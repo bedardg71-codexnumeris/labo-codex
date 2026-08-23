@@ -165,16 +165,53 @@ function prochainParamCache(actuel, dateDuJour) {
 // La boucle de bump plus bas n'avait, elle, rien de specifique au JS : elle
 // cherche `<chemin>?v=` sans savoir si c'est un <script src> ou un <link
 // href>. Il ne manquait que le fichier dans la liste.
+// INCIDENT DU 23 AOUT 2026 — LE BON NUMERO DE VERSION SUR L'ANCIENNE APP.
+//
+// Cette fonction ne regardait que `git status --porcelain`, c'est-a-dire
+// l'ARBRE DE TRAVAIL. Elle supposait donc qu'on lance la release AVANT de
+// commiter (l'ordre de DEPLOY.md §2.1). Le 23 aout, le chantier #291/#476 a
+// ete commite d'abord, puis release : `git status` ne voyait plus rien, et
+// SEULS `init-inline.js` et `main.js` ont ete bumpes — c'est-a-dire
+// precisement les deux fichiers qui AFFICHENT le numero de version.
+//
+// Resultat mesure sur l'iPad de Gregoire : « 1.92.0 build 0823-1013 » en bas
+// de page, et l'ANCIEN bandeau de doublons a l'ecran, consigne fausse
+// comprise. Le pire des symptomes — l'app annonce une version qu'elle
+// n'execute pas, donc la porte terrain teste l'etat d'AVANT en croyant tester
+// l'apres.
+//
+// La parade : ne plus faire confiance a un seul point de vue. On reunit
+//   (a) l'arbre de travail   — le chantier pas encore commite ;
+//   (b) tout ce qui a change DEPUIS LA RELEASE PRECEDENTE — le chantier deja
+//       commite. Le repere est le dernier commit qui a touche `version.json`,
+//       c'est-a-dire la release d'avant, par construction.
+// L'ordre de travail n'a plus d'importance.
 function fichiersModifies(racine) {
+  const git = (args) => execFileSync('git', args, {
+    cwd: racine, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
+  });
+  const retenir = (liste) => liste
+    .filter((f) => (f.endsWith('.js') || f.endsWith('.css')) && !f.includes('_archives/'));
+
   try {
-    // Perimetre : le code JS, la feuille principale, et le dossier css/.
-    const sortie = execFileSync('git', ['status', '--porcelain', '--', 'js', 'styles.css', 'css'], {
-      cwd: racine, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
-    });
-    return sortie
-      .split('\n')
-      .map((l) => l.slice(3).trim())
-      .filter((f) => (f.endsWith('.js') || f.endsWith('.css')) && !f.includes('_archives/'));
+    // (a) arbre de travail
+    const travail = git(['status', '--porcelain', '--', 'js', 'styles.css', 'css'])
+      .split('\n').map((l) => l.slice(3).trim()).filter(Boolean);
+
+    // (b) depuis la release precedente
+    let depuisRelease = [];
+    try {
+      const repere = git(['log', '-1', '--format=%H', '--', 'version.json']).trim();
+      if (repere) {
+        depuisRelease = git(['diff', '--name-only', repere, 'HEAD', '--', 'js', 'styles.css', 'css'])
+          .split('\n').map((l) => l.trim()).filter(Boolean);
+      }
+    } catch {
+      // Depot sans historique de version.json (premier commit, greffe) :
+      // l'arbre de travail reste une base valable, on ne bloque pas.
+    }
+
+    return [...new Set(retenir([...travail, ...depuisRelease]))];
   } catch {
     // Pas de git (archive, tarball) : on ne bloque pas la release, mais on ne
     // fait pas semblant non plus — l'appelant affiche l'avertissement.
