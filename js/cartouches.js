@@ -1344,7 +1344,7 @@ async function dupliquerCartouche(cartoucheId, grilleId) {
         const nouveauCartouche = {
             ...cartoucheOriginal,
             id: genererIdUnique('CART_'),
-            nom: cartoucheOriginal.nom + ' (copie)',
+            nom: nommerCopie(cartoucheOriginal.nom, cartouches),
             auteur: BibliothequeUI.obtenirAuteurActif(),
             isDemo: false,
             inspireDe: BibliothequeUI.forgerInspireDe(cartoucheOriginal),
@@ -3446,7 +3446,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
         }
         const grilleIdLocal = grilleLocale ? grilleLocale.id : grilleId;
 
-        const cartouches = await db.get(`cartouches_${grilleIdLocal}`) || [];
+        let cartouches = await db.get(`cartouches_${grilleIdLocal}`) || [];
         let cartouche = cartouches.find(c => c.id === id);
         if (!cartouche) {
             cartouche = cartouches.find(c => c.idOriginal === id);
@@ -3469,7 +3469,14 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
                     dansBibliotheque: true,
                     dateImport: new Date().toISOString()
                 };
-                cartouches.push(cartouche);
+                // #476 — garde d'identité au point d'écriture (cf. grilles.js).
+                const gardeCartouche = ajouterAvecGardeIdentite(cartouches, cartouche);
+                if (!gardeCartouche.ajoute) {
+                    const nomEnPlace = (gardeCartouche.conflit && gardeCartouche.conflit.nom) || 'Une cartouche';
+                    alert(`« ${nomEnPlace} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
+                    return;
+                }
+                cartouches = gardeCartouche.liste;
             } else {
                 alert('Cartouche introuvable');
                 return;
@@ -3479,9 +3486,20 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
         }
 
         await db.set(`cartouches_${grilleIdLocal}`, cartouches);
+
+        // ⚠ Relecture-vérification : `db.set` refuse en silence (cf. grilles.js).
+        const verifCartouche = await db.get(`cartouches_${grilleIdLocal}`) || [];
+
         fermerModalBibliothequeCartouches();
         await afficherBanqueCartouches();
         await afficherBibliothequeCartouches();
+
+        if (!verifCartouche.some(c => c.id === cartouche.id)) {
+            console.error('[cartouches] Écriture non confirmée —', cartouche.id, 'absente après db.set.');
+            alert(`« ${cartouche.nom || 'Cartouche'} » n'a PAS pu être ajoutée.\n\nL'enregistrement a été refusé. Ouvre la console pour la raison.`);
+            return;
+        }
+
         alert('Cartouche ajoutée à ta sélection avec succès !');
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
@@ -3586,7 +3604,7 @@ async function dupliquerEtEditerCartouche(id) {
     const cartouche = cartouches.find(c => c.id === id);
     if (!cartouche) return;
 
-    const copie = BibliothequeUI.forkerItem(cartouche, 'CART_');
+    const copie = BibliothequeUI.forkerItem(cartouche, 'CART_', cartouches);
     cartouches.push(copie);
     await db.set(`cartouches_${grilleId}`, cartouches);
 
@@ -3614,7 +3632,7 @@ async function dupliquerCartoucheBibliotheque(id, grilleId) {
     const nouvelleCartouche = {
         ...cartouche,
         id: genererIdUnique('CART_'),
-        nom: `${cartouche.nom} (copie)`,
+        nom: nommerCopie(cartouche.nom, cartouches),
         auteur: BibliothequeUI.obtenirAuteurActif(),
         isDemo: false,
         inspireDe: BibliothequeUI.forgerInspireDe(cartouche),

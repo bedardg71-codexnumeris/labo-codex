@@ -409,7 +409,16 @@
         return null;
     };
 
-    BibliothequeUI.forkerItem = function (source, prefixeId) {
+    /**
+     * Fabrique la copie d'un item de bibliothèque.
+     *
+     * @param {Object} source
+     * @param {string} [prefixeId]
+     * @param {Array} [nomsExistants] - collection où la copie va atterrir.
+     *        Sert à sauter au premier rang libre (CO-24) ; facultatif, la
+     *        normalisation du suffixe fonctionne sans.
+     */
+    BibliothequeUI.forkerItem = function (source, prefixeId, nomsExistants) {
         var genererId = window.genererIdUnique || function (p) {
             return (p || 'ITEM_') + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
         };
@@ -420,7 +429,9 @@
         // `criteres`, `niveaux`, `commentaires`) entre la source démo et la copie.
         var copie = JSON.parse(JSON.stringify(source));
         copie.id = genererId(prefixeId || 'ITEM_');
-        copie.nom = (source.nom || source.titre || 'Sans titre') + ' (copie)';
+        // CO-24 — dupliquer une copie donnait « X (copie) (copie) (copie) ».
+        // `nommerCopie` normalise le suffixe au lieu de l'empiler.
+        copie.nom = nommerCopie(source.nom || source.titre, nomsExistants);
         copie.auteur = auteurActif;
         copie.isDemo = false;
         copie.inspireDe = BibliothequeUI.forgerInspireDe(source);

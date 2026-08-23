@@ -41,6 +41,10 @@
    - classerGroupe(exemplaires)        → 'collision-id' | 'copie' | 'homonymes'
    - reunirSources(...listes)          → une liste unique, sans compter deux
                                          fois le même objet vu de deux magasins
+   - ajouterAvecGardeIdentite(liste, item)
+                                       → refuse un ajout dont l'identité est déjà là
+   - nommerCopie(nomSource, nomsExistants)
+                                       → « X (copie) », « X (copie 2) »… sans empiler
    - analyserDoublons(liste, champNom) → groupes de même nom, classés
 
    Testé dans tests/unit/identite-item.test.js.
@@ -348,6 +352,114 @@ function analyserDoublons(liste, champNom) {
 }
 
 /**
+ * Ajoute un item à une liste — sauf si son identité y est déjà.
+ *
+ * #476 volet 1, verdict « bloquer » de Grégoire. Ce qui est bloqué est PRÉCIS :
+ *
+ *   · « Ajouter à ma sélection », import → l'utilisateur veut UNE copie :
+ *     on refuse si l'identité est déjà là, et on NOMME l'exemplaire en place ;
+ *   · « Dupliquer » (bouton explicite) → l'utilisateur veut une copie DE PLUS :
+ *     ce chemin ne passe pas par ici et n'est JAMAIS bloqué ;
+ *   · sauvegarde d'un formulaire au nom déjà pris → on avertit (modale
+ *     existante), on ne bloque pas : les homonymes légitimes existent (#450).
+ *
+ * ⚠ ON BLOQUE SUR L'IDENTITÉ, JAMAIS SUR LE NOM. Grégoire a deux échelles
+ * « IDME et niv 0 » réellement utilisées toutes les deux : bloquer sur le nom
+ * casserait ses données.
+ *
+ * POURQUOI ICI ET PAS SUR LES 24 BOUTONS. Le projet compte 24 fonctions
+ * `dupliquer*` pour cinq familles, parce que chaque point d'entrée a reçu sa
+ * propre fonction au lieu d'un paramètre. Poser une garde sur chacune, ce
+ * serait figer ce défaut et créer 24 endroits à garder synchronisés. Les 24
+ * finissent toutes par pousser dans une liste : la garde va donc au point
+ * d'ÉCRITURE, où elle couvre aussi les imports et les chemins futurs.
+ *
+ * La fonction reste PURE : elle ne pousse pas dans `liste`, elle rend une
+ * nouvelle liste. L'appelant écrit ce qu'on lui rend.
+ *
+ * @param {Array} liste - collection existante
+ * @param {Object} item - candidat à l'ajout
+ * @returns {{ajoute: boolean, conflit: Object|null, liste: Array}}
+ *          `conflit` est l'exemplaire déjà en place, à NOMMER dans le message.
+ */
+function ajouterAvecGardeIdentite(liste, item) {
+    var base = Array.isArray(liste) ? liste : [];
+
+    if (!item || typeof item !== 'object') {
+        return { ajoute: false, conflit: null, liste: base };
+    }
+
+    for (var i = 0; i < base.length; i++) {
+        if (memeIdentite(base[i], item)) {
+            return { ajoute: false, conflit: base[i], liste: base };
+        }
+    }
+
+    return { ajoute: true, conflit: null, liste: base.concat([item]) };
+}
+
+/** Reconnaît un suffixe de copie déjà posé : « (copie) » ou « (copie N) ». */
+var MOTIF_SUFFIXE_COPIE = /\s*\((?:copie)(?:\s+(\d+))?\)\s*$/i;
+
+/**
+ * Nomme la copie d'un élément — sans jamais empiler les suffixes.
+ *
+ * CO-24 : dupliquer une copie donnait « X (copie) (copie) (copie) ». Le vrai
+ * reproche n'était pas l'absence de garde — dupliquer est une action voulue —
+ * c'était le nom illisible qui en sortait.
+ *
+ *   X               → X (copie)
+ *   X (copie)       → X (copie 2)
+ *   X (copie 2)     → X (copie 3)
+ *
+ * La normalisation du suffixe fonctionne SEULE : c'est elle qui règle CO-24.
+ * `nomsExistants` n'est qu'un raffinement — il fait sauter au premier rang
+ * libre pour éviter deux « X (copie 2) » dans la même liste.
+ *
+ * @param {string} nomSource - nom de l'élément dupliqué
+ * @param {Array<string|Object>} [nomsExistants] - noms déjà pris (chaînes, ou
+ *        items dont on lit `nom` puis `titre`)
+ * @returns {string} le nom de la copie
+ */
+function nommerCopie(nomSource, nomsExistants) {
+    var base = String(nomSource == null ? '' : nomSource).trim();
+    if (!base) base = 'Sans titre';
+
+    // La souche est le nom DÉBARRASSÉ de son suffixe de copie : c'est ce qui
+    // empêche l'empilement.
+    var souche = base.replace(MOTIF_SUFFIXE_COPIE, '').trim() || 'Sans titre';
+
+    // Rang de départ : un cran après le suffixe déjà présent, s'il y en a un.
+    var dejaPose = MOTIF_SUFFIXE_COPIE.exec(base);
+    var rang = 1;
+    if (dejaPose) {
+        rang = dejaPose[1] ? (parseInt(dejaPose[1], 10) + 1) : 2;
+    }
+
+    var pris = new Set();
+    if (Array.isArray(nomsExistants)) {
+        nomsExistants.forEach(function (n) {
+            var texte = (typeof n === 'string')
+                ? n
+                : (n && typeof n === 'object' ? (n.nom || n.titre) : null);
+            if (typeof texte === 'string') pris.add(normaliserNom(texte));
+        });
+    }
+
+    var candidat = formerNomCopie(souche, rang);
+    while (pris.has(normaliserNom(candidat))) {
+        rang++;
+        candidat = formerNomCopie(souche, rang);
+    }
+    return candidat;
+}
+
+/** « X (copie) » au rang 1, « X (copie N) » au-delà. */
+function formerNomCopie(souche, rang) {
+    return rang <= 1 ? souche + ' (copie)' : souche + ' (copie ' + rang + ')';
+}
+
+/**
  * ID court d'affichage : les 6 derniers caractères.
  * Repris de `BibliothequeUI.genererIdCourt` pour que ce module reste pur et
  * chargeable seul (les tests unitaires n'ont pas d'UI). Les deux doivent
@@ -370,5 +482,7 @@ window.memeIdentite = memeIdentite;
 window.classerGroupe = classerGroupe;
 window.reunirSources = reunirSources;
 window.analyserDoublons = analyserDoublons;
+window.ajouterAvecGardeIdentite = ajouterAvecGardeIdentite;
+window.nommerCopie = nommerCopie;
 
 })();

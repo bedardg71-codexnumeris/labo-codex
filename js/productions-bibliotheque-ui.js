@@ -316,8 +316,19 @@ async function ajouterProductionIndividuelle(id) {
             // enregistrement.
             delete prod.echeancesParGroupe;
 
-            // Ajouter aux productions du cours
-            productions.push(prod);
+            // #476 — garde d'identité au point d'écriture. La recherche
+            // ci-dessus ne teste que `p.id === id` : un exemplaire déjà
+            // présent sous un id neuf (copie, ou paquet collègue avec
+            // `inspireDe`) passait au travers et s'empilait.
+            const gardeProd = ajouterAvecGardeIdentite(productions, prod);
+            if (!gardeProd.ajoute) {
+                const enPlace = gardeProd.conflit || {};
+                notifications.info(
+                    `« ${enPlace.titre || 'Cette production'} » est déjà dans ta sélection.`,
+                    'Pour en avoir un second exemplaire, utilise « Dupliquer ».');
+                return;
+            }
+            productions = gardeProd.liste;
             await db.set(cleProductions, productions);
 
         } else {
