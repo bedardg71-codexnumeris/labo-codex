@@ -11,7 +11,12 @@
 > ⚠ Le repère de version du §0 dit désormais « **1.91.2 ou plus récent** » : `main` est
 > passé à 1.91.8 depuis, et un numéro supérieur ne doit pas se lire comme un échec.
 >
-> **État : EN ATTENTE DU RELEVÉ.** Ce qui échoue devient un item de backlog.
+> **État : ✅ CLOSE — relevé reçu le 22 août 2026 : 15/15, ZÉRO ÉCHEC, zéro sans objet.**
+> Les deux décisions sont rendues (voir §3). Rien de ce lot n'est dû.
+> Build relevé : **1.91.8 / 0822-0948**. Note de Grégoire au geste 2.7 (cases du mode
+> hybride) : « Enfin, merci ! » — la fonctionnalité était inopérante depuis Beta 95.4.
+> Geste 2.13 : champ de mesure vide, ce qui est le résultat ATTENDU — il n'y avait
+> aucune ligne rouge à recopier.
 > Aucune migration de données dans ce lot — backup non requis (le réflexe Codex reste bon).
 > ⚠ Deux gestes de ce lot sont IRRÉVERSIBLES sur tes données : 2.2 (dépôt d'une fiche
 > de cours) et 2.8 (suppression d'un gabarit). Les faire sur des éléments de TEST.
@@ -66,7 +71,8 @@
       21 août : schéma en cul-de-sac, « 0 commentaire(s) »). ⮕ Attendu : ils
       n'apparaissent plus. **Décision D-a** : rien d'autre ne doit les remplacer,
       ou tu veux un vrai gabarit de cartouche ancré sur une grille ?
-      → verdict : ______________________
+      → **verdict (22 août) : NON** — rien ne doit les remplacer. Les deux gabarits
+        restent retirés, et aucun gabarit de cartouche ancré sur une grille n'est à créer.
 
 ### Productions (CO-17) — le plus important du lot
 
@@ -97,7 +103,7 @@
       Supprimer la fiche. « Déposer » et « Retirer » ont le même effet sur la fiche
       (elle quitte ta sélection) — « Déposer » y ajoute en plus les métadonnées
       Creative Commons. Est-ce que les deux se justifient, ou faut-il n'en garder
-      qu'une ? → verdict : ______________________
+      qu'une ? → **verdict (22 août) : OK** — les quatre entrées sont gardées telles quelles.
 
 ## §4 · Ce que la session n'a pas pu vérifier
 
@@ -110,8 +116,9 @@
 - Le nom de fichier de 2.1 épure le code de cours (tout ce qui n'est ni lettre, ni
   chiffre, ni `-`/`_` devient `-`). À vérifier sur un code de cours réel.
 
-## Au retour
+## Au retour — FAIT le 22 août 2026
 
-1. Chaque échec → item BACKLOG avec son numéro de porte.
-2. Les deux décisions (2.9 · D-a, 3.1) sont à trancher explicitement.
-3. Mettre ce fichier à jour (état, date).
+1. **Aucun échec** : rien à verser au BACKLOG.
+2. Les deux décisions sont rendues : **D-a NON** (rien ne remplace les gabarits retirés),
+   **3.1 OK** (les quatre entrées du menu restent).
+3. Fichier mis à jour. ⮕ **Le lot #468 est CLOS, terrain compris.**
