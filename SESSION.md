@@ -7,6 +7,109 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 23 AOÛT 2026 : GESTION DES DOUBLONS (#291 + #476, 1.92.0).
+     Plan appliqué : `plans de travail/PLAN-291-476-gestion-des-doublons.md`,
+     Lots 0 à 5. Lot 6 (CT-15) NON fait — le plan le déclare optionnel.
+
+     ▣ LE CONSTAT QUI COMMANDE TOUT. Les cinq détecteurs de doublons
+       (grilles, cartouches, échelles, productions, pratiques) étaient CINQ
+       COPIES DU MÊME CODE, à un nom de champ près ('nom' vs 'titre'), et
+       tous DÉDUPLIQUAIENT PAR `id` AVANT de regrouper par nom. Trois
+       conséquences mesurées :
+         · une vraie collision d'identifiant rendait `[]` — l'anomalie la
+           plus grave était la SEULE invisible ;
+         · une copie et deux homonymes légitimes sortaient INDISCERNABLES ;
+         · le bandeau affirmait pourtant « IDs identiques = vraies copies,
+           IDs différents = homonymes légitimes » — faux des deux côtés, la
+           première moitié décrivant même une branche morte.
+       D'où « Lesquels sont lesquels ? » : personne ne pouvait le savoir,
+       parce que l'information était détruite avant l'affichage.
+
+     ▣ CE QUI EST LIVRÉ
+       · Lot 1 — `js/identite-item.js`, module PUR, source unique de
+         l'identité : identitesDe / memeIdentite / classerGroupe /
+         reunirSources / ajouterAvecGardeIdentite / nommerCopie /
+         analyserDoublons. Les lignées sont calculées par FERMETURE
+         TRANSITIVE (X ← Y ← Z est une seule lignée bien que X et Z ne
+         partagent aucun jeton).
+       · Lot 2 — les cinq détecteurs SUPPRIMÉS (zéro-dette), plus l'export
+         mort `window.detecterDoublonsProductions`. Sentinelle-cliquet
+         d'absence, exception portée sur le SYMBOLE `detecterDoublonsStockage`
+         (doublons de FICHIERS de travaux, autre sujet) et non sur un fichier.
+       · Lot 3 — le bandeau DÉSIGNE : trois catégories calculées et colorées,
+         un exemplaire par ligne (nom · ID court · date · provenance),
+         « Voir » qui défile et met en évidence, « Retirer »/« Supprimer »
+         sur place. Les cartes portent enfin leur ID court (opt-in : les
+         écrans hors bibliothèque qui partagent le composant ne bougent pas).
+         La consigne fausse est SUPPRIMÉE, pas reformulée.
+       · Lot 4 — garde d'identité au POINT D'ÉCRITURE des cinq familles.
+         Bloque « Ajouter à ma sélection » quand l'identité est déjà là et
+         NOMME l'exemplaire en place ; ne bloque JAMAIS « Dupliquer ».
+       · Lot 5 — `nommerCopie` : X → X (copie) → X (copie 2) → X (copie 3).
+       · Lot 0 — `scripts/diagnostic-doublons-bibliotheques.js`, à coller en
+         console, lecture seule MESURÉE par un test d'intégration.
+
+     ▣ DEUX DÉCOUVERTES EN COURS DE ROUTE, NON PRÉVUES PAR LE PLAN
+       · `reunirSources` — le même `id` vit LÉGITIMEMENT dans la sélection ET
+         dans la bibliothèque partagée : `ajouterGrilleALaBibliotheque`
+         conserve l'id au versement. Concaténer les deux magasins aurait
+         classé « collision d'identifiant » CHAQUE ressource que Grégoire a
+         publiée — exactement le bruit que ce chantier existe pour supprimer.
+         Règle retenue : même id dans deux magasins → un exemplaire ; deux
+         fois dans LE MÊME magasin → collision, elle survit.
+       · Deux bugs latents trouvés en câblant le Lot 5 :
+         `dupliquerGrilleActuelle` n'avait aucune collection en portée, et
+         `dupliquerEchelleActuelle` déclarait la sienne APRÈS le point de
+         lecture (zone morte temporelle du `let`). Corrigés.
+
+     ▣ DEUX ERREURS DE SESSION, RATTRAPÉES — à connaître.
+       1. Une regex trop gourmande a d'abord supprimé CINQ fonctions voisines
+          dans `js/productions.js` (getCleProductions, getCleGrilles,
+          obtenirEcheanceEffective, obtenirEcheancePlusTot,
+          trierListeProductions) et un gros bloc dans `js/echelles.js` —
+          dont `niveauxDefaut`, marquée « NE PAS MODIFIER ». Attrapé par la
+          suite (23 rouges), fichiers restaurés par `git show HEAD:<f> > <f>`,
+          retrait REFAIT ligne à ligne avec garde-fous (assertions sur le
+          nombre de `function` et la présence du commentaire attendu). Diff
+          final : 28-29 lignes par fichier, rien d'autre.
+       2. Une suite lancée en arrière-plan PENDANT les break-tests a rendu
+          des résultats faux (les sources étaient volontairement cassées).
+          Jetés, suite relancée sur l'arbre propre.
+
+     ▣ CE QUI N'A PAS ÉTÉ FAIT, ET POURQUOI
+       · Lot 6 / CT-15 — optionnel par le plan.
+       · Fusion des 24 `dupliquer*` — renvoyée au volet 2 de #476.
+       · Modale de comparaison côte-à-côte de #291 — hors périmètre, reliquat
+         laissé ouvert, question posée en porte terrain 3.6.
+       · Échappement du TITRE des cartes (`opts.nom`) — vrai défaut, mais
+         `js/echelles.js:2244` y injecte délibérément un badge HTML et sept
+         appelants dont plusieurs HORS bibliothèques sont concernés. Versé au
+         backlog sous #476 plutôt qu'élargi ici.
+       · `db.set`/`db.setSync` rendant un booléen — dette de fond, surface
+         d'appel trop large. Contournée par relecture-vérification.
+
+     ▣ TESTS. Vitest 2959/2959 (2868 avant, 91 neufs). Playwright : 2 specs
+       neufs, dont un qui MESURE la taille rendue des boutons (44 px) et
+       vérifie que « Voir » éclaire la bonne carte et pas sa voisine.
+       ⚠ WebKit N'EST PAS INSTALLÉ dans le conteneur : les specs ont été
+       éprouvés sur CHROMIUM via une config hors dépôt. Un témoin lancé au
+       commit de base montre que les échecs Chromium préexistent au chantier.
+       Le rendu Safari/iPad reste une PORTE TERRAIN DUE.
+
+     ▣ SEPT BREAK-TESTS exécutés, tous rouges avant restauration : dédup par
+       id rétablie · échappement du nom retiré · classerGroupe figé sur
+       'homonymes' (unitaire ET navigateur) · détecteur réintroduit · garde
+       acceptant tout · relecture retirée · concaténation naïve · cibles
+       tactiles à 24 px (mesure navigateur) · écriture dans le diagnostic.
+
+     ▣ PORTE TERRAIN : `plans de travail/PORTES-TERRAIN-2026-08-23-doublons.md`
+       + artefact https://claude.ai/code/artifact/cc472a60-c838-4f3b-a2d5-433eaedea013
+       La porte 1.2 est le CAS-TÉMOIN : ses deux échelles « IDME et niv 0 »
+       doivent ressortir HOMONYMES, pas copies. Si elle échoue, la décision
+       « on ne bloque pas sur le nom » est fausse et ses données sont en jeu.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 21 AOÛT 2026 (8e cycle) : LOT L6 « BOUTONS QUI MENTENT,
      GESTES QUI PLANTENT » (#468, 1.91.2) — rang 4 de l'ordre du triage.
      ▣ SIX CONSTATS, SIX GESTES QUE L'UTILISATEUR FAISAIT POUR RIEN.

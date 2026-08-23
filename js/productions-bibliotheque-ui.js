@@ -17,7 +17,7 @@
      obtenirToutesLesProductionsBibliotheque, listerTrimestresAvecProductions,
      formaterNomTrimestre, obtenirProductionsTrimestre,
      importerDansBibliotheque, ajouterALaBibliotheque, retirerDeLaBibliotheque
-   - Résidu productions.js : getCleProductions, detecterDoublonsProductions,
+   - Résidu productions.js : getCleProductions,
      getTypeLabel (tous exposés sur window)
    - Autres sous-modules : afficherListeProductions (productions-liste.js),
      afficherTableauProductions, mettreAJourPonderationTotale (productions.js)
@@ -48,12 +48,16 @@ async function preparerDonneesBibliothequeProductions() {
     const toutesProductionsBiblio = BibliothequeUI.filtrerParModeDemo(
         await obtenirToutesLesProductionsBibliotheque()
     );
-    const doublonsDetectes = detecterDoublonsProductions(productionsUtilisateur, toutesProductionsBiblio);
+    // #291 — champ 'titre' pour les productions : c'était la SEULE différence
+    // entre les cinq détecteurs qu'`analyserDoublons` remplace.
+    const doublonsDetectes = analyserDoublons(
+        reunirSources(productionsUtilisateur, toutesProductionsBiblio), 'titre');
 
     // Section 1
     const cartesSection1 = productionsDansSelection.map(prod => ({
         nom: `${BibliothequeUI.formaterTitreDemo(prod.titre, BibliothequeUI.estItemDemo(prod))}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,
         id: prod.id,
+        afficherId: true,
         badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsDansSelection),
         metadonnees: BibliothequeUI.formaterMetadonnees(prod, {
             quantite: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%`
@@ -121,6 +125,7 @@ async function preparerDonneesBibliothequeProductions() {
         cartesSection2.push({
             nom: `${BibliothequeUI.formaterTitreDemo(prod.titre, BibliothequeUI.estItemDemo(prod))}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,
             id: prod.id,
+            afficherId: true,
             badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsUtilisateur),
             metadonnees: BibliothequeUI.formaterMetadonnees(prod, {
                 quantite: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%`
@@ -144,6 +149,7 @@ async function preparerDonneesBibliothequeProductions() {
         doublonsDetectes,
         sectionImportTrimestre,
         repsProductions,
+        productionsDansSelection,
         nombreSelection: productionsDansSelection.length
     };
 }
@@ -244,7 +250,14 @@ async function afficherBibliothequeProductions() {
         titre: 'Bibliothèque de productions',
         sousTitre: 'Gérez les productions affichées dans la barre latérale.',
         onFermer: 'fermerModalBibliothequeProductions',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes),
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
+            itemsSelection: data.productionsDansSelection,
+            actions: {
+                retirer: 'retirerProductionDeBibliotheque',
+                supprimer: 'supprimerProductionDefinitivement',
+                supprimerPartagee: 'supprimerProductionDeBibliothequePartagee'
+            }
+        }),
         titreSection1: `Productions dans ta sélection (${data.nombreSelection})`,
         contenuSection1: contenuSection1,
         boutonsApresSection1: boutonsApresSection1,
@@ -303,8 +316,19 @@ async function ajouterProductionIndividuelle(id) {
             // enregistrement.
             delete prod.echeancesParGroupe;
 
-            // Ajouter aux productions du cours
-            productions.push(prod);
+            // #476 — garde d'identité au point d'écriture. La recherche
+            // ci-dessus ne teste que `p.id === id` : un exemplaire déjà
+            // présent sous un id neuf (copie, ou paquet collègue avec
+            // `inspireDe`) passait au travers et s'empilait.
+            const gardeProd = ajouterAvecGardeIdentite(productions, prod);
+            if (!gardeProd.ajoute) {
+                const enPlace = gardeProd.conflit || {};
+                notifications.info(
+                    `« ${enPlace.titre || 'Cette production'} » est déjà dans ta sélection.`,
+                    'Pour en avoir un second exemplaire, utilise « Dupliquer ».');
+                return;
+            }
+            productions = gardeProd.liste;
             await db.set(cleProductions, productions);
 
         } else {

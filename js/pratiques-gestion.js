@@ -43,34 +43,6 @@ let enChargementFormulaire = false;
    =============================== */
 
 /**
- * Détecter les doublons potentiels dans les pratiques
- * @param {Array} pratiquesLocales - Pratiques de l'utilisateur
- * @param {Array} pratiquesBibliotheque - Pratiques de la bibliothèque partagée
- * @returns {Array} Liste des doublons {nom, count, ids}
- */
-function detecterDoublonsPratiques(pratiquesLocales, pratiquesBibliotheque) {
-    const parId = new Map();
-    [...pratiquesLocales, ...pratiquesBibliotheque].forEach(pratique => {
-        if (pratique && pratique.id && !parId.has(pratique.id)) {
-            parId.set(pratique.id, pratique);
-        }
-    });
-
-    const parNom = {};
-    parId.forEach(pratique => {
-        const nom = (pratique.nom || '').trim().toLowerCase();
-        if (!nom) return;
-        if (!parNom[nom]) {
-            parNom[nom] = { nom: pratique.nom, count: 0, ids: [] };
-        }
-        parNom[nom].count++;
-        parNom[nom].ids.push(pratique.id);
-    });
-
-    return Object.values(parNom).filter(d => d.count > 1);
-}
-
-/**
  * Générer un badge de source pour une pratique
  * @param {Object} pratique - La pratique
  * @param {Array} pratiquesLocales - Pratiques locales pour vérifier la source
@@ -362,7 +334,9 @@ async function afficherBibliothequePratiques() {
     }
     pratiquesDisponibles = BibliothequeUI.filtrerParMaquette(BibliothequeUI.filtrerParModeDemo(pratiquesDisponibles));
 
-    const doublonsDetectes = detecterDoublonsPratiques(pratiquesDansBibliotheque, pratiquesDisponibles);
+    // #291 — réunion des deux magasins avant analyse (cf. grilles.js).
+    const doublonsDetectes = analyserDoublons(
+        reunirSources(pratiquesDansBibliotheque, pratiquesDisponibles), 'nom');
 
     // Section 1 : pratiques dans la sélection
     let contenuSection1 = '';
@@ -373,6 +347,7 @@ async function afficherBibliothequePratiques() {
             contenuSection1 += BibliothequeUI.renderCarteSelection({
                 nom: BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre'),
                 id: pratique.id,
+                afficherId: true,
                 badgesPratiques: genererBadgeTypePratique(pratique),
                 badgeSource: genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque),
                 metadonnees: BibliothequeUI.formaterMetadonnees(pratique, { discipline: true }),
@@ -496,6 +471,7 @@ async function afficherBibliothequePratiques() {
         return BibliothequeUI.renderCarteDisponible({
             nom: BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre'),
             id: pratique.id,
+            afficherId: true,
             badgesPratiques: genererBadgeTypePratique(pratique),
             badgeSource: genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque),
             metadonnees: BibliothequeUI.formaterMetadonnees(pratique, { discipline: true }),
@@ -548,7 +524,14 @@ async function afficherBibliothequePratiques() {
         titre: 'Bibliothèque de pratiques de notation',
         sousTitre: 'Gérez les pratiques affichées dans la barre latérale.',
         onFermer: 'fermerModalBibliothequePratiques',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(doublonsDetectes),
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(doublonsDetectes, {
+            itemsSelection: pratiquesDansBibliotheque,
+            actions: {
+                retirer: 'retirerPratiqueDeBibliothequeMateriel',
+                supprimer: 'supprimerPratiqueDefinitivement',
+                supprimerPartagee: 'supprimerPratiqueDeBibliothequePartagee'
+            }
+        }),
         titreSection1: 'Pratiques dans la barre latérale',
         contenuIdListe1: 'listePratiquesDansBibliotheque',
         contenuSection1: contenuSection1,
@@ -844,13 +827,41 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
             dateAjout: new Date().toISOString()
         };
 
-        configurations.push(nouvelleConfig);
-        db.setSync(cle('pratiquesConfigurables'), configurations);
+        // #476 — garde d'identité au point d'écriture. La recherche ci-dessus
+        // ne teste que `p.id === pratiqueId` : une pratique importée d'un autre
+        // trimestre porte son ascendance dans `inspireDe.sourceId` sous un id
+        // neuf, et s'ajoutait donc une seconde fois sans que rien ne le dise.
+        const gardePratique = ajouterAvecGardeIdentite(configurations, nouvelleConfig);
+        if (!gardePratique.ajoute) {
+            const enPlace = gardePratique.conflit || {};
+            notifications.info(
+                `« ${enPlace.nom || 'Cette pratique'} » est déjà dans ta sélection.`,
+                'Pour en avoir un second exemplaire, utilise « Dupliquer ».');
+            return;
+        }
+        // security-ok: `configSource` vient de la bibliothèque, où toute entrée
+        // passe déjà par assainirObjet (pratiques-bibliotheque.js, B-β). La garde
+        // ne fait que refuser un doublon ; elle n'introduit aucune donnée neuve.
+        db.setSync(cle('pratiquesConfigurables'), gardePratique.liste);
     }
+
+    // ⚠ Relecture-vérification : `db.setSync` fait un `return;` NU quand une
+    // garde refuse l'écriture (js/db.js:1458) — le succès et le refus se
+    // ressemblent depuis l'appelant. On relit avant d'annoncer quoi que ce soit.
+    const verifPratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
 
     // Rafraîchir la sidebar et fermer le modal
     await afficherListePratiquesMateriel();
     fermerModalBibliothequePratiques();
+
+    if (!verifPratiques.some(p => p.id === pratiqueId && p.dansBibliotheque !== false)) {
+        console.error('[pratiques-gestion] Écriture non confirmée —', pratiqueId,
+            'absente de la sélection après db.setSync.');
+        notifications.erreur(
+            `« ${configSource.nom || 'Cette pratique'} » n'a PAS pu être ajoutée.`,
+            'L\'enregistrement a été refusé. Ouvre la console pour la raison.');
+        return;
+    }
 
     notifications.succes(`Pratique "${configSource.nom}" ajoutée`);
 }
@@ -1079,7 +1090,10 @@ async function dupliquerEtEditerPratique(id) {
     }
     if (!pratique) return;
 
-    const copie = BibliothequeUI.forkerItem(pratique, 'pratique_');
+    // CO-24 — la collection de destination sert à sauter au premier rang
+    // de copie libre ; sans elle on empilerait « (copie) (copie) ».
+    const pratiquesExistantes = db.getSync(cle('pratiquesConfigurables'), null) || [];
+    const copie = BibliothequeUI.forkerItem(pratique, 'pratique_', pratiquesExistantes);
     configurations.push(copie);
     db.setSync(cle('pratiquesConfigurables'), configurations);
 
