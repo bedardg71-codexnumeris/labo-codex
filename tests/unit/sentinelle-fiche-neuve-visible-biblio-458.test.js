@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { globauxIdentiteNaturelle } from './_helpers/identite-naturelle.js';
 
 // =======================================================================
 // SENTINELLE #458 — une fiche de cours neuve est VISIBLE dans la Bibliothèque
@@ -32,7 +33,9 @@ describe('#458 · une fiche neuve est visible dans la Bibliothèque', () => {
                 getSync: (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)),
                 setSync: (k, v) => { store[k] = v; }
             },
-            genererIdUnique: (p) => p + 'X1'
+            genererIdUnique: (p) => p + 'X1',
+            // CT-15 : `creer` porte désormais la garde d'unicité #455.
+            ...globauxIdentiteNaturelle()
         });
 
         const fiche = await win.CoursEntite.creer({ codeCours: '000-TEST-ZZ', nomCours: 'Test', discipline: 'Bio' });

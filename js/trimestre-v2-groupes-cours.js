@@ -638,6 +638,41 @@ function sauvegarderGroupeCoursV2() {
     const cleGC = cle('groupesCours');
     let groupesCours = db.getSync(cleGC, []);
 
+    // CT-15 (23 août 2026) — GARDE SUR LE TRIPLET (trimestre, cours, groupe).
+    //
+    // Ce `push` n'a jamais regardé si le triplet existait déjà. Or le nom d'un
+    // groupe-cours est ENGENDRÉ à partir de ce triplet, juste au-dessus : deux
+    // jumeaux portent donc LE MÊME LIBELLÉ dans tous les menus. Rien ne les
+    // distingue à l'œil, et les présences comme les évaluations se répartissent
+    // entre eux au hasard du clic — un demi-groupe dans chacun, sans erreur
+    // nulle part.
+    //
+    // ⚠ ON N'INTERDIT PAS : deux GC de même triplet sont légitimes quand
+    // l'horaire ou l'enseignant diffèrent (co-enseignement, horaire scindé) —
+    // et ces deux champs sont volontairement HORS du triplet pour cette raison.
+    // La règle est celle de #455 : le geste reste possible, jamais silencieux.
+    const jumeau = trouverDoublonNaturel(
+        groupesCours,
+        { trimestreId, coursId, groupeNum },
+        cleNaturelleGroupeCours,
+        groupeCoursEnEditionId ? { exclureId: groupeCoursEnEditionId } : undefined
+    );
+    if (jumeau) {
+        // `confirm` natif, comme la garde jumelle #455 de `sauvegarderCoursV2` :
+        // cette fonction est synchrone, et l'écran n'est pas une modale — donc
+        // aucun des empilements de z-index de la famille corrigée le 23 août.
+        const quandMeme = confirm(
+            'Un groupe-cours identique existe déjà : « ' + (jumeau.nom || jumeau.id) + ' ».\n\n' +
+            'Même trimestre, même cours, même groupe d\'étudiants. Les deux ' +
+            'porteront le même nom dans les menus, et les présences comme les ' +
+            'évaluations pourront se répartir entre les deux sans prévenir.\n\n' +
+            (groupeCoursEnEditionId
+                ? 'Enregistrer quand même ?'
+                : 'Créer quand même un second groupe-cours ?')
+        );
+        if (!quandMeme) return;
+    }
+
     if (groupeCoursEnEditionId) {
         // Modification
         const index = groupesCours.findIndex(g => g.id === groupeCoursEnEditionId);

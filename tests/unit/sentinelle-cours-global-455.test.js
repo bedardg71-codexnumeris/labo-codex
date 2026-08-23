@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { chargerScript } from './_helpers/charger-script.js';
+import { globauxIdentiteNaturelle } from './_helpers/identite-naturelle.js';
 
 // =======================================================================
 // SENTINELLE #455 — le cours est GLOBAL : son identité est le CODE seul
@@ -30,8 +31,10 @@ import { chargerScript } from './_helpers/charger-script.js';
 //   F. le prédicat de doublon de l'import de cours (`cours.js`) compare le
 //      CODE seul, plus session/année ;
 //   G. la création au formulaire (`sauvegarderCoursV2`) porte le garde
-//      anti-seconde-fiche : détection par `_tupleCoursNaturel` + `confirm`
-//      explicite, jamais une entrée silencieuse.
+//      anti-seconde-fiche : détection + `confirm` explicite, jamais une
+//      entrée silencieuse — et depuis CT-15 (23 août 2026) la DÉTECTION est
+//      celle de `CoursEntite.chercherDoublonCode`, la même que l'entité
+//      applique au point d'écriture, l'ÉDITION étant gardée elle aussi.
 //
 // `session`/`annee`/`trimestreId` restent sur les fiches legacy comme champs
 // HISTORIQUES, non décisionnels — comme le préfixe d'un id (`h2026-…`).
@@ -41,6 +44,8 @@ function chargerModule(globauxSupp = {}) {
         db: { getSync: (k, d) => d, setSync: () => {} },
         cle: (k) => k,
         toggleDisplay: () => {},
+        // CT-15 : l'identité du cours vit désormais dans identite-naturelle.js.
+        ...globauxIdentiteNaturelle(),
         ...globauxSupp
     });
 }
@@ -130,11 +135,16 @@ describe('#455 · le cours est global : identité = code seul', () => {
     it('F · l\'import de cours dédoublonne par code seul, plus par session/année', () => {
         const source = sansCommentaires('js/cours.js');
 
-        // Le prédicat vivant…
-        expect(source).toMatch(/codeCours\s*===\s*coursImporte\.codeCours/);
+        // Le prédicat vivant. CT-15 (23 août) : ce n'est plus un `===` brut
+        // sur `codeCours` — c'était précisément le trou, « 601-101-mq »
+        // s'installait à côté de « 601-101-MQ ». L'import passe par la même
+        // clé que le formulaire et que l'entité.
+        expect(source).toMatch(/trouverDoublonNaturel\([\s\S]{0,80}cleNaturelleCours/);
         // …et plus AUCUNE comparaison de période dans un prédicat de doublon.
         expect(source).not.toMatch(/session\s*===\s*coursImporte\.session/);
         expect(source).not.toMatch(/annee\s*===\s*coursImporte\.annee/);
+        // Ni retour au `===` brut, qui rouvrirait le trou de casse.
+        expect(source).not.toMatch(/codeCours\s*===\s*coursImporte\.codeCours/);
     });
 
     it('G · la création au formulaire porte le garde anti-seconde-fiche (détection + confirm)', () => {
@@ -144,7 +154,13 @@ describe('#455 · le cours est global : identité = code seul', () => {
         // tout motif de sentinelle s'ancre) jusqu'à sa fermeture en colonne 0.
         const corps = source.match(/^async function sauvegarderCoursV2[\s\S]*?\n\}/m);
         expect(corps).not.toBeNull();
-        expect(corps[0]).toMatch(/_tupleCoursNaturel\(d\)/);
+        // CT-15 (23 août) : la DÉTECTION a déménagé dans `CoursEntite`, qui la
+        // refait au point d'écriture. Le formulaire, lui, garde ce qu'il est
+        // seul à pouvoir faire — POSER LA QUESTION.
+        expect(corps[0]).toMatch(/CoursEntite\.chercherDoublonCode\(/);
         expect(corps[0]).toMatch(/confirm\(/);
+        // Et l'édition est gardée elle aussi : renommer le code d'une fiche
+        // pour lui donner celui d'une autre fabrique le même doublon.
+        expect(corps[0]).toMatch(/exclureId:\s*coursEnEditionV2/);
     });
 });

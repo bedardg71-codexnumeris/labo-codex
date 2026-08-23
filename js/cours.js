@@ -661,9 +661,15 @@ async function importerCoursSimple(eventOuEl) {
                 // d'automne » à côté du 601-101 existant — deux fiches pour la
                 // même chose (famille #346/#454). session/annee sur les fiches
                 // legacy sont historiques, non décisionnels.
-                const doublon = coursExistants.find(c =>
-                    c.codeCours === coursImporte.codeCours
-                );
+                //
+                // CT-15 (23 août 2026) : la comparaison était ici un `===`
+                // BRUT, quand le formulaire, lui, normalisait casse et
+                // espaces. « 601-101-mq » importé à côté d'un « 601-101-MQ »
+                // existant n'était donc PAS vu comme un doublon — refusé à la
+                // main, accepté par fichier. Une seule règle désormais,
+                // `cleNaturelleCours`.
+                const doublon = trouverDoublonNaturel(
+                    coursExistants, coursImporte, cleNaturelleCours);
 
                 if (doublon) {
                     nbDoublons++;

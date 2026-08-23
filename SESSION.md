@@ -7,9 +7,105 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 23 AOÛT 2026, FIN DE CYCLE : CI, DOCUMENTATION, PUIS
+     LOT 6 / CT-15 — LES DOUBLONS DU CADRE.
+
+     ▣ PARTIE 1 — LA CI. Deux pannes DISTINCTES, à ne pas confondre.
+       (a) Le job ne démarre plus depuis le 21 août 16 h 21 UTC : 26 runs
+           d'affilée « échouent » en 3-5 s avec `runner_id: 0` et aucune
+           étape enregistrée — il n'est jamais dispatché. Le workflow est
+           `state: active`. ⮕ CAUSE NON ÉTABLISSABLE DEPUIS LE DÉPÔT. La
+           signature est celle de minutes Actions épuisées sur dépôt privé,
+           mais le champ `billable` de l'API renvoie 0 pour TOUS les runs, y
+           compris un qui a tourné 868 s : inexploitable. À vérifier par
+           Grégoire dans Settings › Billing › Actions.
+       (b) ET AVANT DE S'ARRÊTER, ELLE ÉTAIT DÉJÀ ROUGE. Dernier run complet,
+           18 août : Vitest vert, Playwright **88 passés / 5 échoués** (specs
+           de glisser-déposer et mise en page du planificateur). ⮕ Rétablir
+           les minutes ne rendra PAS la CI verte.
+       (c) Le gaspillage, lui, est structurel et corrigeable : 61 annulés,
+           26 en échec, zéro succès sur 87 runs, dont une bonne part sur des
+           commits PUREMENT documentaires. `paths-ignore` (20 entrées, ancre
+           YAML partagée push/pull_request) + cache du binaire WebKit.
+           ⚠ Cliquet `sentinelle-ci-paths-ignore` : si un test se met à LIRE
+           un chemin ignoré, il rougit — sans quoi l'optimisation créerait un
+           angle mort silencieux. `.claude/**` volontairement PAS ignoré.
+       ▣ UNE INFÉRENCE NON FONDÉE, RETIRÉE. L'en-tête du workflow affirmait
+         d'abord une date de passage en privé DÉDUITE de `billable = 0` —
+         champ dont la même analyse montrait qu'il est inutilisable. Réécrit
+         pour ne dire que ce qui est mesuré.
+
+     ▣ PARTIE 2 — DEPLOY.md v1.5. Le dépôt est PRIVÉ (§1.1) ; le site
+       Netlify est `codexnumeris-051225`, pas `labocodex` (§1.2) ; les
+       previews de déploiement servent une ORIGINE DIFFÉRENTE, donc un
+       stockage navigateur distinct — piège documenté ; le bump passe par
+       `scripts/release.mjs` avec l'incident anti-cache du 23 août (§2.1) ;
+       nouvel §2.4 sur l'état de la CI ; table DNS marquée historique, ses
+       deux colonnes périmées nommées (§3.4).
+
+     ▣ PARTIE 3 — LOT 6 / CT-15, LES TROIS CRÉATIONS SILENCIEUSES.
+       Sites nommés par l'audit du 20 août, tous les trois traités :
+       groupe-cours poussé sans regarder le triplet, courriel d'enseignant
+       jamais vérifié à la création manuelle, `creerCours` sans contrôle.
+
+       · NOUVEAU MODULE `js/identite-naturelle.js`, fonctions PURES.
+         ⚠ À NE PAS CONFONDRE avec `identite-item.js` : celui-là dit la
+         LIGNÉE (« cet item descend-il de celui-là ? »), celui-ci l'identité
+         NATURELLE (« ces deux fiches désignent-elles la même chose ? »).
+         Cours = le CODE seul (#455 appliqué, pas contourné) ; enseignant =
+         le COURRIEL, jamais le nom (#450 transposé hors bibliothèques) ;
+         groupe-cours = le TRIPLET trimestre+cours+groupe.
+
+       ▣ CE QUE LE LOT A TROUVÉ EN ROUTE, ET QUI N'ÉTAIT PAS DANS LE PLAN.
+         1. TROIS NORMALISATIONS CONCURRENTES pour « est-ce le même cours ? ».
+            Le formulaire faisait `trim().toUpperCase()`, l'import comparait
+            en `===` BRUT, l'entité ne comparait rien. Conséquence mesurable :
+            « 601-101-mq » importé à côté d'un « 601-101-MQ » existant n'était
+            PAS vu comme un doublon — refusé à la main, accepté par fichier.
+            Trois réponses possibles à la même question, c'est zéro source de
+            vérité. `_tupleCoursNaturel` retiré (zéro-dette).
+         2. L'ÉDITION ÉTAIT LE QUATRIÈME TROU, non listé par l'audit :
+            renommer le code d'une fiche pour lui donner celui d'une autre
+            fabriquait exactement le doublon que la création refusait.
+
+       ▣ POURQUOI HORAIRE ET ENSEIGNANT SONT HORS DU TRIPLET DU GC — et
+         c'est la décision de conception du lot : ce sont eux qui rendent
+         deux jumeaux LÉGITIMES (co-enseignement, horaire scindé). Les
+         inclure dans l'identité désarmerait la garde exactement dans le cas
+         où elle doit parler. Le break-test qui compte le plus est celui-là.
+
+       ▣ RÈGLE COMMUNE AUX TROIS GARDES, celle de #455 : LE GESTE RESTE
+         POSSIBLE, JAMAIS SILENCIEUX. On n'interdit pas — un enseignant peut
+         réellement porter deux profils dans deux institutions. La garde de
+         cours vit au POINT D'ÉCRITURE (`creerCours` refuse sans
+         `doublonAssume`) : le formulaire POSE la question, l'entité APPLIQUE.
+
+     ▣ TESTS. Vitest 2983/2983 (+17). Sentinelle `sentinelle-ct15-identite-
+       naturelle` (16 cas) + porte navigateur `doublons-cadre-ct15`.
+       SEPT BREAK-TESTS rouges avant restauration : normalisation retirée ·
+       garde de `creerCours` retirée · `exclureId` retiré (la fiche se voit
+       elle-même) · garde du triplet retirée · garde du courriel retirée ·
+       `<script>` retiré d'index.html (unitaire ET navigateur) · triplet
+       élargi à horaire+enseignant.
+       ⚠ WebKit toujours absent du conteneur : éprouvé sur Chromium. Témoin
+       relancé au commit de base sur les 7 specs du Cadre — MÊME liste de 12
+       échecs, donc zéro régression de ce lot.
+
+     ▣ TROIS SENTINELLES EXISTANTES REMISES EN PHASE (#442, #455, #458) :
+       leurs bancs chargent `js/identite-naturelle.js` par un helper partagé,
+       et les motifs de #455 pointent le mécanisme à sa NOUVELLE adresse
+       (`CoursEntite.chercherDoublonCode`), sans rien relâcher.
+
+     ▣ PORTE TERRAIN DUE :
+       `plans de travail/PORTES-TERRAIN-2026-08-23-doublons-cadre.md`
+       Trois dialogues neufs à voir sur Mac ET iPad. Trois décisions au §3,
+       dont : avertir ou REFUSER fermement sur le groupe-cours ?
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 23 AOÛT 2026 : GESTION DES DOUBLONS (#291 + #476, 1.92.0).
      Plan appliqué : `plans de travail/PLAN-291-476-gestion-des-doublons.md`,
-     Lots 0 à 5. Lot 6 (CT-15) NON fait — le plan le déclare optionnel.
+     Lots 0 à 6 — Lot 6 (CT-15) fait en fin de session, voir le bloc suivant.
 
      ▣ LE CONSTAT QUI COMMANDE TOUT. Les cinq détecteurs de doublons
        (grilles, cartouches, échelles, productions, pratiques) étaient CINQ
@@ -77,7 +173,7 @@
           Jetés, suite relancée sur l'arbre propre.
 
      ▣ CE QUI N'A PAS ÉTÉ FAIT, ET POURQUOI
-       · Lot 6 / CT-15 — optionnel par le plan.
+       · Lot 6 / CT-15 — repris en fin de session, voir le bloc CT-15.
        · Fusion des 24 `dupliquer*` — renvoyée au volet 2 de #476.
        · Modale de comparaison côte-à-côte de #291 — hors périmètre, reliquat
          laissé ouvert, question posée en porte terrain 3.6.

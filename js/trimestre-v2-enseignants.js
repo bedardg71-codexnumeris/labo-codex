@@ -37,8 +37,12 @@ function chargerProfilEnseignantV2() {
     let enseignants = db.getSync('enseignants', []);
 
     if (profilAncien && profilAncien.prenom && profilAncien.nom) {
-        // Vérifier si ce profil existe déjà dans la liste (par courriel)
-        const existe = enseignants.some(e => e.courriel === profilAncien.courriel);
+        // Vérifier si ce profil existe déjà dans la liste (par courriel).
+        // CT-15 : même clé que la garde de `sauvegarderEnseignantV2`, sinon la
+        // migration réinjecterait un profil que la création aurait refusé —
+        // « X@Exemple.com » et « x@exemple.com » sont le même courriel.
+        const existe = !!trouverDoublonNaturel(
+            enseignants, profilAncien, cleNaturelleEnseignant);
         if (!existe) {
             const nouveauProfil = {
                 id: genererIdUnique('ENS_'),
@@ -253,6 +257,40 @@ async function sauvegarderEnseignantV2() {
     };
 
     let enseignants = db.getSync('enseignants', []);
+
+    // CT-15 (23 août 2026) — GARDE SUR LE COURRIEL.
+    //
+    // La création manuelle ne vérifiait rien, alors que la migration du vieux
+    // `profilEnseignant` — trente lignes plus haut, dans ce même fichier —
+    // vérifie, elle : `enseignants.some(e => e.courriel === …)`. Deux chemins
+    // vers la même collection, un seul gardé.
+    //
+    // ⚠ L'IDENTITÉ EST LE COURRIEL, PAS LE NOM. Deux enseignants homonymes
+    // existent ; c'est la leçon #450 transposée hors des bibliothèques — on ne
+    // bloque jamais sur un nom.
+    //
+    // ⚠ ON N'INTERDIT PAS : un même courriel peut légitimement porter deux
+    // profils (deux institutions, deux départements). Règle #455 : le geste
+    // reste possible, jamais silencieux.
+    const memeCourriel = trouverDoublonNaturel(
+        enseignants,
+        { courriel },
+        cleNaturelleEnseignant,
+        enseignantEnEditionId ? { exclureId: enseignantEnEditionId } : undefined
+    );
+    if (memeCourriel) {
+        const quandMeme = confirm(
+            'Un profil utilise déjà « ' + courriel + ' » : ' +
+            ((memeCourriel.prenom || '') + ' ' + (memeCourriel.nom || '')).trim() +
+            '.\n\n' +
+            'Deux profils au même courriel sont indiscernables dans les menus ' +
+            'de groupe-cours.\n\n' +
+            (enseignantEnEditionId
+                ? 'Enregistrer quand même ?'
+                : 'Créer quand même un second profil ?')
+        );
+        if (!quandMeme) return;
+    }
 
     if (enseignantEnEditionId) {
         // Modification d'un profil existant
