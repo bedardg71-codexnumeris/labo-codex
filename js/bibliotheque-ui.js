@@ -25,6 +25,39 @@
     };
 
     /**
+     * #291 (23 août 2026) — La puce d'identifiant affichée sur une carte.
+     *
+     * « J'ai une information m'indiquant que j'ai des doublons […] ils ne sont
+     * pas affichés ! » Le bandeau citait des IDs tronqués (#b209ef, #6fdd43…)
+     * que RIEN dans la liste ne portait : il décrivait des objets qu'aucun
+     * geste ne permettait de retrouver. Cette puce est la moitié manquante.
+     *
+     * L'ID complet part en `title` — contexte d'ATTRIBUT, donc
+     * `echapperAttribut` et non `echapperHtml` (CT-29 : la seconde n'encode
+     * pas les guillemets).
+     *
+     * @param {string} id - identifiant complet
+     * @returns {string} HTML de la puce ('' si pas d'id)
+     */
+    BibliothequeUI.renderPuceId = function (id) {
+        if (!id) return '';
+        return '<code class="biblio-id-court" title="Identifiant complet : ' +
+            echapperAttribut(id) + '">#' +
+            echapperHtml(BibliothequeUI.genererIdCourt(id)) + '</code>';
+    };
+
+    /**
+     * L'attribut d'ancrage qui rend « Voir » possible (#291, §3.3).
+     *
+     * Sans ancre stable sur la carte, « les rechercher manuellement par leur ID
+     * est laborieux » reste vrai : le bandeau saurait nommer l'objet mais pas
+     * y conduire.
+     */
+    function _ancreItem(id) {
+        return id ? ' data-biblio-item-id="' + echapperAttribut(id) + '"' : '';
+    }
+
+    /**
      * Détermine si un item est un exemple démo.
      * Détection par flag isDemo ou par auteur démo `'Demo Labo Codex'`.
      *
@@ -376,7 +409,16 @@
         return null;
     };
 
-    BibliothequeUI.forkerItem = function (source, prefixeId) {
+    /**
+     * Fabrique la copie d'un item de bibliothèque.
+     *
+     * @param {Object} source
+     * @param {string} [prefixeId]
+     * @param {Array} [nomsExistants] - collection où la copie va atterrir.
+     *        Sert à sauter au premier rang libre (CO-24) ; facultatif, la
+     *        normalisation du suffixe fonctionne sans.
+     */
+    BibliothequeUI.forkerItem = function (source, prefixeId, nomsExistants) {
         var genererId = window.genererIdUnique || function (p) {
             return (p || 'ITEM_') + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
         };
@@ -387,7 +429,9 @@
         // `criteres`, `niveaux`, `commentaires`) entre la source démo et la copie.
         var copie = JSON.parse(JSON.stringify(source));
         copie.id = genererId(prefixeId || 'ITEM_');
-        copie.nom = (source.nom || source.titre || 'Sans titre') + ' (copie)';
+        // CO-24 — dupliquer une copie donnait « X (copie) (copie) (copie) ».
+        // `nommerCopie` normalise le suffixe au lieu de l'empiler.
+        copie.nom = nommerCopie(source.nom || source.titre, nomsExistants);
         copie.auteur = auteurActif;
         copie.isDemo = false;
         copie.inspireDe = BibliothequeUI.forgerInspireDe(source);
@@ -663,7 +707,9 @@
             ? '<div class="biblio-carte-desc">' + echapperHtml(descTronquee) + '</div>'
             : '';
 
-        return '<div class="biblio-carte biblio-carte--selection">' +
+        var puceId = opts.afficherId ? BibliothequeUI.renderPuceId(opts.id) : '';
+
+        return '<div class="biblio-carte biblio-carte--selection"' + _ancreItem(opts.id) + '>' +
             '<div class="biblio-carte-contenu">' +
                 '<div style="flex: 1;">' +
                     '<div class="biblio-carte-titre">' +
@@ -672,7 +718,7 @@
                         ' ' + opts.badgeSource +
                     '</div>' +
                     ligneInspireDe +
-                    '<div class="biblio-carte-meta">' + opts.metadonnees + '</div>' +
+                    '<div class="biblio-carte-meta">' + opts.metadonnees + puceId + '</div>' +
                     descHTML +
                 '</div>' +
                 actionsHTML +
@@ -730,7 +776,9 @@
             ? '<div class="biblio-carte-desc">' + echapperHtml(descTronquee) + '</div>'
             : '';
 
-        return '<div class="' + classeItem + ' biblio-carte biblio-carte--disponible" ' + dataAttrs + ' style="' + opacite + styleExtra + '">' +
+        var puceId = opts.afficherId ? BibliothequeUI.renderPuceId(opts.id) : '';
+
+        return '<div class="' + classeItem + ' biblio-carte biblio-carte--disponible" ' + dataAttrs + _ancreItem(opts.id) + ' style="' + opacite + styleExtra + '">' +
             '<div class="biblio-carte-contenu">' +
                 '<div style="flex: 1;">' +
                     '<div class="biblio-carte-titre">' +
@@ -739,7 +787,7 @@
                         ' ' + opts.badgeSource +
                     '</div>' +
                     ligneInspireDe +
-                    '<div class="biblio-carte-meta">' + opts.metadonnees + '</div>' +
+                    '<div class="biblio-carte-meta">' + opts.metadonnees + puceId + '</div>' +
                     descHTML +
                     (opts.dejaPresent ? '<div class="biblio-carte-deja">Déjà dans la barre latérale</div>' : '') +
                 '</div>' +
@@ -748,41 +796,239 @@
         '</div>';
     };
 
-    /**
-     * Génère le bloc d'avertissement doublons
-     */
-    BibliothequeUI.renderAvertissementDoublons = function (doublons, fnIdCourt) {
-        if (!doublons || doublons.length === 0) return '';
+    /* ===========================================================
+       #291 — LE BANDEAU DÉSIGNE, IL NE DÉCRIT PLUS
+       ===========================================================
 
-        var genId = fnIdCourt || BibliothequeUI.genererIdCourt;
-        var nomChamp = doublons[0].nom !== undefined ? 'nom' : 'titre';
+       CE QUI ÉTAIT SERVI JUSQU'AU 23 AOÛT 2026 :
 
-        var listeHTML = doublons.map(function (d) {
-            var nom = d[nomChamp] || 'Sans titre';
-            var idsStr = '';
-            if (d.ids) {
-                idsStr = ' (IDs: ' + d.ids.map(function (id) {
-                    return '<span title="ID complet : ' + id + '" style="cursor: help; text-decoration: underline dotted;">#' + genId(id) + '</span>';
-                }).join(', ') + ')';
+         « ⚠️ 4 doublon(s) potentiel(s) détecté(s) […] Survole un ID pour voir
+           sa valeur complète — IDs identiques = vraies copies, IDs différents
+           = homonymes légitimes. »
+
+       Les deux moitiés de cette consigne étaient FAUSSES :
+
+         · « IDs identiques » ne pouvait JAMAIS se produire : les détecteurs
+           dédupliquaient par `id` avant de regrouper, donc la branche était
+           morte ;
+         · « IDs différents = homonymes légitimes » était servi aussi bien à
+           une COPIE qu'à deux entités réellement distinctes. L'application
+           affirmait donc que ses propres copies étaient des homonymes.
+
+       La consigne n'est pas reformulée : elle est SUPPRIMÉE. À la place, la
+       catégorie est CALCULÉE (`analyserDoublons`, js/identite-item.js) et
+       chaque exemplaire est nommé, daté, identifié et atteignable.
+
+       ⚠ AUCUNE CASE À COCHER NE PORTE UN VERDICT (règle des portes terrain) :
+       la catégorie est calculée et affichée, jamais laissée à un interrupteur.
+       =========================================================== */
+
+    var _CATEGORIES_DOUBLON = {
+        'collision-id': {
+            puce: '🔴',
+            titre: 'Collision d\'identifiant',
+            classe: 'biblio-doublon-groupe--collision',
+            explication: function (n) {
+                return 'Anomalie de données : ' + n + ' entrées portent le même identifiant. ' +
+                    'Ce n\'est pas une duplication ordinaire — signale-le.';
             }
-            return '<li><strong>' + nom + '</strong> : ' + d.count + ' exemplaire(s)' + idsStr + '</li>';
+        },
+        'copie': {
+            puce: '🟠',
+            titre: 'Copies',
+            classe: 'biblio-doublon-groupe--copie',
+            explication: function (n) {
+                return n + ' exemplaires issus du même original. Tu peux n\'en garder qu\'un.';
+            }
+        },
+        'homonymes': {
+            puce: '🔵',
+            titre: 'Homonymes',
+            classe: 'biblio-doublon-groupe--homonymes',
+            explication: function (n) {
+                return n + ' entités distinctes portant le même nom. Ce n\'est pas un défaut — ' +
+                    'renomme-les seulement si tu veux les distinguer d\'un coup d\'œil.';
+            }
+        }
+    };
+
+    /**
+     * Date d'affichage d'un item, dans l'ordre où le corpus la range.
+     * Coupe à AAAA-MM-JJ : une heure n'aide personne à trancher un doublon.
+     */
+    function _dateItem(item) {
+        if (!item) return '';
+        var brute = item.dateModification || item.dateCreation ||
+                    item.dateAjoutBiblio || item.dateImport || item.dateAjout || '';
+        return brute ? String(brute).slice(0, 10) : '';
+    }
+
+    /**
+     * Un bouton d'action de ligne d'exemplaire. Zéro handler inline.
+     * Les `data-param*` portent des identifiants venus du stockage : contexte
+     * d'attribut, donc `echapperAttribut` (CT-29).
+     */
+    function _boutonExemplaire(btn) {
+        var attrs = ' data-action="' + echapperAttribut(btn.action) + '"';
+        if (btn.param != null) attrs += ' data-param="' + echapperAttribut(btn.param) + '"';
+        if (btn.param2 != null) attrs += ' data-param2="' + echapperAttribut(btn.param2) + '"';
+        return '<button type="button"' + attrs +
+            ' class="btn ' + (btn.classe || 'btn-secondaire') + ' biblio-doublon-action"' +
+            ' title="' + echapperAttribut(btn.title || btn.label) + '">' +
+            echapperHtml(btn.label) + '</button>';
+    }
+
+    /**
+     * Rend le bandeau des groupes de même nom, catégorie par catégorie.
+     *
+     * @param {Array} groupes - sortie de `analyserDoublons` (js/identite-item.js)
+     * @param {Object} [opts]
+     * @param {Array}  [opts.itemsSelection] - items actuellement dans la barre
+     *        latérale : décide si la ligne propose « Retirer / Supprimer »
+     *        (l'item est à toi) ou « Supprimer de la bibliothèque ».
+     * @param {Object} [opts.actions] - noms des actions EXISTANTES de la famille :
+     *        {retirer, supprimer, supprimerPartagee, champParam2}
+     *        `champParam2` nomme le champ de l'item à passer en 2e paramètre
+     *        (cartouches : 'grilleId'). On ne crée aucune action neuve.
+     * @returns {string} HTML du bandeau ('' si rien à signaler)
+     */
+    BibliothequeUI.renderAvertissementDoublons = function (groupes, opts) {
+        if (!groupes || groupes.length === 0) return '';
+        opts = opts || {};
+        var actions = opts.actions || {};
+        var selection = Array.isArray(opts.itemsSelection) ? opts.itemsSelection : [];
+
+        function estDansSelection(item) {
+            if (!item) return false;
+            if (item.dansBibliotheque === false) return false;
+            return selection.some(function (x) {
+                return x === item || (x && x.id && item.id && x.id === item.id);
+            });
+        }
+
+        var blocsHTML = groupes.map(function (groupe) {
+            var meta = _CATEGORIES_DOUBLON[groupe.categorie] || _CATEGORIES_DOUBLON.homonymes;
+
+            // Un numéro de lignée n'a de sens que s'il y en a plusieurs à
+            // distinguer : sur un groupe d'une seule lignée, il n'apporterait
+            // qu'un chiffre de plus à lire.
+            var nbLignees = new Set(groupe.exemplaires.map(function (e) { return e.lignee; })).size;
+
+            var lignesHTML = groupe.exemplaires.map(function (ex) {
+                var item = ex.item || {};
+                var dansSelection = estDansSelection(item);
+                var param2 = actions.champParam2 ? item[actions.champParam2] : null;
+
+                var boutons = [{
+                    label: 'Voir',
+                    action: 'BibliothequeUI.voirItemDoublon',
+                    param: ex.id,
+                    classe: 'btn-secondaire',
+                    title: 'Aller à cette carte dans la liste et la mettre en évidence'
+                }];
+
+                if (dansSelection && actions.retirer) {
+                    boutons.push({
+                        label: 'Retirer', action: actions.retirer, param: ex.id, param2: param2,
+                        classe: 'btn-secondaire',
+                        title: 'Retirer de la barre latérale (données conservées)'
+                    });
+                }
+                if (dansSelection && actions.supprimer) {
+                    boutons.push({
+                        label: 'Supprimer', action: actions.supprimer, param: ex.id, param2: param2,
+                        classe: 'btn-supprimer', title: 'Supprimer définitivement'
+                    });
+                } else if (!dansSelection && actions.supprimerPartagee) {
+                    boutons.push({
+                        label: 'Supprimer', action: actions.supprimerPartagee, param: ex.id,
+                        classe: 'btn-supprimer',
+                        title: 'Supprimer définitivement de la bibliothèque partagée'
+                    });
+                }
+
+                var date = _dateItem(item);
+                var reperes = '';
+                if (nbLignees > 1) {
+                    reperes += '<span class="biblio-doublon-lignee">Lignée ' + ex.lignee + '</span>';
+                }
+                if (ex.collisionId) {
+                    reperes += '<span class="biblio-doublon-collision">identifiant en double</span>';
+                }
+
+                return '<li class="biblio-doublon-exemplaire">' +
+                    '<span class="biblio-doublon-desc">' +
+                        '<strong>' + echapperHtml(ex.nomAffiche) + '</strong> ' +
+                        BibliothequeUI.renderPuceId(ex.id) +
+                        (date ? '<span class="biblio-doublon-date">modifié le ' + echapperHtml(date) + '</span>' : '') +
+                        BibliothequeUI.genererBadgeSource(item) +
+                        (dansSelection ? '<span class="biblio-doublon-lieu">Dans ta barre latérale</span>'
+                                       : '<span class="biblio-doublon-lieu biblio-doublon-lieu--partagee">Bibliothèque partagée</span>') +
+                        reperes +
+                    '</span>' +
+                    '<span class="biblio-doublon-actions">' +
+                        boutons.map(_boutonExemplaire).join('') +
+                    '</span>' +
+                '</li>';
+            }).join('');
+
+            return '<div class="biblio-doublon-groupe ' + meta.classe + '">' +
+                '<div class="biblio-doublon-titre">' +
+                    meta.puce + ' ' + echapperHtml(meta.titre) +
+                    ' — « ' + echapperHtml(groupe.nom) + ' »' +
+                '</div>' +
+                '<p class="biblio-doublon-explication">' +
+                    echapperHtml(meta.explication(groupe.count)) +
+                '</p>' +
+                '<ul class="biblio-doublon-exemplaires">' + lignesHTML + '</ul>' +
+            '</div>';
         }).join('');
 
-        return '<div class="info-box info-box--attention" style="margin-bottom: 20px;">' +
-            '<div style="font-weight: bold; margin-bottom: 8px;">' +
-                '⚠️ ' + doublons.length + ' doublon(s) potentiel(s) détecté(s)' +
+        return '<div class="biblio-doublons">' +
+            '<div class="biblio-doublons-entete">' +
+                groupes.length + ' groupe(s) portent le même nom' +
             '</div>' +
-            '<p style="font-size: 0.9em; margin: 0 0 8px 0;">' +
-                'Des éléments avec des noms similaires existent en plusieurs exemplaires.' +
+            '<p class="biblio-doublons-intro">' +
+                'Un même nom n\'est pas forcément un défaut. Voici ce qu\'est chaque groupe, ' +
+                'et de quoi trancher sur place.' +
             '</p>' +
-            '<p style="font-size: 0.85em; margin: 0 0 10px 0; color: var(--texte-secondaire, #8aa4b0);">' +
-                '<strong>Pour résoudre :</strong> repère les exemplaires au même nom dans la liste ci-dessous, ouvre leur menu ⋮ et choisis « Retirer » (déplace hors de la barre latérale, données conservées) ou « Supprimer » (suppression définitive). Survole un ID pour voir sa valeur complète — IDs identiques = vraies copies, IDs différents = homonymes légitimes.' +
-            '</p>' +
-            '<details style="font-size: 0.85em;">' +
-                '<summary style="cursor: pointer; font-weight: 500;">Voir les détails</summary>' +
-                '<ul style="margin: 10px 0 0 0; padding-left: 20px;">' + listeHTML + '</ul>' +
-            '</details>' +
+            blocsHTML +
         '</div>';
+    };
+
+    /**
+     * #291 §3.3 — « Voir » amène à la carte au lieu de la décrire.
+     *
+     * « Les rechercher manuellement par leur ID est laborieux. » Ce n'est plus
+     * à l'utilisateur de faire la correspondance : on l'y conduit.
+     *
+     * Plusieurs cartes peuvent porter le même identifiant — c'est exactement le
+     * cas « collision » — donc on les met TOUTES en évidence et on défile vers
+     * la première.
+     *
+     * @param {string} id - identifiant complet de l'exemplaire
+     */
+    BibliothequeUI.voirItemDoublon = function (id) {
+        if (!id || typeof document === 'undefined') return;
+
+        var cibles = document.querySelectorAll(
+            '[data-biblio-item-id="' + String(id).replace(/["\\]/g, '\\$&') + '"]');
+
+        if (!cibles.length) {
+            // Un filtre actif ou un dossier replié peut masquer la carte : le
+            // dire, plutôt que de ne rien faire et laisser croire à une panne.
+            if (typeof notifications !== 'undefined' && notifications.info) {
+                notifications.info('Cette carte n\'est pas affichée en ce moment.',
+                    'Vide le champ de recherche ou les filtres, puis réessaie.');
+            }
+            return;
+        }
+
+        cibles[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        cibles.forEach(function (el) { el.classList.add('biblio-carte--pointee'); });
+        setTimeout(function () {
+            cibles.forEach(function (el) { el.classList.remove('biblio-carte--pointee'); });
+        }, 2200);
     };
 
     /**

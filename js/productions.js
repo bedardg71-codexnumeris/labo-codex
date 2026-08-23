@@ -111,35 +111,6 @@ function trierListeProductions() {
 }
 
 /**
- * ✅ AJOUT (28 janvier 2026) : Détecter les doublons potentiels dans les productions
- * Retourne une liste des titres qui apparaissent plus d'une fois
- * @param {Array} productionsLocales - Productions de l'utilisateur
- * @param {Array} productionsBibliotheque - Productions de la bibliothèque partagée
- * @returns {Array} Liste des doublons {titre, count, ids}
- */
-function detecterDoublonsProductions(productionsLocales, productionsBibliotheque) {
-    const parId = new Map();
-    [...productionsLocales, ...productionsBibliotheque].forEach(prod => {
-        if (prod && prod.id && !parId.has(prod.id)) {
-            parId.set(prod.id, prod);
-        }
-    });
-
-    const parTitre = {};
-    parId.forEach(prod => {
-        const titre = (prod.titre || '').trim().toLowerCase();
-        if (!titre) return;
-        if (!parTitre[titre]) {
-            parTitre[titre] = { titre: prod.titre, count: 0, ids: [] };
-        }
-        parTitre[titre].count++;
-        parTitre[titre].ids.push(prod.id);
-    });
-
-    return Object.values(parTitre).filter(d => d.count > 1);
-}
-
-/**
  * ✅ AJOUT (28 janvier 2026) : Générer un badge de source pour une production
  * @param {Object} prod - La production
  * @param {Array} productionsLocales - Productions locales pour vérifier la source
@@ -2166,7 +2137,6 @@ window.gererPortfolio = gererPortfolio;
 window.initialiserModuleProductions = initialiserModuleProductions;
 window.getCleProductions = getCleProductions; // Exposé pour sous-module productions-import-export.js
 window.poserReferenceSelect = poserReferenceSelect; // #453 §3 — exposé pour la sentinelle (tests/unit)
-window.detecterDoublonsProductions = detecterDoublonsProductions; // Exposé pour sous-module productions-bibliotheque-ui.js
 
 // Export/Import avec licence CC → extraits dans productions-import-export.js (refactor 16 mai 2026)
 // Sidebar + CRUD utilisateur → extraits dans productions-liste.js (refactor 16 mai 2026)

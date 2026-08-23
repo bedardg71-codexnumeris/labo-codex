@@ -160,34 +160,6 @@ let echelleTemplateActuelle = null;
    =============================== */
 
 /**
- * Détecter les doublons potentiels dans les échelles
- * @param {Array} echellesLocales - Échelles de l'utilisateur
- * @param {Array} echellesBibliotheque - Échelles de la bibliothèque partagée
- * @returns {Array} Liste des doublons {nom, count, ids}
- */
-function detecterDoublonsEchelles(echellesLocales, echellesBibliotheque) {
-    const parId = new Map();
-    [...echellesLocales, ...echellesBibliotheque].forEach(echelle => {
-        if (echelle && echelle.id && !parId.has(echelle.id)) {
-            parId.set(echelle.id, echelle);
-        }
-    });
-
-    const parNom = {};
-    parId.forEach(echelle => {
-        const nom = (echelle.nom || '').trim().toLowerCase();
-        if (!nom) return;
-        if (!parNom[nom]) {
-            parNom[nom] = { nom: echelle.nom, count: 0, ids: [] };
-        }
-        parNom[nom].count++;
-        parNom[nom].ids.push(echelle.id);
-    });
-
-    return Object.values(parNom).filter(d => d.count > 1);
-}
-
-/**
  * Générer un badge de source pour une échelle
  * @param {Object} echelle - L'échelle
  * @param {Array} echellesLocales - Échelles locales pour vérifier la source
@@ -389,7 +361,7 @@ async function dupliquerEchelle(echelleId) {
         return;
     }
 
-    const nouveauNom = prompt('Nom de la nouvelle échelle :', echelle.nom + ' (copie)');
+    const nouveauNom = prompt('Nom de la nouvelle échelle :', nommerCopie(echelle.nom, echelles));
     if (!nouveauNom) return;
 
     const nouvelleEchelle = {
@@ -835,7 +807,12 @@ async function enregistrerCommeEchelle() {
 async function dupliquerEchelleActuelle() {
     if (!echelleTemplateActuelle) return;
 
-    const nouveauNom = prompt('Nom de la nouvelle échelle :', echelleTemplateActuelle.nom + ' (copie)');
+    // CO-24 — lecture AVANT l'invite : `nommerCopie` doit connaître les noms
+    // déjà pris. La déclaration vivait plus bas, ce qui plaçait cet appel dans
+    // la zone morte temporelle du `let`.
+    let echelles = await db.get(cle('echellesTemplates')) ||  [];
+
+    const nouveauNom = prompt('Nom de la nouvelle échelle :', nommerCopie(echelleTemplateActuelle.nom, echelles));
     if (!nouveauNom) return;
 
     const nouvelleEchelle = {
@@ -848,7 +825,6 @@ async function dupliquerEchelleActuelle() {
         baseSur: echelleTemplateActuelle.nom
     };
 
-    let echelles = await db.get(cle('echellesTemplates')) ||  [];
     echelles.push(nouvelleEchelle);
     await db.set(cle('echellesTemplates'),  echelles);
 
@@ -2178,7 +2154,9 @@ async function preparerDonneesBibliothequeEchelles() {
     const echellesDisponibles = BibliothequeUI.filtrerParModeDemo(
         await obtenirToutesLesEchellesBibliotheque()
     );
-    const doublonsDetectes = detecterDoublonsEchelles(echellesDansBibliotheque, echellesDisponibles);
+    // #291 — réunion des deux magasins avant analyse (cf. grilles.js).
+    const doublonsDetectes = analyserDoublons(
+        reunirSources(echellesDansBibliotheque, echellesDisponibles), 'nom');
 
     // #327 — dossiers de classement (couche par-dessus, range par identité).
     const repsEchelles = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
@@ -2191,6 +2169,7 @@ async function preparerDonneesBibliothequeEchelles() {
     const cartesSection1 = echellesDansBibliotheque.map(echelle => ({
         nom: BibliothequeUI.formaterTitreDemo(echelle.nom || 'Sans titre', BibliothequeUI.estItemDemo(echelle)),
         id: echelle.id,
+        afficherId: true,
         badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
         badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(echelle) : '',
         metadonnees: BibliothequeUI.formaterMetadonnees(echelle, {
@@ -2243,6 +2222,7 @@ async function preparerDonneesBibliothequeEchelles() {
         return {
             nom: BibliothequeUI.formaterTitreDemo(echelle.nom || 'Sans titre', BibliothequeUI.estItemDemo(echelle)) + ' ' + gabaritBadge,
             id: echelle.id,
+            afficherId: true,
             badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
             badgesPratiques: badgesPratiques,
             metadonnees: BibliothequeUI.formaterMetadonnees(echelle, {
@@ -2263,7 +2243,7 @@ async function preparerDonneesBibliothequeEchelles() {
     const trimestresDisponibles = typeof listerTrimestresAvecEchelles === 'function' ? listerTrimestresAvecEchelles() : [];
     const sectionImportTrimestre = trimestresDisponibles.length > 0 ? { trimestres: trimestresDisponibles } : null;
 
-    return { cartesSection1, cartesSection2, doublonsDetectes, sectionImportTrimestre, repsEchelles };
+    return { cartesSection1, cartesSection2, doublonsDetectes, sectionImportTrimestre, repsEchelles, echellesDansBibliotheque };
 }
 
 async function afficherBibliothequeEchelles() {
@@ -2355,7 +2335,14 @@ async function afficherBibliothequeEchelles() {
         titre: "Bibliothèque d'échelles de performance",
         sousTitre: 'Gérez les échelles de performance affichées dans la barre latérale.',
         onFermer: 'fermerModalBibliothequeEchelles',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes),
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
+            itemsSelection: data.echellesDansBibliotheque,
+            actions: {
+                retirer: 'retirerEchelleDeBibliotheque',
+                supprimer: 'supprimerEchelleDefinitivement',
+                supprimerPartagee: 'supprimerEchelleDeBibliothequePartagee'
+            }
+        }),
         titreSection1: 'Échelles dans la barre latérale',
         contenuIdListe1: 'listeEchellesDansBibliotheque',
         contenuSection1: contenuSection1,
@@ -2378,7 +2365,7 @@ async function afficherBibliothequeEchelles() {
  */
 async function ajouterEchelleIndividuelle(id) {
     try {
-        const echelles = await db.get(cle('echellesTemplates')) || [];
+        let echelles = await db.get(cle('echellesTemplates')) || [];
         let echelle = echelles.find(e => e.id === id);
         if (!echelle) {
             echelle = echelles.find(e => e.idOriginal === id);
@@ -2397,7 +2384,14 @@ async function ajouterEchelleIndividuelle(id) {
                     dansBibliotheque: true,
                     dateImport: new Date().toISOString()
                 };
-                echelles.push(echelle);
+                // #476 — garde d'identité au point d'écriture (cf. grilles.js).
+                const gardeEchelle = ajouterAvecGardeIdentite(echelles, echelle);
+                if (!gardeEchelle.ajoute) {
+                    const nomEnPlace = (gardeEchelle.conflit && gardeEchelle.conflit.nom) || 'Une échelle';
+                    alert(`« ${nomEnPlace} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
+                    return;
+                }
+                echelles = gardeEchelle.liste;
             } else {
                 alert('Échelle introuvable');
                 return;
@@ -2407,9 +2401,20 @@ async function ajouterEchelleIndividuelle(id) {
         }
 
         await db.set(cle('echellesTemplates'), echelles);
+
+        // ⚠ Relecture-vérification : `db.set` refuse en silence (cf. grilles.js).
+        const verifEchelle = await db.get(cle('echellesTemplates')) || [];
+
         fermerModalBibliothequeEchelles();
         await afficherListeEchelles();
         await afficherBibliothequeEchelles();
+
+        if (!verifEchelle.some(e => e.id === echelle.id)) {
+            console.error('[echelles] Écriture non confirmée —', echelle.id, 'absente après db.set.');
+            alert(`« ${echelle.nom || 'Échelle'} » n'a PAS pu être ajoutée.\n\nL'enregistrement a été refusé. Ouvre la console pour la raison.`);
+            return;
+        }
+
         alert('Échelle ajoutée à ta sélection avec succès !');
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
@@ -2549,7 +2554,7 @@ async function dupliquerEchelleBibliotheque(id) {
     const nouvelleEchelle = {
         ...echelle,
         id: genererIdUnique('ECH_'),
-        nom: `${echelle.nom} (copie)`,
+        nom: nommerCopie(echelle.nom, echelles),
         auteur: BibliothequeUI.obtenirAuteurActif(),
         isDemo: false,
         inspireDe: BibliothequeUI.forgerInspireDe(echelle),
@@ -3114,7 +3119,7 @@ async function dupliquerEtEditerEchelle(id) {
     const echelle = echelles.find(e => e.id === id);
     if (!echelle) return;
 
-    const copie = BibliothequeUI.forkerItem(echelle, 'ECH_');
+    const copie = BibliothequeUI.forkerItem(echelle, 'ECH_', echelles);
     echelles.push(copie);
     await db.set(cle('echellesTemplates'), echelles);
 
@@ -3494,7 +3499,7 @@ async function dupliquerEchelleDepuisSidebar(id) {
     const copie = {
         ...echelle,
         id: genererIdUnique('ECH_'),
-        nom: echelle.nom + ' (copie)',
+        nom: nommerCopie(echelle.nom, echelles),
         verrouille: false
     };
 

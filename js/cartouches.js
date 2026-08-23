@@ -80,34 +80,6 @@ async function obtenirCartouchesGrille(grilleId) {
    =============================== */
 
 /**
- * Détecter les doublons potentiels dans les cartouches
- * @param {Array} cartouchesLocales - Cartouches de l'utilisateur
- * @param {Array} cartouchesBibliotheque - Cartouches de la bibliothèque partagée
- * @returns {Array} Liste des doublons {nom, count, ids}
- */
-function detecterDoublonsCartouches(cartouchesLocales, cartouchesBibliotheque) {
-    const parId = new Map();
-    [...cartouchesLocales, ...cartouchesBibliotheque].forEach(cartouche => {
-        if (cartouche && cartouche.id && !parId.has(cartouche.id)) {
-            parId.set(cartouche.id, cartouche);
-        }
-    });
-
-    const parNom = {};
-    parId.forEach(cartouche => {
-        const nom = (cartouche.nom || '').trim().toLowerCase();
-        if (!nom) return;
-        if (!parNom[nom]) {
-            parNom[nom] = { nom: cartouche.nom, count: 0, ids: [] };
-        }
-        parNom[nom].count++;
-        parNom[nom].ids.push(cartouche.id);
-    });
-
-    return Object.values(parNom).filter(d => d.count > 1);
-}
-
-/**
  * Générer un badge de source pour une cartouche
  * @param {Object} cartouche - La cartouche
  * @param {Array} cartouchesLocales - Cartouches locales pour vérifier la source
@@ -1372,7 +1344,7 @@ async function dupliquerCartouche(cartoucheId, grilleId) {
         const nouveauCartouche = {
             ...cartoucheOriginal,
             id: genererIdUnique('CART_'),
-            nom: cartoucheOriginal.nom + ' (copie)',
+            nom: nommerCopie(cartoucheOriginal.nom, cartouches),
             auteur: BibliothequeUI.obtenirAuteurActif(),
             isDemo: false,
             inspireDe: BibliothequeUI.forgerInspireDe(cartoucheOriginal),
@@ -3302,7 +3274,11 @@ async function preparerDonneesBibliothequeCartouches() {
     }
     cartouchesDisponibles = BibliothequeUI.filtrerParModeDemo(cartouchesDisponibles);
 
-    const doublonsDetectes = detecterDoublonsCartouches(cartouchesDansBibliotheque, cartouchesDisponibles);
+    // #291 — voir le commentaire de grilles.js : réunion des deux magasins
+    // avant analyse, sinon un même objet vu des deux côtés passerait pour
+    // une collision d'identifiant.
+    const doublonsDetectes = analyserDoublons(
+        reunirSources(cartouchesDansBibliotheque, cartouchesDisponibles), 'nom');
     const toutesLesGrilleNoms = [...cartouchesLocales, ...cartouchesDisponibles].map(c => c.grilleNom || 'Autre');
     const disciplines = [...new Set(toutesLesGrilleNoms)].sort();
 
@@ -3320,6 +3296,7 @@ async function preparerDonneesBibliothequeCartouches() {
             cartesSection1.push({
                 nom: BibliothequeUI.formaterTitreDemo(cartouche.nom || 'Sans titre', BibliothequeUI.estItemDemo(cartouche)),
                 id: cartouche.id,
+                afficherId: true,
                 badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
                 metadonnees: BibliothequeUI.formaterMetadonnees(cartouche, {
                     quantite: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)`
@@ -3352,6 +3329,7 @@ async function preparerDonneesBibliothequeCartouches() {
             cartesSection2.push({
                 nom: BibliothequeUI.formaterTitreDemo(cartouche.nom || 'Sans titre', BibliothequeUI.estItemDemo(cartouche)),
                 id: cartouche.id,
+                afficherId: true,
                 badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
                 metadonnees: BibliothequeUI.formaterMetadonnees(cartouche, {
                     quantite: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)`
@@ -3370,7 +3348,7 @@ async function preparerDonneesBibliothequeCartouches() {
         });
     });
 
-    return { cartesSection1, cartesSection2, doublonsDetectes, disciplines };
+    return { cartesSection1, cartesSection2, doublonsDetectes, disciplines, cartouchesDansBibliotheque };
 }
 
 async function afficherBibliothequeCartouches() {
@@ -3427,7 +3405,17 @@ async function afficherBibliothequeCartouches() {
         titre: 'Bibliothèque de cartouches de rétroaction',
         sousTitre: 'Gérez les cartouches de rétroaction affichées dans la barre latérale.',
         onFermer: 'fermerModalBibliothequeCartouches',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes),
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
+            itemsSelection: data.cartouchesDansBibliotheque,
+            actions: {
+                retirer: 'retirerCartoucheDeBibliotheque',
+                supprimer: 'supprimerCartoucheDefinitivement',
+                supprimerPartagee: 'supprimerCartoucheDeBibliothequePartagee',
+                // Ces deux actions prennent (id, grilleId) : le magasin des
+                // cartouches est `cartouches_<grilleId>`, pas une clé unique.
+                champParam2: 'grilleId'
+            }
+        }),
         titreSection1: 'Cartouches dans la barre latérale',
         contenuIdListe1: 'listeCartouchesDansBibliotheque',
         contenuSection1: contenuSection1,
@@ -3458,7 +3446,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
         }
         const grilleIdLocal = grilleLocale ? grilleLocale.id : grilleId;
 
-        const cartouches = await db.get(`cartouches_${grilleIdLocal}`) || [];
+        let cartouches = await db.get(`cartouches_${grilleIdLocal}`) || [];
         let cartouche = cartouches.find(c => c.id === id);
         if (!cartouche) {
             cartouche = cartouches.find(c => c.idOriginal === id);
@@ -3481,7 +3469,14 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
                     dansBibliotheque: true,
                     dateImport: new Date().toISOString()
                 };
-                cartouches.push(cartouche);
+                // #476 — garde d'identité au point d'écriture (cf. grilles.js).
+                const gardeCartouche = ajouterAvecGardeIdentite(cartouches, cartouche);
+                if (!gardeCartouche.ajoute) {
+                    const nomEnPlace = (gardeCartouche.conflit && gardeCartouche.conflit.nom) || 'Une cartouche';
+                    alert(`« ${nomEnPlace} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
+                    return;
+                }
+                cartouches = gardeCartouche.liste;
             } else {
                 alert('Cartouche introuvable');
                 return;
@@ -3491,9 +3486,20 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
         }
 
         await db.set(`cartouches_${grilleIdLocal}`, cartouches);
+
+        // ⚠ Relecture-vérification : `db.set` refuse en silence (cf. grilles.js).
+        const verifCartouche = await db.get(`cartouches_${grilleIdLocal}`) || [];
+
         fermerModalBibliothequeCartouches();
         await afficherBanqueCartouches();
         await afficherBibliothequeCartouches();
+
+        if (!verifCartouche.some(c => c.id === cartouche.id)) {
+            console.error('[cartouches] Écriture non confirmée —', cartouche.id, 'absente après db.set.');
+            alert(`« ${cartouche.nom || 'Cartouche'} » n'a PAS pu être ajoutée.\n\nL'enregistrement a été refusé. Ouvre la console pour la raison.`);
+            return;
+        }
+
         alert('Cartouche ajoutée à ta sélection avec succès !');
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
@@ -3598,7 +3604,7 @@ async function dupliquerEtEditerCartouche(id) {
     const cartouche = cartouches.find(c => c.id === id);
     if (!cartouche) return;
 
-    const copie = BibliothequeUI.forkerItem(cartouche, 'CART_');
+    const copie = BibliothequeUI.forkerItem(cartouche, 'CART_', cartouches);
     cartouches.push(copie);
     await db.set(`cartouches_${grilleId}`, cartouches);
 
@@ -3626,7 +3632,7 @@ async function dupliquerCartoucheBibliotheque(id, grilleId) {
     const nouvelleCartouche = {
         ...cartouche,
         id: genererIdUnique('CART_'),
-        nom: `${cartouche.nom} (copie)`,
+        nom: nommerCopie(cartouche.nom, cartouches),
         auteur: BibliothequeUI.obtenirAuteurActif(),
         isDemo: false,
         inspireDe: BibliothequeUI.forgerInspireDe(cartouche),
