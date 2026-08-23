@@ -5,6 +5,45 @@
 > **Plan appliqué** : `plans de travail/PLAN-291-476-gestion-des-doublons.md` (Lots 0 à 5)
 > **Artefact jumeau** : https://claude.ai/code/artifact/cc472a60-c838-4f3b-a2d5-433eaedea013
 >
+> ---
+>
+> ## ✅ RELEVÉ REÇU — 23 août 2026, 14 h 40 · **39 passées · 3 en échec · 1 non traitée**
+>
+> **La porte 1.2 PASSE** — le cas-témoin du chantier. Sur le corpus réel :
+> **0 collision d'identifiant · 8 copies · 13 homonymes · 21 groupes de même nom.**
+> Les deux « IDME et niv 0 » ressortent bien 🔵 homonymes. La décision de fond
+> — *on bloque sur l'identité, jamais sur le nom* — tient sur ses vraies données.
+>
+> **Les trois ✗ avaient une seule cause, mesurée puis corrigée (1.92.1)** :
+>
+> | Porte | Ce qu'il a vu | Mesure | Correctif |
+> |---|---|---|---|
+> | 2.1c | puce illisible sans zoomer sur iPad | **11,8 px** (héritage `em` de `.biblio-carte-meta`) | `font-size` en **`rem`**, 14 px |
+> | 2.1d | contraste insuffisant en mode clair | **4,01:1** — sous le seuil AA de 4,5 | jetons propres, **5,87:1** |
+> | 2.1e | « même puce partout » non constatable | la puce était **présente dans les 5 familles** | rien à corriger : conséquence des deux ci-dessus |
+>
+> **La mesure 2.5 a attrapé un quatrième défaut, préexistant** : « la modale
+> *Supprimer de la bibliothèque partagée* apparaît SOUS la modale de la
+> bibliothèque ». `uiDialogues` construit un `.modal-overlay` à **z-index 9999**
+> quand les modales de bibliothèque sont à **10000** — la confirmation naissait
+> derrière ce qui l'avait demandée. Seules les productions confirment par une
+> modale ; les quatre autres familles utilisent `confirm()` natif, que rien ne
+> recouvre. Corrigé à 10005, comme le précédent `.modal-overlay--partage`.
+>
+> **Sentinelle** `tests/integration/doublons-lisibilite-291.spec.js` : les
+> quatre faits sont désormais verrouillés au navigateur, format iPad, dans les
+> deux modes. Les trois break-tests ont rougi avant restauration.
+>
+> **1.1c non traitée** (lire la 2e ligne du rapport) : sans conséquence, les
+> quatre mesures du 1.1 sont revenues.
+>
+> **Décisions du §3, toutes rendues** : 3.1 à 3.5 « c'est bon » — catégories,
+> groupes mixtes, bandeau déplié, double chemin Retirer/Supprimer et disparité
+> alerte/notification sont **actés tels quels**. **3.6 : la comparaison
+> côte-à-côte de #291 devient le PROCHAIN CHANTIER.**
+>
+> ---
+>
 > **Ce qui échoue ici devient un item de backlog, pas une note mentale.**
 > Au retour : trier chaque ✗ (défaut réel, ou build en retard ?), verser les
 > défauts réels au `BACKLOG.md` avec leur numéro de porte, puis mettre à jour
