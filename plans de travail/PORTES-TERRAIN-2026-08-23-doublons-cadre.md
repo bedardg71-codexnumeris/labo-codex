@@ -3,6 +3,7 @@
 > **Date** : 23 août 2026 · **Version livrée** : voir `version.json` après le bump
 > **Branche** : `claude/gestion-des-doublons-ytpvkt`
 > **Plan appliqué** : `plans de travail/PLAN-291-476-gestion-des-doublons.md` — **Lot 6**
+> **Artefact jumeau** : https://claude.ai/code/artifact/bdb3f1b9-f4bb-4f11-9156-64f63bc77efa
 > **Porte jumelle, déjà relevée** : `PORTES-TERRAIN-2026-08-23-doublons.md` (Lots 0-5, 39/43)
 >
 > ---
