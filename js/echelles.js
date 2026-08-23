@@ -160,34 +160,6 @@ let echelleTemplateActuelle = null;
    =============================== */
 
 /**
- * Détecter les doublons potentiels dans les échelles
- * @param {Array} echellesLocales - Échelles de l'utilisateur
- * @param {Array} echellesBibliotheque - Échelles de la bibliothèque partagée
- * @returns {Array} Liste des doublons {nom, count, ids}
- */
-function detecterDoublonsEchelles(echellesLocales, echellesBibliotheque) {
-    const parId = new Map();
-    [...echellesLocales, ...echellesBibliotheque].forEach(echelle => {
-        if (echelle && echelle.id && !parId.has(echelle.id)) {
-            parId.set(echelle.id, echelle);
-        }
-    });
-
-    const parNom = {};
-    parId.forEach(echelle => {
-        const nom = (echelle.nom || '').trim().toLowerCase();
-        if (!nom) return;
-        if (!parNom[nom]) {
-            parNom[nom] = { nom: echelle.nom, count: 0, ids: [] };
-        }
-        parNom[nom].count++;
-        parNom[nom].ids.push(echelle.id);
-    });
-
-    return Object.values(parNom).filter(d => d.count > 1);
-}
-
-/**
  * Générer un badge de source pour une échelle
  * @param {Object} echelle - L'échelle
  * @param {Array} echellesLocales - Échelles locales pour vérifier la source
@@ -2178,7 +2150,9 @@ async function preparerDonneesBibliothequeEchelles() {
     const echellesDisponibles = BibliothequeUI.filtrerParModeDemo(
         await obtenirToutesLesEchellesBibliotheque()
     );
-    const doublonsDetectes = detecterDoublonsEchelles(echellesDansBibliotheque, echellesDisponibles);
+    // #291 — réunion des deux magasins avant analyse (cf. grilles.js).
+    const doublonsDetectes = analyserDoublons(
+        reunirSources(echellesDansBibliotheque, echellesDisponibles), 'nom');
 
     // #327 — dossiers de classement (couche par-dessus, range par identité).
     const repsEchelles = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
@@ -2191,6 +2165,7 @@ async function preparerDonneesBibliothequeEchelles() {
     const cartesSection1 = echellesDansBibliotheque.map(echelle => ({
         nom: BibliothequeUI.formaterTitreDemo(echelle.nom || 'Sans titre', BibliothequeUI.estItemDemo(echelle)),
         id: echelle.id,
+        afficherId: true,
         badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
         badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(echelle) : '',
         metadonnees: BibliothequeUI.formaterMetadonnees(echelle, {
@@ -2243,6 +2218,7 @@ async function preparerDonneesBibliothequeEchelles() {
         return {
             nom: BibliothequeUI.formaterTitreDemo(echelle.nom || 'Sans titre', BibliothequeUI.estItemDemo(echelle)) + ' ' + gabaritBadge,
             id: echelle.id,
+            afficherId: true,
             badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
             badgesPratiques: badgesPratiques,
             metadonnees: BibliothequeUI.formaterMetadonnees(echelle, {
@@ -2263,7 +2239,7 @@ async function preparerDonneesBibliothequeEchelles() {
     const trimestresDisponibles = typeof listerTrimestresAvecEchelles === 'function' ? listerTrimestresAvecEchelles() : [];
     const sectionImportTrimestre = trimestresDisponibles.length > 0 ? { trimestres: trimestresDisponibles } : null;
 
-    return { cartesSection1, cartesSection2, doublonsDetectes, sectionImportTrimestre, repsEchelles };
+    return { cartesSection1, cartesSection2, doublonsDetectes, sectionImportTrimestre, repsEchelles, echellesDansBibliotheque };
 }
 
 async function afficherBibliothequeEchelles() {
@@ -2355,7 +2331,14 @@ async function afficherBibliothequeEchelles() {
         titre: "Bibliothèque d'échelles de performance",
         sousTitre: 'Gérez les échelles de performance affichées dans la barre latérale.',
         onFermer: 'fermerModalBibliothequeEchelles',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes),
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
+            itemsSelection: data.echellesDansBibliotheque,
+            actions: {
+                retirer: 'retirerEchelleDeBibliotheque',
+                supprimer: 'supprimerEchelleDefinitivement',
+                supprimerPartagee: 'supprimerEchelleDeBibliothequePartagee'
+            }
+        }),
         titreSection1: 'Échelles dans la barre latérale',
         contenuIdListe1: 'listeEchellesDansBibliotheque',
         contenuSection1: contenuSection1,
