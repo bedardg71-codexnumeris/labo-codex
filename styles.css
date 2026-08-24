@@ -5415,7 +5415,11 @@ body:not(.mode-clair) .badge-source--partage {
     top: 20px;
     right: 20px;
     padding: 15px 20px;
-    background: var(--vert-leger);
+    /* --vert-succes, et non --vert-leger : c'est la couleur qui S'AFFICHAIT
+       réellement, imposée par la copie inline d'index.html retirée le 24 août
+       2026. Consolider sans la préserver aurait changé en silence la teinte de
+       tous les toasts de succès et d'info, que personne n'a demandé de changer. */
+    background: var(--vert-succes);
     color: white;
     border-radius: var(--radius-grand);
     box-shadow: var(--shadow-prononce);
