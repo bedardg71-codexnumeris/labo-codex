@@ -703,20 +703,12 @@ async function dupliquerProductionBibliotheque(id) {
         prefixeId: 'PROD_',
         lireListe: async () => await db.get(getCleProductions()) || [],
         ecrireListe: async (liste) => { await db.set(getCleProductions(), liste); },
-        // ⚠ DEUX ÉCARTS CONNUS, RECONDUITS TELS QUELS (#476 volet 2, refactor pur).
-        // (1) Les productions nomment par `titre`, pas par `nom`.
-        // (2) Le suffixe est une CONCATÉNATION NUE : dupliquer une copie rend
-        //     « X (copie) (copie) ». C'est le défaut CO-24, que le Lot 5 a
-        //     corrigé partout ailleurs en câblant `nommerCopie` — ce fichier
-        //     n'était pas dans la liste surveillée par sa sentinelle.
-        nommerLaCopie: (copie, source) => { copie.titre = `${source.titre} (copie)`; },
-        // ⚠ ÉCART CONNU : provenance construite à la main, trois clés, sans
-        // `sourceId` ; et `inspireDe.nom` reçoit le TITRE, faute de `nom`.
-        forgerProvenance: (source) => ({
-            nom: source.titre || 'Inconnu',
-            auteur: source.auteur || 'Inconnu',
-            date: new Date().toISOString().slice(0, 10)
-        }),
+        // ✅ D3 (arbitrage du 24 août) — `nommerCopie` remplace la concaténation
+        // nue `${source.titre} (copie)`, qui empilait « X (copie) (copie) ». Les
+        // productions nomment par `titre` : c'est ce champ qui est renommé.
+        nommerLaCopie: (copie, source, liste) => { copie.titre = nommerCopie(source.titre, liste); },
+        // ✅ D5 — provenance complète, `sourceId` compris.
+        forgerProvenance: (source) => BibliothequeUI.forgerInspireDe(source),
         siIntrouvable: () => notifications.erreur('Production introuvable'),
         rafraichirUI: async () => {
             fermerModalBibliothequeProductions();

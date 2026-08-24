@@ -988,9 +988,9 @@ async function dupliquerPratiqueBibliotheque(pratiqueId) {
         cloneProfond: true,
         lireListe: () => db.getSync(cle('pratiquesConfigurables'), null) || [],
         ecrireListe: (liste) => { db.setSync(cle('pratiquesConfigurables'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
-        // ⚠ ÉCART CONNU, RECONDUIT TEL QUEL : concaténation nue au lieu de
-        // `nommerCopie` — CO-24 encore vivant ici (voir BACKLOG #476, écart 9).
-        nommerLaCopie: (copie, source) => { copie.nom = `${source.nom} (copie)`; },
+        // ✅ D3 (arbitrage du 24 août) — `nommerCopie` remplace la concaténation
+        // nue, qui empilait « X (copie) (copie) ».
+        nommerLaCopie: (copie, source, liste) => { copie.nom = nommerCopie(source.nom, liste); },
         forgerProvenance: (source) => BibliothequeUI.forgerInspireDe(source),
         siIntrouvable: () => alert('Pratique introuvable'),
         retoucherCopie: (copie) => { delete copie.estGabarit; }, // ce n'est plus un gabarit
@@ -2064,13 +2064,20 @@ async function dupliquerPratiqueMateriel(pratiqueId) {
         return;
     }
 
+    // ✅ D3 + D4 + D7 (arbitrage du 24 août). Avant : le nom était concaténé à la
+    // main (« X (copie) (copie) » au deuxième tour), et ni les métadonnées de
+    // partage ni le drapeau `estGabarit` n'étaient retirés — la copie gardait la
+    // licence de la source et sa nature de gabarit.
     const copie = JSON.parse(JSON.stringify(original));
     copie.id = genererIdUnique('pratique_');
-    copie.nom = `${original.nom} (copie)`;
+    copie.nom = nommerCopie(original.nom, configurations);
     copie.auteur = BibliothequeUI.obtenirAuteurActif();
     copie.isDemo = false;
     copie.inspireDe = BibliothequeUI.forgerInspireDe(original);
     copie.dateCreation = new Date().toISOString();
+    delete copie.metadata_cc;
+    delete copie.auteurOriginal;
+    delete copie.estGabarit;
 
     configurations.push(copie);
     await db.set(cle('pratiquesConfigurables'), configurations);

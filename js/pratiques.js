@@ -946,7 +946,18 @@ async function editerPratique(id) {
  * @param {string} id - ID de la pratique à dupliquer
  */
 async function dupliquerPratique(id, options = {}) {
-    const nomPropose = options.nom || 'Copie de pratique';
+    // ✅ D8 (arbitrage du 24 août) — L'INVITE PROPOSE LE NOM DE LA SOURCE.
+    // Avant, elle proposait la constante « Copie de pratique », qui ne dit pas de
+    // quoi c'est la copie : seule des voies de duplication à ne pas consulter
+    // `nommerCopie`. La collection est lue AVANT l'invite — c'est la leçon du
+    // Lot 5 : sans elle, `nommerCopie` ne connaît pas les noms déjà pris et ne
+    // peut pas sauter au premier rang libre.
+    // Si la source est introuvable, on garde l'ancien libellé générique : l'échec
+    // est annoncé plus bas, par le `throw` du bloc `try`, comme avant.
+    const pratiquesExistantes = db.getSync(cle('pratiquesConfigurables'), null) || [];
+    const souche = pratiquesExistantes.find(p => p.id === id);
+    const nomPropose = options.nom
+        || (souche ? nommerCopie(souche.nom, pratiquesExistantes) : 'Copie de pratique');
     const nouveauNom = options.nom || prompt('Nom de la copie:', nomPropose);
     if (!nouveauNom) return;
 
