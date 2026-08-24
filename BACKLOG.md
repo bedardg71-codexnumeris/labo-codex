@@ -87,6 +87,29 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ## A faire
 
+### Retour testeur — 24 août 2026 (Grégoire, en cours de planification)
+
+- [x] **#486 — Un gabarit de production s'enregistre sans date d'échéance.** LIVRÉ en **1.94.0**.
+  Grégoire prépare toutes ses productions avant de les transmettre ; or poser l'échéance EST
+  l'acte de transmission. Depuis Beta 94, la sauvegarde exigeait la date : il fallait avoir
+  déjà distribué le travail pour avoir le droit de le préparer. La garde contredisait aussi
+  l'écran qu'elle gardait (« Décoché = les étudiant·es n'ont pas encore reçu le travail »,
+  Beta 98.3) et rien en aval n'en dépendait — tous les lecteurs d'échéance filtrent déjà sur
+  `assignee && !!date`, et `partage-schemas.js` classe `dateEcheance` parmi les champs LOCAUX
+  interdits d'export. Livré : garde retirée de `validerChampsObligatoiresProduction`, helper
+  `aucuneEcheanceAssignee()` (pendant d'`obtenirEcheanceEffective`, dont il reprend la lecture
+  d'`assignee` pour que le badge ne puisse pas contredire le calendrier), badge « à planifier »
+  dans la barre latérale (`.badge-a-planifier`, jetons `--badge-non-evalue-*`, fond OPAQUE —
+  translucide, il tombait à 4,30:1 au survol en mode clair), microcopy remis d'accord aux
+  trois endroits qui affirmaient l'inverse. **Portée arrêtée avec Grégoire : la date seule
+  cesse de bloquer ; titre, type et pondération restent exigés.** Sentinelle
+  `tests/unit/sentinelle-486-gabarit-sans-echeance.test.js`, 25 cas, **4 break-tests rouges**.
+  Vitest 3008/3008.
+  ⏳ **PORTE TERRAIN DUE** — `plans de travail/PORTES-TERRAIN-2026-08-24-486-gabarit-sans-echeance.md`
+  + artefact https://claude.ai/code/artifact/886278b4-72e8-43b3-ba74-cb8116eefded
+  (34 vérifications + **5 décisions en attente de verdict**, dont 3.3 : faut-il aussi libérer
+  la pondération ?). **Aucun verdict Safari/WebKit possible en session** : binaire absent.
+
 ### Audit « Conception » — 20-21 août 2026 (rapport `plans de travail/AUDIT-conception-2026-08-20.md` + addendum)
 
 > ✅ **TRI FAIT le 21 août 2026** (relevé 27/27 de Grégoire, artefact + trace
