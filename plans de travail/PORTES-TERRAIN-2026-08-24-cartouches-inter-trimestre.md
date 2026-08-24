@@ -1,6 +1,6 @@
 # Portes terrain — Importer les cartouches d'un autre trimestre
 
-**Version à tester : 1.95.0**, build `0824-1653` · branche `claude/uniform-save-confirmations-qbb33o`
+**Version à tester : 1.95.1**, build `0824-1716` · branche `claude/uniform-save-confirmations-qbb33o`
 Jumeau interactif : `plans de travail/portes-terrain-2026-08-24-cartouches-inter-trimestre.html`
 
 > Ce qui échoue ici devient un item de BACKLOG avec son numéro de porte, jamais une note mentale.
@@ -21,7 +21,7 @@ copiée avec elle.
 
 ## Cette liste a été triée avant d'être écrite
 
-**Six comportements ont été prouvés en session**, dans un vrai navigateur contre
+**Sept comportements ont été prouvés en session**, dans un vrai navigateur contre
 le vrai `index.html` — ils ne sont pas devenus des rangées. Le relevé de chaque
 preuve est au §2 bis. **Il reste 16 rangées à cocher et 4 décisions.**
 
@@ -31,20 +31,21 @@ preuve est au §2 bis. **Il reste 16 rangées à cocher et 4 décisions.**
 
 | | Geste | Attendu |
 |---|---|---|
-| 0.1 | `git pull`, recharger l'app, lire le bas de page | **1.95.0, build `0824-1653`.** Plus bas = tu testes l'état d'avant. |
+| 0.1 | `git pull`, recharger l'app, lire le bas de page | **1.95.1, build `0824-1716`.** Plus bas = tu testes l'état d'avant — et en 1.95.0 la section n'apparaît PAS, c'est le bug corrigé. |
 | 0.2 | Exporter un Codex de sauvegarde | Tout le §1 écrit dans ton corpus réel. |
 
 ---
 
 ## §1 · ⚠⚠ Données — sur ton corpus
 
-> **La rangée 1.1 commande tout le reste.** Si elle échoue, les six suivantes
-> n'ont pas d'objet, et c'est un vrai résultat à me rapporter tel quel.
+> **La rangée 1.1 est celle qui a échoué sur ta capture du 24 août.** La cause est
+> identifiée, reproduite et corrigée en 1.95.1 — le §2 bis la raconte. Si elle
+> échoue encore, c'est un vrai résultat à me rapporter tel quel.
 
 | | Geste | Attendu | Tags |
 |---|---|---|---|
-| 1.1 | Conception › Cartouches de rétroaction › **Consulter la bibliothèque**. Faire défiler jusque sous les boutons d'export. | Un bloc **« Importer depuis un autre trimestre »** avec un menu déroulant. **Si le bloc N'APPARAÎT PAS**, ce n'est pas forcément un bug — voir la rangée 1.2. | ⚠⚠ Données |
-| 1.2 | *(seulement si 1.1 ne montre rien)* Ouvrir le menu déroulant du trimestre dans la bibliothèque des **grilles**, et noter si tes trimestres archivés y sont listés. | Le bloc des cartouches ne s'affiche que pour les trimestres qui ont une **copie archivée de leurs cartouches**. Cette copie est posée par l'archivage depuis le 28 janvier 2026 : un trimestre archivé AVANT cette date a ses grilles mais pas ses cartouches. **Note ce que tu vois : c'est la mesure qui décidera s'il faut un rattrapage.** | ⚠⚠ Données |
+| 1.1 | Conception › Cartouches de rétroaction › **Consulter la bibliothèque**. Faire défiler jusque sous les boutons d'export. | Un bloc **« Importer depuis un autre trimestre »** avec un menu déroulant. **C'est exactement ce qui manquait sur ta capture du 24 août 17 h** — voir le §2 bis pour la cause. | ⚠⚠ Données |
+| 1.2 | Comparer la liste des trimestres du bloc **cartouches** avec celle du bloc **grilles** (bibliothèque des grilles). | Les mêmes trimestres, à ceci près qu'un trimestre dont aucune grille ne porte de cartouche n'apparaît que côté grilles. **Si un trimestre te manque côté cartouches alors que tu sais qu'il en a, note-le : c'est un vrai échec.** | ⚠⚠ Données |
 | 1.3 | Choisir un trimestre, cliquer **« Voir les cartouches »**. | La liste apparaît, **groupée par grille**, et chaque grille annonce ce qui va se passer : « sa grille est déjà dans ce trimestre » ou « sa grille sera copiée avec elle ». | ⚠⚠ Données |
 | 1.4 | Compter ce que la liste affiche, et comparer avec ce que tu te rappelles de ce trimestre. | **Mesure, pas un seuil.** Un écart n'est pas forcément un défaut (l'archivage ne copie que les cartouches des grilles *utilisées*), mais je veux le chiffre. | ⚠⚠ Données |
 | 1.5 | Importer **une** cartouche dont la ligne dit « sa grille sera copiée avec elle ». | Bandeau vert « … importée dans ce trimestre » + « Sa grille … a été copiée avec elle ». La grille apparaît dans ta barre latérale des grilles, avec **cette seule cartouche**. | ⚠⚠ Données |
@@ -69,10 +70,11 @@ preuve est au §2 bis. **Il reste 16 rangées à cocher et 4 décisions.**
 
 > Ces cartes se lisent, elles ne se cochent pas. Chacune a été exécutée le 24 août
 > dans Chromium contre le vrai `index.html`. Fichier :
-> `tests/integration/cartouches-import-trimestre.spec.js` (6 cas).
+> `tests/integration/cartouches-import-trimestre.spec.js` (7 cas).
 
 | Retiré | Preuve mesurée |
 |---|---|
+| ⚠ **« Un trimestre VIVANT est proposé »** — le bug de ta capture | Deux trimestres, le second jamais archivé : ses grilles dans `h2026_grillesTemplates`, ses cartouches dans la clé partagée `cartouches_GR_H26`. **AVANT correction** : liste vide, section non rendue — reproduit à l'identique de ta capture. **APRÈS** : « Hiver 2026 (2 cartouches) », section rendue. Break-test : en revenant à la lecture archive-seule, ce cas rougit. |
 | « Le bloc apparaît avec le bon compte » | Trimestre `a2025` semé avec 2 cartouches archivées. Le sélecteur est bien rendu dans le modal, et son option lit exactement **« Automne 2025 (2 cartouches) »**. |
 | « L'aperçu groupe par grille et annonce le sort de la grille » | L'aperçu contient « Grille-5 FR-HOLIS A25 » et la mention **« sa grille sera copiée avec elle »**. Deux boutons « Importer », un par cartouche. |
 | « Le dispatcher passe bien les TROIS paramètres » | Relevé des attributs du bouton : `{p1:'a2025', p2:'GRILLE_A25', p3:'CART_1'}`. Sans le troisième, la fonction aurait reçu `undefined` comme id de cartouche — aucun test de logique pure n'aurait vu ça. |
@@ -114,15 +116,18 @@ des deux chemins.
   six preuves du §2 bis viennent de **Chromium**. Un vert Chromium est un indice,
   pas un verdict Safari.
 - **L'iPad.** Tout le §2, entièrement à ta charge.
-- **Ton corpus réel — et c'est le point le plus incertain du lot.** Je ne sais pas
-  si tes trimestres archivés portent réellement des copies de cartouches. La copie
-  à l'archivage date du 28 janvier 2026 et ne couvre que les grilles *utilisées*
-  du trimestre. Les rangées 1.1, 1.2 et 1.4 sont là pour le mesurer, pas pour le
-  confirmer : je n'ai aucune idée de ce qu'elles vont donner.
-- **Le rattrapage éventuel.** Si le 1.2 montre que tes archives n'ont pas de
-  cartouches, la fonctionnalité est correcte mais sans matière chez toi. Il
-  faudrait alors un chantier séparé pour reconstituer ces copies — je ne l'ai pas
-  écrit, et je ne le proposerai qu'avec ta mesure en main.
+- **Ton corpus réel.** Je ne connais pas la répartition de tes cartouches entre
+  tes trimestres. Les rangées 1.2 et 1.3 sont là pour la mesurer.
+- **Une erreur de conception de ma part, corrigée le jour même.** La 1.95.0 ne
+  lisait que les copies d'archive `<trimestre>_cartouches_<grille>`, en croyant
+  protéger d'un piège connu (#464/CT-26). Or depuis #358 les grilles sont
+  namespacées pour TOUT trimestre, pas seulement les archivés : un trimestre
+  vivant a ses grilles rangées à part et ses cartouches dans la clé partagée. Ma
+  garde rendait donc la section invisible pour le cas le plus courant — le tien.
+  Reproduit au navigateur AVANT correction, puis verrouillé par deux tests neufs
+  (unit 5a + intégration 2). Le vrai risque du repli, lui, est bien gardé : une
+  grille présente à l'identique dans les deux trimestres est exclue, parce que son
+  magasin de cartouches est littéralement le même (unit 5b).
 - **La suite Playwright existante.** Les rouges Chromium préexistants mesurés au
   cycle précédent n'ont pas été recontrôlés ici : mon diff ne touche que
   `cartouches.js`, `changelog-data.js` et les points de version.
