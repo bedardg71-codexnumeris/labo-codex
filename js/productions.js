@@ -2407,7 +2407,7 @@ window.supprimerProduction = async function(id) {
         annulerFormProduction();
     }
 
-    alert('Production supprimée');
+    notifications.succes('Production supprimée');
 };
 
 

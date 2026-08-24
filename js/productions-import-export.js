@@ -447,11 +447,11 @@ window.confirmerImportProductions = async function(donnees) {
             }
         }
 
-        let message = `Import réussi.\n\n`;
-        if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) production(s) ajoutée(s).\n`;
-        if (nbMisesAJour > 0) message += `${nbMisesAJour} production(s) mise(s) à jour.\n`;
-        message += `\nConsulte "Productions disponibles" pour les ajouter à ta barre latérale.`;
-        alert(message);
+        const details = [];
+        if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) production(s) ajoutée(s).`);
+        if (nbMisesAJour > 0) details.push(`${nbMisesAJour} production(s) mise(s) à jour.`);
+        details.push('Consulte « Productions disponibles » pour les ajouter à ta barre latérale.');
+        notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);
@@ -504,7 +504,7 @@ async function afficherAssistantMigrationCategories() {
     );
 
     if (sansCategorie.length === 0) {
-        alert('Toutes les productions ont déjà une catégorie assignée.');
+        notifications.info('Toutes les productions ont déjà une catégorie assignée.');
         return;
     }
 
