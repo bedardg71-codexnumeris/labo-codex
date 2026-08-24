@@ -7,6 +7,121 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 24 AOÛT 2026 : #476 VOLET 2, LA FUSION DES `dupliquer*`.
+     TROIS LOTS LIVRÉS, ET UNE DÉCISION RENDUE À GRÉGOIRE.
+
+     ▣ CE QU'IL FAUT RETENIR EN PREMIER — LA PRÉMISSE DE RELANCE ÉTAIT FAUSSE.
+       « Refactor pur, et beaucoup plus sûr maintenant que les sentinelles des
+       Lots 1-6 l'encadrent. » La mesure dit autre chose : sur les 24 fonctions
+       du périmètre, DEUX seulement étaient exécutées par un test
+       (`dupliquerPratique`, `dupliquerPratiqueBibliotheque`). Les sentinelles
+       des Lots 1-6 couvrent l'IDENTITÉ et le NOMMAGE des copies — pas la
+       mécanique de chaque fonction.
+       Et deux de ces sentinelles sont des GREPS SUR LE TEXTE SOURCE, donc
+       hostiles au refactor par construction : l'une épinglait cinq call-sites
+       littéraux de `forkerItem` (→ rouge à la fusion), l'autre découpait les
+       blocs `function dupliquer*` et serait passée VACUEMENT VERTE une fois
+       les blocs disparus. Une sentinelle qui vérifie la FORME du code, pas son
+       comportement, se retourne contre le premier chantier qui touche à cette
+       forme. Les deux pièges sont fermés (§ Lot C).
+
+     ▣ LOT A — DEUX DES 24 ÉTAIENT DU CODE MORT (commit 74fafdd7).
+       · `dupliquerGrilleActuelle` : aucun appelant, nulle part.
+       · `dupliquerEchelleActuelle` : câblée au seul bouton index.html:5242, en
+         `display:none`, dont l'`id="btnDupliquerEchelle"` était DUPLIQUÉ avec
+         index.html:5094. `getElementById` rendant le premier élément, les trois
+         sites qui démasquent ce bouton touchaient toujours l'autre. Il ne
+         pouvait donc jamais paraître.
+       ⚠ CE SONT EXACTEMENT LES DEUX FONCTIONS DONT LE LOT 5 A CORRIGÉ UN
+         « BUG LATENT » LA VEILLE (collection hors de portée, zone morte
+         temporelle du `let`). Deux corrections sur du code qu'aucun
+         utilisateur ne pouvait exécuter. LEÇON : mesurer l'atteignabilité
+         AVANT de corriger, pas après.
+       Retrait de l'entrée correspondante dans `noms_stables.json` (zone
+       protégée) autorisé par Grégoire en séance.
+
+     ▣ LOT B — LE BANC DE CARACTÉRISATION (commit 2549cb56).
+       `tests/integration/carac-476-volet2-duplication.spec.js`, 27 cas, EN
+       NAVIGATEUR contre le vrai DOM d'index.html. Pourquoi pas en Vitest : les
+       fonctions de rafraîchissement (`afficherListeGrilles`,
+       `chargerGrillePourModif`…) sont INTERNES à l'IIFE de leur module et ne
+       sont donc pas surchargeables depuis un test. Seuls `prompt`, `alert` et
+       `notifications` sont interceptés — ce sont des globaux d'autres fichiers,
+       donc des coutures légitimes, et ce sont les sorties qu'on veut lire.
+       ⚠ DEUX PIÈGES RENCONTRÉS, DOCUMENTÉS DANS LE SPEC :
+       (1) UN PREMIER JEU D'ASSERTIONS DE NOM ÉTAIT NON DISCRIMINANT. Sur une
+           PREMIÈRE copie, `nommerCopie` et la concaténation nue `${nom} (copie)`
+           rendent le même texte : le break-test est resté VERT alors que la
+           mutation était réelle. D'où le bloc « CO-24 · la chaîne des copies »,
+           qui duplique DEUX FOIS d'affilée. Toute assertion de nom ajoutée là
+           doit passer par une chaîne d'au moins deux maillons.
+       (2) LE BANC POLLUAIT LES AUTRES SPECS. Tous les specs partagent le
+           localStorage de l'origine `file://` (d'où `workers: 1`). La première
+           version amorçait cinq collections sans nettoyer : suite complète
+           84/84 verte une fois, puis DIX ROUGES à l'exécution suivante, dans
+           des specs sans rapport (comparateur #326, bascule CT-05…). Un
+           `afterEach` purge désormais les clés touchées. ⚠ NE JAMAIS CONCLURE
+           D'UNE SEULE PASSE VERTE en intégration : c'est une double passe qui
+           a révélé la pollution.
+
+     ▣ LOT C — LE SOCLE SÛR EST FUSIONNÉ (commit da2f0bcd).
+       Les cinq `dupliquerEtEditerX` déroulaient la MÊME séquence recopiée cinq
+       fois. Elle vit maintenant une seule fois dans
+       `BibliothequeUI.dupliquerEtEditerItem` ; chaque famille n'apporte que son
+       descripteur (clé, préfixe d'ID, lecture/écriture, rafraîchissement, champ
+       de focus), les rappels servant à atteindre l'UI interne à chaque IIFE.
+       Comportement PRÉSERVÉ ET MESURÉ : le banc du Lot B est resté vert sans
+       être touché.
+       La sentinelle a SUIVI la logique : la garantie « la collection de
+       destination est transmise à `forkerItem` » est vérifiée à son nouvel
+       emplacement, plus une assertion neuve que les cinq familles passent bien
+       par le moteur. Et le test de découpe exige désormais AU MOINS UN BLOC par
+       fichier — sans quoi la fusion l'aurait rendu muet.
+
+     ▣ LOT D — LE SECOND MOTEUR, ET LE SOCLE EST COMPLET.
+       Les cinq `dupliquerXBibliotheque` passent par
+       `BibliothequeUI.dupliquerVersBibliotheque`. Bilan du socle retenu :
+       10 fonctions → 2 moteurs + 10 descripteurs, comportement mesuré
+       identique (banc vert, non touché).
+       ⮕ UNE DIVERGENCE A DISPARU D'ELLE-MÊME en regardant de près :
+         `dupliquerGrilleBibliotheque` calculait son auteur par une expression
+         inline qui s'est révélée STRICTEMENT équivalente à
+         `BibliothequeUI.obtenirAuteurActif()`. Écart cosmétique, pas
+         fonctionnel — un bouton de configuration en moins. Vérifier avant de
+         paramétrer : toutes les divergences apparentes n'en sont pas.
+       ⚠ CE QUI RESTE PARAMÉTRÉ EST UNE DETTE, PAS UNE FONCTIONNALITÉ. Les
+         rappels `nommerLaCopie` et `forgerProvenance` existent parce que les
+         familles ont divergé sans que personne le décide. Chacun porte un
+         commentaire « ⚠ ÉCART CONNU » qui renvoie au BACKLOG. Les rassembler
+         est ce qui rend la convergence DÉCIDABLE.
+
+     ▣ CE QUI RESTE, ET POURQUOI CE N'EST PAS QU'UNE QUESTION DE TEMPS.
+       Les 12 voies restantes (invite, barre latérale, item actif) divergent
+       RÉELLEMENT — neuf écarts mesurés, énumérés dans BACKLOG #476. La plupart
+       ressemblent à des ACCIDENTS, pas à des intentions : la copie d'une démo
+       qui reste marquée démo, un `titre` de production jamais suffixé, un
+       champ `nom` posé sur des objets qui n'en ont pas, CO-24 encore vivant sur
+       trois voies. Les fusionner « sans changement de comportement » revient à
+       ÉRIGER CES ACCIDENTS EN CONFIGURATION DÉLIBÉRÉE. Trois chemins ont été
+       posés à Grégoire ; le socle sûr a été retenu pour ce cycle, la suite
+       reste sa décision.
+
+     ▣ DETTE ADJACENTE DÉCOUVERTE : `index.html` porte 11 AUTRES ID DOM
+       DUPLIQUÉS, très concentrés sur la zone échelles. Même classe de bug que
+       celui du Lot A. Chacun signifie qu'un `getElementById` ne touche jamais
+       le second élément. Inscrit au BACKLOG #476.
+
+     ▣ PORTE TERRAIN DUE : le banc a été mis au point sur CHROMIUM (seul
+       navigateur du conteneur). La cible de production est WebKit/Safari, et
+       le passage iPad n'a pas eu lieu. Tant qu'ils ne sont pas faits, le banc
+       atteste d'un comportement Chromium, pas du comportement de production.
+
+     ▣ ÉTAT DES SUITES : 2990/2990 unitaires · 27/27 au banc · intégration
+       verte sur Chromium, DOUBLE PASSE. Version inchangée : 1.93.0 — aucun des
+       quatre lots ne change ce que voit l'utilisateur.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 23 AOÛT 2026, FIN DE CYCLE : CI, DOCUMENTATION, PUIS
      LOT 6 / CT-15 — LES DOUBLONS DU CADRE.
 

@@ -511,6 +511,79 @@
     };
 
     /**
+     * #476 volet 2 — LE CHEMIN « DUPLIQUER DEPUIS LA BIBLIOTHÈQUE », POUR LES
+     * CINQ FAMILLES.
+     *
+     * Les cinq `dupliquerXBibliotheque` faisaient la même chose : copier la
+     * source, lui donner une identité neuve, l'attribuer à l'utilisateur
+     * courant, poser la trace de provenance, la ranger dans la bibliothèque,
+     * retirer les métadonnées de partage, écrire, rafraîchir. Une seule
+     * séquence, recopiée cinq fois.
+     *
+     * ⚠ CE QUI RESTE PARAMÉTRÉ EST UNE DETTE, PAS UNE FONCTIONNALITÉ. Les
+     * rappels `nommerLaCopie` et `forgerProvenance` existent parce que les cinq
+     * familles ont DIVERGÉ sans que personne le décide — pas parce qu'on
+     * voudrait qu'elles diffèrent. Les rassembler ici est justement ce qui rend
+     * l'écart visible et la convergence décidable (BACKLOG #476, les neuf
+     * écarts). Le volet 2 étant un refactor PUR, chaque écart est reconduit à
+     * l'identique et signalé chez l'appelant.
+     *
+     * @param {Object} d
+     * @param {string} d.id                  - id de l'item source
+     * @param {string} d.prefixeId           - préfixe d'ID de la famille
+     * @param {Function} d.lireListe         - () => liste (sync ou async)
+     * @param {Function} d.ecrireListe       - (liste) => void (sync ou async)
+     * @param {Function} d.nommerLaCopie     - (copie, source, liste) => void
+     * @param {Function} d.forgerProvenance  - (source) => objet `inspireDe`
+     * @param {boolean} [d.cloneProfond]     - clone JSON au lieu d'un étalement
+     * @param {Function} [d.siIntrouvable]   - () => void, message d'absence
+     * @param {Function} [d.retoucherCopie]  - (copie, source) => void, en fin de course
+     * @param {Function} [d.rafraichirUI]    - () => void
+     * @returns {Object|null} la copie écrite, ou null si la source est absente
+     */
+    BibliothequeUI.dupliquerVersBibliotheque = async function (d) {
+        var liste = await d.lireListe();
+        if (!Array.isArray(liste)) liste = [];
+
+        var source = liste.find(function (x) { return x && x.id === d.id; });
+        if (!source) {
+            if (typeof d.siIntrouvable === 'function') d.siIntrouvable();
+            return null;
+        }
+
+        var genererId = window.genererIdUnique || function (p) {
+            return (p || 'ITEM_') + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        };
+
+        // Étalement ou clone profond : seules les pratiques exigent le second
+        // (sous-objets `configuration` / `jetons` partagés sinon — invariant
+        // « source immuable », durcissement de la Brique C).
+        var copie = d.cloneProfond
+            ? JSON.parse(JSON.stringify(source))
+            : Object.assign({}, source);
+
+        copie.id = genererId(d.prefixeId);
+        d.nommerLaCopie(copie, source, liste);
+        copie.auteur = BibliothequeUI.obtenirAuteurActif();
+        copie.isDemo = false;
+        copie.inspireDe = d.forgerProvenance(source);
+        copie.dansBibliotheque = true;
+        copie.dateCreation = new Date().toISOString();
+
+        // La copie devient un original de l'utilisateur : les métadonnées de
+        // partage de la source n'ont plus cours.
+        delete copie.metadata_cc;
+        delete copie.auteurOriginal;
+        if (typeof d.retoucherCopie === 'function') d.retoucherCopie(copie, source);
+
+        liste.push(copie);
+        await d.ecrireListe(liste);
+
+        if (typeof d.rafraichirUI === 'function') await d.rafraichirUI();
+        return copie;
+    };
+
+    /**
      * Phase A.3 (audit biblios 2026-05-09) — Strippe les préfixes type
      * en tête de titre : `[STD]`, `[SPE]`, `[SOM]`, `[DEN]`, `[Multi]`,
      * `[MULTI]`, `[Démo]`, etc. La typologie est déjà communiquée par les

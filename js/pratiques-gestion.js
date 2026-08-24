@@ -975,49 +975,31 @@ async function supprimerPratiqueDeBibliothequePartagee(pratiqueId) {
  * @returns {Promise<Object|undefined>} la copie créée (undefined si pratique introuvable)
  */
 async function dupliquerPratiqueBibliotheque(pratiqueId) {
-    const configurations = db.getSync(cle('pratiquesConfigurables'), null) || [];
-    const pratique = configurations.find(p => p.id === pratiqueId);
-
-    if (!pratique) {
-        alert('Pratique introuvable');
-        return;
-    }
-
-    // Créer une copie avec un nouvel ID. La copie devient un nouvel original
-    // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
-    // source était une démo, la copie perd le flag isDemo.
-    //
-    // Copie PROFONDE (et non `{...pratique}`) : aucune référence partagée avec la
-    // source (sous-objets configuration / jetons / objectifs). Garantit
-    // STRUCTURELLEMENT l'invariant « source immuable » (zéro-dette), pas seulement
-    // par la sérialisation de la persistance. Aligné sur copierPratiqueDepuisTrimestre
-    // (Brique C pas 5). Une pratique est full-JSON (localStorage) → round-trip sans perte.
-    const nouvellePratique = JSON.parse(JSON.stringify(pratique));
-    nouvellePratique.id = genererIdUnique('pratique_');
-    nouvellePratique.nom = `${pratique.nom} (copie)`;
-    nouvellePratique.auteur = BibliothequeUI.obtenirAuteurActif();
-    nouvellePratique.isDemo = false;
-    nouvellePratique.inspireDe = BibliothequeUI.forgerInspireDe(pratique);
-    nouvellePratique.dansBibliotheque = true;
-    nouvellePratique.dateCreation = new Date().toISOString();
-
-    // Supprimer les métadonnées de partage
-    delete nouvellePratique.metadata_cc;
-    delete nouvellePratique.auteurOriginal;
-    delete nouvellePratique.estGabarit; // Ce n'est plus un gabarit
-
-    // Ajouter à la liste
-    configurations.push(nouvellePratique);
-    db.setSync(cle('pratiquesConfigurables'), configurations);
-
-    // Rafraîchir UI
-    fermerModalBibliothequePratiques();
-    await afficherListePratiquesMateriel();
-    await afficherBibliothequePratiques();
-
-    // Retourne la copie (parité avec copierPratiqueDepuisTrimestre) : le dispatcher
-    // data-action ignore le retour, mais la sentinelle d'indépendance s'en sert.
-    return nouvellePratique;
+    // #476 volet 2 — séquence partagée. Les pratiques sont la seule famille à
+    // lire/écrire en SYNCHRONE, à exiger un clone PROFOND, et à RENDRE la copie.
+    return await BibliothequeUI.dupliquerVersBibliotheque({
+        id: pratiqueId,
+        prefixeId: 'pratique_',
+        // Copie PROFONDE (et non un étalement) : aucune référence partagée avec
+        // la source (sous-objets configuration / jetons / objectifs). Garantit
+        // STRUCTURELLEMENT l'invariant « source immuable » (zéro-dette), pas
+        // seulement par la sérialisation de la persistance. Aligné sur
+        // copierPratiqueDepuisTrimestre (Brique C pas 5).
+        cloneProfond: true,
+        lireListe: () => db.getSync(cle('pratiquesConfigurables'), null) || [],
+        ecrireListe: (liste) => { db.setSync(cle('pratiquesConfigurables'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
+        // ⚠ ÉCART CONNU, RECONDUIT TEL QUEL : concaténation nue au lieu de
+        // `nommerCopie` — CO-24 encore vivant ici (voir BACKLOG #476, écart 9).
+        nommerLaCopie: (copie, source) => { copie.nom = `${source.nom} (copie)`; },
+        forgerProvenance: (source) => BibliothequeUI.forgerInspireDe(source),
+        siIntrouvable: () => alert('Pratique introuvable'),
+        retoucherCopie: (copie) => { delete copie.estGabarit; }, // ce n'est plus un gabarit
+        rafraichirUI: async () => {
+            fermerModalBibliothequePratiques();
+            await afficherListePratiquesMateriel();
+            await afficherBibliothequePratiques();
+        }
+    });
 }
 
 /* ===============================
@@ -1092,7 +1074,7 @@ async function dupliquerEtEditerPratique(id) {
         id: id,
         prefixeId: 'pratique_',
         lireListe: () => db.getSync(cle('pratiquesConfigurables'), null) || [],
-        ecrireListe: (liste) => { db.setSync(cle('pratiquesConfigurables'), liste); },
+        ecrireListe: (liste) => { db.setSync(cle('pratiquesConfigurables'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
         repliSource: async (idSource) => (
             typeof obtenirConfigurationPratiqueParId === 'function'
                 ? await obtenirConfigurationPratiqueParId(idSource)

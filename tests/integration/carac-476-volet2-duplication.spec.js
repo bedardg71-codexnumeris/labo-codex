@@ -176,10 +176,41 @@ const GRILLE_SOURCE = {
     metadata_cc: { licence: 'CC BY' }
 };
 
+// ▣ ÉTANCHÉITÉ — LA LEÇON DU 24 AOÛT, PAYÉE COMPTANT.
+// Tous les specs ouvrent le MÊME index.html en `file://` et partagent donc le
+// localStorage de cette origine (c'est pourquoi playwright.config.js impose
+// `workers: 1`). Une première version de ce banc amorçait `grillesTemplates`,
+// `echellesTemplates`, `cartouches_GR_X`, `productions` et
+// `pratiquesConfigurables` sans jamais nettoyer : la suite complète est passée
+// 84/84 une fois, puis a rendu 10 rouges à l'exécution suivante — dans des
+// specs sans aucun rapport (comparateur #326, bascule de trimestre CT-05…).
+// Un banc qui laisse ses fixtures derrière lui ne casse pas ses propres tests :
+// il casse ceux des autres, par intermittence, et l'enquête part dans le décor.
+// D'où le nettoyage ci-dessous, qui court APRÈS CHAQUE CAS, y compris en échec.
+const CLES_TOUCHEES = [
+    'grillesTemplates', 'echellesTemplates', 'productions', 'pratiquesConfigurables'
+];
+
 test.beforeEach(async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
+});
+
+test.afterEach(async ({ page }) => {
+    await page.evaluate(async (clesLogiques) => {
+        const aRetirer = [];
+        for (const nom of clesLogiques) aRetirer.push(window.cle(nom), nom);
+        // Les cartouches sont namespacées par grille porteuse, pas par `cle()`.
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.indexOf('cartouches_') !== -1) aRetirer.push(k);
+        }
+        for (const k of aRetirer) {
+            try { localStorage.removeItem(k); } catch (e) { /* rien à retirer */ }
+            try { db.memoryCache.delete(k); } catch (e) { /* cache absent */ }
+        }
+    }, CLES_TOUCHEES).catch(() => { /* page déjà fermée : rien à nettoyer */ });
 });
 
 /* ================================================================== */
@@ -883,5 +914,50 @@ test.describe('#476 volet 2 · caractérisation — CO-24, la chaîne des copies
         expect(r.nombre).toBe(3);
         expect(r.premier).toBe('Pratique source (copie)');
         expect(r.second).toBe('Pratique source (copie) (copie)');
+    });
+});
+
+/* ================================================================== */
+/* SOURCE ABSENTE — CE QUE L'UTILISATEUR ENTEND QUAND RIEN N'EXISTE    */
+/* ================================================================== */
+
+// Ajouté APRÈS la fusion des deux moteurs (#476 volet 2, Lots C et D) : le
+// chemin « source introuvable » avait été refactorisé sans être couvert. Le
+// message d'absence n'est pas un détail — il diffère d'une famille à l'autre
+// (quatre `alert`, un `notifications.erreur`), et rien ne le verrouillait.
+// Une fusion qui uniformiserait ces messages par inadvertance passerait
+// inaperçue.
+
+test.describe('#476 volet 2 · caractérisation — source absente', () => {
+    const CAS = [
+        ['dupliquerGrilleBibliotheque',     'grillesTemplates',       GRILLE_SOURCE,     [],       ['alert', 'Grille introuvable']],
+        ['dupliquerEchelleBibliotheque',    'echellesTemplates',      ECHELLE_SOURCE,    [],       ['alert', 'Échelle introuvable']],
+        ['dupliquerProductionBibliotheque', 'productions',            PRODUCTION_SOURCE, [],       ['erreur', 'Production introuvable']],
+        ['dupliquerPratiqueBibliotheque',   'pratiquesConfigurables', PRATIQUE_SOURCE,   [],       ['alert', 'Pratique introuvable']]
+    ];
+
+    for (const [fonction, cleNom, source, extra, attendu] of CAS) {
+        test(`${fonction} — dit l'absence et n'écrit rien`, async ({ page }) => {
+            const r = await caracteriser(page, {
+                cleNom, source,
+                appel: [fonction, ['ID_QUI_N_EXISTE_PAS', ...extra]]
+            });
+            expect(r.erreur).toBeNull();
+            expect(r.n).toBe(1);                 // la collection n'a pas bougé
+            expect(r.copie).toBeNull();
+            expect(r.msgs).toEqual([attendu]);
+        });
+    }
+
+    test('dupliquerCartoucheBibliotheque — dit l\'absence et n\'écrit rien', async ({ page }) => {
+        const r = await caracteriser(page, {
+            cleBrute: 'cartouches_GR_X', amorces: AMORCE_CARTOUCHES(),
+            source: CARTOUCHE_SOURCE,
+            appel: ['dupliquerCartoucheBibliotheque', ['ID_QUI_N_EXISTE_PAS', 'GR_X']]
+        });
+        expect(r.erreur).toBeNull();
+        expect(r.n).toBe(1);
+        expect(r.copie).toBeNull();
+        expect(r.msgs).toEqual([['alert', 'Cartouche introuvable']]);
     });
 });

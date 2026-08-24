@@ -2492,41 +2492,21 @@ async function ajouterMesEchellesALaBibliotheque() {
  * @param {string} id - ID de l'échelle à dupliquer
  */
 async function dupliquerEchelleBibliotheque(id) {
-    const echelles = await db.get(cle('echellesTemplates')) || [];
-    const echelle = echelles.find(e => e.id === id);
-
-    if (!echelle) {
-        alert('Échelle introuvable');
-        return;
-    }
-
-    // Créer une copie avec un nouvel ID. La copie devient un nouvel original
-    // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
-    // source était une démo, la copie perd le flag isDemo.
-    const nouvelleEchelle = {
-        ...echelle,
-        id: genererIdUnique('ECH_'),
-        nom: nommerCopie(echelle.nom, echelles),
-        auteur: BibliothequeUI.obtenirAuteurActif(),
-        isDemo: false,
-        inspireDe: BibliothequeUI.forgerInspireDe(echelle),
-        dansBibliotheque: true,
-        dateCreation: new Date().toISOString()
-    };
-
-    // Supprimer les métadonnées de partage
-    delete nouvelleEchelle.metadata_cc;
-    delete nouvelleEchelle.auteurOriginal;
-
-    // Ajouter à la liste
-    echelles.push(nouvelleEchelle);
-    await db.set(cle('echellesTemplates'), echelles);
-
-    // Rafraîchir UI
-    fermerModalBibliothequeEchelles();
-    await afficherListeEchelles();
-    await afficherBibliothequeEchelles();
-
+    // #476 volet 2 — séquence partagée (BibliothequeUI.dupliquerVersBibliotheque).
+    await BibliothequeUI.dupliquerVersBibliotheque({
+        id: id,
+        prefixeId: 'ECH_',
+        lireListe: async () => await db.get(cle('echellesTemplates')) || [],
+        ecrireListe: async (liste) => { await db.set(cle('echellesTemplates'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
+        nommerLaCopie: (copie, source, liste) => { copie.nom = nommerCopie(source.nom, liste); },
+        forgerProvenance: (source) => BibliothequeUI.forgerInspireDe(source),
+        siIntrouvable: () => alert('Échelle introuvable'),
+        rafraichirUI: async () => {
+            fermerModalBibliothequeEchelles();
+            await afficherListeEchelles();
+            await afficherBibliothequeEchelles();
+        }
+    });
 }
 
 /**
@@ -3072,7 +3052,7 @@ async function dupliquerEtEditerEchelle(id) {
         id: id,
         prefixeId: 'ECH_',
         lireListe: async () => await db.get(cle('echellesTemplates')) || [],
-        ecrireListe: async (liste) => { await db.set(cle('echellesTemplates'), liste); },
+        ecrireListe: async (liste) => { await db.set(cle('echellesTemplates'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
         rafraichirListe: async () => { await afficherListeEchelles(); },
         chargerPourModif: async (idCopie) => { await chargerEchellePourModif(idCopie); },
         champFocus: 'nomEchelleTemplate'
