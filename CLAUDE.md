@@ -23,12 +23,10 @@ identifiants de backlog. `RELAIS.md` est le seul point que toute session lit,
 quelle que soit la branche ouverte.
 
 **EN TOUT PREMIER, AU DÉBUT DE CHAQUE SESSION** : **déléguer le rituel au
-subagent `audit-debut-session`**, qui exécute le skill `debut-de-session-labo-codex`
-dans un contexte isolé et ne renvoie que son rapport (~500 tokens au lieu de
-~135 000 de bruit relu à chaque tour). Audit factuel git + tests + version,
-lecture ciblée de `SESSION.md`/`BACKLOG.md`, comparaison avec la prémisse de
-relance reçue. Lecture seule, aucune modification. Acté le 28 mai 2026 après un
-écart de 24 h sur le Lot A ✴.
+subagent `audit-debut-session`** (skill `debut-de-session-labo-codex` en contexte
+isolé, ~500 tokens rendus au lieu de ~135 000 de bruit). Audit git + tests +
+version, lecture ciblée de `SESSION.md`/`BACKLOG.md`, comparaison avec la
+prémisse reçue. Lecture seule. Acté le 28 mai 2026 après un écart de 24 h.
 
 ⚠ **Vitest se lance DEPUIS `tests/`**, jamais de la racine : de la racine il
 balaie `.claude/worktrees/` sans la config et rend 217 fichiers rouges.
@@ -62,9 +60,19 @@ Les retours utilisateurs passent AVANT le backlog prévu.
 
 - `Retours des testeurs/SUIVI-BUGS.md` — bugs ouverts vs corrigés. Consulter
   **de façon ciblée** (le fichier fait 120 Ko) AVANT de corriger un bug.
-- `Retours des testeurs/USAGE-FORMATS.md` — journal d'observation sur l'usage
-  des formats. Si une observation pertinente émerge en session, l'y noter en
-  moins de 30 secondes (date + initiales + 1-3 lignes).
+- `Retours des testeurs/USAGE-FORMATS.md` — journal d'usage des formats. Y noter
+  toute observation en moins de 30 s (date + initiales + 1-3 lignes).
+
+### Ce qui entre au BACKLOG (24 août 2026)
+
+**Un item n'entre que s'il a un symptôme que Grégoire a VÉCU, ou s'il bloque un
+chantier en cours.** Les trouvailles de passage deviennent un **commentaire dans
+le code concerné**, pas un item qui le regarde. Motif : 76 items ouverts, nourris
+par les sessions — « les tâches s'accumulent sans jamais voir la fin ».
+
+⮕ Même esprit pour les portes terrain : les **deux règles de tête** du skill
+`portes-terrain` (aucune porte si une machine peut répondre ; préalable dû
+seulement si un raté est irréversible).
 
 ---
 
@@ -103,12 +111,9 @@ Les données sont préfixées par trimestre (`h2026_groupeEtudiants`,
 
 ## Architecture des données
 
-**Document fondateur** : `docs/architecture/ECOSYSTEME-DONNEES.md` (26 avril 2026).
-
-Quatre concepts : **Codex** (espace de travail actif), **Archives** (dépôt local),
-**Codex data** (format recherche), **Voûte** (bibliothèque partagée).
-Lire ce document AVANT de toucher à `codex.js`, `import-export.js`, `db.js` ou
-`travaux-stockage.js`.
+**Document fondateur** : `docs/architecture/ECOSYSTEME-DONNEES.md` (26 avril 2026)
+— quatre concepts : Codex, Archives, Codex data, Voûte. À lire AVANT de toucher à
+`codex.js`, `import-export.js`, `db.js` ou `travaux-stockage.js`.
 
 ---
 

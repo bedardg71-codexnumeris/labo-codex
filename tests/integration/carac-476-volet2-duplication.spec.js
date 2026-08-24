@@ -993,3 +993,91 @@ test.describe('#476 volet 2 · caractérisation — source absente', () => {
         expect(r.msgs).toEqual([['alert', 'Cartouche introuvable']]);
     });
 });
+
+/* ================================================================== */
+/* LE RENDU, ET PAS SEULEMENT LA DONNÉE                                */
+/* ================================================================== */
+
+// ▣ POURQUOI CE BLOC EXISTE — ET IL REMPLACE DU TRAVAIL HUMAIN.
+// Tout le reste du banc vérifie la DONNÉE écrite : `isDemo` à false, l'auteur
+// réattribué. Mais ce que Grégoire vit, lui, c'est un FORMULAIRE : ses champs
+// sont-ils grisés, oui ou non ? Entre la donnée et l'écran il y a
+// `estItemDemo` (qui rend vrai sur `isDemo === true` OU sur l'auteur
+// « Demo Labo Codex ») puis `appliquerModeLectureSeuleDemo`, qui pose
+// `disabled` sur tous les `input`/`select`/`textarea` du conteneur.
+//
+// C'était le seul point de la porte terrain du 24 août que la machine ne
+// couvrait pas — et j'avais donc demandé à Grégoire de le vérifier à la main,
+// avec 23 autres portes dont 19 étaient déjà mesurées ici. Il l'a dit :
+// « je suis complètement découragé par les portes terrain nombreuses ».
+// La règle qu'on en tire, et qui vaut pour la suite : UNE PORTE N'EXISTE QUE SI
+// AUCUNE MACHINE NE PEUT RÉPONDRE. Quand une porte est automatisable, l'écrire
+// ici coûte une heure une fois, au lieu de dix minutes à Grégoire à chaque cycle.
+//
+// Ce que ce bloc ne remplace PAS : le rendu sous WebKit, le doigt sur l'iPad, et
+// le corpus réel. Ces trois-là restent à lui — et ils sont peu nombreux.
+
+test.describe('#476 volet 2 · le formulaire de la copie est réellement éditable', () => {
+    const GRILLE_DEMO = {
+        id: 'GR_DEMO', nom: 'Grille de démonstration',
+        criteres: [{ id: 'CR_D1', nom: 'Critère démo' }],
+        auteur: 'Demo Labo Codex', isDemo: true, dansBibliotheque: true
+    };
+
+    test('grilles — la source démo est verrouillée, sa copie ne l\'est plus', async ({ page }) => {
+        const r = await page.evaluate(async (source) => {
+            const cle = window.cle('grillesTemplates');
+            await db.set(cle, [JSON.parse(JSON.stringify(source))]);
+            window.alert = () => {}; window.confirm = () => true;
+            window.notifications = { succes: () => {}, erreur: () => {}, info: () => {}, avertissement: () => {} };
+
+            const lireEtat = () => {
+                const c = document.getElementById('conteneurEditionGrille');
+                if (!c) return { conteneur: false };
+                const champs = c.querySelectorAll('input, select, textarea');
+                return {
+                    conteneur: true,
+                    nbChamps: champs.length,
+                    tousDesactives: champs.length > 0 && Array.from(champs).every((x) => x.disabled),
+                    aucunDesactive: Array.from(champs).every((x) => !x.disabled),
+                    bandeau: !!c.querySelector('.bandeau-demo-readonly'),
+                    classeLectureSeule: c.classList.contains('demo-readonly')
+                };
+            };
+
+            // 1) la SOURCE démo, chargée en édition : verrouillée (c'est voulu)
+            await window.chargerGrillePourModif('GR_DEMO');
+            const avant = lireEtat();
+
+            // 2) on la duplique depuis la barre latérale, puis on charge LA COPIE
+            await window.dupliquerGrilleDepuisSidebar('GR_DEMO');
+            const liste = (await db.get(cle)) || [];
+            const copie = liste.find((g) => g.id !== 'GR_DEMO');
+            if (!copie) return { copieAbsente: true };
+            await window.chargerGrillePourModif(copie.id);
+            const apres = lireEtat();
+
+            return { avant, apres, copieAuteur: copie.auteur, copieIsDemo: copie.isDemo };
+        }, GRILLE_DEMO);
+
+        expect(r.copieAbsente).toBeUndefined();
+        expect(r.avant.conteneur).toBe(true);
+        expect(r.avant.nbChamps).toBeGreaterThan(0);
+
+        // La source démo EST verrouillée — sinon le test ne prouverait rien :
+        // un formulaire éditable des deux côtés ne dirait pas que la copie l'est
+        // DEVENUE. C'est le témoin qui donne son sens à l'assertion suivante.
+        expect(r.avant.tousDesactives, 'la source démo devrait être en lecture seule').toBe(true);
+        expect(r.avant.classeLectureSeule).toBe(true);
+
+        // Et la copie, elle, s'ouvre MODIFIABLE. C'est le correctif D1, vu à
+        // l'écran et non plus seulement dans le stockage.
+        expect(r.apres.aucunDesactive, 'la copie doit être éditable').toBe(true);
+        expect(r.apres.bandeau, 'la copie ne doit plus porter le bandeau « exemple »').toBe(false);
+        expect(r.apres.classeLectureSeule).toBe(false);
+
+        // Et la donnée qui commande ce rendu, pour lier les deux niveaux.
+        expect(r.copieIsDemo).toBe(false);
+        expect(r.copieAuteur).not.toBe('Demo Labo Codex');
+    });
+});
