@@ -1,6 +1,6 @@
 # Portes terrain — CT-15 · les doublons du Cadre
 
-> **Date** : 23 août 2026 · **Version livrée** : voir `version.json` après le bump
+> **Date** : 23 août 2026 · **Version livrée** : **1.93.0** · build `0823-1534`
 > **Branche** : `claude/gestion-des-doublons-ytpvkt`
 > **Plan appliqué** : `plans de travail/PLAN-291-476-gestion-des-doublons.md` — **Lot 6**
 > **Artefact jumeau** : https://claude.ai/code/artifact/bdb3f1b9-f4bb-4f11-9156-64f63bc77efa
@@ -20,10 +20,41 @@
 >
 > ---
 >
-> **Ce qui échoue ici devient un item de backlog, pas une note mentale.**
-> Au retour : trier chaque ✗ (défaut réel, ou build en retard ?), verser les
-> défauts réels au `BACKLOG.md` avec leur numéro de porte, puis mettre à jour
-> l'état en tête de ce fichier.
+> ## ✅ RELEVÉ REÇU — 23 août 2026 · **29 passées · 0 en échec · 0 non traitée**
+>
+> **Porte close, sans reliquat.** Les vingt-neuf portes sont vertes, sur les
+> deux appareils.
+>
+> **Les quatre portes qui comptaient vraiment sont dans le lot** — ce sont
+> celles où la garde devait rester MUETTE, et où un excès de zèle aurait rendu
+> le correctif inutilisable au quotidien :
+>
+> | Porte | Ce qu'elle éprouve | Verdict |
+> |---|---|---|
+> | 1.2a | `000-test-zz` en minuscules déclenche le MÊME dialogue que `000-TEST-ZZ` | ✓ le trou de casse est refermé |
+> | 1.3d | modifier le seul NOM d'une fiche ne pose aucune question | ✓ une fiche ne se voit pas elle-même |
+> | 1.4d | deux homonymes à courriels différents passent sans un mot | ✓ #450 tient hors des bibliothèques |
+> | 1.5e | changer l'horaire d'un groupe-cours existant ne pose aucune question | ✓ le triplet ne mord pas l'édition |
+>
+> Et 1.5c — changer le seul enseignant fait **revenir** la question — confirme
+> le choix de conception du lot : horaire et enseignant sont HORS du triplet,
+> précisément pour que la garde parle dans le cas de co-enseignement.
+>
+> **Décisions du §3, toutes rendues, aucune ne demande de code** :
+>
+> - **3.1 — « bon réglage pour les trois »** : avertir plutôt qu'interdire est
+>   acté pour les trois gardes. La règle #455 vaut désormais pour tout le Cadre.
+> - **3.2 — « oui »** : le dialogue natif du navigateur est conservé. Il colle
+>   à la garde voisine du cours et évite la famille d'empilement de z-index
+>   corrigée le 23 août.
+> - **3.3 — « c'est suffisant »** (levé le 23 août : le « oui » du relevé
+>   pouvait se lire des deux côtés de l'alternative). Nommer le jumeau suffit à
+>   décider ; on n'ajoute NI l'horaire NI l'enseignant au message. ⮕ À noter
+>   pour la suite : le nom d'un groupe-cours porte déjà le résumé de l'horaire,
+>   `genererNomGroupeCoursV2` le lui accole — seul l'enseignant manquait, et
+>   Grégoire n'en a pas besoin pour trancher.
+>
+> **Aucun item de backlog n'est né de cette porte.**
 
 ---
 
