@@ -83,6 +83,35 @@ function obtenirEcheanceEffective(production, groupeCoursId) {
 }
 
 /**
+ * #486 (24 août 2026) : une production SANS échéance assignée est un état
+ * LÉGITIME, pas un formulaire à moitié rempli. Le gabarit est préparé, les
+ * consignes ne sont pas encore transmises aux étudiant·es. C'est déjà la
+ * sémantique affichée par le mode multi-groupe (« Décoché = les étudiant·es
+ * n'ont pas encore reçu le travail »), déjà la lecture faite par TOUS les
+ * consommateurs en aval (graphiques C/P, calendrier, jetons, synthèse,
+ * export PDF) qui filtrent sur `assignee && !!date` avant de compter quoi que
+ * ce soit, et déjà la position du format de partage, qui classe `dateEcheance`
+ * parmi les champs LOCAUX interdits d'export (partage-schemas.js).
+ *
+ * Cette fonction est le pendant de `obtenirEcheanceEffective` : elle répond
+ * « aucun groupe n'a d'échéance assignée », donc « rien n'est dû nulle part ».
+ * Elle en reprend volontairement la lecture d'`assignee` (`!== false`, une
+ * entrée muette vaut assignée) pour qu'un badge « à planifier » ne puisse
+ * JAMAIS contredire ce que le calendrier affiche comme dû.
+ *
+ * @param {Object} production
+ * @returns {boolean} true si aucune échéance n'est assignée
+ */
+function aucuneEcheanceAssignee(production) {
+    if (!production) return false;
+    if (production.echeancesParGroupe) {
+        return !Object.values(production.echeancesParGroupe)
+            .some(e => e && e.assignee !== false && e.date);
+    }
+    return !production.dateEcheance;
+}
+
+/**
  * 🆕 Beta 99.08 : Obtenir la date d'échéance la plus tôt parmi tous les groupes
  * Utilisé pour le tri dans la sidebar (sans contexte de groupe spécifique)
  * @param {Object} production - La production
@@ -994,17 +1023,29 @@ function lireDonneesFormulaireProduction() {
 }
 
 // Valide les champs obligatoires (alerte + retourne false si manquant)
+//
+// #486 (24 août 2026) — LA DATE D'ÉCHÉANCE N'EST PLUS UNE CONDITION DE
+// SAUVEGARDE. Elle l'était depuis Beta 94, et c'était une garde de trop :
+// Grégoire prépare TOUTES ses productions avant de les transmettre, et poser
+// l'échéance est précisément l'acte de transmission. Exiger la date pour
+// enregistrer, c'est exiger d'avoir déjà distribué le travail pour avoir le
+// droit de le préparer — la planification devenait impossible.
+//
+// La règle contredisait aussi l'écran qu'elle gardait : sous « Échéances par
+// groupe », l'interface annonce depuis Beta 98.3 que « Décoché = les
+// étudiant·es n'ont pas encore reçu le travail » — un état déclaré légitime,
+// que la sauvegarde refusait pourtant d'enregistrer.
+//
+// Rien en aval ne dépend de cette garde : tous les lecteurs d'échéance
+// filtrent déjà sur `assignee && !!date` (voir `aucuneEcheanceAssignee`). Une
+// production sans date n'est pas une donnée cassée, c'est une production qui
+// n'est due nulle part — exactement comme un portfolio conteneur, dispensé de
+// date depuis toujours. Le gabarit sans échéance se signale désormais dans la
+// barre latérale par le badge « à planifier » (productions-liste.js), pour
+// qu'un oubli reste visible sans être bloquant.
 function validerChampsObligatoiresProduction(d) {
     if (!d.titre || !d.type || (d.type !== 'artefact-portfolio' && d.ponderation === 0)) {
         alert('Veuillez remplir tous les champs obligatoires (Titre, Type et Pondération)');
-        return false;
-    }
-    // 🆕 Beta 98.3 : En mode multi-groupe, au moins un groupe assigné doit avoir une date
-    const auMoinsUneDateAssignee = d.echeancesParGroupe
-        ? Object.values(d.echeancesParGroupe).some(e => e.assignee && e.date)
-        : !!d.dateEcheance;
-    if (!auMoinsUneDateAssignee && d.type !== 'portfolio') {
-        alert('La date d\'échéance est obligatoire pour les productions (sauf portfolios conteneurs)');
         return false;
     }
     return true;
@@ -1546,7 +1587,7 @@ function gererChangementTypeProduction() {
     }
     if (asterisqueDateEcheance) asterisqueDateEcheance.classList.remove('u-hide');
     if (noteExplicativeDateEcheance) {
-        noteExplicativeDateEcheance.innerHTML = 'Cette date fixe les indices <strong>C</strong> (Complétion) et <strong>P</strong> (Performance) pour les suivis longitudinaux.';
+        noteExplicativeDateEcheance.innerHTML = 'Cette date fixe les indices <strong>C</strong> (Complétion) et <strong>P</strong> (Performance) pour les suivis longitudinaux. Facultative : laisse-la vide tant que les consignes ne sont pas transmises.';
     }
 
     if (champsPortfolio) champsPortfolio.classList.add('u-hide');
@@ -2148,6 +2189,8 @@ window.chargerGrillesDisponiblesPourProduction = chargerGrillesDisponiblesPourPr
 
 // 🆕 Beta 98.3 : Échéances par groupe-cours
 window.obtenirEcheanceEffective = obtenirEcheanceEffective;
+window.aucuneEcheanceAssignee = aucuneEcheanceAssignee;                     // #486 — badge « à planifier » + sentinelle (tests/unit)
+window.validerChampsObligatoiresProduction = validerChampsObligatoiresProduction; // #486 — exposé pour la sentinelle (tests/unit)
 // #394 : avertissements de cohérence STD (fonction pure + rendu) et conversion
 // par geste explicite (bouton « Typer comme terminale », dispatcher data-action)
 window.validerProductionsStd = validerProductionsStd;

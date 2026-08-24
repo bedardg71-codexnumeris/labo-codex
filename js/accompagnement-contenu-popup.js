@@ -1015,6 +1015,10 @@ const AIDE_CONTEXTUELLE = {
                 type: 'texte',
                 contenu: 'Cette date fixe les indices C (Complétion) et P (Performance) pour les suivis longitudinaux. Une production non remise à cette date sera comptée comme manquante dans le calcul de C.'
             },
+            {
+                type: 'conseil',
+                contenu: 'La date est <strong>facultative</strong>. Poser l\u2019\u00e9ch\u00e9ance, c\u2019est transmettre\u00a0: tant qu\u2019elle est vide, le gabarit s\u2019enregistre normalement et porte le badge <em>\u00e0 planifier</em> dans la liste. Il n\u2019appara\u00eet alors ni au calendrier ni dans les indices C et P \u2014 rien n\u2019est d\u00fb tant que rien n\u2019est annonc\u00e9.'
+            },
         ],
         voirAussi: ['tableau-bord-apercu', 'conception-productions']
     },
