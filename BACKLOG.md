@@ -105,7 +105,12 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   cesse de bloquer ; titre, type et pondération restent exigés.** Sentinelle
   `tests/unit/sentinelle-486-gabarit-sans-echeance.test.js`, 25 cas, **4 break-tests rouges**.
   Vitest 3008/3008.
-  ⏳ **PORTE TERRAIN DUE — 4 vérifications + 1 décision** (~3 min) :
+  ✅ **PORTE TERRAIN RELEVÉE le 24 août — 3 passées, 0 échec, décision D rendue.** Le badge est
+  lisible sur son iPad en clair ET en sombre (le seul verdict que la session ne pouvait pas rendre).
+  **Décision D close sans code** : « il n'y a pas de pondération pour un artefact, je ne suis pas
+  bloqué » — vérifié, la garde exempte déjà `artefact-portfolio`. La portée de #486 était juste.
+  Rangée 4 (mesure de corpus) sans réponse exploitable — champ mal conçu de mon côté, voir #488.
+  Fichiers :
   `plans de travail/PORTES-TERRAIN-2026-08-24-486-gabarit-sans-echeance.md`
   + artefact https://claude.ai/code/artifact/886278b4-72e8-43b3-ba74-cb8116eefded
   ⚠ **Émise à 34 rangées, ramenée à 4 le jour même** sur retour de Grégoire (« complètement
@@ -134,6 +139,13 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   pas automatisable avant de l'inscrire, (b) le tri par RISQUE — un défaut cosmétique se découvre
   à l'usage et ne mérite pas de porte, une écriture de masse sur le corpus si, (c) une porte est
   le RÉSIDU, pas l'inventaire. Constat du 24 août : 20 portes en 14 jours.
+  ⮕ **(d) UN CHAMP PAR NOMBRE — règle du 11 août, enfreinte le 24.** La porte allégée de #486
+  fusionnait deux mesures dans un seul champ (« Portent le badge / me surprennent »). Réponse
+  reçue : « aucune » — **inexploitable**, on ne sait pas lequel des deux nombres elle vise.
+  Le skill l'interdisait déjà en toutes lettres ; la règle existait et n'a pas suffi. ⮕ Ajouter
+  un **contrôle mécanique** plutôt qu'une consigne de plus : un libellé de mesure qui contient
+  « / », « et » ou « puis » est un signal de champ fusionné. Une règle qu'on peut enfreindre en
+  la relisant n'est pas une règle, c'est un vœu.
 
 - [ ] **#489 — Le verrouillage des productions est une coquille vide, pas seulement un bouton manquant.**
   Constat de #468 (« `verrouillerEvaluation` reste sans point d'entrée UI », `SESSION.md:417`,

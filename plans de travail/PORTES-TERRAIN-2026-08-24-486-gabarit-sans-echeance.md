@@ -5,7 +5,30 @@
 **Artefact interactif** : https://claude.ai/code/artifact/886278b4-72e8-43b3-ba74-cb8116eefded
 **Jumeau HTML versionné** : `plans de travail/portes-terrain-2026-08-24-486-gabarit-sans-echeance.html`
 **Volume** : **4 vérifications · 1 décision** — environ trois minutes
-**État** : ⏳ **DUE**
+**État** : ✅ **RELEVÉE le 24 août** — **3 passées · 0 échec · 1 réponse ambiguë (de ma faute)** · décision D rendue
+
+> **Relevé de Grégoire.** Rangées 1, 2 et 3 ✓ — dont la 3, la seule vraiment
+> obligatoire : **le badge est lisible sur son iPad, en mode clair et en mode
+> sombre.** C'est le verdict que la session ne pouvait pas rendre.
+>
+> **Décision D — RENDUE, aucun code à écrire.** Sa réponse : *« il n'y a pas de
+> pondération pour un artefact. je ne suis pas bloqué. »* **Vérifiée dans le
+> code** : `validerChampsObligatoiresProduction` teste
+> `d.type !== 'artefact-portfolio' && d.ponderation === 0` — la garde exempte
+> déjà les artefacts, elle ne pouvait pas le bloquer. Il travaille en artefacts
+> de portfolio, qui n'ont pas de pondération propre. **La portée de #486 était
+> juste : la date seule cesse de bloquer, et rien d'autre n'est à libérer.**
+>
+> ⚠ **Rangée 4 — défaut de MA conception, pas du relevé.** Réponse reçue :
+> « aucune », dans un champ que j'avais libellé « Portent le badge / me
+> surprennent » — **UN seul champ pour DEUX nombres.** C'est exactement
+> l'anti-pattern que le skill `portes-terrain` interdit depuis le 11 août
+> (« toute rangée qui produit un chiffre porte son propre champ »), et je l'ai
+> reproduit. La réponse ne peut donc pas être interprétée sans lui redemander.
+> **Lecture la plus probable : « aucune ne me surprend »** — parce qu'un « zéro
+> production ne porte le badge » contredirait les rangées 2 et 3, toutes deux
+> vertes (il a enregistré sans date, et il a VU le badge sur iPad). Versé en
+> #488.
 
 > **Cette porte a d'abord été émise à 34 rangées, puis ramenée à 4.** Grégoire :
 > « je suis complètement découragé par les portes terrain nombreuses […] ma
