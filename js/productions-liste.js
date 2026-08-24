@@ -37,16 +37,11 @@ async function dupliquerEtEditerProduction(id) {
         prefixeId: 'PROD_',
         lireListe: async () => await db.get(getCleProductions()) || [],
         ecrireListe: async (liste) => { await db.set(getCleProductions(), liste); },
-        // ⚠ DETTE CONNUE, PRÉSERVÉE TELLE QUELLE (#476 volet 2, refactor pur).
-        // Les productions nomment par `titre` et non `nom`, et la retouche
-        // ci-dessous est une CONCATÉNATION NUE : dupliquer une copie rend
-        // « X (copie) (copie) ». Le reste du projet passe par `nommerCopie`,
-        // qui normalise le suffixe (CO-24, Lot 5). La sentinelle CO-24 ne lit
-        // pas ce fichier, d'où l'oubli. Corriger ce point CHANGE le comportement
-        // et relève d'une décision de Grégoire, pas de la fusion.
-        retoucherCopie: (copie, source) => {
-            if (source.titre) copie.titre = source.titre + ' (copie)';
-        },
+        // ✅ D9 + D3 (arbitrage du 24 août) — PLUS DE RETOUCHE ICI. `forkerItem`
+        // renomme désormais le champ qui existe : `titre` pour une production, et
+        // par `nommerCopie`. Avant, il posait un `nom` que la production n'avait
+        // pas, puis cette retouche réécrivait le `titre` par concaténation nue —
+        // deux défauts pour un seul renommage.
         rafraichirListe: async () => {
             if (typeof afficherListeProductions === 'function') await afficherListeProductions();
         },
@@ -308,20 +303,25 @@ async function dupliquerProduction(id) {
 
     // Créer une copie avec un nouvel ID. La copie devient un nouvel original
     // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY).
+    // ✅ D2 + D4 + D5 (arbitrage du 24 août) — ON RENOMME CE QUE L'UTILISATEUR VOIT.
+    // Avant, le `titre` — le champ affiché dans la liste — restait IDENTIQUE à
+    // celui de la source : rien ne distinguait la copie de l'originale. Ce sont
+    // `activiteApprentissage` et `description` qui recevaient « (copie) », et la
+    // description était ÉCRASÉE par l'activité au passage, perdant son texte sans
+    // avertissement. Désormais : le titre passe par `nommerCopie`, les deux autres
+    // champs sont laissés intacts, la provenance est complète et les métadonnées
+    // de partage de la source sont retirées.
     const copie = {
         ...production,
         id: genererIdUnique('PROD_'),
-        activiteApprentissage: `${production.activiteApprentissage || production.description || ''} (copie)`,
-        description: `${production.activiteApprentissage || production.description || ''} (copie)`,
+        titre: nommerCopie(production.titre, productions),
         auteur: BibliothequeUI.obtenirAuteurActif(),
         isDemo: false,
-        inspireDe: {
-            nom: production.titre || production.activiteApprentissage || 'Inconnu',
-            auteur: production.auteur || 'Inconnu',
-            date: new Date().toISOString().slice(0, 10)
-        },
+        inspireDe: BibliothequeUI.forgerInspireDe(production),
         verrouille: false
     };
+    delete copie.metadata_cc;
+    delete copie.auteurOriginal;
 
     productions.push(copie);
     await db.set(getCleProductions(), productions);
@@ -340,7 +340,7 @@ async function dupliquerProduction(id) {
         window.rechargerFiltreProduction();
     }
 
-    alert(`Production "${copie.activiteApprentissage || copie.description}" dupliquée avec succès`);
+    alert(`Production "${copie.titre}" dupliquée avec succès`);
 }
 
 /**

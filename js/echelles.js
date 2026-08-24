@@ -3422,12 +3422,20 @@ async function dupliquerEchelleDepuisSidebar(id) {
 
     if (!echelle) return;
 
+    // ✅ D1 + D4 + D5 (arbitrage du 24 août) — même correctif que côté grilles :
+    // c'était le même angle mort, sur la même voie « barre latérale ». Voir le
+    // commentaire de `dupliquerGrilleDepuisSidebar` pour le détail du défaut.
     const copie = {
         ...echelle,
         id: genererIdUnique('ECH_'),
         nom: nommerCopie(echelle.nom, echelles),
+        auteur: BibliothequeUI.obtenirAuteurActif(),
+        isDemo: false,
+        inspireDe: BibliothequeUI.forgerInspireDe(echelle),
         verrouille: false
     };
+    delete copie.metadata_cc;
+    delete copie.auteurOriginal;
 
     echelles.push(copie);
     await db.set(cle('echellesTemplates'),  echelles);

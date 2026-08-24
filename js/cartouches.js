@@ -1353,8 +1353,14 @@ async function dupliquerCartouche(cartoucheId, grilleId) {
             commentaires: { ...cartoucheOriginal.commentaires }
         };
 
+        // ✅ D4 (arbitrage du 24 août) — les métadonnées de partage de la source
+        // n'ont plus cours : la copie est un original de l'utilisateur. Avant,
+        // cette voie les conservait, contrairement à sa voisine de bibliothèque.
+        delete nouveauCartouche.metadata_cc;
+        delete nouveauCartouche.auteurOriginal;
+
         cartouches.push(nouveauCartouche);
-        await db.set(`cartouches_${grilleId}`, cartouches);
+        await db.set(`cartouches_${grilleId}`, cartouches); // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
 
         // NOUVELLE INTERFACE (Beta 80.5+): Charger directement la copie
         await chargerCartouchePourModif(nouveauCartouche.id, grilleId);

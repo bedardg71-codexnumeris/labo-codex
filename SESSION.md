@@ -95,6 +95,44 @@
          commentaire « ⚠ ÉCART CONNU » qui renvoie au BACKLOG. Les rassembler
          est ce qui rend la convergence DÉCIDABLE.
 
+     ▣ LOT E — LES ONZE VERDICTS SONT RENDUS, LA CONVERGENCE EST LIVRÉE.
+       Grégoire a tranché 11/11, et D0 = CONVERGENCE DÉLIBÉRÉE. Neuf écarts
+       corrigés ; D6 (identifiants de critères partagés) renvoyée en instruction
+       séparée, faute d'avoir mesuré son effet dans le module Évaluation.
+       ⮕ ORDRE D'ÉCRITURE, ET C'EST LE POINT DE MÉTHODE À RETENIR : les 32
+         attentes du banc ont été RETOURNÉES D'ABORD, et vues 16 ROUGES ; le code
+         a suivi ensuite. Converger en lançant le code puis en ajustant les
+         attentes à ce qu'il produit aurait rendu le banc tautologique — « le
+         code fait ce que le code fait ». C'est la seule façon honnête de faire
+         évoluer un banc de caractérisation.
+       ⮕ CE QUE LA FUSION AVAIT DÉJÀ RAPPORTÉ : `forkerItem` n'avait plus qu'UN
+         SEUL appelant (le moteur du Lot C). Les corrections D7 et D9 se sont
+         donc faites en un endroit au lieu de cinq. Fusionner d'abord a rendu la
+         convergence moins risquée — l'inverse de ce qu'on craignait.
+       ⚠ LA CORRECTION NE RÉPARE PAS LES COPIES DÉJÀ FAITES. Elle vaut pour les
+         duplications À VENIR. Celles déjà créées depuis la barre latérale
+         restent marquées « exemple », donc non modifiables. C'est la décision
+         3.1 de la porte terrain, en attente.
+       ⚠ UN FAUX ROUGE INSTRUCTIF : un cliquet que j'avais posé au Lot D
+         interdisait `delete X.metadata_cc` dans un FICHIER ENTIER. La correction
+         D4, parfaitement légitime, l'a fait rougir — sur une autre fonction du
+         même fichier. Il porte désormais sur le CORPS DE LA FONCTION visée. Un
+         cliquet trop large ne protège pas mieux : il interdit des correctifs
+         justes. (Helper `corpsDeFonction`, réutilisable.)
+       ⮕ ET LE TROU QUI AVAIT CAUSÉ D3 EST BOUCHÉ : la sentinelle CO-24 ne lisait
+         que quatre fichiers ; `productions-*.js` et `pratiques-gestion.js` n'y
+         étaient pas, d'où un défaut réputé clos et vivant pendant un mois. Ils y
+         sont maintenant. Une sentinelle qui ne lit pas un fichier ne dit RIEN
+         sur ce fichier — elle ne dit pas qu'il va bien.
+
+     ▣ PORTE TERRAIN PRODUITE, DUE, NON RELEVÉE.
+       `plans de travail/PORTES-TERRAIN-2026-08-24-convergence-duplications.md`
+       + artefact jumeau : 24 portes Mac + iPad, une mesure à saisir, deux
+       décisions en attente (3.1 réparer ou non les copies déjà faites ; 3.2 une
+       quatrième correction CO-24 que D3 ne nommait pas). Bouton « Copier mes
+       résultats » éprouvé au navigateur avant publication, filtres « iPad
+       seulement » et « à faire seulement ».
+
      ▣ CE QUI RESTE, ET POURQUOI CE N'EST PAS QU'UNE QUESTION DE TEMPS.
        Les 12 voies restantes (invite, barre latérale, item actif) divergent
        RÉELLEMENT — neuf écarts mesurés, énumérés dans BACKLOG #476. La plupart
@@ -135,9 +173,11 @@
        le passage iPad n'a pas eu lieu. Tant qu'ils ne sont pas faits, le banc
        atteste d'un comportement Chromium, pas du comportement de production.
 
-     ▣ ÉTAT DES SUITES : 2990/2990 unitaires · 27/27 au banc · intégration
-       verte sur Chromium, DOUBLE PASSE. Version inchangée : 1.93.0 — aucun des
-       quatre lots ne change ce que voit l'utilisateur.
+     ▣ ÉTAT DES SUITES : 2990/2990 unitaires · 32/32 au banc · 89/89 en
+       intégration, DOUBLE PASSE. Version inchangée : 1.93.0 — mais ⚠ le Lot E
+       CHANGE ce que voit l'utilisateur (contrairement aux Lots A-D). Le bump et
+       le changelog attendent le relevé de la porte terrain : on ne livre pas un
+       changement de comportement non éprouvé sur Safari et iPad.
      ===================================================================== -->
 
 <!-- =====================================================================

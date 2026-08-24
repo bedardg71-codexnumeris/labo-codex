@@ -35,6 +35,24 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dossierJs = path.resolve(__dirname, '..', '..', 'js');
 const lire = (f) => readFileSync(path.join(dossierJs, f), 'utf8');
 
+/** Retire blocs et lignes de commentaire — idiome repris de sentinelle-468. */
+function sansCommentaires(source) {
+    return source
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/(^|[^:])\/\/.*$/gm, '$1');
+}
+
+/**
+ * Découpe le corps d'une fonction nommée, de sa déclaration jusqu'à la
+ * déclaration suivante. Grossier mais suffisant, et surtout : il évite les
+ * cliquets portés sur un FICHIER entier, qui transforment un correctif légitime
+ * ailleurs dans le même fichier en faux rouge (constaté le 24 août).
+ */
+function corpsDeFonction(source, nom) {
+    const blocs = source.split(/\n(?=(?:async )?function )/);
+    return blocs.find((b) => new RegExp('^(?:async )?function ' + nom + '\\b').test(b)) || null;
+}
+
 let win;
 beforeEach(() => { win = chargerScript('js/identite-item.js'); });
 
@@ -242,8 +260,22 @@ describe('CO-24 · nommerCopie', () => {
     });
 
     it('les cinq familles passent par le helper, plus par concaténation', () => {
-        for (const fichier of ['grilles.js', 'echelles.js', 'cartouches.js', 'bibliotheque-ui.js']) {
-            const src = lire(fichier);
+        // ⚠ LA LISTE S'EST ÉTENDUE LE 24 AOÛT, ET C'EST TOUT LE SUJET DE D3.
+        // Elle ne contenait que quatre fichiers ; `productions-liste.js`,
+        // `productions-bibliotheque-ui.js` et `pratiques-gestion.js` en étaient
+        // absents. Résultat : CO-24 a été déclaré clos alors que trois voies
+        // concaténaient encore « (copie) » à la main, et personne ne l'a vu
+        // pendant un mois. Une sentinelle qui ne lit pas un fichier ne dit RIEN
+        // sur ce fichier — elle ne dit pas qu'il va bien.
+        for (const fichier of ['grilles.js', 'echelles.js', 'cartouches.js', 'bibliotheque-ui.js',
+                               'productions-liste.js', 'productions-bibliotheque-ui.js',
+                               'pratiques-gestion.js']) {
+            // On DÉPOUILLE LES COMMENTAIRES avant de chercher — idiome maison
+            // (cf. sentinelle-468) : la correction s'explique DANS le code, et
+            // ces explications citent forcément la forme qu'elles retirent. Sans
+            // ce dépouillement, le commentaire « avant : ${source.titre} (copie) »
+            // fait rougir la sentinelle qui vérifie qu'il n'y en a plus.
+            const src = sansCommentaires(lire(fichier));
             expect(src, `${fichier} : concaténation naïve « (copie) » encore présente`)
                 .not.toMatch(/\+ ' \(copie\)'|\$\{[^}]*\} \(copie\)/);
             expect(src, `${fichier} : nommerCopie absent`).toMatch(/nommerCopie\(/);
@@ -292,11 +324,24 @@ describe('CO-24 · nommerCopie', () => {
                 .toMatch(motif);
         }
 
-        // Et plus aucune famille ne refait le retrait chez elle : s'il y
+        // Et la voie bibliothèque ne refait plus le retrait chez elle : s'il y
         // revenait, c'est que la séquence a été recopiée — le défaut d'origine.
-        for (const fichier of ['grilles.js', 'echelles.js', 'cartouches.js',
-                               'productions-bibliotheque-ui.js']) {
-            expect(lire(fichier), `${fichier} : refait le retrait des métadonnées au lieu de le déléguer`)
+        //
+        // ⚠ L'ASSERTION EST PORTÉE PAR LE CORPS DE LA FONCTION, PAS PAR LE FICHIER.
+        // Elle a d'abord été écrite sur le fichier entier, et elle est devenue un
+        // FAUX ROUGE dès la convergence du 24 août : `dupliquerGrilleDepuisSidebar`
+        // a légitimement reçu son propre `delete copie.metadata_cc` (D4), sur une
+        // voie qui ne passe pas par le moteur. Un cliquet trop large ne protège pas
+        // mieux — il interdit des correctifs justes.
+        for (const [fichier, fonction] of Object.entries({
+            'grilles.js': 'dupliquerGrilleBibliotheque',
+            'echelles.js': 'dupliquerEchelleBibliotheque',
+            'cartouches.js': 'dupliquerCartoucheBibliotheque',
+            'productions-bibliotheque-ui.js': 'dupliquerProductionBibliotheque'
+        })) {
+            const corps = corpsDeFonction(lire(fichier), fonction);
+            expect(corps, `${fichier} : ${fonction} introuvable`).toBeTruthy();
+            expect(corps, `${fichier} : ${fonction} refait le retrait au lieu de le déléguer`)
                 .not.toMatch(/delete \w+\.metadata_cc/);
         }
     });

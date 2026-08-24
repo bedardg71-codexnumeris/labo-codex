@@ -3,6 +3,8 @@
 **Date** : 24 août 2026 · **Version de référence** : 1.93.0
 **Branche** : `claude/fusion-24-fonctions-dupliquer-qrop3b` (commits `74fafdd7` → `ab30ade3`)
 **Artefact jumeau** : https://claude.ai/code/artifact/64c50829-440e-4ad5-8cf8-7b4bdfc06b05
+**✅ RELEVÉ RENDU LE 24 AOÛT 2026 — 11 / 11 tranchées.** Les verdicts sont inscrits ci-dessous.
+**Orientation retenue (D0) : CONVERGENCE DÉLIBÉRÉE**, avec porte terrain Mac + iPad.
 (11 décisions, chacune avec un champ de verdict et un bouton « Copier mes résultats ».)
 
 ---
@@ -25,12 +27,17 @@ Une case cochée dirait « j'ai tranché » sans dire *quoi* — c'est exactemen
 l'erreur relevée le 11 août, où cinq décisions sont revenues « prises » et
 introuvables.
 
-**La conséquence de tes verdicts** : si tu réponds « défaut » sur les lignes du
-groupe A, le chantier suivant n'est plus un refactor, c'est une **correction de
-comportement** — elle touchera tes données réelles et demandera une vraie porte
-terrain Mac + iPad. Si tu réponds « voulu » partout, la fusion des 12 voies
-restantes peut se faire à comportement préservé, mais elle inscrira ces
-différences dans le code comme des règles délibérées.
+**Ce que les verdicts ont décidé** : neuf écarts sur dix sont déclarés **défauts
+à corriger ou à uniformiser**, et D6 part en instruction séparée. Le chantier
+suivant n'est donc plus un refactor — c'est une **correction de comportement**
+sur les données réelles, qui exige sa porte terrain Mac + iPad.
+
+⮕ **Et la convergence DÉBLOQUE la fusion.** Les deux moteurs livrés aux Lots C
+et D portent des rappels (`nommerLaCopie`, `forgerProvenance`) qui n'existent
+que pour reconduire ces écarts. Une fois les écarts résorbés, ces rappels
+s'effondrent et les 12 voies restantes deviennent fusionnables sans rien
+paramétrer. L'ordre décidé est donc le bon : converger d'abord, fusionner
+ensuite.
 
 ---
 
@@ -78,7 +85,7 @@ document — ce qui touche au respect de CC BY que le projet tient par ailleurs.
 
 **Question** : défaut à corriger, ou comportement voulu ?
 
-**VERDICT** : ________________________________________________
+**VERDICT (24 août 2026)** : **Défaut à corriger.**
 
 ---
 
@@ -99,7 +106,7 @@ description écrasée sans avertissement.
 
 **Question** : défaut à corriger, ou comportement voulu ?
 
-**VERDICT** : ________________________________________________
+**VERDICT (24 août 2026)** : **Défaut à corriger.**
 
 ---
 
@@ -123,7 +130,7 @@ deux familles.
 **Question** : corriger maintenant (petit correctif isolé, indépendant de la
 fusion), ou laisser avec le reste ?
 
-**VERDICT** : ________________________________________________
+**VERDICT (24 août 2026)** : **Corriger maintenant.**
 
 ---
 
@@ -147,7 +154,7 @@ fausse qui se propage, et elle ressortira au prochain partage.
 
 **Question** : défaut à corriger, ou comportement voulu ?
 
-**VERDICT** : ________________________________________________
+**VERDICT (24 août 2026)** : **Défaut à corriger.**
 
 ---
 
@@ -167,7 +174,7 @@ complet. Ça pèsera quand tu voudras t'y fier.
 
 **Question** : uniformiser, ou laisser ?
 
-**VERDICT** : ________________________________________________
+**VERDICT (24 août 2026)** : **Uniformiser sur les trois autres familles.**
 
 ---
 
@@ -190,7 +197,7 @@ partagés ; je ne sais pas encore ce que ça produit dans le module Évaluation.
 
 **Question** : à instruire séparément, ou trancher tout de suite ?
 
-**VERDICT** : ________________________________________________
+**VERDICT (24 août 2026)** : **À instruire séparément** — mesurer l'effet dans Évaluation d'abord.
 
 ---
 
@@ -205,7 +212,7 @@ selon le bouton pressé.
 
 **Question** : laquelle est la bonne ?
 
-**VERDICT** : ________________________________________________
+**VERDICT (24 août 2026)** : **La copie cesse d'être un gabarit** (comportement bibliothèque).
 
 ---
 
@@ -222,7 +229,7 @@ selon le bouton pressé.
 
 **Question** : aligner sur les autres, ou laisser ?
 
-**VERDICT** : ________________________________________________
+**VERDICT (24 août 2026)** : **Aligner** : proposer le nom de la source.
 
 ---
 
@@ -237,7 +244,7 @@ compliquera les exports et les comparaisons.
 
 **Question** : nettoyer, ou laisser ?
 
-**VERDICT** : ________________________________________________
+**VERDICT (24 août 2026)** : **Nettoyer.**
 
 ---
 
@@ -253,7 +260,7 @@ branchera quelque chose derrière ce bouton.
 
 **Question** : aligner sur les échelles, ou laisser ?
 
-**VERDICT** : ________________________________________________
+**VERDICT (24 août 2026)** : **Aligner sur les échelles.**
 
 ---
 
@@ -268,7 +275,7 @@ place à la fin.
 | **Fusion totale à comportement préservé** | Les 12 rejoignent un moteur, avec un réglage par différence. ⚠ Ça revient à inscrire les défauts ci-dessus dans le code comme des règles voulues. Déconseillé si tu réponds « défaut » à D1 ou D4. |
 | **Convergence délibérée** | On applique partout le comportement que tu auras tranché. Le résultat le plus propre, et il corrige de vrais défauts — mais ce n'est plus un refactor : ça touche tes données et exige une porte terrain Mac + iPad. |
 
-**VERDICT** : ________________________________________________
+**VERDICT (24 août 2026)** : **Convergence délibérée**, avec porte terrain Mac + iPad.
 
 ---
 

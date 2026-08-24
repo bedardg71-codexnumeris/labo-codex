@@ -36,11 +36,26 @@ import { fileURLToPath } from 'node:url';
 // sont interceptés — ce sont des globaux d'autres fichiers, donc des coutures
 // légitimes, et ce sont précisément les sorties qu'on veut lire.
 //
-// ▣ CE QUE LE BANC N'EST PAS. Il ne dit pas ce que le comportement DEVRAIT
-// être. Plusieurs valeurs figées ici sont discutables et sont signalées par un
-// commentaire « ⚠ ÉCART » : le banc les fige quand même, parce que le mandat du
-// volet 2 est un refactor PUR. Les corriger est un chantier distinct, à décider
-// par Grégoire — pas un effet de bord de la fusion.
+// ▣ CE QUE LE BANC EST DEVENU (24 août 2026, après l'arbitrage). Il a d'abord
+// figé le comportement TEL QU'IL ÉTAIT, écarts compris, pour que la fusion des
+// Lots C et D puisse se prouver sans changement. Grégoire a ensuite tranché les
+// onze décisions de
+// `plans de travail/ARBITRAGE-2026-08-24-476-volet2-duplications.md` :
+// neuf écarts sur dix sont déclarés DÉFAUTS, et l'orientation retenue est la
+// CONVERGENCE DÉLIBÉRÉE. Les attentes ci-dessous décrivent donc désormais le
+// comportement VOULU, et chaque endroit converge porte un commentaire
+// « ✅ CONVERGÉ (Dn) » qui dit ce que c'était AVANT — la trace de l'ancien
+// comportement est le seul moyen de reconnaître une régression qui reviendrait.
+//
+// ⚠ ORDRE D'ÉCRITURE, ET IL COMPTE. Les attentes neuves ont été écrites AVANT
+// le code, et vues ROUGES. Converger en lançant le code puis en ajustant les
+// attentes à ce qu'il produit serait une tautologie : le test ne prouverait plus
+// que « le code fait ce que le code fait ».
+//
+// ⏸ SEULE DÉCISION NON APPLIQUÉE : D6 (identifiants de critères partagés entre
+// une grille et sa copie) part en INSTRUCTION SÉPARÉE — il faut d'abord mesurer
+// ce que ça produit dans le module Évaluation. Le banc continue donc de figer
+// le comportement actuel sur ce point, sans le bénir.
 //
 // ▣ ATTENTION AU LANCEMENT. La config du dépôt cible WebKit — Safari est la
 // cible de production, et c'est bien sous WebKit que ce banc doit faire foi :
@@ -232,9 +247,12 @@ test.describe('#476 volet 2 · caractérisation — grilles', () => {
         expect(r.copie.prefixeId).toBe('GRILLE');
         expect(r.copie.auteur).toBe('Inconnu');            // profil CC absent → repli
         expect(r.copie.isDemo).toBe(false);
-        expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom']);
+        // ✅ CONVERGÉ (D5) — provenance complète, `sourceId` compris. AVANT :
+        // trois clés construites à la main, sans `sourceId` : on ne pouvait pas
+        // dire de QUELLE grille homonyme venait la copie.
+        expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom', 'sourceId']);
         expect(r.copie.dansBibliotheque).toBe(true);
-        // ⚠ ÉCART ASSUMÉ — objet RECONSTRUIT champ par champ, pas étalé : tout
+        // ⚠ ÉCART CONSERVÉ — objet RECONSTRUIT champ par champ, pas étalé : tout
         // ce qui n'est pas listé dans la fonction est PERDU. `verrouille: true`
         // et `metadata_cc` de la source ne passent pas.
         expect(r.copie.verrouille).toBeUndefined();
@@ -259,7 +277,8 @@ test.describe('#476 volet 2 · caractérisation — grilles', () => {
         expect(r.copie.nom).toBe('Grille source (copie)');  // nommerCopie, pas d'invite
         expect(r.copie.auteur).toBe('Inconnu');
         expect(r.copie.isDemo).toBe(false);
-        expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom']);
+        // ✅ CONVERGÉ (D5) — provenance complète, `sourceId` compris.
+        expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom', 'sourceId']);
         expect(r.copie.dansBibliotheque).toBe(true);
         expect(r.copie.aDateCreation).toBe(true);
         expect(r.copie.metadata_cc).toBe('absent');         // supprimé explicitement
@@ -288,7 +307,7 @@ test.describe('#476 volet 2 · caractérisation — grilles', () => {
         expect(r.copie.criteresIds).toEqual(['CR_1', 'CR_2']);
     });
 
-    test('dupliquerGrilleDepuisSidebar — copie brute : garde l\'auteur ET le drapeau démo de la source', async ({ page }) => {
+    test('dupliquerGrilleDepuisSidebar — la copie devient TIENNE : attribuée, éditable, tracée', async ({ page }) => {
         const r = await caracteriser(page, {
             cleNom: 'grillesTemplates', source: GRILLE_SOURCE,
             appel: ['dupliquerGrilleDepuisSidebar', ['GR_SRC']]
@@ -297,30 +316,32 @@ test.describe('#476 volet 2 · caractérisation — grilles', () => {
         expect(r.erreur).toBeNull();
         expect(r.n).toBe(2);
         expect(r.copie.nom).toBe('Grille source (copie)');
-        expect(r.copie.verrouille).toBe(false);             // seul champ forcé
-        // ⚠ ÉCART ASSUMÉ, ET C'EST LE PLUS GROS DU LOT. Cette voie ne pose NI
-        // auteur, NI isDemo, NI inspireDe, et ne retire PAS metadata_cc : la
-        // copie d'un exemple de démo reste marquée démo et attribuée à son
-        // auteur d'origine. Les quatre autres voies de la famille font l'inverse.
-        // Figé tel quel — le volet 2 est un refactor pur. À porter au BACKLOG.
-        expect(r.copie.auteur).toBe('Alice');
-        expect(r.copie.isDemo).toBe(true);
-        expect(r.copie.inspireDe).toBeNull();
-        expect(r.copie.metadata_cc).toBe('present');
+        expect(r.copie.verrouille).toBe(false);
+        // ✅ CONVERGÉ (D1 + D4 + D5) — LE PLUS GROS DÉFAUT DU LOT, CORRIGÉ.
+        // AVANT : cette voie ne posait NI auteur, NI isDemo, NI inspireDe, et ne
+        // retirait PAS metadata_cc. Conséquence mesurée : `estItemDemo` rend vrai
+        // sur `isDemo === true` OU sur l'auteur `Demo Labo Codex` — la copie
+        // gardait LES DEUX, et `appliquerModeLectureSeuleDemo` désactivait alors
+        // tous ses champs. Dupliquer un exemple depuis la barre latérale rendait
+        // une copie QU'ON NE POUVAIT TOUJOURS PAS MODIFIER, soit exactement ce que
+        // le geste est censé débloquer.
+        expect(r.copie.auteur).toBe('Inconnu');
+        expect(r.copie.isDemo).toBe(false);
+        expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom', 'sourceId']);
+        expect(r.copie.metadata_cc).toBe('absent');
         expect(r.copie.criteresIds).toEqual(['CR_1', 'CR_2']);
         expect(r.msgs).toEqual([['alert', 'Grille "Grille source (copie)" dupliquée avec succès']]);
     });
 
-    test('dupliquerGrilleActive — relais NON-async : rend avant que l\'écriture soit faite', async ({ page }) => {
-        // ⚠ ÉCART ASSUMÉ. `dupliquerGrilleActive` est la seule des 22 déclarée
-        // `function` et non `async function` : elle lance
-        // `dupliquerGrilleDepuisSidebar` sans `await`. Son homologue
-        // `dupliquerEchelleActive` attend. Un appelant qui croit pouvoir
-        // enchaîner sur son retour lit un état d'AVANT l'écriture.
+    test('dupliquerGrilleActive — attend son écriture, comme son homologue échelles', async ({ page }) => {
+        // ✅ CONVERGÉ (D10). AVANT : seule des 22 déclarée `function` et non
+        // `async function`, elle lançait `dupliquerGrilleDepuisSidebar` sans
+        // `await` et rendait la main avant l'écriture. Un appelant qui enchaînait
+        // sur son retour lisait un état d'AVANT la copie.
         //
-        // On fige le fait STRUCTUREL (la valeur rendue n'est pas thenable), pas
-        // l'issue de la course : asserter « la copie n'est pas encore écrite »
-        // serait un test à bascule, vert ou rouge selon la vitesse de la machine.
+        // On vérifie le fait STRUCTUREL (la valeur rendue est attendable), pas
+        // l'issue d'une course : asserter « la copie est déjà écrite » serait un
+        // test à bascule, vert ou rouge selon la vitesse de la machine.
         const nature = await page.evaluate(async () => {
             const cle = window.cle('grillesTemplates');
             await db.set(cle, [{ id: 'GR_SRC', nom: 'Grille source', criteres: [] }]);
@@ -333,8 +354,8 @@ test.describe('#476 volet 2 · caractérisation — grilles', () => {
             return { grilleThenable: estThenable(rGrille), echelleThenable: estThenable(rEchelle) };
         });
 
-        expect(nature.grilleThenable).toBe(false);   // ne rend rien d'attendable
-        expect(nature.echelleThenable).toBe(true);   // son homologue, si
+        expect(nature.grilleThenable).toBe(true);    // rend désormais un attendable
+        expect(nature.echelleThenable).toBe(true);   // son homologue, déjà
 
         // L'écriture finit bien par avoir lieu — c'est le fond du comportement.
         const apres = await caracteriser(page, {
@@ -431,7 +452,7 @@ test.describe('#476 volet 2 · caractérisation — échelles', () => {
         expect(r.copie.niveauxNb).toBe(2);
     });
 
-    test('dupliquerEchelleDepuisSidebar — copie brute : garde l\'auteur ET le drapeau démo', async ({ page }) => {
+    test('dupliquerEchelleDepuisSidebar — la copie devient TIENNE : attribuée, éditable, tracée', async ({ page }) => {
         const r = await caracteriser(page, {
             cleNom: 'echellesTemplates', source: ECHELLE_SOURCE,
             appel: ['dupliquerEchelleDepuisSidebar', ['ECH_SRC']]
@@ -441,14 +462,12 @@ test.describe('#476 volet 2 · caractérisation — échelles', () => {
         expect(r.n).toBe(2);
         expect(r.copie.nom).toBe('Echelle source (copie)');
         expect(r.copie.verrouille).toBe(false);
-        // ⚠ ÉCART ASSUMÉ — strictement le même que côté grilles : ni auteur, ni
-        // isDemo, ni inspireDe, et metadata_cc conservé. Deux familles, un seul
-        // et même angle mort : c'est la voie « barre latérale » qui est en retard.
-        expect(r.copie.auteur).toBe('Alice');
-        expect(r.copie.isDemo).toBe(true);
-        expect(r.copie.inspireDe).toBeNull();
-        expect(r.copie.metadata_cc).toBe('present');
-        expect(r.copie.aDateCreation).toBe(false);
+        // ✅ CONVERGÉ (D1 + D4 + D5) — même correctif que côté grilles : c'était
+        // le même angle mort, sur la même voie « barre latérale ».
+        expect(r.copie.auteur).toBe('Inconnu');
+        expect(r.copie.isDemo).toBe(false);
+        expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom', 'sourceId']);
+        expect(r.copie.metadata_cc).toBe('absent');
         expect(r.msgs).toEqual([['alert', 'Échelle "Echelle source (copie)" dupliquée avec succès']]);
     });
 
@@ -508,10 +527,10 @@ test.describe('#476 volet 2 · caractérisation — cartouches', () => {
         expect(r.copie.dansBibliotheque).toBe(true);
         expect(r.copie.verrouille).toBe(false);        // forcé, comme DepuisSidebar
         expect(r.copie.commentairesCles).toEqual(['CR_1']);
-        // ⚠ ÉCART ASSUMÉ — cette voie ne supprime ni `metadata_cc` ni
-        // `auteurOriginal`, là où `dupliquerCartoucheBibliotheque` le fait. Une
-        // copie faite par ce chemin garde donc la licence de partage de la source.
-        expect(r.copie.metadata_cc).toBe('present');
+        // ✅ CONVERGÉ (D4). AVANT : cette voie ne supprimait ni `metadata_cc` ni
+        // `auteurOriginal` — la copie gardait la licence de partage de la source
+        // et se présentait encore comme le document du collègue.
+        expect(r.copie.metadata_cc).toBe('absent');
         expect(r.copie.aDateCreation).toBe(false);      // pas de dateCreation posée
         expect(r.msgs).toEqual([]);
     });
@@ -581,8 +600,8 @@ test.describe('#476 volet 2 · caractérisation — cartouches', () => {
             appel: ['dupliquerCartoucheActive', []]
         });
         expect(avecEtat.n).toBe(2);
-        // Hérite du profil de `dupliquerCartouche` : metadata_cc CONSERVÉ.
-        expect(avecEtat.copie.metadata_cc).toBe('present');
+        // Hérite du profil de `dupliquerCartouche`, désormais convergé (D4).
+        expect(avecEtat.copie.metadata_cc).toBe('absent');
         expect(avecEtat.copie.verrouille).toBe(false);
     });
 });
@@ -611,7 +630,7 @@ const PRODUCTION_SOURCE = {
 };
 
 test.describe('#476 volet 2 · caractérisation — productions', () => {
-    test('dupliquerProduction — ne touche PAS au titre, suffixe l\'activité et la description', async ({ page }) => {
+    test('dupliquerProduction — renomme le TITRE et laisse activité et description intactes', async ({ page }) => {
         const r = await caracteriser(page, {
             cleNom: 'productions', source: PRODUCTION_SOURCE,
             appel: ['dupliquerProduction', ['PROD_SRC']]
@@ -619,23 +638,25 @@ test.describe('#476 volet 2 · caractérisation — productions', () => {
 
         expect(r.erreur).toBeNull();
         expect(r.n).toBe(2);
-        // ⚠ ÉCART ASSUMÉ, LE PLUS SURPRENANT DE LA FAMILLE. Le `titre` — le champ
-        // que l'utilisateur voit — reste IDENTIQUE à celui de la source. Ce sont
-        // `activiteApprentissage` et `description` qui reçoivent « (copie) », et
-        // la description est ÉCRASÉE par l'activité au passage.
-        expect(r.copie.titre).toBe('Prod source');
-        expect(r.copie.activite).toBe('Activite (copie)');
-        expect(r.copie.description).toBe('Activite (copie)');
+        // ✅ CONVERGÉ (D2 + D4 + D5) — LE PLUS SURPRENANT DE LA FAMILLE, CORRIGÉ.
+        // AVANT : le `titre` — le champ que l'utilisateur VOIT dans sa liste —
+        // restait IDENTIQUE à celui de la source, si bien que rien ne distinguait
+        // la copie de l'originale. Ce sont `activiteApprentissage` et
+        // `description` qui recevaient « (copie) », et la description était
+        // ÉCRASÉE par l'activité au passage : un texte perdu sans avertissement.
+        expect(r.copie.titre).toBe('Prod source (copie)');
+        expect(r.copie.activite).toBe('Activite');
+        expect(r.copie.description).toBe('Desc');
         expect(r.copie.auteur).toBe('Inconnu');
         expect(r.copie.isDemo).toBe(false);
-        expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom']);  // construit à la main
+        expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom', 'sourceId']);
         expect(r.copie.verrouille).toBe(false);
-        expect(r.copie.metadata_cc).toBe('present');
+        expect(r.copie.metadata_cc).toBe('absent');
         expect(r.copie.aDateCreation).toBe(false);
-        expect(r.msgs).toEqual([['alert', 'Production "Activite (copie)" dupliquée avec succès']]);
+        expect(r.msgs).toEqual([['alert', 'Production "Prod source (copie)" dupliquée avec succès']]);
     });
 
-    test('dupliquerProductionBibliotheque — suffixe le titre par CONCATÉNATION, pas par nommerCopie', async ({ page }) => {
+    test('dupliquerProductionBibliotheque — suffixe le titre par nommerCopie', async ({ page }) => {
         const r = await caracteriser(page, {
             cleNom: 'productions', source: PRODUCTION_SOURCE,
             appel: ['dupliquerProductionBibliotheque', ['PROD_SRC']]
@@ -644,22 +665,24 @@ test.describe('#476 volet 2 · caractérisation — productions', () => {
         expect(r.erreur).toBeNull();
         expect(r.n).toBe(2);
         expect(r.msgs).toEqual([]);
-        // ⚠ ÉCART ASSUMÉ — CO-24 ENCORE VIVANT ICI. `${production.titre} (copie)`
-        // est une concaténation nue : dupliquer une copie rend « X (copie) (copie) ».
-        // Le reste du projet passe par `nommerCopie`, qui normalise le suffixe.
+        // ✅ CONVERGÉ (D3 + D5). AVANT : `${production.titre} (copie)`, une
+        // concaténation nue — dupliquer une copie rendait « X (copie) (copie) ».
+        // C'est CO-24, réputé clos et pourtant vivant ici, faute que la sentinelle
+        // du Lot 5 lise ce fichier. La chaîne de deux maillons plus bas est ce qui
+        // rend la correction observable.
         expect(r.copie.titre).toBe('Prod source (copie)');
-        expect(r.copie.activite).toBe('Activite');       // intactes, contrairement à dupliquerProduction
+        expect(r.copie.activite).toBe('Activite');
         expect(r.copie.description).toBe('Desc');
         expect(r.copie.auteur).toBe('Inconnu');
         expect(r.copie.isDemo).toBe(false);
-        expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom']);
+        expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom', 'sourceId']);
         expect(r.copie.dansBibliotheque).toBe(true);
         expect(r.copie.aDateCreation).toBe(true);
         expect(r.copie.metadata_cc).toBe('absent');
         expect(r.copie.verrouille).toBe(true);
     });
 
-    test('dupliquerEtEditerProduction — forkerItem POSE un champ `nom` que les productions n\'ont pas', async ({ page }) => {
+    test('dupliquerEtEditerProduction — nomme par `titre` seul, sans inventer de champ `nom`', async ({ page }) => {
         const r = await caracteriser(page, {
             cleNom: 'productions', source: PRODUCTION_SOURCE,
             appel: ['dupliquerEtEditerProduction', ['PROD_SRC']]
@@ -668,12 +691,17 @@ test.describe('#476 volet 2 · caractérisation — productions', () => {
         expect(r.erreur).toBeNull();
         expect(r.n).toBe(2);
         expect(r.msgs).toEqual([]);
-        // ⚠ ÉCART ASSUMÉ — `forkerItem` écrit `copie.nom = nommerCopie(nom || titre)`.
-        // Comme une production n'a pas de `nom`, la copie en reçoit un qui n'existait
-        // pas sur la source : deux champs de nom coexistent désormais sur la copie.
-        expect(r.copie.nom).toBe('Prod source (copie)');
+        // ✅ CONVERGÉ (D9). AVANT : `forkerItem` écrivait
+        // `copie.nom = nommerCopie(nom || titre)` ; une production n'ayant pas de
+        // `nom`, la copie en recevait un qui n'existait pas sur la source — deux
+        // champs de nom sur la copie, un seul sur l'originale.
+        expect(r.copie.nom).toBeUndefined();
         expect(r.sourceIntacte.nom).toBeUndefined();
-        // Et le `titre` est réécrit juste après, par concaténation nue (CO-24).
+        // ✅ CONVERGÉ — le `titre` passe par `nommerCopie`, plus par concaténation.
+        // ⚠ CE POINT ÉTEND D3, QUI NE NOMMAIT PAS CETTE FONCTION : la même
+        // concaténation nue vivait ici. La corriger relève du principe de D3 et de
+        // l'orientation « convergence » (D0), mais Grégoire ne l'a pas arbitrée
+        // nommément — à signaler plutôt qu'à faire passer pour acquis.
         expect(r.copie.titre).toBe('Prod source (copie)');
         expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom', 'sourceId']);
         expect(r.copie.isDemo).toBe(false);
@@ -726,7 +754,7 @@ const PRATIQUE_SOURCE = {
 };
 
 test.describe('#476 volet 2 · caractérisation — pratiques', () => {
-    test('dupliquerPratique — invite « Copie de pratique », RETOURNE un id, alerte', async ({ page }) => {
+    test('dupliquerPratique — l\'invite propose le nom de la source, RETOURNE un id, alerte', async ({ page }) => {
         const r = await caracteriser(page, {
             cleNom: 'pratiquesConfigurables', source: PRATIQUE_SOURCE,
             appel: ['dupliquerPratique', ['pratique_SRC']]
@@ -734,10 +762,10 @@ test.describe('#476 volet 2 · caractérisation — pratiques', () => {
 
         expect(r.erreur).toBeNull();
         expect(r.n).toBe(2);
-        // ⚠ ÉCART ASSUMÉ — la seule des 22 dont l'invite ne propose PAS le nom
-        // de la source : elle propose la constante « Copie de pratique ». Elle
-        // ne consulte donc pas `nommerCopie` du tout.
-        expect(r.msgs[0]).toEqual(['prompt-defaut', 'Copie de pratique']);
+        // ✅ CONVERGÉ (D8). AVANT : la seule des 22 dont l'invite ne proposait PAS
+        // le nom de la source — elle proposait la constante « Copie de pratique »,
+        // qui ne dit pas de quoi c'est la copie, et ne consultait pas `nommerCopie`.
+        expect(r.msgs[0]).toEqual(['prompt-defaut', 'Pratique source (copie)']);
         expect(r.copie.nom).toBe('NOM CHOISI');
         expect(r.copie.prefixeId).toBe('pratique');
         expect(r.copie.auteur).toBe('Inconnu');
@@ -775,7 +803,7 @@ test.describe('#476 volet 2 · caractérisation — pratiques', () => {
         expect(r.retourType).toBe('object');            // parité copierPratiqueDepuisTrimestre
     });
 
-    test('dupliquerEtEditerPratique — forkerItem : CONSERVE estGabarit, contrairement à sa voisine', async ({ page }) => {
+    test('dupliquerEtEditerPratique — la copie cesse d\'être un gabarit, comme sa voisine', async ({ page }) => {
         const r = await caracteriser(page, {
             cleNom: 'pratiquesConfigurables', source: PRATIQUE_SOURCE,
             appel: ['dupliquerEtEditerPratique', ['pratique_SRC']]
@@ -788,13 +816,15 @@ test.describe('#476 volet 2 · caractérisation — pratiques', () => {
         expect(r.copie.isDemo).toBe(false);
         expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom', 'sourceId']);
         expect(r.copie.metadata_cc).toBe('absent');
-        // ⚠ ÉCART ASSUMÉ — `forkerItem` ne connaît pas `estGabarit` : la copie
-        // reste marquée gabarit, là où `dupliquerPratiqueBibliotheque` le retire
-        // explicitement. Deux « dupliquer » voisins, deux natures de copie.
-        expect(r.copie.estGabarit).toBe(true);
+        // ✅ CONVERGÉ (D7). AVANT : `forkerItem` ne connaissait pas `estGabarit`,
+        // si bien que la copie restait marquée gabarit là où
+        // `dupliquerPratiqueBibliotheque` le retirait. Deux « dupliquer » voisins
+        // rendaient deux natures de copie. Verdict de Grégoire : c'est le
+        // comportement bibliothèque qui fait foi.
+        expect(r.copie.estGabarit).toBeUndefined();
     });
 
-    test('dupliquerPratiqueMateriel — clone profond, notification, nom par CONCATÉNATION', async ({ page }) => {
+    test('dupliquerPratiqueMateriel — clone profond, notification, nom par nommerCopie', async ({ page }) => {
         const r = await caracteriser(page, {
             cleNom: 'pratiquesConfigurables', source: PRATIQUE_SOURCE,
             appel: ['dupliquerPratiqueMateriel', ['pratique_SRC']]
@@ -802,17 +832,19 @@ test.describe('#476 volet 2 · caractérisation — pratiques', () => {
 
         expect(r.erreur).toBeNull();
         expect(r.n).toBe(2);
-        // ⚠ ÉCART ASSUMÉ — CO-24 vivant ici aussi : `${original.nom} (copie)`.
-        // Comme pour les productions, `pratiques-gestion.js` n'est pas dans la
-        // liste des fichiers surveillés par la sentinelle CO-24.
+        // ✅ CONVERGÉ (D3) — `nommerCopie` remplace la concaténation nue
+        // `${original.nom} (copie)`. Comme pour les productions,
+        // `pratiques-gestion.js` n'était pas dans la liste surveillée par la
+        // sentinelle CO-24, d'où l'oubli.
         expect(r.copie.nom).toBe('Pratique source (copie)');
         expect(r.copie.auteur).toBe('Inconnu');
         expect(r.copie.isDemo).toBe(false);
         expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom', 'sourceId']);
         expect(r.copie.aDateCreation).toBe(true);
-        // Ni suppression de metadata_cc, ni de estGabarit : clone brut + retouches.
-        expect(r.copie.estGabarit).toBe(true);
-        expect(r.copie.metadata_cc).toBe('present');
+        // ✅ CONVERGÉ (D4 + D7) — AVANT : ni `metadata_cc` ni `estGabarit` n'étaient
+        // retirés, la copie gardant la licence de la source et sa nature de gabarit.
+        expect(r.copie.estGabarit).toBeUndefined();
+        expect(r.copie.metadata_cc).toBe('absent');
         expect(r.msgs).toEqual([['succes', 'Pratique dupliquée']]);
     });
 });
@@ -882,38 +914,38 @@ test.describe('#476 volet 2 · caractérisation — CO-24, la chaîne des copies
         expect(r.second).toBe('Echelle source (copie 2)');
     });
 
-    test('productions · dupliquerProductionBibliotheque EMPILE encore — CO-24 vivant', async ({ page }) => {
+    test('productions · dupliquerProductionBibliotheque NORMALISE désormais le suffixe', async ({ page }) => {
         const r = await chaineDeCopies(page, {
             cleNom: 'productions', source: PRODUCTION_SOURCE,
             fonction: 'dupliquerProductionBibliotheque', champNom: 'titre'
         });
         expect(r.nombre).toBe(3);
         expect(r.premier).toBe('Prod source (copie)');
-        // ⚠ ÉCART ASSUMÉ — la concaténation nue `${titre} (copie)` empile. C'est
-        // exactement le reproche de CO-24, resté vivant sur cette famille parce
-        // que la sentinelle du Lot 5 ne lit pas ce fichier. Figé, pas corrigé :
-        // le volet 2 est un refactor pur.
-        expect(r.second).toBe('Prod source (copie) (copie)');
+        // ✅ CONVERGÉ (D3). AVANT : « Prod source (copie) (copie) » — la
+        // concaténation nue empilait, exactement le reproche de CO-24.
+        expect(r.second).toBe('Prod source (copie 2)');
     });
 
-    test('pratiques · dupliquerPratiqueMateriel EMPILE encore — CO-24 vivant', async ({ page }) => {
+    test('pratiques · dupliquerPratiqueMateriel NORMALISE désormais le suffixe', async ({ page }) => {
         const r = await chaineDeCopies(page, {
             cleNom: 'pratiquesConfigurables', source: PRATIQUE_SOURCE,
             fonction: 'dupliquerPratiqueMateriel', champNom: 'nom'
         });
         expect(r.nombre).toBe(3);
         expect(r.premier).toBe('Pratique source (copie)');
-        expect(r.second).toBe('Pratique source (copie) (copie)');
+        // ✅ CONVERGÉ (D3). AVANT : « Pratique source (copie) (copie) ».
+        expect(r.second).toBe('Pratique source (copie 2)');
     });
 
-    test('pratiques · dupliquerPratiqueBibliotheque EMPILE encore — CO-24 vivant', async ({ page }) => {
+    test('pratiques · dupliquerPratiqueBibliotheque NORMALISE désormais le suffixe', async ({ page }) => {
         const r = await chaineDeCopies(page, {
             cleNom: 'pratiquesConfigurables', source: PRATIQUE_SOURCE,
             fonction: 'dupliquerPratiqueBibliotheque', champNom: 'nom'
         });
         expect(r.nombre).toBe(3);
         expect(r.premier).toBe('Pratique source (copie)');
-        expect(r.second).toBe('Pratique source (copie) (copie)');
+        // ✅ CONVERGÉ (D3). AVANT : « Pratique source (copie) (copie) ».
+        expect(r.second).toBe('Pratique source (copie 2)');
     });
 });
 

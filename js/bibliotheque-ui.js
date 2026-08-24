@@ -431,7 +431,15 @@
         copie.id = genererId(prefixeId || 'ITEM_');
         // CO-24 — dupliquer une copie donnait « X (copie) (copie) (copie) ».
         // `nommerCopie` normalise le suffixe au lieu de l'empiler.
-        copie.nom = nommerCopie(source.nom || source.titre, nomsExistants);
+        //
+        // ✅ D9 (arbitrage du 24 août) — ON RENOMME LE CHAMP QUI EXISTE, ET LUI SEUL.
+        // Avant, la ligne était `copie.nom = nommerCopie(source.nom || source.titre)` :
+        // une production, qui se nomme par `titre` et n'a pas de `nom`, se voyait
+        // POSER un `nom` que sa source n'avait pas. La copie portait deux champs de
+        // nom, l'originale un seul — et son `titre`, lui, restait à renommer par
+        // l'appelant, à la main et par concaténation nue.
+        var champNom = (source.nom !== undefined && source.nom !== null) ? 'nom' : 'titre';
+        copie[champNom] = nommerCopie(source[champNom], nomsExistants);
         copie.auteur = auteurActif;
         copie.isDemo = false;
         copie.inspireDe = BibliothequeUI.forgerInspireDe(source);
@@ -439,6 +447,12 @@
         copie.dateCreation = new Date().toISOString();
         delete copie.metadata_cc;
         delete copie.auteurOriginal;
+        // ✅ D7 (arbitrage du 24 août) — la copie d'un gabarit n'est plus un
+        // gabarit. Verdict de Grégoire : c'est le comportement de
+        // `dupliquerPratiqueBibliotheque` qui fait foi. Avant, `forkerItem` ne
+        // connaissait pas ce drapeau, si bien que « Dupliquer et éditer » rendait
+        // une copie encore marquée gabarit là où sa voisine la libérait.
+        delete copie.estGabarit;
         return copie;
     };
 

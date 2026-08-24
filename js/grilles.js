@@ -993,11 +993,10 @@ async function dupliquerGrille(grilleId) {
         dateModification: new Date().toISOString(),
         auteur: auteurActif,
         isDemo: false,
-        inspireDe: {
-            nom: grilleOriginale.nom,
-            auteur: grilleOriginale.auteur || 'Inconnu',
-            date: new Date().toISOString().slice(0, 10)
-        },
+        // ✅ D5 — provenance COMPLÈTE (`sourceId` compris). Avant, l'objet était
+        // construit à la main sur trois clés : deux grilles homonymes rendaient la
+        // filiation indécidable.
+        inspireDe: BibliothequeUI.forgerInspireDe(grilleOriginale),
         dansBibliotheque: true  // ✅ AJOUT (Beta 95.2 - Bug Bruno) - Grille dupliquée dans bibliothèque
     };
 
@@ -2692,16 +2691,9 @@ async function dupliquerGrilleBibliotheque(id) {
         lireListe: async () => await db.get(cle('grillesTemplates')) || [],
         ecrireListe: async (liste) => { await db.set(cle('grillesTemplates'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
         nommerLaCopie: (copie, source, liste) => { copie.nom = nommerCopie(source.nom, liste); },
-        // ⚠ ÉCART CONNU, RECONDUIT TEL QUEL (#476 volet 2, refactor pur) : cette
-        // voie construit `inspireDe` à la main — trois clés, sans `sourceId` —
-        // là où les échelles, cartouches et pratiques passent par
-        // `BibliothequeUI.forgerInspireDe`, qui en pose quatre. L'arbre de
-        // filiation est donc muet pour les grilles dupliquées par ce chemin.
-        forgerProvenance: (source) => ({
-            nom: source.nom,
-            auteur: source.auteur || 'Inconnu',
-            date: new Date().toISOString().slice(0, 10)
-        }),
+        // ✅ D5 — aligné sur les trois autres familles : `forgerInspireDe` pose
+        // aussi `sourceId`, ce qui rend l'arbre de filiation décidable.
+        forgerProvenance: (source) => BibliothequeUI.forgerInspireDe(source),
         siIntrouvable: () => alert('Grille introuvable'),
         rafraichirUI: async () => {
             fermerModalBibliothequeGrilles();
@@ -3670,12 +3662,25 @@ async function dupliquerGrilleDepuisSidebar(id) {
 
     if (!grille) return;
 
+    // ✅ D1 + D4 + D5 (arbitrage du 24 août) — LA COPIE DEVIENT CELLE DE
+    // L'UTILISATEUR. Avant, cette voie se contentait d'étaler la source : elle ne
+    // posait ni `auteur`, ni `isDemo`, ni `inspireDe`, et gardait `metadata_cc`.
+    // Or `BibliothequeUI.estItemDemo` rend vrai sur `isDemo === true` OU sur
+    // l'auteur « Demo Labo Codex » — la copie gardait LES DEUX, et
+    // `appliquerModeLectureSeuleDemo` désactivait alors tous ses champs :
+    // dupliquer un exemple depuis la barre latérale rendait une copie qu'on ne
+    // pouvait toujours pas modifier, soit exactement ce que le geste doit débloquer.
     const copie = {
         ...grille,
         id: genererIdUnique('GRILLE_'),
         nom: nommerCopie(grille.nom, grilles),
+        auteur: BibliothequeUI.obtenirAuteurActif(),
+        isDemo: false,
+        inspireDe: BibliothequeUI.forgerInspireDe(grille),
         verrouille: false
     };
+    delete copie.metadata_cc;
+    delete copie.auteurOriginal;
 
     grilles.push(copie);
     await db.set(cle('grillesTemplates'), grilles);
@@ -3726,13 +3731,16 @@ function annulerFormGrille() {
 /**
  * Duplique la grille actuellement en édition
  */
-function dupliquerGrilleActive() {
+async function dupliquerGrilleActive() {
     if (!grilleTemplateActuelle) {
         alert('Aucune grille en cours d\'édition');
         return;
     }
     // ✅ CORRIGÉ (16 mars 2026) : grilleTemplateActuelle est un objet, pas un ID
-    dupliquerGrilleDepuisSidebar(grilleTemplateActuelle.id);
+    // ✅ D10 (arbitrage du 24 août) : `async` + `await`, aligné sur
+    // `dupliquerEchelleActive`. Avant, seule des 22 à être synchrone, elle rendait
+    // la main AVANT l'écriture — un appelant qui enchaînait lisait l'état d'avant.
+    await dupliquerGrilleDepuisSidebar(grilleTemplateActuelle.id);
 }
 
 /**
