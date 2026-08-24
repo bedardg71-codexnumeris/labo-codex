@@ -96,11 +96,37 @@
        et les motifs de #455 pointent le mécanisme à sa NOUVELLE adresse
        (`CoursEntite.chercherDoublonCode`), sans rien relâcher.
 
-     ▣ PORTE TERRAIN DUE :
+     ▣ PORTE TERRAIN RELEVÉE LE JOUR MÊME — **29/29, ZÉRO ÉCHEC, ZÉRO RELIQUAT**.
        `plans de travail/PORTES-TERRAIN-2026-08-23-doublons-cadre.md`
        + artefact https://claude.ai/code/artifact/bdb3f1b9-f4bb-4f11-9156-64f63bc77efa
-       Trois dialogues neufs à voir sur Mac ET iPad. Trois décisions au §3,
-       dont : avertir ou REFUSER fermement sur le groupe-cours ?
+
+       ▣ LES QUATRE PORTES QUI COMPTAIENT sont celles où la garde devait
+         rester MUETTE — un excès de zèle aurait rendu le correctif
+         inutilisable au quotidien, et c'est le mode d'échec qu'une garde
+         neuve court vraiment :
+           · 1.2a — `000-test-zz` déclenche le MÊME dialogue que `000-TEST-ZZ`
+                    (le trou de casse est refermé) ;
+           · 1.3d — modifier le seul NOM d'une fiche ne pose aucune question
+                    (une fiche ne se voit pas elle-même) ;
+           · 1.4d — deux homonymes à courriels différents passent sans un mot
+                    (#450 tient hors des bibliothèques) ;
+           · 1.5e — changer l'horaire d'un GC existant ne pose aucune question.
+         Et 1.5c — changer le seul enseignant fait REVENIR la question —
+         confirme le choix de conception : horaire et enseignant sont HORS du
+         triplet, précisément pour que la garde parle en co-enseignement.
+
+       ▣ DÉCISIONS DU §3, TOUTES RENDUES, AUCUNE NE DEMANDE DE CODE.
+         3.1 « bon réglage pour les trois » — avertir plutôt qu'interdire est
+             ACTÉ pour tout le Cadre, pas seulement pour le cours.
+         3.2 « oui » — le dialogue natif du navigateur est conservé.
+         3.3 « c'est suffisant » — nommer le jumeau suffit ; on n'ajoute NI
+             l'horaire NI l'enseignant au message. ⚠ Le « oui » du relevé se
+             lisait des deux côtés de l'alternative : levé par une question,
+             pas par une supposition. À noter pour la suite : le nom d'un GC
+             porte DÉJÀ le résumé de l'horaire (`genererNomGroupeCoursV2` le
+             lui accole) — seul l'enseignant manquait, et il n'en a pas besoin.
+
+       ▣ AUCUN ITEM DE BACKLOG N'EST NÉ DE CETTE PORTE.
      ===================================================================== -->
 
 <!-- =====================================================================
