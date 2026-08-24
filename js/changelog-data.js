@@ -29,7 +29,8 @@
                 'Une cartouche arrive toujours AVEC sa grille. Si la grille est d\u00e9j\u00e0 dans le trimestre courant, la cartouche s\u2019y range\u00a0; sinon elle est copi\u00e9e avec elle. Ce n\u2019est pas un choix de confort\u00a0: une cartouche est rang\u00e9e SOUS sa grille, et sans grille d\u2019accueil elle serait introuvable.',
                 'Le rattachement se d\u00e9cide sur la filiation de la grille, jamais sur son nom \u2014 deux grilles homonymes restent deux grilles. Cons\u00e9quence directe\u00a0: importer une cartouche dans un trimestre o\u00f9 tu as d\u00e9j\u00e0 import\u00e9 sa grille ne t\u2019en fabrique pas une seconde copie.',
                 'R\u00e9importer une cartouche d\u00e9j\u00e0 pr\u00e9sente te le dit, au lieu d\u2019en empiler un second exemplaire en silence. Pour en avoir vraiment deux, \u00ab\u00a0Dupliquer\u00a0\u00bb reste l\u00e0.',
-                'L\u2019aper\u00e7u annonce, grille par grille, ce qui va se passer\u00a0: \u00ab\u00a0sa grille est d\u00e9j\u00e0 dans ce trimestre\u00a0\u00bb ou \u00ab\u00a0sa grille sera copi\u00e9e avec elle\u00a0\u00bb. Tu sais ce que tu d\u00e9clenches avant de cliquer.'
+                'L\u2019aper\u00e7u annonce, grille par grille, ce qui va se passer\u00a0: \u00ab\u00a0sa grille est d\u00e9j\u00e0 dans ce trimestre\u00a0\u00bb ou \u00ab\u00a0sa grille sera copi\u00e9e avec elle\u00a0\u00bb. Tu sais ce que tu d\u00e9clenches avant de cliquer.',
+                'La section \u00ab\u00a0Importer depuis un autre trimestre\u00a0\u00bb RESTE ouverte apr\u00e8s chaque import\u00a0: le trimestre choisi, la liste d\u00e9pli\u00e9e et ta position dans la fen\u00eatre sont conserv\u00e9s. Importer dix cartouches ne demande plus dix fois de tout rouvrir. Le d\u00e9faut \u00e9tait le m\u00eame dans les cinq biblioth\u00e8ques \u2014 productions, grilles, \u00e9chelles, cartouches et pratiques \u2014 et il est corrig\u00e9 partout.'
             ]
         },
         {

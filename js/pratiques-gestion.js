@@ -701,6 +701,15 @@ function afficherPratiquesTrimestreModal() {
  * @param {string} srcId - id du trimestre source
  * @param {string} pratiqueId - id de la pratique dans le trimestre source
  */
+/** État de la section d'import, à reposer après reconstruction du modal. */
+function etatImportPratiques() {
+    return BibliothequeUI.capturerImportTrimestre({
+        modalId: 'modalBibliothequePratiques',
+        selects: ['selectTrimestreImportPratiques'],
+        apercu: 'previewPratiquesTrimestre'
+    });
+}
+
 async function importerUnePratiqueTrimestre(srcId, pratiqueId) {
     if (window.estTrimestreArchive && window.estTrimestreArchive()) {
         alert('Import impossible : le trimestre actif est archivé (consultation). Active un trimestre courant pour importer des pratiques.');
@@ -711,11 +720,16 @@ async function importerUnePratiqueTrimestre(srcId, pratiqueId) {
     const pratique = pratiques.find(p => p.id === pratiqueId);
     if (!pratique) { alert('Pratique introuvable.'); return; }
 
+    // L'import reconstruit le modal : sans capture/restauration, le trimestre
+    // choisi, l'aperçu déplié et le défilement disparaissent avec l'ancien DOM.
+    const etatSection = etatImportPratiques();
+
     const res = copierPratiqueDepuisTrimestre(pratique, srcId);
 
     fermerModalBibliothequePratiques();
     await afficherListePratiquesMateriel();
     await afficherBibliothequePratiques();
+    await BibliothequeUI.restaurerImportTrimestre(etatSection, afficherPratiquesTrimestreModal);
 
     const details = res.depsManquantes.length > 0
         ? `À re-sélectionner à l'édition (absent de ce trimestre) : ${res.depsManquantes.join(', ')}.`
@@ -750,6 +764,10 @@ async function importerToutPratiquesTrimestreModal() {
     );
     if (!confirmation) return;
 
+    // L'import reconstruit le modal : sans capture/restauration, le trimestre
+    // choisi, l'aperçu déplié et le défilement disparaissent avec l'ancien DOM.
+    const etatSection = etatImportPratiques();
+
     let nb = 0;
     const depsGlobales = new Set();
     for (const pratique of pratiques) {
@@ -761,6 +779,7 @@ async function importerToutPratiquesTrimestreModal() {
     fermerModalBibliothequePratiques();
     await afficherListePratiquesMateriel();
     await afficherBibliothequePratiques();
+    await BibliothequeUI.restaurerImportTrimestre(etatSection, afficherPratiquesTrimestreModal);
 
     let details = `${nb} pratique(s) copiée(s).`;
     if (depsGlobales.size > 0) {

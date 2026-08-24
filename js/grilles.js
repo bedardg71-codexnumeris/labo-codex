@@ -2453,6 +2453,15 @@ function copierGrilleDepuisTrimestre(grilleSource, srcId) {
     return partageSection.dupliquerGrillePartagee(source, lireCartouchesParCle);
 }
 
+/** État de la section d'import, à reposer après reconstruction du modal. */
+function etatImportGrilles() {
+    return BibliothequeUI.capturerImportTrimestre({
+        modalId: 'modalBibliothequeGrilles',
+        selects: ['selectTrimestreImportGrilles'],
+        apercu: 'previewGrillesTrimestre'
+    });
+}
+
 /**
  * Bouton « Voir les grilles » : affiche, sous le sélecteur, la liste des grilles du
  * trimestre choisi avec un bouton « Importer » par ligne.
@@ -2516,6 +2525,10 @@ async function importerToutGrillesTrimestreModal() {
     );
     if (!confirmation) return;
 
+    // L'import reconstruit le modal : sans capture/restauration, le trimestre
+    // choisi, l'aperçu déplié et le défilement disparaissent avec l'ancien DOM.
+    const etatSection = etatImportGrilles();
+
     let nbGrilles = 0, nbCartouches = 0;
     for (const grille of grilles) {
         const res = copierGrilleDepuisTrimestre(grille, srcId);
@@ -2526,6 +2539,7 @@ async function importerToutGrillesTrimestreModal() {
     fermerModalBibliothequeGrilles();
     await afficherListeGrilles();
     await afficherBibliothequeGrilles();
+    await BibliothequeUI.restaurerImportTrimestre(etatSection, afficherGrillesTrimestreModal);
 
     notifications.succes('Import terminé', `${nbGrilles} grille(s) copiée(s)` + (nbCartouches ? ` • ${nbCartouches} cartouche(s)` : '') + '.');
 }
@@ -2544,11 +2558,16 @@ async function importerUneGrilleTrimestre(srcId, grilleId) {
     const grille = grilles.find(g => g.id === grilleId);
     if (!grille) { alert('Grille introuvable.'); return; }
 
+    // L'import reconstruit le modal : sans capture/restauration, le trimestre
+    // choisi, l'aperçu déplié et le défilement disparaissent avec l'ancien DOM.
+    const etatSection = etatImportGrilles();
+
     const res = copierGrilleDepuisTrimestre(grille, srcId);
 
     fermerModalBibliothequeGrilles();
     await afficherListeGrilles();
     await afficherBibliothequeGrilles();
+    await BibliothequeUI.restaurerImportTrimestre(etatSection, afficherGrillesTrimestreModal);
 
     const suffixe = res.nbCartouches ? ` (avec ${res.nbCartouches} cartouche${res.nbCartouches > 1 ? 's' : ''})` : '';
     notifications.succes(`« ${grille.nom || 'Grille'} » importée dans ce trimestre${suffixe}.`);

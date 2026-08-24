@@ -50,6 +50,13 @@ function paramCache(relatif) {
 function git(args) {
     return execFileSync('git', args, {
         cwd: racineProjet, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
+        // index.html pèse ~1 Mo — au-dessus du tampon par défaut d'execFileSync,
+        // qui est EXACTEMENT 1 Mo. Sans ce relèvement, `git show <commit>:index.html`
+        // lève ENOBUFS. La première version de la comparaison ci-dessous attrapait
+        // cette exception et rendait `null` : elle sautait la vérification EN
+        // SILENCE, et le test passait au vert sans avoir rien comparé. Trouvé par
+        // le break-test, pas par la lecture du code.
+        maxBuffer: 64 * 1024 * 1024,
     });
 }
 
@@ -61,13 +68,44 @@ function git(args) {
  * vérifier. Prendre le dernier rendrait un ensemble vide — un test qui passe
  * toujours, donc un test qui ne dit rien.
  */
-function fichiersDepuisReleasePrecedente() {
+function commitReleasePrecedente() {
     const commits = git(['log', '-3', '--format=%H', '--', 'version.json'])
         .split('\n').map((l) => l.trim()).filter(Boolean);
-    if (commits.length < 2) return null;   // dépôt trop jeune : rien à comparer
-    return git(['diff', '--name-only', commits[1], 'HEAD', '--', 'js', 'styles.css', 'css'])
+    return commits.length < 2 ? null : commits[1];
+}
+
+function fichiersDepuisReleasePrecedente() {
+    const repere = commitReleasePrecedente();
+    if (repere === null) return null;   // dépôt trop jeune : rien à comparer
+    return git(['diff', '--name-only', repere, 'HEAD', '--', 'js', 'styles.css', 'css'])
         .split('\n').map((l) => l.trim())
         .filter((f) => (f.endsWith('.js') || f.endsWith('.css')) && !f.includes('_archives/'));
+}
+
+/**
+ * index.html tel qu'il était à la release PRÉCÉDENTE, ou null s'il n'existait pas.
+ * Lu UNE fois (le fichier fait ~1 Mo).
+ *
+ * ⚠ Ne rend `null` que pour l'absence réelle du fichier. Toute autre panne de
+ * `git show` remonte : un helper qui avale ses erreurs transforme une sentinelle
+ * en décoration.
+ */
+function indexPrecedent(repere) {
+    try {
+        return git(['show', repere + ':index.html']);
+    } catch (e) {
+        const msg = String((e && e.message) || '');
+        if (/does not exist|exists on disk, but not in|unknown revision/i.test(msg)) return null;
+        throw e;
+    }
+}
+
+/** `?v=` que portait un fichier dans un index.html donné. */
+function paramCacheDans(contenu, relatif) {
+    if (!contenu) return null;
+    const motif = new RegExp(relatif.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\?v=([A-Za-z0-9]+)');
+    const m = motif.exec(contenu);
+    return m ? m[1] : null;
 }
 
 describe('anti-cache · un fichier modifié ne peut pas être servi sous son ancienne URL', () => {
@@ -81,18 +119,51 @@ describe('anti-cache · un fichier modifié ne peut pas être servi sous son anc
         if (modifies === null) return;   // dépôt sans deux releases : rien à prouver
 
         const mmjjBuild = version.build.slice(0, 4);
+        const repere = commitReleasePrecedente();
+        const ancienIndex = repere ? indexPrecedent(repere) : null;
         const perimes = [];
+        let comparaisons = 0;
 
         for (const relatif of modifies) {
             const param = paramCache(relatif);
             // Un fichier non référencé dans index.html (chargé autrement, ou
             // nouveau et pas encore branché) n'est pas concerné.
             if (param === null) continue;
+
             const mmjjParam = param.slice(4, 8);   // AAAAMMJJ → MMJJ
             if (mmjjParam !== mmjjBuild) {
                 perimes.push(`${relatif} : ?v=${param} (build ${version.build})`);
+                continue;
+            }
+
+            // ▣ DURCISSEMENT DU 24 AOÛT 2026. Comparer le seul JOUR laissait
+            // passer le cas des releases MULTIPLES dans la même journée — et il
+            // y en a eu quatre le 24 août. Un fichier modifié après la release
+            // du matin garde `20260824a` : même jour, donc vert, alors que
+            // l'URL n'a PAS changé et que le navigateur sert le cache.
+            //
+            // Constaté sur pièces : `js/bibliotheque-ui.js` est resté à
+            // `20260824a` après avoir reçu le helper de persistance de la
+            // section d'import, et ce test passait. C'est exactement l'incident
+            // du 23 août, rejoué à l'intérieur d'une journée.
+            //
+            // L'invariant juste n'est pas « le ?v= porte la bonne date », c'est
+            // « le ?v= a CHANGÉ depuis la release précédente ».
+            const avant = paramCacheDans(ancienIndex, relatif);
+            if (avant !== null) comparaisons++;
+            if (avant !== null && avant === param) {
+                perimes.push(`${relatif} : ?v=${param} INCHANGÉ depuis la release précédente`);
             }
         }
+
+        // Garde anti-silence : si AUCUNE comparaison n'a pu se faire alors qu'il y
+        // avait des fichiers à comparer, ce test n'a rien prouvé. Le dire, plutôt
+        // que de rendre un vert vide.
+        expect(
+            comparaisons > 0 || modifies.length === 0,
+            'Aucun ?v= n\'a pu être comparé à la release précédente : la sentinelle\n' +
+            'n\'a rien vérifié. Vérifier la lecture de l\'index.html du commit repère.'
+        ).toBe(true);
 
         expect(
             perimes,
