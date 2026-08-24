@@ -792,53 +792,6 @@ async function enregistrerCommeEchelle() {
 }
 
 /**
- * Duplique l'échelle actuellement sélectionnée
- * 
- * FONCTIONNEMENT:
- * 1. Vérifie qu'une échelle est sélectionnée
- * 2. Crée une copie complète (niveaux + config)
- * 3. Ajoute «(copie)» au nom
- * 4. Sauvegarde la nouvelle échelle
- * 5. Sélectionne automatiquement la copie
- * 
- * UTILISÉ PAR:
- * - Bouton «Dupliquer» (visible seulement si échelle sélectionnée)
- */
-async function dupliquerEchelleActuelle() {
-    if (!echelleTemplateActuelle) return;
-
-    // CO-24 — lecture AVANT l'invite : `nommerCopie` doit connaître les noms
-    // déjà pris. La déclaration vivait plus bas, ce qui plaçait cet appel dans
-    // la zone morte temporelle du `let`.
-    let echelles = await db.get(cle('echellesTemplates')) ||  [];
-
-    const nouveauNom = prompt('Nom de la nouvelle échelle :', nommerCopie(echelleTemplateActuelle.nom, echelles));
-    if (!nouveauNom) return;
-
-    const nouvelleEchelle = {
-        id: genererIdUnique('ECH_'),
-        nom: nouveauNom,
-        niveaux: echelleTemplateActuelle.niveaux.map(n => ({ ...n })),
-        config: { ...echelleTemplateActuelle.config },
-        dateCreation: new Date().toISOString(),
-        dateModification: new Date().toISOString(),
-        baseSur: echelleTemplateActuelle.nom
-    };
-
-    echelles.push(nouvelleEchelle);
-    await db.set(cle('echellesTemplates'),  echelles);
-
-    // Mettre à jour l'interface
-    echelleTemplateActuelle = nouvelleEchelle;
-    await chargerEchellesTemplates();
-    await afficherToutesLesEchellesNiveaux();
-    document.getElementById('selectEchelleTemplate').value = nouvelleEchelle.id;
-    document.getElementById('nomEchelleTemplate').value = nouvelleEchelle.nom;
-
-    notifications.succes(`Échelle «${nouvelleEchelle.nom}» créée avec succès.`);
-}
-
-/**
  * Supprime une échelle template
  * 
  * FONCTIONNEMENT:
@@ -2067,7 +2020,6 @@ window.assurerEchelleGenerique = assurerEchelleGenerique;
 window.chargerEchellesTemplates = chargerEchellesTemplates;
 window.chargerEchelleTemplate = chargerEchelleTemplate;
 window.supprimerEchelle = supprimerEchelle;
-window.dupliquerEchelleActuelle = dupliquerEchelleActuelle;
 window.enregistrerCommeEchelle = enregistrerCommeEchelle;
 window.sauvegarderNomEchelle = sauvegarderNomEchelle;
 window.sauvegarderConfigEchelle = sauvegarderConfigEchelle;

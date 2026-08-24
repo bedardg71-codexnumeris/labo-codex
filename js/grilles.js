@@ -1019,76 +1019,6 @@ async function dupliquerGrille(grilleId) {
 }
 
 /* ===============================
-   📑 FONCTION: DUPLIQUER GRILLE ACTUELLE
-   Duplique la grille en cours d'édition
-   ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
-   =============================== */
-
-/**
- * Duplique la grille actuellement en édition
- * 
- * UTILISÉ PAR:
- * - Bouton "Dupliquer cette grille"
- * 
- * FONCTIONNEMENT:
- * Vérifie qu'il y a une grille active puis appelle la logique de duplication
- */
-async function dupliquerGrilleActuelle() {
-    if (!grilleTemplateActuelle) {
-        alert('Aucune grille à dupliquer');
-        return;
-    }
-
-    // CO-24 — la collection est lue AVANT l'invite : `nommerCopie` doit
-    // connaître les noms déjà pris pour proposer le premier rang libre.
-    let grilles = await db.get(cle('grillesTemplates')) || [];
-
-    // Demander le nom de la nouvelle grille
-    const nouveauNom = prompt('Nom de la nouvelle grille :', nommerCopie(grilleTemplateActuelle.nom, grilles));
-
-    if (!nouveauNom || nouveauNom.trim() === '') {
-        return;
-    }
-
-    // Créer la nouvelle grille avec les mêmes critères
-    const nouvelleGrille = {
-        id: genererIdUnique('GRILLE_'),
-        nom: nouveauNom.trim(),
-        criteres: grilleTemplateActuelle.criteres.map(c => ({
-            ...c,
-            id: genererIdUnique('CR_')
-        })),
-        dateCreation: new Date().toISOString(),
-        dateModification: new Date().toISOString(),
-        baseSur: grilleTemplateActuelle.nom,
-        dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) - Grille dupliquée dans bibliothèque par défaut
-    };
-
-    // Sauvegarder la nouvelle grille
-    grilles.push(nouvelleGrille);
-    await db.set(cle('grillesTemplates'), grilles);
-
-    // Mettre à jour l'interface
-    grilleTemplateActuelle = nouvelleGrille;
-    await chargerListeGrillesTemplates();
-    await afficherToutesLesGrillesCriteres();
-
-    // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
-    await afficherListeGrilles();
-
-    const select = document.getElementById('selectGrilleTemplate');
-    const nomInput = document.getElementById('nomGrilleTemplate');
-    if (select) select.value = nouvelleGrille.id;
-    if (nomInput) nomInput.value = nouvelleGrille.nom;
-    afficherListeCriteres(nouvelleGrille.criteres, nouvelleGrille.id);
-
-    const btnDupliquer = document.getElementById('btnDupliquerGrille');
-    if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
-
-    notifications.succes(`Grille "${nouvelleGrille.nom}" créée à partir de "${grilleTemplateActuelle.baseSur}" !`);
-}
-
-/* ===============================
    🔒 FONCTION: BASCULER VERROUILLAGE CRITÈRE
    Verrouille ou déverrouille un critère
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
@@ -1614,7 +1544,6 @@ async function initialiserModuleGrilles() {
  * - chargerGrilleEnEdition(grilleId)
  * - supprimerGrille(grilleId)
  * - dupliquerGrille(grilleId)
- * - dupliquerGrilleActuelle()
  * - basculerVerrouillageCritere(critereId)
  * - getTypeCritereLabel(type)
  * - calculerTotalPonderationCriteres(criteres)
@@ -2088,7 +2017,6 @@ window.fermerModalGrilles = fermerModalGrilles;
 window.chargerGrilleEnEdition = chargerGrilleEnEdition;
 window.supprimerGrille = supprimerGrille;
 window.dupliquerGrille = dupliquerGrille;
-window.dupliquerGrilleActuelle = dupliquerGrilleActuelle;
 window.basculerVerrouillageCritere = basculerVerrouillageCritere;
 window.getTypeCritereLabel = getTypeCritereLabel;
 window.calculerTotalPonderationCriteres = calculerTotalPonderationCriteres;
