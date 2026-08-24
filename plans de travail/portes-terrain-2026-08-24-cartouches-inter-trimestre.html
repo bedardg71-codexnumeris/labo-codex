@@ -164,8 +164,8 @@ footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--trait);color:
   </div>
   <footer>
     Jumeau markdown&nbsp;: <span class="mono">plans de travail/PORTES-TERRAIN-2026-08-24-cartouches-inter-trimestre.md</span><br>
-    Version visée&nbsp;: <span class="mono">1.95.1</span>, build <span class="mono">0824-1716</span>.<br>
-    Sentinelles&nbsp;: <span class="mono">tests/unit/cartouches-import-trimestre.test.js</span> (11 assertions) et <span class="mono">tests/integration/cartouches-import-trimestre.spec.js</span> (7 preuves).
+    Version visée&nbsp;: <span class="mono">1.95.2</span>, build <span class="mono">0824-1738</span>.<br>
+    Sentinelles&nbsp;: <span class="mono">tests/unit/cartouches-import-trimestre.test.js</span> (11 assertions) et <span class="mono">tests/unit/bibliotheques-import-persistance.test.js</span> (4) et <span class="mono">tests/integration/cartouches-import-trimestre.spec.js</span> (7 preuves) + <span class="mono">bibliotheques-import-persistance.spec.js</span> (3).
   </footer>
 </div>
 
@@ -178,7 +178,7 @@ const DONNEES = [
    pourquoi:"Deux des quatre échecs des 81 portes du 10 août étaient des faux rouges venus de là — et ce type de faux rouge est indétectable au récit, parce qu’il décrit exactement l’état d’avant le correctif.",
    rangees:[
     {geste:"Fais ton git pull habituel, recharge l’app, lis le bas de la page.",
-     attendu:"1.95.1, build 0824-1716. En 1.95.0 la section n’apparaît PAS — c’est précisément le bug corrigé. Plus bas que 1.95.1, rien d’autre dans cette liste ne vaut.", tags:["mac"]}
+     attendu:"1.95.2, build 0824-1738. Plus bas, rien d’autre dans cette liste ne vaut.", tags:["mac"]}
    ]},
   {num:"0.2", titre:"Ta sauvegarde",
    pourquoi:"Les neuf rangées du §1 écrivent pour de vrai : elles copient des grilles et des cartouches d’un trimestre vers un autre.",
@@ -247,6 +247,18 @@ const DONNEES = [
 
  {num:"§2", titre:"Interface — Safari et iPad",
   portes:[
+  {num:"2.0", titre:"La section reste ouverte d’un import à l’autre",
+   pourquoi:"Ton retour de 17 h 25 : « je dois l’ouvrir à chaque cartouche ». Importer rafraîchissait la liste en reconstruisant toute la fenêtre — le trimestre choisi, la liste dépliée et ta position partaient avec. C’était pareil dans les CINQ bibliothèques. Cartouches et grilles sont prouvées au navigateur ; les trois autres sont branchées sur le même mécanisme, mais leur affichage n’a pas été joué.",
+   rangees:[
+    {geste:"Cartouches › bibliothèque › choisis un trimestre › « Voir les cartouches » › FAIS DÉFILER › importe une cartouche.",
+     attendu:"le trimestre reste choisi, la liste reste dépliée, et tu es au même endroit dans la fenêtre. Enchaîne un deuxième import sans rien rouvrir.", tags:["donnees","mac"]},
+    {geste:"Même geste dans Échelles de performance.",
+     attendu:"idem.", tags:["donnees","mac"]},
+    {geste:"Même geste dans Pratiques de notation.",
+     attendu:"idem.", tags:["donnees","mac"]},
+    {geste:"Même geste dans Productions étudiantes, en utilisant AUSSI le filtre de cours avant d’importer.",
+     attendu:"idem, et le filtre de cours est lui aussi reposé — c’est le seul des cinq à avoir un second menu qui dépend du premier.", tags:["donnees","mac"]}
+   ]},
   {num:"2.1", titre:"Le bloc sur ton iPad",
    pourquoi:"Le navigateur cible n’existe pas dans mon conteneur. Toutes mes mesures viennent de Chromium : un vert Chromium est un indice, jamais un verdict Safari.",
    rangees:[
@@ -264,6 +276,15 @@ const DONNEES = [
   portes:[
   {num:"⚠", titre:"« Un trimestre VIVANT est proposé » — le bug de ta capture",
    pourquoi:"Deux trimestres, le second jamais archivé : ses grilles dans h2026_grillesTemplates, ses cartouches dans la clé partagée cartouches_GR_H26. AVANT correction : liste vide, section non rendue — reproduit à l’identique de ta capture. APRÈS : « Hiver 2026 (2 cartouches) », section rendue. Break-test : en revenant à la lecture archive-seule, ce cas rougit.",
+   rangees:[]},
+  {num:"—", titre:"« La section reste ouverte après un import » (cartouches)",
+   pourquoi:"Trimestre choisi, aperçu déplié, fenêtre défilée à 220 px, puis import d’une cartouche. Après : trimestre toujours h2026, aperçu toujours déplié ET garni de ses boutons, défilement exactement à 220 px. Break-test : retirer la restauration rougit le cas.",
+   rangees:[]},
+  {num:"—", titre:"« Un aperçu REPLIÉ ne se rouvre pas tout seul »",
+   pourquoi:"On repose ce qui était à l’écran, jamais davantage. Break-test : rouvrir inconditionnellement rougit le cas.",
+   rangees:[]},
+  {num:"—", titre:"« Même garantie pour les grilles »",
+   pourquoi:"Même scénario côté grilles. Break-test : ma première cassure visait le « Tout importer » au lieu de l’import unitaire — elle n’a rien prouvé. Refaite au bon endroit, elle rougit.",
    rangees:[]},
   {num:"—", titre:"« Le bloc apparaît avec le bon compte »",
    pourquoi:"Trimestre a2025 semé avec 2 cartouches archivées. Le sélecteur est bien rendu dans le modal, et son option lit exactement « Automne 2025 (2 cartouches) ».",
@@ -303,7 +324,9 @@ const ANGLES = [
  "**Mon erreur de conception, corrigée le jour même.** La 1.95.0 ne lisait que les copies d’archive, en croyant se protéger d’un piège connu du projet. Or depuis #358 les grilles sont rangées par trimestre pour TOUS les trimestres, pas seulement les archivés : un trimestre vivant range ses cartouches dans la clé partagée. Ma garde rendait la section invisible pour le cas le plus courant — le tien. **J’ai reproduit le défaut au navigateur AVANT de le corriger**, plutôt que de conclure que c’étaient tes données qui manquaient de matière. C’est exactement l’erreur que j’ai failli commettre.",
  "**Le vrai risque, lui, reste gardé.** Une grille présente à l’identique dans les deux trimestres partage littéralement son magasin de cartouches : elle est exclue de l’import, sinon on te proposerait tes propres cartouches et « importer » en ferait des doublons.",
  "**Ton corpus réel.** Je ne connais pas la répartition de tes cartouches entre tes trimestres. Les rangées 1.2 et 1.3 la mesurent.",
- "**Safari et WebKit n’existent pas dans le conteneur.** Les six preuves du §2 bis viennent de Chromium.",
+ "**Safari et WebKit n’existent pas dans le conteneur.** Toutes les preuves du §2 bis viennent de Chromium.",
+ "**Une fausse piste que je me suis faite, et la façon dont elle s’est démentie.** J’ai cru qu’un fichier était sorti de la release sans nouveau numéro anti-cache — ce qui t’aurait servi l’ancien code sans que rien ne le dise. C’était faux : j’avais lu une sortie tronquée, et la mesure l’a démenti. Mais la fausse piste a mis au jour un trou RÉEL dans le filet qui surveille ça : il ne comparait que la DATE du numéro, pas sa valeur. Avec quatre releases dans la même journée, un fichier modifié après celle du matin serait passé au vert avec son ancienne URL. Corrigé, et éprouvé.",
+ "**Quatre de mes cassures de test ont raté leur cible avant de porter.** Une cassure qui laisse le test vert ne prouve rien — ni que le test est bon, ni qu’il est mauvais. Chacune a été refaite jusqu’à viser juste. L’une d’elles a d’ailleurs révélé que mon propre durcissement se taisait sur une erreur qu’il attrapait.",
  "**L’iPad n’existe pas en session.** C’est tout le §2.",
  "**La suite Playwright existante n’a pas été recontrôlée ici.** Les rouges Chromium préexistants mesurés au cycle précédent sont restés tels quels : mon diff ne touche que cartouches.js, le changelog et les points de version."
 ];
@@ -489,8 +512,8 @@ document.getElementById("btn-export").addEventListener("click", () => {
   const ok = r.filter(x => etat[x.dataset.id] === "ok").length;
   const ko = r.filter(x => etat[x.dataset.id] === "ko").length;
   const L = [];
-  L.push("PORTES TERRAIN — cartouches inter-trimestre (24 août 2026, 1.95.1 build 0824-1716)");
-  L.push("16 rangées + 4 décisions. 7 comportements retirés sur preuve mesurée (§2 bis).");
+  L.push("PORTES TERRAIN — cartouches inter-trimestre (24 août 2026, 1.95.2 build 0824-1738)");
+  L.push("20 rangées + 4 décisions. 10 comportements retirés sur preuve mesurée (§2 bis).");
   L.push(ok + " passées · " + ko + " échec(s) · " + (r.length - ok - ko) + " non traitée(s)");
   L.push("");
   DONNEES.forEach(sec => {
