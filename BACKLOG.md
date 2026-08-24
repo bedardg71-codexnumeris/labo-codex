@@ -109,7 +109,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   lisible sur son iPad en clair ET en sombre (le seul verdict que la session ne pouvait pas rendre).
   **Décision D close sans code** : « il n'y a pas de pondération pour un artefact, je ne suis pas
   bloqué » — vérifié, la garde exempte déjà `artefact-portfolio`. La portée de #486 était juste.
-  Rangée 4 (mesure de corpus) sans réponse exploitable — champ mal conçu de mon côté, voir #488.
+  Mesure de corpus : **zéro surprise** — le badge marque bien, et aucun gabarit oublié n'a été
+  révélé. Il sert à ne PAS en perdre, pas à réparer un retard. (Le champ était mal conçu de mon
+  côté — un seul champ pour deux nombres ; levé par une question, versé en #488(d).)
+  ⮕ **#486 EST CLOS : livré, éprouvé sur iPad, porte relevée 4/4, décision rendue.**
   Fichiers :
   `plans de travail/PORTES-TERRAIN-2026-08-24-486-gabarit-sans-echeance.md`
   + artefact https://claude.ai/code/artifact/886278b4-72e8-43b3-ba74-cb8116eefded
