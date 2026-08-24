@@ -443,6 +443,74 @@
     };
 
     /**
+     * Met le curseur dans le champ de nom fraîchement chargé, texte sélectionné,
+     * pour que l'utilisateur puisse renommer la copie sans un clic de plus.
+     *
+     * @param {string} idChamp - id DOM du champ de nom de la famille
+     */
+    BibliothequeUI.focaliserChamp = function (idChamp) {
+        if (!idChamp) return;
+        var champ = document.getElementById(idChamp);
+        if (champ) {
+            champ.focus();
+            champ.select();
+        }
+    };
+
+    /**
+     * #476 volet 2 — LE CHEMIN « DUPLIQUER ET ÉDITER », POUR LES CINQ FAMILLES.
+     *
+     * Les cinq `dupliquerEtEditerX` (grilles, échelles, cartouches, productions,
+     * pratiques) exécutaient la MÊME séquence, recopiée cinq fois :
+     *   lire la liste → trouver la source → forker → pousser → écrire →
+     *   rafraîchir la liste → charger la copie en édition → focus du champ de nom.
+     * Elles ne différaient que par leur plomberie (quelle clé, quel préfixe d'ID,
+     * quelles fonctions de rafraîchissement) — jamais par leur logique.
+     *
+     * Zéro-dette : la séquence vit ICI, une seule fois. Chaque famille n'apporte
+     * plus que son descripteur. Les fonctions de rafraîchissement sont INTERNES à
+     * l'IIFE de leur module et ne peuvent donc pas être atteintes d'ici : elles
+     * arrivent en rappels, ce qui est aussi ce qui garde chaque famille maîtresse
+     * de son UI.
+     *
+     * ⚠ NE REND RIEN VOLONTAIREMENT. Les cinq appelants d'origine rendaient
+     * `undefined` ; rendre la copie serait un changement de contrat, hors du
+     * mandat « refactor pur » du volet 2. Le banc de caractérisation
+     * (tests/integration/carac-476-volet2-duplication.spec.js) fige ce point.
+     *
+     * @param {Object} d                    - descripteur de famille
+     * @param {string} d.id                 - id de l'item à dupliquer
+     * @param {string} d.prefixeId          - préfixe d'ID de la famille ('GRILLE_'…)
+     * @param {Function} d.lireListe        - () => liste (peut être asynchrone)
+     * @param {Function} d.ecrireListe      - (liste) => void (peut être asynchrone)
+     * @param {Function} [d.repliSource]    - (id) => source, si absente de la liste
+     * @param {Function} [d.retoucherCopie] - (copie, source) => void, après forkerItem
+     * @param {Function} [d.rafraichirListe]- () => void, avant le chargement en édition
+     * @param {Function} [d.chargerPourModif] - (idCopie) => void
+     * @param {string} [d.champFocus]       - id DOM du champ de nom
+     */
+    BibliothequeUI.dupliquerEtEditerItem = async function (d) {
+        var liste = await d.lireListe();
+        if (!Array.isArray(liste)) liste = [];
+
+        var source = liste.find(function (x) { return x && x.id === d.id; });
+        if (!source && typeof d.repliSource === 'function') {
+            source = await d.repliSource(d.id);
+        }
+        if (!source) return;
+
+        var copie = BibliothequeUI.forkerItem(source, d.prefixeId, liste);
+        if (typeof d.retoucherCopie === 'function') d.retoucherCopie(copie, source);
+
+        liste.push(copie);
+        await d.ecrireListe(liste);
+
+        if (typeof d.rafraichirListe === 'function') await d.rafraichirListe();
+        if (typeof d.chargerPourModif === 'function') await d.chargerPourModif(copie.id);
+        BibliothequeUI.focaliserChamp(d.champFocus);
+    };
+
+    /**
      * Phase A.3 (audit biblios 2026-05-09) — Strippe les préfixes type
      * en tête de titre : `[STD]`, `[SPE]`, `[SOM]`, `[DEN]`, `[Multi]`,
      * `[MULTI]`, `[Démo]`, etc. La typologie est déjà communiquée par les

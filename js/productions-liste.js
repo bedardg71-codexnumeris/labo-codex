@@ -31,27 +31,28 @@
  * Phase 4.B : fork une production démo et charge la copie en édition.
  */
 async function dupliquerEtEditerProduction(id) {
-    const cleProductions = getCleProductions();
-    const productions = await db.get(cleProductions) || [];
-    const production = productions.find(p => p.id === id);
-    if (!production) return;
-
-    const copie = BibliothequeUI.forkerItem(production, 'PROD_', productions);
-    // Les productions utilisent `titre` plutôt que `nom`
-    if (production.titre) copie.titre = production.titre + ' (copie)';
-    productions.push(copie);
-    await db.set(cleProductions, productions);
-
-    if (typeof afficherListeProductions === 'function') {
-        await afficherListeProductions();
-    }
-    await chargerProductionPourModif(copie.id);
-
-    const titreField = document.getElementById('productionTitre');
-    if (titreField) {
-        titreField.focus();
-        titreField.select();
-    }
+    // #476 volet 2 — séquence partagée ; ne reste que la plomberie des productions.
+    await BibliothequeUI.dupliquerEtEditerItem({
+        id: id,
+        prefixeId: 'PROD_',
+        lireListe: async () => await db.get(getCleProductions()) || [],
+        ecrireListe: async (liste) => { await db.set(getCleProductions(), liste); },
+        // ⚠ DETTE CONNUE, PRÉSERVÉE TELLE QUELLE (#476 volet 2, refactor pur).
+        // Les productions nomment par `titre` et non `nom`, et la retouche
+        // ci-dessous est une CONCATÉNATION NUE : dupliquer une copie rend
+        // « X (copie) (copie) ». Le reste du projet passe par `nommerCopie`,
+        // qui normalise le suffixe (CO-24, Lot 5). La sentinelle CO-24 ne lit
+        // pas ce fichier, d'où l'oubli. Corriger ce point CHANGE le comportement
+        // et relève d'une décision de Grégoire, pas de la fusion.
+        retoucherCopie: (copie, source) => {
+            if (source.titre) copie.titre = source.titre + ' (copie)';
+        },
+        rafraichirListe: async () => {
+            if (typeof afficherListeProductions === 'function') await afficherListeProductions();
+        },
+        chargerPourModif: async (idCopie) => { await chargerProductionPourModif(idCopie); },
+        champFocus: 'productionTitre'
+    });
 }
 
 /**
