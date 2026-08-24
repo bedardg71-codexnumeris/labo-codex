@@ -1,0 +1,524 @@
+<title>Portes terrain 1.94.0</title>
+<style>
+:root{
+  --papier:#f7f9fa; --carte:#ffffff; --encre:#12232e; --encre-doux:#4a6472;
+  --trait:#dbe4e8; --trait-fort:#c2d1d8;
+  --sarcelle:#217a88; --sarcelle-doux:#e3f1f3;
+  --ambre:#a4650f; --ambre-doux:#fbf1de;
+  --vert:#286b47; --vert-doux:#e2f1e8;
+  --rouge:#a93b32; --rouge-doux:#fbe9e7;
+  --ombre:0 1px 2px rgba(18,35,46,.06),0 8px 24px -12px rgba(18,35,46,.18);
+  --r-s:5px; --r-m:8px; --r-g:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --papier:#0d1b24; --carte:#14262f; --encre:#e4eef1; --encre-doux:#93aeb8;
+    --trait:#24404c; --trait-fort:#31525f;
+    --sarcelle:#5fc0cd; --sarcelle-doux:#123039;
+    --ambre:#e0a84e; --ambre-doux:#33260f;
+    --vert:#6bc493; --vert-doux:#122c1f;
+    --rouge:#e78078; --rouge-doux:#301715;
+    --ombre:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  --papier:#0d1b24; --carte:#14262f; --encre:#e4eef1; --encre-doux:#93aeb8;
+  --trait:#24404c; --trait-fort:#31525f;
+  --sarcelle:#5fc0cd; --sarcelle-doux:#123039;
+  --ambre:#e0a84e; --ambre-doux:#33260f;
+  --vert:#6bc493; --vert-doux:#122c1f;
+  --rouge:#e78078; --rouge-doux:#301715;
+  --ombre:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--papier);color:var(--encre);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%;
+}
+.mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace}
+.enveloppe{max-width:860px;margin:0 auto;padding:0 20px 80px}
+header.tete{padding:40px 0 22px}
+.surtitre{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--sarcelle);font-weight:700;margin:0 0 10px;
+}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.12;margin:0 0 14px;text-wrap:balance;letter-spacing:-.02em}
+.chapeau{color:var(--encre-doux);max-width:64ch;margin:0 0 6px}
+.chapeau strong{color:var(--encre)}
+.barre{
+  position:sticky;top:0;z-index:20;background:var(--papier);
+  border-bottom:1px solid var(--trait);padding:10px 0;margin-bottom:26px;
+}
+.barre-inner{max-width:860px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.compteur{display:flex;gap:6px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.jeton{
+  font-size:12px;font-weight:700;padding:5px 10px;border-radius:var(--r-s);
+  border:1px solid var(--trait-fort);white-space:nowrap;
+}
+.jeton.ok{background:var(--vert-doux);border-color:var(--vert);color:var(--vert)}
+.jeton.ko{background:var(--rouge-doux);border-color:var(--rouge);color:var(--rouge)}
+.jeton.reste{background:transparent;color:var(--encre-doux)}
+.pousse{flex:1 1 auto}
+.filtres{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border-radius:var(--r-s);border:1px solid var(--trait-fort);
+  background:var(--carte);color:var(--encre);padding:8px 12px;min-height:44px;transition:background .12s,border-color .12s}
+button:hover{border-color:var(--sarcelle)}
+button:focus-visible{outline:2px solid var(--sarcelle);outline-offset:2px}
+.filtre.actif{background:var(--sarcelle-doux);border-color:var(--sarcelle);color:var(--sarcelle);font-weight:700}
+.btn-export{background:var(--sarcelle);border-color:var(--sarcelle);color:#fff;font-weight:700}
+:root[data-theme="dark"] .btn-export{color:#0d1b24}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn-export{color:#0d1b24}}
+section.bloc{margin:0 0 38px}
+.bloc-tete{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 6px;padding-bottom:8px;border-bottom:2px solid var(--trait)}
+.bloc-num{font-size:13px;font-weight:700;color:var(--sarcelle)}
+.bloc-titre{font-size:20px;font-weight:700;margin:0;letter-spacing:-.01em}
+.bloc-note{color:var(--encre-doux);font-size:14.5px;margin:10px 0 18px;max-width:66ch}
+.bloc-note.alerte{
+  background:var(--ambre-doux);border-left:3px solid var(--ambre);
+  padding:12px 14px;border-radius:0 var(--r-m) var(--r-m) 0;color:var(--encre);
+}
+.porte{
+  background:var(--carte);border:1px solid var(--trait);border-radius:var(--r-g);
+  box-shadow:var(--ombre);margin:0 0 16px;overflow:hidden;
+}
+.porte-tete{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:16px 18px 0}
+.porte-num{font-size:13px;font-weight:700;color:var(--sarcelle)}
+.porte-titre{font-size:17px;font-weight:700;margin:0;flex:1 1 220px;letter-spacing:-.01em}
+.pourquoi{
+  margin:12px 18px 4px;padding:12px 14px;background:var(--sarcelle-doux);
+  border-radius:var(--r-m);font-size:14.5px;color:var(--encre);
+}
+.pourquoi b{font-weight:700}
+.rangees{list-style:none;margin:10px 0 0;padding:0}
+.rangee{display:flex;gap:12px;padding:12px 18px;border-top:1px solid var(--trait);align-items:flex-start}
+.bascule{display:flex;gap:5px;flex:0 0 auto;padding-top:1px}
+.bascule button{min-width:44px;min-height:44px;padding:0;font-size:16px;font-weight:700;line-height:1}
+.bascule button[aria-pressed="true"][data-v="ok"]{background:var(--vert);border-color:var(--vert);color:var(--carte)}
+.bascule button[aria-pressed="true"][data-v="ko"]{background:var(--rouge);border-color:var(--rouge);color:var(--carte)}
+.corps{flex:1 1 auto;min-width:0}
+.geste{margin:0;font-weight:600}
+.attendu{margin:6px 0 0;color:var(--encre-doux);font-size:14.5px}
+.attendu b{color:var(--encre)}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 7px;border-radius:var(--r-s);border:1px solid var(--trait-fort);color:var(--encre-doux)}
+.tag.donnees{background:var(--rouge-doux);border-color:var(--rouge);color:var(--rouge)}
+.tag.ipad{background:var(--sarcelle-doux);border-color:var(--sarcelle);color:var(--sarcelle)}
+.tag.terminal{background:var(--ambre-doux);border-color:var(--ambre);color:var(--ambre)}
+.saisie{margin-top:9px;display:flex;flex-direction:column;gap:5px}
+.saisie label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sarcelle)}
+.saisie input,.saisie textarea{
+  font:inherit;width:100%;padding:9px 11px;border-radius:var(--r-m);
+  border:1px solid var(--trait-fort);background:var(--papier);color:var(--encre);min-height:44px;
+}
+.saisie textarea{min-height:76px;resize:vertical;line-height:1.5}
+.saisie input:focus,.saisie textarea:focus{outline:2px solid var(--sarcelle);outline-offset:1px}
+.rangee.decision{align-items:stretch}
+.rangee.decision .corps{width:100%}
+pre.cmd{margin:8px 0 0;padding:11px 13px;background:var(--papier);border:1px solid var(--trait-fort);
+  border-radius:var(--r-m);overflow-x:auto;font-size:13.5px}
+ol.angles{padding-left:22px;margin:0}
+ol.angles li{margin-bottom:14px;color:var(--encre-doux);max-width:66ch}
+ol.angles li b{color:var(--encre)}
+.masque{display:none !important}
+#zone-releve{margin-top:14px}
+#releve{font:inherit;width:100%;padding:11px 12px;border-radius:var(--r-m);
+  border:1px solid var(--trait-fort);background:var(--carte);color:var(--encre);
+  min-height:240px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:13px;white-space:pre}
+#releve:focus{outline:2px solid var(--sarcelle);outline-offset:1px}
+footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--trait);color:var(--encre-doux);font-size:13.5px}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+
+<div class="barre">
+  <div class="barre-inner">
+    <div class="compteur">
+      <span class="jeton ok mono" id="c-ok">✓ 0</span>
+      <span class="jeton ko mono" id="c-ko">✗ 0</span>
+      <span class="jeton reste mono" id="c-reste">— 0</span>
+    </div>
+    <div class="pousse"></div>
+    <div class="filtres">
+      <button class="filtre actif" data-f="tout">Tout</button>
+      <button class="filtre" data-f="ipad">iPad</button>
+      <button class="filtre" data-f="mac">Mac</button>
+      <button class="filtre" data-f="reste">À faire</button>
+    </div>
+    <button class="btn-export" id="btn-export">Copier mes résultats</button>
+  </div>
+</div>
+
+<div class="enveloppe">
+  <header class="tete">
+    <p class="surtitre">Labo&nbsp;Codex · porte terrain</p>
+    <h1>Préparer une production sans avoir à l’annoncer</h1>
+    <p class="chapeau">Tu m’as écrit&nbsp;: <em>«&nbsp;j’ai besoin de pouvoir enregistrer un gabarit même s’il n’est pas entièrement complété […] ça me bloque dans ma planification&nbsp;»</em>. La date d’échéance n’empêche plus d’enregistrer, et les productions sans échéance portent maintenant un badge <strong>«&nbsp;à planifier&nbsp;»</strong> dans la liste de gauche.</p>
+    <p class="chapeau"><strong>Ce qui échoue devient un item de backlog, pas une note mentale.</strong> Le relevé se récupère avec le bouton <em>Copier mes résultats</em>&nbsp;— ton avancement vit dans ce navigateur, je ne peux pas le lire.</p>
+  </header>
+  <main id="racine"></main>
+  <div id="zone-releve" class="masque">
+    <p class="bloc-note"><strong>Ton relevé.</strong> Il est déjà sélectionné&nbsp;: <span class="mono">⌘C</span> pour le copier si le bouton n’a pas suffi.</p>
+    <textarea id="releve" readonly></textarea>
+  </div>
+  <footer>
+    Jumeau markdown&nbsp;: <span class="mono">plans de travail/PORTES-TERRAIN-2026-08-24-486-gabarit-sans-echeance.md</span><br>
+    Version visée&nbsp;: <span class="mono">1.94.0</span>, build <span class="mono">0824-1141</span> · item <span class="mono">#486</span>.
+  </footer>
+</div>
+
+<script>
+const DONNEES = [
+ {num:"§0", titre:"Avant de commencer",
+  alerte:"La première rangée n’est pas une vérification, c’est un déploiement. Ton app tourne depuis ton clone, en file:// — elle est à la version de ton dernier git pull, pas à celle de main. Sans ce §0, l’app affichera 1.93.0, la date d’échéance bloquera toujours, et tu cocheras ✗ sur un correctif qui marche. Ce faux rouge est indétectable au récit : il décrit exactement l’état d’avant.",
+  portes:[{num:"0.1", titre:"Récupérer la version", pourquoi:null, rangees:[
+    {geste:"SEULE commande de Terminal de toute la liste — dans l’app Terminal, pas la console du navigateur, dans le dossier Monitorage_v6.",
+     cmd:"git checkout main && git pull origin main",
+     attendu:"la liste des fichiers reçus, puis Fast-forward. Si Terminal répond « error: Your local changes would be overwritten », arrête-toi et dis-le-moi.", tags:["terminal","mac"]},
+    {geste:"Recharger l’app et lire le numéro en bas de page.",
+     attendu:"1.94.0, build 0824-1141. Si tu lis 1.93.0 ou moins, la commande ci-dessus n’a pas pris — rien d’autre dans cette liste ne vaut.", tags:["mac"]},
+    {geste:"Sauvegarder ton Codex (export d’archive) avant de toucher au §1.",
+     attendu:"un fichier d’archive daté d’aujourd’hui existe sur ton disque. Le §1 écrit dans tes vraies productions.", tags:["donnees","mac"]},
+    {geste:"Prévoir les deux appareils et les deux modes (sombre + clair).",
+     attendu:"MacBook + iPad. Cinq rangées ne se tranchent que sur l’iPad — filtre « iPad » en haut.", tags:[]}
+  ]}]},
+
+ {num:"§1", titre:"⚠⚠ Données — sur ton corpus réel",
+  alerte:"Ces rangées écrivent dans tes vraies productions. La sauvegarde du §0 doit être faite.",
+  portes:[
+  {num:"1.1", titre:"Le geste qui t’a bloqué",
+   pourquoi:"Hier, sur ta production « Description de personnage (Madawigouche) », tu as cliqué Enregistrer et l’app t’a répondu « La date d’échéance est obligatoire pour les productions (sauf portfolios conteneurs) ». Impossible d’avancer sans inventer une date que tu ne connaissais pas encore.",
+   rangees:[
+    {geste:"Conception › Production étudiante : ouvre la production exacte de ta capture d’écran.",
+     attendu:"la fiche s’ouvre, le champ Date d’échéance est vide (jj/mm/aaaa).", tags:["donnees","mac"]},
+    {geste:"Sans toucher à la date, clique Enregistrer.",
+     attendu:"AUCUNE alerte. La notification verte « Production modifiée avec succès ! » apparaît.", tags:["donnees","mac"]},
+    {geste:"Quitte la section, reviens, rouvre la fiche.",
+     attendu:"tes consignes sont toujours là, et la date est toujours vide — rien n’a été inventé à ta place.", tags:["donnees","mac"]}
+   ]},
+  {num:"1.2", titre:"Préparer une production neuve de bout en bout",
+   pourquoi:"C’est ton vrai usage : tu prépares TOUTES tes productions avant de les transmettre. Cette porte éprouve le parcours complet, pas seulement le déblocage. Les trois dernières rangées vérifient que les garde-fous qui RESTENT tiennent toujours.",
+   rangees:[
+    {geste:"« + Nouvelle production » : remplis titre, type, pondération, objectif, tâche, détail. Laisse la date vide.",
+     attendu:"tous les champs acceptent la saisie, le champ date reste sur jj/mm/aaaa.", tags:["donnees","mac"]},
+    {geste:"Clique Enregistrer.",
+     attendu:"aucune alerte, « Production ajoutée avec succès ! ».", tags:["donnees","mac"]},
+    {geste:"Efface le titre, puis réenregistre.",
+     attendu:"l’alerte « Titre, Type et Pondération » DOIT revenir. C’est le garde-fou qui reste — s’il ne revient pas, c’est un défaut.", tags:["donnees","mac"]},
+    {geste:"Remets le titre, mets la pondération à 0, réenregistre.",
+     attendu:"la même alerte. La pondération reste exigée : c’est la portée que tu as choisie ce matin. Si ça te gêne à l’usage, dis-le en 3.3.", tags:["donnees","mac"]}
+   ]},
+  {num:"1.3", titre:"Le cas multi-groupes",
+   pourquoi:"Sous « Échéances par groupe », l’écran annonçait déjà que « décoché = les étudiant·es n’ont pas encore reçu le travail ». C’était donc un état déclaré légitime… que la sauvegarde refusait d’enregistrer. À sauter si aucun de tes cours n’a deux groupes.",
+   rangees:[
+    {geste:"Ouvre une production d’un cours à deux groupes, puis décoche tous les groupes.",
+     attendu:"les champs de date se grisent, un par groupe.", tags:["donnees","mac"]},
+    {geste:"Clique Enregistrer.",
+     attendu:"aucune alerte, l’enregistrement passe.", tags:["donnees","mac"]},
+    {geste:"Recoche UN groupe, donne-lui une date, enregistre, puis rouvre la fiche.",
+     attendu:"la case est cochée et la date est là. L’autre groupe est resté décoché.", tags:["donnees","mac"]}
+   ]},
+  {num:"1.4", titre:"La mesure d’entrée",
+   pourquoi:"Aucun chiffre n’est un échec ici : c’est un relevé, pas un seuil. Je ne connais pas ton corpus — ces deux nombres me diront si le badge attrape ce qu’il doit attraper.",
+   rangees:[
+    {geste:"Compte les productions qui portent le badge « à planifier » dans ta liste de gauche.",
+     attendu:"note le nombre ci-dessous — une case cochée ne dit jamais « combien ».",
+     mesure:"Combien de productions portent le badge ?", tags:["mac"]},
+    {geste:"Parmi elles, combien te surprennent — tu les croyais datées ?",
+     attendu:"note le nombre. S’il est élevé, le badge vient de te rendre un service qu’on n’avait pas prévu.",
+     mesure:"Combien te surprennent ?", tags:["mac"]}
+   ]}
+ ]},
+
+ {num:"§2", titre:"Interface — ce que tu vérifies à l’écran",
+  portes:[
+  {num:"2.1", titre:"Le badge « à planifier »",
+   pourquoi:"Sans marquage, un gabarit oublié sans échéance devient invisible : il ne remonte dans aucun calendrier ni aucun indice, et rien à l’écran ne te le rappelle. Tu as demandé un badge dans la liste.",
+   rangees:[
+    {geste:"Regarde la liste de gauche, sur la production du 1.1.",
+     attendu:"une pastille grise « à planifier », à côté du badge de pondération.", tags:["mac"]},
+    {geste:"Donne-lui une date, enregistre, puis regarde la liste.",
+     attendu:"le badge DISPARAÎT.", tags:["donnees","mac"]},
+    {geste:"Retire la date, enregistre, puis regarde la liste.",
+     attendu:"le badge REVIENT.", tags:["donnees","mac"]},
+    {geste:"Trouve un portfolio conteneur dans ta liste.",
+     attendu:"AUCUN badge. Un portfolio n’a jamais de date propre — seuls ses artefacts en ont. Un badge ici serait un faux positif permanent.", tags:["mac"]},
+    {geste:"Trouve un artefact sans date.",
+     attendu:"le badge EST présent. Les artefacts, eux, ont bien une échéance.", tags:["mac"]}
+   ]},
+  {num:"2.2", titre:"Le badge à l’œil",
+   pourquoi:"J’ai calculé les contrastes du badge, mais je n’ai pas pu les REGARDER : aucun Safari dans l’environnement de session. Seul ton œil, sur ton matériel, tranche. C’est la porte la plus importante du §2.",
+   rangees:[
+    {geste:"Mode clair : lis le badge sans te pencher vers l’écran.",
+     attendu:"lisible du premier coup d’œil, sans effort.", tags:["mac"]},
+    {geste:"Mode sombre : même chose.",
+     attendu:"lisible du premier coup d’œil, sans effort.", tags:["mac"]},
+    {geste:"Survole la ligne de la production avec la souris (la ligne s’assombrit).",
+     attendu:"le badge reste lisible PENDANT le survol. C’est exactement le cas où mon premier essai tombait sous le seuil.", tags:["mac"]},
+    {geste:"Sur iPad, en mode clair puis en mode sombre.",
+     attendu:"lisible, et le badge ne déborde pas de la carte.", tags:["ipad"]},
+    {geste:"Sur iPad, ouvre une production au titre long qui porte plusieurs badges (pratique + pondération + « à planifier »).",
+     attendu:"les badges passent à la ligne proprement, rien n’est coupé ni chevauché.", tags:["ipad"]},
+    {geste:"Survole le badge lui-même (Mac).",
+     attendu:"une infobulle explique que les consignes ne sont pas transmises et que la production n’apparaît ni au calendrier ni dans les indices C et P.", tags:["mac"]}
+   ]},
+  {num:"2.3", titre:"Le texte d’aide",
+   pourquoi:"Trois endroits affirmaient encore que ce champ conditionne tout, sans dire qu’il est facultatif. Un texte qui contredit le comportement, c’est le comportement qu’on croit cassé.",
+   rangees:[
+    {geste:"Survole le libellé « Date d’échéance ».",
+     attendu:"le texte contient « Facultative : laisse-la vide tant que les consignes ne sont pas transmises ».", tags:["mac"]},
+    {geste:"Clique l’icône ⓘ à côté de « Date d’échéance ».",
+     attendu:"la bulle contient un encadré « conseil » disant que la date est facultative, et ce que vaut le badge « à planifier ».", tags:["mac"]},
+    {geste:"Regarde la note grise sous le champ Date d’échéance (elle apparaît selon le type choisi).",
+     attendu:"elle se termine par « Facultative : laisse-la vide tant que les consignes ne sont pas transmises ».", tags:["mac"]}
+   ]},
+  {num:"2.4", titre:"Ce que le reste de l’app en dit",
+   pourquoi:"Vérifier que le badge s’affiche ne prouve que l’affichage. Ce qui compte est qu’une production sans date reste HORS des calculs, et y ENTRE dès que tu poses la date. C’est le vecteur, pas l’état.",
+   rangees:[
+    {geste:"Va au calendrier, avec la production du 1.1 toujours sans date.",
+     attendu:"elle n’y figure pas. C’est voulu : rien n’est dû tant que rien n’est annoncé.", tags:["mac"]},
+    {geste:"Donne-lui une date DANS ton trimestre, enregistre, retourne au calendrier.",
+     attendu:"elle apparaît à la bonne date. C’est la moitié qui compte : elle rejoint les calculs à la seconde où tu poses la date.", tags:["donnees","mac"]},
+    {geste:"Donne-lui une date HORS de ton trimestre, puis enregistre.",
+     attendu:"la demande de confirmation « en dehors du trimestre » DOIT toujours apparaître. Ce garde-fou-là n’a pas été touché.", tags:["donnees","mac"]},
+    {geste:"Retire la date, puis clique « Exporter en PDF » sur cette production.",
+     attendu:"le PDF sort normalement et l’échéance s’affiche « — », au lieu de faire échouer l’export.", tags:["mac"]}
+   ]}
+ ]}
+];
+
+const DECISIONS = [
+ {num:"3.1", question:"Le mot du badge. J’ai écrit « à planifier ». Autres pistes : « sans échéance », « non transmise », « en préparation ». Lequel dit le mieux ce que tu vis ?"},
+ {num:"3.2", question:"Le registre. Le badge est gris neutre, volontairement : préparer avant de transmettre est normal, pas une anomalie à signaler en orange. Après usage — trop discret, ou juste ?"},
+ {num:"3.3", question:"La pondération. Tu as choisi que seule la date cesse de bloquer. Après avoir préparé quelques productions : la pondération à 0 t’a-t-elle rebloqué ? Faut-il la libérer aussi ?"},
+ {num:"3.4", question:"Ailleurs que dans la liste. Le badge ne vit que dans la barre latérale. Le voudrais-tu aussi dans le tableau des productions, ou dans un rappel du genre « 4 productions restent à planifier » ?"},
+ {num:"3.5", question:"Le portfolio conteneur. Je l’ai exclu du badge : il n’a jamais de date propre. D’accord, ou préfères-tu qu’il en porte un quand aucun de ses artefacts n’a de date ?"}
+];
+
+const ANGLES = [
+ "**Aucun verdict Safari/WebKit.** Le binaire WebKit est absent de l’environnement de session — la suite Playwright n’a pas pu démarrer du tout. Tout le §2 est donc structurellement invérifiable de mon côté.",
+ "**Contrôle de substitution sur Chromium, et sa valeur exacte.** J’ai lancé la suite d’intégration sur le Chromium local via une configuration temporaire : 57 passés / 54 échoués. J’ai relancé la même suite sur l’arbre PROPRE, mes changements mis de côté : exactement la même liste d’échecs, au bit près. Ces 54 échecs préexistent et sont propres à Chromium ; aucun n’est causé par ce chantier. Mais cela ne dit RIEN de Safari.",
+ "**Les contrastes sont calculés, pas regardés.** 5,63:1 en mode clair, 5,20:1 en sombre, 5,34:1 à l’impression — au-dessus du seuil AA de 4,5:1 dans les quatre combinaisons, survol compris. C’est de l’arithmétique sur les jetons de couleur, pas un jugement d’œil. D’où les rangées 2.2.",
+ "**Ton corpus n’est pas là.** Je ne sais pas combien de tes productions porteront le badge, ni si l’une d’elles te surprendra. C’est la mesure 1.4.",
+ "**L’iPad n’existe pas en session.** Débordement, retour à la ligne des badges, taille tactile : seul ton matériel tranche (2.2d, 2.2e).",
+ "**Une correction que j’ai faite en route, à signaler.** Mon premier jet donnait au badge un fond TRANSLUCIDE, comme le badge « non évalué » existant. En calculant le contraste au SURVOL de la ligne — qui s’assombrit — je suis tombé à 4,30:1 en mode clair, sous le seuil. J’ai basculé sur un fond opaque. Sans ce calcul, le défaut serait parti en production et n’aurait été visible qu’à l’œil, au survol, en mode clair.",
+ "**Un faux rouge rencontré, et sa cause.** La sentinelle anti-cache du 23 août a rougi pendant le cycle. Ce n’était pas un défaut : elle prend pour repère l’avant-dernier commit touchant version.json, et je l’avais lancée AVANT de commiter la release — elle comparait donc depuis 1.92.1 et voyait les fichiers de CT-15. Verte après le commit. À savoir pour la prochaine session : cette sentinelle ne se lit qu’après le commit de release."
+];
+
+/* ---------------------------------------------------------------- état */
+const CLE = "portes-486-v1";
+let etat = {};
+try { etat = JSON.parse(localStorage.getItem(CLE) || "{}") || {}; } catch (e) { etat = {}; }
+function sauver(){ try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch (e) {} }
+
+function el(tag, cls, txt){
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (txt != null) n.textContent = txt;
+  return n;
+}
+/* Rend **gras** sans innerHTML : on construit les nœuds. */
+function riche(cible, texte, prefixe){
+  if (prefixe) { const b = el("b", null, prefixe); cible.append(b); }
+  texte.split(/\*\*/).forEach((bout, i) => {
+    if (!bout) return;
+    cible.append(i % 2 ? el("b", null, bout) : document.createTextNode(bout));
+  });
+}
+
+const racine = document.getElementById("racine");
+
+DONNEES.forEach(sec => {
+  const s = el("section","bloc");
+  const t = el("div","bloc-tete");
+  t.append(el("span","bloc-num mono", sec.num), el("h2","bloc-titre", sec.titre));
+  s.append(t);
+  if (sec.alerte) s.append(el("p","bloc-note alerte", sec.alerte));
+
+  sec.portes.forEach(p => {
+    const c = el("div","porte");
+    const ct = el("div","porte-tete");
+    ct.append(el("span","porte-num mono", p.num), el("h3","porte-titre", p.titre));
+    c.append(ct);
+    if (p.pourquoi) { const q = el("div","pourquoi"); riche(q, " " + p.pourquoi, "POURQUOI —"); c.append(q); }
+
+    const ul = el("ul","rangees");
+    p.rangees.forEach((r, i) => {
+      const id = p.num + "-" + i;
+      const li = el("li","rangee");
+      li.dataset.id = id;
+      li.dataset.tags = (r.tags || []).join(",");
+
+      const bas = el("div","bascule");
+      ["ok","ko"].forEach(v => {
+        const b = el("button", null, v === "ok" ? "✓" : "✗");
+        b.dataset.v = v;
+        b.setAttribute("aria-pressed", etat[id] === v ? "true" : "false");
+        b.setAttribute("aria-label", (v === "ok" ? "Réussie : " : "Échec : ") + r.geste);
+        b.addEventListener("click", () => {
+          etat[id] = (etat[id] === v) ? null : v;
+          if (!etat[id]) delete etat[id];
+          bas.querySelectorAll("button").forEach(x =>
+            x.setAttribute("aria-pressed", etat[id] === x.dataset.v ? "true" : "false"));
+          sauver(); majCompteur(); appliquerFiltre();
+        });
+        bas.append(b);
+      });
+      li.append(bas);
+
+      const corps = el("div","corps");
+      corps.append(el("p","geste", r.geste));
+      if (r.cmd) corps.append(el("pre","cmd mono", r.cmd));
+      if (r.attendu) { const a = el("p","attendu"); riche(a, " : " + r.attendu, "Attendu"); corps.append(a); }
+      if (r.mesure) {
+        const w = el("div","saisie");
+        const lab = el("label", null, r.mesure);
+        const inp = document.createElement("input");
+        inp.type = "text";
+        inp.id = "m-" + id;
+        inp.placeholder = "ex. 7";
+        inp.value = etat["m-" + id] || "";
+        lab.htmlFor = inp.id;
+        inp.addEventListener("input", () => { etat["m-" + id] = inp.value; sauver(); });
+        w.append(lab, inp);
+        corps.append(w);
+      }
+      if ((r.tags || []).length) {
+        const tg = el("div","tags");
+        r.tags.forEach(x => tg.append(el("span","tag " + x,
+          x === "donnees" ? "⚠⚠ Données" : x === "ipad" ? "iPad" : x === "terminal" ? "Terminal" : "Mac")));
+        corps.append(tg);
+      }
+      li.append(corps);
+      ul.append(li);
+    });
+    c.append(ul);
+    s.append(c);
+  });
+  racine.append(s);
+});
+
+/* §3 — DÉCISIONS. Pas de bascule ✓/✗ : une case cochée ne porte pas un
+   verdict. Chaque rangée prend un champ de saisie, et l’export le reprend. */
+const s3 = el("section","bloc");
+const t3 = el("div","bloc-tete");
+t3.append(el("span","bloc-num mono","§3"), el("h2","bloc-titre","Décisions — ce qui attend ton verdict"));
+s3.append(t3);
+s3.append(el("p","bloc-note alerte",
+  "Ce ne sont PAS des vérifications. Ce sont des choix que j’ai posés faute de pouvoir les trancher à ta place. Chaque ligne attend une phrase écrite, pas une coche : une décision sans verdict écrit est une décision perdue."));
+const c3 = el("div","porte");
+const ul3 = el("ul","rangees");
+DECISIONS.forEach(d => {
+  const li = el("li","rangee decision");
+  const corps = el("div","corps");
+  corps.append(el("p","geste", d.num + " · " + d.question));
+  const w = el("div","saisie");
+  const ta = document.createElement("textarea");
+  ta.id = "d-" + d.num;
+  ta.placeholder = "Ton verdict, en une phrase…";
+  ta.value = etat["d-" + d.num] || "";
+  const lab = el("label", null, "Ton verdict");
+  lab.htmlFor = ta.id;
+  ta.addEventListener("input", () => { etat["d-" + d.num] = ta.value; sauver(); });
+  w.append(lab, ta);
+  corps.append(w);
+  li.append(corps);
+  ul3.append(li);
+});
+c3.append(ul3);
+s3.append(c3);
+racine.append(s3);
+
+/* §4 — angles morts */
+const s4 = el("section","bloc");
+const t4 = el("div","bloc-tete");
+t4.append(el("span","bloc-num mono","§4"), el("h2","bloc-titre","Ce que je n’ai pas pu vérifier"));
+s4.append(t4);
+s4.append(el("p","bloc-note","Une liste qui ne déclare pas ses angles morts se fait croire complète."));
+const ol = el("ol","angles");
+ANGLES.forEach(a => { const li = document.createElement("li"); riche(li, a); ol.append(li); });
+s4.append(ol);
+racine.append(s4);
+
+/* ------------------------------------------------------- compteur, filtre */
+function toutesRangees(){ return [...document.querySelectorAll(".rangee:not(.decision)")]; }
+function majCompteur(){
+  const r = toutesRangees();
+  const ok = r.filter(x => etat[x.dataset.id] === "ok").length;
+  const ko = r.filter(x => etat[x.dataset.id] === "ko").length;
+  document.getElementById("c-ok").textContent = "✓ " + ok;
+  document.getElementById("c-ko").textContent = "✗ " + ko;
+  document.getElementById("c-reste").textContent = "— " + (r.length - ok - ko);
+}
+let filtre = "tout";
+function appliquerFiltre(){
+  toutesRangees().forEach(x => {
+    const tags = x.dataset.tags || "";
+    let visible = true;
+    if (filtre === "ipad") visible = tags.includes("ipad");
+    else if (filtre === "mac") visible = !tags.includes("ipad");
+    else if (filtre === "reste") visible = !etat[x.dataset.id];
+    x.classList.toggle("masque", !visible);
+  });
+  document.querySelectorAll(".porte").forEach(p => {
+    if (p.querySelector(".rangee.decision")) return;   // le §3 ne se filtre pas
+    const reste = [...p.querySelectorAll(".rangee")].some(r => !r.classList.contains("masque"));
+    p.classList.toggle("masque", !reste);
+  });
+  document.querySelectorAll("section.bloc").forEach(s => {
+    const rangees = [...s.querySelectorAll(".rangee:not(.decision)")];
+    if (!rangees.length) return;                        // §3 et §4 restent visibles
+    s.classList.toggle("masque", rangees.every(r => r.classList.contains("masque")));
+  });
+}
+document.querySelectorAll(".filtre").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".filtre").forEach(x => x.classList.remove("actif"));
+  b.classList.add("actif"); filtre = b.dataset.f; appliquerFiltre();
+}));
+
+/* -------------------------------------------------------------- export */
+document.getElementById("btn-export").addEventListener("click", () => {
+  const r = toutesRangees();
+  const ok = r.filter(x => etat[x.dataset.id] === "ok").length;
+  const ko = r.filter(x => etat[x.dataset.id] === "ko").length;
+  const L = [];
+  L.push("PORTES TERRAIN — #486 gabarit sans échéance (24 août 2026, 1.94.0 build 0824-1141)");
+  L.push(ok + " passées · " + ko + " échec(s) · " + (r.length - ok - ko) + " non traitée(s)");
+  L.push("");
+  DONNEES.forEach(sec => {
+    L.push("═══ " + sec.num + " · " + sec.titre + " ═══");
+    sec.portes.forEach(p => {
+      L.push("  " + p.num + " — " + p.titre);
+      p.rangees.forEach((rg, i) => {
+        const id = p.num + "-" + i;
+        const v = etat[id];
+        L.push("    [" + (v === "ok" ? "v" : v === "ko" ? "X" : " ") + "] " + rg.geste);
+        if (rg.mesure) L.push("        ↳ " + rg.mesure + "  " + (etat["m-" + id] || "(non renseigné)"));
+      });
+    });
+    L.push("");
+  });
+  L.push("═══ §3 · Décisions — verdicts de Grégoire ═══");
+  DECISIONS.forEach(d => {
+    const v = (etat["d-" + d.num] || "").trim();
+    L.push("  " + d.num + " — " + d.question);
+    L.push("    ⮕ " + (v || "(pas de verdict)"));
+  });
+  L.push("");
+  const texte = L.join("\n");
+  const zone = document.getElementById("zone-releve");
+  const ta = document.getElementById("releve");
+  zone.classList.remove("masque");
+  ta.value = texte;
+  ta.focus(); ta.select();
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texte).catch(() => {});
+    }
+  } catch (e) {}
+  zone.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+majCompteur();
+appliquerFiltre();
+</script>

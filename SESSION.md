@@ -7,6 +7,103 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 24 AOÛT 2026 : RETOUR TESTEUR #486 — UN GABARIT DE
+     PRODUCTION S'ENREGISTRE SANS DATE D'ÉCHÉANCE. 1.94.0.
+
+     ▣ LA DEMANDE, capture à l'appui. Grégoire, dans Conception ›
+       Production étudiante : « j'ai besoin de pouvoir enregistrer un gabarit
+       même s'il n'est pas entièrement complété. Ici, je ne peux faire de
+       sauvegarde parce que je n'ai pas de date d'échéance. Ça me bloque dans
+       ma planification. Habituellement la complétion de ce champ signifie que
+       les consignes ont été fournies aux élèves, mais ce n'est pas encore le
+       cas, je prépare toutes mes productions avant de les transmettre. »
+       ⮕ Priorité absolue (retour testeur) : le plan en cours s'interrompt.
+
+     ▣ CE QUE LA LECTURE DU CODE A MONTRÉ — trois constats convergents, tous
+       en faveur de la demande. Ils valent d'être gardés, parce qu'ils disent
+       que la garde était une PIÈCE RAPPORTÉE, pas un invariant.
+       (a) TOUS les consommateurs d'échéance filtrent DÉJÀ sur
+           `assignee && !!date` avant de compter : graphiques C/P
+           (`graphiques-progression.js` ~623, ~845, ~1716), calendrier
+           (`calendrier-vue.js` ~233), jetons (`impact-jetons.js` ~92),
+           synthèse (`synthese-retroaction-data.js` ~248), export PDF. Une
+           production sans date était déjà, partout, « pas encore due ».
+       (b) L'INTERFACE DISAIT DÉJÀ LE CONTRAIRE DE LA VALIDATION. Sous
+           « Échéances par groupe » (index.html, Beta 98.3) : « Cocher =
+           consignes transmises […] Décoché = les étudiant·es n'ont pas
+           encore reçu le travail ». État déclaré légitime par l'écran,
+           refusé par la sauvegarde. La règle contredisait la porte qu'elle
+           gardait.
+       (c) LE FORMAT DE PARTAGE TRANCHE DÉJÀ : `partage-schemas.js:320`
+           classe `dateEcheance` parmi les `champsInterdits`, avec `coursId`
+           — champs LOCAUX, jamais exportés dans un gabarit partagé. Donc la
+           date n'appartient pas au gabarit ; elle appartient à l'acte de le
+           transmettre. Le modèle de données donnait raison à Grégoire.
+
+     ▣ PORTÉE ARRÊTÉE AVEC LUI (AskUserQuestion, 2 questions).
+       (1) « La date d'échéance seulement » — titre, type et pondération
+           restent exigés. Il a écarté « date + pondération » et « tout sauf
+           le titre ». ⮕ Si la pondération le rebloque à l'usage, c'est la
+           décision 3.3 de la porte terrain.
+       (2) « Badge À planifier dans la liste » — écarté « badge + note dans
+           le formulaire » et « aucun signal ».
+
+     ▣ LIVRÉ (1.94.0, build 0824-1141, commit 4970f11)
+       · `productions.js` — garde de date RETIRÉE de
+         `validerChampsObligatoiresProduction` (l'alerte de la capture n'existe
+         plus dans le dépôt). Nouveau `aucuneEcheanceAssignee()`, exposé.
+       · `productions-liste.js` — badge « à planifier », portfolio conteneur
+         exclu (il n'a jamais de date propre, seuls ses artefacts en ont).
+       · `styles.css` — `.badge-a-planifier`. Registre NEUTRE, pas alerte.
+       · microcopy remis d'accord aux TROIS endroits qui affirmaient l'inverse
+         (infobulle `cn-prod-echeance`, popup `echeance-indices`, note
+         `noteExplicativeDateEcheance`).
+
+     ▣ LE PIÈGE ÉVITÉ, à garder. Premier jet : fond TRANSLUCIDE pour le badge,
+       comme `.badge-statut.non-evalue`. Le contraste calculé au SURVOL de
+       `.sidebar-item` — qui s'assombrit — tombait à **4,30:1** en mode clair,
+       sous le seuil AA. Bascule sur un fond OPAQUE (`--surface-carte`) :
+       5,63:1 clair, 5,20:1 sombre, 5,34:1 impression, indépendant de l'état de
+       la ligne. ⮕ ENSEIGNEMENT : un badge translucide hérite du fond de sa
+       ligne ; tout composant posé sur une surface qui change d'état doit être
+       mesuré DANS cet état, pas au repos.
+
+     ▣ VÉRIFICATION
+       · Vitest **3008/3008** (296 fichiers, +25). Sentinelle #486 :
+         `tests/unit/sentinelle-486-gabarit-sans-echeance.test.js`. Le cas qui
+         porte le sens : l'accord STRICT, dans les deux sens, entre
+         `aucuneEcheanceAssignee` et `obtenirEcheanceEffective` sur sept formes
+         de production — ni badge sur une production due, ni production due
+         laissée sans badge.
+       · **4 BREAK-TESTS ROUGES** : remettre le blocage (4 rouges ciblés),
+         ignorer la case décochée (3), retirer le badge (3), retirer
+         l'exclusion du portfolio (1). Code restauré et revérifié après chacun.
+       · **Playwright : AUCUN verdict.** Le binaire WebKit est absent de
+         l'environnement distant. Contrôle de substitution sur le Chromium
+         local (config temporaire, `executablePath`) : 57 passés / 54 échoués
+         — puis la MÊME suite relancée sur l'arbre PROPRE (changements
+         `git stash`és) : liste d'échecs IDENTIQUE au bit près. Préexistants,
+         propres à Chromium, aucun causé par ce chantier. Ne dit rien de Safari.
+
+     ▣ FAUX ROUGE RENCONTRÉ, ET SA CAUSE — à savoir pour la prochaine session.
+       `sentinelle-anticache-fichiers-modifies` a rougi après le bump. Ce
+       n'était pas un défaut : elle prend pour repère l'AVANT-DERNIER commit
+       touchant `version.json`, et elle avait été lancée AVANT le commit de
+       release — elle comparait donc depuis 1.92.1 et voyait les fichiers de
+       CT-15. Verte dès le commit fait. ⮕ **Cette sentinelle ne se lit
+       qu'APRÈS le commit de release.**
+
+     ▣ DÛ CÔTÉ GRÉGOIRE — porte terrain 34 vérifications + 5 décisions :
+       `plans de travail/PORTES-TERRAIN-2026-08-24-486-gabarit-sans-echeance.md`
+       + artefact https://claude.ai/code/artifact/886278b4-72e8-43b3-ba74-cb8116eefded
+       (jumeau HTML versionné dans le dépôt). Les portes qui comptent sont
+       celles que la session ne peut PAS trancher : 2.2 (le badge à l'œil, sur
+       Safari et sur iPad, survol compris) et 1.4 (la mesure d'entrée sur son
+       corpus). Le §3 attend cinq verdicts ÉCRITS, dont 3.3 (libérer aussi la
+       pondération ?) et 3.1 (le mot « à planifier » est-il le bon ?).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 23 AOÛT 2026, FIN DE CYCLE : CI, DOCUMENTATION, PUIS
      LOT 6 / CT-15 — LES DOUBLONS DU CADRE.
 
