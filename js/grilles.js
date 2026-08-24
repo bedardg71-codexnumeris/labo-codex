@@ -3128,22 +3128,17 @@ async function chargerGrillePourModif(id) {
  * Déclenché depuis le bandeau du formulaire en lecture seule.
  */
 async function dupliquerEtEditerGrille(id) {
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === id);
-    if (!grille) return;
-
-    const copie = BibliothequeUI.forkerItem(grille, 'GRILLE_', grilles);
-    grilles.push(copie);
-    await db.set(cle('grillesTemplates'), grilles);
-
-    await afficherListeGrilles();
-    await chargerGrillePourModif(copie.id);
-
-    const nomField = document.getElementById('nomGrilleTemplate');
-    if (nomField) {
-        nomField.focus();
-        nomField.select();
-    }
+    // #476 volet 2 — la séquence vit dans BibliothequeUI.dupliquerEtEditerItem ;
+    // il ne reste ici que la plomberie propre aux grilles.
+    await BibliothequeUI.dupliquerEtEditerItem({
+        id: id,
+        prefixeId: 'GRILLE_',
+        lireListe: async () => await db.get(cle('grillesTemplates')) || [],
+        ecrireListe: async (liste) => { await db.set(cle('grillesTemplates'), liste); },
+        rafraichirListe: async () => { await afficherListeGrilles(); },
+        chargerPourModif: async (idCopie) => { await chargerGrillePourModif(idCopie); },
+        champFocus: 'nomGrilleTemplate'
+    });
 }
 
 function afficherCriteresGrille(grille) {

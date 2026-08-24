@@ -1083,30 +1083,27 @@ async function chargerPratiquePourModif(pratiqueId) {
  * Phase 4.B : fork une pratique démo et charge la copie en édition.
  */
 async function dupliquerEtEditerPratique(id) {
-    const configurations = db.getSync(cle('pratiquesConfigurables'), null) || [];
-    let pratique = configurations.find(p => p.id === id);
-    if (!pratique && typeof obtenirConfigurationPratiqueParId === 'function') {
-        pratique = await obtenirConfigurationPratiqueParId(id);
-    }
-    if (!pratique) return;
-
-    // CO-24 — la collection de destination sert à sauter au premier rang
-    // de copie libre ; sans elle on empilerait « (copie) (copie) ».
-    const pratiquesExistantes = db.getSync(cle('pratiquesConfigurables'), null) || [];
-    const copie = BibliothequeUI.forkerItem(pratique, 'pratique_', pratiquesExistantes);
-    configurations.push(copie);
-    db.setSync(cle('pratiquesConfigurables'), configurations);
-
-    if (typeof afficherListePratiquesSidebar === 'function') {
-        await afficherListePratiquesSidebar();
-    }
-    await chargerPratiquePourModif(copie.id);
-
-    const nomField = document.getElementById('mat-pratique-nom');
-    if (nomField) {
-        nomField.focus();
-        nomField.select();
-    }
+    // #476 volet 2 — séquence partagée. Les pratiques sont la seule famille à
+    // lire et écrire en SYNCHRONE (`getSync`/`setSync`, localStorage) et la seule
+    // à disposer d'un repli quand la source n'est pas dans la collection.
+    // La collection transmise à `forkerItem` sert à sauter au premier rang de
+    // copie libre (CO-24) : le moteur lui passe la liste lue, qui est la même.
+    await BibliothequeUI.dupliquerEtEditerItem({
+        id: id,
+        prefixeId: 'pratique_',
+        lireListe: () => db.getSync(cle('pratiquesConfigurables'), null) || [],
+        ecrireListe: (liste) => { db.setSync(cle('pratiquesConfigurables'), liste); },
+        repliSource: async (idSource) => (
+            typeof obtenirConfigurationPratiqueParId === 'function'
+                ? await obtenirConfigurationPratiqueParId(idSource)
+                : null
+        ),
+        rafraichirListe: async () => {
+            if (typeof afficherListePratiquesSidebar === 'function') await afficherListePratiquesSidebar();
+        },
+        chargerPourModif: async (idCopie) => { await chargerPratiquePourModif(idCopie); },
+        champFocus: 'mat-pratique-nom'
+    });
 }
 
 /**

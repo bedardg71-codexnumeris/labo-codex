@@ -3067,22 +3067,16 @@ async function chargerEchellePourModif(id) {
  * Phase 4.B : fork une échelle démo et charge la copie en édition.
  */
 async function dupliquerEtEditerEchelle(id) {
-    const echelles = await db.get(cle('echellesTemplates')) || [];
-    const echelle = echelles.find(e => e.id === id);
-    if (!echelle) return;
-
-    const copie = BibliothequeUI.forkerItem(echelle, 'ECH_', echelles);
-    echelles.push(copie);
-    await db.set(cle('echellesTemplates'), echelles);
-
-    await afficherListeEchelles();
-    await chargerEchellePourModif(copie.id);
-
-    const nomField = document.getElementById('nomEchelleTemplate');
-    if (nomField) {
-        nomField.focus();
-        nomField.select();
-    }
+    // #476 volet 2 — séquence partagée ; ne reste que la plomberie des échelles.
+    await BibliothequeUI.dupliquerEtEditerItem({
+        id: id,
+        prefixeId: 'ECH_',
+        lireListe: async () => await db.get(cle('echellesTemplates')) || [],
+        ecrireListe: async (liste) => { await db.set(cle('echellesTemplates'), liste); },
+        rafraichirListe: async () => { await afficherListeEchelles(); },
+        chargerPourModif: async (idCopie) => { await chargerEchellePourModif(idCopie); },
+        champFocus: 'nomEchelleTemplate'
+    });
 }
 
 function afficherNiveauxEchelle(echelle) {

@@ -162,17 +162,25 @@ describe('#476 · les cinq points d\'écriture sont gardés', () => {
     it('« Dupliquer » n\'est PAS bloqué : aucune fonction dupliquer* ne consulte la garde', () => {
         // Dupliquer est une action voulue. Si la garde apparaissait dans une
         // `dupliquer*`, on aurait converti une fonctionnalité en régression.
+        // #476 volet 2 — `bibliotheque-ui.js` REJOINT LA LISTE : la séquence de
+        // « dupliquer et éditer » y a été fusionnée. Sans lui, la garantie
+        // « dupliquer n'est jamais bloqué » cesserait de couvrir le chemin qui
+        // porte désormais les cinq familles.
         const fichiers = ['grilles.js', 'echelles.js', 'cartouches.js',
                           'productions-liste.js', 'productions-bibliotheque-ui.js',
-                          'pratiques.js', 'pratiques-gestion.js'];
+                          'pratiques.js', 'pratiques-gestion.js', 'bibliotheque-ui.js'];
         for (const fichier of fichiers) {
             const src = lire(fichier);
             // Découpe grossière mais suffisante : le corps de chaque `dupliquer*`
             // jusqu'à la prochaine déclaration de fonction.
-            const blocs = src.split(/\n(?=(?:async )?function )/)
-                .filter((b) => /^(?:async )?function dupliquer/.test(b));
+            const blocs = src.split(/\n(?=(?:async )?function |\s*BibliothequeUI\.\w+ = )/)
+                .filter((b) => /^(?:async )?function dupliquer|^\s*BibliothequeUI\.dupliquer/.test(b));
+            // Une découpe qui ne trouve RIEN passerait verte sans rien vérifier :
+            // c'est le piège que la fusion du volet 2 rendait possible.
+            expect(blocs.length, `${fichier} : plus aucun bloc dupliquer* à vérifier`).toBeGreaterThan(0);
             for (const bloc of blocs) {
-                const nom = /function (dupliquer[A-Za-z]*)/.exec(bloc)[1];
+                const nom = (/function (dupliquer[A-Za-z]*)/.exec(bloc)
+                    || /BibliothequeUI\.(dupliquer[A-Za-z]*)/.exec(bloc))[1];
                 expect(bloc, `${fichier}:${nom} ne doit PAS bloquer une duplication voulue`)
                     .not.toMatch(/ajouterAvecGardeIdentite/);
             }
@@ -247,14 +255,32 @@ describe('CO-24 · nommerCopie', () => {
         // il évite en plus de heurter un nom déjà pris.
         const src = lire('bibliotheque-ui.js');
         expect(src).toMatch(/forkerItem = function \(source, prefixeId, nomsExistants\)/);
-        for (const [fichier, motif] of Object.entries({
-            'grilles.js': /forkerItem\(grille, 'GRILLE_', grilles\)/,
-            'echelles.js': /forkerItem\(echelle, 'ECH_', echelles\)/,
-            'cartouches.js': /forkerItem\(cartouche, 'CART_', cartouches\)/,
-            'productions-liste.js': /forkerItem\(production, 'PROD_', productions\)/,
-            'pratiques-gestion.js': /forkerItem\(pratique, 'pratique_', pratiquesExistantes\)/
-        })) {
-            expect(lire(fichier), `${fichier} : collection non transmise à forkerItem`).toMatch(motif);
+
+        // #476 VOLET 2 — CETTE ASSERTION A DÉMÉNAGÉ AVEC LA LOGIQUE.
+        // Elle épinglait cinq call-sites littéraux (`forkerItem(grille,
+        // 'GRILLE_', grilles)`…), un par famille. La fusion du volet 2 les a
+        // réunis dans `BibliothequeUI.dupliquerEtEditerItem` : les épingler
+        // encore serait rouge, et les retirer sans les remplacer laisserait
+        // CO-24 sans garde sur ce chemin. On vérifie donc la MÊME garantie à
+        // son nouvel emplacement — le moteur transmet la collection de
+        // DESTINATION — puis que les cinq familles passent bien par lui.
+        expect(src, 'le moteur partagé ne transmet plus la collection à forkerItem')
+            .toMatch(/forkerItem\(source, d\.prefixeId, liste\)/);
+        expect(src, 'la liste passée à forkerItem doit être celle où la copie atterrit')
+            .toMatch(/liste\.push\(copie\)/);
+    });
+
+    it('les cinq familles passent par le moteur partagé de « dupliquer et éditer »', () => {
+        // C'est ce qui leur fait hériter de la garantie ci-dessus. Si une
+        // famille se remettait à dérouler la séquence chez elle, la garde
+        // CO-24 de ce chemin cesserait de valoir pour elle sans que rien
+        // d'autre ne rougisse.
+        for (const fichier of ['grilles.js', 'echelles.js', 'cartouches.js',
+                               'productions-liste.js', 'pratiques-gestion.js']) {
+            expect(lire(fichier), `${fichier} : n'appelle pas le moteur partagé`)
+                .toMatch(/BibliothequeUI\.dupliquerEtEditerItem\(/);
+            expect(lire(fichier), `${fichier} : refait la séquence au lieu de la déléguer`)
+                .not.toMatch(/forkerItem\(/);
         }
     });
 });

@@ -3600,21 +3600,18 @@ async function dupliquerEtEditerCartouche(id) {
         alert('Grille introuvable pour cette cartouche');
         return;
     }
-    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
-    const cartouche = cartouches.find(c => c.id === id);
-    if (!cartouche) return;
-
-    const copie = BibliothequeUI.forkerItem(cartouche, 'CART_', cartouches);
-    cartouches.push(copie);
-    await db.set(`cartouches_${grilleId}`, cartouches);
-
-    await chargerCartouchePourModif(copie.id, grilleId);
-
-    const nomField = document.getElementById('nomCartouche');
-    if (nomField) {
-        nomField.focus();
-        nomField.select();
-    }
+    // #476 volet 2 — séquence partagée. Les cartouches sont la seule famille
+    // dont la clé est PARAMÉTRÉE par la grille porteuse : c'est pourquoi le
+    // descripteur reçoit des rappels et non un nom de clé constant. Pas de
+    // rafraîchissement de liste ici : cette voie n'en faisait pas.
+    await BibliothequeUI.dupliquerEtEditerItem({
+        id: id,
+        prefixeId: 'CART_',
+        lireListe: async () => await db.get(`cartouches_${grilleId}`) || [],
+        ecrireListe: async (liste) => { await db.set(`cartouches_${grilleId}`, liste); },
+        chargerPourModif: async (idCopie) => { await chargerCartouchePourModif(idCopie, grilleId); },
+        champFocus: 'nomCartouche'
+    });
 }
 
 async function dupliquerCartoucheBibliotheque(id, grilleId) {
