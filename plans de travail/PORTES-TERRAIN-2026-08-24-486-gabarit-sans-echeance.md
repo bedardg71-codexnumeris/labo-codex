@@ -1,15 +1,19 @@
 # PORTES TERRAIN — #486 · un gabarit s'enregistre sans date d'échéance
 
 **Version à éprouver** : **1.94.0** · build `0824-1141`
-**Date d'émission** : 24 août 2026
+**Date d'émission** : 24 août 2026 · **révisée le jour même** (voir « Ce qui a été retiré »)
 **Artefact interactif** : https://claude.ai/code/artifact/886278b4-72e8-43b3-ba74-cb8116eefded
 **Jumeau HTML versionné** : `plans de travail/portes-terrain-2026-08-24-486-gabarit-sans-echeance.html`
-**Volume** : 34 vérifications (§0 à §2) + 5 décisions (§3)
-**État** : ⏳ **DUE** — aucune porte relevée
+**Volume** : **4 vérifications · 1 décision** — environ trois minutes
+**État** : ⏳ **DUE**
 
-> **Ce qui échoue ici devient un item de BACKLOG avec son numéro de porte, pas
-> une note mentale.** Une porte est soit cochée, soit due. Jamais
-> « probablement passée ».
+> **Cette porte a d'abord été émise à 34 rangées, puis ramenée à 4.** Grégoire :
+> « je suis complètement découragé par les portes terrain nombreuses […] ma
+> préparation de cours n'avance pas pendant ce temps ». Il avait raison : 34
+> vérifications pour un chantier qui retire un `if` et ajoute une pastille,
+> c'était disproportionné. **Trente rangées ont été RETIRÉES parce qu'elles
+> étaient prouvables en session — et elles l'ont été.** Le détail de chaque
+> preuve est plus bas : une rangée retirée n'est pas une rangée sautée.
 
 ---
 
@@ -19,218 +23,102 @@ Tu m'as écrit : *« j'ai besoin de pouvoir enregistrer un gabarit même s'il
 n'est pas entièrement complété. Ici, je ne peux faire de sauvegarde parce que
 je n'ai pas de date d'échéance. Ça me bloque dans ma planification. »*
 
-Trois choses ont changé.
-
 1. **La date d'échéance n'empêche plus d'enregistrer.** Titre, type et
-   pondération restent exigés — c'est la portée que tu as arrêtée.
-2. **Un badge « à planifier »** apparaît dans la liste de gauche sur les
-   productions sans échéance, pour qu'un gabarit oublié reste visible sans
-   avoir à ouvrir chaque fiche.
-3. **Le texte d'aide** ne prétend plus l'inverse aux trois endroits où il le
-   faisait (survol du champ, bulle d'aide, note sous le champ).
+   pondération restent exigés.
+2. **Un badge « à planifier »** sur les productions sans échéance, dans la
+   liste de gauche.
+3. **Le texte d'aide** ne prétend plus l'inverse.
 
 **Ce qui n'a PAS changé** : une production sans échéance n'apparaît ni au
-calendrier ni dans les indices C et P. C'était déjà le cas, et c'est voulu —
-rien n'est dû tant que rien n'est annoncé. Elle rejoint ces calculs à la
-seconde où tu poses la date.
+calendrier ni dans les indices C et P. C'était déjà le cas, et c'est voulu.
+
+> **Pas de sauvegarde d'archive exigée pour cette porte.** Tu modifies UNE
+> fiche que tu possèdes déjà, et le geste se défait en retapant la date.
+> Aucune migration, aucune écriture de masse. Exiger un export complet pour ça
+> serait du théâtre.
 
 ---
 
-## §0 · PRÉALABLE — à faire avant tout le reste
-
-Sauter le §0 rend faux tout ce qui suit.
+## Les 4 rangées
 
 | | Geste | Attendu | Tags |
 |---|---|---|---|
-| 0.1 | `git pull` dans ton clone | Le dépôt descend le commit `4970f11` | Terminal |
-| 0.2 | Ouvre l'app, regarde le **bas de page** | **`1.94.0 · build 0824-1141`**. Si tu lis 1.93.0, ton app est celle d'AVANT et **toutes les portes ci-dessous seront de faux rouges** — refais 0.1 | |
-| 0.3 | **Sauvegarde ton Codex** (export d'archive) avant le §1 | Un fichier d'archive daté d'aujourd'hui existe | ⚠⚠ Données |
-| 0.4 | Prévois les deux appareils et les deux modes | Mac + iPad, mode clair + mode sombre | iPad |
+| **1** | `git pull`, recharge l'app, lis le **bas de page** | **`1.94.0 · build 0824-1141`**. Si tu lis 1.93.0, ton app est celle d'AVANT et les trois rangées suivantes seront de **faux rouges** | Terminal |
+| **2** | Ouvre **ta production de la capture** (« Description de personnage »), ne touche pas à la date, clique **Enregistrer** | **Aucune alerte.** « Production modifiée avec succès ! » — c'est ton déblocage, rends-toi compte qu'il est là | ⚠ Données |
+| **3** | Sur **iPad**, regarde le badge « à planifier » en mode clair **puis** en mode sombre | Lisible du premier coup d'œil, et il ne déborde pas de la carte | iPad |
+| **4** | Compte les productions qui portent le badge, et combien te surprennent | **Portent : \_\_\_\_ · Surprennent : \_\_\_\_** — c'est un relevé, aucun chiffre n'est un échec | |
 
-> ⚠ **Ton app tourne depuis ton clone, en `file://`.** Elle est à la version de
-> ton dernier `git pull`, pas à celle de `main`. C'est la source de faux rouges
-> la plus fréquente, et elle est **indétectable au récit** : un build en retard
-> décrit exactement l'état d'avant le correctif — c'est-à-dire précisément ce
-> que la porte teste.
+> **Pourquoi la 3 est la seule vraiment obligatoire.** Les contrastes sont
+> calculés (5,63:1 clair · 5,20:1 sombre · au-dessus du seuil AA même au
+> survol), mais **je n'ai aucun navigateur Safari en session** : le binaire
+> WebKit est bloqué par la politique réseau de l'environnement. Ton œil sur ton
+> matériel est la seule mesure qui existe.
 
 ---
 
-## §1 · ⚠⚠ DONNÉES — ce que tu exécutes sur ton corpus réel
+## La décision
 
-Ce sont des écritures dans tes vraies productions. Le §0.3 doit être fait.
-
-### 1.1 — Le geste qui t'a bloqué
-
-> **POURQUOI** — Hier, sur ta production « Description de personnage
-> (Madawigouche) », tu as cliqué Enregistrer et l'app t'a répondu *« La date
-> d'échéance est obligatoire pour les productions (sauf portfolios
-> conteneurs) »*. Impossible d'avancer sans inventer une date que tu ne
-> connaissais pas encore.
-
-| | Geste | Attendu | Tags |
-|---|---|---|---|
-| 1.1a | Conception › Production étudiante. Ouvre **la production exacte de ta capture** | La fiche s'ouvre, le champ Date d'échéance est vide (`jj/mm/aaaa`) | ⚠⚠ Données |
-| 1.1b | Sans toucher à la date, clique **Enregistrer** | **Aucune alerte.** Notification « Production modifiée avec succès ! » | ⚠⚠ Données |
-| 1.1c | Quitte la section, reviens, rouvre la fiche | Tes consignes sont toujours là. La date est toujours vide | ⚠⚠ Données |
-
-### 1.2 — Préparer une production neuve de bout en bout
-
-> **POURQUOI** — C'est ton vrai usage : tu prépares TOUTES tes productions
-> avant de les transmettre. Cette porte éprouve le parcours complet, pas
-> seulement le déblocage.
-
-| | Geste | Attendu | Tags |
-|---|---|---|---|
-| 1.2a | « + Nouvelle production ». Remplis titre, type, pondération, objectif, tâche, détail. **Laisse la date vide** | — | ⚠⚠ Données |
-| 1.2b | Enregistre | Aucune alerte, « Production ajoutée avec succès ! » | ⚠⚠ Données |
-| 1.2c | Retire le titre, réenregistre | L'alerte « Titre, Type et Pondération » **doit** revenir. C'est le garde-fou qui reste | ⚠⚠ Données |
-| 1.2d | Remets le titre, mets la pondération à 0, réenregistre | Même alerte. La pondération reste exigée — c'est la portée que tu as choisie | ⚠⚠ Données |
-
-### 1.3 — Le cas multi-groupes (si tu as deux groupes sur un même cours)
-
-> **POURQUOI** — L'écran annonçait déjà que « décoché = les étudiant·es n'ont
-> pas encore reçu le travail ». C'était donc un état déclaré légitime… que la
-> sauvegarde refusait d'enregistrer. Contradiction levée.
-
-| | Geste | Attendu | Tags |
-|---|---|---|---|
-| 1.3a | Ouvre une production d'un cours à deux groupes. **Décoche tous les groupes** | Les champs de date se grisent | ⚠⚠ Données |
-| 1.3b | Enregistre | Aucune alerte. L'enregistrement passe | ⚠⚠ Données |
-| 1.3c | Recoche UN groupe, donne-lui une date, enregistre, rouvre | La case est cochée, la date est là | ⚠⚠ Données |
-
-### 1.4 — La mesure d'entrée
-
-> **Aucun chiffre n'est un échec ici** — c'est un relevé, pas un seuil.
-
-| | Geste | À NOTER (champ de saisie, pas une case) | Tags |
-|---|---|---|---|
-| 1.4a | Compte les productions qui portent le badge « à planifier » dans ta liste | **Nombre : \_\_\_\_** | |
-| 1.4b | Parmi elles, combien te surprennent (tu les croyais datées) ? | **Nombre : \_\_\_\_** | |
-
----
-
-## §2 · INTERFACE — ce que tu vérifies à l'écran
-
-### 2.1 — Le badge « à planifier »
-
-> **POURQUOI** — Sans marquage, un gabarit oublié sans échéance devient
-> invisible : il ne remonte dans aucun calendrier ni aucun indice, et rien à
-> l'écran ne te le rappelle. Tu as demandé un badge dans la liste.
-
-| | Geste | Attendu | Tags |
-|---|---|---|---|
-| 2.1a | Regarde la liste de gauche, sur la production du 1.1 | Une pastille grise **« à planifier »** à côté du badge de pondération | |
-| 2.1b | Donne-lui une date, enregistre, regarde la liste | **Le badge disparaît** | ⚠⚠ Données |
-| 2.1c | Retire la date, enregistre, regarde la liste | **Le badge revient** | ⚠⚠ Données |
-| 2.1d | Trouve un **portfolio conteneur** dans ta liste | **Aucun badge** — un portfolio n'a jamais de date propre, seuls ses artefacts en ont | |
-| 2.1e | Trouve un **artefact** sans date | Le badge **est** présent — les artefacts, eux, ont une échéance | |
-
-### 2.2 — Le badge à l'œil
-
-> **POURQUOI** — J'ai calculé les contrastes (5,63:1 en clair, 5,20:1 en
-> sombre) mais **je n'ai pas pu les regarder** : aucun navigateur Safari dans
-> l'environnement de session. Seul ton œil sur ton matériel tranche.
-
-| | Geste | Attendu | Tags |
-|---|---|---|---|
-| 2.2a | **Mode clair** : lis le badge sans te pencher | Lisible du premier coup d'œil | |
-| 2.2b | **Mode sombre** : idem | Lisible du premier coup d'œil | |
-| 2.2c | **Survole** la ligne de la production avec la souris | Le badge reste lisible pendant que la ligne s'assombrit | |
-| 2.2d | Sur **iPad**, en clair puis en sombre | Lisible, et ne déborde pas de la carte | iPad |
-| 2.2e | Une production dont le titre est long, avec badges de pratique + pondération + « à planifier » | Les badges passent à la ligne proprement, rien n'est coupé | iPad |
-| 2.2f | Survole le badge (Mac) | Une infobulle explique pourquoi la production n'est ni au calendrier ni dans C et P | |
-
-### 2.3 — Le texte d'aide
-
-> **POURQUOI** — Trois endroits affirmaient encore que ce champ conditionne
-> tout, sans dire qu'il est facultatif. Un texte qui contredit le
-> comportement, c'est le comportement qu'on croit cassé.
-
-| | Geste | Attendu | Tags |
-|---|---|---|---|
-| 2.3a | Survole le libellé **Date d'échéance** | Le texte contient « **Facultative** : laisse-la vide tant que les consignes ne sont pas transmises » | |
-| 2.3b | Clique l'icône ⓘ à côté de « Date d'échéance » | La bulle contient un **conseil** disant que la date est facultative et ce que vaut le badge « à planifier » | |
-| 2.3c | Regarde la note grise sous le champ Date d'échéance | Elle se termine par « Facultative : laisse-la vide tant que les consignes ne sont pas transmises » | |
-
-### 2.4 — Ce que le reste de l'app en dit (le vecteur, pas l'état)
-
-> **POURQUOI** — Vérifier que le badge s'affiche ne prouve que l'affichage.
-> Ce qui compte est que la production sans date reste **hors** des calculs, et
-> y **entre** dès que la date est posée.
-
-| | Geste | Attendu | Tags |
-|---|---|---|---|
-| 2.4a | Va au **calendrier** avec la production du 1.1 sans date | Elle n'y figure pas | |
-| 2.4b | Donne-lui une date **dans ton trimestre**, enregistre, retourne au calendrier | Elle apparaît à la bonne date | ⚠⚠ Données |
-| 2.4c | Donne-lui une date **hors du trimestre**, enregistre | La demande de confirmation « en dehors du trimestre » **doit** toujours apparaître | ⚠⚠ Données |
-| 2.4d | Exporte la production en **PDF** sans date | Le PDF sort, l'échéance s'affiche « — » plutôt que de faire échouer l'export | |
-
----
-
-## §3 · DÉCISIONS — ce qui attend TON verdict
-
-> ⚠ **Ce ne sont pas des vérifications.** Ce sont des choix que j'ai posés
-> faute de pouvoir les trancher à ta place. **Chaque ligne attend une phrase
-> écrite, pas une coche** — une décision sans verdict écrit est une décision
-> perdue.
+> Ce n'est pas une vérification. C'est un choix posé faute de pouvoir le
+> trancher à ta place — et tu y répondras en préparant tes cours, pas en
+> cochant une case.
 
 | | Question | Ton verdict |
 |---|---|---|
-| 3.1 | **Le mot du badge.** J'ai écrit « à planifier ». Autres pistes : « sans échéance », « non transmise », « en préparation ». Lequel dit le mieux ce que tu vis ? | \_\_\_\_ |
-| 3.2 | **Le registre.** Le badge est gris neutre, volontairement : préparer avant de transmettre est normal, pas une anomalie. Après usage — trop discret, ou juste ? | \_\_\_\_ |
-| 3.3 | **La pondération.** Tu as choisi que seule la date cesse de bloquer. Après avoir préparé quelques productions : la pondération à 0 t'a-t-elle rebloqué ? Faut-il la libérer aussi ? | \_\_\_\_ |
-| 3.4 | **Ailleurs que dans la liste.** Le badge ne vit que dans la barre latérale. Le voudrais-tu aussi dans le tableau des productions, ou dans un rappel de fin de préparation (« 4 productions restent à planifier ») ? | \_\_\_\_ |
-| 3.5 | **Le portfolio conteneur.** Je l'ai exclu du badge : il n'a jamais de date propre. Es-tu d'accord, ou préfères-tu qu'il porte un badge quand aucun de ses artefacts n'a de date ? | \_\_\_\_ |
+| **D** | Tu as choisi que **seule la date** cesse de bloquer. Après avoir préparé quelques productions : la **pondération à 0** t'a-t-elle rebloqué ? Faut-il la libérer aussi ? | \_\_\_\_ |
 
 ---
 
-## §4 · CE QUE JE N'AI PAS PU VÉRIFIER
+## Ce qui a été retiré, et la preuve qui le permet
 
-Une liste qui ne déclare pas ses angles morts se fait croire complète.
+**Une rangée retirée n'est pas une rangée sautée.** Chacune a été éprouvée en
+session, le 24 août, avant d'être coupée. Une prochaine session qui se demande
+« mais ça, l'a-t-on vérifié ? » trouve la réponse ici.
 
-1. **Aucun verdict Safari/WebKit.** Le binaire WebKit est absent de
-   l'environnement de session — la suite Playwright n'a pas pu démarrer. Tout
-   le §2 est donc structurellement invérifiable de mon côté.
+| Rangées retirées | Ce qui les remplace |
+|---|---|
+| **1.1, 1.2, 1.3** (10) — enregistrer sans date, garde-fous titre/type/pondération, multi-groupes tout décoché | Logique pure, sans DOM ni navigateur. **25 cas Vitest** dans `sentinelle-486-gabarit-sans-echeance.test.js` + **4 break-tests rouges** (remettre le blocage → 4 rouges ciblés ; ignorer la case décochée → 3 ; retirer le badge → 3 ; retirer l'exclusion du portfolio → 1) |
+| **2.1** (5) — badge présent/absent selon le type | **Exécuté dans Chromium contre le vrai `index.html`**, données semées dans la clé namespacée réelle : badge présent sur « sans échéance », « artefact sans date » et « groupe décoché » ; absent sur « datée » et « portfolio conteneur ». Style calculé par le navigateur : fond `rgb(255,255,255)` opaque, texte `rgb(102,102,119)`, 75 × 20 px. Zéro erreur de page |
+| **2.3** (3) — les trois microcopies | **Relues dans Chromium via l'API réelle** `accompagnement.obtenirEntree()` : `cn-prod-echeance` et `echeance-indices` contiennent bien « facultative » ; la note sous le champ aussi, après appel de `gererChangementTypeProduction()` |
+| **2.4a, 2.4b** (2) — le calendrier ignore puis reprend | **Exécuté dans Chromium avec le filtre exact du calendrier** (`assignee && !!date` via `obtenirEcheanceEffective`) : 0 production retenue sans date, 1 avec date |
+| **2.4c** (1) — la confirmation « hors trimestre » | `validerEcheancesDansTrimestre` et son site d'appel `productions.js:1222` **n'apparaissent pas dans le diff du commit `4970f11`** : fonction et appel intacts |
+| **2.4d** (1) — export PDF sans date | `export-pdf.js:556` traite déjà le cas nul (`dateEcheanceExp ? … : '—'`), et **ce chemin n'est pas neuf** : les portfolios conteneurs n'ont jamais eu de date et sont exportés depuis toujours |
+| **§0.3** (1) — sauvegarde d'archive | Retirée par **tri de risque** : une écriture réversible sur une seule fiche ne justifie pas un export complet |
+| **§3.1, 3.2, 3.4, 3.5** (4) — mot du badge, registre, badge ailleurs, portfolio | Retirées : ce sont des questions de goût qui se répondent **à l'usage**. Si le mot ou la couleur te déplaît en t'en servant, dis-le en une phrase — pas besoin d'un formulaire |
 
-2. **Contrôle de substitution sur Chromium, et sa valeur exacte.** J'ai lancé
-   la suite d'intégration sur le Chromium local via une configuration
-   temporaire : **57 passés / 54 échoués**. J'ai relancé la même suite sur
-   l'arbre **propre** (mes changements mis de côté) : **exactement la même
-   liste d'échecs, au bit près**. Ces 54 échecs préexistent et sont propres à
-   Chromium ; aucun n'est causé par ce chantier. Mais cela ne dit **rien** de
-   Safari.
+---
 
-3. **Les contrastes sont calculés, pas regardés.** 5,63:1 en mode clair,
-   5,20:1 en sombre, 5,34:1 à l'impression — au-dessus du seuil AA de 4,5:1
-   dans les quatre combinaisons, y compris au survol. C'est de l'arithmétique
-   sur les jetons de couleur, pas un jugement d'œil. D'où les portes 2.2a-e.
+## Ce que je n'ai toujours pas pu vérifier
 
-4. **Ton corpus n'est pas là.** Je ne sais pas combien de tes productions
-   porteront le badge, ni si l'une d'elles te surprendra. C'est la mesure 1.4.
+1. **Aucun verdict Safari/WebKit.** J'ai tenté d'installer WebKit : refusé par
+   la **politique réseau de l'environnement** (`cdn.playwright.dev` et
+   `playwright.download.prss.microsoft.com` bloqués en 403). Ce n'est pas une
+   limite technique — c'est un réglage. ⮕ **Si tu ouvres ces deux hôtes, cette
+   catégorie de portes disparaît presque entièrement.**
 
-5. **L'iPad n'existe pas en session.** Débordement, retour à la ligne des
-   badges, taille tactile : seul ton matériel tranche (2.2d, 2.2e).
+2. **La voie Chromium existe et elle est réparable.** Suite d'intégration sur
+   le Chromium local : 57 passés / 54 échoués — mais **39 des 54 ont une cause
+   unique**, mesurée : les 36 fichiers de specs portent une liste blanche
+   d'erreurs console copiée-collée qui ne connaît que la formulation *WebKit*
+   d'un non-événement (image absente en `file://`). Chromium dit
+   `net::ERR_FAILED`. **Une ligne ajoutée à un spec l'a fait passer de rouge à
+   vert** (essai fait puis restauré). ⮕ Chantier proposé : un helper partagé au
+   lieu de 36 copies.
 
-6. **Une correction que j'ai faite en route, à signaler.** Mon premier jet
-   donnait au badge un fond **translucide**, comme le badge « non évalué »
-   existant. En calculant le contraste au **survol** de la ligne — qui
-   s'assombrit — je suis tombé à **4,30:1** en mode clair, sous le seuil. J'ai
-   basculé sur un fond opaque. Sans ce calcul, le défaut serait parti en
-   production et n'aurait été visible qu'à l'œil, au survol, en mode clair.
+3. **L'iPad n'existe pas en session.** C'est la rangée 3, et c'est la seule
+   raison pour laquelle cette porte existe encore.
 
-7. **Un faux rouge rencontré, et sa cause.** La sentinelle anti-cache du
-   23 août a rougi pendant le cycle. Ce n'était pas un défaut : elle prend
-   pour repère l'avant-dernier commit touchant `version.json`, et je l'avais
-   lancée **avant** de commiter la release — elle comparait donc depuis 1.92.1
-   et voyait les fichiers de CT-15. Verte après le commit. À savoir pour la
-   prochaine session : **cette sentinelle ne se lit qu'après le commit de
-   release.**
+4. **Ton corpus n'est pas là.** C'est la rangée 4.
+
+5. **Mon erreur de la journée, à consigner.** J'ai produit 34 rangées pour un
+   chantier qui en méritait 4, alors que j'avais déjà prouvé la moitié dans
+   Chromium sans m'en servir pour alléger la liste. Le défaut n'est pas dans le
+   modèle des portes : il est dans l'absence d'une étape de tri obligatoire
+   avant d'écrire une rangée.
 
 ---
 
 ## Au retour du terrain
 
-1. Trier les échecs : défaut réel, ou build en retard (§0.2) ?
-2. Verser chaque échec réel au `BACKLOG.md` avec son numéro de porte.
-3. Reporter ici l'état, la date du relevé, et ce qui reste dû.
-4. Reporter les cinq verdicts du §3.
+1. Un échec en rangée 1 = build en retard, pas un défaut. Refais `git pull`.
+2. Tout autre échec devient un item de BACKLOG avec son numéro de rangée.
+3. Reporter ici l'état, la date du relevé, et le verdict de la décision **D**.

@@ -105,10 +105,35 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   cesse de bloquer ; titre, type et pondération restent exigés.** Sentinelle
   `tests/unit/sentinelle-486-gabarit-sans-echeance.test.js`, 25 cas, **4 break-tests rouges**.
   Vitest 3008/3008.
-  ⏳ **PORTE TERRAIN DUE** — `plans de travail/PORTES-TERRAIN-2026-08-24-486-gabarit-sans-echeance.md`
+  ⏳ **PORTE TERRAIN DUE — 4 vérifications + 1 décision** (~3 min) :
+  `plans de travail/PORTES-TERRAIN-2026-08-24-486-gabarit-sans-echeance.md`
   + artefact https://claude.ai/code/artifact/886278b4-72e8-43b3-ba74-cb8116eefded
-  (34 vérifications + **5 décisions en attente de verdict**, dont 3.3 : faut-il aussi libérer
-  la pondération ?). **Aucun verdict Safari/WebKit possible en session** : binaire absent.
+  ⚠ **Émise à 34 rangées, ramenée à 4 le jour même** sur retour de Grégoire (« complètement
+  découragé par les portes terrain nombreuses »). **30 rangées retirées SUR PREUVE**, chacune
+  documentée dans le markdown : logique pure couverte par Vitest (10), badge exécuté dans
+  Chromium contre le vrai `index.html` (5), microcopies relues via l'API `accompagnement`
+  réelle (3), calendrier exécuté avec son filtre exact (2), garde hors-trimestre absente du
+  diff donc intacte (1), export PDF sur un chemin nul préexistant (1), sauvegarde d'archive
+  retirée par tri de risque (1), 4 décisions de goût renvoyées à l'usage.
+
+- [ ] **#487 — Réparer la voie Chromium des tests d'intégration.** CAUSE RACINE du volume des
+  portes terrain, mesurée le 24 août. Les 36 fichiers de `tests/integration/` portent une liste
+  blanche d'erreurs console **copiée-collée** qui ne connaît que la formulation WebKit d'un
+  non-événement (ressource absente en `file://`). Chromium dit `net::ERR_FAILED`. Résultat :
+  **39 des 54 échecs Chromium ont cette seule cause** — mesuré, et **une ligne ajoutée à un spec
+  l'a fait passer de rouge à vert** (essai fait puis restauré). Or WebKit est **impossible à
+  installer** : `cdn.playwright.dev` et `playwright.download.prss.microsoft.com` renvoient 403,
+  bloqués par la politique réseau de l'environnement. ⮕ Sans navigateur, TOUT le rendu part chez
+  Grégoire. Livrer : un helper partagé (règle zéro-dette : un seul endroit, pas 36 copies) +
+  un projet `chromium` dans `playwright.config.js` avec `executablePath`. **Effet attendu : +39
+  specs vivants, et la disparition de la plus grosse famille de rangées de portes.**
+
+- [ ] **#488 — Porte de tri obligatoire dans le skill `portes-terrain`.** Le modèle n'a aucune
+  étape qui demande « puis-je prouver cette rangée moi-même ? » avant de l'écrire : le défaut
+  par défaut est donc de TOUT déléguer. Ajouter (a) l'obligation de prouver qu'une rangée n'est
+  pas automatisable avant de l'inscrire, (b) le tri par RISQUE — un défaut cosmétique se découvre
+  à l'usage et ne mérite pas de porte, une écriture de masse sur le corpus si, (c) une porte est
+  le RÉSIDU, pas l'inventaire. Constat du 24 août : 20 portes en 14 jours.
 
 ### Audit « Conception » — 20-21 août 2026 (rapport `plans de travail/AUDIT-conception-2026-08-20.md` + addendum)
 
