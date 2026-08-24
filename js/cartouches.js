@@ -3469,22 +3469,65 @@ async function afficherBibliothequeCartouches() {
    =================================================================== */
 
 /**
- * Lit les cartouches d'une grille TELLES QU'ARCHIVÉES dans un trimestre source.
+ * Lit les cartouches d'une grille DANS un trimestre source.
  *
- * ⚠ Clé d'archive EXPLICITE, jamais `cleSource()`. Pour une clé `cartouches_*`
- * sans copie d'archive, `cleSource` retombe volontairement sur la clé GLOBALE —
- * qui contient les cartouches du trimestre ACTIF. On afficherait alors, sous le
- * nom d'un autre trimestre, ce que l'enseignant a déjà sous les yeux, et
- * « importer » en fabriquerait un doublon. C'est la mécanique de #464/CT-26 :
- * une clé que son appelant croit namespacée devient globale de fait.
+ * Routage canonique par `cleSource` : copie d'archive
+ * `<srcId>_cartouches_<grilleId>` si elle existe, sinon la clé GLOBALE
+ * `cartouches_<grilleId>`.
  *
- * @param {string} srcId - id du trimestre source (ex. 'a2025')
+ * ⚠ CORRECTIF DU 24 AOÛT, ET IL EST LE CŒUR DE LA FONCTIONNALITÉ. Ma première
+ * version ne lisait QUE la copie d'archive, par crainte du repli sur le global
+ * (#464/CT-26). Cette crainte était mal placée ici, et elle rendait la section
+ * INVISIBLE pour le cas le plus courant — celui de Grégoire.
+ *
+ * Depuis #358, `grillesTemplates` est namespacée pour TOUT trimestre, pas
+ * seulement les archivés : un trimestre vivant a ses grilles dans
+ * `<srcId>_grillesTemplates` et ses cartouches dans la clé globale, keyée par
+ * grille. Comme on n'itère QUE les grilles de la source, et qu'une grille
+ * n'appartient qu'à un trimestre, ce global EST celui de la source.
+ *
+ * Le vrai risque — une grille présente à l'identique dans les deux trimestres,
+ * dont le magasin de cartouches est alors littéralement partagé — est écarté en
+ * amont par `lotsCartouchesDuTrimestre`, qui exclut ces grilles.
+ *
+ * Reproduit au navigateur avant correction : trimestre vivant, 2 cartouches
+ * dans `cartouches_GR_H26`, section non rendue.
+ *
+ * @param {string} srcId - id du trimestre source (ex. 'h2026')
  * @param {string} grilleId - id de la grille DANS ce trimestre
- * @returns {Promise<Array>} les cartouches archivées, [] si aucune copie
+ * @returns {Promise<Array>} les cartouches de cette grille, [] si aucune
  */
-async function lireCartouchesArchivees(srcId, grilleId) {
-    const lot = await db.get(`${srcId}_cartouches_${grilleId}`);
+async function lireCartouchesDuTrimestre(srcId, grilleId) {
+    const lot = await db.get(cleSource('cartouches_' + grilleId, srcId));
     return Array.isArray(lot) ? lot : [];
+}
+
+/**
+ * Inventaire importable d'un trimestre source : ses grilles qui portent des
+ * cartouches, chacune avec son lot. Source unique des trois appelants (liste des
+ * trimestres, aperçu, « Tout importer ») — sans quoi la règle d'exclusion
+ * ci-dessous vivrait en trois exemplaires.
+ *
+ * @param {string} srcId
+ * @returns {Promise<Array<{grille:Object, cartouches:Array}>>}
+ */
+async function lotsCartouchesDuTrimestre(srcId) {
+    const grilles = await db.get(cleSource('grillesTemplates', srcId)) || [];
+    const grillesActives = await db.get(cle('grillesTemplates')) || [];
+    const idsActifs = new Set(grillesActives.map(g => g && g.id).filter(Boolean));
+
+    const lots = [];
+    for (const grille of grilles) {
+        if (!grille || !grille.id) continue;
+        // Une grille présente À L'IDENTIQUE dans le trimestre actif partage son
+        // magasin de cartouches — `cartouches_<id>` est global. Ce ne serait pas
+        // un import : ce serait proposer à l'enseignant ses propres cartouches,
+        // et les « importer » en ferait des doublons.
+        if (idsActifs.has(grille.id)) continue;
+        const cartouches = await lireCartouchesDuTrimestre(srcId, grille.id);
+        if (cartouches.length > 0) lots.push({ grille, cartouches });
+    }
+    return lots;
 }
 
 /**
@@ -3509,16 +3552,8 @@ async function listerTrimestresAvecCartouches() {
     for (const t of (obtenirTrimestres() || [])) {
         if (!t || !t.id || t.id === actif) continue;
 
-        const cleGrilles = cleSource('grillesTemplates', t.id);
-        // Pas de copie propre de grilles → pas de copie propre de cartouches.
-        if (cleGrilles === 'grillesTemplates') continue;
-
-        const grilles = await db.get(cleGrilles) || [];
-        let nombre = 0;
-        for (const g of grilles) {
-            if (!g || !g.id) continue;
-            nombre += (await lireCartouchesArchivees(t.id, g.id)).length;
-        }
+        const lots = await lotsCartouchesDuTrimestre(t.id);
+        const nombre = lots.reduce((n, lot) => n + lot.cartouches.length, 0);
         if (nombre > 0) resultat.push({ id: t.id, nom: t.nom || t.id, nombre });
     }
 
@@ -3643,17 +3678,13 @@ async function afficherCartouchesTrimestreModal() {
     const srcId = select.value;
     if (!srcId) { preview.classList.add('u-hide'); return; }
 
-    const grilles = await db.get(cleSource('grillesTemplates', srcId)) || [];
+    const lots = await lotsCartouchesDuTrimestre(srcId);
     const grillesLocales = await db.get(cle('grillesTemplates')) || [];
 
     let html = '<div style="max-height: 260px; overflow-y: auto; border: 1px solid var(--bordure-claire); border-radius: 4px; padding: 10px;">';
     let total = 0;
 
-    for (const grille of grilles) {
-        if (!grille || !grille.id) continue;
-        const cartouches = await lireCartouchesArchivees(srcId, grille.id);
-        if (cartouches.length === 0) continue;
-
+    for (const { grille, cartouches } of lots) {
         const dejaLa = grillesLocales.some(g => memeIdentite(g, grille));
         const mention = dejaLa
             ? 'sa grille est déjà dans ce trimestre'
@@ -3700,7 +3731,7 @@ async function importerUneCartoucheTrimestre(srcId, grilleId, cartoucheId) {
     const grilleSource = grilles.find(g => g && g.id === grilleId);
     if (!grilleSource) { alert('Grille introuvable dans le trimestre source.'); return; }
 
-    const cartouches = await lireCartouchesArchivees(srcId, grilleId);
+    const cartouches = await lireCartouchesDuTrimestre(srcId, grilleId);
     const cartoucheSource = cartouches.find(c => c && c.id === cartoucheId);
     if (!cartoucheSource) { alert('Cartouche introuvable dans le trimestre source.'); return; }
 
@@ -3744,13 +3775,7 @@ async function importerToutCartouchesTrimestreModal() {
 
     // Inventaire AVANT de demander confirmation : le nombre annoncé est mesuré,
     // jamais estimé.
-    const grilles = await db.get(cleSource('grillesTemplates', srcId)) || [];
-    const lots = [];
-    for (const grille of grilles) {
-        if (!grille || !grille.id) continue;
-        const cartouches = await lireCartouchesArchivees(srcId, grille.id);
-        if (cartouches.length > 0) lots.push({ grille, cartouches });
-    }
+    const lots = await lotsCartouchesDuTrimestre(srcId);
 
     const total = lots.reduce((n, lot) => n + lot.cartouches.length, 0);
     if (total === 0) { alert('Aucune cartouche à importer dans ce trimestre.'); return; }
@@ -4116,7 +4141,8 @@ window.importerUneCartoucheTrimestre = importerUneCartoucheTrimestre;
 window.importerToutCartouchesTrimestreModal = importerToutCartouchesTrimestreModal;
 window.listerTrimestresAvecCartouches = listerTrimestresAvecCartouches;
 window.copierCartoucheDepuisTrimestre = copierCartoucheDepuisTrimestre;
-window.lireCartouchesArchivees = lireCartouchesArchivees;
+window.lireCartouchesDuTrimestre = lireCartouchesDuTrimestre;
+window.lotsCartouchesDuTrimestre = lotsCartouchesDuTrimestre;
 window.genererSectionImportTrimestreCartouches = genererSectionImportTrimestreCartouches;
 
 /**

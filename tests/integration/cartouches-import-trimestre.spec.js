@@ -65,6 +65,47 @@ test('PREUVE · la section « Importer depuis un autre trimestre » apparaît, a
     expect(r.options.join(' ')).toContain('Automne 2025 (2 cartouches)');
 });
 
+test('PREUVE · trimestre VIVANT (jamais archivé) : la section apparaît quand même', async ({ page }) => {
+    // C'est le cas de Grégoire, et c'est la régression du 24 août : la première
+    // version ne lisait que les copies d'archive `<src>_cartouches_<grille>`, alors
+    // que depuis #358 un trimestre VIVANT a ses grilles namespacées et ses cartouches
+    // dans la clé GLOBALE. La section était invisible pour le cas le plus courant.
+    // Reproduit ici avant d'être corrigé.
+    await ouvrir(page);
+    const r = await page.evaluate(async () => {
+        db.setSync('trimestres', [
+            { id: 'a2026', nom: 'Automne 2026', annee: 2026, session: 'A', actif: true },
+            { id: 'h2026', nom: 'Hiver 2026', annee: 2026, session: 'H', actif: false }
+        ]);
+        db.setSync('trimestreActif', 'a2026');
+        // security-ok: fixtures littérales écrites par le spec, aucune source externe.
+        await db.set('a2026_grillesTemplates', []);
+        await db.set('h2026_grillesTemplates', [{ id: 'GR_H26', nom: 'Grille-5 FR-HOLIS H26', criteres: [], dansBibliotheque: true }]);
+        // AUCUNE copie d'archive : ce trimestre n'a jamais été archivé.
+        // security-ok: fixture de test, littéral écrit par le spec — aucune source externe.
+        await db.set('cartouches_GR_H26', [
+            { id: 'C1', nom: 'Stratégies de lecture', grilleId: 'GR_H26', commentaires: {} },
+            { id: 'C2', nom: 'Plan de rédaction', grilleId: 'GR_H26', commentaires: {} }
+        ]);
+
+        const liste = await listerTrimestresAvecCartouches();
+        await afficherBibliothequeCartouches();
+        await new Promise(res => setTimeout(res, 400));
+        const select = document.getElementById('selectTrimestreImportCartouches');
+        return {
+            liste,
+            sectionRendue: !!select,
+            options: select ? [...select.options].map(o => o.textContent.trim()) : []
+        };
+    });
+
+    console.log('TRIMESTRE VIVANT →', JSON.stringify(r, null, 1));
+    expect(r.liste, 'un trimestre vivant doit être proposé').toHaveLength(1);
+    expect(r.liste[0].nombre).toBe(2);
+    expect(r.sectionRendue, 'la section doit être rendue — c\'est le bug de la capture').toBe(true);
+    expect(r.options.join(' ')).toContain('Hiver 2026 (2 cartouches)');
+});
+
 test('PREUVE · « Voir les cartouches » liste les cartouches groupées par leur grille', async ({ page }) => {
     await ouvrir(page);
     const r = await page.evaluate(async (semer) => {

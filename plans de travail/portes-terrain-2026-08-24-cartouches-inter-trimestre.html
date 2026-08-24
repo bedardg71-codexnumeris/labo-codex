@@ -155,7 +155,7 @@ footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--trait);color:
     <h1>Une cartouche ne voyage jamais seule</h1>
     <p class="chapeau"><strong>La bibliothèque de cartouches a maintenant sa section «&nbsp;Importer depuis un autre trimestre&nbsp;».</strong> C’était la seule des cinq à ne pas l’avoir.</p>
     <p class="chapeau"><strong>Et une cartouche arrive toujours AVEC sa grille.</strong> Ce n’est pas un choix de confort&nbsp;: une cartouche est rangée SOUS sa grille. Sans grille d’accueil, elle n’a aucun endroit où exister. Donc si la grille est déjà là, la cartouche s’y range&nbsp;; sinon la grille est copiée avec elle.</p>
-    <p class="chapeau"><strong>Une rangée commande tout le reste&nbsp;: la 1.1.</strong> Je ne sais pas si tes trimestres archivés portent réellement des copies de cartouches — la copie à l’archivage date du 28 janvier 2026. Si le bloc n’apparaît pas chez toi, ce n’est pas forcément un défaut, et c’est un vrai résultat à me rapporter tel quel.</p>
+    <p class="chapeau"><strong>Ta capture de 17&nbsp;h montrait un bloc absent. C’était mon bug, et il est corrigé.</strong> La 1.95.0 ne lisait que les copies d’archive&nbsp;; or tes trimestres vivants rangent leurs cartouches ailleurs. Reproduit au navigateur, corrigé, verrouillé par deux tests neufs. <strong>Le §2&nbsp;bis raconte la mécanique</strong> — et la rangée 1.1 est là pour que tu confirmes que ça marche vraiment chez toi.</p>
   </header>
   <main id="racine"></main>
   <div id="zone-releve" class="masque">
@@ -164,8 +164,8 @@ footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--trait);color:
   </div>
   <footer>
     Jumeau markdown&nbsp;: <span class="mono">plans de travail/PORTES-TERRAIN-2026-08-24-cartouches-inter-trimestre.md</span><br>
-    Version visée&nbsp;: <span class="mono">1.95.0</span>, build <span class="mono">0824-1653</span>.<br>
-    Sentinelles&nbsp;: <span class="mono">tests/unit/cartouches-import-trimestre.test.js</span> (10 assertions) et <span class="mono">tests/integration/cartouches-import-trimestre.spec.js</span> (6 preuves).
+    Version visée&nbsp;: <span class="mono">1.95.1</span>, build <span class="mono">0824-1716</span>.<br>
+    Sentinelles&nbsp;: <span class="mono">tests/unit/cartouches-import-trimestre.test.js</span> (11 assertions) et <span class="mono">tests/integration/cartouches-import-trimestre.spec.js</span> (7 preuves).
   </footer>
 </div>
 
@@ -178,7 +178,7 @@ const DONNEES = [
    pourquoi:"Deux des quatre échecs des 81 portes du 10 août étaient des faux rouges venus de là — et ce type de faux rouge est indétectable au récit, parce qu’il décrit exactement l’état d’avant le correctif.",
    rangees:[
     {geste:"Fais ton git pull habituel, recharge l’app, lis le bas de la page.",
-     attendu:"1.95.0, build 0824-1653. Plus bas que ça, rien d’autre dans cette liste ne vaut.", tags:["mac"]}
+     attendu:"1.95.1, build 0824-1716. En 1.95.0 la section n’apparaît PAS — c’est précisément le bug corrigé. Plus bas que 1.95.1, rien d’autre dans cette liste ne vaut.", tags:["mac"]}
    ]},
   {num:"0.2", titre:"Ta sauvegarde",
    pourquoi:"Les neuf rangées du §1 écrivent pour de vrai : elles copient des grilles et des cartouches d’un trimestre vers un autre.",
@@ -191,18 +191,18 @@ const DONNEES = [
  {num:"§1", titre:"Données — sur ton corpus",
   alerte:"La rangée 1.1 commande tout le reste. Si elle échoue, les suivantes n’ont pas d’objet — et c’est un vrai résultat, pas un échec de ta part.",
   portes:[
-  {num:"1.1", titre:"Est-ce que le bloc apparaît chez toi ?",
-   pourquoi:"C’est la seule question à laquelle je ne peux pas répondre depuis ici. Le bloc ne s’affiche que pour les trimestres qui possèdent une COPIE ARCHIVÉE de leurs cartouches. Cette copie est posée par l’archivage depuis le 28 janvier 2026 : un trimestre archivé avant cette date a ses grilles, mais pas ses cartouches. Je n’ai pas tes données, donc je ne sais pas.",
+  {num:"1.1", titre:"Le bloc apparaît — c’est ce qui manquait sur ta capture",
+   pourquoi:"Sur ta capture du 24 août à 17 h, la bibliothèque de cartouches passait directement des boutons d’export à « Cartouches disponibles ». Le bloc d’import n’existait pas. La cause est identifiée et reproduite : la 1.95.0 ne lisait que les copies d’archive, alors que tes trimestres vivants rangent leurs cartouches ailleurs. Corrigé en 1.95.1.",
    rangees:[
     {geste:"Conception › Cartouches de rétroaction › « Consulter la bibliothèque ». Fais défiler jusque sous les boutons d’export.",
-     attendu:"un bloc « Importer depuis un autre trimestre » avec un menu déroulant. S’il n’apparaît PAS, coche ✗ et passe à la 1.2 — ce n’est pas forcément un bug.", tags:["donnees","mac"]}
+     attendu:"un bloc « Importer depuis un autre trimestre » avec un menu déroulant. S’il n’apparaît toujours pas en 1.95.1, coche ✗ : c’est un vrai échec, et je veux le savoir.", tags:["donnees","mac"]}
    ]},
-  {num:"1.2", titre:"Si le bloc n’apparaît pas — la mesure qui explique pourquoi",
-   pourquoi:"Cette rangée ne teste rien : elle mesure. Elle me dira si le problème est le code (à corriger) ou tes archives (un chantier de rattrapage séparé, que je ne proposerai qu’avec ton chiffre en main).",
+  {num:"1.2", titre:"Les deux bibliothèques proposent-elles les mêmes trimestres ?",
+   pourquoi:"Cette rangée ne teste pas, elle mesure. Un trimestre peut légitimement manquer côté cartouches : celui dont aucune grille ne porte de cartouche. Mais un trimestre dont tu SAIS qu’il a des cartouches et qui manque, c’est un défaut.",
    rangees:[
-    {geste:"Ouvre la bibliothèque des GRILLES, déplie son menu « Importer depuis un autre trimestre », et note quels trimestres y sont listés.",
-     attendu:"note les noms ci-dessous. Si les grilles listent des trimestres que les cartouches ne listent pas, c’est que ces archives-là n’ont pas de copie de cartouches.",
-     mesure:"Trimestres listés côté GRILLES", tags:["donnees","mac"]}
+    {geste:"Ouvre la bibliothèque des GRILLES, déplie son menu « Importer depuis un autre trimestre », et note les trimestres listés. Compare avec ceux du bloc des cartouches.",
+     attendu:"les mêmes, à l’exception de ceux qui n’ont aucune cartouche. Note les deux listes ci-dessous.",
+     mesure:"Trimestres — côté GRILLES / côté CARTOUCHES", tags:["donnees","mac"]}
    ]},
   {num:"1.3", titre:"L’aperçu dit ce qui va se passer",
    pourquoi:"Avant de cliquer, tu dois savoir si tu vas récupérer une cartouche seule ou une grille entière. C’est écrit grille par grille, au-dessus de chaque groupe.",
@@ -262,6 +262,9 @@ const DONNEES = [
  {num:"§2 bis", titre:"Ce qui a été retiré, et la preuve qui le permet",
   alerte:"Une rangée retirée n’est pas une rangée sautée. Chacune a été exécutée le 24 août dans un vrai navigateur, contre le vrai index.html, AVANT d’être coupée. Ces cartes se lisent, elles ne se cochent pas.",
   portes:[
+  {num:"⚠", titre:"« Un trimestre VIVANT est proposé » — le bug de ta capture",
+   pourquoi:"Deux trimestres, le second jamais archivé : ses grilles dans h2026_grillesTemplates, ses cartouches dans la clé partagée cartouches_GR_H26. AVANT correction : liste vide, section non rendue — reproduit à l’identique de ta capture. APRÈS : « Hiver 2026 (2 cartouches) », section rendue. Break-test : en revenant à la lecture archive-seule, ce cas rougit.",
+   rangees:[]},
   {num:"—", titre:"« Le bloc apparaît avec le bon compte »",
    pourquoi:"Trimestre a2025 semé avec 2 cartouches archivées. Le sélecteur est bien rendu dans le modal, et son option lit exactement « Automne 2025 (2 cartouches) ».",
    rangees:[]},
@@ -297,8 +300,9 @@ const DECISIONS = [
 ];
 
 const ANGLES = [
- "**Ton corpus réel — et c’est le point le plus incertain du lot.** Je ne sais pas si tes trimestres archivés portent réellement des copies de cartouches. La copie à l’archivage date du 28 janvier 2026 et ne couvre que les grilles UTILISÉES du trimestre. Les rangées 1.1, 1.2 et 1.3 sont là pour le MESURER, pas pour le confirmer : je n’ai aucune idée de ce qu’elles vont donner.",
- "**Le rattrapage éventuel.** Si la 1.2 montre que tes archives n’ont pas de cartouches, la fonctionnalité est correcte mais sans matière chez toi. Il faudrait alors un chantier séparé pour reconstituer ces copies — je ne l’ai pas écrit, et je ne le proposerai qu’avec ta mesure en main.",
+ "**Mon erreur de conception, corrigée le jour même.** La 1.95.0 ne lisait que les copies d’archive, en croyant se protéger d’un piège connu du projet. Or depuis #358 les grilles sont rangées par trimestre pour TOUS les trimestres, pas seulement les archivés : un trimestre vivant range ses cartouches dans la clé partagée. Ma garde rendait la section invisible pour le cas le plus courant — le tien. **J’ai reproduit le défaut au navigateur AVANT de le corriger**, plutôt que de conclure que c’étaient tes données qui manquaient de matière. C’est exactement l’erreur que j’ai failli commettre.",
+ "**Le vrai risque, lui, reste gardé.** Une grille présente à l’identique dans les deux trimestres partage littéralement son magasin de cartouches : elle est exclue de l’import, sinon on te proposerait tes propres cartouches et « importer » en ferait des doublons.",
+ "**Ton corpus réel.** Je ne connais pas la répartition de tes cartouches entre tes trimestres. Les rangées 1.2 et 1.3 la mesurent.",
  "**Safari et WebKit n’existent pas dans le conteneur.** Les six preuves du §2 bis viennent de Chromium.",
  "**L’iPad n’existe pas en session.** C’est tout le §2.",
  "**La suite Playwright existante n’a pas été recontrôlée ici.** Les rouges Chromium préexistants mesurés au cycle précédent sont restés tels quels : mon diff ne touche que cartouches.js, le changelog et les points de version."
@@ -485,8 +489,8 @@ document.getElementById("btn-export").addEventListener("click", () => {
   const ok = r.filter(x => etat[x.dataset.id] === "ok").length;
   const ko = r.filter(x => etat[x.dataset.id] === "ko").length;
   const L = [];
-  L.push("PORTES TERRAIN — cartouches inter-trimestre (24 août 2026, 1.95.0 build 0824-1653)");
-  L.push("16 rangées + 4 décisions. 6 comportements retirés sur preuve mesurée (§2 bis).");
+  L.push("PORTES TERRAIN — cartouches inter-trimestre (24 août 2026, 1.95.1 build 0824-1716)");
+  L.push("16 rangées + 4 décisions. 7 comportements retirés sur preuve mesurée (§2 bis).");
   L.push(ok + " passées · " + ko + " échec(s) · " + (r.length - ok - ko) + " non traitée(s)");
   L.push("");
   DONNEES.forEach(sec => {

@@ -186,7 +186,7 @@ describe('Cartouches · import depuis un autre trimestre', () => {
         // neufs. Avec des littéraux, la fonction pouvait les muter sans que rien
         // du magasin ne bouge : le test passait sans rien prouver (break-test B6).
         const grilleSource = (await db.get('a2025_grillesTemplates'))[0];
-        const cartoucheSource = (await win.lireCartouchesArchivees('a2025', 'GRILLE_A25'))[0];
+        const cartoucheSource = (await win.lireCartouchesDuTrimestre('a2025', 'GRILLE_A25'))[0];
         const empreinteAvant = JSON.stringify({ grille: grilleSource, cartouche: cartoucheSource });
         const magasinAvant = JSON.stringify(await db.get('a2025_cartouches_GRILLE_A25'));
 
@@ -210,7 +210,7 @@ describe('Cartouches · import depuis un autre trimestre', () => {
         }]);
 
         const grilleSource = (await db.get('a2025_grillesTemplates'))[0];
-        const cartoucheSource = (await win.lireCartouchesArchivees('a2025', 'GRILLE_A25'))[0];
+        const cartoucheSource = (await win.lireCartouchesDuTrimestre('a2025', 'GRILLE_A25'))[0];
         const empreinteAvant = JSON.stringify({ grille: grilleSource, cartouche: cartoucheSource });
 
         const res = await win.copierCartoucheDepuisTrimestre('a2025', grilleSource, cartoucheSource);
@@ -241,17 +241,46 @@ describe('Cartouches · import depuis un autre trimestre', () => {
         expect(cartouches, 'aucun second exemplaire de la cartouche').toHaveLength(1);
     });
 
-    it('5 · lireCartouchesArchivees ne retombe JAMAIS sur la clé globale du trimestre actif', async () => {
-        const { win, db } = ctx;
-        // Le piège : pas de copie d'archive pour cette grille, mais la clé
-        // GLOBALE porte des cartouches — celles du trimestre ACTIF.
-        await db.set('cartouches_GRILLE_SANS_ARCHIVE', [CARTOUCHE('CART_ACTIF', 'Cartouche du trimestre actif')]);
+    it('5a · un trimestre VIVANT est lisible : ses cartouches sont dans la clé globale, pas dans une archive', async () => {
+        // RÉGRESSION du 24 août, vue sur la capture de Grégoire puis reproduite au
+        // navigateur. Ma première version ne lisait QUE la copie d'archive
+        // `<src>_cartouches_<grille>`. Or depuis #358, `grillesTemplates` est
+        // namespacée pour TOUT trimestre : un trimestre jamais archivé a ses grilles
+        // dans `<src>_grillesTemplates` et ses cartouches dans le GLOBAL. La section
+        // était donc invisible pour le cas le plus courant — le sien.
+        const vivant = monter({
+            h2026_grillesTemplates: [],
+            a2025_grillesTemplates: [{ id: 'GR_VIVANT', nom: 'Grille d\'un trimestre vivant', criteres: [], dansBibliotheque: true }],
+            // Aucune copie d'archive : les cartouches sont dans la clé globale.
+            cartouches_GR_VIVANT: [CARTOUCHE('CART_V1', 'Stratégies de lecture')]
+        });
 
-        const lot = await win.lireCartouchesArchivees('a2025', 'GRILLE_SANS_ARCHIVE');
-        expect(lot, 'lire la source ne doit jamais rendre le contenu de l\'actif').toEqual([]);
+        const lot = await vivant.win.lireCartouchesDuTrimestre('a2025', 'GR_VIVANT');
+        expect(lot, 'les cartouches d\'un trimestre vivant doivent être lues').toHaveLength(1);
+
+        const liste = await vivant.win.listerTrimestresAvecCartouches();
+        expect(liste, 'et le trimestre doit donc être propos\u00e9').toHaveLength(1);
+        expect(liste[0].nombre).toBe(1);
     });
 
-    it('6 · listerTrimestresAvecCartouches compte les archives et ignore le trimestre actif', async () => {
+    it('5b · une grille présente À L\'IDENTIQUE dans le trimestre actif est EXCLUE', async () => {
+        // Le vrai risque du repli sur la clé globale : `cartouches_<id>` est un
+        // magasin unique. Si la même grille (même id) vit dans les deux trimestres,
+        // ce ne serait pas un import — ce serait proposer à l'enseignant ses propres
+        // cartouches, et les « importer » en ferait des doublons.
+        const partage = monter({
+            a2025_grillesTemplates: [{ id: 'GR_PARTAGEE', nom: 'Grille partagée', criteres: [], dansBibliotheque: true }],
+            h2026_grillesTemplates: [{ id: 'GR_PARTAGEE', nom: 'Grille partagée', criteres: [], dansBibliotheque: true }],
+            cartouches_GR_PARTAGEE: [CARTOUCHE('CART_P1', 'Déjà sous les yeux')]
+        });
+
+        expect(await partage.win.lotsCartouchesDuTrimestre('a2025'),
+            'rien à importer : le magasin est le même des deux côtés').toEqual([]);
+        expect(await partage.win.listerTrimestresAvecCartouches(),
+            'et le trimestre n\'est pas proposé').toEqual([]);
+    });
+
+    it('6 · listerTrimestresAvecCartouches compte les cartouches et ignore le trimestre actif', async () => {
         const { win } = ctx;
         const liste = await win.listerTrimestresAvecCartouches();
 
@@ -261,9 +290,9 @@ describe('Cartouches · import depuis un autre trimestre', () => {
         expect(liste[0].nombre, 'les deux cartouches archivées sont comptées').toBe(2);
     });
 
-    it('7 · un trimestre sans copie propre de cartouches n\'est pas proposé', async () => {
+    it('7 · un trimestre dont aucune grille ne porte de cartouche n\'est pas proposé', async () => {
         const ctx2 = monter({
-            a2025_grillesTemplates: [GRILLE_SOURCE()],   // grilles archivées, mais AUCUNE cartouche
+            a2025_grillesTemplates: [GRILLE_SOURCE()],   // des grilles, mais AUCUNE cartouche nulle part
             h2026_grillesTemplates: []
         });
         expect(await ctx2.win.listerTrimestresAvecCartouches()).toEqual([]);
