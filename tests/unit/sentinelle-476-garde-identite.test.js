@@ -270,6 +270,37 @@ describe('CO-24 · nommerCopie', () => {
             .toMatch(/liste\.push\(copie\)/);
     });
 
+    it('les cinq familles passent par le moteur partagé de « dupliquer depuis la bibliothèque »', () => {
+        // #476 volet 2 — second moteur fusionné. La garantie qui a déménagé ici
+        // est le retrait des métadonnées de partage : la copie devient un
+        // original de l'utilisateur, la licence de la source n'a plus cours.
+        // Elle vivait en cinq exemplaires, un par famille ; elle vit ici.
+        const src = lire('bibliotheque-ui.js');
+        expect(src, 'le moteur ne retire plus les métadonnées de partage')
+            .toMatch(/delete copie\.metadata_cc;[\s\S]{0,80}delete copie\.auteurOriginal;/);
+        expect(src, 'le moteur ne désarme plus le drapeau démo de la copie')
+            .toMatch(/copie\.isDemo = false;/);
+
+        for (const [fichier, motif] of Object.entries({
+            'grilles.js': /dupliquerVersBibliotheque\(\{[\s\S]{0,200}prefixeId: 'GRILLE_'/,
+            'echelles.js': /dupliquerVersBibliotheque\(\{[\s\S]{0,200}prefixeId: 'ECH_'/,
+            'cartouches.js': /dupliquerVersBibliotheque\(\{[\s\S]{0,200}prefixeId: 'CART_'/,
+            'productions-bibliotheque-ui.js': /dupliquerVersBibliotheque\(\{[\s\S]{0,200}prefixeId: 'PROD_'/,
+            'pratiques-gestion.js': /dupliquerVersBibliotheque\(\{[\s\S]{0,200}prefixeId: 'pratique_'/
+        })) {
+            expect(lire(fichier), `${fichier} : n'appelle pas le moteur partagé de bibliothèque`)
+                .toMatch(motif);
+        }
+
+        // Et plus aucune famille ne refait le retrait chez elle : s'il y
+        // revenait, c'est que la séquence a été recopiée — le défaut d'origine.
+        for (const fichier of ['grilles.js', 'echelles.js', 'cartouches.js',
+                               'productions-bibliotheque-ui.js']) {
+            expect(lire(fichier), `${fichier} : refait le retrait des métadonnées au lieu de le déléguer`)
+                .not.toMatch(/delete \w+\.metadata_cc/);
+        }
+    });
+
     it('les cinq familles passent par le moteur partagé de « dupliquer et éditer »', () => {
         // C'est ce qui leur fait hériter de la garantie ci-dessus. Si une
         // famille se remettait à dérouler la séquence chez elle, la garde

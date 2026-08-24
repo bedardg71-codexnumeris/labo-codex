@@ -2685,50 +2685,30 @@ async function ajouterMesGrillesALaBibliotheque() {
  * @param {string} id - ID de la grille à dupliquer
  */
 async function dupliquerGrilleBibliotheque(id) {
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === id);
-
-    if (!grille) {
-        alert('Grille introuvable');
-        return;
-    }
-
-    // Auteur de l'utilisateur actif (CC BY) ; fallback « Inconnu » si pas défini
-    const auteurActif = (typeof obtenirProfilAuteurActifSync === 'function'
-        ? obtenirProfilAuteurActifSync()?.auteur_original
-        : null) || 'Inconnu';
-
-    // Créer une copie avec un nouvel ID. La copie devient un nouvel original
-    // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
-    // source était une démo, le nouvel item perd le flag isDemo.
-    const nouvelleGrille = {
-        ...grille,
-        id: genererIdUnique('GRILLE_'),
-        nom: nommerCopie(grille.nom, grilles),
-        auteur: auteurActif,
-        isDemo: false,
-        inspireDe: {
-            nom: grille.nom,
-            auteur: grille.auteur || 'Inconnu',
+    // #476 volet 2 — séquence partagée (BibliothequeUI.dupliquerVersBibliotheque).
+    await BibliothequeUI.dupliquerVersBibliotheque({
+        id: id,
+        prefixeId: 'GRILLE_',
+        lireListe: async () => await db.get(cle('grillesTemplates')) || [],
+        ecrireListe: async (liste) => { await db.set(cle('grillesTemplates'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
+        nommerLaCopie: (copie, source, liste) => { copie.nom = nommerCopie(source.nom, liste); },
+        // ⚠ ÉCART CONNU, RECONDUIT TEL QUEL (#476 volet 2, refactor pur) : cette
+        // voie construit `inspireDe` à la main — trois clés, sans `sourceId` —
+        // là où les échelles, cartouches et pratiques passent par
+        // `BibliothequeUI.forgerInspireDe`, qui en pose quatre. L'arbre de
+        // filiation est donc muet pour les grilles dupliquées par ce chemin.
+        forgerProvenance: (source) => ({
+            nom: source.nom,
+            auteur: source.auteur || 'Inconnu',
             date: new Date().toISOString().slice(0, 10)
-        },
-        dansBibliotheque: true,
-        dateCreation: new Date().toISOString()
-    };
-
-    // Supprimer les métadonnées de partage (c'est une nouvelle grille)
-    delete nouvelleGrille.metadata_cc;
-    delete nouvelleGrille.auteurOriginal;
-
-    // Ajouter à la liste
-    grilles.push(nouvelleGrille);
-    await db.set(cle('grillesTemplates'), grilles);
-
-    // Rafraîchir UI
-    fermerModalBibliothequeGrilles();
-    await afficherListeGrilles();
-    await afficherBibliothequeGrilles();
-
+        }),
+        siIntrouvable: () => alert('Grille introuvable'),
+        rafraichirUI: async () => {
+            fermerModalBibliothequeGrilles();
+            await afficherListeGrilles();
+            await afficherBibliothequeGrilles();
+        }
+    });
 }
 
 /**
@@ -3134,7 +3114,7 @@ async function dupliquerEtEditerGrille(id) {
         id: id,
         prefixeId: 'GRILLE_',
         lireListe: async () => await db.get(cle('grillesTemplates')) || [],
-        ecrireListe: async (liste) => { await db.set(cle('grillesTemplates'), liste); },
+        ecrireListe: async (liste) => { await db.set(cle('grillesTemplates'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
         rafraichirListe: async () => { await afficherListeGrilles(); },
         chargerPourModif: async (idCopie) => { await chargerGrillePourModif(idCopie); },
         champFocus: 'nomGrilleTemplate'

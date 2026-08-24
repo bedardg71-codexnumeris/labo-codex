@@ -697,46 +697,33 @@ async function supprimerProductionDeBibliothequePartagee(id) {
  * @param {string} id - ID de la production à dupliquer
  */
 async function dupliquerProductionBibliotheque(id) {
-    const productions = await db.get(getCleProductions()) || [];
-    const production = productions.find(p => p.id === id);
-
-    if (!production) {
-        notifications.erreur('Production introuvable');
-        return;
-    }
-
-    // Créer une copie avec un nouvel ID. La copie devient un nouvel original
-    // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
-    // source était une démo, la copie perd le flag isDemo. Le champ nom de
-    // production est `titre`, donc inspireDe.nom reçoit production.titre.
-    const nouvelleProduction = {
-        ...production,
-        id: genererIdUnique('PROD_'),
-        titre: `${production.titre} (copie)`,
-        auteur: BibliothequeUI.obtenirAuteurActif(),
-        isDemo: false,
-        inspireDe: {
-            nom: production.titre || 'Inconnu',
-            auteur: production.auteur || 'Inconnu',
+    // #476 volet 2 — séquence partagée (BibliothequeUI.dupliquerVersBibliotheque).
+    await BibliothequeUI.dupliquerVersBibliotheque({
+        id: id,
+        prefixeId: 'PROD_',
+        lireListe: async () => await db.get(getCleProductions()) || [],
+        ecrireListe: async (liste) => { await db.set(getCleProductions(), liste); },
+        // ⚠ DEUX ÉCARTS CONNUS, RECONDUITS TELS QUELS (#476 volet 2, refactor pur).
+        // (1) Les productions nomment par `titre`, pas par `nom`.
+        // (2) Le suffixe est une CONCATÉNATION NUE : dupliquer une copie rend
+        //     « X (copie) (copie) ». C'est le défaut CO-24, que le Lot 5 a
+        //     corrigé partout ailleurs en câblant `nommerCopie` — ce fichier
+        //     n'était pas dans la liste surveillée par sa sentinelle.
+        nommerLaCopie: (copie, source) => { copie.titre = `${source.titre} (copie)`; },
+        // ⚠ ÉCART CONNU : provenance construite à la main, trois clés, sans
+        // `sourceId` ; et `inspireDe.nom` reçoit le TITRE, faute de `nom`.
+        forgerProvenance: (source) => ({
+            nom: source.titre || 'Inconnu',
+            auteur: source.auteur || 'Inconnu',
             date: new Date().toISOString().slice(0, 10)
-        },
-        dansBibliotheque: true,
-        dateCreation: new Date().toISOString()
-    };
-
-    // Supprimer les métadonnées de partage
-    delete nouvelleProduction.metadata_cc;
-    delete nouvelleProduction.auteurOriginal;
-
-    // Ajouter à la liste
-    productions.push(nouvelleProduction);
-    await db.set(getCleProductions(), productions);
-
-    // Rafraîchir UI
-    fermerModalBibliothequeProductions();
-    await afficherBibliothequeProductions();
-    await afficherListeProductions();
-
+        }),
+        siIntrouvable: () => notifications.erreur('Production introuvable'),
+        rafraichirUI: async () => {
+            fermerModalBibliothequeProductions();
+            await afficherBibliothequeProductions();
+            await afficherListeProductions();
+        }
+    });
 }
 
 /**

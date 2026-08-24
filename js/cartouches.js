@@ -3608,48 +3608,29 @@ async function dupliquerEtEditerCartouche(id) {
         id: id,
         prefixeId: 'CART_',
         lireListe: async () => await db.get(`cartouches_${grilleId}`) || [],
-        ecrireListe: async (liste) => { await db.set(`cartouches_${grilleId}`, liste); },
+        ecrireListe: async (liste) => { await db.set(`cartouches_${grilleId}`, liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
         chargerPourModif: async (idCopie) => { await chargerCartouchePourModif(idCopie, grilleId); },
         champFocus: 'nomCartouche'
     });
 }
 
 async function dupliquerCartoucheBibliotheque(id, grilleId) {
-    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
-    const cartouche = cartouches.find(c => c.id === id);
-
-    if (!cartouche) {
-        alert('Cartouche introuvable');
-        return;
-    }
-
-    // Créer une copie avec un nouvel ID. La copie devient un nouvel original
-    // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
-    // source était une démo, la copie perd le flag isDemo.
-    const nouvelleCartouche = {
-        ...cartouche,
-        id: genererIdUnique('CART_'),
-        nom: nommerCopie(cartouche.nom, cartouches),
-        auteur: BibliothequeUI.obtenirAuteurActif(),
-        isDemo: false,
-        inspireDe: BibliothequeUI.forgerInspireDe(cartouche),
-        dansBibliotheque: true,
-        dateCreation: new Date().toISOString()
-    };
-
-    // Supprimer les métadonnées de partage
-    delete nouvelleCartouche.metadata_cc;
-    delete nouvelleCartouche.auteurOriginal;
-
-    // Ajouter à la liste
-    cartouches.push(nouvelleCartouche);
-    await db.set(`cartouches_${grilleId}`, cartouches);
-
-    // Rafraîchir UI
-    fermerModalBibliothequeCartouches();
-    await afficherBanqueCartouches();
-    await afficherBibliothequeCartouches();
-
+    // #476 volet 2 — séquence partagée. Clé PARAMÉTRÉE par la grille porteuse :
+    // d'où des rappels de lecture/écriture plutôt qu'un nom de clé constant.
+    await BibliothequeUI.dupliquerVersBibliotheque({
+        id: id,
+        prefixeId: 'CART_',
+        lireListe: async () => await db.get(`cartouches_${grilleId}`) || [],
+        ecrireListe: async (liste) => { await db.set(`cartouches_${grilleId}`, liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
+        nommerLaCopie: (copie, source, liste) => { copie.nom = nommerCopie(source.nom, liste); },
+        forgerProvenance: (source) => BibliothequeUI.forgerInspireDe(source),
+        siIntrouvable: () => alert('Cartouche introuvable'),
+        rafraichirUI: async () => {
+            fermerModalBibliothequeCartouches();
+            await afficherBanqueCartouches();
+            await afficherBibliothequeCartouches();
+        }
+    });
 }
 
 /**
