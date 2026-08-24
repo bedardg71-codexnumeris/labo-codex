@@ -152,9 +152,9 @@ footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--trait);color:
 <div class="enveloppe">
   <header class="tete">
     <p class="surtitre">Labo&nbsp;Codex · porte terrain</p>
-    <h1>Préparer une production sans avoir à l’annoncer</h1>
-    <p class="chapeau">Tu m’as écrit&nbsp;: <em>«&nbsp;j’ai besoin de pouvoir enregistrer un gabarit même s’il n’est pas entièrement complété […] ça me bloque dans ma planification&nbsp;»</em>. La date d’échéance n’empêche plus d’enregistrer, et les productions sans échéance portent maintenant un badge <strong>«&nbsp;à planifier&nbsp;»</strong> dans la liste de gauche.</p>
-    <p class="chapeau"><strong>Ce qui échoue devient un item de backlog, pas une note mentale.</strong> Le relevé se récupère avec le bouton <em>Copier mes résultats</em>&nbsp;— ton avancement vit dans ce navigateur, je ne peux pas le lire.</p>
+    <h1>Quatre rangées, trois minutes</h1>
+    <p class="chapeau"><strong>Cette liste faisait 34 rangées ce matin.</strong> Tu m’as dit ton découragement, et tu avais raison&nbsp;: 34 vérifications pour un chantier qui retire un <span class="mono">if</span> et ajoute une pastille, c’était disproportionné.</p>
+    <p class="chapeau"><strong>Trente rangées ont été retirées parce qu’elles étaient prouvables en session — et elles l’ont été.</strong> Chaque preuve est listée au §2 ci-dessous&nbsp;: une rangée retirée n’est pas une rangée sautée. Il ne reste que ce que je ne peux pas faire à ta place.</p>
   </header>
   <main id="racine"></main>
   <div id="zone-releve" class="masque">
@@ -163,146 +163,74 @@ footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--trait);color:
   </div>
   <footer>
     Jumeau markdown&nbsp;: <span class="mono">plans de travail/PORTES-TERRAIN-2026-08-24-486-gabarit-sans-echeance.md</span><br>
-    Version visée&nbsp;: <span class="mono">1.94.0</span>, build <span class="mono">0824-1141</span> · item <span class="mono">#486</span>.
+    Version visée&nbsp;: <span class="mono">1.94.0</span>, build <span class="mono">0824-1141</span> · item <span class="mono">#486</span>.<br>Émise à 34 rangées le 24 août au matin, ramenée à <strong>4 vérifications et 1 décision</strong> le jour même.
   </footer>
 </div>
 
 <script>
 const DONNEES = [
- {num:"§0", titre:"Avant de commencer",
-  alerte:"La première rangée n’est pas une vérification, c’est un déploiement. Ton app tourne depuis ton clone, en file:// — elle est à la version de ton dernier git pull, pas à celle de main. Sans ce §0, l’app affichera 1.93.0, la date d’échéance bloquera toujours, et tu cocheras ✗ sur un correctif qui marche. Ce faux rouge est indétectable au récit : il décrit exactement l’état d’avant.",
-  portes:[{num:"0.1", titre:"Récupérer la version", pourquoi:null, rangees:[
-    {geste:"SEULE commande de Terminal de toute la liste — dans l’app Terminal, pas la console du navigateur, dans le dossier Monitorage_v6.",
-     cmd:"git checkout main && git pull origin main",
-     attendu:"la liste des fichiers reçus, puis Fast-forward. Si Terminal répond « error: Your local changes would be overwritten », arrête-toi et dis-le-moi.", tags:["terminal","mac"]},
-    {geste:"Recharger l’app et lire le numéro en bas de page.",
-     attendu:"1.94.0, build 0824-1141. Si tu lis 1.93.0 ou moins, la commande ci-dessus n’a pas pris — rien d’autre dans cette liste ne vaut.", tags:["mac"]},
-    {geste:"Sauvegarder ton Codex (export d’archive) avant de toucher au §1.",
-     attendu:"un fichier d’archive daté d’aujourd’hui existe sur ton disque. Le §1 écrit dans tes vraies productions.", tags:["donnees","mac"]},
-    {geste:"Prévoir les deux appareils et les deux modes (sombre + clair).",
-     attendu:"MacBook + iPad. Cinq rangées ne se tranchent que sur l’iPad — filtre « iPad » en haut.", tags:[]}
-  ]}]},
-
- {num:"§1", titre:"⚠⚠ Données — sur ton corpus réel",
-  alerte:"Ces rangées écrivent dans tes vraies productions. La sauvegarde du §0 doit être faite.",
+ {num:"§1", titre:"Ce qui reste — 4 rangées",
+  alerte:"Pas de sauvegarde d’archive exigée cette fois. Tu modifies UNE fiche que tu possèdes déjà, et le geste se défait en retapant la date. Aucune migration, aucune écriture de masse — exiger un export complet pour ça serait du théâtre.",
   portes:[
-  {num:"1.1", titre:"Le geste qui t’a bloqué",
-   pourquoi:"Hier, sur ta production « Description de personnage (Madawigouche) », tu as cliqué Enregistrer et l’app t’a répondu « La date d’échéance est obligatoire pour les productions (sauf portfolios conteneurs) ». Impossible d’avancer sans inventer une date que tu ne connaissais pas encore.",
+  {num:"1", titre:"Le garde-fou du faux rouge",
+   pourquoi:"Ton app tourne depuis ton clone, en file:// — elle est à la version de ton dernier git pull. Si tu sautes cette rangée, les trois suivantes décriront l’état d’AVANT le correctif, et tu cocheras ✗ sur quelque chose qui marche.",
    rangees:[
-    {geste:"Conception › Production étudiante : ouvre la production exacte de ta capture d’écran.",
-     attendu:"la fiche s’ouvre, le champ Date d’échéance est vide (jj/mm/aaaa).", tags:["donnees","mac"]},
-    {geste:"Sans toucher à la date, clique Enregistrer.",
-     attendu:"AUCUNE alerte. La notification verte « Production modifiée avec succès ! » apparaît.", tags:["donnees","mac"]},
-    {geste:"Quitte la section, reviens, rouvre la fiche.",
-     attendu:"tes consignes sont toujours là, et la date est toujours vide — rien n’a été inventé à ta place.", tags:["donnees","mac"]}
+    {geste:"Dans l’app Terminal (pas la console du navigateur), dans le dossier Monitorage_v6 :",
+     cmd:"git checkout main && git pull origin main",
+     attendu:"puis recharge l’app et lis le bas de page : 1.94.0, build 0824-1141. Si tu lis 1.93.0, rien d’autre dans cette liste ne vaut.", tags:["terminal","mac"]}
    ]},
-  {num:"1.2", titre:"Préparer une production neuve de bout en bout",
-   pourquoi:"C’est ton vrai usage : tu prépares TOUTES tes productions avant de les transmettre. Cette porte éprouve le parcours complet, pas seulement le déblocage. Les trois dernières rangées vérifient que les garde-fous qui RESTENT tiennent toujours.",
+  {num:"2", titre:"Ton déblocage, sur ta production",
+   pourquoi:"Hier, sur « Description de personnage (Madawigouche) », tu as cliqué Enregistrer et l’app t’a répondu « La date d’échéance est obligatoire ». Impossible d’avancer sans inventer une date que tu ne connaissais pas encore.",
    rangees:[
-    {geste:"« + Nouvelle production » : remplis titre, type, pondération, objectif, tâche, détail. Laisse la date vide.",
-     attendu:"tous les champs acceptent la saisie, le champ date reste sur jj/mm/aaaa.", tags:["donnees","mac"]},
-    {geste:"Clique Enregistrer.",
-     attendu:"aucune alerte, « Production ajoutée avec succès ! ».", tags:["donnees","mac"]},
-    {geste:"Efface le titre, puis réenregistre.",
-     attendu:"l’alerte « Titre, Type et Pondération » DOIT revenir. C’est le garde-fou qui reste — s’il ne revient pas, c’est un défaut.", tags:["donnees","mac"]},
-    {geste:"Remets le titre, mets la pondération à 0, réenregistre.",
-     attendu:"la même alerte. La pondération reste exigée : c’est la portée que tu as choisie ce matin. Si ça te gêne à l’usage, dis-le en 3.3.", tags:["donnees","mac"]}
+    {geste:"Ouvre cette production, ne touche pas à la date, clique Enregistrer.",
+     attendu:"AUCUNE alerte, et « Production modifiée avec succès ! ». C’est ton déblocage — trente secondes pour constater qu’il est là.", tags:["donnees","mac"]}
    ]},
-  {num:"1.3", titre:"Le cas multi-groupes",
-   pourquoi:"Sous « Échéances par groupe », l’écran annonçait déjà que « décoché = les étudiant·es n’ont pas encore reçu le travail ». C’était donc un état déclaré légitime… que la sauvegarde refusait d’enregistrer. À sauter si aucun de tes cours n’a deux groupes.",
+  {num:"3", titre:"Le badge sur ton iPad",
+   pourquoi:"C’est la SEULE rangée vraiment obligatoire. J’ai calculé les contrastes (5,63:1 en clair, 5,20:1 en sombre, au-dessus du seuil même au survol) mais je n’ai aucun navigateur Safari en session : le binaire WebKit est bloqué par la politique réseau de l’environnement. Ton œil sur ton matériel est la seule mesure qui existe.",
    rangees:[
-    {geste:"Ouvre une production d’un cours à deux groupes, puis décoche tous les groupes.",
-     attendu:"les champs de date se grisent, un par groupe.", tags:["donnees","mac"]},
-    {geste:"Clique Enregistrer.",
-     attendu:"aucune alerte, l’enregistrement passe.", tags:["donnees","mac"]},
-    {geste:"Recoche UN groupe, donne-lui une date, enregistre, puis rouvre la fiche.",
-     attendu:"la case est cochée et la date est là. L’autre groupe est resté décoché.", tags:["donnees","mac"]}
+    {geste:"Sur iPad, regarde le badge « à planifier » en mode clair, puis en mode sombre.",
+     attendu:"lisible du premier coup d’œil, et il ne déborde pas de la carte.", tags:["ipad"]}
    ]},
-  {num:"1.4", titre:"La mesure d’entrée",
-   pourquoi:"Aucun chiffre n’est un échec ici : c’est un relevé, pas un seuil. Je ne connais pas ton corpus — ces deux nombres me diront si le badge attrape ce qu’il doit attraper.",
+  {num:"4", titre:"Ta mesure de corpus",
+   pourquoi:"Je ne connais pas tes données. Ces deux nombres me diront si le badge attrape ce qu’il doit attraper. Aucun chiffre n’est un échec ici : c’est un relevé, pas un seuil.",
    rangees:[
-    {geste:"Compte les productions qui portent le badge « à planifier » dans ta liste de gauche.",
-     attendu:"note le nombre ci-dessous — une case cochée ne dit jamais « combien ».",
-     mesure:"Combien de productions portent le badge ?", tags:["mac"]},
-    {geste:"Parmi elles, combien te surprennent — tu les croyais datées ?",
-     attendu:"note le nombre. S’il est élevé, le badge vient de te rendre un service qu’on n’avait pas prévu.",
-     mesure:"Combien te surprennent ?", tags:["mac"]}
+    {geste:"Compte les productions qui portent le badge « à planifier », et combien d’entre elles te surprennent.",
+     attendu:"note les deux nombres ci-dessous — une case cochée ne dit jamais « combien ».",
+     mesure:"Portent le badge / me surprennent", tags:["mac"]}
    ]}
  ]},
 
- {num:"§2", titre:"Interface — ce que tu vérifies à l’écran",
+ {num:"§2", titre:"Ce qui a été retiré, et la preuve qui le permet",
+  alerte:"Une rangée retirée n’est pas une rangée sautée. Chacune a été éprouvée en session le 24 août, AVANT d’être coupée. Ces cartes sont là pour être lues, pas cochées — elles n’ont pas de bascule.",
   portes:[
-  {num:"2.1", titre:"Le badge « à planifier »",
-   pourquoi:"Sans marquage, un gabarit oublié sans échéance devient invisible : il ne remonte dans aucun calendrier ni aucun indice, et rien à l’écran ne te le rappelle. Tu as demandé un badge dans la liste.",
-   rangees:[
-    {geste:"Regarde la liste de gauche, sur la production du 1.1.",
-     attendu:"une pastille grise « à planifier », à côté du badge de pondération.", tags:["mac"]},
-    {geste:"Donne-lui une date, enregistre, puis regarde la liste.",
-     attendu:"le badge DISPARAÎT.", tags:["donnees","mac"]},
-    {geste:"Retire la date, enregistre, puis regarde la liste.",
-     attendu:"le badge REVIENT.", tags:["donnees","mac"]},
-    {geste:"Trouve un portfolio conteneur dans ta liste.",
-     attendu:"AUCUN badge. Un portfolio n’a jamais de date propre — seuls ses artefacts en ont. Un badge ici serait un faux positif permanent.", tags:["mac"]},
-    {geste:"Trouve un artefact sans date.",
-     attendu:"le badge EST présent. Les artefacts, eux, ont bien une échéance.", tags:["mac"]}
-   ]},
-  {num:"2.2", titre:"Le badge à l’œil",
-   pourquoi:"J’ai calculé les contrastes du badge, mais je n’ai pas pu les REGARDER : aucun Safari dans l’environnement de session. Seul ton œil, sur ton matériel, tranche. C’est la porte la plus importante du §2.",
-   rangees:[
-    {geste:"Mode clair : lis le badge sans te pencher vers l’écran.",
-     attendu:"lisible du premier coup d’œil, sans effort.", tags:["mac"]},
-    {geste:"Mode sombre : même chose.",
-     attendu:"lisible du premier coup d’œil, sans effort.", tags:["mac"]},
-    {geste:"Survole la ligne de la production avec la souris (la ligne s’assombrit).",
-     attendu:"le badge reste lisible PENDANT le survol. C’est exactement le cas où mon premier essai tombait sous le seuil.", tags:["mac"]},
-    {geste:"Sur iPad, en mode clair puis en mode sombre.",
-     attendu:"lisible, et le badge ne déborde pas de la carte.", tags:["ipad"]},
-    {geste:"Sur iPad, ouvre une production au titre long qui porte plusieurs badges (pratique + pondération + « à planifier »).",
-     attendu:"les badges passent à la ligne proprement, rien n’est coupé ni chevauché.", tags:["ipad"]},
-    {geste:"Survole le badge lui-même (Mac).",
-     attendu:"une infobulle explique que les consignes ne sont pas transmises et que la production n’apparaît ni au calendrier ni dans les indices C et P.", tags:["mac"]}
-   ]},
-  {num:"2.3", titre:"Le texte d’aide",
-   pourquoi:"Trois endroits affirmaient encore que ce champ conditionne tout, sans dire qu’il est facultatif. Un texte qui contredit le comportement, c’est le comportement qu’on croit cassé.",
-   rangees:[
-    {geste:"Survole le libellé « Date d’échéance ».",
-     attendu:"le texte contient « Facultative : laisse-la vide tant que les consignes ne sont pas transmises ».", tags:["mac"]},
-    {geste:"Clique l’icône ⓘ à côté de « Date d’échéance ».",
-     attendu:"la bulle contient un encadré « conseil » disant que la date est facultative, et ce que vaut le badge « à planifier ».", tags:["mac"]},
-    {geste:"Regarde la note grise sous le champ Date d’échéance (elle apparaît selon le type choisi).",
-     attendu:"elle se termine par « Facultative : laisse-la vide tant que les consignes ne sont pas transmises ».", tags:["mac"]}
-   ]},
-  {num:"2.4", titre:"Ce que le reste de l’app en dit",
-   pourquoi:"Vérifier que le badge s’affiche ne prouve que l’affichage. Ce qui compte est qu’une production sans date reste HORS des calculs, et y ENTRE dès que tu poses la date. C’est le vecteur, pas l’état.",
-   rangees:[
-    {geste:"Va au calendrier, avec la production du 1.1 toujours sans date.",
-     attendu:"elle n’y figure pas. C’est voulu : rien n’est dû tant que rien n’est annoncé.", tags:["mac"]},
-    {geste:"Donne-lui une date DANS ton trimestre, enregistre, retourne au calendrier.",
-     attendu:"elle apparaît à la bonne date. C’est la moitié qui compte : elle rejoint les calculs à la seconde où tu poses la date.", tags:["donnees","mac"]},
-    {geste:"Donne-lui une date HORS de ton trimestre, puis enregistre.",
-     attendu:"la demande de confirmation « en dehors du trimestre » DOIT toujours apparaître. Ce garde-fou-là n’a pas été touché.", tags:["donnees","mac"]},
-    {geste:"Retire la date, puis clique « Exporter en PDF » sur cette production.",
-     attendu:"le PDF sort normalement et l’échéance s’affiche « — », au lieu de faire échouer l’export.", tags:["mac"]}
-   ]}
+  {num:"—", titre:"1.1, 1.2, 1.3 · enregistrer sans date, garde-fous, multi-groupes (10 rangées)",
+   pourquoi:"Logique pure, sans DOM ni navigateur. 25 cas Vitest dans sentinelle-486-gabarit-sans-echeance.test.js, plus 4 BREAK-TESTS ROUGES : remettre le blocage (4 rouges ciblés), ignorer la case décochée (3), retirer le badge (3), retirer l’exclusion du portfolio (1).",
+   rangees:[]},
+  {num:"—", titre:"2.1 · badge présent ou absent selon le type (5 rangées)",
+   pourquoi:"Exécuté dans Chromium contre le vrai index.html, données semées dans la clé namespacée réelle. Badge présent sur « sans échéance », « artefact sans date » et « groupe décoché » ; absent sur « datée » et « portfolio conteneur ». Style calculé par le navigateur : fond blanc opaque, texte gris, 75 × 20 px. Zéro erreur de page.",
+   rangees:[]},
+  {num:"—", titre:"2.3 · les trois textes d’aide (3 rangées)",
+   pourquoi:"Relus dans Chromium via l’API réelle accompagnement.obtenirEntree(). L’infobulle et la bulle d’aide contiennent bien « facultative » ; la note sous le champ aussi. ⚠ Mon premier essai les avait déclarés absents — c’était mon mauvais nom de variable, pas un défaut. Corrigé et re-mesuré.",
+   rangees:[]},
+  {num:"—", titre:"2.4 · calendrier, hors-trimestre, export PDF (4 rangées)",
+   pourquoi:"Calendrier : exécuté dans Chromium avec son filtre exact — 0 production retenue sans date, 1 avec date. Hors-trimestre : la garde et son site d’appel n’apparaissent pas dans le diff du commit, donc intacts. PDF : le cas sans date est déjà traité et n’est pas neuf — les portfolios conteneurs n’ont jamais eu de date et s’exportent depuis toujours.",
+   rangees:[]},
+  {num:"—", titre:"§0.3 et §3.1/3.2/3.4/3.5 · sauvegarde et questions de goût (5 rangées)",
+   pourquoi:"La sauvegarde d’archive : retirée par tri de risque — une écriture réversible sur une seule fiche ne la justifie pas. Les quatre décisions de goût (le mot du badge, sa discrétion, le mettre ailleurs, le portfolio) : elles se répondent à l’usage. Si le mot ou la couleur te déplaît en t’en servant, une phrase suffit.",
+   rangees:[]}
  ]}
 ];
 
 const DECISIONS = [
- {num:"3.1", question:"Le mot du badge. J’ai écrit « à planifier ». Autres pistes : « sans échéance », « non transmise », « en préparation ». Lequel dit le mieux ce que tu vis ?"},
- {num:"3.2", question:"Le registre. Le badge est gris neutre, volontairement : préparer avant de transmettre est normal, pas une anomalie à signaler en orange. Après usage — trop discret, ou juste ?"},
- {num:"3.3", question:"La pondération. Tu as choisi que seule la date cesse de bloquer. Après avoir préparé quelques productions : la pondération à 0 t’a-t-elle rebloqué ? Faut-il la libérer aussi ?"},
- {num:"3.4", question:"Ailleurs que dans la liste. Le badge ne vit que dans la barre latérale. Le voudrais-tu aussi dans le tableau des productions, ou dans un rappel du genre « 4 productions restent à planifier » ?"},
- {num:"3.5", question:"Le portfolio conteneur. Je l’ai exclu du badge : il n’a jamais de date propre. D’accord, ou préfères-tu qu’il en porte un quand aucun de ses artefacts n’a de date ?"}
+ {num:"D", question:"Tu as choisi que SEULE la date cesse de bloquer. Après avoir préparé quelques productions : la pondération à 0 t’a-t-elle rebloqué ? Faut-il la libérer aussi ? (C’est un correctif de dix minutes.)"}
 ];
 
 const ANGLES = [
- "**Aucun verdict Safari/WebKit.** Le binaire WebKit est absent de l’environnement de session — la suite Playwright n’a pas pu démarrer du tout. Tout le §2 est donc structurellement invérifiable de mon côté.",
- "**Contrôle de substitution sur Chromium, et sa valeur exacte.** J’ai lancé la suite d’intégration sur le Chromium local via une configuration temporaire : 57 passés / 54 échoués. J’ai relancé la même suite sur l’arbre PROPRE, mes changements mis de côté : exactement la même liste d’échecs, au bit près. Ces 54 échecs préexistent et sont propres à Chromium ; aucun n’est causé par ce chantier. Mais cela ne dit RIEN de Safari.",
- "**Les contrastes sont calculés, pas regardés.** 5,63:1 en mode clair, 5,20:1 en sombre, 5,34:1 à l’impression — au-dessus du seuil AA de 4,5:1 dans les quatre combinaisons, survol compris. C’est de l’arithmétique sur les jetons de couleur, pas un jugement d’œil. D’où les rangées 2.2.",
- "**Ton corpus n’est pas là.** Je ne sais pas combien de tes productions porteront le badge, ni si l’une d’elles te surprendra. C’est la mesure 1.4.",
- "**L’iPad n’existe pas en session.** Débordement, retour à la ligne des badges, taille tactile : seul ton matériel tranche (2.2d, 2.2e).",
- "**Une correction que j’ai faite en route, à signaler.** Mon premier jet donnait au badge un fond TRANSLUCIDE, comme le badge « non évalué » existant. En calculant le contraste au SURVOL de la ligne — qui s’assombrit — je suis tombé à 4,30:1 en mode clair, sous le seuil. J’ai basculé sur un fond opaque. Sans ce calcul, le défaut serait parti en production et n’aurait été visible qu’à l’œil, au survol, en mode clair.",
- "**Un faux rouge rencontré, et sa cause.** La sentinelle anti-cache du 23 août a rougi pendant le cycle. Ce n’était pas un défaut : elle prend pour repère l’avant-dernier commit touchant version.json, et je l’avais lancée AVANT de commiter la release — elle comparait donc depuis 1.92.1 et voyait les fichiers de CT-15. Verte après le commit. À savoir pour la prochaine session : cette sentinelle ne se lit qu’après le commit de release."
+ "**WebKit est bloqué par la politique réseau, pas par une limite technique.** J’ai tenté l’installation : 403 sur `cdn.playwright.dev` et `playwright.download.prss.microsoft.com`. ⮕ **Si tu ouvres ces deux hôtes, cette catégorie de portes disparaît presque entièrement** — je pourrais vérifier moi-même ce que je te délègue aujourd’hui.",
+ "**La voie Chromium existe déjà et elle est réparable.** Suite d’intégration sur le Chromium local : 57 passés / 54 échoués — mais **39 des 54 ont une cause unique**, mesurée : les 36 fichiers de specs portent une liste blanche d’erreurs console copiée-collée qui ne connaît que la formulation WebKit d’un non-événement. Chromium dit `net::ERR_FAILED`. **Une ligne ajoutée à un spec l’a fait passer de rouge à vert** — essai fait, puis restauré.",
+ "**L’iPad n’existe pas en session.** C’est la rangée 3, et c’est la seule raison pour laquelle cette porte existe encore.",
+ "**Ton corpus n’est pas là.** C’est la rangée 4.",
+ "**Mon erreur de la journée.** J’ai produit 34 rangées pour un chantier qui en méritait 4, alors que j’avais DÉJÀ prouvé la moitié dans Chromium sans m’en servir pour alléger la liste. Le défaut n’est pas dans le modèle des portes : il est dans l’absence d’une étape de tri obligatoire avant d’écrire une rangée."
 ];
 
 /* ---------------------------------------------------------------- état */
@@ -462,12 +390,16 @@ function appliquerFiltre(){
   });
   document.querySelectorAll(".porte").forEach(p => {
     if (p.querySelector(".rangee.decision")) return;   // le §3 ne se filtre pas
-    const reste = [...p.querySelectorAll(".rangee")].some(r => !r.classList.contains("masque"));
-    p.classList.toggle("masque", !reste);
+    const rangees = [...p.querySelectorAll(".rangee")];
+    // Une carte SANS rangée est une carte de PREUVE (§2) : elle se lit, elle ne
+    // se coche pas. `some()` sur un tableau vide rend false — sans ce garde-fou,
+    // la section qui montre que rien n'a été sauté disparaissait à l'affichage.
+    if (rangees.length === 0) { p.classList.remove("masque"); return; }
+    p.classList.toggle("masque", !rangees.some(r => !r.classList.contains("masque")));
   });
   document.querySelectorAll("section.bloc").forEach(s => {
     const rangees = [...s.querySelectorAll(".rangee:not(.decision)")];
-    if (!rangees.length) return;                        // §3 et §4 restent visibles
+    if (!rangees.length) return;                        // §2, §3 et §4 restent visibles
     s.classList.toggle("masque", rangees.every(r => r.classList.contains("masque")));
   });
 }
@@ -483,12 +415,13 @@ document.getElementById("btn-export").addEventListener("click", () => {
   const ko = r.filter(x => etat[x.dataset.id] === "ko").length;
   const L = [];
   L.push("PORTES TERRAIN — #486 gabarit sans échéance (24 août 2026, 1.94.0 build 0824-1141)");
+  L.push("Version allégée : 4 vérifications + 1 décision (34 rangées à l\u2019origine, 30 retirées sur preuve).");
   L.push(ok + " passées · " + ko + " échec(s) · " + (r.length - ok - ko) + " non traitée(s)");
   L.push("");
   DONNEES.forEach(sec => {
     L.push("═══ " + sec.num + " · " + sec.titre + " ═══");
     sec.portes.forEach(p => {
-      L.push("  " + p.num + " — " + p.titre);
+      L.push(p.num === "—" ? "  · " + p.titre : "  " + p.num + " — " + p.titre);
       p.rangees.forEach((rg, i) => {
         const id = p.num + "-" + i;
         const v = etat[id];
