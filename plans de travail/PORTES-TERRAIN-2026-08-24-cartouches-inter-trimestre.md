@@ -1,6 +1,6 @@
 # Portes terrain — Importer les cartouches d'un autre trimestre
 
-**Version à tester : 1.95.1**, build `0824-1716` · branche `claude/uniform-save-confirmations-qbb33o`
+**Version à tester : 1.95.2**, build `0824-1738` · branche `claude/uniform-save-confirmations-qbb33o`
 Jumeau interactif : `plans de travail/portes-terrain-2026-08-24-cartouches-inter-trimestre.html`
 
 > Ce qui échoue ici devient un item de BACKLOG avec son numéro de porte, jamais une note mentale.
@@ -23,7 +23,7 @@ copiée avec elle.
 
 **Sept comportements ont été prouvés en session**, dans un vrai navigateur contre
 le vrai `index.html` — ils ne sont pas devenus des rangées. Le relevé de chaque
-preuve est au §2 bis. **Il reste 16 rangées à cocher et 4 décisions.**
+preuve est au §2 bis. **Il reste 20 rangées à cocher et 4 décisions.**
 
 ---
 
@@ -31,7 +31,7 @@ preuve est au §2 bis. **Il reste 16 rangées à cocher et 4 décisions.**
 
 | | Geste | Attendu |
 |---|---|---|
-| 0.1 | `git pull`, recharger l'app, lire le bas de page | **1.95.1, build `0824-1716`.** Plus bas = tu testes l'état d'avant — et en 1.95.0 la section n'apparaît PAS, c'est le bug corrigé. |
+| 0.1 | `git pull`, recharger l'app, lire le bas de page | **1.95.2, build `0824-1738`.** Plus bas = tu testes l'état d'avant — et en 1.95.0 la section n'apparaît PAS, c'est le bug corrigé. |
 | 0.2 | Exporter un Codex de sauvegarde | Tout le §1 écrit dans ton corpus réel. |
 
 ---
@@ -56,7 +56,23 @@ preuve est au §2 bis. **Il reste 16 rangées à cocher et 4 décisions.**
 
 ---
 
-## §2 · Interface — Safari et iPad
+## §2 · Interface — persistance, Safari et iPad
+
+### La section reste ouverte d'un import à l'autre
+
+> Ton retour de 17 h 25 : « je dois l'ouvrir à chaque cartouche ». Corrigé dans
+> les **cinq** bibliothèques. Cartouches et grilles sont prouvées au navigateur
+> (§2 bis) ; les trois autres sont câblées sur le même helper, mais leur rendu
+> n'a pas été joué — d'où ces rangées.
+
+| | Geste | Attendu | Tags |
+|---|---|---|---|
+| 2.0.1 | Cartouches › bibliothèque › choisir un trimestre › « Voir les cartouches » › **faire défiler** › importer une cartouche. | Le trimestre reste choisi, la liste reste dépliée, tu es au même endroit dans la fenêtre. Enchaîne un 2ᵉ import sans rien rouvrir. | ⚠⚠ Données |
+| 2.0.2 | Même geste dans **Échelles de performance**. | Idem. | ⚠⚠ Données |
+| 2.0.3 | Même geste dans **Pratiques de notation**. | Idem. | ⚠⚠ Données |
+| 2.0.4 | Même geste dans **Productions étudiantes**, en utilisant aussi le **filtre de cours** avant d'importer. | Idem, **et le filtre de cours est lui aussi reposé** : c'est le seul des cinq à avoir un second menu qui dépend du premier. | ⚠⚠ Données |
+
+### Safari et iPad
 
 | | Geste | Attendu | Tags |
 |---|---|---|---|
@@ -70,10 +86,14 @@ preuve est au §2 bis. **Il reste 16 rangées à cocher et 4 décisions.**
 
 > Ces cartes se lisent, elles ne se cochent pas. Chacune a été exécutée le 24 août
 > dans Chromium contre le vrai `index.html`. Fichier :
-> `tests/integration/cartouches-import-trimestre.spec.js` (7 cas).
+> `tests/integration/cartouches-import-trimestre.spec.js` (7 cas) et
+> `tests/integration/bibliotheques-import-persistance.spec.js` (3 cas).
 
 | Retiré | Preuve mesurée |
 |---|---|
+| **« La section reste ouverte après un import »** (cartouches) | Trimestre choisi, aperçu déplié, modal défilé à 220 px, puis import. Après : trimestre toujours `h2026`, aperçu toujours déplié **et garni** de ses boutons, défilement **exactement** à 220 px. Break-test : retirer la restauration rougit le cas. |
+| **« Un aperçu REPLIÉ ne se rouvre pas tout seul »** | On repose ce qui était à l'écran, jamais davantage. Break-test : rouvrir inconditionnellement rougit le cas. |
+| **« Même garantie pour les grilles »** | Même scénario côté grilles. Break-test : la première cassure visait le « Tout importer » au lieu de l'import unitaire et n'a rien prouvé — refaite au bon endroit, elle rougit. |
 | ⚠ **« Un trimestre VIVANT est proposé »** — le bug de ta capture | Deux trimestres, le second jamais archivé : ses grilles dans `h2026_grillesTemplates`, ses cartouches dans la clé partagée `cartouches_GR_H26`. **AVANT correction** : liste vide, section non rendue — reproduit à l'identique de ta capture. **APRÈS** : « Hiver 2026 (2 cartouches) », section rendue. Break-test : en revenant à la lecture archive-seule, ce cas rougit. |
 | « Le bloc apparaît avec le bon compte » | Trimestre `a2025` semé avec 2 cartouches archivées. Le sélecteur est bien rendu dans le modal, et son option lit exactement **« Automne 2025 (2 cartouches) »**. |
 | « L'aperçu groupe par grille et annonce le sort de la grille » | L'aperçu contient « Grille-5 FR-HOLIS A25 » et la mention **« sa grille sera copiée avec elle »**. Deux boutons « Importer », un par cartouche. |
