@@ -135,6 +135,31 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   à l'usage et ne mérite pas de porte, une écriture de masse sur le corpus si, (c) une porte est
   le RÉSIDU, pas l'inventaire. Constat du 24 août : 20 portes en 14 jours.
 
+- [ ] **#489 — Le verrouillage des productions est une coquille vide, pas seulement un bouton manquant.**
+  Constat de #468 (« `verrouillerEvaluation` reste sans point d'entrée UI », `SESSION.md:417`,
+  et `AUDIT-conception-2026-08-20.md:533` « verrouillage par ailleurs inerte ») **jamais versé au
+  backlog** — il a vécu neuf jours dans un journal. Mesuré le 24 août, et c'est PIRE que ce qui
+  avait été noté, sur les DEUX bouts de la chaîne :
+  · **Personne ne peut verrouiller.** `verrouillerEvaluation` (`js/productions.js:1386`, exposée
+    ligne 2170) n'a **aucun appelant** : zéro occurrence dans `index.html`, absente du dispatcher
+    de `main.js`, aucun appel JS. Seuls la définition, l'export, un commentaire et un test
+    d'export la mentionnent. Idem pour `verrouillerEvaluationIndividuelle` (`js/evaluation.js:2601`).
+  · **Et rien n'honorerait le verrou s'il était posé.** Le drapeau `verrouille` des productions
+    est ÉCRIT à la création (`productions.js:1181`, `productions-liste.js:338`) et basculé par la
+    fonction morte (`:1398`) — mais **aucun lecteur** ne s'en sert pour restreindre quoi que ce
+    soit. (À ne pas confondre avec les cartouches, dont le verrou est complet et fonctionnel :
+    `js/cartouches.js:1125-1300`.)
+  ⮕ Décision à prendre, pas un correctif évident : **câbler** (le verrou devient réel, il faut
+  alors définir ce qu'il interdit) ou **retirer** (règle zéro-dette : le champ part avec le code
+  mort). Ne pas trancher à la place de Grégoire.
+  ⮕ **Antécédent retrouvé le 24 août** : `stash@{5}` du **15 novembre 2025** (archivé en
+  `archive/stash-5`) porte 1516 lignes de refonte du module Évaluation, dont le renommage
+  `verrouillerEvaluationIndividuelle` → `verrouillerEvaluation` et un passage des jetons de la
+  barre latérale vers une modale. **Valeur documentaire seulement** — `js/evaluation.js` a neuf
+  mois d'évolution depuis, le diff ne s'appliquerait pas et ne doit pas être tenté. Il touche
+  aussi `js/navigation.js`, zone protégée. Son nom, « sauvegarde avant retour arrière », dit
+  qu'il a été délibérément écarté. À lire si la question des jetons ou du verrouillage revient.
+
 ### Audit « Conception » — 20-21 août 2026 (rapport `plans de travail/AUDIT-conception-2026-08-20.md` + addendum)
 
 > ✅ **TRI FAIT le 21 août 2026** (relevé 27/27 de Grégoire, artefact + trace
