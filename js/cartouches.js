@@ -3356,7 +3356,9 @@ async function preparerDonneesBibliothequeCartouches() {
         });
     });
 
-    return { cartesSection1, cartesSection2, doublonsDetectes, disciplines, cartouchesDansBibliotheque };
+    const trimestresAvecCartouches = await listerTrimestresAvecCartouches();
+
+    return { cartesSection1, cartesSection2, doublonsDetectes, disciplines, cartouchesDansBibliotheque, trimestresAvecCartouches };
 }
 
 async function afficherBibliothequeCartouches() {
@@ -3432,8 +3434,356 @@ async function afficherBibliothequeCartouches() {
         filtresSection2: filtresHTML,
         contenuIdListe2: 'listeCartouchesDisponibles',
         contenuSection2: contenuSection2,
+        sectionImportTrimestre: genererSectionImportTrimestreCartouches(data.trimestresAvecCartouches),
         sectionPartages: window.partageSection ? partageSection.genererSectionHTML('cartouche') : ''
     });
+}
+
+/* ===================================================================
+   IMPORT INTER-TRIMESTRE DE CARTOUCHES
+
+   Demandé par Grégoire le 24 août 2026 : « je veux pouvoir importer les
+   cartouches d'un autre trimestre, comme je peux le faire avec les autres
+   éléments ». Grilles, échelles, productions et pratiques avaient la section ;
+   les cartouches, non.
+
+   CE QUI REND CE CAS DIFFÉRENT DES QUATRE AUTRES. Une cartouche n'est pas
+   rangée dans une collection à elle : elle est ANCRÉE à sa grille par la clé
+   `cartouches_{grilleId}`. Une cartouche sans grille d'accueil n'est pas
+   « orpheline » au sens figuré — elle est littéralement introuvable, parce
+   qu'il n'existe aucun magasin où la lire. Le projet le dit déjà en toutes
+   lettres dans `partageSection.dupliquerVersMesDocuments` : « Une cartouche est
+   inutilisable sans sa grille : on duplique la grille parente entière. »
+
+   D'où les deux chemins de `copierCartoucheDepuisTrimestre` :
+     · la grille de MÊME LIGNÉE est déjà dans le trimestre actif (l'enseignant
+       l'a importée avant) → la cartouche s'y rattache, et AUCUNE seconde grille
+       n'est créée. C'est le point qui évite de refabriquer le problème des
+       doublons de bibliothèque (#291 / #476) à chaque import de cartouche ;
+     · sinon → la grille parente est copiée en n'emportant QUE la cartouche
+       demandée, via `dupliquerGrillePartagee` (le lecteur de cartouches est
+       injecté, c'est exactement ce pour quoi ce point d'extension existe).
+
+   La lignée est décidée par `memeIdentite` (js/identite-item.js), jamais par le
+   nom : Grégoire a deux échelles réellement homonymes en a2025 (#450).
+   =================================================================== */
+
+/**
+ * Lit les cartouches d'une grille TELLES QU'ARCHIVÉES dans un trimestre source.
+ *
+ * ⚠ Clé d'archive EXPLICITE, jamais `cleSource()`. Pour une clé `cartouches_*`
+ * sans copie d'archive, `cleSource` retombe volontairement sur la clé GLOBALE —
+ * qui contient les cartouches du trimestre ACTIF. On afficherait alors, sous le
+ * nom d'un autre trimestre, ce que l'enseignant a déjà sous les yeux, et
+ * « importer » en fabriquerait un doublon. C'est la mécanique de #464/CT-26 :
+ * une clé que son appelant croit namespacée devient globale de fait.
+ *
+ * @param {string} srcId - id du trimestre source (ex. 'a2025')
+ * @param {string} grilleId - id de la grille DANS ce trimestre
+ * @returns {Promise<Array>} les cartouches archivées, [] si aucune copie
+ */
+async function lireCartouchesArchivees(srcId, grilleId) {
+    const lot = await db.get(`${srcId}_cartouches_${grilleId}`);
+    return Array.isArray(lot) ? lot : [];
+}
+
+/**
+ * Liste les trimestres qui possèdent des cartouches PROPRES (copies d'archive),
+ * avec leur compte. Calque de `listerTrimestresAvecGrilles` : un trimestre
+ * vivant partage le catalogue global, il n'y a rien à lui importer.
+ *
+ * @returns {Promise<Array<{id:string, nom:string, nombre:number}>>}
+ */
+async function listerTrimestresAvecCartouches() {
+    if (typeof obtenirTrimestres !== 'function' || typeof cleSource !== 'function') return [];
+    // Garde D-C7, reprise des grilles : la CIBLE d'un import n'est JAMAIS un
+    // trimestre archivé — la copie irait dans le catalogue global, invisible
+    // depuis l'actif. Aucune source listée → pas de section affichée.
+    if (window.estTrimestreArchive && window.estTrimestreArchive()) return [];
+
+    const actif = (typeof obtenirTrimestreId === 'function')
+        ? obtenirTrimestreId()
+        : (window.trimestreActif || '');
+
+    const resultat = [];
+    for (const t of (obtenirTrimestres() || [])) {
+        if (!t || !t.id || t.id === actif) continue;
+
+        const cleGrilles = cleSource('grillesTemplates', t.id);
+        // Pas de copie propre de grilles → pas de copie propre de cartouches.
+        if (cleGrilles === 'grillesTemplates') continue;
+
+        const grilles = await db.get(cleGrilles) || [];
+        let nombre = 0;
+        for (const g of grilles) {
+            if (!g || !g.id) continue;
+            nombre += (await lireCartouchesArchivees(t.id, g.id)).length;
+        }
+        if (nombre > 0) resultat.push({ id: t.id, nom: t.nom || t.id, nombre });
+    }
+
+    resultat.sort((a, b) => String(b.id).localeCompare(String(a.id)));
+    return resultat;
+}
+
+/**
+ * Construit le bloc « Importer depuis un autre trimestre » du modal.
+ * Rien à importer → chaîne vide, et `creerModal` n'affiche aucune section.
+ */
+function genererSectionImportTrimestreCartouches(trimestres) {
+    if (!Array.isArray(trimestres) || trimestres.length === 0) return '';
+
+    const options = trimestres.map(t =>
+        `<option value="${echapperHtml(t.id)}">${echapperHtml(t.nom)} (${t.nombre} cartouche${t.nombre > 1 ? 's' : ''})</option>`
+    ).join('');
+
+    return `
+        <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
+            <h4 style="color: var(--accent-primaire); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre</h4>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <select id="selectTrimestreImportCartouches" class="controle-form" style="flex: 1; min-width: 200px;">
+                    <option value="">-- Choisir un trimestre --</option>
+                    ${options}
+                </select>
+                <button data-action="afficherCartouchesTrimestreModal" class="btn btn-secondaire btn-compact">Voir les cartouches</button>
+                <button data-action="importerToutCartouchesTrimestreModal" class="btn btn-principal btn-compact">Tout importer</button>
+            </div>
+            <p style="margin: 10px 0 0; font-size: 0.85rem; color: var(--gris-moyen);">
+                Une cartouche arrive toujours avec sa grille : si la grille est déjà dans ce trimestre, la cartouche s'y range ; sinon la grille est copiée avec elle.
+            </p>
+            <div id="previewCartouchesTrimestre" class="u-hide" style="margin-top: 10px;"></div>
+        </div>`;
+}
+
+/**
+ * Pose la trace de provenance sur une COPIE de la cartouche source.
+ *
+ * Les DEUX chemins de `copierCartoucheDepuisTrimestre` passent par ici, et c'est
+ * le point : `dupliquerGrillePartagee` recopie la cartouche via `copiePropre`,
+ * qui remplace l'`id` sans rien poser d'autre. Sans cette trace, la cartouche
+ * arrivée par le chemin « copie de la grille » ne portait AUCUNE lignée — et le
+ * réimport suivant, passé par le rattachement, ne la reconnaissait pas : deux
+ * exemplaires de la même cartouche, en silence. Trouvé par la preuve
+ * d'intégration, pas par la sentinelle unitaire, qui n'enchaînait pas les deux
+ * chemins.
+ *
+ * @param {Object} cartoucheSource
+ * @param {string} srcId - id du trimestre source
+ * @returns {Object} copie tracée (la source n'est pas touchée)
+ */
+function marquerProvenanceCartouche(cartoucheSource, srcId) {
+    return {
+        ...cartoucheSource,
+        idOriginal: cartoucheSource.id,
+        inspireDe: BibliothequeUI.forgerInspireDe(cartoucheSource),
+        inspireDeTrimestre: srcId,
+        dansBibliotheque: true,
+        dateImport: new Date().toISOString()
+    };
+}
+
+/**
+ * Copie UNE cartouche d'un trimestre source vers le trimestre ACTIF.
+ * La source n'est jamais mutée (la copie part d'un littéral neuf).
+ *
+ * @param {string} srcId - id du trimestre source
+ * @param {Object} grilleSource - la grille parente, telle que lue dans la source
+ * @param {Object} cartoucheSource - la cartouche à copier
+ * @returns {Promise<{ajoutee:boolean, conflit:Object|null, grilleCreee:Object|null, grilleAccueil:Object|null}>}
+ */
+async function copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSource) {
+    const grillesLocales = await db.get(cle('grillesTemplates')) || [];
+    const grilleAccueil = grillesLocales.find(g => memeIdentite(g, grilleSource)) || null;
+
+    // Chemin 1 — aucune grille d'accueil : la cartouche n'aurait aucun magasin
+    // où vivre. On copie la grille parente en n'emportant QUE cette cartouche.
+    if (!grilleAccueil) {
+        const source = Object.assign({}, grilleSource, {
+            inspireDe: BibliothequeUI.forgerInspireDe(grilleSource),
+            inspireDeTrimestre: srcId
+        });
+        const res = partageSection.dupliquerGrillePartagee(
+            source,
+            () => [marquerProvenanceCartouche(cartoucheSource, srcId)]
+        );
+        return { ajoutee: true, conflit: null, grilleCreee: res.grille, grilleAccueil: null };
+    }
+
+    // Chemin 2 — la grille de même lignée est déjà là : la cartouche s'y range.
+    const cleDest = `cartouches_${grilleAccueil.id}`;
+    const existantes = await db.get(cleDest) || [];
+
+    const copie = {
+        ...marquerProvenanceCartouche(cartoucheSource, srcId),
+        id: genererIdUnique('CART_'),
+        grilleId: grilleAccueil.id
+    };
+
+    // #476 — garde d'identité AU POINT D'ÉCRITURE : réimporter deux fois la même
+    // cartouche ne doit pas en empiler deux exemplaires silencieusement.
+    const garde = ajouterAvecGardeIdentite(existantes, copie);
+    if (!garde.ajoute) {
+        return { ajoutee: false, conflit: garde.conflit, grilleCreee: null, grilleAccueil };
+    }
+
+    // security-ok: la source est une copie d'archive écrite par l'app elle-même, pas un fichier externe.
+    await db.set(cleDest, garde.liste);
+    return { ajoutee: true, conflit: null, grilleCreee: null, grilleAccueil };
+}
+
+/**
+ * Bouton « Voir les cartouches » : liste les cartouches du trimestre choisi,
+ * groupées par leur grille, avec un bouton « Importer » par ligne.
+ */
+async function afficherCartouchesTrimestreModal() {
+    const select = document.getElementById('selectTrimestreImportCartouches');
+    const preview = document.getElementById('previewCartouchesTrimestre');
+    if (!select || !preview) return;
+
+    const srcId = select.value;
+    if (!srcId) { preview.classList.add('u-hide'); return; }
+
+    const grilles = await db.get(cleSource('grillesTemplates', srcId)) || [];
+    const grillesLocales = await db.get(cle('grillesTemplates')) || [];
+
+    let html = '<div style="max-height: 260px; overflow-y: auto; border: 1px solid var(--bordure-claire); border-radius: 4px; padding: 10px;">';
+    let total = 0;
+
+    for (const grille of grilles) {
+        if (!grille || !grille.id) continue;
+        const cartouches = await lireCartouchesArchivees(srcId, grille.id);
+        if (cartouches.length === 0) continue;
+
+        const dejaLa = grillesLocales.some(g => memeIdentite(g, grille));
+        const mention = dejaLa
+            ? 'sa grille est déjà dans ce trimestre'
+            : 'sa grille sera copiée avec elle';
+
+        html += `<h5 style="margin: 12px 0 6px; color: var(--gris-moyen); font-size: 0.9rem;">
+                    ${echapperHtml(grille.nom || 'Grille sans titre')}
+                    <span style="font-weight: 400; font-style: italic;"> — ${mention}</span>
+                 </h5>`;
+
+        cartouches.forEach(cartouche => {
+            total++;
+            const nbCommentaires = Object.keys(cartouche.commentaires || {}).length;
+            html += `
+                <div style="padding: 8px; border-bottom: 1px solid var(--bordure-claire); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                    <div style="min-width: 0;">
+                        <strong>${echapperHtml(cartouche.nom || 'Sans titre')}</strong>
+                        <br><small style="color: var(--gris-moyen);">${nbCommentaires} commentaire${nbCommentaires > 1 ? 's' : ''}</small>
+                    </div>
+                    <button data-action="importerUneCartoucheTrimestre" data-param="${echapperHtml(srcId)}" data-param2="${echapperHtml(grille.id)}" data-param3="${echapperHtml(cartouche.id)}" class="btn btn-confirmer btn-tres-compact">
+                        Importer
+                    </button>
+                </div>`;
+        });
+    }
+    html += '</div>';
+
+    preview.innerHTML = total > 0
+        ? html
+        : '<p style="color: var(--gris-clair); font-style: italic;">Aucune cartouche trouvée dans ce trimestre.</p>';
+    preview.classList.remove('u-hide');
+}
+
+/**
+ * Bouton « Importer » d'une ligne d'aperçu : copie UNE cartouche.
+ */
+async function importerUneCartoucheTrimestre(srcId, grilleId, cartoucheId) {
+    if (window.estTrimestreArchive && window.estTrimestreArchive()) {
+        alert('Import impossible : le trimestre actif est archivé (consultation). Active un trimestre courant pour importer des cartouches.');
+        return;
+    }
+
+    const grilles = await db.get(cleSource('grillesTemplates', srcId)) || [];
+    const grilleSource = grilles.find(g => g && g.id === grilleId);
+    if (!grilleSource) { alert('Grille introuvable dans le trimestre source.'); return; }
+
+    const cartouches = await lireCartouchesArchivees(srcId, grilleId);
+    const cartoucheSource = cartouches.find(c => c && c.id === cartoucheId);
+    if (!cartoucheSource) { alert('Cartouche introuvable dans le trimestre source.'); return; }
+
+    const res = await copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSource);
+
+    await afficherBanqueCartouches();
+    await afficherBibliothequeCartouches();
+
+    if (!res.ajoutee) {
+        const nomEnPlace = (res.conflit && res.conflit.nom) || 'Cette cartouche';
+        notifications.info(
+            `« ${nomEnPlace} » est déjà dans ce trimestre.`,
+            'Pour en avoir un second exemplaire, utilise « Dupliquer ».');
+        return;
+    }
+
+    const nom = cartoucheSource.nom || 'Cartouche';
+    notifications.succes(
+        `« ${nom} » importée dans ce trimestre.`,
+        res.grilleCreee
+            ? `Sa grille « ${res.grilleCreee.nom || 'Sans titre'} » a été copiée avec elle.`
+            : `Rangée dans « ${(res.grilleAccueil && res.grilleAccueil.nom) || 'sa grille'} », déjà présente.`);
+}
+
+/**
+ * Bouton « Tout importer » : copie toutes les cartouches du trimestre choisi.
+ */
+async function importerToutCartouchesTrimestreModal() {
+    if (window.estTrimestreArchive && window.estTrimestreArchive()) {
+        alert('Import impossible : le trimestre actif est archivé (consultation). Active un trimestre courant pour importer des cartouches.');
+        return;
+    }
+
+    const select = document.getElementById('selectTrimestreImportCartouches');
+    if (!select || !select.value) { alert('Sélectionne d\'abord un trimestre.'); return; }
+
+    const srcId = select.value;
+    const trimestres = (typeof obtenirTrimestres === 'function') ? (obtenirTrimestres() || []) : [];
+    const trimSrc = trimestres.find(t => t && t.id === srcId);
+    const nomTrim = (trimSrc && trimSrc.nom) ? trimSrc.nom : srcId;
+
+    // Inventaire AVANT de demander confirmation : le nombre annoncé est mesuré,
+    // jamais estimé.
+    const grilles = await db.get(cleSource('grillesTemplates', srcId)) || [];
+    const lots = [];
+    for (const grille of grilles) {
+        if (!grille || !grille.id) continue;
+        const cartouches = await lireCartouchesArchivees(srcId, grille.id);
+        if (cartouches.length > 0) lots.push({ grille, cartouches });
+    }
+
+    const total = lots.reduce((n, lot) => n + lot.cartouches.length, 0);
+    if (total === 0) { alert('Aucune cartouche à importer dans ce trimestre.'); return; }
+
+    const confirmation = confirm(
+        `Veux-tu importer les ${total} cartouche(s) de ${nomTrim} dans ce trimestre ?\n\n` +
+        'Chaque cartouche est COPIÉE (l\'original du trimestre source reste intact). ' +
+        'Une grille absente d\'ici est copiée avec ses cartouches.'
+    );
+    if (!confirmation) return;
+
+    let ajoutees = 0;
+    let deja = 0;
+    let grillesCreees = 0;
+    for (const lot of lots) {
+        for (const cartouche of lot.cartouches) {
+            const res = await copierCartoucheDepuisTrimestre(srcId, lot.grille, cartouche);
+            if (res.ajoutee) {
+                ajoutees++;
+                if (res.grilleCreee) grillesCreees++;
+            } else {
+                deja++;
+            }
+        }
+    }
+
+    await afficherBanqueCartouches();
+    await afficherBibliothequeCartouches();
+
+    let details = `${ajoutees} cartouche(s) copiée(s).`;
+    if (grillesCreees > 0) details += ` ${grillesCreees} grille(s) copiée(s) avec elles.`;
+    if (deja > 0) details += ` ${deja} étai(en)t déjà présente(s).`;
+    notifications.succes('Import terminé', details);
 }
 
 /**
@@ -3757,6 +4107,17 @@ window.dupliquerCartoucheBibliotheque = dupliquerCartoucheBibliotheque;
 window.dupliquerEtEditerCartouche = dupliquerEtEditerCartouche;
 window.supprimerCartoucheDefinitivement = supprimerCartoucheDefinitivement;
 window.supprimerCartoucheDeBibliothequePartagee = supprimerCartoucheDeBibliothequePartagee;
+
+// Import inter-trimestre de cartouches (24 août 2026). Les trois premiers sont
+// les cibles des `data-action` du modal ; les suivants sont exposés pour être
+// éprouvés (sentinelle Vitest + preuve d'intégration).
+window.afficherCartouchesTrimestreModal = afficherCartouchesTrimestreModal;
+window.importerUneCartoucheTrimestre = importerUneCartoucheTrimestre;
+window.importerToutCartouchesTrimestreModal = importerToutCartouchesTrimestreModal;
+window.listerTrimestresAvecCartouches = listerTrimestresAvecCartouches;
+window.copierCartoucheDepuisTrimestre = copierCartoucheDepuisTrimestre;
+window.lireCartouchesArchivees = lireCartouchesArchivees;
+window.genererSectionImportTrimestreCartouches = genererSectionImportTrimestreCartouches;
 
 /**
  * Importe une liste de cartouches externes (archives, voûte, etc.).
