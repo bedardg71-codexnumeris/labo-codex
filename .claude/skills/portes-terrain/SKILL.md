@@ -23,8 +23,48 @@ description: >
 
 ## 0. QUAND DÉCLENCHER
 
+### ⚠⚠ LES DEUX RÈGLES QUI PASSENT AVANT TOUT LE RESTE (24 août 2026)
+
+**Elles viennent de Grégoire, ce jour-là : « Je suis complètement découragé par
+les portes terrain nombreuses. […] Ma préparation de cours n'avance pas pendant
+ce temps. »** Il avait 24 portes d'une session et 35 d'une autre. Une liste que
+personne ne peut faire ne protège rien.
+
+**RÈGLE 1 — Une porte n'existe que si AUCUNE MACHINE ne peut répondre.**
+Le défaut par défaut est d'écrire un test, même si ça coûte plus de travail à la
+session. Une vérification automatisable coûte une heure UNE FOIS ; la même
+vérification en porte coûte dix minutes à Grégoire À CHAQUE CYCLE.
+Avant d'écrire une rangée, se demander : *un test pourrait-il répondre à ça ?*
+Si oui, l'écrire, et ne pas mettre la rangée.
+
+> **L'incident qui fonde la règle.** La porte terrain du 24 août (#476 volet 2)
+> comptait 24 rangées. Le banc de caractérisation en mesurait déjà **19**, dans
+> un vrai navigateur contre le vrai `index.html`. Une 20ᵉ — « la copie s'ouvre-t-elle
+> vraiment MODIFIABLE à l'écran ? » — était un vrai trou, et elle a été
+> automatisée en une heure. Les 3 portes iPad avaient été posées **par réflexe de
+> gabarit** : ce chantier n'avait touché aucun CSS ni aucune mise en page.
+> Restaient **3 portes réelles**. Le modèle disait pourtant déjà de ne pas lister
+> de portes sans objet — il a été appliqué mécaniquement.
+
+**RÈGLE 2 — La vérification PRÉALABLE n'est due que si un raté est IRRÉVERSIBLE.**
+Grégoire est le seul utilisateur de Labo Codex. Une porte existe pour attraper un
+défaut *avant* qu'il le rencontre — mais il est la seule personne qui le
+rencontrerait, et le coût d'un raté est « il le dit, on corrige ». Le coût de la
+porte, lui, est prélevé sur sa préparation de cours.
+
+- **Porte terrain due** : perte de données, corruption, écriture irréversible sur
+  un trimestre réel, migration de masse.
+- **Pas de porte** : apparence, confort, comportement, renommage, refactor. On
+  livre, et il signale ce qui cloche en usage normal.
+
+⮕ Ces deux règles ne dispensent PAS du §4 (« ce que je n'ai pas pu vérifier ») :
+ce qui n'est pas vérifié doit être DIT, qu'on en fasse une porte ou non.
+
+### Le cas général
+
 Dès qu'un cycle livre du changement que la session **ne peut pas éprouver
-elle-même**. Concrètement, presque toujours :
+elle-même** — ET que la règle 1 ne permet pas de l'automatiser, ET que la
+règle 2 en fait un enjeu de données. Concrètement :
 
 - WebKit n'existe pas dans les conteneurs — **tout ce qui touche Safari et
   l'iPad est structurellement invérifiable en session** ;
@@ -290,5 +330,6 @@ pas une note mentale » — le dire dans l'en-tête, et le tenir au retour.
 
 | Date | Changement |
 |---|---|
+| 2026-08-24 | **Les deux règles de tête** (§0) : une porte n'existe que si aucune machine ne peut répondre ; la vérification préalable n'est due que si un raté est irréversible. Adoptées après que Grégoire eut dit son découragement devant 24 portes d'une session et 35 d'une autre — dont 19 étaient déjà mesurées par les tests. Le gabarit avait été appliqué mécaniquement, y compris 3 portes iPad sur un chantier sans une ligne de CSS. |
 | 2026-08-11 | Bouton « Copier mes résultats » rendu obligatoire, éprouvé au navigateur avant publication. Et la leçon de son premier usage : une case à cocher ne porte ni un nombre ni un verdict — les rangées du §3 et les rangées de mesure prennent un champ de saisie, pas une bascule. |
 | 2026-08-10 | Création, à la demande de Grégoire (« je veux qu'on utilise dorénavant ce modèle »). Codifie l'artefact du cycle 1.67.1 → 1.71.1, lui-même repris du modèle de captures qu'il avait versé au dépôt le 9 août. La règle 1 (symptôme, pas mécanisme) vient de son rappel « je ne suis pas développeur », dans la même réponse. |
