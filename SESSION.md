@@ -106,6 +106,25 @@
        posés à Grégoire ; le socle sûr a été retenu pour ce cycle, la suite
        reste sa décision.
 
+     ▣ FICHE D'ARBITRAGE PRODUITE, EN ATTENTE DE VERDICT.
+       `plans de travail/ARBITRAGE-2026-08-24-476-volet2-duplications.md` et son
+       artefact jumeau (lien dans le markdown) : 11 décisions, D1…D10 sur les
+       écarts et D0 sur l'orientation du reste. Modèle des portes terrain
+       appliqué, avec sa règle du 11 août : ce sont des DÉCISIONS, donc chaque
+       ligne porte un CHAMP DE SAISIE et jamais une case à cocher, et le bouton
+       « Copier mes résultats » a été éprouvé au navigateur avant publication.
+       ⚠ UN CONSTAT A ÉMERGÉ EN RÉDIGEANT LA FICHE, et il change le poids de D1 :
+         `estItemDemo` (js/bibliotheque-ui.js:72) rend vrai si `isDemo === true`
+         OU si l'auteur vaut `Demo Labo Codex`. La copie faite depuis la barre
+         latérale garde LES DEUX, et `appliquerModeLectureSeuleDemo` désactive
+         alors tous les champs. Donc : DUPLIQUER UN EXEMPLE DEPUIS LA BARRE
+         LATÉRALE REND UNE COPIE QU'ON NE PEUT TOUJOURS PAS MODIFIER — soit
+         exactement ce que le geste est censé débloquer. Ce n'est plus un écart
+         de style, c'est un défaut fonctionnel. Écrire la fiche en langage
+         d'usage est ce qui l'a fait apparaître : la question « qu'est-ce que ça
+         lui fait, à lui ? » a trouvé ce que « quels champs diffèrent ? » avait
+         laissé passer.
+
      ▣ DETTE ADJACENTE DÉCOUVERTE : `index.html` porte 11 AUTRES ID DOM
        DUPLIQUÉS, très concentrés sur la zone échelles. Même classe de bug que
        celui du Lot A. Chacun signifie qu'un `getElementById` ne touche jamais
