@@ -5,7 +5,7 @@
 **Artefact interactif** : https://claude.ai/code/artifact/886278b4-72e8-43b3-ba74-cb8116eefded
 **Jumeau HTML versionné** : `plans de travail/portes-terrain-2026-08-24-486-gabarit-sans-echeance.html`
 **Volume** : **4 vérifications · 1 décision** — environ trois minutes
-**État** : ✅ **RELEVÉE le 24 août** — **3 passées · 0 échec · 1 réponse ambiguë (de ma faute)** · décision D rendue
+**État** : ✅ **CLOSE le 24 août — 4/4, zéro échec, zéro reliquat** · décision D rendue
 
 > **Relevé de Grégoire.** Rangées 1, 2 et 3 ✓ — dont la 3, la seule vraiment
 > obligatoire : **le badge est lisible sur son iPad, en mode clair et en mode
@@ -19,16 +19,17 @@
 > de portfolio, qui n'ont pas de pondération propre. **La portée de #486 était
 > juste : la date seule cesse de bloquer, et rien d'autre n'est à libérer.**
 >
-> ⚠ **Rangée 4 — défaut de MA conception, pas du relevé.** Réponse reçue :
-> « aucune », dans un champ que j'avais libellé « Portent le badge / me
-> surprennent » — **UN seul champ pour DEUX nombres.** C'est exactement
-> l'anti-pattern que le skill `portes-terrain` interdit depuis le 11 août
-> (« toute rangée qui produit un chiffre porte son propre champ »), et je l'ai
-> reproduit. La réponse ne peut donc pas être interprétée sans lui redemander.
-> **Lecture la plus probable : « aucune ne me surprend »** — parce qu'un « zéro
-> production ne porte le badge » contredirait les rangées 2 et 3, toutes deux
-> vertes (il a enregistré sans date, et il a VU le badge sur iPad). Versé en
-> #488.
+> **Rangée 4 — LEVÉE après une question de clarification.** Réponse d'abord
+> reçue : « aucune », dans un champ que j'avais libellé « Portent le badge / me
+> surprennent » — **UN seul champ pour DEUX nombres**, exactement l'anti-pattern
+> que le skill `portes-terrain` interdit depuis le 11 août, et que j'ai reproduit.
+> Question posée, réponse de Grégoire : **« oui, elle porte la pastille ».**
+> ⮕ **Le nombre qui compte est donc : ZÉRO surprise.** Le badge marque bien les
+> productions sans échéance, et **aucune de celles qu'il a trouvées marquées ne
+> l'a étonné** — son corpus était déjà sous contrôle, il n'avait pas de gabarit
+> oublié. Le badge sert à ne PAS en perdre à l'avenir, pas à réparer un retard.
+> Le défaut de conception du champ reste versé en **#488(d)** : un contrôle
+> mécanique, pas une consigne de plus.
 
 > **Cette porte a d'abord été émise à 34 rangées, puis ramenée à 4.** Grégoire :
 > « je suis complètement découragé par les portes terrain nombreuses […] ma
