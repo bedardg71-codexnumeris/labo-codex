@@ -2044,11 +2044,11 @@ window.confirmerImportGrilles = async function(donnees) {
             await afficherBibliothequeGrilles();
         }
 
-        let message = `✅ Import réussi !\n\n`;
-        if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) grille(s) ajoutée(s).\n`;
-        if (nbMisesAJour > 0) message += `${nbMisesAJour} grille(s) mise(s) à jour.\n`;
-        message += `\nConsultez "Grilles disponibles" pour les ajouter à ta barre latérale.`;
-        alert(message);
+        const details = [];
+        if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) grille(s) ajoutée(s).`);
+        if (nbMisesAJour > 0) details.push(`${nbMisesAJour} grille(s) mise(s) à jour.`);
+        details.push('Consulte « Grilles disponibles » pour les ajouter à ta barre latérale.');
+        notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);
@@ -2527,7 +2527,7 @@ async function importerToutGrillesTrimestreModal() {
     await afficherListeGrilles();
     await afficherBibliothequeGrilles();
 
-    alert(`Import terminé.\n\n${nbGrilles} grille(s) copiée(s)` + (nbCartouches ? ` • ${nbCartouches} cartouche(s)` : '') + '.');
+    notifications.succes('Import terminé', `${nbGrilles} grille(s) copiée(s)` + (nbCartouches ? ` • ${nbCartouches} cartouche(s)` : '') + '.');
 }
 
 /**
@@ -2551,7 +2551,7 @@ async function importerUneGrilleTrimestre(srcId, grilleId) {
     await afficherBibliothequeGrilles();
 
     const suffixe = res.nbCartouches ? ` (avec ${res.nbCartouches} cartouche${res.nbCartouches > 1 ? 's' : ''})` : '';
-    alert(`« ${grille.nom || 'Grille'} » importée dans ce trimestre${suffixe}.`);
+    notifications.succes(`« ${grille.nom || 'Grille'} » importée dans ce trimestre${suffixe}.`);
 }
 
 /**
@@ -2623,7 +2623,7 @@ async function ajouterGrilleIndividuelle(id) {
             return;
         }
 
-        alert('Grille ajoutée à ta sélection avec succès !');
+        notifications.succes('Grille ajoutée à ta sélection !');
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
         alert('Erreur lors de l\'ajout de la grille');
@@ -2741,10 +2741,12 @@ async function ajouterMesGrillesALaBibliotheque() {
         await afficherBibliothequeGrilles();
 
         if (resultat.ajoutees > 0) {
-            alert(`${resultat.ajoutees} grille(s) ajoutée(s) à la bibliothèque !` +
-                (resultat.existantes > 0 ? `\n${resultat.existantes} étai(en)t déjà présente(s).` : ''));
+            notifications.succes(
+                `${resultat.ajoutees} grille(s) ajoutée(s) à la bibliothèque !`,
+                resultat.existantes > 0 ? `${resultat.existantes} étai(en)t déjà présente(s).` : ''
+            );
         } else {
-            alert('Toutes tes grilles étaient déjà dans la bibliothèque.');
+            notifications.info('Toutes tes grilles étaient déjà dans la bibliothèque.');
         }
     } catch (error) {
         console.error('Erreur lors de l\'ajout à la bibliothèque:', error);
@@ -2852,7 +2854,7 @@ async function ajouterGrillesABibliotheque() {
     fermerModalBibliothequeGrilles();
 
     if (nbAjoutees > 0) {
-        alert(`${nbAjoutees} grille(s) ajoutée(s) à la barre latérale`);
+        notifications.succes(`${nbAjoutees} grille(s) ajoutée(s) à la barre latérale`);
     }
 }
 
@@ -3780,7 +3782,7 @@ async function dupliquerGrilleDepuisSidebar(id) {
     await afficherListeGrilles();
     await chargerGrillePourModif(copie.id);
 
-    alert('Grille "' + copie.nom + '" dupliquée avec succès');
+    notifications.succes('Grille "' + copie.nom + '" dupliquée !');
 }
 
 async function supprimerGrilleDepuisSidebar(id) {
@@ -3799,7 +3801,7 @@ async function supprimerGrilleDepuisSidebar(id) {
         document.getElementById('conteneurEditionGrille').classList.add('u-hide');
         // Note: optionsImportExportGrilles supprimé en Beta 92
         document.getElementById('accueilGrilles').classList.remove('u-hide');
-        alert('Grille supprimée');
+        notifications.succes('Grille supprimée');
     }
 }
 
@@ -4008,7 +4010,7 @@ async function sauvegarderCategoriesErreurs(grilleId, critereIndex) {
     fermerModalCategoriesErreurs();
     afficherCriteresGrille(grille);
 
-    alert('Catégories d\'erreurs sauvegardées avec succès !');
+    notifications.succes('Catégories d\'erreurs sauvegardées !');
 }
 
 /**

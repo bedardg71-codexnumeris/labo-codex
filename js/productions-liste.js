@@ -355,7 +355,7 @@ async function dupliquerProduction(id) {
         window.rechargerFiltreProduction();
     }
 
-    alert(`Production "${copie.activiteApprentissage || copie.description}" dupliquée avec succès`);
+    notifications.succes(`Production "${copie.activiteApprentissage || copie.description}" dupliquée !`);
 }
 
 /**
@@ -407,7 +407,7 @@ async function supprimerProductionActive() {
         window.rechargerFiltreProduction();
     }
 
-    alert('Production supprimée avec succès');
+    notifications.succes('Production supprimée');
 }
 
 /**

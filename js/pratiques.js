@@ -709,7 +709,7 @@ async function activerPratique(id, confirmer = true) {
 
         // Notification seulement si confirmation était demandée
         if (confirmer) {
-            alert(`✅ Pratique activée avec succès !\n\nLes évaluations futures utiliseront cette pratique.`);
+            notifications.succes('Pratique activée !', 'Les évaluations futures utiliseront cette pratique.');
         }
     } catch (error) {
         console.error('Erreur lors de l\'activation:', error);
@@ -864,7 +864,7 @@ async function desactiverPratique(id) {
         await afficherListePratiques();
 
         // Notification
-        alert(`✅ Pratique désactivée avec succès !\n\nLa pratique par défaut est maintenant active.`);
+        notifications.succes('Pratique désactivée', 'La pratique par défaut est maintenant active.');
     } catch (error) {
         console.error('Erreur lors de la désactivation:', error);
         alert(`❌ Erreur : ${error.message}`);
@@ -1031,7 +1031,7 @@ async function dupliquerPratique(id, options = {}) {
         // `silencieux` (#326 D-3, T4) : la dérivation affiche sa propre notification
         // « Maquette créée » et l'appelant rafraîchit l'arbre → pas d'alerte ici.
         if (!options.silencieux) {
-            alert(`✅ Pratique dupliquée avec succès !\n\n"${nouveauNom}" a été ajoutée à tes pratiques.`);
+            notifications.succes(`Pratique "${nouveauNom}" dupliquée !`, 'Elle a été ajoutée à tes pratiques.');
         }
         return copie.id;
     } catch (error) {
@@ -1132,7 +1132,7 @@ async function supprimerPratique(id) {
         // Recharger
         await afficherListePratiques();
 
-        alert(`✅ Pratique supprimée avec succès.`);
+        notifications.succes('Pratique supprimée');
     } catch (error) {
         console.error('Erreur lors de la suppression:', error);
         alert(`❌ Erreur : ${error.message}`);
@@ -1252,7 +1252,7 @@ async function traiterImportPratique(event) {
         // Recharger
         await afficherListePratiques();
 
-        alert(`✅ Pratique importée avec succès !\n\n"${pratiqueJSON.nom}" a été ajoutée à tes pratiques.`);
+        notifications.succes(`Pratique "${pratiqueJSON.nom}" importée !`, 'Elle a été ajoutée à tes pratiques.');
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);
         alert(`❌ Erreur d'import : ${error.message}`);
@@ -1694,7 +1694,7 @@ async function supprimerPratiqueHorsBibliotheque(pratiqueId) {
             await afficherListePratiques();
         }
 
-        alert(`✅ Pratique supprimée avec succès.`);
+        notifications.succes('Pratique supprimée');
     } catch (error) {
         console.error('Erreur lors de la suppression:', error);
         alert(`❌ Erreur : ${error.message}`);
@@ -1736,7 +1736,7 @@ async function partagerPratique(pratiqueId) {
         await afficherListePratiquesSidebar();
         await ouvrirModalBibliothequePratiques();
 
-        alert('Pratique partagée avec succès !\n\nElle est maintenant disponible dans la section "Disponibles à ajouter".');
+        notifications.succes('Pratique partagée !', 'Elle est maintenant disponible dans « Disponibles à ajouter ».');
     } catch (error) {
         console.error('Erreur lors du partage:', error);
         alert('Erreur lors du partage de la pratique');
@@ -1783,7 +1783,7 @@ async function exporterPratiqueActive(pratiqueId) {
         link.click();
         URL.revokeObjectURL(url);
 
-        alert('Pratique exportée avec succès !');
+        notifications.succes('Pratique exportée');
 
     } catch (error) {
         console.error('Erreur lors de l\'export:', error);

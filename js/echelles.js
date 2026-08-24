@@ -652,6 +652,11 @@ async function chargerEchelleTemplate(echelleId) {
  *
  * FONCTIONNEMENT:
  * Met à jour le nom de l'échelle en mémoire ET dans localStorage
+ *
+ * @returns {Promise<boolean>} true si l'écriture a eu lieu, false sinon. Le
+ * verdict est lu par `sauvegarderEchelleComplete` : sans lui, un refus
+ * d'écriture produisait quand même une confirmation « sauvegardée ».
+ * Cf. #466/CO-16, patron de `sauvegarderGrilleTemplate`.
  */
 async function sauvegarderNomEchelle() {
     const nom = document.getElementById('nomEchelleTemplate')?.value?.trim();
@@ -695,19 +700,22 @@ async function sauvegarderNomEchelle() {
                 'Impossible d\'enregistrer cette échelle',
                 'Elle n\'appartient pas au trimestre actif. Bascule sur son trimestre pour la modifier.'
             );
-            return;
+            return false;
         }
-        if (index !== -1) {
-            echelles[index] = { ...echelleTemplateActuelle };
-            await db.set(cle('echellesTemplates'),  echelles);
+        echelles[index] = { ...echelleTemplateActuelle };
+        // security-ok: écriture pré-existante, seulement ré-indentée (la branche
+        // `if (index !== -1)` redondante a sauté). La source est l'éditeur local,
+        // jamais un fichier importé : les imports passent par confirmerImportEchelles.
+        await db.set(cle('echellesTemplates'),  echelles);
 
-            // Recharger la sidebar ET le select pour afficher le nouveau nom
-            await afficherListeEchelles();
-            await definirEchelleActive(echelleTemplateActuelle.id);
-            await chargerEchellesTemplates();
-            document.getElementById('selectEchelleTemplate').value = echelleTemplateActuelle.id;
-        }
+        // Recharger la sidebar ET le select pour afficher le nouveau nom
+        await afficherListeEchelles();
+        await definirEchelleActive(echelleTemplateActuelle.id);
+        await chargerEchellesTemplates();
+        document.getElementById('selectEchelleTemplate').value = echelleTemplateActuelle.id;
+        return true;
     }
+    return false;
 }
 
 /**
@@ -783,7 +791,7 @@ async function enregistrerCommeEchelle() {
 
     document.getElementById('selectEchelleTemplate').value = echelleTemplateActuelle.id;
 
-    notifications.succes(`Échelle «${nomEchelle}» enregistrée avec succès !`);
+    notifications.succes(`Échelle "${nomEchelle}" sauvegardée !`);
 
     // Retourner à l'accueil après la sauvegarde
     setTimeout(() => {
@@ -2039,11 +2047,11 @@ window.confirmerImportEchelles = async function(donnees) {
             await afficherBibliothequeEchelles();
         }
 
-        let message = `Import réussi.\n\n`;
-        if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) échelle(s) ajoutée(s).\n`;
-        if (nbMisesAJour > 0) message += `${nbMisesAJour} échelle(s) mise(s) à jour.\n`;
-        message += `\nConsultez "Échelles disponibles" pour les ajouter à ta barre latérale.`;
-        alert(message);
+        const details = [];
+        if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) échelle(s) ajoutée(s).`);
+        if (nbMisesAJour > 0) details.push(`${nbMisesAJour} échelle(s) mise(s) à jour.`);
+        details.push('Consulte « Échelles disponibles » pour les ajouter à ta barre latérale.');
+        notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);
@@ -2415,7 +2423,7 @@ async function ajouterEchelleIndividuelle(id) {
             return;
         }
 
-        alert('Échelle ajoutée à ta sélection avec succès !');
+        notifications.succes('Échelle ajoutée à ta sélection !');
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
         alert('Erreur lors de l\'ajout de l\'échelle');
@@ -2524,10 +2532,12 @@ async function ajouterMesEchellesALaBibliotheque() {
         await afficherBibliothequeEchelles();
 
         if (resultat.ajoutees > 0) {
-            alert(`${resultat.ajoutees} échelle(s) ajoutée(s) à la bibliothèque !` +
-                (resultat.existantes > 0 ? `\n${resultat.existantes} étai(en)t déjà présente(s).` : ''));
+            notifications.succes(
+                `${resultat.ajoutees} échelle(s) ajoutée(s) à la bibliothèque !`,
+                resultat.existantes > 0 ? `${resultat.existantes} étai(en)t déjà présente(s).` : ''
+            );
         } else {
-            alert('Toutes tes échelles étaient déjà dans la bibliothèque.');
+            notifications.info('Toutes tes échelles étaient déjà dans la bibliothèque.');
         }
     } catch (error) {
         console.error('Erreur lors de l\'ajout à la bibliothèque:', error);
@@ -2626,7 +2636,7 @@ async function ajouterEchellesABibliotheque() {
     fermerModalBibliothequeEchelles();
 
     if (nbAjoutees > 0) {
-        alert(`${nbAjoutees} échelle(s) ajoutée(s) à la barre latérale`);
+        notifications.succes(`${nbAjoutees} échelle(s) ajoutée(s) à la barre latérale`);
     }
 }
 
@@ -2737,7 +2747,7 @@ async function importerToutEchellesTrimestreModal() {
     fermerModalBibliothequeEchelles();
     await afficherBibliothequeEchelles();
 
-    alert(`Import terminé.\n\n${ajoutees} échelle(s) ajoutée(s).\n${existantes} déjà présente(s).`);
+    notifications.succes('Import terminé', `${ajoutees} échelle(s) ajoutée(s) • ${existantes} déjà présente(s).`);
 }
 
 /**
@@ -2760,9 +2770,9 @@ async function importerUneEchelleTrimestre(cleTrimestre, echelleId) {
         // Rafraîchir l'affichage
         fermerModalBibliothequeEchelles();
         await afficherBibliothequeEchelles();
-        alert(`"${echelle.nom || 'Échelle'}" ajoutée à la bibliothèque.`);
+        notifications.succes(`"${echelle.nom || 'Échelle'}" ajoutée à la bibliothèque.`);
     } else {
-        alert('Cette échelle est déjà dans la bibliothèque.');
+        notifications.info('Cette échelle est déjà dans la bibliothèque.');
     }
 }
 
@@ -3366,7 +3376,10 @@ async function ajouterNiveauEchelle(echelleId) {
     await afficherListeEchelles();
 
     // Notification de succès
-    alert(`✅ Niveau ajouté avec succès !\n\nL'échelle contient maintenant ${echelleTemplateActuelle.niveaux.length} niveau(x).\nModifie les propriétés du niveau (code, nom, min, max, etc.) puis continue ton travail.`);
+    notifications.succes(
+        'Niveau ajouté !',
+        `L'échelle contient maintenant ${echelleTemplateActuelle.niveaux.length} niveau(x). Ajuste ses propriétés (code, nom, min, max), puis enregistre.`
+    );
 }
 
 /**
@@ -3509,7 +3522,7 @@ async function dupliquerEchelleDepuisSidebar(id) {
     await afficherListeEchelles();
     await chargerEchellePourModif(copie.id);
 
-    alert('Échelle "' + copie.nom + '" dupliquée avec succès');
+    notifications.succes('Échelle "' + copie.nom + '" dupliquée !');
 }
 
 /**
@@ -3612,7 +3625,7 @@ async function supprimerEchelleDepuisSidebar(id) {
                         document.getElementById('conteneurEditionEchelle').classList.add('u-hide');
                         // Note: Section optionsImportExportEchelles supprimée (Beta 92)
                         document.getElementById('accueilEchelles').classList.remove('u-hide');
-                        alert(`✅ Échelle supprimée avec succès !\n${nbMigrees} évaluation(s) ont été migrées vers "${nouvelleEchelle.nom}".`);
+                        notifications.succes('Échelle supprimée', `${nbMigrees} évaluation(s) migrée(s) vers "${nouvelleEchelle.nom}".`);
                     }
                 } else {
                     alert('Migration annulée. L\'échelle n\'a pas été supprimée.');
@@ -3641,7 +3654,7 @@ async function supprimerEchelleDepuisSidebar(id) {
             document.getElementById('conteneurEditionEchelle').classList.add('u-hide');
             // Note: Section optionsImportExportEchelles supprimée (Beta 92)
             document.getElementById('accueilEchelles').classList.remove('u-hide');
-            alert('Échelle supprimée avec succès !');
+            notifications.succes('Échelle supprimée');
         }
     }
 }
@@ -3756,11 +3769,16 @@ async function sauvegarderEchelleComplete() {
         echelleTemplateActuelle = nouvelleEchelle;
 
         // Message de confirmation
-        alert('Nouvelle échelle créée avec succès !');
+        notifications.succes(`Échelle "${nom}" sauvegardée !`);
     } else {
         // Cas 2: Modification d'une échelle existante
-        await sauvegarderNomEchelle();
-        alert('Échelle sauvegardée avec succès');
+        // #466/CO-16 : on n'annonce la sauvegarde QUE si l'écriture a eu lieu.
+        // `sauvegarderNomEchelle` refuse quand l'échelle éditée n'appartient pas
+        // au trimestre actif (édition à cheval sur une bascule) et affiche alors
+        // sa propre notification d'erreur.
+        const ecrite = await sauvegarderNomEchelle();
+        if (!ecrite) return;
+        notifications.succes(`Échelle "${nom}" sauvegardée !`);
     }
 
     // Recharger la liste pour refléter les changements

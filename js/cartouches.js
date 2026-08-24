@@ -692,12 +692,12 @@ async function sauvegarderCommentaire(key) {
  * - Sélection automatique de la cartouche sauvegardée
  */
 async function sauvegarderCartouche() {
-    if (!cartoucheActuel) return;
+    if (!cartoucheActuel) return false;
 
     let nom = document.getElementById('nomCartouche').value.trim();
     if (!nom) {
         alert('Veuillez donner un nom à la cartouche');
-        return;
+        return false;
     }
 
     const grilleId = cartoucheActuel.grilleId;
@@ -714,7 +714,7 @@ async function sauvegarderCartouche() {
 
         if (resultat === null) {
             // Utilisateur a annulé
-            return;
+            return false;
         }
 
         if (resultat && resultat.action === 'renommer') {
@@ -787,6 +787,7 @@ async function sauvegarderCartouche() {
         await afficherBanqueCartouches();
     }
 
+    return true;
 }
 
 /* ===============================
@@ -2514,10 +2515,17 @@ async function sauvegarderCartoucheComplete() {
     const grilleIdSauvegarde = window.cartoucheActuel?.grilleId;
 
     // Sauvegarder avec la fonction existante
-    await sauvegarderCartouche();
+    // On n'annonce la sauvegarde QUE si l'écriture a eu lieu : `sauvegarderCartouche`
+    // abandonne sans écrire quand le nom est vide ou que le dialogue de doublon est
+    // annulé. Même patron que grilles.js / echelles.js (#466/CO-16).
+    const ecrite = await sauvegarderCartouche();
+    if (!ecrite) return;
 
     // Message de confirmation
-    alert('Cartouche sauvegardée avec succès');
+    // Le nom est relu dans le champ : `sauvegarderCartouche` y réécrit le nom
+    // retenu quand le dialogue de doublon a mené à un renommage.
+    const nomCartouche = document.getElementById('nomCartouche')?.value?.trim() || '';
+    notifications.succes(`Cartouche "${nomCartouche}" sauvegardée !`);
 
     // 🆕 BETA 95.1 : Réouvrir la cartouche en mode édition pour qu'elle reste visible
     if (idSauvegarde && grilleIdSauvegarde && typeof chargerCartouchePourModif === 'function') {
@@ -3500,7 +3508,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
             return;
         }
 
-        alert('Cartouche ajoutée à ta sélection avec succès !');
+        notifications.succes('Cartouche ajoutée à ta sélection !');
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
         alert('Erreur lors de l\'ajout de la cartouche');

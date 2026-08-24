@@ -717,11 +717,10 @@ async function importerUnePratiqueTrimestre(srcId, pratiqueId) {
     await afficherListePratiquesMateriel();
     await afficherBibliothequePratiques();
 
-    let msg = `« ${pratique.nom || 'Pratique'} » importée dans ce trimestre.`;
-    if (res.depsManquantes.length > 0) {
-        msg += `\n\nÀ re-sélectionner à l'édition (absent de ce trimestre) : ${res.depsManquantes.join(', ')}.`;
-    }
-    alert(msg);
+    const details = res.depsManquantes.length > 0
+        ? `À re-sélectionner à l'édition (absent de ce trimestre) : ${res.depsManquantes.join(', ')}.`
+        : '';
+    notifications.succes(`« ${pratique.nom || 'Pratique'} » importée dans ce trimestre.`, details);
 }
 
 /**
@@ -763,11 +762,11 @@ async function importerToutPratiquesTrimestreModal() {
     await afficherListePratiquesMateriel();
     await afficherBibliothequePratiques();
 
-    let msg = `Import terminé.\n\n${nb} pratique(s) copiée(s).`;
+    let details = `${nb} pratique(s) copiée(s).`;
     if (depsGlobales.size > 0) {
-        msg += `\n\nCertaines pratiques référencent des éléments absents de ce trimestre (${[...depsGlobales].join(', ')}) — à re-sélectionner à l'édition.`;
+        details += ` Certaines référencent des éléments absents de ce trimestre (${[...depsGlobales].join(', ')}) — à re-sélectionner à l'édition.`;
     }
-    alert(msg);
+    notifications.succes('Import terminé', details);
 }
 
 /**
@@ -811,7 +810,7 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
     if (existante) {
         // La pratique existe - vérifier si elle est dans la sélection
         if (existante.dansBibliotheque !== false) {
-            alert('Cette pratique est déjà dans ta sélection.');
+            notifications.info('Cette pratique est déjà dans ta sélection.');
             return;
         }
 
@@ -2387,11 +2386,11 @@ window.confirmerImportPratiques = async function(donnees) {
             }
         }
 
-        let message = `✅ Import réussi !\n\n`;
-        if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) pratique(s) ajoutée(s).\n`;
-        if (nbMisesAJour > 0) message += `${nbMisesAJour} pratique(s) mise(s) à jour.\n`;
-        message += `\nConsulte « Pratiques disponibles » pour les ajouter à ta barre latérale.`;
-        alert(message);
+        const details = [];
+        if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) pratique(s) ajoutée(s).`);
+        if (nbMisesAJour > 0) details.push(`${nbMisesAJour} pratique(s) mise(s) à jour.`);
+        details.push('Consulte « Pratiques disponibles » pour les ajouter à ta barre latérale.');
+        notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);
