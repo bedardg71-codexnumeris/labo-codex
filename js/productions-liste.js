@@ -141,6 +141,21 @@ async function afficherListeProductions(filtreType = '') {
             ? `<span class="badge-caracteristique">${prod.ponderation}%</span>`
             : '';
 
+        // #486 : badge « à planifier ». Depuis que la date d'échéance ne bloque
+        // plus la sauvegarde, un gabarit peut légitimement vivre sans elle — mais
+        // il est alors ABSENT du calendrier, des snapshots et des indices C et P.
+        // Le badge est le seul endroit où cet état se voit sans ouvrir la fiche.
+        // Ton neutre volontaire (jetons `--badge-non-evalue-*`) : c'est un état de
+        // préparation normal, pas une anomalie — une pastille d'alerte harcèlerait
+        // Grégoire pendant qu'il fait exactement ce qu'il veut faire.
+        // Le portfolio conteneur est exclu : il n'a JAMAIS de date propre (seuls
+        // ses artefacts en ont), le badge y serait un faux positif permanent.
+        const aPlanifierBadge = (prod.type !== 'portfolio'
+            && typeof aucuneEcheanceAssignee === 'function'
+            && aucuneEcheanceAssignee(prod))
+            ? '<span class="badge-a-planifier" title="Aucune échéance assignée : les consignes ne sont pas encore transmises. Cette production n\'apparaît ni au calendrier ni dans les indices C et P.">à planifier</span>'
+            : '';
+
         return `
             <div class="sidebar-item" data-id="${prod.id}" data-action="chargerProductionPourModif" data-param="${prod.id}">
                 <div class="sidebar-item-titre">${echapperHtml(titre)}</div>
@@ -148,6 +163,7 @@ async function afficherListeProductions(filtreType = '') {
                 <div class="sidebar-item-badges">
                     ${badgesPratiques}
                     ${ponderationBadge}
+                    ${aPlanifierBadge}
                 </div>
             </div>
         `;

@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.94',
+            couleur: 'vert',
+            titre: 'Préparer une production sans avoir à l\u2019annoncer',
+            items: [
+                'Une production s\u2019enregistre maintenant sans date d\u2019échéance. Tu peux préparer tes gabarits \u2014 objectif, tâche, consignes, grille \u2014 pendant l\u2019été ou entre deux trimestres, et ne fixer l\u2019échéance qu\u2019au moment de transmettre le travail. Jusqu\u2019ici, l\u2019app exigeait la date pour enregistrer\u00a0: il fallait avoir déjà distribué le travail pour avoir le droit de le préparer.',
+                'Les productions qui n\u2019ont pas encore d\u2019échéance portent un badge \u00ab\u00a0à planifier\u00a0\u00bb dans la liste de gauche. Un gabarit oublié reste visible d\u2019un coup d\u2019\u0153il, sans avoir à ouvrir chaque fiche.',
+                'En multi-groupes, décocher tous les groupes est désormais un état enregistrable\u00a0: c\u2019est exactement ce que l\u2019écran annonçait déjà (\u00ab\u00a0décoché = les étudiant\u00b7es n\u2019ont pas encore reçu le travail\u00a0\u00bb), mais que la sauvegarde refusait.',
+                'Une production sans échéance n\u2019apparaît ni au calendrier ni dans les indices C (complétion) et P (performance)\u00a0: rien n\u2019est dû tant que rien n\u2019est annoncé. Elle rejoint ces calculs dès que tu poses la date.'
+            ]
+        },
+        {
             version: '1.93',
             couleur: 'vert',
             titre: 'Le Cadre te prévient avant de créer un double',
