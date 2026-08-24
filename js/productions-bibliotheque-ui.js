@@ -559,15 +559,35 @@ async function importerToutTrimestreModal() {
 
     if (!confirmation) return;
 
+    // L'import reconstruit le modal : sans capture/restauration, le trimestre
+    // choisi, l'aperçu déplié et le défilement disparaissent avec l'ancien DOM.
+    const etatSection = etatImportProductions();
+
     const resultat = await importerDansBibliotheque(productions);
 
     // Rafraîchir l'affichage
     fermerModalBibliothequeProductions();
     await afficherBibliothequeProductions();
+    await BibliothequeUI.restaurerImportTrimestre(
+        etatSection, afficherProductionsTrimestreModal, mettreAJourFiltreCoursTrimestreProductions);
 
     notifications.succes('Import terminé.',
         `${resultat.ajoutees} ${window.pluriel(resultat.ajoutees, 'production ajoutée', 'productions ajoutées')}. ` +
         `${resultat.existantes} ${window.pluriel(resultat.existantes, 'déjà présente', 'déjà présentes')}.`);
+}
+
+/**
+ * État de la section d'import, à reposer après reconstruction du modal.
+ * Deux selects : le trimestre, puis le filtre de cours qui EN DÉPEND — il est
+ * peuplé par un handler `onchange` que la restauration programmatique ne
+ * déclenche pas, d'où `mettreAJourFiltreCoursTrimestreProductions` en rappel.
+ */
+function etatImportProductions() {
+    return BibliothequeUI.capturerImportTrimestre({
+        modalId: 'modalBibliothequeProductions',
+        selects: ['selectTrimestreImport', 'selectCoursImportProductions'],
+        apercu: 'previewProductionsTrimestre'
+    });
 }
 
 /**
@@ -582,12 +602,18 @@ async function importerUneProductionTrimestre(cleTrimestre, productionId) {
         return;
     }
 
+    // L'import reconstruit le modal : sans capture/restauration, le trimestre
+    // choisi, l'aperçu déplié et le défilement disparaissent avec l'ancien DOM.
+    const etatSection = etatImportProductions();
+
     const resultat = await ajouterALaBibliotheque(prod);
 
     if (resultat) {
         // Rafraîchir l'affichage
         fermerModalBibliothequeProductions();
         await afficherBibliothequeProductions();
+        await BibliothequeUI.restaurerImportTrimestre(
+            etatSection, afficherProductionsTrimestreModal, mettreAJourFiltreCoursTrimestreProductions);
         notifications.succes(`"${prod.titre}" ajoutée à la bibliothèque !`);
     } else {
         notifications.info('Cette production est déjà dans la bibliothèque.');

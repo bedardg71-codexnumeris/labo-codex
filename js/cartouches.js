@@ -3666,6 +3666,15 @@ async function copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSour
     return { ajoutee: true, conflit: null, grilleCreee: null, grilleAccueil };
 }
 
+/** État de la section d'import, à reposer après reconstruction du modal. */
+function etatImportCartouches() {
+    return BibliothequeUI.capturerImportTrimestre({
+        modalId: 'modalBibliothequeCartouches',
+        selects: ['selectTrimestreImportCartouches'],
+        apercu: 'previewCartouchesTrimestre'
+    });
+}
+
 /**
  * Bouton « Voir les cartouches » : liste les cartouches du trimestre choisi,
  * groupées par leur grille, avec un bouton « Importer » par ligne.
@@ -3735,10 +3744,15 @@ async function importerUneCartoucheTrimestre(srcId, grilleId, cartoucheId) {
     const cartoucheSource = cartouches.find(c => c && c.id === cartoucheId);
     if (!cartoucheSource) { alert('Cartouche introuvable dans le trimestre source.'); return; }
 
+    // L'import reconstruit le modal : sans capture/restauration, le trimestre
+    // choisi, l'aperçu déplié et le défilement disparaissent avec l'ancien DOM.
+    const etatSection = etatImportCartouches();
+
     const res = await copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSource);
 
     await afficherBanqueCartouches();
     await afficherBibliothequeCartouches();
+    await BibliothequeUI.restaurerImportTrimestre(etatSection, afficherCartouchesTrimestreModal);
 
     if (!res.ajoutee) {
         const nomEnPlace = (res.conflit && res.conflit.nom) || 'Cette cartouche';
@@ -3780,6 +3794,8 @@ async function importerToutCartouchesTrimestreModal() {
     const total = lots.reduce((n, lot) => n + lot.cartouches.length, 0);
     if (total === 0) { alert('Aucune cartouche à importer dans ce trimestre.'); return; }
 
+    const etatSection = etatImportCartouches();
+
     const confirmation = confirm(
         `Veux-tu importer les ${total} cartouche(s) de ${nomTrim} dans ce trimestre ?\n\n` +
         'Chaque cartouche est COPIÉE (l\'original du trimestre source reste intact). ' +
@@ -3804,6 +3820,7 @@ async function importerToutCartouchesTrimestreModal() {
 
     await afficherBanqueCartouches();
     await afficherBibliothequeCartouches();
+    await BibliothequeUI.restaurerImportTrimestre(etatSection, afficherCartouchesTrimestreModal);
 
     let details = `${ajoutees} cartouche(s) copiée(s).`;
     if (grillesCreees > 0) details += ` ${grillesCreees} grille(s) copiée(s) avec elles.`;

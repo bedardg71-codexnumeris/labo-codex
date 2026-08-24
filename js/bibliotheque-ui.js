@@ -1096,6 +1096,100 @@
     };
 
     /* =====================================================================
+       SECTION « IMPORTER DEPUIS UN AUTRE TRIMESTRE » — SURVIVRE À LA
+       RECONSTRUCTION DU MODAL (24 août 2026)
+
+       Retour de Grégoire : « la section se referme aussitôt que je clique pour
+       importer une cartouche. Je dois l'ouvrir à chaque cartouche. » Mesuré : le
+       défaut est le MÊME dans les cinq bibliothèques — importer un élément
+       rafraîchit la liste en appelant `afficherBibliothequeX()`, qui reconstruit
+       le modal de zéro. Le trimestre choisi, l'aperçu déplié et la position de
+       défilement disparaissent avec l'ancien DOM.
+
+       Importer dix cartouches demandait donc dix fois : rouvrir la biblio,
+       redérouler le menu, recliquer « Voir les cartouches », refaire défiler.
+
+       Le remède est volontairement MINIMAL : on ne touche pas au cycle de
+       reconstruction (le refaire en place toucherait cinq modules et cinq
+       rendus). On capture l'état AVANT, on le repose APRÈS. Deux fonctions,
+       un seul endroit.
+       ===================================================================== */
+
+    /**
+     * Capture l'état de la section d'import AVANT reconstruction du modal.
+     *
+     * @param {Object} config
+     * @param {string} config.modalId - ex. 'modalBibliothequeCartouches'
+     * @param {string[]} config.selects - ids des <select> à restaurer, dans
+     *        l'ordre de dépendance (le trimestre d'abord ; productions a un
+     *        second select de cours qui en dépend).
+     * @param {string} config.apercu - id du conteneur d'aperçu
+     * @returns {Object|null} état opaque, à passer à `restaurerImportTrimestre`
+     */
+    BibliothequeUI.capturerImportTrimestre = function (config) {
+        if (!config || !config.selects || !config.selects.length) return null;
+
+        var valeurs = {};
+        config.selects.forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) valeurs[id] = el.value;
+        });
+
+        var apercu = config.apercu ? document.getElementById(config.apercu) : null;
+        var contenu = document.querySelector('#' + config.modalId + ' .modal-js-contenu');
+
+        return {
+            modalId: config.modalId,
+            selects: config.selects,
+            apercu: config.apercu,
+            valeurs: valeurs,
+            // Un aperçu replié n'a pas à se rouvrir tout seul : on repose
+            // exactement ce qui était à l'écran, jamais davantage.
+            apercuOuvert: !!(apercu && !apercu.classList.contains('u-hide')),
+            defilement: contenu ? contenu.scrollTop : 0
+        };
+    };
+
+    /**
+     * Repose l'état capturé APRÈS reconstruction du modal.
+     *
+     * @param {Object|null} etat - retour de `capturerImportTrimestre`
+     * @param {Function} [rouvrirApercu] - la fonction « Voir les X » du module
+     * @param {Function} [repeuplerDependants] - appelée après avoir reposé le
+     *        PREMIER select, pour les modules dont un second en dépend
+     *        (productions : le filtre de cours, peuplé par un handler onchange
+     *        que la restauration programmatique ne déclenche pas).
+     */
+    BibliothequeUI.restaurerImportTrimestre = async function (etat, rouvrirApercu, repeuplerDependants) {
+        if (!etat) return;
+
+        for (var i = 0; i < etat.selects.length; i++) {
+            var id = etat.selects[i];
+            var el = document.getElementById(id);
+            if (!el) continue;
+            var valeur = etat.valeurs[id];
+            if (valeur === undefined || valeur === '') continue;
+            // Ne poser que des valeurs qui existent encore : un trimestre peut
+            // avoir disparu de la liste entre-temps (plus rien à en importer).
+            var existe = Array.prototype.some.call(el.options, function (o) { return o.value === valeur; });
+            if (!existe) continue;
+            el.value = valeur;
+            if (i === 0 && typeof repeuplerDependants === 'function') {
+                await repeuplerDependants();
+            }
+        }
+
+        if (etat.apercuOuvert && typeof rouvrirApercu === 'function') {
+            await rouvrirApercu();
+        }
+
+        // Le défilement se repose EN DERNIER : rouvrir l'aperçu change la
+        // hauteur du contenu, donc un scrollTop posé avant serait écrasé.
+        var contenu = document.querySelector('#' + etat.modalId + ' .modal-js-contenu');
+        if (contenu && etat.defilement) contenu.scrollTop = etat.defilement;
+    };
+
+    /* =====================================================================
        #327 — RÉPERTOIRES DE CLASSEMENT : couche UI GÉNÉRIQUE (transversale).
        Généralise l'UI livrée pour les pratiques en #320 (zone « Mes dossiers »
        repliable, pool groupé en selects compacts, assignation) à TOUTES les

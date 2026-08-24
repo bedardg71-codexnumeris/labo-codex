@@ -2655,6 +2655,15 @@ function fermerModalBibliothequeEchelles() {
 /**
  * 🆕 Beta 95.3 : Afficher la prévisualisation des échelles d'un trimestre
  */
+/** État de la section d'import, à reposer après reconstruction du modal. */
+function etatImportEchelles() {
+    return BibliothequeUI.capturerImportTrimestre({
+        modalId: 'modalBibliothequeEchelles',
+        selects: ['selectTrimestreImportEchelles'],
+        apercu: 'previewEchellesTrimestre'
+    });
+}
+
 function afficherEchellesTrimestreModal() {
     const select = document.getElementById('selectTrimestreImportEchelles');
     const preview = document.getElementById('previewEchellesTrimestre');
@@ -2730,6 +2739,10 @@ async function importerToutEchellesTrimestreModal() {
 
     if (!confirmation) return;
 
+    // L'import reconstruit le modal : sans capture/restauration, le trimestre
+    // choisi, l'aperçu déplié et le défilement disparaissent avec l'ancien DOM.
+    const etatSection = etatImportEchelles();
+
     // Importer chaque échelle
     let ajoutees = 0;
     let existantes = 0;
@@ -2746,6 +2759,7 @@ async function importerToutEchellesTrimestreModal() {
     // Rafraîchir l'affichage
     fermerModalBibliothequeEchelles();
     await afficherBibliothequeEchelles();
+    await BibliothequeUI.restaurerImportTrimestre(etatSection, afficherEchellesTrimestreModal);
 
     notifications.succes('Import terminé', `${ajoutees} échelle(s) ajoutée(s) • ${existantes} déjà présente(s).`);
 }
@@ -2764,12 +2778,17 @@ async function importerUneEchelleTrimestre(cleTrimestre, echelleId) {
         return;
     }
 
+    // L'import reconstruit le modal : sans capture/restauration, le trimestre
+    // choisi, l'aperçu déplié et le défilement disparaissent avec l'ancien DOM.
+    const etatSection = etatImportEchelles();
+
     const resultat = await ajouterEchelleALaBibliotheque(echelle);
 
     if (resultat) {
         // Rafraîchir l'affichage
         fermerModalBibliothequeEchelles();
         await afficherBibliothequeEchelles();
+        await BibliothequeUI.restaurerImportTrimestre(etatSection, afficherEchellesTrimestreModal);
         notifications.succes(`"${echelle.nom || 'Échelle'}" ajoutée à la bibliothèque.`);
     } else {
         notifications.info('Cette échelle est déjà dans la bibliothèque.');
