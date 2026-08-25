@@ -262,6 +262,41 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
   Vitest **3262/3262** (312 fichiers). Dernier ID : **#508**.
 
+### Chantier — 25 août 2026 (correctifs de l'audit Conception, lot « enregistrement »)
+
+> Sur `Rapports/AUDIT-conception-gabarits-2026-08-25.md`, constats A1 et A2 — les deux causes
+> directes du symptôme rapporté par Grégoire : « on dirait que les données n'étaient pas toujours
+> enregistrées ». Les autres constats de l'audit (A3, A4, B1 à B5, C1 à C6) restent OUVERTS.
+
+- [x] **#509 — « + Nouvelle production » ne repart plus avec les consignes de la précédente.**
+  `creerNouvelleProduction` (productions-liste.js) vide le formulaire champ par champ et ne passe
+  pas par `reinitialiserFormulaireProduction` (productions.js), seul appelant du peuplement des
+  blocs. Deux effets, tous deux reproduits au navigateur pendant l'audit : au PREMIER geste d'une
+  session, la fiche neuve n'affichait AUCUN bloc — ni objectif, ni description, ni détail de la
+  tâche, donc rien à saisir et un enregistrement muet de chaînes vides ; et APRÈS l'édition d'une
+  production, ses champs personnalisés, ses titres réécrits et son ordre de blocs restaient à
+  l'écran dans la fiche « neuve », puis s'enregistraient dans la NOUVELLE production.
+  ⚠ Exactement la classe de défaut corrigée pour #468/CO-17 (échéances par groupe héritées en
+  silence), sur la zone voisine : la sentinelle tient désormais la COUTURE — les deux chemins de
+  remise à neuf doivent vider la même zone.
+
+- [x] **#510 — Deux enregistrements coup sur coup ne s'effacent plus l'un l'autre.**
+  `modifierCritereGrille` et `modifierNiveauEchelle` lisaient la collection entière, la modifiaient
+  et la réécrivaient entière. Or le `change` d'un champ part AU BLUR, c'est-à-dire au moment précis
+  où l'on clique dans le champ suivant : deux rafales lisaient le même instantané, et la seconde
+  réécrivait la collection SANS la modification de la première. Sans erreur, sans message — le
+  mécanisme le plus vraisemblable du « je l'avais rempli, c'est pas resté ». Antérieur au chantier
+  #496-#507, pas une régression de 1.99.0.
+  ⚠ Sérialiser les ÉCRITURES n'y aurait rien fait : le mal est fait à la LECTURE. C'est la séquence
+  entière qui doit être atomique — d'où `db.modifier(cle, mutateur, defaut)`, une file par clé dans
+  `db.js` (clés distinctes indépendantes ; un mutateur qui rend `undefined` n'écrit rien ; une
+  opération en échec ne bloque pas la file). Les deux éditeurs y passent.
+  ▣ **Primitive à réemployer** : tout autre autosave en lecture-modification-écriture porte la même
+  course. Audit des autres sites NON FAIT dans ce lot.
+
+  Vitest **3275/3275** (311 fichiers, depuis `tests/`), 2 break-tests par constat, tous ROUGE puis
+  restaurés. Dernier ID : **#510**.
+
 ### Chantier — 25 août 2026 (le pont carte d'alignement ↔ productions)
 
 - [x] **#492 — Le sélecteur « Production » de l'Inspecteur ne montrait rien, et personne ne pouvait le voir.**
