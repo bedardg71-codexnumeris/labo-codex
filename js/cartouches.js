@@ -2800,13 +2800,44 @@ function filtrerCartouchesBanque() {
  * @param {string} echelleId - ID de l'échelle à pré-sélectionner (optionnel)
  * @param {boolean} disabled - Si true, désactive les dropdowns (mode édition)
  */
+/**
+ * Un élément est-il dans la SÉLECTION de l'enseignant (sa barre latérale) ?
+ *
+ * ⚠ Rapport terrain de Grégoire, 24 août 2026 : « les grilles disponibles dans
+ * le dropdown des cartouches ne correspondent pas à celles que j'utilise cet
+ * automne. J'utilise 3 grilles, mais celles de H26 sont encore dans le
+ * dropdown. » Mesuré sur ses captures : 3 grilles dans la barre latérale,
+ * SEPT dans le menu du formulaire.
+ *
+ * La cause : `afficherListeGrilles` filtre sur `dansBibliotheque !== false`
+ * (retirer une grille de sa sélection pose ce drapeau), et ce menu-ci ne
+ * filtrait rien. Il offrait donc des grilles d'un trimestre passé, que
+ * l'enseignant avait explicitement retirées — et une cartouche configurée sur
+ * l'une d'elles se retrouve rattachée à une grille hors de son plan de travail.
+ *
+ * La convention existe déjà ailleurs dans le projet : `chargerDropdownEchellesMat`
+ * (pratiques-gestion.js) l'applique depuis le 10 janvier 2026, avec le même motif.
+ *
+ * @param {Object} item - grille ou échelle
+ * @returns {boolean}
+ */
+function estDansSelection(item) {
+    return !!item && item.dansBibliotheque !== false;
+}
+
 async function populerDropdownsCartouche(grilleId = '', echelleId = '', disabled = false) {
     const selectGrille = document.getElementById('selectGrilleCartouche');
     const selectEchelle = document.getElementById('selectEchelleCartouche');
 
     // Peupler dropdown grille
     if (selectGrille) {
-        const grilles = await db.get(cle('grillesTemplates')) || [];
+        const toutesGrilles = await db.get(cle('grillesTemplates')) || [];
+        // On garde la sélection de l'enseignant, PLUS l'élément actuellement lié :
+        // une cartouche déjà rattachée à une grille retirée doit continuer de
+        // l'afficher, sinon l'ouvrir pour la lire la relierait en silence à autre
+        // chose. On n'en propose pas de nouvelles ; on ne casse pas les anciennes.
+        const grilles = toutesGrilles.filter(g =>
+            estDansSelection(g) || g.id === grilleId || g.idOriginal === grilleId);
         let optionsHtml = '<option value="">-- Grille --</option>';
         grilles.forEach(grille => {
             const selected = (grille.id === grilleId || grille.idOriginal === grilleId) ? 'selected' : '';
@@ -2820,7 +2851,9 @@ async function populerDropdownsCartouche(grilleId = '', echelleId = '', disabled
 
     // Peupler dropdown échelle
     if (selectEchelle) {
-        const echelles = await db.get(cle('echellesTemplates')) || [];
+        const toutesEchelles = await db.get(cle('echellesTemplates')) || [];
+        const echelles = toutesEchelles.filter(e =>
+            estDansSelection(e) || e.id === echelleId || e.idOriginal === echelleId);
         let optionsHtml = '<option value="">-- Échelle --</option>';
         let echelleMatchee = false;
         echelles.forEach(echelle => {
