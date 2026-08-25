@@ -57,7 +57,7 @@ function genererBanniereBienvenue() {
 
     const paragrapheCommunaute = `
             <div class="banniere-bienvenue-acces">
-                <p><strong>Rejoindre la communauté.</strong> L’AQPC héberge une Communauté de pratique (CoP) Labo Codex : le lieu pour obtenir du soutien et échanger entre pairs. Des enseignant·es comme toi y explorent d’autres pratiques pédagogiques et co-construisent des ressources libres. Une occasion de développement professionnel.</p>
+                <p>L’Association québécoise de pédagogie collégiale (AQPC) héberge une Communauté de pratique (CoP) Labo Codex : le lieu idéal pour obtenir du soutien et échanger entre pairs. Des enseignant·es comme toi y explorent d’autres pratiques pédagogiques et co-construisent des ressources libres. Une belle occasion de développement professionnel !</p>
             </div>`;
 
     return `
@@ -67,9 +67,10 @@ function genererBanniereBienvenue() {
                 <span class="banniere-chevron" aria-hidden="true"></span>
             </button>
             <div id="banniere-bienvenue-corps" class="banniere-bienvenue-corps">
-            <p>Labo Codex te propose de numériser ton travail habituel : planifier, concevoir, évaluer, suivre la progression de tes étudiant·es. Les mêmes gestes que sur papier, réunis dans un seul outil portable.</p>
-            <p><strong>Par où commencer ?</strong> Configure ton trimestre, ton cours et ton groupe dans l’onglet Cadre : tu saisis tout une fois, l’app s’en sert partout. Ensuite, crée et partage le matériel que tu veux.</p>
-            <p><strong>Comprendre les cadres de l’app.</strong> Trois guides pédagogiques expliquent en quelques pages la taxonomie SOLO, les micro-données ACP et le modèle RàI — accessibles en tout temps par les boutons « Guide » des Outils d’observation.</p>
+            <p>Labo Codex est un outil de soutien à l’enseignement et de suivi des apprentissages. L’application te propose de numériser ton travail. Tu peux planifier, concevoir, évaluer et suivre la progression de tes étudiant·es. Les mêmes gestes que sur papier, mais dans un seul outil numérique et portable ! Labo Codex est gratuit, ouvert et indépendant !</p>
+            <p><strong>Par où commencer ?</strong> Configure ton trimestre, ton cours et ton groupe dans l’onglet Cadre : tu saisis tout une fois, l’app s’en sert partout. Ensuite, crée tes productions et tes évaluations. Tu peux les élaborer et les partager facilement avec tes collègues.</p>
+            <p><strong>Certains concepts sont nouveaux pour toi ?</strong> Trois guides pédagogiques t’expliquent en quelques pages la taxonomie SOLO, les micro-données et le modèle RàI — accessibles en tout temps par les boutons « Guide » des Outils d’observation.</p>
+            <p>À partir du 1<sup>er</sup> septembre, l’identification sera obligatoire pour utiliser l’application.</p>
             ${paragrapheCommunaute}
             <div class="banniere-bienvenue-actions">
                 <button class="btn btn-primaire" data-action="demarrerTourGuide">
