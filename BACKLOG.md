@@ -123,10 +123,43 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Vitest **3046/3046** (299 fichiers). **14 break-tests, 14 ROUGE.** Vérification navigateur
   (Chromium) : menu ⋮ présent et ouvrable dans les 5 bibliothèques, suppression effective,
   cascade correcte, tableau de Réglages › Données à jour, zéro erreur console.
-  ⏳ **Porte terrain émise** : `plans de travail/PORTES-TERRAIN-2026-08-25-490-supprimer-un-partage.md`
-  — 2 préalables, 6 vérifications, 2 décisions (Safari et iPad : la suite Playwright du projet
-  est webkit-seule et webkit n'est pas installé en conteneur). Artefact :
+  ✅ **PORTE TERRAIN RELEVÉE ET CLOSE le 25 août — 8/8, zéro échec, zéro reliquat.** Dont la 2.3,
+  la seule vraiment obligatoire : sur son iPad, la confirmation s'affiche PAR-DESSUS la fenêtre de
+  bibliothèque — le défaut de 1.92.1 ne se rejoue pas.
+  `plans de travail/PORTES-TERRAIN-2026-08-25-490-supprimer-un-partage.md` · artefact
   https://claude.ai/code/artifact/46caad82-bbb2-4337-9014-c850a3415da6
+  **Décision 3.1 : « garder la cascade »** — aucun code, comportement confirmé.
+  **Décision 3.2 : « oui »** — LIVRÉE en **1.97.0**, voir ci-dessous. ⮕ **#490 EST CLOS.**
+
+- [x] **#491 — « Exporter pour partager » un item reçu d'un collègue.** LIVRÉ en **1.97.0**.
+  Décision 3.2 de la porte #490, rendue par Grégoire. **Trois obstacles MESURÉS au navigateur avant
+  d'écrire une ligne**, pas supposés :
+  · `partageExport.resoudreEntite` ne balaie que les collections de l'utilisateur → l'export
+    s'arrêtait sur « item introuvable » ;
+  · `rassemblerDependances` rendait **0 cartouche là où 2 étaient liées** — les cartouches
+    partagées vivent dans une collection PLATE, pas sous `cartouches_{grilleId}`. Le package
+    serait parti **amputé, en silence**. Le pire des trois ;
+  · `chaineAttribution` sortait **vide**, avec le seul nom de qui exporte. Un item importé n'a pas
+    de `metadata_cc` : sa provenance vit dans `inspireDe`, que `construireChaineAttribution` ne
+    regarde pas. Tant qu'on n'exportait que ses propres affaires, la chaîne vide était EXACTE ;
+    en ouvrant l'export aux partagés, elle devenait un **mensonge de licence**.
+  Livré : `partage-format.js` — `rassemblerDependances(item, type, lecteurs)` rend la SOURCE
+  injectable (`LECTEURS_UTILISATEUR` par défaut), et `construirePackage` accepte
+  `options.chaineAttribution` (clonée) ; `partage-export.js` — cœur `exporterEntite(entite, type,
+  options)` extrait de `exporterPourPartager`, **sans dupliquer** le pipeline signature +
+  auto-contrôle, et la confirmation calcule ses dépendances avec les MÊMES lecteurs que le package ;
+  `partage-section.js` — `exporterPourPartager` + `chaineAttributionPour`, qui repart de la chaîne
+  du package REÇU (registre) et y ajoute l'auteur d'origine, **sauf s'il s'agit de l'auteur qui
+  exporte** (cas de Grégoire : ses partagés sont ses propres exports ; identité comparée avec la
+  normalisation du TOFU, pas une seconde notion d'« même personne »).
+  ⚠ **Trois break-tests sont d'abord restés VERTS** : les sentinelles vérifiaient que les bonnes
+  options étaient PASSÉES, jamais que `construirePackage` s'en SERVE. Supprimer les deux lignes
+  qui les lisent laissait toute la suite verte, avec un package amputé et non attribué en sortie.
+  Sentinelles ajoutées dans `partage-phase1-P1.test.js`. Vitest **3056/3056**.
+  Vérifié au navigateur de bout en bout : import d'un vrai `.lcz` de « Marie Collègue » → le ⋮ de
+  la carte partagée porte l'entrée → la confirmation annonce **3 ressources liées** → le `.lcz`
+  émis contient **3 cartouches** et la chaîne `[Marie Collègue]`, et repasse la validation.
+  Dernier ID : **#491**.
   Dernier ID : **#490**.
 
 ### Retour testeur — 24 août 2026 (Grégoire, en cours de planification)

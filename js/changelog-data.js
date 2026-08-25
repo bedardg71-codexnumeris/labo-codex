@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.97',
+            couleur: 'vert',
+            titre: 'Retransmettre un document re\u00e7u d\u2019un coll\u00e8gue',
+            items: [
+                'Le menu \u22ee des cartes \u00ab\u00a0Partag\u00e9s par des coll\u00e8gues\u00a0\u00bb offre maintenant \u00ab\u00a0Exporter pour partager\u00a0\u00bb, comme tes propres cartes. Tu peux donc faire suivre \u00e0 un coll\u00e8gue un document qu\u2019on t\u2019a transmis \u2014 ou r\u00e9cup\u00e9rer ton propre mat\u00e9riel r\u00e9import\u00e9 pour le renvoyer ailleurs.',
+                '<strong>L\u2019attribution d\u2019origine part avec le fichier.</strong> Le package retransmis nomme la personne dont vient le travail, et conserve la cha\u00eene compl\u00e8te si le document avait d\u00e9j\u00e0 chang\u00e9 de mains. Rien n\u2019est r\u00e9\u00e9mis sous ton seul nom.',
+                'Quand le document vient de TOI \u2014 tes propres exports r\u00e9import\u00e9s \u2014 aucun maillon inutile n\u2019est ajout\u00e9\u00a0: le fichier te nomme d\u00e9j\u00e0 comme auteur.',
+                'Une grille partag\u00e9e repart <strong>avec toutes ses cartouches</strong>, et la fen\u00eatre de confirmation annonce exactement ce que le fichier contiendra.'
+            ]
+        },
+        {
             version: '1.96',
             couleur: 'vert',
             titre: 'Supprimer un document partag\u00e9 par un coll\u00e8gue',

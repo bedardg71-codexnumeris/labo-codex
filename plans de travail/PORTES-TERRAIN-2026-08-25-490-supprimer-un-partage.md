@@ -6,7 +6,26 @@
 **Artefact interactif** : https://claude.ai/code/artifact/46caad82-bbb2-4337-9014-c850a3415da6
 **Jumeau HTML versionné** : `plans de travail/portes-terrain-2026-08-25-490-supprimer-un-partage.html`
 **Volume** : **2 préalables · 6 vérifications · 2 décisions** — environ cinq minutes
-**État** : ⏳ **DUE**
+**État** : ✅ **CLOSE le 25 août — 8/8, zéro échec, zéro reliquat** · décisions 3.1 et 3.2 rendues
+
+> **RELEVÉ DE GRÉGOIRE — 8 passées, 0 échec, 0 non traitée.** Dont la **2.3**,
+> la seule vraiment obligatoire : sur son iPad, la question de confirmation
+> s'affiche bien PAR-DESSUS la fenêtre de bibliothèque. C'est le défaut de
+> 1.92.1 qui ne s'est pas rejoué, et c'est le verdict que la session ne pouvait
+> pas rendre.
+>
+> **Décision 3.1 — « garder la cascade ».** Aucun code à écrire : le
+> comportement livré est confirmé. Supprimer une grille partagée continue
+> d'emporter ses cartouches partagées, après une confirmation qui les nomme.
+>
+> **Décision 3.2 — « oui ».** Elle, elle demandait du code, et **trois
+> obstacles ont été MESURÉS au navigateur avant d'écrire une ligne** :
+> `resoudreEntite` ne trouvait pas un partagé ; `rassemblerDependances`
+> rendait **0 cartouche là où 2 étaient liées** (package amputé en silence) ;
+> et la chaîne d'attribution sortait **vide**, avec le seul nom de qui
+> exporte — ré-émettre le travail d'un collègue sans maillon aurait été une
+> faute de licence, pas un détail d'affichage. Les trois sont refermés en
+> **1.97.0**.
 
 > **Cette porte est courte exprès.** Tu as écrit le 24 août : « je suis
 > complètement découragé par les portes terrain nombreuses ». Le tri du même
@@ -132,12 +151,15 @@ l'ai pas tranchée.
    tout — ni en vert, ni en rouge. C'est **#456 / #487**, antérieur à ce
    chantier. C'est toute la raison d'être des six rangées ci-dessus.
 
-2. **Un vrai `.lcz` de collègue n'a pas fait l'aller-retour complet.** J'ai semé
-   des partagés à la main, avec exactement la forme que produit l'import
-   (préfixe `PARTAGE_`, `inspireDe`, registre). L'enchaînement réel
-   *importer un vrai fichier → supprimer un de ses items → réimporter le même
-   fichier* n'a pas été joué de bout en bout dans un navigateur. Le comportement
-   est verrouillé par les tests, pas par une observation.
+2. ~~**Un vrai `.lcz` n'a pas fait l'aller-retour complet.**~~ **RETIRÉ le
+   25 août** — joué de bout en bout au navigateur en préparant la décision 3.2 :
+   export réel → `.lcz` → import (1 grille + 3 cartouches) → **suppression d'une
+   cartouche du vrai package** (le registre passe de 3 à 2) → **réimport du même
+   fichier** (`remplace: true`, contenu restauré, **une seule entrée de registre**,
+   pas de doublon). L'enchaînement complet est désormais observé, pas déduit.
+   ⮕ **Ce qui reste hors observation** : la règle « pas de maillon pour mon
+   propre matériel » est verrouillée par un test unitaire ET son break-test,
+   mais n'a pas été vue au navigateur avec un profil d'auteur configuré.
 
 3. **Erreur de la session, rattrapée par une sentinelle.** J'ai édité le
    changelog **après** avoir lancé la release : l'URL anti-cache de ce fichier
