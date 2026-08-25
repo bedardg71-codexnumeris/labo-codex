@@ -21,6 +21,20 @@
 
     var CHANGELOG = [
         {
+            version: '1.98',
+            couleur: 'vert',
+            titre: 'Les \u00e9ch\u00e9ances viennent de ta carte d\u2019alignement',
+            items: [
+                'Quand une production est rattach\u00e9e \u00e0 un bloc \u00c9valuation de ta carte d\u2019alignement, sa <strong>date de remise se remplit toute seule</strong>. La le\u00e7on est pos\u00e9e en semaine 4, deuxi\u00e8me s\u00e9ance\u00a0? L\u2019\u00e9ch\u00e9ance tombe au jour o\u00f9 tu rencontres r\u00e9ellement ce groupe-l\u00e0.',
+                '<strong>Chaque groupe re\u00e7oit SA date.</strong> M\u00eame case de la carte, mais deux horaires\u00a0: lundi pour l\u2019un, mardi pour l\u2019autre. Plus besoin de recalculer chaque remise groupe par groupe.',
+                '<strong>Une date que tu as saisie n\u2019est jamais \u00e9cras\u00e9e.</strong> Si elle diff\u00e8re de ce que dit la carte, l\u2019\u00e9cart est signal\u00e9 sous le champ, avec un lien pour adopter la date de la carte si tu le veux. Tu gardes la main.',
+                'Sans carte d\u2019alignement, rien ne change\u00a0: tu saisis la date \u00e0 la main comme avant. Il en va de m\u00eame si la le\u00e7on n\u2019a pas encore de semaine ou de s\u00e9ance, ou si l\u2019horaire du groupe n\u2019est pas saisi \u2014 mieux vaut un champ vide qu\u2019une date approximative.',
+                'La case <strong>\u00ab\u00a0Consignes transmises\u00a0\u00bb existe maintenant aussi quand tu n\u2019as qu\u2019un seul groupe.</strong> Elle n\u2019\u00e9tait offerte qu\u2019en multi-groupe. Une production peut donc \u00eatre pr\u00e9par\u00e9e \u00e0 l\u2019avance, date comprise, sans \u00eatre compt\u00e9e comme remise aux \u00e9tudiant\u00b7es\u00a0: elle garde son badge \u00ab\u00a0\u00e0 planifier\u00a0\u00bb et n\u2019entre ni au calendrier ni dans les indices.',
+                '<strong>Correction\u00a0:</strong> le s\u00e9lecteur \u00ab\u00a0Production\u00a0\u00bb de la carte d\u2019alignement \u00e9tait vide. Aucune production ne pouvait y \u00eatre rattach\u00e9e \u2014 ni artefact, ni portfolio, ni laboratoire, ni pr\u00e9sentation, ni stage. Les douze types du formulaire y sont d\u00e9sormais offerts, class\u00e9s comme dans Conception.',
+                '<strong>Correction\u00a0:</strong> la colonne \u00ab\u00a0Production\u00a0\u00bb de ton plan de cours export\u00e9 affichait \u00ab\u00a0undefined\u00a0\u00bb au lieu du titre. Elle dit maintenant le nom que tes \u00e9tudiant\u00b7es reconnaissent.'
+            ]
+        },
+        {
             version: '1.97',
             couleur: 'vert',
             titre: 'Retransmettre un document re\u00e7u d\u2019un coll\u00e8gue',
