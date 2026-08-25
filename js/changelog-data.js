@@ -21,6 +21,22 @@
 
     var CHANGELOG = [
         {
+            version: '1.99',
+            couleur: 'vert',
+            titre: 'Le document de consignes, et des gabarits qui se ressemblent',
+            items: [
+                'Le bouton <strong>\u00ab Pr\u00e9parer le PDF \u00bb</strong> t\u2019am\u00e8ne directement \u00e0 l\u2019aper\u00e7u, avec la grille, l\u2019\u00e9chelle et la cartouche de la production ouverte. Il ne te redemande plus ce que ta fiche sait d\u00e9j\u00e0 \u2014 et il ne te propose plus, par erreur, la grille du document que tu as pr\u00e9par\u00e9 avant.',
+                '<strong>L\u2019aper\u00e7u montre enfin de vraies pages lettre.</strong> Elles s\u2019empilent au lieu de s\u2019\u00e9tirer sans fin, et les consignes ont leur page \u00e0 elles : c\u2019est la feuille que ton \u00e9tudiant garde sous les yeux en travaillant. Ce que tu vois \u00e0 l\u2019\u00e9cran est ce que le PDF contient.',
+                'Un r\u00e9glage <strong>\u00ab Contenu \u00bb</strong> \u00e0 trois crans : les consignes seules, puis la grille et l\u2019\u00e9chelle, puis la cartouche. Un cran sans mati\u00e8re est d\u00e9sactiv\u00e9 et te dit pourquoi, plut\u00f4t que de dispara\u00eetre du menu.',
+                'Un r\u00e9glage <strong>\u00ab Disposition \u00bb</strong> : au fil du texte, ou en deux colonnes avec un bandeau qui annonce chaque bloc. Les retours \u00e0 la ligne de tes consignes num\u00e9rot\u00e9es sont enfin pr\u00e9serv\u00e9s.',
+                '<strong>La date de remise est toujours dans les consignes.</strong> Avec plusieurs groupes, toutes les dates apparaissent, chacune nomm\u00e9e \u2014 personne ne re\u00e7oit la date d\u2019un autre groupe. Tant qu\u2019elle n\u2019est pas fix\u00e9e, le document dit \u00ab \u00c0 pr\u00e9ciser \u00bb au lieu de se taire.',
+                '<strong>Tu peux ajouter tes propres champs</strong> au gabarit d\u2019une production : \u00ab Format et mise en page \u00bb, \u00ab Remise du travail \u00bb, \u00ab \u00c0 v\u00e9rifier \u00bb\u2026 Tu les nommes, tu les ordonnes, et ils rejoignent les consignes. Les trois champs d\u2019origine se d\u00e9placent et se renomment de la m\u00eame fa\u00e7on.',
+                '<strong>Les boutons d\u2019action sont pass\u00e9s en haut</strong> des productions, des grilles et des \u00e9chelles \u2014 plus besoin de descendre au bas d\u2019un formulaire pour enregistrer. Et monter, descendre ou retirer un bloc a partout la m\u00eame apparence.',
+                '<strong>Un ast\u00e9risque rouge marque les champs vraiment obligatoires</strong>, un ast\u00e9risque gris ceux qui sont recommand\u00e9s \u2014 ceux dont l\u2019absence fait dispara\u00eetre une ligne de tes r\u00e9troactions sans rien dire. Une l\u00e9gende explique les deux.',
+                '<strong>Corrections :</strong> le s\u00e9lecteur \u00ab Production \u00bb de la carte d\u2019alignement restait vide ; la colonne \u00ab Production \u00bb du plan de cours affichait \u00ab undefined \u00bb ; le logo de licence occupait les deux tiers de la page ; et un titre long recouvrait les informations du cours.'
+            ]
+        },
+        {
             version: '1.98',
             couleur: 'vert',
             titre: 'Les \u00e9ch\u00e9ances viennent de ta carte d\u2019alignement',
