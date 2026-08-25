@@ -58,7 +58,7 @@ function charger(champsAffiches = null) {
     const els = {};
     if (champsAffiches) els['champsPersonnalisesListe'] = listeDeChamps(champsAffiches);
 
-    const win = chargerScript('js/productions.js', {
+    const globaux = {
         db: {
             get: async () => null, getSync: (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)),
             set: async () => {}, setSync: () => {}
@@ -75,7 +75,12 @@ function charger(champsAffiches = null) {
             querySelector: () => null, querySelectorAll: () => [],
             createElement: (t) => elementEchappant(t), addEventListener() {}
         }
-    });
+    };
+
+    // #504 — `ui-blocs.js` d'abord : `productions.js` appelle ses helpers au
+    // rendu. Deux modules dans le MÊME sandbox, comme dans le navigateur.
+    const win = chargerScript('js/ui-blocs.js', globaux);
+    chargerScript('js/productions.js', globaux, win);
     win.genererIdUnique = (p) => p + Math.floor(Math.random() * 1e9);
     return { win, els };
 }
@@ -195,54 +200,73 @@ describe('#499 · AB — ce qui s\'enregistre', () => {
 /* --------------------- AE — la forme des boutons suit celle de l'application */
 
 describe('#504 · AE — flèches et × reprennent le patron existant', () => {
-    const source = readFileSync(
-        path.resolve(__dirname, '..', '..', 'js', 'productions.js'), 'utf8');
-    // ⚠ Les commentaires DÉCRIVENT ce qui a été retiré — ils citent donc les
-    // entités qu'on ne veut plus voir. Les lire ferait échouer la garde sur sa
-    // propre explication : on ne garde que le code.
-    const rendu = source
-        .slice(source.indexOf('function rendreBlocsConsignes'),
-               source.indexOf('function rendreChampsPersonnalises'))
-        .split('\n')
-        .filter(l => !/^\s*(\/\/|\*|\/\*)/.test(l))
-        .join('\n');
+    const lire = (f) => readFileSync(path.resolve(__dirname, '..', '..', f), 'utf8');
+    // ⚠ DÉPLACÉ, PAS AFFAIBLI : le HTML des boutons a quitté `productions.js`
+    // pour `ui-blocs.js`, partagé par les cinq écrans. La garde vérifie donc
+    // deux choses au lieu d'une — que le module rend le bon patron, et que les
+    // écrans l'APPELLENT au lieu de le réécrire.
+    const uiBlocs = lire('js/ui-blocs.js');
+    const sansCommentaires = (t) => t.split('\n')
+        .filter(l => !/^\s*(\/\/|\*|\/\*)/.test(l)).join('\n');
 
     it('AE.a Les flèches réutilisent `pipeline-btn-reorder` et ses chevrons', () => {
         // Le réordonnancement a déjà sa forme dans l'application
         // (travaux-ui.js) : en inventer une seconde, c'est deux écrans qui ne
         // se ressemblent plus.
-        expect(rendu).toContain('class="pipeline-btn-reorder"');
-        expect(rendu).toContain('icons/icon-chevron-up.svg');
-        expect(rendu).toContain('icons/icon-chevron-down.svg');
-        expect(rendu, 'plus de flèche typographique').not.toContain('&uarr;');
-        expect(rendu, 'plus de flèche typographique').not.toContain('&darr;');
+        expect(uiBlocs).toContain('class="pipeline-btn-reorder"');
+        expect(uiBlocs).toContain('icons/icon-chevron-up.svg');
+        expect(uiBlocs).toContain('icons/icon-chevron-down.svg');
     });
 
     it('AE.b LE POINT DÉCISIF : le × n\'est plus un bouton PLEIN', () => {
-        // `.btn-annuler` est réservé à l'abandon d'un formulaire — un geste
-        // avec confirmation. Un × d'icône est un retrait local et réversible :
-        // lui donner le poids visuel d'un abandon fait mentir la couleur.
-        expect(rendu, 'le × ne doit plus porter btn-annuler').not.toContain('btn btn-annuler');
-        expect(rendu).toContain('btn-delete-icon');
-        expect(rendu).toContain('icons/icons8-trash.svg');
+        // `.btn-supprimer` est réservé aux gestes qui engagent — supprimer une
+        // grille entière. Retirer un bloc d'un formulaire non enregistré est
+        // local et réversible : lui donner ce poids visuel fait mentir la
+        // couleur.
+        expect(uiBlocs).toContain('btn-delete-icon');
+        expect(uiBlocs).toContain('icons/icons8-trash.svg');
+        expect(sansCommentaires(uiBlocs)).not.toContain('btn btn-supprimer');
     });
 
     it('AE.c Chaque bouton d\'icône dit ce qu\'il fait', () => {
         // Une icône seule n'a pas de texte : sans `aria-label`, un lecteur
         // d'écran n'annonce rien.
-        for (const etiquette of ['Monter ce bloc', 'Descendre ce bloc', 'Retirer ce champ']) {
-            expect(rendu, etiquette).toContain('aria-label="' + etiquette + '"');
-        }
+        expect(uiBlocs).toContain('aria-label="Monter ${quoi}"');
+        expect(uiBlocs).toContain('aria-label="Descendre ${quoi}"');
+        expect(uiBlocs).toContain('aria-label="${titre}"');
     });
 
     it('AE.d Les classes utilisées existent vraiment dans la feuille de style', () => {
-        // Une classe inventée ne rougit nulle part : le bouton s'affiche nu,
-        // et on ne s'en aperçoit qu'à l'œil.
-        const css = readFileSync(path.resolve(__dirname, '..', '..', 'styles.css'), 'utf8');
-        for (const classe of ['.pipeline-btn-reorder', '.btn-icone-nu', '.btn-delete-icon']) {
+        // Une classe inventée ne rougit nulle part : le bouton s'affiche nu, et
+        // on ne s'en aperçoit qu'à l'œil.
+        const css = lire('styles.css');
+        for (const classe of ['.pipeline-btn-reorder', '.btn-icone-nu',
+                              '.btn-delete-icon', '.bloc-reordonner', '.bloc-retirer-coin']) {
             expect(css, classe).toContain(classe + ' {');
         }
         expect(css, 'les chevrons ont besoin d\'une règle pour leur image')
             .toContain('.pipeline-btn-reorder img {');
+    });
+
+    it('AE.e LE RATCHET : les cinq écrans appellent le helper, aucun ne le réécrit', () => {
+        // C'est lui qui empêche le patron de se remettre à diverger : le jour
+        // où quelqu'un recopie deux boutons à la main dans un sixième écran, la
+        // garde ne le verra pas — mais elle verra une régression dans ces cinq.
+        for (const f of ['js/productions.js', 'js/grilles.js', 'js/echelles.js']) {
+            const code = sansCommentaires(lire(f));
+            expect(code, f + ' doit appeler le helper').toContain('boutonsReordonnerBloc(');
+            expect(code, f + ' ne doit plus poser de flèche typographique').not.toContain('↑');
+            expect(code, f + ' ne doit plus poser de flèche typographique').not.toContain('↓');
+        }
+        expect(sansCommentaires(lire('js/grilles.js'))).toContain('boutonRetirerBloc(');
+        expect(sansCommentaires(lire('js/echelles.js'))).toContain('boutonRetirerBloc(');
+    });
+
+    it('AE.f Le module est chargé AVANT ceux qui s\'en servent', () => {
+        const html = lire('index.html');
+        expect(html.indexOf('js/ui-blocs.js'))
+            .toBeLessThan(html.indexOf('js/productions.js'));
+        expect(html.indexOf('js/ui-blocs.js'))
+            .toBeLessThan(html.indexOf('js/grilles.js'));
     });
 });
