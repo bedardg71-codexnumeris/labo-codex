@@ -2,7 +2,7 @@
 
 **Version à éprouver** : **1.96.0** · build `0824-2123`
 **Date d'émission** : 25 août 2026
-**Branche** : `claude/shared-cartridges-deletion-r7ld2p` — ⚠ **NON fusionnée dans `main`**
+**Branche** : **fusionnée dans `main`** le 25 août (avance rapide)
 **Artefact interactif** : https://claude.ai/code/artifact/46caad82-bbb2-4337-9014-c850a3415da6
 **Jumeau HTML versionné** : `plans de travail/portes-terrain-2026-08-25-490-supprimer-un-partage.html`
 **Volume** : **2 préalables · 6 vérifications · 2 décisions** — environ cinq minutes
@@ -41,7 +41,7 @@ cartes. […] Cette option devrait être présente dans toutes les bibliothèque
 
 | | Geste | Attendu |
 |---|---|---|
-| **0.1** | `git pull` sur la branche `claude/shared-cartridges-deletion-r7ld2p`, puis recharger l'app. | Le bas de page affiche **1.96.0 · build 0824-2123**. **Si tu vois autre chose, arrête ici** : tu éprouverais l'état d'avant en croyant éprouver l'après. |
+| **0.1** | `git pull` sur **`main`**, puis recharger l'app. | Le bas de page affiche **1.96.0 · build 0824-2123**. **Si tu vois autre chose, arrête ici** : tu éprouverais l'état d'avant en croyant éprouver l'après. ⚠ **Ce n'est pas théorique** : le 25 août au matin, la capture qui disait « il n'y a pas de menu » montrait en réalité un build 1.95.4. |
 | **0.2** | ⚠ **Garde tes fichiers `.lcz` sous la main.** Cette porte te fait supprimer de vraies choses importées. | Tout est réimportable **à condition d'avoir le fichier**. Si tu n'as plus le `.lcz` d'un package, ne le supprime pas — importe-en un autre pour l'essai, ou fais un export Codex d'abord. |
 
 ---
@@ -147,11 +147,13 @@ l'ai pas tranchée.
    pas au commit ; corrigé par un `--build-only` relancé sur l'arbre complet.
    Rien de tout cela n'a été poussé dans cet état.
 
-4. **La fusion vers `main` n'est pas faite.** Cette session n'avait
-   l'autorisation de pousser que sur sa branche. `RELAIS.md` a été mis à jour
-   **sur la branche**, pas sur `main` — donc une session qui ouvrirait `main`
-   demain ne verrait pas ce travail. C'est le scénario du 8 août. **À trancher
-   par toi.**
+4. ~~**La fusion vers `main` n'est pas faite.**~~ **RÉGLÉ le 25 août au matin** —
+   et le coût de l'avoir laissé dehors est mesuré : tu es revenu quelques heures
+   plus tard avec une capture montrant l'absence du menu. Ton build était en
+   retard, pas le correctif absent. Le paragraphe d'introduction de la section
+   « Partagés » a servi de marqueur : il disait « en lecture seule », texte de
+   1.95.4, là où 1.96.0 dit « non modifiables ici […] Le menu ⋮ supprime la copie
+   importée ». Fusionné en avance rapide sur ta décision.
 
 ---
 

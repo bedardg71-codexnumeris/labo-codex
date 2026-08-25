@@ -293,7 +293,7 @@ footer{
       prouvable sans Safari l'a été — ce qui reste ici ne peut être tranché que sur tes appareils.</p>
     <div class="jetons">
       <span class="jeton jeton--vif">1.96.0 · build 0824-2123</span>
-      <span class="jeton">branche claude/shared-cartridges-deletion-r7ld2p</span>
+      <span class="jeton">fusionné dans main</span>
       <span class="jeton">25 août 2026</span>
     </div>
   </header>
@@ -310,9 +310,10 @@ footer{
         <span class="porte-titre">La bonne version est chargée</span>
       </div>
       <div class="pourquoi">Tu lances l'app depuis ton clone : elle est à la version de ton dernier
-        <code>git pull</code>. <b>Deux des quatre échecs des 81 portes venaient de là</b> — et ce
-        faux rouge est indétectable, parce qu'il décrit exactement l'état d'avant le correctif.</div>
-      <p class="geste">Fais <code>git pull</code> sur la branche <code>claude/shared-cartridges-deletion-r7ld2p</code>, puis recharge l'app.</p>
+        <code>git pull</code>. <b>Ce n'est pas théorique ici</b> : le 25 août au matin, la capture qui
+        disait « il n'y a pas de menu » montrait un build 1.95.4. Le correctif était livré, ton clone
+        ne l'avait pas. Ce faux rouge est indétectable au récit — il décrit exactement l'état d'avant.</div>
+      <p class="geste">Fais <code>git pull</code> sur <b>main</b>, puis recharge l'app.</p>
       <p class="attendu"><b>Attendu :</b> le bas de page affiche <b>1.96.0 · build 0824-2123</b>.
         Si tu vois autre chose, <b>arrête ici</b>.</p>
       <div class="bascules"></div>
@@ -490,10 +491,10 @@ footer{
     </div>
 
     <div class="aveugle">
-      <h3>La fusion vers <code>main</code> n'est pas faite</h3>
-      Cette session ne pouvait pousser que sur sa branche. <code>RELAIS.md</code> a été mis à jour
-      <b>sur la branche</b>, pas sur <code>main</code> : une session qui ouvrirait <code>main</code>
-      demain ne verrait pas ce travail. C'est le scénario du 8 août. <b>À trancher par toi.</b>
+      <h3>La fusion vers <code>main</code> — réglée le 25 août</h3>
+      Le travail est resté hors de <code>main</code> une nuit, et ça s'est vu : tu es revenu avec une
+      capture montrant l'absence du menu, sur un build 1.95.4. Fusionné en avance rapide depuis, sur ta
+      décision — un <code>git pull</code> sur <code>main</code> suffit maintenant.
     </div>
   </section>
 

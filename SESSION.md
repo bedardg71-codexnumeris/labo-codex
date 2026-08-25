@@ -114,8 +114,24 @@
          écrits ne survivaient pas au rechargement, exactement la perte que le
          skill interdit depuis le 11 août ; et la barre collante débordait
          l'écran de 40 px à 834 px (iPad portrait). Les deux corrigés.
-       · Fusion vers `main` NON FAITE (autorisation limitée à la branche) :
-         `RELAIS.md` est à jour sur la branche, pas sur `main`.
+       · **FUSION FAITE le 25 août au matin, et c'est lui qui l'a révélée.**
+         Il est revenu avec une nouvelle capture : toujours pas de menu ⋮.
+         Sa capture disait « Importés par fichier .lcz, **en lecture seule**
+         […] Gestion des packages : Réglages › Données » — le texte de
+         1.95.4 MOT POUR MOT, alors que 1.96.0 dit « non modifiables ici […]
+         Le menu ⋮ supprime la copie importée ». Le paragraphe d'introduction
+         de cette section est un marqueur de version infaillible : il a suffi
+         à trancher en une commande, sans lui faire refaire un seul geste.
+         ⮕ **Le §0.1 de la porte, joué pour de vrai — et le coût du travail
+         laissé hors de `main` est mesuré : quelques heures et un aller-retour.**
+         Fusion en avance rapide (`origin/main` = base de la branche, zéro
+         divergence) sur sa décision explicite.
+       · Son observation neuve : « il s'agit ici de mon PROPRE matériel ».
+         Ses partagés portent « par Grégoire Bédard » — ce sont ses exports
+         réimportés, qui font double emploi avec ses cartouches. Rien à changer
+         au correctif : la copie partagée vit dans `partage_*`, ses originaux
+         sous leur grille, et la supprimer ne touche pas les seconds. C'est
+         exactement l'usage que la suppression sert.
        · Question ouverte, pas tranchée ici : faut-il aussi « Exporter pour
          partager » un item partagé (la chaîne d'attribution le permettrait) ?
          Hors périmètre de la demande.
