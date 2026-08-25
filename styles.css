@@ -16826,6 +16826,41 @@ tr.etudiant-inactif td {
     transition: background 0.15s;
 }
 
+/* #504 (25 août 2026) — LE BOUTON D'ICÔNE NU.
+   La suppression d'un bloc utilisait `.btn btn-annuler` : un bouton PLEIN
+   orange pour un geste secondaire. Le design system réserve `.btn-annuler` à
+   l'abandon d'un formulaire — avec confirmation —, alors qu'un × d'icône est
+   un retrait local et réversible. Cette classe donne au bouton la taille de
+   `.btn-mini` sans son fond : c'est l'ICÔNE qui porte le sens, et sa couleur
+   de survol vient de `.btn-delete-icon`. */
+.btn-icone-nu {
+    background: transparent;
+    border: none;
+    padding: 3px 5px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: var(--radius-moyen);
+    transition: background 0.15s;
+}
+
+.btn-icone-nu:hover:not(:disabled) {
+    background: rgba(160, 160, 160, 0.18);
+}
+
+/* Les chevrons de réordonnancement portent une image : elle doit suivre la
+   couleur du texte secondaire, comme le glyphe qu'elle remplace. */
+.pipeline-btn-reorder img {
+    width: 11px;
+    height: 11px;
+    object-fit: contain;
+    filter: brightness(0) invert(0.55);
+}
+
+.pipeline-btn-reorder:disabled img { opacity: 0.35; }
+
 .pipeline-btn-reorder:hover:not(:disabled) {
     background: rgba(106, 172, 184, 0.2);
     color: var(--texte-principal);

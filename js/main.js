@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0825-1608';
+window._SCRIPT_BUILD_main = '0825-1619';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -256,9 +256,16 @@ window.appliquerPratiqueAuCoursActive = function() {
 };
 document.addEventListener('DOMContentLoaded', function () {
 
-    // #503 — les actions de la fiche de production suivent leur formulaire,
-    // maintenant qu'elles vivent dans la barre de section.
-    window.lierActionsAuFormulaire('formulaireProduction', 'actionsFicheProduction');
+    // #503 — les actions de fiche suivent leur formulaire, maintenant qu'elles
+    // vivent dans la barre de section. Un couple par écran : le formulaire
+    // observé, et la barre qui le suit.
+    [
+        ['formulaireProduction', 'actionsFicheProduction'],
+        ['conteneurEditionGrille', 'actionsFicheGrille'],
+        ['conteneurEditionEchelle', 'actionsFicheEchelle']
+    ].forEach(function(couple) {
+        window.lierActionsAuFormulaire(couple[0], couple[1]);
+    });
 
     // ===============================
     // FONCTION UTILITAIRE : Recalcul indices C-P

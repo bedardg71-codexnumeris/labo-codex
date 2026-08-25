@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
 import { elementEchappant } from './_helpers/element-echappant.js';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Sentinelle #499 (25 août 2026) — DES BLOCS QUE GRÉGOIRE NOMME LUI-MÊME.
 //
@@ -144,9 +149,16 @@ describe('#499 · AA — rien de ce qui est saisi ne se perd', () => {
     });
 
     it('AA.e Le titre saisi est échappé avant de retourner dans l\'écran', () => {
-        const { win, els } = charger([{ id: 'C1', titre: '<img src=x onerror=1>', contenu: 'A' }]);
+        // ⚠ `<img` ne peut plus servir de témoin : le rendu en contient
+        // légitimement, depuis que les boutons portent des icônes (#504).
+        // Le témoin doit être ce que SEULE une injection produirait.
+        const { win, els } = charger([
+            { id: 'C1', titre: '<script>TEMOIN_INJECTION</script>', contenu: 'A' }
+        ]);
         win.ajouterChampPersonnalise();
-        expect(els['champsPersonnalisesListe'].innerHTML).not.toContain('<img');
+        const rendu = els['champsPersonnalisesListe'].innerHTML;
+        expect(rendu).not.toContain('<script>');
+        expect(rendu, 'le texte est là, mais neutralisé').toContain('&lt;script&gt;');
     });
 });
 
@@ -177,5 +189,60 @@ describe('#499 · AB — ce qui s\'enregistre', () => {
     it('AB.d Sans zone à l\'écran, l\'enregistrement ne fabrique rien', () => {
         const { win } = charger(null);
         expect(win.champsPersonnalisesAEnregistrer()).toEqual([]);
+    });
+});
+
+/* --------------------- AE — la forme des boutons suit celle de l'application */
+
+describe('#504 · AE — flèches et × reprennent le patron existant', () => {
+    const source = readFileSync(
+        path.resolve(__dirname, '..', '..', 'js', 'productions.js'), 'utf8');
+    // ⚠ Les commentaires DÉCRIVENT ce qui a été retiré — ils citent donc les
+    // entités qu'on ne veut plus voir. Les lire ferait échouer la garde sur sa
+    // propre explication : on ne garde que le code.
+    const rendu = source
+        .slice(source.indexOf('function rendreBlocsConsignes'),
+               source.indexOf('function rendreChampsPersonnalises'))
+        .split('\n')
+        .filter(l => !/^\s*(\/\/|\*|\/\*)/.test(l))
+        .join('\n');
+
+    it('AE.a Les flèches réutilisent `pipeline-btn-reorder` et ses chevrons', () => {
+        // Le réordonnancement a déjà sa forme dans l'application
+        // (travaux-ui.js) : en inventer une seconde, c'est deux écrans qui ne
+        // se ressemblent plus.
+        expect(rendu).toContain('class="pipeline-btn-reorder"');
+        expect(rendu).toContain('icons/icon-chevron-up.svg');
+        expect(rendu).toContain('icons/icon-chevron-down.svg');
+        expect(rendu, 'plus de flèche typographique').not.toContain('&uarr;');
+        expect(rendu, 'plus de flèche typographique').not.toContain('&darr;');
+    });
+
+    it('AE.b LE POINT DÉCISIF : le × n\'est plus un bouton PLEIN', () => {
+        // `.btn-annuler` est réservé à l'abandon d'un formulaire — un geste
+        // avec confirmation. Un × d'icône est un retrait local et réversible :
+        // lui donner le poids visuel d'un abandon fait mentir la couleur.
+        expect(rendu, 'le × ne doit plus porter btn-annuler').not.toContain('btn btn-annuler');
+        expect(rendu).toContain('btn-delete-icon');
+        expect(rendu).toContain('icons/icons8-trash.svg');
+    });
+
+    it('AE.c Chaque bouton d\'icône dit ce qu\'il fait', () => {
+        // Une icône seule n'a pas de texte : sans `aria-label`, un lecteur
+        // d'écran n'annonce rien.
+        for (const etiquette of ['Monter ce bloc', 'Descendre ce bloc', 'Retirer ce champ']) {
+            expect(rendu, etiquette).toContain('aria-label="' + etiquette + '"');
+        }
+    });
+
+    it('AE.d Les classes utilisées existent vraiment dans la feuille de style', () => {
+        // Une classe inventée ne rougit nulle part : le bouton s'affiche nu,
+        // et on ne s'en aperçoit qu'à l'œil.
+        const css = readFileSync(path.resolve(__dirname, '..', '..', 'styles.css'), 'utf8');
+        for (const classe of ['.pipeline-btn-reorder', '.btn-icone-nu', '.btn-delete-icon']) {
+            expect(css, classe).toContain(classe + ' {');
+        }
+        expect(css, 'les chevrons ont besoin d\'une règle pour leur image')
+            .toContain('.pipeline-btn-reorder img {');
     });
 });

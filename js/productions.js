@@ -692,13 +692,21 @@ function rendreBlocsConsignes() {
     liste.innerHTML = _blocsConsignes.map((bloc, index) => {
         const premier = index === 0;
         const dernier = index === _blocsConsignes.length - 1;
+        // ⚠⚠ #504 (25 août 2026) — ON REPREND LE PATRON DE L'APPLICATION, ON N'EN
+        // INVENTE PAS UN. Le premier jet posait des `btn btn-secondaire` portant
+        // des entités `&uarr;`/`&darr;` : deux boutons de pleine taille pour un
+        // geste secondaire, et une flèche typographique là où le reste de
+        // l'application met une icône. Le réordonnancement a déjà sa forme ici
+        // — `pipeline-btn-reorder` et les chevrons (travaux-ui.js) — et la
+        // suppression aussi : `btn-delete-icon` sur l'icône de corbeille.
+        // Réutiliser ces deux-là, c'est ce qui rend les écrans semblables.
         const fleches = `
-                <button type="button" class="btn btn-secondaire u-texte-petit" title="Monter"
+                <button type="button" class="pipeline-btn-reorder" title="Monter" aria-label="Monter ce bloc"
                     data-action="deplacerBlocConsigne" data-param="${echapperHtml(bloc.ref)}" data-param2="-1"
-                    ${premier ? 'disabled' : ''}>&uarr;</button>
-                <button type="button" class="btn btn-secondaire u-texte-petit" title="Descendre"
+                    ${premier ? 'disabled' : ''}><img src="icons/icon-chevron-up.svg" alt=""></button>
+                <button type="button" class="pipeline-btn-reorder" title="Descendre" aria-label="Descendre ce bloc"
                     data-action="deplacerBlocConsigne" data-param="${echapperHtml(bloc.ref)}" data-param2="1"
-                    ${dernier ? 'disabled' : ''}>&darr;</button>`;
+                    ${dernier ? 'disabled' : ''}><img src="icons/icon-chevron-down.svg" alt=""></button>`;
 
         if (bloc.ancre) {
             const a = bloc.ancre;
@@ -727,8 +735,9 @@ function rendreBlocsConsignes() {
                     placeholder="Nom du champ — ex : Remise du travail"
                     value="${echapperHtml(bloc.titre)}">
                 ${fleches}
-                <button type="button" class="btn btn-annuler u-texte-petit" title="Retirer ce champ"
-                    data-action="supprimerChampPersonnalise" data-param="${echapperHtml(bloc.ref)}">&times;</button>
+                <button type="button" class="btn-mini btn-icone-nu" title="Retirer ce champ" aria-label="Retirer ce champ"
+                    data-action="supprimerChampPersonnalise" data-param="${echapperHtml(bloc.ref)}"
+                    ><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
             </div>
             <textarea class="controle-form champ-perso-contenu" rows="3"
                 placeholder="Ce que ce bloc dira aux étudiant·es">${echapperHtml(bloc.contenu)}</textarea>

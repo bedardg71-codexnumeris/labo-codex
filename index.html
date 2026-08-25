@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260825a"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260825b"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4839,6 +4839,33 @@
 
                             <!-- Boutons actions en haut à droite -->
                             <div class="u-flex-gap-10 u-mb-20 u-text-right" style="justify-content: flex-end">
+                                <!-- #503 — les actions de la fiche vivent en tête, à côté de
+                                     « + Nouvelle grille ». Elles n'ont de sens que si une fiche est
+                                     ouverte : `lierActionsAuFormulaire` (main.js) les fait suivre
+                                     `#conteneurEditionGrille`, en l'observant. -->
+                                <div id="actionsFicheGrille" class="u-flex-gap-10 u-hide" style="display: none">
+                                <!-- Boutons du formulaire -->
+                                <div class="u-flex-gap-10">
+                                    <!-- Boutons gauche (actions sur la grille) -->
+                                    <div class="u-flex-gap-10">
+                                        <button id="btnDupliquerGrille" class="btn btn-secondaire u-hide" data-action="dupliquerGrilleActive" title="Créer une copie de cette grille">
+                                            Dupliquer
+                                        </button>
+                                    </div>
+                                    <!-- Boutons droite (actions principales) -->
+                                    <div class="u-flex-gap-10">
+                                        <button id="btnSupprimerGrille" class="btn btn-supprimer u-hide" data-action="supprimerGrilleActive" title="Supprimer cette grille">
+                                            Supprimer
+                                        </button>
+                                        <button class="btn btn-annuler" data-action="annulerFormGrille">Annuler</button>
+                                        <button class="btn btn-confirmer" data-action="sauvegarderGrilleComplete">
+                                            <span id="btnTexteGrille">Enregistrer</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                </div>
+
                                 <button data-action="creerNouvelleGrille" class="btn btn-principal">
                                     + Nouvelle grille
                                 </button>
@@ -4933,26 +4960,6 @@
                                 <!-- Panneau métadonnées (Beta 95.1) -->
                                 <div id="panneauMetadonneesGrille"></div>
 
-                                <!-- Boutons du formulaire -->
-                                <div class="btn-groupe u-flex-between">
-                                    <!-- Boutons gauche (actions sur la grille) -->
-                                    <div class="u-flex-gap-10">
-                                        <button id="btnDupliquerGrille" class="btn btn-secondaire u-hide" data-action="dupliquerGrilleActive" title="Créer une copie de cette grille">
-                                            Dupliquer
-                                        </button>
-                                    </div>
-                                    <!-- Boutons droite (actions principales) -->
-                                    <div class="u-flex-gap-10">
-                                        <button id="btnSupprimerGrille" class="btn btn-supprimer u-hide" data-action="supprimerGrilleActive" title="Supprimer cette grille">
-                                            Supprimer
-                                        </button>
-                                        <button class="btn btn-annuler" data-action="annulerFormGrille">Annuler</button>
-                                        <button class="btn btn-confirmer" data-action="sauvegarderGrilleComplete">
-                                            <span id="btnTexteGrille">Enregistrer</span>
-                                        </button>
-                                    </div>
-                                </div>
-
                             </div><!-- Fin conteneurEditionGrille -->
 
                             <!-- Conteneurs cachés pour compatibilité -->
@@ -5009,6 +5016,33 @@
 
                             <!-- Boutons actions en haut à droite -->
                             <div class="u-flex-gap-10 u-mb-20 u-text-right" style="justify-content: flex-end">
+                                <!-- #503 — les actions de la fiche vivent en tête, à côté de
+                                     « + Nouvelle échelle ». Elles n'ont de sens que si une fiche est
+                                     ouverte : `lierActionsAuFormulaire` (main.js) les fait suivre
+                                     `#conteneurEditionEchelle`, en l'observant. -->
+                                <div id="actionsFicheEchelle" class="u-flex-gap-10 u-hide" style="display: none">
+                                <!-- Boutons du formulaire -->
+                                <div class="u-flex-gap-10">
+                                    <!-- Boutons gauche (actions sur l'échelle) -->
+                                    <div class="u-flex-gap-10">
+                                        <button id="btnDupliquerEchelle" class="btn btn-secondaire u-hide" data-action="dupliquerEchelleActive" title="Créer une copie de cette échelle">
+                                            Dupliquer
+                                        </button>
+                                    </div>
+                                    <!-- Boutons droite (actions principales) -->
+                                    <div class="u-flex-gap-10">
+                                        <button id="btnSupprimerEchelle" class="btn btn-supprimer u-hide" data-action="supprimerEchelleActive" title="Supprimer cette échelle">
+                                            Supprimer
+                                        </button>
+                                        <button class="btn btn-annuler" data-action="annulerFormEchelle">Annuler</button>
+                                        <button class="btn btn-confirmer" data-action="sauvegarderEchelleComplete">
+                                            <span id="btnTexteEchelle">Enregistrer</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                </div>
+
                                 <button data-action="creerNouvelleEchelle" class="btn btn-principal">
                                     + Nouvelle échelle
                                 </button>
@@ -5064,26 +5098,6 @@
 
                                 <!-- Panneau métadonnées (Beta 95.1) -->
                                 <div id="panneauMetadonneesEchelle"></div>
-
-                                <!-- Boutons du formulaire -->
-                                <div class="btn-groupe u-flex-between">
-                                    <!-- Boutons gauche (actions sur l'échelle) -->
-                                    <div class="u-flex-gap-10">
-                                        <button id="btnDupliquerEchelle" class="btn btn-secondaire u-hide" data-action="dupliquerEchelleActive" title="Créer une copie de cette échelle">
-                                            Dupliquer
-                                        </button>
-                                    </div>
-                                    <!-- Boutons droite (actions principales) -->
-                                    <div class="u-flex-gap-10">
-                                        <button id="btnSupprimerEchelle" class="btn btn-supprimer u-hide" data-action="supprimerEchelleActive" title="Supprimer cette échelle">
-                                            Supprimer
-                                        </button>
-                                        <button class="btn btn-annuler" data-action="annulerFormEchelle">Annuler</button>
-                                        <button class="btn btn-confirmer" data-action="sauvegarderEchelleComplete">
-                                            <span id="btnTexteEchelle">Enregistrer</span>
-                                        </button>
-                                    </div>
-                                </div>
 
                             </div><!-- Fin conteneurEditionEchelle -->
 
@@ -14386,7 +14400,7 @@
     <script src="js/donnees-v2.js?v=20260821a"></script> <!-- Refonte nav SP5 : afficherSection calendrier -->
     <script src="js/etudiants.js?v=20260822a"></script>
     <script src="js/productions-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/productions.js?v=20260825c"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
+    <script src="js/productions.js?v=20260825d"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
     <script src="js/productions-import-export.js?v=20260824a"></script> <!-- Refactor étape 3 (16 mai 2026) : extrait de productions.js (lignes 2630-3276) -->
     <script src="js/productions-liste.js?v=20260825b"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js -->
     <script src="js/productions-bibliotheque-ui.js?v=20260824b"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide -->
@@ -14582,11 +14596,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260825g"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260825h"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260825g"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260825h"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>

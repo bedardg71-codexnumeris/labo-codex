@@ -55,8 +55,38 @@ describe('#503 · les actions de la fiche ont monté en tête', () => {
         expect(barre[0]).toContain('display: none');
     });
 
-    it('d. Elle est liée au formulaire au démarrage', () => {
-        expect(mainJs).toContain("lierActionsAuFormulaire('formulaireProduction', 'actionsFicheProduction')");
+    it('d. LES TROIS ÉCRANS sont liés au démarrage', () => {
+        // ⚠ La garde ne cherche plus un appel littéral : les trois couples sont
+        // déclarés dans une table. Ce qui compte est qu'aucun écran ne soit
+        // oublié — une barre non liée reste visible sur un écran vide.
+        for (const [formulaire, actions] of [
+            ['formulaireProduction', 'actionsFicheProduction'],
+            ['conteneurEditionGrille', 'actionsFicheGrille'],
+            ['conteneurEditionEchelle', 'actionsFicheEchelle']
+        ]) {
+            expect(mainJs, formulaire).toContain(`['${formulaire}', '${actions}']`);
+            expect(indexHtml, actions).toContain(`id="${actions}"`);
+        }
+        expect(mainJs).toContain('window.lierActionsAuFormulaire(couple[0], couple[1])');
+    });
+
+    it('d2. Les barres de la grille et de l\'échelle naissent masquées elles aussi', () => {
+        for (const id of ['actionsFicheGrille', 'actionsFicheEchelle']) {
+            const barre = indexHtml.match(new RegExp('<div id="' + id + '"[^>]*>'));
+            expect(barre, id).toBeTruthy();
+            expect(barre[0], id).toContain('u-hide');
+            expect(barre[0], id).toContain('display: none');
+        }
+    });
+
+    it('d3. Leurs formulaires ne gardent pas de barre orpheline', () => {
+        for (const [debutMarq, finMarq, action] of [
+            ['id="conteneurEditionGrille"', 'Fin conteneurEditionGrille', 'sauvegarderGrilleComplete'],
+            ['id="conteneurEditionEchelle"', 'Fin conteneurEditionEchelle', 'sauvegarderEchelleComplete']
+        ]) {
+            const dedans = indexHtml.slice(indexHtml.indexOf(debutMarq), indexHtml.indexOf(finMarq));
+            expect(dedans, action).not.toContain('data-action="' + action + '"');
+        }
     });
 
     it('e. Le lien OBSERVE le formulaire, il ne se greffe pas sur ses appelants', () => {
