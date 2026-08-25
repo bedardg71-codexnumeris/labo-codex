@@ -97,7 +97,16 @@ function poser(win, ecran, production, gcId) {
     win.poserCaseAssignationSimple(ecran.input, production, gcId);
     return ecran.parent.querySelector('.echeance-simple-assignee');
 }
-const laCase = (zone) => zone && zone.enfants.find(n => n.type === 'checkbox');
+function laCase(zone) {
+    if (!zone) return null;
+    const ligne = zone.enfants.find(n => n.className === 'echeance-simple-ligne');
+    return ligne ? ligne.enfants.find(n => n.type === 'checkbox') : null;
+}
+
+// Tout ce que la fonction a semé dans le parent, à plat.
+function tousLesNoeuds(parent) {
+    return parent.enfants.flatMap(n => [n, ...(n.enfants || []).flatMap(m => [m, ...(m.enfants || [])])]);
+}
 
 /* ------------------------------------------------------- U1 — elle est là */
 
@@ -116,13 +125,30 @@ describe('#494 · U1 — la case existe en mode simple', () => {
         expect(poser(win, ecran, null, null)).toBeNull();
     });
 
-    it('U1.c Rouvrir la fiche ne pose pas une deuxième case', () => {
+    it('U1.c Rouvrir la fiche ne pose RIEN en double — ni case, ni note', () => {
+        // Le bug du 25 août : la case était retirée avant d'être reposée, mais
+        // sa note vivait à côté d'elle et personne ne la retirait. Trois
+        // ouvertures = trois notes empilées, vues à l'écran par Grégoire.
+        // Compter les zones ne suffisait pas : c'est l'ORPHELIN qu'il faut
+        // interdire, et la note vit désormais DANS la zone.
         const win = charger();
         const ecran = ecranModeSimple();
         poser(win, ecran, null, 'GC_A');
         poser(win, ecran, null, 'GC_A');
-        const zones = ecran.parent.enfants.filter(n => n.className === 'echeance-simple-assignee');
-        expect(zones).toHaveLength(1);
+        poser(win, ecran, null, 'GC_A');
+
+        const tous = tousLesNoeuds(ecran.parent);
+        expect(tous.filter(n => n.className === 'echeance-simple-assignee')).toHaveLength(1);
+        expect(tous.filter(n => n.className && n.className.includes('echeance-simple-note'))).toHaveLength(1);
+        expect(tous.filter(n => n.type === 'checkbox')).toHaveLength(1);
+    });
+
+    it('U1.d La note dit ce qui se prépare : la production, pas la date', () => {
+        const win = charger();
+        const ecran = ecranModeSimple();
+        const zone = poser(win, ecran, null, 'GC_A');
+        const note = zone.enfants.find(n => n.className && n.className.includes('echeance-simple-note'));
+        expect(note.textContent).toContain('La production peut être préparée à l\'avance.');
     });
 });
 
