@@ -58,6 +58,83 @@ function getCleProductions() {
 }
 
 /**
+ * LES TYPES DE PRODUCTION — table unique (25 août 2026).
+ *
+ * ⚠⚠ POURQUOI UNE CONSTANTE ET NON TROIS LISTES. Avant ce jour, la liste des
+ * types vivait à trois endroits qui avaient DIVERGÉ, chacun en silence :
+ *
+ *   1. le `<select id="productionType">` d'`index.html` — 12 types, c'est ce
+ *      que Grégoire voit en créant une production, donc la vérité de fait ;
+ *   2. `getTypeLabel()` ci-dessous — 8 types. `laboratoire`, `entrevue`,
+ *      `projet` et `stage` n'y étaient pas : ils s'affichaient en identifiant
+ *      brut et minuscule (« laboratoire ») partout où le type est montré ;
+ *   3. `typesOrdre` du sélecteur « Production » de la carte d'alignement
+ *      (`planification-carte.js`) — 5 types. Conséquence mesurée le 25 août :
+ *      AUCUN artefact, AUCUN portfolio, aucun laboratoire, aucune présentation,
+ *      aucune entrevue, aucun stage, aucune évaluation terminale ne pouvait
+ *      être rattaché à un bloc Évaluation de la carte. Les productions étaient
+ *      chargées, regroupées, puis jamais rendues — sans un mot dans la console.
+ *
+ * ⮕ Le pont carte ↔ productions existait ; il ne pouvait tout simplement pas
+ * porter le type de production sur lequel repose tout le portfolio.
+ *
+ * ▣ DEUX LIBELLÉS, ET C'EST VOULU — même patron que `VISEES_EVALUATION` dans
+ * `planification-carte.js`. `libelle` est le libellé de CHOIX : celui du
+ * formulaire, celui des sélecteurs, court parce qu'il vit dans un `<option>`
+ * déjà classé sous son `<optgroup>`. `libelleLong` est le libellé de LECTURE,
+ * rendu par `getTypeLabel()` là où le type est montré hors de tout groupe et
+ * doit se suffire à lui-même. Absent = les deux sont identiques.
+ *
+ * ⚠ `prefixeAffichage` porte le 📁 historique du portfolio. Il est ici pour
+ * être VU : la règle « zéro emoji » du projet le condamne, mais le retirer
+ * change un libellé d'interface (et `productions.js:207` en pose un second,
+ * séparément) — c'est un geste à trancher avec Grégoire, pas un effet de bord
+ * de ce chantier-ci.
+ *
+ * ⚠ `ponderationPropre: false` n'invente aucune règle : il NOMME celle que
+ * l'interface affiche déjà (« Les artefacts n'ont pas de pondération propre.
+ * C'est le portfolio conteneur qui définit la pondération globale »), que
+ * `validerChampsProduction` applique en n'exigeant pas la pondération d'un
+ * artefact, et que `getAvertissementsStructure` redit à voix haute (« sa
+ * pondération n'est pas utilisée par le calcul »).
+ *
+ * ⮕ L'ORDRE DES ENTRÉES EST SIGNIFIANT : c'est celui du formulaire, et la
+ * sentinelle `types-production-source-unique` le vérifie option par option.
+ * Ajouter un type au `<select>` sans l'ajouter ici fait ROUGIR le test — c'est
+ * exactement la dérive silencieuse qu'on vient de payer.
+ */
+const TYPES_PRODUCTION = [
+    { id: 'examen',             libelle: 'Examen',                groupe: 'Évaluations' },
+    { id: 'travail',            libelle: 'Travail écrit',         groupe: 'Évaluations' },
+    { id: 'quiz',               libelle: 'Quiz/Test',             groupe: 'Évaluations' },
+    { id: 'laboratoire',        libelle: 'Laboratoire',           groupe: 'Évaluations' },
+    { id: 'presentation',       libelle: 'Présentation',          groupe: 'Évaluations' },
+    { id: 'entrevue',           libelle: 'Entrevue',              groupe: 'Évaluations' },
+    { id: 'projet',             libelle: 'Projet',                groupe: 'Évaluations' },
+    { id: 'stage',              libelle: 'Stage',                 groupe: 'Évaluations' },
+    { id: 'autre',              libelle: 'Autre',                 groupe: 'Évaluations' },
+    { id: 'portfolio',          libelle: 'Portfolio (conteneur)', groupe: 'Portfolio',
+      prefixeAffichage: '📁 ' },
+    { id: 'artefact-portfolio', libelle: 'Artefact',              groupe: 'Portfolio',
+      libelleLong: 'Artefact d\'un portfolio', ponderationPropre: false },
+    { id: 'terminale',          libelle: 'Évaluation terminale',  groupe: 'Évaluation terminale' }
+];
+
+/** L'entrée de table d'un type, ou null si le type est inconnu. */
+function typeProduction(id) {
+    return TYPES_PRODUCTION.find(t => t.id === id) || null;
+}
+
+/**
+ * Vrai si ce type porte une pondération qui lui est propre. Défaut : oui —
+ * seul l'artefact dit explicitement le contraire.
+ */
+function typePorteSaPonderation(id) {
+    const t = typeProduction(id);
+    return t ? t.ponderationPropre !== false : true;
+}
+
+/**
  * 🆕 Beta 95.4 : Helper pour obtenir la clé namespacée des grilles
  */
 function getCleGrilles() {
@@ -405,6 +482,85 @@ async function typerProductionCommeTerminale(productionId) {
    =============================== */
 
 /**
+ * LA CASE « CONSIGNES TRANSMISES », EN MODE SIMPLE (#494, 25 août 2026).
+ *
+ * ⚠⚠ POURQUOI ELLE MANQUAIT, ET POURQUOI ELLE NE PEUT PLUS MANQUER. Le mode
+ * multi-groupe porte cette case depuis Beta 98.3 ; le mode simple, jamais.
+ * `obtenirEcheanceEffective` y répondait `assignee: true` EN DUR, et c'était
+ * défendable : tant que poser la date demandait un geste, une date saisie
+ * VALAIT la transmission des consignes.
+ *
+ * ⮕ Le 25 août (#493), la date s'est mise à arriver toute seule depuis la carte
+ * d'alignement. L'équivalence a sauté : une production simplement PLANIFIÉE
+ * devenait TRANSMISE, entrait au calendrier, dans les indices C et P et dans
+ * les snapshots, et perdait son badge « à planifier » sans qu'aucune consigne
+ * ne soit partie. L'automatisme a rendu nécessaire la donnée que la supposition
+ * remplaçait.
+ *
+ * ▣ UN SEUL MODÈLE D'ASSIGNATION. La case écrit `echeancesParGroupe` avec son
+ * unique entrée — exactement ce que produit le mode multi. Pas de champ
+ * parallèle : deux modèles pour la même notion, c'est la dette que la règle
+ * zéro-dette du projet interdit, et c'est deux endroits où le badge et le
+ * calendrier peuvent se mettre à se contredire.
+ *
+ * ⚠ RÉTRO-COMPAT : une production d'avant ce jour n'a qu'un `dateEcheance`.
+ * Sa case s'affiche cochée si cette date existe — c'est la sémantique sous
+ * laquelle Grégoire l'a saisie. Rien de ses données n'est réécrit tant qu'il
+ * n'enregistre pas.
+ *
+ * ⚠ Sans groupe-cours identifié, pas de case : il n'y a rien à assigner, et
+ * le repli legacy d'`obtenirEcheanceEffective` reste seul en piste.
+ */
+function poserCaseAssignationSimple(inputSimple, production, groupeCoursId) {
+    const parent = inputSimple && inputSimple.parentElement;
+    if (!parent) return;
+
+    const existante = parent.querySelector('.echeance-simple-assignee');
+    if (existante) existante.remove();
+    if (!groupeCoursId) return;
+
+    const entree = production && production.echeancesParGroupe
+        ? production.echeancesParGroupe[groupeCoursId]
+        : null;
+    // Entrée muette ⇒ assignée, comme partout ailleurs (`obtenirEcheanceEffective`).
+    // Pas d'entrée ⇒ on lit le legacy : une date saisie valait transmission.
+    const assignee = entree
+        ? (entree.assignee !== false)
+        : !!(production && production.dateEcheance);
+
+    const zone = document.createElement('div');
+    zone.className = 'echeance-simple-assignee';
+    zone.style.cssText = 'display: flex; align-items: center; gap: 6px; margin-bottom: 6px;';
+
+    const case_ = document.createElement('input');
+    case_.type = 'checkbox';
+    case_.id = 'productionEcheanceAssignee';
+    case_.className = 'echeance-simple-checkbox';
+    case_.setAttribute('data-gc-id', groupeCoursId);
+    case_.checked = assignee;
+
+    const etiquette = document.createElement('label');
+    etiquette.setAttribute('for', 'productionEcheanceAssignee');
+    etiquette.style.cssText = 'cursor: pointer; font-weight: normal; margin: 0;';
+    etiquette.textContent = 'Consignes transmises';
+
+    zone.appendChild(case_);
+    zone.appendChild(etiquette);
+
+    const note = document.createElement('p');
+    note.className = 'echeance-simple-note u-texte-petit';
+    note.style.cssText = 'color: var(--gris-moyen); margin: 0 0 8px 0; line-height: 1.4;';
+    note.textContent = 'Décoché = les étudiant·es n\'ont pas encore reçu le travail. La date peut être préparée à l\'avance.';
+
+    parent.insertBefore(zone, inputSimple);
+    parent.insertBefore(note, inputSimple);
+
+    // Même geste que le mode multi : sans transmission, le champ ne se saisit pas.
+    inputSimple.disabled = !assignee;
+    case_.addEventListener('change', () => { inputSimple.disabled = !case_.checked; });
+}
+
+/**
  * 🆕 Beta 98.3 : Peuple le conteneur d'échéances par groupe-cours
  * Si plusieurs groupes partagent le même cours-entité, affiche une ligne par groupe
  * avec checkbox d'assignation + champ date. Sinon, reste en mode simple (champ legacy).
@@ -461,7 +617,16 @@ function peuplerEcheancesParGroupe(production) {
 
         // 🆕 Beta 98.4 : Indicateur de séance en mode simple
         if (inputSimple) {
-            const groupeNum = groupesFreres.length === 1 ? (groupesFreres[0].groupeNum || null) : null;
+            // #493 — le contexte de groupe voyage d'un bloc : c'est l'identité du
+            // groupe-cours (`groupeCoursId`) qui donne son horaire, pas le numéro.
+            const contexteSimple = {
+                coursId: coursIdProd,
+                groupeCoursId: groupesFreres.length === 1 ? groupesFreres[0].id : null
+            };
+
+            // #494 — la case « consignes transmises », jusqu'ici réservée au
+            // mode multi-groupe. Voir `poserCaseAssignationSimple`.
+            poserCaseAssignationSimple(inputSimple, production, contexteSimple.groupeCoursId);
             let spanSimple = inputSimple.parentElement.querySelector('.info-seance-echeance');
             if (!spanSimple) {
                 spanSimple = document.createElement('span');
@@ -471,11 +636,15 @@ function peuplerEcheancesParGroupe(production) {
             }
             const spanRef = spanSimple; // capture pour le listener
             inputSimple.addEventListener('change', () => {
-                afficherInfoSeanceEcheance(spanRef, inputSimple.value, coursIdProd, groupeNum);
+                afficherInfoSeanceEcheance(spanRef, inputSimple.value, contexteSimple);
             });
             if (inputSimple.value) {
-                afficherInfoSeanceEcheance(spanRef, inputSimple.value, coursIdProd, groupeNum);
+                afficherInfoSeanceEcheance(spanRef, inputSimple.value, contexteSimple);
             }
+
+            // #493 — la carte d'alignement propose la date, si elle en connaît une.
+            brancherPropositionDeLaCarte(inputSimple, spanRef,
+                production && production.id, contexteSimple);
         }
         return;
     }
@@ -527,23 +696,28 @@ function peuplerEcheancesParGroupe(production) {
     });
 
     // 🆕 Beta 98.4 : Indicateur de séance à côté des dates
-    // Construire un map gcId → groupeNum pour les lookups
-    const mapGcGroupeNum = {};
-    groupesFreres.forEach(gc => { mapGcGroupeNum[gc.id] = gc.groupeNum || null; });
+    // (#493 : la table gcId → groupeNum a disparu avec le filtre qu'elle servait.
+    //  C'est l'identité du groupe-cours qui donne l'horaire, pas son numéro.)
 
     // Multi-groupe : listener change + affichage initial
     listeContainer.querySelectorAll('.echeance-gc-date').forEach(dateInput => {
         const gcId = dateInput.dataset.gcId;
-        const groupeNum = mapGcGroupeNum[gcId] || null;
+        const contexteGroupe = { coursId: coursIdProd, groupeCoursId: gcId };
         const spanInfo = listeContainer.querySelector(`.info-seance-echeance[data-gc-id="${gcId}"]`);
 
         dateInput.addEventListener('change', () => {
-            afficherInfoSeanceEcheance(spanInfo, dateInput.value, coursIdProd, groupeNum);
+            afficherInfoSeanceEcheance(spanInfo, dateInput.value, contexteGroupe);
         });
         // Affichage initial si une date est déjà renseignée
         if (dateInput.value) {
-            afficherInfoSeanceEcheance(spanInfo, dateInput.value, coursIdProd, groupeNum);
+            afficherInfoSeanceEcheance(spanInfo, dateInput.value, contexteGroupe);
         }
+
+        // #493 — chaque groupe reçoit SA date : même semaine, même rang de
+        // séance, mais l'horaire du groupe décide du jour. C'est ce qui donne
+        // lundi au gr. 00002 et mardi au gr. 00008 pour la même case de la carte.
+        brancherPropositionDeLaCarte(dateInput, spanInfo,
+            production && production.id, contexteGroupe);
     });
 
     // 🆕 Beta 98.4 : Avertissement en temps réel si date hors trimestre
@@ -591,15 +765,126 @@ function verifierDateHorsTrimestre(inputDate, dateMin, dateMax, labelDebut, labe
 }
 
 /**
+ * LES DATES DE SÉANCE D'UNE SEMAINE, POUR UN GROUPE (25 août 2026).
+ *
+ * ⚠⚠ UNE SEULE LISTE, DEUX LECTURES — c'est tout l'intérêt de l'avoir extraite.
+ *   • `indexOf(date) + 1` donne le RANG : c'est le libellé « 2e séance de la
+ *     semaine 4 » sous le champ d'échéance ;
+ *   • `[rang - 1]` donne la DATE : c'est ce que la carte d'alignement propose
+ *     quand sa leçon est posée en semaine 4, séance B.
+ * Deux fonctions distinctes auraient pu diverger d'une séance et faire dire à
+ * l'écran le contraire de la carte, sur la date que lisent ses étudiant·es.
+ *
+ * ⚠⚠ D'OÙ VIENNENT LES SÉANCES, ET POURQUOI PAS DE `obtenirSeancesCompletes`.
+ * La source par groupe est `obtenirSeancesCompletesDuGroupe(groupeCoursId)`,
+ * qui lit la clé `seancesCompletes_gc_<id>` — un horaire par groupe-cours,
+ * comme le fait déjà `construireHoraireDeLecons` pour l'export du plan de cours.
+ *
+ * ⮕ Le premier jet filtrait `obtenirSeancesCompletes(coursId)` sur
+ * `seance.groupe === groupeNum`, et ne trouvait JAMAIS rien. Deux raisons, et
+ * la première suffit : `obtenirSeancesCompletes` rend déjà la table du
+ * groupe-cours ACTIF (cf. `cleSeancesCompletes`), donc filtrer encore par
+ * groupe est un second filtre sur une table déjà filtrée ; et `seance.groupe`
+ * est un champ de saisie d'horaire, laissé vide dans le cas courant. Le repli
+ * « toutes les séances du cours » que portait le code d'origine n'était donc
+ * pas un secours exceptionnel : c'était le chemin normal, et c'est ce qui
+ * rendait le libellé juste malgré le filtre inopérant.
+ *
+ * ⚠ `replierSurLeCours` — À MANIER AVEC PRÉCAUTION. Quand aucune séance n'est
+ * trouvée pour le groupe, on peut retomber sur l'horaire du cours. C'est bon
+ * pour un LIBELLÉ, qui informe et n'engage rien ; c'est mauvais pour une DATE
+ * D'ÉCHÉANCE dérivée, qui serait alors celle d'un autre groupe. La dérivation
+ * passe donc `false` et préfère ne rien proposer.
+ *
+ * @param {Object} contexte - { coursId, groupeCoursId }
+ * @param {number} numSemaine
+ * @param {boolean} replierSurLeCours - Voir ci-dessus. Défaut : false.
+ * @returns {Array<string>} dates 'AAAA-MM-JJ' triées, [] si rien
+ */
+function datesSeancesDeLaSemaine(contexte, numSemaine, replierSurLeCours = false) {
+    const ctx = contexte || {};
+    const semaine = parseInt(numSemaine, 10);
+    if (isNaN(semaine)) return [];
+
+    // 1. La source juste : l'horaire du groupe-cours.
+    if (ctx.groupeCoursId && typeof obtenirSeancesCompletesDuGroupe === 'function') {
+        const dates = datesDeLaSemaineDansTable(
+            obtenirSeancesCompletesDuGroupe(ctx.groupeCoursId), semaine);
+        if (dates.length > 0) return dates;
+    }
+
+    // 2. À défaut seulement — et jamais pour une échéance dérivée.
+    if (!replierSurLeCours) return [];
+    if (typeof obtenirSeancesCompletes !== 'function') return [];
+    return datesDeLaSemaineDansTable(obtenirSeancesCompletes(ctx.coursId), semaine);
+}
+
+/**
+ * Les dates d'une table `date -> [séances]` qui tombent dans cette semaine.
+ *
+ * ⚠ Le numéro de semaine est lu sur la SÉANCE, pas dans `calendrierComplet` :
+ * c'est `genererSeancesCompletes` qui l'y a posé, à partir de ce même
+ * calendrier, pour ce groupe-là. Passer par la séance évite qu'une entrée de
+ * calendrier partagée entre groupes fasse entrer une date étrangère.
+ */
+function datesDeLaSemaineDansTable(parDate, semaine) {
+    if (!parDate || typeof parDate !== 'object') return [];
+    return Object.keys(parDate)
+        .filter(date => {
+            const seances = parDate[date];
+            return Array.isArray(seances) && seances.length > 0 &&
+                parseInt(seances[0].numeroSemaine, 10) === semaine;
+        })
+        .sort();   // Tri lexicographique = tri chronologique en AAAA-MM-JJ.
+}
+
+/**
+ * La date de la n-ième rencontre d'une semaine, pour un groupe. C'est la
+ * traduction de « semaine 4, séance B » en « mardi 17 février ».
+ *
+ * ⚠ Rend null plutôt qu'une date approchante quand le rang n'existe pas dans
+ * cette semaine-là — rang 3 sur une semaine à deux rencontres, semaine hors
+ * trimestre, groupe sans horaire saisi. Une échéance absente se voit et se
+ * corrige ; une échéance fausse se découvre le jour de la remise.
+ *
+ * @returns {string|null} 'AAAA-MM-JJ' ou null
+ */
+function dateSeanceDuRang(contexte, numSemaine, rang) {
+    const r = parseInt(rang, 10);
+    if (isNaN(r) || r < 1) return null;
+    const dates = datesSeancesDeLaSemaine(contexte, numSemaine, false);
+    return r <= dates.length ? dates[r - 1] : null;
+}
+
+/**
+ * LA DATE QUE LA CARTE PROPOSE pour cette production, dans ce groupe.
+ * Null dès qu'un maillon manque — pas de carte, production non rattachée à un
+ * bloc Évaluation, leçon sans semaine ni rang, groupe sans séance à ce rang.
+ * Tous ces cas sont NORMAUX : ils laissent simplement le champ à la saisie.
+ *
+ * @returns {string|null} 'AAAA-MM-JJ'
+ */
+function dateEcheanceProposeeParLaCarte(productionId, contexte) {
+    const carte = window.planificationCarte;
+    if (!carte || typeof carte.positionCarteDeLaProduction !== 'function') return null;
+
+    const position = carte.positionCarteDeLaProduction(productionId, (contexte || {}).coursId);
+    if (!position) return null;
+
+    return dateSeanceDuRang(contexte, position.semaine, position.rangSeance);
+}
+
+/**
  * 🆕 Beta 98.4 : Affiche l'info de séance correspondant à une date d'échéance
  * Ex: "Sem. 4, lundi — 1re séance"
  *
  * @param {HTMLElement} spanInfo - Le <span> où afficher le texte
  * @param {string} dateStr - Date au format YYYY-MM-DD
- * @param {string|null} coursId - ID du cours
- * @param {string|null} groupeNum - Numéro du groupe (ex: "00002") pour filtrer les séances
+ * @param {Object} contexte - { coursId, groupeCoursId } — le groupe décide du
+ *   rang : deux groupes du même cours ne se rencontrent pas les mêmes jours,
+ *   donc « 2e séance » ne désigne pas la même date pour les deux.
  */
-function afficherInfoSeanceEcheance(spanInfo, dateStr, coursId, groupeNum) {
+function afficherInfoSeanceEcheance(spanInfo, dateStr, contexte) {
     if (!spanInfo) return;
     spanInfo.textContent = '';
 
@@ -643,50 +928,24 @@ function afficherInfoSeanceEcheance(spanInfo, dateStr, coursId, groupeNum) {
         return;
     }
 
-    // Rang de la séance dans la semaine, filtré par groupe
+    // Rang de la séance dans la semaine, filtré par groupe.
+    // ⮕ La liste vient de `datesSeancesDeLaSemaine` — LA MÊME que celle qui
+    //   sert à dériver une date depuis la carte d'alignement. Deux lectures
+    //   d'une seule liste : le libellé ne peut pas dire « 2e séance » là où la
+    //   carte a posé « B ».
     let rang = 0;
     let total = 0;
 
-    if (typeof obtenirSeancesCompletes === 'function') {
-        const seancesCompletes = obtenirSeancesCompletes(coursId);
-
-        // Filtrer par groupe si possible
-        let datesGroupeSemaine = [];
-        if (groupeNum) {
-            datesGroupeSemaine = Object.entries(seancesCompletes)
-                .filter(([date, seances]) => {
-                    const info = calendrier[date];
-                    if (!info || info.numeroSemaine !== numSemaine) return false;
-                    return Array.isArray(seances) && seances.some(s => s.groupe === groupeNum);
-                })
-                .map(([date]) => date)
-                .sort();
-        }
-
-        // Fallback : toutes les séances du cours si le filtre par groupe ne donne rien
-        if (datesGroupeSemaine.length === 0) {
-            datesGroupeSemaine = Object.entries(seancesCompletes)
-                .filter(([date, seances]) => {
-                    const info = calendrier[date];
-                    if (!info || info.numeroSemaine !== numSemaine) return false;
-                    return Array.isArray(seances) && seances.length > 0;
-                })
-                .map(([date]) => date)
-                .sort();
-        }
-
+    const datesGroupeSemaine = datesSeancesDeLaSemaine(contexte, numSemaine, true);
+    if (datesGroupeSemaine.length > 0) {
         rang = datesGroupeSemaine.indexOf(dateStr) + 1;
         total = datesGroupeSemaine.length;
 
         // Si la date n'est pas pile un jour de séance, trouver la séance la plus proche suivante
-        if (rang === 0 && datesGroupeSemaine.length > 0) {
+        if (rang === 0) {
             const prochaine = datesGroupeSemaine.find(d => d >= dateStr);
-            if (prochaine) {
-                rang = datesGroupeSemaine.indexOf(prochaine) + 1;
-            } else {
-                // Après la dernière séance de la semaine
-                rang = datesGroupeSemaine.length;
-            }
+            // Après la dernière séance de la semaine : on rattache à la dernière.
+            rang = prochaine ? datesGroupeSemaine.indexOf(prochaine) + 1 : datesGroupeSemaine.length;
         }
     }
 
@@ -704,12 +963,112 @@ function afficherInfoSeanceEcheance(spanInfo, dateStr, coursId, groupeNum) {
 }
 
 /**
+ * LA CARTE PROPOSE, GRÉGOIRE DISPOSE (#493, 25 août 2026).
+ *
+ * Branche une proposition de date sur UN champ d'échéance. Trois situations,
+ * et une seule écrit quelque chose :
+ *   • champ vide          ⇒ la date de la carte s'y installe ;
+ *   • champ = proposition ⇒ rien à dire, l'écran est déjà d'accord ;
+ *   • champ ≠ proposition ⇒ l'écart est DIT, avec de quoi l'adopter d'un clic.
+ *
+ * ⚠⚠ UNE DATE SAISIE N'EST JAMAIS ÉCRASÉE. C'est la décision de Grégoire du
+ * 25 août, et elle tient à ce qu'une échéance n'est pas une donnée d'affichage :
+ * elle part dans les consignes de ses étudiant·es. Déplacer une leçon dans la
+ * carte ne doit pas réécrire en silence une date déjà transmise — mais ne rien
+ * dire du tout laisserait la carte et l'écran se contredire sans témoin. D'où
+ * l'écart montré plutôt qu'appliqué.
+ *
+ * ⚠ LA CASE N'EST PAS TOUCHÉE. « Cocher = consignes transmises » : écrire une
+ * date ne transmet rien. Un gabarit pré-rempli mais non coché garde son badge
+ * « à planifier » (#486) et n'entre ni au calendrier ni dans les indices C et P
+ * — ce qui est exactement l'état d'une production préparée, pas encore remise.
+ */
+function brancherPropositionDeLaCarte(inputDate, spanInfo, productionId, contexte) {
+    if (!inputDate || !productionId) return;
+
+    const proposee = dateEcheanceProposeeParLaCarte(productionId, contexte);
+    if (!proposee) return;   // Pas de carte, pas de rattachement, pas de rang : champ manuel.
+
+    if (!inputDate.value) {
+        inputDate.value = proposee;
+        if (spanInfo) afficherInfoSeanceEcheance(spanInfo, proposee, contexte);
+        return;
+    }
+
+    if (inputDate.value === proposee) return;
+
+    afficherEcartAvecLaCarte(inputDate, spanInfo, proposee, contexte);
+}
+
+/**
+ * L'écart entre la date saisie et celle que la carte propose, avec le bouton
+ * qui l'adopte. Construit en DOM (createElement + textContent) plutôt qu'en
+ * `innerHTML` : rien de ce qui entre ici n'est du texte libre, et le geste
+ * évite d'ouvrir une porte de plus dans un écran de saisie.
+ */
+function afficherEcartAvecLaCarte(inputDate, spanInfo, proposee, contexte) {
+    const parent = inputDate.parentElement;
+    if (!parent) return;
+
+    const ancien = parent.querySelector('.echeance-ecart-carte');
+    if (ancien) ancien.remove();
+
+    const zone = document.createElement('span');
+    zone.className = 'echeance-ecart-carte';
+    zone.style.cssText = 'font-size: 0.85em; color: var(--texte-secondaire, #999); display: inline-flex; align-items: center; gap: 6px; margin-left: 8px;';
+
+    const texte = document.createElement('span');
+    texte.textContent = `La carte situe cette remise le ${libelleJourEtDate(proposee)}.`;
+    zone.appendChild(texte);
+
+    const bouton = document.createElement('button');
+    bouton.type = 'button';
+    bouton.className = 'btn-lien-echeance-carte';
+    bouton.textContent = 'Utiliser cette date';
+    bouton.style.cssText = 'background: none; border: none; padding: 0; font-size: inherit; color: var(--lien, #0066cc); text-decoration: underline; cursor: pointer;';
+    bouton.addEventListener('click', () => {
+        inputDate.value = proposee;
+        if (spanInfo) afficherInfoSeanceEcheance(spanInfo, proposee, contexte);
+        zone.remove();
+    });
+    zone.appendChild(bouton);
+
+    parent.appendChild(zone);
+}
+
+/** « lundi 16 févr. » — le format déjà employé sous les champs d'échéance. */
+function libelleJourEtDate(dateStr) {
+    const dateObj = new Date(dateStr + 'T12:00:00');
+    const jour = dateObj.toLocaleDateString('fr-CA', { weekday: 'long' });
+    const courte = (typeof formaterDateCourte === 'function') ? formaterDateCourte(dateStr) : dateStr;
+    return `${jour} ${courte}`;
+}
+
+/**
  * 🆕 Beta 98.3 : Lire les échéances par groupe depuis le formulaire multi-groupe
  * @returns {Object|null} echeancesParGroupe ou null si mode simple
  */
 function lireEcheancesParGroupeDepuisFormulaire() {
     const containerMulti = document.getElementById('containerEcheancesGroupes');
-    if (!containerMulti || containerMulti.classList.contains('u-hide')) return null;
+
+    // #494 — le mode simple écrit le MÊME modèle, avec une seule entrée. Sans
+    // ce chemin, la case « consignes transmises » serait cochée à l'écran et
+    // perdue à l'enregistrement : le formulaire retomberait sur le legacy, où
+    // `assignee` vaut true en dur — soit exactement le contraire de ce que
+    // Grégoire vient de décocher.
+    if (!containerMulti || containerMulti.classList.contains('u-hide')) {
+        const caseSimple = document.getElementById('productionEcheanceAssignee');
+        const gcId = caseSimple ? caseSimple.getAttribute('data-gc-id') : null;
+        if (!gcId) return null;   // Pas de groupe : rien à assigner, legacy seul.
+
+        const inputSimple = document.getElementById('productionDateEcheance');
+        return {
+            [gcId]: {
+                assignee: caseSimple.checked,
+                date: (inputSimple && inputSimple.value) ? inputSimple.value : null
+            }
+        };
+    }
 
     const listeContainer = document.getElementById('listeEcheancesGroupes');
     if (!listeContainer) return null;
@@ -1823,17 +2182,13 @@ function mettreAJourResumeTypes(evaluations) {
  * - autre : Autre
  */
 function getTypeLabel(type) {
-    const labels = {
-        'examen': 'Examen',
-        'travail': 'Travail écrit',
-        'quiz': 'Quiz/Test',
-        'presentation': 'Présentation',
-        'portfolio': '📁 Portfolio (conteneur)',
-        'artefact-portfolio': 'Artefact d\'un portfolio',
-        'terminale': 'Évaluation terminale',
-        'autre': 'Autre'
-    };
-    return labels[type] || type;
+    // Libellé de LECTURE (cf. TYPES_PRODUCTION) : `libelleLong` s'il existe,
+    // `libelle` sinon, préfixe d'affichage compris. Les quatre types qui
+    // manquaient à l'ancienne table locale — laboratoire, entrevue, projet,
+    // stage — cessent du même coup de s'afficher en identifiant brut.
+    const t = typeProduction(type);
+    if (!t) return type;  // Type inconnu : on rend l'entrée telle quelle.
+    return (t.prefixeAffichage || '') + (t.libelleLong || t.libelle);
 }
 
 /* ===============================
@@ -2174,6 +2529,9 @@ window.gererChangementTypeProduction = gererChangementTypeProduction;
 window.chargerArtefactsDisponibles = chargerArtefactsDisponibles;
 window.mettreAJourPonderationTotale = mettreAJourPonderationTotale;
 window.getTypeLabel = getTypeLabel;
+window.TYPES_PRODUCTION = TYPES_PRODUCTION;                                 // 25 août 2026 — table unique des types (sélecteurs, sentinelle)
+window.typeProduction = typeProduction;
+window.typePorteSaPonderation = typePorteSaPonderation;
 window.gererPortfolio = gererPortfolio;
 window.initialiserModuleProductions = initialiserModuleProductions;
 window.getCleProductions = getCleProductions; // Exposé pour sous-module productions-import-export.js
@@ -2190,6 +2548,13 @@ window.chargerGrillesDisponiblesPourProduction = chargerGrillesDisponiblesPourPr
 // 🆕 Beta 98.3 : Échéances par groupe-cours
 window.obtenirEcheanceEffective = obtenirEcheanceEffective;
 window.aucuneEcheanceAssignee = aucuneEcheanceAssignee;                     // #486 — badge « à planifier » + sentinelle (tests/unit)
+window.datesSeancesDeLaSemaine = datesSeancesDeLaSemaine;                   // #493 — la liste unique (rang ⇄ date)
+window.dateSeanceDuRang = dateSeanceDuRang;                                 // #493 — « semaine 4, séance B » → « mardi 17 février »
+window.dateEcheanceProposeeParLaCarte = dateEcheanceProposeeParLaCarte;     // #493 — ce que la carte propose, par groupe
+window.datesDeLaSemaineDansTable = datesDeLaSemaineDansTable;               // #493 — filtre d'une table horaire par semaine
+window.brancherPropositionDeLaCarte = brancherPropositionDeLaCarte;         // #493 — le geste : proposer sans écraser
+window.poserCaseAssignationSimple = poserCaseAssignationSimple;             // #494 — « consignes transmises » en mode simple
+window.lireEcheancesParGroupeDepuisFormulaire = lireEcheancesParGroupeDepuisFormulaire;   // #494 — sentinelle : l'écran et l'enregistrement disent la même chose
 window.validerChampsObligatoiresProduction = validerChampsObligatoiresProduction; // #486 — exposé pour la sentinelle (tests/unit)
 // #394 : avertissements de cohérence STD (fonction pure + rendu) et conversion
 // par geste explicite (bouton « Typer comme terminale », dispatcher data-action)

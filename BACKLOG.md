@@ -162,6 +162,78 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Dernier ID : **#491**.
   Dernier ID : **#490**.
 
+### Chantier — 25 août 2026 (le pont carte d'alignement ↔ productions)
+
+- [x] **#492 — Le sélecteur « Production » de l'Inspecteur ne montrait rien, et personne ne pouvait le voir.**
+  Livré sur `echeance-depuis-carte-alignement`. Demande de Grégoire : rattacher ses artefacts aux
+  blocs Évaluation de la carte. **TROIS défauts empilés, et chacun cachait le suivant** :
+  · **le filtre fantôme** — `chargerProductions` filtrait sur `p.estActive`, un champ qu'AUCUN module
+    n'écrit jamais (recherche sur tout le dépôt : une seule occurrence, le filtre lui-même). La
+    fonction rendait `[]` en toutes circonstances. Le pont était coupé à sa SOURCE, pas à son bout ;
+  · **la liste amputée** — le sélecteur portait ses propres cinq types (`travail, examen, projet,
+    quiz, autre`) quand le formulaire de Conception en offre douze. Artefacts, portfolios,
+    laboratoires, présentations, entrevues, stages et évaluation terminale étaient chargés,
+    regroupés, puis abandonnés sans un mot ;
+  · **le libellé mort** — la projection lisait `p.nom`, un champ que le modèle ne porte pas (il porte
+    `titre`). Chaque option affichait « undefined », **et la même projection alimente la colonne
+    "Production" du plan de cours exporté** (`nomProduction`).
+  ⚠ **Le golden master #416 ne pouvait PAS voir le troisième** : ses fixtures disaient `nom`, comme le
+  bug. Fixture et code étaient d'accord entre eux et faux tous les deux. Corrigées vers `titre` —
+  **le golden repasse au vert sans qu'un octet de référence bouge**, ce qui prouve qu'il décrivait le
+  bon comportement depuis le début.
+  Livré : `TYPES_PRODUCTION` dans `productions.js` — table UNIQUE qui remplace trois listes
+  divergentes (12 / 8 / 5) ; `getTypeLabel` en dérive, et `laboratoire`/`entrevue`/`projet`/`stage`
+  cessent de s'afficher en identifiant brut ; `optionsProductionsHTML` groupée comme le formulaire,
+  avec un filet « Type non répertorié » pour qu'aucune production ne puisse plus disparaître en
+  silence ; `echapperHtml` sur le titre — la faille dormait derrière le `undefined`, réparer le
+  libellé sans échapper l'aurait réveillée. Sentinelle 20 cas, break-testée.
+  📐 **Signalé, hors périmètre** : `getTypeLabel('portfolio')` rend « 📁 Portfolio (conteneur) ».
+  L'emoji est déplacé dans la table sans être retiré — le retrait change un libellé d'interface, et
+  `productions.js:207` en pose un second. Geste à trancher avec Grégoire.
+
+- [x] **#493 — La carte d'alignement propose la date d'échéance, et chaque groupe reçoit la sienne.**
+  Livré sur `echeance-depuis-carte-alignement`. Une leçon porte `metadata.semaine` et
+  `metadata.rangSeance` ; une production rattachée à son bloc Évaluation est donc SITUÉE. Deux
+  groupes du même cours ne se rencontrent pas le même jour : même case de carte, lundi pour l'un,
+  mardi pour l'autre — ce que Grégoire saisissait à la main cet hiver.
+  ▣ **UNE SEULE LISTE, DEUX LECTURES** : `datesSeancesDeLaSemaine` donne les rencontres d'un groupe
+  pour une semaine. Le libellé fait `indexOf(date) + 1` (« 2e séance de la semaine 4 ») ; la
+  dérivation fait `[rang - 1]`. Deux fonctions séparées auraient pu diverger d'une séance et faire
+  dire à l'écran le contraire de la carte, **sur la date que lisent ses étudiant·es**.
+  ⚠⚠ **MON PREMIER JET NE TROUVAIT JAMAIS RIEN, et c'est le navigateur qui l'a dit** (`SEANCES → []`
+  avec une POSITION valide). Je tirais les séances de `obtenirSeancesCompletes(coursId)` puis
+  filtrais sur `seance.groupe === groupeNum`. Deux erreurs en une ligne : `obtenirSeancesCompletes`
+  rend DÉJÀ la table du groupe-cours actif (`cleSeancesCompletes`), et `seance.groupe` est un champ
+  de saisie d'horaire, **vide dans le cas courant**. Le repli « toutes les séances du cours » du code
+  d'origine n'était pas un secours exceptionnel : c'était le chemin normal, et je l'avais interdit à
+  la dérivation en le prenant pour un raccourci douteux. Source juste = `obtenirSeancesCompletesDuGroupe`,
+  celle que l'export du plan de cours utilisait déjà.
+  Livré : `positionCarteDeLaProduction` (l'autre sens du pont, dans `planification-carte.js`) ;
+  `dateSeanceDuRang` ; `dateEcheanceProposeeParLaCarte` ; `brancherPropositionDeLaCarte`.
+  **Décision de Grégoire (option A) : la carte propose, il dispose** — champ vide rempli, date saisie
+  JAMAIS écrasée, écart signalé avec « Utiliser cette date ». Trois refus délibérés plutôt qu'une
+  approximation : rang inexistant, deux positions contradictoires, groupe sans horaire ⇒ **rien**.
+  Sentinelle 24 cas, break-testée. Vérifié au navigateur : `2026-09-15`, mardi, 2e séance de la
+  semaine 4.
+
+- [x] **#494 — « Consignes transmises » existe aussi quand il n'y a qu'un groupe.**
+  Livré sur `echeance-depuis-carte-alignement`. La case du mode multi-groupe (Beta 98.3) n'a JAMAIS
+  existé en mode simple : `obtenirEcheanceEffective` y répondait `assignee: true` **en dur**.
+  C'était défendable — tant que poser la date demandait un geste, une date saisie VALAIT la
+  transmission.
+  ⚠⚠ **#493 A FAIT SAUTER CETTE ÉQUIVALENCE LE MÊME JOUR.** La date arrivant seule depuis la carte,
+  une production simplement PLANIFIÉE devenait TRANSMISE : entrée au calendrier, dans les indices C
+  et P et dans les snapshots, badge « à planifier » (#486) perdu, **sans qu'aucune consigne ne soit
+  partie**. L'automatisme a rendu nécessaire la donnée que la supposition remplaçait. Repéré par
+  Grégoire, à l'usage.
+  Livré : `poserCaseAssignationSimple` écrit le MÊME modèle que le multi (`echeancesParGroupe` à une
+  entrée) — pas de champ parallèle, **un seul modèle d'assignation dans le projet** ;
+  `lireEcheancesParGroupeDepuisFormulaire` gère le chemin simple, sans quoi la case aurait été cochée
+  à l'écran et perdue à l'enregistrement. Rétro-compat : une production d'avant ce jour, qui n'a
+  qu'un `dateEcheance`, s'affiche cochée — c'est la sémantique de sa saisie ; rien n'est réécrit.
+  Sentinelle 15 cas, break-testée. Vérifié au navigateur, aller-retour d'enregistrement compris.
+  Vitest **3124/3124** (302 fichiers). Dernier ID : **#494**.
+
 ### Retour testeur — 24 août 2026 (Grégoire, en cours de planification)
 
 - [x] **#486 — Un gabarit de production s'enregistre sans date d'échéance.** LIVRÉ en **1.94.0**.
