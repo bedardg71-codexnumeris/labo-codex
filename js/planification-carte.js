@@ -2893,32 +2893,16 @@ function ouvrirPanneau(id) {
         // reçoit son travail commenté. Deux notions, deux libellés.
         extra.innerHTML += selecteurRetroactionHTML('Rétroaction sur le rendu', donnees.metadata.retroaction);
 
+        // Le contenu du sélecteur vit dans `optionsProductionsHTML` (fin de
+        // module, à côté de `chargerProductions`) : les deux bouts du pont
+        // carte ↔ productions se lisent ensemble, et la construction devient
+        // testable sans ouvrir un panneau.
         var prodVal = donnees.metadata.productionId || '';
-        var productions = chargerProductions();
         var htmlProd = '<label for="planif-panneau-production">Production</label>' +
             '<select id="planif-panneau-production">' +
-            '<option value="">Aucune</option>';
-        if (productions.length > 0) {
-            var parType = {};
-            for (var pp = 0; pp < productions.length; pp++) {
-                var tp = productions[pp].type || 'autre';
-                if (!parType[tp]) parType[tp] = [];
-                parType[tp].push(productions[pp]);
-            }
-            var typesOrdre = ['travail', 'examen', 'projet', 'quiz', 'autre'];
-            var typesLabels = { travail: 'Travaux', examen: 'Examens', projet: 'Projets', quiz: 'Quiz', autre: 'Autres' };
-            for (var ti = 0; ti < typesOrdre.length; ti++) {
-                var grp = parType[typesOrdre[ti]];
-                if (!grp || grp.length === 0) continue;
-                htmlProd += '<optgroup label="' + (typesLabels[typesOrdre[ti]] || typesOrdre[ti]) + '">';
-                for (var pi = 0; pi < grp.length; pi++) {
-                    var selAttr = prodVal === grp[pi].id ? ' selected' : '';
-                    htmlProd += '<option value="' + grp[pi].id + '"' + selAttr + '>' + grp[pi].nom + ' (' + (grp[pi].ponderation || 0) + ' %)</option>';
-                }
-                htmlProd += '</optgroup>';
-            }
-        }
-        htmlProd += '</select>';
+            '<option value="">Aucune</option>' +
+            optionsProductionsHTML(chargerProductions(), prodVal) +
+            '</select>';
 
         extra.innerHTML += htmlProd;
         // ⚠ Listeners posés EN FIN de ouvrirPanneau, pas ici. L'ancien câblage
@@ -7559,15 +7543,257 @@ function chargerProductions() {
     if (typeof db === 'undefined' || typeof window.cle !== 'function') return [];
     try {
         var productions = db.getSync(window.cle('productions'), []);
-        return productions.filter(function(p) { return p.estActive; }).map(function(p) {
+
+        // ⚠⚠ LE FILTRE QUI VIDAIT TOUT (corrigé le 25 août 2026).
+        // Cette ligne disait `p.estActive`. Or AUCUN module du projet n'écrit
+        // jamais ce champ — ni la création d'une production, ni l'import, ni le
+        // pack démo, ni le partage. Une recherche sur tout le dépôt ne le
+        // trouvait qu'ICI, dans le filtre lui-même. `chargerProductions` rendait
+        // donc `[]` en toutes circonstances, et le sélecteur « Production » de
+        // l'Inspecteur n'a jamais pu proposer quoi que ce soit : le pont carte ↔
+        // productions était coupé à sa source, pas à son extrémité.
+        //
+        // ⮕ C'est aussi ce qui a gardé deux autres défauts invisibles pendant des
+        // mois — la liste de types amputée et le libellé `nom`/`titre` : on ne
+        // voit pas les libellés cassés d'une liste qui reste vide.
+        //
+        // Le critère retenu est celui que Grégoire voit RÉELLEMENT dans sa liste
+        // de Conception (`productions-liste.js`) : `dansBibliotheque !== false`,
+        // puis le masquage des items de démonstration hors mode démo. Le
+        // sélecteur de la carte offre exactement ce que la barre latérale montre
+        // — deux écrans qui ne peuvent plus se contredire.
+        var visibles = productions.filter(function(p) { return p && p.dansBibliotheque !== false; });
+        if (window.BibliothequeUI && typeof window.BibliothequeUI.filtrerParModeDemo === 'function') {
+            visibles = window.BibliothequeUI.filtrerParModeDemo(visibles);
+        }
+
+        return visibles.map(function(p) {
             // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
             var infoC = db.getSync('infoCours', null);
             var gcPlanif = infoC ? (infoC._groupeCoursId || infoC.id || null) : null;
             var dateEch = (typeof obtenirEcheanceEffective === 'function')
                 ? obtenirEcheanceEffective(p, gcPlanif).date : p.dateEcheance;
-            return { id: p.id, nom: p.nom, type: p.type || 'autre', ponderation: p.ponderation || 0, grilleId: p.grilleId, dateEcheance: dateEch };
+            // ⚠ `titre`, PAS `nom` (25 août 2026). Le modèle de production porte
+            // `titre` — `nom` n'a jamais existé dessus. La projection rendait donc
+            // `undefined` pour CHAQUE production, et ce `undefined` partait dans le
+            // sélecteur de l'Inspecteur ET dans la colonne « Production » du plan de
+            // cours exporté (`nomProduction`, cf. planification-export.js:444). Le
+            // défaut ne s'était jamais vu parce que le même écran n'avait aucune
+            // production à offrir : les deux se couvraient l'un l'autre.
+            return { id: p.id, titre: p.titre, type: p.type || 'autre', ponderation: p.ponderation || 0, grilleId: p.grilleId, dateEcheance: dateEch };
         });
     } catch(e) { return []; }
+}
+
+/**
+ * OÙ CETTE PRODUCTION EST-ELLE POSÉE DANS LES CARTES ? (25 août 2026)
+ *
+ * L'autre sens du pont. `metadata.productionId` dit, depuis un bloc Évaluation,
+ * QUELLE production il évalue ; cette fonction répond à la question inverse —
+ * à quelle semaine et à quelle séance cette production est-elle attendue ?
+ * C'est ce qui permet à l'écran des échéances de proposer une date au lieu de
+ * la demander.
+ *
+ * ⚠ QUELLES CARTES SONT FOUILLÉES, ET POURQUOI PAS TOUTES. Une carte porte un
+ * `coursId` FACULTATIF. On fouille donc, dans l'ordre :
+ *   1. les cartes du MÊME cours que la production — le cas normal ;
+ *   2. à défaut, les cartes qui n'ont aucun cours — celle de l'enseignant qui
+ *      n'a qu'une carte et ne l'a jamais rattachée.
+ * Une carte rattachée à un AUTRE cours n'est jamais lue : proposer à un travail
+ * de Littérature la date d'une leçon de Philosophie serait pire que ne rien
+ * proposer du tout.
+ *
+ * ⚠ DEUX POSITIONS CONTRADICTOIRES ⇒ AUCUNE. Si la même production est posée à
+ * deux endroits qui ne tombent pas sur la même séance (un clone déplacé, deux
+ * cartes concurrentes), on ne tranche pas à sa place : on rend null, et le champ
+ * reste manuel. Choisir « la première trouvée » écrirait une date d'échéance —
+ * une date que ses étudiant·es liront — sur un tirage au sort.
+ *
+ * @param {string} productionId
+ * @param {string|null} coursId - Cours de la production
+ * @returns {Object|null} { semaine, rangSeance, carteId, noeudId } ou null
+ */
+function positionCarteDeLaProduction(productionId, coursId) {
+    if (!productionId) return null;
+    var pd = window.planificationDonnees;
+    if (!pd || typeof pd.getIndex !== 'function' || typeof pd.chargerCarte !== 'function') return null;
+
+    var index = pd.getIndex();
+    if (!index || !Array.isArray(index.cartes)) return null;
+
+    var duCours = [], sansCours = [];
+    for (var c = 0; c < index.cartes.length; c++) {
+        var fiche = index.cartes[c];
+        if (!fiche || !fiche.id) continue;
+        var idCours = fiche.coursId || null;
+        if (coursId && idCours === coursId) duCours.push(fiche.id);
+        else if (!idCours) sansCours.push(fiche.id);
+    }
+    var aFouiller = duCours.length > 0 ? duCours : sansCours;
+
+    var trouvees = [];
+    for (var i = 0; i < aFouiller.length; i++) {
+        var pos = positionDansUneCarte(aFouiller[i], productionId, pd);
+        if (pos) trouvees.push(pos);
+    }
+    if (trouvees.length === 0) return null;
+
+    // Toutes d'accord ? Alors la réponse est celle-là. Sinon, silence.
+    var premiere = trouvees[0];
+    for (var t = 1; t < trouvees.length; t++) {
+        if (trouvees[t].semaine !== premiere.semaine ||
+            trouvees[t].rangSeance !== premiere.rangSeance) return null;
+    }
+    return premiere;
+}
+
+/**
+ * La position de la production DANS une carte donnée, lue au stockage.
+ * `sauvegarder()` écrit à chaque geste : le stockage ne retarde pas sur l'écran.
+ * @returns {Object|null} { semaine, rangSeance, carteId, noeudId }
+ */
+function positionDansUneCarte(carteId, productionId, pd) {
+    var donnees = pd.chargerCarte(carteId);
+    if (!donnees || !Array.isArray(donnees.noeuds)) return null;
+
+    var parId = {};
+    for (var i = 0; i < donnees.noeuds.length; i++) {
+        var n = donnees.noeuds[i];
+        if (n && n.id) parId[n.id] = n;
+    }
+
+    for (var j = 0; j < donnees.noeuds.length; j++) {
+        var noeud = donnees.noeuds[j];
+        if (!noeud || noeud.type !== 'evaluation') continue;
+        if (!noeud.metadata || noeud.metadata.productionId !== productionId) continue;
+
+        var lecon = leconAncetreSerialisee(noeud, parId);
+        if (!lecon || !lecon.metadata) continue;
+
+        var semaine = parseInt(lecon.metadata.semaine, 10);
+        var rang = parseInt(lecon.metadata.rangSeance, 10);
+        // Une leçon sans semaine OU sans rang n'est pas située : rien à proposer.
+        if (isNaN(semaine) || isNaN(rang) || semaine < 1 || rang < 1) continue;
+
+        return { semaine: semaine, rangSeance: rang, carteId: carteId, noeudId: noeud.id };
+    }
+    return null;
+}
+
+/**
+ * La leçon qui contient ce nœud, en remontant les parents d'une carte
+ * SÉRIALISÉE (`leconParenteDe` ne sait lire que la carte active en mémoire, et
+ * ne monte que d'un cran).
+ * La borne à 50 n'est pas de la prudence rituelle : une carte importée peut
+ * porter un cycle de parents, et cette fonction tourne dans un écran de saisie.
+ */
+function leconAncetreSerialisee(noeud, parId) {
+    var courant = noeud, sauts = 0;
+    while (courant && courant.parent && sauts < 50) {
+        courant = parId[courant.parent];
+        if (courant && courant.type === 'lecon') return courant;
+        sauts++;
+    }
+    return null;
+}
+
+/**
+ * LES OPTIONS DU SÉLECTEUR « PRODUCTION » DE L'INSPECTEUR (25 août 2026).
+ *
+ * ⚠⚠ CE QUE CE CODE REMPLACE, ET POURQUOI ÇA COMPTAIT. L'ancienne construction
+ * portait sa propre liste de types — `['travail','examen','projet','quiz','autre']`
+ * — et n'itérait QUE sur elle. Les productions des sept autres types étaient
+ * chargées, regroupées dans `parType`, puis abandonnées là : jamais rendues,
+ * jamais signalées. Un artefact de portfolio ne pouvait donc PAS être rattaché
+ * à un bloc Évaluation de la carte, alors que `metadata.productionId` est
+ * précisément le pont prévu pour ça.
+ *
+ * ⮕ L'ordre et les groupes viennent maintenant de `TYPES_PRODUCTION`
+ * (`productions.js`), la même table que le formulaire de Conception. Un type
+ * ajouté là-bas apparaît ici sans qu'une ligne soit écrite ici.
+ *
+ * ▣ RIEN NE PEUT PLUS DISPARAÎTRE EN SILENCE — c'est la leçon du défaut qu'on
+ * corrige. Une production dont le type n'est dans AUCUNE entrée de la table
+ * (donnée ancienne, type retiré depuis) atterrit dans un dernier groupe
+ * « Type non répertorié » plutôt que d'être escamotée. Le sélecteur montre
+ * toujours TOUTES les productions actives, quoi qu'il arrive à la table.
+ *
+ * ⚠ `echapperHtml` sur le titre n'est pas décoratif : le titre est du texte
+ * libre de Grégoire, et il entre ici dans un `innerHTML`. Il n'était pas
+ * échappé avant — la faille dormait derrière le `undefined` que projetait
+ * `chargerProductions`. Réparer le libellé sans échapper l'aurait réveillée.
+ *
+ * @param {Array} productions - Projection de `chargerProductions()`
+ * @param {string} idChoisi - `metadata.productionId` du nœud, ou ''
+ * @returns {string} HTML des <optgroup>/<option>, '' si aucune production
+ */
+function optionsProductionsHTML(productions, idChoisi) {
+    if (!Array.isArray(productions) || productions.length === 0) return '';
+
+    var parType = {};
+    for (var i = 0; i < productions.length; i++) {
+        var t = productions[i].type || 'autre';
+        if (!parType[t]) parType[t] = [];
+        parType[t].push(productions[i]);
+    }
+
+    var table = Array.isArray(window.TYPES_PRODUCTION) ? window.TYPES_PRODUCTION : [];
+    if (table.length === 0) {
+        console.warn('[carte] TYPES_PRODUCTION indisponible : sélecteur rendu à plat.');
+    }
+
+    var html = '';
+    var groupeOuvert = null;
+    for (var ti = 0; ti < table.length; ti++) {
+        var entree = table[ti];
+        var lot = parType[entree.id];
+        if (!lot || lot.length === 0) continue;
+        if (entree.groupe !== groupeOuvert) {
+            if (groupeOuvert !== null) html += '</optgroup>';
+            html += '<optgroup label="' + echapperHtml(entree.groupe) + '">';
+            groupeOuvert = entree.groupe;
+        }
+        for (var li = 0; li < lot.length; li++) {
+            html += optionProductionHTML(lot[li], idChoisi);
+        }
+        delete parType[entree.id];
+    }
+    if (groupeOuvert !== null) html += '</optgroup>';
+
+    // Le filet : ce que la table ne connaît pas reste visible et choisissable.
+    var orphelins = Object.keys(parType);
+    if (orphelins.length > 0) {
+        html += '<optgroup label="Type non répertorié">';
+        for (var oi = 0; oi < orphelins.length; oi++) {
+            var reste = parType[orphelins[oi]];
+            for (var ri = 0; ri < reste.length; ri++) {
+                html += optionProductionHTML(reste[ri], idChoisi);
+            }
+        }
+        html += '</optgroup>';
+    }
+    return html;
+}
+
+/**
+ * Une option du sélecteur.
+ *
+ * ⚠ La pondération n'est affichée que si le type en porte une qui lui soit
+ * propre. Un artefact n'en a pas : c'est le portfolio conteneur qui définit la
+ * pondération globale, et `getAvertissementsStructure` avertit explicitement
+ * quand une pondération traîne sur un artefact (« sa pondération n'est pas
+ * utilisée par le calcul »). Écrire « (0 %) » ou « (6,67 %) » derrière
+ * « Artefact 1 » donnerait pour un chiffre de notation ce que le calcul ignore.
+ */
+function optionProductionHTML(prod, idChoisi) {
+    var titre = (prod.titre && String(prod.titre).trim()) || 'Sans titre';
+    var portePonderation = (typeof window.typePorteSaPonderation === 'function')
+        ? window.typePorteSaPonderation(prod.type)
+        : true;
+    var suffixe = portePonderation ? ' (' + (prod.ponderation || 0) + ' %)' : '';
+    return '<option value="' + echapperHtml(prod.id) + '"' +
+        (idChoisi === prod.id ? ' selected' : '') + '>' +
+        echapperHtml(titre) + suffixe + '</option>';
 }
 
 function afficherDetailsProduction(productionId, productions) {
@@ -7596,7 +7822,7 @@ function afficherDetailsProduction(productionId, productions) {
     var gcDetPlanif = infoCDet ? (infoCDet._groupeCoursId || infoCDet.id || null) : null;
     var dateEchDet = (typeof obtenirEcheanceEffective === 'function')
         ? obtenirEcheanceEffective(prod, gcDetPlanif).date : (prod.dateEcheance || null);
-    return { nomProduction: prod.nom, ponderation: prod.ponderation, nomGrille: nomGrille, nomEchelle: nomEchelle, dateEcheance: dateEchDet };
+    return { nomProduction: prod.titre, ponderation: prod.ponderation, nomGrille: nomGrille, nomEchelle: nomEchelle, dateEcheance: dateEchDet };
 }
 
 
@@ -11371,6 +11597,8 @@ window.planificationCarte = {
     TYPES_LIENS: TYPES_LIENS,
     trouverIdeesMaitressesAncetres: trouverIdeesMaitressesAncetres,
     chargerProductions: chargerProductions,
+    optionsProductionsHTML: optionsProductionsHTML,                             // 25 août 2026 — exposée pour la sentinelle #492
+    positionCarteDeLaProduction: positionCarteDeLaProduction,                   // 25 août 2026 — l'autre sens du pont (#493)
     afficherDetailsProduction: afficherDetailsProduction,
     naviguerVers: naviguerVers,
     CLE_SEANCES: CLE_SEANCES,

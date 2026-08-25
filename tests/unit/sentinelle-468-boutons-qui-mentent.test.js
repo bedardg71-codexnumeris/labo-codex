@@ -412,15 +412,27 @@ describe('#468 · S4 (CO-17) — enregistrer une production ne réécrit pas son
  */
 function fauxElement(id) {
     const classes = new Set();
+    const attributs = {};
     return {
-        id, value: '', textContent: '', innerHTML: '', style: {},
+        id, value: '', textContent: '', innerHTML: '', style: {}, disabled: false,
         classList: {
             add: (c) => classes.add(c),
             remove: (c) => classes.delete(c),
             contains: (c) => classes.has(c)
         },
-        parentElement: { querySelector: () => null, appendChild() {} },
-        addEventListener() {}, setAttribute() {}, querySelectorAll: () => []
+        // #494 : le mode simple pose désormais la case « consignes transmises »
+        // AVANT le champ date — d'où `insertBefore` et `remove`. Le mock reste
+        // minimal, mais il ne doit pas faire échouer un geste que le navigateur
+        // exécute sans peine.
+        parentElement: {
+            querySelector: () => null, appendChild() {}, insertBefore() {}
+        },
+        remove() {},
+        appendChild() {}, insertBefore() {}, querySelector: () => null,
+        addEventListener() {},
+        setAttribute(n, v) { attributs[n] = String(v); },
+        getAttribute(n) { return n in attributs ? attributs[n] : null; },
+        querySelectorAll: () => []
     };
 }
 

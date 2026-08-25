@@ -45,8 +45,8 @@ function monterTout() {
         // Productions du trimestre actif (a2026) — échéance résolue en repli
         // direct (obtenirEcheanceEffective absent du sandbox).
         'a2026_productions': [
-            { id: 'prod-dissert', nom: 'Dissertation critique', estActive: true, type: 'travail', ponderation: 25, grilleId: 'grille-1', dateEcheance: '2026-10-15' },
-            { id: 'prod-quiz', nom: 'Quiz de lecture', estActive: true, type: 'quiz', ponderation: 10, grilleId: null, dateEcheance: null }
+            { id: 'prod-dissert', titre: 'Dissertation critique', type: 'travail', ponderation: 25, grilleId: 'grille-1', dateEcheance: '2026-10-15' },
+            { id: 'prod-quiz', titre: 'Quiz de lecture', type: 'quiz', ponderation: 10, grilleId: null, dateEcheance: null }
         ],
         'a2026_grillesTemplates': [{ id: 'grille-1', nom: 'Grille SRPNF', echelleId: 'ech-1' }],
         'a2026_echellesTemplates': [{ id: 'ech-1', nom: 'Échelle IDME' }],
