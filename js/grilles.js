@@ -3805,6 +3805,35 @@ async function dupliquerGrilleDepuisSidebar(id) {
 }
 
 async function supprimerGrilleDepuisSidebar(id) {
+    // ⚠ GARDE D'ORPHELINAGE (24 août 2026, sur relevé du corpus de Grégoire).
+    //
+    // Les cartouches ne vivent pas DANS la grille : elles sont ancrées à part,
+    // dans `cartouches_{grilleId}`. Retirer la grille de la liste sans toucher à
+    // cette clé ne détruit rien — mais plus personne ne peut lire ce qu'elle
+    // contient : la barre latérale et la bibliothèque n'énumèrent que les
+    // cartouches des grilles PRÉSENTES. Les cartouches deviennent invisibles, et
+    // l'enseignant conclut qu'elles n'ont pas été enregistrées.
+    //
+    // C'est exactement ce qui s'est passé : son diagnostic du 24 août a retrouvé
+    // « Carte mentale A26 », « Plan de rédaction A26 » et « Stratégies de lecture
+    // A26 » vivantes dans des clés dont la grille avait disparu de son trimestre.
+    //
+    // `supprimerGrilleDefinitivement` portait DÉJÀ cette garde. Ce chemin-ci —
+    // celui de la corbeille de la barre latérale, le plus utilisé — ne l'avait
+    // jamais reçue. Deux chemins, une même action, une seule protégée.
+    const cartouchesLiees = await db.get(`cartouches_${id}`) || [];
+    if (cartouchesLiees.length > 0) {
+        const noms = cartouchesLiees.slice(0, 5).map(c => (c && c.nom) || 'sans nom').join(', ');
+        const reste = cartouchesLiees.length > 5 ? `, et ${cartouchesLiees.length - 5} autre(s)` : '';
+        alert(
+            `Impossible de supprimer cette grille.\n\n` +
+            `${cartouchesLiees.length} cartouche(s) y sont rattachée(s) : ${noms}${reste}.\n\n` +
+            `Supprime-les d'abord, ou déplace-les vers une autre grille — sinon elles ` +
+            `deviendraient introuvables.`
+        );
+        return;
+    }
+
     if (!confirm('Supprimer cette grille ?')) return;
 
     const grilles = await db.get(cle('grillesTemplates')) || [];
