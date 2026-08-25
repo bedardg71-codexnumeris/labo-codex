@@ -207,6 +207,15 @@ h1{
   padding:1.05rem 1.15rem;margin-bottom:.85rem;box-shadow:var(--ombre);
 }
 .decision label{display:block;font-weight:600;margin:.9rem 0 .35rem;font-size:.9rem}
+.verdict{
+  background:var(--ok-voile);border-left:3px solid var(--ok);
+  padding:.7rem .85rem;margin:.9rem 0 0;font-size:.93rem;
+}
+.verdict-etiq{
+  display:inline-block;font-family:"IBM Plex Mono", ui-monospace, monospace;
+  font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ok);margin-right:.5rem;
+}
 textarea{
   width:100%;font:inherit;font-size:.95rem;
   background:var(--surface-creuse);color:var(--encre);
@@ -432,9 +441,9 @@ footer{
   <!-- ================= §3 ================= -->
   <section class="section">
     <div class="section-tete"><span class="section-num">§3</span><h2>Décisions</h2></div>
-    <p class="section-note"><strong>Ce ne sont pas des vérifications.</strong> Ce sont deux choix
-      posés faute de pouvoir les trancher à ta place. <b>Écris ta réponse</b> — il n'y a rien à
-      cocher, et une décision sans verdict écrit est une décision perdue.</p>
+    <p class="section-note"><strong>Les deux verdicts sont RENDUS le 25 août.</strong> Ils sont
+      repris en clair sous chaque question — le champ de saisie reste là pour un complément, mais
+      le verdict, lui, ne dépend plus de ce qu'un navigateur a mémorisé.</p>
 
     <article class="decision" data-decision="3.1">
       <div class="porte-tete">
@@ -445,7 +454,9 @@ footer{
         question qui les nomme. L'autre option était de <b>refuser</b>, comme pour tes propres
         grilles — mais il faudrait alors supprimer les cartouches une à une avant de pouvoir
         atteindre la grille.</p>
-      <label for="d31">Ton verdict</label>
+      <p class="verdict"><span class="verdict-etiq">Verdict rendu</span>
+        <b>« garder la cascade »</b> — aucun code à écrire, le comportement de 1.96.0 est confirmé.</p>
+      <label for="d31">Complément (facultatif)</label>
       <textarea id="d31" placeholder="Garder la cascade / plutôt refuser comme pour mes grilles / autre…"></textarea>
     </article>
 
@@ -458,7 +469,10 @@ footer{
         n'offre que « Supprimer ». La chaîne d'attribution permettrait de retransmettre le travail
         d'un collègue en conservant son nom — mais c'est une question de convenance entre collègues,
         pas de code, et je ne l'ai pas tranchée.</p>
-      <label for="d32">Ton verdict</label>
+      <p class="verdict"><span class="verdict-etiq">Verdict rendu</span>
+        <b>« oui »</b> — <b>livré en 1.97.0</b> (#491). Le menu ⋮ des cartes partagées porte
+        « Exporter pour partager », et l'attribution d'origine part avec le fichier.</p>
+      <label for="d32">Complément (facultatif)</label>
       <textarea id="d32" placeholder="Oui / non / seulement pour certains types…"></textarea>
     </article>
   </section>
@@ -650,9 +664,19 @@ footer{
 
       sec.querySelectorAll('.decision').forEach(function (bloc) {
         var id = bloc.dataset.decision;
+        // Le verdict RENDU vit dans le DOM depuis la clôture ; le champ ne
+        // porte plus qu'un complément. Le relevé doit sortir le verdict même
+        // sur un navigateur qui n'a rien mémorisé — sinon il rendrait
+        // « (non renseigné) » sur une décision pourtant prise.
+        var rendu = bloc.querySelector('.verdict');
         var rep = (etat.decisions[id] || '').trim();
         corps.push('  ' + id + ' — ' + bloc.querySelector('.porte-titre').textContent.trim());
-        corps.push('      verdict : ' + (rep || '(non renseigné)'));
+        if (rendu) {
+          corps.push('      verdict : ' + rendu.textContent.replace(/\s+/g, ' ')
+            .replace(/^Verdict rendu\s*/, '').trim());
+        }
+        if (rep) corps.push('      complément : ' + rep);
+        if (!rendu && !rep) corps.push('      verdict : (non renseigné)');
       });
 
       sec.querySelectorAll('.aveugle h3').forEach(function (h) {

@@ -119,8 +119,9 @@ cartes. […] Cette option devrait être présente dans toutes les bibliothèque
 
 ## §3 · Décisions — ce qui attend ton verdict
 
-> **Ce ne sont pas des vérifications.** Ce sont deux choix que j'ai posés faute
-> de pouvoir les trancher à ta place. **Écris ta réponse**, ne coche pas.
+> **Ce ne sont pas des vérifications.** Ce sont deux choix posés faute de
+> pouvoir les trancher à sa place. ✅ **Les deux sont RENDUS**, reportés
+> ci-dessous ; la 3.2 est livrée en 1.97.0.
 
 ### 3.1 La cascade grille → cartouches : bon comportement ?
 
@@ -129,7 +130,8 @@ après une confirmation qui les nomme. L'autre option était de **refuser**, com
 pour tes propres grilles — mais il faudrait alors supprimer les cartouches une
 à une avant de pouvoir atteindre la grille.
 
-**Ton verdict** : `_______________________________________________`
+**VERDICT RENDU (25 août)** : ***« garder la cascade ».***
+⮕ Aucun code à écrire — le comportement livré en 1.96.0 est confirmé tel quel.
 
 ### 3.2 Faut-il aussi pouvoir « Exporter pour partager » un item partagé ?
 
@@ -139,7 +141,14 @@ permettrait de retransmettre le travail d'un collègue en conservant son nom —
 mais c'est une question de convenance entre collègues, pas de code, et je ne
 l'ai pas tranchée.
 
-**Ton verdict** : `_______________________________________________`
+**VERDICT RENDU (25 août)** : ***« oui ».***
+⮕ **LIVRÉ en 1.97.0** (#491). Trois obstacles mesurés au navigateur avant
+d'écrire : `resoudreEntite` ne trouvait pas un partagé ;
+`rassemblerDependances` rendait 0 cartouche là où 2 étaient liées (package
+amputé en silence) ; et la chaîne d'attribution sortait vide, avec le seul nom
+de qui exporte. Le menu ⋮ des cartes partagées porte maintenant « Exporter
+pour partager », et l'attribution d'origine part avec le fichier — sans maillon
+redondant quand le matériel vient de toi.
 
 ---
 
