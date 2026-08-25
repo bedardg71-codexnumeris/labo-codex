@@ -1,0 +1,125 @@
+import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// Sentinelle #506 (25 août 2026) — L'ASTÉRISQUE DIT VRAI, DANS LES DEUX SENS.
+//
+// Demande de Grégoire : marquer d'un astérisque rouge les champs sans lesquels
+// l'application ne fonctionne pas.
+//
+// ⚠⚠ « OBLIGATOIRE » A ÉTÉ ÉTABLI SUR LE CODE, PAS SUR L'INTUITION. Un champ
+// est marqué si, et seulement si, une validation REFUSE l'enregistrement quand
+// il est vide. C'est vérifiable, et c'est ce que cette sentinelle vérifie.
+//
+// ⮕ Deux mensonges possibles, et la garde tient les deux :
+//   · un champ bloquant SANS astérisque — l'utilisateur remplit son formulaire
+//     et se fait refuser à la fin, sans savoir ce qui manquait ;
+//   · un champ facultatif AVEC astérisque — il perd du temps à remplir ce que
+//     personne ne lui demande. C'est le mensonge le plus discret : rien ne
+//     rougit jamais, et il ne le saura pas.
+//
+// ⚠ CE QUI N'EST PAS MARQUÉ, ET POURQUOI. L'« Activité d'apprentissage » a été
+// examinée : Grégoire la croyait indispensable. Elle est lue à plus de quarante
+// endroits, TOUJOURS avec un repli (`activiteApprentissage || description ||
+// titre`). Rien ne casse sans elle. Elle n'est donc pas marquée — un astérisque
+// qui n'est pas exact devient un astérisque qu'on n'écoute plus.
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const racine = path.resolve(__dirname, '..', '..');
+const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
+const indexHtml = lire('index.html');
+
+const MARQUE = 'title="Champ obligatoire"';
+
+/** Le <label> qui contient ce texte, tel qu'il est écrit dans le fichier. */
+function label(source, texte) {
+    const i = source.indexOf(texte);
+    if (i < 0) return null;
+    const debut = source.lastIndexOf('<label', i);
+    const fin = source.indexOf('</label>', i);
+    return (debut < 0 || fin < 0) ? null : source.slice(debut, fin);
+}
+
+/* --------------------------------- Les champs que le code REFUSE de laisser vides */
+
+const BLOQUANTS = [
+    // [fichier, texte du label, preuve dans le code]
+    ['index.html', 'Nom de la production',
+     ["validerChampsObligatoiresProduction", "!d.titre"]],
+    ['index.html', '>Type ',
+     ["validerChampsObligatoiresProduction", "!d.type"]],
+    ['index.html', 'Pondération (%)',
+     ["validerChampsObligatoiresProduction", "d.ponderation === 0"]],
+    ['index.html', 'Nom de la grille',
+     ["Le nom de la grille est obligatoire"]],
+    // ⚠ La preuve est cherchée sans son apostrophe : le source l'échappe
+    // (`l\\'échelle`), et une preuve qui ne peut pas être trouvée ferait rougir
+    // la garde sur sa propre écriture plutôt que sur le code.
+    ['index.html', "Nom de l'échelle",
+     ["échelle est obligatoire"]],
+    ['index.html', 'Nom de la cartouche',
+     ["Veuillez donner un nom à la cartouche"]],
+    ['js/grilles.js', 'Nom du critère',
+     ["Le nom du critère est obligatoire"]]
+];
+
+describe('#506 · chaque champ marqué est refusé s\'il est vide', () => {
+    for (const [fichier, texte, preuves] of BLOQUANTS) {
+        it(`${texte.trim()} — marqué, et le code le refuse`, () => {
+            const l = label(lire(fichier), texte);
+            expect(l, `label « ${texte} » trouvé dans ${fichier}`).toBeTruthy();
+            expect(l, 'doit porter l\'astérisque').toContain(MARQUE);
+
+            // La preuve : quelque part, une validation refuse ce champ vide.
+            const sources = ['js/productions.js', 'js/grilles.js',
+                             'js/echelles.js', 'js/cartouches.js'].map(lire).join('\n');
+            for (const preuve of preuves) {
+                expect(sources, `preuve « ${preuve} »`).toContain(preuve);
+            }
+        });
+    }
+
+    it('La grille et l\'échelle d\'une cartouche : sans elles, la matrice reste masquée', () => {
+        for (const texte of ['Grille (critères)', 'Échelle (niveaux)']) {
+            expect(label(indexHtml, texte), texte).toContain(MARQUE);
+        }
+        // La preuve de leur nécessité : le rendu s'arrête là.
+        expect(lire('js/cartouches.js')).toContain('if (!grilleId || !echelleId)');
+    });
+});
+
+/* ------------------------- L'AUTRE SENS : pas d'astérisque de complaisance */
+
+describe('#506 · aucun astérisque sur un champ facultatif', () => {
+    const FACULTATIFS = [
+        ["Activité d'apprentissage", 'lue partout avec un repli — rien ne casse sans elle'],
+        ['Objectif d\'apprentissage', 'aucune validation ne l\'exige'],
+        ['Détail de la tâche', 'Grégoire l\'a dit lui-même : pas nécessaire'],
+        ['Description (optionnel)', 'son libellé le dit déjà']
+    ];
+
+    for (const [texte, raison] of FACULTATIFS) {
+        it(`${texte} — PAS d'astérisque (${raison})`, () => {
+            // Le label peut vivre dans le HTML ou dans un rendu JS.
+            for (const f of ['index.html', 'js/productions.js']) {
+                const l = label(lire(f), texte);
+                if (l) expect(l, `${texte} dans ${f}`).not.toContain(MARQUE);
+            }
+        });
+    }
+
+    it('LE POINT DE FOND : « Activité d\'apprentissage » est toujours lue avec un repli', () => {
+        // C'est ce qui l'a fait écarter de la liste, contre la prémisse de
+        // départ. Si un jour un site la lit SANS repli, elle devient bloquante
+        // — et cette garde rougira pour le dire.
+        const sources = ['js/evaluation-retroaction.js', 'js/synthese-retroaction-data.js',
+                         'js/profil-etudiant-calculs.js', 'js/consolidation.js'].map(lire).join('\n');
+        const usages = sources.split('\n').filter(l => l.includes('activiteApprentissage')
+            && !l.trim().startsWith('//') && !l.trim().startsWith('*'));
+        expect(usages.length, 'des usages à vérifier').toBeGreaterThan(0);
+        for (const u of usages) {
+            expect(u, `usage sans repli : ${u.trim().slice(0, 90)}`).toMatch(/\|\||\?\./);
+        }
+    });
+});

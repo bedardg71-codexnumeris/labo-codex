@@ -2971,7 +2971,7 @@ function afficherCriteresTemp() {
                     </div>
                 </div>
                 <div class="groupe-form">
-                    <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère</label>
+                    <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span></label>
                     <input type="text"
                            class="controle-form"
                            value="${echapperHtml(critere.nom)}"
@@ -3263,7 +3263,7 @@ function afficherCriteresGrille(grille) {
                     </div>
                 </div>
                 <div class="groupe-form">
-                    <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère</label>
+                    <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span></label>
                     <input type="text"
                            class="controle-form"
                            value="${echapperHtml(critere.nom)}"
