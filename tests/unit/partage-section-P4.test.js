@@ -29,23 +29,46 @@ function fauxDb() {
 let db;
 let w;
 let compteurIds;
+let dernierConfirm;
+let reponseConfirm;
 
 function charger() {
     db = fauxDb();
     compteurIds = 0;
+    reponseConfirm = true;
+    dernierConfirm = '';
     w = chargerScript('js/partage-section.js', {
         db,
         genererIdUnique: (prefixe) => prefixe + 'NEUF_' + (++compteurIds),
         getCleProductions: () => 'h2026_productions',
-        alert: () => {}
+        alert: () => {},
+        confirm: (texte) => { dernierConfirm = texte; return reponseConfirm; }
     });
     w.cle = (k) => 'h2026_' + k;
     w.BibliothequeUI = {
         obtenirAuteurActif: () => 'Grégoire',
         formaterTitre: (n) => n,
         renderCarteDisponible: (opts) => '[carte:' + opts.nom + ':' + opts.boutonPrincipal.label + ']'
+            + '[menu:' + (opts.actionsMenu || []).map(a => a.label + '→' + a.action).join(',') + ']'
     };
+    // Registre des packages importés : le vrai module (partage-import.js) est
+    // chargé à part dans les tests de suppression, pour vérifier que la
+    // suppression à l'unité met le registre à jour au lieu de le laisser mentir.
     return w;
+}
+
+/**
+ * Charge `partage-import.js` sur LE MÊME faux window et le même `db`, pour
+ * que `partageSection.supprimerDuPartage` trouve `partageImport.oublierEntites`
+ * comme dans l'application.
+ */
+function chargerRegistreReel() {
+    chargerScript('js/partage-import.js', {
+        db,
+        crypto: { randomUUID: () => 'aaaaaaaa-0000-0000-0000-000000000000' },
+        JSZip: function () {}
+    }, w);
+    return w.partageImport;
 }
 
 function poserPartages() {
@@ -85,7 +108,8 @@ beforeEach(() => {
 
 describe('lot P4 · sentinelle exports', () => {
     it('expose l\'API attendue sur window.partageSection', () => {
-        ['genererSectionHTML', 'dupliquer', 'dupliquerVersMesDocuments'].forEach(nom => {
+        ['genererSectionHTML', 'dupliquer', 'dupliquerVersMesDocuments',
+            'consequencesSuppression', 'supprimerDuPartage', 'supprimer'].forEach(nom => {
             expect(w.partageSection[nom], nom).toBeTypeOf('function');
         });
     });
@@ -191,5 +215,196 @@ describe('lot P4 · rendu de la section', () => {
     it('cartouche : bouton « Dupliquer avec sa grille »', () => {
         const html = w.partageSection.genererSectionHTML('cartouche');
         expect(html).toContain('Dupliquer avec sa grille');
+    });
+});
+
+
+/* ===================================================================
+   SUPPRESSION D'UN ITEM PARTAGÉ (25 août 2026)
+
+   « Je voudrais pouvoir supprimer les cartouches partagées. Il n'y a pas de
+   menu pour le faire, comme dans les autres cartes. »
+
+   Ce que ces sentinelles tiennent :
+     1. le menu ⋮ EXISTE sur les cartes partagées des cinq bibliothèques ;
+     2. supprimer retire la copie importée — et RIEN d'autre : ni les
+        documents de l'utilisateur, ni les autres partagés ;
+     3. supprimer une grille emporte SES cartouches partagées (sinon elles
+        restent à l'écran avec un bouton « Dupliquer » qui échoue) et
+        laisse les productions, dont la duplication sait déjà se rattraper ;
+     4. le registre des packages importés cesse d'annoncer ce qui n'est
+        plus là — c'est lui qui alimente Réglages › Données.
+   =================================================================== */
+
+describe('suppression · le menu ⋮ est rendu sur toutes les bibliothèques', () => {
+    it('chaque type propose « Supprimer » → partageSection.supprimer', () => {
+        ['grille', 'echelle', 'cartouche', 'production', 'pratique'].forEach(type => {
+            const html = w.partageSection.genererSectionHTML(type);
+            expect(html, type).toContain('[menu:Supprimer→partageSection.supprimer]');
+        });
+    });
+});
+
+describe('suppression · portée', () => {
+    it('cartouche : retirée de partage_cartouches, sa grille et le reste intacts', () => {
+        const r = w.partageSection.supprimerDuPartage('cartouche', 'PARTAGE_abc_CART_1');
+        expect(r.nom).toBe('Cartouche liée');
+        expect(db.getSync('partage_cartouches', [])).toHaveLength(0);
+        expect(db.getSync('partage_grilles', [])).toHaveLength(1);
+        expect(db.getSync('partage_echelles', [])).toHaveLength(1);
+        expect(db.getSync('partage_productions', [])).toHaveLength(1);
+        expect(db.getSync('partage_pratiques', [])).toHaveLength(1);
+    });
+
+    it('échelle et pratique : suppression directe, sans dépendants', () => {
+        expect(w.partageSection.supprimerDuPartage('echelle', 'PARTAGE_abc_ECH_1')).not.toBeNull();
+        expect(w.partageSection.supprimerDuPartage('pratique', 'PARTAGE_abc_PR_1')).not.toBeNull();
+        expect(db.getSync('partage_echelles', [])).toHaveLength(0);
+        expect(db.getSync('partage_pratiques', [])).toHaveLength(0);
+        expect(db.getSync('partage_grilles', [])).toHaveLength(1);
+        expect(db.getSync('partage_cartouches', [])).toHaveLength(1);
+    });
+
+    it('grille : emporte SES cartouches partagées, laisse les productions', () => {
+        const r = w.partageSection.supprimerDuPartage('grille', 'PARTAGE_abc_GR_X');
+        expect(r.nbCartouches).toBe(1);
+        expect(db.getSync('partage_grilles', [])).toHaveLength(0);
+        expect(db.getSync('partage_cartouches', [])).toHaveLength(0);
+        expect(db.getSync('partage_productions', [])).toHaveLength(1);
+    });
+
+    it('grille : ne touche QUE ses propres cartouches', () => {
+        db.setSync('partage_cartouches', db.getSync('partage_cartouches', []).concat([
+            { id: 'PARTAGE_abc_CART_2', grilleId: 'PARTAGE_abc_GR_AUTRE', nom: 'Cartouche d\'une autre grille' }
+        ]));
+        w.partageSection.supprimerDuPartage('grille', 'PARTAGE_abc_GR_X');
+        const restantes = db.getSync('partage_cartouches', []);
+        expect(restantes).toHaveLength(1);
+        expect(restantes[0].id).toBe('PARTAGE_abc_CART_2');
+    });
+
+    it('les documents de l\'utilisateur ne sont jamais touchés', () => {
+        db.setSync('h2026_grillesTemplates', [{ id: 'GRILLE_A_MOI', nom: 'Ma grille' }]); // security-ok: littéral de test, aucune source externe
+        db.setSync('cartouches_GRILLE_A_MOI', [{ id: 'CART_A_MOI', grilleId: 'GRILLE_A_MOI' }]); // security-ok: littéral de test, aucune source externe
+        w.partageSection.supprimerDuPartage('grille', 'PARTAGE_abc_GR_X');
+        expect(db.getSync('h2026_grillesTemplates', [])).toHaveLength(1);
+        expect(db.getSync('cartouches_GRILLE_A_MOI', [])).toHaveLength(1);
+    });
+
+    it('id introuvable → null, aucune écriture', () => {
+        const avant = instantanePartages();
+        expect(w.partageSection.supprimerDuPartage('grille', 'FANTOME')).toBeNull();
+        expect(instantanePartages()).toBe(avant);
+    });
+});
+
+describe('suppression · consequencesSuppression (avant toute écriture)', () => {
+    it('nomme les cartouches et les productions d\'une grille sans rien écrire', () => {
+        const avant = instantanePartages();
+        const c = w.partageSection.consequencesSuppression('grille', 'PARTAGE_abc_GR_X');
+        expect(c.cartouches.map(x => x.id)).toEqual(['PARTAGE_abc_CART_1']);
+        expect(c.productions.map(x => x.id)).toEqual(['PARTAGE_abc_PROD_1']);
+        expect(instantanePartages()).toBe(avant);
+    });
+
+    it('une cartouche n\'a pas de dépendants', () => {
+        const c = w.partageSection.consequencesSuppression('cartouche', 'PARTAGE_abc_CART_1');
+        expect(c.cartouches).toHaveLength(0);
+        expect(c.productions).toHaveLength(0);
+    });
+});
+
+describe('suppression · handler (confirmation)', () => {
+    it('confirmation refusée → rien n\'est supprimé', () => {
+        reponseConfirm = false;
+        const avant = instantanePartages();
+        w.partageSection.supprimer('cartouche', 'PARTAGE_abc_CART_1');
+        expect(instantanePartages()).toBe(avant);
+    });
+
+    it('la confirmation NOMME les cartouches emportées et les productions touchées', () => {
+        reponseConfirm = false;
+        w.partageSection.supprimer('grille', 'PARTAGE_abc_GR_X');
+        expect(dernierConfirm).toContain('Grille partagée');
+        expect(dernierConfirm).toContain('Cartouche liée');
+        expect(dernierConfirm).toContain('1 production');
+        expect(dernierConfirm).toContain('réimporter le fichier .lcz');
+    });
+
+    it('confirmation acceptée → suppression effectuée', () => {
+        reponseConfirm = true;
+        w.partageSection.supprimer('cartouche', 'PARTAGE_abc_CART_1');
+        expect(db.getSync('partage_cartouches', [])).toHaveLength(0);
+    });
+});
+
+describe('suppression · le registre cesse d\'annoncer ce qui n\'est plus là', () => {
+    function poserRegistre() {
+        db.setSync('partage_packagesImportes', [{
+            idImport: 'IMP_abc',
+            dateImport: '2026-06-10T12:00:00.000Z',
+            auteur: { nom: 'Marie' },
+            auteurNormalise: 'marie',
+            itemPrincipal: { type: 'grille', idOriginal: 'GR_X', idNouveau: 'PARTAGE_abc_GR_X', nom: 'Grille partagée' },
+            nbParType: { grille: 1, cartouche: 1, production: 1, echelle: 1, pratique: 1 },
+            idsIntegres: {
+                grille: ['PARTAGE_abc_GR_X'],
+                cartouche: ['PARTAGE_abc_CART_1'],
+                production: ['PARTAGE_abc_PROD_1'],
+                echelle: ['PARTAGE_abc_ECH_1'],
+                pratique: ['PARTAGE_abc_PR_1']
+            }
+        }]);
+    }
+
+    it('supprimer une échelle décrémente son décompte dans le registre', () => {
+        chargerRegistreReel();
+        poserRegistre();
+        w.partageSection.supprimerDuPartage('echelle', 'PARTAGE_abc_ECH_1');
+        const entree = db.getSync('partage_packagesImportes', [])[0];
+        expect(entree.idsIntegres.echelle).toEqual([]);
+        expect(entree.nbParType.echelle).toBeUndefined();
+        expect(entree.nbParType.grille).toBe(1);
+    });
+
+    it('supprimer la grille retire aussi ses cartouches DU REGISTRE', () => {
+        chargerRegistreReel();
+        poserRegistre();
+        w.partageSection.supprimerDuPartage('grille', 'PARTAGE_abc_GR_X');
+        const entree = db.getSync('partage_packagesImportes', [])[0];
+        expect(entree.idsIntegres.grille).toEqual([]);
+        expect(entree.idsIntegres.cartouche).toEqual([]);
+        expect(entree.nbParType.production).toBe(1);
+    });
+
+    it('un package vidé item par item disparaît du registre', () => {
+        chargerRegistreReel();
+        poserRegistre();
+        ['grille', 'production', 'echelle', 'pratique'].forEach(type => {
+            const id = db.getSync('partage_' + (type === 'echelle' ? 'echelles' : type + 's'), [])[0];
+            if (id) w.partageSection.supprimerDuPartage(type, id.id);
+        });
+        expect(db.getSync('partage_packagesImportes', [])).toHaveLength(0);
+    });
+
+    it('oublierEntites : un ID absent ne casse rien, ne compte rien, n\'écrit rien', () => {
+        const registre = chargerRegistreReel();
+        poserRegistre();
+        // Une entrée déjà vide (cas limite) doit survivre à un appel qui
+        // n'oublie rien : sans la garde `if (oublies)`, le filtre de fin la
+        // supprimerait au passage — une écriture non demandée.
+        db.setSync('partage_packagesImportes', db.getSync('partage_packagesImportes', []).concat([
+            { idImport: 'IMP_vide', auteur: { nom: 'Vide' }, nbParType: {}, idsIntegres: { grille: [] },
+              itemPrincipal: { type: 'grille', nom: 'Rien' } }
+        ]));
+        const avant = JSON.stringify(db.getSync('partage_packagesImportes', []));
+        expect(registre.oublierEntites({ grille: ['PARTAGE_zzz_INCONNU'] })).toBe(0);
+        expect(JSON.stringify(db.getSync('partage_packagesImportes', []))).toBe(avant);
+    });
+
+    it('sans registre chargé, la suppression fonctionne quand même', () => {
+        expect(w.partageImport).toBeUndefined();
+        expect(w.partageSection.supprimerDuPartage('pratique', 'PARTAGE_abc_PR_1')).not.toBeNull();
+        expect(db.getSync('partage_pratiques', [])).toHaveLength(0);
     });
 });

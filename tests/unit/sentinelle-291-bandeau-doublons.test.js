@@ -287,3 +287,39 @@ describe('#291 §3.4 · résoudre sans aller chercher un menu ⋮', () => {
         expect(html).not.toContain('data-action="supprimer');
     });
 });
+
+/* ------------------------------------------------------------------ */
+/* CT-29 — les data-param des boutons de carte sont un contexte        */
+/* d'attribut (25 août 2026, chantier « supprimer un partagé »)        */
+/* ------------------------------------------------------------------ */
+
+// `_btnAttrs` concaténait `data-param2="' + btn.param2 + '"` sans échapper.
+// L'`id` d'un item partagé vient d'un `.lcz` reçu d'un tiers : la validation
+// d'import refuse le HTML brut (`/<[a-zA-Z!\/]/`) mais laisse passer un
+// guillemet seul — de quoi sortir de l'attribut et en greffer d'autres sur le
+// bouton. Le menu ⋮ des cartes partagées passe par ce même chemin.
+//
+// BREAK-TEST (fait le 25 août 2026) : retirer `echapperAttribut` autour de
+// `btn.param2` dans `_btnAttrs` → les deux `it` de ce bloc ROUGISSENT.
+
+const ID_HOSTILE = 'PARTAGE_x" data-action="supprimerTout';
+
+describe('CT-29 · les identifiants sortent échappés des attributs de bouton', () => {
+    it('bouton principal : un id porteur d\'un guillemet ne peut pas greffer d\'attribut', () => {
+        const html = ui.renderCarteDisponible({
+            nom: 'Grille partagée', id: ID_HOSTILE, badgeSource: '', metadonnees: '',
+            boutonPrincipal: { label: 'Dupliquer', action: 'partageSection.dupliquer',
+                param: 'grille', param2: ID_HOSTILE }
+        });
+        expect(html).toContain('&quot; data-action=&quot;supprimerTout');
+        expect(html).not.toContain('" data-action="supprimerTout');
+    });
+
+    it('menu ⋮ : même garde sur les items d\'action', () => {
+        const html = ui.renderMenuActions([
+            { label: 'Supprimer', action: 'partageSection.supprimer', param: 'grille', param2: ID_HOSTILE }
+        ], 'ctx');
+        expect(html).toContain('&quot; data-action=&quot;supprimerTout');
+        expect(html).not.toContain('" data-action="supprimerTout');
+    });
+});

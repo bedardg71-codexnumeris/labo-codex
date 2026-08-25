@@ -558,15 +558,25 @@
 
     /**
      * Génère les attributs d'un bouton : supporte {action, param} (délégué) ou {onclick} (legacy)
+     *
+     * ⚠ CONTEXTE D'ATTRIBUT (CT-29, 25 août 2026) — `echapperAttribut`, pas
+     * `echapperHtml` : la seconde n'encode pas les guillemets. Les `param*`
+     * portent des identifiants venus du stockage, et depuis la Voûte certains
+     * viennent d'un `.lcz` reçu d'un tiers : la validation d'import refuse le
+     * HTML brut (`/<[a-zA-Z!\/]/`) mais laisse passer un `"` seul, qui
+     * suffirait à sortir de `data-param2="…"` et à greffer des attributs sur
+     * le bouton. `el.dataset.param*` décode les entités : le dispatcher de
+     * main.js lit exactement la même valeur qu'avant.
+     *
      * @param {Object} btn - {label, classe, title, onclick?, action?, param?}
      * @returns {string} attributs HTML du bouton
      */
     function _btnAttrs(btn) {
         if (btn.action) {
-            var attrs = 'data-action="' + btn.action + '"';
-            if (btn.param != null) attrs += ' data-param="' + btn.param + '"';
-            if (btn.param2 != null) attrs += ' data-param2="' + btn.param2 + '"';
-            if (btn.param3 != null) attrs += ' data-param3="' + btn.param3 + '"';
+            var attrs = 'data-action="' + echapperAttribut(btn.action) + '"';
+            if (btn.param != null) attrs += ' data-param="' + echapperAttribut(btn.param) + '"';
+            if (btn.param2 != null) attrs += ' data-param2="' + echapperAttribut(btn.param2) + '"';
+            if (btn.param3 != null) attrs += ' data-param3="' + echapperAttribut(btn.param3) + '"';
             return attrs;
         }
         // Legacy onclick string → convertir en data-action via parsing

@@ -312,6 +312,55 @@
         return true;
     };
 
+    /**
+     * Oublie des entités DANS LE REGISTRE seulement — les collections
+     * `partage_*` restent la responsabilité de l'appelant.
+     *
+     * Demandé par la suppression à l'unité d'un partagé (25 août 2026) : sans
+     * cela, la carte Réglages › Données continuerait d'annoncer « 4 grilles,
+     * 12 cartouches » pour un package dont la moitié a été supprimée. Le
+     * registre doit décrire ce qui EST là, pas ce qui est entré un jour.
+     *
+     * Une entrée dont il ne reste plus aucune entité est retirée : garder une
+     * ligne « Contenu : — » avec un bouton « Retirer » qui n'a plus rien à
+     * retirer serait le même mensonge à l'envers.
+     *
+     * @param {Object} idsParType - { grille: ['PARTAGE_…'], cartouche: [...] }
+     * @returns {number} nombre d'IDs effectivement oubliés
+     */
+    partageImport.oublierEntites = function (idsParType) {
+        if (!idsParType) return 0;
+        var registre = lireCollection(CLE_REGISTRE);
+        if (!registre.length) return 0;
+
+        var oublies = 0;
+        var restants = registre.filter(function (entree) {
+            var ids = entree.idsIntegres || {};
+            entree.nbParType = entree.nbParType || {};
+
+            Object.keys(idsParType).forEach(function (type) {
+                var aOublier = idsParType[type] || [];
+                if (!aOublier.length || !Array.isArray(ids[type])) return;
+                var gardes = ids[type].filter(function (id) {
+                    return aOublier.indexOf(id) === -1;
+                });
+                if (gardes.length === ids[type].length) return;
+                oublies += ids[type].length - gardes.length;
+                ids[type] = gardes;
+                if (gardes.length) entree.nbParType[type] = gardes.length;
+                else delete entree.nbParType[type];
+            });
+
+            // L'entrée survit tant qu'il lui reste au moins une entité.
+            return Object.keys(ids).some(function (type) {
+                return (ids[type] || []).length > 0;
+            });
+        });
+
+        if (oublies) ecrire(CLE_REGISTRE, restants);
+        return oublies;
+    };
+
     // ------------------------------------------------------------------
     // Lecture du fichier .lcz
     // ------------------------------------------------------------------
