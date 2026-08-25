@@ -232,7 +232,29 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   à l'écran et perdue à l'enregistrement. Rétro-compat : une production d'avant ce jour, qui n'a
   qu'un `dateEcheance`, s'affiche cochée — c'est la sémantique de sa saisie ; rien n'est réécrit.
   Sentinelle 15 cas, break-testée. Vérifié au navigateur, aller-retour d'enregistrement compris.
-  Vitest **3124/3124** (302 fichiers). Dernier ID : **#494**.
+  Vitest **3125/3125** (302 fichiers). ⚠ Correctif du jour : la note de la case s'empilait
+  à chaque réouverture de la fiche (garde U1.c comptait les zones, pas les notes) ; la note vit
+  désormais DANS la zone. Libellé : « La production peut être préparée à l'avance. »
+  Dernier ID : **#495**.
+
+- [ ] **#495 — La baseline Playwright est périmée : 8 specs rouges sur `main`, hors dette #456.**
+  Découvert le 25 août au push du chantier #492-#494. Le hook pré-push les annonce comme une
+  RÉGRESSION du chantier ; vérification faite en basculant sur `main` et en les rejouant : **les huit
+  échouent à l'identique sans une ligne du chantier**. Le verdict du garde-fou est donc faux, et
+  c'est ce qui le rend coûteux — un hook qui crie au loup finit par se faire contourner, et le
+  `--no-verify` du 25 août (autorisé par Grégoire, dette prouvée préexistante) est le premier.
+  Toutes tombent sur la MÊME erreur, qui n'a aucun rapport avec ce que les specs vérifient :
+  `pageerror: //Users/.../Monitorage_v6/version.json due to access control checks` — WebKit refuse
+  le chargement de `version.json` en `file://`. ⚠ Noter le **double slash** en tête de chemin : la
+  piste est une résolution d'URL relative, pas la sécurité de WebKit elle-même.
+  Fichiers touchés : `diagnostic-doublons-lecture-seule`, `doublons-bandeau-291`,
+  `doublons-cadre-ct15` (×2), `doublons-lisibilite-291` (×2), `productions-ajout-refus-garde-340`,
+  `productions-biblio-ajout-identite`. Leur seul point commun : elles ouvrent l'application et
+  exigent zéro erreur console.
+  ⮕ À trancher : corriger le chargement (`init-inline.js`, XHR synchrone + `fetch` de secours) ou
+  reconnaître l'erreur comme bruit d'environnement dans les specs. **Le premier est préférable** —
+  si WebKit refuse ce chargement en `file://`, l'iPad de Grégoire le refuse aussi, et c'est la
+  détection de mise à jour qui est en jeu, pas seulement des tests.
 
 ### Retour testeur — 24 août 2026 (Grégoire, en cours de planification)
 
