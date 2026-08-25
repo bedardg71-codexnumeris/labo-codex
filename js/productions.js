@@ -558,14 +558,19 @@ const BLOCS_ANCRES = [
         titreDefaut: "Objectif d'apprentissage",
         note: "À la fin de cette activité, l'étudiant·e sera capable de...",
         placeholder: 'Ex: Reconnaître le propos du texte',
-        tooltip: 'cn-prod-objectif', aide: 'objectif-verbes-actifs'
+        tooltip: 'cn-prod-objectif', aide: 'objectif-verbes-actifs',
+        // #507 — recommandé : `_rendreOptionsProduction` n'écrit la ligne
+        // « Objectif : … » de la rétroaction QUE si ce champ est rempli. Vide,
+        // la ligne ne manque pas : elle n'existe pas, et personne ne le dit.
+        recommande: true
     },
     {
         cle: 'tache', champId: 'productionTache', rows: 3,
         titreDefaut: 'Description de la tâche',
         note: "La tâche permet de démontrer l'atteinte de l'objectif...",
         placeholder: 'Ex: Rédiger un texte de 500 mots...',
-        tooltip: 'cn-prod-tache', aide: null
+        tooltip: 'cn-prod-tache', aide: null,
+        recommande: true   // #507 — même raison : la ligne « Tâche : … » de la rétroaction
     },
     {
         cle: 'detailTache', champId: 'productionDetailTache', rows: 5,
@@ -722,7 +727,7 @@ function rendreBlocsConsignes() {
                     value="${echapperHtml(bloc.titre)}">
                 ${boutonAide}${fleches}
             </div>
-            <p class="u-texte-petit" style="color: var(--gris-moyen); margin: 0 0 6px 0">${echapperHtml(a.note)}</p>
+            <p class="u-texte-petit" style="color: var(--gris-moyen); margin: 0 0 6px 0">${echapperHtml(a.note)}${a.recommande ? ' <span class="champ-recommande" title="Recommandé : sans ce champ, l\'en-tête des rétroactions perd cette ligne, en silence">*</span>' : ''}</p>
             <textarea id="${echapperHtml(a.champId)}" class="controle-form champ-perso-contenu-ancre" rows="${a.rows}"
                 placeholder="${echapperHtml(a.placeholder)}">${echapperHtml(bloc.contenu)}</textarea>
         </div>`;
