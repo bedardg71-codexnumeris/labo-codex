@@ -15,8 +15,17 @@
 
 // Logo CC BY-NC-SA en PNG base64 (RGB, sans alpha) pour pieds de page PDF
 const CC_LOGO_PNG = 'data:image/png;base64,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';
-const CC_LOGO_W = 144; // largeur en mm dans le PDF (267:50 ratio)
-const CC_LOGO_H = 27;  // hauteur en mm dans le PDF
+// ⚠⚠ TAILLE CORRIGÉE LE 25 AOÛT 2026. Ces constantes valaient 144 × 27 mm
+// depuis leur introduction (5 avril, commit 80d0de36) : sur une page lettre de
+// 216 mm de large, le badge en occupait les DEUX TIERS et recouvrait le tableau
+// de critères. Le défaut n'avait jamais été vu parce que ces PDF n'étaient pas
+// exportés — c'est en préparant ses consignes d'automne que Grégoire l'a
+// découvert.
+// L'image fait 267 × 50 px : la hauteur SUIT la largeur pour que le badge ne
+// soit pas déformé. 24 mm est la taille usuelle d'un badge de licence en pied
+// de page — lisible, et il laisse la place au nom de l'enseignant à gauche.
+const CC_LOGO_W = 24;                              // mm
+const CC_LOGO_H = CC_LOGO_W * (50 / 267);          // mm — ratio de l'image, jamais une valeur à part
 
 const PDF_CONFIG = {
     // Marges en mm (0,5 pouce = 12,7mm)
@@ -72,6 +81,8 @@ function sauvegarderReglagesPDF() {
         echelleId: scope.querySelector(`#${prefix}-echelle`)?.value || '',
         cartoucheId: scope.querySelector(`#${prefix}-cartouche`)?.value || '',
         // Options du modal (toujours dans document)
+        cran: document.getElementById('apercuPDF-cran')?.value || '',
+        disposition: document.getElementById('apercuPDF-disposition')?.value || '',
         orientation: document.getElementById('apercuPDF-orientation')?.value || 'portrait',
         afficherTrimestre: document.getElementById('apercuPDF-afficher-trimestre')?.checked ?? true,
         piedEnseignant: document.getElementById('apercuPDF-pied-enseignant')?.checked ?? true,
@@ -305,21 +316,41 @@ function obtenirInfosCoursPDF() {
 function ajouterEntetePage(doc, titre, options = {}) {
     const largeurPage = doc.internal.pageSize.getWidth();
 
-    // Options d'entête individuelles (rétrocompatibilité avec afficherTrimestre)
-    const afficherCode = options.enteteCode !== false;
-    const afficherNomCours = options.enteteNom !== false;
-    const afficherTrimestre = options.enteteTrimestre !== false;
+    // ⚠⚠ LE TITRE DÉBORDAIT SUR LES INFOS DU COURS (corrigé le 25 août 2026).
+    // `doc.text()` n'enveloppe pas : un titre long — « Artefact 1 - Appliquer
+    // des stratégies de lecture variées (Madawigouche) » — sortait de la page
+    // ET passait PAR-DESSUS le sigle, le nom du cours et le trimestre, rendus
+    // au même endroit. Deux textes superposés, illisibles tous les deux.
+    //
+    // ⮕ La largeur du titre est ce qui RESTE une fois le bloc de droite mesuré.
+    // Mesuré, pas estimé : le sigle et le nom du cours changent d'un cours à
+    // l'autre, et une marge fixe finirait par être trop courte pour l'un d'eux.
+    const lignesDroite = lignesEnteteDocument(options);
+    doc.setFontSize(PDF_CONFIG.polices.textePetit);
+    let largeurDroite = 0;
+    lignesDroite.forEach(ligne => {
+        doc.setFont('helvetica', ligne.gras ? 'bold' : 'normal');
+        largeurDroite = Math.max(largeurDroite, doc.getTextWidth(ligne.texte));
+    });
+
+    const ECART_TITRE_INFOS = 8;  // mm — de l'air entre les deux blocs
+    const largeurTitre = Math.max(
+        largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite
+            - largeurDroite - ECART_TITRE_INFOS,
+        40   // plancher : sous 40 mm un titre ne se lit plus, mieux vaut qu'il déborde et se voie
+    );
 
     // Titre principal (gauche)
     doc.setFontSize(PDF_CONFIG.polices.titrePrincipal);
     doc.setTextColor(...PDF_CONFIG.couleurs.titreSection);
     doc.setFont('helvetica', 'bold');
-    doc.text(titre, PDF_CONFIG.marges.gauche, PDF_CONFIG.marges.haut + 5);
+    const lignesTitre = doc.splitTextToSize(titre, largeurTitre);
+    doc.text(lignesTitre, PDF_CONFIG.marges.gauche, PDF_CONFIG.marges.haut + 5);
 
-    // Infos à droite : Code cours, Nom cours, Trimestre (selon options)
-    const infosCours = options.infosCours || obtenirInfosCoursPDF();
-    const trimestre = obtenirNomTrimestre();
-
+    // #497 — Infos à droite : les MÊMES lignes que l'aperçu HTML, dans le même
+    // ordre et sous les mêmes conditions. `gras` est une indication de rang que
+    // ce rendeur-ci traduit en `setFont('bold')` ; l'aperçu, lui, en fait un
+    // `<span>`. Le contenu est décidé une fois, la traduction deux.
     doc.setFontSize(PDF_CONFIG.polices.textePetit);
     doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
     doc.setFont('helvetica', 'normal');
@@ -327,31 +358,31 @@ function ajouterEntetePage(doc, titre, options = {}) {
     let posYDroite = PDF_CONFIG.marges.haut + 2;
     const xDroite = largeurPage - PDF_CONFIG.marges.droite;
 
-    // Sigle du cours (en gras)
-    if (afficherCode && infosCours.sigle) {
-        doc.setFont('helvetica', 'bold');
-        doc.text(infosCours.sigle, xDroite, posYDroite, { align: 'right' });
+    lignesEnteteDocument(options).forEach(ligne => {
+        doc.setFont('helvetica', ligne.gras ? 'bold' : 'normal');
+        doc.text(ligne.texte, xDroite, posYDroite, { align: 'right' });
         posYDroite += 3.5;
-        doc.setFont('helvetica', 'normal');
-    }
+    });
+    doc.setFont('helvetica', 'normal');
 
-    // Nom du cours
-    if (afficherNomCours && infosCours.titre) {
-        doc.text(infosCours.titre, xDroite, posYDroite, { align: 'right' });
-        posYDroite += 3.5;
-    }
+    // ⚠ La ligne de séparation descend avec le titre. Un titre sur deux lignes
+    // la traversait ; un titre sur trois la faisait passer dans le tableau.
+    // Le cas d'UNE ligne rend exactement les valeurs d'avant (10 et 18) : tous
+    // les autres exports qui appellent cette fonction ne bougent pas d'un mm.
+    const INTERLIGNE_TITRE = 7;  // mm à 18 pt
+    const basTitre = PDF_CONFIG.marges.haut + 10 + (lignesTitre.length - 1) * INTERLIGNE_TITRE;
+    // ⚠ `posYDroite` a été incrémenté APRÈS la dernière ligne : l'utiliser tel
+    // quel descendrait la séparation de 3,5 mm dans TOUS les exports du module,
+    // pour un changement que personne n'a demandé. On revient sous la dernière
+    // ligne écrite, plus 1 mm d'air — ce que faisait le code d'origine.
+    const basInfos = lignesDroite.length > 0 ? posYDroite - 3.5 + 1 : 0;
+    const yLigne = Math.max(basTitre, basInfos);
 
-    // Trimestre
-    if (afficherTrimestre && trimestre) {
-        doc.text(trimestre, xDroite, posYDroite, { align: 'right' });
-    }
-
-    // Ligne de separation
     doc.setDrawColor(...PDF_CONFIG.couleurs.bordure);
     doc.setLineWidth(0.5);
-    doc.line(PDF_CONFIG.marges.gauche, PDF_CONFIG.marges.haut + 10, largeurPage - PDF_CONFIG.marges.droite, PDF_CONFIG.marges.haut + 10);
+    doc.line(PDF_CONFIG.marges.gauche, yLigne, largeurPage - PDF_CONFIG.marges.droite, yLigne);
 
-    return PDF_CONFIG.marges.haut + 18; // Position Y apres l'en-tete
+    return yLigne + 8; // Position Y apres l'en-tete
 }
 
 /**
@@ -1654,6 +1685,362 @@ async function mettreAJourApercuPDF() {
  * @param {Object} cartouche - Cartouche de retroaction (optionnel)
  * @param {Object} options - Options d'affichage
  */
+/**
+ * LE MODÈLE DU DOCUMENT — ce qu'il DIT, avant qu'on décide comment le montrer.
+ * (#497, étape 2 du plan « document de consignes », 25 août 2026)
+ *
+ * ⚠⚠ POURQUOI CETTE COUCHE EXISTE. `genererApercuCombine` (HTML) et
+ * `genererPDFCombine` (jsPDF) construisaient DEUX FOIS le même document, chacun
+ * avec sa mise en page et sa propre copie des règles : quel titre porter, quels
+ * blocs d'information montrer, quelles lignes d'en-tête. Rien ne les tenait
+ * d'accord. C'est la cause de fond du constat de Grégoire — « l'aperçu ne
+ * ressemble pas au PDF » — et pas un défaut de CSS.
+ *
+ * ⮕ Désormais les deux rendeurs partent du MÊME modèle. Ce qui change ici
+ * change des deux côtés ; ce qui reste dans un rendeur est une décision de
+ * PRÉSENTATION, jamais une décision de contenu.
+ *
+ * ⚠ Le modèle porte du TEXTE BRUT, jamais d'échappement ni de balise :
+ * l'échappement est une affaire de rendu HTML, et le PDF n'en veut pas. Un
+ * modèle qui contiendrait déjà `&amp;` enverrait cette esperluette telle quelle
+ * dans le PDF.
+ */
+function construireModeleDocument(grille, cartouche, options) {
+    const cran = cranDocument(options, grille, cartouche);
+    return {
+        cran: cran,
+        disposition: dispositionDocument(options),
+        titre: titreDocument(grille, options),
+        entete: lignesEnteteDocument(options),
+        // ⚠ Le contexte de la rétroaction appartient à la CARTOUCHE : il n'entre
+        // dans les blocs qu'au cran où la cartouche entre elle-même.
+        blocsInfo: blocsInformationDocument(cran === CRAN_RETROACTION ? cartouche : null, options),
+        afficheEvaluation: cran === CRAN_EVALUATION || cran === CRAN_RETROACTION,
+        afficheRetroaction: cran === CRAN_RETROACTION
+    };
+}
+
+/**
+ * LA DISPOSITION DES CONSIGNES (#497 étape 4, 25 août 2026).
+ *
+ * Décision de Grégoire : la mise en page est un CHOIX, au même titre que
+ * l'orientation du papier. Deux dispositions :
+ *   • `continu`       — un bloc après l'autre, pleine largeur ;
+ *   • `deux-colonnes` — le format de son Manuel : chaque bloc annoncé par un
+ *     bandeau, et les blocs répartis en deux colonnes.
+ *
+ * ⚠⚠ CE QUI REND LE FORMAT DU MANUEL LISIBLE N'EST PAS LE NOMBRE DE COLONNES,
+ * c'est que chaque bloc DIT ce qu'il est avant de commencer. Deux colonnes de
+ * texte nu seraient exactement le défaut qu'on vient de corriger — des bandes
+ * étroites où le détail de la tâche déborde. Le bandeau vient donc AVEC la
+ * disposition, jamais en supplément facultatif.
+ *
+ * ⚠ LA PAGE D'ÉVALUATION RESTE PLEINE LARGEUR, quelle que soit la disposition :
+ * un tableau de six colonnes de descripteurs dans une demi-page ne se lit pas.
+ * La disposition règle les CONSIGNES ; la grille garde sa page. (Décision de
+ * Grégoire, 25 août : ce document REMPLACE la mise en page de son Manuel, il
+ * n'a donc pas à en reproduire la grille miniature.)
+ */
+const DISPO_CONTINU = 'continu';
+const DISPO_DEUX_COLONNES = 'deux-colonnes';
+
+function dispositionDocument(options) {
+    return (options && options.disposition === DISPO_DEUX_COLONNES)
+        ? DISPO_DEUX_COLONNES : DISPO_CONTINU;
+}
+
+/**
+ * Répartit les blocs en deux colonnes de hauteur comparable.
+ *
+ * ⚠⚠ FONCTION PURE, PARTAGÉE PAR LES DEUX RENDEURS — c'est tout l'intérêt de
+ * l'étape 2. Le CSS sait faire `column-count: 2` et jsPDF ne sait pas : laisser
+ * chacun répartir à sa façon donnerait un aperçu et un PDF qui ne coupent pas
+ * au même bloc, et le premier texte un peu long le montrerait.
+ *
+ * ⚠ Le poids d'un bloc est la longueur de son texte PLUS un forfait pour son
+ * bandeau et l'air autour. Sans ce forfait, trois blocs courts et un long
+ * partiraient tous du même côté : la longueur du texte seule ne dit pas la
+ * hauteur d'un bloc sur la page.
+ *
+ * ⮕ L'ordre de lecture est préservé dans chaque colonne : on remplit la gauche
+ * jusqu'à la moitié du poids total, puis la droite. On ne réordonne jamais des
+ * consignes — « 1. Lis et annote » doit précéder « 2. Identifie ».
+ *
+ * @returns {{gauche: Array, droite: Array}}
+ */
+function repartirEnDeuxColonnes(blocs) {
+    const FORFAIT_BANDEAU = 90;   // caractères — le bandeau et l'air autour
+    const poids = (b) => String(b.texte || '').length + FORFAIT_BANDEAU;
+    const total = blocs.reduce((somme, b) => somme + poids(b), 0);
+
+    const gauche = [], droite = [];
+    let accumule = 0;
+    blocs.forEach((bloc, i) => {
+        const restants = blocs.length - i;
+        // La colonne de droite ne doit pas rester vide : s'il ne reste que de
+        // quoi la remplir, on bascule.
+        const basculer = accumule >= total / 2
+            || (droite.length === 0 && restants === 1 && gauche.length > 0);
+        if (basculer && gauche.length > 0) {
+            droite.push(bloc);
+        } else {
+            gauche.push(bloc);
+            accumule += poids(bloc);
+        }
+    });
+    return { gauche: gauche, droite: droite };
+}
+
+/**
+ * LES TROIS CRANS DU DOCUMENT (#497, étape 3 — 25 août 2026).
+ *
+ * Décision de Grégoire : trois profondeurs CUMULATIVES, pas trois documents.
+ * Chacune ajoute à la précédente — on ne montre jamais l'échelle sans les
+ * consignes, ni la cartouche sans la grille qui la porte.
+ *
+ * ⚠ UN CRAN SANS MATIÈRE N'EST PAS OFFERT, ET LA RAISON EST DITE. Une
+ * production sans grille ne peut pas monter à « + Évaluation » : proposer le
+ * cran puis rendre une page vide serait pire que ne pas le proposer.
+ * `cransDisponibles` répond à l'interface ; cette fonction-ci se contente de
+ * RABATTRE une demande impossible sur le cran le plus haut qui tienne — sans
+ * quoi un réglage mémorisé sur « + Rétroaction » viderait le document d'une
+ * production qui n'a pas de cartouche.
+ */
+const CRAN_CONSIGNES = 'consignes';
+const CRAN_EVALUATION = 'evaluation';
+const CRAN_RETROACTION = 'retroaction';
+
+function cranDocument(options, grille, cartouche) {
+    const dispo = cransDisponibles(grille, cartouche, options);
+    // ⚠ Sans demande explicite, le cran le plus HAUT que le document puisse
+    // porter : c'est le comportement d'avant les crans, et rien ne disparaît de
+    // ce que Grégoire voyait jusqu'ici en ouvrant l'aperçu.
+    const demande = options.cran || dispo[dispo.length - 1];
+    if (dispo.indexOf(demande) !== -1) return demande;
+    return dispo[dispo.length - 1] || CRAN_CONSIGNES;
+}
+
+/**
+ * Les crans que CE document peut réellement porter, du plus bas au plus haut.
+ *
+ * ⚠ Sans production, il n'y a pas de consignes à montrer : le document est
+ * alors une grille, et son premier cran est « + Évaluation ». C'est le chemin
+ * des boutons qui partent d'une échelle ou d'une cartouche.
+ *
+ * @returns {Array<string>} jamais vide
+ */
+function cransDisponibles(grille, cartouche, options) {
+    const opts = options || {};
+    const crans = [];
+
+    const aConsignes = !!(opts.production && (
+        opts.production.objectif || opts.production.tache || opts.production.detailTache));
+    if (aConsignes) crans.push(CRAN_CONSIGNES);
+
+    const aEvaluation = !!(grille && Array.isArray(grille.criteres) && grille.criteres.length > 0);
+    if (aEvaluation) crans.push(CRAN_EVALUATION);
+
+    // La rétroaction n'a de sens qu'avec la grille qui porte ses commentaires.
+    const aRetroaction = aEvaluation && !!cartouche;
+    if (aRetroaction) crans.push(CRAN_RETROACTION);
+
+    return crans.length > 0 ? crans : [CRAN_CONSIGNES];
+}
+
+/** Ce que le cran indisponible doit DIRE, plutôt que de disparaître en silence. */
+function raisonCranIndisponible(cran, grille, cartouche, options) {
+    if (cran === CRAN_CONSIGNES) {
+        return 'Cette production n\'a ni objectif, ni description, ni détail de tâche.';
+    }
+    if (cran === CRAN_EVALUATION) {
+        return 'Aucune grille de critères n\'est associée à cette production.';
+    }
+    if (cran === CRAN_RETROACTION) {
+        if (!grille || !Array.isArray(grille.criteres) || grille.criteres.length === 0) {
+            return 'Sans grille de critères, il n\'y a pas de cartouche à montrer.';
+        }
+        return 'Aucune cartouche de rétroaction n\'est associée à cette production.';
+    }
+    return '';
+}
+
+/**
+ * Le titre du document : le nom de la production quand il y en a une, le nom de
+ * la grille sinon. C'était écrit à l'identique dans les deux rendeurs.
+ */
+function titreDocument(grille, options) {
+    if (options.production && options.inclureNomProduction) {
+        const nomProd = options.production.titre || 'Production';
+        const activite = options.production.activiteApprentissage || options.production.description || '';
+        return activite ? `${nomProd} - ${activite}` : nomProd;
+    }
+    return (grille && grille.nom) || 'Grille de critères';
+}
+
+/**
+ * Les lignes d'en-tête, à droite du titre : sigle, nom du cours, trimestre.
+ * `gras` est une indication de RANG, pas de style : c'est au rendeur de décider
+ * comment il la traduit (un `<span>` ici, un `setFont('bold')` là).
+ * @returns {Array<{texte: string, gras: boolean}>}
+ */
+function lignesEnteteDocument(options) {
+    const infosCours = (options && options.infosCours) || obtenirInfosCoursPDF();
+    const trimestre = obtenirNomTrimestre();
+    const lignes = [];
+
+    if ((options.enteteCode !== false) && infosCours.sigle) {
+        lignes.push({ texte: infosCours.sigle, gras: true });
+    }
+    if ((options.enteteNom !== false) && infosCours.titre) {
+        lignes.push({ texte: infosCours.titre, gras: false });
+    }
+    if ((options.enteteTrimestre !== false) && trimestre) {
+        lignes.push({ texte: trimestre, gras: false });
+    }
+    return lignes;
+}
+
+/**
+ * Les blocs d'information du document — objectif, description, détail, contexte
+ * de la rétroaction — dans leur ordre de lecture.
+ *
+ * ⚠ Ils ne portent PAS leur disposition. Le premier jet les appelait
+ * « colonnes » des deux côtés, et cette manière de les nommer a suffi à figer
+ * une mise en page : sur une consigne dont le détail fait quinze lignes,
+ * quatre colonnes côte à côte donnent une bande d'un pouce qui déborde pendant
+ * que ses voisines restent vides. Ce sont des BLOCS ; leur disposition est un
+ * choix de l'utilisateur (étape 4 du plan).
+ *
+ * @returns {Array<{titre: string, texte: string}>}
+ */
+function blocsInformationDocument(cartouche, options) {
+    const blocs = [];
+    const prod = options.production;
+
+    if (prod && options.inclureObjectif && prod.objectif) {
+        blocs.push({ titre: 'Objectif d\'apprentissage :', texte: prod.objectif });
+    }
+    if (prod && options.inclureDescription && prod.tache) {
+        blocs.push({ titre: 'Description de la tâche :', texte: prod.tache });
+    }
+    if (prod && options.inclureDetailTache && prod.detailTache) {
+        blocs.push({ titre: 'Détail de la tâche :', texte: prod.detailTache });
+    }
+    if (cartouche && cartouche.contexte) {
+        blocs.push({ titre: 'Contexte de la rétroaction :', texte: cartouche.contexte });
+    }
+    return blocs;
+}
+
+/**
+ * LES BLOCS D'INFORMATION DANS LE PDF — même disposition que l'aperçu (#497 étape 4).
+ *
+ * ⚠ La répartition en colonnes vient de `repartirEnDeuxColonnes`, la MÊME
+ * fonction que l'aperçu appelle. Le CSS sait faire des colonnes et jsPDF ne
+ * sait pas : laisser chacun répartir à sa façon donnerait un écran et un
+ * fichier qui ne coupent pas au même bloc.
+ *
+ * @returns {number} la position Y sous les blocs
+ */
+function poserBlocsInfoPDF(doc, modele, posY, largeurContenu, facteurTaille) {
+    const blocs = modele.blocsInfo;
+    if (blocs.length === 0) return posY;
+
+    const INTERLIGNE = 5;   // mm — celui du reste du module
+    const gauche = PDF_CONFIG.marges.gauche;
+
+    // Un bandeau : rectangle plein, titre blanc centré, en majuscules.
+    const poserBandeau = (texte, x, y, largeur) => {
+        const HAUTEUR = 5.5;
+        doc.setFillColor(...PDF_CONFIG.couleurs.titreSection);
+        doc.rect(x, y - 4, largeur, HAUTEUR, 'F');
+        doc.setFontSize(PDF_CONFIG.polices.textePetit * facteurTaille);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.text(texte.replace(/\s*:\s*$/, '').toUpperCase(), x + largeur / 2, y, { align: 'center' });
+        return y + HAUTEUR + 1;
+    };
+
+    const poserTexte = (texte, x, y, largeur) => {
+        doc.setFontSize(PDF_CONFIG.polices.texteNormal * facteurTaille);
+        doc.setTextColor(...PDF_CONFIG.couleurs.textePrincipal);
+        doc.setFont('helvetica', 'normal');
+        const lignes = doc.splitTextToSize(texte, largeur);
+        doc.text(lignes, x, y);
+        return y + lignes.length * INTERLIGNE;
+    };
+
+    if (modele.disposition === DISPO_DEUX_COLONNES) {
+        const ECART = 8;   // mm
+        const largeurCol = (largeurContenu - ECART) / 2;
+        const repartition = repartirEnDeuxColonnes(blocs);
+        let basMax = posY;
+
+        [repartition.gauche, repartition.droite].forEach((colonne, index) => {
+            const x = gauche + index * (largeurCol + ECART);
+            let y = posY;
+            colonne.forEach(bloc => {
+                y = poserBandeau(bloc.titre, x, y, largeurCol);
+                y = poserTexte(bloc.texte, x, y, largeurCol) + 4;
+            });
+            basMax = Math.max(basMax, y);
+        });
+        return basMax + 3;
+    }
+
+    // Continu : un bloc après l'autre, pleine largeur.
+    let y = posY;
+    blocs.forEach(bloc => {
+        doc.setFontSize(PDF_CONFIG.polices.texteNormal * facteurTaille);
+        doc.setTextColor(...PDF_CONFIG.couleurs.titreSection);
+        doc.setFont('helvetica', 'bold');
+        doc.text(bloc.titre, gauche, y);
+        y += INTERLIGNE;
+        y = poserTexte(bloc.texte, gauche, y, largeurContenu) + 4;
+    });
+    return y + 1;
+}
+
+/**
+ * LES BLOCS D'INFORMATION, DANS LA DISPOSITION CHOISIE (#497 étape 4).
+ *
+ * ⚠⚠ CE QUE CETTE FONCTION REMPLACE. Les blocs étaient posés côte à côte en
+ * `flex: 1`, sans autre choix possible. Sur une consigne dont le détail fait
+ * quinze lignes, ça donnait une bande d'un pouce de large qui débordait vers le
+ * bas pendant que ses voisines restaient vides — la capture de Grégoire du
+ * 25 août. Ce n'était pas une disposition, c'était un défaut.
+ *
+ * ⚠ `white-space: pre-line` n'est pas cosmétique : le détail de la tâche porte
+ * des retours à la ligne (« 1. Lis et annote », « 2. Identifie… ») que le rendu
+ * précédent écrasait en un seul paragraphe.
+ */
+function blocsInfoHTML(modele, styles) {
+    const { styleTexteNormal, couleurTexte, couleurTitre, facteurTaille } = styles;
+
+    const bandeau = (texte) =>
+        `<div style="background: rgb(3, 46, 92); color: #ffffff; text-transform: uppercase;`
+        + ` font-weight: bold; font-size: ${7.5 * facteurTaille}pt; letter-spacing: 0.04em;`
+        + ` text-align: center; padding: 3px 6px; border-radius: 3px; margin-bottom: 5px;">`
+        + `${escapeHtml(texte.replace(/\s*:\s*$/, ''))}</div>`;
+
+    const corps = (texte) =>
+        `<p style="${styleTexteNormal} margin: 0 0 10px; color: ${couleurTexte}; white-space: pre-line;">${escapeHtml(texte)}</p>`;
+
+    if (modele.disposition === DISPO_DEUX_COLONNES) {
+        const repartition = repartirEnDeuxColonnes(modele.blocsInfo);
+        const colonne = (blocs) =>
+            `<div style="flex: 1; min-width: 0;">${blocs.map(b => bandeau(b.titre) + corps(b.texte)).join('')}</div>`;
+        return `<div style="display: flex; gap: 16px; margin-bottom: 8px; align-items: flex-start;">`
+            + colonne(repartition.gauche) + colonne(repartition.droite) + `</div>`;
+    }
+
+    // Continu : un bloc après l'autre, pleine largeur.
+    return `<div style="margin-bottom: 8px;">` + modele.blocsInfo.map(b =>
+        `<div style="font-size: ${10 * facteurTaille}pt; font-weight: bold; color: ${couleurTitre}; margin-bottom: 3px;">${escapeHtml(b.titre)}</div>`
+        + corps(b.texte)
+    ).join('') + `</div>`;
+}
+
 function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
     if (!grille || !echelle) return '<p class="text-muted">Données manquantes</p>';
 
@@ -1700,34 +2087,20 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
     // Conteneur principal (le padding est géré par .apercu-pdf-page-contenu dans CSS)
     let html = `<div class="apercu-pdf" style="min-height: 100%; display: flex; flex-direction: column;">`;
 
-    // Titre (production avec activité, ou grille) - TAILLE FIXE, non affectee
-    let titre = grille.nom || 'Grille de critères';
-    if (options.production && options.inclureNomProduction) {
-        const nomProd = options.production.titre || 'Production';
-        const activite = options.production.activiteApprentissage || options.production.description || '';
-        titre = activite ? `${nomProd} - ${activite}` : nomProd;
-    }
-
-    // Infos du cours pour l'en-tête (utilise les nouvelles options individuelles)
-    const afficherCode = options.enteteCode !== false;
-    const afficherNomCours = options.enteteNom !== false;
-    const afficherTrimestre = options.enteteTrimestre !== false;
-
-    const infosCours = options.infosCours || obtenirInfosCoursPDF();
-    const trimestre = obtenirNomTrimestre();
+    // #497 — titre, en-tête et PROFONDEUR viennent du MODÈLE, partagé avec le PDF.
+    const modele = construireModeleDocument(grille, cartouche, options);
+    const titre = modele.titre;
+    // ⚠ La cartouche n'est pas une section à part : ses commentaires REMPLACENT
+    // les descriptions de niveaux dans les cellules du tableau. Le cran se
+    // traduit donc par la cartouche qu'on laisse passer — pas par un bloc
+    // qu'on ajoute.
+    cartouche = modele.afficheRetroaction ? cartouche : null;
 
     // Construire les infos à droite (sigle, titre cours, trimestre)
     let infosEnteteHtml = '';
-    const lignes = [];
-    if (afficherCode && infosCours.sigle) {
-        lignes.push(`<span style="font-weight: bold;">${escapeHtml(infosCours.sigle)}</span>`);
-    }
-    if (afficherNomCours && infosCours.titre) {
-        lignes.push(`<span>${escapeHtml(infosCours.titre)}</span>`);
-    }
-    if (afficherTrimestre && trimestre) {
-        lignes.push(`<span>${escapeHtml(trimestre)}</span>`);
-    }
+    const lignes = modele.entete.map(l => l.gras
+        ? `<span style="font-weight: bold;">${escapeHtml(l.texte)}</span>`
+        : `<span>${escapeHtml(l.texte)}</span>`);
     if (lignes.length > 0) {
         infosEnteteHtml = `<div style="text-align: right; font-size: ${7.5 * facteurTaille}pt; color: ${couleurSecondaire}; line-height: 1.4;">${lignes.join('<br>')}</div>`;
     }
@@ -1742,54 +2115,20 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
 
     // Informations : Objectif, Description de la tâche, Contexte de la rétroaction
     // Jusqu'à 3 colonnes selon ce qui est présent
-    if (options.production || (cartouche && cartouche.contexte)) {
-        const aObjectif = options.production && options.inclureObjectif && options.production.objectif;
-        const aDescription = options.production && options.inclureDescription && options.production.tache;
-        const aContexte = cartouche && cartouche.contexte;
-
-        const colonnes = [];
-        if (aObjectif) {
-            colonnes.push(`
-                <div style="flex: 1;">
-                    <div style="${styleSectionTitre} margin-bottom: 3px;">Objectif d'apprentissage :</div>
-                    <p style="${styleTexteNormal} margin: 0; color: ${couleurTexte};">${escapeHtml(options.production.objectif)}</p>
-                </div>
-            `);
-        }
-        if (aDescription) {
-            colonnes.push(`
-                <div style="flex: 1;">
-                    <div style="${styleSectionTitre} margin-bottom: 3px;">Description de la tâche :</div>
-                    <p style="${styleTexteNormal} margin: 0; color: ${couleurTexte};">${escapeHtml(options.production.tache)}</p>
-                </div>
-            `);
-        }
-        if (options.production && options.inclureDetailTache && options.production.detailTache) {
-            colonnes.push(`
-                <div style="flex: 1;">
-                    <div style="${styleSectionTitre} margin-bottom: 3px;">Détail de la tâche :</div>
-                    <p style="${styleTexteNormal} margin: 0; color: ${couleurTexte};">${escapeHtml(options.production.detailTache)}</p>
-                </div>
-            `);
-        }
-        if (aContexte) {
-            colonnes.push(`
-                <div style="flex: 1;">
-                    <div style="${styleSectionTitre} margin-bottom: 3px;">Contexte de la rétroaction :</div>
-                    <p style="${styleTexteNormal} margin: 0; color: ${couleurTexte};">${escapeHtml(cartouche.contexte)}</p>
-                </div>
-            `);
-        }
-
-        if (colonnes.length > 0) {
-            html += `<div style="display: flex; gap: 12px; margin-bottom: 8px;">${colonnes.join('')}</div>`;
-        }
+    // #497 — les blocs viennent du modèle ; leur DISPOSITION reste ici, parce
+    // qu'elle est une décision de présentation (et bientôt un choix de
+    // l'utilisateur, étape 4 du plan).
+    // `partie` restreint le rendu à une FEUILLE : 'consignes' pour la page 1,
+    // 'evaluation' pour les suivantes. Absent = tout, comme avant.
+    const partie = options.partie || 'tout';
+    if (partie !== 'evaluation' && modele.blocsInfo.length > 0) {
+        html += blocsInfoHTML(modele, { styleTexteNormal, couleurTexte, couleurTitre, facteurTaille });
     }
 
     // Légende supprimée - le nom du niveau est dans l'entête du tableau
 
     // Tableau des criteres - largeurs adaptees comme le PDF
-    if (grille.criteres && grille.criteres.length > 0 && echelle.niveaux && echelle.niveaux.length > 0) {
+    if (partie !== 'consignes' && modele.afficheEvaluation && grille.criteres && grille.criteres.length > 0 && echelle.niveaux && echelle.niveaux.length > 0) {
         const nbNiveaux = echelle.niveaux.length;
         // Largeurs en % comme dans le PDF
         const largeurCritere = aCartoucheLongue ? '8%' : '20%';
@@ -1938,13 +2277,12 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
     const orientationPDF = options.orientation === 'paysage' ? 'landscape' : 'portrait';
     const doc = creerDocumentPDF(orientationPDF);
 
-    // Titre : production (avec activité) ou grille
-    let titre = grille.nom || 'Grille de critères';
-    if (options.production && options.inclureNomProduction) {
-        const nomProd = options.production.titre || 'Production';
-        const activite = options.production.activiteApprentissage || options.production.description || '';
-        titre = activite ? `${nomProd} - ${activite}` : nomProd;
-    }
+    // #497 — le document est décidé UNE fois ; ce rendeur ne fait que le poser.
+    const modele = construireModeleDocument(grille, cartouche, options);
+    const titre = modele.titre;
+    // Même règle que l'aperçu : le cran se traduit par la cartouche qu'on laisse
+    // passer, puisque ses commentaires remplissent les cellules du tableau.
+    cartouche = modele.afficheRetroaction ? cartouche : null;
 
     let posY = ajouterEntetePage(doc, titre, {
         enteteCode: options.enteteCode,
@@ -1956,57 +2294,30 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
     const largeurPage = doc.internal.pageSize.getWidth();
     const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
 
-    // Informations : Objectif, Description, Contexte (jusqu'à 3 colonnes)
-    const colonnesInfo = [];
-    if (options.production && options.inclureObjectif && options.production.objectif) {
-        colonnesInfo.push({ titre: 'Objectif d\'apprentissage :', texte: options.production.objectif });
-    }
-    if (options.production && options.inclureDescription && options.production.tache) {
-        colonnesInfo.push({ titre: 'Description de la tâche :', texte: options.production.tache });
-    }
-    if (options.production && options.inclureDetailTache && options.production.detailTache) {
-        colonnesInfo.push({ titre: 'Détail de la tâche :', texte: options.production.detailTache });
-    }
-    if (cartouche && cartouche.contexte) {
-        colonnesInfo.push({ titre: 'Contexte de la rétroaction :', texte: cartouche.contexte });
-    }
-
-    if (colonnesInfo.length > 0) {
-        doc.setFont('helvetica', 'normal');
-        const espaceEntreCol = 8; // mm
-        const nbCols = colonnesInfo.length;
-        const largeurColonne = (largeurContenu - (espaceEntreCol * (nbCols - 1))) / nbCols;
-        const posYDepart = posY;
-        let maxPosY = posY;
-
-        colonnesInfo.forEach((col, index) => {
-            const colX = PDF_CONFIG.marges.gauche + index * (largeurColonne + espaceEntreCol);
-            let colPosY = posYDepart;
-
-            // Titre
-            doc.setFontSize(PDF_CONFIG.polices.texteNormal * facteurTaille);
-            doc.setTextColor(...PDF_CONFIG.couleurs.titreSection);
-            doc.setFont('helvetica', 'bold');
-            doc.text(col.titre, colX, colPosY);
-            colPosY += 5;
-
-            // Texte
-            doc.setTextColor(...PDF_CONFIG.couleurs.textePrincipal);
-            doc.setFont('helvetica', 'normal');
-            const lignes = doc.splitTextToSize(col.texte, largeurColonne);
-            doc.text(lignes, colX, colPosY);
-            colPosY += lignes.length * 5;
-
-            maxPosY = Math.max(maxPosY, colPosY);
-        });
-
-        posY = maxPosY + 5;
-    }
+    // #497 — les mêmes blocs que l'aperçu, dans le même ordre. Ce qui reste ici
+    // est leur DISPOSITION en colonnes, qui est une décision de présentation.
+    // #497 étape 4 — la disposition des consignes, choisie par l'utilisateur.
+    posY = poserBlocsInfoPDF(doc, modele, posY, largeurContenu, facteurTaille);
 
     // Légende supprimée - le nom du niveau est dans l'entête du tableau
 
     // Tableau des criteres
-    if (grille.criteres && grille.criteres.length > 0 && echelle.niveaux && echelle.niveaux.length > 0) {
+    // ⚠⚠ #497 étape 3 — « LES CONSIGNES SEULES SUR LEUR PAGE » VAUT ICI AUSSI.
+    // La règle n'existait d'abord que dans l'aperçu : le PDF, lui, enchaînait
+    // tout, et la grille commençait au BAS de la page 1 pour se poursuivre au
+    // verso. L'écran et le fichier se contredisaient sur la seule chose que le
+    // lecteur regarde — où commence ce sur quoi on l'évalue.
+    if (modele.blocsInfo.length > 0 && modele.afficheEvaluation) {
+        doc.addPage();
+        posY = ajouterEntetePage(doc, titre, {
+            enteteCode: options.enteteCode,
+            enteteNom: options.enteteNom,
+            enteteTrimestre: options.enteteTrimestre,
+            infosCours: options.infosCours
+        });
+    }
+
+    if (modele.afficheEvaluation && grille.criteres && grille.criteres.length > 0 && echelle.niveaux && echelle.niveaux.length > 0) {
         // En-tetes avec Code + Nom niveau
         const entetes = ['Critère', '%', ...echelle.niveaux.map(n => {
             return n.nom ? `${n.code || '?'} - ${n.nom}` : (n.code || '?');
@@ -2460,6 +2771,93 @@ async function ouvrirApercuPDF() {
 /**
  * Rafraichit l'apercu PDF quand les options de mise en page changent
  */
+/**
+ * ACCORDE LE SÉLECTEUR DE CRAN AU DOCUMENT COURANT (#497 étape 3, 25 août 2026).
+ *
+ * ⚠⚠ UN CRAN INDISPONIBLE EST DÉSACTIVÉ ET DIT POURQUOI. Le retirer du menu
+ * aurait été plus simple, et faux : Grégoire verrait un menu à deux entrées
+ * sans savoir que la troisième existe, ni ce qui lui manque pour l'atteindre.
+ * Le `title` porte la raison — « Aucune grille de critères n'est associée à
+ * cette production », pas « indisponible ».
+ *
+ * ⚠ Le sélecteur est REPOSITIONNÉ quand sa valeur ne tient plus : un réglage
+ * mémorisé sur « + Rétroaction » ouvert sur une production sans cartouche
+ * afficherait un menu qui ment sur ce que la page montre.
+ *
+ * @returns {string} le cran réellement retenu
+ */
+/**
+ * LES FEUILLES DU DOCUMENT (#497 étape 3, 25 août 2026).
+ *
+ * ⚠⚠ LA RÈGLE VIENT DE GRÉGOIRE, PAS DU CODE : « les consignes seules sur leur
+ * page ». La page 1 ne porte QUE les consignes, même à moitié vide — c'est la
+ * feuille que l'étudiant garde sous les yeux en travaillant. Grille, échelle et
+ * cartouche s'enchaînent à partir de la page 2.
+ *
+ * Écarté le 25 août : une page par cran (une cartouche de six lignes coûterait
+ * une feuille par étudiant, et ils sont trente-quatre) ; le flux continu (la
+ * grille commencerait au bas de la page 1, et l'étudiant perdrait le repère
+ * entre ce qu'on lui demande et ce sur quoi on l'évalue).
+ *
+ * ⚠ Un document SANS consignes — le chemin des boutons qui partent d'une
+ * échelle ou d'une cartouche — n'a pas de page 1 vide : sa première feuille est
+ * l'évaluation.
+ *
+ * @returns {Array<string>} les parties, une par feuille. Jamais vide.
+ */
+function feuillesDuDocument(modele) {
+    const feuilles = [];
+    if (modele.blocsInfo.length > 0) feuilles.push('consignes');
+    if (modele.afficheEvaluation) feuilles.push('evaluation');
+    return feuilles.length > 0 ? feuilles : ['tout'];
+}
+
+/**
+ * Dit qu'une feuille déborde, plutôt que de le cacher.
+ *
+ * ⚠⚠ POURQUOI ON NE DÉCOUPE PAS AUTOMATIQUEMENT. Couper un tableau de critères
+ * au milieu d'une ligne demanderait de le reconstruire avec ses en-têtes sur la
+ * feuille suivante — c'est ce que fait jsPDF dans le PDF, et le refaire ici en
+ * mesurant du DOM produirait deux paginations différentes qui se contrediraient
+ * au premier cas limite. ⮕ L'aperçu DIT que le PDF ajoutera une page ; il ne
+ * prétend pas montrer laquelle. Un aperçu honnête sur sa limite vaut mieux
+ * qu'un aperçu fidèle en apparence.
+ */
+function signalerDebordement(feuille) {
+    const contenu = feuille.querySelector('.apercu-pdf-page-contenu');
+    if (!contenu) return;
+    const deborde = contenu.scrollHeight > contenu.clientHeight + 2;
+
+    const ancien = feuille.querySelector('.apercu-pdf-debordement');
+    if (ancien) ancien.remove();
+    if (!deborde) return;
+
+    const note = document.createElement('div');
+    note.className = 'apercu-pdf-debordement';
+    note.textContent = 'Ce contenu dépasse la feuille : le PDF le poursuivra sur une page de plus.';
+    feuille.appendChild(note);
+}
+
+function accorderSelecteurCran() {
+    const select = document.getElementById('apercuPDF-cran');
+    const grille = _apercuPDFData.grille;
+    const cartouche = _apercuPDFData.cartouche;
+    const optionsCran = { production: _apercuPDFData.production };
+
+    const dispo = cransDisponibles(grille, cartouche, optionsCran);
+    if (!select) return cranDocument({ cran: null, production: _apercuPDFData.production }, grille, cartouche);
+
+    Array.from(select.options).forEach(option => {
+        const possible = dispo.indexOf(option.value) !== -1;
+        option.disabled = !possible;
+        option.title = possible ? '' : raisonCranIndisponible(option.value, grille, cartouche, optionsCran);
+    });
+
+    const retenu = cranDocument({ cran: select.value, production: _apercuPDFData.production }, grille, cartouche);
+    if (select.value !== retenu) select.value = retenu;
+    return retenu;
+}
+
 function rafraichirApercuPDF() {
     if (!_apercuPDFData) return;
 
@@ -2487,8 +2885,16 @@ function rafraichirApercuPDF() {
     const inclureDetailTache = document.getElementById('apercuPDF-prod-detailTache')?.checked !== false;
     const inclureDescCriteres = document.getElementById('apercuPDF-prod-criteres')?.checked === true;
 
+    // #497 étape 3 — la profondeur du document, et l'état du sélecteur qui la
+    // règle. Les deux sont posés AVANT le rendu : un cran devenu indisponible
+    // (production changée, grille retirée) doit être désactivé au moment même
+    // où le document cesse de pouvoir le porter.
+    const cran = accorderSelecteurCran();
+
     // Options d'affichage combinees (taille fixe: petit)
     const options = {
+        cran: cran,
+        disposition: document.getElementById('apercuPDF-disposition')?.value || '',
         production: _apercuPDFData.production,
         inclureNomProduction: inclureNomProduction,
         inclureObjectif: inclureObjectif,
@@ -2514,13 +2920,41 @@ function rafraichirApercuPDF() {
     pagePDF.classList.add(orientation === 'paysage' ? 'apercu-pdf-paysage' : 'apercu-pdf-portrait');
     pagePDF.classList.add('apercu-taille-petit');
 
-    // Generer l'apercu
-    zoneApercu.innerHTML = genererApercuCombine(
+    // #497 étape 3 — UNE FEUILLE PAR PAGE, au lieu d'un rouleau continu.
+    // Jusqu'ici l'aperçu écrivait tout dans une page unique dont la hauteur
+    // s'étirait sans fin : Grégoire voyait un document au format d'aucune
+    // imprimante. Les feuilles suivantes sont posées à côté de la première,
+    // qui garde ses identifiants (le reste du module s'y réfère).
+    const modele = construireModeleDocument(_apercuPDFData.grille, _apercuPDFData.cartouche, options);
+    const parties = feuillesDuDocument(modele);
+
+    const conteneurFeuilles = pagePDF.parentElement;
+    Array.from(conteneurFeuilles.querySelectorAll('.apercu-pdf-page'))
+        .filter(f => f !== pagePDF)
+        .forEach(f => f.remove());
+
+    const rendu = (partie) => genererApercuCombine(
         _apercuPDFData.grille,
         _apercuPDFData.echelle,
         _apercuPDFData.cartouche,
-        options
+        Object.assign({}, options, { partie: partie })
     );
+
+    zoneApercu.innerHTML = rendu(parties[0]);
+
+    for (let i = 1; i < parties.length; i++) {
+        const feuille = document.createElement('div');
+        feuille.className = pagePDF.className;
+        const contenu = document.createElement('div');
+        contenu.className = 'apercu-pdf-page-contenu';
+        contenu.innerHTML = rendu(parties[i]);   // security-ok: HTML construit par genererApercuCombine, dont chaque donnée passe par escapeHtml
+        feuille.appendChild(contenu);
+        conteneurFeuilles.appendChild(feuille);
+    }
+
+    // Chaque feuille dit si elle déborde — l'aperçu ne prétend pas paginer à la
+    // place de jsPDF, il annonce que le PDF ajoutera une page.
+    Array.from(conteneurFeuilles.querySelectorAll('.apercu-pdf-page')).forEach(signalerDebordement);
 }
 
 /**
@@ -2564,6 +2998,13 @@ async function exporterPDFDepuisApercu() {
     try {
         // Options d'affichage combinees (taille fixe: petit)
         const options = {
+            // ⚠⚠ #497 étape 3 — LE CRAN VOYAGE JUSQU'AU PDF. Sans cette ligne,
+            // l'aperçu montre les consignes seules et le fichier exporté sort
+            // avec la grille et la cartouche : exactement l'écart entre écran et
+            // document que l'étape 2 venait de fermer, rouvert par la porte de
+            // sortie. Le cran est lu au même endroit que l'aperçu le lit.
+            cran: document.getElementById('apercuPDF-cran')?.value || '',
+            disposition: document.getElementById('apercuPDF-disposition')?.value || '',
             production: _apercuPDFData.production,
             inclureNomProduction: inclureNomProduction,
             inclureObjectif: inclureObjectif,
@@ -2653,6 +3094,30 @@ async function afficherFormulairePDFDepuisProduction() {
     const productionId = (typeof productionEnEdition !== 'undefined' && productionEnEdition)
         ? productionEnEdition
         : null;
+
+    // ⚠⚠ #496 (25 août 2026) — LA FICHE SAIT DÉJÀ, ON NE LUI REDEMANDE PAS.
+    // Une production porte `grilleId`, `echelleId` et `cartoucheId` : le
+    // formulaire de préparation lui redemandait ces trois choix, et pouvait
+    // répondre autre chose qu'elle, puisqu'il se pré-remplit avec les derniers
+    // réglages mémorisés. Grégoire, 25 août : « ce bouton nous mène à une
+    // fenêtre qui ressemble déjà beaucoup aux gabarits de la production comme
+    // telle ; je voudrais qu'il nous mène plutôt à la visualisation. »
+    if (productionId) {
+        const productions = await db.get(cle('productions')) || [];
+        const production = productions.find(p => p.id === productionId);
+        if (production) {
+            const ouvert = await ouvrirApercuPDFPour({
+                productionId: production.id,
+                grilleId: production.grilleId,
+                echelleId: production.echelleId,
+                cartoucheId: production.cartoucheId
+            });
+            if (ouvert) return;
+            // ⏳ REPLI ASSUMÉ, à retirer à l'étape 3 du plan : sans grille ni
+            // échelle, l'aperçu ne sait pas encore rendre des consignes seules.
+            // Le formulaire reste alors la seule porte — pas une erreur muette.
+        }
+    }
 
     await afficherFormulairePDFInline({
         productionId: productionId
@@ -2879,67 +3344,61 @@ async function mettreAJourOptionsInlinePDF() {
 /**
  * Ouvre l'aperçu PDF depuis le formulaire inline
  */
-async function ouvrirApercuPDFDepuisInline() {
-    // Scopé à _zonePrincipalePDF pour éviter les conflits d'IDs dupliqués
-    const scope = _zonePrincipalePDF || document;
-    const productionId = scope.querySelector('#inlinePDF-production')?.value;
-    const grilleId = scope.querySelector('#inlinePDF-grille')?.value;
-    const echelleId = scope.querySelector('#inlinePDF-echelle')?.value;
-    const cartoucheId = scope.querySelector('#inlinePDF-cartouche')?.value;
+/**
+ * OUVRIR L'APERÇU À PARTIR D'IDENTIFIANTS (#496, 25 août 2026).
+ *
+ * ⚠⚠ POURQUOI CETTE FONCTION EXISTE. L'aperçu ne s'ouvrait QUE depuis le
+ * formulaire de préparation : tout ce qu'il lui fallait, il allait le chercher
+ * dans des `<select>`. Un appelant qui SAIT déjà quoi montrer — la fiche d'une
+ * production, qui porte sa grille, son échelle et sa cartouche — devait donc
+ * passer par un écran qui lui redemandait ce qu'il savait, et qui pouvait lui
+ * répondre autre chose : le formulaire se pré-remplit avec les DERNIERS
+ * RÉGLAGES MÉMORISÉS, pas avec la production ouverte.
+ *
+ * ⮕ Le chargement et l'ouverture ne dépendent plus d'aucun DOM de formulaire.
+ * Deux appelants s'en servent : le formulaire (qui lit ses `<select>` puis
+ * délègue) et la fiche de production (qui lit sa propre production).
+ *
+ * @param {Object} ids - { productionId, grilleId, echelleId, cartoucheId }
+ * @returns {Promise<boolean>} false si la grille ou l'échelle manque
+ */
+async function ouvrirApercuPDFPour(ids) {
+    const { productionId, grilleId, echelleId, cartoucheId } = ids || {};
+    if (!grilleId || !echelleId) return false;
 
-    if (!grilleId || !echelleId) {
-        alert('Veuillez sélectionner une grille et une échelle.');
-        return;
-    }
-
-    // Récupérer les données
     const grilles = await db.get(cle('grillesTemplates')) || [];
     const echelles = await db.get(cle('echellesTemplates')) || [];
     const grille = grilles.find(g => g.id === grilleId);
     const echelle = echelles.find(e => e.id === echelleId);
+    if (!grille || !echelle) return false;
 
     let production = null;
     if (productionId) {
-        const cleProductions = cle('productions');
-        const productions = await db.get(cleProductions) || [];
-        production = productions.find(p => p.id === productionId);
+        const productions = await db.get(cle('productions')) || [];
+        production = productions.find(p => p.id === productionId) || null;
     }
 
     let cartouche = null;
-    if (cartoucheId && grilleId) {
+    if (cartoucheId) {
         const cartouches = await db.get(`cartouches_${grilleId}`) || [];
-        cartouche = cartouches.find(c => c.id === cartoucheId);
+        cartouche = cartouches.find(c => c.id === cartoucheId) || null;
     }
 
-    // Charger les infos pour le pied de page
-    const nomEnseignant = obtenirNomEnseignantPDF();
     const infosCours = obtenirInfosCoursPDF();
-    const nomCours = infosCours.sigleTitre;
-
-    // Stocker les données pour l'aperçu
     _apercuPDFData = {
         grille: grille,
         echelle: echelle,
         cartouche: cartouche,
         production: production,
-        nomEnseignant: nomEnseignant,
-        nomCours: nomCours,
+        nomEnseignant: obtenirNomEnseignantPDF(),
+        nomCours: infosCours.sigleTitre,
         infosCours: infosCours
     };
 
-    // Sauvegarder les réglages AVANT de fermer le formulaire (_zonePrincipalePDF encore valide)
-    sauvegarderReglagesPDF();
-
-    // Fermer le formulaire inline (restaure le contenu précédent)
-    fermerFormulairePDFInline();
-
-    // Afficher/masquer les options de production dans le modal
+    // Les options de production n'ont de sens que s'il y a une production.
     const optionsProd = document.getElementById('apercuPDF-options-production');
-    if (optionsProd) {
-        toggleDisplay(optionsProd, !!production);
-    }
+    if (optionsProd) toggleDisplay(optionsProd, !!production);
 
-    // Restaurer les options du modal depuis les réglages sauvegardés
     const reglages = restaurerReglagesPDF();
     const selectOrientation = document.getElementById('apercuPDF-orientation');
     const checkPiedEnseignant = document.getElementById('apercuPDF-pied-enseignant');
@@ -2953,12 +3412,48 @@ async function ouvrirApercuPDFDepuisInline() {
     if (checkPiedLicence) checkPiedLicence.checked = reglages?.piedLicence ?? true;
     if (checkAfficherTrimestre) checkAfficherTrimestre.checked = reglages?.afficherTrimestre ?? true;
 
-    // Ouvrir le modal d'aperçu (.modal-overlay utilise .actif)
+    // #497 étape 3 — le cran mémorisé, s'il tient encore. `accorderSelecteurCran`
+    // le repositionnera au rendu si ce document ne peut pas le porter.
+    const selectCran = document.getElementById('apercuPDF-cran');
+    if (selectCran && reglages?.cran) selectCran.value = reglages.cran;
+    const selectDispo = document.getElementById('apercuPDF-disposition');
+    if (selectDispo && reglages?.disposition) selectDispo.value = reglages.disposition;
+
     const modalApercu = document.getElementById('modalApercuPDF');
     if (modalApercu) {
         modalApercu.classList.add('actif');
         rafraichirApercuPDF();
     }
+    return true;
+}
+
+/**
+ * Le chemin du FORMULAIRE : il lit ses `<select>`, mémorise les réglages, se
+ * retire, puis délègue l'ouverture. Il reste le seul chemin possible quand on
+ * part d'une échelle ou d'une cartouche — là, il n'y a pas de production d'où
+ * déduire quoi que ce soit.
+ */
+async function ouvrirApercuPDFDepuisInline() {
+    // Scopé à _zonePrincipalePDF pour éviter les conflits d'IDs dupliqués
+    const scope = _zonePrincipalePDF || document;
+    const ids = {
+        productionId: scope.querySelector('#inlinePDF-production')?.value,
+        grilleId: scope.querySelector('#inlinePDF-grille')?.value,
+        echelleId: scope.querySelector('#inlinePDF-echelle')?.value,
+        cartoucheId: scope.querySelector('#inlinePDF-cartouche')?.value
+    };
+
+    if (!ids.grilleId || !ids.echelleId) {
+        alert('Veuillez sélectionner une grille et une échelle.');
+        return;
+    }
+
+    // ⚠ AVANT de fermer : `sauvegarderReglagesPDF` lit le DOM du formulaire,
+    // que `fermerFormulairePDFInline` remplace par le contenu précédent.
+    sauvegarderReglagesPDF();
+    fermerFormulairePDFInline();
+
+    await ouvrirApercuPDFPour(ids);
 }
 
 // Exposer les nouvelles fonctions globalement
@@ -2982,6 +3477,22 @@ window.fermerFormulairePDFInline = fermerFormulairePDFInline;
 window.chargerOptionsInlinePDF = chargerOptionsInlinePDF;
 window.mettreAJourOptionsInlinePDF = mettreAJourOptionsInlinePDF;
 window.ouvrirApercuPDFDepuisInline = ouvrirApercuPDFDepuisInline;
+window.ouvrirApercuPDFPour = ouvrirApercuPDFPour;                           // #496 — ouvrir l'aperçu sans passer par un formulaire
+window.genererApercuCombine = genererApercuCombine;                         // #497 — golden master du document de consignes
+window.genererPDFCombine = genererPDFCombine;                               // #497 — l'autre rendeur du MÊME document
+window.construireModeleDocument = construireModeleDocument;                 // #497 — le document décidé une fois pour les deux rendeurs
+window.titreDocument = titreDocument;
+window.lignesEnteteDocument = lignesEnteteDocument;
+window.blocsInformationDocument = blocsInformationDocument;
+window.cransDisponibles = cransDisponibles;                                 // #497 étape 3 — ce que le document peut porter
+window.cranDocument = cranDocument;
+window.raisonCranIndisponible = raisonCranIndisponible;
+window.accorderSelecteurCran = accorderSelecteurCran;                       // #497 étape 3 — le menu ne peut pas mentir sur ce que la page montre
+window.feuillesDuDocument = feuillesDuDocument;
+window.dispositionDocument = dispositionDocument;                           // #497 étape 4 — la mise en page est un choix
+window.repartirEnDeuxColonnes = repartirEnDeuxColonnes;                     // #497 étape 4 — une seule répartition pour les deux rendeurs
+window.blocsInfoHTML = blocsInfoHTML;                             // #497 étape 3 — les consignes seules sur leur page
+window.restaurerReglagesPDF = restaurerReglagesPDF;                         // #496 — la sentinelle doit pouvoir prouver que les réglages sont posés
 
 
 

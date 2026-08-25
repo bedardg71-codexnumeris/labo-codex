@@ -4539,9 +4539,6 @@
 
                             <!-- Boutons actions en haut à droite -->
                             <div class="u-flex-gap-10 u-mb-20 u-text-right" style="justify-content: flex-end">
-                                <button data-action="afficherFormulairePDFDepuisProduction" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
-                                    <img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Pr&eacute;parer le PDF
-                                </button>
                                 <button id="btnExporterProductionsPDF" data-action="exporterProductionsEnPDF" class="btn btn-secondaire btn-export-pdf" title="Exporter la liste des productions en PDF">
                                     <img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Exporter la liste en PDF
                                 </button>
@@ -4644,6 +4641,16 @@
                                                     max="100" placeholder="Ex: 20">
                                             </div>
                                             <p id="notePonderation" class="u-hide u-texte-petit" style="color: var(--gris-moyen); margin: 0; padding-top: 28px; line-height: 1.5"></p>
+                                        </div>
+                                        <!-- #496 (25 août 2026) : « Préparer le PDF » a quitté l'en-tête de
+                                             section pour venir ICI, au-dessus des trois choix dont il dépend.
+                                             Depuis qu'il lit la production ouverte plutôt qu'un formulaire, sa
+                                             place est dans la fiche : le bouton et ce qu'il emporte se lisent
+                                             d'un seul regard. -->
+                                        <div class="u-text-right" style="margin-bottom: -5px;">
+                                            <button data-action="afficherFormulairePDFDepuisProduction" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
+                                                <img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Pr&eacute;parer le PDF
+                                            </button>
                                         </div>
                                         <!-- Grille de critères + Échelle + Cartouche -->
                                         <div id="champGrille" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: end;">
@@ -14729,7 +14736,31 @@
             <h2 class="modal-titre"><img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Aper&ccedil;u du document <button class="btn-aide-contextuelle" data-aide="modal-apercu-pdf" aria-label="Aide : aperçu et options PDF"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h2>
 
             <!-- Options de mise en page sur une ligne -->
-            <div class="u-mb-12 u-texte-petit u-align-center" style="display: grid; grid-template-columns: auto 1fr 1fr; gap: 15px; padding: 10px 15px; background: var(--gris-tres-clair, #f5f5f5); border-radius: var(--radius-moyen)">
+            <div class="u-mb-12 u-texte-petit u-align-center" style="display: grid; grid-template-columns: auto auto auto 1fr 1fr; gap: 15px; padding: 10px 15px; background: var(--gris-tres-clair, #f5f5f5); border-radius: var(--radius-moyen)">
+                <!-- #497 étape 3 : la PROFONDEUR du document. Trois crans cumulatifs,
+                     décision de Grégoire du 25 août. Un cran sans matière est désactivé
+                     et DIT pourquoi (title) plutôt que de disparaître. -->
+                <div class="u-flex-gap-8 u-align-center">
+                    <span class="u-texte-medium" style="color: var(--gris-moyen)">Contenu :</span>
+                    <select id="apercuPDF-cran" class="controle-form u-texte-petit" style="width: auto; padding: 4px 8px" data-on-change="rafraichirApercuPDF">
+                        <option value="consignes">Consignes</option>
+                        <option value="evaluation">+ Évaluation</option>
+                        <option value="retroaction">+ Rétroaction</option>
+                    </select>
+                </div>
+
+                <!-- #497 étape 4 : la disposition des CONSIGNES. Décision de Grégoire —
+                     la mise en page est un choix, au même titre que l'orientation du
+                     papier. « Deux colonnes » reprend le format de son Manuel, bandeaux
+                     compris ; la page d'évaluation reste pleine largeur dans les deux cas. -->
+                <div class="u-flex-gap-8 u-align-center">
+                    <span class="u-texte-medium" style="color: var(--gris-moyen)">Disposition :</span>
+                    <select id="apercuPDF-disposition" class="controle-form u-texte-petit" style="width: auto; padding: 4px 8px" data-on-change="rafraichirApercuPDF">
+                        <option value="continu">Continu</option>
+                        <option value="deux-colonnes">Deux colonnes</option>
+                    </select>
+                </div>
+
                 <!-- Orientation -->
                 <div class="u-flex-gap-8 u-align-center">
                     <span class="u-texte-medium" style="color: var(--gris-moyen)">Orientation :</span>

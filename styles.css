@@ -13678,10 +13678,15 @@ tr.etudiant-inactif td {
    ================================================ */
 
 /* Zone conteneur avec fond gris "bureau" */
+/* #497 étape 3 : les feuilles s'empilent, elles ne s'étirent plus.
+   L'aperçu montrait UNE page dont la hauteur suivait le contenu — un document
+   au format d'aucune imprimante. */
 .apercu-pdf-zone {
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 24px;
 }
 
 /* Page simulée - base commune (toujours en mode clair = papier blanc) */
@@ -13693,20 +13698,32 @@ tr.etudiant-inactif td {
     color: #333333;
 }
 
-/* Portrait : ratio Letter (8.5 x 11) - echelle 0.7 pour tenir dans le modal */
+/* Portrait : ratio Letter (8.5 x 11) - echelle 0.7 pour tenir dans le modal.
+   ⚠ HAUTEUR FIXE, et non plus min-height : une feuille qui s'étire n'est plus
+   une feuille. Ce qui dépasse est signalé par `signalerDebordement`, jamais
+   escamoté en silence. */
 .apercu-pdf-page.apercu-pdf-portrait {
     width: 595px;  /* 8.5" * 70 */
-    min-height: 770px; /* 11" * 70 */
+    height: 770px; /* 11" * 70 */
     max-width: 100%;
-    /* aspect-ratio retiré pour permettre au contenu de s'étendre verticalement */
 }
 
 /* Paysage : ratio Letter inversé (11 x 8.5) */
 .apercu-pdf-page.apercu-pdf-paysage {
     width: 770px;  /* 11" * 70 */
-    min-height: 595px; /* 8.5" * 70 */
+    height: 595px; /* 8.5" * 70 */
     max-width: 100%;
-    /* aspect-ratio retiré pour permettre au contenu de s'étendre verticalement */
+}
+
+/* Le débordement se DIT, sous la feuille concernée. */
+.apercu-pdf-debordement {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -22px;
+    text-align: center;
+    font-size: 0.78rem;
+    color: #f0c674;
 }
 
 /* Contenu de la page avec marges simulées (toujours mode clair) */
@@ -13715,7 +13732,8 @@ tr.etudiant-inactif td {
     font-size: 10pt;
     line-height: 1.4;
     color: #333333;
-    min-height: calc(100% - 60px);
+    height: 100%;
+    overflow: hidden;   /* la feuille a une fin ; ce qui la dépasse est DIT, pas montré à cheval */
     display: flex;
     flex-direction: column;
 }
