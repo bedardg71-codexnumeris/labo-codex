@@ -481,6 +481,142 @@ async function typerProductionCommeTerminale(productionId) {
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
 
+/* ===============================
+   CHAMPS SUPPLÉMENTAIRES DU GABARIT (#499, 25 août 2026)
+   =============================== */
+
+/**
+ * ⚠⚠ POURQUOI CES CHAMPS EXISTENT. Le gabarit offrait quatre blocs figés —
+ * objectif, tâche, détail, échéance. Le document de consignes de Grégoire en
+ * demande d'autres, propres à sa matière : « Format et mise en page », « Remise
+ * du travail », « À vérifier ». Les ajouter en dur au formulaire aurait résolu
+ * SON cas et laissé le suivant sans réponse ; ce sont donc des blocs qu'il
+ * NOMME lui-même.
+ *
+ * ⚠ PORTÉE : par production, jamais partagés (décision de Grégoire, 25 août).
+ * Une définition unique au niveau du cours aurait évité la retape, mais
+ * corriger un champ aurait alors changé TOUTES les productions — y compris
+ * celles dont les consignes sont déjà entre les mains des étudiant·es. L'étape D
+ * offrira une reprise par COPIE : la commodité sans l'effet à distance.
+ *
+ * ▣ LE DOM EST LA SOURCE PENDANT L'ÉDITION. `_champsPersonnalises` ne sert qu'à
+ * ajouter, retirer et déplacer ; avant chaque re-rendu on RELIT les champs de
+ * l'écran. Sans cette relecture, taper un titre puis cliquer « + Nouveau champ »
+ * effacerait ce qu'on vient d'écrire — la saisie vit dans le DOM, pas dans
+ * l'état.
+ */
+let _champsPersonnalises = [];
+
+/** Le champ vide, tel qu'on l'ajoute. */
+function nouveauChampPersonnalise() {
+    const id = (typeof window.genererIdUnique === 'function')
+        ? window.genererIdUnique('CHP_')
+        : 'CHP_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    return { id: id, titre: '', contenu: '' };
+}
+
+/** Relit l'écran : c'est lui qui fait foi tant que la fiche est ouverte. */
+function lireChampsPersonnalisesDepuisFormulaire() {
+    const liste = document.getElementById('champsPersonnalisesListe');
+    if (!liste) return _champsPersonnalises.slice();
+
+    const lus = [];
+    liste.querySelectorAll('.champ-perso').forEach(bloc => {
+        const id = bloc.getAttribute('data-champ-id');
+        const titre = bloc.querySelector('.champ-perso-titre');
+        const contenu = bloc.querySelector('.champ-perso-contenu');
+        lus.push({
+            id: id,
+            titre: titre ? titre.value : '',
+            contenu: contenu ? contenu.value : ''
+        });
+    });
+    return lus;
+}
+
+/**
+ * Ce qui part dans la production : les champs SANS TITRE sont écartés.
+ *
+ * ⚠ Un bloc sans nom n'a pas sa place dans un document de consignes — il
+ * s'afficherait comme un bandeau vide au-dessus d'un texte orphelin. Un champ
+ * nommé mais vide, en revanche, est CONSERVÉ : c'est une section qu'on prépare.
+ */
+function champsPersonnalisesAEnregistrer() {
+    return lireChampsPersonnalisesDepuisFormulaire()
+        .filter(c => c.titre && c.titre.trim())
+        .map(c => ({ id: c.id, titre: c.titre.trim(), contenu: c.contenu || '' }));
+}
+
+function rendreChampsPersonnalises() {
+    const liste = document.getElementById('champsPersonnalisesListe');
+    if (!liste) return;
+
+    liste.innerHTML = _champsPersonnalises.map((champ, index) => {
+        const premier = index === 0;
+        const dernier = index === _champsPersonnalises.length - 1;
+        return `
+        <div class="champ-perso" data-champ-id="${echapperHtml(champ.id)}" style="border: 1px solid var(--bordure-moyenne, #ccc); border-radius: var(--rayon-moyen, 6px); padding: 12px;">
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                <input type="text" class="controle-form champ-perso-titre" style="flex: 1;"
+                    placeholder="Nom du champ — ex : Remise du travail"
+                    value="${echapperHtml(champ.titre)}">
+                <button type="button" class="btn btn-secondaire u-texte-petit" title="Monter"
+                    data-action="deplacerChampPersonnalise" data-param="${echapperHtml(champ.id)}" data-param2="-1"
+                    ${premier ? 'disabled' : ''}>&uarr;</button>
+                <button type="button" class="btn btn-secondaire u-texte-petit" title="Descendre"
+                    data-action="deplacerChampPersonnalise" data-param="${echapperHtml(champ.id)}" data-param2="1"
+                    ${dernier ? 'disabled' : ''}>&darr;</button>
+                <button type="button" class="btn btn-annuler u-texte-petit" title="Retirer ce champ"
+                    data-action="supprimerChampPersonnalise" data-param="${echapperHtml(champ.id)}">&times;</button>
+            </div>
+            <textarea class="controle-form champ-perso-contenu" rows="3"
+                placeholder="Ce que ce bloc dira aux étudiant·es">${echapperHtml(champ.contenu)}</textarea>
+        </div>`;
+    }).join('');
+}
+
+function ajouterChampPersonnalise() {
+    // ⚠ Relire AVANT d'ajouter : le re-rendu écraserait sinon la saisie en cours.
+    _champsPersonnalises = lireChampsPersonnalisesDepuisFormulaire();
+    _champsPersonnalises.push(nouveauChampPersonnalise());
+    rendreChampsPersonnalises();
+
+    // Le curseur va dans le champ qu'on vient de créer : sans ça, il faut
+    // viser à la souris un bloc qui vient d'apparaître en bas de page.
+    const liste = document.getElementById('champsPersonnalisesListe');
+    const titres = liste ? liste.querySelectorAll('.champ-perso-titre') : [];
+    if (titres.length > 0) titres[titres.length - 1].focus();
+}
+
+function supprimerChampPersonnalise(id) {
+    _champsPersonnalises = lireChampsPersonnalisesDepuisFormulaire()
+        .filter(c => c.id !== id);
+    rendreChampsPersonnalises();
+}
+
+function deplacerChampPersonnalise(id, sens) {
+    const champs = lireChampsPersonnalisesDepuisFormulaire();
+    const i = champs.findIndex(c => c.id === id);
+    const j = i + Number(sens);
+    if (i < 0 || j < 0 || j >= champs.length) return;
+    const tmp = champs[i]; champs[i] = champs[j]; champs[j] = tmp;
+    _champsPersonnalises = champs;
+    rendreChampsPersonnalises();
+}
+
+/** Remplit la zone à l'ouverture d'une fiche. `null` = nouvelle production. */
+function peuplerChampsPersonnalises(production) {
+    const source = (production && Array.isArray(production.champsPersonnalises))
+        ? production.champsPersonnalises
+        : [];
+    _champsPersonnalises = source.map(c => ({
+        id: c.id || nouveauChampPersonnalise().id,
+        titre: c.titre || '',
+        contenu: c.contenu || ''
+    }));
+    rendreChampsPersonnalises();
+}
+
 /**
  * LA CASE « CONSIGNES TRANSMISES », EN MODE SIMPLE (#494, 25 août 2026).
  *
@@ -1183,6 +1319,7 @@ async function prerenseignerFormulaireProduction(prod) {
     document.getElementById('productionObjectif').value = prod.objectif || '';
     document.getElementById('productionTache').value = prod.tache || '';
     document.getElementById('productionDetailTache').value = prod.detailTache || '';
+    peuplerChampsPersonnalises(prod);                                        // #499
 
     // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Charger date d'échéance
     document.getElementById('productionDateEcheance').value = prod.dateEcheance || '';
@@ -1234,6 +1371,7 @@ function reinitialiserFormulaireProduction() {
     document.getElementById('productionDateEcheance').value = '';
 
     // 🆕 Beta 98.3 : Échéances par groupe-cours (multi-groupe)
+    peuplerChampsPersonnalises(null);                                        // #499 — une fiche neuve n'hérite pas des champs de la précédente
     peuplerEcheancesParGroupe(null);
 
     // Réinitialiser les checkboxes de pratiques compatibles
@@ -1387,7 +1525,11 @@ function lireDonneesFormulaireProduction() {
     const cartoucheSelect = document.getElementById('productionCartouche');
     const cartoucheId = cartoucheSelect ? cartoucheSelect.value : '';
 
+    // #499 — les blocs que Grégoire a nommés lui-même.
+    const champsPersonnalises = champsPersonnalisesAEnregistrer();
+
     return { titre, activiteApprentissage, type, ponderation, objectif, tache, detailTache,
+             champsPersonnalises,
              echeancesParGroupe, dateEcheance, grilleId, echelleId, cartoucheId };
 }
 
@@ -1526,6 +1668,7 @@ function construireProductionData(d, evaluations, idEnEdition) {
         objectif: d.objectif,
         tache: d.tache,
         detailTache: d.detailTache,
+        champsPersonnalises: d.champsPersonnalises || [],   // #499
         grilleId: d.grilleId,
         echelleId: d.echelleId,        // 🆕 Persistance échelle dans le gabarit
         cartoucheId: d.cartoucheId,    // 🆕 Persistance cartouche dans le gabarit
@@ -2563,6 +2706,12 @@ window.dateSeanceDuRang = dateSeanceDuRang;                                 // #
 window.dateEcheanceProposeeParLaCarte = dateEcheanceProposeeParLaCarte;     // #493 — ce que la carte propose, par groupe
 window.datesDeLaSemaineDansTable = datesDeLaSemaineDansTable;               // #493 — filtre d'une table horaire par semaine
 window.brancherPropositionDeLaCarte = brancherPropositionDeLaCarte;         // #493 — le geste : proposer sans écraser
+window.ajouterChampPersonnalise = ajouterChampPersonnalise;                 // #499 — bouton « + Nouveau champ »
+window.supprimerChampPersonnalise = supprimerChampPersonnalise;
+window.deplacerChampPersonnalise = deplacerChampPersonnalise;
+window.peuplerChampsPersonnalises = peuplerChampsPersonnalises;
+window.champsPersonnalisesAEnregistrer = champsPersonnalisesAEnregistrer;
+window.lireChampsPersonnalisesDepuisFormulaire = lireChampsPersonnalisesDepuisFormulaire;
 window.poserCaseAssignationSimple = poserCaseAssignationSimple;             // #494 — « consignes transmises » en mode simple
 window.lireEcheancesParGroupeDepuisFormulaire = lireEcheancesParGroupeDepuisFormulaire;   // #494 — sentinelle : l'écran et l'enregistrement disent la même chose
 window.validerChampsObligatoiresProduction = validerChampsObligatoiresProduction; // #486 — exposé pour la sentinelle (tests/unit)

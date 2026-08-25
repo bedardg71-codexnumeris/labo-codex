@@ -1901,6 +1901,88 @@ function lignesEnteteDocument(options) {
 }
 
 /**
+ * LE BLOC « DATE DE REMISE » (#498, 25 août 2026).
+ *
+ * ⚠⚠ IL EST TOUJOURS LÀ — demande de Grégoire. Une consigne sans date de remise
+ * est une consigne à moitié transmise, et un document qui la tait laisse
+ * l'étudiant la chercher ailleurs. Quand aucune date n'est posée, le bloc dit
+ * « À préciser » plutôt que de disparaître : le document avoue ce qu'il ne sait
+ * pas encore, au lieu de faire silence sur une information attendue.
+ *
+ * ⚠ PLUSIEURS GROUPES, PLUSIEURS DATES. Deux groupes du même cours ne se
+ * rencontrent pas le même jour (cf. #493) : le bloc les nomme tous les deux
+ * plutôt que d'en choisir un. En choisir un donnerait à la moitié des
+ * étudiant·es une date qui n'est pas la leur — sur le document qui la leur
+ * annonce.
+ *
+ * ⚠ Une date NON ASSIGNÉE est affichée quand même. Ce document EST l'acte de
+ * transmission : au moment où Grégoire l'imprime, la case « consignes
+ * transmises » n'est pas encore cochée. La taire ici obligerait à cocher avant
+ * d'imprimer, c'est-à-dire à déclarer transmis ce qui ne l'est pas encore.
+ *
+ * @returns {{titre: string, texte: string}|null} null si la production manque
+ */
+function blocEcheance(production) {
+    if (!production) return null;
+
+    const dates = datesDeRemise(production);
+    if (dates.length === 0) {
+        return { titre: 'Date de remise :', texte: 'À préciser' };
+    }
+    if (dates.length === 1) {
+        return { titre: 'Date de remise :', texte: dates[0].date };
+    }
+    return {
+        titre: 'Date de remise :',
+        texte: dates.map(d => `${d.groupe} : ${d.date}`).join('\n')
+    };
+}
+
+/**
+ * Les dates de remise d'une production, avec le groupe quand il y en a
+ * plusieurs. Lit le même modèle que l'écran des échéances (`echeancesParGroupe`,
+ * repli `dateEcheance`) : deux lectures différentes finiraient par annoncer
+ * deux dates différentes pour la même remise.
+ *
+ * @returns {Array<{groupe: string, date: string}>}
+ */
+function datesDeRemise(production) {
+    const formater = (iso) => {
+        if (!iso) return '';
+        const d = new Date(iso + 'T12:00:00');
+        if (isNaN(d.getTime())) return iso;
+        return d.toLocaleDateString('fr-CA', {
+            weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+        });
+    };
+
+    const parGroupe = production.echeancesParGroupe;
+    if (!parGroupe || Object.keys(parGroupe).length === 0) {
+        return production.dateEcheance
+            ? [{ groupe: '', date: formater(production.dateEcheance) }]
+            : [];
+    }
+
+    let groupesCours = [];
+    try {
+        if (typeof db !== 'undefined' && db.getSync && typeof cle === 'function') {
+            groupesCours = db.getSync(cle('groupesCours'), []) || [];
+        }
+    } catch (e) { groupesCours = []; }
+
+    const nomDe = (gcId) => {
+        const gc = groupesCours.find(g => g && g.id === gcId);
+        const num = gc && gc.groupeNum;
+        return num ? `gr. ${String(num).padStart(5, '0')}` : 'Groupe';
+    };
+
+    return Object.keys(parGroupe)
+        .filter(gcId => parGroupe[gcId] && parGroupe[gcId].date)
+        .map(gcId => ({ groupe: nomDe(gcId), date: formater(parGroupe[gcId].date) }))
+        .sort((a, b) => a.groupe.localeCompare(b.groupe));
+}
+
+/**
  * Les blocs d'information du document — objectif, description, détail, contexte
  * de la rétroaction — dans leur ordre de lecture.
  *
@@ -1926,6 +2008,27 @@ function blocsInformationDocument(cartouche, options) {
     if (prod && options.inclureDetailTache && prod.detailTache) {
         blocs.push({ titre: 'Détail de la tâche :', texte: prod.detailTache });
     }
+    // #499 — les champs que Grégoire a nommés lui-même, dans SON ordre. Ils
+    // viennent après les consignes du gabarit et avant la date : l'étudiant lit
+    // ce qu'on lui demande, puis comment le rendre, puis quand.
+    // ⚠ Un champ sans titre n'entre pas : il s'afficherait comme un bandeau vide
+    // au-dessus d'un texte orphelin. Un champ nommé mais vide n'entre pas non
+    // plus — dans le GABARIT c'est une section en préparation, dans le document
+    // remis ce serait une promesse sans contenu.
+    if (prod && Array.isArray(prod.champsPersonnalises)) {
+        prod.champsPersonnalises.forEach(champ => {
+            const titre = champ && champ.titre ? String(champ.titre).trim() : '';
+            const contenu = champ && champ.contenu ? String(champ.contenu).trim() : '';
+            if (titre && contenu) blocs.push({ titre: titre + ' :', texte: contenu });
+        });
+    }
+
+    // ⚠ La date de remise vient APRÈS les consignes et AVANT le contexte de
+    // rétroaction : l'étudiant lit ce qu'on lui demande, puis quand le rendre.
+    // Le contexte, lui, parle de l'évaluation, pas de la tâche.
+    const echeance = blocEcheance(prod);
+    if (echeance) blocs.push(echeance);
+
     if (cartouche && cartouche.contexte) {
         blocs.push({ titre: 'Contexte de la rétroaction :', texte: cartouche.contexte });
     }
@@ -3491,7 +3594,9 @@ window.accorderSelecteurCran = accorderSelecteurCran;                       // #
 window.feuillesDuDocument = feuillesDuDocument;
 window.dispositionDocument = dispositionDocument;                           // #497 étape 4 — la mise en page est un choix
 window.repartirEnDeuxColonnes = repartirEnDeuxColonnes;                     // #497 étape 4 — une seule répartition pour les deux rendeurs
-window.blocsInfoHTML = blocsInfoHTML;                             // #497 étape 3 — les consignes seules sur leur page
+window.blocsInfoHTML = blocsInfoHTML;
+window.blocEcheance = blocEcheance;                                         // #498 — la date de remise, toujours dans les consignes
+window.datesDeRemise = datesDeRemise;                             // #497 étape 3 — les consignes seules sur leur page
 window.restaurerReglagesPDF = restaurerReglagesPDF;                         // #496 — la sentinelle doit pouvoir prouver que les réglages sont posés
 
 
