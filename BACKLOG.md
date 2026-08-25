@@ -123,7 +123,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Vitest **3046/3046** (299 fichiers). **14 break-tests, 14 ROUGE.** Vérification navigateur
   (Chromium) : menu ⋮ présent et ouvrable dans les 5 bibliothèques, suppression effective,
   cascade correcte, tableau de Réglages › Données à jour, zéro erreur console.
-  ⏳ **Porte terrain due** : Safari et iPad (la suite Playwright du projet est webkit-seul).
+  ⏳ **Porte terrain émise** : `plans de travail/PORTES-TERRAIN-2026-08-25-490-supprimer-un-partage.md`
+  — 2 préalables, 6 vérifications, 2 décisions (Safari et iPad : la suite Playwright du projet
+  est webkit-seule et webkit n'est pas installé en conteneur). Artefact :
+  https://claude.ai/code/artifact/46caad82-bbb2-4337-9014-c850a3415da6
   Dernier ID : **#490**.
 
 ### Retour testeur — 24 août 2026 (Grégoire, en cours de planification)

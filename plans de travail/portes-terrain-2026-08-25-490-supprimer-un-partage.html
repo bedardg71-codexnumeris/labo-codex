@@ -1,0 +1,692 @@
+<title>Supprimer un partagé — portes 1.96.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --fond:#eef2f3;
+  --surface:#ffffff;
+  --surface-creuse:#e4ebed;
+  --encre:#10222b;
+  --encre-douce:#4f6c78;
+  --trait:#d3dee2;
+  --trait-fort:#b6c7cd;
+  --sarcelle:#1a4a5e;
+  --sarcelle-voile:#dfeaee;
+  --or:#8a5f22;
+  --or-voile:#f6eddd;
+  --ok:#1c6b4a;
+  --ok-voile:#dfeee7;
+  --ko:#a81f37;
+  --ko-voile:#f7e2e5;
+  --ombre:0 1px 2px rgba(16,34,43,.05), 0 6px 18px -10px rgba(16,34,43,.22);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --fond:#0c1a22;
+    --surface:#152a35;
+    --surface-creuse:#11222c;
+    --encre:#d5e3e7;
+    --encre-douce:#93aeb9;
+    --trait:#2a4450;
+    --trait-fort:#3d5b68;
+    --sarcelle:#6aacb8;
+    --sarcelle-voile:#173540;
+    --or:#c8a060;
+    --or-voile:#2c2415;
+    --ok:#48b78d;
+    --ok-voile:#12302a;
+    --ko:#f0707f;
+    --ko-voile:#331920;
+    --ombre:0 1px 2px rgba(0,0,0,.35), 0 8px 24px -14px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --fond:#0c1a22;
+  --surface:#152a35;
+  --surface-creuse:#11222c;
+  --encre:#d5e3e7;
+  --encre-douce:#93aeb9;
+  --trait:#2a4450;
+  --trait-fort:#3d5b68;
+  --sarcelle:#6aacb8;
+  --sarcelle-voile:#173540;
+  --or:#c8a060;
+  --or-voile:#2c2415;
+  --ok:#48b78d;
+  --ok-voile:#12302a;
+  --ko:#f0707f;
+  --ko-voile:#331920;
+  --ombre:0 1px 2px rgba(0,0,0,.35), 0 8px 24px -14px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--fond);
+  color:var(--encre);
+  font-family:"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size:16px;
+  line-height:1.6;
+  -webkit-text-size-adjust:100%;
+}
+.enveloppe{max-width:44rem;margin:0 auto;padding:0 1.25rem 5rem}
+
+/* ---------- en-tête ---------- */
+.chapeau{padding:2.75rem 0 1.5rem}
+.eyebrow{
+  font-family:"IBM Plex Mono", ui-monospace, monospace;
+  font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--or);margin:0 0 .75rem;
+}
+h1{
+  font-family:"Fraunces", ui-serif, Georgia, serif;
+  font-weight:600;font-size:clamp(1.85rem,5.2vw,2.6rem);
+  line-height:1.12;margin:0 0 .85rem;text-wrap:balance;
+  font-variation-settings:"opsz" 96;
+}
+.sous{color:var(--encre-douce);margin:0 0 1.25rem;max-width:34rem}
+.jetons{display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:1.25rem}
+.jeton{
+  font-family:"IBM Plex Mono", ui-monospace, monospace;font-size:.75rem;
+  padding:.3rem .6rem;border-radius:2px;border:1px solid var(--trait-fort);
+  background:var(--surface);color:var(--encre-douce);
+}
+.jeton--vif{border-color:var(--sarcelle);color:var(--sarcelle);background:var(--sarcelle-voile)}
+
+/* ---------- barre d'état ---------- */
+.barre{
+  position:sticky;top:0;z-index:20;
+  background:color-mix(in srgb, var(--fond) 88%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--trait);
+  /* La barre est un frère de .enveloppe, donc déjà pleine largeur : un
+     retrait négatif la pousserait HORS du viewport (débordement mesuré à
+     834 px, largeur d'iPad en portrait). Padding seul. */
+  padding:.7rem 1.25rem;margin:0 0 2rem;
+}
+.barre-int{max-width:44rem;margin:0 auto;display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+.compteur{
+  display:flex;gap:.9rem;font-family:"IBM Plex Mono", ui-monospace, monospace;
+  font-size:.8rem;font-variant-numeric:tabular-nums;
+}
+.compteur b{font-weight:500}
+.c-ok{color:var(--ok)} .c-ko{color:var(--ko)} .c-reste{color:var(--encre-douce)}
+.filtres{display:flex;gap:.35rem;margin-left:auto;flex-wrap:wrap}
+.filtre{
+  font:inherit;font-size:.8rem;cursor:pointer;
+  min-height:34px;padding:.25rem .7rem;
+  border:1px solid var(--trait-fort);border-radius:999px;
+  background:var(--surface);color:var(--encre-douce);
+}
+.filtre[aria-pressed="true"]{background:var(--sarcelle);border-color:var(--sarcelle);color:var(--fond)}
+:root[data-theme="dark"] .filtre[aria-pressed="true"],
+:root:not([data-theme="light"]) .filtre[aria-pressed="true"]{color:#0c1a22}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]) .filtre[aria-pressed="true"]{color:#ffffff}
+}
+
+/* ---------- sections ---------- */
+.section{margin:0 0 2.5rem}
+.section-tete{
+  display:flex;align-items:baseline;gap:.7rem;
+  padding-bottom:.5rem;margin-bottom:1.1rem;
+  border-bottom:2px solid var(--encre);
+}
+.section-num{
+  font-family:"IBM Plex Mono", ui-monospace, monospace;
+  font-size:.85rem;color:var(--or);font-weight:500;
+}
+.section-tete h2{
+  font-family:"Fraunces", ui-serif, Georgia, serif;
+  font-weight:600;font-size:1.28rem;margin:0;font-variation-settings:"opsz" 40;
+}
+.section-note{
+  background:var(--or-voile);border-left:3px solid var(--or);
+  padding:.8rem 1rem;margin:0 0 1.1rem;font-size:.92rem;
+}
+.section-note strong{color:var(--or)}
+
+/* ---------- cartes ---------- */
+.porte{
+  background:var(--surface);border:1px solid var(--trait);
+  border-left:4px solid var(--trait-fort);
+  border-radius:3px;box-shadow:var(--ombre);
+  padding:1.05rem 1.15rem;margin-bottom:.85rem;
+  transition:border-left-color .15s ease, opacity .15s ease;
+}
+.porte[data-etat="ok"]{border-left-color:var(--ok)}
+.porte[data-etat="ko"]{border-left-color:var(--ko);background:var(--ko-voile)}
+.porte.masquee{display:none}
+.porte-tete{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;margin-bottom:.5rem}
+.porte-id{
+  font-family:"IBM Plex Mono", ui-monospace, monospace;
+  font-size:.8rem;color:var(--sarcelle);font-weight:500;
+}
+.porte-titre{font-weight:600;font-size:1.02rem;flex:1;min-width:12rem}
+.tag{
+  font-family:"IBM Plex Mono", ui-monospace, monospace;font-size:.68rem;
+  letter-spacing:.06em;text-transform:uppercase;
+  padding:.18rem .45rem;border-radius:2px;
+  background:var(--sarcelle-voile);color:var(--sarcelle);border:1px solid var(--trait-fort);
+}
+.tag--alerte{background:var(--ko-voile);color:var(--ko);border-color:var(--ko)}
+
+.pourquoi{
+  background:var(--surface-creuse);border-radius:3px;
+  padding:.7rem .85rem;margin:0 0 .8rem;
+  font-size:.9rem;color:var(--encre-douce);
+}
+.pourquoi b{color:var(--encre)}
+
+.geste{margin:0 0 .55rem}
+.attendu{
+  font-size:.9rem;color:var(--encre-douce);
+  border-left:2px solid var(--trait-fort);padding-left:.7rem;margin:0 0 .8rem;
+}
+.attendu b{color:var(--encre)}
+
+/* ---------- bascules ---------- */
+.bascules{display:flex;gap:.5rem}
+.bascule{
+  font:inherit;font-size:.88rem;cursor:pointer;
+  min-height:44px;min-width:88px;padding:.4rem 1rem;
+  border:1px solid var(--trait-fort);border-radius:3px;
+  background:var(--surface);color:var(--encre-douce);
+  display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+}
+.bascule:hover{border-color:var(--encre-douce)}
+.bascule[aria-pressed="true"][data-valeur="ok"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.bascule[aria-pressed="true"][data-valeur="ko"]{background:var(--ko);border-color:var(--ko);color:#fff}
+
+/* ---------- décisions ---------- */
+.decision{
+  background:var(--surface);border:1px solid var(--trait);
+  border-left:4px solid var(--or);border-radius:3px;
+  padding:1.05rem 1.15rem;margin-bottom:.85rem;box-shadow:var(--ombre);
+}
+.decision label{display:block;font-weight:600;margin:.9rem 0 .35rem;font-size:.9rem}
+textarea{
+  width:100%;font:inherit;font-size:.95rem;
+  background:var(--surface-creuse);color:var(--encre);
+  border:1px solid var(--trait-fort);border-radius:3px;
+  padding:.6rem .7rem;min-height:4.5rem;resize:vertical;
+}
+
+/* ---------- angles morts ---------- */
+.aveugle{
+  background:var(--surface);border:1px dashed var(--trait-fort);
+  border-radius:3px;padding:1rem 1.15rem;margin-bottom:.7rem;font-size:.93rem;
+}
+.aveugle h3{
+  font-family:"IBM Plex Sans", sans-serif;font-size:.95rem;
+  margin:0 0 .4rem;color:var(--ko);
+}
+:root:not([data-theme="light"]) .aveugle h3{color:var(--ko)}
+
+/* ---------- export ---------- */
+.export{
+  background:var(--surface);border:1px solid var(--trait-fort);
+  border-radius:3px;padding:1.15rem;margin-top:2rem;box-shadow:var(--ombre);
+}
+.export h2{
+  font-family:"Fraunces", ui-serif, Georgia, serif;font-weight:600;
+  font-size:1.15rem;margin:0 0 .5rem;
+}
+.export p{margin:0 0 .85rem;font-size:.92rem;color:var(--encre-douce)}
+.btn-copier{
+  font:inherit;font-weight:600;cursor:pointer;
+  min-height:44px;padding:.55rem 1.2rem;
+  background:var(--sarcelle);color:var(--fond);
+  border:1px solid var(--sarcelle);border-radius:3px;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]) .btn-copier{color:#ffffff}
+}
+:root[data-theme="light"] .btn-copier{color:#ffffff}
+.btn-copier:hover{filter:brightness(1.1)}
+.etat-copie{font-size:.85rem;color:var(--ok);margin-left:.7rem}
+#releve{
+  margin-top:.9rem;min-height:11rem;
+  font-family:"IBM Plex Mono", ui-monospace, monospace;font-size:.78rem;line-height:1.5;
+}
+
+code{
+  font-family:"IBM Plex Mono", ui-monospace, monospace;font-size:.88em;
+  background:var(--surface-creuse);padding:.1rem .3rem;border-radius:2px;
+}
+a{color:var(--sarcelle)}
+:focus-visible{outline:2px solid var(--or);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{transition:none !important}}
+@media (max-width:520px){
+  .filtres{margin-left:0;width:100%}
+  .bascule{flex:1}
+}
+footer{
+  margin-top:3rem;padding-top:1.2rem;border-top:1px solid var(--trait);
+  font-size:.85rem;color:var(--encre-douce);
+}
+</style>
+
+<div class="barre">
+  <div class="barre-int">
+    <div class="compteur" aria-live="polite">
+      <span class="c-ok">✓ <b id="n-ok">0</b></span>
+      <span class="c-ko">✗ <b id="n-ko">0</b></span>
+      <span class="c-reste">reste <b id="n-reste">8</b></span>
+    </div>
+    <div class="filtres" role="group" aria-label="Filtrer les vérifications">
+      <button type="button" class="filtre" data-filtre="tout" aria-pressed="true">Tout</button>
+      <button type="button" class="filtre" data-filtre="iPad" aria-pressed="false">iPad</button>
+      <button type="button" class="filtre" data-filtre="reste" aria-pressed="false">À faire</button>
+    </div>
+  </div>
+</div>
+
+<div class="enveloppe">
+
+  <header class="chapeau">
+    <p class="eyebrow">Portes terrain · #490</p>
+    <h1>Supprimer un document partagé par un collègue</h1>
+    <p class="sous">Deux préalables, six vérifications, deux décisions. Environ cinq minutes. Tout ce qui était
+      prouvable sans Safari l'a été — ce qui reste ici ne peut être tranché que sur tes appareils.</p>
+    <div class="jetons">
+      <span class="jeton jeton--vif">1.96.0 · build 0824-2123</span>
+      <span class="jeton">branche claude/shared-cartridges-deletion-r7ld2p</span>
+      <span class="jeton">25 août 2026</span>
+    </div>
+  </header>
+
+  <!-- ================= §0 ================= -->
+  <section class="section">
+    <div class="section-tete"><span class="section-num">§0</span><h2>Préalable</h2></div>
+    <p class="section-note"><strong>Ce qui invalide tout le reste s'il est sauté.</strong>
+      Ces deux rangées d'abord, dans l'ordre.</p>
+
+    <article class="porte" data-porte="0.1" data-tags="">
+      <div class="porte-tete">
+        <span class="porte-id">0.1</span>
+        <span class="porte-titre">La bonne version est chargée</span>
+      </div>
+      <div class="pourquoi">Tu lances l'app depuis ton clone : elle est à la version de ton dernier
+        <code>git pull</code>. <b>Deux des quatre échecs des 81 portes venaient de là</b> — et ce
+        faux rouge est indétectable, parce qu'il décrit exactement l'état d'avant le correctif.</div>
+      <p class="geste">Fais <code>git pull</code> sur la branche <code>claude/shared-cartridges-deletion-r7ld2p</code>, puis recharge l'app.</p>
+      <p class="attendu"><b>Attendu :</b> le bas de page affiche <b>1.96.0 · build 0824-2123</b>.
+        Si tu vois autre chose, <b>arrête ici</b>.</p>
+      <div class="bascules"></div>
+    </article>
+
+    <article class="porte" data-porte="0.2" data-tags="">
+      <div class="porte-tete">
+        <span class="porte-id">0.2</span>
+        <span class="porte-titre">Tes fichiers .lcz sont sous la main</span>
+        <span class="tag tag--alerte">Données</span>
+      </div>
+      <div class="pourquoi">Cette porte te fait supprimer de vraies choses importées. Tout est
+        réimportable — <b>à condition d'avoir encore le fichier</b>.</div>
+      <p class="geste">Repère le ou les <code>.lcz</code> que tes collègues t'ont envoyés.</p>
+      <p class="attendu"><b>Attendu :</b> tu peux en désigner au moins un. Si tu n'as plus le fichier
+        d'un package, <b>ne le supprime pas</b> — importe-en un autre pour l'essai, ou fais un export
+        Codex d'abord.</p>
+      <div class="bascules"></div>
+    </article>
+  </section>
+
+  <!-- ================= §2 ================= -->
+  <section class="section">
+    <div class="section-tete"><span class="section-num">§2</span><h2>Interface</h2></div>
+
+    <article class="porte" data-porte="2.1" data-tags="iPad">
+      <div class="porte-tete">
+        <span class="porte-id">2.1</span>
+        <span class="porte-titre">Le menu ⋮ apparaît sur une carte partagée</span>
+        <span class="tag">iPad</span>
+      </div>
+      <div class="pourquoi">C'est exactement ta capture : la carte de ta barre latérale a ses trois
+        points, la carte « Partagés par des collègues » n'avait que <b>Dupliquer</b>. Il n'existait
+        aucun geste pour retirer un partagé.</div>
+      <p class="geste">Ouvre une bibliothèque qui contient des partagés — Cartouches, par exemple —
+        et descends jusqu'à la section <b>« Partagés par des collègues »</b>.</p>
+      <p class="attendu"><b>Attendu :</b> chaque carte porte maintenant un <b>⋮</b> à droite de
+        « Dupliquer ».</p>
+      <div class="bascules"></div>
+    </article>
+
+    <article class="porte" data-porte="2.2" data-tags="iPad">
+      <div class="porte-tete">
+        <span class="porte-id">2.2</span>
+        <span class="porte-titre">Le ⋮ s'ouvre au doigt</span>
+        <span class="tag">iPad</span>
+      </div>
+      <div class="pourquoi">Le ⋮ est le même bouton que sur tes cartes ordinaires, mais il n'a jamais
+        été touché au doigt à cet endroit-là de la fenêtre.</div>
+      <p class="geste">Touche le ⋮ d'une carte partagée — avec le doigt, pas un stylet.</p>
+      <p class="attendu"><b>Attendu :</b> le menu s'ouvre <b>du premier coup</b> et affiche
+        « Supprimer » en rouge.</p>
+      <div class="bascules"></div>
+    </article>
+
+    <article class="porte" data-porte="2.3" data-tags="iPad">
+      <div class="porte-tete">
+        <span class="porte-id">2.3</span>
+        <span class="porte-titre">La question s'affiche PAR-DESSUS la fenêtre de bibliothèque</span>
+        <span class="tag">iPad</span>
+      </div>
+      <div class="pourquoi">C'est le défaut réel de 1.92.1 : <b>une confirmation qui se cachait sous
+        sa propre modale</b>. Celle-ci part de l'intérieur de la fenêtre de bibliothèque — exactement
+        la configuration qui avait cassé.</div>
+      <p class="geste">Touche « Supprimer », puis <b>regarde sans répondre</b>. Réponds ensuite
+        <b>Annuler</b>.</p>
+      <p class="attendu"><b>Attendu :</b> la question s'affiche en entier, par-dessus, avec ses deux
+        boutons atteignables. Après « Annuler », <b>rien n'a été supprimé</b>.</p>
+      <div class="bascules"></div>
+    </article>
+
+    <article class="porte" data-porte="2.4" data-tags="">
+      <div class="porte-tete">
+        <span class="porte-id">2.4</span>
+        <span class="porte-titre">Supprimer une cartouche partagée</span>
+      </div>
+      <p class="geste">Refais le geste sur une cartouche partagée, et accepte cette fois.</p>
+      <p class="attendu"><b>Attendu :</b> la carte disparaît de la liste, un message vert confirme, et
+        <b>les autres partagés ne bougent pas</b>.</p>
+      <div class="bascules"></div>
+    </article>
+
+    <article class="porte" data-porte="2.5" data-tags="">
+      <div class="porte-tete">
+        <span class="porte-id">2.5</span>
+        <span class="porte-titre">Supprimer une grille partagée qui porte des cartouches</span>
+      </div>
+      <div class="pourquoi">C'est la seule décision de portée du cycle, et elle est l'<b>inverse</b>
+        de celle d'hier : pour <b>tes</b> grilles, supprimer est refusé quand il y a des cartouches.
+        Pour une grille <b>partagée</b>, elle emporte ses cartouches — parce que tout est
+        réimportable, et qu'une cartouche partagée sans sa grille ne peut plus être dupliquée.
+        La question doit te le dire <b>avant</b>.</div>
+      <p class="geste">Dans la bibliothèque de grilles : ⋮ → Supprimer, sur une grille partagée qui a
+        des cartouches.</p>
+      <p class="attendu"><b>Attendu :</b> la question <b>nomme les cartouches</b> qui partiront avec
+        elle. Si tu acceptes, elles ont disparu de la bibliothèque de cartouches aussi.</p>
+      <div class="bascules"></div>
+    </article>
+
+    <article class="porte" data-porte="2.6" data-tags="">
+      <div class="porte-tete">
+        <span class="porte-id">2.6</span>
+        <span class="porte-titre">Réglages › Données dit la vérité</span>
+      </div>
+      <div class="pourquoi">Le tableau « Packages importés » comptait ce qui était <b>entré un jour</b>.
+        Il doit maintenant compter ce qui <b>reste</b>.</div>
+      <p class="geste">Va dans <b>Réglages › Données</b>, carte « Packages importés », colonne
+        <b>Contenu</b>.</p>
+      <p class="attendu"><b>Attendu :</b> le décompte a baissé de ce que tu viens de supprimer. Un
+        package dont tu aurais tout supprimé <b>n'apparaît plus du tout</b>.</p>
+      <div class="bascules"></div>
+    </article>
+  </section>
+
+  <!-- ================= §3 ================= -->
+  <section class="section">
+    <div class="section-tete"><span class="section-num">§3</span><h2>Décisions</h2></div>
+    <p class="section-note"><strong>Ce ne sont pas des vérifications.</strong> Ce sont deux choix
+      posés faute de pouvoir les trancher à ta place. <b>Écris ta réponse</b> — il n'y a rien à
+      cocher, et une décision sans verdict écrit est une décision perdue.</p>
+
+    <article class="decision" data-decision="3.1">
+      <div class="porte-tete">
+        <span class="porte-id">3.1</span>
+        <span class="porte-titre">La cascade grille → cartouches : bon comportement ?</span>
+      </div>
+      <p>J'ai choisi d'emporter les cartouches partagées avec leur grille partagée, après une
+        question qui les nomme. L'autre option était de <b>refuser</b>, comme pour tes propres
+        grilles — mais il faudrait alors supprimer les cartouches une à une avant de pouvoir
+        atteindre la grille.</p>
+      <label for="d31">Ton verdict</label>
+      <textarea id="d31" placeholder="Garder la cascade / plutôt refuser comme pour mes grilles / autre…"></textarea>
+    </article>
+
+    <article class="decision" data-decision="3.2">
+      <div class="porte-tete">
+        <span class="porte-id">3.2</span>
+        <span class="porte-titre">Faut-il « Exporter pour partager » un item partagé ?</span>
+      </div>
+      <p>Le ⋮ de tes propres cartes offre « Exporter pour partager ». Sur une carte partagée, il
+        n'offre que « Supprimer ». La chaîne d'attribution permettrait de retransmettre le travail
+        d'un collègue en conservant son nom — mais c'est une question de convenance entre collègues,
+        pas de code, et je ne l'ai pas tranchée.</p>
+      <label for="d32">Ton verdict</label>
+      <textarea id="d32" placeholder="Oui / non / seulement pour certains types…"></textarea>
+    </article>
+  </section>
+
+  <!-- ================= §4 ================= -->
+  <section class="section">
+    <div class="section-tete"><span class="section-num">§4</span><h2>Ce que je n'ai PAS pu vérifier</h2></div>
+
+    <div class="aveugle">
+      <h3>Safari et l'iPad, structurellement</h3>
+      WebKit n'existe pas dans le conteneur, et la suite Playwright du projet est
+      <b>webkit-seule</b> : elle n'a pas pu être jouée du tout — ni en vert, ni en rouge.
+      C'est <code>#456 / #487</code>, antérieur à ce chantier. C'est toute la raison d'être des six
+      rangées ci-dessus.
+    </div>
+
+    <div class="aveugle">
+      <h3>Aucun vrai .lcz n'a fait l'aller-retour complet</h3>
+      J'ai semé des partagés à la main, avec exactement la forme que produit l'import. Mais
+      l'enchaînement réel <b>importer un vrai fichier → supprimer un de ses items → réimporter le
+      même fichier</b> n'a pas été joué de bout en bout dans un navigateur. Ce comportement est
+      verrouillé par des tests, pas par une observation.
+    </div>
+
+    <div class="aveugle">
+      <h3>Une erreur de ma part, rattrapée par une sentinelle</h3>
+      J'ai édité le changelog <b>après</b> avoir lancé la release : l'URL anti-cache de ce fichier
+      n'avait donc pas changé, et ton navigateur t'aurait servi l'ancienne version des « Nouvelles »
+      sous un numéro de version neuf — l'incident du 23 août, rejoué. La sentinelle l'a attrapé
+      <b>au push</b>, pas au commit. Corrigé avant d'être poussé.
+    </div>
+
+    <div class="aveugle">
+      <h3>La fusion vers <code>main</code> n'est pas faite</h3>
+      Cette session ne pouvait pousser que sur sa branche. <code>RELAIS.md</code> a été mis à jour
+      <b>sur la branche</b>, pas sur <code>main</code> : une session qui ouvrirait <code>main</code>
+      demain ne verrait pas ce travail. C'est le scénario du 8 août. <b>À trancher par toi.</b>
+    </div>
+  </section>
+
+  <!-- ================= export ================= -->
+  <section class="export">
+    <h2>Copier mes résultats</h2>
+    <p>Ton avancement vit dans le navigateur de cet appareil — je ne peux pas le lire. Ce bouton
+      construit le relevé ; colle-le dans ta réponse.</p>
+    <button type="button" class="btn-copier" id="btn-copier">Copier mes résultats</button>
+    <span class="etat-copie" id="etat-copie" role="status"></span>
+    <textarea id="releve" readonly aria-label="Relevé à copier"></textarea>
+  </section>
+
+  <footer>
+    Jumeau versionné : <code>plans de travail/PORTES-TERRAIN-2026-08-25-490-supprimer-un-partage.md</code><br>
+    Ce qui échoue devient un item de backlog avec son numéro de porte — pas une note mentale.
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var CLE = 'porte-490-etat';
+  var etat = { portes: {}, decisions: {} };
+
+  function lire() {
+    try {
+      var brut = localStorage.getItem(CLE);
+      if (!brut) return;
+      var v = JSON.parse(brut);
+      if (v && typeof v === 'object') {
+        etat.portes = v.portes || {};
+        etat.decisions = v.decisions || {};
+      }
+    } catch (e) { /* stockage refusé : la page marche quand même */ }
+  }
+
+  function ecrire() {
+    try { localStorage.setItem(CLE, JSON.stringify(etat)); }
+    catch (e) { /* idem */ }
+  }
+
+  // ⚠ L'état est relu AVANT tout câblage. Le premier jet appelait `lire()` en
+  // fin de script : les bascules s'en sortaient (elles sont peintes par
+  // `rendre()`, appelé après), mais les VERDICTS ÉCRITS du §3 étaient posés
+  // dans un `etat.decisions` encore vide — ils disparaissaient au moindre
+  // rechargement. Trouvé au navigateur, pas à la lecture.
+  lire();
+
+  // --- bascules ---------------------------------------------------------
+  var portes = Array.prototype.slice.call(document.querySelectorAll('.porte'));
+
+  portes.forEach(function (carte) {
+    var id = carte.dataset.porte;
+    var hote = carte.querySelector('.bascules');
+    [['ok', '✓ Passe'], ['ko', '✗ Échec']].forEach(function (paire) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'bascule';
+      b.dataset.valeur = paire[0];
+      b.textContent = paire[1];
+      b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', function () {
+        etat.portes[id] = (etat.portes[id] === paire[0]) ? null : paire[0];
+        ecrire();
+        rendre();
+      });
+      hote.appendChild(b);
+    });
+  });
+
+  // --- décisions --------------------------------------------------------
+  var decisions = Array.prototype.slice.call(document.querySelectorAll('.decision'));
+  decisions.forEach(function (bloc) {
+    var id = bloc.dataset.decision;
+    var champ = bloc.querySelector('textarea');
+    champ.value = etat.decisions[id] || '';
+    champ.addEventListener('input', function () {
+      etat.decisions[id] = champ.value;
+      ecrire();
+    });
+  });
+
+  // --- filtres ----------------------------------------------------------
+  var filtreActif = 'tout';
+  var boutonsFiltre = Array.prototype.slice.call(document.querySelectorAll('.filtre'));
+  boutonsFiltre.forEach(function (b) {
+    b.addEventListener('click', function () {
+      filtreActif = b.dataset.filtre;
+      boutonsFiltre.forEach(function (x) {
+        x.setAttribute('aria-pressed', String(x === b));
+      });
+      rendre();
+    });
+  });
+
+  // --- rendu ------------------------------------------------------------
+  function rendre() {
+    var nOk = 0, nKo = 0, nReste = 0;
+
+    portes.forEach(function (carte) {
+      var id = carte.dataset.porte;
+      var v = etat.portes[id] || null;
+
+      if (v === 'ok') nOk++;
+      else if (v === 'ko') nKo++;
+      else nReste++;
+
+      carte.dataset.etat = v || 'vierge';
+      carte.querySelectorAll('.bascule').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.valeur === v));
+      });
+
+      var visible = true;
+      if (filtreActif === 'iPad') visible = (carte.dataset.tags || '').indexOf('iPad') !== -1;
+      else if (filtreActif === 'reste') visible = !v;
+      carte.classList.toggle('masquee', !visible);
+    });
+
+    document.getElementById('n-ok').textContent = nOk;
+    document.getElementById('n-ko').textContent = nKo;
+    document.getElementById('n-reste').textContent = nReste;
+  }
+
+  // --- relevé -----------------------------------------------------------
+  function construireReleve() {
+    var lignes = [];
+    var nOk = 0, nKo = 0, nReste = 0;
+    portes.forEach(function (carte) {
+      var v = etat.portes[carte.dataset.porte];
+      if (v === 'ok') nOk++; else if (v === 'ko') nKo++; else nReste++;
+    });
+
+    lignes.push('PORTES TERRAIN #490 — supprimer un partagé — 1.96.0 build 0824-2123');
+    lignes.push(nOk + ' passées · ' + nKo + ' échec · ' + nReste + ' non traitées');
+    lignes.push('');
+
+    document.querySelectorAll('.section').forEach(function (sec) {
+      var tete = sec.querySelector('.section-tete');
+      if (!tete) return;
+      var titre = tete.querySelector('.section-num').textContent + ' '
+        + tete.querySelector('h2').textContent;
+      var corps = [];
+
+      sec.querySelectorAll('.porte').forEach(function (carte) {
+        var v = etat.portes[carte.dataset.porte];
+        var marque = v === 'ok' ? '[v]' : (v === 'ko' ? '[X]' : '[ ]');
+        corps.push('  ' + marque + ' ' + carte.dataset.porte + ' — '
+          + carte.querySelector('.porte-titre').textContent.trim());
+      });
+
+      sec.querySelectorAll('.decision').forEach(function (bloc) {
+        var id = bloc.dataset.decision;
+        var rep = (etat.decisions[id] || '').trim();
+        corps.push('  ' + id + ' — ' + bloc.querySelector('.porte-titre').textContent.trim());
+        corps.push('      verdict : ' + (rep || '(non renseigné)'));
+      });
+
+      sec.querySelectorAll('.aveugle h3').forEach(function (h) {
+        corps.push('  · ' + h.textContent.trim());
+      });
+
+      if (corps.length) {
+        lignes.push(titre);
+        lignes.push.apply(lignes, corps);
+        lignes.push('');
+      }
+    });
+
+    return lignes.join('\n');
+  }
+
+  var zoneReleve = document.getElementById('releve');
+  var etatCopie = document.getElementById('etat-copie');
+
+  document.getElementById('btn-copier').addEventListener('click', function () {
+    var texte = construireReleve();
+    zoneReleve.value = texte;
+    zoneReleve.focus();
+    zoneReleve.select();
+    etatCopie.textContent = 'Relevé prêt — sélectionné ci-dessous.';
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texte).then(function () {
+        etatCopie.textContent = 'Copié dans le presse-papiers.';
+      }).catch(function () {
+        etatCopie.textContent = 'Copie automatique refusée — le texte est sélectionné, fais Cmd+C.';
+      });
+    } else {
+      etatCopie.textContent = 'Le texte est sélectionné — fais Cmd+C.';
+    }
+  });
+
+  rendre();
+})();
+</script>
