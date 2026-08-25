@@ -284,10 +284,11 @@ async function afficherTableauProductions() {
                     ${estPortfolio ? '📁 ' : ''}${prod.titre}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}
                 </strong>
                 <div class="production-actions">
-                    ${index > 0 ?
-                `<button data-action="monterEvaluation" data-param="${prod.id}" class="btn btn-principal">↑</button>` : ''}
-                    ${index < evaluations.length - 1 ?
-                `<button data-action="descendreEvaluation" data-param="${prod.id}" class="btn btn-principal">↓</button>` : ''}
+                    ${window.boutonsReordonnerBloc({
+                        actionHaut: 'monterEvaluation', actionBas: 'descendreEvaluation',
+                        param: prod.id, premier: index === 0,
+                        dernier: index === evaluations.length - 1, quoi: 'cette production'
+                    })}
                     <button data-action="modifierProduction" data-param="${prod.id}" class="btn btn-modifier">Modifier</button>
                     <button data-action="supprimerProduction" data-param="${prod.id}" class="btn btn-supprimer">Supprimer</button>
                 </div>
@@ -700,13 +701,13 @@ function rendreBlocsConsignes() {
         // — `pipeline-btn-reorder` et les chevrons (travaux-ui.js) — et la
         // suppression aussi : `btn-delete-icon` sur l'icône de corbeille.
         // Réutiliser ces deux-là, c'est ce qui rend les écrans semblables.
-        const fleches = `
-                <button type="button" class="pipeline-btn-reorder" title="Monter" aria-label="Monter ce bloc"
-                    data-action="deplacerBlocConsigne" data-param="${echapperHtml(bloc.ref)}" data-param2="-1"
-                    ${premier ? 'disabled' : ''}><img src="icons/icon-chevron-up.svg" alt=""></button>
-                <button type="button" class="pipeline-btn-reorder" title="Descendre" aria-label="Descendre ce bloc"
-                    data-action="deplacerBlocConsigne" data-param="${echapperHtml(bloc.ref)}" data-param2="1"
-                    ${dernier ? 'disabled' : ''}><img src="icons/icon-chevron-down.svg" alt=""></button>`;
+        // #504 — les mêmes boutons que les critères d'une grille et les niveaux
+        // d'une échelle : un seul rendu (`main.js`), cinq appels. Le prochain
+        // bloc réordonnable le reprendra sans avoir à deviner la convention.
+        const fleches = window.boutonsReordonnerBloc({
+            actionHaut: 'deplacerBlocConsigneHaut', actionBas: 'deplacerBlocConsigneBas',
+            param: bloc.ref, premier: premier, dernier: dernier, quoi: 'ce bloc'
+        });
 
         if (bloc.ancre) {
             const a = bloc.ancre;
@@ -735,9 +736,10 @@ function rendreBlocsConsignes() {
                     placeholder="Nom du champ — ex : Remise du travail"
                     value="${echapperHtml(bloc.titre)}">
                 ${fleches}
-                <button type="button" class="btn-mini btn-icone-nu" title="Retirer ce champ" aria-label="Retirer ce champ"
-                    data-action="supprimerChampPersonnalise" data-param="${echapperHtml(bloc.ref)}"
-                    ><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
+                ${window.boutonRetirerBloc({
+                    action: 'supprimerChampPersonnalise', param: bloc.ref,
+                    titre: 'Retirer ce champ'
+                })}
             </div>
             <textarea class="controle-form champ-perso-contenu" rows="3"
                 placeholder="Ce que ce bloc dira aux étudiant·es">${echapperHtml(bloc.contenu)}</textarea>
@@ -774,6 +776,9 @@ function supprimerChampPersonnalise(ref) {
     _blocsConsignes = lireBlocsConsignesDepuisFormulaire().filter(b => b.ref !== ref);
     rendreBlocsConsignes();
 }
+
+function deplacerBlocConsigneHaut(ref) { deplacerBlocConsigne(ref, -1); }
+function deplacerBlocConsigneBas(ref) { deplacerBlocConsigne(ref, 1); }
 
 function deplacerBlocConsigne(ref, sens) {
     const blocs = lireBlocsConsignesDepuisFormulaire();
@@ -2149,7 +2154,7 @@ async function verrouillerEvaluation(id) {
  * @param {string} id - ID de la production
  * 
  * UTILISÉ PAR:
- * - Bouton "↑" dans la liste
+ * - Chevron « monter » dans la liste
  * 
  * FONCTIONNEMENT:
  * 1. Charge la liste des productions
@@ -2182,7 +2187,7 @@ async function monterEvaluation(id) {
  * @param {string} id - ID de la production
  * 
  * UTILISÉ PAR:
- * - Bouton "↓" dans la liste
+ * - Chevron « descendre » dans la liste
  * 
  * FONCTIONNEMENT:
  * 1. Charge la liste des productions
@@ -2670,12 +2675,11 @@ async function afficherToutesLesProductionsParType() {
                         ` : ''}
                     </div>
                     <div style="white-space: nowrap; margin-left: 15px;">
-                        ${index > 0 ?
-                            `<button data-action="monterEvaluation" data-param="${prod.id}" class="btn btn-principal"
-                             style="padding: 4px 8px; font-size: 0.8rem; margin-right: 3px;">↑</button>` : ''}
-                        ${index < total - 1 ?
-                            `<button data-action="descendreEvaluation" data-param="${prod.id}" class="btn btn-principal"
-                             style="padding: 4px 8px; font-size: 0.8rem; margin-right: 3px;">↓</button>` : ''}
+                        ${window.boutonsReordonnerBloc({
+                            actionHaut: 'monterEvaluation', actionBas: 'descendreEvaluation',
+                            param: prod.id, premier: index === 0,
+                            dernier: index === total - 1, quoi: 'cette production'
+                        })}
                         <button data-action="modifierProduction" data-param="${prod.id || 'ERROR_NO_ID'}" class="btn btn-modifier"
                                 style="padding: 4px 10px; font-size: 0.8rem; margin-right: 3px;">Modifier</button>
                         <button data-action="supprimerProduction" data-param="${prod.id}" class="btn btn-supprimer"
@@ -2921,7 +2925,9 @@ window.brancherPropositionDeLaCarte = brancherPropositionDeLaCarte;         // #
 window.valeurChampGabarit = valeurChampGabarit;                             // #500 — un champ rendu peut ne pas être là
 window.poserValeurChampGabarit = poserValeurChampGabarit;
 window.ajouterChampPersonnalise = ajouterChampPersonnalise;
-window.deplacerBlocConsigne = deplacerBlocConsigne;                         // #500 — ancrés et libres se déplacent ensemble
+window.deplacerBlocConsigne = deplacerBlocConsigne;
+window.deplacerBlocConsigneHaut = deplacerBlocConsigneHaut;
+window.deplacerBlocConsigneBas = deplacerBlocConsigneBas;                         // #500 — ancrés et libres se déplacent ensemble
 window.peuplerBlocsConsignes = peuplerBlocsConsignes;
 window.lireBlocsConsignesDepuisFormulaire = lireBlocsConsignesDepuisFormulaire;
 window.titresBlocsAEnregistrer = titresBlocsAEnregistrer;

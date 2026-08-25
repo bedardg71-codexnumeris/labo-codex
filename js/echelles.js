@@ -1054,21 +1054,16 @@ function afficherTableauNiveaux(niveaux) {
                 ${niveaux.map((niveau, index) => `
                     <tr style="opacity: ${niveau.verrouille ? '0.7' : '1'};">
                         <td class="echelle-text-center">
-                            <div style="display: flex; gap: 4px; justify-content: center;">
-                                <button data-action="deplacerNiveauHaut" data-param="${index}"
-                                        class="btn btn-compact"
-                                        ${index === 0 ? 'disabled' : ''}
-                                        title="Déplacer vers le haut"
-                                        class="echelle-padding-compact">
-                                    ↑
-                                </button>
-                                <button data-action="deplacerNiveauBas" data-param="${index}"
-                                        class="btn btn-compact"
-                                        ${index === niveaux.length - 1 ? 'disabled' : ''}
-                                        title="Déplacer vers le bas"
-                                        class="echelle-padding-compact">
-                                    ↓
-                                </button>
+                            <div class="bloc-reordonner bloc-reordonner-ligne">
+                                ${/* ⚠ #504 : ces deux boutons portaient DEUX attributs `class`
+                                      chacun — `btn btn-compact` puis `echelle-padding-compact`.
+                                      Le navigateur ignore le second : le padding compact n'a
+                                      jamais été appliqué. Le helper n'a qu'une classe. */''}
+                                ${window.boutonsReordonnerBloc({
+                                    actionHaut: 'deplacerNiveauHaut', actionBas: 'deplacerNiveauBas',
+                                    param: index, premier: index === 0,
+                                    dernier: index === niveaux.length - 1, quoi: 'ce niveau'
+                                })}
                             </div>
                         </td>
                         <td>
@@ -2893,29 +2888,22 @@ function afficherNiveauxNouvelleEchelle() {
         return `
         <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); margin-bottom: 10px;">
             ${niveaux.length > 1 ? `
-                <button data-action="supprimerNiveauTemp" data-param="${index}"
-                        class="btn btn-supprimer btn-tres-compact"
-                        title="Supprimer ce niveau"
-                        style="position: absolute; top: 8px; right: 8px;">
-                    ✕
-                </button>
+                            ${window.boutonRetirerBloc({
+                                action: 'supprimerNiveauTemp',
+                                param: index,
+                                coin: true,
+                                titre: 'Supprimer ce niveau'
+                            })}
             ` : ''}
             <div class="echelle-niveau-grille">
                 <div class="groupe-form echelle-text-center">
                     <label class="echelle-texte-detail">Ordre</label>
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <button data-action="deplacerNiveauTempHaut" data-param="${index}"
-                                class="btn btn-compact"
-                                ${index === 0 ? 'disabled' : ''}
-                                title="Déplacer vers le haut">
-                            ↑
-                        </button>
-                        <button data-action="deplacerNiveauTempBas" data-param="${index}"
-                                class="btn btn-compact"
-                                ${index === niveaux.length - 1 ? 'disabled' : ''}
-                                title="Déplacer vers le bas">
-                            ↓
-                        </button>
+                    <div class="bloc-reordonner">
+                        ${window.boutonsReordonnerBloc({
+                            actionHaut: 'deplacerNiveauTempHaut', actionBas: 'deplacerNiveauTempBas',
+                            param: index, premier: index === 0, dernier: index === niveaux.length - 1,
+                            quoi: 'ce niveau'
+                        })}
                     </div>
                 </div>
                 <div class="groupe-form">
@@ -3183,31 +3171,24 @@ function afficherNiveauxEchelle(echelle) {
     const html = echelle.niveaux.map((niveau, index) => `
         <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); margin-bottom: 10px;">
             ${echelle.niveaux.length > 1 ? `
-                <button data-action="supprimerNiveauEchelle" data-param="${echelle.id}" data-param2="${index}"
-                        class="btn btn-supprimer btn-tres-compact"
-                        title="Supprimer ce niveau"
-                        style="position: absolute; top: 8px; right: 8px;">
-                    ✕
-                </button>
+                            ${window.boutonRetirerBloc({
+                                action: 'supprimerNiveauEchelle',
+                                param: echelle.id,
+                                param2: index,
+                                coin: true,
+                                titre: 'Supprimer ce niveau'
+                            })}
             ` : ''}
             <div class="echelle-niveau-grille">
                 <div class="groupe-form echelle-text-center">
                     <label class="echelle-texte-detail">Ordre</label>
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <button data-action="deplacerNiveauEchelleHaut" data-param="${echelle.id}" data-param2="${index}"
-                                class="btn btn-compact"
-                                ${index === 0 ? 'disabled' : ''}
-                                title="Déplacer vers le haut"
-                                class="echelle-padding-compact">
-                            ↑
-                        </button>
-                        <button data-action="deplacerNiveauEchelleBas" data-param="${echelle.id}" data-param2="${index}"
-                                class="btn btn-compact"
-                                ${index === echelle.niveaux.length - 1 ? 'disabled' : ''}
-                                title="Déplacer vers le bas"
-                                class="echelle-padding-compact">
-                            ↓
-                        </button>
+                    <div class="bloc-reordonner">
+                        ${window.boutonsReordonnerBloc({
+                            actionHaut: 'deplacerNiveauEchelleHaut', actionBas: 'deplacerNiveauEchelleBas',
+                            param: echelle.id,
+                            param2: index,
+                            premier: index === 0, dernier: index === niveaux.length - 1, quoi: 'ce niveau'
+                        })}
                     </div>
                 </div>
                 <div class="groupe-form">

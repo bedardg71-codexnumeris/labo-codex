@@ -16826,6 +16826,30 @@ tr.etudiant-inactif td {
     transition: background 0.15s;
 }
 
+/* #504 — La colonne « Ordre » d'un bloc réordonnable : deux chevrons empilés,
+   ou côte à côte dans une ligne de tableau. */
+.bloc-reordonner {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+}
+
+.bloc-reordonner-ligne {
+    flex-direction: row;
+    justify-content: center;
+    gap: 4px;
+}
+
+/* Le bouton de retrait d'un bloc, posé dans son coin. Il était en `position:
+   absolute` avec un fond rouge plein ; l'icône nue tient la même place sans
+   peser autant. */
+.bloc-retirer-coin {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
 /* #504 (25 août 2026) — LE BOUTON D'ICÔNE NU.
    La suppression d'un bloc utilisait `.btn btn-annuler` : un bouton PLEIN
    orange pour un geste secondaire. Le design system réserve `.btn-annuler` à

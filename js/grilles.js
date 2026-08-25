@@ -2953,28 +2953,21 @@ function afficherCriteresTemp() {
 
     const html = window.tempCriteres.map((critere, index) => `
         <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); border: 1px solid var(--bordure-claire); border-radius: 6px; margin-bottom: 10px;">
-            <button class="btn btn-supprimer btn-tres-compact"
-                    data-action="supprimerCritereTemp" data-param="${index}"
-                    title="Supprimer ce critère"
-                    style="position: absolute; top: 8px; right: 8px;">
-                ✕
-            </button>
+                            ${window.boutonRetirerBloc({
+                                action: 'supprimerCritereTemp',
+                                param: index,
+                                coin: true,
+                                titre: 'Supprimer ce critère'
+                            })}
             <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 150px 3fr; gap: 12px; align-items: end;">
-                <div class="groupe-form" style="text-align: center;">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Ordre</label>
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <button data-action="deplacerCritereTempHaut" data-param="${index}"
-                                class="btn btn-compact"
-                                ${index === 0 ? 'disabled' : ''}
-                                title="Déplacer vers le haut">
-                            ↑
-                        </button>
-                        <button data-action="deplacerCritereTempBas" data-param="${index}"
-                                class="btn btn-compact"
-                                ${index === window.tempCriteres.length - 1 ? 'disabled' : ''}
-                                title="Déplacer vers le bas">
-                            ↓
-                        </button>
+                <div class="groupe-form echelle-text-center">
+                    <label class="echelle-texte-detail">Ordre</label>
+                    <div class="bloc-reordonner">
+                        ${window.boutonsReordonnerBloc({
+                            actionHaut: 'deplacerCritereTempHaut', actionBas: 'deplacerCritereTempBas',
+                            param: index, premier: index === 0, dernier: index === window.tempCriteres.length - 1,
+                            quoi: 'ce critère'
+                        })}
                     </div>
                 </div>
                 <div class="groupe-form">
@@ -3250,28 +3243,23 @@ function afficherCriteresGrille(grille) {
 
     const html = grille.criteres.map((critere, index) => `
         <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); border: 1px solid var(--bordure-claire); border-radius: 6px; margin-bottom: 10px;">
-            <button class="btn btn-supprimer btn-tres-compact"
-                    data-action="supprimerCritereGrille" data-param="${grille.id}" data-param2="${index}"
-                    title="Supprimer ce critère"
-                    style="position: absolute; top: 8px; right: 8px;">
-                ✕
-            </button>
+                            ${window.boutonRetirerBloc({
+                                action: 'supprimerCritereGrille',
+                                param: grille.id,
+                                param2: index,
+                                coin: true,
+                                titre: 'Supprimer ce critère'
+                            })}
             <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 150px 3fr; gap: 12px; align-items: end;">
-                <div class="groupe-form" style="text-align: center;">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Ordre</label>
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <button data-action="deplacerCritereGrilleHaut" data-param="${grille.id}" data-param2="${index}"
-                                class="btn btn-compact"
-                                ${index === 0 ? 'disabled' : ''}
-                                title="Déplacer vers le haut">
-                            ↑
-                        </button>
-                        <button data-action="deplacerCritereGrilleBas" data-param="${grille.id}" data-param2="${index}"
-                                class="btn btn-compact"
-                                ${index === grille.criteres.length - 1 ? 'disabled' : ''}
-                                title="Déplacer vers le bas">
-                            ↓
-                        </button>
+                <div class="groupe-form echelle-text-center">
+                    <label class="echelle-texte-detail">Ordre</label>
+                    <div class="bloc-reordonner">
+                        ${window.boutonsReordonnerBloc({
+                            actionHaut: 'deplacerCritereGrilleHaut', actionBas: 'deplacerCritereGrilleBas',
+                            param: grille.id,
+                            param2: index,
+                            premier: index === 0, dernier: index === grille.criteres.length - 1, quoi: 'ce critère'
+                        })}
                     </div>
                 </div>
                 <div class="groupe-form">
