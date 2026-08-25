@@ -295,7 +295,31 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   course. Audit des autres sites NON FAIT dans ce lot.
 
   Vitest **3275/3275** (311 fichiers, depuis `tests/`), 2 break-tests par constat, tous ROUGE puis
-  restaurés. Dernier ID : **#510**.
+  restaurés.
+
+- [x] **#511 — Partager une production ne la vide plus de son contenu pédagogique.**
+  `SCHEMAS_IMPORT.production` est une LISTE BLANCHE : une clé absente n'est pas signalée, elle
+  disparaît. Ni `objectif`, ni `tache`, ni `detailTache`, ni `ponderation`, ni `cartoucheId`, ni
+  `echeancesParGroupe`, ni `pratiquesCompatibles` n'y figuraient — ni les `champsPersonnalises` /
+  `titresBlocs` / `ordreBlocs` de #499/#500. Deux chemins vivants l'appliquent :
+  `ajouterALaBibliotheque` (partager) et l'import sélectif d'archives (restaurer). Les deux
+  rendaient donc une production structurellement intacte et pédagogiquement MUETTE.
+  Même trou côté grilles : ni `sousCriteres` ni `categoriesErreurs` — les onze rétroactions de
+  français se perdaient au transport, elles aussi.
+  ⚠ Deux formes de données manquaient au vocabulaire de `assainirObjet`, d'où deux types neufs :
+  `arrayStrings` (tableau de chaînes assainies UNE À UNE — `array` sans sous-schéma copie tel quel,
+  et ces valeurs repartent dans des attributs HTML) et `mapObjets` (map à clés dynamiques dont les
+  valeurs sont des objets cadrés — le cas d'`echeancesParGroupe`).
+  ▣ **La couture est désormais tenue** : `CLES_PRODUCTION_NON_TRANSPORTEES` déclare les exclusions
+  AVEC leur raison, et la sentinelle relit les clés qu'écrit `construireProductionData` pour exiger
+  que chacune soit transportée ou inscrite là. Ajouter une clé au gabarit sans décider de son sort
+  fait maintenant rougir un test.
+  📐 **Une seule clé exclue : `coursId`** (rattachement local, décidé à l'arrivée). Conséquence
+  assumée et INCHANGÉE : restaurer une archive rend des productions sans cours. **À trancher.**
+
+  Vitest **3288/3288** (312 fichiers). Trois break-tests, trois ROUGE — dont la garde de validité
+  du ratchet, qui attrape une regex d'extraction devenue muette (motif AP-2 relevé par l'audit sur
+  la sentinelle #506). Dernier ID : **#511**.
 
 ### Chantier — 25 août 2026 (le pont carte d'alignement ↔ productions)
 
