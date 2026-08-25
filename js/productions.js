@@ -486,6 +486,30 @@ async function typerProductionCommeTerminale(productionId) {
    =============================== */
 
 /**
+ * ⚠⚠ ACCÈS DÉFENSIF AUX TROIS CHAMPS ANCRÉS (#500, 25 août 2026).
+ *
+ * `productionObjectif`, `productionTache` et `productionDetailTache` étaient
+ * écrits en dur dans `index.html` : `getElementById(...).value` ne pouvait pas
+ * rendre null, et onze sites le faisaient sans garde.
+ *
+ * ⮕ Depuis que ces champs sont RENDUS par `rendreBlocsConsignes`, ils
+ * n'existent qu'après le rendu. Un accès direct qui arrive avant devient une
+ * exception qui casse l'OUVERTURE de la fiche — pas un simple champ vide.
+ * Ces deux helpers font qu'un champ absent donne '' à la lecture et ne fait
+ * rien à l'écriture : la fiche s'ouvre, même incomplète, et le défaut se voit
+ * au lieu de tout arrêter.
+ */
+function valeurChampGabarit(id) {
+    const el = document.getElementById(id);
+    return el && typeof el.value === 'string' ? el.value : '';
+}
+
+function poserValeurChampGabarit(id, valeur) {
+    const el = document.getElementById(id);
+    if (el) el.value = valeur == null ? '' : valeur;
+}
+
+/**
  * ⚠⚠ POURQUOI CES CHAMPS EXISTENT. Le gabarit offrait quatre blocs figés —
  * objectif, tâche, détail, échéance. Le document de consignes de Grégoire en
  * demande d'autres, propres à sa matière : « Format et mise en page », « Remise
@@ -499,13 +523,86 @@ async function typerProductionCommeTerminale(productionId) {
  * celles dont les consignes sont déjà entre les mains des étudiant·es. L'étape D
  * offrira une reprise par COPIE : la commodité sans l'effet à distance.
  *
- * ▣ LE DOM EST LA SOURCE PENDANT L'ÉDITION. `_champsPersonnalises` ne sert qu'à
+ * ▣ LE DOM EST LA SOURCE PENDANT L'ÉDITION. `_blocsConsignes` ne sert qu'à
  * ajouter, retirer et déplacer ; avant chaque re-rendu on RELIT les champs de
  * l'écran. Sans cette relecture, taper un titre puis cliquer « + Nouveau champ »
  * effacerait ce qu'on vient d'écrire — la saisie vit dans le DOM, pas dans
  * l'état.
  */
-let _champsPersonnalises = [];
+let _blocsConsignes = [];
+
+/**
+ * LES TROIS BLOCS ANCRÉS (#500, 25 août 2026).
+ *
+ * ⚠⚠ POURQUOI ILS NE SONT PAS DEVENUS DES CHAMPS LIBRES. `objectif`, `tache` et
+ * `detailTache` sont lus à 53 endroits, dans cinq modules — dont la rétroaction
+ * et la synthèse, qui composent les commentaires reçus par les étudiant·es. Les
+ * fondre dans `champsPersonnalises` aurait demandé de migrer les productions
+ * existantes ET de réécrire ces 53 sites, y compris le texte de rétroactions
+ * déjà transmises. Décision de Grégoire, 25 août : même FORME, nom et ordre
+ * modifiables, clé de stockage intouchée.
+ *
+ * ⮕ Ils gardent donc leurs identifiants HTML : tout ce qui les lit continue de
+ * les trouver. Ce qui change est où et comment ils sont dessinés.
+ * ⮕ Ils ne sont pas supprimables : les retirer casserait ce qui les lit
+ *   ailleurs. Les masquer du document se fait déjà par les cases de l'aperçu.
+ *
+ * ⚠ `tooltip` et `aide` sont conservés tels quels : l'accompagnement fonctionne
+ * par DÉLÉGATION d'événements (`closest('[data-tooltip]')`), donc ces attributs
+ * gardent leur effet sur du HTML rendu après coup.
+ */
+const BLOCS_ANCRES = [
+    {
+        cle: 'objectif', champId: 'productionObjectif', rows: 3,
+        titreDefaut: "Objectif d'apprentissage",
+        note: "À la fin de cette activité, l'étudiant·e sera capable de...",
+        placeholder: 'Ex: Reconnaître le propos du texte',
+        tooltip: 'cn-prod-objectif', aide: 'objectif-verbes-actifs'
+    },
+    {
+        cle: 'tache', champId: 'productionTache', rows: 3,
+        titreDefaut: 'Description de la tâche',
+        note: "La tâche permet de démontrer l'atteinte de l'objectif...",
+        placeholder: 'Ex: Rédiger un texte de 500 mots...',
+        tooltip: 'cn-prod-tache', aide: null
+    },
+    {
+        cle: 'detailTache', champId: 'productionDetailTache', rows: 5,
+        titreDefaut: 'Détail de la tâche',
+        note: "Les consignes précises remises à l'étudiant·e : étapes, contraintes, format attendu.",
+        placeholder: 'Ex : format APA, 4 à 6 pages, sources primaires obligatoires…',
+        tooltip: 'cn-prod-detail-tache', aide: 'detail-tache-qualite'
+    }
+];
+
+const ancreParCle = (cle) => BLOCS_ANCRES.find(b => b.cle === cle) || null;
+
+/** Le titre d'un bloc ancré : celui que Grégoire a écrit, ou celui d'origine. */
+function titreBlocAncre(production, cle) {
+    const perso = production && production.titresBlocs && production.titresBlocs[cle];
+    if (perso && String(perso).trim()) return String(perso).trim();
+    const ancre = ancreParCle(cle);
+    return ancre ? ancre.titreDefaut : cle;
+}
+
+/**
+ * L'ordre des blocs à l'écran et dans le document.
+ *
+ * ⚠ Un ordre enregistré peut être INCOMPLET ou PÉRIMÉ : un champ libre supprimé
+ * y laisse son id, un champ ajouté depuis n'y figure pas. On repart donc de ce
+ * qui EXISTE, en suivant l'ordre connu quand il s'applique — plutôt que de
+ * faire confiance à une liste qui a pu vieillir.
+ */
+function ordreBlocsConsignes(production) {
+    const existants = BLOCS_ANCRES.map(b => b.cle)
+        .concat((production && Array.isArray(production.champsPersonnalises)
+            ? production.champsPersonnalises : []).map(c => c.id));
+
+    const memorise = (production && Array.isArray(production.ordreBlocs)) ? production.ordreBlocs : [];
+    const connus = memorise.filter(id => existants.indexOf(id) !== -1);
+    const nouveaux = existants.filter(id => connus.indexOf(id) === -1);
+    return connus.concat(nouveaux);
+}
 
 /** Le champ vide, tel qu'on l'ajoute. */
 function nouveauChampPersonnalise() {
@@ -515,23 +612,42 @@ function nouveauChampPersonnalise() {
     return { id: id, titre: '', contenu: '' };
 }
 
-/** Relit l'écran : c'est lui qui fait foi tant que la fiche est ouverte. */
-function lireChampsPersonnalisesDepuisFormulaire() {
+/**
+ * RELIT L'ÉCRAN — il fait foi tant que la fiche est ouverte.
+ *
+ * ⚠ Chaque bloc rendu porte `data-champ-id` ; les ancrés portent en plus
+ * `data-ancre`. C'est cette marque, et non l'ordre ou la classe, qui dit à quoi
+ * on a affaire : un bloc ancré ne part pas dans `champsPersonnalises`, son
+ * contenu vit dans `objectif` / `tache` / `detailTache`.
+ *
+ * @returns {Array<{ref: string, ancre: Object|null, titre: string, contenu: string}>}
+ */
+function lireBlocsConsignesDepuisFormulaire() {
     const liste = document.getElementById('champsPersonnalisesListe');
-    if (!liste) return _champsPersonnalises.slice();
+    if (!liste) return _blocsConsignes.slice();
 
     const lus = [];
     liste.querySelectorAll('.champ-perso').forEach(bloc => {
-        const id = bloc.getAttribute('data-champ-id');
-        const titre = bloc.querySelector('.champ-perso-titre');
-        const contenu = bloc.querySelector('.champ-perso-contenu');
+        const ref = bloc.getAttribute('data-champ-id');
+        const cleAncre = bloc.getAttribute('data-ancre');
+        const champTitre = bloc.querySelector('.champ-perso-titre');
+        const champContenu = bloc.querySelector(
+            cleAncre ? '.champ-perso-contenu-ancre' : '.champ-perso-contenu');
         lus.push({
-            id: id,
-            titre: titre ? titre.value : '',
-            contenu: contenu ? contenu.value : ''
+            ref: ref,
+            ancre: cleAncre ? ancreParCle(cleAncre) : null,
+            titre: champTitre ? champTitre.value : '',
+            contenu: champContenu ? champContenu.value : ''
         });
     });
     return lus;
+}
+
+/** Les blocs LIBRES seuls, sous la forme attendue par la production. */
+function lireChampsPersonnalisesDepuisFormulaire() {
+    return lireBlocsConsignesDepuisFormulaire()
+        .filter(b => !b.ancre)
+        .map(b => ({ id: b.ref, titre: b.titre, contenu: b.contenu }));
 }
 
 /**
@@ -547,75 +663,157 @@ function champsPersonnalisesAEnregistrer() {
         .map(c => ({ id: c.id, titre: c.titre.trim(), contenu: c.contenu || '' }));
 }
 
-function rendreChampsPersonnalises() {
+/**
+ * Les titres que Grégoire a réécrits sur les blocs ancrés.
+ * ⚠ Un titre identique au défaut n'est PAS enregistré : un défaut n'est pas un
+ * choix, et le figer empêcherait un libellé d'évoluer avec l'application.
+ */
+function titresBlocsAEnregistrer() {
+    const titres = {};
+    lireBlocsConsignesDepuisFormulaire().forEach(bloc => {
+        if (!bloc.ancre) return;
+        const pose = (bloc.titre || '').trim();
+        if (pose && pose !== bloc.ancre.titreDefaut) titres[bloc.ancre.cle] = pose;
+    });
+    return titres;
+}
+
+/** L'ordre posé à l'écran, tel qu'il devra être relu. */
+function ordreBlocsAEnregistrer() {
+    return lireBlocsConsignesDepuisFormulaire()
+        .filter(b => b.ancre || (b.titre && b.titre.trim()))
+        .map(b => b.ref);
+}
+
+function rendreBlocsConsignes() {
     const liste = document.getElementById('champsPersonnalisesListe');
     if (!liste) return;
 
-    liste.innerHTML = _champsPersonnalises.map((champ, index) => {
+    liste.innerHTML = _blocsConsignes.map((bloc, index) => {
         const premier = index === 0;
-        const dernier = index === _champsPersonnalises.length - 1;
+        const dernier = index === _blocsConsignes.length - 1;
+        const fleches = `
+                <button type="button" class="btn btn-secondaire u-texte-petit" title="Monter"
+                    data-action="deplacerBlocConsigne" data-param="${echapperHtml(bloc.ref)}" data-param2="-1"
+                    ${premier ? 'disabled' : ''}>&uarr;</button>
+                <button type="button" class="btn btn-secondaire u-texte-petit" title="Descendre"
+                    data-action="deplacerBlocConsigne" data-param="${echapperHtml(bloc.ref)}" data-param2="1"
+                    ${dernier ? 'disabled' : ''}>&darr;</button>`;
+
+        if (bloc.ancre) {
+            const a = bloc.ancre;
+            const boutonAide = a.aide
+                ? `<button class="btn-aide-contextuelle" data-aide="${echapperHtml(a.aide)}" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>`
+                : '';
+            return `
+        <div class="champ-perso champ-perso-ancre" data-champ-id="${echapperHtml(a.cle)}" data-ancre="${echapperHtml(a.cle)}"
+             style="border: 1px solid var(--bordure-moyenne, #ccc); border-radius: var(--rayon-moyen, 6px); padding: 12px;">
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 4px;" data-tooltip="${echapperHtml(a.tooltip)}">
+                <input type="text" class="controle-form champ-perso-titre" style="flex: 1;"
+                    value="${echapperHtml(bloc.titre)}">
+                ${boutonAide}${fleches}
+            </div>
+            <p class="u-texte-petit" style="color: var(--gris-moyen); margin: 0 0 6px 0">${echapperHtml(a.note)}</p>
+            <textarea id="${echapperHtml(a.champId)}" class="controle-form champ-perso-contenu-ancre" rows="${a.rows}"
+                placeholder="${echapperHtml(a.placeholder)}">${echapperHtml(bloc.contenu)}</textarea>
+        </div>`;
+        }
+
         return `
-        <div class="champ-perso" data-champ-id="${echapperHtml(champ.id)}" style="border: 1px solid var(--bordure-moyenne, #ccc); border-radius: var(--rayon-moyen, 6px); padding: 12px;">
+        <div class="champ-perso" data-champ-id="${echapperHtml(bloc.ref)}"
+             style="border: 1px solid var(--bordure-moyenne, #ccc); border-radius: var(--rayon-moyen, 6px); padding: 12px;">
             <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
                 <input type="text" class="controle-form champ-perso-titre" style="flex: 1;"
                     placeholder="Nom du champ — ex : Remise du travail"
-                    value="${echapperHtml(champ.titre)}">
-                <button type="button" class="btn btn-secondaire u-texte-petit" title="Monter"
-                    data-action="deplacerChampPersonnalise" data-param="${echapperHtml(champ.id)}" data-param2="-1"
-                    ${premier ? 'disabled' : ''}>&uarr;</button>
-                <button type="button" class="btn btn-secondaire u-texte-petit" title="Descendre"
-                    data-action="deplacerChampPersonnalise" data-param="${echapperHtml(champ.id)}" data-param2="1"
-                    ${dernier ? 'disabled' : ''}>&darr;</button>
+                    value="${echapperHtml(bloc.titre)}">
+                ${fleches}
                 <button type="button" class="btn btn-annuler u-texte-petit" title="Retirer ce champ"
-                    data-action="supprimerChampPersonnalise" data-param="${echapperHtml(champ.id)}">&times;</button>
+                    data-action="supprimerChampPersonnalise" data-param="${echapperHtml(bloc.ref)}">&times;</button>
             </div>
             <textarea class="controle-form champ-perso-contenu" rows="3"
-                placeholder="Ce que ce bloc dira aux étudiant·es">${echapperHtml(champ.contenu)}</textarea>
+                placeholder="Ce que ce bloc dira aux étudiant·es">${echapperHtml(bloc.contenu)}</textarea>
         </div>`;
     }).join('');
 }
 
+/** Compat : l'ancien nom appelle le nouveau rendu. */
+function rendreChampsPersonnalises() { rendreBlocsConsignes(); }
+
 function ajouterChampPersonnalise() {
     // ⚠ Relire AVANT d'ajouter : le re-rendu écraserait sinon la saisie en cours.
-    _champsPersonnalises = lireChampsPersonnalisesDepuisFormulaire();
-    _champsPersonnalises.push(nouveauChampPersonnalise());
-    rendreChampsPersonnalises();
+    _blocsConsignes = lireBlocsConsignesDepuisFormulaire();
+    const neuf = nouveauChampPersonnalise();
+    _blocsConsignes.push({ ref: neuf.id, ancre: null, titre: '', contenu: '' });
+    rendreBlocsConsignes();
 
-    // Le curseur va dans le champ qu'on vient de créer : sans ça, il faut
-    // viser à la souris un bloc qui vient d'apparaître en bas de page.
+    // Le curseur va dans le champ qu'on vient de créer : sans ça, il faut viser
+    // à la souris un bloc qui vient d'apparaître en bas de page.
     const liste = document.getElementById('champsPersonnalisesListe');
     const titres = liste ? liste.querySelectorAll('.champ-perso-titre') : [];
-    if (titres.length > 0) titres[titres.length - 1].focus();
+    if (titres.length > 0 && typeof titres[titres.length - 1].focus === 'function') {
+        titres[titres.length - 1].focus();
+    }
 }
 
-function supprimerChampPersonnalise(id) {
-    _champsPersonnalises = lireChampsPersonnalisesDepuisFormulaire()
-        .filter(c => c.id !== id);
-    rendreChampsPersonnalises();
+/**
+ * ⚠ Un bloc ANCRÉ ne se supprime pas : `objectif`, `tache` et `detailTache`
+ * sont lus par la rétroaction et les exports. Le bouton n'existe pas sur ces
+ * blocs ; ce garde-fou tient si l'appel vient d'ailleurs.
+ */
+function supprimerChampPersonnalise(ref) {
+    if (ancreParCle(ref)) return;
+    _blocsConsignes = lireBlocsConsignesDepuisFormulaire().filter(b => b.ref !== ref);
+    rendreBlocsConsignes();
 }
 
-function deplacerChampPersonnalise(id, sens) {
-    const champs = lireChampsPersonnalisesDepuisFormulaire();
-    const i = champs.findIndex(c => c.id === id);
+function deplacerBlocConsigne(ref, sens) {
+    const blocs = lireBlocsConsignesDepuisFormulaire();
+    const i = blocs.findIndex(b => b.ref === ref);
     const j = i + Number(sens);
-    if (i < 0 || j < 0 || j >= champs.length) return;
-    const tmp = champs[i]; champs[i] = champs[j]; champs[j] = tmp;
-    _champsPersonnalises = champs;
-    rendreChampsPersonnalises();
+    if (i < 0 || j < 0 || j >= blocs.length) return;
+    const tmp = blocs[i]; blocs[i] = blocs[j]; blocs[j] = tmp;
+    _blocsConsignes = blocs;
+    rendreBlocsConsignes();
 }
 
-/** Remplit la zone à l'ouverture d'une fiche. `null` = nouvelle production. */
-function peuplerChampsPersonnalises(production) {
-    const source = (production && Array.isArray(production.champsPersonnalises))
-        ? production.champsPersonnalises
-        : [];
-    _champsPersonnalises = source.map(c => ({
-        id: c.id || nouveauChampPersonnalise().id,
-        titre: c.titre || '',
-        contenu: c.contenu || ''
-    }));
-    rendreChampsPersonnalises();
+/** Compat : l'ancien nom, gardé le temps que les appels existants s'alignent. */
+function deplacerChampPersonnalise(ref, sens) { deplacerBlocConsigne(ref, sens); }
+
+/**
+ * Remplit la zone à l'ouverture d'une fiche. `null` = production neuve.
+ *
+ * ⚠ Les trois ancrés sont TOUJOURS présents, même vides : ce sont eux qui
+ * portent l'objectif, la tâche et le détail, et onze sites les cherchent par
+ * identifiant. Leur absence ne serait pas une fiche allégée, ce serait une
+ * fiche cassée.
+ */
+function peuplerBlocsConsignes(production) {
+    const libres = (production && Array.isArray(production.champsPersonnalises))
+        ? production.champsPersonnalises : [];
+    const parId = {};
+    libres.forEach(c => { parId[c.id] = c; });
+
+    _blocsConsignes = ordreBlocsConsignes(production).map(ref => {
+        const ancre = ancreParCle(ref);
+        if (ancre) {
+            return {
+                ref: ancre.cle, ancre: ancre,
+                titre: titreBlocAncre(production, ancre.cle),
+                contenu: (production && production[ancre.cle]) || ''
+            };
+        }
+        const libre = parId[ref];
+        return {
+            ref: ref, ancre: null,
+            titre: (libre && libre.titre) || '',
+            contenu: (libre && libre.contenu) || ''
+        };
+    });
+    rendreBlocsConsignes();
 }
+
+/** Compat : l'ancien nom appelle le nouveau peuplement. */
+function peuplerChampsPersonnalises(production) { peuplerBlocsConsignes(production); }
 
 /**
  * LA CASE « CONSIGNES TRANSMISES », EN MODE SIMPLE (#494, 25 août 2026).
@@ -1316,9 +1514,9 @@ async function prerenseignerFormulaireProduction(prod) {
         if (prod.cartoucheId) poserReferenceSelect(selectCartouche, prod.cartoucheId, 'cartouche');
     }
 
-    document.getElementById('productionObjectif').value = prod.objectif || '';
-    document.getElementById('productionTache').value = prod.tache || '';
-    document.getElementById('productionDetailTache').value = prod.detailTache || '';
+    poserValeurChampGabarit('productionObjectif', prod.objectif);
+    poserValeurChampGabarit('productionTache', prod.tache);
+    poserValeurChampGabarit('productionDetailTache', prod.detailTache);
     peuplerChampsPersonnalises(prod);                                        // #499
 
     // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Charger date d'échéance
@@ -1363,9 +1561,9 @@ function reinitialiserFormulaireProduction() {
     if (selectGrille) selectGrille.value = '';
     if (selectEchelle) selectEchelle.value = '';
     if (selectCartouche) selectCartouche.innerHTML = '<option value="">Aucune</option>';
-    document.getElementById('productionObjectif').value = '';
-    document.getElementById('productionTache').value = '';
-    document.getElementById('productionDetailTache').value = '';
+    poserValeurChampGabarit('productionObjectif', '');
+    poserValeurChampGabarit('productionTache', '');
+    poserValeurChampGabarit('productionDetailTache', '');
 
     // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Réinitialiser date d'échéance
     document.getElementById('productionDateEcheance').value = '';
@@ -1495,9 +1693,9 @@ function lireDonneesFormulaireProduction() {
     const activiteApprentissage = document.getElementById('productionActivite').value.trim();
     const type = document.getElementById('productionType').value;
     const ponderation = parseInt(document.getElementById('productionPonderation').value) || 0;
-    const objectif = document.getElementById('productionObjectif').value.trim();
-    const tache = document.getElementById('productionTache').value.trim();
-    const detailTache = document.getElementById('productionDetailTache')?.value.trim() || '';
+    const objectif = valeurChampGabarit('productionObjectif').trim();
+    const tache = valeurChampGabarit('productionTache').trim();
+    const detailTache = valeurChampGabarit('productionDetailTache').trim();
 
     // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Date d'échéance
     // 🆕 Beta 98.3 : Lire les échéances multi-groupe si disponible
@@ -1527,9 +1725,12 @@ function lireDonneesFormulaireProduction() {
 
     // #499 — les blocs que Grégoire a nommés lui-même.
     const champsPersonnalises = champsPersonnalisesAEnregistrer();
+    // #500 — les titres qu'il a réécrits sur les blocs ancrés, et l'ordre posé.
+    const titresBlocs = titresBlocsAEnregistrer();
+    const ordreBlocs = ordreBlocsAEnregistrer();
 
     return { titre, activiteApprentissage, type, ponderation, objectif, tache, detailTache,
-             champsPersonnalises,
+             champsPersonnalises, titresBlocs, ordreBlocs,
              echeancesParGroupe, dateEcheance, grilleId, echelleId, cartoucheId };
 }
 
@@ -1669,6 +1870,8 @@ function construireProductionData(d, evaluations, idEnEdition) {
         tache: d.tache,
         detailTache: d.detailTache,
         champsPersonnalises: d.champsPersonnalises || [],   // #499
+        titresBlocs: d.titresBlocs || {},                  // #500 — seulement ce qui diffère du défaut
+        ordreBlocs: d.ordreBlocs || [],                    // #500
         grilleId: d.grilleId,
         echelleId: d.echelleId,        // 🆕 Persistance échelle dans le gabarit
         cartoucheId: d.cartoucheId,    // 🆕 Persistance cartouche dans le gabarit
@@ -2706,7 +2909,17 @@ window.dateSeanceDuRang = dateSeanceDuRang;                                 // #
 window.dateEcheanceProposeeParLaCarte = dateEcheanceProposeeParLaCarte;     // #493 — ce que la carte propose, par groupe
 window.datesDeLaSemaineDansTable = datesDeLaSemaineDansTable;               // #493 — filtre d'une table horaire par semaine
 window.brancherPropositionDeLaCarte = brancherPropositionDeLaCarte;         // #493 — le geste : proposer sans écraser
-window.ajouterChampPersonnalise = ajouterChampPersonnalise;                 // #499 — bouton « + Nouveau champ »
+window.valeurChampGabarit = valeurChampGabarit;                             // #500 — un champ rendu peut ne pas être là
+window.poserValeurChampGabarit = poserValeurChampGabarit;
+window.ajouterChampPersonnalise = ajouterChampPersonnalise;
+window.deplacerBlocConsigne = deplacerBlocConsigne;                         // #500 — ancrés et libres se déplacent ensemble
+window.peuplerBlocsConsignes = peuplerBlocsConsignes;
+window.lireBlocsConsignesDepuisFormulaire = lireBlocsConsignesDepuisFormulaire;
+window.titresBlocsAEnregistrer = titresBlocsAEnregistrer;
+window.ordreBlocsAEnregistrer = ordreBlocsAEnregistrer;
+window.titreBlocAncre = titreBlocAncre;
+window.ordreBlocsConsignes = ordreBlocsConsignes;
+window.BLOCS_ANCRES = BLOCS_ANCRES;                 // #499 — bouton « + Nouveau champ »
 window.supprimerChampPersonnalise = supprimerChampPersonnalise;
 window.deplacerChampPersonnalise = deplacerChampPersonnalise;
 window.peuplerChampsPersonnalises = peuplerChampsPersonnalises;

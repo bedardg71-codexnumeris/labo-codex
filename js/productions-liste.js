@@ -189,10 +189,10 @@ async function chargerProductionPourModif(id) {
     // Afficher les boutons Dupliquer, Supprimer et Export PDF (mode édition)
     const btnDupliquer = document.getElementById('btnDupliquerProduction');
     const btnSupprimer = document.getElementById('btnSupprimerProduction');
-    const btnExportPDFProd = document.getElementById('btnExporterPDFProduction');
+    // #501 — « Exporter en PDF » a quitté le gabarit : « Préparer le PDF » le
+    // remplace, et le fait mieux. Le code mort part avec le bouton.
     if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
     if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
-    if (btnExportPDFProd) btnExportPDFProd.classList.remove('u-hide');
 
     // Appeler afficherFormProduction pour charger les données
     await afficherFormProduction(id);
@@ -242,10 +242,8 @@ function creerNouvelleProduction() {
     // Cacher les boutons Dupliquer, Supprimer et Export PDF (mode création)
     const btnDupliquer = document.getElementById('btnDupliquerProduction');
     const btnSupprimer = document.getElementById('btnSupprimerProduction');
-    const btnExportPDFNew = document.getElementById('btnExporterPDFProduction');
     if (btnDupliquer) btnDupliquer.classList.add('u-hide');
     if (btnSupprimer) btnSupprimer.classList.add('u-hide');
-    if (btnExportPDFNew) btnExportPDFNew.classList.add('u-hide');
 
     // Réinitialiser le formulaire
     document.getElementById('productionActivite').value = '';
@@ -253,9 +251,12 @@ function creerNouvelleProduction() {
     document.getElementById('productionType').value = '';
     document.getElementById('productionPonderation').value = '';
     document.getElementById('productionGrille').value = '';
-    document.getElementById('productionObjectif').value = '';
-    document.getElementById('productionTache').value = '';
-    document.getElementById('productionDetailTache').value = '';
+    // #500 — ces champs sont RENDUS : ils peuvent ne pas exister encore.
+    if (typeof poserValeurChampGabarit === 'function') {
+        poserValeurChampGabarit('productionObjectif', '');
+        poserValeurChampGabarit('productionTache', '');
+        poserValeurChampGabarit('productionDetailTache', '');
+    }
 
     // ✅ AJOUT (6 jan 2026) : Vider le panneau métadonnées (mode création)
     const panneauMeta = document.getElementById('panneauMetadonneesProduction');

@@ -55,10 +55,23 @@ describe('nuance tâche/objectif — contenu des info-bulles', () => {
 
 describe('nuance tâche/objectif — câblage du champ « Détail de la tâche »', () => {
     it('le libellé porte son data-tooltip et son bouton d\'aide', () => {
-        const bloc = indexHtml.match(/<label for="productionDetailTache"[\s\S]{0,400}?<\/label>/);
-        expect(bloc, 'libellé productionDetailTache trouvé').toBeTruthy();
-        expect(bloc[0]).toContain('data-tooltip="cn-prod-detail-tache"');
-        expect(bloc[0]).toContain('data-aide="detail-tache-qualite"');
+        // ⚠ DÉPLACÉ, PAS AFFAIBLI (#500, 25 août 2026). Ce libellé vivait dans
+        // `index.html` ; depuis que les blocs de consignes sont RENDUS par
+        // `productions.js`, c'est là qu'il faut le chercher. Ce que la garde
+        // tient n'a pas changé : le tooltip et le bouton d'aide accompagnent le
+        // champ, où qu'il soit écrit. L'accompagnement fonctionne par
+        // délégation d'événements, donc ces attributs gardent leur effet sur du
+        // HTML posé après coup.
+        const source = readFileSync(
+            path.join(racine, 'js', 'productions.js'), 'utf8');
+        const entree = source.match(/champId: 'productionDetailTache'[\s\S]{0,600}?\}/);
+        expect(entree, 'bloc ancré productionDetailTache trouvé').toBeTruthy();
+        expect(entree[0]).toContain("tooltip: 'cn-prod-detail-tache'");
+        expect(entree[0]).toContain("aide: 'detail-tache-qualite'");
+
+        // Et le rendu les pose réellement dans le DOM.
+        expect(source).toContain('data-tooltip="${echapperHtml(a.tooltip)}"');
+        expect(source).toContain('data-aide="${echapperHtml(a.aide)}"');
     });
 });
 

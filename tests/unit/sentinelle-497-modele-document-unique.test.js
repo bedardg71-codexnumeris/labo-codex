@@ -672,3 +672,81 @@ describe('#499 · AC — les champs rejoignent les consignes', () => {
         ]);
     });
 });
+
+/* ------------ AD — les blocs ancrés se renomment et se déplacent (#500) */
+
+describe('#500 · AD — le gabarit commande le titre et l\'ordre', () => {
+    const win = charger();
+    const BASE = (extra) => Object.assign({
+        production: Object.assign({}, PRODUCTION, extra),
+        inclureObjectif: true, inclureDescription: true, inclureDetailTache: true
+    }, {});
+
+    it('AD.a Sans titres posés, les libellés d\'origine', () => {
+        const titres = win.blocsInformationDocument(null, BASE({})).map(b => b.titre);
+        expect(titres.slice(0, 3)).toEqual([
+            'Objectif d\'apprentissage :', 'Description de la tâche :', 'Détail de la tâche :'
+        ]);
+    });
+
+    it('AD.b LE CAS QUI PORTE LE SENS : un titre réécrit remplace le libellé', () => {
+        // « Description de la tâche » → « TÂCHE », comme dans son Manuel.
+        const titres = win.blocsInformationDocument(null, BASE({
+            titresBlocs: { tache: 'TÂCHE' }
+        })).map(b => b.titre);
+        expect(titres).toContain('TÂCHE :');
+        expect(titres).not.toContain('Description de la tâche :');
+        // Les autres ne bougent pas.
+        expect(titres).toContain('Objectif d\'apprentissage :');
+    });
+
+    it('AD.c Un titre vide ou blanc retombe sur le défaut', () => {
+        for (const pose of ['', '   ', null]) {
+            const titres = win.blocsInformationDocument(null, BASE({
+                titresBlocs: { tache: pose }
+            })).map(b => b.titre);
+            expect(titres, String(pose)).toContain('Description de la tâche :');
+        }
+    });
+
+    it('AD.d L\'ordre du gabarit fait foi', () => {
+        const titres = win.blocsInformationDocument(null, BASE({
+            ordreBlocs: ['detailTache', 'objectif', 'tache']
+        })).map(b => b.titre);
+        expect(titres.slice(0, 3)).toEqual([
+            'Détail de la tâche :', 'Objectif d\'apprentissage :', 'Description de la tâche :'
+        ]);
+    });
+
+    it('AD.e Les champs libres se glissent entre les ancrés', () => {
+        const titres = win.blocsInformationDocument(null, BASE({
+            champsPersonnalises: [{ id: 'C1', titre: 'Remise', contenu: 'Sur Léa' }],
+            ordreBlocs: ['objectif', 'C1', 'tache', 'detailTache']
+        })).map(b => b.titre);
+        expect(titres.slice(0, 4)).toEqual([
+            'Objectif d\'apprentissage :', 'Remise :',
+            'Description de la tâche :', 'Détail de la tâche :'
+        ]);
+    });
+
+    it('AD.f Un ordre PÉRIMÉ ne fait pas disparaître un bloc', () => {
+        // Un champ supprimé laisse son id dans la liste ; un champ ajouté depuis
+        // n'y figure pas. On repart de ce qui EXISTE.
+        const titres = win.blocsInformationDocument(null, BASE({
+            champsPersonnalises: [{ id: 'C_NEUF', titre: 'Ajouté depuis', contenu: 'X' }],
+            ordreBlocs: ['objectif', 'C_DISPARU', 'tache']
+        })).map(b => b.titre);
+        expect(titres).toContain('Détail de la tâche :');   // absent de l'ordre mémorisé
+        expect(titres).toContain('Ajouté depuis :');        // créé après
+        expect(titres.filter(t => t === undefined)).toHaveLength(0);
+    });
+
+    it('AD.g La date reste après les consignes, quel que soit l\'ordre', () => {
+        const titres = win.blocsInformationDocument(CARTOUCHE, BASE({
+            dateEcheance: '2026-09-15',
+            ordreBlocs: ['detailTache', 'tache', 'objectif']
+        })).map(b => b.titre);
+        expect(titres.indexOf('Date de remise :')).toBe(titres.length - 2);
+        expect(titres[titres.length - 1]).toBe('Contexte de la rétroaction :');
+    });
+});
