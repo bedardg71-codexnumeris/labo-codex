@@ -224,3 +224,41 @@ ligne à 12 espaces —, attrapé cette fois par l'assertion.
 
 Le défaut est *Continu*. Son Manuel étant en deux colonnes, il voudra peut-être l'inverse — le
 réglage est mémorisé, donc l'enjeu est seulement la toute première ouverture.
+
+---
+
+## 9. Chantier suivant — les champs du gabarit (25 août, après-midi)
+
+**Demande de Grégoire** : un bouton « Nouveaux champs » après « Détail de la tâche », qui ajoute des
+blocs nommés par lui dans la grille des consignes. Plus un bloc « Date d'échéance » toujours présent.
+C'est ce qui donnera les sections de son Manuel : *Format et mise en page*, *Remise du travail*,
+*À vérifier*.
+
+**Décision (25 août)** — *par production, avec reprise d'une autre*. Chaque production porte ses
+champs ; un bouton les copie depuis une autre production du trimestre. Écarté : une définition
+unique au niveau du cours, où corriger un champ changerait TOUTES les productions, y compris celles
+dont les consignes sont déjà transmises.
+
+**Défauts assumés, à contredire s'il le souhaite** : contenu en texte libre (les retours à la ligne
+sont préservés, donc une liste à puces tapée à la main s'affiche) ; les vraies cases à cocher sont
+un type distinct, remis à plus tard.
+
+| Étape | Ce qu'elle fait | État |
+|---|---|---|
+| C | Le bloc « Date de remise », toujours dans les consignes | ✅ livré |
+| A | `champsPersonnalises` + bouton « Nouveaux champs » | à faire |
+| B | Les champs rejoignent les consignes | à faire |
+| D | « Reprendre les champs de… » | à faire |
+
+### Étape C — livrée
+
+`blocEcheance` s'insère APRÈS le détail de la tâche et AVANT le contexte de rétroaction :
+l'étudiant lit ce qu'on lui demande, puis quand le rendre ; le contexte, lui, parle de l'évaluation.
+
+⚠ **Plusieurs groupes ⇒ toutes les dates, nommées.** En choisir une donnerait à la moitié des
+étudiant·es une date qui n'est pas la leur — sur le document même qui la leur annonce.
+⚠ **Sans date, le bloc reste et dit « À préciser ».** Le taire laisserait l'étudiant chercher
+ailleurs une information qu'il attend à cet endroit.
+⚠ **Une date NON assignée s'affiche.** Ce document EST l'acte de transmission : au moment de
+l'imprimer, la case « consignes transmises » n'est pas encore cochée. La taire obligerait à déclarer
+transmis ce qui ne l'est pas encore.

@@ -35,7 +35,13 @@ function charger() {
     // ⚠ `trimestres` n'est PAS namespacée : `obtenirNomTrimestre` la lit nue.
     // La fixture disait `a2026_trimestres` — le trimestre sortait vide, et le
     // golden figeait un document amputé de sa troisième ligne d'en-tête.
-    const store = { 'trimestres': [{ id: 'a2026', nom: 'Automne 2026', actif: true }] };
+    const store = {
+        'trimestres': [{ id: 'a2026', nom: 'Automne 2026', actif: true }],
+        'a2026_groupesCours': [
+            { id: 'GC_A', groupeNum: '00002', coursId: 'COURS_A' },
+            { id: 'GC_B', groupeNum: '00008', coursId: 'COURS_A' }
+        ]
+    };
     return chargerScript('js/export-pdf.js', {
         db: {
             get: async () => null,
@@ -107,14 +113,17 @@ describe('#497 · W1 — ce que le modèle décide', () => {
     });
 
     it('W1.f Les blocs sortent dans leur ordre de lecture', () => {
+        // ⚠ « À préciser » est le bloc de date (#498) : il est TOUJOURS là,
+        // même sans date posée, entre les consignes et le contexte.
         expect(win.blocsInformationDocument(CARTOUCHE, OPTIONS()).map(b => b.texte))
-            .toEqual(['OBJECTIF', 'TACHE', 'DETAIL', 'CONTEXTE']);
+            .toEqual(['OBJECTIF', 'TACHE', 'DETAIL', 'À préciser', 'CONTEXTE']);
     });
 
     it('W1.g Un champ vide ne fabrique pas un bloc vide', () => {
         const creuse = { titre: 'X', objectif: '', tache: null, detailTache: '   ' };
         const blocs = win.blocsInformationDocument(null, OPTIONS({ production: creuse }));
-        expect(blocs.map(b => b.titre)).toEqual(['Détail de la tâche :']);  // '   ' est truthy
+        // '   ' est truthy ; « Date de remise » s'ajoute toujours (#498).
+        expect(blocs.map(b => b.titre)).toEqual(['Détail de la tâche :', 'Date de remise :']);
         expect(blocs.some(b => b.texte === '' || b.texte === null)).toBe(false);
     });
 
@@ -493,5 +502,173 @@ describe('#497 · Y3 — la disposition voyage jusqu\'au fichier', () => {
         // descripteurs dans une demi-page ne se lit pas.
         expect(corpsDe('poserBlocsInfoPDF')).toContain('modele.blocsInfo');
         expect(corpsDe('genererPDFCombine')).not.toContain('DISPO_DEUX_COLONNES');
+    });
+});
+
+/* ------------------------------------- Z — la date de remise (#498, étape C) */
+
+describe('#498 · Z1 — la date de remise est toujours dans les consignes', () => {
+    const win = charger();
+
+    it('Z1.a Une seule date : en toutes lettres', () => {
+        const bloc = win.blocEcheance({ dateEcheance: '2026-09-15' });
+        expect(bloc.titre).toBe('Date de remise :');
+        expect(bloc.texte).toBe('mardi 15 septembre 2026');
+    });
+
+    it('Z1.b LE CAS QUI PORTE LE SENS : deux groupes, deux dates, toutes deux nommées', () => {
+        // En choisir une donnerait à la moitié des étudiant·es une date qui
+        // n'est pas la leur — sur le document même qui la leur annonce.
+        const bloc = win.blocEcheance({
+            echeancesParGroupe: {
+                GC_A: { assignee: true, date: '2026-02-16' },
+                GC_B: { assignee: true, date: '2026-02-17' }
+            }
+        });
+        expect(bloc.texte).toContain('gr. 00002 : lundi 16 février 2026');
+        expect(bloc.texte).toContain('gr. 00008 : mardi 17 février 2026');
+    });
+
+    it('Z1.c Sans date, le bloc reste et l\'avoue', () => {
+        // Le taire laisserait l'étudiant chercher ailleurs une information
+        // qu'il attend à cet endroit.
+        const bloc = win.blocEcheance({ dateEcheance: null });
+        expect(bloc).not.toBeNull();
+        expect(bloc.texte).toBe('À préciser');
+    });
+
+    it('Z1.d Une date NON assignée s\'affiche quand même', () => {
+        // Ce document EST l'acte de transmission : au moment de l'imprimer, la
+        // case « consignes transmises » n'est pas encore cochée. La taire
+        // obligerait à déclarer transmis ce qui ne l'est pas encore.
+        const bloc = win.blocEcheance({
+            echeancesParGroupe: { GC_A: { assignee: false, date: '2026-09-15' } }
+        });
+        expect(bloc.texte).toContain('15 septembre 2026');
+    });
+
+    it('Z1.e Un groupe sans date ne fabrique pas une ligne vide', () => {
+        const bloc = win.blocEcheance({
+            echeancesParGroupe: {
+                GC_A: { assignee: true, date: '2026-02-16' },
+                GC_B: { assignee: false, date: null }
+            }
+        });
+        expect(bloc.texte).toBe('lundi 16 février 2026');   // une seule date ⇒ pas de nom de groupe
+    });
+
+    it('Z1.f Le modèle par groupe prime sur le legacy', () => {
+        // Deux lectures différentes finiraient par annoncer deux dates
+        // différentes pour la même remise.
+        const bloc = win.blocEcheance({
+            dateEcheance: '2026-01-01',
+            echeancesParGroupe: { GC_A: { assignee: true, date: '2026-09-15' } }
+        });
+        expect(bloc.texte).toContain('15 septembre 2026');
+        expect(bloc.texte).not.toContain('janvier');
+    });
+
+    it('Z1.g Sans production, pas de bloc', () => {
+        expect(win.blocEcheance(null)).toBeNull();
+    });
+});
+
+describe('#498 · Z2 — sa place dans le document', () => {
+    const win = charger();
+    const OPTIONS_COMPLETES = {
+        production: Object.assign({}, PRODUCTION, { dateEcheance: '2026-09-15' }),
+        inclureObjectif: true, inclureDescription: true, inclureDetailTache: true
+    };
+
+    it('Z2.a Après les consignes, avant le contexte de rétroaction', () => {
+        // L'étudiant lit ce qu'on lui demande, puis quand le rendre. Le
+        // contexte, lui, parle de l'évaluation et non de la tâche.
+        const blocs = win.blocsInformationDocument(CARTOUCHE, OPTIONS_COMPLETES);
+        const titres = blocs.map(b => b.titre);
+        expect(titres.indexOf('Date de remise :')).toBeGreaterThan(titres.indexOf('Détail de la tâche :'));
+        expect(titres.indexOf('Date de remise :')).toBeLessThan(titres.indexOf('Contexte de la rétroaction :'));
+    });
+
+    it('Z2.b Elle voyage dans les deux dispositions', () => {
+        const modele = win.construireModeleDocument(
+            { id: 'G', nom: 'G', criteres: [] }, null, OPTIONS_COMPLETES);
+        const STYLES = { styleTexteNormal: '', couleurTexte: '#333',
+                         couleurTitre: '#032e5c', facteurTaille: 1 };
+        for (const disposition of ['continu', 'deux-colonnes']) {
+            const html = win.blocsInfoHTML(Object.assign({}, modele, { disposition }), STYLES);
+            expect(html, disposition).toContain('15 septembre 2026');
+        }
+    });
+});
+
+/* ------------------------- AC — les champs deviennent des blocs (#499, étape B) */
+
+describe('#499 · AC — les champs rejoignent les consignes', () => {
+    const win = charger();
+    const AVEC_CHAMPS = (champs) => ({
+        production: Object.assign({}, PRODUCTION, {
+            dateEcheance: '2026-09-15', champsPersonnalises: champs
+        }),
+        inclureObjectif: true, inclureDescription: true, inclureDetailTache: true
+    });
+
+    it('AC.a Ils suivent le détail et précèdent la date', () => {
+        // L'étudiant lit ce qu'on lui demande, puis comment le rendre, puis quand.
+        const blocs = win.blocsInformationDocument(null, AVEC_CHAMPS([
+            { id: 'C1', titre: 'Remise du travail', contenu: 'Sur Léa uniquement' }
+        ]));
+        const titres = blocs.map(b => b.titre);
+        expect(titres.indexOf('Remise du travail :')).toBeGreaterThan(titres.indexOf('Détail de la tâche :'));
+        expect(titres.indexOf('Remise du travail :')).toBeLessThan(titres.indexOf('Date de remise :'));
+    });
+
+    it('AC.b Leur ORDRE est celui que Grégoire a posé', () => {
+        const blocs = win.blocsInformationDocument(null, AVEC_CHAMPS([
+            { id: 'C1', titre: 'Format', contenu: 'A' },
+            { id: 'C2', titre: 'Remise', contenu: 'B' },
+            { id: 'C3', titre: 'À vérifier', contenu: 'C' }
+        ]));
+        const perso = blocs.map(b => b.titre).filter(t => ['Format :', 'Remise :', 'À vérifier :'].includes(t));
+        expect(perso).toEqual(['Format :', 'Remise :', 'À vérifier :']);
+    });
+
+    it('AC.c LE CAS QUI PORTE LE SENS : un champ sans contenu n\'entre pas dans le document', () => {
+        // Dans le GABARIT, un champ nommé mais vide est une section en
+        // préparation — on le garde. Dans le document REMIS, ce serait un
+        // bandeau au-dessus du vide : une promesse sans contenu.
+        const blocs = win.blocsInformationDocument(null, AVEC_CHAMPS([
+            { id: 'C1', titre: 'À vérifier', contenu: '' },
+            { id: 'C2', titre: 'Remise', contenu: 'Sur Léa' }
+        ]));
+        const titres = blocs.map(b => b.titre);
+        expect(titres).not.toContain('À vérifier :');
+        expect(titres).toContain('Remise :');
+    });
+
+    it('AC.d Un champ sans titre n\'entre pas non plus', () => {
+        const blocs = win.blocsInformationDocument(null, AVEC_CHAMPS([
+            { id: 'C1', titre: '', contenu: 'du texte orphelin' }
+        ]));
+        expect(blocs.map(b => b.texte)).not.toContain('du texte orphelin');
+    });
+
+    it('AC.e Ils se rendent dans les deux dispositions', () => {
+        const modele = win.construireModeleDocument({ id: 'G', nom: 'G', criteres: [] }, null,
+            AVEC_CHAMPS([{ id: 'C1', titre: 'Remise du travail', contenu: 'SUR-LEA-UNIQUEMENT' }]));
+        const STYLES = { styleTexteNormal: '', couleurTexte: '#333',
+                         couleurTitre: '#032e5c', facteurTaille: 1 };
+        for (const disposition of ['continu', 'deux-colonnes']) {
+            const html = win.blocsInfoHTML(Object.assign({}, modele, { disposition }), STYLES);
+            expect(html, disposition).toContain('SUR-LEA-UNIQUEMENT');
+            expect(html, disposition).toContain('Remise du travail');
+        }
+    });
+
+    it('AC.f Une production sans champs se comporte comme avant', () => {
+        const sans = win.blocsInformationDocument(null, AVEC_CHAMPS(undefined));
+        expect(sans.map(b => b.titre)).toEqual([
+            'Objectif d\'apprentissage :', 'Description de la tâche :',
+            'Détail de la tâche :', 'Date de remise :'
+        ]);
     });
 });

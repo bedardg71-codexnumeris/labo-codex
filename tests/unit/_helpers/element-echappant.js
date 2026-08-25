@@ -35,6 +35,7 @@ export function elementEchappant(tag = 'div') {
         declencher(evt) { (el._ecouteurs[evt] || []).forEach(fn => fn()); },
         _ecouteurs: {},
 
+        focus() { el._focus = true; },
         appendChild(n) { n.parentElement = el; el.enfants.push(n); return n; },
         insertBefore(n, ref) {
             n.parentElement = el;
