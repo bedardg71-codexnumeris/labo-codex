@@ -372,11 +372,36 @@ function assainirChaine(str, maxLen = 500) {
 }
 
 /**
+ * #511 (25 août 2026) — CE QUE `SCHEMAS_IMPORT.production` N'EMPORTE PAS, ET POURQUOI.
+ *
+ * Le schéma est une liste blanche : une clé oubliée n'est pas signalée, elle
+ * disparaît. C'est ainsi que tout le contenu pédagogique des productions a
+ * voyagé vide pendant des mois. Le remède n'est pas seulement d'allonger la
+ * liste — c'est de rendre l'oubli VISIBLE : la sentinelle #511 relit les clés
+ * qu'écrit `construireProductionData` (productions.js) et exige que chacune
+ * soit transportée OU inscrite ici, avec sa raison.
+ *
+ * Ajouter une clé au gabarit sans décider de son sort fera donc rougir un test,
+ * plutôt que de perdre la donnée en silence.
+ */
+const CLES_PRODUCTION_NON_TRANSPORTEES = {
+    // Rattachement LOCAL au cours actif au moment de la création. Le transporter
+    // ferait apparaître une production reçue sous un cours homonyme du
+    // destinataire, ou sous un cours qui n'existe pas chez lui. Le rattachement
+    // est décidé à l'arrivée, par le chemin d'import — pas par le fichier.
+    // ⚠ Conséquence assumée et INCHANGÉE depuis toujours : restaurer une archive
+    // rend des productions sans `coursId`. À trancher séparément.
+    coursId: 'rattachement local au cours actif — décidé à l\'arrivée, jamais par le fichier'
+};
+
+/**
  * Assainit un objet importé selon un schéma (whitelist de propriétés)
  * @param {Object} obj - Objet à assainir
  * @param {Object} schema - Schéma { nomProp: { type, maxLen?, schema? } }
  *   Types reconnus : 'string', 'number', 'boolean', 'array', 'object',
  *                    'mapStrings' (object à clés dynamiques, valeurs assainies en strings),
+ *                    'mapObjets' (object à clés dynamiques, valeurs = objets assainis par spec.schema),
+ *                    'arrayStrings' (tableau de chaînes, chacune assainie),
  *                    'stringOrNumber' (id qui peut arriver soit en string soit en number).
  * @returns {Object} Objet nettoyé (seules les clés du schéma sont conservées)
  */
@@ -456,6 +481,37 @@ function assainirObjet(obj, schema) {
                     resultat[cle] = {};
                 }
                 break;
+            case 'arrayStrings':
+                // #511 — tableau de chaînes courtes : identifiants de blocs
+                // (`ordreBlocs`), codes de pratique (`pratiquesCompatibles`).
+                // ⚠ `array` SANS sous-schéma copie le tableau TEL QUEL : ces
+                // valeurs-là repartent dans des attributs HTML (`data-param`,
+                // `data-champ-id`), elles doivent être assainies une à une.
+                resultat[cle] = Array.isArray(valeur)
+                    ? valeur.filter(v => typeof v === 'string').map(v => assainirChaine(v, spec.maxLen || 100))
+                    : [];
+                break;
+            case 'mapObjets':
+                // #511 — object à clés dynamiques dont les valeurs sont des
+                // OBJETS assainis par `spec.schema`. Ex. `echeancesParGroupe` :
+                // { '<groupeCoursId>': { assignee: bool, date: 'AAAA-MM-JJ' } }.
+                // `mapStrings` ne convenait pas (valeurs non scalaires), et
+                // `object` non plus (clés inconnues à l'avance).
+                if (typeof valeur === 'object' && valeur !== null && !Array.isArray(valeur)) {
+                    const carte = {};
+                    for (const k in valeur) {
+                        if (Object.prototype.hasOwnProperty.call(valeur, k)) {
+                            const cleAssainie = assainirChaine(k, 200);
+                            if (cleAssainie && typeof valeur[k] === 'object' && valeur[k] !== null) {
+                                carte[cleAssainie] = assainirObjet(valeur[k], spec.schema || {});
+                            }
+                        }
+                    }
+                    resultat[cle] = carte;
+                } else {
+                    resultat[cle] = {};
+                }
+                break;
             default:
                 // Type inconnu : copier tel quel (fallback safe)
                 resultat[cle] = valeur;
@@ -511,7 +567,37 @@ const SCHEMAS_IMPORT = {
                 formule: { type: 'string', maxLen: 200 },
                 niveauSOLO: { type: 'string', maxLen: 50 },
                 verrouille: { type: 'boolean' },
-                obligatoire: { type: 'boolean' }
+                obligatoire: { type: 'boolean' },
+                facteurNormalisation: { type: 'number' },
+
+                // #511 — LES ONZE RÉTROACTIONS DE FRANÇAIS SE PERDAIENT AUSSI.
+                // Un critère algorithmique porte ses catégories d'erreurs : ce
+                // sont ELLES qui contiennent les textes rendus à l'étudiant·e,
+                // parfois plusieurs centaines de mots chacun. Absentes du
+                // schéma, elles disparaissaient au transport — la grille
+                // arrivait structurellement intacte et pédagogiquement muette.
+                sousCriteres: {
+                    type: 'array',
+                    schema: {
+                        id: { type: 'string', maxLen: 100 },
+                        code: { type: 'stringOrNumber', maxLen: 20 },
+                        nom: { type: 'string', maxLen: 200 },
+                        ponderation: { type: 'number' },
+                        retroaction: { type: 'string', maxLen: 5000 }
+                    }
+                },
+                // Structure antérieure aux sous-critères, encore lue par la
+                // migration (`_categoriesmigrees`) : la transporter est ce qui
+                // permet à cette migration de faire son travail à l'arrivée.
+                categoriesErreurs: {
+                    type: 'array',
+                    schema: {
+                        code: { type: 'stringOrNumber', maxLen: 20 },
+                        nom: { type: 'string', maxLen: 200 },
+                        retroaction: { type: 'string', maxLen: 5000 }
+                    }
+                },
+                _categoriesmigrees: { type: 'boolean' }
             }
         },
         auteur: { type: 'string', maxLen: 100 },
@@ -622,8 +708,55 @@ const SCHEMAS_IMPORT = {
         grilleId: { type: 'string', maxLen: 100 },
         echelleId: { type: 'string', maxLen: 100 },
         pratiqueId: { type: 'string', maxLen: 100 },
+        cartoucheId: { type: 'string', maxLen: 100 },
         dansBibliotheque: { type: 'boolean' },
         dateAjoutBiblio: { type: 'string', maxLen: 50 },
+
+        // #511 (25 août 2026) — LE CONTENU PÉDAGOGIQUE VOYAGE ENFIN.
+        //
+        // ⚠⚠ Ce schéma est une LISTE BLANCHE : ce qui n'y figure pas est
+        // silencieusement écarté. Or deux chemins vivants l'appliquent —
+        // `ajouterALaBibliotheque` (partager une production) et l'import
+        // sélectif d'archives (la restaurer). Les deux rendaient donc une
+        // production VIDE de ses consignes : ni objectif, ni tâche, ni détail,
+        // ni pondération, ni blocs nommés par l'enseignant·e. Partager sa
+        // production, c'était partager une coquille — et personne ne le disait.
+        //
+        // ⚠ `maxLen` généreux sur les champs libres : `detailTache` porte les
+        // consignes remises aux étudiant·es (étapes numérotées, contraintes de
+        // format). Une troncature à 500 caractères y aurait coupé au milieu
+        // d'une phrase, en silence elle aussi.
+        ponderation: { type: 'number' },
+        objectif: { type: 'string', maxLen: 2000 },
+        tache: { type: 'string', maxLen: 2000 },
+        detailTache: { type: 'string', maxLen: 20000 },
+        champsPersonnalises: {                                   // #499
+            type: 'array',
+            schema: {
+                id: { type: 'string', maxLen: 100 },
+                titre: { type: 'string', maxLen: 200 },
+                contenu: { type: 'string', maxLen: 20000 }
+            }
+        },
+        titresBlocs: { type: 'mapStrings', maxLen: 200 },        // #500
+        ordreBlocs: { type: 'arrayStrings', maxLen: 100 },       // #500
+        pratiquesCompatibles: { type: 'arrayStrings', maxLen: 50 },
+        categorie: { type: 'string', maxLen: 100 },
+        modeCalcul: { type: 'string', maxLen: 50 },
+        verrouille: { type: 'boolean' },
+        // Les dates par groupe-cours (#468/CO-17). Les identifiants de groupe
+        // sont LOCAUX : chez un destinataire qui ne les connaît pas, l'entrée
+        // est simplement ignorée (`obtenirEcheanceEffective` retombe sur
+        // `dateEcheance`). Les perdre, en revanche, était une perte sèche à la
+        // restauration d'une archive.
+        echeancesParGroupe: {
+            type: 'mapObjets',
+            schema: {
+                assignee: { type: 'boolean' },
+                date: { type: 'string', maxLen: 50 }
+            }
+        },
+
         metadata_cc: SCHEMA_METADATA_CC,
         inspireDe: SCHEMA_INSPIRE_DE
     },
@@ -3217,6 +3350,7 @@ window.filtrerRessourcesNonDemo = filtrerRessourcesNonDemo;
 window.assainirObjet = assainirObjet;
 window.assainirChaine = assainirChaine;
 window.SCHEMAS_IMPORT = SCHEMAS_IMPORT;
+window.CLES_PRODUCTION_NON_TRANSPORTEES = CLES_PRODUCTION_NON_TRANSPORTEES;
 window.verifierUniciteIds = verifierUniciteIds; // #292 : exposé pour chargerCodex (codex.js)
 window.fusionnerParIdentite = fusionnerParIdentite; // #448
 window.signatureContenu = signatureContenu;         // #448
