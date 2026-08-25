@@ -4600,7 +4600,7 @@
                                      ═══════════════════════════════════════════════════════════ -->
                                 <div class="u-flex-gap-20 u-mb-20 u-flex-wrap" style="align-items: flex-start">
                                     <div class="groupe-form u-flex-1" style="min-width: 300px; margin: 0">
-                                        <label>Nom de la production :</label>
+                                        <label>Nom de la production <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span> :</label>
                                         <input type="text" id="productionTitre" class="controle-form"
                                             placeholder="Ex: Analyse #1">
                                     </div>
@@ -4616,7 +4616,7 @@
                                 <!-- Ligne 2 : Type + Description -->
                                 <div class="u-mb-15" style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px">
                                     <div class="groupe-form">
-                                        <label data-tooltip="cn-prod-type">Type</label>
+                                        <label data-tooltip="cn-prod-type">Type <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span></label>
                                         <select id="productionType" class="controle-form"
                                             data-on-change="gererChangementTypeProduction">
                                             <option value="">— Sélectionner —</option>
@@ -4669,7 +4669,7 @@
                                         <!-- Pondération + Note explicative -->
                                         <div id="champPonderation" style="display: grid; grid-template-columns: 150px 1fr; gap: 15px; align-items: start;">
                                             <div class="groupe-form" style="margin: 0;">
-                                                <label data-tooltip="cn-prod-ponderation">Pondération (%)</label>
+                                                <label data-tooltip="cn-prod-ponderation">Pondération (%) <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span></label>
                                                 <input type="number" id="productionPonderation" class="controle-form" min="0"
                                                     max="100" placeholder="Ex: 20">
                                             </div>
@@ -4931,7 +4931,7 @@
                                 <!-- Nom + Pratiques compatibles sur même ligne -->
                                 <div class="u-flex-gap-20 u-mb-20 u-flex-wrap" style="align-items: flex-start">
                                     <div class="groupe-form u-flex-1" style="min-width: 300px; margin: 0">
-                                        <label>Nom de la grille :</label>
+                                        <label>Nom de la grille <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span> :</label>
                                         <input type="text" id="nomGrilleTemplate" class="controle-form"
                                             placeholder="Ex: Grille analyse littéraire" data-on-change="sauvegarderNomGrille">
                                     </div>
@@ -5070,7 +5070,7 @@
                                 <!-- Nom + Pratiques compatibles sur même ligne -->
                                 <div class="u-flex-gap-20 u-mb-20 u-flex-wrap" style="align-items: flex-start">
                                     <div class="groupe-form u-flex-1" style="min-width: 300px; margin: 0">
-                                        <label>Nom de l'échelle :</label>
+                                        <label>Nom de l'échelle <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span> :</label>
                                         <input type="text" id="nomEchelleTemplate" class="controle-form"
                                             placeholder="Ex: Échelle standard A-F" data-on-change="sauvegarderNomEchelle">
                                     </div>
@@ -5133,7 +5133,7 @@
                         <!-- Nom de l'échelle (visible uniquement en création/édition) -->
                         <div id="nomEchelleContainer" class="groupe-form"
                             class="max-w-400-mb20-hidden">
-                            <label>Nom de l'échelle :</label>
+                            <label>Nom de l'échelle <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span> :</label>
                             <input type="text" id="nomEchelleTemplate" class="controle-form"
                                 placeholder="Ex: Échelle standard A-F" data-on-change="sauvegarderNomEchelle">
                         </div>
@@ -5351,7 +5351,7 @@
                             <!-- Grille + Échelle + Nom sur même ligne -->
                             <div data-tooltip="cn-cartouche-selectors" class="u-flex-gap-15 u-mb-20 u-flex-wrap" style="align-items: flex-start">
                                 <div class="groupe-form" style="flex: 0 0 200px; margin: 0;">
-                                    <label>Grille (critères) :
+                                    <label>Grille (critères) <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span> :
                                         <span class="primo-aide" data-target="retroaction-grille-descriptive"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                                     </label>
                                     <select id="selectGrilleCartouche" class="controle-form" data-on-change="onChangeSelectionCartouche">
@@ -5360,14 +5360,14 @@
                                     </select>
                                 </div>
                                 <div class="groupe-form" style="flex: 0 0 200px; margin: 0;">
-                                    <label>Échelle (niveaux) :</label>
+                                    <label>Échelle (niveaux) <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span> :</label>
                                     <select id="selectEchelleCartouche" class="controle-form" data-on-change="onChangeSelectionCartouche">
                                         <option value="">— Échelle —</option>
                                         <!-- Options générées par JS -->
                                     </select>
                                 </div>
                                 <div class="groupe-form u-flex-1" style="min-width: 250px; margin: 0">
-                                    <label>Nom de la cartouche :</label>
+                                    <label>Nom de la cartouche <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span> :</label>
                                     <input type="text" id="nomCartouche" class="controle-form"
                                         placeholder="Ex: Dissertation argumentative - H2026">
                                 </div>
@@ -14409,7 +14409,7 @@
     <script src="js/productions-liste.js?v=20260825b"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js -->
     <script src="js/productions-bibliotheque-ui.js?v=20260824b"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide -->
     <script src="js/grilles-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/grilles.js?v=20260825b"></script> <!-- Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée -->
+    <script src="js/grilles.js?v=20260825c"></script> <!-- Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée -->
     <script src="js/echelles-bibliotheque.js?v=20260821a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/echelles.js?v=20260825c"></script> <!-- Fix preview « Voir les échelles » : display:none inline → classe u-hide -->
     <script src="js/cartouches-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
@@ -14600,11 +14600,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260825k"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260825l"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260825k"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260825l"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
