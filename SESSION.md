@@ -102,8 +102,20 @@
          éprouver par Grégoire**.
 
      ▣ CE QUI RESTE
-       · Porte terrain Safari + iPad : ouvrir le ⋮ d'une carte partagée au
-         doigt (cible tactile), supprimer, vérifier Réglages › Données.
+       · **PORTE TERRAIN ÉMISE** :
+         `plans de travail/PORTES-TERRAIN-2026-08-25-490-supprimer-un-partage.md`
+         — 2 préalables, 6 vérifications, 2 décisions. Courte exprès (tri du
+         24 août) : chaque retrait y est documenté par sa preuve. Jumeau HTML
+         versionné à côté ; artefact interactif
+         https://claude.ai/code/artifact/46caad82-bbb2-4337-9014-c850a3415da6
+         ⚠ Le bouton « Copier mes résultats » a été ÉPROUVÉ au Chromium avant
+         publication, et ce test a trouvé DEUX vrais défauts dans l'artefact :
+         `lire()` s'exécutait APRÈS le câblage des champs du §3 — les verdicts
+         écrits ne survivaient pas au rechargement, exactement la perte que le
+         skill interdit depuis le 11 août ; et la barre collante débordait
+         l'écran de 40 px à 834 px (iPad portrait). Les deux corrigés.
+       · Fusion vers `main` NON FAITE (autorisation limitée à la branche) :
+         `RELAIS.md` est à jour sur la branche, pas sur `main`.
        · Question ouverte, pas tranchée ici : faut-il aussi « Exporter pour
          partager » un item partagé (la chaîne d'attribution le permettrait) ?
          Hors périmètre de la demande.
