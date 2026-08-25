@@ -260,7 +260,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Les gardes tiennent les deux mensonges — un champ bloquant sans marque, et un champ facultatif
   avec marque (le plus discret : rien ne rougit, et l'utilisateur ne le saura jamais).
 
-  Vitest **3262/3262** (312 fichiers). Dernier ID : **#507**.
+  Vitest **3262/3262** (312 fichiers). Dernier ID : **#508**.
 
 ### Chantier — 25 août 2026 (le pont carte d'alignement ↔ productions)
 
@@ -696,6 +696,26 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - ⚠ **Sécurité** : `sentinelle-inspecteur-duree-coercition` visait `#planif-duree-min`, disparu — elle serait devenue vraie pour rien pendant que le risque déménageait. **Réorientée et passée au comportement** (valeur empoisonnée rendue, on regarde ce qui sort). ⮕ *Un invariant de sécurité voyage avec le champ qu'il protège.*
   - **2 sentinelles, 26 cas, 17 break-tests.** Deux faux-verts attrapés : (1) « la remontée touche tous les ancêtres » testait `dureeRollupNoeud`, qui récurse tout seul et préexistait — on testait le calcul en croyant tester le rafraîchissement ; (2) « cible tactile iPad » se satisfaisait d'un AUTRE bloc `@media (hover: none)` du fichier.
   - ⮕ **Porte terrain** : saisie de durée au doigt sur iPad, et lisibilité de l'en-tête sur un nœud étroit (le lot « largeur » n'est pas fait).
+
+- [ ] **#508** ⏳ **ÉCHÉANCE : 1er SEPTEMBRE 2026** — l'avis d'identification sur la page d'accueil.
+  Créé le 25 août 2026, en posant le nouveau texte de bienvenue demandé par Grégoire. Le dernier
+  paragraphe annonce : « À partir du 1er septembre, l'identification sera obligatoire pour utiliser
+  l'application. » (`js/accueil.js`, `genererBanniereBienvenue`).
+  ⚠ **C'est le SEUL énoncé daté de la page**, et il crée deux dettes à la même date :
+  · **Il promet une contrainte qui n'existe pas encore.** Elle dépend de **#427** (refermer l'accès
+    public — réactiver Cloudflare Access, OTP par courriel), dont l'échéance est « septembre 2026 »
+    sans jour fixé et dont plusieurs décisions restent ouvertes (quota des 50 sièges saturé, révision
+    de l'ADR-008). Si le dispositif n'est pas en place le 1er, la page annonce à ses collègues une
+    règle que l'application n'applique pas.
+  · **Il périme tout seul.** Le 2 septembre, la phrase parle d'un futur passé. Un avis périmé sur une
+    page d'accueil coûte plus cher que pas d'avis du tout : il apprend au lecteur à ne plus lire
+    cette zone — et c'est la zone où vivent « Par où commencer ? » et l'invitation à la CoP.
+  ⮕ **À faire le 1er septembre, dans un sens ou dans l'autre** :
+    · #427 livré ⇒ réécrire au présent (« l'identification est requise… ») ;
+    · #427 non livré ⇒ **retirer le paragraphe** et le reposer quand la date sera tenable. Reporter
+      la phrase sans reporter le dispositif serait la seule issue à éviter.
+  ⮕ Un seul paragraphe à changer, sans conséquence technique : le coût est de s'en souvenir, pas de
+  le faire. C'est pour ça que l'item existe.
 
 - [ ] **#427** ⚠️ Refermer l'accès public — réactiver Cloudflare Access (OTP par courriel) — créé 8 août 2026 (demande Grégoire). ⮕ **ÉCHÉANCE REPORTÉE À SEPTEMBRE 2026** (décision Grégoire, 8 août soir — l'échéance initiale du ~20 août n'est plus visée). Checklist dashboard prête : `plans de travail/Checklist Levée Cloudflare Access .txt`.
   - **Ce que Grégoire veut** : que les utilisateurs passent de nouveau par un **code envoyé par courriel** (OTP), comme au printemps ; retrouver le **contrôle des 50 sièges gratuits** ; et **savoir qui a accès à l'application et qui est vraiment un utilisateur**. Échéance visée : **septembre 2026** (reportée du ~20 août par Grégoire le 8 août au soir).
