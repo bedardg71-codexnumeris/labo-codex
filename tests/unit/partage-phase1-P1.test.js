@@ -391,3 +391,41 @@ describe('#490 · construirePackage honore options.chaineAttribution', () => {
         ]);
     });
 });
+
+/* ===================================================================
+   ▣ TROU DE COUVERTURE TROUVÉ AU RITUEL DU 25 AOÛT.
+
+   La garde qui accepte `options.lecteurs` vérifie que l'objet porte bien
+   SES DEUX fonctions. Remplacer cette garde par un simple `lecteurs ||`
+   laissait la suite ENTIÈRE verte (3062/3062) — donc rien ne retenait un
+   futur refactor de la raboter.
+
+   Ce qu'elle retient : un objet `lecteurs` PARTIEL ne doit pas être adopté
+   à moitié. Sans elle, `construirePackage` accepterait
+   `{ cartouchesDeGrille }` seul, puis lèverait `lire.grilleParId is not a
+   function` au premier besoin — au milieu d'un export, après la
+   confirmation de l'utilisateur.
+   =================================================================== */
+
+describe('#490 · un lecteur PARTIEL est refusé en bloc, pas adopté à moitié', () => {
+    it('lecteurs sans grilleParId → repli complet sur la source par défaut', () => {
+        const pkg = win.partageFormat.construirePackage(grilleFixture(), {
+            type: 'grille', identiteAuteur: 'Test P1',
+            lecteurs: { cartouchesDeGrille: () => [] }   // grilleParId manquant
+        });
+        // Le lecteur partiel aurait rendu [] ; le repli rend les vraies cartouches.
+        expect(pkg.entites.cartouches.map(c => c.id)).toEqual(['CART1', 'CART2']);
+    });
+
+    it('une dépendance de grille ne lève pas sur un lecteur partiel', () => {
+        const cartouche = {
+            id: 'CART1', grilleId: 'GR_TEST', nom: 'Cartouche CART1',
+            criteres: [{ id: 'C1', nom: 'Structure' }],
+            niveaux: [{ code: 'I', nom: 'Incomplet' }], commentaires: {}
+        };
+        expect(() => win.partageFormat.construirePackage(cartouche, {
+            type: 'cartouche', identiteAuteur: 'Test P1',
+            lecteurs: { cartouchesDeGrille: () => [] }   // grilleParId manquant
+        })).not.toThrow();
+    });
+});

@@ -155,7 +155,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⚠ **Trois break-tests sont d'abord restés VERTS** : les sentinelles vérifiaient que les bonnes
   options étaient PASSÉES, jamais que `construirePackage` s'en SERVE. Supprimer les deux lignes
   qui les lisent laissait toute la suite verte, avec un package amputé et non attribué en sortie.
-  Sentinelles ajoutées dans `partage-phase1-P1.test.js`. Vitest **3056/3056**.
+  Sentinelles ajoutées dans `partage-phase1-P1.test.js`. Vitest **3065/3065**.
   Vérifié au navigateur de bout en bout : import d'un vrai `.lcz` de « Marie Collègue » → le ⋮ de
   la carte partagée porte l'entrée → la confirmation annonce **3 ressources liées** → le `.lcz`
   émis contient **3 cartouches** et la chaîne `[Marie Collègue]`, et repasse la validation.

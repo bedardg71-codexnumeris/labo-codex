@@ -315,6 +315,20 @@ describe('CT-29 · les identifiants sortent échappés des attributs de bouton',
         expect(html).not.toContain('" data-action="supprimerTout');
     });
 
+    // ▣ TROU DE COUVERTURE TROUVÉ AU RITUEL DU 25 AOÛT. Les deux `it` ci-dessus
+    // ne testaient que `param2` : retirer `echapperAttribut` autour de
+    // `btn.action` laissait la suite ENTIÈRE verte (3062/3062), alors que le
+    // titre du bloc promet « les identifiants sortent échappés des attributs de
+    // bouton ». Les `action` sont des littéraux de code aujourd'hui — le risque
+    // est nul, la PROMESSE du test ne l'était pas.
+    it('l\'attribut data-action est échappé lui aussi, pas seulement les params', () => {
+        const html = ui.renderMenuActions([
+            { label: 'Supprimer', action: 'x" data-param="injecte', param: 'grille' }
+        ], 'ctx');
+        expect(html).toContain('&quot; data-param=&quot;injecte');
+        expect(html).not.toContain('x" data-param="injecte');
+    });
+
     it('menu ⋮ : même garde sur les items d\'action', () => {
         const html = ui.renderMenuActions([
             { label: 'Supprimer', action: 'partageSection.supprimer', param: 'grille', param2: ID_HOSTILE }

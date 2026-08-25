@@ -77,8 +77,43 @@
        matériel » tient sur un test unitaire + son break-test, pas sur un
        relevé au navigateur avec profil d'auteur configuré.
 
+     ▣ RITUEL DE FIN DE SESSION — ce qu'il a trouvé, et qui n'était pas dans
+       les deux cycles.
+       Les **27 mutations rejouées sur l'arbre FINAL** (au lieu des états
+       intermédiaires) ont donné **25 rouges et 2 VERTES**. Les deux verts
+       n'étaient dans aucun des deux cycles : je les ai inventés pour cette
+       passe, et ils ont trouvé de vrais trous de couverture.
+       (a) `_btnAttrs` — ma sentinelle CT-29 ne testait que `param2`. Retirer
+           `echapperAttribut` autour de `btn.action` laissait la suite ENTIÈRE
+           verte, alors que le titre du bloc promet « les identifiants sortent
+           échappés des attributs de bouton ». Risque vivant nul (les `action`
+           sont des littéraux) — c'est la PROMESSE du test qui était fausse.
+       (b) `partage-format.js` — la garde duck-type d'`options.lecteurs` :
+           la remplacer par `lecteurs ||` restait verte. Elle est pourtant
+           porteuse : un objet PARTIEL serait adopté à moitié, puis lèverait
+           `lire.grilleParId is not a function` en plein export, APRÈS la
+           confirmation de l'utilisateur. Du code de garde non testé se rabote
+           sans signal au prochain refactor.
+       ⮕ Deux assertions ajoutées, **toutes deux break-testées ROUGE** contre
+       la suite entière avant qu'on leur fasse confiance.
+       · **Écart récit↔code corrigé** : trois documents annonçaient
+         « 3056/3056 » pour #491 alors que ce même commit en mesurait 3062.
+         J'avais écrit le chiffre AVANT d'ajouter les sentinelles P1.
+       · **Incohérence documentaire corrigée** : la porte annonçait ses deux
+         décisions rendues mais son §3 affichait encore des champs vides.
+         Les verdicts sont maintenant en clair dans le markdown ET dans
+         l'artefact — et le bouton « Copier mes résultats » les sort même sur
+         un navigateur qui n'a rien mémorisé, au lieu de « (non renseigné) ».
+       · **Passe connexions** : seuls DEUX modules écrivent dans `partage_*`,
+         et les trois chemins d'écriture d'entités synchronisent le registre
+         (`integrerPackage`, `retirerImport`, `supprimerDuPartage →
+         oublierEntites`). Aucun purge de masse (Codex, Réserve, démo) ne
+         touche le namespace — vérifié par grep, zéro `startsWith('partage`.
+       · **Audit sécurité statique sur le diff** : zéro `innerHTML`, zéro
+         handler inline, zéro `eval`, zéro `console.log`.
+
      ▣ VÉRIFICATION
-       · Vitest **3056/3056** (299 fichiers).
+       · Vitest **3065/3065** (299 fichiers).
        · Navigateur, bout en bout : import d'un `.lcz` de « Marie Collègue »
          → le ⋮ de la carte partagée porte « Exporter pour partager » → la
          confirmation annonce **3 ressources liées** → le `.lcz` émis contient
