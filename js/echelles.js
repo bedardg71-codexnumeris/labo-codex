@@ -3187,7 +3187,8 @@ function afficherNiveauxEchelle(echelle) {
                             actionHaut: 'deplacerNiveauEchelleHaut', actionBas: 'deplacerNiveauEchelleBas',
                             param: echelle.id,
                             param2: index,
-                            premier: index === 0, dernier: index === niveaux.length - 1, quoi: 'ce niveau'
+                            premier: index === 0, dernier: index === echelle.niveaux.length - 1,
+                            quoi: 'ce niveau'
                         })}
                     </div>
                 </div>
@@ -3868,6 +3869,7 @@ window.deplacerNiveauEchelleBas = deplacerNiveauEchelleBas;
 window.ajouterNiveauEchelle = ajouterNiveauEchelle;
 window.ajouterPremierNiveau = ajouterPremierNiveau;
 window.afficherNiveauxNouvelleEchelle = afficherNiveauxNouvelleEchelle;
+window.afficherNiveauxEchelle = afficherNiveauxEchelle;                     // #505 — pour que la sentinelle puisse EXÉCUTER ce rendu
 window.modifierNiveauTemp = modifierNiveauTemp;
 window.ajouterNiveauTemp = ajouterNiveauTemp;
 window.supprimerNiveauTemp = supprimerNiveauTemp;
