@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.96',
+            couleur: 'vert',
+            titre: 'Supprimer un document partag\u00e9 par un coll\u00e8gue',
+            items: [
+                'Les cartes de la section \u00ab\u00a0Partag\u00e9s par des coll\u00e8gues\u00a0\u00bb ont maintenant le m\u00eame menu \u22ee que les autres, avec \u00ab\u00a0Supprimer\u00a0\u00bb. Jusqu\u2019ici elles n\u2019offraient que \u00ab\u00a0Dupliquer\u00a0\u00bb\u00a0: une fois un fichier .lcz import\u00e9, rien ne permettait d\u2019en retirer un \u00e9l\u00e9ment. Le menu est l\u00e0 dans les cinq biblioth\u00e8ques \u2014 grilles, \u00e9chelles, cartouches, productions et pratiques.',
+                'Supprimer un partag\u00e9 ne touche QUE la copie import\u00e9e. Tes propres documents, y compris ce que tu avais d\u00e9j\u00e0 dupliqu\u00e9 dans tes affaires, restent intacts \u2014 et tu peux r\u00e9importer le fichier .lcz quand tu veux.',
+                'Supprimer une grille partag\u00e9e emporte SES cartouches partag\u00e9es, et la confirmation les nomme avant de le faire. Sans sa grille, une cartouche partag\u00e9e ne peut plus \u00eatre dupliqu\u00e9e\u00a0: la laisser derri\u00e8re, ce serait laisser une carte dont le seul bouton \u00e9choue.',
+                'La carte \u00ab\u00a0Packages import\u00e9s\u00a0\u00bb de R\u00e9glages \u203a Donn\u00e9es suit\u00a0: elle annonce ce qui reste, pas ce qui est entr\u00e9 un jour. Un package vid\u00e9 \u00e9l\u00e9ment par \u00e9l\u00e9ment dispara\u00eet de la liste.'
+            ]
+        },
+        {
             version: '1.95',
             couleur: 'vert',
             titre: 'Reprendre ses cartouches d\u2019un trimestre \u00e0 l\u2019autre',

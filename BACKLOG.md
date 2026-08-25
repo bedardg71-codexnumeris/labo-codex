@@ -87,6 +87,45 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ## A faire
 
+### Retour testeur — 25 août 2026 (Grégoire)
+
+- [x] **#490 — Aucun moyen de supprimer un document partagé par un collègue.** LIVRÉ en **1.96.0**.
+  « Je voudrais pouvoir supprimer les cartouches partagées. Il n'y a pas de menu pour le faire,
+  comme dans les autres cartes. […] Cette option devrait être présente dans toutes les
+  bibliothèques. » Deux captures à l'appui : la carte de la section « Partagés par des
+  collègues » ne portait QUE « Dupliquer avec sa grille », là où une carte de la barre latérale
+  porte un menu ⋮ avec « Exporter pour partager / Retirer / Supprimer ». Un `.lcz` importé une
+  fois ne pouvait plus être défait item par item — seulement en bloc, depuis Réglages › Données
+  (`partageImport.retirerImport`, écrit depuis le lot P3 et **jamais câblé à un geste**), et à
+  condition de savoir que cette carte existe. Livré :
+  · `partage-section.js` — `actionsMenu` posé sur les cartes partagées : les cinq bibliothèques
+    en héritent d'un coup, elles rendent toutes cette section par `genererSectionHTML`.
+    Nouveaux `consequencesSuppression` (lecture seule, sert la confirmation), `supprimerDuPartage`
+    (storage pur) et `supprimer` (handler `data-action`).
+  · **Portée : la copie importée, jamais autre chose.** Les documents de l'utilisateur — y
+    compris ce qu'il avait déjà dupliqué — ne sont pas touchés, et un réimport du `.lcz` remet
+    tout en place.
+  · **Cascade grille → SES cartouches partagées, nommées dans la confirmation.** ⚠ Divergence
+    ASSUMÉE avec la garde de 1.95.4, qui REFUSE de supprimer une grille de l'utilisateur portant
+    des cartouches : là-bas l'objet détruit est du travail écrit, irrécupérable ; ici tout est
+    une copie réimportable, et un refus obligerait à supprimer 20 cartouches à la main avant
+    d'atteindre leur grille. Les productions partagées, elles, SURVIVENT — leur duplication sait
+    déjà vider une référence de grille absente et le dire.
+  · `partage-import.js` — `oublierEntites()` : le registre `partage_packagesImportes` cesse
+    d'annoncer ce qui n'est plus là (c'est lui qui alimente la colonne « Contenu » de Réglages ›
+    Données) ; une entrée vidée item par item disparaît.
+  · **CT-29 en passant** — `_btnAttrs` (`bibliotheque-ui.js`, chemin commun aux 5 bibliothèques)
+    concaténait ses `data-param*` SANS échapper. L'`id` d'un item partagé vient d'un `.lcz` reçu
+    d'un tiers, et la validation d'import refuse le HTML brut (`/<[a-zA-Z!\/]/`) mais laisse
+    passer un guillemet seul : de quoi sortir de l'attribut et en greffer d'autres sur le bouton.
+    `echapperAttribut` posé sur les quatre paramètres (`el.dataset.*` décode les entités — le
+    dispatcher lit la même valeur qu'avant).
+  Vitest **3046/3046** (299 fichiers). **14 break-tests, 14 ROUGE.** Vérification navigateur
+  (Chromium) : menu ⋮ présent et ouvrable dans les 5 bibliothèques, suppression effective,
+  cascade correcte, tableau de Réglages › Données à jour, zéro erreur console.
+  ⏳ **Porte terrain due** : Safari et iPad (la suite Playwright du projet est webkit-seul).
+  Dernier ID : **#490**.
+
 ### Retour testeur — 24 août 2026 (Grégoire, en cours de planification)
 
 - [x] **#486 — Un gabarit de production s'enregistre sans date d'échéance.** LIVRÉ en **1.94.0**.

@@ -7,6 +7,109 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 25 AOÛT 2026 : RETOUR TESTEUR #490 — ON NE PEUT PAS
+     SUPPRIMER UN DOCUMENT PARTAGÉ PAR UN COLLÈGUE. 1.96.0.
+
+     ▣ LA DEMANDE, deux captures à l'appui. « Je voudrais pouvoir supprimer
+       les cartouches partagées. Il n'y a pas de menu pour le faire, comme
+       dans les autres cartes. Voir captures. Cette option devrait être
+       présente dans toutes les bibliothèques. »
+       Les captures montrent exactement l'asymétrie : à gauche, une carte de
+       « Cartouches dans la barre latérale » avec son ⋮ ouvert (Exporter pour
+       partager / Retirer / Supprimer) ; à droite, une carte de « Partagés par
+       des collègues » qui ne porte QUE « Dupliquer avec sa grille ».
+       ⮕ Priorité absolue (retour testeur) : le plan en cours s'interrompt.
+
+     ▣ CE QUE LA LECTURE DU CODE A MONTRÉ — le geste manquait, pas la
+       mécanique.
+       (a) `genererSectionHTML` (partage-section.js) passait un
+           `boutonPrincipal` et AUCUN `actionsMenu`. Or `renderCarteDisponible`
+           accepte les deux depuis la Phase C #267 : le ⋮ ne s'affichait pas
+           parce qu'on ne lui donnait rien à afficher.
+       (b) Les CINQ modales rendent cette section par le même appel
+           (`grilles.js:2387`, `echelles.js:2363`, `cartouches.js:3471`,
+           `productions-bibliotheque-ui.js:269`, `pratiques-gestion.js:544`).
+           Une seule correction couvre donc la demande « dans toutes les
+           bibliothèques ».
+       (c) `partageImport.retirerImport()` existait depuis le lot P3 —
+           **et n'avait AUCUN appelant**. Le texte de la section renvoyait
+           pourtant à « Gestion des packages : Réglages › Données ». La
+           granularité en bloc était là, celle à l'unité n'a jamais existé.
+
+     ▣ LA DÉCISION DE PORTÉE — la cascade, et pourquoi elle diverge de 1.95.4.
+       Supprimer une GRILLE partagée emporte SES cartouches partagées, après
+       une confirmation qui les NOMME. C'est l'inverse de la garde livrée la
+       veille en 1.95.4 (refus + message, pas de cascade), et c'est assumé :
+       là-bas l'objet détruit est du travail écrit par Grégoire, irrécupérable ;
+       ici tout est une copie réimportable depuis le `.lcz`. Et surtout, une
+       cartouche partagée SANS sa grille est une carte morte — `dupliquer`
+       refuse (« liée à une grille qui n'est plus dans tes partagés ») : la
+       laisser derrière, ce serait laisser à l'écran un bouton qui échoue,
+       exactement la classe de défaut fermée la veille.
+       Les PRODUCTIONS partagées, elles, survivent : leur duplication sait
+       déjà vider une référence de grille absente et le dire (« à
+       réassocier »). On les nomme dans la confirmation, on ne les détruit pas.
+
+     ▣ LE REGISTRE DEVAIT SUIVRE. Sans quoi Réglages › Données aurait continué
+       d'annoncer « 4 grilles, 12 cartouches » pour un package à moitié
+       supprimé. `partageImport.oublierEntites()` retire les IDs du registre,
+       décrémente `nbParType`, et fait disparaître une entrée vidée item par
+       item — garder une ligne « Contenu : — » avec un bouton « Retirer » qui
+       n'a plus rien à retirer serait le même mensonge à l'envers.
+
+     ▣ CT-29 TROUVÉ EN PASSANT (et corrigé). `_btnAttrs` (bibliotheque-ui.js),
+       chemin commun aux cinq bibliothèques, concaténait ses `data-param*`
+       SANS échapper. L'`id` d'un item partagé vient d'un `.lcz` reçu d'un
+       tiers ; la validation d'import refuse le HTML brut (`/<[a-zA-Z!\/]/`)
+       mais laisse passer un guillemet seul — assez pour sortir de
+       `data-param2="…"` et greffer des attributs sur le bouton. La CSP bloque
+       un `onclick` injecté, pas un `data-action` détourné. `echapperAttribut`
+       posé sur les quatre paramètres ; `el.dataset.*` décode les entités,
+       donc le dispatcher de `main.js` lit exactement la même valeur qu'avant.
+
+     ▣ LIVRÉ (1.96.0, build 0824-2123)
+       · `js/partage-section.js` — `actionsMenu` sur les cartes partagées ;
+         `consequencesSuppression` (lecture seule), `supprimerDuPartage`
+         (storage pur), `supprimer` (handler `data-action`) ; `rafraichirApres`
+         factorisé avec `dupliquer` ; en-tête et microcopy remis d'accord avec
+         le fait que « lecture seule » n'était plus le bon mot (« non
+         modifiable ici » — on ne l'édite pas, on peut le supprimer).
+       · `js/partage-import.js` — `oublierEntites()`.
+       · `js/bibliotheque-ui.js` — `_btnAttrs` échappe ses `data-param*`.
+       · `js/changelog-data.js` — entrée 1.96.
+
+     ▣ VÉRIFICATION
+       · Vitest **3046/3046** (299 fichiers), depuis `tests/`.
+       · **14 break-tests, 14 ROUGE** — chaque sentinelle neuve nommée par la
+         mutation qui la vise, aucune sentinelle aveugle. Mutations jouées :
+         menu retiré · cascade coupée · cascade non filtrée par `grilleId` ·
+         productions emportées · `confirm` ignoré · confirmation muette sur les
+         dépendants · registre non synchronisé · entrée vidée conservée ·
+         `oublierEntites` qui compte faux · garde `window.partageImport`
+         supprimée · documents de l'utilisateur touchés · id fantôme accepté ·
+         `echapperAttribut` retiré (×2 sentinelles CT-29).
+       · **Navigateur (Chromium, file://)** : menu ⋮ présent dans les CINQ
+         bibliothèques, popover qui s'ouvre avec « Supprimer » en rouge,
+         suppression d'une cartouche (registre à jour, carte disparue de la
+         modale), suppression d'une grille (cascade correcte, production
+         conservée), tableau de Réglages › Données réduit à ce qui reste.
+         Zéro erreur console inattendue.
+       · ⚠ **La suite Playwright du projet n'a PAS pu être jouée ici** : elle
+         est configurée webkit-seul (Desktop Safari) et webkit n'est pas
+         installé dans ce conteneur (« Executable doesn't exist at
+         /opt/pw-browsers/webkit-2287 »). Environnemental, antérieur à ce
+         chantier — mais cela veut dire que **Safari et iPad restent à
+         éprouver par Grégoire**.
+
+     ▣ CE QUI RESTE
+       · Porte terrain Safari + iPad : ouvrir le ⋮ d'une carte partagée au
+         doigt (cible tactile), supprimer, vérifier Réglages › Données.
+       · Question ouverte, pas tranchée ici : faut-il aussi « Exporter pour
+         partager » un item partagé (la chaîne d'attribution le permettrait) ?
+         Hors périmètre de la demande.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 24 AOÛT 2026 : RETOUR TESTEUR #486 — UN GABARIT DE
      PRODUCTION S'ENREGISTRE SANS DATE D'ÉCHÉANCE. 1.94.0.
 

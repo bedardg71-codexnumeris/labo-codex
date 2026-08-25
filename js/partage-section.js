@@ -8,11 +8,16 @@
  *
  * Rôle : chaque modale de bibliothèque affiche une 3e section « Partagés
  * par des collègues » listant les items des clés `partage_*` (importés par
- * js/partage-import.js). Ces items sont en LECTURE SEULE : la seule action
- * est « Dupliquer vers mes documents », qui crée une copie MODIFIABLE dans
- * les collections de l'utilisateur. L'interdiction de référencer un item
- * partagé dans un assemblage est garantie PAR CONSTRUCTION : les items
- * partagés n'entrent jamais dans les collections que lisent les sélecteurs.
+ * js/partage-import.js). Ces items sont NON MODIFIABLES : on ne les édite
+ * pas, on les « Duplique vers mes documents », ce qui crée une copie
+ * MODIFIABLE dans les collections de l'utilisateur. L'interdiction de
+ * référencer un item partagé dans un assemblage est garantie PAR
+ * CONSTRUCTION : les items partagés n'entrent jamais dans les collections
+ * que lisent les sélecteurs.
+ *
+ * Non modifiable ne veut pas dire subi : le menu ⋮ de chaque carte porte
+ * « Supprimer », qui retire la COPIE IMPORTÉE de `partage_*` (25 août 2026,
+ * demande de Grégoire — voir le bloc « Suppression d'un item partagé »).
  *
  * DUPLICATION AVEC DÉPENDANCES (cohérent avec le modèle d'export) :
  *  - grille      → copie + SES cartouches partagées (grilleId remappé,
@@ -34,7 +39,8 @@
  * avant insertion dans le HTML des cartes.
  *
  * Tests : tests/unit/partage-section-P4.test.js (duplication par type,
- * dépendances, invariant lecture seule) + flux Playwright dans
+ * dépendances, invariant « la duplication n'écrit pas dans partage_* »,
+ * suppression et sa cascade) + flux Playwright dans
  * tests/integration/partage-import-rendu.spec.js.
  */
 (function () {
@@ -275,6 +281,169 @@
     };
 
     // ------------------------------------------------------------------
+    // Suppression d'un item partagé (Grégoire, 25 août 2026)
+    //
+    // « Je voudrais pouvoir supprimer les cartouches partagées. Il n'y a pas
+    // de menu pour le faire, comme dans les autres cartes. » La section
+    // « Partagés » n'offrait QUE « Dupliquer » : un package importé une fois
+    // ne pouvait plus être défait item par item — seulement en bloc, depuis
+    // Réglages › Données, et à condition de savoir que cette carte existe.
+    //
+    // Ce qui est supprimé : la COPIE importée, dans les collections
+    // `partage_*`. Jamais les documents de l'utilisateur, jamais ce qu'il a
+    // déjà dupliqué, jamais le fichier .lcz d'origine — un réimport le
+    // ramène tel quel.
+    // ------------------------------------------------------------------
+
+    function trouverPartage(type, id) {
+        var trouve = null;
+        lire(CLES_STOCKAGE[type] || '').forEach(function (i) {
+            if (i.id === id) trouve = i;
+        });
+        return trouve;
+    }
+
+    /**
+     * Ce qu'une suppression emporte, SANS RIEN ÉCRIRE — de quoi nommer les
+     * conséquences dans la confirmation avant de les produire.
+     *
+     * Seule la grille a des dépendants dans le namespace partagé :
+     *  - ses cartouches partagées, qui partent AVEC elle. Une cartouche
+     *    partagée sans sa grille est une carte morte : `dupliquer` refuse
+     *    (« liée à une grille qui n'est plus dans tes partagés »). La laisser
+     *    derrière, ce serait laisser à l'écran un bouton qui échoue.
+     *  - ses productions partagées, qui SURVIVENT : leur duplication sait
+     *    déjà vider une référence de grille absente et le dire (« à
+     *    réassocier »). On les nomme, on ne les détruit pas.
+     *
+     * ⚠ Divergence assumée avec la garde des grilles de l'utilisateur (1.95.4,
+     * qui REFUSE de supprimer une grille portant des cartouches) : là-bas
+     * l'objet détruit est du travail écrit par Grégoire, irrécupérable. Ici
+     * tout est une copie réimportable depuis le .lcz — le coût d'une erreur
+     * n'est pas le même, et un refus obligerait à supprimer 20 cartouches à
+     * la main avant d'atteindre leur grille.
+     *
+     * @returns {Object|null} { item, cartouches: [], productions: [] }
+     */
+    partageSection.consequencesSuppression = function (type, id) {
+        var item = trouverPartage(type, id);
+        if (!item) return null;
+
+        var cartouches = [];
+        var productions = [];
+        if (type === 'grille') {
+            cartouches = lire(CLES_STOCKAGE.cartouche).filter(function (c) {
+                return c.grilleId === item.id;
+            });
+            productions = lire(CLES_STOCKAGE.production).filter(function (p) {
+                return p.grilleId === item.id;
+            });
+        }
+        return { item: item, cartouches: cartouches, productions: productions };
+    };
+
+    /**
+     * Retire un item partagé (et, pour une grille, ses cartouches partagées)
+     * des collections `partage_*`, puis met le registre des packages importés
+     * à jour pour qu'il n'annonce plus ce qui n'est plus là.
+     *
+     * @returns {Object|null} { nom, supprimes: {type: [ids]}, nbCartouches }
+     */
+    partageSection.supprimerDuPartage = function (type, id) {
+        var conseq = partageSection.consequencesSuppression(type, id);
+        if (!conseq) {
+            console.error('[partage-section] Item partagé introuvable :', type, id);
+            return null;
+        }
+
+        var supprimes = {};
+
+        var idsCartouches = conseq.cartouches.map(function (c) { return c.id; });
+        if (idsCartouches.length) {
+            ecrire(CLES_STOCKAGE.cartouche, lire(CLES_STOCKAGE.cartouche).filter(function (c) {
+                return idsCartouches.indexOf(c.id) === -1;
+            }));
+            supprimes.cartouche = idsCartouches;
+        }
+
+        ecrire(CLES_STOCKAGE[type], lire(CLES_STOCKAGE[type]).filter(function (i) {
+            return i.id !== id;
+        }));
+        supprimes[type] = (supprimes[type] || []).concat([id]);
+
+        if (window.partageImport && typeof window.partageImport.oublierEntites === 'function') {
+            window.partageImport.oublierEntites(supprimes);
+        }
+
+        return { nom: nomDe(conseq.item), supprimes: supprimes, nbCartouches: idsCartouches.length };
+    };
+
+    /** Au plus 8 noms : une confirmation illisible n'est plus une confirmation. */
+    function listerNoms(items) {
+        var noms = items.slice(0, 8).map(function (i) { return '\u2022 ' + nomDe(i); });
+        if (items.length > 8) noms.push('\u2022 … et ' + (items.length - 8) + ' autre'
+            + (items.length - 8 > 1 ? 's' : ''));
+        return noms.join('\n');
+    }
+
+    /** data-action="partageSection.supprimer" param=type param2=id */
+    partageSection.supprimer = function (type, id) {
+        var conseq = partageSection.consequencesSuppression(type, id);
+        if (!conseq) return;
+
+        var lignes = ['Supprimer « ' + nomDe(conseq.item) + ' » de tes partagés ?', ''];
+
+        if (conseq.cartouches.length) {
+            lignes.push('Ses ' + conseq.cartouches.length + ' cartouche'
+                + (conseq.cartouches.length > 1 ? 's' : '') + ' partagée'
+                + (conseq.cartouches.length > 1 ? 's partent' : ' part') + ' avec elle — '
+                + 'sans sa grille, une cartouche partagée n\'est plus duplicable :');
+            lignes.push(listerNoms(conseq.cartouches));
+            lignes.push('');
+        }
+        if (conseq.productions.length) {
+            lignes.push(conseq.productions.length + ' production'
+                + (conseq.productions.length > 1 ? 's partagées perdront' : ' partagée perdra')
+                + ' cette grille : il faudra lui en réassocier une à la duplication.');
+            lignes.push('');
+        }
+
+        lignes.push('Seule la copie importée est retirée : tes propres documents, '
+            + 'y compris ce que tu as déjà dupliqué, ne sont pas touchés. '
+            + 'Tu pourras réimporter le fichier .lcz.');
+
+        if (!confirm(lignes.join('\n'))) return;
+
+        var resultat = partageSection.supprimerDuPartage(type, id);
+        if (!resultat) return;
+
+        if (typeof notifications !== 'undefined' && notifications.succes) {
+            notifications.succes('« ' + resultat.nom + ' » supprimé de tes partagés'
+                + (resultat.nbCartouches
+                    ? ' (avec ' + resultat.nbCartouches + ' cartouche'
+                        + (resultat.nbCartouches > 1 ? 's' : '') + ')'
+                    : ''));
+        }
+
+        rafraichirApres(type);
+    };
+
+    /**
+     * Rafraîchit ce que l'action vient de changer : la modale d'où elle part,
+     * et — si la carte Réglages › Données est à l'écran — le tableau des
+     * packages, dont la colonne « Contenu » vient de bouger.
+     */
+    function rafraichirApres(type) {
+        var fn = window[FONCTIONS_MODALE[type]];
+        if (typeof fn === 'function' && document.getElementById(IDS_MODALE[type])) {
+            fn();
+        }
+        if (window.partageImport && typeof window.partageImport.rafraichirSection === 'function') {
+            window.partageImport.rafraichirSection();
+        }
+    }
+
+    // ------------------------------------------------------------------
     // Handler data-action (bouton « Dupliquer » des cartes)
     // ------------------------------------------------------------------
 
@@ -287,10 +456,7 @@
         }
         // Rafraîchir la modale d'où l'action vient (la copie apparaît en
         // Section 1 — elle est dansBibliotheque: true).
-        var fn = window[FONCTIONS_MODALE[type]];
-        if (typeof fn === 'function' && document.getElementById(IDS_MODALE[type])) {
-            fn();
-        }
+        rafraichirApres(type);
     };
 
     // ------------------------------------------------------------------
@@ -336,15 +502,24 @@
                     param2: item.id,
                     classe: 'btn-confirmer',
                     title: 'Créer une copie modifiable dans tes documents (l\'original partagé reste intact)'
-                }
+                },
+                actionsMenu: [{
+                    label: 'Supprimer',
+                    action: 'partageSection.supprimer',
+                    param: type,
+                    param2: item.id,
+                    classe: 'btn-supprimer',
+                    title: 'Supprimer cette copie importée (tes documents ne sont pas touchés)'
+                }]
             });
         }).join('');
 
         return '<h3 class="biblio-section-titre">Partagés par des collègues</h3>' +
             '<p style="color: var(--gris-clair); font-size: 0.9em; margin-bottom: 12px;">' +
-                'Importés par fichier .lcz, en lecture seule. « Dupliquer » crée une copie ' +
+                'Importés par fichier .lcz, non modifiables ici. « Dupliquer » crée une copie ' +
                 'modifiable dans tes documents — l\'attribution d\'origine est conservée. ' +
-                'Gestion des packages : Réglages › Données.' +
+                'Le menu ⋮ supprime la copie importée ; pour retirer un package entier : ' +
+                'Réglages › Données.' +
             '</p>' +
             cartes;
     };
