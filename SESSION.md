@@ -7,6 +7,87 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 25 AOÛT 2026 (SUITE) : PORTE #490 CLOSE 8/8, ET SA
+     DÉCISION 3.2 LIVRÉE — #491, RETRANSMETTRE UN PARTAGÉ. 1.97.0.
+
+     ▣ LE RELEVÉ : 8 passées, 0 échec, 0 non traitée. La rangée qui comptait
+       est la 2.3 — sur son iPad, la confirmation s'affiche PAR-DESSUS la
+       fenêtre de bibliothèque. Le défaut de 1.92.1 ne se rejoue pas.
+       · 3.1 « garder la cascade » → aucun code, comportement confirmé.
+       · 3.2 « oui » → du code, et pas qu'un peu.
+
+     ▣ CE QUE LA MESURE A TROUVÉ AVANT QUE J'ÉCRIVE UNE LIGNE. Aller-retour
+       réel au navigateur (export → .lcz → import), puis tentative de
+       ré-export d'un partagé. Trois obstacles, tous mesurés :
+       (a) `resoudreEntite` ne balaie que les collections de l'utilisateur →
+           « Cet item est introuvable ». Le bouton aurait toujours échoué.
+       (b) `rassemblerDependances` rendait **0 cartouche alors que 2 étaient
+           liées**. Les cartouches partagées vivent dans une collection PLATE
+           filtrée par `grilleId`, pas sous `cartouches_{grilleId}`. Sans
+           correction, le package serait parti AMPUTÉ, en silence — la classe
+           de défaut la plus coûteuse, parce qu'elle réussit.
+       (c) `chaineAttribution` sortait VIDE, auteur annoncé = moi seul. Un
+           item importé n'a pas de `metadata_cc` : sa provenance vit dans
+           `inspireDe`, que `construireChaineAttribution` ne regarde pas.
+           ⮕ **Tant qu'on n'exportait que ses propres affaires, la chaîne vide
+           était EXACTE.** C'est l'ouverture aux partagés qui la transforme en
+           mensonge de licence. Le défaut n'existait pas avant le chantier :
+           il serait NÉ de lui.
+
+     ▣ LIVRÉ (1.97.0) — trois modules, chacun dans son rôle, zéro duplication.
+       · `partage-format.js` — `rassemblerDependances(item, type, lecteurs)` :
+         la SOURCE devient injectable (`LECTEURS_UTILISATEUR` par défaut, donc
+         aucun appelant existant ne change de comportement). `construirePackage`
+         accepte `options.lecteurs` et `options.chaineAttribution` (CLONÉE :
+         l'appelant ne garde pas la main sur le manifeste).
+       · `partage-export.js` — cœur `exporterEntite(entite, type, options)`
+         EXTRAIT de `exporterPourPartager`, qui devient un mince résolveur.
+         La section « Partagés » emprunte ainsi la chaîne signature +
+         auto-contrôle au lieu de la réécrire. Et la confirmation calcule ses
+         dépendances avec les MÊMES lecteurs que le package — sans quoi elle
+         annoncerait un contenu que l'export n'émettrait pas.
+       · `partage-section.js` — `exporterPourPartager` et
+         `chaineAttributionPour` : la chaîne repart de celle du package REÇU
+         (mémorisée au registre à l'import) et y ajoute l'auteur d'origine.
+         ⚠ Le maillon est OMIS quand l'auteur d'origine est celui qui exporte
+         — c'est SON cas, ses partagés portent « par Grégoire Bédard ». Un
+         maillon « Grégoire Bédard » sur un package de Grégoire Bédard
+         n'apprend rien et ressemble à une erreur. Identité comparée avec la
+         normalisation du TOFU : pas de seconde notion d'« même personne ».
+         (Vérifié au navigateur : `obtenirIdentiteCCUtilisateur` et
+         `BibliothequeUI.obtenirAuteurActif` lisent la MÊME source.)
+
+     ▣ ⚠ TROIS BREAK-TESTS SONT D'ABORD RESTÉS VERTS — la leçon du cycle.
+       Mes sentinelles vérifiaient que `partage-section` PASSE les bonnes
+       options ; AUCUNE ne vérifiait que `construirePackage` s'en SERVE.
+       Supprimer les deux lignes qui les lisent laissait la suite entière
+       verte, avec en sortie exactement les deux défauts que le chantier
+       existait pour empêcher : package amputé, attribution perdue.
+       ⮕ Une option ignorée en silence est pire qu'une option absente.
+       Sentinelles ajoutées dans `partage-phase1-P1.test.js` (lecteurs
+       honorés, chaîne honorée, chaîne clonée, défauts inchangés).
+       Bilan : 12 mutations, 9 rouges du premier coup, 3 rattrapées.
+
+     ▣ ANGLE MORT §4 n°2 RETIRÉ. L'aller-retour d'un vrai `.lcz` est
+       maintenant OBSERVÉ, plus déduit : export → import (1 grille,
+       3 cartouches) → suppression d'une cartouche du vrai package (registre
+       3 → 2) → réimport du même fichier (`remplace: true`, contenu restauré,
+       UNE seule entrée de registre, pas de doublon).
+       ⏳ Reste hors observation : la règle « pas de maillon pour mon propre
+       matériel » tient sur un test unitaire + son break-test, pas sur un
+       relevé au navigateur avec profil d'auteur configuré.
+
+     ▣ VÉRIFICATION
+       · Vitest **3056/3056** (299 fichiers).
+       · Navigateur, bout en bout : import d'un `.lcz` de « Marie Collègue »
+         → le ⋮ de la carte partagée porte « Exporter pour partager » → la
+         confirmation annonce **3 ressources liées** → le `.lcz` émis contient
+         **3 cartouches** et la chaîne `[Marie Collègue]`, et repasse la
+         validation. Zéro erreur console.
+       · ⏳ Safari et iPad : non éprouvés (WebKit absent du conteneur, #487).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 25 AOÛT 2026 : RETOUR TESTEUR #490 — ON NE PEUT PAS
      SUPPRIMER UN DOCUMENT PARTAGÉ PAR UN COLLÈGUE. 1.96.0.
 

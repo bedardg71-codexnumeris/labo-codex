@@ -263,8 +263,7 @@
     /**
      * Entrée des menus ⋮ : data-action="partageExport.exporterPourPartager"
      * avec param=type, param2=id, param3=grilleId (cartouches seulement).
-     * Chaîne complète, avec AUTO-CONTRÔLE : le package signé repasse par
-     * validerPackage avant d'être émis.
+     * Résout l'entité dans les collections de l'utilisateur, puis délègue.
      */
     partageExport.exporterPourPartager = function (type, id, contexteId) {
         var entite = partageExport.resoudreEntite(type, id, contexteId);
@@ -273,16 +272,45 @@
             alert('Cet item est introuvable dans ses collections — export impossible.');
             return Promise.resolve(false);
         }
+        return partageExport.exporterEntite(entite, type);
+    };
+
+    /**
+     * Cœur d'export, sur une entité DÉJÀ RÉSOLUE : confirmation, package
+     * signé, AUTO-CONTRÔLE (le package repasse par notre propre validation
+     * d'import avant d'être émis), `.lcz`, téléchargement.
+     *
+     * Extrait de `exporterPourPartager` le 25 août 2026 (décision 3.2 de la
+     * porte #490) pour que la section « Partagés » puisse ré-exporter un item
+     * du namespace `partage_*` SANS dupliquer ce pipeline — elle sait résoudre
+     * son entité et sa provenance, elle ne doit pas réécrire la chaîne de
+     * signature et d'auto-contrôle.
+     *
+     * @param {Object} entite - entité résolue, non mutée
+     * @param {string} type
+     * @param {Object} [options] - passé tel quel à `construirePackageSigne` :
+     *        `lecteurs` (d'où lire les dépendances) et `chaineAttribution`
+     *        (provenance explicite). Voir l'en-tête de partage-format.js.
+     */
+    partageExport.exporterEntite = function (entite, type, options) {
+        options = options || {};
         if (window.BibliothequeUI && BibliothequeUI.estItemDemo && BibliothequeUI.estItemDemo(entite)) {
             alert('Le matériel de démonstration ne s\'exporte pas : il est déjà fourni avec Labo Codex.');
             return Promise.resolve(false);
         }
 
-        var dependances = window.partageFormat.rassemblerDependances(entite, type);
+        // Les MÊMES lecteurs que le package : sinon la confirmation annoncerait
+        // un contenu que l'export n'émettrait pas.
+        var dependances = window.partageFormat.rassemblerDependances(entite, type, options.lecteurs);
 
         return confirmerExport(type, entite, dependances).then(function (confirme) {
             if (!confirme) return false;
-            return window.partageFormat.construirePackageSigne(entite, { type: type })
+            var optionsPackage = { type: type };
+            if (options.lecteurs) optionsPackage.lecteurs = options.lecteurs;
+            if (options.chaineAttribution) optionsPackage.chaineAttribution = options.chaineAttribution;
+            if (options.identiteAuteur) optionsPackage.identiteAuteur = options.identiteAuteur;
+
+            return window.partageFormat.construirePackageSigne(entite, optionsPackage)
                 .then(function (pkgSigne) {
                     // Auto-contrôle : ne JAMAIS émettre un package que notre
                     // propre validation d'import (P3) rejetterait.

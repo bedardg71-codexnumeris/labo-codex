@@ -310,3 +310,84 @@ describe('#329 P1 · _testPartagePhase1 — harnais console terrain', () => {
         expect(win._testPartagePhase1()).toBe(true);
     });
 });
+
+/* ===================================================================
+   LES OPTIONS DE SOURCE ET DE PROVENANCE SONT-ELLES HONORÉES ?
+   (25 août 2026 — décision 3.2 de la porte #490)
+
+   Ces deux options existent pour ré-exporter un item du namespace
+   `partage_*`, dont les dépendances sont rangées ailleurs et dont la
+   provenance ne vit pas dans `metadata_cc`.
+
+   ⚠ CES SENTINELLES SONT NÉES D'UN BREAK-TEST RESTÉ VERT. Les tests de
+   `partage-section` vérifiaient que le bon `options` était PASSÉ ; rien ne
+   vérifiait que `construirePackage` s'en SERVE. Supprimer les deux lignes
+   qui les lisent laissait toute la suite verte — avec, en sortie, un package
+   amputé de ses cartouches et ré-émis sans l'attribution de son auteur.
+   Une option ignorée en silence est pire qu'une option absente.
+   =================================================================== */
+
+describe('#490 · construirePackage honore options.lecteurs', () => {
+    it('lit les dépendances DANS la source injectée, pas dans les collections par défaut', () => {
+        const cartoucheAilleurs = {
+            id: 'CART_AILLEURS', grilleId: 'GR_TEST', nom: 'Cartouche d\'ailleurs',
+            criteres: [{ id: 'C1', nom: 'Structure' }],
+            niveaux: [{ code: 'I', nom: 'Incomplet' }], commentaires: {}
+        };
+        const pkg = win.partageFormat.construirePackage(grilleFixture(), {
+            type: 'grille', identiteAuteur: 'Test P1',
+            lecteurs: {
+                cartouchesDeGrille: () => [cartoucheAilleurs],
+                grilleParId: () => null
+            }
+        });
+        expect(pkg.entites.cartouches.map(c => c.id)).toEqual(['CART_AILLEURS']);
+    });
+
+    it('sans lecteurs, la source par défaut reste celle de l\'utilisateur', () => {
+        const pkg = win.partageFormat.construirePackage(grilleFixture(), {
+            type: 'grille', identiteAuteur: 'Test P1'
+        });
+        expect(pkg.entites.cartouches.map(c => c.id)).toEqual(['CART1', 'CART2']);
+    });
+
+    it('un lecteur vide n\'émet aucune cartouche — le package le DIT, il ne le cache pas', () => {
+        const pkg = win.partageFormat.construirePackage(grilleFixture(), {
+            type: 'grille', identiteAuteur: 'Test P1',
+            lecteurs: { cartouchesDeGrille: () => [], grilleParId: () => null }
+        });
+        expect(pkg.entites.cartouches).toEqual([]);
+        expect(pkg.references).toEqual([]);
+    });
+});
+
+describe('#490 · construirePackage honore options.chaineAttribution', () => {
+    it('la chaîne fournie remplace celle déduite de metadata_cc', () => {
+        const chaine = [{ niveau: 0, auteur: 'Marie', nomItem: 'Grille de Marie' }];
+        const pkg = win.partageFormat.construirePackage(grilleFixture(), {
+            type: 'grille', identiteAuteur: 'Grégoire', chaineAttribution: chaine
+        });
+        expect(pkg.manifest.chaineAttribution).toEqual(chaine);
+        // Et le package reste valide avec cette chaîne — sinon l'export
+        // s'arrêterait à l'auto-contrôle au lieu d'émettre.
+        expect(win.partageValidation.validerPackage(pkg).valide).toBe(true);
+    });
+
+    it('la chaîne fournie est CLONÉE — l\'appelant ne garde pas la main dessus', () => {
+        const chaine = [{ niveau: 0, auteur: 'Marie', nomItem: 'X' }];
+        const pkg = win.partageFormat.construirePackage(grilleFixture(), {
+            type: 'grille', identiteAuteur: 'G', chaineAttribution: chaine
+        });
+        chaine[0].auteur = 'Usurpateur';
+        expect(pkg.manifest.chaineAttribution[0].auteur).toBe('Marie');
+    });
+
+    it('sans option, la chaîne reste déduite de metadata_cc', () => {
+        const pkg = win.partageFormat.construirePackage(grilleFixture(), {
+            type: 'grille', identiteAuteur: 'Test P1'
+        });
+        expect(pkg.manifest.chaineAttribution).toEqual([
+            { niveau: 0, auteur: 'Test P1', nomItem: 'Grille de test' }
+        ]);
+    });
+});

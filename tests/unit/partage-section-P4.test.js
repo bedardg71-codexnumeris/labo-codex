@@ -31,6 +31,7 @@ let w;
 let compteurIds;
 let dernierConfirm;
 let reponseConfirm;
+let appelsExport;
 
 function charger() {
     db = fauxDb();
@@ -54,6 +55,20 @@ function charger() {
     // Registre des packages importés : le vrai module (partage-import.js) est
     // chargé à part dans les tests de suppression, pour vérifier que la
     // suppression à l'unité met le registre à jour au lieu de le laisser mentir.
+    //
+    // partageExport est stubbé : ce qui compte ici n'est pas qu'un .lcz sorte
+    // (couvert ailleurs), c'est CE QU'ON LUI PASSE — les lecteurs de la source
+    // partagée et la chaîne d'attribution.
+    appelsExport = [];
+    w.partageExport = {
+        exporterEntite: (entite, type, options) => {
+            appelsExport.push({ entite, type, options });
+            return Promise.resolve(true);
+        }
+    };
+    w.trustTofu = {
+        normaliserNomAuteur: (n) => String(n || '').normalize('NFC').replace(/\s+/g, ' ').trim().toLowerCase()
+    };
     return w;
 }
 
@@ -109,7 +124,8 @@ beforeEach(() => {
 describe('lot P4 · sentinelle exports', () => {
     it('expose l\'API attendue sur window.partageSection', () => {
         ['genererSectionHTML', 'dupliquer', 'dupliquerVersMesDocuments',
-            'consequencesSuppression', 'supprimerDuPartage', 'supprimer'].forEach(nom => {
+            'consequencesSuppression', 'supprimerDuPartage', 'supprimer',
+            'exporterPourPartager', 'chaineAttributionPour'].forEach(nom => {
             expect(w.partageSection[nom], nom).toBeTypeOf('function');
         });
     });
@@ -240,7 +256,10 @@ describe('suppression · le menu ⋮ est rendu sur toutes les bibliothèques', (
     it('chaque type propose « Supprimer » → partageSection.supprimer', () => {
         ['grille', 'echelle', 'cartouche', 'production', 'pratique'].forEach(type => {
             const html = w.partageSection.genererSectionHTML(type);
-            expect(html, type).toContain('[menu:Supprimer→partageSection.supprimer]');
+            // Le menu a gagné « Exporter pour partager » le 25 août (décision 3.2) :
+            // on tient la PRÉSENCE de l'entrée, pas la composition entière du menu
+            // — celle-ci est verrouillée par la sentinelle de ré-export plus bas.
+            expect(html, type).toContain('Supprimer→partageSection.supprimer]');
         });
     });
 });
@@ -406,5 +425,114 @@ describe('suppression · le registre cesse d\'annoncer ce qui n\'est plus là', 
         expect(w.partageImport).toBeUndefined();
         expect(w.partageSection.supprimerDuPartage('pratique', 'PARTAGE_abc_PR_1')).not.toBeNull();
         expect(db.getSync('partage_pratiques', [])).toHaveLength(0);
+    });
+});
+
+/* ===================================================================
+   RÉ-EXPORT D'UN ITEM PARTAGÉ — décision 3.2 de la porte #490
+
+   « Faut-il aussi pouvoir "Exporter pour partager" un item partagé ? »
+   Verdict de Grégoire : oui.
+
+   Ce que ces sentinelles tiennent, dans l'ordre du risque :
+     1. L'ATTRIBUTION. Un item importé n'a pas de `metadata_cc` — sa
+        provenance vit dans `inspireDe`. Mesuré au navigateur avant
+        d'écrire : la chaîne sortait VIDE, avec le seul nom de qui exporte.
+        Ré-émettre le travail d'un collègue ainsi est une faute de licence.
+     2. LA SOURCE DES DÉPENDANCES. Les cartouches partagées vivent dans une
+        collection PLATE, pas sous `cartouches_{grilleId}` : sans lecteurs
+        injectés, le package partirait AMPUTÉ, en silence.
+     3. Le menu ⋮ propose l'entrée, avant « Supprimer ».
+   =================================================================== */
+
+describe('ré-export · le menu ⋮ propose « Exporter pour partager »', () => {
+    it('l\'entrée existe dans les cinq bibliothèques, avant « Supprimer »', () => {
+        ['grille', 'echelle', 'cartouche', 'production', 'pratique'].forEach(type => {
+            const html = w.partageSection.genererSectionHTML(type);
+            expect(html, type).toContain(
+                '[menu:Exporter pour partager→partageSection.exporterPourPartager,'
+                + 'Supprimer→partageSection.supprimer]');
+        });
+    });
+});
+
+describe('ré-export · la source des dépendances est le namespace partagé', () => {
+    it('passe des lecteurs qui trouvent les cartouches de la collection PLATE', async () => {
+        await w.partageSection.exporterPourPartager('grille', 'PARTAGE_abc_GR_X');
+        expect(appelsExport).toHaveLength(1);
+        const { entite, type, options } = appelsExport[0];
+        expect(type).toBe('grille');
+        expect(entite.id).toBe('PARTAGE_abc_GR_X');
+        // C'est CE lecteur qui empêche le package de partir amputé.
+        expect(options.lecteurs.cartouchesDeGrille('PARTAGE_abc_GR_X').map(c => c.id))
+            .toEqual(['PARTAGE_abc_CART_1']);
+        expect(options.lecteurs.grilleParId('PARTAGE_abc_GR_X').nom).toBe('Grille partagée');
+    });
+
+    it('les lecteurs ne débordent pas sur une autre grille', async () => {
+        await w.partageSection.exporterPourPartager('grille', 'PARTAGE_abc_GR_X');
+        const { options } = appelsExport[0];
+        expect(options.lecteurs.cartouchesDeGrille('PARTAGE_abc_GR_AUTRE')).toEqual([]);
+        expect(options.lecteurs.grilleParId('PARTAGE_abc_GR_AUTRE')).toBeNull();
+    });
+
+    it('id introuvable → aucun export tenté', async () => {
+        await w.partageSection.exporterPourPartager('grille', 'FANTOME');
+        expect(appelsExport).toHaveLength(0);
+    });
+});
+
+describe('ré-export · l\'attribution d\'origine part avec le fichier', () => {
+    it('un item d\'un collègue : sa provenance devient un maillon', () => {
+        const item = db.getSync('partage_grilles', [])[0];
+        const chaine = w.partageSection.chaineAttributionPour(item, 'Grégoire Bédard');
+        expect(chaine).toEqual([
+            { niveau: 0, auteur: 'Marie', nomItem: 'Grille partagée' }
+        ]);
+    });
+
+    it('la chaîne du package REÇU est conservée, le maillon vient après', () => {
+        chargerRegistreReel();
+        db.setSync('partage_packagesImportes', [{
+            idImport: 'IMP_abc', auteur: { nom: 'Marie' },
+            chaineAttribution: [{ niveau: 0, auteur: 'Autrice première', nomItem: 'Ancêtre' }],
+            nbParType: { grille: 1 }, idsIntegres: { grille: ['PARTAGE_abc_GR_X'] },
+            itemPrincipal: { type: 'grille', nom: 'Grille partagée' }
+        }]);
+        const item = db.getSync('partage_grilles', [])[0];
+        const chaine = w.partageSection.chaineAttributionPour(item, 'Grégoire Bédard');
+        expect(chaine.map(m => m.auteur)).toEqual(['Autrice première', 'Marie']);
+    });
+
+    it('un auteur déjà nommé dans la chaîne reçue n\'est pas ajouté deux fois', () => {
+        chargerRegistreReel();
+        db.setSync('partage_packagesImportes', [{
+            idImport: 'IMP_abc', auteur: { nom: 'Marie' },
+            chaineAttribution: [{ niveau: 0, auteur: 'MARIE', nomItem: 'Grille partagée' }],
+            nbParType: { grille: 1 }, idsIntegres: { grille: ['PARTAGE_abc_GR_X'] },
+            itemPrincipal: { type: 'grille', nom: 'Grille partagée' }
+        }]);
+        const item = db.getSync('partage_grilles', [])[0];
+        expect(w.partageSection.chaineAttributionPour(item, 'Grégoire')).toHaveLength(1);
+    });
+
+    it('MON propre matériel réimporté : aucun maillon — le manifeste me nomme déjà', () => {
+        // Le cas réel de Grégoire : ses partagés portent « par Grégoire Bédard ».
+        const item = JSON.parse(JSON.stringify(db.getSync('partage_grilles', [])[0]));
+        item.inspireDe.auteur = 'Grégoire  BÉDARD';   // casse et espaces différentes
+        db.setSync('partage_grilles', [item]);
+        expect(w.partageSection.chaineAttributionPour(item, 'grégoire bédard')).toEqual([]);
+    });
+
+    it('sans trace de provenance, on n\'invente aucun maillon', () => {
+        const item = JSON.parse(JSON.stringify(db.getSync('partage_grilles', [])[0]));
+        delete item.inspireDe;
+        expect(w.partageSection.chaineAttributionPour(item, 'Grégoire')).toEqual([]);
+    });
+
+    it('l\'export reçoit la chaîne, pas seulement l\'entité', async () => {
+        await w.partageSection.exporterPourPartager('cartouche', 'PARTAGE_abc_CART_1');
+        expect(appelsExport[0].options.chaineAttribution)
+            .toEqual([{ niveau: 0, auteur: 'Marie', nomItem: 'Cartouche liée' }]);
     });
 });

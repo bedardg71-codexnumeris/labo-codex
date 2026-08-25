@@ -16,8 +16,9 @@
  * que lisent les sélecteurs.
  *
  * Non modifiable ne veut pas dire subi : le menu ⋮ de chaque carte porte
- * « Supprimer », qui retire la COPIE IMPORTÉE de `partage_*` (25 août 2026,
- * demande de Grégoire — voir le bloc « Suppression d'un item partagé »).
+ * « Exporter pour partager » et « Supprimer » (25 août 2026, demande de
+ * Grégoire puis décision 3.2 de la porte #490 — voir les blocs dédiés plus
+ * bas). Le ré-export transmet l'attribution d'origine avec le fichier.
  *
  * DUPLICATION AVEC DÉPENDANCES (cohérent avec le modèle d'export) :
  *  - grille      → copie + SES cartouches partagées (grilleId remappé,
@@ -40,8 +41,8 @@
  *
  * Tests : tests/unit/partage-section-P4.test.js (duplication par type,
  * dépendances, invariant « la duplication n'écrit pas dans partage_* »,
- * suppression et sa cascade) + flux Playwright dans
- * tests/integration/partage-import-rendu.spec.js.
+ * suppression et sa cascade, chaîne d'attribution du ré-export) + flux
+ * Playwright dans tests/integration/partage-import-rendu.spec.js.
  */
 (function () {
     'use strict';
@@ -444,6 +445,121 @@
     }
 
     // ------------------------------------------------------------------
+    // Ré-export d'un item partagé (Grégoire, décision 3.2 de la porte #490)
+    //
+    // « Faut-il aussi pouvoir "Exporter pour partager" un item partagé ? »
+    // — « oui ». Trois obstacles MESURÉS au navigateur avant d'écrire, pas
+    // supposés :
+    //   1. `partageExport.resoudreEntite` ne balaie que les collections de
+    //      l'utilisateur → l'export s'arrêtait sur « item introuvable » ;
+    //   2. `rassemblerDependances` rendait 0 cartouche là où 2 étaient liées
+    //      (les cartouches partagées vivent dans une collection PLATE, pas
+    //      sous `cartouches_{grilleId}`) → un package parti AMPUTÉ, en
+    //      silence. Le pire des trois ;
+    //   3. la chaîne d'attribution sortait VIDE, avec le seul nom de qui
+    //      exporte. Un item importé n'a pas de `metadata_cc` : sa provenance
+    //      vit dans `inspireDe`. Ré-émettre le travail d'un collègue sans
+    //      maillon serait une faute de licence, pas un détail.
+    // ------------------------------------------------------------------
+
+    /**
+     * Lecteurs de dépendances pour le namespace partagé, à passer au format.
+     * Même contrat que `partageFormat.LECTEURS_UTILISATEUR`, autre rangement.
+     */
+    function lecteursPartage() {
+        return {
+            cartouchesDeGrille: function (grilleId) {
+                return lire(CLES_STOCKAGE.cartouche).filter(function (c) {
+                    return c.grilleId === grilleId;
+                });
+            },
+            grilleParId: function (grilleId) {
+                var trouvee = null;
+                lire(CLES_STOCKAGE.grille).forEach(function (g) {
+                    if (g.id === grilleId) trouvee = g;
+                });
+                return trouvee;
+            }
+        };
+    }
+
+    function normaliserAuteur(nom) {
+        if (window.trustTofu && window.trustTofu.normaliserNomAuteur) {
+            return window.trustTofu.normaliserNomAuteur(nom);
+        }
+        return String(nom || '').normalize('NFC').replace(/\s+/g, ' ').trim().toLowerCase();
+    }
+
+    /** Entrée du registre d'import qui contient cet id, ou null. */
+    function importDOrigine(id) {
+        if (!window.partageImport || typeof window.partageImport.listerImports !== 'function') return null;
+        var trouve = null;
+        window.partageImport.listerImports().forEach(function (entree) {
+            var ids = entree.idsIntegres || {};
+            Object.keys(ids).forEach(function (type) {
+                if ((ids[type] || []).indexOf(id) !== -1) trouve = entree;
+            });
+        });
+        return trouve;
+    }
+
+    /**
+     * Chaîne d'attribution à ré-émettre pour un item partagé : la chaîne du
+     * package REÇU (mémorisée au registre à l'import), plus un maillon pour
+     * l'auteur d'origine si elle ne le nomme pas déjà.
+     *
+     * ⚠ Le maillon est OMIS quand l'auteur d'origine est celui qui exporte.
+     * Le cas est le sien : ses partagés portent « par Grégoire Bédard » — ce
+     * sont ses propres exports réimportés. Un maillon « Grégoire Bédard » sur
+     * un package de Grégoire Bédard n'apprend rien au destinataire et
+     * ressemble à une erreur, alors que le manifeste le nomme déjà comme
+     * auteur. L'identité est comparée avec la MÊME normalisation que le TOFU,
+     * pour ne pas inventer une seconde notion d'« même personne ».
+     */
+    partageSection.chaineAttributionPour = function (item, auteurExport) {
+        var entree = importDOrigine(item.id);
+        var chaine = (entree && Array.isArray(entree.chaineAttribution))
+            ? JSON.parse(JSON.stringify(entree.chaineAttribution)) : [];
+
+        var origine = (item.inspireDe && item.inspireDe.auteur) ? String(item.inspireDe.auteur) : '';
+        if (!origine) return chaine;
+        if (auteurExport && normaliserAuteur(origine) === normaliserAuteur(auteurExport)) return chaine;
+
+        var dejaNomme = chaine.some(function (maillon) {
+            return maillon && normaliserAuteur(maillon.auteur) === normaliserAuteur(origine);
+        });
+        if (dejaNomme) return chaine;
+
+        chaine.push({
+            niveau: chaine.length,
+            auteur: origine,
+            nomItem: String((item.inspireDe && item.inspireDe.nom) || nomDe(item))
+        });
+        return chaine;
+    };
+
+    /** data-action="partageSection.exporterPourPartager" param=type param2=id */
+    partageSection.exporterPourPartager = function (type, id) {
+        var item = trouverPartage(type, id);
+        if (!item) {
+            console.error('[partage-section] Item partagé introuvable :', type, id);
+            return Promise.resolve(false);
+        }
+        if (!window.partageExport || typeof window.partageExport.exporterEntite !== 'function') {
+            console.error('[partage-section] partageExport.exporterEntite indisponible');
+            return Promise.resolve(false);
+        }
+
+        var auteurExport = (window.BibliothequeUI && window.BibliothequeUI.obtenirAuteurActif)
+            ? window.BibliothequeUI.obtenirAuteurActif() : '';
+
+        return window.partageExport.exporterEntite(item, type, {
+            lecteurs: lecteursPartage(),
+            chaineAttribution: partageSection.chaineAttributionPour(item, auteurExport)
+        });
+    };
+
+    // ------------------------------------------------------------------
     // Handler data-action (bouton « Dupliquer » des cartes)
     // ------------------------------------------------------------------
 
@@ -504,6 +620,13 @@
                     title: 'Créer une copie modifiable dans tes documents (l\'original partagé reste intact)'
                 },
                 actionsMenu: [{
+                    label: 'Exporter pour partager',
+                    action: 'partageSection.exporterPourPartager',
+                    param: type,
+                    param2: item.id,
+                    classe: 'btn-secondaire',
+                    title: 'Générer un fichier .lcz signé — l\'attribution d\'origine part avec lui'
+                }, {
                     label: 'Supprimer',
                     action: 'partageSection.supprimer',
                     param: type,
@@ -518,8 +641,8 @@
             '<p style="color: var(--gris-clair); font-size: 0.9em; margin-bottom: 12px;">' +
                 'Importés par fichier .lcz, non modifiables ici. « Dupliquer » crée une copie ' +
                 'modifiable dans tes documents — l\'attribution d\'origine est conservée. ' +
-                'Le menu ⋮ supprime la copie importée ; pour retirer un package entier : ' +
-                'Réglages › Données.' +
+                'Le menu ⋮ retransmet un item à un collègue ou supprime la copie importée ; ' +
+                'pour retirer un package entier : Réglages › Données.' +
             '</p>' +
             cartes;
     };
