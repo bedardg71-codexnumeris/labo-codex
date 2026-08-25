@@ -162,6 +162,106 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Dernier ID : **#491**.
   Dernier ID : **#490**.
 
+### Chantier — 25 août 2026, après-midi (le document de consignes et les gabarits)
+
+> Un seul fil : ce que Grégoire remet à ses étudiant·es. Plan complet dans
+> `plans de travail/PLAN-document-consignes-production.md`.
+
+- [x] **#496 — « Préparer le PDF » mène à l'aperçu, pas à un formulaire qui redemande.**
+  Le bouton lit la grille, l'échelle et la cartouche DANS la production ouverte. Le formulaire
+  qu'il ouvrait redemandait ces trois choix ET se pré-remplissait avec les DERNIERS RÉGLAGES
+  MÉMORISÉS : ouvrir l'artefact 1 après une dissertation proposait la grille de la dissertation,
+  à un clic de l'impression. Le bouton a aussi quitté l'en-tête de section pour venir au-dessus
+  des trois choix dont il dépend.
+
+- [x] **#497 — Un seul document, deux rendeurs (étapes 2 à 4).**
+  `genererApercuCombine` et `genererPDFCombine` bâtissaient chacun leur mise en page à partir des
+  mêmes données : c'est la cause de fond du « l'aperçu ne ressemble pas au PDF », pas un défaut de
+  CSS. `construireModeleDocument` décide le CONTENU ; les rendeurs ne décident plus que la
+  PRÉSENTATION. Golden master posé AVANT (6 documents de référence) : l'extraction est un no-op
+  PROUVÉ, et un ratchet empêche la duplication de repousser.
+  **Vraies pages** : le CSS avait les proportions lettre mais en `min-height` — la page s'étirait
+  sans fin. Hauteur fixe, feuilles empilées, consignes seules sur la page 1 (décision de Grégoire).
+  Trois crans cumulatifs ; un cran sans matière est DÉSACTIVÉ et dit pourquoi.
+  **Disposition au choix** : « Deux colonnes » reprend le format de son Manuel, bandeaux compris —
+  ce qui rend deux colonnes lisibles n'est pas leur nombre, c'est que chaque bloc annonce ce qu'il
+  est. Le « continu » empile enfin au lieu de poser les blocs en `flex: 1` quoi qu'il arrive.
+  ⚠ L'aperçu ne DÉCOUPE PAS un tableau qui déborde : il annonce que le PDF ajoutera une page.
+  Une seconde pagination contredirait jsPDF au premier cas limite.
+  ⚠ Trois écarts trouvés EN USAGE RÉEL : le cran ne voyageait pas jusqu'au fichier exporté ; la
+  règle de pagination n'existait que dans l'aperçu (la grille commençait au bas de la page 1) ; et
+  le badge CC faisait **144 mm de large sur une page de 216** — depuis avril, jamais vu faute
+  d'export. Le titre, lui, ne peut plus recouvrir les infos du cours : sa largeur est ce qui reste
+  une fois le bloc de droite MESURÉ.
+  ⚠ Incident : `genererPDFCombine` dupliquée en cours de route, une borne de découpage apparaissant
+  deux fois dans le fichier. Détectée par la sentinelle W2.f, réparée depuis une sauvegarde,
+  réappliquée avec des ancres dont l'unicité est ASSERTÉE.
+
+- [x] **#498 — La date de remise, toujours dans les consignes.**
+  Après le détail, avant le contexte de rétroaction. Plusieurs groupes ⇒ TOUTES les dates, nommées
+  (en choisir une donnerait à la moitié des étudiant·es une date qui n'est pas la leur, sur le
+  document qui la leur annonce). Sans date ⇒ « À préciser » plutôt que le silence. Une date NON
+  assignée s'affiche : ce document EST l'acte de transmission.
+
+- [x] **#499 — Des champs supplémentaires, nommés par l'utilisateur.**
+  Le gabarit offrait quatre blocs figés ; le document en demande d'autres — « Format et mise en
+  page », « Remise du travail », « À vérifier ». Les ajouter en dur aurait résolu CE cas et laissé
+  le suivant sans réponse. Portée : par production, jamais partagés — une définition unique au
+  niveau du cours aurait changé TOUTES les productions, y compris celles déjà transmises.
+  ▣ L'écran fait foi pendant l'édition : chaque geste relit les champs affichés, sans quoi taper un
+  titre puis cliquer « + Nouveau champ » effacerait ce qu'on vient d'écrire.
+
+- [x] **#500 — Les trois champs d'origine prennent la forme des champs libres.**
+  `objectif`, `tache` et `detailTache` sont lus à **53 endroits**, dont la rétroaction et la
+  synthèse qui composent les commentaires reçus par les étudiant·es. Les fondre dans
+  `champsPersonnalises` aurait demandé de migrer les productions ET de réécrire ces 53 sites, y
+  compris le texte de rétroactions déjà transmises. Décision : même FORME, nom et ordre modifiables,
+  stockage intouché, pas de suppression.
+  ⚠ Le filet d'abord : onze accès lisaient ces champs par `getElementById` SANS garde. Écrits en
+  dur, `.value` ne pouvait pas échouer ; RENDUS, ils n'existent qu'après le rendu.
+  ⚠ Un trou dans ma propre sentinelle : en retirant le garde-fou « un bloc ancré ne se supprime
+  pas », AUCUN test n'a rougi. Comblé.
+
+- [x] **#501/#502 — Ménage des écrans gris.**
+  « Préparer le PDF » retiré des grilles, échelles et cartouches ; « Exporter en PDF » retiré du bas
+  du gabarit, avec son code mort. ⚠ Ce bouton PARTAGEAIT son action avec « Exporter la liste en
+  PDF » de l'en-tête : le cibler par action aurait retiré le mauvais.
+  Cartouches : la Description part, la matrice remonte sous le nom, et les DEUX contextes DESCENDENT
+  sous elle au lieu de disparaître — `contexte` est le paragraphe qui OUVRE chaque rétroaction reçue
+  par un étudiant. ⚠ La ligne qui l'enregistrait serait devenue `description = ''` : celle des
+  cartouches déjà remplies aurait été effacée au premier enregistrement.
+
+- [x] **#503 — Les actions de fiche montent dans la barre de section** (production, grille, échelle).
+  Elles ne portaient AUCUNE règle d'affichage : elles tiraient leur visibilité du formulaire qui les
+  CONTENAIT. Sorties de lui, elles resteraient visibles sur un écran vide — dont « Supprimer ».
+  `lierActionsAuFormulaire` OBSERVE le formulaire plutôt que de se greffer sur chacun des endroits
+  qui l'ouvrent : quel que soit le chemin, la barre suit.
+
+- [x] **#504 — Un seul patron pour monter, descendre et retirer un bloc.**
+  Sept endroits rendaient le même geste, chacun à sa façon — jusqu'à `btn-principal` (la couleur
+  d'« Enregistrer ») pour monter une ligne d'une place. `js/ui-blocs.js` : un rendu, sept appels.
+  ⚠ Module à part et non `main.js` : cinq sentinelles chargent leur module dans un sandbox.
+  ⚠ Défaut trouvé en chemin : deux boutons de l'échelle portaient DEUX attributs `class` chacun —
+  le navigateur ignore le second, le padding compact n'avait jamais été appliqué.
+
+- [x] **#505 — Le rendu des niveaux levait une ReferenceError, l'écran restait vide.**
+  `niveaux.length` là où la variable s'appelle `echelle.niveaux`. **Aucun des 3 239 tests ne l'a
+  vue** : toutes les gardes de #504 lisaient le SOURCE, aucune n'EXÉCUTAIT un rendu. Un test qui lit
+  du texte ne peut pas voir une variable qui n'existe pas. Sentinelle qui EXÉCUTE les quatre rendus.
+
+- [x] **#506/#507 — Astérisque « obligatoire », marque « recommandé », et leur légende.**
+  « Obligatoire » établi sur le CODE : un champ n'est marqué que si une validation refuse
+  l'enregistrement quand il est vide. ⚠ ÉCART AVEC LA PRÉMISSE : Grégoire donnait « Activité
+  d'apprentissage » comme indispensable ; elle est lue à plus de quarante endroits, TOUJOURS avec un
+  repli. Rien ne casse sans elle — elle est donc « recommandée », avec l'objectif et la tâche : ces
+  trois-là produisent chacun une ligne de l'en-tête de rétroaction qui, vide, n'existe pas et que
+  rien ne signale. Une LÉGENDE accompagne les deux marques : deux astérisques de couleurs
+  différentes sans elle forment une énigme.
+  Les gardes tiennent les deux mensonges — un champ bloquant sans marque, et un champ facultatif
+  avec marque (le plus discret : rien ne rougit, et l'utilisateur ne le saura jamais).
+
+  Vitest **3262/3262** (312 fichiers). Dernier ID : **#507**.
+
 ### Chantier — 25 août 2026 (le pont carte d'alignement ↔ productions)
 
 - [x] **#492 — Le sélecteur « Production » de l'Inspecteur ne montrait rien, et personne ne pouvait le voir.**

@@ -262,3 +262,56 @@ ailleurs une information qu'il attend à cet endroit.
 ⚠ **Une date NON assignée s'affiche.** Ce document EST l'acte de transmission : au moment de
 l'imprimer, la case « consignes transmises » n'est pas encore cochée. La taire obligerait à déclarer
 transmis ce qui ne l'est pas encore.
+
+---
+
+## 10. Clôture du chantier (25 août 2026, 17 h)
+
+Les quatre étapes du plan sont livrées, plus le chantier des gabarits qui en a découlé.
+Tout est vérifié au navigateur par Grégoire, étape par étape.
+
+| # | Livré | Vérifié |
+|---|---|---|
+| 496 | Le bouton mène à l'aperçu | ✅ |
+| 497 | Modèle unique, vraies pages, trois crans, disposition | ✅ |
+| 498 | La date de remise dans les consignes | ✅ |
+| 499 | Champs supplémentaires nommés par l'utilisateur | ✅ |
+| 500 | Les trois champs d'origine prennent la même forme | ✅ |
+| 501/502 | Ménage des écrans gris | ✅ |
+| 503 | Actions de fiche en tête (3 écrans) | ✅ |
+| 504 | Un patron pour monter/descendre/retirer | ✅ |
+| 505 | Le rendu des niveaux réparé | ✅ |
+| 506/507 | Obligatoire, recommandé, légende | ✅ |
+
+### Ce que ce chantier laisse comme méthode
+
+▣ **Le golden master AVANT le refactoring.** #497 étape 2 aurait été un pari sans lui ; il a rendu
+l'extraction PROUVÉE plutôt qu'espérée, et il a servi de témoin aux étapes 3 et 4, qui changeaient
+le document délibérément.
+
+▣ **Une ancre de découpage se COMPTE avant de servir.** `genererPDFCombine` a été dupliquée parce
+qu'un commentaire pris pour borne apparaissait deux fois. Depuis, chaque remplacement assertait
+son unicité — et l'assertion a arrêté deux autres pièges le jour même, dont une chaîne à 8 espaces
+qui était une sous-chaîne de la même à 12.
+
+▣ **Un test qui lit du SOURCE ne voit pas une variable qui n'existe pas.** #505 : l'écran des
+échelles est resté vide devant 3 239 tests verts. Les gardes de #504 vérifiaient les classes, les
+icônes, les appels — aucune n'exécutait un rendu. Toute garde d'interface a maintenant son pendant
+qui APPELLE la fonction.
+
+▣ **Trois fois le même piège de harnais** a fini en helper partagé
+(`tests/unit/_helpers/element-echappant.js`) : `escapeHtml` échappe via le navigateur, et un faux
+élément où `textContent` et `innerHTML` sont indépendants rend TOUT le document vide, en silence.
+
+▣ **Deux prémisses corrigées par l'audit**, et c'est ce qui a évité deux dégâts : le « contexte »
+des cartouches (qui ouvre chaque rétroaction) et l'« activité d'apprentissage » (toujours lue avec
+un repli). Dans les deux cas, la demande partait d'une lecture plausible et fausse.
+
+### ⏳ Reste ouvert
+
+- **#495** — la baseline Playwright annonce une régression qui n'existe pas (WebKit refuse
+  `version.json` en `file://`). Chaque push de ce chantier a demandé `--no-verify`. Un garde-fou
+  qui crie au loup se fait contourner : à traiter avant qu'il devienne décoratif.
+- 📐 Le défaut de disposition est **Continu** ; le Manuel de Grégoire est en deux colonnes. À
+  trancher — l'enjeu ne porte que sur la première ouverture, le réglage étant mémorisé.
+- 📐 L'emoji 📁 de `getTypeLabel('portfolio')`, déplacé dans `TYPES_PRODUCTION` sans être retiré.
