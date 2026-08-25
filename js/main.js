@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0825-1521';
+window._SCRIPT_BUILD_main = '0825-1608';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -51,6 +51,45 @@ window.genererIdUnique = (function() {
  * @param {HTMLElement|null} element - L'élément à montrer/cacher
  * @param {boolean} show - true pour montrer, false pour cacher
  */
+/**
+ * LIE UNE BARRE D'ACTIONS À SON FORMULAIRE (#503, 25 août 2026).
+ *
+ * ⚠⚠ POURQUOI UN OBSERVATEUR PLUTÔT QU'UN APPEL À CHAQUE OUVERTURE. Les boutons
+ * d'une fiche — Dupliquer, Supprimer, Annuler, Enregistrer — tiraient leur
+ * visibilité du formulaire qui les CONTENAIT : il disparaissait, ils
+ * disparaissaient avec lui. Remontés dans la barre de section, ils n'ont plus
+ * ce parent, et rien ne commande leur affichage.
+ *
+ * ⮕ Les accrocher à chaque endroit qui ouvre ou ferme le formulaire aurait
+ * demandé de tous les trouver — et d'en retrouver un de plus au prochain
+ * chantier, le jour où quelqu'un ajoute un chemin d'ouverture sans savoir que
+ * des boutons en dépendent ailleurs. L'observateur, lui, regarde le formulaire :
+ * quel que soit le chemin, la barre suit.
+ *
+ * @param {string} idFormulaire - le formulaire observé
+ * @param {string} idActions - la barre qui doit le suivre
+ */
+window.lierActionsAuFormulaire = function(idFormulaire, idActions) {
+    const formulaire = document.getElementById(idFormulaire);
+    const actions = document.getElementById(idActions);
+    if (!formulaire || !actions) return null;
+
+    const synchroniser = function() {
+        // `u-hide` OU un style inline : les deux ont cours dans le projet, et
+        // ne regarder que l'un des deux laisserait la barre visible sur un
+        // écran vide dans la moitié des cas.
+        const masque = formulaire.classList.contains('u-hide')
+            || formulaire.style.display === 'none';
+        actions.classList.toggle('u-hide', masque);
+        actions.style.display = masque ? 'none' : '';
+    };
+
+    synchroniser();
+    const observateur = new MutationObserver(synchroniser);
+    observateur.observe(formulaire, { attributes: true, attributeFilter: ['class', 'style'] });
+    return observateur;
+};
+
 window.toggleDisplay = function(element, show) {
     if (!element) return;
     if (show) {
@@ -216,6 +255,10 @@ window.appliquerPratiqueAuCoursActive = function() {
     }
 };
 document.addEventListener('DOMContentLoaded', function () {
+
+    // #503 — les actions de la fiche de production suivent leur formulaire,
+    // maintenant qu'elles vivent dans la barre de section.
+    window.lierActionsAuFormulaire('formulaireProduction', 'actionsFicheProduction');
 
     // ===============================
     // FONCTION UTILITAIRE : Recalcul indices C-P

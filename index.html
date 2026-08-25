@@ -4542,6 +4542,39 @@
                                 <button id="btnExporterProductionsPDF" data-action="exporterProductionsEnPDF" class="btn btn-secondaire btn-export-pdf" title="Exporter la liste des productions en PDF">
                                     <img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Exporter la liste en PDF
                                 </button>
+                                <!-- ═══════════════════════════════════════════════════════════
+                                     #503 (25 août 2026) — LES ACTIONS DE LA FICHE ONT MONTÉ ICI.
+                                     Demande de Grégoire : les retrouver en haut, à côté de
+                                     « + Nouvelle production », plutôt qu'au bas d'un formulaire
+                                     qu'il faut parcourir pour enregistrer.
+                                     ⚠ Elles n'ont de sens QUE si une fiche est ouverte : hors du
+                                     formulaire, plus rien ne commande leur affichage. C'est
+                                     `lierActionsAuFormulaire` (main.js) qui s'en charge, en
+                                     observant le formulaire lui-même — pas en s'accrochant à
+                                     chacun des endroits qui l'ouvrent ou le ferment.
+                                     ═══════════════════════════════════════════════════════════ -->
+                                <div id="actionsFicheProduction" class="u-flex-gap-10 u-hide" style="display: none">
+                                <div class="u-flex-gap-10">
+                                    <!-- Boutons gauche (actions sur la production) -->
+                                    <div class="u-flex-gap-10">
+                                        <button id="btnDupliquerProduction" class="btn btn-secondaire u-hide" data-action="dupliquerProductionActive" title="Créer une copie de cette production">
+                                            Dupliquer
+                                        </button>
+                                        <button id="btnSupprimerProduction" class="btn btn-supprimer u-hide" data-action="supprimerProductionActive" title="Supprimer cette production">
+                                            Supprimer
+                                        </button>
+                                    </div>
+                                    <!-- Boutons droite (actions principales) -->
+                                    <div class="u-flex-gap-10">
+                                        <button class="btn btn-annuler" data-action="annulerFormProduction">Annuler</button>
+                                        <button class="btn btn-confirmer" data-action="sauvegarderProduction">
+                                            <span id="btnTexteEvaluation">Enregistrer</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                </div>
+
                                 <button data-action="creerNouvelleProduction" class="btn btn-principal">
                                     + Nouvelle production
                                 </button>
@@ -4686,36 +4719,14 @@
                                      ═══════════════════════════════════════════════════════════ -->
 
                                 <!-- ═══════════════════════════════════════════════════════════
-                                     SECTION 4 : OBJECTIFS PÉDAGOGIQUES
-                                     Objectif d'apprentissage + Description de la tâche
+                                     SECTION 4 : LES BLOCS DE CONSIGNES (#500, 25 août 2026)
+                                     Objectif, Description de la tâche et Détail de la tâche ne sont
+                                     plus écrits ici : ils sont RENDUS par `rendreBlocsConsignes`,
+                                     dans la même liste que les champs ajoutés par l'utilisateur.
+                                     ⚠ Ils gardent leurs identifiants (productionObjectif, etc.) —
+                                     onze sites du projet les lisent par getElementById, et la
+                                     rétroaction en dépend.
                                      ═══════════════════════════════════════════════════════════ -->
-                                <div class="u-mb-20" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
-                                    <div class="groupe-form">
-                                        <label data-tooltip="cn-prod-objectif">Objectif d'apprentissage
-                                            <button class="btn-aide-contextuelle" data-aide="objectif-verbes-actifs" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
-                                        </label>
-                                        <p class="u-texte-petit" style="color: var(--gris-moyen); margin: 0 0 6px 0">À la fin de cette activité, l'étudiant·e sera capable de...</p>
-                                        <textarea id="productionObjectif" class="controle-form" rows="3"
-                                            placeholder="Ex: Reconnaître le propos du texte"></textarea>
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label data-tooltip="cn-prod-tache">Description de la tâche</label>
-                                        <p class="u-texte-petit" style="color: var(--gris-moyen); margin: 0 0 6px 0">La tâche permet de démontrer l'atteinte de l'objectif...</p>
-                                        <textarea id="productionTache" class="controle-form" rows="3"
-                                            placeholder="Ex: Rédiger un texte de 500 mots..."></textarea>
-                                    </div>
-                                </div>
-
-                                <!-- Détail de la tâche : consignes précises (pleine largeur) -->
-                                <div class="groupe-form u-mb-20">
-                                    <label for="productionDetailTache" data-tooltip="cn-prod-detail-tache">Détail de la tâche
-                                        <button class="btn-aide-contextuelle" data-aide="detail-tache-qualite" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
-                                    </label>
-                                    <p class="u-texte-petit" style="color: var(--gris-moyen); margin: 0 0 6px 0">Les consignes précises remises à l'étudiant·e : étapes, contraintes, format attendu.</p>
-                                    <textarea id="productionDetailTache" class="controle-form" rows="5"
-                                        placeholder="Ex : format APA, 4 à 6 pages, sources primaires obligatoires…"></textarea>
-                                </div>
-
                                 <!-- ═══════════════════════════════════════════════════════════
                                      CHAMPS SUPPLÉMENTAIRES (#499, 25 août 2026)
                                      Demande de Grégoire : des blocs qu'il nomme lui-même et qui
@@ -4770,28 +4781,6 @@
                                      ═══════════════════════════════════════════════════════════ -->
                                 <!-- Ancien div champsPortfolio gardé pour compatibilité JS (caché) -->
                                 <div id="champsPortfolio" class="u-hide"></div>
-                                <div class="btn-groupe u-flex-between">
-                                    <!-- Boutons gauche (actions sur la production) -->
-                                    <div class="u-flex-gap-10">
-                                        <button id="btnDupliquerProduction" class="btn btn-secondaire u-hide" data-action="dupliquerProductionActive" title="Créer une copie de cette production">
-                                            Dupliquer
-                                        </button>
-                                        <button id="btnSupprimerProduction" class="btn btn-supprimer u-hide" data-action="supprimerProductionActive" title="Supprimer cette production">
-                                            Supprimer
-                                        </button>
-                                        <button id="btnExporterPDFProduction" class="btn btn-secondaire u-hide" data-action="exporterProductionsEnPDF" title="Exporter les productions en PDF">
-                                            Exporter en PDF
-                                        </button>
-                                    </div>
-                                    <!-- Boutons droite (actions principales) -->
-                                    <div class="u-flex-gap-10">
-                                        <button class="btn btn-annuler" data-action="annulerFormProduction">Annuler</button>
-                                        <button class="btn btn-confirmer" data-action="sauvegarderProduction">
-                                            <span id="btnTexteEvaluation">Enregistrer</span>
-                                        </button>
-                                    </div>
-                                </div>
-
                             </div><!-- Fin du formulaireProduction -->
 
                             <!-- Conteneurs cachés pour compatibilité -->
@@ -4850,9 +4839,6 @@
 
                             <!-- Boutons actions en haut à droite -->
                             <div class="u-flex-gap-10 u-mb-20 u-text-right" style="justify-content: flex-end">
-                                <button data-action="afficherFormulairePreparationPDF" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
-                                    <img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Pr&eacute;parer le PDF
-                                </button>
                                 <button data-action="creerNouvelleGrille" class="btn btn-principal">
                                     + Nouvelle grille
                                 </button>
@@ -5023,9 +5009,6 @@
 
                             <!-- Boutons actions en haut à droite -->
                             <div class="u-flex-gap-10 u-mb-20 u-text-right" style="justify-content: flex-end">
-                                <button data-action="afficherFormulairePDFDepuisEchelle" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
-                                    <img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Pr&eacute;parer le PDF
-                                </button>
                                 <button data-action="creerNouvelleEchelle" class="btn btn-principal">
                                     + Nouvelle échelle
                                 </button>
@@ -5317,9 +5300,6 @@
 
                                 <!-- Boutons actions en haut à droite -->
                                 <div class="u-flex-gap-10 u-mb-20 u-text-right" style="justify-content: flex-end">
-                                    <button data-action="afficherFormulairePDFDepuisCartouche" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
-                                        <img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Pr&eacute;parer le PDF
-                                    </button>
                                     <button data-action="creerNouvelleCartouche" class="btn btn-principal">
                                         + Nouvelle cartouche
                                     </button>
@@ -5380,26 +5360,6 @@
                                 <div id="checkboxesPratiquesCartouche" style="flex-shrink: 0; align-self: flex-end;"></div>
                             </div>
 
-                            <div class="groupe-form">
-                                <label>Description (optionnel) :</label>
-                                <input type="text" id="descriptionCartouche" class="controle-form"
-                                    placeholder="Ex: Cartouche pour la dissertation argumentative">
-                            </div>
-
-                            <div class="groupe-form">
-                                <label data-tooltip="cn-cartouche-contexte">Contexte de la rétroaction générale (optionnel) :</label>
-                                <textarea id="contexteCartouche" class="controle-form" rows="3"
-                                    placeholder="Ex: Le commentaire associé à ton évaluation est général. Contextualise-le en fonction de ta production."></textarea>
-                                <small class="u-texte-petit" style="color: var(--gris-moyen)">Apparaît au-dessus du tableau des critères dans le PDF de rétroaction.</small>
-                            </div>
-
-                            <div class="groupe-form">
-                                <label>Contexte de la rétroaction spécifique (optionnel) :</label>
-                                <textarea id="contexteSpecifiqueCartouche" class="controle-form" rows="3"
-                                    placeholder="Ex: Les tampons et codes d'erreur ci-dessous identifient des points précis dans ta production."></textarea>
-                                <small class="u-texte-petit" style="color: var(--gris-moyen)">Apparaît au-dessus des tampons et erreurs de français dans le PDF de rétroaction.</small>
-                            </div>
-
                             <!-- Liste des cartouches existantes (DÉSACTIVÉ - remplacé par sidebar) -->
                             <div id="listeCartouchesExistants" class="d-none-important">
                                 <div id="listeCartouchesContainer"></div>
@@ -5415,6 +5375,33 @@
                             <div id="matriceContainer" class="overflow-x-auto">
                                 <!-- La matrice sera générée dynamiquement ici par afficherMatriceRetroaction() -->
                             </div>
+
+                            <!-- ═══════════════════════════════════════════════════════════
+                                 #502 (25 août 2026) — LES DEUX CONTEXTES ONT ÉTÉ DESCENDUS ICI.
+                                 Grégoire demandait de les retirer, les champs libres de la
+                                 production les remplaçant dans le document de consignes. Or ils
+                                 servent AUSSI ailleurs : `contexte` est le paragraphe qui OUVRE
+                                 chaque rétroaction reçue par un étudiant (evaluation-retroaction.js),
+                                 et `contexteSpecifique` alimente la synthèse. Les retirer aurait
+                                 coupé cette introduction pour toute cartouche neuve.
+                                 ⮕ Décision du 25 août : on les garde, on les DÉPLACE. Le haut de
+                                 l'écran devient ce qu'il demande — échelles, nom, matrice — et ce
+                                 qui sert à la rétroaction vient après elle.
+                                 ═══════════════════════════════════════════════════════════ -->
+                            <div class="groupe-form">
+                                <label data-tooltip="cn-cartouche-contexte">Contexte de la rétroaction générale (optionnel) :</label>
+                                <textarea id="contexteCartouche" class="controle-form" rows="3"
+                                    placeholder="Ex: Le commentaire associé à ton évaluation est général. Contextualise-le en fonction de ta production."></textarea>
+                                <small class="u-texte-petit" style="color: var(--gris-moyen)">Apparaît au-dessus du tableau des critères dans le PDF de rétroaction.</small>
+                            </div>
+
+                            <div class="groupe-form">
+                                <label>Contexte de la rétroaction spécifique (optionnel) :</label>
+                                <textarea id="contexteSpecifiqueCartouche" class="controle-form" rows="3"
+                                    placeholder="Ex: Les tampons et codes d'erreur ci-dessous identifient des points précis dans ta production."></textarea>
+                                <small class="u-texte-petit" style="color: var(--gris-moyen)">Apparaît au-dessus des tampons et erreurs de français dans le PDF de rétroaction.</small>
+                            </div>
+
 
                             <div style="margin-top: 12px;">
                                 <button class="btn btn-secondaire btn-compact" data-action="ouvrirImportTxtCartouche">
@@ -14399,17 +14386,17 @@
     <script src="js/donnees-v2.js?v=20260821a"></script> <!-- Refonte nav SP5 : afficherSection calendrier -->
     <script src="js/etudiants.js?v=20260822a"></script>
     <script src="js/productions-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/productions.js?v=20260825a"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
+    <script src="js/productions.js?v=20260825c"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
     <script src="js/productions-import-export.js?v=20260824a"></script> <!-- Refactor étape 3 (16 mai 2026) : extrait de productions.js (lignes 2630-3276) -->
-    <script src="js/productions-liste.js?v=20260824b"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js -->
+    <script src="js/productions-liste.js?v=20260825b"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js -->
     <script src="js/productions-bibliotheque-ui.js?v=20260824b"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide -->
     <script src="js/grilles-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/grilles.js?v=20260824d"></script> <!-- Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée -->
     <script src="js/echelles-bibliotheque.js?v=20260821a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/echelles.js?v=20260824c"></script> <!-- Fix preview « Voir les échelles » : display:none inline → classe u-hide -->
     <script src="js/cartouches-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/cartouches.js?v=20260824f"></script> <!-- Beta 99.42 b0512-1012 : #159 retiré (onglets + aperçu legacy supprimés) -->
-    <script src="js/export-pdf.js?v=20260825a"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
+    <script src="js/cartouches.js?v=20260825a"></script> <!-- Beta 99.42 b0512-1012 : #159 retiré (onglets + aperçu legacy supprimés) -->
+    <script src="js/export-pdf.js?v=20260825b"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
     <script src="js/cours.js?v=20260823a"></script> <!-- Beta 99.74 b0529-1016 : chantier 0 refonte — _diagnostiquerModeleCours (read-only) -->
     <script src="js/contexte.js?v=2026062701"></script> <!-- Beta 95.2 : Support groupe-cours -->
 
@@ -14595,11 +14582,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260825e"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260825g"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260825e"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260825g"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>

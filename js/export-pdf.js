@@ -1996,32 +1996,48 @@ function datesDeRemise(production) {
  * @returns {Array<{titre: string, texte: string}>}
  */
 function blocsInformationDocument(cartouche, options) {
-    const blocs = [];
     const prod = options.production;
+    const parCle = {};
+
+    // ⚠ #500 — le TITRE d'un bloc ancré est celui que Grégoire a écrit, s'il
+    // en a écrit un. `titresBlocs` ne contient que ce qui DIFFÈRE du défaut :
+    // un libellé non touché suit l'application quand elle le fait évoluer.
+    const titreAncre = (cle, defaut) => {
+        const pose = prod && prod.titresBlocs && prod.titresBlocs[cle];
+        return (pose && String(pose).trim()) ? String(pose).trim() + ' :' : defaut;
+    };
 
     if (prod && options.inclureObjectif && prod.objectif) {
-        blocs.push({ titre: 'Objectif d\'apprentissage :', texte: prod.objectif });
+        parCle.objectif = { titre: titreAncre('objectif', 'Objectif d\'apprentissage :'), texte: prod.objectif };
     }
     if (prod && options.inclureDescription && prod.tache) {
-        blocs.push({ titre: 'Description de la tâche :', texte: prod.tache });
+        parCle.tache = { titre: titreAncre('tache', 'Description de la tâche :'), texte: prod.tache };
     }
     if (prod && options.inclureDetailTache && prod.detailTache) {
-        blocs.push({ titre: 'Détail de la tâche :', texte: prod.detailTache });
+        parCle.detailTache = { titre: titreAncre('detailTache', 'Détail de la tâche :'), texte: prod.detailTache };
     }
-    // #499 — les champs que Grégoire a nommés lui-même, dans SON ordre. Ils
-    // viennent après les consignes du gabarit et avant la date : l'étudiant lit
-    // ce qu'on lui demande, puis comment le rendre, puis quand.
-    // ⚠ Un champ sans titre n'entre pas : il s'afficherait comme un bandeau vide
-    // au-dessus d'un texte orphelin. Un champ nommé mais vide n'entre pas non
-    // plus — dans le GABARIT c'est une section en préparation, dans le document
-    // remis ce serait une promesse sans contenu.
+
+    // #499 — les champs libres. Un champ sans titre OU sans contenu n'entre pas :
+    // il s'afficherait comme un bandeau vide au-dessus du vide.
     if (prod && Array.isArray(prod.champsPersonnalises)) {
         prod.champsPersonnalises.forEach(champ => {
             const titre = champ && champ.titre ? String(champ.titre).trim() : '';
             const contenu = champ && champ.contenu ? String(champ.contenu).trim() : '';
-            if (titre && contenu) blocs.push({ titre: titre + ' :', texte: contenu });
+            if (titre && contenu) parCle[champ.id] = { titre: titre + ' :', texte: contenu };
         });
     }
+
+    // ⚠ #500 — L'ORDRE DU GABARIT FAIT FOI. Sans `ordreBlocs`, on garde celui
+    // d'origine : objectif, tâche, détail, puis les champs libres dans leur
+    // ordre de création. Un ordre enregistré peut être périmé — on ne prend que
+    // les blocs qui EXISTENT, et on ajoute à la fin ceux qu'il ne connaît pas.
+    const ordreDefaut = ['objectif', 'tache', 'detailTache'].concat(
+        (prod && Array.isArray(prod.champsPersonnalises) ? prod.champsPersonnalises : []).map(c => c.id));
+    const memorise = (prod && Array.isArray(prod.ordreBlocs)) ? prod.ordreBlocs : [];
+    const ordre = memorise.filter(ref => parCle[ref])
+        .concat(ordreDefaut.filter(ref => parCle[ref] && memorise.indexOf(ref) === -1));
+
+    const blocs = ordre.map(ref => parCle[ref]);
 
     // ⚠ La date de remise vient APRÈS les consignes et AVANT le contexte de
     // rétroaction : l'étudiant lit ce qu'on lui demande, puis quand le rendre.

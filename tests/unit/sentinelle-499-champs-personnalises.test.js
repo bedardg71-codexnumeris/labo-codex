@@ -115,6 +115,21 @@ describe('#499 · AA — rien de ce qui est saisi ne se perd', () => {
         expect(rendu).not.toContain('CHAMP-RETIRE');
     });
 
+    it('AA.f UN BLOC ANCRÉ NE SE SUPPRIME PAS', () => {
+        // `objectif`, `tache` et `detailTache` sont lus par la rétroaction et
+        // les exports — 53 sites. Le bouton × n'existe pas sur ces blocs, mais
+        // le garde-fou doit tenir si l'appel vient d'ailleurs (dispatcher,
+        // console, futur raccourci). Ce trou n'était couvert par rien : le
+        // break-test du 25 août est resté VERT en retirant la garde.
+        const { win, els } = charger([
+            { id: 'objectif', titre: "Objectif d'apprentissage", contenu: 'A' }
+        ]);
+        els['champsPersonnalisesListe'].innerHTML = 'INTACT';
+        win.supprimerChampPersonnalise('objectif');
+        expect(els['champsPersonnalisesListe'].innerHTML,
+            'aucun re-rendu : la demande est refusée avant tout effet').toBe('INTACT');
+    });
+
     it('AA.d Déplacer échange deux voisins, et refuse de sortir de la liste', () => {
         const { win, els } = charger([
             { id: 'C1', titre: 'Premier', contenu: 'A' },

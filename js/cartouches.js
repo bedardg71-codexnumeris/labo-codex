@@ -413,7 +413,6 @@ async function initialiserNouveauCartouche(grilleId) {
 
     // Réinitialiser les champs
     document.getElementById('nomCartouche').value = '';
-    document.getElementById('descriptionCartouche').value = '';
     document.getElementById('contexteCartouche').value = '';
     var specClear = document.getElementById('contexteSpecifiqueCartouche');
     if (specClear) specClear.value = '';
@@ -474,8 +473,6 @@ async function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam 
         const inputContexte = document.getElementById('contexteCartouche');
 
         if (inputNom) inputNom.value = cartoucheActuel.nom;
-        const inputDesc = document.getElementById('descriptionCartouche');
-        if (inputDesc) inputDesc.value = cartoucheActuel.description || '';
         if (inputContexte) inputContexte.value = cartoucheActuel.contexte || '';
         const inputContexteSpec = document.getElementById('contexteSpecifiqueCartouche');
         if (inputContexteSpec) inputContexteSpec.value = cartoucheActuel.contexteSpecifique || '';
@@ -735,7 +732,13 @@ async function sauvegarderCartouche() {
 
     // Mettre à jour les champs
     cartoucheActuel.nom = nom;
-    cartoucheActuel.description = document.getElementById('descriptionCartouche')?.value?.trim() || '';
+    // #502 (25 août 2026) — le champ « Description » a quitté l'écran : il ne
+    // servait qu'au formulaire et au partage, rien ne le lisait ailleurs.
+    // ⚠ On ne l'ÉCRASE PAS pour autant. Écrire '' ici effacerait la description
+    // des cartouches déjà remplies au premier enregistrement — une donnée
+    // perdue en silence, pour un champ qu'on voulait seulement cesser de
+    // montrer. Ce qui existe est conservé tel quel.
+    if (cartoucheActuel.description === undefined) cartoucheActuel.description = '';
     cartoucheActuel.contexte = document.getElementById('contexteCartouche').value.trim();
     cartoucheActuel.contexteSpecifique = (document.getElementById('contexteSpecifiqueCartouche') || {}).value ? document.getElementById('contexteSpecifiqueCartouche').value.trim() : '';
     cartoucheActuel.pratiquesCompatibles = pratiquesCompatibles;
@@ -2487,7 +2490,6 @@ function annulerFormCartouche() {
 
     // Réinitialiser les champs
     document.getElementById('nomCartouche').value = '';
-    document.getElementById('descriptionCartouche').value = '';
     document.getElementById('contexteCartouche').value = '';
     var specClear2 = document.getElementById('contexteSpecifiqueCartouche');
     if (specClear2) specClear2.value = '';
@@ -3008,7 +3010,6 @@ async function creerNouvelleCartouche() {
 
     // Réinitialiser les champs
     document.getElementById('nomCartouche').value = '';
-    document.getElementById('descriptionCartouche').value = '';
     document.getElementById('contexteCartouche').value = '';
     var specClear3 = document.getElementById('contexteSpecifiqueCartouche');
     if (specClear3) specClear3.value = '';
