@@ -528,9 +528,18 @@ function poserCaseAssignationSimple(inputSimple, production, groupeCoursId) {
         ? (entree.assignee !== false)
         : !!(production && production.dateEcheance);
 
+    // ⚠ UN SEUL NŒUD POSÉ, UN SEUL NŒUD RETIRÉ (correctif du 25 août). Le
+    // premier jet insérait la case ET sa note comme deux frères, mais n'en
+    // retirait qu'un : rouvrir la fiche empilait une note de plus à chaque fois.
+    // La note vit DANS la zone — l'orphelin n'est plus possible, il n'est plus
+    // seulement évité.
     const zone = document.createElement('div');
     zone.className = 'echeance-simple-assignee';
-    zone.style.cssText = 'display: flex; align-items: center; gap: 6px; margin-bottom: 6px;';
+    zone.style.cssText = 'margin-bottom: 6px;';
+
+    const ligne = document.createElement('div');
+    ligne.className = 'echeance-simple-ligne';
+    ligne.style.cssText = 'display: flex; align-items: center; gap: 6px;';
 
     const case_ = document.createElement('input');
     case_.type = 'checkbox';
@@ -544,16 +553,17 @@ function poserCaseAssignationSimple(inputSimple, production, groupeCoursId) {
     etiquette.style.cssText = 'cursor: pointer; font-weight: normal; margin: 0;';
     etiquette.textContent = 'Consignes transmises';
 
-    zone.appendChild(case_);
-    zone.appendChild(etiquette);
+    ligne.appendChild(case_);
+    ligne.appendChild(etiquette);
+    zone.appendChild(ligne);
 
     const note = document.createElement('p');
     note.className = 'echeance-simple-note u-texte-petit';
-    note.style.cssText = 'color: var(--gris-moyen); margin: 0 0 8px 0; line-height: 1.4;';
-    note.textContent = 'Décoché = les étudiant·es n\'ont pas encore reçu le travail. La date peut être préparée à l\'avance.';
+    note.style.cssText = 'color: var(--gris-moyen); margin: 2px 0 0 0; line-height: 1.4;';
+    note.textContent = 'Décoché = les étudiant·es n\'ont pas encore reçu le travail. La production peut être préparée à l\'avance.';
+    zone.appendChild(note);
 
     parent.insertBefore(zone, inputSimple);
-    parent.insertBefore(note, inputSimple);
 
     // Même geste que le mode multi : sans transmission, le champ ne se saisit pas.
     inputSimple.disabled = !assignee;
