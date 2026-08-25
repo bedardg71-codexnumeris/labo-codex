@@ -16826,6 +16826,30 @@ tr.etudiant-inactif td {
     transition: background 0.15s;
 }
 
+/* #507 (25 août 2026) — LA MARQUE « RECOMMANDÉ ».
+   Distincte de l'astérisque rouge des champs obligatoires : celui-ci refuse
+   l'enregistrement, celle-là ne refuse rien. Un champ recommandé laisse
+   l'application fonctionner ; ce qu'il coûte, c'est une ligne qui disparaît
+   ailleurs — dans l'en-tête d'une rétroaction, par exemple — sans que personne
+   ne le dise.
+   ⚠ Deux astérisques de couleurs différentes forment un code à apprendre :
+   c'est la LÉGENDE (`.legende-marques`) qui le rend lisible, pas la couleur
+   seule. Ne jamais poser l'une sans l'autre. */
+.champ-recommande {
+    color: var(--gris-moyen, #666);
+    font-weight: 600;
+    cursor: help;
+}
+
+.legende-marques {
+    font-size: 0.78rem;
+    color: var(--gris-moyen, #666);
+    margin: 0 0 14px 0;
+    line-height: 1.5;
+}
+
+.legende-marques .text-danger { font-weight: 600; }
+
 /* #504 — La colonne « Ordre » d'un bloc réordonnable : deux chevrons empilés,
    ou côte à côte dans une ligne de tableau. */
 .bloc-reordonner {

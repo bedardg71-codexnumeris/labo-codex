@@ -123,3 +123,55 @@ describe('#506 · aucun astérisque sur un champ facultatif', () => {
         }
     });
 });
+
+/* ------------------------------- La marque « recommandé » (#507, 25 août) */
+
+describe('#507 · « recommandé » se distingue d\'« obligatoire »', () => {
+    const RECO = 'class="champ-recommande"';
+
+    it('a. Les trois champs de l\'en-tête de rétroaction sont marqués', () => {
+        // `_rendreOptionsProduction` n'écrit chaque ligne QUE si son champ est
+        // rempli. Vide, la ligne ne manque pas : elle n'existe pas.
+        expect(label(indexHtml, "Activité d'apprentissage"), 'activité').toContain(RECO);
+        const prods = lire('js/productions.js');
+        for (const cle of ["cle: 'objectif'", "cle: 'tache'"]) {
+            const i = prods.indexOf(cle);
+            expect(i, cle).toBeGreaterThan(-1);
+            expect(prods.slice(i, i + 700), cle + ' doit être recommandé').toContain('recommande: true');
+        }
+    });
+
+    it('b. LE POINT DÉCISIF : recommandé N\'EST PAS obligatoire', () => {
+        // Les confondre ferait refuser un enregistrement que le code accepte,
+        // ou l'inverse. Aucun champ recommandé ne porte la marque rouge.
+        expect(label(indexHtml, "Activité d'apprentissage")).not.toContain(MARQUE);
+        // Et le détail de la tâche, que Grégoire a dit facultatif, n'a ni l'une
+        // ni l'autre.
+        const prods = lire('js/productions.js');
+        const i = prods.indexOf("cle: 'detailTache'");
+        expect(prods.slice(i, i + 700)).not.toContain('recommande: true');
+    });
+
+    it('c. La LÉGENDE existe : deux astérisques sans elle sont une énigme', () => {
+        const legende = indexHtml.match(/<p class="legende-marques">[\s\S]*?<\/p>/);
+        expect(legende, 'légende trouvée').toBeTruthy();
+        expect(legende[0], 'elle explique le rouge').toContain('obligatoire');
+        expect(legende[0], 'et le gris').toContain('Recommandé');
+        expect(legende[0]).toContain('text-danger');
+        expect(legende[0]).toContain('champ-recommande');
+    });
+
+    it('d. Les deux marques ont un style, et il diffère', () => {
+        const css = lire('styles.css');
+        expect(css).toContain('.champ-recommande {');
+        expect(css).toContain('.legende-marques {');
+        // La marque recommandée ne doit pas emprunter le rouge de l'obligatoire.
+        const bloc = css.slice(css.indexOf('.champ-recommande {'), css.indexOf('.legende-marques {'));
+        expect(bloc, 'pas de rouge sur du recommandé').not.toMatch(/danger|#c0392b|red/i);
+    });
+
+    it('e. Chaque marque dit pourquoi, au survol', () => {
+        expect(indexHtml).toContain('title="Champ obligatoire"');
+        expect(indexHtml + lire('js/productions.js')).toContain('title="Recommandé');
+    });
+});
