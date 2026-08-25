@@ -266,14 +266,29 @@ sur mesures, `SKILL_portes_terrain.md` amendé, et trois outils de console
 
 **Sa rentrée est dans trois semaines.**
 
-0. ⚠️ **SES CARTOUCHES ORPHELINES — à récupérer, contenu réel.**
-   Son diagnostic du 24 août a retrouvé, vivantes mais illisibles :
-   « Carte mentale A26 », « Plan de rédaction A26 », « Stratégies de lecture
-   A26 », « Description d'un personnage A26 » et deux « Aligner … HOC ».
-   Elles sont dans des clés `cartouches_<grille>` dont la grille a disparu.
-   `scripts/reparation-cartouches-orphelines.js` les rattache — mais **le choix
-   de la grille d'accueil lui revient**, personne d'autre ne peut le faire à sa
-   place. Tant que ce n'est pas fait, ce travail reste invisible pour lui.
+0. ✅ ~~**SES CARTOUCHES ORPHELINES — à récupérer.**~~ **FAIT le 24 août au
+   soir, par Grégoire lui-même.** Les 6 cartouches A26 de sa soirée (lots 16 et
+   5 du dry-run) sont rattachées à « Grille-5 FR-HOLIS A26 » via
+   `scripts/reparation-cartouches-orphelines.js`. Les lots d'origine sont
+   CONSERVÉS — filet volontaire, à retirer seulement après vérification à
+   l'écran.
+
+   ⏳ **Ce qui reste de son côté, et qui n'est pas du code :**
+   · **trois paires à départager** sur cette grille — « Description d'un
+     personnage » / « … A26 », « Carte mentale » / « … A26 », « Plan de
+     rédaction » / « … A26 ». La garde d'identité conserve les deux exemplaires
+     par construction ; c'est à lui de comparer et de retirer la périmée ;
+   · « Stratégies de lecture A26 » a suivi son lot vers A, alors que
+     « Stratégies de lecture » vit sur B (Grille-4 A26). S'il veut l'y déplacer,
+     il faut un rattachement À LA PIÈCE — le script ne sait déplacer qu'un lot
+     entier.
+
+   ⏳ **16 lots orphelins restants, laissés À DESSEIN** : matériel démo
+   (générique, Démo, les deux « rapport de laboratoire » chimie/bio), trimestres
+   passés, et trois piles de doublons (le lot 12 contient « Description d'un
+   personnage » DEUX fois, le 13 a « Carte mentale » en triple). Les rattacher
+   inonderait ses trois grilles et recréerait les doublons fermés en 1.92. Le
+   ménage est une décision séparée, avec un dry-run par lot.
 
 0 bis. ⏳ **PORTES TERRAIN 1.95.2 — 20 rangées + 4 décisions, non relevées.**
    `plans de travail/PORTES-TERRAIN-2026-08-24-cartouches-inter-trimestre.md`
