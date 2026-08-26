@@ -1831,6 +1831,14 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Le stockage mesuré ici (55 Ko) n'a rien d'un état de terrain, et 400-700 ms de boot ne se
   transposent pas. Ne rien conclure sur les performances réelles sans mesure séparée.
 
+  📊 **CE QUE LES REPRISES ONT RÉVÉLÉ (26 août, deux runs comparés à périmètre égal)** — 2 specs
+  instables dans les deux cas, rattrapées au second essai. **Et l'instable n'est pas le même test
+  d'un run à l'autre** dans `planif-tout-voir-loupe.spec.js` : lignes 75, 111 et 160 ont rougi
+  tour à tour. ⮕ Ce n'est donc pas une assertion fragile, c'est **le fichier entier** — son
+  montage ou le temps de rendu de la carte. `cours-refonte-rendu.spec.js:100`, lui, est constant :
+  toujours le même test, toujours le dépassement au chargement. **Deux causes distinctes derrière
+  un même symptôme** — ne pas les traiter ensemble.
+
 - [x] **🔴 #456 CLOS 18 août 2026** **Six** specs Playwright ROUGES, et surtout : **elles ne tournaient nulle part** — créé 12 août 2026 (constat au rituel de début), **recompté le 18 août**.
   - ✅ **CLÔTURE (4ᵉ passe WebKit, relevé Grégoire : 9/9, 54,1 s, aucun échec).** Les six rouges sont éteintes en quatre passes terrain, TOUTES des dérives de test ou des défauts de harnais — zéro bug d'app : quatre dérives réparées au 1ᵉʳ cycle (badge #366, API renommée, fixture pré-#367, prise sur le menu de type 1.86) ; Alt/⌥ = modificateur ⌥ non transporté par Playwright-WebKit (prouvé par sonde, réécrite en PointerEvent purs) ; aimantation = dernier `pointermove` d'un trajet groupé avalé par WebKit (prouvé par diagnostic embarqué : 433 = un pas manquant, zéro guide — trajet livré pas à pas, final doublé, assertion recentrée sur l'invariant). **Baseline → 0** : transcription composée de deux mesures — le 9/9 de la 4ᵉ passe sur les deux dernières specs, et la passe COMPLÈTE de la 2ᵉ passe (diff `--ecrire` vide sur 87 tests), aucun autre fichier de test n'ayant changé entre les deux. Le garde-fou de push redevient strict sur TOUTE rougeur. ⚠ Si la session Mac pousse son propre `--ecrire` à 0, il sera identique — sinon, le prochain `--ecrire` Mac fait foi comme toujours.
   - ▣ **La cause générale reste outillée** : le hook de push (sentinelle `verifier-playwright.mjs`) tourne sur le Mac, et la config `tests/playwright.chromium.config.js` donne aux sessions cloud un moteur de reproduction ciblée — avec sa leçon écrite dedans : un vert Chromium est un indice, jamais un verdict Safari (deux prédictions de vert sont tombées en une journée pour l'avoir oublié).
