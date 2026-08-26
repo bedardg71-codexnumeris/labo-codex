@@ -321,6 +321,37 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   du ratchet, qui attrape une regex d'extraction devenue muette (motif AP-2 relevé par l'audit sur
   la sentinelle #506). Dernier ID : **#511**.
 
+- [x] **#512 — L'aperçu ne s'ouvre plus sur « Consignes » quand le document a mieux à montrer.**
+  `cranDocument` promet, sans demande explicite, le cran le plus HAUT que le document puisse porter
+  — le comportement d'avant les crans, pour que rien ne disparaisse de ce que Grégoire voyait.
+  Promesse court-circuitée au PREMIER usage : faute de valeur posée, le `<select>` restait sur sa
+  première option du HTML (« Consignes ») et le code lisait cela comme un choix de l'utilisateur.
+  Une production munie de sa grille, de son échelle ET de sa cartouche ouvrait donc son aperçu sur
+  la seule page de consignes.
+  ⚠ Correctif : poser explicitement `''` quand aucun réglage n'est mémorisé — une valeur absente de
+  la liste met `selectedIndex` à -1, et le sélecteur dit alors « je ne demande rien ».
+  ⚠ La sentinelle imite un `<select>` FIDÈLE à HTML (une valeur inconnue retombe à `''`) : un faux
+  élément complaisant aurait prouvé le contraire de ce qui se passe dans un navigateur.
+
+- [x] **#513 — Une production sans grille produit enfin son document de consignes.**
+  La porte de l'aperçu exigeait grille ET échelle, alors que le cran « Consignes » existe depuis
+  #497. Le cas ordinaire — un travail préparé avant qu'on ait monté son évaluation — ne pouvait pas
+  produire le document distribué aux étudiant·es, et le repli renvoyait vers un formulaire qui, lui,
+  réclame justement les deux : une impasse polie. Le commentaire du code annonçait le retrait de ce
+  repli « à l'étape 3 » ; l'étape 3 a été livrée sans que la porte s'ouvre.
+  Le rendu, lui, savait déjà faire : le tableau des critères était conditionné. Seules trois gardes
+  bloquaient (porte, rendu, nom de fichier PDF).
+  ▣ **Défaut voisin corrigé du même coup** : « cette production a-t-elle des consignes ? » était
+  écrit DEUX fois et les deux versions divergeaient — `blocsInformationDocument` comptait les blocs
+  libres de #499, `cransDisponibles` non. Une production dont seuls « Format et mise en page » et
+  « Remise du travail » étaient remplis se voyait refuser son cran, avec un motif FAUX en infobulle
+  (« ni objectif, ni description, ni détail de tâche »). Un seul prédicat désormais,
+  `productionAConsignes`, et le motif de refus dit la même chose que la règle.
+  ⏳ **Non touché** : le bouton du formulaire inline reste conditionné à `grilleId && echelleId`
+  (chemin secondaire, sans production chargée d'où déduire les consignes).
+
+  Vitest **3298/3298** (313 fichiers). Trois break-tests, trois ROUGE. Dernier ID : **#513**.
+
 ### Chantier — 25 août 2026 (le pont carte d'alignement ↔ productions)
 
 - [x] **#492 — Le sélecteur « Production » de l'Inspecteur ne montrait rien, et personne ne pouvait le voir.**

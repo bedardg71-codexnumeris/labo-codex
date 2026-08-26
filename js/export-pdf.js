@@ -1821,6 +1821,29 @@ function cranDocument(options, grille, cartouche) {
 }
 
 /**
+ * #513 (25 août 2026) — « CETTE PRODUCTION A-T-ELLE DES CONSIGNES À MONTRER ? »,
+ * EN UN SEUL ENDROIT.
+ *
+ * ⚠⚠ La réponse était écrite deux fois, et les deux versions divergeaient.
+ * `blocsInformationDocument` rend les trois blocs ancrés ET les blocs libres
+ * de #499 ; `cransDisponibles`, lui, ne regardait que les trois ancrés. Une
+ * production dont l'enseignant·e avait rempli « Format et mise en page » et
+ * « Remise du travail » — et rien d'autre — se voyait donc refuser son cran
+ * « Consignes », avec un motif faux en infobulle : « ni objectif, ni
+ * description, ni détail de tâche ». Elle en avait, pourtant, et à l'écran.
+ *
+ * Même règle que le rendu pour les blocs libres : titre ET contenu, faute de
+ * quoi ce serait un bandeau au-dessus du vide.
+ */
+function productionAConsignes(production) {
+    if (!production) return false;
+    if (production.objectif || production.tache || production.detailTache) return true;
+    return Array.isArray(production.champsPersonnalises)
+        && production.champsPersonnalises.some(champ =>
+            champ && String(champ.titre || '').trim() && String(champ.contenu || '').trim());
+}
+
+/**
  * Les crans que CE document peut réellement porter, du plus bas au plus haut.
  *
  * ⚠ Sans production, il n'y a pas de consignes à montrer : le document est
@@ -1833,9 +1856,7 @@ function cransDisponibles(grille, cartouche, options) {
     const opts = options || {};
     const crans = [];
 
-    const aConsignes = !!(opts.production && (
-        opts.production.objectif || opts.production.tache || opts.production.detailTache));
-    if (aConsignes) crans.push(CRAN_CONSIGNES);
+    if (productionAConsignes(opts.production)) crans.push(CRAN_CONSIGNES);
 
     const aEvaluation = !!(grille && Array.isArray(grille.criteres) && grille.criteres.length > 0);
     if (aEvaluation) crans.push(CRAN_EVALUATION);
@@ -1850,7 +1871,9 @@ function cransDisponibles(grille, cartouche, options) {
 /** Ce que le cran indisponible doit DIRE, plutôt que de disparaître en silence. */
 function raisonCranIndisponible(cran, grille, cartouche, options) {
     if (cran === CRAN_CONSIGNES) {
-        return 'Cette production n\'a ni objectif, ni description, ni détail de tâche.';
+        // #513 — le motif doit dire la MÊME chose que la règle : les blocs
+        // nommés par l'enseignant·e comptent aussi.
+        return 'Cette production n\'a aucun bloc de consignes rempli.';
     }
     if (cran === CRAN_EVALUATION) {
         return 'Aucune grille de critères n\'est associée à cette production.';
@@ -2161,7 +2184,6 @@ function blocsInfoHTML(modele, styles) {
 }
 
 function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
-    if (!grille || !echelle) return '<p class="text-muted">Données manquantes</p>';
 
     // Facteur de taille pour les elements configurables (pas titre, pas retroactions)
     const facteurTaille = options.taillePolice === 'petit' ? 0.85 :
@@ -2208,6 +2230,17 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
 
     // #497 — titre, en-tête et PROFONDEUR viennent du MODÈLE, partagé avec le PDF.
     const modele = construireModeleDocument(grille, cartouche, options);
+
+    // ⚠ #513 — la garde vient APRÈS le modèle, et porte sur ce que le document
+    // peut MONTRER. Elle exigeait grille et échelle : au cran « Consignes »,
+    // elles ne servent à rien, et leur absence rendait « Données manquantes »
+    // au-dessus de consignes parfaitement rédigées. Le tableau des critères, lui,
+    // est déjà conditionné plus bas — le rendu savait faire, c'est la porte qui
+    // ne laissait pas entrer.
+    if (!modele.afficheEvaluation && modele.blocsInfo.length === 0) {
+        return '<p class="text-muted">Données manquantes</p>';
+    }
+
     const titre = modele.titre;
     // ⚠ La cartouche n'est pas une section à part : ses commentaires REMPLACENT
     // les descriptions de niveaux dans les cellules du tableau. Le cran se
@@ -2571,9 +2604,11 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
             .substring(0, 30);
         nomFichier = cartouche ? `${nomProd}-grille-descriptive.pdf` : `${nomProd}-grille.pdf`;
     } else {
+        // #513 — sans grille (document de consignes seules), il reste un nom à donner.
+        const nomGrille = (grille && grille.nom) || 'export';
         nomFichier = cartouche
-            ? `grille-descriptive-${grille.nom || 'export'}.pdf`
-            : `grille-${grille.nom || 'export'}.pdf`;
+            ? `grille-descriptive-${nomGrille}.pdf`
+            : `grille-${nomGrille}.pdf`;
     }
     doc.save(nomFichier);
 }
@@ -3232,9 +3267,11 @@ async function afficherFormulairePDFDepuisProduction() {
                 cartoucheId: production.cartoucheId
             });
             if (ouvert) return;
-            // ⏳ REPLI ASSUMÉ, à retirer à l'étape 3 du plan : sans grille ni
-            // échelle, l'aperçu ne sait pas encore rendre des consignes seules.
-            // Le formulaire reste alors la seule porte — pas une erreur muette.
+            // #513 — le repli ne sert plus qu'à un cas : une production qui n'a
+            // RIEN à montrer, ni évaluation ni consignes. Le formulaire de
+            // préparation est alors le bon endroit — pas une erreur muette.
+            // (Le commentaire précédent annonçait le retrait de ce repli « à
+            // l'étape 3 » ; l'étape 3 a été livrée sans que la porte s'ouvre.)
         }
     }
 
@@ -3483,19 +3520,31 @@ async function mettreAJourOptionsInlinePDF() {
  */
 async function ouvrirApercuPDFPour(ids) {
     const { productionId, grilleId, echelleId, cartoucheId } = ids || {};
-    if (!grilleId || !echelleId) return false;
-
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const echelles = await db.get(cle('echellesTemplates')) || [];
-    const grille = grilles.find(g => g.id === grilleId);
-    const echelle = echelles.find(e => e.id === echelleId);
-    if (!grille || !echelle) return false;
 
     let production = null;
     if (productionId) {
         const productions = await db.get(cle('productions')) || [];
         production = productions.find(p => p.id === productionId) || null;
     }
+
+    const grilles = grilleId ? (await db.get(cle('grillesTemplates')) || []) : [];
+    const echelles = echelleId ? (await db.get(cle('echellesTemplates')) || []) : [];
+    const grille = grilleId ? (grilles.find(g => g.id === grilleId) || null) : null;
+    const echelle = echelleId ? (echelles.find(e => e.id === echelleId) || null) : null;
+
+    // ⚠⚠ #513 (25 août 2026) — LE DOCUMENT DE CONSIGNES N'A BESOIN NI DE GRILLE
+    // NI D'ÉCHELLE. Cette porte exigeait les deux, et le cran « Consignes »
+    // existait pourtant depuis #497 : une production sans grille — le cas
+    // ordinaire d'un travail qu'on prépare avant d'avoir monté son évaluation —
+    // ne pouvait pas produire le document qu'on distribue aux étudiant·es. Le
+    // repli renvoyait alors vers un formulaire qui, lui, réclame les deux : une
+    // impasse polie.
+    //
+    // ⚠ Ce qui reste refusé : un document qui n'aurait RIEN à montrer — ni
+    // évaluation, ni consignes. `false` fait alors ouvrir le formulaire de
+    // préparation, qui est le bon endroit pour choisir ce qu'on veut voir.
+    const peutEvaluer = !!(grille && echelle);
+    if (!peutEvaluer && !productionAConsignes(production)) return false;
 
     let cartouche = null;
     if (cartoucheId) {
@@ -3533,8 +3582,21 @@ async function ouvrirApercuPDFPour(ids) {
 
     // #497 étape 3 — le cran mémorisé, s'il tient encore. `accorderSelecteurCran`
     // le repositionnera au rendu si ce document ne peut pas le porter.
+    //
+    // ⚠⚠ #512 (25 août 2026) — SANS RÉGLAGE MÉMORISÉ, IL N'Y A PAS DE DEMANDE.
+    // `cranDocument` promet, sans demande explicite, le cran le plus HAUT que le
+    // document puisse porter — le comportement d'avant les crans. Cette promesse
+    // était court-circuitée au PREMIER usage : faute de valeur posée, le
+    // `<select>` restait sur sa première option du HTML (« Consignes »), et
+    // `accorderSelecteurCran` lisait cela comme un choix de l'utilisateur. Une
+    // production munie de sa grille, de son échelle et de sa cartouche ouvrait
+    // donc son aperçu sur la seule page de consignes.
+    //
+    // Poser une valeur absente de la liste met `selectedIndex` à -1 et `value` à
+    // '' : le sélecteur dit alors « je ne demande rien », et
+    // `accorderSelecteurCran` l'alignera sur le cran retenu juste après.
     const selectCran = document.getElementById('apercuPDF-cran');
-    if (selectCran && reglages?.cran) selectCran.value = reglages.cran;
+    if (selectCran) selectCran.value = reglages?.cran || '';
     const selectDispo = document.getElementById('apercuPDF-disposition');
     if (selectDispo && reglages?.disposition) selectDispo.value = reglages.disposition;
 
@@ -3606,6 +3668,7 @@ window.blocsInformationDocument = blocsInformationDocument;
 window.cransDisponibles = cransDisponibles;                                 // #497 étape 3 — ce que le document peut porter
 window.cranDocument = cranDocument;
 window.raisonCranIndisponible = raisonCranIndisponible;
+window.productionAConsignes = productionAConsignes;                         // #513 — « a-t-elle des consignes à montrer ? », en un seul endroit
 window.accorderSelecteurCran = accorderSelecteurCran;                       // #497 étape 3 — le menu ne peut pas mentir sur ce que la page montre
 window.feuillesDuDocument = feuillesDuDocument;
 window.dispositionDocument = dispositionDocument;                           // #497 étape 4 — la mise en page est un choix
