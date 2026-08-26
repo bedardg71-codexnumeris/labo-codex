@@ -171,6 +171,38 @@ describe('#533 · E — le jeton reste local', () => {
     });
 });
 
+/* ------------------------------------- G — la reprise ne devient pas un tapis (#534) */
+
+describe('#534 · G — une reprise se dit, elle ne se cache pas', () => {
+
+    const CONFIG = readFileSync(path.join(racine, 'tests', 'playwright.config.js'), 'utf8');
+    const VERIF = readFileSync(path.join(racine, 'scripts', 'verifier-playwright.mjs'), 'utf8');
+
+    it('G.a la suite a droit à UN essai de reprise — pas davantage', () => {
+        const m = CONFIG.match(/^\s*retries:\s*(\d+)/m);
+        expect(m, 'sans retries, un timeout isolé refuse un push légitime (#534)').toBeTruthy();
+        expect(
+            Number(m[1]),
+            'au-delà de 1, on n\'achète plus de la stabilité : on achète du vert'
+        ).toBe(1);
+    });
+
+    it('G.b le vérificateur NOMME les specs rattrapées au second essai', () => {
+        expect(VERIF).toContain('flakyDuRapport');
+        expect(
+            /VERTE\(S\) AU SECOND ESSAI/.test(VERIF),
+            'une reprise silencieuse transforme l\'instabilité en vert, et personne ne voit plus rien'
+        ).toBe(true);
+    });
+
+    it('G.c mais elles ne bloquent pas : seul un échec définitif compte', () => {
+        // `spec.ok` reste vrai après une reprise réussie — c'est ce qui fait que
+        // retries:1 a l'effet voulu. Le jour où quelqu'un compterait les essais
+        // individuels, la reprise ne servirait plus à rien.
+        expect(VERIF).toContain('spec.ok === false');
+    });
+});
+
 describe('#533 · F — dans pousser.sh, la garde vient AVANT le push', () => {
 
     it('F.a l\'ordre des deux appels est le sujet même de ce script', () => {
