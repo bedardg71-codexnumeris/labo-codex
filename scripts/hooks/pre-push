@@ -6,21 +6,26 @@
 # push si un test rouge — c'est la dernière ligne de défense avant que
 # du code régressé atteigne origin.
 #
-# La suite Playwright (intégration browser-real) EST dans ce hook depuis le
-# 18 août 2026, en seconde étape et sous conditions. Le commentaire qu'elle
-# remplace disait qu'elle « prend ~4 s » : c'était vrai en mai, elle prend
-# aujourd'hui ~4 MINUTES. Personne ne l'a relancée entre les deux, ce qui est
-# précisément le défaut décrit en #456 — six specs ont rougi en silence
-# pendant que Vitest restait vert.
+# La sentinelle Playwright (intégration browser-real) est en seconde étape
+# depuis le 18 août 2026 — mais elle est LUE ici, plus lancée (#533, 26 août).
 #
-# Trois conditions, parce qu'un hook inapplicable se contourne au lieu de
-# servir :
-#   1. il ne part QUE si le push touche du code observable au navigateur
-#      (js/, index.html, styles.css, tests/integration/) — un push
-#      documentaire ne paie pas 4 minutes ;
-#   2. il ne juge que par rapport à `scripts/playwright-baseline.json`, le
-#      cliché de la dette connue de #456 : seule une rougeur NOUVELLE bloque,
-#      sinon il refuserait tout push dès son installation ;
+# ⚠ POURQUOI CE RENVERSEMENT. `git push` ouvre la connexion vers le serveur
+# AVANT d'exécuter ce hook. Tant que WebKit tournait ici, la session restait
+# muette six minutes et GitHub la fermait : « Connection to github.com closed
+# by remote host », suivi du verdict — juste, vert, et arrivé trop tard. Le
+# push échouait alors que rien n'était cassé, ce qui pousse au --no-verify
+# systématique, c'est-à-dire à la perte de la garde entière.
+# La suite tourne désormais EN AMONT, via scripts/pousser.sh, et y dépose son
+# verdict ; il ne reste ici qu'une lecture instantanée. Ce hook ne dépasse plus
+# la durée de Vitest, une trentaine de secondes.
+#
+# Trois conditions tenues, parce qu'un hook inapplicable se contourne au lieu
+# de servir :
+#   1. le verdict n'est exigé QUE si le push touche du code observable au
+#      navigateur (motif partagé : scripts/lot-observable.sh) — un push
+#      documentaire ne demande rien ;
+#   2. le jugement reste celui de `scripts/playwright-baseline.json`, le cliché
+#      de la dette connue de #456 : seule une rougeur NOUVELLE bloque ;
 #   3. il passe (fail-open) là où WebKit n'existe pas — tous les conteneurs.
 #      Le Mac de Grégoire est le seul poste capable de rendre ce verdict.
 #
@@ -85,10 +90,14 @@ fi
 NUL='0000000000000000000000000000000000000000'
 FICHIERS=''
 LANCER=0
+SHA_POUSSE=''
 
 while read -r _ref_locale sha_local _ref_distante sha_distant; do
     # Suppression de branche : rien n'est poussé, rien à vérifier.
     [ "$sha_local" = "$NUL" ] && continue
+
+    # Le verdict est rattaché à un commit précis : on retient celui qui part.
+    SHA_POUSSE="$sha_local"
 
     if [ "$sha_distant" = "$NUL" ]; then
         # Branche neuve : aucune plage calculable. On lance — se taire ici
@@ -102,8 +111,13 @@ while read -r _ref_locale sha_local _ref_distante sha_distant; do
 "
 done
 
+# Le motif vit dans UN seul fichier, partagé avec scripts/pousser.sh : deux
+# copies finiraient par diverger, et la divergence se verrait le jour où l'une
+# laisserait passer un lot que l'autre aurait retenu.
+. "$REPO_ROOT/scripts/lot-observable.sh"
+
 if [ $LANCER -eq 0 ]; then
-    if printf '%s' "$FICHIERS" | grep -qE '^(js/|index\.html|styles\.css|tests/integration/|scripts/verifier-playwright\.mjs|scripts/playwright-baseline\.json)'; then
+    if printf '%s' "$FICHIERS" | lot_observable; then
         LANCER=1
     fi
 fi
@@ -113,11 +127,19 @@ if [ $LANCER -eq 0 ]; then
     exit 0
 fi
 
-node "$REPO_ROOT/scripts/verifier-playwright.mjs"
+node "$REPO_ROOT/scripts/lire-verdict.mjs" "$SHA_POUSSE"
 CODE_PW=$?
 
-# 1 = rougeur NOUVELLE, la seule qui bloque.
+# 0 = verdict vert, rendu sur CE commit.
+if [ $CODE_PW -eq 0 ]; then
+    printf "${VERT}✓ Sentinelle Playwright : verdict vert à jour pour ce commit.${RAZ}\n"
+    exit 0
+fi
+
+# 1 = rougeur NOUVELLE, la seule qui bloque au fond.
 if [ $CODE_PW -eq 1 ]; then
+    printf "\n${ROUGE}✗ Sentinelle Playwright : rougeur NOUVELLE au dernier passage — push bloqué.${RAZ}\n"
+    printf "  Relance pour le détail : ${JAUNE}node scripts/verifier-playwright.mjs${RAZ}\n"
     exit 1
 fi
 
@@ -127,6 +149,18 @@ fi
 if [ $CODE_PW -eq 2 ]; then
     printf "${JAUNE}⚠ Sentinelle Playwright : verdict impossible ici — push laissé passer.${RAZ}\n"
     printf "  Ces specs ne sont vérifiables que sur un poste avec WebKit.\n"
+    exit 0
 fi
 
-exit 0
+# 3 = aucun verdict à jour. Ce push emporte du code observable au navigateur et
+# personne n'a jugé CE commit. On refuse — mais en donnant le geste exact, parce
+# qu'un refus sans issue se contourne au --no-verify et emporte toute la garde.
+printf "\n${ROUGE}✗ Sentinelle Playwright : aucun verdict pour ce commit — push bloqué.${RAZ}\n\n"
+printf "  Ce lot touche du code observable au navigateur, et WebKit n'a rien dit dessus.\n"
+printf "  Le chemin normal fait les deux d'un geste :\n\n"
+printf "      ${VERT}scripts/pousser.sh${RAZ}\n\n"
+printf "  Ou, pour juger seulement (~4 min), puis repousser à la main :\n"
+printf "      ${VERT}node scripts/verifier-playwright.mjs${RAZ}\n\n"
+printf "  ${JAUNE}Ne lance PAS la suite depuis ce hook : la connexion au serveur est\n"
+printf "  déjà ouverte, et six minutes de silence la font fermer (#533).${RAZ}\n"
+exit 1

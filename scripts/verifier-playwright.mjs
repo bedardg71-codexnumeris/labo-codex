@@ -37,6 +37,43 @@ const RACINE = path.resolve(__dirname, '..');
 const DOSSIER_TESTS = path.join(RACINE, 'tests');
 const BASELINE = path.join(__dirname, 'playwright-baseline.json');
 
+// Jeton de verdict — état LOCAL, jamais versionné (.gitignore).
+//
+// POURQUOI IL EXISTE (#533, 26 août 2026). Le hook pré-push lançait cette suite
+// lui-même. Or git ouvre la connexion vers le serveur AVANT d'exécuter le hook :
+// pendant les six minutes de WebKit, la session SSH ne transmet rien, et GitHub
+// la ferme. Le verdict arrivait juste après la fermeture — juste, et inutile.
+// Désormais la suite tourne EN AMONT (scripts/pousser.sh) et dépose ici son
+// verdict ; le hook ne fait plus que le lire, en une fraction de seconde.
+//
+// Le SHA est ce qui empêche le jeton de mentir : un verdict rendu sur un commit
+// ne couvre pas le suivant. Commiter à nouveau périme le jeton, et le hook
+// redemande la garde — c'est voulu.
+const VERDICT = process.env.VERDICT_PLAYWRIGHT || path.join(__dirname, '.verdict-playwright.json');
+
+/**
+ * Dépose le verdict pour le commit courant.
+ *
+ * Silencieux en cas d'échec : hors dépôt git, ou dossier en lecture seule, un
+ * jeton non écrit fait retomber le hook sur « pas de verdict » — il redemandera
+ * la garde. C'est le bon repli : jamais un push non vérifié.
+ */
+function deposerVerdict(code, echecs) {
+    try {
+        const tete = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: RACINE, encoding: 'utf8' });
+        if (tete.status !== 0) return;
+        writeFileSync(VERDICT, `${JSON.stringify({
+            _lisezMoi: 'Verdict local de la sentinelle Playwright, lu par le hook pré-push. Non versionné. Régénérer : scripts/pousser.sh, ou node scripts/verifier-playwright.mjs',
+            sha: tete.stdout.trim(),
+            code,
+            echecsConnus: echecs.length,
+            rendule: new Date().toISOString()
+        }, null, 4)}\n`, 'utf8');
+    } catch {
+        /* voir ci-dessus : l'absence de jeton est un repli sûr */
+    }
+}
+
 // ESC construit plutôt qu'écrit : un octet 0x1b littéral dans le source est
 // invisible à la relecture et se perd à la première réédition du fichier.
 const ESC = String.fromCharCode(27);
@@ -94,6 +131,7 @@ const webkitAbsent = sondeWebKit.status !== 0 || !cheminAnnonce || !existsSync(c
 if (webkitAbsent) {
     process.stderr.write(`${JAUNE}⚠ WebKit introuvable — la suite Playwright ne peut pas être jugée ici.${RAZ}\n`);
     process.stderr.write('  C\'est le cas de tous les conteneurs (cf. #456). Sur le Mac : cd tests && npx playwright install webkit\n');
+    deposerVerdict(2, []);
     process.exit(2);
 }
 
@@ -114,6 +152,7 @@ if (!existsSync(fichierRapport)) {
     process.stderr.write(`${ROUGE}✗ Sentinelle Playwright : aucun rapport produit — la suite n'a pas pu s'exécuter.${RAZ}\n`);
     process.stderr.write(`${execution.stderr || execution.stdout || '(aucune sortie)'}\n`);
     rmSync(dossierTemporaire, { recursive: true, force: true });
+    deposerVerdict(2, []);
     process.exit(2);
 }
 
@@ -123,6 +162,7 @@ try {
 } catch (erreur) {
     process.stderr.write(`${ROUGE}✗ Rapport JSON illisible : ${erreur.message}${RAZ}\n`);
     rmSync(dossierTemporaire, { recursive: true, force: true });
+    deposerVerdict(2, []);
     process.exit(2);
 }
 rmSync(dossierTemporaire, { recursive: true, force: true });
@@ -147,6 +187,7 @@ if (ecrire) {
 if (!existsSync(BASELINE)) {
     process.stderr.write(`${ROUGE}✗ Baseline absente (${path.relative(RACINE, BASELINE)}).${RAZ}\n`);
     process.stderr.write('  La créer : node scripts/verifier-playwright.mjs --ecrire\n');
+    deposerVerdict(2, []);
     process.exit(2);
 }
 
@@ -164,6 +205,7 @@ if (reparees.length > 0) {
 }
 
 if (nouveaux.length > 0) {
+    deposerVerdict(1, echecs);
     process.stderr.write(`\n${ROUGE}✗ ${nouveaux.length} spec(s) Playwright NOUVELLEMENT rouge(s) — push bloqué.${RAZ}\n\n`);
     for (const spec of nouveaux) process.stderr.write(`    · ${spec}\n`);
     process.stderr.write(`\n${ROUGE}Ces specs ne sont pas dans la dette connue de #456 : c'est une régression.${RAZ}\n`);
@@ -171,5 +213,6 @@ if (nouveaux.length > 0) {
     process.exit(1);
 }
 
+deposerVerdict(0, echecs);
 process.stderr.write(`${VERT}✓ Sentinelle Playwright : aucune rougeur nouvelle (${echecs.length} échec(s) connu(s), inchangé).${RAZ}\n`);
 process.exit(0);
