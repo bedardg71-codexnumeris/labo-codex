@@ -4,6 +4,16 @@
 **Sources** : `Rapports/AUDIT-conception-gabarits-2026-08-25.md` et `plans de travail/TRIAGE-audits-2026-08-21.md`
 **Artefact jumeau** (l'OPÉRATION — ce fichier est la TRACE) : <https://claude.ai/code/artifact/6ba06b23-b992-40d5-9339-e6b2804a89e6>
 
+**✅ RELEVÉ RENDU LE 26 AOÛT 2026 — 6/6 TRANCHÉES.** Les verdicts sont inscrits sous chaque
+question. Grégoire a suivi les six recommandations, et **ajouté une exigence sur D1** : les
+astérisques doivent être **rouges partout, pas de bleu**.
+
+⮕ Vérification faite dans la foulée : `.text-danger` **n'a aucune règle de couleur dans tout le
+projet** — 28 astérisques héritent donc de la couleur de leur label. `.champ-requis` (3 usages)
+est, lui, correctement rouge. Le « bleu » a une cause, et elle est dans le CSS.
+
+---
+
 > ⚠ **Aucune de ces lignes ne se coche.** Chacune attend un verdict ÉCRIT. Une case cochée dirait
 > « j'ai tranché » sans dire *quoi* — c'est l'erreur relevée le 11 août, où cinq décisions sont
 > revenues « prises » et introuvables.
@@ -38,7 +48,7 @@ l'astérisque : c'est un garde-fou qui ne gardait rien.
 **Recommandation : A.** La légende a été validée en la lisant comme une promesse. Dans les deux
 cas, la preuve du test est réancrée sur le chemin vivant — non négociable.
 
-**VERDICT** : ________________________________________________
+**VERDICT (26 août 2026)** : **A — REFUSER vraiment.** Et : « les astérisques doivent être rouge partout (pas de bleu) ».
 
 ---
 
@@ -61,7 +71,7 @@ qui a déclenché l'audit. L'écran cartouche est aussi le seul des quatre sans 
 **Recommandation : A.** L'uniformité est ce qui était demandé pour cet onglet, et le bouton ne
 protège de rien qu'un enregistrement automatique ne protège mieux.
 
-**VERDICT** : ________________________________________________
+**VERDICT (26 août 2026)** : **A — enregistrement automatique**, comme les grilles et les échelles.
 
 ---
 
@@ -84,7 +94,7 @@ depuis. Elle touche le même écran que D2.
 **Recommandation : B.** Non par prudence de principe : parce que si une migration est mêlée à un
 changement d'interface, on ne sait plus ce qui a cassé quoi quand ça tourne mal.
 
-**VERDICT** : ________________________________________________
+**VERDICT (26 août 2026)** : **B — D2 maintenant, D3 plus tard.**
 
 ---
 
@@ -105,7 +115,7 @@ vide dans le document remis aux étudiant·es). Mais c'est du texte **tapé** qu
 **Recommandation : A.** Le seul des trois qui laisse décider, et le contenu d'un bloc appartient à
 son auteur. B arrête pour une règle de mise en page ; C écrit dans le document un mot non choisi.
 
-**VERDICT** : ________________________________________________
+**VERDICT (26 août 2026)** : **A — avertir avant d'enregistrer.**
 
 ---
 
@@ -130,7 +140,7 @@ des scripts périmés en cache (#285) repose sur cette lecture.
 **Recommandation : A.** Ce n'est pas qu'un problème de tests : si Safari refuse cette lecture,
 l'iPad la refuse aussi.
 
-**VERDICT** : ________________________________________________
+**VERDICT (26 août 2026)** : **A — corriger la lecture de `version.json`.**
 
 ---
 
@@ -151,7 +161,7 @@ traiter avec le patron #449 déjà validé.
 vient d'être éprouvé : c'est le meilleur moment. L'outillage ensuite, sinon chaque chantier paiera
 le même prix. Le rang 5 après, avec une session entière devant lui.
 
-**VERDICT** : ________________________________________________
+**VERDICT (26 août 2026)** : **B puis C puis A.** Les décisions d'abord, l'outillage ensuite, le rang 5 après.
 
 ---
 

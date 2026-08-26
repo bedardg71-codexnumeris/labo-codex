@@ -401,7 +401,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 > Les six correctifs ci-dessus (#509 à #515) épuisent ce qui ne demandait pas d'arbitrage de
 > Grégoire. Restent, du rapport `Rapports/AUDIT-conception-gabarits-2026-08-25.md` :
 
-- [ ] **#516** 📐 **A3 — l'astérisque « Nom du critère » promet un refus qui n'existe pas.**
+- [ ] **#516** ✅ **TRANCHÉ 26 août : REFUSER l'enregistrement d'un critère sans nom** (verdict D1), **+ exigence : astérisques ROUGES partout, pas de bleu**. ⮕ Cause du bleu trouvée le jour même : `.text-danger` n'a AUCUNE règle de couleur dans le projet — 28 astérisques héritent de la couleur de leur label ; `.champ-requis` (3 usages, nom français) est correctement rouge. Le chantier unifie donc sur `.champ-requis`. 📐 **A3 — l'astérisque « Nom du critère » promet un refus qui n'existe pas.**
   La légende (#506) dit « Champ obligatoire — l'enregistrement est refusé sans lui ». Reproduit au
   navigateur : une grille dont un critère a un nom VIDE s'enregistre sans aucun refus. La « preuve »
   de la sentinelle #506 pour ce champ vit dans `sauvegarderCritere()`, qui lit `#critereNom` — un id
@@ -409,7 +409,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   vide (motif AP-2). **Décision requise** : valider réellement (attention à l'autosave) OU retirer
   l'astérisque de ce champ. Dans les deux cas, réancrer la preuve sur le chemin vivant.
 
-- [ ] **#517** 📐 **B1 — la matrice de cartouche ne vit qu'en RAM jusqu'au bouton Enregistrer.**
+- [ ] **#517** ✅ **TRANCHÉ 26 août : ENREGISTREMENT AUTOMATIQUE**, comme les grilles et les échelles (verdict D2). Le namespacing des cartouches (CO-33/D1 du 21 août) reste un chantier SÉPARÉ et POSTÉRIEUR (verdict D3) — une migration de données doit pouvoir être annulée seule. 📐 **B1 — la matrice de cartouche ne vit qu'en RAM jusqu'au bouton Enregistrer.**
   `sauvegarderCommentaire()` écrit en mémoire seulement ; la persistance n'arrive qu'au bouton, en
   bas d'un écran long. Aucun garde-fou : changer de cartouche, de sous-onglet ou fermer l'app perd
   toute la saisie, en silence. C'est le modèle INVERSE des grilles et des échelles (autosave champ
@@ -419,7 +419,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⚠ L'écran cartouche est aussi le seul des quatre sans barre d'actions en tête (#503 visait « les
   trois écrans » — mais l'utilisateur, lui, en voit quatre).
 
-- [ ] **#518** 📐 **B2 — un champ personnalisé rempli mais sans titre est écarté en silence.**
+- [ ] **#518** ✅ **TRANCHÉ 26 août : AVERTIR avant d'enregistrer** (verdict D4) — « un bloc sans nom ne sera pas conservé ». Ni refus bloquant, ni titre par défaut : le contenu d'un bloc appartient à son auteur. 📐 **B2 — un champ personnalisé rempli mais sans titre est écarté en silence.**
   `champsPersonnalisesAEnregistrer()` filtre les blocs sans titre. La règle est défendable (pas de
   bandeau vide dans le document), mais du CONTENU TAPÉ disparaît à l'enregistrement sans un mot.
   **Décision requise** : avertir (« un bloc sans nom ne sera pas conservé ») OU refuser de fermer
@@ -627,7 +627,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
       `totalEchecsConnus: 0`, générée le 18 août **là où WebKit n'existe pas** — elle certifiait
       zéro dette sur des specs qui n'avaient jamais tourné. Le hook criait donc « régression » sur
       une dette de plusieurs jours, ce que cet item déplorait déjà.
-  ⮕ À trancher : corriger le chargement (`init-inline.js`, XHR synchrone + `fetch` de secours) ou
+  ✅ **TRANCHÉ 26 août (verdict D5) : CORRIGER LA LECTURE.** Motif retenu : ce n'est pas qu'un
+  problème de tests — si WebKit refuse cette lecture en `file://`, l'iPad la refuse aussi, et c'est
+  le mécanisme qui prévient quand l'app sert un fichier périmé depuis son cache (#285).
+  Énoncé d'origine : corriger le chargement (`init-inline.js`, XHR synchrone + `fetch` de secours) ou
   reconnaître l'erreur comme bruit d'environnement dans les specs. **Le premier est préférable** —
   si WebKit refuse ce chargement en `file://`, l'iPad de Grégoire le refuse aussi, et c'est la
   détection de mise à jour qui est en jeu, pas seulement des tests.
