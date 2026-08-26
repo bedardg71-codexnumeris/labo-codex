@@ -3371,17 +3371,32 @@ async function obtenirGrilleParId(grilleId) {
 }
 
 async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === grilleId);
+    // #510 (25 août 2026) — LA SAISIE QUI NE RESTAIT PAS.
+    //
+    // Cette fonction lisait la collection entière, y changeait une valeur et la
+    // réécrivait entière. Or le `change` d'un champ part au BLUR : quitter un
+    // champ pour cliquer dans le suivant lance deux enregistrements coup sur
+    // coup, qui lisaient le même instantané — le second réécrivait la grille
+    // sans la modification du premier, sans erreur et sans message.
+    // `db.modifier` sérialise la séquence entière par clé (cf. db.js).
+    //
+    // ⚠ Le mutateur rend `undefined` pour ANNULER l'écriture : une grille ou un
+    // critère introuvable ne doit pas réécrire la collection telle quelle.
+    let grilleModifiee = null;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const grille = grilles.find(g => g.id === grilleId);
+        if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return undefined;
 
-    if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return;
+        // Mettre à jour le champ
+        grille.criteres[critereIndex][champ] = valeur;
+        grille.dateModification = new Date().toISOString();
+        grilleModifiee = grille;
+        return grilles;
+    }, []);
 
-    // Mettre à jour le champ
-    grille.criteres[critereIndex][champ] = valeur;
-    grille.dateModification = new Date().toISOString();
-
-    // Sauvegarder dans IndexedDB
-    await db.set(cle('grillesTemplates'), grilles);
+    if (!grilleModifiee) return;
+    const grille = grilleModifiee;
 
     // FIX (10 jan 2026) : Synchroniser grilleTemplateActuelle pour éviter l'écrasement
     if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {

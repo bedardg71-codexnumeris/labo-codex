@@ -262,6 +262,185 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
   Vitest **3262/3262** (312 fichiers). Dernier ID : **#508**.
 
+### Chantier — 25 août 2026 (correctifs de l'audit Conception, lot « enregistrement »)
+
+> Sur `Rapports/AUDIT-conception-gabarits-2026-08-25.md`, constats A1 et A2 — les deux causes
+> directes du symptôme rapporté par Grégoire : « on dirait que les données n'étaient pas toujours
+> enregistrées ». Les autres constats de l'audit (A3, A4, B1 à B5, C1 à C6) restent OUVERTS.
+
+- [x] **#509 — « + Nouvelle production » ne repart plus avec les consignes de la précédente.**
+  `creerNouvelleProduction` (productions-liste.js) vide le formulaire champ par champ et ne passe
+  pas par `reinitialiserFormulaireProduction` (productions.js), seul appelant du peuplement des
+  blocs. Deux effets, tous deux reproduits au navigateur pendant l'audit : au PREMIER geste d'une
+  session, la fiche neuve n'affichait AUCUN bloc — ni objectif, ni description, ni détail de la
+  tâche, donc rien à saisir et un enregistrement muet de chaînes vides ; et APRÈS l'édition d'une
+  production, ses champs personnalisés, ses titres réécrits et son ordre de blocs restaient à
+  l'écran dans la fiche « neuve », puis s'enregistraient dans la NOUVELLE production.
+  ⚠ Exactement la classe de défaut corrigée pour #468/CO-17 (échéances par groupe héritées en
+  silence), sur la zone voisine : la sentinelle tient désormais la COUTURE — les deux chemins de
+  remise à neuf doivent vider la même zone.
+
+- [x] **#510 — Deux enregistrements coup sur coup ne s'effacent plus l'un l'autre.**
+  `modifierCritereGrille` et `modifierNiveauEchelle` lisaient la collection entière, la modifiaient
+  et la réécrivaient entière. Or le `change` d'un champ part AU BLUR, c'est-à-dire au moment précis
+  où l'on clique dans le champ suivant : deux rafales lisaient le même instantané, et la seconde
+  réécrivait la collection SANS la modification de la première. Sans erreur, sans message — le
+  mécanisme le plus vraisemblable du « je l'avais rempli, c'est pas resté ». Antérieur au chantier
+  #496-#507, pas une régression de 1.99.0.
+  ⚠ Sérialiser les ÉCRITURES n'y aurait rien fait : le mal est fait à la LECTURE. C'est la séquence
+  entière qui doit être atomique — d'où `db.modifier(cle, mutateur, defaut)`, une file par clé dans
+  `db.js` (clés distinctes indépendantes ; un mutateur qui rend `undefined` n'écrit rien ; une
+  opération en échec ne bloque pas la file). Les deux éditeurs y passent.
+  ▣ **Primitive à réemployer** : tout autre autosave en lecture-modification-écriture porte la même
+  course. Audit des autres sites NON FAIT dans ce lot.
+
+  Vitest **3275/3275** (311 fichiers, depuis `tests/`), 2 break-tests par constat, tous ROUGE puis
+  restaurés.
+
+- [x] **#511 — Partager une production ne la vide plus de son contenu pédagogique.**
+  `SCHEMAS_IMPORT.production` est une LISTE BLANCHE : une clé absente n'est pas signalée, elle
+  disparaît. Ni `objectif`, ni `tache`, ni `detailTache`, ni `ponderation`, ni `cartoucheId`, ni
+  `echeancesParGroupe`, ni `pratiquesCompatibles` n'y figuraient — ni les `champsPersonnalises` /
+  `titresBlocs` / `ordreBlocs` de #499/#500. Deux chemins vivants l'appliquent :
+  `ajouterALaBibliotheque` (partager) et l'import sélectif d'archives (restaurer). Les deux
+  rendaient donc une production structurellement intacte et pédagogiquement MUETTE.
+  Même trou côté grilles : ni `sousCriteres` ni `categoriesErreurs` — les onze rétroactions de
+  français se perdaient au transport, elles aussi.
+  ⚠ Deux formes de données manquaient au vocabulaire de `assainirObjet`, d'où deux types neufs :
+  `arrayStrings` (tableau de chaînes assainies UNE À UNE — `array` sans sous-schéma copie tel quel,
+  et ces valeurs repartent dans des attributs HTML) et `mapObjets` (map à clés dynamiques dont les
+  valeurs sont des objets cadrés — le cas d'`echeancesParGroupe`).
+  ▣ **La couture est désormais tenue** : `CLES_PRODUCTION_NON_TRANSPORTEES` déclare les exclusions
+  AVEC leur raison, et la sentinelle relit les clés qu'écrit `construireProductionData` pour exiger
+  que chacune soit transportée ou inscrite là. Ajouter une clé au gabarit sans décider de son sort
+  fait maintenant rougir un test.
+  📐 **Une seule clé exclue : `coursId`** (rattachement local, décidé à l'arrivée). Conséquence
+  assumée et INCHANGÉE : restaurer une archive rend des productions sans cours. **À trancher.**
+
+  Vitest **3288/3288** (312 fichiers). Trois break-tests, trois ROUGE — dont la garde de validité
+  du ratchet, qui attrape une regex d'extraction devenue muette (motif AP-2 relevé par l'audit sur
+  la sentinelle #506). Dernier ID : **#511**.
+
+- [x] **#512 — L'aperçu ne s'ouvre plus sur « Consignes » quand le document a mieux à montrer.**
+  `cranDocument` promet, sans demande explicite, le cran le plus HAUT que le document puisse porter
+  — le comportement d'avant les crans, pour que rien ne disparaisse de ce que Grégoire voyait.
+  Promesse court-circuitée au PREMIER usage : faute de valeur posée, le `<select>` restait sur sa
+  première option du HTML (« Consignes ») et le code lisait cela comme un choix de l'utilisateur.
+  Une production munie de sa grille, de son échelle ET de sa cartouche ouvrait donc son aperçu sur
+  la seule page de consignes.
+  ⚠ Correctif : poser explicitement `''` quand aucun réglage n'est mémorisé — une valeur absente de
+  la liste met `selectedIndex` à -1, et le sélecteur dit alors « je ne demande rien ».
+  ⚠ La sentinelle imite un `<select>` FIDÈLE à HTML (une valeur inconnue retombe à `''`) : un faux
+  élément complaisant aurait prouvé le contraire de ce qui se passe dans un navigateur.
+
+- [x] **#513 — Une production sans grille produit enfin son document de consignes.**
+  La porte de l'aperçu exigeait grille ET échelle, alors que le cran « Consignes » existe depuis
+  #497. Le cas ordinaire — un travail préparé avant qu'on ait monté son évaluation — ne pouvait pas
+  produire le document distribué aux étudiant·es, et le repli renvoyait vers un formulaire qui, lui,
+  réclame justement les deux : une impasse polie. Le commentaire du code annonçait le retrait de ce
+  repli « à l'étape 3 » ; l'étape 3 a été livrée sans que la porte s'ouvre.
+  Le rendu, lui, savait déjà faire : le tableau des critères était conditionné. Seules trois gardes
+  bloquaient (porte, rendu, nom de fichier PDF).
+  ▣ **Défaut voisin corrigé du même coup** : « cette production a-t-elle des consignes ? » était
+  écrit DEUX fois et les deux versions divergeaient — `blocsInformationDocument` comptait les blocs
+  libres de #499, `cransDisponibles` non. Une production dont seuls « Format et mise en page » et
+  « Remise du travail » étaient remplis se voyait refuser son cran, avec un motif FAUX en infobulle
+  (« ni objectif, ni description, ni détail de tâche »). Un seul prédicat désormais,
+  `productionAConsignes`, et le motif de refus dit la même chose que la règle.
+  ⏳ **Non touché** : le bouton du formulaire inline reste conditionné à `grilleId && echelleId`
+  (chemin secondaire, sans production chargée d'où déduire les consignes).
+
+  Vitest **3298/3298** (313 fichiers). Trois break-tests, trois ROUGE.
+
+- [x] **#514 — Les consignes longues ne sont plus dessinées sous le bord du papier.**
+  `poserBlocsInfoPDF` ne consultait JAMAIS la hauteur de page : aucun `addPage`, aucun `getHeight`.
+  Le tableau des critères, lui, pagine (autoTable s'en charge) — d'où un document dont la partie
+  évaluation se poursuit proprement pendant que les consignes disparaissent à l'impression. Et
+  l'aperçu affichait « le PDF le poursuivra sur une page de plus » : promesse tenue pour le tableau
+  seulement. Le cas d'usage réel est justement celui qui déborde — un « Détail de la tâche » en
+  étapes numérotées, ce que Grégoire distribue.
+  ▣ **Le cas ordinaire reste inchangé** : quand tout tient sur la feuille, c'est exactement le rendu
+  d'avant qui est produit (celui que fige le golden master). La pagination est un chemin qui ne
+  s'ouvre que lorsque le contenu était perdu.
+  ⚠ En deux colonnes, l'équilibrage n'a plus de sens au débordement (deux colonnes de hauteur
+  comparable qui dépassent toutes les deux ne s'arrangent pas en les équilibrant) : les blocs
+  deviennent un FLUX — gauche jusqu'en bas, droite, puis feuille suivante. L'ordre est préservé.
+  ⚠ **Piège attrapé en cours de route** : l'abscisse doit être RÉÉVALUÉE après chaque repli, un
+  repli pouvant changer de colonne autant que de page. Lue une seule fois, le texte se poursuivait
+  dans la colonne qu'on venait de quitter — invisible dans le source, visible sur le papier.
+  ⚠ **Et un faux-vert attrapé par le break-test** : l'assertion « le texte occupe les deux
+  colonnes » comptait aussi les titres de bandeaux, qui sont posés CENTRÉS, donc à une abscisse qui
+  leur est propre. Elle restait verte avec une abscisse figée — le défaut même qu'elle devait voir.
+
+  Vitest **3305/3305** (314 fichiers). La sentinelle mesure ce qui est DESSINÉ (faux jsPDF qui note
+  page et ordonnée de chaque tracé), pas ce qui est écrit dans le source. Dernier ID : **#514**.
+
+- [x] **#515 — L'avis de débordement de l'aperçu suit enfin le thème.** (constat C4)
+  `.apercu-pdf-debordement` portait `#f0c674` en dur, hors palette. Le ton ne suivait pas le thème :
+  sur fond clair, le message « Ce contenu dépasse la feuille » était presque illisible — un avis
+  d'alerte qu'on ne lit pas ne prévient de rien. Rattaché à `--alerte-texte-attention`, défini pour
+  les deux thèmes (#d4b878 sombre, #7a5a20 clair).
+  ⏳ Pas de sentinelle : une valeur de couleur n'est pas un garde-fou de comportement. Le ratchet
+  utile serait un lint général des couleurs en dur — chantier distinct, hors de ce lot.
+
+### Constats de l'audit du 25 août ENCORE OUVERTS
+
+> Les six correctifs ci-dessus (#509 à #515) épuisent ce qui ne demandait pas d'arbitrage de
+> Grégoire. Restent, du rapport `Rapports/AUDIT-conception-gabarits-2026-08-25.md` :
+
+- [ ] **#516** 📐 **A3 — l'astérisque « Nom du critère » promet un refus qui n'existe pas.**
+  La légende (#506) dit « Champ obligatoire — l'enregistrement est refusé sans lui ». Reproduit au
+  navigateur : une grille dont un critère a un nom VIDE s'enregistre sans aucun refus. La « preuve »
+  de la sentinelle #506 pour ce champ vit dans `sauvegarderCritere()`, qui lit `#critereNom` — un id
+  ABSENT d'index.html. La garde textuelle est donc ancrée sur du code mort et la sentinelle passe à
+  vide (motif AP-2). **Décision requise** : valider réellement (attention à l'autosave) OU retirer
+  l'astérisque de ce champ. Dans les deux cas, réancrer la preuve sur le chemin vivant.
+
+- [ ] **#517** 📐 **B1 — la matrice de cartouche ne vit qu'en RAM jusqu'au bouton Enregistrer.**
+  `sauvegarderCommentaire()` écrit en mémoire seulement ; la persistance n'arrive qu'au bouton, en
+  bas d'un écran long. Aucun garde-fou : changer de cartouche, de sous-onglet ou fermer l'app perd
+  toute la saisie, en silence. C'est le modèle INVERSE des grilles et des échelles (autosave champ
+  par champ) — cette incohérence entre sous-onglets voisins nourrit à elle seule la perception
+  « des fois ça enregistre, des fois non ». **Décision requise** : autosave comme les voisins OU
+  garde-fou « modifications non enregistrées ». À trancher AVANT de coder.
+  ⚠ L'écran cartouche est aussi le seul des quatre sans barre d'actions en tête (#503 visait « les
+  trois écrans » — mais l'utilisateur, lui, en voit quatre).
+
+- [ ] **#518** 📐 **B2 — un champ personnalisé rempli mais sans titre est écarté en silence.**
+  `champsPersonnalisesAEnregistrer()` filtre les blocs sans titre. La règle est défendable (pas de
+  bandeau vide dans le document), mais du CONTENU TAPÉ disparaît à l'enregistrement sans un mot.
+  **Décision requise** : avertir (« un bloc sans nom ne sera pas conservé ») OU refuser de fermer
+  sans trancher.
+
+- [ ] **#519 — Passe design (constats C1, C2, C3, C5).** C1 : `design-system.html` ne documente
+  aucun composant du chantier (`.btn-icone-nu`, `.bloc-reordonner`, `.champ-recommande`,
+  `.legende-marques`, usage étendu de `.pipeline-btn-reorder`). C2 : la légende des deux astérisques
+  n'existe que sur l'écran Production — Grilles, Échelles et Cartouches en portent SANS légende,
+  alors que le commentaire CSS de `.champ-recommande` dit lui-même « ne jamais poser l'une sans
+  l'autre ». ⚠ **C2 dépend de #516** (si l'astérisque du nom de critère est retiré, la légende à
+  poser change). C3 : cibles tactiles — chevrons (icône 11 px) et corbeille (`padding: 3px 5px`)
+  loin des 44×44 px exigés pour iPad. C5 : rangée de cinq boutons pleins multicolores, « Supprimer »
+  (rouge) entre « Dupliquer » et « Annuler », à un clic d'« Enregistrer ».
+
+- [ ] **#520 — Zéro-dette : l'« ANCIEN SYSTÈME » des échelles.** (constat C6) Un bloc caché garde des
+  ids DUPLIQUÉS (`nomEchelleTemplate` ×3, `selectEchelleTemplate`, `btnDupliquerEchelle`,
+  `typeEchelle`, `seuilReussite`…). Pas de bug actif — le premier id du DOM gagne, et c'est
+  l'éditeur vivant — mais une mine au premier réordonnancement, et une entorse au zéro-dette.
+  Ablation avec sentinelle ratchet.
+
+- [ ] **#521 — Décider du sort de `coursId` au transport.** Extrait de #511 : le rattachement local
+  au cours est la seule clé volontairement NON transportée. Conséquence inchangée depuis toujours —
+  restaurer une archive rend des productions sans cours. Transporter ferait apparaître une
+  production reçue sous un cours homonyme du destinataire, ou sous un cours inexistant.
+  **Décision requise.**
+
+- [ ] **#522 — Auditer les autres autosaves pour la course lecture-modification-écriture.**
+  Extrait de #510 : `db.modifier` existe désormais, mais seuls les deux éditeurs du constat A2 y
+  passent. Tout autre autosave en lecture-modification-écriture porte la même course. Recoupe
+  [[project-autosaves-a-auditer]].
+
+  Dernier ID : **#522**.
+
 ### Chantier — 25 août 2026 (le pont carte d'alignement ↔ productions)
 
 - [x] **#492 — Le sélecteur « Production » de l'Inspecteur ne montrait rien, et personne ne pouvait le voir.**

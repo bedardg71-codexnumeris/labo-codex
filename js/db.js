@@ -145,6 +145,10 @@
             // logique métier est injectée par un module dédié (cf.
             // js/productions-namespace-garde.js).
             this._gardesEcriture = new Map();
+            // #510 — files d'attente des lectures-modifications-écritures, une
+            // par clé. Voir `modifier()` : c'est ce qui empêche deux rafales
+            // d'autosave de lire le même instantané et de s'entre-écraser.
+            this._filesModification = new Map();
         }
 
         /**
@@ -491,6 +495,66 @@
             } else {
                 this._setLocalStorage(key, value);
             }
+        }
+
+        /**
+         * #510 — LIRE, MODIFIER, ÉCRIRE SANS SE FAIRE DOUBLER (25 août 2026).
+         *
+         * ⚠⚠ CE QUE ÇA CORRIGE, ET POURQUOI ON NE LE VOYAIT PAS. Les éditeurs
+         * de gabarits enregistrent champ par champ : le `change` d'un champ
+         * part au blur, c'est-à-dire au moment PRÉCIS où on clique dans le
+         * champ suivant. Chaque enregistrement lisait la collection entière,
+         * y changeait une valeur, puis la réécrivait entière. Deux rafales
+         * rapprochées lisaient donc le même instantané, et la seconde
+         * réécrivait la collection SANS la modification de la première :
+         *
+         *     A : get(grilles) ─────────── set(grilles + nomA)
+         *     B :     get(grilles) ──────────────── set(grilles SANS nomA)
+         *
+         * La saisie disparaissait sans erreur et sans message — d'où le
+         * « je l'avais rempli, c'est pas resté » rapporté par Grégoire, et
+         * son caractère intermittent : la fenêtre est étroite, mais réelle,
+         * chaque `get` IndexedDB rendant la main.
+         *
+         * Le remède n'est PAS de sérialiser les écritures : deux `set` bien
+         * ordonnés perdent quand même la première modification, puisque le
+         * mal est fait à la LECTURE. C'est la séquence entière qui doit être
+         * atomique — d'où la file par clé.
+         *
+         * @param {string} key - la clé à modifier
+         * @param {function} mutateur - reçoit la valeur lue, rend la valeur à
+         *   écrire ; peut être asynchrone. Rendre `undefined` ANNULE
+         *   l'écriture (rien n'est touché) : c'est le chemin des refus,
+         *   « grille introuvable », « index hors bornes », etc.
+         * @param {*} defaut - valeur rendue par la lecture si la clé est vide
+         * @returns {Promise<*>} ce que le mutateur a rendu
+         */
+        async modifier(key, mutateur, defaut = null) {
+            const precedente = this._filesModification.get(key) || Promise.resolve();
+
+            // ⚠ La file ne doit pas se rompre sur un échec : une opération qui
+            // lève laisserait toutes les suivantes en attente pour toujours.
+            // On chaîne donc sur l'issue, pas sur le succès.
+            const courante = precedente.then(() => {}, () => {}).then(async () => {
+                const valeur = await this.get(key, defaut);
+                const resultat = await mutateur(valeur);
+                if (resultat === undefined) return undefined;
+                await this.set(key, resultat);
+                return resultat;
+            });
+
+            this._filesModification.set(key, courante);
+
+            // Ne pas laisser la Map enfler : la dernière opération de la file
+            // retire son entrée. (Le `then` vide évite un rejet non capté ici ;
+            // l'appelant, lui, reçoit bien `courante` et son erreur.)
+            courante.then(() => {}, () => {}).then(() => {
+                if (this._filesModification.get(key) === courante) {
+                    this._filesModification.delete(key);
+                }
+            });
+
+            return courante;
         }
 
         /**

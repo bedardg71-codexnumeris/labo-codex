@@ -13723,7 +13723,11 @@ tr.etudiant-inactif td {
     bottom: -22px;
     text-align: center;
     font-size: 0.78rem;
-    color: #f0c674;
+    /* #515 — la couleur d'attention de la palette, pas un jaune inventé. Le
+       ton en dur (#f0c674) ne suivait pas le thème : sur fond clair, l'avis de
+       débordement était presque illisible — un message d'alerte qu'on ne lit
+       pas ne prévient de rien. */
+    color: var(--alerte-texte-attention, #d4b878);
 }
 
 /* Contenu de la page avec marges simulées (toujours mode clair) */

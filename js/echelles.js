@@ -3211,39 +3211,51 @@ function afficherNiveauxEchelle(echelle) {
  * @param {any} valeur - Nouvelle valeur
  */
 async function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
-    const echelles = await db.get(cle('echellesTemplates')) ||  [];
-    const echelleIndex = echelles.findIndex(e => e.id === echelleId);
+    // #510 (25 août 2026) — MÊME COURSE QUE LES GRILLES, MÊME REMÈDE.
+    // Lecture-modification-écriture de la collection entière, sur un champ qui
+    // s'enregistre au blur : deux niveaux édités coup sur coup lisaient le même
+    // instantané et le second effaçait le premier, en silence. `db.modifier`
+    // sérialise la séquence par clé (cf. db.js).
+    let echelleModifiee = null;
+    await db.modifier(cle('echellesTemplates'), (lues) => {
+        const echelles = lues || [];
+        const echelleIndex = echelles.findIndex(e => e.id === echelleId);
 
-    if (echelleIndex === -1) {
-        console.error('❌ Échelle non trouvée pour modification:', echelleId);
-        return;
-    }
+        if (echelleIndex === -1) {
+            console.error('❌ Échelle non trouvée pour modification:', echelleId);
+            return undefined;
+        }
 
-    const echelle = echelles[echelleIndex];
+        const echelle = echelles[echelleIndex];
 
-    if (!echelle.niveaux || !echelle.niveaux[niveauIndex]) {
-        console.error('❌ Niveau introuvable à l\'index:', niveauIndex);
-        return;
-    }
+        if (!echelle.niveaux || !echelle.niveaux[niveauIndex]) {
+            console.error('❌ Niveau introuvable à l\'index:', niveauIndex);
+            return undefined;
+        }
 
-    // Mettre à jour le champ
-    echelle.niveaux[niveauIndex][champ] = valeur;
+        // Mettre à jour le champ
+        echelle.niveaux[niveauIndex][champ] = valeur;
 
-    // Remettre l'échelle modifiée dans le tableau
-    echelles[echelleIndex] = echelle;
+        // Remettre l'échelle modifiée dans le tableau
+        echelles[echelleIndex] = echelle;
+        echelleModifiee = echelle;
+        return echelles;
+    }, []);
 
-    // Sauvegarder dans localStorage
-    await db.set(cle('echellesTemplates'),  echelles);
+    if (!echelleModifiee) return;
 
-    // CRITIQUE: Recharger echelleTemplateActuelle depuis localStorage (évite références obsolètes)
-    const echellesRecharge = await db.get(cle('echellesTemplates')) ||  [];
-    echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
+    // L'échelle rendue par le mutateur EST celle qui vient d'être écrite : plus
+    // besoin de relire la collection pour éviter une référence obsolète — et
+    // cette relecture pouvait justement rendre un instantané concurrent.
+    echelleTemplateActuelle = echelleModifiee;
 
-    // Mettre à jour db.setSync('niveauxEchelle') si c'est l'échelle active (compatibilité ancienne logique)
-    const niveauxEchelle = await db.get('niveauxEchelle') ||  [];
-    if (niveauxEchelle.length > 0 && niveauxEchelle[0].echelleId === echelleId) {
-        await db.set('niveauxEchelle',  echelleTemplateActuelle.niveaux);
-    }
+    // Mettre à jour 'niveauxEchelle' si c'est l'échelle active (compatibilité
+    // ancienne logique). Lecture conditionnelle puis écriture : même sérialisation.
+    await db.modifier('niveauxEchelle', (lus) => {
+        const niveauxEchelle = lus || [];
+        if (niveauxEchelle.length === 0 || niveauxEchelle[0].echelleId !== echelleId) return undefined;
+        return echelleModifiee.niveaux;
+    }, []);
 
     // Réafficher pour mettre à jour l'aperçu visuel et les bordures colorées
     afficherNiveauxEchelle(echelleTemplateActuelle);

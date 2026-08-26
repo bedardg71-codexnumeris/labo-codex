@@ -254,6 +254,24 @@ function creerNouvelleProduction() {
         poserValeurChampGabarit('productionDetailTache', '');
     }
 
+    // #509 (25 août 2026) : REMETTRE LA ZONE DES CONSIGNES À NEUF.
+    //
+    // Même défaut que #468/CO-17 plus bas, sur la zone voisine — et découvert
+    // par l'audit du 25 août. Ce chemin-ci vide le formulaire champ par champ
+    // et ne passe pas par reinitialiserFormulaireProduction (productions.js),
+    // le seul à appeler le peuplement. Deux conséquences, toutes deux vues à
+    // l'écran : au PREMIER geste d'une session, la fiche neuve n'affichait
+    // AUCUN bloc — ni objectif, ni description, ni détail de la tâche, donc
+    // rien à saisir et un enregistrement muet de chaînes vides ; et APRÈS
+    // l'édition d'une production, ses champs personnalisés, ses titres réécrits
+    // et son ordre de blocs restaient à l'écran dans la fiche « neuve », puis
+    // s'enregistraient dans la nouvelle production.
+    //
+    // ⚠ APRÈS les poserValeurChampGabarit ci-dessus, jamais avant : le
+    // peuplement RE-REND la zone entière, et un rendu postérieur écraserait ce
+    // que ceux-ci viennent de poser.
+    if (typeof peuplerBlocsConsignes === 'function') peuplerBlocsConsignes(null);
+
     // ✅ AJOUT (6 jan 2026) : Vider le panneau métadonnées (mode création)
     const panneauMeta = document.getElementById('panneauMetadonneesProduction');
     if (panneauMeta) panneauMeta.innerHTML = '';

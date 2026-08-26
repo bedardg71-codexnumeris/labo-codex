@@ -1821,6 +1821,29 @@ function cranDocument(options, grille, cartouche) {
 }
 
 /**
+ * #513 (25 août 2026) — « CETTE PRODUCTION A-T-ELLE DES CONSIGNES À MONTRER ? »,
+ * EN UN SEUL ENDROIT.
+ *
+ * ⚠⚠ La réponse était écrite deux fois, et les deux versions divergeaient.
+ * `blocsInformationDocument` rend les trois blocs ancrés ET les blocs libres
+ * de #499 ; `cransDisponibles`, lui, ne regardait que les trois ancrés. Une
+ * production dont l'enseignant·e avait rempli « Format et mise en page » et
+ * « Remise du travail » — et rien d'autre — se voyait donc refuser son cran
+ * « Consignes », avec un motif faux en infobulle : « ni objectif, ni
+ * description, ni détail de tâche ». Elle en avait, pourtant, et à l'écran.
+ *
+ * Même règle que le rendu pour les blocs libres : titre ET contenu, faute de
+ * quoi ce serait un bandeau au-dessus du vide.
+ */
+function productionAConsignes(production) {
+    if (!production) return false;
+    if (production.objectif || production.tache || production.detailTache) return true;
+    return Array.isArray(production.champsPersonnalises)
+        && production.champsPersonnalises.some(champ =>
+            champ && String(champ.titre || '').trim() && String(champ.contenu || '').trim());
+}
+
+/**
  * Les crans que CE document peut réellement porter, du plus bas au plus haut.
  *
  * ⚠ Sans production, il n'y a pas de consignes à montrer : le document est
@@ -1833,9 +1856,7 @@ function cransDisponibles(grille, cartouche, options) {
     const opts = options || {};
     const crans = [];
 
-    const aConsignes = !!(opts.production && (
-        opts.production.objectif || opts.production.tache || opts.production.detailTache));
-    if (aConsignes) crans.push(CRAN_CONSIGNES);
+    if (productionAConsignes(opts.production)) crans.push(CRAN_CONSIGNES);
 
     const aEvaluation = !!(grille && Array.isArray(grille.criteres) && grille.criteres.length > 0);
     if (aEvaluation) crans.push(CRAN_EVALUATION);
@@ -1850,7 +1871,9 @@ function cransDisponibles(grille, cartouche, options) {
 /** Ce que le cran indisponible doit DIRE, plutôt que de disparaître en silence. */
 function raisonCranIndisponible(cran, grille, cartouche, options) {
     if (cran === CRAN_CONSIGNES) {
-        return 'Cette production n\'a ni objectif, ni description, ni détail de tâche.';
+        // #513 — le motif doit dire la MÊME chose que la règle : les blocs
+        // nommés par l'enseignant·e comptent aussi.
+        return 'Cette production n\'a aucun bloc de consignes rempli.';
     }
     if (cran === CRAN_EVALUATION) {
         return 'Aucune grille de critères n\'est associée à cette production.';
@@ -2068,54 +2091,149 @@ function poserBlocsInfoPDF(doc, modele, posY, largeurContenu, facteurTaille) {
     const INTERLIGNE = 5;   // mm — celui du reste du module
     const gauche = PDF_CONFIG.marges.gauche;
 
+    // ⚠⚠ #514 (26 août 2026) — CE QUI DÉPASSE LE BAS DE LA FEUILLE N'EXISTE PAS.
+    //
+    // Cette fonction ne consultait JAMAIS la hauteur de page. Le tableau des
+    // critères, lui, pagine (autoTable s'en charge) — d'où un document où la
+    // partie évaluation se poursuit proprement pendant que les consignes, elles,
+    // sont dessinées sous le bord du papier et disparaissent à l'impression.
+    // Le cas d'usage réel est justement celui qui déborde : un « Détail de la
+    // tâche » en étapes numérotées. Et l'aperçu affichait « le PDF le poursuivra
+    // sur une page de plus » — une promesse tenue pour le tableau seulement.
+    //
+    // ▣ LE CAS ORDINAIRE RESTE INCHANGÉ, AU PIXEL PRÈS : quand tout tient sur la
+    // feuille, c'est exactement le rendu d'avant qui est produit (c'est celui que
+    // le golden master fige). La pagination est un chemin qui ne s'ouvre que
+    // lorsque le contenu était perdu.
+    const limiteBas = doc.internal.pageSize.getHeight() - PDF_CONFIG.marges.bas;
+    const HAUTEUR_BANDEAU = 5.5;
+
     // Un bandeau : rectangle plein, titre blanc centré, en majuscules.
     const poserBandeau = (texte, x, y, largeur) => {
-        const HAUTEUR = 5.5;
         doc.setFillColor(...PDF_CONFIG.couleurs.titreSection);
-        doc.rect(x, y - 4, largeur, HAUTEUR, 'F');
+        doc.rect(x, y - 4, largeur, HAUTEUR_BANDEAU, 'F');
         doc.setFontSize(PDF_CONFIG.polices.textePetit * facteurTaille);
         doc.setTextColor(255, 255, 255);
         doc.setFont('helvetica', 'bold');
         doc.text(texte.replace(/\s*:\s*$/, '').toUpperCase(), x + largeur / 2, y, { align: 'center' });
-        return y + HAUTEUR + 1;
+        return y + HAUTEUR_BANDEAU + 1;
     };
 
-    const poserTexte = (texte, x, y, largeur) => {
+    const styleTexte = () => {
         doc.setFontSize(PDF_CONFIG.polices.texteNormal * facteurTaille);
         doc.setTextColor(...PDF_CONFIG.couleurs.textePrincipal);
         doc.setFont('helvetica', 'normal');
+    };
+
+    const poserTexte = (texte, x, y, largeur) => {
+        styleTexte();
         const lignes = doc.splitTextToSize(texte, largeur);
         doc.text(lignes, x, y);
         return y + lignes.length * INTERLIGNE;
+    };
+
+    /** Ce qu'un bloc occupera en hauteur, bandeau et respiration compris. */
+    const hauteurBloc = (bloc, largeur, avecBandeau) => {
+        styleTexte();
+        const lignes = doc.splitTextToSize(bloc.texte, largeur);
+        return (avecBandeau ? HAUTEUR_BANDEAU + 1 : INTERLIGNE) + lignes.length * INTERLIGNE + 4;
+    };
+
+    /**
+     * Pose un texte LIGNE À LIGNE, en demandant une feuille neuve dès qu'il n'y
+     * a plus de place. Un bloc plus long qu'une page se poursuit donc au lieu
+     * d'être tronqué — c'est le cas des consignes numérotées.
+     */
+    // ⚠ `obtenirX` est une FONCTION, jamais une valeur : un repli peut changer
+    // de COLONNE autant que de page. Une abscisse lue une seule fois, avant la
+    // pose, ferait continuer le texte dans la colonne qu'on vient de quitter.
+    const poserTextePagine = (texte, obtenirX, y, largeur, replier) => {
+        styleTexte();
+        const lignes = doc.splitTextToSize(texte, largeur);
+        let curseur = y;
+        lignes.forEach(ligne => {
+            if (curseur > limiteBas) {
+                curseur = replier();
+                styleTexte();   // ⚠ la nouvelle page ne garde pas l'état de police
+            }
+            doc.text(ligne, obtenirX(), curseur);
+            curseur += INTERLIGNE;
+        });
+        return curseur;
     };
 
     if (modele.disposition === DISPO_DEUX_COLONNES) {
         const ECART = 8;   // mm
         const largeurCol = (largeurContenu - ECART) / 2;
         const repartition = repartirEnDeuxColonnes(blocs);
-        let basMax = posY;
 
-        [repartition.gauche, repartition.droite].forEach((colonne, index) => {
-            const x = gauche + index * (largeurCol + ECART);
-            let y = posY;
-            colonne.forEach(bloc => {
-                y = poserBandeau(bloc.titre, x, y, largeurCol);
-                y = poserTexte(bloc.texte, x, y, largeurCol) + 4;
+        const hauteurColonne = (colonne) =>
+            colonne.reduce((total, bloc) => total + hauteurBloc(bloc, largeurCol, true), 0);
+        const tientSurLaFeuille = posY
+            + Math.max(hauteurColonne(repartition.gauche), hauteurColonne(repartition.droite))
+            <= limiteBas;
+
+        if (tientSurLaFeuille) {
+            let basMax = posY;
+            [repartition.gauche, repartition.droite].forEach((colonne, index) => {
+                const x = gauche + index * (largeurCol + ECART);
+                let y = posY;
+                colonne.forEach(bloc => {
+                    y = poserBandeau(bloc.titre, x, y, largeurCol);
+                    y = poserTexte(bloc.texte, x, y, largeurCol) + 4;
+                });
+                basMax = Math.max(basMax, y);
             });
-            basMax = Math.max(basMax, y);
+            return basMax + 3;
+        }
+
+        // ⚠ Débordement : la répartition équilibrée n'a plus de sens — deux
+        // colonnes de hauteur comparable qui dépassent toutes les deux ne
+        // s'arrangent pas en les équilibrant. Les blocs deviennent un FLUX :
+        // colonne de gauche jusqu'en bas, colonne de droite, puis feuille
+        // suivante. C'est la lecture d'un journal, et l'ordre est préservé.
+        let colonne = 0;
+        let hautColonne = posY;
+        let y = posY;
+        const replier = () => {
+            if (colonne === 0) {
+                colonne = 1;
+            } else {
+                doc.addPage();
+                colonne = 0;
+                hautColonne = PDF_CONFIG.marges.haut;
+            }
+            y = hautColonne;
+            return y;
+        };
+
+        const x = () => gauche + colonne * (largeurCol + ECART);
+        blocs.forEach(bloc => {
+            // Un bandeau seul en bas de colonne annoncerait un bloc qui commence
+            // ailleurs : on replie AVANT de le poser.
+            if (y + HAUTEUR_BANDEAU + 1 + INTERLIGNE > limiteBas) replier();
+            y = poserBandeau(bloc.titre, x(), y, largeurCol);
+            y = poserTextePagine(bloc.texte, x, y, largeurCol, replier) + 4;
         });
-        return basMax + 3;
+        return y + 3;
     }
 
     // Continu : un bloc après l'autre, pleine largeur.
     let y = posY;
+    const replierContinu = () => {
+        doc.addPage();
+        y = PDF_CONFIG.marges.haut;
+        return y;
+    };
     blocs.forEach(bloc => {
+        // Même règle : un titre ne reste pas seul au bas d'une page.
+        if (y + INTERLIGNE * 2 > limiteBas) replierContinu();
         doc.setFontSize(PDF_CONFIG.polices.texteNormal * facteurTaille);
         doc.setTextColor(...PDF_CONFIG.couleurs.titreSection);
         doc.setFont('helvetica', 'bold');
         doc.text(bloc.titre, gauche, y);
         y += INTERLIGNE;
-        y = poserTexte(bloc.texte, gauche, y, largeurContenu) + 4;
+        y = poserTextePagine(bloc.texte, () => gauche, y, largeurContenu, replierContinu) + 4;
     });
     return y + 1;
 }
@@ -2161,7 +2279,6 @@ function blocsInfoHTML(modele, styles) {
 }
 
 function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
-    if (!grille || !echelle) return '<p class="text-muted">Données manquantes</p>';
 
     // Facteur de taille pour les elements configurables (pas titre, pas retroactions)
     const facteurTaille = options.taillePolice === 'petit' ? 0.85 :
@@ -2208,6 +2325,17 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
 
     // #497 — titre, en-tête et PROFONDEUR viennent du MODÈLE, partagé avec le PDF.
     const modele = construireModeleDocument(grille, cartouche, options);
+
+    // ⚠ #513 — la garde vient APRÈS le modèle, et porte sur ce que le document
+    // peut MONTRER. Elle exigeait grille et échelle : au cran « Consignes »,
+    // elles ne servent à rien, et leur absence rendait « Données manquantes »
+    // au-dessus de consignes parfaitement rédigées. Le tableau des critères, lui,
+    // est déjà conditionné plus bas — le rendu savait faire, c'est la porte qui
+    // ne laissait pas entrer.
+    if (!modele.afficheEvaluation && modele.blocsInfo.length === 0) {
+        return '<p class="text-muted">Données manquantes</p>';
+    }
+
     const titre = modele.titre;
     // ⚠ La cartouche n'est pas une section à part : ses commentaires REMPLACENT
     // les descriptions de niveaux dans les cellules du tableau. Le cran se
@@ -2571,9 +2699,11 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
             .substring(0, 30);
         nomFichier = cartouche ? `${nomProd}-grille-descriptive.pdf` : `${nomProd}-grille.pdf`;
     } else {
+        // #513 — sans grille (document de consignes seules), il reste un nom à donner.
+        const nomGrille = (grille && grille.nom) || 'export';
         nomFichier = cartouche
-            ? `grille-descriptive-${grille.nom || 'export'}.pdf`
-            : `grille-${grille.nom || 'export'}.pdf`;
+            ? `grille-descriptive-${nomGrille}.pdf`
+            : `grille-${nomGrille}.pdf`;
     }
     doc.save(nomFichier);
 }
@@ -3232,9 +3362,11 @@ async function afficherFormulairePDFDepuisProduction() {
                 cartoucheId: production.cartoucheId
             });
             if (ouvert) return;
-            // ⏳ REPLI ASSUMÉ, à retirer à l'étape 3 du plan : sans grille ni
-            // échelle, l'aperçu ne sait pas encore rendre des consignes seules.
-            // Le formulaire reste alors la seule porte — pas une erreur muette.
+            // #513 — le repli ne sert plus qu'à un cas : une production qui n'a
+            // RIEN à montrer, ni évaluation ni consignes. Le formulaire de
+            // préparation est alors le bon endroit — pas une erreur muette.
+            // (Le commentaire précédent annonçait le retrait de ce repli « à
+            // l'étape 3 » ; l'étape 3 a été livrée sans que la porte s'ouvre.)
         }
     }
 
@@ -3483,19 +3615,31 @@ async function mettreAJourOptionsInlinePDF() {
  */
 async function ouvrirApercuPDFPour(ids) {
     const { productionId, grilleId, echelleId, cartoucheId } = ids || {};
-    if (!grilleId || !echelleId) return false;
-
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const echelles = await db.get(cle('echellesTemplates')) || [];
-    const grille = grilles.find(g => g.id === grilleId);
-    const echelle = echelles.find(e => e.id === echelleId);
-    if (!grille || !echelle) return false;
 
     let production = null;
     if (productionId) {
         const productions = await db.get(cle('productions')) || [];
         production = productions.find(p => p.id === productionId) || null;
     }
+
+    const grilles = grilleId ? (await db.get(cle('grillesTemplates')) || []) : [];
+    const echelles = echelleId ? (await db.get(cle('echellesTemplates')) || []) : [];
+    const grille = grilleId ? (grilles.find(g => g.id === grilleId) || null) : null;
+    const echelle = echelleId ? (echelles.find(e => e.id === echelleId) || null) : null;
+
+    // ⚠⚠ #513 (25 août 2026) — LE DOCUMENT DE CONSIGNES N'A BESOIN NI DE GRILLE
+    // NI D'ÉCHELLE. Cette porte exigeait les deux, et le cran « Consignes »
+    // existait pourtant depuis #497 : une production sans grille — le cas
+    // ordinaire d'un travail qu'on prépare avant d'avoir monté son évaluation —
+    // ne pouvait pas produire le document qu'on distribue aux étudiant·es. Le
+    // repli renvoyait alors vers un formulaire qui, lui, réclame les deux : une
+    // impasse polie.
+    //
+    // ⚠ Ce qui reste refusé : un document qui n'aurait RIEN à montrer — ni
+    // évaluation, ni consignes. `false` fait alors ouvrir le formulaire de
+    // préparation, qui est le bon endroit pour choisir ce qu'on veut voir.
+    const peutEvaluer = !!(grille && echelle);
+    if (!peutEvaluer && !productionAConsignes(production)) return false;
 
     let cartouche = null;
     if (cartoucheId) {
@@ -3533,8 +3677,21 @@ async function ouvrirApercuPDFPour(ids) {
 
     // #497 étape 3 — le cran mémorisé, s'il tient encore. `accorderSelecteurCran`
     // le repositionnera au rendu si ce document ne peut pas le porter.
+    //
+    // ⚠⚠ #512 (25 août 2026) — SANS RÉGLAGE MÉMORISÉ, IL N'Y A PAS DE DEMANDE.
+    // `cranDocument` promet, sans demande explicite, le cran le plus HAUT que le
+    // document puisse porter — le comportement d'avant les crans. Cette promesse
+    // était court-circuitée au PREMIER usage : faute de valeur posée, le
+    // `<select>` restait sur sa première option du HTML (« Consignes »), et
+    // `accorderSelecteurCran` lisait cela comme un choix de l'utilisateur. Une
+    // production munie de sa grille, de son échelle et de sa cartouche ouvrait
+    // donc son aperçu sur la seule page de consignes.
+    //
+    // Poser une valeur absente de la liste met `selectedIndex` à -1 et `value` à
+    // '' : le sélecteur dit alors « je ne demande rien », et
+    // `accorderSelecteurCran` l'alignera sur le cran retenu juste après.
     const selectCran = document.getElementById('apercuPDF-cran');
-    if (selectCran && reglages?.cran) selectCran.value = reglages.cran;
+    if (selectCran) selectCran.value = reglages?.cran || '';
     const selectDispo = document.getElementById('apercuPDF-disposition');
     if (selectDispo && reglages?.disposition) selectDispo.value = reglages.disposition;
 
@@ -3606,6 +3763,8 @@ window.blocsInformationDocument = blocsInformationDocument;
 window.cransDisponibles = cransDisponibles;                                 // #497 étape 3 — ce que le document peut porter
 window.cranDocument = cranDocument;
 window.raisonCranIndisponible = raisonCranIndisponible;
+window.productionAConsignes = productionAConsignes;                         // #513 — « a-t-elle des consignes à montrer ? », en un seul endroit
+window.poserBlocsInfoPDF = poserBlocsInfoPDF;                               // #514 — sentinelle de pagination : elle mesure ce qui est DESSINÉ
 window.accorderSelecteurCran = accorderSelecteurCran;                       // #497 étape 3 — le menu ne peut pas mentir sur ce que la page montre
 window.feuillesDuDocument = feuillesDuDocument;
 window.dispositionDocument = dispositionDocument;                           // #497 étape 4 — la mise en page est un choix
