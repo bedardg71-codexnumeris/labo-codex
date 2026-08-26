@@ -145,6 +145,32 @@ describe('#476 · C — sans pack, le script refuse', () => {
     });
 });
 
+/* ------------------------------ C bis — « Inconnu » n'est pas une identité */
+
+describe('#476 · C bis — un auteur non identifié n\'est pas écrit dans les données', () => {
+    it('C.c LE CAS VU SUR LES DONNÉES RÉELLES : « Inconnu » ne remplace pas l\'auteur', async () => {
+        // Constaté au dry-run du 26 août : le rapport annonçait « Auteur actif :
+        // Inconnu ». C'est le LIBELLÉ que rend obtenirAuteurActif faute de profil
+        // résolu, pas une identité — l'écrire remplacerait une attribution juste
+        // par une fausse, durablement.
+        const store = etatInitial();
+        const { win } = monter({ store, pack: PACK, auteur: 'Inconnu' });
+
+        await win.reparer476({ executer: true });
+
+        const copie = store.a2026_grillesTemplates[1];
+        expect(copie.isDemo, 'la marque part quand même : c\'est elle qui bloque').toBeUndefined();
+        expect(copie.auteur, 'l\'auteur d\'origine reste, faute de mieux').toBe('Labo Codex');
+    });
+
+    it('C.d un auteur réel, lui, est bien posé', async () => {
+        const store = etatInitial();
+        const { win } = monter({ store, pack: PACK, auteur: 'Grégoire Bédard' });
+        await win.reparer476({ executer: true });
+        expect(store.a2026_grillesTemplates[1].auteur).toBe('Grégoire Bédard');
+    });
+});
+
 /* ------------------------------------------------------------- D — l'annulation */
 
 describe('#476 · D — l\'annulation rend l\'état d\'avant', () => {

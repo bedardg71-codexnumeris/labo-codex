@@ -77,6 +77,20 @@ l'app → Cmd+V dans la console, Entrée.
 | 1.1a | Coller le script. | La console affiche **`Réparation #476 chargée. Lancer : await reparer476()   (dry-run)`**. Si tu ne vois pas cette ligne exacte, le fichier n'est pas chargé. |
 | 1.1b | Taper `await reparer476()` — **c'est le dry-run, il n'écrit rien**. | Un rapport qui commence par **`RÉPARATION #476 — copies restées marquées « exemple »`** puis **`👁 DRY-RUN — aucune écriture`**. |
 | 1.1c | **Copie le rapport entier et colle-le-moi AVANT d'exécuter.** | *(mesure — écris ici le total annoncé : combien de copies à libérer)* |
+> **RELEVÉ DU 26 AOÛT — RIEN À RÉPARER, la porte 1.1d est SANS OBJET.**
+> Dry-run sur les données réelles : **13 collections scannées, 0 copie à libérer.**
+> Les 16 items du namespace `demo_` (2 échelles, 3 grilles, 11 productions) sont tous reconnus
+> comme exemples fournis et laissés intacts — le critère « marque démo ET id absent du pack »
+> a fait exactement son travail. Le défaut D1 existait, Grégoire ne l'a pas subi : aucune copie
+> bloquée dans son corpus. **Aucune écriture n'a eu lieu, et aucune n'est due.**
+>
+> ⚠ **Ce que le rapport a révélé, en revanche** : « Auteur actif : **Inconnu** ». C'est le libellé
+> que rend `obtenirAuteurActif` faute de profil résolu, pas une identité. S'il y avait eu quelque
+> chose à réparer, le script aurait écrit « Inconnu » dans `auteur` — remplaçant une attribution
+> juste par une fausse, durablement. **Corrigé le jour même** : un auteur non identifié n'est plus
+> écrit ; la marque « exemple » part quand même, puisque c'est elle qui bloque l'édition.
+> Verrouillé par deux cas de plus dans la sentinelle (9 cas, break-test ROUGE).
+
 | 1.1d | Après mon feu vert seulement : `await reparer476({executer: true})`, puis recharge la page. | Chaque collection dit « n copie(s) libérée(s) ». Tes copies s'ouvrent désormais **modifiables**. |
 
 `⚠⚠ Données` `Console`
