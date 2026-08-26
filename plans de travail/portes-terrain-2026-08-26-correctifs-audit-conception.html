@@ -213,12 +213,13 @@ const DONNEES = [
   portes:[
   {num:"2.1", titre:"La saisie qui ne restait pas",
    pourquoi:"Tes mots à toi : « les boutons d’enregistrement des paramètres semblent avoir causé des soucis à quelques moments — on dirait que les données n’étaient pas toujours enregistrées. » C’est le geste de passer d’un champ au suivant qui le déclenchait : les deux enregistrements partaient en même temps et le second effaçait le premier.",
+   note:"**N’utilise pas le bouton « Enregistrer » dans cette porte, et pars d’une grille QUI EXISTE DÉJÀ.** Les noms de critères ne passent pas par ce bouton : ils s’enregistrent seuls quand tu quittes le champ, et c’est ce mécanisme-là qui perdait ta saisie. Cliquer « Enregistrer » réécrirait tout d’un coup et rendrait le défaut invisible — la porte dirait « ça marche » sans avoir rien vérifié. Sur une grille neuve non encore enregistrée, il n’y a d’ailleurs pas de critère à nommer : le code cherche la grille en base et abandonne s’il ne l’y trouve pas.",
    rangees:[
-    {geste:"Ouvre une grille. Nomme le critère 1, puis clique DIRECTEMENT dans le nom du critère 2 et nomme-le. Ne clique nulle part entre les deux.",
+    {geste:"Ouvre une grille DÉJÀ ENREGISTRÉE. Nomme le critère 1, puis clique DIRECTEMENT dans le nom du critère 2 et nomme-le. Ne clique nulle part entre les deux, et ne touche pas à « Enregistrer ».",
      attendu:"les deux champs portent ce que tu viens d’écrire.", tags:["donnees","mac"]},
-    {geste:"Recharge la page (Cmd+R) et rouvre la grille.",
+    {geste:"Recharge la page (Cmd+R) et rouvre LA MÊME grille.",
      attendu:"LES DEUX NOMS SONT LÀ. Avant : le premier des deux pouvait être vide, sans un mot d’erreur.", tags:["donnees","mac"]},
-    {geste:"Même chose sur une échelle : renomme deux niveaux d’affilée, recharge, rouvre.",
+    {geste:"Même chose sur une ÉCHELLE déjà enregistrée : renomme deux niveaux d’affilée, recharge, rouvre.",
      attendu:"les deux noms sont là.", tags:["donnees","mac"]}
    ]},
   {num:"2.2", titre:"La fiche neuve qui portait les consignes de la précédente",
