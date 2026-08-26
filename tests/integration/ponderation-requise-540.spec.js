@@ -211,6 +211,19 @@ test('#540-F · le handler data-on-input fonctionne enfin (export manquant corri
     await preparer(page);
 
     const r = await page.evaluate(async () => {
+        // #540 lot B : la proposition dérive désormais du calendrier RÉEL. Ce cas-ci
+        // porte sur l'EXPORT du handler, pas sur le nombre de semaines — on pose donc
+        // un trimestre régulier explicite pour que l'attendu reste lisible.
+        const cal = {};
+        let jour = 1;
+        for (let sem = 1; sem <= 15; sem++) {
+            for (let j = 0; j < 5; j++) {
+                cal['2026-01-' + String(jour++).padStart(2, '0')] =
+                    { statut: 'cours', numeroSemaine: sem };
+            }
+        }
+        window.db.setSync(window.cle('calendrierComplet'), cal);
+
         await window.nouveauCoursV2();
         const pond = document.getElementById('v2-ponderation');
         const heures = document.getElementById('v2-heuresEnseignement');
@@ -235,5 +248,79 @@ test('#540-F · le handler data-on-input fonctionne enfin (export manquant corri
     expect(r.heuresProposees, 'la proposition automatique ne s\'est pas déclenchée').toBe('75');
     expect(r.repere, 'le repère d\'unités doit suivre la frappe').toContain('unités');
     expect(avertissements, `handler introuvable : ${avertissements.join(' | ')}`).toEqual([]);
+    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
+});
+
+test('#540-G · lot B — la proposition d\'heures suit le calendrier réel', async ({ page }) => {
+    const { erreurs } = brancherEcouteurs(page);
+    await preparer(page);
+
+    const r = await page.evaluate(async () => {
+        const poser = (nbSemaines) => {
+            const cal = {};
+            let jour = 1;
+            for (let s = 1; s <= nbSemaines; s++) {
+                for (let j = 0; j < 5; j++) {
+                    cal['2026-01-' + String(jour++).padStart(2, '0')] =
+                        { statut: 'cours', numeroSemaine: s };
+                }
+            }
+            window.db.setSync(window.cle('calendrierComplet'), cal);
+        };
+
+        const essai = async (nbSemaines, ponderation) => {
+            poser(nbSemaines);
+            await window.nouveauCoursV2();
+            const pond = document.getElementById('v2-ponderation');
+            const heures = document.getElementById('v2-heuresEnseignement');
+            heures.value = '';
+            pond.value = ponderation;
+            pond.dispatchEvent(new Event('input', { bubbles: true }));
+            return {
+                heures: heures.value,
+                repere: document.getElementById('v2-repereHeures')?.textContent || ''
+            };
+        };
+
+        return {
+            regulier: await essai(15, '2-2-3'),   // littérature : (2+2) × 15 = 60
+            ecourte: await essai(11, '2-2-3'),    // trimestre écourté : 44, PAS 60
+            chimieEte: await essai(7, '3-2-3')    // session d'été : (3+2) × 7 = 35
+        };
+    });
+
+    expect(r.erreur, `Erreur eval : ${r.erreur}`).toBeUndefined();
+    expect(r.regulier.heures).toBe('60');
+    expect(r.regulier.repere).toBe('(2 + 2) × 15 semaines = 60 h');
+    // Le cœur du lot B : avec le « × 15 » en dur, celui-ci valait 60 lui aussi.
+    expect(r.ecourte.heures).toBe('44');
+    expect(r.ecourte.repere).toBe('(2 + 2) × 11 semaines = 44 h');
+    expect(r.chimieEte.heures).toBe('35');
+    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
+});
+
+test('#540-H · lot B — sans calendrier, rien n\'est proposé, et c\'est DIT', async ({ page }) => {
+    const { erreurs } = brancherEcouteurs(page);
+    await preparer(page);
+
+    const r = await page.evaluate(async () => {
+        window.db.setSync(window.cle('calendrierComplet'), {});
+        await window.nouveauCoursV2();
+        const pond = document.getElementById('v2-ponderation');
+        const heures = document.getElementById('v2-heuresEnseignement');
+        heures.value = '';
+        pond.value = '2-2-3';
+        pond.dispatchEvent(new Event('input', { bubbles: true }));
+        return {
+            heures: heures.value,
+            repere: document.getElementById('v2-repereHeures')?.textContent || ''
+        };
+    });
+
+    // Aucun total inventé : le champ reste vide, l'utilisateur saisit ou définit son trimestre.
+    expect(r.heures, 'un total a été proposé sans calendrier pour l\'appuyer').toBe('');
+    expect(r.repere).toContain('4 h par semaine');
+    expect(r.repere).toContain('calendrier');
+    expect(r.repere).not.toContain('60');
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

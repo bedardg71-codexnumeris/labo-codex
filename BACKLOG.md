@@ -747,8 +747,30 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     `trimestre-v2-cours.js` (`:372`, `:599`, `:608`, `:654`, `:663`) — autres gestes que
     « Enregistrer » (supprimer, modifier, dupliquer). Élargir sans mandat n'était pas le lot A.
     Vitest **3488/3488**, Playwright **171/171**.
-  · **B — la dérivation** : heures = (théorie + labo) × nombre RÉEL de semaines du trimestre.
-    *Fin : plus aucun nombre de semaines en dur.*
+  · **✅ B — la dérivation · LIVRÉ 26 août 2026.** `proposerHeuresEnseignementDepuisPonderation`
+    multipliait par `15` en dur. Or `calculerStatistiquesCalendrier` (`trimestre-v2.js`, #366)
+    compte déjà les semaines réelles, et son en-tête dit pourquoi elle existe : elle « remplace
+    les constantes de repli 15/75 qui affichaient un chiffre inventé ». **Cette multiplication-là
+    avait échappé au balayage de #366.** Nouveau helper `_semainesDuTrimestreActif()` : il LIT le
+    calendrier du trimestre actif, et rend **0 quand le calendrier est muet — un refus de
+    répondre, pas une valeur**. La proposition ne remplit alors rien.
+    ⮕ **Ce que ça corrigeait pour de vrai** : un trimestre ne fait pas toujours quinze semaines
+    (session d'été, calendrier écourté, cours intensif), et quinze semaines au calendrier n'en
+    font pas quinze de cours si des congés tombent dedans. La proposition d'heures — celle qui
+    sert à VÉRIFIER LA CONFORMITÉ RREC — était donc fausse hors du cas régulier, en silence.
+    Un 2-2-3 sur onze semaines vaut 44 h, pas 60.
+    ⮕ **Nouveau repère `#v2-repereHeures`** sous le champ : il DIT la base du calcul
+    (« (2 + 2) × 15 semaines = 60 h »), ou, sans calendrier, nomme l'absence sans avancer de
+    total. Même règle que #538 : on dérive et on le dit, on n'invente pas. L'aide contextuelle
+    (`accompagnement-contenu-popup.js`) ne promet plus « les 15 semaines du trimestre régulier ».
+    ⮕ **Verrous** : `tests/unit/sentinelle-540-lotB-semaines-reelles.test.js` (18 cas, cinq bancs,
+    banc VIVANT sur des calendriers de 15 / 11 / 7 semaines) et deux cas de plus dans la porte
+    navigateur (#540-G, #540-H). **4 break-tests rouges.** Le cas #540-F du lot A a dû poser un
+    calendrier explicite : son attendu dépendait du `× 15` qu'on venait de retirer.
+    ⚠ `index.html` : `?v=` de `trimestre-v2-cours.js` et `accompagnement-contenu-popup.js` bumpés
+    À LA MAIN, exactement comme `release.mjs --build-only` l'aurait fait pour eux — **sans toucher
+    au build**, Grégoire ayant l'application ouverte en `file://`. Le bump de version reste dû à la
+    clôture de #540. Vitest **3513/3513**.
   · **C — tarir les `2`** : les quatre familles ci-dessus, `periodesParSeance` en tête ; l'écran
     Horaire affiche ce qu'il calcule. *Fin : affichage et calcul lisent la même donnée.*
   · **D — le recoupement** (demande d'origine) : l'écran Horaire confronte le total des séances à la

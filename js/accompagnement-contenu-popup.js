@@ -44,7 +44,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'texte',
-                contenu: "Les heures d'enseignement sont le temps où l'enseignant est en présence des étudiants, pour un enseignement théorique ou pratique. On les obtient en additionnant les deux premiers chiffres de la pondération et en multipliant par les 15 semaines du trimestre régulier. Exemple : pondération 2-2-3 → (2 + 2) × 15 = 60 heures d'enseignement."
+                contenu: "Les heures d'enseignement sont le temps où l'enseignant est en présence des étudiants, pour un enseignement théorique ou pratique. On les obtient en additionnant les deux premiers chiffres de la pondération et en multipliant par le nombre de semaines du trimestre. Exemple : pondération 2-2-3 dans un trimestre de 15 semaines → (2 + 2) × 15 = 60 heures d'enseignement. L'application compte les semaines dans ton calendrier plutôt que de les supposer : un trimestre écourté ou une session d'été donnent un autre total."
             },
             {
                 type: 'alerte',
