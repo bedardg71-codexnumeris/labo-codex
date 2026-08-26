@@ -1,0 +1,348 @@
+<title>Six arbitrages de Conception</title>
+<style>
+:root{
+  --papier:#f7f9fa; --carte:#ffffff; --encre:#12232e; --encre-doux:#4a6472;
+  --trait:#dbe4e8; --trait-fort:#c2d1d8;
+  --sarcelle:#217a88; --sarcelle-doux:#e3f1f3;
+  --ambre:#a4650f; --ambre-doux:#fbf1de;
+  --vert:#286b47; --vert-doux:#e2f1e8;
+  --rouge:#a93b32; --rouge-doux:#fbe9e7;
+  --ombre:0 1px 2px rgba(18,35,46,.06),0 8px 24px -12px rgba(18,35,46,.18);
+  --r-s:5px; --r-m:8px; --r-g:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --papier:#0d1b24; --carte:#14262f; --encre:#e4eef1; --encre-doux:#93aeb8;
+    --trait:#24404c; --trait-fort:#31525f;
+    --sarcelle:#5fc0cd; --sarcelle-doux:#123039;
+    --ambre:#e0a84e; --ambre-doux:#33260f;
+    --vert:#6bc493; --vert-doux:#122c1f;
+    --rouge:#e78078; --rouge-doux:#301715;
+    --ombre:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  --papier:#0d1b24; --carte:#14262f; --encre:#e4eef1; --encre-doux:#93aeb8;
+  --trait:#24404c; --trait-fort:#31525f;
+  --sarcelle:#5fc0cd; --sarcelle-doux:#123039;
+  --ambre:#e0a84e; --ambre-doux:#33260f;
+  --vert:#6bc493; --vert-doux:#122c1f;
+  --rouge:#e78078; --rouge-doux:#301715;
+  --ombre:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--papier);color:var(--encre);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%;
+}
+.mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace}
+.enveloppe{max-width:860px;margin:0 auto;padding:0 20px 80px}
+header.tete{padding:40px 0 22px}
+.surtitre{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--sarcelle);font-weight:700;margin:0 0 10px;
+}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.12;margin:0 0 14px;text-wrap:balance;letter-spacing:-.02em}
+.chapeau{color:var(--encre-doux);max-width:64ch;margin:0 0 6px}
+.chapeau strong{color:var(--encre)}
+.barre{
+  position:sticky;top:0;z-index:20;background:var(--papier);
+  border-bottom:1px solid var(--trait);padding:10px 0;margin-bottom:26px;
+}
+.barre-inner{max-width:860px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.compteur{display:flex;gap:6px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.jeton{
+  font-size:12px;font-weight:700;padding:5px 10px;border-radius:var(--r-s);
+  border:1px solid var(--trait-fort);white-space:nowrap;
+}
+.jeton.ok{background:var(--vert-doux);border-color:var(--vert);color:var(--vert)}
+.jeton.ko{background:var(--rouge-doux);border-color:var(--rouge);color:var(--rouge)}
+.jeton.reste{background:transparent;color:var(--encre-doux)}
+.pousse{flex:1 1 auto}
+.filtres{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border-radius:var(--r-s);border:1px solid var(--trait-fort);
+  background:var(--carte);color:var(--encre);padding:8px 12px;min-height:44px;transition:background .12s,border-color .12s}
+button:hover{border-color:var(--sarcelle)}
+button:focus-visible{outline:2px solid var(--sarcelle);outline-offset:2px}
+.filtre.actif{background:var(--sarcelle-doux);border-color:var(--sarcelle);color:var(--sarcelle);font-weight:700}
+.btn-export{background:var(--sarcelle);border-color:var(--sarcelle);color:#fff;font-weight:700}
+:root[data-theme="dark"] .btn-export{color:#0d1b24}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn-export{color:#0d1b24}}
+section.bloc{margin:0 0 38px}
+.bloc-tete{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 6px;padding-bottom:8px;border-bottom:2px solid var(--trait)}
+.bloc-num{font-size:13px;font-weight:700;color:var(--sarcelle)}
+.bloc-titre{font-size:20px;font-weight:700;margin:0;letter-spacing:-.01em}
+.bloc-note{color:var(--encre-doux);font-size:14.5px;margin:10px 0 18px;max-width:66ch}
+.bloc-note.alerte{
+  background:var(--ambre-doux);border-left:3px solid var(--ambre);
+  padding:12px 14px;border-radius:0 var(--r-m) var(--r-m) 0;color:var(--encre);
+}
+.porte{
+  background:var(--carte);border:1px solid var(--trait);border-radius:var(--r-g);
+  box-shadow:var(--ombre);margin:0 0 16px;overflow:hidden;
+}
+.porte-tete{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:16px 18px 0}
+.porte-num{font-size:13px;font-weight:700;color:var(--sarcelle)}
+.porte-titre{font-size:17px;font-weight:700;margin:0;flex:1 1 220px;letter-spacing:-.01em}
+.pourquoi{
+  margin:12px 18px 4px;padding:12px 14px;background:var(--sarcelle-doux);
+  border-radius:var(--r-m);font-size:14.5px;color:var(--encre);
+}
+.pourquoi b{font-weight:700}
+.rangees{list-style:none;margin:10px 0 0;padding:0}
+.rangee{display:flex;gap:12px;padding:12px 18px;border-top:1px solid var(--trait);align-items:flex-start}
+.bascule{display:flex;gap:5px;flex:0 0 auto;padding-top:1px}
+.bascule button{min-width:44px;min-height:44px;padding:0;font-size:16px;font-weight:700;line-height:1}
+.bascule button[aria-pressed="true"][data-v="ok"]{background:var(--vert);border-color:var(--vert);color:var(--carte)}
+.bascule button[aria-pressed="true"][data-v="ko"]{background:var(--rouge);border-color:var(--rouge);color:var(--carte)}
+.corps{flex:1 1 auto;min-width:0}
+.geste{margin:0;font-weight:600}
+.attendu{margin:6px 0 0;color:var(--encre-doux);font-size:14.5px}
+.attendu b{color:var(--encre)}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 7px;border-radius:var(--r-s);border:1px solid var(--trait-fort);color:var(--encre-doux)}
+.tag.donnees{background:var(--rouge-doux);border-color:var(--rouge);color:var(--rouge)}
+.tag.ipad{background:var(--sarcelle-doux);border-color:var(--sarcelle);color:var(--sarcelle)}
+.tag.terminal{background:var(--ambre-doux);border-color:var(--ambre);color:var(--ambre)}
+.tag.console{background:var(--ambre-doux);border-color:var(--ambre);color:var(--ambre)}
+.saisie{margin-top:9px;display:flex;flex-direction:column;gap:5px}
+.saisie label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sarcelle)}
+.saisie input,.saisie textarea{
+  font:inherit;width:100%;padding:9px 11px;border-radius:var(--r-m);
+  border:1px solid var(--trait-fort);background:var(--papier);color:var(--encre);min-height:44px;
+}
+.saisie textarea{min-height:76px;resize:vertical;line-height:1.5}
+.saisie input:focus,.saisie textarea:focus{outline:2px solid var(--sarcelle);outline-offset:1px}
+.rangee.decision{align-items:stretch}
+.rangee.decision .corps{width:100%}
+pre.cmd{margin:8px 0 0;padding:11px 13px;background:var(--papier);border:1px solid var(--trait-fort);
+  border-radius:var(--r-m);overflow-x:auto;font-size:13.5px}
+ol.angles{padding-left:22px;margin:0}
+ol.angles li{margin-bottom:14px;color:var(--encre-doux);max-width:66ch}
+ol.angles li b{color:var(--encre)}
+.masque{display:none !important}
+#zone-releve{margin-top:14px}
+#releve{font:inherit;width:100%;padding:11px 12px;border-radius:var(--r-m);
+  border:1px solid var(--trait-fort);background:var(--carte);color:var(--encre);
+  min-height:240px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:13px;white-space:pre}
+#releve:focus{outline:2px solid var(--sarcelle);outline-offset:1px}
+footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--trait);color:var(--encre-doux);font-size:13.5px}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+<div class="barre">
+  <div class="barre-inner">
+    <div class="compteur">
+      <span class="jeton ok mono" id="c-rendues">0 tranchée(s)</span>
+      <span class="jeton reste mono" id="c-reste">— 6 en attente</span>
+    </div>
+    <div class="pousse"></div>
+    <button class="btn-export" id="btn-export">Copier mes verdicts</button>
+  </div>
+</div>
+
+<div class="enveloppe">
+  <header class="tete">
+    <p class="surtitre">Labo&nbsp;Codex · arbitrages</p>
+    <h1>Six choses que je ne peux pas trancher à ta place</h1>
+    <p class="chapeau"><strong>Aucune ne se coche.</strong> Chacune attend un verdict ÉCRIT&nbsp;: une case cochée dirait « j’ai tranché » sans dire <em>quoi</em>, et c’est ainsi que cinq décisions sont revenues « prises » et introuvables le 11&nbsp;août.</p>
+    <p class="chapeau"><strong>Chaque question porte ma recommandation</strong>, avec ce qui la fonde. Tu peux la suivre, l’écarter, ou écrire autre chose — c’est ton verdict qui compte, pas mon avis.</p>
+    <p class="chapeau">Trois viennent de l’audit Conception du 25&nbsp;août, une de son recoupement avec l’audit du 20, et deux de l’outillage de test qui nous a occupés aujourd’hui. <strong>Le bouton « Copier mes verdicts » est obligatoire</strong>&nbsp;: ce que tu écris vit dans TON navigateur, je ne peux pas le lire.</p>
+  </header>
+  <main id="racine"></main>
+  <div id="zone-releve" class="masque">
+    <p class="bloc-note"><strong>Tes verdicts.</strong> Déjà sélectionnés&nbsp;: <span class="mono">⌘C</span> pour copier si le bouton n’a pas suffi.</p>
+    <textarea id="releve" readonly></textarea>
+  </div>
+  <footer>
+    Jumeau markdown&nbsp;: <span class="mono">plans de travail/ARBITRAGE-2026-08-26-suites-audit-conception.md</span><br>
+    Base&nbsp;: 1.99.1, build <span class="mono">0826-0636</span> · sources&nbsp;: <span class="mono">Rapports/AUDIT-conception-gabarits-2026-08-25.md</span> et <span class="mono">plans de travail/TRIAGE-audits-2026-08-21.md</span>.<br>
+    Ce qui est tranché ici devient un item de BACKLOG avec son verdict — pas une note mentale.
+  </footer>
+</div>
+<script>
+const DECISIONS = [
+{
+  num: "D1", item: "#516", origine: "audit du 25 août, constat A3",
+  titre: "L’astérisque du « Nom du critère » promet un refus qui n’existe pas",
+  vecu: "La légende que tu as validée hier dit : « Champ obligatoire — l’enregistrement est refusé sans lui. » Or une grille dont un critère n’a pas de nom s’enregistre très bien. La marque annonce une protection que rien n’applique.",
+  fond: "La « preuve » que la sentinelle #506 en donnait vit dans une fonction que plus personne n’appelle, et qui lit un champ absent de la page. Le test passait donc à vide : il gardait du code mort. C’est le motif que l’audit a nommé, et il est plus grave que l’astérisque lui-même.",
+  options: [
+    ["A", "Refuser vraiment l’enregistrement d’un critère sans nom", "La marque dit alors la vérité. ⚠ Attention : ces champs s’enregistrent SEULS au fil de la frappe — un refus doit se faire sans t’empêcher de continuer à taper."],
+    ["B", "Retirer l’astérisque de ce champ", "Plus rapide, et honnête aussi : un critère sans nom n’a jamais cassé quoi que ce soit. Mais tu perds un garde-fou que tu croyais avoir."]
+  ],
+  reco: "A — parce que tu as validé cette légende hier en la lisant comme une promesse. La tenir coûte moins cher que d’expliquer plus tard pourquoi elle ne valait pas. Dans les deux cas, la preuve du test est réancrée sur le chemin vivant : c’est non négociable."
+},
+{
+  num: "D2", item: "#517", origine: "audit du 25 août, constat B1",
+  titre: "La matrice d’une cartouche ne s’enregistre qu’au bouton, en bas d’un long écran",
+  vecu: "Dans une grille ou une échelle, ce que tu tapes est gardé au fil de la saisie. Dans une cartouche, rien n’est écrit tant que tu n’as pas cliqué « Enregistrer » — tout en bas. Changer de cartouche, changer d’onglet ou fermer l’app perd toute la matrice, sans un mot.",
+  fond: "C’est le modèle INVERSE de ses trois voisins, dans le même onglet. Cette incohérence entre écrans voisins suffit à produire la perception « des fois ça enregistre, des fois non » — celle qui a déclenché l’audit. L’écran cartouche est aussi le seul des quatre sans barre d’actions en tête.",
+  options: [
+    ["A", "Enregistrement automatique, comme les grilles et les échelles", "Les quatre écrans se comportent enfin pareil. C’est le sens de tout le chantier « des gabarits qui se ressemblent »."],
+    ["B", "Garder le bouton, mais avertir avant de perdre la saisie", "Un « tu as des modifications non enregistrées » quand tu quittes. Moins de travail, mais l’écran reste le mouton noir des quatre."]
+  ],
+  reco: "A — l’uniformité est justement ce que tu as demandé pour cet onglet, et le bouton ne protège de rien qu’un enregistrement automatique ne protège mieux. ⚠ À noter : ce chantier croise D3 ci-dessous."
+},
+{
+  num: "D3", item: "recoupe #471 · CO-33 / D1 du 21 août", origine: "audit du 20 août, décision jamais planifiée",
+  titre: "Les cartouches sont la seule famille encore commune à tous tes trimestres",
+  vecu: "Tes grilles, tes échelles et tes productions appartiennent chacune à un trimestre. Tes cartouches, non : elles sont partagées entre tous, et mélangées avec celles de la démo. Une cartouche devient aussi orpheline quand tu supprimes la grille qui la portait.",
+  fond: "Tu as DÉJÀ tranché ce point le 21 août — « namespacer par trimestre » — mais la décision n’a jamais reçu de numéro ni de place dans l’ordre des chantiers. Elle dort depuis. Et elle touche le même écran que D2, ce qui pose la question de les faire ensemble.",
+  options: [
+    ["A", "Faire D2 et D3 dans le même chantier", "Un seul passage sur l’écran cartouche : son modèle d’enregistrement ET son rattachement au trimestre. Plus long d’un coup, mais on n’y revient pas."],
+    ["B", "D2 maintenant, D3 plus tard", "Le confort d’abord, la migration ensuite. ⚠ Déplacer des données est un chantier à risque, qui demande sauvegarde et vérification — le mêler à autre chose brouille le diagnostic si ça tourne mal."],
+    ["C", "D3 d’abord, D2 ensuite", "Le rangement avant le confort. Défendable si tu prépares un trimestre neuf."]
+  ],
+  reco: "B — non par prudence de principe, mais parce qu’une migration de données doit pouvoir être annulée seule. Si elle est mêlée à un changement d’interface, on ne sait plus ce qui a cassé quoi."
+},
+{
+  num: "D4", item: "#518", origine: "audit du 25 août, constat B2",
+  titre: "Un bloc de consignes rempli mais sans nom disparaît à l’enregistrement",
+  vecu: "Tu ajoutes un bloc dans une production, tu écris son contenu, tu oublies de lui donner un nom. À l’enregistrement, le bloc et son texte sont écartés — sans un mot.",
+  fond: "La règle se défend : un bloc sans nom produirait un bandeau vide au-dessus du vide dans le document remis aux étudiant·es. Mais c’est du texte TAPÉ qui disparaît, et rien ne le signale.",
+  options: [
+    ["A", "Avertir avant d’enregistrer", "« Un bloc sans nom ne sera pas conservé » — tu tranches en connaissance de cause."],
+    ["B", "Refuser d’enregistrer tant que le bloc n’est pas nommé", "Rien ne se perd jamais, mais tu es bloqué tant que tu n’as pas nommé."],
+    ["C", "Garder le bloc et lui donner un nom par défaut", "Rien ne se perd, rien ne bloque. ⚠ Mais un bandeau « Bloc 2 » se retrouverait dans le document distribué si tu ne le renommes pas."]
+  ],
+  reco: "A — c’est le seul des trois qui te laisse décider, et le contenu d’un bloc t’appartient. B t’arrête pour une règle de mise en page ; C écrit dans ton document un mot que tu n’as pas choisi."
+},
+{
+  num: "D5", item: "#495", origine: "outillage de test, découvert le 25 et mesuré le 26",
+  titre: "Huit tests échouent parce que Safari refuse de lire le numéro de version",
+  vecu: "Rien de visible pour toi dans l’app. Mais le garde-fou qui protège les envois de code compte huit tests rouges en permanence, ce qui l’a rendu inutilisable aujourd’hui — jusqu’à deux contournements en deux jours.",
+  fond: "Mesuré aujourd’hui : la cause est une lecture SYNCHRONE de version.json que WebKit refuse en fichier local. L’exception est bien attrapée, mais Safari la signale quand même, et ces huit tests exigent zéro erreur. ⚠ Conséquence RÉELLE au-delà des tests : sur ton Safari et sur ton iPad, version.json n’est probablement jamais lu — l’app tourne sur les valeurs de repli inscrites dans le code. Ça marche, mais la détection des scripts périmés en cache repose là-dessus.",
+  options: [
+    ["A", "Corriger la lecture de version.json", "Une méthode que WebKit accepte en fichier local. Ferme les huit tests ET répare la détection de cache sur ton iPad."],
+    ["B", "Apprendre aux tests à ignorer ce bruit", "Plus court. Mais on éteint le voyant sans réparer ce qu’il signale, et l’iPad reste dans le même état."]
+  ],
+  reco: "A — parce que ce n’est pas qu’un problème de tests. Si Safari refuse cette lecture, ton iPad la refuse aussi, et c’est le mécanisme qui te prévient quand ton app sert un fichier périmé depuis son cache."
+},
+{
+  num: "D6", item: "—", origine: "le plan de travail lui-même",
+  titre: "Par quoi on enchaîne",
+  vecu: "Le triage du 21 août a séquencé dix chantiers. Quatre sont franchis, et le plan s’est arrêté au rang 5 depuis cinq jours — le terrain a été occupé par tes demandes directes et par l’audit, ce qui est normal, mais il faut le dire.",
+  fond: "Rang 5 = #463, les suppressions gardées : sept familles d’objets qu’on peut supprimer sans garde-fou, à traiter avec le patron que tu as déjà validé. C’est le plus gros des chantiers restants, et le plus structurant.",
+  options: [
+    ["A", "Reprendre le plan au rang 5 (#463, les suppressions)", "On retrouve la file, et on attaque le morceau structurant pendant qu’il reste du temps avant la rentrée."],
+    ["B", "D’abord les décisions ci-dessus (D1, D2, D4)", "Des correctifs bornés, sur l’onglet que tu viens d’éprouver. Le plan attend une session de plus."],
+    ["C", "D’abord l’outillage (D5, puis #523)", "Réparer le garde-fou avant de livrer davantage — pour ne plus avoir à le contourner."]
+  ],
+  reco: "B puis C puis A — les décisions ci-dessus sont courtes et tu viens d’avoir l’onglet Conception sous les yeux : c’est le meilleur moment pour les livrer. L’outillage ensuite, parce que chaque chantier suivant paiera sinon le même prix. Le rang 5 après, avec une session entière devant lui."
+}
+];
+
+/* ---------------------------------------------------------------- état */
+const CLE = "arbitrages-suites-audit-conception-2026-08-26-v1";
+let etat = {};
+try { etat = JSON.parse(localStorage.getItem(CLE) || "{}") || {}; } catch (e) { etat = {}; }
+function sauver(){ try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch (e) {} }
+
+function el(tag, cls, txt){
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (txt != null) n.textContent = txt;
+  return n;
+}
+function riche(cible, texte, prefixe){
+  if (prefixe) { const b = el("b", null, prefixe); cible.append(b); }
+  texte.split(/\*\*/).forEach((bout, i) => {
+    if (!bout) return;
+    cible.append(i % 2 ? el("b", null, bout) : document.createTextNode(bout));
+  });
+}
+
+const racine = document.getElementById("racine");
+
+DECISIONS.forEach(d => {
+  const s = el("section","bloc");
+  const t = el("div","bloc-tete");
+  t.append(el("span","bloc-num mono", d.num), el("h2","bloc-titre", d.titre));
+  s.append(t);
+
+  const prov = el("p","bloc-note");
+  riche(prov, " " + d.item + " · " + d.origine, "D’OÙ ÇA VIENT —");
+  s.append(prov);
+
+  const c = el("div","porte");
+  const q = el("div","pourquoi");
+  riche(q, " " + d.vecu, "CE QUE TU VIS —");
+  c.append(q);
+
+  const f = el("p","bloc-note");
+  riche(f, " " + d.fond, "CE QU’IL Y A DESSOUS —");
+  c.append(f);
+
+  const ul = el("ul","rangees");
+  d.options.forEach(([lettre, titre, detail]) => {
+    const li = el("li","rangee");
+    const corps = el("div","rangee-corps");
+    const g = el("div","geste");
+    riche(g, " " + titre, lettre + " · ");
+    corps.append(g);
+    const a = el("div","attendu");
+    riche(a, " " + detail, "⮕ ");
+    corps.append(a);
+    li.append(corps);
+    ul.append(li);
+  });
+  c.append(ul);
+
+  const r = el("p","bloc-note alerte");
+  riche(r, " " + d.reco, "MA RECOMMANDATION —");
+  c.append(r);
+
+  const w = el("div","mesure");
+  const lab = el("label", null, "TON VERDICT (écris-le, ne coche rien) :");
+  const inp = document.createElement("textarea");
+  inp.id = "v-" + d.num;
+  inp.rows = 2;
+  inp.value = etat["v-" + d.num] || "";
+  lab.htmlFor = inp.id;
+  inp.addEventListener("input", () => { etat["v-" + d.num] = inp.value; sauver(); majCompteur(); });
+  w.append(lab, inp);
+  c.append(w);
+
+  s.append(c);
+  racine.append(s);
+});
+
+function majCompteur(){
+  const rendues = DECISIONS.filter(d => (etat["v-" + d.num] || "").trim()).length;
+  document.getElementById("c-rendues").textContent = rendues + " tranchée(s)";
+  document.getElementById("c-reste").textContent = "— " + (DECISIONS.length - rendues) + " en attente";
+}
+
+/* -------------------------------------------------------------- export */
+document.getElementById("btn-export").addEventListener("click", () => {
+  const L = [];
+  const rendues = DECISIONS.filter(d => (etat["v-" + d.num] || "").trim()).length;
+  L.push("ARBITRAGES — suites de l’audit Conception (26 août 2026, base 1.99.1)");
+  L.push(rendues + " / " + DECISIONS.length + " tranchée(s)");
+  L.push("");
+  DECISIONS.forEach(d => {
+    L.push("═══ " + d.num + " (" + d.item + ") — " + d.titre + " ═══");
+    d.options.forEach(([lettre, titre]) => L.push("    " + lettre + " · " + titre));
+    L.push("    (ma reco : " + d.reco.split("—")[0].trim() + ")");
+    const v = (etat["v-" + d.num] || "").trim();
+    L.push("  ⮕ VERDICT : " + (v || "(pas de verdict)"));
+    L.push("");
+  });
+  const texte = L.join("\n");
+  const zone = document.getElementById("zone-releve");
+  const ta = document.getElementById("releve");
+  zone.classList.remove("masque");
+  ta.value = texte;
+  ta.focus(); ta.select();
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texte).catch(() => {});
+    }
+  } catch (e) {}
+  zone.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+majCompteur();
+</script>
