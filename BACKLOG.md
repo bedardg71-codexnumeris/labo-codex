@@ -473,6 +473,26 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   refus empêche d'en créer de nouveaux, il ne répare pas l'existant. Sonde en lecture seule à écrire.
   Vitest **3371/3371** (320 fichiers). Deux break-tests, deux ROUGE.
 
+- [x] **#527 LIVRÉ 26 août 2026 (1.99.6)** — le repli sur le milieu de plage est RETIRÉ.
+  Suite directe de #526, et rendu possible par un fait que seul Grégoire pouvait donner : « aucun de
+  mes niveaux n'a pas de valeur ponctuelle, j'ai travaillé tout l'hiver avec mon échelle actuelle ».
+  ▣ **MESURÉ AVANT DE RETIRER, sur trois sources** :
+  · ses échelles réelles — son témoignage ;
+  · le **pack de démarrage** — 9 niveaux d'échelle, **9 avec `valeurCalcul`, 0 sans** ;
+  · les échelles **semées par le code** (`assurerEchellesPersonnalisees`, création d'un niveau) —
+    toutes posent une valeur.
+  ⚠ **Première mesure FAUSSE, corrigée** : un filtre trop large comptait 51 niveaux « sans valeur »
+  — en ramassant des catégories d'erreurs de français (`{code, retroaction}`) et des niveaux de
+  CARTOUCHE (`{code, nom}`), qui ne sont pas des niveaux d'échelle. Recompté en ciblant
+  `echellesTemplates` et la présence de `min`.
+  ⮕ Le repli ne servait donc à personne, nulle part. Il ne pouvait que **fabriquer une note fausse**
+  le jour où une valeur manquerait vraiment — et masquer le vrai problème.
+  ⮕ **Sans valeur ponctuelle, un niveau est NON CALCULABLE**, et les deux lecteurs le savent déjà :
+  `evaluation-calcul.js` exclut le critère du total (`valeurCritere !== undefined`, **pondération
+  comprise** — vérifié, pas de zéro silencieux) et `consolidation.js` saute le niveau. C'est la
+  doctrine du projet : non calculable et DIT, jamais un chiffre inventé.
+  Skill `pratiques-notation` §7 bis aligné. Vitest **3371/3371** (320 fichiers).
+
 ### Constats de l'audit du 25 août ENCORE OUVERTS
 
 > Les six correctifs ci-dessus (#509 à #515) épuisent ce qui ne demandait pas d'arbitrage de

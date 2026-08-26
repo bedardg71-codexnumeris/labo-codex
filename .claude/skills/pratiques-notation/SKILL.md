@@ -305,8 +305,15 @@ Un niveau porte **deux** informations numériques, et elles servent des sens opp
 interdit les fallbacks arbitraires sur les valeurs métier — celui-ci en était un.
 
 ⮕ **Les deux sont donc obligatoires depuis #526** : astérisque à l'écran et refus réel à l'écriture
-(`refusChampNiveau`, `echelles.js`). Le repli subsiste **uniquement** pour les niveaux enregistrés
-avant cette date, et il se signale en console à chaque usage.
+(`refusChampNiveau`, `echelles.js`).
+
+⮕ **Et le repli est RETIRÉ (#527)** — mesuré avant, pas supposé : les échelles réelles de Grégoire
+(« aucun de mes niveaux n'a pas de valeur ponctuelle, j'ai travaillé tout l'hiver avec »), le pack de
+démarrage (9 niveaux, 9 avec `valeurCalcul`) et les échelles semées par le code en portent toutes
+une. Il ne servait à personne et ne pouvait que fabriquer une note fausse le jour où une valeur
+manquerait vraiment. **Sans valeur ponctuelle, un niveau est désormais NON CALCULABLE** :
+`evaluation-calcul.js` exclut le critère du total, pondération comprise, et `consolidation.js` saute
+le niveau. Jamais un zéro, jamais un chiffre inventé.
 
 ⚠ **Le zéro est une valeur, pas une absence.** `valeurCalcul: 0` est légitime (échelles « IDME et
 niv 0 ») : toute lecture doit employer `!= null`, jamais un OU-logique. Un `0 || x` rend `x` — c'est

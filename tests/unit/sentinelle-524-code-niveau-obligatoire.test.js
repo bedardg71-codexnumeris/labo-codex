@@ -217,9 +217,14 @@ describe('#525 · E — le ZÉRO est une valeur, pas une absence', () => {
         expect(win.valeurNumeriqueDuNiveau({ code: '0', valeurCalcul: 0, min: 0, max: 59 })).toBe(0);
     });
 
-    it('E.b sans valeur ponctuelle, le milieu de la plage — le repli reste voulu', () => {
+    it('E.b #527 — sans valeur ponctuelle : `null`, PAS le milieu de la plage', () => {
+        // Le repli fabriquait une décision pédagogique. Mesuré avant de le
+        // retirer : les échelles de Grégoire, le pack de démarrage (9/9) et les
+        // échelles semées par le code en portent toutes une. Il ne servait à
+        // personne, et ne pouvait que produire une note fausse le jour où une
+        // valeur manquerait vraiment.
         const { win } = monter({ echelles: ECHELLE() });
-        expect(win.valeurNumeriqueDuNiveau({ code: 'D', min: 60, max: 74 })).toBe(67);
+        expect(win.valeurNumeriqueDuNiveau({ code: 'D', min: 60, max: 74 })).toBeNull();
     });
 
     it('E.c ni valeur ni bornes exploitables ⇒ null, JAMAIS NaN ni 0', () => {
@@ -238,9 +243,9 @@ describe('#525 · E — le ZÉRO est une valeur, pas une absence', () => {
         expect(win.valeurNumeriqueDuNiveau({ code: 'M', valeurCalcul: '40' })).toBe(40);
     });
 
-    it('E.e une chaîne VIDE n\'est pas une valeur : on retombe sur les bornes', () => {
+    it('E.e une chaîne VIDE n\'est pas une valeur, et les bornes ne la remplacent pas', () => {
         const { win } = monter({ echelles: ECHELLE() });
-        expect(win.valeurNumeriqueDuNiveau({ code: 'M', valeurCalcul: '', min: 80, max: 100 })).toBe(90);
+        expect(win.valeurNumeriqueDuNiveau({ code: 'M', valeurCalcul: '', min: 80, max: 100 })).toBeNull();
     });
 });
 
@@ -330,13 +335,14 @@ describe('#526 · G — la valeur ponctuelle est obligatoire, comme les bornes',
         expect(marques.length).toBeGreaterThanOrEqual(10);
     });
 
-    it('G.d LE REPLI RESTE, mais il se DIT — il ne doit plus être silencieux', () => {
-        // Il ne subsiste que pour les niveaux enregistrés avant #526. Un repli
-        // muet redeviendrait un arbitrage pédagogique invisible.
+    it('G.d #527 — le repli n\'existe plus du tout', () => {
+        // Mesuré avant de le retirer : il ne servait à personne. Le garder,
+        // c'était garder une porte ouverte à une note fabriquée.
         const src = readFileSync(path.join(racineProjet, 'js/echelles.js'), 'utf8');
         const i = src.indexOf('function valeurNumeriqueDuNiveau');
         const corps = src.slice(i, src.indexOf('\nconst REFUS_VALEUR', i));
-        expect(corps, 'le repli doit signaler ce qu\'il fabrique').toContain('console.warn');
+        expect(corps, 'plus de milieu de plage fabriqué').not.toMatch(/\(min \+ max\) \/ 2/);
+        expect(corps, 'la fonction rend null quand elle ne sait pas').toContain('return null;');
     });
 
     it('G.e LA DISTINCTION EST DANS LE SKILL, pas seulement dans une tête', () => {

@@ -3270,18 +3270,27 @@ function valeurNumeriqueDuNiveau(niveau) {
     const max = brut(niveau.max);
     if (isNaN(min) || isNaN(max)) return null;   // ⚠ jamais NaN en silence
 
-    // ⚠⚠ #526 — CE REPLI EST TRANSITOIRE, et il ne doit plus grossir.
-    // Depuis #526, `valeurCalcul` est OBLIGATOIRE à la saisie : la plage et la
-    // valeur ponctuelle sont deux conversions inverses, et l'une ne se déduit
-    // pas de l'autre. Le milieu de plage est donc un ARBITRAGE PÉDAGOGIQUE
-    // fabriqué par le code, ce que le projet interdit.
-    // Il ne subsiste que pour les niveaux ENREGISTRÉS AVANT ce jour, qui n'ont
-    // pas de valeur ponctuelle et qu'on ne peut pas deviner. Il se signale, pour
-    // qu'on sache combien il en reste plutôt que de l'oublier.
-    console.warn('[echelles] Niveau « ' + (niveau.code || '?') + ' » sans valeur ponctuelle : '
-        + 'repli sur le milieu de plage (' + ((min + max) / 2) + '). '
-        + 'Ouvre l\'échelle et pose la valeur — elle décide de la note chiffrée.');
-    return (min + max) / 2;
+    // ⚠⚠ #527 (26 août 2026) — LE REPLI SUR LE MILIEU DE PLAGE EST RETIRÉ.
+    //
+    // Il fabriquait une décision pédagogique que seul l'enseignant peut prendre :
+    // « Maîtrise » de 75 à 89 aurait valu 82, alors qu'il en veut peut-être 80.
+    // La plage et la valeur ponctuelle sont deux conversions INVERSES (cf. §7 bis
+    // du skill `pratiques-notation`) — l'une ne se déduit pas de l'autre.
+    //
+    // ▣ MESURÉ AVANT DE RETIRER, plutôt que supposé :
+    //   · les échelles réelles de Grégoire — « aucun de mes niveaux n'a pas de
+    //     valeur ponctuelle, j'ai travaillé tout l'hiver avec » (26 août) ;
+    //   · le pack de démarrage — 9 niveaux d'échelle, 9 avec `valeurCalcul` ;
+    //   · les échelles semées par le code — toutes en posent une.
+    // Le repli ne servait donc à personne, nulle part. Il ne pouvait que
+    // fabriquer une note fausse le jour où une valeur manquerait vraiment.
+    //
+    // ⮕ `null` = « je ne sais pas calculer », et les deux lecteurs le savent :
+    // `evaluation-calcul.js` EXCLUT le critère du total (`valeurCritere !==
+    // undefined`, pondération comprise — pas de zéro silencieux) et
+    // `consolidation.js` saute le niveau. C'est la doctrine du projet : non
+    // calculable et DIT, jamais un chiffre inventé.
+    return null;
 }
 
 const REFUS_VALEUR_NIVEAU = 'La valeur ponctuelle du niveau est obligatoire';
