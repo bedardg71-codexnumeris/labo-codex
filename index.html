@@ -6509,7 +6509,7 @@
                                             <!-- Informations générales -->
                                             <div class="grille-form-2col u-mb-15">
                                                 <div class="groupe-form">
-                                                    <label>Code du cours</label>
+                                                    <label>Code du cours <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span></label>
                                                     <input type="text" id="v2-codeCours" class="controle-form" placeholder="Ex: 601-101-MQ">
                                                 </div>
                                                 <div class="groupe-form">
@@ -6531,8 +6531,8 @@
 
                                             <div class="grille-form-2col u-mb-15" data-tooltip="reglages-cours-ponderation-heures">
                                                 <div class="groupe-form">
-                                                    <label>Pondération <button class="btn-aide-contextuelle" data-aide="cadre-cours-balises" aria-label="Aide : les balises du cours"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></label>
-                                                    <input type="text" id="v2-ponderation" class="controle-form" placeholder="Ex: 2-2-3" data-on-input="proposerHeuresEnseignementDepuisPonderation">
+                                                    <label>Pondération <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> <button class="btn-aide-contextuelle" data-aide="cadre-cours-balises" aria-label="Aide : les balises du cours"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></label>
+                                                    <input type="text" id="v2-ponderation" class="controle-form" placeholder="Ex: 2-2-3" data-on-input="proposerHeuresEnseignementDepuisPonderation" data-on-change="normaliserPonderationCoursV2">
                                                     <span id="v2-repereUnites" class="u-texte-075 u-texte-gris"></span>
                                                 </div>
                                                 <div class="groupe-form">
@@ -6544,7 +6544,7 @@
 
                                             <div class="grille-form-2col u-mb-15">
                                                 <div class="groupe-form">
-                                                    <label>Discipline</label>
+                                                    <label>Discipline <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span></label>
                                                     <select id="v2-disciplineCours" class="controle-form">
                                                         <option value="">— Sélectionner —</option>
                                                         <optgroup label="Sciences de la santé et techniques (100)">
@@ -6695,6 +6695,10 @@
                                                         placeholder="• Reconnaître le propos du texte&#10;• Repérer et classer des thèmes"></textarea>
                                                 </div>
                                             </div>
+
+                                            <p class="legende-marques">
+                                                <span class="champ-requis">*</span> Champ obligatoire — l'enregistrement est refusé sans lui.
+                                            </p>
 
                                             <!-- Boutons d'action -->
                                             <div class="actions-formulaire">

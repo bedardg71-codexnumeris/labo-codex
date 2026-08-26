@@ -179,16 +179,23 @@ describe('#524 · D — un astérisque sans légende est une énigme', () => {
         // Elle n'existait que sur Production. Le commentaire CSS de
         // `.champ-recommande` dit « ne jamais poser l'une sans l'autre ».
         //
-        // ⚠ TROIS, pas quatre : la CARTOUCHE en est dispensée (décision de
-        // Grégoire, 26 août, au vu du rendu). Ses trois champs de tête sont TOUS
-        // obligatoires — une légende qui annonce « champ obligatoire » n'y
-        // apprend rien —, et posée dans le premier bloc, large de 200 px, elle
-        // poussait la grille à la ligne suivante. La règle « jamais l'une sans
-        // l'autre » vise le cas où DEUX marques cohabitent sans être expliquées ;
-        // ici il n'y en a qu'une, et elle ne distingue rien.
+        // ⚠ La CARTOUCHE en est dispensée (décision de Grégoire, 26 août, au vu du
+        // rendu). Ses trois champs de tête sont TOUS obligatoires — une légende qui
+        // annonce « champ obligatoire » n'y apprend rien —, et posée dans le premier
+        // bloc, large de 200 px, elle poussait la grille à la ligne suivante. La règle
+        // « jamais l'une sans l'autre » vise le cas où DEUX marques cohabitent sans
+        // être expliquées ; là il n'y en a qu'une, et elle ne distingue rien.
+        //
+        // ⮕ QUATRE depuis #540 lot A (26 août 2026, même jour) : le formulaire COURS
+        // rejoint la liste. Sa pondération devient obligatoire — elle porte les heures
+        // de cours par semaine, que le recoupement avec l'horaire confrontera —, et le
+        // code du cours comme la discipline étaient DÉJÀ refusés à l'enregistrement
+        // sans qu'aucune marque ne l'annonce. Trois marques d'un coup sur un écran qui
+        // n'en avait aucune : la légende y apprend quelque chose, contrairement au cas
+        // cartouche ci-dessus.
         const html = lire('index.html');
         const legendes = html.match(/class="legende-marques"/g) || [];
-        expect(legendes.length, 'production, grille, échelle').toBe(3);
+        expect(legendes.length, 'production, grille, échelle, cours').toBe(4);
     });
 
     it('D.d l\'écran cartouche garde ses astérisques, et son ordre de champs', () => {

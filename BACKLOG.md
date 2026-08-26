@@ -646,6 +646,92 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   (N champs dérivés de la grille) ? La seconde change la nature du volet — choix pédagogique autant
   que technique.
 
+- [ ] **#540 — La durée hebdomadaire du cours n'est ni exigée, ni recoupée avec l'horaire.**
+  Constaté le 26 août 2026 sur une capture du formulaire Cours envoyée par Grégoire : « le nombre
+  d'heures de cours par semaine n'est pas dans les formulaires ». **Audit : il y est, mais dérivé
+  et jamais vérifié.** `_parserPonderation` (`trimestre-v2-cours.js:732`) découpe déjà « 2-2-3 », et
+  `(théorie + labo)` EST la durée hebdomadaire d'enseignement — 4 h en littérature, 4 h en
+  philosophie (3-1-3), 5 h en chimie (3-2-3). Elle ne sert qu'à *proposer* les heures totales
+  (`:785`), jamais à valider quoi que ce soit.
+  ⮕ **Ce que l'assiduité utilise vraiment** : ni la pondération, ni les heures d'enseignement.
+  `calculerAssiduite` (`indices.js:147`) compte des PÉRIODES, et `obtenirNombrePeriodesSeance`
+  (`saisie-presences.js:515`) les dérive de l'HORAIRE du groupe-cours. `heuresContact` (le « 60 »)
+  n'a qu'un lecteur dans tout le dépôt : la jauge de planification
+  (`planification-carte.js:9167`). Le libellé sous le champ promet « Sert à vérifier la
+  conformité » — **rien ne la vérifie**.
+  ⮕ **Deux sources concurrentes pour la durée hebdomadaire, que rien ne réconcilie** : ce que
+  l'écran Horaire AFFICHE (`nbSeances × periodesParSeance`, déclaratif et uniforme, défaut `2`) et
+  ce que l'assiduité CALCULE (somme des `heureFin − heureDebut`, convertie par `dureePeriode`).
+  Une séance 08:00→11:00 dans un horaire déclaré « 2 périodes/séance » s'affiche à 2 périodes et
+  pèse 4 au dénominateur. **Le calcul est juste ; c'est l'affichage qui ment.**
+  ⮕ **Valeurs en dur restantes après #538** — quatre familles ATTEIGNABLES :
+  · `periodesParSeance || 2` — `trimestre-v2-horaires.js:449,590,653,820`, `trimestres.js:551`,
+    `demo-namespace.js:215` ;
+  · `2` périodes quand la séance n'a ni `nombrePeriodes` ni `duree` — `trimestre-v2-horaires.js:99,
+    113,192`. **Cas courant** : `sauvegarderHoraireV2:666-671` n'écrit que jour/heureDebut/heureFin/
+    local ;
+  · `'08:00'` / `'10:00'` à la lecture d'un champ absent — `trimestre-v2-horaires.js:669-670` ;
+  · `intervention.duree || 2` — `interventions.js:122,654,814,1273,1390`.
+  Plus cinq gardes INERTES (`: 2` si `obtenirNombrePeriodesSeance` absente — `indices.js:182,321,
+  369`, `etudiants.js:228`, `profil-etudiant-sections-affichage.js:1431`) : mortes tant que
+  l'ordre de chargement tient, réveillées en silence s'il change.
+  Et une cousine une couche plus haut : `× 15` semaines en dur (`trimestre-v2-cours.js:785`), alors
+  que le trimestre connaît son vrai nombre de semaines (`v2-nombreSemaines`).
+  ✅ **TRANCHÉ PAR GRÉGOIRE, 26 août 2026.** (1) La pondération devient **obligatoire**, astérisque
+  rouge, **règle unique** : requise pour toute fiche, ancienne comme neuve — une fiche incomplète ne
+  s'enregistre pas tant qu'on ne la complète pas. (2) **Un seul champ**, pas trois : `ponderation`
+  est stockée en chaîne « 2-2-3 » sur l'entité cours, et trois cases obligeraient soit à recomposer
+  la chaîne (habillage), soit à changer le modèle — ce qui casserait les fiches déjà saisies.
+  Normalisation à la sortie du champ : « 2 2 3 » ou « 223 » ressort « 2-2-3 », format du devis
+  ministériel. (3) Le rapport entre les deux champs **s'inverse** : la pondération devient la source,
+  les heures d'enseignement la dérivée.
+  ⮕ **QUATRE LOTS, dans cet ordre** :
+  · **✅ A — le champ · LIVRÉ 26 août 2026.** Astérisque `champ-requis` sur pondération, code du
+    cours et discipline (les deux derniers étaient refusés depuis toujours SANS qu'aucune marque ne
+    l'annonce), légende sous le formulaire, refus par `notifications.erreur` — les deux `alert()`
+    du geste « Enregistrer » convertis avec. `_normaliserPonderation` ramène la saisie à la forme
+    du devis : espaces, barres obliques, virgules, forme compacte à trois chiffres, et les tirets
+    Unicode d'un copier-coller de PDF. Câblée en `data-on-change` (le `change` d'un input se
+    déclenche à la perte de focus — pas besoin de toucher au dispatcher de `main.js`, qui ne gère
+    pas `blur`), et REJOUÉE à la lecture du DOM pour l'utilisateur qui clique « Enregistrer » sans
+    quitter le champ. Le parseur reste le SEUL juge du format.
+    ⮕ **DEUX DÉFAUTS TROUVÉS EN CHEMIN, tous deux corrigés :**
+    · **Un export orphelin, jamais vu depuis l'origine.** `index.html:6535` câble
+      `data-on-input="proposerHeuresEnseignementDepuisPonderation"`, et le dispatcher de `main.js`
+      résout ce nom SUR `window` — or la fonction vivait dans l'IIFE sans export. Le dispatcher
+      `console.warn`-ait et rendait la main : **la proposition automatique des heures
+      d'enseignement ne s'est jamais déclenchée**, et le repère « ≈ N unités » ne bougeait pas à la
+      frappe (il n'apparaissait qu'à l'ouverture d'une fiche, appelé directement par
+      `afficherFormCoursV2` — ce qui le rendait crédible). Famille
+      [[feedback-exports-orphelins-grep-window]].
+    · **Le signe négatif silencieusement avalé** — trouvé par la sentinelle AVANT que le code
+      n'atteigne l'application. « -2-2-3 » se découpait en `['', '2', '2', '3']`, et le
+      `.filter(p => p !== '')` faisait disparaître le signe pour rendre un « 2-2-3 » que personne
+      n'avait saisi. Un morceau vide est désormais une malformation, et se refuse.
+    ⮕ **Verrous** : `tests/unit/sentinelle-540-ponderation-requise.test.js` (34 cas, six bancs —
+    normalisation vivante, refus de l'ambiguïté, exports réels sur `window`, astérisques + légende
+    dans `index.html`, refus sans dialogue natif, parseur juge unique) et porte navigateur
+    `tests/integration/ponderation-requise-540.spec.js` (6 cas, dont la RÈGLE UNIQUE éprouvée sur
+    une fiche ancienne, et le handler `data-on-input` prouvé vivant par un VRAI événement).
+    **5 break-tests rouges** avant de leur faire confiance, verts après restauration.
+    ⚠ La sentinelle #524 cas D.b comptait les légendes `legende-marques` et en attendait
+    exactement 3 : passée à 4, avec la raison inscrite sur place.
+    ⏳ **RESTE de l'hygiène adjacente, NON fait** : cinq `alert()` subsistent dans
+    `trimestre-v2-cours.js` (`:372`, `:599`, `:608`, `:654`, `:663`) — autres gestes que
+    « Enregistrer » (supprimer, modifier, dupliquer). Élargir sans mandat n'était pas le lot A.
+    Vitest **3488/3488**, Playwright **171/171**.
+  · **B — la dérivation** : heures = (théorie + labo) × nombre RÉEL de semaines du trimestre.
+    *Fin : plus aucun nombre de semaines en dur.*
+  · **C — tarir les `2`** : les quatre familles ci-dessus, `periodesParSeance` en tête ; l'écran
+    Horaire affiche ce qu'il calcule. *Fin : affichage et calcul lisent la même donnée.*
+  · **D — le recoupement** (demande d'origine) : l'écran Horaire confronte le total des séances à la
+    durée hebdomadaire déclarée et le DIT quand ça diverge, sans bloquer. *Fin : un horaire de 3 h
+    sur un cours 2-2-3 est signalé.*
+  **C avant D** : tant que l'horaire affiche une durée déclarative, un signal de divergence serait
+  illisible. ⚠ La pondération suppose une répartition uniforme sur le trimestre — pour un stage ou
+  un cours intensif, `(théorie + labo)` n'est pas la durée d'une semaine donnée. D devra prévoir
+  l'écart assumé, jamais le blocage.
+
 - [ ] **#537 — Le « critère de langue » est reconnu par son NOM, dans le code.**
   ⚠ *Renuméroté #534 → #537 le 26 août 2026 : collision d'ID avec l'item « un seul dépassement
   de délai refuse un push », qui est ancré dans deux commits, `tests/playwright.config.js` et une
