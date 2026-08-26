@@ -287,6 +287,37 @@ plusieurs pratiques sur les mêmes artefacts sans toucher aux données du trimes
 
 ---
 
+## 7 bis. L'ÉCHELLE : deux conversions inverses, deux champs obligatoires
+
+**Précision de Grégoire, 26 août 2026** — elle ne figurait nulle part dans ce skill, alors qu'elle
+commande la lecture de tout niveau d'échelle.
+
+Un niveau porte **deux** informations numériques, et elles servent des sens opposés :
+
+| | Champ | Sens | Sert à |
+|---|---|---|---|
+| **La plage** | `min` / `max` | note chiffrée **→ CODE** | les **pratiques alternatives** : la note finale d'un·e élève sur une production EST un code, déterminé par la plage dans laquelle tombe la note chiffrée — laquelle reste cachée |
+| **La valeur ponctuelle** | `valeurCalcul` | CODE **→ note chiffrée** | la **notation sommative**, et toute conversion en chiffre exigée par la certification (RREC) |
+
+⮕ **L'une ne se déduit PAS de l'autre.** Le code a longtemps replié `valeurCalcul` sur
+`(min + max) / 2` quand elle manquait : c'est un **arbitrage pédagogique fabriqué par le code**.
+« Maîtrise » de 75 à 89 vaudrait 82, alors que l'enseignant·e voudrait peut-être 80, ou 85. Le projet
+interdit les fallbacks arbitraires sur les valeurs métier — celui-ci en était un.
+
+⮕ **Les deux sont donc obligatoires depuis #526** : astérisque à l'écran et refus réel à l'écriture
+(`refusChampNiveau`, `echelles.js`). Le repli subsiste **uniquement** pour les niveaux enregistrés
+avant cette date, et il se signale en console à chaque usage.
+
+⚠ **Le zéro est une valeur, pas une absence.** `valeurCalcul: 0` est légitime (échelles « IDME et
+niv 0 ») : toute lecture doit employer `!= null`, jamais un OU-logique. Un `0 || x` rend `x` — c'est
+le défaut #525, qui donnait 29,5 au lieu de 0 sur un niveau 0 de plage 0-59.
+
+⮕ **Lecture unique** : `valeurNumeriqueDuNiveau(niveau)` (`echelles.js`), consommée par
+`evaluation-calcul.js` et `consolidation.js`. Elle rend `null` — jamais `NaN`, jamais un zéro
+inventé — quand il n'y a ni valeur ni bornes exploitables.
+
+---
+
 ## 8. Calcul par famille (résumé technique)
 
 - **SOM** (fn `calculerPerformance`, `pratique-sommative.js`) : moyenne pondérée de **toutes** les évaluations

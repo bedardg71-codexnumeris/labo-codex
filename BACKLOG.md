@@ -448,6 +448,31 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   utilisable. C'est une commodité, pas un oubli.
   Vitest **3366/3366** (320 fichiers). Deux break-tests, deux ROUGE.
 
+- [x] **#526 LIVRÉ 26 août 2026 (1.99.5)** — la plage et la valeur ponctuelle sont deux conversions
+  INVERSES, et les deux sont obligatoires.
+  **Précision de Grégoire** : « la plage sert aux pratiques de notation alternatives, la note
+  ponctuelle sert à la notation sommative, ou lorsque la note doit être convertie en note chiffrée ».
+  ⮕ **Les deux sens, visibles dans le code** :
+  · note chiffrée **→ CODE** : `pourcentage >= n.min && pourcentage <= n.max` (`evaluation-calcul.js`)
+    — c'est la PLAGE qui détermine le niveau final d'un·e élève, la note chiffrée restant cachée ;
+  · CODE **→ note chiffrée** : `valeurCalcul` — c'est elle qui rend un chiffre quand la certification
+    en exige un.
+  ⚠⚠ **L'une ne se déduit PAS de l'autre.** Le repli `(min+max)/2` que #525 avait conservé fabrique
+  une décision pédagogique que seul l'enseignant peut prendre : « Maîtrise » de 75 à 89 vaudrait 82,
+  alors qu'il voudrait peut-être 80 ou 85. **C'est un fallback arbitraire sur une valeur métier**, ce
+  que le projet interdit ([[feedback-zero-fallback-arbitraire]]). J'avais écrit la veille que
+  `valeurCalcul` « reste facultatif, délibérément » : c'était faux, et c'est Grégoire qui l'a corrigé.
+  ⮕ `valeurCalcul` devient **obligatoire** (astérisque + refus), comme `min` et `max`. Le repli
+  subsiste UNIQUEMENT pour les niveaux enregistrés avant ce jour, et **il se signale en console** à
+  chaque usage — un repli muet redeviendrait un arbitrage invisible.
+  ⚠⚠ **LA DISTINCTION N'ÉTAIT PAS DANS LE SKILL** : zéro occurrence de `valeurCalcul`, « plage de
+  notes » ou « valeur ponctuelle » dans `pratiques-notation/SKILL.md`. Elle vivait dans la tête de
+  Grégoire et dans le code. ⮕ **§7 bis ajouté au skill**, et une sentinelle vérifie qu'il y reste :
+  un invariant pédagogique qui ne vit que dans le code se perd au premier refactor.
+  ⏳ **À MESURER** : combien de niveaux de ses échelles réelles n'ont PAS de valeur ponctuelle ? Le
+  refus empêche d'en créer de nouveaux, il ne répare pas l'existant. Sonde en lecture seule à écrire.
+  Vitest **3371/3371** (320 fichiers). Deux break-tests, deux ROUGE.
+
 ### Constats de l'audit du 25 août ENCORE OUVERTS
 
 > Les six correctifs ci-dessus (#509 à #515) épuisent ce qui ne demandait pas d'arbitrage de

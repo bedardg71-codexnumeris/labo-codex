@@ -286,3 +286,67 @@ describe('#525 · F — les bornes sont obligatoires, et les deux lecteurs ont l
         expect(marques.length).toBeGreaterThanOrEqual(8);
     });
 });
+
+/* ========================================================================== */
+/* #526 — LA PLAGE ET LA VALEUR PONCTUELLE SONT DEUX CONVERSIONS INVERSES      */
+/*                                                                            */
+/* Précision de Grégoire, 26 août : « la plage sert aux pratiques de notation  */
+/* alternatives, la note ponctuelle sert à la notation sommative, ou lorsque   */
+/* la note doit être convertie en note chiffrée ». L'une ne se déduit pas de   */
+/* l'autre — et le repli sur le milieu de plage fabriquait une décision        */
+/* pédagogique que seul l'enseignant peut prendre.                            */
+/* ========================================================================== */
+
+describe('#526 · G — la valeur ponctuelle est obligatoire, comme les bornes', () => {
+
+    it('G.a LE CAS QUI PORTE LE SENS : une valeur ponctuelle vide est refusée', async () => {
+        const { win, store } = monter({
+            echelles: [{ id: 'E1', nom: 'IDME', niveaux: [
+                { code: 'M', nom: 'Maîtrise', min: 75, max: 89, valeurCalcul: 82 }] }]
+        });
+
+        const r = await win.modifierNiveauEchelle('E1', 0, 'valeurCalcul', '');
+
+        expect(r.refuse).toBe('La valeur ponctuelle du niveau est obligatoire');
+        expect(store.a2026_echellesTemplates[0].niveaux[0].valeurCalcul).toBe(82);
+    });
+
+    it('G.b ZÉRO reste une valeur ponctuelle valide', async () => {
+        // La garde refuse le VIDE, pas le zéro — sans quoi elle rendrait
+        // impossible le niveau 0 que #525 vient de protéger.
+        const { win, store } = monter({
+            echelles: [{ id: 'E1', nom: 'IDME', niveaux: [
+                { code: '0', nom: 'Aucun', min: 0, max: 0, valeurCalcul: 5 }] }]
+        });
+        const r = await win.modifierNiveauEchelle('E1', 0, 'valeurCalcul', 0);
+        expect(r.ok).toBe(true);
+        expect(store.a2026_echellesTemplates[0].niveaux[0].valeurCalcul).toBe(0);
+    });
+
+    it('G.c la valeur ponctuelle porte l\'astérisque dans les deux éditeurs', () => {
+        const src = readFileSync(path.join(racineProjet, 'js/echelles.js'), 'utf8');
+        const marques = src.match(/champ-requis" title="Champ obligatoire">\*/g) || [];
+        // Code ×2, Nom ×2, Min ×2, Max ×2, Valeur ponctuelle ×2
+        expect(marques.length).toBeGreaterThanOrEqual(10);
+    });
+
+    it('G.d LE REPLI RESTE, mais il se DIT — il ne doit plus être silencieux', () => {
+        // Il ne subsiste que pour les niveaux enregistrés avant #526. Un repli
+        // muet redeviendrait un arbitrage pédagogique invisible.
+        const src = readFileSync(path.join(racineProjet, 'js/echelles.js'), 'utf8');
+        const i = src.indexOf('function valeurNumeriqueDuNiveau');
+        const corps = src.slice(i, src.indexOf('\nconst REFUS_VALEUR', i));
+        expect(corps, 'le repli doit signaler ce qu\'il fabrique').toContain('console.warn');
+    });
+
+    it('G.e LA DISTINCTION EST DANS LE SKILL, pas seulement dans une tête', () => {
+        // Elle n'y était pas : zéro occurrence de `valeurCalcul` avant le 26 août.
+        // Un invariant pédagogique qui ne vit que dans le code se perd au premier
+        // refactor — c'est la mémoire du projet qui doit le porter.
+        const skill = readFileSync(
+            path.join(racineProjet, '.claude/skills/pratiques-notation/SKILL.md'), 'utf8');
+        expect(skill).toContain('valeurCalcul');
+        expect(skill, 'les deux sens de conversion').toMatch(/note chiffrée \*\*→ CODE\*\*/);
+        expect(skill).toMatch(/CODE \*\*→ note chiffrée\*\*/);
+    });
+});
