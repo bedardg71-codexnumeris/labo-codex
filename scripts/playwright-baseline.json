@@ -1,6 +1,15 @@
 {
     "_lisezMoi": "Cliché des specs Playwright rouges CONNUES (#456). Une rougeur absente de cette liste bloque le push. Cette liste doit RÉTRÉCIR : chaque spec réparée s'en retire. Régénérer : node scripts/verifier-playwright.mjs --ecrire",
-    "genereLe": "2026-08-18",
-    "totalEchecsConnus": 0,
-    "echecsConnus": []
+    "genereLe": "2026-08-26",
+    "totalEchecsConnus": 8,
+    "echecsConnus": [
+        "diagnostic-doublons-lecture-seule.spec.js › porte Lot 0 · le diagnostic classe juste et n'écrit RIEN",
+        "doublons-bandeau-291.spec.js › porte #291 · le bandeau distingue copies et homonymes, et « Voir » mène à la bonne carte",
+        "doublons-cadre-ct15.spec.js › CT-15 · les fonctions d'identité naturelle sont chargées et pures",
+        "doublons-cadre-ct15.spec.js › CT-15 · un second cours au même code est REFUSÉ au point d'écriture",
+        "doublons-lisibilite-291.spec.js › porte 2.1c-e · la puce d'identifiant est lisible dans les 5 familles, en sombre ET en clair",
+        "doublons-lisibilite-291.spec.js › porte 2.5 · une confirmation passe AU-DESSUS de la modale qui l'a demandée",
+        "productions-ajout-refus-garde-340.spec.js › terrain · une écriture refusée par la garde #340 n'est JAMAIS annoncée comme un succès",
+        "productions-biblio-ajout-identite.spec.js › terrain · ajouter depuis la bibliothèque retire l'item des « disponibles » et interdit le doublon"
+    ]
 }
