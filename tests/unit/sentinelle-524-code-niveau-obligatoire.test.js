@@ -175,13 +175,36 @@ describe('#524 · D — un astérisque sans légende est une énigme', () => {
         expect(marques.length, 'Code ×2 et Nom du niveau ×2').toBeGreaterThanOrEqual(4);
     });
 
-    it('D.b LE POINT QUI BLOQUAIT LE TUTORIEL : les quatre écrans ont leur légende', () => {
+    it('D.b LE POINT QUI BLOQUAIT LE TUTORIEL : les écrans concernés ont leur légende', () => {
         // Elle n'existait que sur Production. Le commentaire CSS de
-        // `.champ-recommande` dit pourtant « ne jamais poser l'une sans l'autre ».
+        // `.champ-recommande` dit « ne jamais poser l'une sans l'autre ».
+        //
+        // ⚠ TROIS, pas quatre : la CARTOUCHE en est dispensée (décision de
+        // Grégoire, 26 août, au vu du rendu). Ses trois champs de tête sont TOUS
+        // obligatoires — une légende qui annonce « champ obligatoire » n'y
+        // apprend rien —, et posée dans le premier bloc, large de 200 px, elle
+        // poussait la grille à la ligne suivante. La règle « jamais l'une sans
+        // l'autre » vise le cas où DEUX marques cohabitent sans être expliquées ;
+        // ici il n'y en a qu'une, et elle ne distingue rien.
         const html = lire('index.html');
         const legendes = html.match(/class="legende-marques"/g) || [];
-        expect(legendes.length,
-               'production, grille, échelle, cartouche').toBeGreaterThanOrEqual(4);
+        expect(legendes.length, 'production, grille, échelle').toBe(3);
+    });
+
+    it('D.d l\'écran cartouche garde ses astérisques, et son ordre de champs', () => {
+        // Retirer la légende ne retire pas les marques : les trois champs restent
+        // obligatoires et refusés. Et l'ordre demandé est Nom, Grille, Échelle.
+        const html = lire('index.html');
+        const i = html.indexOf('Nom + Grille + Échelle sur une seule ligne');
+        expect(i, 'le bloc réordonné existe').toBeGreaterThan(-1);
+        const bloc = html.slice(i, html.indexOf('checkboxesPratiquesCartouche', i));
+        expect(bloc, 'pas de légende sur cet écran').not.toContain('legende-marques');
+        const ordre = ['nomCartouche', 'selectGrilleCartouche', 'selectEchelleCartouche']
+            .map(id => bloc.indexOf(id));
+        expect(ordre[0], 'le nom vient en premier').toBeGreaterThan(-1);
+        expect(ordre[0]).toBeLessThan(ordre[1]);
+        expect(ordre[1], 'puis la grille, puis l\'échelle').toBeLessThan(ordre[2]);
+        expect((bloc.match(/champ-requis/g) || []).length, 'les trois astérisques restent').toBe(3);
     });
 
     it('D.c une seule définition de `.champ-requis`, et elle vient de la palette', () => {
