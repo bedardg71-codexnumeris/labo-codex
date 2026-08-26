@@ -511,7 +511,36 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   jour redeviendrait une définition isolée — et le tutoriel expliquerait ce que l'écran tait.
   Vitest **3377/3377** (321 fichiers). Deux break-tests, deux ROUGE.
 
-- [ ] **#529** 📐 **CHANTIER MAJEUR — sortir SRPNF et IDME du code.** Session DÉDIÉE (décision
+- [x] **#529 LIVRÉ 26 août 2026 (1.101.0 → 1.101.1) — le CALCUL et l'AFFICHAGE ne connaissent
+  plus ni SRPNF ni IDME.** Quatre lots faits dans la même session.
+  ⮕ **Lot 1 — la conversion.** Filtre nominal `['0','I','D','M','E']` retiré ; TROIS replis IDME en
+  dur retirés, aux valeurs **mutuellement incompatibles** (calculs I:0.40 · pan-standards I:0.55 ·
+  consolidation I:0.40) — selon le chemin, un même niveau valait 0.40 ou 0.55. La table se construit
+  depuis l'échelle, et vaut `null` quand l'échelle ne dit rien. Un seed est une ÉCHELLE LIVRÉE, pas
+  des nombres qu'un calcul invente : c'est la règle de Grégoire, appliquée à la lettre.
+  ⮕ **Lot 2 — le calcul.** Les deux regex qui lisaient les scores dans la PROSE des rétroactions
+  (celle des cinq critères, celle du français) sont remplacées par la lecture de
+  `evaluation.criteres[]` — structuré, présent depuis octobre 2025, et déjà utilisé par
+  `calculerMoyennesCriteres` et l'IPB dans le même fichier. Convergence, pas invention.
+  La conversion se fait désormais **par évaluation** (chacune porte son `echelleId`).
+  ⮕ **Lot 3 — l'affichage.** Le tableau littéral des cinq critères existait en QUATRE exemplaires.
+  Les barres viennent de la grille, toutes, dans son ordre (décision de Grégoire). `cleCritere` et
+  `criteresDeLaGrillePourAffichage` centralisés dans `profil-etudiant-helpers.js`.
+  ⮕ **Lot 4 — l'aide.** Onze passages recadrés : SRPNF y est la grille d'exemple fournie, attribuée
+  au modèle ELLAC, plus la structure du logiciel.
+  🐛 **UN BUG RÉEL SUR LES DONNÉES DE GRÉGOIRE, corrigé au passage** : `tableConversion[niveau] ||
+  null` traitait un score de **0** comme une ABSENCE. Le niveau « 0 » de son échelle 0-IDME était
+  EXCLU des moyennes au lieu d'y compter pour zéro — ses moyennes étaient plus hautes que la réalité
+  partout où un élève a des 0. ⚠ **Ses chiffres vont baisser à ces endroits : c'est la correction.**
+  🐛 **Défaut latent trouvé et corrigé** : le nom affiché venait d'une cascade de ternaires finissant
+  par `: 'Français'` SANS condition — tout critère non reconnu se serait affiché « Français ».
+  ✅ Vitest 3454/3454 (328 fichiers) · Playwright 165/165 · baseline à zéro · dix break-tests rouges.
+  ⏳ **CE QUI RESTE OUVERT, ET QUI LUI APPARTIENT** : #537 (le critère de langue reconnu par son nom),
+  #535 (les cibles RàI indexées par nom de critère), #539 (les clés du volet confidentiel), #536
+  (`idmeMoyen` à 0 vs « pas de donnée »). Aucun n'est un oubli : chacun engage sa didactique ou ses
+  données, et je ne les ai pas tranchés seul.
+
+- [x] **~~#529 (énoncé d'origine, conservé)~~** 📐 **CHANTIER MAJEUR — sortir SRPNF et IDME du code.** Session DÉDIÉE (décision
   Grégoire, 26 août : « rien ne doit être codé en dur, mais l'échelle IDME peut être seedée par
   contre »). Audit : `Rapports/AUDIT-srpnf-code-en-dur-2026-08-26.md`.
   ⚠⚠ **LA RÈGLE, telle que Grégoire l'a énoncée — elle décide de tout le chantier** :
