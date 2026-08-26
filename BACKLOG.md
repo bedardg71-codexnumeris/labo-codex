@@ -1793,6 +1793,36 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ### Tests d'intégration — specs rouges découvertes le 12 août 2026 (recomptées à SIX le 18)
 
+- [ ] **#534** La suite d'intégration vit au bord de son délai — deux specs tombent au CHARGEMENT, pas sur une assertion — créé 26 août 2026 (constat au push de #533).
+
+  **Mesuré.** `cours-refonte-rendu.spec.js:100` et `planif-tout-voir-loupe.spec.js:160` rendent
+  `page.goto: Test timeout of 30000ms exceeded` — la navigation vers `index.html` n'aboutit pas.
+  Aucune des deux n'atteint ce qu'elle vérifie. Lancées avec leurs voisines de fichier (8 specs),
+  les mêmes passent en 22 s. Rouges deux fois de suite en suite complète, machine au repos ;
+  vertes une heure plus tôt sur un code **identique** (`git diff` sur `js/`, `index.html`,
+  `styles.css` : vide). Le premier échec tombe à la 64ᵉ spec sur 163.
+
+  **Inférence, pas encore démontrée.** `tests/playwright.config.js` impose `workers: 1` parce que
+  toutes les specs partagent le `localStorage` de l'origine `file://`. **Rien ne le vide entre les
+  specs.** Or `db.js` relit tout le stockage au boot pour hydrater son cache : plus la suite avance,
+  plus le boot est long — jusqu'à franchir les 30 s. Le profil colle (précoces vertes, tardives
+  rouges, isolé vert), et il explique aussi la bascule vert/rouge d'un run à l'autre : un test au
+  bord de son délai change de verdict selon la charge. **À prouver avant de corriger** : mesurer la
+  taille du stockage et le temps de `page.goto` au fil de la suite.
+
+  ⚠ **Ce que ça n'est pas.** Ni #532 ni #533 n'y sont pour rien — aucun ne touche le temps de boot.
+  Et ce ne sont pas des régressions : c'est pourquoi elles **ne doivent pas** entrer dans
+  `playwright-baseline.json`, qui inventorie des specs rouges pour de vraies raisons. Y verser deux
+  timeouts d'environnement ferait exactement ce que #456 interdit — couvrir du vert.
+
+  **Trois voies, à trancher sur mesure et non d'avance** : vider le stockage entre les specs (le plus
+  propre, et le seul qui attaque la cause) · relever le délai des specs concernées (repousse le mur
+  sans le retirer) · lancer la suite par fichiers (perd la détection des interactions entre specs).
+
+  ⛔ **Ce que ce constat NE dit pas** : que l'application soit lente au démarrage pour un utilisateur.
+  Un `localStorage` gonflé par 63 specs n'est pas un état de terrain. Ne pas en tirer de conclusion
+  sur les performances réelles sans mesure séparée.
+
 - [x] **🔴 #456 CLOS 18 août 2026** **Six** specs Playwright ROUGES, et surtout : **elles ne tournaient nulle part** — créé 12 août 2026 (constat au rituel de début), **recompté le 18 août**.
   - ✅ **CLÔTURE (4ᵉ passe WebKit, relevé Grégoire : 9/9, 54,1 s, aucun échec).** Les six rouges sont éteintes en quatre passes terrain, TOUTES des dérives de test ou des défauts de harnais — zéro bug d'app : quatre dérives réparées au 1ᵉʳ cycle (badge #366, API renommée, fixture pré-#367, prise sur le menu de type 1.86) ; Alt/⌥ = modificateur ⌥ non transporté par Playwright-WebKit (prouvé par sonde, réécrite en PointerEvent purs) ; aimantation = dernier `pointermove` d'un trajet groupé avalé par WebKit (prouvé par diagnostic embarqué : 433 = un pas manquant, zéro guide — trajet livré pas à pas, final doublé, assertion recentrée sur l'invariant). **Baseline → 0** : transcription composée de deux mesures — le 9/9 de la 4ᵉ passe sur les deux dernières specs, et la passe COMPLÈTE de la 2ᵉ passe (diff `--ecrire` vide sur 87 tests), aucun autre fichier de test n'ayant changé entre les deux. Le garde-fou de push redevient strict sur TOUTE rougeur. ⚠ Si la session Mac pousse son propre `--ecrire` à 0, il sera identique — sinon, le prochain `--ecrire` Mac fait foi comme toujours.
   - ▣ **La cause générale reste outillée** : le hook de push (sentinelle `verifier-playwright.mjs`) tourne sur le Mac, et la config `tests/playwright.chromium.config.js` donne aux sessions cloud un moteur de reproduction ciblée — avec sa leçon écrite dedans : un vert Chromium est un indice, jamais un verdict Safari (deux prédictions de vert sont tombées en une journée pour l'avoir oublié).
