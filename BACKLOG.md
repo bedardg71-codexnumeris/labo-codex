@@ -509,7 +509,24 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   passent. Tout autre autosave en lecture-modification-écriture porte la même course. Recoupe
   [[project-autosaves-a-auditer]].
 
-- [ ] **#523 — Deux specs Playwright rouges en suite, vertes isolées — cause NON ÉTABLIE.**
+- [x] **#523 CLOS 26 août 2026 — c'était GitHub Desktop, et c'est Grégoire qui l'a trouvé.**
+  ⮕ **MESURE CONCLUANTE** : suite WebKit rejouée machine au repos ET **GitHub Desktop fermé** (hook
+  pré-push de la release 1.99.2) → « aucune rougeur nouvelle, 8 échecs connus, **inchangé** ». Les
+  deux specs `cours-refonte-rendu › Chantier C` et `pratique-edition-preserve-enveloppe › CO-01`
+  sont VERTES.
+  ⮕ **La cause** : l'application exécutait des commandes git pendant que Playwright lisait
+  `index.html` et `js/` en `file://` — les fichiers changeaient sous les pieds des tests. Ni
+  contamination d'état entre specs, ni instabilité intrinsèque : une interférence externe.
+  ⚠ **RÈGLE À RETENIR, plus large que cet item** : *aucune suite Playwright ne vaut si GitHub
+  Desktop est ouvert sur le dépôt.* Les specs lisent l'arbre de travail en direct. À ajouter au
+  préalable de toute campagne de tests navigateur — c'est le pendant de
+  [[feedback-sessions-paralleles-meme-depot]] pour les tests.
+  ⚠ Et une leçon sur la méthode : mes deux hypothèses (contamination d'état, saturation machine)
+  étaient toutes deux plausibles et toutes deux fausses. Quatre exécutions ne les auraient jamais
+  départagées, parce qu'aucune ne portait sur la vraie variable. C'est l'utilisateur qui savait ce
+  qui tournait à côté. **Demander avant de mesurer plus.**
+  Énoncé d'origine :
+- [ ] **~~#523~~ — Deux specs Playwright rouges en suite, vertes isolées — cause NON ÉTABLIE.**
   ⚠⚠ **CORRECTION DU 26 AOÛT, À LIRE AVANT TOUT LE RESTE DE CET ITEM.** Le titre d'origine disait
   « specs INSTABLES » : c'était une conclusion prématurée. En regardant la machine, j'ai trouvé
   **23 processus Playwright/WebKit vivants en même temps** et une charge moyenne à **159** — parce

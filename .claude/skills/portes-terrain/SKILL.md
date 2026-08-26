@@ -148,6 +148,20 @@ L'ordre n'est pas décoratif : il va **du plus risqué au plus réfléchi**.
 
 ### §0 · Préalable
 Ce qui invalide tout le reste s'il est sauté. Toujours :
+
+⚠⚠ **AVANT TOUTE SUITE PLAYWRIGHT : GitHub Desktop DOIT être fermé.** (26 août 2026.) Les specs
+ouvrent le vrai `index.html` en `file://` et lisent l'arbre de travail EN DIRECT : une commande git
+lancée depuis l'application pendant la suite change les fichiers sous les pieds des tests, et fait
+rougir des specs quelconques, sans rapport avec le code. Deux specs ont ainsi été prises pour une
+régression du chantier, puis pour une instabilité, avant que Grégoire ne signale que
+l'application tournait. Rejouées fenêtre fermée : vertes. C'est le pendant, côté tests, du piège
+déjà connu de GitHub Desktop qui stashe le travail non commité au changement de branche.
+
+⮕ Et la leçon de méthode qui va avec : quand une mesure ne s'explique pas, **demander ce qui
+tournait à côté avant de mesurer davantage**. Les deux hypothèses formulées ce jour-là étaient
+plausibles et fausses ; aucune exécution supplémentaire ne les aurait départagées, parce qu'aucune
+ne portait sur la vraie variable.
+
 - `git pull` + **vérifier le numéro de version en bas de page** ;
 - backup Codex si une porte touche les données ;
 - `allow pasting` si une porte demande la console ;
