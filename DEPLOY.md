@@ -166,13 +166,38 @@ surinvoqué et préciser le régime réel»).
    ```bash
    git commit -m "feat(<scope>): <description>"
    ```
-5. **Push + merge sur `main`** :
+5. **Push + merge sur `main`** — par `scripts/pousser.sh`, jamais `git push` nu :
    ```bash
-   git push origin <branche>
-   # Puis depuis le worktree main (ou GitHub web) :
-   git push . HEAD:main
-   git push origin main
+   scripts/pousser.sh                  # branche courante vers origin
+   scripts/pousser.sh origin main      # arguments passés tels quels à git push
    ```
+
+   ⚠ **INCIDENT DU 26 AOÛT 2026, À CONNAÎTRE (#533).** Trois pushs de suite ont
+   échoué alors que rien n'était cassé :
+
+   ```
+   Connection to github.com closed by remote host.
+   Transferred: sent 3620, received 19832 bytes, in 360.5 seconds
+   ✓ Sentinelle Playwright : aucune rougeur nouvelle (1 échec connu, inchangé).
+   ```
+
+   Ces trois lignes, lues dans l'ordre, sont tout le défaut. `git push` ouvre la
+   connexion vers GitHub **avant** d'exécuter le hook pré-push ; le hook lançait
+   WebKit lui-même — six minutes — pendant lesquelles la session ne transmet
+   rien, et GitHub la ferme. Le verdict tombait après : juste, vert, et sans
+   personne à qui le dire. **Le danger n'est pas l'échec, c'est ce qu'il
+   enseigne** — un push qui échoue alors que tout est vert apprend à taper
+   `--no-verify` par réflexe, et ce réflexe emporte aussi Vitest et la baseline
+   #456.
+
+   Depuis, l'ordre est renversé : `scripts/pousser.sh` lance la sentinelle
+   Playwright **avant** d'ouvrir la connexion et dépose un verdict rattaché au
+   SHA ; le hook ne fait plus que le lire, en une fraction de seconde. Chaque
+   suite ne tourne qu'une fois — Playwright dans le script, Vitest dans le hook.
+   Un `git push` nu sur un lot qui touche `js/`, `index.html`, `styles.css` ou
+   `tests/integration/` est refusé tant qu'aucun verdict ne couvre le commit ;
+   le refus dit quoi lancer. Verrouillé par
+   `tests/unit/sentinelle-533-verdict-avant-connexion.test.js`.
 6. **Netlify déclenche le build automatiquement** (webhook GitHub → Netlify).
 7. Le déploiement est en ligne en **~30-60 secondes** sur `app.codexnumeris.org`.
 

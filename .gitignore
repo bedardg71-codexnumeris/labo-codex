@@ -114,3 +114,7 @@ test-results/
 # depuis `tests/` si un script y est lancé un jour.
 repro.html
 undefined/
+
+# Verdict local de la sentinelle Playwright (#533) — état de MA machine,
+# rattaché à un SHA. Il ne veut rien dire ailleurs : jamais versionné.
+scripts/.verdict-playwright.json
