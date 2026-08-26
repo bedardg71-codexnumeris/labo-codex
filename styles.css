@@ -16852,7 +16852,17 @@ tr.etudiant-inactif td {
     line-height: 1.5;
 }
 
-.legende-marques .text-danger { font-weight: 600; }
+.legende-marques .champ-requis { font-weight: 600; }
+
+/* #516 — un champ dont la saisie a été REFUSÉE. L'écran garde ce qui est tapé
+   (on ne re-remplit pas sous les doigts), mais l'écart avec les données doit se
+   VOIR : sans cette marque, le refus serait aussi silencieux que l'absence de
+   refus qu'il corrige. */
+.champ-refuse,
+.champ-refuse:focus {
+    border-color: var(--rouge-erreur) !important;
+    box-shadow: 0 0 0 2px rgba(232, 64, 87, 0.15);
+}
 
 /* #504 — La colonne « Ordre » d'un bloc réordonnable : deux chevrons empilés,
    ou côte à côte dans une ligne de tableau. */

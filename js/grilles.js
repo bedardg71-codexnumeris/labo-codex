@@ -2871,7 +2871,7 @@ function afficherCriteresTemp() {
                     </div>
                 </div>
                 <div class="groupe-form">
-                    <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span></label>
+                    <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span></label>
                     <input type="text"
                            class="controle-form"
                            value="${echapperHtml(critere.nom)}"
@@ -3158,7 +3158,7 @@ function afficherCriteresGrille(grille) {
                     </div>
                 </div>
                 <div class="groupe-form">
-                    <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span></label>
+                    <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span></label>
                     <input type="text"
                            class="controle-form"
                            value="${echapperHtml(critere.nom)}"
@@ -3370,7 +3370,32 @@ async function obtenirGrilleParId(grilleId) {
     return grilles.find(g => g.id === grilleId);
 }
 
+/**
+ * #516 — CE QUE LA LÉGENDE PROMET, ET QUE LE CODE DOIT TENIR.
+ * Le libellé exact est repris de la validation qui vivait dans du code mort :
+ * elle disait déjà la bonne chose, personne ne l'exécutait.
+ */
+const REFUS_NOM_CRITERE = 'Le nom du critère est obligatoire';
+
 async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
+    // ⚠⚠ #516 (26 août 2026) — L'ASTÉRISQUE PROMETTAIT UN REFUS QUI N'EXISTAIT PAS.
+    //
+    // La légende de #506 dit : « Champ obligatoire — l'enregistrement est refusé
+    // sans lui. » Il ne l'était pas : une grille dont un critère avait un nom
+    // VIDE s'enregistrait sans un mot. La « preuve » qu'en donnait la sentinelle
+    // vivait dans `sauvegarderCritere()`, qui lit `#critereNom` — un id absent
+    // d'index.html, dans une fonction sans appelant vivant. Le test gardait du
+    // code mort ; la promesse, elle, n'était tenue nulle part.
+    //
+    // ⚠ ON REFUSE L'ÉCRITURE, ON NE BLOQUE PAS LA FRAPPE. Ces champs
+    // s'enregistrent seuls au blur : restaurer l'ancienne valeur dans le champ
+    // ferait se re-remplir sous les doigts de quelqu'un qui vide pour retaper.
+    // Le nom vide n'atteint donc pas les données, l'écran garde ce qui est tapé,
+    // et le champ est marqué pour que l'écart soit VU (cf. le handler).
+    if (champ === 'nom' && !String(valeur == null ? '' : valeur).trim()) {
+        return { refuse: REFUS_NOM_CRITERE };
+    }
+
     // #510 (25 août 2026) — LA SAISIE QUI NE RESTAIT PAS.
     //
     // Cette fonction lisait la collection entière, y changeait une valeur et la
@@ -3395,7 +3420,7 @@ async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
         return grilles;
     }, []);
 
-    if (!grilleModifiee) return;
+    if (!grilleModifiee) return { refuse: null };   // grille ou critère introuvable
     const grille = grilleModifiee;
 
     // FIX (10 jan 2026) : Synchroniser grilleTemplateActuelle pour éviter l'écrasement
@@ -3408,6 +3433,7 @@ async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
         calculerEtAfficherTotalPonderation(grille);
     }
 
+    return { ok: true };
 }
 
 /* ===============================
@@ -4044,6 +4070,8 @@ async function migrerCategoriesVersSousCriteres() {
 migrerCategoriesVersSousCriteres();
 
 window.modifierCritereGrille = modifierCritereGrille;
+window.marquerChampRefuse = marquerChampRefuse;                             // #516 — le refus se VOIT
+window.REFUS_NOM_CRITERE = REFUS_NOM_CRITERE;
 window.ajouterCritereGrille = ajouterCritereGrille;
 window.supprimerCritereGrille = supprimerCritereGrille;
 window.afficherConfigurationCategoriesErreurs = afficherConfigurationCategoriesErreurs;
@@ -4075,12 +4103,30 @@ function modifierTypeCritereTempHandler(el) {
 }
 
 /** Handler délégué pour modifierCritereGrille(grilleId, index, champ, valeur) */
+/**
+ * #516 — le champ REFUSÉ se voit, et ne le dit qu'une fois.
+ *
+ * ⚠ La notification n'est émise qu'au PASSAGE en refus. Sans cette garde, vider
+ * un champ puis cliquer trois fois ailleurs produirait trois bandeaux pour un
+ * seul problème — et le troisième ferait fermer la barre sans la lire.
+ */
+function marquerChampRefuse(el, raison) {
+    if (!el || !el.classList) return;
+    if (!raison) { el.classList.remove('champ-refuse'); return; }
+    const dejaMarque = el.classList.contains('champ-refuse');
+    el.classList.add('champ-refuse');
+    if (!dejaMarque && typeof notifications !== 'undefined' && notifications.erreur) {
+        notifications.erreur(raison, 'La modification n\'a pas été enregistrée.');
+    }
+}
+
 function modifierCritereGrilleHandler(el) {
     var grilleId = el.dataset.grilleId;
     var index = parseInt(el.dataset.critereIndex);
     var champ = el.dataset.champ;
     var valeur = el.hasAttribute('data-parse-int') ? parseInt(el.value) : el.value;
-    modifierCritereGrille(grilleId, index, champ, valeur);
+    Promise.resolve(modifierCritereGrille(grilleId, index, champ, valeur))
+        .then(function (resultat) { marquerChampRefuse(el, resultat && resultat.refuse); });
 }
 
 /** Handler délégué pour modifierCritereGrille type + refresh */
