@@ -645,18 +645,80 @@ async function afficherMatriceRetroaction() {
  * UTILISÉ PAR:
  * - Textarea dans la matrice (onchange)
  * 
- * NOTE:
- * - Sauvegarde en mémoire uniquement
- * - Persistance complète via await sauvegarderCartouche()
+ * ⚠⚠ #517 (26 août 2026) — LA MATRICE S'ENREGISTRE MAINTENANT SEULE.
+ *
+ * Jusqu'ici cette fonction n'écrivait qu'en MÉMOIRE : la persistance n'arrivait
+ * qu'au bouton « Enregistrer », tout en bas d'un écran long. Changer de
+ * cartouche, changer de sous-onglet ou fermer l'application perdait toute la
+ * saisie de la matrice, sans un mot.
+ *
+ * C'était le modèle INVERSE de ses trois voisins — grille, échelle et production
+ * enregistrent au fil de la saisie —, dans le même onglet. Cette incohérence
+ * entre écrans voisins suffisait à produire la perception « des fois ça
+ * enregistre, des fois non ». Verdict de Grégoire (D2, 26 août) : enregistrement
+ * automatique, comme les autres.
  */
 async function sauvegarderCommentaire(key) {
     if (!cartoucheActuel) return;
 
     const textarea = document.getElementById(`comm_${key}`);
     if (textarea) {
+        // ▣ L'ÉCRAN FAIT FOI PENDANT L'ÉDITION : la mémoire est mise à jour
+        // d'abord, et c'est elle que lit le calcul de complétion.
         cartoucheActuel.commentaires[key] = textarea.value;
         await calculerPourcentageComplete();
+        await persisterCartouchePartielle(c => { c.commentaires[key] = textarea.value; });
     }
+}
+
+/**
+ * #517 — écrire UN champ de la cartouche ouverte, sans passer par le bouton.
+ *
+ * ⚠⚠ POURQUOI CE CHEMIN EST SÉPARÉ DE `sauvegarderCartouche()`. Celle-ci valide
+ * le nom (avec une alerte bloquante), interroge l'utilisateur sur les doublons et
+ * relit tout le formulaire. La faire tourner à chaque frappe dans la matrice
+ * ouvrirait une boîte de dialogue au milieu d'une saisie. L'enregistrement au fil
+ * de l'eau écrit donc le strict nécessaire, et rien d'autre.
+ *
+ * ⚠ Une cartouche JAMAIS ENREGISTRÉE n'a pas encore de place en base : le
+ * mutateur rend `undefined` et rien n'est écrit. C'est exactement le modèle des
+ * grilles et des échelles, dont les critères et les niveaux ne s'enregistrent
+ * seuls qu'une fois l'objet créé — le premier enregistrement reste un geste.
+ *
+ * ⚠ Passe par `db.modifier` (#510) : deux commentaires quittés coup sur coup
+ * liraient sinon le même instantané, et le second effacerait le premier. C'est
+ * le défaut que ce même cycle vient de corriger sur les grilles ; l'introduire
+ * ici en le sachant serait impardonnable.
+ */
+async function persisterCartouchePartielle(appliquer) {
+    if (!cartoucheActuel || !cartoucheActuel.id || !cartoucheActuel.grilleId) return false;
+    const resultat = await db.modifier(`cartouches_${cartoucheActuel.grilleId}`, (lues) => {
+        const cartouches = lues || [];
+        const enBase = cartouches.find(c => c.id === cartoucheActuel.id);
+        if (!enBase) return undefined;              // pas encore enregistrée
+        if (!enBase.commentaires) enBase.commentaires = {};
+        appliquer(enBase);
+        enBase.dateModification = new Date().toISOString();
+        return cartouches;
+    }, []);
+    return resultat !== undefined;
+}
+
+/**
+ * #517 — le CONTEXTE aussi. Il ouvre chaque rétroaction reçue par un étudiant·e :
+ * le perdre en silence coûte autant que perdre une cellule de la matrice.
+ *
+ * ⚠ Le NOM, lui, reste au bouton : il déclenche la vérification de doublons, qui
+ * pose une question à l'utilisateur. Une question par frappe n'est pas un
+ * enregistrement automatique, c'est un harcèlement.
+ */
+async function sauvegarderContexteCartouche() {
+    if (!cartoucheActuel) return;
+    const champ = document.getElementById('contexteCartouche');
+    if (!champ) return;
+    const valeur = champ.value.trim();
+    cartoucheActuel.contexte = valeur;
+    await persisterCartouchePartielle(c => { c.contexte = valeur; });
 }
 
 /* ===============================
@@ -2581,6 +2643,8 @@ window.supprimerCartoucheConfirm = supprimerCartoucheConfirm;
 window.chargerCartouchesRetroaction = chargerCartouchesRetroaction;
 window.sauvegarderCartouche = sauvegarderCartouche;
 window.sauvegarderCommentaire = sauvegarderCommentaire;
+window.persisterCartouchePartielle = persisterCartouchePartielle;           // #517
+window.sauvegarderContexteCartouche = sauvegarderContexteCartouche;         // #517
 window.importerCommentaires = importerCommentaires;
 window.initialiserModuleCartouches = initialiserModuleCartouches;
 
