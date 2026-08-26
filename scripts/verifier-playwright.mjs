@@ -112,6 +112,30 @@ function echecsDuRapport(rapport) {
     return trouves.sort();
 }
 
+/**
+ * Specs VERTES AU SECOND ESSAI (#534, 26 août 2026).
+ *
+ * `retries: 1` empêche qu'un dépassement de délai isolé refuse un push légitime.
+ * Mais une reprise silencieuse est un tapis : elle transforme l'instabilité en
+ * vert, et personne ne voit plus rien. Ces specs ne bloquent pas — elles se
+ * DISENT. C'est la même règle que le « verdict impossible » plus bas : ce qu'on
+ * n'a pas su juger ne doit jamais ressembler à ce qui va bien.
+ */
+function flakyDuRapport(rapport) {
+    const trouves = [];
+    const descendre = (suites) => {
+        for (const suite of suites ?? []) {
+            for (const spec of suite.specs ?? []) {
+                const instable = (spec.tests ?? []).some((t) => t.status === 'flaky');
+                if (instable) trouves.push(identite(spec.file ?? suite.file ?? '?', spec.title));
+            }
+            descendre(suite.suites);
+        }
+    };
+    descendre(rapport.suites);
+    return trouves.sort();
+}
+
 // ── WebKit est-il seulement là ? ───────────────────────────────────────────────
 // Sans lui, on ne peut RIEN juger. Ne pas confondre avec « tout va bien » : le
 // script sort en 2, et c'est à l'appelant de décider s'il laisse passer.
@@ -168,6 +192,15 @@ try {
 rmSync(dossierTemporaire, { recursive: true, force: true });
 
 const echecs = echecsDuRapport(rapport);
+const instables = flakyDuRapport(rapport);
+
+// Dit avant tout verdict : une spec rattrapée au second essai est passée, mais
+// elle a échoué une fois, et c'est une information qui se perd si on se tait.
+if (instables.length > 0) {
+    process.stderr.write(`\n${JAUNE}⚠ ${instables.length} spec(s) VERTE(S) AU SECOND ESSAI — passées, mais instables :${RAZ}\n`);
+    for (const spec of instables) process.stderr.write(`    · ${spec}\n`);
+    process.stderr.write(`${JAUNE}  ⮕ Ne bloque pas (#534). Si la même revient souvent, c'est un vrai sujet.${RAZ}\n`);
+}
 
 // ── Mode écriture ─────────────────────────────────────────────────────────────
 if (ecrire) {
