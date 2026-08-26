@@ -89,7 +89,19 @@ Les correctifs valent pour les **nouvelles** duplications. Les copies que tu as
 déjà faites depuis la barre latérale restent marquées « exemple », donc non
 modifiables. Les libérer demanderait un correctif ponctuel sur tes données.
 
-**VERDICT** : ________________________________________________
+**VERDICT (26 août 2026)** : **OUI — un correctif ponctuel.**
+
+⮕ Livré : `scripts/reparation-476-copies-marquees-exemple.js`.
+`await reparer476()` en dry-run d'abord (il n'écrit rien et imprime le plan),
+puis `await reparer476({executer: true})` après un backup Codex.
+`annuler476()` revient en arrière dans la même session.
+
+⚠ Le critère : marque démo **ET** id absent de `PACK_DEMARRAGE`. Le drapeau seul
+ne suffit pas — les exemples fournis le portent aussi, et les libérer casserait
+la démo. Si le pack n'est pas chargé, le script **refuse** : « id absent du pack »
+deviendrait vrai pour tout. Verrouillé par
+`tests/unit/sentinelle-476-reparation-copies-demo.test.js` (7 cas, 2 break-tests
+ROUGE, dont celui-là).
 
 ### 2.2 · Une correction que tu n'as pas arbitrée nommément
 
@@ -97,7 +109,9 @@ Ton verdict D3 nommait trois fonctions ; une **quatrième** portait le même dé
 (le « Dupliquer et éditer » d'une production concaténait aussi « (copie) » à la
 main). Je l'ai corrigée au titre de la convergence, sans que tu l'aies décidée.
 
-**VERDICT** (garder, ou retirer ?) : ____________________________
+**VERDICT (26 août 2026)** : **GARDER.** Même défaut, même remède : la quatrième
+voie rejoint les trois autres. C'est la convergence retenue en D0, appliquée sans
+exception.
 
 ---
 
