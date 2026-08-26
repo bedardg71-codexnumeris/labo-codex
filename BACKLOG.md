@@ -1934,6 +1934,35 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 - [ ] **#534** Un seul dépassement de délai suffit à refuser un push légitime — créé 26 août 2026, **hypothèse initiale RÉFUTÉE le jour même par la mesure**.
 
+  ✅ **LA MESURE DEMANDÉE A ÉTÉ FAITE — 26 août 2026, fin de journée. LES DEUX SPECS SONT VERTES.**
+  Conditions exigées par cet item, toutes réunies et vérifiées AVANT de lancer : GitHub Desktop
+  fermé (`pgrep` : absent), aucun processus Playwright vivant, la session parallèle terminée et
+  ses commits poussés, arbre au repos.
+  ⮕ **Résultat : 165 passés / 0 échec / 0 reprise, en 5,8 min.** Aucune spec n'a eu besoin de son
+  essai de reprise — `retries: 1` n'a donc rien absorbé, et l'instabilité ne s'est pas exprimée.
+  ⮕ **Ce que ça départage.** `planif-tout-voir-loupe.spec.js` (lignes 75/111/160 selon les runs) et
+  `cours-refonte-rendu.spec.js:100` passent toutes deux. La variable dominante était bien
+  l'INTERFÉRENCE EXTERNE — commandes git concurrentes sur l'arbre lu en `file://`, contention
+  machine — et non une fragilité propre à ces deux fichiers. C'est la troisième explication, celle
+  apportée par Grégoire sur #523, qui se confirme.
+  ⚠ **CE QUE CE VERT NE DIT PAS, et il faut le tenir séparé.** Un run vert ne prouve pas l'absence
+  d'un défaut non déterministe ; il dit que dans ces conditions-là, il ne s'est pas produit. La
+  lecture de code faite le même jour annonçait « deux causes structurelles distinctes » : elle
+  décrivait des FAITS de code réels (ci-dessous) mais leur prêtait un effet que la mesure n'a pas
+  confirmé. L'analyse par lecture a une fois de plus proposé une explication qui se lit bien.
+  ⏳ **CE QUI RESTE VRAI ET VÉRIFIABLE SANS RUN — deux fragilités latentes, non corrigées :**
+  · `cours-refonte-rendu.spec.js` n'attend **jamais** `window.dbReady`. Ses deux tests posent un
+    `waitForTimeout(500)` fixe, quand `page.goto` sur `index.html` coûte 400 à 700 ms en régime
+    normal. La marge est nulle par construction. La spec voisine `planif-tout-voir-loupe` attend
+    `dbReady` (20 s) — l'asymétrie n'est pas un choix documenté.
+  · `planif-tout-voir-loupe.spec.js` rejoue tout son montage à CHAQUE test (4 tests × [`goto` +
+    attente `dbReady` + 800 ms + 1200 ms de sommeils fixes + injection de 41 nœuds]), sous le
+    plafond de 30 s par défaut. Les quatre tests partagent donc le même profil de risque — ce qui
+    explique que la ligne rouge se promenait d'un run à l'autre sans que le fichier change.
+  ⮕ **Décision à prendre** : durcir ces deux montages (attente d'état plutôt que sommeils fixes)
+  ou fermer l'item sur le vert mesuré. Non tranché — ce n'est plus un bug, c'est de l'hygiène.
+
+
   ⚠⚠ **CE QUE CET ITEM A D'ABORD AFFIRMÉ ÉTAIT FAUX, ET C'EST LA PARTIE UTILE.** Version du matin :
   « la suite sature le `localStorage` partagé de l'origine `file://`, le boot ralentit, les specs
   tardives tombent ». L'inférence était cohérente — `workers: 1` existe précisément parce que le
