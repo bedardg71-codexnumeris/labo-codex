@@ -111,11 +111,19 @@ l'app → Cmd+V dans la console, Entrée.
 > pas toujours enregistrées. » Tu remplissais un champ, il n'était plus là ensuite.
 > C'est le geste de passer d'un champ au suivant qui le déclenchait.
 
+
+> ⚠ **N'utilise pas le bouton « Enregistrer » dans cette porte, et pars d'une grille QUI EXISTE
+> DÉJÀ.** Les noms de critères ne passent pas par ce bouton : ils s'enregistrent seuls quand tu
+> quittes le champ, et c'est ce mécanisme-là qui perdait ta saisie. Cliquer « Enregistrer »
+> réécrirait tout d'un coup et rendrait le défaut invisible — la porte dirait « ça marche » sans
+> avoir rien vérifié. Sur une grille neuve non encore enregistrée, il n'y a d'ailleurs pas de
+> critère à nommer : le code cherche la grille en base et abandonne s'il ne l'y trouve pas.
+
 | | Geste | Attendu |
 |---|---|---|
-| 2.1a | Ouvre une grille. Nomme le **critère 1**, puis clique **directement** dans le nom du **critère 2** et nomme-le. Ne clique nulle part entre les deux. | Les deux champs portent ce que tu viens d'écrire. |
-| 2.1b | Recharge la page (Cmd+R) et rouvre la grille. | **Les deux noms sont là.** Avant : le premier des deux pouvait être vide. |
-| 2.1c | Même chose sur une **échelle** : renomme deux niveaux d'affilée, recharge, rouvre. | Les deux noms sont là. |
+| 2.1a | Ouvre une grille **déjà enregistrée**. Nomme le **critère 1**, puis clique **directement** dans le nom du **critère 2** et nomme-le. Ne clique nulle part entre les deux, et **ne touche pas à « Enregistrer »**. | Les deux champs portent ce que tu viens d'écrire. |
+| 2.1b | Recharge la page (Cmd+R) et rouvre **la même grille**. | **Les deux noms sont là.** Avant : le premier des deux pouvait être vide, sans un mot d'erreur. |
+| 2.1c | Même chose sur une **échelle déjà enregistrée** : renomme deux niveaux d'affilée, recharge, rouvre. | Les deux noms sont là. |
 
 `⚠⚠ Données`
 
