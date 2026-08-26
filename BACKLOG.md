@@ -530,6 +530,24 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `doublons-cadre-ct15` (×2), `doublons-lisibilite-291` (×2), `productions-ajout-refus-garde-340`,
   `productions-biblio-ajout-identite`. Leur seul point commun : elles ouvrent l'application et
   exigent zéro erreur console.
+  ⮕ **MESURE DU 26 AOÛT — LA PISTE DU « DOUBLE SLASH » EST FAUSSE, ET LA BASELINE EST RÉGÉNÉRÉE.**
+    · L'URL est CORRECTE : les specs construisent `'file://' + path.join(racineProjet, 'index.html')`,
+      ce qui donne bien `file:///Users/…`. Le `//Users/…` du message est simplement ce que WebKit
+      affiche APRÈS le schéma — pas une résolution ratée. Ne pas repartir de cette piste.
+    · La cause est le **XHR SYNCHRONE** de `chargerVersionJSON` (`init-inline.js` ~l. 222) : WebKit
+      refuse `XMLHttpRequest` sur `file://`. Le `try/catch` attrape bien l'exception — mais WebKit
+      rapporte QUAND MÊME l'erreur au niveau page, et ces huit specs exigent zéro erreur console.
+      Un try/catch ne fait pas taire un `pageerror`.
+    · **Conséquence utilisateur, elle, réelle** : sur Safari en `file://`, `version.json` n'est
+      probablement JAMAIS lu — l'app tourne sur les valeurs de repli codées dans `init-inline.js`
+      et `main.js`. C'est pour ça que `release.mjs` les synchronise à chaque bump, et ça marche.
+      Mais le mécanisme de détection des scripts périmés (#285) repose sur cette lecture.
+    · **Baseline régénérée le 26 août sur le Mac** (`node scripts/verifier-playwright.mjs --ecrire`)
+      après vérification que ces huit rougissent à l'identique sur `8dfda3ed`, commit d'avant la
+      fusion du jour (mesuré en worktree, pas supposé). ⚠ L'ancienne baseline annonçait
+      `totalEchecsConnus: 0`, générée le 18 août **là où WebKit n'existe pas** — elle certifiait
+      zéro dette sur des specs qui n'avaient jamais tourné. Le hook criait donc « régression » sur
+      une dette de plusieurs jours, ce que cet item déplorait déjà.
   ⮕ À trancher : corriger le chargement (`init-inline.js`, XHR synchrone + `fetch` de secours) ou
   reconnaître l'erreur comme bruit d'environnement dans les specs. **Le premier est préférable** —
   si WebKit refuse ce chargement en `file://`, l'iPad de Grégoire le refuse aussi, et c'est la
