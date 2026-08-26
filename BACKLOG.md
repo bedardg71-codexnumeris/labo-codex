@@ -439,7 +439,26 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   passent. Tout autre autosave en lecture-modification-écriture porte la même course. Recoupe
   [[project-autosaves-a-auditer]].
 
-  Dernier ID : **#522**.
+- [ ] **#523 — Deux specs Playwright INSTABLES rendent le garde-fou de push non déterministe.**
+  Mesuré le 26 août, sur quatre exécutions de la suite WebKit à quelques minutes d'intervalle,
+  même arbre, même machine :
+  · régénération de la baseline → **exactement 8** échecs (les 8 de #495) ;
+  · hook pré-push, 1ʳᵉ passe → « aucune rougeur nouvelle, 8 connus, **inchangé** » ;
+  · hook pré-push, 2ᵉ passe → 8 **+ 2** : `cours-refonte-rendu › Chantier C · édition d'un cours
+    legacy` et `pratique-edition-preserve-enveloppe › CO-01 · la CRÉATION n'est pas affectée` ;
+  · ces deux specs relancées SEULES → **6/6 vertes** (leurs fichiers au complet).
+  ⮕ Elles ne rougissent que dans la suite complète, jamais isolées : état partagé, ordre
+  d'exécution ou timing sous charge. **Rien à voir avec le bruit `version.json` de #495** — ce
+  sont deux instabilités distinctes, à ne pas confondre.
+  ⚠ **L'effet est pire que les deux specs** : un garde-fou qui rend un verdict différent à chaque
+  passage ne protège plus, il fait jouer à pile ou face un push de 5 minutes. C'est le mécanisme
+  exact par lequel un hook finit contourné — et #495 note déjà que le premier `--no-verify` date
+  du 25 août.
+  ⏳ À instruire : `--repeat-each` pour confirmer le taux, puis isoler la dépendance (fixture
+  partagée ? `db` non purgée entre fichiers ?). Ne PAS les verser à la baseline : une spec instable
+  n'est pas une dette connue, c'est un test à réparer.
+
+  Dernier ID : **#523**.
 
 ### Chantier — 25 août 2026 (le pont carte d'alignement ↔ productions)
 
