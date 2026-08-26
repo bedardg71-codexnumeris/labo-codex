@@ -7,6 +7,97 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 25-26 AOÛT 2026 : L'AUDIT CONCEPTION ÉPUISÉ, #476 FUSIONNÉ,
+     ET version.json ENFIN LISIBLE. 1.99.0 → 1.100.0.
+
+     ▣ CE QU'IL FAUT SAVOIR EN PREMIER — TROIS CHOSES QUI ENGAGENT LA SUITE.
+
+       1. #529 EST OUVERT ET C'EST LE GROS morceau : SRPNF et IDME sont codés
+          en dur jusque dans le CALCUL. `profil-etudiant-calculs.js` extrait les
+          scores par critère du TEXTE des rétroactions, via une regex qui
+          contient les cinq noms de critères ET les quatre niveaux. Pour tout
+          utilisateur qui n'est pas Grégoire, le bloc « Forces et défis » du
+          profil est MUET. Session DÉDIÉE, décision de Grégoire.
+          ⮕ SA RÈGLE, à ne pas déformer : « rien ne doit être codé en dur, mais
+            l'échelle IDME peut être seedée ». Seeder une valeur de départ
+            modifiable = permis. L'inscrire dans la logique = interdit.
+
+       2. #530 EST UN VRAI BUG, découvert en fermant #495 : la garde #340 laisse
+          passer une écriture qu'elle devrait bloquer (deux productions
+          étrangères ajoutées d'affilée). Vérifié sur 8dfda3ed — PAS une
+          régression, il dormait sous le bruit de #495. C'est la garde qui
+          protège de la contamination inter-trimestre : la famille de l'incident
+          de juin. Seule spec de la baseline Playwright désormais.
+
+       3. #427 A UNE DATE : le 1er septembre, dans six jours. Fiche opératoire
+          prête (`plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`).
+          ⏳ DÛ PAR GRÉGOIRE : la liste nominale des personnes à inviter, et les
+          trois noms Cloudflare. Personne ne peut les préparer à sa place.
+
+     ▣ LIVRÉ — 1.99.0 → 1.100.0, 16 items.
+       · #509→#515 : les sept correctifs de l'audit Conception du 25 août.
+       · #476 : la convergence des duplications, FUSIONNÉE (8 commits qui
+         dormaient depuis le 24 ; les 11 arbitrages étaient déjà rendus).
+       · #516/#517/#518 : les trois décisions du matin (astérisque du nom de
+         critère, autosave des cartouches, avertissement du bloc sans nom).
+       · #524→#528 : les champs obligatoires des grilles et échelles, la valeur
+         d'un niveau décidée une fois pour tous, les aides qui se répondent.
+       · #495 : version.json lisible en file:// — voir ci-dessous.
+       · #531 : le modèle de cartouche à faire remplir par une IA.
+
+     ▣ #495 — LA DÉCOUVERTE LA PLUS UTILE DE LA SESSION.
+       MESURÉ sous WebKit : XHR synchrone, XHR asynchrone ET fetch échouent tous
+       les trois sur un fichier local. Le commentaire du code affirmait « XHR
+       synchrone (fonctionne sur Safari file://) » — c'était FAUX. version.json
+       n'a JAMAIS été lu sur le Safari ni l'iPad de Grégoire.
+       ⮕ Remède : `version.js`, un SCRIPT (seule voie qui passe), généré par
+         `release.mjs` EN MÊME TEMPS que version.json — deux fichiers écrits
+         ensemble ne divergent pas. Son anti-cache est posé explicitement.
+       ⮕ Effet : la baseline Playwright passe de 8 échecs connus à 1.
+
+     ▣ #523 CLOS — ET C'EST GRÉGOIRE QUI A TROUVÉ. Deux specs rouges en suite,
+       vertes isolées : ni contamination d'état, ni saturation machine, mais
+       GitHub Desktop qui exécutait des commandes git pendant que Playwright
+       lisait les fichiers. Règle versée au skill `portes-terrain` : aucune
+       suite Playwright ne vaut si GitHub Desktop est ouvert sur le dépôt.
+       ⮕ LEÇON DE MÉTHODE, écrite au même endroit : mes deux hypothèses étaient
+         plausibles et toutes deux fausses. Aucune exécution supplémentaire ne
+         les aurait départagées. DEMANDER ce qui tourne à côté avant de mesurer
+         davantage.
+
+     ▣ CE QUE VALENT LES VERTS DE CETTE SESSION — à lire avant de s'y fier.
+       QUATRE de mes tests se sont révélés complaisants, et c'est le break-test
+       qui les a montrés, jamais la relecture :
+       · #514 — l'assertion comptait les titres de bandeaux (posés centrés) et
+         restait verte avec le défaut présent ;
+       · #517 — le harnais rendait la MÊME référence à chaque lecture, ce qui
+         rend la course structurellement impossible ;
+       · #524 — un break-test dont l'ancre n'existait pas : il n'a rien cassé,
+         et son vert ne prouvait rien ;
+       · #531 — un tri de codes « nécessaire » qui ne l'était pas : le
+         backtracking de la regex suffit. Code retiré plutôt que gardé.
+       ⮕ Un vert vaut ce que vaut le break-test qui l'accompagne.
+
+     ▣ PORTES TERRAIN RELEVÉES : 21/21 (le matin, correctifs de l'audit) et 9/9
+       (l'après-midi, les trois décisions). Verdicts consignés dans les fiches.
+       ⚠ Le `git pull` du §0 est INUTILE : le clone de Grégoire EST l'arbre de
+         travail. Son app voit les modifications dès qu'il recharge. Corriger la
+         consigne dans les prochaines fiches.
+
+     ▣ DEUX MALADRESSES DE MA PART, sans conséquence mais qui se répètent :
+       · `git checkout <fichier>` pour annuler un break-test a emporté DEUX FOIS
+         du travail non commité du même fichier. Committer avant d'annuler.
+       · J'ai saturé le Mac avec des suites Playwright lancées en parallèle
+         (23 processus, charge à 159), puis conclu à tort à des tests instables.
+
+     ⏳ RESTE OUVERT : #519 (passe design, dont la barre d'actions absente de
+       l'écran cartouche), #520 (ablation de l'ANCIEN SYSTÈME des échelles —
+       renforcé par #524 : ce bloc mort HÉBERGE des gardes qui rassurent à
+       tort), #522 (autres autosaves), #463 (rang 5 du plan du 21 août, jamais
+       commencé), #530, #529.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 25 AOÛT 2026 (SUITE) : PORTE #490 CLOSE 8/8, ET SA
      DÉCISION 3.2 LIVRÉE — #491, RETRANSMETTRE UN PARTAGÉ. 1.97.0.
 
