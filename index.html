@@ -5355,31 +5355,33 @@
                                         </div>
                                     </div>
 
-                            <!-- Grille + Échelle + Nom sur même ligne -->
+                            <!-- Nom + Grille + Échelle sur une seule ligne (26 août 2026).
+                                 ⚠ La légende des astérisques a été RETIRÉE d'ici : les trois champs
+                                 de cette ligne sont TOUS obligatoires, une légende qui l'annonce
+                                 n'apprend donc rien — et posée dans le premier bloc, large de
+                                 200 px, elle poussait la grille à la ligne suivante. Décision de
+                                 Grégoire au vu du rendu. -->
                             <div data-tooltip="cn-cartouche-selectors" class="u-flex-gap-15 u-mb-20 u-flex-wrap" style="align-items: flex-start">
+                                <div class="groupe-form u-flex-1" style="min-width: 250px; margin: 0">
+                                    <label>Nom de la cartouche <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :</label>
+                                    <input type="text" id="nomCartouche" class="controle-form"
+                                        placeholder="Ex: Dissertation argumentative - H2026">
+                                </div>
                                 <div class="groupe-form" style="flex: 0 0 200px; margin: 0;">
-                                    <p class="legende-marques" style="width: 100%">
-                                        <span class="champ-requis">*</span> Champ obligatoire — l'enregistrement est refusé sans lui.
-                                    </p>
                                     <label>Grille (critères) <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :
                                         <span class="primo-aide" data-target="retroaction-grille-descriptive"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                                     </label>
-                                    <select id="selectGrilleCartouche" class="controle-form" data-on-change="onChangeSelectionCartouche">
+                                    <select id="selectGrilleCartouche" class="controle-form" data-on-change="onChangeSelectionGrilleCartouche">
                                         <option value="">— Grille —</option>
                                         <!-- Options générées par JS -->
                                     </select>
                                 </div>
                                 <div class="groupe-form" style="flex: 0 0 200px; margin: 0;">
                                     <label>Échelle (niveaux) <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :</label>
-                                    <select id="selectEchelleCartouche" class="controle-form" data-on-change="onChangeSelectionCartouche">
+                                    <select id="selectEchelleCartouche" class="controle-form" data-on-change="onChangeSelectionEchelleCartouche">
                                         <option value="">— Échelle —</option>
                                         <!-- Options générées par JS -->
                                     </select>
-                                </div>
-                                <div class="groupe-form u-flex-1" style="min-width: 250px; margin: 0">
-                                    <label>Nom de la cartouche <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :</label>
-                                    <input type="text" id="nomCartouche" class="controle-form"
-                                        placeholder="Ex: Dissertation argumentative - H2026">
                                 </div>
                                 <div id="checkboxesPratiquesCartouche" style="flex-shrink: 0; align-self: flex-end;"></div>
                             </div>
@@ -14343,7 +14345,7 @@
          donc jamais lu sur Safari ni sur iPad. Un script, lui, se charge. Généré
          par scripts/release.mjs en même temps que version.json — les deux ne
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
-    <script src="version.js?v=08261218"></script>
+    <script src="version.js?v=08261248"></script>
     <script src="js/db.js?v=20260826b"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
     <script src="js/pratiques/modalites-evaluation.js?v=20260810a"></script> <!-- SSOT #328 Lot 1 : module propriétaire de modalitesEvaluation (seul point d'écriture), chargé avec la couche stockage -->
@@ -14618,11 +14620,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260826w"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260826x"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260826w"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260826x"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
