@@ -267,11 +267,13 @@ const TOOLTIPS = {
     'cn-echelle-titre':
         'Échelles de conversion pourcentage → niveaux de performance. Configure les seuils et les couleurs pour chaque niveau (ex. : Insuffisant, Développement, Maîtrise, Étendu).',
     'cn-echelle-niveau':
-        'Niveaux avec code, nom, plages de pourcentage, valeur ponctuelle et couleur.',
+        'Chaque niveau porte DEUX traductions opposées : la plage dit dans quel niveau tombe un pourcentage, la valeur ponctuelle dit ce que vaut ce niveau quand il faut un chiffre. Les deux sont obligatoires, avec le code, le nom et la couleur.',
     'cn-echelle-apercu':
         'Barre colorée montrant les plages de chaque niveau. Vérifie visuellement la cohérence de tes seuils.',
+    // #528 — le survol dit la RELATION, pas seulement la définition : c'est elle
+    // qui manquait à quelqu'un qui monte sa première échelle.
     'cn-echelle-valeur-ponctuelle':
-        'Valeur numérique fixe attribuée à ce niveau pour les calculs de note.',
+        'Ce que vaut ce niveau quand il faut un chiffre (bulletin, note finale). La plage, elle, dit l\'inverse : dans quel niveau tombe un pourcentage. Les deux sont obligatoires — le milieu de la plage est un calcul, pas ton jugement.',
 
     // --- Cartouches de rétroaction ---
 

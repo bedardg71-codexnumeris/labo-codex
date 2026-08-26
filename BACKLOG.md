@@ -493,6 +493,24 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   doctrine du projet : non calculable et DIT, jamais un chiffre inventé.
   Skill `pratiques-notation` §7 bis aligné. Vitest **3371/3371** (320 fichiers).
 
+- [x] **#528 LIVRÉ 26 août 2026 (1.99.7)** — les deux aides de l'échelle se répondent enfin.
+  Demande de Grégoire, en préparant un tutoriel : « comment expliquerais-tu la nuance entre les
+  plages et la note ponctuelle à un utilisateur qui veut monter sa première échelle ? »
+  ⚠ **Les deux aides EXISTAIENT** (`echelle-plage-notes`, `echelle-valeur-ponctuelle`), et chacune
+  décrivait son champ **sans mentionner l'autre** : « plage de pourcentages » d'un côté, « valeur
+  numérique fixe » de l'autre. Qui ouvrait l'une ne voyait jamais la relation — **c'est la relation
+  qui manquait, pas la définition**.
+  ⮕ Réécrites en PAIRE : la question de chacune (« ce pourcentage, c'est quel niveau ? » ↔ « ce
+  niveau, ça vaut combien ? »), **le même exemple dans les deux** (Maîtrisé, 75-89), le renvoi
+  mutuel, et le piège NOMMÉ plutôt qu'évité — « le milieu d'un intervalle est un calcul, pas un
+  jugement ». Une liste dit quand chacune travaille selon la pratique (alternative ou sommative),
+  puisque **le gabarit sert les deux**.
+  ⮕ Survols alignés aussi (`cn-echelle-valeur-ponctuelle`, `cn-echelle-niveau`).
+  ▣ **La sentinelle tient la PAIRE, pas les textes** : renvoi mutuel, les deux sens de traduction,
+  l'exemple partagé, le piège nommé, et l'accord avec le §7 bis du skill. Une aide réécrite seule un
+  jour redeviendrait une définition isolée — et le tutoriel expliquerait ce que l'écran tait.
+  Vitest **3377/3377** (321 fichiers). Deux break-tests, deux ROUGE.
+
 ### Constats de l'audit du 25 août ENCORE OUVERTS
 
 > Les six correctifs ci-dessus (#509 à #515) épuisent ce qui ne demandait pas d'arbitrage de
