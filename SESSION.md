@@ -7,6 +7,107 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 26 AOÛT 2026 (après-midi) : LE RETOUR DE JEAN-FRANÇOIS, ET DEUX
+     CORRECTIONS SUR MON PROPRE TRAVAIL DANS LA MÊME JOURNÉE. 1.99.8 → 1.100.1.
+
+     ⚠⚠ À LIRE EN PREMIER — COLLISION D'IDENTIFIANT #533, À TRANCHER.
+
+       DEUX chantiers différents portent le numéro #533 depuis aujourd'hui :
+         · au BACKLOG (l.583) : « la garde #340 est probablement INERTE sur les
+           données réelles » — inscrit en bonne et due forme par la session
+           parallèle ;
+         · dans MES commits, DEPLOY.md §2.1, `scripts/` et le nom de fichier
+           `tests/unit/sentinelle-533-verdict-avant-connexion.test.js` : « la
+           garde lourde passe avant la connexion ». JAMAIS inscrit au backlog —
+           numéro emprunté à la volée, à tort.
+       ⮕ C'est à MOI de céder : le leur est un item, le mien un usage. #535 est
+         libre. Le renommage touche 6 fichiers (sentinelle renommée, DEPLOY.md,
+         hook, pousser.sh, lire-verdict.mjs, verifier-playwright.mjs) + les
+         renvois depuis #534. NON FAIT — attend l'arbitrage de Grégoire.
+       ⮕ Origine : deux sessions ont pris le « prochain numéro » au même moment
+         sans se voir. Le prochain qui emprunte un ID sans l'inscrire refera le
+         même nœud.
+
+     ▣ CE QUI EST LIVRÉ ET EN LIGNE (1.100.1, build 0826-1312).
+
+       #532 — RETOUR JEAN-FRANÇOIS, BLOQUANT. « Je ne peux pas entrer les
+       présences, un message jaune doré dit que l'horaire n'est pas configuré
+       (alors qu'il l'est dans Cadre), et le lien ne débouche nulle part. »
+       DEUX défauts indépendants, aucun ne levant d'erreur :
+         (a) la condition testait `db.getSync('formatHoraire')` — clé que PLUS
+             PERSONNE N'ÉCRIT (grep exhaustif : 3 lectures, 0 écriture) depuis
+             que le format vit dans l'entité Horaire. `!formatHoraire` valait
+             donc TOUJOURS vrai : l'horaire réel n'était même pas consulté.
+             Invisible chez qui traîne un résidu Beta 95, PERMANENT chez tout
+             nouvel utilisateur — d'où un bloquant qui attendait un testeur neuf.
+         (b) `naviguerVersReglagesTrimestre` était définie DEUX FOIS sur
+             `window` ; le dispatcher résout au CLIC, donc main.js (chargé
+             après) gagnait toujours — et sa version faisait un
+             `location.href='#...'` que rien n'écoute (aucun routeur de hash au
+             dépôt) puis appelait un nom inexistant. Le doublon perdant visait
+             `reglages`, alors que la sous-section vit dans `calendrier`.
+             Répare aussi le bouton « Trimestres » du bandeau archive.
+
+       BANC DE PARCOURS NEUF (`tests/integration/parcours-neuf-saisie-presences.spec.js`)
+       — trimestre, cours, groupe, horaire créés À L'ÉCRAN, puis Suivi › Saisie :
+       il exige 15 CHAMPS DE SAISIE, pas seulement le silence du bandeau (un
+       écran muet mais stérile serait un faux vert — le symétrique exact du
+       vécu de Jean-François). Il PASSE. Break-test : la condition de #532
+       remise, il rougit sur « LE CAS DE JEAN-FRANÇOIS ».
+       ⮕ CONCLUSION : le rapport est ENTIÈREMENT expliqué par (a) + (b). Pas de
+         troisième bug. Trois chemins de rattachement écartés au préalable :
+         l'horaire est OBLIGATOIRE à la création d'un groupe-cours, un horaire
+         naît toujours avec ≥ 1 séance, et le mode cours (`id:null`) ne survit
+         pas au re-peuplement du sélecteur.
+
+     ▣ DEUX CORRECTIONS SUR MON PROPRE TRAVAIL — c'est la partie utile.
+
+       1. UNE HYPOTHÈSE RÉFUTÉE PAR LA MESURE (#534). J'avais écrit au backlog
+          que la suite d'intégration saturait le localStorage partagé. Cohérent,
+          et FAUX : deux sondes aux extrémités donnent 54 clés / 55 838 car. à
+          la 1re spec, 54 clés / 55 811 car. à la 164e — et `page.goto` passe de
+          678 ms à 387 ms. L'item est RÉÉCRIT avec ces mesures plutôt que
+          corrigé en silence : une explication qui se lit bien se durcit en fait
+          acquis (c'est ce qui est arrivé au compte de #456, recopié six jours).
+          Ce qui restait vrai a été livré : `retries: 1`, et une reprise qui SE
+          DIT (le vérificateur nomme les specs vertes au second essai).
+
+       2. UN HOOK DEVENU INAPPLICABLE (mon #533). Le correctif du matin refusait
+          les pushs sans verdict local. Il a BLOQUÉ Grégoire depuis GitHub
+          Desktop, en donnant pour seule issue une commande de terminal — un
+          refus dont la solution est hors de portée de l'outil où il se produit.
+          C'est mot pour mot le « hook inapplicable » que `pre-push` combat dans
+          ses propres commentaires : le correctif reproduisait le défaut qu'il
+          corrigeait. J'avais VU le risque le matin et tranché dans le mauvais
+          sens, par écrit. Désormais : sans verdict → avertit et laisse passer
+          (la CI juge de toute façon), verdict ROUGE → bloque toujours ; et le
+          message donne `cd <racine> && scripts/pousser.sh`, copiable.
+
+     ▣ CE QUI RESTE OUVERT, PAR ORDRE.
+
+       · RETOUR TERRAIN DE JEAN-FRANÇOIS sur 1.100.1 — consigne rédigée dans
+         `Retours des testeurs/jean-françois/CONSIGNE-TEST_2026-08-26.md`. S'il
+         REVOIT le bandeau, il dira cette fois VRAI : le défaut serait alors
+         dans le rattachement (`groupesCours[].horaireId`), et sa réponse aux
+         3 questions de la consigne le désignerait.
+       · DETTE, NON TOUCHÉE : `saisie-presences.js:306` et `:343` lisent la même
+         clé morte que #532 pour un repli en heures — la branche « 4 » est
+         INATTEIGNABLE, et le « 2 » restant est une valeur métier EN DUR qui
+         entre dans le calcul d'assiduité. Décision de Grégoire, pas de code.
+       · DEUX SPECS INSTABLES (#534) — et DEUX CAUSES distinctes, mesurées sur
+         deux runs comparés à périmètre égal : `planif-tout-voir-loupe.spec.js`
+         vacille d'un TEST à l'autre (75, 111, 160 selon les runs) = le FICHIER
+         est en cause ; `cours-refonte-rendu.spec.js:100` est constant = un
+         dépassement au chargement. Ne pas les traiter ensemble.
+       · COLLISION #533 ci-dessus.
+
+     ▣ ÉTAT DE L'ARBRE. Tout est poussé jusqu'à `2ec83a8c`. Le commit `5a737a94`
+       (#530, 1.100.2, session parallèle) était local et non poussé à l'heure de
+       ce relais. Deux sessions ont travaillé le même dépôt tout l'après-midi :
+       `git add` par chemins explicites des deux côtés, aucun travail perdu.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 26 AOÛT 2026 (suite) : #530 CLOS — LE DÉFAUT ÉTAIT DANS LA
      SENTINELLE. BASELINE PLAYWRIGHT À ZÉRO. 1.100.1 → 1.100.2.
 
