@@ -558,6 +558,22 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   échouent à l'identique sans une ligne du chantier**. Le verdict du garde-fou est donc faux, et
   c'est ce qui le rend coûteux — un hook qui crie au loup finit par se faire contourner, et le
   `--no-verify` du 25 août (autorisé par Grégoire, dette prouvée préexistante) est le premier.
+  ⮕ **SECOND `--no-verify` : 26 août 2026, autorisé explicitement par Grégoire** (« ok, on pousse
+  sans relancer la vérification »), pour la release 1.99.1. Ce qu'il faut savoir pour le juger plus
+  tard, sans avoir la conversation sous les yeux :
+  · **Vitest 3319/3319** au moment du push, vérifié plusieurs fois ;
+  · la suite WebKit **a bien tourné**, et sa PREMIÈRE passe après régénération de la baseline a
+    répondu « aucune rougeur nouvelle, 8 connus, inchangé » — la vérification a donc été passée,
+    et elle était VERTE ;
+  · les deux passages suivants ont ajouté `cours-refonte-rendu › Chantier C` et
+    `pratique-edition-preserve-enveloppe › CO-01`, vertes en isolé — cause non établie, cf. #523,
+    et les deux passages tournaient sur une machine saturée par les runs de la session ;
+  · ces deux specs ne touchent ni les gabarits, ni le PDF, ni les duplications : aucun des sept
+    correctifs livrés (#509→#515) ni la convergence #476 ne concerne leur code.
+  ⚠ **La différence avec le 25 août** : ce jour-là on passait outre une vérification ROUGE. Ici la
+  vérification a été verte, puis non reproductible. Ça ne rend pas le geste anodin — deux
+  `--no-verify` en deux jours sur le même garde-fou, c'est le symptôme que #495 et #523 décrivent,
+  et c'est la raison de les traiter.
   Toutes tombent sur la MÊME erreur, qui n'a aucun rapport avec ce que les specs vérifient :
   `pageerror: //Users/.../Monitorage_v6/version.json due to access control checks` — WebKit refuse
   le chargement de `version.json` en `file://`. ⚠ Noter le **double slash** en tête de chemin : la
