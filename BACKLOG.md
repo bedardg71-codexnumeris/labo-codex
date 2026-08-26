@@ -375,6 +375,72 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Vitest **3305/3305** (314 fichiers). La sentinelle mesure ce qui est DESSINÉ (faux jsPDF qui note
   page et ordonnée de chaque tracé), pas ce qui est écrit dans le source. Dernier ID : **#514**.
 
+- [x] **#515 — L'avis de débordement de l'aperçu suit enfin le thème.** (constat C4)
+  `.apercu-pdf-debordement` portait `#f0c674` en dur, hors palette. Le ton ne suivait pas le thème :
+  sur fond clair, le message « Ce contenu dépasse la feuille » était presque illisible — un avis
+  d'alerte qu'on ne lit pas ne prévient de rien. Rattaché à `--alerte-texte-attention`, défini pour
+  les deux thèmes (#d4b878 sombre, #7a5a20 clair).
+  ⏳ Pas de sentinelle : une valeur de couleur n'est pas un garde-fou de comportement. Le ratchet
+  utile serait un lint général des couleurs en dur — chantier distinct, hors de ce lot.
+
+### Constats de l'audit du 25 août ENCORE OUVERTS
+
+> Les six correctifs ci-dessus (#509 à #515) épuisent ce qui ne demandait pas d'arbitrage de
+> Grégoire. Restent, du rapport `Rapports/AUDIT-conception-gabarits-2026-08-25.md` :
+
+- [ ] **#516** 📐 **A3 — l'astérisque « Nom du critère » promet un refus qui n'existe pas.**
+  La légende (#506) dit « Champ obligatoire — l'enregistrement est refusé sans lui ». Reproduit au
+  navigateur : une grille dont un critère a un nom VIDE s'enregistre sans aucun refus. La « preuve »
+  de la sentinelle #506 pour ce champ vit dans `sauvegarderCritere()`, qui lit `#critereNom` — un id
+  ABSENT d'index.html. La garde textuelle est donc ancrée sur du code mort et la sentinelle passe à
+  vide (motif AP-2). **Décision requise** : valider réellement (attention à l'autosave) OU retirer
+  l'astérisque de ce champ. Dans les deux cas, réancrer la preuve sur le chemin vivant.
+
+- [ ] **#517** 📐 **B1 — la matrice de cartouche ne vit qu'en RAM jusqu'au bouton Enregistrer.**
+  `sauvegarderCommentaire()` écrit en mémoire seulement ; la persistance n'arrive qu'au bouton, en
+  bas d'un écran long. Aucun garde-fou : changer de cartouche, de sous-onglet ou fermer l'app perd
+  toute la saisie, en silence. C'est le modèle INVERSE des grilles et des échelles (autosave champ
+  par champ) — cette incohérence entre sous-onglets voisins nourrit à elle seule la perception
+  « des fois ça enregistre, des fois non ». **Décision requise** : autosave comme les voisins OU
+  garde-fou « modifications non enregistrées ». À trancher AVANT de coder.
+  ⚠ L'écran cartouche est aussi le seul des quatre sans barre d'actions en tête (#503 visait « les
+  trois écrans » — mais l'utilisateur, lui, en voit quatre).
+
+- [ ] **#518** 📐 **B2 — un champ personnalisé rempli mais sans titre est écarté en silence.**
+  `champsPersonnalisesAEnregistrer()` filtre les blocs sans titre. La règle est défendable (pas de
+  bandeau vide dans le document), mais du CONTENU TAPÉ disparaît à l'enregistrement sans un mot.
+  **Décision requise** : avertir (« un bloc sans nom ne sera pas conservé ») OU refuser de fermer
+  sans trancher.
+
+- [ ] **#519 — Passe design (constats C1, C2, C3, C5).** C1 : `design-system.html` ne documente
+  aucun composant du chantier (`.btn-icone-nu`, `.bloc-reordonner`, `.champ-recommande`,
+  `.legende-marques`, usage étendu de `.pipeline-btn-reorder`). C2 : la légende des deux astérisques
+  n'existe que sur l'écran Production — Grilles, Échelles et Cartouches en portent SANS légende,
+  alors que le commentaire CSS de `.champ-recommande` dit lui-même « ne jamais poser l'une sans
+  l'autre ». ⚠ **C2 dépend de #516** (si l'astérisque du nom de critère est retiré, la légende à
+  poser change). C3 : cibles tactiles — chevrons (icône 11 px) et corbeille (`padding: 3px 5px`)
+  loin des 44×44 px exigés pour iPad. C5 : rangée de cinq boutons pleins multicolores, « Supprimer »
+  (rouge) entre « Dupliquer » et « Annuler », à un clic d'« Enregistrer ».
+
+- [ ] **#520 — Zéro-dette : l'« ANCIEN SYSTÈME » des échelles.** (constat C6) Un bloc caché garde des
+  ids DUPLIQUÉS (`nomEchelleTemplate` ×3, `selectEchelleTemplate`, `btnDupliquerEchelle`,
+  `typeEchelle`, `seuilReussite`…). Pas de bug actif — le premier id du DOM gagne, et c'est
+  l'éditeur vivant — mais une mine au premier réordonnancement, et une entorse au zéro-dette.
+  Ablation avec sentinelle ratchet.
+
+- [ ] **#521 — Décider du sort de `coursId` au transport.** Extrait de #511 : le rattachement local
+  au cours est la seule clé volontairement NON transportée. Conséquence inchangée depuis toujours —
+  restaurer une archive rend des productions sans cours. Transporter ferait apparaître une
+  production reçue sous un cours homonyme du destinataire, ou sous un cours inexistant.
+  **Décision requise.**
+
+- [ ] **#522 — Auditer les autres autosaves pour la course lecture-modification-écriture.**
+  Extrait de #510 : `db.modifier` existe désormais, mais seuls les deux éditeurs du constat A2 y
+  passent. Tout autre autosave en lecture-modification-écriture porte la même course. Recoupe
+  [[project-autosaves-a-auditer]].
+
+  Dernier ID : **#522**.
+
 ### Chantier — 25 août 2026 (le pont carte d'alignement ↔ productions)
 
 - [x] **#492 — Le sélecteur « Production » de l'Inspecteur ne montrait rien, et personne ne pouvait le voir.**
