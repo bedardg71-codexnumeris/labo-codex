@@ -411,6 +411,19 @@ Conditions qui pourraient justifier une réactivation future :
    vraisemblablement requis (cf. §1.4).
 4. **Croissance qualitative inattendue** qui rendrait utile une
    traçabilité dont l'absence ne pose actuellement aucun problème.
+5. **Contrôle d'accès voulu par le porteur du projet** (ajouté le
+   26 août 2026). Ni incident, ni contrainte externe : une préférence
+   de gouvernance, qui se suffit à elle-même. C'est le motif du
+   refermage décidé pour le **1er septembre 2026** — voir ADR-008,
+   révision du 26 août, et la fiche opératoire
+   `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`.
+
+⚠ **Ce qu'une liste blanche ne donne pas.** Elle contrôle l'ENTRÉE, pas
+l'usage : la phase janvier-mai 2026 l'a montré (~50 invités, aucun
+retour, aucun revenant), les logs sont purgés à 24 h sur plan gratuit,
+et l'application est locale et hors ligne. Refermer pour *mesurer*
+l'usage serait se tromper d'outil ; refermer pour *filtrer* l'entrée
+est légitime, et c'est ce qui est décidé.
 
 Procédure de réactivation, le cas échéant : suivre §3.1 à §3.5 (config
 Access) et §4 (gestion de la liste blanche). À documenter au moment

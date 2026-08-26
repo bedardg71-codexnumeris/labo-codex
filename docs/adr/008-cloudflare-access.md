@@ -88,6 +88,56 @@ Aurait été pertinent si le projet restait limité au cégep. **Écartée** par
 
 ## Notes de révision
 
+**Révision 26 août 2026 — refermage décidé pour le 1er septembre 2026, et un cinquième motif**
+
+Décision de Grégoire, 26 août 2026 : l'accès public est refermé le 1er septembre.
+
+⚠ **Le motif ne figure dans aucune des quatre conditions du §3.6 de `DEPLOY.md`**
+(risque opérationnel concret · création de la Voûte · bascule institutionnelle ·
+croissance qualitative inattendue). Il faut donc l'énoncer plutôt que de l'y faire
+rentrer de force :
+
+> **Cinquième motif — le contrôle d'accès voulu par le porteur du projet.** Grégoire
+> veut savoir qui a accès à Labo Codex et reprendre la main sur les cinquante sièges.
+> Ce n'est ni un incident, ni une contrainte externe : c'est une préférence de
+> gouvernance, et elle se suffit à elle-même. La faire passer pour un « risque
+> opérationnel » aurait été plus commode et malhonnête.
+
+**Ce que ce refermage NE donne PAS, et qui est accepté.** La liste blanche contrôle
+l'ENTRÉE, jamais l'usage. Trois faits, déjà au dossier :
+
+1. Phase janvier-mai 2026 : ~50 personnes invitées, « aucune n'a renvoyé de feedback
+   ou de rapport de bug, et aucune n'est revenue après l'expiration de son accès ».
+   La liste était pleine et l'usage nul.
+2. `DEPLOY.md` : les logs Cloudflare sont « purgés à 24 h sur plan gratuit » et « ne
+   produisent rien d'actionnable ».
+3. L'application est **locale et hors ligne** : l'usage réel n'est observable par
+   personne, et le rendre observable contredirait la posture de confidentialité.
+
+⮕ Décision du 26 août : **le filtrage de l'entrée suffit**, le besoin de mesure n'est
+pas poursuivi. Écrit ici pour qu'une session future ne prenne pas cette limite pour un
+défaut à corriger.
+
+**Arbitrage du quota** : le plan gratuit s'arrête à 50 sièges, et la liste du printemps
+les saturait déjà. Retenu : **sélection** — la communauté de pratique et les personnes
+actives d'abord, les autres sur demande. Pas d'upgrade payant. Le précédent de
+janvier-mai pèse dans ce sens : une liste pleine n'a pas produit d'usage, et payer
+pour des sièges vides serait acheter un chiffre.
+
+**Statut applicatif** : aucun changement de code, comme aux révisions précédentes. Le
+contrat reste « app servie telle quelle depuis Netlify, derrière DNS Cloudflare proxy
+orange ». Seule la policy change d'état.
+
+**Fiche opératoire** : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`
+(gestes, liste, courriel d'invitation, vérifications et consignation).
+
+⏳ **À compléter le jour du geste** : date effective, taille de la liste reconstituée,
+et les trois placeholders Cloudflare de `DEPLOY.md`.
+
+---
+
+
+
 **Révision 2 juin 2026 — retrait du refermage planifié au 1er juillet, ouverture publique par défaut**
 
 Décision actée par Grégoire le 2 juin 2026 matin (J−1 avant AQPC),

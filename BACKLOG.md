@@ -1093,6 +1093,12 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - ⮕ **Porte terrain** : saisie de durée au doigt sur iPad, et lisibilité de l'en-tête sur un nœud étroit (le lot « largeur » n'est pas fait).
 
 - [ ] **#508** ⏳ **ÉCHÉANCE : 1er SEPTEMBRE 2026** — l'avis d'identification sur la page d'accueil.
+  ✅ **DÉBLOQUÉ le 26 août** : #427 a désormais une DATE (le 1er septembre) et une fiche opératoire.
+  Le paragraphe n'annonce donc plus une contrainte sans dispositif — il annonce une contrainte dont
+  la mise en place est planifiée. ⮕ **Les deux textes sont écrits d'avance** au §7 de
+  `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md` : celui du refermage réussi (au
+  présent) et celui du report (retrait pur et simple). Le choix se fait le jour même, selon ce qui
+  s'est réellement passé — pas avant.
   Créé le 25 août 2026, en posant le nouveau texte de bienvenue demandé par Grégoire. Le dernier
   paragraphe annonce : « À partir du 1er septembre, l'identification sera obligatoire pour utiliser
   l'application. » (`js/accueil.js`, `genererBanniereBienvenue`).
@@ -1112,7 +1118,27 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ Un seul paragraphe à changer, sans conséquence technique : le coût est de s'en souvenir, pas de
   le faire. C'est pour ça que l'item existe.
 
-- [ ] **#427** ⚠️ Refermer l'accès public — réactiver Cloudflare Access (OTP par courriel) — créé 8 août 2026 (demande Grégoire). ⮕ **ÉCHÉANCE REPORTÉE À SEPTEMBRE 2026** (décision Grégoire, 8 août soir — l'échéance initiale du ~20 août n'est plus visée). Checklist dashboard prête : `plans de travail/Checklist Levée Cloudflare Access .txt`.
+- [ ] **#427** ⚠️ Refermer l'accès public — **DATE FIXÉE AU 1er SEPTEMBRE 2026** (décision Grégoire,
+  26 août). ⮕ **FICHE OPÉRATOIRE PRÊTE** : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`
+  — gestes Cloudflare, liste à remplir, courriel d'invitation, vérifications, consignation.
+  ✅ **DEUX DÉCISIONS TRANCHÉES le 26 août** :
+  · **Quota** — **sélection** : la CoP et les personnes actives d'abord, les autres sur demande. Pas
+    d'upgrade payant. Le précédent de janvier-mai pèse : une liste pleine n'a pas produit d'usage, et
+    payer pour des sièges vides serait acheter un chiffre.
+  · **Mesure d'usage** — **NON POURSUIVIE, et c'est acté**. La liste blanche contrôle l'entrée, pas
+    l'usage : ~50 invités au printemps sans un seul retour, logs purgés à 24 h, application locale et
+    hors ligne. Filtrer l'entrée suffit. ⚠ À ne pas reprendre pour un défaut dans six mois.
+  ✅ **ADR-008 RÉVISÉ** (26 août) : le motif de Grégoire devient un **cinquième cas** de réactivation,
+  énoncé pour lui-même — « une préférence de gouvernance, qui se suffit à elle-même » — plutôt que
+  déguisé en risque opérationnel. `DEPLOY.md` §3.6 complété du même motif et de la limite.
+  ⏳ **DÛ PAR GRÉGOIRE avant le 1er** : la liste nominale (§3 de la fiche), et les trois noms
+  Cloudflare (team Zero Trust, application, policy) qui remplacent les `[À COMPLÉTER]` de `DEPLOY.md`
+  lignes 269, 277, 293. **Personne ne peut les préparer à sa place.**
+  ⏳ **LE JOUR MÊME** : la séquence §4 de la fiche — dont **deux vérifications non facultatives**,
+  qu'un accès autorisé passe ET qu'un accès non listé soit refusé. Une policy dormante depuis trois
+  mois ne se réveille pas intacte sur parole.
+  Énoncé d'origine :
+- [ ] **~~#427~~** Refermer l'accès public — réactiver Cloudflare Access (OTP par courriel) — créé 8 août 2026 (demande Grégoire). ⮕ **ÉCHÉANCE REPORTÉE À SEPTEMBRE 2026** (décision Grégoire, 8 août soir — l'échéance initiale du ~20 août n'est plus visée). Checklist dashboard prête : `plans de travail/Checklist Levée Cloudflare Access .txt`.
   - **Ce que Grégoire veut** : que les utilisateurs passent de nouveau par un **code envoyé par courriel** (OTP), comme au printemps ; retrouver le **contrôle des 50 sièges gratuits** ; et **savoir qui a accès à l'application et qui est vraiment un utilisateur**. Échéance visée : **septembre 2026** (reportée du ~20 août par Grégoire le 8 août au soir).
   - ✔ **Bonne nouvelle : rien à construire.** La configuration est intégralement documentée et le DNS n'a jamais été défait — « Cloudflare Access reste configuré côté DNS / proxy orange ; seule la policy est désactivée. La réactivation est une opération de quelques minutes dans le dashboard Zero Trust » (`DEPLOY.md` §3.6). Procédure : `DEPLOY.md` §3.1→§3.5 (config Access) + §4 (gestion de la liste blanche).
   - ⚠ **C'est une RÉVISION D'ADR, pas un changement de config silencieux.** La décision d'ouverture publique est formalisée dans `docs/adr/008-cloudflare-access.md` (révisé le 2 juin 2026) et reprise dans `DEPLOY.md` v1.4 et `SECURITY.md`. Refermer exige de réviser les trois, avec date effective et raison déclenchante — c'est explicitement demandé par le §3.6.
