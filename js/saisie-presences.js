@@ -283,6 +283,100 @@ function obtenirToutesDatesCours() {
    =============================== */
 
 /**
+ * Ce que l'en-tête de saisie affiche quand l'horaire ne prévoit AUCUNE durée
+ * pour ce jour de cours (#538). Le trou est nommé plutôt que comblé.
+ */
+const MENTION_DUREE_INCONNUE = 'durée inconnue : horaire à configurer';
+
+/**
+ * Durée en heures que l'HORAIRE du groupe-cours prévoit pour cette date.
+ *
+ * ⮕ #538 (26 août 2026, décision de Grégoire) — remplace les trois `2` en dur
+ * qui vivaient dans `obtenirHeuresSeance`. La durée d'une séance n'est pas une
+ * valeur métier à inventer : elle se DÉRIVE de l'horaire que l'utilisateur a
+ * configuré, ou elle n'existe pas. Rien de codé en dur, et 0 quand l'horaire
+ * ne dit rien — c'est `mettreAJourEnteteDateSeance` qui le DIT alors à l'écran.
+ *
+ * ⚠ LA CLÉ MORTE QUE CE HELPER REMPLACE. `db.getSync('formatHoraire')` : trois
+ * lectures dans le dépôt, ZÉRO écriture depuis que le format vit dans l'entité
+ * Horaire (même prémisse que #532, verrouillée par sa sentinelle cas B.b). La
+ * comparaison `=== '1x4'` était donc TOUJOURS fausse : la branche « 4 heures »
+ * n'a jamais été atteinte, et le repli valait toujours 2 heures — un nombre qui
+ * entrait dans le calcul d'assiduité sans que rien ne l'ait jamais dit.
+ *
+ * ⚠ LE JOUR VISÉ N'EST PAS TOUJOURS LE JOUR RÉEL. Pour une reprise, c'est le
+ * jour REMPLACÉ qui porte l'horaire — même règle que `genererSeancesCompletes`
+ * (`horaire.js`). Diverger ici ferait lire le mauvais jour aux seules dates de
+ * reprise, c'est-à-dire exactement là où personne ne regarde.
+ *
+ * @param {string} dateStr - Date au format YYYY-MM-DD
+ * @returns {number} Heures décimales prévues ce jour-là, ou 0 si l'horaire est muet
+ */
+function obtenirHeuresPrevuesParHoraire(dateStr) {
+    if (!dateStr) return 0;
+
+    const seancesHoraire = typeof obtenirSeancesHoraire === 'function'
+        ? obtenirSeancesHoraire()
+        : db.getSync('seancesHoraire', []);
+
+    if (!Array.isArray(seancesHoraire) || seancesHoraire.length === 0) return 0;
+
+    // Jour de semaine visé : le jour remplacé pour une reprise, le jour du
+    // calendrier sinon, et à défaut celui que porte la date elle-même.
+    const JOURS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    const infoJour = obtenirInfosJourCalendrier(dateStr);
+    let jourVise = null;
+    if (infoJour) {
+        jourVise = (infoJour.statut === 'reprise' && infoJour.jourRemplace)
+            ? infoJour.jourRemplace
+            : infoJour.jourSemaine;
+    }
+    if (!jourVise) {
+        const d = new Date(dateStr + 'T00:00:00');
+        if (isNaN(d.getTime())) return 0;
+        jourVise = JOURS[d.getDay()];
+    }
+
+    const cible = String(jourVise).toLowerCase();
+    return seancesHoraire.reduce((total, seance) => {
+        if (!seance || !seance.jour) return total;
+        if (String(seance.jour).toLowerCase() !== cible) return total;
+        return total + mesurerDureeSeance(seance);
+    }, 0);
+}
+
+/**
+ * Durée en heures d'UNE séance, quelle que soit la forme sous laquelle elle est
+ * écrite. Trois formes cohabitent dans les données réelles : `duree` en heures
+ * décimales (entité Horaire), `debut`/`fin` (séances générées), et le couple
+ * legacy `heureDebut`/`heureFin`.
+ *
+ * ⮕ #538 — rend 0 pour une séance illisible. Ne JAMAIS y remettre un défaut :
+ * une séance dont on ne sait pas lire la durée ne dure pas 2 heures, elle dure
+ * une durée inconnue, et c'est l'appelant qui doit le dire.
+ *
+ * @param {Object} seance
+ * @returns {number} Heures décimales, ou 0 si la forme n'est pas lisible
+ */
+function mesurerDureeSeance(seance) {
+    if (!seance) return 0;
+
+    if (typeof seance.duree === 'number' && seance.duree > 0) return seance.duree;
+
+    const paires = [[seance.debut, seance.fin], [seance.heureDebut, seance.heureFin]];
+    for (const [debut, fin] of paires) {
+        if (!debut || !fin) continue;
+        const [hD, mD] = String(debut).split(':').map(Number);
+        const [hF, mF] = String(fin).split(':').map(Number);
+        if ([hD, mD, hF, mF].some(n => !Number.isFinite(n))) continue;
+        const ecart = (hF + mF / 60) - (hD + mD / 60);
+        if (ecart > 0) return ecart;
+    }
+
+    return 0;
+}
+
+/**
  * Obtient les heures totales d'une séance pour une date
  */
 function obtenirHeuresSeance(dateStr) {
@@ -300,12 +394,11 @@ function obtenirHeuresSeance(dateStr) {
 
 
     if (!seances || seances.length === 0) {
-        // Pour les jours de cours sans séances définies, utiliser valeur par défaut
+        // #538 : jour de cours sans séance datée — la durée se DÉRIVE de l'horaire
+        // du groupe-cours, jamais d'un nombre écrit ici. 0 si l'horaire est muet.
         const infoJour = obtenirInfosJourCalendrier(dateStr);
         if (infoJour && (infoJour.statut === 'cours' || infoJour.statut === 'reprise')) {
-            const formatHoraire = db.getSync('formatHoraire', null);
-            const heuresDefaut = formatHoraire === '1x4' ? 4 : 2;
-            return heuresDefaut;
+            return obtenirHeuresPrevuesParHoraire(dateStr);
         }
         return 0;
     }
@@ -336,16 +429,22 @@ function obtenirHeuresSeance(dateStr) {
         // Si format inconnu mais jour de cours valide
         else {
             console.warn('⚠️ Format de séance non reconnu:', seance);
-            // Utiliser une valeur par defaut, mais ACCUMULER (+=) plutot que
-            // d'ECRASER (=). L'ancien `=` wipait silencieusement le total des
-            // seances precedentes -- comportement order-dependent et incoherent
-            // avec les 2 branches reconnues ci-dessus qui utilisent `+=`.
-            const formatHoraire = db.getSync('formatHoraire', null);
-            totalHeures += formatHoraire === '1x4' ? 4 : 2;
+            // #538 : une séance illisible n'ajoute RIEN au total — d'où l'absence
+            // d'instruction ici, qui est le comportement et non un oubli. L'ancien
+            // code ajoutait 2 heures, un nombre inventé, autant de fois qu'il y
+            // avait de séances mal formées : le dénominateur d'assiduité gonflait
+            // d'autant. Si AUCUNE séance n'est lisible, la garde finale (plus bas)
+            // retombe sur ce que l'horaire prévoit.
+            // ⚠ Ne PAS y remettre un `totalHeures = ...` : l'invariant des trois
+            // branches est l'accumulation (+=). L'ancien `=` wipait silencieusement
+            // le total des séances précédentes — comportement order-dependent.
         }
     });
 
-    return totalHeures || 2;
+    // #538 : aucune séance lisible → on retombe sur ce que l'horaire prévoit,
+    // et sur 0 s'il ne prévoit rien. Ce `|| 2` était la troisième valeur métier
+    // en dur de cette fonction, et la plus discrète des trois.
+    return totalHeures || obtenirHeuresPrevuesParHoraire(dateStr);
 }
 
 /**
@@ -395,14 +494,19 @@ function calculerNombreSeances(dateJusqua) {
     return compteur;
 }
 
-/**
- * Obtient la durée maximale d'une séance
+/*
+ * #538 — `obtenirDureeMaxSeance()` RETIRÉE le 26 août 2026.
+ *
+ * Elle rendait `2` (« Simplification pédagogique : toujours 2h max par séance »)
+ * — la CINQUIÈME valeur métier en dur de cette famille. Elle n'était appelée
+ * NULLE PART : ni dans `js/`, ni dans `tests/`, ni dans `scripts/`, et jamais
+ * exportée sur `window`. Ne subsistaient que trois mentions en commentaire
+ * (deux dans l'en-tête de `etudiants.js`, une dans `obtenirNombrePeriodesSeance`
+ * ci-dessous, corrigée en même temps).
+ *
+ * ⚠ Ne pas la ressusciter : un plafond de séance ne se décrète pas ici, il se
+ * lit dans l'horaire du groupe-cours (`obtenirHeuresPrevuesParHoraire`).
  */
-function obtenirDureeMaxSeance() {
-    // Simplification pédagogique : toujours 2h max par séance
-    // (2 périodes de 60 minutes = 2 heures)
-    return 2;
-}
 
 /**
  * 🆕 BETA 95.1 : Obtient le nombre de périodes d'une séance pour une date
@@ -425,9 +529,9 @@ function obtenirNombrePeriodesSeance(dateStr) {
     const seancesDuJour = seancesCompletes[dateStr];
 
     if (seancesDuJour && seancesDuJour.length > 0) {
-        // Agreger toutes les seances du jour. obtenirDureeMaxSeance() cap chaque
-        // seance a 2 periodes -- un horaire 1x4 (4 periodes) est donc forcement
-        // stocke en >=2 seances. Symetrie avec obtenirHeuresSeance qui agrege
+        // Agreger toutes les seances du jour. (#538 : la phrase d'origine invoquait
+        // `obtenirDureeMaxSeance()`, qui capait a 2 periodes -- retiree, elle
+        // n'etait appelee nulle part.) Symetrie avec obtenirHeuresSeance qui agrege
         // deja avec forEach. Avant : seul seancesDuJour[0].nombrePeriodes etait
         // retourne, sous-comptant les jours multi-seances et polluant l'indice
         // d'assiduite.
@@ -440,8 +544,20 @@ function obtenirNombrePeriodesSeance(dateStr) {
         if (total > 0) return total;
     }
 
-    // Fallback : 2 périodes par défaut
-    return 2;
+    // #538 : la quatrième valeur en dur de la famille, en PÉRIODES cette fois.
+    // `genererSeancesCompletes` (horaire.js) la nomme déjà comme polluant le
+    // dénominateur d'assiduité — commentaire « ÉTAPE 3 supprimée », FIX #220.
+    // Même règle que `obtenirHeuresSeance` : on dérive de l'horaire, on n'invente
+    // pas. Les heures prévues deviennent des périodes par la durée de période
+    // configurée (`dureePeriode`, clé réellement écrite par `definirDureePeriode`).
+    // 0 si l'horaire ne prévoit rien ce jour-là.
+    const heuresPrevues = obtenirHeuresPrevuesParHoraire(dateStr);
+    if (heuresPrevues > 0) {
+        const dureePeriodeMin = typeof obtenirDureePeriode === 'function'
+            ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
+        return Math.round((heuresPrevues * 60) / dureePeriodeMin);
+    }
+    return 0;
 }
 
 /**
@@ -845,6 +961,13 @@ function mettreAJourEnteteDateSeance(dateStr) {
 
     const heures = obtenirHeuresSeance(dateStr);
     const heuresFormatees = formaterHeuresAffichage(heures);
+    // #538 : une durée à 0 sur un jour de cours n'est plus un blanc silencieux.
+    // Avant, `formaterHeuresAffichage(0)` rendait '' et l'en-tête taisait le
+    // trou ; le tableau se remplissait quand même, avec 2 heures inventées.
+    // Désormais la durée vient de l'horaire — et quand l'horaire ne dit rien,
+    // c'est CE message qui l'apprend à l'utilisateur, à l'endroit exact où il
+    // s'apprête à saisir.
+    const dureeInconnue = !heures;
     const rangSeance = obtenirRangSeanceDansSemaine(dateStr);
 
     let message = '';
@@ -870,6 +993,8 @@ function mettreAJourEnteteDateSeance(dateStr) {
 
         if (heuresFormatees) {
             message += message ? ` (${heuresFormatees})` : heuresFormatees;
+        } else if (dureeInconnue) {
+            message += message ? ` \u2014 ${MENTION_DUREE_INCONNUE}` : MENTION_DUREE_INCONNUE;
         }
 
     } else if (statutEffectif === 'reprise') {
@@ -885,6 +1010,8 @@ function mettreAJourEnteteDateSeance(dateStr) {
 
         if (heuresFormatees) {
             message += ` — ${heuresFormatees}`;
+        } else if (dureeInconnue) {
+            message += ` \u2014 ${MENTION_DUREE_INCONNUE}`;
         }
 
     } else if (infoJour.statut === 'conge') {
