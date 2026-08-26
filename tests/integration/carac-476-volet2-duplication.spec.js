@@ -1,3 +1,17 @@
+/**
+ * ⚠ RÉALIGNÉ LE 26 AOÛT 2026 — LA COLLISION DE DEUX CHANTIERS PARALLÈLES.
+ *
+ * Ce banc a été écrit le 24 août contre des `alert()`. Le MÊME JOUR, sur une AUTRE
+ * branche, le chantier « une seule forme de confirmation après sauvegarde »
+ * (c7bfacd9) remplaçait ces alertes par des notifications. Les deux branches ne
+ * se sont rencontrées qu'à la fusion du 26 : cinq assertions attendaient encore
+ * ['alert', '… dupliquée avec succès'] là où le code produit ['succes',
+ * '… dupliquée !'].
+ *
+ * ⮕ Ce n'est pas le code qui a régressé, c'est le banc qui figeait un état périmé.
+ * Vérifié en rejouant les mêmes specs sur le commit d'avant la fusion. Les
+ * assertions sont donc alignées sur la forme retenue, jamais l'inverse.
+ */
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -330,7 +344,7 @@ test.describe('#476 volet 2 · caractérisation — grilles', () => {
         expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom', 'sourceId']);
         expect(r.copie.metadata_cc).toBe('absent');
         expect(r.copie.criteresIds).toEqual(['CR_1', 'CR_2']);
-        expect(r.msgs).toEqual([['alert', 'Grille "Grille source (copie)" dupliquée avec succès']]);
+        expect(r.msgs).toEqual([['succes', 'Grille "Grille source (copie)" dupliquée !']]);
     });
 
     test('dupliquerGrilleActive — attend son écriture, comme son homologue échelles', async ({ page }) => {
@@ -468,7 +482,7 @@ test.describe('#476 volet 2 · caractérisation — échelles', () => {
         expect(r.copie.isDemo).toBe(false);
         expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom', 'sourceId']);
         expect(r.copie.metadata_cc).toBe('absent');
-        expect(r.msgs).toEqual([['alert', 'Échelle "Echelle source (copie)" dupliquée avec succès']]);
+        expect(r.msgs).toEqual([['succes', 'Échelle "Echelle source (copie)" dupliquée !']]);
     });
 
     test('dupliquerEchelleActive — relais qui ATTEND, contrairement à son homologue grilles', async ({ page }) => {
@@ -485,7 +499,7 @@ test.describe('#476 volet 2 · caractérisation — échelles', () => {
         expect(r.n).toBe(2);
         expect(r.copie.nom).toBe('Echelle source (copie)');
         expect(r.copie.verrouille).toBe(false);
-        expect(r.msgs).toEqual([['alert', 'Échelle "Echelle source (copie)" dupliquée avec succès']]);
+        expect(r.msgs).toEqual([['succes', 'Échelle "Echelle source (copie)" dupliquée !']]);
     });
 });
 
@@ -653,7 +667,10 @@ test.describe('#476 volet 2 · caractérisation — productions', () => {
         expect(r.copie.verrouille).toBe(false);
         expect(r.copie.metadata_cc).toBe('absent');
         expect(r.copie.aDateCreation).toBe(false);
-        expect(r.msgs).toEqual([['alert', 'Production "Prod source (copie)" dupliquée avec succès']]);
+        // ⚠ Le message nomme l'ACTIVITÉ d'apprentissage, pas le titre : c'est le
+        // libellé courant d'une production à l'écran. Le titre, lui, reçoit bien
+        // « (copie) » — c'est ce que vérifient les assertions au-dessus.
+        expect(r.msgs).toEqual([['succes', 'Production "Activite" dupliquée !']]);
     });
 
     test('dupliquerProductionBibliotheque — suffixe le titre par nommerCopie', async ({ page }) => {
@@ -754,7 +771,7 @@ const PRATIQUE_SOURCE = {
 };
 
 test.describe('#476 volet 2 · caractérisation — pratiques', () => {
-    test('dupliquerPratique — l\'invite propose le nom de la source, RETOURNE un id, alerte', async ({ page }) => {
+    test('dupliquerPratique — l\'invite propose le nom de la source, RETOURNE un id, confirme', async ({ page }) => {
         const r = await caracteriser(page, {
             cleNom: 'pratiquesConfigurables', source: PRATIQUE_SOURCE,
             appel: ['dupliquerPratique', ['pratique_SRC']]
@@ -780,7 +797,7 @@ test.describe('#476 volet 2 · caractérisation — pratiques', () => {
         expect(r.copie.metadata_cc).toBe('absent');
         // Seule des 22 à rendre une valeur exploitable : l'id de la copie.
         expect(r.retourType).toBe('string');
-        expect(r.msgs.some(([k, m]) => k === 'alert' && m.includes('NOM CHOISI'))).toBe(true);
+        expect(r.msgs.some(([k, m]) => k === 'succes' && m.includes('NOM CHOISI'))).toBe(true);
     });
 
     test('dupliquerPratiqueBibliotheque — clone profond, retire estGabarit, RETOURNE la copie', async ({ page }) => {
