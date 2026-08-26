@@ -800,53 +800,6 @@ async function enregistrerCommeEchelle() {
 }
 
 /**
- * Duplique l'échelle actuellement sélectionnée
- * 
- * FONCTIONNEMENT:
- * 1. Vérifie qu'une échelle est sélectionnée
- * 2. Crée une copie complète (niveaux + config)
- * 3. Ajoute «(copie)» au nom
- * 4. Sauvegarde la nouvelle échelle
- * 5. Sélectionne automatiquement la copie
- * 
- * UTILISÉ PAR:
- * - Bouton «Dupliquer» (visible seulement si échelle sélectionnée)
- */
-async function dupliquerEchelleActuelle() {
-    if (!echelleTemplateActuelle) return;
-
-    // CO-24 — lecture AVANT l'invite : `nommerCopie` doit connaître les noms
-    // déjà pris. La déclaration vivait plus bas, ce qui plaçait cet appel dans
-    // la zone morte temporelle du `let`.
-    let echelles = await db.get(cle('echellesTemplates')) ||  [];
-
-    const nouveauNom = prompt('Nom de la nouvelle échelle :', nommerCopie(echelleTemplateActuelle.nom, echelles));
-    if (!nouveauNom) return;
-
-    const nouvelleEchelle = {
-        id: genererIdUnique('ECH_'),
-        nom: nouveauNom,
-        niveaux: echelleTemplateActuelle.niveaux.map(n => ({ ...n })),
-        config: { ...echelleTemplateActuelle.config },
-        dateCreation: new Date().toISOString(),
-        dateModification: new Date().toISOString(),
-        baseSur: echelleTemplateActuelle.nom
-    };
-
-    echelles.push(nouvelleEchelle);
-    await db.set(cle('echellesTemplates'),  echelles);
-
-    // Mettre à jour l'interface
-    echelleTemplateActuelle = nouvelleEchelle;
-    await chargerEchellesTemplates();
-    await afficherToutesLesEchellesNiveaux();
-    document.getElementById('selectEchelleTemplate').value = nouvelleEchelle.id;
-    document.getElementById('nomEchelleTemplate').value = nouvelleEchelle.nom;
-
-    notifications.succes(`Échelle «${nouvelleEchelle.nom}» créée avec succès.`);
-}
-
-/**
  * Supprime une échelle template
  * 
  * FONCTIONNEMENT:
@@ -2070,7 +2023,6 @@ window.assurerEchelleGenerique = assurerEchelleGenerique;
 window.chargerEchellesTemplates = chargerEchellesTemplates;
 window.chargerEchelleTemplate = chargerEchelleTemplate;
 window.supprimerEchelle = supprimerEchelle;
-window.dupliquerEchelleActuelle = dupliquerEchelleActuelle;
 window.enregistrerCommeEchelle = enregistrerCommeEchelle;
 window.sauvegarderNomEchelle = sauvegarderNomEchelle;
 window.sauvegarderConfigEchelle = sauvegarderConfigEchelle;
@@ -2545,41 +2497,21 @@ async function ajouterMesEchellesALaBibliotheque() {
  * @param {string} id - ID de l'échelle à dupliquer
  */
 async function dupliquerEchelleBibliotheque(id) {
-    const echelles = await db.get(cle('echellesTemplates')) || [];
-    const echelle = echelles.find(e => e.id === id);
-
-    if (!echelle) {
-        alert('Échelle introuvable');
-        return;
-    }
-
-    // Créer une copie avec un nouvel ID. La copie devient un nouvel original
-    // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
-    // source était une démo, la copie perd le flag isDemo.
-    const nouvelleEchelle = {
-        ...echelle,
-        id: genererIdUnique('ECH_'),
-        nom: nommerCopie(echelle.nom, echelles),
-        auteur: BibliothequeUI.obtenirAuteurActif(),
-        isDemo: false,
-        inspireDe: BibliothequeUI.forgerInspireDe(echelle),
-        dansBibliotheque: true,
-        dateCreation: new Date().toISOString()
-    };
-
-    // Supprimer les métadonnées de partage
-    delete nouvelleEchelle.metadata_cc;
-    delete nouvelleEchelle.auteurOriginal;
-
-    // Ajouter à la liste
-    echelles.push(nouvelleEchelle);
-    await db.set(cle('echellesTemplates'), echelles);
-
-    // Rafraîchir UI
-    fermerModalBibliothequeEchelles();
-    await afficherListeEchelles();
-    await afficherBibliothequeEchelles();
-
+    // #476 volet 2 — séquence partagée (BibliothequeUI.dupliquerVersBibliotheque).
+    await BibliothequeUI.dupliquerVersBibliotheque({
+        id: id,
+        prefixeId: 'ECH_',
+        lireListe: async () => await db.get(cle('echellesTemplates')) || [],
+        ecrireListe: async (liste) => { await db.set(cle('echellesTemplates'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
+        nommerLaCopie: (copie, source, liste) => { copie.nom = nommerCopie(source.nom, liste); },
+        forgerProvenance: (source) => BibliothequeUI.forgerInspireDe(source),
+        siIntrouvable: () => alert('Échelle introuvable'),
+        rafraichirUI: async () => {
+            fermerModalBibliothequeEchelles();
+            await afficherListeEchelles();
+            await afficherBibliothequeEchelles();
+        }
+    });
 }
 
 /**
@@ -3132,22 +3064,16 @@ async function chargerEchellePourModif(id) {
  * Phase 4.B : fork une échelle démo et charge la copie en édition.
  */
 async function dupliquerEtEditerEchelle(id) {
-    const echelles = await db.get(cle('echellesTemplates')) || [];
-    const echelle = echelles.find(e => e.id === id);
-    if (!echelle) return;
-
-    const copie = BibliothequeUI.forkerItem(echelle, 'ECH_', echelles);
-    echelles.push(copie);
-    await db.set(cle('echellesTemplates'), echelles);
-
-    await afficherListeEchelles();
-    await chargerEchellePourModif(copie.id);
-
-    const nomField = document.getElementById('nomEchelleTemplate');
-    if (nomField) {
-        nomField.focus();
-        nomField.select();
-    }
+    // #476 volet 2 — séquence partagée ; ne reste que la plomberie des échelles.
+    await BibliothequeUI.dupliquerEtEditerItem({
+        id: id,
+        prefixeId: 'ECH_',
+        lireListe: async () => await db.get(cle('echellesTemplates')) || [],
+        ecrireListe: async (liste) => { await db.set(cle('echellesTemplates'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
+        rafraichirListe: async () => { await afficherListeEchelles(); },
+        chargerPourModif: async (idCopie) => { await chargerEchellePourModif(idCopie); },
+        champFocus: 'nomEchelleTemplate'
+    });
 }
 
 function afficherNiveauxEchelle(echelle) {
@@ -3510,12 +3436,20 @@ async function dupliquerEchelleDepuisSidebar(id) {
 
     if (!echelle) return;
 
+    // ✅ D1 + D4 + D5 (arbitrage du 24 août) — même correctif que côté grilles :
+    // c'était le même angle mort, sur la même voie « barre latérale ». Voir le
+    // commentaire de `dupliquerGrilleDepuisSidebar` pour le détail du défaut.
     const copie = {
         ...echelle,
         id: genererIdUnique('ECH_'),
         nom: nommerCopie(echelle.nom, echelles),
+        auteur: BibliothequeUI.obtenirAuteurActif(),
+        isDemo: false,
+        inspireDe: BibliothequeUI.forgerInspireDe(echelle),
         verrouille: false
     };
+    delete copie.metadata_cc;
+    delete copie.auteurOriginal;
 
     echelles.push(copie);
     await db.set(cle('echellesTemplates'),  echelles);

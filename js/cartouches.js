@@ -1357,8 +1357,14 @@ async function dupliquerCartouche(cartoucheId, grilleId) {
             commentaires: { ...cartoucheOriginal.commentaires }
         };
 
+        // ✅ D4 (arbitrage du 24 août) — les métadonnées de partage de la source
+        // n'ont plus cours : la copie est un original de l'utilisateur. Avant,
+        // cette voie les conservait, contrairement à sa voisine de bibliothèque.
+        delete nouveauCartouche.metadata_cc;
+        delete nouveauCartouche.auteurOriginal;
+
         cartouches.push(nouveauCartouche);
-        await db.set(`cartouches_${grilleId}`, cartouches);
+        await db.set(`cartouches_${grilleId}`, cartouches); // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
 
         // NOUVELLE INTERFACE (Beta 80.5+): Charger directement la copie
         await chargerCartouchePourModif(nouveauCartouche.id, grilleId);
@@ -4034,59 +4040,37 @@ async function dupliquerEtEditerCartouche(id) {
         alert('Grille introuvable pour cette cartouche');
         return;
     }
-    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
-    const cartouche = cartouches.find(c => c.id === id);
-    if (!cartouche) return;
-
-    const copie = BibliothequeUI.forkerItem(cartouche, 'CART_', cartouches);
-    cartouches.push(copie);
-    await db.set(`cartouches_${grilleId}`, cartouches);
-
-    await chargerCartouchePourModif(copie.id, grilleId);
-
-    const nomField = document.getElementById('nomCartouche');
-    if (nomField) {
-        nomField.focus();
-        nomField.select();
-    }
+    // #476 volet 2 — séquence partagée. Les cartouches sont la seule famille
+    // dont la clé est PARAMÉTRÉE par la grille porteuse : c'est pourquoi le
+    // descripteur reçoit des rappels et non un nom de clé constant. Pas de
+    // rafraîchissement de liste ici : cette voie n'en faisait pas.
+    await BibliothequeUI.dupliquerEtEditerItem({
+        id: id,
+        prefixeId: 'CART_',
+        lireListe: async () => await db.get(`cartouches_${grilleId}`) || [],
+        ecrireListe: async (liste) => { await db.set(`cartouches_${grilleId}`, liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
+        chargerPourModif: async (idCopie) => { await chargerCartouchePourModif(idCopie, grilleId); },
+        champFocus: 'nomCartouche'
+    });
 }
 
 async function dupliquerCartoucheBibliotheque(id, grilleId) {
-    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
-    const cartouche = cartouches.find(c => c.id === id);
-
-    if (!cartouche) {
-        alert('Cartouche introuvable');
-        return;
-    }
-
-    // Créer une copie avec un nouvel ID. La copie devient un nouvel original
-    // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
-    // source était une démo, la copie perd le flag isDemo.
-    const nouvelleCartouche = {
-        ...cartouche,
-        id: genererIdUnique('CART_'),
-        nom: nommerCopie(cartouche.nom, cartouches),
-        auteur: BibliothequeUI.obtenirAuteurActif(),
-        isDemo: false,
-        inspireDe: BibliothequeUI.forgerInspireDe(cartouche),
-        dansBibliotheque: true,
-        dateCreation: new Date().toISOString()
-    };
-
-    // Supprimer les métadonnées de partage
-    delete nouvelleCartouche.metadata_cc;
-    delete nouvelleCartouche.auteurOriginal;
-
-    // Ajouter à la liste
-    cartouches.push(nouvelleCartouche);
-    await db.set(`cartouches_${grilleId}`, cartouches);
-
-    // Rafraîchir UI
-    fermerModalBibliothequeCartouches();
-    await afficherBanqueCartouches();
-    await afficherBibliothequeCartouches();
-
+    // #476 volet 2 — séquence partagée. Clé PARAMÉTRÉE par la grille porteuse :
+    // d'où des rappels de lecture/écriture plutôt qu'un nom de clé constant.
+    await BibliothequeUI.dupliquerVersBibliotheque({
+        id: id,
+        prefixeId: 'CART_',
+        lireListe: async () => await db.get(`cartouches_${grilleId}`) || [],
+        ecrireListe: async (liste) => { await db.set(`cartouches_${grilleId}`, liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
+        nommerLaCopie: (copie, source, liste) => { copie.nom = nommerCopie(source.nom, liste); },
+        forgerProvenance: (source) => BibliothequeUI.forgerInspireDe(source),
+        siIntrouvable: () => alert('Cartouche introuvable'),
+        rafraichirUI: async () => {
+            fermerModalBibliothequeCartouches();
+            await afficherBanqueCartouches();
+            await afficherBibliothequeCartouches();
+        }
+    });
 }
 
 /**
