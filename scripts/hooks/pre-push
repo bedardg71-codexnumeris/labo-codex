@@ -152,15 +152,26 @@ if [ $CODE_PW -eq 2 ]; then
     exit 0
 fi
 
-# 3 = aucun verdict à jour. Ce push emporte du code observable au navigateur et
-# personne n'a jugé CE commit. On refuse — mais en donnant le geste exact, parce
-# qu'un refus sans issue se contourne au --no-verify et emporte toute la garde.
-printf "\n${ROUGE}✗ Sentinelle Playwright : aucun verdict pour ce commit — push bloqué.${RAZ}\n\n"
-printf "  Ce lot touche du code observable au navigateur, et WebKit n'a rien dit dessus.\n"
-printf "  Le chemin normal fait les deux d'un geste :\n\n"
-printf "      ${VERT}scripts/pousser.sh${RAZ}\n\n"
-printf "  Ou, pour juger seulement (~4 min), puis repousser à la main :\n"
-printf "      ${VERT}node scripts/verifier-playwright.mjs${RAZ}\n\n"
+# 3 = aucun verdict à jour. Le lot touche du code observable au navigateur et
+# personne n'a jugé CE commit.
+#
+# ⚠⚠ ON AVERTIT, ON NE BLOQUE PAS — et c'est une correction du 26 août 2026,
+# le jour même où ce mécanisme est né. La première version refusait. Elle a
+# bloqué un push lancé depuis GITHUB DESKTOP, en donnant pour seule issue une
+# commande de terminal : un refus dont la solution est hors de portée de
+# l'outil où il se produit. C'est mot pour mot le « hook inapplicable » contre
+# lequel ce fichier met en garde depuis août — il s'était mis à le devenir.
+#
+# Ce que ce fail-open ne perd pas : la CI (.github/workflows/tests.yml) lance
+# Vitest ET Playwright WebKit à CHAQUE push. Le verdict existe donc de toute
+# façon, quelques minutes plus tard. Ce que le hook garde, c'est le refus d'un
+# push dont on SAIT déjà que WebKit est rouge (code 1 ci-dessus) — le cas où
+# l'on pousserait une régression connue.
+printf "\n${JAUNE}⚠ Sentinelle Playwright : aucun verdict local pour ce commit.${RAZ}\n"
+printf "  Ce lot touche du code observable au navigateur ; WebKit n'a rien dit dessus ICI.\n"
+printf "  ${JAUNE}Push laissé passer — la CI le jugera. Pour juger avant, au terminal :${RAZ}\n\n"
+printf "      ${VERT}cd %s && scripts/pousser.sh${RAZ}\n\n" "$REPO_ROOT"
+printf "  (ou ${VERT}node scripts/verifier-playwright.mjs${RAZ} pour juger seulement, ~4 min)\n"
 printf "  ${JAUNE}Ne lance PAS la suite depuis ce hook : la connexion au serveur est\n"
 printf "  déjà ouverte, et six minutes de silence la font fermer (#533).${RAZ}\n"
-exit 1
+exit 0

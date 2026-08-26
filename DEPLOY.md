@@ -195,8 +195,18 @@ surinvoqué et préciser le régime réel»).
    SHA ; le hook ne fait plus que le lire, en une fraction de seconde. Chaque
    suite ne tourne qu'une fois — Playwright dans le script, Vitest dans le hook.
    Un `git push` nu sur un lot qui touche `js/`, `index.html`, `styles.css` ou
-   `tests/integration/` est refusé tant qu'aucun verdict ne couvre le commit ;
-   le refus dit quoi lancer. Verrouillé par
+   `tests/integration/` **passe en avertissant** quand aucun verdict local ne
+   couvre le commit — la CI lance de toute façon Vitest et Playwright WebKit à
+   chaque push. Seul un verdict **rouge** bloque.
+
+   ⚠ **CORRIGÉ LE JOUR MÊME, ET LA LEÇON VAUT PLUS QUE LE RÉGLAGE.** La première
+   version REFUSAIT en l'absence de verdict. Elle a bloqué un push lancé depuis
+   **GitHub Desktop**, en donnant pour seule issue une commande de terminal :
+   un refus dont la solution est hors de portée de l'outil où il se produit.
+   C'est mot pour mot le « hook inapplicable » contre lequel `pre-push` met en
+   garde depuis août — le correctif s'était mis à le devenir. Le message donne
+   désormais la commande **complète** (`cd <racine> && scripts/pousser.sh`),
+   copiable telle quelle. Verrouillé par
    `tests/unit/sentinelle-533-verdict-avant-connexion.test.js`.
 6. **Netlify déclenche le build automatiquement** (webhook GitHub → Netlify).
 7. Le déploiement est en ligne en **~30-60 secondes** sur `app.codexnumeris.org`.
