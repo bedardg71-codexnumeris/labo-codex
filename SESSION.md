@@ -20,10 +20,26 @@
            `tests/unit/sentinelle-533-verdict-avant-connexion.test.js` : « la
            garde lourde passe avant la connexion ». JAMAIS inscrit au backlog —
            numéro emprunté à la volée, à tort.
-       ⮕ C'est à MOI de céder : le leur est un item, le mien un usage. #535 est
-         libre. Le renommage touche 6 fichiers (sentinelle renommée, DEPLOY.md,
-         hook, pousser.sh, lire-verdict.mjs, verifier-playwright.mjs) + les
-         renvois depuis #534. NON FAIT — attend l'arbitrage de Grégoire.
+       ⮕ C'est à MOI de céder : le leur est un item, le mien un usage. Le
+         renommage touche 6 fichiers (sentinelle renommée, DEPLOY.md, hook,
+         pousser.sh, lire-verdict.mjs, verifier-playwright.mjs) + les renvois
+         depuis #534. NON FAIT — attend l'arbitrage de Grégoire.
+
+       ⚠ CORRECTION DE LA SESSION PARALLÈLE, 26 août fin d'après-midi :
+         **#535 N'EST PLUS LIBRE.** Il a été pris pour « les cibles
+         d'intervention RàI sont indexées par nom de critère » (chantier #529)
+         pendant que la présente note s'écrivait — exactement le nœud qu'elle
+         décrit, une seconde fois, pour la même raison.
+         ⮕ ÉTAT RÉEL DES IDENTIFIANTS AU MOMENT DE CETTE CORRECTION :
+             #532 · #534 · #538          -> session « présences / hook »
+             #535 · #536 · #537 · #539   -> session « #529 SRPNF/IDME »
+             #533                        -> LES DEUX (la collision à trancher)
+             #540                        -> PREMIER LIBRE
+         ⮕ Si l'arbitrage confirme que l'usage cède, la cible est **#540**,
+           pas #535.
+         ⮕ Et la leçon tient toujours, renforcée : inscrire l'ID au backlog
+           AVANT de l'employer — y compris pour un « simple » nom de fichier de
+           sentinelle. Un usage non inscrit est invisible à l'autre session.
        ⮕ Origine : deux sessions ont pris le « prochain numéro » au même moment
          sans se voir. Le prochain qui emprunte un ID sans l'inscrire refera le
          même nœud.
