@@ -7,6 +7,72 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 26 AOÛT 2026 (suite) : #530 CLOS — LE DÉFAUT ÉTAIT DANS LA
+     SENTINELLE. BASELINE PLAYWRIGHT À ZÉRO. 1.100.1 → 1.100.2.
+
+     ▣ LA LEÇON, D'ABORD — elle vaut au-delà de cet item.
+
+       #530 était inscrit au backlog comme « la garde #340 laisse passer une
+       écriture qu'elle devrait bloquer », avec le sérieux que mérite une garde
+       anti-contamination. Instruit ce matin : LA GARDE VA BIEN. C'est la spec
+       qui armait par un magasin retiré UN COMMIT PLUS TARD (2342224b, 1.91.7
+       → b598fb5a, 1.91.8, le 22 août, à quelques heures d'intervalle).
+
+       La map d'attribution sortait vide, la garde se taisait — par fail-open
+       délibéré — et la sentinelle accusait le code du silence qu'elle avait
+       elle-même provoqué. Deux jours d'un item ouvert sur un faux coupable.
+
+       ⮕ CE QUI EST POSÉ CONTRE LA RÉCIDIVE : une ANCRE D'ARMEMENT.
+       `coursAttribues > 0` est asserté AVANT toute autre assertion. Si la
+       source d'attribution rebouge, la spec dit « la garde n'était pas armée »
+       au lieu d'envoyer chercher un bug inexistant. Break-testée : elle rougit
+       avec ce message-là.
+
+     ▣ CE QUI EST RÉPARÉ, ET COMMENT C'EST VÉRIFIÉ.
+
+       · `tests/integration/productions-ajout-refus-garde-340.spec.js` — armée
+         par `<trimestre>_groupesCours`, la source réelle depuis #455.
+       · TROIS break-tests, TROIS rouges DISTINCTS : armement neutralisé →
+         « la garde doit être ARMÉE » · `bienEcrite` forcé à `true` → « le refus
+         doit être DIT » · garde désactivée → « les données ne bougent pas ».
+       · Le mécanisme de fond — relire la collection avant d'annoncer un succès,
+         `productions-bibliotheque-ui.js:352` — était DÉJÀ correct. Rien à y
+         toucher. C'est le résultat le plus utile de la matinée.
+
+     ▣ BASELINE PLAYWRIGHT À ZÉRO — la dette #456 est épuisée.
+
+       `scripts/playwright-baseline.json` : `totalEchecsConnus: 0`. Suite
+       complète 165/165, Vitest 3420/3420 (324 fichiers). Toute rougeur neuve
+       bloque désormais le push, sans exception à plaider.
+
+     ▣ CE QUE LA MESURE A RÉVÉLÉ AU PASSAGE — #533, OUVERT, POUR GRÉGOIRE.
+
+       En vérifiant le périmètre RÉEL de la garde plutôt qu'en le supposant :
+       `construireMapCoursTrimestre` ne rattache un coursId à un trimestre que
+       s'il n'y apparaît QUE là. Un cours reconduit d'une session à l'autre —
+       601-101, chaque automne et chaque hiver — est vu PARTOUT, donc rattaché
+       NULLE PART, donc neutre.
+
+       ⮕ MESURÉ, pas déduit : un test de périmètre est maintenant en place, et
+       il montre deux productions 100 % étrangères passant sans blocage.
+       ⮕ Conséquence : sur les données de Grégoire, cette garde ne protège
+       probablement RIEN. Or le symptôme qu'elle couvrait est vécu — l'incident
+       de juin, productions A25 écrites sous clé H2026.
+       ⮕ CE N'EST PAS UN BUG À CORRIGER SEUL : la prudence actuelle a été
+       choisie le 22 août contre un blocage TOTAL de son trimestre. Arbitrage
+       de conception, pas de code. À trancher par lui.
+
+     ▣ ÉTAT DE L'ARBRE À CETTE HEURE.
+
+       ⚠ Un commit d'une AUTRE session est posé sur la branche locale sans être
+       poussé : `249d27ec` (tests #532, parcours utilisateur neuf). Il n'est pas
+       de moi ; je committe par chemins explicites et je ne le touche pas. Un
+       push l'emportera avec le mien — signalé à Grégoire avant d'appuyer.
+
+     ⏭ SUITE ACTÉE PAR GRÉGOIRE : #530 d'abord (fait), puis #529.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 25-26 AOÛT 2026 : L'AUDIT CONCEPTION ÉPUISÉ, #476 FUSIONNÉ,
      ET version.json ENFIN LISIBLE. 1.99.0 → 1.100.0.
 

@@ -1,8 +1,6 @@
 {
     "_lisezMoi": "Cliché des specs Playwright rouges CONNUES (#456). Une rougeur absente de cette liste bloque le push. Cette liste doit RÉTRÉCIR : chaque spec réparée s'en retire. Régénérer : node scripts/verifier-playwright.mjs --ecrire",
     "genereLe": "2026-08-26",
-    "totalEchecsConnus": 1,
-    "echecsConnus": [
-        "productions-ajout-refus-garde-340.spec.js › terrain · une écriture refusée par la garde #340 n'est JAMAIS annoncée comme un succès"
-    ]
+    "totalEchecsConnus": 0,
+    "echecsConnus": []
 }
