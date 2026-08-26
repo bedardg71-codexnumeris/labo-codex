@@ -469,8 +469,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   le localStorage partagé de l'origine `file://` ; (b) simple expiration d'attente sous une machine
   saturée par mes propres lancements. Le fait que les deux mêmes specs tombent deux fois de suite
   penche pour (a), mais les deux runs étaient tous deux sous charge — donc ça ne tranche pas.
+  ⮕ **TROISIÈME EXPLICATION, apportée par Grégoire le 26 août, et la plus vraisemblable** :
+  **GitHub Desktop était ouvert et a exécuté des commandes git en parallèle** des runs. Une
+  opération git pendant que Playwright lit `index.html` et `js/` en `file://` change les fichiers
+  SOUS LES PIEDS des tests — ce qui produit des rouges sans rapport avec le code, et sur des specs
+  quelconques. C'est la même famille de piège que [[feedback-sessions-paralleles-meme-depot]] (GitHub
+  Desktop qui stashe le travail non commité au changement de branche). L'application a été fermée
+  depuis.
   ⏳ **Première chose à faire quand cet item s'ouvrira** : rejouer la suite complète UNE SEULE FOIS,
-  sur une machine au repos, et voir si les deux rougissent encore. Tout le reste en dépend.
+  machine au repos ET **GitHub Desktop fermé**, et voir si les deux rougissent encore. Tout le reste
+  en dépend — et il est maintenant probable que la réponse soit « non ».
   Mesuré le 26 août, sur quatre exécutions de la suite WebKit à quelques minutes d'intervalle,
   même arbre, même machine :
   · régénération de la baseline → **exactement 8** échecs (les 8 de #495) ;
