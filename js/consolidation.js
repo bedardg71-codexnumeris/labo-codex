@@ -201,8 +201,13 @@ function _construireConversion(echelle) {
     if (echelle && echelle.niveaux && echelle.niveaux.length > 0) {
         echelle.niveaux.forEach(function(n) {
             if (n.code) {
-                // Utiliser valeurCalcul si disponible, sinon milieu de la plage
-                var val = n.valeurCalcul != null ? n.valeurCalcul : ((n.min + n.max) / 2);
+                // #525 — la règle vit dans `echelles.js` et ne s'écrit plus ici.
+                // Celle-ci était la BONNE des deux (`!= null` respecte le zéro) ;
+                // elle est conservée en repli si le module n'est pas chargé.
+                var val = (typeof valeurNumeriqueDuNiveau === 'function')
+                    ? valeurNumeriqueDuNiveau(n)
+                    : (n.valeurCalcul != null ? n.valeurCalcul : ((n.min + n.max) / 2));
+                if (val === null) return;   // ni valeur, ni bornes : ce niveau ne compte pas
                 map[String(n.code).toUpperCase()] = val / 100;
             }
         });

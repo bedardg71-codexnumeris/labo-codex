@@ -559,9 +559,20 @@ function calculerNote() {
 
     // Utiliser les valeurs ponctuelles configurées par l'utilisateur
     const valeurs = {};
+    // #525 — UNE SEULE RÈGLE, celle de `echelles.js`. Ce site repliait la valeur
+    // ponctuelle sur le milieu de plage par un OU-logique : celui-ci traitait une
+    // valeur ponctuelle de ZÉRO comme absente et la remplaçait par le milieu. Sur un
+    // niveau 0 dont la plage irait de 0 à 59, la note valait 29,5 au lieu de 0.
+    // `consolidation.js` appliquait déjà la bonne règle — deux lecteurs, deux
+    // résultats pour la même échelle.
     niveaux.forEach(niveau => {
-        // Si valeurCalcul existe, l'utiliser, sinon calculer le milieu de la plage
-        valeurs[niveau.code] = niveau.valeurCalcul || (niveau.min + niveau.max) / 2;
+        const valeur = (typeof valeurNumeriqueDuNiveau === 'function')
+            ? valeurNumeriqueDuNiveau(niveau)
+            : (niveau.valeurCalcul != null ? Number(niveau.valeurCalcul) : (Number(niveau.min) + Number(niveau.max)) / 2);
+        // ⚠ `null` = « je ne sais pas calculer » (ni valeur ponctuelle, ni bornes
+        // exploitables). On ne pose PAS 0 à la place : un zéro inventé se
+        // propagerait dans la note sans que rien ne le distingue d'un vrai zéro.
+        if (valeur !== null && !isNaN(valeur)) valeurs[niveau.code] = valeur;
     });
 
     let noteTotal = 0;
