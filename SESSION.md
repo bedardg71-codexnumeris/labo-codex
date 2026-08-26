@@ -164,9 +164,9 @@
        ⮕ RÈGLE : après tout renommage transversal, la vérification qui compte
        est le CHARGEMENT AU NAVIGATEUR, pas la syntaxe ni Vitest.
 
-     ▣ CE QUE J'AI REFUSÉ DE TRANCHER SEUL — #534, #535, #536.
+     ▣ CE QUE J'AI REFUSÉ DE TRANCHER SEUL — #537 (ex-#534), #535, #536.
 
-       · #534 le « critère de langue » reconnu par son nom. Ce n'est pas un
+       · #537 (renuméroté depuis #534, collision) le « critère de langue » reconnu par son nom. Ce n'est pas un
          libellé, c'est un statut : au collégial québécois le français écrit a
          un régime propre (épreuve uniforme, CAF) et des cibles d'intervention
          que les autres critères n'ont pas. Marqué `NOM_CRITERE_LANGUE` dans
@@ -181,9 +181,48 @@
        Vitest 3430/3430 (326 fichiers) · Playwright 165/165 · baseline à zéro.
        Cinq break-tests Lot 1 + deux Lot 2, tous rouges avec le bon message.
 
-     ⏭ RESTE DE #529 : Lot 3 (barres du profil dérivées de la grille — tableaux
-       littéraux dans `sections-affichage` et `diagnostics`) et Lot 4 (l'aide :
-       popup, glossaire d'index.html, hover). Le CALCUL, lui, est fait.
+     ▣ LOTS 3 ET 4 FAITS DANS LA FOULÉE (1.101.1).
+
+       · LOT 3 — les barres du profil viennent de la GRILLE. Le tableau littéral
+         `['structure','rigueur','plausibilite','nuance','francais']` existait en
+         QUATRE exemplaires (2 dans `sections-affichage`, 2 dans `diagnostics`).
+         Décision de Grégoire, 26 août : TOUTES les barres de la grille, dans son
+         ordre — pas de repli, pas de troncature.
+         ⮕ Défaut latent trouvé en passant : le nom affiché venait d'une cascade
+         de ternaires finissant par `: 'Français'` SANS condition. Tout critère
+         non reconnu se serait affiché « Français ».
+         ⮕ `cleCritere` et `criteresDeLaGrillePourAffichage` vivent maintenant
+         dans `profil-etudiant-helpers.js` (chargé en premier) : UNE règle de
+         normalisation pour le calcul ET l'affichage. Si les deux divergent, les
+         blocs se vident en silence — d'où l'assertion dédiée.
+
+       · LOT 4 — l'aide ne présente plus SRPNF comme la structure du logiciel.
+         Onze passages recadrés (glossaire, popup du profil, survols, notes des
+         grilles). Le patron était déjà là, ligne 10272 : « L'exemple qui suit
+         (SRPNF) illustre une grille inspirée du modèle ELLAC ». On l'étend.
+         ⮕ CE QUI RESTE, ET C'EST VOULU : les mentions déjà cadrées en exemple
+         (« ex : SRPNF », « Grille SRPNF Littérature »). Elles sont justes.
+
+     ▣ TROISIÈME QUESTION LAISSÉE À GRÉGOIRE — #539.
+
+       Le volet confidentiel porte les cinq critères dans ses IDENTIFIANTS de
+       champs (`portraitPlausibilite`). Ce sont des clés de données, pas des
+       libellés : les renommer casserait ses portraits déjà saisis. L'aide au
+       survol est recadrée ; la structure attend sa décision.
+
+     ▣ COLLISION D'ID AVEC LA SESSION PARALLÈLE.
+
+       Mon #534 est devenu #537 : l'autre session avait pris #534 le même jour,
+       et son item est ancré dans deux commits et une sentinelle — c'est le mien
+       qui cède. #538 est à elle aussi. Mon dernier ID : #539.
+       ⚠ `BACKLOG.md`, `SESSION.md` et `index.html` portent maintenant le
+       travail des DEUX sessions. `js/saisie-presences.js` est à elle et n'est
+       pas dans mes commits.
+
+     ▣ VÉRIFICATION FINALE DES QUATRE LOTS.
+
+       Vitest 3454/3454 (328 fichiers) · Playwright 165/165 · baseline à zéro.
+       Dix break-tests sur la journée, tous rouges avec le message attendu.
      ===================================================================== -->
 
 <!-- =====================================================================

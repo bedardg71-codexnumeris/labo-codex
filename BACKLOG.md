@@ -580,7 +580,47 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **Seule spec de la baseline** depuis le 26 août : le hook bloquera désormais toute rougeur neuve,
   et celle-ci est la dernière à en sortir.
 
-- [ ] **#534 — Le « critère de langue » est reconnu par son NOM, dans le code.**
+- [ ] **#538 — La durée d'une séance était inventée : trois `2` en dur dans le calcul d'assiduité.**
+  Constaté au relais du 26 août, tranché par Grégoire le même jour. `obtenirHeuresSeance`
+  (`saisie-presences.js`) lisait `db.getSync('formatHoraire')` pour choisir entre 4 h et 2 h.
+  **Grep exhaustif du dépôt : trois lectures, ZÉRO écriture** — la clé est morte depuis que le
+  format vit dans l'entité Horaire (même clé que #532, même prémisse, déjà verrouillée par
+  `tests/unit/sentinelle-532-horaire-presences.test.js` cas B.b). La branche « 4 » était donc
+  **inatteignable**, et le repli valait **toujours 2 heures**.
+  ⮕ **Trois valeurs en dur, pas deux** — le relais n'en annonçait que deux :
+  · `:307` jour marqué « cours » au calendrier, aucune séance définie → `2` ;
+  · `:344` format de séance non reconnu → `+= 2` ;
+  · `:348` `return totalHeures || 2` — le total calculé vaut 0.
+  Plus une quatrième, cousine et en PÉRIODES : `obtenirNombrePeriodesSeance` → `return 2`.
+  `genererSeancesCompletes` la nomme déjà comme polluant le dénominateur d'assiduité
+  (commentaire « ÉTAPE 3 supprimée », FIX #220).
+  ⮕ **Ce n'est pas de l'affichage.** Quatre appelants : pré-remplissage du tableau (`:970`),
+  plafond du code couleur et taux affiché (`:1226`), infobulle de séance (`:846`), validation de
+  date (`:523`). Les deux premiers alimentent `calculerAssiduitePourAffichage`.
+  ✅ **TRANCHÉ PAR GRÉGOIRE, 26 août 2026 : dériver de l'horaire, sinon 0.** La durée se lit dans
+  l'horaire du groupe-cours (`obtenirSeancesHoraire()`, SSOT `groupesCours[].horaireId` — le chemin
+  réparé par #332), en cherchant les séances du jour de semaine visé (le jour REMPLACÉ pour une
+  reprise, comme le fait `genererSeancesCompletes`). Si l'horaire ne dit rien : **0, et le dire à
+  l'écran** — jamais une valeur inventée. Conforme à [[feedback-zero-fallback-arbitraire]] : une
+  dérivation est une conséquence logique, un `2` est un arbitraire.
+
+- [ ] **#539 — Le volet confidentiel porte les critères de Grégoire dans ses IDENTIFIANTS de champs.**
+  `js/profil-etudiant-confidentiel.js` lit et écrit `confidentiel-portrait-plausibilite`,
+  `portraitPlausibilite`, etc. : le portrait qualitatif du lecteur est structuré par les cinq
+  critères SRPNF. Repéré en faisant #529 (26 août), NON corrigé volontairement.
+  ⮕ **Pourquoi je n'y ai pas touché** : ce ne sont pas des libellés mais des CLÉS DE DONNÉES. Les
+  renommer casserait les portraits déjà saisis — or la préservation des données de Grégoire est la
+  seule contrainte de rétro-compatibilité que le projet se donne (`CLAUDE.md`, zéro-dette).
+  ⮕ L'aide au survol est recadrée en attendant : elle dit que ces champs sont ceux de la grille
+  d'exemple et ne se déduisent pas des critères de l'utilisateur.
+  ⏳ **À TRANCHER** : migrer les clés (avec reprise des données), ou rendre le volet générique
+  (N champs dérivés de la grille) ? La seconde change la nature du volet — choix pédagogique autant
+  que technique.
+
+- [ ] **#537 — Le « critère de langue » est reconnu par son NOM, dans le code.**
+  ⚠ *Renuméroté #534 → #537 le 26 août 2026 : collision d'ID avec l'item « un seul dépassement
+  de délai refuse un push », qui est ancré dans deux commits, `tests/playwright.config.js` et une
+  sentinelle. Le présent item n'était cité que dans BACKLOG.md et SESSION.md — c'est lui qui cède.*
   Constaté en faisant #529 (26 août). Deux fonctions calculent un `francaisMoyen` en repérant le
   critère dont le nom commence par « francais » : `calculerIndicateurs3DerniersArtefacts`
   (`profil-etudiant-calculs.js`) et son jumeau dans `pratique-pan-standards.js`. Les deux portaient
@@ -601,7 +641,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `'Nuance'`, `'Français'`. Une grille « Méthode / Résultats / Discussion » ne matche AUCUNE branche :
   `determinerCibleIntervention` rend `null`, et l'utilisateur n'a aucune cible — sans message.
   ⮕ **La FORME est générique** (« Pratique guidée en X », « Remédiation en X ») et se dériverait du
-  nom du critère en une ligne. C'est le cas Français qui ne se dérive pas (cf. #534).
+  nom du critère en une ligne. C'est le cas Français qui ne se dérive pas (cf. #537).
   ⏳ **À TRANCHER AVEC GRÉGOIRE** : dériver la forme et traiter la langue à part, ou laisser
   l'enseignant écrire ses propres cibles ? La seconde option est plus juste et bien plus lourde.
   ⚠ Ne pas généraliser « Pratique guidée en {critère} » sans lui : c'est sa didactique, pas une

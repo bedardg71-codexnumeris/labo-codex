@@ -82,12 +82,15 @@ function genererDiagnosticSRPNF(da, defisInfo) {
         <!-- Tableau des scores par critère -->
         <div class="profil-carte-simple">
             <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 10px; font-size: 0.9rem;">
-                ${['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].map(cle => {
-                    const nomCritere = cle === 'structure' ? 'Structure' :
-                                     cle === 'rigueur' ? 'Rigueur' :
-                                     cle === 'plausibilite' ? 'Plausibilité' :
-                                     cle === 'nuance' ? 'Nuance' : 'Français';
-                    const score = moyennes[cle];
+                ${criteresDeLaGrillePourAffichage().map(critere => {
+                    // #529 — les critères viennent de la GRILLE, et leur nom
+                    // est celui que l'utilisateur a écrit. La cascade de
+                    // ternaires qui vivait ici traduisait cinq clés en cinq
+                    // libellés : pour toute autre grille, elle rendait
+                    // « Français » quel que soit le critère (le dernier `:`
+                    // était sans condition).
+                    const nomCritere = echapperHtml(critere.nom);
+                    const score = moyennes[critere.cle];
 
                     if (score === null) return '';
 
@@ -430,17 +433,18 @@ function _genererBarresSRPNF(da) {
     const directions = calculerDirectionsCriteres(da);
 
     // Générer les barres
-    const barresHTML = ['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].map(cle => {
-        const nomCritere = cle === 'structure' ? 'Structure' :
-                         cle === 'rigueur' ? 'Rigueur' :
-                         cle === 'plausibilite' ? 'Plausibilité' :
-                         cle === 'nuance' ? 'Nuance' : 'Français';
+    const barresHTML = criteresDeLaGrillePourAffichage().map(critere => {
+        // #529 — voir le bloc jumeau plus haut : mêmes cinq clés littérales,
+        // même cascade de ternaires, même angle mort.
+        const nomCritere = echapperHtml(critere.nom);
 
-        const score = moyennes?.[cle];
+        const score = moyennes?.[critere.cle];
+        // Pas de donnée => pas de barre. Jamais une barre à 0 % : « aucune
+        // évaluation » et « zéro » se liraient pareil.
         if (typeof score !== 'number' || isNaN(score)) return '';
 
         const pourcentage = Math.round(score * 100);
-        const direction = directions ? directions[cle] : null;
+        const direction = directions ? directions[critere.cle] : null;
         const symboleDirection = direction && direction.symbole ? direction.symbole : '';
 
         const pointsHTML = `<div class="critere-point" style="left: ${Math.min(pourcentage, 100)}%;"></div>`;

@@ -1913,15 +1913,19 @@ function calculerDirectionsCriteres(da) {
         interpretation: 'Données insuffisantes'
     };
 
-    // Pas assez de données pour calculer la direction (besoin de N+1 minimum)
+    // Pas assez de données pour calculer la direction (besoin de N+1 minimum).
+    // #529 — l'objet rendu se calque sur la GRILLE de l'utilisateur, plus sur
+    // les cinq critères de Grégoire. Les consommateurs lisent ces clés par
+    // `directions[cle]` : une clé absente rend `undefined`, ce qu'ils traitent
+    // déjà comme « pas de direction ».
     if (evaluationsEleve.length < N + 1) {
-        return {
-            structure: resultatParDefaut,
-            rigueur: resultatParDefaut,
-            plausibilite: resultatParDefaut,
-            nuance: resultatParDefaut,
-            francais: resultatParDefaut
-        };
+        const parDefaut = {};
+        const grilleRef = (typeof obtenirGrilleReferenceDepistage === 'function')
+            ? obtenirGrilleReferenceDepistage() : null;
+        (grilleRef && Array.isArray(grilleRef.criteres) ? grilleRef.criteres : []).forEach(c => {
+            if (c && c.nom) parDefaut[cleCritere(c.nom)] = resultatParDefaut;
+        });
+        return parDefaut;
     }
 
     // Trier par date (plus récent d'abord)
@@ -1931,36 +1935,32 @@ function calculerDirectionsCriteres(da) {
         return new Date(dateB) - new Date(dateA);
     });
 
-    // Obtenir la table de conversion IDME
-    const tableConversion = obtenirTableConversionNiveaux();
+    // #529 — une table par ÉVALUATION (chacune porte son `echelleId`), et des
+    // accumulateurs dérivés des critères RÉELLEMENT rencontrés.
+    //
+    // CE QUI A DISPARU : cinq accumulateurs littéraux (`structure`, `rigueur`,
+    // `plausibilite`, `nuance`, `francais`) alimentés par une cascade de
+    // `if / else if` nominale. Un critère « Méthode » tombait dans aucune
+    // branche : aucune flèche de direction ne s'affichait pour lui, jamais.
+    const cacheTables = new Map();
 
-    // Fonction helper pour extraire les scores d'une liste d'évaluations
-    // Utilise evaluation.criteres[] (fiable) au lieu du parsing regex de retroactionFinale
     const extraireScoresCriteres = (evals) => {
-        const scoresCriteres = {
-            structure: [],
-            rigueur: [],
-            plausibilite: [],
-            nuance: [],
-            francais: []
-        };
+        const scoresCriteres = {};
 
         evals.forEach(evaluation => {
             if (!evaluation.criteres || !Array.isArray(evaluation.criteres)) return;
+            const table = (typeof tableConversionPourEvaluation === 'function')
+                ? tableConversionPourEvaluation(evaluation, cacheTables)
+                : obtenirTableConversionNiveaux(evaluation.echelleId || null);
 
             evaluation.criteres.forEach(c => {
-                const niveauIDME = c.niveauSelectionne;
-                const score = convertirNiveauEnScore(niveauIDME, tableConversion);
+                if (!c) return;
+                const score = convertirNiveauEnScore(c.niveauSelectionne, table);
                 if (score === null) return;
-
-                const nom = (c.critereNom || '').toLowerCase()
-                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
-
-                if (nom === 'structure') scoresCriteres.structure.push(score);
-                else if (nom === 'rigueur') scoresCriteres.rigueur.push(score);
-                else if (nom.startsWith('plausibilit')) scoresCriteres.plausibilite.push(score);
-                else if (nom === 'nuance') scoresCriteres.nuance.push(score);
-                else if (nom.startsWith('francais') || nom.startsWith('franc')) scoresCriteres.francais.push(score);
+                const cle = cleCritere(c.critereNom);
+                if (!cle) return;
+                if (!scoresCriteres[cle]) scoresCriteres[cle] = [];
+                scoresCriteres[cle].push(score);
             });
         });
 
@@ -1978,13 +1978,17 @@ function calculerDirectionsCriteres(da) {
     // Déterminer le seuil de direction (même seuil que pour le risque)
     const seuilDirection = obtenirSeuil('directionRisque');
 
-    // Calculer la direction pour chaque critère
+    // Calculer la direction pour chaque critère RENCONTRÉ dans les évaluations,
+    // et non pour une liste écrite à l'avance.
     const directions = {};
-    const criteres = ['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'];
+    const criteres = Array.from(new Set([
+        ...Object.keys(scoresRecents),
+        ...Object.keys(scoresSuivants)
+    ]));
 
     criteres.forEach(critere => {
-        const scoresRec = scoresRecents[critere];
-        const scoresSui = scoresSuivants[critere];
+        const scoresRec = scoresRecents[critere] || [];
+        const scoresSui = scoresSuivants[critere] || [];
 
         // Vérifier si nous avons assez de données pour ce critère
         if (scoresRec.length === 0 || scoresSui.length === 0) {
@@ -3636,10 +3640,9 @@ function _calculerMoyennesComparativesSRPNF(da) {
     };
 }
 
-function _nomCritereSRPNF(cle) {
-    const noms = { structure: 'Structure', rigueur: 'Rigueur', plausibilite: 'Plausibilité', nuance: 'Nuance', francais: 'Français' };
-    return noms[cle] || cle;
-}
+// #529 — `cleCritere` et `criteresDeLaGrillePourAffichage` vivent dans
+// `profil-etudiant-helpers.js` (chargé avant ce module) : une seule règle de
+// normalisation pour le calcul ET l'affichage.
 
 function _genererPointsBarreSRPNFNormal(cle, score, directionsPAN) {
     const pourcentage = Math.round(score * 100);
@@ -3652,9 +3655,13 @@ function _genererPointsBarreSRPNFNormal(cle, score, directionsPAN) {
     };
 }
 
-function _genererBarreCritereSRPNF(cle, contexte) {
+function _genererBarreCritereSRPNF(critere, contexte) {
     const { moyennes, directionsPAN, gradientCSS } = contexte;
+    const cle = critere.cle;
     const score = moyennes?.[cle];
+    // Pas de donnée => PAS DE BARRE. Surtout pas une barre à 0 % : « aucune
+    // évaluation sur ce critère » et « zéro sur ce critère » sont deux choses
+    // opposées, et l'élève lirait la seconde.
     if (typeof score !== 'number' || isNaN(score)) return '';
 
     // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
@@ -3664,7 +3671,7 @@ function _genererBarreCritereSRPNF(cle, contexte) {
     return `
         <div class="critere-container">
             <div class="critere-header">
-                <span class="critere-nom" style="min-width: 120px;">${_nomCritereSRPNF(cle)}</span>
+                <span class="critere-nom" style="min-width: 120px;">${echapperHtml(critere.nom)}</span>
                 <span class="critere-valeur" style="margin-left: auto; font-weight: 600;">
                     ${valeursHTML}
                 </span>
@@ -3683,8 +3690,8 @@ function _genererBlocForcesDefisSRPNF(da) {
     const moyennesCtx = _calculerMoyennesComparativesSRPNF(da);
     const contexte = { ...moyennesCtx, gradientCSS };
 
-    const barresHTML = ['structure', 'rigueur', 'plausibilite', 'nuance', 'francais']
-        .map(cle => _genererBarreCritereSRPNF(cle, contexte))
+    const barresHTML = criteresDeLaGrillePourAffichage()
+        .map(critere => _genererBarreCritereSRPNF(critere, contexte))
         .join('');
 
     const legendePositions = niveaux.map(n => ({ ...n, position: (n.min + n.max) / 2 }));

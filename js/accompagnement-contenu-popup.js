@@ -609,18 +609,17 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'liste',
-                titre: "Barres SRPNF (habiletés)",
+                titre: "Barres par critère (habiletés)",
                 items: [
-                    "S (Structure) — Organisation logique du travail.",
-                    "R (Rigueur) — Précision méthodologique et respect des consignes.",
-                    "P (Plausibilité) — Cohérence du raisonnement et des arguments.",
-                    "N (Nuance) — Profondeur de l'analyse et prise en compte de la complexité.",
-                    "F (Français) — Qualité de la langue écrite."
+                    "Une barre par critère de TA grille, dans ton ordre à toi.",
+                    "La longueur de la barre est la moyenne de l'élève sur ce critère, tous artefacts confondus.",
+                    "Un critère sans évaluation n'a pas de barre — plutôt qu'une barre à zéro, qui se lirait comme un échec.",
+                    "La flèche à droite indique la direction : en amélioration, plateau, en détérioration."
                 ]
             },
             {
                 type: 'conseil',
-                contenu: "Compare les barres SRPNF entre elles pour identifier les forces et les défis récurrents. Un étudiant fort en S et R mais faible en P et N a besoin d'un accompagnement différent de celui qui est faible en F."
+                contenu: "Compare les barres entre elles pour identifier les forces et les défis récurrents. Deux élèves ayant la même note globale peuvent avoir des profils opposés d'un critère à l'autre — et appeler des accompagnements différents. C'est ce que la note seule ne montre pas."
             },
             {
                 type: 'liste',

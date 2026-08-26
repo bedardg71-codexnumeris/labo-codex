@@ -282,6 +282,43 @@ function obtenirGrilleReferenceDepistage() {
  * @param {string} da - Numéro DA de l'étudiant
  * @returns {Array} - Tableau de { nom, valeur, cleNormalisee } ou tableau vide si erreur
  */
+/**
+ * Clé de moyenne d'un nom de critère (#529).
+ *
+ * ⚠ MÊME normalisation que `calculerMoyennesCriteres`, qui construit ses clés
+ * ainsi. Toute divergence entre les deux rend les blocs silencieusement vides :
+ * l'affichage cherche des clés que le calcul n'a pas produites, ne trouve
+ * rien, et n'a aucun moyen de le signaler. D'où un seul endroit pour la règle.
+ */
+function cleCritere(nom) {
+    return String(nom || '').toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '');
+}
+
+/**
+ * Les critères à représenter dans les blocs du profil : ceux de la GRILLE de
+ * l'utilisateur, dans son ordre à elle.
+ *
+ * ⮕ #529 — remplace le tableau littéral
+ * `['structure','rigueur','plausibilite','nuance','francais']`, présent en
+ * QUATRE exemplaires (deux dans `sections-affichage`, deux dans
+ * `diagnostics`). Il décrivait la grille de Grégoire ; pour toute autre
+ * grille, les barres restaient vides et les blocs ne montraient rien, sans
+ * dire pourquoi.
+ *
+ * @returns {Array<{nom: string, cle: string}>}
+ */
+function criteresDeLaGrillePourAffichage() {
+    const grille = (typeof obtenirGrilleReferenceDepistage === 'function')
+        ? obtenirGrilleReferenceDepistage() : null;
+    if (!grille || !Array.isArray(grille.criteres)) return [];
+    return grille.criteres
+        .filter(c => c && c.nom)
+        .map(c => ({ nom: c.nom, cle: cleCritere(c.nom) }));
+}
+
 function obtenirCriteresAvecValeurs(da) {
     const grille = obtenirGrilleReferenceDepistage();
     if (!grille || !grille.criteres || grille.criteres.length === 0) {
@@ -611,6 +648,8 @@ window.obtenirNombreProductionsPourPatterns = obtenirNombreProductionsPourPatter
 window.obtenirIdsProductionsEvaluables = obtenirIdsProductionsEvaluables;
 window.obtenirPratiqueActuelle = obtenirPratiqueActuelle;
 window.obtenirGrilleReferenceDepistage = obtenirGrilleReferenceDepistage;
+window.cleCritere = cleCritere;
+window.criteresDeLaGrillePourAffichage = criteresDeLaGrillePourAffichage;
 window.obtenirCriteresAvecValeurs = obtenirCriteresAvecValeurs;
 window.initialiserModuleProfilEtudiant = initialiserModuleProfilEtudiant;
 window.genererBadgePratiqueProfil = genererBadgePratiqueProfil;
