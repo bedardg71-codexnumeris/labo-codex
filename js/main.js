@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0826-1304';
+window._SCRIPT_BUILD_main = '0826-1312';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -208,16 +208,30 @@ window.genererBadgePratique = function(type, compact = false) {
 // ===============================
 // WRAPPERS — Fonctions extraites des onclick complexes (Phase 4)
 // ===============================
+// L'horaire se configure dans « Cadre › Trimestre » — section `calendrier`
+// (« Cadre » dans la barre de navigation), et non dans `reglages`. Les deux noms
+// de wrapper disent « Reglages » : ils datent d'une navigation antérieure. Ils
+// sont conservés (index.html les référence : bouton « Trimestres » du bandeau
+// archive, lien du bandeau d'alerte des présences), seule leur DESTINATION
+// est corrigée.
+//
+// FIX (26 août 2026, retour Jean-François) : « le lien ne débouche nulle
+// part ». Deux fautes cumulées, chacune suffisante :
+//   1. cette fonction faisait `location.href = '#calendrier-trimestre'` — le
+//      dépôt n'a AUCUN routeur de hash (grep hashchange/location.hash = 0) —
+//      puis appelait `afficherSousSectionActuelle`, qui n'existe nulle part.
+//      Résultat : le clic changeait l'URL et rien d'autre ;
+//   2. elle ÉCRASAIT au chargement le wrapper homonyme de saisie-presences.js
+//      (main.js est chargé après), lequel visait de toute façon `reglages` :
+//      la sous-section #calendrier-trimestre vit dans #section-calendrier, donc
+//      même ce chemin-là n'affichait rien de visible.
+// Une seule implémentation subsiste ; le doublon de saisie-presences.js est
+// retiré. Répare du même coup le bouton « Trimestres » du bandeau archive.
 window.naviguerVersReglagesTrimestre = function() {
-    window.location.href = '#calendrier-trimestre';
-    if (typeof afficherSousSectionActuelle === 'function') {
-        afficherSousSectionActuelle('sous-section-trimestre');
-    }
-};
-window.naviguerVersReglagesTrimestreDepuisPresences = function() {
-    if (typeof afficherSection === 'function') afficherSection('reglages');
+    if (typeof afficherSection === 'function') afficherSection('calendrier');
     if (typeof afficherSousSection === 'function') afficherSousSection('calendrier-trimestre');
 };
+window.naviguerVersReglagesTrimestreDepuisPresences = window.naviguerVersReglagesTrimestre;
 window.rechargerPage = function() { window.location.reload(); };
 window.ouvrirImportEchellesLocal = function() {
     var el = document.getElementById('fichier-import-echelles-local');
