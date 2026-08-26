@@ -12,15 +12,16 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** — tout y est. Aucun travail en avance ailleurs. |
-| **Version** | **1.100.0** — build `0826-1258` |
-| **Version précédente** | 1.99.0 (25 août) — la session du 25-26 a livré 16 items entre les deux |
+| **Version** | **1.100.1** — build `0826-1312` (#532, livré par une session parallèle : l'alerte d'horaire des présences) |
+| **Version précédente** | **1.100.0** — la session du 25-26 a livré 16 items depuis 1.99.0 |
 | **Travail en avance sur `main`** | **AUCUN.** `claude/fusion-24-fonctions-dupliquer-qrop3b` (#476) est **FUSIONNÉE** le 26 août — ses 11 arbitrages étaient déjà rendus depuis le 24, seule la fusion manquait. |
 | **Suite Playwright** | baseline à **1 seul échec connu** (contre 8 avant #495) : `productions-ajout-refus-garde-340` = **#530**, un vrai bug, pas du bruit. |
 | ⚠ **AVANT TOUTE SUITE PLAYWRIGHT** | **fermer GitHub Desktop.** Les specs lisent l'arbre de travail en direct ; une commande git lancée pendant la suite change les fichiers sous leurs pieds et fait rougir des specs au hasard. Trouvé le 26 août (#523), règle versée au skill `portes-terrain`. |
 | ⚠ **LE CLONE DE GRÉGOIRE EST L'ARBRE DE TRAVAIL** | `/Users/kuekatsheu/Documents/GitHub/Monitorage_v6` sert à la fois de dépôt de travail et de source `file://` pour son app. Il voit les modifications dès qu'il recharge, **avant tout push** — et peut donc tomber sur un état intermédiaire. Le `git pull` des portes terrain lui est inutile. |
 | 📐 **CHANTIER MAJEUR EN ATTENTE** | **#529 — sortir SRPNF et IDME du code.** Session DÉDIÉE (décision Grégoire, 26 août). Sa règle : « rien ne doit être codé en dur, mais l'échelle IDME peut être seedée ». Audit : `Rapports/AUDIT-srpnf-code-en-dur-2026-08-26.md`. |
 | ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE** | **#427** (refermer l'accès public) et **#508** (l'avis d'accueil qui l'annonce). Fiche opératoire prête : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`. **Dû par Grégoire** : la liste nominale des personnes à inviter et les trois noms Cloudflare — personne ne peut les préparer à sa place. |
-| **Dernière mise à jour** | **26 août 2026, fin de session (20e cycle, 1.100.0)** |
+| ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. |
+| **Dernière mise à jour** | **26 août 2026, fin de session (20e cycle)** — 1.100.1 en ligne, arbre propre, rien en avance |
 
 ## Ce que le cycle a livré
 
