@@ -725,8 +725,12 @@ function remplirFormCoursV2(cours) {
 
 /**
  * Parse une pondération « théorie-labo-perso » (ex. "2-2-3").
- * Tolérant : retourne null si le format n'est pas reconnu (3 nombres séparés
- * par tirets). La saisie reste libre — aucun blocage.
+ * Retourne null si le format n'est pas reconnu (3 nombres séparés par tirets).
+ *
+ * #540 (26 août 2026) : ce parseur reste le SEUL juge du format. `_normaliserPonderation`
+ * ci-dessous ne fait qu'AMENER une saisie libre jusqu'à lui — elle ne décide jamais
+ * seule qu'une pondération est valide. Un seul arbitre, pas deux règles à tenir
+ * d'accord.
  * @returns {{theorie:number, labo:number, perso:number}|null}
  */
 function _parserPonderation(str) {
@@ -736,6 +740,77 @@ function _parserPonderation(str) {
     const nums = parts.map(parseFloat);
     if (nums.some(n => isNaN(n) || n < 0)) return null;
     return { theorie: nums[0], labo: nums[1], perso: nums[2] };
+}
+
+/**
+ * Ramène une pondération saisie librement à la forme du devis ministériel : « 2-2-3 ».
+ *
+ * #540 — Grégoire, 26 août 2026 : « qu'il y ait une transformation automatique 2-2-3,
+ * comme ça apparaît sur le devis ministériel ». Un seul champ, pas trois : `ponderation`
+ * est stockée en CHAÎNE sur l'entité cours, et trois cases obligeraient soit à recomposer
+ * la chaîne (habillage), soit à changer le modèle — ce qui casserait les fiches déjà
+ * saisies.
+ *
+ * Ce qui est accepté, et pourquoi :
+ * · tirets Unicode (‐ ‑ ‒ – — ― −) → le copier-coller depuis un devis en PDF n'envoie
+ *   presque jamais le tiret ASCII ;
+ * · espaces, virgules, barres obliques comme séparateurs ;
+ * · forme compacte « 223 » — mais SEULEMENT à exactement trois chiffres. « 1023 » est
+ *   ambigu (10-2-3 ? 1-0-23 ?) et on refuse plutôt que de deviner ;
+ * · décimales au point ou à la virgule (« 1,5-1,5-3 »), rendues au POINT parce que
+ *   `_parserPonderation` lit par `parseFloat`.
+ *
+ * La virgule est traitée comme séparateur uniquement en l'ABSENCE de tiret — sinon
+ * « 1,5-1,5-3 » se disloquerait en cinq morceaux.
+ *
+ * @param {string} str - Saisie brute de l'utilisateur
+ * @returns {string|null} - « t-l-p » normalisée, ou null si non reconnaissable
+ */
+function _normaliserPonderation(str) {
+    if (str === null || str === undefined) return null;
+    let brut = String(str).trim();
+    if (brut === '') return null;
+
+    // Tirets Unicode → tiret ASCII (copier-coller depuis un devis)
+    brut = brut.replace(/[\u2010-\u2015\u2212]/g, '-');
+
+    let parts;
+    if (brut.indexOf('-') !== -1) {
+        parts = brut.split('-');
+    } else if (brut.indexOf('/') !== -1) {
+        parts = brut.split('/');
+    } else if (brut.indexOf(',') !== -1) {
+        parts = brut.split(',');
+    } else if (/\s/.test(brut)) {
+        parts = brut.split(/\s+/);
+    } else if (/^[0-9]{3}$/.test(brut)) {
+        // Forme compacte, sans ambiguïté possible à trois chiffres exactement
+        parts = brut.split('');
+    } else {
+        return null;
+    }
+
+    // Surtout PAS de `.filter(p => p !== '')` ici : « -2-2-3 » se découpe en
+    // ['', '2', '2', '3'], et filtrer les vides ferait disparaître le signe négatif
+    // pour rendre un « 2-2-3 » que personne n'a saisi. Un morceau vide est le signe
+    // d'une malformation — « 2--2-3 » aussi — et se refuse. (Trouvé par la sentinelle
+    // #540 cas B, avant que le code n'atteigne l'application.)
+    parts = parts.map(p => p.trim());
+    if (parts.length !== 3 || parts.some(p => p === '')) return null;
+
+    const nums = parts.map(p => {
+        // Une virgule SUBSISTANTE ici est décimale : les cas où elle séparait
+        // ont déjà été découpés plus haut.
+        if (!/^[0-9]+([.,][0-9]+)?$/.test(p)) return NaN;
+        return parseFloat(p.replace(',', '.'));
+    });
+    if (nums.some(n => isNaN(n) || !isFinite(n) || n < 0)) return null;
+
+    // `String(2)` → « 2 », `String(1.5)` → « 1.5 » : pas de zéro décoratif.
+    const normalisee = nums.map(n => String(n)).join('-');
+
+    // Le parseur reste le juge : si lui ne la reconnaît pas, elle n'est pas valide.
+    return _parserPonderation(normalisee) ? normalisee : null;
 }
 
 /**
@@ -783,6 +858,26 @@ function proposerHeuresEnseignementDepuisPonderation() {
     if (champHeures && pond && (champHeures.value === '' || champHeures.value === undefined)) {
         // Proposition seulement : ne remplit que si le champ est vide.
         champHeures.value = (pond.theorie + pond.labo) * 15;
+    }
+    majRepereUnitesCours();
+}
+
+/**
+ * Handler `data-on-change` du champ pondération : ramène la saisie à la forme du devis.
+ *
+ * #540 — `change` se déclenche à la perte de focus quand la valeur a bougé, ce qui est
+ * exactement le moment voulu. On ne normalise PAS à chaque frappe (`input`) : « 2-2 » en
+ * cours de saisie n'est pas une erreur, c'est un mot inachevé.
+ *
+ * Une saisie non reconnaissable est laissée TELLE QUELLE — on ne l'efface pas sous les
+ * doigts de l'utilisateur. C'est l'enregistrement qui la refuse, en le disant.
+ */
+function normaliserPonderationCoursV2() {
+    const champ = document.getElementById('v2-ponderation');
+    if (!champ) return;
+    const normalisee = _normaliserPonderation(champ.value);
+    if (normalisee && normalisee !== champ.value.trim()) {
+        champ.value = normalisee;
     }
     majRepereUnitesCours();
 }
@@ -1072,7 +1167,15 @@ function _lireChampsInfosCoursDOM() {
         // Heures d'enseignement = source de vérité de la conformité RREC (chantier A).
         // Vide → null (cours sans exigence saisie), sinon nombre.
         heuresContact: (heuresBrut === '' || heuresBrut === undefined) ? null : (parseFloat(heuresBrut) || null),
-        ponderation: document.getElementById('v2-ponderation')?.value?.trim() || ''
+        // #540 : on normalise ICI aussi — l'utilisateur peut cliquer « Enregistrer »
+        // sans jamais quitter le champ, et `change` ne se serait pas déclenché.
+        // Une saisie NON reconnaissable est rendue TELLE QUELLE (et non vidée) pour que
+        // `sauvegarderCoursV2` distingue « pas de pondération » de « pondération illisible »
+        // et le dise correctement.
+        ponderation: (function() {
+            const brut = document.getElementById('v2-ponderation')?.value?.trim() || '';
+            return _normaliserPonderation(brut) || brut;
+        })()
     };
 }
 
@@ -1123,12 +1226,40 @@ function _postSauvegardeCoursV2(cours) {
 async function sauvegarderCoursV2() {
     const d = _lireDonneesFormCoursV2();
 
+    // #540 (26 août 2026) — TROIS champs requis, et tous les trois le DISENT désormais
+    // à l'écran (astérisque `champ-requis`, légende sous le formulaire). Le code et la
+    // discipline étaient déjà refusés ici depuis toujours, sans qu'aucune marque ne
+    // l'annonce : l'obligation existait sans être dite.
+    // Refus par `notifications.erreur` et non plus par `alert()` — le reste de
+    // l'application n'utilise pas de dialogue natif pour ça, et une alerte bloque tout.
     if (!d.codeCours) {
-        alert('Veuillez renseigner le code du cours.');
+        notifications.erreur('Code du cours requis',
+            'Le code identifie la fiche pour tous les trimestres. Ex. : 601-101-MQ.');
         return;
     }
     if (!d.discipline) {
-        alert('Veuillez renseigner la discipline.');
+        notifications.erreur('Discipline requise',
+            'Choisis la discipline dans la liste.');
+        return;
+    }
+
+    // #540 — La pondération devient la SOURCE de la durée hebdomadaire d'enseignement :
+    // `(théorie + labo)` est le nombre d'heures en classe par semaine — 4 h en littérature
+    // (2-2-3), 4 h en philosophie (3-1-3), 5 h en chimie (3-2-3). C'est elle que le
+    // recoupement avec l'horaire confrontera (lot D). Une fiche sans pondération ne peut
+    // donc plus s'enregistrer.
+    //
+    // RÈGLE UNIQUE, tranchée par Grégoire le 26 août : la même exigence pour une fiche
+    // ancienne et pour une fiche neuve. Une fiche incomplète se complète au premier
+    // passage — c'est une friction assumée, pas un oubli.
+    if (!d.ponderation) {
+        notifications.erreur('Pondération requise',
+            'Elle donne les heures de cours par semaine. Format du devis ministériel : 2-2-3.');
+        return;
+    }
+    if (!_parserPonderation(d.ponderation)) {
+        notifications.erreur('Pondération non reconnue',
+            'Attendu : trois nombres, comme sur le devis ministériel. Ex. : 2-2-3.');
         return;
     }
 
@@ -1169,7 +1300,8 @@ async function sauvegarderCoursV2() {
     if (coursEnEditionV2) {
         coursSauve = await CoursEntite.mettreAJour(coursEnEditionV2, d, { doublonAssume });
         if (!coursSauve) {
-            alert('Cours introuvable pour la mise à jour.');
+            notifications.erreur('Cours introuvable',
+                'La fiche a peut-être été supprimée depuis un autre onglet. Recharge la page.');
             return;
         }
         _resyncInfoCoursSiActif(coursSauve);
@@ -1178,7 +1310,8 @@ async function sauvegarderCoursV2() {
         if (!coursSauve) {
             // La garde de l'entité a refusé alors qu'on venait de demander :
             // état incohérent, on le DIT plutôt que d'annoncer un succès.
-            alert('Création refusée : une fiche porte déjà ce code.');
+            notifications.erreur('Création refusée',
+                'Une fiche porte déjà ce code.');
             return;
         }
         _activerSiPremierCours(coursSauve);
@@ -1228,5 +1361,23 @@ window._deriverSessionAnneeTrimestreActif = _deriverSessionAnneeTrimestreActif;
 // testée directement (sentinelle `sentinelle-fusion-cours-442`). Vérifier
 // l'EXPORT réel, pas la présence de l'appel (leçon du 10 août).
 window._fusionnerListeCoursDansCours = _fusionnerListeCoursDansCours;
+
+// #540 (26 août 2026) — EXPORT MANQUANT, trouvé en faisant le lot A.
+// `index.html:6535` câble `data-on-input="proposerHeuresEnseignementDepuisPonderation"`,
+// et le dispatcher de `main.js` résout ce nom SUR `window`. La fonction vivant dans
+// l'IIFE et n'ayant jamais été exportée, le dispatcher ne trouvait rien : il émettait
+// un `console.warn` et rendait la main. Conséquence observable depuis toujours — la
+// proposition automatique des heures d'enseignement ne se déclenchait pas, et le repère
+// « ≈ N unités » ne bougeait pas à la frappe (il n'apparaissait qu'à l'ouverture d'une
+// fiche, appelé directement par `afficherFormCoursV2`).
+// Famille connue du projet : [[feedback-exports-orphelins-grep-window]].
+window.proposerHeuresEnseignementDepuisPonderation = proposerHeuresEnseignementDepuisPonderation;
+window.normaliserPonderationCoursV2 = normaliserPonderationCoursV2;
+
+// Helpers purs exportés pour être testés DIRECTEMENT par la sentinelle #540 —
+// même raison que `_fusionnerListeCoursDansCours` : vérifier l'export réel, pas
+// la présence de l'appel.
+window._normaliserPonderation = _normaliserPonderation;
+window._parserPonderation = _parserPonderation;
 
 })();
