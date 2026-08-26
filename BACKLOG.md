@@ -646,6 +646,33 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   (N champs dérivés de la grille) ? La seconde change la nature du volet — choix pédagogique autant
   que technique.
 
+- [x] **#541 — Le dépistage classait TOUT LE MONDE en « Étendu ».** LIVRÉ le 26 août 2026.
+  Trouvé pendant l'audit demandé par Grégoire au retour de #529 (« ce qui servait au dépistage
+  est-il encore efficace ? »). **Le défaut ne vient PAS de #529** : il est antérieur, au moins depuis
+  l'extraction du 17 mai 2026 (`d9c67936`), et il touchait le bloc « Forces et défis » du profil.
+  ⮕ **Deux unités comparées sans conversion.** `obtenirNiveauIDMEDepuisPourcentage`
+  (`profil-etudiant-helpers.js`) reçoit un POURCENTAGE sur 0-100 — son nom le dit, son JSDoc le dit,
+  et son appelant vivant le respecte (`profil-etudiant-diagnostics.js:151`, `critere.score * 100`).
+  Les seuils, eux, sortent d'`obtenirSeuil('idme.*')` et valent **0-1** : 0.64 / 0.75 / 0.85. Les deux
+  étaient comparés tels quels. Tout score au-dessus de 1 % traversait les trois `if` sans en
+  satisfaire aucun et tombait dans le `return 'E'` final. **Un critère à 12 % ressortait « Étendu ».**
+  ⮕ **Ce que ça donnait à l'écran** : le bloc « Forces et défis » ne pouvait afficher QUE des forces
+  exceptionnelles, pour tout le monde, y compris un élève en difficulté sur tous ses critères. Aucun
+  message, aucune erreur — le dépistage répondait, et il répondait « tout va bien ».
+  ⮕ **Pourquoi la suite était verte avec** : aucun test n'appelait cette fonction. Seul son NOM était
+  vérifié, dans la liste d'exports de `refactor-profil-etudiant.test.js:149`. Un test d'existence
+  n'est pas un test de comportement.
+  ⮕ **Correctif** : une division. Le contrat d'entrée reste 0-100 (nom de la fonction, JSDoc, deux
+  appelants) ; c'est la conversion qui manquait, pas le contrat. **Aucune heuristique** du genre « si
+  c'est petit, c'est sans doute déjà 0-1 » : 0.8 serait indistinguable de 0,8 % et de 80 %, et la
+  fonction deviendrait un devineur.
+  ⮕ **Constaté en passant, NON corrigé** (hors périmètre, versé ci-dessous) : le second appelant,
+  `genererTableauObjectifs` (`sections-affichage.js:2948`), n'a **aucun appelant** dans tout le dépôt
+  — code mort. Et les codes rendus (`'I'`/`'D'`/`'M'`/`'E'`) restent en dur : c'est le chantier des
+  échelles, pas celui-ci.
+  ✅ Sentinelle `tests/unit/sentinelle-541-niveau-depuis-pourcentage.test.js` — 7 cas, **7 ROUGES au
+  break-test** avec le message attendu (`expected 'E' to be 'I'`). Vitest **3495/3495** (330 fichiers).
+
 - [ ] **#540 — La durée hebdomadaire du cours n'est ni exigée, ni recoupée avec l'horaire.**
   Constaté le 26 août 2026 sur une capture du formulaire Cours envoyée par Grégoire : « le nombre
   d'heures de cours par semaine n'est pas dans les formulaires ». **Audit : il y est, mais dérivé

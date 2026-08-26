@@ -164,18 +164,53 @@ function obtenirCouleurNiveauIDME(codeNiveau) {
 }
 
 /**
- * Détermine le niveau IDME d'un pourcentage selon les seuils configurés
- * @param {number} pourcentage - Pourcentage (0-100)
- * @returns {string} - Code niveau ('I', 'D', 'M', 'E')
+ * Détermine le niveau d'un pourcentage selon les seuils configurés.
+ *
+ * ⚠⚠ LE DÉFAUT CORRIGÉ ICI : DEUX UNITÉS COMPARÉES SANS CONVERSION (#541,
+ * 26 août 2026).
+ *
+ * Cette fonction reçoit un POURCENTAGE, sur 0-100. C'est son nom, c'est son
+ * contrat documenté, et c'est ce que passent ses appelants — `critere.score
+ * * 100` dans `profil-etudiant-diagnostics`, `P` dans `sections-affichage`
+ * (comparé deux lignes plus bas à `seuil * 100`).
+ *
+ * Les seuils, eux, viennent d'`obtenirSeuil('idme.*')` et valent 0-1 : 0.64,
+ * 0.75, 0.85. Les deux étaient comparés TELS QUELS. Conséquence : tout
+ * pourcentage supérieur à 0.85 — c'est-à-dire tout score au-dessus de 1 %,
+ * donc à peu près tous — traversait les trois `if` sans en satisfaire aucun et
+ * tombait dans le dernier `return`. **Un critère à 12 % était classé « E »,
+ * Étendu.**
+ *
+ * Le bloc « Forces et défis » du diagnostic ne pouvait donc afficher que des
+ * forces exceptionnelles, pour tout le monde, y compris pour un élève en
+ * difficulté sur tous ses critères — et rien ne le signalait. Le défaut est
+ * antérieur au décodage-en-dur de #529 : il existe au moins depuis
+ * l'extraction du 17 mai 2026 (d9c67936), et aucun test ne l'exerçait.
+ *
+ * ⮕ CE QUI N'A PAS ÉTÉ CHANGÉ, ET POURQUOI. Le contrat reste 0-100 : le nom
+ * de la fonction l'annonce, les deux appelants le respectent déjà, et le
+ * déplacer aurait demandé de toucher des sites d'appel que ce correctif n'a
+ * pas à rouvrir. C'est la conversion qui manquait, pas le contrat.
+ *
+ * Verrouillé par `tests/unit/sentinelle-541-niveau-depuis-pourcentage.test.js`.
+ *
+ * @param {number} pourcentage - Pourcentage sur 0-100 (et non un score 0-1)
+ * @returns {string} - Code du niveau, selon les seuils configurés
  */
 function obtenirNiveauIDMEDepuisPourcentage(pourcentage) {
-    const seuilInsuffisant = obtenirSeuil('idme.insuffisant'); // Par défaut 65%
-    const seuilDeveloppement = obtenirSeuil('idme.developpement'); // Par défaut 75%
-    const seuilMaitrise = obtenirSeuil('idme.maitrise'); // Par défaut 85%
+    const seuilInsuffisant = obtenirSeuil('idme.insuffisant'); // 0-1 — défaut 0.64
+    const seuilDeveloppement = obtenirSeuil('idme.developpement'); // 0-1 — défaut 0.75
+    const seuilMaitrise = obtenirSeuil('idme.maitrise'); // 0-1 — défaut 0.85
 
-    if (pourcentage < seuilInsuffisant) return 'I';
-    if (pourcentage < seuilDeveloppement) return 'D';
-    if (pourcentage < seuilMaitrise) return 'M';
+    // Ramener l'entrée sur l'échelle des seuils. PAS de détection du genre
+    // « si c'est petit, c'est sans doute déjà 0-1 » : 0.8 serait alors
+    // indistinguable de 0,8 % et de 80 %, et la fonction deviendrait un
+    // devineur. Un seul contrat, celui que le nom annonce.
+    const score = pourcentage / 100;
+
+    if (score < seuilInsuffisant) return 'I';
+    if (score < seuilDeveloppement) return 'D';
+    if (score < seuilMaitrise) return 'M';
     return 'E';
 }
 
