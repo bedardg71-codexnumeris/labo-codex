@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.100',
+            couleur: 'vert',
+            titre: 'Un modèle de cartouche à faire remplir',
+            items: [
+                '<strong>Un bouton \u00ab T\u00e9l\u00e9charger un mod\u00e8le \u00bb</strong> dans les cartouches de r\u00e9troaction. Il construit un fichier texte \u00e0 partir de la grille et de l\u2019\u00e9chelle que tu as choisies : tous les crit\u00e8res, tous les niveaux, une ligne par commentaire \u00e0 \u00e9crire. Tu le fais remplir \u2014 par un assistant, ou \u00e0 la main \u2014 et tu le r\u00e9importes pour obtenir ta cartouche.',
+                'Le fichier porte <strong>ses propres consignes en t\u00eate</strong> : ce qu\u2019on attend, et le format exact \u00e0 ne pas d\u00e9former. Un assistant laiss\u00e9 libre reformate, et un fichier reformat\u00e9 ne se r\u00e9importe plus.',
+                '<strong>Correction de fond sur l\u2019import texte :</strong> les niveaux reconnus viennent d\u00e9sormais de TON \u00e9chelle. Ils \u00e9taient \u00e9crits dans le code \u2014 et pas de la m\u00eame fa\u00e7on selon le bouton emprunt\u00e9 : le niveau \u00ab 0 \u00bb de l\u2019\u00e9chelle \u00ab 0-IDME \u00bb passait par un chemin et disparaissait en silence par les deux autres. Une \u00e9chelle A-B-C-D, elle, n\u2019\u00e9tait lue par aucun.',
+            ]
+        },
+        {
             version: '1.99',
             couleur: 'vert',
             titre: 'Le document de consignes, et des gabarits qui se ressemblent',
