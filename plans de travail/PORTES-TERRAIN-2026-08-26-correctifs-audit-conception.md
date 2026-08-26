@@ -7,6 +7,29 @@ Bouton « Copier mes résultats » obligatoire : l'avancement vit dans ton navig
 **Origine** : `Rapports/AUDIT-conception-gabarits-2026-08-25.md` et
 `plans de travail/ARBITRAGE-2026-08-24-476-volet2-duplications.md`.
 
+## ✅ RELEVÉ RENDU LE 26 AOÛT 2026 — 21/21, ZÉRO ÉCHEC. 2/2 décisions tranchées.
+
+| | Résultat |
+|---|---|
+| §0 préalable | 2/2 — build du 26 vérifié, Codex sauvegardé |
+| §1 données | 4/4 — **rien à réparer** : dry-run à 0 copie, aucune écriture due |
+| §2 interface | 15/15 — les quatre correctifs tiennent sur le corpus réel, sous Safari |
+| §3 décisions | **3.1 tel quel · 3.2 tel quel** |
+
+**Mesure rapportée** : la description d'une production dupliquée — « Transformer ta carte mentale
+en plan de rédaction… » — est **intacte** après duplication (2.5d), et le titre a bien reçu
+« (copie) ». C'était le défaut nommé par le verdict D3 de #476.
+
+⏳ **Une mesure d'entrée non renseignée** : 2.3a (les premiers mots de l'objectif, à noter AVANT le
+partage). Sans conséquence sur le verdict — 2.3b a passé, les consignes étaient bien là après le
+partage —, mais la comparaison avant/après n'est pas tracée. Notée pour ne pas la croire faite.
+
+⚠ **1.1d est cochée alors qu'elle était SANS OBJET** : le dry-run rendait 0 copie à libérer, et il
+n'y avait donc rien à exécuter. Sans conséquence ici (une exécution sur 0 item n'écrit rien), mais
+la rangée aurait dû rester non traitée plutôt que passée.
+
+---
+
 > **Ce qui échoue ici devient un item de BACKLOG, avec son numéro de porte.**
 > Pas une note mentale.
 

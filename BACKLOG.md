@@ -347,8 +347,11 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   « Remise du travail » étaient remplis se voyait refuser son cran, avec un motif FAUX en infobulle
   (« ni objectif, ni description, ni détail de tâche »). Un seul prédicat désormais,
   `productionAConsignes`, et le motif de refus dit la même chose que la règle.
-  ⏳ **Non touché** : le bouton du formulaire inline reste conditionné à `grilleId && echelleId`
-  (chemin secondaire, sans production chargée d'où déduire les consignes).
+  ✅ **TRANCHÉ 26 août 2026 (porte terrain, décision 3.1) : le formulaire inline reste TEL QUEL.**
+  Son bouton « Aperçu » demeure conditionné à `grilleId && echelleId`. Ce chemin n'a pas de
+  production d'où déduire les consignes ; la fiche de production, elle, s'ouvre désormais sans
+  grille, et c'est par là que passe le geste courant. Ce n'est donc plus un « non touché » en
+  attente : c'est une décision rendue.
 
   Vitest **3298/3298** (313 fichiers). Trois break-tests, trois ROUGE.
 
@@ -382,6 +385,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   les deux thèmes (#d4b878 sombre, #7a5a20 clair).
   ⏳ Pas de sentinelle : une valeur de couleur n'est pas un garde-fou de comportement. Le ratchet
   utile serait un lint général des couleurs en dur — chantier distinct, hors de ce lot.
+
+> ✅ **PORTE TERRAIN RELEVÉE LE 26 AOÛT — 21/21, ZÉRO ÉCHEC**, décisions 3.1 et 3.2 tranchées
+> (« tel quel » pour les deux). Les quatre correctifs qui donnaient une porte tiennent sur le corpus
+> réel, sous Safari : la saisie de deux critères d'affilée reste (#510), la fiche neuve ne porte plus
+> les consignes de la précédente (#509), une production partagée arrive avec ses consignes (#511),
+> et le document se produit sans grille comme il pagine quand il déborde (#513/#514).
+> ⏳ Deux réserves, notées dans la trace plutôt que tues : la mesure d'entrée 2.3a n'a pas été
+> renseignée (le verdict tient, la comparaison avant/après n'est pas tracée), et 1.1d a été cochée
+> alors qu'elle était sans objet.
+> Trace : `plans de travail/PORTES-TERRAIN-2026-08-26-correctifs-audit-conception.md`.
 
 ### Constats de l'audit du 25 août ENCORE OUVERTS
 
@@ -428,7 +441,13 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   l'éditeur vivant — mais une mine au premier réordonnancement, et une entorse au zéro-dette.
   Ablation avec sentinelle ratchet.
 
-- [ ] **#521 — Décider du sort de `coursId` au transport.** Extrait de #511 : le rattachement local
+- [x] **#521 TRANCHÉ 26 août 2026 — `coursId` reste NON transporté.** Verdict de Grégoire à la
+  porte terrain (décision 3.2) : « tel quel ». Le rattachement au cours continue d'être décidé à
+  l'arrivée, jamais par le fichier — transporter ferait apparaître une production reçue sous un
+  cours homonyme du destinataire, ou sous un cours qui n'existe pas chez lui. La clé reste inscrite
+  dans `CLES_PRODUCTION_NON_TRANSPORTEES` avec sa raison, et la sentinelle #511 continue d'exiger
+  que toute clé neuve soit transportée ou exclue sciemment. Énoncé d'origine :
+- [ ] **~~#521~~ — Décider du sort de `coursId` au transport.** Extrait de #511 : le rattachement local
   au cours est la seule clé volontairement NON transportée. Conséquence inchangée depuis toujours —
   restaurer une archive rend des productions sans cours. Transporter ferait apparaître une
   production reçue sous un cours homonyme du destinataire, ou sous un cours inexistant.
