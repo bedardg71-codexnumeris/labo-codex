@@ -2878,7 +2878,7 @@ function afficherNiveauxNouvelleEchelle() {
                            data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="max" data-parse-float>
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-valeur-ponctuelle">Valeur ponctuelle
+                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-valeur-ponctuelle">Valeur ponctuelle <span class="champ-requis" title="Champ obligatoire">*</span>
                         <span class="primo-aide" data-target="echelle-valeur-ponctuelle"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                     </label>
                     <input type="number"
@@ -3161,7 +3161,7 @@ function afficherNiveauxEchelle(echelle) {
                            data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="max" data-parse-float>
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-valeur-ponctuelle">Valeur ponctuelle
+                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-valeur-ponctuelle">Valeur ponctuelle <span class="champ-requis" title="Champ obligatoire">*</span>
                         <span class="primo-aide" data-target="echelle-valeur-ponctuelle"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                     </label>
                     <input type="number"
@@ -3269,9 +3269,22 @@ function valeurNumeriqueDuNiveau(niveau) {
     const min = brut(niveau.min);
     const max = brut(niveau.max);
     if (isNaN(min) || isNaN(max)) return null;   // ⚠ jamais NaN en silence
+
+    // ⚠⚠ #526 — CE REPLI EST TRANSITOIRE, et il ne doit plus grossir.
+    // Depuis #526, `valeurCalcul` est OBLIGATOIRE à la saisie : la plage et la
+    // valeur ponctuelle sont deux conversions inverses, et l'une ne se déduit
+    // pas de l'autre. Le milieu de plage est donc un ARBITRAGE PÉDAGOGIQUE
+    // fabriqué par le code, ce que le projet interdit.
+    // Il ne subsiste que pour les niveaux ENREGISTRÉS AVANT ce jour, qui n'ont
+    // pas de valeur ponctuelle et qu'on ne peut pas deviner. Il se signale, pour
+    // qu'on sache combien il en reste plutôt que de l'oublier.
+    console.warn('[echelles] Niveau « ' + (niveau.code || '?') + ' » sans valeur ponctuelle : '
+        + 'repli sur le milieu de plage (' + ((min + max) / 2) + '). '
+        + 'Ouvre l\'échelle et pose la valeur — elle décide de la note chiffrée.');
     return (min + max) / 2;
 }
 
+const REFUS_VALEUR_NIVEAU = 'La valeur ponctuelle du niveau est obligatoire';
 const REFUS_MIN_NIVEAU = 'La borne minimale du niveau est obligatoire';
 const REFUS_MAX_NIVEAU = 'La borne maximale du niveau est obligatoire';
 const REFUS_CODE_NIVEAU = 'Le code du niveau est obligatoire';
@@ -3282,11 +3295,28 @@ function refusChampNiveau(champ, valeur) {
     const vide = !String(valeur == null ? '' : valeur).trim();
     if (champ === 'code' && vide) return REFUS_CODE_NIVEAU;
     if (champ === 'nom' && vide) return REFUS_NOM_NIVEAU;
-    // #525 — les bornes portent la note quand aucune valeur ponctuelle n'est
-    // posée. Vides ou non numériques, elles rendaient `(undefined+undefined)/2`,
-    // c'est-à-dire NaN, jusque dans la note affichée à l'étudiant·e.
-    if ((champ === 'min' || champ === 'max') && (vide || isNaN(Number(valeur)))) {
-        return champ === 'min' ? REFUS_MIN_NIVEAU : REFUS_MAX_NIVEAU;
+    // ⚠⚠ #526 (26 août 2026) — LA PLAGE ET LA VALEUR PONCTUELLE SONT DEUX
+    // CONVERSIONS INVERSES, ET LES DEUX SONT OBLIGATOIRES.
+    //
+    // Précision de Grégoire, ce jour-là : « la plage sert aux pratiques de
+    // notation alternatives, la note ponctuelle sert à la notation sommative,
+    // ou lorsque la note doit être convertie en note chiffrée ».
+    //
+    //   note chiffrée  →  CODE  : `pourcentage >= n.min && pourcentage <= n.max`
+    //                             (evaluation-calcul.js) — c'est la PLAGE qui
+    //                             détermine le niveau final d'un·e élève.
+    //   CODE  →  note chiffrée  : `valeurCalcul` — c'est elle qui rend un chiffre
+    //                             quand la certification en exige un.
+    //
+    // ⮕ L'une ne se déduit PAS de l'autre. Faire dériver la valeur ponctuelle du
+    // milieu de la plage fabrique une décision pédagogique que seul l'enseignant
+    // peut prendre : « Maîtrise » de 75 à 89 vaudrait 82, alors qu'il voudrait
+    // peut-être 80 ou 85. C'est un fallback arbitraire, et le projet en interdit.
+    if ((champ === 'min' || champ === 'max' || champ === 'valeurCalcul')
+        && (vide || isNaN(Number(valeur)))) {
+        if (champ === 'min') return REFUS_MIN_NIVEAU;
+        if (champ === 'max') return REFUS_MAX_NIVEAU;
+        return REFUS_VALEUR_NIVEAU;
     }
     return null;
 }
@@ -3929,6 +3959,7 @@ window.modifierNiveauEchelle = modifierNiveauEchelle;
 window.refusChampNiveau = refusChampNiveau;                                 // #524
 window.valeurNumeriqueDuNiveau = valeurNumeriqueDuNiveau;                   // #525 — LA règle, pour tous les lecteurs
 window.REFUS_MIN_NIVEAU = REFUS_MIN_NIVEAU;
+window.REFUS_VALEUR_NIVEAU = REFUS_VALEUR_NIVEAU;                           // #526
 window.REFUS_MAX_NIVEAU = REFUS_MAX_NIVEAU;
 window.marquerChampRefuseEchelle = marquerChampRefuseEchelle;               // #524
 window.REFUS_CODE_NIVEAU = REFUS_CODE_NIVEAU;
