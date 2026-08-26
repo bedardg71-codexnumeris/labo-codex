@@ -2839,7 +2839,7 @@ function afficherNiveauxNouvelleEchelle() {
                     </div>
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Code</label>
+                    <label class="echelle-texte-detail">Code <span class="champ-requis" title="Champ obligatoire">*</span></label>
                     <input type="text"
                            class="controle-form"
                            value="${echapperHtml(niveau.code)}"
@@ -2849,7 +2849,7 @@ function afficherNiveauxNouvelleEchelle() {
                            style="font-weight: 600; text-align: center;">
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-niveau">Nom du niveau</label>
+                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-niveau">Nom du niveau <span class="champ-requis" title="Champ obligatoire">*</span></label>
                     <input type="text"
                            class="controle-form"
                            value="${echapperHtml(niveau.nom)}"
@@ -2929,8 +2929,13 @@ function afficherNiveauxNouvelleEchelle() {
  */
 function modifierNiveauTemp(index, champ, valeur) {
     if (!window._niveauxNouvelleEchelle) return;
+    // #524 — même règle que sur une échelle existante : un code ou un nom vide
+    // n'entre pas. Une échelle neuve deviendra une échelle comme les autres.
+    const refus = refusChampNiveau(champ, valeur);
+    if (refus) return { refuse: refus };
     window._niveauxNouvelleEchelle[index][champ] = valeur;
     afficherNiveauxNouvelleEchelle();
+    return { ok: true };
 }
 
 /**
@@ -3119,7 +3124,7 @@ function afficherNiveauxEchelle(echelle) {
                     </div>
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Code</label>
+                    <label class="echelle-texte-detail">Code <span class="champ-requis" title="Champ obligatoire">*</span></label>
                     <input type="text"
                            class="controle-form"
                            value="${echapperHtml(niveau.code)}"
@@ -3128,7 +3133,7 @@ function afficherNiveauxEchelle(echelle) {
                            style="font-weight: 600; text-align: center;">
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-niveau">Nom du niveau</label>
+                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-niveau">Nom du niveau <span class="champ-requis" title="Champ obligatoire">*</span></label>
                     <input type="text"
                            class="controle-form"
                            value="${echapperHtml(niveau.nom)}"
@@ -3210,7 +3215,40 @@ function afficherNiveauxEchelle(echelle) {
  * @param {string} champ - Nom du champ à modifier
  * @param {any} valeur - Nouvelle valeur
  */
+/**
+ * #524 (26 août 2026) — LE CODE D'UN NIVEAU EST UNE CLÉ, PAS UNE ÉTIQUETTE.
+ *
+ * ⚠⚠ POURQUOI CE REFUS EXISTE. `niveau.code` sert d'INDEX aux commentaires de
+ * cartouche et aux rendus PDF — `${critere.id}_${niveau.code}`, lu à 23 endroits.
+ * Un code vide donne la clé `CR_1_` : TOUS les niveaux sans code se retrouvent
+ * sur la même case, et le dernier commentaire écrase les autres. Sans un mot.
+ *
+ * ⚠ Une validation disait déjà « Code et nom obligatoires » — dans
+ * `sauvegarderNiveaux()`, dont le bouton vit dans le bloc « ANCIEN SYSTÈME »
+ * masqué, et qui écrit dans `#tableauNiveaux` quand l'éditeur vivant est
+ * `#tableauNiveauxEchelle`. La garde existait, sur un chemin que personne
+ * n'emprunte : c'est le motif AP-2, le même que #516 le matin même, sur l'écran
+ * voisin. Deux fois en un jour, ce n'est plus un accident.
+ *
+ * ⮕ Le refus est donc posé ICI, sur le chemin vivant, et il vaut pour les deux
+ * éditeurs (échelle neuve et échelle existante).
+ */
+const REFUS_CODE_NIVEAU = 'Le code du niveau est obligatoire';
+const REFUS_NOM_NIVEAU = 'Le nom du niveau est obligatoire';
+
+/** Ce que le champ refuse, ou `null` s'il passe. Partagé par les deux éditeurs. */
+function refusChampNiveau(champ, valeur) {
+    const vide = !String(valeur == null ? '' : valeur).trim();
+    if (champ === 'code' && vide) return REFUS_CODE_NIVEAU;
+    if (champ === 'nom' && vide) return REFUS_NOM_NIVEAU;
+    return null;
+}
+
 async function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
+    // #524 — on refuse l'ÉCRITURE, on ne bloque pas la frappe (cf. #516).
+    const refus = refusChampNiveau(champ, valeur);
+    if (refus) return { refuse: refus };
+
     // #510 (25 août 2026) — MÊME COURSE QUE LES GRILLES, MÊME REMÈDE.
     // Lecture-modification-écriture de la collection entière, sur un champ qui
     // s'enregistre au blur : deux niveaux édités coup sur coup lisaient le même
@@ -3242,7 +3280,7 @@ async function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
         return echelles;
     }, []);
 
-    if (!echelleModifiee) return;
+    if (!echelleModifiee) return { refuse: null };
 
     // L'échelle rendue par le mutateur EST celle qui vient d'être écrite : plus
     // besoin de relire la collection pour éviter une référence obsolète — et
@@ -3259,6 +3297,7 @@ async function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
 
     // Réafficher pour mettre à jour l'aperçu visuel et les bordures colorées
     afficherNiveauxEchelle(echelleTemplateActuelle);
+    return { ok: true };
 }
 
 /**
@@ -3753,11 +3792,27 @@ function modifierNiveauHandler(el) {
 }
 
 /** Handler délégué pour modifierNiveauTemp(index, champ, valeur) */
+/**
+ * #524 — le champ refusé se voit, et ne le dit qu'une fois (cf. #516).
+ * ⚠ Sans la garde `dejaMarque`, vider un champ puis cliquer trois fois ailleurs
+ * produirait trois bandeaux pour un seul problème.
+ */
+function marquerChampRefuseEchelle(el, raison) {
+    if (!el || !el.classList) return;
+    if (!raison) { el.classList.remove('champ-refuse'); return; }
+    const dejaMarque = el.classList.contains('champ-refuse');
+    el.classList.add('champ-refuse');
+    if (!dejaMarque && typeof notifications !== 'undefined' && notifications.erreur) {
+        notifications.erreur(raison, 'La modification n\'a pas été enregistrée.');
+    }
+}
+
 function modifierNiveauTempHandler(el) {
     var index = parseInt(el.dataset.niveauIndex);
     var champ = el.dataset.champ;
     var valeur = el.hasAttribute('data-parse-float') ? parseFloat(el.value) : el.value;
-    modifierNiveauTemp(index, champ, valeur);
+    var resultat = modifierNiveauTemp(index, champ, valeur);
+    marquerChampRefuseEchelle(el, resultat && resultat.refuse);
 }
 
 /** Handler délégué pour modifierNiveauEchelle(echelleId, index, champ, valeur) */
@@ -3766,7 +3821,8 @@ function modifierNiveauEchelleHandler(el) {
     var index = parseInt(el.dataset.niveauIndex);
     var champ = el.dataset.champ;
     var valeur = el.hasAttribute('data-parse-float') ? parseFloat(el.value) : el.value;
-    modifierNiveauEchelle(echelleId, index, champ, valeur);
+    Promise.resolve(modifierNiveauEchelle(echelleId, index, champ, valeur))
+        .then(function (resultat) { marquerChampRefuseEchelle(el, resultat && resultat.refuse); });
 }
 
 /** Annuler import échelles (fermer modal + cleanup) */
@@ -3823,6 +3879,10 @@ window.deplacerNiveauTempHaut = deplacerNiveauTempHaut;
 window.deplacerNiveauTempBas = deplacerNiveauTempBas;
 window.supprimerNiveauEchelle = supprimerNiveauEchelle;
 window.modifierNiveauEchelle = modifierNiveauEchelle;
+window.refusChampNiveau = refusChampNiveau;                                 // #524
+window.marquerChampRefuseEchelle = marquerChampRefuseEchelle;               // #524
+window.REFUS_CODE_NIVEAU = REFUS_CODE_NIVEAU;
+window.REFUS_NOM_NIVEAU = REFUS_NOM_NIVEAU;
 window.verifierUtilisationEchelle = verifierUtilisationEchelle;
 window.migrerEvaluationsVersNouvelleEchelle = migrerEvaluationsVersNouvelleEchelle;
 
