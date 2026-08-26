@@ -396,6 +396,30 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 > alors qu'elle était sans objet.
 > Trace : `plans de travail/PORTES-TERRAIN-2026-08-26-correctifs-audit-conception.md`.
 
+- [x] **#524 LIVRÉ 26 août 2026 (1.99.3)** — les champs obligatoires des Grilles et Échelles, marqués
+  et refusés. Audit `Rapports/AUDIT-asterisques-grilles-echelles-2026-08-26.md`, demandé par Grégoire
+  en préparant un tutoriel.
+  ⮕ **Ce qui existait était juste** : nom de grille, nom de critère (#516) et nom d'échelle portent
+  leur astérisque ET sont refusés. Rien à retirer.
+  ⚠⚠ **A1 — LE CODE D'UN NIVEAU EST UNE CLÉ.** `${critere.id}_${niveau.code}`, lu à **23 endroits**
+  (cartouches, PDF). Un code vide donne `CR_1_` : tous les niveaux sans code sur la même case, le
+  dernier commentaire écrase les autres, sans un mot. Ni astérisque, ni refus sur le chemin vivant.
+  ⮕ Refus posé sur les DEUX éditeurs (échelle neuve et existante), pour le code ET le nom.
+  ⚠⚠ **UNE VALIDATION EXISTAIT — SUR DU CODE MORT.** `sauvegarderNiveaux()` disait déjà « Code et nom
+  obligatoires », mais son bouton vit dans le bloc `u-hide` « ANCIEN SYSTÈME » et écrit dans
+  `#tableauNiveaux` quand l'éditeur vivant est `#tableauNiveauxEchelle`. **Motif AP-2, le même que
+  #516 le matin même, sur l'écran voisin.** Deux fois en un jour : à surveiller comme un pli, pas
+  comme un accident. ⮕ Renforce #520 (ablation de l'ANCIEN SYSTÈME) : ce bloc ne fait pas que dormir,
+  il **héberge des gardes qui rassurent à tort**.
+  ⮕ **A2 — la légende posée sur les quatre écrans** (elle n'existait que sur Production). C'est le
+  point qui bloquait le tutoriel : un astérisque sans légende est une énigme. Constat C2 du 25 août,
+  débloqué par le verdict D1.
+  ⮕ **A3 — `.champ-requis` n'est plus défini deux fois.** La copie en dur d'`index.html` (`#e74c3c`)
+  écrasait `styles.css` par l'ordre — et **perdait `font-weight: 700` au passage**. Retirée ; la
+  palette reprend la main. Même motif que le doublon de règle du bandeau, trouvé le 24 août.
+  Vitest **3356/3356** (320 fichiers). Trois break-tests, trois ROUGE — dont un **rejoué** parce que
+  mon ancre n'existait pas et qu'il n'avait donc rien cassé la première fois.
+
 ### Constats de l'audit du 25 août ENCORE OUVERTS
 
 > Les six correctifs ci-dessus (#509 à #515) épuisent ce qui ne demandait pas d'arbitrage de
