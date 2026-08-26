@@ -942,69 +942,43 @@ class PratiquePANStandards {
         // Prendre les N derniers
         const derniersArtefacts = evaluationsEleve.slice(0, nombreArtefacts);
 
-        // Obtenir table de conversion IDME
-        const tableConversion = this._obtenirTableConversionIDME();
-
-        // ✅ Initialiser accumulateurs dynamiquement selon la grille
-        const scoresCriteres = {};
-        grille.criteres.forEach(c => {
-            const cleNormalisee = c.nom.toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/\s+/g, '');
-            scoresCriteres[cleNormalisee] = [];
-        });
-
-        // ✅ Construire regex dynamique depuis les noms de critères de la grille
-        // Ex: (STRUCTURE|RIGUEUR|PLAUSIBILITE|NUANCE|FRANCAIS)\s*\(([IDME0])\)
-        const nomsRegex = grille.criteres.map(c => {
-            // Échapper les caractères spéciaux et supporter les variantes accentuées
-            return c.nom.toUpperCase()
-                .replace(/É/g, '[ÉE]')
-                .replace(/È/g, '[ÈE]')
-                .replace(/Ç/g, '[ÇC]')
-                .replace(/\s+/g, '\\s+');
-        }).join('|');
-
-        const regexCritere = new RegExp(`(${nomsRegex})\\s*\\(([IDME0])\\)`, 'gi');
-
-        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+        // #529 (26 août 2026) — CE BLOC LISAIT LA PROSE, LUI AUSSI.
+        //
+        // Il construisait une regex depuis les noms de critères de la grille
+        // — ce qui était déjà mieux que son jumeau de `profil-etudiant-calculs`
+        // — puis la faisait courir sur `retroactionFinale` avec les codes de
+        // niveau EN DUR : `\(([IDME0])\)`. Une échelle A/B/C/D ne matchait donc
+        // rien, et le diagnostic « forces et défis » de la pratique PAN restait
+        // vide sans le dire.
+        //
+        // Les scores vivent dans `evaluation.criteres[]` (structuré, depuis la
+        // création du dépôt). Deux chemins lisaient la même chose de deux
+        // façons différentes ; il n'en reste qu'une.
+        const cacheTables = new Map();
 
         derniersArtefacts.forEach(evaluation => {
-            const retroaction = evaluation.retroactionFinale || '';
+            if (!Array.isArray(evaluation.criteres)) return;
+            const tableEvaluation = this._obtenirTableConversionNiveaux(evaluation.echelleId);
+            evaluation.criteres.forEach(critereSauvegarde => {
+                if (!critereSauvegarde) return;
+                const score = this._convertirNiveauEnScore(critereSauvegarde.niveauSelectionne, tableEvaluation);
+                if (score === null) return;
 
-            let match;
-            while ((match = regexCritere.exec(retroaction)) !== null) {
-                const nomCritere = match[1].toUpperCase();
-                const niveauIDME = match[2].toUpperCase();
-                const score = this._convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
+                const nomEval = String(critereSauvegarde.critereNom || '').toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+                if (!nomEval) return;
 
-                if (score !== null) {
-                    // ✅ Trouver le critère correspondant dans la grille
-                    const critereReference = grille.criteres.find(c => {
-                        const nomRef = c.nom.toUpperCase()
-                            .normalize('NFD')
-                            .replace(/[\u0300-\u036f]/g, '')
-                            .replace(/\s+/g, '');
-                        const nomMatch = nomCritere
-                            .normalize('NFD')
-                            .replace(/[\u0300-\u036f]/g, '')
-                            .replace(/\s+/g, '');
+                const critereReference = grille.criteres.find(c => {
+                    const nomRef = c.nom.toLowerCase()
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+                    return nomRef === nomEval || nomRef.startsWith(nomEval) || nomEval.startsWith(nomRef);
+                });
+                if (!critereReference) return;
 
-                        return nomRef === nomMatch ||
-                               nomRef.startsWith(nomMatch) ||
-                               nomMatch.startsWith(nomRef);
-                    });
-
-                    if (critereReference) {
-                        const cleNormalisee = critereReference.nom.toLowerCase()
-                            .normalize('NFD')
-                            .replace(/[\u0300-\u036f]/g, '')
-                            .replace(/\s+/g, '');
-                        scoresCriteres[cleNormalisee].push(score);
-                    }
-                }
-            }
+                const cleNormalisee = critereReference.nom.toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+                if (scoresCriteres[cleNormalisee]) scoresCriteres[cleNormalisee].push(score);
+            });
         });
 
         // Calculer moyennes
@@ -1132,32 +1106,42 @@ class PratiquePANStandards {
         // Performance moyenne
         const performance = derniers.reduce((sum, e) => sum + e.noteFinale, 0) / derniers.length / 100;
 
-        // IDME moyen
-        const tableConversion = this._obtenirTableConversionIDME();
-        const niveauxIDME = derniers
-            .map(e => e.niveauFinal)
-            .filter(n => n && ['I', 'D', 'M', 'E', '0'].includes(n))
-            .map(n => this._convertirNiveauIDMEEnScore(n, tableConversion))
+        // Moyenne des niveaux finaux — #529.
+        // Retiré : `.filter(n => ['I','D','M','E','0'].includes(n))`. Ce filtre
+        // écartait tout code étranger à IDME ; pour une échelle A/B/C/D il les
+        // écartait TOUS et la moyenne tombait à 0 — la pire note possible, là
+        // où il n'y avait aucune donnée. Un niveau compte s'il est convertible
+        // par SON échelle, rien d'autre ne le qualifie.
+        const cacheTables = new Map();
+        const scoresNiveauxFinaux = derniers
+            .map(e => this._convertirNiveauEnScore(e.niveauFinal, this._tablePour(e, cacheTables)))
             .filter(s => s !== null);
 
-        const idmeMoyen = niveauxIDME.length > 0
-            ? niveauxIDME.reduce((sum, s) => sum + s, 0) / niveauxIDME.length
+        const idmeMoyen = scoresNiveauxFinaux.length > 0
+            ? scoresNiveauxFinaux.reduce((sum, s) => sum + s, 0) / scoresNiveauxFinaux.length
             : 0;
 
-        // Moyenne français
+        // Moyenne du critère de LANGUE — #529.
+        // Retiré : la regex /FRAN[ÇC]AIS\s+[ÉE]CRIT\s*\(([IDME])\)/gi, jumelle
+        // exacte de celle de `profil-etudiant-calculs`. Deux copies de la même
+        // lecture de prose, dans deux fichiers, avec les mêmes codes en dur.
+        // ⚠ Le NOM du critère de langue reste une convention du code : le
+        // sortir suppose que l'utilisateur puisse désigner quel critère de sa
+        // grille joue ce rôle. Décision de conception, inscrite au backlog.
+        const NOM_CRITERE_LANGUE = 'francais';
         const scoresFrancais = [];
-        const regexFrancais = /FRAN[ÇC]AIS\s+[ÉE]CRIT\s*\(([IDME])\)/gi;
 
         derniers.forEach(evaluation => {
-            const retroaction = evaluation.retroactionFinale || '';
-            let match;
-            while ((match = regexFrancais.exec(retroaction)) !== null) {
-                const niveauIDME = match[1].toUpperCase();
-                const score = this._convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
-                if (score !== null) {
-                    scoresFrancais.push(score * 100);
-                }
-            }
+            if (!Array.isArray(evaluation.criteres)) return;
+            const table = this._tablePour(evaluation, cacheTables);
+            evaluation.criteres.forEach(critereSauvegarde => {
+                if (!critereSauvegarde) return;
+                const nom = String(critereSauvegarde.critereNom || '').toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+                if (!nom.startsWith(NOM_CRITERE_LANGUE)) return;
+                const score = this._convertirNiveauEnScore(critereSauvegarde.niveauSelectionne, table);
+                if (score !== null) scoresFrancais.push(score * 100);
+            });
         });
 
         const francaisMoyen = scoresFrancais.length > 0
@@ -1319,20 +1303,30 @@ class PratiquePANStandards {
      * Obtient la table de conversion IDME (niveaux → scores)
      * @private
      */
-    _obtenirTableConversionIDME() {
-        // Utiliser la fonction globale si disponible
-        if (typeof obtenirTableConversionIDME === 'function') {
-            return obtenirTableConversionIDME();
-        }
+    /**
+     * Table de conversion de l'échelle qui a produit CETTE évaluation (#529).
+     * @private
+     */
+    _tablePour(evaluation, cache) {
+        const id = (evaluation && evaluation.echelleId) || '';
+        if (cache && cache.has(id)) return cache.get(id);
+        const table = this._obtenirTableConversionNiveaux(id || null);
+        if (cache) cache.set(id, table);
+        return table;
+    }
 
-        // Sinon, valeurs par défaut
-        return {
-            'I': { min: 0, max: 64, valeur: 0.55 },
-            'D': { min: 65, max: 74, valeur: 0.70 },
-            'M': { min: 75, max: 84, valeur: 0.80 },
-            'E': { min: 85, max: 100, valeur: 0.90 },
-            '0': { min: 0, max: 0, valeur: 0 }
-        };
+    _obtenirTableConversionNiveaux(echelleId) {
+        // #529 — le repli qui vivait ici est RETIRÉ. Il rendait
+        // {I:0.55, D:0.70, M:0.80, E:0.90} — des valeurs qui n'étaient celles
+        // de personne, et qui ne s'accordaient MÊME PAS avec l'autre repli du
+        // projet ({I:0.40, D:0.65, M:0.75, E:1.00}, profil-etudiant-calculs).
+        // Selon le chemin emprunté, un même niveau valait donc 0.55 ou 0.40 :
+        // deux vérités pour une seule donnée. Désormais une seule source, et
+        // `null` quand elle est absente — au lieu d'un chiffre inventé.
+        if (typeof obtenirTableConversionNiveaux === 'function') {
+            return obtenirTableConversionNiveaux(echelleId || null);
+        }
+        return null;
     }
 
     /**
@@ -1342,7 +1336,7 @@ class PratiquePANStandards {
      * - Format simple: {I: 0.4, D: 0.65, ...}
      * @private
      */
-    _convertirNiveauIDMEEnScore(niveau, tableConversion) {
+    _convertirNiveauEnScore(niveau, tableConversion) {
         niveau = niveau.trim().toUpperCase();
         const entry = tableConversion[niveau];
 

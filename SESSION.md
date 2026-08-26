@@ -108,6 +108,85 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 26 AOÛT 2026 (suite 2) : #529 LOTS 1 ET 2 — LE CALCUL NE
+     CONNAÎT PLUS NI SRPNF NI IDME. 1.100.2 → 1.101.0.
+
+     ▣ CE QUI EST FAIT, EN UNE PHRASE.
+
+       Les scores par critère ne sont plus RELUS DANS LA PROSE des rétroactions
+       par une expression régulière contenant les cinq noms de Grégoire et les
+       quatre codes IDME. Ils sont lus dans `evaluation.criteres[]`, structuré,
+       présent depuis la création du dépôt (octobre 2025).
+
+     ▣ CE QUE L'AUDIT DU MATIN N'AVAIT PAS VU — TROIS COUCHES DE PLUS.
+
+       1. TROIS REPLIS IDME EN DUR, AUX VALEURS INCOMPATIBLES.
+          · `profil-etudiant-calculs` : I 0.40 · D 0.65 · M 0.75 · E 1.00
+          · `pratique-pan-standards`  : I 0.55 · D 0.70 · M 0.80 · E 0.90
+          · `consolidation`           : alignée sur le premier
+          Selon le chemin emprunté, un même niveau valait 0.40 ou 0.55. Les
+          trois sont retirés : `null` quand l'échelle ne dit rien. Un seed est
+          une ÉCHELLE LIVRÉE, pas des nombres qu'un calcul invente.
+
+       2. LA TABLE DE CONVERSION FILTRAIT SUR ['0','I','D','M','E'].
+          Une échelle A/B/C/D produisait une table VIDE, puis les valeurs IDME
+          du repli. Des scores faux, sans un mot.
+
+       3. UNE SECONDE REGEX, POUR LE FRANÇAIS, dans DEUX fichiers à la fois.
+
+     ▣ UN BUG RÉEL SUR LES DONNÉES DE GRÉGOIRE — LE ZÉRO ÉTAIT AVALÉ.
+
+       `convertirNiveauIDMEEnScore` finissait par `return tableConversion[niveau]
+       || null`. Un score de 0 est falsy : le niveau « 0 » de son échelle
+       0-IDME était donc traité comme ABSENT, et EXCLU des moyennes au lieu d'y
+       compter pour zéro. Un élève avec des 0 voyait ses moyennes calculées
+       comme si ces évaluations n'existaient pas — donc plus hautes que la
+       réalité. ⮕ CORRIGÉ. Ses chiffres vont bouger, à la baisse là où il y a
+       des zéros. C'est la correction, pas une régression.
+
+     ▣ LA CONVERSION SE FAIT DÉSORMAIS PAR ÉVALUATION.
+
+       Chaque évaluation porte son `echelleId` (`_lireChampsDOMAutoSave`). Le
+       code lisait pourtant UNE table globale, résolue en cherchant des codes
+       IDME parmi les échelles. Deux évaluations produites avec des échelles
+       différentes étaient converties avec la même table — celle de l'une des
+       deux, au hasard de l'ordre de stockage. Corrigé partout (helpers
+       `tableConversionPourEvaluation` et `_tablePour`, avec cache par échelle).
+
+     ▣ MON ERREUR DU JOUR, ET CE QU'ELLE APPREND.
+
+       Après le renommage `obtenirTableConversionIDME` -> `…Niveaux`, j'ai
+       laissé une variable orpheline (`tableConversion`, seconde regex du
+       français). `node -e "new Function(...)"` a dit « syntaxe OK » — il ne
+       voit pas les variables non définies. VITEST EST RESTÉ VERT : il ne
+       charge pas ces chemins. Seule la suite Playwright a parlé, avec 22 specs
+       rouges et « Can't find variable ».
+       ⮕ RÈGLE : après tout renommage transversal, la vérification qui compte
+       est le CHARGEMENT AU NAVIGATEUR, pas la syntaxe ni Vitest.
+
+     ▣ CE QUE J'AI REFUSÉ DE TRANCHER SEUL — #534, #535, #536.
+
+       · #534 le « critère de langue » reconnu par son nom. Ce n'est pas un
+         libellé, c'est un statut : au collégial québécois le français écrit a
+         un régime propre (épreuve uniforme, CAF) et des cibles d'intervention
+         que les autres critères n'ont pas. Marqué `NOM_CRITERE_LANGUE` dans
+         les deux fichiers : UN seul point à changer, la décision venue.
+       · #535 les cibles RàI indexées par nom de critère. La FORME se dériverait
+         en une ligne (« Pratique guidée en {X} ») — mais c'est sa didactique.
+       · #536 `idmeMoyen` à 0 au lieu de « pas de donnée » : contrat existant,
+         pas touché dans ce diff.
+
+     ▣ VÉRIFICATION.
+
+       Vitest 3430/3430 (326 fichiers) · Playwright 165/165 · baseline à zéro.
+       Cinq break-tests Lot 1 + deux Lot 2, tous rouges avec le bon message.
+
+     ⏭ RESTE DE #529 : Lot 3 (barres du profil dérivées de la grille — tableaux
+       littéraux dans `sections-affichage` et `diagnostics`) et Lot 4 (l'aide :
+       popup, glossaire d'index.html, hover). Le CALCUL, lui, est fait.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 26 AOÛT 2026 (suite) : #530 CLOS — LE DÉFAUT ÉTAIT DANS LA
      SENTINELLE. BASELINE PLAYWRIGHT À ZÉRO. 1.100.1 → 1.100.2.
 

@@ -166,8 +166,8 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
             'changerOngletDeveloppement',
             'naviguerVersPresenceAvecDate',
             // Zone Calculs — 14 exports (session A 18 mai 2026 : tous promus window.X)
-            'obtenirTableConversionIDME',
-            'convertirNiveauIDMEEnScore',
+            'obtenirTableConversionNiveaux',
+            'convertirNiveauEnScore',
             'calculerMoyennesCriteres',
             'calculerMoyennesCriteresRecents',
             'calculerIPB',
