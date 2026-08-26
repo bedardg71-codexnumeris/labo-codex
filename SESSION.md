@@ -122,8 +122,7 @@
        · ⏳ Safari et iPad : non éprouvés (WebKit absent du conteneur, #487).
      ===================================================================== -->
 
-<!-- =====================================================================
-     SESSION — 25 AOÛT 2026 : RETOUR TESTEUR #490 — ON NE PEUT PAS
+<!-- ==============================================================     SESSION — 25 AOÛT 2026 : RETOUR TESTEUR #490 — ON NE PEUT PAS
      SUPPRIMER UN DOCUMENT PARTAGÉ PAR UN COLLÈGUE. 1.96.0.
 
      ▣ LA DEMANDE, deux captures à l'appui. « Je voudrais pouvoir supprimer
@@ -348,6 +347,178 @@
        Safari et sur iPad, survol compris) et 1.4 (la mesure d'entrée sur son
        corpus). Le §3 attend cinq verdicts ÉCRITS, dont 3.3 (libérer aussi la
        pondération ?) et 3.1 (le mot « à planifier » est-il le bon ?).
+=======
+     SESSION — 24 AOÛT 2026 : #476 VOLET 2, LA FUSION DES `dupliquer*`.
+     TROIS LOTS LIVRÉS, ET UNE DÉCISION RENDUE À GRÉGOIRE.
+
+     ▣ CE QU'IL FAUT RETENIR EN PREMIER — LA PRÉMISSE DE RELANCE ÉTAIT FAUSSE.
+       « Refactor pur, et beaucoup plus sûr maintenant que les sentinelles des
+       Lots 1-6 l'encadrent. » La mesure dit autre chose : sur les 24 fonctions
+       du périmètre, DEUX seulement étaient exécutées par un test
+       (`dupliquerPratique`, `dupliquerPratiqueBibliotheque`). Les sentinelles
+       des Lots 1-6 couvrent l'IDENTITÉ et le NOMMAGE des copies — pas la
+       mécanique de chaque fonction.
+       Et deux de ces sentinelles sont des GREPS SUR LE TEXTE SOURCE, donc
+       hostiles au refactor par construction : l'une épinglait cinq call-sites
+       littéraux de `forkerItem` (→ rouge à la fusion), l'autre découpait les
+       blocs `function dupliquer*` et serait passée VACUEMENT VERTE une fois
+       les blocs disparus. Une sentinelle qui vérifie la FORME du code, pas son
+       comportement, se retourne contre le premier chantier qui touche à cette
+       forme. Les deux pièges sont fermés (§ Lot C).
+
+     ▣ LOT A — DEUX DES 24 ÉTAIENT DU CODE MORT (commit 74fafdd7).
+       · `dupliquerGrilleActuelle` : aucun appelant, nulle part.
+       · `dupliquerEchelleActuelle` : câblée au seul bouton index.html:5242, en
+         `display:none`, dont l'`id="btnDupliquerEchelle"` était DUPLIQUÉ avec
+         index.html:5094. `getElementById` rendant le premier élément, les trois
+         sites qui démasquent ce bouton touchaient toujours l'autre. Il ne
+         pouvait donc jamais paraître.
+       ⚠ CE SONT EXACTEMENT LES DEUX FONCTIONS DONT LE LOT 5 A CORRIGÉ UN
+         « BUG LATENT » LA VEILLE (collection hors de portée, zone morte
+         temporelle du `let`). Deux corrections sur du code qu'aucun
+         utilisateur ne pouvait exécuter. LEÇON : mesurer l'atteignabilité
+         AVANT de corriger, pas après.
+       Retrait de l'entrée correspondante dans `noms_stables.json` (zone
+       protégée) autorisé par Grégoire en séance.
+
+     ▣ LOT B — LE BANC DE CARACTÉRISATION (commit 2549cb56).
+       `tests/integration/carac-476-volet2-duplication.spec.js`, 27 cas, EN
+       NAVIGATEUR contre le vrai DOM d'index.html. Pourquoi pas en Vitest : les
+       fonctions de rafraîchissement (`afficherListeGrilles`,
+       `chargerGrillePourModif`…) sont INTERNES à l'IIFE de leur module et ne
+       sont donc pas surchargeables depuis un test. Seuls `prompt`, `alert` et
+       `notifications` sont interceptés — ce sont des globaux d'autres fichiers,
+       donc des coutures légitimes, et ce sont les sorties qu'on veut lire.
+       ⚠ DEUX PIÈGES RENCONTRÉS, DOCUMENTÉS DANS LE SPEC :
+       (1) UN PREMIER JEU D'ASSERTIONS DE NOM ÉTAIT NON DISCRIMINANT. Sur une
+           PREMIÈRE copie, `nommerCopie` et la concaténation nue `${nom} (copie)`
+           rendent le même texte : le break-test est resté VERT alors que la
+           mutation était réelle. D'où le bloc « CO-24 · la chaîne des copies »,
+           qui duplique DEUX FOIS d'affilée. Toute assertion de nom ajoutée là
+           doit passer par une chaîne d'au moins deux maillons.
+       (2) LE BANC POLLUAIT LES AUTRES SPECS. Tous les specs partagent le
+           localStorage de l'origine `file://` (d'où `workers: 1`). La première
+           version amorçait cinq collections sans nettoyer : suite complète
+           84/84 verte une fois, puis DIX ROUGES à l'exécution suivante, dans
+           des specs sans rapport (comparateur #326, bascule CT-05…). Un
+           `afterEach` purge désormais les clés touchées. ⚠ NE JAMAIS CONCLURE
+           D'UNE SEULE PASSE VERTE en intégration : c'est une double passe qui
+           a révélé la pollution.
+
+     ▣ LOT C — LE SOCLE SÛR EST FUSIONNÉ (commit da2f0bcd).
+       Les cinq `dupliquerEtEditerX` déroulaient la MÊME séquence recopiée cinq
+       fois. Elle vit maintenant une seule fois dans
+       `BibliothequeUI.dupliquerEtEditerItem` ; chaque famille n'apporte que son
+       descripteur (clé, préfixe d'ID, lecture/écriture, rafraîchissement, champ
+       de focus), les rappels servant à atteindre l'UI interne à chaque IIFE.
+       Comportement PRÉSERVÉ ET MESURÉ : le banc du Lot B est resté vert sans
+       être touché.
+       La sentinelle a SUIVI la logique : la garantie « la collection de
+       destination est transmise à `forkerItem` » est vérifiée à son nouvel
+       emplacement, plus une assertion neuve que les cinq familles passent bien
+       par le moteur. Et le test de découpe exige désormais AU MOINS UN BLOC par
+       fichier — sans quoi la fusion l'aurait rendu muet.
+
+     ▣ LOT D — LE SECOND MOTEUR, ET LE SOCLE EST COMPLET.
+       Les cinq `dupliquerXBibliotheque` passent par
+       `BibliothequeUI.dupliquerVersBibliotheque`. Bilan du socle retenu :
+       10 fonctions → 2 moteurs + 10 descripteurs, comportement mesuré
+       identique (banc vert, non touché).
+       ⮕ UNE DIVERGENCE A DISPARU D'ELLE-MÊME en regardant de près :
+         `dupliquerGrilleBibliotheque` calculait son auteur par une expression
+         inline qui s'est révélée STRICTEMENT équivalente à
+         `BibliothequeUI.obtenirAuteurActif()`. Écart cosmétique, pas
+         fonctionnel — un bouton de configuration en moins. Vérifier avant de
+         paramétrer : toutes les divergences apparentes n'en sont pas.
+       ⚠ CE QUI RESTE PARAMÉTRÉ EST UNE DETTE, PAS UNE FONCTIONNALITÉ. Les
+         rappels `nommerLaCopie` et `forgerProvenance` existent parce que les
+         familles ont divergé sans que personne le décide. Chacun porte un
+         commentaire « ⚠ ÉCART CONNU » qui renvoie au BACKLOG. Les rassembler
+         est ce qui rend la convergence DÉCIDABLE.
+
+     ▣ LOT E — LES ONZE VERDICTS SONT RENDUS, LA CONVERGENCE EST LIVRÉE.
+       Grégoire a tranché 11/11, et D0 = CONVERGENCE DÉLIBÉRÉE. Neuf écarts
+       corrigés ; D6 (identifiants de critères partagés) renvoyée en instruction
+       séparée, faute d'avoir mesuré son effet dans le module Évaluation.
+       ⮕ ORDRE D'ÉCRITURE, ET C'EST LE POINT DE MÉTHODE À RETENIR : les 32
+         attentes du banc ont été RETOURNÉES D'ABORD, et vues 16 ROUGES ; le code
+         a suivi ensuite. Converger en lançant le code puis en ajustant les
+         attentes à ce qu'il produit aurait rendu le banc tautologique — « le
+         code fait ce que le code fait ». C'est la seule façon honnête de faire
+         évoluer un banc de caractérisation.
+       ⮕ CE QUE LA FUSION AVAIT DÉJÀ RAPPORTÉ : `forkerItem` n'avait plus qu'UN
+         SEUL appelant (le moteur du Lot C). Les corrections D7 et D9 se sont
+         donc faites en un endroit au lieu de cinq. Fusionner d'abord a rendu la
+         convergence moins risquée — l'inverse de ce qu'on craignait.
+       ⚠ LA CORRECTION NE RÉPARE PAS LES COPIES DÉJÀ FAITES. Elle vaut pour les
+         duplications À VENIR. Celles déjà créées depuis la barre latérale
+         restent marquées « exemple », donc non modifiables. C'est la décision
+         3.1 de la porte terrain, en attente.
+       ⚠ UN FAUX ROUGE INSTRUCTIF : un cliquet que j'avais posé au Lot D
+         interdisait `delete X.metadata_cc` dans un FICHIER ENTIER. La correction
+         D4, parfaitement légitime, l'a fait rougir — sur une autre fonction du
+         même fichier. Il porte désormais sur le CORPS DE LA FONCTION visée. Un
+         cliquet trop large ne protège pas mieux : il interdit des correctifs
+         justes. (Helper `corpsDeFonction`, réutilisable.)
+       ⮕ ET LE TROU QUI AVAIT CAUSÉ D3 EST BOUCHÉ : la sentinelle CO-24 ne lisait
+         que quatre fichiers ; `productions-*.js` et `pratiques-gestion.js` n'y
+         étaient pas, d'où un défaut réputé clos et vivant pendant un mois. Ils y
+         sont maintenant. Une sentinelle qui ne lit pas un fichier ne dit RIEN
+         sur ce fichier — elle ne dit pas qu'il va bien.
+
+     ▣ PORTE TERRAIN PRODUITE, DUE, NON RELEVÉE.
+       `plans de travail/PORTES-TERRAIN-2026-08-24-convergence-duplications.md`
+       + artefact jumeau : 24 portes Mac + iPad, une mesure à saisir, deux
+       décisions en attente (3.1 réparer ou non les copies déjà faites ; 3.2 une
+       quatrième correction CO-24 que D3 ne nommait pas). Bouton « Copier mes
+       résultats » éprouvé au navigateur avant publication, filtres « iPad
+       seulement » et « à faire seulement ».
+
+     ▣ CE QUI RESTE, ET POURQUOI CE N'EST PAS QU'UNE QUESTION DE TEMPS.
+       Les 12 voies restantes (invite, barre latérale, item actif) divergent
+       RÉELLEMENT — neuf écarts mesurés, énumérés dans BACKLOG #476. La plupart
+       ressemblent à des ACCIDENTS, pas à des intentions : la copie d'une démo
+       qui reste marquée démo, un `titre` de production jamais suffixé, un
+       champ `nom` posé sur des objets qui n'en ont pas, CO-24 encore vivant sur
+       trois voies. Les fusionner « sans changement de comportement » revient à
+       ÉRIGER CES ACCIDENTS EN CONFIGURATION DÉLIBÉRÉE. Trois chemins ont été
+       posés à Grégoire ; le socle sûr a été retenu pour ce cycle, la suite
+       reste sa décision.
+
+     ▣ FICHE D'ARBITRAGE PRODUITE, EN ATTENTE DE VERDICT.
+       `plans de travail/ARBITRAGE-2026-08-24-476-volet2-duplications.md` et son
+       artefact jumeau (lien dans le markdown) : 11 décisions, D1…D10 sur les
+       écarts et D0 sur l'orientation du reste. Modèle des portes terrain
+       appliqué, avec sa règle du 11 août : ce sont des DÉCISIONS, donc chaque
+       ligne porte un CHAMP DE SAISIE et jamais une case à cocher, et le bouton
+       « Copier mes résultats » a été éprouvé au navigateur avant publication.
+       ⚠ UN CONSTAT A ÉMERGÉ EN RÉDIGEANT LA FICHE, et il change le poids de D1 :
+         `estItemDemo` (js/bibliotheque-ui.js:72) rend vrai si `isDemo === true`
+         OU si l'auteur vaut `Demo Labo Codex`. La copie faite depuis la barre
+         latérale garde LES DEUX, et `appliquerModeLectureSeuleDemo` désactive
+         alors tous les champs. Donc : DUPLIQUER UN EXEMPLE DEPUIS LA BARRE
+         LATÉRALE REND UNE COPIE QU'ON NE PEUT TOUJOURS PAS MODIFIER — soit
+         exactement ce que le geste est censé débloquer. Ce n'est plus un écart
+         de style, c'est un défaut fonctionnel. Écrire la fiche en langage
+         d'usage est ce qui l'a fait apparaître : la question « qu'est-ce que ça
+         lui fait, à lui ? » a trouvé ce que « quels champs diffèrent ? » avait
+         laissé passer.
+
+     ▣ DETTE ADJACENTE DÉCOUVERTE : `index.html` porte 11 AUTRES ID DOM
+       DUPLIQUÉS, très concentrés sur la zone échelles. Même classe de bug que
+       celui du Lot A. Chacun signifie qu'un `getElementById` ne touche jamais
+       le second élément. Inscrit au BACKLOG #476.
+
+     ▣ PORTE TERRAIN DUE : le banc a été mis au point sur CHROMIUM (seul
+       navigateur du conteneur). La cible de production est WebKit/Safari, et
+       le passage iPad n'a pas eu lieu. Tant qu'ils ne sont pas faits, le banc
+       atteste d'un comportement Chromium, pas du comportement de production.
+
+     ▣ ÉTAT DES SUITES : 2990/2990 unitaires · 32/32 au banc · 89/89 en
+       intégration, DOUBLE PASSE. Version inchangée : 1.93.0 — mais ⚠ le Lot E
+       CHANGE ce que voit l'utilisateur (contrairement aux Lots A-D). Le bump et
+       le changelog attendent le relevé de la porte terrain : on ne livre pas un
+       changement de comportement non éprouvé sur Safari et iPad.
      ===================================================================== -->
 
 <!-- =====================================================================

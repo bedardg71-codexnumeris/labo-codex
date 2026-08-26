@@ -35,6 +35,24 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dossierJs = path.resolve(__dirname, '..', '..', 'js');
 const lire = (f) => readFileSync(path.join(dossierJs, f), 'utf8');
 
+/** Retire blocs et lignes de commentaire — idiome repris de sentinelle-468. */
+function sansCommentaires(source) {
+    return source
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/(^|[^:])\/\/.*$/gm, '$1');
+}
+
+/**
+ * Découpe le corps d'une fonction nommée, de sa déclaration jusqu'à la
+ * déclaration suivante. Grossier mais suffisant, et surtout : il évite les
+ * cliquets portés sur un FICHIER entier, qui transforment un correctif légitime
+ * ailleurs dans le même fichier en faux rouge (constaté le 24 août).
+ */
+function corpsDeFonction(source, nom) {
+    const blocs = source.split(/\n(?=(?:async )?function )/);
+    return blocs.find((b) => new RegExp('^(?:async )?function ' + nom + '\\b').test(b)) || null;
+}
+
 let win;
 beforeEach(() => { win = chargerScript('js/identite-item.js'); });
 
@@ -162,17 +180,25 @@ describe('#476 · les cinq points d\'écriture sont gardés', () => {
     it('« Dupliquer » n\'est PAS bloqué : aucune fonction dupliquer* ne consulte la garde', () => {
         // Dupliquer est une action voulue. Si la garde apparaissait dans une
         // `dupliquer*`, on aurait converti une fonctionnalité en régression.
+        // #476 volet 2 — `bibliotheque-ui.js` REJOINT LA LISTE : la séquence de
+        // « dupliquer et éditer » y a été fusionnée. Sans lui, la garantie
+        // « dupliquer n'est jamais bloqué » cesserait de couvrir le chemin qui
+        // porte désormais les cinq familles.
         const fichiers = ['grilles.js', 'echelles.js', 'cartouches.js',
                           'productions-liste.js', 'productions-bibliotheque-ui.js',
-                          'pratiques.js', 'pratiques-gestion.js'];
+                          'pratiques.js', 'pratiques-gestion.js', 'bibliotheque-ui.js'];
         for (const fichier of fichiers) {
             const src = lire(fichier);
             // Découpe grossière mais suffisante : le corps de chaque `dupliquer*`
             // jusqu'à la prochaine déclaration de fonction.
-            const blocs = src.split(/\n(?=(?:async )?function )/)
-                .filter((b) => /^(?:async )?function dupliquer/.test(b));
+            const blocs = src.split(/\n(?=(?:async )?function |\s*BibliothequeUI\.\w+ = )/)
+                .filter((b) => /^(?:async )?function dupliquer|^\s*BibliothequeUI\.dupliquer/.test(b));
+            // Une découpe qui ne trouve RIEN passerait verte sans rien vérifier :
+            // c'est le piège que la fusion du volet 2 rendait possible.
+            expect(blocs.length, `${fichier} : plus aucun bloc dupliquer* à vérifier`).toBeGreaterThan(0);
             for (const bloc of blocs) {
-                const nom = /function (dupliquer[A-Za-z]*)/.exec(bloc)[1];
+                const nom = (/function (dupliquer[A-Za-z]*)/.exec(bloc)
+                    || /BibliothequeUI\.(dupliquer[A-Za-z]*)/.exec(bloc))[1];
                 expect(bloc, `${fichier}:${nom} ne doit PAS bloquer une duplication voulue`)
                     .not.toMatch(/ajouterAvecGardeIdentite/);
             }
@@ -234,8 +260,22 @@ describe('CO-24 · nommerCopie', () => {
     });
 
     it('les cinq familles passent par le helper, plus par concaténation', () => {
-        for (const fichier of ['grilles.js', 'echelles.js', 'cartouches.js', 'bibliotheque-ui.js']) {
-            const src = lire(fichier);
+        // ⚠ LA LISTE S'EST ÉTENDUE LE 24 AOÛT, ET C'EST TOUT LE SUJET DE D3.
+        // Elle ne contenait que quatre fichiers ; `productions-liste.js`,
+        // `productions-bibliotheque-ui.js` et `pratiques-gestion.js` en étaient
+        // absents. Résultat : CO-24 a été déclaré clos alors que trois voies
+        // concaténaient encore « (copie) » à la main, et personne ne l'a vu
+        // pendant un mois. Une sentinelle qui ne lit pas un fichier ne dit RIEN
+        // sur ce fichier — elle ne dit pas qu'il va bien.
+        for (const fichier of ['grilles.js', 'echelles.js', 'cartouches.js', 'bibliotheque-ui.js',
+                               'productions-liste.js', 'productions-bibliotheque-ui.js',
+                               'pratiques-gestion.js']) {
+            // On DÉPOUILLE LES COMMENTAIRES avant de chercher — idiome maison
+            // (cf. sentinelle-468) : la correction s'explique DANS le code, et
+            // ces explications citent forcément la forme qu'elles retirent. Sans
+            // ce dépouillement, le commentaire « avant : ${source.titre} (copie) »
+            // fait rougir la sentinelle qui vérifie qu'il n'y en a plus.
+            const src = sansCommentaires(lire(fichier));
             expect(src, `${fichier} : concaténation naïve « (copie) » encore présente`)
                 .not.toMatch(/\+ ' \(copie\)'|\$\{[^}]*\} \(copie\)/);
             expect(src, `${fichier} : nommerCopie absent`).toMatch(/nommerCopie\(/);
@@ -247,14 +287,76 @@ describe('CO-24 · nommerCopie', () => {
         // il évite en plus de heurter un nom déjà pris.
         const src = lire('bibliotheque-ui.js');
         expect(src).toMatch(/forkerItem = function \(source, prefixeId, nomsExistants\)/);
+
+        // #476 VOLET 2 — CETTE ASSERTION A DÉMÉNAGÉ AVEC LA LOGIQUE.
+        // Elle épinglait cinq call-sites littéraux (`forkerItem(grille,
+        // 'GRILLE_', grilles)`…), un par famille. La fusion du volet 2 les a
+        // réunis dans `BibliothequeUI.dupliquerEtEditerItem` : les épingler
+        // encore serait rouge, et les retirer sans les remplacer laisserait
+        // CO-24 sans garde sur ce chemin. On vérifie donc la MÊME garantie à
+        // son nouvel emplacement — le moteur transmet la collection de
+        // DESTINATION — puis que les cinq familles passent bien par lui.
+        expect(src, 'le moteur partagé ne transmet plus la collection à forkerItem')
+            .toMatch(/forkerItem\(source, d\.prefixeId, liste\)/);
+        expect(src, 'la liste passée à forkerItem doit être celle où la copie atterrit')
+            .toMatch(/liste\.push\(copie\)/);
+    });
+
+    it('les cinq familles passent par le moteur partagé de « dupliquer depuis la bibliothèque »', () => {
+        // #476 volet 2 — second moteur fusionné. La garantie qui a déménagé ici
+        // est le retrait des métadonnées de partage : la copie devient un
+        // original de l'utilisateur, la licence de la source n'a plus cours.
+        // Elle vivait en cinq exemplaires, un par famille ; elle vit ici.
+        const src = lire('bibliotheque-ui.js');
+        expect(src, 'le moteur ne retire plus les métadonnées de partage')
+            .toMatch(/delete copie\.metadata_cc;[\s\S]{0,80}delete copie\.auteurOriginal;/);
+        expect(src, 'le moteur ne désarme plus le drapeau démo de la copie')
+            .toMatch(/copie\.isDemo = false;/);
+
         for (const [fichier, motif] of Object.entries({
-            'grilles.js': /forkerItem\(grille, 'GRILLE_', grilles\)/,
-            'echelles.js': /forkerItem\(echelle, 'ECH_', echelles\)/,
-            'cartouches.js': /forkerItem\(cartouche, 'CART_', cartouches\)/,
-            'productions-liste.js': /forkerItem\(production, 'PROD_', productions\)/,
-            'pratiques-gestion.js': /forkerItem\(pratique, 'pratique_', pratiquesExistantes\)/
+            'grilles.js': /dupliquerVersBibliotheque\(\{[\s\S]{0,200}prefixeId: 'GRILLE_'/,
+            'echelles.js': /dupliquerVersBibliotheque\(\{[\s\S]{0,200}prefixeId: 'ECH_'/,
+            'cartouches.js': /dupliquerVersBibliotheque\(\{[\s\S]{0,200}prefixeId: 'CART_'/,
+            'productions-bibliotheque-ui.js': /dupliquerVersBibliotheque\(\{[\s\S]{0,200}prefixeId: 'PROD_'/,
+            'pratiques-gestion.js': /dupliquerVersBibliotheque\(\{[\s\S]{0,200}prefixeId: 'pratique_'/
         })) {
-            expect(lire(fichier), `${fichier} : collection non transmise à forkerItem`).toMatch(motif);
+            expect(lire(fichier), `${fichier} : n'appelle pas le moteur partagé de bibliothèque`)
+                .toMatch(motif);
+        }
+
+        // Et la voie bibliothèque ne refait plus le retrait chez elle : s'il y
+        // revenait, c'est que la séquence a été recopiée — le défaut d'origine.
+        //
+        // ⚠ L'ASSERTION EST PORTÉE PAR LE CORPS DE LA FONCTION, PAS PAR LE FICHIER.
+        // Elle a d'abord été écrite sur le fichier entier, et elle est devenue un
+        // FAUX ROUGE dès la convergence du 24 août : `dupliquerGrilleDepuisSidebar`
+        // a légitimement reçu son propre `delete copie.metadata_cc` (D4), sur une
+        // voie qui ne passe pas par le moteur. Un cliquet trop large ne protège pas
+        // mieux — il interdit des correctifs justes.
+        for (const [fichier, fonction] of Object.entries({
+            'grilles.js': 'dupliquerGrilleBibliotheque',
+            'echelles.js': 'dupliquerEchelleBibliotheque',
+            'cartouches.js': 'dupliquerCartoucheBibliotheque',
+            'productions-bibliotheque-ui.js': 'dupliquerProductionBibliotheque'
+        })) {
+            const corps = corpsDeFonction(lire(fichier), fonction);
+            expect(corps, `${fichier} : ${fonction} introuvable`).toBeTruthy();
+            expect(corps, `${fichier} : ${fonction} refait le retrait au lieu de le déléguer`)
+                .not.toMatch(/delete \w+\.metadata_cc/);
+        }
+    });
+
+    it('les cinq familles passent par le moteur partagé de « dupliquer et éditer »', () => {
+        // C'est ce qui leur fait hériter de la garantie ci-dessus. Si une
+        // famille se remettait à dérouler la séquence chez elle, la garde
+        // CO-24 de ce chemin cesserait de valoir pour elle sans que rien
+        // d'autre ne rougisse.
+        for (const fichier of ['grilles.js', 'echelles.js', 'cartouches.js',
+                               'productions-liste.js', 'pratiques-gestion.js']) {
+            expect(lire(fichier), `${fichier} : n'appelle pas le moteur partagé`)
+                .toMatch(/BibliothequeUI\.dupliquerEtEditerItem\(/);
+            expect(lire(fichier), `${fichier} : refait la séquence au lieu de la déléguer`)
+                .not.toMatch(/forkerItem\(/);
         }
     });
 });

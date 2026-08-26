@@ -431,7 +431,15 @@
         copie.id = genererId(prefixeId || 'ITEM_');
         // CO-24 — dupliquer une copie donnait « X (copie) (copie) (copie) ».
         // `nommerCopie` normalise le suffixe au lieu de l'empiler.
-        copie.nom = nommerCopie(source.nom || source.titre, nomsExistants);
+        //
+        // ✅ D9 (arbitrage du 24 août) — ON RENOMME LE CHAMP QUI EXISTE, ET LUI SEUL.
+        // Avant, la ligne était `copie.nom = nommerCopie(source.nom || source.titre)` :
+        // une production, qui se nomme par `titre` et n'a pas de `nom`, se voyait
+        // POSER un `nom` que sa source n'avait pas. La copie portait deux champs de
+        // nom, l'originale un seul — et son `titre`, lui, restait à renommer par
+        // l'appelant, à la main et par concaténation nue.
+        var champNom = (source.nom !== undefined && source.nom !== null) ? 'nom' : 'titre';
+        copie[champNom] = nommerCopie(source[champNom], nomsExistants);
         copie.auteur = auteurActif;
         copie.isDemo = false;
         copie.inspireDe = BibliothequeUI.forgerInspireDe(source);
@@ -439,6 +447,153 @@
         copie.dateCreation = new Date().toISOString();
         delete copie.metadata_cc;
         delete copie.auteurOriginal;
+        // ✅ D7 (arbitrage du 24 août) — la copie d'un gabarit n'est plus un
+        // gabarit. Verdict de Grégoire : c'est le comportement de
+        // `dupliquerPratiqueBibliotheque` qui fait foi. Avant, `forkerItem` ne
+        // connaissait pas ce drapeau, si bien que « Dupliquer et éditer » rendait
+        // une copie encore marquée gabarit là où sa voisine la libérait.
+        delete copie.estGabarit;
+        return copie;
+    };
+
+    /**
+     * Met le curseur dans le champ de nom fraîchement chargé, texte sélectionné,
+     * pour que l'utilisateur puisse renommer la copie sans un clic de plus.
+     *
+     * @param {string} idChamp - id DOM du champ de nom de la famille
+     */
+    BibliothequeUI.focaliserChamp = function (idChamp) {
+        if (!idChamp) return;
+        var champ = document.getElementById(idChamp);
+        if (champ) {
+            champ.focus();
+            champ.select();
+        }
+    };
+
+    /**
+     * #476 volet 2 — LE CHEMIN « DUPLIQUER ET ÉDITER », POUR LES CINQ FAMILLES.
+     *
+     * Les cinq `dupliquerEtEditerX` (grilles, échelles, cartouches, productions,
+     * pratiques) exécutaient la MÊME séquence, recopiée cinq fois :
+     *   lire la liste → trouver la source → forker → pousser → écrire →
+     *   rafraîchir la liste → charger la copie en édition → focus du champ de nom.
+     * Elles ne différaient que par leur plomberie (quelle clé, quel préfixe d'ID,
+     * quelles fonctions de rafraîchissement) — jamais par leur logique.
+     *
+     * Zéro-dette : la séquence vit ICI, une seule fois. Chaque famille n'apporte
+     * plus que son descripteur. Les fonctions de rafraîchissement sont INTERNES à
+     * l'IIFE de leur module et ne peuvent donc pas être atteintes d'ici : elles
+     * arrivent en rappels, ce qui est aussi ce qui garde chaque famille maîtresse
+     * de son UI.
+     *
+     * ⚠ NE REND RIEN VOLONTAIREMENT. Les cinq appelants d'origine rendaient
+     * `undefined` ; rendre la copie serait un changement de contrat, hors du
+     * mandat « refactor pur » du volet 2. Le banc de caractérisation
+     * (tests/integration/carac-476-volet2-duplication.spec.js) fige ce point.
+     *
+     * @param {Object} d                    - descripteur de famille
+     * @param {string} d.id                 - id de l'item à dupliquer
+     * @param {string} d.prefixeId          - préfixe d'ID de la famille ('GRILLE_'…)
+     * @param {Function} d.lireListe        - () => liste (peut être asynchrone)
+     * @param {Function} d.ecrireListe      - (liste) => void (peut être asynchrone)
+     * @param {Function} [d.repliSource]    - (id) => source, si absente de la liste
+     * @param {Function} [d.retoucherCopie] - (copie, source) => void, après forkerItem
+     * @param {Function} [d.rafraichirListe]- () => void, avant le chargement en édition
+     * @param {Function} [d.chargerPourModif] - (idCopie) => void
+     * @param {string} [d.champFocus]       - id DOM du champ de nom
+     */
+    BibliothequeUI.dupliquerEtEditerItem = async function (d) {
+        var liste = await d.lireListe();
+        if (!Array.isArray(liste)) liste = [];
+
+        var source = liste.find(function (x) { return x && x.id === d.id; });
+        if (!source && typeof d.repliSource === 'function') {
+            source = await d.repliSource(d.id);
+        }
+        if (!source) return;
+
+        var copie = BibliothequeUI.forkerItem(source, d.prefixeId, liste);
+        if (typeof d.retoucherCopie === 'function') d.retoucherCopie(copie, source);
+
+        liste.push(copie);
+        await d.ecrireListe(liste);
+
+        if (typeof d.rafraichirListe === 'function') await d.rafraichirListe();
+        if (typeof d.chargerPourModif === 'function') await d.chargerPourModif(copie.id);
+        BibliothequeUI.focaliserChamp(d.champFocus);
+    };
+
+    /**
+     * #476 volet 2 — LE CHEMIN « DUPLIQUER DEPUIS LA BIBLIOTHÈQUE », POUR LES
+     * CINQ FAMILLES.
+     *
+     * Les cinq `dupliquerXBibliotheque` faisaient la même chose : copier la
+     * source, lui donner une identité neuve, l'attribuer à l'utilisateur
+     * courant, poser la trace de provenance, la ranger dans la bibliothèque,
+     * retirer les métadonnées de partage, écrire, rafraîchir. Une seule
+     * séquence, recopiée cinq fois.
+     *
+     * ⚠ CE QUI RESTE PARAMÉTRÉ EST UNE DETTE, PAS UNE FONCTIONNALITÉ. Les
+     * rappels `nommerLaCopie` et `forgerProvenance` existent parce que les cinq
+     * familles ont DIVERGÉ sans que personne le décide — pas parce qu'on
+     * voudrait qu'elles diffèrent. Les rassembler ici est justement ce qui rend
+     * l'écart visible et la convergence décidable (BACKLOG #476, les neuf
+     * écarts). Le volet 2 étant un refactor PUR, chaque écart est reconduit à
+     * l'identique et signalé chez l'appelant.
+     *
+     * @param {Object} d
+     * @param {string} d.id                  - id de l'item source
+     * @param {string} d.prefixeId           - préfixe d'ID de la famille
+     * @param {Function} d.lireListe         - () => liste (sync ou async)
+     * @param {Function} d.ecrireListe       - (liste) => void (sync ou async)
+     * @param {Function} d.nommerLaCopie     - (copie, source, liste) => void
+     * @param {Function} d.forgerProvenance  - (source) => objet `inspireDe`
+     * @param {boolean} [d.cloneProfond]     - clone JSON au lieu d'un étalement
+     * @param {Function} [d.siIntrouvable]   - () => void, message d'absence
+     * @param {Function} [d.retoucherCopie]  - (copie, source) => void, en fin de course
+     * @param {Function} [d.rafraichirUI]    - () => void
+     * @returns {Object|null} la copie écrite, ou null si la source est absente
+     */
+    BibliothequeUI.dupliquerVersBibliotheque = async function (d) {
+        var liste = await d.lireListe();
+        if (!Array.isArray(liste)) liste = [];
+
+        var source = liste.find(function (x) { return x && x.id === d.id; });
+        if (!source) {
+            if (typeof d.siIntrouvable === 'function') d.siIntrouvable();
+            return null;
+        }
+
+        var genererId = window.genererIdUnique || function (p) {
+            return (p || 'ITEM_') + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        };
+
+        // Étalement ou clone profond : seules les pratiques exigent le second
+        // (sous-objets `configuration` / `jetons` partagés sinon — invariant
+        // « source immuable », durcissement de la Brique C).
+        var copie = d.cloneProfond
+            ? JSON.parse(JSON.stringify(source))
+            : Object.assign({}, source);
+
+        copie.id = genererId(d.prefixeId);
+        d.nommerLaCopie(copie, source, liste);
+        copie.auteur = BibliothequeUI.obtenirAuteurActif();
+        copie.isDemo = false;
+        copie.inspireDe = d.forgerProvenance(source);
+        copie.dansBibliotheque = true;
+        copie.dateCreation = new Date().toISOString();
+
+        // La copie devient un original de l'utilisateur : les métadonnées de
+        // partage de la source n'ont plus cours.
+        delete copie.metadata_cc;
+        delete copie.auteurOriginal;
+        if (typeof d.retoucherCopie === 'function') d.retoucherCopie(copie, source);
+
+        liste.push(copie);
+        await d.ecrireListe(liste);
+
+        if (typeof d.rafraichirUI === 'function') await d.rafraichirUI();
         return copie;
     };
 

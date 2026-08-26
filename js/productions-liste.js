@@ -31,27 +31,23 @@
  * Phase 4.B : fork une production démo et charge la copie en édition.
  */
 async function dupliquerEtEditerProduction(id) {
-    const cleProductions = getCleProductions();
-    const productions = await db.get(cleProductions) || [];
-    const production = productions.find(p => p.id === id);
-    if (!production) return;
-
-    const copie = BibliothequeUI.forkerItem(production, 'PROD_', productions);
-    // Les productions utilisent `titre` plutôt que `nom`
-    if (production.titre) copie.titre = production.titre + ' (copie)';
-    productions.push(copie);
-    await db.set(cleProductions, productions);
-
-    if (typeof afficherListeProductions === 'function') {
-        await afficherListeProductions();
-    }
-    await chargerProductionPourModif(copie.id);
-
-    const titreField = document.getElementById('productionTitre');
-    if (titreField) {
-        titreField.focus();
-        titreField.select();
-    }
+    // #476 volet 2 — séquence partagée ; ne reste que la plomberie des productions.
+    await BibliothequeUI.dupliquerEtEditerItem({
+        id: id,
+        prefixeId: 'PROD_',
+        lireListe: async () => await db.get(getCleProductions()) || [],
+        ecrireListe: async (liste) => { await db.set(getCleProductions(), liste); },
+        // ✅ D9 + D3 (arbitrage du 24 août) — PLUS DE RETOUCHE ICI. `forkerItem`
+        // renomme désormais le champ qui existe : `titre` pour une production, et
+        // par `nommerCopie`. Avant, il posait un `nom` que la production n'avait
+        // pas, puis cette retouche réécrivait le `titre` par concaténation nue —
+        // deux défauts pour un seul renommage.
+        rafraichirListe: async () => {
+            if (typeof afficherListeProductions === 'function') await afficherListeProductions();
+        },
+        chargerPourModif: async (idCopie) => { await chargerProductionPourModif(idCopie); },
+        champFocus: 'productionTitre'
+    });
 }
 
 /**
@@ -324,20 +320,25 @@ async function dupliquerProduction(id) {
 
     // Créer une copie avec un nouvel ID. La copie devient un nouvel original
     // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY).
+    // ✅ D2 + D4 + D5 (arbitrage du 24 août) — ON RENOMME CE QUE L'UTILISATEUR VOIT.
+    // Avant, le `titre` — le champ affiché dans la liste — restait IDENTIQUE à
+    // celui de la source : rien ne distinguait la copie de l'originale. Ce sont
+    // `activiteApprentissage` et `description` qui recevaient « (copie) », et la
+    // description était ÉCRASÉE par l'activité au passage, perdant son texte sans
+    // avertissement. Désormais : le titre passe par `nommerCopie`, les deux autres
+    // champs sont laissés intacts, la provenance est complète et les métadonnées
+    // de partage de la source sont retirées.
     const copie = {
         ...production,
         id: genererIdUnique('PROD_'),
-        activiteApprentissage: `${production.activiteApprentissage || production.description || ''} (copie)`,
-        description: `${production.activiteApprentissage || production.description || ''} (copie)`,
+        titre: nommerCopie(production.titre, productions),
         auteur: BibliothequeUI.obtenirAuteurActif(),
         isDemo: false,
-        inspireDe: {
-            nom: production.titre || production.activiteApprentissage || 'Inconnu',
-            auteur: production.auteur || 'Inconnu',
-            date: new Date().toISOString().slice(0, 10)
-        },
+        inspireDe: BibliothequeUI.forgerInspireDe(production),
         verrouille: false
     };
+    delete copie.metadata_cc;
+    delete copie.auteurOriginal;
 
     productions.push(copie);
     await db.set(getCleProductions(), productions);

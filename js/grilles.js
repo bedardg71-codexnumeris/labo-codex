@@ -993,11 +993,10 @@ async function dupliquerGrille(grilleId) {
         dateModification: new Date().toISOString(),
         auteur: auteurActif,
         isDemo: false,
-        inspireDe: {
-            nom: grilleOriginale.nom,
-            auteur: grilleOriginale.auteur || 'Inconnu',
-            date: new Date().toISOString().slice(0, 10)
-        },
+        // ✅ D5 — provenance COMPLÈTE (`sourceId` compris). Avant, l'objet était
+        // construit à la main sur trois clés : deux grilles homonymes rendaient la
+        // filiation indécidable.
+        inspireDe: BibliothequeUI.forgerInspireDe(grilleOriginale),
         dansBibliotheque: true  // ✅ AJOUT (Beta 95.2 - Bug Bruno) - Grille dupliquée dans bibliothèque
     };
 
@@ -1016,76 +1015,6 @@ async function dupliquerGrille(grilleId) {
     await chargerGrilleTemplate();
 
     notifications.succes(`Grille "${nouvelleGrille.nom}" créée à partir de "${grilleOriginale.nom}" !`);
-}
-
-/* ===============================
-   📑 FONCTION: DUPLIQUER GRILLE ACTUELLE
-   Duplique la grille en cours d'édition
-   ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
-   =============================== */
-
-/**
- * Duplique la grille actuellement en édition
- * 
- * UTILISÉ PAR:
- * - Bouton "Dupliquer cette grille"
- * 
- * FONCTIONNEMENT:
- * Vérifie qu'il y a une grille active puis appelle la logique de duplication
- */
-async function dupliquerGrilleActuelle() {
-    if (!grilleTemplateActuelle) {
-        alert('Aucune grille à dupliquer');
-        return;
-    }
-
-    // CO-24 — la collection est lue AVANT l'invite : `nommerCopie` doit
-    // connaître les noms déjà pris pour proposer le premier rang libre.
-    let grilles = await db.get(cle('grillesTemplates')) || [];
-
-    // Demander le nom de la nouvelle grille
-    const nouveauNom = prompt('Nom de la nouvelle grille :', nommerCopie(grilleTemplateActuelle.nom, grilles));
-
-    if (!nouveauNom || nouveauNom.trim() === '') {
-        return;
-    }
-
-    // Créer la nouvelle grille avec les mêmes critères
-    const nouvelleGrille = {
-        id: genererIdUnique('GRILLE_'),
-        nom: nouveauNom.trim(),
-        criteres: grilleTemplateActuelle.criteres.map(c => ({
-            ...c,
-            id: genererIdUnique('CR_')
-        })),
-        dateCreation: new Date().toISOString(),
-        dateModification: new Date().toISOString(),
-        baseSur: grilleTemplateActuelle.nom,
-        dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) - Grille dupliquée dans bibliothèque par défaut
-    };
-
-    // Sauvegarder la nouvelle grille
-    grilles.push(nouvelleGrille);
-    await db.set(cle('grillesTemplates'), grilles);
-
-    // Mettre à jour l'interface
-    grilleTemplateActuelle = nouvelleGrille;
-    await chargerListeGrillesTemplates();
-    await afficherToutesLesGrillesCriteres();
-
-    // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
-    await afficherListeGrilles();
-
-    const select = document.getElementById('selectGrilleTemplate');
-    const nomInput = document.getElementById('nomGrilleTemplate');
-    if (select) select.value = nouvelleGrille.id;
-    if (nomInput) nomInput.value = nouvelleGrille.nom;
-    afficherListeCriteres(nouvelleGrille.criteres, nouvelleGrille.id);
-
-    const btnDupliquer = document.getElementById('btnDupliquerGrille');
-    if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
-
-    notifications.succes(`Grille "${nouvelleGrille.nom}" créée à partir de "${grilleTemplateActuelle.baseSur}" !`);
 }
 
 /* ===============================
@@ -1614,7 +1543,6 @@ async function initialiserModuleGrilles() {
  * - chargerGrilleEnEdition(grilleId)
  * - supprimerGrille(grilleId)
  * - dupliquerGrille(grilleId)
- * - dupliquerGrilleActuelle()
  * - basculerVerrouillageCritere(critereId)
  * - getTypeCritereLabel(type)
  * - calculerTotalPonderationCriteres(criteres)
@@ -2088,7 +2016,6 @@ window.fermerModalGrilles = fermerModalGrilles;
 window.chargerGrilleEnEdition = chargerGrilleEnEdition;
 window.supprimerGrille = supprimerGrille;
 window.dupliquerGrille = dupliquerGrille;
-window.dupliquerGrilleActuelle = dupliquerGrilleActuelle;
 window.basculerVerrouillageCritere = basculerVerrouillageCritere;
 window.getTypeCritereLabel = getTypeCritereLabel;
 window.calculerTotalPonderationCriteres = calculerTotalPonderationCriteres;
@@ -2778,50 +2705,23 @@ async function ajouterMesGrillesALaBibliotheque() {
  * @param {string} id - ID de la grille à dupliquer
  */
 async function dupliquerGrilleBibliotheque(id) {
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === id);
-
-    if (!grille) {
-        alert('Grille introuvable');
-        return;
-    }
-
-    // Auteur de l'utilisateur actif (CC BY) ; fallback « Inconnu » si pas défini
-    const auteurActif = (typeof obtenirProfilAuteurActifSync === 'function'
-        ? obtenirProfilAuteurActifSync()?.auteur_original
-        : null) || 'Inconnu';
-
-    // Créer une copie avec un nouvel ID. La copie devient un nouvel original
-    // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
-    // source était une démo, le nouvel item perd le flag isDemo.
-    const nouvelleGrille = {
-        ...grille,
-        id: genererIdUnique('GRILLE_'),
-        nom: nommerCopie(grille.nom, grilles),
-        auteur: auteurActif,
-        isDemo: false,
-        inspireDe: {
-            nom: grille.nom,
-            auteur: grille.auteur || 'Inconnu',
-            date: new Date().toISOString().slice(0, 10)
-        },
-        dansBibliotheque: true,
-        dateCreation: new Date().toISOString()
-    };
-
-    // Supprimer les métadonnées de partage (c'est une nouvelle grille)
-    delete nouvelleGrille.metadata_cc;
-    delete nouvelleGrille.auteurOriginal;
-
-    // Ajouter à la liste
-    grilles.push(nouvelleGrille);
-    await db.set(cle('grillesTemplates'), grilles);
-
-    // Rafraîchir UI
-    fermerModalBibliothequeGrilles();
-    await afficherListeGrilles();
-    await afficherBibliothequeGrilles();
-
+    // #476 volet 2 — séquence partagée (BibliothequeUI.dupliquerVersBibliotheque).
+    await BibliothequeUI.dupliquerVersBibliotheque({
+        id: id,
+        prefixeId: 'GRILLE_',
+        lireListe: async () => await db.get(cle('grillesTemplates')) || [],
+        ecrireListe: async (liste) => { await db.set(cle('grillesTemplates'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
+        nommerLaCopie: (copie, source, liste) => { copie.nom = nommerCopie(source.nom, liste); },
+        // ✅ D5 — aligné sur les trois autres familles : `forgerInspireDe` pose
+        // aussi `sourceId`, ce qui rend l'arbre de filiation décidable.
+        forgerProvenance: (source) => BibliothequeUI.forgerInspireDe(source),
+        siIntrouvable: () => alert('Grille introuvable'),
+        rafraichirUI: async () => {
+            fermerModalBibliothequeGrilles();
+            await afficherListeGrilles();
+            await afficherBibliothequeGrilles();
+        }
+    });
 }
 
 /**
@@ -3214,22 +3114,17 @@ async function chargerGrillePourModif(id) {
  * Déclenché depuis le bandeau du formulaire en lecture seule.
  */
 async function dupliquerEtEditerGrille(id) {
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === id);
-    if (!grille) return;
-
-    const copie = BibliothequeUI.forkerItem(grille, 'GRILLE_', grilles);
-    grilles.push(copie);
-    await db.set(cle('grillesTemplates'), grilles);
-
-    await afficherListeGrilles();
-    await chargerGrillePourModif(copie.id);
-
-    const nomField = document.getElementById('nomGrilleTemplate');
-    if (nomField) {
-        nomField.focus();
-        nomField.select();
-    }
+    // #476 volet 2 — la séquence vit dans BibliothequeUI.dupliquerEtEditerItem ;
+    // il ne reste ici que la plomberie propre aux grilles.
+    await BibliothequeUI.dupliquerEtEditerItem({
+        id: id,
+        prefixeId: 'GRILLE_',
+        lireListe: async () => await db.get(cle('grillesTemplates')) || [],
+        ecrireListe: async (liste) => { await db.set(cle('grillesTemplates'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
+        rafraichirListe: async () => { await afficherListeGrilles(); },
+        chargerPourModif: async (idCopie) => { await chargerGrillePourModif(idCopie); },
+        champFocus: 'nomGrilleTemplate'
+    });
 }
 
 function afficherCriteresGrille(grille) {
@@ -3776,12 +3671,25 @@ async function dupliquerGrilleDepuisSidebar(id) {
 
     if (!grille) return;
 
+    // ✅ D1 + D4 + D5 (arbitrage du 24 août) — LA COPIE DEVIENT CELLE DE
+    // L'UTILISATEUR. Avant, cette voie se contentait d'étaler la source : elle ne
+    // posait ni `auteur`, ni `isDemo`, ni `inspireDe`, et gardait `metadata_cc`.
+    // Or `BibliothequeUI.estItemDemo` rend vrai sur `isDemo === true` OU sur
+    // l'auteur « Demo Labo Codex » — la copie gardait LES DEUX, et
+    // `appliquerModeLectureSeuleDemo` désactivait alors tous ses champs :
+    // dupliquer un exemple depuis la barre latérale rendait une copie qu'on ne
+    // pouvait toujours pas modifier, soit exactement ce que le geste doit débloquer.
     const copie = {
         ...grille,
         id: genererIdUnique('GRILLE_'),
         nom: nommerCopie(grille.nom, grilles),
+        auteur: BibliothequeUI.obtenirAuteurActif(),
+        isDemo: false,
+        inspireDe: BibliothequeUI.forgerInspireDe(grille),
         verrouille: false
     };
+    delete copie.metadata_cc;
+    delete copie.auteurOriginal;
 
     grilles.push(copie);
     await db.set(cle('grillesTemplates'), grilles);
@@ -3861,13 +3769,16 @@ function annulerFormGrille() {
 /**
  * Duplique la grille actuellement en édition
  */
-function dupliquerGrilleActive() {
+async function dupliquerGrilleActive() {
     if (!grilleTemplateActuelle) {
         alert('Aucune grille en cours d\'édition');
         return;
     }
     // ✅ CORRIGÉ (16 mars 2026) : grilleTemplateActuelle est un objet, pas un ID
-    dupliquerGrilleDepuisSidebar(grilleTemplateActuelle.id);
+    // ✅ D10 (arbitrage du 24 août) : `async` + `await`, aligné sur
+    // `dupliquerEchelleActive`. Avant, seule des 22 à être synchrone, elle rendait
+    // la main AVANT l'écriture — un appelant qui enchaînait lisait l'état d'avant.
+    await dupliquerGrilleDepuisSidebar(grilleTemplateActuelle.id);
 }
 
 /**
