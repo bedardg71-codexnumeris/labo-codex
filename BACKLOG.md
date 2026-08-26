@@ -511,6 +511,41 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   jour redeviendrait une définition isolée — et le tutoriel expliquerait ce que l'écran tait.
   Vitest **3377/3377** (321 fichiers). Deux break-tests, deux ROUGE.
 
+- [ ] **#529** 📐 **CHANTIER MAJEUR — sortir SRPNF et IDME du code.** Session DÉDIÉE (décision
+  Grégoire, 26 août : « rien ne doit être codé en dur, mais l'échelle IDME peut être seedée par
+  contre »). Audit : `Rapports/AUDIT-srpnf-code-en-dur-2026-08-26.md`.
+  ⚠⚠ **LA RÈGLE, telle que Grégoire l'a énoncée — elle décide de tout le chantier** :
+  · **SEEDER est permis** : livrer IDME comme valeur de départ, modifiable, dans les données. C'est
+    une commodité d'accueil, pas une contrainte.
+  · **CODER EN DUR est interdit** : inscrire les codes ou les noms dans la LOGIQUE — regex, cascade
+    de `if`, tableau littéral, objet de traduction, définition de glossaire.
+  ⮕ La différence tient en une question : *l'utilisateur peut-il changer cette valeur et l'application
+    continue-t-elle de fonctionner ?* Si oui, c'est un seed. Sinon, c'est du dur.
+  **Ce que l'audit a trouvé, par ordre de gravité** :
+  1. ⚠⚠ **BLOQUANT — le calcul.** `profil-etudiant-calculs.js:922` extrait les scores par critère du
+     TEXTE des rétroactions, via
+     `/(STRUCTURE|RIGUEUR|PLAUSIBILIT[ÉE]|NUANCE|FRAN[ÇC]AIS\s+[ÉE]CRIT)\s*\(([IDME])\)/gi`, puis
+     ventile par cascade nominale. Les cinq critères ET les quatre niveaux y sont. ⮕ **Pour tout
+     utilisateur qui n'est pas Grégoire, le bloc « Forces et défis » du profil est MUET.** Et le
+     mécanisme est fragile en soi : relire de la prose pour retrouver une donnée écrite structurée
+     ailleurs — toute reformulation d'un libellé casse le calcul, en silence.
+  2. **L'interface** : `profil-etudiant-sections-affichage.js:3686` — la liste des cinq barres est un
+     tableau littéral ; `:3639` — les noms sont un objet littéral, avec un repli `|| cle` qui trahit
+     que le cas « autre critère » a été entrevu sans être traité.
+  3. **L'aide** : le popup `profil-etudiant-indicateurs` définit les cinq critères ; le glossaire
+     d'`index.html` (l. 14037) présente SRPNF comme un terme de l'application **avec les pondérations
+     personnelles de Grégoire** (15/20/10/25/30 %). Six autres mentions décrivent des écrans par ces
+     critères.
+  ✔ **LA BONNE FORME EXISTE DÉJÀ, et elle prouve que c'est tenable** : `index.html:10260` — « *L'exemple
+    qui suit (SRPNF)* illustre une grille inspirée du modèle ELLAC, développé pour l'enseignement de la
+    lecture littéraire au collégial ». Cadré comme exemple, attribué à sa source, situé dans sa
+    discipline. C'est le patron à généraliser.
+  ⏳ **À MESURER EN PREMIER, avant toute correction** : ce que voit réellement un utilisateur avec une
+  autre grille — barres vides, à zéro, ou absentes ? Le code suggère « vides », ce n'est pas vérifié.
+  ⏳ **Non dépouillés** : `js/interventions.js` (4), `js/evaluation.js` (4), `js/pratiques/*` (12).
+  Recoupe [[feedback-concepts-pedagogiques-couche-2-configurables]] et
+  [[feedback-libelles-idme-configurables]].
+
 ### Constats de l'audit du 25 août ENCORE OUVERTS
 
 > Les six correctifs ci-dessus (#509 à #515) épuisent ce qui ne demandait pas d'arbitrage de
