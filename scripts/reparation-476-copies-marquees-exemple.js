@@ -88,17 +88,34 @@
         return SUFFIXES_VISES.find(s => cle === s || cle.endsWith('_' + s)) || null;
     }
 
+    /**
+     * ⚠⚠ « Inconnu » N'EST PAS UN AUTEUR (constaté au dry-run du 26 août sur les
+     * données réelles : le rapport annonçait « Auteur actif : Inconnu »).
+     *
+     * `obtenirAuteurActif` rend la chaîne 'Inconnu' quand aucun profil
+     * enseignant n'est résolu — c'est un LIBELLÉ d'affichage, pas une identité.
+     * L'écrire dans `auteur` remplacerait une attribution juste par une
+     * attribution fausse, et de façon durable. Mieux vaut ne pas réattribuer :
+     * la marque « exemple » part quand même, et c'est elle qui bloquait
+     * l'édition.
+     */
+    const AUTEURS_NON_IDENTIFIES = ['inconnu', 'anonyme', ''];
+
     function _auteurActif() {
+        const retenir = (valeur) => {
+            const nom = String(valeur == null ? '' : valeur).trim();
+            return (nom && AUTEURS_NON_IDENTIFIES.indexOf(nom.toLowerCase()) === -1) ? nom : null;
+        };
         try {
             if (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.obtenirAuteurActif) {
-                const a = BibliothequeUI.obtenirAuteurActif();
+                const a = retenir(BibliothequeUI.obtenirAuteurActif());
                 if (a) return a;
             }
         } catch (e) { /* on tente la voie suivante */ }
         try {
             if (typeof obtenirProfilAuteurActifSync === 'function') {
                 const p = obtenirProfilAuteurActifSync();
-                if (p && p.auteur_original) return p.auteur_original;
+                if (p) { const a = retenir(p.auteur_original); if (a) return a; }
             }
         } catch (e) { /* rien */ }
         return null;
@@ -122,8 +139,9 @@
 
         const auteur = _auteurActif();
         if (!auteur) {
-            L('⚠ Auteur actif introuvable : la marque « exemple » sera retirée,');
-            L('  mais `auteur` ne sera pas réattribué (rien d\'inventé).');
+            L('⚠ Aucun auteur IDENTIFIÉ (« Inconnu » n\'en est pas un) : la marque');
+            L('  « exemple » sera retirée — c\'est elle qui bloque l\'édition —, mais');
+            L('  `auteur` ne sera pas réécrit. Rien d\'inventé dans tes données.');
         } else {
             L('Auteur actif : ' + auteur);
         }
