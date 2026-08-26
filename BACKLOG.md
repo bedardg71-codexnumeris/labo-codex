@@ -401,13 +401,33 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 > Les six correctifs ci-dessus (#509 à #515) épuisent ce qui ne demandait pas d'arbitrage de
 > Grégoire. Restent, du rapport `Rapports/AUDIT-conception-gabarits-2026-08-25.md` :
 
-- [ ] **#516** ✅ **TRANCHÉ 26 août : REFUSER l'enregistrement d'un critère sans nom** (verdict D1), **+ exigence : astérisques ROUGES partout, pas de bleu**. ⮕ Cause du bleu trouvée le jour même : `.text-danger` n'a AUCUNE règle de couleur dans le projet — 28 astérisques héritent de la couleur de leur label ; `.champ-requis` (3 usages, nom français) est correctement rouge. Le chantier unifie donc sur `.champ-requis`. 📐 **A3 — l'astérisque « Nom du critère » promet un refus qui n'existe pas.**
+- [x] **#516 LIVRÉ 26 août 2026** ✅ **TRANCHÉ : REFUSER l'enregistrement d'un critère sans nom** (verdict D1), **+ exigence : astérisques ROUGES partout, pas de bleu**. ⮕ Cause du bleu trouvée le jour même : `.text-danger` n'a AUCUNE règle de couleur dans le projet — 28 astérisques héritent de la couleur de leur label ; `.champ-requis` (3 usages, nom français) est correctement rouge. Le chantier unifie donc sur `.champ-requis`. 📐 **A3 — l'astérisque « Nom du critère » promet un refus qui n'existe pas.**
   La légende (#506) dit « Champ obligatoire — l'enregistrement est refusé sans lui ». Reproduit au
   navigateur : une grille dont un critère a un nom VIDE s'enregistre sans aucun refus. La « preuve »
   de la sentinelle #506 pour ce champ vit dans `sauvegarderCritere()`, qui lit `#critereNom` — un id
   ABSENT d'index.html. La garde textuelle est donc ancrée sur du code mort et la sentinelle passe à
   vide (motif AP-2). **Décision requise** : valider réellement (attention à l'autosave) OU retirer
   l'astérisque de ce champ. Dans les deux cas, réancrer la preuve sur le chemin vivant.
+
+  ⮕ **LIVRÉ EN TROIS VOLETS.**
+  1. **Les astérisques sont rouges partout** : `.text-danger` n'avait AUCUNE règle de couleur dans
+     le projet — ses 29 porteurs héritaient de la couleur de leur label. Unifiés sur `.champ-requis`
+     (nom français, `--rouge-erreur`, déjà utilisée par 3 champs). ⚠ `text-danger-bs` et
+     `text-danger-red-bold` sont d'AUTRES classes, avec leur propre couleur : épargnées par une
+     limite de mot dans le remplacement.
+  2. **Le refus a lieu** : `modifierCritereGrille` n'écrit plus un nom vide et rend `{refuse}`.
+     ⚠ **On refuse l'écriture, on ne bloque pas la frappe** — ces champs s'enregistrent au blur, et
+     restaurer l'ancienne valeur ferait se re-remplir le champ sous les doigts de quelqu'un qui vide
+     pour retaper. L'écran garde ce qui est tapé, le champ est marqué `.champ-refuse`, et la raison
+     est dite UNE fois (trois blurs ne font pas trois bandeaux).
+  3. **La preuve est réancrée.** La garde #506 cherchait une CHAÎNE dans les sources, et la trouvait
+     dans `sauvegarderCritere()` — fonction qui lit `#critereNom`, id absent d'index.html, sans
+     appelant vivant. Elle pointe désormais le chemin vivant, et le refus est EXÉCUTÉ par
+     `sentinelle-516-nom-critere-refuse.test.js` (10 cas). Un texte trouvé dans un fichier ne
+     prouvera plus qu'un refus a lieu.
+  ⏳ **Code mort laissé en place, à verser à #469** : `sauvegarderCritere()` et `sauvegarderEtFermer()`
+     (exportée, jamais appelée). Elles ne trompent plus aucune sentinelle, mais elles sont toujours là.
+  Vitest **3331/3331** (317 fichiers). Trois break-tests, trois ROUGE.
 
 - [ ] **#517** ✅ **TRANCHÉ 26 août : ENREGISTREMENT AUTOMATIQUE**, comme les grilles et les échelles (verdict D2). Le namespacing des cartouches (CO-33/D1 du 21 août) reste un chantier SÉPARÉ et POSTÉRIEUR (verdict D3) — une migration de données doit pouvoir être annulée seule. 📐 **B1 — la matrice de cartouche ne vit qu'en RAM jusqu'au bouton Enregistrer.**
   `sauvegarderCommentaire()` écrit en mémoire seulement ; la persistance n'arrive qu'au bouton, en

@@ -60,8 +60,16 @@ const BLOQUANTS = [
      ["échelle est obligatoire"]],
     ['index.html', 'Nom de la cartouche',
      ["Veuillez donner un nom à la cartouche"]],
+    // ⚠⚠ #516 (26 août 2026) — CETTE PREUVE-LÀ PASSAIT À VIDE.
+    // La chaîne existait bien… dans `sauvegarderCritere()`, qui lit `#critereNom`
+    // — un id ABSENT d'index.html — et que plus aucun chemin n'appelle. La garde
+    // gardait donc du code mort, et l'astérisque promettait un refus qui n'avait
+    // jamais lieu. La preuve est réancrée sur le chemin VIVANT (`REFUS_NOM_CRITERE`,
+    // consommé par `modifierCritereGrille`), et le refus lui-même est désormais
+    // EXÉCUTÉ par `sentinelle-516-nom-critere-refuse.test.js` — un texte trouvé
+    // dans un fichier ne prouvera plus jamais qu'un refus a lieu.
     ['js/grilles.js', 'Nom du critère',
-     ["Le nom du critère est obligatoire"]]
+     ["const REFUS_NOM_CRITERE", "if (champ === 'nom' &&"]]
 ];
 
 describe('#506 · chaque champ marqué est refusé s\'il est vide', () => {
@@ -157,7 +165,7 @@ describe('#507 · « recommandé » se distingue d\'« obligatoire »', () => {
         expect(legende, 'légende trouvée').toBeTruthy();
         expect(legende[0], 'elle explique le rouge').toContain('obligatoire');
         expect(legende[0], 'et le gris').toContain('Recommandé');
-        expect(legende[0]).toContain('text-danger');
+        expect(legende[0]).toContain('champ-requis');
         expect(legende[0]).toContain('champ-recommande');
     });
 

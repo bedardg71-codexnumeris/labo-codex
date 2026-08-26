@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260826c"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260826d"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -2531,7 +2531,7 @@
             color: var(--niveau-attention-modere);
             font-weight: bold;
         }
-        .text-danger { color: #e74c3c; }
+        .champ-requis { color: #e74c3c; }
         .text-danger-bs { color: var(--niveau-attention-tres-eleve); }
         .text-warning-856-mt0 {
             color: var(--alerte-texte-attention);
@@ -4600,13 +4600,13 @@
                                      ═══════════════════════════════════════════════════════════ -->
 
                                 <p class="legende-marques">
-                                    <span class="text-danger">*</span> Champ obligatoire — l'enregistrement est refusé sans lui.
+                                    <span class="champ-requis">*</span> Champ obligatoire — l'enregistrement est refusé sans lui.
                                     &nbsp;·&nbsp;
                                     <span class="champ-recommande">*</span> Recommandé — l'application fonctionne sans, mais une information disparaît ailleurs.
                                 </p>
                                 <div class="u-flex-gap-20 u-mb-20 u-flex-wrap" style="align-items: flex-start">
                                     <div class="groupe-form u-flex-1" style="min-width: 300px; margin: 0">
-                                        <label>Nom de la production <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span> :</label>
+                                        <label>Nom de la production <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :</label>
                                         <input type="text" id="productionTitre" class="controle-form"
                                             placeholder="Ex: Analyse #1">
                                     </div>
@@ -4622,7 +4622,7 @@
                                 <!-- Ligne 2 : Type + Description -->
                                 <div class="u-mb-15" style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px">
                                     <div class="groupe-form">
-                                        <label data-tooltip="cn-prod-type">Type <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span></label>
+                                        <label data-tooltip="cn-prod-type">Type <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span></label>
                                         <select id="productionType" class="controle-form"
                                             data-on-change="gererChangementTypeProduction">
                                             <option value="">— Sélectionner —</option>
@@ -4675,7 +4675,7 @@
                                         <!-- Pondération + Note explicative -->
                                         <div id="champPonderation" style="display: grid; grid-template-columns: 150px 1fr; gap: 15px; align-items: start;">
                                             <div class="groupe-form" style="margin: 0;">
-                                                <label data-tooltip="cn-prod-ponderation">Pondération (%) <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span></label>
+                                                <label data-tooltip="cn-prod-ponderation">Pondération (%) <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span></label>
                                                 <input type="number" id="productionPonderation" class="controle-form" min="0"
                                                     max="100" placeholder="Ex: 20">
                                             </div>
@@ -4937,7 +4937,7 @@
                                 <!-- Nom + Pratiques compatibles sur même ligne -->
                                 <div class="u-flex-gap-20 u-mb-20 u-flex-wrap" style="align-items: flex-start">
                                     <div class="groupe-form u-flex-1" style="min-width: 300px; margin: 0">
-                                        <label>Nom de la grille <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span> :</label>
+                                        <label>Nom de la grille <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :</label>
                                         <input type="text" id="nomGrilleTemplate" class="controle-form"
                                             placeholder="Ex: Grille analyse littéraire" data-on-change="sauvegarderNomGrille">
                                     </div>
@@ -5076,7 +5076,7 @@
                                 <!-- Nom + Pratiques compatibles sur même ligne -->
                                 <div class="u-flex-gap-20 u-mb-20 u-flex-wrap" style="align-items: flex-start">
                                     <div class="groupe-form u-flex-1" style="min-width: 300px; margin: 0">
-                                        <label>Nom de l'échelle <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span> :</label>
+                                        <label>Nom de l'échelle <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :</label>
                                         <input type="text" id="nomEchelleTemplate" class="controle-form"
                                             placeholder="Ex: Échelle standard A-F" data-on-change="sauvegarderNomEchelle">
                                     </div>
@@ -5139,7 +5139,7 @@
                         <!-- Nom de l'échelle (visible uniquement en création/édition) -->
                         <div id="nomEchelleContainer" class="groupe-form"
                             class="max-w-400-mb20-hidden">
-                            <label>Nom de l'échelle <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span> :</label>
+                            <label>Nom de l'échelle <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :</label>
                             <input type="text" id="nomEchelleTemplate" class="controle-form"
                                 placeholder="Ex: Échelle standard A-F" data-on-change="sauvegarderNomEchelle">
                         </div>
@@ -5353,7 +5353,7 @@
                             <!-- Grille + Échelle + Nom sur même ligne -->
                             <div data-tooltip="cn-cartouche-selectors" class="u-flex-gap-15 u-mb-20 u-flex-wrap" style="align-items: flex-start">
                                 <div class="groupe-form" style="flex: 0 0 200px; margin: 0;">
-                                    <label>Grille (critères) <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span> :
+                                    <label>Grille (critères) <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :
                                         <span class="primo-aide" data-target="retroaction-grille-descriptive"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                                     </label>
                                     <select id="selectGrilleCartouche" class="controle-form" data-on-change="onChangeSelectionCartouche">
@@ -5362,14 +5362,14 @@
                                     </select>
                                 </div>
                                 <div class="groupe-form" style="flex: 0 0 200px; margin: 0;">
-                                    <label>Échelle (niveaux) <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span> :</label>
+                                    <label>Échelle (niveaux) <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :</label>
                                     <select id="selectEchelleCartouche" class="controle-form" data-on-change="onChangeSelectionCartouche">
                                         <option value="">— Échelle —</option>
                                         <!-- Options générées par JS -->
                                     </select>
                                 </div>
                                 <div class="groupe-form u-flex-1" style="min-width: 250px; margin: 0">
-                                    <label>Nom de la cartouche <span class="text-danger u-texte-medium" title="Champ obligatoire">*</span> :</label>
+                                    <label>Nom de la cartouche <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :</label>
                                     <input type="text" id="nomCartouche" class="controle-form"
                                         placeholder="Ex: Dissertation argumentative - H2026">
                                 </div>
@@ -6264,11 +6264,11 @@
                                         <h5 class="sous-titre-section u-mb-12" style="margin-top: 0" data-tooltip="reglages-trim-identification">Identification du trimestre</h5>
                                         <div class="grille-identification">
                                             <div class="groupe-form">
-                                                <label>Nom du trimestre <span class="text-danger u-texte-medium">*</span></label>
+                                                <label>Nom du trimestre <span class="champ-requis u-texte-medium">*</span></label>
                                                 <input type="text" class="controle-form" id="v2-nomTrimestre" placeholder="Ex: Hiver 2026">
                                             </div>
                                             <div class="groupe-form">
-                                                <label>Session <span class="text-danger u-texte-medium">*</span></label>
+                                                <label>Session <span class="champ-requis u-texte-medium">*</span></label>
                                                 <select class="controle-form" id="v2-sessionTrimestre">
                                                     <option value="">— Sélectionner —</option>
                                                     <option value="automne">Automne</option>
@@ -6277,7 +6277,7 @@
                                                 </select>
                                             </div>
                                             <div class="groupe-form">
-                                                <label>Année <span class="text-danger u-texte-medium">*</span></label>
+                                                <label>Année <span class="champ-requis u-texte-medium">*</span></label>
                                                 <input type="number" class="controle-form" id="v2-anneeTrimestre" min="2020" max="2050" placeholder="2026">
                                             </div>
                                         </div>
@@ -6372,11 +6372,11 @@
                                             <button data-action="annulerFormEvenementV2" class="btn-fermer" title="Annuler"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                                             <div class="u-mb-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
                                                 <div class="groupe-form">
-                                                    <label>Date <span class="text-danger u-texte-medium">*</span></label>
+                                                    <label>Date <span class="champ-requis u-texte-medium">*</span></label>
                                                     <input type="date" id="v2-dateEvenement" class="controle-form controle-form-compact">
                                                 </div>
                                                 <div class="groupe-form">
-                                                    <label>Description <span class="text-danger u-texte-medium">*</span></label>
+                                                    <label>Description <span class="champ-requis u-texte-medium">*</span></label>
                                                     <input type="text" id="v2-descriptionEvenement" class="controle-form controle-form-compact" placeholder="Ex: Fête du travail, tempête, maladie">
                                                 </div>
                                             </div>
@@ -6752,23 +6752,23 @@
 
                                     <div class="grille-form-2col u-mb-15">
                                         <div class="groupe-form">
-                                            <label>Prénom <span class="text-danger">*</span></label>
+                                            <label>Prénom <span class="champ-requis">*</span></label>
                                             <input type="text" id="v2-ens-prenom" class="controle-form" placeholder="Ex: Marie" data-on-change="mettreAJourCarteEnseignant">
                                         </div>
                                         <div class="groupe-form">
-                                            <label>Nom <span class="text-danger">*</span></label>
+                                            <label>Nom <span class="champ-requis">*</span></label>
                                             <input type="text" id="v2-ens-nom" class="controle-form" placeholder="Ex: Tremblay" data-on-change="mettreAJourCarteEnseignant">
                                         </div>
                                     </div>
 
                                     <div class="groupe-form u-mb-15">
-                                        <label>Courriel <span class="text-danger">*</span></label>
+                                        <label>Courriel <span class="champ-requis">*</span></label>
                                         <input type="email" id="v2-ens-courriel" class="controle-form" placeholder="Ex: marie.tremblay@cegep.qc.ca" data-on-change="mettreAJourCarteEnseignant">
                                     </div>
 
                                     <div class="grille-form-2col u-mb-15">
                                         <div class="groupe-form">
-                                            <label>Institution <span class="text-danger">*</span></label>
+                                            <label>Institution <span class="champ-requis">*</span></label>
                                             <input type="text" id="v2-ens-institution" class="controle-form" placeholder="Ex: Cégep de Drummondville" data-on-change="mettreAJourCarteEnseignant">
                                         </div>
                                         <div class="groupe-form">
@@ -7026,11 +7026,11 @@
                                                 <input type="text" id="v2-etudiantDA" class="controle-form controle-form-compact" placeholder="1234567">
                                             </div>
                                             <div class="groupe-form">
-                                                <label>Nom <span class="text-danger">*</span></label>
+                                                <label>Nom <span class="champ-requis">*</span></label>
                                                 <input type="text" id="v2-etudiantNom" class="controle-form controle-form-compact" placeholder="Tremblay">
                                             </div>
                                             <div class="groupe-form">
-                                                <label>Prénom <span class="text-danger">*</span></label>
+                                                <label>Prénom <span class="champ-requis">*</span></label>
                                                 <input type="text" id="v2-etudiantPrenom" class="controle-form controle-form-compact" placeholder="Marie">
                                             </div>
                                             <div class="groupe-form">
@@ -7164,7 +7164,7 @@
 
                                         <!-- Groupe associé (obligatoire) -->
                                         <div class="groupe-form u-mb-15">
-                                            <label>Groupe associé <span class="text-danger">*</span></label>
+                                            <label>Groupe associé <span class="champ-requis">*</span></label>
                                             <select id="v2-hor-groupeAssocie" class="controle-form">
                                                 <option value="">— Sélectionner un groupe —</option>
                                             </select>
@@ -7172,7 +7172,7 @@
                                         </div>
 
                                         <div class="groupe-form u-mb-15">
-                                            <label>Nom de l'horaire <span class="text-danger">*</span></label>
+                                            <label>Nom de l'horaire <span class="champ-requis">*</span></label>
                                             <input type="text" id="v2-hor-nom" class="controle-form" placeholder="Ex: Lun-Mer 10h">
                                         </div>
 
@@ -7320,13 +7320,13 @@
                                         <!-- Ligne 1: Trimestre + Cours -->
                                         <div class="grille-form-2col u-mb-15">
                                             <div class="groupe-form">
-                                                <label>1. Trimestre <span class="text-danger">*</span></label>
+                                                <label>1. Trimestre <span class="champ-requis">*</span></label>
                                                 <select id="v2-gc-trimestre" class="controle-form" data-on-change="mettreAJourNomGroupeCoursV2">
                                                     <option value="">— Choisir un trimestre —</option>
                                                 </select>
                                             </div>
                                             <div class="groupe-form">
-                                                <label>2. Cours à enseigner <span class="text-danger">*</span></label>
+                                                <label>2. Cours à enseigner <span class="champ-requis">*</span></label>
                                                 <select id="v2-gc-cours" class="controle-form" data-on-change="mettreAJourNomGroupeCoursV2">
                                                     <option value="">— Choisir un cours —</option>
                                                 </select>
@@ -7336,13 +7336,13 @@
                                         <!-- Ligne 2: Groupe + Horaire -->
                                         <div class="grille-form-2col u-mb-15">
                                             <div class="groupe-form">
-                                                <label>3. Numéro de groupe <span class="text-danger">*</span></label>
+                                                <label>3. Numéro de groupe <span class="champ-requis">*</span></label>
                                                 <select id="v2-gc-groupe" class="controle-form" data-on-change="mettreAJourNomGroupeCoursV2">
                                                     <option value="">— Choisir un groupe —</option>
                                                 </select>
                                             </div>
                                             <div class="groupe-form">
-                                                <label>4. Horaire <span class="text-danger">*</span></label>
+                                                <label>4. Horaire <span class="champ-requis">*</span></label>
                                                 <select id="v2-gc-horaire" class="controle-form" data-on-change="mettreAJourNomGroupeCoursV2">
                                                     <option value="">— Choisir un horaire —</option>
                                                 </select>
@@ -7352,7 +7352,7 @@
                                         <!-- Ligne 3: Enseignant + Pratique -->
                                         <div class="grille-form-2col u-mb-15">
                                             <div class="groupe-form">
-                                                <label>5. Enseignant·e <span class="text-danger">*</span></label>
+                                                <label>5. Enseignant·e <span class="champ-requis">*</span></label>
                                                 <select id="v2-gc-enseignant" class="controle-form" data-on-change="mettreAJourNomGroupeCoursV2">
                                                     <option value="">— Choisir un enseignant —</option>
                                                 </select>
@@ -14411,7 +14411,7 @@
     <script src="js/productions-liste.js?v=20260826c"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js -->
     <script src="js/productions-bibliotheque-ui.js?v=20260826a"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide -->
     <script src="js/grilles-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/grilles.js?v=20260826c"></script> <!-- Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée -->
+    <script src="js/grilles.js?v=20260826d"></script> <!-- Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée -->
     <script src="js/echelles-bibliotheque.js?v=20260821a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/echelles.js?v=20260826c"></script> <!-- Fix preview « Voir les échelles » : display:none inline → classe u-hide -->
     <script src="js/cartouches-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
@@ -14602,11 +14602,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260826c"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260826d"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260826c"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260826d"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
