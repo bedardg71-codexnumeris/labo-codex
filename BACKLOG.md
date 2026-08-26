@@ -546,7 +546,23 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Recoupe [[feedback-concepts-pedagogiques-couche-2-configurables]] et
   [[feedback-libelles-idme-configurables]].
 
-- [ ] **#530 — La garde #340 laisse passer une écriture qu'elle devrait bloquer.**
+- [x] **#530 CLOS 26 août 2026 (1.100.2) — le défaut était dans la SENTINELLE, pas dans la garde.**
+  ⮕ **Verdict, mesuré** : la spec arme la garde en écrivant le magasin global `cours`. Or le commit
+  **suivant** celui qui l'a créée — `2342224b` (1.91.7) puis `b598fb5a` (1.91.8), **le même jour** —
+  a retiré cette source : `construireMapCoursTrimestre` lit désormais les `<trimestre>_groupesCours`
+  NAMESPACÉS. La mise en scène est restée en arrière d'un commit : la map sortait **vide**, la garde
+  se taisait par `fail-open` délibéré, et la spec accusait le code du silence qu'elle avait causé.
+  ⮕ **Ce qui est réparé** : l'armement (par groupes-cours), plus une **ancre anti-péremption** —
+  `coursAttribues > 0` est désormais asserté AVANT tout le reste. Si la source d'attribution rebouge,
+  la spec dira « la garde n'était pas armée » au lieu de faire chercher un bug qui n'existe pas.
+  ⮕ **Trois break-tests, trois rouges distincts** : armement neutralisé → « la garde doit être
+  ARMÉE » · `bienEcrite` forcé à `true` → « le refus doit être DIT » · garde désactivée → « les
+  données ne bougent pas ». Le mécanisme de fond (relire la collection avant d'annoncer un succès,
+  `productions-bibliotheque-ui.js:352`) était **déjà en place et correct**.
+  ⮕ **Baseline Playwright à ZÉRO** : la dette #456 est épuisée, toute rougeur neuve bloque le push.
+  ⚠ **CE QUE LA MESURE A RÉVÉLÉ AU PASSAGE, et qui reste OUVERT — voir #533.**
+
+- [ ] **~~#530 (énoncé d'origine, conservé)~~ — La garde #340 laisse passer une écriture qu'elle devrait bloquer.**
   Découvert le 26 août en fermant #495, et **il ne s'agit PAS d'une régression** : mesuré à
   l'identique sur `8dfda3ed`, le commit d'avant les travaux du jour (worktree, même erreur, même
   assertion). Il dormait dans la liste des « 8 rouges » de #495, rangé à tort avec le bruit.
@@ -563,6 +579,24 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `coursId` est bien là. Le compte des natives/étrangères est donc à vérifier en premier.
   ⮕ **Seule spec de la baseline** depuis le 26 août : le hook bloquera désormais toute rougeur neuve,
   et celle-ci est la dernière à en sortir.
+
+- [ ] **#533 — La garde #340 est probablement INERTE sur les données réelles de Grégoire.**
+  Mesuré le 26 août en fermant #530, par un test qui reproduit le cas ordinaire
+  (`productions-ajout-refus-garde-340.spec.js`, test « périmètre ») : `construireMapCoursTrimestre`
+  ne rattache un `coursId` à un trimestre **que s'il n'apparaît QUE là**. Un cours reconduit d'une
+  session à l'autre — 601-101, chaque automne et chaque hiver — est vu dans PLUSIEURS trimestres,
+  donc « non attribuable », donc neutre. **Vérifié** : deux productions 100 % étrangères passent
+  sans être bloquées.
+  ⮕ **Ce n'est pas un oubli, c'est un prix payé** : le 22 août, la garde ancrée sur
+  `cours.trimestreId` refusait TOUTE écriture dans son trimestre (`b598fb5a`). La prudence actuelle
+  a été choisie contre ce blocage-là, et elle est défendable.
+  ⮕ **Mais le symptôme qu'elle devait couvrir est VÉCU** : l'incident de juin (#340 / résurrections
+  IDB) — des productions A25 écrites sous clé H2026. Cette protection-là n'existe plus en pratique.
+  ⏳ **À TRANCHER PAR GRÉGOIRE, pas par moi** : accepter l'inertie (la garde ne sert plus qu'aux
+  cours vus une seule fois), ou ré-armer par une autre source. Piste : `productions[].coursId` seul
+  ne suffit pas ; il faudrait un marqueur de trimestre POSÉ À L'ÉCRITURE, pas déduit après coup.
+  ⚠ Ne pas « améliorer » la règle d'attribution sans relire `b598fb5a` — le test de périmètre
+  rougira, et c'est voulu.
 
 - [x] **#531 LIVRÉ 26 août 2026 (1.100.0)** — un modèle de cartouche à faire remplir par une IA.
   Demande de Grégoire : télécharger un squelette construit depuis la grille et l'échelle choisies,
