@@ -429,7 +429,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
      (exportée, jamais appelée). Elles ne trompent plus aucune sentinelle, mais elles sont toujours là.
   Vitest **3331/3331** (317 fichiers). Trois break-tests, trois ROUGE.
 
-- [ ] **#517** ✅ **TRANCHÉ 26 août : ENREGISTREMENT AUTOMATIQUE**, comme les grilles et les échelles (verdict D2). Le namespacing des cartouches (CO-33/D1 du 21 août) reste un chantier SÉPARÉ et POSTÉRIEUR (verdict D3) — une migration de données doit pouvoir être annulée seule. 📐 **B1 — la matrice de cartouche ne vit qu'en RAM jusqu'au bouton Enregistrer.**
+- [x] **#517 LIVRÉ 26 août 2026** ✅ **TRANCHÉ : ENREGISTREMENT AUTOMATIQUE**, comme les grilles et les échelles (verdict D2). Le namespacing des cartouches (CO-33/D1 du 21 août) reste un chantier SÉPARÉ et POSTÉRIEUR (verdict D3) — une migration de données doit pouvoir être annulée seule. 📐 **B1 — la matrice de cartouche ne vit qu'en RAM jusqu'au bouton Enregistrer.**
   `sauvegarderCommentaire()` écrit en mémoire seulement ; la persistance n'arrive qu'au bouton, en
   bas d'un écran long. Aucun garde-fou : changer de cartouche, de sous-onglet ou fermer l'app perd
   toute la saisie, en silence. C'est le modèle INVERSE des grilles et des échelles (autosave champ
@@ -438,6 +438,24 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   garde-fou « modifications non enregistrées ». À trancher AVANT de coder.
   ⚠ L'écran cartouche est aussi le seul des quatre sans barre d'actions en tête (#503 visait « les
   trois écrans » — mais l'utilisateur, lui, en voit quatre).
+
+  ⮕ **LIVRÉ.** `sauvegarderCommentaire` persiste chaque cellule, et le CONTEXTE aussi (il ouvre
+  chaque rétroaction reçue par un·e étudiant·e : le perdre coûte autant qu'une cellule).
+  ⚠ **Chemin SÉPARÉ de `sauvegarderCartouche()`**, délibérément : celle-ci valide le nom par une
+  alerte bloquante et interroge sur les doublons. La réveiller à chaque frappe ouvrirait une boîte
+  de dialogue au milieu d'une phrase. `persisterCartouchePartielle` écrit le strict nécessaire.
+  ⚠ **Le NOM reste au bouton** — il déclenche la vérification de doublons, qui pose une question.
+  Une question par frappe n'est pas un enregistrement automatique.
+  ⚠ **Une cartouche jamais enregistrée n'écrit rien** : même modèle que les grilles et les échelles,
+  dont critères et niveaux ne s'autosauvent qu'une fois l'objet créé.
+  ▣ **Passe par `db.modifier` (#510)** : deux cellules quittées coup sur coup liraient sinon le même
+  instantané. Réintroduire cette course en la connaissant aurait été impardonnable.
+  ⚠ **Faux-vert attrapé au break-test** : le banc rendait la MÊME référence à chaque lecture, ce qui
+  rend la course structurellement impossible — le test de la course passait au vert quoi qu'il
+  arrive au code. Le harnais sérialise désormais, comme une vraie base.
+  ⏳ **Non fait** : la barre d'actions en tête sur ce quatrième écran (#503 visait « les trois
+  écrans »). Hors du verdict D2, à verser à #519.
+  Vitest **3338/3338** (318 fichiers). Deux break-tests, deux ROUGE.
 
 - [ ] **#518** ✅ **TRANCHÉ 26 août : AVERTIR avant d'enregistrer** (verdict D4) — « un bloc sans nom ne sera pas conservé ». Ni refus bloquant, ni titre par défaut : le contenu d'un bloc appartient à son auteur. 📐 **B2 — un champ personnalisé rempli mais sans titre est écarté en silence.**
   `champsPersonnalisesAEnregistrer()` filtre les blocs sans titre. La règle est défendable (pas de
