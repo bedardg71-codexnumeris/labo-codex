@@ -2858,7 +2858,7 @@ function afficherNiveauxNouvelleEchelle() {
                            style="font-weight: 500;">
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Min (%)
+                    <label class="echelle-texte-detail">Min (%) <span class="champ-requis" title="Champ obligatoire">*</span>
                         <span class="primo-aide" data-target="echelle-plage-notes"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                     </label>
                     <input type="number"
@@ -2869,7 +2869,7 @@ function afficherNiveauxNouvelleEchelle() {
                            data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="min" data-parse-float>
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Max (%)</label>
+                    <label class="echelle-texte-detail">Max (%) <span class="champ-requis" title="Champ obligatoire">*</span></label>
                     <input type="number"
                            class="controle-form"
                            value="${echapperHtml(niveau.max)}"
@@ -3141,7 +3141,7 @@ function afficherNiveauxEchelle(echelle) {
                            style="font-weight: 500;">
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Min (%)
+                    <label class="echelle-texte-detail">Min (%) <span class="champ-requis" title="Champ obligatoire">*</span>
                         <span class="primo-aide" data-target="echelle-plage-notes"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                     </label>
                     <input type="number"
@@ -3152,7 +3152,7 @@ function afficherNiveauxEchelle(echelle) {
                            data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="min" data-parse-float>
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Max (%)</label>
+                    <label class="echelle-texte-detail">Max (%) <span class="champ-requis" title="Champ obligatoire">*</span></label>
                     <input type="number"
                            class="controle-form"
                            value="${echapperHtml(niveau.max)}"
@@ -3233,6 +3233,47 @@ function afficherNiveauxEchelle(echelle) {
  * ⮕ Le refus est donc posé ICI, sur le chemin vivant, et il vaut pour les deux
  * éditeurs (échelle neuve et échelle existante).
  */
+/**
+ * #525 (26 août 2026) — LA VALEUR D'UN NIVEAU, DÉCIDÉE UNE FOIS POUR TOUS.
+ *
+ * ⚠⚠ DEUX MODULES APPLIQUAIENT DEUX RÈGLES À LA MÊME DONNÉE :
+ *   `evaluation-calcul.js`  →  `niveau.valeurCalcul || (min + max) / 2`
+ *   `consolidation.js`      →  `valeurCalcul != null ? valeurCalcul : (min + max) / 2`
+ *
+ * Le premier trahit le ZÉRO. `0 || x` rend `x` : une valeur ponctuelle de 0 —
+ * parfaitement légitime, et présente dans les échelles « IDME et niv 0 » de
+ * Grégoire — était traitée comme ABSENTE et remplacée par le milieu de la plage.
+ * Sur un niveau 0 dont la plage irait de 0 à 59, la note valait **29,5 au lieu
+ * de 0**. Le pack de démonstration y échappe par chance : son niveau « Aucun »
+ * a min 0 et max 0, dont le milieu vaut 0.
+ *
+ * ⮕ Une seule règle désormais, ici, et les deux lecteurs y passent. `!= null`
+ * est la bonne : elle distingue « pas de valeur » de « la valeur zéro ».
+ *
+ * ⚠ Le repli sur le milieu de plage reste VOLONTAIRE — c'est une commodité :
+ * une échelle qui ne pose que des bornes reste utilisable. Mais il ne peut plus
+ * rendre `NaN` en silence : sans bornes exploitables, la fonction rend `null`,
+ * et c'est à l'appelant de dire qu'il ne sait pas calculer.
+ */
+function valeurNumeriqueDuNiveau(niveau) {
+    if (!niveau) return null;
+    const ponctuelle = Number(niveau.valeurCalcul);
+    if (niveau.valeurCalcul != null && niveau.valeurCalcul !== '' && !isNaN(ponctuelle)) {
+        return ponctuelle;
+    }
+    // ⚠⚠ `Number('')` vaut ZÉRO, pas NaN. Sans ce filtre, une borne laissée
+    // vide devenait 0 en silence — et deux bornes vides donnaient un niveau qui
+    // « vaut 0 », impossible à distinguer d'un vrai niveau zéro. Trouvé par un
+    // test qui attendait `null` et recevait `+0` (26 août).
+    const brut = (v) => (v == null || String(v).trim() === '') ? NaN : Number(v);
+    const min = brut(niveau.min);
+    const max = brut(niveau.max);
+    if (isNaN(min) || isNaN(max)) return null;   // ⚠ jamais NaN en silence
+    return (min + max) / 2;
+}
+
+const REFUS_MIN_NIVEAU = 'La borne minimale du niveau est obligatoire';
+const REFUS_MAX_NIVEAU = 'La borne maximale du niveau est obligatoire';
 const REFUS_CODE_NIVEAU = 'Le code du niveau est obligatoire';
 const REFUS_NOM_NIVEAU = 'Le nom du niveau est obligatoire';
 
@@ -3241,6 +3282,12 @@ function refusChampNiveau(champ, valeur) {
     const vide = !String(valeur == null ? '' : valeur).trim();
     if (champ === 'code' && vide) return REFUS_CODE_NIVEAU;
     if (champ === 'nom' && vide) return REFUS_NOM_NIVEAU;
+    // #525 — les bornes portent la note quand aucune valeur ponctuelle n'est
+    // posée. Vides ou non numériques, elles rendaient `(undefined+undefined)/2`,
+    // c'est-à-dire NaN, jusque dans la note affichée à l'étudiant·e.
+    if ((champ === 'min' || champ === 'max') && (vide || isNaN(Number(valeur)))) {
+        return champ === 'min' ? REFUS_MIN_NIVEAU : REFUS_MAX_NIVEAU;
+    }
     return null;
 }
 
@@ -3880,6 +3927,9 @@ window.deplacerNiveauTempBas = deplacerNiveauTempBas;
 window.supprimerNiveauEchelle = supprimerNiveauEchelle;
 window.modifierNiveauEchelle = modifierNiveauEchelle;
 window.refusChampNiveau = refusChampNiveau;                                 // #524
+window.valeurNumeriqueDuNiveau = valeurNumeriqueDuNiveau;                   // #525 — LA règle, pour tous les lecteurs
+window.REFUS_MIN_NIVEAU = REFUS_MIN_NIVEAU;
+window.REFUS_MAX_NIVEAU = REFUS_MAX_NIVEAU;
 window.marquerChampRefuseEchelle = marquerChampRefuseEchelle;               // #524
 window.REFUS_CODE_NIVEAU = REFUS_CODE_NIVEAU;
 window.REFUS_NOM_NIVEAU = REFUS_NOM_NIVEAU;

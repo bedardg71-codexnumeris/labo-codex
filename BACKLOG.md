@@ -420,6 +420,34 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Vitest **3356/3356** (320 fichiers). Trois break-tests, trois ROUGE — dont un **rejoué** parce que
   mon ancre n'existait pas et qu'il n'avait donc rien cassé la première fois.
 
+- [x] **#525 LIVRÉ 26 août 2026 (1.99.4)** — la valeur d'un niveau, décidée une fois pour tous.
+  **Née d'une question de Grégoire** : « aucune valeur numérique n'est obligatoire pour les échelles ?
+  comment la note peut-elle se construire si elle est absente ? » Elle portait exactement sur
+  l'angle mort que l'audit #524 avait DÉCLARÉ sans le mesurer (§5.1). La mesure a trouvé deux défauts.
+  ⚠⚠ **LE ZÉRO ÉTAIT TRAHI PAR UN OU-LOGIQUE.** `evaluation-calcul.js` repliait
+  `valeurCalcul` sur `(min+max)/2` par un OU : une valeur ponctuelle de **0** est *falsy*, donc
+  traitée comme ABSENTE et remplacée par le milieu de la plage. Sur un niveau 0 dont la plage irait
+  de 0 à 59, **la note valait 29,5 au lieu de 0** — et Grégoire a des échelles « IDME et niv 0 »
+  (cf. #450). Le pack de démonstration y échappe par chance : son niveau « Aucun » a min 0 et max 0,
+  dont le milieu vaut 0.
+  ⚠⚠ **DEUX MODULES, DEUX RÈGLES** pour la même donnée : `consolidation.js` employait `!= null`
+  (correct), `evaluation-calcul.js` le OU-logique (bogué). La même échelle pouvait donner deux
+  valeurs selon l'écran qui la lisait. ⮕ Règle unique désormais : `valeurNumeriqueDuNiveau()` dans
+  `echelles.js`, consommée par les deux, chacun gardant son ancien calcul en repli si le module n'est
+  pas chargé.
+  ⮕ **`null` plutôt que `NaN`** quand il n'y a ni valeur ni bornes : `(undefined+undefined)/2`
+  rendait NaN, qui se propageait jusque dans la note affichée. Et poser 0 à la place serait pire —
+  un zéro inventé ne se distingue plus d'un vrai zéro.
+  ⚠ **Défaut de mon propre correctif, attrapé par un test** : `Number('')` vaut **0**, pas NaN. Une
+  borne laissée vide devenait donc 0 en silence, et deux bornes vides donnaient un niveau qui « vaut
+  zéro ». Le test attendait `null` et recevait `+0`.
+  ⮕ **Min et Max deviennent obligatoires** (astérisque + refus) : ce sont eux qui portent la note
+  quand aucune valeur ponctuelle n'est posée. ⚠ La garde refuse le VIDE, pas le zéro — sans quoi elle
+  rendrait impossible le niveau 0 qu'elle protège.
+  ⮕ **`valeurCalcul` reste facultatif**, délibérément : une échelle qui ne pose que des bornes reste
+  utilisable. C'est une commodité, pas un oubli.
+  Vitest **3366/3366** (320 fichiers). Deux break-tests, deux ROUGE.
+
 ### Constats de l'audit du 25 août ENCORE OUVERTS
 
 > Les six correctifs ci-dessus (#509 à #515) épuisent ce qui ne demandait pas d'arbitrage de

@@ -196,3 +196,93 @@ describe('#524 · D — un astérisque sans légende est une énigme', () => {
         expect(bloc).toContain('font-weight: 700');
     });
 });
+
+/* ========================================================================== */
+/* #525 — LA VALEUR D'UN NIVEAU, DÉCIDÉE UNE FOIS POUR TOUS                    */
+/*                                                                            */
+/* Question de Grégoire, 26 août : « aucune valeur numérique n'est obligatoire */
+/* pour les échelles ? comment la note peut-elle se construire si elle est     */
+/* absente ? » Elle portait exactement sur l'angle mort que l'audit avait      */
+/* déclaré sans le mesurer — et la mesure a trouvé deux défauts.               */
+/* ========================================================================== */
+
+describe('#525 · E — le ZÉRO est une valeur, pas une absence', () => {
+
+    it('E.a LE CAS QUI PORTE LE SENS : une valeur ponctuelle de 0 est respectée', () => {
+        // `evaluation-calcul.js` écrivait `valeurCalcul || (min+max)/2`. Le `||`
+        // traite 0 comme absent : sur un niveau 0 dont la plage irait de 0 à 59,
+        // la note valait 29,5 au lieu de 0. Les échelles « IDME et niv 0 » de
+        // Grégoire sont exactement ce cas.
+        const { win } = monter({ echelles: ECHELLE() });
+        expect(win.valeurNumeriqueDuNiveau({ code: '0', valeurCalcul: 0, min: 0, max: 59 })).toBe(0);
+    });
+
+    it('E.b sans valeur ponctuelle, le milieu de la plage — le repli reste voulu', () => {
+        const { win } = monter({ echelles: ECHELLE() });
+        expect(win.valeurNumeriqueDuNiveau({ code: 'D', min: 60, max: 74 })).toBe(67);
+    });
+
+    it('E.c ni valeur ni bornes exploitables ⇒ null, JAMAIS NaN ni 0', () => {
+        // `(undefined + undefined) / 2` rendait NaN, qui se propageait jusque
+        // dans la note affichée. Et poser 0 à la place serait pire : un zéro
+        // inventé ne se distingue plus d'un vrai zéro.
+        const { win } = monter({ echelles: ECHELLE() });
+        expect(win.valeurNumeriqueDuNiveau({ code: 'X' })).toBeNull();
+        expect(win.valeurNumeriqueDuNiveau({ code: 'X', min: '', max: '' })).toBeNull();
+        expect(win.valeurNumeriqueDuNiveau(null)).toBeNull();
+    });
+
+    it('E.d une valeur ponctuelle en TEXTE est lue comme un nombre', () => {
+        // Le pack de démonstration porte `"valeurCalcul": "40"` : une chaîne.
+        const { win } = monter({ echelles: ECHELLE() });
+        expect(win.valeurNumeriqueDuNiveau({ code: 'M', valeurCalcul: '40' })).toBe(40);
+    });
+
+    it('E.e une chaîne VIDE n\'est pas une valeur : on retombe sur les bornes', () => {
+        const { win } = monter({ echelles: ECHELLE() });
+        expect(win.valeurNumeriqueDuNiveau({ code: 'M', valeurCalcul: '', min: 80, max: 100 })).toBe(90);
+    });
+});
+
+describe('#525 · F — les bornes sont obligatoires, et les deux lecteurs ont la même règle', () => {
+
+    it('F.a une borne vide est refusée', async () => {
+        const { win, store } = monter({ echelles: ECHELLE() });
+        const r = await win.modifierNiveauEchelle('E1', 0, 'min', '');
+        expect(r.refuse).toBeTruthy();
+        expect(store.a2026_echellesTemplates[0].niveaux[0].min).toBe(0);
+    });
+
+    it('F.b une borne non numérique aussi', async () => {
+        const { win } = monter({ echelles: ECHELLE() });
+        expect((await win.modifierNiveauEchelle('E1', 0, 'max', 'beaucoup')).refuse).toBeTruthy();
+    });
+
+    it('F.c mais ZÉRO est une borne valide', async () => {
+        // La garde doit refuser le vide, pas le zéro — sans quoi elle rendrait
+        // impossible le niveau 0 qu'elle est censée protéger.
+        const { win, store } = monter({ echelles: ECHELLE() });
+        const r = await win.modifierNiveauEchelle('E1', 1, 'min', 0);
+        expect(r.ok).toBe(true);
+        expect(store.a2026_echellesTemplates[0].niveaux[1].min).toBe(0);
+    });
+
+    it('F.d LA COUTURE : plus aucun module ne réécrit la règle dans son coin', () => {
+        const lire = (f) => readFileSync(path.join(racineProjet, f), 'utf8');
+        for (const fichier of ['js/evaluation-calcul.js', 'js/consolidation.js']) {
+            const src = lire(fichier);
+            expect(src, `${fichier} doit passer par valeurNumeriqueDuNiveau`)
+                .toContain('valeurNumeriqueDuNiveau');
+            // ⚠ Le `||` est la forme exacte qui trahissait le zéro.
+            expect(src, `${fichier} ne doit plus écrire \`valeurCalcul ||\``)
+                .not.toMatch(/valeurCalcul\s*\|\|/);
+        }
+    });
+
+    it('F.e Min et Max portent l\'astérisque dans les deux éditeurs', () => {
+        const src = readFileSync(path.join(racineProjet, 'js/echelles.js'), 'utf8');
+        const marques = src.match(/champ-requis" title="Champ obligatoire">\*/g) || [];
+        // Code ×2, Nom ×2, Min ×2, Max ×2
+        expect(marques.length).toBeGreaterThanOrEqual(8);
+    });
+});
