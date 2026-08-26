@@ -546,6 +546,24 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Recoupe [[feedback-concepts-pedagogiques-couche-2-configurables]] et
   [[feedback-libelles-idme-configurables]].
 
+- [ ] **#530 — La garde #340 laisse passer une écriture qu'elle devrait bloquer.**
+  Découvert le 26 août en fermant #495, et **il ne s'agit PAS d'une régression** : mesuré à
+  l'identique sur `8dfda3ed`, le commit d'avant les travaux du jour (worktree, même erreur, même
+  assertion). Il dormait dans la liste des « 8 rouges » de #495, rangé à tort avec le bruit.
+  **Le symptôme** (`tests/integration/productions-ajout-refus-garde-340.spec.js`) : deux productions
+  de bibliothèque portant un `coursId` d'un AUTRE trimestre sont ajoutées l'une après l'autre dans le
+  trimestre actif. La première passe (une seule étrangère est tolérée) ; **la seconde devrait être
+  BLOQUÉE** — zéro production native, deux étrangères — et elle ne l'est pas : « Artefact 3 » entre
+  dans les données.
+  ⚠ **Ce que la garde protège** : la contamination inter-trimestre, c'est-à-dire la famille de
+  l'incident de juin (productions A25 écrites sous clé H2026). Ce n'est pas une garde décorative.
+  ⏳ **À instruire** : `js/productions-namespace-garde.js` traite « sans `coursId` → neutre » et
+  compte sur le fait qu'une production partagée CONSERVE son `coursId` étranger. Le chemin d'ajout
+  (`ajouterProductionIndividuelle`, `productions-bibliotheque-ui.js`) copie par spread — donc le
+  `coursId` est bien là. Le compte des natives/étrangères est donc à vérifier en premier.
+  ⮕ **Seule spec de la baseline** depuis le 26 août : le hook bloquera désormais toute rougeur neuve,
+  et celle-ci est la dernière à en sortir.
+
 ### Constats de l'audit du 25 août ENCORE OUVERTS
 
 > Les six correctifs ci-dessus (#509 à #515) épuisent ce qui ne demandait pas d'arbitrage de
@@ -797,7 +815,24 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   désormais DANS la zone. Libellé : « La production peut être préparée à l'avance. »
   Dernier ID : **#495**.
 
-- [ ] **#495 — La baseline Playwright est périmée : 8 specs rouges sur `main`, hors dette #456.**
+- [x] **#495 LIVRÉ 26 août 2026 (1.99.8)** — `version.json` est enfin lisible en `file://`.
+  ⮕ **MESURÉ sous WebKit avant de choisir** — les trois voies échouent TOUTES sur un fichier local :
+  XHR synchrone (`NetworkError`), XHR **asynchrone** (`onerror`) et `fetch` (`TypeError: Load
+  failed`), les trois émettant « … due to access control checks ». ⚠ Le commentaire du code affirmait
+  « XHR synchrone (fonctionne sur Safari file://) » : **c'était faux**. `version.json` n'a donc JAMAIS
+  été lu sur le Safari ni l'iPad de Grégoire.
+  ⮕ **La seule voie qui passe : un `<script>`** (vérifié sous WebKit, zéro erreur). `version.js` est
+  généré par `release.mjs` **en même temps que** `version.json` — deux fichiers écrits ensemble ne
+  peuvent pas diverger — et son anti-cache est posé explicitement à partir du build, sinon Safari en
+  servirait une copie périmée et tout #285 reposerait sur un chiffre faux.
+  ▣ **Effet mesuré : la baseline passe de 8 échecs connus à 1.**
+  ⚠⚠ **ET MON RAPPORT ÉTAIT INEXACT.** Il affirmait « toutes tombent sur la MÊME erreur » — repris de
+  l'énoncé du 25 août sans vérifier spec par spec. C'était vrai pour SEPT. La huitième
+  (`productions-ajout-refus-garde-340`) **n'a aucune assertion sur les erreurs console** : elle
+  échouait sur une assertion métier, et le bruit ne la masquait pas — c'est mon inattention qui l'a
+  rangée avec les autres. Elle devient **#530**.
+  Énoncé d'origine :
+- [ ] **~~#495~~ — La baseline Playwright est périmée : 8 specs rouges sur `main`, hors dette #456.**
   Découvert le 25 août au push du chantier #492-#494. Le hook pré-push les annonce comme une
   RÉGRESSION du chantier ; vérification faite en basculant sur `main` et en les rejouant : **les huit
   échouent à l'identique sans une ligne du chantier**. Le verdict du garde-fou est donc faux, et

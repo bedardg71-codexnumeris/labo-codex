@@ -323,7 +323,7 @@ for (const relatif of aBumper) {
 // --- rapport ---
 console.log('Version : ' + curVersion + '  ->  ' + newVersion + (buildOnly ? '   (inchangee)' : ''));
 console.log('Build   : ' + curBuild + '  ->  ' + newBuild);
-console.log('Fichiers: version.json, js/init-inline.js (x2), js/main.js');
+console.log('Fichiers: version.json, version.js, js/init-inline.js (x2), js/main.js');
 console.log('Anti-cache index.html : ' + bumpes.length + ' fichier(s) bumpe(s) (script + css)');
 for (const ligne of bumpes) console.log('  · ' + ligne);
 if (absents.length) {
@@ -341,6 +341,39 @@ if (dryRun) {
 
 // --- ecriture ---
 writeFileSync(versionJsonPath, versionNew);
+
+// #495 (26 aout 2026) — LE JUMEAU LISIBLE EN file://.
+//
+// MESURE, pas supposition : sous WebKit en file://, AUCUNE des trois voies de
+// lecture ne fonctionne — XHR synchrone (NetworkError), XHR asynchrone (onerror)
+// et fetch (TypeError: Load failed) echouent tous, et les trois emettent
+// « ... due to access control checks ». `version.json` n'a donc JAMAIS ete lu sur
+// le Safari ni l'iPad de Gregoire : l'app tournait sur les valeurs de repli.
+//
+// Un `<script>` local, lui, se charge sans restriction — verifie sous WebKit,
+// zero erreur. `version.js` est donc genere ICI, depuis la meme source, a chaque
+// ecriture : deux fichiers ne peuvent pas diverger s'ils sont ecrits ensemble.
+// `version.json` reste la source de verite pour les outils et les tests.
+const versionJsPath = join(root, 'version.js');
+writeFileSync(versionJsPath,
+  '/* GENERE PAR scripts/release.mjs — NE PAS EDITER A LA MAIN.\n'
+  + '   Jumeau de version.json, lisible en file:// ou fetch et XHR sont refuses\n'
+  + '   par WebKit (#495). Les deux fichiers sont ecrits ensemble. */\n'
+  + 'window.__VERSION__ = ' + versionNew.trim() + ';\n');
+
+// ⚠ ET SON ANTI-CACHE, POSE EXPLICITEMENT. `version.js` change a CHAQUE build :
+// si son URL ne change pas, Safari en sert une copie perimee et tout le mecanisme
+// #285 repose alors sur un chiffre faux — exactement le defaut qu'on corrige.
+// Il n'est pas dans `js/`, donc le balayage d'anti-cache ne le voit pas : on
+// l'ecrit ici, a partir du build, pour que les deux ne puissent pas se decaler.
+{
+  const jeton = newBuild.replace('-', '');
+  const avant = indexNew;
+  indexNew = indexNew.replace(/(src="version\.js\?v=)[^"]*(")/, '$1' + jeton + '$2');
+  if (indexNew === avant) {
+    console.warn('⚠ version.js introuvable dans index.html : son anti-cache n\'a PAS ete pose.');
+  }
+}
 writeFileSync(initPath, initNew);
 writeFileSync(mainPath, mainNew);
 writeFileSync(indexPath, indexNew);

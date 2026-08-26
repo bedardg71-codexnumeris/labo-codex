@@ -100,8 +100,8 @@ function definirModeExpertFromEl(el) {
 // === CONFIGURATION ===
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
 // Les valeurs ici servent de fallback si version.json n'est pas disponible
-let VERSION_MAJEURE = '1.99.7';
-let BUILD_ID = '0826-1151';
+let VERSION_MAJEURE = '1.99.8';
+let BUILD_ID = '0826-1218';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
@@ -216,18 +216,25 @@ function afficherBuildNumero() {
  */
 async function chargerVersionJSON() {
     if (window.location.protocol === 'file:') {
-        // Lire version.json via XHR synchrone (fonctionne sur Safari file://)
-        try {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'version.json', false);
-            xhr.send();
-            if (xhr.status === 0 || xhr.status === 200) {
-                var data = JSON.parse(xhr.responseText);
-                if (data.beta) VERSION_MAJEURE = data.beta;
-                if (data.build) BUILD_ID = data.build;
-            }
-        } catch (e) {
-            // XHR échoué — garder les valeurs fallback
+        // ⚠⚠ #495 (26 août 2026) — LE COMMENTAIRE PRÉCÉDENT ÉTAIT FAUX.
+        //
+        // Il disait « XHR synchrone (fonctionne sur Safari file://) ». Mesuré sous
+        // WebKit ce jour-là : il ne fonctionne pas. Ni lui, ni le XHR asynchrone,
+        // ni `fetch` — les trois échouent sur un fichier local et émettent
+        // « … due to access control checks ». `version.json` n'a donc JAMAIS été lu
+        // sur le Safari ni l'iPad de Grégoire : l'application tournait sur les
+        // valeurs de repli ci-dessus, que `release.mjs` tient à jour.
+        //
+        // Ça marchait — mais ça privait #285 de sa référence : comparer le snapshot
+        // d'un script à un BUILD_ID qui vient du script lui-même ne détecte rien.
+        //
+        // ⮕ `version.js` est un SCRIPT, et un script local se charge sans
+        // restriction (vérifié sous WebKit, zéro erreur). Il est généré par
+        // `release.mjs` en même temps que `version.json` : les deux ne peuvent pas
+        // diverger, puisqu'ils sont écrits ensemble.
+        if (window.__VERSION__) {
+            if (window.__VERSION__.beta) VERSION_MAJEURE = window.__VERSION__.beta;
+            if (window.__VERSION__.build) BUILD_ID = window.__VERSION__.build;
         }
 
         window.VERSION_MAJEURE = VERSION_MAJEURE;
