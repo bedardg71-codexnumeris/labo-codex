@@ -7,6 +7,137 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 26 AOÛT 2026 (fin de journée) : LA DETTE DES HEURES PAR DÉFAUT
+     (#538), ET LA MESURE QUE #534 ATTENDAIT. 1.101.1, POUSSÉ.
+
+     ▣ DEUX POINTS ANNONCÉS PAR GRÉGOIRE EN OUVERTURE, LES DEUX CLOS.
+
+     ▣ #538 — LA DURÉE D'UNE SÉANCE SE DÉRIVE, ELLE NE S'INVENTE PLUS.
+
+       `obtenirHeuresSeance` choisissait entre 4 h et 2 h selon
+       `db.getSync('formatHoraire')` : trois lectures dans le dépôt, ZÉRO
+       écriture — la même clé morte que #532, dont la sentinelle verrouillait
+       déjà la prémisse (cas B.b). La comparaison `=== '1x4'` était donc toujours
+       fausse. La branche « 4 heures » N'A JAMAIS ÉTÉ ATTEINTE de la vie de
+       l'application, et le repli valait TOUJOURS 2 heures.
+
+       ⮕ CINQ valeurs métier en dur, là où le relais du matin en annonçait deux :
+         · `:307` jour de cours sans séance datée            → 2
+         · `:344` format de séance non reconnu               → += 2
+         · `:348` `return totalHeures || 2`                  → 2
+         · `obtenirNombrePeriodesSeance` → `return 2`        (en PÉRIODES)
+         · `obtenirDureeMaxSeance()` → `return 2`            (trouvée en chemin :
+           MORTE, appelée nulle part, jamais exportée — retirée, avec la trace
+           de sa disparition sur place)
+
+       ⮕ CE N'ÉTAIT PAS DE L'AFFICHAGE. Quatre appelants, dont deux alimentent
+         `calculerAssiduitePourAffichage` : le pré-remplissage du tableau et le
+         plafond du code couleur. `genererSeancesCompletes` (horaire.js) nommait
+         DÉJÀ le repli à 2 périodes comme polluant le dénominateur d'assiduité
+         (commentaire « ÉTAPE 3 supprimée », FIX #220, 3 mars) — la source n'avait
+         simplement jamais été tarie.
+
+       ⮕ DÉCISION DE GRÉGOIRE, question fermée en 4 options : dériver de
+         l'horaire du groupe-cours (`obtenirSeancesHoraire()`, SSOT
+         `groupesCours[].horaireId`, le chemin réparé par #332), et 0 quand
+         l'horaire est muet. Jamais une valeur inventée. Une dérivation est une
+         conséquence logique ; un `2` écrit dans le code est un arbitraire.
+
+       ⮕ LA RÈGLE DE LA REPRISE EST RESPECTÉE : c'est le jour REMPLACÉ qui porte
+         l'horaire, comme dans `genererSeancesCompletes`. Diverger ici n'aurait
+         cassé QUE les dates de reprise — un trou invisible partout ailleurs.
+
+       ⮕ LE 0 EST DIT À L'ÉCRAN (« durée inconnue : horaire à configurer »).
+         Avant, `formaterHeuresAffichage(0)` rendait '' : le trou était muet et le
+         tableau se remplissait quand même, avec des heures fabriquées.
+
+       Sentinelle `sentinelle-538-duree-seance-derivee.test.js` : 19 cas, banc
+       vivant sur `obtenirNombrePeriodesSeance` + verrous de source.
+       BREAK-TESTÉE (repli à 2 réinjecté → 8 rouges, code restauré).
+
+     ▣ UNE TROUVAILLE DE MÉTHODE, ET ELLE VAUT AU-DELÀ DE CET ITEM.
+
+       Deux verrous de source ont d'abord rougi — non parce que les valeurs en
+       dur étaient revenues, mais parce que les COMMENTAIRES du correctif citent
+       ce qu'ils ont retiré (« la clé morte `formatHoraire` », « ce `|| 2` »).
+       ⮕ Un verrou de source qui lit les commentaires INTERDIT d'expliquer le
+         correctif dans le code : il pousse à effacer la mémoire du défaut pour
+         faire passer le test. Le test dépouille désormais les commentaires avant
+         de mesurer (`sansCommentaires`, documenté dans le fichier de test).
+         À reprendre dans toutes les sentinelles de source du projet.
+
+     ▣ #534 — LA MESURE QUE L'ITEM EXIGEAIT A ÉTÉ FAITE. LES DEUX SPECS SONT
+       VERTES.
+
+       Conditions vérifiées AVANT de lancer, comme l'item le demandait : GitHub
+       Desktop absent (`pgrep`), aucun processus Playwright vivant, session
+       parallèle terminée et poussée, arbre au repos.
+       ⮕ 165 passés / 0 échec / 0 reprise, en 5,8 min. `retries: 1` n'a rien eu
+         à absorber. `planif-tout-voir-loupe.spec.js` (75/111/160 selon les runs)
+         et `cours-refonte-rendu.spec.js:100` passent toutes deux.
+       ⮕ CE QUE ÇA DÉPARTAGE : la variable dominante était l'INTERFÉRENCE
+         EXTERNE — commandes git concurrentes sur l'arbre lu en `file://`,
+         contention machine — et non une fragilité propre à ces deux fichiers.
+         C'est la troisième explication, celle apportée par Grégoire sur #523.
+
+     ▣ UNE CORRECTION SUR MON PROPRE TRAVAIL, DANS LA MÊME SESSION.
+
+       En ouverture, j'avais lu les deux specs et annoncé « deux causes
+       STRUCTURELLES distinctes ». Le vert ne le confirme pas. Les faits de code
+       que je décrivais sont réels ; l'effet que je leur prêtais ne l'est pas.
+       ⮕ Ils restent versés à #534 comme FRAGILITÉS LATENTES, pas comme bugs :
+         · `cours-refonte-rendu.spec.js` n'attend JAMAIS `window.dbReady` — deux
+           `waitForTimeout(500)` fixes quand `page.goto` coûte 400 à 700 ms. La
+           spec voisine, elle, attend `dbReady` : l'asymétrie n'est documentée
+           nulle part ;
+         · `planif-tout-voir-loupe.spec.js` rejoue tout son montage à CHAQUE test
+           (4 × [goto + attente dbReady + 2 s de sommeils fixes + 41 nœuds]) sous
+           le plafond de 30 s — même profil de risque pour les quatre, ce qui
+           explique la ligne rouge qui se promenait sans que le fichier change.
+       ⮕ C'est la même famille que l'erreur du matin sur la saturation du
+         localStorage : une lecture cohérente, qui se lit bien, et que seule une
+         mesure départage. Deux fois dans la journée.
+
+     ▣ LE MÉLANGE ENTRE SESSIONS S'EST REPRODUIT — DANS L'AUTRE SENS.
+
+       Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les
+       `BACKLOG.md` et `SESSION.md` de la session « présences » : l'inscription
+       de #538 et la renumérotation #534 → #537 vivent dans un commit qui parle
+       d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc NON
+       réécrit. Consigné dans RELAIS.md.
+       ⮕ Deux avertissements en un jour, dans les deux sens. Sur ce dépôt,
+         `git add` par chemins EXPLICITES n'est pas une préférence.
+
+     ▣ COLLISION D'IDENTIFIANT #534, RÉGLÉE. Deux items ouverts la portaient. Le
+       « critère de langue » devient #537 : l'autre est ancré dans deux commits,
+       `tests/playwright.config.js` et une sentinelle — c'est le documentaire qui
+       cède. ⮕ Et le mécanisme a tenu pour #538 : l'ID inscrit au backlog AVANT
+       d'être employé, la session parallèle l'a vu et a pris #539. C'est
+       exactement ce que la collision #533 réclamait. La collision #533
+       elle-même reste OUVERTE, et attend toujours l'arbitrage de Grégoire.
+
+     ▣ CE QUI RESTE OUVERT, PAR ORDRE.
+
+       · VÉRIFICATION NAVIGATEUR DE #538, DUE PAR GRÉGOIRE — le code n'a pas été
+         vu dans l'app. Build NON bumpé (sa session `file://` pouvait être
+         ouverte). Ouvrir Suivi › Présences sur une date de cours, puis sur une
+         date de REPRISE : c'est le cas où la durée doit venir de l'horaire du
+         jour REMPLACÉ, et rien d'automatisé ne le couvre.
+       · #534 — DÉCISION D'HYGIÈNE : durcir les deux montages de specs (attente
+         d'état plutôt que sommeils fixes) ou fermer l'item sur le vert mesuré.
+         Ce n'est plus un bug. NON TRANCHÉ.
+       · COLLISION #533, toujours en attente d'arbitrage.
+
+     ▣ ÉTAT DE L'ARBRE. Deux commits, poussés (`4e8c6877..cb050c8a`) :
+       `79b82ea1` fix(#538) · `cb050c8a` docs(#534). Arbre propre.
+       Vitest 3454/3454 (328 fichiers, LANCÉ DEPUIS `tests/` — lancé de la racine
+       il balaie les worktrees et rend 61 fichiers rouges pour rien, piège tombé
+       une fois de plus cette session). Playwright 165/165.
+       Poussé par `scripts/pousser.sh` : garde lourde d'abord, connexion ensuite
+       — les deux verdicts verts, aucun faux refus.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 26 AOÛT 2026 (après-midi) : LE RETOUR DE JEAN-FRANÇOIS, ET DEUX
      CORRECTIONS SUR MON PROPRE TRAVAIL DANS LA MÊME JOURNÉE. 1.99.8 → 1.100.1.
 
