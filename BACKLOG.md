@@ -457,11 +457,24 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   écrans »). Hors du verdict D2, à verser à #519.
   Vitest **3338/3338** (318 fichiers). Deux break-tests, deux ROUGE.
 
-- [ ] **#518** ✅ **TRANCHÉ 26 août : AVERTIR avant d'enregistrer** (verdict D4) — « un bloc sans nom ne sera pas conservé ». Ni refus bloquant, ni titre par défaut : le contenu d'un bloc appartient à son auteur. 📐 **B2 — un champ personnalisé rempli mais sans titre est écarté en silence.**
+- [x] **#518 LIVRÉ 26 août 2026** ✅ **TRANCHÉ : AVERTIR avant d'enregistrer** (verdict D4) — « un bloc sans nom ne sera pas conservé ». Ni refus bloquant, ni titre par défaut : le contenu d'un bloc appartient à son auteur. 📐 **B2 — un champ personnalisé rempli mais sans titre est écarté en silence.**
   `champsPersonnalisesAEnregistrer()` filtre les blocs sans titre. La règle est défendable (pas de
   bandeau vide dans le document), mais du CONTENU TAPÉ disparaît à l'enregistrement sans un mot.
   **Décision requise** : avertir (« un bloc sans nom ne sera pas conservé ») OU refuser de fermer
   sans trancher.
+
+  ⮕ **LIVRÉ.** `validerBlocsNommes()` s'intercale dans la chaîne de validation, après les champs
+  obligatoires (qui bloquent) et avant l'écriture. Une FENÊTRE, pas un bandeau : il y a une question
+  à poser et une réponse à attendre — le bandeau annonce ce qui EST FAIT, la fenêtre demande ce
+  qu'on VEUT faire.
+  ⚠ **Elle lit les blocs BRUTS du formulaire**, jamais `donnees.champsPersonnalises` : ceux-là sont
+  DÉJÀ filtrés, et un bloc écarté n'y figure plus. Chercher l'oubli dans la liste dont il vient
+  d'être retiré ne l'aurait jamais trouvé — un test vert sur une garde morte. Le break-test le
+  vérifie explicitement.
+  ⚠ **Elle ne crie que s'il y a à perdre** : un bloc nommé mais vide (section qu'on prépare) et un
+  bloc entièrement vide ne déclenchent rien. Un avertissement qui s'affiche pour rien apprend à
+  cliquer « oui » sans lire — et le jour où il dit quelque chose, personne ne le voit.
+  Vitest **3346/3346** (319 fichiers). Trois break-tests, trois ROUGE.
 
 - [ ] **#519 — Passe design (constats C1, C2, C3, C5).** C1 : `design-system.html` ne documente
   aucun composant du chantier (`.btn-icone-nu`, `.bloc-reordonner`, `.champ-recommande`,

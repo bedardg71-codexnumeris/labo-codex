@@ -1774,6 +1774,40 @@ function lireDonneesFormulaireProduction() {
 // date depuis toujours. Le gabarit sans échéance se signale désormais dans la
 // barre latérale par le badge « à planifier » (productions-liste.js), pour
 // qu'un oubli reste visible sans être bloquant.
+/**
+ * #518 (26 août 2026) — UN BLOC REMPLI MAIS SANS NOM DISPARAISSAIT EN SILENCE.
+ *
+ * `champsPersonnalisesAEnregistrer` écarte les blocs sans titre, et la règle se
+ * défend : un bloc sans nom s'afficherait comme un bandeau vide au-dessus d'un
+ * texte orphelin, dans le document remis aux étudiant·es. Mais ce qui était
+ * écarté, c'était du texte TAPÉ — et rien ne le disait.
+ *
+ * Verdict de Grégoire (D4, 26 août) : AVERTIR. Ni refus bloquant, ni titre
+ * inventé par l'application — le contenu d'un bloc appartient à son auteur, et
+ * c'est à lui de trancher.
+ *
+ * ⚠ Une fenêtre, pas un bandeau : il y a une question à poser et une réponse à
+ * attendre. C'est la doctrine du projet depuis la migration des confirmations —
+ * le bandeau annonce ce qui EST FAIT, la fenêtre demande ce qu'on VEUT faire.
+ *
+ * ⚠ On lit les blocs BRUTS du formulaire, pas `donnees.champsPersonnalises` :
+ * ceux-là sont déjà filtrés, et un bloc écarté n'y figure plus. Chercher
+ * l'oubli dans la liste dont il a été retiré ne l'aurait jamais trouvé.
+ */
+function validerBlocsNommes() {
+    if (typeof lireChampsPersonnalisesDepuisFormulaire !== 'function') return true;
+    const orphelins = lireChampsPersonnalisesDepuisFormulaire()
+        .filter(c => !String(c.titre || '').trim() && String(c.contenu || '').trim());
+    if (orphelins.length === 0) return true;
+
+    const message = orphelins.length === 1
+        ? 'Un bloc de consignes est rempli mais n\'a pas de nom : il ne sera pas conservé.\n\n'
+          + 'Enregistrer quand même ?'
+        : orphelins.length + ' blocs de consignes sont remplis mais n\'ont pas de nom : ils ne '
+          + 'seront pas conservés.\n\nEnregistrer quand même ?';
+    return confirm(message);
+}
+
 function validerChampsObligatoiresProduction(d) {
     if (!d.titre || !d.type || (d.type !== 'artefact-portfolio' && d.ponderation === 0)) {
         alert('Veuillez remplir tous les champs obligatoires (Titre, Type et Pondération)');
@@ -1953,6 +1987,10 @@ async function sauvegarderProduction() {
     const donnees = lireDonneesFormulaireProduction();
 
     if (!validerChampsObligatoiresProduction(donnees)) return;
+    // #518 — après les champs obligatoires (qui bloquent), avant l'écriture :
+    // on n'empile pas deux fenêtres, et l'avertissement porte sur ce qui va
+    // réellement partir.
+    if (!validerBlocsNommes()) return;
     if (!validerEcheancesDansTrimestre(donnees)) return;
 
     // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
@@ -2944,6 +2982,7 @@ window.supprimerChampPersonnalise = supprimerChampPersonnalise;
 window.deplacerChampPersonnalise = deplacerChampPersonnalise;
 window.peuplerChampsPersonnalises = peuplerChampsPersonnalises;
 window.champsPersonnalisesAEnregistrer = champsPersonnalisesAEnregistrer;
+window.validerBlocsNommes = validerBlocsNommes;                              // #518
 window.lireChampsPersonnalisesDepuisFormulaire = lireChampsPersonnalisesDepuisFormulaire;
 window.poserCaseAssignationSimple = poserCaseAssignationSimple;             // #494 — « consignes transmises » en mode simple
 window.lireEcheancesParGroupeDepuisFormulaire = lireEcheancesParGroupeDepuisFormulaire;   // #494 — sentinelle : l'écran et l'enregistrement disent la même chose
