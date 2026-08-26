@@ -693,27 +693,30 @@ function sauvegarderPresencesSansValidation(dateStr) {
 }
 
 /**
- * Vérifie la configuration du format horaire
+ * Vérifie que l'horaire du groupe-cours actif porte des séances
+ *
+ * FIX (26 août 2026, retour Jean-François) : la condition lisait AUSSI
+ * `db.getSync('formatHoraire')` — une clé que PLUS PERSONNE N'ÉCRIT depuis que
+ * le format vit dans l'entité Horaire du groupe-cours (`horaire.formatHoraire`,
+ * js/entites/horaires.js). Grep exhaustif du dépôt : trois lectures, zéro
+ * écriture. `!formatHoraire` était donc TOUJOURS vrai, et l'alerte « L'horaire
+ * des cours n'est pas configuré » s'affichait quel que soit l'horaire réel —
+ * invisible pour qui traîne un résidu de la Beta 95 dans son localStorage,
+ * permanente pour tout nouvel utilisateur. Seule l'absence de séances compte.
  */
 function verifierConfigurationFormatHoraire() {
     const alerteDiv = document.getElementById('alerteFormatHoraire');
     if (!alerteDiv) return;
 
-    const formatHoraire = db.getSync('formatHoraire', null);
     // 🆕 BETA 95 : Utiliser l'horaire du cours actif
     const seancesHoraire = typeof obtenirSeancesHoraire === 'function'
         ? obtenirSeancesHoraire()
         : db.getSync('seancesHoraire', []);
 
-    if (!formatHoraire || seancesHoraire.length === 0) {
-        alerteDiv.classList.remove('u-hide');
-        alerteDiv.innerHTML =
-            '<strong><img src="icons/icons8-high-priority.svg" alt="" class="alerte-icone"> Configuration incomplète</strong><br>' +
-            'L\'horaire des cours n\'est pas configuré. ' +
-            '<a href="#" data-prevent data-action="naviguerVersReglagesTrimestre">Configurer l\'horaire →</a>';
-    } else {
-        alerteDiv.classList.add('u-hide');
-    }
+    // Le bandeau porte son propre texte (index.html, #alerteFormatHoraire) : on le
+    // révèle ou on le masque, sans le réécrire. L'innerHTML retiré ici tenait un
+    // SECOND message, divergent de celui du HTML, avec son propre lien.
+    alerteDiv.classList.toggle('u-hide', seancesHoraire.length > 0);
 }
 
 /* ===============================
@@ -1675,10 +1678,11 @@ function obtenirDerniereDataSaisie(da = null) {
    🔗 WRAPPERS DÉLÉGATION (Phase 5 — Lot 5.14c)
    =============================== */
 
-function naviguerVersReglagesTrimestre(el) {
-    if (typeof afficherSection === 'function') afficherSection('reglages');
-    if (typeof afficherSousSection === 'function') afficherSousSection('calendrier-trimestre');
-}
+// naviguerVersReglagesTrimestre() RETIRÉE d'ici le 26 août 2026 (retour
+// Jean-François) : elle était définie DEUX FOIS — ici et dans main.js, que
+// index.html charge APRÈS ce fichier. La définition de main.js gagnait donc
+// toujours, et c'était la mauvaise. Une seule implémentation subsiste, dans main.js
+// (wrappers de navigation globaux), et elle mène à Cadre, pas à Réglages.
 
 function mettreAJourLignePeriodesHandler(el) {
     mettreAJourLignePeriodes(el.dataset.da, el.dataset.dateStr, parseInt(el.dataset.nbPeriodes));
@@ -1689,7 +1693,6 @@ function mettreAJourLignePeriodesHandler(el) {
    =============================== */
 
 // Rendre les fonctions disponibles globalement
-window.naviguerVersReglagesTrimestre = naviguerVersReglagesTrimestre;
 window.mettreAJourLignePeriodesHandler = mettreAJourLignePeriodesHandler;
 window.initialiserModuleSaisiePresences = initialiserModuleSaisiePresences;
 window.chargerGroupesPresences = chargerGroupesPresences;
