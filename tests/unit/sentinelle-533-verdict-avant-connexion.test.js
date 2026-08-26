@@ -140,10 +140,30 @@ describe('#533 · C — l\'absence de verdict ne vaut pas « tout va bien »', (
         expect(lireVerdict({ sha: SHA, code: 42 }, SHA)).toBe(3);
     });
 
-    it('C.e le refus donne le geste exact — sinon il se contourne', () => {
-        const refus = HOOK.slice(HOOK.indexOf('aucun verdict pour ce commit'));
-        expect(refus).toContain('scripts/pousser.sh');
-        expect(refus).toContain('node scripts/verifier-playwright.mjs');
+    it('C.e sans verdict, le hook AVERTIT et laisse passer — il ne bloque pas', () => {
+        // ⚠ Corrigé le 26 août, le jour même : la première version refusait, et
+        // elle a bloqué un push lancé depuis GitHub Desktop en donnant pour
+        // seule issue une commande de terminal. Un refus dont la solution est
+        // hors de portée de l'outil où il se produit est le « hook
+        // inapplicable » que ce fichier combat depuis août.
+        const bloc = HOOK.slice(HOOK.indexOf('aucun verdict local pour ce commit'));
+        expect(bloc, 'le message d\'avertissement a disparu').toBeTruthy();
+        const sortie = bloc.match(/^exit (\d)/m);
+        expect(
+            sortie && sortie[1],
+            'bloquer ici recréerait le blocage GitHub Desktop du 26 août'
+        ).toBe('0');
+    });
+
+    it('C.f mais il donne le geste COMPLET, terminal compris', () => {
+        const bloc = HOOK.slice(HOOK.indexOf('aucun verdict local pour ce commit'));
+        expect(bloc, 'sans `cd`, la commande n\'est pas copiable telle quelle').toContain('cd %s && scripts/pousser.sh');
+        expect(bloc).toContain('node scripts/verifier-playwright.mjs');
+    });
+
+    it('C.g un verdict ROUGE, lui, bloque toujours — c\'est ce qui reste gardé', () => {
+        const rouge = HOOK.slice(HOOK.indexOf('CODE_PW -eq 1'));
+        expect(rouge.slice(0, 400)).toMatch(/exit 1/);
     });
 });
 
