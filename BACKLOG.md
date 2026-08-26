@@ -350,7 +350,30 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⏳ **Non touché** : le bouton du formulaire inline reste conditionné à `grilleId && echelleId`
   (chemin secondaire, sans production chargée d'où déduire les consignes).
 
-  Vitest **3298/3298** (313 fichiers). Trois break-tests, trois ROUGE. Dernier ID : **#513**.
+  Vitest **3298/3298** (313 fichiers). Trois break-tests, trois ROUGE.
+
+- [x] **#514 — Les consignes longues ne sont plus dessinées sous le bord du papier.**
+  `poserBlocsInfoPDF` ne consultait JAMAIS la hauteur de page : aucun `addPage`, aucun `getHeight`.
+  Le tableau des critères, lui, pagine (autoTable s'en charge) — d'où un document dont la partie
+  évaluation se poursuit proprement pendant que les consignes disparaissent à l'impression. Et
+  l'aperçu affichait « le PDF le poursuivra sur une page de plus » : promesse tenue pour le tableau
+  seulement. Le cas d'usage réel est justement celui qui déborde — un « Détail de la tâche » en
+  étapes numérotées, ce que Grégoire distribue.
+  ▣ **Le cas ordinaire reste inchangé** : quand tout tient sur la feuille, c'est exactement le rendu
+  d'avant qui est produit (celui que fige le golden master). La pagination est un chemin qui ne
+  s'ouvre que lorsque le contenu était perdu.
+  ⚠ En deux colonnes, l'équilibrage n'a plus de sens au débordement (deux colonnes de hauteur
+  comparable qui dépassent toutes les deux ne s'arrangent pas en les équilibrant) : les blocs
+  deviennent un FLUX — gauche jusqu'en bas, droite, puis feuille suivante. L'ordre est préservé.
+  ⚠ **Piège attrapé en cours de route** : l'abscisse doit être RÉÉVALUÉE après chaque repli, un
+  repli pouvant changer de colonne autant que de page. Lue une seule fois, le texte se poursuivait
+  dans la colonne qu'on venait de quitter — invisible dans le source, visible sur le papier.
+  ⚠ **Et un faux-vert attrapé par le break-test** : l'assertion « le texte occupe les deux
+  colonnes » comptait aussi les titres de bandeaux, qui sont posés CENTRÉS, donc à une abscisse qui
+  leur est propre. Elle restait verte avec une abscisse figée — le défaut même qu'elle devait voir.
+
+  Vitest **3305/3305** (314 fichiers). La sentinelle mesure ce qui est DESSINÉ (faux jsPDF qui note
+  page et ordonnée de chaque tracé), pas ce qui est écrit dans le source. Dernier ID : **#514**.
 
 ### Chantier — 25 août 2026 (le pont carte d'alignement ↔ productions)
 

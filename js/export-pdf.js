@@ -2091,54 +2091,149 @@ function poserBlocsInfoPDF(doc, modele, posY, largeurContenu, facteurTaille) {
     const INTERLIGNE = 5;   // mm — celui du reste du module
     const gauche = PDF_CONFIG.marges.gauche;
 
+    // ⚠⚠ #514 (26 août 2026) — CE QUI DÉPASSE LE BAS DE LA FEUILLE N'EXISTE PAS.
+    //
+    // Cette fonction ne consultait JAMAIS la hauteur de page. Le tableau des
+    // critères, lui, pagine (autoTable s'en charge) — d'où un document où la
+    // partie évaluation se poursuit proprement pendant que les consignes, elles,
+    // sont dessinées sous le bord du papier et disparaissent à l'impression.
+    // Le cas d'usage réel est justement celui qui déborde : un « Détail de la
+    // tâche » en étapes numérotées. Et l'aperçu affichait « le PDF le poursuivra
+    // sur une page de plus » — une promesse tenue pour le tableau seulement.
+    //
+    // ▣ LE CAS ORDINAIRE RESTE INCHANGÉ, AU PIXEL PRÈS : quand tout tient sur la
+    // feuille, c'est exactement le rendu d'avant qui est produit (c'est celui que
+    // le golden master fige). La pagination est un chemin qui ne s'ouvre que
+    // lorsque le contenu était perdu.
+    const limiteBas = doc.internal.pageSize.getHeight() - PDF_CONFIG.marges.bas;
+    const HAUTEUR_BANDEAU = 5.5;
+
     // Un bandeau : rectangle plein, titre blanc centré, en majuscules.
     const poserBandeau = (texte, x, y, largeur) => {
-        const HAUTEUR = 5.5;
         doc.setFillColor(...PDF_CONFIG.couleurs.titreSection);
-        doc.rect(x, y - 4, largeur, HAUTEUR, 'F');
+        doc.rect(x, y - 4, largeur, HAUTEUR_BANDEAU, 'F');
         doc.setFontSize(PDF_CONFIG.polices.textePetit * facteurTaille);
         doc.setTextColor(255, 255, 255);
         doc.setFont('helvetica', 'bold');
         doc.text(texte.replace(/\s*:\s*$/, '').toUpperCase(), x + largeur / 2, y, { align: 'center' });
-        return y + HAUTEUR + 1;
+        return y + HAUTEUR_BANDEAU + 1;
     };
 
-    const poserTexte = (texte, x, y, largeur) => {
+    const styleTexte = () => {
         doc.setFontSize(PDF_CONFIG.polices.texteNormal * facteurTaille);
         doc.setTextColor(...PDF_CONFIG.couleurs.textePrincipal);
         doc.setFont('helvetica', 'normal');
+    };
+
+    const poserTexte = (texte, x, y, largeur) => {
+        styleTexte();
         const lignes = doc.splitTextToSize(texte, largeur);
         doc.text(lignes, x, y);
         return y + lignes.length * INTERLIGNE;
+    };
+
+    /** Ce qu'un bloc occupera en hauteur, bandeau et respiration compris. */
+    const hauteurBloc = (bloc, largeur, avecBandeau) => {
+        styleTexte();
+        const lignes = doc.splitTextToSize(bloc.texte, largeur);
+        return (avecBandeau ? HAUTEUR_BANDEAU + 1 : INTERLIGNE) + lignes.length * INTERLIGNE + 4;
+    };
+
+    /**
+     * Pose un texte LIGNE À LIGNE, en demandant une feuille neuve dès qu'il n'y
+     * a plus de place. Un bloc plus long qu'une page se poursuit donc au lieu
+     * d'être tronqué — c'est le cas des consignes numérotées.
+     */
+    // ⚠ `obtenirX` est une FONCTION, jamais une valeur : un repli peut changer
+    // de COLONNE autant que de page. Une abscisse lue une seule fois, avant la
+    // pose, ferait continuer le texte dans la colonne qu'on vient de quitter.
+    const poserTextePagine = (texte, obtenirX, y, largeur, replier) => {
+        styleTexte();
+        const lignes = doc.splitTextToSize(texte, largeur);
+        let curseur = y;
+        lignes.forEach(ligne => {
+            if (curseur > limiteBas) {
+                curseur = replier();
+                styleTexte();   // ⚠ la nouvelle page ne garde pas l'état de police
+            }
+            doc.text(ligne, obtenirX(), curseur);
+            curseur += INTERLIGNE;
+        });
+        return curseur;
     };
 
     if (modele.disposition === DISPO_DEUX_COLONNES) {
         const ECART = 8;   // mm
         const largeurCol = (largeurContenu - ECART) / 2;
         const repartition = repartirEnDeuxColonnes(blocs);
-        let basMax = posY;
 
-        [repartition.gauche, repartition.droite].forEach((colonne, index) => {
-            const x = gauche + index * (largeurCol + ECART);
-            let y = posY;
-            colonne.forEach(bloc => {
-                y = poserBandeau(bloc.titre, x, y, largeurCol);
-                y = poserTexte(bloc.texte, x, y, largeurCol) + 4;
+        const hauteurColonne = (colonne) =>
+            colonne.reduce((total, bloc) => total + hauteurBloc(bloc, largeurCol, true), 0);
+        const tientSurLaFeuille = posY
+            + Math.max(hauteurColonne(repartition.gauche), hauteurColonne(repartition.droite))
+            <= limiteBas;
+
+        if (tientSurLaFeuille) {
+            let basMax = posY;
+            [repartition.gauche, repartition.droite].forEach((colonne, index) => {
+                const x = gauche + index * (largeurCol + ECART);
+                let y = posY;
+                colonne.forEach(bloc => {
+                    y = poserBandeau(bloc.titre, x, y, largeurCol);
+                    y = poserTexte(bloc.texte, x, y, largeurCol) + 4;
+                });
+                basMax = Math.max(basMax, y);
             });
-            basMax = Math.max(basMax, y);
+            return basMax + 3;
+        }
+
+        // ⚠ Débordement : la répartition équilibrée n'a plus de sens — deux
+        // colonnes de hauteur comparable qui dépassent toutes les deux ne
+        // s'arrangent pas en les équilibrant. Les blocs deviennent un FLUX :
+        // colonne de gauche jusqu'en bas, colonne de droite, puis feuille
+        // suivante. C'est la lecture d'un journal, et l'ordre est préservé.
+        let colonne = 0;
+        let hautColonne = posY;
+        let y = posY;
+        const replier = () => {
+            if (colonne === 0) {
+                colonne = 1;
+            } else {
+                doc.addPage();
+                colonne = 0;
+                hautColonne = PDF_CONFIG.marges.haut;
+            }
+            y = hautColonne;
+            return y;
+        };
+
+        const x = () => gauche + colonne * (largeurCol + ECART);
+        blocs.forEach(bloc => {
+            // Un bandeau seul en bas de colonne annoncerait un bloc qui commence
+            // ailleurs : on replie AVANT de le poser.
+            if (y + HAUTEUR_BANDEAU + 1 + INTERLIGNE > limiteBas) replier();
+            y = poserBandeau(bloc.titre, x(), y, largeurCol);
+            y = poserTextePagine(bloc.texte, x, y, largeurCol, replier) + 4;
         });
-        return basMax + 3;
+        return y + 3;
     }
 
     // Continu : un bloc après l'autre, pleine largeur.
     let y = posY;
+    const replierContinu = () => {
+        doc.addPage();
+        y = PDF_CONFIG.marges.haut;
+        return y;
+    };
     blocs.forEach(bloc => {
+        // Même règle : un titre ne reste pas seul au bas d'une page.
+        if (y + INTERLIGNE * 2 > limiteBas) replierContinu();
         doc.setFontSize(PDF_CONFIG.polices.texteNormal * facteurTaille);
         doc.setTextColor(...PDF_CONFIG.couleurs.titreSection);
         doc.setFont('helvetica', 'bold');
         doc.text(bloc.titre, gauche, y);
         y += INTERLIGNE;
-        y = poserTexte(bloc.texte, gauche, y, largeurContenu) + 4;
+        y = poserTextePagine(bloc.texte, () => gauche, y, largeurContenu, replierContinu) + 4;
     });
     return y + 1;
 }
@@ -3669,6 +3764,7 @@ window.cransDisponibles = cransDisponibles;                                 // #
 window.cranDocument = cranDocument;
 window.raisonCranIndisponible = raisonCranIndisponible;
 window.productionAConsignes = productionAConsignes;                         // #513 — « a-t-elle des consignes à montrer ? », en un seul endroit
+window.poserBlocsInfoPDF = poserBlocsInfoPDF;                               // #514 — sentinelle de pagination : elle mesure ce qui est DESSINÉ
 window.accorderSelecteurCran = accorderSelecteurCran;                       // #497 étape 3 — le menu ne peut pas mentir sur ce que la page montre
 window.feuillesDuDocument = feuillesDuDocument;
 window.dispositionDocument = dispositionDocument;                           // #497 étape 4 — la mise en page est un choix
