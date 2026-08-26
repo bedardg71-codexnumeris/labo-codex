@@ -454,9 +454,14 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   passage ne protège plus, il fait jouer à pile ou face un push de 5 minutes. C'est le mécanisme
   exact par lequel un hook finit contourné — et #495 note déjà que le premier `--no-verify` date
   du 25 août.
-  ⏳ À instruire : `--repeat-each` pour confirmer le taux, puis isoler la dépendance (fixture
-  partagée ? `db` non purgée entre fichiers ?). Ne PAS les verser à la baseline : une spec instable
-  n'est pas une dette connue, c'est un test à réparer.
+  ⮕ **Piste du parallélisme EXCLUE, vérifiée** : `tests/playwright.config.js` porte déjà
+  `workers: 1` et `fullyParallel: false`, avec le commentaire qui explique pourquoi (toutes les
+  specs ouvrent le MÊME `index.html` en `file://` et partagent le localStorage de cette origine).
+  L'exécution est donc séquentielle — mais le localStorage reste partagé ENTRE FICHIERS : un fichier
+  qui laisse un état derrière lui peut faire tomber un autre. C'est la piste à instruire en premier.
+  ⏳ À instruire : `--repeat-each` pour confirmer le taux, puis isoler la dépendance (état laissé
+  par un fichier voisin ? attente qui expire sous charge ?). Ne PAS les verser à la baseline : une
+  spec instable n'est pas une dette connue, c'est un test à réparer.
 
   Dernier ID : **#523**.
 
