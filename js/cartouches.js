@@ -705,6 +705,53 @@ async function persisterCartouchePartielle(appliquer) {
 }
 
 /**
+ * #531 (26 août 2026) — LES CODES DE NIVEAU VIENNENT DE L'ÉCHELLE, PAS D'UNE
+ * LISTE ÉCRITE DANS UNE REGEX.
+ *
+ * ⚠⚠ CE QUI ÉTAIT CASSÉ, ET DEPUIS QUAND. Trois fonctions d'import lisaient le
+ * niveau d'un commentaire avec une classe de caractères EN DUR — et pas la même :
+ *   · `importerCartoucheDepuisTxt`  →  ([IDME0])   le zéro passe
+ *   · `importerCommentaires`        →  ([IDME])    le zéro est REJETÉ
+ *   · `parserMarkdownCartouche`     →  ([IDME])    le zéro est REJETÉ
+ * L'échelle de Grégoire est « 0-IDME (5 niv.) » : selon le bouton d'import
+ * emprunté, ses commentaires de niveau 0 revenaient ou disparaissaient EN
+ * SILENCE. Et pour une échelle A/B/C/D, aucun des trois ne lisait quoi que ce soit.
+ *
+ * ⚠ UN CODE PEUT FAIRE JUSQU'À TROIS CARACTÈRES (`maxlength="3"` dans les deux
+ * éditeurs d'échelle). Une classe `[...]` ne conviendrait donc pas : « NM » y
+ * serait lu comme « N » ou « M ». D'où l'ALTERNANCE.
+ *
+ * ⚠ CE QUI N'EST PAS NÉCESSAIRE, ET POURQUOI C'EST ÉCRIT ICI. Un premier jet
+ * triait les codes par longueur décroissante, « pour qu'un code court ne masque
+ * pas un code long qui commence pareil ». Le break-test a montré que ce tri ne
+ * change RIEN : le `\)` qui suit l'alternance force le moteur à revenir sur ses
+ * pas, et « M+ » est trouvé même si « M » est essayé d'abord. Le tri a donc été
+ * retiré plutôt que gardé « au cas où » — et la raison est notée pour que
+ * personne ne le remette en croyant corriger un oubli.
+ */
+function codesNiveauxPourLecture(niveaux) {
+    const codes = (niveaux || [])
+        .map(n => String((n && n.code) != null ? n.code : '').trim())
+        .filter(Boolean);
+    if (codes.length === 0) return null;          // rien à lire : l'appelant décide
+    // Échapper ce qui a un sens en expression régulière (« + », « . », « ( »…).
+    return codes.map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+}
+
+/**
+ * #531 — la ligne « **Critère (NIVEAU)** : commentaire », lue avec les codes RÉELS.
+ * Rend `null` si la ligne n'en est pas une.
+ */
+function lireLigneCommentaire(ligne, niveaux) {
+    const alternance = codesNiveauxPourLecture(niveaux);
+    if (!alternance) return null;
+    const motif = new RegExp('^\\*\\*(.+?)\\s*\\((' + alternance + ')\\)\\*\\*\\s*:\\s*(.*)$');
+    const m = String(ligne || '').trim().match(motif);
+    if (!m) return null;
+    return { critere: m[1].trim(), niveau: m[2].trim(), commentaire: m[3].trim() };
+}
+
+/**
  * #517 — le CONTEXTE aussi. Il ouvre chaque rétroaction reçue par un étudiant·e :
  * le perdre en silence coûte autant que perdre une cellule de la matrice.
  *
@@ -950,11 +997,13 @@ async function importerCommentaires() {
             }
             
             // Détecter un commentaire : **CRITÈRE (NIVEAU)** : Texte...
-            const match = ligne.match(/^\*\*(.+?)\s*\(([IDME])\)\*\*\s*:\s*(.+)$/);
-            if (match && critereActuel) {
-                const nomCritere = match[1].trim().toUpperCase();
-                const niveau = match[2].trim();
-                const commentaire = match[3].trim();
+            // #531 — les codes viennent de l'ÉCHELLE de la cartouche ouverte,
+            // plus d'une classe `[IDME]` qui rejetait le niveau 0 en silence.
+            const lu = lireLigneCommentaire(ligne, cartoucheActuel && cartoucheActuel.niveaux);
+            if (lu && critereActuel) {
+                const nomCritere = lu.critere.toUpperCase();
+                const niveau = lu.niveau;
+                const commentaire = lu.commentaire;
                 
                 // Vérifier que le critère correspond
                 if (nomCritere === critereActuel) {
@@ -1989,6 +2038,11 @@ function importerCartoucheDepuisTxt(eventOuEl) {
         return;
     }
 
+    // #531 — les codes de niveau à reconnaître viennent de l'ÉCHELLE de la
+    // cartouche ouverte. Ils étaient écrits `[IDME0]` : bon pour l'échelle de
+    // Grégoire, muet pour toute autre.
+    const niveauxPourLecture = cartoucheActuel.niveaux;
+
     const reader = new FileReader();
     reader.onload = async function(e) {
         try {
@@ -2006,10 +2060,13 @@ function importerCartoucheDepuisTxt(eventOuEl) {
             texte = texte.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
             // 2. Corriger les astérisques mal placés : **CRITÈRE (N) :** → **CRITÈRE (N)** :
-            texte = texte.replace(/\*\*([^*]+)\(([IDME0])\)\s*:\s*\*\*/g, '**$1($2)** :');
+            // #531 — l'alternance des codes RÉELS remplace la classe `[IDME0]`, qui ne
+            // valait que pour l'échelle de Grégoire et rien d'autre.
+            const _codes = codesNiveauxPourLecture(niveauxPourLecture) || 'IDME0';
+            texte = texte.replace(new RegExp('\\*\\*([^*]+)\\((' + _codes + ')\\)\\s*:\\s*\\*\\*', 'g'), '**$1($2)** :');
 
             // 3. Normaliser les espaces autour des deux-points
-            texte = texte.replace(/\*\*([^*]+)\(([IDME0])\)\*\*\s*:\s*/g, '**$1($2)** : ');
+            texte = texte.replace(new RegExp('\\*\\*([^*]+)\\((' + _codes + ')\\)\\*\\*\\s*:\\s*', 'g'), '**$1($2)** : ');
 
             // 4. Supprimer les lignes vides multiples (max 2 sauts de ligne consécutifs)
             texte = texte.replace(/\n{3,}/g, '\n\n');
@@ -2135,7 +2192,8 @@ function importerCartoucheDepuisTxt(eventOuEl) {
                 // - **CRITÈRE (NIVEAU):**         (sans espace)
                 // - **CRITÈRE (NIVEAU) : **       (astérisques mal placés)
                 // Regex ultra-flexible : capture tout entre ** et (NIVEAU), puis ignore tout jusqu'au :
-                const matchDebut = ligne.match(/^\*\*(.+?)\s*\(([IDME0])\)\s*[:\*\s]+(.*)$/);
+                const matchDebut = ligne.match(new RegExp('^\\*\\*(.+?)\\s*\\(('
+                    + (codesNiveauxPourLecture(niveauxPourLecture) || 'IDME0') + ')\\)\\s*[:\\*\\s]+(.*)$'));
                 if (matchDebut) {
                     const nomCritere = matchDebut[1].trim().toUpperCase();
                     const niveau = matchDebut[2].trim();
@@ -2210,6 +2268,130 @@ function importerCartoucheDepuisTxt(eventOuEl) {
  * UTILISÉ PAR:
  * - Bouton «Exporter en texte» dans la barre de boutons d'édition
  */
+/**
+ * #531 (26 août 2026) — LE MODÈLE VIDE, À DONNER À UNE IA.
+ *
+ * Demande de Grégoire : pouvoir télécharger un squelette de cartouche construit
+ * à partir de la grille et de l'échelle CHOISIES, le faire remplir par une IA,
+ * puis le réimporter.
+ *
+ * ⚠ La différence avec `exporterCartoucheEnTexte` tient en un mot : celle-ci
+ * exporte une cartouche qui EXISTE, celle-ci fabrique le squelette AVANT qu'il y
+ * en ait une. Les deux produisent le MÊME format — c'est ce qui rend le
+ * réimport possible, et c'est pourquoi la structure des lignes est écrite une
+ * seule fois, dans `lignesMatriceCartouche`.
+ */
+function lignesMatriceCartouche(criteres, niveaux, commentaires) {
+    const lignes = [];
+    const dit = commentaires || {};
+    (criteres || []).forEach((critere, index) => {
+        lignes.push('## ' + critere.nom);
+        lignes.push('');
+        (niveaux || []).forEach(niveau => {
+            const cle = critere.id + '_' + niveau.code;
+            lignes.push('**' + critere.nom + ' (' + niveau.code + ')** : ' + (dit[cle] || ''));
+        });
+        if (index < (criteres || []).length - 1) {
+            lignes.push('');
+            lignes.push('---');
+            lignes.push('');
+        }
+    });
+    return lignes;
+}
+
+async function telechargerModeleCartouche() {
+    const idGrille = (document.getElementById('selectGrilleCartouche') || {}).value;
+    const idEchelle = (document.getElementById('selectEchelleCartouche') || {}).value;
+    if (!idGrille || !idEchelle) {
+        alert('Choisis d\'abord une grille et une échelle : le modèle est construit à partir des deux.');
+        return;
+    }
+
+    const grilles = await db.get(cle('grillesTemplates')) || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
+    const grille = grilles.find(g => g.id === idGrille);
+    const echelle = echelles.find(e => e.id === idEchelle);
+    if (!grille || !echelle) {
+        alert('Grille ou échelle introuvable.');
+        return;
+    }
+
+    const criteres = grille.criteres || [];
+    const niveaux = echelle.niveaux || [];
+    if (criteres.length === 0 || niveaux.length === 0) {
+        alert('Cette grille n\'a pas de critères, ou cette échelle pas de niveaux : il n\'y a pas de matrice à décrire.');
+        return;
+    }
+
+    const nomCartouche = ((document.getElementById('nomCartouche') || {}).value || '').trim()
+        || ('Cartouche — ' + grille.nom);
+
+    // ⚠ L'en-tête s'adresse à l'IA autant qu'à l'utilisateur. Il dit le format
+    // EXACT à respecter, parce qu'une IA laissée libre reformate — et un fichier
+    // reformaté n'est plus réimportable. Il est en commentaire Markdown : le
+    // parseur ne lit que les lignes « **Critère (CODE)** : … », il ignore donc
+    // tout ceci sans qu'on ait à le lui demander.
+    const lignes = [];
+    lignes.push('# ' + nomCartouche);
+    lignes.push('');
+    lignes.push('> CONSIGNES — à lire par l\'assistant, puis à laisser telles quelles.');
+    lignes.push('>');
+    lignes.push('> Rédige un commentaire de rétroaction pour CHAQUE ligne « ** … ** : » ci-dessous,');
+    lignes.push('> en écrivant à la suite des deux-points. Une ligne = un commentaire.');
+    lignes.push('>');
+    lignes.push('> À RESPECTER, sans quoi le fichier ne pourra pas être réimporté :');
+    lignes.push('> - ne change RIEN à ce qui est entre les deux astérisques : ni le nom du critère,');
+    lignes.push('>   ni le code entre parenthèses, ni la ponctuation ;');
+    lignes.push('> - garde une seule ligne par commentaire, sans saut de ligne au milieu ;');
+    lignes.push('> - n\'ajoute pas de lignes « ** … ** : » qui ne sont pas déjà là ;');
+    lignes.push('> - laisse les titres « ## » et les séparateurs « --- » en place.');
+    lignes.push('>');
+    lignes.push('> Le commentaire s\'adresse à l\'étudiant·e, à la deuxième personne. Il décrit ce');
+    lignes.push('> que le niveau atteint veut dire pour CE critère, et ce qu\'il reste à travailler.');
+    lignes.push('');
+    lignes.push('Grille : ' + grille.nom);
+    lignes.push('Échelle : ' + echelle.nom);
+    lignes.push('');
+    lignes.push('Niveaux, du plus faible au plus élevé :');
+    niveaux.forEach(n => {
+        const borne = (n.min != null && n.max != null) ? ' [' + n.min + ' à ' + n.max + ' %]' : '';
+        lignes.push('- **' + n.code + '** — ' + (n.nom || '') + borne
+            + (n.description ? ' : ' + n.description : ''));
+    });
+    lignes.push('');
+    lignes.push('Critères de la grille :');
+    criteres.forEach(c => {
+        lignes.push('- **' + c.nom + '**'
+            + (c.ponderation ? ' (' + c.ponderation + ' %)' : '')
+            + (c.description ? ' — ' + c.description : ''));
+    });
+    lignes.push('');
+    lignes.push('---');
+    lignes.push('');
+
+    // La matrice, vide — MÊME structure que l'export d'une cartouche remplie.
+    lignes.push(...lignesMatriceCartouche(criteres, niveaux, {}));
+
+    const contenu = lignes.join('\n');
+    const nomFichier = ('modele-' + nomCartouche)
+        .replace(/[^a-zA-Z0-9àâäéèêëïîôùûüÿçÀÂÄÉÈÊËÏÎÔÙÛÜŸÇ\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .toLowerCase();
+    const blob = new Blob([contenu], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nomFichier + '.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    notifications.succes('Modèle téléchargé',
+        criteres.length + ' critère(s) × ' + niveaux.length + ' niveau(x) à remplir.');
+}
+
 async function exporterCartoucheEnTexte() {
     if (!cartoucheActuel) {
         alert('Aucune cartouche active à exporter');
@@ -2253,23 +2435,9 @@ async function exporterCartoucheEnTexte() {
     const niveaux = cartoucheActuel.niveaux || [];
     const commentaires = cartoucheActuel.commentaires || {};
 
-    criteres.forEach((critere, index) => {
-        lignes.push('## ' + critere.nom);
-        lignes.push('');
-
-        niveaux.forEach(niveau => {
-            const cle = critere.id + '_' + niveau.code;
-            const commentaire = commentaires[cle] || '';
-            lignes.push('**' + critere.nom + ' (' + niveau.code + ')** : ' + commentaire);
-        });
-
-        // Séparateur entre critères (sauf le dernier)
-        if (index < criteres.length - 1) {
-            lignes.push('');
-            lignes.push('---');
-            lignes.push('');
-        }
-    });
+    // #531 — une seule écriture de la structure, partagée avec le MODÈLE vide.
+    // Deux copies divergeraient, et un modèle qui ne se relit pas ne sert à rien.
+    lignes.push(...lignesMatriceCartouche(criteres, niveaux, commentaires));
 
     // Générer et télécharger le fichier
     const contenu = lignes.join('\n');
@@ -2645,6 +2813,11 @@ window.sauvegarderCartouche = sauvegarderCartouche;
 window.sauvegarderCommentaire = sauvegarderCommentaire;
 window.persisterCartouchePartielle = persisterCartouchePartielle;           // #517
 window.sauvegarderContexteCartouche = sauvegarderContexteCartouche;         // #517
+window.codesNiveauxPourLecture = codesNiveauxPourLecture;                   // #531
+window.lireLigneCommentaire = lireLigneCommentaire;                         // #531
+window.lignesMatriceCartouche = lignesMatriceCartouche;                     // #531
+window.parserMarkdownCartouche = parserMarkdownCartouche;                   // #531 — l'aller-retour est testé
+window.telechargerModeleCartouche = telechargerModeleCartouche;             // #531
 window.importerCommentaires = importerCommentaires;
 window.initialiserModuleCartouches = initialiserModuleCartouches;
 
@@ -3194,20 +3367,20 @@ function importerDepuisMarkdown() {
  * @param {string} markdown - Texte markdown à parser
  * @returns {Object} Objet avec clés critère_niveau
  */
-function parserMarkdownCartouche(markdown) {
+function parserMarkdownCartouche(markdown, niveaux) {
     const commentaires = {};
     const lignes = markdown.split('\n');
 
-    lignes.forEach(ligne => {
-        // Chercher pattern : **CRITÈRE (NIVEAU)** : Commentaire
-        const match = ligne.match(/\*\*(.+?)\s*\(([IDME])\)\*\*\s*:\s*(.+)/);
-        if (match) {
-            const critere = match[1].trim().toUpperCase();
-            const niveau = match[2].trim();
-            const commentaire = match[3].trim();
+    // #531 — les codes viennent de l'échelle passée par l'appelant, ou de la
+    // cartouche ouverte à défaut. Une classe `[IDME]` écrite ici rejetait le
+    // niveau 0 de l'échelle « 0-IDME » — et TOUT d'une échelle A/B/C/D.
+    const niveauxLus = niveaux || (typeof cartoucheActuel !== 'undefined'
+        && cartoucheActuel ? cartoucheActuel.niveaux : null);
 
-            const cle = `${critere}_${niveau}`;
-            commentaires[cle] = commentaire;
+    lignes.forEach(ligne => {
+        const lu = lireLigneCommentaire(ligne, niveauxLus);
+        if (lu && lu.commentaire) {
+            commentaires[`${lu.critere.toUpperCase()}_${lu.niveau}`] = lu.commentaire;
         }
     });
 

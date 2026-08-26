@@ -564,6 +564,31 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **Seule spec de la baseline** depuis le 26 août : le hook bloquera désormais toute rougeur neuve,
   et celle-ci est la dernière à en sortir.
 
+- [x] **#531 LIVRÉ 26 août 2026 (1.100.0)** — un modèle de cartouche à faire remplir par une IA.
+  Demande de Grégoire : télécharger un squelette construit depuis la grille et l'échelle choisies,
+  le faire remplir, le réimporter.
+  ⮕ **Le format existait déjà** (`exporterCartoucheEnTexte`), mais il exporte une cartouche QUI
+  EXISTE. Ce qui manquait, c'est le squelette AVANT qu'il y en ait une. La structure des lignes est
+  désormais écrite **une seule fois** (`lignesMatriceCartouche`) et partagée par les deux : deux
+  copies divergeraient, et un modèle qui ne se relit pas ne sert à rien.
+  ⚠⚠ **CE QUI BLOQUAIT, ET QUI ÉTAIT DÉJÀ CASSÉ AVANT LA DEMANDE.** Trois fonctions d'import lisaient
+  le code de niveau avec une classe EN DUR, et **pas la même** : `importerCartoucheDepuisTxt` avec
+  `([IDME0])`, `importerCommentaires` et `parserMarkdownCartouche` avec `([IDME])`. L'échelle de
+  Grégoire est « 0-IDME (5 niv.) » : **selon le bouton emprunté, ses commentaires de niveau 0
+  revenaient ou disparaissaient en silence**. Une échelle A/B/C/D n'était lue par aucun des trois.
+  ⮕ Les codes viennent maintenant de l'ÉCHELLE (`codesNiveauxPourLecture`, `lireLigneCommentaire`),
+  avec échappement des caractères de regex. **Sous-ensemble minimal de #529**, livré parce que la
+  demande ne bouclait pas sans lui — le reste (SRPNF, l'affichage, le calcul) attend sa session.
+  ⮕ **Consignes en tête du fichier** (verdict de Grégoire) : format exact à ne pas déformer, une
+  ligne par commentaire, ne rien changer entre les `**`. Un assistant laissé libre reformate, et un
+  fichier reformaté ne se réimporte plus. Elles sont en citation Markdown, que le parseur ignore
+  sans qu'on ait à le lui demander.
+  ⚠ **Un break-test a montré du code INUTILE, et il a été retiré** : le tri des codes par longueur
+  décroissante « pour qu'un code court ne masque pas un code long » ne change rien — le `\)` qui suit
+  l'alternance force le retour arrière, et « M+ » est trouvé même si « M » est essayé d'abord. Retiré
+  plutôt que gardé « au cas où », avec la raison écrite pour que personne ne le remette.
+  Vitest **3387/3387** (322 fichiers). Deux break-tests : l'échappement mord, le tri ne mordait pas.
+
 ### Constats de l'audit du 25 août ENCORE OUVERTS
 
 > Les six correctifs ci-dessus (#509 à #515) épuisent ce qui ne demandait pas d'arbitrage de
