@@ -439,7 +439,19 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   passent. Tout autre autosave en lecture-modification-écriture porte la même course. Recoupe
   [[project-autosaves-a-auditer]].
 
-- [ ] **#523 — Deux specs Playwright INSTABLES rendent le garde-fou de push non déterministe.**
+- [ ] **#523 — Deux specs Playwright rouges en suite, vertes isolées — cause NON ÉTABLIE.**
+  ⚠⚠ **CORRECTION DU 26 AOÛT, À LIRE AVANT TOUT LE RESTE DE CET ITEM.** Le titre d'origine disait
+  « specs INSTABLES » : c'était une conclusion prématurée. En regardant la machine, j'ai trouvé
+  **23 processus Playwright/WebKit vivants en même temps** et une charge moyenne à **159** — parce
+  que j'avais enchaîné plusieurs suites sans attendre la fin des précédentes (régénération de la
+  baseline, deux hooks de push, un run isolé, une suite complète). Sous une charge pareille, une
+  attente qui expire produit exactement le même symptôme qu'une contamination d'état.
+  ⮕ **Deux explications concurrentes, aucune écartée** : (a) état laissé par un fichier voisin dans
+  le localStorage partagé de l'origine `file://` ; (b) simple expiration d'attente sous une machine
+  saturée par mes propres lancements. Le fait que les deux mêmes specs tombent deux fois de suite
+  penche pour (a), mais les deux runs étaient tous deux sous charge — donc ça ne tranche pas.
+  ⏳ **Première chose à faire quand cet item s'ouvrira** : rejouer la suite complète UNE SEULE FOIS,
+  sur une machine au repos, et voir si les deux rougissent encore. Tout le reste en dépend.
   Mesuré le 26 août, sur quatre exécutions de la suite WebKit à quelques minutes d'intervalle,
   même arbre, même machine :
   · régénération de la baseline → **exactement 8** échecs (les 8 de #495) ;
