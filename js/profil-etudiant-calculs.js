@@ -4,7 +4,7 @@
    correspond à L4185-5686 du fichier original) — refactor 18 mai 2026
 
    Contenu de ce sous-module (14 fonctions, ~1500 LOC) :
-   - Conversion IDME : obtenirTableConversionIDME, convertirNiveauIDMEEnScore
+   - Conversion IDME : obtenirTableConversionNiveaux, convertirNiveauEnScore
    - Moyennes critères : calculerMoyennesCriteres, calculerMoyennesCriteresRecents
    - IPB : calculerIPB (cyc <30, éclaté en helpers privés Cat-B Track 3 phase 2 — 21 mai 2026)
    - Diagnostic apprentissage : diagnostiquerSuiviApprentissage, diagnostiquerForcesChallenges
@@ -26,62 +26,71 @@
 'use strict';
 
 /**
- * Récupère la table de conversion IDME depuis l'échelle configurée
- * @param {string} echelleId - ID de l'échelle (optionnel, prend la première IDME si non spécifié)
- * @returns {Object} - { I: 0.40, D: 0.65, M: 0.75, E: 1.00 }
+ * Table « code de niveau -> score 0-1 », construite depuis l'échelle de
+ * l'utilisateur. AUCUN code de niveau n'est présumé.
+ *
+ * ⚠⚠ CE QUI A ÉTÉ RETIRÉ ICI, ET POURQUOI (#529, 26 août 2026).
+ *
+ * 1. UN FILTRE NOMINAL. La version précédente ne retenait que les niveaux dont
+ *    le code appartenait à `['0','I','D','M','E']`, et choisissait même
+ *    l'échelle en cherchant ces codes-là. Une échelle A/B/C/D — ou toute
+ *    échelle que l'utilisateur a nommée autrement — produisait une table VIDE,
+ *    donc aucun score, donc un profil muet, sans message.
+ *
+ * 2. UN REPLI FABRIQUÉ : `{0:0, I:0.40, D:0.65, M:0.75, E:1.00}`. Ces cinq
+ *    nombres n'étaient les valeurs de PERSONNE — ni de l'échelle lue, ni d'un
+ *    réglage. Ils rendaient impossible de distinguer « l'échelle dit 0.65 » de
+ *    « on n'a rien trouvé ». Pire : `pratique-pan-standards.js` portait un
+ *    SECOND repli aux valeurs DIFFÉRENTES (I:0.55, D:0.70, M:0.80, E:0.90) —
+ *    selon le chemin emprunté, un même niveau valait 0.40 ou 0.55.
+ *
+ * ⮕ RÈGLE APPLIQUÉE (Grégoire, 26 août) : « rien ne doit être codé en dur,
+ *   mais l'échelle IDME peut être seedée ». Un seed est une ÉCHELLE LIVRÉE,
+ *   que l'utilisateur voit et modifie — pas des nombres qu'un calcul invente
+ *   quand il ne trouve rien. En l'absence d'échelle exploitable : `null`, et
+ *   l'appelant doit le dire plutôt que d'afficher un chiffre inventé.
+ *
+ * @param {string} [echelleId] - échelle à lire. Sans elle, l'échelle n'est
+ *   résolue que s'il n'y a AUCUNE ambiguïté (une seule échelle disponible).
+ * @returns {Object|null} - { <code>: score 0-1 }, ou null si rien d'exploitable
  */
-function obtenirTableConversionIDME(echelleId = null) {
-    // 🔧 #464/CO-19 (21 août 2026) : PRIORITÉ INVERSÉE. L'ancien ordre lisait
-    // D'ABORD la clé NUE `niveauxEchelle` — un instantané d'une manipulation
-    // ancienne de l'éditeur (potentiellement d'un AUTRE trimestre) primait sur
-    // l'échelle du trimestre actif dans les conversions I/D/M/E des profils.
-    // Ordre corrigé : échelle du trimestre d'abord ; le résidu `niveauxEchelle`
-    // ne sert plus qu'en dernier recours (ses écrivains sont des chemins morts,
-    // retrait complet au lot L7/#469).
+function obtenirTableConversionNiveaux(echelleId = null) {
+    var echelles = db.getSync(cle('echellesTemplates'), []) || [];
+    if (!Array.isArray(echelles) || echelles.length === 0) return null;
 
-    // PRIORITÉ 1 : l'échelle du trimestre (echellesTemplates namespacée)
-    let echelles = db.getSync(cle('echellesTemplates'), []);
-    let echelle;
-
+    var echelle = null;
     if (echelleId) {
-        echelle = echelles.find(e => e.id === echelleId);
+        echelle = echelles.find(function (e) {
+            return e && (e.id === echelleId || e.idOriginal === echelleId);
+        }) || null;
     } else {
-        // Chercher une échelle avec les codes I, D, M, E (ou 0)
-        echelle = echelles.find(e =>
-            e.niveaux &&
-            e.niveaux.some(n => ['0', 'I', 'D', 'M', 'E'].includes(n.code))
-        );
-    }
-
-    if (echelle && echelle.niveaux) {
-        const table = {};
-        echelle.niveaux.forEach(niveau => {
-            const code = niveau.code.toUpperCase();
-            if (['0', 'I', 'D', 'M', 'E'].includes(code)) {
-                const valeur = parseFloat(niveau.valeurCalcul || niveau.valeurPonctuelle || 0) / 100;
-                table[code] = valeur;
-            }
+        // Sans désignation : on ne DEVINE pas. Une seule échelle = pas
+        // d'ambiguïté ; plusieurs = l'appelant doit dire laquelle (chaque
+        // évaluation porte son `echelleId`, cf. _lireChampsDOMAutoSave).
+        var utilisables = echelles.filter(function (e) {
+            return e && Array.isArray(e.niveaux) && e.niveaux.length > 0;
         });
-        return table;
+        if (utilisables.length === 1) echelle = utilisables[0];
     }
 
-    // PRIORITÉ 2 (dernier recours) : résidu `niveauxEchelle` — clé nue héritée,
-    // conservée seulement pour un profil sans aucune échelle de trimestre.
-    let niveaux = db.getSync('niveauxEchelle', []);
-    if (niveaux.length > 0 && niveaux.some(n => ['0', 'I', 'D', 'M', 'E'].includes(n.code))) {
-        const table = {};
-        niveaux.forEach(niveau => {
-            const code = niveau.code.toUpperCase();
-            if (['0', 'I', 'D', 'M', 'E'].includes(code)) {
-                const valeur = parseFloat(niveau.valeurCalcul || niveau.valeurPonctuelle || 0) / 100;
-                table[code] = valeur;
-            }
-        });
-        return table;
-    }
+    if (!echelle || !Array.isArray(echelle.niveaux)) return null;
 
-    // FALLBACK : Valeurs par défaut si aucune échelle trouvée (avec niveau 0)
-    return { '0': 0.00, I: 0.40, D: 0.65, M: 0.75, E: 1.00 };
+    var table = {};
+    echelle.niveaux.forEach(function (niveau) {
+        if (!niveau || niveau.code == null) return;
+        var code = String(niveau.code).trim().toUpperCase();
+        if (!code) return;
+        // `valeurCalcul` = la note ponctuelle du niveau (CODE -> note chiffrée).
+        // C'est la conversion qui sert la notation sommative ; les plages
+        // min/max servent l'inverse (note -> code) et ne conviennent pas ici.
+        var brut = niveau.valeurCalcul;
+        if (brut == null || String(brut).trim() === '') return;
+        var valeur = parseFloat(brut);
+        if (isNaN(valeur)) return;
+        table[code] = valeur / 100;
+    });
+
+    return Object.keys(table).length > 0 ? table : null;
 }
 
 /**
@@ -90,9 +99,17 @@ function obtenirTableConversionIDME(echelleId = null) {
  * @param {Object} tableConversion - Table de conversion IDME
  * @returns {number} - Score 0-1
  */
-function convertirNiveauIDMEEnScore(niveau, tableConversion) {
-    niveau = niveau.trim().toUpperCase();
-    return tableConversion[niveau] || null;
+function convertirNiveauEnScore(niveau, tableConversion) {
+    // #529 — la table peut désormais valoir `null` (aucune échelle
+    // exploitable). Avant, elle était toujours un objet grâce à un repli
+    // fabriqué ; ce repli est retiré, donc ce garde-fou n'est pas décoratif.
+    if (!tableConversion || niveau == null) return null;
+    var code = String(niveau).trim().toUpperCase();
+    if (!code) return null;
+    var score = tableConversion[code];
+    // `0` est un score LÉGITIME (niveau « 0 » d'une échelle 0-IDME) : tester
+    // la présence, jamais la véracité — `|| null` le transformait en absence.
+    return (score === undefined || score === null) ? null : score;
 }
 
 /**
@@ -101,6 +118,31 @@ function convertirNiveauIDMEEnScore(niveau, tableConversion) {
  * @param {string} da - Numéro de DA
  * @returns {Object} - { structure, rigueur, plausibilite, nuance, francais } (scores 0-1)
  */
+/**
+ * Table de conversion applicable à UNE évaluation : celle de l'échelle qui a
+ * servi à la produire.
+ *
+ * POURQUOI PAR ÉVALUATION, ET PAS UNE FOIS POUR TOUTES (#529). Chaque
+ * évaluation enregistre son `echelleId` (cf. `_lireChampsDOMAutoSave`). Les
+ * calculs lisaient pourtant UNE table globale, résolue en cherchant des codes
+ * IDME parmi les échelles : deux évaluations produites avec des échelles
+ * différentes étaient donc converties avec la même table — celle de l'une des
+ * deux, au hasard de l'ordre de stockage.
+ *
+ * @param {Object} evaluation - évaluation sauvegardée
+ * @param {Map} cache - mémo par echelleId (une échelle relue N fois sinon)
+ * @returns {Object|null} table de conversion, ou null si non résolue
+ */
+function tableConversionPourEvaluation(evaluation, cache) {
+    var id = (evaluation && evaluation.echelleId) || '';
+    if (cache && cache.has(id)) return cache.get(id);
+    // Sans `echelleId` (évaluation ancienne), `obtenirTableConversionNiveaux`
+    // ne résout que s'il n'y a AUCUNE ambiguïté. Elle ne devine jamais.
+    var table = obtenirTableConversionNiveaux(id || null);
+    if (cache) cache.set(id, table);
+    return table;
+}
+
 /**
  * Calcule les moyennes des critères SRPNF sur TOUTES les évaluations de l'étudiant
  * Utilisé pour la pratique sommative (SOM) qui considère toutes les évaluations
@@ -128,8 +170,9 @@ function calculerMoyennesCriteres(da) {
         return null;
     }
 
-    // Obtenir la table de conversion IDME depuis l'échelle configurée
-    const tableConversion = obtenirTableConversionIDME();
+    // #529 — la table dépend de l'échelle de CHAQUE évaluation, pas d'une
+    // échelle globale devinée. Cache pour ne pas relire N fois la même.
+    const cacheTables = new Map();
 
     // Initialiser accumulateurs dynamiquement selon critères de la grille
     const scoresCriteres = {};
@@ -157,7 +200,7 @@ function calculerMoyennesCriteres(da) {
             const nomCritere = critereSauvegarde.critereNom;
 
             // Convertir le niveau IDME en score numérique
-            const score = convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
+            const score = convertirNiveauEnScore(niveauIDME, tableConversionPourEvaluation(evaluation, cacheTables));
 
             if (score !== null) {
                 // Trouver le critère correspondant dans la grille de référence
@@ -277,8 +320,8 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
         return null;
     }
 
-    // Obtenir la table de conversion IDME
-    const tableConversion = obtenirTableConversionIDME();
+    // #529 — une table PAR évaluation (chacune porte son `echelleId`).
+    const cacheTables = new Map();
 
     // Initialiser accumulateurs dynamiquement selon critères de la grille
     const scoresCriteres = {};
@@ -306,7 +349,7 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
             const nomCritere = critereSauvegarde.critereNom;
 
             // Convertir le niveau IDME en score numérique
-            const score = convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
+            const score = convertirNiveauEnScore(niveauIDME, tableConversionPourEvaluation(evaluation, cacheTables));
 
             if (score !== null) {
                 // Trouver le critère correspondant dans la grille de référence
@@ -392,10 +435,12 @@ function _filtrerEtTrierEvaluationsIPB(evaluations, da, productionsIds) {
     return filtrees;
 }
 
-function _calculerScoreMultiArtefactIPB(ev, nomsMulti, tableConversion) {
+function _calculerScoreMultiArtefactIPB(ev, nomsMulti, cacheTables) {
+    // #529 — l'échelle est celle de CETTE évaluation, pas une globale devinée.
+    var tableConversion = tableConversionPourEvaluation(ev, cacheTables);
     var scores = {};
     ev.criteres.forEach(function (cs) {
-        var score = convertirNiveauIDMEEnScore(cs.niveauSelectionne, tableConversion);
+        var score = convertirNiveauEnScore(cs.niveauSelectionne, tableConversion);
         if (score === null) return;
         var nomEval = _normaliserNomCritereIPB(cs.critereNom);
         nomsMulti.forEach(function (cm) {
@@ -418,13 +463,13 @@ function _calculerScoreMultiArtefactIPB(ev, nomsMulti, tableConversion) {
     return { score: totalScore / totalPond, details: scores };
 }
 
-function _construireHistoriqueIPB(evaluationsEleve, productions, nomsMulti, tableConversion) {
+function _construireHistoriqueIPB(evaluationsEleve, productions, nomsMulti, cacheTables) {
     var prodMap = {};
     productions.forEach(function (p) { prodMap[p.id] = p; });
     var historiqueRecentsVersAnciens = [];
     for (var h = 0; h < evaluationsEleve.length; h++) {
         var ev = evaluationsEleve[h];
-        var res = _calculerScoreMultiArtefactIPB(ev, nomsMulti, tableConversion);
+        var res = _calculerScoreMultiArtefactIPB(ev, nomsMulti, cacheTables);
         var prod = prodMap[ev.productionId];
         var nomActivite = '';
         if (prod) {
@@ -450,9 +495,9 @@ function _determinerDirectionScoreIPB(actuel, precedent, seuilProgression) {
     return '→'; // →
 }
 
-function _identifierCriteresEnDefiIPB(dernierEvaluation, nomsMulti, tableConversion, seuilDefi) {
+function _identifierCriteresEnDefiIPB(dernierEvaluation, nomsMulti, cacheTables, seuilDefi) {
     if (!dernierEvaluation) return [];
-    var dernierResult = _calculerScoreMultiArtefactIPB(dernierEvaluation, nomsMulti, tableConversion);
+    var dernierResult = _calculerScoreMultiArtefactIPB(dernierEvaluation, nomsMulti, cacheTables);
     if (!dernierResult) return [];
     var criteresEnDefi = [];
     nomsMulti.forEach(function (cm) {
@@ -487,7 +532,7 @@ function calculerIPB(da) {
     var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     var productions = obtenirDonneesSelonMode('productions') || [];
     var productionsIds = obtenirIdsProductionsEvaluables(productions);
-    var tableConversion = obtenirTableConversionIDME();
+    var cacheTables = new Map();   // #529 — une table par échelle d'évaluation
 
     var evaluationsEleve = _filtrerEtTrierEvaluationsIPB(evaluations, da, productionsIds);
     if (evaluationsEleve.length === 0) return null;
@@ -501,7 +546,7 @@ function calculerIPB(da) {
     var limite = Math.min(evaluationsEleve.length, fenetreN);
     var scoresRecents = [];
     for (var i = 0; i < limite; i++) {
-        var result = _calculerScoreMultiArtefactIPB(evaluationsEleve[i], nomsMulti, tableConversion);
+        var result = _calculerScoreMultiArtefactIPB(evaluationsEleve[i], nomsMulti, cacheTables);
         scoresRecents.push(result ? result.score : null);
     }
 
@@ -525,11 +570,11 @@ function calculerIPB(da) {
         scorePrecedent: scorePrecedent,
         direction: direction,
         criteresMulti: nomsMulti.map(function (c) { return c.nom; }),
-        criteresEnDefi: _identifierCriteresEnDefiIPB(evaluationsEleve[0], nomsMulti, tableConversion, seuilDefi),
+        criteresEnDefi: _identifierCriteresEnDefiIPB(evaluationsEleve[0], nomsMulti, cacheTables, seuilDefi),
         fenetre: limite,
         seuil: seuilDefi,
         scoresParArtefact: scoresRecents.slice().reverse(), // ancien → récent
-        historiqueComplet: _construireHistoriqueIPB(evaluationsEleve, productions, nomsMulti, tableConversion)
+        historiqueComplet: _construireHistoriqueIPB(evaluationsEleve, productions, nomsMulti, cacheTables)
     };
 }
 
@@ -736,32 +781,67 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
     // Calculer la performance moyenne (notes)
     const performance = troisDerniers.reduce((sum, e) => sum + e.noteFinale, 0) / troisDerniers.length / 100;
 
-    // Calculer IDME moyen (si disponible)
-    const tableConversion = obtenirTableConversionIDME();
-    const niveauxIDME = troisDerniers
-        .map(e => e.niveauFinal)
-        .filter(n => n && ['I', 'D', 'M', 'E'].includes(n))
-        .map(n => convertirNiveauIDMEEnScore(n, tableConversion))
+    // Moyenne des niveaux finaux — #529.
+    //
+    // CE QUI A ÉTÉ RETIRÉ : `.filter(n => ['I','D','M','E'].includes(n))`. Ce
+    // filtre écartait tout niveau final dont le code n'était pas IDME. Pour une
+    // échelle A/B/C/D, il écartait TOUS les niveaux, la moyenne tombait à 0 —
+    // et 0 n'est pas « aucune donnée », c'est la pire note possible. Le calcul
+    // en aval traitait donc un élève sans niveau lisible comme un élève en
+    // échec total, sans un mot.
+    //
+    // Il n'y a plus de liste de codes admis : un niveau compte s'il est
+    // convertible par SON échelle, et rien d'autre ne le qualifie.
+    const cacheTablesNiveaux = new Map();
+    const scoresNiveauxFinaux = troisDerniers
+        .map(e => convertirNiveauEnScore(e.niveauFinal, tableConversionPourEvaluation(e, cacheTablesNiveaux)))
         .filter(s => s !== null);
 
-    const idmeMoyen = niveauxIDME.length > 0
-        ? niveauxIDME.reduce((sum, s) => sum + s, 0) / niveauxIDME.length
+    // ⚠ LE ZÉRO EST CONSERVÉ ICI, DÉLIBÉRÉMENT (#529, 26 août 2026).
+    //
+    // Rendre `null` serait plus juste — rien de convertible n'est pas la même
+    // chose qu'une moyenne de zéro. Mais le contrat de cette fonction distingue
+    // déjà l'absence par `nbArtefacts` (cf. le retour anticipé plus haut :
+    // `{performance:0, idmeMoyen:0, francaisMoyen:0, nbArtefacts:0}`), et ses
+    // consommateurs s'y fient. Changer la convention DANS un chantier de
+    // dé-codage-en-dur mêlerait deux corrections dans le même diff, et la
+    // seconde n'a pas été demandée. Inscrit au backlog plutôt que glissé ici.
+    const idmeMoyen = scoresNiveauxFinaux.length > 0
+        ? scoresNiveauxFinaux.reduce((sum, s) => sum + s, 0) / scoresNiveauxFinaux.length
         : 0;
 
-    // Calculer moyenne du critère Français (si disponible)
+    // Moyenne du critère de LANGUE — #529, correction partielle assumée.
+    //
+    // CE QUI A DISPARU : une SECONDE expression régulière sur la prose,
+    // /FRAN[ÇC]AIS\s+[ÉE]CRIT\s*\(([IDME])\)/gi — même défaut que la
+    // première, au même endroit du même fichier. Elle lisait la rétroaction
+    // pour retrouver un niveau enregistré structuré dans `criteres[]`.
+    //
+    // ⚠ CE QUI RESTE EN DUR, ET POURQUOI JE NE L'AI PAS TRANCHÉ SEUL.
+    // Reconnaître « le critère de langue » par son NOM reste une convention
+    // écrite dans le code. Ce n'est pas un simple libellé : au collégial
+    // québécois, le français écrit a un statut à part (épreuve uniforme, CAF),
+    // et `_resoudreCibleDefiSpecifique` lui réserve des cibles d'intervention
+    // que les autres critères n'ont pas. Le sortir du code suppose que
+    // l'utilisateur puisse DÉSIGNER quel critère de sa grille joue ce rôle —
+    // une décision de conception qui appartient à Grégoire, pas au refactor
+    // qui passe. Inscrit au backlog ; ici, on cesse au moins de dépendre de la
+    // prose et des codes IDME.
+    const NOM_CRITERE_LANGUE = 'francais';   // à remplacer par un réglage utilisateur
     const scoresFrancais = [];
-    const regexFrancais = /FRAN[ÇC]AIS\s+[ÉE]CRIT\s*\(([IDME])\)/gi;
+    const cacheTablesLangue = new Map();
 
     troisDerniers.forEach(evaluation => {
-        const retroaction = evaluation.retroactionFinale || '';
-        let match;
-        while ((match = regexFrancais.exec(retroaction)) !== null) {
-            const niveauIDME = match[1].toUpperCase();
-            const score = convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
-            if (score !== null) {
-                scoresFrancais.push(score * 100); // Convertir en pourcentage
-            }
-        }
+        if (!Array.isArray(evaluation.criteres)) return;
+        const table = tableConversionPourEvaluation(evaluation, cacheTablesLangue);
+        evaluation.criteres.forEach(critereSauvegarde => {
+            if (!critereSauvegarde) return;
+            const nom = String(critereSauvegarde.critereNom || '')
+                .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+            if (!nom.startsWith(NOM_CRITERE_LANGUE)) return;
+            const score = convertirNiveauEnScore(critereSauvegarde.niveauSelectionne, table);
+            if (score !== null) scoresFrancais.push(score * 100);
+        });
     });
 
     const francaisMoyen = scoresFrancais.length > 0
@@ -875,7 +955,8 @@ function calculerProgressionEleve(da) {
  * Seuil: Valeur configurable (défaut: 71.25%, ajustable via interpretation-config.js)
  *
  * @param {string} da - Numéro de DA
- * @returns {Object} - { defi: 'Structure'|'Rigueur'|'Plausibilité'|'Nuance'|'Français'|'Aucun', score (0-1) }
+ * @returns {Object} - { defi: <nom du critère le plus faible, tel qu'il est
+ *   écrit dans la grille de l'utilisateur> | 'Aucun', score (0-1) | null }
  */
 function identifierDefiSpecifique(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
@@ -907,77 +988,69 @@ function identifierDefiSpecifique(da) {
     // Prendre les N plus récents
     const derniers = evaluationsEleve.slice(0, N);
 
-    // Obtenir la table de conversion IDME
-    const tableConversion = obtenirTableConversionIDME();
+    // #529 (26 août 2026) — CE QUI A DISPARU D'ICI : une expression régulière.
+    //
+    //   /(STRUCTURE|RIGUEUR|PLAUSIBILIT[ÉE]|NUANCE|FRAN[ÇC]AIS\s+[ÉE]CRIT)\s*\(([IDME])\)/gi
+    //
+    // Elle relisait la PROSE de la rétroaction pour y retrouver des scores qui
+    // avaient été enregistrés structurés quelques lignes plus tôt, dans
+    // `evaluation.criteres[]` (critereId, critereNom, niveauSelectionne — cf.
+    // `_collecterCriteresAutoSave`). Trois défauts, du plus visible au plus
+    // profond :
+    //
+    //   1. Les cinq noms de critères de Grégoire y étaient écrits. Une grille
+    //      « Méthode / Résultats / Discussion » ne produisait AUCUN score : le
+    //      bloc « Forces et défis » restait muet, sans expliquer pourquoi.
+    //   2. Les quatre codes IDME aussi. Une échelle A/B/C/D ne matchait rien —
+    //      alors que ces libellés sont configurables par l'utilisateur.
+    //   3. Même pour Grégoire, la moindre reformulation d'un libellé de
+    //      rétroaction cassait le calcul EN SILENCE : plus de match, plus de
+    //      score, aucune erreur.
+    //
+    // La donnée structurée existe depuis la création du dépôt (octobre 2025).
+    // Le patron de lecture est celui qu'utilisent déjà `calculerMoyennesCriteres`
+    // et le calcul de l'IPB dans ce même fichier : on converge, on n'invente pas.
+    const cacheTables = new Map();
 
-    // Accumuler les scores par critère
-    const scoresCriteres = {
-        structure: [],
-        rigueur: [],
-        plausibilite: [],
-        nuance: [],
-        francais: []
-    };
-
-    // Regex pour extraire: NOM_CRITERE (NIVEAU)
-    const regexCritere = /(STRUCTURE|RIGUEUR|PLAUSIBILIT[ÉE]|NUANCE|FRAN[ÇC]AIS\s+[ÉE]CRIT)\s*\(([IDME])\)/gi;
+    // Accumulation par critereId — identifiant STABLE, contrairement au nom qui
+    // peut être renommé d'une grille à l'autre. Le nom n'est gardé que pour
+    // l'affichage, et c'est le dernier vu qui l'emporte (le plus récent, les
+    // évaluations étant triées).
+    const scoresParCritere = new Map();
 
     derniers.forEach(evaluation => {
-        const retroaction = evaluation.retroactionFinale || '';
-        let match;
-        while ((match = regexCritere.exec(retroaction)) !== null) {
-            const nomCritere = match[1].toUpperCase();
-            const niveauIDME = match[2].toUpperCase();
-            const score = convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
-
-            if (score !== null) {
-                if (nomCritere === 'STRUCTURE') {
-                    scoresCriteres.structure.push(score);
-                } else if (nomCritere === 'RIGUEUR') {
-                    scoresCriteres.rigueur.push(score);
-                } else if (nomCritere.startsWith('PLAUSIBILIT')) {
-                    scoresCriteres.plausibilite.push(score);
-                } else if (nomCritere === 'NUANCE') {
-                    scoresCriteres.nuance.push(score);
-                } else if (nomCritere.startsWith('FRAN')) {
-                    scoresCriteres.francais.push(score);
-                }
+        if (!Array.isArray(evaluation.criteres)) return;
+        const table = tableConversionPourEvaluation(evaluation, cacheTables);
+        evaluation.criteres.forEach(critereSauvegarde => {
+            if (!critereSauvegarde) return;
+            const score = convertirNiveauEnScore(critereSauvegarde.niveauSelectionne, table);
+            if (score === null) return;
+            const id = critereSauvegarde.critereId || critereSauvegarde.critereNom;
+            if (!id) return;
+            if (!scoresParCritere.has(id)) {
+                scoresParCritere.set(id, { nom: critereSauvegarde.critereNom || String(id), scores: [] });
             }
-        }
+            scoresParCritere.get(id).scores.push(score);
+        });
     });
 
-    // Calculer les moyennes
-    const moyennes = {};
-    const seuil = obtenirSeuil('defiSpecifique'); // Seuil configurable (défaut: 71.25%)
-
-    for (const critere in scoresCriteres) {
-        const scores = scoresCriteres[critere];
-        if (scores.length > 0) {
-            moyennes[critere] = scores.reduce((sum, s) => sum + s, 0) / scores.length;
-        } else {
-            moyennes[critere] = null;
-        }
-    }
-
-    // Identifier le critère le plus faible (< seuil)
+    // Identifier le critère le plus faible sous le seuil.
+    const seuil = obtenirSeuil('defiSpecifique');
     let defiMinimum = null;
-    let scoreMinimum = 1.0;
+    let scoreMinimum = null;
 
-    const nomsCriteres = {
-        structure: 'Structure',
-        rigueur: 'Rigueur',
-        plausibilite: 'Plausibilité',
-        nuance: 'Nuance',
-        francais: 'Français'
-    };
-
-    for (const critere in moyennes) {
-        const score = moyennes[critere];
-        if (score !== null && score < seuil && score < scoreMinimum) {
-            scoreMinimum = score;
-            defiMinimum = nomsCriteres[critere];
+    scoresParCritere.forEach(entree => {
+        if (entree.scores.length === 0) return;
+        const moyenne = entree.scores.reduce((somme, s) => somme + s, 0) / entree.scores.length;
+        if (moyenne >= seuil) return;
+        // `scoreMinimum === null` au départ, et non 1.0 : un critère à 1.0 sous
+        // un seuil supérieur à 1 doit pouvoir être retenu. L'ancienne borne
+        // rendait ce cas invisible.
+        if (scoreMinimum === null || moyenne < scoreMinimum) {
+            scoreMinimum = moyenne;
+            defiMinimum = entree.nom;
         }
-    }
+    });
 
 
     return {
@@ -1378,8 +1451,8 @@ function determinerCibleIntervention(da) {
 }
 
 // Exporter les 14 fonctions vers window (décision étape 1 b — convention systématique)
-window.obtenirTableConversionIDME = obtenirTableConversionIDME;
-window.convertirNiveauIDMEEnScore = convertirNiveauIDMEEnScore;
+window.obtenirTableConversionNiveaux = obtenirTableConversionNiveaux;
+window.convertirNiveauEnScore = convertirNiveauEnScore;
 window.calculerMoyennesCriteres = calculerMoyennesCriteres;
 window.calculerMoyennesCriteresRecents = calculerMoyennesCriteresRecents;
 window.calculerIPB = calculerIPB;

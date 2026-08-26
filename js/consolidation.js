@@ -213,10 +213,12 @@ function _construireConversion(echelle) {
         });
     }
 
-    // Fallback IDME si map vide
-    if (Object.keys(map).length === 0) {
-        map = { '0': 0.00, 'I': 0.40, 'D': 0.65, 'M': 0.75, 'E': 1.00 };
-    }
+    // #529 — TROISIÈME repli IDME du projet, retiré ici. Les deux autres
+    // (profil-etudiant-calculs, pratique-pan-standards) portaient des valeurs
+    // MUTUELLEMENT INCOMPATIBLES ; celui-ci s'alignait sur l'un des deux, donc
+    // contredisait l'autre. Une map vide veut dire « l'échelle ne dit rien » —
+    // c'est une information, pas un trou à combler avec les chiffres de
+    // quelqu'un d'autre.
 
     return function(niveau) {
         if (niveau == null || niveau === '') return null;

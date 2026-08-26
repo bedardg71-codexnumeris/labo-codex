@@ -580,6 +580,42 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **Seule spec de la baseline** depuis le 26 août : le hook bloquera désormais toute rougeur neuve,
   et celle-ci est la dernière à en sortir.
 
+- [ ] **#534 — Le « critère de langue » est reconnu par son NOM, dans le code.**
+  Constaté en faisant #529 (26 août). Deux fonctions calculent un `francaisMoyen` en repérant le
+  critère dont le nom commence par « francais » : `calculerIndicateurs3DerniersArtefacts`
+  (`profil-etudiant-calculs.js`) et son jumeau dans `pratique-pan-standards.js`. Les deux portaient
+  AUSSI une regex sur la prose — retirée ; la reconnaissance par nom, elle, reste.
+  ⮕ **Pourquoi je ne l'ai pas tranché seul** : ce n'est pas un libellé, c'est un statut. Au collégial
+  québécois le français écrit a un régime propre (épreuve uniforme, CAF), et
+  `_resoudreCibleDefiSpecifique` lui réserve des cibles d'intervention que les autres critères n'ont
+  pas — « Rencontre individuelle | CAF | Dépistage SA ». Généraliser reviendrait à décider de la
+  didactique de Grégoire à sa place.
+  ⏳ **À TRANCHER** : l'utilisateur désigne-t-il, dans sa grille, quel critère joue ce rôle (un
+  drapeau `estCritereDeLangue` sur le critère) ? Ou le régime particulier disparaît-il ?
+  ⮕ Marqué dans les deux fichiers par `const NOM_CRITERE_LANGUE = 'francais';` — un seul point à
+  changer quand la décision sera prise.
+
+- [ ] **#535 — Les cibles d'intervention RàI sont indexées par nom de critère.**
+  `_resoudreCibleDefiSpecifique`, `_resoudreCibleRemediation` et `_resoudreCibleStable`
+  (`profil-etudiant-calculs.js`) testent `N === 'Structure'`, `'Rigueur'`, `'Plausibilité'`,
+  `'Nuance'`, `'Français'`. Une grille « Méthode / Résultats / Discussion » ne matche AUCUNE branche :
+  `determinerCibleIntervention` rend `null`, et l'utilisateur n'a aucune cible — sans message.
+  ⮕ **La FORME est générique** (« Pratique guidée en X », « Remédiation en X ») et se dériverait du
+  nom du critère en une ligne. C'est le cas Français qui ne se dérive pas (cf. #534).
+  ⏳ **À TRANCHER AVEC GRÉGOIRE** : dériver la forme et traiter la langue à part, ou laisser
+  l'enseignant écrire ses propres cibles ? La seconde option est plus juste et bien plus lourde.
+  ⚠ Ne pas généraliser « Pratique guidée en {critère} » sans lui : c'est sa didactique, pas une
+  chaîne de caractères.
+
+- [ ] **#536 — `idmeMoyen` rend 0 quand rien n'est convertible, au lieu de « pas de donnée ».**
+  Repéré pendant #529 et VOLONTAIREMENT NON CORRIGÉ : le contrat de
+  `calculerIndicateurs3DerniersArtefacts` distingue déjà l'absence par `nbArtefacts`, et ses
+  consommateurs s'y fient. Changer la convention dans le même diff qu'un chantier de
+  dé-codage-en-dur aurait mêlé deux corrections dont une n'était pas demandée.
+  ⮕ Le risque a beaucoup baissé depuis #529 : les niveaux d'une échelle non-IDME sont désormais
+  convertibles, donc le cas « rien de convertible » ne survient plus que sans échelle du tout.
+  ⮕ Commentaire posé sur place (`⚠ LE ZÉRO EST CONSERVÉ ICI, DÉLIBÉRÉMENT`).
+
 - [ ] **#533 — La garde #340 est probablement INERTE sur les données réelles de Grégoire.**
   Mesuré le 26 août en fermant #530, par un test qui reproduit le cas ordinaire
   (`productions-ajout-refus-garde-340.spec.js`, test « périmètre ») : `construireMapCoursTrimestre`

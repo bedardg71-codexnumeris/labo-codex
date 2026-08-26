@@ -1932,7 +1932,7 @@ function calculerDirectionsCriteres(da) {
     });
 
     // Obtenir la table de conversion IDME
-    const tableConversion = obtenirTableConversionIDME();
+    const tableConversion = obtenirTableConversionNiveaux();
 
     // Fonction helper pour extraire les scores d'une liste d'évaluations
     // Utilise evaluation.criteres[] (fiable) au lieu du parsing regex de retroactionFinale
@@ -1950,7 +1950,7 @@ function calculerDirectionsCriteres(da) {
 
             evaluation.criteres.forEach(c => {
                 const niveauIDME = c.niveauSelectionne;
-                const score = convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
+                const score = convertirNiveauEnScore(niveauIDME, tableConversion);
                 if (score === null) return;
 
                 const nom = (c.critereNom || '').toLowerCase()
