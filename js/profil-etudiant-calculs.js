@@ -962,7 +962,19 @@ function diagnostiquerForcesChallenges(moyennes, seuil = null) {
             nom: c.nom,
             cle: cleNormalisee,
             score: moyennes[cleNormalisee] ?? null,
-            ponderation: c.ponderation || 0
+            ponderation: c.ponderation || 0,
+            // #552 — LE NIVEAU SOLO VOYAGE AVEC LE CRITÈRE.
+            //
+            // Sans lui, tout consommateur qui veut savoir SI un défi touche une
+            // fondation ou une compétence supérieure n'a plus que le NOM du
+            // critère pour le deviner — c'est-à-dire le défaut B9, retiré de
+            // `trimestres.js` au pas 4 du lot 3 de #542, et qui vivait encore
+            // dans les résolveurs de cibles.
+            //
+            // ⮕ MÊME DÉFAUT QUE `calculerIPB` ET QUE L'ÉDITEUR DE GRILLES : un
+            // critère sans étiquette est une fondation. C'est le défaut posé à
+            // la création d'un critère (`grilles.js`), pas une valeur choisie ici.
+            niveauSOLO: c.niveauSOLO || 'multistructurel'
         };
     }).filter(c => c.score !== null); // Garder seulement critères avec score
 
@@ -1007,7 +1019,7 @@ function diagnostiquerForcesChallenges(moyennes, seuil = null) {
  *
  * @param {string} da - Numéro de DA
  * @param {boolean} pourDepistage - Si true, utilise fenêtre de dépistage (3). Si false, utilise N pour note finale (4)
- * @returns {Object} - { performance, idmeMoyen, francaisMoyen, nbArtefacts }
+ * @returns {Object} - { performance, idmeMoyen, nbArtefacts }
  */
 function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
     // Déterminer le nombre d'artefacts selon l'usage
@@ -1041,7 +1053,7 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
     );
 
     if (evaluationsEleve.length === 0) {
-        return { performance: 0, idmeMoyen: 0, francaisMoyen: 0, nbArtefacts: 0 };
+        return { performance: 0, idmeMoyen: 0, nbArtefacts: 0 };
     }
 
     // Trier par date de création (la plus récente d'abord)
@@ -1079,7 +1091,7 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
     // Rendre `null` serait plus juste — rien de convertible n'est pas la même
     // chose qu'une moyenne de zéro. Mais le contrat de cette fonction distingue
     // déjà l'absence par `nbArtefacts` (cf. le retour anticipé plus haut :
-    // `{performance:0, idmeMoyen:0, francaisMoyen:0, nbArtefacts:0}`), et ses
+    // `{performance:0, idmeMoyen:0, nbArtefacts:0}`), et ses
     // consommateurs s'y fient. Changer la convention DANS un chantier de
     // dé-codage-en-dur mêlerait deux corrections dans le même diff, et la
     // seconde n'a pas été demandée. Inscrit au backlog plutôt que glissé ici.
@@ -1087,49 +1099,33 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
         ? scoresNiveauxFinaux.reduce((sum, s) => sum + s, 0) / scoresNiveauxFinaux.length
         : 0;
 
-    // Moyenne du critère de LANGUE — #529, correction partielle assumée.
+    // ⚠⚠ #537 (27 août 2026) — LE CALCUL DE `francaisMoyen` A ÉTÉ RETIRÉ, ET
+    // AVEC LUI LA DERNIÈRE RECONNAISSANCE D'UN CRITÈRE PAR SON NOM DANS CE
+    // FICHIER.
     //
-    // CE QUI A DISPARU : une SECONDE expression régulière sur la prose,
-    // /FRAN[ÇC]AIS\s+[ÉE]CRIT\s*\(([IDME])\)/gi — même défaut que la
-    // première, au même endroit du même fichier. Elle lisait la rétroaction
-    // pour retrouver un niveau enregistré structuré dans `criteres[]`.
+    // Ce qui vivait ici : `const NOM_CRITERE_LANGUE = 'francais'`, un
+    // `nom.startsWith(NOM_CRITERE_LANGUE)` sur chaque critère de chaque
+    // évaluation, et une moyenne en pourcentage rendue sous le nom
+    // `francaisMoyen`. Le commentaire qui l'accompagnait disait pourquoi il
+    // n'avait pas été tranché en #529 : « `_resoudreCibleDefiSpecifique` lui
+    // réserve des cibles d'intervention que les autres critères n'ont pas ».
     //
-    // ⚠ CE QUI RESTE EN DUR, ET POURQUOI JE NE L'AI PAS TRANCHÉ SEUL.
-    // Reconnaître « le critère de langue » par son NOM reste une convention
-    // écrite dans le code. Ce n'est pas un simple libellé : au collégial
-    // québécois, le français écrit a un statut à part (épreuve uniforme, CAF),
-    // et `_resoudreCibleDefiSpecifique` lui réserve des cibles d'intervention
-    // que les autres critères n'ont pas. Le sortir du code suppose que
-    // l'utilisateur puisse DÉSIGNER quel critère de sa grille joue ce rôle —
-    // une décision de conception qui appartient à Grégoire, pas au refactor
-    // qui passe. Inscrit au backlog ; ici, on cesse au moins de dépendre de la
-    // prose et des codes IDME.
-    const NOM_CRITERE_LANGUE = 'francais';   // à remplacer par un réglage utilisateur
-    const scoresFrancais = [];
-    const cacheTablesLangue = new Map();
-
-    troisDerniers.forEach(evaluation => {
-        if (!Array.isArray(evaluation.criteres)) return;
-        const table = tableConversionPourEvaluation(evaluation, cacheTablesLangue);
-        evaluation.criteres.forEach(critereSauvegarde => {
-            if (!critereSauvegarde) return;
-            const nom = String(critereSauvegarde.critereNom || '')
-                .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
-            if (!nom.startsWith(NOM_CRITERE_LANGUE)) return;
-            const score = convertirNiveauEnScore(critereSauvegarde.niveauSelectionne, table);
-            if (score !== null) scoresFrancais.push(score * 100);
-        });
-    });
-
-    const francaisMoyen = scoresFrancais.length > 0
-        ? scoresFrancais.reduce((sum, s) => sum + s, 0) / scoresFrancais.length
-        : 0;
-
+    // ⮕ CE QUI A CHANGÉ, ET QUI AUTORISE LE RETRAIT. Ces résolveurs n'existent
+    // plus (#552), et Grégoire a tranché le 27 août 2026 : le critère de langue
+    // est un critère comme un autre, sans statut propre et sans désignation par
+    // l'utilisateur. `francaisMoyen` disparaît comme notion — pas remplacé par
+    // un réglage, retiré.
+    //
+    // ⚠ CE QUI SUBSISTE AILLEURS, et qu'il ne faut pas croire réglé : une
+    // SECONDE implémentation de ces indices vit dans
+    // `js/pratiques/pratique-pan-standards.js` et calcule encore son propre
+    // `francaisMoyen`. Elle appartient au système de pratiques (#307), dont le
+    // câblage n'est pas fini et dont le contrat `IPratique` est verrouillé.
+    // Geste distinct, item distinct.
 
     return {
         performance: performance,
         idmeMoyen: idmeMoyen,
-        francaisMoyen: francaisMoyen,
         nbArtefacts: troisDerniers.length
     };
 }
@@ -1608,71 +1604,84 @@ function determinerAlerteContextuelle(da) {
     };
 }
 
-function _resoudreCibleDifficultePersistante(M, N, I) {
-    if (N === 'Français' && I <= 17) {
-        return { cible: 'Rencontre individuelle | CAF | Dépistage', pattern: M, niveau: 3, couleur: '#dc3545' };
-    }
-    if (N === 'Structure' && I <= 17) {
-        return { cible: 'Remédiation en Structure | Exercice supplémentaire | CAF', pattern: M, niveau: 3, couleur: '#dc3545' };
-    }
-    if (N === 'Rigueur' && I <= 17) {
-        return { cible: 'Remédiation en Rigueur | CAF', pattern: M, niveau: 3, couleur: '#dc3545' };
-    }
-    if (N === 'Aucun') {
-        return { cible: 'Rencontre individuelle | CAF | Dépistage', pattern: M, niveau: 3, couleur: '#dc3545' };
-    }
-    return null;
+/**
+ * Le libellé lisible d'un niveau SOLO configuré sur un critère de grille.
+ *
+ * ⮕ POURQUOI UN HELPER PLUTÔT QUE LA CORRESPONDANCE ÉCRITE DEUX FOIS. La même
+ * table vivait inline dans `interventions.js` (badge du sélecteur de critères
+ * ciblés). Deux écritures d'une seule table, c'est deux endroits à changer le
+ * jour où un niveau s'ajoute — et un des deux qu'on oublie.
+ *
+ * ⚠ NE PAS CONFONDRE avec le `niveauSOLO` d'un NIVEAU D'ÉCHELLE (`js/echelles.js`),
+ * qui porte le même vocabulaire sur un autre objet. Ici : l'étiquette d'un
+ * CRITÈRE, saisie dans l'éditeur de grilles.
+ *
+ * @param {string} niveauSOLO - Étiquette configurée du critère
+ * @returns {string} Libellé lisible
+ */
+function libelleNiveauSOLO(niveauSOLO) {
+    // Même défaut que `calculerIPB`, `typeCritereSelonSOLO` et l'éditeur de
+    // grilles : un critère sans étiquette est une fondation.
+    if (niveauSOLO === 'relationnel') return 'relationnel';
+    if (niveauSOLO === 'abstrait_etendu') return 'abstrait étendu';
+    return 'multistructurel';
 }
 
-function _resoudreCibleDifficulteEmergente(M, N, I) {
-    if (N === 'Français' && I >= 18 && I <= 20) {
-        return { cible: 'Remédiation en stratégie de révision ciblée | CAF recommandé', pattern: M, niveau: 2, couleur: '#ff9800' };
-    }
-    if (N === 'Structure' && I >= 18 && I <= 27) {
-        return { cible: 'Remédiation en Structure', pattern: M, niveau: 2, couleur: '#ff9800' };
-    }
-    if (N === 'Rigueur' && I >= 18 && I <= 27) {
-        return { cible: 'Remédiation en Rigueur', pattern: M, niveau: 2, couleur: '#ff9800' };
-    }
-    if (N === 'Aucun') {
-        return { cible: 'Remédiation en rigueur', pattern: M, niveau: 2, couleur: '#ff9800' };
-    }
-    return null;
-}
-
-function _resoudreCibleDefiSpecifique(M, N, I) {
-    if (N === 'Français') {
-        if (I <= 17) return { cible: 'Rencontre individuelle | CAF | Dépistage SA', pattern: M, niveau: 2, couleur: '#ffc107' };
-        if (I >= 18 && I <= 20) return { cible: 'Remédiation en révision linguistique | CAF recommandé', pattern: M, niveau: 2, couleur: '#ffc107' };
-        if (I >= 21 && I <= 27) return { cible: 'Remédiation en révision linguistique', pattern: M, niveau: 2, couleur: '#ffc107' };
-    }
-    if (N === 'Structure' && I >= 18) return { cible: 'Pratique guidée en Structure', pattern: M, niveau: 2, couleur: '#ffc107' };
-    if (N === 'Rigueur' && I >= 18) return { cible: 'Pratique guidée en Rigueur', pattern: M, niveau: 2, couleur: '#ffc107' };
-    if (N === 'Plausibilité' && I >= 18) return { cible: 'Pratique guidée en Plausibilité', pattern: M, niveau: 2, couleur: '#ffc107' };
-    if (N === 'Nuance' && I >= 18) return { cible: 'Pratique guidée en Nuance', pattern: M, niveau: 2, couleur: '#ffc107' };
-    return null;
-}
-
-function _resoudreCibleStable(M, N, I) {
-    if (N === 'Aucun') {
-        return I >= 25
-            ? { cible: 'Pratique autonome → Explorer jumelage', pattern: M, niveau: 1, couleur: '#28a745' }
-            : { cible: 'Suivi régulier | Performance stable', pattern: M, niveau: 1, couleur: '#28a745' };
-    }
-    if (I < 21) return null;
-    const ciblesParDefi = {
-        'Structure': 'Pratique autonome → Explorer structures originales',
-        'Rigueur': 'Pratique autonome → Explorer pistes originales',
-        'Plausibilité': 'Pratique autonome → Explorer hypothèses originales',
-        'Nuance': 'Pratique autonome → Explorer interprétations originales',
-        'Français': 'Pratique autonome → Explorer style'
-    };
-    if (ciblesParDefi[N]) {
-        return { cible: ciblesParDefi[N], pattern: M, niveau: 1, couleur: '#28a745' };
-    }
-    return null;
-}
-
+/**
+ * Ce que le dépistage OBSERVE chez un élève, et à quelle intensité.
+ *
+ * ⚠⚠ #552 · #535 · #537 (27 août 2026) — CE QUI VIVAIT ICI ÉTAIT LE CONTEXTE
+ * DE GRÉGOIRE, ÉCRIT DANS LE CODE.
+ *
+ * Quatre résolveurs (`_resoudreCibleDifficultePersistante`, `...Emergente`,
+ * `...DefiSpecifique`, `...Stable`) branchaient sur le NOM du critère en défi
+ * — « Structure », « Rigueur », « Plausibilité », « Nuance », « Français » —
+ * croisé avec `I`, la moyenne de l'élève au critère de langue, comparée aux
+ * seuils 17 / 18 / 20 / 21 / 25 / 27. Ils rendaient un vocabulaire
+ * d'intervention (« CAF », « Dépistage SA », « Remédiation en X », « Pratique
+ * guidée en X ») et une intensité RàI 1/2/3.
+ *
+ * ⮕ TROIS DÉFAUTS SUPERPOSÉS, mesurés le 27 août :
+ *   1. `I` conditionnait les branches de TOUS les critères, pas seulement
+ *      celles du français. Trois élèves de performance identique, tous en défi
+ *      sur le même critère, recevaient trois cibles différentes selon leur
+ *      seule note de langue — et la difficulté des deux derniers n'était même
+ *      plus nommée.
+ *   2. Les seuils étaient des NOTES BRUTES SUR 30 (17/30 = seuil d'échec)
+ *      comparées à un POURCENTAGE 0-100 (`scoresFrancais.push(score * 100)`).
+ *      Même patron que la correction 1.102. Sur une pondération de 20, la bande
+ *      `I >= 21 && I <= 27` ne pouvait plus jamais correspondre à une note réelle.
+ *   3. Le vocabulaire d'intervention était celui de son réseau. Un enseignant
+ *      qui n'a pas de CAF recevait une prescription qui ne le concerne pas.
+ *
+ * ⮕ CE QUI LES REMPLACE, et pourquoi ce n'est pas un autre arbitraire :
+ *   · L'INTENSITÉ vient de `diagnostiquerSuiviApprentissage` — le croisement
+ *     IPB × direction, qui compte les artefacts consécutifs sous le seuil de
+ *     défi CONFIGURÉ et lit une tendance. Aucun nom de critère, aucun seuil
+ *     écrit ici. Cette table est celle du modèle RàI documenté (skill
+ *     `depistage-rai`), et elle était déjà vivante côté tableau de bord.
+ *   · LA CAUSE est NOMMÉE, pas prescrite : le critère en défi — dont le nom
+ *     vient de la grille de l'utilisateur — et son niveau SOLO configuré.
+ *     « L'app fournit les données ; l'enseignant prend les décisions »
+ *     (`depistage-rai`). C'est le geste de #550 et du lot 3 de #542 : nommer
+ *     plutôt que deviner.
+ *
+ * ⚠ CE QUI RESTE À TRAITER, et qu'il ne faut pas croire réglé :
+ *   · Le seuil de défi (`obtenirSeuil('defiSpecifique')`) a un défaut à 0,70 et
+ *     des replis en dur qui divergent selon les fichiers (0,70 ici et dans
+ *     `interventions.js`, 0,75 dans `sections-affichage.js` et
+ *     `pratique-pan-standards.js`). C'est le point de convergence du §6 de la
+ *     consigne #552/#537/#535.
+ *   · La branche « Décrochage » ci-dessous N'EST JAMAIS ATTEINTE depuis ici :
+ *     `interpreterMobilisation` ne rend ce niveau que si son 3e argument
+ *     `statutDecrochage` est vrai, et cet appel ne le passe pas. Le statut
+ *     existe pourtant dans le modèle (`trimestre-v2-etudiants.js`). CONSTAT
+ *     INSCRIT, PAS CORRIGÉ : brancher un site mort est un geste distinct, qui
+ *     demande son propre item.
+ *
+ * @param {string} da - Le DA de l'élève
+ * @returns {Object} { cible, pattern, niveau, couleur }
+ */
 function determinerCibleIntervention(da) {
     const indices = calculerTousLesIndices(da);
     // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
@@ -1686,48 +1695,55 @@ function determinerCibleIntervention(da) {
     const diagnostic = diagnostiquerForcesChallenges(moyennes);
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true);
 
+    // Élève présent, aucune production remise : il n'y a rien à mesurer, et
+    // c'est en soi le signal le plus fort. Conséquence logique, pas seuil.
     if (indices3Derniers.nbArtefacts === 0 && indices.A > 0) {
         return { cible: 'Non-participation', pattern: 'Non-participation', niveau: 3, couleur: '#dc3545' };
     }
 
-    const interpMobilisation = interpreterMobilisation(indices.A / 100, indices.C / 100);
-    const E = interpMobilisation.niveau;
-    const I = indices3Derniers.francaisMoyen;
     const M = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null);
-    const N = diagnostic.principalDefi ? diagnostic.principalDefi.nom : 'Aucun';
 
-    if (E === 'Décrochage') {
+    // La mobilisation prime sur le dépistage : un élève décroché ne se lit pas
+    // dans ses critères. Voir le constat ci-dessus sur l'argument manquant.
+    const interpMobilisation = interpreterMobilisation(indices.A / 100, indices.C / 100);
+    if (interpMobilisation.niveau === 'Décrochage') {
         return { cible: 'Décrochage', pattern: M, niveau: 3, couleur: '#9e9e9e' };
     }
 
-    if (M === 'Difficulté persistante') {
-        const cible = _resoudreCibleDifficultePersistante(M, N, I);
-        if (cible) return cible;
+    const suivi = (typeof diagnostiquerSuiviApprentissage === 'function')
+        ? diagnostiquerSuiviApprentissage(da)
+        : null;
+
+    // ⮕ SANS SUIVI, ON NOMME LA CAUSE — on ne rend pas une intensité inventée.
+    // `diagnostiquerSuiviApprentissage` rend `null` quand aucune grille de
+    // référence n'est utilisable ou qu'aucune évaluation n'est comparable.
+    // Rendre « niveau 1 » dans ce cas se lirait comme un verdict rassurant SUR
+    // L'ÉLÈVE — exactement le défaut corrigé par #550.
+    if (!suivi) {
+        return {
+            cible: 'Intensité non calculable — aucun suivi des fondations disponible',
+            pattern: M,
+            niveau: null,
+            couleur: '#8aa4b0'
+        };
     }
 
-    if (M === 'Difficulté émergente') {
-        const cible = _resoudreCibleDifficulteEmergente(M, N, I);
-        if (cible) return cible;
-    }
+    // ⮕ CE QUI N'EST PLUS MÊLÉ ICI : le contexte de mobilisation. Il avait sa
+    // branche de repli (« Risque de démotivation », niveau 2, sur `fragile` ou
+    // `critique`), qui mêlait une lecture d'ENGAGEMENT à une intensité
+    // PÉDAGOGIQUE. Le skill `depistage-rai` les tient séparés, et l'écran aussi :
+    // `determinerAlerteContextuelle` a sa propre carte.
+    const defi = diagnostic.principalDefi;
+    const cible = defi
+        ? suivi.diagnostic + ' — ' + defi.nom + ' (' + libelleNiveauSOLO(defi.niveauSOLO) + ')'
+        : suivi.diagnostic;
 
-    if (M === 'Défi spécifique') {
-        const cible = _resoudreCibleDefiSpecifique(M, N, I);
-        if (cible) return cible;
-    }
-
-    if (M === 'Stable') {
-        const cible = _resoudreCibleStable(M, N, I);
-        if (cible) return cible;
-    }
-
-    if (E.includes('fragile') || E.includes('critique')) {
-        return { cible: 'Risque de démotivation', pattern: M, niveau: 2, couleur: '#ff9800' };
-    }
-
-    return { cible: 'À clarifier en rencontre individuelle', pattern: M, niveau: 1, couleur: '#8aa4b0' };
+    return { cible: cible, pattern: M, niveau: suivi.niveauRaI, couleur: suivi.couleur };
 }
 
-// Exporter les 14 fonctions vers window (décision étape 1 b — convention systématique)
+// Exporter vers window (décision étape 1 b — convention systématique).
+// Le compte est retiré : il disait 14 et le module en exporte davantage depuis
+// #552 — un chiffre juste sous un mauvais libellé est un chiffre faux.
 window.obtenirEchelleResolue = obtenirEchelleResolue;
 window.obtenirEchelleCommuneDesEvaluations = obtenirEchelleCommuneDesEvaluations;
 window.obtenirTableConversionNiveaux = obtenirTableConversionNiveaux;
@@ -1745,6 +1761,7 @@ window.identifierDefiSpecifique = identifierDefiSpecifique;
 window.identifierPatternActuel = identifierPatternActuel;
 window.determinerNiveauRaiPedagogique = determinerNiveauRaiPedagogique;
 window.determinerAlerteContextuelle = determinerAlerteContextuelle;
+window.libelleNiveauSOLO = libelleNiveauSOLO;
 window.determinerCibleIntervention = determinerCibleIntervention;
 
 })();

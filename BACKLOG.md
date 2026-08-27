@@ -535,10 +535,12 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   🐛 **Défaut latent trouvé et corrigé** : le nom affiché venait d'une cascade de ternaires finissant
   par `: 'Français'` SANS condition — tout critère non reconnu se serait affiché « Français ».
   ✅ Vitest 3454/3454 (328 fichiers) · Playwright 165/165 · baseline à zéro · dix break-tests rouges.
-  ⏳ **CE QUI RESTE OUVERT, ET QUI LUI APPARTIENT** : #537 (le critère de langue reconnu par son nom),
-  #535 (les cibles RàI indexées par nom de critère), #539 (les clés du volet confidentiel), #536
+  ⏳ **CE QUI RESTE OUVERT, ET QUI LUI APPARTIENT** : #539 (les clés du volet confidentiel), #536
   (`idmeMoyen` à 0 vs « pas de donnée »). Aucun n'est un oubli : chacun engage sa didactique ou ses
   données, et je ne les ai pas tranchés seul.
+  ✅ **#537 et #535 LIVRÉS le 27 août 2026** avec #552 — ils n'étaient pas séparables : `I` ÉTAIT
+  `francaisMoyen`. Grégoire a tranché ce jour-là (« le critère de langue est un critère comme un
+  autre ») et le chantier a été mené d'un seul tenant. Voir BACKLOG-ARCHIVE.md.
 
 - [x] **~~#529 (énoncé d'origine, conservé)~~** 📐 **CHANTIER MAJEUR — sortir SRPNF et IDME du code.** Session DÉDIÉE (décision
   Grégoire, 26 août : « rien ne doit être codé en dur, mais l'échelle IDME peut être seedée par
@@ -1495,99 +1497,44 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   un cours intensif, `(théorie + labo)` n'est pas la durée d'une semaine donnée. D devra prévoir
   l'écart assumé, jamais le blocage.
 
-- [ ] **#552 — Les cibles d'intervention RàI comparent un POURCENTAGE à des notes sur 30 que Grégoire n'utilise plus.**
-  Créé le 27 août 2026 (après-midi), en vérifiant les consommateurs de `francaisMoyen` avant
-  d'engager **#537**. ⮕ **Le chantier #537 ne peut pas avancer sans trancher celui-ci** : retirer
-  `francaisMoyen` fait tomber la variable `I`, donc les QUATRE résolveurs de cibles en entier — pas
-  seulement leurs branches Français.
+- [ ] **#553 — Le rabotage de clé `startsWith('francais')` : un pansement sur un appariement qui échoue.**
+  Créé le 27 août 2026, sorti du chantier #552. **Huit sites** rabotent la clé d'un critère vers
+  `'francais'` : `calculs.js` (526, 675, 696) · `helpers.js` (670) · `sections-affichage.js` (1101) ·
+  `interventions.js` (995, 1173, 1221).
+  ⚠ **CE N'EST PAS DE LA DIDACTIQUE**, contrairement aux apparences. C'est un pansement sur un
+  appariement de clés qui échoue : deux endroits normalisent le nom d'un critère et n'obtiennent pas
+  la même clé. On a raboté « francais » spécifiquement parce que c'est là qu'on avait vu le symptôme.
+  ⮕ **TOUT critère dont le nom varie entre deux écritures a le même bug, en silence, avec des 0 %.**
+  Indice mesuré le 27 août : dans `diagnostiquerForcesChallenges`, un critère nommé « Français écrit »
+  produit la clé `francaisecrit`, que `moyennes` ne contient pas (elle contient `francais`) — le
+  critère est donc **filtré du diagnostic, sans un mot**.
+  ⮕ **Le geste** : une seule fonction de normalisation, partagée par les deux côtés de l'appariement,
+  et le retrait des huit rabotages. Pas de valeur métier : c'est un défaut technique.
 
-  **DEUX DÉFAUTS DISTINCTS, dans la même variable.**
+- [ ] **#554 — `determinerCibleIntervention` ne reçoit jamais le statut de décrochage.**
+  Créé le 27 août 2026, constaté pendant #552 et **volontairement non corrigé** : brancher un site
+  mort est un geste distinct de celui qui était en cours.
+  `interpreterMobilisation(A, C, statutDecrochage)` ne rend le niveau `'Décrochage'` que si son
+  **troisième argument** est vrai. `determinerCibleIntervention` l'appelle avec deux arguments.
+  ⮕ **La branche `if (interpMobilisation.niveau === 'Décrochage')` n'est donc jamais atteinte** — et
+  le statut existe pourtant dans le modèle (`trimestre-v2-etudiants.js`, statut `décrochage`).
+  ⏳ **À TRANCHER** : passer le statut (et vérifier que les deux autres appelants le font aussi), ou
+  retirer la branche. Vérifier les consommateurs AVANT de brancher.
 
-  **1. L'UNITÉ.** `determinerCibleIntervention` (`profil-etudiant-calculs.js:1695`) calcule
-  `const I = indices3Derniers.francaisMoyen` et le passe aux quatre `_resoudreCible*`.
-  · `francaisMoyen` est un **pourcentage 0-100** : `scoresFrancais.push(score * 100)`, où `score`
-    est la `valeurCalcul` normalisée du niveau (`convertirNiveauEnScore`).
-  · Les seuils comparés à `I` sont **17, 18, 20, 21, 25, 27** — tous dans le bas d'une échelle de 100.
-  ⮕ **GRÉGOIRE, LE 27 AOÛT** : « La pondération a déjà été sur 30, ensuite elle a été sur 20 à
-  l'H26. » ⮕ **Ce sont donc des NOTES BRUTES sur 30**, pas des pourcentages : 17/30 = 57 % (seuil
-  d'échec), 20/30 = 67 %, 27/30 = 90 %. La progression des cibles y est cohérente — CAF et dépistage
-  sous 17, révision ciblée de 18 à 20, révision simple de 21 à 27, pratique autonome au-dessus de 25.
-  ⚠ **ET ELLES SONT DEUX FOIS PÉRIMÉES** : comparées à un pourcentage (mauvaise unité), et calibrées
-  sur une pondération abandonnée. **Sur 20, la borne `I >= 21 && I <= 27` ne peut plus JAMAIS
-  correspondre à une note réelle.**
-  ✅ **PROUVÉ le 27 août** par `tests/unit/constat-552-cible-rai-pilotee-par-le-francais.test.js`
-  (4 tests, **2 break-tests rouges vérifiés**, restauration confirmée par `diff -q`). Deux élèves
-  dont TOUT est identique — mêmes `noteFinale`, donc même performance, donc même pattern ; même
-  Structure au plus bas, donc même défi principal — ne se distinguent que par le niveau de leur
-  critère de langue :
-
-  | Moyenne en langue | `I` | Cible reçue | Niveau RàI |
-  |---|---|---|---|
-  | niveau X (15 %) | 15 | « Remédiation en Structure \| Exercice supplémentaire \| CAF » | **3** |
-  | niveau Y (60 %) | 60 | « À clarifier en rencontre individuelle » | **1** |
-  | niveau Z (90 %) | 90 | « À clarifier en rencontre individuelle » | **1** |
-
-  ⮕ **UN BON FRANÇAIS MASQUE UNE DIFFICULTÉ PERSISTANTE EN STRUCTURE.** Le second élève est en
-  difficulté exactement autant que le premier ; sa difficulté n'est même plus NOMMÉE dans sa cible.
-  Au-delà de 27 — c'est-à-dire pour la quasi-totalité des élèves — aucune bande ne matche, le
-  résolveur rend `null`, et l'élève tombe dans le repli générique de fin de fonction.
-  ⚠ **Le test porte sa propre garde anti-silence** : il vérifie d'abord que les deux montages
-  produisent le MÊME pattern et le MÊME défi principal. Sans elle, deux cibles différentes
-  pourraient venir d'un pattern différent, et le test « prouverait » un défaut qui n'est pas
-  celui qu'on mesure.
-  ⮕ **Break-tests** : élargir la borne `I <= 17` à `I <= 100` fait matcher les deux cas (2 rouges) ·
-  faire venir `I` de la performance au lieu du français (1 rouge). Le constat tient donc bien à la
-  BORNE et à la VARIABLE, pas au montage.
-  ⚠ **C'est le patron EXACT de la correction 1.102** : « un pourcentage était comparé à un seuil
-  exprimé dans une autre unité, si bien que tout critère au-dessus de 1 % ressortait Étendu ». Le
-  même défaut vit ici, non corrigé, dans une autre fonction.
-
-  **2. LE CRITÈRE PILOTE.** `I` est la moyenne du **français**, mais elle conditionne les cibles de
-  **TOUS** les critères : `N === 'Structure' && I <= 17`, `N === 'Rigueur' && I >= 18 && I <= 27`.
-  ⮕ **La cible d'intervention pour un défi en Structure dépend de la performance en FRANÇAIS de
-  l'élève.** Ce défaut-là ne vient pas de l'unité : il resterait même avec des seuils justes.
-
-  ⚠ **C'EST DU CODE VIVANT, sur les données réelles.** `determinerCibleIntervention` est appelée par
-  `genererSectionAccompagnement` (`profil-etudiant-sections-affichage.js:825`) et par la zone critique
-  du tableau de bord (`tableau-bord-apercu.js:2673`). Vérifié au grep récursif le 27 août.
-
-  ⮕ **PREMIER GESTE — PROUVER, PAS CORRIGER.** Une spec qui montre quelle cible reçoit un élève en
-  difficulté persistante en Structure selon sa moyenne en français. Tant que le comportement n'est
-  pas vu, « refaire les cibles » serait réécrire à l'aveugle une règle didactique.
-  ⏳ **ENSUITE, À TRANCHER AVEC GRÉGOIRE** — et c'est **#535** : dériver la forme de la cible depuis
-  le nom du critère (« Pratique guidée en {critère} »), ou laisser l'enseignant écrire les siennes ?
-  ⮕ **Parenté avec #551** : même famille de défaut — des bornes de Grégoire figées dans le code, qui
-  ne valent plus même pour lui. Mais #551 porte sur des seuils CONFIGURABLES mal nommés ; ici les
-  nombres sont écrits en dur dans quatre fonctions.
-- [ ] **#537 — Le « critère de langue » est reconnu par son NOM, dans le code.**
-  ⚠ *Renuméroté #534 → #537 le 26 août 2026 : collision d'ID avec l'item « un seul dépassement
-  de délai refuse un push », qui est ancré dans deux commits, `tests/playwright.config.js` et une
-  sentinelle. Le présent item n'était cité que dans BACKLOG.md et SESSION.md — c'est lui qui cède.*
-  Constaté en faisant #529 (26 août). Deux fonctions calculent un `francaisMoyen` en repérant le
-  critère dont le nom commence par « francais » : `calculerIndicateurs3DerniersArtefacts`
-  (`profil-etudiant-calculs.js`) et son jumeau dans `pratique-pan-standards.js`. Les deux portaient
-  AUSSI une regex sur la prose — retirée ; la reconnaissance par nom, elle, reste.
-  ⮕ **Pourquoi je ne l'ai pas tranché seul** : ce n'est pas un libellé, c'est un statut. Au collégial
-  québécois le français écrit a un régime propre (épreuve uniforme, CAF), et
-  `_resoudreCibleDefiSpecifique` lui réserve des cibles d'intervention que les autres critères n'ont
-  pas — « Rencontre individuelle | CAF | Dépistage SA ». Généraliser reviendrait à décider de la
-  didactique de Grégoire à sa place.
-  ⏳ **À TRANCHER** : l'utilisateur désigne-t-il, dans sa grille, quel critère joue ce rôle (un
-  drapeau `estCritereDeLangue` sur le critère) ? Ou le régime particulier disparaît-il ?
-  ⮕ Marqué dans les deux fichiers par `const NOM_CRITERE_LANGUE = 'francais';` — un seul point à
-  changer quand la décision sera prise.
-
-- [ ] **#535 — Les cibles d'intervention RàI sont indexées par nom de critère.**
-  `_resoudreCibleDefiSpecifique`, `_resoudreCibleRemediation` et `_resoudreCibleStable`
-  (`profil-etudiant-calculs.js`) testent `N === 'Structure'`, `'Rigueur'`, `'Plausibilité'`,
-  `'Nuance'`, `'Français'`. Une grille « Méthode / Résultats / Discussion » ne matche AUCUNE branche :
-  `determinerCibleIntervention` rend `null`, et l'utilisateur n'a aucune cible — sans message.
-  ⮕ **La FORME est générique** (« Pratique guidée en X », « Remédiation en X ») et se dériverait du
-  nom du critère en une ligne. C'est le cas Français qui ne se dérive pas (cf. #537).
-  ⏳ **À TRANCHER AVEC GRÉGOIRE** : dériver la forme et traiter la langue à part, ou laisser
-  l'enseignant écrire ses propres cibles ? La seconde option est plus juste et bien plus lourde.
-  ⚠ Ne pas généraliser « Pratique guidée en {critère} » sans lui : c'est sa didactique, pas une
-  chaîne de caractères.
+- [ ] **#555 — Le seuil de défi : un défaut à 0,70, des replis qui divergent, et la marque de maîtrise absente.**
+  Créé le 27 août 2026. C'est le **point de convergence** identifié au §6 de la consigne #552 : cinq
+  items butent sur la même chose manquante (#552 clos, #551, #535 clos, #549, pas 3c-3 de #542).
+  ⚠ **L'ÉTAT MESURÉ.** `obtenirSeuil('defiSpecifique')` a un défaut à **0,70**
+  (`interpretation-config.js:48`) et des **replis en dur qui ne s'accordent pas entre eux** :
+  `|| 0.70` dans `profil-etudiant-calculs.js` et `interventions.js`, `|| 0.75` dans
+  `profil-etudiant-sections-affichage.js` et `pratique-pan-standards.js`. Deux fichiers répondent
+  donc différemment à la même question quand la préférence est absente.
+  ⮕ **CE QUI MANQUE VRAIMENT** : la **marque de seuil sur l'échelle** — quel niveau, dans l'échelle
+  de CET utilisateur, marque le passage à la maîtrise. Un niveau porte déjà `code`, `nom`, `min`,
+  `max`, `valeurCalcul`, `couleur` et, depuis 1.103, une étiquette SOLO facultative.
+  ⏳ **DÉCISION D'ARCHITECTURE, pas un pas de refactor** : un champ, un écran d'édition, une
+  migration. À poser à Grégoire avant d'écrire une ligne.
+  ⮕ **Premier pas possible et sans décision** : unifier les quatre replis divergents.
 
 - [ ] **#536 — `idmeMoyen` rend 0 quand rien n'est convertible, au lieu de « pas de donnée ».**
   Repéré pendant #529 et VOLONTAIREMENT NON CORRIGÉ : le contrat de
