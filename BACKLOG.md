@@ -682,7 +682,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ✅ Sentinelle `tests/unit/sentinelle-541-niveau-depuis-pourcentage.test.js` — 7 cas, **7 ROUGES au
   break-test** avec le message attendu (`expected 'E' to be 'I'`). Vitest **3495/3495** (330 fichiers).
 
-- [ ] **#550 — Sans grille de référence, le dépistage dit « aucune force ni défi » au lieu de « je n'ai rien à comparer ».**
+- [x] **#550 LIVRÉ 27 août 2026 — Sans grille de référence, le dépistage dit « aucune force ni défi » au lieu de « je n'ai rien à comparer ».**
   Créé le 27 août 2026, **symptôme vécu par Grégoire le matin même** : sa carte « Observation
   de la structure des résultats d'apprentissage » affichait *« Aucune force ni défi identifié
   selon la taxonomie SOLO »*, et « Progression par critère » était vide. Cause : **aucune
@@ -697,15 +697,36 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   configuration, et elle doit le dire, avec le chemin pour la régler.
   ⮕ Même patron que `diagnostiquerConversionNiveaux` : nommer la cause, parce qu'une cause
   nommée se répare et qu'un silence ne se répare pas.
-  ⚠ **PARTIELLEMENT ADRESSÉ SANS L'AVOIR VISÉ — 27 août 2026, pas 3c-3 de #542.** La
-  réécriture de la carte a **retiré la phrase fautive** : « Aucune force ni défi identifié
-  selon la taxonomie SOLO » n'existe plus. Selon le cas, la carte affiche désormais la cause
-  de l'échelle manquante (`obtenirEchelleCommuneDesEvaluations` la nomme) ou « Aucun critère
-  évalué à situer dans l'échelle pour l'instant ».
-  ⮕ **CE QUI RESTE OUVERT, ET C'EST LE CŒUR DE L'ITEM** : le cas « aucune grille de référence
-  désignée » ne se DIT toujours pas. `criteresSOLO` est vide, et la carte l'annonce sans
-  nommer la configuration manquante ni le chemin pour la régler. Le verdict rassurant est
-  parti ; la cause nommée n'est pas encore là.
+  ✅ **LIVRÉ le 27 août 2026, en deux temps.**
+  ⮕ **Temps 1, sans l'avoir visé** (pas 3c-3 de #542) : la réécriture de la carte a retiré la
+  phrase fautive. « Aucune force ni défi identifié selon la taxonomie SOLO » n'existe plus.
+  ⮕ **Temps 2, le cœur de l'item** : `diagnostiquerGrilleReferenceDepistage()`
+  (`profil-etudiant-helpers.js`) rend `{ grille, raison, message }` sur le patron
+  d'`obtenirEchelleCommuneDesEvaluations`, et **distingue TROIS causes** qui ne demandent pas
+  le même geste :
+
+  | Raison | Ce qui s'affiche |
+  |---|---|
+  | `aucune-grille-designee` | « Aucune grille de critères n'est désignée… Choisis-en une dans **Labo → Outils d'observation → « Grille de critères pour le dépistage »** » — le cas vécu par Grégoire |
+  | `grille-introuvable` | la grille désignée **a été supprimée** — cause différente, dite comme telle (et la préférence est auto-nettoyée, comportement d'origine préservé) |
+  | `grille-sans-criteres` | la grille est là mais **vide** : il faut la remplir, pas en désigner une autre. Le nom de la grille est cité |
+
+  ⮕ **LE MESSAGE VA DANS LES DEUX BLOCS** qui étaient muets : la carte « Observation de la
+  structure » ET la liste « Progression par critère », qui était vide en silence — une liste
+  vide se lit comme « rien à signaler ». En corriger un seul aurait laissé l'autre mentir.
+  ⮕ **Le chemin de réglage est cité tel qu'il s'écrit à l'écran** (`index.html:8617`), vérifié
+  avant d'être écrit : un message qui envoie vers un libellé périmé fait chercher, ce qui est
+  pire qu'un message absent.
+  ⚠ **NON-RÉGRESSION TENUE PAR UN TEST** : `obtenirGrilleReferenceDepistage` garde son contrat
+  exact et devient un adaptateur (`diagnostiquer…().grille`). **Treize sites l'appellent**, et
+  aucun n'a eu besoin de changer. En particulier, une grille SANS critères reste rendue telle
+  quelle — un premier jet la faisait passer à `null`, ce qui aurait fait perdre son `nom` aux
+  appelants. Un correctif d'affichage n'a pas à modifier ce que douze autres sites reçoivent.
+  **Sentinelles** : `tests/unit/sentinelle-550-grille-reference-cause-nommee.test.js` (5 tests,
+  5 break-tests rouges vérifiés **isolément**) et le cas #550 ajouté à
+  `tests/integration/depistage-542-3c3-carte-structure.spec.js` — qui prouve que le message
+  **arrive à l'écran**, ce que la sentinelle de source ne peut pas dire. Vitest **3706/3706**
+  (348 fichiers).
 
 - [ ] **#551 — Le dépistage du RISQUE est calibré sur les bornes de Grégoire.**
   Créé le 27 août 2026, **issu du pas 5 de #542 lot 3**, que Grégoire a décidé de sortir du
