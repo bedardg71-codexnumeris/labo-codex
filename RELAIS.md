@@ -23,9 +23,30 @@
 | ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE** | **#427** (refermer l'accès public) et **#508** (l'avis d'accueil qui l'annonce). Fiche opératoire prête : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`. **Dû par Grégoire** : la liste nominale des personnes à inviter et les trois noms Cloudflare — personne ne peut les préparer à sa place. |
 | ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. ⮕ **ET C'EST ARRIVÉ UNE SECONDE FOIS LE MÊME JOUR, dans l'autre sens.** Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les `BACKLOG.md` et `SESSION.md` de la session « présences » — l'inscription de l'item **#538** et la renumérotation **#534 → #537** vivent donc dans un commit qui parle d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc non réécrit. **Deux avertissements en un jour : sur ce dépôt, `git add` par chemins explicites n'est pas une préférence, c'est la seule méthode qui tienne.** |
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
-| **Dernière mise à jour** | **27 août 2026, fin de journée** — rituel de fin. Lot 3 de #542 REFERMÉ (8 pas) · #550 · #551 pas 1 · 1.104.0 · #552 créé et prouvé · **puis le chantier #552 · #535 · #537 MENÉ ET LIVRÉ en 1.104.1**. Trois items neufs en sortent : **#553**, **#554**, **#555**. |
+| **Dernière mise à jour** | **27 août 2026, 15 h 45** — **l'audit Fable 5 est rendu** : `Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md` (base `fbeffdad`, lecture seule, aucun bump). Deux items neufs : **#573** (cartouche remplacée après « Enregistrer », autosave #517 muet) et **#574** (seeds/gabarits d'échelle sans `valeurCalcul` → non calculables depuis #527) ; #542 mis à jour (**lot 4 jamais livré, chiffres faux chez Grégoire**). Avant : rituel de fin du 27 août — lot 3 de #542 REFERMÉ (8 pas) · #550 · #551 pas 1 · 1.104.0 · #552 · #535 · #537 LIVRÉS en 1.104.1 · #553, #554, #555 créés. |
 
 ## ▶ POUR LA SESSION QUI PREND LE RELAIS — 27 août 2026, fin de journée
+
+### ✅ L'AUDIT FABLE 5 EST RENDU — 27 août 2026, 15 h 45
+
+`Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md`. Périmètre élargi par Grégoire au 27 août et à
+l'onglet Conception. **Verdict en une ligne** : les correctifs des 26-27 août font ce qu'ils annoncent
+et mordent (25/31 sentinelles sur chacune de leurs assertions) ; la réparation de l'échelle orpheline n'a touché
+aucune note ; **mais le lot 4 du plan SOLO n'a jamais été livré**, et il produit des chiffres faux chez
+Grégoire aujourd'hui (`analyserSousGroupe` → repli IDME de `portfolio.js` derrière une clé jamais écrite).
+
+⮕ **Ce qui attend Grégoire** (rapport §9, une décision) : par quoi ouvrir — **A** lot 4 du plan SOLO en
+item propre (recommandé) · **B** Conception, #573 + #574 · **C** volet données (commande de vérification
+du §6, un Codex enregistré, garde référentielle à la suppression d'échelle, #545).
+
+⚠ **Trois affirmations du 27 août sont fausses, ne pas les recopier** : « plus aucun ternaire `>= 85` »
+(`determinerLettreIDME` est rendu à l'écran) ; « `_identifierPatternActuel` vivant » (mort) ; « 3695/3695
+lu à l'écran » (3678 au SHA — l'écran montrait l'arbre d'une autre session). Et **`_genererBarresSRPNF`
+est VIVANT**, pas « probablement mort ». Détail §2.2 du rapport.
+
+⚠ **Le hook lot C verrouille le `|| 2`** de durée d'intervention qu'il croit retiré
+(`interventions.js:1345` l'écrit en base). Sentinelles à renforcer : rapport §4.
+
 
 ### ⚠⚠ LA RÈGLE QUI COMMANDE LE PROCHAIN CHANTIER
 
@@ -344,12 +365,11 @@ d'un cadrage est une donnée en soi.
 ⮕ **Ce relais-ci ne fait pas exception.** Le lire au début d'une session, oui ; le croire
 sur les chiffres, non — vérifier `git log`, `BACKLOG.md` et l'arbre.
 
-### L'audit externe des 26-27 août
+### L'audit externe des 26-27 août — ✅ RENDU le 27 août, 15 h 45
 
-`Rapports/CADRAGE-AUDIT-FABLE5-2026-08-27.md` (commits `9ac3c86c` puis `8269e8de`).
-Grégoire le donnera à **Fable 5** pour auditer le travail des deux chantiers : vérification
-adverse et intégrité des données. **La conception est HORS PÉRIMÈTRE**, sur sa décision
-explicite.
+Cadrage : `Rapports/CADRAGE-AUDIT-FABLE5-2026-08-27.md`. Rapport : `Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md`.
+Périmètre finalement **élargi** par Grégoire (27 août et onglet Conception inclus ; la didactique
+reste hors jugement). Voir le bloc « L'AUDIT FABLE 5 EST RENDU » en tête de ce fichier.
 
 ### Défauts trouvés et NON corrigés (inscrits, pas oubliés)
 

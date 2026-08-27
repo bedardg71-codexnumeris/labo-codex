@@ -7,6 +7,81 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 27 AOÛT 2026 (après-midi, 15 h → 15 h 45) : L'AUDIT FABLE 5 DU
+     TRAVAIL DES 25-27 AOÛT — DÉCOUPLAGE SRPNF / IDME / SOLO ET CONCEPTION.
+     Lecture seule. Aucun bump. Rapport : `Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md`
+
+     ▣ LA DEMANDE. Grégoire : « je voudrais que tu t'assures de la qualité du
+       travail qui était fait, de la logique et que les éléments ne sont pas codés
+       en dur. Je veux que l'application soit ouverte à plusieurs utilisateurs,
+       plusieurs disciplines. » Périmètre choisi par lui (question fermée, 3
+       options) : ÉLARGI — 3e8faabe..fbeffdad (67 commits) + Conception 25-26 août.
+
+     ▣ LA MÉTHODE. Skill verification-adverse, mode B. Baseline lue d'abord (Vitest
+       3716/3716, 350 fichiers, 15 h 06). Huit chantiers en parallèle, chacun dans
+       un worktree jetable (node_modules par lien symbolique, Vitest depuis tests/)
+       — le dépôt principal, source file:// de l'app ouverte, n'a rien reçu. 31
+       sentinelles break-testées, 70+ mutations, restauration vérifiée à chaque
+       fois. Chaque constat porteur d'un chantier RE-DÉRIVÉ par la session
+       principale avant d'entrer au rapport (grep, lecture, re-run). Passe
+       « connexions » et synthèse par une seule tête. Worktrees retirés à la fin.
+
+     ▣ CE QUI TIENT. Les correctifs des 26-27 août font ce qu'ils annoncent sur
+       les chemins qu'ils touchent : #542 lots 1-3, #552, #540/#538, #550/#551 —
+       confirmés par mutation. La réparation #542 n'a touché AUCUNE note (une
+       échelle ajoutée, identifiable, retirable). A1/A2 de l'audit SRPNF corrigés.
+       Les refus des astérisques sont réels et ancrés sur le chemin vivant.
+
+     ▣ CE QUI NE TIENT PAS — quatre faits.
+       1. LE LOT 4 DU PLAN SOLO N'A JAMAIS ÉTÉ LIVRÉ, et aucun item ne le porte.
+          analyserSousGroupe (interventions.js:251) lit les cinq noms de critères
+          de Grégoire ; convertirNiveauEnPourcentage (portfolio.js:548) replie sur
+          {I:32, D:69.5, M:79.5, E:92.5} derrière `echellesPerformance`, clé que
+          RIEN n'écrit → faux chez lui aussi (≠ 40/65/75/100), 0 % hors IDME.
+       2. Deux affirmations de clôture fausses : « plus aucun ternaire >= 85 »
+          (determinerLettreIDME, sections-affichage.js:4236, RENDU) ;
+          « _identifierPatternActuel vivant » (mort).
+       3. 19 sites arbitraires vivants non inscrits (rapport §3), dont EUF/CAF
+          injecté dans tout critère algorithmique (evaluation-calcul.js:173) et
+          SCALE_FALLBACK → PDF élève (synthese-retroaction-data.js:24).
+       4. Conception : cartouche REMPLACÉE après « Enregistrer », autosave #517
+          muet (→ #573) ; seeds/gabarits d'échelle sans valeurCalcul → non
+          calculables depuis #527, niveau neuf à 50 écrit en base (→ #574).
+       + 6 sentinelles qui ne mordent pas sur l'assertion porteuse (#552 tests
+         2/4, pas 4 test 4, lot C test F — qui EXIGE le `|| 2` écrit en base à
+         interventions.js:1345 —, lot E2 C, lot E3 C, #549 tests 3/4).
+       + une couture ouverte par le lot 3 : valeurCalcul ∈ [min, max] n'est gardé
+         nulle part (aller-retour niveau → valeur → moyenne → plage).
+
+     ▣ VOLET C (données). Sondes en lecture seule (confirmé au grep). Réparation :
+       sans sauvegarde (drapeau d'honneur), sans flush() IDB, sans test durable ;
+       « seuil de 90 % » n'existe plus (r2) ; la concordance dry-run/exécution est
+       une tautologie interne. #545 candidat n° 1 : ouverture d'un Codex / import
+       qui réécrit echellesTemplates EN BLOC (codex.js:620) — le même risque pèse
+       sur la réparation du 26. Candidat n° 2 : supprimerEchelleDefinitivement
+       (echelles.js:2425) sans garde référentielle. Une commande console pour
+       Grégoire lève le doute (rapport §6).
+
+     ▣ MÉTHODE — ce que l'audit a mesuré sur le rituel lui-même. Deux comptes de
+       tests de commits sont faux parce que l'ÉCRAN MONTRAIT L'ARBRE d'une autre
+       session (c914255a : 3695 annoncé, 3678 au SHA) ; quatre commits « tout
+       vert » rougissent isolément sur l'anti-cache (#547 mesuré). Règle versée en
+       mémoire : arbre partagé → mesurer au SHA en worktree, sinon écrire « non
+       attribuable au commit ». Et pendant l'audit, une autre session a écrit
+       BACKLOG/RELAIS/ETAT-PROJET puis commité bb7e7eb2 (#556-#572 pris).
+
+     ▣ DOCUMENTÉ ICI. BACKLOG : #573, #574, note d'audit sous #542 (lot 4).
+       RELAIS : bloc « L'AUDIT FABLE 5 EST RENDU » + ligne d'état. Commit par
+       hunks isolés (`git apply --cached` depuis la version HEAD) parce que
+       BACKLOG.md et RELAIS.md portent les modifications non commitées d'une
+       autre session — rien d'elle n'est emporté.
+
+     ▣ CE QUI ATTEND GRÉGOIRE — une décision (rapport §9) : A lot 4 en item propre
+       (recommandé : seul chantier qui produit des chiffres faux chez lui) ·
+       B Conception (#573, #574) · C données (§6). Rien n'a été corrigé.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 26 AOÛT 2026 (fin de journée) : LA DETTE DES HEURES PAR DÉFAUT
      (#538), ET LA MESURE QUE #534 ATTENDAIT. 1.101.1, POUSSÉ.
 
