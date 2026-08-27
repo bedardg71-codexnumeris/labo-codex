@@ -21,6 +21,20 @@
 
     var CHANGELOG = [
         {
+            version: '1.103',
+            couleur: 'vert',
+            titre: 'Le niveau vient de ta pratique',
+            items: [
+                '<strong>Le niveau affich\u00e9 avec la performance globale d\u2019un \u00e9l\u00e8ve vient maintenant de TON \u00e9chelle.</strong> Il \u00e9tait calcul\u00e9 par une formule \u00e9crite dans le logiciel \u2014 85 pour \u00ab E \u00bb, 75 pour \u00ab M \u00bb, 65 pour \u00ab D \u00bb \u2014 c\u2019est-\u00e0-dire tes propres bornes, recopi\u00e9es il y a des mois et appliqu\u00e9es \u00e0 tout le monde.',
+                '<strong>C\u2019est ta pratique de notation qui d\u00e9cide.</strong> Une pratique par niveaux affiche le code du niveau atteint, tir\u00e9 de l\u2019\u00e9chelle de tes \u00e9valuations. Une pratique sommative n\u2019en affiche plus : sa note globale est un pourcentage pond\u00e9r\u00e9, et un pourcentage n\u2019est pas un niveau atteint. Survole le pourcentage, l\u2019explication s\u2019y trouve.',
+                '<strong>Chaque niveau de ton \u00e9chelle peut porter une \u00e9tiquette SOLO</strong> \u2014 pr\u00e9structurel, unistructurel, multistructurel, relationnel, abstrait \u00e9tendu. Quand elle est pos\u00e9e, son interpr\u00e9tation appara\u00eet au survol du niveau. Sans \u00e9tiquette, c\u2019est le nom que tu as donn\u00e9 au niveau qui s\u2019affiche : rien ne se tait.',
+                '<strong>Correction :</strong> un \u00e9l\u00e8ve dont une seule \u00e9valuation d\u00e9signait une \u00e9chelle disparue du trimestre n\u2019avait plus AUCUN niveau affich\u00e9. Cette \u00e9valuation est pourtant d\u00e9j\u00e0 \u00e9cart\u00e9e du calcul, et l\u2019encadr\u00e9 \u00ab D\u00e9pistage incomplet \u00bb le dit \u2014 une \u00e9chelle absente n\u2019est pas une \u00e9chelle concurrente.',
+                '<strong>Le mod\u00e8le de cartouche \u00e0 faire remplir emporte les consignes du travail.</strong> Un menu \u00ab Consignes du travail \u00bb s\u2019ajoute \u00e0 c\u00f4t\u00e9 de la grille et de l\u2019\u00e9chelle : l\u2019objectif, la t\u00e2che, le d\u00e9tail et tes champs nomm\u00e9s partent avec le fichier. L\u2019assistant \u00e9crivait jusqu\u2019ici des commentaires sur une t\u00e2che qu\u2019il ne connaissait pas. Le menu dit aussi quelles productions n\u2019ont pas encore de consignes.',
+                '<strong>Les consignes adress\u00e9es \u00e0 l\u2019assistant sont r\u00e9\u00e9crites</strong> : trois phrases par commentaire, un conseil concret sous le seuil de ma\u00eetrise, aucun au-dessus, et l\u2019interdiction d\u2019inventer le moindre d\u00e9tail d\u2019une copie qui n\u2019a pas encore \u00e9t\u00e9 remise.',
+                '<strong>Correction :</strong> le profil d\u2019un \u00e9l\u00e8ve pouvait cesser de s\u2019afficher enti\u00e8rement lorsqu\u2019une pratique configurable avait \u00e9t\u00e9 supprim\u00e9e ou que sa configuration \u00e9tait devenue invalide.'
+            ]
+        },
+        {
             version: '1.102',
             couleur: 'orange',
             titre: 'Des p\u00e9riodes r\u00e9elles, un d\u00e9pistage qui dit vrai',

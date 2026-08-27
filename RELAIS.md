@@ -12,8 +12,8 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** — tout y est. Aucun travail en avance ailleurs. |
-| **Version** | **1.102.0** — build `0827-0556`. Bumpée le 27 août au matin, une fois Grégoire sorti de sa session `file://`. Changelog : **deux** entrées écrites, `1.102` et `1.101` — cette dernière n'avait jamais été annoncée aux utilisateurs. Playwright 186/186, Vitest vert. |
-| **Version précédente** | **1.101.1** — #529, livrée le 26 août en fin d'après-midi. Elle n'avait pas d'entrée au changelog ; c'est réparé. |
+| **Version** | **1.103.0** — build `0827-0858`. Le niveau global vient de la pratique, le modèle de cartouche emporte les consignes du travail. Playwright 189/189, Vitest 3674/3674. |
+| **Version précédente** | **1.102.0** — livrée le 27 août au matin : les périodes réelles et le dépistage qui dit vrai. |
 | **Travail en avance sur `main`** | **NON — tout est poussé** (vérifié le 27 août à 5 h 20 : `git log origin/main..HEAD` vide). La ligne d'hier annonçait le contraire ; elle avait été écrite avant le push de 22 h 25. **Rien sur aucune branche.** |
 | **Suite Playwright** | baseline à **1 seul échec connu** (contre 8 avant #495) : `productions-ajout-refus-garde-340` = **#530**, un vrai bug, pas du bruit. |
 | ⚠ **AVANT TOUTE SUITE PLAYWRIGHT** | **fermer GitHub Desktop.** Les specs lisent l'arbre de travail en direct ; une commande git lancée pendant la suite change les fichiers sous leurs pieds et fait rougir des specs au hasard. Trouvé le 26 août (#523), règle versée au skill `portes-terrain`. |
@@ -24,7 +24,26 @@
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
 | **Dernière mise à jour** | **27 août 2026, matin** — #542 lot 3 : pas 1 et 2 livrés. Le bump de version reste dû. |
 
-## ⏳ PORTE TERRAIN OUVERTE — 27 août, non relevée
+## ✅ PORTE TERRAIN DU 27 AOÛT — RELEVÉE, LES QUATRE DÉCISIONS SONT PRISES
+
+| Décision | Verdict de Grégoire | Suite |
+|---|---|---|
+| **D1** survol SOLO sur iPad | « confort réservé au Mac » | **CLOS**, aucun code |
+| **D2** le niveau disparaît sous sommative | « le niveau disparaît » | **CLOS**, comportement confirmé |
+| **D3** étiqueter son échelle en SOLO | « oui, maintenant » | ⏳ **son geste** — et ce n'est plus un confort : la consigne du modèle de cartouche (#549) fait dépendre toute sa rédaction du seuil de maîtrise, que seule l'étiquette SOLO peut donner |
+| **D4** laquelle des trois formulations SOLO | « les longues » | ✅ **APPLIQUÉ** dans `NIVEAUX_SOLO_ECHELLE` |
+
+⚠ **Ce que la porte a attrapé, et qu'aucun test ne pouvait voir** : le niveau global ne
+s'affichait PAS chez lui. Une évaluation désignant une échelle disparue était comptée comme
+« une deuxième échelle », et le code refusait de choisir. Corrigé le matin même.
+
+⏳ **Deux écarts signalés sur D4, non tranchés** : « préstructurel » garde sa formulation
+courte (aucune longue n'existait) ; les quatre longues emploient « il/elle », un accord lourd
+que la convention d'écriture inclusive demande de reformuler.
+
+---
+
+## ⏳ ANCIENNE ENTRÉE — porte terrain ouverte (remplacée ci-dessus)
 
 `plans de travail/PORTES-TERRAIN-2026-08-27-niveau-global-selon-pratique.md`
 (jumeau interactif : le `.html` de même nom, publié comme artefact).

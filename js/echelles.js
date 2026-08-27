@@ -2860,14 +2860,33 @@ function ajouterPremierNiveau() {
 // ⚠ « Préstructurel » est la SEULE description que le dépôt n'avait pas :
 // l'ancien code n'en produisait que quatre, pour cinq niveaux SOLO. Celle-ci a
 // donc été écrite à neuf, d'après la définition de la taxonomie —
-// ✅ VALIDÉE PAR GRÉGOIRE le 27 août 2026, telle quelle. Les cinq descriptions
-// sont désormais de sa main ou de son accord : aucune ne se change sans le sien.
+// ✅ VALIDÉE PAR GRÉGOIRE le 27 août 2026, telle quelle.
+//
+// ✅ DÉCISION D4 DE LA PORTE TERRAIN (27 août) : « les longues ». Le dépôt
+// portait TROIS formulations concurrentes des mêmes niveaux ; ce sont celles de
+// la carte « Observation de la structure » qui sont retenues, reprises mot pour
+// mot. Les courtes qui vivaient ici sont retirées — le chantier ne les empile
+// pas à côté.
+//
+// ⏳ DEUX ÉCARTS SIGNALÉS À GRÉGOIRE, NON TRANCHÉS, ET VOLONTAIREMENT LAISSÉS :
+//   · « préstructurel » garde sa formulation COURTE — il n'en existait pas de
+//     longue à reprendre, et en écrire une serait décider d'un vocabulaire
+//     pédagogique à sa place ;
+//   · les quatre longues emploient « il/elle », un accord lourd que sa convention
+//     d'écriture inclusive demande de reformuler. Elles sont reprises TELLES
+//     QUELLES parce que sa décision porte sur ces textes-là ; la reformulation
+//     est un geste distinct, et c'est le sien.
 const NIVEAUX_SOLO_ECHELLE = [
-    { valeur: 'prestructurel', libelle: 'Préstructurel', description: 'Aucun aspect pertinent n\'est traité' },
-    { valeur: 'unistructurel', libelle: 'Unistructurel', description: 'Un seul aspect traité, compréhension superficielle' },
-    { valeur: 'multistructurel', libelle: 'Multistructurel', description: 'Plusieurs aspects sans vision d\'ensemble' },
-    { valeur: 'relationnel', libelle: 'Relationnel', description: 'Vision globale avec liens entre les aspects' },
-    { valeur: 'abstrait_etendu', libelle: 'Abstrait étendu', description: 'Transfert à d\'autres contextes' }
+    { valeur: 'prestructurel', libelle: 'Préstructurel',
+      description: 'Aucun aspect pertinent n\'est traité' },
+    { valeur: 'unistructurel', libelle: 'Unistructurel',
+      description: 'À ce niveau unistructurel, l\'étudiant·e ne traite que d\'un seul aspect du savoir ou d\'un savoir-faire à la fois. L\'étudiant·e n\'a pas encore de réelle compréhension.' },
+    { valeur: 'multistructurel', libelle: 'Multistructurel',
+      description: 'À ce niveau multistructurel, l\'étudiant·e peut se concentrer sur plusieurs points pertinents à la fois. Cependant, il/elle les considère indépendamment.' },
+    { valeur: 'relationnel', libelle: 'Relationnel',
+      description: 'À ce niveau relationnel, l\'étudiant·e peut comprendre, lier et intégrer plusieurs aspects d\'une réponse dans un tout cohérent. Il/elle voit plusieurs aspects d\'une situation et sait l\'aborder de différentes façons.' },
+    { valeur: 'abstrait_etendu', libelle: 'Abstrait étendu',
+      description: 'À ce niveau abstrait étendu, l\'étudiant·e a la capacité de généraliser la structure au-delà de l\'information donnée. Il/elle comprend et il/elle est capable de transférer ses apprentissages à des contextes proches.' }
 ];
 
 /**
