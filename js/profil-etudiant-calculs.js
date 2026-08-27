@@ -261,6 +261,76 @@ function tableConversionPourEvaluation(evaluation, cache) {
  *   `{ total, nonConverties, raisons: {pratiqueIntrouvable, echelleIntrouvable,
  *      echelleNonDesignee}, message }`
  */
+/**
+ * L'échelle commune aux évaluations retenues d'un élève, ou la raison pour
+ * laquelle il n'y en a pas.
+ *
+ * ⮕ #542 lot 3, pas 3b. Sert aux pratiques qui établissent leur note globale
+ * PAR NIVEAUX — elles convertissent déjà évaluation par évaluation, chacune avec
+ * son `echelleId` ; c'est cette même échelle qui doit relire la moyenne.
+ *
+ * ⚠ POURQUOI CE HELPER N'EST PAS DANS UNE PRATIQUE. Deux pratiques en ont besoin
+ * (PAN-Standards et toute configurable travaillant par niveaux) et elles ne
+ * partagent pas de classe de base. L'écrire deux fois, c'est le patron que #529
+ * a défait — et le geste que le pas 3a vient d'éviter pour la résolution.
+ *
+ * ⚠ IL NE DEVINE PAS. Si les évaluations désignent des échelles DIFFÉRENTES, il
+ * n'en choisit aucune : la moyenne n'est alors située dans rien, et l'appelant
+ * doit le DIRE. C'est la même règle que #529 pour une évaluation isolée, portée
+ * à l'échelle du portrait — et le même refus que `obtenirEchelleResolue(null)`
+ * oppose à l'ambiguïté.
+ *
+ * Mêmes exclusions que `diagnostiquerConversionNiveaux` : une évaluation
+ * remplacée porte l'état d'AVANT une reprise.
+ *
+ * @param {string} da - Numéro de DA
+ * @returns {Object} `{ echelle, raison, message }` — `echelle` non nulle et
+ *   `raison` nulle quand une seule échelle est en jeu et qu'elle se résout.
+ */
+function obtenirEchelleCommuneDesEvaluations(da) {
+    var evaluations = (obtenirDonneesSelonMode('evaluationsSauvegardees') || [])
+        .filter(function (e) {
+            return e && e.etudiantDA === da && e.retroactionFinale && !e.remplaceeParId;
+        });
+
+    if (evaluations.length === 0) {
+        return {
+            echelle: null,
+            raison: 'aucune-evaluation',
+            message: 'Aucune évaluation retenue pour cet élève : il n\'y a pas de note globale à situer.'
+        };
+    }
+
+    var ids = [];
+    evaluations.forEach(function (e) {
+        var id = (e && e.echelleId) || '';
+        if (ids.indexOf(id) === -1) ids.push(id);
+    });
+
+    if (ids.length > 1) {
+        return {
+            echelle: null,
+            raison: 'echelles-divergentes',
+            message: 'Les ' + evaluations.length + ' évaluations de cet élève emploient '
+                + ids.length + ' échelles différentes. Sa note globale n\'est donc située dans '
+                + 'aucune d\'elles — choisir la « bonne » reviendrait à en écarter une autre '
+                + 'sans le dire.'
+        };
+    }
+
+    var echelle = obtenirEchelleResolue(ids[0] || null);
+    if (!echelle) {
+        return {
+            echelle: null,
+            raison: 'echelle-non-resolue',
+            message: 'L\'échelle des évaluations de cet élève est introuvable dans ce trimestre. '
+                + 'Sa note globale ne peut pas être située tant qu\'elle n\'est pas rétablie.'
+        };
+    }
+
+    return { echelle: echelle, raison: null, message: null };
+}
+
 function diagnostiquerConversionNiveaux(da) {
     var evaluations = (obtenirDonneesSelonMode('evaluationsSauvegardees') || [])
         .filter(function (e) {
@@ -1631,6 +1701,7 @@ function determinerCibleIntervention(da) {
 
 // Exporter les 14 fonctions vers window (décision étape 1 b — convention systématique)
 window.obtenirEchelleResolue = obtenirEchelleResolue;
+window.obtenirEchelleCommuneDesEvaluations = obtenirEchelleCommuneDesEvaluations;
 window.obtenirTableConversionNiveaux = obtenirTableConversionNiveaux;
 window.convertirNiveauEnScore = convertirNiveauEnScore;
 // #542 A3 — consommée par `profil-etudiant-sections-affichage.js` (carte RàI).
