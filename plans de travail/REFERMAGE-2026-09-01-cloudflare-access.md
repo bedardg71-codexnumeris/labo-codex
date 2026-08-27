@@ -1,62 +1,79 @@
-# Refermage de l'accès public — fiche opératoire du 1er septembre 2026
+# Réactivation de Cloudflare Access — fiche opératoire du 1er septembre 2026
 
 **Item** : #427 · **Dépendance** : #508 (l'avis d'accueil, daté du 1er septembre)
-**Préparée le** : 26 août 2026 · **Décisions de Grégoire** : ce même jour (voir §1)
-**Sources** : `docs/adr/008-cloudflare-access.md`, `DEPLOY.md` §3.6 et §4, `SECURITY.md`
+**Préparée le** : 26 août 2026 · **Réécrite le** : 27 août 2026, après correction du dossier (§1)
+**Sources** : `docs/adr/008-cloudflare-access.md` (révision du 27 août), `DEPLOY.md` §3 et §4, `SECURITY.md`
 
 > **Rien à construire.** La configuration Cloudflare Access n'a jamais été défaite : le DNS reste en
-> proxy orange, seule la *policy* est désactivée. Le refermage est une opération de quelques minutes
-> dans le tableau de bord Zero Trust — plus une révision d'ADR, qui est le vrai travail.
+> proxy orange, seule la *policy* est désactivée. L'opération est de quelques minutes dans le
+> tableau de bord Zero Trust — la révision documentaire est le vrai travail, et elle est faite.
+
+> ⚠ **Cette fiche remplace la version du 26 août**, qui décrivait un refermage par liste blanche.
+> Ce n'était pas ce que Grégoire voulait, et elle s'appuyait sur des faits inexacts. Voir §1.
 
 ---
 
-## §1 · Ce qui est décidé, et ce qui ne l'est pas
+## §1 · Ce qui a changé depuis la version du 26 août
 
-| | Décision | Verdict du 26 août |
+La version précédente organisait une **sélection** : liste blanche nominative, invitations
+individuelles, test de refus. Elle se fondait sur trois affirmations, toutes fausses ou
+déformées, corrigées à l'ADR-008 le 27 août.
+
+| Affirmation du 26 août | Ce qu'il en est |
+|---|---|
+| « Le quota de 50 sièges était déjà saturé au printemps » | **Faux.** Il ne l'a jamais été. Le CSV du 20 mai donne 51 identités mais **4 sièges Access actifs** |
+| « La politique d'hiver était une liste blanche » | **Périmé.** Vrai en janvier seulement ; la liste a été abandonnée en cours d'hiver au profit de `Everyone` |
+| « Mesure d'usage : hors sujet, acté » | **Renversé.** C'est le motif principal. La confusion portait sur l'objet à consulter (voir §6) |
+
+**Le motif réel** : Grégoire veut savoir qui utilise l'application, pour constituer
+progressivement une liste de personnes joignables — contribution au développement, signalement
+de bogues, invitation à la communauté de pratique. **Il ne cherche pas à filtrer l'entrée.** La
+porte reste donc ouverte ; l'authentification sert à nommer, pas à trier.
+
+---
+
+## §2 · La configuration visée
+
+| Paramètre | Valeur | Écart avec l'hiver |
 |---|---|---|
-| Motif | Pourquoi refermer, alors que le §3.6 n'a pas prévu ce cas | **Contrôle d'accès voulu par Grégoire** — un cinquième motif, à inscrire dans l'ADR |
-| Quota | 50 sièges gratuits, déjà saturés au printemps | **Sélection** : la CoP et les personnes actives d'abord ; les autres sur demande |
-| Mesure d'usage | Access ne dit pas qui travaille | **Hors sujet, acté** : filtrer l'entrée suffit. Le second besoin n'est pas poursuivi |
-| Liste nominale | Qui exactement | ⏳ **À REMPLIR PAR GRÉGOIRE** (§3) |
+| **Action** | `Allow` | — |
+| **Règle `Include`** | **`Everyone`** | aucun |
+| **Authentification** | One-time PIN par courriel | aucun |
+| **Durée de session** | **1 mois** | **changement assumé** (une semaine en janvier) |
+| **Liste blanche** | aucune | aucun |
 
-⚠ **Ce que ce refermage ne donnera pas, et qui est assumé.** La liste blanche contrôle l'ENTRÉE.
-Deux faits du dossier : la phase janvier-mai a vu ~50 personnes invitées dont « aucune n'a renvoyé de
-feedback ou de rapport de bug, et aucune n'est revenue après l'expiration de son accès » ; et les
-logs Cloudflare sont « purgés à 24 h sur plan gratuit » et « ne produisent rien d'actionnable ».
-S'ajoute une contrainte d'architecture : l'application est locale et hors-ligne, donc l'usage réel
-n'est observable par personne. **Décision du 26 août : c'est accepté, le filtrage suffit.** Écrit ici
-pour qu'on ne redécouvre pas la limite après coup en la prenant pour un défaut.
+⚠ **La durée d'un mois est un changement, pas une restauration.** `DEPLOY.md` §3.2 documente
+« 1 semaine (confirmé 22 mai 2026) ». Un mois reste dans la plage offerte par Cloudflare pour une
+application self-hosted (documentation Cloudflare consultée le 27 août 2026,
+`developers.cloudflare.com/cloudflare-one/access-controls/access-settings/session-management/` :
+« immediate timeout to one month »). À inscrire comme changement assumé dans la consignation du §7.
 
 ---
 
-## §2 · Avant le 1er septembre — ce que Grégoire seul peut faire
+## §3 · Avant le 1er septembre — ce que Grégoire seul peut faire
 
 | | Geste | Où |
 |---|---|---|
-| 2.1 | **Dresser la liste** des personnes à inviter (§3), en visant **moins de 50** | — |
-| 2.2 | Relever le **nom de la team Zero Trust**, le **nom de l'application** et le **nom de la policy** | Tableau de bord Cloudflare Zero Trust |
-| 2.3 | Me transmettre ces trois noms : ils remplacent les `[À COMPLÉTER]` de `DEPLOY.md` (lignes 269, 277, 293) | — |
+| 3.1 | Relever le **nom de la team Zero Trust**, le **nom de l'application**, le **nom de la policy** | `one.dash.cloudflare.com` |
+| 3.2 | Relever la **durée de session actuelle** avant de la modifier (pour la consignation) | `Access → Applications → [app]` |
+| 3.3 | Relever la **règle `Include` réelle** de la policy dormante | `Access → Applications → [app] → Policies` |
+| 3.3 bis | **Décider quoi faire de l'URL Netlify directe** (voir l'encadré ci-dessous) | Tableau de bord Netlify |
+| 3.4 | Me transmettre ces relevés : ils remplacent les `[À COMPLÉTER]` de `DEPLOY.md` §3.1, §3.2 et §3.3 | — |
 
----
+> **Pourquoi relever avant de modifier.** Le dossier a déjà affirmé trois fois des valeurs qui ne
+> correspondaient à rien de vérifié. Un relevé de trente secondes coûte moins cher qu'une
+> quatrième inférence.
 
-## §3 · La liste blanche — à remplir
-
-**Règle retenue** : la CoP et les personnes actives d'abord. Les autres obtiennent l'accès sur
-demande, ce qui est un geste d'une minute (§4.1 de `DEPLOY.md`) et remplace utilement une invitation
-massive dont le printemps a montré le rendement.
-
-```
-# Une adresse par ligne. Viser < 50.
-# Communauté de pratique :
-
-# Personnes actives (retours, bugs signalés, usage constaté) :
-
-# Institutionnel / partenaires :
-
-```
-
-⚠ **Compter avant de coller.** Le plan gratuit s'arrête à 50 ; au-delà, Cloudflare refuse l'ajout
-sans prévenir en amont de la liste.
+⚠ **La porte de service.** `DEPLOY.md` §1.2 documente que
+`main--codexnumeris-051225.netlify.app` sert la production **sans passer par le proxy
+Cloudflare**. Cette URL contourne donc Access : quiconque la connaît entre sans laisser
+d'identité. C'était sans conséquence tant que l'application était ouverte à tous ; à partir du
+1er septembre, c'est un trou dans la mesure. Trois options, à trancher avant le geste : la
+laisser (le risque est faible, l'URL n'est publiée nulle part), la rediriger vers
+`app.codexnumeris.org` depuis `netlify.toml`, ou désactiver le sous-domaine Netlify par défaut.
+⚠ **Ce n'est pas un constat, c'est une hypothèse.** Elle se déduit de la configuration décrite
+en `DEPLOY.md` §1.2 ; **aucun test n'a été fait**. Un `curl -I` sur cette URL tranche en dix
+secondes, et c'est le geste 3.3 bis.
 
 ---
 
@@ -65,81 +82,156 @@ sans prévenir en amont de la liste.
 | | Geste | Attendu |
 |---|---|---|
 | 4.1 | `Access → Applications → [app] → Policies → [policy]` : **réactiver** la policy | La policy passe à l'état actif |
-| 4.2 | Règle `Include → Emails` : coller la liste du §3 | Le compte affiché est celui de ta liste |
-| 4.3 | **Se déconnecter et ouvrir `app.codexnumeris.org` dans une fenêtre privée** | Un code OTP est demandé par courriel |
-| 4.4 | Entrer le code reçu | L'application s'ouvre |
-| 4.5 | Essayer avec une adresse **absente** de la liste | L'accès est refusé |
-| 4.6 | Envoyer le courriel d'invitation (§5) aux personnes de la liste | — |
+| 4.2 | Vérifier que la règle `Include` est bien **`Everyone`** — la corriger si la policy dormante a gardé une liste d'`Emails` | La règle affiche `Everyone` |
+| 4.3 | `Access → Applications → [app]` : porter **Session duration** à **1 month** | La valeur est enregistrée |
+| 4.4 | Vérifier que le fournisseur **One-time PIN** est actif : `Integrations → Identity providers` | OTP présent et actif |
+| 4.5 | **Se déconnecter, ouvrir `app.codexnumeris.org` en fenêtre privée** | Un code OTP est demandé par courriel |
+| 4.6 | Entrer le code reçu | L'application s'ouvre |
+| 4.7 | Recommencer avec une **adresse quelconque hors du réseau collégial** (une adresse personnelle suffit) | **L'accès est accordé** — c'est le test que la porte est bien ouverte |
+| 4.8 | `curl -I https://app.codexnumeris.org` | **HTTP/2 302** vers le login Access (cf. `DEPLOY.md` §3.5) |
 
-⚠ **4.3 et 4.5 ne sont pas facultatives.** Réactiver une policy sans vérifier qu'elle laisse passer
-ET qu'elle bloque, c'est croire un tableau de bord sur parole. Le refermage de janvier a fonctionné ;
-rien ne garantit qu'une policy dormante depuis trois mois se réveille intacte.
+⚠ **4.5, 4.7 et 4.8 ne sont pas facultatives.** Le sens du test a changé : il ne s'agit plus de
+vérifier qu'on bloque, mais qu'on **laisse passer tout en identifiant**. Une policy dormante
+depuis trois mois peut se réveiller avec la règle `Emails` de janvier, ce qui refermerait la
+porte sans que rien ne le signale. Le §4.7 est le seul geste qui l'attrape.
 
----
-
-## §5 · Le courriel d'invitation
-
-> **Objet** : Ton accès à Labo Codex
->
-> Bonjour,
->
-> Labo Codex demande de nouveau une identification pour y accéder. Rien ne change dans
-> l'application elle-même — c'est la porte d'entrée qui redevient nominative.
->
-> **L'adresse** : app.codexnumeris.org
->
-> **Comment ça marche** : tu entres ton courriel, tu reçois un code à usage unique, tu le colles.
-> C'est à refaire à chaque session, et il n'y a pas de mot de passe à retenir.
->
-> **Tes données ne bougent pas.** Elles restent sur ton appareil, comme avant : Labo Codex
-> fonctionne hors ligne et ne transmet rien. L'identification protège l'accès au site, pas
-> tes contenus — ceux-là ne sont jamais partis de chez toi.
-> La politique de confidentialité est ici : [lien vers PRIVACY.md]
->
-> Si le code n'arrive pas, regarde dans les indésirables — et écris-moi, je vérifie la liste.
->
-> Grégoire
-
-⚠ **Le paragraphe sur les données n'est pas une formule de politesse** : c'est la question que
-posera la moitié des destinataires, et y répondre avant qu'elle soit posée évite une inquiétude
-qu'un silence installerait.
+⚠ **Vérifier le fournisseur OTP, plutôt que le supposer présent.** La documentation Cloudflare
+(`developers.cloudflare.com/cloudflare-one/integrations/identity-providers/one-time-pin/`,
+consultée le 27 août 2026) indique que le One-time PIN « n'est plus ajouté automatiquement » aux
+comptes, sans préciser à partir de quand ni ce qu'il advient des comptes existants. Ce que cela
+implique pour ce compte-ci n'est **pas connu** : d'où le §4.4. Sans fournisseur OTP actif, la
+policy n'a aucun moyen d'authentifier et personne n'entre.
 
 ---
 
-## §6 · Après le geste — à consigner le jour même
+## §5 · L'annonce
 
-Le §3.6 de `DEPLOY.md` l'exige, et c'est ce qui manquait aux refermages précédents :
+La porte étant ouverte, il n'y a **personne à inviter nominativement** : il y a un changement à
+annoncer. Deux canaux, dans cet ordre d'efficacité.
 
-- [ ] **date effective** du refermage ;
-- [ ] **raison déclenchante** (le motif de Grégoire, désormais inscrit à l'ADR) ;
-- [ ] **taille de la liste** blanche reconstituée ;
-- [ ] **arbitrage sur le quota** (sélection retenue, pas d'upgrade) ;
+**1. Le message de rentrée à la CoP** (`Cowork A26 CoP Labo Codex/message-cop-rentree-2026.md`,
+non encore envoyé). C'est le meilleur véhicule : il part vers des gens qui liront, il est déjà
+rédigé, et il annonce déjà un sondage. Un paragraphe à y insérer :
+
+> **Une petite chose à savoir.** À partir du 1er septembre, Labo Codex demande une identification
+> à l'entrée : tu donnes ton courriel, tu reçois un code, tu le colles, et tu n'y repenses plus
+> pendant un mois. Passé ce délai, tu redonnes ton courriel et c'est reparti pour un mois. **Rien
+> ne se ferme** : il n'y a ni compte à créer, ni mot de passe à retenir, ni accès à redemander.
+> Tes données ne bougent pas non plus, elles n'ont jamais quitté ton appareil. Ce que ça me donne,
+> c'est de savoir qui utilise l'outil, pour pouvoir vous écrire quand j'ai besoin de retours.
+
+⚠ **Le mois est un renouvellement, pas une échéance.** C'est le point sur lequel un lecteur pressé
+se trompe, et la formulation « l'accès reste ouvert un mois » l'y invitait franchement (retour de
+Grégoire, 27 août). Partout où la durée est mentionnée — bandeau, accueil, courriel, `PRIVACY.md` —
+la phrase qui suit doit dire ce qui se passe au bout du mois. Sans elle, la durée se lit comme une
+date de péremption et transforme une commodité en menace.
+
+**2. Le paragraphe d'accueil dans l'application** (#508, voir §8). Grégoire doute qu'il soit lu, et
+ce doute est fondé : un avis en page d'accueil est vu par ceux qui entrent déjà, c'est-à-dire trop
+tard pour préparer qui que ce soit. Il reste utile comme **rappel après coup**, pas comme préavis.
+
+⚠ **Ce qu'aucun de ces canaux ne couvre.** Des textes rédigés le 2 juin décrivent l'application
+comme « **librement accessible**, sans création de compte, sans procédure d'inscription » et
+étaient destinés à la page CoP du portail AQPC (`aqpc.qc.ca/fr/cop-labocodex`) et à l'infolettre.
+**Leur publication n'est pas établie** : la note qui les porte les range sous « points à
+coordonner » et demandait encore à **Fanny Joussemet** de confirmer l'insertion. Premier geste
+donc : vérifier ce qui a effectivement été publié. Si ces textes sont en ligne, leur correction
+passe par l'AQPC, avec un délai hors du contrôle de Grégoire. Source :
+`Cowork H26 App Labo Codex/communauté/OneDrive_1_2026-04-30/Lancement CoP - Documentation essentielle à fournir 2/Nécessaire pour un lancement réussi/Note accès web app - communication CoP.md`.
+
+---
+
+## §6 · Ce que la mesure donne, et ce qu'elle ne donne pas
+
+C'est le point que la version du 26 août avait manqué. **Deux objets distincts** dans Cloudflare
+Zero Trust, et un seul répond au besoin.
+
+| Objet | Où | Rétention | Utile ? |
+|---|---|---|---|
+| Journaux d'authentification | `Logs → Access` | **24 h** sur plan gratuit | Non |
+| **Liste des identités et sièges** | **`My Team → Users`** | **persistante** | **Oui** |
+
+La page `Users` donne, par adresse : date de création, **dernière connexion réussie**, état du
+siège Access. Elle s'exporte en CSV depuis le tableau de bord. **Le précédent existe** :
+`Cowork H26 App Labo Codex/Essais sur Cloudflare/User_Seats_Log_2026-05-20T20_03_38Z.csv`, produit
+le 20 mai 2026, 51 identités. C'est exactement le livrable recherché.
+
+**Cadence suggérée** : un export à la fin de chaque mois, déposé dans
+`Cowork A26 CoP Labo Codex/`. Les exports se comparent d'un mois à l'autre : les nouvelles
+adresses sont les nouveaux venus, les dates de dernière connexion distinguent les actifs des
+passants.
+
+⚠ **La limite, qui reste entière.** La page `Users` enregistre qui franchit la porte, jamais ce
+qui se passe ensuite. L'application est locale et hors ligne (ADR-003) : l'usage réel n'est
+observable par personne, et le rendre observable contredirait la posture de confidentialité.
+Une adresse dans la liste dit « cette personne est entrée », pas « cette personne s'en sert ».
+Ce constat de la version du 26 août est le seul qui survit intact.
+
+⚠ **Le quota, à surveiller sans dramatiser.** 50 sièges, et un potentiel estimé par Grégoire à
+« une vingtaine d'utilisateurs » (27 août 2026) : la marge est confortable. Mais la porte étant ouverte, le nombre d'identités n'est plus borné par
+une liste. Et l'écart du CSV de mai (51 identités, 4 sièges actifs) reste **inexpliqué** : on ne
+sait pas si Cloudflare recycle les sièges inactifs. À regarder au premier export.
+
+---
+
+## §7 · Après le geste — à consigner le jour même
+
+- [ ] **date effective** de la réactivation ;
+- [ ] **motif** (savoir qui utilise, désormais inscrit à l'ADR) ;
+- [ ] **durée de session relevée avant modification**, et la nouvelle valeur ;
+- [ ] **règle `Include` trouvée** dans la policy dormante (`Everyone` ou résidu d'`Emails`) ;
 - [ ] les **trois placeholders** de `DEPLOY.md` remplis ;
-- [ ] `ADR-008`, `DEPLOY.md` et `SECURITY.md` révisés ;
-- [ ] **#508** : le paragraphe d'accueil réécrit au présent (le texte est prêt, cf. §7).
+- [x] `ADR-008`, `DEPLOY.md` (v1.6), `SECURITY.md` et `PRIVACY.md` (v1.2) révisés le 27 août 2026 ;
+- [ ] `BACKLOG.md` (#427, #508), `RELAIS.md` et `ETAT-PROJET.md` alignés — **non faits**, voir §10 ;
+- [ ] **#508** : le paragraphe d'accueil posé (§8).
 
 ---
 
-## §7 · #508 — le paragraphe d'accueil, dans les deux cas
+## §8 · #508 — le paragraphe d'accueil
 
-**Si le refermage a lieu le 1er** (texte prêt à poser dans `js/accueil.js`) :
+**Si la réactivation a lieu le 1er** (à poser dans `js/accueil.js`) :
 
-> L'identification est requise pour accéder à Labo Codex. Tu reçois un code par courriel à chaque
-> session ; tes données, elles, restent sur ton appareil.
+> L'identification est requise pour accéder à Labo Codex. Tu donnes ton courriel, tu reçois un
+> code, et tu n'y repenses plus pendant un mois — après quoi tu redonnes ton courriel et c'est
+> reparti. Rien ne se ferme, et tes données restent sur ton appareil.
 
-**Si le refermage n'a PAS lieu le 1er** : retirer le paragraphe, purement et simplement. Le reposer
-quand la date sera tenable. ⚠ **Reporter la phrase sans reporter le dispositif est la seule issue à
-éviter** : elle apprendrait au lecteur à ne plus lire cette zone de la page — celle où vivent « Par
-où commencer ? » et l'invitation à la CoP.
+**Si elle n'a PAS lieu le 1er** : retirer le paragraphe, purement et simplement. Le reposer quand
+la date sera tenable. ⚠ **Reporter la phrase sans reporter le dispositif est la seule issue à
+éviter** : elle apprendrait au lecteur à ne plus lire cette zone de la page — celle où vivent
+« Par où commencer ? » et l'invitation à la CoP.
 
 ---
 
-## §8 · Ce que je n'ai pas pu vérifier
+## §9 · La dette de confidentialité créée par ce geste
 
-1. **Rien de tout ceci n'a été essayé.** Je n'ai pas accès à ton tableau de bord Cloudflare, et je
-   n'ai donc pas pu confirmer que la policy dormante est intacte ni que le DNS est bien en proxy
-   orange. Le dossier l'affirme ; le §4.3 et le §4.5 sont là pour le vérifier avant d'y croire.
-2. **Le quota de 50** est un chiffre de `DEPLOY.md` daté du 2 juin 2026. Les conditions du plan
-   gratuit Cloudflare ont pu changer depuis — à confirmer sur place au moment du geste.
-3. **La liste de la CoP** ne m'est pas connue. Le §3 est un cadre vide, et il le restera tant que tu
-   ne l'auras pas rempli : c'est le seul point de ce dossier que personne ne peut préparer à ta place.
+`PRIVACY.md` déclarait aux utilisateurs (§3.3 et §8.2) que les journaux d'accès sont purgés
+après 24 heures. C'est vrai, et c'est **incomplet** dès lors que la liste des identités est
+conservée sans limite et exportée périodiquement pour constituer une liste de contacts.
+
+**Réglé le 27 août 2026** : `PRIVACY.md` v1.2 déclare désormais, dans les mêmes termes simples
+que le reste du document, que l'adresse courriel et la date de dernière connexion sont conservées
+sans limite chez Cloudflare, à quoi elles servent, et comment demander leur retrait (§3.3, §6.1,
+§8.2 et §9). Le délai de retrait annoncé aux utilisateurs est aligné sur `DEPLOY.md` §4.3
+(quelques jours ouvrables).
+
+---
+
+## §10 · Ce qui n'a pas été vérifié
+
+1. **Rien de tout ceci n'a été essayé.** Aucun accès au tableau de bord Cloudflare depuis cette
+   session. Que la policy dormante soit intacte et le DNS en proxy orange, le dossier l'affirme ;
+   les §4.5, §4.7 et §4.8 sont là pour le vérifier avant d'y croire.
+2. **Le quota de 50** et le **recyclage des sièges** n'ont pas été confirmés sur le plan gratuit
+   dans son état d'août 2026.
+3. **L'export CSV de la page `Users`** est attesté par le fichier de mai 2026. Que le bouton
+   d'export soit toujours au même endroit dans le tableau de bord actuel n'a pas été vérifié.
+4. **Le comportement du fournisseur OTP** sur un compte existant (§4.4) : la documentation
+   Cloudflare est muette sur ce cas.
+5. **L'URL Netlify directe** (§3) : son accessibilité vient de `DEPLOY.md` §1.2, elle n'a pas été
+   testée.
+6. **Les documents de pilotage ne sont pas alignés.** `BACKLOG.md` (#427, #508), `RELAIS.md` et
+   `ETAT-PROJET.md` portent encore la décision du 26 août — liste blanche, quota « saturé »,
+   mesure d'usage « non poursuivie ». Ils étaient en cours d'édition par Grégoire au moment de
+   cette passe et n'ont pas été touchés. `INCIDENTS.md`, `AUDIT.md`, `js/accueil.js` (commentaire
+   d'en-tête) et les plans d'audit de mai portent des mentions du même ordre, de nature
+   archivistique.

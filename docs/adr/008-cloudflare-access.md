@@ -1,9 +1,9 @@
 # ADR-008 : Cloudflare Access pour authentification
 
-**Statut** : **Révisé — Cloudflare Access désactivé par défaut, pas de date de réactivation planifiée** (cf. Notes de révision §2 juin 2026 ci-dessous)
+**Statut** : **Révisé — réactivation planifiée au 1er septembre 2026, policy ouverte (`Everyone`) + OTP** (cf. Notes de révision du 27 août 2026 ci-dessous)
 **Date de décision originale** : décembre 2025 - janvier 2026 (déploiement initial avec Beta 95 pour une première phase d'invitations alpha)
 **Formalisation ADR** : 14 mai 2026 (corrigé après le sous-audit 4.4 qui a confirmé que l'implémentation est en production, contrairement à la rédaction initiale de cet ADR qui supposait à tort un déploiement à venir)
-**Date de bascule** : 28 mai 2026 PM (décision initiale d'une fenêtre d'ouverture publique 3-30 juin avec refermage planifié au 1er juillet), reprise le 2 juin 2026 (retrait du refermage ; ouverture publique par défaut sans calendrier de réactivation)
+**Date de bascule** : réactivation au 1er septembre 2026 avec policy ouverte (révision du 27 août 2026) ; auparavant : 28 mai 2026 PM (décision initiale d'une fenêtre d'ouverture publique 3-30 juin avec refermage planifié au 1er juillet), reprise le 2 juin 2026 (retrait du refermage ; ouverture publique par défaut sans calendrier de réactivation)
 **Auteur** : Grégoire Bédard
 
 ---
@@ -27,11 +27,11 @@ Plusieurs options ont été envisagées : authentification Netlify Identity, hé
 
 Caractéristiques :
 - **Authentification par One-Time Pin par e-mail** : l'utilisateur entre son adresse, reçoit un code à 6 chiffres, le saisit, et accède à l'app. Pas de mot de passe à gérer côté projet.
-- **Politique d'accès** : liste blanche d'adresses e-mail (initialement les ~10 collègues invités via le brouillon `docs/MESSAGES_ENSEIGNANTS_H2026.md` rédigé en janvier 2026 ; usage effectif limité à quelques contacts alpha entre janvier et fin février 2026).
+- **Politique d'accès** : `Include → Everyone`, c'est-à-dire toute adresse capable de recevoir le code OTP. *Correction du 27 août 2026 : cette ligne décrivait une liste blanche d'adresses e-mail. C'était l'état de janvier 2026 seulement, présenté à tort comme la configuration de toute la période. Grégoire a abandonné la liste blanche en cours d'hiver et élargi la règle à `Everyone` — l'application était en réalité en alpha, avec très peu de testeurs, et la restriction n'avait plus d'objet. C'est cet état ouvert, et non une liste blanche, qui a produit les 51 identités du CSV du 20 mai 2026.*
 - **Quota** : plan Cloudflare gratuit, **maximum 50 utilisateurs actifs**.
 - **Aucun changement de code applicatif requis** : Cloudflare Access intercepte les requêtes HTTP avant qu'elles n'atteignent l'app. L'app reste 100 % hors-ligne au sens de son fonctionnement (cf. ADR-003) une fois la page chargée.
 
-**Statut au 14 mai 2026** : **en production** depuis janvier 2026 (Beta 95). Une première phase d'invitations alpha a été ouverte en janvier 2026 — le brouillon `docs/MESSAGES_ENSEIGNANTS_H2026.md` visait initialement ~10 collègues. La liste blanche Cloudflare Access s'est élargie progressivement entre janvier et mai 2026 jusqu'à environ 50 personnes (en plus de l'auteur), chacune disposant d'un accès individuel d'une semaine via OTP par email. Aucune n'a renvoyé de feedback ou de rapport de bug, et aucune n'est revenue après l'expiration de son accès. Cette absence de retours est elle-même un signal — l'invitation alpha seule, sans matériel d'accompagnement structuré, n'a pas suffi à enclencher un engagement. L'auteur reste l'unique utilisateur actif depuis fin février 2026. La présentation AQPC du 3 juin 2026 (Cégep de Drummondville) vise à amorcer la première vague significative d'expérimentateurs accompagnés, en vue d'une phase plus structurée à l'automne 2026 (allocation cégep). Le quota Cloudflare de 50 utilisateurs est actuellement saturé ; il devra être surveillé pour la prochaine vague (options : upgrade payant Cloudflare, ou basculement vers une politique « domaine de confiance »).
+**Statut au 14 mai 2026** : **en production** depuis janvier 2026 (Beta 95). Une première phase d'invitations alpha a été ouverte en janvier 2026 — le brouillon `docs/MESSAGES_ENSEIGNANTS_H2026.md` (supprimé du dépôt depuis) visait initialement ~10 collègues. La configuration a changé plusieurs fois pendant l'hiver : liste blanche et session d'une semaine au démarrage en janvier 2026, puis abandon de la liste blanche au profit d'une règle ouverte (`Everyone`) en cours d'hiver, l'application étant en alpha avec très peu de testeurs. Une cinquantaine d'identités se sont enregistrées de cette manière entre décembre 2025 et mai 2026, en plus de l'auteur (la plus ancienne date du 7 décembre 2025). *Reformulé le 27 août 2026 : la rédaction antérieure décrivait un élargissement progressif de la liste blanche, ce qui était une reconstruction — la liste n'a pas grandi, elle a été retirée.* Aucune n'a renvoyé de feedback ni de rapport de bogue. Cette absence de retours est elle-même un signal — l'invitation alpha seule, sans matériel d'accompagnement structuré, n'a pas suffi à enclencher un engagement. *Corrigé le 27 août 2026 : cette phrase affirmait que « l'auteur reste l'unique utilisateur actif depuis fin février 2026 », et la précédente ajoutait qu'« aucune n'est revenue après l'expiration de son accès » (membre retiré le 27 août). L'export du 20 mai 2026 les contredit — **15 identités y portent une dernière connexion réussie postérieure au 28 février** (9 en mars, 5 en avril, 1 en mai ; une 16e est datée du 28 février même). Ce qui reste établi, et qui est un constat différent : aucun retour, aucun rapport de bogue n'est parvenu par cette voie. Il n'a jamais été possible de savoir si ces connexions correspondaient à un usage réel — c'est précisément la limite qui motive la réactivation du 1er septembre 2026.* La présentation AQPC du 3 juin 2026 (Cégep de Drummondville) vise à amorcer la première vague significative d'expérimentateurs accompagnés, en vue d'une phase plus structurée à l'automne 2026 (allocation cégep). *Correction du 27 août 2026 : cette phrase affirmait que le quota de 50 utilisateurs était « actuellement saturé ». C'est faux, et Grégoire l'a démenti — le quota n'a jamais été saturé cet hiver. L'export `User_Seats_Log_2026-05-20T20_03_38Z.csv` recense 51 identités enregistrées mais seulement 4 sièges Access actifs. L'affirmation de saturation était une inférence tirée du nombre d'identités, en confondant identités enregistrées et sièges occupés. Elle a servi d'appui à l'arbitrage « sélection plutôt qu'ouverture » de la révision du 26 août, qui tombe avec elle.*
 
 ---
 
@@ -41,7 +41,7 @@ Caractéristiques :
 
 - **Délégation complète de l'authentification** à un fournisseur spécialisé. Pas de schéma de mots de passe à concevoir et maintenir.
 - **Coût zéro** sur la formule Cloudflare gratuite tant qu'on reste en deçà des limites (50 utilisateurs actifs).
-- **Logs d'accès** centralisés (utiles pour la phase expérimentateurs).
+- **Identification des utilisateurs** centralisée. *Précisé le 27 août 2026 : cette ligne disait « logs d'accès centralisés (utiles pour la phase expérimentateurs) », ce qui vise le mauvais objet — les journaux sont purgés à 24 h sur le plan gratuit. C'est la page `My Team → Users`, persistante et exportable en CSV, qui rend service.*
 - **Pas d'impact sur le code applicatif** : l'app continue de fonctionner localement en `file://` sans aucune adaptation.
 - **Compatible avec la posture de protection des renseignements personnels** : l'identité de l'utilisateur reste chez Cloudflare ; les données pédagogiques restent côté navigateur. Aucune corrélation identité ↔ contenu pédagogique côté serveur. *Note 28 mai 2026 PM* : la formulation initiale de cette conséquence était «Compatible avec la posture Loi 25». Cette qualification était disproportionnée (cf. DEPLOY.md §1.4) – le cadre Loi 25 ne semble pas s'appliquer à la configuration actuelle. La conséquence elle-même reste juste, c'est le cadre invoqué qui était trop fort.
 
@@ -88,7 +88,106 @@ Aurait été pertinent si le projet restait limité au cégep. **Écartée** par
 
 ## Notes de révision
 
+**Révision 27 août 2026 — policy ouverte (`Everyone`) au 1er septembre, et correction de quatre inférences**
+
+Décision de Grégoire, 27 août 2026, après relecture du dossier. Elle **corrige la
+révision du 26 août** sur deux points de fond et rétablit quatre faits que les
+rédactions antérieures avaient déformés.
+
+**La configuration retenue pour le 1er septembre 2026**
+
+| Paramètre | Valeur | Écart avec l'hiver |
+|---|---|---|
+| Action | `Allow` | — |
+| Règle `Include` | **`Everyone`** | aucun (état de la fin de l'hiver) |
+| Authentification | One-time PIN par courriel | aucun |
+| Durée de session | **1 mois** | **changement assumé** (une semaine en janvier) |
+| Liste blanche | **aucune** | aucun (abandonnée en cours d'hiver) |
+
+La durée d'un mois est un **changement délibéré**, pas un retour à l'état
+antérieur. `DEPLOY.md` §3.2 documente « 1 semaine (confirmé 22 mai 2026) » et
+Grégoire l'a confirmé de mémoire. Le passage à un mois vise à réduire la
+fréquence de réauthentification pour des enseignants qui ouvrent l'application
+de façon irrégulière. La valeur reste dans la plage offerte par Cloudflare pour
+une application self-hosted (« immediate timeout to one month »).
+
+**Le motif, corrigé**
+
+La révision du 26 août inscrivait un cinquième motif — « le contrôle d'accès
+voulu par le porteur du projet » — et déclarait le besoin de mesure « hors
+sujet, acté ». **Ce n'est pas le motif de Grégoire, et l'inverse est vrai.**
+
+> **Motif réel : savoir qui utilise l'application.** Grégoire ne cherche pas à
+> filtrer l'entrée ; il l'a dit explicitement le 27 août. Il veut constituer
+> progressivement une liste de personnes joignables, pour les inviter à
+> contribuer au développement, à signaler des bogues et à rejoindre la
+> communauté de pratique. Le contrôle d'entrée est le moyen, pas la fin — et
+> c'est pourquoi la porte reste ouverte.
+
+**Pourquoi la traçabilité est possible, contrairement à ce qui était écrit**
+
+La révision du 26 août concluait à l'impossibilité de mesurer, en s'appuyant sur
+le fait que les journaux Cloudflare sont purgés à 24 h sur le plan gratuit. Le
+constat est juste ; **son extension à toute forme de traçabilité ne l'est pas.**
+Deux objets distincts ont été confondus :
+
+- les **journaux d'authentification** (`Logs → Access`) : volatils, purgés à 24 h
+  sur le plan gratuit, effectivement inexploitables pour cet usage ;
+- la **liste des identités et des sièges** (`My Team → Users`) : **persistante**,
+  affichant pour chaque adresse la date de création et la dernière connexion
+  réussie, et **exportable en CSV** depuis le tableau de bord.
+
+C'est le second objet qui répond au besoin, et il a déjà servi : l'export
+`User_Seats_Log_2026-05-20T20_03_38Z.csv` (51 identités, colonne `Last Successful
+Login`) est exactement le livrable recherché. Il est conservé dans
+`Cowork H26 App Labo Codex/Essais sur Cloudflare/`.
+
+⚠ **Ce que la mesure ne donnera toujours pas.** La page `Users` enregistre qui
+franchit la porte, jamais ce qui se passe ensuite : l'application est locale et
+hors ligne (ADR-003), et l'usage réel n'est observable par personne. Cette limite
+de la révision du 26 août reste entière et reste assumée. Ce qui change, c'est
+qu'elle ne s'étend pas à l'identification des utilisateurs, laquelle est
+possible.
+
+**Le quota, corrigé**
+
+L'arbitrage « sélection plutôt qu'ouverture » du 26 août reposait sur une
+saturation du quota qui n'a jamais eu lieu (cf. correction au §Décision). Sans
+cet appui, il tombe. Grégoire estime le potentiel à « une vingtaine d'utilisateurs » (27 août 2026) ;
+sur 50 sièges, la marge est donc confortable. **À surveiller malgré tout** : la porte étant ouverte,
+le nombre d'identités n'est plus borné par une liste, et le comportement du
+quota (recyclage ou non des sièges inactifs) n'a pas été vérifié — c'est
+précisément l'écart entre 51 identités et 4 sièges actifs du CSV de mai, dont la
+cause reste inconnue.
+
+**Conséquence de confidentialité**
+
+Conserver et exporter la liste des identités est une opération sur des
+renseignements personnels que `PRIVACY.md` ne déclare pas : ce document ne
+mentionne que les journaux d'accès purgés à 24 h. À corriger dans la même passe.
+
+**Statut applicatif** : aucun changement de code, comme aux révisions
+précédentes. Seul l'état de la policy change.
+
+**Fiche opératoire** : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`,
+réécrite le 27 août pour la policy ouverte.
+
+⏳ **À compléter au moment du geste** : date effective, valeur réelle relevée de
+la durée de session avant modification, et les trois placeholders Cloudflare de
+`DEPLOY.md` (nom de la team Zero Trust, nom de l'application, nom de la policy).
+
+---
+
+
 **Révision 26 août 2026 — refermage décidé pour le 1er septembre 2026, et un cinquième motif**
+
+> ⚠️ *Note du 27 août 2026* : **cette révision est remplacée par celle du 27 août
+> 2026** (ci-dessus). Elle organisait un refermage par **liste blanche** sur la
+> foi de deux affirmations fausses — un quota saturé qui ne l'a jamais été, et un
+> besoin de mesure déclaré impossible alors qu'il ne l'est pas — et elle
+> attribuait à Grégoire un motif de gouvernance qui n'était pas le sien. Le bloc
+> est conservé tel quel pour la traçabilité de la chronologie ; **ne pas s'y
+> fier pour l'état de la décision.**
 
 Décision de Grégoire, 26 août 2026 : l'accès public est refermé le 1er septembre.
 
@@ -333,15 +432,15 @@ intermédiaires côté DEPLOY.md (v1.1 «retrait» et v1.2 «recadrage Loi
 
 **Révision 14 mai 2026** (initiale) : la première rédaction de cet ADR (commit `d571d90`) supposait à tort que Cloudflare Access était au statut « Proposé, implémentation à venir juin 2026 ». Le sous-audit 4.4 Reproductibilité du déploiement (commit suivant) a confirmé que Cloudflare Access est en production depuis janvier 2026 (Beta 95). Le statut, la date originale et les caractéristiques ont été corrigés. Le « juin 2026 » du `docs/CALENDRIER.md` désigne **l'ouverture à un public plus large**, pas le démarrage du déploiement.
 
-**Révision post-audit (mai 2026)** : la description de l'usage en production présentait initialement le brouillon d'invitations `docs/MESSAGES_ENSEIGNANTS_H2026.md` comme une cohorte active de testeurs (« Bruno V., Olivier L., autres l'utilisent activement »). En réalité, ce brouillon de janvier 2026 visait environ 10 collègues ; l'usage effectif a été limité à quelques contacts alpha entre janvier et fin février 2026. Depuis fin février 2026, l'application n'a qu'un seul utilisateur actif : son auteur. La phase visée par l'AQPC du 3 juin 2026 est la **première** vague significative d'expérimentateurs, pas une seconde. Les sections « Contexte », « Décision » et « Statut » ont été reformulées en conséquence.
+**Révision post-audit (mai 2026)** : la description de l'usage en production présentait initialement le brouillon d'invitations `docs/MESSAGES_ENSEIGNANTS_H2026.md` (supprimé du dépôt depuis) comme une cohorte active de testeurs (« Bruno V., Olivier L., autres l'utilisent activement »). En réalité, ce brouillon de janvier 2026 visait environ 10 collègues ; l'usage effectif a été limité à quelques contacts alpha entre janvier et fin février 2026. Depuis fin février 2026, l'application n'a qu'un seul utilisateur actif : son auteur. La phase visée par l'AQPC du 3 juin 2026 est la **première** vague significative d'expérimentateurs, pas une seconde. Les sections « Contexte », « Décision » et « Statut » ont été reformulées en conséquence.
 
 À réviser si :
 - Émergence d'un risque opérationnel concret sur l'app publique : abus mesurable, DoS persistant non absorbé par Cloudflare, scraping intensif identifié, dérive d'usage.
 - Création de la Voûte (cf. §Contexte) imposant un contrôle d'accès applicatif fort — décision à prendre au moment d'implémenter la Voûte sur la nécessité (ou non) de réactiver Access sur l'app principale comme première barrière.
 - Bascule institutionnelle : si Labo Codex est porté un jour par une organisation (cégep, OBNL, entreprise), reprise complète de l'analyse Loi 25 + contrôle d'accès.
 - Le cégep officialise une politique d'accès institutionnelle (réviser pour intégrer CAS).
-- Croissance qualitative inattendue rendant utile une traçabilité dont l'absence ne pose actuellement aucun problème.
-- Si Access est un jour réactivé : le quota de 50 utilisateurs Cloudflare gratuit deviendrait à nouveau une contrainte (arbitrage upgrade payant vs sélection vs politique de domaine).
+- ~~Croissance qualitative inattendue rendant utile une traçabilité dont l'absence ne pose actuellement aucun problème.~~ *Survenu autrement le 27 août 2026 : la traçabilité est devenue le motif principal, sans qu'aucune croissance ne l'ait provoquée.*
+- ~~Si Access est un jour réactivé~~ **Access étant réactivé le 1er septembre 2026** : le quota de 50 sièges gratuits redevient une contrainte à surveiller, d'autant que la porte est ouverte et que le nombre d'identités n'est plus borné par une liste (arbitrage upgrade payant vs politique de domaine vs sélection, à poser si le plafond approche).
 
 ---
 
