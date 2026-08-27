@@ -697,6 +697,55 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   configuration, et elle doit le dire, avec le chemin pour la régler.
   ⮕ Même patron que `diagnostiquerConversionNiveaux` : nommer la cause, parce qu'une cause
   nommée se répare et qu'un silence ne se répare pas.
+  ⚠ **PARTIELLEMENT ADRESSÉ SANS L'AVOIR VISÉ — 27 août 2026, pas 3c-3 de #542.** La
+  réécriture de la carte a **retiré la phrase fautive** : « Aucune force ni défi identifié
+  selon la taxonomie SOLO » n'existe plus. Selon le cas, la carte affiche désormais la cause
+  de l'échelle manquante (`obtenirEchelleCommuneDesEvaluations` la nomme) ou « Aucun critère
+  évalué à situer dans l'échelle pour l'instant ».
+  ⮕ **CE QUI RESTE OUVERT, ET C'EST LE CŒUR DE L'ITEM** : le cas « aucune grille de référence
+  désignée » ne se DIT toujours pas. `criteresSOLO` est vide, et la carte l'annonce sans
+  nommer la configuration manquante ni le chemin pour la régler. Le verdict rassurant est
+  parti ; la cause nommée n'est pas encore là.
+
+- [ ] **#551 — Le dépistage du RISQUE est calibré sur les bornes de Grégoire.**
+  Créé le 27 août 2026, **issu du pas 5 de #542 lot 3**, que Grégoire a décidé de sortir du
+  lot plutôt que de l'y forcer. Ce n'est pas une trouvaille de passage : c'était un pas
+  planifié, mesuré, et refermé ailleurs.
+  ⮕ **CE QUI A ÉTÉ MESURÉ** (et qu'un `grep` seul n'aurait pas donné — la leçon du lot 3 :
+  la liste des seuils TROUVÉS est plus longue que celle des seuils qui AGISSENT) :
+
+  | Site | Fonction | Vivant ? |
+  |---|---|---|
+  | `profil-etudiant-calculs.js:1352` | `identifierPatternActuel` | **oui** — via le niveau RàI |
+  | `profil-etudiant-calculs.js:1444` | `determinerNiveauRaiPedagogique` | **oui** — `snapshots.js`, `etudiants.js`, le profil |
+  | `interventions.js:1213` | `suggererObjectifIntervention` | **oui** — bouton « Suggérer » |
+  | `pratiques/pratique-pan-standards.js:1169` | `_identifierPatternActuel` | **oui** — DOUBLON du premier |
+  | `profil-etudiant-helpers.js:201` | `obtenirNiveauIDMEDepuisPourcentage` | **NON** — ses 2 appelants sont eux-mêmes morts |
+
+  ⮕ **LE DÉFAUT.** `identifierPatternActuel` compare une performance à `0,64` et `0,75` — les
+  bornes de Grégoire — pour décider « difficulté persistante / émergente / stable ». Chez un
+  utilisateur qui note en W/X/Y/Z, ces nombres ne veulent rien dire, et son niveau RàI est
+  calibré sur l'échelle de quelqu'un d'autre.
+  ⮕ **NUANCE QUI COMPTE, et qui distingue cet item du lot 3** : ces seuils sont
+  **configurables** (ils passent par `obtenirSeuil`), donc pas « codés en dur » au sens
+  strict. Ce qui cloche est double : ils s'appellent `idme.*`, donc **se font passer pour
+  l'échelle de notation**, alors qu'ils décident d'un seuil d'ALERTE ; et le dépistage de
+  risque ne consulte jamais l'échelle réelle.
+  ⮕ **DEUX GESTES POSSIBLES, non tranchés** : (a) les renommer `depistage.*` et documenter
+  qu'ils sont un seuil d'alerte pédagogique — honnête, ne corrige pas le calibrage ;
+  (b) situer la performance dans l'échelle de l'utilisateur et exprimer la règle en niveaux —
+  fidèle au lot 3, mais **dépend de l'étiquetage SOLO, qu'aucune échelle réelle ne porte**.
+  ⮕ **PRÉALABLE À (b)** : les cinq étiquettes SOLO sur l'échelle de Grégoire. Et **avant tout
+  geste** : fusionner les DEUX implémentations du pattern (procédurale et méthode de
+  pratique), sinon la correction devrait être écrite deux fois — cf. [[project-deux-systemes-calcul-pratiques]].
+  ⮕ **TROIS FONCTIONS MORTES repérées en chemin**, à traiter avec cet item plutôt que de les
+  brancher : `genererDiagnosticSRPNF` (`profil-etudiant-diagnostics.js:57`, jumeau de la carte
+  refaite au pas 3c-3), `genererTableauObjectifs` (`profil-etudiant-sections-affichage.js:3147`,
+  aucun appelant), et `obtenirNiveauIDMEDepuisPourcentage` — **corrigée par #541 le 26 août,
+  et appelée uniquement depuis ces deux-là**. Le correctif de #541 était réel, le défaut
+  aussi ; simplement personne ne les atteignait.
+  ⚠ **NON VÉRIFIÉ** : `genererDiagnosticGenerique` et `_genererBarresSRPNF`, dans le même
+  fichier et probablement dans le même cas. Ne pas le supposer.
 
 - [x] **#549 LIVRÉ 27 août 2026** — Le modèle de cartouche part sans les consignes du travail.
   Créé le 27 août 2026, **symptôme vécu par Grégoire** : « il manquait un élément important,
