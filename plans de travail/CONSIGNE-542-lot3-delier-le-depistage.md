@@ -180,8 +180,8 @@ La consigne autorisait deux pas ; deux ont été faits, et le troisième n'a pas
 | **3c-1** | ✅ | **La performance GLOBALE est branchée** — elle demande son échelle à la pratique, situe, interprète. Le ternaire `pct >= 85 ? …` de cette ligne est retiré. Spec WebKit, 2 break-tests rouges. **Premier pas du lot qui change l'écran.** |
 | **3c-2** | ✅ | Le niveau **par critère** est branché sur l'échelle commune des évaluations. ⮕ **Source DIFFÉRENTE de 3c-1, et c'est le point** : la note GLOBALE la demande à la pratique, un CRITÈRE est évalué par l'échelle — même en sommative, chaque critère reçoit un niveau avant d'être converti en note. **Plus aucun ternaire `pct >= 85` dans le fichier.** |
 | **3c-3** | ✅ | **Fait le 27 août, fin de matinée.** DEUX des quatre morceaux étaient du CODE MORT et ont été supprimés, pas branchés · la carte « Observation de la structure » rend désormais **un bloc par niveau de l'échelle** (décision de Grégoire). Détail ci-dessous. |
-| **4** | ⏳ | Supprimer `obtenirNiveauSOLO()` (`trimestres.js`). |
-| **5** | ⏳ | Trancher le devenir des seuils `idme.*`. B ne leur laisse aucun rôle de repli. |
+| **4** | ✅ | **Fait le 27 août.** `obtenirNiveauSOLO()` supprimée ET son jumeau `obtenirTypeCritere()` ; l'export de recherche livre les vraies échelles. |
+| **5** | ⮕ | **SORTI DU LOT le 27 août, décision de Grégoire** → item **#551** au backlog. La mesure est faite : 4 chemins vivants, 1 mort. Voir la clôture en fin de document. |
 
 ✅ **LA PERFORMANCE GLOBALE EST BRANCHÉE DEPUIS LE PAS 3c-1** (27 août). Vérifiée sur les
 données réelles de Grégoire : « Performance globale (P) : **D 72 %** », le code venant de son
@@ -534,3 +534,63 @@ break-test avait arrêté le test sur une assertion précédente et n'aurait rie
 celle-là.
 
 **Vitest 3701/3701, 347 fichiers.** Anti-cache : `trimestres.js` `20260827a → b`.
+
+---
+
+## ✅ LOT 3 REFERMÉ — 27 août 2026
+
+**Pas 1 · 2 · 3a · 3b · 3c-1 · 3c-2 · 3c-3 · 4 livrés.** Le pas 5 est **sorti du lot** par
+décision de Grégoire et vit désormais comme item **#551** au backlog.
+
+### Le pas 5, mesuré avant d'être refermé
+
+La question du pas 5 était « qui lit encore les seuils `idme.*` ». Elle a reçu sa réponse,
+et **ce n'est pas celle qu'un `grep` donnait** :
+
+| Site | Fonction | Vivant ? |
+|---|---|---|
+| `profil-etudiant-calculs.js:1352` | `identifierPatternActuel` | **oui** — via le niveau RàI |
+| `profil-etudiant-calculs.js:1444` | `determinerNiveauRaiPedagogique` | **oui** — `snapshots.js`, `etudiants.js`, le profil |
+| `interventions.js:1213` | `suggererObjectifIntervention` | **oui** — bouton « Suggérer » |
+| `pratiques/pratique-pan-standards.js:1169` | `_identifierPatternActuel` | **oui** — DOUBLON du premier |
+| `profil-etudiant-helpers.js:201` | `obtenirNiveauIDMEDepuisPourcentage` | **NON** — ses 2 appelants sont eux-mêmes morts |
+
+⮕ **POURQUOI LE PAS 5 NE POUVAIT PAS ÊTRE UN PAS.** Les quatre chemins vivants ne font pas du
+dépistage d'échelle : ils décident **si un élève est à risque**. C'est une autre question,
+avec ses propres règles — et deux implémentations concurrentes à fusionner d'abord. La
+traiter à la fin d'un lot d'affichage l'aurait mal traitée.
+
+⮕ **ET LA NUANCE QUI L'EN DISTINGUE VRAIMENT** : ces seuils sont **configurables**. Ils ne
+sont pas « codés en dur » au sens que le lot 3 combattait. Ce qui cloche est double — ils
+s'appellent `idme.*`, donc se font passer pour l'échelle de notation alors qu'ils décident
+d'un seuil d'ALERTE ; et le dépistage de risque ne consulte jamais l'échelle réelle.
+
+### Ce que le lot 3 aura appris, et qui vaut au-delà de lui
+
+1. **Vérifier les consommateurs AVANT de brancher.** Trois fonctions du périmètre étaient
+   mortes (`interpreterScoreIDME`, `interpreterPerformance`, `genererDiagnosticSRPNF`), et la
+   consigne en donnait une explicitement pour vivante. Les brancher sur l'échelle de
+   l'utilisateur aurait été **rendre vivant du code mort en croyant appliquer la règle
+   zéro-dette**. La même vérification, au pas 4, a établi l'inverse : l'export de recherche
+   était bien vivant, et le geste était un remplacement.
+2. **La liste des seuils TROUVÉS est plus longue que celle des seuils qui AGISSENT**, et les
+   deux ne demandent pas le même geste.
+3. **Un correctif juste sur du code mort reste sans effet.** `obtenirNiveauIDMEDepuisPourcentage`
+   a été corrigée par #541 le 26 août — un vrai défaut, un vrai correctif — et ses deux seuls
+   appelants sont morts. Personne ne l'atteignait.
+4. **Un site d'EXPORT ne se traite pas comme un site d'affichage.** Un affichage trompeur se
+   corrige au rechargement suivant ; un jeu de données de recherche part ailleurs, est
+   analysé, cité, et survit à sa correction. C'est ce qui a justifié d'aller plus loin que
+   « remplacer les codes » dans `exporterFormatRecherche`.
+5. **Documenter un retrait sur place casse les sentinelles naïves.** Trois sentinelles du lot
+   ont dû **retirer les commentaires avant de chercher** : les commentaires de retrait citent
+   le code disparu, et un grep sur le texte rougit sur la trace du correctif.
+
+### Ce qui reste dû, et qui n'est pas du code
+
+**Les cinq étiquettes SOLO sur l'échelle « 0-IDME » de Grégoire** (geste D3, deux minutes dans
+l'éditeur). Tant qu'elles manquent : la carte « Observation de la structure » affiche ses noms
+de niveaux et l'avis d'étiquette manquante — **comportement attendu, pas panne** — le
+catalogue exporté porte `niveau_solo: null`, et l'option (b) de #551 reste impraticable.
+⮕ **Et #549 en dépend aussi** : les consignes du modèle de cartouche font dépendre toute leur
+rédaction du « seuil de maîtrise », que seule l'étiquette SOLO peut dire aujourd'hui.
