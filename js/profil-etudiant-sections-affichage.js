@@ -999,15 +999,60 @@ function genererSectionAccompagnement(da) {
 
                 <p class="profil-texte-paragraphe" style="margin-top: 12px;"><strong>Progression par critère :</strong> <span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal;">(moyennes sur ${accordTermeProduction('tous', 2)} les ${obtenirTermeProduction('pluriel')})</span></p>
                 <ul style="margin-left: 20px; color: var(--gris-fonce); font-size: 0.9rem;">
-                    ${criteres.map(c => {
-                        const pct = c.valeur * 100;
-                        const niveau = pct >= 85 ? 'E' : pct >= 75 ? 'M' : pct >= 65 ? 'D' : 'I';
-                        let cleDir = c.cleNormalisee;
-                        if (cleDir.startsWith('francais')) cleDir = 'francais';
-                        const dir = directionsCriteres ? directionsCriteres[cleDir] : null;
-                        const symbDir = dir && dir.symbole ? ' ' + dir.symbole : '';
-                        return `<li>${echapperHtml(c.nom)} : ${niveau} ${pct.toFixed(0)}%${symbDir}</li>`;
-                    }).join('')}
+                    ${(() => {
+                        // ⚠⚠ #542 lot 3, pas 3c-2 — LE NIVEAU D'UN CRITÈRE VIENT DE
+                        // L'ÉCHELLE, PLUS D'UN TERNAIRE.
+                        //
+                        // Ce qui vivait ici, en clair :
+                        //     pct >= 85 ? 'E' : pct >= 75 ? 'M' : pct >= 65 ? 'D' : 'I'
+                        // Le jumeau exact de celui que le pas 3c-1 a retiré de la
+                        // performance globale, dans le même fichier, à soixante lignes
+                        // d'écart.
+                        //
+                        // ⮕ MAIS LA SOURCE DE L'ÉCHELLE N'EST PAS LA MÊME, et c'est le
+                        // point de ce pas. Grégoire a tranché le 27 août : « c'est la
+                        // pratique de notation qui établit la note GLOBALE de l'élève ».
+                        // La note globale, donc — pas les critères. Un critère est évalué
+                        // PAR l'échelle de la grille, quelle que soit la pratique : même
+                        // en sommative, chaque critère reçoit un niveau avant d'être
+                        // converti en note. On demande donc l'échelle aux ÉVALUATIONS,
+                        // pas à la pratique.
+                        //
+                        // ⮕ UNE SEULE RÉSOLUTION POUR TOUTE LA LISTE, hors de la boucle :
+                        // la refaire par critère coûterait N lectures de la base pour un
+                        // résultat identique.
+                        const lectureCriteres = (typeof obtenirEchelleCommuneDesEvaluations === 'function')
+                            ? obtenirEchelleCommuneDesEvaluations(da)
+                            : { echelle: null, raison: 'helper-absent', message: '' };
+
+                        return criteres.map(c => {
+                            const pct = c.valeur * 100;
+                            const niveauCritere = lectureCriteres.echelle
+                                ? situerPourcentageDansEchelle(pct, lectureCriteres.echelle)
+                                : null;
+                            const lectureSOLOCritere = interpreterNiveauAtteint(niveauCritere);
+
+                            // Même règle qu'au pas 3c-1 : le niveau se lit, SOLO explique
+                            // au survol. Sans niveau, le pourcentage porte la raison —
+                            // et elle est la même pour toute la liste, d'où un seul
+                            // message plutôt qu'un par ligne.
+                            const survolCritere = niveauCritere
+                                ? (lectureSOLOCritere.interpretee
+                                    ? lectureSOLOCritere.libelleSOLO + ' — ' + lectureSOLOCritere.texte
+                                    : (lectureSOLOCritere.texte || '') + (lectureSOLOCritere.message ? ' · ' + lectureSOLOCritere.message : ''))
+                                : (lectureCriteres.message || '');
+                            const codeCritere = niveauCritere
+                                ? `<span title="${echapperHtml(survolCritere)}">${echapperHtml(String(niveauCritere.code))}</span> `
+                                : '';
+                            const survolPct = niveauCritere ? '' : ` title="${echapperHtml(survolCritere)}"`;
+
+                            let cleDir = c.cleNormalisee;
+                            if (cleDir.startsWith('francais')) cleDir = 'francais';
+                            const dir = directionsCriteres ? directionsCriteres[cleDir] : null;
+                            const symbDir = dir && dir.symbole ? ' ' + dir.symbole : '';
+                            return `<li>${echapperHtml(c.nom)} : ${codeCritere}<span${survolPct}>${pct.toFixed(0)}%</span>${symbDir}</li>`;
+                        }).join('');
+                    })()}
                 </ul>
 
                 <div class="profil-separateur-section"></div>

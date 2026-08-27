@@ -90,6 +90,15 @@ async function monterProfil(page, typePratique) {
               dateEcheance: '2026-04-01', groupes: ['01'], ponderation: 100 }
         ]);
         window.db.setSync(window.cle('echellesTemplates'), [echelle]); // security-ok: fixture de test, echelle definie en tete de ce fichier
+        // #542 pas 3c-2 — la liste « Progression par critère » ne se remplit que si une
+        // GRILLE DE RÉFÉRENCE est désignée. Sans elle, les blocs restent vides — c'est
+        // exactement ce que Grégoire a vu le 27 août au matin (#550).
+        window.db.setSync(window.cle('grillesTemplates'), [ // security-ok: fixture de test, litteral du fichier
+            { id: 'GR_542', nom: 'Grille test', criteres: [{ id: 'cr1', nom: 'Structure', ponderation: 100 }] }
+        ]);
+        if (typeof window.definirPreference === 'function') {
+            window.definirPreference('grilleReferenceDepistage', 'GR_542');
+        }
         window.db.setSync(window.cle('evaluationsSauvegardees'), [ // security-ok: fixture de test, litteral du fichier
             {
                 id: 'eval-542-1', etudiantDA: 'TEST542', productionId: 'prod-542-1',
@@ -125,6 +134,10 @@ async function monterProfil(page, typePratique) {
         const i = html.indexOf('Performance globale');
         const bloc = i === -1 ? '' : html.slice(i, i + 900);
 
+        // #542 pas 3c-2 — la liste des critères, qui a son propre chemin d'échelle.
+        const j = html.indexOf('Progression par critère');
+        const blocCriteres = j === -1 ? '' : html.slice(j, j + 900);
+
         // GARDE ANTI-SILENCE : le test doit vérifier qu'il a bien établi la
         // configuration qu'il croit exercer. Sans cette ligne, un montage qui
         // rate sa cible rend un test vert qui n'a rien testé — c'est ce qui
@@ -132,7 +145,7 @@ async function monterProfil(page, typePratique) {
         const pratiqueEffective = (typeof window.obtenirTypePratiqueActive === 'function')
             ? window.obtenirTypePratiqueActive() : null;
 
-        return { aBloc: i !== -1, bloc, longueur: html.length, pratiqueEffective };
+        return { aBloc: i !== -1, bloc, blocCriteres, longueur: html.length, pratiqueEffective };
     }, { echelle: ECHELLE_WXYZ, typePratique });
 }
 
@@ -168,6 +181,33 @@ test('#542 pas 3c · le niveau global n\'est PLUS un code IDME écrit dans le co
     // qui doit s'y trouver, pas une phrase générique.
     expect(r.bloc, 'l\'étiquette SOLO du niveau atteint doit être au survol')
         .toMatch(/title="(Préstructurel|Unistructurel|Multistructurel|Relationnel|Abstrait étendu) —/);
+
+    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
+});
+
+test('#542 pas 3c-2 · le niveau PAR CRITÈRE vient de l\'échelle des évaluations, pas d\'un ternaire', async ({ page }) => {
+    const erreurs = brancherEcouteurs(page);
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
+
+    const r = await monterProfil(page, 'standards');
+    expect(r.erreur, `Erreur : ${r.erreur}`).toBeUndefined();
+
+    // ⮕ CE PAS A SA PROPRE SOURCE D'ÉCHELLE, ET C'EST TOUT SON OBJET. La note
+    // GLOBALE la demande à la pratique (pas 3b) ; un CRITÈRE est évalué par
+    // l'échelle de la grille, quelle que soit la pratique. Les deux chemins sont
+    // distincts, et ce test verrouille le second.
+    expect(r.blocCriteres, 'la liste des critères doit être rendue').toContain('Structure');
+
+    const codesIDME = (r.blocCriteres.match(/>\s*[IDME]\s*<\/span>/g) || []);
+    expect(codesIDME, `codes IDME rendus depuis le code : ${codesIDME.join(' ')}`).toEqual([]);
+
+    // L'assertion positive : un code de l'échelle W/X/Y/Z doit apparaître, sans
+    // quoi « pas de code IDME » serait vrai pour rien.
+    const codeAffiche = (r.blocCriteres.match(/>\s*([WXYZ])\s*<\/span>/) || [])[1];
+    expect(codeAffiche, `aucun code de l'échelle dans la liste — bloc : ${r.blocCriteres.slice(0, 200)}`)
+        .toBeTruthy();
 
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

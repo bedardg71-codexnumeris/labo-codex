@@ -178,7 +178,7 @@ La consigne autorisait deux pas ; deux ont été faits, et le troisième n'a pas
 | **3a** | ✅ | `obtenirEchelleResolue` — la résolution d'une échelle séparée de sa réduction en table. Refactor no-op, 11 tests, 4 break-tests rouges. |
 | **3b** | ✅ | **C'est la PRATIQUE qui dit dans quoi sa note globale se lit** (correction de Grégoire). `obtenirEchelleNoteGlobale(da)` au contrat + les trois pratiques + le helper `obtenirEchelleCommuneDesEvaluations`. 11 tests. |
 | **3c-1** | ✅ | **La performance GLOBALE est branchée** — elle demande son échelle à la pratique, situe, interprète. Le ternaire `pct >= 85 ? …` de cette ligne est retiré. Spec WebKit, 2 break-tests rouges. **Premier pas du lot qui change l'écran.** |
-| **3c-2** | ⏳ | Le niveau **par critère** — second ternaire `pct >= 85 ? …`, même fichier, autre échelle (celle de l'évaluation). |
+| **3c-2** | ✅ | Le niveau **par critère** est branché sur l'échelle commune des évaluations. ⮕ **Source DIFFÉRENTE de 3c-1, et c'est le point** : la note GLOBALE la demande à la pratique, un CRITÈRE est évalué par l'échelle — même en sommative, chaque critère reçoit un niveau avant d'être converti en note. **Plus aucun ternaire `pct >= 85` dans le fichier.** |
 | **3c-3** | ⏳ | `interpreterScoreIDME` et ses 4 descriptions · les bornes `0.85` de « Maîtrisé et étendu » · `interpreterPerformance` (helpers) et ses 4 seuils · **la carte « Observation de la structure »** et son troisième jeu de descriptions (D4 : « les longues » sont désormais dans la source unique, il reste à brancher). |
 | **4** | ⏳ | Supprimer `obtenirNiveauSOLO()` (`trimestres.js`). |
 | **5** | ⏳ | Trancher le devenir des seuils `idme.*`. B ne leur laisse aucun rôle de repli. |
