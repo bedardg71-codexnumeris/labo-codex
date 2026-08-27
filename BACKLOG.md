@@ -705,6 +705,45 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   « risque latent ». ⏳ **DÛ PAR GRÉGOIRE** : la lancer et renvoyer le rapport. Il commande (a)
   ci-dessus et le lot 3.
 
+  🔧 **DÉCOUVERTE DU LOT 0 — L'ÉCHELLE ORPHELINE DE H2026** (27 août 2026).
+  La sonde a mesuré autre chose que ce qu'elle cherchait : **383 évaluations sur 670 désignent une
+  échelle introuvable** — 339 sous le seul id `1767389426695`, 44 sous `ECHELLE_DEMO` (résidu connu
+  et accepté du 5 août). **1706 niveaux sur 2983, soit 57 % des données, ne se convertissent pas.**
+  L'échelle `1767389426695` avait pourtant été recréée le 5 août ; elle a donc été **ré-orphelinée
+  depuis**. ⏳ **Cause NON élucidée** — les ids `ECH_1786375947252_5wff1x` (h2026) et
+  `ECH_1786375947256_edk4an` (a2026) sont séquentiels à 4 ms : créés par un même passage
+  programmatique, piste à remonter. **Tant qu'on ne le sait pas, la réparation peut se défaire.**
+  ⮕ **Établi par l'oracle** (`scripts/oracle-542-identifier-echelle-orpheline.js`) : plafond de
+  l'outil **99,6 %** (279/280 notes témoins) ; **217 évaluations discriminantes** (celles qui
+  emploient `M` ou `0`, seuls niveaux où les candidates divergent) ; **188 reproduites** par la
+  famille `0=0 I=40 D=65 M=75 E=100` ; **0 reproduite par une AUTRE échelle** ; **0 code de niveau
+  inconnu**. ⮕ Une seule échelle a circulé — la réparation en bloc est sûre.
+  ⮕ **Réparation écrite, NON exécutée** : `scripts/reparation-542-echelle-orpheline.js`, dry-run par
+  défaut, exige `{ executer: true, sauvegardeFaite: true }`, idempotente, et **revérifie elle-même**
+  que la source reproduit les notes avant d'écrire (refus mesuré au banc si elle ne les reproduit
+  pas). Elle ajoute UNE échelle, ne touche à AUCUNE note et ne modifie AUCUNE évaluation.
+
+- [ ] **#543 — Les 55 évaluations dont la note stockée ne se recalcule pas.** Créé le 27 août 2026,
+  extrait de #542 (l'oracle les isole ; ce ne sont PAS un problème d'échelle — aucune n'est
+  reproduite par une échelle différente, aucune ne porte de code de niveau inconnu). **Deux causes
+  distinctes, à ne pas confondre :**
+  - **~47 — le pourcentage algorithmique STOCKÉ n'est pas celui qui a servi.** Mesuré sur pièces :
+    « Artefact 6 », Français écrit stocké `algo 100`, alors que la note stockée (40,8) exige une
+    valeur de ce critère proche de **0** ; un autre du même nom exige ≈ 11. Famille du bug **#350**
+    (le champ « nombre d'erreurs » du critère français algo n'est pas restauré à l'ouverture).
+    ⚠ Conséquence à vérifier : le dépistage lit le NIVEAU, pas le pourcentage — il n'est donc pas
+    faussé par ça. C'est l'intégrité de la donnée algorithmique qui est en cause, pas le dépistage.
+  - **~8 — la note stockée est IMPOSSIBLE à produire depuis les niveaux sauvegardés.** Preuve qui ne
+    dépend d'aucune hypothèse : « Artefact 5 », quatre critères **tous à `D` = 65**, Σ pondérations
+    100 %. Une moyenne pondérée de valeurs toutes égales à 65 vaut 65 **quelles que soient les
+    pondérations**. La note stockée vaut **56,3**. Aucune échelle ne peut produire ça — c'est un
+    désaccord entre la note conservée et les critères conservés, vraisemblablement un résidu des
+    réparations d'août (où les notes ont été préservées pendant que grilles et critères étaient
+    recréés).
+  ⮕ **Ne rien réparer avant d'avoir tranché ce que « juste » veut dire ici** : la note stockée est ce
+  que l'élève a reçu, les critères sont ce qui a été saisi. Les faire coïncider, c'est choisir lequel
+  des deux ment — décision de Grégoire, pas de code.
+
   ✅ **LOT 1 LIVRÉ le 27 août 2026** — le dépistage ne rend plus de verdict rassurant sans avoir
   calculé. Deux sentinelles, **11 rouges vérifiés au break-test**.
   - **A4 — `defisCommuns` était TOUJOURS vide** (`interventions.js`, `analyserSousGroupe`). **Trois**
