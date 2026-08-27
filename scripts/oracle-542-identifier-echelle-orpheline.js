@@ -345,6 +345,81 @@
         };
     }
 
+    // Le détail critère par critère d'UNE évaluation sous UNE échelle. Sert aux
+    // évaluations qu'aucune candidate ne reproduit : à ce stade, compter ne dit
+    // plus rien, il faut regarder.
+    function detailler(ev, echelle, L) {
+        const table = echelle.table;
+        const algo = ev.donneesAlgorithmiques || {};
+        L('        ▸ ' + (ev.productionNom || '(sans nom)')
+            + '   —   stockée ' + Number(ev.noteFinale).toFixed(1)
+            + (ev.plafondNoteCiblee ? '   [plafond ' + ev.plafondNoteCiblee + ']' : ''));
+        let note = 0, pond = 0, hors = 0;
+        for (const c of (Array.isArray(ev.criteres) ? ev.criteres : [])) {
+            if (!c) continue;
+            const brut = c.niveauSelectionne;
+            const code = (brut == null) ? '' : String(brut).trim().toUpperCase();
+            const p = Number(c.ponderation) || 0;
+            if (!code) {
+                L('            · ' + (c.critereNom || '(sans nom)') + '  : aucun niveau saisi   pond ' + p + ' %');
+                continue;
+            }
+            const v = table[code];
+            const dA = (c.critereId != null) ? algo[c.critereId] : undefined;
+            const a = (dA && dA.pourcentage !== undefined) ? Number(dA.pourcentage) : null;
+            L('            · ' + (c.critereNom || '(sans nom)') + '  : ' + code
+                + ' → ' + (v === undefined ? '(HORS ÉCHELLE)' : v)
+                + '   pond ' + p + ' %'
+                + (a !== null ? '   · algo ' + a : ''));
+            if (v === undefined) { hors++; continue; }
+            note += v * (p / 100);
+            pond += p / 100;
+        }
+        if (pond > 0) {
+            L('            ⇒ sans algorithme : ' + (note / pond).toFixed(1)
+                + '   ·   Σ pondérations retenues : ' + (pond * 100).toFixed(0) + ' %'
+                + (hors ? '   ·   ' + hors + ' critère(s) hors échelle' : ''));
+        } else {
+            L('            ⇒ rien de calculable');
+        }
+    }
+
+    /* ── LE CROISEMENT (r3) ──────────────────────────────────────────────────
+       La question que les étapes 1 et 2 ne tranchent pas : les évaluations que
+       la MEILLEURE candidate ne reproduit pas sont-elles reproduites par une
+       AUTRE ? Si oui, deux échelles ont circulé, et les traiter en bloc serait
+       une faute. Si non, la cause est dans le calcul, pas dans l'échelle.
+
+       ⚠ ET UNE SECONDE QUESTION, QUE JE N'AVAIS PAS POSÉE : combien de ces
+       évaluations DISCRIMINENT réellement ? Les familles d'échelles en présence
+       partagent `I=40`, `D=65`, `E=100` ; elles ne diffèrent que sur `M`
+       (75 contre 85) et sur l'existence du niveau `0`. Une évaluation qui
+       n'emploie ni `M` ni `0` est reproduite par les deux et ne prouve RIEN.
+       Compter ces évaluations-là comme des preuves gonflerait la certitude sans
+       l'augmenter — c'est le même défaut que les quatre verdicts précédents,
+       pris à la racine cette fois. ─────────────────────────────────────────── */
+    function croiser(orphelines, candidates) {
+        const parEval = [];
+        for (const ev of orphelines) {
+            const stockee = Number(ev.noteFinale);
+            if (ev.noteFinale == null || isNaN(stockee)) continue;
+            const notes = [], reproduisent = [];
+            for (let i = 0; i < candidates.length; i++) {
+                const best = meilleurEcart(ev, candidates[i], stockee);
+                notes.push(best ? best.pourcentage : null);
+                if (best && best.ecart <= TOLERANCE) reproduisent.push(i);
+            }
+            // Discriminante = les candidates ne rendent PAS toutes la même note.
+            const definies = notes.filter(function (n) { return n !== null; });
+            let discriminante = false;
+            for (const n of definies) {
+                if (Math.abs(n - definies[0]) > TOLERANCE) { discriminante = true; break; }
+            }
+            parEval.push({ ev: ev, reproduisent: reproduisent, discriminante: discriminante });
+        }
+        return parEval;
+    }
+
     // Ventilation des échecs : de quoi NOMMER la cause au lieu de la supposer.
     function ventiler(echecs, L) {
         if (!echecs.length) { L('      (aucun échec à ventiler)'); return; }
@@ -571,6 +646,63 @@
             L('');
         }
 
+        // ══ ÉTAPE 3 · LE CROISEMENT ═════════════════════════════════════════
+        L('══ ÉTAPE 3 · le croisement — une SECONDE échelle a-t-elle circulé ? ══');
+        L('');
+
+        const meilleureIdx = candidates.indexOf(resultats.length ? resultats[0].echelle : null);
+        const croisement = croiser(orphelines, candidates);
+
+        const parBest = croisement.filter(function (x) { return x.reproduisent.indexOf(meilleureIdx) !== -1; });
+        const parAutreSeulement = croisement.filter(function (x) {
+            return x.reproduisent.length > 0 && x.reproduisent.indexOf(meilleureIdx) === -1;
+        });
+        const parPersonne = croisement.filter(function (x) { return x.reproduisent.length === 0; });
+
+        L('   reproduites par la meilleure candidate ............ ' + parBest.length);
+        L('   reproduites par une AUTRE candidate SEULEMENT ..... ' + parAutreSeulement.length
+            + (parAutreSeulement.length ? '   ⚠ le cas qui changerait tout' : '   ← aucune seconde échelle'));
+        L('   reproduites par AUCUNE candidate .................. ' + parPersonne.length);
+        L('');
+
+        if (parAutreSeulement.length) {
+            const parQui = new Map();
+            for (const x of parAutreSeulement) {
+                for (const i of x.reproduisent) {
+                    if (!parQui.has(i)) parQui.set(i, 0);
+                    parQui.set(i, parQui.get(i) + 1);
+                }
+            }
+            L('   ⚠ CES ÉVALUATIONS SONT REPRODUITES PAR :');
+            for (const [i, n] of [...parQui].sort(function (a, b) { return b[1] - a[1]; })) {
+                L('        ' + candidates[i].nom + '   [' + candidates[i].chemin + ']  → ' + n);
+                L('             ' + candidates[i].signature);
+            }
+            L('');
+        }
+
+        // ⚠ La force de la preuve, mesurée plutôt qu'affirmée.
+        const discriminantes = croisement.filter(function (x) { return x.discriminante; });
+        const preuvesReelles = parBest.filter(function (x) { return x.discriminante; });
+        L('   ── ce que ces reproductions PROUVENT vraiment ──');
+        L('      évaluations DISCRIMINANTES (les candidates y divergent) : '
+            + discriminantes.length + ' / ' + croisement.length);
+        L('      … dont reproduites par la meilleure : ' + preuvesReelles.length);
+        L('      Les autres emploient des niveaux sur lesquels les candidates');
+        L('      s\'accordent (I=40, D=65, E=100) : elles ne départagent rien.');
+        L('');
+
+        if (parPersonne.length) {
+            L('   ── les évaluations qu\'AUCUNE candidate ne reproduit ──');
+            L('      (détail critère par critère, sous la meilleure candidate)');
+            const aDetailler = parPersonne.slice(0, 6);
+            for (const x of aDetailler) detailler(x.ev, resultats[0].echelle, L);
+            if (parPersonne.length > aDetailler.length) {
+                L('        … et ' + (parPersonne.length - aDetailler.length) + ' autre(s) non détaillée(s)');
+            }
+            L('');
+        }
+
         // ══ VERDICT ═════════════════════════════════════════════════════════
         L('==== VERDICT ====');
         L('');
@@ -585,18 +717,31 @@
 
         if (gagnantes.length === 0) {
             const meilleur = resultats.length ? resultats[0] : null;
-            L('⮕ AUCUNE candidate n\'atteint le plafond de l\'outil.');
-            L('  Meilleure : ' + (meilleur ? (meilleur.r.taux * 100).toFixed(1) + ' %  ('
-                + meilleur.echelle.nom + ')' : 'n/a')
-                + '   ·   plafond : ' + (meilleurTemoin * 100).toFixed(1) + ' %');
+            L('⮕ Aucune candidate n\'atteint le plafond de l\'outil : '
+                + (meilleur ? (meilleur.r.taux * 100).toFixed(1) + ' %' : 'n/a')
+                + ' contre ' + (meilleurTemoin * 100).toFixed(1) + ' %.');
             L('');
-            L('  ⚠ CE N\'EST PAS ENCORE « ce n\'est pas la bonne échelle ». Regarde la');
-            L('    ventilation ci-dessus : tant que les échecs s\'expliquent par des');
-            L('    codes de niveau CONNUS, un plafond de reprise ou un critère');
-            L('    algorithmique, ils parlent du CALCUL, pas de l\'échelle. Seul un');
-            L('    CODE DE NIVEAU INCONNU est un indice qu\'une autre échelle a servi.');
-            L('    Compare aussi à la candidate structurellement différente du');
-            L('    classement : un mauvais candidat s\'effondre, il ne frôle pas.');
+            // ⮕ C'EST LE CROISEMENT QUI TRANCHE, PAS LE TAUX. Un taux sous le
+            // plafond dit qu'il reste des évaluations inexpliquées ; il ne dit
+            // pas POURQUOI. Les trois cas ci-dessous ne se réparent pas pareil,
+            // et c'est l'étape 3 qui les sépare.
+            if (parAutreSeulement.length > 0) {
+                L('  ⛔ DEUX ÉCHELLES ONT CIRCULÉ. ' + parAutreSeulement.length + ' évaluation(s)');
+                L('     sont reproduites par une candidate DIFFÉRENTE de la meilleure.');
+                L('     ⮕ NE LES TRAITE PAS EN BLOC. Une réparation qui repointerait les');
+                L('       ' + orphelines.length + ' vers une seule échelle fausserait le dépistage de');
+                L('       celles-là. Le tableau de l\'étape 3 dit lesquelles, et vers quoi.');
+            } else if (parPersonne.length > 0) {
+                L('  ✅ UNE SEULE ÉCHELLE, et c\'est le résultat qui commandait la réparation.');
+                L('     Aucune des ' + orphelines.length + ' évaluations n\'est reproduite par une autre');
+                L('     candidate que la meilleure. Il n\'y a pas de seconde échelle en');
+                L('     circulation — les ' + parPersonne.length + ' non reproduites ne le sont par PERSONNE,');
+                L('     ce qui parle du CALCUL (cf. #350, le recalcul algorithmique à');
+                L('     l\'ouverture) et non de l\'échelle.');
+                L('     ⮕ Le détail critère par critère ci-dessus est là pour le vérifier');
+                L('       plutôt que le supposer : un « Σ pondérations » qui ne fait pas');
+                L('       100 %, ou un critère hors échelle, se voit à l\'œil.');
+            }
         } else if (gagnantes.length === 1) {
             const g = gagnantes[0];
             L('⮕ IDENTIFIÉE, et sans rien inventer :');
