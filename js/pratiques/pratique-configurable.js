@@ -95,6 +95,42 @@ class PratiqueConfigurable {
      * @param {string} code - Code du niveau (ex: "3", "M", "B")
      * @returns {object} Objet niveau
      */
+    /**
+     * L'échelle dans laquelle SA note globale se lit — pour une pratique
+     * configurable : celle qu'elle EMBARQUE, quand elle travaille par niveaux.
+     *
+     * ⮕ #542 lot 3, pas 3b. C'est le cas le plus simple des trois : cette
+     * pratique porte son échelle en propre (`config.echelle`), et c'est
+     * exactement celle avec laquelle elle a converti (`calcul_note.methode ===
+     * 'conversion_niveaux'`). Aucune résolution, aucune ambiguïté possible.
+     *
+     * ⚠ MAIS TOUTES NE TRAVAILLENT PAS PAR NIVEAUX. Une pratique configurable
+     * peut calculer sa note autrement — l'échelle n'est exigée à la
+     * construction que pour `conversion_niveaux` (`:52`). Quand elle ne porte
+     * pas d'échelle de niveaux, sa note globale est un chiffre, et elle le dit :
+     * même réponse que la pratique sommative.
+     *
+     * @returns {Object} `{ echelle, raison, message }`
+     */
+    obtenirEchelleNoteGlobale() {
+        var echelle = this.config && this.config.echelle;
+        var aDesNiveaux = echelle
+            && echelle.type === 'niveaux'
+            && Array.isArray(echelle.niveaux)
+            && echelle.niveaux.length > 0;
+
+        if (!aDesNiveaux) {
+            return {
+                echelle: null,
+                raison: 'note-chiffree',
+                message: 'Cette pratique n\'établit pas sa note globale par niveaux : '
+                    + 'il n\'y a pas de niveau atteint à en tirer.'
+            };
+        }
+
+        return { echelle: echelle, raison: null, message: null };
+    }
+
     getNiveau(code) {
         if (this.config.echelle.type !== 'niveaux') {
             throw new Error('Cette méthode nécessite une échelle de type "niveaux"');
