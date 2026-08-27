@@ -1497,6 +1497,168 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   un cours intensif, `(théorie + labo)` n'est pas la durée d'une semaine donnée. D devra prévoir
   l'écart assumé, jamais le blocage.
 
+### Constats de l'audit de l'onglet ÉVALUATIONS (Fable 5, 25 août) — VERSÉS LE 27 AOÛT
+
+> **Rapport** : `Rapports/AUDIT-evaluation-onglet-2026-08-25.md` (fusionné sur `main` le 27 août,
+> commit `b7f46938` ; il était resté sur la branche `claude/audit-evaluation-tab-txocw7`, jamais
+> fusionnée, pendant que son jumeau Conception, lui, l'avait été).
+>
+> ⚠ **BASE AUDITÉE : 1.99.0** (commit `8dfda3ed`, 25 août). Cinq versions de retard sur 1.104.1.
+> **Les numéros de ligne cités dans le rapport datent de cette base** — les revérifier au grep
+> avant de coder, pas les suivre.
+>
+> ⚠ **AUCUN VERDICT N'A ÉTÉ EXÉCUTÉ.** L'audit se déclare lecture seule : tous ses constats sont
+> marqués `[lecture]`, aucun Chromium n'a été lancé. Les deux critiques ont été contre-vérifiés par
+> une seconde lecture, pas par un essai. **Reproduire avant de corriger.**
+>
+> ✅ **A1 et A2 ONT ÉTÉ REVÉRIFIÉS SUR 1.104.1 le 27 août** : les deux tiennent encore. Les autres
+> ne l'ont pas été.
+>
+> ⮕ Croisements avec des items déjà ouverts, que l'audit signale sans les redémontrer : **#483**,
+> **#465**, **#482**, **#440**, et le bug testeur **#340-T3**.
+
+- [ ] 🔴 **#556 — « Vider la corbeille » détruit au-delà de ce que la modale annonce.** (constat A1, CRITIQUE)
+  **REVÉRIFIÉ ENCORE VRAI le 27 août sur 1.104.1.** La modale compte les fichiers de la corbeille
+  **filtrée par groupe-cours actif**, mais `travauxStockage.viderCorbeille()`
+  (`travaux-stockage.js:1065`) itère `obtenirCorbeilleComplete()` et termine par
+  `sauvegarderCorbeille([])` : **blobs et métadonnées de TOUS les groupes-cours du trimestre sont
+  détruits**. Le nettoyage des évaluations liées, lui, ne couvre que le groupe actif.
+  ⮕ **Perte de données définitive et silencieuse**, sur un écran qui annonçait autre chose.
+  ⮕ **Geste** : `viderCorbeille()` doit détruire exactement l'ensemble AFFICHÉ (recevoir la liste,
+  ou filtrer par `groupeCoursId`) + sentinelle « la modale et la destruction comptent le même
+  ensemble ». C'est la correction n° 1 du ratio impact/effort de l'audit.
+
+- [ ] 🔴 **#557 — `supprimerEvaluation` existe en double : la version corrigée est inatteignable.** (constat A2, CRITIQUE)
+  **REVÉRIFIÉ ENCORE VRAI le 27 août sur 1.104.1.** `liste-evaluations.js:1996` définit la version
+  **avec** `restaurerOriginaleSiReprise` (correctif du 8 juin) ; `evaluation.js:2710` en définit une
+  **sans**. `liste-evaluations.js` est chargé à `index.html:14580`, `evaluation.js` à `14595` :
+  l'export `window.supprimerEvaluation` du second **écrase** celui du premier.
+  ⮕ **Supprimer une reprise depuis le profil étudiant laisse l'originale « remplacée » à jamais.**
+  Le détail qui le prouve : `profil-etudiant-actions.js:154` porte le commentaire « Appeler la
+  fonction de suppression du module liste-evaluations.js » — et appelle celle d'`evaluation.js`.
+  ⮕ Même mécanique pour `rechargerFiltreProduction` (`evaluation.js` gagne sur
+  `liste-evaluations.js`, sans exclusion portfolio ni préservation de la sélection).
+  ⮕ **Geste** : une seule définition par identifiant global (zéro-dette) + **sentinelle statique
+  « aucun doublon de `function X` exportée sur `window` entre modules »** — ce motif est la
+  réintroduction silencieuse d'un bug déjà corrigé, et il a déjà mordu ailleurs.
+
+- [ ] **#558 — La file d'attente d'import ne survit pas au rechargement.** (constats B1, B2, B3)
+  Trois défauts du même mécanisme, à traiter ensemble. **B1** : `travaux-import.js` filtre la file
+  après import sans appeler `persisterFileDAttente()` — au rechargement, `restaurerFileDAttente()`
+  ressuscite les fichiers déjà importés (blob nul) → fantômes « à re-déposer » et risque de
+  ré-import en doublon. Aggravé : le cas « remplacer » met l'ancien fichier en corbeille **avant**
+  l'`await importerFichier` ; si l'import échoue, l'erreur n'est qu'un `console.error`.
+  **B2** : le réglage « Rés. max. » (DPI) revient à 250 à chaque re-render (`selected` codé en dur) —
+  un choix de 400 dpi est silencieusement perdu, alors que la valeur est réellement utilisée.
+  **B3** : `persisterFileDAttente` n'enregistre ni `productionIdParFichier`, ni `modeImport`,
+  `dateFichier`, `nomDocumentLibre`, `operations`, `skipBalance` : la protection #313 est inopérante
+  après reload, et le sélecteur peut afficher une production que les nouveaux dépôts ne recevront pas.
+  ⚠ Code livré le jour même (#496-#507), **jamais éprouvé au terrain**.
+
+- [ ] **#559 — Poste de préparation : la case cochée marque un fichier étranger.** (constat B4)
+  `changerOptBalance` / `changerOptResolution` écrivent `queue[indexActuel + queueOffset]`. Avec
+  `queueOffset === -1` (« Ajouter des pages ») et une file d'import non vide, l'écriture atterrit
+  sur **un autre fichier de la file**.
+
+- [ ] **#560 — Trois écritures directes contournent le garde des modes.** (constats B5, B8)
+  `supprimerFichierDefinitivement` et le nettoyage de « Vider la corbeille » (`liste-evaluations.js`),
+  ainsi que le jeton personnalisé (`evaluation.js`), écrivent par `db.setSync(cle(...))` direct —
+  esquivant le blocage du mode anonymisation que `supprimerEvaluation` respecte.
+  ⚠ **Pire cas décrit** : avec un contexte de simulation posé (#326 R2), la lecture peut renvoyer le
+  **corpus injecté**, que l'écriture directe reverserait dans la clé réelle.
+  ⮕ Toutes les fonctions sœurs passent par `sauvegarderDonneesSelonMode`.
+  ⮕ **Second défaut de B5, distinct** : ces suppressions par couple (DA, production) sont **trop
+  larges** — elles emportent originales, reprises et l'évaluation active d'un fichier réimporté.
+
+- [ ] **#561 — Réassociation avec jeton de reprise : l'async n'est pas attendu.** (constat B6)
+  `associerProductionDepuisListe` n'attend pas `travauxUI.changerProductionFichier` (async, peut
+  avorter sur `confirm()` refusé) mais marque quand même `estReprise:true` et consomme le jeton
+  → **reprise créée sur l'ancienne production**.
+
+- [ ] **#562 — Échappement incomplet dans la Liste des évaluations.** (constat B7)
+  `${ligne.da}` / `${daAffiche}` et `${ligne.niveauFinal}` injectés sans `echapperHtml`. Le DA est
+  nettoyé à l'import CSV, pas garanti sur les autres chemins d'entrée.
+  ⮕ Violation de la règle 1 du projet, qui est « sans exception ».
+
+- [ ] **#563 — Décocher « Reprise ciblée » ne retire rien, et les échecs sont silencieux.** (constat B9)
+  La branche est un **TODO vide** (`evaluation-sauvegarde.js`) : la case se décoche, le jeton reste
+  appliqué. Et les écritures d'`evaluation-jetons.js` (6 sites) n'examinent jamais le retour de
+  `sauvegarderDonneesSelonMode` : en mode anonymisation, l'échec est silencieux pendant que l'UI se
+  met à jour comme si tout allait bien.
+
+- [ ] **#564 — L'auto-save ne couvre que les critères : une rétroaction seule peut être perdue.** (constat B10)
+  Son unique déclencheur est la sélection d'un niveau (`evaluation-chargement.js`). Modifier
+  **seulement** la rétroaction finale ou un commentaire, sans toucher un critère, ne crée aucun
+  snapshot → le flush au changement de fichier ne sauve rien ; seul le bouton « Enregistrer »
+  persiste. ⮕ **Perte de texte réelle en navigation rapide entre copies.**
+  ⚠ Le reste de la chaîne de sauvegarde est sain — l'audit le documente en §E.
+
+- [ ] **#565 — Un étudiant en échec avorte tout le lot d'export, et la page de synthèse peut manquer sans le dire.** (constats B11, B12)
+  **B11** : les boucles de l'export Léa et du trimestre complet (`travaux-archivage.js`) n'ont aucun
+  try/catch par item ; une exception (blob manquant, PDF corrompu) remonte au catch global →
+  **zéro PDF livré**, même pour les N−1 étudiants valides, et un seul `alert`.
+  **B12** : `ajouterPageSynthese` avale l'échec de rasterisation et l'absence de lib
+  (`console.error`/`console.warn` seuls). ⮕ **L'enseignant peut téléverser sur Léa des PDF sans la
+  page de rétroaction sans jamais le savoir** — alors que c'est la promesse du bouton.
+  ⮕ **Geste** : try/catch par étudiant + bilan final (« 23 réussis, 2 échoués : … »), l'omission de
+  la synthèse remontée dans ce bilan.
+
+- [ ] **#566 — Écart d'anonymisation dans la synthèse, et compteur « N prêtes » trompeur.** (constat B13)
+  Le modal de révision anonymise les rétroactions, la synthèse rasterisée **jamais** : en mode
+  anonymisé, un prénom tapé dans une rétroaction **sort dans le PDF**. Et le compteur
+  « N évaluations prêtes » peut dépasser le nombre de PDF réellement produits (évaluations sans
+  fichier résolu ignorées en silence).
+
+- [ ] **#567 — Variables CSS fantômes : les avertissements perdent leur couleur d'alerte.** (constat C1)
+  `var(--attention)` n'existe nulle part ; idem `--orange`, `--orange-pale`, `--radius`,
+  `--couleur-attention`, `--couleur-texte-sombre` (ces deux dernières retombant sur des hex Bootstrap
+  hors palette). ⮕ « Non associé », les modales de suppression et l'alerte « à re-déposer »
+  **perdent leur couleur d'alerte dans les deux modes**.
+  ⮕ ~12 usages : définir les alias ou substituer. Correction n° 4 du ratio impact/effort.
+
+- [ ] **#568 — Cibles tactiles sous 44 px sur l'écran le plus utilisé au doigt.** (constat C2)
+  `.travaux-btn-nav` et `.travaux-fond-swatch` à 28×28 px, `.eval-actions-select` à ~24 px.
+  ⮕ La norme est **déjà appliquée ailleurs** dans le projet (`css/accompagnement.css`) — c'est un
+  écart, pas une norme absente.
+
+- [ ] **#569 — L'écran « Exporter et archiver » est hors design system.** (constat C3)
+  8 selects en `class="form-select"` — classe quasi inexistante dans `styles.css`, rendu natif sans
+  jetons de surface ni de focus ; la classe canonique est `.controle-form`. Titre « Archivage des
+  travaux » ≠ libellé de navigation « Exporter et archiver ». **Aucun état vide** (pas d'entrée
+  `evaluations-exporter` dans `etats-vides.js`).
+
+- [ ] **#570 — Mode clair : les flèches de tri de la Liste à 2,0:1 de contraste.** (constat C4)
+  `var(--gris-clair)` (famille fond-clair, `#777788` en clair) posé sur l'en-tête bleu fixe.
+
+- [ ] **#571 — PDF de rétroaction : densité et lisibilité.** (constat C5) 📐 **DÉCISION REQUISE**
+  Le mode fixe inline (hex/px) est **volontaire et documenté** — l'audit le confirme correct. Mais
+  la densité dessert l'usage cible cellulaire : base 10 px, dates à **6 px**, numéros 6,5 px, pied
+  7 px — rasterisé, c'est du bitmap à zoomer. Et le texte `PAPER` est posé sur les couleurs
+  d'échelle de l'utilisateur **sans garde de luminance** : un niveau jaune rend le code IDME
+  illisible. Plus une date non échappée (seul oubli du fichier).
+  ⮕ **La garde de luminance et l'échappement sont des correctifs ; les tailles sont ta décision** —
+  c'est ton document, remis à tes élèves.
+
+- [ ] **#572 — Mineurs de l'audit Évaluations (condensé).** (section D du rapport)
+  **Import** : ~25 `console.log` dans `travaux-resolution.js` · fuite de `setInterval` à chaque
+  ouverture du poste de préparation (aucun `clearInterval`) · clés sessionStorage non namespacées ·
+  `new Date('AAAA-MM-JJ')` parsé UTC (décalage d'un jour) · `appliquerJetonsReprisePostImport`
+  balaie sans filtre groupe-cours.
+  **Liste** : handlers orphelins (`toggleVerrouillerEvaluation` sans appelant, branches de filtres
+  dont les selects n'existent plus, `attacherEvenementsActions` no-op au commentaire mensonger) ·
+  double rendu et accumulation de listeners à chaque visite · `production.nom` au lieu de `titre`
+  → colonne vide en vue corbeille · `reprise-ciblee` absent du tri jetons · annotations jamais
+  purgées à la suppression définitive ni à la purge 30 jours.
+  **Annoter** : deux blocs `if` vides · note finale lue depuis le DOM (`parseFloat(...textContent)`)
+  au lieu du SSOT de calcul.
+  **Export** : barres de progression jamais remises à zéro · noms de dossiers ZIP non assainis (un
+  « / » crée des sous-dossiers ; fichier sans extension → la version annotée écrase l'original) ·
+  code mort `lancerAllegement` · `echapperHtml` n'échappe pas les guillemets (`config.js`) · couleurs
+  utilisateur interpolées dans des attributs `style` sans échappement (8 sites).
+  **Design mineur** : hiérarchie h2/h3 incohérente · un « Cliquez » vouvoyé · badges jetons en hex
+  dur alors que les variables existent · pas de `:focus-visible` sur la toolbar d'annotation ·
+  `aria-label` remplacés par `title` sur les boutons-icônes de la visionneuse.
+
 - [ ] **#553 — Le rabotage de clé `startsWith('francais')` : un pansement sur un appariement qui échoue.**
   Créé le 27 août 2026, sorti du chantier #552. **Huit sites** rabotent la clé d'un critère vers
   `'francais'` : `calculs.js` (526, 675, 696) · `helpers.js` (670) · `sections-affichage.js` (1101) ·
