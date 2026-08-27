@@ -89,13 +89,36 @@ function _echelleDePratiqueConfigurable(echelleId) {
     return echelle;
 }
 
-function obtenirTableConversionNiveaux(echelleId = null) {
+/**
+ * Résout l'échelle désignée et la rend TELLE QUELLE — ses niveaux, donc ses
+ * PLAGES (`min`/`max`) et leurs étiquettes `niveauSOLO`.
+ *
+ * ⮕ #542 lot 3, pas 3a. Extraite de `obtenirTableConversionNiveaux`, qui faisait
+ * DEUX choses : résoudre une échelle, puis la réduire à une table
+ * `{ code: score }`. Le dépistage a maintenant besoin des deux moitiés
+ * séparément — la table pour convertir un niveau en note, les PLAGES pour situer
+ * une moyenne (`situerPourcentageDansEchelle`) et l'étiquette pour l'interpréter
+ * (`interpreterNiveauAtteint`).
+ *
+ * ⚠ **CE QUI N'A PAS BOUGÉ, ET C'EST LE POINT** : la RÉSOLUTION est désormais
+ * écrite à UN SEUL endroit. La recopier pour obtenir les plages aurait recréé
+ * exactement le patron que #529 a passé une session à défaire — deux chemins
+ * parallèles qui finissent par diverger, et un même identifiant qui résout
+ * différemment selon l'appelant. Les deux gisements (`echellesTemplates` et
+ * l'échelle embarquée d'une pratique configurable, #542 A2), la reconnaissance
+ * par `idOriginal`, et le refus de deviner quand plusieurs échelles existent :
+ * tout cela vit ici, et `obtenirTableConversionNiveaux` le lit.
+ *
+ * @param {string} [echelleId] - échelle à lire. Sans elle, l'échelle n'est
+ *   résolue que s'il n'y a AUCUNE ambiguïté (une seule échelle utilisable).
+ * @returns {Object|null} - l'échelle, avec son tableau `niveaux`, ou `null`
+ */
+function obtenirEchelleResolue(echelleId = null) {
     // #542 A2 — les échelles de pratique AVANT tout : elles ne vivent pas dans
     // `echellesTemplates`, et le garde-fou « aucune échelle template » plus bas
     // les aurait écartées d'entrée sur un trimestre qui n'en compte aucune.
     if (echelleId && String(echelleId).indexOf('pratique-') === 0) {
-        var echellePratique = _echelleDePratiqueConfigurable(echelleId);
-        return echellePratique ? _tableDepuisNiveaux(echellePratique.niveaux) : null;
+        return _echelleDePratiqueConfigurable(echelleId);
     }
 
     var echelles = db.getSync(cle('echellesTemplates'), []) || [];
@@ -116,9 +139,16 @@ function obtenirTableConversionNiveaux(echelleId = null) {
         if (utilisables.length === 1) echelle = utilisables[0];
     }
 
-    if (!echelle || !Array.isArray(echelle.niveaux)) return null;
+    // Une échelle SANS aucun niveau ne sert à personne — ni à situer, ni à
+    // convertir. C'est le comportement historique de la table, préservé ici.
+    if (!echelle || !Array.isArray(echelle.niveaux) || echelle.niveaux.length === 0) return null;
 
-    return _tableDepuisNiveaux(echelle.niveaux);
+    return echelle;
+}
+
+function obtenirTableConversionNiveaux(echelleId = null) {
+    var echelle = obtenirEchelleResolue(echelleId);
+    return echelle ? _tableDepuisNiveaux(echelle.niveaux) : null;
 }
 
 /**
@@ -1600,6 +1630,7 @@ function determinerCibleIntervention(da) {
 }
 
 // Exporter les 14 fonctions vers window (décision étape 1 b — convention systématique)
+window.obtenirEchelleResolue = obtenirEchelleResolue;
 window.obtenirTableConversionNiveaux = obtenirTableConversionNiveaux;
 window.convertirNiveauEnScore = convertirNiveauEnScore;
 // #542 A3 — consommée par `profil-etudiant-sections-affichage.js` (carte RàI).
