@@ -128,8 +128,28 @@ moyenne (qui ne demande que des plages, présentes partout) et l'interpréter (q
 étiquette, facultative). Et elle est la seule qui rende le dépistage juste pour un utilisateur
 qui n'a jamais entendu parler de SOLO.
 
+### ✅ DÉCISION DE GRÉGOIRE — **B**, prise le jeudi 27 août 2026 au matin
+
+**L'étiquette SOLO est facultative, et son absence est DITE.**
+
+| Le lot 3 fait | Le lot 3 ne fait pas |
+|---|---|
+| Situer la moyenne dans les plages `min`/`max` de l'échelle de l'évaluation — présentes partout, y compris chez un utilisateur qui ignore SOLO | Exiger que Grégoire étiquette son échelle avant que le dépistage fonctionne (option A) |
+| Interpréter par `niveauSOLO` quand l'étiquette est là | Retomber sur `idme.*` quand elle manque (option C) |
+| Afficher le **nom du niveau atteint** quand elle manque, et signaler que l'interprétation SOLO n'est pas configurée | Rester muet, ou inventer une phrase |
+
+⮕ **Ce que B engage pour le pas 5** (« devenir des seuils `idme.*` ») : B ne leur laisse **aucun rôle de repli**.
+Leur disparition devient l'hypothèse par défaut ; ce qui reste à mesurer, c'est **qui les lit encore**.
+
+⮕ **Ce que B engage pour la validation** : le §4 prévient qu'aucun résultat de dépistage ne changera
+chez Grégoire — ancien et nouveau chemin y donnent la même chose. **Le message d'absence d'étiquette
+est donc le SEUL comportement du lot 3 observable sur ses données**, puisque ses échelles n'en portent
+aucune (§2). C'est lui, et lui seul, qu'une porte terrain doit regarder. Le reste se prouve sur
+l'échelle A/B/C/D fabriquée en test.
+
 ⚠ **Ne pas coder avant que Grégoire ait tranché.** Le §6 du plan liste le devenir des seuils
 `idme.*` comme « à trancher dans ce lot, pas avant » — c'est ici que ça se joue.
+⮕ **Levé le 27 août : la décision est prise, voir ci-dessus.**
 
 ---
 
@@ -174,6 +194,17 @@ qui n'a jamais entendu parler de SOLO.
 - **Vitest 3614/3615.** L'unique rouge est `styles.css` à l'anti-cache (`?v=20260826d` inchangé),
   fichier de #540 commité par `565b130d` — **hors périmètre #542**, à signaler à kuekatsheu-fc.
 - Playwright non relancé en fin de séance.
+
+⮕ **AUDIT DU JEUDI 27 AOÛT, 5 h 20 — trois des lignes ci-dessus sont périmées.**
+
+- **Tout est poussé.** `origin/main` = `HEAD` = `2aff7198`, `git log origin/main..HEAD` est vide.
+  Le « rien n'est poussé » ci-dessus a été écrit avant le push de 22 h 25.
+- **Vitest est VERT : 3615/3615**, 338 fichiers — mesure lue à l'écran ce matin, après le dernier
+  commit et sans changement depuis. Le rouge `styles.css` a été refermé par `2aff7198`, et sa cause
+  — l'anti-cache attrapé trop tard — est inscrite en **#547**.
+- **Playwright toujours pas relancé** : cette ligne-là tient. Baseline connue = 1 échec (`#530`).
+- Version inchangée — `1.101.1`, build `0826-1658`. **Le bump reste dû.**
+- Prochain ID libre : **#548**, vérifié au `BACKLOG.md` ce matin et non recopié d'un document.
 
 **Ouvert au backlog, dans l'ordre où ça devient gênant :**
 
