@@ -682,6 +682,21 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ✅ Sentinelle `tests/unit/sentinelle-541-niveau-depuis-pourcentage.test.js` — 7 cas, **7 ROUGES au
   break-test** avec le message attendu (`expected 'E' to be 'I'`). Vitest **3495/3495** (330 fichiers).
 
+- [ ] **#549 — Le modèle de cartouche part sans les consignes du travail.**
+  Créé le 27 août 2026, **symptôme vécu par Grégoire** : « il manquait un élément important,
+  c'est les consignes du travail ». Le bouton « Télécharger un modèle » (#531, livré le
+  26 août) croise une GRILLE et une ÉCHELLE, et rend un fichier que l'assistant remplit.
+  ⮕ **Ce qui manque, et pourquoi ça compte** : l'assistant reçoit les critères et les
+  niveaux, mais **pas ce qui était demandé à l'élève**. Il écrit donc des commentaires sur
+  une tâche qu'il ne connaît pas.
+  ⮕ **Le geste** : un TROISIÈME menu, à côté des deux autres — la production — dont les
+  consignes sont jointes au fichier. Facultatif : le modèle sans consignes reste utile, et
+  rendre le champ obligatoire casserait un usage qui fonctionne.
+  ⮕ **Réutiliser `blocsInformationDocument` (`export-pdf.js`)**, le composeur du document de
+  consignes : titres personnalisés (`titresBlocs`), champs libres (`champsPersonnalises`),
+  ordre du gabarit (`ordreBlocs`). En écrire un second ferait diverger deux textes qui
+  décrivent le même travail — le patron que #529 a passé une session à défaire.
+
 - [ ] **#542 — SOLO, l'échelle de performance, et ce que le dépistage a le droit de supposer.**
   Chantier ouvert le 26 août 2026 au soir, plan complet dans
   `plans de travail/PLAN-SOLO-echelle-et-depistage.md`. Origine : l'audit du dépistage demandé au
