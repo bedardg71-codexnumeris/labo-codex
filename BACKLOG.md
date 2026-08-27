@@ -682,7 +682,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ✅ Sentinelle `tests/unit/sentinelle-541-niveau-depuis-pourcentage.test.js` — 7 cas, **7 ROUGES au
   break-test** avec le message attendu (`expected 'E' to be 'I'`). Vitest **3495/3495** (330 fichiers).
 
-- [ ] **#549 — Le modèle de cartouche part sans les consignes du travail.**
+- [x] **#549 LIVRÉ 27 août 2026** — Le modèle de cartouche part sans les consignes du travail.
   Créé le 27 août 2026, **symptôme vécu par Grégoire** : « il manquait un élément important,
   c'est les consignes du travail ». Le bouton « Télécharger un modèle » (#531, livré le
   26 août) croise une GRILLE et une ÉCHELLE, et rend un fichier que l'assistant remplit.
@@ -696,6 +696,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   consignes : titres personnalisés (`titresBlocs`), champs libres (`champsPersonnalises`),
   ordre du gabarit (`ordreBlocs`). En écrire un second ferait diverger deux textes qui
   décrivent le même travail — le patron que #529 a passé une session à défaire.
+  ✅ **LIVRÉ le 27 août 2026** (`c4cafff0`). Menu « Consignes du travail », facultatif,
+  option neutre en tête. Le libellé dit quelles productions n'ont **pas** de consignes ; le
+  conteneur `portfolio` n'est pas proposé. `composerModeleCartouche` extraite en fonction
+  PURE au passage — la composition vivait derrière un `Blob` et n'était vérifiable que de
+  visu. 8 tests unitaires + 1 spec WebKit pour le DOM, 4 break-tests rouges vérifiés.
+  ⮕ **Le test qui compte** : le fichier reste RÉIMPORTABLE. Une consigne contenant le motif
+  `**Nom (CODE)** :` ne doit créer aucune ligne de matrice, sinon un faux commentaire entre
+  dans la cartouche réimportée sous un critère qui n'existe pas.
+  ⏳ **À VOIR À L'ÉCRAN** : Grégoire doit faire un `git pull` — il lance l'application depuis
+  son clone en `file://`.
 
 - [ ] **#542 — SOLO, l'échelle de performance, et ce que le dépistage a le droit de supposer.**
   Chantier ouvert le 26 août 2026 au soir, plan complet dans
