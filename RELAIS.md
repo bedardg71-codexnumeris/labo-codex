@@ -12,9 +12,9 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** — tout y est. Aucun travail en avance ailleurs. |
-| **Version** | **1.103.0** — build `0827-0858`. Le niveau global vient de la pratique, le modèle de cartouche emporte les consignes du travail. Playwright 189/189, Vitest 3674/3674. |
-| **Version précédente** | **1.102.0** — livrée le 27 août au matin : les périodes réelles et le dépistage qui dit vrai. |
-| **Travail en avance sur `main`** | **NON — tout est poussé** (vérifié le 27 août à 5 h 20 : `git log origin/main..HEAD` vide). La ligne d'hier annonçait le contraire ; elle avait été écrite avant le push de 22 h 25. **Rien sur aucune branche.** |
+| **Version** | **1.103.1** — build `0827-0953`. Bumpée au rituel de fin : le pas 3c-2 avait été livré APRÈS le déploiement de 1.103.0, donc l'application annonçait un numéro plus ancien que son code. **Vitest 3674/3674 · Playwright 190/190.** |
+| **Version précédente** | **1.103.0** — déployée à 9 h : le niveau vient de la pratique, le modèle de cartouche emporte les consignes. |
+| **Travail en avance sur `main`** | **NON — tout est poussé**, vérifié au rituel de fin (`git log origin/main..HEAD` vide, arbre propre). **Rien sur aucune branche.** |
 | **Suite Playwright** | baseline à **1 seul échec connu** (contre 8 avant #495) : `productions-ajout-refus-garde-340` = **#530**, un vrai bug, pas du bruit. |
 | ⚠ **AVANT TOUTE SUITE PLAYWRIGHT** | **fermer GitHub Desktop.** Les specs lisent l'arbre de travail en direct ; une commande git lancée pendant la suite change les fichiers sous leurs pieds et fait rougir des specs au hasard. Trouvé le 26 août (#523), règle versée au skill `portes-terrain`. |
 | ⚠ **LE CLONE DE GRÉGOIRE EST L'ARBRE DE TRAVAIL** | `/Users/kuekatsheu/Documents/GitHub/Monitorage_v6` sert à la fois de dépôt de travail et de source `file://` pour son app. Il voit les modifications dès qu'il recharge, **avant tout push** — et peut donc tomber sur un état intermédiaire. Le `git pull` des portes terrain lui est inutile. |
@@ -23,6 +23,73 @@
 | ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. ⮕ **ET C'EST ARRIVÉ UNE SECONDE FOIS LE MÊME JOUR, dans l'autre sens.** Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les `BACKLOG.md` et `SESSION.md` de la session « présences » — l'inscription de l'item **#538** et la renumérotation **#534 → #537** vivent donc dans un commit qui parle d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc non réécrit. **Deux avertissements en un jour : sur ce dépôt, `git add` par chemins explicites n'est pas une préférence, c'est la seule méthode qui tienne.** |
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
 | **Dernière mise à jour** | **27 août 2026, matin** — #542 lot 3 : pas 1 et 2 livrés. Le bump de version reste dû. |
+
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 27 août 2026, fin de matinée
+
+**En trois lignes.** Le chantier principal est **#542 lot 3** : faire en sorte que le
+dépistage cesse de lire l'échelle de Grégoire depuis le code. Les fondations sont posées,
+deux écrans sont branchés, il reste la carte « Observation de la structure » — et elle
+demande de la conception, pas du remplacement. Arbre propre, tout poussé, 1.103.1 déployée.
+
+### Le chantier, pas par pas
+
+| Pas | | |
+|---|---|---|
+| 1 · 2 · 3a · 3b | ✅ | Situer · interpréter · une seule résolution d'échelle · **la pratique dit dans quoi sa note globale se lit** |
+| **3c-1** | ✅ | La performance **globale** est branchée. Vérifiée sur ses données : `D 72 %` |
+| **3c-2** | ✅ | Le niveau **par critère** est branché. Plus aucun ternaire `pct >= 85` dans le fichier |
+| **3c-3** | ⏳ | **LE GROS MORCEAU.** `interpreterScoreIDME` et ses 4 descriptions · les bornes `0.85` de « Maîtrisé et étendu » · `interpreterPerformance` et ses 4 seuils · **la carte « Observation de la structure »** |
+| **4** | ⏳ | Supprimer `obtenirNiveauSOLO()` (`trimestres.js`), qui redevine SOLO depuis le NOM d'un critère |
+| **5** | ⏳ | Trancher le devenir des seuils `idme.*` — l'option B ne leur laisse aucun rôle de repli |
+
+⚠ **3c-3 N'EST PAS UN REMPLACEMENT DE TEXTE.** La carte « Observation de la structure » ne
+se contente pas d'afficher des descriptions : elle **choisit quels blocs montrer** selon les
+seuils (forces E, forces M, défis D, défis critiques I). La brancher sur l'échelle de
+l'utilisateur veut dire que quatre blocs figés par niveau IDME deviennent N blocs selon les
+niveaux de SON échelle. C'est de la conception. Consigne détaillée :
+`plans de travail/CONSIGNE-542-lot3-delier-le-depistage.md`.
+
+⚠ **ET LE PIÈGE DU CHANTIER, à connaître avant de commencer** : chez Grégoire, l'ancien et
+le nouveau chemin donnent **le même résultat**, parce que les bornes recopiées dans le code
+sont exactement les siennes. **Ce chantier ne peut pas être validé sur ses données.** Toute
+preuve passe par une échelle fabriquée en test — et jamais A/B/C/D, dont le « D » collisionne
+avec IDME (utiliser W/X/Y/Z).
+
+### Ce qui attend un verdict de Grégoire
+
+- **Étiqueter son échelle en SOLO** — il a répondu « oui, maintenant » (D3), le geste est à
+  lui. ⮕ **Ce n'est plus un confort** : les consignes du modèle de cartouche (#549) font
+  dépendre toute leur rédaction du « seuil de maîtrise », et l'étiquette SOLO est la seule
+  donnée du dépôt qui puisse le dire.
+- **Le pas 5** — les seuils `idme.*` disparaissent-ils ou gardent-ils un rôle ?
+- **Le niveau « 0 » dans le modèle de cartouche** — la matrice génère une ligne par niveau, et
+  la consigne demande de décrire « ce qu'un travail de ce niveau présente ». Un jugement
+  suspendu ne présente rien.
+- **Deux points de vocabulaire** — « préstructurel » garde une formulation courte parmi
+  quatre longues ; les quatre longues emploient « il/elle », un accord lourd que sa convention
+  demande de reformuler.
+
+### Trois pièges qui coûteront à qui les ignore
+
+1. ⚠⚠ **NE JAMAIS ÉCRIRE « fais un `git pull` » DANS UNE PORTE TERRAIN.** Le clone
+   `~/Documents/GitHub/Monitorage_v6` est **à la fois** l'arbre de travail des sessions et la
+   source `file://` de son application. Quand la session commite là — le cas courant — ses
+   commits sont **déjà chez lui**. GitHub Desktop affiche « No local changes » et ne propose
+   aucun pull. **Il s'est bloqué là-dessus le 27 août**, et le gabarit portait la consigne
+   fautive : corrigé dans `.claude/skills/portes-terrain`. La rangée juste est « recharge
+   l'application, et lis le numéro en bas de page ».
+2. ⚠ **L'anti-cache ne se vérifie qu'UNE FOIS PAR CYCLE DE RELEASE.** La sentinelle contrôle
+   que le `?v=` a changé depuis la release précédente ; une fois qu'il a changé, elle reste
+   verte quel que soit le nombre de modifications suivantes du même fichier. Un correctif est
+   parti sous un `?v=` déjà servi le 27 — le navigateur de Grégoire aurait rendu l'ancien
+   fichier. **Bumper le `?v=` à chaque commit qui touche le fichier**, pas une fois par cycle.
+   Versé à **#547**.
+3. ⚠ **Un script de garde qui échoue sans bloquer la suite ne garde rien.** Le même jour, un
+   script de bump a levé une exception, la commande suivante s'est exécutée quand même, et le
+   commit est parti en croyant l'anti-cache posé. **Chaîner avec `&&`**, et faire sortir le
+   script en erreur explicite.
+
+---
 
 ## ✅ PORTE TERRAIN DU 27 AOÛT — RELEVÉE, LES QUATRE DÉCISIONS SONT PRISES
 
