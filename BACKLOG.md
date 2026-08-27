@@ -842,6 +842,19 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   son clone en `file://`.
 
 - [ ] **#542 — SOLO, l'échelle de performance, et ce que le dépistage a le droit de supposer.**
+  ⚠ **AUDIT FABLE 5, 27 août 2026** (`Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md`) :
+  **le lot 4 n'a pas été livré, et il produit des chiffres FAUX chez Grégoire aujourd'hui.**
+  `analyserSousGroupe` (`interventions.js:251, 285`) lit ses cinq noms de critères et convertit les niveaux
+  par `convertirNiveauEnPourcentage` (`portfolio.js:548-570`) : repli `{I:32, D:69.5, M:79.5, E:92.5}`
+  derrière la clé `echellesPerformance` que rien n'écrit — 32/69,5/79,5/92,5 au lieu de 40/65/75/100, et
+  `|| 0` → 0 % pour tout code non IDME (« défis communs » partout ou nulle part selon la grille). La
+  sentinelle A4 stubbe cette fonction et ne peut pas le voir. Toujours vivants aussi : `determinerLettreIDME`
+  (`profil-etudiant-sections-affichage.js:4236`, RENDU à l'écran — l'affirmation « plus aucun ternaire »
+  du pas 3c-2 est fausse), `:714-717`, `_genererBarresSRPNF` + `diagnostics.js:403-406` (VIVANT, pas
+  mort), `liste-evaluations.js:368` (B7), `synthese-retroaction-data.js:19-30` (B10 + `SCALE_FALLBACK` →
+  PDF élève), `evaluation-retroaction.js:488`, `evaluation.js:284` (échelle ancienne M/I/D/B/O),
+  `interventions.js:1019, 1246`. Liste complète et classement vivant/mort : rapport §3. ⮕ **Lot 4 = le
+  prochain chantier recommandé par l'audit** (§9 n° 1), en item propre.
   Chantier ouvert le 26 août 2026 au soir, plan complet dans
   `plans de travail/PLAN-SOLO-echelle-et-depistage.md`. Origine : l'audit du dépistage demandé au
   retour de #529, et la question de Grégoire — « pourquoi la taxonomie SOLO est-elle associée aux
@@ -1496,6 +1509,39 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   illisible. ⚠ La pondération suppose une répartition uniforme sur le trimestre — pour un stage ou
   un cours intensif, `(théorie + labo)` n'est pas la durée d'une semaine donnée. D devra prévoir
   l'écart assumé, jamais le blocage.
+
+### Audit Fable 5 des 26-27 août (découplage SRPNF / IDME / SOLO + Conception) — VERSÉ LE 27 AOÛT
+
+> **Rapport** : `Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md` — base `fbeffdad` (1.104.1),
+> 8 chantiers en worktrees jetables, 31 sentinelles break-testées (70+ mutations), chaque constat porteur
+> re-dérivé une seconde fois. **Ce qui tient** : les correctifs des 26-27 août mordent (#542 lots 1-3,
+> #552, #540/#538, #550/#551) ; la réparation #542 n'a touché aucune note. **Ce qui ne tient pas** est en
+> deux items ci-dessous plus une mise à jour de #542. Le reste — §3 du rapport (19 sites arbitraires
+> vivants non inscrits), §4 (6 sentinelles à renforcer), §5 (coutures, dont `valeurCalcul ∈ [min, max]`
+> gardé nulle part) — reste au rapport tant que Grégoire n'a pas choisi l'ordre (§9 : A lot 4 / B
+> Conception / C données).
+
+- [ ] **#573 — Après « Enregistrer », la cartouche ouverte est REMPLACÉE par une cartouche neuve, et l'autosave #517 devient muet.**
+  (rapport §7.2 n° 1) `sauvegarderCartouche` → `chargerCartouchesRetroaction()` (`cartouches.js:890`) →
+  `initialiserNouveauCartouche(grilleId)` (`:321`) : `cartoucheActuel` = `CART_xxx` neuf, nom et contexte
+  vidés (`:414-417`), matrice re-rendue vide ; la cellule tapée ensuite **n'atteint pas la base**
+  (`persisterCartouchePartielle` ne trouve pas l'enregistrement). Même chemin après suppression (`:1646`).
+  Reproduit en harnais Node, **non vérifié en navigateur**. Antérieur à #517, mais #517 promet désormais un
+  enregistrement qui n'a pas lieu. ⮕ **Candidat sérieux au symptôme « des fois ça enregistre, des fois
+  non »** qui a déclenché l'audit du 25 août. Au même geste : `initialiserNouveauCartouche` porte les plages
+  IDME de Grégoire en repli (`:374-379`) et choisit l'échelle par `find(e => !e.estDemo) || echelles[0]`,
+  sans `echelleId` — la cartouche neuve porte les colonnes de la PREMIÈRE échelle, pas de celle choisie.
+- [ ] **#574 — Depuis #527, l'échelle générique et les gabarits d'échelle sont NON CALCULABLES : aucun ne porte de `valeurCalcul`.**
+  (rapport §7.2 n° 2-3) `ECHELLE_GENERIQUE` (`echelles.js:474-484`, semée au boot par
+  `assurerEchelleGenerique:512`) écrit `valeur: 45/67/82/95` ; `GABARIT_ECHELLE_IDME`
+  (`gabarits-utils.js:294-297`) n'a aucune valeur ; `GABARIT_ECHELLE_STD_MASTERY` écrit `valeurNumerique`.
+  `valeurNumeriqueDuNiveau` ne lit que `valeurCalcul` et rend `null` → **tout critère évalué sur l'une
+  d'elles sort du calcul, sans message ciblé** (le repli retiré par #527 masquait le trou). Le commentaire
+  `echelles.js:3428` (« les échelles semées portent toutes une valeur ponctuelle ») et `:3400-3403`
+  (« le repli reste VOLONTAIRE ») sont faux. Au même geste : un niveau NEUF naît avec `code: 'N', min: 0,
+  max: 100, valeurCalcul: 50` **écrits en base** (`:1221, 2798, 3096, 3563`) — `refusChampNiveau` ne garde
+  que l'édition, l'arbitrage que #526/#527 interdisent revient un cran plus tôt. ⚠ **Sonde d'abord** : des
+  évaluations réelles reposent-elles sur `ECHELLE_GENERIQUE` ou sur une copie de gabarit ?
 
 ### Constats de l'audit de l'onglet ÉVALUATIONS (Fable 5, 25 août) — VERSÉS LE 27 AOÛT
 
