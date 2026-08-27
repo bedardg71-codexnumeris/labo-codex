@@ -61,21 +61,23 @@ describe('durée de période · le défaut vaut 50', () => {
         expect(win.obtenirDureePeriode()).toBe(75);
     });
 
-    it('definirDureePeriode replie sur 50 quand l\'entrée est illisible', () => {
-        const stores = {};
+    it('⚠ #540 lot E3 · la durée de période ne s\'ÉCRIT plus — elle ne se règle plus', () => {
+        // Ce cas éprouvait `definirDureePeriode`. Le setter et son select ont été retirés
+        // le 26 août : le champ n'existait que comme pont entre deux unités (heures
+        // d'horloge à l'horaire, périodes à la présence), et un ratio est invariant par
+        // unité — il ne servait donc pas à calculer l'assiduité. Depuis E1, chaque séance
+        // porte son nombre de périodes.
+        //
+        // La LECTURE subsiste, pour relire le champ `heures` d'anciennes présences que la
+        // saisie n'écrit plus : c'est un paramètre de désérialisation, pas un réglage. Ce
+        // cas garde donc son objet en le retournant — il vérifie qu'aucun chemin ne
+        // réécrit cette clé.
         const win = chargerScript('js/horaire.js', {
-            db: {
-                getSync: (k, d) => (k in stores ? stores[k] : d),
-                setSync: (k, v) => { stores[k] = v; }
-            },
+            db: { getSync: (k, d) => d, setSync: () => {} },
             cle: (n) => 'a2026_' + n
         });
-
-        win.definirDureePeriode('pas un nombre');
-        expect(stores.a2026_dureePeriode).toBe(50);
-
-        win.definirDureePeriode(60);
-        expect(stores.a2026_dureePeriode).toBe(60);
+        expect(typeof win.definirDureePeriode, 'le setter ne doit pas revenir').toBe('undefined');
+        expect(typeof win.obtenirDureePeriode, 'la lecture reste, pour les données d\'avant').toBe('function');
     });
 });
 
@@ -108,12 +110,13 @@ describe('durée de période · le défaut n\'existe qu\'à un seul endroit', ()
         ).toBe('');
     });
 
-    it('le sélecteur d\'index.html présélectionne 50, pas 55', () => {
+    it('⚠ #540 lot E3 · le sélecteur a DISPARU de l\'écran', () => {
+        // Il présélectionnait 50 depuis le 22 août. Il n'existe plus : régler une durée
+        // de période n'a plus de sens une fois que chaque séance porte ses périodes.
+        // Ce cas veille à ce qu'il ne revienne pas — le remettre ressusciterait le pont
+        // entre deux unités que le lot E a démonté.
         const html = lire('index.html');
-        const bloc = html.slice(html.indexOf('id="v2-dureePeriode"'));
-        const select = bloc.slice(0, bloc.indexOf('</select>'));
-
-        expect(select).toMatch(/<option value="50" selected>/);
-        expect(select, 'le 55 ne doit plus être présélectionné').not.toMatch(/<option value="55" selected>/);
+        expect(html, 'le réglage de durée de période est revenu').not.toContain('id="v2-dureePeriode"');
+        expect(html).not.toContain('Durée d\'une période');
     });
 });

@@ -318,16 +318,30 @@ function calculerHeureFin(debut, duree) {
  */
 const DUREE_PERIODE_DEFAUT = 50;
 
+/**
+ * ⚠ #540 lot E3 (26 août 2026) — CECI N'EST PLUS UN RÉGLAGE. NE PAS LE REMETTRE À L'ÉCRAN.
+ *
+ * Le select « Durée d'une période » a été RETIRÉ, et avec lui `definirDureePeriode` et
+ * les deux handlers qui le servaient. Décision de Grégoire, après un audit qui a montré
+ * que ce champ n'existait que comme PONT entre deux unités — l'horaire se saisissait en
+ * heures d'horloge, la présence en périodes. Or un ratio est invariant par unité : cette
+ * valeur ne servait pas à CALCULER l'assiduité, seulement à réconcilier deux modes de
+ * saisie. Et elle ne pouvait pas bien le faire : une période comprend sa PAUSE (50 + 10
+ * ici, 55 + 5 ailleurs), donc aucune durée d'horloge ne rend un nombre de périodes.
+ * Depuis E1, chaque séance PORTE son nombre de périodes ; plus rien ne se déduit.
+ *
+ * CE QUI SUBSISTE, ET POURQUOI. Onze sites lisent encore cette valeur — tous pour relire
+ * le champ `heures` d'anciennes présences, que la saisie n'écrit plus (E3). C'est un
+ * paramètre de DÉSÉRIALISATION d'un format historique, pas une donnée métier : `heures`
+ * y était écrit comme `periodesPresentes × dureePeriode / 60`, on refait l'aller-retour
+ * avec le même diviseur et on retombe sur la valeur d'origine. Rien de neuf ne s'y
+ * calcule.
+ *
+ * ⮕ Si un besoin de « durée d'une période » réapparaît, ce n'est PAS cette clé qu'il faut
+ * ressusciter : c'est une donnée par séance, comme `nombrePeriodes`.
+ */
 function obtenirDureePeriode() {
     return db.getSync(cle('dureePeriode'), null) || DUREE_PERIODE_DEFAUT;
-}
-
-/**
- * Définit la durée d'une période en minutes
- * @param {number} minutes - Durée en minutes (50, 55, 60...)
- */
-function definirDureePeriode(minutes) {
-    db.setSync(cle('dureePeriode'), parseInt(minutes) || DUREE_PERIODE_DEFAUT);
 }
 
 /**
@@ -1556,7 +1570,6 @@ window.calculerHeureFin = calculerHeureFin;
 // 🆕 BETA 95.1 : Gestion des périodes
 window.DUREE_PERIODE_DEFAUT = DUREE_PERIODE_DEFAUT;
 window.obtenirDureePeriode = obtenirDureePeriode;
-window.definirDureePeriode = definirDureePeriode;
 window.periodesVersHeures = periodesVersHeures;
 window.heuresVersPeriodes = heuresVersPeriodes;
 window.periodesVersMinutes = periodesVersMinutes;
@@ -1564,38 +1577,7 @@ window.calculerHeureFinPeriodes = calculerHeureFinPeriodes;
 window.genererOptionsNombrePeriodes = genererOptionsNombrePeriodes;
 window.formaterDuree = formaterDuree;
 
-/**
- * 🆕 BETA 95.1 : Handler UI pour modifier la durée de période
- * Appelé depuis le select #v2-dureePeriode dans index.html
- */
-function modifierDureePeriodeV2(minutes) {
-    if (typeof minutes === 'object' && minutes && minutes.value !== undefined) minutes = minutes.value;
-    definirDureePeriode(parseInt(minutes));
 
-    // Afficher confirmation visuelle
-    const select = document.getElementById('v2-dureePeriode');
-    if (select) {
-        select.style.transition = 'background-color 0.3s';
-        select.style.backgroundColor = 'var(--alerte-fond-succes, #d4edda)';
-        setTimeout(() => {
-            select.style.backgroundColor = '';
-        }, 1000);
-    }
-}
-window.modifierDureePeriodeV2 = modifierDureePeriodeV2;
-
-/**
- * 🆕 BETA 95.1 : Charger la durée de période sauvegardée dans l'UI
- * Appelé lors de l'initialisation de la page Trimestre
- */
-function chargerDureePeriodeUI() {
-    const select = document.getElementById('v2-dureePeriode');
-    if (select) {
-        const dureeSauvegardee = obtenirDureePeriode();
-        select.value = dureeSauvegardee.toString();
-    }
-}
-window.chargerDureePeriodeUI = chargerDureePeriodeUI;
 
 // Fonctions appelées depuis le HTML (onclick, onchange)
 window.afficherFormulaireSeancesDynamique = afficherFormulaireSeancesDynamique;
