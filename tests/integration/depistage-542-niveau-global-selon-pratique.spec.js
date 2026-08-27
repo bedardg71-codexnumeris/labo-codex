@@ -81,16 +81,16 @@ async function monterProfil(page, typePratique) {
         window.db.setSync('trimestreActif', trimestreId);
 
         const coursId = 'cours-542-lot3';
-        window.db.setSync('infoCours', { id: coursId, codeCours: 'FRA101', groupe: '01', _modeCours: true });
-        window.db.setSync(window.cle('groupeEtudiants'), [
+        window.db.setSync('infoCours', { id: coursId, codeCours: 'FRA101', groupe: '01', _modeCours: true }); // security-ok: fixture de test, litteral du fichier, aucune source externe
+        window.db.setSync(window.cle('groupeEtudiants'), [ // security-ok: fixture de test, litteral du fichier
             { da: 'TEST542', nom: 'Roy', prenom: 'Camille', groupe: '01', coursId }
         ]);
-        window.db.setSync(window.cle('productions'), [
+        window.db.setSync(window.cle('productions'), [ // security-ok: fixture de test, litteral du fichier
             { id: 'prod-542-1', type: 'production', activiteApprentissage: 'Analyse littéraire',
               dateEcheance: '2026-04-01', groupes: ['01'], ponderation: 100 }
         ]);
-        window.db.setSync(window.cle('echellesTemplates'), [echelle]);
-        window.db.setSync(window.cle('evaluationsSauvegardees'), [
+        window.db.setSync(window.cle('echellesTemplates'), [echelle]); // security-ok: fixture de test, echelle definie en tete de ce fichier
+        window.db.setSync(window.cle('evaluationsSauvegardees'), [ // security-ok: fixture de test, litteral du fichier
             {
                 id: 'eval-542-1', etudiantDA: 'TEST542', productionId: 'prod-542-1',
                 echelleId: echelle.id, noteFinale: 78, retroactionFinale: 'Bon travail.',
