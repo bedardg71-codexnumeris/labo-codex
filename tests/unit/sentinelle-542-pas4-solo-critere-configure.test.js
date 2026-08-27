@@ -97,4 +97,49 @@ describe('#542 pas 4 · le SOLO d\'un critère vient du champ configuré', () =>
         expect(trimestres, 'l\'export n\'applique pas le même défaut que calculerIPB')
             .toMatch(/niveauSOLO\s*\)?\s*\|\|\s*'multistructurel'/);
     });
+
+    // -----------------------------------------------------------------------
+    // #542 lot 3, pas 4 (suite) — L'EXPORT N'ANNONCE PLUS UNE ÉCHELLE QU'IL
+    // N'A PAS LUE.
+    //
+    // ⚠ POURQUOI CES DEUX TESTS PÈSENT PLUS QUE LEURS VOISINS. Un affichage
+    // trompeur se corrige au rechargement suivant. Un jeu de données de
+    // recherche part ailleurs, est analysé, cité — et survit à sa correction.
+    // L'export annonçait `['I','D','M','E']` à tout le monde, y compris à qui
+    // note en W/X/Y/Z ; ce fichier-là n'était pas incomplet, il était faux.
+    // -----------------------------------------------------------------------
+
+    it('5. l\'échelle IDME et le seuil de réussite ne sont plus écrits dans l\'export', () => {
+        const code = lireCodeSansCommentaires('js/trimestres.js');
+
+        expect(code, 'la liste IDME en dur est revenue dans l\'export')
+            .not.toMatch(/echelle:\s*\[\s*'I'\s*,\s*'D'\s*,\s*'M'\s*,\s*'E'\s*\]/);
+        // `seuil_reussite` est retiré SANS remplaçant : aucune donnée du dépôt ne
+        // dit quel niveau marque la réussite. Le champ ne peut donc pas revenir
+        // « rempli autrement » — il ne peut revenir que supposé.
+        expect(code, '`seuil_reussite` est revenu — or rien ne peut le renseigner')
+            .not.toContain('seuil_reussite');
+    });
+
+    it('6. l\'export livre le catalogue des échelles, et chaque évaluation dit laquelle lire', () => {
+        const code = lireCodeSansCommentaires('js/trimestres.js');
+
+        // Le catalogue vient de la variable que la fonction chargeait déjà et
+        // jetait sans usage.
+        expect(code, 'le catalogue des échelles a disparu de l\'export')
+            .toMatch(/echelles:\s*\(echelles\s*\|\|\s*\[\]\)/);
+
+        // ⮕ ET SES PLAGES AVEC, sans quoi le catalogue ne servirait à rien : un
+        // code de niveau seul ne dit ni à quel pourcentage il correspond, ni ce
+        // qu'il signifie.
+        const bloc = (code.match(/echelles:\s*\(echelles[\s\S]{0,900}/) || [''])[0];
+        for (const champ of ['min', 'max', 'niveau_solo']) {
+            expect(bloc, `le catalogue n'exporte plus « ${champ} »`).toContain(champ);
+        }
+
+        // Le lien entre une évaluation et son échelle. Sans lui, le catalogue est
+        // là mais rien ne dit lequel de ses éléments s'applique.
+        expect(code, 'les évaluations exportées ne portent plus leur `echelle_id`')
+            .toMatch(/echelle_id:\s*e\.echelleId/);
+    });
 });

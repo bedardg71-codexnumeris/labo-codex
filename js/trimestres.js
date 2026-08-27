@@ -1775,8 +1775,40 @@
                     grille_evaluation: grilleRef ? {
                         id: grilleRef.id,
                         nom: grilleRef.nom,
-                        echelle: ['I', 'D', 'M', 'E'],
-                        seuil_reussite: 'M',
+                        // ⚠⚠ #542 lot 3, pas 4 (suite) — DEUX VALEURS EN DUR RETIRÉES
+                        // D'ICI, ET C'EST PLUS GRAVE QU'À L'ÉCRAN.
+                        //
+                        // Ce qui vivait là :
+                        //     echelle: ['I', 'D', 'M', 'E'],
+                        //     seuil_reussite: 'M',
+                        //
+                        // ⮕ TROIS FAITS, MESURÉS AVANT LE GESTE :
+                        //   1. Cette fonction CHARGE déjà les échelles réelles du
+                        //      trimestre (`echelles`, plus haut) — et ne s'en servait
+                        //      JAMAIS. La variable était lue et jetée.
+                        //   2. Les évaluations exportées portaient leurs
+                        //      `niveauSelectionne` (« M », « Y »…) mais PAS leur
+                        //      `echelleId` : le chercheur recevait des codes de niveau
+                        //      sans savoir dans quelle échelle les lire.
+                        //   3. Le seul repère qu'on lui donnait était cette liste
+                        //      IDME écrite dans le code.
+                        //
+                        // ⮕ Chez un utilisateur qui note autrement, le fichier produit
+                        // n'était pas incomplet : il était FAUX. Un affichage trompeur
+                        // se corrige au rechargement ; un jeu de données de recherche
+                        // part ailleurs et survit à sa correction.
+                        //
+                        // ✅ DÉCISION DE GRÉGOIRE (27 août 2026) : l'export livre le
+                        // CATALOGUE RÉEL des échelles (voir `echelles` ci-dessous) et
+                        // chaque évaluation porte son `echelle_id`. Le lecteur relie
+                        // les deux lui-même, sans que l'application ne suppose rien.
+                        //
+                        // ⮕ `seuil_reussite` est RETIRÉ, sans remplaçant : AUCUNE
+                        // donnée du dépôt ne dit quel niveau marque la réussite. Le
+                        // « seuil de maîtrise » est justement ce qui manque aussi à
+                        // #549 et à la troisième option écartée au pas 3c-3. Écrire
+                        // « M » était une supposition, et une supposition exportée est
+                        // indiscernable d'une mesure.
                         criteres: (grilleRef.criteres || []).map(c => ({
                             code: c.id,
                             nom: c.nom,
@@ -1820,6 +1852,37 @@
                             type: typeCritereSelonSOLO(c)
                         }))
                     } : {},
+
+                    // ⮕ #542 lot 3, pas 4 (suite) — LE CATALOGUE DES ÉCHELLES DU
+                    // TRIMESTRE, qui remplace la liste `['I','D','M','E']` retirée
+                    // ci-dessus. Ces échelles étaient déjà chargées par la fonction et
+                    // jetées sans usage.
+                    //
+                    // TOUTES celles du trimestre, et pas « celle de la grille » : une
+                    // grille ne désigne pas d'échelle dans ce dépôt, et plusieurs
+                    // peuvent coexister sur un même trimestre. Choisir aurait été
+                    // deviner — c'est le geste que tout ce lot retire. Le lien se fait
+                    // par l'`echelle_id` que porte désormais chaque évaluation.
+                    //
+                    // Les PLAGES et l'étiquette SOLO partent avec, parce que sans elles
+                    // un code de niveau reste illisible : « M » ne dit ni à quel
+                    // pourcentage il correspond, ni ce qu'il signifie.
+                    echelles: (echelles || []).map(ech => ({
+                        id: ech.id,
+                        nom: ech.nom,
+                        niveaux: (ech.niveaux || []).map(n => ({
+                            code: n.code,
+                            nom: n.nom,
+                            min: n.min,
+                            max: n.max,
+                            valeur_calcul: (n.valeurCalcul !== undefined ? n.valeurCalcul : n.valeur),
+                            // Vide tant que l'utilisateur n'a pas étiqueté son échelle
+                            // (#542 lot 2). `null` plutôt qu'une valeur devinée : c'est
+                            // la même règle que partout dans ce lot.
+                            niveau_solo: n.niveauSOLO || null
+                        }))
+                    })),
+
                     calendrier: {
                         date_debut: cadreCalendrier.dateDebut || '',
                         date_fin: cadreCalendrier.dateFin || '',
@@ -1868,6 +1931,16 @@
                             id_artefact: e.productionId,
                             date_echeance: obtenirDateEcheance(e.productionId, productions),
                             statut_remise: e.statutRemise,
+                            // ⮕ #542 lot 3, pas 4 (suite) — SANS CE CHAMP, LES NIVEAUX
+                            // CI-DESSOUS SONT ILLISIBLES. `criteres` rend des codes
+                            // (« M », « Y »…) qui n'ont de sens que dans une échelle
+                            // donnée ; l'export n'en désignait aucune. Le catalogue
+                            // `contexte.echelles` porte les échelles, celui-ci dit
+                            // laquelle lire pour CETTE évaluation.
+                            // `null` quand l'évaluation n'en désigne pas — une donnée
+                            // ancienne, ou une échelle disparue du trimestre. On ne
+                            // choisit pas à sa place.
+                            echelle_id: e.echelleId || null,
                             criteres: (e.criteres || []).reduce((acc, c) => {
                                 acc[normaliserNomCritere(c.critereNom)] = c.niveauSelectionne;
                                 return acc;
