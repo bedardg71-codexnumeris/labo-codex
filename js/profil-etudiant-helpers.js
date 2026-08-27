@@ -300,6 +300,116 @@ function _borneNumeriqueOuNull(valeur) {
     return Number.isFinite(nombre) ? nombre : null;
 }
 
+/**
+ * Interprète le NIVEAU ATTEINT — celui que rend `situerPourcentageDansEchelle` —
+ * par l'étiquette SOLO que l'utilisateur a posée dessus.
+ *
+ * ⮕ #542 lot 3, pas 2. C'est la moitié « INTERPRÉTER ». Elle est séparée de la
+ * moitié « SITUER » parce que les deux ne demandent pas la même chose : situer ne
+ * demande que des plages, présentes dans TOUTE échelle ; interpréter demande une
+ * étiquette SOLO, qui est FACULTATIVE.
+ *
+ * ⚠ DÉCISION DE GRÉGOIRE, 27 août 2026 — OPTION B : « l'étiquette est
+ * facultative, et son absence est DITE ». Deux options ont été écartées ce
+ * jour-là, et il faut savoir pourquoi avant de les rouvrir :
+ *
+ *   A — exiger que l'utilisateur étiquette son échelle d'abord. Écartée : elle
+ *       rend le dépistage MUET tant que la porte n'est pas passée, et un
+ *       utilisateur qui n'a jamais entendu parler de SOLO ne la passera jamais.
+ *   C — retomber sur les seuils `idme.*` quand l'étiquette manque. Écartée : ce
+ *       sont les bornes de Grégoire recopiées dans le code, et les retirer est
+ *       tout l'objet du chantier. Un repli les y remettrait par la porte
+ *       arrière — c'est exactement la manière dont ils y étaient entrés.
+ *
+ * ⮕ CE QUE B DONNE, ET QUI EST LE POINT : sans étiquette, le dépistage rend le
+ * NOM DU NIVEAU ATTEINT — « Avancé », « Maîtrise », ce que l'utilisateur a écrit —
+ * et DIT que l'interprétation SOLO n'est pas configurée. Il ne se tait pas, il
+ * n'invente pas, et il nomme ce qui manque. C'est le patron du lot 1
+ * (`diagnostiquerConversionNiveaux`) : un message qui NOMME la cause, parce
+ * qu'une cause nommée se répare et qu'un silence ne se répare pas.
+ *
+ * ⚠ AUJOURD'HUI, AUCUNE ÉCHELLE RÉELLE NE PORTE D'ÉTIQUETTE : le lot 2 a livré le
+ * champ, et il naît vide. Le chemin « non interprétée » est donc, pour l'instant,
+ * le SEUL que les données de Grégoire empruntent. Ce n'est pas un cas de bord
+ * théorique, c'est le cas courant — et c'est lui qu'une porte terrain doit
+ * regarder.
+ *
+ * Verrouillé par `tests/unit/sentinelle-542-interpreter-niveau-atteint.test.js`.
+ *
+ * @param {Object|null} niveau - Le niveau atteint, tel que rendu par `situerPourcentageDansEchelle`
+ * @returns {Object} - `{ interpretee, solo, libelleSOLO, texte, raison, message }`
+ */
+function interpreterNiveauAtteint(niveau) {
+    // Aucun niveau : la moyenne ne tombait dans aucune plage, ou l'échelle est
+    // introuvable. Il n'y a rien à interpréter, et surtout rien à supposer.
+    if (!niveau) {
+        return {
+            interpretee: false,
+            solo: null,
+            libelleSOLO: null,
+            texte: null,
+            raison: 'sans-niveau',
+            message: 'La moyenne ne correspond à aucun niveau de l\'échelle utilisée. '
+                + 'Vérifie que les plages de l\'échelle couvrent bien tout l\'intervalle des notes.'
+        };
+    }
+
+    const nomDuNiveau = String(niveau.nom || niveau.code || '').trim() || null;
+    const etiquette = String(niveau.niveauSOLO == null ? '' : niveau.niveauSOLO).trim();
+
+    // Sans étiquette : le NOM du niveau, et l'absence est dite. C'est l'option B.
+    if (!etiquette) {
+        return {
+            interpretee: false,
+            solo: null,
+            libelleSOLO: null,
+            texte: nomDuNiveau,
+            raison: 'sans-etiquette',
+            message: 'Le niveau atteint est affiché tel que tu l\'as nommé. '
+                + 'Pour obtenir une interprétation en termes de taxonomie SOLO, associe une '
+                + 'étiquette SOLO à chaque niveau de ton échelle, dans l\'éditeur d\'échelles.'
+        };
+    }
+
+    // La table des cinq niveaux SOLO vit dans `echelles.js` — UN seul producteur,
+    // celui-là même qui alimente le menu de l'éditeur (#542 lot 2). On la lit, on
+    // n'en refait pas une copie : deux copies d'une même liste finissent toujours
+    // par diverger, et #529 a passé une session à défaire ce patron.
+    const table = (typeof NIVEAUX_SOLO_ECHELLE !== 'undefined')
+        ? NIVEAUX_SOLO_ECHELLE
+        : (typeof window !== 'undefined' ? window.NIVEAUX_SOLO_ECHELLE : null);
+
+    const entree = Array.isArray(table)
+        ? table.find(function(n) { return n && n.valeur === etiquette; })
+        : null;
+
+    // Étiquette posée mais inconnue de la table — donnée importée, ou table non
+    // chargée. On ne devine pas : on retombe sur le nom du niveau, et on dit
+    // laquelle des deux causes s'applique.
+    if (!entree || !entree.description) {
+        return {
+            interpretee: false,
+            solo: etiquette,
+            libelleSOLO: entree ? entree.libelle : null,
+            texte: nomDuNiveau,
+            raison: Array.isArray(table) ? 'etiquette-inconnue' : 'table-absente',
+            message: Array.isArray(table)
+                ? 'Ce niveau porte l\'étiquette SOLO « ' + etiquette + ' », qui ne fait pas '
+                    + 'partie des cinq niveaux de la taxonomie. Le niveau atteint est affiché tel quel.'
+                : 'La table des niveaux SOLO n\'est pas disponible. Le niveau atteint est affiché tel quel.'
+        };
+    }
+
+    return {
+        interpretee: true,
+        solo: entree.valeur,
+        libelleSOLO: entree.libelle,
+        texte: entree.description,
+        raison: null,
+        message: null
+    };
+}
+
 /* ===============================
    🚀 INITIALISATION DU MODULE
    =============================== */
@@ -770,6 +880,7 @@ window.accordTermeProduction = accordTermeProduction;
 window.obtenirCouleurNiveauIDME = obtenirCouleurNiveauIDME;
 window.obtenirNiveauIDMEDepuisPourcentage = obtenirNiveauIDMEDepuisPourcentage;
 window.situerPourcentageDansEchelle = situerPourcentageDansEchelle;
+window.interpreterNiveauAtteint = interpreterNiveauAtteint;
 window.obtenirNombreProductionsPourPatterns = obtenirNombreProductionsPourPatterns;
 window.obtenirIdsProductionsEvaluables = obtenirIdsProductionsEvaluables;
 window.obtenirPratiqueActuelle = obtenirPratiqueActuelle;
