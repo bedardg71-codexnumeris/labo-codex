@@ -682,6 +682,22 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ✅ Sentinelle `tests/unit/sentinelle-541-niveau-depuis-pourcentage.test.js` — 7 cas, **7 ROUGES au
   break-test** avec le message attendu (`expected 'E' to be 'I'`). Vitest **3495/3495** (330 fichiers).
 
+- [ ] **#550 — Sans grille de référence, le dépistage dit « aucune force ni défi » au lieu de « je n'ai rien à comparer ».**
+  Créé le 27 août 2026, **symptôme vécu par Grégoire le matin même** : sa carte « Observation
+  de la structure des résultats d'apprentissage » affichait *« Aucune force ni défi identifié
+  selon la taxonomie SOLO »*, et « Progression par critère » était vide. Cause : **aucune
+  grille de référence n'était désignée** dans ses préférences — `obtenirCriteresAvecValeurs`
+  rendait donc un tableau vide.
+  ⮕ **Le défaut n'est pas le vide, c'est la PHRASE.** « Aucune force ni défi identifié » se
+  lit comme un verdict rassurant sur l'élève, alors que ça veut dire « je n'ai aucun critère
+  à quoi comparer ». C'est **exactement le patron A3 de #542**, que le lot 1 a refermé pour
+  les conversions d'échelle — et qui subsiste ici pour l'absence de grille.
+  ⮕ **Le geste** : distinguer les deux cas. « Aucun défi détecté » (les critères existent et
+  vont bien) est un verdict ; « aucune grille de référence n'est désignée » est une panne de
+  configuration, et elle doit le dire, avec le chemin pour la régler.
+  ⮕ Même patron que `diagnostiquerConversionNiveaux` : nommer la cause, parce qu'une cause
+  nommée se répare et qu'un silence ne se répare pas.
+
 - [x] **#549 LIVRÉ 27 août 2026** — Le modèle de cartouche part sans les consignes du travail.
   Créé le 27 août 2026, **symptôme vécu par Grégoire** : « il manquait un élément important,
   c'est les consignes du travail ». Le bouton « Télécharger un modèle » (#531, livré le
