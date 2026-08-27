@@ -787,6 +787,30 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   écrite, et c'est l'écriture qui écrase. Voir aussi le seed d'échelles au boot et les migrations de
   trimestre (`project-modele-horaire-par-trimestre` a le même patron de recréation pure).
 
+- [ ] **#547 — L'anti-cache est attrapé APRÈS le commit, jamais pendant. Quatre oublis en deux jours.**
+  Créé le 26 août 2026 (fin de soirée). **Ce n'est plus une étourderie individuelle, c'est un
+  motif** : quatre occurrences du même geste manqué, sur **trois sessions différentes** et trois
+  chantiers sans rapport (#540 lot C, #540 lot D sur `styles.css`, #541, #542). À chaque fois :
+  un fichier modifié dont le `?v=` de `index.html` ne suit pas, donc un navigateur qui sert la
+  version périmée pendant que le bas de page annonce la neuve — l'incident du 23 août.
+  ⮕ **POURQUOI LE FILET NE TIENT PAS.** `sentinelle-anticache-fichiers-modifies` compare des
+  COMMITS : elle ne peut rien voir tant que le travail est dans l'arbre, et rougit seulement
+  au coup d'après. Le hook `pre-push` la voit — trop tard, le commit est écrit. Le geste
+  correcteur (`node scripts/release.mjs --build-only`, ou l'édition du seul suffixe quand on ne
+  veut pas bumper le build) est connu de tous et appliqué correctement à chaque fois : ce n'est
+  pas la connaissance qui manque, c'est le RAPPEL AU BON MOMENT.
+  ⮕ **Pistes, à trancher** : (a) un contrôle dans `scripts/hooks/pre-commit` qui compare les
+  fichiers STAGÉS à leur `?v=` — il tourne avant l'écriture, mais doit rester rapide et ne pas
+  bloquer un commit de documentation ; (b) `--build-only` intégré au geste de commit, ce qui
+  suppose de trancher le cas « session `file://` ouverte » où le build ne doit PAS bouger ;
+  (c) laisser en l'état et l'accepter comme coût de la coordination à plusieurs sessions.
+  ⚠ **La contrainte qui décide** : Grégoire travaille dans l'arbre en `file://`. Tout automatisme
+  qui bumpe le BUILD pendant qu'il a l'application ouverte lui change la version sous les pieds
+  ([[feedback-bump-build-session-ouverte]]). Un contrôle qui SIGNALE sans écrire est donc plus
+  sûr qu'un contrôle qui corrige.
+  ⮕ Repéré par la session #542 sur le `styles.css` du lot D de #540, et relayé par la session
+  #541 — les trois sessions du soir ont vu le même défaut, aucune ne l'avait vu chez elle.
+
 - [ ] **#543 — Les 55 évaluations dont la note stockée ne se recalcule pas.** Créé le 26 août 2026 (soirée),
   extrait de #542 (l'oracle les isole ; ce ne sont PAS un problème d'échelle — aucune n'est
   reproduite par une échelle différente, aucune ne porte de code de niveau inconnu). **Deux causes

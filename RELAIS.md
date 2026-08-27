@@ -21,7 +21,7 @@
 | 📐 **CHANTIER MAJEUR EN ATTENTE** | **#529 — sortir SRPNF et IDME du code.** Session DÉDIÉE (décision Grégoire, 26 août). Sa règle : « rien ne doit être codé en dur, mais l'échelle IDME peut être seedée ». Audit : `Rapports/AUDIT-srpnf-code-en-dur-2026-08-26.md`. |
 | ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE** | **#427** (refermer l'accès public) et **#508** (l'avis d'accueil qui l'annonce). Fiche opératoire prête : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`. **Dû par Grégoire** : la liste nominale des personnes à inviter et les trois noms Cloudflare — personne ne peut les préparer à sa place. |
 | ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. ⮕ **ET C'EST ARRIVÉ UNE SECONDE FOIS LE MÊME JOUR, dans l'autre sens.** Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les `BACKLOG.md` et `SESSION.md` de la session « présences » — l'inscription de l'item **#538** et la renumérotation **#534 → #537** vivent donc dans un commit qui parle d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc non réécrit. **Deux avertissements en un jour : sur ce dépôt, `git add` par chemins explicites n'est pas une préférence, c'est la seule méthode qui tienne.** |
-| ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit trois fois en deux jours, sur trois sessions** : un fichier modifié dont le `?v=` ne suit pas. Le réflexe à prendre — vérifier `sentinelle-anticache-fichiers-modifies` AVANT de committer, pas après. |
+| ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
 | **Dernière mise à jour** | **26 août 2026, fin de soirée (21e cycle)** — #540 clos (5 lots), #541 livré, #542 en cours par une session encore active |
 
 ## Ce que la soirée du 26 août a livré (21e cycle)
@@ -101,8 +101,30 @@ le dire.** Antérieur à tous les chantiers de la soirée. Aucune réparation en
 une décision sur ses données réelles, avec sauvegarde et dry-run. L'oracle du 26 sert à
 identifier laquelle avant d'y toucher.
 
-⮕ **Prochain ID libre : #543.** Trois collisions d'ID ont été évitées de justesse ce soir
-en inscrivant l'item au backlog AVANT de l'employer.
+⮕ **Prochain ID libre : #548.** ⚠ Ce chiffre a bougé QUATRE FOIS pendant la rédaction de ce
+relais — il annonçait #543, déjà pris, puis #547 l'a été à son tour. Les collisions ont été
+évitées en inscrivant chaque item au backlog AVANT de l'employer ; **vérifier le dernier ID
+au moment d'écrire, jamais celui qu'un document annonce.**
+
+### ⚠ Une leçon qui vaut pour ce fichier lui-même
+
+**Les documents de coordination se périment plus vite que le travail qu'ils décrivent.**
+Constat de la session #541 sur son propre cadrage d'audit : quatre de ses affirmations
+étaient fausses deux heures après l'avoir écrit, dont « aucune réparation n'a été engagée »
+alors qu'elle venait de l'être sur les données réelles. Son périmètre avait doublé — 11
+commits devenus 22. Elle a inscrit les corrections DANS le document plutôt que de les
+effacer, et c'est le bon geste : dans un dépôt à trois sessions, la vitesse de péremption
+d'un cadrage est une donnée en soi.
+
+⮕ **Ce relais-ci ne fait pas exception.** Le lire au début d'une session, oui ; le croire
+sur les chiffres, non — vérifier `git log`, `BACKLOG.md` et l'arbre.
+
+### L'audit externe des 26-27 août
+
+`Rapports/CADRAGE-AUDIT-FABLE5-2026-08-27.md` (commits `9ac3c86c` puis `8269e8de`).
+Grégoire le donnera à **Fable 5** pour auditer le travail des deux chantiers : vérification
+adverse et intégrité des données. **La conception est HORS PÉRIMÈTRE**, sur sa décision
+explicite.
 
 ### Défauts trouvés et NON corrigés (inscrits, pas oubliés)
 
