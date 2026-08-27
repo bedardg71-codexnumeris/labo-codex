@@ -733,6 +733,28 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⏳ **ET LA CAUSE RESTE INCONNUE** : l'échelle avait déjà été recréée le 5 août. Tant qu'on ne sait
   pas ce qui l'a ré-orphelinée, cette réparation peut se défaire.
 
+- [ ] **#546 — Le « jugement suspendu » n'est plus saisissable : #526 a fermé la porte que le plan SOLO suppose ouverte.**
+  Créé le 27 août 2026 pendant le lot 2 de #542. **Deux exigences de Grégoire, posées le même jour,
+  se contredisent — et aucune n'est fautive :**
+  - **#526 (26 août)** a étendu `refusChampNiveau` (`echelles.js`) : `min`, `max` **et
+    `valeurCalcul`** sont refusés vides ou non numériques. Motif donné alors, et il tient : « la
+    plage sert aux pratiques alternatives, la note ponctuelle sert à la notation sommative » — les
+    deux sont des conversions INVERSES, l'une ne se déduit pas de l'autre.
+  - **Le plan SOLO (26 août au soir), §2-D4 et §3-C4**, pose que le « jugement suspendu » — un niveau
+    qui ne produit pas de note et retire le critère du calcul, numérateur ET dénominateur — se réalise
+    par une `valeurCalcul` **VIDE**, « mécanisme déjà en place de bout en bout ».
+  ⮕ **Les deux sont vrais, et c'est le problème** : le mécanisme existe toujours dans le CALCUL
+  (`valeurNumeriqueDuNiveau` rend `null`, `evaluation-calcul.js` exclut le critère), mais **l'UI en
+  interdit désormais l'entrée**. Un utilisateur ne peut plus créer un niveau hors calcul.
+  ⚠ **Le lot 2 a donc REFUSÉ d'exécuter l'instruction « retirer l'astérisque de Valeur ponctuelle »**
+  du plan : depuis #526, cet astérisque dit la vérité. Le retirer aurait été une régression écrite en
+  croyant appliquer le plan. Le constat C4 est **périmé**, il décrivait l'état du 26 août au matin.
+  ⏳ **À TRANCHER PAR GRÉGOIRE, et ce n'est pas une question de code** : (a) le jugement suspendu
+  passe-t-il par un autre geste que la valeur vide — une case « hors calcul », par exemple, qui dirait
+  ce qu'elle fait au lieu de le laisser deviner ? (b) ou bien la valeur vide redevient-elle permise,
+  avec un libellé qui explique ce qu'elle signifie ? La seconde rouvre exactement ce que #526 a
+  fermé. **Ne pas coder avant d'avoir choisi.**
+
 - [ ] **#544 — Les 44 évaluations `ECHELLE_DEMO` de H2026, et la décision du 5 août à revoir.**
   Créé le 27 août 2026, au terme de la réparation #542. Ces 44 évaluations vivent dans
   `h2026_evaluationsSauvegardees` — un magasin RÉEL, pas la démo — et désignent `ECHELLE_DEMO`, un

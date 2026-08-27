@@ -57,7 +57,23 @@
  * Structure de chaque niveau:
  * - code: Code court (1-3 lettres)
  * - nom: Nom descriptif du niveau
- * - description: Explication du niveau (taxonomie SOLO)
+ * - description: Explication du niveau, en prose — c'est le texte que l'élève
+ *   LIT (il part dans les PDF remis, cf. `export-pdf.js`, les cartouches et le
+ *   comparateur). Il n'est PAS remplacé par le champ ci-dessous.
+ * - niveauSOLO: l'étiquette SOLO STRUCTURÉE du niveau — ce que le calcul sait
+ *   lire, là où la `description` est de la prose qu'il ne peut pas lire (#542
+ *   lot 2). Facultatif : une échelle en pourcentages ou en lettres n'a pas de
+ *   lecture SOLO.
+ *   ⚠ POSÉ ICI PARCE QUE C'EST UN SEED — une échelle LIVRÉE, que l'utilisateur
+ *   voit et modifie. Ce n'est pas la même chose que deviner l'étiquette d'une
+ *   échelle EXISTANTE depuis sa prose : ça, ce serait exactement le défaut B9
+ *   (`obtenirNiveauSOLO()` qui redevine SOLO depuis le nom d'un critère et
+ *   contredit le champ configuré). Aucune reprise automatique n'est faite sur
+ *   les échelles déjà enregistrées : le champ y naît vide.
+ *   ⚠ « I » reçoit `unistructurel` et NON un composite : sa description dit
+ *   « Préstructurel, unistructurel », mais le menu ne prend qu'UNE étiquette
+ *   (décision du 26 août : pas d'entrée composite, chaque lecteur n'a qu'une
+ *   valeur à traiter). La nuance reste dans la prose, qui est faite pour ça.
  * - min: Pourcentage minimum
  * - max: Pourcentage maximum
  * - couleur: Variable CSS pour la couleur
@@ -69,6 +85,7 @@ const niveauxDefaut = [
         code: 'I',
         nom: 'Incomplet',
         description: 'Préstructurel, unistructurel',
+        niveauSOLO: 'unistructurel',
         min: 0,
         max: 64.99,
         valeurCalcul: 32,
@@ -78,6 +95,7 @@ const niveauxDefaut = [
         code: 'D',
         nom: 'en Développement',
         description: 'Multistructurel',
+        niveauSOLO: 'multistructurel',
         min: 65,
         max: 74.99,
         valeurCalcul: 69.5,
@@ -87,6 +105,7 @@ const niveauxDefaut = [
         code: 'M',
         nom: 'Maîtrisé',
         description: 'Relationnel',
+        niveauSOLO: 'relationnel',
         min: 75,
         max: 84.99,
         valeurCalcul: 79.5,
@@ -96,6 +115,7 @@ const niveauxDefaut = [
         code: 'E',
         nom: 'Étendu',
         description: 'Abstrait étendu',
+        niveauSOLO: 'abstrait_etendu',
         min: 85,
         max: 100,
         valeurCalcul: 92.5,
@@ -2788,6 +2808,78 @@ function ajouterPremierNiveau() {
  * Affiche les niveaux pour une nouvelle échelle (pas encore sauvegardée)
  * Format identique aux échelles existantes avec placeholders
  */
+/* ===============================
+   🎓 NIVEAU SOLO ATTEINT — LE MENU DE L'ÉCHELLE (#542 lot 2)
+   =============================== */
+
+/**
+ * Les cinq niveaux canoniques de la taxonomie SOLO, pour le menu « Niveau SOLO
+ * atteint » des DEUX éditeurs d'échelle.
+ *
+ * ⚠⚠ DEUX SOLO, DEUX QUESTIONS DIFFÉRENTES — ET C'EST VOULU.
+ *
+ *   · SOLO sur le CRITÈRE de grille (`grilles.js`) : « quelle complexité ce
+ *     critère EXIGE-t-il ? » — une VISÉE didactique. TROIS valeurs, parce qu'on
+ *     ne conçoit jamais un critère qui vise l'unistructurel. C'est ce champ qui
+ *     pilote l'IPB, lequel ne surveille que les critères « multistructurels »,
+ *     les FONDATIONS.
+ *
+ *   · SOLO sur le NIVEAU d'échelle (ici) : « quelle complexité la réponse
+ *     ATTEINT-elle ? » — un CONSTAT. CINQ valeurs, parce qu'une réponse, elle,
+ *     peut être préstructurelle.
+ *
+ * ⮕ ON AJOUTE, ON NE DÉPLACE PAS (décision de Grégoire, 26 août 2026).
+ *   Déplacer SOLO du critère vers l'échelle ferait perdre l'IPB : un élève qui
+ *   bloque sur un critère « fondation » n'a pas les bases, tandis qu'un élève
+ *   qui bute sur un critère de nuance bute sur ce qui est difficile pour tout le
+ *   monde. Les compter pareil produirait des faux positifs en série.
+ *
+ * ⮕ QUE LES DEUX MENUS SOIENT VISIBLEMENT DIFFÉRENTS EST UN ACQUIS, PAS UN
+ *   DÉFAUT : c'est ce qui apprend à l'utilisateur qu'il ne répond pas à la même
+ *   question.
+ *
+ * ⮕ FACULTATIF, et ça compte : toutes les échelles n'ont pas de lecture SOLO —
+ *   une échelle en pourcentages, une échelle A/B/C/D. « aucun » est une réponse
+ *   légitime, pas un champ à remplir.
+ *
+ * ⮕ PAS D'ENTRÉE COMPOSITE, pas de sélection multiple : chaque lecteur du champ
+ *   n'a qu'une étiquette à traiter. La nuance « I couvre aussi le
+ *   préstructurel » reste dans la `description`, qui est le texte que l'élève
+ *   lit.
+ */
+const NIVEAUX_SOLO_ECHELLE = [
+    { valeur: 'prestructurel', libelle: 'Préstructurel' },
+    { valeur: 'unistructurel', libelle: 'Unistructurel' },
+    { valeur: 'multistructurel', libelle: 'Multistructurel' },
+    { valeur: 'relationnel', libelle: 'Relationnel' },
+    { valeur: 'abstrait_etendu', libelle: 'Abstrait étendu' }
+];
+
+/**
+ * Rend les <option> du menu SOLO d'un niveau d'échelle.
+ *
+ * UN SEUL producteur pour les DEUX éditeurs : `echelles.js` en porte deux
+ * copies du même formulaire, et toute duplication y a fini par diverger. C'est
+ * le patron que #529 a eu à défaire (deux replis aux valeurs différentes selon
+ * le chemin emprunté), et celui que #542 a rejoué dans la conversion.
+ *
+ * @param {string} valeurCourante - `niveauSOLO` du niveau, ou vide
+ * @returns {string} les <option>, « aucun » en tête et sélectionné par défaut
+ */
+function optionsNiveauSOLOEchelle(valeurCourante) {
+    const v = String(valeurCourante == null ? '' : valeurCourante);
+    let html = `<option value=""${v === '' ? ' selected' : ''}>— aucun —</option>`;
+    for (const n of NIVEAUX_SOLO_ECHELLE) {
+        // `n` vient de la constante `NIVEAUX_SOLO_ECHELLE` — aucune donnée
+        // utilisateur ici. On échappe quand même : la Défense E est un lint
+        // STATIQUE, et lui poser une exemption reviendrait à lui apprendre à se
+        // taire sur ce patron. Échapper une constante ne coûte rien ; une
+        // exemption, elle, survit au jour où le contenu cesse d'être constant.
+        html += `<option value="${echapperHtml(n.valeur)}"${v === n.valeur ? ' selected' : ''}>${echapperHtml(n.libelle)}</option>`;
+    }
+    return html;
+}
+
 function afficherNiveauxNouvelleEchelle() {
     const container = document.getElementById('tableauNiveauxEchelle');
     const apercuContainer = document.getElementById('apercuEchelleNiveaux');
@@ -2898,6 +2990,15 @@ function afficherNiveauxNouvelleEchelle() {
                             'champ': 'couleur'
                         }
                     })}
+                </div>
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail">Niveau SOLO atteint
+                        <span class="echelle-texte-petit"> (facultatif)</span>
+                    </label>
+                    <select class="controle-form"
+                            data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="niveauSOLO">
+                        ${optionsNiveauSOLOEchelle(niveau.niveauSOLO)}
+                    </select>
                 </div>
             </div>
         </div>
@@ -3182,6 +3283,15 @@ function afficherNiveauxEchelle(echelle) {
                             'champ': 'couleur'
                         }
                     })}
+                </div>
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail">Niveau SOLO atteint
+                        <span class="echelle-texte-petit"> (facultatif)</span>
+                    </label>
+                    <select class="controle-form"
+                            data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="niveauSOLO">
+                        ${optionsNiveauSOLOEchelle(niveau.niveauSOLO)}
+                    </select>
                 </div>
             </div>
         </div>
@@ -3967,6 +4077,8 @@ window.supprimerNiveauEchelle = supprimerNiveauEchelle;
 window.modifierNiveauEchelle = modifierNiveauEchelle;
 window.refusChampNiveau = refusChampNiveau;                                 // #524
 window.valeurNumeriqueDuNiveau = valeurNumeriqueDuNiveau;                   // #525 — LA règle, pour tous les lecteurs
+window.optionsNiveauSOLOEchelle = optionsNiveauSOLOEchelle;                 // #542 lot 2 — UN seul producteur pour les deux éditeurs
+window.NIVEAUX_SOLO_ECHELLE = NIVEAUX_SOLO_ECHELLE;                         // #542 lot 2 — les cinq niveaux canoniques
 window.REFUS_MIN_NIVEAU = REFUS_MIN_NIVEAU;
 window.REFUS_VALEUR_NIVEAU = REFUS_VALEUR_NIVEAU;                           // #526
 window.REFUS_MAX_NIVEAU = REFUS_MAX_NIVEAU;
