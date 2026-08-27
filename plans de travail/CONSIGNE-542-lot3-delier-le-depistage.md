@@ -233,6 +233,24 @@ ses deux voisines `interpreterCompletion` et `interpreterAssiduite` lisent leurs
 **rien** — ses quatre valeurs sont écrites dans le code. Elle est exportée sur `window` et
 son résultat s'affiche.
 
+⮕ **ET UN SIXIÈME SITE, LE PLUS GROS, TROUVÉ LE 27 AOÛT SUR UNE CAPTURE DE GRÉGOIRE.**
+La carte **« Observation de la structure des résultats d'apprentissage »**
+(`profil-etudiant-sections-affichage.js`, ~1100-1200) porte à elle seule :
+
+- **un TROISIÈME jeu de descriptions SOLO en dur**, plus long et plus riche que les deux
+  autres — « À ce niveau multistructurel, l'étudiant·e peut se concentrer sur plusieurs
+  points pertinents à la fois. Cependant, il/elle les considère indépendamment. » ;
+- **les codes IDME écrits dans le texte** : « En développement (D) », « Incomplet (I) »,
+  « Maîtrisé et étendu (E) » ;
+- **le mapping seuil → niveau SOLO en dur** : `valeur >= idme.insuffisant && < seuilDeveloppement`
+  signifie « multistructurel », et rien ne le dit à l'utilisateur.
+
+⚠ **LA DÉCISION QUE ÇA OUVRE, ET QUI EST POUR GRÉGOIRE.** Le dépôt contient donc **trois
+formulations concurrentes** des mêmes niveaux SOLO : celles d'`interpreterScoreIDME`
+(courtes), celles d'`interpreterPerformance` (autres), et celles-ci (longues, les plus
+pédagogiques). Le pas 3c doit n'en garder **qu'une**, dans `NIVEAUX_SOLO_ECHELLE`. Laquelle
+est un choix de vocabulaire, pas de mécanique — **ne pas trancher à sa place**.
+
 ⮕ **Conséquence pour le pas 3** : le lot ne peut pas se dire fini en ne traitant que
 `interpreterScoreIDME`. Ce sont **deux jeux de descriptions SOLO parallèles**, aux seuils
 différents (`0,64` contre `0,40` pour le bas de l'échelle), qui décrivent la même chose et
