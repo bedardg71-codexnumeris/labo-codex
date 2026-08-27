@@ -2533,15 +2533,15 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   l'application. » (`js/accueil.js`, `genererBanniereBienvenue`).
   ⚠ **C'est le SEUL énoncé daté de la page**, et il crée deux dettes à la même date :
   · **Il promet une contrainte qui n'existe pas encore.** Elle dépend de **#427** (refermer l'accès
-    public — réactiver Cloudflare Access, OTP par courriel), dont l'échéance est « septembre 2026 »
-    sans jour fixé et dont plusieurs décisions restent ouvertes (quota des 50 sièges saturé, révision
-    de l'ADR-008). Si le dispositif n'est pas en place le 1er, la page annonce à ses collègues une
+    public — réactiver Cloudflare Access, OTP par courriel), dont l'échéance est fixée au **1er septembre 2026** et
+    dont les décisions sont tranchées depuis le 27 août (policy ouverte, session d'un mois, ADR-008
+    et documents alignés). Si le dispositif n'est pas en place le 1er, la page annonce à ses collègues une
     règle que l'application n'applique pas.
   · **Il périme tout seul.** Le 2 septembre, la phrase parle d'un futur passé. Un avis périmé sur une
     page d'accueil coûte plus cher que pas d'avis du tout : il apprend au lecteur à ne plus lire
     cette zone — et c'est la zone où vivent « Par où commencer ? » et l'invitation à la CoP.
   ⮕ **À faire le 1er septembre, dans un sens ou dans l'autre** :
-    · #427 livré ⇒ réécrire au présent (« l'identification est requise… ») ;
+    · #427 livré ⇒ réécrire au présent, en mentionnant la durée **et son renouvellement** : « L'identification est requise pour accéder à Labo Codex. Tu donnes ton courriel, tu reçois un code, et tu n'y repenses plus pendant un mois — après quoi tu redonnes ton courriel et c'est reparti. Rien ne se ferme, et tes données restent sur ton appareil. » ⚠ Ne jamais écrire la durée sans dire ce qui se passe au bout : « l'accès reste ouvert un mois » se lit comme une date de péremption (retour de Grégoire, 27 août) ;
     · #427 non livré ⇒ **retirer le paragraphe** et le reposer quand la date sera tenable. Reporter
       la phrase sans reporter le dispositif serait la seule issue à éviter.
   ⮕ Un seul paragraphe à changer, sans conséquence technique : le coût est de s'en souvenir, pas de
@@ -2550,30 +2550,51 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 - [ ] **#427** ⚠️ Refermer l'accès public — **DATE FIXÉE AU 1er SEPTEMBRE 2026** (décision Grégoire,
   26 août). ⮕ **FICHE OPÉRATOIRE PRÊTE** : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`
   — gestes Cloudflare, liste à remplir, courriel d'invitation, vérifications, consignation.
-  ✅ **DEUX DÉCISIONS TRANCHÉES le 26 août** :
-  · **Quota** — **sélection** : la CoP et les personnes actives d'abord, les autres sur demande. Pas
-    d'upgrade payant. Le précédent de janvier-mai pèse : une liste pleine n'a pas produit d'usage, et
-    payer pour des sièges vides serait acheter un chiffre.
-  · **Mesure d'usage** — **NON POURSUIVIE, et c'est acté**. La liste blanche contrôle l'entrée, pas
-    l'usage : ~50 invités au printemps sans un seul retour, logs purgés à 24 h, application locale et
-    hors ligne. Filtrer l'entrée suffit. ⚠ À ne pas reprendre pour un défaut dans six mois.
-  ✅ **ADR-008 RÉVISÉ** (26 août) : le motif de Grégoire devient un **cinquième cas** de réactivation,
-  énoncé pour lui-même — « une préférence de gouvernance, qui se suffit à elle-même » — plutôt que
-  déguisé en risque opérationnel. `DEPLOY.md` §3.6 complété du même motif et de la limite.
-  ⏳ **DÛ PAR GRÉGOIRE avant le 1er** : la liste nominale (§3 de la fiche), et les trois noms
-  Cloudflare (team Zero Trust, application, policy) qui remplacent les `[À COMPLÉTER]` de `DEPLOY.md`
-  lignes 269, 277, 293. **Personne ne peut les préparer à sa place.**
-  ⏳ **LE JOUR MÊME** : la séquence §4 de la fiche — dont **deux vérifications non facultatives**,
-  qu'un accès autorisé passe ET qu'un accès non listé soit refusé. Une policy dormante depuis trois
-  mois ne se réveille pas intacte sur parole.
+  ⚠️ **LES DÉCISIONS DU 26 AOÛT ONT ÉTÉ RENVERSÉES LE 27** (décision Grégoire, 27 août). Elles
+  reposaient sur trois faits erronés, corrigés depuis. La fiche opératoire a été réécrite en
+  conséquence ; ADR-008, `DEPLOY.md` (v1.6), `PRIVACY.md` (v1.2) et `SECURITY.md` sont alignés.
+  ✅ **CE QUI EST DÉCIDÉ (27 août)** :
+  · **Policy OUVERTE** — `Include → Everyone` + OTP par courriel, **aucune liste blanche**. C'était
+    déjà l'état de la fin de l'hiver ; la liste blanche n'a existé qu'en janvier. Grégoire ne cherche
+    pas à filtrer l'entrée.
+  · **Durée de session : 1 mois** — **changement assumé**, pas une restauration (`DEPLOY.md` §3.2
+    documente « 1 semaine, confirmé 22 mai 2026 »).
+  · **Motif : savoir QUI utilise l'application**, pour bâtir une liste de personnes joignables
+    (développement, bogues, CoP). L'entrée est le moyen, pas la fin.
+  · **Quota** — la « sélection » du 26 août tombe avec la saturation qui la fondait. ~20 utilisateurs
+    attendus sur 50 sièges. À surveiller au premier export, la porte étant ouverte.
+  ❌ **TROIS FAITS ERRONÉS, corrigés le 27 août** :
+  · **« Les 50 sièges étaient saturés »** — **faux, ils ne l'ont jamais été.** L'export
+    `User_Seats_Log_2026-05-20T20_03_38Z.csv` : **51 identités, mais 4 sièges Access actifs**.
+    L'affirmation confondait identités enregistrées et sièges occupés.
+  · **« Mesure d'usage non poursuivie »** — **renversé.** Le raisonnement visait le mauvais objet :
+    les *journaux* (`Logs → Access`) sont bien purgés à 24 h, mais la **liste des identités**
+    (`My Team → Users`) est **persistante et exportable en CSV** — Grégoire l'a déjà fait le 20 mai.
+  · **« L'auteur, unique utilisateur actif depuis fin février »** — **faux.** Le même CSV montre
+    **15 dernières connexions postérieures au 28 février** (9 mars, 5 avril, 1 mai). Des gens sont
+    revenus ; il ne l'a jamais su. C'est exactement l'angle mort que le geste vient combler.
+  ⏳ **DÛ PAR GRÉGOIRE avant le 1er** (§3 de la fiche) : les trois noms Cloudflare (team Zero Trust,
+  application, policy) pour les `[À COMPLÉTER]` de `DEPLOY.md` §3.1, §3.2 et §3.3 ; la durée de
+  session et la règle `Include` **réellement** en place dans la policy dormante ; et l'arbitrage sur
+  l'URL Netlify directe. **Personne ne peut les préparer à sa place.**
+  ⏳ **LE JOUR MÊME** : la séquence §4 de la fiche. Le sens des vérifications a changé — il ne s'agit
+  plus de vérifier qu'on bloque, mais qu'on **laisse passer tout en identifiant**. Une policy dormante
+  depuis trois mois peut se réveiller avec la règle `Emails` de janvier et refermer la porte sans
+  que rien ne le signale.
+  ⚠ **À VÉRIFIER** : `main--codexnumeris-051225.netlify.app` ne semble pas passer par le proxy
+  Cloudflare (`DEPLOY.md` §1.2). Si c'est le cas, cette URL contourne Access et laisse entrer sans
+  identité — un trou dans la mesure. **Non testé** ; un `curl -I` tranche.
+  ⚠ **COMMUNICATIONS AQPC** : des textes du 2 juin décrivent l'application comme « librement
+  accessible, sans création de compte ». Leur publication n'est **pas établie** (la note les range
+  sous « à coordonner » avec Fanny Joussemet). À vérifier avant le geste.
   Énoncé d'origine :
 - [ ] **~~#427~~** Refermer l'accès public — réactiver Cloudflare Access (OTP par courriel) — créé 8 août 2026 (demande Grégoire). ⮕ **ÉCHÉANCE REPORTÉE À SEPTEMBRE 2026** (décision Grégoire, 8 août soir — l'échéance initiale du ~20 août n'est plus visée). Checklist dashboard prête : `plans de travail/Checklist Levée Cloudflare Access .txt`.
   - **Ce que Grégoire veut** : que les utilisateurs passent de nouveau par un **code envoyé par courriel** (OTP), comme au printemps ; retrouver le **contrôle des 50 sièges gratuits** ; et **savoir qui a accès à l'application et qui est vraiment un utilisateur**. Échéance visée : **septembre 2026** (reportée du ~20 août par Grégoire le 8 août au soir).
   - ✔ **Bonne nouvelle : rien à construire.** La configuration est intégralement documentée et le DNS n'a jamais été défait — « Cloudflare Access reste configuré côté DNS / proxy orange ; seule la policy est désactivée. La réactivation est une opération de quelques minutes dans le dashboard Zero Trust » (`DEPLOY.md` §3.6). Procédure : `DEPLOY.md` §3.1→§3.5 (config Access) + §4 (gestion de la liste blanche).
   - ⚠ **C'est une RÉVISION D'ADR, pas un changement de config silencieux.** La décision d'ouverture publique est formalisée dans `docs/adr/008-cloudflare-access.md` (révisé le 2 juin 2026) et reprise dans `DEPLOY.md` v1.4 et `SECURITY.md`. Refermer exige de réviser les trois, avec date effective et raison déclenchante — c'est explicitement demandé par le §3.6.
   - ⚠ **Le motif de Grégoire ne figure PAS dans les 4 conditions de réactivation du §3.6** (risque opérationnel concret · création de la Voûte · bascule institutionnelle · croissance qualitative inattendue). Le sien est autre : **connaître sa base d'utilisateurs à l'entrée d'une phase structurée**. ⮕ Ajouter une 5e condition au §3.6 plutôt que de forcer le motif dans une case existante.
-  - ⚠ **LES 50 SIÈGES ÉTAIENT DÉJÀ SATURÉS.** ADR-008 : « Le quota Cloudflare de 50 utilisateurs est actuellement saturé » (statut au 14 mai 2026), la liste s'étant élargie de ~10 à ~50 personnes entre janvier et mai. ⮕ **Décision à prendre avant de refermer** : repartir d'une liste blanche NEUVE (purge de l'ancienne), reprendre l'ancienne telle quelle (le quota est alors déjà atteint), ou basculer sur une politique « domaine de confiance » (moins granulaire, sans plafond de sièges). L'upgrade payant est la quatrième voie.
-  - ⚠ **La liste blanche contrôle l'ENTRÉE, elle ne dit pas l'USAGE.** Deux faits documentés, à mettre devant l'objectif « savoir qui est un utilisateur » : (1) ADR-008 sur la phase janvier-mai — ~50 personnes invitées, accès individuel d'une semaine par OTP, « aucune n'a renvoyé de feedback ou de rapport de bug, et aucune n'est revenue après l'expiration de son accès » ; (2) `DEPLOY.md` — les logs Cloudflare sont « purgés à 24 h sur plan gratuit » et « ne produisent rien d'actionnable ». ⮕ Si l'objectif est de **mesurer** l'usage et pas seulement de le **filtrer**, Access seul n'y répondra pas : c'est un second besoin, à nommer séparément.
+  - ❌ ~~**LES 50 SIÈGES ÉTAIENT DÉJÀ SATURÉS.**~~ *Démenti par Grégoire le 27 août 2026, et par l'export du 20 mai (51 identités, 4 sièges actifs). Le paragraphe ci-dessous est conservé pour la traçabilité.* ADR-008 : « Le quota Cloudflare de 50 utilisateurs est actuellement saturé » (statut au 14 mai 2026), la liste s'étant élargie de ~10 à ~50 personnes entre janvier et mai. ⮕ **Décision à prendre avant de refermer** : repartir d'une liste blanche NEUVE (purge de l'ancienne), reprendre l'ancienne telle quelle (le quota est alors déjà atteint), ou basculer sur une politique « domaine de confiance » (moins granulaire, sans plafond de sièges). L'upgrade payant est la quatrième voie.
+  - ⚠ **La liste blanche contrôle l'ENTRÉE, elle ne dit pas l'USAGE.** *Corrigé le 27 août : la conclusion « Access seul n'y répondra pas » est fausse pour la partie identification. Elle vaut pour les journaux, pas pour la page `My Team → Users`, qui est persistante et exportable.* Deux faits documentés, à mettre devant l'objectif « savoir qui est un utilisateur » : (1) ADR-008 sur la phase janvier-mai — ~50 personnes invitées, accès individuel d'une semaine par OTP, « aucune n'a renvoyé de feedback ou de rapport de bug, et aucune n'est revenue après l'expiration de son accès » ; (2) `DEPLOY.md` — les logs Cloudflare sont « purgés à 24 h sur plan gratuit » et « ne produisent rien d'actionnable ». ⮕ Si l'objectif est de **mesurer** l'usage et pas seulement de le **filtrer**, Access seul n'y répondra pas : c'est un second besoin, à nommer séparément.
   - ✅ **Tension de calendrier RÉSOLUE par le report** : `DEPLOY.md` impute l'échec de l'alpha de janvier à deux paramètres, dont « **début de trimestre (bande passante mentale des enseignants saturée)** ». Le ~20 août plaçait le geste exactement à ce moment-là ; **septembre l'en éloigne** — le report tranche la tension dans le bon sens. Le document note lui-même que le contexte a changé (bêta stable, CoP en place) — mais la coïncidence mérite d'être regardée en face plutôt que découverte après coup.
   - **À faire au moment du refermage** (liste du §3.6, complétée) : consigner la date effective, la raison déclenchante, la taille de la liste blanche reconstituée, l'arbitrage sur le quota ; remplir les 3 placeholders Cloudflare restés `[À COMPLÉTER]` dans `DEPLOY.md` (nom de la team Zero Trust ligne 269, application name ligne 277, policy name ligne 293) ; réviser ADR-008, `DEPLOY.md` et `SECURITY.md`.
   - ⮕ **À préparer avant le geste (septembre)** : la liste des personnes à inviter, et le courriel d'invitation (le gabarit du printemps est décrit en `DEPLOY.md` §4.1, étape 5).

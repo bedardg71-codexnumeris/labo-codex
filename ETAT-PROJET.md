@@ -60,10 +60,16 @@
 - **Horizon courant** : la **cohorte CoP** — Rencontre 1 « Outiller son
   regard » **mi à fin septembre**, à communiquer **4 semaines à l'avance**
   (donc date à arrêter maintenant). Référence : `docs/CALENDRIER.md` §6.
-- **Décision de calendrier (8 août)** : #427 (refermer l'accès public par
-  Cloudflare Access) **reporté du ~20 août à septembre**. Effet favorable :
-  le geste quitte la semaine de rentrée, que `DEPLOY.md` désigne justement
-  comme le pire moment (bande passante mentale des enseignants).
+- **Décision de calendrier (8 août, précisée le 26, tranchée le 27)** : #427
+  **réactiver Cloudflare Access le 1er septembre 2026**, avec une **policy
+  ouverte** (`Everyone`) + OTP par courriel et une session d'un mois. **Aucune
+  liste blanche** : le motif est de savoir **qui** utilise l'application, pour
+  bâtir une liste de personnes joignables — pas de filtrer l'entrée. Effet
+  favorable du report initial : le geste quitte la semaine de rentrée, que
+  `DEPLOY.md` désigne comme le pire moment. ⚠ Les décisions du 26 août
+  (liste blanche, quota « saturé », mesure d'usage abandonnée) ont été
+  **renversées le 27** sur constat de trois faits erronés — voir #427 au
+  backlog et ADR-008, révision du 27 août.
 
 ### ⚠ Tension à regarder en face
 
@@ -204,7 +210,7 @@ production. Un plan ne dit pas son propre état ; seul le code le dit.
 
 | Plan | Item | Échéance |
 |---|---|---|
-| `Checklist Levée Cloudflare Access .txt` | #427 | **septembre 2026** (reporté du ~20 août par Grégoire, 8 août) |
+| `REFERMAGE-2026-09-01-cloudflare-access.md` | #427 | **1er septembre 2026** — fiche opératoire réécrite le 27 août pour la policy ouverte. ⚠ Ne pas suivre `Checklist Levée Cloudflare Access .txt` : c'est la checklist de la **levée** de mai, l'opération inverse |
 | `PLAN_sessionC_calcul_303.md` | #303 Session C | non datée ; Sessions A et B livrées, débloque #307 |
 | `Plan - Désaturation localStorage (analyse).md` | #353 | reportée (session dédiée) ; Option 1 livrée le 3 juillet, options 2/3/4 en attente de **mesures** |
 | `PLAN_recadrage_skill_ecosysteme.md` | — | reporté explicitement par Grégoire (5 juin) |

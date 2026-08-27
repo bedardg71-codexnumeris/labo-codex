@@ -122,7 +122,7 @@ n'est exposé. La surface d'attaque visible publiquement se limite à :
 | Surface | Mécanisme de protection |
 |---|---|
 | Site statique sur Netlify | HTTPS forcé, CSP `script-src 'self'`, en-têtes durcis via `netlify.toml` |
-| Contrôle d'accès | Cloudflare Access (Zero Trust, OTP par email) |
+| Contrôle d'accès | Cloudflare Access (Zero Trust, OTP par courriel). **Porte ouverte** : à partir du 1er septembre 2026 la policy est `Include → Everyone` — toute adresse capable de recevoir le code entre. Le dispositif **identifie**, il ne filtre pas (cf. `DEPLOY.md` §3.6) |
 | Données locales | Reste sur la machine de l'utilisateur (IndexedDB + localStorage + FileVault au repos pour macOS) |
 | Imports utilisateur (ZIP, images, PDF) | Validation magic bytes + `validerZipSecurite` (taille, path traversal) |
 | Données utilisateur dans le DOM | `echapperHtml()` obligatoire avant `innerHTML` — vérifié par `tests/unit/lint-securite.test.js` |
@@ -160,8 +160,14 @@ listés ici par ordre chronologique (sauf demande de retrait).
 Les éléments suivants ne donnent **pas** lieu à divulgation responsable car ils
 relèvent d'un fonctionnement attendu ou documenté :
 
-- L'accès à la page d'accueil de l'instance publique : Cloudflare Access est le
-  contrôle, pas la page elle-même.
+- L'accès à la page d'accueil de l'instance publique : l'identification Access est
+  le seuil, pas la page elle-même.
+- **Le fait d'obtenir un accès avec une adresse courriel quelconque** : c'est le
+  fonctionnement voulu à partir du 1er septembre 2026, pas une faille. La policy est
+  ouverte (`Everyone`) ; elle sert à identifier les utilisateurs, pas à les
+  sélectionner. Ce qui **serait** un signalement valable : une façon d'atteindre
+  l'application sans laisser d'identité du tout (par exemple en contournant le
+  proxy Cloudflare par l'URL Netlify directe).
 - La présence du code source sur GitHub : le dépôt est volontairement public
   (transparence, double licence AGPL + CC BY-NC-SA).
 - L'absence de chiffrement applicatif des données locales : la protection

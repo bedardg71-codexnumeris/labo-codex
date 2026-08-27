@@ -146,9 +146,15 @@ personne ne le sache.
 - **Deux points de vocabulaire** — « préstructurel » garde une formulation courte parmi
   quatre longues ; les quatre longues emploient « il/elle », un accord lourd que sa convention
   demande de reformuler.
-- ⏳ **ÉCHÉANCE DATÉE, DANS 5 JOURS — le 1er septembre** : #427 et #508. **Dû par lui, et
-  personne ne peut le préparer à sa place** : la liste nominale des personnes à inviter, et les
-  trois noms Cloudflare qui remplacent les `[À COMPLÉTER]` de `DEPLOY.md` (lignes 269, 277, 293).
+- ⏳ **ÉCHÉANCE DATÉE, DANS 5 JOURS — le 1er septembre** : #427 et #508. ⚠ **Les décisions du
+  26 août ont été renversées le 27** : policy **ouverte** (`Everyone`) + OTP, session d'un mois,
+  **aucune liste blanche** — le motif est d'identifier les utilisateurs, pas de filtrer l'entrée.
+  Trois faits erronés corrigés au passage (quota jamais saturé, mesure d'usage possible via
+  `My Team → Users`, 15 connexions postérieures à fin février). ADR-008, `DEPLOY.md` v1.6,
+  `PRIVACY.md` v1.2, `SECURITY.md` et la fiche opératoire sont alignés. **Dû par lui, et personne
+  ne peut le préparer à sa place** : les trois noms Cloudflare pour les `[À COMPLÉTER]` de
+  `DEPLOY.md` §3.1-§3.3, la durée de session et la règle `Include` réellement en place, et
+  l'arbitrage sur l'URL Netlify directe (elle contourne peut-être Access — non testé).
 
 ### Trois pièges qui coûteront à qui les ignore
 

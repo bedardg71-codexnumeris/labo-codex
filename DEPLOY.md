@@ -49,14 +49,14 @@ pour les personnes invitées.
 | **GitHub** | Dépôt source, branche `main` = vérité | Plan gratuit — ⚠ **dépôt PRIVÉ depuis le 23 juin 2026** (cf. §8.3). Les minutes Actions sont dès lors décomptées d'un quota mensuel. |
 | **Netlify** | Build + hébergement statique de l'application | Plan gratuit |
 | **Cloudflare DNS** | Résolution DNS du domaine `app.codexnumeris.org` | Gratuit |
-| **Cloudflare Access** | ~~Contrôle d'accès Zero Trust (OTP par courriel)~~ **Retiré le 28 mai 2026 en préparation AQPC** — voir §3 | n/a |
+| **Cloudflare Access** | Identification Zero Trust (OTP par courriel), porte ouverte à toute adresse. Retiré le 28 mai 2026 pour l'AQPC, **réactivé le 1er septembre 2026** — voir §3 | Gratuit (50 sièges) |
 
 ### 1.2 URL et domaines
 
 | URL | Rôle | Accessible |
 |---|---|---|
-| `app.codexnumeris.org` | URL publique principale | **Publique** depuis le 28 mai 2026 (Cloudflare Access retiré) |
-| `main--codexnumeris-051225.netlify.app` | Origin Netlify de la production | Accessible — c'est la branche `main` servie par Netlify |
+| `app.codexnumeris.org` | URL publique principale | Publique sans authentification du 28 mai au 31 août 2026 ; **identification par OTP à partir du 1er septembre 2026** (porte ouverte, cf. §3) |
+| `main--codexnumeris-051225.netlify.app` | Origin Netlify de la production | Accessible — c'est la branche `main` servie par Netlify. ⚠️ **À vérifier avant le 1er septembre 2026** : cette URL ne semble pas passer par le proxy Cloudflare, auquel cas elle contournerait Access et constituerait une entrée ne laissant aucune identité. **Non testé** — un `curl -I` tranche en dix secondes. Sans conséquence tant que l'application est ouverte à tous |
 | `deploy-preview-<N>--codexnumeris-051225.netlify.app` | **Aperçu automatique de la pull request n° N** | Accessible dès que la PR est ouverte, ~30 s après le push |
 | `github.com/bedardg71-codexnumeris/Monitorage_v6` | Code source | **Privé** |
 
@@ -105,13 +105,14 @@ article premier, deuxième alinéa, exclut les renseignements collectés
   Les données pédagogiques (noms d'étudiants, évaluations, productions)
   restent sur la machine de chaque utilisateur. Aucun flux serveur.
 - **Niveau infrastructure** : quand Cloudflare Access est actif, les
-  adresses courriel de la liste blanche transitent par Cloudflare pour
-  l'authentification OTP. Logs d'accès retenus 24 h sur le plan gratuit.
-  C'est tout.
+  adresses courriel des personnes qui s'identifient transitent par Cloudflare
+  pour l'authentification OTP. Les journaux d'accès sont retenus 24 h sur le
+  plan gratuit ; **les adresses elles-mêmes, elles, sont conservées sans limite**
+  dans `My Team → Users` et exportées périodiquement (§4.4, et `PRIVACY.md` §3.3).
 
-**Discipline maintenue** : tenue rigoureuse de la liste blanche (quand
-Access est en place), retrait sur demande sous quelques jours ouvrables,
-non-diffusion des courriels. Cette discipline relève de l'hygiène
+**Discipline maintenue** : retrait sur demande (§4.3), non-diffusion des
+courriels, et export périodique consigné plutôt que consultation au fil de l'eau
+(§4.4). *Révisé le 27 août 2026 : il n'y a plus de liste blanche à tenir.* Cette discipline relève de l'hygiène
 professionnelle et de la courtoisie envers les testeurs, pas d'une
 obligation légale.
 
@@ -254,9 +255,22 @@ finissaient.
 
 ---
 
-## 3. Configuration Cloudflare Access (désactivé par défaut — référence technique pour un usage futur)
+## 3. Configuration Cloudflare Access (réactivation au 1er septembre 2026 — policy ouverte)
 
-> **Statut au 2 juin 2026** : Cloudflare Access est **désactivé sur
+> **Statut au 27 août 2026** : réactivation décidée pour le **1er septembre 2026**,
+> avec une **policy ouverte** (`Include → Everyone`), OTP par courriel et une
+> **durée de session d'un mois**. Le motif n'est pas de filtrer l'entrée mais
+> d'identifier les utilisateurs, via la page `My Team → Users` et son export CSV.
+> Gestes et vérifications : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`.
+> Décision et corrections : ADR-008, révision du 27 août 2026.
+>
+> ⚠️ Le §4 ci-dessous décrit la gestion d'une **liste blanche**. Avec une policy
+> ouverte, ses procédures 4.1 et 4.2 sont **sans objet** ; 4.3 et 4.4 restent
+> valables sous la forme révisée.
+>
+> ---
+>
+> **Statut au 2 juin 2026 (périmé, conservé pour la chronologie)** : Cloudflare Access est **désactivé sur
 > `app.codexnumeris.org` sans date de réactivation planifiée**.
 > L'application est publiquement accessible sans authentification.
 > Les procédures de gestion d'accès documentées dans cette section et
@@ -364,12 +378,15 @@ Organisation : *[À COMPLÉTER — nom de la team Zero Trust]*
 | **Application name** | *[À COMPLÉTER — ex : « Labo Codex »]* | Nom affiché à l'authentification |
 | **Type** | Self-hosted | Type d'application Cloudflare Access |
 | **Application domain** | `app.codexnumeris.org` | Domaine protégé |
-| **Session duration** | **1 semaine** (confirmé 22 mai 2026) | Durée de cookie de session |
+| **Session duration** | **1 semaine** (confirmé 22 mai 2026) → **1 mois** au 1er septembre 2026 | Durée de cookie de session. Le passage à un mois est un **changement assumé**, pas une restauration |
 | **App launcher visible** | Activé / Désactivé *[à confirmer]* | Visible dans le launcher Cloudflare |
 | **Authentication** | **One-time PIN (OTP) par courriel** (confirmé 22 mai 2026) | Méthode d'auth — seule méthode active |
 
-**Utilisateurs autorisés au 22 mai 2026** : **51 personnes** (auteur +
-une cinquantaine de collègues à qui un accès individuel a été accordé).
+**Identités enregistrées au 20 mai 2026** : **51** (auteur compris), dont **4 sièges
+Access actifs**, selon l'export `User_Seats_Log_2026-05-20T20_03_38Z.csv`. *Corrigé le
+27 août 2026 : la rédaction antérieure parlait de 51 « utilisateurs autorisés » à qui un
+accès aurait été « accordé » individuellement. La liste blanche avait été abandonnée en
+cours d'hiver ; ces identités se sont enregistrées d'elles-mêmes par une porte ouverte.*
 
 ### 3.3 Policies (règles d'accès)
 
@@ -379,11 +396,12 @@ une cinquantaine de collègues à qui un accès individuel a été accordé).
 |---|---|
 | **Policy name** | *[À COMPLÉTER — ex : « Collègues invités »]* |
 | **Action** | Allow |
-| **Include rule** | `Emails` → liste blanche des ~50 courriels |
+| **Include rule** | **`Everyone`** (au 1er septembre 2026). *Corrigé le 27 août 2026 : cette ligne indiquait une liste blanche d'`Emails`, ce qui décrivait l'état de janvier 2026 seulement.* |
 
-**Liste blanche actuelle** : voir `Include` → champ `Emails`. Les courriels
-ne sont **pas publiés** dans ce document pour préserver la confidentialité
-des personnes concernées (voir [`PRIVACY.md`](PRIVACY.md) §6.2).
+**Aucune liste blanche.** La règle `Include` est `Everyone` : toute adresse capable de
+recevoir le code OTP entre. Les identités enregistrées se consultent dans
+`My Team → Users` et **ne sont pas publiées** dans ce document (voir
+[`PRIVACY.md`](PRIVACY.md) §3.3 et §6.2).
 
 ### 3.4 DNS Cloudflare
 
@@ -410,26 +428,42 @@ de la recopier d'ici — c'est ce document qui a menti, pas le tableau de bord.
 
 ⚠️ Le proxy orange était **obligatoire** pour que Cloudflare Access intercepte
 les requêtes. Si le proxy est gris (DNS only), Cloudflare Access est
-contourné et l'app est accessible sans authentification. *Access étant retiré
-depuis le 28 mai, ce point ne vaut que pour une réactivation (§3.6).*
+contourné et l'app est accessible sans authentification. *Ce point redevient
+opérant le 1er septembre 2026 (§3.6) : vérifier que le proxy est bien orange
+avant de considérer la policy comme active.*
 
 ### 3.5 Vérification
 
 Test rapide depuis un terminal :
 ```bash
 curl -I https://app.codexnumeris.org
-# Attendu en posture actuelle (Access désactivé) : HTTP/2 200 (accès direct).
-# Attendu si Access est un jour réactivé : HTTP/2 302 (redirection vers Cloudflare Access login).
+# Attendu jusqu'au 31 août 2026 (Access désactivé) : HTTP/2 200 (accès direct).
+# Attendu à partir du 1er septembre 2026 : HTTP/2 302 (redirection vers le login Access).
+# Un 200 après la réactivation signifie que la policy n'est pas active.
 ```
 
-### 3.6 Conditions de réactivation éventuelle
+### 3.6 Réactivation — décidée pour le 1er septembre 2026
 
-Aucun refermage n'est planifié au calendrier (décision du 2 juin 2026).
-Cloudflare Access reste néanmoins configuré côté DNS / proxy orange ;
-seule la policy est désactivée. La réactivation est une opération de
-quelques minutes dans le dashboard Zero Trust.
+**Décision du 27 août 2026** (ADR-008, révision du même jour). La configuration
+n'a jamais été défaite : le DNS reste en proxy orange, seule la policy est
+désactivée. La réactivation est une opération de quelques minutes.
 
-Conditions qui pourraient justifier une réactivation future :
+**Motif** : identifier les utilisateurs, pas les filtrer. Le projet n'a aucun
+autre moyen de savoir qui se sert de l'application, puisqu'elle est locale et
+hors ligne (ADR-003). La porte reste donc ouverte à tous.
+
+**Les quatre conditions listées ci-dessous** (risque opérationnel, création de la
+Voûte, bascule institutionnelle, croissance qualitative inattendue) n'ont pas été
+retenues et **aucune n'est survenue**. La réactivation
+procède d'un cinquième motif, énoncé plutôt que rangé de force dans les quatre
+autres. Ces conditions restent valides pour d'éventuelles décisions ultérieures.
+
+**Gestes, vérifications et consignation** :
+`plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`.
+
+Conditions envisagées au fil du dossier. **Les quatre premières n'ont joué aucun
+rôle dans la décision du 1er septembre 2026** et restent valides pour des
+décisions ultérieures ; la cinquième est le motif de cette décision :
 
 1. **Émergence d'un risque opérationnel concret** : abus mesurable
    (DoS persistant non absorbé par Cloudflare, scraping intensif
@@ -446,35 +480,43 @@ Conditions qui pourraient justifier une réactivation future :
    vraisemblablement requis (cf. §1.4).
 4. **Croissance qualitative inattendue** qui rendrait utile une
    traçabilité dont l'absence ne pose actuellement aucun problème.
-5. **Contrôle d'accès voulu par le porteur du projet** (ajouté le
-   26 août 2026). Ni incident, ni contrainte externe : une préférence
-   de gouvernance, qui se suffit à elle-même. C'est le motif du
-   refermage décidé pour le **1er septembre 2026** — voir ADR-008,
-   révision du 26 août, et la fiche opératoire
-   `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`.
+5. **Savoir qui utilise l'application** (ajouté le 26 août 2026, **reformulé le
+   27 août**). Ni incident, ni contrainte externe. *Correction du 27 août : ce
+   point était rédigé « contrôle d'accès voulu par le porteur du projet », en
+   préférence de gouvernance. Ce n'est pas le motif de Grégoire, qui a dit
+   explicitement ne pas chercher à filtrer l'entrée. Le motif est
+   d'**identifier** les utilisateurs pour pouvoir les joindre — d'où une policy
+   ouverte et non une liste blanche.* C'est le motif de la réactivation du
+   **1er septembre 2026** ; voir ADR-008, révision du 27 août, et la fiche
+   opératoire `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`.
 
-⚠ **Ce qu'une liste blanche ne donne pas.** Elle contrôle l'ENTRÉE, pas
-l'usage : la phase janvier-mai 2026 l'a montré (~50 invités, aucun
-retour, aucun revenant), les logs sont purgés à 24 h sur plan gratuit,
-et l'application est locale et hors ligne. Refermer pour *mesurer*
-l'usage serait se tromper d'outil ; refermer pour *filtrer* l'entrée
-est légitime, et c'est ce qui est décidé.
+⚠ **Ce que l'identification ne donne pas.** Elle enregistre qui franchit la
+porte, jamais ce qui se passe ensuite : l'application est locale et hors ligne,
+et l'usage réel n'est observable par personne. *Correction du 27 août 2026 : ce
+paragraphe concluait « refermer pour mesurer l'usage serait se tromper d'outil ;
+refermer pour filtrer l'entrée est légitime, et c'est ce qui est décidé ». Les
+deux moitiés sont fausses. La confusion portait sur l'objet à consulter — les
+journaux purgés à 24 h, et non la page `My Team → Users`, qui est persistante et
+exportable (§4.4). Et rien n'est filtré : la porte est ouverte.* Ce qui reste
+vrai, et qui est assumé : une adresse dans la liste dit « cette personne est
+entrée », pas « cette personne s'en sert ».
 
-Procédure de réactivation, le cas échéant : suivre §3.1 à §3.5 (config
-Access) et §4 (gestion de la liste blanche). À documenter au moment
-de la réactivation : date effective, raison déclenchante, taille de
-la liste blanche reconstituée, et arbitrage upgrade Cloudflare payant
-si le quota gratuit de 50 sièges est dépassé.
+Procédure de réactivation : suivre §3.1 à §3.5 (configuration Access) et §4.4
+(export périodique des identités). §4.1 et §4.2 sont sans objet, faute de liste
+blanche. À documenter au moment de la réactivation : date effective, motif,
+durée de session relevée avant modification, règle `Include` trouvée dans la
+policy dormante, et surveillance du quota gratuit de 50 sièges.
 
 ---
 
 ## 4. Gestion des utilisateurs autorisés (référence technique pour un usage futur)
 
-> **Section sans usage actuel** : Cloudflare Access étant désactivé
-> sans date de réactivation planifiée (cf. §3), les procédures
-> ci-dessous ne s'appliquent à aucune opération en cours. Elles sont
-> conservées comme référence technique pour une éventuelle
-> réactivation future (conditions listées en §3.6).
+> **Révisé le 27 août 2026.** Avec une policy ouverte (`Include → Everyone`), il
+> n'y a plus de liste blanche à tenir : **§4.1 et §4.2 sont sans objet** et sont
+> conservées comme référence technique au cas où une liste redeviendrait
+> nécessaire. **§4.3 (demande de retrait) et §4.4 (suivi périodique) restent en
+> vigueur** et prennent même plus d'importance, puisque les identités
+> s'accumulent désormais sans intervention.
 
 ### 4.1 Ajouter une personne à la liste blanche
 
@@ -489,12 +531,12 @@ si le quota gratuit de 50 sièges est dépassé.
    - Le fait que ses données pédagogiques restent locales sur sa machine
    - Le lien vers `PRIVACY.md` (politique de confidentialité)
 
-⚠️ **Quota plan gratuit** : 50 utilisateurs maximum. États historiques :
-saturée au 22 mai 2026, libérée le 28 mai 2026 en vue de l'ouverture
-publique. État au 2 juin 2026 : aucune liste active (policy
-désactivée). En cas de réactivation future, si la liste reconstituée
-dépasse 50 personnes, évaluer les options (upgrade payant, politique
-de domaine, sélection).
+⚠️ **Quota plan gratuit** : 50 utilisateurs maximum. *Corrigé le 27 août 2026 :
+ce paragraphe affirmait la liste « saturée au 22 mai 2026 ». Elle ne l'a jamais
+été — 51 identités enregistrées, mais 4 sièges Access actifs.* Avec une porte
+ouverte, le nombre d'identités n'est plus borné par une liste : c'est le point à
+surveiller au premier export (§4.4). Si le plafond approche, évaluer les options
+(upgrade payant, politique de domaine, sélection).
 
 ### 4.2 Retirer une personne de la liste blanche
 
@@ -507,21 +549,40 @@ de domaine, sélection).
 
 ### 4.3 Demande de retrait par l'utilisateur
 
-Toute personne sur la liste blanche peut demander son retrait à
+Toute personne dont l'adresse figure dans `My Team → Users` peut demander son retrait à
 [labo@codexnumeris.org](mailto:labo@codexnumeris.org). Le retrait est
 exécuté **dans les quelques jours ouvrables qui suivent la demande**.
 Geste de courtoisie professionnelle, pas une obligation Loi 25 (cf.
 §1.4 pour le cadrage). La référence à `PRIVACY.md` §9 sera mise à jour
 quand ce document sera révisé (BACKLOG `#298` reformulé).
 
-### 4.4 Audit périodique
+### 4.4 Export périodique des identités
 
-Une fois par session (recommandation) :
-1. Lister les utilisateurs actuellement autorisés.
-2. Identifier ceux qui n'ont pas accédé depuis 3+ mois.
-3. Leur écrire pour confirmer l'intérêt continu — sinon les retirer.
-4. Documenter l'audit dans `INCIDENTS.md` si une décision de retrait
-   notable est prise.
+**Révisé le 27 août 2026** : ce n'est plus un audit de liste blanche, c'est le
+geste qui sert le motif de la réactivation.
+
+⚠️ **Deux objets à ne pas confondre.** Les journaux d'authentification
+(`Logs → Access`) sont purgés à 24 h sur le plan gratuit et n'apprennent rien.
+C'est la page **`My Team → Users`** qu'il faut consulter : elle est persistante et
+donne, par adresse, la date de création, la **dernière connexion réussie** et
+l'état du siège.
+
+Une fois par mois :
+
+1. Exporter la liste en CSV depuis `My Team → Users`.
+2. Déposer l'export daté dans `Cowork A26 CoP Labo Codex/`.
+3. Comparer avec l'export précédent : les adresses neuves sont les nouveaux venus,
+   les dates de dernière connexion distinguent les actifs des passants.
+4. Surveiller le total au regard du plafond de 50 sièges.
+5. Consigner dans `INCIDENTS.md` toute décision de retrait notable.
+
+**Précédent** : `Cowork H26 App Labo Codex/Essais sur Cloudflare/User_Seats_Log_2026-05-20T20_03_38Z.csv`
+(20 mai 2026, 51 identités).
+
+⚠️ **Ce que l'export ne dit pas** : qui utilise réellement l'application. Il dit
+qui a franchi la porte. L'application est locale et hors ligne ; l'usage n'est
+observable par personne, et le rendre observable contredirait la posture du
+projet.
 
 ---
 
@@ -597,7 +658,7 @@ Pour permettre la reconstruction en cas d'incident majeur :
 | Code source | **GitHub `main`** est la source de vérité. Forks possibles. |
 | Configuration Netlify | **`netlify.toml`** versionné dans le repo (depuis 22 mai 2026). |
 | Configuration Cloudflare Access | **Non versionnable** (pas d'export programmatique sur le plan gratuit). À documenter manuellement dans ce fichier (§3) et à mettre à jour après chaque modification. |
-| Liste blanche des emails | **Non versionnée** (donnée personnelle). Maintenue uniquement dans Cloudflare Access. Si Cloudflare est perdu, la liste devra être reconstruite via les courriels d'invitation envoyés. |
+| Liste des identités Cloudflare | **Non versionnée** (donnée personnelle). Maintenue uniquement dans Cloudflare (`My Team → Users`). Si Cloudflare est perdu, elle n'est pas reconstituable — d'où l'intérêt des **exports CSV datés** conservés hors du dépôt (§4.4), qui font office de sauvegarde. |
 
 ### 6.3 Procédure de reprise complète (hypothèse pire cas)
 
@@ -707,6 +768,7 @@ supprimé le 26 juin).
 
 | Date | Version | Modification |
 |---|---|---|
+| 2026-08-27 | 1.6 | **Réactivation de Cloudflare Access décidée pour le 1er septembre 2026, avec une policy ouverte.** (a) Correction de quatre affirmations fausses ou périmées, toutes issues d'inférences non vérifiées : le quota n'a **jamais** été saturé (51 identités mais 4 sièges actifs au 20 mai) ; la règle `Include` d'hiver était `Everyone` et non une liste blanche (celle-ci n'a existé qu'en janvier) ; les 51 identités ne sont pas des personnes « autorisées » une à une mais des gens entrés par une porte ouverte ; la traçabilité n'est pas impossible — c'est la page `Users` qu'il faut lire, pas les journaux purgés à 24 h. (b) §3 retitrée et son encadré de statut réécrit ; §3.2 (durée de session portée à **1 mois**, changement assumé) ; §3.3 (`Include → Everyone`) ; §3.5 (attendus du `curl` inversés) ; §3.6 réécrite en « Réactivation décidée » avec le cinquième motif énoncé plutôt que rangé de force dans les quatre conditions existantes. (c) §4 : 4.1 et 4.2 marquées sans objet, 4.3 élargie hors liste blanche, **4.4 refondue en « Export périodique des identités »** — le geste qui sert le motif. (d) `PRIVACY.md` §3.3 et §6.2 alignés dans la même passe : la conservation sans limite des adresses et leur export périodique sont désormais déclarés aux utilisateurs, avec leur finalité. Cf. ADR-008 révision du 27 août 2026 et `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`. |
 | 2026-05-22 | 1.0 DRAFT | Rédaction initiale, soumis à validation. Placeholders à confirmer sur 5 points marqués `[À COMPLÉTER]`. |
 | 2026-08-23 | 1.5 | (a) §1.2 : le site Netlify s'appelle **`codexnumeris-051225`**, pas `labocodex` — vérifié par l'API ; l'ancien nom ne correspondait à rien dans le compte. (b) §1.2 : aperçus de PR documentés (`deploy-preview-<N>--…`), avec l'avertissement que c'est une **origine différente**, donc sans les données. (c) §1.1 : le dépôt est **privé**, avec sa conséquence sur les minutes Actions. (d) §2.1 : le bump passe par `scripts/release.mjs`, plus par une édition manuelle ; incident du jour consigné. (e) §2.4 (neuf) : état réel de la CI — ne démarre plus, et était déjà rouge. |
 | 2026-05-28 | 1.1 | (a) Substitution `labo.codexnumeris.org` → `app.codexnumeris.org` partout. L'ancien sous-domaine n'a plus d'enregistrement DNS. (b) Retrait du Cloudflare Access acté en préparation de l'AQPC du 3 juin. Sections 3 et 4 marquées historiques. PRIVACY.md à réviser séparément (BACKLOG #298). Cf. ADR-008 révisé. |
@@ -717,7 +779,7 @@ supprimé le 26 juin).
 ---
 
 **Document à compléter** :
-- ~~§1.2 `labocodex.netlify.app` restreint par Access ?~~ Sans objet depuis le retrait de Access.
-- ~~§3.1 à §3.3 noms exacts de la team / app / policy Cloudflare Access~~ Sections historiques.
+- **§1.2 `codexnumeris-051225.netlify.app` restreint par Access ?** — de nouveau pertinent à partir du 1er septembre 2026 : vérifier si l'URL Netlify directe contourne Access (elle n'est pas derrière le proxy Cloudflare). Si oui, c'est une porte dérobée qui vide la mesure de son sens.
+- **§3.1 à §3.3 noms exacts de la team / app / policy Cloudflare Access** — de nouveau requis (lignes marquées `[À COMPLÉTER]`) : à relever dans le tableau de bord avant le 1er septembre 2026, avec la durée de session et la règle `Include` réellement en place. Cf. fiche de réactivation §3.
 - §7 registrar du domaine et coût annuel
 - §8.1 statut 2FA sur GitHub / Netlify / Cloudflare
