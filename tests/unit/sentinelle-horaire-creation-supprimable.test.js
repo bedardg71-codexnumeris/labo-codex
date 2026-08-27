@@ -56,10 +56,16 @@ function creerDom() {
         'v2-hor-groupeAssocie': creerElement([], '00001'),
         'v2-hor-nom': creerElement([], 'Mar-Jeu'),
         'v2-hor-nbSeances': creerElement([], '1'),
-        'v2-hor-periodesParSeance': creerElement([], '2'),
         'v2-hor-seance-0-jour': creerElement([], 'Mardi'),
         'v2-hor-seance-0-debut': creerElement([], '10:00'),
         'v2-hor-seance-0-fin': creerElement([], '12:00'),
+        // #540 lot E1 (26 août 2026) : le champ global « Périodes par séance » a disparu
+        // au profit d'un nombre de périodes PAR séance, désormais requis à
+        // l'enregistrement — une période comprend sa pause, elle ne se déduit pas des
+        // heures. Sans ce champ, `sauvegarderHoraireV2` refuse et ce banc ne créait plus
+        // rien : ses trois cas rougissaient sur l'absence du bouton Supprimer, pas sur
+        // ce qu'ils verrouillent.
+        'v2-hor-seance-0-periodes': creerElement([], '2'),
         'v2-hor-seance-0-local': creerElement([], 'A-101'),
         'v2-seancesHoraireContainer': creerElement(),
         'v2-seancesContainer': creerElement()

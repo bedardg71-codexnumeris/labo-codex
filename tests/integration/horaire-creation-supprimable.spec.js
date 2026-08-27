@@ -69,8 +69,14 @@ test('terrain 2.4 · un horaire qu\'on vient de créer porte un bouton Supprimer
         await new Promise((res) => setTimeout(res, 150));
         const j = document.getElementById('v2-hor-seance-0-jour');
         const d = document.getElementById('v2-hor-seance-0-debut');
+        // #540 lot E1 (26 août 2026) : la séance porte SON nombre de périodes, requis à
+        // l'enregistrement — une période comprend sa pause, elle ne se déduit pas des
+        // heures. Sans lui, la sauvegarde refuse et ce cas ne créait plus d'horaire : il
+        // rougissait sur l'absence du bouton Supprimer, pas sur ce qu'il verrouille.
+        const p = document.getElementById('v2-hor-seance-0-periodes');
         if (j) j.value = 'Mardi';
         if (d) d.value = '08:00';
+        if (p) p.value = '2';
 
         window.sauvegarderHoraireV2();
         await new Promise((res) => setTimeout(res, 400));
