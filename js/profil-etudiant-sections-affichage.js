@@ -822,7 +822,6 @@ function genererSectionAccompagnement(da) {
         ? diagnostiquerConversionNiveaux(da) : null;
     const alerteContexte = determinerAlerteContextuelle(da);
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true); // true = dépistage (3 artefacts)
-    const cibleInfo = determinerCibleIntervention(da); // Conservé pour compatibilité (sera retiré plus tard)
     const progression = calculerProgressionEleve(da);
     const defiSpecifique = identifierDefiSpecifique(da);
     const directionRisque = calculerDirectionRisque(da);
@@ -887,19 +886,23 @@ function genererSectionAccompagnement(da) {
     // sur `criteresSOLO` — le « 0 » est un jugement suspendu.
 
 
-    // Badge RàI avec classes CSS
-    let badgeClasse = '';
-    let badgeLabel = '';
-    if (cibleInfo.niveau === 3) {
-        badgeClasse = 'badge-sys badge-rai-3';
-        badgeLabel = 'Niveau 3';
-    } else if (cibleInfo.niveau === 2) {
-        badgeClasse = 'badge-sys badge-rai-2';
-        badgeLabel = 'Niveau 2';
-    } else {
-        badgeClasse = 'badge-sys badge-rai-1';
-        badgeLabel = 'Niveau 1';
-    }
+    // ⚠⚠ #552 — `cibleInfo`, `badgeClasse` ET `badgeLabel` ONT ÉTÉ RETIRÉS :
+    // ILS ÉTAIENT ASSIGNÉS ET JAMAIS LUS.
+    //
+    // Ce qui vivait ici : un appel à `determinerCibleIntervention(da)` marqué
+    // « Conservé pour compatibilité (sera retiré plus tard) », dont le seul usage
+    // était de remplir deux variables locales à partir de `cibleInfo.niveau`.
+    //
+    // ⮕ CE QUE LA VÉRIFICATION A MONTRÉ. Grep sur tout le fichier : quatre
+    // écritures de `badgeClasse`, quatre de `badgeLabel`, AUCUNE lecture. Le
+    // badge RàI réellement rendu plus bas lit `niveauRai.badgeClasse` — une
+    // autre source, `determinerNiveauRaiPedagogique`, que le skill `depistage-rai`
+    // désigne comme la source unique du niveau RàI. Même patron que
+    // `patternTexte` et `interpP`, retirés au lot 3 de #542.
+    //
+    // ⮕ Conséquence : l'écran d'accompagnement n'appelle plus
+    // `determinerCibleIntervention`. Son seul appelant vivant est
+    // `tableau-bord-apercu.js`, qui n'en lit que `.pattern`.
 
     // ⚠⚠ #542 lot 3, pas 3c-3 — `interpreterScoreIDME` A ÉTÉ SUPPRIMÉE, ET
     // ELLE N'A PAS ÉTÉ REMPLACÉE : ELLE NE S'AFFICHAIT NULLE PART.
@@ -1219,12 +1222,21 @@ function genererSectionAccompagnement(da) {
                     ? obtenirEchelleCommuneDesEvaluations(da)
                     : { echelle: null, raison: 'helper-absent', message: '' };
 
-                // Le critère « Français » reste écarté, et son nom reste écrit ici.
-                // C'est un jugement pédagogique de Grégoire — un critère
-                // linguistique n'a rien à dire sur la structure cognitive — mais
-                // c'est aussi un nom de critère en dur, du même genre que ceux que
-                // #529 a pour mandat de sortir du code. Il est PRÉSERVÉ TEL QUEL :
-                // le lot 3 retire des seuils, il ne change pas ce qui est observé.
+                // ⚠⚠ #537 (27 août 2026) — L'EXCLUSION DU CRITÈRE « Français » A ÉTÉ
+                // RETIRÉE, ET C'EST UNE DÉCISION DE GRÉGOIRE, PAS UNE CONSÉQUENCE
+                // TECHNIQUE.
+                //
+                // Ce qui vivait ici : `c.nom !== 'Français'`. Le commentaire qui
+                // l'accompagnait disait pourquoi #529 puis le lot 3 de #542 l'avaient
+                // laissé — « c'est un jugement pédagogique de Grégoire : un critère
+                // linguistique n'a rien à dire sur la structure cognitive », donc pas
+                // à un refactor de le trancher.
+                //
+                // ⮕ IL L'A TRANCHÉ LE 27 AOÛT 2026 : « le critère de langue est un
+                // critère comme un autre », sans statut propre. ⮕ CONSÉQUENCE ASSUMÉE,
+                // confirmée explicitement le même jour : SON critère Français apparaît
+                // désormais dans cette carte, dont il était exclu. C'était le dernier
+                // nom de critère écrit en dur du chantier #552 · #535 · #537.
                 //
                 // ⮕ `valeur > 0` est préservé aussi, et pour une raison plus
                 // profonde : le « 0 » est un JUGEMENT SUSPENDU, pas une performance
@@ -1233,7 +1245,7 @@ function genererSectionAccompagnement(da) {
                 // filtrait, `forces` ne pouvait pas le contenir). Le regroupement
                 // par niveau le ferait tomber dans le niveau « 0 » de l'échelle de
                 // Grégoire, qui couvre 0-0 : il serait affiché comme un résultat.
-                const criteresSOLO = criteres.filter(c => c.nom !== 'Français' && c.valeur > 0);
+                const criteresSOLO = criteres.filter(c => c.valeur > 0);
 
                 const enteteCarte = `
             <!-- Carte SOLO : positionnée au centre via order (26 mai PM2) -->

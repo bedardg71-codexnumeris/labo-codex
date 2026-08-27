@@ -815,8 +815,11 @@ function ouvrirIntervention(interventionId, options) {
     if (grilleRef && grilleRef.criteres && grilleRef.criteres.length > 0) {
         criteresInitHtml = grilleRef.criteres.map(function(c) {
             var checked = intervention.criteresCibles.indexOf(c.nom) >= 0 ? 'checked' : '';
-            var niveauLabel = c.niveauSOLO === 'relationnel' ? 'relationnel' :
-                              c.niveauSOLO === 'abstrait_etendu' ? 'abstrait étendu' : 'multistructurel';
+            // #552 — une seule écriture de la table SOLO, dans
+            // `profil-etudiant-calculs.js`. Elle vivait ici en double.
+            var niveauLabel = typeof libelleNiveauSOLO === 'function'
+                ? libelleNiveauSOLO(c.niveauSOLO)
+                : 'multistructurel';
             return '<label style="display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer;">' +
                 '<input type="checkbox" class="critere-cible-cb" value="' + echapperHtml(c.nom) + '" ' + checked + ' style="width: auto; margin: 0;">' +
                 '<span>' + echapperHtml(c.nom) + '</span>' +

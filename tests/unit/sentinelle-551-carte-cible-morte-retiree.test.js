@@ -81,16 +81,26 @@ describe('#551 · la carte « Cible d\'intervention » morte est retirée', () =
     });
 
     it('3. le chemin VIVANT du même besoin est intact', () => {
-        // `determinerCibleIntervention` (procédural) est ce qui alimente
-        // réellement l'écran d'accompagnement et la zone critique du tableau de
-        // bord. C'est lui, et non la carte retirée, que #551 devra recalibrer.
-        const affichage = lireSansCommentaires(AFFICHAGE);
-        expect(affichage, 'l\'appel vivant à determinerCibleIntervention a disparu de l\'accompagnement')
-            .toContain('determinerCibleIntervention(da)');
-
+        // ⚠ CE TEST A ÉTÉ CORRIGÉ PAR #552, ET C'EST LA MESURE QUI L'A EXIGÉ.
+        //
+        // Il tenait que `determinerCibleIntervention` était appelée DEUX fois :
+        // depuis l'écran d'accompagnement et depuis la zone critique du tableau
+        // de bord. La première moitié était fausse — pas l'appel, qui existait
+        // bien, mais ce qu'il alimentait. Son résultat ne servait qu'à remplir
+        // `badgeClasse` et `badgeLabel`, deux variables assignées quatre fois et
+        // jamais lues. Le badge RàI rendu à l'écran vient de `niveauRai`, donc de
+        // `determinerNiveauRaiPedagogique`.
+        //
+        // ⮕ L'appel mort a été retiré par #552. Ce qui reste à tenir, et qui
+        // porte le sens de #551 : le tableau de bord, LUI, consomme vraiment la
+        // fonction — et il n'en lit que `.pattern`.
         const bord = lireSansCommentaires('js/tableau-bord-apercu.js');
         expect(bord, 'la zone critique du tableau de bord n\'appelle plus determinerCibleIntervention')
             .toContain('determinerCibleIntervention(e.da)');
+
+        const affichage = lireSansCommentaires(AFFICHAGE);
+        expect(affichage, 'l\'appel mort à determinerCibleIntervention est revenu dans l\'accompagnement')
+            .not.toContain('determinerCibleIntervention(da)');
     });
 
     it('4. les CINQ `identifierPattern` et leur contrat IPratique n\'ont pas été emportés', () => {
