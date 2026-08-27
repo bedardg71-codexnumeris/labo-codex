@@ -698,14 +698,14 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Grégoire — décision sur SES données, après le lot 0 ; (b) le devenir des seuils `idme.*` (repli ou
   disparition) — se décide dans le lot 3.
 
-  ✅ **LOT 0 LIVRÉ le 27 août 2026** — sonde `scripts/diagnostic-542-echelles-et-niveaux.js`, LECTURE
+  ✅ **LOT 0 LIVRÉ le 26 août 2026 (soirée)** — sonde `scripts/diagnostic-542-echelles-et-niveaux.js`, LECTURE
   SEULE, à coller en console puis `await diag542()`. Elle répond aux quatre questions du plan (code
   de niveau absent de son échelle · niveau `0` · `echelleId` préfixé `pratique-` · aucun `echelleId`,
   en distinguant les cas RÉSOLUBLES des cas MUETS) et conclut, pour chacun, « risque actif » ou
   « risque latent ». ⏳ **DÛ PAR GRÉGOIRE** : la lancer et renvoyer le rapport. Il commande (a)
   ci-dessus et le lot 3.
 
-  🔧 **DÉCOUVERTE DU LOT 0 — L'ÉCHELLE ORPHELINE DE H2026** (27 août 2026).
+  🔧 **DÉCOUVERTE DU LOT 0 — L'ÉCHELLE ORPHELINE DE H2026** (26 août 2026, soirée).
   La sonde a mesuré autre chose que ce qu'elle cherchait : **383 évaluations sur 670 désignent une
   échelle introuvable** — 339 sous le seul id `1767389426695`, 44 sous `ECHELLE_DEMO` (résidu connu
   et accepté du 5 août). **1706 niveaux sur 2983, soit 57 % des données, ne se convertissent pas.**
@@ -718,7 +718,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   emploient `M` ou `0`, seuls niveaux où les candidates divergent) ; **188 reproduites** par la
   famille `0=0 I=40 D=65 M=75 E=100` ; **0 reproduite par une AUTRE échelle** ; **0 code de niveau
   inconnu**. ⮕ Une seule échelle a circulé — la réparation en bloc est sûre.
-  ✅ **RÉPARATION EXÉCUTÉE le 27 août 2026** (`scripts/reparation-542-echelle-orpheline.js`, après
+  ✅ **RÉPARATION EXÉCUTÉE le 26 août 2026 (soirée)** (`scripts/reparation-542-echelle-orpheline.js`, après
   sauvegarde Codex, dry-run relu). Une échelle ajoutée dans `h2026_echellesTemplates` sous l'id
   `1767389426695`, copie intégrale de `h2026_echellesTemplates[1]` (`parDefaut` NON propagé).
   **Aucune note touchée, aucune évaluation modifiée.**
@@ -734,7 +734,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   pas ce qui l'a ré-orphelinée, cette réparation peut se défaire.
 
 - [ ] **#546 — Le « jugement suspendu » n'est plus saisissable : #526 a fermé la porte que le plan SOLO suppose ouverte.**
-  Créé le 27 août 2026 pendant le lot 2 de #542. **Deux exigences de Grégoire, posées le même jour,
+  Créé le 26 août 2026 (soirée) pendant le lot 2 de #542. **Deux exigences de Grégoire, posées le même jour,
   se contredisent — et aucune n'est fautive :**
   - **#526 (26 août)** a étendu `refusChampNiveau` (`echelles.js`) : `min`, `max` **et
     `valeurCalcul`** sont refusés vides ou non numériques. Motif donné alors, et il tient : « la
@@ -756,7 +756,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   fermé. **Ne pas coder avant d'avoir choisi.**
 
 - [ ] **#544 — Les 44 évaluations `ECHELLE_DEMO` de H2026, et la décision du 5 août à revoir.**
-  Créé le 27 août 2026, au terme de la réparation #542. Ces 44 évaluations vivent dans
+  Créé le 26 août 2026 (soirée), au terme de la réparation #542. Ces 44 évaluations vivent dans
   `h2026_evaluationsSauvegardees` — un magasin RÉEL, pas la démo — et désignent `ECHELLE_DEMO`, un
   identifiant qui n'existe nulle part, **pas même côté démo** (les échelles de démonstration sont
   `ECH_DEMO_*`). Elles portent **176 niveaux**, seul reliquat non convertible après #542
@@ -775,7 +775,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   été mal nommée. La sonde du lot 0 les nomme (`await diag542()`).
 
 - [ ] **#545 — Pourquoi l'échelle `1767389426695` a-t-elle été ré-orphelinée ?**
-  Créé le 27 août 2026. **C'est le point qui rend la réparation #542 fragile** : cette échelle avait
+  Créé le 26 août 2026 (soirée). **C'est le point qui rend la réparation #542 fragile** : cette échelle avait
   DÉJÀ été recréée le 5 août 2026 dans `h2026_echellesTemplates` (réparation documentée, oracle
   avant==après). Elle n'y était plus le 27. Quelque chose l'a retirée ou remplacée entre les deux —
   et tant qu'on ne sait pas quoi, **le même effacement peut se reproduire et défaire #542**.
@@ -787,7 +787,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   écrite, et c'est l'écriture qui écrase. Voir aussi le seed d'échelles au boot et les migrations de
   trimestre (`project-modele-horaire-par-trimestre` a le même patron de recréation pure).
 
-- [ ] **#543 — Les 55 évaluations dont la note stockée ne se recalcule pas.** Créé le 27 août 2026,
+- [ ] **#543 — Les 55 évaluations dont la note stockée ne se recalcule pas.** Créé le 26 août 2026 (soirée),
   extrait de #542 (l'oracle les isole ; ce ne sont PAS un problème d'échelle — aucune n'est
   reproduite par une échelle différente, aucune ne porte de code de niveau inconnu). **Deux causes
   distinctes, à ne pas confondre :**
@@ -808,7 +808,24 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   que l'élève a reçu, les critères sont ce qui a été saisi. Les faire coïncider, c'est choisir lequel
   des deux ment — décision de Grégoire, pas de code.
 
-  ✅ **LOT 1 LIVRÉ le 27 août 2026** — le dépistage ne rend plus de verdict rassurant sans avoir
+  ✅ **LOT 2 LIVRÉ le 26 août 2026 (soirée)** — menu « Niveau SOLO atteint », cinq valeurs + « aucun »,
+  FACULTATIF, dans les DEUX éditeurs d'échelle, servi par UN SEUL producteur d'options
+  (`optionsNiveauSOLOEchelle`). Le seed livré reçoit ses étiquettes ; les échelles existantes NON —
+  le champ y naît vide, et un test interdit toute reprise depuis la prose (ce serait le défaut B9).
+  `description` intacte : elle part dans les documents remis aux élèves. Sentinelle
+  `tests/unit/sentinelle-542-lot2-solo-echelle.test.js`, 15 cas, **3 break-tests rouges** (menu retiré
+  d'un seul éditeur → 3 ; étiquette du seed retirée → 1 ; reprise automatique introduite → 2).
+  ⚠ **L'instruction « retirer l'astérisque de Valeur ponctuelle » N'A PAS été exécutée** : le constat
+  C4 du plan est périmé (#526 l'a rendue obligatoire le même jour). Contradiction versée en **#546**.
+  ⚠ **CORRECTION D'UNE AFFIRMATION FAUSSE DE MON PROPRE COMMIT** (`c1d92a0f`) : il annonce
+  « Vitest 3615/3615 ». **Je n'ai jamais observé cette suite verte.** La mesure réelle au moment du
+  commit était **3614/3615**, le rouge portant sur `styles.css` (anti-cache, `?v=20260826d` inchangé)
+  — fichier de la session #540, commité par `565b130d`, hors de mon périmètre. Le commit est
+  immuable ; la correction vit ici. **C'est la deuxième fois dans la même session** qu'une suite est
+  annoncée verte sans avoir été vue verte (la première : `aa880dfa`). ⮕ Règle à tenir : ne jamais
+  reporter un total de tests qui n'a pas été lu à l'écran APRÈS le dernier changement.
+
+  ✅ **LOT 1 LIVRÉ le 26 août 2026 (soirée)** — le dépistage ne rend plus de verdict rassurant sans avoir
   calculé. Deux sentinelles, **11 rouges vérifiés au break-test**.
   - **A4 — `defisCommuns` était TOUJOURS vide** (`interventions.js`, `analyserSousGroupe`). **Trois**
     causes indépendantes, qui se masquaient : (1) `seuils.acceptable` n'existe pas à la racine — la
