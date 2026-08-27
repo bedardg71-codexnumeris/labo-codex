@@ -850,6 +850,32 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   recharge) mais **le suffixe ment sur la date de modification**. C'est un chiffre juste sous
   un mauvais libellé, exactement ce que [[feedback-total-tests-lu-apres-dernier-changement]]
   nomme.
+  🔧 **LA CAUSE STRUCTURELLE, TROUVÉE À LA RELEASE 1.102.0 DU 27 AOÛT — ET CE N'EST PAS UN
+  DÉFAUT DE RAPPEL.** `release.mjs` et la sentinelle **ne prennent pas le même repère**, et
+  l'écart est d'exactement UN commit :
+
+  | | Repère | Ce qu'il diffe |
+  |---|---|---|
+  | `scripts/release.mjs:203` | `git log -1 --format=%H -- version.json` → le **dernier** commit touchant `version.json` | ce qui a changé **APRÈS** la dernière release |
+  | `sentinelle-anticache:71-75` | `git log -3 ... ` puis `commits[1]` → l'**avant-dernier** | ce qui a changé **DEPUIS** l'avant-dernière release, donc **y compris dans le commit de release lui-même** |
+
+  ⮕ **Conséquence** : quand une release est faite dans le MÊME commit que du code — ce qui est
+  le cas courant ici, `feat(profil): … (1.101.1)` a bumpé `version.json` ET modifié neuf
+  fichiers `js/` — **`release.mjs` ne peut structurellement pas voir ces fichiers-là**. Ils
+  sont dans son repère, pas après. La sentinelle, elle, les voit. Le script ne les rattrapera
+  donc JAMAIS, à aucune release ultérieure.
+  ⮕ **Mesuré** : la release 1.102.0 a bumpé 19 fichiers et en a raté **deux** —
+  `js/accompagnement-contenu-hover.js` et `js/profil-etudiant-diagnostics.js`, tous deux
+  modifiés dans `38c6b574` (le commit de 1.101.1). Rattrapés à la main.
+  ⮕ **Le correctif pressenti** est un `~1` sur le repère de `release.mjs` (partir du commit
+  qui PRÉCÈDE la dernière release, comme la sentinelle). **NON APPLIQUÉ** : on ne modifie pas
+  l'outil de release pendant une release. À faire à froid, avec un test qui reproduit le cas
+  « release commitée avec du code ».
+  ⚠ **Ceci change le diagnostic de l'item.** « Le geste correcteur est connu de tous et
+  appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT » reste
+  vrai pour les quatre oublis du 26. Mais **au moins une part du motif n'est pas un oubli
+  humain : c'est un angle mort de l'outil**, et aucun rappel n'y aurait changé quoi que ce soit.
+
   ⮕ **Ce que ça tranche** : la piste (b) — `--build-only` intégré au geste de commit — est à
   écarter telle quelle. Elle bumperait le build, donc la version sous les pieds de Grégoire.
   Le 27 au matin, `--build-only --dry-run` proposait de toucher **18 fichiers** pour un
