@@ -733,6 +733,34 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⏳ **ET LA CAUSE RESTE INCONNUE** : l'échelle avait déjà été recréée le 5 août. Tant qu'on ne sait
   pas ce qui l'a ré-orphelinée, cette réparation peut se défaire.
 
+  ✅ **LOT 3 — PAS 1 ET 2 LIVRÉS le 27 août 2026 au matin** (`4d04dd21`, `750e7c3f`). Consigne
+  suivie : `plans de travail/CONSIGNE-542-lot3-delier-le-depistage.md`.
+  ⮕ **DÉCISION DE GRÉGOIRE, prise AVANT de coder — OPTION B** : « l'étiquette SOLO est
+  facultative, et son absence est DITE ». A (exiger l'étiquette d'abord) et C (repli sur les
+  seuils `idme.*`) sont écartées. **Conséquence pour le pas 5 : les seuils `idme.*` n'ont
+  aucun rôle de repli, leur disparition devient l'hypothèse par défaut.**
+  ⮕ **Pas 1** — `situerPourcentageDansEchelle(pourcentage, echelle)` : la moyenne se situe dans
+  les plages de l'échelle de l'utilisateur. Première plage contenante gagne (une note nulle rend
+  « 0 », pas « I » — comportement de `calculerNote` reproduit à dessein) ; hors plage rend
+  `null`, **sans repli « plus proche »** ; une borne vide n'est pas la borne zéro.
+  ⮕ **Pas 2** — `interpreterNiveauAtteint(niveau)` : l'interprétation vient de l'étiquette SOLO
+  du niveau. Sans étiquette, le **nom du niveau** est rendu et l'absence est nommée. Les quatre
+  descriptions SOLO sont rapatriées dans `NIVEAUX_SOLO_ECHELLE` (`echelles.js`), leur source
+  unique — c'était leur mode de SÉLECTION qui était fautif, pas leur texte.
+  ⮕ **20 tests, 8 break-tests rouges vérifiés**, restauration confirmée par `diff -q`. Vitest
+  3635/3635 (340 fichiers) lu après le dernier changement.
+  ⚠ **RIEN N'EST ENCORE BRANCHÉ À L'ÉCRAN.** `interpreterScoreIDME` et la borne `0.85` sont
+  toujours en place ; les deux fonctions neuves n'ont aucun appelant. L'application se comporte
+  exactement comme avant. **Le branchement et le retrait sont le pas 3.**
+  ⏳ **DÛ PAR GRÉGOIRE, et personne ne peut le faire à sa place** : valider la description de
+  « préstructurel » — **« Aucun aspect pertinent n'est traité »**. C'est le SEUL texte écrit à
+  neuf : l'ancien code ne produisait que quatre descriptions pour cinq niveaux SOLO. C'est du
+  vocabulaire pédagogique.
+  ⏳ **RESTE AU LOT 3** : pas 3 (brancher, et retirer les quatre descriptions en dur + la borne
+  `0.85`), pas 4 (supprimer `obtenirNiveauSOLO()` de `trimestres.js`, qui redevine SOLO depuis
+  le NOM d'un critère et contredit le champ configuré), pas 5 (trancher le devenir des seuils
+  `idme.*`).
+
 - [ ] **#546 — Le « jugement suspendu » n'est plus saisissable : #526 a fermé la porte que le plan SOLO suppose ouverte.**
   Créé le 26 août 2026 (soirée) pendant le lot 2 de #542. **Deux exigences de Grégoire, posées le même jour,
   se contredisent — et aucune n'est fautive :**
@@ -810,6 +838,23 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   sûr qu'un contrôle qui corrige.
   ⮕ Repéré par la session #542 sur le `styles.css` du lot D de #540, et relayé par la session
   #541 — les trois sessions du soir ont vu le même défaut, aucune ne l'avait vu chez elle.
+
+  🔧 **UNE DONNÉE NEUVE, MESURÉE LE 27 AOÛT AU MATIN (#542 lot 3, pas 1).** La sentinelle ne
+  se contente pas d'exiger un `?v=` DIFFÉRENT : elle exige un `?v=` **du jour du build**.
+  Posé `20260827a` sur un fichier modifié le 27, elle a rougi — parce que le build est resté
+  à `0826-1658`, l'application de Grégoire étant ouverte en `file://`.
+  ⮕ **Les deux règles du projet se contredisent dès qu'on travaille le LENDEMAIN d'un build** :
+  « le `?v=` d'un fichier modifié se pose » et « aucun bump de build pendant une session
+  `file://` ouverte ». Le contournement employé — poser la lettre suivante du JOUR DU BUILD
+  (`20260826b`, puis `c`) — est correct au sens de l'anti-cache (l'URL change, le navigateur
+  recharge) mais **le suffixe ment sur la date de modification**. C'est un chiffre juste sous
+  un mauvais libellé, exactement ce que [[feedback-total-tests-lu-apres-dernier-changement]]
+  nomme.
+  ⮕ **Ce que ça tranche** : la piste (b) — `--build-only` intégré au geste de commit — est à
+  écarter telle quelle. Elle bumperait le build, donc la version sous les pieds de Grégoire.
+  Le 27 au matin, `--build-only --dry-run` proposait de toucher **18 fichiers** pour un
+  chantier qui en modifiait deux. **La piste (a), un contrôle qui SIGNALE au pre-commit, reste
+  la seule compatible avec sa manière de travailler.**
 
 - [ ] **#543 — Les 55 évaluations dont la note stockée ne se recalcule pas.** Créé le 26 août 2026 (soirée),
   extrait de #542 (l'oracle les isole ; ce ne sont PAS un problème d'échelle — aucune n'est

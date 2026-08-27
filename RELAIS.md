@@ -14,7 +14,7 @@
 | **Branche à ouvrir** | **`main`** — tout y est. Aucun travail en avance ailleurs. |
 | **Version** | **1.101.1** — build `0826-1658`. ⏳ **BUMP DÛ** : Grégoire a eu l'application ouverte en `file://` toute la soirée du 26, et la règle du projet interdit de bumper le build pendant une session ouverte. Les `?v=` ont donc été bumpés **à la main, fichier par fichier, à chaque lot** — la sentinelle anti-cache est verte. Le bump de version reste à faire au prochain démarrage. |
 | **Version précédente** | **1.100.0** — la session du 25-26 a livré 16 items depuis 1.99.0 |
-| **Travail en avance sur `main`** | **OUI — plusieurs commits non poussés au soir du 26 août.** Tout est sur `main`, rien sur une branche. Voir « Ce que la soirée du 26 a livré » ci-dessous. |
+| **Travail en avance sur `main`** | **NON — tout est poussé** (vérifié le 27 août à 5 h 20 : `git log origin/main..HEAD` vide). La ligne d'hier annonçait le contraire ; elle avait été écrite avant le push de 22 h 25. **Rien sur aucune branche.** |
 | **Suite Playwright** | baseline à **1 seul échec connu** (contre 8 avant #495) : `productions-ajout-refus-garde-340` = **#530**, un vrai bug, pas du bruit. |
 | ⚠ **AVANT TOUTE SUITE PLAYWRIGHT** | **fermer GitHub Desktop.** Les specs lisent l'arbre de travail en direct ; une commande git lancée pendant la suite change les fichiers sous leurs pieds et fait rougir des specs au hasard. Trouvé le 26 août (#523), règle versée au skill `portes-terrain`. |
 | ⚠ **LE CLONE DE GRÉGOIRE EST L'ARBRE DE TRAVAIL** | `/Users/kuekatsheu/Documents/GitHub/Monitorage_v6` sert à la fois de dépôt de travail et de source `file://` pour son app. Il voit les modifications dès qu'il recharge, **avant tout push** — et peut donc tomber sur un état intermédiaire. Le `git pull` des portes terrain lui est inutile. |
@@ -22,7 +22,44 @@
 | ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE** | **#427** (refermer l'accès public) et **#508** (l'avis d'accueil qui l'annonce). Fiche opératoire prête : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`. **Dû par Grégoire** : la liste nominale des personnes à inviter et les trois noms Cloudflare — personne ne peut les préparer à sa place. |
 | ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. ⮕ **ET C'EST ARRIVÉ UNE SECONDE FOIS LE MÊME JOUR, dans l'autre sens.** Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les `BACKLOG.md` et `SESSION.md` de la session « présences » — l'inscription de l'item **#538** et la renumérotation **#534 → #537** vivent donc dans un commit qui parle d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc non réécrit. **Deux avertissements en un jour : sur ce dépôt, `git add` par chemins explicites n'est pas une préférence, c'est la seule méthode qui tienne.** |
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
-| **Dernière mise à jour** | **26 août 2026, fin de soirée (21e cycle)** — #540 clos (5 lots), #541 livré, #542 en cours par une session encore active |
+| **Dernière mise à jour** | **27 août 2026, matin** — #542 lot 3 : pas 1 et 2 livrés. Le bump de version reste dû. |
+
+## Ce que la matinée du 27 août a livré
+
+**#542 lot 3, pas 1 et 2** — `4d04dd21`, `750e7c3f`. Le nombre de pas était plafonné à deux
+par la consigne ; deux ont été faits.
+
+**La décision qui commandait tout, prise avant la première ligne de code — OPTION B** :
+l'étiquette SOLO est facultative, et son absence est DITE. Sans étiquette, le dépistage
+rend le **nom du niveau atteint** et nomme ce qui manque. Il ne se tait pas (A), il
+n'invente pas (C). ⮕ **Conséquence pour le pas 5 : les seuils `idme.*` n'ont plus aucun
+rôle de repli possible.**
+
+- **Pas 1** — `situerPourcentageDansEchelle` : la moyenne se situe dans les plages de
+  l'échelle de l'UTILISATEUR. Hors plage rend `null`, **sans repli « plus proche »** — un
+  repli par distance fabrique une réponse que l'échelle ne donne pas.
+- **Pas 2** — `interpreterNiveauAtteint` : l'interprétation vient de l'étiquette SOLO. Les
+  quatre descriptions rapatriées dans `NIVEAUX_SOLO_ECHELLE` (`echelles.js`), leur source
+  unique.
+
+⚠ **RIEN N'EST BRANCHÉ À L'ÉCRAN** — les deux fonctions n'ont aucun appelant, et
+l'application se comporte exactement comme avant. C'est délibéré : le branchement est le
+pas 3. **Playwright n'a rien de neuf à observer ; il en aura au pas 3.**
+
+⏳ **DÛ PAR GRÉGOIRE avant le pas 3** : valider **« Aucun aspect pertinent n'est traité »**
+(description de « préstructurel »). Seul texte écrit à neuf du lot — l'ancien code n'en
+produisait que quatre pour cinq niveaux SOLO.
+
+⮕ **Une donnée neuve versée à #547** : la sentinelle anti-cache exige un `?v=` du **jour du
+build**, pas du jour de la modification. Poser `20260827a` sous un build `0826-1658` la fait
+rougir. Les deux règles du projet se contredisent dès qu'on travaille le lendemain d'un
+build — ce qui **écarte la piste (b)** de #547 et laisse la piste (a), un contrôle qui
+SIGNALE au pre-commit.
+
+**Vitest 3635/3635 (340 fichiers)**, lu après le dernier changement. 20 tests neufs,
+**8 break-tests rouges vérifiés**, restauration confirmée par `diff -q`.
+
+---
 
 ## Ce que la soirée du 26 août a livré (21e cycle)
 

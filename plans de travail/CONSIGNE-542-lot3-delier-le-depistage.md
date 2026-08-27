@@ -167,6 +167,40 @@ l'échelle A/B/C/D fabriquée en test.
 
 ---
 
+### ✅ PAS 1 ET 2 FAITS — 27 août 2026, matin (`4d04dd21`, `750e7c3f`)
+
+La consigne autorisait deux pas ; deux ont été faits, et le troisième n'a pas été entamé.
+
+| Pas | État | Ce qui a été livré |
+|---|---|---|
+| **1** | ✅ | `situerPourcentageDansEchelle(pourcentage, echelle)` — `profil-etudiant-helpers.js`. Première plage contenante gagne · hors plage → `null`, sans repli « plus proche » · borne vide ≠ borne zéro. 11 tests, 4 break-tests rouges. |
+| **2** | ✅ | `interpreterNiveauAtteint(niveau)` — même fichier. Étiquette SOLO présente → sa description ; absente → **le nom du niveau, et l'absence dite**. Les 4 descriptions rapatriées dans `NIVEAUX_SOLO_ECHELLE` (`echelles.js`). 9 tests, 4 break-tests rouges. |
+| **3** | ⏳ | Brancher, et retirer les quatre descriptions en dur + la borne `0.85`. **Pas entamé.** |
+| **4** | ⏳ | Supprimer `obtenirNiveauSOLO()` (`trimestres.js`). |
+| **5** | ⏳ | Trancher le devenir des seuils `idme.*`. B ne leur laisse aucun rôle de repli. |
+
+⚠ **RIEN N'EST BRANCHÉ À L'ÉCRAN.** Les deux fonctions neuves n'ont **aucun appelant** :
+`interpreterScoreIDME` et la borne `0.85` sont toujours en place, et l'application se
+comporte exactement comme avant. C'est délibéré — le branchement est le pas 3, et le
+mélanger au pas 2 aurait rendu impossible de dire lequel des deux a changé un
+comportement. **Playwright n'a donc rien de neuf à observer pour l'instant ; il en aura au
+pas 3.**
+
+⏳ **DÛ PAR GRÉGOIRE avant le pas 3** : valider la description de « préstructurel » —
+**« Aucun aspect pertinent n'est traité »**. Seul texte écrit à neuf de tout le lot :
+l'ancien code n'en produisait que quatre pour cinq niveaux SOLO. C'est du vocabulaire
+pédagogique, pas de la mécanique.
+
+⮕ **CE QUE LE PAS 3 DOIT SAVOIR, ET QUI N'ÉTAIT PAS DANS CETTE CONSIGNE.** Le §3 listait
+les seuils `idme.*` et les quatre descriptions. Il en manquait un, trouvé en lisant le
+code : `profil-etudiant-sections-affichage.js`, dans la carte « Performance globale (P) »,
+écrit **`pct >= 85 ? 'E' : pct >= 75 ? 'M' : pct >= 65 ? 'D' : 'I'`** — les bornes de
+Grégoire en clair dans un ternaire, sans même passer par `obtenirSeuil`. Il ne se voit pas
+en cherchant `idme.` : le re-localiser au pas 3 par la valeur `>= 85`, pas par le nom du
+seuil.
+
+---
+
 ## 7. Précautions, apprises à mes dépens le 26
 
 - **Chaque correctif porte sa sentinelle, avec break-test ROUGE vérifié**, restauration confirmée
