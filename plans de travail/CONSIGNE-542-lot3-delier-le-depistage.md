@@ -498,3 +498,39 @@ seuil_reussite: 'M',
 ⮕ `seuil_reussite: 'M'` bute exactement sur la donnée qui manque partout : **le seuil de
 maîtrise**, celui que #549 cherche aussi et que la troisième option écartée au pas 3c-3
 proposait d'ajouter à l'échelle. Aucune donnée du dépôt ne le dit aujourd'hui.
+
+#### ✅ TRANCHÉ ET LIVRÉ — l'export de recherche, 27 août 2026
+
+**DÉCISION DE GRÉGOIRE : le catalogue réel des échelles, et l'`echelle_id` sur chaque
+évaluation.** Deux options écartées : n'échanger que les codes (le chercheur ignorerait
+toujours les plages, les étiquettes, et le cas multi-échelles) ; attendre #549 (l'export
+continuerait de sortir un fichier faux entre-temps).
+
+| Ce qui part | Ce qui arrive |
+|---|---|
+| `echelle: ['I', 'D', 'M', 'E']` | `contexte.echelles[]` — **toutes** les échelles du trimestre, avec `code`, `nom`, `min`, `max`, `valeur_calcul` et `niveau_solo` par niveau |
+| — | `echelle_id` sur **chaque évaluation** exportée : le lien qui rend ses `criteres` lisibles |
+| `seuil_reussite: 'M'` | **rien.** Aucune donnée du dépôt ne dit quel niveau marque la réussite |
+
+⮕ **TOUTES les échelles, et pas « celle de la grille »** : une grille ne désigne pas
+d'échelle dans ce dépôt, et plusieurs peuvent coexister sur un trimestre. Choisir aurait été
+deviner — le geste que tout ce lot retire. Le lien se fait par l'`echelle_id` de chaque
+évaluation, et c'est le lecteur qui le suit.
+
+⮕ **`seuil_reussite` retiré SANS remplaçant, et c'est le point** : le champ ne peut pas
+revenir « rempli autrement », il ne peut revenir que supposé. **Une supposition exportée est
+indiscernable d'une mesure** — c'est ce qui distingue ce site de tous les autres du lot. Un
+affichage trompeur se corrige au rechargement suivant ; un jeu de données de recherche part
+ailleurs, est analysé, cité, et survit à sa correction.
+
+⮕ **Les plages ET l'étiquette SOLO partent avec le catalogue**, sans quoi il ne servirait à
+rien : « M » seul ne dit ni à quel pourcentage il correspond, ni ce qu'il signifie.
+
+**Sentinelle étendue à 6 tests** (mêmes fichiers) : la liste IDME absente · `seuil_reussite`
+absent · le catalogue alimenté depuis la variable déjà chargée · ses `min`/`max`/`niveau_solo`
+présents · l'`echelle_id` sur les évaluations. Les trois nouvelles assertions ont leur
+break-test rouge vérifié — **dont `echelle_id` cassé ISOLÉMENT**, parce que le premier
+break-test avait arrêté le test sur une assertion précédente et n'aurait rien prouvé sur
+celle-là.
+
+**Vitest 3701/3701, 347 fichiers.** Anti-cache : `trimestres.js` `20260827a → b`.
