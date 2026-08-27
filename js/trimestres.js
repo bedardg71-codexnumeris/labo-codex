@@ -1781,8 +1781,43 @@
                             code: c.id,
                             nom: c.nom,
                             ponderation: c.ponderation,
-                            niveau_solo: obtenirNiveauSOLO(c.nom),
-                            type: obtenirTypeCritere(c.nom)
+                            // ⚠⚠ #542 lot 3, pas 4 — LE SOLO D'UN CRITÈRE SE LIT, IL NE SE
+                            // DEVINE PLUS DEPUIS SON NOM.
+                            //
+                            // Ce qui vivait ici : `obtenirNiveauSOLO(c.nom)`, qui cherchait
+                            // « structure », « rigueur », « français », « plausibilité »,
+                            // « nuance » dans le NOM du critère — les cinq critères de
+                            // Grégoire écrits dans le code — et rendait `multistructural`
+                            // par défaut pour tout le reste.
+                            //
+                            // ⮕ TROIS DÉFAUTS, du plus visible au plus profond :
+                            //   1. Une grille « Méthode / Résultats / Discussion » recevait
+                            //      `multistructural` sur TOUS ses critères, sans que rien ne
+                            //      le dise. C'est le même défaut que l'expression régulière
+                            //      retirée d'`identifierDefiSpecifique` par #529.
+                            //   2. Le vocabulaire rendu était ANGLAIS — `multistructural`,
+                            //      `relational`, `extended_abstract` — alors que le champ
+                            //      configuré par l'utilisateur est en français. Deux
+                            //      vocabulaires pour la même chose, dans le même dépôt.
+                            //   3. Surtout : LE CHAMP EXISTE. `critere.niveauSOLO` est
+                            //      configuré dans l'éditeur de grilles (`grilles.js`, menu à
+                            //      trois valeurs), et c'est déjà lui que lit `calculerIPB`
+                            //      (`profil-etudiant-calculs.js`) pour choisir les critères
+                            //      « fondations ». La fonction devinait donc une réponse que
+                            //      l'utilisateur avait déjà donnée — et pouvait la CONTREDIRE.
+                            //
+                            // ⮕ LE DÉFAUT « multistructurel » N'EST PAS ARBITRAIRE : c'est la
+                            // valeur que l'éditeur de grilles présélectionne et celle que
+                            // `calculerIPB` applique déjà à un critère sans étiquette. Une
+                            // troisième lecture du même champ doit lire le même défaut, sans
+                            // quoi l'IPB et l'export diraient deux choses d'un même critère.
+                            //
+                            // ⚠ LE FORMAT D'EXPORT CHANGE, et c'est voulu : `niveau_solo`
+                            // passe du vocabulaire anglais deviné au vocabulaire français
+                            // configuré. Un fichier exporté avant ce jour et un fichier
+                            // exporté après ne portent pas les mêmes valeurs dans ce champ.
+                            niveau_solo: (c.niveauSOLO || 'multistructurel'),
+                            type: typeCritereSelonSOLO(c)
                         }))
                     } : {},
                     calendrier: {
@@ -1942,44 +1977,58 @@
         }
     }
 
-    /**
-     * Obtient le niveau SOLO associé à un critère
-     * @param {string} nomCritere - Nom du critère
-     * @returns {string} Niveau SOLO
-     */
-    function obtenirNiveauSOLO(nomCritere) {
-        const nom = nomCritere.toLowerCase();
-        // Critères fondamentaux (multistructurel)
-        if (nom.includes('structure') || nom.includes('rigueur') || nom.includes('français')) {
-            return 'multistructural';
-        }
-        // Critère transitionnel (relationnel)
-        if (nom.includes('plausibilité') || nom.includes('plausibilite')) {
-            return 'relational';
-        }
-        // Critère complexe (abstrait étendu)
-        if (nom.includes('nuance')) {
-            return 'extended_abstract';
-        }
-        return 'multistructural'; // Par défaut
-    }
+    // ⚠⚠ #542 lot 3, pas 4 — `obtenirNiveauSOLO()` A ÉTÉ SUPPRIMÉE.
+    //
+    // Elle redevinait le niveau SOLO d'un critère depuis son NOM : cinq mots-clés
+    // — « structure », « rigueur », « français », « plausibilité », « nuance » —
+    // qui sont les critères de Grégoire, écrits dans le code. Tout autre nom
+    // recevait `multistructural`, en silence.
+    //
+    // ⮕ ELLE CONTREDISAIT LE CHAMP QUE L'UTILISATEUR CONFIGURE. `critere.niveauSOLO`
+    // existe, il est saisi dans l'éditeur de grilles, et `calculerIPB` s'en sert
+    // déjà. Son unique appelant — l'export de recherche — le lit désormais
+    // directement ; voir le commentaire à `niveau_solo`.
+    //
+    // ⮕ C'était le défaut B9 du plan `PLAN-SOLO-echelle-et-depistage.md`, et le
+    // même patron que l'expression régulière retirée d'`identifierDefiSpecifique`
+    // par #529 : du code qui relit des noms pour retrouver une donnée déjà
+    // structurée ailleurs.
+    //
+    // Verrouillé par `tests/unit/sentinelle-542-pas4-solo-critere-configure.test.js`.
 
     /**
-     * Obtient le type d'un critère (fondamental, transitionnel, complexe)
-     * @param {string} nomCritere - Nom du critère
+     * Le TYPE d'un critère, dérivé de son étiquette SOLO configurée.
+     *
+     * ⚠⚠ #542 lot 3, pas 4 — CE QUI VIVAIT ICI ÉTAIT LE JUMEAU EXACT DE
+     * `obtenirNiveauSOLO()` : les mêmes cinq mots-clés cherchés dans le NOM du
+     * critère (« structure », « rigueur », « français », « plausibilité »,
+     * « nuance »), pour rendre un vocabulaire différent — `fondamental`,
+     * `transitionnel`, `complexe` — du MÊME axe. Deux fonctions, deux
+     * vocabulaires, une seule question, et le même défaut : les critères de
+     * Grégoire écrits dans le code.
+     *
+     * ⮕ LE MAPPING CI-DESSOUS N'EST PAS UNE INVENTION, et c'est ce qui autorise
+     * à le poser sans demander. Les deux fonctions supprimées répondaient aux
+     * MÊMES mots-clés par des valeurs parallèles, ligne pour ligne :
+     *     structure / rigueur / français  →  multistructural  ET  fondamental
+     *     plausibilité                    →  relational       ET  transitionnel
+     *     nuance                          →  extended_abstract ET  complexe
+     * La correspondance était déjà posée par le code ; on la lit désormais sur
+     * la donnée configurée au lieu de la redécouvrir sur un nom.
+     *
+     * ⚠ NE PAS CONFONDRE AVEC LE `type` D'UN OBJECTIF (`js/objectifs.js`), qui
+     * porte le même vocabulaire mais est un champ CONFIGURÉ, sur un autre objet.
+     * Deux notions distinctes ; seul le mot est commun.
+     *
+     * @param {Object} critere - Le critère de la grille, avec son `niveauSOLO`
      * @returns {string} Type du critère
      */
-    function obtenirTypeCritere(nomCritere) {
-        const nom = nomCritere.toLowerCase();
-        if (nom.includes('structure') || nom.includes('rigueur') || nom.includes('français')) {
-            return 'fondamental';
-        }
-        if (nom.includes('plausibilité') || nom.includes('plausibilite')) {
-            return 'transitionnel';
-        }
-        if (nom.includes('nuance')) {
-            return 'complexe';
-        }
+    function typeCritereSelonSOLO(critere) {
+        // Même défaut que `calculerIPB` et que l'éditeur de grilles : un critère
+        // sans étiquette est multistructurel, donc « fondation ».
+        const solo = (critere && critere.niveauSOLO) || 'multistructurel';
+        if (solo === 'relationnel') return 'transitionnel';
+        if (solo === 'abstrait_etendu') return 'complexe';
         return 'fondamental';
     }
 

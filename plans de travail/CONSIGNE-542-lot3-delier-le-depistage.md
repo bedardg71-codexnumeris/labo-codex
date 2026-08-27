@@ -431,3 +431,70 @@ l'échelle de l'utilisateur, c'est du code mort rendu vivant.
 
 ⏳ **NON TRAITÉ ICI, ET DÉLIBÉRÉMENT** : hors périmètre du pas 3c-3, et le fichier n'était
 pas dans le commit. À prendre au pas 5, avec la vérification des deux fonctions voisines.
+
+---
+
+### ✅ PAS 4 FAIT — 27 août 2026, midi
+
+**`obtenirNiveauSOLO()` est supprimée. Et son JUMEAU avec elle.**
+
+Contrairement aux fonctions du pas 3c-3, celle-ci **n'était pas morte** : son appelant est
+`exporterFormatRecherche` (`js/trimestres.js`), branché sur un vrai bouton
+(`index.html:9646`). Le geste était donc un remplacement, pas un retrait — et la
+vérification des consommateurs, faite d'abord, est ce qui l'a établi.
+
+| | |
+|---|---|
+| **Ce qui vivait là** | `obtenirNiveauSOLO(c.nom)` cherchait cinq mots-clés dans le NOM du critère — « structure », « rigueur », « français », « plausibilité », « nuance », les critères de Grégoire écrits dans le code — et rendait `multistructural` par défaut. |
+| **Le jumeau, non listé dans la consigne** | `obtenirTypeCritere(c.nom)`, deux lignes plus bas dans le même objet : **mêmes** mots-clés, **même** axe, autre vocabulaire (`fondamental` / `transitionnel` / `complexe`). |
+| **Le défaut de fond** | **Le champ existe.** `critere.niveauSOLO` est saisi dans l'éditeur de grilles (`grilles.js`, menu à trois valeurs) et `calculerIPB` le lit déjà pour choisir les critères « fondations ». Les deux fonctions devinaient une réponse que l'utilisateur avait donnée — et pouvaient la contredire. |
+| **Un défaut de plus, visible seulement à la lecture** | Le vocabulaire rendu était **anglais** (`multistructural`, `relational`, `extended_abstract`) alors que le champ configuré est en français. Deux vocabulaires pour la même chose. |
+
+**Le geste** : `niveau_solo` lit `c.niveauSOLO`, et `type` passe par `typeCritereSelonSOLO(c)`,
+qui dérive du même champ.
+
+⮕ **LE MAPPING DE `type` N'EST PAS UNE INVENTION**, et c'est ce qui a permis de le poser
+sans demander : les deux fonctions supprimées répondaient aux **mêmes** mots-clés par des
+valeurs parallèles, ligne pour ligne (`structure` → `multistructural` ET `fondamental` ;
+`plausibilité` → `relational` ET `transitionnel` ; `nuance` → `extended_abstract` ET
+`complexe`). La correspondance était déjà posée par le code.
+
+⚠ **LE FORMAT D'EXPORT CHANGE**, et c'est voulu : `niveau_solo` passe du vocabulaire anglais
+deviné au vocabulaire français configuré. Un fichier exporté avant ce jour et un fichier
+exporté après ne portent pas les mêmes valeurs dans ce champ.
+
+**Verrouillé par** `tests/unit/sentinelle-542-pas4-solo-critere-configure.test.js` (4 tests) :
+les deux fonctions absentes **et sans appel orphelin** · **aucun nom de critère de Grégoire
+dans le code** (l'assertion qui porte le sens du pas) · les deux champs alimentés depuis
+`niveauSOLO` · **et le défaut `|| 'multistructurel'` identique à celui de `calculerIPB`** —
+sans quoi un critère sans étiquette serait « fondation » pour l'IPB et autre chose dans
+l'export, deux vérités sur une même donnée. Break-tests rouges vérifiés sur les quatre,
+restauration confirmée par `diff -q`.
+
+**Vitest 3699/3699, 347 fichiers.** Anti-cache : `trimestres.js` `20260821c → 20260827a`,
+`echelles.js` `20260827c → d` (son commentaire sur B9 parlait au présent d'une fonction
+disparue).
+
+#### ⏳ CE QUE LE PAS 4 A DÉCOUVERT ET N'A PAS TRANCHÉ — pour Grégoire
+
+Le même objet `grille_evaluation` de l'export porte **deux autres valeurs en dur**, que le
+pas 4 laisse intactes parce qu'elles demandent une décision :
+
+```js
+echelle: ['I', 'D', 'M', 'E'],
+seuil_reussite: 'M',
+```
+
+⚠ **ET C'EST PLUS GRAVE QU'À L'ÉCRAN.** Trois faits mesurés :
+
+1. L'export **charge déjà** les échelles réelles du trimestre (`echellesTemplates`, ligne
+   1697) — et **ne s'en sert jamais**. La variable est lue et jetée.
+2. Les évaluations exportées portent leurs `niveauSelectionne` (« Y », « M »…) mais **PAS
+   leur `echelleId`**. Un chercheur reçoit donc des codes de niveau sans savoir dans quelle
+   échelle les lire.
+3. Le seul indice qu'on lui donne est `['I', 'D', 'M', 'E']`, écrit dans le code. **Chez un
+   utilisateur qui note autrement, ce fichier de recherche est faux** — pas incomplet, faux.
+
+⮕ `seuil_reussite: 'M'` bute exactement sur la donnée qui manque partout : **le seuil de
+maîtrise**, celui que #549 cherche aussi et que la troisième option écartée au pas 3c-3
+proposait d'ajouter à l'échelle. Aucune donnée du dépôt ne le dit aujourd'hui.
