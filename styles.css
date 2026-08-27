@@ -6120,65 +6120,10 @@ body:not(.mode-clair) .badge-source--partage {
    (Conservé du redesign précédent)
    =============================== */
 
-/* Carte premium pour cible d'intervention */
-.carte-cible-intervention {
-    background: var(--surface-carte, #1a3040);
-    border: 2px solid;
-    border-radius: var(--radius-grand);
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow-normal);
-    transition: box-shadow 0.3s;
-}
-
-.carte-cible-intervention:hover {
-    box-shadow: var(--shadow-prononce);
-}
-
-.carte-cible-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.carte-cible-titre {
-    font-size: 1.1rem;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.carte-cible-badge-niveau {
-    padding: 6px 16px;
-    border-radius: var(--radius-pill);
-    font-size: 0.85rem;
-    font-weight: bold;
-    color: white;
-    white-space: nowrap;
-}
-
-.carte-cible-texte-principal {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 12px;
-    line-height: 1.4;
-}
-
-.carte-cible-meta {
-    font-size: 0.9rem;
-    color: var(--texte-secondaire, #8aa4b0);
-    margin-bottom: 10px;
-}
-
-.carte-cible-description {
-    background: var(--bleu-tres-pale);
-    padding: 12px;
-    border-radius: var(--radius-moyen);
-    font-size: 0.9rem;
-    line-height: 1.5;
-}
+/* #551 (27 aout 2026) — les regles `.carte-cible-*` sont RETIREES avec leur seule
+   consommatrice, `genererCarteCibleIntervention` (profil-etudiant-sections-affichage.js),
+   qui etait du code mort. Aucune autre vue n'employait ces classes : verifie par grep
+   recursif sur *.js et *.html avant le retrait. Detail du geste au commentaire du JS. */
 
 /* Sections collapsibles */
 .section-collapsible {
@@ -6248,16 +6193,6 @@ body:not(.mode-clair) .badge-source--partage {
 
 /* Responsive - Mobile */
 @media (max-width: 768px) {
-    .carte-cible-texte-principal {
-        font-size: 1.1rem;
-    }
-
-    .carte-cible-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
     .section-collapsible-header {
         padding: 12px;
     }

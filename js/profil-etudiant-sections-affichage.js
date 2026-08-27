@@ -1742,90 +1742,32 @@ function obtenirDetailsAssiduite(da) {
    🎨 FONCTIONS HELPER - REDESIGN UI
    =============================== */
 
-/**
- * Génère la carte premium de cible d'intervention
- * @param {string} da - Numéro de DA
- * @returns {string} - HTML de la carte
- */
-function genererCarteCibleIntervention(da) {
-    // NOUVEAU Beta 90 : Utiliser la pratique active
-    const pratique = typeof obtenirPratiqueActive === 'function' ? obtenirPratiqueActive() : null;
-
-    if (!pratique) {
-        console.error('[ProfilEtudiant] Aucune pratique active trouvée');
-        return `
-            <div class="info-box info-box--attention">
-                <strong><img src="icons/icons8-high-priority.svg" alt="" class="alerte-icone">Configuration requise</strong><br>
-                Configure une pratique de notation dans Conception › Pratiques de notation.
-            </div>
-        `;
-    }
-
-    // Utiliser la pratique active
-    const cibleInfo = pratique.genererCibleIntervention(da);
-    const patternInfo = pratique.identifierPattern(da);
-
-    // Ne pas afficher si pas de cible
-    if (!cibleInfo) {
-        return '';
-    }
-
-    // Obtenir nombre d'artefacts/évaluations pour affichage (si disponible)
-    const nbArtefacts = patternInfo.indices?.nbArtefacts || 0;
-
-    // Badge cohérent avec Liste et Aperçu
-    const niveauTexte = cibleInfo.niveau === 3 ? 'RàI 3' :
-                       cibleInfo.niveau === 2 ? 'RàI 2' :
-                       'RàI 1';
-
-    const descriptionNiveau = cibleInfo.niveau === 3
-        ? '<strong>Action immédiate requise</strong> - Intervention intensive pour prévenir un échec. Mobiliser les ressources d\'aide (CAF, aide à l\'apprentissage).'
-        : cibleInfo.niveau === 2
-        ? '<strong>Intervention ciblée recommandée</strong> - Soutien spécifique pour consolider les apprentissages et prévenir l\'aggravation des difficultés.'
-        : cibleInfo.cible.includes('Pratique autonome')
-        ? '<strong>Enrichissement</strong> - L\'étudiant maîtrise les bases. Encourager l\'exploration, la créativité et le développement de l\'autonomie.'
-        : '<strong>Maintien</strong> - Performance satisfaisante. Continuer le suivi régulier et encourager la constance.';
-
-    return `
-        <!-- Détails de la section (masqué par défaut) -->
-        <div id="details-calculs-risque-${da}" class="carte-info-toggle carte-info-note u-hide">
-            <strong>À propos de cette section</strong>
-            <br><br>
-            <strong>Objectif :</strong> Cette section présente le niveau d'intervention RàI (Réponse à l'Intervention) recommandé pour l'étudiant, basé sur une analyse combinée de son engagement, de ses patterns d'apprentissage et de sa performance récente.
-            <br><br>
-            <strong>Niveaux RàI :</strong> Niveau 1 (Universel) : suivi régulier en classe • Niveau 2 (Préventif) : interventions préventives ciblées • Niveau 3 (Intensif) : interventions intensives individuelles hors classe
-            <br><br>
-            <strong>Méthodologie :</strong> Le système analyse l'engagement (E = A × C × P), le pattern d'apprentissage actuel (basé sur les ${nbArtefacts} ${accordTermeProduction('dernier', nbArtefacts)} ${obtenirTermeProduction(nbArtefacts > 1 ? 'pluriel' : 'singulier')}), et les défis identifiés sur les critères de la grille de référence. La logique de décision priorise les situations de décrochage, puis les difficultés persistantes et émergentes, avant de recommander des cibles d'enrichissement ou de maintien.
-            <br><br>
-            <strong>Utilisation :</strong> Cette section te guide dans le choix d'interventions appropriées. Les recommandations sont contextualisées selon les besoins spécifiques de l'étudiant. Consulte la section Accompagnement pour planifier et documenter tes interventions.
-        </div>
-
-        <!-- CARTE CIBLE D'INTERVENTION PREMIUM -->
-        <div class="carte-cible-intervention" style="border-color: ${cibleInfo.couleur};">
-            <div class="carte-cible-header">
-                <div class="carte-cible-titre" style="color: ${cibleInfo.couleur};">
-                    <span class="pastille-rai" style="background:${cibleInfo.couleur}"></span> Cible d'intervention recommandée
-                </div>
-                <div class="carte-cible-badge-niveau" style="background: ${cibleInfo.couleur};">
-                    ${niveauTexte}
-                </div>
-            </div>
-
-            <div class="carte-cible-texte-principal" style="color: ${cibleInfo.couleur};">
-                ${cibleInfo.cible}
-            </div>
-
-            <div class="carte-cible-meta">
-                <strong>Pattern actuel :</strong> ${patternInfo.type} ·
-                <strong>Basé sur :</strong> ${nbArtefacts} ${accordTermeProduction('dernier', nbArtefacts)} ${obtenirTermeProduction(nbArtefacts > 1 ? 'pluriel' : 'singulier')}
-            </div>
-
-            <div class="carte-cible-description">
-                ${descriptionNiveau}
-            </div>
-        </div>
-    `;
-}
+// #551 (27 aout 2026) — `genererCarteCibleIntervention` est RETIREE : elle etait
+// MORTE. Une seule occurrence dans tout le depot, sa definition ; aucun export
+// `window`, aucun appel, aucun dispatch dynamique (`data-action`, table de nom).
+//
+// ⮕ CE QU'ELLE ETAIT, ET POURQUOI SON RETRAIT COMPTE. Elle rendait la carte
+// « Cible d'intervention » et etait LE SEUL consommateur, dans toute
+// l'application, de `pratique.identifierPattern(da)` et de
+// `pratique.genererCibleIntervention(da)`. Sa mort rend donc muettes les CINQ
+// implementations de `identifierPattern` des pratiques (PAN-Standards,
+// Sommative, PAN-Specifications, Configurable, Test) : elles ne sont plus
+// atteintes que par `testerPratiqueFrancois` et `testerPratiqueTest`, deux
+// fonctions de console jamais appelees.
+//
+// ⚠ LES CINQ IMPLEMENTATIONS RESTENT EN PLACE, et c'est delibere. Contrairement
+// aux vestiges du lot 3 de #542, `identifierPattern` et `genererCibleIntervention`
+// sont deux des huit methodes OBLIGATOIRES du contrat IPratique, verifiees a
+// l'enregistrement (`pratique-registre.js`, `throw` si absentes). Elles sont
+// peut-etre sans consommateur parce que le cablage du systeme de pratiques
+// n'est pas fini (#307), pas parce qu'elles sont perimees. Les retirer serait
+// trancher une direction d'architecture — cf. #551 au backlog.
+//
+// ⮕ CE QU'ELLE MONTRAIT, et qui n'atteignait personne : un badge « RaI 1/2/3 »,
+// la cible d'intervention, le pattern actuel et le nombre de productions
+// retenues. Le chemin VIVANT du meme besoin passe par `determinerCibleIntervention`
+// (procedural), appele plus haut dans ce fichier par `genererSectionAccompagnement`
+// et par `tableau-bord-apercu.js`. Son CSS `.carte-cible-*` est parti avec elle.
 
 /**
  * Génère une section collapsible avec header cliquable
