@@ -44,6 +44,32 @@
      savoir reproduire, sa formule est fausse, et **il refuse de conclure sur le
      reste**. Un outil qui n'a pas fait ses preuves n'a pas de verdict à rendre.
 
+   ── r2 (27 août 2026) — CE QUE LE PREMIER PASSAGE A APPRIS ──────────────────
+
+   Le passage r1 a rendu : témoin 100 % (279/280), puis CINQ candidates à 84 %
+   (283/338) — toutes portant `0=0 I=40 D=65 M=75 E=100` — contre 28 % pour la
+   seule candidate structurellement différente (`M=85`). Son verdict a pourtant
+   annoncé « aucune candidate », à cause d'un seuil de 95 % que j'avais inventé.
+   Un écart de 56 points entre la meilleure et la suivante ne se lit pas
+   « aucune ». TROIS corrections en découlent :
+
+     1. LE MODE ALGORITHMIQUE SE DÉCIDE PAR CRITÈRE, pas par évaluation. r1
+        n'essayait que « tout algorithmique » ou « tout au niveau » ; l'appli
+        tranche critère par critère. r2 énumère les combinaisons.
+
+     2. LES SEUILS INVENTÉS SONT RETIRÉS (0,90 et 0,95). Le groupe témoin ne
+        sert plus de test à passer : il MESURE le plafond de l'outil sur des
+        évaluations dont l'échelle est certaine, et les candidates sont
+        comparées à ce plafond. Aucun nombre arbitraire.
+
+     3. LES ÉCHECS SONT VENTILÉS, pas comptés. Un échec dû à un code de niveau
+        INCONNU dit qu'une autre échelle a servi ; un échec dû à un plafond de
+        reprise ou à un critère algorithmique parle du calcul. Les confondre,
+        c'était transformer du bruit en verdict.
+
+   ⮕ Et la ligne « ratées 55 · dont 25 à critère algorithmique » était fausse à
+     la lecture : le « dont » comptait parmi les RÉUSSITES. Corrigé.
+
    ── CE QU'IL NE FAIT PAS ────────────────────────────────────────────────────
 
    Il ne répare rien et ne propose aucune écriture. Identifier l'échelle est une
@@ -156,90 +182,154 @@
     }
 
     /* ── LE RECALCUL, calqué sur `calculerNote` ──────────────────────────────
-       `modeAlgo` : les critères algorithmiques ont été notés avec un pourcentage
-       EXACT, pas avec la valeur du niveau — sauf si l'enseignant avait choisi un
-       niveau à la main (jeton de reprise). La donnée sauvegardée ne dit PAS
-       lequel des deux cas s'est produit : c'est une ambiguïté irréductible, pas
-       une négligence. On essaie donc les deux lectures, et l'évaluation est dite
-       reproduite si l'une des deux retombe sur la note stockée. Les évaluations
-       concernées sont comptées à part : elles discriminent moins bien entre
-       candidates, et le rapport le dit. ──────────────────────────────────── */
-    function recalculer(evaluation, echelle, modeAlgo) {
+
+       ⚠⚠ CORRIGÉ EN r2 (27 août 2026) — LA r1 DÉCIDAIT PAR ÉVALUATION, L'APPLI
+       DÉCIDE PAR CRITÈRE.
+
+       Un critère algorithmique a été noté avec un POURCENTAGE EXACT
+       (`donneesAlgorithmiques[id].pourcentage`) plutôt qu'avec la valeur de son
+       niveau — SAUF si l'enseignant avait choisi un niveau à la main (jeton de
+       reprise ciblée). `calculerNote` tranche ce cas critère PAR critère, en
+       lisant le `<select>` de chacun (`evaluation-calcul.js:592`).
+
+       La r1 essayait deux lectures GLOBALES : « tout en algorithmique » ou
+       « tout au niveau ». Une évaluation mêlant les deux — un critère
+       algorithmique laissé au calcul et un autre repris à la main — échouait
+       donc dans les deux essais, alors que l'échelle était la bonne. C'est la
+       cause probable des 55 « ratées » du premier passage, et de l'unique raté
+       du groupe témoin (76,6 contre 76,0).
+
+       ⮕ r2 énumère les combinaisons : chaque critère algorithmique peut avoir
+         été lu d'une façon ou de l'autre, indépendamment des autres. Si UNE des
+         combinaisons retombe sur la note stockée, l'évaluation est reproduite.
+         Au-delà de 12 critères algorithmiques (4096 combinaisons), l'outil ne
+         tente que les deux lectures globales ET LE DIT — il ne conclut pas en
+         silence sur ce qu'il n'a pas énuméré.
+       ──────────────────────────────────────────────────────────────────────── */
+
+    const PLAFOND_COMBINAISONS = 12;
+
+    // Prépare les contributions d'une évaluation sous une échelle donnée.
+    // `fixes` = critères dont la valeur ne dépend d'aucun choix ;
+    // `variables` = critères algorithmiques, qui ont DEUX lectures possibles.
+    function preparerContributions(evaluation, echelle) {
         const table = echelle.table;
-        const criteres = Array.isArray(evaluation.criteres) ? evaluation.criteres : [];
         const algo = evaluation.donneesAlgorithmiques || {};
-        let noteTotal = 0, ponderationTotal = 0, utilises = 0;
+        const criteres = Array.isArray(evaluation.criteres) ? evaluation.criteres : [];
+        const fixes = [];
+        const variables = [];
+        const codesInconnus = new Set();
 
         for (const c of criteres) {
             if (!c) continue;
-            const niveau = c.niveauSelectionne;
-            if (niveau == null || String(niveau).trim() === '') continue;
+            const brut = c.niveauSelectionne;
+            if (brut == null || String(brut).trim() === '') continue;
+            const code = String(brut).trim().toUpperCase();
             const ponderation = (Number(c.ponderation) || 0) / 100;
 
-            let valeur;
-            const dAlgo = c.critereId != null ? algo[c.critereId] : undefined;
-            if (modeAlgo && dAlgo && dAlgo.pourcentage !== undefined) {
-                valeur = Number(dAlgo.pourcentage);
-            } else {
-                valeur = table[String(niveau).trim().toUpperCase()];
-            }
-            // ⚠ `undefined` = le niveau n'existe pas dans cette échelle. Le
+            // ⚠ `undefined` = ce code n'existe pas dans l'échelle candidate. Le
             // critère sort du calcul, pondération comprise — jamais de zéro
-            // silencieux (c'est la règle de `calculerNote`).
-            if (valeur === undefined || valeur === null || isNaN(valeur)) continue;
+            // silencieux (c'est la règle de `calculerNote`). On NOTE le code :
+            // un code inconnu est le signe qu'une AUTRE échelle a servi, et
+            // c'est le diagnostic le plus utile qu'on puisse tirer d'un échec.
+            const vNiveau = table[code];
+            if (vNiveau === undefined) codesInconnus.add(code);
 
-            noteTotal += valeur * ponderation;
-            ponderationTotal += ponderation;
-            utilises++;
-        }
+            const dAlgo = c.critereId != null ? algo[c.critereId] : undefined;
+            const vAlgo = (dAlgo && dAlgo.pourcentage !== undefined) ? Number(dAlgo.pourcentage) : undefined;
 
-        if (ponderationTotal <= 0) return null;
-        let pourcentage = noteTotal / ponderationTotal;
-
-        // Plafond de reprise ciblée : écrêtage au `max` du niveau plafond.
-        if (evaluation.plafondNoteCiblee) {
-            const plafond = (echelle.niveaux || []).find(function (n) {
-                return n && String(n.code) === String(evaluation.plafondNoteCiblee);
-            });
-            if (plafond && plafond.max != null && pourcentage > Number(plafond.max)) {
-                pourcentage = Number(plafond.max);
+            if (vAlgo !== undefined && !isNaN(vAlgo)) {
+                variables.push({ vAlgo: vAlgo, vNiveau: vNiveau, ponderation: ponderation });
+            } else if (vNiveau !== undefined && !isNaN(vNiveau)) {
+                fixes.push({ valeur: vNiveau, ponderation: ponderation });
             }
         }
-        return { pourcentage: pourcentage, criteresUtilises: utilises };
+        return { fixes: fixes, variables: variables, codesInconnus: Array.from(codesInconnus) };
+    }
+
+    function appliquerPlafond(pourcentage, evaluation, echelle) {
+        if (!evaluation.plafondNoteCiblee) return pourcentage;
+        const plafond = (echelle.niveaux || []).find(function (n) {
+            return n && String(n.code) === String(evaluation.plafondNoteCiblee);
+        });
+        if (plafond && plafond.max != null && pourcentage > Number(plafond.max)) {
+            return Number(plafond.max);
+        }
+        return pourcentage;
+    }
+
+    // Rend le MEILLEUR écart atteignable, toutes lectures confondues.
+    function meilleurEcart(evaluation, echelle, stockee) {
+        const prep = preparerContributions(evaluation, echelle);
+        let baseNote = 0, basePond = 0;
+        for (const f of prep.fixes) { baseNote += f.valeur * f.ponderation; basePond += f.ponderation; }
+
+        const k = prep.variables.length;
+        const enumerable = k <= PLAFOND_COMBINAISONS;
+        const nbCombinaisons = enumerable ? (1 << k) : 2;
+
+        let best = null;
+        for (let masque = 0; masque < nbCombinaisons; masque++) {
+            let note = baseNote, pond = basePond;
+            for (let i = 0; i < k; i++) {
+                const v = prep.variables[i];
+                // Bit à 1 = lecture algorithmique ; à 0 = valeur du niveau.
+                // Hors énumération, `masque` vaut 0 puis 1 : les deux lectures
+                // globales de la r1, appliquées à TOUS les variables.
+                const prendreAlgo = enumerable ? !!(masque & (1 << i)) : (masque === 1);
+                if (prendreAlgo) {
+                    note += v.vAlgo * v.ponderation;
+                    pond += v.ponderation;
+                } else if (v.vNiveau !== undefined && !isNaN(v.vNiveau)) {
+                    note += v.vNiveau * v.ponderation;
+                    pond += v.ponderation;
+                }
+                // vNiveau inconnu et lecture « niveau » : le critère sort, comme
+                // dans l'application.
+            }
+            if (pond <= 0) continue;
+            const pourcentage = appliquerPlafond(note / pond, evaluation, echelle);
+            const ecart = Math.abs(pourcentage - stockee);
+            if (best === null || ecart < best.ecart) best = { ecart: ecart, pourcentage: pourcentage };
+        }
+
+        if (best === null) return null;
+        best.nbAlgo = k;
+        best.enumerable = enumerable;
+        best.codesInconnus = prep.codesInconnus;
+        best.nbCriteres = prep.fixes.length + k;
+        return best;
     }
 
     function eprouver(evaluations, echelle) {
-        let reproduites = 0, ratees = 0, indecidables = 0, ambigues = 0;
-        let ecartTotal = 0;
-        const ratesExemples = [];
+        let reproduites = 0, ratees = 0, indecidables = 0;
+        let reproduitesAvecAlgo = 0, nonEnumerees = 0;
+        const echecs = [];
 
         for (const ev of evaluations) {
             const stockee = Number(ev.noteFinale);
             if (ev.noteFinale == null || isNaN(stockee)) { indecidables++; continue; }
 
-            const aAlgo = !!(ev.donneesAlgorithmiques && Object.keys(ev.donneesAlgorithmiques).length);
-            const essais = aAlgo ? [true, false] : [false];
-            let meilleur = null;
+            const best = meilleurEcart(ev, echelle, stockee);
+            if (best === null) { indecidables++; continue; }
+            if (!best.enumerable) nonEnumerees++;
 
-            for (const modeAlgo of essais) {
-                const r = recalculer(ev, echelle, modeAlgo);
-                if (!r) continue;
-                const ecart = Math.abs(r.pourcentage - stockee);
-                if (meilleur === null || ecart < meilleur.ecart) meilleur = { ecart: ecart, r: r };
-            }
-
-            if (meilleur === null) { indecidables++; continue; }
-            if (meilleur.ecart <= TOLERANCE) {
+            if (best.ecart <= TOLERANCE) {
                 reproduites++;
-                if (aAlgo) ambigues++;
+                if (best.nbAlgo > 0) reproduitesAvecAlgo++;
             } else {
                 ratees++;
-                ecartTotal += meilleur.ecart;
-                if (ratesExemples.length < 4) {
-                    ratesExemples.push((ev.productionNom || '(sans nom)')
-                        + ' : stockée ' + stockee.toFixed(1)
-                        + ' · recalculée ' + meilleur.r.pourcentage.toFixed(1));
-                }
+                echecs.push({
+                    nom: ev.productionNom || '(sans nom)',
+                    stockee: stockee,
+                    recalculee: best.pourcentage,
+                    ecart: best.ecart,
+                    nbCriteres: best.nbCriteres,
+                    nbAlgo: best.nbAlgo,
+                    plafond: ev.plafondNoteCiblee || null,
+                    codesInconnus: best.codesInconnus,
+                    enumerable: best.enumerable
+                });
             }
         }
 
@@ -248,11 +338,52 @@
             reproduites: reproduites,
             ratees: ratees,
             indecidables: indecidables,
-            ambigues: ambigues,
+            reproduitesAvecAlgo: reproduitesAvecAlgo,
+            nonEnumerees: nonEnumerees,
             taux: examinees > 0 ? (reproduites / examinees) : null,
-            ecartMoyenRates: ratees > 0 ? (ecartTotal / ratees) : null,
-            exemples: ratesExemples
+            echecs: echecs
         };
+    }
+
+    // Ventilation des échecs : de quoi NOMMER la cause au lieu de la supposer.
+    function ventiler(echecs, L) {
+        if (!echecs.length) { L('      (aucun échec à ventiler)'); return; }
+
+        const avecCodeInconnu = echecs.filter(function (e) { return e.codesInconnus.length > 0; });
+        const avecPlafond = echecs.filter(function (e) { return e.plafond && !e.codesInconnus.length; });
+        const avecAlgo = echecs.filter(function (e) { return e.nbAlgo > 0 && !e.plafond && !e.codesInconnus.length; });
+        const nues = echecs.filter(function (e) {
+            return !e.codesInconnus.length && !e.plafond && e.nbAlgo === 0;
+        });
+        const horsEnumeration = echecs.filter(function (e) { return !e.enumerable; });
+
+        L('      ' + avecCodeInconnu.length + ' portent un CODE DE NIVEAU absent de cette échelle');
+        if (avecCodeInconnu.length) {
+            const codes = new Map();
+            for (const e of avecCodeInconnu) for (const c of e.codesInconnus) codes.set(c, (codes.get(c) || 0) + 1);
+            L('           codes vus : ' + [...codes].map(function (x) { return x[0] + ' ×' + x[1]; }).join(' · '));
+            L('           ⮕ SEUL indice d\'une AUTRE échelle. Tout le reste est du bruit de calcul.');
+        }
+        L('      ' + avecPlafond.length + ' portent un plafond de reprise ciblée');
+        L('      ' + avecAlgo.length + ' ont au moins un critère algorithmique');
+        L('      ' + nues.length + ' n\'ont AUCUNE de ces particularités — inexpliqués');
+        if (horsEnumeration.length) {
+            L('      ⚠ ' + horsEnumeration.length + ' ont plus de ' + PLAFOND_COMBINAISONS
+                + ' critères algorithmiques : combinaisons NON énumérées, verdict non concluant sur elles');
+        }
+
+        // Distribution des écarts : un nuage serré autour de zéro ne se lit pas
+        // comme une poignée d'écarts massifs.
+        const tries = echecs.map(function (e) { return e.ecart; }).sort(function (a, b) { return a - b; });
+        const median = tries[Math.floor(tries.length / 2)];
+        L('      écarts : médian ' + median.toFixed(2) + ' · max ' + tries[tries.length - 1].toFixed(2)
+            + ' · sous 1 point : ' + tries.filter(function (x) { return x < 1; }).length + '/' + tries.length);
+        for (const e of echecs.slice(0, 4)) {
+            L('        ✗ ' + e.nom + ' : stockée ' + e.stockee.toFixed(1)
+                + ' · recalculée ' + e.recalculee.toFixed(1)
+                + '  (' + e.nbCriteres + ' critères, ' + e.nbAlgo + ' algo'
+                + (e.plafond ? ', plafond ' + e.plafond : '') + ')');
+        }
     }
 
     async function oracle542(cible) {
@@ -333,18 +464,34 @@
             return { statut: 'sans-temoin' };
         }
 
-        let meilleurTemoin = null;
+        // ⚠ r2 — LE TÉMOIN N'EST PLUS UN SEUIL, C'EST UN PLAFOND MESURÉ.
+        // La r1 refusait de conclure sous 90 %, et déclarait « identifiée »
+        // au-dessus de 95 %. Ces deux nombres, je les avais INVENTÉS : ce sont
+        // exactement les valeurs métier arbitraires que ce projet s'interdit,
+        // posées dans l'outil censé les traquer.
+        // ⮕ Le témoin mesure ce que cet outil sait reproduire QUAND l'échelle
+        //   est certaine. C'est son plafond. Une candidate qui atteint ce
+        //   plafond a été identifiée ; une candidate qui reste dessous doit
+        //   expliquer son écart. Aucun nombre inventé : la comparaison se fait
+        //   à une référence mesurée sur les données de Grégoire.
+        let temoinReproduites = 0, temoinExaminees = 0;
+        const echecsTemoin = [];
         for (const [id, evals] of temoinParId) {
             const ech = candidates.find(function (e) { return e.ids.indexOf(id) !== -1; });
             if (!ech) continue;
             const r = eprouver(evals, ech);
+            temoinReproduites += r.reproduites;
+            temoinExaminees += (r.reproduites + r.ratees);
+            for (const e of r.echecs) echecsTemoin.push(e);
             L('   ' + id + '  (' + ech.nom + ', ' + evals.length + ' évals)');
             L('      reproduites : ' + r.reproduites + ' / ' + (r.reproduites + r.ratees)
-                + (r.taux !== null ? '   (' + Math.round(r.taux * 100) + ' %)' : ''));
-            if (r.ratees > 0 && r.exemples.length) {
-                for (const x of r.exemples) L('        ✗ ' + x);
-            }
-            if (meilleurTemoin === null || (r.taux || 0) > meilleurTemoin) meilleurTemoin = (r.taux || 0);
+                + (r.taux !== null ? '   (' + (r.taux * 100).toFixed(1) + ' %)' : ''));
+        }
+        const meilleurTemoin = temoinExaminees > 0 ? (temoinReproduites / temoinExaminees) : null;
+        if (echecsTemoin.length) {
+            L('');
+            L('   Ce que l\'outil ne sait PAS reproduire, échelle pourtant certaine :');
+            ventiler(echecsTemoin, L);
         }
         L('');
 
@@ -357,9 +504,13 @@
             return { statut: 'temoin-non-apparie' };
         }
 
-        if (meilleurTemoin < 0.90) {
-            L('⛔ LA FORMULE NE REPRODUIT PAS LES NOTES CONNUES (meilleur taux : '
-                + Math.round(meilleurTemoin * 100) + ' %).');
+        // Seule garde conservée, et elle n'est pas un réglage : si l'outil
+        // reproduit MOINS DE LA MOITIÉ des notes dont l'échelle est certaine,
+        // il ne calcule pas comme l'application, et rien de ce qu'il dirait
+        // ensuite n'aurait de sens.
+        if (meilleurTemoin < 0.5) {
+            L('⛔ LA FORMULE NE REPRODUIT PAS LES NOTES CONNUES (témoin : '
+                + (meilleurTemoin * 100).toFixed(1) + ' %).');
             L('  Ce n\'est pas un problème de données : c\'est que cet outil ne calcule');
             L('  pas comme l\'application. Son verdict sur les orphelines n\'aurait');
             L('  aucune valeur — il ne le rendra donc pas.');
@@ -370,8 +521,10 @@
             return { statut: 'formule-invalide', tauxTemoin: meilleurTemoin };
         }
 
-        L('✅ La formule reproduit ' + Math.round(meilleurTemoin * 100) + ' % des notes connues.');
-        L('   L\'oracle a fait ses preuves ; son verdict sur les orphelines a un sens.');
+        L('✅ PLAFOND DE L\'OUTIL : ' + (meilleurTemoin * 100).toFixed(1) + ' % ('
+            + temoinReproduites + '/' + temoinExaminees + '), mesuré sur des évaluations');
+        L('   dont l\'échelle est CERTAINE. C\'est la référence à laquelle les');
+        L('   candidates seront comparées — aucun seuil inventé.');
         L('');
 
         // ══ ÉTAPE 2 — LES ORPHELINES, CANDIDATE PAR CANDIDATE ═══════════════
@@ -394,33 +547,63 @@
         resultats.sort(function (a, b) { return b.r.taux - a.r.taux; });
 
         for (const x of resultats.slice(0, 8)) {
-            L('   ' + (Math.round(x.r.taux * 100) + ' %').padStart(5) + '  '
+            L('   ' + ((x.r.taux * 100).toFixed(1) + ' %').padStart(7) + '  '
                 + x.echelle.nom + '   [' + x.echelle.chemin + ']');
             L('           ' + x.echelle.signature);
-            L('           reproduites ' + x.r.reproduites + ' · ratées ' + x.r.ratees
-                + (x.r.ambigues ? ' · dont ' + x.r.ambigues + ' à critère algorithmique (moins discriminantes)' : ''));
+            // ⚠ r2 — la r1 écrivait « ratées 55 · dont 25 à critère
+            // algorithmique », et le « dont » se lisait comme portant sur les
+            // RATÉES alors qu'il comptait parmi les RÉUSSITES. Chaque nombre
+            // dit maintenant ce qu'il compte.
+            L('           reproduites ' + x.r.reproduites + '  ·  ratées ' + x.r.ratees
+                + '  ·  écart au plafond : '
+                + (meilleurTemoin !== null ? ((meilleurTemoin - x.r.taux) * 100).toFixed(1) + ' pts' : 'n/a'));
+            L('           (' + x.r.reproduitesAvecAlgo + ' des RÉUSSITES portent un critère algorithmique)');
             if (x.echelle.ids.length) L('           ids voisins : ' + x.echelle.ids.join(' · '));
         }
         L('');
 
+        // Ventilation des échecs de la MEILLEURE candidate : c'est là que se
+        // décide s'il reste une autre échelle en circulation, ou seulement du
+        // bruit de calcul.
+        if (resultats.length) {
+            L('   ── ce que la meilleure candidate ne reproduit pas ──');
+            ventiler(resultats[0].r.echecs, L);
+            L('');
+        }
+
         // ══ VERDICT ═════════════════════════════════════════════════════════
         L('==== VERDICT ====');
         L('');
-        const gagnantes = resultats.filter(function (x) { return x.r.taux >= 0.95; });
+        // ⚠ r2 — plus de seuil inventé. Une candidate est retenue quand son
+        // taux ATTEINT LE PLAFOND MESURÉ sur le groupe témoin : l'outil ne peut
+        // pas exiger d'une échelle inconnue mieux qu'il ne fait sur une échelle
+        // certaine. La marge est celle du témoin lui-même, pas un réglage.
+        const margeTemoin = meilleurTemoin !== null ? (1 - meilleurTemoin) : 0;
+        const gagnantes = resultats.filter(function (x) {
+            return meilleurTemoin !== null && x.r.taux >= (meilleurTemoin - margeTemoin - 1e-9);
+        });
 
         if (gagnantes.length === 0) {
-            L('⮕ AUCUNE candidate ne reproduit tes notes (meilleur taux : '
-                + (resultats.length ? Math.round(resultats[0].r.taux * 100) + ' %' : 'n/a') + ').');
-            L('  L\'échelle qui a produit ces évaluations n\'est donc PAS parmi celles');
-            L('  qui subsistent — et cette conclusion vaut, puisque la formule a fait');
-            L('  ses preuves sur le groupe témoin.');
-            L('  ⮕ Reste la piste d\'une archive Codex antérieure au 5 août 2026.');
+            const meilleur = resultats.length ? resultats[0] : null;
+            L('⮕ AUCUNE candidate n\'atteint le plafond de l\'outil.');
+            L('  Meilleure : ' + (meilleur ? (meilleur.r.taux * 100).toFixed(1) + ' %  ('
+                + meilleur.echelle.nom + ')' : 'n/a')
+                + '   ·   plafond : ' + (meilleurTemoin * 100).toFixed(1) + ' %');
+            L('');
+            L('  ⚠ CE N\'EST PAS ENCORE « ce n\'est pas la bonne échelle ». Regarde la');
+            L('    ventilation ci-dessus : tant que les échecs s\'expliquent par des');
+            L('    codes de niveau CONNUS, un plafond de reprise ou un critère');
+            L('    algorithmique, ils parlent du CALCUL, pas de l\'échelle. Seul un');
+            L('    CODE DE NIVEAU INCONNU est un indice qu\'une autre échelle a servi.');
+            L('    Compare aussi à la candidate structurellement différente du');
+            L('    classement : un mauvais candidat s\'effondre, il ne frôle pas.');
         } else if (gagnantes.length === 1) {
             const g = gagnantes[0];
             L('⮕ IDENTIFIÉE, et sans rien inventer :');
             L('     ' + g.echelle.nom + '   [' + g.echelle.chemin + ']');
             L('     ' + g.echelle.signature);
-            L('     ' + Math.round(g.r.taux * 100) + ' % des ' + orphelines.length + ' orphelines reproduites.');
+            L('     ' + (g.r.taux * 100).toFixed(1) + ' % des ' + orphelines.length
+                + ' orphelines reproduites (plafond de l\'outil : ' + (meilleurTemoin * 100).toFixed(1) + ' %).');
             L('  Cette échelle-là a produit tes notes : elles retombent dessus au dixième.');
         } else {
             L('⮕ ' + gagnantes.length + ' candidates reproduisent tes notes aussi bien :');
