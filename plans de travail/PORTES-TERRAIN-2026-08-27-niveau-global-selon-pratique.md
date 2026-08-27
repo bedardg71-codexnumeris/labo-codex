@@ -3,7 +3,7 @@
 > Jumeau interactif : `portes-terrain-2026-08-27-niveau-global-selon-pratique.html`
 > (même dossier), publié comme artefact.
 >
-> **3 vérifications, 3 décisions.** La liste est courte parce que les deux règles
+> **3 vérifications, 4 décisions.** La liste est courte parce que les deux règles
 > de tête du skill l'exigent : aucune porte si une machine peut répondre, et pas
 > de préalable si un raté n'est pas irréversible. **Rien de ce qui a été livré
 > aujourd'hui n'écrit dans tes données** — d'où l'absence de §1.
@@ -26,18 +26,22 @@ Désormais c'est **ta pratique de notation** qui dit dans quoi sa note se lit :
 
 ---
 
-## ⚠ UNE INCOHÉRENCE TEMPORAIRE, ET IL FAUT LA CONNAÎTRE AVANT DE REGARDER
+## ⚠ LE TRAVAIL EST À MOITIÉ FAIT — MAIS CHEZ TOI, ÇA NE SE VOIT PAS
 
 Dans la même carte, **deux lignes ne suivent pas encore la même règle** :
 
-- **« Performance globale (P) »** — corrigée aujourd'hui, lit ton échelle ;
+- **« Performance globale (P) »** — corrigée le 27 août, lit ton échelle ;
 - **« Progression par critère »**, juste en dessous — **pas encore corrigée**,
-  calcule toujours ses niveaux avec la formule en dur.
+  calcule toujours ses niveaux avec la formule écrite dans le code.
 
-⮕ Si ton échelle n'est pas IDME, tu peux donc voir **deux codes différents pour
-le même élève** : le global venu de ton échelle, les critères venus du code. Ce
-n'est pas un bug à signaler, c'est le travail à moitié fait — le reste est le pas
-3c, et il est inscrit.
+⮕ **Vérifié le 27 août sur Benjamin A. : les deux coïncident.** C'est normal —
+les bornes recopiées dans le code sont exactement les tiennes (`D` 65-74, `I` sous
+65). Les deux chemins rendent donc le même verdict.
+
+⮕ C'est la meilleure justification du chantier, et aussi son piège : **on ne peut
+pas valider ce correctif sur tes données**, puisque l'ancien et le nouveau y
+donnent la même chose. L'écart n'apparaîtrait que chez quelqu'un qui note en
+A/B/C/D.
 
 ---
 
@@ -59,17 +63,23 @@ n'est pas un bug à signaler, c'est le travail à moitié fait — le reste est 
 
 ### 2.1 — La ligne « Performance globale » d'un élève réel — **avec mesure**
 
-> **Pourquoi.** Le dépistage a déjà été muet sans le dire : jusqu'au 26 août, il
-> affichait « Stable » pour un élève en difficulté sur tous ses critères quand il
-> n'arrivait pas à convertir ses évaluations. Le changement d'aujourd'hui touche
-> exactement cette ligne. S'il ne trouve rien dans tes données, le niveau
-> disparaîtra — et il faut le savoir tout de suite.
+> ✅ **CETTE PORTE A DÉJÀ SERVI, le 27 août à 07 h 48.** Elle a attrapé un défaut
+> qu'aucun test ne pouvait voir : le niveau ne s'affichait PAS. Un élève avait dix
+> évaluations dont une désignant une échelle disparue du trimestre ; le code
+> comptait cette absence comme *une deuxième échelle*, concluait « je ne choisis
+> pas », et n'affichait plus rien. Or cette évaluation est déjà écartée du calcul —
+> le pourcentage est calculé sur les neuf autres, et le bandeau au-dessus le dit.
+> **Corrigé et poussé le matin même** (`35ca5d72`). La rangée sert maintenant à
+> confirmer sur d'autres élèves.
 
 **Le geste** : ouvre le profil d'un élève qui a au moins une évaluation →
 section **Accompagnement** → première ligne, « Performance globale (P) ».
 
 ⮕ **Attendu** : le pourcentage s'affiche, et devant lui un code de niveau **si**
-ta pratique travaille par niveaux.
+ta pratique travaille par niveaux. Relevé le 27 août sur Benjamin A. :
+**`D 72 %`**. Un élève dont TOUTES les évaluations pointent vers une échelle
+disparue n'aura toujours pas de code — c'est voulu, et le bandeau « Dépistage
+incomplet » l'explique.
 
 📋 **À noter** : le texte exact de la ligne (par ex. `M 78 %` ou `78 %`).
 
@@ -144,7 +154,33 @@ lui donnerait en plus l'interprétation.
 
 ---
 
+### D4 — Trois formulations SOLO se disputent le même niveau : laquelle garder ?
+
+Ta capture du 27 août a révélé un jeu de descriptions que **trois relectures du
+code avaient manqué**. La carte « Observation de la structure » dit *« À ce niveau
+multistructurel, l'étudiant·e peut se concentrer sur plusieurs points pertinents à
+la fois. Cependant, il/elle les considère indépendamment. »* Ailleurs, le même
+niveau est décrit par *« Plusieurs aspects sans vision d'ensemble »*, et ailleurs
+encore par *« Points pertinents identifiés, liens à consolider »*. Le chantier doit
+n'en garder **qu'une**. Les longues sont plus riches, les courtes tiennent dans une
+infobulle.
+
+**Ton verdict :** `________________________________`
+
+---
+
 ## §4 · Ce que je n'ai pas pu vérifier
+
+### Ce que cette porte a déjà attrapé — 27 août, matin
+
+- **Le niveau ne s'affichait pas du tout** (voir 2.1). Reproduit, corrigé, poussé.
+  **Aucun test n'aurait pu le trouver** — il fallait tes données.
+- **Un sixième site de descriptions SOLO écrites dans le code**, dans la carte
+  « Observation de la structure ». Trois balayages l'avaient manqué : ces textes ne
+  contiennent aucun des motifs cherchés. C'est l'écran qui l'a montré. ⮕ Devenu **D4**.
+- **Sans grille de référence, le dépistage disait « aucune force ni défi
+  identifié »** — un verdict rassurant, alors qu'il voulait dire « je n'ai aucun
+  critère à quoi comparer ». Inscrit en **#550**.
 
 - **Ton corpus réel.** Tout a été éprouvé sur une échelle fabriquée (W/X/Y/Z) et
   un élève fictif. L'échelle orpheline découverte hier soir rappelle que tes
@@ -174,3 +210,12 @@ lui donnerait en plus l'interprétation.
   protection qui empêche le terminal d'interpréter les accents graves, et deux
   précisions ont sauté. Le dépôt ne réécrit pas un commit poussé — il reste tel
   quel.
+- **Mon script d'anti-cache a échoué en silence**, et j'ai commité en croyant
+  l'URL du fichier corrigé mise à jour. Ton navigateur t'aurait rendu l'ANCIEN
+  fichier : tu aurais testé un correctif que tu n'avais pas. Rattrapé avant que tu
+  recharges, et versé à #547 — la sentinelle ne vérifie le `?v=` qu'une fois par
+  cycle de release, donc elle est aveugle au deuxième changement d'un même fichier.
+- **En mettant CET artefact à jour, j'ai cassé son tableau de décisions** (une
+  virgule manquante) : la page s'ouvrait vide. Attrapé par la vérification au
+  navigateur que le modèle impose avant publication — sans elle, je te livrais une
+  page morte.

@@ -152,13 +152,18 @@ input[type="text"]:focus-visible,textarea:focus-visible{outline:2px solid var(--
   </header>
 
   <div class="avertissement">
-    <h2>À savoir avant de regarder : le travail est à moitié fait, et ça se voit</h2>
+    <h2>Le travail est à moitié fait — mais chez toi, ça ne se voit pas</h2>
     <p>Dans la même carte, deux lignes ne suivent pas encore la même règle.
     <strong>« Performance globale »</strong> lit désormais ton échelle ;
     <strong>« Progression par critère »</strong>, juste en dessous, calcule encore ses niveaux
-    avec l'ancienne formule.</p>
-    <p>⮕ Si ton échelle n'est pas IDME, tu peux donc voir <strong>deux codes différents pour le même
-    élève</strong>. Ce n'est pas un défaut à signaler : c'est le reste du chantier, et il est inscrit.</p>
+    avec l'ancienne formule écrite dans le code.</p>
+    <p>⮕ <strong>Vérifié le 27 août sur ton profil de Benjamin A. : les deux coïncident.</strong>
+    Et c'est normal — les bornes recopiées dans le code sont exactement les tiennes
+    (<span class="mono">D</span> de 65 à 74, <span class="mono">I</span> sous 65). Les deux chemins
+    rendent donc le même verdict.</p>
+    <p>⮕ C'est la meilleure justification du chantier, et aussi son piège : <strong>on ne peut pas
+    valider ce correctif sur tes données</strong>, puisque l'ancien et le nouveau y donnent la même
+    chose. L'écart n'apparaîtrait que chez quelqu'un qui note en A/B/C/D.</p>
   </div>
 
   <section class="bloc" id="sections"></section>
@@ -183,6 +188,21 @@ input[type="text"]:focus-visible,textarea:focus-visible{outline:2px solid var(--
         <li><b>Le reste du chantier.</b> Le niveau par critère, les quatre descriptions écrites en dur,
         les bornes de « Maîtrisé et étendu », et les quatre seuils de l'interprétation de performance.</li>
       </ul>
+      <h3>Ce que cette porte a déjà attrapé — 27 août, matin</h3>
+      <ul>
+        <li><b>Le niveau ne s'affichait pas du tout.</b> Un élève avec une évaluation pointant
+        vers une échelle disparue : mon code comptait cette absence comme une deuxième échelle
+        et refusait de choisir. Reproduit, corrigé, poussé. <b>Aucun test n'aurait pu le
+        trouver</b> — il fallait tes données.</li>
+        <li><b>Un sixième site de descriptions SOLO écrites dans le code</b>, dans la carte
+        « Observation de la structure ». Trois balayages du code l'avaient manqué : ces textes
+        ne contiennent aucun des motifs que je cherchais. C'est l'écran qui l'a montré.
+        ⮕ Devenu la décision <b>D4</b>.</li>
+        <li><b>Sans grille de référence, le dépistage disait « aucune force ni défi identifié »</b>
+        — un verdict rassurant, alors qu'il voulait dire « je n'ai aucun critère à quoi
+        comparer ». Inscrit en <b>#550</b>.</li>
+      </ul>
+
       <h3>Mes erreurs de cette session, y compris rattrapées</h3>
       <ul>
         <li><b>Ma première spec était décorative.</b> Elle croyait tester la pratique sommative ; son
@@ -195,6 +215,10 @@ input[type="text"]:focus-visible,textarea:focus-visible{outline:2px solid var(--
         pratique qui établit la note globale. Ta correction a déplacé tout le pas.</li>
         <li><b>Un message de commit est parti amputé</b> (<span class="mono">f5a8e020</span>) : deux
         précisions ont sauté. Le dépôt ne réécrit pas un commit poussé — il reste tel quel.</li>
+        <li><b>Mon script d'anti-cache a échoué en silence</b>, et j'ai commité en croyant l'URL
+        du fichier corrigé mise à jour. Ton navigateur t'aurait rendu l'ANCIEN fichier : tu
+        aurais testé un correctif que tu n'avais pas, et rapporté qu'il ne marchait pas.
+        Rattrapé avant que tu recharges.</li>
       </ul>
     </div>
   </section>
@@ -230,10 +254,10 @@ const DONNEES = [
     portes: [
       {
         num: "2.1", titre: "La ligne « Performance globale » d'un élève réel",
-        pourquoi: "Le dépistage a déjà été muet sans le dire : jusqu'au 26 août, il affichait « Stable » pour un élève en difficulté sur tous ses critères quand il n'arrivait pas à convertir ses évaluations. Le changement d'aujourd'hui touche exactement cette ligne — s'il ne trouve rien dans tes données, le niveau disparaîtra, et il faut le savoir tout de suite.",
+        pourquoi: "✅ <b>CETTE PORTE A DÉJÀ SERVI, le 27 août à 07 h 48.</b> Elle a attrapé un défaut que rien d'automatisé ne pouvait voir : le niveau ne s'affichait PAS. Un de tes élèves a 10 évaluations dont une désigne une échelle disparue du trimestre ; mon code comptait cette absence comme <i>une deuxième échelle</i>, concluait « je ne choisis pas », et n'affichait plus rien. Or cette évaluation est déjà écartée du calcul — le pourcentage est calculé sur les neuf autres, et le bandeau au-dessus le dit. <b>Corrigé et poussé le matin même.</b> Cette rangée sert maintenant à confirmer sur d'autres élèves.",
         rangees: [{
           geste: "Ouvre le profil d'un élève qui a au moins une évaluation, section <b>Accompagnement</b>, première ligne.",
-          attendu: "Le pourcentage s'affiche, précédé d'un code de niveau <b>si</b> ta pratique travaille par niveaux.",
+          attendu: "Le pourcentage s'affiche, précédé d'un code de niveau <b>si</b> ta pratique travaille par niveaux. Relevé le 27 août sur Benjamin A. : <b>D 72 %</b>. Un élève dont TOUTES les évaluations pointent vers une échelle disparue n'aura toujours pas de code — c'est voulu, et le bandeau « Dépistage incomplet » l'explique.",
           mesure: "Le texte exact de la ligne"
         }]
       },
@@ -271,6 +295,10 @@ const DECISIONS = [
   {
     num: "D3", question: "Étiqueter ton échelle en SOLO, maintenant ou pas ?",
     texte: "Aucune de tes échelles ne porte d'étiquette SOLO : le champ existe depuis hier, il naît vide. Tant qu'il l'est, le dépistage affiche le nom de tes niveaux — ce qui fonctionne. L'étiqueter, cinq menus dans l'éditeur d'échelles, lui donnerait en plus l'interprétation."
+  },
+  {
+    num: "D4", question: "Trois formulations SOLO se disputent le même niveau : laquelle garder ?",
+    texte: "Ta capture du 27 août a révélé un jeu de descriptions que trois relectures du code avaient manqué. La carte « Observation de la structure » dit « À ce niveau multistructurel, l'étudiant·e peut se concentrer sur plusieurs points pertinents à la fois. Cependant, il/elle les considère indépendamment. » Ailleurs, le même niveau est décrit par « Plusieurs aspects sans vision d'ensemble », et ailleurs encore par « Points pertinents identifiés, liens à consolider ». Le chantier doit n'en garder QU'UNE. C'est un choix de vocabulaire pédagogique — les longues sont plus riches, les courtes tiennent dans une infobulle."
   }
 ];
 
