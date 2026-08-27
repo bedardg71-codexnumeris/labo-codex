@@ -12,7 +12,7 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** — tout y est. Aucun travail en avance ailleurs. |
-| **Version** | **1.104.0** — build `0827-1245` (`588debf1`). Minor : la carte « Observation de la structure » rend un bloc par niveau de l'échelle, et le SOLO d'un critère vient du champ configuré. **Vitest 3711/3711 (349 fichiers) · Playwright 193/193**, verdict vert enregistré au SHA par `scripts/pousser.sh`. ⚠ **Grégoire doit recharger sa session `file://`** : huit jetons anti-cache ont changé au bump. |
+| **Version** | **1.104.0** — build `0827-1245` (`588debf1`). Minor : la carte « Observation de la structure » rend un bloc par niveau de l'échelle, et le SOLO d'un critère vient du champ configuré. **Vitest 3715/3715 (350 fichiers) · Playwright 193/193**, verdict vert enregistré au SHA par `scripts/pousser.sh`. ✅ **AUCUN BUMP DÛ** : rien de code applicatif n'a changé depuis — seuls un test de constat et de la documentation. ⚠ **Grégoire doit recharger sa session `file://`** : huit jetons anti-cache ont changé au bump. |
 | **Version précédente** | **1.103.1** — build `0827-0953`, qui a porté six changements de code sans bump (pas 3c-3, pas 4, #547, #550, #551) : la session `file://` de Grégoire était ouverte, et la règle du projet interdit de bumper pendant. **C'est la seconde fois de la journée que l'application annonce un numéro plus ancien que son code.** |
 | **Travail en avance sur `main`** | **NON — tout est poussé**, vérifié au rituel de fin (`git log origin/main..HEAD` vide, arbre propre). **Rien sur aucune branche.** |
 | **Suite Playwright** | **baseline à ZÉRO échec** — 193/193 le 27 août (contre 8 avant #495). ⚠ Cette ligne annonçait encore « 1 échec connu, `productions-ajout-refus-garde-340` = #530 » : **#530 est CLOS depuis le 26 août** (1.100.2 — le défaut était dans la sentinelle, pas dans la garde). La baseline était périmée d'une journée. |
@@ -22,61 +22,69 @@
 | ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE** | **#427** (refermer l'accès public) et **#508** (l'avis d'accueil qui l'annonce). Fiche opératoire prête : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`. **Dû par Grégoire** : la liste nominale des personnes à inviter et les trois noms Cloudflare — personne ne peut les préparer à sa place. |
 | ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. ⮕ **ET C'EST ARRIVÉ UNE SECONDE FOIS LE MÊME JOUR, dans l'autre sens.** Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les `BACKLOG.md` et `SESSION.md` de la session « présences » — l'inscription de l'item **#538** et la renumérotation **#534 → #537** vivent donc dans un commit qui parle d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc non réécrit. **Deux avertissements en un jour : sur ce dépôt, `git add` par chemins explicites n'est pas une préférence, c'est la seule méthode qui tienne.** |
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
-| **Dernière mise à jour** | **27 août 2026, 12 h 50** — lot 3 REFERMÉ (8 pas), #550 et #551 pas 1 livrés, **1.104.0 déployée**. |
+| **Dernière mise à jour** | **27 août 2026, fin d'après-midi** — rituel de fin. Lot 3 de #542 REFERMÉ (8 pas) · #550 · #551 pas 1 · **1.104.0 déployée** · **#552 créé et PROUVÉ**. Chantier suivant cadré : consigne `CONSIGNE-552-537-535-cibles-intervention-sans-contexte-impose.md`. |
 
-## ▶ POUR LA SESSION QUI PREND LE RELAIS — 27 août 2026, début d'après-midi
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 27 août 2026, fin d'après-midi
 
-**En trois lignes.** **Le lot 3 de #542 est REFERMÉ** — le dépistage ne lit plus l'échelle
-de Grégoire depuis le code, huit pas livrés. Ce qui en sort vit maintenant comme **#551** :
-le dépistage du RISQUE, lui, est encore calibré sur ses bornes. Arbre propre, tout poussé,
-**1.104.0 déployée** (build `0827-1245`), verdict Playwright vert au SHA.
+### ⚠⚠ LA RÈGLE QUI COMMANDE LE PROCHAIN CHANTIER
 
-⮕ **LA LEÇON DU LOT, et elle vaut pour la suite** : sur ce chantier, la liste des seuils
-TROUVÉS au `grep` est plus longue que la liste des seuils qui AGISSENT. **Cinq fonctions
-mesurées mortes** en deux jours (`interpreterScoreIDME`, `interpreterPerformance`,
-`genererDiagnosticSRPNF`, `genererTableauObjectifs`, `genererCarteCibleIntervention`).
-Chaque site trouvé demande sa vérification de consommateurs AVANT qu'on décide de le brancher
-ou de le supprimer — **un site mort branché sur l'échelle de l'utilisateur, c'est du code mort
-rendu vivant.**
+> **Grégoire, 27 août 2026** : « Ce qui est important, ici, c'est surtout de ne rien coder
+> en dur. Les utilisateurs auront tous des besoins et des conditions différentes et je ne
+> veux pas imposer mon contexte. »
 
-### Le chantier, pas par pas
+Ce n'est pas une préférence de style : c'est le **critère qui tranche** chaque question
+ouverte du chantier, et il élimine des options avant qu'on en discute. ⮕ **Distinguer
+conséquence logique et valeur arbitraire** : dériver un libellé d'une donnée que
+l'utilisateur a saisie est une conséquence ; écrire « au-dessus de 75 %, c'est la maîtrise »
+est un arbitraire, **même configurable**. La règle vise le second.
 
-| Pas | | |
-|---|---|---|
-| 1 · 2 · 3a · 3b | ✅ | Situer · interpréter · une seule résolution d'échelle · **la pratique dit dans quoi sa note globale se lit** |
-| **3c-1** | ✅ | La performance **globale** est branchée. Vérifiée sur ses données : `D 72 %` |
-| **3c-2** | ✅ | Le niveau **par critère** est branché. Plus aucun ternaire `pct >= 85` dans le fichier |
-| **3c-3** | ✅ | **Livré le 27 août à 10 h 29** (`c914255a`). DEUX des quatre morceaux étaient du CODE MORT et ont été supprimés, pas branchés. La carte rend **un bloc par niveau de l'échelle** (décision de Grégoire) |
-| **4** | ✅ | **Livré le 27 août à midi.** `obtenirNiveauSOLO()` supprimée **et son jumeau `obtenirTypeCritere()` avec elle** — le champ `critere.niveauSOLO` existait déjà |
-| **5** | ➡ | **SORTI DU LOT** par décision de Grégoire — vit comme **#551** au backlog. Les quatre chemins vivants ne font pas du dépistage d'échelle : ils décident **si un élève est à risque**. Autre question, autres règles |
+### Le chantier : #552 · #537 · #535 — les cibles d'intervention
 
-⮕ **CE QUE LE PAS 3c-3 A RÉELLEMENT DEMANDÉ**, pour qui relit ce chantier : sur ses quatre
-morceaux annoncés, **deux étaient du code mort** — leurs consommateurs rangeaient le résultat
-dans des variables que rien ne lisait. Suivre la consigne à la lettre aurait branché sur
-l'échelle de l'utilisateur deux fonctions n'atteignant aucun écran. Seule la carte
-« Observation de la structure » demandait de la conception : elle ne choisissait pas un
-libellé, elle choisissait **quels blocs existent**. Consigne détaillée et journal des pas :
-`plans de travail/CONSIGNE-542-lot3-delier-le-depistage.md`.
+**En trois lignes.** `determinerCibleIntervention` décide quelle intervention est
+recommandée pour un élève, et elle alimente **deux écrans vivants** — l'accompagnement du
+profil et la zone critique du tableau de bord. Elle est écrite **entièrement** sur le
+contexte de Grégoire : ses cinq critères, ses seuils, sa pondération d'il y a deux ans, son
+établissement. Le chantier n'est **pas commencé** ; ce qui est fait, c'est la mesure.
 
-⚠ **ET LE PIÈGE DU CHANTIER, à connaître avant de commencer** : chez Grégoire, l'ancien et
-le nouveau chemin donnent **le même résultat**, parce que les bornes recopiées dans le code
-sont exactement les siennes. **Ce chantier ne peut pas être validé sur ses données.** Toute
-preuve passe par une échelle fabriquée en test — et jamais A/B/C/D, dont le « D » collisionne
-avec IDME (utiliser W/X/Y/Z).
+⮕ **CONSIGNE COMPLÈTE, à lire avant tout geste** :
+`plans de travail/CONSIGNE-552-537-535-cibles-intervention-sans-contexte-impose.md`
+
+### Ce que la mesure a établi, et qui change le plan
+
+| | |
+|---|---|
+| **Le défaut, prouvé** | Un bon français **masque** une difficulté persistante en Structure. `I = francaisMoyen` conditionne les branches de TOUS les critères. Trois élèves identiques : langue à 15 % → RàI **3** avec CAF · à 60 % → RàI **1** « à clarifier » · à 90 % → RàI **1**. La difficulté des deux derniers n'est même plus NOMMÉE |
+| **La preuve** | `tests/unit/constat-552-cible-rai-pilotee-par-le-francais.test.js` — 4 tests, garde anti-silence incluse, 2 break-tests rouges vérifiés. ⚠ **C'est un CONSTAT, pas une sentinelle** : ses attentes décrivent le comportement fautif. À la correction, il se **réécrit**, il ne se supprime pas |
+| **L'unité** | Les seuils `17/18/20/21/25/27` sont des **notes brutes sur 30** (Grégoire : « la pondération a déjà été sur 30, ensuite sur 20 à l'H26 »), comparées à un pourcentage. Deux fois périmées. **Patron exact de la correction 1.102** — le chercher ailleurs fait partie du chantier |
+| ⚠ **LES TROIS ITEMS SONT INSÉPARABLES** | `I` **est** `francaisMoyen`. Le retirer (geste de #537) fait tomber les **quatre résolveurs en entier**, pas seulement leurs branches Français. Il n'y a pas de « petit pas #537 » |
+| **Déjà tranché le 27** | Le critère de langue est **un critère comme un autre** — pas de statut propre, pas de désignation par l'utilisateur. ⮕ Et son critère Français **apparaîtra** dans la carte « Observation de la structure », dont il est exclu aujourd'hui : conséquence assumée, confirmée explicitement |
+| **À sortir en item propre** | Le **rabotage de clé** `startsWith('francais') → 'francais'`, 8 sites. Ce n'est PAS de la didactique : un pansement sur un appariement de clés qui échoue, et tout critère dont le nom varie entre deux écritures a le même bug **en silence**. Dernier ID pris : **#552** |
 
 ### Ce qui attend un verdict de Grégoire
 
+- 📐 **LA DÉCISION DU CHANTIER** — **d'où vient une cible d'intervention, si rien ne vient du
+  code ?** Trois options posées au §8 de la consigne : **A** dérivée du critère · **B** saisie
+  par l'enseignant · **C** aucune cible, nommer la cause. ⮕ **Et la question qui la précède** :
+  si l'intensité RàI 1/2/3 doit survivre, qu'est-ce qui la décide sans seuil en dur ?
+- 📐 **LE POINT DE CONVERGENCE, probablement la vraie décision** — **#552, #551, #535, #549 et
+  le pas 3c-3 de #542 butent tous sur la même chose manquante** : rien, dans l'échelle d'un
+  utilisateur, ne dit **quel niveau marque la maîtrise**. L'option « un champ sur l'échelle » a
+  été écartée au pas 3c-3 **pas sur le fond** — « elle ajoute un champ, un écran d'édition et
+  une migration. C'est un chantier, pas un pas. » ⮕ **Ce chantier est peut-être ce
+  chantier-là.** À poser avant d'écrire une ligne : c'est de l'architecture, pas du refactor.
 - **Étiqueter son échelle en SOLO** — il a répondu « oui, maintenant » (D3), le geste est à
   lui. ⮕ **Ce n'est plus un confort** : les consignes du modèle de cartouche (#549) font
-  dépendre toute leur rédaction du « seuil de maîtrise », et l'étiquette SOLO est la seule
-  donnée du dépôt qui puisse le dire.
-- **~~Le pas 5~~ — TRANCHÉ le 27 août** : sorti du lot, devenu **#551**. Ce qui reste à décider y est posé — renommer les seuils `depistage.*` (honnête, ne corrige pas le calibrage) ou exprimer la règle en niveaux de l'échelle (fidèle au lot 3, mais dépend de l'étiquetage SOLO).
+  dépendre toute leur rédaction du « seuil de maîtrise », et l'étiquette SOLO est aujourd'hui
+  la seule donnée du dépôt qui puisse en approcher.
 - **Le niveau « 0 » dans le modèle de cartouche** — la matrice génère une ligne par niveau, et
   la consigne demande de décrire « ce qu'un travail de ce niveau présente ». Un jugement
   suspendu ne présente rien.
 - **Deux points de vocabulaire** — « préstructurel » garde une formulation courte parmi
   quatre longues ; les quatre longues emploient « il/elle », un accord lourd que sa convention
   demande de reformuler.
+- ⏳ **ÉCHÉANCE DATÉE, DANS 5 JOURS — le 1er septembre** : #427 et #508. **Dû par lui, et
+  personne ne peut le préparer à sa place** : la liste nominale des personnes à inviter, et les
+  trois noms Cloudflare qui remplacent les `[À COMPLÉTER]` de `DEPLOY.md` (lignes 269, 277, 293).
 
 ### Trois pièges qui coûteront à qui les ignore
 
