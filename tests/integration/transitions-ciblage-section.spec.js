@@ -54,6 +54,13 @@ test('transitions — bandeau de jalon ciblé par section (accueil propre, Suivi
         if (typeof window.definirPreference === 'function') {
             ['transition_num_crois_vue', 'transition_crois_obs_vue', 'transition_obs_comp_vue']
                 .forEach((p) => window.definirPreference(p + '_demo', false));
+
+            // #508 — l'avis daté « identification au 1er septembre » est en tête
+            // du tableau, sans ciblage de section : il s'afficherait sur l'accueil
+            // et masquerait la régression que ce test surveille. Ce test porte sur
+            // le ciblage des JALONS ; l'avis est neutralisé ici, et couvert par son
+            // propre test. Clé unique (ignorerModeDemo), donc sans suffixe _demo.
+            window.definirPreference('avis_identification_2026_09_vue', true);
         }
 
         const attendre = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -93,6 +100,8 @@ test('transitions — bandeau de jalon ciblé par section (accueil propre, Suivi
     expect(resultat.texteSuivi).toContain('tableau de bord');
 
     // Verrou de structure : le mapping section reste explicite.
+    // L'avis daté #508 n'a volontairement PAS de champ `sections` (il doit être vu
+    // partout) : il est absent de ces assertions, pas oublié.
     expect(resultat.mapping['observation-competence']).toEqual(['suivi']);
     expect(resultat.mapping['croisement-observation']).toEqual(['suivi']);
     expect(resultat.mapping['numerisation-croisement']).toEqual(['evaluations']);

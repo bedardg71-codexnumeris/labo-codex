@@ -124,6 +124,13 @@
         transition_crois_obs_vue_demo: false,
         transition_obs_comp_vue: false,
         transition_obs_comp_vue_demo: false,
+        // #508 (27 août 2026) — Avis daté annonçant l'identification à l'entrée
+        // au 1er septembre 2026. Pas de variante `_demo` : l'avis concerne
+        // l'accès au site, pas le contenu de l'espace de travail, et doit donc
+        // se fermer une seule fois quel que soit le mode. La condition d'affichage
+        // est temporelle (voir js/transitions.js) : l'avis disparaît de lui-même
+        // le 1er septembre, cette préférence ne sert qu'à la fermeture manuelle.
+        avis_identification_2026_09_vue: false,
 
         // État de la visite guidée 6 étapes (js/accompagnement.js)
         tourGuide_etape: null,
