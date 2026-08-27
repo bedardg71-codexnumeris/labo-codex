@@ -165,6 +165,99 @@ function chargerSeancesV2() {
  * et comme le calcul d'assiduité. Recâblé sur chaque champ d'heure (`data-on-change`)
  * pour suivre la saisie.
  */
+/**
+ * Périodes par semaine DÉCLARÉES par le devis du cours, pour un horaire donné.
+ *
+ * #540 lot D (26 août 2026) — LA DEMANDE D'ORIGINE DE GRÉGOIRE : « il faudrait que le
+ * formulaire du cours demande la durée et que le tout soit confirmé par l'horaire ».
+ *
+ * ⮕ POURQUOI AUCUNE CONVERSION N'EST NÉCESSAIRE, ce qui n'allait pas de soi. La
+ * pondération « 2-2-3 » compte des heures au sens du réseau collégial — et une « heure
+ * de cours », au cégep, EST une période : 50 minutes d'enseignement plus 10 de pause,
+ * soit environ 60 minutes à l'horaire. `(théorie + labo)` donne donc directement un
+ * nombre de PÉRIODES par semaine, comparable tel quel au total de l'horaire. C'est le
+ * seul endroit du chantier où les deux grandeurs se rencontrent sans qu'on ait à
+ * traduire — et c'est ce qui rend ce recoupement possible après le lot E.
+ *
+ * Littérature 2-2-3 → 4 périodes ; philosophie 3-1-3 → 4 ; chimie 3-2-3 → 5.
+ *
+ * @param {Object} horaire - l'entité horaire (porte `groupeAssocie`)
+ * @returns {{periodes:number, cours:Object}|null} null si la chaîne ne mène à aucun cours
+ *          ou à aucune pondération lisible — on ne recoupe alors rien, et on se tait.
+ */
+function periodesDeclareesParLeCours(horaire) {
+    if (!horaire || !horaire.groupeAssocie) return null;
+    try {
+        const groupesCours = db.getSync(cle('groupesCours'), []) || [];
+        if (!Array.isArray(groupesCours)) return null;
+
+        // `groupeAssocie` porte le numéro de groupe (« 00001 »), pas un id de GC.
+        const gc = groupesCours.find(g => g && (
+            g.groupe === horaire.groupeAssocie ||
+            g.horaireId === horaire.id
+        ));
+        if (!gc || !gc.coursId) return null;
+
+        const tousCours = db.getSync('cours', []) || [];
+        const cours = tousCours.find(c => c && c.id === gc.coursId);
+        if (!cours || !cours.ponderation) return null;
+
+        // Le parseur du formulaire Cours reste le juge du format (#540 lot A).
+        const pond = typeof window._parserPonderation === 'function'
+            ? window._parserPonderation(cours.ponderation)
+            : null;
+        if (!pond) return null;
+
+        return { periodes: pond.theorie + pond.labo, cours: cours };
+    } catch (e) {
+        return null;
+    }
+}
+
+/**
+ * Confronte le total de l'horaire à ce que le devis du cours déclare, et le DIT.
+ *
+ * #540 lot D. **Jamais bloquant** : un écart peut être légitime (cours intensif, semaine
+ * de reprise, horaire en cours de saisie), et c'est l'enseignant qui sait. On informe,
+ * on n'interdit pas — même règle que la jauge de planification.
+ *
+ * On se TAIT quand on ne sait pas : pas de cours associé, pas de pondération lisible, ou
+ * horaire encore incomplet. Un signal qui parle sans savoir devient un signal qu'on
+ * n'écoute plus.
+ */
+function majRecoupementHoraireV2(horaire) {
+    const zone = document.getElementById('v2-hor-recoupement');
+    if (!zone) return;
+
+    const declare = periodesDeclareesParLeCours(horaire);
+    if (!declare) { zone.textContent = ''; zone.className = 'texte-aide u-texte-075'; return; }
+
+    const seances = (horaire && horaire.seances) || [];
+    const incompletes = seances.filter(s => !(parseInt(s && s.nombrePeriodes, 10) > 0)).length;
+    if (seances.length === 0 || incompletes > 0) {
+        // L'horaire n'est pas en état d'être confronté : le dire, sans verdict.
+        zone.textContent = '';
+        zone.className = 'texte-aide u-texte-075';
+        return;
+    }
+
+    const total = periodesParSemaine(seances);
+    const code = declare.cours.codeCours || declare.cours.code || 'le cours';
+    const pond = declare.cours.ponderation;
+
+    if (total === declare.periodes) {
+        zone.textContent = `Concorde avec le devis de ${code} (${pond}) : ${declare.periodes} périodes par semaine.`;
+        zone.className = 'texte-aide u-texte-075 recoupement-concorde';
+    } else {
+        const ecart = total - declare.periodes;
+        const sens = ecart > 0 ? 'de plus' : 'de moins';
+        zone.textContent = `Écart avec le devis de ${code} (${pond}) : l'horaire compte `
+            + `${total} période${total > 1 ? 's' : ''} par semaine, le devis en déclare `
+            + `${declare.periodes}. Soit ${Math.abs(ecart)} ${sens}.`;
+        zone.className = 'texte-aide u-texte-075 recoupement-ecart';
+    }
+}
+
 function majResumeFormatHoraireV2() {
     const resumeElem = document.getElementById('v2-hor-formatResume');
     if (!resumeElem) return;
@@ -175,11 +268,23 @@ function majResumeFormatHoraireV2() {
     let total = 0;
     let nb = 0;
     let incompletes = 0;
+    const seancesSaisies = [];
     for (let i = 0; document.getElementById(`v2-hor-seance-${i}-jour`); i++) {
         nb++;
         const brut = document.getElementById(`v2-hor-seance-${i}-periodes`)?.value;
         const p = parseInt(brut, 10);
+        seancesSaisies.push({ nombrePeriodes: p > 0 ? p : undefined });
         if (p > 0) total += p; else incompletes++;
+    }
+
+    // #540 lot D : le recoupement suit la saisie, sur l'horaire en cours d'édition.
+    if (horaireEnEditionId) {
+        const horaires = db.getSync(cle('horaires'), []) || [];
+        const enEdition = horaires.find(h => h && h.id === horaireEnEditionId);
+        if (enEdition) {
+            // On confronte ce qui est À L'ÉCRAN, pas ce qui est enregistré.
+            majRecoupementHoraireV2({ ...enEdition, seances: seancesSaisies });
+        }
     }
 
     const sSeance = nb > 1 ? 's' : '';
@@ -923,6 +1028,9 @@ function supprimerHoraireV2() {
 }
 window.supprimerHoraireV2 = supprimerHoraireV2;
 window.majResumeFormatHoraireV2 = majResumeFormatHoraireV2;
+// #540 lot D — le recoupement horaire ↔ devis du cours.
+window.majRecoupementHoraireV2 = majRecoupementHoraireV2;
+window.periodesDeclareesParLeCours = periodesDeclareesParLeCours;
 window.periodesDeLaSeance = periodesDeLaSeance;
 window.periodesParSemaine = periodesParSemaine;
 

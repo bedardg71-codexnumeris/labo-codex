@@ -26257,3 +26257,16 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
         height: 20px;
     }
 }
+
+/* #540 lot D (26 août 2026) — recoupement horaire ↔ devis du cours.
+   Informatif, jamais bloquant : du texte teinté, pas d'alerte. Même parti que la jauge
+   de temps de la planification — un écart peut être légitime (cours intensif, semaine de
+   reprise), et c'est l'enseignant qui sait. */
+.recoupement-concorde {
+    color: var(--vert-succes, #34c759);
+}
+.recoupement-ecart {
+    /* Même fallback que les autres emplois de cette variable dans la feuille. */
+    color: var(--orange-attention, #e8a838);
+    font-weight: 600;
+}
