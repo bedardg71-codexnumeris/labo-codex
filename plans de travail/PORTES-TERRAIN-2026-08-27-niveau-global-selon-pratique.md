@@ -47,15 +47,21 @@ A/B/C/D.
 
 ## §0 · Préalable
 
-**P.1 — `git pull`, puis vérifier le numéro en bas de page.**
+**P.1 — Recharge l'application, et lis le numéro en bas de page.**
 
-⮕ Attendu : **1.102.0 · build 0827-0556**.
+⮕ Attendu : **1.103.0 · build 0827-0858**.
 
 > **Pourquoi c'est en tête.** Tu lances l'application depuis ton clone, en
-> `file://` : elle est à la version de ton dernier `git pull`, pas à celle de
-> `main`. Sans ce geste, tout ce qui suit décrit l'état d'AVANT — et un faux
-> rouge de ce type est indétectable au récit, parce qu'il ressemble exactement à
-> ce que la porte cherche.
+> `file://` : elle affiche ce qu'il y a SUR TON DISQUE. Sans rechargement, tout ce
+> qui suit décrit l'état d'AVANT — et un faux rouge de ce type est indétectable au
+> récit, parce qu'il ressemble exactement à ce que la porte cherche.
+>
+> ⚠ **CETTE RANGÉE DISAIT « fais un `git pull` », ET C'ÉTAIT FAUX.** (Corrigé le
+> 27 août, après que Grégoire s'est trouvé bloqué dessus.) Les sessions commitent
+> DANS ce clone : leurs commits y sont déjà, et GitHub Desktop affiche « No local
+> changes » sans proposer de pull. Il n'y a rien à tirer — seulement à recharger.
+> Le `RELAIS.md` le disait déjà ; la consigne avait été recopiée du gabarit sans
+> être confrontée à la situation. Le gabarit lui-même est corrigé.
 
 ---
 

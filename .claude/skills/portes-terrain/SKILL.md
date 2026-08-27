@@ -162,16 +162,38 @@ tournait à côté avant de mesurer davantage**. Les deux hypothèses formulées
 plausibles et fausses ; aucune exécution supplémentaire ne les aurait départagées, parce qu'aucune
 ne portait sur la vraie variable.
 
-- `git pull` + **vérifier le numéro de version en bas de page** ;
+- **vérifier le numéro de version en bas de page** — c'est le geste qui vaut dans
+  TOUS les cas, et le seul qui prouve quelque chose ;
+
+  ⚠⚠ **NE PAS ÉCRIRE « fais un `git pull` » SANS AVOIR VÉRIFIÉ D'OÙ TU AS TRAVAILLÉ.**
+  (27 août 2026.) Le dépôt de Grégoire, `~/Documents/GitHub/Monitorage_v6`, sert
+  À LA FOIS d'arbre de travail aux sessions et de source `file://` à son
+  application. **Quand la session commite là — le cas courant — ses commits sont
+  DÉJÀ chez lui : il n'y a rien à tirer.** GitHub Desktop affiche alors « No local
+  changes » et un bouton « Fetch origin » qui ne propose aucun pull, et la porte
+  se bloque sur sa toute première rangée.
+
+  ⮕ **C'est arrivé ce jour-là**, et le `RELAIS.md` l'annonçait pourtant noir sur
+  blanc (« le `git pull` des portes terrain lui est inutile »). La consigne a été
+  recopiée du gabarit sans être confrontée à la situation — exactement le défaut
+  que les deux règles de tête de ce skill visent, appliqué au §0.
+
+  ⮕ **La rangée juste** : « recharge l'application, et lis le numéro en bas de
+  page ». Le `git pull` ne s'ajoute que si la session a travaillé AILLEURS que
+  dans son clone (worktree, autre machine, branche non fusionnée) — et il faut
+  alors le dire, avec la raison.
 - backup Codex si une porte touche les données ;
 - `allow pasting` si une porte demande la console ;
 - les deux appareils, les deux modes.
 
-⚠ **Rappeler que son build n'est pas `main`.** Il lance l'app en `file://`
-depuis son clone : elle est à la version de son dernier `git pull`. Deux des
-quatre échecs des 81 portes étaient des faux rouges venus de là — et **ce type
-de faux rouge est indétectable au récit**, parce qu'il décrit exactement l'état
-d'avant le correctif, qui est précisément ce que la porte teste.
+⚠ **Rappeler que son build n'est pas forcément celui de `main`.** Il lance l'app
+en `file://` depuis son clone : elle est à la version des fichiers SUR SON DISQUE.
+Quand la session a commité dans ce même clone, ils sont à jour dès le commit ;
+quand elle a travaillé ailleurs, ils sont à la version de son dernier `git pull`.
+Deux des quatre échecs des 81 portes étaient des faux rouges venus de là — et **ce
+type de faux rouge est indétectable au récit**, parce qu'il décrit exactement
+l'état d'avant le correctif, qui est précisément ce que la porte teste.
+⮕ D'où le geste qui tranche dans les deux cas : **lire le numéro en bas de page**.
 
 ### §1 · ⚠⚠ Données — ce qu'il exécute sur son corpus
 En tête dès qu'il y en a. Ce sont les gestes **irréversibles**.
