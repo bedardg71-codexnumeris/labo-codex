@@ -199,6 +199,28 @@ Grégoire en clair dans un ternaire, sans même passer par `obtenirSeuil`. Il ne
 en cherchant `idme.` : le re-localiser au pas 3 par la valeur `>= 85`, pas par le nom du
 seuil.
 
+⮕ **ET UN CINQUIÈME SITE, TROUVÉ LE 27 EN RELISANT LE FICHIER DÉPLOYÉ — le plus gros des
+deux.** `interpreterPerformance`, dans `profil-etudiant-helpers.js` (~ligne 744), porte
+**quatre seuils en dur ET quatre descriptions SOLO reformulées** :
+
+| Seuil en dur | Description | Ce que c'est, en fait |
+|---|---|---|
+| `p >= 0.85` | « Maîtrise étendue des compétences avec transfert à d'autres contextes » | abstrait étendu |
+| `p >= 0.75` | « Maîtrise globale avec liens établis entre les concepts » | relationnel |
+| `p >= 0.65` | « Points pertinents identifiés, liens à consolider » | multistructurel |
+| `p >= 0.40` | « Compréhension superficielle, renforcement nécessaire » | unistructurel |
+
+⚠ **L'asymétrie qui le démasque, et qui est dans le même fichier, à vingt lignes d'écart** :
+ses deux voisines `interpreterCompletion` et `interpreterAssiduite` lisent leurs seuils par
+`obtenirSeuil('interpretation.*')`. `interpreterPerformance`, seule des trois, ne consulte
+**rien** — ses quatre valeurs sont écrites dans le code. Elle est exportée sur `window` et
+son résultat s'affiche.
+
+⮕ **Conséquence pour le pas 3** : le lot ne peut pas se dire fini en ne traitant que
+`interpreterScoreIDME`. Ce sont **deux jeux de descriptions SOLO parallèles**, aux seuils
+différents (`0,64` contre `0,40` pour le bas de l'échelle), qui décrivent la même chose et
+peuvent se contredire à l'écran pour un même élève.
+
 ---
 
 ## 7. Précautions, apprises à mes dépens le 26
