@@ -307,28 +307,56 @@ function obtenirEchelleCommuneDesEvaluations(da) {
         if (ids.indexOf(id) === -1) ids.push(id);
     });
 
-    if (ids.length > 1) {
-        return {
-            echelle: null,
-            raison: 'echelles-divergentes',
-            message: 'Les ' + evaluations.length + ' évaluations de cet élève emploient '
-                + ids.length + ' échelles différentes. Sa note globale n\'est donc située dans '
-                + 'aucune d\'elles — choisir la « bonne » reviendrait à en écarter une autre '
-                + 'sans le dire.'
-        };
-    }
+    // ⚠⚠ ON NE COMPTE QUE LES ÉCHELLES RÉSOLUES, ET C'EST TOUT LE SUJET.
+    //
+    // Défaut trouvé le 27 août 2026 par la porte terrain, sur les données
+    // réelles de Grégoire — pas par une fixture. Un élève avait 10 évaluations :
+    // 9 sur son échelle, 1 désignant une échelle disparue du trimestre. La
+    // première version comptait les IDENTIFIANTS distincts, trouvait « 2 », et
+    // concluait « échelles divergentes » : plus aucun niveau ne s'affichait.
+    //
+    // ⮕ C'était incohérent avec le reste de l'application. Cette 10e évaluation
+    // est DÉJÀ écartée du calcul — la performance globale est calculée sur les 9
+    // autres, et `diagnostiquerConversionNiveaux` l'annonce à l'écran
+    // (« Dépistage incomplet · 1 des 10 évaluations n'a pas pu être convertie »).
+    // La compter ici comme une échelle concurrente, c'est refuser de situer une
+    // moyenne à cause d'une donnée qui n'entre pas dans cette moyenne.
+    //
+    // ⮕ Une échelle introuvable n'est pas une AUTRE échelle : c'est une absence,
+    // et l'absence est déjà dite ailleurs. La divergence qui empêche vraiment de
+    // conclure, c'est deux échelles qui existent toutes les deux.
+    //
+    // ⮕ Effet de bord voulu : deux identifiants qui pointent vers la MÊME
+    // échelle (par `idOriginal`, après un import) se dédoublonnent ici, puisque
+    // la comparaison porte sur l'échelle résolue et non sur l'id désigné.
+    var resolues = [];
+    ids.forEach(function (id) {
+        var e = obtenirEchelleResolue(id || null);
+        if (e && !resolues.some(function (x) { return x.id === e.id; })) resolues.push(e);
+    });
 
-    var echelle = obtenirEchelleResolue(ids[0] || null);
-    if (!echelle) {
+    if (resolues.length === 0) {
         return {
             echelle: null,
             raison: 'echelle-non-resolue',
-            message: 'L\'échelle des évaluations de cet élève est introuvable dans ce trimestre. '
-                + 'Sa note globale ne peut pas être située tant qu\'elle n\'est pas rétablie.'
+            message: 'Aucune des échelles désignées par les évaluations de cet élève n\'est '
+                + 'trouvable dans ce trimestre. Sa note globale ne peut pas être située tant '
+                + 'qu\'elles ne sont pas rétablies.'
         };
     }
 
-    return { echelle: echelle, raison: null, message: null };
+    if (resolues.length > 1) {
+        return {
+            echelle: null,
+            raison: 'echelles-divergentes',
+            message: 'Les évaluations de cet élève emploient ' + resolues.length + ' échelles '
+                + 'différentes, toutes les deux présentes dans ce trimestre. Sa note globale '
+                + 'n\'est donc située dans aucune — choisir la « bonne » reviendrait à en '
+                + 'écarter une autre sans le dire.'
+        };
+    }
+
+    return { echelle: resolues[0], raison: null, message: null };
 }
 
 function diagnostiquerConversionNiveaux(da) {

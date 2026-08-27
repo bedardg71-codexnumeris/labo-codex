@@ -91,6 +91,8 @@ describe('#542 lot 3 pas 3b · A — obtenirEchelleCommuneDesEvaluations', () =>
         expect(r.echelle).toBeNull();
         expect(r.raison).toBe('echelles-divergentes');
         expect(r.message).toContain('2 échelles différentes');
+        expect(r.message, 'la divergence qui bloque est celle de deux échelles PRÉSENTES')
+            .toContain('présentes');
     });
 
     it('A3. aucune évaluation : rien à situer, et c\'est dit', () => {
@@ -99,12 +101,44 @@ describe('#542 lot 3 pas 3b · A — obtenirEchelleCommuneDesEvaluations', () =>
         expect(r.raison).toBe('aucune-evaluation');
     });
 
-    it('A4. échelle désignée mais introuvable : la cause est distincte de la divergence', () => {
+    it('A4. TOUTES les échelles introuvables : la cause est distincte de la divergence', () => {
         evaluationsEnBase = [evalDe('ECH_DISPARUE')];
         const r = winCalculs.obtenirEchelleCommuneDesEvaluations('1234567');
         expect(r.echelle).toBeNull();
         expect(r.raison).toBe('echelle-non-resolue');
-        expect(r.message).toContain('introuvable');
+        expect(r.message).toContain('trouvable');
+    });
+
+    it('A4bis. ⚠ LE CAS RÉEL — une échelle disparue parmi neuf bonnes ne bloque PAS le niveau', () => {
+        // Trouvé le 27 août par la porte terrain, sur les données de Grégoire, et
+        // NON par une fixture : un élève avec 10 évaluations, dont 1 désignant une
+        // échelle disparue du trimestre. La première version comptait les
+        // IDENTIFIANTS distincts, trouvait « 2 », concluait « divergentes », et le
+        // niveau ne s'affichait plus du tout.
+        //
+        // ⮕ Or cette 10e évaluation est DÉJÀ écartée du calcul : la performance
+        // globale est calculée sur les 9 autres, et l'écran l'annonce
+        // (« Dépistage incomplet »). Refuser de situer une moyenne à cause d'une
+        // donnée qui n'entre pas dans cette moyenne était incohérent.
+        evaluationsEnBase = [];
+        for (let i = 0; i < 9; i++) evaluationsEnBase.push(evalDe('ECH_A'));
+        evaluationsEnBase.push(evalDe('ECH_DISPARUE'));
+
+        const r = winCalculs.obtenirEchelleCommuneDesEvaluations('1234567');
+        expect(r.raison, 'une échelle absente n\'est pas une échelle concurrente').toBeNull();
+        expect(r.echelle).not.toBeNull();
+        expect(r.echelle.id).toBe('ECH_A');
+    });
+
+    it('A4ter. deux ids qui pointent vers la MÊME échelle ne sont pas une divergence', () => {
+        // Après un import, une échelle porte un id neuf et garde son `idOriginal`.
+        // Des évaluations d'avant et d'après désignent donc deux ids pour un seul
+        // objet. La comparaison porte sur l'échelle RÉSOLUE, pas sur l'id désigné.
+        echellesEnBase = [{ ...ECHELLE_A, id: 'ECH_NEUF', idOriginal: 'ECH_ANCIEN' }];
+        evaluationsEnBase = [evalDe('ECH_NEUF'), evalDe('ECH_ANCIEN')];
+        const r = winCalculs.obtenirEchelleCommuneDesEvaluations('1234567');
+        expect(r.raison).toBeNull();
+        expect(r.echelle.id).toBe('ECH_NEUF');
     });
 
     it('A5. les évaluations REMPLACÉES ne comptent pas — elles portent l\'état d\'avant une reprise', () => {
