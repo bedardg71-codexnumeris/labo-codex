@@ -945,9 +945,42 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     une saisie par ligne. Et deux cas de la porte du lot C ont été RETIRÉS, leur objet
     ayant disparu avec le champ ; ce qu'ils protégeaient est repris par la porte E1.
     Vitest **3574/3574**, Playwright **179/179**.
-    ⏳ **RESTE E2 et E3** : E2 — `obtenirNombrePeriodesSeance` lit `nombrePeriodes` sans
-    plus jamais diviser (les 8 conversions du groupe 1). E3 — retirer le champ « Durée
-    d'une période » et ses 41 lectures.
+    ⮕ **✅ E2 — plus aucune division · LIVRÉ 26 août 2026.** Les huit sites du groupe 1
+    sont taris. `obtenirNombrePeriodesSeance` LIT `nombrePeriodes` et ne convertit plus ;
+    son repli passe par une porte neuve, `obtenirPeriodesPrevuesParHoraire`, sœur
+    d'`obtenirHeuresPrevuesParHoraire` — **deux grandeurs, deux portes, aucun pont**.
+    `periodesDeLaSeance` (écran Horaire) devient une lecture. La grille imprimable cesse
+    de convertir ET perd son repli à 2 : annoncer deux périodes là où l'horaire n'en dit
+    aucune faisait cocher, au crayon, des absences sur des périodes inexistantes.
+    ⮕ **Les deux migrations ne devinent plus.** Elles réécrivaient `nombrePeriodes` EN
+    BASE à chaque démarrage, par division. ⚠ Ce que cela NE RÉPARE PAS : les valeurs que
+    leurs exécutions passées ont déjà inscrites — les corriger demanderait de savoir ce
+    que `duree` signifiait, ce que personne ne peut dire après coup.
+    ⮕ **Les présences FACULTATIVES sont exclues de la conversion** : leur champ `heures`
+    porte en réalité des PÉRIODES (`interventions.js` y écrit `intervention.duree`, dont
+    le libellé de saisie est « Durée (périodes) »). Les convertir revenait à diviser des
+    périodes par une durée de période. L'écart restait petit, donc plausible, donc
+    invisible.
+    ⮕ **Le groupe 2 reste, et c'est légitime** : `heures` sur une présence régulière est
+    une SÉRIALISATION de `periodesPresentes` (`× dureePeriode / 60` à l'écriture, même
+    diviseur à la lecture) — on retombe sur la valeur d'origine quel que soit le réglage.
+    Six sites inchangés.
+    ⮕ **Verrous** : `tests/unit/sentinelle-540-lotE2-aucune-division.test.js` (15 cas,
+    dont la preuve VIVANTE qu'un bloc de 4 h déclaré 4 périodes en rend 4 — l'ancienne
+    chaîne en comptait 5 — et que le réglage de durée n'influe plus sur rien).
+    **4 break-tests rouges.**
+    ⚠ **QUATRE BANCS ONT DÛ ÊTRE RÉVISÉS**, dont la sentinelle #538 écrite le matin même :
+    son banc vivant tout entier reposait sur la dérivation qu'E2 supprime. Trois cas ont
+    été RETOURNÉS plutôt que supprimés — « une séance en debut/fin se mesure quand même »
+    devient « ne vaut rien sans ses périodes », « la durée configurée est respectée »
+    devient « n'influe plus », et le cas de parité de la grille imprimable passe de
+    `[4, 2, 2]` à `[4, 0, 0]`. Idem pour la porte du lot C : elle attendait 4 des deux
+    côtés, elle attend 0 — les deux chaînes s'accordent désormais aussi sur ce qu'elles
+    ignorent. Vitest **3573/3573**, Playwright **179/179**.
+    ⏳ **Code mort repéré, NON supprimé** : `mettreAJourLigne` (`saisie-presences.js`)
+    lit un champ `heures_${da}` qui n'est plus généré nulle part et n'est appelée par
+    personne — seule `mettreAJourLignePeriodes` l'est. Vestige du format « heures ».
+    ⏳ **RESTE E3** : retirer le champ « Durée d'une période » et ses lectures restantes.
   · **D — le recoupement** (demande d'origine) : l'écran Horaire confronte le total des séances à la
     durée hebdomadaire déclarée et le DIT quand ça diverge, sans bloquer. *Fin : un horaire de 3 h
     sur un cours 2-2-3 est signalé.* **Après E** : recouper avec une conversion fausse

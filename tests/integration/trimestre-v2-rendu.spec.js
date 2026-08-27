@@ -52,9 +52,12 @@ test('Chantier I · trimestre-v2 rend la carte résumé horaires (jours + heures
             nom: 'Horaire test chantier I',
             groupeAssocie: '01',
             periodesParSeance: 2,
+            // #540 lot E1/E2 (26 août 2026) : chaque séance porte son nombre de périodes.
+            // Sans lui, la carte résumé annonce « durée non déterminée » — ce qui est le
+            // comportement voulu, mais ne permet pas d'éprouver ce que ce cas vérifie.
             seances: [
-                { jour: 'Lundi', heureDebut: '08:30', heureFin: '10:25', local: 'A-101' },
-                { jour: 'Mercredi', heureDebut: '13:00', heureFin: '14:55', local: 'A-101' }
+                { jour: 'Lundi', heureDebut: '08:30', heureFin: '10:25', nombrePeriodes: 2, local: 'A-101' },
+                { jour: 'Mercredi', heureDebut: '13:00', heureFin: '14:55', nombrePeriodes: 2, local: 'A-101' }
             ]
         };
         window.db.setSync(window.cle('horaires'), [horaire]);
@@ -79,7 +82,8 @@ test('Chantier I · trimestre-v2 rend la carte résumé horaires (jours + heures
             aHeureLundi: htmlCarte.includes('08:30'),
             aHeureMercredi: htmlCarte.includes('13:00'),
             aLocal: htmlCarte.includes('A-101'),
-            aFormat: htmlCarte.includes('2×2') || htmlCarte.includes('Format'),
+            // Le libellé « 2×2 » a disparu avec le format déclaré (#540 lot E1).
+            aFormat: htmlCarte.includes('Format'),
             aPeriodes: htmlCarte.includes('périodes')
         };
     });

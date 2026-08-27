@@ -138,7 +138,20 @@ function monter({ horaire = [], jour = null, statut = 'cours', jourRemplace = nu
     });
 }
 
-const LUNDI_2H = [{ id: 1, jour: 'Lundi', debut: '08:00', duree: 2 }];
+// ⚠ CE BANC A ÉTÉ RÉVISÉ PAR #540 LOT E2, LE MÊME JOUR (26 août 2026).
+//
+// #538 avait remplacé un `2` en dur par une DÉRIVATION : la durée d'une séance se lisait
+// dans l'horaire, en heures, puis se convertissait en périodes par la durée de période.
+// C'était un progrès — on ne fabriquait plus de dénominateur — mais la conversion
+// elle-même était fausse : Grégoire a montré le soir même qu'une période comprend sa
+// PAUSE (50 + 10 ici, 55 + 5 ailleurs). Diviser une durée d'horloge par la seule durée
+// d'enseignement rendait 4 périodes pour un bloc de 08:00 à 11:00, qui en fait trois.
+//
+// E2 supprime la conversion : `nombrePeriodes` est SAISI sur chaque séance (lot E1) et
+// se lit. Les cas ci-dessous qui éprouvaient la DÉRIVATION sont donc réécrits sur la
+// LECTURE ; ceux qui éprouvaient le choix du jour, l'agrégation ou le refus d'inventer
+// sont conservés tels quels — c'est ce que #538 protégeait vraiment, et ça n'a pas bougé.
+const LUNDI_2P = [{ id: 1, jour: 'Lundi', debut: '08:00', nombrePeriodes: 2 }];
 
 describe('#538 · A — la durée vient de l\'horaire, ou elle n\'existe pas', () => {
 
@@ -150,40 +163,52 @@ describe('#538 · A — la durée vient de l\'horaire, ou elle n\'existe pas', (
         ).toBe(0);
     });
 
-    it('A.b l\'horaire prévoit 2 h ce lundi → 2 périodes de 50 min', () => {
-        const win = monter({ horaire: LUNDI_2H, jour: 'Lundi' });
+    it('A.b l\'horaire dit 2 périodes ce lundi → 2', () => {
+        const win = monter({ horaire: LUNDI_2P, jour: 'Lundi' });
         expect(win.obtenirNombrePeriodesSeance('2026-08-24')).toBe(2);
     });
 
     it('A.c un jour que l\'horaire ne couvre pas → 0, jamais un repli', () => {
-        const win = monter({ horaire: LUNDI_2H, jour: 'Jeudi' });
+        const win = monter({ horaire: LUNDI_2P, jour: 'Jeudi' });
         expect(win.obtenirNombrePeriodesSeance('2026-08-27')).toBe(0);
     });
 
     it('A.d la casse du nom de jour ne décide de rien', () => {
-        const win = monter({ horaire: [{ id: 1, jour: 'LUNDI', debut: '08:00', duree: 2 }], jour: 'lundi' });
+        const win = monter({ horaire: [{ id: 1, jour: 'LUNDI', debut: '08:00', nombrePeriodes: 2 }], jour: 'lundi' });
         expect(win.obtenirNombrePeriodesSeance('2026-08-24')).toBe(2);
     });
 
     it('A.e deux séances le même jour s\'ADDITIONNENT (une seule serait un sous-compte)', () => {
         const win = monter({
             horaire: [
-                { id: 1, jour: 'Lundi', debut: '08:00', duree: 2 },
-                { id: 2, jour: 'Lundi', debut: '13:00', duree: 1 }
+                { id: 1, jour: 'Lundi', debut: '08:00', nombrePeriodes: 2 },
+                { id: 2, jour: 'Lundi', debut: '13:00', nombrePeriodes: 1 }
             ],
             jour: 'Lundi'
         });
-        expect(win.obtenirNombrePeriodesSeance('2026-08-24')).toBe(4); // 3 h ÷ 50 min
+        // #540 lot E2 : 3, et non 4. L'ancienne chaîne divisait 3 h par 50 min et
+        // arrondissait à 4 — une période de plus au dénominateur, tous les lundis.
+        expect(win.obtenirNombrePeriodesSeance('2026-08-24')).toBe(3);
     });
 
-    it('A.f une séance écrite en debut/fin, sans `duree`, se mesure quand même', () => {
+    it('A.f une séance qui ne dit PAS ses périodes ne vaut rien, même avec des heures', () => {
+        // ⚠ CAS RETOURNÉ PAR E2, et c'est le cœur du lot. Il vérifiait qu'une séance
+        // écrite en `debut`/`fin` « se mesure quand même » — précisément la mesure qu'on
+        // retire. Les heures ne disent pas les périodes : entre 08:00 et 10:00 il peut y
+        // avoir deux périodes de 50 min et deux pauses, ou autre chose selon le collège.
+        // On ne devine plus ; l'écran Horaire signale la séance à compléter (lot E1).
         const win = monter({ horaire: [{ id: 1, jour: 'Lundi', debut: '08:00', fin: '10:00' }], jour: 'Lundi' });
-        expect(win.obtenirNombrePeriodesSeance('2026-08-24')).toBe(2);
+        expect(win.obtenirNombrePeriodesSeance('2026-08-24')).toBe(0);
     });
 
-    it('A.g forme legacy heureDebut/heureFin — les données réelles en portent encore', () => {
+    it('A.g les HEURES, elles, restent lisibles — pour l\'affichage, pas pour compter', () => {
+        // La mesure du temps d'horloge n'a pas disparu : `obtenirHeuresPrevuesParHoraire`
+        // la fait toujours, et c'est légitime — c'est une durée, pas un décompte de
+        // périodes. E2 sépare les deux grandeurs au lieu de passer de l'une à l'autre.
         const win = monter({ horaire: [{ id: 1, jour: 'Lundi', heureDebut: '08:00', heureFin: '10:00' }], jour: 'Lundi' });
-        expect(win.obtenirNombrePeriodesSeance('2026-08-24')).toBe(2);
+        expect(win.obtenirHeuresPrevuesParHoraire('2026-08-24')).toBe(2);
+        // Mais elle ne fabrique aucune période pour autant.
+        expect(win.obtenirNombrePeriodesSeance('2026-08-24')).toBe(0);
     });
 
     it('A.h une séance illisible ne vaut pas 2 h : elle ne vaut rien', () => {
@@ -191,15 +216,22 @@ describe('#538 · A — la durée vient de l\'horaire, ou elle n\'existe pas', (
         expect(win.obtenirNombrePeriodesSeance('2026-08-24')).toBe(0);
     });
 
-    it('A.i la durée de période configurée est respectée (60 min ≠ 50 min)', () => {
-        const win = monter({ horaire: LUNDI_2H, jour: 'Lundi', dureePeriode: 60 });
-        expect(win.obtenirNombrePeriodesSeance('2026-08-24')).toBe(2);
-        const win75 = monter({ horaire: [{ id: 1, jour: 'Lundi', duree: 4, debut: '08:00' }], jour: 'Lundi', dureePeriode: 60 });
-        expect(win75.obtenirNombrePeriodesSeance('2026-08-24')).toBe(4);
+    it('A.i la durée de période N\'INFLUE PLUS sur le compte des périodes', () => {
+        // ⚠ CAS RETOURNÉ PAR E2. Il vérifiait que le réglage était respecté par la
+        // conversion ; il vérifie maintenant qu'aucune conversion n'a lieu. Le même
+        // horaire rend le même nombre, quel que soit le réglage — c'est la preuve que la
+        // division a bien disparu de cette chaîne.
+        for (const dureePeriode of [50, 55, 60, 75, 90]) {
+            const win = monter({ horaire: LUNDI_2P, jour: 'Lundi', dureePeriode });
+            expect(
+                win.obtenirNombrePeriodesSeance('2026-08-24'),
+                `le réglage ${dureePeriode} min ne doit plus rien changer`
+            ).toBe(2);
+        }
     });
 
     it('A.j date inconnue du calendrier → le jour RÉEL de la date fait foi', () => {
-        const win = monter({ horaire: LUNDI_2H, jour: null });
+        const win = monter({ horaire: LUNDI_2P, jour: null });
         expect(win.obtenirNombrePeriodesSeance('2026-08-24'), '2026-08-24 est un lundi').toBe(2);
         expect(win.obtenirNombrePeriodesSeance('2026-08-27'), '2026-08-27 est un jeudi').toBe(0);
     });
@@ -210,7 +242,7 @@ describe('#538 · A — la durée vient de l\'horaire, ou elle n\'existe pas', (
 describe('#538 · B — une reprise porte l\'horaire du jour REMPLACÉ', () => {
 
     it('B.a vendredi qui reprend un lundi → l\'horaire du lundi s\'applique', () => {
-        const win = monter({ horaire: LUNDI_2H, jour: 'Vendredi', statut: 'reprise', jourRemplace: 'Lundi' });
+        const win = monter({ horaire: LUNDI_2P, jour: 'Vendredi', statut: 'reprise', jourRemplace: 'Lundi' });
         expect(
             win.obtenirNombrePeriodesSeance('2026-08-28'),
             'sans la règle du jour remplacé, seules les dates de REPRISE sortiraient à 0 — ' +
@@ -219,7 +251,7 @@ describe('#538 · B — une reprise porte l\'horaire du jour REMPLACÉ', () => {
     });
 
     it('B.b une reprise SANS jour remplacé retombe sur son jour réel', () => {
-        const win = monter({ horaire: LUNDI_2H, jour: 'Vendredi', statut: 'reprise', jourRemplace: null });
+        const win = monter({ horaire: LUNDI_2P, jour: 'Vendredi', statut: 'reprise', jourRemplace: null });
         expect(win.obtenirNombrePeriodesSeance('2026-08-28')).toBe(0);
     });
 });
@@ -258,9 +290,32 @@ describe('#538 · C — les cinq valeurs métier en dur ne reviennent pas', () =
         ).toBe(false);
     });
 
-    it('C.f obtenirHeuresPrevuesParHoraire est la source unique de la dérivation', () => {
-        const appels = (SRC_PRESENCES.match(/obtenirHeuresPrevuesParHoraire\(/g) || []).length;
-        expect(appels, 'définition + les points où un repli existait auparavant').toBeGreaterThanOrEqual(4);
+    it('C.f la lecture de l\'horaire reste la source unique — en périodes depuis E2', () => {
+        // ⚠ RÉVISÉ PAR #540 LOT E2. Ce cas comptait les appels à
+        // `obtenirHeuresPrevuesParHoraire`, qui était alors le seul chemin vers l'horaire :
+        // on y mesurait des heures, puis on divisait pour obtenir des périodes.
+        //
+        // E2 a séparé les deux grandeurs. `obtenirPeriodesPrevuesParHoraire` lit les
+        // périodes SAISIES, sa sœur mesure toujours les heures d'horloge pour l'affichage,
+        // et plus aucune division ne relie l'une à l'autre. Ce qui compte n'a pas changé :
+        // il n'existe qu'UNE porte vers l'horaire pour chaque grandeur, et le repli à 2
+        // n'est revenu par aucune.
+        const enPeriodes = (SRC_PRESENCES.match(/obtenirPeriodesPrevuesParHoraire\(/g) || []).length;
+        const enHeures = (SRC_PRESENCES.match(/obtenirHeuresPrevuesParHoraire\(/g) || []).length;
+        expect(enPeriodes, 'définition + le repli d\'obtenirNombrePeriodesSeance').toBeGreaterThanOrEqual(2);
+        expect(enHeures, 'définition + les points d\'affichage').toBeGreaterThanOrEqual(3);
+    });
+
+    it('C.g PLUS AUCUNE division ne convertit une durée en périodes (#540 lot E2)', () => {
+        // Le verrou de fond du lot E : une période comprend sa pause, donc aucune durée
+        // d'horloge ne peut rendre un nombre de périodes. Les conversions qui subsistent
+        // dans ce module font l'ALLER-RETOUR sur `heures`, un champ que la saisie écrit
+        // elle-même comme `periodesPresentes × dureePeriode / 60` — même diviseur des deux
+        // côtés, donc valeur d'origine retrouvée quel que soit le réglage.
+        const corps = corpsDe('obtenirNombrePeriodesSeance');
+        expect(corps).not.toMatch(/\*\s*60\s*\)\s*\//);
+        expect(corps).not.toContain('dureePeriode');
+        expect(corps).toContain('obtenirPeriodesPrevuesParHoraire');
     });
 });
 

@@ -44,13 +44,25 @@ describe('Colonnes — codes de séances et périodes attendues', () => {
     });
 
     it('agrège les périodes attendues de toutes les séances du jour (parité obtenirNombrePeriodesSeance)', () => {
+        // ⚠ RÉVISÉ PAR #540 LOT E2 (26 août 2026). Deux des trois colonnes reposaient sur
+        // ce que ce lot retire : la conversion d'une `duree` en périodes, et le repli à 2
+        // quand la séance ne déclarait rien.
+        //
+        // La conversion est fausse — une période comprend sa pause (50 + 10 ici, 55 + 5
+        // ailleurs), donc diviser une durée d'horloge par la durée d'enseignement gonfle
+        // le compte. Et le repli l'est doublement sur une GRILLE IMPRIMABLE : annoncer
+        // deux périodes là où l'horaire n'en dit aucune fait saisir, au crayon, des
+        // absences sur des périodes qui n'existent pas.
+        //
+        // La parité annoncée dans le titre est donc maintenue — c'est bien la même règle
+        // que `obtenirNombrePeriodesSeance` applique désormais : on lit, ou on rend 0.
         const seances = {
             '2026-02-02': [{ numeroSemaine: 3, nombrePeriodes: 2 }, { numeroSemaine: 3, nombrePeriodes: 2 }],
-            '2026-02-05': [{ numeroSemaine: 3, duree: 2 }],   // 2 h × 60 / 55 ≈ 2 périodes
-            '2026-02-09': [{ numeroSemaine: 4 }]              // rien de déclaré → défaut 2
+            '2026-02-05': [{ numeroSemaine: 3, duree: 2 }],   // une durée ne dit pas les périodes
+            '2026-02-09': [{ numeroSemaine: 4 }]              // rien de déclaré → rien d'inventé
         };
         const modele = construire([], seances, [], OPTS);
-        expect(modele.colonnes.map(c => c.periodesAttendues)).toEqual([4, 2, 2]);
+        expect(modele.colonnes.map(c => c.periodesAttendues)).toEqual([4, 0, 0]);
     });
 
     it('exclut les dates sans séances et tolère une séance sans numeroSemaine (code vide, date seule)', () => {

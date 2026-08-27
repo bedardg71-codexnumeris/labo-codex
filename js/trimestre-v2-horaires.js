@@ -34,8 +34,14 @@ function dureePeriodeCourante() {
 }
 
 /**
- * Périodes d'UNE séance, dérivées de ses heures réelles — la même mesure que celle
- * du calcul d'assiduité.
+ * Périodes d'UNE séance : on les LIT, on ne les mesure plus.
+ *
+ * #540 lot E2 (26 août 2026) : cette fonction dérivait les périodes des heures, avec la
+ * même mesure que le calcul d'assiduité — ce qui fermait la divergence entre l'écran et
+ * le calcul (lot C), mais laissait les deux également faux. Une période comprend sa
+ * pause : la division ignorait 10 minutes par période, donc `08:00 → 11:00` rendait 4
+ * là où la réponse est 3. Depuis E1, la séance PORTE son nombre de périodes ; il ne
+ * reste qu'à le lire.
  *
  * #540 lot C (26 août 2026). Trois endroits de ce fichier mesuraient une séance à leur
  * façon, et tous trois se repliaient sur `2` quand ni `nombrePeriodes` ni `duree`
@@ -52,15 +58,8 @@ function dureePeriodeCourante() {
  */
 function periodesDeLaSeance(seance) {
     if (!seance) return 0;
-    if (seance.nombrePeriodes > 0) return seance.nombrePeriodes;
-
-    // Chargée après ce fichier (index.html) mais appelée au runtime : toujours là.
-    // Si elle manquait, 0 — un refus de répondre, pas un repli à 2.
-    if (typeof mesurerDureeSeance !== 'function') return 0;
-
-    const heures = mesurerDureeSeance(seance);
-    if (!(heures > 0)) return 0;
-    return Math.round((heures * 60) / dureePeriodeCourante());
+    const p = parseInt(seance.nombrePeriodes, 10);
+    return p > 0 ? p : 0;
 }
 
 /** Total hebdomadaire d'un horaire, lu à ses séances. 0 si elles ne disent rien. */
@@ -109,13 +108,6 @@ function chargerSeancesV2() {
         conteneur.innerHTML = messageVide;
         return;
     }
-
-    // #540 lot C : `s.duree` est absente des séances du formulaire — ce total valait 0
-    // pour tout horaire créé normalement. On mesure comme le fait l'assiduité.
-    let totalHeures = 0;
-    horaire.forEach(s => {
-        totalHeures += (typeof mesurerDureeSeance === 'function') ? mesurerDureeSeance(s) : 0;
-    });
 
     const joursNoms = { 'Lundi': 1, 'Mardi': 2, 'Mercredi': 3, 'Jeudi': 4, 'Vendredi': 5 };
     const joursInverse = ['', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
