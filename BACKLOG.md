@@ -718,10 +718,20 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   emploient `M` ou `0`, seuls niveaux où les candidates divergent) ; **188 reproduites** par la
   famille `0=0 I=40 D=65 M=75 E=100` ; **0 reproduite par une AUTRE échelle** ; **0 code de niveau
   inconnu**. ⮕ Une seule échelle a circulé — la réparation en bloc est sûre.
-  ⮕ **Réparation écrite, NON exécutée** : `scripts/reparation-542-echelle-orpheline.js`, dry-run par
-  défaut, exige `{ executer: true, sauvegardeFaite: true }`, idempotente, et **revérifie elle-même**
-  que la source reproduit les notes avant d'écrire (refus mesuré au banc si elle ne les reproduit
-  pas). Elle ajoute UNE échelle, ne touche à AUCUNE note et ne modifie AUCUNE évaluation.
+  ✅ **RÉPARATION EXÉCUTÉE le 27 août 2026** (`scripts/reparation-542-echelle-orpheline.js`, après
+  sauvegarde Codex, dry-run relu). Une échelle ajoutée dans `h2026_echellesTemplates` sous l'id
+  `1767389426695`, copie intégrale de `h2026_echellesTemplates[1]` (`parDefaut` NON propagé).
+  **Aucune note touchée, aucune évaluation modifiée.**
+  ⮕ **Oracle avant/après, mesuré par la sonde du lot 0** : niveaux convertibles **1277 → 2807**
+  (+1530) ; `echelleId` introuvable **383 → 44**. Le +1530 est EXACTEMENT ce que le dry-run avait
+  prédit — prédiction et résultat concordent au niveau près.
+  ⏳ **RESTE 44 évaluations `ECHELLE_DEMO`** dans `h2026_evaluationsSauvegardees` (176 niveaux).
+  ⚠ **La décision du 5 août de les « laisser telles quelles » est à REVOIR** : elle avait été prise
+  quand un repli codé en dur masquait le problème (repli retiré par #529). Depuis le lot 1, ces
+  élèves affichent « Dépistage incomplet ». Un `await oracle542('ECHELLE_DEMO')` dirait si le même
+  geste s'applique.
+  ⏳ **ET LA CAUSE RESTE INCONNUE** : l'échelle avait déjà été recréée le 5 août. Tant qu'on ne sait
+  pas ce qui l'a ré-orphelinée, cette réparation peut se défaire.
 
 - [ ] **#543 — Les 55 évaluations dont la note stockée ne se recalcule pas.** Créé le 27 août 2026,
   extrait de #542 (l'oracle les isole ; ce ne sont PAS un problème d'échelle — aucune n'est
