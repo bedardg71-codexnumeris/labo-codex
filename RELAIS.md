@@ -24,6 +24,24 @@
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
 | **Dernière mise à jour** | **27 août 2026, matin** — #542 lot 3 : pas 1 et 2 livrés. Le bump de version reste dû. |
 
+## Les arbitrages de Grégoire, 27 août 2026 — quatre dossiers refermés
+
+| Dossier | Verdict | Effet |
+|---|---|---|
+| **#538** | Les **trois** portes terrain sont conformes — cours ordinaire, **reprise** (le cas critique), et **groupe-cours sans horaire** | **CLOS.** La troisième porte est la seule qu'aucun test ne pouvait trancher : sans horaire, l'application affiche **0 et le dit**, au lieu du `2` inventé |
+| **#534** | Durcir la SEULE spec qui a un manque objectif | **CLOS.** `cours-refonte-rendu.spec.js` attend désormais `window.dbReady` au lieu d'un `waitForTimeout(500)` sans marge. **Quatre** montages, pas deux comme l'item l'annonçait. 4/4 verts en 4,4 s — plus rapide qu'avant |
+| **#533** | L'item du backlog change de numéro (1 fichier) | **Renuméroté #533 → #548.** ⚠ L'arbitrage disait « #540 » : **il n'était plus libre**, pris la veille au soir par l'assiduité. Appliqué à la lettre, il recréait la collision qu'il éteignait |
+| **#542** | « Aucun aspect pertinent n'est traité » est retenue | Les **cinq** descriptions SOLO sont désormais de sa main ou de son accord. Inscrit dans `echelles.js` |
+
+⚠ **LA LEÇON DU #533, ET ELLE VAUT POUR TOUT ARBITRAGE DIFFÉRÉ.** Entre le moment où un
+numéro est tranché et celui où il est appliqué, **le dernier ID a bougé**. C'est le cas
+d'école de `feedback-id-backlog-inscrire-avant-usage`, vu depuis l'autre bout : ce n'est
+plus deux sessions qui prennent le même numéro, c'est une décision qui vieillit d'une
+soirée. ⮕ **Vérifier le dernier ID au moment d'APPLIQUER, jamais celui qu'un document —
+ou une décision — annonce.**
+
+---
+
 ## Ce que la matinée du 27 août a livré
 
 **#542 lot 3, pas 1 et 2** — `4d04dd21`, `750e7c3f`. Le nombre de pas était plafonné à deux

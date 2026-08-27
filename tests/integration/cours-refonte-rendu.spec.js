@@ -45,7 +45,14 @@ test('Chantier C · création route via CoursEntite → ID COURS_* sans période
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    // #534 — ATTENDRE UN ÉTAT, PAS UNE DURÉE (décision de Grégoire, 27 août 2026).
+    // Le `waitForTimeout(500)` qui vivait ici était sans marge par construction :
+    // `page.goto` sur `index.html` coûte 400 à 700 ms en régime normal. La spec
+    // touchait donc `window.db` et `window.CoursEntite` avant que la base soit
+    // prête, une fois sur deux, selon la charge de la machine. La spec voisine
+    // `planif-tout-voir-loupe` attendait `dbReady` depuis toujours : l'asymétrie
+    // n'était pas un choix, c'était un oubli.
+    await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
 
     const resultat = await page.evaluate(async () => {
         for (const dep of ['CoursEntite', 'sauvegarderCoursV2', 'nouveauCoursV2', 'db']) {
@@ -102,7 +109,14 @@ test('Chantier C · édition d\'un cours legacy → ID préservé + champs legac
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    // #534 — ATTENDRE UN ÉTAT, PAS UNE DURÉE (décision de Grégoire, 27 août 2026).
+    // Le `waitForTimeout(500)` qui vivait ici était sans marge par construction :
+    // `page.goto` sur `index.html` coûte 400 à 700 ms en régime normal. La spec
+    // touchait donc `window.db` et `window.CoursEntite` avant que la base soit
+    // prête, une fois sur deux, selon la charge de la machine. La spec voisine
+    // `planif-tout-voir-loupe` attendait `dbReady` depuis toujours : l'asymétrie
+    // n'était pas un choix, c'était un oubli.
+    await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
 
     const resultat = await page.evaluate(async () => {
         for (const dep of ['CoursEntite', 'sauvegarderCoursV2', 'changerCoursSelectionneV2', 'db']) {
@@ -177,7 +191,14 @@ test('Chantier E · reprendre une description ne crée aucun doublon de cours (b
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    // #534 — ATTENDRE UN ÉTAT, PAS UNE DURÉE (décision de Grégoire, 27 août 2026).
+    // Le `waitForTimeout(500)` qui vivait ici était sans marge par construction :
+    // `page.goto` sur `index.html` coûte 400 à 700 ms en régime normal. La spec
+    // touchait donc `window.db` et `window.CoursEntite` avant que la base soit
+    // prête, une fois sur deux, selon la charge de la machine. La spec voisine
+    // `planif-tout-voir-loupe` attendait `dbReady` depuis toujours : l'asymétrie
+    // n'était pas un choix, c'était un oubli.
+    await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
 
     const resultat = await page.evaluate(async () => {
         for (const dep of ['reprendreCoursDansTrimestreActif', 'GroupeCoursEntite', 'obtenirTrimestreActif', 'db']) {
@@ -224,7 +245,14 @@ test('Chantier E · reprendre une description déjà reprise est un no-op (pas d
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    // #534 — ATTENDRE UN ÉTAT, PAS UNE DURÉE (décision de Grégoire, 27 août 2026).
+    // Le `waitForTimeout(500)` qui vivait ici était sans marge par construction :
+    // `page.goto` sur `index.html` coûte 400 à 700 ms en régime normal. La spec
+    // touchait donc `window.db` et `window.CoursEntite` avant que la base soit
+    // prête, une fois sur deux, selon la charge de la machine. La spec voisine
+    // `planif-tout-voir-loupe` attendait `dbReady` depuis toujours : l'asymétrie
+    // n'était pas un choix, c'était un oubli.
+    await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
 
     const resultat = await page.evaluate(async () => {
         for (const dep of ['reprendreCoursDansTrimestreActif', 'GroupeCoursEntite', 'db']) {
