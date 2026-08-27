@@ -25,6 +25,24 @@ VERT='\033[0;32m'
 GRIS='\033[0;90m'
 RAZ='\033[0m'
 
+# === Contrôle 0 : anti-cache (#547) ===
+#
+# AVANT la Défense J, et avant toute sortie anticipée : le contrôle de sécurité
+# ci-dessous filtre sur '*.js' '*.html' et sort tôt si ce lot est vide — un
+# commit qui ne touche que `styles.css` passerait donc à côté de l'anti-cache.
+# L'ordre n'est pas cosmétique : c'est ce qui rend le contrôle applicable à
+# TOUS les commits.
+#
+# Le script ne corrige rien, il refuse. Fail-open s'il n'y a pas de node :
+# un hook inapplicable se fait contourner au lieu de servir (même raison que
+# le fail-open WebKit du pre-push).
+if command -v node >/dev/null 2>&1; then
+    RACINE_DEPOT=$(git rev-parse --show-toplevel 2>/dev/null || echo '.')
+    if ! node "$RACINE_DEPOT/scripts/verifier-anticache-stage.mjs"; then
+        exit 1
+    fi
+fi
+
 # Diff staged côté ajouts uniquement, sur les fichiers JS et HTML.
 DIFF=$(git diff --cached --unified=2 --diff-filter=AM -- '*.js' '*.html' 2>/dev/null || echo '')
 

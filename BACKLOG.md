@@ -965,6 +965,39 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   chantier qui en modifiait deux. **La piste (a), un contrôle qui SIGNALE au pre-commit, reste
   la seule compatible avec sa manière de travailler.**
 
+  ✅ **PISTE (a) LIVRÉE le 27 août 2026 — le contrôle au pre-commit.**
+  `scripts/verifier-anticache-stage.mjs` (neuf) + son appel dans `scripts/hooks/pre-commit`,
+  placé **AVANT** la sortie anticipée de la Défense J — qui filtre sur `'*.js' '*.html'` et
+  laisserait passer un commit de `styles.css` seul, précisément un des quatre oublis.
+  ⮕ **Le repère est HEAD, pas la release précédente.** C'est ce qui répond à la CINQUIÈME
+  DONNÉE ci-dessus : une fois le `?v=` bumpé dans le cycle, la sentinelle est satisfaite pour
+  toutes les modifications suivantes. Comparé à HEAD, chaque commit qui touche le fichier doit
+  poser une URL neuve — le cas `js/profil-etudiant-calculs.js`, parti trois fois sous le même
+  `c`, serait refusé.
+  ⮕ **Il signale et refuse, il n'écrit jamais.** Le geste proposé dans le message est
+  d'incrémenter la LETTRE du suffixe, qui ne touche pas `version.json` : sûr même avec
+  l'application ouverte en `file://`. Échappatoire documentée pour le cas exceptionnel,
+  `LABO_ANTICACHE_SKIP=1 git commit` — jamais `--no-verify`.
+  🔧 **UN TROU TROUVÉ EN MESURANT.** Le motif relevait **185 références sur 188**. Les trois
+  manquantes étaient les bibliothèques vendored, versionnées par un numéro **à points** —
+  `libs/pdf.min.js?v=3.11.174`, `libs/jszip.min.js`, `libs/html2canvas.min.js` — invisibles à
+  une classe `[A-Za-z0-9]`. Motif élargi, **188/188**.
+  ⮕ **CHOIX ASSUMÉ, PAS UN OUBLI** : la sentinelle post-commit n'est **pas** étendue à `libs/`.
+  Son second invariant — « le suffixe porte la date du build » — n'a aucun sens sur un numéro
+  de version de bibliothèque, et l'y étendre demanderait deux régimes de lecture dans le même
+  test. Le risque est couvert au commit, là où il naît.
+  ✅ **Sentinelle** `tests/unit/sentinelle-547-anticache-precommit.test.js` — **17 cas**,
+  **6 break-tests rouges vérifiés**, restauration confirmée par `diff -q`. Plus **6 cas réels**
+  joués dans un dépôt git jetable (refus sans bump · refus `styles.css` seul · passage avec
+  bump · documentation silencieuse · échappatoire · fichier neuf) : l'index du dépôt partagé
+  n'a pas été touché pour éprouver le hook. **Coût mesuré : ~40 ms** pour deux lectures d'un
+  `index.html` de 1 Mo.
+  ⏳ **POURQUOI L'ITEM RESTE OUVERT** : le volet `release.mjs` — le repère à UN commit d'écart
+  de la sentinelle, et le `~1` pressenti plus haut. Ce contrôle rappelle au bon moment ; il ne
+  corrige pas l'angle mort du script de release, qui ne voit structurellement pas les fichiers
+  commités EN MÊME TEMPS qu'un bump. À faire à froid, avec un test qui reproduit le cas
+  « release commitée avec du code ».
+
 - [ ] **#543 — Les 55 évaluations dont la note stockée ne se recalcule pas.** Créé le 26 août 2026 (soirée),
   extrait de #542 (l'oracle les isole ; ce ne sont PAS un problème d'échelle — aucune n'est
   reproduite par une échelle différente, aucune ne porte de code de niveau inconnu). **Deux causes
