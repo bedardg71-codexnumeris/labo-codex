@@ -175,7 +175,9 @@ La consigne autorisait deux pas ; deux ont été faits, et le troisième n'a pas
 |---|---|---|
 | **1** | ✅ | `situerPourcentageDansEchelle(pourcentage, echelle)` — `profil-etudiant-helpers.js`. Première plage contenante gagne · hors plage → `null`, sans repli « plus proche » · borne vide ≠ borne zéro. 11 tests, 4 break-tests rouges. |
 | **2** | ✅ | `interpreterNiveauAtteint(niveau)` — même fichier. Étiquette SOLO présente → sa description ; absente → **le nom du niveau, et l'absence dite**. Les 4 descriptions rapatriées dans `NIVEAUX_SOLO_ECHELLE` (`echelles.js`). 9 tests, 4 break-tests rouges. |
-| **3** | ⏳ | Brancher, et retirer les quatre descriptions en dur + la borne `0.85`. **Pas entamé.** |
+| **3a** | ✅ | `obtenirEchelleResolue` — la résolution d'une échelle séparée de sa réduction en table. Refactor no-op, 11 tests, 4 break-tests rouges. |
+| **3b** | ✅ | **C'est la PRATIQUE qui dit dans quoi sa note globale se lit** (correction de Grégoire). `obtenirEchelleNoteGlobale(da)` au contrat + les trois pratiques + le helper `obtenirEchelleCommuneDesEvaluations`. 11 tests. |
+| **3c** | ⏳ | Brancher, et retirer `interpreterScoreIDME`, les **deux** ternaires `pct >= 85 ? …` et les bornes `0.85`. **Pas entamé.** |
 | **4** | ⏳ | Supprimer `obtenirNiveauSOLO()` (`trimestres.js`). |
 | **5** | ⏳ | Trancher le devenir des seuils `idme.*`. B ne leur laisse aucun rôle de repli. |
 
@@ -186,7 +188,22 @@ mélanger au pas 2 aurait rendu impossible de dire lequel des deux a changé un
 comportement. **Playwright n'a donc rien de neuf à observer pour l'instant ; il en aura au
 pas 3.**
 
-⏳ **DÛ PAR GRÉGOIRE avant le pas 3** : valider la description de « préstructurel » —
+🔧 **UN `ReferenceError` LATENT TROUVÉ ET CORRIGÉ EN CHEMIN (27 août).** Le repli de
+`obtenirPratiqueActuelle` (`profil-etudiant-helpers.js`) instanciait
+**`PratiquePANMaitrise`** — une classe qui n'existe nulle part : elle s'appelle
+`PratiquePANStandards`. Ce n'est PAS du code mort : `obtenirPratiqueParId` rend `null`
+quand une pratique configurable a été supprimée, ou quand sa construction a levé et que le
+`catch` de `pratique-registre.js` l'a rattrapée — le repli prend alors la main et fait
+tomber TOUT le profil de l'élève.
+⮕ **Il bloquait le pas 3c**, qui doit passer par `obtenirPratiqueActuelle()` pour demander
+son échelle à la pratique. D'où sa correction ici plutôt qu'une inscription au backlog.
+⮕ **Trouvé par un test, pas par une lecture** : `new w.PratiquePANMaitrise()` a échoué
+dans la sentinelle du pas 3b. J'avais lu cette fonction deux fois sans voir le nom.
+Reproduit (registre stubbé à `null` → « ReferenceError : PratiquePANMaitrise is not
+defined ») **avant** d'être corrigé. Verrouillé par
+`tests/unit/sentinelle-542-repli-pratique-actuelle.test.js`, break-test rouge vérifié.
+
+⏳ ~~**DÛ PAR GRÉGOIRE avant le pas 3**~~ ✅ **FAIT le 27 août** : la description de « préstructurel » —
 **« Aucun aspect pertinent n'est traité »**. Seul texte écrit à neuf de tout le lot :
 l'ancien code n'en produisait que quatre pour cinq niveaux SOLO. C'est du vocabulaire
 pédagogique, pas de la mécanique.

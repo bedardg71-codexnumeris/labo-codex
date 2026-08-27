@@ -444,7 +444,7 @@ function obtenirIdsProductionsEvaluables(productions) {
 
 /**
  * Obtient l'instance de la pratique actuelle configurée
- * @returns {Object} - Instance de la pratique (PratiquePANMaitrise ou PratiqueSommative)
+ * @returns {Object} - Instance de la pratique (PratiquePANStandards ou PratiqueSommative)
  */
 function obtenirPratiqueActuelle() {
     // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
@@ -463,11 +463,30 @@ function obtenirPratiqueActuelle() {
     }
 
     // Fallback : créer une instance directement (id déjà canonique).
+    //
+    // ⚠⚠ LE DÉFAUT CORRIGÉ ICI : CE REPLI LEVAIT UN `ReferenceError` (#542
+    // lot 3, 27 août 2026). Il instanciait `PratiquePANMaitrise`, une classe qui
+    // N'EXISTE NULLE PART dans le dépôt — la classe s'appelle
+    // `PratiquePANStandards` (`js/pratiques/pratique-pan-standards.js:75`). Le
+    // nom fautif ne vivait qu'ici et dans le JSDoc juste au-dessus.
+    //
+    // ⮕ IL EST ATTEIGNABLE, ce n'est pas du code mort. `obtenirPratiqueParId`
+    // rend `null` dans deux cas réels : la pratique configurable a été
+    // supprimée, ou sa construction a levé et a été rattrapée par le `catch` de
+    // `pratique-registre.js`. Le repli prenait alors la main et faisait tomber
+    // TOUT le profil de l'élève.
+    //
+    // ⮕ REPRODUIT AVANT D'ÊTRE CORRIGÉ, pas déduit de la lecture : un registre
+    // stubbé à `null` rend « ReferenceError : PratiquePANMaitrise is not
+    // defined ». Trouvé en écrivant le pas 3b — le nom de la classe ne
+    // correspondait pas à ce que le test attendait.
+    //
+    // Verrouillé par `tests/unit/sentinelle-542-repli-pratique-actuelle.test.js`.
     if (pratiqueId === 'sommative') {
         return new PratiqueSommative();
     } else {
         // Standards (et toutes ses variantes normalisées) par défaut.
-        return new PratiquePANMaitrise();
+        return new PratiquePANStandards();
     }
 }
 
