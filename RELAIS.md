@@ -12,16 +12,107 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** — tout y est. Aucun travail en avance ailleurs. |
-| **Version** | **1.100.1** — build `0826-1312` (#532, livré par une session parallèle : l'alerte d'horaire des présences) |
+| **Version** | **1.101.1** — build `0826-1658`. ⏳ **BUMP DÛ** : Grégoire a eu l'application ouverte en `file://` toute la soirée du 26, et la règle du projet interdit de bumper le build pendant une session ouverte. Les `?v=` ont donc été bumpés **à la main, fichier par fichier, à chaque lot** — la sentinelle anti-cache est verte. Le bump de version reste à faire au prochain démarrage. |
 | **Version précédente** | **1.100.0** — la session du 25-26 a livré 16 items depuis 1.99.0 |
-| **Travail en avance sur `main`** | **AUCUN.** `claude/fusion-24-fonctions-dupliquer-qrop3b` (#476) est **FUSIONNÉE** le 26 août — ses 11 arbitrages étaient déjà rendus depuis le 24, seule la fusion manquait. |
+| **Travail en avance sur `main`** | **OUI — plusieurs commits non poussés au soir du 26 août.** Tout est sur `main`, rien sur une branche. Voir « Ce que la soirée du 26 a livré » ci-dessous. |
 | **Suite Playwright** | baseline à **1 seul échec connu** (contre 8 avant #495) : `productions-ajout-refus-garde-340` = **#530**, un vrai bug, pas du bruit. |
 | ⚠ **AVANT TOUTE SUITE PLAYWRIGHT** | **fermer GitHub Desktop.** Les specs lisent l'arbre de travail en direct ; une commande git lancée pendant la suite change les fichiers sous leurs pieds et fait rougir des specs au hasard. Trouvé le 26 août (#523), règle versée au skill `portes-terrain`. |
 | ⚠ **LE CLONE DE GRÉGOIRE EST L'ARBRE DE TRAVAIL** | `/Users/kuekatsheu/Documents/GitHub/Monitorage_v6` sert à la fois de dépôt de travail et de source `file://` pour son app. Il voit les modifications dès qu'il recharge, **avant tout push** — et peut donc tomber sur un état intermédiaire. Le `git pull` des portes terrain lui est inutile. |
 | 📐 **CHANTIER MAJEUR EN ATTENTE** | **#529 — sortir SRPNF et IDME du code.** Session DÉDIÉE (décision Grégoire, 26 août). Sa règle : « rien ne doit être codé en dur, mais l'échelle IDME peut être seedée ». Audit : `Rapports/AUDIT-srpnf-code-en-dur-2026-08-26.md`. |
 | ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE** | **#427** (refermer l'accès public) et **#508** (l'avis d'accueil qui l'annonce). Fiche opératoire prête : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`. **Dû par Grégoire** : la liste nominale des personnes à inviter et les trois noms Cloudflare — personne ne peut les préparer à sa place. |
 | ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. ⮕ **ET C'EST ARRIVÉ UNE SECONDE FOIS LE MÊME JOUR, dans l'autre sens.** Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les `BACKLOG.md` et `SESSION.md` de la session « présences » — l'inscription de l'item **#538** et la renumérotation **#534 → #537** vivent donc dans un commit qui parle d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc non réécrit. **Deux avertissements en un jour : sur ce dépôt, `git add` par chemins explicites n'est pas une préférence, c'est la seule méthode qui tienne.** |
-| **Dernière mise à jour** | **26 août 2026, fin de session (20e cycle)** — 1.100.1 en ligne, arbre propre, rien en avance |
+| ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit trois fois en deux jours, sur trois sessions** : un fichier modifié dont le `?v=` ne suit pas. Le réflexe à prendre — vérifier `sentinelle-anticache-fichiers-modifies` AVANT de committer, pas après. |
+| **Dernière mise à jour** | **26 août 2026, fin de soirée (21e cycle)** — #540 clos (5 lots), #541 livré, #542 en cours par une session encore active |
+
+## Ce que la soirée du 26 août a livré (21e cycle)
+
+**Trois chantiers, trois sessions, tout sur `main`.**
+
+### #540 — CLOS. L'assiduité comptait des périodes qui n'existaient pas.
+
+Parti d'une capture de Grégoire : « le nombre d'heures de cours par semaine n'est pas
+dans les formulaires ». L'audit a montré l'inverse — il y était, dérivé et jamais
+vérifié — puis a découvert bien pire en chemin.
+
+| Lot | Ce qu'il a fait |
+|---|---|
+| **A** | La pondération devient obligatoire (astérisque, refus dit), normalisation vers « 2-2-3 ». **Un export orphelin trouvé** : `proposerHeuresEnseignementDepuisPonderation` n'a JAMAIS fonctionné — jamais exportée sur `window`, le dispatcher ne la trouvait pas. |
+| **B** | Le `× 15 semaines` en dur retiré : les semaines se comptent au calendrier. Un 2-2-3 sur onze semaines vaut 44 h, pas 60. |
+| **C** | L'écran Horaire cesse d'afficher `nbSeances × periodesParSeance` et affiche ce qu'il compte. Les replis à `2` taris. |
+| **E1** | **Chaque séance porte SON nombre de périodes**, saisi et jamais déduit. Le champ global disparaît. |
+| **E2** | **Plus aucune division** ne convertit une durée en périodes. Les deux migrations cessent de deviner. |
+| **E3** | Le réglage « Durée d'une période » disparaît. La saisie n'écrit plus le champ `heures`. |
+| **D** | L'horaire est confronté au devis du cours, et le dit. Jamais bloquant. |
+
+⮕ **CE QUE GRÉGOIRE A APPORTÉ, ET QUI N'ÉTAIT NULLE PART DANS LE CODE** : « une heure
+qui dure 60 minutes, c'est une période de 50 minutes plus 10 minutes de pause. Dans
+d'autres collèges, 55 plus 5. » Tout le dépôt divisait un temps d'horloge par la seule
+durée d'enseignement : `08:00 → 11:00` rendait **4 périodes au lieu de 3**, et un bloc
+de quatre heures — cas courant en littérature — en comptait **5 pour 4**. L'erreur
+croissait avec la durée, et ce nombre EST le dénominateur de l'assiduité : **un élève
+pouvait être compté absent d'une période qui n'existe pas.**
+
+⮕ Puis sa question a tranché le chantier : « je me demande si la durée de la période est
+pertinente et si elle ne crée pas davantage de confusion. » L'audit lui a donné raison —
+ce champ n'existait que comme **pont entre deux unités**, et un ratio est invariant par
+unité. Il ne servait pas à calculer l'assiduité, seulement à réconcilier deux modes de
+saisie.
+
+⮕ **EN UNE PHRASE** : l'application ne convertit plus jamais une durée en périodes, parce
+qu'elle ne le peut pas. Elle demande les deux, et les confronte.
+
+### ⚠ CE QUE #540 LAISSE, ET QUI DEMANDE UNE DÉCISION
+
+- **Les `nombrePeriodes` déjà écrits en base par les migrations** peuvent être gonflés.
+  Elles ont tourné à chaque démarrage pendant des mois. Irréparables sans savoir ce que
+  `duree` signifiait — personne ne peut le dire après coup.
+- **Les horaires existants de Grégoire** ont des séances sans `nombrePeriodes`. Le
+  chargement pré-remplit avec `periodesParSeance` (sa propre déclaration, pas une
+  déduction), mais il doit **ouvrir chaque horaire et enregistrer** pour que ce soit
+  écrit sur les séances.
+- **Cinq `alert()`** subsistent dans `trimestre-v2-cours.js`, sur d'autres gestes
+  qu'« Enregistrer ». Et `mettreAJourLigne` (`saisie-presences.js`) est **du code mort** :
+  elle lit un champ `heures_${da}` que plus personne ne génère.
+
+### #541 — le dépistage classait TOUT LE MONDE en « Étendu »
+
+Livré et poussé (`69ce1483`) par la session « audit dépistage ».
+`obtenirNiveauIDMEDepuisPourcentage` recevait un pourcentage 0-100 et le comparait à des
+seuils 0-1 : **tout critère au-dessus de 1 % ressortait « Étendu »**, y compris à 12 %.
+Le bloc « Forces et défis » ne pouvait afficher que des forces exceptionnelles, pour tout
+le monde. Défaut antérieur à #529, au moins depuis le 17 mai. Aucun test ne l'exerçait.
+
+Plan versé : `plans de travail/PLAN-SOLO-echelle-et-depistage.md` (`43cc4faa`), six lots.
+
+### #542 — EN COURS, session encore active au moment d'écrire
+
+Lots 0 et 1 livrés, oracle écrit. **Lots 2-3 en cours.** Ses fichiers :
+`js/interventions.js`, `js/profil-etudiant-calculs.js`,
+`js/profil-etudiant-sections-affichage.js`, `js/echelles.js`.
+
+⮕ **LA DÉCOUVERTE QUI DÉPASSE LES TROIS CHANTIERS, et qui n'est de personne :**
+
+> **383 évaluations sur 670 — 57 % des niveaux — désignent une échelle introuvable**,
+> dont 339 sous le seul id `1767389426695` en H2026. Les valeurs survivent sous deux
+> autres ids. Même patron que les grilles désappariées du 5 août.
+
+**Le dépistage de Grégoire tourne aujourd'hui sur moins de la moitié de ses données, sans
+le dire.** Antérieur à tous les chantiers de la soirée. Aucune réparation engagée : c'est
+une décision sur ses données réelles, avec sauvegarde et dry-run. L'oracle du 26 sert à
+identifier laquelle avant d'y toucher.
+
+⮕ **Prochain ID libre : #543.** Trois collisions d'ID ont été évitées de justesse ce soir
+en inscrivant l'item au backlog AVANT de l'employer.
+
+### Défauts trouvés et NON corrigés (inscrits, pas oubliés)
+
+- `interventions.js:221` — `seuils.acceptable` est `undefined` (la clé vit sous
+  `interpretation.acceptable`) : `score < undefined` est toujours faux, donc **la liste
+  des défis communs d'un sous-groupe est toujours vide**.
+- `portfolio.js:543` et `:554` — un quatrième repli IDME en dur, dont la clé de lecture
+  `echellesPerformance` n'est **jamais écrite** nulle part : le repli est toujours actif.
+
+---
 
 ## Ce que le cycle a livré
 
