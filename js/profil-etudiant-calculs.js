@@ -54,7 +54,50 @@
  *   résolue que s'il n'y a AUCUNE ambiguïté (une seule échelle disponible).
  * @returns {Object|null} - { <code>: score 0-1 }, ou null si rien d'exploitable
  */
+/**
+ * Résout une échelle EMBARQUÉE dans une pratique configurable.
+ *
+ * ⚠⚠ LE DÉFAUT CORRIGÉ ICI : LE DÉPISTAGE ÉTAIT MUET SUR TOUTE ÉVALUATION
+ * PRODUITE AVEC UNE PRATIQUE CONFIGURABLE (#542 lot 1, défaut A2 du plan SOLO).
+ *
+ * Une évaluation faite sous une pratique configurable enregistre
+ * `echelleId = 'pratique-<id>'` (`evaluation-chargement.js:251`,
+ * `_resoudreEchellePratique`). Or son échelle ne vit PAS dans
+ * `echellesTemplates` : elle est embarquée dans
+ * `pratiquesConfigurables[].config.echelle`. `obtenirTableConversionNiveaux` ne
+ * lisait que le premier gisement — donc, pour ces évaluations, elle rendait
+ * `null`, tous les scores valaient `null`, et le profil affichait : aucun défi,
+ * pattern « Stable », RàI calculé sur P seul. Sans message.
+ *
+ * ⮕ ON CONVERGE, ON N'INVENTE PAS. Ce chemin de résolution existe déjà, mot
+ * pour mot, dans `evaluation-calcul.js:526` (`calculerNote`). Le dépistage
+ * lisait simplement l'autre moitié du monde. Aucune valeur n'est fabriquée :
+ * si la pratique ou son échelle a disparu, on rend `null`, comme avant.
+ *
+ * @param {string} echelleId - identifiant de la forme `pratique-<id>`
+ * @returns {Object|null} l'échelle embarquée, ou null si non résolue
+ */
+function _echelleDePratiqueConfigurable(echelleId) {
+    var pratiqueId = String(echelleId).slice('pratique-'.length);
+    if (!pratiqueId) return null;
+    var pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
+    if (!Array.isArray(pratiques)) return null;
+    var pratique = pratiques.find(function (p) { return p && p.id === pratiqueId; });
+    if (!pratique || !pratique.config || !pratique.config.echelle) return null;
+    var echelle = pratique.config.echelle;
+    if (!Array.isArray(echelle.niveaux) || echelle.niveaux.length === 0) return null;
+    return echelle;
+}
+
 function obtenirTableConversionNiveaux(echelleId = null) {
+    // #542 A2 — les échelles de pratique AVANT tout : elles ne vivent pas dans
+    // `echellesTemplates`, et le garde-fou « aucune échelle template » plus bas
+    // les aurait écartées d'entrée sur un trimestre qui n'en compte aucune.
+    if (echelleId && String(echelleId).indexOf('pratique-') === 0) {
+        var echellePratique = _echelleDePratiqueConfigurable(echelleId);
+        return echellePratique ? _tableDepuisNiveaux(echellePratique.niveaux) : null;
+    }
+
     var echelles = db.getSync(cle('echellesTemplates'), []) || [];
     if (!Array.isArray(echelles) || echelles.length === 0) return null;
 
@@ -75,8 +118,29 @@ function obtenirTableConversionNiveaux(echelleId = null) {
 
     if (!echelle || !Array.isArray(echelle.niveaux)) return null;
 
+    return _tableDepuisNiveaux(echelle.niveaux);
+}
+
+/**
+ * Construit la table `{ <code>: score 0-1 }` à partir des niveaux d'une échelle.
+ *
+ * Extrait le 27 août 2026 (#542 A2) pour que les DEUX gisements d'échelles —
+ * `echellesTemplates` et l'échelle embarquée d'une pratique configurable —
+ * produisent leur table par le MÊME code. Deux constructions parallèles auraient
+ * fini par diverger, ce qui est exactement le patron que #529 a eu à défaire
+ * (deux replis aux valeurs différentes selon le chemin emprunté).
+ *
+ * Un niveau SANS `valeurCalcul` exploitable est volontairement absent de la
+ * table : il ne produit pas de note, et le critère sort du calcul. C'est le
+ * mécanisme « jugement suspendu », déjà en place de bout en bout.
+ *
+ * @param {Array} niveaux - niveaux de l'échelle
+ * @returns {Object|null} table de conversion, ou null si aucun niveau exploitable
+ */
+function _tableDepuisNiveaux(niveaux) {
+    if (!Array.isArray(niveaux)) return null;
     var table = {};
-    echelle.niveaux.forEach(function (niveau) {
+    niveaux.forEach(function (niveau) {
         if (!niveau || niveau.code == null) return;
         var code = String(niveau.code).trim().toUpperCase();
         if (!code) return;
@@ -141,6 +205,91 @@ function tableConversionPourEvaluation(evaluation, cache) {
     var table = obtenirTableConversionNiveaux(id || null);
     if (cache) cache.set(id, table);
     return table;
+}
+
+/**
+ * Dit si le dépistage a pu convertir les évaluations d'un élève — et sinon,
+ * POURQUOI.
+ *
+ * ⚠⚠ CE QUE CETTE FONCTION EXISTE POUR EMPÊCHER (#542 lot 1, défaut A3 du plan
+ * SOLO). Quand la table de conversion n'est pas résolue, tous les scores valent
+ * `null`, donc aucun défi n'est détecté, donc le pattern rendu est « Stable » et
+ * le RàI se calcule sur P seul. **Un dépistage muet qui affiche « Stable » est
+ * pire qu'un dépistage qui s'avoue aveugle** : le premier ment par omission, et
+ * l'enseignant n'a aucun moyen de le savoir.
+ *
+ * Le choix de #529 — ne pas DEVINER l'échelle quand plusieurs existent — reste
+ * juste et n'est pas rouvert ici. C'est son SILENCE qu'on corrige, pas lui.
+ *
+ * LECTURE SEULE, et volontairement sans `console.warn` : un avertissement de
+ * console n'atteint pas Grégoire devant son écran. Le rendu est destiné à
+ * l'affichage.
+ *
+ * @param {string} da - Numéro de DA
+ * @returns {Object|null} `null` si tout est convertible (le cas normal, aucun
+ *   message à afficher) ; sinon
+ *   `{ total, nonConverties, raisons: {pratiqueIntrouvable, echelleIntrouvable,
+ *      echelleNonDesignee}, message }`
+ */
+function diagnostiquerConversionNiveaux(da) {
+    var evaluations = (obtenirDonneesSelonMode('evaluationsSauvegardees') || [])
+        .filter(function (e) {
+            // Mêmes exclusions que les calculs : les évaluations remplacées
+            // portent l'état d'AVANT une reprise, les compter ferait remonter
+            // un modèle périmé.
+            return e && e.etudiantDA === da && e.retroactionFinale && !e.remplaceeParId;
+        });
+
+    if (evaluations.length === 0) return null;
+
+    var cache = new Map();
+    var nonConverties = 0;
+    var raisons = { pratiqueIntrouvable: 0, echelleIntrouvable: 0, echelleNonDesignee: 0 };
+
+    evaluations.forEach(function (evaluation) {
+        if (tableConversionPourEvaluation(evaluation, cache)) return;
+        nonConverties++;
+        var id = evaluation.echelleId || '';
+        if (id.indexOf('pratique-') === 0) raisons.pratiqueIntrouvable++;
+        else if (id) raisons.echelleIntrouvable++;
+        else raisons.echelleNonDesignee++;
+    });
+
+    if (nonConverties === 0) return null;
+
+    // Le message NOMME la cause, parce qu'elles ne se réparent pas pareil :
+    // une échelle non désignée se règle en rouvrant l'évaluation, une échelle
+    // introuvable se règle en la recréant (cf. la réparation du 5 août).
+    var causes = [];
+    if (raisons.echelleNonDesignee > 0) {
+        causes.push(raisons.echelleNonDesignee + ' ne désigne'
+            + (raisons.echelleNonDesignee > 1 ? 'nt' : '')
+            + ' aucune échelle, et ce trimestre en compte plusieurs');
+    }
+    if (raisons.echelleIntrouvable > 0) {
+        causes.push(raisons.echelleIntrouvable + ' désigne'
+            + (raisons.echelleIntrouvable > 1 ? 'nt' : '')
+            + ' une échelle introuvable dans ce trimestre');
+    }
+    if (raisons.pratiqueIntrouvable > 0) {
+        causes.push(raisons.pratiqueIntrouvable + ' désigne'
+            + (raisons.pratiqueIntrouvable > 1 ? 'nt' : '')
+            + ' l\'échelle d\'une pratique qui n\'existe plus');
+    }
+
+    var toutes = (nonConverties === evaluations.length);
+    return {
+        total: evaluations.length,
+        nonConverties: nonConverties,
+        raisons: raisons,
+        message: (toutes
+            ? 'Aucune des ' + evaluations.length + ' évaluations de cet élève n\'a pu être convertie'
+            : nonConverties + ' des ' + evaluations.length + ' évaluations de cet élève n\'ont pas pu être converties')
+            + ' : ' + causes.join(' ; ') + '. '
+            + (toutes
+                ? 'Les critères, les défis et le pattern ci-dessous ne reposent donc sur AUCUNE donnée de performance — ne les lis pas comme un portrait de l\'élève.'
+                : 'Le portrait ci-dessous est calculé sur les autres seulement.')
+    };
 }
 
 /**
@@ -1453,6 +1602,8 @@ function determinerCibleIntervention(da) {
 // Exporter les 14 fonctions vers window (décision étape 1 b — convention systématique)
 window.obtenirTableConversionNiveaux = obtenirTableConversionNiveaux;
 window.convertirNiveauEnScore = convertirNiveauEnScore;
+// #542 A3 — consommée par `profil-etudiant-sections-affichage.js` (carte RàI).
+window.diagnostiquerConversionNiveaux = diagnostiquerConversionNiveaux;
 window.calculerMoyennesCriteres = calculerMoyennesCriteres;
 window.calculerMoyennesCriteresRecents = calculerMoyennesCriteresRecents;
 window.calculerIPB = calculerIPB;

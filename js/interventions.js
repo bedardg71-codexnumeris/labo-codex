@@ -211,14 +211,47 @@ function analyserSousGroupe(dasEtudiants) {
             }
         }
 
-        // Identifier les défis SRPNF (< 75% selon seuils par défaut)
-        const seuils = chargerSeuilsInterpretation();
+        // Identifier les défis parmi les critères.
+        //
+        // ⚠⚠ LE DÉFAUT CORRIGÉ ICI : `defisCommuns` ÉTAIT TOUJOURS VIDE (#542
+        // lot 1, défaut A4 du plan SOLO). Deux causes indépendantes, qui
+        // produisaient le MÊME silence — l'une masquait l'autre.
+        //
+        // CAUSE 1 — une comparaison à `undefined`. La ligne lisait
+        // `seuils.acceptable`. Cette clé n'existe pas à la racine : elle vit
+        // sous `interpretation.acceptable` (`interpretation-config.js:55`).
+        // `score < undefined` est TOUJOURS faux — aucune erreur, aucun message,
+        // et un tableau de bord qui répond « aucun défi commun » pour un groupe
+        // entier. Même famille que #541 : une comparaison qui ne lève rien et
+        // rend un verdict rassurant.
+        //
+        // CAUSE 2 — deux unités. `obtenirPerformancesSRPNF` rend des moyennes de
+        // POURCENTAGES (0-100, cf. `convertirNiveauEnPourcentage`) ; les seuils
+        // valent 0-1. Corriger la seule clé n'aurait donc rien débloqué :
+        // `32 < 0.70` est faux, exactement comme `32 < undefined`. On ramène le
+        // score sur l'échelle des seuils, même geste qu'en #541 — et AUCUNE
+        // heuristique du genre « si c'est petit c'est déjà 0-1 », qui ferait de
+        // ce code un devineur.
+        //
+        // ⮕ POURQUOI `defiSpecifique` ET NON `interpretation.acceptable`.
+        // Le plan prescrivait `interpretation.acceptable`. Les deux valent 0,70
+        // aujourd'hui, donc le choix ne change aucun chiffre — mais il change ce
+        // qui bouge le jour où Grégoire règle un seuil. `defiSpecifique` est LE
+        // seuil « en dessous duquel un critère est un défi » : c'est son rôle
+        // documenté, c'est celui qu'exposent les préférences (`preferences-v2.js`),
+        // et c'est celui qu'emploient déjà les trois autres sites qui identifient
+        // un défi (`profil-etudiant-calculs.js:528, 659, 1038`). `interpretation.*`
+        // est le jeu A-C-M (assiduité, complétion, mobilisation), sans UI depuis
+        // #299. Prendre `interpretation.acceptable` aurait fait diverger le seuil
+        // de défi du tableau de bord de celui des profils. On converge.
+        const seuilDefi = obtenirSeuil('defiSpecifique'); // 0-1 — défaut 0.70
         const performances = obtenirPerformancesSRPNF(da);
 
         if (performances) {
             ['Structure', 'Rigueur', 'Plausibilité', 'Nuance', 'Français'].forEach(critere => {
                 const score = performances[critere];
-                if (score !== null && score < seuils.acceptable) {
+                if (score === null || score === undefined) return;
+                if ((score / 100) < seuilDefi) {
                     defisCommuns[critere] = (defisCommuns[critere] || 0) + 1;
                 }
             });
@@ -256,18 +289,54 @@ function obtenirPerformancesSRPNF(da) {
         'Français': []
     };
 
-    // Collecter toutes les notes par critère
+    // Collecter toutes les notes par critère.
+    //
+    // ⚠⚠ LA TROISIÈME CAUSE DU MÊME SILENCE (#542 lot 1 ; le plan la classait
+    // « C1 », au lot 4, sans voir qu'elle co-causait A4).
+    //
+    // `evaluation.criteres` est un TABLEAU d'objets — c'est ce que sauvegarde
+    // `evaluation-sauvegarde.js:135` : `[{critereId, critereNom,
+    // niveauSelectionne, retroaction, ponderation}]`, et c'est ainsi que le lit
+    // tout le reste du dépôt. Ce code seul le traitait comme un DICTIONNAIRE
+    // « nom → niveau » :
+    //
+    //     Object.keys(evaluation.criteres)   // ⮕ ['0','1','2','3','4']
+    //     evaluation.criteres['0']           // ⮕ l'objet critère, pas un niveau
+    //     performances['0']                  // ⮕ undefined ⇒ rien n'est collecté
+    //
+    // Aucune note n'entrait donc jamais, TOUTES les moyennes valaient `null`, et
+    // `defisCommuns` restait vide même une fois le seuil réparé. Les deux
+    // correctifs ne valent que POSÉS ENSEMBLE : c'est pourquoi celui-ci ne part
+    // pas au lot 4 avec le reste des constats C.
+    //
+    // ⮕ CE QUI RESTE EN DUR ICI, ET PART AU LOT 4 (B3/B4) : les cinq clés de
+    // `performances` sont les critères de Grégoire. Une autre grille ne remplit
+    // toujours rien. La correspondance ci-dessous est donc volontairement
+    // TOLÉRANTE aux accents et à la casse — même normalisation que
+    // `calculerMoyennesCriteres` — pour ne pas ajouter un second motif d'échec
+    // au premier.
+    const normaliser = (s) => String(s == null ? '' : s)
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '');
+    const indexCles = {};
+    Object.keys(performances).forEach(nom => { indexCles[normaliser(nom)] = nom; });
+
     evaluations.forEach(evaluation => {
-        if (evaluation.criteres) {
-            Object.keys(evaluation.criteres).forEach(critere => {
-                const niveau = evaluation.criteres[critere];
-                if (niveau !== null && performances[critere]) {
-                    // Convertir le niveau IDME en pourcentage
-                    const pct = convertirNiveauEnPourcentage(niveau, evaluation.echelleId || 'idme');
-                    performances[critere].push(pct);
-                }
-            });
-        }
+        if (!Array.isArray(evaluation.criteres)) return;
+        evaluation.criteres.forEach(critereSauvegarde => {
+            if (!critereSauvegarde) return;
+            const niveau = critereSauvegarde.niveauSelectionne;
+            if (niveau == null || String(niveau).trim() === '') return;
+            const cleAttendue = indexCles[normaliser(critereSauvegarde.critereNom)];
+            if (!cleAttendue) return;
+            // Convertir le niveau en pourcentage selon l'échelle de CETTE
+            // évaluation. `|| 'idme'` conservé tel quel : le repli de
+            // `convertirNiveauEnPourcentage` est le défaut B1, traité au lot 4.
+            const pct = convertirNiveauEnPourcentage(niveau, evaluation.echelleId || 'idme');
+            performances[cleAttendue].push(pct);
+        });
     });
 
     // Calculer les moyennes

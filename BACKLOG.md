@@ -673,6 +673,77 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ✅ Sentinelle `tests/unit/sentinelle-541-niveau-depuis-pourcentage.test.js` — 7 cas, **7 ROUGES au
   break-test** avec le message attendu (`expected 'E' to be 'I'`). Vitest **3495/3495** (330 fichiers).
 
+- [ ] **#542 — SOLO, l'échelle de performance, et ce que le dépistage a le droit de supposer.**
+  Chantier ouvert le 26 août 2026 au soir, plan complet dans
+  `plans de travail/PLAN-SOLO-echelle-et-depistage.md`. Origine : l'audit du dépistage demandé au
+  retour de #529, et la question de Grégoire — « pourquoi la taxonomie SOLO est-elle associée aux
+  critères plutôt qu'à l'échelle ? ».
+  ⮕ **La crainte qui fonde le chantier**, mot pour mot : « La crainte que j'ai, c'est que nous
+  codions en dur ce qui est dans ma tête, alors qu'il faut rendre l'application flexible.
+  L'utilisateur est capable de faire du dépistage même s'il n'a pas exactement la même échelle que
+  moi. » Elle s'est **déjà réalisée** : le repli retiré par #529 valait
+  `{0:0, I:0.40, D:0.65, M:0.75, E:1.00}` — ce sont les valeurs de l'échelle de Grégoire, au chiffre
+  près, recopiées dans le code il y a des mois.
+  ⮕ **Décisions actées le 26 août** (§2 du plan) : les deux SOLO sont deux objets distincts et les
+  deux restent — SOLO du critère = la **visée** (ce que le critère exige), SOLO du niveau d'échelle =
+  le **constat** (ce que la réponse atteint) ; on AJOUTE, on ne déplace pas, sinon l'IPB perd les
+  critères « fondations » qu'il surveille. Le champ `description` du niveau n'est PAS remplacé : il
+  part dans les documents remis aux élèves (`export-pdf.js`, `cartouches.js`, `comparateur-pratiques.js`).
+  Le niveau « 0 » est un **jugement suspendu**, pas une performance nulle.
+  ⮕ **Les lots** : **0** mesurer (sonde lecture seule) · **1** refermer les silences du dépistage
+  (A2/A3/A4) · **2** le menu SOLO sur l'échelle · **3** délier le dépistage de l'échelle de Grégoire
+  (le cœur : la moyenne se situe dans les PLAGES de l'échelle de l'utilisateur, l'interprétation lit
+  l'étiquette SOLO — plus de 0,64/0,75/0,85) · **4** le reste du codé-en-dur (B1-B13) · **5** écrire.
+  ⏳ **Non tranché, et à ne pas trancher d'avance** : (a) retirer le niveau 0 de l'échelle de
+  Grégoire — décision sur SES données, après le lot 0 ; (b) le devenir des seuils `idme.*` (repli ou
+  disparition) — se décide dans le lot 3.
+
+  ✅ **LOT 0 LIVRÉ le 27 août 2026** — sonde `scripts/diagnostic-542-echelles-et-niveaux.js`, LECTURE
+  SEULE, à coller en console puis `await diag542()`. Elle répond aux quatre questions du plan (code
+  de niveau absent de son échelle · niveau `0` · `echelleId` préfixé `pratique-` · aucun `echelleId`,
+  en distinguant les cas RÉSOLUBLES des cas MUETS) et conclut, pour chacun, « risque actif » ou
+  « risque latent ». ⏳ **DÛ PAR GRÉGOIRE** : la lancer et renvoyer le rapport. Il commande (a)
+  ci-dessus et le lot 3.
+
+  ✅ **LOT 1 LIVRÉ le 27 août 2026** — le dépistage ne rend plus de verdict rassurant sans avoir
+  calculé. Deux sentinelles, **11 rouges vérifiés au break-test**.
+  - **A4 — `defisCommuns` était TOUJOURS vide** (`interventions.js`, `analyserSousGroupe`). **Trois**
+    causes indépendantes, qui se masquaient : (1) `seuils.acceptable` n'existe pas à la racine — la
+    clé vit sous `interpretation.acceptable`, donc `score < undefined`, toujours faux ; (2) les
+    performances sont des POURCENTAGES (0-100) comparés à des seuils 0-1 — même défaut que #541 ;
+    (3) `evaluation.criteres` lu comme un DICTIONNAIRE alors que c'est un TABLEAU, donc **rien**
+    n'était jamais collecté et toutes les moyennes valaient `null`.
+    ⚠ **Écart assumé avec le plan, et il compte** : le plan annonçait « une ligne » et ne voyait que
+    la cause 1 ; il classait la cause 3 en « C1 », au lot 4, sans voir qu'elle CO-CAUSAIT A4.
+    Break-test à l'appui : chacune des trois, remise seule, rend 7 rouges. Le correctif d'une ligne
+    n'aurait donc rien débloqué — `defisCommuns` serait resté vide, et le lot aurait été déclaré clos.
+    ⚠ **Second écart assumé** : le seuil employé est `obtenirSeuil('defiSpecifique')`, pas
+    `interpretation.acceptable`. Les deux valent 0,70 — aucun chiffre ne change aujourd'hui. Mais
+    `defiSpecifique` est LE seuil « en dessous duquel un critère est un défi » (rôle documenté, exposé
+    dans les préférences, déjà employé par les trois autres sites qui identifient un défi :
+    `profil-etudiant-calculs.js:528, 659, 1038`), tandis qu'`interpretation.*` est le jeu A-C-M, sans
+    UI depuis #299. Le prendre aurait fait diverger le seuil du tableau de bord de celui des profils
+    le jour où Grégoire en règle un.
+  - **A2 — les échelles de pratique étaient invisibles au dépistage**
+    (`profil-etudiant-calculs.js`, `obtenirTableConversionNiveaux`). Une évaluation produite sous une
+    pratique configurable porte `echelleId = 'pratique-<id>'`, et son échelle vit dans
+    `pratiquesConfigurables[].config.echelle`, pas dans `echellesTemplates`. La table rendait `null` →
+    aucun défi, pattern « Stable », RàI sur P seul, **sans un mot**. On CONVERGE avec le chemin qui
+    existait déjà (`evaluation-calcul.js:526`) ; la construction de la table est extraite en
+    `_tableDepuisNiveaux` pour que les deux gisements ne divergent jamais (le patron que #529 a eu à
+    défaire).
+  - **A3 — et quand la conversion échoue, l'écran le DIT.** Nouvelle
+    `diagnostiquerConversionNiveaux(da)` : elle rend `null` dans le cas normal, sinon un message qui
+    NOMME la cause (échelle non désignée · échelle introuvable · pratique disparue) et distingue
+    « toutes » de « certaines ». Affichée dans la carte RàI, **juste sous le badge de niveau** — donc
+    avant les chiffres qu'elle disqualifie. Pas un `console.warn` : il n'atteint pas Grégoire.
+    Le choix de #529 (ne pas deviner l'échelle) n'est pas rouvert — c'est son silence qui l'est.
+  - ✅ Vitest **3574/3574** (335 fichiers), depuis `tests/`. Sentinelles
+    `tests/unit/sentinelle-542-a4-defis-communs.test.js` (11 cas) et
+    `tests/unit/sentinelle-542-a2-a3-depistage-non-muet.test.js` (13 cas).
+  - ⚠ **Pas de bump de version** : l'application de Grégoire est ouverte en `file://` et le bump est
+    dû à la clôture de #540. Une release à la fois.
+
 - [ ] **#540 — La durée hebdomadaire du cours n'est ni exigée, ni recoupée avec l'horaire.**
   Constaté le 26 août 2026 sur une capture du formulaire Cours envoyée par Grégoire : « le nombre
   d'heures de cours par semaine n'est pas dans les formulaires ». **Audit : il y est, mais dérivé

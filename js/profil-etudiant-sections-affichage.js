@@ -815,6 +815,10 @@ function genererSectionAccompagnement(da) {
 
     // 🆕 NOUVEAU : Utiliser les fonctions séparées pour RàI pédagogique et contexte
     const niveauRai = determinerNiveauRaiPedagogique(da);
+    // #542 A3 — ce que le dépistage n'a PAS pu calculer doit se voir. `null`
+    // dans le cas normal : aucun encadré n'apparaît quand tout est convertible.
+    const conversionAveugle = (typeof diagnostiquerConversionNiveaux === 'function')
+        ? diagnostiquerConversionNiveaux(da) : null;
     const alerteContexte = determinerAlerteContextuelle(da);
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true); // true = dépistage (3 artefacts)
     const cibleInfo = determinerCibleIntervention(da); // Conservé pour compatibilité (sera retiré plus tard)
@@ -910,6 +914,16 @@ function genererSectionAccompagnement(da) {
                 <div class="badge-sys ${niveauRai.badgeClasse}">
                     ${niveauRai.label}
                 </div>
+
+                <!-- #542 A3 — le dépistage s'avoue aveugle plutôt que de rendre
+                     un verdict rassurant. Placé JUSTE SOUS le badge de niveau,
+                     donc avant tout chiffre : il faut le lire avant de lire ce
+                     qu'il disqualifie, pas après. -->
+                ${conversionAveugle ? `
+                <div style="margin: 12px 0; padding: 10px 12px; background: var(--alerte-fond-attention, rgba(232,168,56,0.10)); border-left: 3px solid var(--orange-attention, #e8a838); border-radius: 0 4px 4px 0; font-size: 0.85rem; color: var(--gris-fonce);">
+                    <strong style="color: var(--orange-attention, #e8a838);">Dépistage incomplet</strong><br>
+                    ${echapperHtml(conversionAveugle.message)}
+                </div>` : ''}
 
                 <p class="profil-texte-paragraphe">
                     <strong>Performance globale (P) :</strong> ${(() => {
