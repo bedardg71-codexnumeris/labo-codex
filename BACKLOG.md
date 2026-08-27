@@ -733,6 +733,38 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⏳ **ET LA CAUSE RESTE INCONNUE** : l'échelle avait déjà été recréée le 5 août. Tant qu'on ne sait
   pas ce qui l'a ré-orphelinée, cette réparation peut se défaire.
 
+- [ ] **#544 — Les 44 évaluations `ECHELLE_DEMO` de H2026, et la décision du 5 août à revoir.**
+  Créé le 27 août 2026, au terme de la réparation #542. Ces 44 évaluations vivent dans
+  `h2026_evaluationsSauvegardees` — un magasin RÉEL, pas la démo — et désignent `ECHELLE_DEMO`, un
+  identifiant qui n'existe nulle part, **pas même côté démo** (les échelles de démonstration sont
+  `ECH_DEMO_*`). Elles portent **176 niveaux**, seul reliquat non convertible après #542
+  (2807/2983).
+  ⚠ **La décision du 5 août — « laissé tel quel, repli générique cosmétique » — N'EST PLUS VALIDE**,
+  et il faut le dire clairement : elle a été prise quand un repli codé en dur fabriquait un score à
+  la place de l'échelle manquante. **Ce repli a été retiré par #529.** Depuis le lot 1 de #542, ces
+  élèves affichent « Dépistage incomplet » — ce qui est correct, mais ce n'est plus cosmétique : leur
+  dépistage est aveugle, et il le dit.
+  ⮕ **Premier geste, une commande, aucun code à écrire** : `await oracle542('ECHELLE_DEMO')`.
+  L'oracle est paramétré par identifiant. Il dira si une échelle subsistante reproduit leurs notes,
+  et donc si le geste de #542 s'applique à l'identique.
+  ⮕ **À NE PAS PRÉSUMER** : que ce soient de « fausses » évaluations parce que l'identifiant dit
+  « DEMO ». Elles sont dans le magasin réel de H2026 et portent des notes. Avant tout geste, savoir
+  ce qu'elles sont — un import de démonstration mal rangé, ou de vraies évaluations dont l'échelle a
+  été mal nommée. La sonde du lot 0 les nomme (`await diag542()`).
+
+- [ ] **#545 — Pourquoi l'échelle `1767389426695` a-t-elle été ré-orphelinée ?**
+  Créé le 27 août 2026. **C'est le point qui rend la réparation #542 fragile** : cette échelle avait
+  DÉJÀ été recréée le 5 août 2026 dans `h2026_echellesTemplates` (réparation documentée, oracle
+  avant==après). Elle n'y était plus le 27. Quelque chose l'a retirée ou remplacée entre les deux —
+  et tant qu'on ne sait pas quoi, **le même effacement peut se reproduire et défaire #542**.
+  ⮕ **Piste mesurée, pas supposée** : les ids `ECH_1786375947252_5wff1x` (h2026) et
+  `ECH_1786375947256_edk4an` (a2026) sont séquentiels à **4 ms d'écart**. Deux échelles créées dans
+  le même passage programmatique, pas par deux gestes humains. Chercher l'écrivain : quel code écrit
+  `<trimestre>_echellesTemplates` en REMPLAÇANT la liste plutôt qu'en l'augmentant.
+  ⚠ Patron à vérifier en premier : [[feedback-cle-db-lue-jamais-ecrite]] à l'envers — ici la clé est
+  écrite, et c'est l'écriture qui écrase. Voir aussi le seed d'échelles au boot et les migrations de
+  trimestre (`project-modele-horaire-par-trimestre` a le même patron de recréation pure).
+
 - [ ] **#543 — Les 55 évaluations dont la note stockée ne se recalcule pas.** Créé le 27 août 2026,
   extrait de #542 (l'oracle les isole ; ce ne sont PAS un problème d'échelle — aucune n'est
   reproduite par une échelle différente, aucune ne porte de code de niveau inconnu). **Deux causes
@@ -1057,10 +1089,41 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     ⮕ **CE QUE LE LOT E A CHANGÉ, EN UNE PHRASE** : l'application ne convertit plus jamais
     une durée en périodes, parce qu'elle ne le peut pas — une période comprend sa pause, et
     cette convention n'est écrite nulle part dans les données. Elle demande donc les deux.
-  · **D — le recoupement** (demande d'origine) : l'écran Horaire confronte le total des séances à la
-    durée hebdomadaire déclarée et le DIT quand ça diverge, sans bloquer. *Fin : un horaire de 3 h
-    sur un cours 2-2-3 est signalé.* **Après E** : recouper avec une conversion fausse
-    signalerait des écarts qui n'existent pas.
+  · **✅ D — le recoupement · LIVRÉ 26 août 2026.** L'écran Horaire confronte le total des
+    séances à ce que le devis du cours déclare, et le DIT. **Jamais bloquant** : un écart
+    peut être légitime (cours intensif, semaine de reprise), et c'est l'enseignant qui sait.
+    ⮕ **CE QUI REND LE RECOUPEMENT POSSIBLE SANS CONVERSION, et qui n'allait pas de soi.**
+    La pondération « 2-2-3 » compte des heures au sens du réseau collégial — et une « heure
+    de cours », au cégep, EST une période : 50 minutes d'enseignement plus 10 de pause.
+    `(théorie + labo)` donne donc directement des PÉRIODES par semaine, comparables telles
+    quelles au total de l'horaire. C'est le seul endroit du chantier où les deux grandeurs
+    se rencontrent sans traduction — et c'est ce qui rend ce lot faisable APRÈS E, alors
+    qu'il aurait signalé des écarts imaginaires avant.
+    ⮕ **On se TAIT quand on ne sait pas** : pas de cours associé, pas de pondération
+    lisible, ou horaire incomplet. Un signal qui parle sans savoir devient un signal qu'on
+    n'écoute plus.
+    ⮕ **Verrous** : `tests/integration/recoupement-horaire-devis-540D.spec.js` (7 cas —
+    concordance à deux séances ET en bloc unique, écart chiffré, chimie 3-2-3 à 5 périodes,
+    et les trois silences). **3 break-tests**, dont un qui N'A PAS ROUGI d'abord : le cas
+    « pondération illisible » passait une chaîne VIDE, écartée par une garde antérieure au
+    parseur — le chemin du parseur n'était donc pas couvert. Un huitième cas l'atteint
+    désormais par une chaîne non vide et non reconnaissable.
+    Vitest **3600/3600**, Playwright **186/186**.
+
+  ✅ **#540 EST CLOS.** Cinq lots livrés le 26 août : A (pondération obligatoire), B (les
+  semaines réelles du trimestre), C (l'écran affiche ce qu'il compte), E1+E2+E3 (la séance
+  porte ses périodes, plus aucune division, le réglage disparaît), D (le recoupement).
+  ⮕ **CE QUE LE CHANTIER A CHANGÉ, EN UNE PHRASE** : l'application ne convertit plus jamais
+  une durée en périodes, parce qu'elle ne le peut pas — une période comprend sa pause, et
+  cette convention n'est écrite nulle part dans les données. Elle demande donc les deux, et
+  les confronte.
+  ⏳ **BUMP DE VERSION DÛ** — non fait : Grégoire avait l'application ouverte en `file://`
+  toute la session. Les `?v=` ont été bumpés à la main, fichier par fichier, à chaque lot.
+  ⏳ **RESTES INSCRITS, non faits** : cinq `alert()` dans `trimestre-v2-cours.js` sur
+  d'autres gestes qu'« Enregistrer » ; `mettreAJourLigne` (`saisie-presences.js`), code mort
+  qui lit un champ `heures_${da}` que plus personne ne génère ; et les `nombrePeriodes` que
+  les exécutions passées des migrations ont pu inscrire gonflés — irréparables sans savoir
+  ce que `duree` signifiait.
   **C avant D** : tant que l'horaire affiche une durée déclarative, un signal de divergence serait
   illisible. ⚠ La pondération suppose une répartition uniforme sur le trimestre — pour un stage ou
   un cours intensif, `(théorie + labo)` n'est pas la durée d'une semaine donnée. D devra prévoir
