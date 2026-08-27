@@ -2300,32 +2300,23 @@ function lignesMatriceCartouche(criteres, niveaux, commentaires) {
     return lignes;
 }
 
-async function telechargerModeleCartouche() {
-    const idGrille = (document.getElementById('selectGrilleCartouche') || {}).value;
-    const idEchelle = (document.getElementById('selectEchelleCartouche') || {}).value;
-    if (!idGrille || !idEchelle) {
-        alert('Choisis d\'abord une grille et une échelle : le modèle est construit à partir des deux.');
-        return;
-    }
-
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const echelles = await db.get(cle('echellesTemplates')) || [];
-    const grille = grilles.find(g => g.id === idGrille);
-    const echelle = echelles.find(e => e.id === idEchelle);
-    if (!grille || !echelle) {
-        alert('Grille ou échelle introuvable.');
-        return;
-    }
-
-    const criteres = grille.criteres || [];
-    const niveaux = echelle.niveaux || [];
-    if (criteres.length === 0 || niveaux.length === 0) {
-        alert('Cette grille n\'a pas de critères, ou cette échelle pas de niveaux : il n\'y a pas de matrice à décrire.');
-        return;
-    }
-
-    const nomCartouche = ((document.getElementById('nomCartouche') || {}).value || '').trim()
-        || ('Cartouche — ' + grille.nom);
+/**
+ * Le TEXTE du modèle de cartouche — fonction pure, sans DOM ni téléchargement.
+ *
+ * ⮕ Extraite de `telechargerModeleCartouche` le 27 août 2026 (#549). Tant que la
+ * composition vivait derrière un `Blob` et un clic simulé, son contenu n'était
+ * vérifiable que de visu : on pouvait prouver que le bouton téléchargeait
+ * quelque chose, jamais que ce quelque chose disait ce qu'il fallait.
+ *
+ * @param {Object} grille - la grille, avec ses `criteres`
+ * @param {Object} echelle - l'échelle, avec ses `niveaux`
+ * @param {Object|null} production - la production dont on joint les consignes, ou `null`
+ * @param {string} nomCartouche - le nom donné à la cartouche
+ * @returns {string} le contenu Markdown du fichier
+ */
+function composerModeleCartouche(grille, echelle, production, nomCartouche) {
+    const criteres = (grille && grille.criteres) || [];
+    const niveaux = (echelle && echelle.niveaux) || [];
 
     // ⚠ L'en-tête s'adresse à l'IA autant qu'à l'utilisateur. Il dit le format
     // EXACT à respecter, parce qu'une IA laissée libre reformate — et un fichier
@@ -2350,8 +2341,47 @@ async function telechargerModeleCartouche() {
     lignes.push('> Le commentaire s\'adresse à l\'étudiant·e, à la deuxième personne. Il décrit ce');
     lignes.push('> que le niveau atteint veut dire pour CE critère, et ce qu\'il reste à travailler.');
     lignes.push('');
+
+    // ⮕ #549 — LE TRAVAIL DEMANDÉ VIENT AVANT LA MANIÈRE DE L'ÉVALUER.
+    //
+    // Sans ce bloc, l'assistant recevait les critères et les niveaux, mais pas
+    // ce qui avait été demandé à l'élève : il écrivait des commentaires sur une
+    // tâche qu'il ne connaissait pas. Symptôme rapporté par Grégoire le 27 août.
+    //
+    // ⚠ Les blocs viennent de `blocsInformationDocument` (`export-pdf.js`), le
+    // composeur du DOCUMENT DE CONSIGNES — titres personnalisés, champs libres,
+    // ordre du gabarit. En écrire un second ici ferait diverger deux textes qui
+    // décrivent le même travail, et c'est exactement le patron que #529 a passé
+    // une session à défaire.
+    if (production && typeof blocsInformationDocument === 'function') {
+        const blocs = blocsInformationDocument(null, {
+            production: production,
+            inclureObjectif: true,
+            inclureDescription: true,
+            inclureDetailTache: true
+        }) || [];
+        if (blocs.length > 0) {
+            lignes.push('## Le travail demandé');
+            lignes.push('');
+            lignes.push('_Ce que l\'étudiant·e devait faire. Appuie-toi dessus pour écrire des');
+            lignes.push('commentaires qui parlent de CETTE tâche, et non d\'un travail générique._');
+            lignes.push('');
+            blocs.forEach(b => {
+                lignes.push('**' + String(b.titre || '').replace(/\s*:\s*$/, '') + '**');
+                lignes.push('');
+                String(b.texte == null ? '' : b.texte).split('\n').forEach(l => lignes.push(l));
+                lignes.push('');
+            });
+            lignes.push('---');
+            lignes.push('');
+        }
+    }
+
     lignes.push('Grille : ' + grille.nom);
     lignes.push('Échelle : ' + echelle.nom);
+    if (production) {
+        lignes.push('Production : ' + (production.activiteApprentissage || production.nom || '(sans nom)'));
+    }
     lignes.push('');
     lignes.push('Niveaux, du plus faible au plus élevé :');
     niveaux.forEach(n => {
@@ -2373,7 +2403,46 @@ async function telechargerModeleCartouche() {
     // La matrice, vide — MÊME structure que l'export d'une cartouche remplie.
     lignes.push(...lignesMatriceCartouche(criteres, niveaux, {}));
 
-    const contenu = lignes.join('\n');
+    return lignes.join('\n');
+}
+
+async function telechargerModeleCartouche() {
+    const idGrille = (document.getElementById('selectGrilleCartouche') || {}).value;
+    const idEchelle = (document.getElementById('selectEchelleCartouche') || {}).value;
+    // #549 — la production est FACULTATIVE : un modèle sans consignes reste
+    // utile, et l'exiger casserait un usage qui fonctionne depuis le 26 août.
+    const idProduction = (document.getElementById('selectProductionCartouche') || {}).value;
+    if (!idGrille || !idEchelle) {
+        alert('Choisis d\'abord une grille et une échelle : le modèle est construit à partir des deux.');
+        return;
+    }
+
+    const grilles = await db.get(cle('grillesTemplates')) || [];
+    const echelles = await db.get(cle('echellesTemplates')) || [];
+    const grille = grilles.find(g => g.id === idGrille);
+    const echelle = echelles.find(e => e.id === idEchelle);
+    if (!grille || !echelle) {
+        alert('Grille ou échelle introuvable.');
+        return;
+    }
+
+    const criteres = grille.criteres || [];
+    const niveaux = echelle.niveaux || [];
+    if (criteres.length === 0 || niveaux.length === 0) {
+        alert('Cette grille n\'a pas de critères, ou cette échelle pas de niveaux : il n\'y a pas de matrice à décrire.');
+        return;
+    }
+
+    let production = null;
+    if (idProduction) {
+        const productions = await db.get(cle('productions')) || [];
+        production = productions.find(p => p.id === idProduction) || null;
+    }
+
+    const nomCartouche = ((document.getElementById('nomCartouche') || {}).value || '').trim()
+        || ('Cartouche — ' + grille.nom);
+
+    const contenu = composerModeleCartouche(grille, echelle, production, nomCartouche);
     const nomFichier = ('modele-' + nomCartouche)
         .replace(/[^a-zA-Z0-9àâäéèêëïîôùûüÿçÀÂÄÉÈÊËÏÎÔÙÛÜŸÇ\s-]/g, '')
         .replace(/\s+/g, '-')
@@ -2388,8 +2457,13 @@ async function telechargerModeleCartouche() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
+    // Le message DIT si les consignes sont parties, parce que c'est le seul
+    // moyen de s'apercevoir qu'on a oublié de choisir la production.
     notifications.succes('Modèle téléchargé',
-        criteres.length + ' critère(s) × ' + niveaux.length + ' niveau(x) à remplir.');
+        criteres.length + ' critère(s) × ' + niveaux.length + ' niveau(x) à remplir.'
+        + (production
+            ? ' Les consignes de « ' + (production.activiteApprentissage || 'la production') + ' » sont jointes.'
+            : ' Sans consignes : aucune production choisie.'));
 }
 
 async function exporterCartoucheEnTexte() {
@@ -2741,6 +2815,9 @@ function annulerFormCartouche() {
         selectEchelle.value = '';
         selectEchelle.disabled = false;
     }
+    // #549 — le choix des consignes se remet à « aucune » comme les deux autres.
+    const selectProdReset = document.getElementById('selectProductionCartouche');
+    if (selectProdReset) selectProdReset.value = '';
 
 }
 
@@ -2817,6 +2894,7 @@ window.codesNiveauxPourLecture = codesNiveauxPourLecture;                   // #
 window.lireLigneCommentaire = lireLigneCommentaire;                         // #531
 window.lignesMatriceCartouche = lignesMatriceCartouche;                     // #531
 window.parserMarkdownCartouche = parserMarkdownCartouche;                   // #531 — l'aller-retour est testé
+window.composerModeleCartouche = composerModeleCartouche;                   // #549
 window.telechargerModeleCartouche = telechargerModeleCartouche;             // #531
 window.importerCommentaires = importerCommentaires;
 window.initialiserModuleCartouches = initialiserModuleCartouches;
@@ -3111,6 +3189,38 @@ async function populerDropdownsCartouche(grilleId = '', echelleId = '', disabled
         selectEchelle.innerHTML = optionsHtml;
         // Ne pas désactiver si aucune échelle n'est matchée (permet la correction manuelle)
         selectEchelle.disabled = disabled && echelleMatchee;
+    }
+
+    // #549 — Peupler le dropdown des consignes.
+    //
+    // ⚠ IL NE SERT QU'AU MODÈLE À FAIRE REMPLIR : il ne rattache RIEN, il ne
+    // s'enregistre pas dans la cartouche. D'où l'absence de `data-on-change` —
+    // sa valeur est lue au moment du téléchargement, et nulle part ailleurs.
+    //
+    // ⮕ Le libellé dit si la production a des consignes ou non. Sans cette
+    // mention, en choisir une qui n'en a pas rend un modèle identique à celui
+    // d'avant, sans que rien ne l'explique.
+    const selectProduction = document.getElementById('selectProductionCartouche');
+    if (selectProduction) {
+        const valeurAvant = selectProduction.value;
+        const productions = await db.get(cle('productions')) || [];
+        const aDesConsignes = (p) => !!(
+            (p.objectif && String(p.objectif).trim())
+            || (p.tache && String(p.tache).trim())
+            || (p.detailTache && String(p.detailTache).trim())
+            || (Array.isArray(p.champsPersonnalises)
+                && p.champsPersonnalises.some(c => c && c.titre && c.contenu))
+        );
+        let htmlProd = '<option value="">— aucune —</option>';
+        productions
+            .filter(p => p && p.type !== 'portfolio')   // le conteneur n'est pas un travail
+            .forEach(p => {
+                const nom = p.activiteApprentissage || p.nom || '(sans nom)';
+                const marque = aDesConsignes(p) ? '' : ' — sans consignes';
+                const selected = (p.id === valeurAvant) ? ' selected' : '';
+                htmlProd += `<option value="${echapperHtml(p.id)}"${selected}>${echapperHtml(nom + marque)}</option>`;
+            });
+        selectProduction.innerHTML = htmlProd;
     }
 }
 
