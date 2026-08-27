@@ -94,7 +94,14 @@ incomplet » l'explique.
 > pas. Reste à vérifier qu'elle est bien là, et qu'elle dit quelque chose
 > d'utile.
 
-**Le geste** : passe la souris sur le code de niveau (Mac, pas iPad).
+**Le geste** : dans la carte **« Modèle de la Réponse à l'intervention »**, ligne
+« Performance globale (P) », passe la souris sur **la lettre qui précède le pourcentage**
+— le `D` de `D 72 %`. Sur Mac, pas sur iPad.
+
+> ⚠ **Rangée reformulée le 27 août.** Elle disait « passe la souris sur le code de niveau »
+> sans redire où il se trouve, et Grégoire a répondu « Où est le code de niveau ? Dans quel
+> écran ? ». Une porte qui suppose connu ce que la rangée précédente vient d'apprendre est
+> une porte ratée.
 
 ⮕ **Attendu** : une infobulle. Si tu as étiqueté ton échelle en SOLO, elle donne
 le nom du niveau SOLO et sa description. Sinon, elle donne **le nom du niveau que

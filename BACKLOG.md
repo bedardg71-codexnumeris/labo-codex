@@ -806,6 +806,23 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   **« Aucun aspect pertinent n'est traité »** — est retenue telle quelle. C'est le SEUL texte écrit à
   neuf : l'ancien code ne produisait que quatre descriptions pour cinq niveaux SOLO. C'est du
   vocabulaire pédagogique.
+  ✅ **LES QUATRE VERDICTS DE LA PORTE TERRAIN — 27 août 2026, relevé de Grégoire :**
+  · **D1 — le survol SOLO sur iPad** : « confort réservé au Mac ». **Aucun code à écrire** ;
+    l'infobulle reste, et son absence au tactile est acceptée. Dossier CLOS.
+  · **D2 — le niveau disparaît sous sommative** : « le niveau disparaît ». Le comportement
+    livré est confirmé. Dossier CLOS.
+  · **D3 — étiquetter son échelle en SOLO** : « oui, maintenant ». ⏳ **Geste de Grégoire**,
+    cinq menus dans l'éditeur d'échelles. ⮕ **Ce n'est plus un confort** : le modèle de
+    cartouche (#549) fait dépendre toute sa consigne de rédaction du « seuil de maîtrise »,
+    et l'étiquette SOLO est la seule donnée du dépôt qui puisse le dire.
+  · **D4 — laquelle des trois formulations SOLO garder** : « les longues ». ✅ **APPLIQUÉ** —
+    les quatre descriptions de la carte « Observation de la structure » sont reprises MOT POUR
+    MOT dans `NIVEAUX_SOLO_ECHELLE` (`echelles.js`), et les courtes retirées.
+    ⏳ **Deux écarts signalés, non tranchés** : « préstructurel » garde sa formulation courte
+    (il n'en existait pas de longue) ; les quatre longues emploient « il/elle », un accord
+    lourd que la convention d'écriture inclusive demande de reformuler — reprises telles
+    quelles parce que le verdict porte sur CES textes.
+
   ⏳ **RESTE AU LOT 3** : pas 3 (brancher, et retirer les quatre descriptions en dur + la borne
   `0.85`), pas 4 (supprimer `obtenirNiveauSOLO()` de `trimestres.js`, qui redevine SOLO depuis
   le NOM d'un critère et contredit le champ configuré), pas 5 (trancher le devenir des seuils
