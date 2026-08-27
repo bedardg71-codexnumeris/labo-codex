@@ -96,14 +96,16 @@ function construireModeleRapportPresences(etudiants, seancesParDate, presences, 
     const colonnes = dates.map(date => {
         const seances = seancesParDate[date];
 
-        // Périodes attendues : agrégation identique à obtenirNombrePeriodesSeance
-        // (saisie-presences.js) — nombrePeriodes, sinon durée convertie, sinon 2.
-        let periodesAttendues = seances.reduce((acc, s) => {
-            if (s && s.nombrePeriodes) return acc + s.nombrePeriodes;
-            if (s && s.duree) return acc + Math.round((s.duree * 60) / dureePeriode);
-            return acc;
+        // Périodes attendues : agrégation identique à `obtenirNombrePeriodesSeance`.
+        // #540 lot E2 (26 août 2026) : on LIT `nombrePeriodes`, sans plus convertir de
+        // durée — une période comprend sa pause, la division gonflait le compte dès la
+        // troisième. Et le repli « sinon 2 » disparaît : une grille imprimable qui
+        // annonce deux périodes là où l'horaire n'en dit aucune fait saisir des absences
+        // sur des périodes qui n'existent pas.
+        const periodesAttendues = seances.reduce((acc, s) => {
+            const p = s ? parseInt(s.nombrePeriodes, 10) : 0;
+            return acc + (p > 0 ? p : 0);
         }, 0);
-        if (periodesAttendues <= 0) periodesAttendues = 2;
 
         // Code de séance « 1a/1b… » : numeroSemaine porté par la séance +
         // rang de la date à l'intérieur de sa semaine (ordre chronologique).

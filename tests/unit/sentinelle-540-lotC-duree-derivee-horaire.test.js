@@ -92,36 +92,47 @@ function chargerHoraires(dureePeriode = 50) {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-describe('#540-C/A — une seule mesure, partagée', () => {
-    it('mesurerDureeSeance est exportée (le module horaires la consomme)', () => {
+// ⚠ LES DEUX PREMIERS BANCS ONT ÉTÉ RÉVISÉS PAR LE LOT E2, LE MÊME SOIR.
+//
+// Le lot C avait donné UNE SEULE MESURE aux deux chaînes : l'écran Horaire cessait de
+// réinventer la sienne et employait `mesurerDureeSeance`, comme le calcul d'assiduité.
+// C'était le bon geste — il a fermé la divergence entre ce qui s'affichait et ce qui se
+// comptait — mais il laissait les deux également faux : une période comprend sa pause,
+// et diviser une durée d'horloge par la durée d'enseignement gonflait le compte dès la
+// troisième période.
+//
+// E2 ne partage plus la mesure : il la SUPPRIME. `nombrePeriodes` est saisi sur chaque
+// séance (lot E1) et se lit. Les cas qui éprouvaient la mesure partagée sont donc
+// réécrits sur la lecture ; ce que le lot C a apporté de durable — plus aucun repli à 2,
+// plus d'heures fabriquées à la sauvegarde — est verrouillé par les bancs D et E, qui
+// n'ont pas bougé.
+
+describe('#540-C/A — la mesure des heures existe toujours, mais ne compte plus de périodes', () => {
+    it('mesurerDureeSeance reste exportée — elle mesure des heures d\'horloge', () => {
+        // Toujours utile : `obtenirHeuresPrevuesParHoraire` s'en sert pour l'affichage
+        // d'une durée. Ce qui a disparu, c'est son emploi pour COMPTER des périodes.
         expect(SRC_PRESENCES).toContain('window.mesurerDureeSeance = mesurerDureeSeance');
     });
 
-    it('le module horaires l\'emploie plutôt que d\'en refaire une', () => {
-        expect(SRC_HORAIRES).toContain('mesurerDureeSeance');
+    it('mais le module horaires ne l\'emploie plus pour compter', () => {
+        const i = SRC_HORAIRES.indexOf('function periodesDeLaSeance');
+        const corps = SRC_HORAIRES.slice(i, SRC_HORAIRES.indexOf('\n}', i));
+        expect(corps).not.toContain('mesurerDureeSeance');
+        expect(corps).not.toContain('dureePeriode');
     });
 });
 
-describe('#540-C/B — la séance du formulaire est mesurée JUSTE (banc vivant)', () => {
+describe('#540-C/B — les périodes se LISENT sur la séance (banc vivant)', () => {
     const win = chargerHoraires(50);
 
-    it('LE CAS COURANT : heureDebut/heureFin seuls, sans duree ni nombrePeriodes', () => {
-        // Exactement ce que `sauvegarderHoraireV2` écrit. L'ancien code rendait 2.
-        const seance = { jour: 'Lundi', heureDebut: '08:00', heureFin: '10:00', local: 'B-201' };
-        expect(win.periodesDeLaSeance(seance)).toBe(2);   // 2 h = 120 min / 50 = 2,4 → 2
+    it('une séance qui dit ses périodes les rend', () => {
+        expect(win.periodesDeLaSeance({ jour: 'Lundi', heureDebut: '08:00', heureFin: '11:00', nombrePeriodes: 3 })).toBe(3);
     });
 
-    it('LE CAS QUI MENTAIT : une séance de trois heures ne vaut plus 2 périodes', () => {
-        const seance = { jour: 'Lundi', heureDebut: '08:00', heureFin: '11:00' };
-        expect(win.periodesDeLaSeance(seance)).toBe(4);   // 180 / 50 = 3,6 → 4
-    });
-
-    it('`nombrePeriodes` reste prioritaire quand il est là', () => {
-        expect(win.periodesDeLaSeance({ nombrePeriodes: 3, heureDebut: '08:00', heureFin: '10:00' })).toBe(3);
-    });
-
-    it('l\'ancienne forme `duree` en heures est toujours lue', () => {
-        expect(win.periodesDeLaSeance({ duree: 2 })).toBe(2);
+    it('LE CAS QUI MENTAIT : trois heures sans périodes ne valent plus 4 — elles valent 0', () => {
+        // L'ancienne chaîne divisait 180 min par 50 et arrondissait à 4. La réponse est 3,
+        // et personne ne peut la déduire des heures : on ne répond donc pas.
+        expect(win.periodesDeLaSeance({ jour: 'Lundi', heureDebut: '08:00', heureFin: '11:00' })).toBe(0);
     });
 
     it('une séance MUETTE rend 0 — jamais 2', () => {
@@ -130,23 +141,27 @@ describe('#540-C/B — la séance du formulaire est mesurée JUSTE (banc vivant)
         expect(win.periodesDeLaSeance(null)).toBe(0);
     });
 
-    it('la durée de période CONFIGURÉE est respectée', () => {
-        const w75 = chargerHoraires(75);
-        // 08:00 → 10:30 = 150 min : 2 périodes à 75 min, 3 à 50 min.
-        const seance = { heureDebut: '08:00', heureFin: '10:30' };
-        expect(w75.periodesDeLaSeance(seance)).toBe(2);
-        expect(chargerHoraires(50).periodesDeLaSeance(seance)).toBe(3);
+    it('la durée de période N\'INFLUE PLUS — preuve qu\'aucune division ne subsiste', () => {
+        const seance = { heureDebut: '08:00', heureFin: '10:30', nombrePeriodes: 2 };
+        for (const d of [50, 60, 75]) {
+            expect(chargerHoraires(d).periodesDeLaSeance(seance), `réglage ${d} min`).toBe(2);
+        }
     });
 
-    it('le total hebdomadaire est la somme des séances réelles', () => {
+    it('le total hebdomadaire additionne les périodes déclarées', () => {
         const seances = [
-            { jour: 'Lundi', heureDebut: '08:00', heureFin: '10:00' },   // 2
-            { jour: 'Jeudi', heureDebut: '13:00', heureFin: '16:00' }    // 4
+            { jour: 'Lundi', heureDebut: '08:00', heureFin: '10:00', nombrePeriodes: 2 },
+            { jour: 'Jeudi', heureDebut: '13:00', heureFin: '16:00', nombrePeriodes: 3 }
         ];
-        expect(win.periodesParSemaine(seances)).toBe(6);
+        expect(win.periodesParSemaine(seances)).toBe(5);
     });
 
-    it('un horaire sans séances exploitables rend 0, pas un total inventé', () => {
+    it('une séance incomplète ne contribue pas au total, et ne l\'annule pas non plus', () => {
+        const seances = [
+            { jour: 'Lundi', nombrePeriodes: 2 },
+            { jour: 'Jeudi', heureDebut: '13:00', heureFin: '16:00' }   // sans périodes
+        ];
+        expect(win.periodesParSemaine(seances)).toBe(2);
         expect(win.periodesParSemaine([{ jour: 'Lundi' }, {}])).toBe(0);
         expect(win.periodesParSemaine(null)).toBe(0);
     });

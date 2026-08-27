@@ -355,14 +355,25 @@ function migrerSeancesVersPeriodes() {
         const seancesHoraire = db.getSync(cleHoraireCours, []);
         let modified = false;
 
-        seancesHoraire.forEach(seance => {
-            if (seance.duree !== undefined && seance.nombrePeriodes === undefined) {
-                // Convertir la durée en périodes
-                seance.nombrePeriodes = Math.round((seance.duree * 60) / dureePeriode);
-                nbSeancesMigrees++;
-                modified = true;
-            }
-        });
+        // #540 lot E2 (26 août 2026) — CETTE MIGRATION NE DEVINE PLUS.
+        //
+        // Elle convertissait `duree` (heures) en périodes par une division. Or une
+        // période comprend sa pause — 50 minutes d'enseignement plus 10 de pause ici,
+        // 55 plus 5 ailleurs : diviser par la seule durée d'enseignement gonflait le
+        // compte dès la troisième période, et 4 heures d'horloge rendaient 5 périodes.
+        // Ce nombre étant le dénominateur de l'assiduité, la migration ÉCRIVAIT un faux
+        // en base, à chaque démarrage, pour toute séance qui n'avait qu'une durée.
+        //
+        // Depuis E1, `nombrePeriodes` est une donnée SAISIE. Une séance qui ne le porte
+        // pas reste incomplète — l'écran Horaire le DIT (« N sans nombre de périodes »)
+        // et l'utilisateur la complète en la voyant. Un dénominateur absent qui se
+        // remarque vaut mieux qu'un dénominateur faux qui passe inaperçu.
+        //
+        // ⚠ CE QUE CELA NE RÉPARE PAS : les `nombrePeriodes` que les exécutions
+        // PASSÉES ont déjà écrits. Ils sont en base, potentiellement gonflés, et rien
+        // ici ne les corrige — les corriger demanderait de savoir ce que `duree`
+        // signifiait, ce que personne ne peut dire après coup.
+        void dureePeriode;
 
         if (modified) {
             db.setSync(cleHoraireCours, seancesHoraire);
@@ -376,12 +387,10 @@ function migrerSeancesVersPeriodes() {
         Object.keys(seancesCompletes).forEach(date => {
             const seancesDuJour = seancesCompletes[date];
             if (Array.isArray(seancesDuJour)) {
-                seancesDuJour.forEach(seance => {
-                    if (seance.duree !== undefined && seance.nombrePeriodes === undefined) {
-                        seance.nombrePeriodes = Math.round((seance.duree * 60) / dureePeriode);
-                        nbSeancesMigrees++;
-                    }
-                });
+                // #540 lot E2 : même raison qu'au-dessus — le cache ne se remplit plus
+                // d'un nombre déduit. Il se régénère depuis l'horaire
+                // (`genererSeancesCompletes`), qui propage désormais `nombrePeriodes`.
+                void seancesDuJour;
             }
         });
 
@@ -422,8 +431,19 @@ function migrerPresencesVersPeriodes() {
     let nbMigrees = 0;
 
     presences.forEach(presence => {
+        // #540 lot E2 : les présences FACULTATIVES (interventions RàI) sont exclues.
+        // Leur champ `heures` porte en réalité des PÉRIODES — `interventions.js` y écrit
+        // `intervention.duree`, dont le libellé de saisie est « Durée (périodes) ». Les
+        // convertir revenait à diviser des périodes par une durée de période. L'écart
+        // restait petit, donc plausible, donc invisible : c'est exactement la forme de
+        // faux qui survit le plus longtemps.
+        if (presence.facultatif === true) return;
+
         if (presence.heures !== undefined && presence.periodesPresentes === undefined) {
-            // Convertir les heures en périodes
+            // Conversion légitime, celle-ci : `heures` est écrit par la saisie comme
+            // `periodesPresentes × dureePeriode / 60`. On refait l'aller-retour avec le
+            // même diviseur, donc on retombe sur la valeur d'origine quel que soit son
+            // réglage. Ce n'est pas une mesure de temps d'horloge.
             presence.periodesPresentes = Math.round((presence.heures * 60) / dureePeriode);
             nbMigrees++;
         }

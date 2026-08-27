@@ -64,9 +64,16 @@ test('#540-C · affichage et assiduité tombent sur le MÊME nombre de périodes
     });
 
     expect(r.erreur, `Erreur eval : ${r.erreur}`).toBeUndefined();
-    // 3 h = 180 min / 50 = 3,6 → 4 périodes. L'affichage disait 2 avant le lot C.
-    expect(r.cotéEcran).toBe(4);
-    expect(r.cotéCalcul).toBe(4);
+    // ⚠ CAS RETOURNÉ PAR LE LOT E2, ET C'EST LE POINT. Il attendait 4 des deux côtés :
+    // 180 min / 50 = 3,6 → 4. Les deux chaînes s'accordaient, mais sur un faux — la
+    // réponse est 3, une période comprenant sa pause. E2 a supprimé la division : une
+    // séance qui ne DÉCLARE pas ses périodes n'en vaut aucune.
+    //
+    // Ce que ce cas verrouille n'a pas changé : affichage et calcul tombent sur le même
+    // nombre. Ils s'accordent désormais aussi sur ce qu'ils ignorent, ce qui est la
+    // seule forme d'accord qui vaille quand la donnée manque.
+    expect(r.cotéEcran).toBe(0);
+    expect(r.cotéCalcul).toBe(0);
     expect(r.cotéEcran, 'affichage et calcul divergent — la panne que le lot C ferme')
         .toBe(r.cotéCalcul);
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);

@@ -312,6 +312,59 @@ const MENTION_DUREE_INCONNUE = 'durée inconnue : horaire à configurer';
  * @param {string} dateStr - Date au format YYYY-MM-DD
  * @returns {number} Heures décimales prévues ce jour-là, ou 0 si l'horaire est muet
  */
+/**
+ * Périodes prévues par l'HORAIRE pour une date — somme des `nombrePeriodes` des séances
+ * du jour visé. 0 si l'horaire ne dit rien.
+ *
+ * #540 lot E2 (26 août 2026). Sœur d'`obtenirHeuresPrevuesParHoraire`, qui rend des
+ * heures d'HORLOGE. Les deux mesurent la même journée, mais pas la même grandeur — et
+ * c'est précisément la confusion que ce lot ferme : on ne passe plus de l'une à l'autre
+ * par une division.
+ *
+ * ⮕ POURQUOI AUCUNE DIVISION N'EST POSSIBLE ICI. Une période de cégep comprend sa pause :
+ * 50 minutes d'enseignement plus 10 de pause ici, 55 plus 5 ailleurs. Diviser une durée
+ * d'horloge par la durée d'ENSEIGNEMENT donnait 4 périodes pour un bloc de 08:00 à 11:00,
+ * qui en fait trois — et 5 pour un bloc de quatre heures, qui en fait quatre. L'erreur
+ * croissait avec la durée, et ce nombre est le dénominateur de l'assiduité.
+ *
+ * La règle de la reprise est celle de `genererSeancesCompletes` et
+ * d'`obtenirHeuresPrevuesParHoraire` : c'est le jour REMPLACÉ qui porte l'horaire.
+ *
+ * @param {string} dateStr - Date (YYYY-MM-DD)
+ * @returns {number} périodes, ou 0 — jamais un nombre inventé.
+ */
+function obtenirPeriodesPrevuesParHoraire(dateStr) {
+    if (!dateStr) return 0;
+
+    const seancesHoraire = typeof obtenirSeancesHoraire === 'function'
+        ? obtenirSeancesHoraire()
+        : db.getSync('seancesHoraire', []);
+
+    if (!Array.isArray(seancesHoraire) || seancesHoraire.length === 0) return 0;
+
+    const JOURS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    const infoJour = obtenirInfosJourCalendrier(dateStr);
+    let jourVise = null;
+    if (infoJour) {
+        jourVise = (infoJour.statut === 'reprise' && infoJour.jourRemplace)
+            ? infoJour.jourRemplace
+            : infoJour.jourSemaine;
+    }
+    if (!jourVise) {
+        const d = new Date(dateStr + 'T00:00:00');
+        if (isNaN(d.getTime())) return 0;
+        jourVise = JOURS[d.getDay()];
+    }
+
+    const cible = String(jourVise).toLowerCase();
+    return seancesHoraire.reduce((total, seance) => {
+        if (!seance || !seance.jour) return total;
+        if (String(seance.jour).toLowerCase() !== cible) return total;
+        const p = parseInt(seance.nombrePeriodes, 10);
+        return total + (p > 0 ? p : 0);
+    }, 0);
+}
+
 function obtenirHeuresPrevuesParHoraire(dateStr) {
     if (!dateStr) return 0;
 
@@ -535,38 +588,23 @@ function obtenirNombrePeriodesSeance(dateStr) {
         // deja avec forEach. Avant : seul seancesDuJour[0].nombrePeriodes etait
         // retourne, sous-comptant les jours multi-seances et polluant l'indice
         // d'assiduite.
-        const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
-        // #540 lot C (26 août 2026) : `mesurerDureeSeance` plutôt qu'une lecture directe
-        // de `s.duree`. Elle sait lire `duree`, `debut/fin` ET `heureDebut/heureFin` —
-        // et une entrée du cache peut n'avoir QUE des heures : `genererSeancesCompletes`
-        // recopie `duree` depuis la séance de l'horaire, qui ne la porte pas quand
-        // l'horaire vient du formulaire. Le total tombait alors à 0 et la fonction
-        // repartait interroger l'horaire, par un détour dont le résultat dépendait de
-        // l'assemblage groupe-cours. Ici on mesure ce qu'on a sous la main, avec la même
-        // fonction que l'écran Horaire — une seule mesure pour les deux.
+        // #540 lot E2 (26 août 2026) : PLUS AUCUNE DIVISION. Le nombre de périodes est
+        // une donnée SAISIE (lot E1), il se lit — il ne se déduit plus des heures.
+        // Une séance qui ne le porte pas ne contribue pas : on ne la remplace par aucun
+        // nombre, et le repli sur l'horaire ci-dessous prendra le relais s'il sait.
         const total = seancesDuJour.reduce((acc, s) => {
-            if (s.nombrePeriodes) return acc + s.nombrePeriodes;
-            const heures = mesurerDureeSeance(s);
-            if (heures > 0) return acc + Math.round((heures * 60) / dureePeriode);
-            return acc;
+            const p = parseInt(s.nombrePeriodes, 10);
+            return acc + (p > 0 ? p : 0);
         }, 0);
         if (total > 0) return total;
     }
 
-    // #538 : la quatrième valeur en dur de la famille, en PÉRIODES cette fois.
-    // `genererSeancesCompletes` (horaire.js) la nomme déjà comme polluant le
-    // dénominateur d'assiduité — commentaire « ÉTAPE 3 supprimée », FIX #220.
-    // Même règle que `obtenirHeuresSeance` : on dérive de l'horaire, on n'invente
-    // pas. Les heures prévues deviennent des périodes par la durée de période
-    // configurée (`dureePeriode`, clé réellement écrite par `definirDureePeriode`).
-    // 0 si l'horaire ne prévoit rien ce jour-là.
-    const heuresPrevues = obtenirHeuresPrevuesParHoraire(dateStr);
-    if (heuresPrevues > 0) {
-        const dureePeriodeMin = typeof obtenirDureePeriode === 'function'
-            ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
-        return Math.round((heuresPrevues * 60) / dureePeriodeMin);
-    }
-    return 0;
+    // #538 : le repli valait `2` en dur ; il lit l'horaire depuis. #540 lot E2 : il le lit
+    // désormais en PÉRIODES, sans passer par les heures. Le détour heures → périodes était
+    // la dernière division de cette chaîne, et la plus coûteuse : elle ignorait les pauses,
+    // donc elle gonflait le dénominateur de l'assiduité dès qu'une séance dépassait deux
+    // périodes. 0 si l'horaire ne prévoit rien ce jour-là — un refus de répondre.
+    return obtenirPeriodesPrevuesParHoraire(dateStr);
 }
 
 /**
@@ -2007,6 +2045,11 @@ window.obtenirNombrePeriodesSeance = obtenirNombrePeriodesSeance;
 // repli à 2 périodes ; l'écran affichait donc une durée que le calcul d'assiduité
 // ne reconnaissait pas. Une seule fonction mesure désormais, pour les deux.
 window.mesurerDureeSeance = mesurerDureeSeance;
+// #540 lot E2 — les périodes prévues par l'horaire, sans conversion.
+window.obtenirPeriodesPrevuesParHoraire = obtenirPeriodesPrevuesParHoraire;
+// Sa sœur en HEURES d'horloge — exportée pour que la sentinelle #538 puisse éprouver
+// que les deux grandeurs restent distinctes et ne se déduisent plus l'une de l'autre.
+window.obtenirHeuresPrevuesParHoraire = obtenirHeuresPrevuesParHoraire;
 window.genererOptionsPeriodesPresentes = genererOptionsPeriodesPresentes;
 
 /* ===============================
