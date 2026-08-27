@@ -2847,12 +2847,26 @@ function ajouterPremierNiveau() {
  *   préstructurel » reste dans la `description`, qui est le texte que l'élève
  *   lit.
  */
+// ⮕ #542 lot 3, pas 2 — LA DESCRIPTION REJOINT LE LIBELLÉ, DANS LA MÊME SOURCE.
+//
+// Les quatre premières descriptions ne sont pas neuves : elles étaient écrites
+// en dur dans `interpreterScoreIDME` (`profil-etudiant-sections-affichage.js`),
+// choisies par une comparaison à 0,64 / 0,75 / 0,85 — les bornes de l'échelle de
+// Grégoire recopiées dans le code. Elles sont RAPATRIÉES ici telles quelles :
+// c'est leur mode de SÉLECTION qui était fautif, pas leur texte. Désormais elles
+// sont attachées à l'étiquette SOLO du niveau, et c'est l'utilisateur qui décide
+// quel niveau de SON échelle porte quelle étiquette.
+//
+// ⚠ « Préstructurel » est la SEULE description que le dépôt n'avait pas :
+// l'ancien code n'en produisait que quatre, pour cinq niveaux SOLO. Celle-ci est
+// donc écrite à neuf, d'après la définition de la taxonomie, et elle attend le
+// mot de Grégoire — c'est du vocabulaire pédagogique, pas de la mécanique.
 const NIVEAUX_SOLO_ECHELLE = [
-    { valeur: 'prestructurel', libelle: 'Préstructurel' },
-    { valeur: 'unistructurel', libelle: 'Unistructurel' },
-    { valeur: 'multistructurel', libelle: 'Multistructurel' },
-    { valeur: 'relationnel', libelle: 'Relationnel' },
-    { valeur: 'abstrait_etendu', libelle: 'Abstrait étendu' }
+    { valeur: 'prestructurel', libelle: 'Préstructurel', description: 'Aucun aspect pertinent n\'est traité' },
+    { valeur: 'unistructurel', libelle: 'Unistructurel', description: 'Un seul aspect traité, compréhension superficielle' },
+    { valeur: 'multistructurel', libelle: 'Multistructurel', description: 'Plusieurs aspects sans vision d\'ensemble' },
+    { valeur: 'relationnel', libelle: 'Relationnel', description: 'Vision globale avec liens entre les aspects' },
+    { valeur: 'abstrait_etendu', libelle: 'Abstrait étendu', description: 'Transfert à d\'autres contextes' }
 ];
 
 /**
