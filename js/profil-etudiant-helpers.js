@@ -214,6 +214,92 @@ function obtenirNiveauIDMEDepuisPourcentage(pourcentage) {
     return 'E';
 }
 
+/**
+ * Situe un pourcentage dans les PLAGES de l'échelle fournie et rend le NIVEAU
+ * atteint — l'objet complet, pas seulement son code.
+ *
+ * ⮕ #542 lot 3, pas 1. C'est la moitié « SITUER » du dépistage. La moitié
+ * « INTERPRÉTER » — lire l'étiquette `niveauSOLO` du niveau obtenu — est
+ * volontairement dehors : les deux ne demandent pas la même chose de
+ * l'utilisateur. Situer ne demande que des plages, présentes dans toute
+ * échelle ; interpréter demande une étiquette SOLO, facultative.
+ *
+ * POURQUOI ELLE EXISTE. `obtenirNiveauIDMEDepuisPourcentage` (juste au-dessus)
+ * compare la moyenne à `idme.insuffisant` / `idme.developpement` /
+ * `idme.maitrise` — 0,64 / 0,75 / 0,85. Mesuré le 26 août 2026 sur les données
+ * réelles : ce sont les bornes de l'échelle de Grégoire, au chiffre près,
+ * recopiées dans le code il y a des mois. Le dépistage d'un utilisateur qui note
+ * autrement lit donc l'échelle d'un autre. Ici, les bornes viennent de SON
+ * échelle.
+ *
+ * CE QUI RESTE NUMÉRIQUE, ET POURQUOI. Agréger plusieurs évaluations exige une
+ * moyenne, donc des nombres. Ce qui doit disparaître n'est pas le calcul : c'est
+ * le fait que les BORNES viennent d'ailleurs que de l'échelle de l'utilisateur.
+ *
+ * CONTRAT D'ENTRÉE : un POURCENTAGE 0-100, comme les `min`/`max` des niveaux.
+ * Aucune détection du genre « si c'est petit, c'est sans doute déjà 0-1 » —
+ * c'est exactement le défaut #541, et un devineur n'est pas un contrat.
+ *
+ * LA PREMIÈRE PLAGE QUI CONTIENT LA VALEUR GAGNE. Ce n'est pas un détail : dans
+ * l'échelle réelle de Grégoire, « 0 » couvre 0-0 et « I » couvre 0-64 — les deux
+ * contiennent 0. Une moyenne de 0 rend donc « 0 », pas « I ». C'est le
+ * comportement de `calculerNote` (`evaluation-calcul.js`) depuis toujours, et le
+ * reproduire ici est délibéré : deux écrans qui situent la même note ne doivent
+ * pas rendre deux niveaux différents.
+ *
+ * AUCUNE PLAGE NE CONTIENT LA VALEUR : rend `null`. PAS de repli « niveau le
+ * plus proche ». Décision du pas 1, et son motif : `calculerNote` a un tel repli
+ * (par distance au milieu de la plage), mais il fabrique une réponse que
+ * l'échelle ne donne pas. C'est un fallback arbitraire, et le projet en interdit
+ * — le même argument qu'a retenu #526 pour refuser de déduire `valeurCalcul` du
+ * milieu d'une plage (`echelles.js`, `refusChampNiveau`). Ici, `null` veut dire
+ * « cette échelle ne répond pas pour cette valeur », et c'est à l'appelant de le
+ * DIRE, jamais de le masquer. `calculerNote` garde son repli : la notation est
+ * hors du périmètre du lot 3, et le changer serait une régression écrite en
+ * passant.
+ *
+ * ⮕ CINQ SITES DU DÉPÔT répètent cette mise en plage à la main —
+ * `evaluation-calcul.js:130, 263, 439, 638` et
+ * `profil-etudiant-sections-affichage.js:709`. Ils sont candidats à converger
+ * ici, mais aucun n'est touché par le lot 3 : ce sont des écrans de NOTATION.
+ *
+ * Verrouillé par `tests/unit/sentinelle-542-situer-pourcentage-dans-echelle.test.js`.
+ *
+ * @param {number} pourcentage - Pourcentage sur 0-100 (et non un score 0-1)
+ * @param {Object} echelle - Échelle de l'évaluation, avec son tableau `niveaux`
+ * @returns {Object|null} - Le niveau atteint (objet complet), ou `null`
+ */
+function situerPourcentageDansEchelle(pourcentage, echelle) {
+    if (!Number.isFinite(pourcentage)) return null;
+
+    const niveaux = (echelle && Array.isArray(echelle.niveaux)) ? echelle.niveaux : null;
+    if (!niveaux || niveaux.length === 0) return null;
+
+    const trouve = niveaux.find(function(n) {
+        const min = _borneNumeriqueOuNull(n && n.min);
+        const max = _borneNumeriqueOuNull(n && n.max);
+        if (min === null || max === null) return false;
+        return pourcentage >= min && pourcentage <= max;
+    });
+
+    return trouve || null;
+}
+
+/**
+ * Une borne de niveau lue comme nombre, ou `null` si elle n'en est pas un.
+ *
+ * `Number('')` vaut 0 : une borne VIDE deviendrait donc la borne zéro, et un
+ * niveau mal saisi capturerait toutes les moyennes nulles. #526 refuse désormais
+ * une borne vide à la saisie (`refusChampNiveau`), mais les échelles écrites
+ * avant lui vivent encore dans les données. Privée au module : ce n'est pas une
+ * règle métier, c'est la lecture prudente d'un champ.
+ */
+function _borneNumeriqueOuNull(valeur) {
+    if (valeur === null || valeur === undefined || valeur === '') return null;
+    const nombre = Number(valeur);
+    return Number.isFinite(nombre) ? nombre : null;
+}
+
 /* ===============================
    🚀 INITIALISATION DU MODULE
    =============================== */
@@ -672,13 +758,18 @@ function interpreterAssiduite(valeur) {
     };
 }
 
-// Exporter les 16 fonctions vers window (décision étape 1 b — convention systématique
-// cross-zones, Écart #4 MODULES-MAP §2.3)
+// Exporter les fonctions vers window (décision étape 1 b — convention systématique
+// cross-zones, Écart #4 MODULES-MAP §2.3).
+// ⮕ Ce libellé annonçait « les 16 fonctions ». Le compte réel était de 19 au
+// 27 août 2026, AVANT l'ajout de #542 : le chiffre s'était périmé en silence à
+// coups d'extractions. Il est retiré plutôt que corrigé — un compte figé dans un
+// commentaire se re-périme au prochain ajout.
 window.obtenirTermeProduction = obtenirTermeProduction;
 window.genreTermeProduction = genreTermeProduction;
 window.accordTermeProduction = accordTermeProduction;
 window.obtenirCouleurNiveauIDME = obtenirCouleurNiveauIDME;
 window.obtenirNiveauIDMEDepuisPourcentage = obtenirNiveauIDMEDepuisPourcentage;
+window.situerPourcentageDansEchelle = situerPourcentageDansEchelle;
 window.obtenirNombreProductionsPourPatterns = obtenirNombreProductionsPourPatterns;
 window.obtenirIdsProductionsEvaluables = obtenirIdsProductionsEvaluables;
 window.obtenirPratiqueActuelle = obtenirPratiqueActuelle;
