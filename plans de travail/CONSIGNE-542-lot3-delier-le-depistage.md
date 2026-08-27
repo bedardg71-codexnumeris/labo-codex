@@ -398,3 +398,36 @@ la session `file://` de Grégoire est ouverte.
 - **Le geste de Grégoire** — étiqueter son échelle « 0-IDME » en SOLO. Tant qu'il ne l'a pas
   fait, la carte affichera ses noms de niveaux et l'avis d'étiquette manquante : **c'est le
   comportement attendu, pas une panne.**
+
+---
+
+### ⚠ UN SEPTIÈME SITE, TROUVÉ APRÈS LE PAS 3c-3 — ET C'EST ENCORE DU CODE MORT
+
+Trouvé le 27 août en vérifiant qui consomme encore `obtenirCouleurNiveauIDME` après la
+réécriture de la carte. **`genererDiagnosticSRPNF` (`js/profil-etudiant-diagnostics.js:57`)
+est le JUMEAU quasi mot pour mot de la carte qu'on vient de refaire** : quatre blocs
+colorés E / M / D / I, mêmes en-têtes (« Forces exceptionnelles (E) », « Forces identifiées
+(M) »…), mêmes `obtenirCouleurNiveauIDME('E')`, et un regroupement par
+`obtenirNiveauIDMEDepuisPourcentage` — qui lit les trois seuils `idme.*`.
+
+**Ce qui a été mesuré, et ce qui ne l'a pas été :**
+
+| Vérifié | Résultat |
+|---|---|
+| Appelants de `genererDiagnosticCriteres` (son unique porte d'entrée) | **Aucun** — grep récursif `*.js`, `*.html`, `*.json` : sa définition, son export `window`, et une ligne de sentinelle d'exports. Rien d'autre. |
+| Appel dynamique par nom (`window[...]`, `data-action`, table de dispatch) | **Aucun** — `'genererDiagnostic` / `"genererDiagnostic` ne matchent nulle part hors tests. |
+| `genererDiagnosticGenerique` et `_genererBarresSRPNF` | **NON vérifiés.** Ils sont dans le même fichier et probablement dans le même cas, mais je ne l'ai pas mesuré — ne pas le supposer. |
+
+⮕ **C'est la TROISIÈME fonction du lot dans ce cas**, après `interpreterScoreIDME` et
+`interpreterPerformance`. Le motif est net et vaut d'être nommé : **les descriptions SOLO et
+les seuils IDME se sont accumulés dans des chemins que plus rien n'appelle.** Chercher les
+seuils par `grep` donne donc une liste plus longue que la liste des seuils qui AGISSENT — et
+les deux ne demandent pas le même geste.
+
+⮕ **CONSÉQUENCE POUR LE PAS 5** (« qui lit encore les seuils `idme.*` ») : la question ne
+peut pas se répondre au `grep` seul. Chaque site trouvé demande sa vérification de
+consommateurs avant qu'on décide de le brancher ou de le supprimer. Un site mort branché sur
+l'échelle de l'utilisateur, c'est du code mort rendu vivant.
+
+⏳ **NON TRAITÉ ICI, ET DÉLIBÉRÉMENT** : hors périmètre du pas 3c-3, et le fichier n'était
+pas dans le commit. À prendre au pas 5, avec la vérification des deux fonctions voisines.
