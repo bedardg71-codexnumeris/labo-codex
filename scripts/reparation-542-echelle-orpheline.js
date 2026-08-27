@@ -169,6 +169,19 @@
         return false;
     }
 
+    // Combien de niveaux saisis le dépistage saura-t-il relire avec cette table ?
+    function compterConvertibles(evals, table) {
+        let n = 0;
+        for (const ev of evals) {
+            for (const c of (Array.isArray(ev.criteres) ? ev.criteres : [])) {
+                if (!c || c.niveauSelectionne == null) continue;
+                const code = String(c.niveauSelectionne).trim().toUpperCase();
+                if (code && table[code] !== undefined) n++;
+            }
+        }
+        return n;
+    }
+
     async function reparer542(options) {
         options = options || {};
         const executer = options.executer === true;
@@ -324,6 +337,17 @@
         const neuve = JSON.parse(JSON.stringify(retenue.s.objet));
         neuve.id = CIBLE;
         delete neuve.idOriginal;
+        // ⚠ `parDefaut` N'EST PAS PROPAGÉ. Quatre sites choisissent une échelle
+        // par `echelles.find(e => e.parDefaut) || echelles[0]`
+        // (`graphiques-progression.js:381`, `portfolio.js:560`,
+        // `tableau-bord-apercu.js:720` et `:1766`), dont le premier lit le
+        // magasin même où l'on écrit. Copier un `parDefaut: true` y poserait
+        // DEUX échelles par défaut. `find` rendrait encore la première, donc
+        // rien ne casserait aujourd'hui — c'est exactement le genre de doublon
+        // dormant que ce projet refuse de laisser derrière lui.
+        // Cette échelle est un point d'ancrage historique, pas un défaut à
+        // proposer : elle ne doit être choisie que par son identifiant.
+        delete neuve.parDefaut;
         neuve.nom = (retenue.s.objet.nom || 'Échelle') + ' (restaurée #542)';
         neuve.restauree542 = {
             date: new Date().toISOString(),
@@ -345,9 +369,27 @@
                 + '   plage ' + String(n.min) + '–' + String(n.max));
         }
         L('');
-        L('   effet attendu : ' + retenue.ok + ' / ' + retenue.vues
-            + ' évaluations redeviennent convertibles ('
-            + (retenue.taux * 100).toFixed(1) + ' %)');
+        // ⚠⚠ CORRIGÉ — LE TAUX DE REPRODUCTION N'EST PAS L'EFFET DE LA
+        // RÉPARATION, et les confondre faisait dire au dry-run l'inverse de la
+        // vérité : « 283 / 339 redeviennent convertibles » laissait croire que
+        // 56 évaluations resteraient cassées.
+        //   · CONVERTIBLE = le code du niveau se trouve dans l'échelle, donc le
+        //     dépistage sait le lire. Aucun code inconnu n'existe sur ces
+        //     évaluations : elles redeviennent TOUTES convertibles.
+        //   · REPRODUITE = en plus, la note stockée se recalcule à l'identique.
+        //     C'est une mesure de CONFIANCE dans l'identification, pas un effet.
+        // Les 56 non reproduites relèvent de #543 (donnée algorithmique altérée,
+        // ou désaccord note ↔ critères) ; leur dépistage, lui, redevient juste.
+        const tableNeuve = tableDe(neuve.niveaux);
+        const nivAvant = compterConvertibles(orphelines, {});
+        const nivApres = compterConvertibles(orphelines, tableNeuve);
+        L('   EFFET RÉEL — niveaux relisibles par le dépistage :');
+        L('        avant : ' + nivAvant + '        après : ' + nivApres
+            + '   (sur ' + orphelines.length + ' évaluations)');
+        L('   CONFIANCE — notes stockées qui se recalculent à l\'identique : '
+            + retenue.ok + ' / ' + retenue.vues + '  (' + (retenue.taux * 100).toFixed(1) + ' %)');
+        L('        les ' + (retenue.vues - retenue.ok) + ' autres redeviennent convertibles elles aussi ;');
+        L('        c\'est leur NOTE qui ne se recalcule pas — voir #543.');
         L('   ⚠ AUCUNE note n\'est touchée. AUCUNE évaluation n\'est modifiée.');
         if (meilleursTaux.length > 1) {
             L('   ℹ ' + meilleursTaux.length + ' sources reproduisent aussi bien (valeurs identiques).');
@@ -378,21 +420,6 @@
             return { statut: 'refus-sauvegarde' };
         }
 
-        // Oracle AVANT : combien de niveaux sont convertibles dans ce magasin ?
-        function compterConvertibles(evals, table) {
-            let n = 0;
-            for (const ev of evals) {
-                for (const c of (Array.isArray(ev.criteres) ? ev.criteres : [])) {
-                    if (!c || c.niveauSelectionne == null) continue;
-                    const code = String(c.niveauSelectionne).trim().toUpperCase();
-                    if (code && table[code] !== undefined) n++;
-                }
-            }
-            return n;
-        }
-        const avant = compterConvertibles(orphelines, {});             // rien n'est résolu
-        const attendu = compterConvertibles(orphelines, tableDe(neuve.niveaux));
-
         const liste = echellesCible.slice();
         liste.push(neuve);
         try {
@@ -421,7 +448,7 @@
         L('   échelles dans le magasin : ' + relu.length);
         L('');
         L('   niveaux convertibles pour ces ' + orphelines.length + ' évaluations :');
-        L('        avant : ' + avant + '        après : ' + attendu);
+        L('        avant : ' + nivAvant + '        après : ' + nivApres);
         L('');
         L('⚠ AUCUNE note n\'a été touchée, AUCUNE évaluation modifiée : une seule');
         L('  échelle a été ajoutée.');
@@ -440,8 +467,8 @@
             statut: 'execute',
             echelle: CIBLE,
             magasin: cleEchelles,
-            convertiblesAvant: avant,
-            convertiblesApres: attendu
+            convertiblesAvant: nivAvant,
+            convertiblesApres: nivApres
         };
     }
 
