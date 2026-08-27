@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.104',
+            couleur: 'vert',
+            titre: 'La structure se lit dans TES niveaux',
+            items: [
+                '<strong>La carte \u00ab Observation de la structure \u00bb montre un bloc par niveau de TON \u00e9chelle.</strong> Les quatre cat\u00e9gories \u00e9crites dans le logiciel \u2014 forces exceptionnelles, forces identifi\u00e9es, d\u00e9fis en d\u00e9veloppement, d\u00e9fis critiques \u2014 disparaissent. Chaque bloc porte le nom que tu as donn\u00e9 \u00e0 ton niveau, sa couleur, et les crit\u00e8res qui y tombent. Un niveau que personne n\'atteint n\'appara\u00eet pas : la carte montre la structure observ\u00e9e, pas ton \u00e9chelle en entier.',
+                '<strong>Quand un niveau porte une \u00e9tiquette SOLO, son interpr\u00e9tation accompagne le bloc.</strong> Sans \u00e9tiquette, c\'est le nom de ton niveau qui s\'affiche, et l\'absence est signal\u00e9e une seule fois \u2014 pas une fois par bloc.',
+                '<strong>Correction : sans grille de r\u00e9f\u00e9rence d\u00e9sign\u00e9e, le d\u00e9pistage annon\u00e7ait \u00ab aucune force ni d\u00e9fi identifi\u00e9 \u00bb.</strong> Cette phrase se lit comme un verdict rassurant sur l\'\u00e9l\u00e8ve, alors qu\'elle voulait dire \u00ab je n\'ai aucun crit\u00e8re \u00e0 quoi comparer \u00bb. Et la liste \u00ab Progression par crit\u00e8re \u00bb restait vide, ce qui se lit comme \u00ab rien \u00e0 signaler \u00bb. La cause est maintenant nomm\u00e9e, et elle se r\u00e9pare \u2014 un silence, non.',
+                '<strong>Le niveau SOLO d\'un crit\u00e8re vient de ce que tu as configur\u00e9 dans ta grille.</strong> Il \u00e9tait devin\u00e9 en cherchant cinq mots-cl\u00e9s dans le NOM du crit\u00e8re \u2014 structure, rigueur, fran\u00e7ais, plausibilit\u00e9, nuance \u2014 c\'est-\u00e0-dire les crit\u00e8res d\'un seul enseignant, appliqu\u00e9s \u00e0 tout le monde. La devinette pouvait contredire le champ que tu avais rempli toi-m\u00eame.',
+                '<strong>L\'export de recherche livre les vraies \u00e9chelles de tes \u00e9valuations</strong>, au lieu d\'en annoncer une seule pour l\'ensemble. \u26a0 Le champ \u00ab niveau_solo \u00bb y passe du vocabulaire anglais au vocabulaire fran\u00e7ais que tu configures : un fichier export\u00e9 avant cette version et un fichier export\u00e9 apr\u00e8s ne portent pas les m\u00eames valeurs dans cette colonne.'
+            ]
+        },
+        {
             version: '1.103',
             couleur: 'vert',
             titre: 'Le niveau vient de ta pratique',
