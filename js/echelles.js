@@ -66,10 +66,13 @@
  *   lecture SOLO.
  *   ⚠ POSÉ ICI PARCE QUE C'EST UN SEED — une échelle LIVRÉE, que l'utilisateur
  *   voit et modifie. Ce n'est pas la même chose que deviner l'étiquette d'une
- *   échelle EXISTANTE depuis sa prose : ça, ce serait exactement le défaut B9
- *   (`obtenirNiveauSOLO()` qui redevine SOLO depuis le nom d'un critère et
- *   contredit le champ configuré). Aucune reprise automatique n'est faite sur
- *   les échelles déjà enregistrées : le champ y naît vide.
+ *   échelle EXISTANTE depuis sa prose : ça, ce serait exactement le défaut B9 —
+ *   `obtenirNiveauSOLO()`, qui redevinait SOLO depuis le nom d'un critère et
+ *   pouvait contredire le champ configuré. ⮕ **Elle a été supprimée au pas 4 du
+ *   lot 3** (`trimestres.js`, 27 août 2026) ; le défaut est nommé ici parce que
+ *   c'est le patron à ne pas recréer, pas parce qu'il vit encore. Aucune reprise
+ *   automatique n'est faite sur les échelles déjà enregistrées : le champ y naît
+ *   vide.
  *   ⚠ « I » reçoit `unistructurel` et NON un composite : sa description dit
  *   « Préstructurel, unistructurel », mais le menu ne prend qu'UNE étiquette
  *   (décision du 26 août : pas d'entrée composite, chaque lecteur n'a qu'une
