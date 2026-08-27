@@ -910,6 +910,22 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   vrai pour les quatre oublis du 26. Mais **au moins une part du motif n'est pas un oubli
   humain : c'est un angle mort de l'outil**, et aucun rappel n'y aurait changé quoi que ce soit.
 
+  🔧 **CINQUIÈME DONNÉE, 27 août au matin — ET C'EST LA PLUS GRAVE : LA SENTINELLE EST
+  AVEUGLE AUX MODIFICATIONS SUCCESSIVES D'UN MÊME FICHIER ENTRE DEUX RELEASES.**
+  Elle vérifie que le `?v=` a changé **depuis la release précédente**. Une fois qu'il a
+  changé une fois, elle est satisfaite — et le reste jusqu'à la release suivante, quel que
+  soit le nombre de fois où le fichier est encore modifié.
+  ⮕ **Mesuré** : `js/profil-etudiant-calculs.js` est passé à `20260827b` (pas 3a), puis
+  `20260827c` (pas 3b). Un troisième changement — le correctif du niveau global — est parti
+  **sous le même `c`**. La sentinelle est restée verte, le hook pré-push a laissé passer, et
+  le navigateur de Grégoire, qui avait déjà chargé `c`, aurait servi l'ANCIEN fichier. Il
+  aurait donc testé un correctif qu'il n'avait pas.
+  ⮕ **C'est le trou que les quatre oublis précédents masquaient** : ils portaient tous sur
+  un fichier dont le `?v=` n'avait pas bougé DU TOUT depuis la release. Celui-ci avait bougé,
+  et c'est ce qui l'a rendu invisible.
+  ⮕ **La règle juste** est donc plus stricte : le `?v=` doit changer à chaque COMMIT qui
+  touche le fichier, pas une seule fois par cycle de release.
+
   ⮕ **Ce que ça tranche** : la piste (b) — `--build-only` intégré au geste de commit — est à
   écarter telle quelle. Elle bumperait le build, donc la version sous les pieds de Grégoire.
   Le 27 au matin, `--build-only --dry-run` proposait de toucher **18 fichiers** pour un
