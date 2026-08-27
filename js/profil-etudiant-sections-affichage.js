@@ -928,7 +928,52 @@ function genererSectionAccompagnement(da) {
                 <p class="profil-texte-paragraphe">
                     <strong>Performance globale (P) :</strong> ${(() => {
                         const pct = indices.P;
-                        const niveau = pct >= 85 ? 'E' : pct >= 75 ? 'M' : pct >= 65 ? 'D' : 'I';
+
+                        // ⚠⚠ #542 lot 3, pas 3c — LE NIVEAU VIENT DE LA PRATIQUE,
+                        // PLUS D'UN TERNAIRE.
+                        //
+                        // Ce qui vivait ici, en clair :
+                        //     pct >= 85 ? 'E' : pct >= 75 ? 'M' : pct >= 65 ? 'D' : 'I'
+                        // Les bornes de l'échelle de Grégoire écrites dans le code,
+                        // sans même passer par `obtenirSeuil` — donc invisibles à
+                        // une recherche sur `idme.`. Elles affichaient un niveau
+                        // IDME pour TOUT LE MONDE, y compris sous une pratique
+                        // sommative dont la note globale est un pourcentage
+                        // pondéré et n'a jamais prétendu être un niveau atteint.
+                        //
+                        // ⮕ DÉCISION DE GRÉGOIRE, 27 août 2026 : « c'est la
+                        // pratique de notation qui établit la note globale de
+                        // l'élève ». C'est donc elle qui dit dans quoi cette note
+                        // se lit — et la sommative répond « aucune échelle »,
+                        // ce qui est la bonne réponse, pas un manque.
+                        const pratiqueLecture = (typeof obtenirPratiqueActuelle === 'function')
+                            ? obtenirPratiqueActuelle() : null;
+                        const lectureNote = (pratiqueLecture && typeof pratiqueLecture.obtenirEchelleNoteGlobale === 'function')
+                            ? pratiqueLecture.obtenirEchelleNoteGlobale(da)
+                            : { echelle: null, raison: 'pratique-sans-methode', message: '' };
+                        const niveauGlobal = lectureNote.echelle
+                            ? situerPourcentageDansEchelle(pct, lectureNote.echelle)
+                            : null;
+                        const lectureSOLO = interpreterNiveauAtteint(niveauGlobal);
+
+                        // Le niveau atteint est ce qu'on LIT ; SOLO est ce qui
+                        // l'explique, et il reste au SURVOL — décision de Grégoire
+                        // sur le comparateur, même esprit ici : ne pas mettre une
+                        // taxonomie en vedette devant un enseignant qui ne l'emploie
+                        // pas.
+                        const survolNiveau = niveauGlobal
+                            ? (lectureSOLO.interpretee
+                                ? lectureSOLO.libelleSOLO + ' — ' + lectureSOLO.texte
+                                : (lectureSOLO.texte || '') + (lectureSOLO.message ? ' · ' + lectureSOLO.message : ''))
+                            : (lectureNote.message || '');
+                        const prefixeNiveau = niveauGlobal
+                            ? `<span title="${echapperHtml(survolNiveau)}">${echapperHtml(String(niveauGlobal.code))}</span> `
+                            : '';
+                        // Sans niveau, le pourcentage porte lui-même l'explication.
+                        // Elle n'est PAS affichée en permanence : une pratique
+                        // sommative qui n'a pas de niveau n'est pas en panne, et un
+                        // avertissement permanent le laisserait croire.
+                        const survolPourcentage = niveauGlobal ? '' : ` title="${echapperHtml(survolNiveau)}"`;
 
                         // Obtenir la configuration pour afficher le nombre d'artefacts retenus
                         const config = db.getSync(cle('modalitesEvaluation'), null) || {};
@@ -948,7 +993,7 @@ function genererSectionAccompagnement(da) {
                         }
 
                         const termeArtefact = nbTotalArtefacts > 1 ? obtenirTermeProduction('pluriel') : obtenirTermeProduction('singulier');
-                        return `${niveau} ${pct.toFixed(0)}% <span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal;">(sur ${nbTotalArtefacts} ${termeArtefact})</span>${noteExplicative}`;
+                        return `${prefixeNiveau}<span${survolPourcentage}>${pct.toFixed(0)}%</span> <span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal;">(sur ${nbTotalArtefacts} ${termeArtefact})</span>${noteExplicative}`;
                     })()}
                 </p>
 
