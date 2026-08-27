@@ -88,6 +88,31 @@ comparées à des pourcentages.
   pour PRODUIRE une intensité — l'IPB × direction en produit une — il en manque une pour FONDER ce
   seuil. Premier pas possible sans décision : unifier les quatre replis.
 
+### ✅ L'AUDIT DE L'ONGLET ÉVALUATIONS EST RETROUVÉ ET VERSÉ — 27 août 2026
+
+Il avait été demandé à **Fable 5** (session cloud « Audit onglet Évaluation ») et **il était resté
+sur sa branche**, `claude/audit-evaluation-tab-txocw7`, jamais fusionnée — pendant que son **rapport
+jumeau**, l'audit Conception du même jour, l'avait été. Personne ne l'avait vu depuis le 25 août.
+
+- **Rapport fusionné sur `main`** : `Rapports/AUDIT-evaluation-onglet-2026-08-25.md` (commit
+  `b7f46938`, cherry-pick, auteur d'origine conservé).
+- **17 items versés au backlog : #556 à #572.** ⮕ **Dernier ID pris : #572.**
+- **Deux critiques, revérifiés sur 1.104.1 le 27 août — ils tiennent encore** :
+  **#556** « Vider la corbeille » détruit les fichiers de TOUS les groupes-cours alors que la modale
+  n'a compté que le groupe actif (perte de données) · **#557** `supprimerEvaluation` existe en
+  double et c'est la version SANS restauration de l'originale qui gagne l'export `window`
+  (`liste-evaluations.js` ligne 14580 contre `evaluation.js` ligne 14595 dans `index.html`).
+
+⚠ **CE QUE CET AUDIT N'EST PAS.** Il se déclare **lecture seule** : tous ses verdicts sont
+`[lecture]`, aucun Chromium n'a été lancé, les deux critiques ont été contre-vérifiés par une
+seconde lecture et non par un essai. Sa base est **1.99.0**, cinq versions en arrière : **ses
+numéros de ligne sont périmés** et seuls A1/A2 ont été revérifiés. ⮕ **Reproduire avant de
+corriger**, et regreper avant de suivre une ligne.
+
+⮕ **Leçon de méthode** : un audit commandé à une session cloud ne revient pas tout seul. Vérifier
+la branche `claude/*` correspondante à la fin du travail, sinon le livrable existe sans que
+personne ne le sache.
+
 ### Ce qui attend encore un verdict de Grégoire
 
 - **Étiqueter son échelle en SOLO** — il a répondu « oui, maintenant » (D3), le geste est à
