@@ -1387,7 +1387,21 @@ function transfererPresencesVersModule(interventionId) {
         ? obtenirEtudiantsCoursActif()
         : obtenirDonneesSelonMode('groupeEtudiants');
 
-    const dureeIntervention = intervention.duree || 2;
+    // #540 lot C : ces périodes-là entrent au NUMÉRATEUR de l'assiduité — une présence
+    // écrite dans les données. Le repli `|| 2` en inventait deux quand l'intervention ne
+    // disait rien. En pratique `creerIntervention` pose toujours une durée, donc le repli
+    // ne se déclenchait pas ; il n'en était pas moins une valeur métier en dur sur le
+    // chemin d'écriture des présences. On refuse et on le dit, plutôt que de compter des
+    // périodes que personne n'a saisies.
+    const dureeIntervention = parseFloat(intervention.duree);
+    if (!(dureeIntervention > 0)) {
+        if (typeof notifications !== 'undefined' && notifications.erreur) {
+            notifications.erreur(
+                'Durée de l\'intervention manquante',
+                'Indique sa durée en périodes avant de reporter les présences : c\'est elle qui est comptée à l\'assiduité.');
+        }
+        return;
+    }
     const marquerMotives = intervention.marquerNonParticipantsMotives === true;
 
     // Construire les entrées de présence

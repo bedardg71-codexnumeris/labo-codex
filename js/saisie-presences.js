@@ -536,9 +536,18 @@ function obtenirNombrePeriodesSeance(dateStr) {
         // retourne, sous-comptant les jours multi-seances et polluant l'indice
         // d'assiduite.
         const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
+        // #540 lot C (26 août 2026) : `mesurerDureeSeance` plutôt qu'une lecture directe
+        // de `s.duree`. Elle sait lire `duree`, `debut/fin` ET `heureDebut/heureFin` —
+        // et une entrée du cache peut n'avoir QUE des heures : `genererSeancesCompletes`
+        // recopie `duree` depuis la séance de l'horaire, qui ne la porte pas quand
+        // l'horaire vient du formulaire. Le total tombait alors à 0 et la fonction
+        // repartait interroger l'horaire, par un détour dont le résultat dépendait de
+        // l'assemblage groupe-cours. Ici on mesure ce qu'on a sous la main, avec la même
+        // fonction que l'écran Horaire — une seule mesure pour les deux.
         const total = seancesDuJour.reduce((acc, s) => {
             if (s.nombrePeriodes) return acc + s.nombrePeriodes;
-            if (s.duree) return acc + Math.round((s.duree * 60) / dureePeriode);
+            const heures = mesurerDureeSeance(s);
+            if (heures > 0) return acc + Math.round((heures * 60) / dureePeriode);
             return acc;
         }, 0);
         if (total > 0) return total;
@@ -1992,6 +2001,12 @@ window.filtrerTableauPresences = filtrerTableauPresences;
 window.mettreAJourLignePeriodes = mettreAJourLignePeriodes;
 window.appliquerCodeCouleurPeriodes = appliquerCodeCouleurPeriodes;
 window.obtenirNombrePeriodesSeance = obtenirNombrePeriodesSeance;
+
+// #540 lot C (26 août 2026) — SOURCE UNIQUE de la mesure d'une séance.
+// `trimestre-v2-horaires.js` réinventait la sienne, en trois endroits et avec un
+// repli à 2 périodes ; l'écran affichait donc une durée que le calcul d'assiduité
+// ne reconnaissait pas. Une seule fonction mesure désormais, pour les deux.
+window.mesurerDureeSeance = mesurerDureeSeance;
 window.genererOptionsPeriodesPresentes = genererOptionsPeriodesPresentes;
 
 /* ===============================

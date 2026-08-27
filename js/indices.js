@@ -178,8 +178,11 @@ function calculerAssiduite(da, dateLimite) {
     var dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
 
     dates.forEach(function(date) {
+        // #540 lot C : 0, pas 2. Cette garde ne se déclenche que si le module de saisie
+        // n'est pas chargé — inerte aujourd'hui, mais un changement d'ordre de chargement
+        // la réveillerait EN SILENCE, avec un dénominateur de 2 périodes par séance.
         var nombrePeriodesSeance = typeof obtenirNombrePeriodesSeance === 'function'
-            ? obtenirNombrePeriodesSeance(date) : 2;
+            ? obtenirNombrePeriodesSeance(date) : 0;
 
         // Présence régulière (non-facultative)
         var presenceReguliere = presencesEtudiant.find(function(p) {
@@ -318,7 +321,7 @@ function calculerAssiduitePourAffichage(da, dateStr, periodesSeanceActuelle) {
         if (!datesSaisies.has(dateSeance)) continue;
 
         var nbPeriodes = typeof obtenirNombrePeriodesSeance === 'function'
-            ? obtenirNombrePeriodesSeance(dateSeance) : 2;
+            ? obtenirNombrePeriodesSeance(dateSeance) : 0;   // #540 lot C
 
         var presenceReguliere = null;
         var presencesFacultatives = [];
@@ -366,7 +369,7 @@ function calculerAssiduitePourAffichage(da, dateStr, periodesSeanceActuelle) {
 
     // Ajouter la séance actuelle
     var nombrePeriodesSeanceActuelle = typeof obtenirNombrePeriodesSeance === 'function'
-        ? obtenirNombrePeriodesSeance(dateStr) : 2;
+        ? obtenirNombrePeriodesSeance(dateStr) : 0;   // #540 lot C
 
     var periodesOffertesTotal = periodesOffertes + nombrePeriodesSeanceActuelle;
     var periodesPresentesTotal = periodesPresentes + periodesSeanceActuelle;
