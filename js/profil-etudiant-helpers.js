@@ -753,47 +753,36 @@ function interpreterMobilisation(A, C, statutDecrochage = false) {
     };
 }
 
-/**
- * Interprète l'indice P (Performance)
- * @param {number} valeur - Valeur en pourcentage (0-100)
- * @returns {Object} - { niveau, emoji, couleur, description }
- */
-function interpreterPerformance(valeur) {
-    const p = valeur / 100; // Normaliser en 0-1
-    if (p >= 0.85) {
-        return {
-            niveau: 'Performance excellente',
-            couleur: '#2196F3', // Bleu
-            description: 'Maîtrise étendue des compétences avec transfert à d\'autres contextes'
-        };
-    }
-    if (p >= 0.75) {
-        return {
-            niveau: 'Performance satisfaisante',
-            couleur: '#28a745', // Vert
-            description: 'Maîtrise globale avec liens établis entre les concepts'
-        };
-    }
-    if (p >= 0.65) {
-        return {
-            niveau: 'En développement',
-            couleur: '#ffc107', // Jaune
-            description: 'Points pertinents identifiés, liens à consolider'
-        };
-    }
-    if (p >= 0.40) {
-        return {
-            niveau: 'Performance insuffisante',
-            couleur: '#ff9800', // Orange
-            description: 'Compréhension superficielle, renforcement nécessaire'
-        };
-    }
-    return {
-        niveau: 'Performance très faible',
-        couleur: '#dc3545', // Rouge
-        description: 'Incompréhension majeure, intervention urgente requise'
-    };
-}
+// ⚠⚠ #542 lot 3, pas 3c-3 — `interpreterPerformance` A ÉTÉ SUPPRIMÉE, ET ELLE
+// N'A PAS ÉTÉ REMPLACÉE : SON RÉSULTAT N'ÉTAIT LU NULLE PART.
+//
+// Elle portait le plus gros gisement de valeurs en dur du dépistage : QUATRE
+// seuils (0,85 / 0,75 / 0,65 / 0,40) ET un TROISIÈME jeu de descriptions SOLO
+// reformulées — « Maîtrise étendue des compétences avec transfert à d'autres
+// contextes » pour l'abstrait étendu, « Points pertinents identifiés, liens à
+// consolider » pour le multistructurel, et ainsi de suite. Elle était exportée
+// sur `window`, et ses deux voisines `interpreterCompletion` et
+// `interpreterAssiduite` lisent leurs seuils par `obtenirSeuil` : elle seule ne
+// consultait rien.
+//
+// ⮕ CE QUE LA VÉRIFICATION A MONTRÉ. Ses deux appelants
+// (`profil-etudiant-sections-affichage.js`) rangeaient le résultat dans une
+// variable `interpP`… que rien ne lisait. Grep récursif sur tout le dépôt :
+// deux appels, une définition, un export, une ligne de sentinelle d'exports.
+// Aucun appel dynamique par nom (`window[...]`) ne la rattrape. Ses quatre
+// descriptions ne se sont jamais affichées.
+//
+// ⮕ La consigne du lot 3 la donnait pour vivante — « elle est exportée sur
+// `window` et son résultat s'affiche ». C'est faux, et c'est ce qui change le
+// geste : la brancher sur l'échelle de l'utilisateur aurait rendu vivant du
+// code mort. Le retrait est complet, avec ses deux appels et son export.
+//
+// ⮕ CE QUI SUBSISTE DE SON RÔLE : la performance globale est située dans
+// l'échelle de la pratique depuis le pas 3c-1, et interprétée par l'étiquette
+// SOLO du niveau atteint (`situerPourcentageDansEchelle` +
+// `interpreterNiveauAtteint`). C'est le chemin vivant, celui qui s'affiche.
+//
+// Verrouillé par `tests/unit/sentinelle-542-3c3-depistage-sans-seuils.test.js`.
 
 /**
  * Interprète l'indice C (Complétion)
@@ -911,7 +900,7 @@ window.initialiserModuleProfilEtudiant = initialiserModuleProfilEtudiant;
 window.genererBadgePratiqueProfil = genererBadgePratiqueProfil;
 window.genererBadgePatternProfil = genererBadgePatternProfil;
 window.interpreterMobilisation = interpreterMobilisation;
-window.interpreterPerformance = interpreterPerformance;
+// `window.interpreterPerformance` retiré au pas 3c-3 de #542 — la fonction n'existe plus.
 window.interpreterCompletion = interpreterCompletion;
 window.interpreterAssiduite = interpreterAssiduite;
 

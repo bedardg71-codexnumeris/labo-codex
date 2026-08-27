@@ -179,7 +179,7 @@ La consigne autorisait deux pas ; deux ont été faits, et le troisième n'a pas
 | **3b** | ✅ | **C'est la PRATIQUE qui dit dans quoi sa note globale se lit** (correction de Grégoire). `obtenirEchelleNoteGlobale(da)` au contrat + les trois pratiques + le helper `obtenirEchelleCommuneDesEvaluations`. 11 tests. |
 | **3c-1** | ✅ | **La performance GLOBALE est branchée** — elle demande son échelle à la pratique, situe, interprète. Le ternaire `pct >= 85 ? …` de cette ligne est retiré. Spec WebKit, 2 break-tests rouges. **Premier pas du lot qui change l'écran.** |
 | **3c-2** | ✅ | Le niveau **par critère** est branché sur l'échelle commune des évaluations. ⮕ **Source DIFFÉRENTE de 3c-1, et c'est le point** : la note GLOBALE la demande à la pratique, un CRITÈRE est évalué par l'échelle — même en sommative, chaque critère reçoit un niveau avant d'être converti en note. **Plus aucun ternaire `pct >= 85` dans le fichier.** |
-| **3c-3** | ⏳ | `interpreterScoreIDME` et ses 4 descriptions · les bornes `0.85` de « Maîtrisé et étendu » · `interpreterPerformance` (helpers) et ses 4 seuils · **la carte « Observation de la structure »** et son troisième jeu de descriptions (D4 : « les longues » sont désormais dans la source unique, il reste à brancher). |
+| **3c-3** | ✅ | **Fait le 27 août, fin de matinée.** DEUX des quatre morceaux étaient du CODE MORT et ont été supprimés, pas branchés · la carte « Observation de la structure » rend désormais **un bloc par niveau de l'échelle** (décision de Grégoire). Détail ci-dessous. |
 | **4** | ⏳ | Supprimer `obtenirNiveauSOLO()` (`trimestres.js`). |
 | **5** | ⏳ | Trancher le devenir des seuils `idme.*`. B ne leur laisse aucun rôle de repli. |
 
@@ -310,3 +310,91 @@ peuvent se contredire à l'écran pour un même élève.
 - **#544** — les 44 `ECHELLE_DEMO` de H2026. Un `await oracle542('ECHELLE_DEMO')` suffit à savoir.
 - **#543** — les 56 évaluations dont la note ne se recalcule pas (deux causes distinctes).
 - **#546** — le « jugement suspendu » n'est plus saisissable depuis #526. **À trancher avec Grégoire.**
+
+---
+
+### ✅ PAS 3c-3 FAIT — 27 août 2026, fin de matinée
+
+**Le pas annonçait quatre morceaux. Deux n'ont pas été branchés : ils étaient morts.**
+C'est la trouvaille du pas, et elle change ce que « retirer les seuils » voulait dire ici.
+
+| Morceau annoncé | Ce que la vérification a montré | Geste |
+|---|---|---|
+| `interpreterScoreIDME` + 4 descriptions courtes | Son seul consommateur, `patternTexte`, était **assigné et jamais lu** — deux occurrences dans tout le fichier, la déclaration et la réassignation. Le badge affiché à l'écran est `niveauRai.pattern`, qui ne passe pas par là. | **Supprimée**, avec `patternTexte`. 3 lectures `idme.*` en moins. |
+| `interpreterPerformance` + 4 seuils + 4 descriptions | Ses **deux** appelants rangeaient le résultat dans un `interpP` que rien ne lisait. Grep récursif sur tout le dépôt : 2 appels, 1 définition, 1 export, 1 ligne de sentinelle. Aucun appel dynamique par nom. **La consigne la donnait pour vivante — « son résultat s'affiche » — et c'était faux.** | **Supprimée**, avec ses 2 appels, son export `window` et sa ligne dans la sentinelle d'exports. |
+| Les bornes `0.85` | Toutes dans la carte SOLO. | Parties avec elle. |
+| La carte « Observation de la structure » | Le vrai morceau, et le seul qui demandait de la conception. | **Réécrite.** |
+
+⮕ **CE QUI SE SERAIT PASSÉ SI ON AVAIT SUIVI LA CONSIGNE À LA LETTRE** : on aurait branché
+sur l'échelle de l'utilisateur deux fonctions qui n'atteignent aucun écran — c'est-à-dire
+rendu vivant du code mort, en croyant appliquer la règle zéro-dette. **Vérifier les
+consommateurs avant de brancher n'est pas une précaution, c'est ce qui décide du geste.**
+
+#### La carte, telle qu'elle est maintenant
+
+✅ **DÉCISION DE GRÉGOIRE (27 août) : « un bloc par niveau ».** Les quatre en-têtes
+« Forces exceptionnelles / Forces identifiées / Défis en développement / Défis critiques »
+disparaissent. Chaque bloc porte le **nom que l'utilisateur a donné à son niveau**, sa
+couleur, et les critères qui y tombent.
+
+| | |
+|---|---|
+| **Ce qui situe** | `obtenirEchelleCommuneDesEvaluations` — un critère est évalué PAR l'échelle de la grille, quelle que soit la pratique. Même source qu'au pas 3c-2, et **différente** de celle de la note globale (3c-1), qui la demande à la pratique. |
+| **Ce qui interprète** | `interpreterNiveauAtteint`, donc l'étiquette SOLO du niveau. Absente → le nom du niveau, et l'absence est dite **une fois**, pas une fois par bloc. |
+| **L'ordre des blocs** | Par borne `min` décroissante — **pas** l'ordre du tableau `niveaux` : rien n'oblige l'utilisateur à saisir ses niveaux dans l'ordre, et un ordre de saisie n'est pas un ordre de mérite. |
+| **Les niveaux non atteints** | N'apparaissent pas. La carte montre la structure **observée**, pas l'échelle en entier. |
+| **Sans échelle commune** | La carte affiche la CAUSE (`aucune-evaluation`, `echelle-non-resolue`, échelles divergentes) au lieu de l'ancien « Aucune force ni défi identifié selon la taxonomie SOLO » — un verdict rassurant là où rien n'avait pu être comparé, exactement le défaut A2/A3 refermé par le lot 1. |
+| **Les critères hors plage** | Nommés sous les blocs. `situerPourcentageDansEchelle` rend `null` sans repli « niveau le plus proche » (pas 1) : l'absence se dit, elle ne se comble pas. |
+| **Les couleurs** | Celles des niveaux de l'utilisateur, **filtrées** : une couleur d'échelle est une donnée utilisateur qui part dans un attribut `style`, et `echapperHtml` n'y neutralise pas l'injection CSS. Seul un hexadécimal est accepté ; `#RGB` est développé plutôt que rejeté. |
+
+**Deux comportements PRÉSERVÉS tels quels**, et il faut savoir qu'ils sont délibérés :
+
+- Le critère **« Français » reste écarté**, son nom toujours écrit dans le code. C'est un
+  jugement pédagogique de Grégoire — un critère linguistique ne dit rien de la structure
+  cognitive — mais c'est aussi un nom de critère en dur, du ressort de **#529**. Le lot 3
+  retire des seuils ; il ne change pas ce qui est observé.
+- Les critères à **valeur 0 restent exclus**. Le « 0 » est un **jugement suspendu**, pas une
+  performance nulle. L'ancien code les écartait déjà ; le regroupement par niveau les aurait
+  fait tomber dans le niveau « 0 » de l'échelle de Grégoire (plage 0-0) et affichés comme un
+  résultat.
+
+**Deux options écartées, et pourquoi** — pour qui voudrait les rouvrir :
+
+- *Forces/Défis dérivés de l'étiquette SOLO* (relationnel et au-dessus = force). La règle
+  « relationnel = force » serait une valeur métier de retour dans le code, et elle resterait
+  muette tant qu'aucune échelle n'est étiquetée — le cas de **toutes** les échelles réelles.
+- *Un champ « ce niveau marque la maîtrise » sur l'échelle*. Pas écartée sur le fond — elle
+  servirait aussi à **#549**, dont les consignes de cartouche cherchent ce seuil — mais elle
+  ajoute un champ, un écran d'édition et une migration. C'est un chantier, pas un pas.
+
+#### Ce qui le verrouille
+
+| Test | Ce qu'il tient |
+|---|---|
+| `tests/unit/sentinelle-542-3c3-depistage-sans-seuils.test.js` | 4 tests. `interpreterPerformance` absente du `window` (**et ses deux voisines toujours là** — une suppression trop large les emporterait sans que rien ne le dise) · aucune lecture `obtenirSeuil('idme.*')` · aucun en-tête figé ni libellé IDME dans le code · les 4 descriptions concurrentes disparues, **et la table `NIVEAUX_SOLO_ECHELLE` portant toujours les siennes**. ⚠ Le test **retire les commentaires avant de chercher** : les retraits sont documentés sur place et citent le code disparu ; un grep naïf rougirait sur la trace du correctif. |
+| `tests/integration/depistage-542-3c3-carte-structure.spec.js` | 2 specs WebKit sur une échelle **W/X/Y/Z** à trois niveaux atteints. Aucun en-tête figé ni libellé IDME · les trois blocs nommés par l'utilisateur · le niveau non atteint sans bloc · les descriptions venues de l'étiquette · **et le cas sans étiquette** : le nom reste, l'absence est dite, une seule fois. |
+
+**Break-tests ROUGES vérifiés** : 4 sur la sentinelle (export réintroduit, seuil `idme.*`
+réintroduit, en-tête figé réintroduit, description réintroduite) et 2 sur la spec (titre de
+bloc redevenu figé ; avis d'étiquette rendu muet). Restauration confirmée par `diff -q` dans
+les deux cas.
+
+**Mesure à l'écran après le dernier changement** : Vitest **3693/3693, 346 fichiers**.
+⚠ Ce total inclut les **15 tests d'une session parallèle** (#547, anti-cache au pre-commit)
+qui travaillait dans le même arbre au même moment — son fichier était rouge à 10 h 22 et vert
+à 10 h 26. Le chiffre est celui de l'arbre partagé à cet instant, pas celui de ce chantier
+seul. Playwright : les 2 specs neuves passent ; la suite entière n'a pas été relancée.
+
+**Anti-cache posé** (#547) : `profil-etudiant-helpers.js` `20260827c → d`,
+`profil-etudiant-sections-affichage.js` `20260827e → f`. Aucun bump de version ni de build —
+la session `file://` de Grégoire est ouverte.
+
+#### Ce qui reste au lot
+
+- **Pas 4** — supprimer `obtenirNiveauSOLO()` (`trimestres.js`), qui redevine SOLO depuis le
+  NOM d'un critère et contredit le champ configuré.
+- **Pas 5** — le devenir des seuils `idme.*`. ⮕ **Le pas 3c-3 change la donne** : le dépistage
+  ne les lit plus du tout. Ce qui reste à mesurer, c'est **qui les lit encore ailleurs**.
+- **Le geste de Grégoire** — étiqueter son échelle « 0-IDME » en SOLO. Tant qu'il ne l'a pas
+  fait, la carte affichera ses noms de niveaux et l'avis d'étiquette manquante : **c'est le
+  comportement attendu, pas une panne.**
