@@ -2858,9 +2858,10 @@ function ajouterPremierNiveau() {
 // quel niveau de SON échelle porte quelle étiquette.
 //
 // ⚠ « Préstructurel » est la SEULE description que le dépôt n'avait pas :
-// l'ancien code n'en produisait que quatre, pour cinq niveaux SOLO. Celle-ci est
-// donc écrite à neuf, d'après la définition de la taxonomie, et elle attend le
-// mot de Grégoire — c'est du vocabulaire pédagogique, pas de la mécanique.
+// l'ancien code n'en produisait que quatre, pour cinq niveaux SOLO. Celle-ci a
+// donc été écrite à neuf, d'après la définition de la taxonomie —
+// ✅ VALIDÉE PAR GRÉGOIRE le 27 août 2026, telle quelle. Les cinq descriptions
+// sont désormais de sa main ou de son accord : aucune ne se change sans le sien.
 const NIVEAUX_SOLO_ECHELLE = [
     { valeur: 'prestructurel', libelle: 'Préstructurel', description: 'Aucun aspect pertinent n\'est traité' },
     { valeur: 'unistructurel', libelle: 'Unistructurel', description: 'Un seul aspect traité, compréhension superficielle' },

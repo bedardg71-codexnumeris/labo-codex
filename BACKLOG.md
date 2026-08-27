@@ -589,7 +589,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   données ne bougent pas ». Le mécanisme de fond (relire la collection avant d'annoncer un succès,
   `productions-bibliotheque-ui.js:352`) était **déjà en place et correct**.
   ⮕ **Baseline Playwright à ZÉRO** : la dette #456 est épuisée, toute rougeur neuve bloque le push.
-  ⚠ **CE QUE LA MESURE A RÉVÉLÉ AU PASSAGE, et qui reste OUVERT — voir #533.**
+  ⚠ **CE QUE LA MESURE A RÉVÉLÉ AU PASSAGE, et qui reste OUVERT — voir #548** (renuméroté depuis #533 le 27 août)**.**
 
 - [ ] **~~#530 (énoncé d'origine, conservé)~~ — La garde #340 laisse passer une écriture qu'elle devrait bloquer.**
   Découvert le 26 août en fermant #495, et **il ne s'agit PAS d'une régression** : mesuré à
@@ -609,7 +609,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **Seule spec de la baseline** depuis le 26 août : le hook bloquera désormais toute rougeur neuve,
   et celle-ci est la dernière à en sortir.
 
-- [ ] **#538 — La durée d'une séance était inventée : trois `2` en dur dans le calcul d'assiduité.**
+- [x] **#538 LIVRÉ ET VÉRIFIÉ TERRAIN — La durée d'une séance était inventée : trois `2` en dur dans le calcul d'assiduité.**
+  ✅ **CLOS le 27 août 2026 — les TROIS portes terrain sont conformes, verdict de Grégoire :**
+  · **date de cours ordinaire** — conforme ;
+  · **date de reprise** (le cas critique : la durée doit venir du jour REMPLACÉ, pas du jour
+    de la reprise) — conforme ;
+  · **groupe-cours sans horaire** (le cas où il ne doit rien inventer) — conforme.
+  ⮕ **Ce que cette troisième porte prouve, et c'est la plus importante des trois** : quand
+  l'horaire ne dit rien, l'application affiche **0 et le dit**, au lieu de la valeur `2` qui
+  s'y trouvait. C'est le seul des trois cas qu'aucun test automatisé ne pouvait trancher —
+  il fallait ses données et son écran.
   Constaté au relais du 26 août, tranché par Grégoire le même jour. `obtenirHeuresSeance`
   (`saisie-presences.js`) lisait `db.getSync('formatHoraire')` pour choisir entre 4 h et 2 h.
   **Grep exhaustif du dépôt : trois lectures, ZÉRO écriture** — la clé est morte depuis que le
@@ -752,8 +761,8 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⚠ **RIEN N'EST ENCORE BRANCHÉ À L'ÉCRAN.** `interpreterScoreIDME` et la borne `0.85` sont
   toujours en place ; les deux fonctions neuves n'ont aucun appelant. L'application se comporte
   exactement comme avant. **Le branchement et le retrait sont le pas 3.**
-  ⏳ **DÛ PAR GRÉGOIRE, et personne ne peut le faire à sa place** : valider la description de
-  « préstructurel » — **« Aucun aspect pertinent n'est traité »**. C'est le SEUL texte écrit à
+  ✅ **VALIDÉ PAR GRÉGOIRE le 27 août 2026** : la description de « préstructurel » —
+  **« Aucun aspect pertinent n'est traité »** — est retenue telle quelle. C'est le SEUL texte écrit à
   neuf : l'ancien code ne produisait que quatre descriptions pour cinq niveaux SOLO. C'est du
   vocabulaire pédagogique.
   ⏳ **RESTE AU LOT 3** : pas 3 (brancher, et retirer les quatre descriptions en dur + la borne
@@ -1302,7 +1311,19 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   convertibles, donc le cas « rien de convertible » ne survient plus que sans échelle du tout.
   ⮕ Commentaire posé sur place (`⚠ LE ZÉRO EST CONSERVÉ ICI, DÉLIBÉRÉMENT`).
 
-- [ ] **#533 — La garde #340 est probablement INERTE sur les données réelles de Grégoire.**
+- [ ] **#548 — La garde #340 est probablement INERTE sur les données réelles de Grégoire.**
+  ⚠ **RENUMÉROTÉ #533 → #548 le 27 août 2026, sur arbitrage de Grégoire.** Deux chantiers sans
+  rapport ont porté #533 le 26 août : celui-ci, **inscrit** au backlog, et « la garde lourde passe
+  avant la connexion », seulement **employé** — dans `DEPLOY.md`, `scripts/pousser.sh`,
+  `scripts/lire-verdict.mjs`, `scripts/verifier-playwright.mjs`, `tests/playwright.config.js` et
+  `tests/unit/sentinelle-533-verdict-avant-connexion.test.js`. Neuf fichiers contre un : c'est
+  celui-ci qui bouge, et **#533 reste à l'autre**.
+  ⮕ **L'arbitrage disait « devient #540 ». #540 n'était plus libre** — la soirée du 26 l'avait
+  attribué au chantier de l'assiduité, clos en cinq lots. Appliquer le verdict à la lettre aurait
+  **recréé la collision qu'il éteignait**. L'ID retenu est donc le prochain réellement libre au
+  moment d'écrire, vérifié au backlog et non recopié d'un document : **#548**.
+  ⮕ C'est le cas d'école de [[feedback-id-backlog-inscrire-avant-usage]] : entre le moment où un
+  numéro est arbitré et celui où il est appliqué, le dernier ID a bougé.
   Mesuré le 26 août en fermant #530, par un test qui reproduit le cas ordinaire
   (`productions-ajout-refus-garde-340.spec.js`, test « périmètre ») : `construireMapCoursTrimestre`
   ne rattache un `coursId` à un trimestre **que s'il n'apparaît QUE là**. Un cours reconduit d'une
@@ -2549,7 +2570,21 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ### Tests d'intégration — specs rouges découvertes le 12 août 2026 (recomptées à SIX le 18)
 
-- [ ] **#534** Un seul dépassement de délai suffit à refuser un push légitime — créé 26 août 2026, **hypothèse initiale RÉFUTÉE le jour même par la mesure**.
+- [x] **#534 CLOS** Un seul dépassement de délai suffit à refuser un push légitime — créé 26 août 2026, **hypothèse initiale RÉFUTÉE le jour même par la mesure**.
+  ✅ **TRANCHÉ PAR GRÉGOIRE le 27 août 2026 : durcir la SEULE spec qui a un manque objectif.**
+  `cours-refonte-rendu.spec.js` n'attendait jamais `window.dbReady` — ses montages posaient un
+  `waitForTimeout(500)` fixe quand `page.goto` sur `index.html` coûte 400 à 700 ms. La marge
+  était nulle par construction. Les quatre montages attendent désormais l'ÉTAT
+  (`waitForFunction(() => window.dbReady === true)`, 20 s), comme le faisait déjà la spec
+  voisine — l'asymétrie n'était pas un choix, c'était un oubli.
+  ⮕ **QUATRE montages, pas deux** : cet item annonçait « ses deux tests ». Le fichier en porte
+  quatre (chantier C ×2, chantier E ×2), tous avec le même sommeil fixe. Compté à l'écran le
+  27 août, pas recopié.
+  ⮕ **Mesuré après durcissement : 4/4 verts en 4,4 s** — plus RAPIDE qu'avant, l'attente d'état
+  se libérant dès que la base est prête au lieu d'épuiser un délai.
+  ⮕ **`planif-tout-voir-loupe.spec.js` n'est PAS touchée**, conformément à l'arbitrage : son
+  montage rejoué à chaque test est un profil de risque, pas un manque objectif. Le constat
+  reste inscrit ci-dessous si elle redevient instable.
 
   ✅ **LA MESURE DEMANDÉE A ÉTÉ FAITE — 26 août 2026, fin de journée. LES DEUX SPECS SONT VERTES.**
   Conditions exigées par cet item, toutes réunies et vérifiées AVANT de lancer : GitHub Desktop
