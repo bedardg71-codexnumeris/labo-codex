@@ -1,12 +1,29 @@
-# CADRAGE D'AUDIT — le travail des 26-27 août 2026
+# CADRAGE D'AUDIT — le travail du 26 août 2026
 
 > **Pour l'auditeur.** Ce document te dit quoi vérifier, pas quoi conclure.
 > Il a été rédigé par l'une des trois sessions dont tu audites le travail —
 > lis le §0 avant tout le reste, il t'explique pourquoi tu ne dois pas me faire
 > confiance sur le volet 1.
 >
-> Commanditaire : Grégoire Bédard. Rédigé le 26 août 2026 au soir.
-> Périmètre : `3e8faabe..HEAD` — 11 commits, 34 fichiers, ~5 200 lignes ajoutées.
+> Commanditaire : Grégoire Bédard. Rédigé le 26 août 2026 au soir, **corrigé
+> le même soir** (§7).
+>
+> ⚠⚠ **NE TE FIE PAS AUX CHIFFRES DE PÉRIMÈTRE ÉCRITS ICI — CALCULE-LES.**
+> Entre la première rédaction de ce document et sa correction, deux heures plus
+> tard, le périmètre est passé de 11 à 22 commits et de 5 200 à 7 800 lignes.
+> Deux sessions travaillaient encore. La seule définition fiable du périmètre
+> est la commande, pas le nombre :
+>
+> ```bash
+> git log --oneline 3e8faabe..HEAD        # borne basse = fin de session 17h29
+> git diff --stat 3e8faabe..HEAD
+> ```
+>
+> **Tout le travail audité est du mercredi 26 août 2026.** Aucun commit du 27,
+> malgré le nom de ce fichier — qui désigne la date prévue de l'audit, pas
+> celle du travail. Une session a daté ses commits du 27 en recopiant une date
+> annoncée au lieu de lire l'horloge ; ne cherche pas les commits qu'elle
+> semble annoncer.
 
 ---
 
@@ -183,9 +200,32 @@ Deux choses à vérifier :
 - **Le chiffre lui-même.** Il vient d'une exécution console chez Grégoire, non reproductible dans le dépôt. Vérifie au moins que la **méthode de comptage** du script est correcte : que compte-t-il exactement — des évaluations, des niveaux, des critères ? Un dénominateur de 670 est-il le bon ?
 - **La conséquence annoncée.** Si l'échelle n'est pas résolue, la conversion rend `null` et l'évaluation est écartée des moyennes, de l'IPB et du dépistage. **Re-dérive cette chaîne dans le code** : est-il vrai qu'une échelle introuvable produit un silence plutôt qu'une valeur fausse ? Les deux sont graves, mais pas de la même façon.
 
-### C.4 · Ce qui n'a pas encore été fait, et qu'il faut protéger
+### C.4 · ⚠ LA RÉPARATION A ÉTÉ EXÉCUTÉE — c'est le point le plus important du volet C
 
-**Aucune réparation n'a été engagée.** Si tu trouves dans le périmètre du code qui **modifie** des données d'évaluation, de grille ou d'échelle en dehors des chemins normaux de l'application, c'est un signalement de priorité maximale.
+**Ce paragraphe corrige la première version de ce document, qui disait « aucune réparation n'a été engagée ». C'est faux depuis `71a3ffea`.**
+
+`scripts/reparation-542-echelle-orpheline.js` a été écrit, passé en dry-run (`04acd7e9`), corrigé (`e3d5af34` — « la réparation disait l'inverse de son effet, et propageait `parDefaut` »), puis **exécuté sur les données réelles de Grégoire**. Mesure annoncée avant/après :
+
+```
+niveaux convertibles ......  1277  ->  2807   (+1530)
+echelleId introuvable .....   383  ->    44
+```
+
+Tu n'audites donc plus un risque à venir, mais **un acte déjà posé sur des données d'enseignement réelles**. Quatre questions, par ordre de gravité :
+
+**1. La concordance dry-run / résultat prouve-t-elle quelque chose ?** Le commit affirme « le +1530 est EXACTEMENT ce que le dry-run avait prédit ». **Vérifie si la prédiction et la mesure sont produites par le même code.** Si oui, leur concordance est une tautologie : elle prouve que le script est déterministe, pas qu'il a raison. C'est la forme la plus élégante du « vert qui ne prouve rien », et elle rassure d'autant mieux qu'elle est chiffrée.
+
+**2. « Aucune note touchée, aucune évaluation modifiée : une échelle ajoutée ».** Re-dérive-le du code de la réparation, pas du message. Que fait-elle exactement — crée-t-elle une échelle, réécrit-elle des `echelleId`, ou les deux ? Une réparation qui « ajoute une échelle » sous un identifiant attendu change le résultat de toutes les évaluations qui le désignent : c'est correct si l'identification est juste, et silencieusement faux sinon.
+
+**3. L'identification était-elle sûre ?** La réparation repose sur l'oracle (§C.2). Si l'oracle s'est trompé d'échelle, 1 530 niveaux d'élèves viennent d'être réinterprétés avec la mauvaise grille de conversion — sans erreur, sans message, avec des notes qui restent plausibles. **Remonte la chaîne oracle → réparation et vérifie que le verdict de l'oracle est bien ce que la réparation applique.**
+
+**4. La réparation peut-elle se défaire ?** Le commit l'admet : « LA CAUSE DU DÉSAPPARIEMENT RESTE INCONNUE. L'échelle avait déjà été recréée le 5 août ; quelque chose l'a re-orphelinée depuis. » Une réparation dont la cause est inconnue est une réparation à durée indéterminée. **Cherche le mécanisme qui ré-orpheline** — c'est la question ouverte la plus utile de tout cet audit.
+
+⮕ **Reste ouvert et inscrit** : 44 évaluations `ECHELLE_DEMO` (176 niveaux) en h2026. Vérifie que ces élèves affichent bien « Dépistage incomplet » plutôt qu'un chiffre.
+
+### C.5 · Et si tu trouves autre chose qui écrit
+
+Si tu trouves, **hors des scripts de réparation nommés ci-dessus**, du code du périmètre qui modifie des données d'évaluation, de grille ou d'échelle en dehors des chemins normaux de l'application : signalement de priorité maximale.
 
 ---
 
@@ -205,7 +245,13 @@ Commence l'audit du volet 1 par ici. Ce ne sont pas des hypothèses : ce sont de
 
 ⮕ **Question pour toi** : d'autres constantes du périmètre coïncident-elles aujourd'hui tout en ayant des sources différentes ? C'est la forme de défaut la plus difficile à voir et la plus durable.
 
-**5.4 — Mon correctif #541 n'a qu'un seul appelant vivant.** J'ai affirmé que le second (`genererTableauObjectifs`) est du code mort. Vérifie-le. Si je me trompe, le correctif a une portée que je n'ai pas mesurée.
+**5.4 — J'ai déclaré non appliquée une règle qui l'était.** Le plan affirme (C4) que l'astérisque « Champ obligatoire » sur *Valeur ponctuelle* n'est pas appliqué, en s'appuyant sur le titre d'un test de #524 : « le refus ne vaut QUE pour le code et le nom ». **C'était vrai pour #524 et périmé par #526**, livré le matin même, qui étend `refusChampNiveau` à `min`, `max` et `valeurCalcul` (`js/echelles.js:3435`). J'ai lu un test au lieu de lire le code courant. Appliquer mon plan aurait retiré un garde-fou en croyant corriger un défaut d'affichage.
+
+⮕ **Question pour toi** : combien d'autres affirmations de ce périmètre reposent sur le **titre** ou l'**intitulé** d'un test plutôt que sur le code qu'il exécute ? C'est une source d'erreur distincte du test tautologique, et elle survit mieux.
+
+⮕ **Et une contradiction réelle en découle**, versée au backlog sous #546 : mon §2-D4 pose que « jugement suspendu = valeurCalcul vide, mécanisme déjà en place ». Il l'est dans le **calcul** ; #526 en interdit l'entrée par l'**interface**. Deux exigences de Grégoire du même jour qui se contredisent. **Ne tranche pas** — c'est de la conception, donc hors périmètre. Vérifie seulement que la contradiction est réelle et correctement décrite.
+
+**5.5 — Mon correctif #541 n'a qu'un seul appelant vivant.** J'ai affirmé que le second (`genererTableauObjectifs`) est du code mort. Vérifie-le. Si je me trompe, le correctif a une portée que je n'ai pas mesurée.
 
 ---
 
@@ -224,3 +270,18 @@ Structure attendue :
 ⮕ **Ne conclus jamais « la suite est verte donc le travail est bon ».** Dans ce dépôt, quatre défauts réels ont coexisté avec une suite entièrement verte, parce que rien n'appelait les fonctions fautives. Un test d'existence n'est pas un test de comportement.
 
 ⮕ **Si tu ne trouves rien sur un volet entier, dis-le franchement.** C'est un résultat possible et acceptable. Un audit qui invente des réserves pour paraître rigoureux est pire qu'un audit vide.
+
+---
+
+## 7. CORRECTIONS APPORTÉES À CE DOCUMENT
+
+Ce document a été corrigé le soir même de sa rédaction, après retour de la session qui exécute #542. Les quatre corrections sont elles-mêmes des données d'audit — elles montrent à quelle vitesse un cadrage se périme dans un dépôt à trois sessions.
+
+| # | Ce que disait la v1 | Correction |
+|---|---|---|
+| 1 | « le travail des 26-27 août » | **Tout est du 26.** Aucun commit du 27 |
+| 2 | « 11 commits, 34 fichiers, ~5 200 lignes » | **22 commits, 51 fichiers, ~7 800 lignes** deux heures plus tard — d'où la consigne de calculer le périmètre plutôt que de le lire |
+| 3 | §5 comptait trois erreurs du rédacteur | **Quatre** : C4 s'ajoute (voir §5.4) |
+| 4 | « aucune réparation n'a été engagée » | **La réparation a été exécutée** sur les données réelles (voir §C.4) |
+
+⮕ La correction 4 est la plus lourde : elle fait passer le volet C d'un audit de prévention à un audit de dommage possible. Si tu ne devais traiter qu'une section de ce document, ce serait §C.4.
