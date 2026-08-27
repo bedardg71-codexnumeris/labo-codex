@@ -2318,6 +2318,22 @@ function composerModeleCartouche(grille, echelle, production, nomCartouche) {
     const criteres = (grille && grille.criteres) || [];
     const niveaux = (echelle && echelle.niveaux) || [];
 
+    // ⮕ #549 — LES BLOCS SONT CALCULÉS AVANT LES CONSIGNES, ET C'EST NÉCESSAIRE.
+    // La consigne d'ancrage renvoie vers la section « Le travail demandé ». Elle
+    // ne doit donc être écrite que si cette section existe VRAIMENT — et une
+    // production peut être choisie sans porter la moindre consigne remplie.
+    // Conditionner sur la présence de la production, comme le faisait le premier
+    // jet, envoyait l'assistant chercher une section absente. Trouvé par un test.
+    const blocsConsignes = (production && typeof blocsInformationDocument === 'function')
+        ? (blocsInformationDocument(null, {
+            production: production,
+            inclureObjectif: true,
+            inclureDescription: true,
+            inclureDetailTache: true
+        }) || [])
+        : [];
+    const aDesConsignes = blocsConsignes.length > 0;
+
     // ⚠ L'en-tête s'adresse à l'IA autant qu'à l'utilisateur. Il dit le format
     // EXACT à respecter, parce qu'une IA laissée libre reformate — et un fichier
     // reformaté n'est plus réimportable. Il est en commentaire Markdown : le
@@ -2328,18 +2344,47 @@ function composerModeleCartouche(grille, echelle, production, nomCartouche) {
     lignes.push('');
     lignes.push('> CONSIGNES — à lire par l\'assistant, puis à laisser telles quelles.');
     lignes.push('>');
-    lignes.push('> Rédige un commentaire de rétroaction pour CHAQUE ligne « ** … ** : » ci-dessous,');
-    lignes.push('> en écrivant à la suite des deux-points. Une ligne = un commentaire.');
+    lignes.push('> Rédige un commentaire de rétroaction pour chaque ligne « ** … ** : » présente');
+    lignes.push('> ci-dessous, à la suite des deux-points. Une ligne = un commentaire. Traite toutes');
+    lignes.push('> les lignes présentes, aucune de plus, aucune de moins.');
     lignes.push('>');
-    lignes.push('> À RESPECTER, sans quoi le fichier ne pourra pas être réimporté :');
-    lignes.push('> - ne change RIEN à ce qui est entre les deux astérisques : ni le nom du critère,');
-    lignes.push('>   ni le code entre parenthèses, ni la ponctuation ;');
-    lignes.push('> - garde une seule ligne par commentaire, sans saut de ligne au milieu ;');
-    lignes.push('> - n\'ajoute pas de lignes « ** … ** : » qui ne sont pas déjà là ;');
-    lignes.push('> - laisse les titres « ## » et les séparateurs « --- » en place.');
+    lignes.push('> FORMAT (sans quoi la réimportation échoue)');
+    lignes.push('> - ne modifie rien de ce qui précède les deux-points : astérisques, nom du critère,');
+    lignes.push('>   code entre parenthèses, espaces, ponctuation ;');
+    lignes.push('> - un commentaire tient sur une seule ligne, sans saut de ligne, sans puce ;');
+    lignes.push('> - pas de gras ni d\'italique : le commentaire s\'affiche tel quel dans');
+    lignes.push('>   l\'application, et les astérisques y resteraient visibles ;');
+    lignes.push('> - ne touche à aucune autre partie du fichier.');
     lignes.push('>');
-    lignes.push('> Le commentaire s\'adresse à l\'étudiant·e, à la deuxième personne. Il décrit ce');
-    lignes.push('> que le niveau atteint veut dire pour CE critère, et ce qu\'il reste à travailler.');
+    lignes.push('> CE QUE TU ÉCRIS');
+    lignes.push('> Le commentaire décrit ce qu\'un travail situé à ce niveau présente pour CE critère.');
+    lignes.push('> Aucun travail n\'a été remis au moment où tu écris. N\'invente aucun détail de copie');
+    lignes.push('> et ne décris jamais une personne.');
+    lignes.push('>');
+    lignes.push('> RÉDACTION');
+    lignes.push('> Trois phrases, de 45 à 70 mots.');
+    lignes.push('> 1. Ce qu\'un travail de ce niveau présente pour ce critère, au présent, sans « tu ».');
+    lignes.push('> 2. Ce que ce niveau entraîne pour la suite du travail, ou ce qu\'il révèle de la');
+    lignes.push('>    démarche.');
+    lignes.push('> 3. Selon la position du niveau dans l\'échelle listée plus bas :');
+    lignes.push('>    - niveaux situés sous le seuil de maîtrise : un conseil concret et exécutable,');
+    lignes.push('>      introduit par « Pour progresser, » ou « Pour t\'améliorer, », à l\'impératif');
+    lignes.push('>      deuxième personne ;');
+    lignes.push('>    - niveaux atteignant ou dépassant la maîtrise : aucun conseil, mais un énoncé');
+    lignes.push('>      de ce que ce niveau révèle de la démarche. Change de tournure d\'un critère');
+    lignes.push('>      à l\'autre ; aucune formule ne doit revenir d\'un critère à l\'autre.');
+    lignes.push('>');
+    lignes.push('> ANCRAGE');
+    if (aDesConsignes) {
+        lignes.push('> - Parle de CETTE tâche, décrite plus bas sous « Le travail demandé », jamais');
+        lignes.push('>   d\'un travail générique.');
+    } else {
+        lignes.push('> - AUCUNE TÂCHE N\'EST DÉCRITE dans ce fichier : reste sur le critère lui-même,');
+        lignes.push('>   et n\'invente aucun contexte de travail.');
+    }
+    lignes.push('> - Emploie un vocabulaire constant d\'un niveau à l\'autre pour un même critère, de');
+    lignes.push('>   sorte que la progression se lise verticalement d\'un niveau au suivant.');
+    lignes.push('> - Aucune note, aucun pourcentage, aucune félicitation adressée à la personne.');
     lignes.push('');
 
     // ⮕ #549 — LE TRAVAIL DEMANDÉ VIENT AVANT LA MANIÈRE DE L'ÉVALUER.
@@ -2353,14 +2398,9 @@ function composerModeleCartouche(grille, echelle, production, nomCartouche) {
     // ordre du gabarit. En écrire un second ici ferait diverger deux textes qui
     // décrivent le même travail, et c'est exactement le patron que #529 a passé
     // une session à défaire.
-    if (production && typeof blocsInformationDocument === 'function') {
-        const blocs = blocsInformationDocument(null, {
-            production: production,
-            inclureObjectif: true,
-            inclureDescription: true,
-            inclureDetailTache: true
-        }) || [];
-        if (blocs.length > 0) {
+    {
+        const blocs = blocsConsignes;
+        if (aDesConsignes) {
             lignes.push('## Le travail demandé');
             lignes.push('');
             lignes.push('_Ce que l\'étudiant·e devait faire. Appuie-toi dessus pour écrire des');

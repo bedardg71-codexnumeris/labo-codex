@@ -137,6 +137,52 @@ describe('#549 · composerModeleCartouche', () => {
         expect(avec).toContain('attention au piège');
     });
 
+    it('6bis. la consigne d\'ANCRAGE s\'adapte : elle ne demande pas l\'impossible sans tâche', () => {
+        // « Parle de CETTE tâche, décrite plus haut » n'a de sens que si une
+        // production est jointe. Sans elle, la consigne demanderait à l'assistant
+        // de se référer à quelque chose qui n'est pas dans le fichier — et un
+        // assistant à qui on demande l'impossible invente.
+        blocsRendus = [{ titre: 'Objectif :', texte: 'Reconnaître le propos' }];
+        const avecTache = win.composerModeleCartouche(GRILLE, ECHELLE, PRODUCTION, 'X');
+        expect(avecTache).toContain('Parle de CETTE tâche');
+        expect(avecTache).not.toContain('AUCUNE TÂCHE');
+
+        const sansTache = win.composerModeleCartouche(GRILLE, ECHELLE, null, 'X');
+        expect(sansTache).not.toContain('Parle de CETTE tâche');
+        expect(sansTache, 'l\'absence est DITE, pas passée sous silence').toContain('AUCUNE TÂCHE');
+        expect(sansTache).toContain('n\'invente aucun contexte');
+    });
+
+    it('6quater. les renvois DIRECTIONNELS disent la vérité — tout vient APRÈS les consignes', () => {
+        // Défaut vu sur un aperçu du fichier réel, pas sur le texte de la consigne :
+        // elle disait « l'échelle indiquée plus haut » et « la tâche décrite plus
+        // haut ». Or les consignes OUVRENT le fichier — l'échelle et la tâche
+        // arrivent après elles. Un renvoi faux envoie l'assistant chercher au
+        // mauvais endroit, et un assistant qui ne trouve pas invente.
+        blocsRendus = [{ titre: 'Objectif :', texte: 'Reconnaître le propos' }];
+        const texte = win.composerModeleCartouche(GRILLE, ECHELLE, PRODUCTION, 'X');
+        expect(texte).not.toContain('plus haut');
+
+        const posConsigne = texte.indexOf('échelle listée plus bas');
+        const posEchelle = texte.indexOf('Niveaux, du plus faible');
+        expect(posConsigne).toBeGreaterThan(-1);
+        expect(posEchelle, 'le renvoi doit pointer vers ce qui suit').toBeGreaterThan(posConsigne);
+    });
+
+    it('6ter. les contraintes de FORMAT sont celles que le parseur exige VRAIMENT', () => {
+        // ⚠ Mesuré contre `lireLigneCommentaire` le 27 août : le motif ancre le
+        // séparateur APRÈS `**Nom (CODE)**` et capture tout le reste de la ligne.
+        // Un deux-points dans le commentaire ne casse donc RIEN — l'interdire
+        // appauvrissait l'écriture sans rien protéger. La contrainte est retirée.
+        const texte = win.composerModeleCartouche(GRILLE, ECHELLE, null, 'X');
+        expect(texte, 'contrainte inutile, retirée après mesure')
+            .not.toContain('deux-points à l\'intérieur');
+        // Celles qui restent le sont pour une raison vérifiée :
+        expect(texte, 'une ligne = un enregistrement').toContain('sans saut de ligne');
+        expect(texte, 'le gras s\'afficherait tel quel dans l\'application').toContain('pas de gras');
+        expect(texte).toContain('s\'affiche tel quel dans');
+    });
+
     it('7. le titre d\'un bloc perd son deux-points final — il devient un intertitre', () => {
         blocsRendus = [{ titre: 'Format et mise en page :', texte: 'APA, 4 à 6 pages' }];
         const texte = win.composerModeleCartouche(GRILLE, ECHELLE, PRODUCTION, 'X');
