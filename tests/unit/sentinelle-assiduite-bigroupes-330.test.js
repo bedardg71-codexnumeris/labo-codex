@@ -60,10 +60,30 @@ const cle = (k) => k;
 const obtenirDonneesSelonMode = (k) => stores[k];
 const obtenirSeancesCompletes = () => seancesCompletes;
 
+/**
+ * #540 lot C (26 août 2026) — CE BANC NE FOURNISSAIT PAS CETTE FONCTION.
+ *
+ * `indices.js` la cherche par `typeof obtenirNombrePeriodesSeance === 'function'`, et
+ * se repliait sinon sur `2` périodes. Le banc pose `nombrePeriodes: 2` sur chacune de
+ * ses séances : les attendus tombaient juste PAR COÏNCIDENCE, en empruntant le repli
+ * plutôt qu'en lisant les séances. Le repli est passé à `0` — un refus de répondre,
+ * jamais un nombre inventé — et les cinq cas ont rougi d'un coup.
+ *
+ * On fournit donc ici la vraie chaîne : agrégation des séances du jour, comme le fait
+ * `obtenirNombrePeriodesSeance` (saisie-presences.js) depuis #538. Le banc éprouve
+ * désormais ce qu'il prétend éprouver — la contamination bi-groupes — et non un défaut.
+ */
+const obtenirNombrePeriodesSeance = (dateStr) => {
+    const duJour = seancesCompletes[dateStr];
+    if (!duJour || !duJour.length) return 0;
+    return duJour.reduce((n, s) => n + (s.nombrePeriodes || 0), 0);
+};
+
 let win;
 beforeAll(() => {
     win = chargerScript('js/indices.js', {
-        db, cle, obtenirDonneesSelonMode, obtenirSeancesCompletes
+        db, cle, obtenirDonneesSelonMode, obtenirSeancesCompletes,
+        obtenirNombrePeriodesSeance
     });
 });
 

@@ -34,6 +34,42 @@ function dureePeriodeCourante() {
 }
 
 /**
+ * Périodes d'UNE séance, dérivées de ses heures réelles — la même mesure que celle
+ * du calcul d'assiduité.
+ *
+ * #540 lot C (26 août 2026). Trois endroits de ce fichier mesuraient une séance à leur
+ * façon, et tous trois se repliaient sur `2` quand ni `nombrePeriodes` ni `duree`
+ * n'étaient présents. Or c'est le CAS COURANT : `sauvegarderHoraireV2` écrit ses séances
+ * avec `{jour, heureDebut, heureFin, local}` — sans `duree`, sans `nombrePeriodes`. Les
+ * horaires créés par le formulaire tombaient donc dans ce repli à CHAQUE affichage,
+ * pendant que `calculerAssiduite` comptait, lui, les heures réelles (#538). L'écran
+ * affichait une durée que le calcul ne reconnaissait pas.
+ *
+ * `mesurerDureeSeance` (saisie-presences.js) sait lire `duree`, `debut/fin` ET
+ * `heureDebut/heureFin`. On l'emploie plutôt que d'en refaire une quatrième.
+ *
+ * @returns {number} périodes, ou 0 si la séance ne dit rien — jamais un nombre inventé.
+ */
+function periodesDeLaSeance(seance) {
+    if (!seance) return 0;
+    if (seance.nombrePeriodes > 0) return seance.nombrePeriodes;
+
+    // Chargée après ce fichier (index.html) mais appelée au runtime : toujours là.
+    // Si elle manquait, 0 — un refus de répondre, pas un repli à 2.
+    if (typeof mesurerDureeSeance !== 'function') return 0;
+
+    const heures = mesurerDureeSeance(seance);
+    if (!(heures > 0)) return 0;
+    return Math.round((heures * 60) / dureePeriodeCourante());
+}
+
+/** Total hebdomadaire d'un horaire, lu à ses séances. 0 si elles ne disent rien. */
+function periodesParSemaine(seances) {
+    if (!Array.isArray(seances)) return 0;
+    return seances.reduce((total, s) => total + periodesDeLaSeance(s), 0);
+}
+
+/**
  * Charge et affiche les séances dans l'accordéon Horaire v2
  * 🆕 BETA 95 : Affiche le cours actif et utilise obtenirSeancesHoraire()
  */
@@ -74,11 +110,11 @@ function chargerSeancesV2() {
         return;
     }
 
-    // Calculer le total d'heures
+    // #540 lot C : `s.duree` est absente des séances du formulaire — ce total valait 0
+    // pour tout horaire créé normalement. On mesure comme le fait l'assiduité.
     let totalHeures = 0;
     horaire.forEach(s => {
-        const duree = parseFloat(s.duree) || 0;
-        totalHeures += duree;
+        totalHeures += (typeof mesurerDureeSeance === 'function') ? mesurerDureeSeance(s) : 0;
     });
 
     const joursNoms = { 'Lundi': 1, 'Mardi': 2, 'Mercredi': 3, 'Jeudi': 4, 'Vendredi': 5 };
@@ -92,12 +128,9 @@ function chargerSeancesV2() {
         </div>`;
     }
 
-    // 🆕 BETA 95.1 : Calculer le total en périodes
-    const totalPeriodes = horaire.reduce((sum, s) => {
-        if (s.nombrePeriodes) return sum + s.nombrePeriodes;
-        if (s.duree) return sum + Math.round((parseFloat(s.duree) * 60) / dureePeriodeCourante());
-        return sum + 2; // Défaut 2 périodes
-    }, 0);
+    // #540 lot C : total LU aux séances (le repli « + 2 » se déclenchait pour tout
+    // horaire créé par le formulaire, qui n'écrit ni `duree` ni `nombrePeriodes`).
+    const totalPeriodes = periodesParSemaine(horaire);
 
     html += `
         <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
@@ -109,8 +142,8 @@ function chargerSeancesV2() {
     horaire.forEach((s, index) => {
         const jourNom = s.jour || joursInverse[s.jourNum] || '?';
         const heureDebut = s.heureDebut || s.debut || '?';
-        // 🆕 BETA 95.1 : Afficher en périodes
-        const periodes = s.nombrePeriodes || (s.duree ? Math.round((parseFloat(s.duree) * 60) / dureePeriodeCourante()) : 2);
+        // #540 lot C : dérivées des heures de la séance, jamais supposées.
+        const periodes = periodesDeLaSeance(s);
         const local = s.local || '';
 
         html += `
@@ -128,6 +161,35 @@ function chargerSeancesV2() {
 
     html += '</div>';
     conteneur.innerHTML = html;
+    majResumeFormatHoraireV2();
+}
+
+/**
+ * Résumé du format, LU aux lignes de séance réellement saisies.
+ *
+ * #540 lot C : il affichait `nbSeances × periodesParSeance`, le produit de deux
+ * déclarations — donc « 2 séances × 3 périodes = 6 périodes/semaine » même quand les
+ * six lignes disaient autre chose. Il lit désormais les heures, comme la carte résumé
+ * et comme le calcul d'assiduité. Recâblé sur chaque champ d'heure (`data-on-change`)
+ * pour suivre la saisie.
+ */
+function majResumeFormatHoraireV2() {
+    const resumeElem = document.getElementById('v2-hor-formatResume');
+    if (!resumeElem) return;
+
+    const seances = [];
+    for (let i = 0; document.getElementById(`v2-hor-seance-${i}-jour`); i++) {
+        seances.push({
+            heureDebut: document.getElementById(`v2-hor-seance-${i}-debut`)?.value || '',
+            heureFin: document.getElementById(`v2-hor-seance-${i}-fin`)?.value || ''
+        });
+    }
+
+    const total = periodesParSemaine(seances);
+    const nb = seances.length;
+    resumeElem.textContent = total > 0
+        ? `${nb} séance${nb > 1 ? 's' : ''} · ${total} période${total > 1 ? 's' : ''}/semaine`
+        : `${nb} séance${nb > 1 ? 's' : ''} · durée non déterminée`;
 }
 
 // Variable pour stocker l'index de la séance en édition
@@ -187,10 +249,11 @@ function modifierSeanceV2(index) {
         // Remplir les champs
         setValue('v2-jourSeance', seance.jour || '');
         setValue('v2-debutSeance', seance.heureDebut || seance.debut || '');
-        // 🆕 BETA 95.1 : Utiliser nombrePeriodes si disponible, sinon convertir depuis duree
-        const periodesValue = seance.nombrePeriodes
-            || (seance.duree ? Math.round((parseFloat(seance.duree) * 60) / dureePeriodeCourante()) : 2);
-        setValue('v2-periodesSeance', String(periodesValue));
+        // #540 lot C : dérivé des heures de la séance. `periodesDeLaSeance` sait lire
+        // `nombrePeriodes`, `duree` ET `heureDebut/heureFin` — ce dernier cas étant celui
+        // des séances créées par le formulaire, qui tombaient sur l'ancien repli à 2.
+        const periodesValue = periodesDeLaSeance(seance);
+        if (periodesValue > 0) setValue('v2-periodesSeance', String(periodesValue));
         setValue('v2-localSeance', seance.local || '');
 
         formulaire.scrollIntoView({ behavior: 'smooth' });
@@ -446,14 +509,20 @@ function mettreAJourCarteResumeHoraireV2(horaire) {
     }
 
     const nbSeances = horaire.seances?.length || 0;
-    const periodesParSeance = horaire.periodesParSeance || 2;
-    const totalPeriodes = nbSeances * periodesParSeance;
+    // #540 lot C : le total se LIT aux séances. Il valait `nbSeances × periodesParSeance`
+    // — une déclaration uniforme jamais confrontée aux heures saisies : un horaire annoncé
+    // « 2 périodes/séance » avec des séances de 08:00 à 11:00 affichait 4 périodes/semaine
+    // et en pesait 8 au dénominateur de l'assiduité.
+    const totalPeriodes = periodesParSemaine(horaire.seances);
 
     let seancesHtml = '';
     if (horaire.seances && horaire.seances.length > 0) {
         seancesHtml = '<ul>';
         horaire.seances.forEach(s => {
-            const heureFin = s.heureFin || calculerHeureFin(s.heureDebut, periodesParSeance);
+            // Une fin manquante se dérive des périodes de CETTE séance, pas du format
+            // déclaré de l'horaire. 0 période → on ne fabrique pas d'heure de fin.
+            const perSeance = periodesDeLaSeance(s);
+            const heureFin = s.heureFin || (perSeance > 0 ? calculerHeureFin(s.heureDebut, perSeance) : '');
             // Afficher le local par séance (ou fallback vers local global pour anciennes données)
             const localSeance = s.local || horaire.local || '';
             const localInfo = localSeance ? ` (${echapperHtml(localSeance)})` : '';
@@ -465,8 +534,8 @@ function mettreAJourCarteResumeHoraireV2(horaire) {
     carte.innerHTML = `
         <div class="resume-horaire-nom">${echapperHtml(horaire.nom || 'Sans nom')}</div>
         <div class="resume-horaire-details">
-            <div>Format : ${nbSeances}×${periodesParSeance}</div>
-            <div>${totalPeriodes} périodes/semaine</div>
+            <div>Format : ${nbSeances} séance${nbSeances > 1 ? 's' : ''}</div>
+            <div>${totalPeriodes > 0 ? totalPeriodes + ' périodes/semaine' : 'durée non déterminée'}</div>
         </div>
         ${seancesHtml ? `<div class="resume-horaire-seances">${seancesHtml}</div>` : ''}
     `;
@@ -614,8 +683,11 @@ function editerHoraireV2(horaire) {
             const inputLocal = document.getElementById(`v2-hor-seance-${i}-local`);
 
             if (selectJour) selectJour.value = s.jour || 'Lundi';
-            if (inputDebut) inputDebut.value = s.heureDebut || '08:00';
-            if (inputFin) inputFin.value = s.heureFin || '10:00';
+            // #540 lot C : les lignes viennent d'être générées avec le début par défaut et
+            // une fin DÉRIVÉE du format choisi. Une séance qui ne dit rien laisse donc la
+            // proposition en place — on ne réécrit plus « 10:00 » par-dessus.
+            if (inputDebut && s.heureDebut) inputDebut.value = s.heureDebut;
+            if (inputFin && s.heureFin) inputFin.value = s.heureFin;
             // Local par séance ou fallback vers local global (migration)
             if (inputLocal) inputLocal.value = s.local || localGlobal;
         });
@@ -663,12 +735,35 @@ function sauvegarderHoraireV2() {
     }
 
     // Collecter les séances (avec local par séance)
+    //
+    // #540 lot C : ces deux replis (`|| '08:00'`, `|| '10:00'`) FABRIQUAIENT une séance de
+    // deux heures à partir de champs vides — et cette séance-là entre ensuite au
+    // dénominateur de l'assiduité par `obtenirHeuresPrevuesParHoraire`. Un horaire ne
+    // s'invente pas : un début manquant est REFUSÉ et dit ; une fin manquante se dérive du
+    // format déclaré, qui pilote désormais vraiment la saisie.
     const seances = [];
     for (let i = 0; i < nbSeances; i++) {
         const jour = document.getElementById(`v2-hor-seance-${i}-jour`)?.value || 'Lundi';
-        const heureDebut = document.getElementById(`v2-hor-seance-${i}-debut`)?.value || '08:00';
-        const heureFin = document.getElementById(`v2-hor-seance-${i}-fin`)?.value || '10:00';
+        const heureDebut = document.getElementById(`v2-hor-seance-${i}-debut`)?.value || '';
         const local = document.getElementById(`v2-hor-seance-${i}-local`)?.value?.trim() || '';
+
+        if (!heureDebut) {
+            notifications.erreur(
+                `Séance ${i + 1} : heure de début manquante`,
+                'Sans elle, la durée de la séance ne peut pas être calculée — et c\'est cette durée qui sert à l\'assiduité.');
+            return;
+        }
+
+        const heureFin = document.getElementById(`v2-hor-seance-${i}-fin`)?.value
+            || calculerHeureFin(heureDebut, periodesParSeance);
+
+        if (!heureFin) {
+            notifications.erreur(
+                `Séance ${i + 1} : heure de fin manquante`,
+                'Indique-la, ou choisis un nombre de périodes par séance pour qu\'elle se calcule.');
+            return;
+        }
+
         seances.push({ jour, heureDebut, heureFin, local });
     }
 
@@ -809,6 +904,9 @@ function supprimerHoraireV2() {
     notifications.succes(`Horaire "${nomHoraire}" supprimé`);
 }
 window.supprimerHoraireV2 = supprimerHoraireV2;
+window.majResumeFormatHoraireV2 = majResumeFormatHoraireV2;
+window.periodesDeLaSeance = periodesDeLaSeance;
+window.periodesParSemaine = periodesParSemaine;
 
 /**
  * Met à jour les champs de séances selon le nombre sélectionné
@@ -819,17 +917,19 @@ function mettreAJourSeancesHoraireV2() {
     const nbSeances = parseInt(document.getElementById('v2-hor-nbSeances')?.value) || 2;
     const periodesParSeance = parseInt(document.getElementById('v2-hor-periodesParSeance')?.value) || 2;
 
-    // Mettre à jour le résumé du format
-    const totalPeriodes = nbSeances * periodesParSeance;
-    const resumeElem = document.getElementById('v2-hor-formatResume');
-    if (resumeElem) {
-        resumeElem.textContent = `${nbSeances} séance(s) × ${periodesParSeance} période(s) = ${totalPeriodes} périodes/semaine`;
-    }
-
     if (!conteneur) return;
 
     const jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
     let html = '';
+
+    // #540 lot C — LE CHAMP DEVIENT EFFECTIF (décision de Grégoire, 26 août 2026).
+    // L'heure de fin naissait à « 10:00 » EN DUR : choisir « 3 périodes » ne changeait
+    // aucune heure proposée, seulement le résumé affiché. Le champ annonçait un format
+    // que la saisie ignorait. Elle se dérive désormais du début + N × durée de période.
+    // L'heure de DÉBUT, elle, reste un défaut de formulaire assumé : rien ne permet de
+    // la déduire, et 8 h est le premier créneau d'une grille de cégep.
+    const DEBUT_PAR_DEFAUT = '08:00';
+    const finProposee = calculerHeureFin(DEBUT_PAR_DEFAUT, periodesParSeance);
 
     for (let i = 0; i < nbSeances; i++) {
         const jourDefaut = jours[i % jours.length];
@@ -839,9 +939,9 @@ function mettreAJourSeancesHoraireV2() {
                 <select id="v2-hor-seance-${i}-jour" class="controle-form">
                     ${jours.map(j => `<option value="${j}" ${j === jourDefaut ? 'selected' : ''}>${j}</option>`).join('')}
                 </select>
-                <input type="time" id="v2-hor-seance-${i}-debut" class="controle-form" value="08:00">
+                <input type="time" id="v2-hor-seance-${i}-debut" class="controle-form" value="${DEBUT_PAR_DEFAUT}" data-on-change="majResumeFormatHoraireV2">
                 <span>à</span>
-                <input type="time" id="v2-hor-seance-${i}-fin" class="controle-form" value="10:00">
+                <input type="time" id="v2-hor-seance-${i}-fin" class="controle-form" value="${finProposee}" data-on-change="majResumeFormatHoraireV2">
                 <input type="text" id="v2-hor-seance-${i}-local" class="controle-form" placeholder="Local">
             </div>
         `;
@@ -889,7 +989,11 @@ function changerFormatSeancesHoraireV2() {
  */
 function calculerHeureFin(heureDebut, nbPeriodes) {
     if (!heureDebut) return '';
-    const dureePeriode = parseInt(document.getElementById('v2-dureePeriode')?.value) || (window.DUREE_PERIODE_DEFAUT || 50);
+    // #540 lot C : `dureePeriodeCourante()` lit la valeur CONFIGURÉE (clé `dureePeriode`,
+    // écrite par `definirDureePeriode`). L'ancienne lecture ne voyait que le select de
+    // l'écran Horaire : appelée depuis un autre écran, elle retombait sur le défaut alors
+    // qu'un réglage existait.
+    const dureePeriode = dureePeriodeCourante();
     const [h, m] = heureDebut.split(':').map(Number);
     const totalMinutes = h * 60 + m + (nbPeriodes * dureePeriode);
     const heures = Math.floor(totalMinutes / 60);

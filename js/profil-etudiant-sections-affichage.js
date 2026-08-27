@@ -1428,7 +1428,7 @@ function obtenirDetailsAssiduite(da) {
 
         // Nombre de périodes de la séance
         const periodesSeance = typeof obtenirNombrePeriodesSeance === 'function'
-            ? obtenirNombrePeriodesSeance(dateCours) : 2;
+            ? obtenirNombrePeriodesSeance(dateCours) : 0;   // #540 lot C
 
         // Nombre de périodes de présence de l'étudiant
         let periodesPresenceEleve = 0;

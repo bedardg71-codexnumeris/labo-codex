@@ -157,8 +157,17 @@ test('CT-01 · réduire 2 → 1 séance garde la première ; « Nouvel horaire �
     expect(r.lignesReduites.length).toBe(1);
     expect(r.lignesReduites[0]).toEqual({ jour: 'Mardi', debut: '10:00', fin: '12:00', local: 'A-101' });
 
+    // #540 lot C (26 août 2026) — LA FIN PAR DÉFAUT EST DÉRIVÉE, PLUS ÉCRITE EN DUR.
+    // Elle valait « 10:00 » quel que soit le format choisi : le champ « Périodes par
+    // séance » n'atteignait pas les lignes, et ce 10:00 supposait de surcroît des
+    // périodes de 60 minutes alors que le réglage du projet est à 50 (#538, 22 août).
+    // Deux périodes de 50 min à partir de 08:00 finissent à 09:40 — c'est ce que le
+    // formulaire propose désormais, et ce que l'assiduité comptera.
+    // ⚠ L'INVARIANT DE CT-01 EST INCHANGÉ : « Nouvel horaire » repart bien des défauts
+    // et n'hérite pas des séances de l'horaire précédent. Seule la valeur du défaut a
+    // bougé, pas ce que ce cas verrouille.
     expect(r.lignesNeuves.length).toBe(2);
-    expect(r.lignesNeuves[0]).toEqual({ jour: 'Lundi', debut: '08:00', fin: '10:00', local: '' });
-    expect(r.lignesNeuves[1]).toEqual({ jour: 'Mardi', debut: '08:00', fin: '10:00', local: '' });
+    expect(r.lignesNeuves[0]).toEqual({ jour: 'Lundi', debut: '08:00', fin: '09:40', local: '' });
+    expect(r.lignesNeuves[1]).toEqual({ jour: 'Mardi', debut: '08:00', fin: '09:40', local: '' });
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

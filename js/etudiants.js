@@ -225,7 +225,7 @@ function calculerAssiduitéGlobale(da) {
         // Obtenir le nombre de périodes de cette séance
         const nombrePeriodesSeance = typeof obtenirNombrePeriodesSeance === 'function'
             ? obtenirNombrePeriodesSeance(p.date)
-            : 2; // Fallback : 2 périodes par défaut
+            : 0; // #540 lot C : 0 est un refus de répondre, jamais un repli à 2.
 
         periodesOffertes += nombrePeriodesSeance;
 

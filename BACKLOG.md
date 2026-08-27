@@ -771,11 +771,79 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     À LA MAIN, exactement comme `release.mjs --build-only` l'aurait fait pour eux — **sans toucher
     au build**, Grégoire ayant l'application ouverte en `file://`. Le bump de version reste dû à la
     clôture de #540. Vitest **3513/3513**.
-  · **C — tarir les `2`** : les quatre familles ci-dessus, `periodesParSeance` en tête ; l'écran
-    Horaire affiche ce qu'il calcule. *Fin : affichage et calcul lisent la même donnée.*
+  · **✅ C — tarir les `2` · LIVRÉ 26 août 2026.** Une seule mesure pour les deux chaînes :
+    `mesurerDureeSeance` (saisie-presences.js) est exportée, et l'écran Horaire l'emploie au
+    lieu des trois mesures maison qu'il portait — toutes avec un repli à `2`. Ce repli n'était
+    pas un cas limite : `sauvegarderHoraireV2` écrit `{jour, heureDebut, heureFin, local}`,
+    donc TOUT horaire créé par le formulaire y tombait à chaque affichage.
+    ⮕ **Le champ « Périodes par séance » est devenu EFFECTIF** (décision de Grégoire) : il ne
+    pré-remplissait rien — les lignes naissaient à `08:00 → 10:00` en dur, quel que soit le
+    choix. Il pilote désormais l'heure de fin PROPOSÉE ; les lignes déjà saisies ne sont pas
+    réécrites (invariant #460 préservé). Le résumé du formulaire et la carte résumé se lisent
+    aux heures réelles, plus au produit `nbSeances × periodesParSeance`.
+    ⮕ **Heures fabriquées taries** : `sauvegarderHoraireV2` lisait ses champs avec `|| '08:00'`
+    et `|| '10:00'` — des champs vides produisaient une séance de deux heures qui entrait au
+    dénominateur. Un début manquant est REFUSÉ et dit ; une fin manquante se dérive du format.
+    Seul `08:00` subsiste, nommé une fois (`DEBUT_PAR_DEFAUT`) : rien ne permet de déduire une
+    heure de début.
+    ⮕ **Gardes de chargement à 0, jamais 2** (`indices.js` ×3, `etudiants.js`,
+    `profil-etudiant-sections-affichage.js`) — inertes tant que l'ordre de chargement tient,
+    mais réveillées EN SILENCE s'il change. ⮕ **`intervention.duree || 2` retiré du chemin
+    d'ÉCRITURE des présences** ; les défauts de SAISIE restent (ils proposent, ils ne comptent
+    pas — distinction verrouillée par un cas dédié).
+    ⮕ **Défaut trouvé en chemin** : `obtenirNombrePeriodesSeance` ne lisait pas
+    `heureDebut/heureFin` d'une entrée du cache — il repartait interroger l'horaire par un
+    détour dont le résultat dépendait de l'assemblage groupe-cours. Il mesure désormais ce
+    qu'il a sous la main, avec la même fonction que l'écran.
+    ⮕ **Verrous** : `tests/unit/sentinelle-540-lotC-duree-derivee-horaire.test.js` (21 cas) et
+    `tests/integration/horaire-duree-derivee-540C.spec.js` (4 cas, dont la preuve que les deux
+    chaînes tombent sur le même nombre). **5 break-tests rouges** — dont un qui N'A PAS rougi
+    d'abord : le verrou visait la chaîne littérale `return sum + 2` et laissait passer le même
+    repli écrit `sum + 2`. Un verrou qui vise une FORMULATION plutôt qu'un COMPORTEMENT ne
+    verrouille rien ; corrigé, puis rejoué.
+    ⚠ **Deux sentinelles existantes ont dû suivre** : `sentinelle-assiduite-bigroupes-330`
+    ne fournissait PAS `obtenirNombrePeriodesSeance` à son sandbox et empruntait donc le repli
+    à 2 — ses attendus tombaient juste par coïncidence ; elle reçoit désormais la vraie chaîne.
+    Et `horaire-format-preserve-seances` (CT-01) attendait `10:00` comme fin par défaut.
+    Vitest **3534/3534**, Playwright **177/177**.
+    ⏳ **LIMITE CONNUE, traitée au lot E** : la conversion temps → périodes divise par la durée
+    d'ENSEIGNEMENT alors qu'elle part d'un temps CALENDAIRE. Le lot C n'a pas changé cette
+    règle — il l'a unifiée. Voir lot E.
+  · **E — LA PAUSE (inséré le 26 août, PASSE AVANT D).** Grégoire, en relisant le lot C : « une
+    heure qui dure 60 minutes, c'est une période de 50 minutes plus 10 minutes de pause. Dans
+    d'autres collèges, 55 plus 5. Il ne faut pas compter uniquement les minutes, il faut compter
+    la pause aussi. »
+    ⮕ **Le défaut : deux grandeurs, un seul diviseur.** Le sens périodes → temps affiché
+    (`p × dureePeriode` → « 2 pér. (1h40) ») est JUSTE : c'est du temps d'enseignement. Le sens
+    temps → périodes divise un temps CALENDAIRE (`heureFin − heureDebut`) par cette même durée
+    d'enseignement. Le code ne se trompe pas de formule, il se trompe de grandeur.
+    `08:00 → 11:00` vaut **3** périodes ; il en comptait **4**. `13:00 → 17:00` — le bloc de
+    quatre heures, cas courant en littérature — en comptait **5**. L'erreur croît avec la durée.
+    ⮕ **Les 14 conversions ne sont pas égales.** Huit partent du temps calendaire et sont
+    FAUSSES (`obtenirNombrePeriodesSeance`, `obtenirHeuresPrevuesParHoraire`,
+    `periodesDeLaSeance`, `presences-rapport:103`, `horaire.js:990/1335`, et **deux migrations
+    qui réécrivent `nombrePeriodes` en base** — `migrations:361/381`). Six font un ALLER-RETOUR
+    (`heures` est calculé à l'écriture par `periodesPresentes × dureePeriode / 60` puis
+    reconverti par le même diviseur) : auto-cohérentes quel que soit le diviseur, elles ne
+    bougent pas.
+    ⮕ **Aucune donnée saisie n'est réinterprétée** : `periodesPresentes` et `nombrePeriodes`
+    sont des entiers choisis dans des selects, les heures d'horaire sont des heures d'horloge.
+    Seul risque : si les deux migrations du groupe 1 ont déjà tourné, elles ont pu inscrire des
+    `nombrePeriodes` gonflés que le nouveau calcul ne corrigera pas seul.
+    ⮕ **Trouvé à l'audit** : `periodesVersHeures` et `heuresVersPeriodes` existent DÉJÀ dans
+    `horaire.js`, exportées — 8 sites les emploient, 14 refont la division à la main.
+    ✅ **TRANCHÉ PAR GRÉGOIRE, 26 août 2026 : un seul champ, l'EMPREINTE CALENDAIRE.** « Durée
+    d'une période » désigne désormais le temps que la période occupe à l'horaire, pause
+    comprise. Le temps d'enseignement net n'est plus modélisé.
+    ⚠ **Le sens du champ change alors que sa valeur est déjà stockée** (`50` chez Grégoire, qui
+    voulait dire « enseignement »). PAS de migration silencieuse : passer 50 à 60 inventerait
+    une pause de 10 minutes que personne n'a déclarée. L'application DIT le nouveau sens à
+    l'écran et laisse l'utilisateur ajuster.
+    *Fin : une séance de 08:00 à 11:00 vaut 3 périodes partout.*
   · **D — le recoupement** (demande d'origine) : l'écran Horaire confronte le total des séances à la
     durée hebdomadaire déclarée et le DIT quand ça diverge, sans bloquer. *Fin : un horaire de 3 h
-    sur un cours 2-2-3 est signalé.*
+    sur un cours 2-2-3 est signalé.* **Après E** : recouper avec une conversion fausse
+    signalerait des écarts qui n'existent pas.
   **C avant D** : tant que l'horaire affiche une durée déclarative, un signal de divergence serait
   illisible. ⚠ La pondération suppose une répartition uniforme sur le trimestre — pour un stage ou
   un cours intensif, `(théorie + labo)` n'est pas la durée d'une semaine donnée. D devra prévoir
