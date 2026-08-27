@@ -239,11 +239,11 @@ const DONNEES = [
     num: "§0", titre: "Préalable",
     note: "Ce qui invalide tout le reste s'il est sauté.",
     portes: [{
-      num: "P.1", titre: "Mettre à jour, et vérifier le numéro en bas de page",
-      pourquoi: "Tu lances l'application depuis ton clone, en <b>file://</b> : elle est à la version de ton dernier <b>git pull</b>, pas à celle de main. Sans ce geste, tout ce qui suit décrit l'état d'AVANT — et ce genre de faux rouge est indétectable au récit, parce qu'il ressemble exactement à ce que la porte cherche.",
+      num: "P.1", titre: "Recharger l'application, et lire le numéro en bas de page",
+      pourquoi: "Tu lances l'application depuis ton clone, en <b>file://</b> : elle affiche ce qu'il y a SUR TON DISQUE. Sans rechargement, tout ce qui suit décrit l'état d'AVANT.<br><br>⚠ <b>Cette rangée disait « fais un git pull », et c'était faux</b> — corrigé le 27 août après que tu t'y sois bloqué. Les sessions commitent DANS ce clone : leurs commits y sont déjà, et GitHub Desktop affiche « No local changes » sans proposer de pull. Il n'y a rien à tirer, seulement à recharger.",
       rangees: [{
-        geste: "Fais un git pull, recharge l'application, et lis le numéro en bas de page.",
-        attendu: "<b>1.102.0 · build 0827-0556</b>",
+        geste: "Recharge l'application (Cmd+R), et lis le numéro en bas de page.",
+        attendu: "<b>1.103.0 · build 0827-0858</b>",
         mesure: "Numéro affiché"
       }]
     }]
