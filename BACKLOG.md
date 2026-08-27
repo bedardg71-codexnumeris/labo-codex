@@ -732,17 +732,6 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Créé le 27 août 2026, **issu du pas 5 de #542 lot 3**, que Grégoire a décidé de sortir du
   lot plutôt que de l'y forcer. Ce n'est pas une trouvaille de passage : c'était un pas
   planifié, mesuré, et refermé ailleurs.
-  ⮕ **CE QUI A ÉTÉ MESURÉ** (et qu'un `grep` seul n'aurait pas donné — la leçon du lot 3 :
-  la liste des seuils TROUVÉS est plus longue que celle des seuils qui AGISSENT) :
-
-  | Site | Fonction | Vivant ? |
-  |---|---|---|
-  | `profil-etudiant-calculs.js:1352` | `identifierPatternActuel` | **oui** — via le niveau RàI |
-  | `profil-etudiant-calculs.js:1444` | `determinerNiveauRaiPedagogique` | **oui** — `snapshots.js`, `etudiants.js`, le profil |
-  | `interventions.js:1213` | `suggererObjectifIntervention` | **oui** — bouton « Suggérer » |
-  | `pratiques/pratique-pan-standards.js:1169` | `_identifierPatternActuel` | **oui** — DOUBLON du premier |
-  | `profil-etudiant-helpers.js:201` | `obtenirNiveauIDMEDepuisPourcentage` | **NON** — ses 2 appelants sont eux-mêmes morts |
-
   ⮕ **LE DÉFAUT.** `identifierPatternActuel` compare une performance à `0,64` et `0,75` — les
   bornes de Grégoire — pour décider « difficulté persistante / émergente / stable ». Chez un
   utilisateur qui note en W/X/Y/Z, ces nombres ne veulent rien dire, et son niveau RàI est
@@ -756,12 +745,69 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   qu'ils sont un seuil d'alerte pédagogique — honnête, ne corrige pas le calibrage ;
   (b) situer la performance dans l'échelle de l'utilisateur et exprimer la règle en niveaux —
   fidèle au lot 3, mais **dépend de l'étiquetage SOLO, qu'aucune échelle réelle ne porte**.
-  ⮕ **PRÉALABLE À (b)** : les cinq étiquettes SOLO sur l'échelle de Grégoire. Et **avant tout
-  geste** : fusionner les DEUX implémentations du pattern (procédurale et méthode de
-  pratique), sinon la correction devrait être écrite deux fois — cf. [[project-deux-systemes-calcul-pratiques]].
+  ⮕ **PRÉALABLE À (b)** : les cinq étiquettes SOLO sur l'échelle de Grégoire.
+
+  ### ⚠ LA MESURE DU 27 AOÛT (après-midi) CORRIGE CET ITEM SUR DEUX POINTS
+
+  **1. Le préalable inscrit ici — « fusionner les DEUX implémentations du pattern, sinon la
+  correction devrait être écrite deux fois » — NE TIENT PAS.** Il n'y a pas deux
+  implémentations mais **six**, et **une seule est atteinte**.
+
+  | Chaîne | Vivante ? |
+  |---|---|
+  | `identifierPatternActuel` → `determinerNiveauRaiPedagogique` → `snapshots.js`, `etudiants.js` (×4) | **oui** |
+  | `identifierPatternActuel` → `determinerCibleIntervention` → `genererSectionAccompagnement`, `tableau-bord-apercu.js:2673` | **oui** |
+  | `suggererObjectifIntervention` (`interventions.js`) → bouton « Suggérer » | **oui** |
+  | `_identifierPatternActuel` (PAN-Standards) → `identifierPattern` → `genererCibleIntervention` → `genererCarteCibleIntervention` | **non** |
+  | `identifierPattern` de Sommative · PAN-Spécifications · Configurable · Test → même chaîne | **non** |
+
+  ⮕ Les seuls autres appelants sont `testerPratiqueFrancois` et `testerPratiqueTest` :
+  définies, exposées sur `window`, **jamais appelées**. Des fonctions de console.
+  ⮕ **CE QUE ÇA CHANGE POUR LE GESTE** : renommer `idme.*` en `depistage.*` (a) ou situer la
+  performance dans l'échelle (b) ne toucherait que **trois sites vivants, tous procéduraux**.
+  Il n'y a pas de double écriture à craindre.
+
+  **2. LES CINQ IMPLÉMENTATIONS DIVERGENT, et pas seulement sur les seuils.** Elles ne rendent
+  pas le même TYPE : `pratique-pan-standards` et `pratique-sommative` rendent un objet
+  `{type, description, couleur}` ; `pratique-pan-specifications` et `pratique-configurable`
+  rendent une **chaîne**. Le vocabulaire diverge aussi (`'Difficulté persistante'` /
+  `'difficulte-persistante'` / `'stable'`). Et leurs règles n'ont rien en commun :
+  `idme.*` configurables d'un côté, `0.60`/`0.30` et un `indiceA = 0.85` « par défaut
+  optimiste » en dur dans Sommative, `50` en dur dans Spécifications, le **nombre** de défis
+  dans Configurable. Ce n'est pas une fusion, c'est un contrat à écrire.
+  ⚠ **ET LE CONTRAT EST OBLIGATOIRE** : `identifierPattern` et `genererCibleIntervention` sont
+  deux des huit méthodes requises de `IPratique`, vérifiées à l'enregistrement
+  (`pratique-registre.js`, `throw` si absentes). Ces cinq implémentations sont peut-être sans
+  consommateur **parce que le câblage du système de pratiques n'est pas fini** (#307), pas
+  parce qu'elles sont périmées. **Ne pas les supprimer par nettoyage** : ce serait trancher une
+  direction d'architecture, et toutes les pratiques échoueraient à s'enregistrer.
+
+  ✅ **UN PAS LIVRÉ LE 27 AOÛT (après-midi)** : `genererCarteCibleIntervention`
+  (`profil-etudiant-sections-affichage.js`, 84 lignes) est **retirée**. Elle rendait la carte
+  « Cible d'intervention » du profil et était **morte** — une seule occurrence dans tout le
+  dépôt, sa définition ; aucun export `window`, aucun appel, aucun dispatch dynamique. Ses
+  règles CSS `.carte-cible-*` (`styles.css`, 8 sélecteurs + 2 en responsive) sont parties avec
+  elle, n'ayant aucune autre consommatrice. **C'est elle qui rendait morte toute la chaîne des
+  pratiques ci-dessus** : elle en était le seul consommateur.
+  ⮕ **UN DÉFAUT D'AFFICHAGE PART AVEC ELLE, ET IL N'A JAMAIS ÉTÉ VU** : la carte interpolait
+  `${patternInfo.type}` dans son HTML, où `patternInfo` vient de `pratique.identifierPattern(da)`.
+  Sous PAN-Spécifications ou sous une pratique configurable — qui rendent une chaîne — `.type`
+  vaut `undefined`, et l'écran aurait affiché « Pattern actuel : undefined ». Personne ne l'a
+  jamais vu parce que personne n'atteignait la carte.
+  ⮕ **Verrouillé par** `tests/unit/sentinelle-551-carte-cible-morte-retiree.test.js` (5 tests,
+  **6 break-tests rouges vérifiés isolément**, restauration confirmée par `diff -q`) : le nom
+  absent partout · **ses deux voisines toujours là** (une coupe trop large les emporterait sans
+  que rien ne le dise) · le chemin vivant `determinerCibleIntervention` intact des deux côtés ·
+  **les cinq `identifierPattern` et les deux entrées du contrat IPratique NON emportées** ·
+  aucune règle `.carte-cible-*` au CSS.
+
+  ⮕ **CE QUI RESTE À CET ITEM** : le calibrage lui-même — geste (a) ou (b) sur les trois sites
+  vivants — et la décision d'architecture sur le contrat `identifierPattern`. Le nettoyage
+  préalable est fait.
+
   ⮕ **TROIS FONCTIONS MORTES repérées en chemin**, à traiter avec cet item plutôt que de les
   brancher : `genererDiagnosticSRPNF` (`profil-etudiant-diagnostics.js:57`, jumeau de la carte
-  refaite au pas 3c-3), `genererTableauObjectifs` (`profil-etudiant-sections-affichage.js:3147`,
+  refaite au pas 3c-3), `genererTableauObjectifs` (`profil-etudiant-sections-affichage.js`,
   aucun appelant), et `obtenirNiveauIDMEDepuisPourcentage` — **corrigée par #541 le 26 août,
   et appelée uniquement depuis ces deux-là**. Le correctif de #541 était réel, le défaut
   aussi ; simplement personne ne les atteignait.
