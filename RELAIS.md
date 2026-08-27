@@ -24,6 +24,30 @@
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
 | **Dernière mise à jour** | **27 août 2026, matin** — #542 lot 3 : pas 1 et 2 livrés. Le bump de version reste dû. |
 
+## ⏳ PORTE TERRAIN OUVERTE — 27 août, non relevée
+
+`plans de travail/PORTES-TERRAIN-2026-08-27-niveau-global-selon-pratique.md`
+(jumeau interactif : le `.html` de même nom, publié comme artefact).
+
+**3 vérifications, 3 décisions.** Volontairement courte : les deux règles de tête du skill
+`portes-terrain` l'exigent — aucune porte si une machine peut répondre, et pas de préalable
+si un raté n'est pas irréversible. **Rien de ce qui a été livré le 27 n'écrit dans les
+données**, d'où l'absence de §1.
+
+⚠ **Ce que la porte annonce en tête, et qu'une session suivante doit savoir** : dans la
+carte Accompagnement, **deux lignes ne suivent pas encore la même règle**. « Performance
+globale » lit l'échelle de la pratique (pas 3c-1, fait) ; « Progression par critère », juste
+en dessous, calcule encore avec le ternaire en dur (pas 3c, reste). Sur une échelle non-IDME,
+**deux codes différents peuvent s'afficher pour le même élève**. Ce n'est pas un défaut à
+corriger en urgence, c'est le chantier à moitié fait — mais il ne faut pas le découvrir par
+surprise.
+
+⏳ **Les trois décisions attendent un verdict ÉCRIT** : (D1) le survol SOLO est inaccessible
+sur iPad ; (D2) le niveau disparaît sous sommative, est-ce ce qu'il veut voir ; (D3)
+étiqueter son échelle en SOLO maintenant ou pas.
+
+---
+
 ## Les arbitrages de Grégoire, 27 août 2026 — quatre dossiers refermés
 
 | Dossier | Verdict | Effet |

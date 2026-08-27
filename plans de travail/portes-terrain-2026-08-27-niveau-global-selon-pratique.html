@@ -1,0 +1,417 @@
+<title>Le niveau vient de ta pratique</title>
+<style>
+:root{
+  --papier:#f7f9fa; --carte:#ffffff; --encre:#12232e; --encre-doux:#4a6472;
+  --trait:#dbe4e8; --trait-fort:#c2d1d8;
+  --sarcelle:#217a88; --sarcelle-doux:#e3f1f3;
+  --ambre:#a4650f; --ambre-doux:#fbf1de;
+  --vert:#286b47; --vert-doux:#e2f1e8;
+  --rouge:#a93b32; --rouge-doux:#fbe9e7;
+  --ombre:0 1px 2px rgba(18,35,46,.06),0 8px 24px -12px rgba(18,35,46,.18);
+  --r-s:5px; --r-m:8px; --r-g:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --papier:#0d1b24; --carte:#14262f; --encre:#e4eef1; --encre-doux:#93aeb8;
+    --trait:#24404c; --trait-fort:#31525f;
+    --sarcelle:#5fc0cd; --sarcelle-doux:#123039;
+    --ambre:#e0a84e; --ambre-doux:#33260f;
+    --vert:#6bc493; --vert-doux:#122c1f;
+    --rouge:#e78078; --rouge-doux:#301715;
+    --ombre:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  --papier:#0d1b24; --carte:#14262f; --encre:#e4eef1; --encre-doux:#93aeb8;
+  --trait:#24404c; --trait-fort:#31525f;
+  --sarcelle:#5fc0cd; --sarcelle-doux:#123039;
+  --ambre:#e0a84e; --ambre-doux:#33260f;
+  --vert:#6bc493; --vert-doux:#122c1f;
+  --rouge:#e78078; --rouge-doux:#301715;
+  --ombre:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--papier);color:var(--encre);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%;
+}
+.mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace}
+.enveloppe{max-width:860px;margin:0 auto;padding:0 20px 80px}
+header.tete{padding:40px 0 20px}
+.surtitre{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--sarcelle);font-weight:700;margin:0 0 10px}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.12;margin:0 0 14px;text-wrap:balance;letter-spacing:-.02em}
+.chapeau{color:var(--encre-doux);max-width:64ch;margin:0 0 10px}
+.chapeau strong{color:var(--encre)}
+
+.barre{position:sticky;top:0;z-index:20;background:var(--papier);border-bottom:1px solid var(--trait);padding:10px 0;margin-bottom:24px}
+.barre-inner{max-width:860px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.compteur{display:flex;gap:6px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.jeton{font-size:12px;font-weight:700;padding:5px 10px;border-radius:var(--r-s);border:1px solid var(--trait-fort);white-space:nowrap}
+.jeton.ok{background:var(--vert-doux);border-color:var(--vert);color:var(--vert)}
+.jeton.ko{background:var(--rouge-doux);border-color:var(--rouge);color:var(--rouge)}
+.jeton.reste{background:transparent;color:var(--encre-doux)}
+.pousse{flex:1 1 auto}
+
+button{font:inherit;cursor:pointer;border-radius:var(--r-s);border:1px solid var(--trait-fort);
+  background:var(--carte);color:var(--encre);padding:8px 12px;min-height:44px;transition:background .12s,border-color .12s}
+button:hover{border-color:var(--sarcelle)}
+button:focus-visible{outline:2px solid var(--sarcelle);outline-offset:2px}
+.principal{background:var(--sarcelle);border-color:var(--sarcelle);color:var(--papier);font-weight:600}
+.principal:hover{filter:brightness(1.08)}
+
+.avertissement{
+  border:1px solid var(--ambre);background:var(--ambre-doux);border-radius:var(--r-g);
+  padding:18px 20px;margin:0 0 30px;
+}
+.avertissement h2{margin:0 0 8px;font-size:17px;color:var(--ambre);letter-spacing:-.01em}
+.avertissement p{margin:0 0 10px;max-width:66ch}
+.avertissement p:last-child{margin-bottom:0}
+.avertissement .mono{background:var(--carte);padding:1px 5px;border-radius:3px;font-size:.88em}
+
+section.bloc{margin:0 0 40px}
+.bloc-tete{display:flex;align-items:baseline;gap:10px;margin:0 0 6px;flex-wrap:wrap}
+.bloc-num{font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--sarcelle)}
+.bloc-tete h2{font-size:22px;margin:0;letter-spacing:-.01em}
+.bloc-note{color:var(--encre-doux);font-size:14px;margin:0 0 18px;max-width:66ch}
+
+.porte{background:var(--carte);border:1px solid var(--trait);border-radius:var(--r-g);padding:20px;margin:0 0 16px;box-shadow:var(--ombre)}
+.porte-tete{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:0 0 4px}
+.porte-num{font-weight:700;color:var(--sarcelle);font-size:14px;font-variant-numeric:tabular-nums}
+.porte-tete h3{margin:0;font-size:17px;letter-spacing:-.01em;flex:1 1 260px}
+.pourquoi{border-left:3px solid var(--trait-fort);padding:2px 0 2px 14px;margin:12px 0 16px;color:var(--encre-doux);font-size:14.5px;max-width:64ch}
+.pourquoi b{color:var(--encre)}
+
+.rangee{border-top:1px solid var(--trait);padding:14px 0 4px}
+.rangee:first-of-type{border-top:0}
+.geste{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.bascule{display:flex;gap:4px;flex-shrink:0}
+.bascule button{min-width:44px;min-height:44px;padding:0;font-size:16px;font-weight:700;line-height:1}
+.bascule button[aria-pressed="true"][data-v="ok"]{background:var(--vert-doux);border-color:var(--vert);color:var(--vert)}
+.bascule button[aria-pressed="true"][data-v="ko"]{background:var(--rouge-doux);border-color:var(--rouge);color:var(--rouge)}
+.bascule button[aria-pressed="true"][data-v="na"]{background:var(--sarcelle-doux);border-color:var(--sarcelle);color:var(--sarcelle)}
+.geste-texte{flex:1 1 280px;min-width:0}
+.geste-texte>p{margin:0 0 6px}
+.attendu{color:var(--encre-doux);font-size:14.5px}
+.attendu b{color:var(--encre)}
+
+.mesure{margin:12px 0 4px;display:flex;flex-direction:column;gap:6px}
+.mesure label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--sarcelle)}
+input[type="text"],textarea{
+  font:inherit;width:100%;background:var(--papier);color:var(--encre);
+  border:1px solid var(--trait-fort);border-radius:var(--r-s);padding:10px 12px;min-height:44px;
+}
+input[type="text"]:focus-visible,textarea:focus-visible{outline:2px solid var(--sarcelle);outline-offset:1px;border-color:var(--sarcelle)}
+.mesure input{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;font-size:14px}
+
+.decision{background:var(--carte);border:1px solid var(--trait);border-left:3px solid var(--ambre);
+  border-radius:var(--r-m);padding:18px 20px;margin:0 0 14px}
+.decision-tete{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:0 0 8px}
+.decision-num{font-weight:700;color:var(--ambre);font-size:14px}
+.decision h3{margin:0;font-size:16.5px;flex:1 1 260px;letter-spacing:-.01em}
+.decision p{margin:0 0 12px;color:var(--encre-doux);font-size:14.5px;max-width:64ch}
+.decision textarea{min-height:76px;resize:vertical}
+
+.angles{background:var(--carte);border:1px solid var(--trait);border-radius:var(--r-g);padding:20px 22px}
+.angles ul{margin:0;padding-left:20px}
+.angles li{margin:0 0 10px;color:var(--encre-doux);max-width:64ch}
+.angles li:last-child{margin-bottom:0}
+.angles li b{color:var(--encre)}
+.angles h3{font-size:15px;margin:22px 0 10px;color:var(--encre)}
+
+#zone-releve{margin-top:26px}
+#zone-releve textarea{min-height:280px;font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.5}
+.masque{display:none}
+.pied{color:var(--encre-doux);font-size:13px;margin-top:40px;border-top:1px solid var(--trait);padding-top:16px;max-width:66ch}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;scroll-behavior:auto !important}}
+</style>
+
+<div class="barre">
+  <div class="barre-inner">
+    <div class="compteur">
+      <span class="jeton ok" id="j-ok">✓ 0</span>
+      <span class="jeton ko" id="j-ko">✗ 0</span>
+      <span class="jeton reste" id="j-reste">— 4</span>
+    </div>
+    <span class="pousse"></span>
+    <button id="btn-export" class="principal">Copier mes résultats</button>
+  </div>
+</div>
+
+<div class="enveloppe">
+
+  <header class="tete">
+    <p class="surtitre">Portes terrain · 27 août 2026 · 1.102.0</p>
+    <h1>Le niveau vient de ta pratique</h1>
+    <p class="chapeau">La ligne <strong>« Performance globale (P) »</strong> du profil affichait un niveau
+    calculé par une formule écrite dans le code — <span class="mono">85 → E</span>, <span class="mono">75 → M</span>,
+    <span class="mono">65 → D</span>. Ce sont <strong>tes bornes</strong>, recopiées il y a des mois, et elles
+    s'appliquaient à tout le monde. Maintenant, c'est ta pratique de notation qui dit dans quoi sa note se lit.</p>
+    <p class="chapeau"><strong>3 vérifications, 3 décisions.</strong> La liste est courte à dessein : rien de
+    ce qui a été livré aujourd'hui n'écrit dans tes données.</p>
+  </header>
+
+  <div class="avertissement">
+    <h2>À savoir avant de regarder : le travail est à moitié fait, et ça se voit</h2>
+    <p>Dans la même carte, deux lignes ne suivent pas encore la même règle.
+    <strong>« Performance globale »</strong> lit désormais ton échelle ;
+    <strong>« Progression par critère »</strong>, juste en dessous, calcule encore ses niveaux
+    avec l'ancienne formule.</p>
+    <p>⮕ Si ton échelle n'est pas IDME, tu peux donc voir <strong>deux codes différents pour le même
+    élève</strong>. Ce n'est pas un défaut à signaler : c'est le reste du chantier, et il est inscrit.</p>
+  </div>
+
+  <section class="bloc" id="sections"></section>
+
+  <section class="bloc">
+    <div class="bloc-tete"><span class="bloc-num">§3</span><h2>Décisions</h2></div>
+    <p class="bloc-note"><strong>Ce ne sont pas des vérifications.</strong> Ce sont des choix posés faute de
+    pouvoir les trancher à ta place. Une décision sans verdict écrit est une décision perdue — d'où les
+    champs de saisie plutôt que des cases.</p>
+    <div id="decisions"></div>
+  </section>
+
+  <section class="bloc">
+    <div class="bloc-tete"><span class="bloc-num">§4</span><h2>Ce que je n'ai pas pu vérifier</h2></div>
+    <div class="angles">
+      <ul>
+        <li><b>Ton corpus réel.</b> Tout a été éprouvé sur une échelle fabriquée et un élève fictif.
+        L'échelle orpheline découverte hier soir rappelle que tes données réservent des surprises que
+        les fixtures n'ont pas.</li>
+        <li><b>L'iPad.</b> Les tests tournent en WebKit, donc proches de Safari — mais le <b>tactile</b>
+        n'est pas éprouvé, et c'est précisément ce que la décision D1 met en jeu.</li>
+        <li><b>Le reste du chantier.</b> Le niveau par critère, les quatre descriptions écrites en dur,
+        les bornes de « Maîtrisé et étendu », et les quatre seuils de l'interprétation de performance.</li>
+      </ul>
+      <h3>Mes erreurs de cette session, y compris rattrapées</h3>
+      <ul>
+        <li><b>Ma première spec était décorative.</b> Elle croyait tester la pratique sommative ; son
+        montage n'écrivait pas au bon endroit, si bien que les deux cas exerçaient le même chemin.
+        Elle était verte et ne prouvait rien. Chaque test vérifie désormais qu'il a bien établi la
+        configuration qu'il croit exercer.</li>
+        <li><b>Mon échelle de test entrait en collision avec IDME.</b> Son « D » était aussi le « D »
+        d'IDME : le test rougissait sur son propre montage en croyant attraper un défaut.</li>
+        <li><b>J'ai posé la question de l'échelle à l'envers</b>, du côté des évaluations. C'est la
+        pratique qui établit la note globale. Ta correction a déplacé tout le pas.</li>
+        <li><b>Un message de commit est parti amputé</b> (<span class="mono">f5a8e020</span>) : deux
+        précisions ont sauté. Le dépôt ne réécrit pas un commit poussé — il reste tel quel.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div id="zone-releve" class="masque">
+    <label for="releve" class="surtitre" style="display:block;margin-bottom:8px">Ton relevé — sélectionné, prêt à coller</label>
+    <textarea id="releve" readonly></textarea>
+  </div>
+
+  <p class="pied">Jumeau versionné : <span class="mono">plans de travail/PORTES-TERRAIN-2026-08-27-niveau-global-selon-pratique.md</span>.
+  Ton avancement est gardé dans ce navigateur seulement — le bouton « Copier mes résultats » est le seul
+  moyen de me le transmettre.</p>
+</div>
+
+<script>
+const DONNEES = [
+  {
+    num: "§0", titre: "Préalable",
+    note: "Ce qui invalide tout le reste s'il est sauté.",
+    portes: [{
+      num: "P.1", titre: "Mettre à jour, et vérifier le numéro en bas de page",
+      pourquoi: "Tu lances l'application depuis ton clone, en <b>file://</b> : elle est à la version de ton dernier <b>git pull</b>, pas à celle de main. Sans ce geste, tout ce qui suit décrit l'état d'AVANT — et ce genre de faux rouge est indétectable au récit, parce qu'il ressemble exactement à ce que la porte cherche.",
+      rangees: [{
+        geste: "Fais un git pull, recharge l'application, et lis le numéro en bas de page.",
+        attendu: "<b>1.102.0 · build 0827-0556</b>",
+        mesure: "Numéro affiché"
+      }]
+    }]
+  },
+  {
+    num: "§2", titre: "Ce que tu vérifies à l'écran",
+    note: "Aucune de ces vérifications n'écrit quoi que ce soit. Tu peux t'arrêter en chemin.",
+    portes: [
+      {
+        num: "2.1", titre: "La ligne « Performance globale » d'un élève réel",
+        pourquoi: "Le dépistage a déjà été muet sans le dire : jusqu'au 26 août, il affichait « Stable » pour un élève en difficulté sur tous ses critères quand il n'arrivait pas à convertir ses évaluations. Le changement d'aujourd'hui touche exactement cette ligne — s'il ne trouve rien dans tes données, le niveau disparaîtra, et il faut le savoir tout de suite.",
+        rangees: [{
+          geste: "Ouvre le profil d'un élève qui a au moins une évaluation, section <b>Accompagnement</b>, première ligne.",
+          attendu: "Le pourcentage s'affiche, précédé d'un code de niveau <b>si</b> ta pratique travaille par niveaux.",
+          mesure: "Le texte exact de la ligne"
+        }]
+      },
+      {
+        num: "2.2", titre: "Le survol du code de niveau",
+        pourquoi: "L'interprétation SOLO est volontairement au survol et non en vedette : on ne met pas une taxonomie devant un enseignant qui ne l'emploie pas. Reste à vérifier qu'elle est bien là, et qu'elle dit quelque chose d'utile.",
+        rangees: [{
+          geste: "Passe la souris sur le code de niveau. Sur Mac, pas sur iPad.",
+          attendu: "Une infobulle. Si ton échelle est étiquetée en SOLO, elle donne le nom du niveau SOLO et sa description. Sinon, elle donne <b>le nom du niveau que tu as écrit toi-même</b>, et dit que l'interprétation SOLO n'est pas configurée.",
+          mesure: "Ce que dit l'infobulle"
+        }]
+      },
+      {
+        num: "2.3", titre: "Sous ta pratique sommative — si tu as un groupe en sommative",
+        pourquoi: "C'est le changement le plus visible : le niveau disparaît. Tu dois le voir de tes yeux avant de trancher la décision D2.",
+        rangees: [{
+          geste: "Bascule sur un groupe-cours en pratique <b>sommative</b>, rouvre le profil d'un élève, regarde la même ligne, puis survole le pourcentage.",
+          attendu: "Le pourcentage seul, sans code de niveau. Au survol, une phrase qui explique que la sommative n'établit pas de niveau.",
+          mesure: null, na: true
+        }]
+      }
+    ]
+  }
+];
+
+const DECISIONS = [
+  {
+    num: "D1", question: "Sur iPad, le survol n'existe pas",
+    texte: "L'interprétation SOLO vit dans une infobulle au survol. Sur ton iPad, il n'y a pas de survol : elle y est donc inaccessible. Trois voies — l'afficher en permanence sous le niveau, au prix de charger l'écran ; la mettre derrière un appui long ; ou l'accepter comme un confort réservé au Mac."
+  },
+  {
+    num: "D2", question: "Le niveau disparaît sous sommative : est-ce ce que tu veux voir ?",
+    texte: "La décision de ce matin dit qu'une note pondérée n'est pas un niveau atteint, donc la sommative n'en affiche plus. C'est cohérent — mais c'est toi qui regardes cet écran tous les jours."
+  },
+  {
+    num: "D3", question: "Étiqueter ton échelle en SOLO, maintenant ou pas ?",
+    texte: "Aucune de tes échelles ne porte d'étiquette SOLO : le champ existe depuis hier, il naît vide. Tant qu'il l'est, le dépistage affiche le nom de tes niveaux — ce qui fonctionne. L'étiqueter, cinq menus dans l'éditeur d'échelles, lui donnerait en plus l'interprétation."
+  }
+];
+
+const CLE = "portes-terrain-2026-08-27-niveau-global";
+let etat = {};
+try { etat = JSON.parse(localStorage.getItem(CLE) || "{}"); } catch (e) { etat = {}; }
+function sauver(){ try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch (e) {} }
+
+function ech(s){
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/* Le « pourquoi » et les « attendus » sont des littéraux de CE fichier, avec un
+   balisage volontaire (<b>). Aucune donnée extérieure n'y entre. Les valeurs
+   saisies par Grégoire, elles, ne sont JAMAIS réinjectées en HTML : elles vivent
+   dans .value d'un champ, et l'export les lit depuis là. */
+function rendre(){
+  const hote = document.getElementById("sections");
+  let html = "";
+  DONNEES.forEach(sec => {
+    html += '<div class="bloc-tete"><span class="bloc-num">' + ech(sec.num) + '</span><h2>' + ech(sec.titre) + '</h2></div>';
+    if (sec.note) html += '<p class="bloc-note">' + sec.note + '</p>';
+    sec.portes.forEach(p => {
+      html += '<article class="porte">';
+      html += '<div class="porte-tete"><span class="porte-num">' + ech(p.num) + '</span><h3>' + ech(p.titre) + '</h3></div>';
+      html += '<div class="pourquoi">' + p.pourquoi + '</div>';
+      p.rangees.forEach((rg, i) => {
+        const id = p.num + "-" + i;
+        html += '<div class="rangee" data-id="' + ech(id) + '">';
+        html += '<div class="geste"><div class="bascule">';
+        html += '<button type="button" data-v="ok" aria-pressed="false" aria-label="Passé">✓</button>';
+        html += '<button type="button" data-v="ko" aria-pressed="false" aria-label="Échec">✗</button>';
+        if (rg.na) html += '<button type="button" data-v="na" aria-pressed="false" aria-label="Sans objet">—</button>';
+        html += '</div><div class="geste-texte"><p>' + rg.geste + '</p>';
+        html += '<p class="attendu">⮕ Attendu : ' + rg.attendu + '</p>';
+        if (rg.mesure) {
+          html += '<div class="mesure"><label for="m-' + ech(id) + '">' + ech(rg.mesure) + '</label>';
+          html += '<input type="text" id="m-' + ech(id) + '" data-mesure="' + ech(id) + '" placeholder="recopie ce que tu vois"></div>';
+        }
+        html += '</div></div></div>';
+      });
+      html += '</article>';
+    });
+  });
+  hote.insertAdjacentHTML("beforeend", html);
+
+  const hoteD = document.getElementById("decisions");
+  let htmlD = "";
+  DECISIONS.forEach(d => {
+    htmlD += '<article class="decision">';
+    htmlD += '<div class="decision-tete"><span class="decision-num">' + ech(d.num) + '</span><h3>' + ech(d.question) + '</h3></div>';
+    htmlD += '<p>' + ech(d.texte) + '</p>';
+    htmlD += '<label class="surtitre" for="d-' + ech(d.num) + '" style="display:block;margin-bottom:6px">Ton verdict</label>';
+    htmlD += '<textarea id="d-' + ech(d.num) + '" data-decision="' + ech(d.num) + '" placeholder="écris ta décision ici — même en une phrase"></textarea>';
+    htmlD += '</article>';
+  });
+  hoteD.insertAdjacentHTML("beforeend", htmlD);
+}
+
+function toutesRangees(){ return [...document.querySelectorAll(".rangee")]; }
+
+function majCompteur(){
+  const r = toutesRangees();
+  const ok = r.filter(x => etat[x.dataset.id] === "ok").length;
+  const ko = r.filter(x => etat[x.dataset.id] === "ko").length;
+  const na = r.filter(x => etat[x.dataset.id] === "na").length;
+  document.getElementById("j-ok").textContent = "✓ " + ok;
+  document.getElementById("j-ko").textContent = "✗ " + ko;
+  document.getElementById("j-reste").textContent = "— " + (r.length - ok - ko - na);
+}
+
+function brancher(){
+  toutesRangees().forEach(rang => {
+    const id = rang.dataset.id;
+    rang.querySelectorAll(".bascule button").forEach(b => {
+      if (etat[id] === b.dataset.v) b.setAttribute("aria-pressed", "true");
+      b.addEventListener("click", () => {
+        const dejaMis = etat[id] === b.dataset.v;
+        etat[id] = dejaMis ? null : b.dataset.v;
+        rang.querySelectorAll(".bascule button").forEach(x =>
+          x.setAttribute("aria-pressed", String(!dejaMis && x.dataset.v === b.dataset.v)));
+        sauver(); majCompteur();
+      });
+    });
+  });
+  document.querySelectorAll("[data-mesure]").forEach(inp => {
+    const k = "m-" + inp.dataset.mesure;
+    if (etat[k]) inp.value = etat[k];
+    inp.addEventListener("input", () => { etat[k] = inp.value; sauver(); });
+  });
+  document.querySelectorAll("[data-decision]").forEach(ta => {
+    const k = "d-" + ta.dataset.decision;
+    if (etat[k]) ta.value = etat[k];
+    ta.addEventListener("input", () => { etat[k] = ta.value; sauver(); });
+  });
+}
+
+document.getElementById("btn-export").addEventListener("click", () => {
+  const r = toutesRangees();
+  const ok = r.filter(x => etat[x.dataset.id] === "ok").length;
+  const ko = r.filter(x => etat[x.dataset.id] === "ko").length;
+  const na = r.filter(x => etat[x.dataset.id] === "na").length;
+  const L = [];
+  L.push("PORTES TERRAIN — le niveau global vient de ta pratique (27 août 2026, 1.102.0)");
+  L.push(ok + " passée(s) · " + ko + " échec(s) · " + na + " sans objet · " + (r.length - ok - ko - na) + " non traitée(s)");
+  L.push("");
+  DONNEES.forEach(sec => {
+    L.push("═══ " + sec.num + " · " + sec.titre + " ═══");
+    sec.portes.forEach(p => {
+      L.push("  " + p.num + " — " + p.titre);
+      p.rangees.forEach((rg, i) => {
+        const id = p.num + "-" + i;
+        const v = etat[id];
+        L.push("    [" + (v === "ok" ? "v" : v === "ko" ? "X" : v === "na" ? "-" : " ") + "] " + rg.geste.replace(/<[^>]+>/g, ""));
+        if (rg.mesure) L.push("        ↳ " + rg.mesure + " : " + (etat["m-" + id] || "(non renseigné)"));
+      });
+    });
+    L.push("");
+  });
+  L.push("═══ §3 · Décisions — tes verdicts ═══");
+  DECISIONS.forEach(d => {
+    L.push("  " + d.num + " — " + d.question);
+    L.push("    ⮕ " + ((etat["d-" + d.num] || "").trim() || "(pas de verdict)"));
+  });
+  const texte = L.join("\n");
+  const zone = document.getElementById("zone-releve");
+  const ta = document.getElementById("releve");
+  zone.classList.remove("masque");
+  ta.value = texte;
+  ta.focus(); ta.select();
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texte).catch(() => {});
+    }
+  } catch (e) {}
+  zone.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+rendre();
+brancher();
+majCompteur();
+</script>
