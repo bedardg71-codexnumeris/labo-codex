@@ -1019,7 +1019,34 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     ⏳ **Code mort repéré, NON supprimé** : `mettreAJourLigne` (`saisie-presences.js`)
     lit un champ `heures_${da}` qui n'est plus généré nulle part et n'est appelée par
     personne — seule `mettreAJourLignePeriodes` l'est. Vestige du format « heures ».
-    ⏳ **RESTE E3** : retirer le champ « Durée d'une période » et ses lectures restantes.
+    ⮕ **✅ E3 — le réglage disparaît · LIVRÉ 26 août 2026.** Le select « Durée d'une
+    période » est retiré de l'écran, avec ses deux handlers (`modifierDureePeriodeV2`,
+    `chargerDureePeriodeUI`) et son appel d'initialisation. **`definirDureePeriode` est
+    retirée** : la clé ne s'écrit plus nulle part.
+    ⮕ **La saisie n'écrit plus `heures` sur une présence** — deux sites l'écrivaient. Ce
+    champ était une SÉRIALISATION de `periodesPresentes` par la durée de période ; il
+    n'apportait rien de plus que sa source, et son nom a déjà induit en erreur (les
+    présences RàI y stockent des PÉRIODES, cf. E2). Tous les lecteurs le lisent APRÈS
+    `periodesPresentes` : une présence neuve qui ne le porte pas est lue correctement
+    partout, et les anciennes restent lisibles.
+    ⮕ **Le select de présence ne promet plus de durée** : « 2 pér. (1h40) » devient
+    « 2 pér. ». La parenthèse annonçait le temps d'ENSEIGNEMENT net — vrai dans son
+    référentiel, mais l'enseignant qui coche pense à l'élève parti à 10 h, donc en temps
+    d'horloge. Afficher l'une des deux grandeurs sans dire laquelle invitait à se tromper.
+    ⮕ **La LECTURE subsiste, et son rôle est DIT dans le code.** Onze sites lisent encore
+    `obtenirDureePeriode`, tous pour relire le champ `heures` d'anciennes présences :
+    c'est un paramètre de DÉSÉRIALISATION d'un format historique, pas une donnée métier.
+    Son en-tête porte un avertissement explicite — sans lui, quelqu'un rebranchera un
+    select dessus et le pont entre les deux unités reviendra par la porte de derrière.
+    ⮕ **Verrous** : `tests/unit/sentinelle-540-lotE3-plus-de-reglage.test.js` (12 cas, dont
+    un qui vérifie que l'AVERTISSEMENT lui-même est présent). **4 break-tests rouges.**
+    ⚠ La sentinelle `duree-periode-defaut-50` (22 août) a dû être révisée : deux de ses cas
+    éprouvaient le setter et le select. RETOURNÉS plutôt que supprimés — ils vérifient
+    désormais que ni l'un ni l'autre ne revient. Vitest **3600/3600**, Playwright
+    **179/179**.
+    ⮕ **CE QUE LE LOT E A CHANGÉ, EN UNE PHRASE** : l'application ne convertit plus jamais
+    une durée en périodes, parce qu'elle ne le peut pas — une période comprend sa pause, et
+    cette convention n'est écrite nulle part dans les données. Elle demande donc les deux.
   · **D — le recoupement** (demande d'origine) : l'écran Horaire confronte le total des séances à la
     durée hebdomadaire déclarée et le DIT quand ça diverge, sans bloquer. *Fin : un horaire de 3 h
     sur un cours 2-2-3 est signalé.* **Après E** : recouper avec une conversion fausse

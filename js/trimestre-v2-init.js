@@ -59,11 +59,6 @@ function initialiserTrimestreV2() {
     // Charger les groupe-cours (Beta 95.2)
     window.chargerGroupeCoursV2();
 
-    // 🆕 BETA 95.1 : Charger la durée de période sauvegardée
-    if (typeof chargerDureePeriodeUI === 'function') {
-        chargerDureePeriodeUI();
-    }
-
     // Charger la liste des étudiants dans l'accordéon Groupes
     window.chargerListeEtudiantsV2();
 

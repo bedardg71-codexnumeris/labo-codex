@@ -614,13 +614,19 @@ function obtenirNombrePeriodesSeance(dateStr) {
  */
 function genererOptionsPeriodesPresentes(nombrePeriodesMax, valeurSelectionnee = null) {
     let options = '';
-    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
 
+    // #540 lot E3 (26 août 2026) : plus de parenthèse « (1h40) ».
+    //
+    // Elle annonçait `p × dureePeriode`, c'est-à-dire le temps d'ENSEIGNEMENT net — vrai
+    // dans son propre référentiel, mais faux pour l'enseignant qui coche : celui-ci pense
+    // à l'élève parti à 10 h, donc en temps d'horloge, pauses comprises. Deux périodes
+    // occupent deux heures au calendrier et 1 h 40 d'enseignement ; afficher l'une des
+    // deux sans dire laquelle invitait à se tromper.
+    //
+    // Le nombre de périodes se suffit : c'est l'unité dans laquelle les absences se
+    // comptent au cégep, et celle dans laquelle l'assiduité est calculée.
     for (let p = 0; p <= nombrePeriodesMax; p++) {
         const selected = (valeurSelectionnee !== null && p === valeurSelectionnee) ? 'selected' : '';
-        const dureeMinutes = p * dureePeriode;
-        const heures = Math.floor(dureeMinutes / 60);
-        const minutes = dureeMinutes % 60;
         let affichage;
 
         if (p === 0) {
@@ -628,8 +634,7 @@ function genererOptionsPeriodesPresentes(nombrePeriodesMax, valeurSelectionnee =
         } else if (p === nombrePeriodesMax) {
             affichage = `${p} pér. (complet)`;
         } else {
-            const tempsStr = minutes > 0 ? `${heures}h${String(minutes).padStart(2, '0')}` : `${heures}h`;
-            affichage = `${p} pér. (${tempsStr})`;
+            affichage = `${p} pér.`;
         }
 
         options += `<option value="${p}" ${selected}>${affichage}</option>`;
@@ -830,14 +835,19 @@ function sauvegarderPresencesSansValidation(dateStr) {
 
         if (inputPeriodes) {
             const periodesPresentes = parseFloat(inputPeriodes.value) || 0;
-            const heures = (periodesPresentes * dureePeriode) / 60;
             const notes = inputNotes ? inputNotes.value.trim() : '';
 
+            // #540 lot E3 : `heures` n'est PLUS ÉCRIT. C'était une sérialisation de
+            // `periodesPresentes` par la durée de période — un champ de
+            // rétrocompatibilité qui n'apportait rien de plus que sa source, et dont le
+            // nom a déjà induit en erreur ailleurs (les présences RàI y stockent des
+            // PÉRIODES, cf. lot E2). Les lecteurs le lisent tous APRÈS
+            // `periodesPresentes` ; une présence neuve qui ne le porte pas est donc lue
+            // correctement partout. Les anciennes le gardent et restent lisibles.
             const presenceObj = {
                 date: dateStr,
                 da: etudiant.da,
                 periodesPresentes: periodesPresentes,
-                heures: heures,
                 notes: notes,
                 coursId: coursId
             };
@@ -1497,8 +1507,9 @@ function enregistrerPresences() {
         if (inputPeriodes) {
             // parseFloat pour supporter les fractions (1.5, etc.)
             const periodesPresentes = parseFloat(inputPeriodes.value) || 0;
-            // Calculer les heures pour rétrocompatibilité
-            const heures = (periodesPresentes * dureePeriode) / 60;
+            // #540 lot E3 : `heures` n'est plus écrit — voir l'autre chemin
+            // d'enregistrement, même raison. Deux sites écrivaient le même champ de
+            // rétrocompatibilité ; aucun ne l'écrit plus.
             const notes = inputNotes ? inputNotes.value.trim() : '';
 
             // Créer l'objet de présence
@@ -1506,7 +1517,6 @@ function enregistrerPresences() {
                 date: dateStr,
                 da: etudiant.da,
                 periodesPresentes: periodesPresentes,  // 🆕 BETA 95.1
-                heures: heures,  // Rétrocompatibilité
                 notes: notes,
                 coursId: coursId  // ✅ Lier la présence au cours actif
             };
