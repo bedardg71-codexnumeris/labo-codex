@@ -522,7 +522,8 @@ function genererSectionMobilisationEngagement(da) {
     const moyenneP = artefactsRetenus.length > 0
         ? Math.round(artefactsRetenus.reduce((sum, a) => sum + (a.note || 0), 0) / artefactsRetenus.length)
         : 0;
-    const interpP = interpreterPerformance(moyenneP);
+    // `const interpP = interpreterPerformance(moyenneP);` retiré au pas 3c-3 de
+    // #542 : le résultat n'était lu nulle part, et la fonction n'existe plus.
 
     return `
         <!-- Détails des calculs (masqué par défaut) -->
@@ -845,18 +846,26 @@ function genererSectionAccompagnement(da) {
         texteProgression = `Apprentissage : ${progression.interpretation}`;
     }
 
-    // Analyser les forces et défis (critères de la grille de référence)
-    const seuilMaitrise = obtenirSeuil('idme.maitrise');
-    const seuilDeveloppement = obtenirSeuil('idme.developpement');
-
     // ✅ Utiliser la fonction dynamique au lieu du tableau SRPNF codé en dur
     const criteres = obtenirCriteresAvecValeurs(da);
 
-    // CORRECTION: Inclure TOUS les niveaux IDME (I, D, M, E)
-    // Forces: M (>=75%) et E (>=85%)
-    const forces = criteres.filter(c => c.valeur >= seuilMaitrise);
-    // Défis: I (<65%) ET D (65-75%)
-    const defis = criteres.filter(c => c.valeur > 0 && c.valeur < seuilMaitrise);
+    // ⚠⚠ #542 lot 3, pas 3c-3 — LE PARTAGE forces/défis A DISPARU AVEC LES SEUILS
+    // QUI LE FAISAIENT.
+    //
+    // Ce qui vivait ici :
+    //     const seuilMaitrise    = obtenirSeuil('idme.maitrise');      // 0,85
+    //     const seuilDeveloppement = obtenirSeuil('idme.developpement'); // 0,75
+    //     const forces = criteres.filter(c => c.valeur >= seuilMaitrise);
+    //     const defis  = criteres.filter(c => c.valeur > 0 && c.valeur < seuilMaitrise);
+    //
+    // Ces deux tableaux n'avaient qu'UN consommateur — la carte « Observation de
+    // la structure » — et elle regroupe désormais les critères par NIVEAU DE
+    // L'ÉCHELLE. La frontière « à partir d'ici c'est une force » n'était pas une
+    // observation, c'était le seuil de Grégoire écrit dans le code.
+    //
+    // ⮕ CE QUI EST PRÉSERVÉ DE LEUR DÉFINITION, et déplacé dans la carte :
+    // l'exclusion des critères à valeur 0 (`c.valeur > 0`). Voir le commentaire
+    // sur `criteresSOLO` — le « 0 » est un jugement suspendu.
 
 
     // Badge RàI avec classes CSS
@@ -873,22 +882,33 @@ function genererSectionAccompagnement(da) {
         badgeLabel = 'Niveau 1';
     }
 
-    // Construire le texte du pattern avec le défi intégré si applicable
-    const interpreterScoreIDME = (score) => {
-        const seuilInsuffisant = obtenirSeuil('idme.insuffisant');
-        const seuilDeveloppement = obtenirSeuil('idme.developpement');
-        const seuilMaitrise = obtenirSeuil('idme.maitrise');
-        if (score < seuilInsuffisant) return 'Un seul aspect traité, compréhension superficielle';
-        if (score < seuilDeveloppement) return 'Plusieurs aspects sans vision d\'ensemble';
-        if (score < seuilMaitrise) return 'Vision globale avec liens entre les aspects';
-        return 'Transfert à d\'autres contextes';
-    };
-
-    let patternTexte = cibleInfo.pattern;
-    if (cibleInfo.pattern === 'Défi spécifique' && defiSpecifique.defi !== 'Aucun') {
-        const niveauIDME = interpreterScoreIDME(defiSpecifique.score);
-        patternTexte = `${cibleInfo.pattern} (${defiSpecifique.defi} - ${niveauIDME})`;
-    }
+    // ⚠⚠ #542 lot 3, pas 3c-3 — `interpreterScoreIDME` A ÉTÉ SUPPRIMÉE, ET
+    // ELLE N'A PAS ÉTÉ REMPLACÉE : ELLE NE S'AFFICHAIT NULLE PART.
+    //
+    // Ce qui vivait ici : une fonction locale qui comparait un score aux trois
+    // seuils `idme.*` (0,64 / 0,75 / 0,85 — les bornes de l'échelle de Grégoire
+    // recopiées dans le code) pour choisir l'une de QUATRE descriptions SOLO
+    // courtes, puis un `patternTexte` qui les assemblait :
+    //     `Défi spécifique (Structure - Plusieurs aspects sans vision d'ensemble)`
+    //
+    // ⮕ CE QUE LA VÉRIFICATION A MONTRÉ, ET QUI CHANGE LE GESTE. `patternTexte`
+    // était ASSIGNÉ et jamais LU : deux occurrences dans tout le fichier, la
+    // déclaration et la réassignation. Le badge de pattern affiché à l'écran est
+    // `niveauRai.pattern` (`determinerNiveauRaiPedagogique`), qui ne passe pas
+    // par ici. Ces quatre descriptions n'ont donc jamais atteint un écran.
+    //
+    // ⮕ Les brancher sur l'échelle de l'utilisateur aurait été rendre vivant du
+    // code mort. La consigne du lot demandait de retirer les seuils en dur ; ici
+    // le retrait est complet, sans substitut, et c'est la règle zéro-dette du
+    // projet : un chantier RETIRE ce qu'il remplace.
+    //
+    // ⮕ Leur texte n'est pas perdu pour autant : les quatre descriptions ont été
+    // rapatriées dans `NIVEAUX_SOLO_ECHELLE` (`echelles.js`) au pas 2 — puis
+    // remplacées par les formulations longues, décision D4 de Grégoire du
+    // 27 août. C'est là qu'elles vivent désormais, attachées à l'étiquette SOLO
+    // du niveau et non à un seuil écrit dans le code.
+    //
+    // Verrouillé par `tests/unit/sentinelle-542-3c3-depistage-sans-seuils.test.js`.
 
     let html = `
         <!-- Détails de la section (masqué par défaut) -->
@@ -1125,126 +1145,201 @@ function genererSectionAccompagnement(da) {
                     return ''; // Ne rien afficher si désactivé
                 }
 
-                // Filtrer "Français" des forces et défis (critère linguistique, pas cognitif SOLO)
-                const forcesSolo = forces.filter(f => f.nom !== 'Français');
-                const defisSolo = defis.filter(d => d.nom !== 'Français');
+                // ⚠⚠ #542 lot 3, pas 3c-3 — UN BLOC PAR NIVEAU DE L'ÉCHELLE, PLUS
+                // QUATRE BLOCS FIGÉS.
+                //
+                // CE QUI VIVAIT ICI. Quatre blocs écrits dans le code — « Forces
+                // exceptionnelles », « Forces identifiées », « Défis en
+                // développement », « Défis critiques » — choisis par quatre
+                // comparaisons en dur : `>= 0.85`, `>= seuilMaitrise && < 0.85`,
+                // `>= idme.insuffisant && < seuilDeveloppement`, `< idme.insuffisant`.
+                // Chacun portait EN CLAIR un code IDME (« Maîtrisé et étendu (E) »)
+                // et une description SOLO. C'était le plus gros des six sites du
+                // lot, et le seul qui ne se réduisait pas à un remplacement de
+                // texte : les seuils ne décidaient pas d'un libellé, ils décidaient
+                // de QUELS BLOCS EXISTENT.
+                //
+                // ⮕ DÉCISION DE GRÉGOIRE, 27 août 2026 : « un bloc par niveau ».
+                // Les quatre en-têtes Forces/Défis disparaissent. Chaque bloc porte
+                // le NOM que l'utilisateur a donné à SON niveau, sa couleur, et les
+                // critères qui y tombent. Une échelle de trois niveaux rend trois
+                // blocs ; une de sept en rend sept.
+                //
+                // ⮕ DEUX OPTIONS ÉCARTÉES CE JOUR-LÀ, et il faut savoir pourquoi
+                // avant de les rouvrir :
+                //   · dériver Forces/Défis de l'étiquette SOLO (relationnel et
+                //     au-dessus = force). Écartée : la règle « relationnel = force »
+                //     serait une valeur métier de retour dans le code — ce que le
+                //     lot entier s'emploie à retirer — et elle resterait muette tant
+                //     qu'aucune échelle n'est étiquetée, ce qui est le cas
+                //     aujourd'hui de toutes les échelles réelles.
+                //   · ajouter à l'échelle un champ « ce niveau marque la maîtrise ».
+                //     Pas écartée sur le fond (elle servirait aussi à #549), mais
+                //     elle ajoute un champ, un écran d'édition et une migration :
+                //     c'est un chantier, pas un pas.
+                //
+                // ⮕ CE QUI SITUE, ET POURQUOI CETTE ÉCHELLE-LÀ. Un critère est
+                // évalué PAR l'échelle de la grille, quelle que soit la pratique —
+                // même raisonnement qu'au pas 3c-2, et même source :
+                // `obtenirEchelleCommuneDesEvaluations`. La note GLOBALE, elle,
+                // demande son échelle à la PRATIQUE (pas 3c-1). Les deux sources
+                // sont différentes, et c'est délibéré.
+                const lectureStructure = (typeof obtenirEchelleCommuneDesEvaluations === 'function')
+                    ? obtenirEchelleCommuneDesEvaluations(da)
+                    : { echelle: null, raison: 'helper-absent', message: '' };
 
-                // Vérifier s'il y a des forces ou défis à afficher (hors Français)
-                if (forcesSolo.length === 0 && defisSolo.length === 0) {
-                    return `
+                // Le critère « Français » reste écarté, et son nom reste écrit ici.
+                // C'est un jugement pédagogique de Grégoire — un critère
+                // linguistique n'a rien à dire sur la structure cognitive — mais
+                // c'est aussi un nom de critère en dur, du même genre que ceux que
+                // #529 a pour mandat de sortir du code. Il est PRÉSERVÉ TEL QUEL :
+                // le lot 3 retire des seuils, il ne change pas ce qui est observé.
+                //
+                // ⮕ `valeur > 0` est préservé aussi, et pour une raison plus
+                // profonde : le « 0 » est un JUGEMENT SUSPENDU, pas une performance
+                // nulle. Un travail non recevable ne dit rien de la structure des
+                // apprentissages, et l'ancien code l'écartait déjà (`defis` le
+                // filtrait, `forces` ne pouvait pas le contenir). Le regroupement
+                // par niveau le ferait tomber dans le niveau « 0 » de l'échelle de
+                // Grégoire, qui couvre 0-0 : il serait affiché comme un résultat.
+                const criteresSOLO = criteres.filter(c => c.nom !== 'Français' && c.valeur > 0);
+
+                const enteteCarte = `
             <!-- Carte SOLO : positionnée au centre via order (26 mai PM2) -->
             <div class="profil-carte" style="order: 2">
-                <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-solo">Observation de la structure des résultats d'apprentissage</h2>
-                <p class="profil-texte-italique-gris">
-                    Aucune force ni défi identifié selon la taxonomie SOLO.
-                </p>
+                <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-solo">Observation de la structure des résultats d'apprentissage</h2>`;
+                const piedCarte = `
                 <div class="profil-separateur-section"></div>
                 <p class="profil-texte-mini-gris">
-                    Basé sur les travaux de Biggs & Collis (taxonomie SOLO)
+                    Basé sur les travaux de Biggs &amp; Collis (taxonomie SOLO)
                 </p>
-            </div>
-                    `;
+            </div>`;
+
+                // ⮕ SANS ÉCHELLE, LA CARTE DIT LAQUELLE MANQUE. L'ancien message
+                // — « Aucune force ni défi identifié selon la taxonomie SOLO » —
+                // était le défaut A2/A3 que le lot 1 a refermé ailleurs : un verdict
+                // rassurant là où le dépistage n'avait rien pu comparer.
+                // `obtenirEchelleCommuneDesEvaluations` NOMME la cause (aucune
+                // évaluation, échelle introuvable, échelles divergentes), et c'est
+                // elle qu'on affiche.
+                if (!lectureStructure.echelle) {
+                    return enteteCarte + `
+                <p class="profil-texte-italique-gris">
+                    ${echapperHtml(lectureStructure.message || 'La structure des résultats ne peut pas être observée : aucune échelle commune n\'a pu être établie pour cet élève.')}
+                </p>` + piedCarte;
                 }
 
-                return `
-            <!-- Carte SOLO : positionnée au centre via order (26 mai PM2) -->
-            <div class="profil-carte" style="order: 2">
-                <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-solo">Observation de la structure des résultats d'apprentissage</h2>
+                if (criteresSOLO.length === 0) {
+                    return enteteCarte + `
+                <p class="profil-texte-italique-gris">
+                    Aucun critère évalué à situer dans l'échelle pour l'instant.
+                </p>` + piedCarte;
+                }
 
-                ${(() => {
-                    // Obtenir les couleurs IDME depuis l'échelle configurée
-                    const couleurE = obtenirCouleurNiveauIDME('E');
-                    const couleurM = obtenirCouleurNiveauIDME('M');
-                    const couleurD = obtenirCouleurNiveauIDME('D');
-                    const couleurI = obtenirCouleurNiveauIDME('I');
+                // Un bloc par niveau ATTEINT. Les niveaux où aucun critère ne tombe
+                // n'apparaissent pas : la carte montre la structure observée, pas
+                // l'échelle en entier.
+                //
+                // ⮕ REGROUPEMENT PAR IDENTITÉ D'OBJET. `situerPourcentageDansEchelle`
+                // rend le niveau lui-même, pris dans le tableau `niveaux` de
+                // l'échelle : deux critères au même niveau rendent la MÊME
+                // référence. La `Map` s'en sert comme clé — aucune clé fabriquée à
+                // partir du code ou du nom, qui peuvent être vides tous les deux
+                // (`echelles.js` en produit : `{ code: '', nom: '', min: 90, ... }`).
+                const parNiveau = new Map();
+                const horsEchelle = [];
+                criteresSOLO.forEach(c => {
+                    const niveau = situerPourcentageDansEchelle(c.valeur * 100, lectureStructure.echelle);
+                    if (!niveau) { horsEchelle.push(c); return; }
+                    if (!parNiveau.has(niveau)) parNiveau.set(niveau, []);
+                    parNiveau.get(niveau).push(c);
+                });
 
-                    let html = '';
+                // Du plus haut au plus bas, par borne inférieure décroissante.
+                // ⮕ L'ORDRE DU TABLEAU `niveaux` N'EST PAS UTILISÉ : rien n'oblige
+                // l'utilisateur à saisir ses niveaux dans l'ordre, et un ordre de
+                // saisie n'est pas un ordre de mérite. `min` est numérique et
+                // garanti présent — sans lui, `situerPourcentageDansEchelle` n'aurait
+                // rien rendu pour ce niveau.
+                const blocs = Array.from(parNiveau.entries())
+                    .sort((a, b) => Number(b[0].min) - Number(a[0].min));
 
-                    // FORCES E (Étendu) - Bleu
-                    if (forcesSolo.some(f => f.valeur >= 0.85)) {
-                        html += `
-                <div style="margin-bottom: 12px;">
-                    <h4 style="color: ${couleurE}; font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
-                        Forces exceptionnelles
+                // Une couleur d'échelle est une donnée UTILISATEUR, et elle part dans
+                // un attribut `style`. `echapperHtml` ne suffirait pas ici : elle
+                // neutralise l'évasion d'attribut, pas l'injection de CSS. On
+                // n'accepte donc qu'un code hexadécimal, et rien d'autre.
+                const couleurSure = (valeur) => {
+                    const c = String(valeur == null ? '' : valeur).trim();
+                    if (/^#[0-9a-fA-F]{6}$/.test(c)) return c;
+                    // `#RGB` est une écriture légitime : on la développe plutôt que
+                    // de la rejeter, sinon le suffixe alpha `22` ajouté plus bas
+                    // produirait du CSS invalide.
+                    if (/^#[0-9a-fA-F]{3}$/.test(c)) return '#' + c[1] + c[1] + c[2] + c[2] + c[3] + c[3];
+                    return '#999999'; // même neutre que le repli d'`obtenirCouleurNiveauIDME`
+                };
+
+                let corps = '';
+                let uneEtiquetteManque = false;
+
+                blocs.forEach(([niveau, criteresDuNiveau], index) => {
+                    const lecture = interpreterNiveauAtteint(niveau);
+                    if (!lecture.interpretee) uneEtiquetteManque = true;
+
+                    const couleur = couleurSure(niveau.couleur);
+                    const nom = String(niveau.nom == null ? '' : niveau.nom).trim();
+                    const code = String(niveau.code == null ? '' : niveau.code).trim();
+                    // Sans nom ni code, la PLAGE est ce que ce niveau porte de plus
+                    // identifiant. Ce n'est pas un repli inventé : c'est la seule
+                    // chose que l'utilisateur ait saisie pour lui.
+                    const titre = nom
+                        ? (code ? nom + ' (' + code + ')' : nom)
+                        : (code || (niveau.min + ' – ' + niveau.max + ' %'));
+
+                    corps += `
+                <div style="margin-bottom: ${index === blocs.length - 1 && horsEchelle.length === 0 ? '0' : '12px'};">
+                    <h4 style="color: ${couleur}; font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
+                        ${echapperHtml(titre)}
                     </h4>
-                    <div style="background: ${couleurE}22; border-left: 4px solid ${couleurE}; padding: 10px 12px;">
-                        <div style="font-weight: bold; color: ${couleurE};">
-                            ${forcesSolo.filter(f => f.valeur >= 0.85).map(f => f.nom).join(', ')} : Maîtrisé et étendu (E)
+                    <div style="background: ${couleur}22; border-left: 4px solid ${couleur}; padding: 10px 12px;">
+                        <div style="font-weight: bold; color: ${couleur};">
+                            ${criteresDuNiveau.map(c => echapperHtml(c.nom)).join(', ')}
                         </div>
-                        <div class="profil-texte-explicatif">
-                            À ce niveau abstrait étendu, l'étudiant·e a la capacité de généraliser la structure au-delà de l'information donnée. Il/elle comprend et il/elle est capable de transférer ses apprentissages à des contextes proches.
-                        </div>
+                        ${lecture.interpretee ? `<div class="profil-texte-explicatif">${echapperHtml(lecture.texte)}</div>` : ''}
                     </div>
-                </div>
-                        `;
-                    }
+                </div>`;
+                });
 
-                    // FORCES M (Maîtrisé) - Vert
-                    if (forcesSolo.some(f => f.valeur >= seuilMaitrise && f.valeur < 0.85)) {
-                        html += `
-                <div style="margin-bottom: ${defisSolo.length > 0 ? '20px' : '0'};">
-                    <h4 style="color: ${couleurM}; font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
-                        Forces identifiées
-                    </h4>
-                    <div style="background: ${couleurM}22; border-left: 4px solid ${couleurM}; padding: 10px 12px;">
-                        <div style="font-weight: bold; color: ${couleurM};">
-                            ${forcesSolo.filter(f => f.valeur >= seuilMaitrise && f.valeur < 0.85).map(f => f.nom).join(', ')} : Maîtrisé (M)
-                        </div>
-                        <div class="profil-texte-explicatif">
-                            À ce niveau relationnel, l'étudiant·e peut comprendre, lier et intégrer plusieurs aspects d'une réponse dans un tout cohérent. Il/elle voit plusieurs aspects d'une situation et sait l'aborder de différentes façons.
-                        </div>
-                    </div>
-                </div>
-                        `;
-                    }
+                // Les critères qu'AUCUNE plage ne contient. `situerPourcentageDansEchelle`
+                // rend `null` sans repli « niveau le plus proche » — décision du pas 1,
+                // et son motif : un repli fabrique une réponse que l'échelle ne donne
+                // pas. C'est donc ici que l'absence se dit, plutôt que dans un bloc
+                // qui aurait l'apparence d'un niveau.
+                if (horsEchelle.length > 0) {
+                    corps += `
+                <p class="profil-texte-mini-gris" style="margin-top: 12px;">
+                    ${echapperHtml(horsEchelle.map(c => c.nom).join(', '))} : aucun niveau de l'échelle ne couvre cette moyenne.
+                </p>`;
+                }
 
-                    // DÉFIS D (Développement) - Orange
-                    if (defisSolo.some(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement)) {
-                        html += `
-                <div style="margin-bottom: 12px;">
-                    <h4 style="color: ${couleurD}; font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
-                        Défis en développement
-                    </h4>
-                    <div style="background: ${couleurD}22; border-left: 4px solid ${couleurD}; padding: 10px 12px;">
-                        <div style="font-weight: bold; color: ${couleurD};">
-                            ${defisSolo.filter(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement).map(d => d.nom).join(', ')} : En développement (D)
-                        </div>
-                        <div class="profil-texte-explicatif">
-                            À ce niveau multistructurel, l'étudiant·e peut se concentrer sur plusieurs points pertinents à la fois. Cependant, il/elle les considère indépendamment.
-                        </div>
-                    </div>
-                </div>
-                        `;
-                    }
+                // ⮕ L'ABSENCE D'ÉTIQUETTE SOLO EST DITE UNE FOIS, PAS UNE FOIS PAR
+                // BLOC. C'est l'option B tranchée par Grégoire le 27 août : le niveau
+                // atteint s'affiche tel qu'il l'a nommé, et ce qui manque est nommé
+                // aussi. Répéter le même avis sous chaque bloc le rendrait illisible
+                // — c'est le patron « un seul message plutôt qu'un par ligne » déjà
+                // retenu au pas 3c-2 pour la liste des critères.
+                //
+                // ⚠ AUJOURD'HUI, AUCUNE ÉCHELLE RÉELLE NE PORTE D'ÉTIQUETTE : cet
+                // avis est donc le SEUL comportement du pas 3c-3 observable sur les
+                // données de Grégoire, et c'est lui qu'une porte terrain doit
+                // regarder. Le reste se prouve sur une échelle fabriquée en test.
+                const avisEtiquette = uneEtiquetteManque ? `
+                <p class="profil-texte-mini-gris" style="margin-top: 12px;">
+                    Les niveaux sont affichés tels que tu les as nommés. Pour obtenir une
+                    interprétation en termes de taxonomie SOLO, associe une étiquette SOLO
+                    à chaque niveau de ton échelle, dans l'éditeur d'échelles.
+                </p>` : '';
 
-                    // DÉFIS I (Incomplet) - Rouge
-                    if (defisSolo.some(d => d.valeur < obtenirSeuil('idme.insuffisant'))) {
-                        html += `
-                <div>
-                    <h4 style="color: ${couleurI}; font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
-                        Défis critiques
-                    </h4>
-                    <div style="background: ${couleurI}22; border-left: 4px solid ${couleurI}; padding: 10px 12px;">
-                        <div style="font-weight: bold; color: ${couleurI};">
-                            ${defisSolo.filter(d => d.valeur < obtenirSeuil('idme.insuffisant')).map(d => d.nom).join(', ')} : Incomplet (I)
-                        </div>
-                        <div class="profil-texte-explicatif">
-                            À ce niveau unistructurel, l'étudiant·e ne traite que d'un seul aspect du savoir ou d'un savoir-faire à la fois. L'étudiant·e n'a pas encore de réelle compréhension.
-                        </div>
-                    </div>
-                </div>
-                        `;
-                    }
-
-                    return html;
-                })()}
-
-                <div class="profil-separateur-section"></div>
-                <p class="profil-texte-mini-gris">
-                    Basé sur les travaux de Biggs & Collis (taxonomie SOLO)
-                </p>
-            </div>
-                `;
+                return enteteCarte + corps + avisEtiquette + piedCarte;
             })()}
         </div>
 
@@ -4143,8 +4238,8 @@ function genererSectionPerformance(da) {
 
     const selectionComplete = nbRetenus === portfolio.regles.nombreARetenir;
 
-    // Interprétation Performance uniquement (C va dans Mobilisation)
-    const interpP = interpreterPerformance(indices.P);
+    // `const interpP = interpreterPerformance(indices.P);` retiré au pas 3c-3 de
+    // #542 : second appel dont le résultat n'était lu nulle part.
 
     // Déterminer les lettres IDME pour SOM et PAN
     const determinerLettreIDME = (P) => {

@@ -143,7 +143,11 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
     // -----------------------------------------------------------------------
     it('1. Sentinelle exports — 30+ exports représentatifs des 7 zones sont définis', () => {
         const exportsAttendus = [
-            // Zone Helpers — 16 exports (session A 17 mai 2026 : tous promus window.X)
+            // Zone Helpers — 20 exports au 27 août 2026 (session A 17 mai 2026 :
+            // tous promus window.X). `interpreterPerformance` a été retirée de
+            // cette liste au pas 3c-3 de #542 : la fonction n'existe plus, son
+            // résultat n'était lu nulle part. Voir le commentaire de retrait dans
+            // `js/profil-etudiant-helpers.js`.
             'obtenirTermeProduction',
             'obtenirCouleurNiveauIDME',
             'obtenirNiveauIDMEDepuisPourcentage',
@@ -156,7 +160,6 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
             'genererBadgePratiqueProfil',
             'genererBadgePatternProfil',
             'interpreterMobilisation',
-            'interpreterPerformance',
             'interpreterCompletion',
             'interpreterAssiduite',
             // Zone Sections affichage (L644-4189) — 5 exports
