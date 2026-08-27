@@ -177,16 +177,22 @@ La consigne autorisait deux pas ; deux ont été faits, et le troisième n'a pas
 | **2** | ✅ | `interpreterNiveauAtteint(niveau)` — même fichier. Étiquette SOLO présente → sa description ; absente → **le nom du niveau, et l'absence dite**. Les 4 descriptions rapatriées dans `NIVEAUX_SOLO_ECHELLE` (`echelles.js`). 9 tests, 4 break-tests rouges. |
 | **3a** | ✅ | `obtenirEchelleResolue` — la résolution d'une échelle séparée de sa réduction en table. Refactor no-op, 11 tests, 4 break-tests rouges. |
 | **3b** | ✅ | **C'est la PRATIQUE qui dit dans quoi sa note globale se lit** (correction de Grégoire). `obtenirEchelleNoteGlobale(da)` au contrat + les trois pratiques + le helper `obtenirEchelleCommuneDesEvaluations`. 11 tests. |
-| **3c** | ⏳ | Brancher, et retirer `interpreterScoreIDME`, les **deux** ternaires `pct >= 85 ? …` et les bornes `0.85`. **Pas entamé.** |
+| **3c-1** | ✅ | **La performance GLOBALE est branchée** — elle demande son échelle à la pratique, situe, interprète. Le ternaire `pct >= 85 ? …` de cette ligne est retiré. Spec WebKit, 2 break-tests rouges. **Premier pas du lot qui change l'écran.** |
+| **3c-2** | ⏳ | Le niveau **par critère** — second ternaire `pct >= 85 ? …`, même fichier, autre échelle (celle de l'évaluation). |
+| **3c-3** | ⏳ | `interpreterScoreIDME` et ses 4 descriptions · les bornes `0.85` de « Maîtrisé et étendu » · `interpreterPerformance` (helpers) et ses 4 seuils · **la carte « Observation de la structure »** et son troisième jeu de descriptions (D4 : « les longues » sont désormais dans la source unique, il reste à brancher). |
 | **4** | ⏳ | Supprimer `obtenirNiveauSOLO()` (`trimestres.js`). |
 | **5** | ⏳ | Trancher le devenir des seuils `idme.*`. B ne leur laisse aucun rôle de repli. |
 
-⚠ **RIEN N'EST BRANCHÉ À L'ÉCRAN.** Les deux fonctions neuves n'ont **aucun appelant** :
-`interpreterScoreIDME` et la borne `0.85` sont toujours en place, et l'application se
-comporte exactement comme avant. C'est délibéré — le branchement est le pas 3, et le
-mélanger au pas 2 aurait rendu impossible de dire lequel des deux a changé un
-comportement. **Playwright n'a donc rien de neuf à observer pour l'instant ; il en aura au
-pas 3.**
+✅ **LA PERFORMANCE GLOBALE EST BRANCHÉE DEPUIS LE PAS 3c-1** (27 août). Vérifiée sur les
+données réelles de Grégoire : « Performance globale (P) : **D 72 %** », le code venant de son
+échelle. Le reste de la carte — le niveau par critère, les descriptions SOLO, les bornes
+`0.85` — n'est **pas encore branché** et calcule toujours avec les valeurs écrites dans le
+code.
+
+⚠ **Chez Grégoire, les deux moitiés donnent le MÊME résultat**, parce que les bornes
+recopiées dans le code sont exactement les siennes. L'écart n'apparaîtrait que chez un
+utilisateur qui note autrement — c'est la meilleure justification du chantier, et son piège :
+**il ne peut pas être validé sur ses données.**
 
 🔧 **UN `ReferenceError` LATENT TROUVÉ ET CORRIGÉ EN CHEMIN (27 août).** Le repli de
 `obtenirPratiqueActuelle` (`profil-etudiant-helpers.js`) instanciait
