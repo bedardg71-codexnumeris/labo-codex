@@ -491,22 +491,59 @@ function obtenirPratiqueActuelle() {
 }
 
 /**
- * Obtient la grille de référence configurée pour le dépistage
- * Cette grille définit les critères utilisés pour identifier forces/défis
+ * La grille de référence du dépistage, AVEC la cause quand il n'y en a pas.
  *
- * @returns {Object|null} - Grille complète avec {id, nom, criteres[], ...} ou null si non configurée
+ * ⮕ #550 — CE QUI MANQUAIT, ET POURQUOI ÇA COMPTE. L'écran voyait `null` et
+ * n'avait aucun moyen de savoir POURQUOI. Il affichait donc « Aucune force ni
+ * défi identifié selon la taxonomie SOLO » — une phrase qui se lit comme un
+ * verdict rassurant SUR L'ÉLÈVE, alors qu'elle voulait dire « je n'ai aucun
+ * critère à quoi comparer ». Symptôme vécu par Grégoire le 27 août 2026 au
+ * matin, sur ses données réelles.
+ *
+ * ⮕ C'est le patron A2/A3 de #542, que le lot 1 a refermé pour les conversions
+ * d'échelle et le lot 3 pour les échelles absentes : **nommer la cause, parce
+ * qu'une cause nommée se répare et qu'un silence ne se répare pas.** Même forme
+ * de retour que `obtenirEchelleCommuneDesEvaluations` et
+ * `diagnostiquerConversionNiveaux` — `{ …, raison, message }`.
+ *
+ * ⚠ TROIS CAUSES DISTINCTES, et elles ne demandent pas le même geste :
+ *   · `aucune-grille-designee` — la préférence est vide. Fraîche installation,
+ *     ou grille jamais choisie. C'est le cas de Grégoire ce matin-là.
+ *   · `grille-introuvable` — la grille désignée a été supprimée. La préférence
+ *     est auto-nettoyée ici même (comportement d'origine, préservé).
+ *   · `grille-sans-criteres` — la grille existe et est bien désignée, mais elle
+ *     est vide. L'écran serait tout aussi muet, pour une raison encore
+ *     différente : c'est la grille qu'il faut remplir, pas en choisir une autre.
+ *
+ * ⚠ L'AUTO-NETTOYAGE FAIT QUE `grille-introuvable` NE S'OBSERVE QU'UNE FOIS :
+ * l'appel suivant, dans le même rendu ou le suivant, verra une préférence vide
+ * et rendra `aucune-grille-designee`. C'est sans conséquence pratique — les deux
+ * messages mènent au même geste, désigner une grille — mais il ne faut pas
+ * écrire de test qui suppose l'ordre des appels.
+ *
+ * Verrouillé par `tests/unit/sentinelle-550-grille-reference-cause-nommee.test.js`.
+ *
+ * @returns {Object} `{ grille, raison, message }` — `grille` non nulle et `raison`
+ *   nulle quand une grille utilisable est désignée.
  */
-function obtenirGrilleReferenceDepistage() {
-    // Lire la préférence utilisateur
+function diagnostiquerGrilleReferenceDepistage() {
+    // Le chemin de réglage est cité tel qu'il s'écrit à l'écran : « Labo →
+    // Outils d'observation », section « Grille de critères pour le dépistage »
+    // (`index.html`). Un message qui envoie vers un libellé périmé est pire
+    // qu'un message absent — il fait chercher.
+    const OU = 'Labo → Outils d\'observation → « Grille de critères pour le dépistage »';
+
     const grilleId = obtenirPreference('grilleReferenceDepistage');
 
     if (!grilleId) {
-        // Fraîche installation ou pas de grille sélectionnée pour le dépistage.
-        // Silent : le profil étudiant affiche son fallback sans signal console.
-        return null;
+        return {
+            grille: null,
+            raison: 'aucune-grille-designee',
+            message: 'Aucune grille de critères n\'est désignée pour le dépistage : il n\'y a '
+                + 'rien à quoi comparer les résultats. Choisis-en une dans ' + OU + '.'
+        };
     }
 
-    // Lire toutes les grilles
     const grilles = db.getSync(cle('grillesTemplates'), []);
     const grille = grilles.find(g => g.id === grilleId);
 
@@ -519,10 +556,48 @@ function obtenirGrilleReferenceDepistage() {
         if (typeof definirPreference === 'function') {
             definirPreference('grilleReferenceDepistage', '');
         }
-        return null;
+        return {
+            grille: null,
+            raison: 'grille-introuvable',
+            message: 'La grille désignée pour le dépistage a été supprimée : il n\'y a plus '
+                + 'rien à quoi comparer les résultats. Désignes-en une autre dans ' + OU + '.'
+        };
     }
 
-    return grille;
+    if (!Array.isArray(grille.criteres) || grille.criteres.length === 0) {
+        // ⚠ LA GRILLE EST RENDUE QUAND MÊME, et c'est délibéré. Avant #550,
+        // `obtenirGrilleReferenceDepistage` rendait une grille vide telle quelle,
+        // et ses treize appelants comptent là-dessus — celui qui veut son `nom`
+        // le perdrait si on rendait `null` ici. Le contrat de l'adaptateur ne
+        // change pas : ce qui s'ajoute, c'est une `raison` que seul l'écran lit.
+        // Un correctif d'affichage n'a pas à modifier ce que douze autres sites
+        // reçoivent.
+        return {
+            grille: grille,
+            raison: 'grille-sans-criteres',
+            message: 'La grille « ' + (grille.nom || grille.id) + ' » est désignée pour le '
+                + 'dépistage, mais elle ne contient aucun critère. Ajoute-lui des critères, ou '
+                + 'désignes-en une autre dans ' + OU + '.'
+        };
+    }
+
+    return { grille: grille, raison: null, message: null };
+}
+
+/**
+ * Obtient la grille de référence configurée pour le dépistage
+ * Cette grille définit les critères utilisés pour identifier forces/défis
+ *
+ * ⮕ #550 — ADAPTATEUR. Tout le travail vit dans
+ * `diagnostiquerGrilleReferenceDepistage` ; celle-ci n'en garde que la grille.
+ * Le contrat est INCHANGÉ, et c'est délibéré : treize sites l'appellent, et
+ * aucun n'avait besoin de changer pour que #550 soit réglé. Un seul chemin de
+ * décision, donc un seul endroit où l'auto-nettoyage se produit.
+ *
+ * @returns {Object|null} - Grille complète avec {id, nom, criteres[], ...} ou null si non configurée
+ */
+function obtenirGrilleReferenceDepistage() {
+    return diagnostiquerGrilleReferenceDepistage().grille;
 }
 
 /**
@@ -893,6 +968,8 @@ window.obtenirNombreProductionsPourPatterns = obtenirNombreProductionsPourPatter
 window.obtenirIdsProductionsEvaluables = obtenirIdsProductionsEvaluables;
 window.obtenirPratiqueActuelle = obtenirPratiqueActuelle;
 window.obtenirGrilleReferenceDepistage = obtenirGrilleReferenceDepistage;
+// #550 — le diagnostiqueur qui NOMME la cause quand il n'y a pas de grille.
+window.diagnostiquerGrilleReferenceDepistage = diagnostiquerGrilleReferenceDepistage;
 window.cleCritere = cleCritere;
 window.criteresDeLaGrillePourAffichage = criteresDeLaGrillePourAffichage;
 window.obtenirCriteresAvecValeurs = obtenirCriteresAvecValeurs;

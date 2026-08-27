@@ -849,6 +849,25 @@ function genererSectionAccompagnement(da) {
     // ✅ Utiliser la fonction dynamique au lieu du tableau SRPNF codé en dur
     const criteres = obtenirCriteresAvecValeurs(da);
 
+    // ⮕ #550 — POURQUOI IL N'Y A PAS DE CRITÈRES, quand il n'y en a pas.
+    //
+    // `obtenirCriteresAvecValeurs` rend un tableau VIDE dès qu'aucune grille de
+    // référence n'est utilisable, et l'écran n'avait aucun moyen de savoir
+    // laquelle des trois causes s'appliquait. Il affichait donc « Aucune force
+    // ni défi identifié selon la taxonomie SOLO » — une phrase qui se lit comme
+    // un verdict rassurant SUR L'ÉLÈVE. Symptôme vécu par Grégoire le 27 août au
+    // matin : sa carte était rassurante et sa liste de critères vide, alors que
+    // rien n'avait pu être comparé.
+    //
+    // ⮕ UN SEUL DIAGNOSTIC POUR LES DEUX BLOCS qui en dépendent — la liste
+    // « Progression par critère » et la carte « Observation de la structure ».
+    // Le refaire dans chacun coûterait deux lectures de la base pour un résultat
+    // identique, et surtout ferait diverger les deux messages le jour où l'un
+    // des deux serait retouché.
+    const lectureGrille = (typeof diagnostiquerGrilleReferenceDepistage === 'function')
+        ? diagnostiquerGrilleReferenceDepistage()
+        : { grille: null, raison: null, message: '' };
+
     // ⚠⚠ #542 lot 3, pas 3c-3 — LE PARTAGE forces/défis A DISPARU AVEC LES SEUILS
     // QUI LE FAISAIENT.
     //
@@ -1045,6 +1064,18 @@ function genererSectionAccompagnement(da) {
                             ? obtenirEchelleCommuneDesEvaluations(da)
                             : { echelle: null, raison: 'helper-absent', message: '' };
 
+                        // ⮕ #550 — UNE LISTE VIDE NE DIT RIEN, ET C'EST CE QUI A
+                        // ÉTÉ VÉCU. Le 27 août au matin, ce bloc était vide chez
+                        // Grégoire : aucune ligne, aucun message, aucune cause.
+                        // Une liste vide se lit comme « rien à signaler » alors
+                        // qu'elle voulait dire « je n'ai aucun critère ».
+                        if (criteres.length === 0) {
+                            return '<li class="u-texte-gris" style="list-style: none; margin-left: -20px; font-style: italic;">'
+                                + echapperHtml(lectureGrille.message
+                                    || 'Aucun critère à afficher pour l\'instant.')
+                                + '</li>';
+                        }
+
                         return criteres.map(c => {
                             const pct = c.valeur * 100;
                             const niveauCritere = lectureCriteres.echelle
@@ -1230,9 +1261,15 @@ function genererSectionAccompagnement(da) {
                 }
 
                 if (criteresSOLO.length === 0) {
+                    // ⮕ #550 — LA CAUSE D'ABORD, ET DANS CET ORDRE. Sans grille
+                    // de référence utilisable, il n'y a pas de critères du tout :
+                    // c'est plus fondamental que « aucun n'est situable », et le
+                    // dire en second reviendrait à décrire la conséquence en
+                    // laissant la cause muette.
                     return enteteCarte + `
                 <p class="profil-texte-italique-gris">
-                    Aucun critère évalué à situer dans l'échelle pour l'instant.
+                    ${echapperHtml(lectureGrille.message
+                        || 'Aucun critère évalué à situer dans l\'échelle pour l\'instant.')}
                 </p>` + piedCarte;
                 }
 

@@ -79,8 +79,9 @@ function echelleWXYZ(avecEtiquettes) {
     };
 }
 
-async function monterProfil(page, echelle) {
-    return page.evaluate(({ echelle }) => {
+async function monterProfil(page, echelle, options) {
+    return page.evaluate(({ echelle, options }) => {
+        const opts = options || {};
         for (const dep of ['afficherProfilComplet', 'changerSectionProfil', 'db', 'cle']) {
             if (typeof window[dep] === 'undefined') return { erreur: `window.${dep} absent` };
         }
@@ -114,8 +115,11 @@ async function monterProfil(page, echelle) {
                 { id: 'cr3', nom: 'Nuance',     ponderation: 33 }
             ] }
         ]);
+        // #550 — `sansGrilleReference` laisse la préférence VIDE, ce qui est
+        // l'état réel de Grégoire le 27 août au matin : la carte et la liste
+        // étaient muettes, faute de quoi que ce soit à comparer.
         if (typeof window.definirPreference === 'function') {
-            window.definirPreference('grilleReferenceDepistage', 'GR_3C3');
+            window.definirPreference('grilleReferenceDepistage', opts.sansGrilleReference ? '' : 'GR_3C3');
         }
         window.db.setSync(window.cle('evaluationsSauvegardees'), [ // security-ok: fixture de test, litteral du fichier
             {
@@ -157,8 +161,12 @@ async function monterProfil(page, echelle) {
             ? window.obtenirCriteresAvecValeurs('TEST3C3').map((c) => c.nom + '=' + c.valeur)
             : null;
 
-        return { aCarte: i !== -1, carte, criteresVus };
-    }, { echelle });
+        // #550 — la liste « Progression par critère », qui était vide en silence.
+        const j = html.indexOf('Progression par critère');
+        const listeCriteres = j === -1 ? '' : html.slice(j, j + 1200);
+
+        return { aCarte: i !== -1, carte, criteresVus, listeCriteres };
+    }, { echelle, options });
 }
 
 test('#542 pas 3c-3 · la carte rend un bloc par NIVEAU DE L\'ÉCHELLE, pas quatre blocs figés', async ({ page }) => {
@@ -235,6 +243,52 @@ test('#542 pas 3c-3 · sans étiquette SOLO, le niveau s\'affiche quand même et
 
     // Aucune description SOLO ne doit être inventée pour un niveau non étiqueté.
     expect(r.carte, 'aucune description SOLO sans étiquette').not.toContain('À ce niveau');
+
+    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
+});
+
+// ---------------------------------------------------------------------------
+// PORTE #550 — SANS GRILLE DE RÉFÉRENCE, L'ÉCRAN NOMME LA CAUSE.
+//
+// Symptôme vécu par Grégoire le 27 août 2026 au matin, sur ses données réelles :
+// la carte affichait « Aucune force ni défi identifié selon la taxonomie SOLO »
+// — un verdict rassurant SUR L'ÉLÈVE — et « Progression par critère » était
+// vide, ce qui se lit comme « rien à signaler ». Dans les deux cas la vérité
+// était « je n'ai aucun critère à quoi comparer ».
+//
+// ⚠ POURQUOI CE TEST EST AU NAVIGATEUR ALORS QUE LA SENTINELLE VITEST EXISTE.
+// Celle-ci vérifie que le diagnostic REND le bon message et que les blocs le
+// lisent. Elle ne dit pas qu'il ARRIVE À L'ÉCRAN — or c'est exactement ce qui
+// manquait à #550 : le message existait dans aucun des deux blocs.
+// ---------------------------------------------------------------------------
+
+test('#550 · sans grille de référence, la carte ET la liste disent la cause', async ({ page }) => {
+    const erreurs = brancherEcouteurs(page);
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
+
+    const r = await monterProfil(page, echelleWXYZ(true), { sansGrilleReference: true });
+    expect(r.erreur, `Erreur : ${r.erreur}`).toBeUndefined();
+    expect(r.aCarte, 'la carte doit être rendue même sans grille de référence').toBe(true);
+
+    // GARDE ANTI-SILENCE : le montage doit avoir réellement produit l'état qu'il
+    // croit exercer — sans critère, pas de #550 à observer.
+    expect(r.criteresVus, 'le montage doit avoir laissé la liste des critères vide').toHaveLength(0);
+
+    // ⮕ LE VERDICT RASSURANT NE DOIT PLUS APPARAÎTRE.
+    expect(r.carte, 'le verdict rassurant est revenu')
+        .not.toContain('Aucune force ni défi identifié');
+
+    // ⮕ ET LA CAUSE DOIT ÊTRE NOMMÉE, AVEC LE CHEMIN POUR LA RÉGLER — dans les
+    // DEUX blocs, parce que les deux étaient muets et qu'en corriger un seul
+    // laisserait l'autre mentir.
+    expect(r.carte, 'la carte ne nomme pas la cause').toMatch(/grille/i);
+    expect(r.carte, 'la carte ne donne pas le chemin de réglage').toContain('Outils d');
+
+    expect(r.listeCriteres, 'la liste « Progression par critère » doit être rendue').toBeTruthy();
+    expect(r.listeCriteres, 'la liste reste muette — c\'est le second symptôme de #550')
+        .toMatch(/grille/i);
 
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
