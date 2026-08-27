@@ -50,6 +50,10 @@ const lireLignesDOM = () => {
             jour: document.getElementById(`v2-hor-seance-${i}-jour`).value,
             debut: document.getElementById(`v2-hor-seance-${i}-debut`)?.value,
             fin: document.getElementById(`v2-hor-seance-${i}-fin`)?.value,
+            // #540 lot E1 : les périodes sont une saisie comme une autre — donc une
+            // saisie que la régénération des lignes doit préserver, au même titre que
+            // les heures. C'est tout l'objet de CT-01.
+            periodes: document.getElementById(`v2-hor-seance-${i}-periodes`)?.value,
             local: document.getElementById(`v2-hor-seance-${i}-local`)?.value
         });
     }
@@ -75,6 +79,14 @@ test('CT-01 · passer de 2 à 3 séances préserve les séances saisies, et Enre
         selectNb.dispatchEvent(new Event('change', { bubbles: true }));
         const lignesApres = lireLignes();
 
+        // #540 lot E1 : la ligne AJOUTÉE naît sans nombre de périodes — c'est voulu, cette
+        // donnée pilote le dénominateur de l'assiduité et se saisit à l'œil ouvert. Sans
+        // elle, l'enregistrement est refusé, et ce cas ne mesurerait plus que ce refus.
+        // On la saisit comme l'utilisateur le fera, pour continuer d'éprouver ce que CT-01
+        // protège : que les DEUX premières lignes aient survécu au changement de format.
+        const p2 = document.getElementById('v2-hor-seance-2-periodes');
+        if (p2) p2.value = '2';
+
         // « Enregistrer » : les valeurs préservées doivent être persistées
         window.sauvegarderHoraireV2();
         const persiste = window.db.getSync('a2026_horaires', []).find(h => h.id === horId);
@@ -87,19 +99,29 @@ test('CT-01 · passer de 2 à 3 séances préserve les séances saisies, et Enre
 
     // Les deux séances saisies survivent au changement de format
     expect(r.lignesApres.length, '3 lignes après le passage à 3 séances').toBe(3);
-    expect(r.lignesApres[0]).toEqual({ jour: 'Mardi', debut: '10:00', fin: '12:00', local: 'A-101' });
-    expect(r.lignesApres[1]).toEqual({ jour: 'Jeudi', debut: '14:00', fin: '16:00', local: 'A-101' });
+    expect(r.lignesApres[0]).toEqual({ jour: 'Mardi', debut: '10:00', fin: '12:00', periodes: '2', local: 'A-101' });
+    expect(r.lignesApres[1]).toEqual({ jour: 'Jeudi', debut: '14:00', fin: '16:00', periodes: '2', local: 'A-101' });
     // La ligne AJOUTÉE prend les défauts (comportement voulu, inchangé)
     expect(r.lignesApres[2].debut).toBe('08:00');
 
     // Et la persistance reflète les valeurs préservées, pas les défauts
     expect(r.seancesPersistees?.length).toBe(3);
-    expect(r.seancesPersistees[0]).toEqual({ jour: 'Mardi', heureDebut: '10:00', heureFin: '12:00', local: 'A-101' });
-    expect(r.seancesPersistees[1]).toEqual({ jour: 'Jeudi', heureDebut: '14:00', heureFin: '16:00', local: 'A-101' });
+    expect(r.seancesPersistees[0]).toEqual({ jour: 'Mardi', heureDebut: '10:00', heureFin: '12:00', nombrePeriodes: 2, local: 'A-101' });
+    expect(r.seancesPersistees[1]).toEqual({ jour: 'Jeudi', heureDebut: '14:00', heureFin: '16:00', nombrePeriodes: 2, local: 'A-101' });
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
-test('CT-01 · changer « Périodes par séance » ne touche pas aux séances saisies', async ({ page }) => {
+// ⚠ CE CAS A CHANGÉ D'OBJET AU LOT E1 (#540, 26 août 2026), ET C'EST VOULU.
+//
+// Il éprouvait le champ GLOBAL « Périodes par séance » : en changer la valeur ne devait
+// pas écraser les heures déjà saisies. Ce champ n'existe plus — un format ne se déclare
+// plus pour tout un horaire, chaque séance porte le sien.
+//
+// L'invariant qu'il protégeait n'a pas disparu pour autant : modifier le format d'une
+// séance ne doit rien faire aux autres. Il est même plus exposé qu'avant, le format étant
+// devenu une saisie par ligne. On le porte donc sous sa nouvelle forme, plutôt que de
+// supprimer le cas et de perdre la protection avec le champ.
+test('CT-01 · modifier les périodes d\'une séance ne touche pas aux autres', async ({ page }) => {
     const erreurs = brancherEcouteurs(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
@@ -110,20 +132,32 @@ test('CT-01 · changer « Périodes par séance » ne touche pas aux séances sa
         const lireLignes = new Function(`return (${lireSrc})()`);
 
         window.changerHoraireSelectionneV2(horId);
+        const avant = lireLignes();
 
-        const selectPeriodes = document.getElementById('v2-hor-periodesParSeance');
-        selectPeriodes.value = '3';
-        selectPeriodes.dispatchEvent(new Event('change', { bubbles: true }));
+        const p0 = document.getElementById('v2-hor-seance-0-periodes');
+        p0.value = '4';
+        p0.dispatchEvent(new Event('input', { bubbles: true }));
 
-        return { lignes: lireLignes() };
+        return {
+            avant,
+            apres: lireLignes(),
+            resume: document.getElementById('v2-hor-formatResume')?.textContent || ''
+        };
     }, {
         setupSrc: SETUP.toString().replace(/^[^{]*\{/, '').replace(/\}$/, ''),
         lireSrc: lireLignesDOM.toString()
     });
 
-    expect(r.lignes.length).toBe(2);
-    expect(r.lignes[0]).toEqual({ jour: 'Mardi', debut: '10:00', fin: '12:00', local: 'A-101' });
-    expect(r.lignes[1]).toEqual({ jour: 'Jeudi', debut: '14:00', fin: '16:00', local: 'A-101' });
+    expect(r.avant.length).toBe(2);
+    // Les deux séances arrivent à 2, repris de la déclaration de l'horaire.
+    expect(r.avant[0].periodes).toBe('2');
+    expect(r.avant[1].periodes).toBe('2');
+
+    expect(r.apres[0]).toEqual({ jour: 'Mardi', debut: '10:00', fin: '12:00', periodes: '4', local: 'A-101' });
+    // Intacte — heures ET périodes.
+    expect(r.apres[1]).toEqual({ jour: 'Jeudi', debut: '14:00', fin: '16:00', periodes: '2', local: 'A-101' });
+    // Et le total suit la saisie, sans rien convertir.
+    expect(r.resume).toContain('6 périodes/semaine');
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
@@ -155,7 +189,7 @@ test('CT-01 · réduire 2 → 1 séance garde la première ; « Nouvel horaire �
     });
 
     expect(r.lignesReduites.length).toBe(1);
-    expect(r.lignesReduites[0]).toEqual({ jour: 'Mardi', debut: '10:00', fin: '12:00', local: 'A-101' });
+    expect(r.lignesReduites[0]).toEqual({ jour: 'Mardi', debut: '10:00', fin: '12:00', periodes: '2', local: 'A-101' });
 
     // #540 lot C (26 août 2026) — LA FIN PAR DÉFAUT EST DÉRIVÉE, PLUS ÉCRITE EN DUR.
     // Elle valait « 10:00 » quel que soit le format choisi : le champ « Périodes par
@@ -166,8 +200,13 @@ test('CT-01 · réduire 2 → 1 séance garde la première ; « Nouvel horaire �
     // ⚠ L'INVARIANT DE CT-01 EST INCHANGÉ : « Nouvel horaire » repart bien des défauts
     // et n'hérite pas des séances de l'horaire précédent. Seule la valeur du défaut a
     // bougé, pas ce que ce cas verrouille.
+    // #540 lot E1 : la fin par défaut redevient « 10:00 ». Le lot C la dérivait du format
+    // déclaré (08:00 + 2 × 50 min = 09:40) ; E1 a retiré la durée de période qui rendait
+    // cette dérivation possible — et elle était fausse de toute façon, puisqu'elle
+    // ignorait les pauses. Début et fin restent des défauts de formulaire VISIBLES ; les
+    // périodes, elles, naissent VIDES : c'est la donnée qui compte au dénominateur.
     expect(r.lignesNeuves.length).toBe(2);
-    expect(r.lignesNeuves[0]).toEqual({ jour: 'Lundi', debut: '08:00', fin: '09:40', local: '' });
-    expect(r.lignesNeuves[1]).toEqual({ jour: 'Mardi', debut: '08:00', fin: '09:40', local: '' });
+    expect(r.lignesNeuves[0]).toEqual({ jour: 'Lundi', debut: '08:00', fin: '10:00', periodes: '', local: '' });
+    expect(r.lignesNeuves[1]).toEqual({ jour: 'Mardi', debut: '08:00', fin: '10:00', periodes: '', local: '' });
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

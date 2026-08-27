@@ -621,9 +621,21 @@ function genererSeancesCompletes(coursId = null) {
                     date: jour.date,
                     jour: jour.jourSemaine,
                     jourRemplace: jour.jourRemplace !== jour.jourSemaine ? jour.jourRemplace : null,
-                    debut: seance.debut,
-                    fin: seance.fin || calculerHeureFin(seance.debut, seance.duree), // Calculer fin si manquant
+                    // #540 lot E1 (26 août 2026) — LES HEURES SE PERDAIENT ICI.
+                    // Les séances du formulaire d'horaire portent `heureDebut`/`heureFin`,
+                    // jamais `debut`/`fin` : cette projection écrivait donc `debut:
+                    // undefined` et une `fin` calculée à partir de rien. Le cache ne
+                    // contenait plus rien d'exploitable, et `obtenirNombrePeriodesSeance`
+                    // repartait interroger l'horaire par un détour — d'où le repli à 2 qui
+                    // se déclenchait si souvent (lot C). On accepte les deux nommages.
+                    debut: seance.debut || seance.heureDebut,
+                    fin: seance.fin || seance.heureFin
+                        || calculerHeureFin(seance.debut || seance.heureDebut, seance.duree),
                     duree: seance.duree, // Ajouter durée pour compatibilité
+                    // #540 lot E1 : le nombre de périodes SAISI suit la séance jusqu'au
+                    // cache. Sans lui, le dénominateur de l'assiduité ne verrait jamais ce
+                    // que l'utilisateur a déclaré à l'écran Horaire.
+                    nombrePeriodes: seance.nombrePeriodes,
                     local: seance.local,
                     numeroSemaine: parseInt(numSemaine)
                 };

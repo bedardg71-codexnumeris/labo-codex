@@ -72,93 +72,21 @@ test('#540-C · affichage et assiduité tombent sur le MÊME nombre de périodes
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
-test('#540-C · le champ « Périodes par séance » pilote vraiment l\'heure de fin', async ({ page }) => {
-    const erreurs = brancherEcouteurs(page);
-    await preparer(page);
-
-    const r = await page.evaluate(async () => {
-        const lireFins = () => {
-            const fins = [];
-            for (let i = 0; document.getElementById(`v2-hor-seance-${i}-fin`); i++) {
-                fins.push({
-                    debut: document.getElementById(`v2-hor-seance-${i}-debut`).value,
-                    fin: document.getElementById(`v2-hor-seance-${i}-fin`).value
-                });
-            }
-            return fins;
-        };
-
-        // Un horaire neuf, à 2 périodes par séance.
-        window.nouveauHoraireV2();
-        const champPeriodes = document.getElementById('v2-hor-periodesParSeance');
-        const champNb = document.getElementById('v2-hor-nbSeances');
-        champPeriodes.value = '2';
-        champPeriodes.dispatchEvent(new Event('change', { bubbles: true }));
-        const aDeux = lireFins();
-
-        // On passe à 3 périodes, PUIS on ajoute une séance : la ligne NEUVE doit naître
-        // au nouveau format. Les lignes déjà là, elles, ne bougent pas — c'est
-        // l'invariant de #460 (changer le format n'écrase pas une saisie).
-        champPeriodes.value = '3';
-        champPeriodes.dispatchEvent(new Event('change', { bubbles: true }));
-        const apresChangementFormat = lireFins();
-
-        champNb.value = String(apresChangementFormat.length + 1);
-        champNb.dispatchEvent(new Event('change', { bubbles: true }));
-        const avecLigneNeuve = lireFins();
-
-        // Et un horaire entièrement neuf reprend le format courant partout.
-        window.nouveauHoraireV2();
-        const neufApres = lireFins();
-
-        return { aDeux, apresChangementFormat, avecLigneNeuve, neufApres };
-    });
-
-    expect(r.erreur, `Erreur eval : ${r.erreur}`).toBeUndefined();
-    // Avant le lot C : « 10:00 » quel que soit le choix — le champ n'atteignait pas les
-    // lignes, il ne changeait que le résumé, qui annonçait donc un format faux. Et ce
-    // 10:00 supposait des périodes de 60 min alors que le réglage du projet est à 50.
-    expect(r.aDeux[0].fin).toBe('09:40');            // 08:00 + 2 × 50 min
-
-    // #460 préservé : les lignes DÉJÀ saisies ne sont pas réécrites.
-    expect(r.apresChangementFormat[0].fin).toBe('09:40');
-
-    // Mais la ligne AJOUTÉE naît au format courant : le champ est bien effectif.
-    const neuve = r.avecLigneNeuve[r.avecLigneNeuve.length - 1];
-    expect(neuve.fin).toBe('10:30');                 // 08:00 + 3 × 50 min
-    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
-});
-
-test('#540-C · le résumé du formulaire se lit aux heures saisies, pas au format déclaré', async ({ page }) => {
-    const erreurs = brancherEcouteurs(page);
-    await preparer(page);
-
-    const r = await page.evaluate(async () => {
-        window.nouveauHoraireV2();
-        const champPeriodes = document.getElementById('v2-hor-periodesParSeance');
-        champPeriodes.value = '2';
-        champPeriodes.dispatchEvent(new Event('change', { bubbles: true }));
-
-        const resumeDeclare = document.getElementById('v2-hor-formatResume')?.textContent || '';
-
-        // L'utilisateur allonge la première séance à trois heures, sans toucher au format.
-        const fin0 = document.getElementById('v2-hor-seance-0-fin');
-        fin0.value = '11:00';
-        fin0.dispatchEvent(new Event('change', { bubbles: true }));
-
-        return {
-            resumeDeclare,
-            resumeApresSaisie: document.getElementById('v2-hor-formatResume')?.textContent || ''
-        };
-    });
-
-    expect(r.erreur, `Erreur eval : ${r.erreur}`).toBeUndefined();
-    // 2 séances × 2 périodes tant que les heures le disent.
-    expect(r.resumeDeclare).toContain('4 périodes/semaine');
-    // Puis 4 + 2 : le résumé SUIT la saisie. Avant, il restait à « 2 × 2 = 4 ».
-    expect(r.resumeApresSaisie).toContain('6 périodes/semaine');
-    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
-});
+// ⚠ DEUX CAS RETIRÉS ICI PAR LE LOT E1 (#540, le même soir), ET C'EST VOULU.
+//
+// Ils éprouvaient le champ GLOBAL « Périodes par séance » que le lot C venait de rendre
+// effectif : qu'il pilote l'heure de fin proposée, et que le résumé se lise aux heures
+// plutôt qu'au produit de deux déclarations.
+//
+// Grégoire a ensuite montré qu'une période comprend sa PAUSE — 50 + 10 ici, 55 + 5
+// ailleurs. La dérivation « début + N × durée de période » était donc fausse dès la
+// troisième période, et le champ global n'avait plus de raison d'être : chaque séance
+// porte désormais son nombre de périodes, saisi et jamais déduit.
+//
+// Ce que ces deux cas protégeaient est repris, sous la forme que le modèle a prise, par
+// `horaire-seance-porte-periodes-540E1.spec.js` — dont le dernier cas vérifie que le
+// résumé suit la saisie et DIT ce qui manque. Rien n'est perdu ; on ne garde simplement
+// pas un verrou sur un champ qui n'existe plus.
 
 test('#540-C · un horaire ne s\'enregistre plus avec des heures fabriquées', async ({ page }) => {
     const erreurs = brancherEcouteurs(page);

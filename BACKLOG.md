@@ -911,6 +911,43 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     une pause de 10 minutes que personne n'a déclarée. L'application DIT le nouveau sens à
     l'écran et laisse l'utilisateur ajuster.
     *Fin : une séance de 08:00 à 11:00 vaut 3 périodes partout.*
+    ⮕ **✅ E1 — la séance porte ses périodes · LIVRÉ 26 août 2026.** Le champ GLOBAL
+    « Périodes par séance » est RETIRÉ (écran + module) : un format ne se déclare plus pour
+    tout un horaire. Chaque ligne de séance a son champ, `sauvegarderHoraireV2` écrit
+    `nombrePeriodes` sur la séance, et le REFUSE absent. Le champ naît **vide** — début et
+    fin restent des défauts de formulaire visibles, mais la donnée qui pilote le
+    dénominateur se saisit à l'œil ouvert. Le résumé additionne les périodes saisies et DIT
+    combien de séances sont incomplètes plutôt que d'annoncer un total partiel.
+    ⮕ **Le maillon qui manquait** : `genererSeancesCompletes` (`horaire.js`) ne propageait
+    PAS `nombrePeriodes` au cache que lit l'assiduité — et perdait même les heures, en
+    écrivant `debut: seance.debut` alors que les séances du formulaire portent `heureDebut`.
+    Le cache ne contenait donc rien d'exploitable, d'où le détour par l'horaire et le repli
+    à 2 qui se déclenchait si souvent (lot C). Les deux nommages sont acceptés, et le
+    nombre de périodes voyage jusqu'au bout.
+    ⮕ **Les séances d'AVANT se complètent par REPRISE** : le chargement pré-remplit avec
+    `horaire.periodesParSeance` — le format que l'utilisateur avait DÉCLARÉ. Reprendre une
+    déclaration n'est pas deviner ; rediviser les heures par 50 l'aurait été, et aurait
+    propagé le faux qu'on retire. La valeur reste sous ses yeux, modifiable, avant qu'il
+    enregistre. `periodesParSeance` n'est plus ÉCRIT mais n'est pas SUPPRIMÉ des fiches
+    existantes : c'est lui qui rend cette reprise possible.
+    ⮕ **Verrous** : `tests/unit/sentinelle-540-lotE1-seance-porte-ses-periodes.test.js`
+    (14 cas) et `tests/integration/horaire-seance-porte-periodes-540E1.spec.js` (4 cas,
+    dont la preuve que le 3 saisi arrive intact au dénominateur — là où l'ancienne chaîne
+    comptait 4). **4 break-tests rouges**, dont un qui n'a pas rougi d'abord : la regex
+    exigeait `value="${…}"` et laissait passer un `value="2"` en dur, précisément la forme
+    la plus probable du retour en arrière.
+    ⚠ **SIX bancs existants ont dû suivre**, tous parce qu'ils ne fournissaient pas le
+    nouveau champ requis : `sentinelle-horaire-creation-supprimable`,
+    `horaire-creation-supprimable.spec`, `parcours-neuf-saisie-presences.spec`, les trois
+    cas de `horaire-format-preserve-seances` (CT-01) — dont un a **changé d'objet** : il
+    éprouvait le champ global, il éprouve désormais que modifier les périodes d'une séance
+    ne touche pas aux autres, invariant plus exposé qu'avant puisque le format est devenu
+    une saisie par ligne. Et deux cas de la porte du lot C ont été RETIRÉS, leur objet
+    ayant disparu avec le champ ; ce qu'ils protégeaient est repris par la porte E1.
+    Vitest **3574/3574**, Playwright **179/179**.
+    ⏳ **RESTE E2 et E3** : E2 — `obtenirNombrePeriodesSeance` lit `nombrePeriodes` sans
+    plus jamais diviser (les 8 conversions du groupe 1). E3 — retirer le champ « Durée
+    d'une période » et ses 41 lectures.
   · **D — le recoupement** (demande d'origine) : l'écran Horaire confronte le total des séances à la
     durée hebdomadaire déclarée et le DIT quand ça diverge, sans bloquer. *Fin : un horaire de 3 h
     sur un cours 2-2-3 est signalé.* **Après E** : recouper avec une conversion fausse

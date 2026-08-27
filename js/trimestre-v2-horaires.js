@@ -177,19 +177,26 @@ function majResumeFormatHoraireV2() {
     const resumeElem = document.getElementById('v2-hor-formatResume');
     if (!resumeElem) return;
 
-    const seances = [];
+    // #540 lot E1 : le total additionne les périodes SAISIES. Il les mesurait aux heures
+    // (lot C), ce qui valait mieux que le produit de deux déclarations, mais reposait sur
+    // une conversion qui ignorait la pause.
+    let total = 0;
+    let nb = 0;
+    let incompletes = 0;
     for (let i = 0; document.getElementById(`v2-hor-seance-${i}-jour`); i++) {
-        seances.push({
-            heureDebut: document.getElementById(`v2-hor-seance-${i}-debut`)?.value || '',
-            heureFin: document.getElementById(`v2-hor-seance-${i}-fin`)?.value || ''
-        });
+        nb++;
+        const brut = document.getElementById(`v2-hor-seance-${i}-periodes`)?.value;
+        const p = parseInt(brut, 10);
+        if (p > 0) total += p; else incompletes++;
     }
 
-    const total = periodesParSemaine(seances);
-    const nb = seances.length;
-    resumeElem.textContent = total > 0
-        ? `${nb} séance${nb > 1 ? 's' : ''} · ${total} période${total > 1 ? 's' : ''}/semaine`
-        : `${nb} séance${nb > 1 ? 's' : ''} · durée non déterminée`;
+    const sSeance = nb > 1 ? 's' : '';
+    if (incompletes > 0) {
+        // On DIT ce qui manque plutôt que d'annoncer un total qui ne compte pas tout.
+        resumeElem.textContent = `${nb} séance${sSeance} · ${incompletes} sans nombre de périodes`;
+    } else {
+        resumeElem.textContent = `${nb} séance${sSeance} · ${total} période${total > 1 ? 's' : ''}/semaine`;
+    }
 }
 
 // Variable pour stocker l'index de la séance en édition
@@ -606,13 +613,11 @@ function nouveauHoraireV2() {
     const champGroupe = document.getElementById('v2-hor-groupeAssocie');
     const champNom = document.getElementById('v2-hor-nom');
     const champNbSeances = document.getElementById('v2-hor-nbSeances');
-    const champPeriodes = document.getElementById('v2-hor-periodesParSeance');
 
     if (champGroupe) champGroupe.value = '';
     if (champNom) champNom.value = '';
     // Note: v2-hor-local supprimé (Beta 95.5) - le local est maintenant par séance
     if (champNbSeances) champNbSeances.value = '2';
-    if (champPeriodes) champPeriodes.value = '2';
 
     // Mettre à jour le titre
     const titre = document.getElementById('v2-titreFormHoraire');
@@ -656,7 +661,6 @@ function editerHoraireV2(horaire) {
     if (selectGroupe) selectGroupe.value = horaire.groupeAssocie || '';
     document.getElementById('v2-hor-nom').value = horaire.nom || '';
     document.getElementById('v2-hor-nbSeances').value = String(horaire.seances?.length || 2);
-    document.getElementById('v2-hor-periodesParSeance').value = String(horaire.periodesParSeance || 2);
 
     // Mettre à jour le titre
     const titre = document.getElementById('v2-titreFormHoraire');
@@ -683,14 +687,26 @@ function editerHoraireV2(horaire) {
             const inputLocal = document.getElementById(`v2-hor-seance-${i}-local`);
 
             if (selectJour) selectJour.value = s.jour || 'Lundi';
-            // #540 lot C : les lignes viennent d'être générées avec le début par défaut et
-            // une fin DÉRIVÉE du format choisi. Une séance qui ne dit rien laisse donc la
-            // proposition en place — on ne réécrit plus « 10:00 » par-dessus.
+            // #540 lot C : une séance qui ne dit rien laisse la proposition du formulaire
+            // en place — on ne réécrit plus « 10:00 » par-dessus.
             if (inputDebut && s.heureDebut) inputDebut.value = s.heureDebut;
             if (inputFin && s.heureFin) inputFin.value = s.heureFin;
+
+            // #540 lot E1 — LES SÉANCES D'AVANT N'ONT PAS DE `nombrePeriodes`.
+            // Le formulaire n'écrivait que {jour, heureDebut, heureFin, local}. Pour les
+            // compléter, on ne redivise PAS les heures : ce serait propager le faux qu'on
+            // retire. On reprend `horaire.periodesParSeance` — le format que l'utilisateur
+            // avait DÉCLARÉ pour cet horaire. Reprendre une déclaration n'est pas deviner ;
+            // et elle reste sous ses yeux, modifiable, avant qu'il enregistre.
+            const inputPeriodes = document.getElementById(`v2-hor-seance-${i}-periodes`);
+            if (inputPeriodes) {
+                const reprises = s.nombrePeriodes || horaire.periodesParSeance || '';
+                inputPeriodes.value = reprises > 0 ? String(reprises) : '';
+            }
             // Local par séance ou fallback vers local global (migration)
             if (inputLocal) inputLocal.value = s.local || localGlobal;
         });
+        majResumeFormatHoraireV2();
     }
 
     // Afficher le formulaire, masquer carte résumé (évite redondance - Beta 95.2)
@@ -722,7 +738,6 @@ function sauvegarderHoraireV2() {
     const groupeAssocie = document.getElementById('v2-hor-groupeAssocie')?.value;
     const nom = document.getElementById('v2-hor-nom')?.value?.trim();
     const nbSeances = parseInt(document.getElementById('v2-hor-nbSeances')?.value) || 2;
-    const periodesParSeance = parseInt(document.getElementById('v2-hor-periodesParSeance')?.value) || 2;
 
     if (!groupeAssocie) {
         notifications.erreur('Veuillez sélectionner un groupe associé');
@@ -754,17 +769,27 @@ function sauvegarderHoraireV2() {
             return;
         }
 
-        const heureFin = document.getElementById(`v2-hor-seance-${i}-fin`)?.value
-            || calculerHeureFin(heureDebut, periodesParSeance);
-
+        const heureFin = document.getElementById(`v2-hor-seance-${i}-fin`)?.value || '';
         if (!heureFin) {
             notifications.erreur(
                 `Séance ${i + 1} : heure de fin manquante`,
-                'Indique-la, ou choisis un nombre de périodes par séance pour qu\'elle se calcule.');
+                'Elle situe la séance dans la journée.');
             return;
         }
 
-        seances.push({ jour, heureDebut, heureFin, local });
+        // #540 lot E1 : le nombre de périodes est SAISI, jamais déduit des heures — une
+        // période comprend sa pause, et la convention varie d'un cégep à l'autre. C'est
+        // ce nombre qui fait le dénominateur de l'assiduité : on le refuse absent plutôt
+        // que d'en proposer un.
+        const nombrePeriodes = parseInt(document.getElementById(`v2-hor-seance-${i}-periodes`)?.value, 10);
+        if (!(nombrePeriodes > 0)) {
+            notifications.erreur(
+                `Séance ${i + 1} : nombre de périodes manquant`,
+                'C\'est lui qui compte au dénominateur de l\'assiduité — il ne se déduit pas des heures, puisqu\'une période comprend sa pause.');
+            return;
+        }
+
+        seances.push({ jour, heureDebut, heureFin, nombrePeriodes, local });
     }
 
     const cleHoraires = cle('horaires');
@@ -790,9 +815,11 @@ function sauvegarderHoraireV2() {
             ...horaires[index],
             groupeAssocie,
             nom,
-            periodesParSeance,
             seances
         };
+        // #540 lot E1 : `periodesParSeance` n'est plus ÉCRIT — chaque séance porte le
+        // sien. On ne le SUPPRIME pas des fiches existantes pour autant : il y reste
+        // lisible, et sert justement à pré-remplir les séances d'avant au chargement.
         // Supprimer l'ancien champ local global s'il existe (migration)
         delete horaires[index].local;
         notifications.succes(`Horaire "${nom}" modifié`);
@@ -802,7 +829,6 @@ function sauvegarderHoraireV2() {
             id: genererIdUnique('HOR_'),
             groupeAssocie,
             nom,
-            periodesParSeance,
             seances
         };
         horaires.push(nouvelHoraire);
@@ -915,21 +941,33 @@ window.periodesParSemaine = periodesParSemaine;
 function mettreAJourSeancesHoraireV2() {
     const conteneur = document.getElementById('v2-hor-seances');
     const nbSeances = parseInt(document.getElementById('v2-hor-nbSeances')?.value) || 2;
-    const periodesParSeance = parseInt(document.getElementById('v2-hor-periodesParSeance')?.value) || 2;
 
     if (!conteneur) return;
 
     const jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
     let html = '';
 
-    // #540 lot C — LE CHAMP DEVIENT EFFECTIF (décision de Grégoire, 26 août 2026).
-    // L'heure de fin naissait à « 10:00 » EN DUR : choisir « 3 périodes » ne changeait
-    // aucune heure proposée, seulement le résumé affiché. Le champ annonçait un format
-    // que la saisie ignorait. Elle se dérive désormais du début + N × durée de période.
-    // L'heure de DÉBUT, elle, reste un défaut de formulaire assumé : rien ne permet de
-    // la déduire, et 8 h est le premier créneau d'une grille de cégep.
+    // #540 lot E1 — CHAQUE SÉANCE PORTE SES PÉRIODES (décision de Grégoire, 26 août 2026,
+    // après le lot C).
+    //
+    // ⮕ POURQUOI ON A CESSÉ DE DÉDUIRE. Une période de cégep, c'est l'enseignement PLUS
+    // la pause : 50 + 10 ici, 55 + 5 ailleurs. Diviser une durée d'horloge par la seule
+    // durée d'enseignement donnait 4 périodes pour un bloc de 08:00 à 11:00, qui en fait
+    // trois — et l'erreur croissait avec la durée : cinq périodes pour un bloc de quatre
+    // heures. Ce n'était pas un défaut d'affichage : ce nombre EST le dénominateur de
+    // l'assiduité, donc un élève pouvait être compté absent d'une période inexistante.
+    //
+    // ⮕ CE QUI REMPLACE LA DÉDUCTION. Les heures et le nombre de périodes sont DEUX
+    // données, toutes deux lues sur l'horaire officiel, qu'aucune convention ne relie de
+    // façon portable. On les demande donc toutes les deux, et on ne convertit plus rien.
+    //
+    // ⮕ CE QUI PORTE UN DÉFAUT, ET CE QUI N'EN PORTE PAS. Le jour et l'heure de début
+    // sont des défauts de formulaire : visibles, modifiables, sans effet sur un calcul
+    // tant qu'ils ne sont pas relus en silence. Le nombre de périodes, lui, naît VIDE —
+    // c'est la donnée qui pilote le dénominateur, elle se saisit à l'œil ouvert. La
+    // sauvegarde la refuse absente plutôt que d'en proposer une.
     const DEBUT_PAR_DEFAUT = '08:00';
-    const finProposee = calculerHeureFin(DEBUT_PAR_DEFAUT, periodesParSeance);
+    const FIN_PAR_DEFAUT = '10:00';
 
     for (let i = 0; i < nbSeances; i++) {
         const jourDefaut = jours[i % jours.length];
@@ -939,9 +977,12 @@ function mettreAJourSeancesHoraireV2() {
                 <select id="v2-hor-seance-${i}-jour" class="controle-form">
                     ${jours.map(j => `<option value="${j}" ${j === jourDefaut ? 'selected' : ''}>${j}</option>`).join('')}
                 </select>
-                <input type="time" id="v2-hor-seance-${i}-debut" class="controle-form" value="${DEBUT_PAR_DEFAUT}" data-on-change="majResumeFormatHoraireV2">
+                <input type="time" id="v2-hor-seance-${i}-debut" class="controle-form" value="${DEBUT_PAR_DEFAUT}">
                 <span>à</span>
-                <input type="time" id="v2-hor-seance-${i}-fin" class="controle-form" value="${finProposee}" data-on-change="majResumeFormatHoraireV2">
+                <input type="time" id="v2-hor-seance-${i}-fin" class="controle-form" value="${FIN_PAR_DEFAUT}">
+                <input type="number" id="v2-hor-seance-${i}-periodes" class="controle-form controle-form-compact"
+                       min="1" max="8" step="1" placeholder="pér." title="Nombre de périodes de cette séance"
+                       data-on-input="majResumeFormatHoraireV2">
                 <input type="text" id="v2-hor-seance-${i}-local" class="controle-form" placeholder="Local">
             </div>
         `;
@@ -965,6 +1006,10 @@ function changerFormatSeancesHoraireV2() {
             jour: document.getElementById(`v2-hor-seance-${i}-jour`).value,
             heureDebut: document.getElementById(`v2-hor-seance-${i}-debut`)?.value || '',
             heureFin: document.getElementById(`v2-hor-seance-${i}-fin`)?.value || '',
+            // #540 lot E1 : les périodes se photographient comme le reste — sans quoi
+            // changer le nombre de séances effacerait une saisie, exactement le défaut
+            // que CT-01 (#460) a fermé pour les heures.
+            periodes: document.getElementById(`v2-hor-seance-${i}-periodes`)?.value || '',
             local: document.getElementById(`v2-hor-seance-${i}-local`)?.value || ''
         });
     }
@@ -981,7 +1026,10 @@ function changerFormatSeancesHoraireV2() {
         if (inputDebut) inputDebut.value = s.heureDebut;
         if (inputFin) inputFin.value = s.heureFin;
         if (inputLocal) inputLocal.value = s.local;
+        const inputPeriodes = document.getElementById(`v2-hor-seance-${i}-periodes`);
+        if (inputPeriodes) inputPeriodes.value = s.periodes;
     });
+    majResumeFormatHoraireV2();
 }
 
 /**

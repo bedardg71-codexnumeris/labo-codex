@@ -109,9 +109,16 @@ test('parcours neuf · de la configuration à la première présence saisissable
         const j = document.getElementById('v2-hor-seance-0-jour');
         const d = document.getElementById('v2-hor-seance-0-debut');
         const f = document.getElementById('v2-hor-seance-0-fin');
+        // #540 lot E1 (26 août 2026) : la séance porte SON nombre de périodes, saisi et
+        // non déduit — une période comprend sa pause, la convention varie d'un cégep à
+        // l'autre. Le formulaire le refuse absent, donc ce parcours le saisit comme
+        // l'utilisateur le fera. C'est un pas de plus au terrain, assumé : ce nombre est
+        // le dénominateur de l'assiduité que ce parcours va justement vérifier.
+        const p = document.getElementById('v2-hor-seance-0-periodes');
         if (j) j.value = JOUR_DE_SEANCE;
         if (d) d.value = '08:00';
         if (f) f.value = '10:00';
+        if (p) p.value = '2';
         window.sauvegarderHoraireV2();
         await pause(500);
 

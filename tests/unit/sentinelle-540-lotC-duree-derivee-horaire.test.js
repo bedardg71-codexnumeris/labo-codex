@@ -71,6 +71,7 @@ function sansCommentaires(src) {
     return sortie;
 }
 
+const HTML = lire('index.html');
 const SRC_HORAIRES = sansCommentaires(lire('js', 'trimestre-v2-horaires.js'));
 const SRC_PRESENCES = sansCommentaires(lire('js', 'saisie-presences.js'));
 
@@ -151,37 +152,75 @@ describe('#540-C/B — la séance du formulaire est mesurée JUSTE (banc vivant)
     });
 });
 
-describe('#540-C/C — le champ « Périodes par séance » est devenu EFFECTIF', () => {
-    it('la fin proposée se calcule, elle n\'est plus « 10:00 » en dur', () => {
+describe('#540-C/C — le format ne se déclare plus globalement', () => {
+    // ⚠ CE BANC A ÉTÉ RÉVISÉ PAR LE LOT E1, LE MÊME SOIR.
+    //
+    // Le lot C avait rendu le champ global « Périodes par séance » EFFECTIF : il pilotait
+    // l'heure de fin proposée, calculée par `début + N × durée de période`. Grégoire a
+    // ensuite montré qu'une période comprend sa PAUSE (50 + 10, ou 55 + 5 ailleurs) : la
+    // dérivation était donc fausse dès la troisième période, et le champ global lui-même
+    // n'avait plus de raison d'être. E1 l'a retiré, et chaque séance porte ses périodes.
+    //
+    // Les trois cas d'origine visaient la dérivation ; ils sont remplacés par ce qu'ils
+    // protégeaient vraiment — qu'aucun format ne soit DÉCLARÉ pour tout un horaire, et
+    // qu'aucune période ne soit déduite d'une durée.
+
+    it('le champ global a disparu du module et de l\'écran', () => {
+        expect(SRC_HORAIRES).not.toContain('v2-hor-periodesParSeance');
+        expect(HTML).not.toContain('v2-hor-periodesParSeance');
+    });
+
+    it('chaque ligne de séance porte SON nombre de périodes', () => {
         const i = SRC_HORAIRES.indexOf('function mettreAJourSeancesHoraireV2');
         const corps = SRC_HORAIRES.slice(i, SRC_HORAIRES.indexOf('\n}', i));
-        expect(corps).toContain('calculerHeureFin');
-        expect(corps).not.toContain("'10:00'");
+        expect(corps).toContain('-periodes');
     });
 
-    it('calculerHeureFin lit la durée CONFIGURÉE, pas seulement le select de l\'écran', () => {
-        const i = SRC_HORAIRES.indexOf('function calculerHeureFin');
-        const corps = SRC_HORAIRES.slice(i, SRC_HORAIRES.indexOf('\n}', i));
-        expect(corps).toContain('dureePeriodeCourante');
-        expect(corps).not.toContain('v2-dureePeriode');
+    it('la sauvegarde écrit `nombrePeriodes` sur la séance, et le REFUSE absent', () => {
+        const i = SRC_HORAIRES.indexOf('function sauvegarderHoraireV2');
+        const corps = SRC_HORAIRES.slice(i, SRC_HORAIRES.indexOf('\n}\n', i) + 2);
+        expect(corps).toContain('nombrePeriodes');
+        expect(corps).toContain('notifications.erreur');
     });
 
-    it('le résumé du formulaire se lit aux lignes, pas au produit de deux déclarations', () => {
+    it('le résumé additionne les périodes SAISIES, sans convertir', () => {
         const i = SRC_HORAIRES.indexOf('function majResumeFormatHoraireV2');
         expect(i).toBeGreaterThan(-1);
         const corps = SRC_HORAIRES.slice(i, SRC_HORAIRES.indexOf('\n}', i));
-        expect(corps).toContain('periodesParSemaine');
+        expect(corps).toContain('-periodes');
         expect(corps).not.toMatch(/nbSeances\s*\*\s*periodesParSeance/);
+        // Plus aucune division par une durée : c'est tout l'objet du lot E.
+        expect(corps).not.toContain('dureePeriode');
+    });
+
+    it('le nombre de périodes du cache vient de la SÉANCE, pas d\'un calcul', () => {
+        // `genererSeancesCompletes` perdait les heures (`debut` vs `heureDebut`) et ne
+        // propageait aucune période : le dénominateur de l'assiduité ne pouvait pas voir
+        // ce que l'utilisateur avait déclaré à l'écran Horaire.
+        const SRC_HORAIRE_JS = sansCommentaires(lire('js', 'horaire.js'));
+        const i = SRC_HORAIRE_JS.indexOf('function genererSeancesCompletes');
+        const corps = SRC_HORAIRE_JS.slice(i, SRC_HORAIRE_JS.indexOf('\n}\n', i) + 2);
+        expect(corps).toContain('nombrePeriodes: seance.nombrePeriodes');
+        expect(corps).toContain('seance.heureDebut');
     });
 });
 
 describe('#540-C/D — plus rien n\'est fabriqué dans le module horaires', () => {
-    it('aucune heure en dur ne subsiste, hors le début par défaut du formulaire', () => {
-        // `08:00` reste : rien ne permet de déduire une heure de début, et c'est le
-        // premier créneau d'une grille de cégep. Il est nommé, une seule fois.
-        expect((SRC_HORAIRES.match(/'08:00'/g) || []).length).toBe(1);
+    it('les heures par défaut sont NOMMÉES, et n\'existent qu\'au formulaire', () => {
+        // ⚠ RÉVISÉ PAR E1. Le lot C dérivait la fin par défaut et interdisait « 10:00 » ;
+        // E1 a retiré la durée de période qui permettait cette dérivation, et la fin
+        // redevient un défaut de formulaire — VISIBLE et modifiable, comme le début.
+        //
+        // La règle qui compte n'a pas bougé, et c'est elle qu'on verrouille : un défaut
+        // de SAISIE se voit à l'écran et se corrige ; une valeur relue en silence sur un
+        // champ vide entre dans les données sans que personne ne la regarde. Les deux
+        // heures ci-dessous sont des constantes NOMMÉES du rendu du formulaire, chacune
+        // employée une seule fois — et la sauvegarde, elle, n'en fabrique aucune (cas
+        // suivant).
         expect(SRC_HORAIRES).toContain('DEBUT_PAR_DEFAUT');
-        expect(SRC_HORAIRES).not.toContain("'10:00'");
+        expect(SRC_HORAIRES).toContain('FIN_PAR_DEFAUT');
+        expect((SRC_HORAIRES.match(/'08:00'/g) || []).length).toBe(1);
+        expect((SRC_HORAIRES.match(/'10:00'/g) || []).length).toBe(1);
     });
 
     it('aucun repli à 2 périodes ne subsiste dans les mesures', () => {
@@ -196,7 +235,7 @@ describe('#540-C/D — plus rien n\'est fabriqué dans le module horaires', () =
             return SRC_HORAIRES.slice(i, SRC_HORAIRES.indexOf('\n}', i));
         };
 
-        for (const nom of ['chargerSeancesV2', 'mettreAJourCarteResumeHoraireV2', 'majResumeFormatHoraireV2']) {
+        for (const nom of ['chargerSeancesV2', 'mettreAJourCarteResumeHoraireV2']) {
             const corps = corpsDe(nom);
             // On vise l'ACCUMULATION d'une constante — `sum + 2`, `acc + 2`, `total + 2`.
             // (Une première version interdisait tout `: 2` et rougissait sur la table des
