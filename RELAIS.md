@@ -12,8 +12,8 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** — tout y est. Aucun travail en avance ailleurs. |
-| **Version** | **1.101.1** — build `0826-1658`. ⏳ **BUMP DÛ** : Grégoire a eu l'application ouverte en `file://` toute la soirée du 26, et la règle du projet interdit de bumper le build pendant une session ouverte. Les `?v=` ont donc été bumpés **à la main, fichier par fichier, à chaque lot** — la sentinelle anti-cache est verte. Le bump de version reste à faire au prochain démarrage. |
-| **Version précédente** | **1.100.0** — la session du 25-26 a livré 16 items depuis 1.99.0 |
+| **Version** | **1.102.0** — build `0827-0556`. Bumpée le 27 août au matin, une fois Grégoire sorti de sa session `file://`. Changelog : **deux** entrées écrites, `1.102` et `1.101` — cette dernière n'avait jamais été annoncée aux utilisateurs. Playwright 186/186, Vitest vert. |
+| **Version précédente** | **1.101.1** — #529, livrée le 26 août en fin d'après-midi. Elle n'avait pas d'entrée au changelog ; c'est réparé. |
 | **Travail en avance sur `main`** | **NON — tout est poussé** (vérifié le 27 août à 5 h 20 : `git log origin/main..HEAD` vide). La ligne d'hier annonçait le contraire ; elle avait été écrite avant le push de 22 h 25. **Rien sur aucune branche.** |
 | **Suite Playwright** | baseline à **1 seul échec connu** (contre 8 avant #495) : `productions-ajout-refus-garde-340` = **#530**, un vrai bug, pas du bruit. |
 | ⚠ **AVANT TOUTE SUITE PLAYWRIGHT** | **fermer GitHub Desktop.** Les specs lisent l'arbre de travail en direct ; une commande git lancée pendant la suite change les fichiers sous leurs pieds et fait rougir des specs au hasard. Trouvé le 26 août (#523), règle versée au skill `portes-terrain`. |

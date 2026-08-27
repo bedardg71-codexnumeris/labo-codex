@@ -21,6 +21,32 @@
 
     var CHANGELOG = [
         {
+            version: '1.102',
+            couleur: 'orange',
+            titre: 'Des p\u00e9riodes r\u00e9elles, un d\u00e9pistage qui dit vrai',
+            items: [
+                '<strong>Une heure d\u2019horloge n\u2019est pas une p\u00e9riode.</strong> Un bloc de 08:00 \u00e0 11:00, ce sont trois p\u00e9riodes de 50 minutes s\u00e9par\u00e9es de pauses \u2014 pas quatre. L\u2019application divisait ton temps d\u2019horloge par la seule dur\u00e9e d\u2019enseignement et comptait une p\u00e9riode de trop d\u00e8s qu\u2019un bloc d\u00e9passait deux heures. Or ce nombre est le d\u00e9nominateur de l\u2019assiduit\u00e9 : un \u00e9l\u00e8ve pouvait \u00eatre compt\u00e9 absent d\u2019une p\u00e9riode qui n\u2019existait pas.',
+                '<strong>Chaque s\u00e9ance porte maintenant SON nombre de p\u00e9riodes</strong>, que tu saisis. L\u2019application ne convertit plus jamais une dur\u00e9e en p\u00e9riodes, parce qu\u2019elle ne le peut pas : elle demande les deux et les confronte. Le r\u00e9glage \u00ab Dur\u00e9e d\u2019une p\u00e9riode \u00bb dispara\u00eet \u2014 il ne servait qu\u2019\u00e0 r\u00e9concilier deux mani\u00e8res de saisir la m\u00eame chose.',
+                '<strong>Les semaines de ton trimestre se comptent au calendrier</strong>, au lieu d\u2019\u00eatre suppos\u00e9es au nombre de quinze. Un cours 2-2-3 sur onze semaines vaut 44 heures, pas 60.',
+                '<strong>La pond\u00e9ration du cours devient obligatoire</strong>, et ta dur\u00e9e hebdomadaire cesse d\u2019\u00eatre invisible. L\u2019horaire que tu saisis est confront\u00e9 au devis du cours, et l\u2019\u00e9cart t\u2019est dit \u2014 sans jamais bloquer ta saisie.',
+                '<strong>Correction de fond : le d\u00e9pistage classait tout le monde au niveau le plus \u00e9lev\u00e9.</strong> Un pourcentage \u00e9tait compar\u00e9 \u00e0 un seuil exprim\u00e9 dans une autre unit\u00e9, si bien que tout crit\u00e8re au-dessus de 1 % ressortait \u00ab \u00c9tendu \u00bb \u2014 y compris \u00e0 12 %. Le bloc \u00ab Forces et d\u00e9fis \u00bb ne pouvait afficher que des forces exceptionnelles, pour tous tes \u00e9l\u00e8ves, y compris ceux en difficult\u00e9 sur tous leurs crit\u00e8res.',
+                '<strong>Le d\u00e9pistage dit d\u00e9sormais quand il ne peut pas conclure.</strong> Quand les \u00e9valuations d\u2019un \u00e9l\u00e8ve ne se convertissent pas \u2014 aucune \u00e9chelle d\u00e9sign\u00e9e, ou une \u00e9chelle introuvable dans le trimestre \u2014 il l\u2019annonce et nomme la cause, au lieu de rendre un portrait rassurant qui ne repose sur rien.',
+                '<strong>Chaque niveau de ton \u00e9chelle peut recevoir une \u00e9tiquette SOLO</strong> (pr\u00e9structurel, unistructurel, multistructurel, relationnel, abstrait \u00e9tendu), dans l\u2019\u00e9diteur d\u2019\u00e9chelles. C\u2019est facultatif, et \u00e7a pr\u00e9pare un d\u00e9pistage qui s\u2019interpr\u00e8te avec TON \u00e9chelle plut\u00f4t qu\u2019avec des valeurs \u00e9crites dans le code.'
+            ]
+        },
+        {
+            version: '1.101',
+            couleur: 'vert',
+            titre: 'Le profil de l\u2019\u00e9l\u00e8ve lit ta grille',
+            items: [
+                '<strong>Les barres du profil viennent de TA grille, dans TON ordre \u2014 toutes.</strong> Elles cherchaient auparavant cinq crit\u00e8res nomm\u00e9s dans le code (Structure, Rigueur, Plausibilit\u00e9, Nuance, Fran\u00e7ais) : avec une autre grille, les blocs restaient vides sans expliquer pourquoi.',
+                '<strong>Correction :</strong> un crit\u00e8re que le logiciel ne reconnaissait pas s\u2019affichait \u00ab Fran\u00e7ais \u00bb.',
+                '<strong>Les scores par crit\u00e8re sont lus dans les donn\u00e9es de l\u2019\u00e9valuation</strong>, et non plus rep\u00e9r\u00e9s dans le TEXTE de tes r\u00e9troactions.',
+                '<strong>Trois tables de conversion \u00e9crites dans le code ont \u00e9t\u00e9 retir\u00e9es</strong> \u2014 et elles ne disaient pas la m\u00eame chose : selon l\u2019\u00e9cran emprunt\u00e9, un m\u00eame niveau valait 0,40 ou 0,55. Les valeurs viennent maintenant de ton \u00e9chelle, que tu vois et que tu modifies.',
+                '<strong>L\u2019aide ne pr\u00e9sente plus SRPNF comme la structure du logiciel</strong>, mais comme la grille d\u2019exemple fournie, attribu\u00e9e au mod\u00e8le ELLAC \u2014 onze passages recadr\u00e9s : glossaire, fen\u00eatre du profil, survols, note des grilles.'
+            ]
+        },
+        {
             version: '1.100',
             couleur: 'vert',
             titre: 'Un modèle de cartouche à faire remplir',
