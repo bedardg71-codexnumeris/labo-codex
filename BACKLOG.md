@@ -1129,6 +1129,19 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   commités EN MÊME TEMPS qu'un bump. À faire à froid, avec un test qui reproduit le cas
   « release commitée avec du code ».
 
+  ⮕ **PRÉCISION DU 28 AOÛT, PAYÉE DEUX FOIS DANS LA MÊME HEURE, EN SENS OPPOSÉS.**
+  **`scripts/release.mjs` bumpe ce qui est COMMITÉ, pas ce qui est dans l'arbre.** D'où deux symptômes
+  contraires et une seule cause :
+  · un fichier modifié **après** le script garde un jeton PÉRIMÉ — arrivé à `js/changelog-data.js` le
+    28 août : l'entrée 1.105 avait été écrite après la release, et sans un bump à la main personne
+    n'aurait vu la nouvelle entrée ;
+  · un fichier non commité **pendant** le script n'est PAS bumpé du tout — arrivé à la session
+    parallèle sur `evaluation-jetons.js` et `evaluation-sauvegarde.js`, restés à `20260821a` et
+    `20260629a` alors que le build était passé au 28.
+  ⚠ J'ai moi-même donné le mauvais conseil sur le second cas (« incrémente la lettre » au lieu de
+  « pose la date du build »), en appliquant à l'envers ce que je venais de payer. La session parallèle
+  a vérifié avant de suivre, et c'est la seule raison pour laquelle l'erreur ne s'est pas propagée.
+
 - [ ] **#543 — Les 55 évaluations dont la note stockée ne se recalcule pas.** Créé le 26 août 2026 (soirée),
   extrait de #542 (l'oracle les isole ; ce ne sont PAS un problème d'échelle — aucune n'est
   reproduite par une échelle différente, aucune ne porte de code de niveau inconnu). **Deux causes
@@ -1750,6 +1763,30 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   **WebKit** `cartouche-enregistrer-reste-ouverte.spec.js` (**4 mutations, 4 rouges**) — l'audit notait
   « reproduit en harnais Node, non vérifié en navigateur » ; ce n'est plus le cas.
   ⏳ **CE QUI RESTE, INSCRIT À PART : #578** (le choix de l'échelle d'une cartouche neuve).
+
+- [ ] **#581 — La rétroaction de français parle d'EUF et du CAF à tout le monde.** (rapport du 27 août, §3 n° 12)
+  Créé le 28 août 2026. `evaluation-calcul.js` écrit « En prévision de l'**EUF** », « erreurs de
+  **français** », « Centre d'aide en **français** (CAF) » et des seuils de 100/75/60/30 mots par erreur.
+  ⮕ **Ce n'est pas un seuil mal placé, c'est une DISCIPLINE écrite dans le moteur.** L'Épreuve uniforme
+  de français et le CAF n'existent que pour un cours de français au collégial québécois. Un·e collègue
+  de biologie qui active le comptage d'erreurs reçoit une rétroaction qui parle d'un examen que ses
+  élèves ne passeront jamais.
+  ⚠ **Distinct de #553** (le rabotage `startsWith('francais')`), qui porte sur l'identification du
+  critère, pas sur le TEXTE produit.
+  ⏳ **DÉCISION REQUISE avant tout code** : ces textes deviennent-ils (a) configurables par pratique,
+  (b) génériques (« l'épreuve de fin de programme », « le centre d'aide »), ou (c) assumés comme
+  propres au français et masqués hors de ce contexte ? C'est du microcopy remis à l'élève.
+
+- [ ] **#582 — Le devis lit « théorie + labo » comme un nombre de PÉRIODES.** (rapport du 27 août, §3 n° 14)
+  Créé le 28 août 2026. `trimestre-v2-horaires.js:211` : `return { periodes: pond.theorie + pond.labo }`.
+  ⮕ **Vrai au Cégep de Drummondville, faux ailleurs.** La pondération d'un devis ministériel compte des
+  HEURES-CONTACT par semaine ; les lire comme un compte de périodes suppose qu'une période dure une
+  heure. C'est le cas ici, ce n'est pas une règle générale du réseau.
+  ⚠ **Chemin vivant** : le recoupement horaire ↔ devis (#540 lot D). Le reste de la fonction dérive
+  correctement ses périodes des heures de séance (`periodesDeLaSeance`) — c'est ce seul point de
+  comparaison qui suppose l'équivalence.
+  ⏳ Faible priorité tant que Grégoire est le seul utilisateur ; à ressortir avant tout élargissement
+  hors de son cégep.
 
 - [ ] **#579 — L'échelle embarquée d'une pratique configurable ne peut PAS recevoir ses repères de maîtrise.**
   Créé le 28 août 2026, ouvert par #555 lot 2. Le bloc « Repères de maîtrise » vit dans l'éditeur des
