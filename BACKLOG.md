@@ -1911,7 +1911,8 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   « aucun doublon de `function X` exportée sur `window` entre modules »** — ce motif est la
   réintroduction silencieuse d'un bug déjà corrigé, et il a déjà mordu ailleurs.
 
-- [ ] **#558 — La file d'attente d'import ne survit pas au rechargement.** (constats B1, B2, B3)
+- [x] **#558 — La file d'attente d'import ne survit pas au rechargement.** (constats B1, B2, B3)
+  ✅ **LIVRÉ le 28 août 2026 (e983d3dd) — B1, B1-aggravé, B2 et B3 traités ensemble.**
   Trois défauts du même mécanisme, à traiter ensemble. **B1** : `travaux-import.js` filtre la file
   après import sans appeler `persisterFileDAttente()` — au rechargement, `restaurerFileDAttente()`
   ressuscite les fichiers déjà importés (blob nul) → fantômes « à re-déposer » et risque de
@@ -1924,7 +1925,8 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   après reload, et le sélecteur peut afficher une production que les nouveaux dépôts ne recevront pas.
   ⚠ Code livré le jour même (#496-#507), **jamais éprouvé au terrain**.
 
-- [ ] **#559 — Poste de préparation : la case cochée marque un fichier étranger.** (constat B4)
+- [x] **#559 — Poste de préparation : la case cochée marque un fichier étranger.** (constat B4)
+  ✅ **LIVRÉ le 28 août 2026 (384ee6f1) — trois fonctions, pas deux : `syncOptImport` avait le même défaut en LECTURE.**
   `changerOptBalance` / `changerOptResolution` écrivent `queue[indexActuel + queueOffset]`. Avec
   `queueOffset === -1` (« Ajouter des pages ») et une file d'import non vide, l'écriture atterrit
   sur **un autre fichier de la file**.
@@ -1971,19 +1973,35 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   tant que la fonction elle-même n'est pas corrigée.** Les deux se traitent ensemble ou pas du tout.
 
 - [ ] **#563 — Décocher « Reprise ciblée » ne retire rien, et les échecs sont silencieux.** (constat B9)
+  🟠 **PARTIEL le 28 août 2026 (c5123798) — L'ITEM RESTE OUVERT.**
+  ✅ Fait : les six écritures muettes. Elles passent par un point de persistance
+  unique qui examine le retour de `sauvegarderDonneesSelonMode`, le DIT à
+  l'utilisateur et le propage à l'appelant.
+  ⏳ **NON fait, et ce n'est pas un oubli** : le retrait du jeton de reprise ciblée.
+  `retirerJetonRepriseCiblee` n'existe NULLE PART, et défaire une reprise ciblée
+  suppose de supprimer l'évaluation qu'elle a créée — son pendant pour la reprise
+  normale est une opération à confirmations multiples avec risque de perte de note
+  (#141, #360). ⮕ **DÉCISION DE CONCEPTION requise de Grégoire**, trois options
+  posées le 28 août : garder le refus explicite actuel, implémenter sur le patron
+  de la reprise normale, ou retirer la case.
+  ⮕ En attendant, la case NE MENT PLUS : elle revient à l'état réel des données.
+  ⚠ Un test rougit si quelqu'un écrit `retirerJetonRepriseCiblee` — ce n'est PAS
+  un test cassé, c'est le signal qu'il faut relire cet item.
   La branche est un **TODO vide** (`evaluation-sauvegarde.js`) : la case se décoche, le jeton reste
   appliqué. Et les écritures d'`evaluation-jetons.js` (6 sites) n'examinent jamais le retour de
   `sauvegarderDonneesSelonMode` : en mode anonymisation, l'échec est silencieux pendant que l'UI se
   met à jour comme si tout allait bien.
 
-- [ ] **#564 — L'auto-save ne couvre que les critères : une rétroaction seule peut être perdue.** (constat B10)
+- [x] **#564 — L'auto-save ne couvre que les critères : une rétroaction seule peut être perdue.** (constat B10)
+  ✅ **LIVRÉ le 28 août 2026 (b4755301) — il ne manquait que le déclencheur ; `_autoSauvegarderCriteres` lisait déjà le texte.**
   Son unique déclencheur est la sélection d'un niveau (`evaluation-chargement.js`). Modifier
   **seulement** la rétroaction finale ou un commentaire, sans toucher un critère, ne crée aucun
   snapshot → le flush au changement de fichier ne sauve rien ; seul le bouton « Enregistrer »
   persiste. ⮕ **Perte de texte réelle en navigation rapide entre copies.**
   ⚠ Le reste de la chaîne de sauvegarde est sain — l'audit le documente en §E.
 
-- [ ] **#565 — Un étudiant en échec avorte tout le lot d'export, et la page de synthèse peut manquer sans le dire.** (constats B11, B12)
+- [x] **#565 — Un étudiant en échec avorte tout le lot d'export, et la page de synthèse peut manquer sans le dire.** (constats B11, B12)
+  ✅ **LIVRÉ le 28 août 2026 (cf378263) — B11 et B12 ; un échec est isolé ET nommé, une copie sans synthèse est signalée à part.**
   **B11** : les boucles de l'export Léa et du trimestre complet (`travaux-archivage.js`) n'ont aucun
   try/catch par item ; une exception (blob manquant, PDF corrompu) remonte au catch global →
   **zéro PDF livré**, même pour les N−1 étudiants valides, et un seul `alert`.
@@ -2052,6 +2070,26 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   dur). Les repères ci-dessus datent d'avant ce commit.
 
 - [ ] **#572 — Mineurs de l'audit Évaluations (condensé).** (section D du rapport)
+  🟠 **PARTIEL le 28 août 2026 (43866c56 + 00a81a24) — L'ITEM RESTE OUVERT.**
+  ✅ Volet Import : fuite de `setInterval`, date parsée en UTC, balayage des jetons
+  de reprise débordant sur un autre groupe-cours.
+  ✅ Volet Export : noms de dossiers ZIP non assainis, fichier sans extension dont
+  la version annotée écrasait l'original, barres de progression jamais remises à zéro.
+  ✅ `echapperHtml` n'échappait pas les guillemets → traité à part (zone protégée,
+  autorisation de Grégoire) ; débloque #562.
+  ⏳ **Restent** : volets Liste, Annoter et Design mineur.
+  ⏳ **Sorti du lot, à ouvrir à part** : les clés sessionStorage non namespacées —
+  21 sites, 6 clés, 5 fichiers dont deux HORS du périmètre Import/Export.
+  Namespacer à moitié casserait les lectures. ⮕ Au passage : `travaux-mode-courant`
+  est ÉCRITE et JAMAIS LUE.
+  ⏳ **Laissé** : les couleurs utilisateur interpolées dans des attributs `style`
+  (~8 sites dans `synthese-retroaction-rendu.js`, 1 dans `evaluation.js`).
+  ❌ **NON RECEVABLE** : les « ~25 `console.log` » de `travaux-resolution.js`. Il y
+  en a 20, et ce n'est PAS de la dette — ils sont dans `diagnostiquer`,
+  `diagnostiquerDoublons` et `nettoyerDoublonsExacts`, des outils de diagnostic
+  dont la SORTIE CONSOLE EST LE PRODUIT. Les retirer casserait l'outil.
+  ✅ `lancerAllegement` : traité par le RETRAIT de la fonctionnalité « Alléger »
+  (828981ad, décision Grégoire), pas par un nettoyage de code mort.
   ⚠ **SIX INEXACTITUDES D'ORIGINE RECTIFIÉES LE 28 AOÛT 2026** — repérées en note sous chaque volet.
   **Import** : **20** `console.log` dans `travaux-resolution.js` (et non ~25) · fuite de `setInterval` à chaque
   ouverture du poste de préparation (aucun `clearInterval`) · clés sessionStorage non namespacées ·

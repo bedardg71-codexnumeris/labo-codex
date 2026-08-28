@@ -7,6 +7,70 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 28 AOÛT 2026 (APRÈS-MIDI, 15 h 10) : SIX ITEMS ÉVALUATIONS,
+     « ALLÉGER » RETIRÉ, ET LE JOUR OÙ UN ÉNONCÉ D'AUDIT A ÉTÉ FAUX SIX FOIS.
+     ===================================================================== -->
+
+## 28 août 2026 — après-midi (15 h 10)
+
+**Poussé** : `43866c56..248ad75b`. Version **1.105.0** inchangée (aucun bump : session
+`file://` de Grégoire ouverte). **Vitest 3925/3925** (368 fichiers) · **Playwright 199/199**.
+
+### Livré
+
+| # | Commit | Ce que ça change pour Grégoire |
+|---|---|---|
+| #564 | `b4755301` | Une rétroaction saisie seule n'est plus perdue au changement de copie. |
+| #565 | `cf378263` | Un échec n'avorte plus le lot d'export ; une copie livrée sans sa page de rétroaction est NOMMÉE. |
+| #559 | `384ee6f1` | Les options d'import ne marquent plus un fichier étranger. |
+| #558 | `e983d3dd` | La file d'import survit au rechargement ; le choix « Rés. max. » n'est plus écrasé. |
+| #572 (partiel) | `43866c56` + `00a81a24` | Volets Import et Export ; `echapperHtml` échappe enfin les guillemets. |
+| #563 (partiel) | `c5123798` | Une écriture de jeton refusée ne passe plus pour un succès. |
+| « Alléger » | `828981ad` | Fonctionnalité RETIRÉE (219 lignes), décision de Grégoire. Chaîne entièrement morte, vérifié avant. |
+
+### Ce que cette session a appris, et qui vaut au-delà d'elle
+
+**1. Un break-test qui ne rougit pas est le seul moyen de voir une sentinelle fausse.**
+Sur #558, le premier break-test est PASSÉ : ma fenêtre de 400 caractères après le filtre
+attrapait le `persisterFileDAttente()` de la fonction SUIVANTE et restait verte quand je
+retirais celui qui comptait. La relecture ne l'aurait jamais vu. Fenêtre bornée depuis par
+le `return` de la fonction elle-même.
+
+**2. Les énoncés du backlog ont été faux ou plus étroits que le code SIX fois.**
+#560 (le « pire cas » en gras porte sur du code MORT depuis juin), #566 (libellé cité
+inexistant), #569 (8 selects dont 2 ailleurs), #572 (20 `console.log`, pas 25 ; deux `if`
+vides mal localisés ; variables de palette inexistantes ; `aria-label` sous-évalué), #559
+(trois fonctions, pas deux), #557 (à moitié caduc). ⮕ **Chercher le MOTIF, jamais les noms
+cités.** Un audit compte des lignes ; il ne les lit pas toutes.
+
+**3. Le code doit DIRE quand il ne peut pas faire ce qu'on lui demande.**
+Patron appliqué trois fois sans l'avoir nommé : `ajouterPageSynthese` rend `{ajoutee, raison}`
+au lieu d'un `return` nu ; le bilan d'export distingue une copie PERDUE d'une copie livrée
+SANS synthèse ; la case « Reprise ciblée » revient à l'état réel au lieu d'acquiescer.
+⮕ **Ne pas deviner en silence, ne pas faire semblant d'avoir réussi.** Et corollaire :
+quand on corrige un bug d'interface, vérifier qu'on ne le remplace pas par une inertie
+silencieuse — c'est pourquoi la section d'options du poste de préparation est MASQUÉE en
+mode ad hoc plutôt que laissée inerte (#559).
+
+**4. Deux sessions dans le même dépôt : le danger est dans l'INDEX de l'autre.**
+`git commit -- <chemins>` ignore l'index et prend l'arbre ; `git commit` sans chemins prend
+l'INDEX, donc tout ce que l'autre session y a laissé. Une session avait six fichiers stagés
+en attente de validation — un commit sans chemins les emportait sous un message parlant
+d'autre chose. ⮕ **Si le commit doit attendre, ce n'est pas dans l'index qu'il attend.**
+
+**5. `release.mjs` bumpe ce qui est COMMITTÉ, pas ce qui est dans l'arbre.**
+Deux symptômes opposés, une seule cause (#547) : un travail non commité au moment du script
+n'est pas bumpé du tout ; un travail commité APRÈS garde un jeton périmé. ⮕ Et le message du
+hook conseille d'incrémenter la LETTRE, alors que la sentinelle exige le jour du BUILD :
+suivi littéralement sur un fichier daté de la veille, le conseil fait passer le hook et
+rougir la sentinelle.
+
+**6. Une modification de sécurité peut casser l'affichage.** Renforcer `echapperHtml` a
+immédiatement cassé un site où le résultat allait dans `textContent` — qui échappe déjà et
+n'interprète pas les entités : « L'atelier » devenait `L&#39;atelier`. Trouvé par une session
+parallèle, corrigé dans le même commit, invariant verrouillé par sentinelle.
+
+<!-- =====================================================================
      SESSION — 28 AOÛT 2026 (FIN, 14 h 30) : 1.105.0 DÉPLOYÉE. #555 CLOS,
      B10 CLOS, ET LA JOURNÉE OÙ LE BREAK-TEST A TOUT TROUVÉ.
 
