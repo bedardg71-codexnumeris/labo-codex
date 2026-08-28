@@ -85,7 +85,7 @@ Vérifié, et le dépôt le documentait déjà (`echelles.js`, note #524) : `ind
 caché**, et le bouton « Enregistrer » de l'ANCIEN SYSTÈME est sans effet. C'est #520 au backlog.
 ⮕ **Ne rien brancher sur cet écran.** Le doublon d'id relève de #481, laissé en place.
 
-### 📌 #578 EST PRIS — prochain ID libre : **#579**
+### 📌 #580 EST PRIS — prochain ID libre : **#581**
 
 **#577 — l'assistant de configuration des pratiques ignore les deux repères de maîtrise.** Demandé
 par Grégoire à la livraison du lot 1 : `wizard-pratique-v2.js` fait choisir une échelle
@@ -108,6 +108,66 @@ avant d'écrire l'écran.** ⏳ Dépend de #555 lot 2 : sans lecteur, l'assistan
 4. **Unifier les quatre replis divergents** (`|| 0.70` ×2, `|| 0.75` ×2) — le pas de #555 qui n'a
    jamais demandé de décision.
 5. L'éditeur d'échelle **neuve**.
+
+---
+
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 28 août 2026, 12 h 20
+
+### ✅ B10b EST CLOS — la marque de maîtrise se lit dans l'échelle
+
+Grégoire a posé ses deux repères ce midi ; le lot 2 était bloqué là-dessus et rien d'autre.
+`zoneDuNiveau(code, echelleId)` rend `'priorite'` / `'signale'` / `'acquis'` / `null`, et
+`synthese-retroaction-data.js` passe de **14 comparaisons IDME en dur à ZÉRO**.
+
+⚠ **`null` N'EST PAS UNE QUATRIÈME ZONE**, c'est un refus de répondre — échelle non résolue, code
+étranger, ou échelle sans repères. Le module ne rend alors RIEN, **et sans note technique** :
+`copierToutRetroaction` copie ce bilan dans ce qui est remis à l'élève.
+
+⚠⚠ **CHAQUE ÉVALUATION EST LUE DANS SON ÉCHELLE.** L'historique, l'antérieure et la courante peuvent
+porter des barèmes différents. Lire le passé avec le barème du présent efface des progrès réels ou en
+invente. **Les DEUX fautes de ce type ont été trouvées par le break-test seul**, sur un lot déjà vert.
+
+### ⚠ CE QUI RESTE DE #555 LOT 2
+
+| | Objet | Note |
+|---|---|---|
+| a | `evaluation-retroaction.js` — 8 lignes / 18 comparaisons | le bilan à l'écran, même geste |
+| b | `_detecterSeuilMaitrise` (`consolidation.js`) | devine par « avant-dernier niveau » |
+| c | les quatre replis `0,70` / `0,75` | le pas qui n'a jamais demandé de décision |
+| d | le nommage — `seuilMaitrise` porte **quatre** sens | décision de Grégoire, avec #577 |
+| e | **#579** et **#580**, ouverts par ce lot | voir ci-dessous |
+
+### 📌 #579 ET #580 SONT PRIS — deux trous que ce lot a révélés
+
+**#579 — l'échelle embarquée d'une pratique configurable ne peut PAS recevoir ses repères.** Le bloc
+d'édition ne vit que sur `echellesTemplates` ; ces échelles-là vivent dans
+`pratiquesConfigurables[].config.echelle`. ⮕ Pour toute évaluation produite sous une pratique
+configurable, `zoneDuNiveau` rend `null` : pas de priorités, pas de force, pas de « tous maîtrisés ».
+Visible, pas silencieux — mais réel.
+
+**#580 — deux reconstructions d'échelle à liste blanche** dans `evaluation-chargement.js`. Elles ne
+cassent pas le lecteur, mais amputent tout champ métier neuf. Même famille que le défaut de
+`dupliquerEchelle`.
+
+### ⚠ UNE QUESTION DE GRÉGOIRE A TROUVÉ CE QU'AUCUNE RELECTURE N'AVAIT VU
+
+Il a demandé si les repères étaient **namespacés par trimestre** comme les échelles. Réponse : oui —
+ils vivent DANS l'objet échelle, écrit et lu par `cle('echellesTemplates')`. Mais la question a fait
+regarder les chemins de COPIE, et **`dupliquerEchelle` les PERDAIT** : elle reconstruit l'échelle par
+une liste blanche qui ne les connaissait pas.
+
+⮕ La liste blanche est **conservée** — un spread emporterait `idOriginal` et la copie répondrait à
+l'identifiant de la source (#542). Le prix est que tout champ métier neuf doit y être ajouté à la
+main ; le commentaire le dit désormais, et deux cas de sentinelle le verrouillent.
+⮕ **La leçon** : demander « où cette donnée est-elle copiée ? » trouve ce que « où est-elle lue ? »
+ne trouve pas.
+
+### ⏳ UNE DÉCISION EN ATTENTE, PETITE MAIS RÉELLE
+
+« Tu as progressé » reste `priorite → acquis` : passer d'une priorité à **« signalé »** n'est pas
+annoncé à l'élève. C'est la règle d'origine, préservée volontairement — un refactor ne change pas la
+sémantique. Mais dans les mots de Grégoire, « D est quand même une maîtrise » : il voudra peut-être
+que ce passage compte. **À lui de trancher, pas à nous.**
 
 ---
 

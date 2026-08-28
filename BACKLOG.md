@@ -1751,6 +1751,27 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   « reproduit en harnais Node, non vérifié en navigateur » ; ce n'est plus le cas.
   ⏳ **CE QUI RESTE, INSCRIT À PART : #578** (le choix de l'échelle d'une cartouche neuve).
 
+- [ ] **#579 — L'échelle embarquée d'une pratique configurable ne peut PAS recevoir ses repères de maîtrise.**
+  Créé le 28 août 2026, ouvert par #555 lot 2. Le bloc « Repères de maîtrise » vit dans l'éditeur des
+  échelles du trimestre (`afficherNiveauxEchelle`, sur `echellesTemplates`). Une échelle embarquée dans
+  une pratique configurable vit ailleurs — `pratiquesConfigurables[].config.echelle`, lue par
+  `_echelleDePratiqueConfigurable` — et **aucun écran ne permet d'y poser les deux repères**.
+  ⮕ **Conséquence mesurable** : pour toute évaluation produite sous une pratique configurable,
+  `zoneDuNiveau` rend `null`. Donc pas de priorités, pas de « ta force », pas de « tous maîtrisés »
+  dans le PDF remis à l'élève. **Visible, pas silencieux** — mais c'est un trou réel, et c'était le cas
+  qui tombait déjà systématiquement sur le repli avant #542 A2.
+  ⏳ À traiter avec (e) du lot 2 : l'assistant (#577) touche la même zone.
+
+- [ ] **#580 — Deux reconstructions d'échelle à liste blanche dans `evaluation-chargement.js`.**
+  Créé le 28 août 2026, relevé pendant #555 lot 2. `evaluation-chargement.js` fabrique DEUX objets
+  échelle à partir d'une pratique configurable, en ne gardant que `id`, `nom`, `niveaux`, `type`,
+  `source`. Ce sont des chemins PARALLÈLES de résolution — le patron que #542 A2 a défait ailleurs.
+  ⚠ **Ils ne cassent pas `zoneDuNiveau`**, qui passe par `obtenirEchelleResolue` (lequel rend l'échelle
+  telle quelle). Ce n'est donc pas urgent. Mais tout champ métier neuf sur une échelle est amputé sur
+  ces deux chemins, sans que rien ne le dise — la même famille que le défaut de `dupliquerEchelle`
+  corrigé au lot 2.
+  ⮕ **Geste** : les faire passer par `obtenirEchelleResolue`, ou dire pourquoi ils ne le peuvent pas.
+
 - [ ] **#578 — Une cartouche neuve prend les colonnes de la PREMIÈRE échelle du trimestre, pas de celle de sa grille.**
   Créé le 28 août 2026, détaché de #573 (rapport du 27 août, §3 n° 18 et §7.2 n° 4).
   `initialiserNouveauCartouche` choisit son échelle par `echelles.find(e => !e.estDemo) || echelles[0]`
@@ -2045,6 +2066,27 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   retirer la branche. Vérifier les consommateurs AVANT de brancher.
 
 - [ ] **#555 — Le seuil de défi : un défaut à 0,70, des replis qui divergent, et la marque de maîtrise absente.**
+  ⮕ **LOT 2 LIVRÉ le 28 août 2026 (12 h 20) — B10b EST CLOS.** Grégoire a posé ses deux repères, ce qui
+  a débloqué le branchement. `zoneDuNiveau(code, echelleId)` (`profil-etudiant-calculs.js`) rend
+  `'priorite'` / `'signale'` / `'acquis'` / `null` ; `synthese-retroaction-data.js` passe de **14
+  comparaisons IDME en dur à ZÉRO** (mesuré sur le code exécutable, commentaires filtrés).
+  · **`null` n'est pas une quatrième zone**, c'est un refus de répondre — échelle non résolue, code
+    étranger, ou échelle sans aucun repère. Le module ne rend alors RIEN, et sans note technique :
+    `copierToutRetroaction` copie ce bilan dans ce qui est remis à l'élève.
+  · **Chaque évaluation est lue dans SON échelle.** L'historique, l'antérieure et la courante peuvent
+    porter des barèmes différents. Deux fautes de ce type ont été trouvées par le break-test SEUL.
+  · **Règle d'origine préservée** : « tu as progressé » reste `priorite → acquis`. Passer d'une priorité
+    à « signalé » n'est pas annoncé. ⏳ **À trancher avec Grégoire** si la zone intermédiaire doit
+    compter comme un progrès — ce serait une décision, pas un effet de bord.
+  · Le test qui CONSTATAIT « 6 sites / 14 comparaisons » est devenu un **ratchet à zéro**. Il n'a pas
+    été « réparé » en changeant le chiffre.
+  · Deux retraits : `rangOuDernier` (repli `Infinity` devenu inatteignable) et le repli de
+    `dupliquerEchelle`, qui **perdait les deux repères** — trouvé par une question de Grégoire sur le
+    namespace, pas par relecture.
+  ⏳ **CE QUI RESTE DU LOT 2** : (a) `evaluation-retroaction.js`, **8 lignes / 18 comparaisons**, le
+  bilan à l'écran ; (b) `_detecterSeuilMaitrise` (`consolidation.js`) ; (c) les quatre replis divergents
+  `0,70` / `0,75` ; (d) le nommage (`seuilMaitrise` porte quatre sens) ; (e) **#579** et **#580**
+  ci-dessous, ouverts par ce lot.
   ⮕ **LOT 1 LIVRÉ le 28 août 2026 — LA DÉCISION D'ARCHITECTURE EST PRISE ET LE MODÈLE EXISTE.**
   Grégoire, sur question fermée en 3 options : **DEUX repères, pas un.** Motif, dans ses mots : sa
   gradation PAN-Standards distingue **trois** états, pas deux — au-dessous l'apprentissage est
