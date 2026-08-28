@@ -606,9 +606,72 @@ function _chargerGrilleDefBilan(grilleId) {
     }
 }
 
-function _collecterCriteresBilan(grilleDef, ec) {
+/**
+ * L'évaluation ENREGISTRÉE que le formulaire est en train de modifier.
+ *
+ * ⮕ #576 (28 août 2026). Elle est la SEULE à porter le nom des critères quand
+ * la grille d'origine a disparu des modèles : `evaluation.criteres` est un
+ * tableau `[{critereId, critereNom, niveauSelectionne}]`, écrit à la sauvegarde
+ * (`evaluation.js`, `critereNom: grille.criteres.find(...)?.nom || critereId`).
+ *
+ * Repérée par `idModification` — l'identifiant que le formulaire pose quand il
+ * ouvre une évaluation existante. À défaut, par le couple élève + production,
+ * en écartant les reprises remplacées comme partout ailleurs dans ce module.
+ */
+function _chargerEvaluationEnregistreeBilan(ec) {
+    if (!ec) return null;
+    try {
+        var toutes = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        if (ec.idModification) {
+            var parId = toutes.find(function(e) { return e && e.id === ec.idModification; });
+            if (parId) return parId;
+        }
+        return toutes.find(function(e) {
+            return e && e.etudiantDA === ec.etudiantDA
+                && e.productionId === ec.productionId && !e.remplaceeParId;
+        }) || null;
+    } catch(e) {
+        console.warn('[Evaluation] evaluation enregistree lookup skipped:', e.message || e);
+        return null;
+    }
+}
+
+/**
+ * Les critères du bilan — depuis la grille, ou depuis l'évaluation enregistrée.
+ *
+ * ⮕ #576 (28 août 2026), trouvé par la porte terrain 2.6 sur les données réelles
+ * d'H2026 de Grégoire. CE QUI SE PASSAIT : quand la grille d'origine n'est plus
+ * dans `grillesTemplates`, `_chargerGrilleDefBilan` rend `null`, cette fonction
+ * rendait `[]`, et TOUT le bilan personnalisé disparaissait en cascade — `defis`
+ * vide, `tousMaitrises` faux (il exige `criteres.length > 0`), `_rendreForceBilan`
+ * sans matière. L'élève recevait une page d'entête sans contenu, impossible à
+ * distinguer d'un élève qui n'aurait aucun défi.
+ *
+ * ⮕ LA DONNÉE ÉTAIT LÀ, ET LE PANNEAU D'À CÔTÉ LA LISAIT DÉJÀ. `evaluation.js`
+ * a exactement ce repli pour le même cas — il affiche les critères depuis
+ * `evaluation.criteres` sous la bannière « Grille d'origine introuvable dans les
+ * modèles actuels — affichage depuis les données sauvegardées ». Le bilan n'en
+ * avait jamais eu. On converge sur la même source, on n'en invente pas une autre.
+ *
+ * ⚠ LES NOMS VIENNENT DE L'ENREGISTREMENT, LES NIVEAUX DU FORMULAIRE. Le nom
+ * d'un critère est figé au moment de la sauvegarde ; le niveau, lui, est celui
+ * que l'enseignant·e a sous les yeux et vient peut-être de changer. Prendre le
+ * niveau enregistré ferait mentir le bilan sur l'écran en cours d'édition.
+ *
+ * ⚠ AUCUNE NOTE TECHNIQUE N'EST AJOUTÉE AU BILAN, et c'est délibéré :
+ * `copierToutRetroaction` copie le `textContent` de ce bloc sous « === BILAN === »
+ * dans ce qui est remis à l'élève. Un message d'anomalie partirait avec. La
+ * bannière du panneau voisin prévient déjà l'enseignant·e — c'est le bon endroit.
+ *
+ * @param {Object|null} grilleDef - la grille template, ou `null` si disparue
+ * @param {Object} ec - `evaluationEnCours` (niveaux vivants, par `critereId`)
+ * @param {Object|null} enregistree - l'évaluation sauvegardée (noms des critères)
+ */
+function _collecterCriteresBilan(grilleDef, ec, enregistree) {
     var criteres = [];
-    if (grilleDef && grilleDef.criteres && ec.criteres) {
+    if (!ec || !ec.criteres) return criteres;
+
+    if (grilleDef && grilleDef.criteres) {
         grilleDef.criteres.forEach(function(gc) {
             var niv = ec.criteres[gc.id];
             if (niv) {
@@ -616,6 +679,24 @@ function _collecterCriteresBilan(grilleDef, ec) {
             }
         });
     }
+    // Le repli couvre AUSSI la grille présente dont plus aucun identifiant ne
+    // correspond (critères renommés ou recréés) : même symptôme, même remède.
+    // La règle tient en une phrase — le bilan lit la grille quand il le peut, et
+    // l'évaluation enregistrée sinon.
+    if (criteres.length > 0) return criteres;
+
+    if (!enregistree || !Array.isArray(enregistree.criteres)) return criteres;
+    enregistree.criteres.forEach(function(c) {
+        if (!c || !c.critereId) return;
+        var niv = ec.criteres[c.critereId];
+        if (!niv) return;
+        criteres.push({
+            critereNom: c.critereNom || c.critereId,
+            critereId: c.critereId,
+            niveauSelectionne: niv,
+            description: ''
+        });
+    });
     return criteres;
 }
 
@@ -693,7 +774,13 @@ function _rendreDefisBilan(defis, algoA0, nomsPatrons, niveauDe) {
         var d = defis[i];
         // Ne pas répéter le critère algorithmique déjà mentionné
         if (algoA0 && d.critereNom === algoA0.critereNom) { maxDefis++; continue; }
-        var desc = d.description ? d.description.toLowerCase() : d.critereNom;
+        // ⚠ #576 — LES DEUX BRANCHES SONT DES DONNÉES UTILISATEUR, et celle de
+        // droite est neuve : le repli sur l'évaluation enregistrée ne fournit
+        // aucune description, donc `desc` devient le NOM du critère, jusque-là
+        // toujours passé par la branche échappée d'à côté. Trouvé par la
+        // sentinelle #576, pas par relecture.
+        var descBrute = d.description ? d.description.toLowerCase() : d.critereNom;
+        var desc = (typeof echapperHtml === 'function') ? echapperHtml(descBrute) : '';
         var patron = nomsPatrons.indexOf(d.critereNom) !== -1 ? '. Cet objectif est prioritaire depuis 3 productions' : '';
         // #575 — le nom du niveau vient de l'échelle. Quand elle ne le nomme
         // pas, le critère s'affiche seul : « (Structure) » plutôt que
@@ -830,7 +917,9 @@ function genererRetroactionBilan() {
     var historiqueEleve = _chargerHistoriqueBilan(da);
     var evalPrecedente = historiqueEleve.length > 0 ? historiqueEleve[0] : null;
     var grilleDef = _chargerGrilleDefBilan(ec.grilleId);
-    var criteres = _collecterCriteresBilan(grilleDef, ec);
+    // #576 — la source de secours des NOMS de critères quand la grille a disparu.
+    var evalEnregistree = _chargerEvaluationEnregistreeBilan(ec);
+    var criteres = _collecterCriteresBilan(grilleDef, ec, evalEnregistree);
     var nomsPatrons = _detecterPatronsRecurrentsBilan(criteres, historiqueEleve);
     var totalErreursFr = _compterErreursFrancaisBilan();
 
@@ -874,6 +963,14 @@ function genererRetroactionBilan() {
         html += _rendreDefisBilan(defis, algoA0, nomsPatrons, niveauDe);
     } else if (tousMaitrises) {
         html += _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente);
+    } else if (criteres.length === 0 && !algoA0) {
+        // #576 — LE SILENCE ÉTAIT LA MOITIÉ DU DÉFAUT. Sans critère lisible, le
+        // bilan affichait « Présentement, il faut se concentrer sur : » suivi de
+        // RIEN, et enchaînait sur les jetons. Impossible, pour l'élève comme pour
+        // l'enseignant·e, de distinguer ça d'un travail sans aucun défi.
+        // ⮕ La phrase est écrite POUR L'ÉLÈVE — ce bloc part dans sa rétroaction.
+        // Elle constate, elle n'accuse pas l'outil et ne nomme aucune anomalie.
+        html += '<p>Aucun critère n\'est encore évalué pour cette production.</p>';
     }
 
     html += _rendreForceBilan(criteres, defis, niveauDe);
