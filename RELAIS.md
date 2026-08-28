@@ -12,7 +12,7 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** — tout y est. Aucun travail en avance ailleurs. |
-| **Version** | **1.104.1** — build `0827-1418`. Patch : **#552 · #535 · #537 livrés** — la cible d'intervention ne vient plus ni de la moyenne en langue, ni du nom d'un critère, ni d'un seuil écrit dans le code. **Vitest 3716/3716 (350 fichiers) · Playwright 193/193** au moment du bump. ⮕ **AU 28 AOÛT 07 h 38, APRÈS LES SEIZE COMMITS : Vitest 3780/3780 (355 fichiers), Playwright sans rougeur nouvelle, ZÉRO rouge des deux côtés** — le rouge `sentinelle-anticache` qui traînait depuis le 27 est refermé (les quatre jetons orphelins de #508 sont partis avec `84661fc8`). **Aucun bump depuis** : la session `file://` de Grégoire était ouverte toute la nuit. ⚠ **Grégoire doit recharger sa session `file://`** : onze jetons anti-cache ont changé depuis qu'il l'a ouverte. |
+| **Version** | **1.105.0** — build `0828-1405`, **DÉPLOYÉE le 28 août à 14 h 05**. Minor : une échelle porte ses deux **repères de maîtrise**, et les **32 comparaisons IDME écrites en dur** ont disparu des DEUX documents remis à l'élève (PDF de synthèse : 14 → 0 ; bilan à l'écran : 18 → 0). **Vitest 3887/3887 (364 fichiers) · Playwright 199** au moment du bump. ⚠ **Grégoire doit recharger sa session `file://`** : 28 jetons ont changé. |
 | **Version précédente** | **1.104.0** — build `0827-1245` (`588debf1`). Minor : la carte « Observation de la structure » rend un bloc par niveau de l'échelle, et le SOLO d'un critère vient du champ configuré. **Vitest 3715/3715 (350 fichiers) · Playwright 193/193**, verdict vert enregistré au SHA par `scripts/pousser.sh`. ✅ **AUCUN BUMP DÛ** : rien de code applicatif n'a changé depuis — seuls un test de constat et de la documentation. ⚠ **Grégoire doit recharger sa session `file://`** : huit jetons anti-cache ont changé au bump. |
 | **Avant-dernière** | **1.103.1** — build `0827-0953`, qui a porté six changements de code sans bump (pas 3c-3, pas 4, #547, #550, #551) : la session `file://` de Grégoire était ouverte, et la règle du projet interdit de bumper pendant. **C'est la seconde fois de la journée que l'application annonce un numéro plus ancien que son code.** |
 | **Travail en avance sur `main`** | ✅ **NON — TOUT EST POUSSÉ.** `origin/main` = **`47eb5bc4`**, arbre propre, `git log origin/main..HEAD` vide, vérifié au rituel de fin du 28 août à 07 h 38. **SEIZE commits** sont partis d'un coup, produits par DEUX sessions en parallèle qui se sont coordonnées par messages : #508 (bandeau d'avis, policy Cloudflare) et #575/#576 (lot 4 du plan SOLO). Les deux régressions Playwright qui bloquaient le push sont réglées — le bandeau `position: fixed` qui avalait les clics (`84661fc8`), puis une spec de bilan verte pour la mauvaise raison (`a5386a30`). ⮕ `scripts/pousser.sh` a rendu : **Playwright aucune rougeur nouvelle · Vitest verte au hook · verdict à jour pour le commit**. **Rien sur aucune branche.** |
@@ -108,6 +108,96 @@ avant d'écrire l'écran.** ⏳ Dépend de #555 lot 2 : sans lecteur, l'assistan
 4. **Unifier les quatre replis divergents** (`|| 0.70` ×2, `|| 0.75` ×2) — le pas de #555 qui n'a
    jamais demandé de décision.
 5. L'éditeur d'échelle **neuve**.
+
+---
+
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 28 août 2026, 14 h 30 (FIN DE SESSION)
+
+### ⚠⚠ LES CINQ PREMIÈRES MINUTES
+
+1. **Audit d'entrée AVANT de croire la prémisse.** Deux sessions ont écrit dans ce dépôt toute la
+   journée. `git log --oneline origin/main..HEAD`, `find .git -name '*.lock'`, `git status`.
+2. **Committer par chemins EXPLICITES.** ⚠ `git commit -- <chemin>` est en mode `--only` et committe
+   l'ARBRE : sur un fichier partagé comme `index.html`, il emporte le travail de l'autre session. La
+   méthode qui tient : `git show HEAD:index.html` → réappliquer SES SEULES lignes → `git hash-object -w`
+   → `git update-index --cacheinfo` → `git commit` SANS chemins. Employée trois fois aujourd'hui, dans
+   les deux sens.
+3. **Lire cette entrée MAINTENANT, pas dans une heure.** Une ligne recopiée d'un relais lu trois heures
+   plus tôt a produit une erreur signalée par Grégoire le 28 au matin.
+
+### ✅ CE QUE LA JOURNÉE A LIVRÉ — 1.105.0 EST EN LIGNE
+
+**#555 (les deux lots) et #575 B10 sont clos.** Une échelle porte `seuilSuffisance` et `seuilMaitrise`,
+posés par l'utilisateur dans l'éditeur. `zoneDuNiveau(code, echelleId)` rend `'priorite'` / `'signale'` /
+`'acquis'` / `null`, et les **32 comparaisons IDME en dur** ont disparu des deux documents remis à
+l'élève. Deux **ratchets à zéro** les empêchent de revenir.
+
+Aussi livrés : **#573** (la cause du « des fois ça enregistre, des fois non »), **#576**, la mise en page
+de l'éditeur d'échelle, et — par la session parallèle — **#564, #565, #559, #563 (moitié), #557**, plus
+sept énoncés du backlog rectifiés par mesure.
+
+### ⚠⚠ CINQ CHOSES QUE SEUL LE BREAK-TEST A VUES, SUR DU CODE DÉJÀ VERT
+
+C'est le fait marquant de la journée. **Aucune n'était visible à la lecture.**
+
+1. **Une régression de condition.** « avant = priorité » au lieu de « avant ≠ acquis » : sur l'échelle
+   de Grégoire, D → M et D → E cessaient d'être annoncés à l'élève. Mes mutations portaient toutes sur
+   le côté DROIT de la condition. ⮕ **Muter les deux côtés d'un `&&`.**
+2. **Sept mutations vertes sur dix** après le branchement du bilan à l'écran : les bancs existants
+   couvraient l'ordre et le nommage, jamais les zones. **Un module peut être entièrement rebranché sans
+   qu'une seule sentinelle s'en aperçoive.**
+3. **Deux remises à zéro d'un drapeau SANS EFFET** — les neutraliser ne rougissait rien.
+4. **Un montage de test qui mesurait des zéros** : `vueRetroGenerale` manquait, la fonction sortait
+   immédiatement, et deux cas passaient par vacuité — **un `not.toContain` est satisfait par une chaîne
+   vide.**
+5. **Une spec WebKit verte pour la mauvaise raison** : elle lisait une cartouche EXISTANTE alors que le
+   repli ne joue qu'à la CRÉATION.
+
+⮕ **Et deux fois, WebKit a vu ce que Vitest ne voyait pas** : la zone intermédiaire ajoutée au seul PDF
+(le bilan à l'écran laissait son titre suivi du VIDE — le symptôme de la porte 2.6, réintroduit), et
+« ta force » qui exigeait des défis alors qu'un élève peut n'avoir que des signalés.
+
+### ⚠ TROIS PIÈGES D'OUTILLAGE, PAYÉS AUJOURD'HUI
+
+- **`release.mjs` bumpe ce qui est COMMITÉ, pas ce qui est dans l'arbre.** Deux symptômes opposés, une
+  cause : un fichier modifié APRÈS le script garde un jeton périmé (`changelog-data.js`, corrigé à la
+  main) ; un fichier non commité PENDANT n'est pas bumpé du tout. Versé à #547.
+- **Le hook pré-push teste l'ARBRE, pas les commits envoyés.** Le travail non commité d'une autre
+  session est donc dans le verdict — et peut bloquer votre push.
+- **`u-hide` porte un `!important`** qu'un `style.display` inline n'écrase pas : une spec qui ouvre un
+  écran caché doit retirer la CLASSE.
+
+### 📌 ARTEFACT DE DÉCISION REMIS À GRÉGOIRE
+
+**Sept décisions en attente**, chacune avec son fait mesuré et ses options :
+`https://claude.ai/code/artifact/971736ee-f346-48c5-999a-8a12e97aadca`
+
+Aucune ne bloque les autres. La seule datée est **#427 · #508 — 1er septembre**, et ce qui manque ne
+peut être relevé que par lui (trois noms Cloudflare, durée de session, règle `Include`, envoi du message
+à la CoP).
+
+### ⏳ CE QUI RESTE DU LOT 2 — ordonné
+
+| | Objet | Bloqué par |
+|---|---|---|
+| 1 | `_detecterSeuilMaitrise` (`consolidation.js`) — devine par « avant-dernier niveau », **juste chez Grégoire par coïncidence**, repli `0.75` | rien |
+| 2 | Les **quatre replis divergents** `0,70` ×2 / `0,75` ×2 (+ le 5e ci-dessus) | rien |
+| 3 | Le **nommage** — `seuilMaitrise` porte quatre sens, j'en ai ajouté un cinquième | décision (#555 · #577) |
+| 4 | **#579** (pratiques configurables sans éditeur de repères), **#580** (deux listes blanches) | décision |
+
+⮕ **Les points 1 et 2 ne demandent AUCUNE décision** : c'est par là qu'il faut reprendre.
+
+### 📌 IDs — prochain libre : **#583**
+
+#581 (EUF/CAF dans le moteur) et #582 (devis « théorie + labo ») inscrits ce soir : les trois sites qui
+ne vivaient que dans le rapport d'audit sont désormais tous au backlog ou qualifiés hors famille.
+
+### ⚠ SIGNALÉ PAR LA SESSION PARALLÈLE, NON TRAITÉ
+
+- **`echapperHtml` n'échappe pas les guillemets** (`js/config.js`, **zone protégée**) — autorisation de
+  Grégoire requise. Compte pour tout texte utilisateur posé dans un ATTRIBUT.
+- **Couleurs utilisateur interpolées dans des attributs `style`** sans échappement : ~8 sites dans
+  `synthese-retroaction-rendu.js`, 1 dans `evaluation.js`. #575 ne les a pas clos.
 
 ---
 

@@ -7,6 +7,72 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 28 AOÛT 2026 (FIN, 14 h 30) : 1.105.0 DÉPLOYÉE. #555 CLOS,
+     B10 CLOS, ET LA JOURNÉE OÙ LE BREAK-TEST A TOUT TROUVÉ.
+
+     ▣ CE QUI EST EN LIGNE. Une échelle porte ses deux repères de maîtrise ;
+       les 32 comparaisons IDME écrites en dur ont disparu des DEUX documents
+       remis à l'élève (PDF 14 → 0, bilan à l'écran 18 → 0). Plus #573, #576,
+       la mise en page de l'éditeur d'échelle, et cinq items de la session
+       parallèle. Vitest 3887/3887, Playwright 199.
+
+     ▣ ⚠⚠ LA LEÇON DE LA JOURNÉE, ET ELLE EST NETTE : **LE BREAK-TEST A TROUVÉ
+       CINQ CHOSES QUE LA LECTURE N'AVAIT PAS VUES, SUR DU CODE DÉJÀ VERT.**
+       · une régression de condition (« avant = priorité » au lieu de « avant ≠
+         acquis ») qui supprimait deux passages annoncés à l'élève — mes
+         mutations portaient toutes sur le côté DROIT du `&&` ;
+       · SEPT mutations vertes sur dix après le branchement du bilan : les bancs
+         existants couvraient l'ordre et le nommage, jamais les zones ;
+       · deux remises à zéro d'un drapeau SANS EFFET ;
+       · un montage de test qui mesurait des zéros (`vueRetroGenerale` manquait,
+         et un `not.toContain` est satisfait par une chaîne vide) ;
+       · une spec WebKit verte pour la mauvaise raison.
+       ⮕ **Muter les DEUX côtés d'un `&&`.** Et : un module peut être
+       entièrement rebranché sans qu'une seule sentinelle s'en aperçoive.
+
+     ▣ ET DEUX FOIS, WEBKIT A VU CE QUE VITEST NE VOYAIT PAS : la zone
+       intermédiaire ajoutée au seul PDF (le bilan à l'écran laissait son titre
+       suivi du VIDE — la porte 2.6 réintroduite), et « ta force » qui exigeait
+       des défis alors qu'un élève peut n'avoir que des signalés.
+
+     ▣ CE QUE LES QUESTIONS DE GRÉGOIRE ONT TROUVÉ, ET QU'AUCUN AUDIT N'AVAIT VU
+       · « Les champs sont-ils namespacés ? » ⮕ oui — mais la question a fait
+         regarder les chemins de COPIE, et `dupliquerEchelle` PERDAIT les deux
+         repères. ⮕ **« Où cette donnée est-elle COPIÉE ? » trouve ce que « où
+         est-elle lue ? » ne trouve pas.**
+       · « Contextualise-moi le point 1 » ⮕ écrire la table des cas, un par un,
+         a révélé la régression de condition ci-dessus. ⮕ **Écrire ce que le
+         code fait trouve ce que le tester ne trouve pas toujours.**
+
+     ▣ SA DÉCISION SUR LA ZONE INTERMÉDIAIRE, ET SES MOTS. « Tu as fait de beaux
+       progrès, maintenant il faut les consolider » — pour l'élève qui sort de
+       l'insuffisance sans avoir encore acquis. Distinct de « Tu as progressé »,
+       réservé à l'acquis. Trois options proposées, la troisième retenue.
+
+     ▣ DEUX SESSIONS TOUTE LA JOURNÉE, ZÉRO COLLISION. Coordination par messages,
+       gel réciproque d'`index.html`, staging chirurgical (`hash-object` +
+       `update-index`) employé trois fois dans les deux sens. Mes trois
+       avertissements lui ont évité trois faux verdicts ; sa relecture m'a évité
+       de pousser un câblage sans sa fonction, et a corrigé un conseil que
+       j'avais donné à l'envers sur `release.mjs`.
+
+     ▣ TROIS PIÈGES D'OUTILLAGE PAYÉS. `release.mjs` bumpe ce qui est COMMITÉ,
+       pas ce qui est dans l'arbre (deux symptômes opposés, une cause — versé à
+       #547) ; le hook pré-push teste l'ARBRE, donc le travail non commité d'une
+       autre session ; `u-hide` porte un `!important` qu'un style inline
+       n'écrase pas.
+
+     ▣ REMIS À GRÉGOIRE : un artefact « Sept décisions en attente », chacune avec
+       son fait mesuré et ses options. La seule datée est le 1er septembre.
+       https://claude.ai/code/artifact/971736ee-f346-48c5-999a-8a12e97aadca
+
+     ▣ RESTE DU LOT 2, ORDONNÉ : `_detecterSeuilMaitrise` et les quatre replis
+       divergents ne demandent AUCUNE décision — c'est par là qu'il faut
+       reprendre. Le nommage et #579/#580 attendent Grégoire.
+     ===================================================================== -->
+
+
+<!-- =====================================================================
      SESSION — 28 AOÛT 2026 (12 h 20) : B10b EST CLOS. LA MARQUE DE
      MAÎTRISE SE LIT DANS L'ÉCHELLE, PLUS DANS DES LETTRES.
 
