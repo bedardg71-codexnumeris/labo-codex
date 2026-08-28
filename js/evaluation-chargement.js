@@ -22,7 +22,7 @@
    `let` IIFE-local (session A), promues à window après audit empirique session B
    (bare cross-IIFE refs résidu/sauvegarde jetaient ReferenceError au runtime).
 
-   13 exports window.X :
+   14 exports window.X :
      · Bloc principal evaluation.js (10) : chargerListeEtudiantsEval,
        chargerGroupesEval, filtrerEtudiantsParGroupe, chargerGrillesDansSelect,
        chargerEchellePerformance, chargerEvaluationsEtudiant, chargerProduction,
@@ -32,6 +32,8 @@
        du résidu — patch call-site fait dans evaluation.js)
      · API Track 4 chantier F Cat-B (1) : demarrerEvaluationDepuisFichier
        (consommée par travaux-ui.js — basculerMode + afficherPalettesEval)
+     · Déclencheur d'auto-save #564 (1) : retroactionModifiee (consommée par
+       data-on-input du textarea #retroactionFinale1, délégation main.js)
 
    NON exportées (préservation comportementale stricte) :
      · _selectionnerCartoucheProduction, _debouncerAutoSave, _flusherAutoSave,
@@ -1240,6 +1242,29 @@ function _debouncerAutoSave() {
 }
 
 /**
+ * #564 — Déclencheur d'auto-save pour la rétroaction finale.
+ *
+ * Avant ce correctif, `_debouncerAutoSave` n'avait qu'un seul appelant :
+ * `niveauSelectionne`. Modifier SEULEMENT le texte de la rétroaction, sans
+ * toucher un critère, ne créait donc aucun snapshot — `_flusherAutoSave` au
+ * changement de fichier n'avait rien à persister et le texte était perdu. Seul
+ * le bouton « Enregistrer » le sauvait. Perte réelle en navigation rapide
+ * entre copies.
+ *
+ * `_autoSauvegarderCriteres` lisait DÉJÀ `retroactionFinale1` dans le DOM (via
+ * `_majEvaluationExistanteAutoSave`) : il ne manquait que le déclencheur.
+ *
+ * Câblé par `data-on-input` sur le textarea (délégation `main.js`). Les
+ * générations automatiques de rétroaction passent par `.value = …`, qui NE
+ * déclenche PAS d'événement `input` : seule une frappe de l'utilisateur arme
+ * le debounce. La garde `_autoSaveSuspendu` de `_debouncerAutoSave` reste donc
+ * le seul rempart nécessaire contre la race condition de chargement.
+ */
+function retroactionModifiee() {
+    _debouncerAutoSave();
+}
+
+/**
  * Flush l'auto-save en attente immédiatement (appelé avant changement d'étudiant/fermeture)
  */
 function _flusherAutoSave() {
@@ -1439,5 +1464,10 @@ window._autoSauvegarderCriteres = _autoSauvegarderCriteres;
 // la pré-sélection d'une nouvelle éval suit le modèle des évals existantes,
 // pas un production.grilleId périmé qui ré-injecterait un modèle partagé.
 window._modeleProductionPourEval = _modeleProductionPourEval;
+
+// #564 — Consommé par `data-on-input` du textarea #retroactionFinale1
+// (délégation main.js). SANS cet export, la saisie de rétroaction ne déclenche
+// aucun auto-save et le texte est perdu au changement de fichier.
+window.retroactionModifiee = retroactionModifiee;
 
 })();
