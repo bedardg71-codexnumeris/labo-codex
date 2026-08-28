@@ -718,6 +718,13 @@
         // Nettoyer les fichiers importes avec succes
         fichiersEnAttente = fichiersEnAttente.filter(f => f.statut !== 'importe');
 
+        // #558 B1 — PERSISTER le retrait, sinon sessionStorage garde les fichiers
+        // déjà importés : au rechargement, `restaurerFileDAttente` les ressuscite
+        // avec un blob nul et l'utilisateur voit des fantômes « à re-déposer »,
+        // qu'il risque de ré-importer en doublon. La file en mémoire et la file
+        // persistée doivent bouger ENSEMBLE.
+        persisterFileDAttente();
+
         return { importes, erreurs, doublons: doublonsDetectes, total };
     }
 
@@ -775,7 +782,30 @@
                 productionIdParLea: !!f.productionIdParLea,
                 estReprise: !!f.estReprise,
                 largeurOriginale: f.largeurOriginale || 0,
-                hauteurOriginale: f.hauteurOriginale || 0
+                hauteurOriginale: f.hauteurOriginale || 0,
+                // #558 B3 — six champs qui manquaient, tous CONSOMMÉS ailleurs :
+                // sans eux, le round-trip sessionStorage les perdait en silence.
+                //   · productionIdParFichier : second drapeau d'intention, jumeau de
+                //     productionIdParLea ci-dessus. C'est LUI que lit la protection
+                //     #313 (travaux-ui.js) pour ne pas écraser un choix explicite —
+                //     inopérante après reload tant qu'il ne survivait pas.
+                //   · modeImport / dateFichier / nomDocumentLibre / operations : lus
+                //     au rendu de la file ; perdus, la ligne se réaffiche vide ou
+                //     retombe sur ses défauts.
+                //   · skipBalance / format11x17 : lus par le pipeline batch. Perdus,
+                //     un fichier explicitement exclu de la balance des blancs y
+                //     repasse au rechargement.
+                productionIdParFichier: !!f.productionIdParFichier,
+                modeImport: f.modeImport || 'lea',
+                // Normalisé en ISO : la valeur circule tantôt en Date, tantôt en
+                // chaîne selon le chemin d'entrée (l. 493 vs 637).
+                dateFichier: f.dateFichier
+                    ? (f.dateFichier instanceof Date ? f.dateFichier.toISOString() : f.dateFichier)
+                    : null,
+                nomDocumentLibre: f.nomDocumentLibre || '',
+                operations: Array.isArray(f.operations) ? f.operations : [],
+                skipBalance: !!f.skipBalance,
+                format11x17: !!f.format11x17
             }));
             sessionStorage.setItem(cleSession, JSON.stringify(donnees));
         } catch (e) {
@@ -823,7 +853,18 @@
                 productionIdParLea: !!d.productionIdParLea,
                 estReprise: !!d.estReprise,
                 largeurOriginale: d.largeurOriginale || 0,
-                hauteurOriginale: d.hauteurOriginale || 0
+                hauteurOriginale: d.hauteurOriginale || 0,
+                // #558 B3 — pendant de l'écriture : le mapping est explicite des
+                // DEUX côtés, donc persister sans restaurer n'aurait servi à rien.
+                productionIdParFichier: !!d.productionIdParFichier,
+                modeImport: d.modeImport || 'lea',
+                // Rendue en Date : le rendu fait `new Date(f.dateFichier)`, qui
+                // accepte les deux, mais le reste du module manipule des Date.
+                dateFichier: d.dateFichier ? new Date(d.dateFichier) : null,
+                nomDocumentLibre: d.nomDocumentLibre || '',
+                operations: Array.isArray(d.operations) ? d.operations : [],
+                skipBalance: !!d.skipBalance,
+                format11x17: !!d.format11x17
             }));
 
         } catch (e) {
