@@ -1577,15 +1577,38 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     `feedback.scale || []`). `normaliserCouleur` ne devine plus la couleur d'après le code IDME de même
     lettre. Sentinelle `sentinelle-575-synthese-pdf-sans-echelle-imposee` (7 cas, **6 mutations, 6 rouges**) ;
     ce module n'avait jusqu'ici **aucun test de comportement**.
-  - [ ] **B10 · `ORDRE_NIV`, et six comparaisons IDME littérales de plus** ⚠ **BUTE SUR #555** (`synthese-retroaction-data.js:19`, rapport §3 n° 9).
-    `ORDRE_NIV[…] || 0` → progression nulle hors IDME. **Mesuré le 27 août, plus large que ce que l'audit
-    décrit** : le module ne compare pas seulement par `ORDRE_NIV`, il teste les codes EN TOUTES LETTRES à
-    **six** endroits — `=== 'I' || === 'D'` pour les défis (`:536`, `:681`, `:915`), `=== 'M' || === 'E'`
-    pour « tous maîtrisés » (`:543`, `:554`, `:607`). L'ordre, lui, se dérive de l'échelle (rang par `min`) ;
-    mais « quel niveau est faible » et « quel niveau est maîtrisé » ne se dérivent d'AUCUNE échelle
-    aujourd'hui — c'est exactement l'objet de **#555 (la marque de maîtrise)**. Le faire sans #555
-    reviendrait à inventer une règle, donc à remplacer un arbitrage codé en dur par un autre. ⮕ **À
-    reprendre APRÈS #555**, en même temps que les autres consommateurs de la même marque.
+  - [x] **B10a · `ORDRE_NIV` — L'ORDRE DU PDF SE DÉRIVE DE L'ÉCHELLE** — LIVRÉ le 28 août 2026 (matin).
+    La table `{ E:4, M:3, D:2, I:1, '0':0 }` de `synthese-retroaction-data.js` est **supprimée**. Elle
+    servait à TROIS endroits du bilan **remis à l'élève** : le tri des défis (les deux « priorités »
+    affichées), le choix de « ta force », et la ligne « Progrès : X → Y » avec la tendance du parcours.
+    `ORDRE_NIV[code] || 0` ne levait pas — il rendait 0 : hors IDME, **tous les niveaux recevaient le même
+    rang, en silence**. Les priorités étaient les deux premières du tableau au lieu des deux plus faibles,
+    « ta force » revenait au premier critère saisi, et la ligne « Progrès » ne pouvait JAMAIS s'afficher.
+    ⮕ Le rang vient de `niveauDuCodeDansEchelle`, le lecteur unique de #575 ; un code étranger à l'échelle
+    n'a PAS de rang et l'appelant le dit (pas de force annoncée, pas de progrès mesuré, tri en fin de file).
+    ⮕ **`echellesComparables` (`profil-etudiant-calculs.js`) est EXTRAIT, pas écrit** : la garde
+    « même barème » livrée le 28 août dans `evaluation-retroaction.js` après la porte terrain 2.7 était
+    nécessaire mot pour mot ici — la recopier aurait créé le patron de replis divergents que #555 constate
+    ailleurs. Les deux modules la consomment ; la comparaison porte sur l'échelle RÉSOLUE (donc `idOriginal`
+    dédoublonne une restauration), et une échelle introuvable reste une ABSENCE.
+    ⮕ **Trouvaille de passage, corrigée** : le message « tous les critères sont maîtrisés depuis plus d'un
+    artefact » nommait le niveau visé EN DUR — « vers le niveau É (transfert à d'autres contextes) », soit
+    le nom ET la description SOLO du dernier niveau de l'échelle de Grégoire, dans un PDF remis aux élèves
+    de qui que ce soit. Il se lit maintenant par le rang le plus haut ; sans échelle résolue, la phrase
+    s'arrête au lieu de nommer.
+    Sentinelle `sentinelle-575-b10-ordre-synthese-pdf` (16 cas, **12 mutations, 12 rouges**), montée sur des
+    échelles qui REPRENNENT les lettres I/D/M/E **dans un autre ordre** — le seul montage où une table en dur
+    et une lecture d'échelle donnent des réponses opposées.
+  - [ ] **B10b · les six butées de #555 dans le même module** ⚠ **BUTE SUR #555** (rapport §3 n° 9).
+    Ce qui RESTE après B10a, mesuré au grep le 28 août : **six sites, quatorze comparaisons** en toutes
+    lettres — `=== 'I' || === 'D'` pour les défis (`:509`, `:682`, `:899`), `=== 'M' || === 'E'` pour
+    « tous maîtrisés » (`:517`, `:528`, `:682`), et `!== 'M' && !== 'E'` dans `construireForce` (`:587`).
+    ⚠ **Le `!==` compte autant que le `===`** : un motif en `===` seul rate un site entier, ce qui a
+    produit une mesure fausse en écrivant la sentinelle. L'ORDRE se dérive d'une échelle ; « quel niveau est
+    faible » et « quel niveau est maîtrisé », **non** — c'est la marque de maîtrise de #555. Le faire sans
+    elle remplacerait un arbitrage codé en dur par un autre. ⮕ Un test CONSTATE le compte 6/14 et rougira
+    quand #555 les retirera : **ne pas le « réparer » en changeant les chiffres.** ⮕ **À reprendre APRÈS
+    #555**, avec les 8 lignes / 18 comparaisons jumelles d'`evaluation-retroaction.js`.
   - [x] **Lettre IDME rendue à l'écran** (rapport §3 n° 3) — LIVRÉ le 27 août 2026.
     `determinerLettreIDME` (`P >= 85 ? 'E' : …`) est retirée ; le bloc « Développement des habiletés » lit
     son niveau par `lireNiveauNoteGlobale` (`profil-etudiant-helpers.js`), **extrait** du site déjà corrigé
@@ -1651,7 +1674,14 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   chemin — s'il en faut un, il est partagé, pour que #553 n'ait qu'un endroit à corriger.
   **Fin** : plus aucun jeu de valeurs IDME en dur sur un chemin vivant ; `grep` à l'appui ; chaque pas porte
   sa sentinelle avec break-test rouge vérifié.
-  ⮕ **ÉTAT AU 28 AOÛT 2026 : il ne reste que B10, et il BUTE SUR #555.** Tous les autres pas du lot 4
+  ⮕ **ÉTAT AU 28 AOÛT 2026, MATIN (9 h) : B10 est SCINDÉ et sa moitié « ordre » est LIVRÉE.** Ce qui
+  reste du lot 4 est **B10b SEUL** — les six sites / quatorze comparaisons de la marque de maîtrise —, et
+  il **BUTE SUR #555**. Vitest **3796/3796** (356 fichiers) après B10a, lue après le dernier changement.
+  ⮕ **La leçon de B10a, pour #555** : la butée n'était pas là où l'item la plaçait. `ORDRE_NIV` (l'ordre)
+  et les comparaisons littérales (la marque) vivaient dans les mêmes lignes, mais ne dépendent PAS de la
+  même décision — l'un se dérive des plages de l'échelle, l'autre non. **Avant de reporter un item
+  entier sur une décision, vérifier ce qui, dedans, n'en dépend pas.**
+  ⮕ Tous les autres pas du lot 4
   sont livrés ou clos par écart de prémisse. Sentinelle du 28 août :
   `tests/unit/sentinelle-575-ordre-niveaux-derive-echelle.test.js` — **23 cas, 14 mutations, 14 rouges**,
   restauration vérifiée à chaque fois. ⚠ **Une butée de même nature que B10 subsiste dans
@@ -1921,6 +1951,15 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⏳ **DÉCISION D'ARCHITECTURE, pas un pas de refactor** : un champ, un écran d'édition, une
   migration. À poser à Grégoire avant d'écrire une ligne.
   ⮕ **Premier pas possible et sans décision** : unifier les quatre replis divergents.
+  ⮕ **AJOUT DU 28 AOÛT (B10a).** Le recensement des consommateurs de la marque est maintenant complet et
+  mesuré, pas estimé : `synthese-retroaction-data.js` **6 sites / 14 comparaisons** (le PDF remis à
+  l'élève), `evaluation-retroaction.js` **8 lignes / 18 comparaisons** (le bilan à l'écran). Les deux
+  portent un test qui CONSTATE ces comptes et rougira le jour de la décision — c'est le signal voulu, pas
+  une régression à réparer en changeant les chiffres.
+  ⮕ **Et une leçon de méthode, payée sur B10** : « l'ordre des niveaux » et « la marque de maîtrise »
+  cohabitaient dans les mêmes lignes et paraissaient une seule butée. Le premier se dérive des plages de
+  l'échelle, la seconde non. La moitié dérivable a été livrée sans rien décider. ⮕ Vérifier de même, pour
+  les quatre autres items en attente de #555, ce qui n'attend pas vraiment.
 
 - [ ] **#536 — `idmeMoyen` rend 0 quand rien n'est convertible, au lieu de « pas de donnée ».**
   Repéré pendant #529 et VOLONTAIREMENT NON CORRIGÉ : le contrat de

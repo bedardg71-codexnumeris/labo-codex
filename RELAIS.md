@@ -25,6 +25,96 @@
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
 | **Dernière mise à jour** | **28 août 2026, 07 h 45** — **#575 (lot 4 du plan SOLO) est FINI sauf B10, et #576 est LIVRÉ.** Porte terrain relevée par Grégoire : **10/12, 2 échecs, tous deux traités**. **Vitest 3780/3780** (355 fichiers), lu après le dernier changement. **Aucun bump** : sa session `file://` était ouverte — les `?v=` touchés portent le jour du build (0827). Avant : 27 août 22 h 40, ouverture de #575 et quatre premiers pas. |
 
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 28 août 2026, 09 h 30
+
+### ✅ B10 EST SCINDÉ, ET SA MOITIÉ « ORDRE » EST LIVRÉE
+
+**#575 n'attend plus que la décision #555.** B10 était porté au backlog ET dans l'entrée
+précédente de ce fichier comme « BUTE SUR #555 » — donc reporté EN ENTIER sur une décision
+qui appartient à Grégoire. C'était vrai de la moitié seulement.
+
+| | Ce qui était mêlé dans les mêmes lignes | Dépend de #555 ? |
+|---|---|---|
+| **L'ORDRE** | `ORDRE_NIV = { E:4, M:3, D:2, I:1, '0':0 }` | **Non** — se dérive des PLAGES de l'échelle |
+| **LA MARQUE** | `=== 'I' \|\| === 'D'` / `=== 'M' \|\| === 'E'` | **Oui** — « faible » et « maîtrisé » ne se dérivent d'aucune échelle |
+
+⮕ **LA RÈGLE À REPASSER SUR LES QUATRE AUTRES ITEMS QUI ATTENDENT #555** : avant de reporter
+un item sur une décision, mesurer ce qui, DEDANS, n'en dépend pas. Ici un item entier était
+bloqué par la moitié de son contenu.
+
+### ⚠ POURQUOI CE DÉFAUT ÉTAIT SILENCIEUX — le patron à reconnaître ailleurs
+
+`ORDRE_NIV[code] || 0` **ne levait pas.** Il rendait 0. Hors IDME, tous les niveaux recevaient
+donc le MÊME rang, dans le bilan **remis à l'élève** (`synthese-retroaction-data.js` alimente
+la page de synthèse du PDF) :
+
+- les deux « priorités » affichées étaient les deux **premières du tableau**, pas les deux plus faibles ;
+- « ta force » revenait au **premier critère saisi** ;
+- la ligne « Progrès : X → Y » ne pouvait **jamais** s'afficher.
+
+C'est le même défaut, dans le même document, que celui corrigé à 7 h dans `evaluation-retroaction.js`.
+⮕ **Un repli `|| 0` sur une table de codes ne casse rien : il ment.**
+
+### ✅ `echellesComparables` EST EXTRAIT — un seul endroit pour la garde « même barème »
+
+La garde livrée à 7 h dans `evaluation-retroaction.js` après la porte terrain 2.7 était nécessaire
+**mot pour mot** pour la ligne « Progrès » du PDF. Elle vit maintenant dans
+`profil-etudiant-calculs.js` et les deux modules la consomment. La recopier, c'était fabriquer le
+patron de replis divergents que **#555 constate ailleurs** (`|| 0.70` ici, `|| 0.75` là).
+
+⚠ Son repli est passé de PERMISSIF à **RESTRICTIF** : sans le lecteur, on n'annonce pas un progrès
+qu'on n'a pas mesuré. Un repli permissif aurait rendu la garde muette au premier changement d'ordre
+de chargement — et un test l'aurait trouvée verte pour la mauvaise raison.
+
+### ⚠⚠ TROIS ASSERTIONS NE PROUVAIENT RIEN, ET SEUL LE BREAK-TEST L'A DIT
+
+Première passe : **16 cas verts, mais 3 mutations sur 12 restaient VERTES.** Les trois cas étaient
+mal construits, pas le code. À lire avant d'écrire une sentinelle d'échelle :
+
+1. **« un niveau illisible se range en dernier »** — mes deux critères étaient TOUS DEUX lisibles.
+   Il faut une échelle qui connaisse « D » mais **pas** « I » : le seul montage où un code franchit
+   la butée #555 (`I || D` = un défi) **sans avoir de rang à lire**.
+2. **« aucun progrès sur un code étranger »** — testé sur l'évaluation COURANTE, où une autre garde
+   sortait déjà. Le cas qui mord est le code étranger côté **ANTÉRIEUR** : sans garde, `rang > null`
+   est vrai et **tout devient un progrès**.
+3. **« la comparabilité ne porte pas sur les ids bruts »** — aucun cas n'avait deux ids DIFFÉRENTS
+   résolvant vers la MÊME échelle. C'est pourtant l'état exact du trimestre de Grégoire après la
+   réparation de #542 (`idOriginal`), et la cause de la porte 2.7.
+
+⮕ **Verte n'est pas prouvée.** Final : **12 mutations, 12 rouges**, restauration vérifiée à chaque fois.
+
+⮕ **Et la suite navigateur a été lancée AVANT d'annoncer la fin**, comme la leçon de la nuit l'impose :
+**Playwright 193 passées** (3 réussies au second essai — `confirmations-conception-uniformes`,
+`partage-import-rendu`, `sandbox-isolation`, aucune liée à ce lot). **Vitest 3796/3796, 356 fichiers**,
+lue après le dernier changement.
+
+⮕ **Et le montage compte** : une échelle W-X-Y-Z ne prouve RIEN sur l'ordre — hors IDME, l'ancienne
+table rendait 0 partout, donc « pas de tri » : un **faux vert par égalité**. Les fixtures reprennent
+les lettres I/D/M/E **dans un autre ordre** (« E » = Émergent, le plus faible), le seul montage où
+table en dur et lecture d'échelle donnent des réponses OPPOSÉES.
+
+### ⚠ UNE MESURE FAUSSE, CORRIGÉE AVANT DE S'INSTALLER
+
+Le test qui CONSTATE les butées #555 restantes comptait par un motif en `===` seul : il annonçait 6.
+Le vrai compte est **6 sites / 14 comparaisons** — `construireForce` filtre par `!== 'M' && !== 'E'`,
+**un site entier qu'un motif en `===` rate**. Le chiffre a été REMESURÉ au grep, pas ajusté pour
+faire passer le test. ⮕ Même piège partout où une sentinelle compte des comparaisons.
+
+### ⏳ CE QUI RESTE — inchangé, sauf B10
+
+- **B10b** : 6 sites / 14 comparaisons dans `synthese-retroaction-data.js`, plus les 8 lignes /
+  18 comparaisons jumelles d'`evaluation-retroaction.js`. Les deux portent un test qui CONSTATE ces
+  comptes et **rougira le jour de la décision #555** — c'est le signal voulu, pas une régression.
+- **Porte terrain 2.7** (Grégoire) — la ligne « Progrès » chez un élève monté d'un niveau.
+- **1er septembre** : #427 + #508. Il n'y a NI liste nominale, NI personne à inviter.
+- ⚠ **`git config maintenance.auto` n'est TOUJOURS pas positionné.** Le relais le recommande depuis
+  trois crashs en trois jours ; personne ne l'a fait. Ce n'est pas un oubli de plus, c'est un geste
+  d'une ligne que chaque session repousse.
+- ⚠ **Le bump est dû dès que la session `file://` de Grégoire sera fermée** : le code applicatif a
+  maintenant **huit commits** d'avance sur le numéro annoncé (1.104.1 / `0827-1418`).
+
+---
+
 ## ▶ POUR LA SESSION QUI PREND LE RELAIS — 28 août 2026, 07 h 45
 
 ### ⚠⚠ LES CINQ PREMIÈRES MINUTES — dans cet ordre, avant toute promesse

@@ -7,6 +7,125 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 28 AOÛT 2026 (9 h, suite) : B10 EST SCINDÉ, ET SA MOITIÉ
+     « ORDRE » EST LIVRÉE. #575 n'attend plus que la décision #555.
+
+     ▣ LA DEMANDE. Grégoire, après l'audit d'entrée : « travaille sur B10 ».
+       B10 était marqué « BUTE SUR #555 » au backlog et au relais — donc
+       reporté en entier sur une décision qui lui appartient.
+
+     ▣ AUDIT D'ENTRÉE (session lancée depuis `~`, hors du dépôt : ni CLAUDE.md
+       ni les skills projet ne se chargent seuls — lus à la main).
+       `main` = `origin/main` = `5cbd87e6`, arbre propre, AUCUN verrou git,
+       aucune branche distante plus récente. Vitest lu AVANT toute écriture :
+       **3780/3780, 355 fichiers**, zéro rouge. Un seul retour testeur ouvert
+       (#114, ancien). ⮕ Zéro écart avec le relais de 7 h 45.
+       ⚠ Deux points que l'audit AJOUTE : `git config maintenance.auto` n'est
+       toujours pas positionné (le relais le recommandait après trois crashs en
+       trois jours), et **sept commits de code applicatif depuis le dernier
+       bump** — l'app annonce 1.104.1 / `0827-1418` pendant que son code est
+       plus récent.
+
+     ▣ ⚠⚠ CE QUI A COMMANDÉ TOUT LE LOT, ET C'EST LA LEÇON DE LA SÉANCE.
+       Avant de reporter B10, MESURER ce qui, dedans, dépend vraiment de #555.
+       Résultat : **B10 n'était pas une butée, c'en était deux**, dans les
+       mêmes lignes.
+       · `ORDRE_NIV` — l'ORDRE des niveaux — se dérive des PLAGES de l'échelle.
+         Aucune décision. C'est même déjà fait ailleurs depuis ce matin.
+       · Les comparaisons `=== 'I' || === 'D'` — la MARQUE de maîtrise — ne se
+         dérivent d'aucune échelle. Décision #555, intacte.
+       ⮕ **Un item entier était bloqué par la moitié de son contenu.** Question
+       de méthode à repasser sur les quatre autres items qui attendent #555 :
+       vérifier ce qui, dedans, n'attend pas vraiment.
+
+     ▣ CE QUE FAISAIT LE DÉFAUT, ET POURQUOI IL ÉTAIT SILENCIEUX.
+       `ORDRE_NIV = { E:4, M:3, D:2, I:1, '0':0 }` servait à TROIS endroits du
+       bilan **remis à l'élève** (`synthese-retroaction-data.js` alimente la
+       page de synthèse du PDF). `ORDRE_NIV[code] || 0` **ne levait pas** : il
+       rendait 0. Hors IDME, tout le monde recevait le même rang, donc —
+       · les deux « priorités » affichées étaient les deux PREMIÈRES du tableau
+         au lieu des deux plus faibles ;
+       · « ta force » revenait au premier critère SAISI ;
+       · la ligne « Progrès : X → Y » ne pouvait JAMAIS s'afficher.
+       Même défaut, même document, que celui corrigé à 7 h dans
+       `evaluation-retroaction.js`.
+
+     ▣ CE QUI EST LIVRÉ
+       1. **`ORDRE_NIV` supprimée.** Le rang vient de `niveauDuCodeDansEchelle`
+          (le lecteur unique de #575). Un code étranger à l'échelle n'a PAS de
+          rang, et l'appelant le DIT : pas de force annoncée, pas de progrès
+          mesuré, et pour un TRI seulement, un rang illisible se range en
+          dernier — jamais en premier, comme le faisait `|| 0`.
+       2. **`echellesComparables` EXTRAIT, PAS ÉCRIT** (`profil-etudiant-calculs.js`).
+          La garde « même barème » livrée à 7 h dans `evaluation-retroaction.js`
+          après la porte terrain 2.7 était nécessaire ICI mot pour mot — la
+          ligne « Progrès » du PDF compare deux évaluations. La recopier, c'était
+          fabriquer le patron de replis divergents que #555 constate ailleurs
+          (`|| 0.70` ici, `|| 0.75` là). Les deux modules la consomment.
+          ⚠ Son repli est passé de PERMISSIF à RESTRICTIF : sans le lecteur, on
+          n'annonce pas un progrès qu'on n'a pas mesuré.
+       3. **La tendance du parcours** écarte les évaluations d'un autre barème
+          au lieu de les compter 0 — `ORDRE_NIV[…] || 0` les faisait entrer dans
+          la moyenne à la valeur du plancher, et tirait le verdict vers le bas.
+       4. **Trouvaille de passage, corrigée** : le message « tous les critères
+          sont maîtrisés depuis plus d'un artefact » nommait le niveau visé EN
+          DUR — « vers le niveau É (transfert à d'autres contextes) », soit le
+          nom ET la description SOLO du dernier niveau de l'échelle de Grégoire,
+          dans un PDF remis aux élèves de n'importe qui. Il se lit maintenant par
+          le rang le plus haut ; sans échelle résolue, la phrase s'arrête.
+
+     ▣ LE MONTAGE DE LA SENTINELLE, ET POURQUOI IL EST CHOISI AINSI.
+       Une échelle W-X-Y-Z ne PROUVE rien sur l'ordre : hors IDME, tous les
+       rangs de l'ancienne table valaient 0, donc « pas de tri » — un faux vert
+       par égalité. Les fixtures reprennent donc **les lettres I/D/M/E dans un
+       AUTRE ordre** (« E » = Émergent, le plus faible ; « I » = Intégré, le plus
+       fort). Table en dur et lecture d'échelle donnent alors des réponses
+       OPPOSÉES. Cas réel : rien n'oblige un·e collègue à faire de « E » son
+       niveau le plus haut.
+
+     ▣ ⚠ TROIS ASSERTIONS NE PROUVAIENT RIEN, ET SEUL LE BREAK-TEST L'A DIT.
+       Première passe : 16 cas verts, mais 3 mutations sur 12 restaient VERTES.
+       · « un niveau illisible se range en dernier » — mes deux critères étaient
+         TOUS DEUX lisibles ; il fallait une échelle qui connaisse « D » mais
+         PAS « I », le seul montage où un code franchit la butée #555 sans avoir
+         de rang.
+       · « aucun progrès sur un code étranger » — testé sur l'évaluation
+         COURANTE, où une autre garde sortait déjà. Le cas qui mord est le code
+         étranger côté ANTÉRIEUR : sans garde, `rang > null` est vrai et TOUT
+         devient un progrès.
+       · « la comparabilité ne porte pas sur les ids bruts » — aucun de mes cas
+         n'avait deux ids DIFFÉRENTS résolvant vers la MÊME échelle. C'est
+         pourtant l'état exact du trimestre de Grégoire après la réparation de
+         #542 (`idOriginal`), et la cause de la porte 2.7.
+       ⮕ **Verte n'est pas prouvée.** 12 mutations, 12 rouges, restauration
+       vérifiée à chaque fois — après réparation des trois cas.
+
+     ▣ UNE MESURE FAUSSE, CORRIGÉE AVANT DE S'INSTALLER. Le test qui CONSTATE
+       les butées #555 restantes comptait par un motif en `===` seul : il
+       annonçait 6. Le vrai compte est **6 sites / 14 comparaisons** —
+       `construireForce` filtre par `!== 'M' && !== 'E'`, un site entier qu'un
+       motif en `===` rate. Le chiffre a été REMESURÉ au grep, pas ajusté pour
+       faire passer le test.
+
+     ▣ AUDIT SÉCURITÉ. Le nom d'un niveau est SAISI par l'utilisateur et entre
+       maintenant dans `messageGlobal`. Vérifié : le module reste PUR (zéro
+       rendu), l'unique consommateur du shape `Feedback` est
+       `synthese-retroaction-rendu.js`, et les cinq champs touchés
+       (`messageGlobal`, `priorites`, `force`, `progression`, `tendance`)
+       passent tous par `esc()`. Aucun `innerHTML` ajouté, ni `eval`, ni handler
+       inline, ni `console.log`, aucune zone protégée touchée.
+
+     ▣ MESURE FINALE, LUE APRÈS LE DERNIER CHANGEMENT : **Vitest 3796/3796,
+       356 fichiers** — zéro rouge. **Playwright : 193 passées**, lancée EN
+       ENTIER avant d'annoncer la fin (3 réussies au second essai, toutes sans
+       rapport avec ce lot : import, sandbox, confirmations). Anti-cache : trois jetons incrémentés sur le
+       jour du BUILD (`20260827h→i`, `a→b`, `c→d`), pas sur la date du jour.
+       Version inchangée (1.104.1 / `0827-1418`) : la session `file://` de
+       Grégoire est ouverte.
+     ===================================================================== -->
+
+
+<!-- =====================================================================
      SESSION — 28 AOÛT 2026 (matin, 4 h 30 → 7 h 45) : #575 FINI SAUF B10,
      #576 OUVERT ET LIVRÉ, ET LA PORTE TERRAIN RELEVÉE PAR GRÉGOIRE.
      Commits `e2819cea`, `10fb514d`, `86475adf`, `a5386a30`. Aucun bump.
