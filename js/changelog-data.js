@@ -21,6 +21,20 @@
 
     var CHANGELOG = [
         {
+            version: '1.105',
+            couleur: 'vert',
+            titre: 'Ton \u00e9chelle dit o\u00f9 commence la ma\u00eetrise',
+            items: [
+                '<strong>Chaque \u00e9chelle porte maintenant deux rep\u00e8res : \u00ab Suffisant \u00e0 partir de \u00bb et \u00ab Ma\u00eetris\u00e9 \u00e0 partir de \u00bb.</strong> Tu les choisis dans l\'\u00e9diteur d\'\u00e9chelle, sous les niveaux. Jusqu\'ici, l\'application devinait o\u00f9 se trouvait la ma\u00eetrise \u00e0 partir des lettres I, D, M et E \u2014 ce qui ne voulait rien dire sur une \u00e9chelle qui n\'emploie pas ces lettres.',
+                '<strong>La r\u00e9troaction distingue d\u00e9sormais trois \u00e9tats au lieu de deux.</strong> Sous ton seuil de suffisance : une priorit\u00e9. Entre les deux rep\u00e8res : un acquis en d\u00e9veloppement, \u00e0 consolider. Au-dessus : acquis.',
+                '<strong>Un \u00e9l\u00e8ve qui sort de l\'insuffisance le lit maintenant dans son bilan.</strong> \u00ab Tu as fait de beaux progr\u00e8s : maintenant il faut les consolider \u00bb \u2014 distinct de \u00ab Tu as progress\u00e9 \u00bb, r\u00e9serv\u00e9 \u00e0 ce qui est acquis.',
+                '<strong>Le PDF remis \u00e0 l\'\u00e9l\u00e8ve et le bilan \u00e0 l\'\u00e9cran disent la m\u00eame chose</strong>, avec tes niveaux et tes mots. Le tri des priorit\u00e9s, \u00ab ta force \u00bb et la ligne \u00ab Progr\u00e8s \u00bb suivent l\'ordre de TON \u00e9chelle.',
+                '<strong>Correction : \u00ab Enregistrer \u00bb ne fermait plus la cartouche qu\'il venait d\'enregistrer.</strong> L\'\u00e9cran repartait \u00e0 vide et ce que tu tapais ensuite n\'atteignait pas la base, sans un mot. C\'est la cause du \u00ab des fois \u00e7a enregistre, des fois non \u00bb.',
+                '<strong>Correction : l\'enregistrement automatique d\'une cartouche te pr\u00e9vient quand il n\'a rien \u00e9crit</strong>, au lieu de perdre la saisie en silence.',
+                '<strong>Correction : les listes de l\'\u00e9diteur d\'\u00e9chelle ne sont plus tronqu\u00e9es</strong>, et le champ \u00ab Niveau SOLO \u00bb retrouve sa place au lieu de s\'empiler mot par mot.'
+            ]
+        },
+        {
             version: '1.104',
             couleur: 'vert',
             titre: 'La structure se lit dans TES niveaux',
