@@ -25,6 +25,12 @@
     let modeCourant = 'annoter'; // 'annoter' | 'evaluer'
     let fichierSelectionneIndex = -1; // -1 = aucune selection dans le pipeline
     let productionFiltreActive = sessionStorage.getItem('travaux-filtre-production') || '';
+    // #558 B2 — le choix « Rés. max. » ne vivait QUE dans le DOM. Le select est
+    // re-généré à chaque rendu du pipeline avec `selected` codé en dur sur 250 :
+    // un autre choix était silencieusement écrasé, alors que la valeur est
+    // réellement utilisée (uniformisation DPI du traitement par lots). Mémorisé
+    // ici, et en session comme le filtre de production ci-dessus.
+    let dpiPipelineChoisi = sessionStorage.getItem('travaux-pipeline-dpi') || '250';
     let _htmlBadgesGrille = ''; // HTML badges pré-généré pour injection dans toolbar unique
     let _htmlDropdownProduction = ''; // HTML dropdown production séparé (fixe, hors scroll)
     let selectionFusion = new Set(); // IDs des fichiers selectionnes pour fusion
@@ -1450,6 +1456,17 @@
      */
     let _previewTimer = null;
     function mettreAJourPreviewsPipeline() {
+        // #558 B2 — capter le choix AVANT tout re-rendu : c'est le seul endroit
+        // où le select signale un changement, et sa valeur ne survivait nulle part.
+        const selDpi = document.getElementById('pipeline-opt-dpi');
+        if (selDpi) {
+            dpiPipelineChoisi = selDpi.value;
+            try {
+                sessionStorage.setItem('travaux-pipeline-dpi', dpiPipelineChoisi);
+            } catch (e) {
+                console.warn('[Travaux-UI] Choix DPI non persisté :', e);
+            }
+        }
         if (_previewTimer) clearTimeout(_previewTimer);
         _previewTimer = setTimeout(_mettreAJourPreviewsPipelineImpl, 300);
     }
@@ -1709,7 +1726,11 @@
         // (gain d'espace vertical ; le titre « Réglages par défaut : » est retiré).
         const fSel = queue[fichierSelectionneIndex];
         const btnReglagesDisabled = fichierSelectionneIndex < 0 || !fSel?.estImage || !fSel?.fichier;
-        colCentre += `<div class="pipeline-reglages-ligne" style="display:flex; align-items:center; gap:10px; margin:8px 0 4px 0;"><label style="white-space:nowrap;">Rés. max. <select id="pipeline-opt-dpi" data-on-change="travauxUI.mettreAJourPreviewsPipeline" class="controle-form-compact" style="width:auto;display:inline-block;font-size:inherit;padding:2px 4px;"><option value="0">désactivée</option><option value="200">200 dpi</option><option value="250" selected>250 dpi</option><option value="300">300 dpi</option></select></label><button class="btn btn-secondaire" ${btnReglagesDisabled ? 'disabled' : ''} data-action="travauxUI.ouvrirPreparationFichier" data-param="${fichierSelectionneIndex}" title="Réglages spécifiques" aria-label="Réglages spécifiques"><img src="icons/icons8-photo-editor.svg" alt="" class="btn-inline-icon"></button></div>`;
+        // #558 B2 — `selected` calculé d'après le choix mémorisé, plus codé en dur.
+        const optionsDpi = [['0', 'désactivée'], ['200', '200 dpi'], ['250', '250 dpi'], ['300', '300 dpi']]
+            .map(([v, libelle]) => `<option value="${v}"${v === dpiPipelineChoisi ? ' selected' : ''}>${libelle}</option>`)
+            .join('');
+        colCentre += `<div class="pipeline-reglages-ligne" style="display:flex; align-items:center; gap:10px; margin:8px 0 4px 0;"><label style="white-space:nowrap;">Rés. max. <select id="pipeline-opt-dpi" data-on-change="travauxUI.mettreAJourPreviewsPipeline" class="controle-form-compact" style="width:auto;display:inline-block;font-size:inherit;padding:2px 4px;">${optionsDpi}</select></label><button class="btn btn-secondaire" ${btnReglagesDisabled ? 'disabled' : ''} data-action="travauxUI.ouvrirPreparationFichier" data-param="${fichierSelectionneIndex}" title="Réglages spécifiques" aria-label="Réglages spécifiques"><img src="icons/icons8-photo-editor.svg" alt="" class="btn-inline-icon"></button></div>`;
 
         // Alerte globale : blobs manquants après restauration session
         const nbBlobsManquants = queue.filter(f => !f.fichier).length;
@@ -3913,11 +3934,18 @@
                     console.error('[Travaux-UI] Erreur import jeton:', e);
                 }
             } else if (choix === 'remplacer') {
-                travauxStockage.deplacerEnCorbeille(d.fichierExistant.id);
+                // #558 B1 — ORDRE INVERSÉ : importer d'abord, jeter ensuite.
+                // Auparavant l'ancien fichier partait à la corbeille AVANT
+                // l'`await`, et l'échec de l'import n'était qu'un `console.error` :
+                // l'utilisateur se retrouvait sans l'ancien ET sans le nouveau,
+                // sans le savoir. Le remplacement ne détruit plus rien tant que
+                // le remplaçant n'est pas là.
                 try {
                     await travauxImport.importerFichier(d.fichierPrepare, d.productionId);
+                    travauxStockage.deplacerEnCorbeille(d.fichierExistant.id);
                 } catch (e) {
                     console.error('[Travaux-UI] Erreur import remplacement:', e);
+                    notifications.erreur('Le remplacement a échoué : le fichier d\'origine a été conservé.');
                 }
             } else if (choix === 'additionnel') {
                 // Livrable additionnel : importer sans déclencher la détection
