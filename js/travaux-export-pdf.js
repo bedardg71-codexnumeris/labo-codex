@@ -41,12 +41,15 @@
             doc = await exporterDepuisImage(blob, annotation);
         }
 
-        await ajouterPageSynthese(doc, fichier, productionIdOverride);
+        // #565 — le statut est REMONTÉ à l'appelant : une copie livrée sans sa
+        // page de rétroaction doit pouvoir être nommée dans le bilan d'export,
+        // au lieu de partir sur Léa sans que personne ne le sache.
+        const synthese = await ajouterPageSynthese(doc, fichier, productionIdOverride);
 
         // ✅ ANONYMISATION (Tier 0.2) : anonymiser le nom du fichier de sortie
         const nomFichierAff = typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(fichier.nomFichier, fichier.etudiantDA) : fichier.nomFichier;
         const nomSortie = nomFichierAff.replace(/\.[^.]+$/, '') + '_annote.pdf';
-        return { doc, nomSortie, fichierId };
+        return { doc, nomSortie, fichierId, synthese };
     }
 
     /**
@@ -661,11 +664,22 @@
      * aucune nouvelle donnée n'est calculée, tout vient de l'évaluation, de
      * l'annotation et des sources existantes (cartouche, grille, échelle,
      * historique). Si l'évaluation ou la lib html2canvas est absente, la page
-     * de synthèse est simplement omise.
+     * de synthèse est omise — mais plus en silence (#565).
+     *
+     * #565 : chaque sortie DIT ce qui s'est passé. Auparavant tous les chemins
+     * d'échec faisaient `return` nu ou se contentaient d'un `console.warn`, si
+     * bien qu'une copie pouvait être téléversée sur Léa sans sa page de
+     * rétroaction sans que personne ne le sache — alors que c'est la promesse du
+     * bouton. La fonction ne LANCE pas pour autant : un échec de synthèse ne doit
+     * pas coûter le PDF annoté, qui lui est bon. C'est l'appelant qui décide
+     * quoi faire de la raison.
      *
      * @param {Object} doc - Instance jsPDF (en cours d'assemblage par genererDocPDF)
      * @param {Object} fichier - Métadonnées du fichier annoté
      * @param {string} [productionIdOverride] - Production cible si différente du fichier
+     * @returns {Promise<{ajoutee: boolean, raison: string|null}>} `ajoutee` faux
+     *   n'est pas toujours une anomalie : « aucune évaluation enregistrée » est
+     *   légitime en export unitaire et anormal en export Léa.
      */
     async function ajouterPageSynthese(doc, fichier, productionIdOverride) {
         // 1. Pré-requis : modules + lib disponibles
@@ -673,19 +687,25 @@
             typeof syntheseRetroactionData === 'undefined' ||
             typeof syntheseRetroactionRendu === 'undefined') {
             console.warn('[Synthèse] Modules ou html2canvas indisponibles — page de synthèse omise.');
-            return;
+            return { ajoutee: false, raison: 'les composants de mise en page ne sont pas chargés' };
         }
 
         // 2. Résoudre l'évaluation pour ce fichier
         const evaluation = trouverEvaluationPourSynthese(fichier, productionIdOverride);
-        if (!evaluation) return; // pas d'éval → pas de synthèse (cas de l'élève sans évaluation enregistrée)
+        if (!evaluation) {
+            // Cas de l'élève sans évaluation enregistrée. Légitime en export
+            // unitaire ; ANORMAL en export Léa, qui part des évaluations actives.
+            // C'est l'appelant qui juge, d'où la raison remontée plutôt qu'un
+            // silence.
+            return { ajoutee: false, raison: 'aucune évaluation enregistrée pour cette copie' };
+        }
 
         // 3. Récupérer l'annotation (peut être null)
         const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
 
         // 4. Construire le shape Feedback
         const feedback = syntheseRetroactionData.construireFeedback(evaluation, fichier, annotation);
-        if (!feedback) return;
+        if (!feedback) return { ajoutee: false, raison: 'les données de rétroaction n\'ont pas pu être assemblées' };
 
         // 5. Générer le HTML
         const html = syntheseRetroactionRendu.rendreSyntheseHTML(feedback);
@@ -699,7 +719,7 @@
         try {
             // 7. Mesurer la hauteur réelle du fragment (≥ 11" Letter US)
             const cible = conteneur.firstElementChild;
-            if (!cible) return;
+            if (!cible) return { ajoutee: false, raison: 'le gabarit de synthèse est vide' };
             // Forcer le min-height à 1056 px puis mesurer ; le rendu peut dépasser
             // si le contenu (bilan détaillé + toutes erreurs FE) est dense.
             const hauteurReelle = Math.max(SYNTH_PAGE_H_MIN, cible.scrollHeight, cible.offsetHeight);
@@ -720,8 +740,10 @@
             doc.addPage([pageW, pageH], 'portrait');
             const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
             doc.addImage(dataUrl, 'JPEG', 0, 0, pageW, pageH);
+            return { ajoutee: true, raison: null };
         } catch (e) {
             console.error('[Synthèse] Échec de rasterisation :', e);
+            return { ajoutee: false, raison: 'échec de la mise en image : ' + (e && e.message ? e.message : e) };
         } finally {
             document.body.removeChild(conteneur);
         }
@@ -806,7 +828,7 @@
             if (_hasProg) window.majProgression(70, 'Ajout de la page de synthèse…');
 
             // Ajouter la page de synthese (grille + retroaction)
-            await ajouterPageSynthese(doc, fichier, productionId);
+            const synthese = await ajouterPageSynthese(doc, fichier, productionId);
 
             if (_hasProg) window.majProgression(90, 'Téléchargement…');
 
@@ -819,6 +841,13 @@
 
             // Marquer le fichier comme exporte (cycle de vie)
             travauxStockage.marquerExporte(fichier.id);
+
+            // #565 — le PDF est livré, mais s'il lui manque la page de
+            // rétroaction, on le DIT. Après le téléchargement : le fichier
+            // annoté reste bon, ce n'est pas un échec d'export.
+            if (synthese && !synthese.ajoutee) {
+                alert('Le PDF a été exporté, mais SANS sa page de rétroaction (' + synthese.raison + ').');
+            }
 
         } catch (e) {
             console.error('[Travaux-Export] Erreur export dossier complet:', e);
