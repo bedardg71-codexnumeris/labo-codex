@@ -387,11 +387,23 @@ async function dupliquerEchelle(echelleId) {
     const nouveauNom = prompt('Nom de la nouvelle échelle :', nommerCopie(echelle.nom, echelles));
     if (!nouveauNom) return;
 
+    // ⚠⚠ CECI EST UNE LISTE BLANCHE, ET C'EST DÉLIBÉRÉ : un spread de `echelle`
+    // emporterait `idOriginal`, et la COPIE se mettrait à répondre à l'identifiant
+    // de la source dans `obtenirEchelleResolue` (le dédoublonnage d'import de
+    // #542). Le prix à payer est qu'un champ métier neuf est PERDU tant qu'il
+    // n'est pas ajouté ici — et c'est arrivé le 28 août même : les deux repères
+    // de maîtrise (#555 lot 1) ne survivaient pas à une duplication.
+    // ⮕ TOUT CHAMP MÉTIER AJOUTÉ À UNE ÉCHELLE DOIT ÊTRE AJOUTÉ ICI. Une
+    // sentinelle le vérifie pour les repères.
     const nouvelleEchelle = {
         id: genererIdUnique('ECH_'),
         nom: nouveauNom,
         niveaux: JSON.parse(JSON.stringify(echelle.niveaux || [])), // Copie profonde
         config: JSON.parse(JSON.stringify(echelle.config || {})),
+        // #555 — les repères désignent des CODES de niveau, et les niveaux sont
+        // copiés à l'identique : les repères restent donc valides dans la copie.
+        ...(echelle.seuilSuffisance ? { seuilSuffisance: echelle.seuilSuffisance } : {}),
+        ...(echelle.seuilMaitrise ? { seuilMaitrise: echelle.seuilMaitrise } : {}),
         dateCreation: new Date().toISOString(),
         dateModification: new Date().toISOString(),
         auteur: BibliothequeUI.obtenirAuteurActif(),
