@@ -2080,50 +2080,23 @@ function afficherIndicateurModeModification(evaluation) {
     indicateur.classList.remove('u-hide');
 }
 
-/**
- * Supprime une évaluation après confirmation
- * Les évaluations verrouillées ne peuvent pas être supprimées
- * @param {string} evaluationId - ID de l'évaluation à supprimer
+/* #557 (28 août 2026) — `supprimerEvaluation` A ÉTÉ RETIRÉE D'ICI.
+ *
+ * Ce module en portait une seconde définition, sans la restauration de
+ * l'originale d'une reprise (correctif du 8 juin) ni la tolérance aux
+ * évaluations orphelines verrouillées (correctif du 16 mars). `evaluation.js`
+ * étant chargé APRÈS `liste-evaluations.js`, c'est cette version-là qui gagnait
+ * `window` : supprimer une reprise depuis le profil étudiant laissait son
+ * originale « remplacée » à jamais.
+ * ⮕ La définition unique vit dans `liste-evaluations.js`, et elle a absorbé les
+ * deux apports de celle-ci : la garde « évaluation introuvable » et la
+ * confirmation qui nomme l'étudiant·e et la production.
+ * ⮕ Même mécanique que les doublons retirés par #575 (`trierListeEvaluations`,
+ * `rechargerFiltreProduction`) : quand deux fichiers posent le même `window.X`,
+ * c'est le dernier chargé qui gagne, en silence.
+ * Les appels de ce fichier (`confirmerSuppressionEvaluationSidebar`) résolvent
+ * désormais vers le global posé par `liste-evaluations.js`, chargé avant.
  */
-function supprimerEvaluation(evaluationId) {
-    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
-    const evaluation = evaluations.find(e => e.id === evaluationId);
-
-    if (!evaluation) {
-        notifications.erreur('Erreur', 'Évaluation introuvable');
-        return;
-    }
-
-    // Vérifier si l'évaluation est verrouillée
-    if (evaluation.verrouillee) {
-        notifications.erreur(
-            'Suppression impossible',
-            'Cette évaluation est verrouillée. Déverrouille-la d\'abord pour la supprimer.'
-        );
-        return;
-    }
-
-    // Demander confirmation
-    if (!confirm(`Veux-tu vraiment supprimer l'évaluation de ${evaluation.etudiantNom} pour ${evaluation.productionNom} ?\n\nCette action est irréversible.`)) {
-        return;
-    }
-
-    // Supprimer l'évaluation
-    evaluations = evaluations.filter(e => e.id !== evaluationId);
-
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        notifications.erreur('Suppression impossible', 'Impossible de supprimer en mode anonymisation');
-        return;
-    }
-
-    notifications.succes('Évaluation supprimée');
-
-    // Recalculer les indices
-    if (typeof calculerEtStockerIndicesCP === 'function') {
-        calculerEtStockerIndicesCP();
-    }
-
-}
 
 /* ===============================
    📚 BANQUE D'ÉVALUATIONS
@@ -3230,7 +3203,9 @@ window.sauvegarderEvaluationModifiee = sauvegarderEvaluationModifiee;
 
 // Phase 5 — fonctions utilisées par data-action / data-on-change
 window.modifierEvaluation = modifierEvaluation;
-window.supprimerEvaluation = supprimerEvaluation;
+// #557 : `window.supprimerEvaluation` n'est plus posé ici — la définition unique
+// est dans `liste-evaluations.js`, chargé avant. Réexporter depuis ce fichier
+// écrasait la version corrigée par la version incomplète, en silence.
 window.basculerVerrouillageEvaluation = basculerVerrouillageEvaluation;
 window.chargerEvaluationDepuisBanque = chargerEvaluationDepuisBanque;
 window.appliquerJetonRepriseDepuisBanque = appliquerJetonRepriseDepuisBanque;

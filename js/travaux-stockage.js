@@ -1064,14 +1064,34 @@
     }
 
     /**
-     * Vide entièrement la corbeille (tous les blobs + métadonnées)
-     * @returns {Promise<number>} Nombre de fichiers supprimés
+     * Détruit définitivement les fichiers de corbeille DONNÉS (blobs + vignettes
+     * + métadonnées).
+     *
+     * ⚠ #556 — LA LISTE EST OBLIGATOIRE, et c'est tout l'objet du correctif.
+     * Cette fonction itérait `obtenirCorbeilleComplete()` puis terminait par
+     * `sauvegarderCorbeille([])`, alors que son unique appelant — la modale
+     * « Vider la corbeille ? » — n'annonce que la corbeille du groupe-cours
+     * ACTIF (`obtenirCorbeille()`, filtrée). Les fichiers des AUTRES
+     * groupes-cours du trimestre étaient donc détruits sans avoir jamais été
+     * comptés à l'écran : perte définitive et silencieuse.
+     * ⮕ Détruire toute la corbeille du trimestre reste possible, mais il faut
+     * désormais le DEMANDER, en passant `obtenirCorbeilleComplete()`. Ce n'est
+     * plus ce qu'on obtient par omission.
+     *
+     * @param {Array<Object>} fichiers - Les fichiers à détruire, c'est-à-dire
+     *        exactement ceux qui ont été annoncés à l'utilisateur.
+     * @returns {Promise<number>} Nombre de fichiers réellement retirés de la corbeille
      */
-    async function viderCorbeille() {
-        const corbeille = obtenirCorbeilleComplete();
-        if (corbeille.length === 0) return 0;
+    async function viderCorbeille(fichiers) {
+        if (!Array.isArray(fichiers)) {
+            console.warn('[Travaux-Stockage] viderCorbeille appelée sans la liste des fichiers à détruire — aucune suppression (#556).');
+            return 0;
+        }
+        if (fichiers.length === 0) return 0;
 
-        for (const f of corbeille) {
+        const aDetruire = new Set(fichiers.map(f => f.id));
+
+        for (const f of fichiers) {
             try {
                 await supprimerBlob(f.id);
             } catch (e) {
@@ -1080,9 +1100,12 @@
             supprimerThumbnail(f.id).catch(function() {});
         }
 
-        const nb = corbeille.length;
-        sauvegarderCorbeille([]);
-        return nb;
+        // Relecture APRÈS les await : un fichier mis en corbeille pendant les
+        // suppressions de blobs doit survivre à la réécriture des métadonnées.
+        const avant = obtenirCorbeilleComplete();
+        const restantes = avant.filter(f => !aDetruire.has(f.id));
+        sauvegarderCorbeille(restantes);
+        return avant.length - restantes.length;
     }
 
     /* ===============================
