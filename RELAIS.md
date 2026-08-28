@@ -85,7 +85,7 @@ Vérifié, et le dépôt le documentait déjà (`echelles.js`, note #524) : `ind
 caché**, et le bouton « Enregistrer » de l'ANCIEN SYSTÈME est sans effet. C'est #520 au backlog.
 ⮕ **Ne rien brancher sur cet écran.** Le doublon d'id relève de #481, laissé en place.
 
-### 📌 #577 EST PRIS — prochain ID libre : **#578**
+### 📌 #578 EST PRIS — prochain ID libre : **#579**
 
 **#577 — l'assistant de configuration des pratiques ignore les deux repères de maîtrise.** Demandé
 par Grégoire à la livraison du lot 1 : `wizard-pratique-v2.js` fait choisir une échelle
@@ -108,6 +108,60 @@ avant d'écrire l'écran.** ⏳ Dépend de #555 lot 2 : sans lecteur, l'assistan
 4. **Unifier les quatre replis divergents** (`|| 0.70` ×2, `|| 0.75` ×2) — le pas de #555 qui n'a
    jamais demandé de décision.
 5. L'éditeur d'échelle **neuve**.
+
+---
+
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 28 août 2026, 11 h 45
+
+### ✅ #573 — « DES FOIS ÇA ENREGISTRE, DES FOIS NON » A UNE CAUSE, ET ELLE EST FERMÉE
+
+C'est le symptôme rapporté par Grégoire qui avait déclenché l'audit du 25 août. L'audit du 27 l'avait
+désigné comme candidat, reproduit en harnais Node, et notait **« non vérifié en navigateur »**. Les
+deux manques sont levés.
+
+**La mécanique, en trois temps, tous silencieux :**
+
+1. `sauvegarderCartouche` appelait `chargerCartouchesRetroaction()`, qui finit par
+   `initialiserNouveauCartouche()` — `cartoucheActuel` devenait une cartouche **neuve jamais écrite**.
+2. La ligne suivante lisait `cartoucheActuel.id` : l'id NEUF, absent des options. Le `<select>`
+   retombait sur « -- Nouvelle cartouche -- ».
+3. La cellule tapée ensuite passait par `persisterCartouchePartielle` (#517), qui cherche en base par
+   cet id absent et rend `false`. **Les deux appelants ignoraient ce verdict.** La frappe était perdue.
+
+⮕ **Correctifs** : `chargerCartouchesRetroaction(cartoucheIdAGarder)` rouvre la cartouche enregistrée
+par le chemin d'ouverture déjà existant ; l'autosave **dit** quand elle n'écrit rien, une fois par
+cartouche ; et le repli `niveauxDefaut` (les plages I/D/M/E de Grégoire, §3 n° 18) est supprimé.
+
+⚠ **Après une SUPPRESSION, l'appel reste SANS argument** — la cartouche ouverte n'existe plus, en
+rouvrir une neuve est le geste juste. Le défaut n'était pas d'initialiser, c'était de le faire aussi
+quand l'objet venait d'être enregistré.
+
+### ⚠⚠ CE QUE LE BREAK-TEST A TROUVÉ, ET QUE LA LECTURE N'AURAIT PAS VU
+
+**Quatre choses, sur un lot qui passait déjà au vert :**
+
+1. **Deux remises à zéro du drapeau d'avertissement étaient SANS EFFET.** Les neutraliser laissait la
+   sentinelle verte : le drapeau mémorise un *id*, donc changer de cartouche le réarme déjà. Retirées —
+   du code qui ne change rien finit par être lu comme s'il changeait quelque chose.
+2. **Le second site de l'autosave n'était pas couvert.** Les cas ne testaient que
+   `sauvegarderCommentaire` ; `sauvegarderContexteCartouche` pouvait redevenir muet sans rien rougir.
+3. **Une mutation « équivalente » n'est pas une faille de la sentinelle.** Déplacer la lecture de l'id
+   après l'appel restait vert parce que l'argument est évalué AVANT — mais l'analyse a montré que la
+   ligne `selectCartouche.value = …` qui suivait était devenue **redondante**. Retirée.
+4. **Dans la spec WebKit, une assertion ne prouvait rien** : elle lisait les colonnes d'une cartouche
+   EXISTANTE alors que le repli ne joue qu'à la CRÉATION. Le scénario a été étendu.
+
+⮕ **Et un piège de mesure, dans la spec** : `nomEnMemoire` était lu dans le `return`, donc APRÈS que le
+scénario ait ouvert une autre cartouche — il décrivait le mauvais objet, avec aplomb. **Capturer la
+mesure au moment où elle a un sens, pas à la fin.**
+
+### 📌 #578 EST PRIS — le reste de #573
+
+**Une cartouche neuve prend les colonnes de la PREMIÈRE échelle du trimestre**
+(`find(e => !e.estDemo) || echelles[0]`), sans `echelleId`. La source non arbitraire existe : **une
+grille porte un `echelleId`**. ⚠ **Préalable mesurable avant de coder** : compter les grilles réelles
+de Grégoire avec et sans `echelleId`. Sans ce compte, passer par `obtenirEchelleResolue` pourrait le
+laisser sans colonnes — une régression pire que le défaut.
 
 ---
 

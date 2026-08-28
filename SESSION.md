@@ -7,6 +7,55 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 28 AOÛT 2026 (11 h 45) : #573 — LE SYMPTÔME « DES FOIS ÇA
+     ENREGISTRE, DES FOIS NON » A UNE CAUSE, ET ELLE EST FERMÉE.
+
+     ▣ LA DEMANDE. Grégoire a voulu faire le point sur l'audit avant d'enchaîner.
+       Point rendu (voie A quasi close, B non engagée, C exécutée ; 10 des 19
+       sites en dur retirés, 9 vivants), puis choix fermé en 4 options : #573 —
+       « le seul de la liste qui corresponde à un symptôme que j'ai vécu ».
+
+     ▣ LA MÉCANIQUE, EN TROIS TEMPS, TOUS SILENCIEUX.
+       1. `sauvegarderCartouche` → `chargerCartouchesRetroaction()` →
+          `initialiserNouveauCartouche()` : `cartoucheActuel` devient une
+          cartouche NEUVE jamais écrite, nom et contexte vidés.
+       2. La ligne suivante lit `cartoucheActuel.id` — l'id NEUF, absent des
+          options — et le `<select>` retombe sur « -- Nouvelle cartouche -- ».
+       3. La cellule tapée ensuite passe par `persisterCartouchePartielle`
+          (#517), qui cherche en base par cet id absent et rend `false`.
+          **Les deux appelants ignoraient ce verdict.** Frappe perdue, sans un mot.
+
+     ▣ CE QUI EST LIVRÉ. `chargerCartouchesRetroaction(cartoucheIdAGarder)`
+       rouvre par `chargerMatriceRetroaction`, le chemin d'ouverture DÉJÀ
+       existant — en écrire un second aurait été le patron des chemins
+       parallèles. L'autosave DIT quand elle n'écrit rien, une fois par
+       cartouche. Le repli `niveauxDefaut` (§3 n° 18) est supprimé.
+       ⚠ Après une SUPPRESSION, l'appel reste SANS argument : le défaut n'était
+       pas d'initialiser, c'était de le faire aussi après un enregistrement.
+
+     ▣ ⚠⚠ QUATRE TROUVAILLES DU BREAK-TEST, SUR UN LOT DÉJÀ VERT
+       · **Deux remises à zéro du drapeau étaient SANS EFFET** — les neutraliser
+         laissait la sentinelle verte, parce que le drapeau mémorise un ID et se
+         réarme donc seul. Retirées.
+       · **Le second site de l'autosave n'était pas couvert** (`contexte`).
+       · **Une mutation « équivalente » n'est pas une faille de test** : l'argument
+         d'un appel est évalué AVANT. Mais l'analyse a révélé que la ligne
+         `selectCartouche.value = …` qui suivait était REDONDANTE. Retirée.
+       · **Dans la spec WebKit, une assertion ne prouvait rien** : elle lisait une
+         cartouche EXISTANTE quand le repli ne joue qu'à la CRÉATION.
+
+     ▣ UN PIÈGE DE MESURE, ET IL VAUT POUR TOUTE SPEC. `nomEnMemoire` était lu
+       dans le `return`, donc APRÈS que le scénario ait ouvert une autre
+       cartouche : il décrivait le mauvais objet, et le disait avec aplomb.
+       ⮕ **Capturer la mesure au moment où elle a un sens, pas à la fin.**
+
+     ▣ MESURE FINALE, LUE APRÈS LE DERNIER CHANGEMENT : **Vitest 3819/3819,
+       358 fichiers**. Anti-cache `cartouches.js` c→d, jour du BUILD. Version
+       inchangée (1.104.1 / `0827-1418`).
+     ===================================================================== -->
+
+
+<!-- =====================================================================
      SESSION — 28 AOÛT 2026 (10 h 45) : #555 LOT 1 — UNE ÉCHELLE PORTE
      ENFIN SES DEUX REPÈRES DE MAÎTRISE.
 

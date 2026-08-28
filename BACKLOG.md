@@ -1729,7 +1729,40 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   restauration vérifiée. Le banc rejoue le cas réel : échelle « IDME et niv 0 (restaurée) », grille
   `GR_DISPARUE`, les quatre critères des captures. Vitest **3778/3778** (355 fichiers).
 
-- [ ] **#573 — Après « Enregistrer », la cartouche ouverte est REMPLACÉE par une cartouche neuve, et l'autosave #517 devient muet.**
+- [x] **#573 — Après « Enregistrer », la cartouche ouverte est REMPLACÉE par une cartouche neuve, et l'autosave #517 devient muet.** — **LIVRÉ le 28 août 2026**
+  ⮕ **LA CAUSE.** `sauvegarderCartouche` appelait `chargerCartouchesRetroaction()`, qui se termine par
+  `initialiserNouveauCartouche()` : `cartoucheActuel` devenait une cartouche NEUVE jamais écrite, nom et
+  contexte vidés. La ligne suivante lisait `cartoucheActuel.id` — donc l'id neuf, absent des options — et
+  le `<select>` retombait sur « -- Nouvelle cartouche -- ». **Le paramètre `cartoucheIdAGarder` rouvre
+  désormais la cartouche enregistrée**, par `chargerMatriceRetroaction`, le chemin d'ouverture DÉJÀ
+  existant. Après une SUPPRESSION, l'appel reste sans argument : là, rouvrir une neuve est le bon geste.
+  ⮕ **LE FILET, ET IL COMPTE AUTANT.** Les DEUX appelants de `persisterCartouchePartielle` ignoraient son
+  verdict : elle rendait `false` — cartouche absente de la base — et la frappe disparaissait sans un mot.
+  `signalerAutosaveCartoucheMuette` avertit maintenant, **une fois par cartouche** (le drapeau mémorise un
+  id, donc il se réarme seul en changeant de cartouche ; deux remises à zéro explicites ont été retirées,
+  le break-test les ayant montrées SANS EFFET). Avertir à chaque frappe aurait été le harcèlement que
+  #517 refuse justement pour le nom.
+  ⮕ **Le repli `niveauxDefaut` (rapport §3 n° 18) est SUPPRIMÉ** : les plages I/D/M/E de Grégoire
+  devenaient les colonnes de la cartouche de n'importe qui dès que `echellesTemplates` était vide — et une
+  matrice est indexée par `niveau.code`, donc ces colonnes sont la structure du document. Sans échelle,
+  aucune colonne n'est inventée.
+  ⮕ Sentinelle `sentinelle-573-cartouche-reste-ouverte` (11 cas, **10 mutations, 10 rouges**) + spec
+  **WebKit** `cartouche-enregistrer-reste-ouverte.spec.js` (**4 mutations, 4 rouges**) — l'audit notait
+  « reproduit en harnais Node, non vérifié en navigateur » ; ce n'est plus le cas.
+  ⏳ **CE QUI RESTE, INSCRIT À PART : #578** (le choix de l'échelle d'une cartouche neuve).
+
+- [ ] **#578 — Une cartouche neuve prend les colonnes de la PREMIÈRE échelle du trimestre, pas de celle de sa grille.**
+  Créé le 28 août 2026, détaché de #573 (rapport du 27 août, §3 n° 18 et §7.2 n° 4).
+  `initialiserNouveauCartouche` choisit son échelle par `echelles.find(e => !e.estDemo) || echelles[0]`
+  (`cartouches.js`) — un ordre de tableau, pas une désignation — et n'enregistre **aucun `echelleId`** sur
+  la cartouche produite. Or **une grille PORTE un `echelleId`** (`grilles.js`, `grilleGenerique`), et c'est
+  la seule source non arbitraire : la matrice d'une cartouche décrit les niveaux de la grille qu'elle sert.
+  ⚠ **POURQUOI CE N'EST PAS DANS #573.** Le corriger change la CRÉATION de cartouche sur des données que je
+  ne peux pas voir : si les grilles réelles de Grégoire ne portent pas d'`echelleId`, passer par
+  `obtenirEchelleResolue` le laisserait sans colonnes — une régression pire que le défaut. **Préalable
+  mesurable** : compter, dans ses trimestres, les grilles avec et sans `echelleId` (un diagnostic en
+  console suffit). ⮕ Ensuite seulement : lire `grille.echelleId`, résoudre par `obtenirEchelleResolue`,
+  et **écrire l'`echelleId` sur la cartouche** pour que la question ne se repose plus.
   (rapport §7.2 n° 1) `sauvegarderCartouche` → `chargerCartouchesRetroaction()` (`cartouches.js:890`) →
   `initialiserNouveauCartouche(grilleId)` (`:321`) : `cartoucheActuel` = `CART_xxx` neuf, nom et contexte
   vidés (`:414-417`), matrice re-rendue vide ; la cellule tapée ensuite **n'atteint pas la base**

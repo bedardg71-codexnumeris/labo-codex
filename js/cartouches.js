@@ -277,7 +277,31 @@ async function chargerSelectGrillesRetroaction() {
  * GÈRE:
  * - Changement d'événement sur #selectGrilleRetroaction
  */
-async function chargerCartouchesRetroaction() {
+/**
+ * #573 — `cartoucheIdAGarder` : la cartouche à ROUVRIR après le rafraîchissement.
+ *
+ * ⚠⚠ SANS CE PARAMÈTRE, « ENREGISTRER » FERMAIT CE QU'IL VENAIT D'ENREGISTRER.
+ * Cette fonction se termine par `initialiserNouveauCartouche(grilleId)`, qui
+ * remplace `cartoucheActuel` par une cartouche NEUVE (`CART_xxx` jamais écrit),
+ * vide le nom et le contexte, et re-rend la matrice. `sauvegarderCartouche`
+ * l'appelait sans rien pouvoir conserver : l'utilisateur voyait un message de
+ * succès, puis un écran vide.
+ *
+ * ⮕ ET LA SUITE ÉTAIT SILENCIEUSE. La cellule tapée ensuite passait par
+ * `persisterCartouchePartielle` (#517), qui cherche la cartouche EN BASE par
+ * `cartoucheActuel.id` — l'id neuf, absent — et rendait `false`. Aucun des deux
+ * appelants ne lisait ce verdict. **La frappe était perdue sans un mot.** C'est
+ * le candidat désigné par l'audit du 27 août au symptôme rapporté par Grégoire,
+ * « des fois ça enregistre, des fois non ».
+ *
+ * ⚠ APRÈS UNE SUPPRESSION (`:1646`), l'appel reste SANS argument, et c'est
+ * voulu : la cartouche ouverte n'existe plus, en rouvrir une neuve est le bon
+ * geste. Le défaut n'était pas d'initialiser — c'était de le faire aussi quand
+ * l'objet venait d'être enregistré.
+ *
+ * @param {string} [cartoucheIdAGarder] - id à rouvrir ; sinon, cartouche neuve.
+ */
+async function chargerCartouchesRetroaction(cartoucheIdAGarder = null) {
     const grilleId = document.getElementById('selectGrilleRetroaction').value;
     const selectCartouche = document.getElementById('selectCartouche');
     
@@ -317,6 +341,17 @@ async function chargerCartouchesRetroaction() {
     const listeAncienne = document.getElementById('listeCartouchesExistants');
     if (listeAncienne) listeAncienne.classList.add('u-hide');
     
+    // #573 — rouvrir la cartouche demandée plutôt que d'en initialiser une neuve.
+    // La relecture passe par `chargerMatriceRetroaction`, le chemin d'ouverture
+    // DÉJÀ existant : il rétablit `cartoucheActuel`, `window.cartoucheActuel`,
+    // les champs et la matrice. En écrire un second aurait été le patron des
+    // chemins parallèles qui divergent.
+    if (cartoucheIdAGarder) {
+        selectCartouche.value = cartoucheIdAGarder;
+        await chargerMatriceRetroaction(cartoucheIdAGarder, grilleId);
+        return;
+    }
+
     // Initialiser une nouvelle cartouche par défaut
     await initialiserNouveauCartouche(grilleId);
 }
@@ -368,16 +403,25 @@ async function initialiserNouveauCartouche(grilleId) {
     // Les critères viennent directement de la grille
     const criteres = grille.criteres || [];
     
-    // Récupérer l'échelle de performance depuis echellesTemplates
-    const niveauxDefaut = [
-        { code: 'I', nom: 'Incomplet', min: 0, max: 64 },
-        { code: 'D', nom: 'en Développement', min: 65, max: 74 },
-        { code: 'M', nom: 'Maîtrisé', min: 75, max: 84 },
-        { code: 'E', nom: 'Étendu', min: 85, max: 100 }
-    ];
+    // ⮕ #573 (rapport du 27 août, §3 n° 18) — LE REPLI `niveauxDefaut` A ÉTÉ
+    // SUPPRIMÉ. C'était l'échelle IDME de Grégoire au complet — codes, noms et
+    // plages `0-64 / 65-74 / 75-84 / 85-100` — posée en colonnes de la cartouche
+    // NEUVE de n'importe qui dès que `echellesTemplates` était vide. Une matrice
+    // de rétroaction est indexée par `niveau.code` : ces colonnes deviennent les
+    // clés des commentaires, donc la structure de son document.
+    //
+    // ⮕ Sans échelle, aucune colonne n'est inventée : `niveaux` reste vide et la
+    // matrice se rend vide. C'est la règle du dépôt depuis #527 — jamais un
+    // libellé, une plage ni une couleur fabriqués.
+    //
+    // ⚠ CE QUI RESTE, ET QUI N'EST PAS CORRIGÉ ICI : le CHOIX de l'échelle par
+    // `find(e => !e.estDemo) || echelles[0]`. Une cartouche neuve prend donc les
+    // colonnes de la PREMIÈRE échelle du trimestre, pas de celle de sa grille —
+    // qui porte pourtant un `echelleId`. Le corriger change la création de
+    // cartouche sur des données que je ne peux pas voir : inscrit à part.
     const echelles = await db.get(cle('echellesTemplates'), []);
     const echelleActive = echelles.find(e => !e.estDemo) || echelles[0];
-    const niveaux = echelleActive?.niveaux || niveauxDefaut;
+    const niveaux = echelleActive?.niveaux || [];
     
     // Créer la structure de cartouche
     cartoucheActuel = {
@@ -667,7 +711,8 @@ async function sauvegarderCommentaire(key) {
         // d'abord, et c'est elle que lit le calcul de complétion.
         cartoucheActuel.commentaires[key] = textarea.value;
         await calculerPourcentageComplete();
-        await persisterCartouchePartielle(c => { c.commentaires[key] = textarea.value; });
+        const ecrit = await persisterCartouchePartielle(c => { c.commentaires[key] = textarea.value; });
+        signalerAutosaveCartoucheMuette(ecrit);
     }
 }
 
@@ -690,6 +735,18 @@ async function sauvegarderCommentaire(key) {
  * le défaut que ce même cycle vient de corriger sur les grilles ; l'introduire
  * ici en le sachant serait impardonnable.
  */
+/**
+ * #573 — id de la cartouche pour laquelle l'avertissement a déjà été montré.
+ *
+ * ⚠ IL MÉMORISE UN ID, PAS UN BOOLÉEN, et c'est ce qui le réarme tout seul :
+ * ouvrir une autre cartouche donne un id différent, donc un avertissement de
+ * nouveau possible. Deux remises à zéro explicites avaient d'abord été posées à
+ * l'ouverture et à l'initialisation ; le break-test les a montrées SANS EFFET —
+ * les neutraliser laissait la sentinelle verte. Elles sont retirées : du code
+ * qui ne change rien finit par être lu comme s'il changeait quelque chose.
+ */
+let _autosaveCartoucheDejaSignalee = null;
+
 async function persisterCartouchePartielle(appliquer) {
     if (!cartoucheActuel || !cartoucheActuel.id || !cartoucheActuel.grilleId) return false;
     const resultat = await db.modifier(`cartouches_${cartoucheActuel.grilleId}`, (lues) => {
@@ -765,7 +822,41 @@ async function sauvegarderContexteCartouche() {
     if (!champ) return;
     const valeur = champ.value.trim();
     cartoucheActuel.contexte = valeur;
-    await persisterCartouchePartielle(c => { c.contexte = valeur; });
+    const ecrit = await persisterCartouchePartielle(c => { c.contexte = valeur; });
+    signalerAutosaveCartoucheMuette(ecrit);
+}
+
+/**
+ * #573 — dire quand l'enregistrement automatique n'a RIEN écrit.
+ *
+ * ⚠⚠ LES DEUX APPELANTS DE `persisterCartouchePartielle` IGNORAIENT SON VERDICT.
+ * Elle rend `false` quand la cartouche ouverte n'est pas en base — exactement
+ * l'état où « Enregistrer » laissait l'écran avant le correctif ci-dessus. La
+ * saisie repartait dans le vide, et rien ne le disait. C'est le patron des
+ * « boutons qui mentent » (#468), appliqué à un enregistrement automatique :
+ * #517 promet d'écrire au fil de la frappe, donc son silence vaut promesse tenue.
+ *
+ * ⮕ LA CAUSE EST CORRIGÉE ; CE FILET RESTE. Un correctif qui referme un chemin
+ * ne dit rien des autres : `persisterCartouchePartielle` refusera encore d'écrire
+ * pour une cartouche jamais enregistrée, et ce jour-là il vaut mieux un
+ * avertissement qu'une perte muette.
+ *
+ * ⚠ UNE SEULE FOIS PAR CARTOUCHE OUVERTE. Ces fonctions se déclenchent à chaque
+ * frappe : avertir à chacune serait du harcèlement, la raison même pour laquelle
+ * le nom est resté au bouton (#517). Le drapeau retombe à l'ouverture suivante.
+ */
+function signalerAutosaveCartoucheMuette(ecrit) {
+    if (ecrit) return;
+    const id = cartoucheActuel && cartoucheActuel.id;
+    if (!id || _autosaveCartoucheDejaSignalee === id) return;
+    _autosaveCartoucheDejaSignalee = id;
+    if (typeof notifications !== 'undefined' && typeof notifications.warning === 'function') {
+        notifications.warning(
+            'Cette cartouche n\'est pas encore enregistrée',
+            'Ce que tu tapes n\'est gardé qu\'à l\'écran. Clique sur « Enregistrer » pour la créer, '
+            + 'puis la saisie se conservera au fil de la frappe.'
+        );
+    }
 }
 
 /* ===============================
@@ -887,8 +978,17 @@ async function sauvegarderCartouche() {
     definirCartoucheActive(cartoucheActuel.id);
 
     // Rafraîchir l'interface (ancien système - compatibilité)
-    await chargerCartouchesRetroaction();
-    document.getElementById('selectCartouche').value = cartoucheActuel.id;
+    // ⚠ #573 — L'ID EST CAPTURÉ AVANT L'APPEL. `chargerCartouchesRetroaction`
+    // réassigne `cartoucheActuel` ; lire `cartoucheActuel.id` APRÈS rendait l'id
+    // de la cartouche NEUVE, que le `<select>` ne contient pas — il retombait
+    // donc sur « -- Nouvelle cartouche -- ».
+    // ⚠ La ligne `selectCartouche.value = cartoucheActuel.id` qui suivait cet
+    // appel est RETIRÉE, et pas par économie : `chargerCartouchesRetroaction`
+    // pose désormais elle-même la valeur, au moment où elle rouvre. La garder
+    // aurait été une seconde écriture du même champ, à un endroit où
+    // `cartoucheActuel` a déjà changé de sens — exactement le genre de doublon
+    // qui survit à un correctif et le contredit un jour.
+    await chargerCartouchesRetroaction(cartoucheActuel.id);
 
     // Rafraîchir la nouvelle vue (ancien système)
     // DÉSACTIVÉ Beta 80.5+ : ancienne interface remplacée par sidebar
