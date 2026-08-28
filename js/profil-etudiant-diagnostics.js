@@ -395,38 +395,25 @@ function genererDiagnosticGenerique(da, defisInfo) {
  */
 function _genererBarresSRPNF(da) {
 
-    // Récupérer les couleurs depuis l'échelle configurée
-    const echelles = db.getSync(cle('echellesTemplates'), []);
-    const echelleActive = echelles.find(e => e.active) || echelles[0];
-
-    let niveaux = [
-        { code: 'I', nom: 'Incomplet', min: 0, max: 64, couleur: 'var(--orange-accent)' },
-        { code: 'D', nom: 'Développement', min: 65, max: 74, couleur: 'var(--btn-annuler)' },
-        { code: 'M', nom: 'Maîtrisé', min: 75, max: 84, couleur: 'var(--vert-succes)' },
-        { code: 'E', nom: 'Étendu', min: 85, max: 100, couleur: 'var(--bleu-clair)' }
-    ];
-
-    if (echelleActive && echelleActive.niveaux) {
-        niveaux = echelleActive.niveaux.map(n => ({
-            code: n.code, nom: n.nom, min: n.min, max: n.max, couleur: n.couleur
-        }));
-    }
-
-    // Gradient CSS
-    const gradientStops = [];
-    niveaux.forEach((niveau, i) => {
-        if (i === 0) {
-            gradientStops.push(`${niveau.couleur} ${niveau.min}%`);
-            gradientStops.push(`${niveau.couleur} ${(i < niveaux.length - 1 ? niveaux[i + 1].min - 2 : niveau.max)}%`);
-        } else if (i === niveaux.length - 1) {
-            gradientStops.push(`${niveau.couleur} ${niveau.min + 2}%`);
-            gradientStops.push(`${niveau.couleur} ${niveau.max}%`);
-        } else {
-            gradientStops.push(`${niveau.couleur} ${niveau.min + 2}%`);
-            gradientStops.push(`${niveau.couleur} ${niveaux[i + 1].min - 2}%`);
-        }
-    });
-    const gradientCSS = `linear-gradient(to right, ${gradientStops.join(', ')})`;
+    // ⮕ #575 (lot 4 du plan SOLO, rapport §3 n° 5) — LA CINQUIÈME TABLE IDME A
+    // ÉTÉ RETIRÉE D'ICI, ET L'ÉCHELLE N'EST PLUS DEVINÉE.
+    //
+    // Ce qui vivait là : `echelles.find(e => e.active) || echelles[0]` — « l'échelle
+    // active, sinon la première » — et, si elle manquait, un repli
+    // `I 0-64 / D 65-74 / M 75-84 / E 85-100` avec ses quatre couleurs, plus le
+    // calcul du dégradé. Le tout en DOUBLE avec `_obtenirNiveauxEtGradientSRPNF`
+    // (`profil-etudiant-sections-affichage.js`), à deux lignes près. L'audit du
+    // 27 août donnait cette fonction pour « probablement morte » : elle est
+    // vivante (`genererSectionPerformance` l'appelle).
+    //
+    // ⮕ Le calcul vit maintenant une seule fois, dans
+    // `niveauxEtGradientDesEvaluations` : l'échelle COMMUNE des évaluations de
+    // l'élève (pas 3b de #542), qui refuse de choisir quand elles divergent et
+    // dit pourquoi. Sans elle : fond neutre, pas de légende, cause au survol.
+    const { niveaux, gradientCSS, message: messageEchelle } = (typeof niveauxEtGradientDesEvaluations === 'function')
+        ? niveauxEtGradientDesEvaluations(da)
+        : { niveaux: [], gradientCSS: 'var(--gris-pale, #e9e9e9)', message: '' };
+    const survolBarre = messageEchelle ? ` title="${echapperHtml(messageEchelle)}"` : '';
 
     // Calculer moyennes SRPNF
     const moyennes = calculerMoyennesCriteres(da);
@@ -456,7 +443,7 @@ function _genererBarresSRPNF(da) {
                     <span class="critere-nom" style="min-width: 120px;">${nomCritere}</span>
                     <span class="critere-valeur" style="margin-left: auto; font-weight: 600;">${pourcentage}%</span>
                 </div>
-                <div class="critere-barre-gradient" style="background: ${gradientCSS};">
+                <div class="critere-barre-gradient" style="background: ${gradientCSS};"${survolBarre}>
                     ${symbolesHTML}
                     ${pointsHTML}
                 </div>
@@ -469,9 +456,13 @@ function _genererBarresSRPNF(da) {
         <div class="legende-idme-container">
             ${niveaux.map(n => {
                 const pos = (n.min + n.max) / 2;
+                // #575 — code et nom viennent de l'échelle de l'utilisateur : ils
+                // sont échappés, comme partout ailleurs. La couleur, elle, est
+                // filtrée à la construction de `niveaux` (un `echapperHtml` ne
+                // neutraliserait pas une injection CSS).
                 return `<div class="legende-idme-item" style="left: ${pos}%; color: ${n.couleur};">
-                    <span class="legende-idme-code">${n.code}</span>
-                    <span class="legende-idme-nom">${n.nom}</span>
+                    <span class="legende-idme-code">${echapperHtml(n.code)}</span>
+                    <span class="legende-idme-nom">${echapperHtml(n.nom)}</span>
                 </div>`;
             }).join('')}
         </div>

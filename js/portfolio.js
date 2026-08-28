@@ -523,53 +523,25 @@ function comptesDansDepistage(production, mode) {
     }
 }
 
-/**
- * Convertit un niveau de performance (IDME) en pourcentage
- *
- * @param {string} niveau - Code du niveau ('I', 'D', 'M', 'E')
- * @param {string} echelleId - ID de l'échelle de performance (optionnel)
- * @returns {number} - Valeur en % (0-100)
- *
- * FONCTIONNEMENT :
- * - Cherche le niveau dans l'échelle spécifiée (ou échelle par défaut)
- * - Utilise la valeur 'valeurCalcul' définie dans echelles.js
- * - Valeurs par défaut si échelle non trouvée :
- *   I = 32%, D = 69.5%, M = 79.5%, E = 92.5%
- *
- * UTILISÉ PAR :
- * - Calcul indice P en mode PAN (artefacts évalués avec IDME)
- * - Conversion des notes qualitatives en notes quantitatives
- */
-function convertirNiveauEnPourcentage(niveau, echelleId = null) {
-    // Valeurs par défaut (basées sur les niveaux IDME standard)
-    const valeursDefaut = {
-        '0': 0,
-        'I': 32,
-        'D': 69.5,
-        'M': 79.5,
-        'E': 92.5
-    };
-
-    // Tenter de récupérer depuis l'échelle configurée
-    const echelles = db.getSync('echellesPerformance', []);
-    let echelle;
-
-    if (echelleId) {
-        echelle = echelles.find(e => e.id === echelleId);
-    } else {
-        echelle = echelles.find(e => e.parDefaut === true) || echelles[0];
-    }
-
-    if (echelle && echelle.niveaux) {
-        const niveauObj = echelle.niveaux.find(n => n.code === niveau);
-        if (niveauObj && niveauObj.valeurCalcul !== undefined) {
-            return niveauObj.valeurCalcul;
-        }
-    }
-
-    // Fallback sur valeurs par défaut
-    return valeursDefaut[niveau] || 0;
-}
+// ⮕ #575 (lot 4 du plan SOLO, B1+B2) — `convertirNiveauEnPourcentage` A ÉTÉ
+// SUPPRIMÉE ICI, AVEC SON REPLI ET SA CLÉ MORTE.
+//
+// Elle convertissait un code de niveau en pourcentage et se repliait, quand
+// elle ne trouvait rien, sur `{0:0, I:32, D:69.5, M:79.5, E:92.5}` — le
+// QUATRIÈME repli IDME du dépôt, celui que #529 avait manqué. Son échelle, elle
+// la cherchait sous `db.getSync('echellesPerformance')` : une clé que RIEN
+// n'écrit dans tout `js/` (le stockage réel est `echellesTemplates`, namespacé
+// par `cle()`). Le repli n'était donc pas un filet de sécurité, c'était le
+// chemin NORMAL — patron `feedback-cle-db-lue-jamais-ecrite`. Chez Grégoire il
+// rendait 32/69,5/79,5/92,5 au lieu de ses 40/65/75/100 ; ailleurs, `|| 0`
+// rendait 0 % pour tout code hors I/D/M/E.
+//
+// Son unique appelant (le bloc « défis communs » de `interventions.js`) est
+// supprimé au même geste. La conversion juste vit dans
+// `profil-etudiant-calculs.js` : `obtenirTableConversionNiveaux(echelleId)` +
+// `convertirNiveauEnScore` — elles lisent l'échelle de CHAQUE évaluation, y
+// compris celle embarquée dans une pratique configurable, et rendent `null`
+// plutôt qu'un chiffre inventé quand l'échelle ne se résout pas.
 
 /* ===============================
    🔄 CALCUL ET STOCKAGE DES INDICES C et P
