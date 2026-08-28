@@ -47,6 +47,7 @@
        =============================== */
 
     let actif = false;
+    let timerBoutonsOutils = null;    // #572 : id du setInterval, pour pouvoir l'arrêter
     let fichiers = [];                // Copies locales des fichiers en attente
     let indexActuel = 0;              // Fichier courant
     let queueOffset = 0;             // Decalage dans la queue pour mode fichier unique
@@ -133,6 +134,12 @@
     function fermer() {
         libererMemoire();
         actif = false;
+        // #572 — arrêter le timer des boutons d'outils : la modale est retirée
+        // du DOM juste après, le timer n'aurait plus rien à observer.
+        if (timerBoutonsOutils) {
+            clearInterval(timerBoutonsOutils);
+            timerBoutonsOutils = null;
+        }
         const modal = document.getElementById('travaux-preparation-modal');
         if (modal) modal.remove();
     }
@@ -2676,8 +2683,14 @@
         configurerZoomEvents();
         configurerDragPalettes();
 
-        // Mettre a jour les boutons d'outils periodiquement
-        setInterval(verifierBoutonsOutils, 200);
+        // Mettre a jour les boutons d'outils periodiquement.
+        // #572 — un `setInterval` nu ici fuyait : la fonction est appelée à
+        // CHAQUE ouverture du poste de préparation, et rien ne nettoyait le
+        // timer précédent. Après dix ouvertures, dix timers tournaient encore à
+        // 200 ms sur une modale fermée. Pas de bug visible (`verifierBoutonsOutils`
+        // sort tôt sur `!actif`), mais une accumulation qui ne s'arrête jamais.
+        if (timerBoutonsOutils) clearInterval(timerBoutonsOutils);
+        timerBoutonsOutils = setInterval(verifierBoutonsOutils, 200);
     }
 
     /**
