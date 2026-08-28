@@ -39,6 +39,8 @@ var _ctx = null; // cache du contexte chargé
  *   productions[]  — productions évaluées, dans l'ordre du tableau
  *   criteres[]     — noms de critères uniques trouvés dans les évaluations
  *   seuilMaitrise  — score numérique (0-1) au-dessus duquel un niveau = maîtrise
+ *   seuilMaitriseDeduit — true si ce score n'a PAS été lu sur le repère de l'échelle
+ *   seuilMaitriseRaison — pourquoi il a fallu le déduire (voir _detecterSeuilMaitrise)
  *   convertir(code) — fonction qui convertit un code de niveau en score (0-1)
  *   criteresParProd — Map<prodIndex, Set<critereNom>> — critères évalués par production
  *   parEtudiant    — Map<da, [{artefactIndex, criteres:{nom:score}}]>
@@ -70,7 +72,11 @@ function _chargerContexte() {
     // ── Échelle ──────────────────────────────────────────────────────────
     var echelle = _detecterEchelle(productions);
     var conversion = _construireConversion(echelle);
-    var seuilMaitrise = _detecterSeuilMaitrise(echelle);
+    // #555 lot 2 — `_detecterSeuilMaitrise` rend désormais {valeur, deduite,
+    // raison}. Les comparaisons restent numériques (`ctx.seuilMaitrise`) ; la
+    // réserve voyage à côté, jusqu'à l'affichage.
+    var repereMaitrise = _detecterSeuilMaitrise(echelle, _idEchelleMajoritaire(productions));
+    var seuilMaitrise = repereMaitrise.valeur;
 
     // ── Productions (toutes celles qui ont au moins une évaluation) ──────
     var prodsEvaluees = new Set();
@@ -144,6 +150,8 @@ function _chargerContexte() {
         criteres: criteresListe,
         criteresParProd: criteresParProd,
         seuilMaitrise: seuilMaitrise,
+        seuilMaitriseDeduit: repereMaitrise.deduite,
+        seuilMaitriseRaison: repereMaitrise.raison,
         conversion: conversion,
         parEtudiant: parEtudiant,
         grilles: grilles
@@ -155,15 +163,17 @@ function _chargerContexte() {
 // ─── Détection de l'échelle ──────────────────────────────────────────────────
 
 /**
- * Trouve l'échelle la plus utilisée parmi les productions.
- * Retourne l'objet échelle ou null.
+ * L'`echelleId` le plus fréquent parmi les productions.
+ * #555 lot 2 (28 août 2026) — extrait de `_detecterEchelle` pour que l'appelant
+ * puisse savoir POURQUOI la résolution a échoué sans recompter lui-même.
+ * @param {Array} productions
+ * @returns {string|null}
  */
-function _detecterEchelle(productions) {
-    // Compter les échelleId
+function _idEchelleMajoritaire(productions) {
     var compteur = {};
     var meilleurId = null;
     var meilleurCount = 0;
-    productions.forEach(function(p) {
+    (productions || []).forEach(function(p) {
         if (!p.echelleId) return;
         compteur[p.echelleId] = (compteur[p.echelleId] || 0) + 1;
         if (compteur[p.echelleId] > meilleurCount) {
@@ -171,6 +181,15 @@ function _detecterEchelle(productions) {
             meilleurId = p.echelleId;
         }
     });
+    return meilleurId;
+}
+
+/**
+ * Trouve l'échelle la plus utilisée parmi les productions.
+ * Retourne l'objet échelle ou null.
+ */
+function _detecterEchelle(productions) {
+    var meilleurId = _idEchelleMajoritaire(productions);
 
     if (!meilleurId) return null;
 
@@ -242,20 +261,89 @@ function _construireConversion(echelle) {
 
 /**
  * Détecte le seuil de maîtrise depuis l'échelle.
- * Convention : avant-dernier niveau = maîtrise. Son `min / 100` = seuil.
- * Fallback : 0.75 (M dans IDME).
+ *
+ * #555 lot 2 (28 août 2026) — LIT LE REPÈRE au lieu de le deviner. Le lot 1 a
+ * doté l'échelle de `seuilMaitrise`, un CODE de niveau posé par l'utilisateur.
+ * Cette fonction le lisait pas : elle appliquait la convention « avant-dernier
+ * niveau = maîtrise », juste par COÏNCIDENCE sur l'échelle de Grégoire (I, D,
+ * M, E — l'avant-dernier EST M), et fausse ailleurs : sur une échelle à trois
+ * paliers l'avant-dernier est celui du milieu, et sur une échelle qui porte un
+ * « 0 » de jugement suspendu le compte se décale.
+ *
+ * ⮕ Décision de Grégoire (28 août) : quand le repère n'est PAS posé, la matrice
+ * CALCULE ET LE DIT — elle ne devine pas en silence, et on ne retire pas la
+ * fonction aux expérimentateurs qui n'ont pas encore posé leurs repères.
+ * D'où un retour à trois champs plutôt qu'un nombre nu.
+ *
+ * @param {Object|null} echelle
+ * @param {string|null} [echelleId] l'identifiant d'origine, pour distinguer une
+ *        echelle de PRATIQUE (non editable, donc reserve non levable) d'une
+ *        echelle simplement introuvable.
+ * @returns {{valeur: number, deduite: boolean, raison: string|null}}
+ *          `deduite: false` = le repère de l'échelle a été lu.
+ *          `deduite: true`  = valeur obtenue autrement ; `raison` dit laquelle.
  */
-function _detecterSeuilMaitrise(echelle) {
-    if (!echelle || !echelle.niveaux || echelle.niveaux.length < 2) return 0.75;
+function _detecterSeuilMaitrise(echelle, echelleId) {
+    // Aucune échelle exploitable : le seuil ne se dérive de rien. On conserve
+    // 0,75 faute de mieux — des scores peuvent tout de même exister, car
+    // `_construireConversion` sait lire un score numérique sans échelle, et un
+    // seuil `null` rendrait toute comparaison `>=` vraie. Mais il est MARQUÉ.
+    if (!echelle || !echelle.niveaux || echelle.niveaux.length < 2) {
+        // Une échelle de PRATIQUE configurable (`echelleId` = `pratique-<id>`)
+        // n'est pas une échelle introuvable : elle est synthétisée à la volée par
+        // `_resoudreEchellePratique` (`evaluation-chargement.js:253`), n'existe
+        // pas dans `echellesTemplates`, et l'éditeur ne permet donc PAS d'y poser
+        // de repères. Dire « échelle non retrouvée » réclamerait à l'utilisateur
+        // un geste qu'il ne peut pas faire. Le cas ne se produit pas chez
+        // Grégoire (ses pratiques sont dans la liste codée en dur écartée
+        // l. 256) — c'est un cas d'expérimentateur. Repéré par la session
+        // d'audit parallèle du 28 août 2026.
+        if (echelleId && String(echelleId).indexOf('pratique-') === 0) {
+            return { valeur: 0.75, deduite: true, raison: 'echelle-de-pratique' };
+        }
+        return { valeur: 0.75, deduite: true, raison: 'echelle-non-resolue' };
+    }
 
-    // Trier par min croissant
     var niveauxTries = echelle.niveaux.slice().sort(function(a, b) {
         return (a.min || 0) - (b.min || 0);
     });
 
-    // Avant-dernier = maîtrise
+    // Le repère posé sur l'échelle, s'il existe : `seuilMaitrise` est un CODE.
+    if (echelle.seuilMaitrise) {
+        var codeVise = String(echelle.seuilMaitrise).toUpperCase();
+        for (var i = 0; i < niveauxTries.length; i++) {
+            var n = niveauxTries[i];
+            if (n && n.code && String(n.code).toUpperCase() === codeVise) {
+                // `!= null` et non `||` : un niveau dont le `min` vaut 0 est
+                // légitime, et `0 || 75` l'aurait remplacé par 75.
+                if (n.min != null) {
+                    return { valeur: n.min / 100, deduite: false, raison: null };
+                }
+                // Le repère désigne un niveau sans borne basse : on ne peut pas
+                // en tirer un score. C'est un repli, donc il se dit.
+                return { valeur: 0.75, deduite: true, raison: 'repere-sans-min' };
+            }
+        }
+        // Le code posé ne correspond à aucun niveau de l'échelle (niveau
+        // renommé ou supprimé depuis). Ne pas retomber SILENCIEUSEMENT sur la
+        // convention : c'est une incohérence de données, pas une absence.
+        return { valeur: _seuilParConvention(niveauxTries), deduite: true, raison: 'repere-introuvable' };
+    }
+
+    // Repère non posé : la convention historique, mais annoncée comme déduite.
+    return { valeur: _seuilParConvention(niveauxTries), deduite: true, raison: 'repere-non-pose' };
+}
+
+/**
+ * La convention historique « avant-dernier niveau = maîtrise », isolée pour que
+ * son unique raison d'être — servir de repli ANNONCÉ — reste lisible.
+ * @param {Array} niveauxTries niveaux triés par `min` croissant
+ * @returns {number}
+ */
+function _seuilParConvention(niveauxTries) {
     var niveauMaitrise = niveauxTries[niveauxTries.length - 2];
-    return (niveauMaitrise.min || 75) / 100;
+    if (!niveauMaitrise || niveauMaitrise.min == null) return 0.75;
+    return niveauMaitrise.min / 100;
 }
 
 // ─── Utilitaires de calcul ───────────────────────────────────────────────────
@@ -413,7 +501,11 @@ function calculerMatriceConsolidation() {
         criteres: ctx.criteres,
         nomsProductions: ctx.nomsProductions,
         nombreProds: ctx.nombreProds,
-        seuilMaitrise: ctx.seuilMaitrise
+        seuilMaitrise: ctx.seuilMaitrise,
+        // #555 lot 2 — la réserve accompagne le seuil jusqu'aux consommateurs :
+        // sans elle, un seuil déduit est indiscernable d'un seuil lu.
+        seuilMaitriseDeduit: ctx.seuilMaitriseDeduit,
+        seuilMaitriseRaison: ctx.seuilMaitriseRaison
     };
 }
 
@@ -471,7 +563,13 @@ function calculerConsolidationIndividuelle(da) {
         resume: resume,
         grille: grille,
         criteres: ctx.criteres,
-        nomsProductions: ctx.nomsProductions
+        nomsProductions: ctx.nomsProductions,
+        // #555 lot 2 — c'est le chemin RENDU À L'ÉCRAN (matrice de consolidation
+        // du profil, graphique de trajectoire). Sans ces deux champs, l'écran ne
+        // peut pas distinguer un seuil lu sur l'échelle d'un seuil deviné.
+        seuilMaitrise: ctx.seuilMaitrise,
+        seuilMaitriseDeduit: ctx.seuilMaitriseDeduit,
+        seuilMaitriseRaison: ctx.seuilMaitriseRaison
     };
 }
 
@@ -660,4 +758,12 @@ function _genererLigneSynthese(donnees) {
 }
 
 window.calculerConsolidationIndividuelle = calculerConsolidationIndividuelle;
+
+// #555 lot 2 — exposée pour la sentinelle. `_detecterSeuilMaitrise` est une
+// fonction PURE (échelle → {valeur, deduite, raison}) dont les cas limites — un
+// niveau repère dont le `min` vaut 0, un code qui ne correspond à aucun niveau,
+// un repère sans borne — ne sont pas atteignables par `calculerConsolidation*`
+// sans monter un jeu complet de productions, d'évaluations et de grilles. Un
+// montage incomplet mesurerait des zéros ; on teste donc la fonction elle-même.
+window._detecterSeuilMaitrise = _detecterSeuilMaitrise;
 

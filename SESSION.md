@@ -7,6 +7,71 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 28 AOÛT 2026 (APRÈS-MIDI, 15 h 40) : LE SEUIL DE DÉFI N'A PLUS
+     QU'UNE SOURCE, LE SEUIL DE MAÎTRISE SE LIT AU LIEU DE SE DEVINER.
+     ⚠ TROIS SESSIONS SIMULTANÉES SUR CE DÉPÔT CET APRÈS-MIDI (58, 75, 5b).
+
+     ▣ LIVRÉ. #555 lot 2, points (c) puis (b). Commits `248ad75b` (poussé) et
+       celui-ci. Vitest 3939/3939 sur 369 fichiers, Playwright 199/199.
+
+     ▣ (c) LES « QUATRE REPLIS DIVERGENTS » ÉTAIENT SEPT, ET TOUS MORTS.
+       ⮕ **L'ÉNONCÉ DU BACKLOG ÉTAIT FAUX**, et c'est le point à retenir :
+       « deux fichiers répondent différemment quand la préférence est absente »
+       — non. `obtenirSeuil` retombe TOUJOURS sur `SEUILS_PAR_DEFAUT` (0,70) et
+       `chargerSeuilsInterpretation` auto-guérit le stockage. Les replis ne se
+       déclenchaient que sur une valeur falsy, qu'AUCUN des trois chemins
+       d'écriture ne peut produire. C'étaient des valeurs mortes documentant
+       deux conventions contradictoires. Qui traite l'item en croyant corriger
+       deux comportements corrige des zéros.
+       · Trois sites de plus que les quatre annoncés, dont la table miroir de
+         `_obtenirSeuil` à 0,75 contre 0,70 à la source.
+       · `interventions.js` : un seul `||` portait DEUX intentions — garde de
+         chargement (réelle en test) et repli de valeur (jamais atteint).
+         Séparés. C'est le geste le moins visible et le plus utile du lot.
+
+     ▣ (b) `_detecterSeuilMaitrise` LIT `echelle.seuilMaitrise` et rend
+       **{valeur, deduite, raison}** au lieu d'un nombre nu.
+       ⮕ **DÉCISION DE GRÉGOIRE, en séance** : quand le repère n'est pas posé,
+       la matrice CALCULE ET LE DIT. Ni devinette muette, ni fonction retirée
+       aux expérimentateurs. Cinq raisons, cinq libellés.
+       · Piège corrigé : `(min || 75)` écrasait un `min` valant **0**, qui est
+         un cran légitime — cf. le « 0 » de jugement suspendu.
+       · Le repli 0,75 de l'échelle non résolue SUBSISTE : `null` était tentant
+         et FAUX, car `_construireConversion` lit un score numérique sans
+         échelle et `score >= null` est vrai dès 0. Il n'est plus muet.
+
+     ▣ CE QUE LES SESSIONS PARALLÈLES ONT TROUVÉ QUE JE N'AURAIS PAS VU.
+       · La 58 : mon travail était STAGÉ pendant 30 min ; un `git commit` sans
+         chemins de sa part l'emportait sous son message. Ma prudence sur le
+         staging ne protégeait rien — le danger était chez elle.
+         ⮕ **Si le commit doit attendre, ce n'est pas dans l'index qu'il attend.**
+       · La 5b : chez un utilisateur en pratique CONFIGURABLE, `echelleId` vaut
+         `pratique-*`, que `_detecterEchelle` ne résout pas — ma réserve se
+         serait affichée en permanence avec une cause **non corrigeable**.
+         Corrigé avant commit : raison `echelle-de-pratique` + libellé qui ne
+         renvoie pas vers l'éditeur. ⚠ **Les deux résolveurs parallèles
+         (`_detecterEchelle` vs `obtenirEchelleResolue`) restent à réconcilier**
+         — chantier, pas retouche.
+       · Et moi à la 58 : `option.textContent = echapperHtml(...)` affichait
+         `L&#39;atelier` dans le filtre des cartouches.
+
+     ▣ DEUX PIÈGES D'OUTILLAGE, DONT UN QUI TROMPE ACTIVEMENT.
+       · **Vitest se lance depuis `tests/`.** Depuis la racine : 77 fichiers
+         rouges en ENOENT, faux verdict complet. Signe rapide : `v2.1.9` (bon)
+         contre `v4.1.11` (mauvais répertoire).
+       · **Le message du hook anti-cache conseille le mauvais geste** : il dit
+         « incrémenter la LETTRE » ; sur un jeton daté de la veille ça donne
+         `20260826d`, le hook passe et la sentinelle rougit, car elle exige le
+         jour du BUILD. Versé à #547. Rencontré deux fois aujourd'hui.
+
+     ▣ RESTE DU LOT 2, ORDONNÉ. (b) au sens strict : le **lecteur unique**
+       « zone d'un code » n'existe toujours pas — chaque consommateur porte sa
+       propre lecture. Puis (c) brancher `evaluation-retroaction.js` (8 lignes /
+       18 comparaisons). Puis (d) le NOMMAGE : `seuilMaitrise` désigne cinq
+       choses de types différents — décision de Grégoire, avec #577.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 28 AOÛT 2026 (APRÈS-MIDI, 15 h 10) : SIX ITEMS ÉVALUATIONS,
      « ALLÉGER » RETIRÉ, ET LE JOUR OÙ UN ÉNONCÉ D'AUDIT A ÉTÉ FAUX SIX FOIS.
      ===================================================================== -->
