@@ -54,6 +54,10 @@ const indexHtml = readFileSync(path.join(racine, 'index.html'), 'utf8');
 const ECHELLE_JAUNE = {
     id: 'ECH_JAUNE',
     nom: 'Cotation par paliers',
+    // #555 lot 2 — P1 et P2 sont des priorités, P3 est signalé, P4 est acquis.
+    // (P0 « Suspendu » reste sous tout : c'est le jugement suspendu.)
+    seuilSuffisance: 'P3',
+    seuilMaitrise: 'P4',
     niveaux: [
         { code: 'P3', nom: 'Palier 3', min: 70, max: 84, valeurCalcul: 78 },
         { code: 'P1', nom: 'Palier 1', min: 0, max: 49, valeurCalcul: 30 },
@@ -95,6 +99,9 @@ const ECHELLE_JUMELLE = {
 const ECHELLE_MIXTE = {
     id: 'ECH_MIXTE',
     nom: 'Codes familiers, noms propres',
+    // #555 lot 2 — I est une priorité, M un signalé, E un acquis.
+    seuilSuffisance: 'M',
+    seuilMaitrise: 'E',
     niveaux: [
         { code: 'I', nom: 'Fragile', min: 0, max: 59, valeurCalcul: 40 },
         { code: 'M', nom: 'En bonne voie', min: 60, max: 84, valeurCalcul: 75 },
@@ -328,6 +335,7 @@ describe('#575 — le rang et le nom d\'un niveau se lisent dans son échelle', 
                 .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')),
             niveauxOrdonnesDeLEchelle: calculs.niveauxOrdonnesDeLEchelle,
             niveauDuCodeDansEchelle: calculs.niveauDuCodeDansEchelle,
+            zoneDuNiveau: calculs.zoneDuNiveau,
             // #575 B10 — la VRAIE garde extraite, pas un stub : une garde
             // simulée rendrait ce fichier vert sans rien prouver.
             echellesComparables: calculs.echellesComparables,
@@ -371,12 +379,20 @@ describe('#575 — le rang et le nom d\'un niveau se lisent dans son échelle', 
             historique: [],
             elements
         });
-        // L'échelle nomme « I » et « D »… mais elle ne les contient pas :
-        // aucun libellé ne doit être inventé pour eux.
+        // ⮕ CE CAS A CHANGÉ DE NATURE AVEC #555 LOT 2, ET IL EST DEVENU PLUS
+        // FORT. Avant, « I » et « D » — absents de `ECHELLE_JAUNE` — passaient
+        // quand même pour des défis, faute de libellé mais présents dans la
+        // liste. Maintenant `zoneDuNiveau` rend `null` pour un code que
+        // l'échelle ne connaît pas : il n'est classé NULLE PART.
+        // ⮕ Ce qui est prouvé ici n'est plus « aucun libellé inventé » mais
+        // « aucun CLASSEMENT inventé » — et le second contient le premier.
         w.basculerVueRetroaction('bilan');
-        expect(elements.contenuRetroBilan.innerHTML).toContain('Démarche');
-        expect(elements.contenuRetroBilan.innerHTML).not.toContain('Incomplet');
-        expect(elements.contenuRetroBilan.innerHTML).not.toContain('En développement');
+        const renduEtranger = elements.contenuRetroBilan.innerHTML;
+        expect(renduEtranger).not.toContain('Démarche');
+        expect(renduEtranger).not.toContain('Incomplet');
+        expect(renduEtranger).not.toContain('En développement');
+        // Et le titre reste, suivi de rien : la section ne ment pas.
+        expect(renduEtranger).toContain('Présentement, il faut se concentrer sur');
     });
 
     it('annonce le progrès quand l\'élève monte DANS SON échelle — ce que la table IDME interdisait', () => {
@@ -453,6 +469,8 @@ describe('#575 — le rang et le nom d\'un niveau se lisent dans son échelle', 
         // données ouvrait un chemin d'injection qui n'existait pas avant.
         const echelleHostile = {
             id: 'ECH_HOSTILE',
+            seuilSuffisance: 'E',
+            seuilMaitrise: 'E',
             niveaux: [
                 { code: 'I', nom: '<img src=x onerror=alert(1)>', min: 0, max: 59, valeurCalcul: 40 },
                 { code: 'E', nom: '<b>Solide</b>', min: 60, max: 100, valeurCalcul: 90 }
@@ -550,13 +568,17 @@ describe('#575 — le rang et le nom d\'un niveau se lisent dans son échelle', 
         expect(code).not.toContain('En développement');
     });
 
-    it('la butée #555 est NOMMÉE dans le module, pas contournée en silence', () => {
-        // Les comparaisons littérales `'I'/'D'` et `'M'/'E'` sont toujours là.
-        // Ce test les CONSTATE : le jour où #555 les retire, il rougira, et
-        // c'est le signal attendu.
+    it('AUCUN code IDME n\'est plus comparé dans ce module — le compte est ZÉRO', () => {
+        // ⮕ CE TEST A CHANGÉ DE NATURE LE 28 AOÛT, ET C'ÉTAIT LE SIGNAL VOULU.
+        // Il CONSTATAIT 18 comparaisons littérales et annonçait qu'il rougirait
+        // le jour où #555 les retirerait. Ce jour est venu : Grégoire a posé ses
+        // deux repères, `zoneDuNiveau` a remplacé les lettres.
+        //
+        // ⚠ Il n'a PAS été « réparé » en changeant le chiffre. Il est devenu un
+        // RATCHET : aucune lettre ne revient, dans un sens comme dans l'autre.
         const code = sansCommentaires(retroaction);
-        const marques = code.match(/===\s*'(I|D|M|E)'/g) || [];
-        expect(marques.length).toBe(18);   // 18 comparaisons, sur 8 lignes
-        expect(retroaction).toContain('#555');
+        expect(code.match(/[!=]==\s*'[IDME0]'/g)).toBeNull();
+        // Et les deux tables d'origine ne reviennent pas non plus.
+        expect(code).not.toMatch(/_NOMS_NIV_BILAN|_ORDRE_NIV_BILAN/);
     });
 });

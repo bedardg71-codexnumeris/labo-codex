@@ -536,6 +536,28 @@ function _lecteurNiveauBilan(echelleId) {
 // la correction de la porte terrain 2.7 est partie avec elle.
 
 
+/**
+ * La ZONE d'un code dans l'échelle du bilan — `'priorite'`, `'signale'`,
+ * `'acquis'`, ou `null`.
+ *
+ * ⮕ #555 lot 2. Ce module testait les codes EN TOUTES LETTRES à sept endroits
+ * (dix-huit comparaisons). `zoneDuNiveau` les remplace toutes, par la même
+ * règle que le PDF de synthèse — et c'est OBLIGATOIRE qu'elle soit la même :
+ * `copierToutRetroaction` copie le `textContent` de ce bilan sous
+ * « === BILAN === » dans ce qui est remis à l'élève. Deux textes qui se
+ * contredisent sur le même document seraient pires que l'un des deux.
+ *
+ * ⚠ `null` = « l'échelle ne dit pas ». L'appelant n'affiche alors rien plutôt
+ * que de ranger l'élève dans une case au hasard.
+ */
+function _lecteurZoneBilan(echelleId) {
+    return function (code) {
+        return (typeof zoneDuNiveau === 'function')
+            ? zoneDuNiveau(code, echelleId || null)
+            : null;
+    };
+}
+
 /** Le rang d'un code, ou `Infinity` : un niveau illisible se range en dernier. */
 function _rangBilan(niveauDe, code) {
     var niveau = niveauDe(code);
@@ -675,16 +697,29 @@ function _collecterCriteresBilan(grilleDef, ec, enregistree) {
     return criteres;
 }
 
-function _detecterPatronsRecurrentsBilan(criteres, historiqueEleve) {
+/**
+ * ⮕ #555 lot 2 — les trois états comparés sont maintenant des ZONES, et chaque
+ * évaluation de l'historique est lue dans SON échelle. Un élève dont la pratique
+ * a changé de barème en cours de trimestre n'hérite plus d'un « objectif
+ * prioritaire depuis 3 productions » calculé sur des zones qui ne parlaient pas
+ * de la même chose.
+ */
+function _detecterPatronsRecurrentsBilan(criteres, historiqueEleve, echelleId) {
     var nomsPatrons = [];
     if (historiqueEleve.length < 2) return nomsPatrons;
-    var cH1 = {}; var cH2 = {};
-    if (historiqueEleve[0] && historiqueEleve[0].criteres) historiqueEleve[0].criteres.forEach(function(c) { cH1[c.critereNom] = c.niveauSelectionne; });
-    if (historiqueEleve[1] && historiqueEleve[1].criteres) historiqueEleve[1].criteres.forEach(function(c) { cH2[c.critereNom] = c.niveauSelectionne; });
+    var zonesDe = function (ev) {
+        var map = {};
+        var zone = _lecteurZoneBilan(ev && ev.echelleId);
+        if (ev && ev.criteres) ev.criteres.forEach(function(c) { map[c.critereNom] = zone(c.niveauSelectionne); });
+        return map;
+    };
+    var zH1 = zonesDe(historiqueEleve[0]);
+    var zH2 = zonesDe(historiqueEleve[1]);
+    var zoneCourante = _lecteurZoneBilan(echelleId);
     criteres.forEach(function(c) {
-        if ((c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D') &&
-            (cH1[c.critereNom] === 'I' || cH1[c.critereNom] === 'D') &&
-            (cH2[c.critereNom] === 'I' || cH2[c.critereNom] === 'D')) {
+        if (zoneCourante(c.niveauSelectionne) === 'priorite' &&
+            zH1[c.critereNom] === 'priorite' &&
+            zH2[c.critereNom] === 'priorite') {
             nomsPatrons.push(c.critereNom);
         }
     });
@@ -780,7 +815,33 @@ function _rendreDefisBilan(defis, algoA0, nomsPatrons, niveauDe) {
     return html;
 }
 
+/**
+ * Les critères « acquis en développement » — entre les deux repères.
+ *
+ * ⮕ #555 lot 2. Réels mais non durables : ni des priorités (les y mettre dirait
+ * à l'élève qu'il n'a rien acquis), ni un silence (le taire lui laisserait
+ * croire que c'est réglé). Mêmes mots que le PDF de synthèse, et c'est
+ * obligatoire — `copierToutRetroaction` copie ce bilan dans son document.
+ *
+ * ⚠ Sans repères sur l'échelle, `zoneDuNiveau` rend `null`, aucun critère n'est
+ * signalé, et la ligne disparaît d'elle-même. Aucune note technique n'apparaît
+ * dans un texte remis à l'élève.
+ */
+function _rendreSignalesBilan(signales, niveauDe) {
+    if (!signales || signales.length === 0) return '';
+    var ech = function (t) { return (typeof echapperHtml === 'function') ? echapperHtml(t) : ''; };
+    var lignes = signales.map(function (c) {
+        var nomNiveau = _nomBilan(niveauDe, c.niveauSelectionne);
+        return '<p>- ' + ech(c.critereNom) + (nomNiveau ? ' (' + nomNiveau + ')' : '') + '</p>';
+    }).join('');
+    return '<h5>Acquis en développement, à consolider :</h5>' + lignes;
+}
+
 function _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente) {
+    // ⚠ #555 lot 2 — l'évaluation PRÉCÉDENTE est lue dans SON échelle, pas dans
+    // celle du bilan en cours : deux barèmes différents ne disent pas la même
+    // chose du même code.
+    var zonePrecedente = _lecteurZoneBilan(evalPrecedente && evalPrecedente.echelleId);
     if (totalErreursFr > 0) {
         return '<p>Tous les critères sont maîtrisés. Concentre-toi sur la qualité du français (' + totalErreursFr + ' erreur' + (totalErreursFr > 1 ? 's' : '') + ' annotée' + (totalErreursFr > 1 ? 's' : '') + ').</p>';
     }
@@ -788,14 +849,14 @@ function _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente) {
     // .every() retourne true sur tableau vide via vacuite JS).
     var maitriseLongtemps = evalPrecedente && Array.isArray(evalPrecedente.criteres) &&
         evalPrecedente.criteres.length > 0 &&
-        evalPrecedente.criteres.every(function(c) { return c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E'; });
+        evalPrecedente.criteres.every(function(c) { return zonePrecedente(c.niveauSelectionne) === 'acquis'; });
     if (maitriseLongtemps) {
         return '<p class="retro-force">Tous les critères sont maîtrisés depuis plus d’un artefact. Tu peux aider tes collègues — c’est une excellente façon d’étendre tes compétences vers le niveau É (transfert à d’autres contextes).</p>';
     }
     return '<p class="retro-force">Tous les critères sont maîtrisés. Continue sur cette lancée !</p>';
 }
 
-function _rendreForceBilan(criteres, defis, niveauDe) {
+function _rendreForceBilan(criteres, defis, niveauDe, zoneDe, signales) {
     // #575 — le meilleur critère se départage par le rang de son niveau DANS
     // L'ÉCHELLE. Un niveau que l'échelle ne situe pas (rang `Infinity`) ne peut
     // pas être « la force » : il est écarté, jamais promu par défaut.
@@ -805,9 +866,18 @@ function _rendreForceBilan(criteres, defis, niveauDe) {
         if (rang === Infinity) return;
         if (meilleurRang === null || rang > meilleurRang) { meilleurRang = rang; meilleur = c; }
     });
-    // ⚠ #555 — « M ou E » reste écrit en toutes lettres : c'est la marque de
-    // maîtrise, et elle ne se dérive d'aucune échelle aujourd'hui.
-    if (meilleur && (meilleur.niveauSelectionne === 'M' || meilleur.niveauSelectionne === 'E') && defis.length > 0) {
+    // ⮕ #555 lot 2 — « ta force » suppose un niveau ACQUIS. Un critère en zone
+    // « signalé » est réel mais non durable : l'annoncer comme une force dirait
+    // à l'élève qu'il peut s'en détourner.
+    // ⚠ « TA FORCE » SE DIT QUAND IL RESTE QUELQUE CHOSE À TRAVAILLER — c'est la
+    // règle d'origine (`defis.length > 0`), et elle a un sens : sans rien à côté,
+    // la phrase « tous les critères sont maîtrisés » dit déjà tout.
+    // ⮕ #555 lot 2 l'a ÉLARGIE aux signalés, et il le fallait : depuis les trois
+    // zones, un élève peut n'avoir aucune priorité tout en ayant des acquis en
+    // développement. Avec la seule condition d'origine, sa force disparaissait
+    // du bilan — trouvé par une spec WebKit, Vitest restant vert.
+    var resteATravailler = defis.length > 0 || (signales && signales.length > 0);
+    if (meilleur && zoneDe(meilleur.niveauSelectionne) === 'acquis' && resteATravailler) {
         var nomNiveau = _nomBilan(niveauDe, meilleur.niveauSelectionne);
         var nomCritere = (typeof echapperHtml === 'function') ? echapperHtml(meilleur.critereNom) : '';
         return '<p class="retro-force">Ta force : ' + nomCritere
@@ -816,7 +886,19 @@ function _rendreForceBilan(criteres, defis, niveauDe) {
     return '';
 }
 
-function _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId) {
+/**
+ * ⚠ LES NOMS DE CRITÈRES SONT SAISIS PAR L'UTILISATEUR et partent dans un
+ * `innerHTML` : ils sont échappés ici, au plus près de la source. La version
+ * précédente les concaténait bruts — sans conséquence tant que la liste venait
+ * de comparaisons de lettres, mais la règle n° 1 du projet ne souffre pas
+ * d'exception.
+ */
+function _listeEchappeeBilan(noms) {
+    var echappe = (typeof echapperHtml === 'function') ? echapperHtml : function () { return ''; };
+    return noms.map(echappe).join(' et ');
+}
+
+function _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId, zoneDe) {
     var recurrentsHtml = '';
 
     // Progrès (comparaison de l'élève avec lui-même)
@@ -847,19 +929,40 @@ function _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId) {
         }
     }
 
-    // Amélioration reconnue
+    // Amélioration reconnue — ⮕ #555 lot 2, DEUX natures de progrès.
+    //   · vers ACQUIS   → « Tu as progressé en X. »
+    //   · vers SIGNALÉ  → « ...tu as fait de beaux progrès : il faut les consolider. »
+    // Décision de Grégoire (28 août) : sortir de l'insuffisance est le passage le
+    // plus difficile, mais il n'est pas durable. Le taire laisserait croire qu'il
+    // ne compte pas ; le confondre avec l'autre, qu'il est réglé.
+    //
+    // ⚠ « AVANT ≠ ACQUIS », pas « avant = priorité » : traduire le côté gauche
+    // par la seule zone « priorité » supprimerait les passages D → M et D → E,
+    // qui étaient annoncés. Régression commise et corrigée le 28 août dans le
+    // module jumeau ; elle ne se reproduit pas ici.
+    // ⚠ `null` n'est pas « non acquis » : sans repères, on ne sait pas, donc on
+    // n'annonce rien — sinon chaque évaluation antérieure à leur pose ferait
+    // annoncer un progrès qu'on n'a pas mesuré.
     if (evalPrecedente && evalPrecedente.criteres) {
+        var zoneAvant = _lecteurZoneBilan(evalPrecedente.echelleId);
         var criteresPrec = {};
         evalPrecedente.criteres.forEach(function(c) { criteresPrec[c.critereNom] = c.niveauSelectionne; });
         var ameliorations = [];
+        var aConsolider = [];
         criteres.forEach(function(c) {
-            var nivP = criteresPrec[c.critereNom];
-            if (nivP && (nivP === 'I' || nivP === 'D') && (c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E')) {
-                ameliorations.push(c.critereNom);
-            }
+            var avant = zoneAvant(criteresPrec[c.critereNom]);
+            var apres = zoneDe(c.niveauSelectionne);
+            if (avant == null) return;
+            if (avant !== 'acquis' && apres === 'acquis') ameliorations.push(c.critereNom);
+            else if (avant === 'priorite' && apres === 'signale') aConsolider.push(c.critereNom);
         });
         if (ameliorations.length > 0) {
-            recurrentsHtml += '<p class="retro-amelioration">Tu as progressé en ' + ameliorations.join(' et ') + '.</p>';
+            recurrentsHtml += '<p class="retro-amelioration">Tu as progressé en '
+                + _listeEchappeeBilan(ameliorations) + '.</p>';
+        }
+        if (aConsolider.length > 0) {
+            recurrentsHtml += '<p class="retro-amelioration">En ' + _listeEchappeeBilan(aConsolider)
+                + ', tu as fait de beaux progrès : maintenant il faut les consolider.</p>';
         }
     }
 
@@ -912,22 +1015,23 @@ function genererRetroactionBilan() {
     // #576 — la source de secours des NOMS de critères quand la grille a disparu.
     var evalEnregistree = _chargerEvaluationEnregistreeBilan(ec);
     var criteres = _collecterCriteresBilan(grilleDef, ec, evalEnregistree);
-    var nomsPatrons = _detecterPatronsRecurrentsBilan(criteres, historiqueEleve);
+    // ⚠ `echelleId` est résolu plus bas ; on le calcule ici pour que les patrons
+    // le reçoivent. Même lecture : l'évaluation d'abord, le sélecteur en repli.
+    var echelleId = ec.echelleId || document.getElementById('selectEchelle1')?.value || null;
+    var nomsPatrons = _detecterPatronsRecurrentsBilan(criteres, historiqueEleve, echelleId);
     var totalErreursFr = _compterErreursFrancaisBilan();
 
     // #575 — l'échelle de l'évaluation en cours, résolue UNE fois pour tout le
     // bilan. Même lecture que `evaluation-calcul.js` : l'évaluation d'abord, le
     // sélecteur de l'écran en repli tant qu'elle n'a pas été enregistrée.
-    var echelleId = ec.echelleId || document.getElementById('selectEchelle1')?.value || null;
     var niveauDe = _lecteurNiveauBilan(echelleId);
+    var zoneDe = _lecteurZoneBilan(echelleId);
 
     // Defis prioritaires + détection « tous maîtrisés »
-    // ⚠ #555 — « I ou D » reste écrit en toutes lettres (marque de maîtrise).
-    // Seul l'ORDRE est désormais dérivé : le défi le plus bas dans l'échelle
-    // passe en premier, et un niveau qu'elle ne situe pas passe en dernier
-    // (avant, `|| 0` le faisait passer devant TOUS les autres).
+    // ⮕ #555 lot 2 — « défi » n'est plus une lettre : c'est ce qui est SOUS le
+    // seuil de suffisance de l'échelle. L'ordre reste dérivé du rang.
     var defis = criteres
-        .filter(function(c) { return c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D'; })
+        .filter(function(c) { return zoneDe(c.niveauSelectionne) === 'priorite'; })
         .sort(function(a, b) {
             var ra = _rangBilan(niveauDe, a.niveauSelectionne);
             var rb = _rangBilan(niveauDe, b.niveauSelectionne);
@@ -937,10 +1041,25 @@ function genererRetroactionBilan() {
             if (ra === rb) return 0;
             return ra < rb ? -1 : 1;
         });
-    // Verification explicite M/E : un travail Non recevable (niveau '0') ne doit
-    // JAMAIS declencher « tous maitrises » via defis.length === 0 (defis exclut '0').
+    // Verification explicite : un travail Non recevable (niveau '0') ne doit
+    // JAMAIS declencher « tous maitrises » via defis.length === 0. Un niveau que
+    // l'échelle ne situe pas (`null`) empêche aussi la conclusion — on n'annonce
+    // pas « tout est acquis » sur un doute.
+    // ⮕ #555 lot 2 — LA ZONE INTERMÉDIAIRE, ici aussi. Elle a d'abord été
+    // ajoutée au seul PDF de synthèse ; c'est une spec WebKit qui a montré le
+    // manque, Vitest restant vert. Or `copierToutRetroaction` copie le
+    // `textContent` de CE bilan dans ce qui est remis à l'élève : les deux
+    // documents doivent dire la même chose du même critère.
+    var signales = criteres
+        .filter(function(c) { return zoneDe(c.niveauSelectionne) === 'signale'; })
+        .sort(function(a, b) {
+            var ra = _rangBilan(niveauDe, a.niveauSelectionne);
+            var rb = _rangBilan(niveauDe, b.niveauSelectionne);
+            return (ra === rb) ? 0 : (ra < rb ? -1 : 1);
+        });
+
     var tousMaitrises = criteres.length > 0 &&
-        criteres.every(function(c) { return c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E'; });
+        criteres.every(function(c) { return zoneDe(c.niveauSelectionne) === 'acquis'; });
 
     var algoA0 = _detecterAlgoA0Bilan(grilleDef, ec, totalErreursFr);
 
@@ -953,6 +1072,14 @@ function genererRetroactionBilan() {
 
     if (defis.length > 0) {
         html += _rendreDefisBilan(defis, algoA0, nomsPatrons, niveauDe);
+        html += _rendreSignalesBilan(signales, niveauDe);
+    } else if (signales.length > 0) {
+        // ⮕ #555 lot 2 — AUCUNE priorité mais des acquis en développement.
+        // Avant les repères, ces critères tombaient dans les défis et la section
+        // n'était jamais vide ; depuis, le titre restait suivi du VIDE — le
+        // symptôme exact de la porte terrain 2.6, réintroduit par mon lot et
+        // trouvé par une spec WebKit alors que Vitest restait vert.
+        html += _rendreSignalesBilan(signales, niveauDe);
     } else if (tousMaitrises) {
         html += _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente);
     } else if (criteres.length === 0 && !algoA0) {
@@ -965,8 +1092,8 @@ function genererRetroactionBilan() {
         html += '<p>Aucun critère n\'est encore évalué pour cette production.</p>';
     }
 
-    html += _rendreForceBilan(criteres, defis, niveauDe);
-    html += _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId);
+    html += _rendreForceBilan(criteres, defis, niveauDe, zoneDe, signales);
+    html += _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId, zoneDe);
     html += _rendreJetonsBilan(da);
 
     conteneur.innerHTML = html;
