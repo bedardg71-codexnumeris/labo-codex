@@ -140,6 +140,16 @@ Quatre décisions à acter avant que Claude Code commence l'exécution. Sans ces
 
 ### 5.1 Quota Cloudflare gratuit saturé
 
+> ❌ **DÉMENTI le 27 août 2026.** Le quota de 50 sièges n'a **jamais** été
+> saturé. L'export `User_Seats_Log_2026-05-20T20_03_38Z.csv` (20 mai 2026)
+> recense 51 identités enregistrées mais **4 sièges Access actifs**.
+> L'affirmation de saturation confondait identités et sièges. On la retrouvait
+> dans ADR-008, `DEPLOY.md` et `PRIVACY.md` — sans qu'on sache lequel de ces
+> documents l'a formulée en premier — et elle a servi d'appui à un arbitrage
+> « sélection plutôt qu'ouverture » abandonné depuis. La policy
+> retenue au 1er septembre 2026 est **ouverte** (`Include → Everyone`).
+> Le bloc ci-dessous est conservé tel quel pour la traçabilité.
+
 Le quota actuel de 50 utilisateurs est atteint. Quatre options à trancher :
 
 - (a) Upgrade vers plan Cloudflare payant (coût mensuel à vérifier).

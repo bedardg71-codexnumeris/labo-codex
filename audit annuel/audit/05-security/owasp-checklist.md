@@ -9,7 +9,7 @@
 **Pertinence Labo Codex** : Faible (pas d'auth multi-utilisateur en local, mais Cloudflare Access en frontal).
 
 **Audit** :
-- Vérifier que Cloudflare Access est correctement configuré (liste d'emails autorisés, durée de session, géo-restriction).
+- Vérifier que Cloudflare Access est correctement configuré (**règle `Include` — `Everyone` à partir du 1er septembre 2026, pas de liste d'emails**, durée de session, géo-restriction). *Mis à jour le 27 août 2026 : cette ligne demandait de vérifier une « liste d'emails autorisés ». Il n'y en a plus — la porte est ouverte par décision, et une liste qui réapparaîtrait serait le signal à relever, pas l'inverse. Cf. ADR-008 et `DEPLOY.md` §3.6.*
 - Vérifier qu'aucune route Netlify n'expose des données sensibles sans authentification.
 
 **Statut** : __

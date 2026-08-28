@@ -103,7 +103,7 @@ Le plan distingue systématiquement trois catégories :
 |---|---|---|
 | D-COW-1 | Correction propre des livrables AQPC sans intégrer le récit méta de la double hallucination (Cowork peut documenter cette histoire ailleurs si pertinent, mais pas dans les livrables AQPC) | mai 2026 |
 | D-COW-2 | Inclusion de la formulation « ~50 accès Cloudflare sans feedback » dans 6 fichiers (ADR-008, 04-4-deploy, SUMMARY-internal, SUMMARY-aqpc, SUMMARY-institutional, AUDIT.md) | mai 2026 |
-| D-COW-3 | Quota Cloudflare gratuit (50 utilisateurs) saturé — décision sur upgrade payant ou changement de politique reportée au plan court terme (cf. D-CT-1) | mai 2026 |
+| D-COW-3 | ❌ **Démenti le 27 août 2026 : jamais saturé** (51 identités, 4 sièges actifs). Énoncé d'origine : quota Cloudflare gratuit (50 utilisateurs) saturé — décision sur upgrade payant ou changement de politique reportée au plan court terme (cf. D-CT-1) | mai 2026 |
 | D-COW-4 | Analyse des logs Cloudflare reportée (utile pour `PRIVACY.md` mais pas critique pour le 3 juin) | mai 2026 |
 | D-COW-5 | Plan Phase 2 segmenté en plusieurs livrables plutôt qu'un seul document fleuve | mai 2026 |
 | D-COW-6 | Court terme rédigé en priorité 1 (date AQPC du 3 juin = seule échéance ferme) | mai 2026 |

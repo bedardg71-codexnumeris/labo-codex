@@ -29,7 +29,7 @@ Les ADRs ne décrivent pas le code en détail — ils décrivent **la décision*
 | [ADR-005](005-echelle-idme.md) | Échelle IDME plutôt que notation numérique classique | Acté rétroactivement |
 | [ADR-006](006-fenetre-glissante-acp.md) | Fenêtre glissante de 3 artefacts pour A-C-P | Acté rétroactivement |
 | [ADR-007](007-vocabulaire-descriptif.md) | Vocabulaire descriptif (« difficulté émergente / plateau / persistante ») | Acté rétroactivement |
-| [ADR-008](008-cloudflare-access.md) | Cloudflare Access pour authentification | Acté rétroactivement |
+| [ADR-008](008-cloudflare-access.md) | Cloudflare Access pour authentification | **Révisé le 27 août 2026** — porte ouverte (`Everyone`) + OTP au 1er septembre |
 | [ADR-009](009-licences.md) | AGPL v3 (code) + CC BY-NC-SA 4.0 (contenu) | Acté rétroactivement |
 | [ADR-010](010-vibe-coding-claude-code.md) | Développement en vibe coding avec Claude Code | Acté rétroactivement |
 | [ADR-011](011-quatre-espaces-donnees.md) | Architecture quatre espaces de données (Codex / Réserve / Codex data / Voûte) | Acté rétroactivement |

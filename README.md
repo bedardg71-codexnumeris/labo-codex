@@ -63,8 +63,13 @@ python -m http.server 8000
 ### Déploiement en ligne
 
 L'instance publique principale est hébergée sur Netlify, derrière Cloudflare
-Access (contrôle d'accès Zero Trust). Voir [`DEPLOY.md`](DEPLOY.md) pour la
-chaîne de déploiement complète.
+Access (Zero Trust). **À partir du 1er septembre 2026**, l'entrée demande une
+identification par code à usage unique envoyé par courriel — valable un mois,
+renouvelable en redonnant son adresse — avec une **porte ouverte** : toute adresse entre, il n'y a ni liste d'invités ni sélection. Le
+dispositif sert à savoir qui utilise l'application, pas à en filtrer l'accès.
+Voir [`DEPLOY.md`](DEPLOY.md) pour la chaîne de déploiement complète,
+[`PRIVACY.md`](PRIVACY.md) §3.3 pour ce qui est conservé et pourquoi, et
+[`ADR-008`](docs/adr/008-cloudflare-access.md) pour la décision.
 
 ---
 

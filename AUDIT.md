@@ -36,12 +36,28 @@ il sera rejoué chaque année tant que Labo Codex reste maintenu.
 
 ## Contexte d'usage
 
-Labo Codex est en production sur `app.codexnumeris.org` depuis janvier 2026,
-derrière Cloudflare Access (Zero Trust, OTP par email, accès individuel
-limité à une semaine). Environ **50 personnes en plus de l'auteur** ont
-obtenu un accès entre janvier et mai 2026 ; aucune n'a renvoyé de feedback
-ou de rapport de bug, et aucune n'est revenue après l'expiration de son
-accès. **L'auteur est seul utilisateur actif depuis fin février 2026.**
+Labo Codex est en production sur `app.codexnumeris.org` depuis janvier 2026.
+L'accès a connu trois régimes : Cloudflare Access avec session d'une semaine
+de janvier à mai 2026 (liste blanche en janvier seulement, puis porte
+ouverte) ; **accès public sans authentification** du 3 juin au 31 août 2026 ;
+et, **à partir du 1er septembre 2026**, Cloudflare Access de nouveau, porte
+ouverte (`Include → Everyone`) avec OTP par courriel et session d'un mois
+renouvelable (au bout du mois, l'utilisateur redonne son adresse ; rien ne se
+ferme).
+
+**50 identités en plus de l'auteur** se sont enregistrées entre décembre 2025
+et avril 2026 ; aucune n'a renvoyé de feedback ni de rapport de bogue.
+
+⚠ *Corrigé le 27 août 2026 : ce paragraphe affirmait qu'« aucune n'est revenue
+après l'expiration de son accès » et que « l'auteur est seul utilisateur actif
+depuis fin février 2026 ». L'export `User_Seats_Log_2026-05-20T20_03_38Z.csv`
+dément les deux : **15 identités portent une dernière connexion réussie
+postérieure au 28 février** (9 en mars, 5 en avril, 1 en mai) — et l'auteur
+n'est pas du nombre, sa propre dernière connexion datant du 17 février. Le
+retour effectif se mesure plus finement par l'écart entre création et dernière
+connexion : 12 identités y montrent plus d'une heure. Ce qui reste établi est
+donc plus étroit que ce qui était écrit : aucun retour n'est parvenu par cette
+voie. Voir ADR-008, révision du 27 août 2026.*
 
 Cette absence de retours est elle-même un signal — l'invitation alpha seule,
 sans matériel d'accompagnement structuré, n'a pas suffi à enclencher un

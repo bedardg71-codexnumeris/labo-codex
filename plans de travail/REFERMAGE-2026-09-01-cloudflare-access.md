@@ -229,9 +229,15 @@ sans limite chez Cloudflare, à quoi elles servent, et comment demander leur ret
    Cloudflare est muette sur ce cas.
 5. **L'URL Netlify directe** (§3) : son accessibilité vient de `DEPLOY.md` §1.2, elle n'a pas été
    testée.
-6. **Les documents de pilotage ne sont pas alignés.** `BACKLOG.md` (#427, #508), `RELAIS.md` et
-   `ETAT-PROJET.md` portent encore la décision du 26 août — liste blanche, quota « saturé »,
-   mesure d'usage « non poursuivie ». Ils étaient en cours d'édition par Grégoire au moment de
-   cette passe et n'ont pas été touchés. `INCIDENTS.md`, `AUDIT.md`, `js/accueil.js` (commentaire
-   d'en-tête) et les plans d'audit de mai portent des mentions du même ordre, de nature
-   archivistique.
+6. ~~**Les documents de pilotage ne sont pas alignés.**~~ **Fait le 27 août 2026** :
+   `BACKLOG.md` (#427, #508), `RELAIS.md` et `ETAT-PROJET.md` alignés dans une première passe ;
+   `INCIDENTS.md`, `AUDIT.md`, `README.md`, `docs/adr/README.md`, `docs/CALENDRIER.md`, le
+   commentaire d'en-tête de `js/accueil.js`, la checklist de levée (marquée périmée), les trois
+   plans d'audit de mai (démentis datés sur la saturation) et `owasp-checklist.md` dans une
+   seconde. Reste hors périmètre, volontairement : `SESSION.md`, `BACKLOG-ARCHIVE.md` et les
+   changelogs archivés, qui sont des journaux.
+7. **Trois dates coexistent pour l'ouverture publique** : `DEPLOY.md` §1.2 dit « depuis le
+   28 mai », `PRIVACY.md` §2 « depuis le 2 juin », et plusieurs autres passages « depuis le
+   3 juin ». Elles désignent probablement des faits différents (décision, révision de la décision,
+   lancement AQPC), mais **aucun document ne l'arbitre**. À trancher par Grégoire — c'est lui qui
+   sait quand la policy a effectivement été désactivée.

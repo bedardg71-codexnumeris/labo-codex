@@ -49,6 +49,17 @@ function afficherAccueil() {
  * réactivation) ; l'encadré temporaire — avec sa logique de dates et sa
  * variante d'urgence J-7 — est remplacé par l'invitation permanente à la
  * CoP. Cf. DEPLOY.md v1.4 §3, ADR-008 (révision 2 juin 2026), BACKLOG.md #298.
+ *
+ * 27 août 2026 (#427/#508) : Cloudflare Access est réactivé le 1er septembre
+ * 2026, porte ouverte (`Include → Everyone`) + OTP, session d'un mois. La
+ * phrase d'avis (4e des 5 blocs du corps, avant l'invitation à la CoP) est
+ * doublée d'un bandeau daté (js/transitions.js, entrée
+ * `avis-identification-2026-09-01`), parce qu'un avis vivant dans un accordéon
+ * repliable n'est pas lu. Le bandeau s'éteint seul le 1er septembre ; c'est
+ * alors ce paragraphe-ci qu'il faut réécrire au présent, ou retirer si le
+ * geste n'a pas eu lieu — les deux textes sont au §8 de
+ * `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`.
+ * Cf. ADR-008 (révision 27 août 2026), DEPLOY.md (révision v1.6).
  * Source texte d'origine : docs/refonte-textes/textes-manquants-bloc4.md
  * (validé 19 avril 2026).
  */

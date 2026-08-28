@@ -1,3 +1,25 @@
+PÉRIMÉ — NE PAS SUIVRE (note du 27 août 2026)
+=============================================
+Ce document décrit la LEVÉE de Cloudflare Access, opération faite en mai-juin
+2026. L'opération en cours est l'INVERSE : la réactivation au 1er septembre
+2026, avec une policy ouverte (Include -> Everyone) + OTP et une session d'un
+mois renouvelable (au bout du mois, l'utilisateur redonne son adresse). La fiche à suivre est :
+
+    plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md
+
+Conservé pour la seule traçabilité. Deux passages sont faux aujourd'hui :
+
+  - la « liste blanche d'emails » n'existe plus (policy ouverte, rien a
+    reconstruire) ;
+  - la section 2 donne « CNAME app -> labocodex.netlify.app », nom que
+    DEPLOY.md v1.5 §1.2 (23 aout 2026) declare ne correspondre a rien dans le
+    compte : le vrai nom est codexnumeris-051225.
+
+Pour les verifications DNS, se fier a DEPLOY.md §3.4, pas a ce fichier.
+Voir ADR-008, revision du 27 aout 2026.
+=============================================
+
+
 Checklist dashboard — Levée du Cloudflare Access
   
   1. Cloudflare Zero Trust (one.dash.cloudflare.com)
