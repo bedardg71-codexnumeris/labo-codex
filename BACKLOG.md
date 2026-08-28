@@ -1968,6 +1968,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   (d) **unifier les quatre replis divergents** ci-dessous ; (e) l'éditeur d'échelle NEUVE
   (`afficherNiveauxNouvelleEchelle`), qui écrit dans un tampon avant création — les repères s'y posent
   après enregistrement, ce qui est acceptable mais reste à finir.
+  ⮕ **SUCCESSEUR : #577** — l'assistant de configuration des pratiques ignore ces deux champs.
   ⚠ **Aucun lecteur n'est branché tant que (a) n'est pas fait** : brancher avant que les échelles
   portent leurs repères retirerait la fonction chez tout le monde, Grégoire compris.
   Créé le 27 août 2026. C'est le **point de convergence** identifié au §6 de la consigne #552 : cinq
@@ -1993,6 +1994,34 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   l'échelle, la seconde non. La moitié dérivable a été livrée sans rien décider. ⮕ Vérifier de même, pour
   les quatre autres items en attente de #555, ce qui n'attend pas vraiment.
 
+- [ ] **#577 — L'assistant de configuration des pratiques ignore les deux repères de maîtrise.**
+  Créé le 28 août 2026, **demande de Grégoire**, à la livraison du lot 1 de #555. Une échelle porte
+  désormais `seuilSuffisance` et `seuilMaitrise` ; **l'assistant (`wizard-pratique-v2.js`) n'en sait
+  rien.** Il fait choisir une échelle et passe à la suite, alors que c'est précisément le moment où
+  l'utilisateur pense sa pratique — et le seul moment où on peut lui demander où commence la maîtrise
+  sans que la question tombe de nulle part.
+  ⚠ **PAN-STD en premier** : `'standards'` se décrit comme « Tu évalues par niveaux de maîtrise
+  (ex. : I-D-M-E) ». C'est la famille dont le calcul REPOSE sur les niveaux, donc celle où des repères
+  absents se paient le plus cher. Mais l'étape concernée les sert toutes.
+  ⮕ **L'ÉTAT MESURÉ (28 août, au code).**
+  · `'echelle-performance'` (ordre 7, branche finale, `condition: typePratique !== 'sommative'`) —
+    un seul champ, `echelleId`, **`required: true`**. Aucune mention des repères.
+  · Un second `select-echelle` **facultatif** pour DEN (`infoMaterielDen`), présenté comme servant « à
+    la rétroaction, pas au calcul ». Les repères y ont un sens différent : à trancher, pas à recopier.
+  · **L'assistant ne touche jamais `obtenirSeuil('defiSpecifique')`** — vérifié au grep : aucune
+    occurrence. Les quatre replis divergents de #555 lui sont donc étrangers.
+  ⚠⚠ **LE PIÈGE DE VOCABULAIRE, ET IL EST DÉJÀ DANS L'ÉCRAN.** L'assistant a une étape
+  `'seuils-personnels'` (« Ces seuils servent au dépistage automatique des étudiant·es en difficulté »)
+  avec `seuilVaBien`, `seuilDifficulte`, `seuilGrandeDifficulte`, plus un `seuilVerrou` ailleurs.
+  **« Seuil » y désigne déjà le dépistage.** Y ajouter « seuil de suffisance » et « seuil de maîtrise »
+  sans les distinguer mettrait deux notions sous un même mot, dans le même parcours. ⮕ Trancher le
+  vocabulaire AVEC Grégoire avant d'écrire l'écran — cf. [[feedback_vocabulaire_simple]].
+  ⮕ **CE QUI EST À DÉCIDER, ET QUI NE M'APPARTIENT PAS** : l'assistant doit-il (a) seulement RAPPELER
+  que l'échelle choisie porte — ou ne porte pas — ses repères, avec un lien vers l'éditeur ; (b) les
+  faire poser sur place ; ou (c) refuser d'avancer tant qu'ils manquent, pour une famille dont le
+  calcul en dépend ? (c) est le plus cohérent et le plus brutal pour qui découvre l'outil.
+  ⏳ **DÉPEND DE #555 lot 2** : tant qu'aucun lecteur ne consomme les repères, l'assistant n'aurait
+  rien à garantir. À reprendre APRÈS, et pas avant.
 - [ ] **#536 — `idmeMoyen` rend 0 quand rien n'est convertible, au lieu de « pas de donnée ».**
   Repéré pendant #529 et VOLONTAIREMENT NON CORRIGÉ : le contrat de
   `calculerIndicateurs3DerniersArtefacts` distingue déjà l'absence par `nbArtefacts`, et ses
