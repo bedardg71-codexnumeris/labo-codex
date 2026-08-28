@@ -1825,6 +1825,55 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   corrigé au lot 2.
   ⮕ **Geste** : les faire passer par `obtenirEchelleResolue`, ou dire pourquoi ils ne le peuvent pas.
 
+- [ ] **#583 — Partager une échelle la prive de ses deux repères de maîtrise, à l'ÉMISSION.**
+  Créé le 28 août 2026, audit `Rapports/AUDIT-copies-echelle-reperes-2026-08-28.md` §5.
+  `projeterEntite` (`partage-format.js:137`) ne copie que les champs déclarés au schéma fermé
+  `SCHEMA_ENTITE.echelle` (`partage-schemas.js:225`), qui connaît `valeurCalcul` et `config` mais
+  **pas `seuilSuffisance` ni `seuilMaitrise`**. Le paquet part sans eux ; ni l'émetteur ni le
+  destinataire ne voient d'anomalie.
+  ⚠ **Ce n'est pas une ligne à ajouter.** Le format se dit fermé et REJETTE tout champ inconnu à
+  l'entrée : ajouter les repères au schéma fait évoluer `labo-codex-partage-v1`, et un paquet produit
+  après ne se lira pas comme un paquet produit avant. **Décision de format due par Grégoire.**
+  ⮕ Le même schéma ignore aussi `niveauSOLO` sur les niveaux d'échelle — à trancher dans le même geste.
+
+- [ ] **#584 — L'export au format recherche ne dit pas où sont posés les repères.**
+  Créé le 28 août 2026, audit §6. `exporterFormatRecherche` (`trimestres.js:1872`) projette
+  `{id, nom, niveaux: [{code, nom, min, max, valeur_calcul, niveau_solo}]}` — sans les deux repères.
+  Rien n'est perdu en base : c'est un choix de CONCEPTION sur ce que les fichiers de recherche
+  contiennent.
+  ⮕ **L'argument qui le réclame est déjà écrit dans le commentaire au-dessus du bloc** : les plages et
+  l'étiquette SOLO partent « parce que sans elles un code de niveau reste illisible ». Sans les repères,
+  le fichier ne dit pas non plus où l'enseignant a placé la suffisance et la maîtrise — la donnée même
+  que #555 lot 1 a rendue explicite. ⏳ Décision, pas correctif.
+
+- [ ] **#585 — 🔒 `assainirChaine` TRONQUE avant de retirer les balises : un `<` traverse le filtre.**
+  Créé le 28 août 2026, trouvé en écrivant la sentinelle de transport des échelles (audit §12).
+  `import-export.js:365-371` fait `substring(0, maxLen)` PUIS `replace(/<[^>]*>/g, '')`. Une balise
+  coupée par la troncature perd son `>` et le filtre ne mord plus.
+  ⮕ **Mesuré** : `'<img src=x onerror=alert(1)>M'` (29 car.) avec `maxLen: 20` ressort
+  **`'<img src=x onerror=a'`**. Champs les plus exposés : `code` (20), `couleur` (30), `notePassage`
+  (20), les deux repères (20), `niveauSOLO` (50).
+  ⚠ **Pas une faille par soi** — il faut encore que le champ parte dans un `innerHTML`. Mais c'est la
+  fonction que TOUS les schémas d'import appellent.
+  ⚠ **Ne pas inverser les deux lignes sans mesurer** : ça touche l'assainissement de chaque type
+  importé, et la leçon du 28 août au matin est fraîche (renforcer `echapperHtml` a cassé un affichage
+  qui allait dans un `textContent`). **Décision due.**
+
+- [ ] **#586 — Trois chemins de duplication d'échelle sur quatre emportent `idOriginal` ; le quatrième s'en protège exprès.**
+  Créé le 28 août 2026, audit §7. À rattacher à **#476** (les neuf écarts entre familles de duplication)
+  et à **#542**.
+  `dupliquerEchelle` (`echelles.js:378`) emploie une liste blanche PRÉCISÉMENT pour ne pas emporter
+  `idOriginal`, et sa sentinelle #555 vérifie `expect(copie.idOriginal).toBeUndefined()`. Mais
+  `dupliquerEchelleDepuisSidebar` (`:3957`, `{...echelle}`), `dupliquerEchelleActive` (qui y délègue) et
+  `dupliquerVersBibliotheque` (`bibliotheque-ui.js:576`, `Object.assign`) l'emportent — ils suppriment
+  `metadata_cc` et `auteurOriginal`, **pas `idOriginal`**.
+  ⮕ **Scénario atteignable** : `ajouterEchelleIndividuelle` (`:2373`) POSE `idOriginal` sur toute échelle
+  ajoutée depuis la bibliothèque ; la dupliquer ensuite par la barre latérale produit deux entrées
+  portant le même `idOriginal`, et `obtenirEchelleResolue` (`profil-etudiant-calculs.js:129`) résout par
+  `e.id === id || e.idOriginal === id` — **le premier du tableau gagne**.
+  ⮕ Une même famille de gestes, quatre implémentations, deux doctrines opposées sur le même champ.
+  Ce n'est pas un arbitrage : c'est une divergence.
+
 - [ ] **#578 — Une cartouche neuve prend les colonnes de la PREMIÈRE échelle du trimestre, pas de celle de sa grille.**
   Créé le 28 août 2026, détaché de #573 (rapport du 27 août, §3 n° 18 et §7.2 n° 4).
   `initialiserNouveauCartouche` choisit son échelle par `echelles.find(e => !e.estDemo) || echelles[0]`
