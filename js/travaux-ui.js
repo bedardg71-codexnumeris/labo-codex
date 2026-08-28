@@ -3986,7 +3986,13 @@
         if (typeof travauxStockage === 'undefined' || typeof appliquerJetonReprise !== 'function') return 0;
 
         // Trouver les fichiers marqués comme reprises sans evaluationId
-        var tousLesFichiers = travauxStockage.obtenirFichiersTravaux();
+        // #572 — RESTREINT au groupe-cours actif. `obtenirFichiersTravaux()`
+        // rend TOUS les fichiers du trimestre, tous groupes confondus : le
+        // balayage post-import appliquait donc des jetons de reprise à des
+        // élèves d'un autre groupe que celui où l'enseignant venait d'importer.
+        // `obtenirFichiersGroupeActif()` retombe sur la liste complète quand
+        // aucun groupe n'est actif, donc aucun cas n'est perdu.
+        var tousLesFichiers = travauxStockage.obtenirFichiersGroupeActif();
         var fichiersReprise = tousLesFichiers.filter(function(f) {
             return f.estReprise && !f.evaluationId && f.etudiantDA && f.productionId;
         });
@@ -5422,7 +5428,25 @@
         var dateStr = (typeof dateStrOuEl === 'object' && dateStrOuEl !== null) ? dateStrOuEl.value : dateStrOuEl;
         const queue = travauxImport.obtenirFileDAttente();
         if (!queue[index]) return;
-        queue[index].dateFichier = dateStr ? new Date(dateStr) : null;
+        // #572 — `new Date('2026-08-28')` est parsé en UTC par la spec, pas en
+        // heure locale : à Toronto (UTC−4) la date devient le 27 août à 20 h, et
+        // l'affichage recule d'un jour. La valeur vient d'un `input[type=date]`,
+        // donc toujours en 'AAAA-MM-JJ'. Construite champ par champ, elle reste
+        // le jour que l'utilisateur a choisi.
+        queue[index].dateFichier = dateStr ? _dateLocaleDepuisAAAAMMJJ(dateStr) : null;
+    }
+
+    /**
+     * #572 — Construit une Date à MINUIT LOCAL depuis 'AAAA-MM-JJ'.
+     * Le constructeur à trois arguments interprète en heure locale, contrairement
+     * au parsing d'une chaîne ISO seule.
+     * @param {string} aaaammjj - date au format 'AAAA-MM-JJ'
+     * @returns {Date|null} la date locale, ou null si le format n'est pas reconnu
+     */
+    function _dateLocaleDepuisAAAAMMJJ(aaaammjj) {
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(aaaammjj));
+        if (!m) return new Date(aaaammjj); // format inattendu : comportement d'origine
+        return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
     }
 
     /**
