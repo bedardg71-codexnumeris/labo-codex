@@ -33,6 +33,10 @@ const retroaction = readFileSync(path.join(racine, 'js/evaluation-retroaction.js
 const ECHELLE = {
     id: 'ECH_IDME_NIV0_RESTAUREE',
     nom: 'IDME et niv 0 (restaurée)',
+    // #555 lot 2 — les deux repères que Grégoire a posés le 28 août. Sans eux,
+    // `zoneDuNiveau` rend `null` et le bilan ne conclut plus rien.
+    seuilSuffisance: 'D',
+    seuilMaitrise: 'M',
     niveaux: [
         { code: '0', nom: 'Non recevable', min: 0, max: 0, valeurCalcul: 0 },
         { code: 'I', nom: 'Incomplet ou insuffisant', min: 1, max: 64, valeurCalcul: 50 },
@@ -67,7 +71,15 @@ const EN_COURS = {
     grilleId: 'GR_DISPARUE',
     echelleId: ECHELLE.id,
     idModification: 'EVAL_A8',
-    criteres: { c1: 'M', c2: 'M', c3: 'D', c4: 'D' }
+    // ⚠ « I », pas « D », depuis #555 lot 2 — ET C'EST ICI QUE ÇA COMPTE.
+    // Le bilan lit les niveaux du FORMULAIRE en cours (`ec.criteres`), pas ceux
+    // de l'évaluation enregistrée : c'est justement ce que vérifie le cas
+    // « prend le niveau du FORMULAIRE ». Avec les repères de Grégoire (suffisant
+    // à partir de D), un critère en « D » n'est plus une PRIORITÉ mais un
+    // SIGNALÉ, et il sort de « présentement, il faut se concentrer sur ».
+    // Ce banc porte sur le NOMMAGE des critères quand la grille a disparu, pas
+    // sur leur zone : « I » garde son objet intact.
+    criteres: { c1: 'M', c2: 'M', c3: 'I', c4: 'I' }
 };
 
 function faireElements() {
@@ -120,7 +132,9 @@ function chargerBilan({ grilles, evaluations, evaluationEnCours, elements }) {
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')),
         niveauxOrdonnesDeLEchelle: calculs.niveauxOrdonnesDeLEchelle,
         niveauDuCodeDansEchelle: calculs.niveauDuCodeDansEchelle,
-        obtenirEchelleResolue: calculs.obtenirEchelleResolue
+        obtenirEchelleResolue: calculs.obtenirEchelleResolue,
+        zoneDuNiveau: calculs.zoneDuNiveau,
+        echellesComparables: calculs.echellesComparables
     });
     w.evaluationEnCours = evaluationEnCours;
     return w;
@@ -143,7 +157,7 @@ describe('#576 — le bilan survit à la disparition de la grille d\'origine', (
         expect(rendu).toContain('Plausibilité');
         expect(rendu).toContain('Nuance');
         // …avec le nom que l'échelle donne au niveau, pas un libellé du code.
-        expect(rendu).toContain('En développement');
+        expect(rendu).toContain('Incomplet ou insuffisant');
         // …et la force (Structure ou Rigueur, tous deux M) apparaît.
         expect(rendu).toContain('Ta force :');
         expect(rendu).toContain('Maîtrisé');
@@ -249,7 +263,7 @@ describe('#576 — le bilan survit à la disparition de la grille d\'origine', (
             evaluations: [Object.assign({}, EVAL_ENREGISTREE, {
                 criteres: [{ critereId: 'c3', critereNom: '<img src=x onerror=alert(1)>', niveauSelectionne: 'D' }]
             })],
-            evaluationEnCours: Object.assign({}, EN_COURS, { criteres: { c3: 'D' } }),
+            evaluationEnCours: Object.assign({}, EN_COURS, { criteres: { c3: 'I' } }),
             elements
         });
         w.basculerVueRetroaction('bilan');
@@ -287,7 +301,7 @@ describe('#576 — le bilan survit à la disparition de la grille d\'origine', (
     it('n\'écrit le nom du critère qu\'UNE fois quand il n\'y a pas de description', () => {
         // Le repli ne fournit aucune description : la ligne retombait sur le
         // nom, puis le répétait entre parenthèses — « Plausibilité
-        // (Plausibilité En développement) ». Vu en RENDANT le bilan, pas en le
+        // (Plausibilité Incomplet ou insuffisant) ». Vu en RENDANT le bilan, pas en le
         // testant : les assertions cherchaient la présence des mots, pas leur
         // nombre. Ce texte part chez l'élève ; il doit se lire.
         const elements = faireElements();
@@ -297,7 +311,7 @@ describe('#576 — le bilan survit à la disparition de la grille d\'origine', (
         w.basculerVueRetroaction('bilan');
         const rendu = elements.contenuRetroBilan.innerHTML;
         expect(rendu).not.toContain('Plausibilité (Plausibilité');
-        expect(rendu).toContain('Plausibilité (En développement)');
+        expect(rendu).toContain('Plausibilité (Incomplet ou insuffisant)');
         // Le nom n'apparaît qu'une fois dans sa ligne.
         const ligne = rendu.split('<p>').find((b) => b.indexOf('Plausibilité') >= 0) || '';
         expect(ligne.split('Plausibilité').length - 1).toBe(1);
@@ -309,11 +323,13 @@ describe('#576 — le bilan survit à la disparition de la grille d\'origine', (
         const w = chargerBilan({
             grilles: [{ id: 'GR_DISPARUE', criteres: [{ id: 'c3', nom: 'Plausibilité', description: 'La cohérence logique' }] }],
             evaluations: [EVAL_ENREGISTREE],
-            evaluationEnCours: Object.assign({}, EN_COURS, { criteres: { c3: 'D' } }),
+            // « I » : ce cas veut un critère PRIORITAIRE pour vérifier le format
+            // « description (Critère Niveau) ». Voir la note sur `EN_COURS`.
+            evaluationEnCours: Object.assign({}, EN_COURS, { criteres: { c3: 'I' } }),
             elements
         });
         w.basculerVueRetroaction('bilan');
-        expect(elements.contenuRetroBilan.innerHTML).toContain('la cohérence logique (Plausibilité En développement)');
+        expect(elements.contenuRetroBilan.innerHTML).toContain('la cohérence logique (Plausibilité Incomplet ou insuffisant)');
     });
 
     it('le repli est branché sur le chemin vivant, pas seulement défini', () => {

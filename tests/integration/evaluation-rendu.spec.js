@@ -168,6 +168,12 @@ test('Chantier I · evaluation rend la rétroaction Bilan (défis prioritaires +
         const echelle = {
             id: 'ech-bilan-chantierI',
             nom: 'Échelle du banc',
+            // #555 lot 2 — les deux repères. Sans eux, `zoneDuNiveau` rend `null`
+            // et le bilan ne conclut plus rien : pas de défi, pas de force.
+            // Ces deux lignes sont ce qui a fait rougir cette spec au
+            // branchement, alors que Vitest restait vert.
+            seuilSuffisance: 'D',
+            seuilMaitrise: 'M',
             niveaux: [
                 { code: 'I', nom: 'À reprendre',  min: 0,  max: 64,  valeurCalcul: 50 },
                 { code: 'D', nom: 'En chemin',    min: 65, max: 74,  valeurCalcul: 70 },
@@ -267,6 +273,8 @@ test('#576 · le bilan nomme les critères quand la grille d\'origine a disparu'
         const echelle = {
             id: 'ech-idme-niv0-restauree',
             nom: 'IDME et niv 0 (restaurée)',
+            seuilSuffisance: 'D',
+            seuilMaitrise: 'M',
             niveaux: [
                 { code: '0', nom: 'Non recevable',            min: 0,  max: 0,   valeurCalcul: 0  },
                 { code: 'I', nom: 'Incomplet ou insuffisant', min: 1,  max: 64,  valeurCalcul: 50 },
