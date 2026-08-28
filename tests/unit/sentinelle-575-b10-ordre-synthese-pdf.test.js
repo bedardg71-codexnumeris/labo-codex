@@ -363,25 +363,69 @@ describe('#575 B10 · l\'ordre du bilan remis à l\'élève vient de SON échell
         expect(bilan.recurrents.ameliorations).toBe('');
     });
 
-    it('passer d\'une priorité à « signalé » n\'est PAS annoncé comme un progrès acquis', () => {
-        // ⚠ COMPORTEMENT D'ORIGINE PRÉSERVÉ, ET C'EST DÉLIBÉRÉ. Avant le lot 2,
-        // la règle était `(I ou D) → (M ou E)` : passer de I à D ne comptait pas.
-        // Traduite en zones, elle devient `priorite → acquis`. Un refactor ne
-        // change pas la règle — et si Grégoire veut que la zone intermédiaire
-        // compte comme un progrès, ce sera une DÉCISION, pas un effet de bord.
+    it('« priorité → signalé » est annoncé, mais AUTREMENT : il faut consolider', () => {
+        // ⮕ DÉCISION DE GRÉGOIRE, 28 août 2026, sur trois options proposées.
+        // Ce passage — sortir de l'insuffisance — est le plus difficile, et il
+        // n'est pas durable. Le taire laissait croire qu'il ne comptait pas ; le
+        // confondre avec un acquis, qu'il était réglé. Ses mots, littéralement.
         const anterieure = evaluation({
             id: 'EV_ANCIENNE', echelleId: 'ECH_RENV', dateEvaluation: '2026-04-01',
             productionNom: 'Labo 1', niveauFinal: 'E',
-            criteres: [critere('Analyse', 'E')]
+            criteres: [critere('Analyse', 'E')]        // E = priorité
         });
         const win = chargerData([ECHELLE_RENVERSEE], [anterieure]);
         const bilan = bilanDe(win, evaluation({
             echelleId: 'ECH_RENV', niveauFinal: 'D',
-            criteres: [critere('Analyse', 'D')]   // E (priorité) → D (signalé)
+            criteres: [critere('Analyse', 'D')]        // D = signalé
+        }));
+
+        expect(bilan.recurrents.ameliorations).toContain('Analyse');
+        expect(bilan.recurrents.ameliorations).toContain('beaux progrès');
+        expect(bilan.recurrents.ameliorations).toContain('consolider');
+        // ⚠ Et surtout PAS confondu avec un acquis.
+        expect(bilan.recurrents.ameliorations).not.toContain('Tu as progressé en');
+    });
+
+    it('« consolider » exige un PROGRÈS, pas seulement un état signalé', () => {
+        // ⚠ Cas trouvé par le break-test : retirer la condition sur l'état
+        // ANTÉRIEUR laissait la sentinelle verte. Sans elle, un critère qui
+        // stagne — ou qui RÉGRESSE d'acquis à signalé — recevrait « tu as fait
+        // de beaux progrès ». Dire un progrès à qui a reculé est pire que se taire.
+        const anterieure = evaluation({
+            id: 'EV_ANCIENNE', echelleId: 'ECH_RENV', dateEvaluation: '2026-04-01',
+            productionNom: 'Labo 1', niveauFinal: 'D',
+            criteres: [critere('Stagne', 'D'), critere('Recule', 'I')]
+        });
+        const win = chargerData([ECHELLE_RENVERSEE], [anterieure]);
+        const bilan = bilanDe(win, evaluation({
+            echelleId: 'ECH_RENV', niveauFinal: 'D',
+            criteres: [critere('Stagne', 'D'), critere('Recule', 'D')]
         }));
 
         expect(bilan.recurrents.ameliorations).toBe('');
     });
+
+    it('les deux natures de progrès cohabitent sans se confondre', () => {
+        // Un critère devenu acquis ET un autre seulement consolidé : deux
+        // phrases, deux listes disjointes, jamais le même critère dans les deux.
+        const anterieure = evaluation({
+            id: 'EV_ANCIENNE', echelleId: 'ECH_RENV', dateEvaluation: '2026-04-01',
+            productionNom: 'Labo 1', niveauFinal: 'E',
+            criteres: [critere('Analyse', 'E'), critere('Rigueur', 'E')]
+        });
+        const win = chargerData([ECHELLE_RENVERSEE], [anterieure]);
+        const bilan = bilanDe(win, evaluation({
+            echelleId: 'ECH_RENV', niveauFinal: 'I',
+            criteres: [critere('Analyse', 'I'), critere('Rigueur', 'D')]
+        }));
+
+        const texte = bilan.recurrents.ameliorations;
+        expect(texte).toContain('Tu as progressé en Analyse');
+        expect(texte).toContain('En Rigueur, tu as fait de beaux progrès');
+        // Analyse est acquise : elle ne doit pas figurer dans « à consolider ».
+        expect(texte).not.toMatch(/En [^,]*Analyse[^,]*, tu as fait/);
+    });
+
 
     // ── 3. LA LIGNE « PROGRÈS » ET LA TENDANCE ───────────────────────────────
 
