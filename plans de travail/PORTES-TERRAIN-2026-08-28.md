@@ -3,7 +3,8 @@
 > **Artefact jumeau** : https://claude.ai/code/artifact/f0e40322-5813-4679-903f-f0be6fa6dd8d
 > **Base** : `main`, 1.104.1, build `0827-1418` — **aucun bump**, la session `file://` de Grégoire
 > est ouverte. Le travail de cette liste n'est **pas commité** au moment où elle est écrite.
-> **État** : ⏳ EN ATTENTE — aucune porte relevée.
+> **État** : ✅ **RELEVÉE le 28 août 2026, 07 h 00 — 10 passées, 2 échecs, 0 non traitée.**
+> Les deux échecs sont traités (voir « Au retour du terrain » en bas). Commit du lot : `e2819cea`.
 > **Ce qui échoue devient un item du BACKLOG avec son numéro de porte**, pas une note mentale.
 
 ---
@@ -82,7 +83,7 @@ Réponses à écrire, pas à cocher.
 | 3.1 | Les lignes sans niveau, en bas dans les deux sens ? | Décidé par la session : une absence de niveau n'est pas un niveau élevé. **Changement de comportement** |
 | 3.2 | Un filtre « par niveau » dans la liste des évaluations ? | Le code en portait un, en I-D-M-E, visant un `<select>` **qui n'a jamais existé** dans `index.html`. Retiré. En faire un vrai filtre = fonction neuve |
 | 3.3 | Quand est-ce qu'on pousse ? | **Six commits non poussés** (dont deux d'un autre chantier : #508/#427), travail du jour non commité, verdict Playwright périmé, **et une autre session écrit dans le dépôt** |
-| 3.4 | Le 1er septembre, dans quatre jours | #427/#508 attendent **la liste nominale** et **les trois noms Cloudflare** |
+| 3.4 | ~~Le 1er septembre, dans quatre jours~~ | ⚠⚠ **CETTE PORTE ÉTAIT FAUSSE, ET GRÉGOIRE L'A CORRIGÉE** : « il n'y a pas de liste nominale. Je crois que tes informations ne sont pas à jour. » Il avait raison. La policy est **ouverte** (`Include → Everyone`) ; la liste blanche de janvier a été abandonnée en cours d'hiver. La fiche §5 le dit noir sur blanc : « La porte étant ouverte, il n'y a **personne à inviter nominativement** : il y a un changement à ANNONCER. » ⮕ **Cause de mon erreur** : j'ai lu `RELAIS.md` à 04 h 30 et recopié cette ligne dans la porte à 06 h 30 **sans la revérifier**. Entre les deux, une autre session avait commité `8c71b534`, `fd9f07cb` et `299afb32`, dont la correction de cette exacte inférence. Le relais était juste ; c'est ma lecture qui était périmée. ⮕ **Ce qui reste réellement dû** : insérer le paragraphe d'annonce dans le message de rentrée à la CoP (`Cowork A26 CoP Labo Codex/message-cop-rentree-2026.md`, rédigé, non envoyé), et relever dans la console les trois noms Cloudflare, la durée de session et la règle `Include` réellement en place |
 
 ## §4 · Ce que je n'ai pas pu vérifier
 
@@ -106,12 +107,42 @@ Réponses à écrire, pas à cocher.
 
 ---
 
-## Au retour du terrain
+## Au retour du terrain — FAIT le 28 août 2026
 
-1. Trier les échecs : **défaut réel, ou build en retard ?** (0.2 tranche.)
-2. Verser chaque échec réel au BACKLOG avec son numéro de porte.
-3. Mettre à jour l'en-tête de ce fichier (état, date, ce qui reste).
-4. Ne jamais laisser une porte « probablement passée ».
+**0.2 était verte** : le build n'était pas en retard. Les deux échecs sont donc réels, et ils ont
+**deux causes différentes**. Les captures de Grégoire (artefacts 8 et 10, Benjamin A.) les ont
+départagées — le panneau Évaluation y affiche en jaune « **Grille d'origine introuvable dans les
+modèles actuels — affichage depuis les données sauvegardées** », et le champ « Grille d'évaluation »
+est vide.
+
+### 2.6 — PAS une régression de ce lot → **#576 ouvert**
+
+Le bilan affiche son entête puis **rien**, et saute aux jetons. Cause : `_chargerGrilleDefBilan`
+rend `null` quand la grille d'origine n'est plus dans `grillesTemplates` ; `_collecterCriteresBilan`
+exige cette grille et rend `[]` ; tout le bilan personnalisé en découle (`defis` vide,
+`tousMaitrises` faux car il exige `criteres.length > 0`, `_rendreForceBilan` sans matière). Chemin
+intact depuis l'origine — la porte l'a seulement mis sous les yeux. ⮕ La donnée est pourtant là :
+l'évaluation enregistrée porte ses critères AVEC leur nom, et `evaluation.js` a déjà un repli
+explicite pour ce cas (`:1158`, `:1426`). Le bilan n'en a jamais eu.
+
+### 2.7 — **RÉGRESSION DE CE LOT, corrigée dans `e2819cea`**
+
+La garde « même échelle » de la ligne « Progrès » comparait les `echelleId` **bruts**. L'échelle
+courante de Grégoire est « IDME et niv 0 (**restaurée**) » — recréée par la réparation de #542, donc
+sous un identifiant NEUF — pendant que ses évaluations d'H2026 en désignent un ancien : la ligne ne
+pouvait plus jamais s'afficher. ⮕ Corrigé par `_memeEchelleBilan`, qui applique les deux règles déjà
+écrites dans `obtenirEchelleCommuneDesEvaluations` : comparer les échelles **résolues** jamais les
+ids, et traiter une échelle absente ou introuvable comme une **absence**, pas comme un barème
+concurrent. Trois cas neufs à la sentinelle, **4 mutations de plus, 4 rouges** (18 au total).
+
+### Les décisions
+
+| # | Verdict de Grégoire | Suite donnée |
+|---|---|---|
+| 3.1 | « je garde » | Les lignes sans niveau restent en bas dans les deux sens. Verrouillé par la sentinelle |
+| 3.2 | « je garde » | Le filtre par niveau reste retiré ; aucune fonction neuve à écrire |
+| 3.3 | « commit et pousse maintenant » | **Commit fait** (`e2819cea`). **Push impossible pour l'instant** : la spec `planif-alignement` est rouge à cause du bandeau #508 (`position: fixed`, z-index 950, qui avale les clics) — diagnostic et correctif d'une session parallèle, qui attendaient que `index.html` se libère. Séquence proposée : elle commite son correctif, régénère le verdict au SHA, pousse les onze commits |
+| 3.4 | « il n'y a pas de liste nominale » | **Il avait raison** — voir la ligne corrigée au §3 |
 
 ## Ce qui reste dû après cette liste
 
