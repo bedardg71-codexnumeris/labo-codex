@@ -1875,6 +1875,17 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Ce n'est pas un arbitrage : c'est une divergence.
 
 - [ ] **#587 — Neuf autres fonctions sont définies deux fois et posées deux fois sur `window`.**
+  ✅ **DOCTRINE TRANCHÉE PAR GRÉGOIRE le 28 août 2026 — OPTION A : DÉDUPLICATION PAR DÉFAUT.**
+  Un nom, une définition. C'est la règle zéro-dette appliquée aux globaux. **L'alias à l'exposition
+  devient l'exception**, qui doit se justifier au cas par cas — il n'est plus un patron à imiter.
+  ⮕ **Conséquence sur le précédent décrit plus bas** : `modifierEvaluationParId` passe de « précédent
+  à suivre » à **cas à traiter**. Son commentaire annonce un conflit disparu depuis `26be0d9b` ;
+  sous la doctrine A, l'alias n'a plus de justification. ⚠ 8 appelants dans 4 fichiers — c'est un
+  chantier, pas une retouche.
+  ⚠ **CE QUE LA DOCTRINE NE TRANCHE PAS** : elle dit qu'un des deux corps doit partir, pas LEQUEL ni
+  COMMENT. Pour `creerNouvellePratique`, si la version courte est un remplacement délibéré, le geste
+  est un **RETRAIT de carcasse** (zéro-dette), pas une déduplication — deux chantiers différents.
+  La question se règle par l'historique : `git log -S ouvrirWizardV2 -- js/pratiques.js`.
   Créé le 28 août 2026 en écrivant le cliquet de **#557**, qui est le dixième cas de ce motif —
   et le seul traité. Voir aussi **#575**, qui en avait retiré deux (`trierListeEvaluations`,
   `rechargerFiltreProduction`).
@@ -1943,6 +1954,15 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   (l'historique, pas la relecture des deux corps).
 
 - [ ] **#578 — Une cartouche neuve prend les colonnes de la PREMIÈRE échelle du trimestre, pas de celle de sa grille.**
+  ✅ **TRANCHÉ PAR GRÉGOIRE le 28 août 2026 — OPTION A : MESURER AVANT DE CODER.**
+  Compter, dans ses trimestres, les grilles **avec** et **sans** `echelleId`. Le chiffre décide de la
+  suite ; le correctif ne s'écrit pas avant.
+  ⮕ **Le motif est une protection, pas une précaution de style** : si les grilles réelles ne portent
+  pas d'`echelleId`, passer par `obtenirEchelleResolue` laisserait la cartouche **sans colonnes** —
+  une régression PIRE que le défaut qu'on corrige.
+  ⮕ La mesure ne peut pas être faite depuis le dépôt : les grilles vivent dans le navigateur de
+  Grégoire. Le geste est un **diagnostic en console** qu'il lance lui-même, sur le patron de
+  `_diagnostiquerModeleCours` (`cours.js`) et d'`oracle542`.
   Créé le 28 août 2026, détaché de #573 (rapport du 27 août, §3 n° 18 et §7.2 n° 4).
   `initialiserNouveauCartouche` choisit son échelle par `echelles.find(e => !e.estDemo) || echelles[0]`
   (`cartouches.js`) — un ordre de tableau, pas une désignation — et n'enregistre **aucun `echelleId`** sur
