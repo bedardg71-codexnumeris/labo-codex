@@ -1964,15 +1964,36 @@ function restaurerOriginaleSiReprise(evaluations, evaluationId) {
     return true;
 }
 
+/**
+ * Supprime une évaluation. DÉFINITION UNIQUE — voir #557.
+ *
+ * ⚠ IL Y EN AVAIT DEUX. `evaluation.js` en portait une seconde, sans la
+ * restauration de l'originale (correctif du 8 juin) ni la tolérance aux
+ * évaluations orphelines (correctif du 16 mars). `evaluation.js` étant chargé
+ * APRÈS `liste-evaluations.js`, c'est cette version-là qui gagnait `window` —
+ * et donc tous les appels venus du profil étudiant et du sidebar d'évaluation.
+ * ⮕ Supprimer une reprise depuis le profil laissait son originale « remplacée »
+ * à jamais, sans aucun moyen de la récupérer.
+ * ⮕ Les deux apports de la version retirée sont absorbés ici : la garde
+ * « évaluation introuvable » et la confirmation qui NOMME ce qu'on détruit.
+ */
 function supprimerEvaluation(evaluationId) {
     // CORRECTION: Lire TOUTES les évaluations (pas seulement celles du cours actif)
     const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const evaluation = evaluations.find(ev => ev.id === evaluationId);
 
+    // #557 : absorbé de la version retirée d'`evaluation.js`. Sans cette garde,
+    // un identifiant périmé faisait un filtrage sans effet, suivi d'une
+    // notification de succès — on annonçait une suppression qui n'avait pas eu lieu.
+    if (!evaluation) {
+        notifications.erreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
     // Vérifier si l'évaluation est verrouillée
     // ✅ CORRIGÉ (16 mars 2026) : permettre la suppression d'une éval verrouillée
     // si le fichier source n'existe plus (évaluation orpheline, pas de moyen de déverrouiller)
-    if (evaluation && evaluation.verrouillee) {
+    if (evaluation.verrouillee) {
         var fichierExiste = false;
         if (typeof travauxResolution !== 'undefined') {
             fichierExiste = !!travauxResolution.trouverFichierPourEvaluation(evaluation);
@@ -1989,7 +2010,13 @@ function supprimerEvaluation(evaluationId) {
         // Fichier absent → évaluation orpheline, on permet la suppression
     }
 
-    if (!confirm('Veux-tu vraiment supprimer cette évaluation ? Cette action est irréversible.')) {
+    // #557 : absorbé de la version retirée d'`evaluation.js`. La confirmation
+    // NOMME ce qu'on détruit — depuis le profil étudiant ou le sidebar, rien à
+    // l'écran ne rappelle sur quelle évaluation le clic vient de porter.
+    const quoi = (evaluation.etudiantNom && evaluation.productionNom)
+        ? `l'évaluation de ${evaluation.etudiantNom} pour ${evaluation.productionNom}`
+        : 'cette évaluation';
+    if (!confirm(`Veux-tu vraiment supprimer ${quoi} ?\n\nCette action est irréversible.`)) {
         return;
     }
 
@@ -2796,8 +2823,14 @@ function viderTouteCorbeille() {
 
     document.getElementById('vider-corbeille-btn-confirmer').onclick = async () => {
         // ✅ CORRIGÉ (16 mars 2026) : supprimer aussi les évaluations liées aux fichiers de la corbeille
-        var fichiersCorbeille = travauxStockage.obtenirCorbeille();
-        await travauxStockage.viderCorbeille();
+        // ✅ #556 (28 août 2026) : on détruit EXACTEMENT l'ensemble annoncé — la liste
+        // capturée au moment de l'affichage, celle dont le nombre est écrit dans la modale.
+        // Deux défauts se refermaient ici : `viderCorbeille()` sans argument détruisait la
+        // corbeille de TOUS les groupes-cours du trimestre, et cette relecture pouvait
+        // rendre un autre ensemble que l'affiché si le groupe-cours actif changeait entre
+        // l'ouverture de la modale et le clic de confirmation.
+        var fichiersCorbeille = corbeille;
+        await travauxStockage.viderCorbeille(fichiersCorbeille);
 
         // Nettoyer les évaluations liées à chaque fichier supprimé
         // ACCÈS DIRECT — read-modify-write : doit lire TOUTES les évaluations pour réécrire sans perte

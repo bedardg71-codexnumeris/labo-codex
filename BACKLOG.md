@@ -1874,6 +1874,74 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ Une même famille de gestes, quatre implémentations, deux doctrines opposées sur le même champ.
   Ce n'est pas un arbitrage : c'est une divergence.
 
+- [ ] **#587 — Neuf autres fonctions sont définies deux fois et posées deux fois sur `window`.**
+  Créé le 28 août 2026 en écrivant le cliquet de **#557**, qui est le dixième cas de ce motif —
+  et le seul traité. Voir aussi **#575**, qui en avait retiré deux (`trierListeEvaluations`,
+  `rechargerFiltreProduction`).
+  **LE MOTIF** : deux modules exposent une fonction sous le même nom sur `window`. Le dernier chargé
+  gagne, en silence. Un grep sur la DÉFINITION ne montre rien d'anormal — il faut greper l'EXPOSITION,
+  et croiser avec l'ordre de chargement d'`index.html`.
+  ⚠ **LE PREMIER COMPTAGE DISAIT SIX, ET IL ÉTAIT FAUX.** Le détecteur ne cherchait que
+  `window.X = X;` — la forme « référence à une fonction nommée ». Il manquait `window.X = function`
+  et `window.X = async function` : **133 expositions** dans `js/`, et trois doublons entiers
+  (`_apresOuvertureFichier`, `afficherSection`, `afficherSousSection`).
+  ⮕ *Un grep compte des occurrences ; il ne connaît pas les synonymes* — la même leçon que l'audit
+  des copies d'échelle du même jour, sur un autre motif. **Vérifié depuis** : `Object.assign(window, …)`
+  et `window[nom] = …` n'existent pas dans `js/` (les quatre `window[x]` sont des LECTURES de dispatcher).
+  **LES NEUF PAIRES, mesurées le 28 août** (taille des corps en caractères ; « gagne » = posé en
+  dernier sur `window`) :
+
+  | Fonction | Gagne `window` | Perd | Écart |
+  |---|---|---|---|
+  | `creerNouvellePratique` | `pratiques.js` (l.14489) · 257 | `pratiques-gestion.js` (l.14427) · 2593 | **×10** |
+  | `afficherTableauProductions` | `productions.js` (l.14436) · 4479 | `donnees-v2.js` (l.14429) · 3029 | ×1,5 |
+  | `evaluerProduction` | `evaluation.js` (l.14596) · 1825 | `profil-etudiant-actions.js` (l.14504) · 948 | ×1,9 |
+  | `listerTrimestresAvecGrilles` | `grilles.js` (l.14441) · 1414 | `grilles-bibliotheque.js` (l.14440) · 1232 | ×1,1 |
+  | `listerTrimestresAvecCartouches` | `cartouches.js` (l.14445) · 987 | `cartouches-bibliotheque.js` (l.14444) · 1241 | ×1,3 |
+  | `fermerModalBibliothequePratiques` | `pratiques.js` (l.14489) · 123 | `pratiques-gestion.js` (l.14427) · 65 | ×1,9 |
+  | `_apresOuvertureFichier` | `liste-evaluations.js` (l.14581) · 140 | `profil-etudiant-actions.js` (l.14504) · 514 | ×3,7 |
+  | `afficherSection` | `planification.js` (l.14529) · 229 | `bilan-reflexif.js` (l.14521) · 259 **et** `rapport-bug.js` (l.14366) · 154 | **3 fichiers** |
+  | `afficherSousSection` | `planification.js` (l.14529) · 270 | `bilan-reflexif.js` (l.14521) · 276 | ×1,0 |
+
+  Les neuf paires **divergent** — aucune n'est une copie inoffensive.
+  ⚠ **« NEUF DOUBLONS » N'EST PAS « NEUF DÉFAUTS VÉCUS », et le tableau ci-dessus ne le dit pas.**
+  Les fichiers perdants sont des IIFE : leurs appels INTERNES résolvent lexicalement vers
+  leur propre version, qui reste donc atteignable. C'est exactement ce qui rendait l'énoncé de #557
+  trop large (« la version corrigée est inatteignable » — non : elle l'était depuis la Liste des
+  évaluations, pas depuis le profil étudiant).
+  ⮕ **Ce qui décide, pour chaque paire, c'est l'existence d'un appelant INTERNE dans le fichier
+  perdant** — pas l'écart de taille, pas l'ordre de chargement.
+  **UNE SEULE PAIRE A ÉTÉ MENÉE JUSQU'AU BOUT** : `creerNouvellePratique` n'a **aucun** appelant
+  interne dans `pratiques-gestion.js`. Son unique point d'entrée est `data-action="creerNouvellePratique"`
+  (`index.html:5550`), résolu par le dispatcher de `main.js`, donc par le global. Ses 2593 caractères
+  sont donc bel et bien inatteignables.
+  ⮕ ⚠ **MAIS CE N'EST PEUT-ÊTRE PAS UN BOGUE.** La version qui gagne (257 car.) ne fait qu'appeler
+  `ouvrirWizardV2` : ça ressemble à un remplacement DÉLIBÉRÉ dont la carcasse est restée. Si c'est le
+  cas, le geste est un RETRAIT (zéro-dette), pas une réparation. **À trancher avant de coder.**
+  ⮕ **Les cinq autres paires demandent chacune la même mesure**, une par une : appelant interne ou non,
+  puis retrait ou fusion. Ne pas les traiter en lot sur la foi du tableau.
+  **CE QUI EST DÉJÀ POSÉ** : `tests/unit/sentinelle-557-supprimer-evaluation-definition-unique.test.js`
+  porte un cliquet à liste connue. Ces six noms y sont tolérés et nommés ; un **septième** fait rougir
+  le banc, et une assertion dédiée empêche d'y rajouter `supprimerEvaluation` pour le faire taire.
+  ⮕ Quand une paire est réglée, **retirer son nom de `DOUBLONS_CONNUS`** : le cliquet ne descend pas
+  tout seul, il rougit pour demander qu'on le descende.
+  📌 **UN PRÉCÉDENT LOCAL, ET IL A ÉTÉ TRANCHÉ DANS L'AUTRE SENS.** `evaluation.js:2976` porte
+  `window.modifierEvaluationParId = modifierEvaluation;` avec le commentaire « Export sous un nom
+  différent pour éviter conflit avec liste-evaluations.js ». Même conflit, mêmes deux fichiers,
+  résolu par **renommage à l'exposition** plutôt que par déduplication — commit `b23900e0`
+  (« Correction du bouton Consulter : résolution conflit de noms de fonctions »). L'alias a
+  aujourd'hui **8 appelants dans 4 fichiers** (`liste-evaluations.js`, `profil-etudiant-actions.js`,
+  `travaux-ui.js`).
+  ⮕ ⚠ **ET SA JUSTIFICATION EST PÉRIMÉE — mesuré le 28 août 2026.** Il n'existe plus qu'UNE seule
+  `modifierEvaluation` dans le dépôt (`evaluation.js:1169`) : `liste-evaluations.js` en portait une,
+  retirée depuis par `26be0d9b`. Le commentaire annonce donc un conflit qui n'existe plus, et le nom
+  `modifierEvaluationParId` n'évite plus rien.
+  ⮕ **Ne pas le retirer à la légère** : 8 appelants, c'est un chantier, pas une retouche. Mais la
+  question « alias ou déduplication ? » est déjà tranchée deux fois dans ce dépôt, dans deux sens
+  opposés — l'écrire ici évite qu'elle se rouvre à froid dans six mois.
+  ⮕ Pour trancher `creerNouvellePratique`, la piste est `git log -S ouvrirWizardV2 -- js/pratiques.js`
+  (l'historique, pas la relecture des deux corps).
+
 - [ ] **#578 — Une cartouche neuve prend les colonnes de la PREMIÈRE échelle du trimestre, pas de celle de sa grille.**
   Créé le 28 août 2026, détaché de #573 (rapport du 27 août, §3 n° 18 et §7.2 n° 4).
   `initialiserNouveauCartouche` choisit son échelle par `echelles.find(e => !e.estDemo) || echelles[0]`
@@ -1927,7 +1995,21 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 > ⮕ Croisements avec des items déjà ouverts, que l'audit signale sans les redémontrer : **#483**,
 > **#465**, **#482**, **#440**, et le bug testeur **#340-T3**.
 
-- [ ] 🔴 **#556 — « Vider la corbeille » détruit au-delà de ce que la modale annonce.** (constat A1, CRITIQUE)
+- [x] **#556 LIVRÉ 28 août 2026** — « Vider la corbeille » détruit exactement ce que la modale annonce. (constat A1, CRITIQUE)
+  `viderCorbeille(fichiers)` reçoit désormais la liste à détruire, et REFUSE l'appel sans argument
+  (l'ancienne signature nue était le défaut lui-même). L'appelant lui passe la liste **capturée au
+  moment de l'affichage** — pas une relecture au clic.
+  ⮕ **UN SECOND DÉFAUT, NON INSCRIT, corrigé au passage** : `viderTouteCorbeille` lisait
+  `obtenirCorbeille()` DEUX fois (une pour le compte affiché, une à la confirmation). Un changement de
+  groupe-cours actif entre l'ouverture de la modale et le clic rendait deux ensembles différents.
+  ⮕ Le retour est désormais MESURÉ sur la corbeille (`avant.length - restantes.length`), pas déduit
+  de la longueur reçue ; et les métadonnées sont relues APRÈS les `await`, pour qu'un fichier mis en
+  corbeille pendant les suppressions de blobs survive.
+  **Sentinelle** : `tests/unit/sentinelle-556-corbeille-detruit-ce-qui-est-annonce.test.js` (7 tests).
+  Elle suit la variable dont le `.length` est écrit dans la modale JUSQU'À l'appel de destruction —
+  « `viderCorbeille` reçoit un argument » ne dit rien tant qu'on ne dit pas LEQUEL.
+  **Break-test** : 9 mutations, 9 verdicts conformes (7 rouges obtenus, 2 témoins verts).
+  ⮕ Énoncé d'origine, conservé pour mémoire :
   **REVÉRIFIÉ ENCORE VRAI le 27 août sur 1.104.1.** La modale compte les fichiers de la corbeille
   **filtrée par groupe-cours actif**, mais `travauxStockage.viderCorbeille()`
   (`travaux-stockage.js:1065`) itère `obtenirCorbeilleComplete()` et termine par
@@ -1938,7 +2020,22 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ou filtrer par `groupeCoursId`) + sentinelle « la modale et la destruction comptent le même
   ensemble ». C'est la correction n° 1 du ratio impact/effort de l'audit.
 
-- [ ] 🔴 **#557 — `supprimerEvaluation` existe en double : la version corrigée est inatteignable.** (constat A2, CRITIQUE)
+- [x] **#557 LIVRÉ 28 août 2026** — `supprimerEvaluation` n'a plus qu'une définition. (constat A2, CRITIQUE)
+  La définition d'`evaluation.js` est RETIRÉE ; celle de `liste-evaluations.js` (avec la restauration
+  de l'originale d'une reprise et la tolérance aux orphelines verrouillées) est la seule, et elle a
+  **absorbé les deux apports** de la version retirée : la garde « évaluation introuvable » et la
+  confirmation qui nomme l'étudiant·e et la production.
+  ⚠ **L'ÉNONCÉ ÉTAIT TROP LARGE — mesuré le 28 août.** « La version corrigée est inatteignable » : non.
+  `liste-evaluations.js` est une IIFE, donc son appel interne (`data-action` « supprimer-eval », depuis
+  la Liste des évaluations) résolvait LEXICALEMENT vers la bonne version. Seuls les appels par le
+  GLOBAL tombaient sur la mauvaise : le profil étudiant et le sidebar d'évaluation. **Le même écran se
+  comportait de deux façons selon le bouton employé** — ce qui est plus difficile à diagnostiquer
+  qu'une fonction franchement inatteignable.
+  **Sentinelle** : `tests/unit/sentinelle-557-supprimer-evaluation-definition-unique.test.js` (7 tests),
+  dont le **cliquet générique** demandé par l'item : aucun NOUVEAU nom de fonction ne peut être posé
+  sur `window` par deux modules. Liste connue de 9 tolérés → **#587**.
+  **Break-test** : 7 mutations, 7 verdicts conformes (5 rouges obtenus, 2 témoins verts).
+  ⮕ Énoncé d'origine, conservé pour mémoire :
   **REVÉRIFIÉ ENCORE VRAI le 28 août à 12 h 05, lignes remesurées.** `liste-evaluations.js:1967`
   définit la version **avec** `restaurerOriginaleSiReprise` (correctif du 8 juin) ;
   `evaluation.js:2088` en définit une **sans**. Les deux sont exportées (`:2843` et `:3233`) ;
