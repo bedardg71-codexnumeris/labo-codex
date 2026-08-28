@@ -192,9 +192,14 @@
 
     /**
      * Genere un ZIP complet du semestre
+     *
+     * #565 : un fichier illisible ne fait plus perdre l'archive entière. Chaque
+     * item est isolé par try/catch, les pertes sont nommées dans `echecs` ET
+     * inscrites dans le `_resume.json` de l'archive.
+     *
      * @param {Object} options - Options d'export
      * @param {Function} onProgression - Callback de progression
-     * @returns {Promise<Blob>} Le blob ZIP
+     * @returns {Promise<{blob: Blob, echecs: string[], nbFichiers: number}>}
      */
     async function exporterSemestre(options = {}, onProgression) {
         if (typeof JSZip === 'undefined') {
@@ -218,6 +223,8 @@
         const nomArchive = trimestreActif ? trimestreActif.nom.replace(/\s/g, '_') : 'semestre';
 
         let traites = 0;
+        // #565 — un fichier illisible ne doit plus faire perdre l'archive entière.
+        const echecs = [];
 
         // Structure: eleve/production/fichier
         for (const fichier of fichiers) {
@@ -232,17 +239,22 @@
                 ? (production.titre || production.nom || '').replace(/[^a-zA-Z0-9]/g, '_')
                 : 'sans-production';
 
-            const blob = await travauxStockage.recupererBlob(fichier.id);
-            if (blob) {
-                zip.file(`${nomEtudiant}/${nomProduction}/${fichier.nomFichier}`, blob);
-            }
+            try {
+                const blob = await travauxStockage.recupererBlob(fichier.id);
+                if (blob) {
+                    zip.file(`${nomEtudiant}/${nomProduction}/${fichier.nomFichier}`, blob);
+                }
 
-            // Toujours inclure les annotations aplaties
-            const annote = await genererFichierAnnote(fichier);
-            if (annote) {
-                const ext = fichier.nomFichier.split('.').pop();
-                const nomAnnote = fichier.nomFichier.replace(`.${ext}`, `_annote.${ext}`);
-                zip.file(`${nomEtudiant}/${nomProduction}/${nomAnnote}`, annote);
+                // Toujours inclure les annotations aplaties
+                const annote = await genererFichierAnnote(fichier);
+                if (annote) {
+                    const ext = fichier.nomFichier.split('.').pop();
+                    const nomAnnote = fichier.nomFichier.replace(`.${ext}`, `_annote.${ext}`);
+                    zip.file(`${nomEtudiant}/${nomProduction}/${nomAnnote}`, annote);
+                }
+            } catch (e) {
+                console.error('[Travaux-Archivage] Export trimestre — échec sur ' + fichier.nomFichier + ' :', e);
+                echecs.push(`${nomEtudiant} / ${fichier.nomFichier} — ${e && e.message ? e.message : e}`);
             }
 
             traites++;
@@ -265,15 +277,21 @@
             date: new Date().toISOString(),
             nbFichiers: fichiers.length,
             nbEtudiants: new Set(fichiers.map(f => f.etudiantDA).filter(Boolean)).size,
-            nbProductions: new Set(fichiers.map(f => f.productionId).filter(Boolean)).size
+            nbProductions: new Set(fichiers.map(f => f.productionId).filter(Boolean)).size,
+            // #565 — les échecs sont inscrits DANS l'archive : le bilan à
+            // l'écran se referme, le fichier reste.
+            nbEchecs: echecs.length,
+            echecs: echecs
         };
         zip.file('_resume.json', JSON.stringify(resume, null, 2));
 
-        return await zip.generateAsync({
+        const blob = await zip.generateAsync({
             type: 'blob',
             compression: 'DEFLATE',
             compressionOptions: { level: 6 }
         });
+
+        return { blob, echecs, nbFichiers: fichiers.length };
     }
 
     /**
@@ -283,7 +301,12 @@
      * @param {string|null} da - DA d'un etudiant specifique (null = tous)
      * @param {boolean} reprisesSeulement - N'exporter que les reprises
      * @param {Function} onProgression - Callback(traites, total)
-     * @returns {Promise<{blobs: Array<{blob: Blob, nom: string}>}>} Les PDFs generes
+     * @returns {Promise<{blobs: Array<{blob: Blob, nom: string}>, nomProd: string,
+     *   echecs: string[], sansSynthese: string[]}>} Les PDFs generes. #565 :
+     *   `echecs` nomme les étudiants dont le PDF n'a PAS pu être produit (le lot
+     *   continue), `sansSynthese` ceux dont le PDF part sans sa page de
+     *   rétroaction — livrable, mais incomplet, et c'est ce qui partait en
+     *   silence sur Léa auparavant.
      */
     async function exporterPourLea(productionId, da, reprisesSeulement, onProgression) {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif();
@@ -336,22 +359,41 @@
         let traites = 0;
         const total = fichiersAvecEval.length;
         const blobs = [];
+        // #565 — un étudiant en échec ne doit plus emporter le lot entier.
+        const echecs = [];
+        const sansSynthese = [];
 
         for (const fichier of fichiersAvecEval) {
-            const { doc } = await travauxExportPDF.genererDocPDF(fichier.id, productionId);
-            const pdfBlob = doc.output('blob');
-
+            // Identité résolue AVANT le try : en cas d'échec, le bilan doit
+            // pouvoir nommer l'étudiant concerné, pas seulement compter.
             const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
             const nom = (etudiant?.nom || 'Inconnu').replace(/[^a-zA-ZÀ-ÿ-]/g, '');
             const daEtud = etudiant?.da || fichier.etudiantDA || '0000000';
-            const nomFichier = `${nom}_${daEtud}_${nomProd}_Evalue.pdf`;
+            const libelle = `${etudiant?.prenom ? etudiant.prenom + ' ' : ''}${etudiant?.nom || 'étudiant inconnu'} (${daEtud})`;
 
-            blobs.push({ blob: pdfBlob, nom: nomFichier });
+            try {
+                const { doc, synthese } = await travauxExportPDF.genererDocPDF(fichier.id, productionId);
+                const pdfBlob = doc.output('blob');
+
+                const nomFichier = `${nom}_${daEtud}_${nomProd}_Evalue.pdf`;
+                blobs.push({ blob: pdfBlob, nom: nomFichier });
+
+                // La copie part quand même : elle est valide, il lui manque la
+                // page de rétroaction. C'est précisément ce qui partait en
+                // silence sur Léa avant #565.
+                if (synthese && !synthese.ajoutee) {
+                    sansSynthese.push(`${libelle} — ${synthese.raison}`);
+                }
+            } catch (e) {
+                console.error('[Travaux-Archivage] Export Léa — échec pour ' + daEtud + ' :', e);
+                echecs.push(`${libelle} — ${e && e.message ? e.message : e}`);
+            }
+
             traites++;
             if (onProgression) onProgression(traites, total);
         }
 
-        return { blobs, nomProd };
+        return { blobs, nomProd, echecs, sansSynthese };
     }
 
     /* ===============================
@@ -555,6 +597,37 @@
     }
 
     /**
+     * #565 — Compose le bilan de fin d'export et l'affiche s'il y a quelque
+     * chose à dire. Silencieux quand tout s'est bien passé : on ne dérange pas
+     * pour confirmer l'ordinaire.
+     *
+     * @param {number} reussis - Nombre d'éléments effectivement produits
+     * @param {number} total - Nombre d'éléments attendus
+     * @param {string[]} echecs - Libellés des éléments perdus
+     * @param {string[]} [sansSynthese] - Libellés des copies livrées sans leur
+     *   page de rétroaction (elles comptent parmi les réussis)
+     */
+    function _afficherBilanExport(reussis, total, echecs, sansSynthese) {
+        const lignes = [];
+
+        if (echecs && echecs.length > 0) {
+            lignes.push(`${reussis} exporté(s) sur ${total}, ${echecs.length} en échec :`);
+            echecs.forEach(function(t) { lignes.push('  • ' + t); });
+        }
+
+        if (sansSynthese && sansSynthese.length > 0) {
+            if (lignes.length > 0) lignes.push('');
+            lignes.push(`${sansSynthese.length} copie(s) livrée(s) SANS leur page de rétroaction :`);
+            sansSynthese.forEach(function(t) { lignes.push('  • ' + t); });
+            lignes.push('');
+            lignes.push('Ces PDF sont exportés et lisibles, mais il leur manque la page de synthèse. À vérifier avant de les téléverser sur Léa.');
+        }
+
+        if (lignes.length === 0) return;
+        alert(lignes.join('\n'));
+    }
+
+    /**
      * Lance l'export du semestre complet et telecharge
      * @param {Object} options - Options
      */
@@ -563,7 +636,7 @@
             const trimestreActif = obtenirTrimestreActif();
             const nom = trimestreActif ? trimestreActif.id : 'semestre';
 
-            const zip = await exporterSemestre(options, (traites, total) => {
+            const { blob, echecs, nbFichiers } = await exporterSemestre(options, (traites, total) => {
                 const pourcent = Math.round((traites / total) * 100);
                 const barre = document.getElementById('travaux-barre-progression');
                 if (barre) barre.style.width = pourcent + '%';
@@ -571,7 +644,10 @@
                 if (texte) texte.textContent = `${traites}/${total} fichiers traités…`;
             });
 
-            telechargerBlob(zip, `archive_travaux_${nom}_${new Date().toISOString().split('T')[0]}.zip`);
+            // L'archive part MÊME si des fichiers ont échoué : les N−1 valides
+            // ont plus de valeur que rien du tout (#565). Le bilan suit.
+            telechargerBlob(blob, `archive_travaux_${nom}_${new Date().toISOString().split('T')[0]}.zip`);
+            _afficherBilanExport(nbFichiers - echecs.length, nbFichiers, echecs);
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export semestre:', e);
             alert('L\'export a échoué : ' + e.message);
@@ -593,13 +669,21 @@
         try {
             const date = new Date().toISOString().split('T')[0];
 
-            const { blobs, nomProd } = await exporterPourLea(productionId, da, reprisesSeulement, (traites, total) => {
+            const { blobs, nomProd, echecs, sansSynthese } = await exporterPourLea(productionId, da, reprisesSeulement, (traites, total) => {
                 const pourcent = Math.round((traites / total) * 100);
                 const barre = document.getElementById('travaux-barre-progression-lea');
                 if (barre) barre.style.width = pourcent + '%';
                 const texte = document.getElementById('travaux-texte-progression-lea');
                 if (texte) texte.textContent = `${traites}/${total} fichiers traités…`;
             });
+
+            // #565 — tout a échoué : ne pas télécharger un ZIP vide en laissant
+            // croire que l'export a réussi.
+            if (blobs.length === 0) {
+                _afficherBilanExport(0, echecs.length, echecs, sansSynthese);
+                if (echecs.length === 0) alert('Aucun PDF n\'a pu être produit.');
+                return;
+            }
 
             if (blobs.length === 1) {
                 // Un seul fichier → PDF direct
@@ -614,6 +698,10 @@
                 const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
                 telechargerBlob(zipBlob, `Lea_${nomProd}_${date}.zip`);
             }
+
+            // Bilan APRÈS le téléchargement : les copies valides sont parties,
+            // et l'enseignant sait ce qui manque avant de téléverser sur Léa.
+            _afficherBilanExport(blobs.length, blobs.length + echecs.length, echecs, sansSynthese);
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export Lea:', e);
             alert('L\'export Léa a échoué : ' + e.message);
