@@ -353,41 +353,24 @@ function genererOptionsFiltres(groupes, productions) {
         });
     }
 
-    // Filtre Note (selon la pratique de notation)
-    const selectNote = document.getElementById('filtre-note-eval');
-    const pratiqueIdFiltres = typeof obtenirPratiqueActiveGroupeCours === 'function'
-        ? obtenirPratiqueActiveGroupeCours()
-        : (typeof obtenirIdPratiqueActive === 'function' ? obtenirIdPratiqueActive() : 'sommative');
-    const estPANFiltres = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratiqueIdFiltres) : pratiqueIdFiltres) === 'standards';
-
-    if (selectNote) {
-        selectNote.innerHTML = '<option value="">Toutes les notes</option>';
-
-        if (estPANFiltres) {
-            // Système IDME
-            ['I', 'D', 'M', 'E'].forEach(niveau => {
-                const option = document.createElement('option');
-                option.value = niveau;
-                option.textContent = niveau;
-                selectNote.appendChild(option);
-            });
-        } else {
-            // Système traditionnel (%)
-            const tranches = [
-                { label: '0-59%', min: 0, max: 59 },
-                { label: '60-69%', min: 60, max: 69 },
-                { label: '70-79%', min: 70, max: 79 },
-                { label: '80-89%', min: 80, max: 89 },
-                { label: '90-100%', min: 90, max: 100 }
-            ];
-            tranches.forEach(tranche => {
-                const option = document.createElement('option');
-                option.value = `${tranche.min}-${tranche.max}`;
-                option.textContent = tranche.label;
-                selectNote.appendChild(option);
-            });
-        }
-    }
+    // #575 — LE FILTRE « NOTE » EST RETIRÉ, PARCE QU'IL N'A JAMAIS EXISTÉ.
+    //
+    // Ce bloc peuplait un `<select id="filtre-note-eval">` de codes `I/D/M/E`
+    // quand la pratique était Standards, de tranches de 10 % sinon. L'audit du
+    // 27 août le donne en exemple de code inutilisable hors IDME (§3 n° 8) —
+    // il l'était, mais il était surtout INATTEIGNABLE : cet identifiant
+    // n'apparaît NULLE PART dans `index.html`, et `git log -S` n'en trouve
+    // aucune trace, depuis le premier commit du dépôt. La garde `if (selectNote)`
+    // n'a donc jamais été vraie, et la branche « niveau » de
+    // `appliquerFiltresSurLignes` jamais empruntée (la valeur lue vaut toujours
+    // `''`, faute d'élément).
+    //
+    // ⮕ Le corriger aurait été un correctif sans effet
+    // (`feedback-verifier-consommateurs-avant-brancher`). Un filtre par niveau,
+    // s'il est voulu, est une fonction NEUVE : il lui faut son `<select>`, ses
+    // options tirées de `niveauxOrdonnesDeLEchelle`, et une décision sur ce
+    // qu'il propose quand les évaluations affichées ne partagent pas la même
+    // échelle. Inscrit au backlog plutôt que ressuscité à l'aveugle.
 }
 
 /**
@@ -433,7 +416,6 @@ function sauvegarderEtatFiltres() {
         groupe: document.getElementById('filtre-groupe-eval')?.value || '',
         production: document.getElementById('filtre-production-eval')?.value || '',
         statut: document.getElementById('filtre-statut-eval')?.value || '',
-        note: document.getElementById('filtre-note-eval')?.value || '',
         tri: document.getElementById('tri-evaluations')?.value || 'nom-asc'
     };
 
@@ -459,13 +441,11 @@ function restaurerEtatFiltres() {
             const filtreGroupe = document.getElementById('filtre-groupe-eval');
             const filtreProduction = document.getElementById('filtre-production-eval');
             const filtreStatut = document.getElementById('filtre-statut-eval');
-            const filtreNote = document.getElementById('filtre-note-eval');
             const tri = document.getElementById('tri-evaluations');
 
             if (filtreGroupe && etat.groupe) filtreGroupe.value = etat.groupe;
             if (filtreProduction && etat.production) filtreProduction.value = etat.production;
             if (filtreStatut && etat.statut) filtreStatut.value = etat.statut;
-            if (filtreNote && etat.note) filtreNote.value = etat.note;
             if (tri && etat.tri) tri.value = etat.tri;
 
 
@@ -485,7 +465,6 @@ function initialiserEvenementsFilres() {
         'filtre-groupe-eval',
         'filtre-production-eval',
         'filtre-statut-eval',
-        'filtre-note-eval',
         'tri-evaluations'
     ];
 
@@ -507,14 +486,12 @@ function reinitialiserFiltres() {
     const filtreGroupe = document.getElementById('filtre-groupe-eval');
     const filtreProduction = document.getElementById('filtre-production-eval');
     const filtreStatut = document.getElementById('filtre-statut-eval');
-    const filtreNote = document.getElementById('filtre-note-eval');
     const tri = document.getElementById('tri-evaluations');
     const recherche = document.getElementById('recherche-evaluations');
 
     if (filtreGroupe) filtreGroupe.value = '';
     if (filtreProduction) filtreProduction.value = '';
     if (filtreStatut) filtreStatut.value = '';
-    if (filtreNote) filtreNote.value = '';
     if (tri) tri.value = 'nom-asc';
     if (recherche) recherche.value = '';
 
@@ -757,6 +734,9 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         note: obtenirNoteAffichee(evaluation, estPAN),
                         noteChiffree: evaluation.noteFinale != null ? evaluation.noteFinale : null,
                         niveauFinal: evaluation.niveauFinal || '-',
+                        // #575 — le code voyage avec SON échelle. Sans elle, le
+                        // tri de la colonne « Niveau » n'a aucun ordre à lire.
+                        echelleId: evaluation.echelleId || null,
                         statut: statut,
                         statutIntegrite: statutIntegrite,
                         statutRemise: evaluation.statutRemise || 'non-remis',  // ✅ Ajout statut de remise
@@ -792,6 +772,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                     note: '-',
                     noteChiffree: null,
                     niveauFinal: '-',
+                    echelleId: null,          // #575 — aucune évaluation, donc aucune échelle
                     statut: 'non-evalue',
                     statutRemise: 'non-remis',  // ✅ Ajout statut de remise (par défaut non remis)
                     evaluationId: null,
@@ -935,7 +916,6 @@ function appliquerFiltresSurLignes(lignes) {
     const filtreGroupe = document.getElementById('filtre-groupe-eval')?.value || '';
     const filtreProduction = document.getElementById('filtre-production-eval')?.value || '';
     const filtreStatut = document.getElementById('filtre-statut-eval')?.value || '';
-    const filtreNote = document.getElementById('filtre-note-eval')?.value || '';
 
     return lignes.filter(ligne => {
         // Filtre Groupe
@@ -973,18 +953,9 @@ function appliquerFiltresSurLignes(lignes) {
             return false;
         }
 
-        // Filtre Note
-        if (filtreNote) {
-            if (filtreNote.includes('-')) {
-                // Tranche de % (ex: "80-89")
-                const [min, max] = filtreNote.split('-').map(Number);
-                const note = parseFloat(ligne.note);
-                if (isNaN(note) || note < min || note > max) return false;
-            } else {
-                // Niveau IDME
-                if (ligne.niveauFinal !== filtreNote) return false;
-            }
-        }
+        // #575 — le filtre « Note » est retiré : son `<select>` n'a jamais
+        // existé dans `index.html`, donc cette branche n'a jamais été empruntée.
+        // Voir la note de `genererOptionsFiltres`.
 
         return true;
     });
@@ -2349,20 +2320,47 @@ function mettreAJourIndicateursTri() {
 /**
  * Trie un tableau de lignes selon la colonne et l'ordre actuel
  * @param {Array} lignes - Tableau de lignes à trier
+ * @param {Object} [tri] - `{ colonne, ordre }` — l'état du tri du module par
+ *   défaut. Paramètre ouvert par #575 pour que la sentinelle exerce le tri
+ *   RÉEL sans piloter l'écran : l'état vit en portée de module, il n'est pas
+ *   posable de l'extérieur. Aucun appelant applicatif ne le passe.
  * @returns {Array} - Tableau trié
  */
-function trierLignesParColonne(lignes) {
+function trierLignesParColonne(lignes, tri) {
     if (!lignes || lignes.length === 0) return lignes;
+
+    const triLu = tri || triEvaluationsActuel;
 
     // Créer une copie pour ne pas modifier l'original
     const lignesTriees = [...lignes];
-    const asc = triEvaluationsActuel.ordre === 'asc';
+    const asc = triLu.ordre === 'asc';
+
+    // #575 — LE RANG D'UN NIVEAU SE LIT DANS SON ÉCHELLE, ET IL SE LIT UNE FOIS.
+    // Le comparateur est appelé O(n log n) fois et chaque résolution d'échelle
+    // lit le stockage : la lecture se fait donc AVANT le tri, une fois par
+    // échelle distincte. `null` = code étranger à l'échelle, ou aucune échelle
+    // résolue — ces lignes n'ont pas de place dans l'ordre (voir plus bas).
+    const rangs = new Map();
+    if (triLu.colonne === 'niveauIDME') {
+        const niveauxParEchelle = new Map();
+        lignesTriees.forEach(ligne => {
+            const cleEchelle = ligne.echelleId || '';
+            if (!niveauxParEchelle.has(cleEchelle)) {
+                niveauxParEchelle.set(cleEchelle, (typeof niveauxOrdonnesDeLEchelle === 'function')
+                    ? niveauxOrdonnesDeLEchelle(ligne.echelleId || null)
+                    : []);
+            }
+            const cible = String(ligne.niveauFinal || '').trim().toUpperCase();
+            const trouve = niveauxParEchelle.get(cleEchelle).find(n => n.code === cible);
+            rangs.set(ligne, trouve ? trouve.rang : null);
+        });
+    }
 
     // Fonction de comparaison
     lignesTriees.sort((a, b) => {
         let valeurA, valeurB;
 
-        switch (triEvaluationsActuel.colonne) {
+        switch (triLu.colonne) {
             case 'da':
                 // ✅ NOUVEAU (29 déc 2025): Utiliser daAffichage pour anonymisation
                 valeurA = (a.daAffichage || a.da || '').toString();
@@ -2413,11 +2411,22 @@ function trierLignesParColonne(lignes) {
                 const numB = obtenirOrdreStatut(b.statutWorkflow);
                 return asc ? numA - numB : numB - numA;
 
-            case 'niveauIDME':
-                const ordreIDME = { 'I': 1, 'D': 2, 'M': 3, 'E': 4, '-': 5 };
-                const idmeA = ordreIDME[a.niveauFinal] ?? 5;
-                const idmeB = ordreIDME[b.niveauFinal] ?? 5;
-                return asc ? idmeA - idmeB : idmeB - idmeA;
+            case 'niveauIDME': {
+                // #575 — la table `{ I:1, D:2, M:3, E:4, '-':5 }` est partie.
+                // Hors IDME, elle rendait 5 à TOUTES les lignes : cliquer sur
+                // l'en-tête ne triait rien, en silence.
+                //
+                // ⮕ Une ligne sans rang lisible reste en FIN dans les deux sens.
+                // Avant, le `?? 5` la faisait remonter en tête au tri
+                // décroissant : les non-évaluées passaient devant les évaluées.
+                // Une absence de niveau n'est pas un niveau élevé.
+                const rangA = rangs.get(a);
+                const rangB = rangs.get(b);
+                if (rangA == null && rangB == null) return 0;
+                if (rangA == null) return 1;
+                if (rangB == null) return -1;
+                return asc ? rangA - rangB : rangB - rangA;
+            }
 
             case 'note':
                 valeurA = a.noteChiffree ?? -1;
@@ -2838,6 +2847,10 @@ window.modifierEvaluationRemplacee = modifierEvaluationRemplacee;
 window.calculerEtSauvegarderIndiceCompletion = calculerEtSauvegarderIndiceCompletion;
 window.trierListeEvaluations = trierListeEvaluations;
 window.trierTableauParColonne = trierTableauParColonne;
+// #575 — exposée pour la sentinelle `sentinelle-575-ordre-niveaux-derive-echelle`,
+// qui exerce le tri réel plutôt qu'une copie. Même convention que
+// `window._restaurerOriginaleSiReprise` : le souligné dit « pas une API ».
+window._trierLignesParColonne = trierLignesParColonne;
 window.rechargerFiltreProduction = rechargerFiltreProduction; // Pour mise à jour après duplication/modification de productions
 
 // Alias pour compatibilité avec le HTML

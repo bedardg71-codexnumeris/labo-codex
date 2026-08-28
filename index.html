@@ -8325,7 +8325,7 @@
                                     <th class="td-center-clickable" data-tooltip="eval-col-niveau" data-action="trierTableauParColonne" data-param="niveau">
                                         Statut <span id="tri-niveau" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th class="td-center-clickable" data-action="trierTableauParColonne" data-param="niveauIDME" title="Niveau de performance IDME">
+                                    <th class="td-center-clickable" data-action="trierTableauParColonne" data-param="niveauIDME" title="Niveau de performance — cliquer pour trier selon l'échelle de l'évaluation">
                                         Niveau <span id="tri-niveauIDME" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
                                     <th class="td-center-clickable" data-action="trierTableauParColonne" data-param="note" title="Cliquer pour trier">
@@ -14380,7 +14380,7 @@
     <script src="js/navigation.js?v=20260808a"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
     <script src="js/preferences.js?v=20260821c"></script> <!-- API centralisée préférences + migration V3 (doit précéder modes.js) ; #485 : défaut rapportPresencesOptions -->
 
-    <script src="js/modes.js?v=20260810a"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre -->
+    <script src="js/modes.js?v=20260827a"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
     <script src="js/ui-dialogues.js?v=20260615a"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
 
@@ -14496,7 +14496,7 @@
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=20260827a"></script> <!-- Refonte nav SP5 : faux ami CSS class préservée -->
     <script src="js/profil-etudiant-helpers.js?v=20260827g"></script> <!-- Refactor session A : zone helpers extraite. Compte de fonctions et de lignes retire le 27 aout 2026 : il disait 16 alors que le module en exportait 19, et il se re-perimerait au prochain ajout. -->
-    <script src="js/profil-etudiant-calculs.js?v=20260827g"></script> <!-- Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) -->
+    <script src="js/profil-etudiant-calculs.js?v=20260827h"></script> <!-- Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) -->
     <script src="js/profil-etudiant-rapport.js?v=20260518a"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
     <script src="js/profil-etudiant-diagnostics.js?v=20260827b"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260518a"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
@@ -14577,7 +14577,7 @@
     <script src="js/partage-section.js?v=20260825a"></script>
     <script src="js/import-export.js?v=20260826b"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) -->
     <script src="js/codex.js?v=20260808b"></script> <!-- 1.16.0+ : #336 D — preview purge espace précédent à l'ouverture -->
-    <script src="js/liste-evaluations.js?v=20260809b"></script> <!-- Beta 99.41 : Défense E — echapperHtml sur error.message + p.id (attribut) -->
+    <script src="js/liste-evaluations.js?v=20260827a"></script> <!-- Beta 99.41 : Défense E — echapperHtml sur error.message + p.id (attribut) -->
     <script src="js/journal.js?v=2026041706"></script>
     <script src="js/snapshots.js?v=20260702a"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
@@ -14590,9 +14590,9 @@
     <script src="js/evaluation-jetons.js?v=20260821a"></script>
     <script src="js/evaluation-chargement.js?v=20260821a"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) -->
     <script src="js/evaluation-calcul.js?v=20260826b"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
-    <script src="js/evaluation-retroaction.js?v=20260518d"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
+    <script src="js/evaluation-retroaction.js?v=20260827a"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
     <script src="js/evaluation-sauvegarde.js?v=20260629a"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) -->
-    <script src="js/evaluation.js?v=20260821a"></script> <!-- #355 (2 juil.) : navigation élève réactivée en consultation -->
+    <script src="js/evaluation.js?v=20260827a"></script> <!-- #355 (2 juil.) : navigation élève réactivée en consultation -->
     <script src="js/evaluation-handlers.js?v=20260518d"></script> <!-- Beta 99.48 : session A étape 3 refactor (3 fonctions extraites) -->
 
     <!-- RAPPEL BACKUP - Avertissement perte de données (Beta 95) -->

@@ -264,7 +264,8 @@ function evaluerProduction(da, productionId) {
    =============================== */
 
 // === VARIABLES GLOBALES ===
-let donneesEvaluationsFiltrees = [];
+// #575 (28 août 2026) — `donneesEvaluationsFiltrees` est retirée avec la vue
+// « accordéon » : elle n'alimentait qu'elle.
 
 /* ===============================
    CALCUL DES INDICES
@@ -275,22 +276,6 @@ let donneesEvaluationsFiltrees = [];
 // mais la clé n'est lue par aucun module. Les vrais indices C et P sont dans
 // cle('indicesCP') (calculés par portfolio.js). Code mort supprimé.
 
-/**
- * Convertit une note lettre en valeur numérique
- */
-function convertirNoteEnValeur(note) {
-    if (typeof note === 'number') return note;
-
-    const conversion = {
-        'M': 4, 'Maîtrise': 4,
-        'I': 3, 'Intermédiaire': 3,
-        'D': 2, 'Développement': 2,
-        'B': 1, 'Base': 1,
-        'O': 0, 'Observation': 0
-    };
-
-    return conversion[note] || 0;
-}
 
 /**
  * Obtient le nom réel d'une cartouche
@@ -375,434 +360,16 @@ function obtenirClasseNote(note, echelleId) {
    AFFICHAGE DE LA LISTE
    =============================== */
 
-/**
- * Charge et affiche la liste des évaluations avec accordéon
- */
-function chargerListeEvaluationsRefonte() {
 
-    // 🆕 NOUVEAU : Les indices sont maintenant calculés par liste-evaluations.js
-    // L'ancien calcul est désactivé pour éviter les conflits de structure
 
-    // Récupérer toutes les données
-    // ✅ NAMESPACING (Beta 95.5)
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    // 🎯 LECTURE DEPUIS LA SOURCE UNIQUE : saisie-presences.js génère indicesAssiduiteDetailles
-    const indicesAssiduiteDetailles = db.getSync(cle('indicesAssiduite'), {});
-    // 🎯 LECTURE DEPUIS LA SOURCE UNIQUE : portfolio.js génère indicesCP
-    const indicesCP = db.getSync(cle('indicesCP'), {});
 
-    // Détecter la pratique active — #328 L2-b1 : type dérivé de la SSOT.
-    const typeActif = (typeof obtenirTypePratiqueActive === 'function') ? obtenirTypePratiqueActive() : null;
-    const pratique = typeActif === 'sommative' ? 'SOM' : 'PAN';
 
-    // Grouper les évaluations par étudiant
-    const evaluationsParEtudiant = {};
-    evaluations.forEach(evaluation => {
-        if (!evaluationsParEtudiant[evaluation.etudiantDA]) {
-            evaluationsParEtudiant[evaluation.etudiantDA] = [];
-        }
-        evaluationsParEtudiant[evaluation.etudiantDA].push(evaluation);
-    });
-
-    // Préparer les données pour l'affichage
-    donneesEvaluationsFiltrees = etudiants.map(etudiant => {
-        const evalsEtudiant = evaluationsParEtudiant[etudiant.da] || [];
-
-        // 🎯 Lire l'indice A depuis saisie-presences.js (Single Source of Truth)
-        const indiceA = indicesAssiduiteDetailles[etudiant.da]?.actuel?.indice ?? 0;
-
-        // 🎯 Lire les indices C et P depuis portfolio.js (Single Source of Truth)
-        // Utiliser la pratique active (SOM ou PAN)
-        const indicesCPEtudiant = indicesCP[etudiant.da]?.actuel?.[pratique] || null;
-        const indiceC = indicesCPEtudiant && typeof indicesCPEtudiant.C === 'number' ? indicesCPEtudiant.C / 100 : 0;
-        const indiceP = indicesCPEtudiant && typeof indicesCPEtudiant.P === 'number' ? indicesCPEtudiant.P / 100 : 0;
-
-        // Calculer l'indice N (Niveau d'attention) = 1 - (A × C × P)
-        const indiceN = 1 - (indiceA * indiceC * indiceP);
-
-        return {
-            ...etudiant,
-            evaluations: evalsEtudiant,
-            indices: {
-                assiduite: indiceA,
-                completion: indiceC,
-                performance: indiceP,
-                niveauAttention: indiceN
-            }
-        };
-    });
-
-    // Charger les filtres
-    chargerFiltresEvaluations();
-
-    // Afficher la liste
-    afficherListeEvaluations(donneesEvaluationsFiltrees);
-
-    // Mettre à jour les statistiques
-    mettreAJourStatistiquesEvaluations();
-
-    // Vérifier s'il y a une préférence sauvegardée
-    const preference = db.getSync('preferenceTriEvaluations', null);
-    if (preference) {
-        // Restaurer la préférence sauvegardée
-        restaurerPreferenceTri();
-    } else {
-        // Appliquer le tri alphabétique par défaut
-        const elTri = document.getElementById('tri-evaluations');
-        if (elTri) elTri.value = 'nom-asc';
-        trierListeEvaluations();
-    }
-}
-
-/**
- * Génère le badge de complétion selon les réglages d'affichage
- * @param {Object} etudiant - Données de l'étudiant avec indices
- * @returns {string} HTML du badge
- */
-function genererBadgeCompletion(etudiant) {
-    // 🎯 Lire depuis la source unique : portfolio.js génère indicesCP
-    // Session C (Lot 3) : jeton SOM|PAN retiré — couche unique de la pratique active.
-
-    // Compter uniquement les artefacts distincts (exclure les évaluations remplacées)
-    const evaluationsActives = etudiant.evaluations.filter(e => !e.remplaceeParId);
-    const productionsDistinctes = new Set(evaluationsActives.map(e => e.productionId));
-    const nbArtefacts = productionsDistinctes.size;
-
-    // Convertir de pourcentage (0-100) en proportion (0-1)
-    let completion = 0;
-
-    // PRIORITÉ 1 : Utiliser obtenirIndicesCP si disponible (Single Source of Truth)
-    if (typeof obtenirIndicesCP === 'function') {
-        const indicesCPEtudiant = obtenirIndicesCP(etudiant.da);
-        if (indicesCPEtudiant && typeof indicesCPEtudiant.C === 'number' && !isNaN(indicesCPEtudiant.C)) {
-            completion = indicesCPEtudiant.C / 100;
-        }
-    }
-
-    // PRIORITÉ 2 : Fallback final - Calculer depuis le nombre d'artefacts
-    if (completion === 0 && nbArtefacts > 0) {
-        const productions = obtenirDonneesSelonMode('productions');
-        const productionsAttendues = productions.filter(p => p.type !== 'portfolio').length;
-        completion = productionsAttendues > 0 ? nbArtefacts / productionsAttendues : 0;
-    }
-
-    // Déterminer la couleur selon le taux de complétion
-    let couleurFond = 'var(--alerte-fond-succes, #e8f5e9)'; // Vert clair par défaut
-    if (completion < 0.5) {
-        couleurFond = 'var(--alerte-fond-erreur, #ffebee)'; // Rouge clair
-    } else if (completion < 0.75) {
-        couleurFond = 'var(--alerte-fond-attention)'; // Orange clair
-    }
-
-    // Affichage unique (les indices C et P n'ont pas de modalité sommatif/alternatif)
-    return `
-        <span class="carte-metrique" style="padding:8px 15px; background: ${couleurFond}; border-radius: 6px;">
-            <strong class="eval-texte-11">C</strong>
-            <span style="font-size: 1.1rem; font-weight: 600; margin-left: 8px;">
-                ${Math.round(completion * 100)}%
-            </span>
-            <span style="font-size: 0.75rem; color: var(--gris-moyen); margin-left: 5px;">(${nbArtefacts} artefacts)</span>
-        </span>
-    `;
-}
-
-/**
- * Affiche la liste des évaluations en accordéon
- */
-function afficherListeEvaluations(donneesEtudiants) {
-    const conteneur = document.getElementById('conteneur-evaluations-accordeon');
-    const messageVide = document.getElementById('message-aucune-evaluation');
-
-    if (!conteneur) return;
-
-    if (donneesEtudiants.length === 0) {
-        conteneur.innerHTML = '';
-        conteneur.classList.add('u-hide');
-        messageVide.classList.remove('u-hide');
-        return;
-    }
-
-    conteneur.classList.remove('u-hide');
-    messageVide.classList.add('u-hide');
-
-    // NE PAS TRIER ICI - Le tri est géré par trierListeEvaluations()
-    // La fonction affiche les données dans l'ordre reçu
-
-    // Générer le HTML
-    const html = donneesEtudiants.map(etudiant => {
-        const iconToggle = '▶';
-
-        return `
-            <div class="carte etudiant-evaluation-carte" data-da="${etudiant.da}">
-                <!-- En-tête cliquable -->
-                <div class="etudiant-header" data-action="toggleEtudiantEval" data-param="${etudiant.da}" style="cursor:pointer; padding: 15px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <span class="toggle-icon" id="toggle-${etudiant.da}">${iconToggle}</span>
-                            <strong>${(typeof anonymiserNom === 'function' && anonymiserNom(etudiant.da)) || (echapperHtml(etudiant.nom) + ', ' + echapperHtml(etudiant.prenom))}</strong>
-                            <span class="badge-info">${etudiant.da}</span>
-                            <span class="badge-info">${etudiant.groupe || 'Sans groupe'}</span>
-                        </div>
-                        <div style="display:flex; gap:15px; align-items:center;">
-${genererBadgeCompletion(etudiant)}
-
-</div>
-                    </div>
-                </div>
-                
-                <!-- Détails cachés par défaut -->
-                <div class="etudiant-details" id="details-eval-${etudiant.da}" style="display:none; padding: 0 15px 15px 15px;">
-                    ${genererDetailsEtudiant(etudiant)}
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    conteneur.innerHTML = html;
-}
-
-/**
- * Génère le HTML des détails d'un étudiant
- */
-function genererDetailsEtudiant(etudiant) {
-    const evaluations = etudiant.evaluations || [];
-    const productions = obtenirDonneesSelonMode('productions');
-
-    // Créer un tableau avec TOUTES les productions et leur statut
-    const tableauComplet = productions.map(production => {
-        // Chercher si cette production a été évaluée pour cet étudiant
-        // PRIORISER l'évaluation active (sans remplaceeParId) si elle existe
-        const evaluationsProduction = evaluations.filter(e => e.productionId === production.id);
-        let evaluation = null;
-
-        if (evaluationsProduction.length > 0) {
-            // PRIORITÉ 1 : Chercher une évaluation de reprise active (repriseDeId ET non remplacée)
-            // C'est l'évaluation qui doit afficher l'étoile ⭐ violette
-            evaluation = evaluationsProduction.find(e => e.repriseDeId && !e.remplaceeParId);
-
-            // PRIORITÉ 2 : Si pas de reprise, chercher une évaluation avec jeton de délai actif
-            // C'est l'évaluation qui doit afficher l'étoile ⭐ orange
-            if (!evaluation) {
-                evaluation = evaluationsProduction.find(e => e.jetonDelaiApplique && !e.remplaceeParId);
-            }
-
-            // PRIORITÉ 3 : Si pas de jeton, chercher toute évaluation active (non remplacée)
-            if (!evaluation) {
-                evaluation = evaluationsProduction.find(e => !e.remplaceeParId);
-            }
-
-            // PRIORITÉ 4 : Si toutes sont remplacées, prendre la première (cas rare)
-            if (!evaluation) {
-                evaluation = evaluationsProduction[0];
-            }
-        }
-
-        return {
-            production: production,
-            evaluation: evaluation
-        };
-    });
-
-    // Générer le tableau HTML
-    const tableauHTML = `
-        <table class="tableau u-mt-15">
-            <thead>
-                <tr>
-                    <th>Production</th>
-                    <th>Grille</th>
-                    <th>Cartouche</th>
-                    <th>Note</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                    <th class="eval-width-60" title="Verrouillage"><img src="icons/icon-lock.svg" alt="" class="btn-inline-icon">/<img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon"></th>
-                </tr>
-            </thead>
-            <tbody>
-                ${tableauComplet.map(item => {
-        if (item.evaluation) {
-            // Production évaluée
-            const estRemplacee = item.evaluation.remplaceeParId ? true : false;
-            const estReprise = item.evaluation.repriseDeId ? true : false;
-
-            // Formater la note combinée
-                                const noteLettre = item.evaluation.niveauFinal || '--';
-                                const notePourcent = item.evaluation.noteFinale !== null ? Math.round(item.evaluation.noteFinale) : 0;
-                                const noteAffichage = noteLettre !== '--' ? `${noteLettre} (${notePourcent}%)` : `— (${notePourcent}%)`;
-
-                                return `
-                            <tr ${estRemplacee ? 'class="eval-desactive"' : ''}>
-                                <td>${echapperHtml(item.production.titre || item.production.nom || '—')}</td>
-                                <td>${echapperHtml(item.evaluation.grilleNom || '—')}</td>
-                                <td>${echapperHtml(obtenirNomCartouche(item.evaluation.cartoucheId, item.evaluation.grilleId) || '—')}</td>
-                                <td>
-                                    <span ${obtenirClasseNote(item.evaluation.niveauFinal, item.evaluation.echelleId)}>
-                                        ${noteAffichage}
-                                    </span>
-                                    ${estRemplacee ? '<span class="badge-statut eval-ml-6">Remplacée</span>' : ''}
-                                    ${estReprise ? '<span style="color: var(--violet-jeton, #9c27b0); font-size: 1.2rem; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
-                                    ${item.evaluation.jetonDelaiApplique ? '<span style="color: var(--orange-accent); font-size: 1.2rem; margin-left: 6px;" title="Jeton de délai appliqué">⭐</span>' : ''}
-                                </td>
-                                <td>${item.evaluation.dateEvaluation ? new Date(item.evaluation.dateEvaluation).toLocaleDateString('fr-CA') : '—'}</td>
-                                <td>
-                                    ${estRemplacee ? `
-                                        <button class="btn btn-modifier btn-compact" data-action="modifierEvaluation" data-param="${item.evaluation.id}">
-                                            Consulter
-                                        </button>
-                                    ` : `
-                                        <button class="btn btn-modifier btn-compact" data-action="modifierEvaluation" data-param="${item.evaluation.id}">
-                                            Consulter
-                                        </button>
-                                        <button class="btn btn-supprimer btn-compact" data-tooltip="eval-btn-supprimer" data-action="supprimerEvaluation" data-param="${item.evaluation.id}" ${item.evaluation.verrouillee ? 'disabled title="Déverrouillez d\'abord pour supprimer"' : ''}>
-                                            Supprimer
-                                        </button>
-                                    `}
-                                </td>
-                                <td class="u-text-center">
-                                    ${estRemplacee ? '' : `
-                                        <span id="cadenas-${item.evaluation.id}"
-                                              data-action="basculerVerrouillageEvaluation" data-param="${item.evaluation.id}"
-                                              style="font-size: 1.2rem; cursor: pointer; user-select: none;"
-                                              title="${item.evaluation.verrouillee ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
-                                            ${item.evaluation.verrouillee ? '<img src="icons/icon-lock.svg" alt="Verrouillée" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="Modifiable" class="btn-inline-icon">'}
-                                        </span>
-                                    `}
-                                </td>
-                            </tr>
-                        `;
-        } else {
-            // Production non évaluée
-            return `
-                            <tr class="u-opacity-07">
-                                <td>${echapperHtml(item.production.titre || item.production.nom || '—')}</td>
-                                <td>—</td>
-                                <td>—</td>
-                                <td>
-                                    <span class="badge-statut">
-                                        Non remis
-                                    </span>
-                                </td>
-                                <td>—</td>
-                                <td>
-                                    <button class="btn btn-confirmer btn-compact" data-action="evaluerProduction" data-param="${etudiant.da}" data-param2="${item.production.id}">
-                                        Évaluer
-                                    </button>
-                                </td>
-                                <td>—</td>
-                            </tr>
-                        `;
-        }
-    }).join('')}
-            </tbody>
-        </table>
-    `;
-
-    // Ajouter le résumé
-    const nbAttendus = productions.filter(p => p.type !== 'portfolio').length;
-
-    // Compter les artefacts distincts actifs (exclure remplacées)
-    const evaluationsActives = evaluations.filter(e => !e.remplaceeParId);
-    const productionsDistinctes = new Set(evaluationsActives.map(e => e.productionId));
-    const nbRemis = productionsDistinctes.size;
-
-    // Lire les indices depuis la source unique (portfolio.js)
-    const indicesCP = db.getSync(cle('indicesCP'), {});
-    const indicesCPEtudiant = indicesCP[etudiant.da]?.actuel || null;
-
-    // Lire C et P directement depuis actuel (structure plate, plus de branches SOM/PAN)
-    const tauxCompletion = indicesCPEtudiant?.C ?? (nbAttendus > 0 ? Math.round((nbRemis / nbAttendus) * 100) : 0);
-
-    // Calcul de la performance moyenne avec fallback
-    let performanceMoyenne = 0;
-    if (indicesCPEtudiant && typeof indicesCPEtudiant.P === 'number' && !isNaN(indicesCPEtudiant.P)) {
-        performanceMoyenne = Math.round(indicesCPEtudiant.P);
-    } else if (evaluationsActives.length > 0) {
-        // Fallback : calculer la moyenne des notes des évaluations actives
-        const sommeNotes = evaluationsActives.reduce((sum, e) => sum + (e.noteFinale || 0), 0);
-        performanceMoyenne = Math.round(sommeNotes / evaluationsActives.length);
-    }
-
-    const nbRemplacees = evaluations.filter(e => e.remplaceeParId).length;
-    const nbReprises = evaluations.filter(e => e.repriseDeId).length;
-    const nbDelais = evaluations.filter(e => e.jetonDelaiApplique && !e.remplaceeParId).length;
-
-    const resumeHTML = `
-        <div class="carte" style="margin-top: 15px; background: var(--bleu-pale);">
-            <h4 style="margin-bottom: 10px;">Résumé de l'étudiant</h4>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                <div>
-                    <strong>Artefacts remis:</strong> ${nbRemis} / ${nbAttendus}
-                </div>
-                <div>
-                    <strong>Performance moyenne:</strong> ${performanceMoyenne}%
-                </div>
-                <div>
-                    <strong>Tendance:</strong> ${obtenirTendance(evaluationsActives)}
-                </div>
-            </div>
-        </div>
-    `;
-
-    return tableauHTML + resumeHTML;
-}
-
-/**
- * Toggle l'affichage des détails d'un étudiant
- */
-function toggleEtudiantEval(da) {
-    const details = document.getElementById(`details-eval-${da}`);
-    const toggle = document.getElementById(`toggle-${da}`);
-
-    if (!details) return;
-
-    if (details.classList.contains('u-hide')) {
-        details.classList.remove('u-hide');
-        if (toggle) toggle.textContent = '▼';
-    } else {
-        details.classList.add('u-hide');
-        if (toggle) toggle.textContent = '▶';
-    }
-}
 
 /* ===============================
    🔍 FILTRAGE
    =============================== */
 
-/**
- * Charge les options de filtrage
- */
-function chargerFiltresEvaluations() {
-    // Charger les groupes
-    const selectGroupe = document.getElementById('filtre-groupe-eval');
-    if (selectGroupe) {
-        const groupes = [...new Set(donneesEvaluationsFiltrees.map(e => e.groupe).filter(g => g))];
-        selectGroupe.innerHTML = '<option value="">Tous les groupes</option>' +
-            groupes.sort().map(groupe =>
-                `<option value="${echapperHtml(groupe)}">Groupe ${echapperHtml(groupe)}</option>`
-            ).join('');
-    }
 
-    // Charger les productions
-    const selectProduction = document.getElementById('filtre-production-eval');
-    if (selectProduction) {
-        const productions = obtenirDonneesSelonMode('productions');
-        selectProduction.innerHTML = '<option value="">Toutes les productions</option>' +
-            productions.map(prod => `<option value="${echapperHtml(prod.id)}">${echapperHtml(prod.titre || prod.nom)}</option>`).join('');
-    }
-}
-
-/**
- * Recharge le filtre de production
- * (Appelée depuis productions.js après ajout/modification d'une production)
- */
-function rechargerFiltreProduction() {
-    const selectProduction = document.getElementById('filtre-production-eval');
-    if (selectProduction) {
-        const productions = obtenirDonneesSelonMode('productions');
-        selectProduction.innerHTML = '<option value="">Toutes les productions</option>' +
-            productions.map(prod => `<option value="${echapperHtml(prod.id)}">${echapperHtml(prod.titre || prod.nom)}</option>`).join('');
-    }
-}
 
 /**
  * Réinitialise tous les filtres
@@ -814,145 +381,12 @@ function rechargerFiltreProduction() {
 //     // La fonction moderne reinitialiserFiltres() est exportée comme window.reinitialiserFiltresEval
 // }
 
-/**
- * Trie la liste des évaluations selon le critère sélectionné
- */
-function trierListeEvaluations() {
-    const selectTri = document.getElementById('tri-evaluations');
-    if (!selectTri) return;
 
-    const critere = selectTri.value;
-    let donneesTries = [...donneesEvaluationsFiltrees];
-
-    // Debug - voir avant le tri
-
-    switch (critere) {
-        case 'nom-asc':
-            donneesTries.sort((a, b) => {
-                const nomA = (a.nom || '').toLowerCase();
-                const nomB = (b.nom || '').toLowerCase();
-                return nomA.localeCompare(nomB, 'fr');
-            });
-            break;
-
-        case 'assiduite-asc':
-            donneesTries.sort((a, b) => a.indices.assiduite - b.indices.assiduite);
-            break;
-
-        case 'assiduite-desc':
-            donneesTries.sort((a, b) => b.indices.assiduite - a.indices.assiduite);
-            break;
-
-        case 'completion-asc':
-            donneesTries.sort((a, b) => a.indices.completion - b.indices.completion);
-            break;
-
-        case 'completion-desc':
-            donneesTries.sort((a, b) => b.indices.completion - a.indices.completion);
-            break;
-
-        case 'performance-asc':
-            donneesTries.sort((a, b) => a.indices.performance - b.indices.performance);
-            break;
-
-        case 'performance-desc':
-            donneesTries.sort((a, b) => b.indices.performance - a.indices.performance);
-            break;
-
-        case 'niveau-attention-asc':
-            donneesTries.sort((a, b) => a.indices.niveauAttention - b.indices.niveauAttention);
-            break;
-
-        case 'niveau-attention-desc':
-            donneesTries.sort((a, b) => b.indices.niveauAttention - a.indices.niveauAttention);
-            break;
-    }
-
-    // Debug - voir après le tri
-
-    // IMPORTANT : Mettre à jour la variable globale
-    donneesEvaluationsFiltrees = donneesTries;
-
-    // Réafficher avec les données triées
-    afficherListeEvaluations(donneesTries);
-
-    // Sauvegarder la préférence
-    db.setSync('preferenceTriEvaluations', critere);
-}
-
-/**
- * Restaure la préférence de tri sauvegardée
- */
-function restaurerPreferenceTri() {
-    const preference = db.getSync('preferenceTriEvaluations', null);
-    if (preference) {
-        const selectTri = document.getElementById('tri-evaluations');
-        if (selectTri) {
-            selectTri.value = preference;
-            trierListeEvaluations();
-        }
-    }
-}
 
 /* ===============================
    STATISTIQUES
    =============================== */
 
-/**
- * Met à jour les statistiques globales
- */
-function mettreAJourStatistiquesEvaluations() {
-    const etudiants = donneesEvaluationsFiltrees;
-    const nbEtudiants = etudiants.length;
-    const etudiantsEvalues = etudiants.filter(e => e.evaluations.length > 0).length;
-
-    // 🎯 Calculer le total d'artefacts DONNÉS (même logique que portfolio.js)
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = obtenirDonneesSelonMode('productions');
-
-    // Identifier les artefacts-portfolio
-    const artefactsPortfolioIds = new Set(
-        productions
-            .filter(p => p.type === 'artefact-portfolio')
-            .map(a => a.id)
-    );
-
-    // Identifier les artefacts réellement donnés (avec au moins une évaluation)
-    const artefactsDonnes = new Set();
-    evaluations.forEach(evaluation => {
-        if (artefactsPortfolioIds.has(evaluation.productionId)) {
-            artefactsDonnes.add(evaluation.productionId);
-        }
-    });
-
-    const nbArtefactsDonnes = artefactsDonnes.size;
-    const totalArtefactsAttendus = nbEtudiants * nbArtefactsDonnes;
-    const totalArtefactsRemis = etudiants.reduce((sum, e) => sum + e.evaluations.length, 0);
-
-    // Calculer les moyennes C et P
-    const moyenneC = nbEtudiants > 0
-        ? etudiants.reduce((sum, e) => sum + (e.indices.completion || 0), 0) / nbEtudiants
-        : 0;
-    const moyenneP = nbEtudiants > 0
-        ? etudiants.reduce((sum, e) => sum + (e.indices.performance || 0), 0) / nbEtudiants
-        : 0;
-
-    // Mettre à jour l'affichage
-    const statEtudiants = document.getElementById('stat-etudiants-evalues');
-    if (statEtudiants) {
-        statEtudiants.textContent = `${etudiantsEvalues}/${nbEtudiants}`;
-    }
-
-    const statArtefacts = document.getElementById('stat-artefacts-completes');
-    if (statArtefacts) {
-        statArtefacts.textContent = `${totalArtefactsRemis}/${totalArtefactsAttendus}`;
-    }
-
-    const statMoyenne = document.getElementById('stat-moyenne-groupe');
-    if (statMoyenne) {
-        statMoyenne.innerHTML = `<strong>C:</strong> ${Math.round(moyenneC * 100)}%`;
-    }
-}
 
 /* ===============================
    FONCTIONS UTILITAIRES
@@ -961,60 +395,12 @@ function mettreAJourStatistiquesEvaluations() {
 // ✅ Fonction obtenirNomCartouche() supprimée (doublon incorrect)
 // La version correcte est définie ligne 1107
 
-/**
- * Formate une date ISO en format court "2026-02-06" (fr-CA par défaut)
- * Distinct de formaterDate() canonique qui retourne "6 février 2026"
- */
-function formaterDateISO(dateISO) {
-    if (!dateISO) return '—';
-    const date = new Date(dateISO + 'T12:00:00');
-    return date.toLocaleDateString('fr-CA');
-}
 
-/**
- * Détermine la tendance d'un étudiant
- */
-function obtenirTendance(evaluations) {
-    if (evaluations.length < 2) return '—';
 
-    // Trier par date (plus récente en premier)
-    const triees = [...evaluations].sort((a, b) =>
-        new Date(b.dateEvaluation || b.dateRemise || 0) - new Date(a.dateEvaluation || a.dateRemise || 0)
-    );
-
-    if (triees.length < 2) return '—';
-
-    // Comparer les 2 dernières évaluations
-    const derniere = convertirNoteEnValeur(triees[0].niveauFinal);
-    const avantDerniere = convertirNoteEnValeur(triees[1].niveauFinal);
-
-    if (derniere > avantDerniere) return '↗ En progression';
-    if (derniere < avantDerniere) return '↘ En régression';
-    return '→ Stable';
-}
-
-/* ===============================
-   🚀 INITIALISATION
-   =============================== */
-
-/**
- * Ajouter à la fonction d'initialisation existante
- */
-// DÉSACTIVÉ : Cette fonction est maintenant gérée par liste-evaluations.js (vue tableau)
-// function initialiserListeEvaluations() {
-//
-//     const sousSection = document.getElementById('evaluations-liste');
-//     if (!sousSection) {
-//         return;
-//     }
-//
-//     // Charger la liste refaite
-//     chargerListeEvaluationsRefonte();
-//
-// }
-
-// Appeler lors du changement vers cette sous-section
-// Ou ajouter dans le module existant
+// #575 (28 août 2026) — la vue « accordéon » des évaluations est RETIRÉE, avec
+// son initialisation restée en commentaire. La liste des évaluations est rendue
+// par `liste-evaluations.js` (tableau), seul module dont le conteneur existe
+// dans `index.html`.
 
 /* ===============================
    🔄 MODE ÉVALUATION EN SÉRIE
@@ -2617,10 +2003,6 @@ function verrouillerEvaluationIndividuelle(evaluationId) {
 
     notifications.succes('Évaluation verrouillée');
 
-    // Recharger la liste
-    if (typeof chargerListeEvaluationsRefonte === 'function') {
-        chargerListeEvaluationsRefonte();
-    }
 }
 
 /**
@@ -2647,10 +2029,6 @@ function deverrouillerEvaluationIndividuelle(evaluationId) {
 
     notifications.succes('Évaluation déverrouillée');
 
-    // Recharger la liste
-    if (typeof chargerListeEvaluationsRefonte === 'function') {
-        chargerListeEvaluationsRefonte();
-    }
 }
 
 /**
@@ -2745,10 +2123,6 @@ function supprimerEvaluation(evaluationId) {
         calculerEtStockerIndicesCP();
     }
 
-    // Recharger la liste
-    if (typeof chargerListeEvaluationsRefonte === 'function') {
-        chargerListeEvaluationsRefonte();
-    }
 }
 
 /* ===============================
@@ -3630,7 +3004,6 @@ window.modifierEvaluationParId = modifierEvaluation; // Export sous un nom diff�
 window.ouvrirProfilDepuisEvaluation = ouvrirProfilDepuisEvaluation;
 window.ouvrirTravailDepuisEvaluation = ouvrirTravailDepuisEvaluation;
 window.mettreAJourBoutonVoirTravail = mettreAJourBoutonVoirTravail;
-window.rechargerFiltreProduction = rechargerFiltreProduction; // Pour mise à jour du filtre après ajout/modification de productions
 
 // ============================================
 // FONCTIONS POUR JETONS PERSONNALISÉS
@@ -3856,7 +3229,6 @@ window.nouvelleEvaluation = nouvelleEvaluation;
 window.sauvegarderEvaluationModifiee = sauvegarderEvaluationModifiee;
 
 // Phase 5 — fonctions utilisées par data-action / data-on-change
-window.toggleEtudiantEval = toggleEtudiantEval;
 window.modifierEvaluation = modifierEvaluation;
 window.supprimerEvaluation = supprimerEvaluation;
 window.basculerVerrouillageEvaluation = basculerVerrouillageEvaluation;
@@ -3880,12 +3252,10 @@ window.verifierEtChargerEvaluationExistante = verifierEtChargerEvaluationExistan
 window.desactiverFormulaireEvaluation = desactiverFormulaireEvaluation;
 window.appliquerJetonDelaiDepuisSidebar = appliquerJetonDelaiDepuisSidebar;
 window.attacherEvenementsMemorisation = attacherEvenementsMemorisation;
-window.chargerListeEvaluationsRefonte = chargerListeEvaluationsRefonte;
 window.cocherOptionsParDefaut = cocherOptionsParDefaut;
 window.memoriserSelectionsEvaluation = memoriserSelectionsEvaluation;
 window.obtenirNomCartouche = obtenirNomCartouche;
 window.sauvegarderSelectionsEvaluation = sauvegarderSelectionsEvaluation;
-window.trierListeEvaluations = trierListeEvaluations;
 // Exposé pour révéler le cadenas de (dé)verrouillage depuis le module de
 // sauvegarde (evaluation-sauvegarde.js) après une première sauvegarde.
 window.afficherOuMasquerBoutonVerrouillage = afficherOuMasquerBoutonVerrouillage;

@@ -29,7 +29,9 @@
        RecurrentsBilan, _compterErreursFrancaisBilan, _detecterAlgoA0Bilan,
        _rendreAlgoA0Bilan, _rendreDefisBilan, _rendreTousMaitrisesBilan,
        _rendreForceBilan, _rendreRecurrentsBilan, _rendreJetonsBilan +
-       2 constantes module-scope _NOMS_NIV_BILAN, _ORDRE_NIV_BILAN)
+       + 2 constantes module-scope _NOMS_NIV_BILAN, _ORDRE_NIV_BILAN —
+       RETIRÉES le 28 août 2026 par #575, remplacées par les trois helpers
+       _lecteurNiveauBilan / _rangBilan / _nomBilan, qui lisent l'échelle)
      · copierToutRetroaction (exporté — callers cross-module : travaux-
        ui.js:4572)
      · sauvegarderRetroactionFinale (privée — 3 LOC, comportementalement
@@ -67,9 +69,13 @@
    Helpers cross-module consommés (script-scope globaux, bare access OK) :
      · evaluationEnCours (let global config.js L145)
      · db.getSync (db.js global)
-     · echapperHtml (01-config.js global, 0 usage ici car aucun innerHTML
-       interpole — innerHTML utilisé mais avec contenu déjà composé hors
-       données utilisateur ou via `.textContent`)
+     · echapperHtml (config.js global) — ⚠ cette ligne annonçait « 0 usage
+       ici car aucun innerHTML interpole » : c'était FAUX au moins depuis
+       l'origine (les noms de critères, de tampons et de cartouches viennent
+       de l'utilisateur et traversent `innerHTML` sans échappement). #575 en
+       échappe TROIS sur les lignes qu'il réécrit — le nom d'un niveau et les
+       deux noms de critères du bilan. Les autres restent à traiter ; ne pas
+       recopier l'affirmation d'origine.
      · obtenirDonneesSelonMode (donnees-v2.js)
      · obtenirConfigJetons (jetons module)
      · travauxVisionneuse, travauxStockage, travauxOutils, travauxExportPDF
@@ -484,9 +490,98 @@ function genererRetroactionSpecifique() {
     conteneur.innerHTML = html;
 }
 
-// Constantes partagées par les helpers privés _Bilan* (extraction étape 4 — éclatement cyc 75 → cyc ≤ 15)
-var _NOMS_NIV_BILAN = { 'E': 'Étendu', 'M': 'Maîtrisé', 'D': 'En développement', 'I': 'Incomplet' };
-var _ORDRE_NIV_BILAN = { 'E': 4, 'M': 3, 'D': 2, 'I': 1 };
+// #575 (lot 4 du plan SOLO, rapport §3 n° 10) — LES DEUX TABLES IDME SONT PARTIES.
+//
+//   var _NOMS_NIV_BILAN  = { E:'Étendu', M:'Maîtrisé', D:'En développement', I:'Incomplet' };
+//   var _ORDRE_NIV_BILAN = { E:4, M:3, D:2, I:1 };
+//
+// Elles imposaient l'échelle de Grégoire au bilan que l'élève reçoit. Hors IDME,
+// `_NOMS_NIV_BILAN[code]` rendait `''` — le niveau s'affichait entre parenthèses
+// VIDES — et `_ORDRE_NIV_BILAN[code] || 0` rendait 0 à tout le monde : la ligne
+// « Progrès : X → Y » ne pouvait donc JAMAIS apparaître, quelle que soit la
+// progression réelle de l'élève.
+//
+// ⮕ Le nom et le rang d'un niveau se lisent maintenant dans SON échelle, par
+// `niveauDuCodeDansEchelle` (`profil-etudiant-calculs.js`), qui résout par le
+// chemin unique de #542 lot 3 — celui qui connaît aussi l'échelle embarquée
+// d'une pratique configurable.
+//
+// ⚠ CE QUI RESTE, ET QUI NE PEUT PAS ÊTRE FAIT ICI : ce module teste encore les
+// codes EN TOUTES LETTRES à huit endroits — `=== 'I' || === 'D'` pour les défis,
+// `=== 'M' || === 'E'` pour « tous maîtrisés ». L'ORDRE se dérive d'une échelle ;
+// « quel niveau est faible » et « quel niveau est maîtrisé », non — c'est la
+// marque de maîtrise de #555. Le faire sans elle remplacerait un arbitrage codé
+// en dur par un autre. Même butée que B10 (`synthese-retroaction-data.js`).
+
+/**
+ * Le niveau d'un code dans l'échelle du bilan en cours — nom et rang.
+ * Rend `null` quand rien ne se résout : l'appelant n'affiche alors pas de
+ * libellé et ne compare pas de rangs, plutôt que d'en inventer.
+ */
+function _lecteurNiveauBilan(echelleId) {
+    return function (code) {
+        return (typeof niveauDuCodeDansEchelle === 'function')
+            ? niveauDuCodeDansEchelle(code, echelleId || null)
+            : null;
+    };
+}
+
+/**
+ * Deux évaluations parlent-elles du MÊME barème ?
+ *
+ * ⮕ #575, corrigé le 28 août 2026 après la porte terrain 2.7. La première
+ * version comparait les `echelleId` BRUTS. Chez Grégoire, l'échelle courante est
+ * « IDME et niv 0 (restaurée) » — recréée par la réparation de #542, donc sous un
+ * identifiant NEUF — pendant que ses évaluations d'H2026 en désignent un ancien.
+ * Deux ids différents pour le même barème : la ligne « Progrès » ne pouvait plus
+ * jamais s'afficher chez lui. C'est une régression que j'ai introduite.
+ *
+ * ⮕ LES DEUX RÈGLES VIENNENT DU DÉPÔT, PAS D'UNE INVENTION. Elles sont celles de
+ * `obtenirEchelleCommuneDesEvaluations` (#542 lot 3) :
+ *   1. la comparaison porte sur l'échelle RÉSOLUE, jamais sur l'id désigné —
+ *      c'est ce qui dédoublonne un import ou une restauration ;
+ *   2. une échelle non désignée, ou désignée mais introuvable, est une ABSENCE,
+ *      pas un barème concurrent. « Une échelle introuvable n'est pas une AUTRE
+ *      échelle : c'est une absence. » On lit alors le code dans l'échelle
+ *      courante — la seule qui existe.
+ *
+ * Ce qui reste refusé, et c'est tout l'objet de la garde : deux échelles qui
+ * existent TOUTES LES DEUX et diffèrent. Le 3e niveau d'un barème à cinq et le
+ * 3e d'un barème à trois ne disent pas la même chose.
+ */
+function _memeEchelleBilan(idPrecedent, idCourant) {
+    if (!idPrecedent) return true;
+    var resoudre = function (id) {
+        return (typeof obtenirEchelleResolue === 'function') ? obtenirEchelleResolue(id || null) : null;
+    };
+    var precedente = resoudre(idPrecedent);
+    if (!precedente) return true;
+    var courante = resoudre(idCourant);
+    if (!courante) return false;
+    return precedente.id === courante.id;
+}
+
+/** Le rang d'un code, ou `Infinity` : un niveau illisible se range en dernier. */
+function _rangBilan(niveauDe, code) {
+    var niveau = niveauDe(code);
+    return (niveau && niveau.rang != null) ? niveau.rang : Infinity;
+}
+
+/**
+ * Le nom d'un code, ou `''` quand l'échelle ne le nomme pas.
+ *
+ * ⚠ ÉCHAPPÉ ICI, ET C'EST OBLIGATOIRE. Les tables retirées ne contenaient que
+ * des littéraux du code (« Étendu », « Maîtrisé ») : les poser dans un
+ * `innerHTML` était sans risque. Le nom d'un niveau, lui, est SAISI PAR
+ * L'UTILISATEUR — la règle n° 1 du projet s'applique dès qu'il traverse un
+ * `innerHTML`, sans exception. Le point d'échappement est unique et au plus
+ * près de la source, pour qu'aucun appelant n'ait à y penser.
+ */
+function _nomBilan(niveauDe, code) {
+    var niveau = niveauDe(code);
+    if (!niveau || !niveau.nom) return '';
+    return (typeof echapperHtml === 'function') ? echapperHtml(niveau.nom) : '';
+}
 
 function _chargerHistoriqueBilan(da) {
     try {
@@ -591,7 +686,7 @@ function _rendreAlgoA0Bilan(algoA0) {
     return '<p>- <strong>la qualité du français écrit est à travailler en priorité</strong> (' + algoA0.critereNom + ' : ' + algoA0.erreurs + ' erreur' + (algoA0.erreurs > 1 ? 's' : '') + ' sur ' + algoA0.mots + ' mots, Insuffisant)</p>';
 }
 
-function _rendreDefisBilan(defis, algoA0, nomsPatrons) {
+function _rendreDefisBilan(defis, algoA0, nomsPatrons, niveauDe) {
     var html = '';
     var maxDefis = algoA0 ? 1 : 2;
     for (var i = 0; i < Math.min(maxDefis, defis.length); i++) {
@@ -600,7 +695,13 @@ function _rendreDefisBilan(defis, algoA0, nomsPatrons) {
         if (algoA0 && d.critereNom === algoA0.critereNom) { maxDefis++; continue; }
         var desc = d.description ? d.description.toLowerCase() : d.critereNom;
         var patron = nomsPatrons.indexOf(d.critereNom) !== -1 ? '. Cet objectif est prioritaire depuis 3 productions' : '';
-        html += '<p>- ' + desc + ' (' + d.critereNom + ' ' + (_NOMS_NIV_BILAN[d.niveauSelectionne] || '') + ')' + patron + '</p>';
+        // #575 — le nom du niveau vient de l'échelle. Quand elle ne le nomme
+        // pas, le critère s'affiche seul : « (Structure) » plutôt que
+        // « (Structure ) », une parenthèse à moitié vide.
+        var nomNiveau = _nomBilan(niveauDe, d.niveauSelectionne);
+        // Le nom du critère vient de la grille de l'utilisateur : même règle.
+        var nomCritere = (typeof echapperHtml === 'function') ? echapperHtml(d.critereNom) : '';
+        html += '<p>- ' + desc + ' (' + nomCritere + (nomNiveau ? ' ' + nomNiveau : '') + ')' + patron + '</p>';
     }
     return html;
 }
@@ -620,28 +721,49 @@ function _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente) {
     return '<p class="retro-force">Tous les critères sont maîtrisés. Continue sur cette lancée !</p>';
 }
 
-function _rendreForceBilan(criteres, defis) {
-    var meilleur = null; var meilleurOrdre = 0;
+function _rendreForceBilan(criteres, defis, niveauDe) {
+    // #575 — le meilleur critère se départage par le rang de son niveau DANS
+    // L'ÉCHELLE. Un niveau que l'échelle ne situe pas (rang `Infinity`) ne peut
+    // pas être « la force » : il est écarté, jamais promu par défaut.
+    var meilleur = null; var meilleurRang = null;
     criteres.forEach(function(c) {
-        var o = _ORDRE_NIV_BILAN[c.niveauSelectionne] || 0;
-        if (o > meilleurOrdre) { meilleurOrdre = o; meilleur = c; }
+        var rang = _rangBilan(niveauDe, c.niveauSelectionne);
+        if (rang === Infinity) return;
+        if (meilleurRang === null || rang > meilleurRang) { meilleurRang = rang; meilleur = c; }
     });
+    // ⚠ #555 — « M ou E » reste écrit en toutes lettres : c'est la marque de
+    // maîtrise, et elle ne se dérive d'aucune échelle aujourd'hui.
     if (meilleur && (meilleur.niveauSelectionne === 'M' || meilleur.niveauSelectionne === 'E') && defis.length > 0) {
-        return '<p class="retro-force">Ta force : ' + meilleur.critereNom + ' (' + (_NOMS_NIV_BILAN[meilleur.niveauSelectionne] || '') + ')</p>';
+        var nomNiveau = _nomBilan(niveauDe, meilleur.niveauSelectionne);
+        var nomCritere = (typeof echapperHtml === 'function') ? echapperHtml(meilleur.critereNom) : '';
+        return '<p class="retro-force">Ta force : ' + nomCritere
+            + (nomNiveau ? ' (' + nomNiveau + ')' : '') + '</p>';
     }
     return '';
 }
 
-function _rendreRecurrentsBilan(evalPrecedente, criteres) {
+function _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId) {
     var recurrentsHtml = '';
 
     // Progrès (comparaison de l'élève avec lui-même)
-    if (evalPrecedente && evalPrecedente.niveauFinal) {
+    //
+    // ⚠⚠ #575 — ON NE COMPARE QUE DANS UNE MÊME ÉCHELLE. Deux rangs issus
+    // d'échelles différentes ne se comparent pas : le 3e niveau d'une échelle à
+    // quatre et le 3e d'une échelle à six ne disent pas la même chose. Quand
+    // l'évaluation précédente désigne une AUTRE échelle — ou n'en désigne
+    // aucune —, la ligne « Progrès » ne s'affiche pas. C'est le même refus que
+    // `obtenirEchelleCommuneDesEvaluations` oppose à l'ambiguïté : ne pas
+    // deviner, plutôt qu'annoncer un progrès qui n'a pas été mesuré.
+    var memeEchelle = !!evalPrecedente
+        && _memeEchelleBilan(evalPrecedente.echelleId, echelleId);
+    if (memeEchelle && evalPrecedente.niveauFinal) {
         var nivAct = document.getElementById('niveauProduction1')?.textContent || '';
         var nivPre = evalPrecedente.niveauFinal;
-        var ordreAct = _ORDRE_NIV_BILAN[nivAct] || 0;
-        var ordrePre = _ORDRE_NIV_BILAN[nivPre] || 0;
-        if (ordreAct > ordrePre) {
+        var rangAct = _rangBilan(niveauDe, nivAct);
+        var rangPre = _rangBilan(niveauDe, nivPre);
+        // `Infinity` des deux côtés ne prouve rien : la comparaison stricte
+        // écarte d'elle-même le cas où aucun des deux codes ne se situe.
+        if (rangAct !== Infinity && rangPre !== Infinity && rangAct > rangPre) {
             recurrentsHtml += '<p>Progrès : ' + nivPre + ' → ' + nivAct + ' depuis ' + (evalPrecedente.productionNom || 'la production précédente') + '</p>';
         }
     }
@@ -712,10 +834,28 @@ function genererRetroactionBilan() {
     var nomsPatrons = _detecterPatronsRecurrentsBilan(criteres, historiqueEleve);
     var totalErreursFr = _compterErreursFrancaisBilan();
 
+    // #575 — l'échelle de l'évaluation en cours, résolue UNE fois pour tout le
+    // bilan. Même lecture que `evaluation-calcul.js` : l'évaluation d'abord, le
+    // sélecteur de l'écran en repli tant qu'elle n'a pas été enregistrée.
+    var echelleId = ec.echelleId || document.getElementById('selectEchelle1')?.value || null;
+    var niveauDe = _lecteurNiveauBilan(echelleId);
+
     // Defis prioritaires + détection « tous maîtrisés »
+    // ⚠ #555 — « I ou D » reste écrit en toutes lettres (marque de maîtrise).
+    // Seul l'ORDRE est désormais dérivé : le défi le plus bas dans l'échelle
+    // passe en premier, et un niveau qu'elle ne situe pas passe en dernier
+    // (avant, `|| 0` le faisait passer devant TOUS les autres).
     var defis = criteres
         .filter(function(c) { return c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D'; })
-        .sort(function(a, b) { return (_ORDRE_NIV_BILAN[a.niveauSelectionne] || 0) - (_ORDRE_NIV_BILAN[b.niveauSelectionne] || 0); });
+        .sort(function(a, b) {
+            var ra = _rangBilan(niveauDe, a.niveauSelectionne);
+            var rb = _rangBilan(niveauDe, b.niveauSelectionne);
+            // ⚠ `Infinity - Infinity` vaut NaN, et un comparateur qui rend NaN
+            // laisse le tri indéfini. Deux niveaux également illisibles gardent
+            // leur ordre d'origine.
+            if (ra === rb) return 0;
+            return ra < rb ? -1 : 1;
+        });
     // Verification explicite M/E : un travail Non recevable (niveau '0') ne doit
     // JAMAIS declencher « tous maitrises » via defis.length === 0 (defis exclut '0').
     var tousMaitrises = criteres.length > 0 &&
@@ -731,13 +871,13 @@ function genererRetroactionBilan() {
     html += _rendreAlgoA0Bilan(algoA0);
 
     if (defis.length > 0) {
-        html += _rendreDefisBilan(defis, algoA0, nomsPatrons);
+        html += _rendreDefisBilan(defis, algoA0, nomsPatrons, niveauDe);
     } else if (tousMaitrises) {
         html += _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente);
     }
 
-    html += _rendreForceBilan(criteres, defis);
-    html += _rendreRecurrentsBilan(evalPrecedente, criteres);
+    html += _rendreForceBilan(criteres, defis, niveauDe);
+    html += _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId);
     html += _rendreJetonsBilan(da);
 
     conteneur.innerHTML = html;

@@ -205,8 +205,18 @@ describe('evaluation — régression refactoring 2026-mai (pré-refactor, 7 test
             'nouvelleEvaluation',
             'reinitialiserFormulaire',
             'evaluerProduction',
-            // Zone Liste + filtres + tri + modification (L3737-5975) — 4 exports
-            'toggleEtudiantEval',
+            // Zone Liste + filtres + tri + modification (L3737-5975) — 3 exports
+            // ⮕ `toggleEtudiantEval`, `chargerListeEvaluationsRefonte`,
+            //   `trierListeEvaluations` et `rechargerFiltreProduction` sont
+            //   RETIRÉS le 28 août 2026 (#575). Ce n'est pas une perte
+            //   accidentelle — le cas que cette sentinelle existe pour attraper —
+            //   mais une suppression décidée : ils appartenaient à la vue
+            //   « accordéon » des évaluations, dont le conteneur
+            //   (`conteneur-evaluations-accordeon`) n'a jamais existé dans
+            //   `index.html`. La liste est rendue par `liste-evaluations.js`.
+            //   ⚠ Les deux derniers étaient en plus des DOUBLONS de noms exportés
+            //   par `liste-evaluations.js` ; `evaluation.js` étant chargé APRÈS,
+            //   c'était la version morte qui gagnait `window`.
             'modifierEvaluation',
             'naviguerEtudiantPrecedent',
             'naviguerEtudiantSuivant',

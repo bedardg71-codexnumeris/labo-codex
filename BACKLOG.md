@@ -1552,8 +1552,23 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     (montage à un étudiant par pattern → une mutation `= 1` passait) et le `toContain` du compteur vivant
     (satisfait par le nom cité dans un COMMENTAIRE du corps — même défaut tautologique que #549, §4 de
     l'audit).
-  - [ ] **B7 · filtre de notes `['I','D','M','E']`** (`liste-evaluations.js:368`, rapport §3 n° 8) — inutilisable
-    hors IDME.
+  - [x] **B7 · filtre de notes `['I','D','M','E']`** — TRAITÉ le 28 août 2026, PAR SUPPRESSION.
+    (rapport §3 n° 8). Le filtre était inutilisable hors IDME, mais il était surtout
+    **INATTEIGNABLE** : le `<select id="filtre-note-eval">` qu'il peuplait n'existe NULLE PART dans
+    `index.html`, et `git log -S` n'en trouve aucune trace depuis le premier commit du dépôt. La garde
+    `if (selectNote)` n'a donc jamais été vraie, et la branche « niveau » de `appliquerFiltresSurLignes`
+    jamais empruntée. Le corriger aurait été un correctif sans effet
+    (`feedback-verifier-consommateurs-avant-brancher`). Retirés : le bloc d'options, la branche de
+    filtrage, et les 5 références résiduelles à l'identifiant. ⮕ **Un filtre par niveau, s'il est
+    voulu, est une fonction NEUVE** (son `<select>`, ses options tirées de `niveauxOrdonnesDeLEchelle`,
+    et une décision sur ce qu'il propose quand les évaluations affichées ne partagent pas d'échelle).
+  - [x] **⮕ TROUVÉ EN CHEMIN, ET VIVANT LUI : le TRI de la colonne « Niveau »** — LIVRÉ le 28 août 2026.
+    `trierLignesParColonne` (`liste-evaluations.js`) portait `{ I:1, D:2, M:3, E:4, '-':5 }` avec un
+    repli `?? 5`. L'en-tête est CLIQUABLE (`index.html`, `data-param="niveauIDME"`) : hors IDME, toutes
+    les lignes recevaient le même rang et **cliquer ne triait rien, en silence**. Le rang se lit
+    désormais dans l'échelle de l'évaluation (`echelleId` ajouté à la ligne), et une ligne sans niveau
+    lisible reste en FIN dans les deux sens — avant, le `?? 5` faisait remonter les non-évaluées en
+    TÊTE au tri décroissant. Le `title` de l'en-tête n'annonce plus « IDME » à l'utilisateur.
   - [x] **`SCALE_FALLBACK` · le PDF remis à l'élève** — LIVRÉ le 27 août 2026 (suppression).
     `lireEchelle` (`synthese-retroaction-data.js`) résout désormais par le chemin unique
     `obtenirEchelleResolue` — qui connaît AUSSI l'échelle embarquée d'une pratique configurable
@@ -1601,14 +1616,74 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     l'avaient relevé. L'état connu est **verrouillé** par un test « exactement UNE occurrence restante » : il
     rougira le jour où on le corrigera, ce qui est le signal attendu. ⚠ Vérifier aussi les zones colorées du
     graphique lui-même (Chart.js), non auditées.
-  - [ ] **Bilan de rétroaction et tendance** (rapport §3 n° 10, 11) : `_NOMS_NIV_BILAN`/`_ORDRE_NIV_BILAN`
-    (`evaluation-retroaction.js:488-489`) ; `convertirNoteEnValeur` (`evaluation.js:284-290`) porte une
-    **échelle ancienne** où `I = 3`, ce qui contredit IDME.
+  - [x] **Bilan de rétroaction** (rapport §3 n° 10) — LIVRÉ le 28 août 2026.
+    `_NOMS_NIV_BILAN` et `_ORDRE_NIV_BILAN` (`evaluation-retroaction.js`) sont retirées. Elles
+    imposaient l'échelle de Grégoire au bilan **remis à l'élève** : hors IDME, le libellé du niveau
+    s'affichait entre parenthèses VIDES, et le rang valait 0 pour tout le monde — la ligne
+    « Progrès : X → Y » ne pouvait donc **jamais** apparaître, quelle que soit la progression réelle.
+    Nom et rang se lisent désormais dans l'échelle de l'évaluation. ⮕ **Et le progrès ne se compare
+    plus qu'à l'intérieur d'UNE MÊME échelle** : le 3ᵉ niveau d'un barème à cinq et le 3ᵉ d'un barème à
+    trois ne disent pas la même chose. ⚠ **Sécurité** : le nom d'un niveau est saisi par l'utilisateur
+    et traverse un `innerHTML` — trois échappements posés (nom du niveau + les deux noms de critères des
+    lignes réécrites). L'en-tête du module affirmait « aucun innerHTML interpolé » : c'était faux depuis
+    l'origine, la mention est corrigée et les autres sites restent à traiter.
+  - [x] **`convertirNoteEnValeur`** (rapport §3 n° 11) — TRAITÉ le 28 août 2026, PAR SUPPRESSION.
+    Elle portait une **échelle ancienne où `I = 3`**, qui contredit IDME — mais elle était MORTE : son
+    unique appelant `obtenirTendance` n'était atteint que par `genererDetailsEtudiant`, sous
+    `afficherListeEvaluations`, qui sort immédiatement faute de `conteneur-evaluations-accordeon` —
+    identifiant qui n'existe nulle part dans le dépôt. ⮕ **Décision de Grégoire (28 août) : supprimer
+    toute la chaîne.** La vue « accordéon » des évaluations, remplacée par le tableau de
+    `liste-evaluations.js`, est retirée : **12 fonctions, 584 lignes** (`evaluation.js` passe de 3894 à
+    3295 lignes), plus `restaurerPreferenceTri` (sans appelant), la variable de module
+    `donneesEvaluationsFiltrees`, 4 exports `window`, 3 appels de rafraîchissement devenus sans effet,
+    et l'entrée `'evaluations-liste-evaluations'` de `modes.js` — clé qui n'a jamais pu s'appliquer,
+    `sousSectionActive` portant l'id du DOM (`evaluations-liste`).
+    ⮕ **DEUX DOUBLONS `window` DISPARAISSENT AVEC ELLE**, et c'est le patron
+    `feedback-double-definition-window-derniere-gagne` : `trierListeEvaluations` et
+    `rechargerFiltreProduction` étaient définis dans les DEUX modules, et `evaluation.js` étant chargé
+    APRÈS `liste-evaluations.js`, **c'était la version morte qui gagnait**. Effet visible du retrait :
+    `window.rechargerFiltreProduction` résout maintenant vers la version de `liste-evaluations.js`,
+    celle qui **exclut le portfolio** du filtre « Production » — la version d'`evaluation.js` le
+    laissait entrer et réécrivait le select en écrasant la sélection en cours.
+    Sentinelle d'exports `refactor-evaluation.test.js` mise à jour avec la raison du retrait.
   ⚠ **Ce que ce lot ne rouvre pas** : le rabotage `startsWith('francais')` (**#553**), les seuils `idme.*` du
   dépistage de risque (**#551**), la marque de maîtrise (**#555**). Ne pas ajouter de site de rabotage en
   chemin — s'il en faut un, il est partagé, pour que #553 n'ait qu'un endroit à corriger.
   **Fin** : plus aucun jeu de valeurs IDME en dur sur un chemin vivant ; `grep` à l'appui ; chaque pas porte
   sa sentinelle avec break-test rouge vérifié.
+  ⮕ **ÉTAT AU 28 AOÛT 2026 : il ne reste que B10, et il BUTE SUR #555.** Tous les autres pas du lot 4
+  sont livrés ou clos par écart de prémisse. Sentinelle du 28 août :
+  `tests/unit/sentinelle-575-ordre-niveaux-derive-echelle.test.js` — **23 cas, 14 mutations, 14 rouges**,
+  restauration vérifiée à chaque fois. ⚠ **Une butée de même nature que B10 subsiste dans
+  `evaluation-retroaction.js`** : le module teste les codes EN TOUTES LETTRES à **huit lignes / 18
+  comparaisons** (`=== 'I' || === 'D'` pour les défis, `=== 'M' || === 'E'` pour « tous maîtrisés »).
+  L'ORDRE se dérive d'une échelle ; « faible » et « maîtrisé », non. Un test CONSTATE ce compte de 18 :
+  il rougira le jour où **#555** les retirera, et c'est le signal voulu.
+
+- [ ] **#576 — Le bilan de rétroaction est VIDE quand la grille d'origine est introuvable, alors que le panneau d'à côté sait s'en passer.**
+  **Trouvé par la porte terrain 2.6 du 28 août 2026, sur les données réelles d'H2026 de Grégoire** (captures
+  à l'appui, artefacts 8 et 10 de Benjamin A.). ⚠ **Ce n'est PAS une régression de #575** : le chemin
+  est intact depuis l'origine ; la porte l'a seulement mis sous les yeux.
+  **Symptôme** : la vue « Bilan » affiche son entête (« Mes standards sont très élevés… », « Selon toi,
+  quel aspect… », « Présentement, il faut se concentrer sur : ») puis **RIEN**, et saute directement aux
+  jetons. Aucun défi, aucune force, aucun progrès — alors que le panneau ÉVALUATION voisin affiche
+  parfaitement les quatre critères (Structure M, Rigueur M, Plausibilité D, Nuance D) et la note (70 %, D).
+  **Cause, lue au code** : `_chargerGrilleDefBilan(grilleId)` (`evaluation-retroaction.js`) cherche la
+  grille dans `grillesTemplates` et rend `null` quand elle n'y est plus. `_collecterCriteresBilan` exige
+  `grilleDef && grilleDef.criteres` : sans elle, il rend `[]`. Tout le bilan personnalisé en découle —
+  `defis` vide, `tousMaitrises` faux (il exige `criteres.length > 0`), `_rendreForceBilan` sans matière.
+  ⮕ **LA DONNÉE EST LÀ, ET LE VOISIN LA LIT DÉJÀ.** L'évaluation enregistrée porte ses critères avec leur
+  NOM (`criteres: [{critereId, critereNom, niveauSelectionne}]`), et `evaluation.js` a un repli explicite
+  pour ce cas exact : bannière « Grille d'origine introuvable dans les modèles actuels — affichage depuis
+  les données sauvegardées » (`:1158`, `:1426`). Le bilan n'a jamais eu ce repli.
+  **Le geste** : `_collecterCriteresBilan` se replie sur les critères de l'évaluation enregistrée quand la
+  grille template manque — pas une invention, la même source que le panneau voisin. Et le bilan dit
+  pourquoi, comme le fait la bannière, plutôt que de se taire.
+  ⚠ **Le silence est le vrai défaut** : ce bilan est le document REMIS À L'ÉLÈVE. Un écran qui ne peut
+  pas conclure doit le dire ; ici il rend une page d'entête sans contenu, impossible à distinguer d'un
+  élève qui n'aurait aucun défi.
+  **Fin** : sur une évaluation dont la grille d'origine a disparu, le bilan nomme les critères et leurs
+  niveaux ; sentinelle avec break-test rouge.
 
 - [ ] **#573 — Après « Enregistrer », la cartouche ouverte est REMPLACÉE par une cartouche neuve, et l'autosave #517 devient muet.**
   (rapport §7.2 n° 1) `sauvegarderCartouche` → `chargerCartouchesRetroaction()` (`cartouches.js:890`) →

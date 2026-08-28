@@ -158,7 +158,9 @@ function rafraichirContenuSelonMode() {
             'calendrier-trimestre': 'initialiserTrimestreV2',  // 🆕 FIX (20 jan 2026): Rafraîchir section Trimestre
             'etudiants-liste': 'afficherListeEtudiantsConsultation',
             'etudiants-profil': 'afficherProfilEtudiant',
-            'evaluations-liste-evaluations': 'chargerListeEvaluationsRefonte',
+            // #575 (28 août 2026) — entrée retirée avec la vue « accordéon ».
+            // Elle n'a jamais pu s'appliquer : `sousSectionActive` porte l'id du
+            // DOM, qui est `evaluations-liste`, pas `evaluations-liste-evaluations`.
             'suivi-saisie': 'afficherTableauPresences',
             // 'suivi-groupe' (anciennement section plate 'apercu') :
             // chargerTableauBordApercu() est appelé par le dispatcher dans navigation.js.

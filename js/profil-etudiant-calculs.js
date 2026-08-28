@@ -152,6 +152,97 @@ function obtenirTableConversionNiveaux(echelleId = null) {
 }
 
 /**
+ * Les niveaux d'une échelle, du plus faible au plus fort, chacun avec son rang.
+ *
+ * ⮕ #575 (lot 4 du plan SOLO). L'ORDRE DES NIVEAUX NE SE DEVINE PAS. Deux
+ * modules l'écrivaient en dur — `{ I:1, D:2, M:3, E:4 }` pour le tri de la
+ * colonne « Niveau » (`liste-evaluations.js`) et `{ E:4, M:3, D:2, I:1 }` pour
+ * le bilan de rétroaction (`evaluation-retroaction.js`). Hors IDME, les deux
+ * rendent le même rang à tout le monde : le tri ne trie plus, et le bilan
+ * n'annonce plus aucun progrès.
+ *
+ * ⚠ Et il ne se lit pas non plus dans l'ordre de SAISIE de l'utilisateur : rien
+ * ne l'oblige à saisir ses niveaux du plus faible au plus fort. Le seul ordre
+ * qui ne soit pas inventé est celui des PLAGES — `min` croissant, la conversion
+ * « note chiffrée → code » du §7 bis du skill `pratiques-notation`. C'est déjà
+ * la convention du dépôt : `niveauxEtGradientDesEvaluations`,
+ * `graphiques-progression.js` et `tableau-bord-apercu.js` trient tous par `min`.
+ *
+ * ⚠ ON NE SE RABAT PAS SUR `valeurCalcul` quand la borne manque. Ce serait un
+ * second chemin, aux résultats parfois différents du premier — le patron exact
+ * que #529 a passé une session à défaire. La plage et la valeur ponctuelle sont
+ * deux conversions INVERSES ; l'une ne se déduit pas de l'autre. Un niveau sans
+ * borne inférieure exploitable n'a donc PAS de rang, et l'appelant doit le dire.
+ *
+ * @param {string} [echelleId] - échelle à lire (résolue par `obtenirEchelleResolue`)
+ * @returns {Array} `[{ code, nom, min, max, rang }]`, `rang` 1 = le plus faible.
+ *   Tableau VIDE quand aucune échelle ne se résout — jamais un ordre par défaut.
+ */
+function niveauxOrdonnesDeLEchelle(echelleId = null) {
+    var echelle = (typeof obtenirEchelleResolue === 'function')
+        ? obtenirEchelleResolue(echelleId)
+        : null;
+    var brut = (echelle && Array.isArray(echelle.niveaux)) ? echelle.niveaux : [];
+
+    // ⚠ `Number('')` vaut ZÉRO, pas NaN : sans ce filtre, une borne laissée vide
+    // ferait passer son niveau pour le plancher de l'échelle. Même garde que
+    // `valeurNumeriqueDuNiveau` (#525).
+    var borne = function (v) {
+        return (v == null || String(v).trim() === '') ? NaN : Number(v);
+    };
+
+    return brut
+        .filter(function (n) {
+            return n && n.code != null && String(n.code).trim() !== ''
+                && Number.isFinite(borne(n.min));
+        })
+        .map(function (n) {
+            return {
+                code: String(n.code).trim().toUpperCase(),
+                nom: (n.nom == null ? '' : String(n.nom)),
+                min: borne(n.min),
+                max: borne(n.max),
+                rang: 0
+            };
+        })
+        // ⚠ DEUX NIVEAUX PEUVENT PARTAGER LA MÊME BORNE INFÉRIEURE, et le cas
+        // n'est pas théorique : les échelles « IDME et niv 0 » de Grégoire
+        // portent un « Suspendu » de 0 à 0 à côté d'un « Insuffisant » de 0 à
+        // 64. Départager par la borne SUPÉRIEURE range le plus étroit d'abord —
+        // une dérivation de plus, pas une règle inventée. Sans elle, l'ordre de
+        // SAISIE tranchait, ce qui est exactement ce que ce helper refuse.
+        .sort(function (a, b) {
+            if (a.min !== b.min) return a.min - b.min;
+            var maxA = Number.isFinite(a.max) ? a.max : Infinity;
+            var maxB = Number.isFinite(b.max) ? b.max : Infinity;
+            return maxA - maxB;
+        })
+        .map(function (n, i) { n.rang = i + 1; return n; });
+}
+
+/**
+ * Le niveau que désigne un code, dans SON échelle — nom et rang compris.
+ *
+ * ⮕ #575. Le point d'entrée des appelants qui tiennent un code enregistré
+ * (`niveauFinal`, `niveauSelectionne`) et l'`echelleId` de l'évaluation qui l'a
+ * produit. Rendre `null` plutôt qu'un rang de repli est le comportement voulu :
+ * un code étranger à l'échelle n'a pas de place dans son ordre.
+ *
+ * @param {string} code - le code enregistré (comparé sans casse ni espaces)
+ * @param {string} [echelleId] - l'échelle de l'évaluation qui porte ce code
+ * @returns {Object|null} `{ code, nom, min, max, rang }`, ou `null`
+ */
+function niveauDuCodeDansEchelle(code, echelleId = null) {
+    if (code == null || String(code).trim() === '') return null;
+    var cible = String(code).trim().toUpperCase();
+    var niveaux = niveauxOrdonnesDeLEchelle(echelleId);
+    for (var i = 0; i < niveaux.length; i++) {
+        if (niveaux[i].code === cible) return niveaux[i];
+    }
+    return null;
+}
+
+/**
  * Construit la table `{ <code>: score 0-1 }` à partir des niveaux d'une échelle.
  *
  * Extrait le 27 août 2026 (#542 A2) pour que les DEUX gisements d'échelles —
@@ -1747,6 +1838,11 @@ function determinerCibleIntervention(da) {
 window.obtenirEchelleResolue = obtenirEchelleResolue;
 window.obtenirEchelleCommuneDesEvaluations = obtenirEchelleCommuneDesEvaluations;
 window.obtenirTableConversionNiveaux = obtenirTableConversionNiveaux;
+// #575 — l'ordre des niveaux, dérivé de l'échelle. Consommées par
+// `liste-evaluations.js` (tri de la colonne « Niveau ») et
+// `evaluation-retroaction.js` (bilan : libellés, défis, progrès).
+window.niveauxOrdonnesDeLEchelle = niveauxOrdonnesDeLEchelle;
+window.niveauDuCodeDansEchelle = niveauDuCodeDansEchelle;
 window.convertirNiveauEnScore = convertirNiveauEnScore;
 // #542 A3 — consommée par `profil-etudiant-sections-affichage.js` (carte RàI).
 window.diagnostiquerConversionNiveaux = diagnostiquerConversionNiveaux;
