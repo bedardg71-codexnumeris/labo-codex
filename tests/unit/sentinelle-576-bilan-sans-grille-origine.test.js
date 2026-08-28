@@ -284,6 +284,38 @@ describe('#576 — le bilan survit à la disparition de la grille d\'origine', (
         expect(elements.contenuRetroBilan.innerHTML).toContain('Aucun critère n\'est encore évalué');
     });
 
+    it('n\'écrit le nom du critère qu\'UNE fois quand il n\'y a pas de description', () => {
+        // Le repli ne fournit aucune description : la ligne retombait sur le
+        // nom, puis le répétait entre parenthèses — « Plausibilité
+        // (Plausibilité En développement) ». Vu en RENDANT le bilan, pas en le
+        // testant : les assertions cherchaient la présence des mots, pas leur
+        // nombre. Ce texte part chez l'élève ; il doit se lire.
+        const elements = faireElements();
+        const w = chargerBilan({
+            grilles: [], evaluations: [EVAL_ENREGISTREE], evaluationEnCours: EN_COURS, elements
+        });
+        w.basculerVueRetroaction('bilan');
+        const rendu = elements.contenuRetroBilan.innerHTML;
+        expect(rendu).not.toContain('Plausibilité (Plausibilité');
+        expect(rendu).toContain('Plausibilité (En développement)');
+        // Le nom n'apparaît qu'une fois dans sa ligne.
+        const ligne = rendu.split('<p>').find((b) => b.indexOf('Plausibilité') >= 0) || '';
+        expect(ligne.split('Plausibilité').length - 1).toBe(1);
+    });
+
+    it('garde la description de la GRILLE en tête quand elle existe', () => {
+        // Le chemin normal est inchangé : « description (Critère Niveau) ».
+        const elements = faireElements();
+        const w = chargerBilan({
+            grilles: [{ id: 'GR_DISPARUE', criteres: [{ id: 'c3', nom: 'Plausibilité', description: 'La cohérence logique' }] }],
+            evaluations: [EVAL_ENREGISTREE],
+            evaluationEnCours: Object.assign({}, EN_COURS, { criteres: { c3: 'D' } }),
+            elements
+        });
+        w.basculerVueRetroaction('bilan');
+        expect(elements.contenuRetroBilan.innerHTML).toContain('la cohérence logique (Plausibilité En développement)');
+    });
+
     it('le repli est branché sur le chemin vivant, pas seulement défini', () => {
         const code = retroaction
             .replace(/\/\*[\s\S]*?\*\//g, '')

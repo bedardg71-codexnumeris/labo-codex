@@ -779,16 +779,28 @@ function _rendreDefisBilan(defis, algoA0, nomsPatrons, niveauDe) {
         // aucune description, donc `desc` devient le NOM du critère, jusque-là
         // toujours passé par la branche échappée d'à côté. Trouvé par la
         // sentinelle #576, pas par relecture.
-        var descBrute = d.description ? d.description.toLowerCase() : d.critereNom;
-        var desc = (typeof echapperHtml === 'function') ? echapperHtml(descBrute) : '';
         var patron = nomsPatrons.indexOf(d.critereNom) !== -1 ? '. Cet objectif est prioritaire depuis 3 productions' : '';
         // #575 — le nom du niveau vient de l'échelle. Quand elle ne le nomme
-        // pas, le critère s'affiche seul : « (Structure) » plutôt que
-        // « (Structure ) », une parenthèse à moitié vide.
+        // pas, il est simplement absent : jamais un repère inventé.
         var nomNiveau = _nomBilan(niveauDe, d.niveauSelectionne);
-        // Le nom du critère vient de la grille de l'utilisateur : même règle.
-        var nomCritere = (typeof echapperHtml === 'function') ? echapperHtml(d.critereNom) : '';
-        html += '<p>- ' + desc + ' (' + nomCritere + (nomNiveau ? ' ' + nomNiveau : '') + ')' + patron + '</p>';
+        // ⚠ LES DEUX SONT DES DONNÉES UTILISATEUR — description ET nom du
+        // critère traversent un innerHTML. La règle n° 1 s'applique aux deux.
+        var ech = function (t) { return (typeof echapperHtml === 'function') ? echapperHtml(t) : ''; };
+        var nomCritere = ech(d.critereNom);
+
+        // ⚠⚠ #576 — LE NOM NE S'ÉCRIT QU'UNE FOIS. La description d'un critère
+        // vient de la GRILLE ; le repli sur l'évaluation enregistrée n'en a
+        // aucune, et la ligne retombait alors sur le nom — qu'elle répétait
+        // aussitôt entre parenthèses : « Plausibilité (Plausibilité En
+        // développement) ». Vu en RENDANT le bilan, pas en le testant : les
+        // assertions cherchaient la présence des mots, pas leur nombre.
+        // Ce texte part chez l'élève ; il doit se lire.
+        var description = (d.description == null) ? '' : String(d.description).trim();
+        var tete = description ? ech(description.toLowerCase()) : nomCritere;
+        var precision = description
+            ? nomCritere + (nomNiveau ? ' ' + nomNiveau : '')
+            : nomNiveau;
+        html += '<p>- ' + tete + (precision ? ' (' + precision + ')' : '') + patron + '</p>';
     }
     return html;
 }
