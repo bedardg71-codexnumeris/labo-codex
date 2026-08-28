@@ -3341,18 +3341,76 @@ function afficherNiveauxEchelle(echelle) {
         </button>
     `;
 
-    container.innerHTML = html + btnAjouterNiveau;
+    container.innerHTML = html + btnAjouterNiveau + blocReperesEchelle(echelle);
 
     // Afficher l'aperçu visuel
     if (apercuContainer) {
-        const apercuHtml = echelle.niveaux.map(niveau => `
+        // #555 — les deux repères se LISENT dans l'aperçu : sans cela, le choix
+        // reste un formulaire dont on ne voit jamais l'effet.
+        const ranges = niveauxRangesDeLEchelle(echelle);
+        const rangDuCode = (code) => {
+            if (!code) return null;
+            const trouve = ranges.find(n => n.code === String(code).trim().toUpperCase());
+            return trouve ? trouve.rang : null;
+        };
+        const rangSuffisant = rangDuCode(echelle.seuilSuffisance);
+        const rangMaitrise = rangDuCode(echelle.seuilMaitrise);
+
+        const apercuHtml = echelle.niveaux.map(niveau => {
+            const rang = rangDuCode(niveau.code);
+            let zone = '';
+            if (rang != null) {
+                if (rangMaitrise != null && rang >= rangMaitrise) zone = 'maîtrisé';
+                else if (rangSuffisant != null && rang >= rangSuffisant) zone = 'suffisant';
+                else if (rangSuffisant != null || rangMaitrise != null) zone = 'à travailler';
+            }
+            return `
             <div style="text-align: center; flex: 1; padding: 10px; background: ${niveau.couleur}20; border-radius: 4px; margin: 0 2px;">
                 <strong style="font-size: 1.2rem; color: ${niveau.couleur};">${echapperHtml(niveau.code)}</strong>
                 <div class="echelle-texte-petit-mt5">${niveau.min}%-${niveau.max}%</div>
+                ${zone ? `<div class="echelle-texte-petit-mt5">${echapperHtml(zone)}</div>` : ''}
             </div>
-        `).join('');
+        `;
+        }).join('');
         apercuContainer.innerHTML = apercuHtml;
     }
+}
+
+/**
+ * Le bloc « Repères de maîtrise » — deux listes, sous les niveaux.
+ *
+ * ⮕ #555. Il vit SOUS le tableau parce qu'il désigne des niveaux qui doivent
+ * déjà exister : le proposer au-dessus reviendrait à demander un choix dans une
+ * liste vide. Et il n'apparaît QUE si l'ordre des plages est lisible — sur une
+ * échelle dont les bornes manquent, un choix serait sans effet et sans
+ * explication.
+ */
+function blocReperesEchelle(echelle) {
+    if (niveauxRangesDeLEchelle(echelle).length === 0) return '';
+    const champs = Object.keys(REPERES_ECHELLE).map((champ) => `
+        <div class="groupe-form">
+            <label class="echelle-texte-detail">${echapperHtml(REPERES_ECHELLE[champ])}</label>
+            <select class="controle-form"
+                    data-on-change="modifierRepereEchelleHandler"
+                    data-echelle-id="${echapperHtml(echelle.id)}"
+                    data-champ="${champ}">
+                ${optionsRepereEchelle(echelle, champ)}
+            </select>
+        </div>
+    `).join('');
+
+    return `
+        <div class="carte-white-border" style="margin-top: 15px; padding: 15px;">
+            <h4 class="titre-bleu-mb-15">Repères de maîtrise</h4>
+            <p class="echelle-texte-detail" style="margin-bottom: 12px;">
+                Ces deux repères disent à l'application où commence l'apprentissage
+                suffisant, et où il est acquis. Sans eux, elle ne peut pas savoir
+                quels critères présenter à l'élève comme des priorités.
+                Les poser sur le même niveau revient à n'en avoir qu'un.
+            </p>
+            <div class="echelle-niveau-grille">${champs}</div>
+        </div>
+    `;
 }
 
 /**
@@ -3475,6 +3533,166 @@ function refusChampNiveau(champ, valeur) {
         return REFUS_VALEUR_NIVEAU;
     }
     return null;
+}
+
+/* =====================================================================
+   #555 — LES DEUX REPÈRES DE MAÎTRISE D'UNE ÉCHELLE
+   =====================================================================
+
+   ⚠⚠ POURQUOI CES CHAMPS EXISTENT. Le code demandait « ce critère est-il un
+   défi ? » et « tous les critères sont-ils maîtrisés ? » en testant les codes
+   EN TOUTES LETTRES — `=== 'I' || === 'D'`, `=== 'M' || === 'E'` — à quatorze
+   endroits. Ces réponses ne sont justes que sur l'échelle IDME de Grégoire.
+   Sur l'échelle de quelqu'un d'autre, elles ne veulent rien dire : rien
+   n'oblige un·e collègue à employer ces lettres, ni à en faire le même usage.
+
+   ⮕ CE QUI MANQUAIT N'ÉTAIT PAS UN SEUIL CHIFFRÉ, MAIS UN REPÈRE SUR L'ÉCHELLE.
+   Un niveau portait déjà `code`, `nom`, `description`, `niveauSOLO`, `min`,
+   `max`, `valeurCalcul`, `couleur` — jamais « à partir d'ici, c'est acquis ».
+   L'information vivait dans l'enseignement, pas dans l'outil.
+
+   ⮕ DEUX REPÈRES, ET NON UN — décision de Grégoire, 28 août 2026. Sa gradation
+   PAN-Standards distingue trois états, pas deux : au-dessous, l'apprentissage
+   est insuffisant ; entre les deux, il est réel mais NON DURABLE (« maîtrisé,
+   mais en développement ») ; au-dessus, il est acquis. Une seule frontière
+   aurait forcé « en développement » dans l'une ou l'autre case, et la
+   rétroaction remise à l'élève aurait dit une chose qu'il ne pense pas.
+
+   ⚠ LES DEUX REPÈRES VIVENT SUR L'ÉCHELLE, PAS SUR SES NIVEAUX. Un marqueur
+   par niveau autoriserait zéro marque, ou trois : un état incohérent que rien
+   ne rattraperait. Ici la donnée ne peut désigner qu'un niveau à la fois.
+
+   ⚠ ÉGALITÉ AUTORISÉE, et c'est voulu : poser les deux repères sur le MÊME
+   niveau revient à n'en avoir qu'un — la zone intermédiaire disparaît. Le
+   modèle à deux frontières contient donc le modèle à une, sans champ de plus.
+
+   ⚠ L'ABSENCE EST UN ÉTAT LÉGITIME. Aucune échelle existante ne porte ces
+   repères, et AUCUNE VALEUR N'EST DEVINÉE À LEUR PLACE — ni par les lettres,
+   ni par une position dans la liste, ni par un pourcentage. Une échelle sans
+   repères est une échelle dont on ne sait pas où commence la maîtrise, et les
+   lecteurs devront le DIRE plutôt que de trancher (`feedback-zero-fallback-arbitraire`).
+   ===================================================================== */
+
+/** Les deux champs de repère, et leur libellé à l'écran. */
+const REPERES_ECHELLE = {
+    seuilSuffisance: 'Suffisant à partir de',
+    seuilMaitrise:   'Maîtrisé à partir de'
+};
+
+/**
+ * Les niveaux d'une échelle, rangés du plus faible au plus fort.
+ *
+ * Passe par `ordonnerNiveauxParPlage` (`profil-etudiant-calculs.js`) : l'ordre
+ * des PLAGES, jamais celui de la saisie. Rend `[]` si la règle n'est pas
+ * chargée — l'appelant refuse alors, il ne devine pas.
+ */
+function niveauxRangesDeLEchelle(echelle) {
+    if (typeof window.ordonnerNiveauxParPlage !== 'function') return [];
+    return window.ordonnerNiveauxParPlage((echelle && echelle.niveaux) || []);
+}
+
+/**
+ * Refus motivé d'un repère, ou `null` si l'écriture peut avoir lieu.
+ *
+ * Trois refus, et aucun n'est cosmétique :
+ *   · le code désigné n'est pas dans l'échelle — le repère pointerait dans le vide ;
+ *   · l'ordre des plages n'est pas lisible — on ne peut rien garantir ;
+ *   · la suffisance passerait AU-DESSUS de la maîtrise — un élève serait
+ *     « acquis » sans être « suffisant », ce qui n'a pas de sens à l'écran.
+ *
+ * ⚠ Le vide N'EST PAS un refus : retirer un repère est un geste légitime.
+ */
+function refusRepereEchelle(echelle, champ, code) {
+    if (!REPERES_ECHELLE[champ]) return 'Repère inconnu.';
+    if (code == null || String(code).trim() === '') return null;
+
+    const cible = String(code).trim().toUpperCase();
+    const ranges = niveauxRangesDeLEchelle(echelle);
+    if (ranges.length === 0) {
+        return 'L\'ordre des niveaux n\'est pas lisible : vérifier que chaque niveau a un code et une borne « Min ».';
+    }
+
+    const vise = ranges.find((n) => n.code === cible);
+    if (!vise) return 'Ce niveau ne fait pas partie de l\'échelle.';
+
+    // L'autre repère, tel qu'il est DÉJÀ enregistré. Absent : rien à comparer.
+    const autreChamp = (champ === 'seuilSuffisance') ? 'seuilMaitrise' : 'seuilSuffisance';
+    const autreCode = echelle && echelle[autreChamp];
+    if (!autreCode) return null;
+    const autre = ranges.find((n) => n.code === String(autreCode).trim().toUpperCase());
+    if (!autre) return null;
+
+    const rangSuffisance = (champ === 'seuilSuffisance') ? vise.rang : autre.rang;
+    const rangMaitrise   = (champ === 'seuilSuffisance') ? autre.rang : vise.rang;
+    if (rangSuffisance > rangMaitrise) {
+        return 'Le seuil de suffisance ne peut pas être plus haut que le seuil de maîtrise.';
+    }
+    return null;
+}
+
+/**
+ * Écrit un repère sur l'échelle.
+ *
+ * Même sérialisation que `modifierNiveauEchelle` (#510) : `db.modifier` par
+ * clé, jamais lecture-modification-écriture à la main. Le refus est calculé sur
+ * l'échelle TELLE QU'ELLE EST EN BASE, à l'intérieur de la transaction — la
+ * valider sur un instantané lu avant laisserait passer un ordre inversé posé
+ * par un geste concurrent.
+ */
+async function modifierRepereEchelle(echelleId, champ, valeur) {
+    if (!REPERES_ECHELLE[champ]) return { refuse: 'Repère inconnu.' };
+
+    const code = (valeur == null) ? '' : String(valeur).trim().toUpperCase();
+    let refus = null;
+    let echelleModifiee = null;
+
+    await db.modifier(cle('echellesTemplates'), (lues) => {
+        const echelles = lues || [];
+        const index = echelles.findIndex((e) => e.id === echelleId);
+        if (index === -1) {
+            refus = 'Échelle introuvable.';
+            return undefined;
+        }
+        const echelle = echelles[index];
+
+        refus = refusRepereEchelle(echelle, champ, code);
+        if (refus) return undefined;
+
+        // Le vide RETIRE le repère plutôt que d'écrire une chaîne creuse : une
+        // clé présente et vide se lit « défini », et c'est faux.
+        if (code === '') delete echelle[champ];
+        else echelle[champ] = code;
+
+        echelle.dateModification = new Date().toISOString();
+        echelles[index] = echelle;
+        echelleModifiee = echelle;
+        return echelles;
+    }, []);
+
+    if (refus) return { refuse: refus };
+    if (!echelleModifiee) return { refuse: null };
+
+    echelleTemplateActuelle = echelleModifiee;
+    afficherNiveauxEchelle(echelleTemplateActuelle);
+    return { ok: true };
+}
+
+/**
+ * Le `<select>` d'un repère : les codes de l'échelle, dans l'ordre des plages.
+ *
+ * ⚠ `code` et `nom` sont SAISIS par l'utilisateur et partent dans un
+ * `innerHTML` : les deux sont échappés ici, au plus près de la source.
+ */
+function optionsRepereEchelle(echelle, champ) {
+    const courant = (echelle && echelle[champ]) ? String(echelle[champ]).trim().toUpperCase() : '';
+    const options = ['<option value=""' + (courant === '' ? ' selected' : '') + '>— non défini —</option>'];
+    niveauxRangesDeLEchelle(echelle).forEach((niveau) => {
+        const libelle = niveau.nom ? (niveau.code + ' · ' + niveau.nom) : niveau.code;
+        options.push('<option value="' + echapperHtml(niveau.code) + '"'
+            + (niveau.code === courant ? ' selected' : '') + '>'
+            + echapperHtml(libelle) + '</option>');
+    });
+    return options.join('');
 }
 
 async function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
@@ -4058,6 +4276,12 @@ function modifierNiveauEchelleHandler(el) {
         .then(function (resultat) { marquerChampRefuseEchelle(el, resultat && resultat.refuse); });
 }
 
+/** #555 — écrit un repère de maîtrise, et rend visible un refus. */
+function modifierRepereEchelleHandler(el) {
+    Promise.resolve(modifierRepereEchelle(el.dataset.echelleId, el.dataset.champ, el.value))
+        .then(function (resultat) { marquerChampRefuseEchelle(el, resultat && resultat.refuse); });
+}
+
 /** Annuler import échelles (fermer modal + cleanup) */
 function fermerModalImportEchelles() {
     // Cibler le wrapper d'import par sa classe dédiée (pas `.modal-js-overlay`,
@@ -4145,6 +4369,11 @@ window.importerUneEchelleTrimestre = importerUneEchelleTrimestre;
 window.modifierNiveauHandler = modifierNiveauHandler;
 window.modifierNiveauTempHandler = modifierNiveauTempHandler;
 window.modifierNiveauEchelleHandler = modifierNiveauEchelleHandler;
+window.modifierRepereEchelleHandler = modifierRepereEchelleHandler;          // #555
+window.modifierRepereEchelle = modifierRepereEchelle;                        // #555
+window.refusRepereEchelle = refusRepereEchelle;                              // #555
+window.optionsRepereEchelle = optionsRepereEchelle;                          // #555
+window.niveauxRangesDeLEchelle = niveauxRangesDeLEchelle;                    // #555
 window.fermerModalImportEchelles = fermerModalImportEchelles;
 window.confirmerEtFermerImportEchelles = confirmerEtFermerImportEchelles;
 window.ouvrirFilePickerImportEchelles = ouvrirFilePickerImportEchelles;
