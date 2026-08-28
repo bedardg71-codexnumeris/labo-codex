@@ -182,7 +182,23 @@ function niveauxOrdonnesDeLEchelle(echelleId = null) {
     var echelle = (typeof obtenirEchelleResolue === 'function')
         ? obtenirEchelleResolue(echelleId)
         : null;
-    var brut = (echelle && Array.isArray(echelle.niveaux)) ? echelle.niveaux : [];
+    return ordonnerNiveauxParPlage((echelle && Array.isArray(echelle.niveaux)) ? echelle.niveaux : []);
+}
+
+/**
+ * Le même ordre, à partir d'un TABLEAU de niveaux déjà en main.
+ *
+ * ⮕ #555. `echelles.js` doit ranger les niveaux d'une échelle qu'il tient
+ * (pour valider les deux repères de maîtrise) sans passer par la résolution :
+ * pendant une écriture, le cache synchrone n'est pas une source fiable, et
+ * relire ce qu'on est en train de modifier invite la course. Recopier le tri
+ * aurait donné deux ordres pouvant diverger — le patron que #529 a défait.
+ *
+ * @param {Array} brut - niveaux tels que saisis
+ * @returns {Array} `[{ code, nom, min, max, rang }]`, `rang` 1 = le plus faible
+ */
+function ordonnerNiveauxParPlage(brut) {
+    brut = Array.isArray(brut) ? brut : [];
 
     // ⚠ `Number('')` vaut ZÉRO, pas NaN : sans ce filtre, une borne laissée vide
     // ferait passer son niveau pour le plancher de l'échelle. Même garde que
@@ -1887,6 +1903,7 @@ window.obtenirTableConversionNiveaux = obtenirTableConversionNiveaux;
 // `liste-evaluations.js` (tri de la colonne « Niveau ») et
 // `evaluation-retroaction.js` (bilan : libellés, défis, progrès).
 window.niveauxOrdonnesDeLEchelle = niveauxOrdonnesDeLEchelle;
+window.ordonnerNiveauxParPlage = ordonnerNiveauxParPlage;
 window.niveauDuCodeDansEchelle = niveauDuCodeDansEchelle;
 window.echellesComparables = echellesComparables;
 window.convertirNiveauEnScore = convertirNiveauEnScore;

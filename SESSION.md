@@ -7,6 +7,78 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 28 AOÛT 2026 (10 h 45) : #555 LOT 1 — UNE ÉCHELLE PORTE
+     ENFIN SES DEUX REPÈRES DE MAÎTRISE.
+
+     ▣ LA DEMANDE, ET CE QUI L'A FAIT NAÎTRE. Après B10a, Grégoire demande de
+       lui rappeler #555. En le lisant, il précise sa pratique — et sa
+       précision REFORME le problème : « ma pratique n'est pas sommative, c'est
+       une pratique alternative fondée sur la maîtrise de standards (PAN-STD).
+       Il ne faut donc pas coder mes choix en dur dans l'application. »
+
+     ▣ CE QUE SA DESCRIPTION A APPORTÉ, ET QUE #555 NE DISAIT PAS. Le mot
+       « maîtrise » recouvrait DEUX choses chez lui :
+       · un CRAN d'échelle (M) — ordinal, se marque sur l'échelle ;
+       · une propriété TEMPORELLE (« pérenne », « pas encore acquise ») — qui ne
+         se lit sur AUCUN niveau : elle se lit sur la RÉPÉTITION. Un M obtenu une
+         fois et un M obtenu trois fois occupent le même cran.
+       ⮕ Le skill `pratiques-notation` documente la seconde côté recherche
+       (Clark : deux démonstrations), et le code en a déjà des traces (« maîtrisés
+       DEPUIS PLUS D'UN ARTEFACT », `identifierPatrons` sur 3 productions).
+       ⮕ **Le repère marque le cran ; la durabilité reste une règle de suivi.**
+       Les mélanger aurait produit un outil qui ment sur l'un ou sur l'autre.
+
+     ▣ LA DÉCISION — question fermée en 3 options : **DEUX repères, pas un.**
+       Sa gradation distingue TROIS états : insuffisant / réel mais non durable
+       / acquis. Une seule frontière aurait forcé « en développement » dans
+       l'une ou l'autre case, et le bilan remis à l'élève aurait dit autre chose
+       que ce qu'il pense.
+
+     ▣ CE QUI A COMMANDÉ LE DÉCOUPAGE. Le lot 1 s'arrête AVANT de brancher le
+       moindre lecteur, et ce n'est pas de la prudence : aucune échelle
+       existante ne porte les repères. Brancher d'abord aurait retiré la
+       fonction chez tout le monde, Grégoire compris. ⮕ Ce qui débloque le lot 2
+       est donc une action de LUI, pas de moi.
+
+     ▣ TROIS CHOIX DE MODÈLE, ET LEUR MOTIF
+       · Les repères vivent sur l'ÉCHELLE, pas sur ses niveaux — un marqueur par
+         niveau autoriserait zéro marque, ou trois.
+       · L'ÉGALITÉ est permise : les deux sur le même niveau = le modèle à une
+         frontière, sans champ de plus. Le modèle à deux contient celui à une.
+       · Le VIDE retire la clé au lieu d'écrire une chaîne creuse : une clé
+         présente et vide se lit « défini », et c'est faux.
+
+     ▣ CE QUE L'EXPLORATION A TROUVÉ, ET QUI VAUT POUR LA SUITE. `index.html`
+       porte **DEUX `id="tableauNiveaux"`**, le premier dans un bloc
+       « Conteneurs cachés ». `getElementById` rend le premier :
+       **`afficherTableauNiveaux` écrit dans un conteneur CACHÉ**, et le bouton
+       « Enregistrer » de l'ANCIEN SYSTÈME est sans effet. Le dépôt le
+       documentait déjà (note #524) ; c'est #520, et le doublon d'id est #481.
+       ⮕ Rien n'a été branché là. Trois éditeurs coexistent, un seul est vivant.
+
+     ▣ `ordonnerNiveauxParPlage` EXTRAIT de `niveauxOrdonnesDeLEchelle` (#575) :
+       `echelles.js` devait ranger des niveaux qu'il tient EN MAIN pour valider
+       les repères. Relire par la résolution pendant une écriture, c'était lire
+       un cache synchrone en pleine transaction ; recopier le tri, c'était deux
+       ordres pouvant diverger. L'extraction est un no-op vérifié (42/42).
+
+     ▣ LES DEUX BANCS, ET POURQUOI DEUX. Le banc unitaire (12 cas, 11 mutations,
+       11 rouges) EXÉCUTE les refus — leçon de #524, où une validation existait
+       bel et bien, sur un chemin mort. La spec WebKit (4 mutations, 4 rouges)
+       prouve le RENDU : les deux listes, dans l'ordre des plages, SOUS les
+       niveaux, et l'aperçu qui nomme la zone. ⮕ Écrite en spec et non en porte
+       terrain — règle 1 du skill `portes-terrain`, et la leçon de la nuit :
+       Vitest tourne dans `node` et ne voit pas le rendu.
+
+     ▣ MESURE FINALE, LUE APRÈS LE DERNIER CHANGEMENT : **Vitest 3808/3808,
+       357 fichiers** — zéro rouge. **Playwright : 196 passées**, suite complète.
+       Anti-cache : `echelles.js` e→f, `profil-etudiant-calculs.js` i→j, sur le
+       jour du BUILD. Version inchangée (1.104.1 / `0827-1418`) : session
+       `file://` de Grégoire ouverte.
+     ===================================================================== -->
+
+
+<!-- =====================================================================
      SESSION — 28 AOÛT 2026 (9 h, suite) : B10 EST SCINDÉ, ET SA MOITIÉ
      « ORDRE » EST LIVRÉE. #575 n'attend plus que la décision #555.
 

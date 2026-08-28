@@ -25,6 +25,78 @@
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
 | **Dernière mise à jour** | **28 août 2026, 07 h 45** — **#575 (lot 4 du plan SOLO) est FINI sauf B10, et #576 est LIVRÉ.** Porte terrain relevée par Grégoire : **10/12, 2 échecs, tous deux traités**. **Vitest 3780/3780** (355 fichiers), lu après le dernier changement. **Aucun bump** : sa session `file://` était ouverte — les `?v=` touchés portent le jour du build (0827). Avant : 27 août 22 h 40, ouverture de #575 et quatre premiers pas. |
 
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 28 août 2026, 10 h 45
+
+### 🔴 UNE ACTION DE GRÉGOIRE BLOQUE LA SUITE — À LIRE EN PREMIER
+
+**#555 lot 1 est livré : une échelle peut enfin porter ses deux repères de maîtrise.** Mais
+**aucune échelle existante ne les porte**, et **aucun lecteur n'est branché** tant qu'elles ne
+les portent pas. Brancher avant retirerait la fonction chez tout le monde, Grégoire compris.
+
+⮕ **Ce qui est dû par lui, et par personne d'autre** : ouvrir chacune de ses échelles et poser
+« Suffisant à partir de » et « Maîtrisé à partir de ». Sur son échelle IDME, il a déjà dit
+lesquels : **D** et **M**.
+
+### ✅ #555 — LA DÉCISION D'ARCHITECTURE EST PRISE : DEUX REPÈRES, PAS UN
+
+Question fermée en 3 options, tranchée par Grégoire le 28 août. **Son motif, et il commande tout
+le reste** : sa gradation PAN-Standards distingue **trois** états, pas deux.
+
+| Zone | Chez lui | Ce que la rétroaction en dit |
+|---|---|---|
+| sous le seuil de suffisance | I | priorité |
+| entre les deux | D — « maîtrisé, **mais en développement** », non durable | signalé, pas prioritaire |
+| au seuil de maîtrise et au-dessus | M, E | acquis |
+
+⮕ **Une seule frontière aurait forcé « en développement » dans l'une ou l'autre case**, et le
+bilan remis à l'élève aurait dit autre chose que ce qu'il pense.
+
+⮕ **ET UNE DISTINCTION À NE PAS PERDRE** : dans ses mots, « maîtrise **durable** » recouvre DEUX
+choses que le mot confond. Un **cran d'échelle** (M) — ordinal, ça se marque sur l'échelle, c'est
+ce que le lot 1 livre. Et une **propriété temporelle** — « pérenne », « pas encore acquise » —
+qui ne se lit sur AUCUN niveau : elle se lit sur la **répétition**. Un M obtenu une fois et un M
+obtenu trois fois occupent le même cran et ne disent pas la même chose. Le skill
+`pratiques-notation` le documente côté recherche (Clark exige deux démonstrations), et le code en
+a déjà des traces : « tous les critères sont maîtrisés **depuis plus d'un artefact** »,
+`identifierPatrons` sur trois productions. ⮕ **Ne pas les mélanger dans un même champ** : le
+repère marque le cran, la durabilité reste une règle de suivi.
+
+### ✅ CE QUE LE LOT 1 A LIVRÉ
+
+`echelle.seuilSuffisance` / `echelle.seuilMaitrise` — des CODES, portés par **l'échelle** et non
+par ses niveaux (un marqueur par niveau autoriserait zéro marque, ou trois : un état incohérent
+que rien ne rattraperait). **L'égalité est permise** — les deux sur le même niveau = le modèle à
+une frontière, sans champ de plus.
+
+Bloc « Repères de maîtrise » dans l'éditeur vivant, **sous** les niveaux, masqué si l'ordre des
+plages n'est pas lisible. L'aperçu nomme la zone de chaque niveau. Refus : code absent de
+l'échelle ; suffisance au-dessus de la maîtrise (dans les deux sens) ; ordre illisible. Le vide
+**retire** le repère au lieu d'écrire une chaîne creuse — une clé présente et vide se lit
+« défini », et c'est faux.
+
+⚠ **L'éditeur d'échelle NEUVE n'a pas le bloc.** Il écrit dans un tampon avant création ; les
+repères s'y posent après enregistrement. Acceptable, inscrit au lot 2, **pas oublié**.
+
+### ⚠ L'ÉDITEUR D'ÉCHELLE VIVANT EST `#tableauNiveauxEchelle` — l'autre est mort
+
+Vérifié, et le dépôt le documentait déjà (`echelles.js`, note #524) : `index.html` porte **deux**
+`id="tableauNiveaux"`, dont le premier est dans un bloc « Conteneurs cachés pour compatibilité ».
+`getElementById` rend le premier : **`afficherTableauNiveaux` écrit donc dans un conteneur
+caché**, et le bouton « Enregistrer » de l'ANCIEN SYSTÈME est sans effet. C'est #520 au backlog.
+⮕ **Ne rien brancher sur cet écran.** Le doublon d'id relève de #481, laissé en place.
+
+### ⏳ RESTE DU LOT 2, DANS L'ORDRE
+
+1. **Grégoire pose ses repères** (bloquant, voir en tête).
+2. Le **lecteur unique** « zone d'un code » — une seule règle, comme `niveauDuCodeDansEchelle`.
+3. **Brancher** : B10b (6 sites / 14 comparaisons), `evaluation-retroaction.js` (8 lignes / 18).
+   Les deux tests qui CONSTATENT ces comptes rougiront alors : **c'est le signal voulu.**
+4. **Unifier les quatre replis divergents** (`|| 0.70` ×2, `|| 0.75` ×2) — le pas de #555 qui n'a
+   jamais demandé de décision.
+5. L'éditeur d'échelle **neuve**.
+
+---
+
 ## ▶ POUR LA SESSION QUI PREND LE RELAIS — 28 août 2026, 09 h 30
 
 ### ✅ B10 EST SCINDÉ, ET SA MOITIÉ « ORDRE » EST LIVRÉE

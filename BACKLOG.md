@@ -1938,6 +1938,38 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   retirer la branche. Vérifier les consommateurs AVANT de brancher.
 
 - [ ] **#555 — Le seuil de défi : un défaut à 0,70, des replis qui divergent, et la marque de maîtrise absente.**
+  ⮕ **LOT 1 LIVRÉ le 28 août 2026 — LA DÉCISION D'ARCHITECTURE EST PRISE ET LE MODÈLE EXISTE.**
+  Grégoire, sur question fermée en 3 options : **DEUX repères, pas un.** Motif, dans ses mots : sa
+  gradation PAN-Standards distingue **trois** états, pas deux — au-dessous l'apprentissage est
+  insuffisant, entre les deux il est **réel mais non durable** (« maîtrisé, mais en développement »),
+  au-dessus il est acquis. Une seule frontière aurait forcé « en développement » dans l'une ou l'autre
+  case, et la rétroaction remise à l'élève aurait dit autre chose que ce qu'il pense.
+  · **Modèle** : `echelle.seuilSuffisance` et `echelle.seuilMaitrise`, des CODES de niveau, portés par
+    l'ÉCHELLE et non par ses niveaux (un marqueur par niveau autoriserait zéro marque ou trois).
+    **L'égalité est permise** : poser les deux sur le même niveau = le modèle à une frontière, sans
+    champ de plus. **L'absence reste un état légitime et rien n'est deviné** — ni par les lettres, ni
+    par une position, ni par un pourcentage.
+  · **Édition** : bloc « Repères de maîtrise » dans l'éditeur vivant (`#tableauNiveauxEchelle`), SOUS
+    les niveaux (il désigne des niveaux qui doivent déjà exister), masqué si l'ordre des plages n'est
+    pas lisible. L'aperçu nomme la zone de chaque niveau — sans quoi le choix serait un formulaire sans
+    effet visible.
+  · **Validation** : code absent de l'échelle → refus ; suffisance au-dessus de la maîtrise → refus,
+    dans les DEUX sens ; ordre illisible → refus (jamais une devinette) ; le vide RETIRE le repère au
+    lieu d'écrire une chaîne creuse. Écriture par `db.modifier` (#510), refus calculé DANS la
+    transaction.
+  · **`ordonnerNiveauxParPlage`** extrait de `niveauxOrdonnesDeLEchelle` (#575) : `echelles.js` range
+    les niveaux qu'il tient sans recopier la règle ni relire ce qu'il modifie.
+  · Sentinelles : `sentinelle-555-reperes-maitrise-echelle` (12 cas, **11 mutations, 11 rouges**) et
+    `echelle-reperes-maitrise-rendu.spec.js` en **WebKit** (**4 mutations, 4 rouges**) — le rendu ne se
+    prouve pas dans `node`. Fixtures sans aucune lettre d'IDME, saisies dans le désordre.
+  ⏳ **CE QUI RESTE (lot 2)** : (a) **Grégoire doit poser ses repères** sur ses échelles — sans eux
+  aucun lecteur ne peut répondre ; (b) le **lecteur unique** « zone d'un code » ; (c) **brancher les
+  consommateurs** — B10b (6 sites / 14 comparaisons), `evaluation-retroaction.js` (8 lignes / 18) ;
+  (d) **unifier les quatre replis divergents** ci-dessous ; (e) l'éditeur d'échelle NEUVE
+  (`afficherNiveauxNouvelleEchelle`), qui écrit dans un tampon avant création — les repères s'y posent
+  après enregistrement, ce qui est acceptable mais reste à finir.
+  ⚠ **Aucun lecteur n'est branché tant que (a) n'est pas fait** : brancher avant que les échelles
+  portent leurs repères retirerait la fonction chez tout le monde, Grégoire compris.
   Créé le 27 août 2026. C'est le **point de convergence** identifié au §6 de la consigne #552 : cinq
   items butent sur la même chose manquante (#552 clos, #551, #535 clos, #549, pas 3c-3 de #542).
   ⚠ **L'ÉTAT MESURÉ.** `obtenirSeuil('defiSpecifique')` a un défaut à **0,70**
