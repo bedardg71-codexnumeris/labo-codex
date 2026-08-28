@@ -3359,23 +3359,22 @@ function afficherNiveauxEchelle(echelle) {
     if (apercuContainer) {
         // #555 — les deux repères se LISENT dans l'aperçu : sans cela, le choix
         // reste un formulaire dont on ne voit jamais l'effet.
+        // ⮕ #555 lot 2 (b) — LA RÈGLE N'EST PLUS RECOPIÉE ICI. Cet aperçu et
+        // `zoneDuNiveau` répondaient à la même question par deux codes
+        // parallèles ; le second est parti dans `zoneDuCodeDansNiveaux`
+        // (`profil-etudiant-calculs.js`). Ne restent ici que les LIBELLÉS, qui
+        // sont propres à cet écran : on y parle de l'échelle qu'on édite, pas
+        // d'un élève. Règle absente : aucune zone affichée, jamais devinée —
+        // même garde que `niveauxRangesDeLEchelle` juste au-dessus.
         const ranges = niveauxRangesDeLEchelle(echelle);
-        const rangDuCode = (code) => {
-            if (!code) return null;
-            const trouve = ranges.find(n => n.code === String(code).trim().toUpperCase());
-            return trouve ? trouve.rang : null;
+        const LIBELLE_ZONE = { acquis: 'maîtrisé', signale: 'suffisant', priorite: 'à travailler' };
+        const libelleZoneDuCode = (code) => {
+            if (typeof window.zoneDuCodeDansNiveaux !== 'function') return '';
+            return LIBELLE_ZONE[window.zoneDuCodeDansNiveaux(code, ranges, echelle)] || '';
         };
-        const rangSuffisant = rangDuCode(echelle.seuilSuffisance);
-        const rangMaitrise = rangDuCode(echelle.seuilMaitrise);
 
         const apercuHtml = echelle.niveaux.map(niveau => {
-            const rang = rangDuCode(niveau.code);
-            let zone = '';
-            if (rang != null) {
-                if (rangMaitrise != null && rang >= rangMaitrise) zone = 'maîtrisé';
-                else if (rangSuffisant != null && rang >= rangSuffisant) zone = 'suffisant';
-                else if (rangSuffisant != null || rangMaitrise != null) zone = 'à travailler';
-            }
+            const zone = libelleZoneDuCode(niveau.code);
             return `
             <div style="text-align: center; flex: 1; padding: 10px; background: ${niveau.couleur}20; border-radius: 4px; margin: 0 2px;">
                 <strong style="font-size: 1.2rem; color: ${niveau.couleur};">${echapperHtml(niveau.code)}</strong>

@@ -259,6 +259,59 @@ function niveauDuCodeDansEchelle(code, echelleId = null) {
 }
 
 /**
+ * La zone d'un code, à partir de niveaux DÉJÀ rangés et de l'échelle qui les porte.
+ *
+ * ⮕ #555 lot 2 (b) — LA RÈGLE, EXTRAITE DE SON RÉSOLVEUR. Elle était écrite
+ * DEUX fois : ici, pour `zoneDuNiveau` ; et dans l'aperçu de l'éditeur d'échelle
+ * (`echelles.js`), qui la recopiait sous un autre vocabulaire (« maîtrisé »,
+ * « suffisant », « à travailler »). Deux copies d'une même règle finissent par
+ * diverger — c'est exactement le patron des replis `|| 0.70` / `|| 0.75` que ce
+ * même item a passé la journée à défaire.
+ *
+ * ⮕ POURQUOI DES NIVEAUX ET UNE ÉCHELLE, PLUTÔT QU'UN IDENTIFIANT. L'éditeur
+ * tient une échelle en cours de saisie, parfois JAMAIS ENREGISTRÉE : la résoudre
+ * par son id rendrait `null` là où l'utilisateur voit ses niveaux à l'écran.
+ * Même motif que `ordonnerNiveauxParPlage` (#555 lot 1), et même remède.
+ *
+ * Le sens des trois zones et celui de `null` sont documentés sur `zoneDuNiveau`,
+ * juste dessous : c'est le point d'entrée de qui tient un `echelleId`.
+ *
+ * @param {string} code - le code dont on cherche la zone
+ * @param {Array} niveauxRanges - `[{ code, rang }]` rangés par `ordonnerNiveauxParPlage`
+ * @param {Object} echelle - l'échelle qui porte `seuilSuffisance` / `seuilMaitrise`
+ * @returns {'priorite'|'signale'|'acquis'|null} `null` = refus de répondre
+ */
+function zoneDuCodeDansNiveaux(code, niveauxRanges, echelle) {
+    if (code == null || String(code).trim() === '') return null;
+    if (!Array.isArray(niveauxRanges) || niveauxRanges.length === 0) return null;
+    if (!echelle) return null;
+
+    var rangDuCode = function (valeur) {
+        if (valeur == null || String(valeur).trim() === '') return null;
+        var cible = String(valeur).trim().toUpperCase();
+        for (var i = 0; i < niveauxRanges.length; i++) {
+            if (niveauxRanges[i].code === cible && niveauxRanges[i].rang != null) {
+                return niveauxRanges[i].rang;
+            }
+        }
+        return null;
+    };
+
+    var rang = rangDuCode(code);
+    if (rang == null) return null;
+
+    var rangMaitrise = rangDuCode(echelle.seuilMaitrise);
+    var rangSuffisance = rangDuCode(echelle.seuilSuffisance);
+
+    // Aucun repère lisible : l'échelle ne dit pas où commence la maîtrise.
+    if (rangMaitrise == null && rangSuffisance == null) return null;
+
+    if (rangMaitrise != null && rang >= rangMaitrise) return 'acquis';
+    if (rangSuffisance != null && rang >= rangSuffisance) return 'signale';
+    return 'priorite';
+}
+
+/**
  * La ZONE d'un code dans son échelle : priorité, signalé, ou acquis.
  *
  * ⮕ #555 lot 2 — LE LECTEUR UNIQUE DE LA MARQUE DE MAÎTRISE. Jusqu'ici, « ce
@@ -302,23 +355,132 @@ function zoneDuNiveau(code, echelleId = null) {
         : null;
     if (!echelle) return null;
 
-    var niveau = niveauDuCodeDansEchelle(code, echelleId);
-    if (!niveau || niveau.rang == null) return null;
+    // La règle vit dans `zoneDuCodeDansNiveaux` ; ici, on ne fait que RÉSOUDRE
+    // l'échelle et lui ranger ses niveaux. #555 lot 2 (b).
+    return zoneDuCodeDansNiveaux(code, niveauxOrdonnesDeLEchelle(echelleId), echelle);
+}
 
-    var rangDuRepere = function (valeur) {
-        if (!valeur) return null;
-        var repere = niveauDuCodeDansEchelle(valeur, echelleId);
-        return (repere && repere.rang != null) ? repere.rang : null;
+/* ===============================
+   DIAGNOSTIC — LES DEUX RÉSOLVEURS D'ÉCHELLE SONT-ILS D'ACCORD ?
+   Audit du 28 août 2026 : Rapports/AUDIT-copies-echelle-reperes-2026-08-28.md
+   =============================== */
+
+/**
+ * Diagnostic LECTURE SEULE : combien d'identifiants d'échelle, portés par des
+ * données réelles, les DEUX résolveurs du dépôt traitent-ils différemment ?
+ * N'écrit RIEN (aucun db.set/setSync) — uniquement des lectures + console.
+ * À lancer en console : _diagnostiquerResolutionEchelles()
+ *
+ * ⚠ POURQUOI CE DIAGNOSTIC EXISTE. Le dépôt a DEUX résolveurs, et leur
+ * divergence est CROISÉE — chacun sait ce que l'autre ignore :
+ *
+ *   | capacité                      | obtenirEchelleResolue | resoudreModeleParId |
+ *   |-------------------------------|-----------------------|---------------------|
+ *   | `idOriginal` (échelle importée)| oui                  | NON                 |
+ *   | identifiant `pratique-*`      | oui                   | NON                 |
+ *   | repli pool inter-trimestre    | NON                   | oui                 |
+ *   | refus d'une échelle sans niveaux | oui                | non                 |
+ *
+ * `resoudreModeleParId` n'est appelé pour une ÉCHELLE qu'à deux endroits —
+ * `consolidation.js` (`_detecterEchelle`) et `pratique-registre.js`
+ * (`construireConfigComplete`) — et l'échec ne s'y voit pas de la même façon :
+ * la matrice de consolidation ne calcule alors RIEN (map de conversion vide, un
+ * niveau en lettres rend `null`), et la pratique retombe sur une échelle IDME
+ * codée en dur qui contredit celle de l'utilisateur.
+ *
+ * ⮕ CE QUE CE DIAGNOSTIC TRANCHE, ET QU'AUCUNE LECTURE DE CODE NE PEUT DIRE :
+ * si la divergence touche des données RÉELLES, ou si elle reste théorique.
+ * Réconcilier les deux résolveurs est un chantier ; on ne l'ouvre pas sans ce
+ * chiffre.
+ *
+ * Les DEUX gisements d'identifiants sont examinés, car ils n'ont pas les mêmes
+ * contraintes : le sélecteur d'une PRODUCTION (`peuplerEchellesProduction`) ne
+ * propose que des `echellesTemplates`, tandis que celui d'une ÉVALUATION
+ * (`chargerEchellePerformance`) propose EN PLUS l'échelle de la pratique active,
+ * sous un identifiant `pratique-<id>` que l'auto-save persiste tel quel.
+ *
+ * @returns {{total:number, divergents:Array, parCause:Object, lignes:Array}}
+ */
+function _diagnostiquerResolutionEchelles() {
+    var lireCollection = function (nomCle) {
+        try {
+            var cleReelle = (nomCle === 'productions' && typeof getCleProductions === 'function')
+                ? getCleProductions()
+                : ((typeof cle === 'function') ? cle(nomCle) : nomCle);
+            return db.getSync(cleReelle, []) || [];
+        } catch (e) {
+            return [];
+        }
     };
-    var rangMaitrise = rangDuRepere(echelle.seuilMaitrise);
-    var rangSuffisance = rangDuRepere(echelle.seuilSuffisance);
 
-    // Aucun repère lisible : l'échelle ne dit pas où commence la maîtrise.
-    if (rangMaitrise == null && rangSuffisance == null) return null;
+    var productions = lireCollection('productions');
+    var evaluations = lireCollection('evaluationsSauvegardees');
 
-    if (rangMaitrise != null && niveau.rang >= rangMaitrise) return 'acquis';
-    if (rangSuffisance != null && niveau.rang >= rangSuffisance) return 'signale';
-    return 'priorite';
+    // id -> { productions, evaluations }
+    var usages = {};
+    var recenser = function (liste, champ) {
+        (liste || []).forEach(function (item) {
+            var id = item && item.echelleId;
+            if (!id) return;
+            if (!usages[id]) usages[id] = { productions: 0, evaluations: 0 };
+            usages[id][champ]++;
+        });
+    };
+    recenser(productions, 'productions');
+    recenser(evaluations, 'evaluations');
+
+    var echelles = [];
+    try {
+        echelles = db.getSync((typeof cle === 'function') ? cle('echellesTemplates') : 'echellesTemplates', []) || [];
+    } catch (e) { echelles = []; }
+
+    var lignes = Object.keys(usages).map(function (id) {
+        var parResolue = (typeof obtenirEchelleResolue === 'function')
+            ? !!obtenirEchelleResolue(id) : null;
+        var parRegistre = (typeof resoudreModeleParId === 'function')
+            ? !!resoudreModeleParId('echelle', id) : null;
+
+        // La CAUSE se nomme, elle ne se devine pas : chaque hypothèse est
+        // vérifiée sur les données, et « indéterminée » reste une réponse.
+        var cause = null;
+        if (parResolue !== parRegistre) {
+            var porteuse = echelles.find(function (e) { return e && e.idOriginal === id; }) || null;
+            if (String(id).indexOf('pratique-') === 0) {
+                cause = 'echelle-de-pratique';
+            } else if (porteuse) {
+                cause = 'idOriginal';
+            } else if (parRegistre && !parResolue) {
+                cause = 'pool-inter-trimestre';
+            } else {
+                cause = 'indeterminee';
+            }
+        }
+
+        return {
+            echelleId: id,
+            productions: usages[id].productions,
+            evaluations: usages[id].evaluations,
+            resolueParRetroaction: parResolue,
+            resolueParConsolidation: parRegistre,
+            divergent: parResolue !== parRegistre,
+            cause: cause
+        };
+    });
+
+    var divergents = lignes.filter(function (l) { return l.divergent; });
+    var parCause = {};
+    divergents.forEach(function (l) { parCause[l.cause] = (parCause[l.cause] || 0) + 1; });
+
+    if (typeof console !== 'undefined' && console.table) console.table(lignes);
+    console.log('[Diagnostic résolveurs] ' + lignes.length + ' identifiant(s) d\'échelle porté(s) par des données.');
+    console.log('[Diagnostic résolveurs] DIVERGENTS : ' + divergents.length + (divergents.length ? '' : ' — la divergence est théorique sur ces données.'));
+    divergents.forEach(function (l) {
+        console.log('  · ' + l.echelleId + ' — ' + l.productions + ' production(s), ' + l.evaluations
+            + ' évaluation(s) — rétroaction: ' + l.resolueParRetroaction
+            + ' · consolidation: ' + l.resolueParConsolidation + ' — cause : ' + l.cause);
+    });
+
+    return { total: lignes.length, divergents: divergents, parCause: parCause, lignes: lignes };
 }
 
 /**
@@ -1974,6 +2136,11 @@ window.ordonnerNiveauxParPlage = ordonnerNiveauxParPlage;
 window.niveauDuCodeDansEchelle = niveauDuCodeDansEchelle;
 window.echellesComparables = echellesComparables;
 window.zoneDuNiveau = zoneDuNiveau;                                           // #555 lot 2
+window._diagnostiquerResolutionEchelles = _diagnostiquerResolutionEchelles;   // diagnostic console (audit du 28 août)
+// #555 lot 2 (b) — la règle nue, pour qui tient déjà son échelle plutôt qu'un
+// identifiant : l'aperçu de l'éditeur (`echelles.js`), sur une échelle en cours
+// de saisie que `obtenirEchelleResolue` ne peut pas résoudre.
+window.zoneDuCodeDansNiveaux = zoneDuCodeDansNiveaux;
 window.convertirNiveauEnScore = convertirNiveauEnScore;
 // #542 A3 — consommée par `profil-etudiant-sections-affichage.js` (carte RàI).
 window.diagnostiquerConversionNiveaux = diagnostiquerConversionNiveaux;
