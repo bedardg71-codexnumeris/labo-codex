@@ -86,12 +86,22 @@ patron des bandeaux NON MODAUX. **Aucun changement d'apparence.** Les 4 specs co
 passent, dont `avis-identification-bandeau-508` (visibilité + fermeture). Contrepartie assumée
 et documentée dans le CSS : le texte de l'avis n'est plus sélectionnable.
 
-⚠ **POURQUOI IL N'EST PAS COMMITÉ.** Le hook anti-cache exige que `styles.css?v=` change dans
-`index.html` — or **la session parallèle a déjà fait ce bump (`c` → `d`) dans SON `index.html`
-non commité**, avec sept autres modifications à elle. Stager `index.html` emporterait son
-travail : c'est l'incident que ce fichier documente déjà trois fois. ⮕ **Geste d'attente
-décidé par Grégoire** : ne rien stager ; quand elle aura commité, bumper d'un cran (`d` → `e`)
-et committer `styles.css` + un `index.html` ne portant QUE ce bump.
+✅ **COMMITÉ le 28 août à 07 h 15 (`84661fc8`), APRÈS COORDINATION DIRECTE ENTRE LES DEUX
+SESSIONS** — Grégoire ayant dit « tu peux communiquer avec l'autre session ».
+
+Le blocage : le hook anti-cache exigeait de stager `index.html`, que la session parallèle
+tenait avec ses propres modifications. Stager le fichier entier aurait emporté son travail —
+l'incident que ce fichier documente trois fois. Elle a commité (`e2819cea`) **ses seuls
+hunks**, méthode qu'elle a transmise et qui mérite d'être retenue : reconstruire « HEAD + ses
+changements » dans un fichier à part, `git hash-object -w`, `git update-index --cacheinfo`,
+puis `git commit` **sans chemins** — surtout pas `git commit -- <paths>`, qui repasse en mode
+`--only` et recommite le contenu de l'ARBRE.
+
+⚠ **UNE DE MES PRÉMISSES ÉTAIT FAUSSE, elle l'a corrigée** : le bump `styles.css` `c` → `d`
+n'était pas d'elle. Les quatre jetons orphelins (`styles.css`, `preferences.js`, `accueil.js`,
+`transitions.js`) étaient déjà dans l'arbre, non commités, posés par la session **#508**
+elle-même. Ils sont partis avec `84661fc8` et **referment le rouge `sentinelle-anticache`**
+qui traînait depuis la veille. ⮕ Vitest est repassé à **3767/3767, 354 fichiers, ZÉRO rouge**.
 
 #### Le correctif, en clair — pour qu'il soit reconstructible si l'arbre le perd
 
@@ -113,6 +123,57 @@ traverse, que le bouton de fermeture reste atteignable, et qu'il ferme encore l'
 **2 mutations, 2 rouges** (retirer l'un ou l'autre `pointer-events`). ⚠ Le correctif et sa
 sentinelle doivent partir **dans le même commit** : commiter la spec seule la rendrait rouge
 sur `HEAD` pour quiconque récupère le dépôt.
+
+### 🔴 LE PUSH RESTE BLOQUÉ — UNE SECONDE RÉGRESSION, DANS `e2819cea`
+
+Après le correctif #508, `scripts/pousser.sh` a refusé une deuxième fois, sur une AUTRE spec :
+`evaluation-rendu.spec.js › Chantier I · evaluation rend la rétroaction Bilan`, ligne 197 —
+`expect(resultat.aMentionForce).toBe(true)` reçoit `false`. Les deux assertions voisines
+(`aTitrePresentement`, `aDefi`) passent : **c'est la mention de force, elle seule, qui a
+disparu.**
+
+Mesuré en worktrees, comme pour #508 : ✅ verte à `299afb32`, ❌ rouge à `e2819cea`, rouge
+ensuite par héritage. ⮕ **Elle appartient au chantier n° 10 de la session parallèle**, qui a
+remplacé `_NOMS_NIV_BILAN` / `_ORDRE_NIV_BILAN` par une dérivation depuis l'échelle et ajouté
+un paramètre `niveauDe` à `_rendreForceBilan`. Hypothèse transmise : le montage de la spec ne
+fournit pas d'échelle résolvable, donc plus d'ordre, donc aucun « meilleur » critère — l'ancienne
+table en dur en fournissait un à tout le monde. **Diagnostic envoyé à la session parallèle ;
+correction non engagée de ce côté-ci — c'est son fichier.** ⚠ `86475adf` (#576) ne l'a pas
+réglée : vérifié après coup, la spec est toujours rouge.
+
+⚠ **CE QUE CES DEUX RÉGRESSIONS DISENT, ET QUI VAUT POUR LES DEUX SESSIONS.** Les deux — le
+bandeau #508 et celle-ci — sont passées sous un **Vitest vert** (3767/3767 des deux côtés) et
+n'ont été vues **que par Playwright, au moment du push**. Sur un lot qui touche du RENDU, la
+suite navigateur n'est pas une formalité de fin de course : c'est la seule qui regarde.
+
+### ✅ LES DEUX LECTURES DE B10 SONT COMPATIBLES — VÉRIFIÉ AVEC L'AUTRE SESSION
+
+Point de conception levé par échange direct, le 28 août. **Elle n'a PAS touché B10** :
+`synthese-retroaction-data.js` est intact, toujours bloqué par #555, exactement comme inscrit
+plus haut. Son chantier était le **n° 10** — `evaluation-retroaction.js`, un fichier DIFFÉRENT
+de forme identique : 8 lignes, 18 comparaisons littérales, qu'elle a **toutes laissées**, pour
+la même raison que moi. Ce qu'elle a dérivé de l'échelle : le **rang** (par `min`, puis `max` à
+égalité — le cas des échelles « IDME et niv 0 ») et le **nom** du niveau, qui se lisent sans
+arbitrage. Un test constate le compte de 18 et rougira quand #555 les retirera.
+⮕ **La réserve « B10 bute sur #555 » tient, pour les deux fichiers.**
+
+### ⚠ SON AVERTISSEMENT TERRAIN — VÉRIFIÉ SUR MES QUATRE PAS, SANS EFFET SUR EUX
+
+Elle a créé puis corrigé une garde qui comparait les `echelleId` **BRUTS**. Chez Grégoire,
+l'échelle courante (« IDME et niv 0 (RESTAURÉE) », recréée par la réparation #542) et les
+`echelleId` que portent ses évaluations d'H2026 ne coïncident pas : la ligne « Progrès » ne
+pouvait plus jamais s'afficher. Trouvé par la porte terrain 2.7, sur ses données réelles.
+⮕ **Mes quatre pas ne comparent aucun id brut** (vérifié au grep sur `c85ec85b`) : ils passent
+tous par `obtenirEchelleResolue` (5 appels) et `obtenirEchelleCommuneDesEvaluations` (3), qui
+comparent les échelles **résolues** et traitent une échelle introuvable comme une ABSENCE, pas
+comme un barème concurrent. C'est la règle qu'elle recommande.
+
+### 📌 #576 EST PRIS — prochain ID libre : **#577**
+
+Par elle, le 28 août : « le bilan de rétroaction est VIDE quand la grille d'origine est
+introuvable » (`_chargerGrilleDefBilan` → null, `_collecterCriteresBilan` → [], tout le bilan
+personnalisé disparaît, alors que le panneau Évaluation voisin a un repli explicite).
+Antérieur à nos deux lots, trouvé par la porte 2.6 avec captures.
 
 ### ⚠ DEUX SESSIONS SUR LE MÊME ITEM #575, LE 28 AOÛT AU PETIT MATIN
 
