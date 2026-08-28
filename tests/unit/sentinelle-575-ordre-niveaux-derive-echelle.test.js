@@ -328,6 +328,9 @@ describe('#575 — le rang et le nom d\'un niveau se lisent dans son échelle', 
                 .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')),
             niveauxOrdonnesDeLEchelle: calculs.niveauxOrdonnesDeLEchelle,
             niveauDuCodeDansEchelle: calculs.niveauDuCodeDansEchelle,
+            // #575 B10 — la VRAIE garde extraite, pas un stub : une garde
+            // simulée rendrait ce fichier vert sans rien prouver.
+            echellesComparables: calculs.echellesComparables,
             // ⚠ Le résolveur d'échelle DOIT être injecté : la garde « même
             // échelle » l'appelle. Sans lui, elle se dégrade en « compare
             // toujours » — et le banc mesurait alors le repli, pas la règle.

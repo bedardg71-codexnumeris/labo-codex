@@ -15,8 +15,27 @@
 (function() {
     'use strict';
 
-    // Mapping ordinal IDME pour comparaisons (force, progression, jauge)
-    const ORDRE_NIV = { 'E': 4, 'M': 3, 'D': 2, 'I': 1, '0': 0 };
+    // ⮕ #575 B10 — `ORDRE_NIV = { E:4, M:3, D:2, I:1, '0':0 }` A ÉTÉ SUPPRIMÉE.
+    //
+    // C'était l'ordre de l'échelle de Grégoire, imposé au PDF remis à l'élève.
+    // `ORDRE_NIV[code] || 0` rendait 0 à TOUT LE MONDE hors IDME : les défis ne
+    // se triaient plus (les deux priorités affichées étaient les deux premières
+    // du tableau, pas les deux plus faibles), aucune force ne ressortait, et la
+    // ligne « Progrès » ne pouvait jamais s'afficher — le même défaut, dans le
+    // même document, que celui corrigé le 28 août dans `evaluation-retroaction.js`.
+    //
+    // ⮕ Le rang se lit maintenant dans SON échelle, par `niveauDuCodeDansEchelle`
+    // (`profil-etudiant-calculs.js`) : ordre des PLAGES, `min` croissant, borne
+    // supérieure pour départager — jamais l'ordre de saisie, jamais un repli sur
+    // `valeurCalcul`. Un code que l'échelle ne connaît pas n'a PAS de rang, et
+    // l'appelant le dit plutôt que d'en inventer un.
+    //
+    // ⚠ CE QUI RESTE, ET QUI NE PEUT PAS ÊTRE FAIT ICI : ce module teste encore
+    // les codes EN TOUTES LETTRES — `=== 'I' || === 'D'` pour les défis,
+    // `=== 'M' || === 'E'` pour « tous maîtrisés ». L'ORDRE se dérive d'une
+    // échelle ; « quel niveau est faible » et « quel niveau est maîtrisé », non.
+    // C'est la marque de maîtrise de #555. Le faire sans elle remplacerait un
+    // arbitrage codé en dur par un autre. Même butée que `evaluation-retroaction.js`.
 
     // ⮕ #575 (lot 4 du plan SOLO) — `SCALE_FALLBACK` A ÉTÉ SUPPRIMÉE.
     //
@@ -532,6 +551,60 @@
     const BILAN_INTRO = "Mes standards sont très élevés à ton égard parce que je crois que tu as tout ce qu'il faut pour les atteindre et j'ai confiance en toi. Si tu as besoin d'aide, viens me voir.\nSelon toi, quel aspect de ta production mériterait le plus d'attention ?";
 
     /**
+     * Le rang d'un code dans l'échelle de CETTE évaluation — ou `null`.
+     *
+     * ⮕ #575 B10. Un seul point d'entrée pour les trois comparaisons d'ordre du
+     * bilan (défis, force, progression), pour qu'elles ne puissent pas répondre
+     * différemment à la même question. `null` quand l'échelle ne se résout pas
+     * ou ne connaît pas le code : c'est le principe déclaré en tête de ce module
+     * — donnée absente, section masquée —, jamais un rang de repli.
+     */
+    function lecteurRang(echelleId) {
+        return function (code) {
+            const niveau = (typeof niveauDuCodeDansEchelle === 'function')
+                ? niveauDuCodeDansEchelle(code, echelleId || null)
+                : null;
+            return (niveau && niveau.rang != null) ? niveau.rang : null;
+        };
+    }
+
+    /**
+     * Le niveau le plus haut de l'échelle de cette évaluation — ou `null`.
+     *
+     * ⮕ #575 B10, trouvé en chemin. Le message « tous les critères sont
+     * maîtrisés depuis plus d'un artefact » nommait le niveau visé EN DUR :
+     * « vers le niveau É (transfert à d'autres contextes) ». C'était le nom et
+     * la description SOLO du dernier niveau de l'échelle de Grégoire, écrits
+     * dans un PDF remis aux élèves de qui que ce soit — le défaut même que la
+     * sentinelle jumelle interdit déjà pour la légende et la jauge.
+     *
+     * Le « plus haut » se lit par le rang, donc par les plages : c'est une
+     * dérivation, pas une convention. Sans échelle résolue, `null` — la phrase
+     * s'arrête alors avant la mention, plutôt que de nommer un niveau inventé.
+     *
+     * @returns {Object|null} `{ label, solo }` — `solo` vide si non renseigné.
+     */
+    function niveauLePlusHaut(echelleId, echelle) {
+        const ordonnes = (typeof niveauxOrdonnesDeLEchelle === 'function')
+            ? niveauxOrdonnesDeLEchelle(echelleId || null)
+            : [];
+        if (!ordonnes.length) return null;
+        const sommet = ordonnes[ordonnes.length - 1];
+        const dansEchelle = Array.isArray(echelle)
+            ? echelle.find(n => n.code === sommet.code)
+            : null;
+        const label = sommet.nom || (dansEchelle && dansEchelle.label) || sommet.code;
+        if (!label) return null;
+        return { label: label, solo: (dansEchelle && dansEchelle.solo) || '' };
+    }
+
+    /** Pour un TRI seulement : un niveau illisible se range en dernier. */
+    function rangOuDernier(rangDe, code) {
+        const rang = rangDe(code);
+        return (rang == null) ? Infinity : rang;
+    }
+
+    /**
      * Renvoie le libellé d'un code IDME tel qu'il est défini dans l'échelle
      * utilisateur (ex. "Insuffisant" / "En Développement" / "Maîtrisé"). Si
      * l'échelle ne contient pas ce code, retombe sur le code brut — aucun
@@ -563,9 +636,14 @@
         const criteres = Array.isArray(evaluation.criteres) ? evaluation.criteres : [];
         const grilleCriteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres : [];
 
+        // ⚠ Le FILTRE reste en toutes lettres — « quel niveau est un défi » est la
+        // marque de maîtrise de #555, elle ne se dérive d'aucune échelle. Seul
+        // l'ORDRE, lui, se lit dans l'échelle de l'évaluation.
+        const rangDe = lecteurRang(evaluation.echelleId);
         const defis = criteres
             .filter(c => c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D')
-            .sort((a, b) => (ORDRE_NIV[a.niveauSelectionne] || 0) - (ORDRE_NIV[b.niveauSelectionne] || 0));
+            .sort((a, b) => rangOuDernier(rangDe, a.niveauSelectionne)
+                          - rangOuDernier(rangDe, b.niveauSelectionne));
 
         const patrons = identifierPatrons(criteres, historique);
         // Vérification explicite M/E sur tous les critères : un travail Non recevable
@@ -583,8 +661,12 @@
                 const maitriseLongtemps = historique[0] && Array.isArray(historique[0].criteres) &&
                     historique[0].criteres.length > 0 &&
                     historique[0].criteres.every(c => c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E');
+                const sommet = niveauLePlusHaut(evaluation.echelleId, echelle);
+                const versLeSommet = sommet
+                    ? ` — c'est une excellente façon d'étendre tes compétences vers le niveau ${sommet.label}${sommet.solo ? ` (${sommet.solo})` : ''}.`
+                    : '.';
                 messageGlobal = maitriseLongtemps
-                    ? "Tous les critères sont maîtrisés depuis plus d'un artefact. Tu peux aider tes collègues — c'est une excellente façon d'étendre tes compétences vers le niveau É (transfert à d'autres contextes)."
+                    ? `Tous les critères sont maîtrisés depuis plus d'un artefact. Tu peux aider tes collègues${versLeSommet}`
                     : 'Tous les critères sont maîtrisés. Continue sur cette lancée !';
             }
         }
@@ -629,10 +711,16 @@
     function construireForce(evaluation, echelle) {
         const criteres = Array.isArray(evaluation.criteres) ? evaluation.criteres : [];
         if (!criteres.length) return '';
+        // Un critère dont le niveau ne se lit pas dans l'échelle n'est la force de
+        // personne : il ne peut pas devenir le meilleur, et si AUCUN ne se lit,
+        // la ligne ne s'affiche pas. Avant, tous étaient à 0 et le premier du
+        // tableau gagnait — l'ordre de saisie décidait de « ta force ».
+        const rangDe = lecteurRang(evaluation.echelleId);
         const meilleur = criteres.reduce((acc, c) => {
-            const o = ORDRE_NIV[c.niveauSelectionne] || 0;
-            const oAcc = acc ? (ORDRE_NIV[acc.niveauSelectionne] || 0) : -1;
-            return o > oAcc ? c : acc;
+            const rang = rangDe(c.niveauSelectionne);
+            if (rang == null) return acc;
+            const rangAcc = acc ? rangDe(acc.niveauSelectionne) : null;
+            return (rangAcc == null || rang > rangAcc) ? c : acc;
         }, null);
         if (!meilleur) return '';
         if (meilleur.niveauSelectionne !== 'M' && meilleur.niveauSelectionne !== 'E') return '';
@@ -673,12 +761,37 @@
         return `Français : ${total} erreur${total > 1 ? 's' : ''}${nomPrinc ? ` (principalement : ${nomPrinc})` : ''}`;
     }
 
+    /**
+     * La ligne « Progrès » et la tendance du parcours.
+     *
+     * ⮕ #575 B10, et c'est ICI que la porte terrain 2.7 du 28 août aurait frappé
+     * une seconde fois. Comparer deux rangs n'a de sens que si les deux
+     * évaluations parlent du MÊME barème : le 3e niveau d'une échelle à cinq et
+     * le 3e d'une échelle à trois ne disent pas la même chose. La garde est
+     * `echellesComparables` (`profil-etudiant-calculs.js`) — l'échelle RÉSOLUE,
+     * jamais l'id désigné, sans quoi une échelle restaurée sous un identifiant
+     * neuf passerait pour un autre barème et effacerait la ligne chez tout le
+     * monde. Une échelle absente ou introuvable est une ABSENCE, pas un barème
+     * concurrent : on lit alors dans l'échelle courante.
+     */
     function construireProgressionResume(evaluation, evalPrecedente, historique) {
         const result = { message: '', tendance: '' };
         if (!evalPrecedente || !evaluation.niveauFinal || !evalPrecedente.niveauFinal) return result;
 
-        const ordreAct = ORDRE_NIV[evaluation.niveauFinal] || 0;
-        const ordrePre = ORDRE_NIV[evalPrecedente.niveauFinal] || 0;
+        const echelleId = evaluation.echelleId;
+        const rangDe = lecteurRang(echelleId);
+        // Repli restrictif : sans le lecteur, on ne peut pas savoir si les rangs
+        // sont comparables, et on n'annonce pas un progrès qu'on n'a pas mesuré.
+        const comparable = (e) => (typeof echellesComparables === 'function')
+            && echellesComparables(e && e.echelleId, echelleId);
+
+        if (!comparable(evalPrecedente)) return result;
+
+        const ordreAct = rangDe(evaluation.niveauFinal);
+        const ordrePre = rangDe(evalPrecedente.niveauFinal);
+        // Un code étranger à l'échelle n'a pas de place dans son ordre : pas de
+        // progrès annoncé, plutôt qu'un progrès mesuré sur un rang inventé.
+        if (ordreAct == null || ordrePre == null) return result;
         if (ordreAct < ordrePre) return result; // pas de signal de régression dans l'ancien code
 
         if (ordreAct > ordrePre) {
@@ -686,8 +799,16 @@
             result.message = `Progrès : ${evalPrecedente.niveauFinal} → ${evaluation.niveauFinal} depuis ${prodPrec}`;
         }
 
-        if (historique.length >= 2) {
-            const niveaux = [ordreAct].concat(historique.map(h => ORDRE_NIV[h.niveauFinal] || 0));
+        // Même exigence sur le parcours : une évaluation d'un autre barème, ou
+        // dont le code ne se lit pas, sort de la moyenne au lieu d'y entrer à 0
+        // — ce que faisait `ORDRE_NIV[…] || 0`, qui tirait la tendance vers le bas.
+        const rangsAnterieurs = historique
+            .filter(comparable)
+            .map(h => rangDe(h.niveauFinal))
+            .filter(rang => rang != null);
+
+        if (rangsAnterieurs.length >= 2) {
+            const niveaux = [ordreAct].concat(rangsAnterieurs);
             const moitie = Math.floor(niveaux.length / 2);
             if (moitie > 0) {
                 const moyR = niveaux.slice(0, moitie).reduce((s, v) => s + v, 0) / moitie;
