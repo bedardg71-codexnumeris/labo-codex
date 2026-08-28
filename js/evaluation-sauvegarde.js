@@ -971,14 +971,42 @@ function gererChangementCheckboxJetonRepriseCiblee() {
             checkbox.checked = false;
         }
     } else {
-        // Retirer le jeton (TODO: implémenter si nécessaire)
+        // #563 — LA CASE NE MENT PLUS.
+        //
+        // Cette branche était un TODO vide : la case se décochait, le jeton
+        // restait appliqué, et rien ne le disait. L'utilisateur croyait avoir
+        // retiré un jeton qui était toujours là.
+        //
+        // Le retrait n'est PAS implémenté, et ce n'est pas un oubli qu'on comble
+        // en passant : `retirerJetonRepriseCiblee` n'existe nulle part, et défaire
+        // une reprise ciblée signifie supprimer l'évaluation qu'elle a créée.
+        // Le pendant pour la reprise normale (`retirerJetonReprise`) est une
+        // opération à confirmations multiples avec risque de perte de note
+        // (#141, #360) — c'est une décision de conception, pas un correctif.
+        //
+        // En attendant cette décision : on remet la case dans l'état RÉEL des
+        // données et on dit pourquoi. Mieux vaut un refus explicite qu'un
+        // acquiescement faux.
+        checkbox.checked = true;
+        notifications.info(
+            'Retrait non disponible',
+            'Le jeton de reprise ciblée ne peut pas être retiré depuis cette case : sa reprise a créé une évaluation. Passe par la liste des évaluations.'
+        );
     }
 }
 
 /**
  * Retire un jeton depuis la barre latérale (pendant l'édition)
+ *
+ * #563 : le JSDoc annonçait trois types, le code n'en a jamais géré que deux —
+ * 'reprise-ciblee' tombait dans le vide, sans `else` ni message. Documenté tel
+ * qu'il EST, avec le manque nommé plutôt que suggéré.
+ *
  * @param {string} evaluationId - ID de l'évaluation
- * @param {string} typeJeton - Type de jeton à retirer ('reprise', 'delai', ou 'reprise-ciblee')
+ * @param {string} typeJeton - 'reprise' ou 'delai'. 'reprise-ciblee' n'est PAS
+ *   pris en charge : `retirerJetonRepriseCiblee` n'existe pas, et défaire une
+ *   reprise ciblée suppose de supprimer l'évaluation qu'elle a créée — décision
+ *   de conception ouverte, cf. la branche de `gererChangementCheckboxJetonRepriseCiblee`.
  */
 function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
 
@@ -1003,6 +1031,12 @@ function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
             console.error('❌ Fonction retirerJetonDelai non disponible');
             notifications.erreur('Erreur', 'Module jetons non disponible');
         }
+    } else {
+        // #563 — 'reprise-ciblee' arrivait ici et repartait sans rien faire ni
+        // rien dire. Le type n'est pas pris en charge : autant que l'appelant et
+        // l'utilisateur l'apprennent, plutôt qu'un silence qui passe pour un succès.
+        console.warn('[Jetons] Retrait non pris en charge pour le type : ' + typeJeton);
+        notifications.info('Retrait non disponible', 'Ce type de jeton ne peut pas être retiré ici.');
     }
 }
 

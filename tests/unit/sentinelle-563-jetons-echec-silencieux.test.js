@@ -1,0 +1,128 @@
+import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { chargerScript } from './_helpers/charger-script.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const racineProjet = path.resolve(__dirname, '..', '..');
+
+// #563 (28 août 2026) — deux défauts, dont un seul était corrigeable aujourd'hui.
+//
+// LES ÉCHECS SILENCIEUX (traité). Les six écritures d'`evaluation-jetons.js`
+// n'examinaient jamais le retour de `sauvegarderDonneesSelonMode`, qui rend
+// `false` en mode anonymisation comme sur erreur de stockage. Le jeton n'était
+// pas enregistré, mais l'interface se mettait à jour comme si tout allait bien :
+// badges, notification de succès, rafraîchissement de la liste. Au rechargement,
+// le jeton avait disparu sans que personne n'ait rien vu passer.
+//
+// LA CASE QUI MENT (garde-fou seulement). Décocher « Reprise ciblée » tombait
+// dans un TODO vide : la case se décochait, le jeton restait. Le retrait n'est
+// PAS implémenté — `retirerJetonRepriseCiblee` n'existe nulle part, et défaire
+// une reprise ciblée suppose de supprimer l'évaluation qu'elle a créée. Le
+// pendant pour la reprise normale est une opération à confirmations multiples
+// avec risque de perte de note (#141, #360) : décision de conception, pas
+// correctif. En attendant, la case revient à l'état RÉEL des données et le dit.
+//
+// Break-tests (à faire rougir AVANT de faire confiance à cette sentinelle) :
+//   1. rendre son appel nu à un des six sites → « aucune écriture nue » rougit.
+//   2. faire rendre `true` au helper quoi qu'il arrive → « l'échec est propagé »
+//      et « l'échec est dit » rougissent.
+//   3. remettre `checkbox.checked = false` dans la branche de décochage
+//      → « la case revient à l'état réel » rougit.
+
+function sansCommentaires(txt) {
+    return txt.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+}
+
+const srcJetons = readFileSync(path.join(racineProjet, 'js', 'evaluation-jetons.js'), 'utf8');
+const srcSauvegarde = readFileSync(path.join(racineProjet, 'js', 'evaluation-sauvegarde.js'), 'utf8');
+
+function monter({ ecritureRefusee }) {
+    const erreurs = [];
+    const evaluations = [
+        { id: 'E1', etudiantDA: '111', productionId: 'P1', jetonDelaiApplique: true, delaiAccorde: true }
+    ];
+    const stubs = {
+        db: { get: async () => null, getSync: () => evaluations, set: async () => {}, setSync: () => {} },
+        cle: (k) => k,
+        echapperHtml: (s) => String(s == null ? '' : s),
+        obtenirDonneesSelonMode: () => evaluations,
+        // Le cœur du test : l'écriture est REFUSÉE, comme en mode anonymisation.
+        sauvegarderDonneesSelonMode: () => !ecritureRefusee,
+        obtenirPreference: () => null,
+        notifications: {
+            erreur: (titre, msg) => erreurs.push(titre + ' | ' + msg),
+            succes: () => {}, info: () => {}
+        }
+    };
+    const win = chargerScript('js/evaluation-jetons.js', stubs, {
+        addEventListener: () => {}, removeEventListener: () => {}
+    });
+    return { win, erreurs, evaluations };
+}
+
+describe('#563 · une écriture de jeton refusée ne passe plus pour un succès', () => {
+    it('l’échec est PROPAGÉ à l’appelant (retour false)', () => {
+        const { win } = monter({ ecritureRefusee: true });
+        expect(win.retirerJetonDelai('E1')).toBe(false);
+    });
+
+    it('l’échec est DIT à l’utilisateur, pas seulement journalisé', () => {
+        const { win, erreurs } = monter({ ecritureRefusee: true });
+        win.retirerJetonDelai('E1');
+        expect(erreurs).toHaveLength(1);
+        expect(erreurs[0]).toContain('Modification non enregistrée');
+        expect(erreurs[0]).toContain('anonymisation');
+    });
+
+    it('contrôle : écriture acceptée → succès, aucune alarme (garde ciblée)', () => {
+        const { win, erreurs } = monter({ ecritureRefusee: false });
+        expect(win.retirerJetonDelai('E1')).toBe(true);
+        expect(erreurs).toHaveLength(0);
+    });
+
+    it('aucune écriture nue ne subsiste dans le module', () => {
+        const nu = sansCommentaires(srcJetons);
+        // Toute persistance doit passer par le point unique, qui examine le retour.
+        expect(nu).not.toMatch(/^\s*sauvegarderDonneesSelonMode\('evaluationsSauvegardees'/m);
+        // Et le point unique doit bien exister et examiner ce retour.
+        expect(nu).toContain('function _persisterEvaluationsJetons');
+        const corps = nu.slice(nu.indexOf('function _persisterEvaluationsJetons'));
+        expect(corps.slice(0, 600)).toContain('if (!ok)');
+    });
+});
+
+describe('#563 · la case « Reprise ciblée » ne ment plus quand on la décoche', () => {
+    it('la branche de décochage n’est plus vide', () => {
+        const nu = sansCommentaires(srcSauvegarde);
+        const pos = nu.indexOf('function gererChangementCheckboxJetonRepriseCiblee');
+        expect(pos, 'la fonction doit exister').toBeGreaterThan(-1);
+        const corps = nu.slice(pos, nu.indexOf('\n}', pos));
+        // L'ancien défaut : un `else { }` sans rien dedans.
+        expect(corps).not.toMatch(/else\s*\{\s*\}\s*$/);
+    });
+
+    it('la case revient à l’état RÉEL des données, et le dit', () => {
+        const nu = sansCommentaires(srcSauvegarde);
+        const pos = nu.indexOf('function gererChangementCheckboxJetonRepriseCiblee');
+        const corps = nu.slice(pos, nu.indexOf('\n}', pos));
+        // Le jeton est toujours appliqué : la case doit repasser à true.
+        expect(corps).toContain('checkbox.checked = true');
+        expect(corps).toContain('notifications.info');
+    });
+
+    it('le type non pris en charge est nommé au lieu de tomber dans le vide', () => {
+        const nu = sansCommentaires(srcSauvegarde);
+        const pos = nu.indexOf('function retirerJetonDepuisSidebar');
+        expect(pos, 'la fonction doit exister').toBeGreaterThan(-1);
+        const corps = nu.slice(pos, nu.indexOf('\n}', pos));
+        expect(corps).toContain('notifications.info');
+    });
+
+    it('le retrait de reprise ciblée reste ABSENT — et l’item doit rester ouvert', () => {
+        // Verrou d'honnêteté : si quelqu'un écrit un jour cette fonction, ce test
+        // rougit et force à relire l'item plutôt qu'à le croire clos.
+        expect(sansCommentaires(srcJetons)).not.toContain('function retirerJetonRepriseCiblee');
+    });
+});

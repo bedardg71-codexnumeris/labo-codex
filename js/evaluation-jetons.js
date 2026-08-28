@@ -215,6 +215,32 @@ function verifierDisponibiliteJeton(da, type) {
     return false;
 }
 
+/**
+ * #563 — Persiste les évaluations et DIT si l'écriture a été refusée.
+ *
+ * `sauvegarderDonneesSelonMode` rend `false` en mode anonymisation (écriture
+ * bloquée) comme sur erreur de stockage. Les six sites d'écriture de ce module
+ * ignoraient ce retour : le jeton n'était pas enregistré, mais l'interface se
+ * mettait à jour comme si tout allait bien — badges, notification de succès,
+ * rafraîchissement de la liste. Au rechargement, le jeton avait disparu sans que
+ * personne n'ait rien vu passer.
+ *
+ * Point de persistance UNIQUE : le prochain site d'écriture n'a plus à se
+ * souvenir d'examiner le retour, il a juste à passer par ici.
+ *
+ * @param {Array} evaluations - Le tableau complet à persister
+ * @param {string} geste - Ce que l'utilisateur croyait faire, pour le message
+ * @returns {boolean} true si l'écriture a bien eu lieu
+ */
+function _persisterEvaluationsJetons(evaluations, geste) {
+    const ok = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+    if (!ok) {
+        console.warn('[Jetons] Écriture refusée — ' + geste);
+        notifications.erreur('Modification non enregistrée', geste + " : l'écriture est bloquée (mode anonymisation).");
+    }
+    return ok;
+}
+
 /* ===============================
    JETON DE DÉLAI
    =============================== */
@@ -271,7 +297,7 @@ function appliquerJetonDelai(evaluationId) {
     }
 
     // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
-    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+    if (!_persisterEvaluationsJetons(evaluations, 'Application du jeton de délai')) return false;
 
 
     // Mettre à jour evaluationEnCours si c'est l'évaluation active
@@ -323,7 +349,7 @@ function retirerJetonDelai(evaluationId) {
     delete evaluation.dureeDelaiJours;
 
     // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
-    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+    if (!_persisterEvaluationsJetons(evaluations, 'Retrait du jeton de délai')) return false;
 
 
     // Mettre à jour evaluationEnCours si c'est l'évaluation active
@@ -464,7 +490,7 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options
     evaluations.push(nouvelleEvaluation);
 
     // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
-    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+    if (!_persisterEvaluationsJetons(evaluations, 'Application du jeton de reprise')) return null;
 
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -589,7 +615,7 @@ function retirerJetonReprise(evaluationId) {
     }
 
     // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
-    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+    if (!_persisterEvaluationsJetons(evaluations, 'Retrait du jeton de reprise')) return false;
 
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -882,7 +908,7 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
     evaluations.push(nouvelleEvaluation);
 
     // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
-    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+    if (!_persisterEvaluationsJetons(evaluations, 'Application du jeton de reprise ciblée')) return null;
 
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -918,7 +944,7 @@ function nettoyerEvaluationsRepriseCiblee() {
     });
 
     if (nbNettoyees > 0) {
-        sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+        if (!_persisterEvaluationsJetons(evaluations, 'Nettoyage des reprises ciblées')) return nbNettoyees;
 
         // Rafraîchir la liste
         if (typeof initialiserListeEvaluations === 'function') {
