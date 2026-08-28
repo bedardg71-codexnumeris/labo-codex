@@ -3,7 +3,145 @@
      CHANTIER D'ENSEMBLE — STABILITÉ MI-AOÛT (CoP / expérimentateurs).
      ⮕ Plan d'ensemble mi-août (3 paliers, porteurs Claude Code vs Grégoire, 6 décisions à trancher §9) : `plans de travail/PLAN-mi-aout-2026.md` (28 juin 2026).
      #326 (réactivation du comparateur, « bloqueur CoP » n°1) = CLOS le 28 juin (release 1.26.0).
-     ⮕ ÉTAT AU 3 JUILLET 2026 SOIR (VAGUE 3 CLOSE + **MERGÉE MAIN ET DÉPLOYÉE — décision Grégoire du 3 juillet, release 1.27.2**, branche `claude/relais-vague-3-etat-n3owyf` fast-forwardée dans `main` : les 3 vagues 1.27.0/1.27.1/1.27.2 sont EN PRODUCTION ; le point « MERGER en août » du signet est donc RÉGLÉ, les validations TERRAIN restent dues) : bilan factuel des vagues 1-2 = TABLEAU dans le bloc « 3 juillet » ci-dessous (12/12 tâches livrées ou closes par écart de prémisse ; AUCUN reliquat 2a) PUIS file 2b ÉPUISÉE : Tâche A #328 = déjà absorbé (vérifié au code, trace consignée) ; Tâche C #118+#283-T1 LIVRÉS (fix CSS overflow) ; Tâche B #363 LIVRÉ (audit currency, 13 écarts corrigés) ; Tâche D #306 LIVRÉ (Lots 1-2-3 ; décision UX « apparition du formulaire » restée ouverte, consignée). Vitest 1257/1257. ⚠ GRÉGOIRE EN CONGÉ TOUT JUILLET, reprise AOÛT. À la reprise (le merge est FAIT — 3 juillet) : validations terrain (#310/#311/#351/#240/#347 + portes vague 1 #313/#344/#361 + vague 2 #355/#305/#121 + vague 3, 2 modes) ; triage des 5 worktrees AVEC `plans de travail/INVENTAIRE-worktrees-2026-07.md` ; #364 T3/T4/T5 ; trancher #365 (audit blanc). ⚠ RESTE SUR LE MAC (seule session locale/Grégoire peut agir) : `rm .git/index.lock .git/HEAD.lock .git/objects/maintenance.lock` ; le commit local `96f1294c` et le BACKLOG #365 du Mac sont OBSOLÈTES (contenu recréé/poussé par les vagues 1-2) ; le fichier relais vague 2 (`RELAIS-2026-07-02-vague-2.md`) n'a jamais été poussé — le committer du Mac si on veut la trace (le relais vague 3 est, lui, versionné ci-dessous).
+     ⮕ ÉTAT AU 3 JUILLET 2026 SOIR (VAGUE 3 CLOSE + **MERGÉE MAIN ET DÉPLOYÉE — décision Grégoire du 3 juillet, release 1.27.2**, branche `claude/relais-vague-3-etat-n3owyf` fast-forwardée dans `main` : les 3 vagues 1.27.0/1.27.1/1.27.2 sont EN PRODUCTION ; le point « MERGER en août » du signet est donc RÉGLÉ, les validations TERRAIN restent dues) : bilan factuel des vagues 1-2 = TABLEAU dans le bloc « 3 juillet » ci-dessous (12/12 tâches livrées ou closes par écart de prémisse ; AUCUN reliquat 2a) PUIS file 2b ÉPUISÉE : Tâche A #328 = déjà absorbé (vérifié au code, trace consignée) ; Tâche C #118+#283-T1 LIVRÉS (fix CSS overflow) ; Tâche B #363 LIVRÉ (audit currency, 13 écarts corrigés) ; Tâche D #306 LIVRÉ (Lots 1-2-3 ; décision UX « apparition du formulaire » restée ouverte, consignée). Vitest 1257/1257. ⚠ GRÉGOIRE EN CONGÉ TOUT JUILLET, reprise AOÛT. À la reprise (le merge est FAIT — 3 juillet) : validations terrain (#310/#311/#351/#240/#347 + portes vague 1 #313/#344/#361 + vague 2 #355/#305/#121 + vague 3, 2 modes) ; triage des 5 worktrees AVEC `plans de travail/INVENTAIRE-worktrees-2026-07.md` ; #364 T3/T4/T5 ; trancher #365 (audit blanc). ✅ **FAIT LE 27 AOÛT 2026 AU SOIR** : `rm .git/index.lock .git/HEAD.lock .git/objects/maintenance.lock` — mais ils étaient REVENUS (datés du 27 août 15 h 46, `git maintenance` crashé) et bloquaient tout commit. ⮕ **Ce point traînait depuis juillet et le 28 juin en portait déjà un : c'est un défaut RÉCURRENT du dépôt, pas une malchance.** À traiter comme tel plutôt qu'à re-nettoyer chaque fois. ; le commit local `96f1294c` et le BACKLOG #365 du Mac sont OBSOLÈTES (contenu recréé/poussé par les vagues 1-2) ; le fichier relais vague 2 (`RELAIS-2026-07-02-vague-2.md`) n'a jamais été poussé — le committer du Mac si on veut la trace (le relais vague 3 est, lui, versionné ci-dessous).
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION — 27 AOÛT 2026 (soir, 21 h 15 → 23 h) : LOT 4 DU PLAN SOLO,
+     OUVERT SOUS #575 ET LIVRÉ À MOITIÉ. Commits `c85ec85b` (code) et
+     `99eed60f` (relais). Aucun bump — session `file://` ouverte.
+
+     ▣ LA DEMANDE. Grégoire : « nous allons apporter les correctifs nécessaires
+       aux problèmes identifiés dans l'audit ». Puis, sur question fermée (4
+       options par TYPE de chantier) : « A — Lot 4 SOLO ». Skills lus à sa
+       demande : `ecosysteme-classe`, `pratiques-notation`, `depistage-rai`.
+
+     ▣ AUDIT FACTUEL D'ENTRÉE. `main` à `f41c6118` (1.104.1, build `0827-1418`),
+       arbre propre, MÊME version que la base auditée. Les CINQ constats porteurs
+       de l'audit re-vérifiés au grep : tous VIVANTS à HEAD. Vitest de départ lu
+       AVANT toute écriture : **3715/3716** — le rouge est
+       `sentinelle-anticache-fichiers-modifies` (preferences.js, transitions.js,
+       styles.css), ANTÉRIEUR et sans rapport.
+
+     ▣ LA DÉCISION QUI A COMMANDÉ LE CHANTIER. Avant de coder B3/B4, grep sur tout
+       le dépôt : `intervention.analyse.defisCommuns` est écrit en base et **lu par
+       AUCUN écran**, depuis sa création (Beta 0.85). `genererAffichageAnalyseCartes`
+       n'affiche que patterns et niveaux RàI. Le besoin est déjà servi, et
+       correctement, par `mettreAJourCriteresCibles` (compteur « — 3/5 en défi »
+       par critère de la GRILLE, via `calculerMoyennesCriteres`). ⮕ Question posée
+       à Grégoire (3 options) : **« supprimer la chaîne morte »**. Réparer aurait
+       été un correctif sans effet — `feedback-verifier-consommateurs-avant-brancher`.
+
+     ▣ CE QUI EST LIVRÉ (4 pas, diff +502 / −556 : le lot RETIRE plus qu'il n'ajoute)
+
+       1. B1+B2+B3+B4 — `defisCommuns`, `obtenirPerformancesSRPNF` (les cinq noms
+          de critères de Grégoire) et `convertirNiveauEnPourcentage` (4e repli IDME
+          32/69,5/79,5/92,5 derrière `echellesPerformance`, clé lue et JAMAIS
+          écrite : le repli n'était pas un filet, c'était le chemin normal).
+          Sentinelle `sentinelle-575-lot4-b1b2-b3b4` (8 cas, 8 mutations, 8 rouges),
+          qui REMPLACE `sentinelle-542-a4-defis-communs` (11 cas) — objet disparu,
+          et son dernier test annonçait ce lot.
+
+       2. `SCALE_FALLBACK` — l'échelle de Grégoire ne part plus dans le **PDF remis
+          à l'élève**. `lireEchelle` résout par `obtenirEchelleResolue` (chemin
+          unique de #542 lot 3, qui connaît l'échelle embarquée d'une pratique
+          configurable — LE cas qui tombait systématiquement sur le repli) et rend
+          `[]` sinon. 7 cas, 6 mutations, 6 rouges. Ce module n'avait AUCUN test.
+
+       3. `determinerLettreIDME` — retirée. Les DEUX blocs du profil lisent leur
+          niveau par `lireNiveauNoteGlobale`, EXTRAIT du site corrigé au pas 3c-1.
+          Le défaut réel était pire qu'une lettre fausse : **le même élève lisait
+          deux niveaux différents pour la même note, sur la même page.**
+          8 cas, 7 mutations, 7 rouges.
+
+       4. Badges + barres — la couleur d'un badge vient du CODE déjà enregistré
+          dans SON échelle (plus de note re-située dans une échelle devinée, qui
+          pouvait CONTREDIRE le code affiché à côté) ; les barres lisent l'échelle
+          COMMUNE des évaluations. 13 cas, 11 mutations, 11 rouges.
+
+     ▣ TROIS TROUVAILLES, NI AU PLAN SOLO NI À L'AUDIT
+
+       · Une **SIXIÈME table IDME** (`_obtenirNiveauxEtGradientSRPNF`,
+         `sections-affichage.js`), jumelle mot pour mot de la cinquième : elle
+         peignait le dégradé et la légende du bloc « Forces et défis » — que
+         l'audit cite en exemple de code proprement configurable (ses CRITÈRES le
+         sont ; ses repères de couleur ne l'étaient pas). Les deux copies sont
+         remplacées par `niveauxEtGradientDesEvaluations`.
+       · Un **SEPTIÈME site** qui devine l'échelle : le graphique de progression
+         (`sections-affichage.js:3400`) et son texte « Zones colorées basées sur
+         l'échelle IDME par défaut ». NON corrigé ; état verrouillé par un test
+         « exactement UNE occurrence restante », qui rougira quand on y touchera.
+       · La moitié du **constat §5.5** (injection CSS) : `couleurSure` était juste
+         mais ENFERMÉE dans une fermeture locale ; badges et barres posaient la
+         couleur utilisateur BRUTE dans un `style`. Extraite en `couleurCssSure`,
+         partagée, testée — elle n'avait aucun test.
+
+     ▣ DEUX SENTINELLES DURCIES APRÈS UN BREAK-TEST **VERT** (le fait de méthode
+       de la session)
+
+       · Comptage des patterns : montage à UN étudiant par pattern → la mutation
+         `= 1` rendait le même objet que le comptage juste. Il fallait DEUX
+         étudiants partageant un pattern pour que l'assertion puisse mordre.
+       · `toContain('calculerMoyennesCriteres')` : satisfait par le nom cité dans
+         un **COMMENTAIRE** du corps de la fonction. C'est le défaut tautologique
+         exact que l'audit reproche à #549 (§4). ⮕ Filtrer les commentaires AVANT
+         d'asserter. Mémoire écrite :
+         `feedback-assertion-statique-filtrer-commentaires`.
+       · Symétrique, mesuré aussi : une assertion TROP large rougit sur du code
+         sain — `nom: 'Incomplet'` attrapait la catégorie de tampons « Incertain /
+         Incomplet / Inexact ». Une garde qui crie à tort finit désarmée.
+
+     ▣ CE QUI N'EST PAS FAIT, ET POURQUOI
+
+       · **B10 BUTE SUR #555.** `synthese-retroaction-data.js` ne compare pas
+         seulement par `ORDRE_NIV` : il teste les codes EN TOUTES LETTRES à SIX
+         endroits (`=== 'I' || === 'D'` pour les défis, `=== 'M' || === 'E'` pour
+         « tous maîtrisés »). L'ordre se dérive d'une échelle ; « faible » et
+         « maîtrisé », non — c'est la marque de maîtrise de #555. Le faire sans
+         elle remplacerait un arbitrage codé en dur par un autre.
+       · Restent faisables tels quels : **B7** (`liste-evaluations.js:368`),
+         **n° 10** (`evaluation-retroaction.js:488`), **n° 11**
+         (`evaluation.js:284` — échelle ancienne où **`I = 3`**, qui contredit IDME).
+
+     ▣ ⚠ RENDU NON VÉRIFIÉ. Trois affichages modifiés — lettre du niveau dans
+       « Développement des habiletés », couleur des badges d'artefacts, barres de
+       critères des deux blocs. L'environnement de test est `node`, sans navigateur.
+       Comportement voulu sans échelle résolue : **pas de lettre, badge neutre,
+       fond de barre neutre, cause au survol** — jamais un repère inventé.
+
+     ▣ ⚠ PLAYWRIGHT NON RELANCÉ, ET LE VERDICT EST PÉRIMÉ.
+       `scripts/.verdict-playwright.json` porte `fbeffdad` ; HEAD est `99eed60f`.
+       **GitHub Desktop était ouvert** (3 processus) — la règle du projet interdit
+       de lancer la suite dans cet état. ⮕ Le hook pré-push refusera tant que le
+       verdict n'est pas régénéré au SHA courant, Desktop fermé.
+
+     ▣ ⚠ TROIS VERROUS GIT ORPHELINS ONT BLOQUÉ TOUT COMMIT — ET CE N'EST PAS UN
+       INCIDENT ISOLÉ. `.git/index.lock`, `.git/HEAD.lock`,
+       `.git/objects/maintenance.lock`, tous vides, datés du 27 août 15 h 45-15 h 46
+       (`git maintenance` crashé). Retirés APRÈS vérification : zéro processus git
+       actif, aucune opération en cours, `lsof` ne montrant qu'un service macOS.
+       ⮕ **Le signet en tête de ce fichier demandait EXACTEMENT le même `rm` depuis
+       JUILLET**, et le 28 juin en portait déjà un. C'est un défaut récurrent du
+       dépôt, pas une malchance : à traiter comme tel (désactiver la maintenance
+       automatique, ou l'inscrire au rituel de début).
+
+     ▣ ⚠ ERRATUM, TROUVÉ PAR LE §4.2 DU RITUEL. Le message de `c85ec85b` annonce
+       « 35 mutations » ; le compte re-dérivé est **32** (8 + 6 + 7 + 11). Les 36
+       cas sont justes, « toutes rouges » est juste, et les quatre comptes PAR
+       SENTINELLE inscrits au BACKLOG sont justes. Seul le total agrégé était faux
+       — recopié sans être recompté, motif exact de
+       `feedback-total-tests-lu-apres-dernier-changement`. RELAIS.md corrigé ;
+       historique NON réécrit (commit non poussé, la décision revient à Grégoire).
+
+     ▣ MESURE FINALE, LUE APRÈS LE DERNIER CHANGEMENT : **Vitest 3740/3741, 353
+       fichiers**. Le seul rouge est l'anti-cache ANTÉRIEUR, et il ne liste aucun
+       fichier de ce lot. Version inchangée (1.104.1 / `0827-1418`, 4 points de
+       vérité synchrones) ; les SEPT `?v=` des fichiers touchés incrémentés, comme
+       #547 le prescrit. Audit sécurité du rituel : aucun motif (ni `eval`, ni
+       handler inline, ni `console.log`, ni zone protégée, ni innerHTML ajouté ;
+       toutes les interpolations neuves passent par `echapperHtml`, et le seul
+       `${gradientCSS}` non échappé est construit de couleurs déjà filtrées par
+       `couleurCssSure` et de nombres).
      ===================================================================== -->
 
 <!-- =====================================================================

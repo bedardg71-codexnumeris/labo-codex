@@ -23,7 +23,7 @@
 | ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE** | **#427** (refermer l'accès public) et **#508** (l'avis d'accueil qui l'annonce). Fiche opératoire prête : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`. **Dû par Grégoire** : la liste nominale des personnes à inviter et les trois noms Cloudflare — personne ne peut les préparer à sa place. |
 | ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. ⮕ **ET C'EST ARRIVÉ UNE SECONDE FOIS LE MÊME JOUR, dans l'autre sens.** Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les `BACKLOG.md` et `SESSION.md` de la session « présences » — l'inscription de l'item **#538** et la renumérotation **#534 → #537** vivent donc dans un commit qui parle d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc non réécrit. **Deux avertissements en un jour : sur ce dépôt, `git add` par chemins explicites n'est pas une préférence, c'est la seule méthode qui tienne.** |
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
-| **Dernière mise à jour** | **27 août 2026, 22 h 40** — **le lot 4 du plan SOLO est ouvert (#575) et à moitié livré** (`c85ec85b`) : quatre pas, 36 cas de sentinelle, 35 mutations toutes rouges. **Vitest 3740/3741, 353 fichiers** — le rouge est l'anti-cache ANTÉRIEUR (`preferences.js`, `transitions.js`, `styles.css`), aucun fichier du lot. Aucun bump (session `file://` ouverte) ; les sept `?v=` touchés sont incrémentés. ⚠ **RENDU NON VÉRIFIÉ.** Avant : **27 août, 15 h 45** — **l'audit Fable 5 est rendu** : `Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md` (base `fbeffdad`, lecture seule, aucun bump). Deux items neufs : **#573** (cartouche remplacée après « Enregistrer », autosave #517 muet) et **#574** (seeds/gabarits d'échelle sans `valeurCalcul` → non calculables depuis #527) ; #542 mis à jour (**lot 4 jamais livré, chiffres faux chez Grégoire**). Avant : rituel de fin du 27 août — lot 3 de #542 REFERMÉ (8 pas) · #550 · #551 pas 1 · 1.104.0 · #552 · #535 · #537 LIVRÉS en 1.104.1 · #553, #554, #555 créés. |
+| **Dernière mise à jour** | **27 août 2026, 22 h 40** — **le lot 4 du plan SOLO est ouvert (#575) et à moitié livré** (`c85ec85b`) : quatre pas, 36 cas de sentinelle, **32 mutations, toutes rouges**. **Vitest 3740/3741, 353 fichiers** — le rouge est l'anti-cache ANTÉRIEUR (`preferences.js`, `transitions.js`, `styles.css`), aucun fichier du lot. Aucun bump (session `file://` ouverte) ; les sept `?v=` touchés sont incrémentés. ⚠ **RENDU NON VÉRIFIÉ.** Avant : **27 août, 15 h 45** — **l'audit Fable 5 est rendu** : `Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md` (base `fbeffdad`, lecture seule, aucun bump). Deux items neufs : **#573** (cartouche remplacée après « Enregistrer », autosave #517 muet) et **#574** (seeds/gabarits d'échelle sans `valeurCalcul` → non calculables depuis #527) ; #542 mis à jour (**lot 4 jamais livré, chiffres faux chez Grégoire**). Avant : rituel de fin du 27 août — lot 3 de #542 REFERMÉ (8 pas) · #550 · #551 pas 1 · 1.104.0 · #552 · #535 · #537 LIVRÉS en 1.104.1 · #553, #554, #555 créés. |
 
 ## ▶ POUR LA SESSION QUI PREND LE RELAIS — 27 août 2026, 22 h 40
 
@@ -57,6 +57,21 @@ doublon aurait été un correctif sans effet. Diff du lot : **+502 / −556**.
    fermeture locale** ; badges et barres posaient la couleur utilisateur BRUTE dans un
    `style`. Extraite en `couleurCssSure`, partagée, testée (elle n'avait aucun test).
 
+### ⚠ ERRATUM SUR LE MESSAGE DE `c85ec85b` — 35 → **32 mutations**
+
+Le message du commit annonce « 36 cas, **35** mutations toutes rouges ». Le compte
+re-dérivé au rituel de fin est **32** (8 + 6 + 7 + 11, un script de break-test par
+sentinelle). Les 36 cas sont justes, « toutes rouges » est juste, et **les quatre comptes
+par sentinelle inscrits au BACKLOG sont justes** (8/8, 6/6, 7/7, 11/11) : c'est le total
+agrégé, et lui seul, qui était faux — recopié sans être re-dérivé.
+
+⮕ Trouvé par le §4.2 du rituel (« confrontation des affirmations au diff »), pas par
+relecture. C'est exactement le motif de `feedback-total-tests-lu-apres-dernier-changement` :
+un chiffre plausible, jamais recompté. **L'historique n'a pas été réécrit** — le commit
+n'est pas poussé, la réécriture reste possible et c'est la décision de Grégoire.
+
+---
+
 ### ⚠ CE QUI RESTE DE #575, ET CE QUI BLOQUE
 
 - **B7** (filtre `['I','D','M','E']`, `liste-evaluations.js:368`), **n° 10** (bilan de
@@ -77,7 +92,7 @@ la **lettre du niveau** dans « Développement des habiletés », les **badges d
 résolue, le comportement voulu est : **pas de lettre, badge neutre, fond de barre neutre,
 cause au survol** — jamais un repère inventé.
 
-### ⚠ TROIS VERROUS GIT ORPHELINS, LE 27 AOÛT À 15 h 45
+### ⚠ TROIS VERROUS GIT ORPHELINS — ET C'EST RÉCURRENT, PAS UN ACCIDENT
 
 `git maintenance` a crashé et laissé `.git/index.lock`, `.git/HEAD.lock` et
 `.git/objects/maintenance.lock` — **tout commit était impossible** jusqu'à leur retrait
@@ -85,6 +100,13 @@ cause au survol** — jamais un repère inventé.
 vieux de sept heures). Si une session retrouve « Unable to create '.git/index.lock' », le
 diagnostic est là : `find .git -name '*.lock'`, vérifier l'âge et l'absence de git actif
 **avant** de retirer quoi que ce soit.
+
+⮕ **CE N'EST PAS LA PREMIÈRE FOIS.** Le signet en tête de `SESSION.md` demandait **exactement
+le même `rm` depuis JUILLET**, et le 28 juin en portait déjà un (« crash git du 28 juin 21:17 »).
+Trois occurrences sur trois mois : le geste de nettoyage est connu, c'est la CAUSE qui ne l'est
+pas. ⮕ **À trancher par Grégoire** : désactiver la maintenance automatique
+(`git config maintenance.auto false`), ou inscrire le contrôle des locks au rituel de DÉBUT de
+session. Re-nettoyer à chaque fois n'est pas une réponse.
 
 ---
 
