@@ -18690,11 +18690,34 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 
 /* Grille d'édition des niveaux d'échelle : 7 colonnes sur desktop,
    empilé sur mobile pour éviter la troncation des champs */
+/* Éditeur d'un niveau d'échelle — HUIT champs : Ordre, Code, Nom, Min, Max,
+   Valeur ponctuelle, Couleur, Niveau SOLO.
+
+   ⚠ LA GRILLE N'EN DÉCLARAIT QUE SEPT (28 août 2026). Le huitième — « Niveau
+   SOLO atteint » — retombait donc dans une SECONDE RANGÉE IMPLICITE, à la
+   colonne 1, large de 60 px : son libellé s'empilait mot par mot sur quatre
+   lignes et sa liste déroulante, en `width: 100%`, était coupée à 60 px. Le
+   défaut se voyait à l'écran depuis que ce champ existe. Signalé par Grégoire
+   sur capture. */
 .echelle-niveau-grille {
     display: grid;
-    grid-template-columns: 60px 60px 2fr 80px 80px 100px 80px;
+    grid-template-columns: 56px 64px minmax(150px, 2fr) 76px 76px 104px 64px minmax(150px, 1fr);
     gap: 12px;
     align-items: end;
+}
+/* Jusqu'à 1280 px — l'iPad Air en paysage en fait partie — huit colonnes ne
+   tiennent plus : la zone principale n'occupe qu'environ 70 % de la fenêtre, et
+   la somme des largeurs minimales dépasserait alors le conteneur, ce qui pousse
+   un débordement horizontal. Mesuré en WebKit, pas estimé. Le SOLO reprend donc
+   la largeur entière : c'est le champ le plus long à nommer, et le seul qui soit
+   facultatif. */
+@media (max-width: 1280px) {
+    .echelle-niveau-grille {
+        grid-template-columns: 56px 64px minmax(140px, 1fr) 76px 76px 104px 64px;
+    }
+    .echelle-niveau-grille > .groupe-form:nth-child(8) {
+        grid-column: 1 / -1;
+    }
 }
 @media (max-width: 640px) {
     .echelle-niveau-grille {
@@ -18706,6 +18729,18 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     .echelle-niveau-grille > .groupe-form:nth-child(3) {
         grid-column: 1 / -1;
     }
+}
+
+/* #555 — les deux repères de maîtrise. Grille PROPRE, et non celle des niveaux :
+   celle-ci est taillée pour huit champs de largeurs très inégales, et ses deux
+   premières colonnes font 56 et 64 px. Deux listes y étaient coupées et leurs
+   libellés empilés mot par mot. La largeur minimale laisse tenir « Suffisant à
+   partir de » sur une seule ligne. */
+.echelle-reperes-grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, max-content));
+    gap: 12px 20px;
+    align-items: end;
 }
 
 /* --- FSAPI Config --- */

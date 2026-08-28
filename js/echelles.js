@@ -3408,7 +3408,7 @@ function blocReperesEchelle(echelle) {
                 quels critères présenter à l'élève comme des priorités.
                 Les poser sur le même niveau revient à n'en avoir qu'un.
             </p>
-            <div class="echelle-niveau-grille">${champs}</div>
+            <div class="echelle-reperes-grille">${champs}</div>
         </div>
     `;
 }
