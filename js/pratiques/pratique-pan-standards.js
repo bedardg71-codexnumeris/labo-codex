@@ -1019,8 +1019,12 @@ class PratiquePANStandards {
      * @returns {Object} { forces[], defis[], principaleForce, principalDefi }
      */
     _diagnostiquerForcesChallenges(moyennes) {
-        // Utiliser seuil configurable (défaut 75%)
-        const seuil = this._obtenirSeuil('defiSpecifique') || 0.75;
+        // Utiliser seuil configurable (défaut 70%, `SEUILS_PAR_DEFAUT`)
+        // #555 lot 2 (28 août 2026) — repli `|| 0.75` retiré : il contredisait la
+        // source (0,70) et `_obtenirSeuil` garantit déjà une valeur. Le « défaut
+        // 75% » de la ligne ci-dessus datait du même malentendu : corrigé aussi,
+        // un commentaire faux survit plus longtemps qu'un repli mort.
+        const seuil = this._obtenirSeuil('defiSpecifique');
 
         if (!moyennes) {
             return {
@@ -1399,14 +1403,23 @@ class PratiquePANStandards {
             return obtenirSeuil(nomSeuil);
         }
 
-        // Sinon, valeurs par défaut
+        // Sinon, valeurs par défaut.
+        // #555 lot 2 (28 août 2026) — `defiSpecifique` valait 0,75 ICI et 0,70
+        // dans `SEUILS_PAR_DEFAUT` (`interpretation-config.js`). Cette table est
+        // un MIROIR de la source, atteignable seulement quand `obtenirSeuil` n'est
+        // pas chargée (cas de test) : elle doit lui être identique, jamais une
+        // seconde convention. Les deux autres valeurs concordaient déjà.
+        // Verrouillé par la sentinelle #555 des replis.
         const seuilsDefaut = {
-            'defiSpecifique': 0.75,
+            'defiSpecifique': 0.70,
             'idme.insuffisant': 0.64,
             'idme.developpement': 0.75
         };
 
-        return seuilsDefaut[nomSeuil] || 0.75;
+        // Un seuil inconnu est une ERREUR d'appel, pas un cas à deviner : rendre
+        // 0,75 au hasard fabriquait une quatrième convention. `undefined` laisse
+        // le défaut échoir à l'appelant plutôt que de mentir sur une valeur.
+        return seuilsDefaut[nomSeuil];
     }
 
     // #435 (9 août 2026) — le « système de comptage d'objectifs » (Beta 95) est
