@@ -73,6 +73,11 @@ function monter({ echelles = ECHELLE() } = {}) {
         echapperHtml: (t) => String(t == null ? '' : t)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'),
         alert: () => {}, confirm: () => true,
+        // `dupliquerEchelle` demande le nom de la copie.
+        prompt: (_q, defaut) => defaut || 'Copie',
+        genererIdUnique: (p) => p + 'COPIE',
+        nommerCopie: (nom) => nom + ' (copie)',
+        BibliothequeUI: new Proxy({}, { get: () => (() => '') }),
         notifications: { succes: () => {}, info: () => {}, avertissement: () => {}, erreur: () => {} },
         echelleTemplateActuelle: null,
         travauxOutils: { renderPickerCouleur: () => '' },
@@ -205,7 +210,43 @@ describe('#555 · une échelle porte ses deux repères de maîtrise', () => {
         expect(codeSeul).not.toMatch(/['"][IDME]['"]/);
     });
 
-    // ── 5. SÉCURITÉ ──────────────────────────────────────────────────────────
+    // ── 5. LES REPÈRES SURVIVENT À UNE DUPLICATION ───────────────────────────
+
+    it('dupliquer une échelle CONSERVE ses deux repères', async () => {
+        // ⚠ TROUVÉ PAR UNE QUESTION DE GRÉGOIRE, pas par une relecture : il a
+        // demandé si ces champs étaient namespacés par trimestre comme les
+        // échelles. Ils le sont — ils vivent DANS l'objet échelle, écrit et lu
+        // par `cle('echellesTemplates')`. Mais la question a fait regarder les
+        // chemins de COPIE, et `dupliquerEchelle` reconstruit l'échelle par une
+        // LISTE BLANCHE de champs : les deux repères y étaient perdus.
+        //
+        // ⚠ La liste blanche est délibérée — un spread emporterait `idOriginal`
+        // et la copie répondrait à l'identifiant de la source (#542). Le prix est
+        // que tout champ métier neuf doit y être ajouté explicitement. Ce cas
+        // existe pour que le prochain oubli rougisse.
+        const { win, store } = monter();
+        await win.modifierRepereEchelle('ECH_TEST_555', 'seuilSuffisance', 'X');
+        await win.modifierRepereEchelle('ECH_TEST_555', 'seuilMaitrise', 'Y');
+
+        await win.dupliquerEchelle('ECH_TEST_555');
+
+        const copie = store['a2026_echellesTemplates'].find((e) => e.id !== 'ECH_TEST_555');
+        expect(copie).toBeTruthy();
+        expect(copie.seuilSuffisance).toBe('X');
+        expect(copie.seuilMaitrise).toBe('Y');
+        // Et elle ne réclame PAS l'identité de la source.
+        expect(copie.idOriginal).toBeUndefined();
+    });
+
+    it('une échelle SANS repères se duplique sans en inventer', async () => {
+        const { win, store } = monter();
+        await win.dupliquerEchelle('ECH_TEST_555');
+        const copie = store['a2026_echellesTemplates'].find((e) => e.id !== 'ECH_TEST_555');
+        expect('seuilSuffisance' in copie).toBe(false);
+        expect('seuilMaitrise' in copie).toBe(false);
+    });
+
+    // ── 6. SÉCURITÉ ──────────────────────────────────────────────────────────
 
     it('un nom de niveau hostile ne sort pas brut dans les options', async () => {
         const { win } = monter({ echelles: [{

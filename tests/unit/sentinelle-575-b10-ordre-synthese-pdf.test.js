@@ -50,6 +50,12 @@ const codeSeul = source
 const ECHELLE_RENVERSEE = {
     id: 'ECH_RENV',
     nom: 'Émergent → Intégré',
+    // #555 lot 2 — les deux repères. Sans eux, `zoneDuNiveau` rend `null` et le
+    // module ne rend RIEN : c'est le comportement voulu, et c'est ce qui a fait
+    // rougir ce fichier au branchement. Ici : E et M sont des priorités,
+    // D est « signalé », I est acquis.
+    seuilSuffisance: 'D',
+    seuilMaitrise: 'I',
     niveaux: [
         { code: 'E', nom: 'Émergent',   min: 0,  max: 59,  valeurCalcul: 40 },
         { code: 'M', nom: 'Mobilisé',   min: 60, max: 74,  valeurCalcul: 67 },
@@ -76,6 +82,8 @@ const ECHELLE_WXYZ = {
 const ECHELLE_SANS_I = {
     id: 'ECH_SANS_I',
     nom: 'Trois paliers aux lettres familières',
+    seuilSuffisance: 'M',
+    seuilMaitrise: 'E',
     niveaux: [
         { code: 'D', nom: 'Départ',   min: 0,  max: 64, valeurCalcul: 50 },
         { code: 'M', nom: 'Milieu',   min: 65, max: 84, valeurCalcul: 75 },
@@ -91,6 +99,23 @@ const ECHELLE_RESTAUREE = {
     idOriginal: 'ECH_WXYZ',
     nom: 'Cotation W-X-Y-Z (restaurée)',
     niveaux: ECHELLE_WXYZ.niveaux
+};
+
+// Deux échelles aux MÊMES codes mais aux repères différents : le seul montage
+// qui distingue « lu dans son échelle » de « lu dans l'échelle courante ».
+const ECHELLE_INDULGENTE = {
+    id: 'ECH_INDULGENTE', nom: 'Maîtrise à partir de X',
+    seuilMaitrise: 'X',
+    niveaux: [
+        { code: 'W', nom: 'Amorce', min: 0, max: 49, valeurCalcul: 30 },
+        { code: 'X', nom: 'Milieu', min: 50, max: 79, valeurCalcul: 65 },
+        { code: 'Y', nom: 'Haut',   min: 80, max: 100, valeurCalcul: 90 }
+    ]
+};
+const ECHELLE_EXIGEANTE = {
+    id: 'ECH_EXIGEANTE', nom: 'Maîtrise à partir de Y',
+    seuilMaitrise: 'Y',
+    niveaux: ECHELLE_INDULGENTE.niveaux
 };
 
 const ECHELLE_TIERS = {
@@ -139,7 +164,9 @@ function chargerData(echelles, evaluationsEnBase) {
         obtenirEchelleResolue: calculs.obtenirEchelleResolue,
         niveauDuCodeDansEchelle: calculs.niveauDuCodeDansEchelle,
         niveauxOrdonnesDeLEchelle: calculs.niveauxOrdonnesDeLEchelle,
-        echellesComparables: calculs.echellesComparables
+        echellesComparables: calculs.echellesComparables,
+        // #555 lot 2 — le VRAI lecteur de zones, pas une doublure.
+        zoneDuNiveau: calculs.zoneDuNiveau
     });
 }
 
@@ -163,73 +190,84 @@ describe('#575 B10 · l\'ordre du bilan remis à l\'élève vient de SON échell
 
     // ── 1. LE TRI DES DÉFIS ──────────────────────────────────────────────────
 
-    it('trie les défis du plus faible au plus fort SELON L\'ÉCHELLE, pas selon IDME', () => {
-        // Dans `ECHELLE_RENVERSEE`, « D » (Développé, 75-84) est PLUS FORT que
-        // « I » (non — « I » y est Intégré, 85-100). Le seul défi lisible comme
-        // « le plus faible » entre D et I est donc D. La table retirée disait
-        // l'inverse : I=1 passait devant D=2.
+    it('trie les priorités du plus faible au plus fort SELON L\'ÉCHELLE, pas selon IDME', () => {
+        // Dans `ECHELLE_RENVERSEE`, « E » (Émergent) est le plus FAIBLE et « M »
+        // (Mobilisé) vient juste au-dessus : les deux sont sous le seuil de
+        // suffisance, donc deux priorités. Attendu : E d'abord.
+        // ⮕ La table retirée disait exactement l'inverse — E=4, M=3.
         const win = chargerData([ECHELLE_RENVERSEE], []);
         const bilan = bilanDe(win, evaluation({
             echelleId: 'ECH_RENV',
-            criteres: [critere('Analyse', 'I'), critere('Plausibilite', 'D')]
+            criteres: [critere('Analyse', 'M'), critere('Plausibilite', 'E')]
         }));
 
-        // Le filtre `I || D` de #555 retient les deux ; c'est l'ORDRE qui est en jeu.
         expect(bilan.concentration.priorites).toHaveLength(2);
         expect(bilan.concentration.priorites[0]).toContain('Plausibilite');
         expect(bilan.concentration.priorites[1]).toContain('Analyse');
     });
 
-    it('un niveau que l\'échelle ne connaît pas se range en DERNIER, pas en premier', () => {
-        // Avant, un code inconnu valait 0 — le rang le plus bas — et devenait la
-        // priorité n° 1 de l'élève. `rangOuDernier` le met en fin de file.
+    it('un code que l\'échelle ne connaît pas n\'entre dans AUCUNE zone', () => {
+        // ⮕ #555 lot 2 a fait disparaître l'objet des deux cas précédents (« un
+        // niveau illisible se range en dernier ») : un code sans zone n'est plus
+        // trié du tout, puisqu'il n'entre ni dans les priorités ni dans les
+        // signalés. Le repli `Infinity` de `rangOuDernier` est devenu
+        // inatteignable et a été retiré avec le lot. Ce qui reste à prouver est
+        // plus fort : un code étranger ne se range nulle part, ni par défaut ni
+        // par hasard.
         const win = chargerData([ECHELLE_RENVERSEE], []);
         const bilan = bilanDe(win, evaluation({
             echelleId: 'ECH_RENV',
-            criteres: [critere('Inconnu', 'D'), critere('Analyse', 'I')]
+            criteres: [critere('Inconnu', 'ZZZ'), critere('Analyse', 'E')]
         }));
-        // 'D' (75-84) et 'I' (85-100) sont tous deux lisibles ici : D d'abord.
-        expect(bilan.concentration.priorites[0]).toContain('Inconnu');
 
-        // Échelle absente : plus AUCUN rang ne se lit, l'ordre d'origine tient et
-        // aucun code n'est promu par un rang inventé.
-        const winSansEchelle = chargerData([], []);
-        const bilanSansEchelle = bilanDe(winSansEchelle, evaluation({
-            echelleId: 'ECH_DISPARUE',
-            criteres: [critere('Premier', 'D'), critere('Second', 'I')]
-        }));
-        expect(bilanSansEchelle.concentration.priorites[0]).toContain('Premier');
+        expect(bilan.concentration.priorites).toHaveLength(1);
+        expect(bilan.concentration.priorites[0]).toContain('Analyse');
+        expect(bilan.concentration.signales).toEqual([]);
+        expect(bilan.concentration.tousMaitrises).toBe(false);
+        expect(bilan.recurrents.force).toBe('');
     });
 
-    it('un défi SANS rang lisible passe DERRIÈRE celui qui en a un', () => {
-        // `ECHELLE_SANS_I` ne connaît pas « I ». Ce critère franchit quand même
-        // la butée #555 (`I || D` = un défi), mais l'échelle ne lui donne aucun
-        // rang : il ne peut pas devenir la priorité n° 1 de l'élève. Avant, un
-        // code inconnu valait 0 — le rang le plus bas — et passait devant tout.
-        const win = chargerData([ECHELLE_SANS_I], []);
+    it('la zone intermédiaire existe : « signalé » n\'est ni une priorité ni un acquis', () => {
+        // La distinction que Grégoire a demandée : « D » est réel mais non
+        // durable. Il sort des priorités remises à l'élève sans devenir un acquis.
+        const win = chargerData([ECHELLE_RENVERSEE], []);
         const bilan = bilanDe(win, evaluation({
-            echelleId: 'ECH_SANS_I',
-            criteres: [critere('SansRang', 'I'), critere('AvecRang', 'D')]
+            echelleId: 'ECH_RENV',
+            criteres: [critere('Analyse', 'E'), critere('Plausibilite', 'D')]
         }));
 
-        expect(bilan.concentration.priorites).toHaveLength(2);
-        expect(bilan.concentration.priorites[0]).toContain('AvecRang');
-        expect(bilan.concentration.priorites[1]).toContain('SansRang');
+        expect(bilan.concentration.priorites).toHaveLength(1);
+        expect(bilan.concentration.priorites[0]).toContain('Analyse');
+        expect(bilan.concentration.signales).toHaveLength(1);
+        expect(bilan.concentration.signales[0]).toContain('Plausibilite');
+        expect(bilan.concentration.tousMaitrises).toBe(false);
     });
 
     // ── 2. « TA FORCE » ──────────────────────────────────────────────────────
 
-    it('« ta force » est le critère le plus haut DE L\'ÉCHELLE', () => {
-        // « M » (Mobilisé, 60-74) et « E » (Émergent, 0-59) sont tous deux
-        // acceptés par la butée #555 (`=== 'M' || === 'E'`). Le plus HAUT des
-        // deux, dans cette échelle, est M. La table retirée choisissait E (=4).
+    it('« ta force » est le critère le plus haut, ET il doit être ACQUIS', () => {
+        // Dans `ECHELLE_RENVERSEE`, « I » (Intégré) est le plus haut et le seul
+        // acquis ; « D » (Développé) est signalé. La table retirée aurait choisi
+        // D — elle donnait I=1 et D=2.
         const win = chargerData([ECHELLE_RENVERSEE], []);
         const bilan = bilanDe(win, evaluation({
             echelleId: 'ECH_RENV',
-            criteres: [critere('Analyse', 'E'), critere('Plausibilite', 'M')]
+            criteres: [critere('Analyse', 'D'), critere('Plausibilite', 'I')]
         }));
         expect(bilan.recurrents.force).toContain('Plausibilite');
         expect(bilan.recurrents.force).not.toContain('Analyse');
+    });
+
+    it('aucune force quand le meilleur critère n\'est que SIGNALÉ', () => {
+        // ⮕ #555 lot 2. « Signalé » est réel mais non durable : l'annoncer comme
+        // une force dirait à l'élève qu'il peut s'en détourner. Avant ce lot, la
+        // seule condition était d'être « M ou E ».
+        const win = chargerData([ECHELLE_RENVERSEE], []);
+        const bilan = bilanDe(win, evaluation({
+            echelleId: 'ECH_RENV',
+            criteres: [critere('Analyse', 'E'), critere('Plausibilite', 'D')]
+        }));
+        expect(bilan.recurrents.force).toBe('');
     });
 
     it('aucune force annoncée quand AUCUN niveau ne se lit dans l\'échelle', () => {
@@ -241,6 +279,65 @@ describe('#575 B10 · l\'ordre du bilan remis à l\'élève vient de SON échell
             criteres: [critere('Analyse', 'M'), critere('Plausibilite', 'E')]
         }));
         expect(bilan.recurrents.force).toBe('');
+    });
+
+    it('« maîtrisés DEPUIS PLUS D\'UN ARTEFACT » lit l\'historique dans SON échelle', () => {
+        // ⚠ Cas trouvé par le BREAK-TEST : lire l'évaluation précédente dans
+        // l'échelle COURANTE laissait la sentinelle verte. Ici, « X » est acquis
+        // sous l'échelle indulgente et ne l'est PAS sous l'exigeante — l'élève a
+        // donc atteint la maîtrise cette fois-ci, mais pas la précédente.
+        const anterieure = evaluation({
+            id: 'EV_ANCIENNE', echelleId: 'ECH_EXIGEANTE', dateEvaluation: '2026-04-01',
+            criteres: [critere('Analyse', 'X')]
+        });
+        const win = chargerData([ECHELLE_INDULGENTE, ECHELLE_EXIGEANTE], [anterieure]);
+        const bilan = bilanDe(win, evaluation({
+            echelleId: 'ECH_INDULGENTE', criteres: [critere('Analyse', 'X')]
+        }));
+
+        expect(bilan.concentration.tousMaitrises).toBe(true);
+        // Lu dans l'échelle exigeante, le passé n'était PAS maîtrisé.
+        expect(bilan.concentration.messageGlobal).toContain('Continue sur cette lancée');
+        expect(bilan.concentration.messageGlobal).not.toContain("depuis plus d'un artefact");
+    });
+
+    it('« tu as progressé » lit l\'état ANTÉRIEUR dans l\'échelle de l\'époque', () => {
+        // ⚠ Second cas trouvé par le break-test, sur la même faute de lecture.
+        // « X » était une PRIORITÉ sous l'échelle exigeante d'alors ; il serait
+        // déjà « acquis » sous l'échelle indulgente d'aujourd'hui. Lire le passé
+        // avec le barème du présent effacerait un progrès réel.
+        const anterieure = evaluation({
+            id: 'EV_ANCIENNE', echelleId: 'ECH_EXIGEANTE', dateEvaluation: '2026-04-01',
+            productionNom: 'Labo 1', niveauFinal: 'X',
+            criteres: [critere('Analyse', 'X')]
+        });
+        const win = chargerData([ECHELLE_INDULGENTE, ECHELLE_EXIGEANTE], [anterieure]);
+        const bilan = bilanDe(win, evaluation({
+            echelleId: 'ECH_INDULGENTE', niveauFinal: 'Y',
+            criteres: [critere('Analyse', 'Y')]
+        }));
+
+        expect(bilan.recurrents.ameliorations).toContain('Analyse');
+    });
+
+    it('passer d\'une priorité à « signalé » n\'est PAS annoncé comme un progrès acquis', () => {
+        // ⚠ COMPORTEMENT D'ORIGINE PRÉSERVÉ, ET C'EST DÉLIBÉRÉ. Avant le lot 2,
+        // la règle était `(I ou D) → (M ou E)` : passer de I à D ne comptait pas.
+        // Traduite en zones, elle devient `priorite → acquis`. Un refactor ne
+        // change pas la règle — et si Grégoire veut que la zone intermédiaire
+        // compte comme un progrès, ce sera une DÉCISION, pas un effet de bord.
+        const anterieure = evaluation({
+            id: 'EV_ANCIENNE', echelleId: 'ECH_RENV', dateEvaluation: '2026-04-01',
+            productionNom: 'Labo 1', niveauFinal: 'E',
+            criteres: [critere('Analyse', 'E')]
+        });
+        const win = chargerData([ECHELLE_RENVERSEE], [anterieure]);
+        const bilan = bilanDe(win, evaluation({
+            echelleId: 'ECH_RENV', niveauFinal: 'D',
+            criteres: [critere('Analyse', 'D')]   // E (priorité) → D (signalé)
+        }));
+
+        expect(bilan.recurrents.ameliorations).toBe('');
     });
 
     // ── 3. LA LIGNE « PROGRÈS » ET LA TENDANCE ───────────────────────────────
@@ -352,14 +449,16 @@ describe('#575 B10 · l\'ordre du bilan remis à l\'élève vient de SON échell
         // Avant : « vers le niveau É (transfert à d'autres contextes) », écrit en
         // dur — le dernier niveau de l'échelle de Grégoire, dans le PDF d'un·e
         // autre. Ici, le plus haut de `ECHELLE_RENVERSEE` est « I / Intégré ».
+        // ⚠ « tous maîtrisés » exige maintenant que TOUTES les zones soient
+        // ACQUISES : seul « I » l'est dans cette échelle.
         const anterieure = evaluation({
             id: 'EV_ANCIENNE', echelleId: 'ECH_RENV', dateEvaluation: '2026-04-01',
-            criteres: [critere('Analyse', 'M'), critere('Plausibilite', 'E')]
+            criteres: [critere('Analyse', 'I'), critere('Plausibilite', 'I')]
         });
         const win = chargerData([ECHELLE_RENVERSEE], [anterieure]);
         const bilan = bilanDe(win, evaluation({
             echelleId: 'ECH_RENV',
-            criteres: [critere('Analyse', 'M'), critere('Plausibilite', 'E')]
+            criteres: [critere('Analyse', 'I'), critere('Plausibilite', 'I')]
         }));
 
         expect(bilan.concentration.tousMaitrises).toBe(true);
@@ -368,7 +467,12 @@ describe('#575 B10 · l\'ordre du bilan remis à l\'élève vient de SON échell
         expect(bilan.concentration.messageGlobal).not.toContain('transfert à d\'autres contextes');
     });
 
-    it('sans échelle résolue, la phrase s\'arrête au lieu de nommer un niveau', () => {
+    it('sans échelle, RIEN n\'est conclu — ni priorité, ni maîtrise, ni force', () => {
+        // ⮕ #555 lot 2 a durci ce cas, et c'est voulu : avant, l'absence
+        // d'échelle laissait quand même le module trancher par les lettres. Une
+        // échelle qui ne se résout pas — ou qui ne porte aucun repère — ne dit
+        // rien, et le bilan ne dit rien non plus. C'est le principe déclaré en
+        // tête du module, appliqué jusqu'au bout.
         const anterieure = evaluation({
             id: 'EV_ANCIENNE', echelleId: 'ECH_DISPARUE', dateEvaluation: '2026-04-01',
             criteres: [critere('Analyse', 'M')]
@@ -378,8 +482,11 @@ describe('#575 B10 · l\'ordre du bilan remis à l\'élève vient de SON échell
             echelleId: 'ECH_DISPARUE', criteres: [critere('Analyse', 'M')]
         }));
 
-        expect(bilan.concentration.messageGlobal).toContain('Tu peux aider tes collègues.');
-        expect(bilan.concentration.messageGlobal).not.toContain('vers le niveau');
+        expect(bilan.concentration.tousMaitrises).toBe(false);
+        expect(bilan.concentration.priorites).toEqual([]);
+        expect(bilan.concentration.signales).toEqual([]);
+        expect(bilan.concentration.messageGlobal).toBe('');
+        expect(bilan.recurrents.force).toBe('');
     });
 
     // ── 5. RATCHETS ──────────────────────────────────────────────────────────
@@ -394,19 +501,19 @@ describe('#575 B10 · l\'ordre du bilan remis à l\'élève vient de SON échell
         expect(codeSeul).not.toContain('transfert à d\'autres contextes');
     });
 
-    it('identite-des-butees — les comparaisons de #555 restent au compte connu', () => {
-        // ⚠ CE TEST CONSTATE, IL NE PROTÈGE PAS. Il fige ce qui reste : SIX sites,
-        // QUATORZE comparaisons. Il rougira le jour où #555 (la marque de
-        // maîtrise) les retirera — et c'est le signal voulu. Ne pas le
-        // « réparer » en changeant les chiffres : le corriger, c'est retirer les
-        // comparaisons.
+    it('AUCUN code IDME n\'est plus comparé dans ce module — le compte est ZÉRO', () => {
+        // ⮕ CE TEST A CHANGÉ DE NATURE LE 28 AOÛT, ET C'ÉTAIT LE SIGNAL VOULU.
+        // Il CONSTATAIT « 6 sites / 14 comparaisons » et annonçait qu'il
+        // rougirait le jour où #555 les retirerait. Ce jour est venu : Grégoire
+        // a posé ses deux repères, `zoneDuNiveau` a remplacé les lettres, et le
+        // compte est tombé à zéro.
         //
-        // ⚠ `!==` COMPTE AUTANT QUE `===`, et l'oublier a coûté une mesure fausse
-        // en écrivant ce fichier : `construireForce` filtre par
-        // `!== 'M' && !== 'E'`, un site entier qu'un motif en `===` seul rate.
+        // ⚠ Il n'a PAS été « réparé » en changeant le chiffre — la consigne était
+        // explicite. Il est devenu un RATCHET : plus aucune lettre ne revient.
         const motif = /[!=]==\s*'[IDME0]'/g;
-        const sites = codeSeul.split('\n').filter((l) => new RegExp(motif.source).test(l));
-        expect(sites).toHaveLength(6);
-        expect(codeSeul.match(motif) || []).toHaveLength(14);
+        expect(codeSeul.match(motif)).toBeNull();
+        // Et la table d'ordre ne revient pas non plus, sous quelque nom que ce soit.
+        expect(codeSeul).not.toMatch(/ORDRE_NIV/);
+        expect(codeSeul).not.toMatch(/E\s*:\s*4\s*,\s*M\s*:\s*3/);
     });
 });

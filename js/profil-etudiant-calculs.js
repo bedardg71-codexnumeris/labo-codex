@@ -259,6 +259,69 @@ function niveauDuCodeDansEchelle(code, echelleId = null) {
 }
 
 /**
+ * La ZONE d'un code dans son échelle : priorité, signalé, ou acquis.
+ *
+ * ⮕ #555 lot 2 — LE LECTEUR UNIQUE DE LA MARQUE DE MAÎTRISE. Jusqu'ici, « ce
+ * critère est-il un défi ? » et « tous les critères sont-ils maîtrisés ? » se
+ * répondaient en testant les codes EN TOUTES LETTRES : `=== 'I' || === 'D'`,
+ * `=== 'M' || === 'E'`, à quatorze endroits du PDF remis à l'élève et dix-huit
+ * du bilan à l'écran. Ces réponses ne valaient que sur l'échelle de Grégoire.
+ *
+ * ⮕ LES TROIS ZONES SONT CELLES QU'IL A CHOISIES le 28 août 2026, et elles
+ * viennent de sa pratique, pas d'une convention d'ici : sa gradation
+ * PAN-Standards distingue **trois** états — insuffisant ; réel mais NON DURABLE
+ * (« maîtrisé, mais en développement ») ; acquis.
+ *
+ *   `'priorite'` — sous le seuil de suffisance
+ *   `'signale'`  — entre les deux repères : à nommer, sans être prioritaire
+ *   `'acquis'`   — au seuil de maîtrise ou au-dessus
+ *
+ * ⚠⚠ `null` N'EST PAS UNE QUATRIÈME ZONE, C'EST UN REFUS DE RÉPONDRE, et
+ * l'appelant doit le traiter comme tel — ne rien afficher plutôt que de ranger
+ * l'élève dans une case au hasard. Trois causes, toutes légitimes :
+ *   · l'échelle ne se résout pas ;
+ *   · le code lui est étranger (il n'a donc pas de rang) ;
+ *   · l'échelle ne porte AUCUN des deux repères — le cas de toute échelle
+ *     antérieure au lot 1. Aucune valeur n'est devinée à leur place : ni par
+ *     les lettres, ni par une position dans la liste, ni par un pourcentage.
+ *
+ * ⚠ UN SEUL REPÈRE SUFFIT À RÉPONDRE, et la réponse reste honnête :
+ *   · maîtrise seule → `'acquis'` au-dessus, `'priorite'` en dessous. C'est le
+ *     modèle à UNE frontière, que le modèle à deux contient.
+ *   · suffisance seule → `'priorite'` en dessous, `'signale'` au-dessus. On sait
+ *     ce qui est insuffisant ; on ne sait PAS où commence l'acquis, donc on ne
+ *     le dit pas.
+ *
+ * @param {string} code - le code enregistré (`niveauSelectionne`, `niveauFinal`)
+ * @param {string} [echelleId] - l'échelle de l'évaluation qui porte ce code
+ * @returns {'priorite'|'signale'|'acquis'|null}
+ */
+function zoneDuNiveau(code, echelleId = null) {
+    var echelle = (typeof obtenirEchelleResolue === 'function')
+        ? obtenirEchelleResolue(echelleId || null)
+        : null;
+    if (!echelle) return null;
+
+    var niveau = niveauDuCodeDansEchelle(code, echelleId);
+    if (!niveau || niveau.rang == null) return null;
+
+    var rangDuRepere = function (valeur) {
+        if (!valeur) return null;
+        var repere = niveauDuCodeDansEchelle(valeur, echelleId);
+        return (repere && repere.rang != null) ? repere.rang : null;
+    };
+    var rangMaitrise = rangDuRepere(echelle.seuilMaitrise);
+    var rangSuffisance = rangDuRepere(echelle.seuilSuffisance);
+
+    // Aucun repère lisible : l'échelle ne dit pas où commence la maîtrise.
+    if (rangMaitrise == null && rangSuffisance == null) return null;
+
+    if (rangMaitrise != null && niveau.rang >= rangMaitrise) return 'acquis';
+    if (rangSuffisance != null && niveau.rang >= rangSuffisance) return 'signale';
+    return 'priorite';
+}
+
+/**
  * Deux évaluations parlent-elles du MÊME barème ?
  *
  * ⮕ #575 B10 — EXTRAIT, PAS ÉCRIT. Ce raisonnement a été livré le 28 août dans
@@ -1906,6 +1969,7 @@ window.niveauxOrdonnesDeLEchelle = niveauxOrdonnesDeLEchelle;
 window.ordonnerNiveauxParPlage = ordonnerNiveauxParPlage;
 window.niveauDuCodeDansEchelle = niveauDuCodeDansEchelle;
 window.echellesComparables = echellesComparables;
+window.zoneDuNiveau = zoneDuNiveau;                                           // #555 lot 2
 window.convertirNiveauEnScore = convertirNiveauEnScore;
 // #542 A3 — consommée par `profil-etudiant-sections-affichage.js` (carte RàI).
 window.diagnostiquerConversionNiveaux = diagnostiquerConversionNiveaux;

@@ -546,6 +546,25 @@
             lignes.push(`<ul style="margin: 0; padding-left: 14px;">${items}</ul>`);
         }
 
+        // ⮕ #555 lot 2 — LA ZONE INTERMÉDIAIRE. Entre le seuil de suffisance et
+        // celui de maîtrise, l'apprentissage est réel mais NON DURABLE : dans les
+        // mots de Grégoire, « maîtrisé, mais en développement ». Ces critères ne
+        // sont donc pas des priorités — les y mettre dirait à l'élève qu'il n'a
+        // rien acquis — mais les taire lui laisserait croire que c'est réglé.
+        //
+        // ⚠ La ligne s'affiche AUSSI quand tout est maîtrisé au sens du premier
+        // seuil : c'est justement le cas où elle apprend quelque chose. Elle est
+        // hors du `else if` pour cette raison.
+        //
+        // ⚠ Une échelle sans repères ne produit AUCUN signalé (`zoneDuNiveau`
+        // rend `null`) : la ligne disparaît d'elle-même, sans note technique dans
+        // un document remis à l'élève.
+        if (Array.isArray(concentration.signales) && concentration.signales.length) {
+            const items = concentration.signales.map(p => `<li style="margin-bottom: 2px;">${esc(p)}</li>`).join('');
+            lignes.push('<div style="margin-top: 6px;">Acquis en développement, à consolider :</div>'
+                + `<ul style="margin: 0; padding-left: 14px;">${items}</ul>`);
+        }
+
         if (!lignes.length) return null;
         return renderRangeeBilan('Présentement, il faut se concentrer sur', lignes.join(''), false);
     }

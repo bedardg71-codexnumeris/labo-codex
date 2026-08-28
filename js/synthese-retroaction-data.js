@@ -598,10 +598,28 @@
         return { label: label, solo: (dansEchelle && dansEchelle.solo) || '' };
     }
 
-    /** Pour un TRI seulement : un niveau illisible se range en dernier. */
-    function rangOuDernier(rangDe, code) {
-        const rang = rangDe(code);
-        return (rang == null) ? Infinity : rang;
+    /**
+     * La zone d'un code — `'priorite'`, `'signale'`, `'acquis'`, ou `null`.
+     *
+     * ⮕ #555 lot 2, et c'est la fin de B10b. Ce module testait les codes EN
+     * TOUTES LETTRES à six endroits (quatorze comparaisons) : `=== 'I' || === 'D'`
+     * pour les défis, `=== 'M' || === 'E'` pour « tous maîtrisés ». Ces réponses
+     * ne valaient que sur l'échelle de Grégoire ; sur celle d'un·e collègue,
+     * elles rendaient « aucun défi » et « personne ne maîtrise » — en silence, et
+     * dans le document remis à l'élève.
+     *
+     * ⚠ `null` SIGNIFIE « L'ÉCHELLE NE DIT PAS », et la seule réponse acceptable
+     * est alors de ne RIEN rendre. C'est le principe déclaré en tête de ce module.
+     * ⚠ Et ici, pas de message d'explication non plus : `copierToutRetroaction`
+     * copie le `textContent` de ce bilan dans ce qui est remis à l'élève. Une
+     * note technique y serait un défaut pire que la section manquante.
+     */
+    function lecteurZone(echelleId) {
+        return function (code) {
+            return (typeof zoneDuNiveau === 'function')
+                ? zoneDuNiveau(code, echelleId || null)
+                : null;
+        };
     }
 
     /**
@@ -636,20 +654,34 @@
         const criteres = Array.isArray(evaluation.criteres) ? evaluation.criteres : [];
         const grilleCriteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres : [];
 
-        // ⚠ Le FILTRE reste en toutes lettres — « quel niveau est un défi » est la
-        // marque de maîtrise de #555, elle ne se dérive d'aucune échelle. Seul
-        // l'ORDRE, lui, se lit dans l'échelle de l'évaluation.
+        // #555 lot 2 — trois zones, lues dans les repères de l'échelle. « Défi »
+        // n'est plus une lettre : c'est ce qui est SOUS le seuil de suffisance.
         const rangDe = lecteurRang(evaluation.echelleId);
-        const defis = criteres
-            .filter(c => c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D')
-            .sort((a, b) => rangOuDernier(rangDe, a.niveauSelectionne)
-                          - rangOuDernier(rangDe, b.niveauSelectionne));
+        const zoneDe = lecteurZone(evaluation.echelleId);
+        // ⚠ `rangOuDernier` (repli `Infinity` pour un code illisible) A ÉTÉ RETIRÉ
+        // avec ce lot : les deux tableaux triés ci-dessous sont filtrés par ZONE,
+        // et une zone non nulle implique un rang lisible — `zoneDuNiveau` rend
+        // `null` dès que le code n'a pas de rang. Le repli était devenu
+        // inatteignable, et un repli qu'on ne peut plus atteindre finit par être
+        // lu comme une garantie qu'il n'offre plus.
+        const parRangCroissant = (a, b) => rangDe(a.niveauSelectionne) - rangDe(b.niveauSelectionne);
 
-        const patrons = identifierPatrons(criteres, historique);
+        const defis = criteres.filter(c => zoneDe(c.niveauSelectionne) === 'priorite')
+                              .sort(parRangCroissant);
+        // La zone intermédiaire de Grégoire : « maîtrisé, mais en développement ».
+        // Réel, donc pas un défi ; non durable, donc pas encore acquis.
+        const signales = criteres.filter(c => zoneDe(c.niveauSelectionne) === 'signale')
+                                 .sort(parRangCroissant);
+
+        const patrons = identifierPatrons(criteres, historique, evaluation.echelleId);
         // Vérification explicite M/E sur tous les critères : un travail Non recevable
         // (niveau '0') ou sans critères ne doit JAMAIS déclencher « tous maîtrisés ».
+        // Garde `length > 0` conservée : `.every()` rend `true` sur un tableau vide
+        // (vacuité JS), et un travail non recevable ne doit JAMAIS déclencher
+        // « tous maîtrisés ». Un niveau que l'échelle ne situe pas (`null`)
+        // empêche la conclusion — on ne dit pas « tout est acquis » sur un doute.
         const tousMaitrises = criteres.length > 0 &&
-            criteres.every(c => c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E');
+            criteres.every(c => zoneDe(c.niveauSelectionne) === 'acquis');
 
         let messageGlobal = '';
         if (tousMaitrises) {
@@ -658,9 +690,11 @@
                 messageGlobal = `Tous les critères sont maîtrisés. Concentre-toi sur la qualité du français (${totErr} erreur${totErr > 1 ? 's' : ''} annotée${totErr > 1 ? 's' : ''}).`;
             } else {
                 // Garde length > 0 : .every() retourne true sur tableau vide (vacuité JS).
+                // ⚠ L'évaluation précédente porte SON échelle, pas forcément celle-ci.
+                const zonePrecedente = lecteurZone(historique[0] && historique[0].echelleId);
                 const maitriseLongtemps = historique[0] && Array.isArray(historique[0].criteres) &&
                     historique[0].criteres.length > 0 &&
-                    historique[0].criteres.every(c => c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E');
+                    historique[0].criteres.every(c => zonePrecedente(c.niveauSelectionne) === 'acquis');
                 const sommet = niveauLePlusHaut(evaluation.echelleId, echelle);
                 const versLeSommet = sommet
                     ? ` — c'est une excellente façon d'étendre tes compétences vers le niveau ${sommet.label}${sommet.solo ? ` (${sommet.solo})` : ''}.`
@@ -685,7 +719,8 @@
         return {
             tousMaitrises:  tousMaitrises,
             messageGlobal:  messageGlobal,
-            priorites:      priorites
+            priorites:      priorites,
+            signales:       signales.map(d => `${d.critereNom} (${libelleNiveau(echelle, d.niveauSelectionne)})`)
         };
     }
 
@@ -723,7 +758,10 @@
             return (rangAcc == null || rang > rangAcc) ? c : acc;
         }, null);
         if (!meilleur) return '';
-        if (meilleur.niveauSelectionne !== 'M' && meilleur.niveauSelectionne !== 'E') return '';
+        // #555 lot 2 — « ta force » suppose un niveau ACQUIS, pas seulement le
+        // moins faible. Un critère en zone « signalé » est réel mais non durable :
+        // l'annoncer comme une force dirait à l'élève qu'il peut s'en détourner.
+        if (lecteurZone(evaluation.echelleId)(meilleur.niveauSelectionne) !== 'acquis') return '';
         return `Ta force : ${meilleur.critereNom} (${libelleNiveau(echelle, meilleur.niveauSelectionne)})`;
     }
 
@@ -827,11 +865,16 @@
         if (!evalPrecedente || !Array.isArray(evalPrecedente.criteres) || !Array.isArray(evaluation.criteres)) return '';
         const prec = {};
         evalPrecedente.criteres.forEach(c => { prec[c.critereNom] = c.niveauSelectionne; });
+
+        // #555 lot 2 — « tu as progressé » = passé d'une PRIORITÉ à un ACQUIS.
+        // ⚠ Chaque évaluation est lue dans SON échelle : la précédente peut avoir
+        // été produite sous une autre, et comparer deux zones lues dans le mauvais
+        // barème annoncerait des progrès qui n'ont pas eu lieu.
+        const zoneAvant = lecteurZone(evalPrecedente.echelleId);
+        const zoneApres = lecteurZone(evaluation.echelleId);
         const ameliores = evaluation.criteres
-            .filter(c => {
-                const p = prec[c.critereNom];
-                return p && (p === 'I' || p === 'D') && (c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E');
-            })
+            .filter(c => zoneAvant(prec[c.critereNom]) === 'priorite'
+                      && zoneApres(c.niveauSelectionne) === 'acquis')
             .map(c => c.critereNom);
         return ameliores.length ? `Tu as progressé en ${ameliores.join(' et ')}.` : '';
     }
@@ -1050,24 +1093,35 @@
         };
     }
 
-    function identifierPatrons(criteresActuels, historique) {
+    /**
+     * Les critères prioritaires depuis TROIS productions d'affilée.
+     *
+     * ⮕ #555 lot 2 — `estFaible` testait `n === 'I' || n === 'D'`. Chaque
+     * évaluation de l'historique est maintenant lue dans SON échelle : un élève
+     * dont la pratique a changé de barème en cours de trimestre n'hérite pas
+     * d'un « objectif prioritaire depuis 3 productions » calculé sur des zones
+     * qui ne parlaient pas de la même chose.
+     */
+    function identifierPatrons(criteresActuels, historique, echelleIdCourante) {
         if (!Array.isArray(historique) || historique.length < 2) return [];
 
-        const niveauxAt = (idx) => {
+        const zonesAt = (idx) => {
             const map = {};
             const ev = historique[idx];
+            const zoneDe = lecteurZone(ev && ev.echelleId);
             if (ev && Array.isArray(ev.criteres)) {
-                ev.criteres.forEach(c => { map[c.critereNom] = c.niveauSelectionne; });
+                ev.criteres.forEach(c => { map[c.critereNom] = zoneDe(c.niveauSelectionne); });
             }
             return map;
         };
-        const cH1 = niveauxAt(0);
-        const cH2 = niveauxAt(1);
-
-        const estFaible = (n) => n === 'I' || n === 'D';
+        const zH1 = zonesAt(0);
+        const zH2 = zonesAt(1);
+        const zoneCourante = lecteurZone(echelleIdCourante);
 
         return criteresActuels
-            .filter(c => estFaible(c.niveauSelectionne) && estFaible(cH1[c.critereNom]) && estFaible(cH2[c.critereNom]))
+            .filter(c => zoneCourante(c.niveauSelectionne) === 'priorite'
+                      && zH1[c.critereNom] === 'priorite'
+                      && zH2[c.critereNom] === 'priorite')
             .map(c => c.critereNom);
     }
 
