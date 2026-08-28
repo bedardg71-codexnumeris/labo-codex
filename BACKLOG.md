@@ -2175,7 +2175,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     `dupliquerEchelle`, qui **perdait les deux repères** — trouvé par une question de Grégoire sur le
     namespace, pas par relecture.
   ⏳ **CE QUI RESTE DU LOT 2** : (a) `evaluation-retroaction.js`, **8 lignes / 18 comparaisons**, le
-  bilan à l'écran ; (b) `_detecterSeuilMaitrise` (`consolidation.js`) ; (c) ✅ FAIT — les quatre replis divergents
+  bilan à l'écran ; (b) ✅ FAIT — `_detecterSeuilMaitrise` (`consolidation.js`) ; (c) ✅ FAIT — les quatre replis divergents
   `0,70` / `0,75` ; (d) le nommage (`seuilMaitrise` porte quatre sens) ; (e) **#579** et **#580**
   ci-dessous, ouverts par ce lot.
   ⮕ **LOT 1 LIVRÉ le 28 août 2026 — LA DÉCISION D'ARCHITECTURE EST PRISE ET LE MODÈLE EXISTE.**
@@ -2215,6 +2215,30 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⚠ **CHEMIN VIVANT, RENDU À L'ÉCRAN** : `calculerConsolidationIndividuelle` ←
   `profil-etudiant-diagnostics.js:612` (matrice de consolidation). Vérifié, pas supposé.
   ⮕ C'est le consommateur le plus direct des deux repères : la convention disparaît, le champ la remplace.
+  ✅ **LIVRÉ le 28 août 2026.** `_detecterSeuilMaitrise` LIT `echelle.seuilMaitrise` (un CODE, comparé
+  sans tenir compte de la casse) et rend **`{valeur, deduite, raison}`** au lieu d'un nombre nu.
+  ⮕ **DÉCISION DE GRÉGOIRE, prise en séance** : quand le repère n'est PAS posé, la matrice **CALCULE
+  ET LE DIT** — une mention paraît sous le bloc Consolidation. Ni devinette muette (c'est elle qui a
+  produit le défaut), ni fonction retirée aux expérimentateurs qui n'ont pas encore posé leurs repères.
+  Quatre raisons distinctes, chacune avec son libellé : `repere-non-pose`, `repere-introuvable` (le
+  code désigne un niveau supprimé depuis — une incohérence de données, à ne PAS confondre avec une
+  absence), `repere-sans-min`, `echelle-non-resolue`.
+  · Les cinq comparaisons internes restent numériques ; la réserve voyage à côté, jusqu'au HTML.
+  · **Un piège corrigé au passage** : `(niveauMaitrise.min || 75)` remplaçait par 75 un `min` valant
+    **0**, qui est un cran d'échelle légitime — cf. [[project-niveau-zero-jugement-suspendu]]. Devenu
+    `min != null`.
+  · Le repli `0.75` de l'échelle non résolue SUBSISTE, faute de pouvoir dériver quoi que ce soit, mais
+    il n'est plus muet. Un `null` était tentant et faux : `_construireConversion` sait lire un score
+    numérique sans échelle, donc des scores peuvent exister, et `score >= null` est vrai dès 0.
+  · Sentinelle `sentinelle-555-seuil-maitrise-lu-non-devine` (12 cas), dont **le cas qui prouve le
+    branchement** : une échelle où le repère et l'avant-dernier niveau DIVERGENT — seul montage qui
+    distingue une lecture d'une devinette. **7 break-tests, 7 rouges isolément**, dont trois sur le
+    RENDU (`genererBlocConsolidation` monté en sandbox) : réserve retirée du bloc, réserve affichée
+    même sur un seuil lu, libellé unique pour les quatre raisons.
+  ⮕ `_detecterSeuilMaitrise` est **exposée sur `window`** pour cette sentinelle : fonction pure dont
+  les cas limites (min à 0, code introuvable, repère sans borne) ne sont pas atteignables par
+  `calculerConsolidation*` sans monter un jeu complet de données — et un montage incomplet mesure des
+  zéros. Même précédent que #572.
   ⚠⚠ **ET UNE COLLISION DE VOCABULAIRE, DÉJÀ DANS LE CODE.** Le nom `seuilMaitrise` désigne aujourd'hui
   **quatre choses de types différents** : le CODE de niveau du lot 1 (`echelles.js`), un score 0-1
   détecté (`consolidation.js`), un seuil de préférence 0-1 (`obtenirSeuil('idme.maitrise')`,
@@ -2223,8 +2247,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   lot 1 en a ajouté un cinquième. ⮕ **Trancher le nommage avec Grégoire au lot 2**, en même temps que
   celui de l'assistant (#577) : c'est le même arbitrage, sur le même mot.
 
-  ⏳ **CE QUI RESTE (lot 2)** : (a) **Grégoire doit poser ses repères** sur ses échelles — sans eux
-  aucun lecteur ne peut répondre ; (b) le **lecteur unique** « zone d'un code » ; (c) **brancher les
+  ⏳ **CE QUI RESTE (lot 2)** : (a) ✅ FAIT — **Grégoire a posé ses repères** le 28 août au matin
+  (« mes repères sont posés sur mon échelle ») ; (b) le **lecteur unique** « zone d'un code » — la
+  matrice de consolidation lit désormais le repère (28 août), mais chaque consommateur porte encore
+  sa propre lecture : le lecteur COMMUN reste à extraire ; (c) **brancher les
   consommateurs** — B10b (6 sites / 14 comparaisons), `evaluation-retroaction.js` (8 lignes / 18) ;
   (d) ✅ **unifier les quatre replis divergents** — FAIT le 28 août 2026 (et ils étaient sept, tous
   inatteignables : voir la mesure ci-dessous) ; (e) l'éditeur d'échelle NEUVE
