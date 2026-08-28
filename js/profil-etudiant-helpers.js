@@ -443,6 +443,194 @@ function obtenirIdsProductionsEvaluables(productions) {
 }
 
 /**
+ * Une couleur d'échelle, rendue sûre pour un attribut `style`.
+ *
+ * ⮕ #575 — EXTRAITE, PAS ÉCRITE. Cette fonction vivait en fermeture locale dans
+ * `genererSectionPerformance` (`profil-etudiant-sections-affichage.js`), donc
+ * inaccessible aux autres sites qui injectent une couleur d'échelle — dont les
+ * badges d'artefacts, qui posaient `niveau.couleur` BRUT dans un `style`
+ * (constat §5.5 de l'audit du 27 août 2026). Un seul des deux était protégé.
+ *
+ * ⚠ `echapperHtml` NE SUFFIT PAS ICI. Elle neutralise l'évasion d'attribut, pas
+ * l'injection de CSS : une « couleur » valant `red; background: url(...)` passe
+ * l'échappement HTML sans difficulté. On n'accepte donc qu'un code hexadécimal.
+ *
+ * @param {*} valeur - la couleur telle que l'utilisateur l'a saisie
+ * @returns {string} un `#rrggbb`, ou le neutre `#999999`
+ */
+function couleurCssSure(valeur) {
+    const c = String(valeur == null ? '' : valeur).trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(c)) return c;
+    // `#RGB` est une écriture légitime : on la développe plutôt que de la
+    // rejeter, sinon un suffixe alpha ajouté ensuite (`${couleur}22`) produirait
+    // du CSS invalide.
+    if (/^#[0-9a-fA-F]{3}$/.test(c)) return '#' + c[1] + c[1] + c[2] + c[2] + c[3] + c[3];
+    return '#999999';
+}
+
+/**
+ * La couleur d'un CODE de niveau, lue dans l'échelle qui a produit ce code.
+ *
+ * ⮕ #575 (lot 4 du plan SOLO, rapport §3 n° 4). Les badges d'artefacts
+ * choisissaient leur couleur en SITUANT la note dans `echelles.find(e => e.active)
+ * || echelles[0]` — l'échelle « active, sinon la première », devinée, alors que
+ * chaque évaluation porte la sienne. Et quand il n'y en avait aucune, ils
+ * repliaient sur quatre couleurs IDME derrière `note >= 85 / 75 / 65`.
+ *
+ * Deux défauts en un : la couleur pouvait CONTREDIRE le code affiché juste à
+ * côté (situer 82 dans une autre échelle ne redonne pas forcément le niveau que
+ * l'évaluation a enregistré), et hors IDME elle ne voulait plus rien dire.
+ *
+ * ⮕ On ne situe plus rien : le code est DÉJÀ connu, on lit sa couleur dans SON
+ * échelle. Sans échelle résolue, sans code, ou sans couleur saisie : le neutre.
+ *
+ * @param {string} code - le code de niveau enregistré par l'évaluation
+ * @param {string} echelleId - l'échelle de cette évaluation
+ * @returns {string} un `#rrggbb` sûr, neutre si rien ne se résout
+ */
+function couleurDuNiveau(code, echelleId) {
+    if (code == null || String(code).trim() === '') return '#999999';
+    const echelle = (typeof obtenirEchelleResolue === 'function')
+        ? obtenirEchelleResolue(echelleId || null)
+        : null;
+    if (!echelle || !Array.isArray(echelle.niveaux)) return '#999999';
+    const cherche = String(code).trim().toUpperCase();
+    const niveau = echelle.niveaux.find(function(n) {
+        return n && String(n.code == null ? '' : n.code).trim().toUpperCase() === cherche;
+    });
+    return niveau ? couleurCssSure(niveau.couleur) : '#999999';
+}
+
+/**
+ * Les niveaux de l'échelle d'un élève et le dégradé qui les peint — ou rien.
+ *
+ * ⮕ #575 (lot 4 du plan SOLO, rapport §3 n° 5). Ce calcul existait en DEUX
+ * exemplaires, à quelques lignes près : `_genererBarresSRPNF`
+ * (`profil-etudiant-diagnostics.js`) et `_obtenirNiveauxEtGradientSRPNF`
+ * (`profil-etudiant-sections-affichage.js`). Les deux devinaient l'échelle par
+ * `echelles.find(e => e.active) || echelles[0]`, et les deux repliaient sur la
+ * même table `I 0-64 / D 65-74 / M 75-84 / E 85-100`. L'audit du 27 août n'avait
+ * relevé que la première ; la seconde peint le dégradé du bloc « Forces et
+ * défis », que ce même audit donne en exemple de code proprement configurable.
+ *
+ * ⮕ L'ÉCHELLE JUSTE est celle des ÉVALUATIONS de l'élève
+ * (`obtenirEchelleCommuneDesEvaluations`, pas 3b de #542) : elle refuse de
+ * choisir quand elles divergent, et dit pourquoi. Sans elle, `niveaux` est vide
+ * et `gradientCSS` vaut un fond neutre — une barre sans repères reste lisible,
+ * une barre aux repères d'un autre ment.
+ *
+ * Les couleurs sont filtrées ici (`couleurCssSure`) : elles partent dans un
+ * attribut `style`, et elles viennent de l'utilisateur.
+ *
+ * @param {string} da - Numéro de DA
+ * @returns {Object} `{ niveaux, gradientCSS, message }` — `niveaux` trié par
+ *   borne inférieure croissante, vide si aucune échelle ne se résout.
+ */
+function niveauxEtGradientDesEvaluations(da) {
+    const NEUTRE = 'var(--gris-pale, #e9e9e9)';
+    const lecture = (typeof obtenirEchelleCommuneDesEvaluations === 'function')
+        ? obtenirEchelleCommuneDesEvaluations(da)
+        : { echelle: null, raison: 'helper-absent', message: '' };
+
+    const brut = (lecture.echelle && Array.isArray(lecture.echelle.niveaux))
+        ? lecture.echelle.niveaux : [];
+
+    // Une borne non numérique rend le niveau impeignable : `Number('')` vaut 0,
+    // et un niveau mal saisi capturerait tout le bas du dégradé.
+    const niveaux = brut
+        .filter(function(n) {
+            return n && Number.isFinite(Number(n.min)) && Number.isFinite(Number(n.max));
+        })
+        .map(function(n) {
+            return {
+                code: n.code, nom: n.nom,
+                min: Number(n.min), max: Number(n.max),
+                couleur: couleurCssSure(n.couleur)
+            };
+        })
+        .sort(function(a, b) { return a.min - b.min; });
+
+    if (niveaux.length === 0) {
+        return { niveaux: [], gradientCSS: NEUTRE, message: lecture.message || '' };
+    }
+
+    // ⚠ L'ORDRE DU TABLEAU `niveaux` DE L'UTILISATEUR N'EST PAS UN ORDRE DE
+    // MÉRITE — rien ne l'oblige à saisir ses niveaux dans l'ordre. Le tri par
+    // `min` ci-dessus est ce qui rend les 2 % de marge ci-dessous cohérents.
+    const stops = [];
+    niveaux.forEach(function(niveau, i) {
+        const dernier = (i === niveaux.length - 1);
+        const debut = (i === 0) ? niveau.min : niveau.min + 2;
+        const fin = dernier ? niveau.max : niveaux[i + 1].min - 2;
+        stops.push(niveau.couleur + ' ' + debut + '%');
+        stops.push(niveau.couleur + ' ' + fin + '%');
+    });
+
+    return {
+        niveaux: niveaux,
+        gradientCSS: 'linear-gradient(to right, ' + stops.join(', ') + ')',
+        message: ''
+    };
+}
+
+/**
+ * LE niveau dans lequel se lit la note globale d'un élève — ou la raison pour
+ * laquelle il n'y en a pas.
+ *
+ * ⮕ #575 (lot 4 du plan SOLO) — EXTRAIT, PAS ÉCRIT. Ce raisonnement vivait déjà,
+ * au complet, dans `genererSectionPerformance` (pas 3c-1 de #542, 27 août) ; le
+ * bloc « Développement des habiletés » du MÊME écran, lui, affichait une lettre
+ * IDME par un ternaire en dur (`P >= 85 ? 'E' : …`). Deux réponses différentes à
+ * la même question, sur la même page, pour le même élève. L'extraction met la
+ * règle à UN endroit plutôt que d'en recopier une seconde version — c'est le
+ * patron que #529 a passé une session à défaire.
+ *
+ * ⮕ LA RÈGLE, TELLE QUE GRÉGOIRE L'A TRANCHÉE LE 27 AOÛT 2026 : « c'est la
+ * pratique de notation qui établit la note globale de l'élève ». C'est donc elle
+ * qui dit dans quoi cette note se lit. Une sommative répond « aucune échelle » —
+ * et c'est la bonne réponse, pas un manque : un pourcentage pondéré n'a jamais
+ * prétendu être un niveau atteint.
+ *
+ * Aucun repli : sans échelle, `niveau` vaut `null` et l'appelant n'affiche pas de
+ * code. Jamais une lettre inventée.
+ *
+ * @param {string} da - Numéro de DA
+ * @param {number} pourcentage - la note globale, 0-100
+ * @returns {Object} `{ niveau, survol, raison }` — `niveau` est l'objet niveau de
+ *   l'échelle (avec son `code`), ou `null` ; `survol` est le texte d'infobulle
+ *   (explication SOLO quand il y en a une, sinon la cause) ; `raison` est nulle
+ *   quand la lecture a abouti.
+ */
+function lireNiveauNoteGlobale(da, pourcentage) {
+    const pratique = (typeof obtenirPratiqueActuelle === 'function')
+        ? obtenirPratiqueActuelle() : null;
+    const lecture = (pratique && typeof pratique.obtenirEchelleNoteGlobale === 'function')
+        ? pratique.obtenirEchelleNoteGlobale(da)
+        : { echelle: null, raison: 'pratique-sans-methode', message: '' };
+
+    const niveau = lecture.echelle
+        ? situerPourcentageDansEchelle(pourcentage, lecture.echelle)
+        : null;
+
+    if (!niveau) {
+        return { niveau: null, survol: lecture.message || '', raison: lecture.raison || 'hors-echelle' };
+    }
+
+    // Le niveau atteint est ce qu'on LIT ; SOLO est ce qui l'explique, et il
+    // reste au SURVOL — décision de Grégoire sur le comparateur, même esprit
+    // ici : ne pas mettre une taxonomie en vedette devant un enseignant qui ne
+    // l'emploie pas.
+    const solo = (typeof interpreterNiveauAtteint === 'function')
+        ? interpreterNiveauAtteint(niveau)
+        : { interpretee: false, texte: '', message: '' };
+    const survol = solo.interpretee
+        ? solo.libelleSOLO + ' — ' + solo.texte
+        : (solo.texte || '') + (solo.message ? ' · ' + solo.message : '');
+
+    return { niveau: niveau, survol: survol, raison: null };
+}
+
+/**
  * Obtient l'instance de la pratique actuelle configurée
  * @returns {Object} - Instance de la pratique (PratiquePANStandards ou PratiqueSommative)
  */
@@ -978,6 +1166,10 @@ window.genererBadgePratiqueProfil = genererBadgePratiqueProfil;
 window.genererBadgePatternProfil = genererBadgePatternProfil;
 window.interpreterMobilisation = interpreterMobilisation;
 // `window.interpreterPerformance` retiré au pas 3c-3 de #542 — la fonction n'existe plus.
+window.niveauxEtGradientDesEvaluations = niveauxEtGradientDesEvaluations;  // #575 — UN dégradé, pour les deux blocs
+window.couleurCssSure = couleurCssSure;                    // #575 — la couleur utilisateur, filtrée, pour TOUS les sites
+window.couleurDuNiveau = couleurDuNiveau;                  // #575 — la couleur d'un code, dans SON échelle
+window.lireNiveauNoteGlobale = lireNiveauNoteGlobale;      // #575 — LA règle, pour les deux blocs du profil
 window.interpreterCompletion = interpreterCompletion;
 window.interpreterAssiduite = interpreterAssiduite;
 

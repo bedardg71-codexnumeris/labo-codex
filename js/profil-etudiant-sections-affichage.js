@@ -105,6 +105,10 @@ function _construireArtefactMobilisation(art, evaluation) {
         remis: estRemis,
         note: evaluation?.noteFinale ?? null,
         niveau: evaluation?.niveauFinal ?? null,
+        // #575 — l'échelle de CETTE évaluation, pour que la vue n'ait pas à la
+        // deviner. Sans elle, le badge choisissait « l'échelle active, sinon la
+        // première » et pouvait colorer un code avec la couleur d'un autre.
+        echelleId: evaluation?.echelleId ?? null,
         statutRemise: statutRemise,
         statutIntegrite: statutIntegrite,
         estNonRecevable: estNonRecevable,
@@ -700,22 +704,26 @@ function genererSectionMobilisationEngagement(da) {
                             // Numéro d'artefact depuis le titre (pas la position)
                             const indexOriginal = _rangProduction(artefactsPortfolio.find(p => p.id === art.id));
 
-                            // Récupérer les couleurs depuis l'échelle configurée
-                            const echelles = db.getSync(cle('echellesTemplates'), []);
-                            const echelleActive = echelles.find(e => e.active) || echelles[0];
-
-                            // Déterminer la couleur selon la note
-                            let couleurBadge = '#999'; // Gris par défaut
-                            if (art.note !== null && echelleActive?.niveaux) {
-                                const niveau = echelleActive.niveaux.find(n => art.note >= n.min && art.note <= n.max);
-                                couleurBadge = niveau?.couleur || '#999';
-                            } else if (art.note !== null) {
-                                // Couleurs par défaut IDME
-                                if (art.note >= 85) couleurBadge = '#2196F3'; // Bleu
-                                else if (art.note >= 75) couleurBadge = '#28a745'; // Vert
-                                else if (art.note >= 65) couleurBadge = '#ffc107'; // Jaune
-                                else couleurBadge = '#ff9800'; // Orange
-                            }
+                            // ⮕ #575 (lot 4 du plan SOLO, rapport §3 n° 4) — TROIS
+                            // DÉFAUTS RETIRÉS EN UN GESTE.
+                            //
+                            //   1. L'échelle était DEVINÉE : `echelles.find(e => e.active)
+                            //      || echelles[0]`. Chaque évaluation porte pourtant la
+                            //      sienne (`echelleId`), désormais transmise par
+                            //      `_construireArtefactMobilisation`.
+                            //   2. La couleur était choisie en SITUANT la note dans les
+                            //      plages de cette échelle devinée — elle pouvait donc
+                            //      CONTREDIRE le code affiché dans le même badge.
+                            //   3. Sans échelle, quatre couleurs IDME derrière
+                            //      `note >= 85 / 75 / 65` : les bornes de Grégoire, pour
+                            //      tout le monde.
+                            //
+                            // On lit la couleur du CODE déjà enregistré, dans SON échelle,
+                            // filtrée pour l'attribut `style` (§5.5 de l'audit : ici, la
+                            // couleur utilisateur partait BRUTE dans le HTML).
+                            const couleurBadge = (typeof couleurDuNiveau === 'function')
+                                ? couleurDuNiveau(art.niveau, art.echelleId)
+                                : '#999999';
 
                             const opacite = art.retenu ? '1' : '0.6';
                             const bordure = art.retenu ? '3px' : '2px';
@@ -988,26 +996,18 @@ function genererSectionAccompagnement(da) {
                         // l'élève ». C'est donc elle qui dit dans quoi cette note
                         // se lit — et la sommative répond « aucune échelle »,
                         // ce qui est la bonne réponse, pas un manque.
-                        const pratiqueLecture = (typeof obtenirPratiqueActuelle === 'function')
-                            ? obtenirPratiqueActuelle() : null;
-                        const lectureNote = (pratiqueLecture && typeof pratiqueLecture.obtenirEchelleNoteGlobale === 'function')
-                            ? pratiqueLecture.obtenirEchelleNoteGlobale(da)
-                            : { echelle: null, raison: 'pratique-sans-methode', message: '' };
-                        const niveauGlobal = lectureNote.echelle
-                            ? situerPourcentageDansEchelle(pct, lectureNote.echelle)
-                            : null;
-                        const lectureSOLO = interpreterNiveauAtteint(niveauGlobal);
-
-                        // Le niveau atteint est ce qu'on LIT ; SOLO est ce qui
-                        // l'explique, et il reste au SURVOL — décision de Grégoire
-                        // sur le comparateur, même esprit ici : ne pas mettre une
-                        // taxonomie en vedette devant un enseignant qui ne l'emploie
-                        // pas.
-                        const survolNiveau = niveauGlobal
-                            ? (lectureSOLO.interpretee
-                                ? lectureSOLO.libelleSOLO + ' — ' + lectureSOLO.texte
-                                : (lectureSOLO.texte || '') + (lectureSOLO.message ? ' · ' + lectureSOLO.message : ''))
-                            : (lectureNote.message || '');
+                        //
+                        // ⮕ #575 — LE CORPS DE CE RAISONNEMENT A ÉMIGRÉ dans
+                        // `lireNiveauNoteGlobale` (`profil-etudiant-helpers.js`).
+                        // Il était juste ici ; il était FAUX vingt écrans plus bas,
+                        // où le bloc « Développement des habiletés » gardait un
+                        // ternaire IDME en dur. Une règle à deux endroits finit
+                        // toujours par diverger — celle-ci l'avait déjà fait.
+                        const lectureNiveau = (typeof lireNiveauNoteGlobale === 'function')
+                            ? lireNiveauNoteGlobale(da, pct)
+                            : { niveau: null, survol: '', raison: 'helper-absent' };
+                        const niveauGlobal = lectureNiveau.niveau;
+                        const survolNiveau = lectureNiveau.survol;
                         const prefixeNiveau = niveauGlobal
                             ? `<span title="${echapperHtml(survolNiveau)}">${echapperHtml(String(niveauGlobal.code))}</span> `
                             : '';
@@ -1317,15 +1317,11 @@ function genererSectionAccompagnement(da) {
                 // un attribut `style`. `echapperHtml` ne suffirait pas ici : elle
                 // neutralise l'évasion d'attribut, pas l'injection de CSS. On
                 // n'accepte donc qu'un code hexadécimal, et rien d'autre.
-                const couleurSure = (valeur) => {
-                    const c = String(valeur == null ? '' : valeur).trim();
-                    if (/^#[0-9a-fA-F]{6}$/.test(c)) return c;
-                    // `#RGB` est une écriture légitime : on la développe plutôt que
-                    // de la rejeter, sinon le suffixe alpha `22` ajouté plus bas
-                    // produirait du CSS invalide.
-                    if (/^#[0-9a-fA-F]{3}$/.test(c)) return '#' + c[1] + c[1] + c[2] + c[2] + c[3] + c[3];
-                    return '#999999'; // même neutre que le repli d'`obtenirCouleurNiveauIDME`
-                };
+                // #575 — cette fermeture locale est devenue `couleurCssSure`
+                // (`profil-etudiant-helpers.js`) : elle était juste, mais
+                // inaccessible aux autres sites qui injectent une couleur
+                // d'échelle. Les badges d'artefacts, eux, n'avaient aucun filtre.
+                const couleurSure = couleurCssSure;
 
                 let corps = '';
                 let uneEtiquetteManque = false;
@@ -3788,39 +3784,19 @@ function genererSectionCompletion(da) {
 }
 
 
-function _obtenirNiveauxEtGradientSRPNF() {
-    const echelles = db.getSync(cle('echellesTemplates'), []);
-    const echelleActive = echelles.find(e => e.active) || echelles[0];
-    let niveaux = [
-        { code: 'I', nom: 'Incomplet', min: 0, max: 64, couleur: 'var(--orange-accent)' },
-        { code: 'D', nom: 'Développement', min: 65, max: 74, couleur: 'var(--btn-annuler)' },
-        { code: 'M', nom: 'Maîtrisé', min: 75, max: 84, couleur: 'var(--vert-succes)' },
-        { code: 'E', nom: 'Étendu', min: 85, max: 100, couleur: 'var(--bleu-clair)' }
-    ];
-    if (echelleActive && echelleActive.niveaux) {
-        niveaux = echelleActive.niveaux.map(n => ({
-            code: n.code, nom: n.nom, min: n.min, max: n.max, couleur: n.couleur
-        }));
-    }
-    const gradientStops = [];
-    niveaux.forEach((niveau, i) => {
-        if (i === 0) {
-            gradientStops.push(`${niveau.couleur} ${niveau.min}%`);
-            if (i < niveaux.length - 1) {
-                gradientStops.push(`${niveau.couleur} ${niveaux[i + 1].min - 2}%`);
-            } else {
-                gradientStops.push(`${niveau.couleur} ${niveau.max}%`);
-            }
-        } else if (i === niveaux.length - 1) {
-            gradientStops.push(`${niveau.couleur} ${niveau.min + 2}%`);
-            gradientStops.push(`${niveau.couleur} ${niveau.max}%`);
-        } else {
-            gradientStops.push(`${niveau.couleur} ${niveau.min + 2}%`);
-            gradientStops.push(`${niveau.couleur} ${niveaux[i + 1].min - 2}%`);
-        }
-    });
-    return { niveaux, gradientCSS: `linear-gradient(to right, ${gradientStops.join(', ')})` };
-}
+// ⮕ #575 (lot 4 du plan SOLO) — `_obtenirNiveauxEtGradientSRPNF` A ÉTÉ REMPLACÉE
+// par `niveauxEtGradientDesEvaluations(da)` (`profil-etudiant-helpers.js`).
+//
+// Elle devinait l'échelle (`echelles.find(e => e.active) || echelles[0]`) et,
+// à défaut, repliait sur une table `I 0-64 / D 65-74 / M 75-84 / E 85-100`
+// complète — la SIXIÈME du dépôt, et la seule que l'audit du 27 août n'avait pas
+// vue : elle peint le dégradé et la légende du bloc « Forces et défis », que ce
+// même audit cite en exemple de code proprement configurable (ses CRITÈRES le
+// sont ; ses repères de couleur ne l'étaient pas).
+//
+// Sa jumelle presque mot pour mot vivait dans `profil-etudiant-diagnostics.js`.
+// Les deux consomment désormais le même helper — et lisent l'échelle des
+// ÉVALUATIONS de l'élève, pas une échelle « active » devinée.
 
 function _calculerMoyennesComparativesSRPNF(da) {
     // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
@@ -3846,7 +3822,7 @@ function _genererPointsBarreSRPNFNormal(cle, score, directionsPAN) {
 }
 
 function _genererBarreCritereSRPNF(critere, contexte) {
-    const { moyennes, directionsPAN, gradientCSS } = contexte;
+    const { moyennes, directionsPAN, gradientCSS, messageEchelle } = contexte;
     const cle = critere.cle;
     const score = moyennes?.[cle];
     // Pas de donnée => PAS DE BARRE. Surtout pas une barre à 0 % : « aucune
@@ -3866,7 +3842,11 @@ function _genererBarreCritereSRPNF(critere, contexte) {
                     ${valeursHTML}
                 </span>
             </div>
-            <div class="critere-barre-gradient" style="background: ${gradientCSS};">
+            <div class="critere-barre-gradient" style="background: ${gradientCSS};"${
+                // #575 — sans échelle, le fond est neutre et la cause se lit au
+                // survol. Pas d'avertissement permanent : une barre sans repères
+                // n'est pas une panne.
+                messageEchelle ? ` title="${echapperHtml(messageEchelle)}"` : ''}>
                 ${symbolesHTML}
                 ${pointsHTML}
             </div>
@@ -3875,10 +3855,12 @@ function _genererBarreCritereSRPNF(critere, contexte) {
 }
 
 function _genererBlocForcesDefisSRPNF(da) {
-    const { niveaux, gradientCSS } = _obtenirNiveauxEtGradientSRPNF();
+    const { niveaux, gradientCSS, message: messageEchelle } = (typeof niveauxEtGradientDesEvaluations === 'function')
+        ? niveauxEtGradientDesEvaluations(da)
+        : { niveaux: [], gradientCSS: 'var(--gris-pale, #e9e9e9)', message: '' };
     // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
     const moyennesCtx = _calculerMoyennesComparativesSRPNF(da);
-    const contexte = { ...moyennesCtx, gradientCSS };
+    const contexte = { ...moyennesCtx, gradientCSS, messageEchelle };
 
     const barresHTML = criteresDeLaGrillePourAffichage()
         .map(critere => _genererBarreCritereSRPNF(critere, contexte))
@@ -4232,16 +4214,38 @@ function genererSectionPerformance(da) {
     // `const interpP = interpreterPerformance(indices.P);` retiré au pas 3c-3 de
     // #542 : second appel dont le résultat n'était lu nulle part.
 
-    // Déterminer les lettres IDME pour SOM et PAN
-    const determinerLettreIDME = (P) => {
-        if (P >= 85) return 'E';
-        if (P >= 75) return 'M';
-        if (P >= 65) return 'D';
-        return 'I';
-    };
-
-    // Session C (#303) : mode comparatif retiré — lettre IDME de la pratique active.
-    const lettreIDME = determinerLettreIDME(indices.P);
+    // ⮕ #575 (lot 4 du plan SOLO) — LE TERNAIRE IDME A ÉTÉ RETIRÉ D'ICI.
+    //
+    // Ce qui vivait là, en clair :
+    //     const determinerLettreIDME = (P) =>
+    //         P >= 85 ? 'E' : P >= 75 ? 'M' : P >= 65 ? 'D' : 'I';
+    // Les bornes de l'échelle de Grégoire écrites dans le code — invisibles à une
+    // recherche sur `idme.`, puisqu'elles ne passaient même pas par `obtenirSeuil`.
+    // La lettre était RENDUE plus bas (« E 87 % »), quelle que soit l'échelle de
+    // l'utilisateur : une cotation W/X/Y/Z affichait un « M ».
+    //
+    // ⚠ ET ELLE CONTREDISAIT L'AUTRE MOITIÉ DU MÊME ÉCRAN. Le pas 3c-1 de #542
+    // avait retiré exactement ce ternaire de `genererSectionPerformance`, la
+    // veille — mais pas cette copie-ci. Le même élève pouvait donc lire deux
+    // niveaux différents pour la même note, sur la même page.
+    //
+    // ⮕ On converge sur `lireNiveauNoteGlobale` (`profil-etudiant-helpers.js`),
+    // où cette règle vit désormais SEULE : c'est la pratique de notation qui
+    // établit la note globale, donc c'est elle qui dit dans quoi la note se lit.
+    // Sans échelle (une sommative, par exemple), il n'y a pas de code — et c'est
+    // la bonne réponse, pas un manque.
+    const lectureNiveauGlobal = (typeof lireNiveauNoteGlobale === 'function')
+        ? lireNiveauNoteGlobale(da, indices.P)
+        : { niveau: null, survol: '', raison: 'helper-absent' };
+    const prefixeNiveauGlobal = lectureNiveauGlobal.niveau
+        ? `<span title="${echapperHtml(lectureNiveauGlobal.survol)}">${echapperHtml(String(lectureNiveauGlobal.niveau.code))}</span> `
+        : '';
+    // Sans niveau, c'est le pourcentage qui porte l'explication — au survol
+    // seulement : une pratique sans échelle n'est pas en panne, et un
+    // avertissement permanent le laisserait croire.
+    const survolPourcentageGlobal = lectureNiveauGlobal.niveau
+        ? ''
+        : ` title="${echapperHtml(lectureNiveauGlobal.survol)}"`;
 
     // Calculer moyennes des critères pour badges
     const moyennes = calculerMoyennesCriteres(da);
@@ -4281,7 +4285,7 @@ function genererSectionPerformance(da) {
             <!-- En-tête avec indice P -->
             <div class="u-flex-between-mb15">
                 <!-- Session C (#303) : mode comparatif retiré — indice P unique (pratique active). -->
-                <strong class="profil-valeur-grande-bleu" style="margin-left: auto;">${lettreIDME} ${indices.P}%</strong>
+                <strong class="profil-valeur-grande-bleu" style="margin-left: auto;"${survolPourcentageGlobal}>${prefixeNiveauGlobal}${indices.P}%</strong>
             </div>
 
             <!-- 🆕 MÉTHODE DE CALCUL EXPLICITE -->

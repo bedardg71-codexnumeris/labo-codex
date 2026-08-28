@@ -18,16 +18,28 @@
     // Mapping ordinal IDME pour comparaisons (force, progression, jauge)
     const ORDRE_NIV = { 'E': 4, 'M': 3, 'D': 2, 'I': 1, '0': 0 };
 
-    // Échelle IDME de fallback si echellesTemplates absent ou échelle introuvable.
-    // Les couleurs sont des hex pour l'export PDF rasterisé (pas de var(--…) qui
-    // ne survit pas à html2canvas hors du DOM live).
-    const SCALE_FALLBACK = [
-        { code: '0', label: 'Non recevable',    solo: 'Préstructurel',    min: 0,  max: 0,   color: '#b8b8b8' },
-        { code: 'I', label: 'Insuffisant',      solo: 'Unistructurel',    min: 1,  max: 64,  color: '#f08c3a' },
-        { code: 'D', label: 'En développement', solo: 'Multistructurel',  min: 65, max: 74,  color: '#f0c83a' },
-        { code: 'M', label: 'Maîtrisé',         solo: 'Relationnel',      min: 75, max: 84,  color: '#5fb84a' },
-        { code: 'E', label: 'Étendu',           solo: 'Abstrait étendu',  min: 85, max: 100, color: '#27b9e0' }
-    ];
+    // ⮕ #575 (lot 4 du plan SOLO) — `SCALE_FALLBACK` A ÉTÉ SUPPRIMÉE.
+    //
+    // C'était l'échelle IDME de Grégoire — codes, libellés, étiquettes SOLO,
+    // plages ET couleurs — rendue quand l'échelle de l'évaluation ne se résolvait
+    // pas. Or ce module alimente la page de synthèse du **PDF de rétroaction
+    // REMIS À L'ÉLÈVE** (`travaux-export-pdf.js`, `ajouterPageSynthese`). Un·e
+    // collègue dont l'échelle est introuvable — cas le plus courant : une
+    // évaluation produite sous une pratique configurable, dont l'échelle vit
+    // dans `pratiquesConfigurables[].config.echelle` et non dans
+    // `echellesTemplates` — remettait donc à SES élèves un document portant
+    // l'échelle d'un autre enseignant, présentée comme la sienne.
+    //
+    // ⮕ Sans échelle résolue, on ne rend RIEN : `lireEchelle` renvoie `[]`, la
+    // légende et la jauge se masquent (le rendu lit partout `feedback.scale || []`),
+    // et le reste du document tient. C'est le principe directeur déclaré en tête
+    // de ce fichier — « si une donnée est absente, la section est masquée » —, et
+    // la même règle que #527 pour la valeur ponctuelle : jamais un chiffre, un
+    // libellé ni une couleur inventés.
+    //
+    // Couleur neutre des niveaux sans couleur définie, seule constante qui reste
+    // (une conséquence d'affichage, pas une valeur métier).
+    const COULEUR_NIVEAU_NEUTRE = '#767169';
 
     // Couleurs des familles de tampons (alignées sur la palette du handoff B).
     const FAMILY_COLOR = {
@@ -282,11 +294,28 @@
        E. ÉCHELLE IDME
        ===================================================================== */
 
+    /**
+     * L'échelle de CETTE évaluation, ou un tableau vide.
+     *
+     * ⮕ #575 — deux changements, un seul geste. La résolution passe par
+     * `obtenirEchelleResolue` (`profil-etudiant-calculs.js`), le chemin UNIQUE
+     * livré par #542 lot 3 : il connaît les deux gisements — `echellesTemplates`
+     * ET l'échelle embarquée d'une pratique configurable (`pratique-<id>`) —,
+     * reconnaît un `idOriginal` après import, et refuse de deviner quand
+     * plusieurs échelles existent sans désignation. Ce module relisait
+     * `echellesTemplates` à la main : toute évaluation faite sous une pratique
+     * configurable y était « introuvable », et tombait sur le repli supprimé.
+     *
+     * Repli local plutôt qu'un `null` : ce module est chargé par la page
+     * d'export, où `profil-etudiant-calculs.js` est présent — mais un shape
+     * `Feedback` ne doit jamais lever pour une dépendance absente.
+     */
     function lireEchelle(echelleId) {
-        const echelles = db.getSync(cle('echellesTemplates'), []) || [];
-        const echelle = echelles.find(x => x.id === echelleId);
+        const echelle = (typeof obtenirEchelleResolue === 'function')
+            ? obtenirEchelleResolue(echelleId || null)
+            : null;
         if (!echelle || !Array.isArray(echelle.niveaux) || !echelle.niveaux.length) {
-            return SCALE_FALLBACK.slice();
+            return [];
         }
         return echelle.niveaux.map(n => ({
             code:  n.code || '',
@@ -294,7 +323,7 @@
             solo:  n.description || n.solo || '',
             min:   typeof n.min === 'number' ? n.min : null,
             max:   typeof n.max === 'number' ? n.max : null,
-            color: normaliserCouleur(n.couleur || n.color, n.code)
+            color: normaliserCouleur(n.couleur || n.color)
         }));
     }
 
@@ -304,12 +333,14 @@
      * donc html2canvas peut résoudre les variables CSS. On retombe sur le
      * fallback IDME uniquement quand aucune couleur n'est définie.
      */
-    function normaliserCouleur(couleur, code) {
+    function normaliserCouleur(couleur) {
         if (typeof couleur === 'string' && couleur.trim()) {
             return couleur.trim();
         }
-        const fallback = SCALE_FALLBACK.find(s => s.code === code);
-        return fallback ? fallback.color : '#767169';
+        // #575 — un niveau sans couleur prend la neutre. Avant, il prenait celle
+        // du niveau de MÊME CODE dans l'échelle de Grégoire : un « M » d'une
+        // autre échelle héritait de son vert.
+        return COULEUR_NIVEAU_NEUTRE;
     }
 
     /* =====================================================================
@@ -998,7 +1029,9 @@
         construireFeedback: construireFeedback,
         // Exposés pour le rendu et les tests
         FAMILY_COLOR: FAMILY_COLOR,
-        FAMILY_ORDER: FAMILY_ORDER,
-        SCALE_FALLBACK: SCALE_FALLBACK
+        FAMILY_ORDER: FAMILY_ORDER
+        // #575 — `SCALE_FALLBACK` était exposée ici ; elle n'avait aucun lecteur
+        // hors du module. Sa remplaçante (`COULEUR_NIVEAU_NEUTRE`) reste privée
+        // plutôt que d'ajouter un export que personne n'appelle.
     };
 })();

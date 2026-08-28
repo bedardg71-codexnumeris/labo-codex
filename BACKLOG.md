@@ -1521,6 +1521,95 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 > gardé nulle part) — reste au rapport tant que Grégoire n'a pas choisi l'ordre (§9 : A lot 4 / B
 > Conception / C données).
 
+- [ ] **#575 — Lot 4 du plan SOLO : le reste du codé-en-dur, à commencer par celui qui fausse les chiffres.**
+  Ouvert le 27 août 2026 sur le §9 n° 1 du rapport. Le plan `plans de travail/PLAN-SOLO-echelle-et-depistage.md`
+  annonçait ce lot (~90 min) ; les lots 1-2-3 ont été livrés, celui-ci **n'a jamais eu d'item**, et ses
+  sites sont intacts à HEAD. **B1+B2 en premier — c'est le seul du lot qui produit des chiffres faux
+  aujourd'hui, chez Grégoire comme ailleurs.**
+  - [x] **B1+B2 · le quatrième repli IDME et sa clé morte** — LIVRÉ le 27 août 2026 (suppression). (rapport §3 n° 2). `convertirNiveauEnPourcentage`
+    (`portfolio.js:543`) replie sur `{0:0, I:32, D:69.5, M:79.5, E:92.5}` derrière `db.getSync('echellesPerformance')`
+    — clé **lue et jamais écrite** dans tout `js/` (patron `feedback-cle-db-lue-jamais-ecrite`), donc le repli
+    est TOUJOURS actif. Chez Grégoire ce sont `32 / 69,5 / 79,5 / 92,5` au lieu de ses `40 / 65 / 75 / 100` :
+    **faux chez lui aussi** ; ailleurs, `|| 0` rend **0 %** pour tout code non IDME, et chaque critère devient
+    un « défi commun ». Unique appelant : `interventions.js:337`.
+  - [x] **B3+B4 · les cinq noms de critères de Grégoire** — LIVRÉ le 27 août 2026 (suppression). (rapport §3 n° 1). `analyserSousGroupe` (`:251`) et
+    `obtenirPerformancesSRPNF` (`:285-289`) énumèrent `Structure / Rigueur / Plausibilité / Nuance / Français` :
+    `defisCommuns` reste **vide pour toute autre grille**. Le patron correct est dans le MÊME fichier —
+    `mettreAJourCriteresCibles` (`:1138`) lit la grille de l'utilisateur et `calculerMoyennesCriteres`. On
+    converge sur lui ; on n'écrit pas un cinquième chemin.
+  ⮕ **B1+B2+B3+B4 livrés ensemble le 27 août 2026, PAR SUPPRESSION.** Constat qui a décidé du geste :
+    `intervention.analyse.defisCommuns` était écrit et sauvegardé, et **aucun écran ne le lisait**, depuis
+    sa création (Beta 0.85) — `genererAffichageAnalyseCartes` n'affiche que les patterns et les niveaux
+    RàI ; grep sur tout le dépôt, zéro lecteur. Le besoin est déjà servi, et correctement, par
+    `mettreAJourCriteresCibles` (compteur « — 3/5 en défi » par critère de la GRILLE, via
+    `calculerMoyennesCriteres`). Réparer le doublon aurait été un correctif sans effet
+    (`feedback-verifier-consommateurs-avant-brancher`). Retirés : le bloc « défis » de `analyserSousGroupe`,
+    le champ `defisCommuns`, `obtenirPerformancesSRPNF` (`interventions.js`),
+    `convertirNiveauEnPourcentage` (`portfolio.js`) et la mention trompeuse de la clé morte dans
+    `tableau-bord-apercu.js`. Sentinelle `sentinelle-575-lot4-b1b2-b3b4` (8 cas, **8 mutations, 8 rouges**)
+    remplace `sentinelle-542-a4-defis-communs` (11 cas), devenue sans objet — son dernier test annonçait
+    ce lot. ⚠ Deux assertions ont été **durcies après un break-test vert** : le comptage des patterns
+    (montage à un étudiant par pattern → une mutation `= 1` passait) et le `toContain` du compteur vivant
+    (satisfait par le nom cité dans un COMMENTAIRE du corps — même défaut tautologique que #549, §4 de
+    l'audit).
+  - [ ] **B7 · filtre de notes `['I','D','M','E']`** (`liste-evaluations.js:368`, rapport §3 n° 8) — inutilisable
+    hors IDME.
+  - [x] **`SCALE_FALLBACK` · le PDF remis à l'élève** — LIVRÉ le 27 août 2026 (suppression).
+    `lireEchelle` (`synthese-retroaction-data.js`) résout désormais par le chemin unique
+    `obtenirEchelleResolue` — qui connaît AUSSI l'échelle embarquée d'une pratique configurable
+    (`pratique-<id>`), le cas qui tombait systématiquement sur le repli — et rend `[]` quand rien ne se
+    résout : la légende et la jauge se masquent, le reste du document tient (le rendu lit partout
+    `feedback.scale || []`). `normaliserCouleur` ne devine plus la couleur d'après le code IDME de même
+    lettre. Sentinelle `sentinelle-575-synthese-pdf-sans-echelle-imposee` (7 cas, **6 mutations, 6 rouges**) ;
+    ce module n'avait jusqu'ici **aucun test de comportement**.
+  - [ ] **B10 · `ORDRE_NIV`, et six comparaisons IDME littérales de plus** ⚠ **BUTE SUR #555** (`synthese-retroaction-data.js:19`, rapport §3 n° 9).
+    `ORDRE_NIV[…] || 0` → progression nulle hors IDME. **Mesuré le 27 août, plus large que ce que l'audit
+    décrit** : le module ne compare pas seulement par `ORDRE_NIV`, il teste les codes EN TOUTES LETTRES à
+    **six** endroits — `=== 'I' || === 'D'` pour les défis (`:536`, `:681`, `:915`), `=== 'M' || === 'E'`
+    pour « tous maîtrisés » (`:543`, `:554`, `:607`). L'ordre, lui, se dérive de l'échelle (rang par `min`) ;
+    mais « quel niveau est faible » et « quel niveau est maîtrisé » ne se dérivent d'AUCUNE échelle
+    aujourd'hui — c'est exactement l'objet de **#555 (la marque de maîtrise)**. Le faire sans #555
+    reviendrait à inventer une règle, donc à remplacer un arbitrage codé en dur par un autre. ⮕ **À
+    reprendre APRÈS #555**, en même temps que les autres consommateurs de la même marque.
+  - [x] **Lettre IDME rendue à l'écran** (rapport §3 n° 3) — LIVRÉ le 27 août 2026.
+    `determinerLettreIDME` (`P >= 85 ? 'E' : …`) est retirée ; le bloc « Développement des habiletés » lit
+    son niveau par `lireNiveauNoteGlobale` (`profil-etudiant-helpers.js`), **extrait** du site déjà corrigé
+    au pas 3c-1 de #542 — les DEUX blocs du profil consomment la même règle, verrouillé par un test qui
+    compte les appels. Le défaut réel était pire que « une lettre fausse » : le même élève lisait **deux
+    niveaux différents pour la même note, sur la même page**. Sentinelle
+    `sentinelle-575-niveau-note-globale-une-seule-regle` (8 cas, **7 mutations, 7 rouges**).
+  - [x] **Badges et barres IDME rendus à l'écran** (rapport §3 n° 4, 5) — LIVRÉ le 27 août 2026.
+    Les badges d'artefacts lisent la couleur du **code déjà enregistré, dans SON échelle**
+    (`couleurDuNiveau`) : ils ne re-situent plus la note dans une échelle devinée, ce qui pouvait
+    **contredire le code affiché dans le même badge**. L'artefact transporte désormais l'`echelleId` de son
+    évaluation. Les barres de critères lisent l'échelle COMMUNE des évaluations de l'élève ; sans elle, fond
+    neutre et cause au survol, jamais un dégradé « par défaut ».
+    ⮕ **DEUX TROUVAILLES au passage, ni au plan SOLO ni à l'audit :**
+    (a) une **SIXIÈME table IDME**, `_obtenirNiveauxEtGradientSRPNF` (`sections-affichage.js:3787`), jumelle
+    mot pour mot de la cinquième — elle peignait le dégradé et la légende du bloc « Forces et défis », que
+    l'audit cite pourtant en exemple de code proprement configurable (ses CRITÈRES le sont ; ses repères de
+    couleur ne l'étaient pas). Les deux copies sont remplacées par un helper unique,
+    `niveauxEtGradientDesEvaluations`.
+    (b) la moitié du **constat §5.5** (injection CSS) : `couleurSure` était juste, mais **enfermée dans une
+    fermeture locale** — les badges et les barres posaient `niveau.couleur` BRUT dans un `style`. Extraite en
+    `couleurCssSure`, partagée, et testée (elle n'avait aucun test). Légende des barres échappée au passage.
+    Sentinelle `sentinelle-575-couleurs-badges-barres` (13 cas, **11 mutations, 11 rouges**).
+  - [ ] **⮕ SEPTIÈME site, TROUVÉ PAR LA SENTINELLE le 27 août — le graphique de progression devine encore
+    l'échelle.** `genererGraphiqueProgression` (`profil-etudiant-sections-affichage.js:3400-3401`) lit
+    `echelles.find(e => e.active) || echelles[0]` pour décrire ses zones colorées, et annonce **« Zones
+    colorées basées sur l'échelle IDME par défaut »** quand il n'en trouve pas. Ni le plan SOLO ni l'audit ne
+    l'avaient relevé. L'état connu est **verrouillé** par un test « exactement UNE occurrence restante » : il
+    rougira le jour où on le corrigera, ce qui est le signal attendu. ⚠ Vérifier aussi les zones colorées du
+    graphique lui-même (Chart.js), non auditées.
+  - [ ] **Bilan de rétroaction et tendance** (rapport §3 n° 10, 11) : `_NOMS_NIV_BILAN`/`_ORDRE_NIV_BILAN`
+    (`evaluation-retroaction.js:488-489`) ; `convertirNoteEnValeur` (`evaluation.js:284-290`) porte une
+    **échelle ancienne** où `I = 3`, ce qui contredit IDME.
+  ⚠ **Ce que ce lot ne rouvre pas** : le rabotage `startsWith('francais')` (**#553**), les seuils `idme.*` du
+  dépistage de risque (**#551**), la marque de maîtrise (**#555**). Ne pas ajouter de site de rabotage en
+  chemin — s'il en faut un, il est partagé, pour que #553 n'ait qu'un endroit à corriger.
+  **Fin** : plus aucun jeu de valeurs IDME en dur sur un chemin vivant ; `grep` à l'appui ; chaque pas porte
+  sa sentinelle avec break-test rouge vérifié.
+
 - [ ] **#573 — Après « Enregistrer », la cartouche ouverte est REMPLACÉE par une cartouche neuve, et l'autosave #517 devient muet.**
   (rapport §7.2 n° 1) `sauvegarderCartouche` → `chargerCartouchesRetroaction()` (`cartouches.js:890`) →
   `initialiserNouveauCartouche(grilleId)` (`:321`) : `cartoucheActuel` = `CART_xxx` neuf, nom et contexte

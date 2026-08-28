@@ -707,7 +707,9 @@ function calculerDistributionPerformance(etudiants) {
     }
 
     // Lire l'échelle de performance active depuis localStorage
-    // Essayer d'abord echellesTemplates (utilisé par echelles.js), puis echellesPerformance (fallback)
+    // #575 — la mention d'un repli sur `echellesPerformance` est retirée : cette clé
+    // n'était écrite nulle part, et son dernier lecteur (`convertirNiveauEnPourcentage`,
+    // `portfolio.js`) a été supprimé avec le repli IDME qu'elle servait.
     let echelles = db.getSync(cle('echellesTemplates'), []);
     let echelleId = db.getSync('echellePerformanceActive', 'idme-5niv');
 
