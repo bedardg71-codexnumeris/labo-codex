@@ -8549,6 +8549,7 @@
                                 </div>
                             </div>
                             <textarea id="retroactionFinale1" class="eval-textarea" rows="6"
+                                data-on-input="retroactionModifiee"
                                 placeholder="La rétroaction sera générée automatiquement ici selon tes évaluations et les options cochées."></textarea>
                             <div class="eval-retro-pied">
                                 <div id="compteur-mots-retro" class="eval-compteur-mots">0 mot</div>
@@ -14546,7 +14547,7 @@
     <script src="js/tampons-bibliotheque.js?v=20260511c"></script> <!-- Beta 99.41 : #264 progression sur exporterBibliotheque (sealing) -->
     <script src="js/travaux-annotation.js?v=20260629a"></script>
     <script src="js/travaux-archivage.js?v=20260511c"></script> <!-- Beta 99.41 : #264 progression sur lancerExport{Etudiant,Production,} -->
-    <script src="js/synthese-retroaction-data.js?v=20260827d"></script>
+    <script src="js/synthese-retroaction-data.js?v=20260827e"></script>
     <script src="js/synthese-retroaction-rendu.js?v=20260827a"></script>
     <script src="js/travaux-export-pdf.js?v=20260821a"></script> <!-- Beta 99.42 : ultrareview 2 Commit 2 — icones via forme.icone, pointille, sym-* -->
     <script src="js/travaux-resolution.js?v=20260702a"></script> <!-- #145 (2 juil.) : refus de la résolution par DA seul (PDF étranger) -->
@@ -14588,7 +14589,7 @@
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=20260821a"></script>
-    <script src="js/evaluation-chargement.js?v=20260821a"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) -->
+    <script src="js/evaluation-chargement.js?v=20260827a"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
     <script src="js/evaluation-calcul.js?v=20260826b"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
     <script src="js/evaluation-retroaction.js?v=20260827d"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
     <script src="js/evaluation-sauvegarde.js?v=20260629a"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) -->

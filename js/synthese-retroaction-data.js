@@ -872,6 +872,15 @@
         // barème annoncerait des progrès qui n'ont pas eu lieu.
         const zoneAvant = lecteurZone(evalPrecedente.echelleId);
         const zoneApres = lecteurZone(evaluation.echelleId);
+        // ⮕ DEUX PROGRÈS DE NATURES DIFFÉRENTES, et Grégoire a demandé qu'ils
+        // soient dits différemment (28 août 2026, option 3 sur trois proposées).
+        //   · vers ACQUIS   → « Tu as progressé en X. »
+        //   · vers SIGNALÉ  → « Tu as fait de beaux progrès, maintenant il faut
+        //                      les consolider. »
+        // Le second est le passage le plus difficile — celui qui fait sortir de
+        // l'insuffisance — mais il n'est pas durable. Le taire laisserait croire
+        // qu'il ne compte pas ; le confondre avec l'autre, qu'il est réglé.
+        //
         // ⚠⚠ « AVANT ≠ ACQUIS », PAS « AVANT = PRIORITÉ ». La règle d'origine
         // était `(avant === 'I' || avant === 'D') && (après === 'M' || 'E')` —
         // soit « ce n'était pas acquis, ça l'est devenu ». Traduire le côté
@@ -888,7 +897,22 @@
                     && zoneApres(c.niveauSelectionne) === 'acquis';
             })
             .map(c => c.critereNom);
-        return ameliores.length ? `Tu as progressé en ${ameliores.join(' et ')}.` : '';
+
+        // Le progrès NON DURABLE : sorti d'une priorité, pas encore acquis.
+        // ⚠ Un critère qui est passé à l'acquis n'est jamais ici : les deux
+        // listes sont disjointes par construction (`=== 'signale'`).
+        const consolides = evaluation.criteres
+            .filter(c => zoneAvant(prec[c.critereNom]) === 'priorite'
+                      && zoneApres(c.niveauSelectionne) === 'signale')
+            .map(c => c.critereNom);
+
+        const phrases = [];
+        if (ameliores.length) phrases.push(`Tu as progressé en ${ameliores.join(' et ')}.`);
+        if (consolides.length) {
+            phrases.push(`En ${consolides.join(' et ')}, tu as fait de beaux progrès : `
+                + 'maintenant il faut les consolider.');
+        }
+        return phrases.join(' ');
     }
 
     /* ----- J.3 — Jetons utilisés -----
