@@ -2638,7 +2638,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 - [ ] **#427** ⚠️ Refermer l'accès public — **DATE FIXÉE AU 1er SEPTEMBRE 2026** (décision Grégoire,
   26 août). ⮕ **FICHE OPÉRATOIRE PRÊTE** : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`
-  — gestes Cloudflare, liste à remplir, courriel d'invitation, vérifications, consignation.
+  — gestes Cloudflare, vérifications, annonce, consignation. ⚠ Plus de « liste à remplir » ni de courriel d'invitation nominatif : la policy est ouverte depuis la décision du 27 août.
   ⚠️ **LES DÉCISIONS DU 26 AOÛT ONT ÉTÉ RENVERSÉES LE 27** (décision Grégoire, 27 août). Elles
   reposaient sur trois faits erronés, corrigés depuis. La fiche opératoire a été réécrite en
   conséquence ; ADR-008, `DEPLOY.md` (v1.6), `PRIVACY.md` (v1.2) et `SECURITY.md` sont alignés.

@@ -501,7 +501,14 @@ Pour chaque rencontre mensuelle, calendrier indicatif de préparation :
 
 Une fois la phase expérimentateurs lancée (mi-juin 2026) :
 
-- **Hebdomadaire** : consultation des statistiques d'usage (si Cloudflare/Netlify les exposent).
+- **Mensuel** : export CSV de la liste des identités Cloudflare
+  (`My Team → Users`), déposé dans `Cowork A26 CoP Labo Codex/` et comparé au
+  précédent. *Précisé le 27 août 2026 : cette ligne disait « hebdomadaire :
+  consultation des statistiques d'usage (si Cloudflare/Netlify les exposent) ».
+  À partir de la réactivation d'Access du 1er septembre 2026, le geste est
+  défini et la cadence mensuelle suffit. Procédure : `DEPLOY.md` §4.4. À noter que l'export
+  dit qui est entré, jamais qui s'est servi de l'application — celle-ci est
+  locale et hors ligne.*
 - **Sur retour spontané** : suivi individualisé.
 - **Mensuel** : compilation des retours, identification de tendances, mise à jour BACKLOG.md.
 

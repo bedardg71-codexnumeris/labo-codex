@@ -40,9 +40,10 @@ d'accès à l'information (CAI).
 Ce registre couvre les incidents qui touchent :
 - Les **données étudiantes** stockées localement par l'auteur ou par un
   collègue utilisant Labo Codex.
-- Les **données enseignantes** (auteurs, personnes ayant reçu un accès,
-  contacts) qui apparaissent dans le dépôt GitHub public, les rapports de
-  bug archivés, la liste blanche Cloudflare Access, ou tout autre composant.
+- Les **données enseignantes** (auteurs, personnes s'étant identifiées à
+  l'entrée, contacts) qui apparaissent dans le dépôt GitHub public, les
+  rapports de bug archivés, la liste des identités Cloudflare
+  (`My Team → Users`) et ses exports CSV, ou tout autre composant.
 - L'**intégrité du code** déployé (compromission du pipeline GitHub →
   Netlify → Cloudflare).
 
@@ -73,8 +74,9 @@ est :
 - Un bug logiciel qui n'affecte pas la confidentialité ou l'intégrité des
   données (à signaler via [GitHub Issues](https://github.com/bedardg71-codexnumeris/Monitorage_v6/issues),
   pas ici).
-- Une demande de retrait d'une personne de la liste blanche Cloudflare
-  Access (à traiter via `labo@codexnumeris.org`, pas un incident).
+- Une demande de retrait d'une adresse de la liste des identités Cloudflare
+  (à traiter via `labo@codexnumeris.org`, pas un incident — cf. `DEPLOY.md`
+  §4.3 et `PRIVACY.md` §3.3).
 - Une difficulté d'utilisation ou un retour de testeur (consigné dans
   `Retours des testeurs/SUIVI-BUGS.md`).
 
@@ -167,8 +169,9 @@ Obligations cumulatives (Loi 25 art. 63.7-63.8) :
 ### 5.1 Immédiat (premières 24 h)
 
 - **Contenir** : isoler la cause, suspendre temporairement l'accès si
-  nécessaire (révoquer une session Cloudflare, retirer un courriel de
-  la liste blanche, fermer temporairement le repo).
+  nécessaire (révoquer une session Cloudflare, restreindre la policy Access
+  à une liste d'adresses — elle est ouverte par défaut à partir du
+  1er septembre 2026, cf. `DEPLOY.md` §3.6 —, fermer temporairement le repo).
 - **Documenter** : capture d'écran, copie de logs, état exact au moment
   de la découverte.
 - **Informer** les personnes habilitées (PRP du Cégep si pertinent).
@@ -276,10 +279,17 @@ Cette absence d'incident ne signifie pas que le risque est nul. Elle
 reflète :
 - Une utilisation **essentiellement individuelle** par l'auteur sur sa
   propre machine.
-- Une **diffusion limitée et essentiellement passive** : un accès individuel
-  Cloudflare Access a été accordé à 51 personnes entre janvier et mai 2026,
-  mais la quasi-totalité a brièvement consulté l'application puis n'y est
-  pas revenue (voir [`PRIVACY.md`](PRIVACY.md) §6.2).
+- Une **diffusion limitée** : 51 identités se sont enregistrées via Cloudflare
+  Access entre décembre 2025 et avril 2026, et aucun retour de bogue n'est
+  parvenu par cette voie (voir [`PRIVACY.md`](PRIVACY.md) §6.2). *Corrigé le
+  27 août 2026 : la rédaction antérieure disait qu'un accès « a été accordé »
+  individuellement à ces 51 personnes, et qualifiait la diffusion de
+  « passive ». Deux nuances : la liste blanche n'a existé qu'en janvier 2026,
+  après quoi la règle est passée à `Everyone` et les identités se sont
+  enregistrées d'elles-mêmes ; et l'export du 20 mai ne mesure aucune durée de
+  session — il ne permet donc pas de dire que ces personnes n'ont fait que
+  « consulter brièvement ». Ce qui est établi : 15 d'entre elles ont une
+  dernière connexion postérieure au 28 février, et aucune n'a écrit.*
 - Une **absence de retours de bug** signalant un incident.
 - Une **absence d'audit externe** qui pourrait avoir détecté des fuites
   non visibles à l'auteur.

@@ -364,19 +364,27 @@ restent purgés à 24 h (§8.2). Le risque résiduel se limite au scraping d'ass
 statiques publics (code déjà public sur GitHub) et à un déni de service absorbé
 par le CDN Cloudflare.
 
-### 6.2 Historique : phase d'accès individuel (janvier – mai 2026)
+### 6.2 Historique : première phase d'identification (décembre 2025 – mai 2026)
 
-Pendant la phase d'invitations alpha, le site était protégé par **Cloudflare
-Access** (service Zero Trust) : les personnes invitées s'authentifiaient par OTP
-(mot de passe à usage unique envoyé par courriel) à chaque session. La liste
-d'accès a compté jusqu'à une cinquantaine de collègues (en plus de l'auteur),
+Le site était alors protégé par **Cloudflare Access** (service Zero Trust) : on
+s'authentifiait par OTP (mot de passe à usage unique envoyé par courriel), avec
+une session d'une semaine. *Précisé le 27 août 2026 : cette section parlait
+d'une « phase d'accès individuel » et de « personnes invitées ». Une liste
+blanche a bien existé, mais en janvier 2026 seulement ; elle a ensuite été
+abandonnée au profit d'une règle ouverte, et les identités suivantes se sont
+enregistrées d'elles-mêmes.* Une cinquantaine d'identités se sont ainsi
+enregistrées (en plus de l'auteur),
 sans jamais atteindre le quota gratuit Cloudflare Zero Trust (50 utilisateurs).
 *Correction du 27 août 2026 : ce passage affirmait que le quota était saturé. Il
 ne l'a jamais été — l'export du 20 mai 2026 recense 51 identités enregistrées mais
 seulement 4 sièges d'accès actifs.* **Aucune
-liste nominative n'a été publiée.** La quasi-totalité des personnes invitées a
-brièvement consulté l'application puis n'y est pas revenue, sans feedback
-structuré ni rapport de bug par cette voie.
+liste nominative n'a été publiée.** Aucun retour ni rapport de bogue n'est
+parvenu par cette voie. *Corrigé le 27 août 2026 : ce passage ajoutait que « la
+quasi-totalité des personnes invitées a brièvement consulté l'application puis
+n'y est pas revenue ». L'export du 20 mai 2026 ne mesure aucune durée de
+session et ne permet donc pas de dire « brièvement » ; il montre par ailleurs
+15 dernières connexions postérieures au 28 février. L'absence de retours, elle,
+est établie — et c'est un constat différent.*
 
 Pendant cette phase, Cloudflare traitait, selon la politique standard du plan
 gratuit Zero Trust :

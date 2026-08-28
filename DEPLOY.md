@@ -1,6 +1,6 @@
 # Guide de déploiement — Labo Codex
 
-> **Version** : 1.5 (23 août 2026 — nom réel du site Netlify corrigé, aperçus de PR documentés, procédure de bump alignée sur `scripts/release.mjs`, état de la CI ; voir historique)
+> **Version** : 1.6 (27 août 2026 — réactivation de Cloudflare Access au 1er septembre 2026 avec une policy ouverte ; quatre affirmations fausses corrigées ; §4.4 refondue en export périodique des identités ; voir historique)
 > **Public** : Grégoire Bédard (mainteneur principal) + co-mainteneur éventuel
 > **Document apparenté** : [`PRIVACY.md`](PRIVACY.md), [`INCIDENTS.md`](INCIDENTS.md)
 
