@@ -3152,7 +3152,13 @@ async function chargerFiltreGrillesCartouche() {
     grilles.forEach(grille => {
         const option = document.createElement('option');
         option.value = grille.id;
-        option.textContent = echapperHtml(grille.nom);
+        // #572 — PAS d'`echapperHtml` ici : `textContent` échappe DÉJÀ par
+        // construction (c'est le mécanisme interne d'`echapperHtml` elle-même),
+        // et il n'interprète pas les entités. Les faire passer deux fois affiche
+        // le code littéral : une grille « L'atelier » devenait « L&#39;atelier »
+        // dans le filtre. Le défaut existait avant pour `&` (« Écrit & oral ») ;
+        // l'échappement des guillemets ajouté à `echapperHtml` l'a rendu courant.
+        option.textContent = grille.nom;
         selectFiltre.appendChild(option);
     });
 }

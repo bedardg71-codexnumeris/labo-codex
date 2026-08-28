@@ -269,20 +269,39 @@ const listeEtudiants = [
  * 
  * FONCTIONNEMENT:
  * - Crée un élément div temporaire
- * - Utilise textContent pour échapper automatiquement
- * - Retourne le innerHTML sécurisé
- * 
+ * - Utilise textContent pour échapper &, < et >
+ * - Échappe ENSUITE les guillemets, que le navigateur ne touche pas
+ *
  * EXEMPLE:
  * echapperHtml('<script>alert("XSS")</script>')
- * // Retourne: '&lt;script&gt;alert("XSS")&lt;/script&gt;'
- * 
+ * // Retourne: '&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;'
+ *
+ * ⚠️ SÛRE EN CONTEXTE D'ATTRIBUT depuis le 28 août 2026 (#572). Avant cette
+ * date, `textContent → innerHTML` laissait passer `"` et `'` : une valeur
+ * interpolée dans un `data-*`, un `title` ou un `style` pouvait refermer
+ * l'attribut et en injecter d'autres. La règle 1 du projet applique cette
+ * fonction aux deux contextes — texte ET attribut — donc elle tient le plus
+ * strict des deux.
+ * ⮕ Ce n'est PAS une licence pour interpoler du contenu utilisateur dans un
+ * attribut sans guillemets : `<div data-x=${valeur}>` reste cassable par une
+ * simple espace. Les attributs se citent, toujours.
+ *
  * ⚠️ NE PAS MODIFIER - Fonction de sécurité critique
+ * (modification du 28 août 2026 faite sur autorisation explicite de Grégoire,
+ * zone protégée `js/config.js`)
  */
 function echapperHtml(texte) {
     if (texte == null) return '';
     const div = document.createElement('div');
     div.textContent = String(texte);
-    return div.innerHTML;
+    // #572 — `textContent → innerHTML` échappe `&`, `<` et `>`, mais PAS les
+    // guillemets : le navigateur n'a pas besoin de les échapper dans du texte.
+    // Or la règle 1 du projet applique cette fonction aussi à des valeurs
+    // interpolées DANS DES ATTRIBUTS (`data-*`, `title`, `style`), où un `"`
+    // referme l'attribut et laisse injecter les suivants. Une seule fonction
+    // sert les deux usages : elle doit tenir le plus strict des deux.
+    // Autorisation explicite de Grégoire (28 août 2026) pour cette zone protégée.
+    return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 /* ===============================
