@@ -57,6 +57,65 @@ doublon aurait été un correctif sans effet. Diff du lot : **+502 / −556**.
    fermeture locale** ; badges et barres posaient la couleur utilisateur BRUTE dans un
    `style`. Extraite en `couleurCssSure`, partagée, testée (elle n'avait aucun test).
 
+### 🔴 #508 — LE BANDEAU D'AVIS BLOQUE LES CLICS SOUS LUI. CORRECTIF PRÊT, **NON COMMITÉ**
+
+**Trouvé le 28 août au petit matin, en tentant de pousser** : `scripts/pousser.sh` a refusé
+avant d'ouvrir la connexion — 1 spec nouvellement rouge,
+`planif-alignement › un bloc glissé près d'un autre COLLE`.
+
+**Ce n'est PAS un artefact de test, et ce n'est pas le lot #575.** Prouvé par trois mesures
+en worktrees jetables :
+
+| Base | Spec |
+|---|---|
+| `fbeffdad` (dernier verdict vert) | ✅ verte |
+| `f41c6118` (**#508**, bandeau d'avis) | ❌ rouge |
+| `f41c6118` + condition de date forcée à `false` | ✅ verte |
+
+⮕ Le bandeau est `position: fixed`, ancré **en bas, centré, 600 px, `z-index: 950`**. Il
+**recouvre la zone de travail** : le `mouse.down()` du glisser atterrit sur lui, jamais sur le
+bloc, qui ne bouge pas d'un pixel (reçu 400 = sa position de départ). ⮕ **Conséquence réelle
+pour l'utilisateur** : tout ce qui se trouve sous le bandeau — un nœud de carte mentale, un
+bouton — est inatteignable au clic **tant que l'avis n'est pas fermé**. Portée limitée (il se
+ferme d'un clic et ne revient plus, et la condition `new Date() < 1er septembre 2026` l'éteint
+d'elle-même dans trois jours), mais réelle d'ici là.
+
+**LE CORRECTIF EST ÉCRIT ET VÉRIFIÉ, IL VIT DANS L'ARBRE, NON COMMITÉ** (`styles.css`) :
+`pointer-events: none` sur `.transition-bandeau`, `auto` sur `.transition-bandeau-fermer` — le
+patron des bandeaux NON MODAUX. **Aucun changement d'apparence.** Les 4 specs concernées
+passent, dont `avis-identification-bandeau-508` (visibilité + fermeture). Contrepartie assumée
+et documentée dans le CSS : le texte de l'avis n'est plus sélectionnable.
+
+⚠ **POURQUOI IL N'EST PAS COMMITÉ.** Le hook anti-cache exige que `styles.css?v=` change dans
+`index.html` — or **la session parallèle a déjà fait ce bump (`c` → `d`) dans SON `index.html`
+non commité**, avec sept autres modifications à elle. Stager `index.html` emporterait son
+travail : c'est l'incident que ce fichier documente déjà trois fois. ⮕ **Geste d'attente
+décidé par Grégoire** : ne rien stager ; quand elle aura commité, bumper d'un cran (`d` → `e`)
+et committer `styles.css` + un `index.html` ne portant QUE ce bump.
+
+### ⚠ DEUX SESSIONS SUR LE MÊME ITEM #575, LE 28 AOÛT AU PETIT MATIN
+
+La session parallèle travaille **sur le lot 4 lui-même** : `evaluation-retroaction.js` (n° 10),
+`liste-evaluations.js` (B7), `profil-etudiant-calculs.js`, et une sentinelle neuve
+`sentinelle-575-ordre-niveaux-derive-echelle` — soit **B10**, que le bloc ci-dessus déclare
+bloqué par #555. ⮕ **À vérifier au moment de la reprise** : ce que cette session a tranché
+pour « quel niveau est faible / maîtrisé » sans #555, et si les deux lectures se contredisent.
+
+### ⚠ `git maintenance` A RE-CRASHÉ — DEUXIÈME FOIS EN DOUZE HEURES
+
+Trois nouveaux verrous à **04:53** (`index.lock`, `next-index-11.lock`,
+`objects/maintenance.lock`), après ceux de 15:46 la veille. Retirés après la même vérification
+(aucun git réel, aucune opération en cours). Ils bloquaient vraisemblablement AUSSI la session
+parallèle, dont la dernière écriture date de 04:50.
+
+⮕ **PISTE SUR LA CAUSE, mesurée deux fois** : `lsof` montre le même processus tenant les
+fichiers `.lock` — **PID 47120,
+`/System/Library/Frameworks/Virtualization.framework/…/XPCServices/com.apple…`**. Un service de
+virtualisation qui garde des descripteurs ouverts sur `.git` expliquerait qu'une tâche de
+maintenance meure en cours d'écriture. À instruire avant de re-nettoyer une troisième fois.
+
+---
+
 ### ⚠ ERRATUM SUR LE MESSAGE DE `c85ec85b` — 35 → **32 mutations**
 
 Le message du commit annonce « 36 cas, **35** mutations toutes rouges ». Le compte
