@@ -1048,6 +1048,22 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   recharge) mais **le suffixe ment sur la date de modification**. C'est un chiffre juste sous
   un mauvais libellé, exactement ce que [[feedback-total-tests-lu-apres-dernier-changement]]
   nomme.
+  🔧 **ET LE MESSAGE DU HOOK CONSEILLE LUI-MÊME LE MAUVAIS GESTE — mesuré le 28 août 2026.**
+  Le refus affiché par `pre-commit` propose : « incrémenter la **lettre** du suffixe dans
+  `index.html` (20260827a -> 20260827b) ». Suivi **littéralement** sur un fichier dont le jeton
+  date de la VEILLE, ce conseil produit `20260827c` : le hook passe, puis
+  `sentinelle-anticache-fichiers-modifies` rougit, puisqu'elle exige le **jour du build**
+  (`version.json` = `0828-1405` → `0828`). Les deux gardes ne disent pas la même chose, et
+  **c'est le conseil affiché qui induit en erreur** — pas l'inattention de qui le suit.
+  ⮕ Le geste correct est de changer la **DATE** pour celle du build, puis la lettre au besoin :
+  `20260827b` → `20260828b`, jamais `20260827c`.
+  ⮕ **Correctif minimal, sans toucher aux gardes** : reformuler le message du hook pour qu'il
+  nomme le jour du build (qu'il connaît déjà, il lit `version.json`) au lieu de parler d'une
+  lettre. Une garde qui refuse ET conseille doit conseiller ce que l'autre garde exigera.
+  ⮕ Rencontré en voulant committer #555 lot 2 : quatre fichiers refusés, dont
+  `pratique-pan-standards.js` au jeton `20260827b` — le seul daté de la veille, donc le seul
+  où le conseil menait au rouge. Signalé à la session parallèle, qui a vérifié ses neuf fichiers
+  en conséquence.
   🔧 **LA CAUSE STRUCTURELLE, TROUVÉE À LA RELEASE 1.102.0 DU 27 AOÛT — ET CE N'EST PAS UN
   DÉFAUT DE RAPPEL.** `release.mjs` et la sentinelle **ne prennent pas le même repère**, et
   l'écart est d'exactement UN commit :
@@ -2121,7 +2137,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     `dupliquerEchelle`, qui **perdait les deux repères** — trouvé par une question de Grégoire sur le
     namespace, pas par relecture.
   ⏳ **CE QUI RESTE DU LOT 2** : (a) `evaluation-retroaction.js`, **8 lignes / 18 comparaisons**, le
-  bilan à l'écran ; (b) `_detecterSeuilMaitrise` (`consolidation.js`) ; (c) les quatre replis divergents
+  bilan à l'écran ; (b) `_detecterSeuilMaitrise` (`consolidation.js`) ; (c) ✅ FAIT — les quatre replis divergents
   `0,70` / `0,75` ; (d) le nommage (`seuilMaitrise` porte quatre sens) ; (e) **#579** et **#580**
   ci-dessous, ouverts par ce lot.
   ⮕ **LOT 1 LIVRÉ le 28 août 2026 — LA DÉCISION D'ARCHITECTURE EST PRISE ET LE MODÈLE EXISTE.**
@@ -2172,7 +2188,8 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⏳ **CE QUI RESTE (lot 2)** : (a) **Grégoire doit poser ses repères** sur ses échelles — sans eux
   aucun lecteur ne peut répondre ; (b) le **lecteur unique** « zone d'un code » ; (c) **brancher les
   consommateurs** — B10b (6 sites / 14 comparaisons), `evaluation-retroaction.js` (8 lignes / 18) ;
-  (d) **unifier les quatre replis divergents** ci-dessous ; (e) l'éditeur d'échelle NEUVE
+  (d) ✅ **unifier les quatre replis divergents** — FAIT le 28 août 2026 (et ils étaient sept, tous
+  inatteignables : voir la mesure ci-dessous) ; (e) l'éditeur d'échelle NEUVE
   (`afficherNiveauxNouvelleEchelle`), qui écrit dans un tampon avant création — les repères s'y posent
   après enregistrement, ce qui est acceptable mais reste à finir.
   ⮕ **SUCCESSEUR : #577** — l'assistant de configuration des pratiques ignore ces deux champs.
@@ -2185,12 +2202,39 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `|| 0.70` dans `profil-etudiant-calculs.js` et `interventions.js`, `|| 0.75` dans
   `profil-etudiant-sections-affichage.js` et `pratique-pan-standards.js`. Deux fichiers répondent
   donc différemment à la même question quand la préférence est absente.
+  ⚠⚠ **CETTE DERNIÈRE PHRASE EST FAUSSE — mesuré le 28 août 2026, et le chantier est LIVRÉ.**
+  Quand la préférence est absente, tout le monde obtient **0,70** : `obtenirSeuil`
+  (`interpretation-config.js:139`) retombe sur `SEUILS_PAR_DEFAUT`, et `chargerSeuilsInterpretation`
+  auto-guérit le stockage incomplet. Les replis `|| 0.70` / `|| 0.75` ne se déclenchaient donc que
+  sur une valeur **falsy**, qu'aucun des trois chemins d'écriture ne peut produire
+  (`interpretation-config.js:108`, `:119`, `preferences-v2.js:294` — ce dernier transformant même une
+  saisie de 0 en 0,70), et `seuilsInterpretation` ne transite ni par l'import ni par le Codex.
+  ⮕ **Ce n'étaient pas deux comportements, mais quatre VALEURS MORTES documentant deux conventions
+  contradictoires.** Le risque n'était pas un calcul faux : c'était qu'un lecteur prenne 0,75 pour la
+  règle. Qui traite cet item en croyant corriger deux comportements corrigera des zéros.
+  ⚠ **ET IL Y AVAIT TROIS SITES DE PLUS QUE LES QUATRE ANNONCÉS** : `pratique-pan-standards.js:1404`
+  (table de repli locale de `_obtenirSeuil`, `defiSpecifique` à **0,75** contre 0,70 à la source — ses
+  deux autres valeurs, `idme.insuffisant` 0,64 et `idme.developpement` 0,75, concordaient) · son repli
+  final `|| 0.75`, arbitraire · `profil-etudiant-calculs.js:1151` et `:1526`, qui n'ont **aucun**
+  repli — un troisième comportement que l'énoncé ne nommait pas.
+  ⮕ **LIVRÉ le 28 août 2026.** Replis retirés (`profil-etudiant-calculs.js:1020`,
+  `profil-etudiant-sections-affichage.js:3147`, `pratique-pan-standards.js:1023`) ; le `|| 0.70`
+  d'`interventions.js` confondait **garde de chargement** et **repli de valeur** sous un seul
+  opérateur — séparés, la garde subsiste (réelle en test ; en production `interpretation-config.js`
+  est chargé avant, `index.html:14451`) ; table miroir alignée sur la source et son repli final retiré
+  (un seuil inconnu est une erreur d'appel, pas un cas à deviner — les 3 appelants sont tous dans la
+  table, vérifié). Sentinelle `sentinelle-555-replis-seuil-defi` (6 cas) : elle **compare** à
+  `SEUILS_PAR_DEFAUT` au lieu de recopier 0,70, commentaires filtrés avant assertion. **6 break-tests,
+  6 rouges isolément** — dont celui qui compte : porter la source à 0,80 SEULE fait rougir les deux
+  miroirs. `progressionArtefacts` (`profil-etudiant-calculs.js:1021`) porte le même patron de repli
+  mort, mais **concordant** : laissé tel quel, inscrit ici plutôt que corrigé au passage.
   ⮕ **CE QUI MANQUE VRAIMENT** : la **marque de seuil sur l'échelle** — quel niveau, dans l'échelle
   de CET utilisateur, marque le passage à la maîtrise. Un niveau porte déjà `code`, `nom`, `min`,
   `max`, `valeurCalcul`, `couleur` et, depuis 1.103, une étiquette SOLO facultative.
   ⏳ **DÉCISION D'ARCHITECTURE, pas un pas de refactor** : un champ, un écran d'édition, une
   migration. À poser à Grégoire avant d'écrire une ligne.
-  ⮕ **Premier pas possible et sans décision** : unifier les quatre replis divergents.
+  ⮕ ~~**Premier pas possible et sans décision** : unifier les quatre replis divergents.~~
+  ✅ **FAIT le 28 août 2026** — voir la mesure ci-dessus, qui corrige l'énoncé au passage.
   ⮕ **AJOUT DU 28 AOÛT (B10a).** Le recensement des consommateurs de la marque est maintenant complet et
   mesuré, pas estimé : `synthese-retroaction-data.js` **6 sites / 14 comparaisons** (le PDF remis à
   l'élève), `evaluation-retroaction.js` **8 lignes / 18 comparaisons** (le bilan à l'écran). Les deux

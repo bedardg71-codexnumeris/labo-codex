@@ -1045,7 +1045,16 @@ function mettreAJourCriteresCibles(interventionId) {
     }
 
     // Récupérer le seuil de défi configurable
-    var seuilDefi = (typeof obtenirSeuil === 'function' ? obtenirSeuil('defiSpecifique') : null) || 0.70;
+    // #555 lot 2 (28 août 2026) — le `|| 0.70` confondait DEUX cas sous un seul
+    // opérateur : la fonction absente (garde de chargement, réelle en test —
+    // `interpretation-config.js` est chargé avant ce fichier en production) et
+    // une valeur falsy rendue par la fonction (repli de valeur, jamais atteint,
+    // qui aurait écrasé un 0 délibéré). Séparés : la garde subsiste, le repli
+    // de valeur est retiré. Le 0,70 ci-dessous MIROITE `SEUILS_PAR_DEFAUT` et ne
+    // doit jamais en diverger — verrouillé par la sentinelle #555 des replis.
+    var seuilDefi = typeof obtenirSeuil === 'function'
+        ? obtenirSeuil('defiSpecifique')
+        : 0.70;
 
     // Compter combien d'étudiants sont en défi pour chaque critère
     var defisParCritere = {};

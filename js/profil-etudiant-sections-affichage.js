@@ -3144,7 +3144,10 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
     const noteFinale = noteFinaleMultiObjectifs.noteFinale || 0;
 
     // Calculer forces et défis
-    const seuil = obtenirSeuil('defiSpecifique') || 0.75;
+    // #555 lot 2 (28 août 2026) — le repli `|| 0.75` est RETIRÉ. Il CONTREDISAIT
+    // la source (`interpretation-config.js` : 0,70) et n'était atteignable sur
+    // aucun chemin d'écriture — une valeur morte qui documentait une fausse règle.
+    const seuil = obtenirSeuil('defiSpecifique');
     let forces = [];
     let defis = [];
 

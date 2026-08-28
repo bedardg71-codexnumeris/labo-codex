@@ -1017,7 +1017,11 @@ function calculerIPB(da) {
     });
     if (criteresMulti.length === 0) return null;
 
-    var seuilDefi = obtenirSeuil('defiSpecifique') || 0.70;
+    // #555 lot 2 (28 août 2026) — le repli `|| 0.70` est RETIRÉ, pas déplacé.
+    // `obtenirSeuil` rend toujours une valeur : clé absente → `SEUILS_PAR_DEFAUT`.
+    // Le repli local ne se déclenchait donc que sur une valeur falsy, et il
+    // aurait alors écrasé un 0 délibéré. Source unique : `interpretation-config.js`.
+    var seuilDefi = obtenirSeuil('defiSpecifique');
     var seuilProgression = (obtenirSeuil('progressionArtefacts') || 0.10);
     var fenetreN = obtenirNombreProductionsPourPatterns() || 3;
 
