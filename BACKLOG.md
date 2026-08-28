@@ -1816,15 +1816,23 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ensemble ». C'est la correction n° 1 du ratio impact/effort de l'audit.
 
 - [ ] 🔴 **#557 — `supprimerEvaluation` existe en double : la version corrigée est inatteignable.** (constat A2, CRITIQUE)
-  **REVÉRIFIÉ ENCORE VRAI le 27 août sur 1.104.1.** `liste-evaluations.js:1996` définit la version
-  **avec** `restaurerOriginaleSiReprise` (correctif du 8 juin) ; `evaluation.js:2710` en définit une
-  **sans**. `liste-evaluations.js` est chargé à `index.html:14580`, `evaluation.js` à `14595` :
-  l'export `window.supprimerEvaluation` du second **écrase** celui du premier.
+  **REVÉRIFIÉ ENCORE VRAI le 28 août à 12 h 05, lignes remesurées.** `liste-evaluations.js:1967`
+  définit la version **avec** `restaurerOriginaleSiReprise` (correctif du 8 juin) ;
+  `evaluation.js:2088` en définit une **sans**. Les deux sont exportées (`:2843` et `:3233`) ;
+  `liste-evaluations.js` étant chargé AVANT `evaluation.js`, l'export du second **écrase** celui du
+  premier.
+  ⚠ **LES LIGNES DE L'ÉNONCÉ PRÉCÉDENT (1996 / 2710) ÉTAIENT PÉRIMÉES** : `evaluation.js` a perdu
+  **642 lignes** le 28 août au matin (vue « accordéon » retirée, #575). Le défaut, lui, n'a pas bougé
+  d'un pouce — c'est le faux négatif que produirait une relecture par numéro de ligne.
   ⮕ **Supprimer une reprise depuis le profil étudiant laisse l'originale « remplacée » à jamais.**
   Le détail qui le prouve : `profil-etudiant-actions.js:154` porte le commentaire « Appeler la
   fonction de suppression du module liste-evaluations.js » — et appelle celle d'`evaluation.js`.
-  ⮕ Même mécanique pour `rechargerFiltreProduction` (`evaluation.js` gagne sur
-  `liste-evaluations.js`, sans exclusion portfolio ni préservation de la sélection).
+  ⮕ ~~Même mécanique pour `rechargerFiltreProduction`~~ — **RÉGLÉ le 28 août** (#575, `e2819cea`) :
+  ce doublon-là est parti avec la vue « accordéon », en même temps que celui de
+  `trierListeEvaluations`. Vérifié au grep le 28 août : **une seule définition de chacun**, dans
+  `liste-evaluations.js`. **Cette moitié de l'item est donc close** ; seul `supprimerEvaluation`
+  reste. Signalé par la session d'audit des items #558-#572, qui a relevé que mon propre chantier
+  avait périmé l'énoncé sans que je le mette à jour.
   ⮕ **Geste** : une seule définition par identifiant global (zéro-dette) + **sentinelle statique
   « aucun doublon de `function X` exportée sur `window` entre modules »** — ce motif est la
   réintroduction silencieuse d'un bug déjà corrigé, et il a déjà mordu ailleurs.
