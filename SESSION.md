@@ -7,6 +7,121 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 28 AOÛT 2026 (matin, 4 h 30 → 7 h 45) : #575 FINI SAUF B10,
+     #576 OUVERT ET LIVRÉ, ET LA PORTE TERRAIN RELEVÉE PAR GRÉGOIRE.
+     Commits `e2819cea`, `10fb514d`, `86475adf`, `a5386a30`. Aucun bump.
+
+     ▣ LA DEMANDE. Grégoire, sur question fermée en 4 options par TYPE de
+       chantier : « Finir #575 ». Puis, à sa demande : lire les skills
+       `ecosysteme-classe`, `pratiques-notation`, `depistage-rai`. Puis
+       « prépare un artefact pour la vérification », puis « corrige 576
+       maintenant », puis « vérifie que la porte 2.6 passe ».
+
+     ▣ AUDIT D'ENTRÉE. `main` à `d5247774`, arbre propre, aucun verrou git —
+       contrairement à la veille. Vitest lu AVANT toute écriture : **3740/3741**,
+       le rouge étant l'anti-cache antérieur. ⚠ Six commits locaux non poussés,
+       dont DEUX d'un autre chantier.
+
+     ▣ CE QUI A COMMANDÉ LES TROIS GESTES DU LOT. Avant de coder, vérifier que
+       chaque site est ATTEINT — la règle qui avait commandé le geste de la
+       veille. Résultat : sur les trois sites qui restaient, **DEUX ÉTAIENT
+       MORTS**, et le troisième n'était pas là où l'audit le disait.
+
+       · **B7** — le `<select id="filtre-note-eval">` que le filtre peuplait
+         n'existe NULLE PART dans `index.html`, et `git log -S` n'en trouve
+         aucune trace depuis le premier commit du dépôt. Inatteignable de
+         naissance. ⮕ Supprimé.
+       · **⮕ MAIS À CÔTÉ, VIVANT : le TRI de la colonne « Niveau »**, en-tête
+         cliquable, avec la même table IDME et un repli `?? 5`. Hors IDME,
+         toutes les lignes recevaient le même rang : **cliquer ne triait rien,
+         en silence.** C'est le vrai B7.
+       · **n° 11** — `convertirNoteEnValeur` (`I = 3`) : chaîne d'appel
+         s'arrêtant sur un conteneur absent du dépôt. Décision de Grégoire,
+         question fermée en 4 options : **supprimer les 441 lignes**. En les
+         retirant, la chaîne réelle s'est révélée être **584 lignes / 12
+         fonctions** — `evaluation.js` passe de 3894 à 3295.
+
+     ▣ DEUX DOUBLONS `window` SONT PARTIS AVEC LA VUE ACCORDÉON, et c'est le
+       patron `feedback-double-definition-window-derniere-gagne` :
+       `trierListeEvaluations` et `rechargerFiltreProduction` étaient définis
+       dans les DEUX modules et, `evaluation.js` étant chargé APRÈS
+       `liste-evaluations.js`, **c'était la version morte qui gagnait**.
+
+     ▣ LA PORTE TERRAIN, ET CE QU'ELLE A RAPPORTÉ. Artefact + markdown jumeau,
+       12 portes, ~8 min, aucune console. Relevé de Grégoire : **10 passées,
+       2 échecs**. 0.2 étant verte, le build n'était pas en retard : les deux
+       échecs sont réels, et **ils ont deux causes différentes**. Ses CAPTURES
+       les ont départagés — sans elles, l'enquête partait sur l'échelle.
+
+       · **2.7 = MA RÉGRESSION.** La garde « même échelle » comparait les
+         `echelleId` BRUTS. Son échelle courante est « IDME et niv 0
+         (**restaurée**) » — recréée par la réparation de #542, donc sous un
+         identifiant NEUF — pendant que ses évaluations d'H2026 en désignent un
+         ancien. La ligne « Progrès » ne pouvait plus jamais s'afficher.
+         Corrigé : comparaison sur l'échelle RÉSOLUE, et une échelle absente ou
+         introuvable traitée comme une ABSENCE. Les deux règles viennent
+         d'`obtenirEchelleCommuneDesEvaluations`, pas d'une invention.
+       · **2.6 = DÉFAUT ANTÉRIEUR → #576.** Le bilan affichait son titre puis
+         RIEN. `_collecterCriteresBilan` exigeait la grille template. La donnée
+         était là : l'évaluation enregistrée porte ses critères AVEC leur nom, et
+         le panneau voisin les lisait déjà sous sa bannière « Grille d'origine
+         introuvable ». Le bilan n'avait jamais eu ce repli. ⮕ **LIVRÉ.**
+
+     ▣ ⚠⚠ LA LEÇON DE LA NUIT, ET C'EST LA PLUS IMPORTANTE : **VITESSE NE VOIT
+       PAS LE RENDU.** Les DEUX régressions de la nuit — le bandeau #508 de la
+       session parallèle et une spec de bilan — sont passées sous des Vitest
+       verts (3767/3767 puis 3780/3780) et n'ont été vues que par **Playwright,
+       qui tourne dans WEBKIT contre le vrai `index.html`**. Sur un lot qui
+       touche l'affichage, la suite navigateur n'est pas une formalité de fin.
+       ⮕ **Corollaire** : la porte terrain 2.6 a été CONVERTIE en spec WebKit
+       (`#576 · le bilan nomme les critères…`). Une porte n'existe que si aucune
+       machine ne peut répondre — règle 1 du skill `portes-terrain`.
+
+     ▣ TROIS DÉFAUTS QUE LES ASSERTIONS N'ONT PAS VUS
+       · Une **faille d'injection ouverte par le correctif lui-même** : remplacer
+         des libellés en dur par le nom SAISI par l'utilisateur fait passer du
+         texte utilisateur dans un `innerHTML`. Quatre échappements au total, le
+         dernier trouvé par la sentinelle #576 (le repli ne fournit pas de
+         description, la ligne retombait sur le nom par une branche non échappée).
+       · Le **nom d'un critère écrit deux fois** — « Plausibilité (Plausibilité
+         En développement) ». Les assertions cherchaient la présence des mots,
+         **pas leur nombre**. Sorti en RENDANT le bilan.
+       · Une **spec verte pour la mauvaise raison** : `evaluation-rendu.spec.js`
+         ne seedait aucune échelle et passait, parce que la table IDME en dur en
+         fournissait une à tout le monde.
+
+     ▣ DEUX SESSIONS EN PARALLÈLE, COORDONNÉES PAR MESSAGES. La session #508
+       était bloquée par `index.html` non commité. Méthode qui a débloqué, et qui
+       est désormais au relais : reconstruire « HEAD + ses seules modifications »,
+       `git hash-object -w`, `git update-index --cacheinfo`, puis **`git commit`
+       SANS chemins** — `git commit -- <chemins>` est en mode `--only` et
+       recommite l'ARBRE, donc emporterait le travail de l'autre.
+       ⚠ Une correction reçue et vérifiée : sa première hypothèse sur la spec
+       était juste, sa « correction » visait à côté parce qu'elle avait sondé le
+       montage APRÈS sa réparation.
+
+     ▣ ⚠ UNE ERREUR DE MA PART, RELEVÉE PAR GRÉGOIRE. La porte 3.4 annonçait
+       « la liste nominale des personnes à inviter » pour le 1er septembre. Il a
+       répondu : « il n'y a pas de liste nominale. Je crois que tes informations
+       ne sont pas à jour. » **Il avait raison** : la policy est ouverte, et la
+       fiche le dit. Cause : `RELAIS.md` lu à 4 h 30, recopié dans la porte à
+       6 h 30 **sans revérification**, alors que trois commits avaient corrigé
+       cette inférence entre-temps. Le relais était juste ; la lecture était
+       périmée. ⮕ **Un attendu faux est pire que pas d'attendu.**
+
+     ▣ MESURE FINALE, LUE APRÈS LE DERNIER CHANGEMENT : **Vitest 3780/3780,
+       355 fichiers** — zéro rouge, l'anti-cache compris. Les 3 specs
+       d'`evaluation-rendu` passent en WebKit. Break-tests du chantier :
+       **18 mutations sur #575, 7 sur #576, 3 en Playwright — toutes rouges**,
+       restauration vérifiée à chaque fois. Version inchangée (1.104.1 /
+       `0827-1418`, 4 points de vérité synchrones) : la session `file://` de
+       Grégoire était ouverte. Audit sécurité du rituel : aucun motif — ni
+       `eval`, ni handler inline, ni `console.log`, ni zone protégée, et zéro
+       `innerHTML` ajouté.
+     ===================================================================== -->
+
+
+<!-- =====================================================================
      SESSION — 27 AOÛT 2026 (soir, 21 h 15 → 23 h) : LOT 4 DU PLAN SOLO,
      OUVERT SOUS #575 ET LIVRÉ À MOITIÉ. Commits `c85ec85b` (code) et
      `99eed60f` (relais). Aucun bump — session `file://` ouverte.

@@ -15,17 +15,138 @@
 | **Version** | **1.104.1** — build `0827-1418`. Patch : **#552 · #535 · #537 livrés** — la cible d'intervention ne vient plus ni de la moyenne en langue, ni du nom d'un critère, ni d'un seuil écrit dans le code. **Vitest 3716/3716 (350 fichiers) · Playwright 193/193.** ⚠ **Grégoire doit recharger sa session `file://`** : cinq jetons anti-cache ont changé au bump. |
 | **Version précédente** | **1.104.0** — build `0827-1245` (`588debf1`). Minor : la carte « Observation de la structure » rend un bloc par niveau de l'échelle, et le SOLO d'un critère vient du champ configuré. **Vitest 3715/3715 (350 fichiers) · Playwright 193/193**, verdict vert enregistré au SHA par `scripts/pousser.sh`. ✅ **AUCUN BUMP DÛ** : rien de code applicatif n'a changé depuis — seuls un test de constat et de la documentation. ⚠ **Grégoire doit recharger sa session `file://`** : huit jetons anti-cache ont changé au bump. |
 | **Avant-dernière** | **1.103.1** — build `0827-0953`, qui a porté six changements de code sans bump (pas 3c-3, pas 4, #547, #550, #551) : la session `file://` de Grégoire était ouverte, et la règle du projet interdit de bumper pendant. **C'est la seconde fois de la journée que l'application annonce un numéro plus ancien que son code.** |
-| **Travail en avance sur `main`** | ⚠ **OUI — CINQ commits locaux non poussés**, mesuré au rituel de fin du 27 août au soir, `git fetch` fait (`origin/main` = **`74fa4aed`**). Trois sont de la session du soir (`c85ec85b`, `99eed60f`, `98b0176a` — lot 4 / #575) ; **DEUX sont ANTÉRIEURS et d'un autre chantier** : `f41c6118` (#508, bandeau d'avis du 1er septembre) et `ed5336c9` (#427/#508, policy Cloudflare). ⮕ Cette ligne annonçait « tout est poussé » : **c'était déjà faux avant la session du soir**. ⮕ **Le push est bloqué en l'état** : le verdict Playwright porte `fbeffdad`, pas le SHA courant (voir la ligne « Suite Playwright »). Le débloquer = fermer GitHub Desktop, relancer la suite, régénérer le verdict — puis pousser les cinq. **Rien sur aucune branche.** |
-| **Suite Playwright** | **baseline à ZÉRO échec** — 193/193 le 27 août (contre 8 avant #495). ⚠ Cette ligne annonçait encore « 1 échec connu, `productions-ajout-refus-garde-340` = #530 » : **#530 est CLOS depuis le 26 août** (1.100.2 — le défaut était dans la sentinelle, pas dans la garde). La baseline était périmée d'une journée. |
+| **Travail en avance sur `main`** | ⚠ **OUI — QUINZE commits locaux non poussés**, mesuré au rituel de fin du 28 août au matin (`git fetch` fait, `origin/main` = **`74fa4aed`**). Ils viennent de DEUX sessions qui ont travaillé en parallèle toute la nuit et se sont coordonnées par messages : la session **#508** (bandeau d'avis, policy Cloudflare) et la session **#575/#576** (lot 4 du plan SOLO). ⮕ **Le push était bloqué par DEUX régressions Playwright successives, toutes deux réglées** : le bandeau `position: fixed` qui avalait les clics (`84661fc8`), puis une spec de bilan verte pour la mauvaise raison (`a5386a30`). ⮕ **La garde `scripts/pousser.sh` reste à lancer** — GitHub Desktop fermé, arbre au repos, personne d'autre n'écrivant. **Rien sur aucune branche.** |
+| **Suite Playwright** | ⚠⚠ **LA LEÇON DE LA NUIT DU 27-28 AOÛT, ET ELLE VAUT POUR TOUT CHANTIER DE RENDU.** Les DEUX régressions de la nuit ont été invisibles à Vitest — 3767/3767 puis 3780/3780, verts pendant que Playwright rougissait. Vitest tourne dans `node`, sans navigateur ; **Playwright tourne dans WebKit, le moteur de Safari, contre le vrai `index.html`**. ⮕ **Sur un lot qui touche l'affichage, la suite navigateur n'est pas une formalité de fin : c'est la seule qui voit.** ⮕ Corollaire découvert le 28 : une vérification qu'on croyait réservée à Grégoire (« porte terrain ») est souvent automatisable en spec WebKit — la porte 2.6 l'a été. |
 | ⚠ **AVANT TOUTE SUITE PLAYWRIGHT** | **fermer GitHub Desktop.** Les specs lisent l'arbre de travail en direct ; une commande git lancée pendant la suite change les fichiers sous leurs pieds et fait rougir des specs au hasard. Trouvé le 26 août (#523), règle versée au skill `portes-terrain`. |
 | ⚠ **LE CLONE DE GRÉGOIRE EST L'ARBRE DE TRAVAIL** | `/Users/kuekatsheu/Documents/GitHub/Monitorage_v6` sert à la fois de dépôt de travail et de source `file://` pour son app. Il voit les modifications dès qu'il recharge, **avant tout push** — et peut donc tomber sur un état intermédiaire. Le `git pull` des portes terrain lui est inutile. |
 | 📐 **CHANTIER MAJEUR — LIVRÉ, ET CETTE LIGNE ÉTAIT FAUSSE** | **#529 est LIVRÉ depuis le 26 août** (1.101.0 → 1.101.1, quatre lots : conversion, calcul, affichage, aide). Cette ligne l'annonçait encore « en attente » le 27 après-midi, et une session s'apprêtait à rouvrir un chantier fait. ⮕ **CE QUI RESTE EN SONT LES QUATRE SUCCESSEURS**, et aucun n'est un oubli : ~~**#537**~~ et ~~**#535**~~ (**LIVRÉS le 27 août** avec #552 — voir ci-dessous), **#539** (les clés du volet confidentiel — des CLÉS DE DONNÉES, pas des libellés), **#536** (`idmeMoyen` à 0 vs « pas de donnée », risque très réduit depuis #529). Audit d'origine : `Rapports/AUDIT-srpnf-code-en-dur-2026-08-26.md`. |
 | ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE** | **#427** (refermer l'accès public) et **#508** (l'avis d'accueil qui l'annonce). Fiche opératoire prête : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`. ⚠ **La policy est OUVERTE** (`Include → Everyone`, décision du 27 août) : il n'y a **ni liste nominale à dresser, ni personne à inviter**. **Dû par Grégoire** : les trois noms Cloudflare, la durée de session et la règle `Include` réellement en place dans la policy dormante — personne ne peut les relever à sa place. |
 | ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. ⮕ **ET C'EST ARRIVÉ UNE SECONDE FOIS LE MÊME JOUR, dans l'autre sens.** Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les `BACKLOG.md` et `SESSION.md` de la session « présences » — l'inscription de l'item **#538** et la renumérotation **#534 → #537** vivent donc dans un commit qui parle d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc non réécrit. **Deux avertissements en un jour : sur ce dépôt, `git add` par chemins explicites n'est pas une préférence, c'est la seule méthode qui tienne.** |
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
-| **Dernière mise à jour** | **27 août 2026, 22 h 40** — **le lot 4 du plan SOLO est ouvert (#575) et à moitié livré** (`c85ec85b`) : quatre pas, 36 cas de sentinelle, **32 mutations, toutes rouges**. **Vitest 3740/3741, 353 fichiers** — le rouge est l'anti-cache ANTÉRIEUR (`preferences.js`, `transitions.js`, `styles.css`), aucun fichier du lot. Aucun bump (session `file://` ouverte) ; les sept `?v=` touchés sont incrémentés. ⚠ **RENDU NON VÉRIFIÉ.** Avant : **27 août, 15 h 45** — **l'audit Fable 5 est rendu** : `Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md` (base `fbeffdad`, lecture seule, aucun bump). Deux items neufs : **#573** (cartouche remplacée après « Enregistrer », autosave #517 muet) et **#574** (seeds/gabarits d'échelle sans `valeurCalcul` → non calculables depuis #527) ; #542 mis à jour (**lot 4 jamais livré, chiffres faux chez Grégoire**). Avant : rituel de fin du 27 août — lot 3 de #542 REFERMÉ (8 pas) · #550 · #551 pas 1 · 1.104.0 · #552 · #535 · #537 LIVRÉS en 1.104.1 · #553, #554, #555 créés. |
+| **Dernière mise à jour** | **28 août 2026, 07 h 45** — **#575 (lot 4 du plan SOLO) est FINI sauf B10, et #576 est LIVRÉ.** Porte terrain relevée par Grégoire : **10/12, 2 échecs, tous deux traités**. **Vitest 3780/3780** (355 fichiers), lu après le dernier changement. **Aucun bump** : sa session `file://` était ouverte — les `?v=` touchés portent le jour du build (0827). Avant : 27 août 22 h 40, ouverture de #575 et quatre premiers pas. |
 
-## ▶ POUR LA SESSION QUI PREND LE RELAIS — 27 août 2026, 22 h 40
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 28 août 2026, 07 h 45
+
+### ⚠⚠ LES CINQ PREMIÈRES MINUTES — dans cet ordre, avant toute promesse
+
+1. **Déléguer le rituel de début** au subagent `audit-debut-session` (CLAUDE.md).
+   Ne pas prendre la prémisse de relance pour argent comptant : **elle est fausse une
+   fois sur deux en ce moment**, parce que deux sessions écrivent dans ce dépôt.
+2. **`git log --oneline origin/main..HEAD`** — s'il reste des commits locaux, la garde
+   `scripts/pousser.sh` n'a pas été passée. Ne rien construire dessus avant de savoir
+   pourquoi.
+3. **`find .git -name '*.lock'`** — `git maintenance` a crashé **trois fois en trois
+   jours** (27 août 15 h 46, 28 août 04 h 53, plus juillet). Vérifier l'âge des verrous
+   ET l'absence de git actif avant de retirer quoi que ce soit. C'est un défaut
+   RÉCURRENT du dépôt : la vraie réponse est de trancher `git config maintenance.auto false`,
+   pas de re-nettoyer.
+4. **`git status`** — si des fichiers modifiés ne sont pas les tiens, **une autre session
+   travaille**. Committer par chemins EXPLICITES, jamais `-A`. Pour un fichier PARTAGÉ
+   comme `index.html` : reconstruire « HEAD + tes seules modifications » dans un fichier
+   à part, `git hash-object -w`, `git update-index --cacheinfo`, puis **`git commit` SANS
+   chemins**. ⚠ `git commit -- <chemins>` est en mode `--only` et recommite le contenu de
+   l'**arbre** : il emporterait le travail de l'autre. Méthode éprouvée le 28 août.
+5. **Lire `RELAIS.md` MAINTENANT, pas au début de la session.** Le 28 août, une session a
+   recopié dans une porte terrain une ligne lue trois heures plus tôt ; entre-temps trois
+   commits l'avaient corrigée. Grégoire a dû relever l'erreur lui-même.
+
+### ⚠⚠ CE QUI A CHANGÉ DANS LA FAÇON DE VÉRIFIER — le point le plus important
+
+**Vitest ne voit pas les régressions d'affichage.** Les deux régressions de la nuit du
+27-28 août sont passées sous 3767/3767 puis 3780/3780 de Vitest, et n'ont été vues que par
+Playwright, au moment du push. Vitest tourne dans `node`, sans navigateur ; **Playwright
+tourne dans WebKit — le moteur de Safari — contre le vrai `index.html`**.
+
+⮕ **Sur tout chantier qui touche du rendu : lancer la suite navigateur AVANT d'annoncer
+que c'est fini.** Conditions : GitHub Desktop fermé, aucune autre session écrivant dans
+l'arbre. Une seule spec se lance vite :
+`cd tests && npx playwright test integration/<fichier>.spec.js --reporter=list`
+
+⮕ **Et le corollaire, découvert le 28 août** : une vérification qu'on croyait réservée à
+Grégoire est souvent automatisable en spec WebKit. La porte terrain 2.6 a été convertie en
+`#576 · le bilan nomme les critères quand la grille d'origine a disparu` — elle rejoue son
+cas réel contre le vrai `index.html`. C'est la règle 1 du skill `portes-terrain` : **une
+porte n'existe que si aucune machine ne peut répondre.** Avant d'écrire une porte, demander
+si une spec peut la remplacer.
+
+---
+
+### ✅ #575 — LOT 4 DU PLAN SOLO : FINI, SAUF B10
+
+**L'ORDRE DES NIVEAUX SE DÉRIVE MAINTENANT DE L'ÉCHELLE.** Deux tables IDME écrites en dur
+vivaient dans deux modules, en ordres opposés, toutes deux RENDUES à l'écran. Elles sont
+remplacées par un lecteur unique — `niveauxOrdonnesDeLEchelle` / `niveauDuCodeDansEchelle`
+(`profil-etudiant-calculs.js`) — qui résout par le chemin de #542 lot 3 et classe par la
+**borne inférieure** des plages, puis par la borne supérieure à égalité (le cas des échelles
+« IDME et niv 0 »). Pas de repli sur `valeurCalcul` : plage et valeur ponctuelle sont deux
+conversions inverses.
+
+| Pas | Geste | Sentinelle |
+|---|---|---|
+| **B7** (filtre `['I','D','M','E']`) | **SUPPRIMÉ** — le `<select id="filtre-note-eval">` qu'il peuplait **n'a jamais existé** dans `index.html`, `git log -S` ne trouve rien depuis le premier commit | `sentinelle-575-ordre-niveaux-derive-echelle` |
+| **Tri de la colonne « Niveau »** (trouvé en chemin, VIVANT) | Le rang se lit dans l'échelle de chaque évaluation ; une ligne sans niveau reste en fin **dans les deux sens** | idem — 26 cas, **18 mutations, 18 rouges** |
+| **n° 10** (bilan de rétroaction) | Les deux tables retirées ; nom et rang viennent de l'échelle | idem |
+| **n° 11** (`convertirNoteEnValeur`, `I = 3`) | **SUPPRIMÉ avec toute la vue « accordéon »** — 12 fonctions, 584 lignes, `evaluation.js` de 3894 à 3295 | — |
+
+⮕ **DEUX DOUBLONS `window` SONT PARTIS AVEC L'ACCORDÉON**, et c'est le patron
+`feedback-double-definition-window-derniere-gagne` : `trierListeEvaluations` et
+`rechargerFiltreProduction` étaient définis dans **les deux** modules et, `evaluation.js`
+étant chargé APRÈS `liste-evaluations.js`, **c'était la version morte qui gagnait**.
+`window.rechargerFiltreProduction` résout désormais vers celle qui exclut le portfolio.
+
+### ⚠ CE QUI RESTE DE #575 : **B10 SEUL, ET IL BUTE SUR #555**
+
+`synthese-retroaction-data.js` teste les codes EN TOUTES LETTRES à six endroits. Et le même
+patron subsiste dans `evaluation-retroaction.js` : **8 lignes / 18 comparaisons**
+(`=== 'I' || === 'D'` pour les défis, `=== 'M' || === 'E'` pour « tous maîtrisés »).
+L'ORDRE se dérive d'une échelle ; **« faible » et « maîtrisé », non** — c'est la marque de
+maîtrise de **#555**. Le faire sans elle remplacerait un arbitrage codé en dur par un autre.
+⮕ **Un test CONSTATE le compte de 18** : il rougira le jour où #555 les retirera, et c'est
+le signal voulu. Ne pas le « réparer » en changeant le chiffre.
+
+### ✅ #576 — LE BILAN SURVIT À LA DISPARITION DE LA GRILLE (livré le 28 août)
+
+Trouvé par la porte terrain 2.6 sur les données réelles d'H2026, captures à l'appui. Le
+bilan affichait « Présentement, il faut se concentrer sur : » puis **RIEN**. Cause :
+`_collecterCriteresBilan` exigeait la grille template et rendait `[]` quand elle avait
+disparu. La donnée était pourtant là — l'évaluation enregistrée porte ses critères AVEC leur
+nom, et le panneau voisin les lisait déjà.
+
+⚠⚠ **UNE CONTRAINTE À NE PAS OUBLIER EN TOUCHANT À CE BLOC** : `copierToutRetroaction` copie
+le `textContent` du bilan sous « === BILAN === » **dans ce qui est remis à l'élève**. Aucune
+note technique ne doit y figurer. Deux sentinelles le verrouillent.
+
+### ⚠ TROIS DÉFAUTS QUE LES TESTS N'ONT PAS VUS, ET COMMENT ILS SONT SORTIS
+
+1. **Une faille d'injection ouverte par le correctif lui-même.** Remplacer des libellés
+   écrits en dur par le nom SAISI par l'utilisateur fait passer du texte utilisateur dans un
+   `innerHTML`. Trois échappements posés, puis un quatrième — le repli #576 ne fournit aucune
+   description, donc la ligne d'un défi retombait sur le nom, par une branche restée non
+   échappée. **Trouvé par la sentinelle, pas par relecture.**
+2. **Le nom d'un critère écrit deux fois** — « Plausibilité (Plausibilité En développement) ».
+   Les assertions cherchaient la présence des mots, **pas leur nombre**. Sorti en RENDANT le
+   bilan, pas en le testant.
+3. **Une spec verte pour la mauvaise raison.** `evaluation-rendu.spec.js` ne seedait aucune
+   échelle et passait quand même, parce que la table IDME en dur en fournissait une à tout le
+   monde. Corrigé — et deux assertions ajoutées : le niveau porte le nom de l'échelle, et
+   aucun libellé IDME n'est connu d'avance.
+
+⮕ **La leçon commune** : une assertion de PRÉSENCE ne dit rien de la FORME. Sur un texte
+lu par un humain, rendre et lire.
+
+### ⏳ CE QUI RESTE DÛ À GRÉGOIRE
+
+- **Porte terrain 2.7** — la ligne « Progrès : X → Y » chez un élève qui est monté d'un
+  niveau. Elle dépend de ses données ; aucune machine ne peut dire si le cas existe chez lui.
+- **Décision #555** (la marque de maîtrise) — elle débloque B10 et les 18 comparaisons.
+- **1er septembre** : #427 + #508. ⚠ **Il n'y a NI liste nominale, NI personne à inviter** —
+  la policy est ouverte. Ce qui reste : insérer le paragraphe d'annonce dans le message de
+  rentrée à la CoP (rédigé, non envoyé), et relever dans la console les trois noms
+  Cloudflare, la durée de session et la règle `Include`.
+
+---
+
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 27 août 2026, 22 h 40 (entrée précédente)
 
 ### ✅ LOT 4 DU PLAN SOLO — OUVERT SOUS #575, QUATRE PAS LIVRÉS (`c85ec85b`)
 
