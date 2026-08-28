@@ -87,6 +87,46 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ## A faire
 
+### Arbitrages du 28 août 2026 (soir) — les deux qui n'avaient pas d'item
+
+> Les vingt et un arbitrages du 28 août sont consignés **dans leurs items respectifs**
+> (#555, #563, #571, #574, #577, #578, #579, #581, #583 à #587). Les deux ci-dessous
+> n'existaient nulle part : ils sont nés de la lecture des skills métier, pas d'un audit.
+> Registre complet, avec les formulations de Grégoire : artefact « Arbitrages Labo Codex ».
+
+- [ ] **#588 — Une reprise « sans pénalité » retient la RÉCENCE, et rien ne le dit.**
+  Créé le 28 août 2026, en lisant le skill `pratiques-notation` §2 bis — pas un audit, pas un bogue.
+  **LE FAIT** : le skill l'écrit noir sur blanc — « sans pénalité » signifie au sens strict **retenir la
+  meilleure** tentative (Talbert, *Heart of the loop*). Le code de Standards retient « le dernier essai
+  non remplacé », donc la **récence**. C'est une variante délibérée et défendable, pas l'équivalent par
+  défaut du terme employé.
+  ⮕ Le cadre le qualifie déjà lui-même : « c'est une **décision pédagogique**, pas un détail technique —
+  la nommer comme telle, et la rendre visible dans le récit de calcul du Comparateur ».
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A : GARDER la récence, et LA DIRE.**
+  ⮕ **Aucune note ne change.** Le travail est d'affichage : le Comparateur (et tout écran qui explique le
+  calcul) doit nommer la règle appliquée au lieu de la laisser deviner. Les options « passer à la
+  meilleure tentative » (qui aurait changé des notes déjà remises) et « rendre le choix configurable »
+  sont écartées.
+  ⚠ Ce que ça ne tranche pas : où exactement la règle doit être dite. Le skill dit « dans le récit de
+  calcul du Comparateur » ; à confirmer si le PDF remis à l'élève doit la porter aussi.
+
+- [ ] **#589 — Le cadre d'alignement et l'application ne décrivent pas le même monde.**
+  Créé le 28 août 2026. Les trois questions étaient **ouvertes depuis le 8 août** dans le skill
+  `alignement`, qui pose lui-même la règle d'attente : « tant que ces trois points ne sont pas tranchés,
+  **le code fait foi pour les types de nœuds** ». Ils sont tranchés — la règle d'attente tombe.
+  ✅ **LES TROIS RÉPONSES DE GRÉGOIRE, le 28 août 2026** :
+  · **D/P/C ou Anderson** ⇒ « *Dans les faits, DPC est davantage utilisé que la proposition Anderson. On
+    devrait laisser une remarque à ce sujet pour dévier vers DPC.* » ⮕ Pas un remplacement : Anderson
+    reste, avec une **remarque qui oriente vers D/P/C**.
+  · **Les stratégies cognitives** ⇒ « *retirer.* » ⮕ La catégorie sort du CADRE ; aucun type de nœud à
+    créer dans l'application.
+  · **Exposé, Évaluation et les cinq phases d'enseignement explicite** ⇒ « *oui* » ⮕ Le cadre les
+    accueille. L'évaluation est le pivot de la vérification et n'y figurait pas.
+  ⚠ **CE CHANTIER PORTE SUR LE SKILL `alignement`, PAS SUR LE CODE.** Les trois décisions alignent le
+  cadre pédagogique sur ce que l'application fait déjà ; aucune ne demande de changer un type de nœud.
+  ⮕ Le §5 « Parcours suggéré » du cadre dit encore « (D/P/C) » : à relire avec la remarque à poser.
+
+
 ### Retour testeur — 25 août 2026 (Grégoire)
 
 - [x] **#490 — Aucun moyen de supprimer un document partagé par un collègue.** LIVRÉ en **1.96.0**.
@@ -1781,6 +1821,18 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⏳ **CE QUI RESTE, INSCRIT À PART : #578** (le choix de l'échelle d'une cartouche neuve).
 
 - [ ] **#581 — La rétroaction de français parle d'EUF et du CAF à tout le monde.** (rapport du 27 août, §3 n° 12)
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A : CONFIGURABLES, en couche 2**, comme SRPNF et
+  les autres concepts pédagogiques.
+  ⮕ Sa règle de conception, dans ses mots : « *La rétroaction est envoyée à chaque élève individuellement
+  et elle devrait être personnalisée le plus possible. Quand on ne peut pas le faire, on renvoie à
+  l'enseignant·e avec un message du genre « Viens me voir »…* »
+  ⮕ **Le repli n'est donc PAS un dispositif générique** (« le centre d'aide de ton établissement »), c'est
+  un **renvoi à l'enseignant**. L'option C est écartée pour cette raison.
+  ⚠ **L'ÉNONCÉ CI-DESSUS EST PLUS ÉTROIT QUE LE DÉFAUT — mesuré le 28 août.** Il ne s'agit pas seulement
+  d'EUF et du CAF dans la rétroaction de français : `pratique-sommative.js` sert « Référence aux services
+  de soutien (SA, CAF, etc.) », « Services adaptés (SA) », « Centre d'aide (CAF) », « Mentorat par les
+  pairs » et « Jeton de reprise disponible » comme **stratégies et ressources du dépistage RàI**, à tout
+  utilisateur, quels que soient sa discipline et son établissement.
   Créé le 28 août 2026. `evaluation-calcul.js` écrit « En prévision de l'**EUF** », « erreurs de
   **français** », « Centre d'aide en **français** (CAF) » et des seuils de 100/75/60/30 mots par erreur.
   ⮕ **Ce n'est pas un seuil mal placé, c'est une DISCIPLINE écrite dans le moteur.** L'Épreuve uniforme
@@ -1805,6 +1857,12 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   hors de son cégep.
 
 - [ ] **#579 — L'échelle embarquée d'une pratique configurable ne peut PAS recevoir ses repères de maîtrise.**
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A : dans l'assistant de configuration** de la
+  pratique, ce qui rejoint #577.
+  ⮕ Sa précision, qui élargit l'item : « *Une fois configuré avec l'assistant, les données et les
+  décisions sont modifiables dans le gabarit de la pratique (ou de l'échelle).* » Il ne s'agit donc pas
+  seulement de poser les repères à la CRÉATION — ils doivent rester modifiables après coup, dans le
+  gabarit. Un assistant qui ne les demanderait qu'une fois ne répondrait qu'à la moitié de la demande.
   Créé le 28 août 2026, ouvert par #555 lot 2. Le bloc « Repères de maîtrise » vit dans l'éditeur des
   échelles du trimestre (`afficherNiveauxEchelle`, sur `echellesTemplates`). Une échelle embarquée dans
   une pratique configurable vit ailleurs — `pratiquesConfigurables[].config.echelle`, lue par
@@ -1875,6 +1933,35 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Ce n'est pas un arbitrage : c'est une divergence.
 
 - [ ] **#587 — Neuf autres fonctions sont définies deux fois et posées deux fois sur `window`.**
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A : DÉDUPLICATION PAR DÉFAUT.** Un nom, une
+  définition ; l'alias devient l'exception justifiée. C'est la règle zéro-dette appliquée aux globaux.
+  ⚠ **CE QUE LA DOCTRINE NE TRANCHE PAS** : elle dit qu'un des deux corps doit partir, **pas lequel des
+  deux gestes s'applique**. Déduplication et retrait de carcasse ont le même résultat sur `window` et
+  pas du tout le même sens dans le code. Chaque paire demande donc sa mesure.
+  ⮕ Conséquence immédiate : `modifierEvaluationParId` (`evaluation.js:2976`) passe de « précédent à
+  suivre » à **cas à traiter** — son commentaire annonce un conflit qui n'existe plus depuis `26be0d9b`.
+  8 appelants dans 4 fichiers : ce n'est pas un geste de passage.
+
+  ⚠⚠ **`creerNouvellePratique` — MESURÉ LE 28 AOÛT AU SOIR, ET CE N'EST NI L'UNE NI L'AUTRE HYPOTHÈSE.**
+  Les deux fonctions ne font pas la même chose : la courte (`pratiques.js`, 257 car.) ouvre l'assistant
+  V2 — c'est ce que le bouton « + Nouvelle pratique » déclenche ; la longue (`pratiques-gestion.js`,
+  2593 car.) crée directement une pratique PAN-Standards préconfigurée, **sans assistant** (identité CC,
+  `metadata_cc`, portfolio n-meilleurs).
+  ⮕ **ET LA LONGUE N'A JAMAIS PU S'EXÉCUTER — PAS UNE FOIS.** L'ordre de chargement a été lu à quatre
+  époques : `600a42fc` (2 janv.), `b70861bf` (8 mai), `a6f84f5b` (11 mai), `HEAD` — la courte gagne
+  partout. `pratiques.js` posait le nom depuis le **25 novembre 2025** ; la longue a été écrite le
+  **2 janvier 2026** sur un nom déjà pris, dans un fichier chargé AVANT. Aucun appelant interne.
+  ⮕ **Quelqu'un l'a ensuite CORRIGÉE trois semaines plus tard** (« FIX v3, 20 janvier 2026 :
+  localStorage comme source principale ») **sur du code qui n'avait jamais tourné.** C'est le coût réel
+  de ce motif : la collision de noms ne casse rien — elle fait travailler dans le vide.
+  ⮕ **Geste : RETRAIT**, et sans risque de régression : on ne casse pas ce qui n'a jamais tourné.
+  ⚠ **RÉSERVE POUR GRÉGOIRE, non levée** : la longue faisait quelque chose que la courte ne fait pas —
+  créer une pratique en un clic, sans assistant. Si cette intention est encore désirée, elle est à
+  **reconstruire, pas à récupérer**. Rien n'est perdu du COMPORTEMENT (il n'y en a jamais eu) ; l'intention,
+  elle, a existé.
+  ⮕ **MÉTHODE POUR LES HUIT AUTRES PAIRES** : lire l'ordre de chargement **à l'époque où la perdante a
+  été écrite**, pas seulement aujourd'hui. C'est ce qui distingue une fonction *devenue* morte d'une
+  fonction **morte-née** — et le geste n'est pas le même.
   ✅ **DOCTRINE TRANCHÉE PAR GRÉGOIRE le 28 août 2026 — OPTION A : DÉDUPLICATION PAR DÉFAUT.**
   Un nom, une définition. C'est la règle zéro-dette appliquée aux globaux. **L'alias à l'exposition
   devient l'exception**, qui doit se justifier au cas par cas — il n'est plus un patron à imiter.
@@ -1984,6 +2071,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   IDME de Grégoire en repli (`:374-379`) et choisit l'échelle par `find(e => !e.estDemo) || echelles[0]`,
   sans `echelleId` — la cartouche neuve porte les colonnes de la PREMIÈRE échelle, pas de celle choisie.
 - [ ] **#574 — Depuis #527, l'échelle générique et les gabarits d'échelle sont NON CALCULABLES : aucun ne porte de `valeurCalcul`.**
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option B : les RETIRER.** N'offrir que des échelles que
+  l'utilisateur complète, plutôt que de leur donner des `valeurCalcul` choisies par le projet.
+  ⮕ Zéro-dette strict, au prix du démarrage rapide. Cohérent avec #527 : poser des valeurs à sa place
+  refabriquerait l'arbitrage pédagogique que le retrait du repli `(min + max) / 2` avait justement supprimé.
   (rapport §7.2 n° 2-3) `ECHELLE_GENERIQUE` (`echelles.js:474-484`, semée au boot par
   `assurerEchelleGenerique:512`) écrit `valeur: 45/67/82/95` ; `GABARIT_ECHELLE_IDME`
   (`gabarits-utils.js:294-297`) n'a aucune valeur ; `GABARIT_ECHELLE_STD_MASTERY` écrit `valeurNumerique`.
@@ -2139,6 +2230,15 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   tant que la fonction elle-même n'est pas corrigée.** Les deux se traitent ensemble ou pas du tout.
 
 - [ ] **#563 — Décocher « Reprise ciblée » ne retire rien, et les échecs sont silencieux.** (constat B9)
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option C : RETIRER LA CASE.**
+  Ses mots : « *Retirons la case et voyons à l'usage ce qu'en feront les utilisateurs.* »
+  ⮕ Zéro-dette appliqué : une commande qui ne commande rien n'a pas à exister. Ni l'implémentation du
+  retrait (option B), ni le statu quo du refus explicite (option A).
+  ⚠ **DEUX PIÈGES À NE PAS MANQUER EN RETIRANT** :
+  · Le test qui rougit si quelqu'un écrit `retirerJetonRepriseCiblee` devient **caduc** — il garderait un
+    comportement qui n'existe plus. Le retirer avec la case, pas le laisser en sentinelle fantôme.
+  · Vérifier que le jeton de reprise ciblée n'est plus applicable par **aucun** chemin, pas seulement que
+    la case quitte l'écran. Une case retirée dont le code reste atteignable ailleurs serait pire que la case.
   🟠 **PARTIEL le 28 août 2026 (c5123798) — L'ITEM RESTE OUVERT.**
   ✅ Fait : les six écritures muettes. Elles passent par un point de persistance
   unique qui examine le retour de `sauvegarderDonneesSelonMode`, le DIT à
@@ -2220,6 +2320,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   évaluations par DA et observer si la flèche active change bien de sens **dans ce tableau-là**.
 
 - [ ] **#571 — PDF de rétroaction : densité et lisibilité.** (constat C5) 📐 **DÉCISION REQUISE**
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — les correctifs OUI, les tailles NON.**
+  ⮕ **Ce qui se fait** : la garde de luminance sur les couleurs d'échelle et l'échappement de la date.
+  ⮕ **Ce qui ne se fait PAS** : les tailles restent inchangées. « *Les commentaires seront recueillis dans
+  la communauté de pratique cet automne. On verra ensuite.* » ⇒ **ne pas rouvrir avant l'automne.**
+  ⚠ **UNE PRÉMISSE DE SA RÉPONSE ÉTAIT FAUSSE, mesurée le 28 août.** Il écrit « *les couleurs sont celles
+  que l'utilisateur choisit dans l'échelle de performance, elles ne devraient pas être en dur* » — elles
+  le sont déjà : `construireMappingCouleurs(scale)` (`synthese-retroaction-rendu.js:109`) mappe chaque
+  code sur `s.color` lu dans SON échelle. Ce qui est fixe, c'est la charpente du document (encre, papier,
+  gris), et c'est documenté comme volontaire. Sa préoccupation est donc déjà satisfaite ; ce qui reste,
+  c'est la garde de luminance — du texte clair sur un niveau jaune.
   Le mode fixe inline (hex/px) est **volontaire et documenté** — l'audit le confirme correct. Mais
   la densité dessert l'usage cible cellulaire : base 10 px, dates à **6 px**, numéros 6,5 px, pied
   7 px — rasterisé, c'est du bitmap à zoomer. Et le texte `PAPER` est posé sur les couleurs
@@ -2323,6 +2433,22 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   retirer la branche. Vérifier les consommateurs AVANT de brancher.
 
 - [ ] **#555 — Le seuil de défi : un défaut à 0,70, des replis qui divergent, et la marque de maîtrise absente.**
+  ✅ **DEUX ARBITRAGES DE GRÉGOIRE, le 28 août 2026 au soir** (registre : artefact « Arbitrages Labo Codex »).
+  **(1) Le repli quand le repère n'est pas lisible — option B** : la matrice de consolidation **ne calcule
+  RIEN et le dit**, exactement comme un niveau sans `valeurCalcul`. Le repli `0,75` disparaît de
+  `_detecterSeuilMaitrise` ; il n'y a plus de valeur métier devinée par le code.
+  ⮕ **Grégoire a d'abord répondu C, puis est revenu à B** quand on lui a signalé que sa note décrivait
+  autre chose que l'option cochée. L'option C (calculer chez lui, refuser ailleurs) est donc ÉCARTÉE.
+  ⮕ **Son intention pour plus tard, qui n'est pas la décision d'aujourd'hui** : « *Dans une version
+  antérieure, la question était posée directement à l'utilisateur dans les « Outils d'observation ».
+  Ce bloc a disparu. On devrait revenir à cette pratique. C'est l'utilisateur qui use de son jugement
+  ici.* » ⚠ **MESURÉ le 28 août — le bloc n'a PAS disparu** : le curseur « Seuil de défi » est toujours
+  à l'écran (`index.html:8764`, Labo → Outils d'observation). Mais il règle `defiSpecifique`, **pas** le
+  seuil de maîtrise de la matrice : deux réglages différents sous des noms voisins, ce qui est exactement
+  la collision de #555 (d). Rebrancher l'existant ne réaliserait donc PAS son intention — il faut un
+  second réglage, ou lier la matrice aux deux repères de l'échelle.
+  **(2) Le nommage (d) — option A** : le **CODE de niveau** garde `seuilMaitrise`, les quatre autres sens
+  deviennent explicites. Voir #577, tranché du même geste, et la réserve « PAN-STD » qui y est consignée.
   ⮕ **LOT 2 LIVRÉ le 28 août 2026 (12 h 20) — B10b EST CLOS.** Grégoire a posé ses deux repères, ce qui
   a débloqué le branchement. `zoneDuNiveau(code, echelleId)` (`profil-etudiant-calculs.js`) rend
   `'priorite'` / `'signale'` / `'acquis'` / `null` ; `synthese-retroaction-data.js` passe de **14
@@ -2476,6 +2602,11 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   les quatre autres items en attente de #555, ce qui n'attend pas vraiment.
 
 - [ ] **#577 — L'assistant de configuration des pratiques ignore les deux repères de maîtrise.**
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A**, en même temps que #555 (d) : le **CODE de
+  niveau** garde le nom `seuilMaitrise` ; les quatre autres sens deviennent explicites.
+  ⮕ Sa réserve, à ne pas perdre : « **On parle de la pratique PAN-STD ici. Ce pourrait être différent
+  pour d'autres PAN. Voire même pour d'autres utilisateurs.** » Le nom retenu vaut pour une famille de
+  pratique, pas pour l'application entière — l'assistant doit pouvoir en nommer un autre ailleurs.
   Créé le 28 août 2026, **demande de Grégoire**, à la livraison du lot 1 de #555. Une échelle porte
   désormais `seuilSuffisance` et `seuilMaitrise` ; **l'assistant (`wizard-pratique-v2.js`) n'en sait
   rien.** Il fait choisir une échelle et passe à la suite, alors que c'est précisément le moment où
