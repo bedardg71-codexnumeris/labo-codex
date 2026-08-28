@@ -111,6 +111,52 @@ avant d'écrire l'écran.** ⏳ Dépend de #555 lot 2 : sans lecteur, l'assistan
 
 ---
 
+## ▶ B10b — ÉTAT AU 28 AOÛT, 11 h 50 (mesuré, pas rapporté)
+
+**B10b n'a pas bougé, et c'est l'état attendu** : il attend #555 lot 2, qui attend un geste de
+Grégoire. Comptes re-mesurés au code exécutable, commentaires filtrés :
+
+| Fichier | Sites | Comparaisons |
+|---|---|---|
+| `synthese-retroaction-data.js` | 6 | 14 |
+| `evaluation-retroaction.js` | 8 | 18 |
+
+Identiques à ce matin — les deux tests qui les CONSTATENT sont donc toujours verts, ce qui est le
+comportement voulu.
+
+### ⚠⚠ MAIS LA MESURE A SORTI UN SITE QUE PERSONNE N'AVAIT VU
+
+`consolidation.js` **DEVINE déjà** ce que le lot 1 vient de rendre explicite.
+`_detecterSeuilMaitrise(echelle)` porte sa convention en commentaire :
+« **avant-dernier niveau = maîtrise**. Son `min / 100` = seuil. Fallback : **0.75** ».
+
+- Sur l'échelle de Grégoire (I, D, M, E), l'avant-dernier **est** M : la convention tombe juste **par
+  coïncidence**. C'est pour cela qu'elle a survécu à deux audits.
+- Sur trois paliers, elle désigne le niveau du milieu. Avec un « 0 » de jugement suspendu, elle se
+  décale. Sur des lettres ordonnées autrement, elle désigne n'importe quoi.
+- Son repli `0.75` est un **cinquième** repli divergent, en plus des quatre déjà listés à #555.
+
+⮕ **Chemin VIVANT, rendu à l'écran** : `calculerConsolidationIndividuelle` ←
+`profil-etudiant-diagnostics.js:612`. Vérifié au grep, pas supposé.
+⮕ C'est le consommateur le plus direct des deux repères — au lot 2, la convention disparaît.
+
+### ⚠⚠ ET UNE COLLISION DE VOCABULAIRE QUE LE LOT 1 A AGGRAVÉE
+
+`seuilMaitrise` désigne aujourd'hui **quatre choses de types différents** :
+
+| Où | Ce que c'est |
+|---|---|
+| `echelles.js` (#555 lot 1) | un **CODE** de niveau (« M ») |
+| `consolidation.js` | un **score 0-1** deviné |
+| `obtenirSeuil('idme.maitrise')` | un **seuil de préférence 0-1** (défaut 0,85) |
+| `pratique-notation-v2.js:279` | un **pourcentage 0-100** |
+
+Aucune collision d'exécution — mais quatre sens sous un mot, et j'en ai ajouté un cinquième en
+nommant le champ. ⮕ **Trancher le nommage avec Grégoire au lot 2**, en même temps que celui de
+l'assistant (#577) : c'est le même arbitrage, sur le même mot.
+
+---
+
 ## ▶ POUR LA SESSION QUI PREND LE RELAIS — 28 août 2026, 11 h 45
 
 ### ✅ #573 — « DES FOIS ÇA ENREGISTRE, DES FOIS NON » A UNE CAUSE, ET ELLE EST FERMÉE

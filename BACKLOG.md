@@ -1995,6 +1995,27 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   · Sentinelles : `sentinelle-555-reperes-maitrise-echelle` (12 cas, **11 mutations, 11 rouges**) et
     `echelle-reperes-maitrise-rendu.spec.js` en **WebKit** (**4 mutations, 4 rouges**) — le rendu ne se
     prouve pas dans `node`. Fixtures sans aucune lettre d'IDME, saisies dans le désordre.
+  ⮕ **TROUVAILLE DU 28 AOÛT (11 h 50), NI À L'AUDIT NI DANS LES 19 SITES.**
+  `consolidation.js` DEVINE déjà ce que le lot 1 vient de rendre explicite.
+  `_detecterSeuilMaitrise(echelle)` porte en commentaire sa propre convention :
+  « **avant-dernier niveau = maîtrise**. Son `min / 100` = seuil. Fallback : **0.75** ».
+  · Sur l'échelle de Grégoire (I, D, M, E), l'avant-dernier EST M : la convention tombe juste **par
+    coïncidence**, et c'est pour cela que personne ne l'a vue.
+  · Sur une échelle à trois paliers, l'avant-dernier est le niveau du MILIEU. Sur une échelle qui porte
+    un « 0 » de jugement suspendu, le compte se décale. Sur une échelle dont les lettres sont ordonnées
+    autrement, elle désigne n'importe quoi.
+  · Le repli `0.75` est un **CINQUIÈME** repli divergent, en plus des quatre listés plus haut.
+  ⚠ **CHEMIN VIVANT, RENDU À L'ÉCRAN** : `calculerConsolidationIndividuelle` ←
+  `profil-etudiant-diagnostics.js:612` (matrice de consolidation). Vérifié, pas supposé.
+  ⮕ C'est le consommateur le plus direct des deux repères : la convention disparaît, le champ la remplace.
+  ⚠⚠ **ET UNE COLLISION DE VOCABULAIRE, DÉJÀ DANS LE CODE.** Le nom `seuilMaitrise` désigne aujourd'hui
+  **quatre choses de types différents** : le CODE de niveau du lot 1 (`echelles.js`), un score 0-1
+  détecté (`consolidation.js`), un seuil de préférence 0-1 (`obtenirSeuil('idme.maitrise')`,
+  `profil-etudiant-helpers.js` / `-calculs.js`), et un pourcentage 0-100
+  (`pratique-notation-v2.js:279`). Aucune collision d'exécution — mais quatre sens sous un mot, et le
+  lot 1 en a ajouté un cinquième. ⮕ **Trancher le nommage avec Grégoire au lot 2**, en même temps que
+  celui de l'assistant (#577) : c'est le même arbitrage, sur le même mot.
+
   ⏳ **CE QUI RESTE (lot 2)** : (a) **Grégoire doit poser ses repères** sur ses échelles — sans eux
   aucun lecteur ne peut répondre ; (b) le **lecteur unique** « zone d'un code » ; (c) **brancher les
   consommateurs** — B10b (6 sites / 14 comparaisons), `evaluation-retroaction.js` (8 lignes / 18) ;
