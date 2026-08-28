@@ -2226,11 +2226,45 @@
        =============================== */
 
     /**
+     * #559 — Résout le fichier de la FILE D'IMPORT correspondant au fichier
+     * courant, ou `null` s'il n'y en a pas.
+     *
+     * Le poste de préparation sert deux modes, et un seul a une file.
+     * `queueOffset === -1` signale le mode ad hoc (« Ajouter des pages ») : le
+     * document travaillé ne vient PAS de la file d'import. Or
+     * `indexActuel + queueOffset` reste un index PARFAITEMENT VALIDE dans cette
+     * file dès que `indexActuel >= 1` — l'écriture atterrissait donc sur un
+     * autre fichier de la file, dont l'utilisateur modifiait les réglages sans
+     * le savoir et sans rien voir.
+     *
+     * Le reste du module tient déjà cette distinction (`modeAdHoc` aux l. 150 et
+     * 194, garde `!modeAdHoc` de la boucle de traitement l. 213). Les trois
+     * fonctions d'options l'avaient perdue ; ce helper la leur rend, en un seul
+     * endroit à corriger.
+     *
+     * @returns {Object|null} L'entrée de file, ou null (mode ad hoc, file vide,
+     *   index hors bornes)
+     */
+    function _fichierDeFileCourant() {
+        if (queueOffset === -1) return null;
+        const queue = travauxImport.obtenirFileDAttente();
+        return (queue && queue[indexActuel + queueOffset]) || null;
+    }
+
+    /**
      * Met a jour les checkboxes Import selon les flags du fichier courant
+     *
+     * #559 : masque la section quand il n'y a pas de fichier de file. Les deux
+     * drapeaux ne sont consommés QUE par le pipeline batch, qui itère la file
+     * (`travaux-ui.js`) — en mode ad hoc ils n'ont donc aucun consommateur.
+     * Laisser les cases visibles les rendrait inertes en silence : on remplacerait
+     * un bug par un mensonge d'interface.
      */
     function syncOptImport() {
-        const queue = travauxImport.obtenirFileDAttente();
-        const qf = queue[indexActuel + queueOffset];
+        const qf = _fichierDeFileCourant();
+
+        const section = document.getElementById('prep-section-import');
+        if (section) section.classList.toggle('u-hide', !qf);
         if (!qf) return;
 
         const cbBalance = document.getElementById('prep-opt-balance');
@@ -2244,8 +2278,7 @@
      * @param {boolean} checked - true = appliquer la balance, false = ignorer
      */
     function changerOptBalance(checked) {
-        const queue = travauxImport.obtenirFileDAttente();
-        const qf = queue[indexActuel + queueOffset];
+        const qf = _fichierDeFileCourant();
         if (!qf) return;
         qf.skipBalance = !checked;
     }
@@ -2255,8 +2288,7 @@
      * @param {boolean} checked - true = conserver la resolution originale
      */
     function changerOptResolution(checked) {
-        const queue = travauxImport.obtenirFileDAttente();
-        const qf = queue[indexActuel + queueOffset];
+        const qf = _fichierDeFileCourant();
         if (!qf) return;
         qf.format11x17 = checked;
     }
