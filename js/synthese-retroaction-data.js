@@ -872,9 +872,21 @@
         // barème annoncerait des progrès qui n'ont pas eu lieu.
         const zoneAvant = lecteurZone(evalPrecedente.echelleId);
         const zoneApres = lecteurZone(evaluation.echelleId);
+        // ⚠⚠ « AVANT ≠ ACQUIS », PAS « AVANT = PRIORITÉ ». La règle d'origine
+        // était `(avant === 'I' || avant === 'D') && (après === 'M' || 'E')` —
+        // soit « ce n'était pas acquis, ça l'est devenu ». Traduire le côté
+        // gauche par `=== 'priorite'` EXCLUT la zone intermédiaire et supprime
+        // deux passages qui étaient annoncés : sur l'échelle de Grégoire, D → M
+        // et D → E. Régression introduite le 28 août au lot 2, corrigée le jour
+        // même — et invisible au break-test, qui mutait le côté DROIT.
+        // ⮕ Un `null` (échelle sans repères) n'est pas « non acquis » : on ne
+        // sait pas, donc on n'annonce rien.
         const ameliores = evaluation.criteres
-            .filter(c => zoneAvant(prec[c.critereNom]) === 'priorite'
-                      && zoneApres(c.niveauSelectionne) === 'acquis')
+            .filter(c => {
+                const avant = zoneAvant(prec[c.critereNom]);
+                return avant != null && avant !== 'acquis'
+                    && zoneApres(c.niveauSelectionne) === 'acquis';
+            })
             .map(c => c.critereNom);
         return ameliores.length ? `Tu as progressé en ${ameliores.join(' et ')}.` : '';
     }

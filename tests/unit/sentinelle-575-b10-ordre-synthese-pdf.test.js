@@ -320,6 +320,49 @@ describe('#575 B10 · l\'ordre du bilan remis à l\'élève vient de SON échell
         expect(bilan.recurrents.ameliorations).toContain('Analyse');
     });
 
+    it('RÉGRESSION 28 août : « signalé → acquis » DOIT être annoncé', () => {
+        // ⚠⚠ Le lot 2 avait traduit « avant = I ou D » par « avant = priorité »,
+        // ce qui excluait la zone intermédiaire : sur l'échelle de Grégoire,
+        // D → M et D → E cessaient d'être annoncés. La règle juste est
+        // « avant ≠ acquis ». Le break-test ne l'avait pas vu — il mutait le
+        // côté DROIT de la condition, jamais le gauche.
+        const anterieure = evaluation({
+            id: 'EV_ANCIENNE', echelleId: 'ECH_RENV', dateEvaluation: '2026-04-01',
+            productionNom: 'Labo 1', niveauFinal: 'D',
+            criteres: [critere('Analyse', 'D')]        // D = signalé
+        });
+        const win = chargerData([ECHELLE_RENVERSEE], [anterieure]);
+        const bilan = bilanDe(win, evaluation({
+            echelleId: 'ECH_RENV', niveauFinal: 'I',
+            criteres: [critere('Analyse', 'I')]        // I = acquis
+        }));
+
+        expect(bilan.recurrents.ameliorations).toContain('Analyse');
+    });
+
+    it('un état antérieur INCONNU n\'est pas « non acquis » : aucun progrès annoncé', () => {
+        // ⚠ CAS CONSTRUIT APRÈS UN BREAK-TEST RESTÉ VERT. Une première version
+        // mettait les deux évaluations sur une échelle SANS repères : les deux
+        // zones valaient `null`, et le côté DROIT de la condition suffisait à
+        // faire passer le test. Il faut un `null` à GAUCHE et un `'acquis'` à
+        // DROITE — donc DEUX échelles : l'ancienne sans repères, la neuve avec.
+        // Sans cette garde, `null !== 'acquis'` annoncerait un progrès qu'on n'a
+        // pas mesuré, à chaque élève dont une évaluation précède la pose des
+        // repères. C'est le cas de TOUT LE TRIMESTRE EN COURS de Grégoire.
+        const anterieure = evaluation({
+            id: 'EV_ANCIENNE', echelleId: 'ECH_WXYZ', dateEvaluation: '2026-04-01',
+            productionNom: 'Labo 1', niveauFinal: 'W',
+            criteres: [critere('Analyse', 'W')]       // ECH_WXYZ : aucun repère → null
+        });
+        const win = chargerData([ECHELLE_WXYZ, ECHELLE_RENVERSEE], [anterieure]);
+        const bilan = bilanDe(win, evaluation({
+            echelleId: 'ECH_RENV', niveauFinal: 'I',
+            criteres: [critere('Analyse', 'I')]       // ECH_RENV : I = acquis
+        }));
+
+        expect(bilan.recurrents.ameliorations).toBe('');
+    });
+
     it('passer d\'une priorité à « signalé » n\'est PAS annoncé comme un progrès acquis', () => {
         // ⚠ COMPORTEMENT D'ORIGINE PRÉSERVÉ, ET C'EST DÉLIBÉRÉ. Avant le lot 2,
         // la règle était `(I ou D) → (M ou E)` : passer de I à D ne comptait pas.
