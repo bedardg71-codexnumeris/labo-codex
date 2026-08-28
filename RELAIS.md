@@ -85,6 +85,20 @@ Vérifié, et le dépôt le documentait déjà (`echelles.js`, note #524) : `ind
 caché**, et le bouton « Enregistrer » de l'ANCIEN SYSTÈME est sans effet. C'est #520 au backlog.
 ⮕ **Ne rien brancher sur cet écran.** Le doublon d'id relève de #481, laissé en place.
 
+### 📌 #577 EST PRIS — prochain ID libre : **#578**
+
+**#577 — l'assistant de configuration des pratiques ignore les deux repères de maîtrise.** Demandé
+par Grégoire à la livraison du lot 1 : `wizard-pratique-v2.js` fait choisir une échelle
+(`'echelle-performance'`, `required: true` pour toute pratique non sommative) et passe à la suite,
+alors que c'est le moment où l'utilisateur PENSE sa pratique. PAN-STD d'abord — c'est la famille dont
+le calcul repose sur les niveaux.
+
+⚠⚠ **Un piège de vocabulaire est déjà dans cet écran** : l'assistant a une étape `'seuils-personnels'`
+où « seuil » désigne le **dépistage** (`seuilVaBien`, `seuilDifficulte`, `seuilGrandeDifficulte`, plus
+`seuilVerrou`). Y ajouter « seuil de suffisance » et « seuil de maîtrise » sans les distinguer
+mettrait deux notions sous un même mot, dans le même parcours. **Trancher le vocabulaire avec Grégoire
+avant d'écrire l'écran.** ⏳ Dépend de #555 lot 2 : sans lecteur, l'assistant n'aurait rien à garantir.
+
 ### ⏳ RESTE DU LOT 2, DANS L'ORDRE
 
 1. **Grégoire pose ses repères** (bloquant, voir en tête).
@@ -451,7 +465,7 @@ tous par `obtenirEchelleResolue` (5 appels) et `obtenirEchelleCommuneDesEvaluati
 comparent les échelles **résolues** et traitent une échelle introuvable comme une ABSENCE, pas
 comme un barème concurrent. C'est la règle qu'elle recommande.
 
-### 📌 #576 EST PRIS — prochain ID libre : **#577**
+### 📌 ~~#576 EST PRIS — prochain ID libre : #577~~ — **PÉRIMÉ, #577 a été pris le 28 août. Voir l'entrée du 28 août en tête de ce fichier.**
 
 Par elle, le 28 août : « le bilan de rétroaction est VIDE quand la grille d'origine est
 introuvable » (`_chargerGrilleDefBilan` → null, `_collecterCriteresBilan` → [], tout le bilan
