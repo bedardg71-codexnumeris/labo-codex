@@ -395,6 +395,28 @@ const CLES_PRODUCTION_NON_TRANSPORTEES = {
 };
 
 /**
+ * AUDIT DU 28 AOÛT 2026 — CE QUE `SCHEMAS_IMPORT.echelle` N'EMPORTE PAS.
+ *
+ * Jumelle de `CLES_PRODUCTION_NON_TRANSPORTEES` (#511), et posée pour la même
+ * raison : la liste blanche ne signale pas ce qu'elle oublie, elle le fait
+ * disparaître. L'audit a trouvé six champs d'échelle perdus à l'import sélectif,
+ * dont `valeurCalcul` — d'où des notes recalculées sur le repli `(min + max) / 2`,
+ * avec des valeurs que l'utilisateur n'avait jamais choisies.
+ *
+ * `tests/unit/sentinelle-transport-echelles.test.js` relit la liste blanche de
+ * `dupliquerEchelle` (echelles.js) et la constante `niveauxDefaut`, et exige que
+ * chaque clé soit transportée OU inscrite ici, avec sa raison.
+ */
+const CLES_ECHELLE_NON_TRANSPORTEES = {
+    // Trace de la source d'un import (`ajouterEchelleIndividuelle`, echelles.js).
+    // Le transporter ferait répondre l'échelle reçue à l'identifiant de l'échelle
+    // d'origine du destinataire : `obtenirEchelleResolue` résout par
+    // `e.id === id || e.idOriginal === id` et prend le PREMIER du tableau (#542).
+    // C'est exactement ce que la liste blanche de `dupliquerEchelle` évite.
+    idOriginal: 'trace de la source d\'un import — la transporter ferait répondre la copie à l\'identifiant de la source (#542)'
+};
+
+/**
  * Assainit un objet importé selon un schéma (whitelist de propriétés)
  * @param {Object} obj - Objet à assainir
  * @param {Object} schema - Schéma { nomProp: { type, maxLen?, schema? } }
@@ -627,10 +649,41 @@ const SCHEMAS_IMPORT = {
                 description: { type: 'string', maxLen: 500 },
                 min: { type: 'number' },
                 max: { type: 'number' },
+                // ⚠ LES DEUX VOYAGENT, ET CE N'EST PAS UNE REDONDANCE.
+                // `valeur` est le champ des échelles de CATALOGUE
+                // (`echelles-bibliotheque.js`) ; `valeurCalcul` est celui que
+                // l'ÉDITEUR écrit (`echelles.js:1540`, `data-champ="valeurCalcul"`)
+                // et que lisent `profil-etudiant-calculs.js:395` et
+                // `consolidation.js:217`. Les données réelles portent l'un ou
+                // l'autre selon leur origine. Ne transporter que `valeur` — l'état
+                // d'avant le 28 août — faisait retomber toute échelle importée sur
+                // le repli `(min + max) / 2` : des notes calculées avec des valeurs
+                // que l'utilisateur n'a jamais choisies (audit du 28 août 2026).
                 valeur: { type: 'number' },
+                valeurCalcul: { type: 'number' },
+                // Étiquette SOLO du niveau (`niveauxDefaut`, `echelles.js:85`),
+                // exportée au format recherche par `trimestres.js:1882`.
+                niveauSOLO: { type: 'string', maxLen: 50 },
                 couleur: { type: 'string', maxLen: 30 }
             }
         },
+        // #555 (28 août 2026) — LES DEUX REPÈRES DE MAÎTRISE. Ce sont des CODES
+        // de niveau ('D', 'M'…), pas des scores : ils ne valent que rapportés aux
+        // `niveaux` transportés ci-dessus, qui voyagent avec eux dans le même objet.
+        seuilSuffisance: { type: 'string', maxLen: 20 },
+        seuilMaitrise: { type: 'string', maxLen: 20 },
+        // Configuration de l'échelle : relue à l'ouverture (`echelles.js:646-656`)
+        // et imprimée sur trois PDF (`export-pdf.js:517, 867, 945`).
+        config: {
+            type: 'object',
+            schema: {
+                typeEchelle: { type: 'string', maxLen: 50 },
+                seuilReussite: { type: 'number' },
+                notePassage: { type: 'string', maxLen: 20 },
+                codesPersonnalises: { type: 'string', maxLen: 2000 }
+            }
+        },
+        pratiquesCompatibles: { type: 'arrayStrings', maxLen: 50 },
         auteur: { type: 'string', maxLen: 100 },
         auteurOriginal: { type: 'string', maxLen: 100 },
         dateImport: { type: 'string', maxLen: 50 },
@@ -3350,6 +3403,7 @@ window.filtrerRessourcesNonDemo = filtrerRessourcesNonDemo;
 window.assainirObjet = assainirObjet;
 window.assainirChaine = assainirChaine;
 window.SCHEMAS_IMPORT = SCHEMAS_IMPORT;
+window.CLES_ECHELLE_NON_TRANSPORTEES = CLES_ECHELLE_NON_TRANSPORTEES;
 window.CLES_PRODUCTION_NON_TRANSPORTEES = CLES_PRODUCTION_NON_TRANSPORTEES;
 window.verifierUniciteIds = verifierUniciteIds; // #292 : exposé pour chargerCodex (codex.js)
 window.fusionnerParIdentite = fusionnerParIdentite; // #448

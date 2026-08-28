@@ -7,6 +7,94 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 28 AOÛT 2026 (FIN D'APRÈS-MIDI, 16 h) : L'AUDIT DES COPIES
+     D'ÉCHELLE, ET LE JOUR OÙ DEUX BREAK-TESTS SUR TROIS ÉTAIENT FAUX.
+
+     ▣ CE QUI EST LIVRÉ. `SCHEMAS_IMPORT.echelle` transporte enfin ce qu'une
+       échelle porte : les DEUX repères de #555, `config`, `pratiquesCompatibles`,
+       et sur chaque niveau `valeurCalcul` et `niveauSOLO`. Plus une sentinelle
+       jumelle de #511. Vitest 3951/3951 (370 fichiers) ·
+       Playwright 196 passées + 3 flaky, relancées seules : vertes (7/7).
+
+     ▣ LE DÉFAUT QUI COÛTAIT LE PLUS N'ÉTAIT PAS CELUI QU'ON CHERCHAIT.
+       On cherchait les deux repères. On a trouvé que l'import sélectif perdait
+       aussi `valeurCalcul` — donc que toute échelle importée retombait sur le
+       repli `(min + max) / 2`. **Des notes calculées avec des valeurs que
+       l'utilisateur n'a jamais choisies, et rien ne le disait.**
+
+     ▣ ⚠⚠ LE COMPTAGE DE MIDI ÉTAIT FAUX DANS LES DEUX SENS. « Treize chemins,
+       un seul corrigé » venait d'un balayage heuristique. Lecture faite :
+       dix-sept sites, TROIS pertes réelles — et le balayage avait MANQUÉ trois
+       fonctions de duplication d'échelle (`dupliquerEchelleBibliotheque`,
+       `dupliquerEchelleDepuisSidebar`, `dupliquerEchelleActive`), qui ne
+       contiennent ni le mot « copie » ni `niveaux:`.
+       ⮕ **Un grep compte des occurrences ; il ne connaît pas les synonymes.**
+
+     ▣ ⚠⚠ DEUX DE MES TROIS PREMIERS BREAK-TESTS ÉTAIENT FAUX, ET ILS
+       « PASSAIENT ». Le motif muté existait DEUX fois dans le fichier
+       (`niveauSOLO` : schéma des critères de grille, puis schéma des niveaux
+       d'échelle) et `replace(…, 1)` frappait le mauvais. L'autre préfixait la
+       raison d'exclusion au lieu de la raccourcir.
+       ⮕ **Un break-test qui ne rougit pas accuse la sentinelle À TORT une fois
+       sur deux.** Vérifier la MUTATION avant de conclure à l'aveuglement.
+       ⮕ Remède posé : deux TÉMOINS qui mutent exprès hors périmètre et DOIVENT
+       passer. Sans eux, on ne distingue pas « sentinelle aveugle » de « mutation
+       à côté ». Bilan final : 13 mutations, 13 verdicts conformes.
+
+     ▣ LA SENTINELLE GARDAIT TOUT SAUF CE QUI L'AVAIT MOTIVÉE. Les deux repères
+       de #555 vivent dans un spread conditionnel `...(x ? { k: v } : {})` : sous
+       DEUX accolades, alors qu'ils posent une clé de premier niveau. Mon
+       extraction ne les voyait pas — le ratchet serait resté vert en les
+       laissant tomber du schéma. **C'est la garde de validité qui l'a attrapé,
+       pas la relecture.** (Même leçon que #506, redite par #511.)
+
+     ▣ ET UNE SOURCE DE VÉRITÉ UNIQUE NE SUFFISAIT PAS. Branché sur la seule
+       liste blanche de `dupliquerEchelle`, le ratchet laissait
+       `pratiquesCompatibles` hors surveillance : ce champ n'est posé que par
+       `sauvegarderEchelleComplete`. Deux littéraux lus depuis.
+       ⮕ C'est un BREAK-TEST qui l'a montré, pas la lecture du code.
+
+     ▣ 🔒 TROUVÉ EN ÉCRIVANT LE BANC, NON CORRIGÉ (#585) : `assainirChaine`
+       TRONQUE à `maxLen` AVANT de retirer les balises. `'<img src=x
+       onerror=alert(1)>M'` avec `maxLen: 20` ressort `'<img src=x onerror=a'` —
+       un `<` traverse le filtre. C'est la fonction que TOUS les schémas d'import
+       appellent. Pas corrigé exprès : inverser deux lignes touche chaque type
+       importé, et ce matin renforcer `echapperHtml` avait cassé un affichage.
+
+     ▣ ⚠ TROIS SPECS FLAKY, ET JE N'EN CONNAIS PAS LA CAUSE. Le run complet a
+       rendu 196 passées + 3 flaky (exit 0) ; relancées seules sur un arbre
+       stable, les trois sont vertes. **La seule différence connue : j'écrivais
+       dans `BACKLOG.md` pendant le premier run.** On m'avait dit — et je l'avais
+       cru — qu'un `.md` est sans effet sur WebKit. Je ne peux pas l'établir dans
+       un sens ni dans l'autre ; je le consigne plutôt que de conclure.
+       ⮕ **Le geste sûr reste : rien écrire du tout pendant un run, `.md` compris.**
+
+     ▣ DEUX SESSIONS, ZÉRO COLLISION, ET UN AVERTISSEMENT UTILE DANS CHAQUE SENS.
+       Je l'ai prévenue que mon `import-export.js` était dans l'arbre que son
+       Playwright testait (écrit à 15:37:54, son run lancé à 15:38 — l'arbre est
+       resté stable, verdict valide, mais il couvrait mon schéma en plus de son
+       lot ; elle l'a écrit dans son message de commit plutôt que de le laisser
+       croire). Elle m'a corrigé deux fois : Vitest pendant un Playwright ne
+       gêne pas (ce qui fabrique un faux verdict, c'est d'ÉCRIRE pendant un run,
+       pas d'en lancer un second), et `main` était à 1 commit d'avance, pas 2.
+
+     ▣ CE QUE L'AUDIT A CHANGÉ DANS SON LOT, AVANT SON COMMIT. `_detecterEchelle`
+       ne résolvait pas les identifiants `pratique-*` alors qu'`obtenirEchelleResolue`
+       le fait : sa réserve « seuil calculé, non lu » se serait affichée en
+       permanence chez un expérimentateur en pratique configurable, **sans aucun
+       geste possible pour la lever**. Corrigé par elle : raison distincte et
+       libellé qui ne renvoie pas vers un éditeur inutile.
+       ⮕ **Les deux résolveurs restent parallèles.** Le second sait maintenant
+       DIRE qu'il ne sait pas ; il n'a pas appris à résoudre. Chantier ouvert.
+
+     ▣ RESTE, ET CHACUN EST UNE DÉCISION DE GRÉGOIRE : #583 (partage — évolution
+       du format fermé v1), #584 (export recherche), #585 (assainirChaine), #586
+       (`idOriginal` emporté par 3 chemins sur 4, à rattacher à #476).
+       Rapport complet : `Rapports/AUDIT-copies-echelle-reperes-2026-08-28.md`.
+     ===================================================================== -->
+
+
+<!-- =====================================================================
      SESSION — 28 AOÛT 2026 (APRÈS-MIDI, 15 h 40) : LE SEUIL DE DÉFI N'A PLUS
      QU'UNE SOURCE, LE SEUIL DE MAÎTRISE SE LIT AU LIEU DE SE DEVINER.
      ⚠ TROIS SESSIONS SIMULTANÉES SUR CE DÉPÔT CET APRÈS-MIDI (58, 75, 5b).
