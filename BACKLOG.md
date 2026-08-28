@@ -1859,9 +1859,23 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `supprimerFichierDefinitivement` et le nettoyage de « Vider la corbeille » (`liste-evaluations.js`),
   ainsi que le jeton personnalisé (`evaluation.js`), écrivent par `db.setSync(cle(...))` direct —
   esquivant le blocage du mode anonymisation que `supprimerEvaluation` respecte.
-  ⚠ **Pire cas décrit** : avec un contexte de simulation posé (#326 R2), la lecture peut renvoyer le
-  **corpus injecté**, que l'écriture directe reverserait dans la clé réelle.
+  ⚠ **LE PIRE CAS PORTE SUR DU CODE MORT — mesuré le 28 août 2026.** Le site du jeton personnalisé,
+  `appliquerJetonPersonnalise` (`evaluation.js`), est **inatteignable, et l'était déjà le 25 août** :
+  aucun appelant dans le dépôt, aucun `data-action` à ce nom (le dispatcher de `main.js` résout un
+  nom littéral), et son rendu `afficherJetonsPersonnalisesEvaluation` est lui aussi sans appelant et
+  sort toujours par sa garde faute du conteneur `jetonsPersonnalisesOptions`, absent partout.
+  `git log -S` : aucun mouvement depuis juin 2026 — ce n'est pas #575 qui a coupé le fil.
+  ⮕ Or **il était le seul des trois à lire par `obtenirDonneesSelonMode`**, donc le seul où un corpus
+  de simulation (`'evaluationsSauvegardees'` est bien dans `_CLES_SIMULABLES`, `modes.js`) pouvait
+  être reversé dans la clé réelle. Les deux autres lisent en `db.getSync(cle(…))` direct : lecture
+  réelle, écriture réelle, **pas de fuite de corpus**. L'alerte en gras de cet item portait sur son
+  seul site qui ne peut pas s'exécuter.
+  ⮕ **CE QUI RESTE VIVANT, sur deux sites atteignables** (`liste-evaluations.js`, joints par
+  `data-action="supprimerFichierDefinitivement"` et `data-action="viderTouteCorbeille"`) : le
+  contournement du blocage d'anonymisation, face à des fonctions sœurs qui, elles, testent le retour.
   ⮕ Toutes les fonctions sœurs passent par `sauvegarderDonneesSelonMode`.
+  ⮕ **Traiter le site mort par retrait, pas par correctif** (règle zéro-dette : pas de code mort
+  « pour plus tard »).
   ⮕ **Second défaut de B5, distinct** : ces suppressions par couple (DA, production) sont **trop
   larges** — elles emportent originales, reprises et l'évaluation active d'un fichier réimporté.
 
@@ -1874,6 +1888,13 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `${ligne.da}` / `${daAffiche}` et `${ligne.niveauFinal}` injectés sans `echapperHtml`. Le DA est
   nettoyé à l'import CSV, pas garanti sur les autres chemins d'entrée.
   ⮕ Violation de la règle 1 du projet, qui est « sans exception ».
+  ⚠ **PLUS LARGE QUE L'ÉNONCÉ — mesuré le 28 août 2026.** La même ligne injecte aussi
+  `${ligne.evaluationId}` et `${ligne.productionId}` dans des attributs `data-*`, et `${ligne.fichierId}`
+  dans un `data-param`, toujours dans `genererLigneHTML` (`liste-evaluations.js`).
+  ⚠ **DÉPENDANCE NON INSCRITE, vers le sous-constat `echapperHtml` de #572.** `echapperHtml`
+  (`config.js`) passe par `textContent` → `innerHTML` et **n'échappe pas les guillemets** : une valeur
+  portant `"` sort de l'attribut. **Poser `echapperHtml` sur ces interpolations ne fermera donc RIEN
+  tant que la fonction elle-même n'est pas corrigée.** Les deux se traitent ensemble ou pas du tout.
 
 - [ ] **#563 — Décocher « Reprise ciblée » ne retire rien, et les échecs sont silencieux.** (constat B9)
   La branche est un **TODO vide** (`evaluation-sauvegarde.js`) : la case se décoche, le jeton reste
@@ -1898,11 +1919,14 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **Geste** : try/catch par étudiant + bilan final (« 23 réussis, 2 échoués : … »), l'omission de
   la synthèse remontée dans ce bilan.
 
-- [ ] **#566 — Écart d'anonymisation dans la synthèse, et compteur « N prêtes » trompeur.** (constat B13)
+- [ ] **#566 — Écart d'anonymisation dans la synthèse, et compteur trompeur.** (constat B13)
   Le modal de révision anonymise les rétroactions, la synthèse rasterisée **jamais** : en mode
-  anonymisé, un prénom tapé dans une rétroaction **sort dans le PDF**. Et le compteur
-  « N évaluations prêtes » peut dépasser le nombre de PDF réellement produits (évaluations sans
-  fichier résolu ignorées en silence).
+  anonymisé, un prénom tapé dans une rétroaction **sort dans le PDF**. Et le compteur peut dépasser
+  le nombre de PDF réellement produits (évaluations sans fichier résolu ignorées en silence).
+  ⚠ **LE LIBELLÉ CITÉ N'EXISTE PAS — mesuré le 28 août 2026.** L'écran ne dit jamais
+  « N évaluations prêtes » : il dit **« N évaluation(s) pour N étudiant(s) »** (`travaux-ui.js`), et
+  « 1 évaluation prête » seulement dans le cas mono-étudiant. L'écart mesuré est réel, la citation
+  ne l'était pas — ne pas chercher cette chaîne dans le code.
 
 - [ ] **#567 — Variables CSS fantômes : les avertissements perdent leur couleur d'alerte.** (constat C1)
   `var(--attention)` n'existe nulle part ; idem `--orange`, `--orange-pale`, `--radius`,
@@ -1917,13 +1941,25 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   écart, pas une norme absente.
 
 - [ ] **#569 — L'écran « Exporter et archiver » est hors design system.** (constat C3)
-  8 selects en `class="form-select"` — classe quasi inexistante dans `styles.css`, rendu natif sans
+  Des selects en `class="form-select"` — classe quasi inexistante dans `styles.css`, rendu natif sans
   jetons de surface ni de focus ; la classe canonique est `.controle-form`. Titre « Archivage des
   travaux » ≠ libellé de navigation « Exporter et archiver ». **Aucun état vide** (pas d'entrée
   `evaluations-exporter` dans `etats-vides.js`).
+  ⚠ **PORTÉE RECTIFIÉE — mesurée le 28 août 2026.** `class="form-select"` apparaît **8 fois** dans
+  `travaux-ui.js`, mais **2 sont sur l'écran Importer**, pas sur « Exporter et archiver ». L'écran
+  nommé par l'item en porte **6**. Les 2 autres restent à traiter, sous un autre écran.
 
 - [ ] **#570 — Mode clair : les flèches de tri de la Liste à 2,0:1 de contraste.** (constat C4)
   `var(--gris-clair)` (famille fond-clair, `#777788` en clair) posé sur l'en-tête bleu fixe.
+  Recalculé le 28 août 2026 : `#777788` sur `#2a4a8a` = **1,96:1**.
+  ⚠ **DÉPENDANCE NON INSCRITE : LE CORRECTIF DE COULEUR SEUL SERA SANS EFFET.** Trois des
+  identifiants de flèches — `tri-da`, `tri-nom`, `tri-prenom` — existent **deux fois dans
+  `index.html`** : tableau des étudiants ET tableau des évaluations. `mettreAJourIndicateursTri`
+  (`liste-evaluations.js`) résout par `getElementById` : **il atteint le premier tableau**, donc pas
+  ceux de la Liste. Repeindre les spans du second ne changera rien pour ces trois colonnes.
+  ⮕ **Corriger le doublon d'identifiants AVANT la couleur**, sinon le correctif est invérifiable.
+  ⮕ **À VÉRIFIER À L'ÉCRAN** (l'effet fonctionnel ne s'établit pas statiquement) : trier la Liste des
+  évaluations par DA et observer si la flèche active change bien de sens **dans ce tableau-là**.
 
 - [ ] **#571 — PDF de rétroaction : densité et lisibilité.** (constat C5) 📐 **DÉCISION REQUISE**
   Le mode fixe inline (hex/px) est **volontaire et documenté** — l'audit le confirme correct. Mais
@@ -1933,26 +1969,56 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   illisible. Plus une date non échappée (seul oubli du fichier).
   ⮕ **La garde de luminance et l'échappement sont des correctifs ; les tailles sont ta décision** —
   c'est ton document, remis à tes élèves.
+  ⚠ **LA DATE NON ÉCHAPPÉE EST PLUS ÉTROITE QUE L'ÉNONCÉ — mesuré le 28 août 2026.** Le site est réel
+  (`formaterDateLongue` appelée hors `esc()`), mais la fonction ne rend une chaîne brute que par son
+  **repli `return iso`**, c'est-à-dire uniquement si la date n'est pas parsable. Le chemin nominal
+  n'ouvre pas d'injection. À corriger quand même, mais ce n'est pas un trou béant.
+  ⚠ **ÉNONCÉ À RE-MESURER SUR HEAD AVANT DE L'OUVRIR.** `synthese-retroaction-rendu.js` est modifié
+  le 28 août 2026 par **#555 lot 2** (branchement de `zoneDuNiveau`, retrait des comparaisons IDME en
+  dur). Les repères ci-dessus datent d'avant ce commit.
 
 - [ ] **#572 — Mineurs de l'audit Évaluations (condensé).** (section D du rapport)
-  **Import** : ~25 `console.log` dans `travaux-resolution.js` · fuite de `setInterval` à chaque
+  ⚠ **SIX INEXACTITUDES D'ORIGINE RECTIFIÉES LE 28 AOÛT 2026** — repérées en note sous chaque volet.
+  **Import** : **20** `console.log` dans `travaux-resolution.js` (et non ~25) · fuite de `setInterval` à chaque
   ouverture du poste de préparation (aucun `clearInterval`) · clés sessionStorage non namespacées ·
   `new Date('AAAA-MM-JJ')` parsé UTC (décalage d'un jour) · `appliquerJetonsReprisePostImport`
   balaie sans filtre groupe-cours.
   **Liste** : handlers orphelins (`toggleVerrouillerEvaluation` sans appelant, branches de filtres
   dont les selects n'existent plus, `attacherEvenementsActions` no-op au commentaire mensonger) ·
   double rendu et accumulation de listeners à chaque visite · `production.nom` au lieu de `titre`
-  → colonne vide en vue corbeille · `reprise-ciblee` absent du tri jetons · annotations jamais
+  → colonne vide en vue corbeille · `reprise-ciblee` mal classé au tri jetons · annotations jamais
   purgées à la suppression définitive ni à la purge 30 jours.
-  **Annoter** : deux blocs `if` vides · note finale lue depuis le DOM (`parseFloat(...textContent)`)
-  au lieu du SSOT de calcul.
+  ⚠ **« branches de filtres » est À MOITIÉ CADUC.** Le bloc `filtre-note-eval` a été **supprimé par
+  #575 le 28 août 2026** ; il n'en reste qu'un **commentaire de 17 lignes qui documente son retrait**
+  — un `grep` brut le trouve encore et fait conclure « vivant » à tort. Ce qui subsiste est un second
+  cas que l'énoncé ne nommait pas : **`filtre-groupe-eval`**, lu à cinq endroits de
+  `liste-evaluations.js` et **créé nulle part dans le dépôt**, plus la branche `'non-remis'` sans option.
+  ⚠ **`reprise-ciblee` est PIRE que « absent du tri ».** Le `badgeType` est bien produit, mais absent
+  de la table `ordreJeton`, dont le repli est `?? 0` : une reprise ciblée n'est pas ignorée du tri,
+  elle est **classée avec les lignes sans jeton**.
+  **Annoter** : note finale lue depuis le DOM (`parseFloat(...textContent)`) au lieu du SSOT de calcul.
+  ⚠ **LES DEUX BLOCS `if` VIDES NE SONT PAS DANS « ANNOTER ».** Ils sont dans `identifierAutoPipeline`
+  (écran **Importer**) et dans `changerProductionFichier` (`travaux-ui.js`).
+  ⮕ Le second **se traite avec #561** : c'est la fonction même dont #561 dit que le retour n'est pas
+  attendu. Même endroit, même geste.
   **Export** : barres de progression jamais remises à zéro · noms de dossiers ZIP non assainis (un
   « / » crée des sous-dossiers ; fichier sans extension → la version annotée écrase l'original) ·
   code mort `lancerAllegement` · `echapperHtml` n'échappe pas les guillemets (`config.js`) · couleurs
   utilisateur interpolées dans des attributs `style` sans échappement (8 sites).
-  **Design mineur** : hiérarchie h2/h3 incohérente · un « Cliquez » vouvoyé · badges jetons en hex
-  dur alors que les variables existent · pas de `:focus-visible` sur la toolbar d'annotation ·
-  `aria-label` remplacés par `title` sur les boutons-icônes de la visionneuse.
+  **Design mineur** : hiérarchie h2/h3 incohérente · **trois** « Cliquez » vouvoyés (et non un seul :
+  `travaux-ui.js` et deux dans `travaux-outils.js`) · badges jetons en hex dur · pas de
+  `:focus-visible` sur la toolbar d'annotation · boutons-icônes de la visionneuse sans nom accessible.
+  ⚠ **« alors que les variables existent » EST FAUX.** Les hex durs sont confirmés dans `styles.css`,
+  mais **aucune variable de palette ne porte `#ff6f00` ni `#9c27b0`** (`--orange-accent` vaut
+  `#c8a060`/`#ff6b35`). Il n'y a pas de substitution à faire : il faut **décider** de la couleur, ou
+  créer les variables. Ce n'est pas un simple remplacement.
+  ⚠ **L'ACCESSIBILITÉ EST SOUS-ÉVALUÉE, pas seulement mal étiquetée.** L'énoncé décrit un `aria-label`
+  remplacé par un `title`. Mesuré : **deux boutons de navigation n'ont NI `title` NI `aria-label`**,
+  et leur icône est en `alt=""` — ils n'ont donc **aucun nom accessible**. Seul un troisième porte un
+  `title`. C'est un défaut plus grave que la substitution décrite.
+  ⚠ **« hiérarchie h2/h3 incohérente » NON VÉRIFIABLE STATIQUEMENT** : dépend du niveau de titre
+  effectivement rendu selon l'onglet actif. ⮕ **Manipulation requise** : ouvrir Évaluations, passer
+  chaque sous-onglet, relever l'arbre de titres rendu.
 
 - [ ] **#553 — Le rabotage de clé `startsWith('francais')` : un pansement sur un appariement qui échoue.**
   Créé le 27 août 2026, sorti du chantier #552. **Huit sites** rabotent la clé d'un critère vers
