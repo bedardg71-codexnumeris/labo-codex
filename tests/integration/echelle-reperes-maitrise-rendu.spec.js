@@ -63,6 +63,30 @@ test('#555 · l\'éditeur d\'échelle rend les deux repères, et l\'aperçu dit 
         window.afficherNiveauxEchelle(echelle);
 
         const editeur = document.getElementById('tableauNiveauxEchelle');
+
+        // ⚠ TROIS ANCÊTRES SONT MASQUÉS tant que l'écran n'est pas ouvert par la
+        // navigation — mesuré, pas supposé. Et `conteneurEditionEchelle` l'est
+        // par la CLASSE `u-hide`, qui porte un `!important` : un `style.display`
+        // inline ne l'écrase pas. Première version de cette spec écrite ainsi,
+        // et c'est la garde anti-silence ci-dessous qui l'a dit — sans elle,
+        // toutes les largeurs auraient valu 0 et le test serait passé au vert
+        // sans rien mesurer.
+        ['conteneurEditionEchelle', 'conception-echelle-performance', 'section-conception']
+            .forEach((id) => {
+                const n = document.getElementById(id);
+                if (!n) return;
+                n.classList.remove('u-hide');
+                n.style.display = 'block';
+            });
+
+        const largeur = (el) => (el ? Math.round(el.getBoundingClientRect().width) : 0);
+        const lignes = (el) => {
+            if (!el) return 0;
+            const hauteurLigne = parseFloat(getComputedStyle(el).lineHeight) || 16;
+            return Math.round(el.getBoundingClientRect().height / hauteurLigne);
+        };
+        const labelDe = (select) => select.closest('.groupe-form').querySelector('label');
+        const selectSOLO = editeur.querySelector('select[data-champ="niveauSOLO"]');
         const apercu = document.getElementById('apercuEchelleNiveaux');
         const selects = [...editeur.querySelectorAll('select[data-champ^="seuil"]')];
 
@@ -77,7 +101,18 @@ test('#555 · l\'éditeur d\'échelle rend les deux repères, et l\'aperçu dit 
             // niveaux qui doivent déjà exister.
             reperesApresNiveaux: editeur.innerHTML.indexOf('Repères de maîtrise')
                 > editeur.innerHTML.indexOf('data-champ="valeurCalcul"'),
-            apercu: apercu ? apercu.textContent.replace(/\s+/g, ' ').trim() : ''
+            apercu: apercu ? apercu.textContent.replace(/\s+/g, ' ').trim() : '',
+
+            // Mise en page, signalée sur capture par Grégoire le 28 août : la
+            // grille des niveaux déclarait SEPT colonnes pour HUIT champs, et le
+            // bloc des repères réutilisait cette grille. Les listes tombaient
+            // dans une colonne de 56-64 px, donc coupées, et leurs libellés
+            // s'empilaient mot par mot.
+            largeurSOLO: largeur(selectSOLO),
+            lignesLabelSOLO: lignes(labelDe(selectSOLO)),
+            largeursReperes: selects.map(largeur),
+            lignesLabelsReperes: selects.map((s) => lignes(labelDe(s))),
+            largeurConteneur: largeur(editeur)
         };
     });
 
@@ -97,5 +132,85 @@ test('#555 · l\'éditeur d\'échelle rend les deux repères, et l\'aperçu dit 
     expect(resultat.apercu).toContain('suffisant');      // X, entre les deux
     expect(resultat.apercu).toContain('maîtrisé');       // Y et Z, au-dessus
 
+    // ── MISE EN PAGE ────────────────────────────────────────────────────────
+    // Garde anti-silence : sans conteneur mesurable, tout ce qui suit vaudrait 0
+    // et passerait. C'est le cas exact qui rendrait ces assertions décoratives.
+    expect(resultat.largeurConteneur).toBeGreaterThan(600);
+
+    // Le seuil n'est pas choisi au hasard : la colonne de repli qui causait le
+    // défaut faisait 56 à 64 px. Exiger le double, c'est prouver que la liste
+    // n'est plus dans cette colonne — sans figer une largeur exacte, qui
+    // rougirait au premier ajustement de la grille.
+    expect(resultat.largeurSOLO).toBeGreaterThan(128);
+    resultat.largeursReperes.forEach((l) => expect(l).toBeGreaterThan(128));
+
+    // Et les libellés ne s'empilent plus mot par mot : « Suffisant à partir de »
+    // tient sur une ligne, « Niveau SOLO atteint (facultatif) » sur deux au plus
+    // (il en occupait quatre).
+    resultat.lignesLabelsReperes.forEach((n) => expect(n).toBeLessThanOrEqual(1));
+    expect(resultat.lignesLabelSOLO).toBeLessThanOrEqual(2);
+
     expect(erreurs).toEqual([]);
+});
+
+// ── LA DISPOSITION À HUIT COLONNES ──────────────────────────────────────────
+//
+// ⚠ CE SECOND CAS N'EST PAS UN DOUBLON. Le viewport par défaut de la suite est
+// 1280 px, où la règle `@media (max-width: 1280px)` s'applique : le test
+// ci-dessus n'éprouve donc QUE la disposition de repli, où le champ SOLO prend
+// toute la largeur. La correction principale — une huitième colonne pour un
+// huitième champ — ne vit qu'au-dessus de 1280 px, c'est-à-dire sur l'écran de
+// Grégoire, celui de la capture. Sans ce cas, elle ne serait verrouillée par
+// rien.
+test('#555 · en fenêtre large, les huit champs d\'un niveau tiennent sur UNE rangée', async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
+
+    const resultat = await page.evaluate(() => {
+        ['conteneurEditionEchelle', 'conception-echelle-performance', 'section-conception']
+            .forEach((id) => {
+                const n = document.getElementById(id);
+                if (!n) return;
+                n.classList.remove('u-hide');
+                n.style.display = 'block';
+            });
+
+        window.afficherNiveauxEchelle({
+            id: 'ECH_SPEC_555_LARGE', nom: 'Deux niveaux',
+            seuilSuffisance: 'I', seuilMaitrise: 'M',
+            niveaux: [
+                { code: 'I', nom: 'Incomplet', min: 0, max: 64, valeurCalcul: 32, couleur: '#111111' },
+                { code: 'M', nom: 'Maîtrisé', min: 75, max: 84, valeurCalcul: 79, couleur: '#222222' }
+            ]
+        });
+
+        const editeur = document.getElementById('tableauNiveauxEchelle');
+        const grille = editeur.querySelector('.echelle-niveau-grille');
+        const champs = [...grille.querySelectorAll(':scope > .groupe-form')];
+        // ⚠ LE BORD BAS, PAS LE BORD HAUT. La grille est en `align-items: end` :
+        // sur une même rangée, un champ dont le libellé tient sur deux lignes
+        // commence PLUS HAUT que ses voisins. Compter les bords hauts distincts
+        // rendait 6 pour une rangée unique — première version de ce test.
+        const bas = (el) => Math.round(el.getBoundingClientRect().bottom);
+        const solo = editeur.querySelector('select[data-champ="niveauSOLO"]');
+
+        return {
+            nbChamps: champs.length,
+            // Une seule rangée : tous les champs partagent le même bord BAS.
+            rangees: [...new Set(champs.map(bas))].length,
+            largeurSOLO: Math.round(solo.getBoundingClientRect().width),
+            // Aucun débordement, ni dans la grille ni dans la page — c'est la
+            // règle du dépôt depuis #118/#283.
+            grilleDeborde: grille.scrollWidth > Math.ceil(grille.getBoundingClientRect().width),
+            pageDeborde: document.documentElement.scrollWidth > window.innerWidth
+        };
+    });
+
+    expect(resultat.nbChamps).toBe(8);
+    expect(resultat.rangees).toBe(1);
+    expect(resultat.largeurSOLO).toBeGreaterThan(128);
+    expect(resultat.grilleDeborde).toBe(false);
+    expect(resultat.pageDeborde).toBe(false);
 });
