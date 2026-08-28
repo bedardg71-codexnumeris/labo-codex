@@ -25703,6 +25703,24 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     z-index: 950;
     transition: bottom 0.35s ease;
+
+    /* ⮕ #508 — LE BANDEAU INFORME, IL NE BLOQUE PAS.
+       Ajouté le 28 août 2026 après une régression MESURÉE : la spec
+       `planif-alignement` (« un bloc glissé près d'un autre COLLE ») est verte
+       à `fbeffdad`, rouge à `f41c6118`, et redevient verte quand on éteint
+       l'avis — le `mouse.down()` du glisser atterrissait sur le bandeau, jamais
+       sur le bloc, qui ne bougeait donc pas d'un pixel.
+
+       Ce n'était pas un artefact de test : posé en `position: fixed` au BAS de
+       l'écran, centré sur 600 px, ce bandeau recouvre la zone de travail. Tout
+       ce qui se trouve dessous — un nœud de carte mentale, un bouton — était
+       inatteignable au clic tant que l'avis n'était pas fermé.
+
+       `pointer-events: none` ici, `auto` sur le seul élément interactif (le
+       bouton de fermeture, plus bas) : le patron des bandeaux NON MODAUX. Rien
+       ne change à l'apparence. Contrepartie assumée : le texte de l'avis n'est
+       plus sélectionnable — un avis court se lit, il ne se copie pas. */
+    pointer-events: none;
 }
 
 .transition-bandeau.visible {
@@ -25724,6 +25742,9 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 
 .transition-bandeau-fermer {
+    /* #508 — le seul élément qui reprend les clics (voir `.transition-bandeau`).
+       Sans cette ligne, le bandeau serait informatif ET infermable. */
+    pointer-events: auto;
     flex-shrink: 0;
     width: 28px;
     height: 28px;
