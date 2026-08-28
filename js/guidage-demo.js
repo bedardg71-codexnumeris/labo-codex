@@ -54,7 +54,7 @@ const GUIDAGE_TEXTES = {
     },
     'evaluations-exporter': {
         titre: 'Exporter et archiver',
-        texte: 'Exporter les PDF annotés aux étudiants, archiver le semestre et alléger le stockage.'
+        texte: 'Exporter les PDF annotés aux étudiants et archiver le semestre.'
     },
     'conception-apercu-legacy': {
         titre: 'Construction de la note \u2014 Aper\u00e7u',

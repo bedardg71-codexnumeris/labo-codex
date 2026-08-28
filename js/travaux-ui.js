@@ -532,7 +532,7 @@
     }
 
     /* ===============================
-       DROPDOWN ACTIONS (Annoter / Évaluer / Alléger)
+       DROPDOWN ACTIONS (Annoter / Évaluer)
        =============================== */
 
     function _configurerDropdownActions() {
@@ -1071,7 +1071,7 @@
                                 <button class="actions-item actions-item-vert" id="travaux-btn-evaluer" data-action="travauxUI.basculerMode" data-param="evaluer">Évaluer</button>
                                 <div class="actions-separateur"></div>
                                 <button class="actions-item" id="travaux-btn-editer" data-action="editerFichierDepuisEvaluation">Modifier</button>
-                                <!-- Alléger et Re-importer : opérations sur fichier, disponibles dans Exporter et archiver -->
+                                <!-- Re-importer : opération sur fichier, disponible dans Exporter et archiver -->
                             </div>
                         </div>
                         ${_htmlDropdownProduction ? `<div class="annot-toolbar-production">${_htmlDropdownProduction}</div>` : ''}
@@ -1171,7 +1171,7 @@
             ${genererGrilleFichiers(fichiersTravaux, 'ouvrirPreviewInline')}
 
             <div class="travaux-archivage-options">
-                <!-- Allégement : carte retirée tant que la fonctionnalité n'est pas prête (refonte textes, décision Grégoire 2 juin) -->
+                <!-- Allégement : fonctionnalité RETIRÉE le 28 août 2026 (décision Grégoire). Le statut « facsimile » subsiste en lecture pour les fichiers déjà allégés. -->
 
                 <!-- Exporter des travaux -->
                 <div class="travaux-archivage-carte">
@@ -3221,7 +3221,6 @@
             // Boutons et badge cycle de vie
             // NB: fichierOuvert déjà déclaré plus haut (ligne résolution)
             const badgeStatut = document.getElementById('travaux-badge-statut');
-            const btnAlleger = document.getElementById('travaux-btn-alleger');
             const btnReimporter = document.getElementById('travaux-btn-reimporter');
 
             if (fichierOuvert) {
@@ -3246,8 +3245,6 @@
                     }
                 }
 
-                // Option Alléger : active si exporté
-                if (btnAlleger) btnAlleger.disabled = (statut !== 'exporte');
                 // Option Re-importer : active si allégé (facsimile)
                 if (btnReimporter) btnReimporter.disabled = (statut !== 'facsimile');
             }
@@ -4299,29 +4296,6 @@
     /* ===============================
        ACTIONS CYCLE DE VIE
        =============================== */
-
-    /**
-     * Allege un fichier specifique (exporte → fac-simile)
-     * @param {string} fichierId
-     */
-    async function allegerFichier(fichierId) {
-        const confirme = confirm(
-            'Alléger ce fichier ?\n\n'
-            + 'Cette opération convertit le fichier en fac-similé '
-            + '(niveaux de gris, résolution réduite, JPEG compressé). '
-            + 'Le fichier original sera écrasé et ne pourra pas être récupéré.\n\n'
-            + 'Pour retrouver l\'original, il faudra le ré-importer.'
-        );
-        if (!confirme) return;
-
-        const ok = await travauxStockage.convertirEnFacsimile(fichierId);
-        if (ok) {
-            notifications.succes('Fichier allégé en fac-similé');
-            rafraichirUI();
-        } else {
-            alert('Erreur lors de l\'allègement');
-        }
-    }
 
     /**
      * Change la production associee a un fichier deja importe
@@ -6797,12 +6771,6 @@
         afficherImport();
     }
 
-    /** Alléger le fichier actuellement ouvert dans la visionneuse */
-    function allegerFichierActuel() {
-        var fichier = travauxVisionneuse.getFichierActuel();
-        if (fichier && fichier.id) allegerFichier(fichier.id);
-    }
-
     /** Re-importer le fichier actuellement ouvert dans la visionneuse */
     function reimporterFichierActuel() {
         var fichier = travauxVisionneuse.getFichierActuel();
@@ -6966,7 +6934,6 @@
         // Suppression
         supprimerFichierImporte: supprimerFichierImporte,
         // Cycle de vie
-        allegerFichier: allegerFichier,
         reimporterFichier: reimporterFichier,
         // Chrono évaluation
         demarrerChrono: demarrerChrono,
@@ -7038,7 +7005,6 @@
         detruireLayoutAnnotation: detruireLayoutAnnotation,
         // Wrappers délégation (Phase 5)
         annulerImport: annulerImport,
-        allegerFichierActuel: allegerFichierActuel,
         reimporterFichierActuel: reimporterFichierActuel,
         changerProductionFichierDepuisTableau: changerProductionFichierDepuisTableau,
         // Plein écran + fond canvas
