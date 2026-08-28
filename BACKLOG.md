@@ -1660,7 +1660,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   L'ORDRE se dérive d'une échelle ; « faible » et « maîtrisé », non. Un test CONSTATE ce compte de 18 :
   il rougira le jour où **#555** les retirera, et c'est le signal voulu.
 
-- [ ] **#576 — Le bilan de rétroaction est VIDE quand la grille d'origine est introuvable, alors que le panneau d'à côté sait s'en passer.**
+- [x] **#576 — Le bilan de rétroaction est VIDE quand la grille d'origine est introuvable, alors que le panneau d'à côté sait s'en passer.**
   **Trouvé par la porte terrain 2.6 du 28 août 2026, sur les données réelles d'H2026 de Grégoire** (captures
   à l'appui, artefacts 8 et 10 de Benjamin A.). ⚠ **Ce n'est PAS une régression de #575** : le chemin
   est intact depuis l'origine ; la porte l'a seulement mis sous les yeux.
@@ -1676,14 +1676,28 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   NOM (`criteres: [{critereId, critereNom, niveauSelectionne}]`), et `evaluation.js` a un repli explicite
   pour ce cas exact : bannière « Grille d'origine introuvable dans les modèles actuels — affichage depuis
   les données sauvegardées » (`:1158`, `:1426`). Le bilan n'a jamais eu ce repli.
-  **Le geste** : `_collecterCriteresBilan` se replie sur les critères de l'évaluation enregistrée quand la
-  grille template manque — pas une invention, la même source que le panneau voisin. Et le bilan dit
-  pourquoi, comme le fait la bannière, plutôt que de se taire.
-  ⚠ **Le silence est le vrai défaut** : ce bilan est le document REMIS À L'ÉLÈVE. Un écran qui ne peut
-  pas conclure doit le dire ; ici il rend une page d'entête sans contenu, impossible à distinguer d'un
-  élève qui n'aurait aucun défi.
-  **Fin** : sur une évaluation dont la grille d'origine a disparu, le bilan nomme les critères et leurs
-  niveaux ; sentinelle avec break-test rouge.
+  **LIVRÉ le 28 août 2026.** `_chargerEvaluationEnregistreeBilan` retrouve l'évaluation sauvegardée (par
+  `idModification`, sinon par élève + production, en écartant les remplacées) et `_collecterCriteresBilan`
+  y lit les NOMS des critères quand la grille manque — la même source que le panneau voisin, pas une
+  seconde lecture. ⮕ **Les noms viennent de l'enregistrement, les niveaux du FORMULAIRE** : le nom est figé
+  à la sauvegarde, le niveau est celui que l'enseignant·e a sous les yeux et vient peut-être de changer.
+  ⮕ Le repli couvre aussi la grille PRÉSENTE dont plus aucun identifiant ne correspond (critères recréés) :
+  même symptôme, même remède. La règle tient en une phrase — le bilan lit la grille quand il le peut, et
+  l'évaluation enregistrée sinon.
+  ⮕ **Le silence est traité, mais PAS comme l'annonçait la première rédaction de cet item.** Elle disait
+  « le bilan dit pourquoi, comme le fait la bannière » : **c'était faux, et dangereux**. Vérifié au code :
+  `copierToutRetroaction` copie le `textContent` de ce bloc sous « === BILAN === » dans ce qui est remis à
+  l'élève — une note d'anomalie serait partie avec. La bannière du panneau voisin prévient déjà
+  l'enseignant·e, c'est le bon endroit. Le bilan rend désormais une phrase écrite POUR L'ÉLÈVE quand rien
+  n'est évaluable (« Aucun critère n'est encore évalué pour cette production. »), qui constate sans nommer
+  d'anomalie — au lieu d'un titre suivi du vide.
+  ⚠ **UN SECOND POINT D'INJECTION, OUVERT PAR LE REPLI LUI-MÊME ET TROUVÉ PAR LA SENTINELLE.** Dans
+  `_rendreDefisBilan`, `desc` vaut la description du critère OU, à défaut, son NOM — et le repli ne
+  fournit aucune description, donc le nom passait par une branche restée non échappée. Échappé. Trouvé par
+  le test, pas par relecture.
+  Sentinelle `sentinelle-576-bilan-sans-grille-origine.test.js` — **11 cas, 7 mutations, 7 rouges**,
+  restauration vérifiée. Le banc rejoue le cas réel : échelle « IDME et niv 0 (restaurée) », grille
+  `GR_DISPARUE`, les quatre critères des captures. Vitest **3778/3778** (355 fichiers).
 
 - [ ] **#573 — Après « Enregistrer », la cartouche ouverte est REMPLACÉE par une cartouche neuve, et l'autosave #517 devient muet.**
   (rapport §7.2 n° 1) `sauvegarderCartouche` → `chargerCartouchesRetroaction()` (`cartouches.js:890`) →
