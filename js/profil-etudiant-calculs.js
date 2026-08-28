@@ -471,6 +471,14 @@ function _diagnostiquerResolutionEchelles() {
     var parCause = {};
     divergents.forEach(function (l) { parCause[l.cause] = (parCause[l.cause] || 0) + 1; });
 
+    // ⚠ `console.log` ASSUMÉ ICI, contre la règle 5 de CLAUDE.md (« zéro
+    // console.log dans le nouveau code »), et l'exception est NOMMÉE plutôt que
+    // subie : pour un outil de diagnostic, la SORTIE CONSOLE EST LE PRODUIT —
+    // il n'a pas d'autre interface. Même statut que `_diagnostiquerModeleCours`
+    // (`cours.js`) et que les `diagnostiquer*` de `travaux-resolution.js`, dont
+    // l'audit du 28 août a établi qu'ils ne sont pas de la dette : les retirer
+    // casserait l'outil. `warn`/`error` seraient sémantiquement faux — rien
+    // n'est anormal quand un diagnostic rend son compte.
     if (typeof console !== 'undefined' && console.table) console.table(lignes);
     console.log('[Diagnostic résolveurs] ' + lignes.length + ' identifiant(s) d\'échelle porté(s) par des données.');
     console.log('[Diagnostic résolveurs] DIVERGENTS : ' + divergents.length + (divergents.length ? '' : ' — la divergence est théorique sur ces données.'));
