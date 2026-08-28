@@ -7,6 +7,64 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 28 AOÛT 2026 (12 h 20) : B10b EST CLOS. LA MARQUE DE
+     MAÎTRISE SE LIT DANS L'ÉCHELLE, PLUS DANS DES LETTRES.
+
+     ▣ LE DÉBLOCAGE. « Mes repères sont posés sur mon échelle. » Le lot 2 de
+       #555 n'attendait que ça — et c'était un geste de LUI, pas de moi.
+
+     ▣ CE QUI EST LIVRÉ. `zoneDuNiveau(code, echelleId)` rend `'priorite'`,
+       `'signale'`, `'acquis'` ou `null`. `synthese-retroaction-data.js` passe
+       de **14 comparaisons IDME en dur à ZÉRO**. Six sites branchés : défis,
+       zone intermédiaire, « tous maîtrisés », « ta force », améliorations,
+       patrons sur 3 productions. Le rendu affiche la zone intermédiaire.
+
+     ▣ ⚠ `null` N'EST PAS UNE QUATRIÈME ZONE. C'est un refus de répondre, et
+       la seule suite acceptable est de ne RIEN rendre — sans note technique,
+       `copierToutRetroaction` copiant ce bilan dans le document de l'élève.
+
+     ▣ ⚠⚠ CHAQUE ÉVALUATION EST LUE DANS SON ÉCHELLE, et les DEUX fautes de ce
+       type ont été trouvées par le BREAK-TEST seul, sur un lot déjà vert :
+       `maitriseLongtemps` et `construireAmeliorations` lisaient le passé avec
+       le barème du présent. Sur des barèmes différents, cela efface un progrès
+       réel ou en invente un. Aucune relecture ne l'avait vu.
+
+     ▣ UNE QUESTION DE GRÉGOIRE A TROUVÉ CE QU'AUCUNE RELECTURE N'AVAIT VU.
+       Il a demandé si les repères étaient NAMESPACÉS par trimestre. Réponse :
+       oui, ils vivent dans l'objet échelle. Mais la question a fait regarder
+       les chemins de COPIE — et `dupliquerEchelle` les PERDAIT, sa liste
+       blanche ne les connaissant pas. ⮕ **« Où cette donnée est-elle COPIÉE ? »
+       trouve ce que « où est-elle lue ? » ne trouve pas.**
+       ⚠ La liste blanche est conservée : un spread emporterait `idOriginal` et
+       la copie répondrait à l'identifiant de la source (#542).
+
+     ▣ DEUX RETRAITS DE CODE DEVENU INUTILE. `rangOuDernier` (repli `Infinity`)
+       est devenu INATTEIGNABLE — les tableaux triés sont filtrés par zone, et
+       une zone non nulle implique un rang lisible. Retiré : un repli qu'on ne
+       peut plus atteindre finit par être lu comme une garantie.
+
+     ▣ RÈGLE D'ORIGINE PRÉSERVÉE, ET SIGNALÉE. « Tu as progressé » reste
+       `priorite → acquis` : passer d'une priorité à « signalé » n'est pas
+       annoncé. Un refactor ne change pas la sémantique — si Grégoire veut que
+       la zone intermédiaire compte, ce sera SA décision.
+
+     ▣ DEUX SESSIONS EN PARALLÈLE, SANS COLLISION. L'autre auditait #558-#572
+       en lecture seule, puis a écrit dans `BACKLOG.md`. J'ai GELÉ mes écritures
+       sur ce fichier le temps qu'elle finisse — parce que
+       `git commit -- BACKLOG.md` est en mode `--only` et committe l'ARBRE,
+       donc son travail. Mes trois avertissements (lignes périmées de 642 sur
+       `evaluation.js`, commentaires qui documentent un retrait, comptage `===`
+       seul) lui ont évité trois faux verdicts, dont un sur #560.
+
+     ▣ MESURE FINALE : **Vitest 3835/3835 (359 fichiers) · Playwright 199
+       passées**, zéro flaky. Anti-cache : 4 jetons, tous ramenés au jour du
+       BUILD — dont `synthese-retroaction-rendu.js`, que j'avais d'abord
+       incrémenté sur sa date de JUIN (la sentinelle ne l'aurait vu qu'après
+       commit, défaut #547).
+     ===================================================================== -->
+
+
+<!-- =====================================================================
      SESSION — 28 AOÛT 2026 (11 h 45) : #573 — LE SYMPTÔME « DES FOIS ÇA
      ENREGISTRE, DES FOIS NON » A UNE CAUSE, ET ELLE EST FERMÉE.
 
