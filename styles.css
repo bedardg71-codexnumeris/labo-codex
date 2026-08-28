@@ -17571,7 +17571,7 @@ tr.etudiant-inactif td {
     text-align: right;
 }
 
-/* Actions (Annoter, PDF, Alléger, Re-importer) — style planif-btn-carte */
+/* Actions (Annoter, PDF, Re-importer) — style planif-btn-carte */
 .travaux-btn-action {
     display: flex;
     align-items: center;

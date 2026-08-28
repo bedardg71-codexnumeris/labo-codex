@@ -415,10 +415,8 @@ const TOOLTIPS = {
         'Mode évaluation : ouvre les panneaux de critères et de paramètres pour évaluer cette production selon la grille.',
     'travaux-evaluer':
         'Ouvre l\'interface d\'évaluation avec l\'étudiant·e et la production présélectionnés. Tu pourras appliquer une grille de critères et générer une rétroaction.',
-    'travaux-btn-alleger':
-        'Remplace l\'original par un fac-similé plus léger (niveaux de gris, 800 px). Réduit l\'espace de stockage. Les annotations sont conservées.',
     'travaux-btn-reimporter':
-        'Remplace le fichier allégé par l\'original complet. Utile si tu as besoin de revoir les détails de la copie originale.',
+        'Remplace un fichier allégé par l\'original complet, à re-déposer. Ne concerne que les copies allégées avant le retrait de cette fonctionnalité.',
 
     // --- Archivage et export ---
 
@@ -432,8 +430,6 @@ const TOOLTIPS = {
         'Ajoute les versions annotées (avec surlignage, commentaires et tampons) au ZIP. Décoche pour n\'exporter que les originaux.',
     'travaux-archivage-inclure-evals':
         'Ajoute un fichier de rétroaction pour chaque évaluation complétée. Pratique pour la remise aux étudiant·es.',
-    'travaux-archivage-alleger':
-        'Convertit les originaux déjà exportés en fac-similés légers (niveaux de gris, 800 px). Libère de l\'espace de stockage sans perdre les annotations.',
 
     // =================================================================
     // T7 — TABLEAU DE BORD — Aperçu

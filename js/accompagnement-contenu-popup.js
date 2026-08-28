@@ -548,10 +548,6 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'conseil',
                 contenu: 'L\'inventaire affiché en haut du panneau (« <em>N fichier(s) en stock</em> ») reflète tout ce qui a été importé via le panneau <strong>Annoter et évaluer</strong>. Si tu ne vois aucun fichier ici, c\'est qu\'aucune copie n\'a encore été importée pour ce groupe-cours.'
-            },
-            {
-                type: 'texte',
-                contenu: '<strong>Allégement des travaux exportés</strong> : fonctionnalité en cours de refonte (bouton désactivé). Visera à convertir les originaux exportés en fac-similés pour réduire la taille du stockage local.'
             }
         ],
         voirAussi: ['evaluations-annoter', 'evaluations-liste']
