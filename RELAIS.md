@@ -93,6 +93,27 @@ travail : c'est l'incident que ce fichier documente déjà trois fois. ⮕ **Ges
 décidé par Grégoire** : ne rien stager ; quand elle aura commité, bumper d'un cran (`d` → `e`)
 et committer `styles.css` + un `index.html` ne portant QUE ce bump.
 
+#### Le correctif, en clair — pour qu'il soit reconstructible si l'arbre le perd
+
+Deux déclarations dans `styles.css`, rien d'autre. Elles vivent dans l'arbre non commité ;
+un `git add -A` d'une autre session pourrait les emporter, et le scratchpad qui en garde une
+copie est éphémère.
+
+```css
+/* dans .transition-bandeau, à côté de `z-index: 950` */
+pointer-events: none;
+
+/* dans .transition-bandeau-fermer, en première déclaration */
+pointer-events: auto;
+```
+
+**Sa sentinelle** : `tests/integration/bandeau-non-modal-508.spec.js` (non commitée elle aussi).
+Elle ne lit pas le CSS — elle pose un TÉMOIN sous le bandeau et vérifie qu'un **vrai clic** le
+traverse, que le bouton de fermeture reste atteignable, et qu'il ferme encore l'avis.
+**2 mutations, 2 rouges** (retirer l'un ou l'autre `pointer-events`). ⚠ Le correctif et sa
+sentinelle doivent partir **dans le même commit** : commiter la spec seule la rendrait rouge
+sur `HEAD` pour quiconque récupère le dépôt.
+
 ### ⚠ DEUX SESSIONS SUR LE MÊME ITEM #575, LE 28 AOÛT AU PETIT MATIN
 
 La session parallèle travaille **sur le lot 4 lui-même** : `evaluation-retroaction.js` (n° 10),
