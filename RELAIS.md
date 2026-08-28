@@ -23,9 +23,72 @@
 | ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE** | **#427** (refermer l'accès public) et **#508** (l'avis d'accueil qui l'annonce). Fiche opératoire prête : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`. **Dû par Grégoire** : la liste nominale des personnes à inviter et les trois noms Cloudflare — personne ne peut les préparer à sa place. |
 | ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. ⮕ **ET C'EST ARRIVÉ UNE SECONDE FOIS LE MÊME JOUR, dans l'autre sens.** Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les `BACKLOG.md` et `SESSION.md` de la session « présences » — l'inscription de l'item **#538** et la renumérotation **#534 → #537** vivent donc dans un commit qui parle d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc non réécrit. **Deux avertissements en un jour : sur ce dépôt, `git add` par chemins explicites n'est pas une préférence, c'est la seule méthode qui tienne.** |
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
-| **Dernière mise à jour** | **27 août 2026, 15 h 45** — **l'audit Fable 5 est rendu** : `Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md` (base `fbeffdad`, lecture seule, aucun bump). Deux items neufs : **#573** (cartouche remplacée après « Enregistrer », autosave #517 muet) et **#574** (seeds/gabarits d'échelle sans `valeurCalcul` → non calculables depuis #527) ; #542 mis à jour (**lot 4 jamais livré, chiffres faux chez Grégoire**). Avant : rituel de fin du 27 août — lot 3 de #542 REFERMÉ (8 pas) · #550 · #551 pas 1 · 1.104.0 · #552 · #535 · #537 LIVRÉS en 1.104.1 · #553, #554, #555 créés. |
+| **Dernière mise à jour** | **27 août 2026, 22 h 40** — **le lot 4 du plan SOLO est ouvert (#575) et à moitié livré** (`c85ec85b`) : quatre pas, 36 cas de sentinelle, 35 mutations toutes rouges. **Vitest 3740/3741, 353 fichiers** — le rouge est l'anti-cache ANTÉRIEUR (`preferences.js`, `transitions.js`, `styles.css`), aucun fichier du lot. Aucun bump (session `file://` ouverte) ; les sept `?v=` touchés sont incrémentés. ⚠ **RENDU NON VÉRIFIÉ.** Avant : **27 août, 15 h 45** — **l'audit Fable 5 est rendu** : `Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md` (base `fbeffdad`, lecture seule, aucun bump). Deux items neufs : **#573** (cartouche remplacée après « Enregistrer », autosave #517 muet) et **#574** (seeds/gabarits d'échelle sans `valeurCalcul` → non calculables depuis #527) ; #542 mis à jour (**lot 4 jamais livré, chiffres faux chez Grégoire**). Avant : rituel de fin du 27 août — lot 3 de #542 REFERMÉ (8 pas) · #550 · #551 pas 1 · 1.104.0 · #552 · #535 · #537 LIVRÉS en 1.104.1 · #553, #554, #555 créés. |
 
-## ▶ POUR LA SESSION QUI PREND LE RELAIS — 27 août 2026, fin de journée
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 27 août 2026, 22 h 40
+
+### ✅ LOT 4 DU PLAN SOLO — OUVERT SOUS #575, QUATRE PAS LIVRÉS (`c85ec85b`)
+
+Le lot 4 n'avait **jamais eu d'item** ; c'est le §9 n° 1 de l'audit Fable 5. Il est ouvert
+sous **#575**, avec sa liste, et quatre pas sont livrés :
+
+| Pas | Ce qui est parti | Sentinelle |
+|---|---|---|
+| **B1+B2+B3+B4** | 4ᵉ repli IDME (`32/69,5/79,5/92,5`), sa clé morte `echellesPerformance`, les cinq noms de critères de Grégoire | `sentinelle-575-lot4-b1b2-b3b4` (8 cas, 8 mutations rouges) |
+| **`SCALE_FALLBACK`** | l'échelle de Grégoire dans le **PDF remis à l'élève** | `…-synthese-pdf-sans-echelle-imposee` (7 cas, 6 rouges) |
+| **`determinerLettreIDME`** | la lettre IDME **rendue à l'écran** (« E 87 % ») | `…-niveau-note-globale-une-seule-regle` (8 cas, 7 rouges) |
+| **Badges + barres** | 5ᵉ **et 6ᵉ** tables IDME, échelles devinées, couleur non filtrée | `…-couleurs-badges-barres` (13 cas, 11 rouges) |
+
+**Le geste central : SUPPRIMER plutôt que RÉPARER.** `intervention.analyse.defisCommuns`
+était écrit en base et **lu par aucun écran depuis la Beta 0.85** (grep sur tout le dépôt).
+Le besoin est déjà servi, et correctement, par `mettreAJourCriteresCibles`. Réparer le
+doublon aurait été un correctif sans effet. Diff du lot : **+502 / −556**.
+
+**Trois choses que l'audit n'avait pas vues**, trouvées en corrigeant :
+1. Une **SIXIÈME table IDME** (`_obtenirNiveauxEtGradientSRPNF`), jumelle de la cinquième,
+   qui peignait le dégradé du bloc « Forces et défis » — que l'audit cite pourtant en
+   exemple de code proprement configurable. Les deux copies sont remplacées par
+   `niveauxEtGradientDesEvaluations`.
+2. Un **SEPTIÈME site** qui devine l'échelle : le graphique de progression
+   (`sections-affichage.js:3400`), avec son texte « Zones colorées basées sur l'échelle
+   IDME par défaut ». **Non corrigé**, mais l'état connu est verrouillé par un test
+   « exactement UNE occurrence restante » — il rougira quand on y touchera, c'est voulu.
+3. La moitié du **constat §5.5** : `couleurSure` était juste mais **enfermée dans une
+   fermeture locale** ; badges et barres posaient la couleur utilisateur BRUTE dans un
+   `style`. Extraite en `couleurCssSure`, partagée, testée (elle n'avait aucun test).
+
+### ⚠ CE QUI RESTE DE #575, ET CE QUI BLOQUE
+
+- **B7** (filtre `['I','D','M','E']`, `liste-evaluations.js:368`), **n° 10** (bilan de
+  rétroaction, `evaluation-retroaction.js:488`), **n° 11** (`convertirNoteEnValeur`,
+  `evaluation.js:284` — une **échelle ancienne où `I = 3`**, qui contredit IDME). Aucun ne
+  dépend d'un arbitrage : ils sont faisables tels quels.
+- **B10 — BUTE SUR #555.** `synthese-retroaction-data.js` ne compare pas seulement par
+  `ORDRE_NIV` : il teste les codes **en toutes lettres à six endroits** (`=== 'I' || === 'D'`
+  pour les défis, `=== 'M' || === 'E'` pour « tous maîtrisés »). L'ordre se dérive d'une
+  échelle ; « faible » et « maîtrisé », non — c'est exactement la marque de maîtrise de
+  **#555**. Le faire sans elle remplacerait un arbitrage en dur par un autre.
+
+### ⚠ CE QUI DEMANDE LES YEUX DE GRÉGOIRE
+
+Trois rendus modifiés, **non vérifiés** (l'environnement de test est `node`, sans navigateur) :
+la **lettre du niveau** dans « Développement des habiletés », les **badges d'artefacts**
+(couleur), les **barres de critères** des deux blocs (dégradé + légende). Sans échelle
+résolue, le comportement voulu est : **pas de lettre, badge neutre, fond de barre neutre,
+cause au survol** — jamais un repère inventé.
+
+### ⚠ TROIS VERROUS GIT ORPHELINS, LE 27 AOÛT À 15 h 45
+
+`git maintenance` a crashé et laissé `.git/index.lock`, `.git/HEAD.lock` et
+`.git/objects/maintenance.lock` — **tout commit était impossible** jusqu'à leur retrait
+(vérifié d'abord : zéro processus git actif, aucune opération en cours, locks vides et
+vieux de sept heures). Si une session retrouve « Unable to create '.git/index.lock' », le
+diagnostic est là : `find .git -name '*.lock'`, vérifier l'âge et l'absence de git actif
+**avant** de retirer quoi que ce soit.
+
+---
+
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 27 août 2026, fin de journée (entrée précédente)
 
 ### ✅ L'AUDIT FABLE 5 EST RENDU — 27 août 2026, 15 h 45
 
