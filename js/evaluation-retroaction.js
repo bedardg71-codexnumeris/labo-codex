@@ -526,40 +526,15 @@ function _lecteurNiveauBilan(echelleId) {
     };
 }
 
-/**
- * Deux évaluations parlent-elles du MÊME barème ?
- *
- * ⮕ #575, corrigé le 28 août 2026 après la porte terrain 2.7. La première
- * version comparait les `echelleId` BRUTS. Chez Grégoire, l'échelle courante est
- * « IDME et niv 0 (restaurée) » — recréée par la réparation de #542, donc sous un
- * identifiant NEUF — pendant que ses évaluations d'H2026 en désignent un ancien.
- * Deux ids différents pour le même barème : la ligne « Progrès » ne pouvait plus
- * jamais s'afficher chez lui. C'est une régression que j'ai introduite.
- *
- * ⮕ LES DEUX RÈGLES VIENNENT DU DÉPÔT, PAS D'UNE INVENTION. Elles sont celles de
- * `obtenirEchelleCommuneDesEvaluations` (#542 lot 3) :
- *   1. la comparaison porte sur l'échelle RÉSOLUE, jamais sur l'id désigné —
- *      c'est ce qui dédoublonne un import ou une restauration ;
- *   2. une échelle non désignée, ou désignée mais introuvable, est une ABSENCE,
- *      pas un barème concurrent. « Une échelle introuvable n'est pas une AUTRE
- *      échelle : c'est une absence. » On lit alors le code dans l'échelle
- *      courante — la seule qui existe.
- *
- * Ce qui reste refusé, et c'est tout l'objet de la garde : deux échelles qui
- * existent TOUTES LES DEUX et diffèrent. Le 3e niveau d'un barème à cinq et le
- * 3e d'un barème à trois ne disent pas la même chose.
- */
-function _memeEchelleBilan(idPrecedent, idCourant) {
-    if (!idPrecedent) return true;
-    var resoudre = function (id) {
-        return (typeof obtenirEchelleResolue === 'function') ? obtenirEchelleResolue(id || null) : null;
-    };
-    var precedente = resoudre(idPrecedent);
-    if (!precedente) return true;
-    var courante = resoudre(idCourant);
-    if (!courante) return false;
-    return precedente.id === courante.id;
-}
+// ⮕ #575 B10 — `_memeEchelleBilan` A ÉTÉ EXTRAITE, pas supprimée. La règle
+// « deux évaluations parlent-elles du même barème ? » vit maintenant dans
+// `echellesComparables` (`profil-etudiant-calculs.js`), à côté des autres
+// lecteurs d'échelle : la page de synthèse du PDF en a besoin du mot pour mot,
+// et deux copies de cette règle auraient fini par diverger — c'est précisément
+// ce que #555 constate ailleurs (`|| 0.70` ici, `|| 0.75` là). Les deux règles
+// qu'elle applique restent celles d'`obtenirEchelleCommuneDesEvaluations`, et
+// la correction de la porte terrain 2.7 est partie avec elle.
+
 
 /** Le rang d'un code, ou `Infinity` : un niveau illisible se range en dernier. */
 function _rangBilan(niveauDe, code) {
@@ -853,8 +828,13 @@ function _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId) {
     // aucune —, la ligne « Progrès » ne s'affiche pas. C'est le même refus que
     // `obtenirEchelleCommuneDesEvaluations` oppose à l'ambiguïté : ne pas
     // deviner, plutôt qu'annoncer un progrès qui n'a pas été mesuré.
+    // ⚠ REPLI RESTRICTIF, et c'est le seul qui soit sûr : sans le lecteur, on ne
+    // peut pas savoir si les deux rangs sont comparables — et « ne pas deviner »
+    // vaut ici aussi. `profil-etudiant-calculs.js` est chargé avant ce module
+    // dans `index.html` ; ce filet ne sert qu'à ne jamais lever.
     var memeEchelle = !!evalPrecedente
-        && _memeEchelleBilan(evalPrecedente.echelleId, echelleId);
+        && (typeof echellesComparables === 'function')
+        && echellesComparables(evalPrecedente.echelleId, echelleId);
     if (memeEchelle && evalPrecedente.niveauFinal) {
         var nivAct = document.getElementById('niveauProduction1')?.textContent || '';
         var nivPre = evalPrecedente.niveauFinal;

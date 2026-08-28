@@ -243,6 +243,51 @@ function niveauDuCodeDansEchelle(code, echelleId = null) {
 }
 
 /**
+ * Deux évaluations parlent-elles du MÊME barème ?
+ *
+ * ⮕ #575 B10 — EXTRAIT, PAS ÉCRIT. Ce raisonnement a été livré le 28 août dans
+ * `evaluation-retroaction.js` (`_memeEchelleBilan`), après la porte terrain 2.7 ;
+ * `synthese-retroaction-data.js` en a besoin du mot pour mot pour la ligne
+ * « Progrès » du PDF. Le recopier, c'est le patron des replis divergents que
+ * #529 a passé une session à défaire — et que #555 constate encore aujourd'hui
+ * (`|| 0.70` d'un côté, `|| 0.75` de l'autre).
+ *
+ * ⮕ LES DEUX RÈGLES VIENNENT D'`obtenirEchelleCommuneDesEvaluations` (#542 lot 3),
+ * pas d'une invention :
+ *   1. la comparaison porte sur l'échelle RÉSOLUE, jamais sur l'id désigné —
+ *      c'est ce qui dédoublonne un import ou une restauration. Chez Grégoire,
+ *      l'échelle courante est « IDME et niv 0 (restaurée) », recréée par la
+ *      réparation de #542 sous un identifiant NEUF, pendant que ses évaluations
+ *      d'H2026 en désignent un ancien : comparer les ids bruts effaçait la
+ *      ligne « Progrès » de tous ses élèves ;
+ *   2. « une échelle introuvable n'est pas une AUTRE échelle : c'est une
+ *      absence. » Une évaluation qui n'en désigne aucune, ou qui en désigne une
+ *      disparue, se lit dans l'échelle courante — la seule qui existe.
+ *
+ * ⚠ LA FONCTION EST ASYMÉTRIQUE, ET C'EST VOULU. L'absence est tolérée du côté
+ * ANCIEN (on lit alors dans l'échelle courante) mais pas du côté COURANT : sans
+ * échelle courante, il n'y a aucun ordre où situer quoi que ce soit. Ce qui
+ * reste refusé est le seul cas qui empêche vraiment de conclure — deux échelles
+ * qui existent TOUTES LES DEUX et diffèrent. Le 3e niveau d'un barème à cinq et
+ * le 3e d'un barème à trois ne disent pas la même chose.
+ *
+ * @param {string} idAncien - l'`echelleId` de l'évaluation la plus ancienne
+ * @param {string} idCourant - l'`echelleId` de l'évaluation de référence
+ * @returns {boolean} `true` quand les deux rangs sont comparables
+ */
+function echellesComparables(idAncien, idCourant) {
+    if (!idAncien) return true;
+    var resoudre = function (id) {
+        return (typeof obtenirEchelleResolue === 'function') ? obtenirEchelleResolue(id || null) : null;
+    };
+    var ancienne = resoudre(idAncien);
+    if (!ancienne) return true;
+    var courante = resoudre(idCourant);
+    if (!courante) return false;
+    return ancienne.id === courante.id;
+}
+
+/**
  * Construit la table `{ <code>: score 0-1 }` à partir des niveaux d'une échelle.
  *
  * Extrait le 27 août 2026 (#542 A2) pour que les DEUX gisements d'échelles —
@@ -1843,6 +1888,7 @@ window.obtenirTableConversionNiveaux = obtenirTableConversionNiveaux;
 // `evaluation-retroaction.js` (bilan : libellés, défis, progrès).
 window.niveauxOrdonnesDeLEchelle = niveauxOrdonnesDeLEchelle;
 window.niveauDuCodeDansEchelle = niveauDuCodeDansEchelle;
+window.echellesComparables = echellesComparables;
 window.convertirNiveauEnScore = convertirNiveauEnScore;
 // #542 A3 — consommée par `profil-etudiant-sections-affichage.js` (carte RàI).
 window.diagnostiquerConversionNiveaux = diagnostiquerConversionNiveaux;
