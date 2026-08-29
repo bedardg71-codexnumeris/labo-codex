@@ -1300,7 +1300,7 @@ function _collecterCriteresAutoSave(grille, ec) {
 
 function _majEvaluationExistanteAutoSave(evalExistante, ec, criteres) {
     evalExistante.criteres = criteres;
-    evalExistante.noteFinale = parseFloat((document.getElementById('noteProduction1') || {}).textContent) || evalExistante.noteFinale;
+    evalExistante.noteFinale = (typeof window.noteCalculeeCourante === 'number') ? window.noteCalculeeCourante : evalExistante.noteFinale;   // #572
     evalExistante.niveauFinal = (document.getElementById('niveauProduction1') || {}).textContent || evalExistante.niveauFinal;
     var retroEl = document.getElementById('retroactionFinale1');
     if (retroEl) evalExistante.retroactionFinale = retroEl.value;
@@ -1324,7 +1324,7 @@ function _lireChampsDOMAutoSave() {
         statutRemise: (document.getElementById('remiseProduction1') || {}).value || '',
         statutIntegrite: (document.getElementById('statutIntegrite') || {}).value || 'recevable',
         notesIntegrite: (document.getElementById('notesIntegrite') || {}).value || '',
-        noteFinale: parseFloat((document.getElementById('noteProduction1') || {}).textContent) || 0,
+        noteFinale: (typeof window.noteCalculeeCourante === 'number') ? window.noteCalculeeCourante : 0,   // #572
         niveauFinal: (document.getElementById('niveauProduction1') || {}).textContent || '',
         retroactionFinale: (document.getElementById('retroactionFinale1') || {}).value || ''
     };

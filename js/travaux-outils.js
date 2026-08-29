@@ -2284,7 +2284,7 @@
 
         let html = '<div class="modal-contenu travaux-retro-modal">';
         html += '<h2 style="margin-top:0">R\u00e9troactions \u2014 Observations</h2>';
-        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes appara\u00eetront dans la r\u00e9troaction g\u00e9n\u00e9r\u00e9e pour l\'\u00e9l\u00e8ve lorsque le tampon correspondant est utilis\u00e9. Cliquez sur l\'image pour la remplacer. Glissez \u2630 pour r\u00e9ordonner.</p>';
+        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes appara\u00eetront dans la r\u00e9troaction g\u00e9n\u00e9r\u00e9e pour l\'\u00e9l\u00e8ve lorsque le tampon correspondant est utilis\u00e9. Clique sur l\'image pour la remplacer. Glissez \u2630 pour r\u00e9ordonner.</p>';
 
         // Noms des categories editables
         var catsPerso = obtenirCategoriesPerso();
@@ -3312,7 +3312,7 @@
 
         let html = '<div class="modal-contenu travaux-retro-modal">';
         html += '<h2 style="margin-top:0">R\u00e9troactions \u2014 Erreurs de fran\u00e7ais</h2>';
-        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes appara\u00eetront dans la r\u00e9troaction g\u00e9n\u00e9r\u00e9e pour l\'\u00e9l\u00e8ve lorsque le code d\'erreur correspondant est utilis\u00e9. Cliquez sur la pastille pour changer sa couleur. Glissez \u2630 pour r\u00e9ordonner.</p>';
+        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes appara\u00eetront dans la r\u00e9troaction g\u00e9n\u00e9r\u00e9e pour l\'\u00e9l\u00e8ve lorsque le code d\'erreur correspondant est utilis\u00e9. Clique sur la pastille pour changer sa couleur. Glissez \u2630 pour r\u00e9ordonner.</p>';
 
         const modeSynthese = obtenirModeSyntheseErrFr();
         html += '<div class="travaux-errfr-reglage">';

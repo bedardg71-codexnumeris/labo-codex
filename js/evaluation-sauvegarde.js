@@ -206,7 +206,7 @@ function _lireChampsDOMSauv() {
         statutRemise: document.getElementById('remiseProduction1').value,
         statutIntegrite: document.getElementById('statutIntegrite').value || 'recevable',
         notesIntegrite: document.getElementById('notesIntegrite').value || '',
-        noteFinale: parseFloat(document.getElementById('noteProduction1').textContent) || 0,
+        noteFinale: (typeof window.noteCalculeeCourante === 'number') ? window.noteCalculeeCourante : 0,   // #572 — la valeur calculée, pas l'écran
         niveauFinal: document.getElementById('niveauProduction1').textContent,
         retroactionFinale: document.getElementById('retroactionFinale1').value
     };

@@ -2644,7 +2644,25 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   le 28 août 2026 par **#555 lot 2** (branchement de `zoneDuNiveau`, retrait des comparaisons IDME en
   dur). Les repères ci-dessus datent d'avant ce commit.
 
-- [ ] **#572 — Mineurs de l'audit Évaluations (condensé).** (section D du rapport)
+- [x] **#572 LIVRÉ 29 août 2026 — les mineurs Liste, Annoter et Design sont réglés ; l'item est clos.** (section D du rapport)
+  **Liste** : `toggleVerrouillerEvaluation` et `attacherEvenementsActions` retirées (mortes) ; le filtre « groupe »
+  (`filtre-groupe-eval`, lu à cinq endroits, créé nulle part) et la branche « non-remis » (aucune option) retirés ; les
+  listeners de filtres ne s'accumulent plus à chaque visite (garde `dataset`) ; la vue Corbeille nomme la production par
+  son `titre` ; `reprise-ciblee` est classée avec les reprises au tri ; **les annotations partent avec le fichier**
+  (`supprimerAnnotationsFichiers`, appelée à la suppression définitive et à la purge 30 jours). **Annoter** : la note
+  finale n'est plus relue depuis le DOM (`parseFloat(textContent)`, trois sites) mais depuis `noteCalculeeCourante`,
+  posée par le calcul (nombre, ou `null` quand rien n'est calculable). **Design** : « Cliquez » → « Clique » (trois sites),
+  badges de jetons sur `--jetons-*` (les variables existaient — l'énoncé du 28 disait le contraire pour `--orange-accent`,
+  mais `--jetons-delai-*`/`--jetons-reprise-*` portent exactement ces couleurs), focus visible sur les barres d'outils,
+  quatre boutons de fermeture et deux boutons de pagination nommés (`aria-label`).
+  **Sentinelle** `sentinelle-572-mineurs-liste-annoter-design` (9 cas, dont la purge en comportement) ; **break-test**
+  4 mutations, 4 rouges. ⏳ **Restent, hors de l'item** : la hiérarchie h2/h3 (manipulation à l'écran, porte terrain) ;
+  les clés `sessionStorage` non namespacées → **#596**.
+- [ ] **#596 — Six clés `sessionStorage` non namespacées, sur cinq fichiers.**
+  Créé le 29 août 2026, sorti de #572 (28 août) : 21 sites, 6 clés (`travaux-pipeline-production`, `travaux-jeton-production`…),
+  cinq fichiers dont deux hors Import/Export. Namespacer à moitié casserait les lectures : un seul lot, lecture + écriture,
+  avec `cle()` ou un préfixe de trimestre. Au passage, `travaux-mode-courant` est ÉCRITE et JAMAIS LUE (à retirer).
+
   🟠 **PARTIEL le 28 août 2026 (43866c56 + 00a81a24) — L'ITEM RESTE OUVERT.**
   ✅ Volet Import : fuite de `setInterval`, date parsée en UTC, balayage des jetons
   de reprise débordant sur un autre groupe-cours.
