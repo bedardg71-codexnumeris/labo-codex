@@ -71,9 +71,13 @@ l'identifiant (éditeur + rétro-remplissage), pas par le lire. Inscrit à l'ite
 Les skills métier (`ecosysteme-classe`, `pratiques-notation`, `depistage-rai`) ont été lus à 4 h — pas avant
 la livraison : hors du dépôt, ils ne se chargent pas. Consigne de Grégoire : tout arbitrage lui est remis en
 **artefact** (Artifact + skill `artifact-design` : fait mesuré → options fermées → recommandation → ce que ça
-ne tranche pas), jamais en prose de chat. ⮕ **Un seul artefact**, à produire quand il aura rapporté
-avec / sans / introuvables de `_diagnostiquerEchellesGrilles()` ; il portera les **deux décisions #555**
-(zone intermédiaire comme progrès ; intention P1) **et le correctif #578**. Ne pas le faire en deux fois.
+ne tranche pas), jamais en prose de chat. ✅ **CHIFFRE RAPPORTÉ** (10 grilles, 1 avec / 9 sans, 0 introuvable —
+la seule « avec » est GRILLE_GENERIQUE). ✅ **ARTEFACT REMIS, 29 août ~4 h 30** :
+`https://claude.ai/code/artifact/89f28423-e48a-4d62-b15c-91e6e4f48cca` — trois décisions : #555·1 zone
+intermédiaire comme progrès (reco C), #555·2 intention « Outils d'observation » (reco A : clore, le repère de
+l'échelle EST le réglage), #578 colonnes de la cartouche neuve (reco A : ne plus deviner, échelle choisie au
+formulaire, `echelleId` écrit sur la cartouche ; la grille reste agnostique). ⮕ **En attente des trois
+lettres de Grégoire.** Rien ne se code avant.
 
 ### 📌 IDs — prochain libre : **#593** (inchangé)
 
