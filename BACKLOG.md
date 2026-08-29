@@ -2429,7 +2429,15 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   avorter sur `confirm()` refusé) mais marque quand même `estReprise:true` et consomme le jeton
   → **reprise créée sur l'ancienne production**.
 
-- [ ] **#562 — Échappement incomplet dans la Liste des évaluations.** (constat B7)
+- [x] **#562 LIVRÉ 29 août 2026 — la Liste des évaluations n'interpole plus rien sans `echapperHtml`.** (constat B7)
+  Onze interpolations échappées dans `genererLigneHTML` (DA, DA affiché, `evaluationId`, `productionId`, `fichierId`,
+  niveau final, note, statut et son libellé, scores d'origine d'une reprise) et `genererDropdownActions` (les identifiants
+  dans `value="action|id|id"` — le navigateur décode `&quot;`/`&amp;` en lisant `.value`, `executerActionEval` reçoit la
+  valeur d'origine). `_genererLigneHTML` exposé pour le banc (patron `_trierLignesParColonne`).
+  **Sentinelle** `sentinelle-562-liste-echappement` : (A) une ligne hostile (`"><img …>`) ne sort ni de son texte ni de
+  son attribut, avec l'`echapperHtml` réel ; (B) cliquet statique récursif : toute interpolation des deux fonctions est
+  `echapperHtml(...)`, un local HTML de la liste fermée, ou un ternaire à branches constantes/échappées — une
+  interpolation neuve non échappée rougit. **Break-test** : 4 mutations, 4 rouges.
   `${ligne.da}` / `${daAffiche}` et `${ligne.niveauFinal}` injectés sans `echapperHtml`. Le DA est
   nettoyé à l'import CSV, pas garanti sur les autres chemins d'entrée.
   ⮕ Violation de la règle 1 du projet, qui est « sans exception ».
