@@ -9,7 +9,7 @@
 > commit). `RELAIS.md` renvoie ici au lieu de redire. Une ligne sans item est un trou à inscrire, pas
 > à oublier.
 >
-> **État au 29 août 2026, 1.106.0, `main` `c43006d1`.** Créé par Claude Code à la demande de Grégoire
+> **État au 29 août 2026, 1.106.0 (+ #578 livré, bump dû), `main`.** Créé par Claude Code à la demande de Grégoire
 > (option A : point zéro = 25 août ; la seconde passe du 27 s'y superpose en second bloc).
 
 ---
@@ -95,7 +95,7 @@ Source : `Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md` (§7 Co
 | 1 | Après « Enregistrer », la cartouche ouverte est remplacée par une neuve | #573 | ✅ Livré 28 août |
 | 2 | Un niveau neuf naît avec `valeurCalcul: 50` écrit en base | dans #574 | ⏳ Arbitré 28 août (option B : retirer seeds et gabarits), **non livré** |
 | 3 | `ECHELLE_GENERIQUE` et les gabarits d'échelle sont non calculables depuis #527 | #574 | ⏳ idem ; sonde préalable requise (des évaluations réelles reposent-elles dessus ?) |
-| 4 | La cartouche neuve prend les colonnes de la première échelle du trimestre | #578 | 🟠 Diagnostic livré 29 août (9 grilles sur 10 sans `echelleId`) ; **arbitré option A** (la cartouche ne devine plus) ; correctif à faire |
+| 4 | La cartouche neuve prend les colonnes de la première échelle du trimestre | #578 | ✅ Livré 29 août (option A) — et une **régression du 26 août** trouvée en chemin : les deux listes du formulaire de cartouche étaient mortes (`e50155e0`), rebranchées ; cliquet posé. Reste : compter les cartouches existantes nées du chemin fautif |
 | 5 | Sentinelle #549, tests 3-4 tautologiques sur l'en-tête | #593 | ⏳ Inscrit 29 août |
 | 6 | Texte du modèle de cartouche : « seuil de maîtrise », figé dans le code | #593 | ⏳ Inscrit 29 août |
 | 7 | Course inter-cartouches (faible) ; câblage #518 non verrouillé ; `getCouleurNiveau` mort | #593 | ⏳ Inscrit 29 août |
@@ -134,7 +134,7 @@ Ordre proposé : d'abord ce qui est **tranché et pas exécuté** (le plus court
 
 ### Conception
 
-1. **#578 A** — la cartouche ne devine plus (tranché 29 août). Petit, mesuré, sentinelle prête à écrire.
+1. ~~**#578 A**~~ — livré 29 août.
 2. **#574 B** — retirer l'échelle générique et les gabarits sans `valeurCalcul` (tranché 28 août) ; sonde d'abord.
 3. **#593** — reliquats 2.1 n° 5-6-7 (petits) ; D3 renvoyé à #358.
 4. **#522** — audit des autres autosaves (la primitive `db.modifier` existe).

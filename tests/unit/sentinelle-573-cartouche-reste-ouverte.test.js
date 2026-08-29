@@ -262,9 +262,15 @@ describe('#573 · « Enregistrer » ne ferme plus la cartouche qu\'il enregistre
         expect(JSON.stringify(win.cartoucheActuel.niveaux)).not.toMatch(/Incomplet|Développement|Maîtrisé|Étendu/);
     });
 
-    it('avec une échelle, la cartouche neuve prend SES codes', async () => {
-        const { win } = monter({ cartouches: [], echelles: ECHELLE });
+    it('avec une échelle CHOISIE au formulaire, la cartouche neuve prend SES codes', async () => {
+        // #578 (29 août 2026, option A) : la cartouche ne devine plus son échelle
+        // — ni la première du trimestre, ni celle de la grille. Elle prend celle
+        // que le formulaire désigne. Ce cas posait auparavant l'échelle en base
+        // seulement, et passait grâce à la devinette `find(...) || echelles[0]`.
+        const { win, els } = monter({ cartouches: [], echelles: ECHELLE });
+        els['selectEchelleCartouche'] = elementFictif('ECH_1');
         await win.chargerCartouchesRetroaction();
         expect(win.cartoucheActuel.niveaux.map(n => n.code)).toEqual(['W', 'Y']);
+        expect(win.cartoucheActuel.echelleId).toBe('ECH_1');
     });
 });
