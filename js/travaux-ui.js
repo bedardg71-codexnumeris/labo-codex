@@ -4302,6 +4302,18 @@
      * @param {string} fichierId - ID du fichier
      * @param {string} productionId - Nouvel ID de production
      */
+    /**
+     * Réassocie un fichier à une autre production.
+     *
+     * #561 (29 août 2026) — RENDRE UN VERDICT. Cette fonction pouvait s'arrêter
+     * sur un `confirm()` refusé sans rien dire à son appelant, qui marquait alors
+     * le fichier « reprise » et consommait le jeton sur l'ANCIENNE production. Elle
+     * rend désormais `true` quand la réassociation a eu lieu, `false` sinon
+     * (abandon par l'utilisateur, ou refus du stockage). Le `if (ok) {}` vide qui
+     * terminait la fonction (#572) était exactement ce verdict jamais rendu.
+     *
+     * @returns {Promise<boolean>}
+     */
     async function changerProductionFichier(fichierId, nouveauProductionId) {
         // Phase 5 : vérifier les conflits et évaluations orphelines avant de réassocier
         const verif = travauxStockage.reassocierFichier(fichierId, { productionId: nouveauProductionId }, { verificationSeule: true });
@@ -4311,18 +4323,17 @@
             const prod = productions.find(p => p.id === nouveauProductionId);
             const nomProd = prod ? (prod.titre || prod.nom) : nouveauProductionId;
             const confirme = confirm(`Un fichier existe déjà pour cette production (${nomProd}). Remplacer l'existant ?`);
-            if (!confirme) return;
+            if (!confirme) return false;
             travauxStockage.deplacerEnCorbeille(verif.fichierExistant.id);
         }
 
         if (verif && verif.evaluationOrpheline) {
             const confirme = confirm('L\'évaluation pour l\'ancienne production perdra son fichier associé. Continuer ?');
-            if (!confirme) return;
+            if (!confirme) return false;
         }
 
         const ok = travauxStockage.reassocierFichier(fichierId, { productionId: nouveauProductionId });
-        if (ok) {
-        }
+        return !!ok;
     }
 
     /**
