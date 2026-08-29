@@ -2154,6 +2154,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ Pour trancher `creerNouvellePratique`, la piste est `git log -S ouvrirWizardV2 -- js/pratiques.js`
   (l'historique, pas la relecture des deux corps).
 
+- [x] **#594 LIVRÉ 29 août 2026 — Le bandeau orange de version s'affiche au chargement, une fois par nouveau build.**
+  Demande de Grégoire : « je n'ai pas revu ce message depuis longtemps ». Mesuré : depuis le 8 juin (`832b459e`,
+  retour terrain : affiché sans condition, il revenait en boucle), le bandeau ne se déclenchait que par le polling
+  distant — désactivé en `file://`, et sur le web seulement si un déploiement survient pendant la session.
+  ⮕ **Option A** : au chargement, si le build chargé ≠ dernier build VU (`monitorage-build-vu`, la clé de la pastille),
+  le bandeau s'affiche avec un texte au présent (« Nouvelle version chargée… ») et SANS bouton Recharger ; fermer le
+  bandeau marque le build vu. Première visite : repère pris, aucun bandeau. Le polling distant est inchangé.
+  Spec WebKit `bandeau-maj-chargement.spec.js` réécrit (4 cas, dont la non-boucle du 8 juin) ; break-test 2 mutations,
+  3 rouges. `js/init-inline.js` (`signalerBuildChargeSiNouveau`, `afficherBandeauVersion(…, distant)`).
+
 - [x] **#593 LIVRÉ 29 août 2026 (points 1-2-3) — les reliquats Conception ont un item, et trois sur quatre sont réglés ; D3 renvoyé à #358.**
   1. ✅ Banc #549 réancré : tests 3 et 4 cherchent `\n## Le travail demandé\n` (l'en-tête réel), plus le mot que la
      consigne d'ancrage citait aussi. 2. ✅ Le modèle de cartouche ne parle plus d'un « seuil de maîtrise » écrit dans le

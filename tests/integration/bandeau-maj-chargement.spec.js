@@ -1,22 +1,65 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
+const BUILD = JSON.parse(readFileSync(path.join(racineProjet, 'version.json'), 'utf8')).build;
 
-// Retour terrain 8 juin : le bandeau orange « une mise à jour a été déployée, recharge
-// pour l'activer » s'affichait AU CHARGEMENT (build chargé == build actif → non-sens) et
-// revenait en boucle après chaque Recharger. Il ne doit plus apparaître à l'ouverture —
-// seul le polling distant (vraie MAJ déployée en cours de session) peut le déclencher.
+// Le bandeau orange « nouvelle version » au chargement — réintroduit le 29 août
+// 2026 (demande de Grégoire), CONDITIONNÉ au dernier build vu. Le retour terrain
+// du 8 juin (bandeau sans condition, « recharge pour l'activer », en boucle) reste
+// verrouillé : première visite silencieuse, une fois par nouveau build, jamais
+// après fermeture.
 
-test('le bandeau de mise à jour n\'est PAS affiché au chargement', async ({ page }) => {
+async function ouvrir(page, buildVu) {
+    await page.addInitScript((v) => {
+        try { localStorage.removeItem('monitorage-build-vu'); if (v !== null) localStorage.setItem('monitorage-build-vu', v); } catch (e) {}
+    }, buildVu);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(800); // laisse passer les listeners DOMContentLoaded
+}
 
+test('première visite (aucun build vu) : PAS de bandeau, et le build est pris comme repère', async ({ page }) => {
+    await ouvrir(page, null);
     const bandeau = page.locator('#bandeau-mise-a-jour');
-    await expect(bandeau).toHaveCount(1);                       // l'élément existe (pour le polling)
-    await expect(bandeau).not.toHaveClass(/\bvisible\b/);      // mais pas affiché à l'ouverture
+    await expect(bandeau).toHaveCount(1);
+    await expect(bandeau).not.toHaveClass(/\bvisible\b/);
+    expect(await page.evaluate(() => localStorage.getItem('monitorage-build-vu'))).toBe(BUILD);
+});
+
+test('build vu différent : le bandeau s\'affiche, au présent, sans bouton Recharger', async ({ page }) => {
+    await ouvrir(page, '0101-0000');
+    const bandeau = page.locator('#bandeau-mise-a-jour');
+    await expect(bandeau).toHaveClass(/\bvisible\b/);
+    await expect(page.locator('#bandeau-mise-a-jour-build')).toContainText('BUILD ' + BUILD);
+    await expect(page.locator('#bandeau-mise-a-jour-texte')).toContainText('Nouvelle version chargée');
+    await expect(page.locator('#bandeau-mise-a-jour-texte')).not.toContainText('Rafraîchis');
+    await expect(page.locator('#bandeau-mise-a-jour [data-action="rechargerPage"]')).toBeHidden();
+});
+
+test('fermer le bandeau marque le build vu : au rechargement suivant, plus de bandeau', async ({ page }) => {
+    await ouvrir(page, '0101-0000');
+    await expect(page.locator('#bandeau-mise-a-jour')).toHaveClass(/\bvisible\b/);
+    await page.locator('#bandeau-mise-a-jour .bandeau-mise-a-jour-close').click();
+    await expect(page.locator('#bandeau-mise-a-jour')).not.toHaveClass(/\bvisible\b/);
+    expect(await page.evaluate(() => localStorage.getItem('monitorage-build-vu'))).toBe(BUILD);
+
+    // Une SECONDE page, sans script d'init : même stockage, aucun faux build réinjecté.
+    // (`addInitScript` se rejoue à chaque navigation de `page` — un `reload` ici
+    // remettrait le faux build vu et prouverait le contraire de ce qu'on regarde.)
+    const page2 = await page.context().newPage();
+    await page2.goto(indexHtml);
+    await page2.waitForLoadState('domcontentloaded');
+    await page2.waitForTimeout(800);
+    expect(await page2.evaluate(() => localStorage.getItem('monitorage-build-vu'))).toBe(BUILD);
+    await expect(page2.locator('#bandeau-mise-a-jour')).not.toHaveClass(/\bvisible\b/);
+});
+
+test('même build déjà vu : rien à l\'ouverture (pas de boucle du 8 juin)', async ({ page }) => {
+    await ouvrir(page, BUILD);
+    await expect(page.locator('#bandeau-mise-a-jour')).not.toHaveClass(/\bvisible\b/);
 });
