@@ -2431,7 +2431,18 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   portant `"` sort de l'attribut. **Poser `echapperHtml` sur ces interpolations ne fermera donc RIEN
   tant que la fonction elle-même n'est pas corrigée.** Les deux se traitent ensemble ou pas du tout.
 
-- [ ] **#563 — Décocher « Reprise ciblée » ne retire rien, et les échecs sont silencieux.** (constat B9)
+- [x] **#563 LIVRÉ 29 août 2026 — la case « Reprise ciblée » est retirée, et plus aucun chemin n'applique ce jeton.** (constat B9)
+  ⮕ **Mesuré avant de retirer** : `appliquerJetonRepriseCiblee` n'avait qu'UN appelant (le handler de la case) ; le
+  tampon d'annotation « JETON DE REPRISE CIBLÉE » cochait cette même case (`cocherCheckboxJeton`, #240). Retirés
+  ensemble, zéro-dette : la case (map des badges), `gererChangementCheckboxJetonRepriseCiblee` (+ export), la fonction
+  d'application et `nettoyerEvaluationsRepriseCiblee` (sans appelant), la route du tampon et le tampon, l'infobulle.
+  **Conservé** : la configuration du type (wizard, normalisation), l'affichage des reprises ciblées DÉJÀ faites (badge,
+  bilan de rétroaction, filtre de la liste) — ces données existent, on ne les efface pas.
+  Bancs #240, #563, `refactor-evaluation` adaptés ; **sentinelle** #563 réécrite (4 cas : ni case, ni handler, ni
+  fonction ; tampon sans route ; type nommé dans `retirerJetonDepuisSidebar` ; les anciennes reprises restent lisibles).
+  **Break-test** : 4 mutations, 4 rouges. ⏳ **DÉCISION SUIVANTE, POUR GRÉGOIRE** : le type « reprise ciblée » reste
+  configurable dans le wizard (`mat-jeton-ciblee-actif`, plafond) alors qu'aucun geste ne le crée plus — retirer le type
+  entier (config, aide, filtre) ou le garder « pour voir à l'usage » ? Non tranché ici.
   ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option C : RETIRER LA CASE.**
   Ses mots : « *Retirons la case et voyons à l'usage ce qu'en feront les utilisateurs.* »
   ⮕ Zéro-dette appliqué : une commande qui ne commande rien n'a pas à exister. Ni l'implémentation du

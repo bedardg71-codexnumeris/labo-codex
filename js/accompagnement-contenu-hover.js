@@ -363,8 +363,6 @@ const TOOLTIPS = {
         'Prolonge l\'échéance de remise. L\'évaluation porte sur la même production, remise plus tard selon une entente convenue.',
     'eval-jeton-reprise':
         'L\'étudiant·e reprend entièrement la production pour démontrer à nouveau sa compétence. La nouvelle évaluation remplace la précédente.',
-    'eval-jeton-reprise-ciblee':
-        'L\'étudiant·e reprend un aspect spécifique que tu as ciblé pour démontrer sa maîtrise. Le niveau IDME peut être ajusté et plafonné.',
 
     // --- Actions du formulaire d'évaluation (#18, déploiement 13 mai 2026) ---
 

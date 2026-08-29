@@ -338,8 +338,9 @@
         //     (qui ne rend que action/comprehension/observations + perso). `jetonType` mappe
         //     vers la checkbox \u00e0 cocher automatiquement apr\u00e8s apposition.
         { id: 'jeton-delai',          nom: 'Jeton de d\u00e9lai',          texteTampon: 'JETON DE D\u00c9LAI',          categorie: 'jeton', jetonType: 'delai' },
-        { id: 'jeton-reprise',        nom: 'Jeton de reprise',        texteTampon: 'JETON DE REPRISE',        categorie: 'jeton', jetonType: 'reprise' },
-        { id: 'jeton-reprise-ciblee', nom: 'Jeton de reprise cibl\u00e9e', texteTampon: 'JETON DE REPRISE CIBL\u00c9E', categorie: 'jeton', jetonType: 'repriseCiblee' }
+        { id: 'jeton-reprise',        nom: 'Jeton de reprise',        texteTampon: 'JETON DE REPRISE',        categorie: 'jeton', jetonType: 'reprise' }
+        // #563 (29 août 2026) : le tampon « JETON DE REPRISE CIBLÉE » est retiré avec la
+        // case qu'il cochait — un tampon qui n'applique plus rien n'a pas à exister.
     ];
 
     // Map jetonType (delai/reprise/repriseCiblee) -> id d'autocollant texte (#240).

@@ -9,7 +9,7 @@
 > commit). `RELAIS.md` renvoie ici au lieu de redire. Une ligne sans item est un trou à inscrire, pas
 > à oublier.
 >
-> **État au 29 août 2026, 1.106.0 (+ #578, #574-retrait et #593 livrés, bump dû), `main`.** Créé par Claude Code à la demande de Grégoire
+> **État au 29 août 2026, 1.106.0 (+ #578, #574, #593, #563 livrés, bump dû), `main`.** Créé par Claude Code à la demande de Grégoire
 > (option A : point zéro = 25 août ; la seconde passe du 27 s'y superpose en second bloc).
 
 ---
@@ -19,7 +19,7 @@
 | Onglet | Constats de départ (25 août) | Réglés | Partiels | Ouverts | Items ouverts qui les portent |
 |---|---|---|---|---|---|
 | **Conception** | 15 (A1-A4, B1-B5, C1-C6) | **11** | 0 | **4** | #519 (C1, C3, C5), #520 (C6) — plus deux restes rattachés : #522, barre d'actions du 4ᵉ écran |
-| **Évaluations** | 20 (A1-A2, B1-B13, C1-C5) + section D « mineurs » | **9** | **1** (B9) | **10** | #560, #561, #562, #563, #566, #567, #568, #569, #570, #571 ; D partiel → #572 |
+| **Évaluations** | 20 (A1-A2, B1-B13, C1-C5) + section D « mineurs » | **10** | 0 | **10** | #560, #561, #562, #566, #567, #568, #569, #570, #571 ; D partiel → #572 |
 
 Lecture honnête de ces chiffres : Conception est **presque bouclé sur sa liste de départ** — ce qui reste est du design et du zéro-dette. Évaluations a réglé **ses deux critiques et le cœur des majeurs** (import, auto-save, export) ; ce qui reste est surtout le garde des modes, l'échappement, et toute la colonne design.
 
@@ -70,7 +70,7 @@ Nés du même élan, hors liste de départ mais dans l'onglet : **#524-#528** (a
 | **B6** Réassociation avec jeton : l'async n'est pas attendu | Reprise créée sur l'ancienne production | #561 | ⏳ Ouvert | Se traite avec le `if` vide de `changerProductionFichier` (#572) |
 | **B7** Échappement incomplet dans la Liste | `da`, `niveauFinal` + `evaluationId`, `productionId`, `fichierId` | #562 | ⏳ Ouvert — **débloqué** | Sa dépendance (`echapperHtml` n'échappait pas `"`) est **levée** le 28 août (`00a81a24`) |
 | **B8** Le jeton personnalisé contournait le garde des modes | **Site mort** — mesuré le 28 août | #560 | ⏳ Ouvert | À traiter par retrait, pas par correctif |
-| **B9** Décocher « Reprise ciblée » ne retirait rien ; échecs silencieux | — | #563 | 🟠 Partiel 28 août (`c5123798`) | Échecs silencieux réglés (point de persistance unique) ; **retrait de la case arbitré (option C) mais non exécuté** |
+| **B9** Décocher « Reprise ciblée » ne retirait rien ; échecs silencieux | — | #563 | ✅ Livré 29 août | Échecs silencieux réglés le 28 ; case, handler, fonction d'application et tampon retirés le 29 — plus aucun chemin ne crée une reprise ciblée ; **décision restante** : le type dans le wizard |
 | **B10** L'auto-save ne couvrait que les critères | Rétroaction seule perdue en navigation rapide | #564 | ✅ Livré 28 août (`b4755301`) | — |
 | **B11** Un étudiant en échec avortait tout le lot d'export | — | #565 | ✅ Livré 28 août (`cf378263`) | Échec isolé et nommé |
 | **B12** L'échec de la page de synthèse était invisible | — | #565 | ✅ Livré 28 août | Copie sans synthèse signalée à part |
@@ -144,7 +144,7 @@ Ordre proposé : d'abord ce qui est **tranché et pas exécuté** (le plus court
 ### Évaluations
 
 1. **#555 exécution** — ligne « Progrès » à trois zones (C) dans le PDF et le bilan ; texte d'aide du curseur « Seuil de défi » (A). Libellés = les mots de Grégoire.
-2. **#563** — retirer la case « Reprise ciblée » (tranché option C) et son test devenu caduc.
+2. ~~**#563**~~ — livré 29 août ; reste la décision sur le type dans le wizard.
 3. **#562** — échappement de la Liste, désormais débloqué.
 4. **#560** — garde des modes : deux sites vivants à router, un site mort à retirer.
 5. **#561** — attendre `changerProductionFichier` (+ le `if` vide voisin).

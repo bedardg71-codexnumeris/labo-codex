@@ -34,10 +34,10 @@
      · peuplementOptJetons (cyc 33 — déjà exporté)
      · gererChangementCheckboxJetonDelai (déjà exporté)
      · gererChangementCheckboxJetonReprise (déjà exporté)
-     · gererChangementCheckboxJetonRepriseCiblee (déjà exporté)
      · retirerJetonDepuisSidebar (déjà exporté)
 
-   12 exports window.X (9 préservés + 3 PROMOTIONS §5.6 nouvelles) :
+   11 exports window.X (8 préservés + 3 PROMOTIONS §5.6 nouvelles ; #563 a retiré
+   gererChangementCheckboxJetonRepriseCiblee avec la case) :
      · window.sauvegarderEvaluation
      · window.majBadgesApresEvaluation (NOUVEAU — utilisé sauvegarder
        EvaluationModifiee résidu)
@@ -50,7 +50,6 @@
      · window.peuplementOptJetons
      · window.gererChangementCheckboxJetonDelai
      · window.gererChangementCheckboxJetonReprise
-     · window.gererChangementCheckboxJetonRepriseCiblee
      · window.retirerJetonDepuisSidebar
 
    Patches §5.6 appliqués DANS ce sous-module :
@@ -745,15 +744,12 @@ function _construireMapPredefinis(evalCourante) {
                 return evalCourante ? !!(evalCourante.jetonRepriseApplique || evalCourante.repriseDeId || (evalCourante.id && evalCourante.id.startsWith('EVAL_REPRISE_'))) : false;
             }
         },
-        'repriseCiblee': {
-            checkboxId: 'checkboxJetonRepriseCiblee',
-            handler: 'gererChangementCheckboxJetonRepriseCiblee',
-            wrapperClass: 'badge-jeton-reprise-ciblee-wrapper',
-            tooltip: 'eval-jeton-reprise-ciblee',
-            estCoche: function() {
-                return evalCourante ? !!evalCourante.jetonRepriseCibleeApplique : false;
-            }
-        }
+        // #563 (29 août 2026, option C de Grégoire) — la case « Reprise ciblée »
+        // est RETIRÉE. Décocher ne retirait rien (le retrait n'existe pas : défaire
+        // une reprise ciblée = supprimer l'évaluation qu'elle a créée), et cette
+        // case était le SEUL chemin qui appliquait ce jeton. « Retirons la case et
+        // voyons à l'usage ce qu'en feront les utilisateurs. » Les reprises ciblées
+        // déjà faites restent visibles là où elles s'affichent (liste, bilan).
     };
 }
 
@@ -924,78 +920,6 @@ function gererChangementCheckboxJetonReprise() {
 }
 
 /**
- * Gère le changement de la checkbox jeton de reprise ciblée
- * Applique ou retire le jeton selon l'état de la checkbox
- */
-function gererChangementCheckboxJetonRepriseCiblee() {
-    const checkbox = document.getElementById('checkboxJetonRepriseCiblee');
-    const evaluationId = window.evaluationEnCours?.idModification;
-
-    if (!evaluationId) {
-        console.warn('⚠️ Jeton de reprise ciblée : Impossible d\'appliquer sur une nouvelle évaluation (pas encore sauvegardée)');
-        checkbox.checked = false;
-        notifications.erreur('Erreur', 'Enregistre d\'abord l\'évaluation avant d\'appliquer un jeton');
-        return;
-    }
-
-    if (checkbox.checked) {
-        // Pour le jeton de reprise ciblée, demander confirmation
-        const confirmer = confirm(
-            'Appliquer un jeton de reprise ciblée créera une nouvelle évaluation ciblant UN SEUL critère spécifique.\n\n' +
-            'La correction apportée devra être justifiée et la note sera plafonnée selon ta configuration.\n\n' +
-            'Veux-tu continuer ?'
-        );
-
-        if (confirmer) {
-            // Appliquer le jeton via le module evaluation-jetons.js
-            if (typeof appliquerJetonRepriseCiblee === 'function') {
-                const nouvelleEval = appliquerJetonRepriseCiblee(evaluationId);
-                if (nouvelleEval) {
-                    // Charger la nouvelle évaluation dans le formulaire
-                    setTimeout(() => {
-                        if (typeof modifierEvaluation === 'function') {
-                            modifierEvaluation(nouvelleEval.id);
-                        }
-                    }, 500);
-                } else {
-                    // Si l'application a échoué, décocher la checkbox
-                    checkbox.checked = false;
-                }
-            } else {
-                console.error('❌ Fonction appliquerJetonRepriseCiblee non disponible');
-                notifications.erreur('Erreur', 'Module jetons non disponible');
-                checkbox.checked = false;
-            }
-        } else {
-            // L'utilisateur a annulé, décocher la checkbox
-            checkbox.checked = false;
-        }
-    } else {
-        // #563 — LA CASE NE MENT PLUS.
-        //
-        // Cette branche était un TODO vide : la case se décochait, le jeton
-        // restait appliqué, et rien ne le disait. L'utilisateur croyait avoir
-        // retiré un jeton qui était toujours là.
-        //
-        // Le retrait n'est PAS implémenté, et ce n'est pas un oubli qu'on comble
-        // en passant : `retirerJetonRepriseCiblee` n'existe nulle part, et défaire
-        // une reprise ciblée signifie supprimer l'évaluation qu'elle a créée.
-        // Le pendant pour la reprise normale (`retirerJetonReprise`) est une
-        // opération à confirmations multiples avec risque de perte de note
-        // (#141, #360) — c'est une décision de conception, pas un correctif.
-        //
-        // En attendant cette décision : on remet la case dans l'état RÉEL des
-        // données et on dit pourquoi. Mieux vaut un refus explicite qu'un
-        // acquiescement faux.
-        checkbox.checked = true;
-        notifications.info(
-            'Retrait non disponible',
-            'Le jeton de reprise ciblée ne peut pas être retiré depuis cette case : sa reprise a créé une évaluation. Passe par la liste des évaluations.'
-        );
-    }
-}
-
-/**
  * Retire un jeton depuis la barre latérale (pendant l'édition)
  *
  * #563 : le JSDoc annonçait trois types, le code n'en a jamais géré que deux —
@@ -1005,8 +929,9 @@ function gererChangementCheckboxJetonRepriseCiblee() {
  * @param {string} evaluationId - ID de l'évaluation
  * @param {string} typeJeton - 'reprise' ou 'delai'. 'reprise-ciblee' n'est PAS
  *   pris en charge : `retirerJetonRepriseCiblee` n'existe pas, et défaire une
- *   reprise ciblée suppose de supprimer l'évaluation qu'elle a créée — décision
- *   de conception ouverte, cf. la branche de `gererChangementCheckboxJetonRepriseCiblee`.
+ *   reprise ciblée suppose de supprimer l'évaluation qu'elle a créée. Depuis #563
+ *   (29 août 2026), la case qui APPLIQUAIT ce jeton est retirée : une reprise
+ *   ciblée ne peut plus naître, seules les anciennes subsistent.
  */
 function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
 
@@ -1052,7 +977,6 @@ window.changerStatutIntegrite = changerStatutIntegrite;
 window.peuplementOptJetons = peuplementOptJetons;
 window.gererChangementCheckboxJetonDelai = gererChangementCheckboxJetonDelai;
 window.gererChangementCheckboxJetonReprise = gererChangementCheckboxJetonReprise;
-window.gererChangementCheckboxJetonRepriseCiblee = gererChangementCheckboxJetonRepriseCiblee;
 window.retirerJetonDepuisSidebar = retirerJetonDepuisSidebar;
 
 // Promotions §5.6 nouvelles (session B 3e sous-module) :

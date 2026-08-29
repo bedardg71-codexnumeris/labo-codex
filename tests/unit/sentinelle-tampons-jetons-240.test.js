@@ -51,7 +51,6 @@ function chargerTravauxOutils() {
 const TROIS_JETONS = [
     { id: 'jeton-delai',          jetonType: 'delai',         texteTampon: 'JETON DE DÉLAI' },
     { id: 'jeton-reprise',        jetonType: 'reprise',       texteTampon: 'JETON DE REPRISE' },
-    { id: 'jeton-reprise-ciblee', jetonType: 'repriseCiblee', texteTampon: 'JETON DE REPRISE CIBLÉE' },
 ];
 
 describe('#240 — catalogue AUTOCOLLANTS : tampons texte de jeton', () => {
@@ -113,14 +112,12 @@ describe('#240 — cochage AUTO de la checkbox + mot du jeton cliquable', () => 
         expect(src).toMatch(/texteTampon/);
         expect(src).toMatch(/function poserTamponTexte/);
         expect(src).toMatch(/function dessinerTamponTexte/);
-        // Cochage auto câblé sur les 3 checkboxes + handlers réels.
+        // Cochage auto câblé sur les 2 checkboxes + handlers réels (#563 a retiré « reprise ciblée »).
         expect(src).toMatch(/cocherCheckboxJeton/);
         expect(src).toMatch(/checkboxJetonDelai/);
         expect(src).toMatch(/checkboxJetonReprise/);
-        expect(src).toMatch(/checkboxJetonRepriseCiblee/);
         expect(src).toMatch(/gererChangementCheckboxJetonDelai/);
         expect(src).toMatch(/gererChangementCheckboxJetonReprise/);
-        expect(src).toMatch(/gererChangementCheckboxJetonRepriseCiblee/);
     });
 
     it('le tampon texte est rendu en ROUGE par dessinerTamponTexte', () => {

@@ -196,7 +196,6 @@ describe('evaluation — régression refactoring 2026-mai (pré-refactor, 7 test
             'peuplementOptJetons',
             'gererChangementCheckboxJetonReprise',
             'gererChangementCheckboxJetonDelai',
-            'gererChangementCheckboxJetonRepriseCiblee',
             'majBadgesApresEvaluation',  // promotion §5.6 session B 3e
             'afficherBadgesJetons',       // promotion §5.6 session B 3e
             'afficherGestionJetons',      // promotion §5.6 session B 3e
