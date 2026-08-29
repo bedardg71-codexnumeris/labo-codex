@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { elementEchappant } from './_helpers/element-echappant.js';
 
 // Sentinelle #518 (26 août 2026) — CE QUI EST TAPÉ NE DISPARAÎT PLUS SANS UN MOT.
@@ -151,5 +154,20 @@ describe('#518 · C — l\'avertissement porte sur ce qui va RÉELLEMENT partir'
         expect(partants.map(c => c.id), 'le filtre écarte bien C1').toEqual(['C2']);
         // Et c'est précisément ce bloc-là que l'avertissement nomme.
         expect(win.validerBlocsNommes()).toBe(true);
+    });
+});
+
+/* ------------------------------------------------------- #593 · le câblage */
+
+describe("#518 · câblage (cliquet #593) — la garde est bien appelée sur le chemin d'enregistrement", () => {
+    it("productions.js appelle validerBlocsNommes et s'arrête sur son refus, avant de construire les données", () => {
+        const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+        const src = readFileSync(path.join(racine, 'js', 'productions.js'), 'utf8')
+            .replace(/\/\*[\s\S]*?\*\//g, '')
+            .replace(/(^|[^:])\/\/.*$/gm, '$1');
+        const posGarde = src.indexOf('if (!validerBlocsNommes()) return;');
+        expect(posGarde, "la garde a disparu du chemin d'enregistrement").toBeGreaterThan(-1);
+        const posConstruction = src.indexOf('construireProductionData(', posGarde);
+        expect(posConstruction, 'la garde précède la construction des données à écrire').toBeGreaterThan(posGarde);
     });
 });

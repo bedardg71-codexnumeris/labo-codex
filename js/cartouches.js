@@ -738,13 +738,19 @@ async function afficherMatriceRetroaction() {
 async function sauvegarderCommentaire(key) {
     if (!cartoucheActuel) return;
 
+    // #593 (29 août 2026) — LA CIBLE EST CAPTURÉE AVANT LE PREMIER `await`.
+    // `cartoucheActuel` est une variable de module : si l'utilisateur ouvre une
+    // autre cartouche pendant que la complétion se calcule, l'écriture partait
+    // dans la NOUVELLE. Fenêtre théorique (jamais reproduite), fermée quand même :
+    // la persistance reçoit la cartouche qui portait la cellule au moment du blur.
+    const cible = cartoucheActuel;
     const textarea = document.getElementById(`comm_${key}`);
     if (textarea) {
         // ▣ L'ÉCRAN FAIT FOI PENDANT L'ÉDITION : la mémoire est mise à jour
         // d'abord, et c'est elle que lit le calcul de complétion.
-        cartoucheActuel.commentaires[key] = textarea.value;
+        cible.commentaires[key] = textarea.value;
         await calculerPourcentageComplete();
-        const ecrit = await persisterCartouchePartielle(c => { c.commentaires[key] = textarea.value; });
+        const ecrit = await persisterCartouchePartielle(c => { c.commentaires[key] = textarea.value; }, cible);
         signalerAutosaveCartoucheMuette(ecrit);
     }
 }
@@ -780,11 +786,13 @@ async function sauvegarderCommentaire(key) {
  */
 let _autosaveCartoucheDejaSignalee = null;
 
-async function persisterCartouchePartielle(appliquer) {
-    if (!cartoucheActuel || !cartoucheActuel.id || !cartoucheActuel.grilleId) return false;
-    const resultat = await db.modifier(`cartouches_${cartoucheActuel.grilleId}`, (lues) => {
+async function persisterCartouchePartielle(appliquer, cible = cartoucheActuel) {
+    // #593 — `cible` : la cartouche visée au moment du geste, pas celle qui est
+    // ouverte au moment où la promesse se résout.
+    if (!cible || !cible.id || !cible.grilleId) return false;
+    const resultat = await db.modifier(`cartouches_${cible.grilleId}`, (lues) => {
         const cartouches = lues || [];
-        const enBase = cartouches.find(c => c.id === cartoucheActuel.id);
+        const enBase = cartouches.find(c => c.id === cible.id);
         if (!enBase) return undefined;              // pas encore enregistrée
         if (!enBase.commentaires) enBase.commentaires = {};
         appliquer(enBase);
@@ -2449,6 +2457,10 @@ function lignesMatriceCartouche(criteres, niveaux, commentaires) {
  * @returns {string} le contenu Markdown du fichier
  */
 function composerModeleCartouche(grille, echelle, production, nomCartouche) {
+    // #593 — les deux repères de l'échelle (#555), s'ils sont posés.
+    const nivx = (echelle && echelle.niveaux) || [];
+    const repereMaitrise = (echelle && echelle.seuilMaitrise) ? (nivx.find(n => n && n.code === echelle.seuilMaitrise) || null) : null;
+    const repereSuffisance = (echelle && echelle.seuilSuffisance) ? (nivx.find(n => n && n.code === echelle.seuilSuffisance) || null) : null;
     const criteres = (grille && grille.criteres) || [];
     const niveaux = (echelle && echelle.niveaux) || [];
 
@@ -2500,11 +2512,24 @@ function composerModeleCartouche(grille, echelle, production, nomCartouche) {
     lignes.push('> 1. Ce qu\'un travail de ce niveau présente pour ce critère, au présent, sans « tu ».');
     lignes.push('> 2. Ce que ce niveau entraîne pour la suite du travail, ou ce qu\'il révèle de la');
     lignes.push('>    démarche.');
+    // #593 (29 août 2026) — « seuil de maîtrise » n'est plus un mot du code : c'est
+    // le repère « Maîtrisé à partir de » que l'utilisateur pose sur SON échelle
+    // (#555). Le modèle nomme le niveau qui le porte ; s'il n'y en a pas, il le
+    // DIT et laisse le jugement à qui lit — jamais un seuil deviné.
     lignes.push('> 3. Selon la position du niveau dans l\'échelle listée plus bas :');
-    lignes.push('>    - niveaux situés sous le seuil de maîtrise : un conseil concret et exécutable,');
-    lignes.push('>      introduit par « Pour progresser, » ou « Pour t\'améliorer, », à l\'impératif');
-    lignes.push('>      deuxième personne ;');
-    lignes.push('>    - niveaux atteignant ou dépassant la maîtrise : aucun conseil, mais un énoncé');
+    if (repereMaitrise) {
+        lignes.push('>    - niveaux situés sous « ' + repereMaitrise.nom + ' » (' + repereMaitrise.code + '), le niveau');
+        lignes.push('>      à partir duquel cette échelle considère la maîtrise atteinte : un conseil concret');
+        lignes.push('>      et exécutable, introduit par « Pour progresser, » ou « Pour t\'améliorer, »,');
+        lignes.push('>      à l\'impératif deuxième personne ;');
+        lignes.push('>    - niveaux à partir de « ' + repereMaitrise.nom + ' » : aucun conseil, mais un énoncé');
+    } else {
+        lignes.push('>    - cette échelle ne porte PAS de repère « Maîtrisé à partir de » : juge d\'après le');
+        lignes.push('>      nom et la description de chaque niveau s\'il atteint les attentes ;');
+        lignes.push('>    - niveaux sous les attentes : un conseil concret et exécutable, introduit par');
+        lignes.push('>      « Pour progresser, » ou « Pour t\'améliorer, », à l\'impératif deuxième personne ;');
+        lignes.push('>    - niveaux aux attentes ou au-delà : aucun conseil, mais un énoncé');
+    }
     lignes.push('>      de ce que ce niveau révèle de la démarche. Change de tournure d\'un critère');
     lignes.push('>      à l\'autre ; aucune formule ne doit revenir d\'un critère à l\'autre.');
     lignes.push('>');
@@ -2560,8 +2585,10 @@ function composerModeleCartouche(grille, echelle, production, nomCartouche) {
     lignes.push('Niveaux, du plus faible au plus élevé :');
     niveaux.forEach(n => {
         const borne = (n.min != null && n.max != null) ? ' [' + n.min + ' à ' + n.max + ' %]' : '';
+        const repere = (repereMaitrise && n === repereMaitrise) ? '  ← « Maîtrisé à partir de » : à partir d\'ici'
+            : ((repereSuffisance && n === repereSuffisance) ? '  ← « Suffisant à partir de » : à partir d\'ici' : '');
         lignes.push('- **' + n.code + '** — ' + (n.nom || '') + borne
-            + (n.description ? ' : ' + n.description : ''));
+            + (n.description ? ' : ' + n.description : '') + repere);
     });
     lignes.push('');
     lignes.push('Critères de la grille :');
