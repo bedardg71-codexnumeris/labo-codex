@@ -2158,6 +2158,19 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ✅ **TRANCHÉ PAR GRÉGOIRE le 28 août 2026 — OPTION A : MESURER AVANT DE CODER.**
   Compter, dans ses trimestres, les grilles **avec** et **sans** `echelleId`. Le chiffre décide de la
   suite ; le correctif ne s'écrit pas avant.
+  ✅ **DIAGNOSTIC LIVRÉ le 29 août 2026** : `await _diagnostiquerEchellesGrilles()` en console
+  (`cartouches.js`, lecture seule, tous trimestres via `db.get`, copie archivée sondée avant la clé
+  globale, une clé partagée comptée une fois). Rend `{ total, avec, sans, resolues, introuvables, parCle,
+  lignes }` et un `console.table` par grille (statut `sans` / `resolue` / `introuvable`, colonne `demo`).
+  Sentinelle `sentinelle-578-diagnostic-echelles-grilles` (6 cas ; 4 mutations rouges : porte inversée,
+  dédoublonnage retiré, écriture ajoutée, lecture par `getSync`).
+  ⮕ **DÛ PAR GRÉGOIRE** : le lancer et rapporter les deux chiffres (avec / sans, et les introuvables).
+  ⚠ **FAIT MESURÉ EN ÉCRIVANT LE DIAGNOSTIC, qui pèse sur l'attente** : l'éditeur de grille
+  (`grilles.js`) n'écrit **JAMAIS** `echelleId` — le seul littéral du dépôt est `GRILLE_GENERIQUE`
+  (`grilles.js:1462`). La prémisse « une grille PORTE un `echelleId` » vaut pour la grille semée, pas
+  pour celles que l'éditeur produit. Si le compte réel confirme « sans » majoritaire, le correctif de
+  #578 commence par ÉCRIRE l'identifiant (éditeur de grille + rétro-remplissage), et seulement ensuite
+  par le LIRE dans `initialiserNouveauCartouche`.
   ⮕ **Le motif est une protection, pas une précaution de style** : si les grilles réelles ne portent
   pas d'`echelleId`, passer par `obtenirEchelleResolue` laisserait la cartouche **sans colonnes** —
   une régression PIRE que le défaut qu'on corrige.
