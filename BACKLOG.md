@@ -2524,7 +2524,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **Geste** : try/catch par étudiant + bilan final (« 23 réussis, 2 échoués : … »), l'omission de
   la synthèse remontée dans ce bilan.
 
-- [ ] **#566 — Écart d'anonymisation dans la synthèse, et compteur trompeur.** (constat B13)
+- [x] **#566 LIVRÉ 29 août 2026 — la synthèse anonymise le texte libre, et le compteur de l'export Léa dit le nombre de PDF réel.** (constat B13)
+  `synthese-retroaction-data.js` : le commentaire libre de chaque critère (rétroaction saisie, algorithmique ou de cartouche)
+  passe par `anonymiserTexteRetroaction(texte, da)` — transparent hors du mode anonymisé. Les noms venaient déjà de
+  `obtenirDonneesSelonMode` (anonymisés) ; seul le texte libre fuyait.
+  `travaux-archivage.js` : la sélection Léa (évaluations actives → une par élève, reprise prioritaire → fichier résolu)
+  est extraite en **`selectionnerEvaluationsLea`**, seule source, exposée ; `exporterPourLea` la lit ; elle rend aussi
+  `sansFichier`. `travaux-ui.js` : `mettreAJourCompteurLea` l'interroge et annonce « N PDF pour N étudiant(s) — K
+  évaluation(s) sans fichier, sans PDF » au lieu d'un compte qui ignorait la résolution.
+  **Sentinelle** `sentinelle-566-synthese-anonymisee-compteur` (A anonymiseur appelé / transparent ; B sélection :
+  sans-fichier, reprise prioritaire, filtres ; C cliquets export ↔ compteur) ; **break-test** 4 mutations, 4 rouges.
   Le modal de révision anonymise les rétroactions, la synthèse rasterisée **jamais** : en mode
   anonymisé, un prénom tapé dans une rétroaction **sort dans le PDF**. Et le compteur peut dépasser
   le nombre de PDF réellement produits (évaluations sans fichier résolu ignorées en silence).

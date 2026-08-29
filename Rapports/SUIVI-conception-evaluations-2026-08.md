@@ -19,7 +19,7 @@
 | Onglet | Constats de départ (25 août) | Réglés | Partiels | Ouverts | Items ouverts qui les portent |
 |---|---|---|---|---|---|
 | **Conception** | 15 (A1-A4, B1-B5, C1-C6) | **11** | 0 | **4** | #519 (C1, C3, C5), #520 (C6) — plus deux restes rattachés : #522, barre d'actions du 4ᵉ écran |
-| **Évaluations** | 20 (A1-A2, B1-B13, C1-C5) + section D « mineurs » | **13** | **1** (B5 : portée à trancher) | **6** | #566, #567, #568, #569, #570, #571 ; D partiel → #572 |
+| **Évaluations** | 20 (A1-A2, B1-B13, C1-C5) + section D « mineurs » | **14** | **1** (B5 : portée à trancher) | **5** | #567, #568, #569, #570, #571 ; D partiel → #572 |
 
 Lecture honnête de ces chiffres : Conception est **presque bouclé sur sa liste de départ** — ce qui reste est du design et du zéro-dette. Évaluations a réglé **ses deux critiques et le cœur des majeurs** (import, auto-save, export) ; ce qui reste est surtout le garde des modes, l'échappement, et toute la colonne design.
 
@@ -74,7 +74,7 @@ Nés du même élan, hors liste de départ mais dans l'onglet : **#524-#528** (a
 | **B10** L'auto-save ne couvrait que les critères | Rétroaction seule perdue en navigation rapide | #564 | ✅ Livré 28 août (`b4755301`) | — |
 | **B11** Un étudiant en échec avortait tout le lot d'export | — | #565 | ✅ Livré 28 août (`cf378263`) | Échec isolé et nommé |
 | **B12** L'échec de la page de synthèse était invisible | — | #565 | ✅ Livré 28 août | Copie sans synthèse signalée à part |
-| **B13** Écart d'anonymisation dans la synthèse ; compteur trompeur | — | #566 | ⏳ Ouvert | Libellé cité inexistant (rectifié) ; l'écart, lui, est réel |
+| **B13** Écart d'anonymisation dans la synthèse ; compteur trompeur | — | #566 | ✅ Livré 29 août | Texte libre anonymisé ; sélection Léa unique (`selectionnerEvaluationsLea`), compteur = PDF réels |
 | **C1** Variables CSS fantômes (`--attention`…) | Avertissements sans couleur d'alerte | #567 | ⏳ Ouvert | ~12 usages |
 | **C2** Cibles tactiles < 44 px | — | #568 | ⏳ Ouvert | Norme déjà appliquée ailleurs |
 | **C3** Écran « Exporter et archiver » hors design system | `form-select` ×6 (+2 sur Importer), pas d'état vide | #569 | ⏳ Ouvert | Portée rectifiée 28 août |
@@ -149,7 +149,7 @@ Ordre proposé : d'abord ce qui est **tranché et pas exécuté** (le plus court
 4. ~~**#560**~~ — livré 29 août ; reste la portée des suppressions par couple (décision).
 5. ~~**#561**~~ — livré 29 août.
 6. **#571** — correctifs arbitrés (garde de luminance, date), à re-mesurer sur HEAD d'abord.
-7. **#566** — anonymisation de la synthèse ; compteur.
+7. ~~**#566**~~ — livré 29 août.
 8. **#572** — Liste, Annoter, Design mineur ; ouvrir à part les clés sessionStorage.
 9. **#567, #568, #569, #570** — la colonne design (#570 : ids dupliqués d'abord).
 10. **#587** — les neuf doublons tolérés par le cliquet.

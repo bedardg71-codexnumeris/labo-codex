@@ -386,11 +386,18 @@
             const retroAlgo = (donneesAlgoCrit && donneesAlgoCrit.retroaction)
                 ? String(donneesAlgoCrit.retroaction).trim()
                 : '';
-            const commentaire =
+            const commentaireBrut =
                 (c.retroaction && c.retroaction.trim()) ||
                 retroAlgo ||
                 (cartouche && cleCart && cartouche.commentaires && cartouche.commentaires[cleCart]) ||
                 '';
+            // #566 — LE TEXTE LIBRE PASSE PAR L'ANONYMISATION. Le modal de révision
+            // anonymisait les rétroactions, la synthèse rasterisée JAMAIS : en mode
+            // anonymisé, un prénom tapé dans une rétroaction sortait dans le PDF remis.
+            // `anonymiserTexteRetroaction` rend le texte tel quel hors de ce mode.
+            const commentaire = (typeof anonymiserTexteRetroaction === 'function')
+                ? anonymiserTexteRetroaction(commentaireBrut, evaluation.etudiantDA)
+                : commentaireBrut;
 
             // Données chiffrées du critère algorithmique : sert au rendu d'une
             // ligne compacte « N erreurs sur M mots → X/P (Y%) » dans le PDF,
