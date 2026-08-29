@@ -2164,7 +2164,11 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   lignes }` et un `console.table` par grille (statut `sans` / `resolue` / `introuvable`, colonne `demo`).
   Sentinelle `sentinelle-578-diagnostic-echelles-grilles` (6 cas ; 4 mutations rouges : porte inversée,
   dédoublonnage retiré, écriture ajoutée, lecture par `getSync`).
-  ⮕ **DÛ PAR GRÉGOIRE** : le lancer et rapporter les deux chiffres (avec / sans, et les introuvables).
+  ✅ **CHIFFRE RAPPORTÉ par Grégoire le 29 août 2026** : 3 trimestres (a2025, h2026, a2026), 10 grilles —
+  **1 avec `echelleId` (GRILLE_GENERIQUE → ECHELLE_GENERIQUE, résolue), 9 sans**, 0 introuvable. Aucune
+  grille réelle n'en porte. ⮕ La lecture `grille.echelleId` est donc EXCLUE comme source : elle laisserait
+  toutes ses cartouches neuves sans colonnes. Arbitrage remis en artefact (un seul, avec les deux
+  décisions #555 restantes), lien dans RELAIS.md.
   ⚠ **FAIT MESURÉ EN ÉCRIVANT LE DIAGNOSTIC, qui pèse sur l'attente** : l'éditeur de grille
   (`grilles.js`) n'écrit **JAMAIS** `echelleId` — le seul littéral du dépôt est `GRILLE_GENERIQUE`
   (`grilles.js:1462`). La prémisse « une grille PORTE un `echelleId` » vaut pour la grille semée, pas
