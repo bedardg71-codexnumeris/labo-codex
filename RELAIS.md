@@ -66,6 +66,15 @@ l'identifiant (éditeur + rétro-remplissage), pas par le lire. Inscrit à l'ite
 - **La session suivante** : #592 ; #555 : deux décisions restantes (zone intermédiaire comme progrès ;
   intention P1) ; correctif #578 UNE FOIS le chiffre connu.
 
+### 📌 RÉFÉRENCE UNIQUE CONCEPTION / ÉVALUATIONS — `Rapports/SUIVI-conception-evaluations-2026-08.md` (29 août, 9 h)
+
+Grégoire : « je ne sais plus où nous en sommes par rapport à la situation de départ ». Mesuré : la référence
+n'existait pas — deux audits du 25 août (photos), une seconde passe le 27 (couche), un backlog dispersé.
+⮕ **Créé** (option A, point zéro = 25 août) : constat par constat → item → statut → preuve, plus le bloc de la
+seconde passe et la liste de travail ordonnée. Chiffres : **Conception 11 réglés / 15, Évaluations 9 réglés /
+20 + 1 partiel**. Quatre constats de la seconde passe sont **sans item** (§2.1 n° 5-6-7, D3) — à inscrire.
+**Règle** : chaque livraison coche sa ligne là-bas ; ce relais n'y redit rien.
+
 ### 📌 ARBITRAGES — UN SEUL ARTEFACT, APRÈS LE CHIFFRE #578 (décision de Grégoire, 29 août 4 h)
 
 Les skills métier (`ecosysteme-classe`, `pratiques-notation`, `depistage-rai`) ont été lus à 4 h — pas avant
