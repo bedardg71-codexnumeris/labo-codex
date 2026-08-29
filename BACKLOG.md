@@ -2154,7 +2154,17 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ Pour trancher `creerNouvellePratique`, la piste est `git log -S ouvrirWizardV2 -- js/pratiques.js`
   (l'historique, pas la relecture des deux corps).
 
-- [ ] **#593 — Reliquats Conception de la seconde passe du 27 août : quatre constats qui n'avaient pas d'item.**
+- [x] **#593 LIVRÉ 29 août 2026 (points 1-2-3) — les reliquats Conception ont un item, et trois sur quatre sont réglés ; D3 renvoyé à #358.**
+  1. ✅ Banc #549 réancré : tests 3 et 4 cherchent `\n## Le travail demandé\n` (l'en-tête réel), plus le mot que la
+     consigne d'ancrage citait aussi. 2. ✅ Le modèle de cartouche ne parle plus d'un « seuil de maîtrise » écrit dans le
+     code : il nomme le niveau qui porte le repère « Maîtrisé à partir de » de l'échelle (#555), marque les deux repères
+     dans la liste des niveaux, et **dit** quand l'échelle n'en a pas (ou quand le repère ne désigne aucun niveau).
+     3. ✅ `sauvegarderCommentaire` capture sa cible avant le premier `await` et la passe à `persisterCartouchePartielle`
+     (paramètre `cible`) : une cartouche ouverte pendant la complétion ne reçoit plus l'écriture d'une autre — **la
+     course « théorique » a été reproduite en banc et fermée**. Cliquet de câblage #518 ajouté à son banc (garde avant
+     `construireProductionData`). `getCouleurNiveau` et les quatre couleurs I/D/M/E identiques retirés d'`export-pdf.js`
+     (parité visuelle : même gris à cinq sites). 4. ⏳ **D3 reste** (clés `cartouches_*` sans `cle()`) → #358.
+  **Sentinelle** `sentinelle-593-reliquats-conception` (5 cas) ; break-test 4 mutations, 4 rouges. Énoncé d'origine :
   Créé le 29 août 2026 en construisant `Rapports/SUIVI-conception-evaluations-2026-08.md` (§2.1) : ces lignes
   du rapport `AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md` §7.2 n'étaient portées par aucun item.
   1. **Sentinelle #549, tests 3 et 4 tautologiques sur l'en-tête** : `toContain('Le travail demandé')` est

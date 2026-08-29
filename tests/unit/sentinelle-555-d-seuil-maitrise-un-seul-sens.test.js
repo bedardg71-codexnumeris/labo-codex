@@ -64,6 +64,10 @@ const EMPLOIS_CONNUS = {
     // #577 : l'assistant LIT le repère de l'échelle choisie (avertissement si
     // absent, récapitulatif) — trois lectures, toutes sur l'échelle.
     'js/wizard-pratique-v2.js': 3,
+    // #593 : le modèle de cartouche remis à l'assistant LIT le repère de
+    // l'échelle (`echelle.seuilMaitrise`, deux fois : garde + résolution du
+    // niveau) pour nommer le niveau « Maîtrisé à partir de » — sur l'échelle.
+    'js/cartouches.js': 2,
     // ⚠ EXCEPTION NOMMÉE — le POURCENTAGE 0-100 du mode « par objectifs »,
     // retiré par #435 (#443). Son écran n'existe plus dans index.html
     // (`v2-config-par-objectifs`, `v2-comptage-seuil-maitrise` : 0 occurrence),

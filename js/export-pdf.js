@@ -42,12 +42,11 @@ const PDF_CONFIG = {
         textePrincipal: [51, 51, 51],     // --gris-fonce #333333
         texteSecondaire: [102, 102, 102], // --gris-moyen #666666
         bordure: [204, 204, 204],         // --bordure-moyenne #cccccc
-        fondEntete: [245, 245, 245],      // Gris très clair pour entêtes
-        // Niveaux - tous en gris pour impression N&B
-        niveauI: [51, 51, 51],            // Gris foncé uniforme
-        niveauD: [51, 51, 51],            // Gris foncé uniforme
-        niveauM: [51, 51, 51],            // Gris foncé uniforme
-        niveauE: [51, 51, 51]             // Gris foncé uniforme
+        fondEntete: [245, 245, 245]       // Gris très clair pour entêtes
+        // #593 (29 août 2026) : les quatre « couleurs de niveau » I/D/M/E — toutes
+        // égales à textePrincipal — sont retirées avec `getCouleurNiveau`. Le PDF
+        // n'a jamais coloré un niveau (impression N&B), et ces lettres étaient un
+        // dernier reste d'IDME écrit dans le code (#529).
     },
     // Polices
     polices: {
@@ -431,19 +430,6 @@ function finaliserDocument(doc, optionsPied = {}) {
         doc.setPage(i);
         ajouterPiedPage(doc, i, totalPages, optionsPied);
     }
-}
-
-/**
- * Obtient la couleur pour un niveau de performance
- */
-function getCouleurNiveau(code) {
-    const couleurs = {
-        'I': PDF_CONFIG.couleurs.niveauI,
-        'D': PDF_CONFIG.couleurs.niveauD,
-        'M': PDF_CONFIG.couleurs.niveauM,
-        'E': PDF_CONFIG.couleurs.niveauE
-    };
-    return couleurs[code] || PDF_CONFIG.couleurs.textePrincipal;
 }
 
 // formaterDate() — supprimée, canonique dans main.js (Beta 97.1 #68)
@@ -902,10 +888,10 @@ async function exporterEchellePDF(echelle, options = {}) {
                 3: { cellWidth: largeurContenu * 0.20, halign: 'center' }
             },
             didParseCell: function(data) {
-                // Colorer le code selon le niveau
+                // Le code du niveau, dans le gris du texte (#593 : plus de couleur par lettre IDME)
                 if (data.section === 'body' && data.column.index === 0) {
                     const code = data.cell.raw;
-                    const couleur = getCouleurNiveau(code);
+                    const couleur = PDF_CONFIG.couleurs.textePrincipal;   // #593 : même gris pour tout code, quelle que soit l'échelle
                     data.cell.styles.textColor = couleur;
                 }
             },
@@ -980,7 +966,7 @@ async function exporterToutesEchellesPDF(options = {}) {
                 didParseCell: function(data) {
                     if (data.section === 'body' && data.column.index === 0) {
                         const code = data.cell.raw;
-                        const couleur = getCouleurNiveau(code);
+                        const couleur = PDF_CONFIG.couleurs.textePrincipal;   // #593 : même gris pour tout code, quelle que soit l'échelle
                         data.cell.styles.textColor = couleur;
                     }
                 },
@@ -1071,11 +1057,11 @@ async function exporterCartouchePDF(cartouche, options = {}) {
             },
             columnStyles: colonnesStyles,
             didParseCell: function(data) {
-                // Colorer les en-tetes de niveaux selon IDME
+                // En-têtes de niveaux : fond blanc, texte gris (#593 : plus de couleur par lettre IDME)
                 if (data.section === 'head' && data.column.index > 0) {
                     const niveau = niveaux[data.column.index - 1];
                     if (niveau?.code) {
-                        const couleur = getCouleurNiveau(niveau.code);
+                        const couleur = PDF_CONFIG.couleurs.textePrincipal;   // #593 : même gris pour tout code, quelle que soit l'échelle
                         // Garder le fond blanc et colorer le texte
                         data.cell.styles.fillColor = [255, 255, 255];
                         data.cell.styles.textColor = couleur;
@@ -1251,7 +1237,7 @@ async function exporterReferentielCompletPDF(options = {}) {
                 didParseCell: function(data) {
                     if (data.section === 'body' && data.column.index === 0) {
                         const code = data.cell.raw;
-                        const couleur = getCouleurNiveau(code);
+                        const couleur = PDF_CONFIG.couleurs.textePrincipal;   // #593 : même gris pour tout code, quelle que soit l'échelle
                         data.cell.styles.textColor = couleur;
                     }
                 },
@@ -2665,11 +2651,11 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
             // Permettre plusieurs pages
             rowPageBreak: 'auto',
             didParseCell: function(data) {
-                // Colorer les en-tetes de niveaux
+                // En-têtes de niveaux : fond blanc, texte gris (#593)
                 if (data.section === 'head' && data.column.index >= 2) {
                     const niveau = echelle.niveaux[data.column.index - 2];
                     if (niveau?.code) {
-                        const couleur = getCouleurNiveau(niveau.code);
+                        const couleur = PDF_CONFIG.couleurs.textePrincipal;   // #593 : même gris pour tout code, quelle que soit l'échelle
                         data.cell.styles.fillColor = [255, 255, 255];
                         data.cell.styles.textColor = couleur;
                     }

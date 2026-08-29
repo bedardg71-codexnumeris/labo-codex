@@ -94,7 +94,9 @@ describe('#549 · composerModeleCartouche', () => {
         expect(appelsComposeur[0].inclureObjectif).toBe(true);
         expect(appelsComposeur[0].inclureDetailTache).toBe(true);
 
-        expect(texte).toContain('Le travail demandé');
+        // #593 (29 août 2026) : l'EN-TÊTE, pas le mot — la consigne d'ancrage cite
+        // aussi « Le travail demandé », et rendait ce test vert sans la section.
+        expect(texte).toContain('\n## Le travail demandé\n');
         expect(texte).toContain('Reconnaître le propos du texte');
         expect(texte).toContain('Rédiger un texte de 500 mots');
         expect(texte).toContain('Production : Dissertation sur Hamlet');
@@ -103,7 +105,7 @@ describe('#549 · composerModeleCartouche', () => {
     it('4. LE TRAVAIL DEMANDÉ vient AVANT les critères — l\'assistant lit la tâche d\'abord', () => {
         blocsRendus = [{ titre: 'Objectif :', texte: 'Reconnaître le propos' }];
         const texte = win.composerModeleCartouche(GRILLE, ECHELLE, PRODUCTION, 'X');
-        const posConsignes = texte.indexOf('Le travail demandé');
+        const posConsignes = texte.indexOf('\n## Le travail demandé\n');   // #593 : l'en-tête réel
         const posCriteres = texte.indexOf('Critères de la grille');
         expect(posConsignes).toBeGreaterThan(-1);
         expect(posCriteres).toBeGreaterThan(-1);

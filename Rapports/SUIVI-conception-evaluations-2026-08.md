@@ -9,7 +9,7 @@
 > commit). `RELAIS.md` renvoie ici au lieu de redire. Une ligne sans item est un trou à inscrire, pas
 > à oublier.
 >
-> **État au 29 août 2026, 1.106.0 (+ #578 et #574-retrait livrés, bump dû), `main`.** Créé par Claude Code à la demande de Grégoire
+> **État au 29 août 2026, 1.106.0 (+ #578, #574-retrait et #593 livrés, bump dû), `main`.** Créé par Claude Code à la demande de Grégoire
 > (option A : point zéro = 25 août ; la seconde passe du 27 s'y superpose en second bloc).
 
 ---
@@ -96,9 +96,9 @@ Source : `Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md` (§7 Co
 | 2 | Un niveau neuf naît avec `valeurCalcul: 50` écrit en base | dans #574 | ⏳ **Non tranché** — un niveau vide en base = collision de clés (#524) ; forme juste = tampon jusqu'à complétude ; lot à part |
 | 3 | `ECHELLE_GENERIQUE` et les gabarits d'échelle sont non calculables depuis #527 | #574 | 🟠 Retrait **livré 29 août** (plus rien n'est semé) ; sonde `_sonder574()` livrée, **chiffre dû par Grégoire** avant toute décision sur les données |
 | 4 | La cartouche neuve prend les colonnes de la première échelle du trimestre | #578 | ✅ Livré 29 août (option A) — et une **régression du 26 août** trouvée en chemin : les deux listes du formulaire de cartouche étaient mortes (`e50155e0`), rebranchées ; cliquet posé. Reste : compter les cartouches existantes nées du chemin fautif |
-| 5 | Sentinelle #549, tests 3-4 tautologiques sur l'en-tête | #593 | ⏳ Inscrit 29 août |
-| 6 | Texte du modèle de cartouche : « seuil de maîtrise », figé dans le code | #593 | ⏳ Inscrit 29 août |
-| 7 | Course inter-cartouches (faible) ; câblage #518 non verrouillé ; `getCouleurNiveau` mort | #593 | ⏳ Inscrit 29 août |
+| 5 | Sentinelle #549, tests 3-4 tautologiques sur l'en-tête | #593 | ✅ Livré 29 août (réancré sur `## Le travail demandé`) |
+| 6 | Texte du modèle de cartouche : « seuil de maîtrise », figé dans le code | #593 | ✅ Livré 29 août (nomme le repère de l'échelle, ou dit qu'il n'y en a pas) |
+| 7 | Course inter-cartouches (faible) ; câblage #518 non verrouillé ; `getCouleurNiveau` mort | #593 | ✅ Livré 29 août (course reproduite et fermée ; cliquet #518 ; colorieur retiré) |
 | D3 | Clés `cartouches_${grilleId}` sans `cle()` — globales, orphelines si la grille disparaît | #593 (→ #358) | ⏳ Inscrit 29 août ; chantier de namespacing, renvoyé à la Brique D |
 
 ⮕ Les quatre lignes sont inscrites sous **#593** le 29 août (D3 y est renvoyé à #358).
@@ -136,7 +136,7 @@ Ordre proposé : d'abord ce qui est **tranché et pas exécuté** (le plus court
 
 1. ~~**#578 A**~~ — livré 29 août.
 2. ~~**#574 B**~~ — retrait livré 29 août ; reste la sonde (Grégoire) et le niveau neuf (à trancher).
-3. **#593** — reliquats 2.1 n° 5-6-7 (petits) ; D3 renvoyé à #358.
+3. ~~**#593**~~ — livré 29 août (n° 5-6-7) ; D3 renvoyé à #358.
 4. **#522** — audit des autres autosaves (la primitive `db.modifier` existe).
 5. **#520** — ablation de l'« ANCIEN SYSTÈME » des échelles.
 6. **#519** — passe design (C1, C3, C5 + barre d'actions du 4ᵉ écran).
