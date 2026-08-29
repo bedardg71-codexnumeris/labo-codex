@@ -621,26 +621,24 @@ describe('#468 · S6 (CO-25) — un gabarit supprimé ne ressuscite pas', () => 
         const store = {};
         const win = chargerGabaritsUtils(store, []);
         win.GabaritsUtils.initialiserTousLesGabarits();
-        const ids = (store.bibliothequeEchelles || []).map(g => g.id);
-        expect(ids).toContain('GABARIT_ECHELLE_IDME');
+        // #574 (29 août 2026) : plus AUCUN gabarit d'échelle semé — ils n'avaient pas
+        // de valeurCalcul, donc non calculables depuis #527. Les grilles, elles, restent.
+        expect(store.bibliothequeEchelles === undefined || store.bibliothequeEchelles.length === 0).toBe(true);
         expect((store.bibliothequeGrilles || []).length).toBe(3);
     });
 
     it('un gabarit marqué supprimé n\'est PAS re-semé — même après N rechargements', () => {
         const store = {};
-        const supprimees = ['GABARIT_ECHELLE_IDME', 'GABARIT_GRILLE_ANALYTIQUE'];
+        const supprimees = ['GABARIT_GRILLE_ANALYTIQUE'];
         const win = chargerGabaritsUtils(store, supprimees);
 
         win.GabaritsUtils.initialiserTousLesGabarits();
         win.GabaritsUtils.initialiserTousLesGabarits();  // le rechargement suivant
         win.GabaritsUtils.initialiserTousLesGabarits();
 
-        const idsEchelles = (store.bibliothequeEchelles || []).map(g => g.id);
         const idsGrilles = (store.bibliothequeGrilles || []).map(g => g.id);
-        expect(idsEchelles).not.toContain('GABARIT_ECHELLE_IDME');
         expect(idsGrilles).not.toContain('GABARIT_GRILLE_ANALYTIQUE');
         // les autres, eux, sont bien là : la garde vise l'id supprimé, pas la famille
-        expect(idsEchelles).toContain('GABARIT_ECHELLE_STD_MASTERY');
         expect(idsGrilles).toContain('GABARIT_GRILLE_STD_OBJECTIFS');
     });
 

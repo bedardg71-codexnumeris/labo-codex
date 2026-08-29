@@ -1459,7 +1459,8 @@ async function assurerGrilleGenerique() {
         id: 'GRILLE_GENERIQUE',
         nom: 'Grille générique (exemple)',
         description: 'Grille 4 critères - Modifie ou duplique selon tes besoins',
-        echelleId: 'ECHELLE_GENERIQUE',
+        // #574/#578 (29 août 2026) : plus d'`echelleId` — l'échelle générique n'est plus
+        // semée, et une grille dit les CRITÈRES ; l'échelle se choisit là où on s'en sert.
         criteres: [
             { id: 'CR_COMPREHENSION', code: 'comp', nom: 'Compréhension', ponderation: 25, description: 'Capacité à saisir le sens et les enjeux du sujet', type: 'holistique' },
             { id: 'CR_APPLICATION', code: 'appl', nom: 'Application', ponderation: 25, description: 'Capacité à utiliser les connaissances dans un contexte donné', type: 'holistique' },

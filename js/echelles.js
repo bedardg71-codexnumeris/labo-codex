@@ -462,50 +462,127 @@ async function migrerEchellesVersBibliotheque() {
     }
 }
 
+/* ===============================
+   #574 — PLUS AUCUNE ÉCHELLE SEMÉE PAR LE CODE
+   =============================== */
+
+// ⮕ #574 (arbitré par Grégoire le 28 août 2026, option B) — `assurerEchelleGenerique`
+// est RETIRÉE. Elle semait au boot, dans chaque trimestre, une « Échelle générique
+// (exemple) » dont les niveaux portaient `valeur: 45/67/82/95` — pas `valeurCalcul`.
+// Depuis #527 (retrait du repli milieu de plage), une évaluation sur cette échelle
+// était NON CALCULABLE sur tous ses critères, sans message ciblé. Lui donner des
+// `valeurCalcul` choisies par le projet aurait refabriqué l'arbitrage pédagogique
+// que #526/#527 interdisent : on n'offre plus que des échelles que l'utilisateur
+// complète lui-même. Même sort pour les deux gabarits d'échelle de
+// `gabarits-utils.js`. Les échelles génériques DÉJÀ présentes dans les données
+// ne sont pas touchées : elles se suppriment comme les autres (tombstone via
+// `IDS_GABARITS_HARDCODES`, qui garde leurs ids pour cette raison).
+//
+// ⚠ Sonde AVANT toute décision sur les données existantes : `await _sonder574()`.
+
 /**
- * Assure la présence de l'échelle générique dans la bibliothèque
- * Facilite la compréhension du système pour les nouveaux utilisateurs
+ * Sonde LECTURE SEULE #574 : dans TOUS les trimestres, quelles échelles sont
+ * fabriquées par le code (générique semée, copies de gabarits), combien de
+ * niveaux d'échelle n'ont PAS de `valeurCalcul` (la mesure promise par #526,
+ * jamais faite), et combien d'évaluations, de productions et de cartouches
+ * désignent une échelle fabriquée. N'écrit RIEN.
+ * À lancer en console : await _sonder574()
+ *
+ * Lecture inter-trimestres par `await db.get()` (source réelle), copie archivée
+ * `{trim}_echellesTemplates` sondée avant la clé globale ; une clé partagée n'est
+ * lue qu'une fois. Les cartouches vivent sur des clés globales `cartouches_*`
+ * (#593/D3) : énumérées par `db.keys()`.
+ *
+ * @returns {Promise<{echellesFabriquees:Array, niveauxSansValeur:Array,
+ *   usages:{evaluations:number, productions:number, cartouches:number}, lignes:Array}>}
  */
-async function assurerEchelleGenerique() {
-    // 🆕 #358 — Garde anti-resemage du global hérité (jumeau de grilles.js). Au boot
-    // (DOMContentLoaded, AVANT db-ready) avec localStorage saturé (#353),
-    // `trimestreActif` n'est pas encore réhydraté → obtenirTrimestreId() est vide →
-    // cle('echellesTemplates') retombe sur la clé GLOBALE nue (trimestres.js:307).
-    // Semer ici recréerait l'exemple dans le global hérité que #358 retire. On ne
-    // sème QUE lorsque cle() résout vers une copie namespacée ; la navigation vers
-    // la section ré-appelle ce module une fois le trimestre actif établi.
-    if (cle('echellesTemplates') === 'echellesTemplates') return;
+async function _sonder574() {
+    var trimestres = [];
+    try { trimestres = (db.getSync('trimestres', []) || []).filter(function (t) { return t && t.id; }); } catch (e) {}
 
-    const echelles = await db.get(cle('echellesTemplates')) || [];
-
-    // Vérifier si l'échelle générique existe déjà ou a été supprimée volontairement
-    const existe = echelles.some(e => e.id === 'ECHELLE_GENERIQUE');
-    if (existe || window.estRessourceSupprimee('ECHELLE_GENERIQUE')) return;
-
-
-    const echelleGenerique = {
-        id: 'ECHELLE_GENERIQUE',
-        nom: 'Échelle générique (exemple)',
-        description: 'Échelle 4 niveaux de performance - Modifie ou duplique selon tes besoins',
-        niveaux: [
-            { code: 'I', nom: 'Incomplet', min: 0, max: 59, valeur: 45, couleur: '#dc3545' },
-            { code: 'D', nom: 'en Développement', min: 60, max: 74, valeur: 67, couleur: '#fd7e14' },
-            { code: 'M', nom: 'Maîtrisé', min: 75, max: 89, valeur: 82, couleur: '#28a745' },
-            { code: 'E', nom: 'Étendu', min: 90, max: 100, valeur: 95, couleur: '#007bff' }
-        ],
-        verrouille: false,
-        dansBibliotheque: true
+    var lire = async function (nomCle, trimestreId) {
+        var copie = trimestreId + '_' + nomCle;
+        var v = await db.get(copie);
+        if (Array.isArray(v)) return { cle: copie, liste: v };
+        v = await db.get(nomCle);
+        if (Array.isArray(v)) return { cle: nomCle, liste: v };
+        return null;
+    };
+    var estFabriquee = function (e) {
+        if (!e || !e.id) return false;
+        if (e.id === 'ECHELLE_GENERIQUE') return true;
+        if (String(e.id).indexOf('GABARIT_ECHELLE_') === 0) return true;
+        if (e.idOriginal && String(e.idOriginal).indexOf('GABARIT_ECHELLE_') === 0) return true;
+        return false;
+    };
+    var sansValeur = function (n) {
+        return !n || n.valeurCalcul == null || String(n.valeurCalcul).trim() === '' || isNaN(Number(n.valeurCalcul));
     };
 
-    echelles.push(echelleGenerique);
-    await db.set(cle('echellesTemplates'), echelles);
+    var clesVues = {};
+    var echellesFabriquees = [];
+    var niveauxSansValeur = [];
+    var idsFabriquees = {};
+    for (var i = 0; i < trimestres.length; i++) {
+        var t = trimestres[i];
+        var ech = await lire('echellesTemplates', t.id);
+        if (!ech || clesVues[ech.cle]) continue;
+        clesVues[ech.cle] = true;
+        ech.liste.forEach(function (e) {
+            if (!e) return;
+            var nb = (e.niveaux || []).filter(sansValeur).length;
+            if (nb > 0) niveauxSansValeur.push({ cle: ech.cle, echelleId: e.id, nom: e.nom || '', niveauxSansValeur: nb, niveaux: (e.niveaux || []).length });
+            if (estFabriquee(e)) { echellesFabriquees.push({ cle: ech.cle, echelleId: e.id, nom: e.nom || '', idOriginal: e.idOriginal || '' }); idsFabriquees[e.id] = true; }
+        });
+    }
+
+    var usages = { evaluations: 0, productions: 0, cartouches: 0 };
+    var lignes = [];
+    var compter = function (liste, type, cleSrc) {
+        (liste || []).forEach(function (item) {
+            if (item && item.echelleId && idsFabriquees[item.echelleId]) {
+                usages[type]++;
+                lignes.push({ type: type, cle: cleSrc, id: item.id || '', echelleId: item.echelleId });
+            }
+        });
+    };
+    for (var k = 0; k < trimestres.length; k++) {
+        var tid = trimestres[k].id;
+        var evals = await db.get(tid + '_evaluationsSauvegardees');
+        compter(evals, 'evaluations', tid + '_evaluationsSauvegardees');
+        var prods = await db.get(tid + '_productions');
+        compter(prods, 'productions', tid + '_productions');
+    }
+    var toutesCles = [];
+    try { toutesCles = await db.keys(); } catch (e) { toutesCles = []; }
+    try { toutesCles = toutesCles.concat(Object.keys(localStorage)); } catch (e) {}
+    var clesCartouches = {};
+    toutesCles.forEach(function (c) { if (typeof c === 'string' && c.indexOf('cartouches_') === 0) clesCartouches[c] = true; });
+    var clesC = Object.keys(clesCartouches);
+    for (var m = 0; m < clesC.length; m++) {
+        var carts = await db.get(clesC[m]);
+        compter(Array.isArray(carts) ? carts : (carts ? [carts] : []), 'cartouches', clesC[m]);
+    }
+
+    // ⚠ `console.log` assumé et nommé : la sortie console EST le produit de cette
+    // sonde (même statut que `_diagnostiquerModeleCours`, `_diagnostiquerEchellesGrilles`).
+    if (typeof console !== 'undefined' && console.table) {
+        console.table(echellesFabriquees);
+        console.table(niveauxSansValeur);
+        if (lignes.length) console.table(lignes);
+    }
+    console.log('[Sonde #574] ' + trimestres.length + ' trimestre(s) · échelles fabriquées par le code : ' + echellesFabriquees.length
+        + ' · échelles avec au moins un niveau SANS valeurCalcul : ' + niveauxSansValeur.length);
+    console.log('[Sonde #574] désignent une échelle fabriquée — évaluations : ' + usages.evaluations
+        + ' · productions : ' + usages.productions + ' · cartouches : ' + usages.cartouches);
+    return { echellesFabriquees: echellesFabriquees, niveauxSansValeur: niveauxSansValeur, usages: usages, lignes: lignes };
 }
 
 // #464 / décision D2 du triage (21 août 2026) : assurerEchellesPersonnalisees
 // RETIRÉE (~200 lignes, 8 échelles « collègues » codées en dur). Elle re-semait
 // les 8 échelles dans CHAQUE trimestre à chaque boot et, appelée avant que le
 // trimestre actif soit établi, recréait la clé NUE echellesTemplates que #358
-// interdit (CO-11 — sa jumelle assurerEchelleGenerique portait la garde, pas
+// interdit (CO-11 — sa jumelle assurerEchelleGenerique, retirée par #574, portait la garde, pas
 // elle). Le contenu est devenu du CATALOGUE : versé une fois dans la
 // bibliothèque partagée par migrerEchellesColleguesVersBibliotheque()
 // (echelles-bibliotheque.js), supprimable et modifiable comme le reste.
@@ -520,8 +597,7 @@ async function initialiserModuleEchelles() {
         // ✅ AJOUT (8 décembre 2025) : Migration vers système de bibliothèque
         await migrerEchellesVersBibliotheque();
 
-        // ✅ AJOUT (3 janvier 2026) : Assurer présence de l'échelle générique
-        await assurerEchelleGenerique();
+        // #574 (29 août 2026) : plus d'échelle générique semée ici — voir _sonder574.
     }
 
     // 🆕 #464/D2 (21 août 2026) : versement one-shot des 8 échelles « collègues »
@@ -2054,7 +2130,7 @@ window.dupliquerEchelle = dupliquerEchelle;
 // Exports des fonctions existantes (pour compatibilité)
 window.initialiserModuleEchelles = initialiserModuleEchelles;
 // Exposée pour la sentinelle #358 (garde anti-resemage du global hérité).
-window.assurerEchelleGenerique = assurerEchelleGenerique;
+window._sonder574 = _sonder574;   // sonde console #574 (lecture seule)
 window.chargerEchellesTemplates = chargerEchellesTemplates;
 window.chargerEchelleTemplate = chargerEchelleTemplate;
 window.supprimerEchelle = supprimerEchelle;
@@ -3536,9 +3612,8 @@ function blocReperesEchelle(echelle, options) {
  * ⮕ Une seule règle désormais, ici, et les deux lecteurs y passent. `!= null`
  * est la bonne : elle distingue « pas de valeur » de « la valeur zéro ».
  *
- * ⚠ Le repli sur le milieu de plage reste VOLONTAIRE — c'est une commodité :
- * une échelle qui ne pose que des bornes reste utilisable. Mais il ne peut plus
- * rendre `NaN` en silence : sans bornes exploitables, la fonction rend `null`,
+ * ⚠ Le repli sur le milieu de plage est RETIRÉ (#527, plus bas) : sans valeur
+ * ponctuelle, la fonction rend `null`, jamais `NaN`, jamais un chiffre inventé —
  * et c'est à l'appelant de dire qu'il ne sait pas calculer.
  */
 function valeurNumeriqueDuNiveau(niveau) {
@@ -3567,7 +3642,10 @@ function valeurNumeriqueDuNiveau(niveau) {
     //   · les échelles réelles de Grégoire — « aucun de mes niveaux n'a pas de
     //     valeur ponctuelle, j'ai travaillé tout l'hiver avec » (26 août) ;
     //   · le pack de démarrage — 9 niveaux d'échelle, 9 avec `valeurCalcul` ;
-    //   · les échelles semées par le code — toutes en posent une.
+    //   · les échelles semées par le code — c'était FAUX (audit du 27 août) :
+    //     l'échelle générique écrivait `valeur`, pas `valeurCalcul`, et les deux
+    //     gabarits n'en avaient pas. ⮕ #574 (29 août) : plus AUCUNE échelle n'est
+    //     semée par le code ; `_sonder574()` compte ce qui reste dans les données.
     // Le repli ne servait donc à personne, nulle part. Il ne pouvait que
     // fabriquer une note fausse le jour où une valeur manquerait vraiment.
     //

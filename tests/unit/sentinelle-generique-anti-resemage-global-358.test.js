@@ -3,8 +3,10 @@ import { chargerScript } from './_helpers/charger-script.js';
 
 // Sentinelle #358 — Garde anti-resemage du global hérité par les exemples génériques.
 //
-// CE QU'ELLE VERROUILLE : `assurerGrilleGenerique` / `assurerEchelleGenerique` ne
-// doivent JAMAIS écrire l'exemple générique dans la clé GLOBALE nue
+// CE QU'ELLE VERROUILLE : `assurerGrilleGenerique` ne doit JAMAIS écrire l'exemple
+// générique dans la clé GLOBALE nue (⚠ #574, 29 août 2026 : sa jumelle
+// `assurerEchelleGenerique` est RETIRÉE — plus aucune échelle n'est semée par le
+// code ; ce banc ne garde que la moitié grille)
 // (`grillesTemplates` / `echellesTemplates`) — la clé héritée que #358 retire.
 //
 // POURQUOI le bug existait : ces fonctions tournent au boot via
@@ -57,7 +59,8 @@ describe('#358 · garde anti-resemage du global par les exemples génériques', 
         expect(winT.cle('echellesTemplates')).toBe('echellesTemplates');
 
         await winG.assurerGrilleGenerique();
-        await winE.assurerEchelleGenerique();
+        // #574 : plus de semis d'échelle du tout — la fonction n'existe plus.
+        expect(winE.assurerEchelleGenerique).toBeUndefined();
 
         // La garde doit avoir court-circuité : le global hérité reste vierge.
         expect(store.grillesTemplates, 'global nu grillesTemplates ne doit PAS être semé').toBeUndefined();
@@ -73,11 +76,10 @@ describe('#358 · garde anti-resemage du global par les exemples génériques', 
         expect(winT.cle('echellesTemplates')).toBe('h2026_echellesTemplates');
 
         await winG.assurerGrilleGenerique();
-        await winE.assurerEchelleGenerique();
 
-        // Semé dans la copie namespacée…
+        // Semé dans la copie namespacée… (grille seulement : #574 a retiré l'échelle)
         expect((store.h2026_grillesTemplates || []).map(g => g.id)).toContain('GRILLE_GENERIQUE');
-        expect((store.h2026_echellesTemplates || []).map(e => e.id)).toContain('ECHELLE_GENERIQUE');
+        expect(store.h2026_echellesTemplates, '#574 : aucune échelle semée').toBeUndefined();
         // …et JAMAIS dans le global hérité.
         expect(store.grillesTemplates, 'global nu intouché').toBeUndefined();
         expect(store.echellesTemplates, 'global nu intouché').toBeUndefined();

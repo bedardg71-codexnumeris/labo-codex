@@ -2244,6 +2244,22 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   IDME de Grégoire en repli (`:374-379`) et choisit l'échelle par `find(e => !e.estDemo) || echelles[0]`,
   sans `echelleId` — la cartouche neuve porte les colonnes de la PREMIÈRE échelle, pas de celle choisie.
 - [ ] **#574 — Depuis #527, l'échelle générique et les gabarits d'échelle sont NON CALCULABLES : aucun ne porte de `valeurCalcul`.**
+  🟠 **PARTIEL le 29 août 2026 — LE RETRAIT EST LIVRÉ, la sonde est due, le niveau neuf n'est pas tranché.**
+  ✅ **Retrait (option B)** : `assurerEchelleGenerique` retirée d'`echelles.js` (fonction, appel au boot, export) ;
+  `GABARITS_ECHELLES_DEFAUT` retiré de `gabarits-utils.js` (semis et export) ; `GRILLE_GENERIQUE` et
+  `CART_GENERIQUE` ne portent plus d'`echelleId` vers une échelle qui n'existe plus (la cartouche se rend depuis
+  ses `niveaux`). Les deux commentaires faux de #527 sont corrigés. **Les données existantes ne sont pas touchées** :
+  une échelle générique déjà semée se supprime comme les autres (`IDS_GABARITS_HARDCODES` conservée pour le tombstone).
+  ✅ **Sonde livrée** : `await _sonder574()` en console (`echelles.js`, lecture seule, tous trimestres) — échelles
+  fabriquées par le code (générique, copies de gabarits), **niveaux sans `valeurCalcul` par échelle** (la mesure
+  promise par #526, jamais faite ; le zéro est une valeur), et usages (évaluations, productions, cartouches).
+  ⮕ **DÛ PAR GRÉGOIRE** : la lancer et rapporter les trois comptes ; c'est le chiffre qui dit s'il y a des données à
+  réparer (option non ouverte tant qu'il est inconnu).
+  **Sentinelle** `sentinelle-574-aucune-echelle-semee` (4 cas + cliquet) ; bancs #358, #468, brique B adaptés (la
+  moitié « échelle » de #358 n'a plus d'objet). **Break-test** : 5 mutations, 5 rouges, restauré par copie.
+  ⏳ **NON TRANCHÉ — le niveau NEUF** (`code: 'N', min: 0, max: 100, valeurCalcul: 50` écrits en base, 4 sites) :
+  le faire naître VIDE écrirait un code vide en base — la collision de clés de #524. La bonne forme est un niveau
+  tenu en tampon jusqu'à ce qu'il soit complet (patron `_reperesNouvelleEchelle`, #555 (e)). Décision et lot à part.
   ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option B : les RETIRER.** N'offrir que des échelles que
   l'utilisateur complète, plutôt que de leur donner des `valeurCalcul` choisies par le projet.
   ⮕ Zéro-dette strict, au prix du démarrage rapide. Cohérent avec #527 : poser des valeurs à sa place

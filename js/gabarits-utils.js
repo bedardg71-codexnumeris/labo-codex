@@ -281,44 +281,12 @@
     // GABARITS PAR DÉFAUT (MULTI-PRATIQUES)
     // =========================================================================
 
-    /**
-     * Gabarits d'échelles multi-pratiques
-     */
-    const GABARITS_ECHELLES_DEFAUT = [
-        {
-            id: 'GABARIT_ECHELLE_IDME',
-            nom: '[Multi] IDME - 4 niveaux',
-            type: 'standard',
-            description: 'Gabarit multi-pratiques : Incomplet, en Développement, Maîtrisé, Étendu',
-            niveaux: [
-                { code: 'E', nom: 'Étendu', description: 'Dépasse les attentes', min: 90, max: 100, couleur: '#28a745' },
-                { code: 'M', nom: 'Maîtrisé', description: 'Atteint les attentes', min: 75, max: 89, couleur: '#17a2b8' },
-                { code: 'D', nom: 'en Développement', description: 'En voie d\'atteindre les attentes', min: 60, max: 74, couleur: '#ffc107' },
-                { code: 'I', nom: 'Incomplet', description: 'N\'atteint pas les attentes', min: 0, max: 59, couleur: '#dc3545' }
-            ],
-            estGabarit: true,
-            pratiques: ['all'],
-            dansBibliotheque: true,
-            dateCreation: '2026-01-02T00:00:00.000Z',
-            auteur: 'Labo Codex'
-        },
-        {
-            id: 'GABARIT_ECHELLE_STD_MASTERY',
-            nom: '[STD] Standards de maîtrise',
-            type: 'standards',
-            description: 'Gabarit PAN-Standards : Non démontré, En développement, Maîtrisé',
-            niveaux: [
-                { code: 'M', nom: 'Maîtrisé', description: 'L\'objectif est maîtrisé', min: 100, max: 100, couleur: '#28a745', valeurNumerique: 2 },
-                { code: 'D', nom: 'En développement', description: 'L\'objectif est partiellement atteint', min: 50, max: 99, couleur: '#ffc107', valeurNumerique: 1 },
-                { code: 'N', nom: 'Non démontré', description: 'L\'objectif n\'est pas atteint', min: 0, max: 49, couleur: '#dc3545', valeurNumerique: 0 }
-            ],
-            estGabarit: true,
-            pratiques: ['STD'],
-            dansBibliotheque: true,
-            dateCreation: '2026-01-02T00:00:00.000Z',
-            auteur: 'Labo Codex'
-        }
-    ];
+    // #574 (29 août 2026, option B de Grégoire) — GABARITS_ECHELLES_DEFAUT RETIRÉ.
+    // `GABARIT_ECHELLE_IDME` n'avait aucune valeur ponctuelle et
+    // `GABARIT_ECHELLE_STD_MASTERY` écrivait `valeurNumerique` : depuis #527, une
+    // évaluation sur une copie de ces gabarits était non calculable. Plutôt que de
+    // leur poser des `valeurCalcul` choisies par le projet, on n'offre plus que des
+    // échelles que l'utilisateur complète. Les copies déjà en bibliothèque restent.
 
     /**
      * Gabarits de grilles multi-pratiques
@@ -486,7 +454,7 @@
      */
     function initialiserTousLesGabarits() {
 
-        ajouterGabaritsDefautSiManquants('bibliothequeEchelles', GABARITS_ECHELLES_DEFAUT);
+        // #574 : plus de gabarit d'échelle semé.
         ajouterGabaritsDefautSiManquants('bibliothequeGrilles', GABARITS_GRILLES_DEFAUT);
         ajouterGabaritsDefautSiManquants('bibliothequeProductions', GABARITS_PRODUCTIONS_DEFAUT);
 
@@ -500,8 +468,7 @@
         // Constantes
         PRATIQUES_DISPONIBLES,
 
-        // Gabarits par défaut
-        GABARITS_ECHELLES_DEFAUT,
+        // Gabarits par défaut (échelles : retirés par #574)
         GABARITS_GRILLES_DEFAUT,
         GABARITS_PRODUCTIONS_DEFAUT,
 

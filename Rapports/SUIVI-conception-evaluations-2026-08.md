@@ -9,7 +9,7 @@
 > commit). `RELAIS.md` renvoie ici au lieu de redire. Une ligne sans item est un trou à inscrire, pas
 > à oublier.
 >
-> **État au 29 août 2026, 1.106.0 (+ #578 livré, bump dû), `main`.** Créé par Claude Code à la demande de Grégoire
+> **État au 29 août 2026, 1.106.0 (+ #578 et #574-retrait livrés, bump dû), `main`.** Créé par Claude Code à la demande de Grégoire
 > (option A : point zéro = 25 août ; la seconde passe du 27 s'y superpose en second bloc).
 
 ---
@@ -93,8 +93,8 @@ Source : `Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md` (§7 Co
 | N° | Constat | Item | Statut |
 |---|---|---|---|
 | 1 | Après « Enregistrer », la cartouche ouverte est remplacée par une neuve | #573 | ✅ Livré 28 août |
-| 2 | Un niveau neuf naît avec `valeurCalcul: 50` écrit en base | dans #574 | ⏳ Arbitré 28 août (option B : retirer seeds et gabarits), **non livré** |
-| 3 | `ECHELLE_GENERIQUE` et les gabarits d'échelle sont non calculables depuis #527 | #574 | ⏳ idem ; sonde préalable requise (des évaluations réelles reposent-elles dessus ?) |
+| 2 | Un niveau neuf naît avec `valeurCalcul: 50` écrit en base | dans #574 | ⏳ **Non tranché** — un niveau vide en base = collision de clés (#524) ; forme juste = tampon jusqu'à complétude ; lot à part |
+| 3 | `ECHELLE_GENERIQUE` et les gabarits d'échelle sont non calculables depuis #527 | #574 | 🟠 Retrait **livré 29 août** (plus rien n'est semé) ; sonde `_sonder574()` livrée, **chiffre dû par Grégoire** avant toute décision sur les données |
 | 4 | La cartouche neuve prend les colonnes de la première échelle du trimestre | #578 | ✅ Livré 29 août (option A) — et une **régression du 26 août** trouvée en chemin : les deux listes du formulaire de cartouche étaient mortes (`e50155e0`), rebranchées ; cliquet posé. Reste : compter les cartouches existantes nées du chemin fautif |
 | 5 | Sentinelle #549, tests 3-4 tautologiques sur l'en-tête | #593 | ⏳ Inscrit 29 août |
 | 6 | Texte du modèle de cartouche : « seuil de maîtrise », figé dans le code | #593 | ⏳ Inscrit 29 août |
@@ -135,7 +135,7 @@ Ordre proposé : d'abord ce qui est **tranché et pas exécuté** (le plus court
 ### Conception
 
 1. ~~**#578 A**~~ — livré 29 août.
-2. **#574 B** — retirer l'échelle générique et les gabarits sans `valeurCalcul` (tranché 28 août) ; sonde d'abord.
+2. ~~**#574 B**~~ — retrait livré 29 août ; reste la sonde (Grégoire) et le niveau neuf (à trancher).
 3. **#593** — reliquats 2.1 n° 5-6-7 (petits) ; D3 renvoyé à #358.
 4. **#522** — audit des autres autosaves (la primitive `db.modifier` existe).
 5. **#520** — ablation de l'« ANCIEN SYSTÈME » des échelles.
