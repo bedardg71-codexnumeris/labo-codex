@@ -1009,6 +1009,11 @@ function rechercherEvaluations() {
  * Génère le HTML d'une ligne du tableau
  */
 function genererLigneHTML(ligne) {
+    // #562 (29 août 2026) — TOUT ce qui vient des données passe par `echapperHtml`,
+    // attributs compris (`data-*`, `title`) : la règle 1 du projet est « sans
+    // exception ». Le DA est nettoyé à l'import CSV, pas garanti sur les autres
+    // chemins ; les identifiants (évaluation, production, fichier) arrivent
+    // d'imports et de partages. Verrou : `sentinelle-562-liste-echappement`.
     // Déterminer les classes CSS et le badge selon le type
     let classeRemplacee = '';
     let badgeJeton = '';
@@ -1035,7 +1040,7 @@ function genererLigneHTML(ligne) {
         if (ligne.scoresOriginaux) {
             var parties = [];
             if (ligne.scoresOriginaux.niveauFinal && ligne.scoresOriginaux.niveauFinal !== '-') {
-                parties.push(ligne.scoresOriginaux.niveauFinal);
+                parties.push(echapperHtml(ligne.scoresOriginaux.niveauFinal));
             }
             if (ligne.scoresOriginaux.noteFinale != null) {
                 parties.push((Math.round(ligne.scoresOriginaux.noteFinale * 10) / 10) + '%');
@@ -1061,7 +1066,7 @@ function genererLigneHTML(ligne) {
     if (ligne.statut === 'non-recevable') {
         affichageNiveau = '<strong style="color: var(--gris-clair);">0</strong>';
     } else {
-        affichageNiveau = `<span class="travaux-badge-pill ${statutW}">${libelleStatut}</span>`;
+        affichageNiveau = `<span class="travaux-badge-pill ${echapperHtml(statutW)}">${echapperHtml(libelleStatut)}</span>`;
     }
 
     // Afficher la note chiffrée (%)
@@ -1077,7 +1082,7 @@ function genererLigneHTML(ligne) {
         // distincte, reste visible). N'altère pas la valeur stockée.
         affichageNoteChiffree = (typeof noteDiffereeActive === 'function' && noteDiffereeActive())
             ? badgeNoteDifferee()
-            : `<strong>${ligne.noteChiffree}%</strong>`;
+            : `<strong>${echapperHtml(ligne.noteChiffree)}%</strong>`;
     } else {
         affichageNoteChiffree = '-';
     }
@@ -1088,22 +1093,22 @@ function genererLigneHTML(ligne) {
     const daAffiche = ligne.daAffichage || ligne.da;
 
     return `
-        <tr data-evaluation-id="${ligne.evaluationId || ''}" data-da="${ligne.da}" data-production-id="${ligne.productionId}"${classeRemplacee}>
-            <td class="td-left">${daAffiche}</td>
+        <tr data-evaluation-id="${echapperHtml(ligne.evaluationId || '')}" data-da="${echapperHtml(ligne.da)}" data-production-id="${echapperHtml(ligne.productionId || '')}"${classeRemplacee}>
+            <td class="td-left">${echapperHtml(daAffiche)}</td>
             <td class="td-left">${echapperHtml(ligne.nom)}</td>
             <td class="td-left">${echapperHtml(ligne.prenom)}</td>
             <td class="td-left">${ligne.associationManquante
                 ? `${echapperHtml(ligne.productionNom)} ${ligne.estDoublon
                     ? `<span style="color: var(--rouge-danger); font-size: 0.85em;" title="Doublon : ce fichier est déjà associé à ${echapperHtml(ligne.diagnosticDoublon || '')}. Suppression sécuritaire."><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Doublon</span>`
                     : (ligne.fichierId
-                        ? `<button type="button" data-stop data-action="ouvrirProprieteFichier" data-param="${ligne.fichierId}" title="${ligne.etudiantManquant ? 'Étudiant·e introuvable : le DA du fichier ne correspond à aucun·e étudiant·e inscrit·e. Clique pour associer l’étudiant·e et la production.' : 'Aucune production liée à ce travail. Clique pour l’associer à une production.'}" style="color: var(--attention); font-size: 0.85em; background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Non associé ›</button>`
+                        ? `<button type="button" data-stop data-action="ouvrirProprieteFichier" data-param="${echapperHtml(ligne.fichierId)}" title="${ligne.etudiantManquant ? 'Étudiant·e introuvable : le DA du fichier ne correspond à aucun·e étudiant·e inscrit·e. Clique pour associer l’étudiant·e et la production.' : 'Aucune production liée à ce travail. Clique pour l’associer à une production.'}" style="color: var(--attention); font-size: 0.85em; background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Non associé ›</button>`
                         : `<span style="color: var(--attention); font-size: 0.85em;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Non associé</span>`)}`
                 : ligne.fichierAutreProduction
                     ? `${echapperHtml(ligne.productionNom)} <span style="color: var(--attention); font-size: 0.85em;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Fichier sous ${ligne.fichierAutreProductionNom ? echapperHtml(ligne.fichierAutreProductionNom) : 'autre production'}</span>`
                     : echapperHtml(ligne.productionNom)}</td>
             <td class="td-center">${badgeJeton}</td>
             <td class="td-center">${affichageNiveau}</td>
-            <td class="td-center">${ligne.niveauFinal && ligne.niveauFinal !== '-' ? `<strong>${ligne.niveauFinal}</strong>` : '-'}</td>
+            <td class="td-center">${ligne.niveauFinal && ligne.niveauFinal !== '-' ? `<strong>${echapperHtml(ligne.niveauFinal)}</strong>` : '-'}</td>
             <td class="td-center">${affichageNoteChiffree}</td>
             <td class="td-center">${boutons}</td>
         </tr>
@@ -1114,6 +1119,9 @@ function genererLigneHTML(ligne) {
  * Génère un <select> natif d'actions contextuel selon le statut de la ligne
  */
 function genererDropdownActions(ligne) {
+    // #562 — les identifiants interpolés dans `value="action|id|id"` sont échappés :
+    // le navigateur décode `&quot;`/`&amp;` en lisant `.value`, `executerActionEval`
+    // reçoit donc la valeur d'origine ; seul l'attribut est protégé.
     // Trouver le fichier importé associé
     let fichierImporte = null;
     if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersTravaux === 'function') {
@@ -1157,42 +1165,42 @@ function genererDropdownActions(ligne) {
 
     // Évaluer — non évalué seulement
     if (ligne.statut === 'non-evalue') {
-        options.push(`<option value="evaluer|${da}|${prodId}">Évaluer</option>`);
+        options.push(`<option value="evaluer|${echapperHtml(da)}|${echapperHtml(prodId)}">Évaluer</option>`);
     }
 
     // Annoter — si fichier importé, sauf remplacée/non-recevable
     if (fichierId && ligne.statut !== 'remplacee' && ligne.statut !== 'non-recevable') {
-        options.push(`<option value="annoter|${fichierId}|${prodId}">Annoter</option>`);
+        options.push(`<option value="annoter|${echapperHtml(fichierId)}|${echapperHtml(prodId)}">Annoter</option>`);
     }
 
     // Consulter — si évaluation existe
     if (evalId) {
-        options.push(`<option value="consulter|${evalId}">Consulter</option>`);
+        options.push(`<option value="consulter|${echapperHtml(evalId)}">Consulter</option>`);
     }
 
     // Journal — si évaluation existe
     if (evalId) {
-        options.push(`<option value="journal|${evalId}">Journal</option>`);
+        options.push(`<option value="journal|${echapperHtml(evalId)}">Journal</option>`);
     }
 
     // Modifier une évaluation remplacée (verrouillée)
     if (evalId && ligne.statut === 'remplacee') {
-        options.push(`<option value="modifier-remplacee|${evalId}">Modifier l'évaluation</option>`);
+        options.push(`<option value="modifier-remplacee|${echapperHtml(evalId)}">Modifier l'évaluation</option>`);
     }
 
     // Dossier PDF — évalué + export dispo
     if (ligne.statut === 'evalue' && typeof travauxExportPDF !== 'undefined') {
-        options.push(`<option value="dossier|${da}|${prodId}">Dossier PDF</option>`);
+        options.push(`<option value="dossier|${echapperHtml(da)}|${echapperHtml(prodId)}">Dossier PDF</option>`);
     }
 
     // Éditer — si fichier importé, sauf remplacée/non-recevable
     if (fichierId && ligne.statut !== 'remplacee' && ligne.statut !== 'non-recevable') {
-        options.push(`<option value="editer|${fichierId}">Modifier</option>`);
+        options.push(`<option value="editer|${echapperHtml(fichierId)}">Modifier</option>`);
     }
 
     // Beta 99.30 : Renommer — si fichier importé, sauf remplacée/non-recevable
     if (fichierId && ligne.statut !== 'remplacee' && ligne.statut !== 'non-recevable') {
-        options.push(`<option value="renommer|${fichierId}">Renommer</option>`);
+        options.push(`<option value="renommer|${echapperHtml(fichierId)}">Renommer</option>`);
     }
 
     // Transférer — si fichier importé, sauf remplacée/non-recevable
@@ -1203,7 +1211,7 @@ function genererDropdownActions(ligne) {
     // Associer / Réassocier — si fichier importé (strict ou souple)
     if (fichierId) {
         const labelAssoc = ligne.productionId ? 'Réassocier' : 'Associer';
-        options.push(`<option value="associer|${fichierId}|${da}">${labelAssoc}</option>`);
+        options.push(`<option value="associer|${echapperHtml(fichierId)}|${echapperHtml(da)}">${labelAssoc}</option>`);
     } else if (typeof travauxStockage !== 'undefined') {
         // Fichier mal associé OU non associé : même DA mais sous une autre production ou sans productionId
         // 🔧 FIX (5 mars 2026) : Inclure aussi les fichiers sans productionId (besoin d'association)
@@ -1213,25 +1221,25 @@ function genererDropdownActions(ligne) {
         );
         if (fichierAAssocier) {
             const label = fichierAAssocier.productionId ? 'Réassocier' : 'Associer';
-            options.push(`<option value="associer|${fichierAAssocier.id}|${da}">${label}</option>`);
+            options.push(`<option value="associer|${echapperHtml(fichierAAssocier.id)}|${echapperHtml(da)}">${label}</option>`);
         }
     }
 
     // Supprimer — si fichier importé
     if (fichierId) {
-        options.push(`<option value="supprimer|${fichierId}|${da}">Supprimer</option>`);
+        options.push(`<option value="supprimer|${echapperHtml(fichierId)}|${echapperHtml(da)}">Supprimer</option>`);
     }
 
     // ✅ AJOUT (16 mars 2026) : Supprimer évaluation orpheline (sans fichier)
     if (!fichierId && evalId) {
-        options.push(`<option value="supprimer-eval|${evalId}">Supprimer l'évaluation</option>`);
+        options.push(`<option value="supprimer-eval|${echapperHtml(evalId)}">Supprimer l'évaluation</option>`);
     }
 
     // Phase 7 #3 : Voir les fichiers multiples — visible si ce (DA × production) a 2+ fichiers
     if (typeof travauxDoublonsUI !== 'undefined' &&
         typeof travauxDoublonsUI.aDoublonPourCas === 'function' &&
         travauxDoublonsUI.aDoublonPourCas(da, prodId)) {
-        options.push(`<option value="examiner-doublons|${da}|${prodId}">Voir les fichiers multiples</option>`);
+        options.push(`<option value="examiner-doublons|${echapperHtml(da)}|${echapperHtml(prodId)}">Voir les fichiers multiples</option>`);
     }
 
     if (options.length === 0) {
@@ -2884,6 +2892,7 @@ window.trierTableauParColonne = trierTableauParColonne;
 // qui exerce le tri réel plutôt qu'une copie. Même convention que
 // `window._restaurerOriginaleSiReprise` : le souligné dit « pas une API ».
 window._trierLignesParColonne = trierLignesParColonne;
+window._genererLigneHTML = genererLigneHTML;   // #562 — exposé pour le banc d'échappement (patron _trierLignesParColonne)
 window.rechargerFiltreProduction = rechargerFiltreProduction; // Pour mise à jour après duplication/modification de productions
 
 // Alias pour compatibilité avec le HTML
