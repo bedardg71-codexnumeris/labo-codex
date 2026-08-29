@@ -7,6 +7,77 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 28 AOÛT 2026 (FIN DE JOURNÉE, 20 h 15) : LES 21 ARBITRAGES SONT
+     TRANCHÉS, ET LA JOURNÉE OÙ TROIS SESSIONS SE SONT CORRIGÉES L'UNE L'AUTRE.
+
+     ▣ LE FAIT PRINCIPAL. Grégoire a répondu aux vingt et un arbitrages relevés
+       dans les skills métier et l'audit du jour. Chaque décision est consignée
+       DANS SON ITEM — #427, #508, #543, #555 (deux), #563, #571, #574, #577,
+       #578, #579, #581, #583 à #591. Registre : artefact « Arbitrages Labo
+       Codex » (59ed2fe9). Quatre commits, trois sessions, aucune collision.
+
+     ▣ LIVRÉ CE SOIR (code) : #555 lot 2 (b) — la règle des zones n'est plus
+       écrite qu'une fois. `zoneDuCodeDansNiveaux` extraite ; l'aperçu de
+       l'éditeur et `zoneDuNiveau` la partagent au lieu de la recopier sous deux
+       vocabulaires. Sentinelle à 8 cas, 5 break-tests rouges, 2 témoins verts.
+       Vitest 3983/3983 · Playwright 199/199.
+
+     ▣ ⚠⚠ TROIS RÉPONSES DISAIENT AUTRE CHOSE QUE L'OPTION COCHÉE. C'est le
+       point de méthode de la soirée, et il a évité une réécriture de données.
+       · #543 : il coche « la note fait foi », mais sa raison est que l'écart est
+         LÉGITIME — il arrondit ses notes finales, ne laisse pas un 59/100.
+         Appliquer l'option à la lettre aurait réécrit son jugement critère par
+         critère sur 55 évaluations. Verdict après vérification : NE RIEN
+         RÉÉCRIRE, et cesser de qualifier l'écart d'incohérence.
+       · #555 : il répond C, puis revient à B quand on lui signale l'écart.
+       · #571 : sa prémisse était fausse — les couleurs viennent DÉJÀ de son
+         échelle (`construireMappingCouleurs`). Seule la garde de luminance reste.
+       ⮕ LIRE LA NOTE AVANT D'AGIR SUR LE CHOIX, et signaler l'écart plutôt que
+       d'exécuter. Une option cochée n'est pas une consigne.
+
+     ▣ ⚠ LA DÉCISION LA PLUS URGENTE A FAILLI N'ÊTRE CONSIGNÉE NULLE PART.
+       #427/#508 — le 1er septembre, dans quatre jours — était la seule des
+       vingt et un à porter une échéance, et AUCUNE des trois sessions ne l'avait
+       inscrite : chacune a supposé qu'une autre s'en chargeait, « puisque le
+       fond était déjà décidé ». Trouvé en vérifiant le compte, pas en s'en
+       souvenant. ⮕ L'ÉLÉMENT LE PLUS URGENT EST CELUI QUE PERSONNE NE PREND.
+
+     ▣ ET `RELAIS.md` EXISTAIT. Une page d'arbitrages y était consignée depuis
+       15 h 10, sous un titre en évidence. Nous en avons publié trois autres,
+       dont deux portant le MÊME TITRE — indistinguables dans une barre
+       d'onglets. La question « quelqu'un a-t-il déjà fait ça ? » avait sa
+       réponse écrite à l'endroit prévu pour ça, et aucun de nous ne l'a lue.
+       ⮕ Ce n'est pas un angle mort de coordination : c'est un relais qui a
+       fonctionné et que personne n'a consulté. Un seul circuit subsiste ;
+       les trois autres pages sont muettes, capacité d'écriture révoquée.
+
+     ▣ QUATRE RÈGLES VÉRIFIABLES, ET AUCUNE N'A ÉTÉ TROUVÉE PAR CELUI QUI AVAIT
+       COMMIS L'ERREUR. C'est le seul argument solide pour trois sessions
+       plutôt qu'une : pas la vitesse, la contradiction.
+       · Un break-test peut ne pas POUVOIR rendre rouge (`$?` lu après `local`).
+         Les témoins ne l'attrapent pas — seul un ROUGE obtenu prouve le harnais.
+       · Un commit n'est PAS une écriture : il lit l'arbre, écrit dans `.git`.
+         Seuls les `mtime` distinguent un verdict invalide d'un verdict valide.
+       · Un grep compte des occurrences, il ne connaît pas les synonymes : le
+         détecteur de doublons `window` en voyait six, il y en avait neuf.
+       · Republier un artefact détruit la seule copie externe de son état.
+
+     ▣ LA TROUVAILLE DE `creerNouvellePratique`, qui donne le coût réel du motif
+       des doublons `window` : la version longue (2593 caractères) N'A JAMAIS PU
+       S'EXÉCUTER — écrite le 2 janvier 2026 sur un nom occupé depuis le
+       25 novembre 2025, dans un fichier chargé AVANT. Vérifié à quatre époques.
+       Et quelqu'un l'a CORRIGÉE le 20 janvier, sur du code qui n'avait jamais
+       tourné. ⮕ La collision de noms ne casse rien : elle fait travailler dans
+       le vide. Et il faut lire l'ordre de chargement À L'ÉPOQUE de l'écriture
+       pour distinguer une fonction devenue morte d'une fonction morte-née.
+
+     ▣ CE QUI REVIENT À GRÉGOIRE, ET À PERSONNE D'AUTRE : les trois valeurs
+       Cloudflare (#427, avant le 1er septembre) et `_diagnostiquerResolutionEchelles()`
+       en console (#590). Le chantier des résolveurs ne s'ouvre pas avant ce chiffre.
+     ===================================================================== -->
+
+
+<!-- =====================================================================
      SESSION — 28 AOÛT 2026 (FIN D'APRÈS-MIDI, 16 h) : L'AUDIT DES COPIES
      D'ÉCHELLE, ET LE JOUR OÙ DEUX BREAK-TESTS SUR TROIS ÉTAIENT FAUX.
 
