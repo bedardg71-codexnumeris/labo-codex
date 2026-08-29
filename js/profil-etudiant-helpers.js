@@ -198,9 +198,9 @@ function obtenirCouleurNiveauIDME(codeNiveau) {
  * @returns {string} - Code du niveau, selon les seuils configurés
  */
 function obtenirNiveauIDMEDepuisPourcentage(pourcentage) {
-    const seuilInsuffisant = obtenirSeuil('idme.insuffisant'); // 0-1 — défaut 0.64
-    const seuilDeveloppement = obtenirSeuil('idme.developpement'); // 0-1 — défaut 0.75
-    const seuilMaitrise = obtenirSeuil('idme.maitrise'); // 0-1 — défaut 0.85
+    const seuilIdmeInsuffisant = obtenirSeuil('idme.insuffisant'); // 0-1 — défaut 0.64
+    const seuilIdmeDeveloppement = obtenirSeuil('idme.developpement'); // 0-1 — défaut 0.75
+    const seuilIdmeMaitrise = obtenirSeuil('idme.maitrise'); // 0-1 — défaut 0.85
 
     // Ramener l'entrée sur l'échelle des seuils. PAS de détection du genre
     // « si c'est petit, c'est sans doute déjà 0-1 » : 0.8 serait alors
@@ -208,9 +208,9 @@ function obtenirNiveauIDMEDepuisPourcentage(pourcentage) {
     // devineur. Un seul contrat, celui que le nom annonce.
     const score = pourcentage / 100;
 
-    if (score < seuilInsuffisant) return 'I';
-    if (score < seuilDeveloppement) return 'D';
-    if (score < seuilMaitrise) return 'M';
+    if (score < seuilIdmeInsuffisant) return 'I';
+    if (score < seuilIdmeDeveloppement) return 'D';
+    if (score < seuilIdmeMaitrise) return 'M';
     return 'E';
 }
 

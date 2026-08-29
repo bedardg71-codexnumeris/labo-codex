@@ -153,6 +153,116 @@ test('#555 · l\'éditeur d\'échelle rend les deux repères, et l\'aperçu dit 
     expect(erreurs).toEqual([]);
 });
 
+// ── L'ÉDITEUR D'ÉCHELLE NEUVE (#555 lot 2 (e)) ──────────────────────────────
+//
+// Le bloc des repères ne vivait que dans l'éditeur d'une échelle ENREGISTRÉE.
+// Ce cas prouve, dans WebKit et contre le vrai `index.html`, que l'éditeur
+// d'une échelle NEUVE le rend aussi — sur son tampon, sans `data-echelle-id`
+// — et surtout que le `change` d'une liste passe par le dispatcher de
+// `main.js` jusqu'au tampon : c'est ce chemin-là, résolu par NOM de handler,
+// qu'aucun banc `node` ne peut voir.
+test('#555 (e) · l\'éditeur d\'échelle NEUVE rend les deux repères, et un change les pose dans le tampon', async ({ page }) => {
+    const erreurs = [];
+    page.on('pageerror', (e) => {
+        const m = `pageerror: ${e.message}`;
+        if (!estErreurAttendue(m)) erreurs.push(m);
+    });
+    page.on('console', (msg) => {
+        if (msg.type() === 'error') {
+            const m = `console.error: ${msg.text()}`;
+            if (!estErreurAttendue(m)) erreurs.push(m);
+        }
+    });
+
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
+
+    const resultat = await page.evaluate(async () => {
+        if (typeof window.afficherNiveauxNouvelleEchelle !== 'function'
+            || typeof window.modifierRepereTempHandler !== 'function') {
+            return { erreur: 'pré-requis absents' };
+        }
+
+        ['conteneurEditionEchelle', 'conception-echelle-performance', 'section-conception']
+            .forEach((id) => {
+                const n = document.getElementById(id);
+                if (!n) return;
+                n.classList.remove('u-hide');
+                n.style.display = 'block';
+            });
+
+        // Même échelle sans lettre d'IDME, saisie dans le désordre — mais NEUVE :
+        // elle vit dans le tampon, pas en base.
+        window._niveauxNouvelleEchelle = [
+            { code: 'Y', nom: 'Consolidé', min: 70, max: 89, valeurCalcul: 80, couleur: '#333333' },
+            { code: 'W', nom: 'Amorce',    min: 0,  max: 49, valeurCalcul: 30, couleur: '#111111' },
+            { code: 'Z', nom: 'Transféré', min: 90, max: 100, valeurCalcul: 95, couleur: '#444444' },
+            { code: 'X', nom: 'En chemin', min: 50, max: 69, valeurCalcul: 60, couleur: '#222222' }
+        ];
+        window._reperesNouvelleEchelle = {};
+        window.afficherNiveauxNouvelleEchelle();
+
+        const editeur = document.getElementById('tableauNiveauxEchelle');
+        const selects = () => [...editeur.querySelectorAll('select[data-champ^="seuil"]')];
+        const avant = {
+            titrePresent: editeur.textContent.includes('Repères de maîtrise'),
+            champs: selects().map((s) => s.dataset.champ),
+            handlers: selects().map((s) => s.dataset.onChange),
+            avecEchelleId: selects().some((s) => 'echelleId' in s.dataset),
+            options: selects().map((s) => [...s.options].map((o) => o.value)),
+            reperesApresNiveaux: editeur.innerHTML.indexOf('Repères de maîtrise')
+                > editeur.innerHTML.indexOf('data-champ="valeurCalcul"'),
+            apercu: document.getElementById('apercuEchelleNiveaux').textContent.replace(/\s+/g, ' ').trim()
+        };
+
+        // Le geste de l'utilisateur : choisir dans la liste. Un `change`
+        // NATIF, résolu par le dispatcher — pas un appel direct au handler.
+        const poser = async (champ, code) => {
+            const s = selects().find((x) => x.dataset.champ === champ);
+            s.value = code;
+            s.dispatchEvent(new Event('change', { bubbles: true }));
+            await new Promise((r) => setTimeout(r, 50));
+        };
+        await poser('seuilSuffisance', 'X');
+        await poser('seuilMaitrise', 'Y');
+        // Et un refus : la suffisance au-dessus de la maîtrise ne s'écrit pas.
+        await poser('seuilSuffisance', 'Z');
+
+        return {
+            avant,
+            tampon: { ...window._reperesNouvelleEchelle },
+            selection: selects().map((s) => s.value),
+            // Le refus se VOIT : la liste garde la valeur refusée et porte la
+            // marque — même contrat que l'éditeur vivant (`marquerChampRefuseEchelle`).
+            refuseMarque: selects().map((s) => s.classList.contains('champ-refuse')),
+            apercuApres: document.getElementById('apercuEchelleNiveaux').textContent.replace(/\s+/g, ' ').trim()
+        };
+    });
+
+    expect(resultat.erreur).toBeUndefined();
+    expect(resultat.avant.titrePresent).toBe(true);
+    expect(resultat.avant.champs).toEqual(['seuilSuffisance', 'seuilMaitrise']);
+    expect(resultat.avant.handlers).toEqual(['modifierRepereTempHandler', 'modifierRepereTempHandler']);
+    expect(resultat.avant.avecEchelleId).toBe(false);
+    expect(resultat.avant.options[0]).toEqual(['', 'W', 'X', 'Y', 'Z']);
+    expect(resultat.avant.reperesApresNiveaux).toBe(true);
+    // Sans repère, l'aperçu ne nomme aucune zone : rien n'est deviné.
+    expect(resultat.avant.apercu).not.toContain('maîtrisé');
+
+    // Les deux `change` ont atteint le tampon par le dispatcher ; le troisième,
+    // refusé, n'y est pas.
+    expect(resultat.tampon).toEqual({ seuilSuffisance: 'X', seuilMaitrise: 'Y' });
+    // La liste refusée garde « Z » et porte la marque ; l'autre est propre.
+    expect(resultat.selection).toEqual(['Z', 'Y']);
+    expect(resultat.refuseMarque).toEqual([true, false]);
+    expect(resultat.apercuApres).toContain('à travailler');
+    expect(resultat.apercuApres).toContain('suffisant');
+    expect(resultat.apercuApres).toContain('maîtrisé');
+
+    expect(erreurs).toEqual([]);
+});
+
 // ── LA DISPOSITION À HUIT COLONNES ──────────────────────────────────────────
 //
 // ⚠ CE SECOND CAS N'EST PAS UN DOUBLON. Le viewport par défaut de la suite est

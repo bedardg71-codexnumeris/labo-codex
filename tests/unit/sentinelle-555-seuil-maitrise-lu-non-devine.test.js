@@ -3,7 +3,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 
 // #555 lot 2 (28 août 2026) — le seuil de maîtrise se LIT sur l'échelle.
 //
-// CE QUI ÉTAIT LÀ. `_detecterSeuilMaitrise` appliquait une convention écrite en
+// CE QUI ÉTAIT LÀ. `_detecterScoreMaitrise` appliquait une convention écrite en
 // commentaire : « avant-dernier niveau = maîtrise, son min/100 = seuil, repli
 // 0.75 ». Sur l'échelle de Grégoire (I, D, M, E) l'avant-dernier EST M : la
 // convention tombait juste PAR COÏNCIDENCE, et c'est pour cela que personne ne
@@ -29,7 +29,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 //      → cas 5 rougit (la raison, pas la valeur).
 
 const win = chargerScript('js/consolidation.js', {});
-const detecter = win._detecterSeuilMaitrise;
+const detecter = win._detecterScoreMaitrise;
 
 // Une échelle où le repère et « l'avant-dernier niveau » DIVERGENT : c'est le
 // seul montage qui distingue une lecture d'une devinette. Saisie dans le
@@ -208,8 +208,8 @@ describe('#555 lot 2 · la réserve se rend à l\'écran', () => {
     it('10. seuil déduit → le bloc porte la mention', () => {
         const html = monterBloc({
             resume: RESUME_MINIMAL,
-            seuilMaitriseDeduit: true,
-            seuilMaitriseRaison: 'repere-non-pose'
+            scoreMaitriseDeduit: true,
+            scoreMaitriseRaison: 'repere-non-pose'
         });
         expect(html).toContain('Seuil de maîtrise déduit');
         expect(html, 'la mention doit nommer la cause, pas rester générique').toContain('aucun repère');
@@ -218,8 +218,8 @@ describe('#555 lot 2 · la réserve se rend à l\'écran', () => {
     it('11. seuil lu → AUCUNE mention, et le bloc n\'est pas vide pour autant', () => {
         const html = monterBloc({
             resume: RESUME_MINIMAL,
-            seuilMaitriseDeduit: false,
-            seuilMaitriseRaison: null
+            scoreMaitriseDeduit: false,
+            scoreMaitriseRaison: null
         });
         // L'ordre compte : un `not.toContain` est satisfait par une chaîne vide.
         // On prouve d'abord que le bloc a bien été rendu.
@@ -231,8 +231,8 @@ describe('#555 lot 2 · la réserve se rend à l\'écran', () => {
     it('13. le libellé d\'une échelle de pratique ne réclame pas un geste impossible', () => {
         const html = monterBloc({
             resume: RESUME_MINIMAL,
-            seuilMaitriseDeduit: true,
-            seuilMaitriseRaison: 'echelle-de-pratique'
+            scoreMaitriseDeduit: true,
+            scoreMaitriseRaison: 'echelle-de-pratique'
         });
         expect(html).toContain('Seuil de maîtrise déduit');
         expect(html).toContain('échelle de la pratique');
@@ -246,8 +246,8 @@ describe('#555 lot 2 · la réserve se rend à l\'écran', () => {
         for (const raison of ['repere-non-pose', 'repere-introuvable', 'repere-sans-min', 'echelle-non-resolue', 'echelle-de-pratique']) {
             const html = monterBloc({
                 resume: RESUME_MINIMAL,
-                seuilMaitriseDeduit: true,
-                seuilMaitriseRaison: raison
+                scoreMaitriseDeduit: true,
+                scoreMaitriseRaison: raison
             });
             const mention = html.slice(html.indexOf('Seuil de maîtrise déduit'));
             expect(mention.length, `aucune mention rendue pour ${raison}`).toBeGreaterThan(0);

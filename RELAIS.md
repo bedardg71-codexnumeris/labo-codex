@@ -15,7 +15,7 @@
 | **Version** | **1.105.0** — build `0828-1405`, **DÉPLOYÉE le 28 août à 14 h 05**. Minor : une échelle porte ses deux **repères de maîtrise**, et les **32 comparaisons IDME écrites en dur** ont disparu des DEUX documents remis à l'élève (PDF de synthèse : 14 → 0 ; bilan à l'écran : 18 → 0). **Vitest 3887/3887 (364 fichiers) · Playwright 199** au moment du bump. ⚠ **Grégoire doit recharger sa session `file://`** : 28 jetons ont changé. |
 | **Version précédente** | **1.104.0** — build `0827-1245` (`588debf1`). Minor : la carte « Observation de la structure » rend un bloc par niveau de l'échelle, et le SOLO d'un critère vient du champ configuré. **Vitest 3715/3715 (350 fichiers) · Playwright 193/193**, verdict vert enregistré au SHA par `scripts/pousser.sh`. ✅ **AUCUN BUMP DÛ** : rien de code applicatif n'a changé depuis — seuls un test de constat et de la documentation. ⚠ **Grégoire doit recharger sa session `file://`** : huit jetons anti-cache ont changé au bump. |
 | **Avant-dernière** | **1.103.1** — build `0827-0953`, qui a porté six changements de code sans bump (pas 3c-3, pas 4, #547, #550, #551) : la session `file://` de Grégoire était ouverte, et la règle du projet interdit de bumper pendant. **C'est la seconde fois de la journée que l'application annonce un numéro plus ancien que son code.** |
-| **Travail en avance sur `main`** | ✅ **NON — TOUT EST POUSSÉ** au rituel du 28 août, 20 h 15. `origin/main` = **`9d4e...`** (voir le dernier commit), arbre propre. **QUATRE commits partis d'un coup, produits par TROIS sessions parallèles coordonnées par messages** : `e1e66566` (#587/#578, session 70), `c1710065` (les 21 décisions, onze détaillées), `e348a42a` (six décisions, session 5b), plus le relais. ⚠ **Aucun fichier `js/` ni `index.html` dans ces commits** — de la documentation seule : le code n'a pas bougé depuis `44a5aeeb` (17 h 22), donc les verdicts de 17 h tiennent, et ils ont été **refaits** avant ce push. |
+| **Travail en avance sur `main`** | ✅ **NON — TOUT EST POUSSÉ** au rituel du 28 août, 21 h 15 (un commit de code : #555 (d)+(e) et #577, voir l'entrée de tête). Avant cela : poussé au rituel de 20 h 15. `origin/main` = **`9d4e...`** (voir le dernier commit), arbre propre. **QUATRE commits partis d'un coup, produits par TROIS sessions parallèles coordonnées par messages** : `e1e66566` (#587/#578, session 70), `c1710065` (les 21 décisions, onze détaillées), `e348a42a` (six décisions, session 5b), plus le relais. ⚠ **Aucun fichier `js/` ni `index.html` dans ces commits** — de la documentation seule : le code n'a pas bougé depuis `44a5aeeb` (17 h 22), donc les verdicts de 17 h tiennent, et ils ont été **refaits** avant ce push. |
 | **Suite Playwright** | ⚠⚠ **LA LEÇON DE LA NUIT DU 27-28 AOÛT, ET ELLE VAUT POUR TOUT CHANTIER DE RENDU.** Les DEUX régressions de la nuit ont été invisibles à Vitest — 3767/3767 puis 3780/3780, verts pendant que Playwright rougissait. Vitest tourne dans `node`, sans navigateur ; **Playwright tourne dans WebKit, le moteur de Safari, contre le vrai `index.html`**. ⮕ **Sur un lot qui touche l'affichage, la suite navigateur n'est pas une formalité de fin : c'est la seule qui voit.** ⮕ Corollaire découvert le 28 : une vérification qu'on croyait réservée à Grégoire (« porte terrain ») est souvent automatisable en spec WebKit — la porte 2.6 l'a été. |
 | ⚠ **AVANT TOUTE SUITE PLAYWRIGHT** | **fermer GitHub Desktop.** Les specs lisent l'arbre de travail en direct ; une commande git lancée pendant la suite change les fichiers sous leurs pieds et fait rougir des specs au hasard. Trouvé le 26 août (#523), règle versée au skill `portes-terrain`. |
 | ⚠ **LE CLONE DE GRÉGOIRE EST L'ARBRE DE TRAVAIL** | `/Users/kuekatsheu/Documents/GitHub/Monitorage_v6` sert à la fois de dépôt de travail et de source `file://` pour son app. Il voit les modifications dès qu'il recharge, **avant tout push** — et peut donc tomber sur un état intermédiaire. Le `git pull` des portes terrain lui est inutile. |
@@ -23,7 +23,58 @@
 | ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE, DANS 4 JOURS** | **#427** + **#508**. ✅ **GRÉGOIRE TIENT LA DATE** (arbitré le 28 août au soir, option A ; « repousser » posé et écarté). ⮕ **DÛ PAR LUI, ET PAR PERSONNE D'AUTRE** : les trois noms Cloudflare, la durée de session, la règle `Include` de la policy dormante. ⮕ **MESURÉ le 28 août** : l'avis est bien en ligne aux deux endroits (`accueil.js`, `transitions.js`), et **le bandeau s'éteint SEUL le 1er septembre** — rien à retirer à la main. Reste à réécrire le paragraphe d'accueil **au présent**. |
 | ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. ⮕ **ET C'EST ARRIVÉ UNE SECONDE FOIS LE MÊME JOUR, dans l'autre sens.** Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les `BACKLOG.md` et `SESSION.md` de la session « présences » — l'inscription de l'item **#538** et la renumérotation **#534 → #537** vivent donc dans un commit qui parle d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc non réécrit. **Deux avertissements en un jour : sur ce dépôt, `git add` par chemins explicites n'est pas une préférence, c'est la seule méthode qui tienne.** |
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
-| **Dernière mise à jour** | **28 août 2026, 20 h 15** — fin de journée, **trois sessions**. Les **21 arbitrages de Grégoire sont TRANCHÉS et consignés dans leurs items**. Livré : #555 lot 2 (b), #556, #557, l'audit des copies d'échelle, le diagnostic des résolveurs. **Vitest 3983/3983** (374 fichiers) · **Playwright 199/199**, relancés sur arbre gelé avant le push. **Aucun bump** : 1.105.0 tient — que de la documentation, aucun `?v=` à bouger. |
+| **Dernière mise à jour** | **28 août 2026, 21 h 15** — session unique (soir). **#555 lot 2 (d) et (e) + #577 LIVRÉS** ; #579 livré pour le cas de l'assistant ; **#592** inscrit. **Vitest 4011/4011** (377 fichiers) · **Playwright 201** (198 verts + 3 instables pré-existantes, vertes au second essai), sur arbre gelé. ⚠ **AUCUN BUMP** : du code a changé (6 fichiers `js/`, `?v=` bougés) mais je ne sais pas si la session `file://` de Grégoire est ouverte — **1.106.0 (minor) est DUE**, à lancer par `node scripts/release.mjs minor` au prochain démarrage. Entrée précédente : **20 h 15** — fin de journée, **trois sessions**. Les **21 arbitrages de Grégoire sont TRANCHÉS et consignés dans leurs items**. Livré : #555 lot 2 (b), #556, #557, l'audit des copies d'échelle, le diagnostic des résolveurs. **Vitest 3983/3983** (374 fichiers) · **Playwright 199/199**, relancés sur arbre gelé avant le push. **Aucun bump** : 1.105.0 tient — que de la documentation, aucun `?v=` à bouger. |
+
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 28 août 2026, 21 h 15 (SOIR, SESSION UNIQUE)
+
+### ✅ LIVRÉ : #555 LOT 2 (d) + (e), ET #577 — LES REPÈRES SE POSENT PARTOUT OÙ L'ÉCHELLE SE PENSE
+
+Mandat de Grégoire : « rendre l'application plus cohérente et plus souple (rien de ma pratique codé
+en dur) pour les utilisateurs de la communauté de pratique ». Option 1 choisie sur question fermée :
+finir les échelles. Un seul commit de code, trois sous-lots, chacun avec sa sentinelle et son break-test.
+
+- **(d) le nommage** — `seuilMaitrise` ne désigne plus que le CODE de niveau porté par l'échelle.
+  `consolidation.js` : `scoreMaitrise` / `scoreMaitriseDeduit` / `scoreMaitriseRaison`,
+  `_detecterScoreMaitrise`, `_scoreParConvention`. `profil-etudiant-helpers.js` / `-calculs.js` :
+  `seuilIdmeMaitrise` (+ `seuilIdmeInsuffisant`, `seuilIdmeDeveloppement`). Le 4ᵉ sens (pourcentage
+  0-100, `pratique-notation-v2.js`) est du CODE MORT → **#592**, pas un renommage.
+  ⮕ `sentinelle-555-d-seuil-maitrise-un-seul-sens` est un **CLIQUET** (liste fermée fichier → compte,
+  commentaires retirés). **Il a rougi UNE FOIS pour de vrai ce soir** : #577 a ajouté trois lectures
+  dans le wizard, la liste a été mise à jour. C'est le comportement voulu — ne pas l'affaiblir.
+- **(e) l'éditeur d'échelle NEUVE** porte le bloc des repères sur un tampon (`_reperesNouvelleEchelle`),
+  mêmes refus, revérification à l'enregistrement, jamais de clé vide. Aperçu unique pour les deux
+  éditeurs (`apercuNiveauxEchelleHtml`). `blocReperesEchelle(echelle, { handler })`.
+- **#577 l'assistant** : l'étape « Échelle de performance » rend le bloc de l'éditeur pour l'échelle
+  choisie, écrit par **`ecrireRepereEchelle`** (extraite : écriture pure, sans redessiner l'éditeur),
+  re-rend l'étape après écriture, avertit si un repère manque, le récapitulatif le redit. Jamais le mot
+  « seuil » à l'écran. **DEN volontairement exclu** (autre sens, non tranché). **#579 clos pour le cas
+  de l'assistant** — mesuré : il n'embarque jamais d'échelle, il la RÉFÉRENCE (`configuration.echelleId`).
+
+### ⚠ TROIS CHOSES QUE J'AI PAYÉES, POUR QUE LA SUIVANTE NE LES PAIE PAS
+
+1. **`git checkout <fichier>` pour défaire une MUTATION efface aussi le travail non commité.** J'ai
+   perdu deux renommages ainsi et dû les refaire. ⮕ Restaurer une mutation par **copie** depuis une
+   sauvegarde faite AVANT (`cp js/x.js $S/ ; …muter… ; cp $S/x.js js/`), jamais par git tant que
+   l'arbre porte du travail.
+2. **Un refus ne se voit PAS par la valeur de la liste.** Sur refus, le `<select>` garde la valeur
+   refusée et porte `champ-refuse` (`marquerChampRefuseEchelle`) — l'éditeur vivant fait pareil. Ma
+   première assertion WebKit attendait la valeur précédente ; c'est l'assertion qui avait tort.
+3. **Le dispatcher `data-on-change` est prouvé par la spec, pas par le grep.** Je n'ai pas trouvé son
+   code en cherchant le nom de l'attribut ; les deux specs WebKit prouvent qu'un `change` natif atteint
+   le handler par son NOM, avec l'élément en argument. Ne pas re-chercher.
+
+### 🔴 DÛ, ET PAR QUI
+
+- **Grégoire** : recharger `file://` (6 jetons bougés) ; **décider le bump** — 1.106.0 (minor) est due,
+  je ne l'ai pas lancée faute de savoir si sa session était ouverte. Reste aussi tout ce qui est listé
+  à l'entrée de 20 h 15 (Cloudflare #427, `_diagnostiquerResolutionEchelles()` #590).
+- **La session suivante** : **#578** (diagnostic console des grilles avec/sans `echelleId`, option 3
+  du cadrage de ce soir, non entamée) ; **#592** ; #555 : deux décisions restantes (zone intermédiaire
+  comme progrès ; intention P1).
+
+### 📌 IDs — prochain libre : **#593**
+
+---
 
 ## ▶ POUR LA SESSION QUI PREND LE RELAIS — 28 août 2026, 20 h 15 (FIN DE JOURNÉE, TROIS SESSIONS)
 

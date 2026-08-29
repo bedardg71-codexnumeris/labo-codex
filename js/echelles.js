@@ -2787,6 +2787,11 @@ async function creerNouvelleEchelle() {
         { code: '', nom: '', min: 0, max: 59, valeurCalcul: 30, couleur: '#e74c3c' }
     ];
 
+    // #555 lot 2 (e) — les repères d'une échelle NEUVE vivent dans un tampon
+    // jusqu'à l'enregistrement, comme ses niveaux. Toujours vide au départ :
+    // l'absence est l'état légitime, rien n'est deviné.
+    window._reperesNouvelleEchelle = {};
+
     // Afficher les niveaux avec placeholders
     afficherNiveauxNouvelleEchelle();
 
@@ -3060,18 +3065,71 @@ function afficherNiveauxNouvelleEchelle() {
         </button>
     `;
 
-    container.innerHTML = html + btnAjouterNiveau;
+    // #555 lot 2 (e) — MÊME bloc de repères que l'éditeur vivant, sur le tampon.
+    // Il n'apparaît que lorsque l'ordre des plages est lisible, donc jamais
+    // avant que les codes soient saisis : on désigne des niveaux qui existent.
+    const tampon = echelleNouvelleTampon();
+    container.innerHTML = html + btnAjouterNiveau
+        + blocReperesEchelle(tampon, { handler: 'modifierRepereTempHandler' });
 
-    // Afficher l'aperçu visuel
-    if (apercuContainer) {
-        const apercuHtml = niveaux.map(niveau => `
-            <div style="text-align: center; flex: 1; padding: 10px; background: ${niveau.couleur}20; border-radius: 4px; margin: 0 2px;">
-                <strong style="font-size: 1.2rem; color: ${niveau.couleur};">${echapperHtml(niveau.code || '?')}</strong>
-                <div class="echelle-texte-petit-mt5">${niveau.min}%-${niveau.max}%</div>
-            </div>
-        `).join('');
-        apercuContainer.innerHTML = apercuHtml;
+    // Afficher l'aperçu visuel — le même que l'éditeur vivant : la zone de
+    // chaque niveau s'y lit dès que les deux repères sont posés.
+    if (apercuContainer) apercuContainer.innerHTML = apercuNiveauxEchelleHtml(tampon);
+}
+
+/**
+ * L'échelle NEUVE telle qu'elle est en cours de saisie : ses niveaux et ses
+ * repères, réunis en un objet que les mêmes lecteurs (`refusRepereEchelle`,
+ * `blocReperesEchelle`, `apercuNiveauxEchelleHtml`) traitent comme une échelle
+ * enregistrée. Pas d'`id` : rien n'est en base.
+ */
+function echelleNouvelleTampon() {
+    return Object.assign(
+        { id: null, niveaux: window._niveauxNouvelleEchelle || [] },
+        window._reperesNouvelleEchelle || {}
+    );
+}
+
+/**
+ * Pose (ou retire) un repère sur l'échelle NEUVE, dans le tampon.
+ *
+ * ⮕ #555 lot 2 (e). Mêmes refus que `modifierRepereEchelle` — calculés par la
+ * même fonction, sur le tampon — et même règle du vide : le vide RETIRE.
+ * Rien n'est écrit en base ici ; c'est `sauvegarderEchelleComplete` qui
+ * transporte les repères, après les avoir revérifiés contre les niveaux finaux.
+ */
+function modifierRepereTemp(champ, valeur) {
+    if (!REPERES_ECHELLE[champ]) return { refuse: 'Repère inconnu.' };
+    if (!window._reperesNouvelleEchelle) window._reperesNouvelleEchelle = {};
+
+    const code = (valeur == null) ? '' : String(valeur).trim().toUpperCase();
+    const refus = refusRepereEchelle(echelleNouvelleTampon(), champ, code);
+    if (refus) return { refuse: refus };
+
+    if (code === '') delete window._reperesNouvelleEchelle[champ];
+    else window._reperesNouvelleEchelle[champ] = code;
+
+    afficherNiveauxNouvelleEchelle();
+    return { ok: true };
+}
+
+/**
+ * Les repères du tampon, revérifiés contre les niveaux FINAUX de l'échelle
+ * neuve. Rend `{ refuse }` au premier repère qui ne tient plus (un code renommé
+ * après avoir été désigné, un ordre devenu illisible), sinon `{ reperes }` —
+ * les seuls champs à écrire, sans clé vide.
+ */
+function reperesNouvelleEchellePourEnregistrement() {
+    const tampon = echelleNouvelleTampon();
+    const reperes = {};
+    for (const champ of Object.keys(REPERES_ECHELLE)) {
+        const code = tampon[champ];
+        if (!code) continue;
+        const refus = refusRepereEchelle(tampon, champ, code);
+        if (refus) return { refuse: REPERES_ECHELLE[champ] + ' : ' + refus };
+        reperes[champ] = code;
     }
+    return { reperes };
 }
 
 /**
@@ -3145,8 +3203,9 @@ function deplacerNiveauTempBas(index) {
  * Annule l'édition d'une échelle et retourne à l'accueil
  */
 function annulerFormEchelle() {
-    // Nettoyer les niveaux temporaires
+    // Nettoyer les niveaux temporaires, et les repères qui vont avec (#555 (e))
     window._niveauxNouvelleEchelle = null;
+    window._reperesNouvelleEchelle = null;
     // Masquer l'éditeur et réafficher l'accueil
     document.getElementById('conteneurEditionEchelle').classList.add('u-hide');
     // Note: Section optionsImportExportEchelles supprimée (Beta 92)
@@ -3356,35 +3415,42 @@ function afficherNiveauxEchelle(echelle) {
     container.innerHTML = html + btnAjouterNiveau + blocReperesEchelle(echelle);
 
     // Afficher l'aperçu visuel
-    if (apercuContainer) {
-        // #555 — les deux repères se LISENT dans l'aperçu : sans cela, le choix
-        // reste un formulaire dont on ne voit jamais l'effet.
-        // ⮕ #555 lot 2 (b) — LA RÈGLE N'EST PLUS RECOPIÉE ICI. Cet aperçu et
-        // `zoneDuNiveau` répondaient à la même question par deux codes
-        // parallèles ; le second est parti dans `zoneDuCodeDansNiveaux`
-        // (`profil-etudiant-calculs.js`). Ne restent ici que les LIBELLÉS, qui
-        // sont propres à cet écran : on y parle de l'échelle qu'on édite, pas
-        // d'un élève. Règle absente : aucune zone affichée, jamais devinée —
-        // même garde que `niveauxRangesDeLEchelle` juste au-dessus.
-        const ranges = niveauxRangesDeLEchelle(echelle);
-        const LIBELLE_ZONE = { acquis: 'maîtrisé', signale: 'suffisant', priorite: 'à travailler' };
-        const libelleZoneDuCode = (code) => {
-            if (typeof window.zoneDuCodeDansNiveaux !== 'function') return '';
-            return LIBELLE_ZONE[window.zoneDuCodeDansNiveaux(code, ranges, echelle)] || '';
-        };
+    if (apercuContainer) apercuContainer.innerHTML = apercuNiveauxEchelleHtml(echelle);
+}
 
-        const apercuHtml = echelle.niveaux.map(niveau => {
-            const zone = libelleZoneDuCode(niveau.code);
-            return `
+/**
+ * L'aperçu des niveaux d'une échelle — UN SEUL producteur pour les DEUX
+ * éditeurs (#555 lot 2 (e)) : celui de l'échelle enregistrée et celui de
+ * l'échelle neuve rendaient deux aperçus voisins, et seul le premier disait la
+ * zone. Même patron que `optionsNiveauSOLOEchelle` : une copie divergerait.
+ *
+ * #555 — les deux repères se LISENT dans l'aperçu : sans cela, le choix
+ * reste un formulaire dont on ne voit jamais l'effet.
+ * ⮕ #555 lot 2 (b) — LA RÈGLE N'EST PAS RECOPIÉE ICI. Cet aperçu et
+ * `zoneDuNiveau` répondaient à la même question par deux codes parallèles ; le
+ * second est parti dans `zoneDuCodeDansNiveaux` (`profil-etudiant-calculs.js`).
+ * Ne restent ici que les LIBELLÉS, propres à cet écran : on y parle de
+ * l'échelle qu'on édite, pas d'un élève. Règle absente : aucune zone affichée,
+ * jamais devinée — même garde que `niveauxRangesDeLEchelle`.
+ */
+function apercuNiveauxEchelleHtml(echelle) {
+    const ranges = niveauxRangesDeLEchelle(echelle);
+    const LIBELLE_ZONE = { acquis: 'maîtrisé', signale: 'suffisant', priorite: 'à travailler' };
+    const libelleZoneDuCode = (code) => {
+        if (typeof window.zoneDuCodeDansNiveaux !== 'function') return '';
+        return LIBELLE_ZONE[window.zoneDuCodeDansNiveaux(code, ranges, echelle)] || '';
+    };
+
+    return ((echelle && echelle.niveaux) || []).map(niveau => {
+        const zone = niveau.code ? libelleZoneDuCode(niveau.code) : '';
+        return `
             <div style="text-align: center; flex: 1; padding: 10px; background: ${niveau.couleur}20; border-radius: 4px; margin: 0 2px;">
-                <strong style="font-size: 1.2rem; color: ${niveau.couleur};">${echapperHtml(niveau.code)}</strong>
+                <strong style="font-size: 1.2rem; color: ${niveau.couleur};">${echapperHtml(niveau.code || '?')}</strong>
                 <div class="echelle-texte-petit-mt5">${niveau.min}%-${niveau.max}%</div>
                 ${zone ? `<div class="echelle-texte-petit-mt5">${echapperHtml(zone)}</div>` : ''}
             </div>
         `;
-        }).join('');
-        apercuContainer.innerHTML = apercuHtml;
-    }
+    }).join('');
 }
 
 /**
@@ -3396,14 +3462,18 @@ function afficherNiveauxEchelle(echelle) {
  * échelle dont les bornes manquent, un choix serait sans effet et sans
  * explication.
  */
-function blocReperesEchelle(echelle) {
+function blocReperesEchelle(echelle, options) {
     if (niveauxRangesDeLEchelle(echelle).length === 0) return '';
+    // #555 lot 2 (e) — le même bloc sert l'échelle enregistrée (écriture en
+    // base, par `modifierRepereEchelleHandler`) et l'échelle neuve (tampon, par
+    // `modifierRepereTempHandler`). Seul le handler change ; le refus, non.
+    const handler = (options && options.handler) || 'modifierRepereEchelleHandler';
+    const attrId = echelle.id ? ` data-echelle-id="${echapperHtml(echelle.id)}"` : '';
     const champs = Object.keys(REPERES_ECHELLE).map((champ) => `
         <div class="groupe-form">
             <label class="echelle-texte-detail">${echapperHtml(REPERES_ECHELLE[champ])}</label>
             <select class="controle-form"
-                    data-on-change="modifierRepereEchelleHandler"
-                    data-echelle-id="${echapperHtml(echelle.id)}"
+                    data-on-change="${handler}"${attrId}
                     data-champ="${champ}">
                 ${optionsRepereEchelle(echelle, champ)}
             </select>
@@ -3651,6 +3721,25 @@ function refusRepereEchelle(echelle, champ, code) {
  * par un geste concurrent.
  */
 async function modifierRepereEchelle(echelleId, champ, valeur) {
+    const resultat = await ecrireRepereEchelle(echelleId, champ, valeur);
+    if (!resultat.ok) return resultat;
+
+    echelleTemplateActuelle = resultat.echelle;
+    afficherNiveauxEchelle(echelleTemplateActuelle);
+    return { ok: true };
+}
+
+/**
+ * L'ÉCRITURE seule d'un repère, sans rafraîchir l'éditeur d'échelle.
+ *
+ * ⮕ #577 — extraite de `modifierRepereEchelle` pour l'assistant de
+ * configuration des pratiques, qui pose les repères de l'échelle choisie sans
+ * être l'éditeur d'échelle : il ne doit ni prendre `echelleTemplateActuelle`
+ * ni redessiner `#tableauNiveauxEchelle`, qui vit dans un autre écran.
+ *
+ * @returns {Promise<{ok: true, echelle: Object} | {refuse: string|null}>}
+ */
+async function ecrireRepereEchelle(echelleId, champ, valeur) {
     if (!REPERES_ECHELLE[champ]) return { refuse: 'Repère inconnu.' };
 
     const code = (valeur == null) ? '' : String(valeur).trim().toUpperCase();
@@ -3682,10 +3771,7 @@ async function modifierRepereEchelle(echelleId, champ, valeur) {
 
     if (refus) return { refuse: refus };
     if (!echelleModifiee) return { refuse: null };
-
-    echelleTemplateActuelle = echelleModifiee;
-    afficherNiveauxEchelle(echelleTemplateActuelle);
-    return { ok: true };
+    return { ok: true, echelle: echelleModifiee };
 }
 
 /**
@@ -4176,6 +4262,15 @@ async function sauvegarderEchelleComplete() {
             return;
         }
 
+        // #555 lot 2 (e) — les repères posés dans le tampon, revérifiés contre
+        // les niveaux FINAUX : un code renommé après avoir été désigné ne part
+        // pas en base en silence. Le refus se dit, et l'enregistrement attend.
+        const transport = reperesNouvelleEchellePourEnregistrement();
+        if (transport.refuse) {
+            alert('Repères de maîtrise — ' + transport.refuse);
+            return;
+        }
+
         // Lire les pratiques compatibles sélectionnées
         const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
             ? GabaritsUtils.lirePratiquesSelectionnees('echelle')
@@ -4193,6 +4288,8 @@ async function sauvegarderEchelleComplete() {
             id: genererIdUnique('ECH_'),
             nom: nom,
             niveaux: niveaux,
+            // #555 lot 2 (e) — uniquement les repères posés : jamais de clé vide.
+            ...transport.reperes,
             description: document.getElementById('descriptionEchelle')?.value?.trim() || '',
             pratiquesCompatibles: pratiquesCompatibles,
             discipline: discipline, // 🆕 Beta 95.3
@@ -4210,8 +4307,9 @@ async function sauvegarderEchelleComplete() {
         echelles.push(nouvelleEchelle);
         await db.set(cle('echellesTemplates'), echelles);
 
-        // Nettoyer les niveaux temporaires
+        // Nettoyer les niveaux temporaires, et les repères qui vont avec
         window._niveauxNouvelleEchelle = null;
+        window._reperesNouvelleEchelle = null;
 
         // Définir comme échelle actuelle
         echelleTemplateActuelle = nouvelleEchelle;
@@ -4285,6 +4383,12 @@ function modifierNiveauEchelleHandler(el) {
     var valeur = el.hasAttribute('data-parse-float') ? parseFloat(el.value) : el.value;
     Promise.resolve(modifierNiveauEchelle(echelleId, index, champ, valeur))
         .then(function (resultat) { marquerChampRefuseEchelle(el, resultat && resultat.refuse); });
+}
+
+/** #555 lot 2 (e) — pose un repère sur l'échelle NEUVE (tampon), et rend visible un refus. */
+function modifierRepereTempHandler(el) {
+    var resultat = modifierRepereTemp(el.dataset.champ, el.value);
+    marquerChampRefuseEchelle(el, resultat && resultat.refuse);
 }
 
 /** #555 — écrit un repère de maîtrise, et rend visible un refus. */
@@ -4381,7 +4485,14 @@ window.modifierNiveauHandler = modifierNiveauHandler;
 window.modifierNiveauTempHandler = modifierNiveauTempHandler;
 window.modifierNiveauEchelleHandler = modifierNiveauEchelleHandler;
 window.modifierRepereEchelleHandler = modifierRepereEchelleHandler;          // #555
+window.modifierRepereTempHandler = modifierRepereTempHandler;                // #555 lot 2 (e)
+window.modifierRepereTemp = modifierRepereTemp;                              // #555 lot 2 (e)
+window.reperesNouvelleEchellePourEnregistrement = reperesNouvelleEchellePourEnregistrement; // #555 lot 2 (e) — testabilité
+window.apercuNiveauxEchelleHtml = apercuNiveauxEchelleHtml;                  // #555 lot 2 (e) — testabilité
 window.modifierRepereEchelle = modifierRepereEchelle;                        // #555
+window.ecrireRepereEchelle = ecrireRepereEchelle;
+window.marquerChampRefuseEchelle = marquerChampRefuseEchelle;                // #577 — le même marquage de refus dans l'assistant                            // #577 — l'assistant écrit sans redessiner l'éditeur
+window.blocReperesEchelle = blocReperesEchelle;                              // #577 — le même bloc dans l'assistant
 window.refusRepereEchelle = refusRepereEchelle;                              // #555
 window.optionsRepereEchelle = optionsRepereEchelle;                          // #555
 window.niveauxRangesDeLEchelle = niveauxRangesDeLEchelle;                    // #555

@@ -38,9 +38,9 @@ var _ctx = null; // cache du contexte chargé
  * Retourne un objet contexte avec :
  *   productions[]  — productions évaluées, dans l'ordre du tableau
  *   criteres[]     — noms de critères uniques trouvés dans les évaluations
- *   seuilMaitrise  — score numérique (0-1) au-dessus duquel un niveau = maîtrise
- *   seuilMaitriseDeduit — true si ce score n'a PAS été lu sur le repère de l'échelle
- *   seuilMaitriseRaison — pourquoi il a fallu le déduire (voir _detecterSeuilMaitrise)
+ *   scoreMaitrise  — score numérique (0-1) au-dessus duquel un niveau = maîtrise
+ *   scoreMaitriseDeduit — true si ce score n'a PAS été lu sur le repère de l'échelle
+ *   scoreMaitriseRaison — pourquoi il a fallu le déduire (voir _detecterScoreMaitrise)
  *   convertir(code) — fonction qui convertit un code de niveau en score (0-1)
  *   criteresParProd — Map<prodIndex, Set<critereNom>> — critères évalués par production
  *   parEtudiant    — Map<da, [{artefactIndex, criteres:{nom:score}}]>
@@ -72,11 +72,11 @@ function _chargerContexte() {
     // ── Échelle ──────────────────────────────────────────────────────────
     var echelle = _detecterEchelle(productions);
     var conversion = _construireConversion(echelle);
-    // #555 lot 2 — `_detecterSeuilMaitrise` rend désormais {valeur, deduite,
-    // raison}. Les comparaisons restent numériques (`ctx.seuilMaitrise`) ; la
+    // #555 lot 2 — `_detecterScoreMaitrise` rend désormais {valeur, deduite,
+    // raison}. Les comparaisons restent numériques (`ctx.scoreMaitrise`) ; la
     // réserve voyage à côté, jusqu'à l'affichage.
-    var repereMaitrise = _detecterSeuilMaitrise(echelle, _idEchelleMajoritaire(productions));
-    var seuilMaitrise = repereMaitrise.valeur;
+    var repereMaitrise = _detecterScoreMaitrise(echelle, _idEchelleMajoritaire(productions));
+    var scoreMaitrise = repereMaitrise.valeur;
 
     // ── Productions (toutes celles qui ont au moins une évaluation) ──────
     var prodsEvaluees = new Set();
@@ -149,9 +149,9 @@ function _chargerContexte() {
         nombreProds: nombreProds,
         criteres: criteresListe,
         criteresParProd: criteresParProd,
-        seuilMaitrise: seuilMaitrise,
-        seuilMaitriseDeduit: repereMaitrise.deduite,
-        seuilMaitriseRaison: repereMaitrise.raison,
+        scoreMaitrise: scoreMaitrise,
+        scoreMaitriseDeduit: repereMaitrise.deduite,
+        scoreMaitriseRaison: repereMaitrise.raison,
         conversion: conversion,
         parEtudiant: parEtudiant,
         grilles: grilles
@@ -283,7 +283,7 @@ function _construireConversion(echelle) {
  *          `deduite: false` = le repère de l'échelle a été lu.
  *          `deduite: true`  = valeur obtenue autrement ; `raison` dit laquelle.
  */
-function _detecterSeuilMaitrise(echelle, echelleId) {
+function _detecterScoreMaitrise(echelle, echelleId) {
     // Aucune échelle exploitable : le seuil ne se dérive de rien. On conserve
     // 0,75 faute de mieux — des scores peuvent tout de même exister, car
     // `_construireConversion` sait lire un score numérique sans échelle, et un
@@ -327,11 +327,11 @@ function _detecterSeuilMaitrise(echelle, echelleId) {
         // Le code posé ne correspond à aucun niveau de l'échelle (niveau
         // renommé ou supprimé depuis). Ne pas retomber SILENCIEUSEMENT sur la
         // convention : c'est une incohérence de données, pas une absence.
-        return { valeur: _seuilParConvention(niveauxTries), deduite: true, raison: 'repere-introuvable' };
+        return { valeur: _scoreParConvention(niveauxTries), deduite: true, raison: 'repere-introuvable' };
     }
 
     // Repère non posé : la convention historique, mais annoncée comme déduite.
-    return { valeur: _seuilParConvention(niveauxTries), deduite: true, raison: 'repere-non-pose' };
+    return { valeur: _scoreParConvention(niveauxTries), deduite: true, raison: 'repere-non-pose' };
 }
 
 /**
@@ -340,7 +340,7 @@ function _detecterSeuilMaitrise(echelle, echelleId) {
  * @param {Array} niveauxTries niveaux triés par `min` croissant
  * @returns {number}
  */
-function _seuilParConvention(niveauxTries) {
+function _scoreParConvention(niveauxTries) {
     var niveauMaitrise = niveauxTries[niveauxTries.length - 2];
     if (!niveauMaitrise || niveauMaitrise.min == null) return 0.75;
     return niveauMaitrise.min / 100;
@@ -377,7 +377,7 @@ function _retentionIndividuelle(ctx, grille, critere, prodIdx) {
     suivants.forEach(function(idx) {
         if (grille[idx] && grille[idx][critere] != null) {
             total++;
-            if (grille[idx][critere] >= ctx.seuilMaitrise) maintenus++;
+            if (grille[idx][critere] >= ctx.scoreMaitrise) maintenus++;
         }
     });
 
@@ -406,7 +406,7 @@ function _calculerCellule(ctx, critere, prodIdx) {
         var score = grille[prodIdx][critere];
         scores.push(score);
 
-        if (score >= ctx.seuilMaitrise) {
+        if (score >= ctx.scoreMaitrise) {
             nMaitrise++;
             var ret = _retentionIndividuelle(ctx, grille, critere, prodIdx);
             if (ret === null) {
@@ -501,11 +501,11 @@ function calculerMatriceConsolidation() {
         criteres: ctx.criteres,
         nomsProductions: ctx.nomsProductions,
         nombreProds: ctx.nombreProds,
-        seuilMaitrise: ctx.seuilMaitrise,
+        scoreMaitrise: ctx.scoreMaitrise,
         // #555 lot 2 — la réserve accompagne le seuil jusqu'aux consommateurs :
         // sans elle, un seuil déduit est indiscernable d'un seuil lu.
-        seuilMaitriseDeduit: ctx.seuilMaitriseDeduit,
-        seuilMaitriseRaison: ctx.seuilMaitriseRaison
+        scoreMaitriseDeduit: ctx.scoreMaitriseDeduit,
+        scoreMaitriseRaison: ctx.scoreMaitriseRaison
     };
 }
 
@@ -528,7 +528,7 @@ function calculerConsolidationIndividuelle(da) {
             if (!_critereEvalue(ctx, critere, a)) continue;
             if (!grille[a] || grille[a][critere] == null) continue;
 
-            if (grille[a][critere] >= ctx.seuilMaitrise) {
+            if (grille[a][critere] >= ctx.scoreMaitrise) {
                 tentativesM++;
                 var ret = _retentionIndividuelle(ctx, grille, critere, a);
                 if (ret && ret.retenu) {
@@ -567,9 +567,9 @@ function calculerConsolidationIndividuelle(da) {
         // #555 lot 2 — c'est le chemin RENDU À L'ÉCRAN (matrice de consolidation
         // du profil, graphique de trajectoire). Sans ces deux champs, l'écran ne
         // peut pas distinguer un seuil lu sur l'échelle d'un seuil deviné.
-        seuilMaitrise: ctx.seuilMaitrise,
-        seuilMaitriseDeduit: ctx.seuilMaitriseDeduit,
-        seuilMaitriseRaison: ctx.seuilMaitriseRaison
+        scoreMaitrise: ctx.scoreMaitrise,
+        scoreMaitriseDeduit: ctx.scoreMaitriseDeduit,
+        scoreMaitriseRaison: ctx.scoreMaitriseRaison
     };
 }
 
@@ -595,7 +595,7 @@ function calculerComparaisonPrerequis() {
             Object.keys(ctx.grilles).forEach(function(da) {
                 var gr = ctx.grilles[da];
                 if (!gr[a] || gr[a][critere] == null) return;
-                if (gr[a][critere] < ctx.seuilMaitrise) return;
+                if (gr[a][critere] < ctx.scoreMaitrise) return;
 
                 var tousCompletes = true;
                 for (var prev = 0; prev < a; prev++) {
@@ -759,11 +759,11 @@ function _genererLigneSynthese(donnees) {
 
 window.calculerConsolidationIndividuelle = calculerConsolidationIndividuelle;
 
-// #555 lot 2 — exposée pour la sentinelle. `_detecterSeuilMaitrise` est une
+// #555 lot 2 — exposée pour la sentinelle. `_detecterScoreMaitrise` est une
 // fonction PURE (échelle → {valeur, deduite, raison}) dont les cas limites — un
 // niveau repère dont le `min` vaut 0, un code qui ne correspond à aucun niveau,
 // un repère sans borne — ne sont pas atteignables par `calculerConsolidation*`
 // sans monter un jeu complet de productions, d'évaluations et de grilles. Un
 // montage incomplet mesurerait des zéros ; on teste donc la fonction elle-même.
-window._detecterSeuilMaitrise = _detecterSeuilMaitrise;
+window._detecterScoreMaitrise = _detecterScoreMaitrise;
 

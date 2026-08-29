@@ -970,7 +970,32 @@ const ETAPES_WIZARD = {
                 id: 'echelleId',
                 type: 'select-echelle',
                 required: true,
-                label: 'Échelle de performance'
+                label: 'Échelle de performance',
+                // #577 : choisir une échelle re-rend l'étape, pour que le bloc
+                // des repères ci-dessous parle de CETTE échelle.
+                rafraichir: true
+            },
+            {
+                // #577 (28 août 2026, décision de Grégoire — A3, option A) : les
+                // deux repères de maîtrise de l'échelle choisie se posent ICI,
+                // au moment où l'utilisateur pense sa pratique, et restent
+                // modifiables ensuite dans Conception → Échelles de performance.
+                // Le bloc est CELUI de l'éditeur d'échelle (`blocReperesEchelle`),
+                // pas une copie ; seul le handler diffère.
+                //
+                // ⚠ VOCABULAIRE : cette étape parle de « repères », jamais de
+                // « seuils » — le mot est déjà pris par le dépistage
+                // (`seuils-personnels`), et deux notions sous un même mot dans le
+                // même parcours seraient indémêlables.
+                //
+                // ⏳ RÉSERVE DE GRÉGOIRE (arbitrage A1) : « suffisant / maîtrisé »
+                // est le vocabulaire de PAN-Standards. Une autre famille de
+                // pratique — ou un autre utilisateur — pourra nommer ces deux
+                // repères autrement. Les libellés viennent d'une source unique
+                // (`REPERES_ECHELLE`, echelles.js) ; les rendre configurables par
+                // famille est un chantier à part, pas une retouche ici.
+                id: 'reperesEchelle',
+                type: 'reperes-echelle'
             }
         ],
         suivant: () => 'grille-criteres',
@@ -1378,6 +1403,8 @@ function genererChamp(champ) {
             return genererCheckboxCards(champ);
         case 'select-echelle':
             return genererSelectEchelle(champ);
+        case 'reperes-echelle':
+            return genererReperesEchelle(champ);
         case 'select-grille':
             return genererSelectGrille(champ);
         case 'select-disciplines':
@@ -1717,15 +1744,95 @@ function genererSelectEchelle(champ) {
         return `<option value="${echapperHtml(e.id)}">${e.nom || 'Sans nom'} (${niveaux} niveaux)</option>`;
     }).join('');
 
+    // #577 : `rafraichir` re-rend l'étape au choix d'une échelle (même
+    // mécanique que le garde-fou a4 : 'change', donc après blur).
+    const onChange = champ.rafraichir ? ' data-on-change="wizardV2RafraichirEtapeCourante"' : '';
+
     return `
         <div class="wizard-v2-champ">
             <label for="${WIZARD_V2_ID_PREFIX}${champ.id}">${champ.label}</label>
-            <select id="${WIZARD_V2_ID_PREFIX}${champ.id}" name="${champ.id}">
+            <select id="${WIZARD_V2_ID_PREFIX}${champ.id}" name="${champ.id}"${onChange}>
                 <option value="">-- Sélectionner une échelle --</option>
                 ${options}
             </select>
         </div>
     `;
+}
+
+/**
+ * #577 — Le bloc « Repères de maîtrise » de l'échelle CHOISIE, dans l'assistant.
+ *
+ * Trois états, et chacun se dit :
+ *   · aucune échelle choisie → rien (le bloc désigne des niveaux d'une échelle) ;
+ *   · l'ordre des plages de l'échelle n'est pas lisible → on renvoie à l'éditeur,
+ *     où chaque niveau reçoit un code et une borne « Min » ;
+ *   · sinon le bloc lui-même, précédé d'un avertissement si un repère manque —
+ *     l'utilisateur peut avancer sans, mais il sait ce que ça coûte.
+ *
+ * L'écriture passe par `ecrireRepereEchelle` (echelles.js), la même transaction
+ * que l'éditeur : mêmes refus, même règle du vide. L'aperçu est le même
+ * producteur (`apercuNiveauxEchelleHtml`) : la zone de chaque niveau se lit
+ * dès que les deux repères sont posés.
+ */
+function genererReperesEchelle(champ) {
+    const echelleId = wizardState.reponses.echelleId;
+    if (!echelleId) return '';
+
+    const echelles = db.getSync(cle('echellesTemplates'), []) || [];
+    const echelle = echelles.find(e => e && e.id === echelleId);
+    if (!echelle) return '';
+
+    const renvoi = 'Conception → Échelles de performance';
+    if (typeof window.blocReperesEchelle !== 'function') {
+        return genererInfo({ texte: `Les repères de maîtrise de cette échelle se posent dans ${renvoi}.` });
+    }
+
+    const bloc = window.blocReperesEchelle(echelle, { handler: 'wizardV2ModifierRepereEchelle' });
+    if (!bloc) {
+        return genererInfo({
+            variante: 'attention',
+            texte: `L'ordre des niveaux de cette échelle n'est pas lisible : ses repères de maîtrise se posent dans ${renvoi}, une fois chaque niveau doté d'un code et d'une borne « Min ».`
+        });
+    }
+
+    const manque = !echelle.seuilSuffisance || !echelle.seuilMaitrise;
+    const avertissement = manque
+        ? genererInfo({
+            variante: 'attention',
+            texte: 'Sans ces deux repères, la rétroaction remise à l\'élève ne peut ni nommer ses priorités ni dire ce qui est acquis. Tu peux les poser ici, ou plus tard dans ' + renvoi + '.'
+        })
+        : '';
+    const apercu = (typeof window.apercuNiveauxEchelleHtml === 'function')
+        ? `<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px;">${window.apercuNiveauxEchelleHtml(echelle)}</div>`
+        : '';
+
+    return `
+        ${avertissement}
+        <div class="wizard-v2-champ" id="${WIZARD_V2_ID_PREFIX}${champ.id}-bloc">
+            ${bloc}
+            ${apercu}
+        </div>
+    `;
+}
+
+/**
+ * #577 — Un repère posé depuis l'assistant : écrit sur l'échelle, puis l'étape
+ * est re-rendue pour que la liste et l'aperçu disent l'état enregistré. Un
+ * refus se voit sur le champ, sans rien écrire — comme dans l'éditeur.
+ */
+function wizardV2ModifierRepereEchelle(el) {
+    if (typeof window.ecrireRepereEchelle !== 'function') return;
+    return Promise.resolve(window.ecrireRepereEchelle(el.dataset.echelleId, el.dataset.champ, el.value))
+        .then((resultat) => {
+            if (resultat && resultat.ok) {
+                wizardV2RafraichirEtapeCourante();
+                return resultat;
+            }
+            if (typeof window.marquerChampRefuseEchelle === 'function') {
+                window.marquerChampRefuseEchelle(el, resultat && resultat.refuse);
+            }
+            return resultat;
+        });
 }
 
 /**
@@ -2035,6 +2142,14 @@ function genererRecapitulatif() {
             const echelles = db.getSync(cle('echellesTemplates'), []);
             const echelle = echelles.find(e => e.id === r.echelleId);
             html += `<p><strong>Échelle\u00a0:</strong> ${echelle?.nom || r.echelleId}</p>`;
+            // #577 : le récapitulatif dit si les deux repères sont posés — et ce
+            // que leur absence coûte, plutôt que de la taire.
+            if (echelle) {
+                const posees = echelle.seuilSuffisance && echelle.seuilMaitrise;
+                html += posees
+                    ? `<p><strong>Repères de maîtrise\u00a0:</strong> suffisant à partir de ${echapperHtml(echelle.seuilSuffisance)}, maîtrisé à partir de ${echapperHtml(echelle.seuilMaitrise)}</p>`
+                    : '<p><strong>Repères de maîtrise\u00a0:</strong> non posés — la rétroaction ne pourra ni nommer les priorités ni dire ce qui est acquis.</p>';
+            }
         }
         if (r.grilleId) {
             const grilles = db.getSync(cle('grillesTemplates'), []);
@@ -3007,6 +3122,7 @@ window.wizardV2GererExclusionCheckbox = wizardV2GererExclusionCheckbox;
 window.wizardV2CreerGrilleDemo = wizardV2CreerGrilleDemo;
 window.wizardV2VoieRapide = wizardV2VoieRapide;
 window.wizardV2RafraichirEtapeCourante = wizardV2RafraichirEtapeCourante;
+window.wizardV2ModifierRepereEchelle = wizardV2ModifierRepereEchelle;   // #577
 window.ouvrirComparateurDepuisWizard = ouvrirComparateurDepuisWizard;
 
 // Exposés pour la testabilité (#317) : la relecture d'édition (#132) et le
@@ -3026,5 +3142,7 @@ window.genererRadioCards = genererRadioCards;
 window.champsReprises = champsReprises;
 window.calculerExempleConsequence = calculerExempleConsequence; // #319 Lot 4 a8 (testabilité)
 window.genererRecapitulatif = genererRecapitulatif;             // #319 Lot 4 a8/a9 (testabilité du rendu)
+window.genererContenuEtape = genererContenuEtape;               // #577 (testabilité du rendu d'une étape)
+window.afficherEtapeWizardV2 = afficherEtapeWizardV2;           // #577 (spec WebKit : rendre une étape dans le vrai DOM)
 
 })();

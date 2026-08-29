@@ -7,6 +7,35 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 28 AOÛT 2026 (SOIR, 21 h 15) : LES REPÈRES DE MAÎTRISE SE POSENT
+     PARTOUT OÙ L'ÉCHELLE SE PENSE — #555 (d)+(e) ET #577 LIVRÉS.
+
+     ▣ MANDAT (Grégoire) : cohérence et souplesse, rien de sa pratique en dur,
+       pour les expérimentateurs de la CoP. Cadrage fermé, option 1 : finir le
+       chantier des échelles. Session unique, un commit de code.
+
+     ▣ LIVRÉ.
+       · (d) `seuilMaitrise` = le CODE, et rien d'autre : `scoreMaitrise*` /
+         `_detecterScoreMaitrise` (consolidation), `seuilIdme*` (préférence).
+         Cliquet à liste fermée, commentaires retirés — il a rougi une fois pour
+         de vrai (lectures ajoutées par #577), la liste a suivi.
+       · (e) l'échelle NEUVE porte ses repères avant enregistrement (tampon,
+         mêmes refus, revérification à l'enregistrement, aperçu unique).
+       · #577 l'assistant pose les repères de l'échelle choisie avec le bloc de
+         l'éditeur et `ecrireRepereEchelle` (écriture pure) ; avertit, récapitule,
+         ne dit jamais « seuil ». DEN exclu (non tranché). #579 clos pour ce cas.
+       · #592 inscrit : le mode « par objectifs » mort porte le 4e sens du mot.
+       Sentinelles : 4 + 13 + 11 cas Vitest, 2 cas WebKit. Break-tests : 4/4,
+       5/5, 6/6 rouges obtenus, témoins verts. Vitest 4011/4011 · Playwright 201.
+
+     ▣ ⚠ AUCUN BUMP — 1.106.0 (minor) DUE, session file:// possiblement ouverte.
+
+     ▣ PIÈGES (détail dans RELAIS.md) : restaurer une mutation par COPIE, jamais
+       `git checkout` sur un fichier qui porte du travail ; un refus se lit à la
+       marque `champ-refuse`, pas à la valeur de la liste.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION — 28 AOÛT 2026 (FIN DE JOURNÉE, 20 h 15) : LES 21 ARBITRAGES SONT
      TRANCHÉS, ET LA JOURNÉE OÙ TROIS SESSIONS SE SONT CORRIGÉES L'UNE L'AUTRE.
 
