@@ -14354,7 +14354,7 @@
          donc jamais lu sur Safari ni sur iPad. Un script, lui, se charge. Généré
          par scripts/release.mjs en même temps que version.json — les deux ne
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
-    <script src="version.js?v=08290303"></script>
+    <script src="version.js?v=08291113"></script>
     <script src="js/db.js?v=20260826b"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
     <script src="js/pratiques/modalites-evaluation.js?v=20260810a"></script> <!-- SSOT #328 Lot 1 : module propriétaire de modalitesEvaluation (seul point d'écriture), chargé avec la couche stockage -->
@@ -14418,7 +14418,7 @@
     <script src="js/entites/reconciliation-evaluations.js?v=2026062801"></script> <!-- #360 : prévention des doublons d'évals note-égale -->
 
     <script src="js/pratique-notation-v2.js?v=2026061113"></script> <!-- Beta 95 : dropdown productions + terminologie "production" -->
-    <script src="js/gabarits-utils.js?v=20260829a"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
+    <script src="js/gabarits-utils.js?v=20260829b"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
     <script src="js/identite-item.js?v=20260823a"></script> <!-- #291/#476 : source unique de l'identite d'un item de bibliotheque (analyserDoublons) — remplace les 5 detecteurs copies-colles -->
     <script src="js/bibliotheque-ui.js?v=20260826a"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 (menu ⋮ kebab + refactor renderCarte) -->
     <script src="js/spe-specifications.js?v=20260808b"></script> <!-- Beta 95 : Module PAN-Spécifications + gabarits François -->
@@ -14438,12 +14438,12 @@
     <script src="js/productions-liste.js?v=20260826c"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js -->
     <script src="js/productions-bibliotheque-ui.js?v=20260826a"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide -->
     <script src="js/grilles-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/grilles.js?v=20260829a"></script> <!-- Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée -->
+    <script src="js/grilles.js?v=20260829b"></script> <!-- Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée -->
     <script src="js/echelles-bibliotheque.js?v=20260821a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/echelles.js?v=20260829b"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant -->
+    <script src="js/echelles.js?v=20260829c"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant -->
     <script src="js/cartouches-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/cartouches.js?v=20260829e"></script> <!-- Beta 99.42 b0512-1012 : #159 retiré (onglets + aperçu legacy supprimés) -->
-    <script src="js/export-pdf.js?v=20260829a"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
+    <script src="js/cartouches.js?v=20260829f"></script> <!-- Beta 99.42 b0512-1012 : #159 retiré (onglets + aperçu legacy supprimés) -->
+    <script src="js/export-pdf.js?v=20260829b"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
     <script src="js/cours.js?v=20260823a"></script> <!-- Beta 99.74 b0529-1016 : chantier 0 refonte — _diagnostiquerModeleCours (read-only) -->
     <script src="js/contexte.js?v=2026062701"></script> <!-- Beta 95.2 : Support groupe-cours -->
 
@@ -14543,9 +14543,9 @@
     <script src="js/travaux-preparation.js?v=20260829a"></script> <!-- #559 : les options d'import ne visent plus un fichier étranger -->
     <script src="js/travaux-import.js?v=20260828a"></script> <!-- Beta 99.31 b0502-0907 : flag livrableAdditionnel pour skip détection doublon (palier 3) ; #558 la file survit au rechargement -->
     <script src="js/travaux-visionneuse.js?v=2026050102"></script> <!-- Beta 99.30 b0501-1830 : cleanup PDF.js + ouvrirPDF try/catch + zoom margin-aware + split nav buttons -->
-    <script src="js/travaux-outils.js?v=20260829a"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 menu ⋮ dans modales Personnaliser tampons + codes erreurs -->
+    <script src="js/travaux-outils.js?v=20260829b"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 menu ⋮ dans modales Personnaliser tampons + codes erreurs -->
     <script src="js/tampons-bibliotheque.js?v=20260511c"></script> <!-- Beta 99.41 : #264 progression sur exporterBibliotheque (sealing) -->
-    <script src="js/travaux-annotation.js?v=20260829a"></script>
+    <script src="js/travaux-annotation.js?v=20260829b"></script>
     <script src="js/travaux-archivage.js?v=20260829a"></script> <!-- Beta 99.41 : #264 progression sur lancerExport{Etudiant,Production,} ; #565 try/catch par item + bilan d'export -->
     <script src="js/synthese-retroaction-data.js?v=20260828a"></script>
     <script src="js/synthese-retroaction-rendu.js?v=20260828a"></script>
@@ -14588,11 +14588,11 @@
     <script src="js/consolidation.js?v=20260829a"></script> <!-- #555 (d) : le score 0-1 se nomme scoreMaitrise, _detecterScoreMaitrise ; seuilMaitrise ne désigne plus que le CODE -->
 
     <!-- PRIORITÉ 7: Utilitaires -->
-    <script src="js/evaluation-jetons.js?v=20260829b"></script> <!-- #563 : une écriture de jeton refusée ne passe plus pour un succès -->
+    <script src="js/evaluation-jetons.js?v=20260829c"></script> <!-- #563 : une écriture de jeton refusée ne passe plus pour un succès -->
     <script src="js/evaluation-chargement.js?v=20260828a"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
     <script src="js/evaluation-calcul.js?v=20260826b"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
     <script src="js/evaluation-retroaction.js?v=20260828a"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
-    <script src="js/evaluation-sauvegarde.js?v=20260829b"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
+    <script src="js/evaluation-sauvegarde.js?v=20260829c"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
     <script src="js/evaluation.js?v=20260829a"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
     <script src="js/evaluation-handlers.js?v=20260518d"></script> <!-- Beta 99.48 : session A étape 3 refactor (3 fonctions extraites) -->
 
@@ -14608,7 +14608,7 @@
     <script src="js/guidage-demo.js?v=20260829a"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260829a"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
+    <script src="js/changelog-data.js?v=20260829b"></script> <!-- Entrée 1.56 : trois chantiers Alignement consolidés -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260808a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14621,7 +14621,7 @@
     <script src="js/accompagnement.js?v=20260821a"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20260829b"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-hover.js?v=20260829c"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
     <script src="js/accompagnement-contenu-popup.js?v=20260829a"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20260809a"></script>
     <script src="js/guides-pedagogiques.js?v=20260629a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
@@ -14629,11 +14629,11 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260829a"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260829b"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260829b"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260829c"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
