@@ -2169,6 +2169,14 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   grille réelle n'en porte. ⮕ La lecture `grille.echelleId` est donc EXCLUE comme source : elle laisserait
   toutes ses cartouches neuves sans colonnes. Arbitrage remis en artefact (un seul, avec les deux
   décisions #555 restantes), lien dans RELAIS.md.
+  ✅ **TRANCHÉ PAR GRÉGOIRE le 29 août 2026, 8 h 18 — OPTION A : LA CARTOUCHE NE DEVINE PLUS.** Sans échelle
+  choisie dans `selectEchelleCartouche`, la matrice reste vide et l'écran dit « choisis une échelle » ; les
+  colonnes viennent toujours du choix d'échelle du formulaire et l'`echelleId` est ÉCRIT sur la cartouche.
+  La grille reste agnostique (critères seulement). Écartées : B (la grille porte une échelle — contredit
+  9 grilles sur 10 et ajouterait une 4ᵉ source), C (défaut contextuel — encore une devinette, ajoutable après).
+  ⮕ **Non tranché, à mesurer avant tout correctif de données** : les cartouches EXISTANTES nées du chemin
+  fautif (sans `echelleId`, colonnes de la 1ʳᵉ échelle) — compter sur les clés `cartouches_*`.
+  Artefact : `https://claude.ai/code/artifact/89f28423-e48a-4d62-b15c-91e6e4f48cca`.
   ⚠ **FAIT MESURÉ EN ÉCRIVANT LE DIAGNOSTIC, qui pèse sur l'attente** : l'éditeur de grille
   (`grilles.js`) n'écrit **JAMAIS** `echelleId` — le seul littéral du dépôt est `GRILLE_GENERIQUE`
   (`grilles.js:1462`). La prémisse « une grille PORTE un `echelleId` » vaut pour la grille semée, pas
@@ -2618,6 +2626,14 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   · **Règle d'origine préservée** : « tu as progressé » reste `priorite → acquis`. Passer d'une priorité
     à « signalé » n'est pas annoncé. ⏳ **À trancher avec Grégoire** si la zone intermédiaire doit
     compter comme un progrès — ce serait une décision, pas un effet de bord.
+    ✅ **TRANCHÉ le 29 août 2026, 8 h 18 — OPTION C : toute montée de zone est un progrès, dit selon la zone
+    d'arrivée** (arrivée en « signalé » = progrès à consolider ; arrivée en « acquis » = progressé). Les trois
+    passages montants sont annoncés dans la ligne « Progrès » du PDF ET du bilan à l'écran. Non tranché : les
+    descentes de zone (rien n'est annoncé, aucune option ne l'ajoutait) ; les libellés = ses mots.
+    ✅ **TRANCHÉ le 29 août 2026, 8 h 18 — intention « Outils d'observation », OPTION A : CLORE.** Le repère
+    « Maîtrisé à partir de » de l'échelle EST le réglage utilisateur ; aucun second réglage. Reste : une
+    explication à l'écran du curseur « Seuil de défi » (ce qu'il règle : le dépistage ; ce qu'il ne règle
+    pas : la matrice), libellé à écrire avec Grégoire. Artefact : voir #578.
   · Le test qui CONSTATAIT « 6 sites / 14 comparaisons » est devenu un **ratchet à zéro**. Il n'a pas
     été « réparé » en changeant le chiffre.
   · Deux retraits : `rangOuDernier` (repli `Infinity` devenu inatteignable) et le repli de

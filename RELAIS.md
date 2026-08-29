@@ -76,8 +76,13 @@ la seule « avec » est GRILLE_GENERIQUE). ✅ **ARTEFACT REMIS, 29 août ~4 h 3
 `https://claude.ai/code/artifact/89f28423-e48a-4d62-b15c-91e6e4f48cca` — trois décisions : #555·1 zone
 intermédiaire comme progrès (reco C), #555·2 intention « Outils d'observation » (reco A : clore, le repère de
 l'échelle EST le réglage), #578 colonnes de la cartouche neuve (reco A : ne plus deviner, échelle choisie au
-formulaire, `echelleId` écrit sur la cartouche ; la grille reste agnostique). ⮕ **En attente des trois
-lettres de Grégoire.** Rien ne se code avant.
+formulaire, `echelleId` écrit sur la cartouche ; la grille reste agnostique). ✅ **RÉPONSES DE GRÉGOIRE,
+29 août 8 h 18, enregistrées DANS l'artefact (v3, capacité `artifact`)** : **#555·1 = C, #555·2 = A, #578 = A**,
+sans note. Consignées aux items. ⮕ Trois chantiers d'exécution distincts, UN par session : (1) #578 A dans
+`initialiserNouveauCartouche` ; (2) #555·1 C dans `synthese-retroaction-data.js` + `evaluation-retroaction.js`
+(ligne « Progrès », deux documents, libellés = ses mots) ; (3) #555·2 A = texte d'aide du curseur « Seuil de
+défi » (`index.html:8764`). ⚠ L'artefact porte désormais la seule copie de ses réponses : LIRE avant toute
+republication (cf. mémoire `republier-artefact-ecriture-destructive`).
 
 ### 📌 IDs — prochain libre : **#593** (inchangé)
 
