@@ -12,7 +12,8 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** — tout y est. Aucun travail en avance ailleurs. |
-| **Version** | **1.105.0** — build `0828-1405`, **DÉPLOYÉE le 28 août à 14 h 05**. Minor : une échelle porte ses deux **repères de maîtrise**, et les **32 comparaisons IDME écrites en dur** ont disparu des DEUX documents remis à l'élève (PDF de synthèse : 14 → 0 ; bilan à l'écran : 18 → 0). **Vitest 3887/3887 (364 fichiers) · Playwright 199** au moment du bump. ⚠ **Grégoire doit recharger sa session `file://`** : 28 jetons ont changé. |
+| **Version** | **1.106.0** — build `0829-0303`, **POUSSÉE le 29 août à 3 h 20** (`59c615bb`). Minor : les repères de maîtrise se posent partout où l'échelle se pense (#555 lot 2 complet, #577), plus #556, #563, #572 partiel, retrait « Alléger ». Entrée 1.106 du changelog écrite, son jeton bumpé à la main. **Vitest 4011/4011 · Playwright vert** (verdict enregistré au SHA par `pousser.sh`). ⚠ **Grégoire doit recharger sa session `file://`** : 27 jetons ont changé. |
+| **Version précédente** | **1.105.0** — build `0828-1405`, **DÉPLOYÉE le 28 août à 14 h 05**. Minor : une échelle porte ses deux **repères de maîtrise**, et les **32 comparaisons IDME écrites en dur** ont disparu des DEUX documents remis à l'élève (PDF de synthèse : 14 → 0 ; bilan à l'écran : 18 → 0). **Vitest 3887/3887 (364 fichiers) · Playwright 199** au moment du bump. ⚠ **Grégoire doit recharger sa session `file://`** : 28 jetons ont changé. |
 | **Version précédente** | **1.104.0** — build `0827-1245` (`588debf1`). Minor : la carte « Observation de la structure » rend un bloc par niveau de l'échelle, et le SOLO d'un critère vient du champ configuré. **Vitest 3715/3715 (350 fichiers) · Playwright 193/193**, verdict vert enregistré au SHA par `scripts/pousser.sh`. ✅ **AUCUN BUMP DÛ** : rien de code applicatif n'a changé depuis — seuls un test de constat et de la documentation. ⚠ **Grégoire doit recharger sa session `file://`** : huit jetons anti-cache ont changé au bump. |
 | **Avant-dernière** | **1.103.1** — build `0827-0953`, qui a porté six changements de code sans bump (pas 3c-3, pas 4, #547, #550, #551) : la session `file://` de Grégoire était ouverte, et la règle du projet interdit de bumper pendant. **C'est la seconde fois de la journée que l'application annonce un numéro plus ancien que son code.** |
 | **Travail en avance sur `main`** | ✅ **NON — TOUT EST POUSSÉ** au rituel du 28 août, 21 h 15 (un commit de code : #555 (d)+(e) et #577, voir l'entrée de tête). Avant cela : poussé au rituel de 20 h 15. `origin/main` = **`9d4e...`** (voir le dernier commit), arbre propre. **QUATRE commits partis d'un coup, produits par TROIS sessions parallèles coordonnées par messages** : `e1e66566` (#587/#578, session 70), `c1710065` (les 21 décisions, onze détaillées), `e348a42a` (six décisions, session 5b), plus le relais. ⚠ **Aucun fichier `js/` ni `index.html` dans ces commits** — de la documentation seule : le code n'a pas bougé depuis `44a5aeeb` (17 h 22), donc les verdicts de 17 h tiennent, et ils ont été **refaits** avant ce push. |
@@ -23,7 +24,51 @@
 | ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE, DANS 4 JOURS** | **#427** + **#508**. ✅ **GRÉGOIRE TIENT LA DATE** (arbitré le 28 août au soir, option A ; « repousser » posé et écarté). ⮕ **DÛ PAR LUI, ET PAR PERSONNE D'AUTRE** : les trois noms Cloudflare, la durée de session, la règle `Include` de la policy dormante. ⮕ **MESURÉ le 28 août** : l'avis est bien en ligne aux deux endroits (`accueil.js`, `transitions.js`), et **le bandeau s'éteint SEUL le 1er septembre** — rien à retirer à la main. Reste à réécrire le paragraphe d'accueil **au présent**. |
 | ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. ⮕ **ET C'EST ARRIVÉ UNE SECONDE FOIS LE MÊME JOUR, dans l'autre sens.** Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les `BACKLOG.md` et `SESSION.md` de la session « présences » — l'inscription de l'item **#538** et la renumérotation **#534 → #537** vivent donc dans un commit qui parle d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc non réécrit. **Deux avertissements en un jour : sur ce dépôt, `git add` par chemins explicites n'est pas une préférence, c'est la seule méthode qui tienne.** |
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
-| **Dernière mise à jour** | **28 août 2026, 21 h 15** — session unique (soir). **#555 lot 2 (d) et (e) + #577 LIVRÉS** ; #579 livré pour le cas de l'assistant ; **#592** inscrit. **Vitest 4011/4011** (377 fichiers) · **Playwright 201** (198 verts + 3 instables pré-existantes, vertes au second essai), sur arbre gelé. ⚠ **AUCUN BUMP** : du code a changé (6 fichiers `js/`, `?v=` bougés) mais je ne sais pas si la session `file://` de Grégoire est ouverte — **1.106.0 (minor) est DUE**, à lancer par `node scripts/release.mjs minor` au prochain démarrage. Entrée précédente : **20 h 15** — fin de journée, **trois sessions**. Les **21 arbitrages de Grégoire sont TRANCHÉS et consignés dans leurs items**. Livré : #555 lot 2 (b), #556, #557, l'audit des copies d'échelle, le diagnostic des résolveurs. **Vitest 3983/3983** (374 fichiers) · **Playwright 199/199**, relancés sur arbre gelé avant le push. **Aucun bump** : 1.105.0 tient — que de la documentation, aucun `?v=` à bouger. |
+| **Dernière mise à jour** | **29 août 2026, 3 h 40** — session unique (nuit). **1.106.0 poussée** ; **#578 : le diagnostic console est LIVRÉ** (`await _diagnostiquerEchellesGrilles()`), sentinelle 6 cas / 4 mutations rouges ; **le chiffre est DÛ par Grégoire**. Fait mesuré : l'éditeur de grille n'écrit jamais `echelleId`. Entrée précédente : **28 août, 21 h 15** — session unique (soir). **#555 lot 2 (d) et (e) + #577 LIVRÉS** ; #579 livré pour le cas de l'assistant ; **#592** inscrit. **Vitest 4011/4011** (377 fichiers) · **Playwright 201** (198 verts + 3 instables pré-existantes, vertes au second essai), sur arbre gelé. ⚠ **AUCUN BUMP** : du code a changé (6 fichiers `js/`, `?v=` bougés) mais je ne sais pas si la session `file://` de Grégoire est ouverte — **1.106.0 (minor) est DUE**, à lancer par `node scripts/release.mjs minor` au prochain démarrage. Entrée précédente : **20 h 15** — fin de journée, **trois sessions**. Les **21 arbitrages de Grégoire sont TRANCHÉS et consignés dans leurs items**. Livré : #555 lot 2 (b), #556, #557, l'audit des copies d'échelle, le diagnostic des résolveurs. **Vitest 3983/3983** (374 fichiers) · **Playwright 199/199**, relancés sur arbre gelé avant le push. **Aucun bump** : 1.105.0 tient — que de la documentation, aucun `?v=` à bouger. |
+
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 29 août 2026, 3 h 40 (NUIT, SESSION UNIQUE)
+
+### ✅ 1.106.0 EST POUSSÉE — ET LA SENTINELLE ANTI-CACHE ROUGIT SI ON LA LANCE AVANT LE COMMIT DE RELEASE
+
+`node scripts/release.mjs minor` puis Vitest : **1 rouge sur 4011**, `sentinelle-anticache-fichiers-modifies`,
+qui nommait 13 fichiers « périmés ». Vérifié sur pièces : les 13 sont ceux de **1.105.0 elle-même**, aucun
+n'a changé depuis `c255dace`. ⮕ **Cause** : le repère de la sentinelle est l'AVANT-DERNIER commit de
+`version.json` — tant que le commit de release n'existe pas, c'est `fbeffdad`, deux releases en arrière.
+Celui du script est le DERNIER. **Ordre juste : script → changelog → commit de release → sentinelle.**
+Elle est verte après le commit. Ce n'est pas un défaut du script ni de la sentinelle, c'est un ordre.
+Le jeton de `changelog-data.js` a de nouveau été bumpé À LA MAIN (l'entrée s'écrit après le script).
+
+### ✅ #578 — LE DIAGNOSTIC EST LIVRÉ, LE CHIFFRE EST DÛ
+
+`await _diagnostiquerEchellesGrilles()` en console (`cartouches.js`, lecture seule). Tous trimestres par
+`db.get` (pas le cache), copie archivée `{trim}_grillesTemplates` sondée avant la clé globale, une clé
+partagée comptée UNE fois. Rend `{ total, avec, sans, resolues, introuvables, parCle, lignes }` et un
+`console.table`. Sentinelle `sentinelle-578-diagnostic-echelles-grilles` : 6 cas, 4 mutations rouges
+(porte inversée, dédoublonnage, écriture ajoutée, lecture par `getSync`).
+
+⚠ **FAIT MESURÉ EN L'ÉCRIVANT** : l'éditeur de grille (`grilles.js`) n'écrit **jamais** `echelleId` ;
+le seul littéral du dépôt est `GRILLE_GENERIQUE`. La prémisse « une grille PORTE un `echelleId` » vient
+de la grille semée. Attendre un compte « sans » majoritaire ; alors le correctif commence par ÉCRIRE
+l'identifiant (éditeur + rétro-remplissage), pas par le lire. Inscrit à l'item.
+
+### ⚠ DEUX PIÈGES D'OUTILLAGE PAYÉS CETTE NUIT
+
+1. `chargerScript` a déjà `console` (et `document`) en paramètres du sandbox : un stub `console` dans
+   `globaux` fait « Duplicate parameter name » sur les six cas, sans nommer le coupable.
+2. `cleSource` sonde la copie archivée par `getSync`, qui ne voit que le trimestre actif : pour une
+   lecture inter-trimestres fiable, sonder les deux clés candidates par `await db.get`.
+
+### 🔴 DÛ, ET PAR QUI
+
+- **Grégoire** : recharger `file://` ; **lancer `await _diagnostiquerEchellesGrilles()` et rapporter
+  avec / sans / introuvables** (#578) ; Cloudflare #427 ; `_diagnostiquerResolutionEchelles()` (#590) ;
+  paragraphe d'accueil au présent (#508, **1er septembre = dans 3 jours**).
+- **La session suivante** : #592 ; #555 : deux décisions restantes (zone intermédiaire comme progrès ;
+  intention P1) ; correctif #578 UNE FOIS le chiffre connu.
+
+### 📌 IDs — prochain libre : **#593** (inchangé)
+
+---
 
 ## ▶ POUR LA SESSION QUI PREND LE RELAIS — 28 août 2026, 21 h 15 (SOIR, SESSION UNIQUE)
 
