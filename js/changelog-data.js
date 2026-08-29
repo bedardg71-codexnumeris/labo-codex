@@ -21,6 +21,20 @@
 
     var CHANGELOG = [
         {
+            version: '1.106',
+            couleur: 'vert',
+            titre: 'Les rep\u00e8res se posent partout o\u00f9 l\'\u00e9chelle se pense',
+            items: [
+                '<strong>Les rep\u00e8res de ma\u00eetrise se posent partout o\u00f9 une \u00e9chelle se cr\u00e9e.</strong> L\'\u00e9diteur d\'\u00e9chelle neuve porte le bloc \u00ab Suffisant \u00e0 partir de \u00bb / \u00ab Ma\u00eetris\u00e9 \u00e0 partir de \u00bb d\u00e8s la cr\u00e9ation, avec les m\u00eames refus que l\'\u00e9diteur d\'une \u00e9chelle existante : aucune \u00e9chelle ne na\u00eet plus sans qu\'on t\'ait demand\u00e9 o\u00f9 commence la ma\u00eetrise.',
+                '<strong>L\'assistant de pratique te fait choisir les rep\u00e8res de l\'\u00e9chelle qu\'il retient.</strong> L\'\u00e9tape \u00ab \u00c9chelle de performance \u00bb affiche les deux rep\u00e8res, t\'avertit s\'il en manque un, et le r\u00e9capitulatif les redit avant d\'enregistrer.',
+                '<strong>Le seuil de ma\u00eetrise se lit sur ton \u00e9chelle, et l\'application dit quand elle ne le peut pas.</strong> Il \u00e9tait devin\u00e9 par une convention \u00e9crite dans le logiciel \u2014 \u00ab l\'avant-dernier niveau \u00bb \u2014 qui tombait juste sur une \u00e9chelle \u00e0 quatre paliers et faux sur toutes les autres.',
+                '<strong>Correction : vider la corbeille ne d\u00e9truit que ce qu\'elle annonce.</strong> La modale comptait les fichiers du groupe-cours actif, mais la suppression emportait ceux de TOUS les groupes. \u00ab 2 fichiers \u00bb pouvait en effacer cinq, d\u00e9finitivement.',
+                '<strong>Correction : un jeton d\'\u00e9valuation qui n\'a pas pu \u00eatre enregistr\u00e9 te le dit.</strong> En mode anonymisation ou sur une erreur de stockage, l\'\u00e9cran affichait un succ\u00e8s pendant que rien n\'\u00e9tait \u00e9crit ; au rechargement, le jeton avait disparu.',
+                '<strong>Correction : dans le poste de pr\u00e9paration des travaux, la date saisie ne recule plus d\'un jour \u00e0 l\'affichage</strong>, et chaque ouverture ne laisse plus tourner un compteur invisible.',
+                '<strong>La fonctionnalit\u00e9 \u00ab All\u00e9ger \u00bb les fichiers export\u00e9s est retir\u00e9e.</strong> Elle \u00e9tait masqu\u00e9e depuis juin et n\'\u00e9tait plus atteignable ; rien de ce que tu utilises ne dispara\u00eet.'
+            ]
+        },
+        {
             version: '1.105',
             couleur: 'vert',
             titre: 'Ton \u00e9chelle dit o\u00f9 commence la ma\u00eetrise',
