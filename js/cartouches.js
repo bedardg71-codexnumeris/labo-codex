@@ -163,7 +163,8 @@ async function assurerCartoucheGenerique() {
         id: 'CART_GENERIQUE',
         nom: 'Cartouche générique (exemple)',
         grilleId: 'GRILLE_GENERIQUE',
-        echelleId: 'ECHELLE_GENERIQUE',
+        // #574 (29 août 2026) : plus d'`echelleId` — l'échelle générique n'est plus semée ;
+        // la matrice se rend depuis les `niveaux` portés ci-dessous.
         contexte: 'Exemple de cartouche de rétroaction - Modifie ou duplique selon tes besoins',
         criteres: [
             { id: 'CR_COMPREHENSION', nom: 'Compréhension' },

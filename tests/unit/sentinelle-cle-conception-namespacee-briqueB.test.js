@@ -122,7 +122,7 @@ describe('Lot B2 · echelles.js — éditeur d’échelles namespacé par trimes
         });
         it('GARDE archive : initialiserModuleEchelles saute la migration/injection en archive', () => {
             expect(src).toMatch(
-                /estTrimestreArchive[\s\S]{0,200}migrerEchellesVersBibliotheque[\s\S]{0,200}assurerEchelleGenerique/
+                /estTrimestreArchive[\s\S]{0,200}migrerEchellesVersBibliotheque/
             );
         });
     });
