@@ -19,7 +19,7 @@
 | Onglet | Constats de départ (25 août) | Réglés | Partiels | Ouverts | Items ouverts qui les portent |
 |---|---|---|---|---|---|
 | **Conception** | 15 (A1-A4, B1-B5, C1-C6) | **11** | 0 | **4** | #519 (C1, C3, C5), #520 (C6) — plus deux restes rattachés : #522, barre d'actions du 4ᵉ écran |
-| **Évaluations** | 20 (A1-A2, B1-B13, C1-C5) + section D « mineurs » | **17** | **1** (B5 : portée à trancher) | **2** | #568, #569 ; D partiel → #572 |
+| **Évaluations** | 20 (A1-A2, B1-B13, C1-C5) + section D « mineurs » | **19** | **1** (B5 : portée à trancher) | **0** | D partiel → #572 |
 
 Lecture honnête de ces chiffres : Conception est **presque bouclé sur sa liste de départ** — ce qui reste est du design et du zéro-dette. Évaluations a réglé **ses deux critiques et le cœur des majeurs** (import, auto-save, export) ; ce qui reste est surtout le garde des modes, l'échappement, et toute la colonne design.
 
@@ -76,8 +76,8 @@ Nés du même élan, hors liste de départ mais dans l'onglet : **#524-#528** (a
 | **B12** L'échec de la page de synthèse était invisible | — | #565 | ✅ Livré 28 août | Copie sans synthèse signalée à part |
 | **B13** Écart d'anonymisation dans la synthèse ; compteur trompeur | — | #566 | ✅ Livré 29 août | Texte libre anonymisé ; sélection Léa unique (`selectionnerEvaluationsLea`), compteur = PDF réels |
 | **C1** Variables CSS fantômes (`--attention`…) | Avertissements sans couleur d'alerte | #567 | ✅ Livré 29 août | Quatre substituées par la palette ; **78 autres fantômes mesurées → #595**, sous cliquet |
-| **C2** Cibles tactiles < 44 px | — | #568 | ⏳ Ouvert | Norme déjà appliquée ailleurs |
-| **C3** Écran « Exporter et archiver » hors design system | `form-select` ×6 (+2 sur Importer), pas d'état vide | #569 | ⏳ Ouvert | Portée rectifiée 28 août |
+| **C2** Cibles tactiles < 44 px | — | #568 | ✅ Livré 29 août | 44 px sous `pointer: coarse` ; porte terrain iPad |
+| **C3** Écran « Exporter et archiver » hors design system | `form-select` ×6 (+2 sur Importer), pas d'état vide | #569 | ✅ Livré 29 août | Dix selects sur `.controle-form`, titre aligné, état vide du module |
 | **C4** Flèches de tri à 2,0:1 en mode clair | **Ids dupliqués** à corriger avant la couleur | #570 | ✅ Livré 29 août | Ids `tri-eval-*`, couleur héritée de l'en-tête ; spec WebKit dans les deux modes |
 | **C5** PDF de rétroaction : densité et lisibilité | — | #571 | ✅ Livré 29 août (correctifs) | Garde de contraste sur les quatre sites, date échappée ; tailles inchangées par décision (automne) |
 | **D** Mineurs (Import, Liste, Annoter, Export, Design) | — | #572 | 🟠 Partiel 28 août (`43866c56`, `00a81a24`, `828981ad`) | Import et Export faits ; **restent Liste, Annoter, Design mineur** ; clés sessionStorage non namespacées à ouvrir à part ; `console.log` de diagnostic déclarés non recevables |
@@ -151,7 +151,7 @@ Ordre proposé : d'abord ce qui est **tranché et pas exécuté** (le plus court
 6. ~~**#571**~~ — livré 29 août (correctifs ; tailles à l'automne).
 7. ~~**#566**~~ — livré 29 août.
 8. **#572** — Liste, Annoter, Design mineur ; ouvrir à part les clés sessionStorage.
-9. ~~#567~~ (livré ; #595 ouvert pour les 78 autres fantômes), **#568, #569** — la colonne design (~~#570~~ livré).
+9. ~~#567~~ (livré ; #595 ouvert pour les 78 autres fantômes), ~~#568, #569, #570~~ — la colonne design, livrée le 29 août.
 10. **#587** — les neuf doublons tolérés par le cliquet.
 
 ### Échelles (transversal, né entre les deux audits)

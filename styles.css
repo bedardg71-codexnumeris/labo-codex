@@ -17786,6 +17786,19 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     transition: border-color 0.15s, transform 0.1s;
     padding: 0;
 }
+/* #569 — état vide rendu par le module lui-même (etats-vides.js s'efface devant .placeholder-vide) */
+.placeholder-vide { color: var(--gris-moyen); font-style: italic; margin: 8px 0 16px; }
+
+/* #568 (29 août 2026) — CIBLES TACTILES. Sur un pointeur grossier (iPad, doigt),
+   les flèches de la visionneuse (28 px), les pastilles de fond (28 px) et le menu
+   d'actions de la Liste (~24 px) montent à la norme de 44 px déjà appliquée
+   ailleurs (css/accompagnement.css). Au pointeur fin (Mac), la densité reste. */
+@media (pointer: coarse) {
+    .travaux-btn-nav { min-width: 44px; min-height: 44px; }
+    .travaux-fond-swatch { width: 44px; height: 44px; }
+    .eval-actions-select { min-height: 44px; padding: 8px 10px; font-size: 0.9rem; }
+}
+
 .travaux-fond-swatch:hover {
     border-color: var(--accent-primaire);
     transform: scale(1.15);

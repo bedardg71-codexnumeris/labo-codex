@@ -1165,10 +1165,12 @@
             : (tailleFiltree / 1024).toFixed(1) + ' Ko';
 
         conteneur.innerHTML = `
-            <h3>Archivage des travaux <button class="btn-aide-contextuelle" data-aide="archiver-travaux" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h3>
+            <h3>Exporter et archiver <button class="btn-aide-contextuelle" data-aide="archiver-travaux" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h3>
             <p class="texte-muted">${fichiersTravaux.length} ${pluriel(fichiersTravaux.length, 'fichier', 'fichiers')} en stock (${tailleFormatee})</p>
 
-            ${genererGrilleFichiers(fichiersTravaux, 'ouvrirPreviewInline')}
+            ${fichiersTravaux.length > 0
+                ? genererGrilleFichiers(fichiersTravaux, 'ouvrirPreviewInline')
+                : `<p class="placeholder-vide">Aucun fichier en stock pour ce groupe. Importe des travaux dans « Préparer et importer » : ils apparaîtront ici, prêts à être exportés ou archivés.</p>`}
 
             <div class="travaux-archivage-options">
                 <!-- Allégement : fonctionnalité RETIRÉE le 28 août 2026 (décision Grégoire). Le statut « facsimile » subsiste en lecture pour les fichiers déjà allégés. -->
@@ -1180,14 +1182,14 @@
                     <div class="travaux-archivage-filtres">
                         <div class="groupe-form">
                             <label>Production</label>
-                            <select id="travaux-archivage-production" class="form-select">
+                            <select id="travaux-archivage-production" class="controle-form">
                                 <option value="">— Toutes —</option>
                                 ${productions.map(p => `<option value="${echapperHtml(p.id)}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                             </select>
                         </div>
                         <div class="groupe-form">
                             <label>Étudiant·e</label>
-                            <select id="travaux-archivage-etudiant" class="form-select">
+                            <select id="travaux-archivage-etudiant" class="controle-form">
                                 <option value="">— Tous —</option>
                                 ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${echapperHtml(e.da)}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
                             </select>
@@ -1203,14 +1205,14 @@
                     <div class="travaux-archivage-filtres">
                         <div class="groupe-form">
                             <label>Production</label>
-                            <select id="travaux-archivage-semestre-production" class="form-select">
+                            <select id="travaux-archivage-semestre-production" class="controle-form">
                                 <option value="">— Toutes —</option>
                                 ${productions.map(p => `<option value="${echapperHtml(p.id)}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                             </select>
                         </div>
                         <div class="groupe-form">
                             <label>Étudiant·e</label>
-                            <select id="travaux-archivage-semestre-etudiant" class="form-select">
+                            <select id="travaux-archivage-semestre-etudiant" class="controle-form">
                                 <option value="">— Tous —</option>
                                 ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${echapperHtml(e.da)}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
                             </select>
@@ -1230,14 +1232,14 @@
                     <div class="travaux-archivage-filtres">
                         <div class="groupe-form">
                             <label>Production</label>
-                            <select id="travaux-archivage-lea-production" class="form-select" data-on-change="travauxUI.mettreAJourCompteurLea">
+                            <select id="travaux-archivage-lea-production" class="controle-form" data-on-change="travauxUI.mettreAJourCompteurLea">
                                 <option value="">— Choisir —</option>
                                 ${productions.map(p => `<option value="${echapperHtml(p.id)}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                             </select>
                         </div>
                         <div class="groupe-form">
                             <label>Étudiant·e</label>
-                            <select id="travaux-archivage-lea-etudiant" class="form-select" data-on-change="travauxUI.mettreAJourCompteurLea">
+                            <select id="travaux-archivage-lea-etudiant" class="controle-form" data-on-change="travauxUI.mettreAJourCompteurLea">
                                 <option value="">— Tous —</option>
                                 ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${echapperHtml(e.da)}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
                             </select>
@@ -1700,7 +1702,7 @@
 
         colCentre += `<div class="pipeline-production-selecteur">
             <label>Production</label>
-            <select class="form-select" id="pipeline-select-production" data-on-change="travauxUI.associerProductionGlobale">
+            <select class="controle-form" id="pipeline-select-production" data-on-change="travauxUI.associerProductionGlobale">
                 <option value="">— Choisir une production —</option>
                 ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${prodActuelle === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                 ${jetonsActifs ? `<option value="__jeton_reprise__" ${prodActuelle === '__jeton_reprise__' || modeJetonActif ? 'selected' : ''}>Jeton de reprise</option>` : ''}
@@ -1714,7 +1716,7 @@
                 || '';
             colCentre += `<div class="pipeline-jeton-sous-select" id="pipeline-jeton-production">
                 <label>Pour quelle production ?</label>
-                <select class="form-select" data-on-change="travauxUI.associerJetonProduction">
+                <select class="controle-form" data-on-change="travauxUI.associerJetonProduction">
                     <option value="">— Choisir —</option>
                     ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${prodJeton === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                 </select>
@@ -1796,7 +1798,7 @@
             </div>`;
             colCentre += `<div class="pipeline-champ">
                 <label>Modifier</label>
-                <select class="form-select pipeline-select-petit" data-on-change="travauxUI.changerProductionPipeline" data-param="${idx}">
+                <select class="controle-form pipeline-select-petit" data-on-change="travauxUI.changerProductionPipeline" data-param="${idx}">
                     <option value="">—</option>
                     ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${f.productionId === p.id && !f.estReprise ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                     ${jetonsActifs ? `<option value="__jeton_reprise__" ${f.estReprise ? 'selected' : ''}>Jeton de reprise</option>` : ''}
@@ -1807,7 +1809,7 @@
             if (f.estReprise) {
                 colCentre += `<div class="pipeline-champ pipeline-jeton-sous-select">
                     <label>Pour quelle production ?</label>
-                    <select class="form-select pipeline-select-petit" data-on-change="travauxUI.changerJetonProductionPipeline" data-param="${idx}">
+                    <select class="controle-form pipeline-select-petit" data-on-change="travauxUI.changerJetonProductionPipeline" data-param="${idx}">
                         <option value="">—</option>
                         ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${f.productionId === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                     </select>
