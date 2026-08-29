@@ -111,7 +111,9 @@ annoncer. Deux canaux, dans cet ordre d'efficacité.
 
 **1. Le message de rentrée à la CoP** (`Cowork A26 CoP Labo Codex/message-cop-rentree-2026.md`,
 non encore envoyé). C'est le meilleur véhicule : il part vers des gens qui liront, il est déjà
-rédigé, et il annonce déjà un sondage. Un paragraphe à y insérer :
+rédigé, et il annonce déjà un sondage. ✅ **Le paragraphe ci-dessous Y EST INSÉRÉ depuis le 29 août 2026**
+(entre « la carte d'alignement » et « Ce que ça change pour notre rencontre ») — Grégoire le croyait
+perdu ; seule l'insertion manquait, le texte a toujours été ici. Le paragraphe, pour mémoire :
 
 > **Une petite chose à savoir.** À partir du 1er septembre, Labo Codex demande une identification
 > à l'entrée : tu donnes ton courriel, tu reçois un code, tu le colles, et tu n'y repenses plus
