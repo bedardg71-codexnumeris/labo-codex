@@ -19,7 +19,7 @@
 | Onglet | Constats de départ (25 août) | Réglés | Partiels | Ouverts | Items ouverts qui les portent |
 |---|---|---|---|---|---|
 | **Conception** | 15 (A1-A4, B1-B5, C1-C6) | **11** | 0 | **4** | #519 (C1, C3, C5), #520 (C6) — plus deux restes rattachés : #522, barre d'actions du 4ᵉ écran |
-| **Évaluations** | 20 (A1-A2, B1-B13, C1-C5) + section D « mineurs » | **11** | 0 | **9** | #560, #561, #566, #567, #568, #569, #570, #571 ; D partiel → #572 |
+| **Évaluations** | 20 (A1-A2, B1-B13, C1-C5) + section D « mineurs » | **12** | **1** (B5 : portée à trancher) | **7** | #561, #566, #567, #568, #569, #570, #571 ; D partiel → #572 |
 
 Lecture honnête de ces chiffres : Conception est **presque bouclé sur sa liste de départ** — ce qui reste est du design et du zéro-dette. Évaluations a réglé **ses deux critiques et le cœur des majeurs** (import, auto-save, export) ; ce qui reste est surtout le garde des modes, l'échappement, et toute la colonne design.
 
@@ -66,10 +66,10 @@ Nés du même élan, hors liste de départ mais dans l'onglet : **#524-#528** (a
 | **B2** « Rés. max. » revenait à 250 à chaque re-render | — | #558 | ✅ Livré 28 août | — |
 | **B3** Choix par fichier perdus à la restauration | Protection #313 inopérante après reload | #558 | ✅ Livré 28 août | — |
 | **B4** Poste de préparation : la case cochée marquait un fichier étranger | — | #559 | ✅ Livré 28 août (`384ee6f1`) | Trois fonctions, pas deux |
-| **B5** Suppressions par couple trop larges + contournement du garde des modes | — | #560 | ⏳ Ouvert | Deux sites vivants ; second défaut (portée) distinct |
+| **B5** Suppressions par couple trop larges + contournement du garde des modes | — | #560 | 🟠 Garde livrée 29 août | Deux sites passent par le garde et disent le refus ; **la portée des suppressions reste à trancher** (règle métier) |
 | **B6** Réassociation avec jeton : l'async n'est pas attendu | Reprise créée sur l'ancienne production | #561 | ⏳ Ouvert | Se traite avec le `if` vide de `changerProductionFichier` (#572) |
 | **B7** Échappement incomplet dans la Liste | `da`, `niveauFinal` + `evaluationId`, `productionId`, `fichierId` | #562 | ✅ Livré 29 août | Onze interpolations échappées ; banc hostile + cliquet statique récursif |
-| **B8** Le jeton personnalisé contournait le garde des modes | **Site mort** — mesuré le 28 août | #560 | ⏳ Ouvert | À traiter par retrait, pas par correctif |
+| **B8** Le jeton personnalisé contournait le garde des modes | **Site mort** — mesuré le 28 août | #560 | ✅ Livré 29 août | Retiré (définition + exports) |
 | **B9** Décocher « Reprise ciblée » ne retirait rien ; échecs silencieux | — | #563 | ✅ Livré 29 août | Échecs silencieux réglés le 28 ; case, handler, fonction d'application et tampon retirés le 29 — plus aucun chemin ne crée une reprise ciblée ; **décision restante** : le type dans le wizard |
 | **B10** L'auto-save ne couvrait que les critères | Rétroaction seule perdue en navigation rapide | #564 | ✅ Livré 28 août (`b4755301`) | — |
 | **B11** Un étudiant en échec avortait tout le lot d'export | — | #565 | ✅ Livré 28 août (`cf378263`) | Échec isolé et nommé |
@@ -146,7 +146,7 @@ Ordre proposé : d'abord ce qui est **tranché et pas exécuté** (le plus court
 1. **#555 exécution** — ligne « Progrès » à trois zones (C) dans le PDF et le bilan ; texte d'aide du curseur « Seuil de défi » (A). Libellés = les mots de Grégoire.
 2. ~~**#563**~~ — livré 29 août ; reste la décision sur le type dans le wizard.
 3. ~~**#562**~~ — livré 29 août.
-4. **#560** — garde des modes : deux sites vivants à router, un site mort à retirer.
+4. ~~**#560**~~ — livré 29 août ; reste la portée des suppressions par couple (décision).
 5. **#561** — attendre `changerProductionFichier` (+ le `if` vide voisin).
 6. **#571** — correctifs arbitrés (garde de luminance, date), à re-mesurer sur HEAD d'abord.
 7. **#566** — anonymisation de la synthèse ; compteur.

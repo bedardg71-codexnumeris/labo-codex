@@ -2400,7 +2400,17 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `queueOffset === -1` (« Ajouter des pages ») et une file d'import non vide, l'écriture atterrit
   sur **un autre fichier de la file**.
 
-- [ ] **#560 — Trois écritures directes contournent le garde des modes.** (constats B5, B8)
+- [x] **#560 LIVRÉ 29 août 2026 — les deux écritures vivantes passent par le garde des modes et disent le refus ; le site mort est retiré.** (constats B5, B8)
+  `supprimerFichierDefinitivement` et « Vider la corbeille » (`liste-evaluations.js`) réécrivent les évaluations par
+  `sauvegarderDonneesSelonMode`, testent son retour et, sur refus (mode anonymisation), le DISENT : « le fichier est
+  supprimé / la corbeille est vidée, mais les évaluations liées n'ont pas été retirées ». Les caches ne sont invalidés
+  que si l'écriture a eu lieu. `appliquerJetonPersonnalise` + `afficherJetonsPersonnalisesEvaluation` (`evaluation.js`)
+  retirées (mortes depuis juin), exports compris ; banc `refactor-evaluation` adapté.
+  **Sentinelle** `sentinelle-560-garde-des-modes-liste` (cliquets statiques : zéro écriture directe, garde testée sur les
+  deux chemins avec refus dit, site mort absent) ; **break-test** 3 mutations, 3 rouges.
+  ⏳ **NON traité, distinct** : le second défaut de B5 — ces suppressions par couple (DA, production) emportent originales,
+  reprises et l'évaluation active d'un fichier réimporté. C'est une règle métier (que supprime-t-on avec un fichier ?), à
+  trancher avant de coder.
   `supprimerFichierDefinitivement` et le nettoyage de « Vider la corbeille » (`liste-evaluations.js`),
   ainsi que le jeton personnalisé (`evaluation.js`), écrivent par `db.setSync(cle(...))` direct —
   esquivant le blocage du mode anonymisation que `supprimerEvaluation` respecte.

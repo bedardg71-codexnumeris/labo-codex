@@ -236,8 +236,6 @@ describe('evaluation — régression refactoring 2026-mai (pré-refactor, 7 test
             'supprimerEvaluationBanque',
             // Zone Banque jetons + recherche + édition (L6851-7348) — 4 exports
             'retirerJeton',
-            'afficherJetonsPersonnalisesEvaluation',
-            'appliquerJetonPersonnalise',
             'copierCriteresSRPN',
             'copierCriteresSRPNF',
             'editerFichierDepuisEvaluation',
