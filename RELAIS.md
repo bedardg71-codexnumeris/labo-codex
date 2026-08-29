@@ -103,8 +103,9 @@ sous BSD sed : trois mutations « vertes » n'avaient rien muté — refaites en
 
 ### 📋 ARTEFACT DE VÉRIFICATION TERRAIN — `https://claude.ai/code/artifact/9f92e346-b61b-4b6b-92e7-f8dc7da2b0db`
 
-Huit vérifications sur sa session (#594, #578, #593, #563/#574, #560, #566, #561, #571), verdict + note enregistrés
-dans la page. **Dû par Grégoire** après le bump 1.106.2.
+Huit vérifications sur sa session (#594, #578, #593, #563/#574, #560, #566, #561, #571). ✅ **RELEVÉE le 29 août à
+19 h 45, sur 1.106.2 : 8/8 conformes**, verdicts enregistrés dans la page. Le panneau de version (#594) est apparu au
+rechargement. Reste la porte iPad de #568 (cibles tactiles au doigt).
 
 ### ✅ #571 LIVRÉ (correctifs) — LE PDF RESTE LISIBLE SUR LES COULEURS DE L'ÉCHELLE
 
