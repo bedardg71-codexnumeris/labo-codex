@@ -72,7 +72,7 @@ Grégoire : « je ne sais plus où nous en sommes par rapport à la situation de
 n'existait pas — deux audits du 25 août (photos), une seconde passe le 27 (couche), un backlog dispersé.
 ⮕ **Créé** (option A, point zéro = 25 août) : constat par constat → item → statut → preuve, plus le bloc de la
 seconde passe et la liste de travail ordonnée. Chiffres : **Conception 11 réglés / 15, Évaluations 9 réglés /
-20 + 1 partiel**. Quatre constats de la seconde passe sont **sans item** (§2.1 n° 5-6-7, D3) — à inscrire.
+20 + 1 partiel**. Les quatre constats sans item de la seconde passe sont inscrits sous **#593**.
 **Règle** : chaque livraison coche sa ligne là-bas ; ce relais n'y redit rien.
 
 ### 📌 ARBITRAGES — UN SEUL ARTEFACT, APRÈS LE CHIFFRE #578 (décision de Grégoire, 29 août 4 h)
@@ -93,7 +93,7 @@ sans note. Consignées aux items. ⮕ Trois chantiers d'exécution distincts, UN
 défi » (`index.html:8764`). ⚠ L'artefact porte désormais la seule copie de ses réponses : LIRE avant toute
 republication (cf. mémoire `republier-artefact-ecriture-destructive`).
 
-### 📌 IDs — prochain libre : **#593** (inchangé)
+### 📌 IDs — **#593 PRIS** le 29 août (reliquats Conception) ; prochain libre : **#594**
 
 ---
 
