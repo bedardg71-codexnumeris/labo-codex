@@ -630,9 +630,9 @@ function genererBlocConsolidation(da) {
     // seuil venait jusqu'ici d'une convention (« avant-dernier niveau ») qui
     // tombait juste par coïncidence sur une échelle I/D/M/E et faux ailleurs,
     // sans que rien ne le signale à l'écran.
-    const reserve = consolidation.seuilMaitriseDeduit
+    const reserve = consolidation.scoreMaitriseDeduit
         ? '<div style="margin-top: 6px; font-size: 0.78rem; color: var(--gris-moyen); font-style: italic;">' +
-          echapperHtml(_libelleSeuilDeduit(consolidation.seuilMaitriseRaison)) +
+          echapperHtml(_libelleSeuilDeduit(consolidation.scoreMaitriseRaison)) +
           '</div>'
         : '';
 
@@ -646,7 +646,7 @@ function genererBlocConsolidation(da) {
  * Dit POURQUOI le seuil de maîtrise a dû être déduit — une phrase par cas, en
  * langage d'enseignant plutôt qu'en code de diagnostic.
  * #555 lot 2 (28 août 2026).
- * @param {string|null} raison valeur rendue par `_detecterSeuilMaitrise`
+ * @param {string|null} raison valeur rendue par `_detecterScoreMaitrise`
  * @returns {string}
  */
 function _libelleSeuilDeduit(raison) {

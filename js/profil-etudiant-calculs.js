@@ -1734,17 +1734,17 @@ function identifierDefiSpecifique(da) {
  */
 function identifierPatternActuel(performancePAN3, aUnDefi) {
     // Utiliser les seuils configurables IDME
-    const seuilInsuffisant = obtenirSeuil('idme.insuffisant');      // Par défaut 0.64 (64%)
-    const seuilDeveloppement = obtenirSeuil('idme.developpement');  // Par défaut 0.75 (75%)
+    const seuilIdmeInsuffisant = obtenirSeuil('idme.insuffisant');      // Par défaut 0.64 (64%)
+    const seuilIdmeDeveloppement = obtenirSeuil('idme.developpement');  // Par défaut 0.75 (75%)
 
 
     // Difficulté persistante : Performance < 64% (Incomplet - unistructurel)
-    if (performancePAN3 < seuilInsuffisant) {
+    if (performancePAN3 < seuilIdmeInsuffisant) {
         return 'Difficulté persistante';
     }
 
     // Difficulté émergente : Performance < 75% (En développement - multistructurel) ET a un défi
-    if (performancePAN3 < seuilDeveloppement && aUnDefi) {
+    if (performancePAN3 < seuilIdmeDeveloppement && aUnDefi) {
         return 'Difficulté émergente';
     }
 
@@ -1826,15 +1826,15 @@ function determinerNiveauRaiPedagogique(da) {
     const pattern = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null);
 
     // Seuils configurables
-    const seuilMaitrise = obtenirSeuil('idme.maitrise');
-    const seuilDeveloppement = obtenirSeuil('idme.developpement');
-    const seuilInsuffisant = obtenirSeuil('idme.insuffisant');
+    const seuilIdmeMaitrise = obtenirSeuil('idme.maitrise');
+    const seuilIdmeDeveloppement = obtenirSeuil('idme.developpement');
+    const seuilIdmeInsuffisant = obtenirSeuil('idme.insuffisant');
 
 
     // LOGIQUE PÉDAGOGIQUE (basée uniquement sur P et SRPNF)
 
     // Niveau 3 - Intensif : Difficulté persistante (P < insuffisant OU plusieurs critères < développement)
-    if (pattern === 'Difficulté persistante' || P < seuilInsuffisant) {
+    if (pattern === 'Difficulté persistante' || P < seuilIdmeInsuffisant) {
         return {
             niveau: 3,
             label: 'Niveau 3 - Intensif',
@@ -1851,10 +1851,10 @@ function determinerNiveauRaiPedagogique(da) {
     // Niveau 2 - Préventif : Performance en développement (<75%) OU Difficulté émergente OU Défi spécifique
     // Un élève avec P en zone "Développement" (65-74%) nécessite un accompagnement préventif,
     // même si son pattern est "Stable" (pas de défi identifié).
-    if (P < seuilDeveloppement || pattern === 'Difficulté émergente' || pattern === 'Défi spécifique') {
+    if (P < seuilIdmeDeveloppement || pattern === 'Difficulté émergente' || pattern === 'Défi spécifique') {
         // Déterminer la description selon le contexte
         let description;
-        if (P < seuilDeveloppement && pattern === 'Stable') {
+        if (P < seuilIdmeDeveloppement && pattern === 'Stable') {
             description = 'Performance en développement nécessitant un accompagnement préventif.';
         } else if (pattern === 'Difficulté émergente') {
             description = 'Difficultés émergentes nécessitant une intervention préventive ciblée.';

@@ -1874,6 +1874,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   hors de son cégep.
 
 - [ ] **#579 — L'échelle embarquée d'une pratique configurable ne peut PAS recevoir ses repères de maîtrise.**
+  ✅ **LIVRÉ POUR LE CAS DE L'ASSISTANT le 28 août 2026 (soir), par #577.** MESURÉ au code : l'assistant
+  n'embarque JAMAIS d'échelle — il écrit `configuration.echelleId`, une RÉFÉRENCE vers
+  `echellesTemplates`. Les repères d'une pratique créée par l'assistant vivent donc sur l'échelle
+  référencée, posables dans l'assistant (#577) et dans l'éditeur d'échelle.
+  ⚠ **CE QUI RESTE** : la forme **legacy `config.echelle`** (échelle EMBARQUÉE, lue par
+  `_echelleDePratiqueConfigurable`, `_resoudreEchellePratique` et trois sites d'`evaluation-*.js`).
+  Aucun écrivain dans le code applicatif : `grep` ne trouve `config.echelle =` nulle part, seul le pack
+  démo porte une `echelle` (au niveau racine de la pratique, pas sous `config`). C'est donc un chemin
+  de **données anciennes ou importées**, pas un chemin vivant de création. ⮕ À traiter avec **#580**
+  (les deux reconstructions à liste blanche), qui touche exactement ces sites.
   ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A : dans l'assistant de configuration** de la
   pratique, ce qui rejoint #577.
   ⮕ Sa précision, qui élargit l'item : « *Une fois configuré avec l'assistant, les données et les
@@ -2018,6 +2028,23 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **CE QUE ÇA NE TRANCHE PAS** : où vit la table de correspondance, comment elle est
   chiffrée, ce qu'il advient d'elle si la machine est perdue — et si « lui seul » tient
   encore quand un fichier anonymisé circule vers un tiers qui, lui, n'a pas la table.
+
+- [ ] **#592 — Le mode « par objectifs » de `pratique-notation-v2.js` est mort, et il porte encore le mot `seuilMaitrise`.**
+  Créé le 28 août 2026 pendant #555 (d). Bloque la clôture propre du nommage : c'est l'**exception
+  nommée** du cliquet `sentinelle-555-d-seuil-maitrise-un-seul-sens` (4 occurrences tolérées).
+  **MESURÉ** : la section « GESTION PAR-OBJECTIFS » (l. 245-~657, `CONFIG_PAR_OBJECTIFS_DEFAUT`,
+  `chargerConfigParObjectifs`, `chargerParametresMode`, `sauvegarderModeCalculObjectifs`…) n'est
+  atteinte que si `#v2-config-par-objectifs` existe — **0 occurrence dans `index.html`**, de même que
+  `v2-objectifs-mode-calcul`, `v2-config-mode-comptage`, `v2-comptage-seuil-maitrise`. Le mode a été
+  retiré par #435 (« le moteur ne la lit plus ») et normalisé en lecture par #443. Le `seuilMaitrise: 75`
+  qui y vit est un POURCENTAGE 0-100 : le quatrième sens du mot, qu'on ne renomme pas parce qu'on ne
+  renomme pas du code mort — on le retire (`feedback-verifier-consommateurs-avant-brancher`).
+  ⮕ **Geste** : mesurer les appelants de chaque fonction de la section (dont l'export
+  `window.chargerConfigParObjectifs`, l. 1217, et l'appel l. 171 gardé par un `getElementById` qui rend
+  `null`), retirer fonction par fonction — **jamais par plage** (`feedback_nettoyage_par_zone_dangereux`)
+  —, puis **retirer la ligne `js/pratique-notation-v2.js` de `EMPLOIS_CONNUS`** dans la sentinelle : le
+  cliquet rougit si on l'oublie, c'est voulu. Une config `modalites.parObjectifs` déjà stockée n'est ni
+  relue ni réécrite (#443) : rien à migrer.
 
 - [ ] **#587 — Neuf autres fonctions sont définies deux fois et posées deux fois sur `window`.**
   ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A : DÉDUPLICATION PAR DÉFAUT.** Un nom, une
@@ -2520,6 +2547,32 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   retirer la branche. Vérifier les consommateurs AVANT de brancher.
 
 - [ ] **#555 — Le seuil de défi : un défaut à 0,70, des replis qui divergent, et la marque de maîtrise absente.**
+  ✅ **LOT 2 (d) ET (e) LIVRÉS le 28 août 2026 (soir)** — avec #577, même commit.
+  · **(d) le nommage — option A exécutée.** `seuilMaitrise` ne désigne plus que le CODE de niveau porté
+    par l'échelle. La matrice de consolidation nomme son score 0-1 `scoreMaitrise` (+ `Deduit`,
+    `Raison`, `_detecterScoreMaitrise`, `_scoreParConvention`) ; la préférence 0-1 se nomme
+    `seuilIdmeMaitrise` (et ses deux voisins `seuilIdmeInsuffisant` / `seuilIdmeDeveloppement`, dans les
+    trois fonctions qui la lisent). Le quatrième sens — le pourcentage 0-100 de `pratique-notation-v2.js`
+    — est du **code mort** (mode « par objectifs » retiré par #435, son écran n'existe plus dans
+    `index.html`) : on ne renomme pas du code mort, on le retire — **#592**.
+    Sentinelle `sentinelle-555-d-seuil-maitrise-un-seul-sens` : un CLIQUET qui compte le mot fichier par
+    fichier, commentaires retirés, contre une liste fermée (4 mutations, 4 rouges, témoin vert).
+  · **(e) l'éditeur d'échelle NEUVE porte le bloc des repères** — sur un tampon
+    (`_reperesNouvelleEchelle`), avec les MÊMES refus (`refusRepereEchelle` sur l'échelle en cours de
+    saisie), la même règle du vide, et une **revérification à l'enregistrement** : un code renommé après
+    avoir été désigné ne part pas en base, l'enregistrement le dit et attend. Seuls les repères posés
+    sont écrits — jamais de clé vide. L'aperçu des deux éditeurs n'a plus qu'**un producteur**
+    (`apercuNiveauxEchelleHtml`) : celui de l'échelle neuve ne disait pas la zone. `blocReperesEchelle`
+    paramétré par handler (deux appelants, plus un troisième dans l'assistant).
+    Sentinelle `sentinelle-555-e-reperes-echelle-neuve` (13 cas, 5 mutations, 5 rouges) + cas WebKit
+    dans `echelle-reperes-maitrise-rendu.spec.js` : le `change` natif passe par le dispatcher jusqu'au
+    tampon, et le refus se VOIT (liste marquée `champ-refuse`, valeur refusée gardée — même contrat que
+    l'éditeur vivant, ce que ma première assertion avait faux).
+  ⏳ **CE QUI RESTE DE #555** : (a) `evaluation-retroaction.js` — **MESURÉ ce soir : 0 comparaison IDME
+  en dur dans le code exécutable** (commentaires retirés) ; la ligne « 8 lignes / 18 comparaisons »
+  plus bas est PÉRIMÉE, (a) a été livré à 14 h 05 (1.105.0). Restent deux décisions, pas du code : la
+  zone intermédiaire comme progrès, et l'intention P1 « demander à l'utilisateur dans Outils
+  d'observation ».
   ✅ **DEUX ARBITRAGES DE GRÉGOIRE, le 28 août 2026 au soir** (registre : artefact « Arbitrages Labo Codex »).
   **(1) Le repli quand le repère n'est pas lisible — option B** : la matrice de consolidation **ne calcule
   RIEN et le dit**, exactement comme un niveau sans `valeurCalcul`. Le repli `0,75` disparaît de
@@ -2689,6 +2742,35 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   les quatre autres items en attente de #555, ce qui n'attend pas vraiment.
 
 - [ ] **#577 — L'assistant de configuration des pratiques ignore les deux repères de maîtrise.**
+  ✅ **LIVRÉ le 28 août 2026 (soir)** — décisions A1 (option A) et A3 (option A) exécutées.
+  · L'étape **« Échelle de performance »** (`echelle-performance`, STD/SPE) rend, SOUS la liste des
+    échelles, le bloc « Repères de maîtrise » de l'échelle CHOISIE — **le bloc de l'éditeur lui-même**
+    (`blocReperesEchelle`, handler `wizardV2ModifierRepereEchelle`), pas une copie. Choisir une échelle
+    re-rend l'étape (`rafraichir: true`, même mécanique que le garde-fou a4).
+  · L'écriture passe par **`ecrireRepereEchelle`** (extraite de `modifierRepereEchelle`, echelles.js) :
+    même transaction `db.modifier`, mêmes refus, même règle du vide — SANS prendre
+    `echelleTemplateActuelle` ni redessiner `#tableauNiveauxEchelle`, qui vit dans un autre écran.
+    Après écriture, l'étape est re-rendue : listes et aperçu (zones) disent l'état enregistré.
+  · **Trois états, et chacun se dit** : aucune échelle choisie → rien ; ordre des plages illisible →
+    renvoi à Conception → Échelles, une fois chaque niveau doté d'un code et d'une borne « Min » ;
+    repère manquant → avertissement ambre : « Sans ces deux repères, la rétroaction remise à l'élève ne
+    peut ni nommer ses priorités ni dire ce qui est acquis. » **On peut avancer sans** (l'option (c)
+    « refuser d'avancer » n'a pas été retenue : A3 dit « poser dans l'assistant », pas « bloquer »).
+  · Le **récapitulatif** dit si les repères sont posés, et ce que leur absence coûte.
+  · **Vocabulaire** : l'étape ne dit jamais « seuil » (le mot est au dépistage) — une assertion le garde.
+  · **Modifiable après coup** (précision de Grégoire sur #579) : oui, dans Conception → Échelles, c'est
+    le même champ sur la même échelle.
+  Sentinelle `sentinelle-577-assistant-reperes-echelle` (11 cas, wizard + echelles.js dans le même
+  bac à sable ; 6 mutations, 6 rouges) + spec WebKit `wizard-577-reperes-echelle-rendu.spec.js`
+  (`afficherEtapeWizardV2` exposée pour rendre l'étape dans le vrai DOM ; le `change` natif écrit en
+  base par le dispatcher ; l'échelle de test est retirée du localStorage partagé en `finally`).
+  ⏳ **CE QUI RESTE, ET QUI N'EST PAS UN OUBLI** :
+  · **DEN** (`config-denotation`) : son échelle est « pour la rétroaction, pas le calcul » ; les repères
+    y ont un autre sens — **non tranché, donc pas recopié**. Une assertion documente le choix.
+  · **Réserve A1** (« PAN-STD ici ; ce pourrait être différent pour d'autres PAN, voire d'autres
+    utilisateurs ») : les libellés « suffisant / maîtrisé » viennent d'UNE source (`REPERES_ECHELLE`) ;
+    les rendre configurables PAR FAMILLE de pratique est un chantier distinct, à ouvrir sur un besoin
+    exprimé par un expérimentateur, pas avant.
   ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A**, en même temps que #555 (d) : le **CODE de
   niveau** garde le nom `seuilMaitrise` ; les quatre autres sens deviennent explicites.
   ⮕ Sa réserve, à ne pas perdre : « **On parle de la pratique PAN-STD ici. Ce pourrait être différent
