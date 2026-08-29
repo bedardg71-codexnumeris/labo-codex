@@ -2434,7 +2434,13 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **Second défaut de B5, distinct** : ces suppressions par couple (DA, production) sont **trop
   larges** — elles emportent originales, reprises et l'évaluation active d'un fichier réimporté.
 
-- [ ] **#561 — Réassociation avec jeton de reprise : l'async n'est pas attendu.** (constat B6)
+- [x] **#561 LIVRÉ 29 août 2026 — la réassociation rend un verdict, et la Liste l'attend avant de marquer la reprise.** (constat B6)
+  Cause amont : `changerProductionFichier` (`travaux-ui.js`) ne rendait RIEN — son `if (ok) {}` vide (sous-constat de #572)
+  était le verdict jamais rendu. Elle rend `true` (réassocié) ou `false` (confirm refusé, stockage en échec).
+  `associerProductionDepuisListe` : le handler est `async`, ATTEND le verdict et, s'il est faux, dit « Réassociation
+  annulée : aucun jeton appliqué » sans marquer `estReprise` ni consommer le jeton ; même attente sur la branche simple.
+  **Sentinelle** `sentinelle-561-reassociation-verdict` (4 cas comportementaux dans le sandbox de #313 + cliquet sur
+  l'ordre await → garde → `estReprise`) ; **break-test** 3 mutations, 4 rouges.
   `associerProductionDepuisListe` n'attend pas `travauxUI.changerProductionFichier` (async, peut
   avorter sur `confirm()` refusé) mais marque quand même `estReprise:true` et consomme le jeton
   → **reprise créée sur l'ancienne production**.
@@ -2630,6 +2636,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   (écran **Importer**) et dans `changerProductionFichier` (`travaux-ui.js`).
   ⮕ Le second **se traite avec #561** : c'est la fonction même dont #561 dit que le retour n'est pas
   attendu. Même endroit, même geste.
+  ✅ **Réglé par #561 (29 août)** : `changerProductionFichier` rend un verdict, le `if` vide est parti.
   **Export** : barres de progression jamais remises à zéro · noms de dossiers ZIP non assainis (un
   « / » crée des sous-dossiers ; fichier sans extension → la version annotée écrase l'original) ·
   code mort `lancerAllegement` · `echapperHtml` n'échappe pas les guillemets (`config.js`) · couleurs

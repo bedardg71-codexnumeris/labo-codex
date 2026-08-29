@@ -1592,7 +1592,7 @@ function associerProductionDepuisListe(fichierId, da) {
         }
     });
 
-    document.getElementById('associer-prod-btn-confirmer').onclick = function() {
+    document.getElementById('associer-prod-btn-confirmer').onclick = async function() {
         var prodId = document.getElementById('associer-prod-select').value;
         if (!prodId) return;
 
@@ -1602,9 +1602,16 @@ function associerProductionDepuisListe(fichierId, da) {
             var jetonProdId = jetonProdSelect ? jetonProdSelect.value : '';
             if (!jetonProdId) return;
 
-            // Réassocier le fichier à la production cible + marquer comme reprise
+            // #561 — Réassocier D'ABORD, et ATTENDRE le verdict : `changerProductionFichier`
+            // peut s'arrêter sur un `confirm()` refusé. Marquer « reprise » et consommer
+            // le jeton sans ce verdict créait la reprise sur l'ANCIENNE production.
             if (typeof travauxUI !== 'undefined' && typeof travauxUI.changerProductionFichier === 'function') {
-                travauxUI.changerProductionFichier(fichierId, jetonProdId);
+                var reassocie = await travauxUI.changerProductionFichier(fichierId, jetonProdId);
+                if (!reassocie) {
+                    notifications.info('Réassociation annulée', 'Le fichier reste sur sa production ; aucun jeton de reprise n\'a été appliqué.');
+                    overlay.remove();
+                    return;
+                }
             }
             travauxStockage.mettreAJourFichier(fichierId, { estReprise: true });
 
@@ -1626,7 +1633,8 @@ function associerProductionDepuisListe(fichierId, da) {
         }
 
         if (typeof travauxUI !== 'undefined' && typeof travauxUI.changerProductionFichier === 'function') {
-            travauxUI.changerProductionFichier(fichierId, prodId);
+            var ok = await travauxUI.changerProductionFichier(fichierId, prodId);
+            if (!ok) notifications.info('Réassociation annulée', 'Le fichier reste sur sa production.');
         }
         overlay.remove();
         appliquerFiltres();
