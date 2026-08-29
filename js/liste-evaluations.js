@@ -2765,7 +2765,8 @@ function supprimerFichierDefinitivement(id) {
         await travauxStockage.supprimerDefinitivement(id);
 
         // Nettoyer les évaluations liées (par etudiantDA + productionId)
-        // ACCÈS DIRECT — read-modify-write : doit lire TOUTES les évaluations pour réécrire sans perte
+        // Lecture directe (read-modify-write : lire TOUTES les évaluations pour réécrire sans perte) ;
+        // l'ÉCRITURE, elle, passe par le garde des modes (#560).
         if (fichier && fichier.etudiantDA && fichier.productionId) {
             var evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
             var avant = evaluations.length;
@@ -2773,12 +2774,18 @@ function supprimerFichierDefinitivement(id) {
                 return !(ev.etudiantDA === fichier.etudiantDA && ev.productionId === fichier.productionId);
             });
             if (evaluations.length < avant) {
-                db.setSync(cle('evaluationsSauvegardees'), evaluations);
-                // Tier 6.3 : Invalider les caches de moyennes
-                window._moyennesQualifies = null;
-                window._moyennesToutes = null;
-                if (typeof calculerEtStockerIndicesCP === 'function') {
-                    calculerEtStockerIndicesCP();
+                // #560 — par le GARDE DES MODES, comme `supprimerEvaluation` : en mode
+                // anonymisation l'écriture est refusée, et on le DIT — le fichier est
+                // parti, les évaluations liées restent, l'écran ne prétend pas le contraire.
+                if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+                    notifications.erreur('Évaluations conservées', 'Le fichier est supprimé, mais ses évaluations n\'ont pas été retirées : écriture refusée en mode anonymisation.');
+                } else {
+                    // Tier 6.3 : Invalider les caches de moyennes
+                    window._moyennesQualifies = null;
+                    window._moyennesToutes = null;
+                    if (typeof calculerEtStockerIndicesCP === 'function') {
+                        calculerEtStockerIndicesCP();
+                    }
                 }
             }
         }
@@ -2841,7 +2848,8 @@ function viderTouteCorbeille() {
         await travauxStockage.viderCorbeille(fichiersCorbeille);
 
         // Nettoyer les évaluations liées à chaque fichier supprimé
-        // ACCÈS DIRECT — read-modify-write : doit lire TOUTES les évaluations pour réécrire sans perte
+        // Lecture directe (read-modify-write : lire TOUTES les évaluations pour réécrire sans perte) ;
+        // l'ÉCRITURE, elle, passe par le garde des modes (#560).
         if (fichiersCorbeille.length > 0) {
             var evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
             var avant = evaluations.length;
@@ -2852,12 +2860,16 @@ function viderTouteCorbeille() {
                 });
             });
             if (evaluations.length < avant) {
-                db.setSync(cle('evaluationsSauvegardees'), evaluations);
-                // Tier 6.3 : Invalider les caches de moyennes
-                window._moyennesQualifies = null;
-                window._moyennesToutes = null;
-                if (typeof calculerEtStockerIndicesCP === 'function') {
-                    calculerEtStockerIndicesCP();
+                // #560 — même garde que ci-dessus, même honnêteté sur le refus.
+                if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+                    notifications.erreur('Évaluations conservées', 'La corbeille est vidée, mais les évaluations liées n\'ont pas été retirées : écriture refusée en mode anonymisation.');
+                } else {
+                    // Tier 6.3 : Invalider les caches de moyennes
+                    window._moyennesQualifies = null;
+                    window._moyennesToutes = null;
+                    if (typeof calculerEtStockerIndicesCP === 'function') {
+                        calculerEtStockerIndicesCP();
+                    }
                 }
             }
         }

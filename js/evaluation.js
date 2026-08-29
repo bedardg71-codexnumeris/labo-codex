@@ -2982,107 +2982,13 @@ window.mettreAJourBoutonVoirTravail = mettreAJourBoutonVoirTravail;
 // FONCTIONS POUR JETONS PERSONNALISÉS
 // ============================================
 
-/**
- * Affiche les jetons personnalisés disponibles dans le sidebar d'évaluation
- */
-function afficherJetonsPersonnalisesEvaluation() {
-    const conteneur = document.getElementById('jetonsPersonnalisesOptions');
-    if (!conteneur) {
-        return;
-    }
-
-    // Récupérer les jetons personnalisés depuis la configuration
-    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    const jetonsPersonnalises = config.jetons?.typesPersonnalises || [];
-
-    if (jetonsPersonnalises.length === 0) {
-        conteneur.innerHTML = '';
-        conteneur.classList.add('u-hide');
-        return;
-    }
-
-    // Afficher le conteneur
-    conteneur.classList.remove('u-hide');
-
-    // Générer un badge avec checkbox pour chaque jeton personnalisé
-    conteneur.innerHTML = jetonsPersonnalises.map(jeton => `
-        <div style="display: flex; align-items: flex-start; gap: 10px;">
-            <input type="checkbox" id="checkboxJetonPerso_${jeton.id}" class="u-mt-6">
-            <div class="u-flex-1">
-                <span class="badge-jeton-personnalise-wrapper">
-                    <span class="badge-jeton-titre">${echapperHtml(jeton.nom)}</span>
-                </span>
-                <p class="text-085-muted-m5-0-0-0" style="margin: 4px 0 0 0; font-size: 0.75rem;">
-                    ${echapperHtml(jeton.description)}
-                </p>
-            </div>
-        </div>
-    `).join('');
-}
-
-/**
- * Applique un jeton personnalisé à l'évaluation
- * @param {string} jetonId - ID du jeton à appliquer
- */
-function appliquerJetonPersonnalise(jetonId) {
-    if (!window.evaluationEnCours?.idModification) {
-        notifications.erreur('Erreur', 'Tu dois charger une évaluation existante pour appliquer un jeton');
-        return;
-    }
-
-    // Récupérer les informations du jeton
-    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    const jeton = config.jetons?.typesPersonnalises?.find(j => j.id === jetonId);
-
-    if (!jeton) {
-        notifications.erreur('Erreur', 'Jeton personnalisé introuvable');
-        return;
-    }
-
-    // Confirmer l'application
-    if (!confirm(`Veux-tu appliquer le jeton «${jeton.nom}» à cette évaluation ?\n\n${jeton.description}`)) {
-        return;
-    }
-
-    // Récupérer l'évaluation
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const evaluation = evaluations.find(e => e.id === window.evaluationEnCours.idModification);
-
-    if (!evaluation) {
-        notifications.erreur('Erreur', 'Évaluation introuvable');
-        return;
-    }
-
-    // Ajouter le jeton personnalisé à l'évaluation
-    if (!evaluation.jetonsPersonnalises) {
-        evaluation.jetonsPersonnalises = [];
-    }
-
-    // Vérifier si ce jeton n'est pas déjà appliqué
-    if (evaluation.jetonsPersonnalises.some(j => j.id === jetonId)) {
-        notifications.erreur('Erreur', 'Ce jeton est déjà appliqué à cette évaluation');
-        return;
-    }
-
-    evaluation.jetonsPersonnalises.push({
-        id: jetonId,
-        nom: jeton.nom,
-        description: jeton.description,
-        dateApplication: new Date().toISOString()
-    });
-
-    // Sauvegarder
-    db.setSync(cle('evaluationsSauvegardees'), evaluations);
-    // Tier 6.3 : Invalider les caches de moyennes
-    window._moyennesQualifies = null;
-    window._moyennesToutes = null;
-
-    // Rafraîchir l'affichage
-    window.afficherBadgesJetons();
-    window.peuplementOptJetons();
-
-    notifications.succes('Succès', `Jeton «${jeton.nom}» appliqué`);
-}
+// #560 (29 août 2026) — `afficherJetonsPersonnalisesEvaluation` et
+// `appliquerJetonPersonnalise` sont RETIRÉES : sans appelant, sans `data-action`,
+// sans conteneur `jetonsPersonnalisesOptions` nulle part — mortes depuis juin.
+// C'était pourtant le seul site des trois de l'audit qui LISAIT par
+// `obtenirDonneesSelonMode` et ÉCRIVAIT en direct : un corpus de simulation
+// aurait pu être reversé dans la clé réelle. Du code mort ne se corrige pas,
+// il se retire.
 
 /**
  * Confirme et supprime l'évaluation en cours depuis le sidebar
@@ -3185,8 +3091,6 @@ async function copierCriteresSRPNF() {
 }
 
 // Exporter les fonctions
-window.afficherJetonsPersonnalisesEvaluation = afficherJetonsPersonnalisesEvaluation;
-window.appliquerJetonPersonnalise = appliquerJetonPersonnalise;
 window.confirmerSuppressionEvaluationSidebar = confirmerSuppressionEvaluationSidebar;
 window.reinitialiserFormulaire = reinitialiserFormulaire;
 window.copierCriteresSRPN = copierCriteresSRPN;
