@@ -552,6 +552,7 @@ function calculerNote() {
         const elNiveau = document.getElementById('niveauProduction1');
         if (elNote) elNote.textContent = '--';
         if (elNiveau) elNiveau.textContent = '--';
+        window.noteCalculeeCourante = null;   // #572 — pas de note calculable
         return;
     }
 
@@ -655,6 +656,11 @@ function calculerNote() {
         }
 
     }
+
+    // #572 — LA VALEUR CALCULÉE EST LA SOURCE, l'écran n'en est que l'affichage.
+    // La sauvegarde relisait `parseFloat(textContent)` : un rendu arrondi, ou
+    // tronqué par un affichage différé (#321), redevenait la note stockée.
+    window.noteCalculeeCourante = pourcentage;
 
     // Mettre à jour l'affichage
     document.getElementById('noteProduction1').textContent = pourcentage.toFixed(1) + ' %';

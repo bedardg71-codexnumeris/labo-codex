@@ -9456,12 +9456,13 @@ body.mode-clair .bloc-rlo-separateur {
 
 
 /* Badge jeton délai (style comme badge-completion) */
+/* #572 — badges de jetons sur la palette (--jetons-*), plus d'hex en dur : ils suivent le thème. */
 .badge-jeton-delai-wrapper {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #ff6f0022;
-    border: 2px solid #ff6f00;
+    background: var(--jetons-delai-fond);
+    border: 2px solid var(--jetons-delai-bordure);
     border-radius: var(--radius-grand);
     padding: 2px 6px;
     transition: all 0.2s ease;
@@ -9479,8 +9480,8 @@ body.mode-clair .bloc-rlo-separateur {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #9c27b022;
-    border: 2px solid #9c27b0;
+    background: var(--jetons-reprise-fond);
+    border: 2px solid var(--jetons-reprise-bordure);
     border-radius: var(--radius-grand);
     padding: 2px 6px;
     transition: all 0.2s ease;
@@ -9544,15 +9545,15 @@ body.mode-clair .bloc-rlo-separateur {
 }
 
 .badge-jeton-numero-delai {
-    background: #ff6f00;
+    background: var(--jetons-delai-bordure);
 }
 
 .badge-jeton-numero-reprise {
-    background: #9c27b0;
+    background: var(--jetons-reprise-bordure);
 }
 
 .badge-jeton-numero-reprise-ciblee {
-    background: #9c27b0;
+    background: var(--jetons-reprise-bordure);
 }
 
 /* Badge jeton reprise ciblée (même style que reprise) */
@@ -9560,8 +9561,8 @@ body.mode-clair .bloc-rlo-separateur {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #9c27b022;
-    border: 2px solid #9c27b0;
+    background: var(--jetons-reprise-fond);
+    border: 2px solid var(--jetons-reprise-bordure);
     border-radius: var(--radius-grand);
     padding: 2px 6px;
     transition: all 0.2s ease;
@@ -17786,6 +17787,14 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     transition: border-color 0.15s, transform 0.1s;
     padding: 0;
 }
+/* #572 — focus visible au clavier sur les barres d'outils de la visionneuse et de
+   l'annotation (aucun état de focus n'y existait). */
+.travaux-toolbar button:focus-visible,
+.annot-toolbar-fichiers button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--focus-ring-width, 3px) var(--focus-ring-color, #6aacb8);
+}
+
 /* #569 — état vide rendu par le module lui-même (etats-vides.js s'efface devant .placeholder-vide) */
 .placeholder-vide { color: var(--gris-moyen); font-style: italic; margin: 8px 0 16px; }
 

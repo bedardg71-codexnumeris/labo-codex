@@ -1018,6 +1018,10 @@
         // Supprimer la thumbnail IDB
         supprimerThumbnail(id).catch(function() {});
 
+        // #572 — les annotations du fichier partent avec lui (elles restaient
+        // orphelines en base, sans plus aucun fichier pour les lire).
+        supprimerAnnotationsFichiers([id]);
+
         // Retirer de la corbeille
         const corbeille = obtenirCorbeilleComplete();
         const index = corbeille.findIndex(f => f.id === id);
@@ -1027,6 +1031,22 @@
             return true;
         }
         return false;
+    }
+
+    /**
+     * #572 — Retire les annotations des fichiers donnés (suppression définitive,
+     * purge de la corbeille). N'écrit rien s'il n'y a rien à retirer.
+     * @param {string[]} ids
+     * @returns {number} nombre d'annotations retirées
+     */
+    function supprimerAnnotationsFichiers(ids) {
+        const cibles = new Set(ids || []);
+        if (cibles.size === 0) return 0;
+        const annotations = obtenirAnnotations();
+        const restantes = annotations.filter(a => !(a && cibles.has(a.fichierId)));
+        const retirees = annotations.length - restantes.length;
+        if (retirees > 0) sauvegarderAnnotations(restantes);
+        return retirees;
     }
 
     /**
@@ -1049,6 +1069,9 @@
         }
 
         if (expirees.length === 0) return 0;
+
+        // #572 — leurs annotations aussi.
+        supprimerAnnotationsFichiers(expirees.map(f => f.id));
 
         // Supprimer les blobs expirés
         for (const f of expirees) {
@@ -1302,6 +1325,7 @@
         deplacerEnCorbeille: deplacerEnCorbeille,
         restaurerDeCorbeille: restaurerDeCorbeille,
         supprimerDefinitivement: supprimerDefinitivement,
+        supprimerAnnotationsFichiers: supprimerAnnotationsFichiers,   // #572
         purgerCorbeilleExpiree: purgerCorbeilleExpiree,
         viderCorbeille: viderCorbeille
     };

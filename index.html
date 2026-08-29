@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260829c"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260829d"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -14541,7 +14541,7 @@
     <script src="libs/pdf.min.js?v=3.11.174"></script>
     <script src="libs/jszip.min.js?v=3.10.1"></script>
     <script src="libs/html2canvas.min.js?v=1.4.1"></script>
-    <script src="js/travaux-stockage.js?v=20260829a"></script> <!-- #556 : viderCorbeille recoit la liste annoncee -->
+    <script src="js/travaux-stockage.js?v=20260829b"></script> <!-- #556 : viderCorbeille recoit la liste annoncee -->
     <script src="js/reserve.js?v=20260805a"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) -->
     <script src="js/reserve-ouvrir.js?v=20260829a"></script> <!-- Beta 99.38 b0508-1440 : #262 label « Choisir un fichier .zip d'archive » -->
     <script src="js/reserve-reglages.js?v=2026050559"></script> <!-- #259 : strings UI Réserve → Archives -->
@@ -14552,7 +14552,7 @@
     <script src="js/travaux-preparation.js?v=20260829a"></script> <!-- #559 : les options d'import ne visent plus un fichier étranger -->
     <script src="js/travaux-import.js?v=20260828a"></script> <!-- Beta 99.31 b0502-0907 : flag livrableAdditionnel pour skip détection doublon (palier 3) ; #558 la file survit au rechargement -->
     <script src="js/travaux-visionneuse.js?v=2026050102"></script> <!-- Beta 99.30 b0501-1830 : cleanup PDF.js + ouvrirPDF try/catch + zoom margin-aware + split nav buttons -->
-    <script src="js/travaux-outils.js?v=20260829b"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 menu ⋮ dans modales Personnaliser tampons + codes erreurs -->
+    <script src="js/travaux-outils.js?v=20260829c"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 menu ⋮ dans modales Personnaliser tampons + codes erreurs -->
     <script src="js/tampons-bibliotheque.js?v=20260511c"></script> <!-- Beta 99.41 : #264 progression sur exporterBibliotheque (sealing) -->
     <script src="js/travaux-annotation.js?v=20260829b"></script>
     <script src="js/travaux-archivage.js?v=20260829b"></script> <!-- Beta 99.41 : #264 progression sur lancerExport{Etudiant,Production,} ; #565 try/catch par item + bilan d'export -->
@@ -14562,7 +14562,7 @@
     <script src="js/travaux-resolution.js?v=20260702a"></script> <!-- #145 (2 juil.) : refus de la résolution par DA seul (PDF étranger) -->
     <script src="js/travaux-doublons-ui.js?v=2026050225"></script> <!-- Beta 99.31 b0502-0940 : db.setSync (écriture localStorage immédiate) — bandeau se met à jour après validations -->
     <script src="js/migration-diagnostic.js?v=2026062701"></script>
-    <script src="js/travaux-ui.js?v=20260829e"></script> <!-- #313 (2 juil.) : le sélecteur global n'écrase plus un choix par-fichier ; #558 choix DPI mémorisé + remplacement non destructif -->
+    <script src="js/travaux-ui.js?v=20260829f"></script> <!-- #313 (2 juil.) : le sélecteur global n'écrase plus un choix par-fichier ; #558 choix DPI mémorisé + remplacement non destructif -->
     <script src="js/actions-rlo.js?v=20260808b"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
@@ -14587,7 +14587,7 @@
     <script src="js/partage-section.js?v=20260825a"></script>
     <script src="js/import-export.js?v=20260829a"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
     <script src="js/codex.js?v=20260808b"></script> <!-- 1.16.0+ : #336 D — preview purge espace précédent à l'ouverture -->
-    <script src="js/liste-evaluations.js?v=20260829f"></script> <!-- #556 + #557 : ensemble detruit = ensemble annonce ; supprimerEvaluation unique -->
+    <script src="js/liste-evaluations.js?v=20260829g"></script> <!-- #556 + #557 : ensemble detruit = ensemble annonce ; supprimerEvaluation unique -->
     <script src="js/journal.js?v=2026041706"></script>
     <script src="js/snapshots.js?v=20260702a"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
@@ -14598,10 +14598,10 @@
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=20260829c"></script> <!-- #563 : une écriture de jeton refusée ne passe plus pour un succès -->
-    <script src="js/evaluation-chargement.js?v=20260828a"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
-    <script src="js/evaluation-calcul.js?v=20260826b"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
+    <script src="js/evaluation-chargement.js?v=20260829a"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
+    <script src="js/evaluation-calcul.js?v=20260829a"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
     <script src="js/evaluation-retroaction.js?v=20260828a"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
-    <script src="js/evaluation-sauvegarde.js?v=20260829c"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
+    <script src="js/evaluation-sauvegarde.js?v=20260829d"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
     <script src="js/evaluation.js?v=20260829b"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
     <script src="js/evaluation-handlers.js?v=20260518d"></script> <!-- Beta 99.48 : session A étape 3 refactor (3 fonctions extraites) -->
 

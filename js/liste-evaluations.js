@@ -413,7 +413,6 @@ function rechargerFiltreProduction() {
  */
 function sauvegarderEtatFiltres() {
     const etatFiltres = {
-        groupe: document.getElementById('filtre-groupe-eval')?.value || '',
         production: document.getElementById('filtre-production-eval')?.value || '',
         statut: document.getElementById('filtre-statut-eval')?.value || '',
         tri: document.getElementById('tri-evaluations')?.value || 'nom-asc'
@@ -438,12 +437,10 @@ function restaurerEtatFiltres() {
 
         // Restaurer chaque filtre (attendre que les éléments soient disponibles)
         setTimeout(() => {
-            const filtreGroupe = document.getElementById('filtre-groupe-eval');
             const filtreProduction = document.getElementById('filtre-production-eval');
             const filtreStatut = document.getElementById('filtre-statut-eval');
             const tri = document.getElementById('tri-evaluations');
 
-            if (filtreGroupe && etat.groupe) filtreGroupe.value = etat.groupe;
             if (filtreProduction && etat.production) filtreProduction.value = etat.production;
             if (filtreStatut && etat.statut) filtreStatut.value = etat.statut;
             if (tri && etat.tri) tri.value = etat.tri;
@@ -461,8 +458,9 @@ function restaurerEtatFiltres() {
  * Initialise les événements des filtres
  */
 function initialiserEvenementsFilres() {
+    // #572 — `filtre-groupe-eval` retiré : l'élément n'existe nulle part (le groupe-cours
+    // actif filtre déjà en amont) ; il était lu à cinq endroits.
     const filtres = [
-        'filtre-groupe-eval',
         'filtre-production-eval',
         'filtre-statut-eval',
         'tri-evaluations'
@@ -470,7 +468,10 @@ function initialiserEvenementsFilres() {
 
     filtres.forEach(filtreId => {
         const filtre = document.getElementById(filtreId);
-        if (filtre) {
+        // #572 — un listener par élément, pas un de plus à chaque visite de la
+        // sous-section (double rendu, puis triple, à chaque `change`).
+        if (filtre && !filtre.dataset.evenementsFiltresAttaches) {
+            filtre.dataset.evenementsFiltresAttaches = '1';
             filtre.addEventListener('change', () => {
                 sauvegarderEtatFiltres(); // Sauvegarder après chaque changement
                 appliquerFiltres();
@@ -483,13 +484,11 @@ function initialiserEvenementsFilres() {
  * Réinitialise tous les filtres
  */
 function reinitialiserFiltres() {
-    const filtreGroupe = document.getElementById('filtre-groupe-eval');
     const filtreProduction = document.getElementById('filtre-production-eval');
     const filtreStatut = document.getElementById('filtre-statut-eval');
     const tri = document.getElementById('tri-evaluations');
     const recherche = document.getElementById('recherche-evaluations');
 
-    if (filtreGroupe) filtreGroupe.value = '';
     if (filtreProduction) filtreProduction.value = '';
     if (filtreStatut) filtreStatut.value = '';
     if (tri) tri.value = 'nom-asc';
@@ -574,8 +573,6 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
             const filtreStatut = document.getElementById('filtre-statut-eval')?.value;
             if (filtreStatut === 'non-evalue') {
                 compteur.textContent = `${nbTotal} ${window.pluriel(nbTotal, 'non évalué', 'non évalués')}`;
-            } else if (filtreStatut === 'non-remis') {
-                compteur.textContent = `${nbTotal} non remis`;
             } else {
                 // Compter importés et évalués via statutWorkflow
                 const nbImportes = lignesFiltrees.filter(l => l.statutWorkflow === 'importe' || l.statutWorkflow === 'annote').length;
@@ -605,7 +602,6 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
         corpsTableau.innerHTML = lignesFiltrees.map(ligne => genererLigneHTML(ligne)).join('');
 
         // Attacher les événements aux boutons d'action
-        attacherEvenementsActions();
 
         // Restaurer la visibilité des colonnes selon les préférences
         restaurerPreferencesColonnes();
@@ -913,13 +909,10 @@ function appliquerFiltres() {
  * Applique les filtres sur les lignes
  */
 function appliquerFiltresSurLignes(lignes) {
-    const filtreGroupe = document.getElementById('filtre-groupe-eval')?.value || '';
     const filtreProduction = document.getElementById('filtre-production-eval')?.value || '';
     const filtreStatut = document.getElementById('filtre-statut-eval')?.value || '';
 
     return lignes.filter(ligne => {
-        // Filtre Groupe
-        if (filtreGroupe && ligne.groupe !== filtreGroupe) return false;
 
         // Filtre Production
         if (filtreProduction && ligne.productionId !== filtreProduction) return false;
@@ -1732,10 +1725,6 @@ function confirmerSuppressionFichier(fichierId, da) {
 /**
  * Attache les événements aux boutons d'action
  */
-function attacherEvenementsActions() {
-    // Les événements sont gérés via onclick dans le HTML pour simplicité
-}
-
 /**
  * Ouvre la page d'évaluation pour modifier une évaluation existante
  * RENOMMÉ consulterEvaluationDepuisListe pour éviter conflit avec evaluation.js
@@ -2121,54 +2110,8 @@ function modifierEvaluationRemplacee(evaluationId) {
     }, 300);
 }
 
-/**
- * Verrouille/Déverrouille une évaluation
- */
-function toggleVerrouillerEvaluation(evaluationId) {
-    // CORRECTION: Lire TOUTES les évaluations (pas seulement celles du cours actif)
-    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
-    const evaluation = evaluations.find(ev => ev.id === evaluationId);
-
-    if (!evaluation) {
-        console.error(`❌ Évaluation ${evaluationId} introuvable`);
-        return;
-    }
-
-    // ✅ CORRECTION : Utiliser "verrouillee" (avec "e") pour cohérence avec evaluation.js
-    evaluation.verrouillee = !evaluation.verrouillee;
-
-    // Ajouter/supprimer la date de verrouillage
-    if (evaluation.verrouillee) {
-        evaluation.dateVerrouillage = new Date().toISOString();
-    } else {
-        delete evaluation.dateVerrouillage;
-    }
-
-    // Journal de bord — verrouillage/déverrouillage
-    if (typeof Journal !== 'undefined') {
-        Journal.ajouterEntree(evaluation,
-            evaluation.verrouillee ? Journal.ACTIONS.VERROUILLAGE : Journal.ACTIONS.DEVERROUILLAGE,
-            {});
-    }
-
-    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-
-
-    // Mettre à jour le cadenas dans le DOM immédiatement
-    const cadenasElement = document.getElementById(`cadenas-liste-${evaluationId}`);
-    if (cadenasElement) {
-        cadenasElement.innerHTML = evaluation.verrouillee ? '<img src="icons/icon-lock.svg" alt="Verrouillée" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="Modifiable" class="btn-inline-icon">';
-        cadenasElement.title = evaluation.verrouillee ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller';
-    }
-
-    // Recharger le tableau
-    chargerDonneesEvaluations();
-
-    // Rafraîchir le profil étudiant si affiché (pour mettre à jour les autres éléments)
-    if (typeof afficherProfilComplet === 'function' && window.profilActuelDA) {
-        setTimeout(() => afficherProfilComplet(window.profilActuelDA), 100);
-    }
-}
+// #572 (29 août 2026) — `toggleVerrouillerEvaluation` retirée : aucun appelant, aucun
+// `data-action` (le verrouillage passe par `basculerVerrouillageEvaluationCourante`).
 
 // ============================================
 // SYSTÈME DE TRI
@@ -2442,6 +2385,7 @@ function trierLignesParColonne(lignes, tri) {
                     '': 0,
                     'delai': 1,
                     'nouvelle-reprise': 2,
+                    'reprise-ciblee': 2,      // #572 — classée avec les reprises, plus avec les lignes sans jeton
                     'originale-reprise': 3,
                     'plagiat': 4,
                     'ia': 4,
@@ -2692,7 +2636,7 @@ function afficherVueCorbeille() {
         const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
         const nomEtudiant = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : fichier.etudiantDA;
         const production = productions.find(p => p.id === fichier.productionId);
-        const nomProduction = production ? production.nom : (fichier.productionId || '—');
+        const nomProduction = production ? (production.titre || production.nom || '—') : (fichier.productionId || '—');   // #572 — une production porte `titre`
         const nomFichier = fichier.nomFichier || fichier.id;
 
         const dateSup = new Date(fichier.dateSuppression);
@@ -2906,7 +2850,6 @@ window.initialiserListeEvaluations = initialiserListeEvaluations;
 window.consulterEvaluationDepuisListe = consulterEvaluationDepuisListe;
 window.supprimerEvaluation = supprimerEvaluation;
 window._restaurerOriginaleSiReprise = restaurerOriginaleSiReprise;
-window.toggleVerrouillerEvaluation = toggleVerrouillerEvaluation;
 window.modifierEvaluationRemplacee = modifierEvaluationRemplacee;
 window.calculerEtSauvegarderIndiceCompletion = calculerEtSauvegarderIndiceCompletion;
 window.trierListeEvaluations = trierListeEvaluations;

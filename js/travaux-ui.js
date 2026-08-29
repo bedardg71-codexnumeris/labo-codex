@@ -801,7 +801,7 @@
         div.id = 'resolution-avertissement';
         div.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:10000;padding:10px 16px;background:var(--couleur-attention,#f0ad4e);color:var(--couleur-texte-sombre,#333);font-size:14px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)';
         div.textContent = msg;
-        div.title = 'Cliquez pour fermer';
+        div.title = 'Clique pour fermer';
         div.addEventListener('click', () => div.remove());
         document.body.appendChild(div);
 
@@ -4273,7 +4273,7 @@
 
         overlay.innerHTML = `
             <div class="modal-contenu modal-compact">
-                <button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
+                <button class="modal-fermer" data-action="fermerOverlayParent" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 <h3 class="modal-titre">${echapperHtml(titre)}</h3>
                 ${contenuHTML}
                 <div class="modal-actions">
@@ -5060,9 +5060,9 @@
         conteneurTravail.innerHTML = `
             <div class="travaux-zone-document" id="travaux-split-document-container">
                 <div class="travaux-toolbar">
-                    <button id="travaux-split-btn-page-prec" class="btn-icon" data-action="travauxVisionneuse.pagePrecedente" disabled><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>
+                    <button id="travaux-split-btn-page-prec" class="btn-icon" data-action="travauxVisionneuse.pagePrecedente" disabled aria-label="Page précédente" title="Page précédente"><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>
                     <span id="travaux-indicateur-page">-- / --</span>
-                    <button id="travaux-split-btn-page-suiv" class="btn-icon" data-action="travauxVisionneuse.pageSuivante" disabled><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>
+                    <button id="travaux-split-btn-page-suiv" class="btn-icon" data-action="travauxVisionneuse.pageSuivante" disabled aria-label="Page suivante" title="Page suivante"><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>
                     <button class="btn btn-petit" data-action="travauxAnnotation.basculerAnnotation">Annoter</button>
                     <button class="btn-icon" data-action="travauxUI.fermerVueCoteACote" title="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 </div>
@@ -6085,7 +6085,7 @@
         var html = `
         <div class="modal-overlay actif" id="modal-fusion-editeur" data-close-on-bg="travauxUI.fermerModalFusionEditeur">
             <div class="modal-contenu modal-fusion-editeur-contenu">
-                <button class="modal-fermer" data-action="travauxUI.fermerModalFusionEditeur"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
+                <button class="modal-fermer" data-action="travauxUI.fermerModalFusionEditeur" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 <h3 class="modal-titre">Fusionner des documents</h3>
 
                 <div class="fusion-editeur-filtres">
@@ -6469,7 +6469,7 @@
         const html = `
         <div class="modal-overlay actif" id="travaux-modal-retroaction" data-close-on-bg="travauxUI.fermerModalRetroaction">
             <div class="modal-contenu" style="max-width: 620px;">
-                <button class="modal-fermer" data-action="travauxUI.fermerModalRetroaction"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
+                <button class="modal-fermer" data-action="travauxUI.fermerModalRetroaction" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 <h3 class="modal-titre">Rétroaction — ${nomEtudiant}</h3>
 
                 <div class="travaux-retro-entete">
@@ -6618,7 +6618,7 @@
         overlay.className = 'modal-overlay actif';
         overlay.innerHTML = `
             <div class="modal-contenu modal-compact" style="max-width: 560px;">
-                <button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
+                <button class="modal-fermer" data-action="fermerOverlayParent" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 <h3 class="modal-titre">Transférer des fichiers</h3>
 
                 <label style="font-size: 0.85em; color: var(--texte-secondaire);">Groupe cible :</label>
