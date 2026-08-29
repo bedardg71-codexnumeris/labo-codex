@@ -414,20 +414,39 @@ async function initialiserNouveauCartouche(grilleId) {
     // matrice se rend vide. C'est la règle du dépôt depuis #527 — jamais un
     // libellé, une plage ni une couleur fabriqués.
     //
-    // ⚠ CE QUI RESTE, ET QUI N'EST PAS CORRIGÉ ICI : le CHOIX de l'échelle par
-    // `find(e => !e.estDemo) || echelles[0]`. Une cartouche neuve prend donc les
-    // colonnes de la PREMIÈRE échelle du trimestre, pas de celle de sa grille —
-    // qui porte pourtant un `echelleId`. Le corriger change la création de
-    // cartouche sur des données que je ne peux pas voir : inscrit à part.
-    const echelles = await db.get(cle('echellesTemplates'), []);
-    const echelleActive = echelles.find(e => !e.estDemo) || echelles[0];
-    const niveaux = echelleActive?.niveaux || [];
+    // ⮕ #578 (arbitré par Grégoire le 29 août 2026, option A) — LA CARTOUCHE NE
+    // DEVINE PLUS SON ÉCHELLE. Jusqu'ici : `echelles.find(e => !e.estDemo) ||
+    // echelles[0]`, un ORDRE DE TABLEAU — la cartouche neuve prenait les colonnes
+    // de la première échelle du trimestre, et n'écrivait aucun `echelleId`.
+    //
+    // ⚠ MESURÉ AVANT DE CODER, sur ses trois trimestres : 10 grilles, 9 sans
+    // `echelleId` — la seule « avec » est GRILLE_GENERIQUE, semée par le code, et
+    // l'éditeur de grille n'écrit jamais ce champ. Lire `grille.echelleId` (la
+    // piste d'origine de l'item) aurait laissé TOUTES ses cartouches neuves sans
+    // colonnes. Le modèle réel est : la grille dit les CRITÈRES ; l'échelle se
+    // choisit là où on s'en sert — l'évaluation lit celle de l'évaluation, la
+    // cartouche porte la sienne (`initialiserNouveauCartoucheAvecEchelle`).
+    //
+    // ⮕ La seule source est donc le CHOIX du formulaire (`selectEchelleCartouche`).
+    // Sans choix : aucune colonne, et la matrice le DIT (règle #527/#573 : jamais
+    // une colonne inventée). Avec choix : ses niveaux, et l'`echelleId` est ÉCRIT
+    // sur la cartouche pour que la question ne se repose plus à la réouverture.
+    // Résolution par `id` puis `idOriginal`, comme `afficherMatriceRetroaction`.
+    const echelleChoisieId = ((document.getElementById('selectEchelleCartouche') || {}).value || '').trim();
+    const echelles = await db.get(cle('echellesTemplates'), []) || [];
+    const echelleChoisie = echelleChoisieId
+        ? (echelles.find(e => e && e.id === echelleChoisieId)
+            || echelles.find(e => e && e.idOriginal === echelleChoisieId)
+            || null)
+        : null;
+    const niveaux = echelleChoisie ? (echelleChoisie.niveaux || []) : [];
     
     // Créer la structure de cartouche
     cartoucheActuel = {
         id: genererIdUnique('CART_'),
         nom: '',
         grilleId: grilleId,
+        echelleId: echelleChoisie ? echelleChoisie.id : '',
         contexte: '',
         description: '', // 🆕 Beta 99.05 : Champ description uniforme
         criteres: criteres.map(c => ({ id: c.id, nom: c.nom })),
@@ -460,6 +479,10 @@ async function initialiserNouveauCartouche(grilleId) {
     document.getElementById('contexteCartouche').value = '';
     var specClear = document.getElementById('contexteSpecifiqueCartouche');
     if (specClear) specClear.value = '';
+
+    // #578 — le formulaire dit la vérité : la grille de la cartouche, et l'échelle
+    // retenue (ou « — Échelle — » quand il n'y en a pas encore).
+    await populerDropdownsCartouche(grilleId, cartoucheActuel.echelleId, false);
 
     await afficherMatriceRetroaction();
     mettreAJourMetriques();
@@ -598,6 +621,15 @@ async function afficherMatriceRetroaction() {
             nom: n.nom,
             couleur: n.couleur || '#cccccc'
         }));
+    }
+
+    // #578 — sans échelle, pas de colonnes : on le dit, on n'invente rien.
+    // (Un tableau à une seule colonne « Critère / Niveau » se lisait comme un bug.)
+    if (niveauxAffichage.length === 0) {
+        container.innerHTML = '<div class="message-vide"><p>Cette cartouche n\'a pas encore d\'échelle. '
+            + 'Choisis une échelle de performance ci-dessus : ses niveaux deviendront les colonnes de la matrice.</p></div>';
+        mettreAJourMetriques();
+        return;
     }
 
     const couleursParCode = {};
@@ -1251,7 +1283,8 @@ async function calculerPourcentageComplete() {
         });
     });
 
-    const pourcentage = Math.round((casesRemplies / totalCases) * 100);
+    // #578 — zéro colonne : 0 %, pas NaN.
+    const pourcentage = totalCases ? Math.round((casesRemplies / totalCases) * 100) : 0;
 
     // Mettre à jour les cartes métriques (vérification existence éléments)
     const nbCriteres = cartoucheActuel.criteres.length;
@@ -3133,7 +3166,7 @@ async function _diagnostiquerEchellesGrilles() {
             + c.sans + ' sans');
     });
     if (total > 0 && sans === total) {
-        console.log('[Diagnostic #578] Aucune grille ne porte d\'echelleId : lire `grille.echelleId` laisserait TOUTE cartouche neuve sans colonnes. Le correctif doit d\'abord ÉCRIRE cet identifiant.');
+        console.log('[Diagnostic #578] Aucune grille ne porte d\'echelleId : lire `grille.echelleId` laisserait TOUTE cartouche neuve sans colonnes — c\'est pourquoi la cartouche prend son échelle du FORMULAIRE, jamais de la grille (option A, 29 août 2026).');
     }
 
     return { total: total, avec: avec, sans: sans, resolues: resolues, introuvables: introuvables, parCle: parCle, lignes: lignes };

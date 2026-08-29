@@ -2170,7 +2170,25 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
      inscrit. ⚠ C'est un chantier de namespacing, pas un reliquat : à cadrer à part le jour venu (Brique D, #358).
   ⮕ 1-2-3 se traitent en un lot court ; 4 se renvoie à #358.
 
-- [ ] **#578 — Une cartouche neuve prend les colonnes de la PREMIÈRE échelle du trimestre, pas de celle de sa grille.**
+- [x] **#578 LIVRÉ 29 août 2026 — La cartouche neuve ne devine plus son échelle : elle prend celle du formulaire, et l'écrit.**
+  ⮕ **Trois volets, un commit.** (1) `initialiserNouveauCartouche` lit `selectEchelleCartouche` (résolution `id`
+  puis `idOriginal`), pose `echelleId` sur la cartouche, et n'invente aucune colonne sans choix ; le formulaire
+  est resynchronisé (`populerDropdownsCartouche`) pour dire la vérité. (2) `afficherMatriceRetroaction` rend un
+  message (« Cette cartouche n'a pas encore d'échelle… ») au lieu d'un tableau à une colonne ; `calculerPourcentageComplete`
+  rend 0 %, pas NaN. (3) ⚠⚠ **RÉGRESSION DU 26 AOÛT TROUVÉE EN CHEMIN** : le commit `e50155e0` avait renommé les
+  `data-on-change` des DEUX listes du formulaire (`onChangeSelectionGrilleCartouche` / `…EchelleCartouche`) vers des
+  fonctions qui **n'ont jamais existé** — le dispatcher résout `window[nom]` et ne faisait que `console.warn`.
+  Choisir une grille ou une échelle dans le formulaire ne faisait donc RIEN depuis trois jours (seul le cas
+  « une seule grille + une seule échelle » de `creerNouvelleCartouche` contournait, par appel direct). Rebranchées
+  sur `onChangeSelectionCartouche`, qui existe. Sans ce volet, l'option A aurait rendu une matrice toujours vide.
+  **Sentinelle** `sentinelle-578-cartouche-ne-devine-plus` (6 cas : sans choix, formulaire resynchronisé, seconde
+  échelle, `idOriginal`, id fantôme, **cliquet** : tout `data-on-change` du bloc `infoCartouche` d'`index.html`
+  résout vers une fonction posée sur `window`). **Break-test** : 6 mutations, 6 rouges, restauré par copie.
+  Le cas « avec une échelle » de `sentinelle-573` reposait sur la devinette : il choisit désormais l'échelle au
+  formulaire. Diagnostic `_diagnostiquerEchellesGrilles()` conservé (message final aligné sur la décision).
+  ⏳ **Reste, non tranché** : les cartouches EXISTANTES nées du chemin fautif (sans `echelleId`, colonnes de la 1ʳᵉ
+  échelle) — compter sur `cartouches_*` avant de décider s'il y a quelque chose à réparer.
+  Énoncé d'origine, conservé :
   ✅ **TRANCHÉ PAR GRÉGOIRE le 28 août 2026 — OPTION A : MESURER AVANT DE CODER.**
   Compter, dans ses trimestres, les grilles **avec** et **sans** `echelleId`. Le chiffre décide de la
   suite ; le correctif ne s'écrit pas avant.
