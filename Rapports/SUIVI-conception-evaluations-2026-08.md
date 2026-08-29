@@ -168,6 +168,7 @@ Ordre proposé : d'abord ce qui est **tranché et pas exécuté** (le plus court
 | 26 août | `valeurCalcul` obligatoire ; repli milieu de plage retiré (mesuré avant) | #526, #527 |
 | 28 août | #563 retirer la case ; #571 correctifs oui, tailles non ; #574 retirer seeds/gabarits ; #578 mesurer avant de coder ; #555 repli non lisible = ne rien calculer et le dire (B) ; nommage (A) | items respectifs |
 | 29 août | #555·1 zone intermédiaire = progrès (C) ; #555·2 clore l'intention (A) ; #578 la cartouche ne devine plus (A) | artefact `claude.ai/code/artifact/89f28423-…` |
+| 29 août, 19 h 45 | **Porte terrain relevée sur 1.106.2 : 8/8 conformes** (#594, #578, #593, #563/#574, #560, #566, #561, #571) | artefact `claude.ai/code/artifact/9f92e346-…` |
 
 ---
 
