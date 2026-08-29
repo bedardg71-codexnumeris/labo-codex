@@ -297,6 +297,7 @@ async function chargerVersionJSON() {
         var spanBuildAide = document.getElementById('aide-apropos-version-build');
         if (spanBetaAide) spanBetaAide.textContent = 'Bêta publique ' + VERSION_MAJEURE;
         if (spanBuildAide) spanBuildAide.textContent = BUILD_ID;
+        signalerBuildChargeSiNouveau();
         return;
     }
 
@@ -329,6 +330,7 @@ async function chargerVersionJSON() {
         if (spanBetaAide) spanBetaAide.textContent = 'Bêta publique ' + VERSION_MAJEURE;
         if (spanBuildAide) spanBuildAide.textContent = BUILD_ID;
     }
+    signalerBuildChargeSiNouveau();
 }
 
 // Initialisation au chargement
@@ -360,14 +362,25 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * BANDEAU VERSION — Affiché UNIQUEMENT quand le polling détecte un build distant
- * plus récent que le build chargé (vraie mise à jour déployée en cours de session).
- * Plus d'affichage au chargement : le build chargé EST déjà le build actif, donc
- * « recharge pour l'activer » n'aurait aucun sens et le bandeau revenait en boucle
- * après chaque Recharger (retour terrain 8 juin). Fermé par X ; Recharger charge le
- * nouveau build (et le bandeau ne réapparaît pas — plus de déclencheur au chargement).
+ * BANDEAU VERSION — deux déclencheurs, deux textes.
+ *
+ * 1. DISTANT (polling) : `version.json` sur le serveur porte un build plus récent
+ *    que celui chargé — vraie mise à jour déployée en cours de session. Texte
+ *    « rafraîchis la page », bouton Recharger.
+ * 2. AU CHARGEMENT (29 août 2026, demande de Grégoire) : le build chargé n'est
+ *    pas le dernier build VU (`monitorage-build-vu`, la clé de la pastille).
+ *    Texte au présent — « Nouvelle version chargée » — SANS bouton Recharger :
+ *    le build chargé est déjà l'actif. Fermer le bandeau marque le build comme
+ *    vu : il s'affiche UNE fois par nouveau build, jamais en boucle.
+ *
+ * ⚠ HISTORIQUE. Le 8 juin (retour terrain), l'affichage au chargement avait été
+ * RETIRÉ : il s'affichait sans condition, avec « recharge pour l'activer » — un
+ * non-sens qui revenait après chaque Recharger. Ce qui revient ici n'est pas ce
+ * mécanisme : il est conditionné au build vu, et son texte dit ce qui est vrai.
+ * Première visite (aucun build vu) : on enregistre le build, sans bandeau.
  */
 let miseAJourDejaSignalee = false;
+let bandeauBuildLocal = null;   // build annoncé par le bandeau AU CHARGEMENT, à marquer vu à la fermeture
 
 function afficherBandeauVersion(beta, build, distant) {
     const bandeau = document.getElementById('bandeau-mise-a-jour');
@@ -381,8 +394,15 @@ function afficherBandeauVersion(beta, build, distant) {
     const heureStr = maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
 
     elBuild.textContent = `BÊTA PUBLIQUE ${beta} (BUILD ${build})`;
-    elTexte.textContent = `Une mise à jour a été déployée en arrière-plan pendant que tu travailles. Rafraîchis la page pour l\u2019activer. Tes données persistent.`;
+    elTexte.textContent = distant
+        ? `Une mise à jour a été déployée en arrière-plan pendant que tu travailles. Rafraîchis la page pour l\u2019activer. Tes données persistent.`
+        : `Nouvelle version chargée. Les nouveautés sont dans Réglages \u203a À propos. Tes données persistent.`;
     elDate.textContent = `${dateStr} à ${heureStr}`;
+
+    // Le bouton Recharger n'a de sens que pour une mise à jour DISTANTE.
+    const btnRecharger = bandeau.querySelector('[data-action="rechargerPage"]');
+    if (btnRecharger) btnRecharger.hidden = !distant;
+    bandeauBuildLocal = distant ? null : build;
 
     bandeau.classList.add('visible');
 }
@@ -391,6 +411,30 @@ function fermerBandeauMiseAJour() {
     const bandeau = document.getElementById('bandeau-mise-a-jour');
     if (bandeau) {
         bandeau.classList.remove('visible');
+    }
+    // Un bandeau « au chargement » fermé = ce build est vu. Le distant, lui, n'est
+    // pas encore chargé : le marquer vu ferait taire le bandeau du prochain démarrage.
+    if (bandeauBuildLocal) {
+        try { localStorage.setItem(CLE_BUILD_VU, bandeauBuildLocal); } catch (e) { /* stockage indisponible */ }
+        bandeauBuildLocal = null;
+        mettreAJourPastille();
+    }
+}
+
+/**
+ * Au chargement : signaler le build si ce n'est pas le dernier VU.
+ * Appelée une fois BUILD_ID établi (les deux branches de chargerVersionJSON).
+ */
+function signalerBuildChargeSiNouveau() {
+    let buildVu = null;
+    try { buildVu = localStorage.getItem(CLE_BUILD_VU); } catch (e) { return; }
+    if (buildVu === null) {
+        // Première visite : rien à annoncer, on prend le repère.
+        try { localStorage.setItem(CLE_BUILD_VU, BUILD_ID); } catch (e) { /* ignore */ }
+        return;
+    }
+    if (buildVu !== BUILD_ID) {
+        afficherBandeauVersion(VERSION_MAJEURE, BUILD_ID, false);
     }
 }
 
