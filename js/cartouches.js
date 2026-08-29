@@ -3016,9 +3016,134 @@ function ouvrirFilePickerImportCartouches() {
 }
 
 /* ===============================
+   DIAGNOSTIC #578 — LES GRILLES PORTENT-ELLES UN echelleId ?
+   =============================== */
+
+/**
+ * Diagnostic LECTURE SEULE : dans TOUS les trimestres, combien de grilles
+ * portent un `echelleId`, combien n'en portent pas, et parmi celles qui en
+ * portent un, combien désignent une échelle qui existe encore ?
+ * N'écrit RIEN (aucun db.set/setSync) — uniquement des lectures + console.
+ * À lancer en console : await _diagnostiquerEchellesGrilles()
+ *
+ * ⚠ POURQUOI CE DIAGNOSTIC EXISTE (#578, arbitré par Grégoire le 28 août 2026 :
+ * MESURER AVANT DE CODER). `initialiserNouveauCartouche` choisit l'échelle
+ * d'une cartouche neuve par `echelles.find(e => !e.estDemo) || echelles[0]` —
+ * un ordre de tableau, pas une désignation. La source non arbitraire serait
+ * `grille.echelleId`. Mais si les grilles réelles n'en portent pas, passer par
+ * cette source laisserait la cartouche SANS colonnes : une régression pire que
+ * le défaut. Le chiffre rendu ici décide donc de la suite ; le correctif ne
+ * s'écrit pas avant.
+ *
+ * ⮕ CE QUE LA LECTURE DU CODE DIT DÉJÀ, ET QUE CE DIAGNOSTIC CONFRONTE AUX
+ * DONNÉES : l'éditeur de grille (`grilles.js`) n'écrit JAMAIS `echelleId` ;
+ * seule `GRILLE_GENERIQUE` en porte un, semé au boot. Le compte « avec » ne
+ * peut donc venir que d'un import, d'un gabarit ou de la grille générique.
+ *
+ * Lecture inter-trimestres : via `await db.get()` (source réelle IDB), car
+ * `getSync` ne voit que le trimestre actif préchargé. Pour chaque trimestre,
+ * la copie namespacée `{trim}_grillesTemplates` est sondée d'abord (trimestre
+ * archivé), puis la clé globale partagée `grillesTemplates` — même routage que
+ * `cleSource`, mais sondé en base plutôt qu'en cache. Une clé partagée par
+ * plusieurs trimestres n'est comptée qu'UNE fois.
+ *
+ * @returns {Promise<{total:number, avec:number, sans:number, resolues:number,
+ *   introuvables:number, parCle:Object, lignes:Array}>}
+ */
+async function _diagnostiquerEchellesGrilles() {
+    var trimestres = [];
+    try { trimestres = db.getSync('trimestres', []) || []; } catch (e) { trimestres = []; }
+    trimestres = trimestres.filter(function (t) { return t && t.id; });
+
+    // Sonde la copie namespacée puis la clé globale ; rend { cle, liste } ou null.
+    var lire = async function (nomCle, trimestreId) {
+        var copie = trimestreId + '_' + nomCle;
+        var v = await db.get(copie);
+        if (Array.isArray(v)) return { cle: copie, liste: v };
+        v = await db.get(nomCle);
+        if (Array.isArray(v)) return { cle: nomCle, liste: v };
+        return null;
+    };
+
+    var clesVues = {};
+    var lignes = [];
+    var parCle = {};
+
+    for (var i = 0; i < trimestres.length; i++) {
+        var t = trimestres[i];
+        var grilles = await lire('grillesTemplates', t.id);
+        if (!grilles) continue;
+        if (clesVues[grilles.cle]) {
+            clesVues[grilles.cle].push(t.id);
+            continue;
+        }
+        clesVues[grilles.cle] = [t.id];
+
+        var echelles = await lire('echellesTemplates', t.id);
+        var idsEchelles = {};
+        (echelles ? echelles.liste : []).forEach(function (e) {
+            if (e && e.id) idsEchelles[e.id] = true;
+        });
+
+        var compte = { trimestres: clesVues[grilles.cle], total: 0, avec: 0, sans: 0, resolues: 0, introuvables: 0 };
+        parCle[grilles.cle] = compte;
+
+        grilles.liste.forEach(function (g) {
+            if (!g) return;
+            var porte = !!g.echelleId;
+            var statut = !porte ? 'sans' : (idsEchelles[g.echelleId] ? 'resolue' : 'introuvable');
+            compte.total++;
+            if (porte) compte.avec++; else compte.sans++;
+            if (statut === 'resolue') compte.resolues++;
+            if (statut === 'introuvable') compte.introuvables++;
+            lignes.push({
+                cle: grilles.cle,
+                grilleId: g.id,
+                nom: g.nom || '',
+                demo: !!(g.estDemo || g.auteurOriginal),
+                echelleId: g.echelleId || '',
+                statut: statut,
+                cleEchelles: echelles ? echelles.cle : '(aucune)'
+            });
+        });
+    }
+
+    var total = lignes.length;
+    var avec = lignes.filter(function (l) { return l.statut !== 'sans'; }).length;
+    var sans = total - avec;
+    var resolues = lignes.filter(function (l) { return l.statut === 'resolue'; }).length;
+    var introuvables = lignes.filter(function (l) { return l.statut === 'introuvable'; }).length;
+
+    // ⚠ `console.log` ASSUMÉ ICI, contre la règle 5 de CLAUDE.md (« zéro
+    // console.log dans le nouveau code »), et l'exception est NOMMÉE plutôt que
+    // subie : pour un outil de diagnostic, la SORTIE CONSOLE EST LE PRODUIT —
+    // il n'a pas d'autre interface. Même statut que `_diagnostiquerModeleCours`
+    // (`cours.js`) et `_diagnostiquerResolutionEchelles`
+    // (`profil-etudiant-calculs.js`). `warn`/`error` seraient sémantiquement
+    // faux — rien n'est anormal quand un diagnostic rend son compte.
+    if (typeof console !== 'undefined' && console.table) console.table(lignes);
+    console.log('[Diagnostic #578] ' + trimestres.length + ' trimestre(s), '
+        + Object.keys(parCle).length + ' clé(s) de grilles distincte(s), ' + total + ' grille(s).');
+    console.log('[Diagnostic #578] AVEC echelleId : ' + avec + ' (résolues : ' + resolues
+        + ', introuvables : ' + introuvables + ') · SANS echelleId : ' + sans);
+    Object.keys(parCle).forEach(function (k) {
+        var c = parCle[k];
+        console.log('  · ' + k + ' [' + c.trimestres.join(', ') + '] — ' + c.total + ' grille(s) : '
+            + c.avec + ' avec (' + c.resolues + ' résolue(s), ' + c.introuvables + ' introuvable(s)), '
+            + c.sans + ' sans');
+    });
+    if (total > 0 && sans === total) {
+        console.log('[Diagnostic #578] Aucune grille ne porte d\'echelleId : lire `grille.echelleId` laisserait TOUTE cartouche neuve sans colonnes. Le correctif doit d\'abord ÉCRIRE cet identifiant.');
+    }
+
+    return { total: total, avec: avec, sans: sans, resolues: resolues, introuvables: introuvables, parCle: parCle, lignes: lignes };
+}
+
+/* ===============================
    EXPORT DES FONCTIONS GLOBALES
    =============================== */
 
+window._diagnostiquerEchellesGrilles = _diagnostiquerEchellesGrilles;   // diagnostic console (#578, lecture seule)
 window.afficherToutesLesGrillesEtCartouches = afficherToutesLesGrillesEtCartouches;
 window.ajouterCartoucheAGrille = ajouterCartoucheAGrille;
 window.basculerVerrouillageCartouche = basculerVerrouillageCartouche;
