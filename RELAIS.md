@@ -66,6 +66,15 @@ l'identifiant (éditeur + rétro-remplissage), pas par le lire. Inscrit à l'ite
 - **La session suivante** : #592 ; #555 : deux décisions restantes (zone intermédiaire comme progrès ;
   intention P1) ; correctif #578 UNE FOIS le chiffre connu.
 
+### 📌 ARBITRAGES — UN SEUL ARTEFACT, APRÈS LE CHIFFRE #578 (décision de Grégoire, 29 août 4 h)
+
+Les skills métier (`ecosysteme-classe`, `pratiques-notation`, `depistage-rai`) ont été lus à 4 h — pas avant
+la livraison : hors du dépôt, ils ne se chargent pas. Consigne de Grégoire : tout arbitrage lui est remis en
+**artefact** (Artifact + skill `artifact-design` : fait mesuré → options fermées → recommandation → ce que ça
+ne tranche pas), jamais en prose de chat. ⮕ **Un seul artefact**, à produire quand il aura rapporté
+avec / sans / introuvables de `_diagnostiquerEchellesGrilles()` ; il portera les **deux décisions #555**
+(zone intermédiaire comme progrès ; intention P1) **et le correctif #578**. Ne pas le faire en deux fois.
+
 ### 📌 IDs — prochain libre : **#593** (inchangé)
 
 ---
