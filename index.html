@@ -3483,6 +3483,15 @@
             z-index: 10;
         }
 
+        /* #570 — les flèches de tri HÉRITENT de la couleur de l'en-tête (blanc sur
+           bleu) au lieu d'un gris de fond clair (1,96:1 en mode clair). Le repos
+           (↕) s'atténue par l'opacité, jamais par une autre couleur. */
+        .thead-sticky-bleu .tri-indicateur {
+            font-size: 0.8em;
+            color: inherit;
+            opacity: 0.8;
+        }
+
         /* Coins arrondis sur l'en-tête sticky */
         .thead-sticky-bleu tr:first-child th:first-child {
             border-top-left-radius: 6px;
@@ -8308,28 +8317,28 @@
                             <thead class="thead-sticky-bleu">
                                 <tr>
                                     <th class="td-left-clickable" data-action="trierTableauParColonne" data-param="da" title="Cliquer pour trier">
-                                        DA <span id="tri-da" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
+                                        DA <span id="tri-eval-da" class="tri-indicateur">↕</span>
                                     </th>
                                     <th class="td-left-clickable" data-action="trierTableauParColonne" data-param="nom" title="Cliquer pour trier">
-                                        Nom <span id="tri-nom" style="font-size: 0.8em; color: var(--gris-clair);">↑</span>
+                                        Nom <span id="tri-eval-nom" class="tri-indicateur">↑</span>
                                     </th>
                                     <th class="td-left-clickable" data-action="trierTableauParColonne" data-param="prenom" title="Cliquer pour trier">
-                                        Prénom <span id="tri-prenom" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
+                                        Prénom <span id="tri-eval-prenom" class="tri-indicateur">↕</span>
                                     </th>
                                     <th class="td-left-clickable" data-action="trierTableauParColonne" data-param="production" title="Cliquer pour trier">
-                                        Production <span id="tri-production" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
+                                        Production <span id="tri-eval-production" class="tri-indicateur">↕</span>
                                     </th>
                                     <th class="td-center-clickable" data-tooltip="eval-col-jeton" data-action="trierTableauParColonne" data-param="jetons">
-                                        Jeton <span id="tri-jetons" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
+                                        Jeton <span id="tri-eval-jetons" class="tri-indicateur">↕</span>
                                     </th>
                                     <th class="td-center-clickable" data-tooltip="eval-col-niveau" data-action="trierTableauParColonne" data-param="niveau">
-                                        Statut <span id="tri-niveau" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
+                                        Statut <span id="tri-eval-niveau" class="tri-indicateur">↕</span>
                                     </th>
                                     <th class="td-center-clickable" data-action="trierTableauParColonne" data-param="niveauIDME" title="Niveau de performance — cliquer pour trier selon l'échelle de l'évaluation">
-                                        Niveau <span id="tri-niveauIDME" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
+                                        Niveau <span id="tri-eval-niveauIDME" class="tri-indicateur">↕</span>
                                     </th>
                                     <th class="td-center-clickable" data-action="trierTableauParColonne" data-param="note" title="Cliquer pour trier">
-                                        Note % <span id="tri-note" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
+                                        Note % <span id="tri-eval-note" class="tri-indicateur">↕</span>
                                     </th>
                                     <th class="td-center">Actions</th>
                                 </tr>
@@ -14578,7 +14587,7 @@
     <script src="js/partage-section.js?v=20260825a"></script>
     <script src="js/import-export.js?v=20260829a"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
     <script src="js/codex.js?v=20260808b"></script> <!-- 1.16.0+ : #336 D — preview purge espace précédent à l'ouverture -->
-    <script src="js/liste-evaluations.js?v=20260829e"></script> <!-- #556 + #557 : ensemble detruit = ensemble annonce ; supprimerEvaluation unique -->
+    <script src="js/liste-evaluations.js?v=20260829f"></script> <!-- #556 + #557 : ensemble detruit = ensemble annonce ; supprimerEvaluation unique -->
     <script src="js/journal.js?v=2026041706"></script>
     <script src="js/snapshots.js?v=20260702a"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
