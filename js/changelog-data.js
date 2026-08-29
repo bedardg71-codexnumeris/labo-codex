@@ -25,6 +25,12 @@
             couleur: 'vert',
             titre: 'Les rep\u00e8res se posent partout o\u00f9 l\'\u00e9chelle se pense',
             items: [
+                '<strong>La Liste des \u00e9valuations est plus juste.</strong> Trier par DA, Nom ou Pr\u00e9nom change bien la fl\u00e8che de la Liste (elle changeait celle du tableau des \u00e9tudiants) ; la fl\u00e8che est lisible en mode clair ; une reprise cibl\u00e9e se classe avec les reprises ; la vue Corbeille nomme la production.',
+                '<strong>Correction : en mode anonymisation, supprimer un fichier ou vider la corbeille te dit maintenant que les \u00e9valuations li\u00e9es n\'ont pas \u00e9t\u00e9 retir\u00e9es</strong>, au lieu de les retirer en silence.',
+                '<strong>Correction : refuser une r\u00e9association n\'applique plus de jeton de reprise</strong> \u2014 le fichier reste sur sa production, aucun jeton n\'est consomm\u00e9.',
+                '<strong>Le PDF de r\u00e9troaction anonymise aussi le texte de tes r\u00e9troactions</strong> en mode anonymis\u00e9, et reste lisible sur les niveaux aux couleurs claires. Le compteur de l\'export L\u00e9a annonce le nombre de PDF r\u00e9ellement produits.',
+                '<strong>Sur iPad, les fl\u00e8ches de la visionneuse, les pastilles de fond et le menu d\'actions de la Liste sont plus faciles \u00e0 toucher</strong> (44 px) ; sur Mac, rien ne change.',
+                '<strong>Correction : la note finale enregistr\u00e9e est la valeur calcul\u00e9e</strong>, plus la relecture de ce qui \u00e9tait affich\u00e9 \u00e0 l\'\u00e9cran.',
                 '<strong>Une cartouche neuve prend l\'\u00e9chelle que tu choisis dans son formulaire \u2014 et l\'\u00e9crit.</strong> Elle prenait la premi\u00e8re \u00e9chelle du trimestre, quoi que tu aies choisi. Sans \u00e9chelle choisie, la matrice le dit au lieu d\'inventer des colonnes. Et les deux listes Grille / \u00c9chelle du formulaire de cartouche, muettes depuis trois jours, r\u00e9pondent de nouveau.',
                 '<strong>Le panneau orange de version revient au chargement</strong>, une fois par nouvelle version : il nomme la version et le build, sans te demander de recharger. Le fermer le fait taire jusqu\'\u00e0 la suivante.',
                 '<strong>La case \u00ab Reprise cibl\u00e9e \u00bb du formulaire d\'\u00e9valuation est retir\u00e9e.</strong> La d\u00e9cocher ne retirait rien. Les reprises cibl\u00e9es d\u00e9j\u00e0 faites restent visibles dans la liste et le bilan.',
