@@ -93,26 +93,24 @@ describe('#563 · une écriture de jeton refusée ne passe plus pour un succès'
     });
 });
 
-describe('#563 · la case « Reprise ciblée » ne ment plus quand on la décoche', () => {
-    it('la branche de décochage n’est plus vide', () => {
-        const nu = sansCommentaires(srcSauvegarde);
-        const pos = nu.indexOf('function gererChangementCheckboxJetonRepriseCiblee');
-        expect(pos, 'la fonction doit exister').toBeGreaterThan(-1);
-        const corps = nu.slice(pos, nu.indexOf('\n}', pos));
-        // L'ancien défaut : un `else { }` sans rien dedans.
-        expect(corps).not.toMatch(/else\s*\{\s*\}\s*$/);
+describe('#563 · la case « Reprise ciblée » est RETIRÉE (option C, 29 août 2026) — et aucun chemin ne l\'applique plus', () => {
+    it('ni la case, ni son handler, ni la fonction d\'application, hors commentaires', () => {
+        const nuS = sansCommentaires(srcSauvegarde);
+        const nuJ = sansCommentaires(srcJetons);
+        expect(nuS).not.toContain('checkboxJetonRepriseCiblee');
+        expect(nuS).not.toContain('gererChangementCheckboxJetonRepriseCiblee');
+        expect(nuJ).not.toContain('function appliquerJetonRepriseCiblee');
+        expect(nuJ).not.toContain('window.appliquerJetonRepriseCiblee');
     });
 
-    it('la case revient à l’état RÉEL des données, et le dit', () => {
-        const nu = sansCommentaires(srcSauvegarde);
-        const pos = nu.indexOf('function gererChangementCheckboxJetonRepriseCiblee');
-        const corps = nu.slice(pos, nu.indexOf('\n}', pos));
-        // Le jeton est toujours appliqué : la case doit repasser à true.
-        expect(corps).toContain('checkbox.checked = true');
-        expect(corps).toContain('notifications.info');
+    it('le tampon d\'annotation ne route plus vers une case absente', () => {
+        const nuA = sansCommentaires(readFileSync(path.join(racineProjet, 'js', 'travaux-annotation.js'), 'utf8'));
+        const nuO = sansCommentaires(readFileSync(path.join(racineProjet, 'js', 'travaux-outils.js'), 'utf8'));
+        expect(nuA).not.toContain('checkboxJetonRepriseCiblee');
+        expect(nuO).not.toContain("jetonType: 'repriseCiblee'");
     });
 
-    it('le type non pris en charge est nommé au lieu de tomber dans le vide', () => {
+    it('le type non pris en charge est nommé au lieu de tomber dans le vide (retirerJetonDepuisSidebar)', () => {
         const nu = sansCommentaires(srcSauvegarde);
         const pos = nu.indexOf('function retirerJetonDepuisSidebar');
         expect(pos, 'la fonction doit exister').toBeGreaterThan(-1);
@@ -120,9 +118,10 @@ describe('#563 · la case « Reprise ciblée » ne ment plus quand on la décoch
         expect(corps).toContain('notifications.info');
     });
 
-    it('le retrait de reprise ciblée reste ABSENT — et l’item doit rester ouvert', () => {
-        // Verrou d'honnêteté : si quelqu'un écrit un jour cette fonction, ce test
-        // rougit et force à relire l'item plutôt qu'à le croire clos.
-        expect(sansCommentaires(srcJetons)).not.toContain('function retirerJetonRepriseCiblee');
+    it('les reprises ciblées DÉJÀ faites restent lisibles : le bilan et le filtre de la liste les nomment encore', () => {
+        const retro = readFileSync(path.join(racineProjet, 'js', 'evaluation-retroaction.js'), 'utf8');
+        expect(retro).toContain('jetonRepriseCibleeApplique');
+        const html = readFileSync(path.join(racineProjet, 'index.html'), 'utf8');
+        expect(html).toContain('value="jeton-reprise-ciblee"');
     });
 });

@@ -813,147 +813,17 @@ function retirerJetonPersonnalise(da, jetonId) {
 }
 
 /* ===============================
-   JETON DE REPRISE CIBLÉE
+   JETON DE REPRISE CIBLÉE — PLUS D'APPLICATION (#563, 29 août 2026)
    =============================== */
 
-/**
- * Applique un jeton de reprise ciblée à une évaluation
- * Crée une nouvelle évaluation avec modification ciblée d'UN SEUL critère
- *
- * @param {string} evaluationOriginaleId - ID de l'évaluation à remplacer
- * @param {string} critereId - ID du critère à corriger (optionnel, sera demandé si omis)
- * @param {boolean} archiverOriginale - Si true, archive l'originale; sinon la supprime (lit config si omis)
- * @returns {object|null} La nouvelle évaluation créée, ou null si échec
- */
-function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, archiverOriginale = null) {
-
-    // IMPORTANT: Utiliser directement db.getSync pour éviter conflit avec les modes
-    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
-    const indexOriginal = evaluations.findIndex(e => e.id === evaluationOriginaleId);
-
-    if (indexOriginal === -1) {
-        notifications.erreur('Erreur', 'Évaluation introuvable');
-        return null;
-    }
-
-    const evaluationOriginale = evaluations[indexOriginal];
-    const da = evaluationOriginale.etudiantDA;
-
-    // Vérifier la disponibilité des jetons de reprise ciblée pour cet étudiant
-    // Pour l'instant, on utilise le même compteur que les reprises standard
-    // TODO: Créer un compteur séparé si besoin
-    // #328 L2-c : la config repriseCiblee dérive de la pratique active (plus de miroir configPAN.jetons).
-    const configRepriseCiblee = obtenirConfigJetons().repriseCiblee || {};
-
-    if (!configRepriseCiblee.actif) {
-        notifications.erreur('Fonction désactivée', 'Les jetons de reprise ciblée sont désactivés');
-        return null;
-    }
-
-    // Utiliser la config pour déterminer si on archive ou supprime l'originale
-    if (archiverOriginale === null) {
-        archiverOriginale = configRepriseCiblee.archiverOriginale !== false; // Par défaut: archiver
-    }
-
-
-    // ✅ CORRECTIF (30 déc 2025): Deep copy pour éviter la modification de l'original
-    const copieOriginale = structuredClone(evaluationOriginale);
-
-    // Créer la nouvelle évaluation (duplicata) avec un nouvel ID unique
-    const nouvelId = genererIdUnique('EVAL_');
-    const nouvelleEvaluation = {
-        ...copieOriginale,
-        id: nouvelId,
-        dateEvaluation: new Date().toISOString(),
-        dateCreation: new Date().toISOString(),
-        repriseDeIdCiblee: evaluationOriginaleId, // Lien vers l'originale (ciblée)
-        critereRepriseCiblee: critereId, // Le critère qui sera corrigé
-        jetonRepriseCibleeApplique: true,
-        dateApplicationJetonRepriseCiblee: new Date().toISOString(),
-        plafondNoteCiblee: configRepriseCiblee.plafondNote || 'M', // M par défaut
-        verrouillee: false, // Déverrouiller pour permettre modification
-        dateModification: undefined,
-        heureModification: undefined,
-        // IMPORTANT: Nettoyer les propriétés qui ne doivent PAS être copiées
-        remplaceeParId: undefined,
-        dateRemplacement: undefined,
-        archivee: undefined,
-        dateArchivage: undefined
-    };
-
-
-    // Journal de bord — jeton de reprise ciblée (avant splice pour garder la bonne référence)
-    var refOriginaleCiblee = evaluations[indexOriginal];
-    if (typeof Journal !== 'undefined') {
-        Journal.ajouterEntree(refOriginaleCiblee,
-            Journal.ACTIONS.JETON_APPLIQUE,
-            { type: 'reprise_ciblee', nouvelleId: nouvelleEvaluation.id, critereId: critereId });
-        Journal.ajouterEntree(nouvelleEvaluation,
-            Journal.ACTIONS.JETON_APPLIQUE,
-            { type: 'reprise_ciblee', originaleId: evaluationOriginaleId, critereId: critereId });
-    }
-
-    if (archiverOriginale) {
-        // Option 1: Archiver l'originale
-        evaluations[indexOriginal].remplaceeParId = nouvelleEvaluation.id;
-        evaluations[indexOriginal].dateRemplacement = new Date().toISOString();
-        evaluations[indexOriginal].archivee = true;
-        evaluations[indexOriginal].dateArchivage = new Date().toISOString();
-    } else {
-        // Option 2: Supprimer l'originale
-        evaluations.splice(indexOriginal, 1);
-    }
-
-    // Ajouter la nouvelle évaluation
-    evaluations.push(nouvelleEvaluation);
-
-    // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
-    if (!_persisterEvaluationsJetons(evaluations, 'Application du jeton de reprise ciblée')) return null;
-
-    // Recalculer les indices
-    if (typeof calculerEtStockerIndicesCP === 'function') {
-        calculerEtStockerIndicesCP();
-    }
-
-    // Rafraîchir le tableau
-    if (typeof initialiserListeEvaluations === 'function') {
-        setTimeout(() => initialiserListeEvaluations(), 150);
-    }
-
-    notifications.succes(`Jeton de reprise ciblée appliqué (${archiverOriginale ? 'originale archivée' : 'originale supprimée'})`);
-    return nouvelleEvaluation;
-}
-
-/**
- * Nettoie les propriétés incorrectes des évaluations de reprise ciblée
- * (Bug corrigé : les nouvelles évaluations héritaient de remplaceeParId de l'originale)
- */
-function nettoyerEvaluationsRepriseCiblee() {
-    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
-    let nbNettoyees = 0;
-
-    evaluations.forEach(evaluation => {
-        // Si c'est une reprise ciblée qui a incorrectement remplaceeParId
-        if (evaluation.jetonRepriseCibleeApplique === true && evaluation.remplaceeParId) {
-            delete evaluation.remplaceeParId;
-            delete evaluation.dateRemplacement;
-            delete evaluation.archivee;
-            delete evaluation.dateArchivage;
-            nbNettoyees++;
-        }
-    });
-
-    if (nbNettoyees > 0) {
-        if (!_persisterEvaluationsJetons(evaluations, 'Nettoyage des reprises ciblées')) return nbNettoyees;
-
-        // Rafraîchir la liste
-        if (typeof initialiserListeEvaluations === 'function') {
-            setTimeout(() => initialiserListeEvaluations(), 100);
-        }
-    }
-
-    return nbNettoyees;
-}
+// `appliquerJetonRepriseCiblee` et `nettoyerEvaluationsRepriseCiblee` sont
+// RETIRÉES. La première n'avait qu'un appelant — la case « Reprise ciblée » du
+// formulaire d'évaluation, retirée par décision de Grégoire (option C : « retirons
+// la case et voyons à l'usage ») ; la seconde n'en avait aucun. Le TYPE reste
+// connu de la configuration et de l'affichage (`jetonRepriseCibleeApplique` sur
+// les évaluations déjà créées, badge, bilan, filtre de la liste) : ces données
+// existent, on ne les efface pas. Ce qui n'existe plus, c'est le geste qui en
+// crée de nouvelles.
 
 /* ===============================
    EXPORTS
@@ -968,8 +838,6 @@ window.appliquerJetonDelai = appliquerJetonDelai;
 window.retirerJetonDelai = retirerJetonDelai;
 window.appliquerJetonReprise = appliquerJetonReprise;
 window.retirerJetonReprise = retirerJetonReprise;
-window.appliquerJetonRepriseCiblee = appliquerJetonRepriseCiblee;
-window.nettoyerEvaluationsRepriseCiblee = nettoyerEvaluationsRepriseCiblee;
 
 // Jetons personnalisés
 window.obtenirTousTypesJetons = obtenirTousTypesJetons;

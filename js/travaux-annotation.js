@@ -1084,13 +1084,14 @@
      * #240 — Coche (et déclenche) la checkbox du jeton correspondant après apposition
      * du tampon. Réutilise les handlers existants (gererChangementCheckboxJeton*) en
      * simulant un changement, pour passer par la même logique d'application du jeton.
-     * @param {string} jetonType - 'delai' | 'reprise' | 'repriseCiblee'
+     * @param {string} jetonType - 'delai' | 'reprise'
      */
     function cocherCheckboxJeton(jetonType) {
         const map = {
             delai: { id: 'checkboxJetonDelai', handler: 'gererChangementCheckboxJetonDelai' },
-            reprise: { id: 'checkboxJetonReprise', handler: 'gererChangementCheckboxJetonReprise' },
-            repriseCiblee: { id: 'checkboxJetonRepriseCiblee', handler: 'gererChangementCheckboxJetonRepriseCiblee' }
+            reprise: { id: 'checkboxJetonReprise', handler: 'gererChangementCheckboxJetonReprise' }
+            // #563 (29 août 2026) : plus de route « repriseCiblee » — la case et le
+            // tampon qui l'appliquaient sont retirés.
         };
         const cible = map[jetonType];
         if (!cible) return;
