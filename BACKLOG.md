@@ -3499,6 +3499,22 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - ⮕ **Porte terrain** : saisie de durée au doigt sur iPad, et lisibilité de l'en-tête sur un nœud étroit (le lot « largeur » n'est pas fait).
 
 - [ ] **#508** ⏳ **ÉCHÉANCE : 1er SEPTEMBRE 2026** — l'avis d'identification sur la page d'accueil.
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 au soir — option A : IL TIENT LA DATE.**
+  ⚠ **CETTE DÉCISION A FAILLI N'ÊTRE CONSIGNÉE NULLE PART.** C'était la seule des vingt et un
+  arbitrages à porter une échéance, et aucune des trois sessions ne l'avait inscrite : chacune a
+  supposé qu'une autre s'en chargeait, parce que « le fond était déjà décidé ». ⮕ **L'élément le plus
+  urgent est celui que personne ne prend.** Trouvé en vérifiant le compte, pas en s'en souvenant.
+  ⮕ **Sa note** : « *Je crois que l'avis dans 508 a déjà été fait par Cowork. C'est en ligne en tout
+  cas à deux endroits : sur la page d'accueil comme telle et dans une fenêtre.* »
+  ✅ **VÉRIFIÉ le 28 août — sa prémisse est juste** : l'avis est bien en ligne aux deux endroits,
+  `js/accueil.js` (le paragraphe d'accueil) et `js/transitions.js` (le bandeau daté).
+  ⮕ **ET LE BANDEAU S'ÉTEINT SEUL LE 1er SEPTEMBRE** (`transitions.js`, condition de date) : il n'y a
+  **rien à retirer manuellement**. Le commentaire du code dit la suite : « #508 prend le relais avec un
+  paragraphe d'accueil rédigé au présent ».
+  ⏳ **CE QUI RESTE À FAIRE LE 1er SEPTEMBRE, et rien d'autre** :
+  · réécrire le paragraphe d'accueil **au présent** (`js/accueil.js`) — il est aujourd'hui au futur ;
+  · ne PAS prolonger la date sans réécrire le message : « un avis périmé apprend à ne plus lire la zone »
+    (avertissement déjà dans `transitions.js`).
   ✅ **DÉBLOQUÉ le 26 août** : #427 a désormais une DATE (le 1er septembre) et une fiche opératoire.
   Le paragraphe n'annonce donc plus une contrainte sans dispositif — il annonce une contrainte dont
   la mise en place est planifiée. ⮕ **Les deux textes sont écrits d'avance** au §7 de
@@ -3525,6 +3541,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   le faire. C'est pour ça que l'item existe.
 
 - [ ] **#427** ⚠️ Refermer l'accès public — **DATE FIXÉE AU 1er SEPTEMBRE 2026** (décision Grégoire,
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 au soir — option A : IL TIENT LA DATE DU 1er SEPTEMBRE.**
+  L'option « repousser » a été posée et écartée. ⮕ Elle restait légitime, **mais elle se prenait le
+  28 août, pas le 1er au matin** — c'est le sens de l'arbitrage.
+  ⏳ **CE QUI MANQUE N'EST RELEVABLE QUE PAR GRÉGOIRE**, dans la console Cloudflare, et aucune session
+  ne peut le mesurer à sa place : les **trois noms**, la **durée de session**, et la règle `Include`
+  réellement en place dans la policy dormante.
+  ⮕ Le reste est prêt : fiche opératoire (`plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`),
+  ADR-008, `DEPLOY.md`, `PRIVACY.md` et `SECURITY.md` alignés sur la policy ouverte du 27 août.
+  ⮕ Voir #508 pour le versant « avis » : le bandeau s'éteint seul, mais le paragraphe d'accueil reste
+  à réécrire au présent.
   26 août). ⮕ **FICHE OPÉRATOIRE PRÊTE** : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`
   — gestes Cloudflare, vérifications, annonce, consignation. ⚠ Plus de « liste à remplir » ni de courriel d'invitation nominatif : la policy est ouverte depuis la décision du 27 août.
   ⚠️ **LES DÉCISIONS DU 26 AOÛT ONT ÉTÉ RENVERSÉES LE 27** (décision Grégoire, 27 août). Elles

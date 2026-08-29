@@ -15,15 +15,105 @@
 | **Version** | **1.105.0** — build `0828-1405`, **DÉPLOYÉE le 28 août à 14 h 05**. Minor : une échelle porte ses deux **repères de maîtrise**, et les **32 comparaisons IDME écrites en dur** ont disparu des DEUX documents remis à l'élève (PDF de synthèse : 14 → 0 ; bilan à l'écran : 18 → 0). **Vitest 3887/3887 (364 fichiers) · Playwright 199** au moment du bump. ⚠ **Grégoire doit recharger sa session `file://`** : 28 jetons ont changé. |
 | **Version précédente** | **1.104.0** — build `0827-1245` (`588debf1`). Minor : la carte « Observation de la structure » rend un bloc par niveau de l'échelle, et le SOLO d'un critère vient du champ configuré. **Vitest 3715/3715 (350 fichiers) · Playwright 193/193**, verdict vert enregistré au SHA par `scripts/pousser.sh`. ✅ **AUCUN BUMP DÛ** : rien de code applicatif n'a changé depuis — seuls un test de constat et de la documentation. ⚠ **Grégoire doit recharger sa session `file://`** : huit jetons anti-cache ont changé au bump. |
 | **Avant-dernière** | **1.103.1** — build `0827-0953`, qui a porté six changements de code sans bump (pas 3c-3, pas 4, #547, #550, #551) : la session `file://` de Grégoire était ouverte, et la règle du projet interdit de bumper pendant. **C'est la seconde fois de la journée que l'application annonce un numéro plus ancien que son code.** |
-| **Travail en avance sur `main`** | ✅ **NON — TOUT EST POUSSÉ.** `origin/main` = **`248ad75b`**, arbre propre, vérifié au rituel de fin du 28 août à 15 h 10. Trois commits partis d'un coup, produits par DEUX sessions parallèles coordonnées par messages : `00a81a24` (`echapperHtml` échappe enfin les guillemets — zone protégée, autorisation de Grégoire), `828981ad` (**retrait de la fonctionnalité « Alléger »**, décision de Grégoire), `248ad75b` (#555 lot 2, sept replis morts). ⚠ **Le hook a signalé « aucun verdict Playwright local pour ce SHA »** : la suite avait été passée AVANT les commits (199/199), pas dessus. Push laissé passer, la CI juge. Pour un verdict local : `scripts/pousser.sh`. |
+| **Travail en avance sur `main`** | ✅ **NON — TOUT EST POUSSÉ** au rituel du 28 août, 20 h 15. `origin/main` = **`9d4e...`** (voir le dernier commit), arbre propre. **QUATRE commits partis d'un coup, produits par TROIS sessions parallèles coordonnées par messages** : `e1e66566` (#587/#578, session 70), `c1710065` (les 21 décisions, onze détaillées), `e348a42a` (six décisions, session 5b), plus le relais. ⚠ **Aucun fichier `js/` ni `index.html` dans ces commits** — de la documentation seule : le code n'a pas bougé depuis `44a5aeeb` (17 h 22), donc les verdicts de 17 h tiennent, et ils ont été **refaits** avant ce push. |
 | **Suite Playwright** | ⚠⚠ **LA LEÇON DE LA NUIT DU 27-28 AOÛT, ET ELLE VAUT POUR TOUT CHANTIER DE RENDU.** Les DEUX régressions de la nuit ont été invisibles à Vitest — 3767/3767 puis 3780/3780, verts pendant que Playwright rougissait. Vitest tourne dans `node`, sans navigateur ; **Playwright tourne dans WebKit, le moteur de Safari, contre le vrai `index.html`**. ⮕ **Sur un lot qui touche l'affichage, la suite navigateur n'est pas une formalité de fin : c'est la seule qui voit.** ⮕ Corollaire découvert le 28 : une vérification qu'on croyait réservée à Grégoire (« porte terrain ») est souvent automatisable en spec WebKit — la porte 2.6 l'a été. |
 | ⚠ **AVANT TOUTE SUITE PLAYWRIGHT** | **fermer GitHub Desktop.** Les specs lisent l'arbre de travail en direct ; une commande git lancée pendant la suite change les fichiers sous leurs pieds et fait rougir des specs au hasard. Trouvé le 26 août (#523), règle versée au skill `portes-terrain`. |
 | ⚠ **LE CLONE DE GRÉGOIRE EST L'ARBRE DE TRAVAIL** | `/Users/kuekatsheu/Documents/GitHub/Monitorage_v6` sert à la fois de dépôt de travail et de source `file://` pour son app. Il voit les modifications dès qu'il recharge, **avant tout push** — et peut donc tomber sur un état intermédiaire. Le `git pull` des portes terrain lui est inutile. |
 | 📐 **CHANTIER MAJEUR — LIVRÉ, ET CETTE LIGNE ÉTAIT FAUSSE** | **#529 est LIVRÉ depuis le 26 août** (1.101.0 → 1.101.1, quatre lots : conversion, calcul, affichage, aide). Cette ligne l'annonçait encore « en attente » le 27 après-midi, et une session s'apprêtait à rouvrir un chantier fait. ⮕ **CE QUI RESTE EN SONT LES QUATRE SUCCESSEURS**, et aucun n'est un oubli : ~~**#537**~~ et ~~**#535**~~ (**LIVRÉS le 27 août** avec #552 — voir ci-dessous), **#539** (les clés du volet confidentiel — des CLÉS DE DONNÉES, pas des libellés), **#536** (`idmeMoyen` à 0 vs « pas de donnée », risque très réduit depuis #529). Audit d'origine : `Rapports/AUDIT-srpnf-code-en-dur-2026-08-26.md`. |
-| ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE** | **#427** (refermer l'accès public) et **#508** (l'avis d'accueil qui l'annonce). Fiche opératoire prête : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`. ⚠ **La policy est OUVERTE** (`Include → Everyone`, décision du 27 août) : il n'y a **ni liste nominale à dresser, ni personne à inviter**. **Dû par Grégoire** : les trois noms Cloudflare, la durée de session et la règle `Include` réellement en place dans la policy dormante — personne ne peut les relever à sa place. |
+| ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE, DANS 4 JOURS** | **#427** + **#508**. ✅ **GRÉGOIRE TIENT LA DATE** (arbitré le 28 août au soir, option A ; « repousser » posé et écarté). ⮕ **DÛ PAR LUI, ET PAR PERSONNE D'AUTRE** : les trois noms Cloudflare, la durée de session, la règle `Include` de la policy dormante. ⮕ **MESURÉ le 28 août** : l'avis est bien en ligne aux deux endroits (`accueil.js`, `transitions.js`), et **le bandeau s'éteint SEUL le 1er septembre** — rien à retirer à la main. Reste à réécrire le paragraphe d'accueil **au présent**. |
 | ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. ⮕ **ET C'EST ARRIVÉ UNE SECONDE FOIS LE MÊME JOUR, dans l'autre sens.** Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les `BACKLOG.md` et `SESSION.md` de la session « présences » — l'inscription de l'item **#538** et la renumérotation **#534 → #537** vivent donc dans un commit qui parle d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc non réécrit. **Deux avertissements en un jour : sur ce dépôt, `git add` par chemins explicites n'est pas une préférence, c'est la seule méthode qui tienne.** |
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
-| **Dernière mise à jour** | **28 août 2026, 15 h 10** — session d'après-midi : **six items Évaluations traités** (#564, #565, #559, #558 LIVRÉS ; #563 et #572 PARTIELS, volontairement laissés ouverts), `echapperHtml` renforcé, **« Alléger » retiré**. **Vitest 3925/3925** (368 fichiers) · **Playwright 199/199**, lus après le dernier changement. **Aucun bump** : 1.105.0 tient, la session `file://` de Grégoire est ouverte. Avant : 28 août 07 h 45 (#575 fini sauf B10, #576 livré). |
+| **Dernière mise à jour** | **28 août 2026, 20 h 15** — fin de journée, **trois sessions**. Les **21 arbitrages de Grégoire sont TRANCHÉS et consignés dans leurs items**. Livré : #555 lot 2 (b), #556, #557, l'audit des copies d'échelle, le diagnostic des résolveurs. **Vitest 3983/3983** (374 fichiers) · **Playwright 199/199**, relancés sur arbre gelé avant le push. **Aucun bump** : 1.105.0 tient — que de la documentation, aucun `?v=` à bouger. |
+
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 28 août 2026, 20 h 15 (FIN DE JOURNÉE, TROIS SESSIONS)
+
+### ✅ LES 21 ARBITRAGES SONT TRANCHÉS — ET C'EST LE FAIT PRINCIPAL DE LA JOURNÉE
+
+Grégoire a répondu aux vingt et un arbitrages relevés dans les skills métier et dans l'audit
+du jour. **Chaque décision est consignée DANS SON ITEM**, pas dans un document à part : un item
+lu dans six mois porte son arbitrage sans qu'il faille retrouver l'artefact qui l'a recueilli.
+
+⮕ Registre complet, avec ses formulations : artefact **« Arbitrages Labo Codex »**
+`https://claude.ai/code/artifact/59ed2fe9-fa0a-49d7-9f97-b0d0e46c4b8b`
+
+**Items portant une décision** : #427, #508, #543, #555 (deux), #563, #571, #574, #577, #578,
+#579, #581, #583, #584, #585, #586, #587, #588, #589, #590, #591.
+
+### 🔴 CE QUI EST DÛ PAR GRÉGOIRE, ET PAR PERSONNE D'AUTRE
+
+1. **Les trois valeurs Cloudflare** (#427) — échéance **1er septembre**. Aucune session ne peut
+   les relever : elles vivent dans sa console, pas dans le dépôt.
+2. **`_diagnostiquerResolutionEchelles()`** en console (#590) — le chantier des trois résolveurs
+   ne s'ouvre PAS avant ce chiffre. S'il rend zéro divergent, il attend sans risque.
+
+⮕ Et un troisième, à produire d'abord : **le diagnostic de #578 n'est pas écrit**. La mesure
+(compter les grilles avec et sans `echelleId`) suppose une fonction console sur le patron
+d'`oracle542` — livrable à produire, pas une inscription.
+
+### ⚠ QUATRE PIÈGES QUE LA SESSION SUIVANTE NE DOIT PAS REPAYER
+
+1. **`RELAIS.md` EXISTAIT, ET AUCUNE DES TROIS SESSIONS NE L'A LU.** Une page d'arbitrages était
+   consignée ici depuis 15 h 10 ; nous en avons publié trois autres, dont deux **portant le même
+   titre**. La question « quelqu'un a-t-il déjà fait ça ? » avait sa réponse écrite à l'endroit
+   prévu pour ça. ⮕ **Lire ce fichier AVANT de produire un livrable, pas seulement au démarrage.**
+2. **Un break-test peut ne pas POUVOIR rendre rouge.** `local obtenu="VERT"; [ $? -ne 0 ]` lit le
+   code de `local`, pas celui du test : 5 mutations « conformes » sur 5, toutes fausses. Les
+   TÉMOINS ne l'attrapent pas (ils attendent du vert, un harnais mort n'en produit que).
+   ⮕ **Un bilan « N conformes » n'est établi que si le lot contient au moins un ROUGE obtenu.**
+3. **Un commit n'est PAS une écriture.** Un `git commit` lit l'arbre et écrit dans `.git` ; il ne
+   touche aucun fichier testé. J'ai invalidé un verdict Playwright à tort en déduisant des heures
+   d'écriture depuis des heures de commit. ⮕ **Seuls les `mtime` tranchent** (`stat -f "%Sm %N"`).
+4. **Republier un artefact est une écriture destructive** sur la seule copie lisible de
+   l'extérieur. Lire l'artefact AVANT de republier par-dessus un état que quelqu'un a pu remplir :
+   la lecture dépose une copie datée sous `tool-results/`, seule trace de l'avant.
+
+### 🔒 TROIS GARDES QUI ROUGIRONT — ET QUI ONT RAISON
+
+- **`sentinelle-transport-echelles`** est un **RATCHET** : elle rougit dès qu'un champ est ajouté
+  à une échelle sans être transporté par `SCHEMAS_IMPORT.echelle`. Son message dit quoi faire.
+  ⮕ **Ne pas l'affaiblir pour la faire taire.**
+- **Le cliquet de #557** (`DOUBLONS_CONNUS`, 9 noms) ne descend pas seul : chaque paire réglée doit
+  être **retirée de la liste**, sinon le banc rougit. C'est voulu.
+- **Le test qui garde `retirerJetonRepriseCiblee`** devient **caduc** quand la case « Reprise
+  ciblée » sera retirée (#563, décision C). Le retirer avec la case, pas le laisser en sentinelle
+  d'un comportement disparu.
+
+⮕ Et une **exception nommée** : le `console.log` du diagnostic (`profil-etudiant-calculs.js`) porte
+son motif en commentaire. Ne pas le « corriger » en `warn` — un diagnostic qui rend son compte n'a
+rien d'anormal.
+
+### 📎 CE QUI RESTE OUVERT, PAR CHANTIER
+
+- **#555 lot 2** : (b) le lecteur unique est LIVRÉ (`zoneDuCodeDansNiveaux`). Restent (d) le
+  nommage — **tranché**, à exécuter avec #577 — et (e) l'éditeur d'échelle NEUVE, qui ne porte
+  toujours pas le bloc des repères (`blocReperesEchelle` n'a qu'un appelant).
+- **#587** : huit paires sur neuf **non mesurées**. Seule `creerNouvellePratique` l'est — et elle
+  n'a **jamais pu s'exécuter**, pas une fois depuis le 2 janvier 2026 (nom pris depuis le
+  25 novembre 2025, fichier chargé avant). Quelqu'un l'a pourtant corrigée le 20 janvier.
+  ⮕ **Méthode pour les huit autres** : lire l'ordre de chargement **à l'époque où la perdante a été
+  écrite**, pas seulement aujourd'hui — c'est ce qui distingue une fonction *devenue* morte d'une
+  fonction **morte-née**, et le geste n'est pas le même (déduplication contre retrait).
+  ⮕ **Réserve à ne pas perdre** : la longue créait une pratique en un clic, sans assistant. Rien
+  n'est perdu du comportement (il n'y en a jamais eu), mais l'**intention** a existé.
+- **`modifierEvaluationParId`** : alias dont la justification est **périmée** depuis `26be0d9b`.
+  8 appelants dans 4 fichiers — chantier, pas retouche.
+- **#591 (anonymisation)** : ⚠ **le seul des vingt et un qui ne se referme PAS par la réponse.**
+  Position prise (pseudonymisation réversible), **à valider avec les contacts Loi 25** — et la
+  limite n'est pas juridique : « lui seul peut inverser » cesse d'être vrai dès qu'un fichier
+  anonymisé circule vers un tiers. **Ne pas le relire comme clos.**
+- **#543** : décision « **ne rien réécrire** ». Aucune écriture sur les 55 évaluations : l'écart
+  note↔critères est la trace d'un **jugement d'enseignant** (il arrondit ses notes finales), pas un
+  défaut de données. Le geste est de faire cesser la qualification d'incohérence.
+  ⮕ **Fausse piste déjà écartée** : `_diagnostiquerNoteNonCalculable` n'est PAS le site — il
+  explique pourquoi une note n'est pas *calculable*, il ne compare jamais note et critères.
+
+### 📄 DOCUMENTS À LIRE AVANT DE ROUVRIR CES CHANTIERS
+
+- `Rapports/AUDIT-copies-echelle-reperes-2026-08-28.md` — porte le périmètre mesuré de #590 (deux
+  sites, deux coûts d'échec) et les trois pertes de l'audit. **#583, #584 et #586 y renvoient.**
+- Les trois artefacts d'arbitrages **clos** (`84660742`, `36b1ee77`, `971736ee`) sont archives ou
+  muets, capacité révoquée. **Un seul circuit de réponse** : `59ed2fe9`.
+
 
 ## ▶ POUR LA SESSION QUI PREND LE RELAIS — 28 août 2026, 15 h 10 (fin d'après-midi)
 
