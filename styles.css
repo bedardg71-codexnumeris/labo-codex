@@ -6860,7 +6860,7 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     background: rgba(33, 150, 243, 0.10);
     border: 1px solid rgba(33, 150, 243, 0.32);
     border-left: 3px solid var(--bleu-moyen, #2196f3);
-    border-radius: var(--radius);
+    border-radius: var(--radius-moyen);
 }
 .travaux-bandeau-sans-da p { margin: 0 0 6px 0; }
 .travaux-bandeau-sans-da ul { margin: 4px 0 6px 18px; padding: 0; }
@@ -6874,7 +6874,7 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     background: rgba(220, 53, 69, 0.10);
     border: 1px solid rgba(220, 53, 69, 0.32);
     border-left: 3px solid var(--rouge, #dc3545);
-    border-radius: var(--radius);
+    border-radius: var(--radius-moyen);
 }
 .travaux-bandeau-doublon p { margin: 0 0 6px 0; }
 .travaux-bandeau-doublon p.travaux-doublon-astuce { background: rgba(106, 172, 184, 0.10); border-left: 3px solid var(--accent-primaire); padding: 8px 10px; border-radius: var(--radius-petit); margin: 4px 0 10px 0; }
@@ -6896,8 +6896,8 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     padding: 10px 12px;
     background: rgba(230, 126, 34, 0.12);
     border: 1px solid rgba(230, 126, 34, 0.35);
-    border-left: 3px solid var(--orange, #e67e22);
-    border-radius: var(--radius);
+    border-left: 3px solid var(--alerte-bordure-attention);
+    border-radius: var(--radius-moyen);
 }
 .travaux-bandeau-autre-gc p {
     margin: 0 0 6px 0;
@@ -24202,7 +24202,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 
 /* Reprise en attente de réévaluation */
 .travaux-badge-pill.a-reevaluer {
-    background: var(--attention, #ff9800);
+    background: var(--alerte-bordure-attention);
     color: #fff;
 }
 
@@ -24673,7 +24673,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 
 .pipeline-groupe-encadre {
     border: 2px solid var(--accent, #4a90d9);
-    border-radius: var(--radius, 8px);
+    border-radius: var(--radius-moyen);
     margin: 4px 0;
     padding: 0;
     background: var(--surface-elevee, rgba(74, 144, 217, 0.05));
@@ -24685,7 +24685,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     justify-content: space-between;
     padding: 4px 8px;
     background: var(--accent, #4a90d9);
-    border-radius: var(--radius, 8px) var(--radius, 8px) 0 0;
+    border-radius: var(--radius-moyen) var(--radius-moyen) 0 0;
 }
 
 .pipeline-groupe-badge {
@@ -24743,7 +24743,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 
 .fusion-avertissement {
-    color: var(--orange, #ff9800);
+    color: var(--alerte-texte-attention);
 }
 
 

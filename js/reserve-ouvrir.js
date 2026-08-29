@@ -836,7 +836,7 @@ function _construireSection(typeRessource, libelle, items) {
     html += '<strong>' + _echapper(libelle) + '</strong>';
     html += '<span style="color: var(--texte-secondaire); font-size: 0.78rem;">' + items.length + ' &eacute;l&eacute;ment(s)';
     if (nbDoublons > 0) html += ' &middot; ' + nbDoublons + ' d&eacute;j&agrave; pr&eacute;sent(s)';
-    if (nbRefManquantes > 0) html += ' &middot; <span style="color: var(--orange, #d68910);">' + nbRefManquantes + ' r&eacute;f. manquante(s)</span>';
+    if (nbRefManquantes > 0) html += ' &middot; <span style="color: var(--alerte-texte-attention);">' + nbRefManquantes + ' r&eacute;f. manquante(s)</span>';
     html += '</span>';
     html += '<span class="u-flex-gap-4">';
     html += '<button class="btn btn-secondaire u-texte-petit" data-action="ReserveOuvrir.onCheckTout" data-param="' + typeRessource + ':1" style="padding: 2px 6px;">Tout</button>';
@@ -870,7 +870,7 @@ function _construireSection(typeRessource, libelle, items) {
             var refs = [];
             if (item._refGrilleManquante) refs.push('grille manquante');
             if (item._refEchelleManquante) refs.push('&eacute;chelle manquante');
-            infos.push('<span style="color: var(--orange, #d68910);">' + refs.join(', ') + '</span>');
+            infos.push('<span style="color: var(--alerte-texte-attention);">' + refs.join(', ') + '</span>');
         }
         if (infos.length > 0) {
             html += '<span style="font-size: 0.72rem; margin-left: auto;">' + infos.join(' &middot; ') + '</span>';
