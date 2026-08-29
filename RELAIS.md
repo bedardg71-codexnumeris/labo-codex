@@ -24,7 +24,37 @@
 | ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE, DANS 4 JOURS** | **#427** + **#508**. ✅ **GRÉGOIRE TIENT LA DATE** (arbitré le 28 août au soir, option A ; « repousser » posé et écarté). ⮕ **DÛ PAR LUI, ET PAR PERSONNE D'AUTRE** : les trois noms Cloudflare, la durée de session, la règle `Include` de la policy dormante. ⮕ **MESURÉ le 28 août** : l'avis est bien en ligne aux deux endroits (`accueil.js`, `transitions.js`), et **le bandeau s'éteint SEUL le 1er septembre** — rien à retirer à la main. Reste à réécrire le paragraphe d'accueil **au présent**. |
 | ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. ⮕ **ET C'EST ARRIVÉ UNE SECONDE FOIS LE MÊME JOUR, dans l'autre sens.** Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les `BACKLOG.md` et `SESSION.md` de la session « présences » — l'inscription de l'item **#538** et la renumérotation **#534 → #537** vivent donc dans un commit qui parle d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc non réécrit. **Deux avertissements en un jour : sur ce dépôt, `git add` par chemins explicites n'est pas une préférence, c'est la seule méthode qui tienne.** |
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
-| **Dernière mise à jour** | **29 août 2026, 3 h 40** — session unique (nuit). **1.106.0 poussée** ; **#578 : le diagnostic console est LIVRÉ** (`await _diagnostiquerEchellesGrilles()`), sentinelle 6 cas / 4 mutations rouges ; **le chiffre est DÛ par Grégoire**. Fait mesuré : l'éditeur de grille n'écrit jamais `echelleId`. Entrée précédente : **28 août, 21 h 15** — session unique (soir). **#555 lot 2 (d) et (e) + #577 LIVRÉS** ; #579 livré pour le cas de l'assistant ; **#592** inscrit. **Vitest 4011/4011** (377 fichiers) · **Playwright 201** (198 verts + 3 instables pré-existantes, vertes au second essai), sur arbre gelé. ⚠ **AUCUN BUMP** : du code a changé (6 fichiers `js/`, `?v=` bougés) mais je ne sais pas si la session `file://` de Grégoire est ouverte — **1.106.0 (minor) est DUE**, à lancer par `node scripts/release.mjs minor` au prochain démarrage. Entrée précédente : **20 h 15** — fin de journée, **trois sessions**. Les **21 arbitrages de Grégoire sont TRANCHÉS et consignés dans leurs items**. Livré : #555 lot 2 (b), #556, #557, l'audit des copies d'échelle, le diagnostic des résolveurs. **Vitest 3983/3983** (374 fichiers) · **Playwright 199/199**, relancés sur arbre gelé avant le push. **Aucun bump** : 1.105.0 tient — que de la documentation, aucun `?v=` à bouger. |
+| **Dernière mise à jour** | **29 août 2026, 10 h 30** — session unique (matin). **#578 LIVRÉ** (option A) + régression du 26 août réparée (listes du formulaire de cartouche mortes) ; **référence unique créée** (`Rapports/SUIVI-conception-evaluations-2026-08.md`) ; #593 inscrit ; 1.106.0 déployée à 3 h. ⚠ **BUMP 1.106.1 DÛ** (code changé : `cartouches.js`, `index.html`), non lancé : session `file://` ouverte. Entrée précédente : **3 h 40** — session unique (nuit). **1.106.0 poussée** ; **#578 : le diagnostic console est LIVRÉ** (`await _diagnostiquerEchellesGrilles()`), sentinelle 6 cas / 4 mutations rouges ; **le chiffre est DÛ par Grégoire**. Fait mesuré : l'éditeur de grille n'écrit jamais `echelleId`. Entrée précédente : **28 août, 21 h 15** — session unique (soir). **#555 lot 2 (d) et (e) + #577 LIVRÉS** ; #579 livré pour le cas de l'assistant ; **#592** inscrit. **Vitest 4011/4011** (377 fichiers) · **Playwright 201** (198 verts + 3 instables pré-existantes, vertes au second essai), sur arbre gelé. ⚠ **AUCUN BUMP** : du code a changé (6 fichiers `js/`, `?v=` bougés) mais je ne sais pas si la session `file://` de Grégoire est ouverte — **1.106.0 (minor) est DUE**, à lancer par `node scripts/release.mjs minor` au prochain démarrage. Entrée précédente : **20 h 15** — fin de journée, **trois sessions**. Les **21 arbitrages de Grégoire sont TRANCHÉS et consignés dans leurs items**. Livré : #555 lot 2 (b), #556, #557, l'audit des copies d'échelle, le diagnostic des résolveurs. **Vitest 3983/3983** (374 fichiers) · **Playwright 199/199**, relancés sur arbre gelé avant le push. **Aucun bump** : 1.105.0 tient — que de la documentation, aucun `?v=` à bouger. |
+
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 29 août 2026, 10 h 30 (MATIN, SESSION UNIQUE)
+
+### ✅ #578 LIVRÉ (option A) — ET LES DEUX LISTES DU FORMULAIRE DE CARTOUCHE ÉTAIENT MORTES DEPUIS LE 26
+
+La cartouche neuve prend l'échelle du FORMULAIRE, l'écrit (`echelleId`), et sans choix la matrice dit « pas
+encore d'échelle » au lieu d'un tableau à une colonne. ⚠⚠ En chemin : le dispatcher résout `data-on-change` par
+`window[nom]`, et `e50155e0` (26 août) avait donné aux listes grille/échelle du formulaire des noms que rien ne
+définit — un `console.warn` par changement, rien d'autre. **Rebranchées** sur `onChangeSelectionCartouche` ;
+**cliquet** dans la sentinelle (tout `data-on-change` du bloc `infoCartouche` doit résoudre). Six mutations, six
+rouges. Le cas « avec une échelle » de `sentinelle-573` reposait sur la devinette : adapté.
+⮕ **Leçon pour le dépôt** : un `data-on-change` renommé ne casse aucun test et aucune console visible ; le cliquet
+ne couvre que ce bloc. Un cliquet GLOBAL (tout `data-on-*`/`data-action` d'`index.html` résout vers un export) serait
+le bon garde-fou — non fait, à inscrire si Grégoire le veut.
+
+### 📄 LA RÉFÉRENCE UNIQUE EXISTE — `Rapports/SUIVI-conception-evaluations-2026-08.md`
+
+Créée ce matin (voir l'état). #593 inscrit (reliquats). Chaque livraison y coche sa ligne — #578 l'est.
+
+### 🔴 DÛ, ET PAR QUI
+
+- **Grégoire** : recharger `file://` (jeton `cartouches.js` → `20260829c`) ; **bump 1.106.1 (patch) dû** — non
+  lancé, sa session est ouverte ; Cloudflare #427 ; `_diagnostiquerResolutionEchelles()` (#590) ; accueil au
+  présent (#508, **1er septembre = dans 3 jours**) ; les deux phrases de #555·1 (arrivée en « signalé », en « acquis »).
+- **La session suivante** : §3 du suivi, dans l'ordre — #574 B (sonde d'abord), #593, puis Évaluations : #555
+  exécution (C + A), #563 retrait de la case, #562 (débloqué), #560, #561.
+
+### 📌 IDs — #593 pris ; prochain libre : **#594**
+
+---
 
 ## ▶ POUR LA SESSION QUI PREND LE RELAIS — 29 août 2026, 3 h 40 (NUIT, SESSION UNIQUE)
 
