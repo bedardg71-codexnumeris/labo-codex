@@ -112,6 +112,29 @@
         return map;
     }
 
+    /**
+     * #571 — LA COULEUR DU TEXTE SUIVANT LE FOND. Les couleurs des niveaux sont
+     * celles que l'utilisateur pose sur SON échelle ; du texte blanc (`PAPER`) y
+     * était écrit sans garde : sur un niveau jaune ou pastel, le code devenait
+     * illisible dans le document remis à l'élève. Luminance relative (WCAG) : fond
+     * clair → encre, fond sombre → papier. Une couleur illisible (nom CSS,
+     * gradient, vide) garde le papier, comme avant : on ne devine pas.
+     */
+    function texteSur(fond) {
+        const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(fond || '').trim());
+        if (!m) return PAPER;
+        let h = m[1];
+        if (h.length === 3) h = h.split('').map(c => c + c).join('');
+        const lin = (v) => { const c = parseInt(v, 16) / 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+        const L = 0.2126 * lin(h.slice(0, 2)) + 0.7152 * lin(h.slice(2, 4)) + 0.0722 * lin(h.slice(4, 6));
+        // Pas de seuil arbitraire : on prend le texte qui CONTRASTE LE PLUS avec ce
+        // fond (rapport WCAG (Lclair + 0,05) / (Lsombre + 0,05)). Luminances de
+        // l'encre #141414 ≈ 0,0056 et du papier = 1.
+        const contrastePapier = 1.05 / (L + 0.05);
+        const contrasteEncre = (L + 0.05) / (0.0056 + 0.05);
+        return contrasteEncre > contrastePapier ? INK : PAPER;
+    }
+
     /* =====================================================================
        1. HEADER
        ===================================================================== */
@@ -132,7 +155,7 @@
             (s.firstName || s.lastName) ? `<b style="color: ${INK}; font-weight: 600;">${esc((s.firstName + ' ' + s.lastName).trim())}</b>` : '',
             s.da ? `DA ${esc(s.da)}` : '',
             s.group ? `Gr. ${esc(s.group)}` : '',
-            a.corrected ? `évalué ${formaterDateLongue(a.corrected)}` : ''
+            a.corrected ? `évalué ${esc(formaterDateLongue(a.corrected))}` : ''   // #571 — le repli `return iso` rend la chaîne brute
         ].filter(Boolean).join(' · ');
 
         const titreHTML = a.title
@@ -176,10 +199,10 @@
                 // L'artefact courant est marqué par un ▼ au-dessus de la case
                 // (cf. indicateurHaut plus bas) ; la case elle-même prend la
                 // couleur IDME comme un done normal — plus de fond noir.
-                bg = ctx.codeColor[t.code] || MUTED; color = PAPER; border = `1px solid ${bg}`;
+                bg = ctx.codeColor[t.code] || MUTED; color = texteSur(bg); border = `1px solid ${bg}`;
                 contenu = t.code || (t.n != null ? String(t.n) : '');
             } else if (done) {
-                bg = ctx.codeColor[t.code] || MUTED; color = PAPER; border = `1px solid ${bg}`;
+                bg = ctx.codeColor[t.code] || MUTED; color = texteSur(bg); border = `1px solid ${bg}`;
                 contenu = t.code || (t.n != null ? String(t.n) : '');
             }
 
@@ -311,7 +334,7 @@
             const atteint = i <= idx;
             const courant = i === idx;
             const bg = atteint ? (ctx.codeColor[critere.code] || MUTED) : CARD;
-            const color = courant ? PAPER : (atteint ? PAPER : MUTED);
+            const color = atteint ? texteSur(bg) : MUTED;   // #571 — lisible sur la couleur de l'échelle
             const border = courant ? `1px solid ${INK}` : `1px solid ${LINE}`;
             const weight = courant ? 800 : 500;
             return `<div style="flex: 1; height: 18px; border-radius: 2px; background: ${bg}; color: ${color}; border: ${border}; display: flex; align-items: center; justify-content: center; font-family: ${FONT_MONO}; font-size: 9px; font-weight: ${weight};">${esc(s.code)}</div>`;
@@ -362,7 +385,7 @@
 
         return `
             <section style="margin-bottom: 10px;">
-                <div style="display: grid; grid-template-columns: auto 1fr; gap: 14px; padding: 10px 12px; background: ${couleur}; color: ${PAPER}; border-radius: 3px; align-items: center;">
+                <div style="display: grid; grid-template-columns: auto 1fr; gap: 14px; padding: 10px 12px; background: ${couleur}; color: ${texteSur(couleur)}; border-radius: 3px; align-items: center;">
                     <div style="font-size: 44px; font-weight: 800; line-height: 0.85; letter-spacing: -2px;">${esc(o.code)}</div>
                     <div style="font-family: ${FONT_MONO}; font-size: 9px; letter-spacing: 0.8px; opacity: 0.9; text-transform: uppercase;">Niveau général${o.label ? ' · ' + esc(o.label) : ''}</div>
                 </div>
@@ -470,7 +493,7 @@
             const pastilleBg = e.color || INK;
             return `
                 <div style="display: grid; grid-template-columns: 22px 1fr 26px; gap: 6px; align-items: start; padding: 5px 0; ${i === 0 ? '' : `border-top: 1px dashed ${LINE};`}">
-                    <div style="width: 18px; height: 18px; border-radius: 50%; background: ${pastilleBg}; color: ${PAPER}; display: flex; align-items: center; justify-content: center; font-family: ${FONT_MONO}; font-size: 9px; font-weight: 700; margin-top: 1px;">${esc(e.code != null ? e.code : '?')}</div>
+                    <div style="width: 18px; height: 18px; border-radius: 50%; background: ${pastilleBg}; color: ${texteSur(pastilleBg)}; display: flex; align-items: center; justify-content: center; font-family: ${FONT_MONO}; font-size: 9px; font-weight: 700; margin-top: 1px;">${esc(e.code != null ? e.code : '?')}</div>
                     <div>
                         <div style="font-size: 9px; font-weight: 600;">${esc(e.name)}</div>
                         ${retro}
@@ -786,6 +809,7 @@
        ===================================================================== */
 
     window.syntheseRetroactionRendu = {
+        _texteSur: texteSur,   // #571 — exposé pour la sentinelle (fonction pure)
         rendreSyntheseHTML: rendreSyntheseHTML
     };
 })();

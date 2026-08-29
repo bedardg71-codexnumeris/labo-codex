@@ -19,7 +19,7 @@
 | Onglet | Constats de départ (25 août) | Réglés | Partiels | Ouverts | Items ouverts qui les portent |
 |---|---|---|---|---|---|
 | **Conception** | 15 (A1-A4, B1-B5, C1-C6) | **11** | 0 | **4** | #519 (C1, C3, C5), #520 (C6) — plus deux restes rattachés : #522, barre d'actions du 4ᵉ écran |
-| **Évaluations** | 20 (A1-A2, B1-B13, C1-C5) + section D « mineurs » | **14** | **1** (B5 : portée à trancher) | **5** | #567, #568, #569, #570, #571 ; D partiel → #572 |
+| **Évaluations** | 20 (A1-A2, B1-B13, C1-C5) + section D « mineurs » | **15** | **1** (B5 : portée à trancher) | **4** | #567, #568, #569, #570 ; D partiel → #572 |
 
 Lecture honnête de ces chiffres : Conception est **presque bouclé sur sa liste de départ** — ce qui reste est du design et du zéro-dette. Évaluations a réglé **ses deux critiques et le cœur des majeurs** (import, auto-save, export) ; ce qui reste est surtout le garde des modes, l'échappement, et toute la colonne design.
 
@@ -79,7 +79,7 @@ Nés du même élan, hors liste de départ mais dans l'onglet : **#524-#528** (a
 | **C2** Cibles tactiles < 44 px | — | #568 | ⏳ Ouvert | Norme déjà appliquée ailleurs |
 | **C3** Écran « Exporter et archiver » hors design system | `form-select` ×6 (+2 sur Importer), pas d'état vide | #569 | ⏳ Ouvert | Portée rectifiée 28 août |
 | **C4** Flèches de tri à 2,0:1 en mode clair | **Ids dupliqués** à corriger avant la couleur | #570 | ⏳ Ouvert | Vérification à l'écran requise |
-| **C5** PDF de rétroaction : densité et lisibilité | — | #571 | ⏳ Ouvert — **arbitré** 28 août | Correctifs oui (luminance, date), tailles non avant l'automne ; **à re-mesurer sur HEAD** (fichier touché par #555) |
+| **C5** PDF de rétroaction : densité et lisibilité | — | #571 | ✅ Livré 29 août (correctifs) | Garde de contraste sur les quatre sites, date échappée ; tailles inchangées par décision (automne) |
 | **D** Mineurs (Import, Liste, Annoter, Export, Design) | — | #572 | 🟠 Partiel 28 août (`43866c56`, `00a81a24`, `828981ad`) | Import et Export faits ; **restent Liste, Annoter, Design mineur** ; clés sessionStorage non namespacées à ouvrir à part ; `console.log` de diagnostic déclarés non recevables |
 
 ---
@@ -148,7 +148,7 @@ Ordre proposé : d'abord ce qui est **tranché et pas exécuté** (le plus court
 3. ~~**#562**~~ — livré 29 août.
 4. ~~**#560**~~ — livré 29 août ; reste la portée des suppressions par couple (décision).
 5. ~~**#561**~~ — livré 29 août.
-6. **#571** — correctifs arbitrés (garde de luminance, date), à re-mesurer sur HEAD d'abord.
+6. ~~**#571**~~ — livré 29 août (correctifs ; tailles à l'automne).
 7. ~~**#566**~~ — livré 29 août.
 8. **#572** — Liste, Annoter, Design mineur ; ouvrir à part les clés sessionStorage.
 9. **#567, #568, #569, #570** — la colonne design (#570 : ids dupliqués d'abord).

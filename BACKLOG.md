@@ -2575,7 +2575,15 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **À VÉRIFIER À L'ÉCRAN** (l'effet fonctionnel ne s'établit pas statiquement) : trier la Liste des
   évaluations par DA et observer si la flèche active change bien de sens **dans ce tableau-là**.
 
-- [ ] **#571 — PDF de rétroaction : densité et lisibilité.** (constat C5) 📐 **DÉCISION REQUISE**
+- [x] **#571 LIVRÉ 29 août 2026 (les correctifs ; les tailles restent, par décision) — le PDF reste lisible sur les couleurs de l'échelle, la date est échappée.** (constat C5)
+  Re-mesuré sur HEAD après #555 : quatre sites posaient `PAPER` (blanc) sur une couleur venue de l'échelle de
+  l'utilisateur — niveau général, trajectoire, segments de critère, pastilles d'erreurs. `texteSur(fond)` choisit le
+  texte qui **contraste le plus** (rapport WCAG, encre `#141414` ou papier) ; une couleur qu'on ne sait pas lire garde
+  le papier, comme avant. Le seuil fixe d'abord posé (0,18) a été abandonné en cours de route : le rouge `#dc3545`
+  y tombait du mauvais côté — la règle est le contraste, pas un nombre. La date d'évaluation passe par `esc()` (le
+  repli `return iso` rend la chaîne brute). **Les tailles ne bougent pas** (décision du 28 août : retours de la CoP à
+  l'automne). **Sentinelle** `sentinelle-571-pdf-luminance-date` (4 cas : `texteSur`, rendu jaune/rouge, cliquet
+  sur les quatre sites, date) ; **break-test** 3 mutations, 3 rouges.
   ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — les correctifs OUI, les tailles NON.**
   ⮕ **Ce qui se fait** : la garde de luminance sur les couleurs d'échelle et l'échappement de la date.
   ⮕ **Ce qui ne se fait PAS** : les tailles restent inchangées. « *Les commentaires seront recueillis dans
