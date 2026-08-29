@@ -1199,6 +1199,23 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   a vérifié avant de suivre, et c'est la seule raison pour laquelle l'erreur ne s'est pas propagée.
 
 - [ ] **#543 — Les 55 évaluations dont la note stockée ne se recalcule pas.** Créé le 26 août 2026 (soirée),
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — NE RIEN RÉÉCRIRE.** Ses mots : « je confirme,
+  ne rien réécrire, et cesser de traiter cet écart comme une incohérence ». Son motif : « en
+  fin de trimestre, les notes remises sont les notes finales. Il arrive que j'arrondisse. Je
+  ne laisse pas de 59/100 par exemple. Les autres utilisateurs voudront aussi cette marge de
+  jugement. »
+  ⮕ **L'écart note↔critères n'est PAS un défaut de données : c'est la trace d'un jugement
+  d'enseignant.** Un outil qui le « répare » efface une décision pédagogique. Aucune
+  écriture sur les 55 évaluations, dans aucun sens — ni réalignement des critères sur la
+  note, ni recalcul de la note depuis les critères.
+  ⮕ **LE GESTE EST AILLEURS** : trouver où l'application QUALIFIE cet écart comme une
+  anomalie (diagnostic, avertissement, sentinelle) et faire qu'elle ne le fasse plus.
+  ⚠ **FAUSSE PISTE DÉJÀ ÉCARTÉE, MESURÉE LE 28 AOÛT** : `_diagnostiquerNoteNonCalculable`
+  (`profil-etudiant-actions.js:174`) porte le nom qu'il faut mais fait autre chose — il
+  explique pourquoi une note n'est pas CALCULABLE (pratique non assignée, introuvable,
+  famille Sommative/Spécifications non branchée, Dénotation qui se saisit). **Il ne compare
+  jamais une note à ses critères.** Chercher le MOTIF (une comparaison entre `noteFinale` et
+  un recalcul, une tolérance, un seuil d'alerte), jamais le nom.
   extrait de #542 (l'oracle les isole ; ce ne sont PAS un problème d'échelle — aucune n'est
   reproduite par une échelle différente, aucune ne porte de code de niveau inconnu). **Deux causes
   distinctes, à ne pas confondre :**
@@ -1884,6 +1901,14 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **Geste** : les faire passer par `obtenirEchelleResolue`, ou dire pourquoi ils ne le peuvent pas.
 
 - [ ] **#583 — Partager une échelle la prive de ses deux repères de maîtrise, à l'ÉMISSION.**
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A : faire évoluer le format en `v2`,
+  avec lecture des DEUX versions.** L'extension tolérante de `v1` est écartée : la
+  fermeture du format est une défense, on ne la retire pas pour deux champs.
+  ⮕ **CE QUE ÇA NE TRANCHE PAS, et c'est une contrainte de DÉPLOIEMENT, pas de code** :
+  une `v2` qui lit les paquets `v1` règle la moitié du problème. L'autre moitié est qu'un
+  paquet `v2` arrivant chez un utilisateur resté en `v1` sera REFUSÉ — le format rejette
+  l'inconnu à l'entrée, c'est précisément ce qu'on a choisi de garder. Il faut donc décider
+  ce que voit cet utilisateur-là : un refus explicite, ou rien.
   Créé le 28 août 2026, audit `Rapports/AUDIT-copies-echelle-reperes-2026-08-28.md` §5.
   `projeterEntite` (`partage-format.js:137`) ne copie que les champs déclarés au schéma fermé
   `SCHEMA_ENTITE.echelle` (`partage-schemas.js:225`), qui connaît `valeurCalcul` et `config` mais
@@ -1895,6 +1920,14 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ Le même schéma ignore aussi `niveauSOLO` sur les niveaux d'échelle — à trancher dans le même geste.
 
 - [ ] **#584 — L'export au format recherche ne dit pas où sont posés les repères.**
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A : les deux repères PARTENT dans
+  l'export.** Il accepte qu'un fichier exporté avant et un fichier exporté après ne portent
+  pas les mêmes champs.
+  ⮕ **CE QUE ÇA NE TRANCHE PAS** : les analyses déjà produites à partir des exports
+  antérieurs ne portent pas cette donnée et ne la porteront jamais. Si une comparaison
+  longitudinale les mêle aux nouveaux, l'absence de repère sur les anciens se lira comme
+  « aucun repère posé » et non comme « champ absent du format ». À dire dans le fichier
+  lui-même (une version de format), pas seulement dans la documentation.
   Créé le 28 août 2026, audit §6. `exporterFormatRecherche` (`trimestres.js:1872`) projette
   `{id, nom, niveaux: [{code, nom, min, max, valeur_calcul, niveau_solo}]}` — sans les deux repères.
   Rien n'est perdu en base : c'est un choix de CONCEPTION sur ce que les fichiers de recherche
@@ -1905,6 +1938,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   que #555 lot 1 a rendue explicite. ⏳ Décision, pas correctif.
 
 - [ ] **#585 — 🔒 `assainirChaine` TRONQUE avant de retirer les balises : un `<` traverse le filtre.**
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option B : INVERSER, avec une passe de
+  vérification sur TOUS les types importés avant de livrer.**
+  Le geste de code est d'une ligne — assainir PUIS tronquer, au lieu de l'inverse. Ce qui
+  est décidé, c'est de ne pas le livrer seul : `assainirChaine` est appelée par tous les
+  schémas d'import, et le 28 août au matin, renforcer `echapperHtml` a cassé un affichage
+  dans l'heure (le résultat allait dans un `textContent`, qui échappe déjà).
+  ⮕ **CE QUE ÇA NE TRANCHE PAS** : rien n'est dit des champs à `maxLen` élevé, où la
+  troncature ne mord jamais — la passe de vérification dira s'il y en a. Ni du cas
+  symétrique (une chaîne assainie PUIS tronquée peut couper au milieu d'une entité HTML
+  `&amp;` et produire `&am`) : à mesurer pendant la passe, pas à supposer.
   Créé le 28 août 2026, trouvé en écrivant la sentinelle de transport des échelles (audit §12).
   `import-export.js:365-371` fait `substring(0, maxLen)` PUIS `replace(/<[^>]*>/g, '')`. Une balise
   coupée par la troncature perd son `>` et le filtre ne mord plus.
@@ -1918,6 +1961,15 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   qui allait dans un `textContent`). **Décision due.**
 
 - [ ] **#586 — Trois chemins de duplication d'échelle sur quatre emportent `idOriginal` ; le quatrième s'en protège exprès.**
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option B : traiter les CINQ FAMILLES
+  ensemble, au titre de #476** (grilles, cartouches, productions, pratiques, échelles), pas
+  les échelles seules.
+  ⚠ **LE PÉRIMÈTRE CHANGE DE TAILLE.** Ce n'est plus « aligner trois fonctions de
+  duplication d'échelle » mais reprendre les cinq `dupliquerX` et leurs neuf écarts déjà
+  recensés par #476. Ne pas l'ouvrir comme une retouche.
+  ⮕ **CE QUE ÇA NE TRANCHE PAS** : lesquels des neuf écarts sont des DIVERGENCES à réduire
+  et lesquels sont des différences légitimes entre familles. #476 les recense sans les
+  qualifier ; `idOriginal` est le seul dont la mesure est faite (audit du 28 août, §7).
   Créé le 28 août 2026, audit §7. À rattacher à **#476** (les neuf écarts entre familles de duplication)
   et à **#542**.
   `dupliquerEchelle` (`echelles.js:378`) emploie une liste blanche PRÉCISÉMENT pour ne pas emporter
@@ -1931,6 +1983,41 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `e.id === id || e.idOriginal === id` — **le premier du tableau gagne**.
   ⮕ Une même famille de gestes, quatre implémentations, deux doctrines opposées sur le même champ.
   Ce n'est pas un arbitrage : c'est une divergence.
+
+
+- [ ] **#590 — Trois résolveurs d'échelle qui ne reconnaissent pas les mêmes identifiants.**
+  Créé le 28 août 2026. Audit : `Rapports/AUDIT-copies-echelle-reperes-2026-08-28.md`, §8.
+  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A, avec sa note : « Rien codé en dur ! »**
+  ⚠ **MAIS LE CHANTIER NE S'OUVRE PAS AVANT UNE MESURE.** Grégoire lance lui-même
+  `_diagnostiquerResolutionEchelles()` (livré ce jour, `profil-etudiant-calculs.js`). Tant
+  que ce chiffre n'existe pas, réconcilier les résolveurs serait travailler sur une
+  hypothèse : la divergence peut être entièrement théorique sur ses données.
+  **LE FAIT MESURÉ.** La divergence est CROISÉE, chacun sait ce que l'autre ignore :
+  `obtenirEchelleResolue` connaît `idOriginal` et les identifiants `pratique-*`, refuse une
+  échelle sans niveaux, sait déduire s'il n'y en a qu'une — mais ne fait PAS le repli pool
+  inter-trimestre ; `resoudreModeleParId` fait le repli pool — mais ne compare que `m.id`.
+  **PÉRIMÈTRE : DEUX SITES**, et l'échec n'y coûte pas la même chose. `consolidation.js`
+  (`_detecterEchelle`) : la map de conversion reste vide et la matrice ne calcule RIEN.
+  `pratique-registre.js` (`construireConfigComplete`) : repli sur une échelle IDME **codée
+  en dur** (50/65/80/95) qui contredit celle de l'utilisateur — c'est ce que sa note vise.
+  ⮕ **CE QUE ÇA NE TRANCHE PAS** : si l'écart touche ses données, faut-il réconcilier les
+  résolveurs ou réparer les données ? Le diagnostic nomme la cause de chaque écart
+  (`idOriginal`, `echelle-de-pratique`, `pool-inter-trimestre`) ; la réponse en dépend.
+
+- [ ] **#591 — 🔒 Anonymisation : réversible ou irréversible ?**
+  Créé le 28 août 2026, depuis le skill `securite-donnees` §3.1, où la question est ouverte.
+  ✅ **POSITION PRISE PAR GRÉGOIRE le 28 août 2026 — option A : pseudonymisation
+  RÉVERSIBLE**, table de correspondance chiffrée conservée sur sa machine, lui seul peut
+  inverser. Motif pratique : pouvoir retrouver « Étudiant-007 » pour corriger une erreur.
+  ⚠⚠ **CE N'EST PAS UNE DÉCISION CLOSE, ET C'EST LE SEUL DES VINGT ET UN DANS CE CAS.**
+  Le cadre dit « à trancher avec les contacts Loi 25 ». Sa réponse **prépare cette
+  conversation, elle ne la remplace pas** : le choix a des conséquences juridiques, pas
+  seulement techniques. ⮕ Lire cet item comme « position à valider », jamais comme
+  « décidé » — quelqu'un qui le relira dans six mois doit trouver la nuance ici, pas dans
+  un fil de discussion.
+  ⮕ **CE QUE ÇA NE TRANCHE PAS** : où vit la table de correspondance, comment elle est
+  chiffrée, ce qu'il advient d'elle si la machine est perdue — et si « lui seul » tient
+  encore quand un fichier anonymisé circule vers un tiers qui, lui, n'a pas la table.
 
 - [ ] **#587 — Neuf autres fonctions sont définies deux fois et posées deux fois sur `window`.**
   ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A : DÉDUPLICATION PAR DÉFAUT.** Un nom, une
