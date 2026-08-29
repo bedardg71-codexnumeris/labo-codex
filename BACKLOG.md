@@ -2263,8 +2263,11 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ✅ **Sonde livrée** : `await _sonder574()` en console (`echelles.js`, lecture seule, tous trimestres) — échelles
   fabriquées par le code (générique, copies de gabarits), **niveaux sans `valeurCalcul` par échelle** (la mesure
   promise par #526, jamais faite ; le zéro est une valeur), et usages (évaluations, productions, cartouches).
-  ⮕ **DÛ PAR GRÉGOIRE** : la lancer et rapporter les trois comptes ; c'est le chiffre qui dit s'il y a des données à
-  réparer (option non ouverte tant qu'il est inconnu).
+  ✅ **SONDE RAPPORTÉE par Grégoire le 29 août 2026** : 3 trimestres ; 1 échelle fabriquée (`ECHELLE_GENERIQUE` dans
+  h2026, 4 niveaux sur 4 sans `valeurCalcul`) ; **0 échelle réelle avec un niveau sans valeur** (la mesure promise par
+  #526 est faite : son témoignage était exact) ; usages : 0 évaluation, 0 production, 1 cartouche (`CART_GENERIQUE`,
+  rangée sous `cartouches_GRILLE1767642435304607`). ⮕ **AUCUNE DONNÉE À RÉPARER.** L'échelle et la cartouche
+  génériques de h2026 se suppriment à la main (tombstone) ; c'est son geste, pas une migration.
   **Sentinelle** `sentinelle-574-aucune-echelle-semee` (4 cas + cliquet) ; bancs #358, #468, brique B adaptés (la
   moitié « échelle » de #358 n'a plus d'objet). **Break-test** : 5 mutations, 5 rouges, restauré par copie.
   ⏳ **NON TRANCHÉ — le niveau NEUF** (`code: 'N', min: 0, max: 100, valeurCalcul: 50` écrits en base, 4 sites) :
