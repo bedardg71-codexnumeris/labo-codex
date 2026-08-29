@@ -2569,12 +2569,20 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   **perdent leur couleur d'alerte dans les deux modes**.
   ⮕ ~12 usages : définir les alias ou substituer. Correction n° 4 du ratio impact/effort.
 
-- [ ] **#568 — Cibles tactiles sous 44 px sur l'écran le plus utilisé au doigt.** (constat C2)
+- [x] **#568 LIVRÉ 29 août 2026 — 44 px au doigt, densité conservée à la souris.** (constat C2)
+  `.travaux-btn-nav` et `.travaux-fond-swatch` (28 px), `.eval-actions-select` (~24 px) montent à 44 px **sous
+  `@media (pointer: coarse)`** — la norme là où elle compte (iPad), sans alourdir le Mac où la visionneuse et la Liste
+  sont denses par choix. Sentinelle `sentinelle-568-569-exporter-design-tactile` (bloc présent et complet, densité de
+  base intacte). ⏳ **Porte terrain iPad** : le rendu réel des trois cibles au doigt (Safari, `pointer: coarse`).
   `.travaux-btn-nav` et `.travaux-fond-swatch` à 28×28 px, `.eval-actions-select` à ~24 px.
   ⮕ La norme est **déjà appliquée ailleurs** dans le projet (`css/accompagnement.css`) — c'est un
   écart, pas une norme absente.
 
-- [ ] **#569 — L'écran « Exporter et archiver » est hors design system.** (constat C3)
+- [x] **#569 LIVRÉ 29 août 2026 — l'écran « Exporter et archiver » entre dans le design system.** (constat C3)
+  Dix `<select class="form-select">` (six sur Exporter, quatre sur Importer — l'audit en comptait huit) passent à
+  `.controle-form`, la classe canonique (les deux petits gardent `pipeline-select-petit`) ; le titre dit « Exporter et
+  archiver » comme la navigation (lu depuis `config.js` par la sentinelle) ; sans fichier, le module rend son propre état
+  vide (`.placeholder-vide`, devant lequel `etats-vides.js` s'efface). **Break-test** du lot #568/#569 : 3 mutations, 3 rouges.
   Des selects en `class="form-select"` — classe quasi inexistante dans `styles.css`, rendu natif sans
   jetons de surface ni de focus ; la classe canonique est `.controle-form`. Titre « Archivage des
   travaux » ≠ libellé de navigation « Exporter et archiver ». **Aucun état vide** (pas d'entrée
