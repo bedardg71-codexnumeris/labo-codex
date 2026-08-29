@@ -2154,6 +2154,22 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ Pour trancher `creerNouvellePratique`, la piste est `git log -S ouvrirWizardV2 -- js/pratiques.js`
   (l'historique, pas la relecture des deux corps).
 
+- [ ] **#593 — Reliquats Conception de la seconde passe du 27 août : quatre constats qui n'avaient pas d'item.**
+  Créé le 29 août 2026 en construisant `Rapports/SUIVI-conception-evaluations-2026-08.md` (§2.1) : ces lignes
+  du rapport `AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md` §7.2 n'étaient portées par aucun item.
+  1. **Sentinelle #549, tests 3 et 4 tautologiques sur l'en-tête** : `toContain('Le travail demandé')` est
+     satisfait par la ligne d'ancrage du corps ; renommer l'en-tête laisse le test vert. Réancrer sur l'en-tête réel.
+  2. **Texte du modèle de cartouche** (`cartouches.js`, « niveaux situés sous le seuil de maîtrise ») : concept
+     désormais porté par les deux repères de l'échelle (#555), texte figé dans le code. À réécrire depuis l'échelle
+     (« sous « Suffisant à partir de » ») ou à retirer.
+  3. **Petits reliquats n° 7** : course inter-cartouches (`sauvegarderCommentaire` lit `cartoucheActuel` après un
+     `await`, non reproduite, faible) ; câblage `if (!validerBlocsNommes()) return;` (#518) sans test ;
+     `getCouleurNiveau` (`export-pdf.js`) qui discrimine I/D/M/E avec quatre couleurs identiques — mort de fait.
+  4. **D3 — régime des cartouches** : clés `cartouches_${grilleId}` sans `cle()` — globales, non namespacées,
+     orphelines si la grille disparaît. Décidé le 21 août (CO-33/D1), mentionné dans #517 et #471, jamais
+     inscrit. ⚠ C'est un chantier de namespacing, pas un reliquat : à cadrer à part le jour venu (Brique D, #358).
+  ⮕ 1-2-3 se traitent en un lot court ; 4 se renvoie à #358.
+
 - [ ] **#578 — Une cartouche neuve prend les colonnes de la PREMIÈRE échelle du trimestre, pas de celle de sa grille.**
   ✅ **TRANCHÉ PAR GRÉGOIRE le 28 août 2026 — OPTION A : MESURER AVANT DE CODER.**
   Compter, dans ses trimestres, les grilles **avec** et **sans** `echelleId`. Le chiffre décide de la

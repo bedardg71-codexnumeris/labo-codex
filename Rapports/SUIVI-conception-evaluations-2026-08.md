@@ -96,12 +96,12 @@ Source : `Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md` (§7 Co
 | 2 | Un niveau neuf naît avec `valeurCalcul: 50` écrit en base | dans #574 | ⏳ Arbitré 28 août (option B : retirer seeds et gabarits), **non livré** |
 | 3 | `ECHELLE_GENERIQUE` et les gabarits d'échelle sont non calculables depuis #527 | #574 | ⏳ idem ; sonde préalable requise (des évaluations réelles reposent-elles dessus ?) |
 | 4 | La cartouche neuve prend les colonnes de la première échelle du trimestre | #578 | 🟠 Diagnostic livré 29 août (9 grilles sur 10 sans `echelleId`) ; **arbitré option A** (la cartouche ne devine plus) ; correctif à faire |
-| 5 | Sentinelle #549, tests 3-4 tautologiques sur l'en-tête | — | ❌ **Sans item** (cité dans #575 seulement) |
-| 6 | Texte du modèle de cartouche : « seuil de maîtrise », figé dans le code | — | ❌ **Sans item** (trace dans #577) |
-| 7 | Course inter-cartouches (faible) ; câblage #518 non verrouillé ; `getCouleurNiveau` mort | — | ❌ **Sans item** |
-| D3 | Clés `cartouches_${grilleId}` sans `cle()` — globales, orphelines si la grille disparaît | — | ❌ **Sans ID** depuis le 21 août (mentionné dans #517 et #471) |
+| 5 | Sentinelle #549, tests 3-4 tautologiques sur l'en-tête | #593 | ⏳ Inscrit 29 août |
+| 6 | Texte du modèle de cartouche : « seuil de maîtrise », figé dans le code | #593 | ⏳ Inscrit 29 août |
+| 7 | Course inter-cartouches (faible) ; câblage #518 non verrouillé ; `getCouleurNiveau` mort | #593 | ⏳ Inscrit 29 août |
+| D3 | Clés `cartouches_${grilleId}` sans `cle()` — globales, orphelines si la grille disparaît | #593 (→ #358) | ⏳ Inscrit 29 août ; chantier de namespacing, renvoyé à la Brique D |
 
-⮕ **Quatre lignes sans item** (5, 6, 7, D3). Proposition : un seul item « reliquats Conception de la seconde passe », au prochain ID libre — à inscrire avant usage.
+⮕ Les quatre lignes sont inscrites sous **#593** le 29 août (D3 y est renvoyé à #358).
 
 ### 2.2 Échelles — le chantier qui a grossi entre les deux audits
 
@@ -136,7 +136,7 @@ Ordre proposé : d'abord ce qui est **tranché et pas exécuté** (le plus court
 
 1. **#578 A** — la cartouche ne devine plus (tranché 29 août). Petit, mesuré, sentinelle prête à écrire.
 2. **#574 B** — retirer l'échelle générique et les gabarits sans `valeurCalcul` (tranché 28 août) ; sonde d'abord.
-3. **Reliquats 2.1 n° 5-6-7 + D3** — à inscrire sous un ID, puis à traiter (petits, sauf D3 qui est un chantier de namespacing).
+3. **#593** — reliquats 2.1 n° 5-6-7 (petits) ; D3 renvoyé à #358.
 4. **#522** — audit des autres autosaves (la primitive `db.modifier` existe).
 5. **#520** — ablation de l'« ANCIEN SYSTÈME » des échelles.
 6. **#519** — passe design (C1, C3, C5 + barre d'actions du 4ᵉ écran).
