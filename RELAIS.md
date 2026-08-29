@@ -45,7 +45,7 @@ le bon garde-fou — non fait, à inscrire si Grégoire le veut.
 Plus aucune échelle semée par le code : `assurerEchelleGenerique` et `GABARITS_ECHELLES_DEFAUT` sont partis ;
 `GRILLE_GENERIQUE`/`CART_GENERIQUE` ne pointent plus vers l'échelle disparue ; commentaires faux de #527 corrigés.
 Données existantes intactes. **Sonde** `await _sonder574()` : échelles fabriquées, niveaux sans `valeurCalcul` (la
-mesure promise par #526), usages — **Grégoire la lance et rapporte**. Sentinelle 4 cas + cliquet, 5 mutations rouges ;
+mesure promise par #526), usages — **rapportée le 29 août : 1 générique en h2026, 0 échelle réelle sans valeur, 0 évaluation/production, 1 cartouche générique — RIEN À RÉPARER**. Sentinelle 4 cas + cliquet, 5 mutations rouges ;
 #358/#468/brique B adaptés. ⚠ Le **niveau neuf à 50** reste : le faire naître vide recréerait la collision de clés
 de #524 ; il faut un tampon jusqu'à complétude (patron de #555 (e)) — décision et lot à part.
 
@@ -63,7 +63,7 @@ Créée ce matin (voir l'état). #593 inscrit (reliquats). Chaque livraison y co
 
 ### 🔴 DÛ, ET PAR QUI
 
-- **Grégoire** : recharger `file://` (jetons `cartouches.js` → `e`, `export-pdf.js` → `20260829a`, `echelles.js` → `b`, `grilles.js`, `gabarits-utils.js`) ; **lancer `await _sonder574()`** et rapporter ; **bump 1.106.1 (patch) dû** — non
+- **Grégoire** : recharger `file://` (jetons `cartouches.js` → `e`, `export-pdf.js` → `20260829a`, `echelles.js` → `b`, `grilles.js`, `gabarits-utils.js`) ; **bump 1.106.1 (patch) dû** — non
   lancé, sa session est ouverte ; Cloudflare #427 ; `_diagnostiquerResolutionEchelles()` (#590) ; accueil au
   présent (#508, **1er septembre = dans 3 jours**) ; les deux phrases de #555·1 (arrivée en « signalé », en « acquis »).
 - **La session suivante** : §3 du suivi — Conception est bouclé sauf #519/#520/#522 ; passer à Évaluations : #555
