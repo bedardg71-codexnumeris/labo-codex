@@ -3388,24 +3388,29 @@
             return;
         }
 
-        // Compter les étudiants évalués (1 PDF par étudiant)
-        const dasGroupeActif = new Set(
-            travauxStockage.obtenirFichiersGroupeActif().map(f => f.etudiantDA).filter(Boolean)
-        );
-        let evalsComptees = (obtenirDonneesSelonMode('evaluationsSauvegardees') || [])
-            .filter(e => e.productionId === productionId && !e.remplaceeParId && dasGroupeActif.has(e.etudiantDA));
-        if (reprisesSeulement) {
-            evalsComptees = evalsComptees.filter(e => e.repriseDeId || e.jetonRepriseCibleeApplique);
+        // #566 — LE COMPTEUR LIT LA SÉLECTION RÉELLE DE L'EXPORT. Il refaisait la
+        // sélection à sa manière, sans résoudre les fichiers : une évaluation sans
+        // fichier était comptée, puis ignorée en silence à l'export. Le chiffre
+        // annoncé est désormais le nombre de PDF que l'export PRODUIRA, et ce qui
+        // n'en produira pas est dit.
+        if (typeof travauxArchivage === 'undefined' || typeof travauxArchivage.selectionnerEvaluationsLea !== 'function') {
+            compteur.textContent = '';
+            return;
         }
-        const dasEvalues = new Set(evalsComptees.map(e => e.etudiantDA));
+        const selection = travauxArchivage.selectionnerEvaluationsLea(productionId, da, reprisesSeulement);
+        const nbPdf = selection.fichiers.length;
+        const nbSans = selection.sansFichier.length;
+        const label = reprisesSeulement ? 'reprise' : 'évaluation';
 
         if (da) {
-            compteur.textContent = dasEvalues.has(da) ? '1 évaluation prête' : 'Aucune évaluation';
+            compteur.textContent = nbPdf > 0
+                ? `1 ${label} prête`
+                : (nbSans > 0 ? `1 ${label}, mais aucun fichier : pas de PDF` : `Aucune ${label}`);
+        } else if (nbPdf === 0 && nbSans === 0) {
+            compteur.textContent = reprisesSeulement ? 'Aucune reprise trouvée' : 'Aucune évaluation trouvée';
         } else {
-            const label = reprisesSeulement ? 'reprise(s)' : 'évaluation(s)';
-            compteur.textContent = dasEvalues.size > 0
-                ? `${dasEvalues.size} ${label} pour ${dasEvalues.size} étudiant(s)`
-                : reprisesSeulement ? 'Aucune reprise trouvée' : 'Aucune évaluation trouvée';
+            compteur.textContent = `${nbPdf} PDF pour ${nbPdf} étudiant(s)`
+                + (nbSans > 0 ? ` — ${nbSans} ${label}(s) sans fichier, sans PDF` : '');
         }
     }
 
