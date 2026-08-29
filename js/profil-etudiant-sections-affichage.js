@@ -3188,7 +3188,7 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
                 <div style="font-size: 1.5rem; font-weight: bold; color: var(--vert-succes);">${forces.length}</div>
                 ${forces.length > 0 ? `<div class="u-texte-mini u-texte-gris" style="margin-top: 5px;">${forces.map(f => f.nom).join(', ')}</div>` : ''}
             </div>
-            <div style="background: var(--orange-pale, #fff3e0); padding: 15px; border-radius: 6px; border-left: 4px solid var(--orange-accent);">
+            <div style="background: var(--alerte-fond-attention); padding: 15px; border-radius: 6px; border-left: 4px solid var(--orange-accent);">
                 <div style="font-weight: bold; color: var(--orange-accent); margin-bottom: 5px;">Défis (< ${(seuil * 100).toFixed(0)}%)</div>
                 <div style="font-size: 1.5rem; font-weight: bold; color: var(--orange-accent);">${defis.length}</div>
                 ${defis.length > 0 ? `<div class="u-texte-mini u-texte-gris" style="margin-top: 5px;">${defis.map(d => d.nom).join(', ')}</div>` : ''}

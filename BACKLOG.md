@@ -2542,7 +2542,27 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   « 1 évaluation prête » seulement dans le cas mono-étudiant. L'écart mesuré est réel, la citation
   ne l'était pas — ne pas chercher cette chaîne dans le code.
 
-- [ ] **#567 — Variables CSS fantômes : les avertissements perdent leur couleur d'alerte.** (constat C1)
+- [x] **#567 LIVRÉ 29 août 2026 — les quatre variables fantômes de l'audit sont remplacées par la palette ; un cliquet global tient les 78 autres (#595).** (constat C1)
+  Mesuré : `--attention` ×7, `--orange` ×6, `--orange-pale` ×2, `--radius` ×7 (dont des usages avec repli) ; `--couleur-attention`
+  et `--couleur-texte-sombre` avaient déjà disparu. Substituées — jamais aliasées — par `--alerte-texte-attention`,
+  `--alerte-fond-attention`, `--alerte-bordure-attention` (définies en clair ET en sombre) et `--radius-moyen`, dans
+  `liste-evaluations.js`, `travaux-ui.js`, `reserve-ouvrir.js`, `profil-etudiant-sections-affichage.js`, `styles.css`.
+  ⚠ **MESURÉ EN CHEMIN** : le projet emploie **78 autres variables CSS jamais définies** (≈270 usages, dont ≈110 sans
+  repli — transparents ou hérités selon la propriété). Inscrit sous **#595**. **Sentinelle** `sentinelle-567-variables-
+  css-fantomes` : les quatre à zéro, leurs remplaçantes définies dans les deux thèmes, et un **cliquet à liste fermée**
+  (variable → usages tolérés) qui rougit sur toute variable fantôme NEUVE, tout usage en hausse, et toute entrée devenue
+  inutile. **Break-test** : 3 mutations, 3 rouges — après un faux vert : `sed '0,/…/'` (GNU) ne fait rien sous BSD.
+- [ ] **#595 — 78 variables CSS employées et jamais définies (≈270 usages).**
+  Créé le 29 août 2026 en livrant #567. Mesure : `node` sur `index.html`, `styles.css`, `js/*.js`, `css/*.css`, commentaires
+  retirés — 303 variables utilisées, 270 définies. Les plus fréquentes : `--bordure` (25), `--orange-attention` (15),
+  `--gris-pale`, `--bordure-legere` (12), `--gris-texte` (11), `--radius-standard` (10), `--orange-principal`,
+  `--bordure-subtile`, `--radius-sm` (8)… Liste complète et comptes : `TOLEREES` dans
+  `tests/unit/sentinelle-567-variables-css-fantomes.test.js` (le cliquet). Deux familles : (a) sans repli → la propriété
+  tombe à `initial`/hérité (bordures invisibles, textes qui prennent la couleur du parent) ; (b) avec repli `var(--x, #hex)`
+  → fonctionne, mais hors palette et hors thème. ⮕ Traiter par familles de nom (bordure, gris, orange, vert, radius,
+  surface), en substituant par la palette existante ; chaque lot fait baisser la liste du cliquet. Pas de définition
+  d'alias « pour faire taire » : la règle est la palette.
+
   `var(--attention)` n'existe nulle part ; idem `--orange`, `--orange-pale`, `--radius`,
   `--couleur-attention`, `--couleur-texte-sombre` (ces deux dernières retombant sur des hex Bootstrap
   hors palette). ⮕ « Non associé », les modales de suppression et l'alerte « à re-déposer »

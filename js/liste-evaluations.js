@@ -1101,10 +1101,10 @@ function genererLigneHTML(ligne) {
                 ? `${echapperHtml(ligne.productionNom)} ${ligne.estDoublon
                     ? `<span style="color: var(--rouge-danger); font-size: 0.85em;" title="Doublon : ce fichier est déjà associé à ${echapperHtml(ligne.diagnosticDoublon || '')}. Suppression sécuritaire."><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Doublon</span>`
                     : (ligne.fichierId
-                        ? `<button type="button" data-stop data-action="ouvrirProprieteFichier" data-param="${echapperHtml(ligne.fichierId)}" title="${ligne.etudiantManquant ? 'Étudiant·e introuvable : le DA du fichier ne correspond à aucun·e étudiant·e inscrit·e. Clique pour associer l’étudiant·e et la production.' : 'Aucune production liée à ce travail. Clique pour l’associer à une production.'}" style="color: var(--attention); font-size: 0.85em; background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Non associé ›</button>`
-                        : `<span style="color: var(--attention); font-size: 0.85em;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Non associé</span>`)}`
+                        ? `<button type="button" data-stop data-action="ouvrirProprieteFichier" data-param="${echapperHtml(ligne.fichierId)}" title="${ligne.etudiantManquant ? 'Étudiant·e introuvable : le DA du fichier ne correspond à aucun·e étudiant·e inscrit·e. Clique pour associer l’étudiant·e et la production.' : 'Aucune production liée à ce travail. Clique pour l’associer à une production.'}" style="color: var(--alerte-texte-attention); font-size: 0.85em; background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Non associé ›</button>`
+                        : `<span style="color: var(--alerte-texte-attention); font-size: 0.85em;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Non associé</span>`)}`
                 : ligne.fichierAutreProduction
-                    ? `${echapperHtml(ligne.productionNom)} <span style="color: var(--attention); font-size: 0.85em;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Fichier sous ${ligne.fichierAutreProductionNom ? echapperHtml(ligne.fichierAutreProductionNom) : 'autre production'}</span>`
+                    ? `${echapperHtml(ligne.productionNom)} <span style="color: var(--alerte-texte-attention); font-size: 0.85em;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Fichier sous ${ligne.fichierAutreProductionNom ? echapperHtml(ligne.fichierAutreProductionNom) : 'autre production'}</span>`
                     : echapperHtml(ligne.productionNom)}</td>
             <td class="td-center">${badgeJeton}</td>
             <td class="td-center">${affichageNiveau}</td>
@@ -2752,7 +2752,7 @@ function supprimerFichierDefinitivement(id) {
             <p style="margin: 8px 0 16px 0; font-size: 0.9em;">
                 Le fichier sera supprimé de façon permanente.
             </p>
-            <p style="margin: 0 0 16px 0; font-size: 0.85em; color: var(--attention);">
+            <p style="margin: 0 0 16px 0; font-size: 0.85em; color: var(--alerte-texte-attention);">
                 Cette action est irréversible.
             </p>
             <div class="modal-actions">
@@ -2831,7 +2831,7 @@ function viderTouteCorbeille() {
             <p style="margin: 8px 0 16px 0; font-size: 0.9em;">
                 Supprimer définitivement les <strong>${corbeille.length}</strong> fichier(s) de la corbeille ?
             </p>
-            <p style="margin: 0 0 16px 0; font-size: 0.85em; color: var(--attention);">
+            <p style="margin: 0 0 16px 0; font-size: 0.85em; color: var(--alerte-texte-attention);">
                 Cette action est irréversible.
             </p>
             <div class="modal-actions">

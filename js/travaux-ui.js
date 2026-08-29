@@ -1735,8 +1735,8 @@
         // Alerte globale : blobs manquants après restauration session
         const nbBlobsManquants = queue.filter(f => !f.fichier).length;
         if (nbBlobsManquants > 0) {
-            colCentre += `<div class="pipeline-alerte-blobs" style="margin-top:8px; padding:8px 10px; background: var(--orange-pale, rgba(255,152,0,0.1)); border-radius: var(--radius); border-left: 3px solid var(--orange);">
-                <p class="u-texte-petit" style="margin:0 0 6px 0; color: var(--orange);"><strong>${nbBlobsManquants} fichier${nbBlobsManquants > 1 ? 's' : ''}</strong> ${nbBlobsManquants > 1 ? 'doivent' : 'doit'} \u00eatre re-d\u00e9pos\u00e9${nbBlobsManquants > 1 ? 's' : ''} (session restaur\u00e9e).</p>
+            colCentre += `<div class="pipeline-alerte-blobs" style="margin-top:8px; padding:8px 10px; background: var(--alerte-fond-attention)); border-radius: var(--radius-moyen); border-left: 3px solid var(--alerte-texte-attention);">
+                <p class="u-texte-petit" style="margin:0 0 6px 0; color: var(--alerte-texte-attention);"><strong>${nbBlobsManquants} fichier${nbBlobsManquants > 1 ? 's' : ''}</strong> ${nbBlobsManquants > 1 ? 'doivent' : 'doit'} \u00eatre re-d\u00e9pos\u00e9${nbBlobsManquants > 1 ? 's' : ''} (session restaur\u00e9e).</p>
                 <button class="btn btn-secondaire btn-sm" data-action="travauxUI.redeposerFichiers">Re-d\u00e9poser les fichiers</button>
             </div>`;
         }
@@ -3861,7 +3861,7 @@
             if (jetonsActifs && d.fichierExistant.etudiantDA && typeof verifierDisponibiliteJeton === 'function') {
                 var jetonDispo = verifierDisponibiliteJeton(d.fichierExistant.etudiantDA, 'reprise');
                 if (jetonDispo) {
-                    boutonJeton = '<button class="btn btn-secondaire" data-choix="jeton" style="border-color:var(--attention);">Appliquer comme jeton de reprise' +
+                    boutonJeton = '<button class="btn btn-secondaire" data-choix="jeton" style="border-color:var(--alerte-texte-attention);">Appliquer comme jeton de reprise' +
                         '<span style="display:block;font-size:11px;font-weight:400;opacity:0.8;">Les deux fichiers sont conserv\u00e9s. L\u2019\u00e9valuation originale est archiv\u00e9e.</span>' +
                     '</button>';
                 }
