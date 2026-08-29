@@ -2347,14 +2347,17 @@ function trierTableauParColonne(colonne) {
  * Met à jour les indicateurs visuels de tri (flèches ↑↓↕)
  */
 function mettreAJourIndicateursTri() {
-    // Réinitialiser tous les indicateurs
+    // #570 — les flèches de la LISTE portent `tri-eval-*`. Elles s'appelaient
+    // `tri-da`, `tri-nom`, `tri-prenom` comme celles du tableau des ÉTUDIANTS
+    // (`etudiants.js`) : `getElementById` atteignait le premier tableau du DOM,
+    // et trier la Liste par DA ne changeait jamais sa propre flèche.
     ['da', 'nom', 'prenom', 'production', 'jetons', 'niveau', 'niveauIDME', 'note'].forEach(col => {
-        const elem = document.getElementById(`tri-${col}`);
+        const elem = document.getElementById(`tri-eval-${col}`);
         if (elem) elem.textContent = '↕';
     });
 
     // Mettre à jour l'indicateur actif
-    const elemActif = document.getElementById(`tri-${triEvaluationsActuel.colonne}`);
+    const elemActif = document.getElementById(`tri-eval-${triEvaluationsActuel.colonne}`);
     if (elemActif) {
         elemActif.textContent = triEvaluationsActuel.ordre === 'asc' ? '↑' : '↓';
     }

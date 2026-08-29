@@ -2583,7 +2583,14 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `travaux-ui.js`, mais **2 sont sur l'écran Importer**, pas sur « Exporter et archiver ». L'écran
   nommé par l'item en porte **6**. Les 2 autres restent à traiter, sous un autre écran.
 
-- [ ] **#570 — Mode clair : les flèches de tri de la Liste à 2,0:1 de contraste.** (constat C4)
+- [x] **#570 LIVRÉ 29 août 2026 — les flèches de tri de la Liste ont leurs ids, et la couleur de leur en-tête.** (constat C4)
+  Ids dupliqués corrigés D'ABORD (comme l'item l'exigeait) : la Liste porte `tri-eval-*` (huit colonnes),
+  `mettreAJourIndicateursTri` les lit ; le tableau des étudiants garde `tri-*` (`etudiants.js`). Puis la couleur : plus de
+  `var(--gris-clair)` en ligne (1,96:1 en mode clair sur l'en-tête bleu) — classe `.tri-indicateur` qui **hérite** du blanc
+  de `.thead-sticky-bleu`, repos atténué par l'opacité. **Sentinelle** statique `sentinelle-570-tri-ids-uniques` (aucun
+  `id="tri-…"` dupliqué, la Liste lit `tri-eval-*`, aucune couleur en dur) + **spec WebKit** `liste-tri-indicateurs-570`
+  (trier par DA change la flèche de la Liste et d'elle seule ; flèche = couleur de l'en-tête, modes sombre et clair).
+  **Break-test** : 2 mutations, rouges des deux côtés.
   `var(--gris-clair)` (famille fond-clair, `#777788` en clair) posé sur l'en-tête bleu fixe.
   Recalculé le 28 août 2026 : `#777788` sur `#2a4a8a` = **1,96:1**.
   ⚠ **DÉPENDANCE NON INSCRITE : LE CORRECTIF DE COULEUR SEUL SERA SANS EFFET.** Trois des
