@@ -30,6 +30,38 @@
 
 Sessions indépendantes, permutables si une session bloque : S1, S2, S5, S7, S8.
 
+### Répartition entre sessions Claude (30 août 2026, fin de journée)
+
+Trois sessions terminal sont actives sur le dépôt. La répartition ci-dessous les
+tient hors de conflit ; elle vit ICI, et pas seulement dans les messages
+échangés entre sessions, parce qu'un message ne se relit pas après un
+redémarrage.
+
+| Session | Prend | Fichiers qui lui appartiennent |
+|---|---|---|
+| `kuekatsheu-c2` | **S4** (#610) | `js/travaux-import.js`, `js/travaux-ui.js` |
+| `kuekatsheu-e6` | **S7** (#613) | `js/import-export.js` |
+| `kuekatsheu-e8` | **S8** (#614) | `js/codex.js` |
+
+**Gelées tant que S4 n'est pas livrée** : S5 (#611), S6 (#612) et S9 (#615)
+touchent toutes `travaux-import.js`, `travaux-ui.js` ou `liste-evaluations.js`.
+
+**Trois règles de non-collision**, apprises le 30 août :
+
+1. **Une seule release à la fois.** `node scripts/release.mjs patch` réécrit
+   `version.json`, `version.js`, `js/init-inline.js`, `js/main.js` et les jetons
+   anti-cache d'`index.html`. Deux releases simultanées entrent en conflit à
+   coup sûr : se prévenir avant de lancer la sienne.
+2. **Staging chirurgical.** `git add` fichier par fichier, jamais `-A`, et
+   `git diff --cached --stat` LU avant chaque commit. Le 30 août, trois fichiers
+   non touchés par la session sont apparus dans son index — c'était le travail
+   Cowork de Grégoire en parallèle. `git status` ne distingue pas les auteurs.
+3. **`BACKLOG.md`, `SESSION.md` et `RELAIS.md` sont partagés** : on y ajoute son
+   bloc, on n'écrase jamais celui d'un autre.
+
+⚠ Les identifiants #607 à #615 sont **déjà réservés** (T0.4) : les employer tels
+quels, n'en réserver aucun de plus.
+
 ---
 
 ## Cadre non négociable (relire à chaque session)
