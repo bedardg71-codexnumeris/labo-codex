@@ -30,6 +30,62 @@
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
 | **Dernière mise à jour** | **30 août 2026, fin de journée** — session unique. **#522 lot 4 LIVRÉ** (le helper des bibliothèques, cinq familles d'un geste) · **#503 étendu aux cartouches** · divergence des deux 1.106.3 TRANCHÉE (report de #555·2, branche abandonnée) · **#508 : trois gestes de code**, pas un — la spec rougirait seule le 1er septembre · consigne de démarrage et artefact de refermage écrits. **Vitest 4114/4114 (395 fichiers)** · ⚠ **Playwright NON relancé, et il est DÛ.** 1.106.4 due, rien poussé. Entrée précédente : **30 août 2026, 8 h 20** — session unique (matin). **#522 : l'AUDIT est fait (213 séquences mesurées, 102 en course) et le LOT 1 est LIVRÉ** — rapport `Rapports/AUDIT-522-courses-lecture-ecriture-2026-08-30.md`. **1.106.3 poussée** (`c2e12dcd`). ⚠⚠ **LE FAIT À RETENIR : `getSync` NE PROTÈGE PAS** — dans `db.set`, l'écriture IndexedDB est attendue AVANT le rafraîchissement de localStorage, donc un concurrent lit encore l'ancienne valeur. ⚠ **Et le banc mentait** : Node n'a pas d'IndexedDB, `db.js` s'y rabat sur localStorage-seul où `set` est synchrone — les six cas passaient au VERT sur le code NON corrigé ; il faut forcer `useIndexedDB` avec une fausse connexion. **Reste 89 sites, quatre lots** ; le plus rentable est le helper `BibliothequeUI` (14 sites, 7 fichiers, un seul changement de contrat pour les cinq familles). Entrée précédente : **29 août 2026, 20 h 15** — session unique (journée entière). **Audit Évaluations bouclé** (#562, #560, #561, #566, #571, #567, #570, #568, #569, #572), #595 et #596 inscrits, artefact de vérification terrain remis. **1.106.2 poussée** (`d1983402`). Entrée précédente : **10 h 30** — session unique (matin). **#578 LIVRÉ** (option A) + régression du 26 août réparée (listes du formulaire de cartouche mortes) ; **#574 retrait LIVRÉ** (option B, sonde due) ; **#593 LIVRÉ** (n° 5-6-7, course fermée) ; **#563 LIVRÉ** (case retirée) ; **#594 LIVRÉ** (bandeau de version au chargement) ; **#562, #560, #561, #566, #571, #567, #570, #568, #569 et #572 LIVRÉS** (après 1.106.1 — **bump 1.106.2 dû**) ; **#595 inscrit** ; **référence unique créée** (`Rapports/SUIVI-conception-evaluations-2026-08.md`) ; #593 inscrit ; 1.106.0 déployée à 3 h. ✅ **1.106.1 poussée à 12 h 40** (`ecd22a59`). Entrée précédente : **3 h 40** — session unique (nuit). **1.106.0 poussée** ; **#578 : le diagnostic console est LIVRÉ** (`await _diagnostiquerEchellesGrilles()`), sentinelle 6 cas / 4 mutations rouges ; **le chiffre est DÛ par Grégoire**. Fait mesuré : l'éditeur de grille n'écrit jamais `echelleId`. Entrée précédente : **28 août, 21 h 15** — session unique (soir). **#555 lot 2 (d) et (e) + #577 LIVRÉS** ; #579 livré pour le cas de l'assistant ; **#592** inscrit. **Vitest 4011/4011** (377 fichiers) · **Playwright 201** (198 verts + 3 instables pré-existantes, vertes au second essai), sur arbre gelé. ⚠ **AUCUN BUMP** : du code a changé (6 fichiers `js/`, `?v=` bougés) mais je ne sais pas si la session `file://` de Grégoire est ouverte — **1.106.0 (minor) est DUE**, à lancer par `node scripts/release.mjs minor` au prochain démarrage. Entrée précédente : **20 h 15** — fin de journée, **trois sessions**. Les **21 arbitrages de Grégoire sont TRANCHÉS et consignés dans leurs items**. Livré : #555 lot 2 (b), #556, #557, l'audit des copies d'échelle, le diagnostic des résolveurs. **Vitest 3983/3983** (374 fichiers) · **Playwright 199/199**, relancés sur arbre gelé avant le push. **Aucun bump** : 1.105.0 tient — que de la documentation, aucun `?v=` à bouger. |
 
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 30 AOÛT 2026, 10 h 45 (SECONDE SESSION)
+
+### ✅ #522 LOT 2 EST CLOS — et il faisait 54 sites, pas 39
+
+Trois blocs, trois sentinelles, trois break-tests à quatre mutations chacun.
+**`niveauxEchelle` (7) · `echellesTemplates` (21) · `grillesTemplates` (26).**
+Il reste **zéro site en course** sur ces trois clés. Sept sites en régime R3 (synchrones de bout en
+bout) restent tels quels : sans point de suspension entre la lecture et l'écriture, rien ne peut
+s'intercaler. **Vitest 4153/4153 (398 fichiers) · Playwright 207/207** (verdict de la 1.106.4, avant
+les trois commits du lot — la suite navigateur est DUE avant le prochain bump).
+
+⚠⚠ **L'AUDIT SOUS-COMPTAIT, ET IL N'AVAIT LAISSÉ AUCUN OUTIL.** Le rapport annonce « 39 sites,
+2 fichiers » ; la mesure refaite en donne **54 sur cinq fichiers**. L'outil de mesure a été
+reconstruit et **resservira aux lots 3 et 5** — il applique le critère du §2 du rapport (R1/R2/R3),
+neutralise commentaires et chaînes à longueur constante, et apparie lecture/écriture par fonction.
+⮕ **Ne pas refaire l'audit : refaire la MESURE.** Les deux ne sont pas la même chose.
+
+### CE QUE CE LOT A APPRIS, ET QUI RESSERVIRA
+
+· ⮕ **HUIT SITES PORTAIENT UNE FENÊTRE D'ATTENTE HUMAINE**, et ce sont les pires : un `prompt` de nom,
+  la question du doublon, quatre confirmations. La collection lue AVANT la question écrasait tout ce
+  qui s'était enregistré pendant. C'est `partagerPratique` du lot 1, sur d'autres clés. **Remède :
+  lire hors file pour POSER la question, relire DANS la file pour ÉCRIRE.**
+· ⮕ **LA CONVERSION MET AU JOUR DES DÉFAUTS QUE PERSONNE NE CHERCHAIT** : `assurerGrilleGenerique`
+  vérifiait la présence de la grille d'exemple HORS file — deux appels concurrents au démarrage la
+  semaient DEUX FOIS. Et la garde d'identité #476 s'appliquait à une collection lue hors file : un
+  doublon ajouté entre-temps passait.
+· ⚠⚠ **DEUX CLIQUETS EXISTANTS ONT ROUGI SUR UN CHEMIN DEVENU MEILLEUR.** #476 mesurait une
+  **proximité textuelle** de 200 caractères entre `conflit` et le message ; #358 exigeait l'argument
+  littéral de `db.set`. Aucun des deux ne mesurait son invariant — l'un mesurait la mise en page,
+  l'autre la méthode d'écriture. **Recalés sur l'invariant, puis BREAK-TESTÉS APRÈS recalage** : un
+  cliquet qu'on recale sans le refaire rougir est pire qu'un cliquet supprimé, parce qu'il rassure.
+· ⚠ **UN PIÈGE DE MESURE, PAYÉ** : `pratiques-gestion.js` porte un message générique « déjà dans ta
+  sélection » AVANT son refus nommé. Une assertion qui cherchait la PREMIÈRE occurrence rendait un
+  faux rouge. Chercher toutes les occurrences, pas la première.
+· ⚠ **TROIS STUBS `db` de sentinelles existantes ont dû recevoir `modifier`** (#468, #358-générique) :
+  sans lui, `TypeError: db.modifier is not a function`. Le stub doit reproduire le REFUS aussi — un
+  mutateur qui rend `undefined` n'écrit rien.
+
+### 📌 À INSCRIRE, TROUVÉ ET NON CORRIGÉ
+
+· **`niveauxEchelle` n'est PAS namespacée par trimestre** — `db.get('niveauxEchelle')` sans `cle()`,
+  contrairement à `echellesTemplates` juste à côté. Latent et neutre ; on ne corrige pas un bug
+  dormant pendant un refactor.
+· **Le rituel de release contient un VERT CREUX.** L'ordre dit « commit → sentinelle anti-cache »,
+  mais `scripts/verifier-anticache-stage.mjs` ne regarde que les fichiers **stagés** : lancé après le
+  commit, il trouve un index vide, ne vérifie RIEN, et sort en code 0 **sans un mot**. C'est un garde
+  de pré-commit, et le rituel le nomme à la mauvaise étape. La vraie vérification post-commit est la
+  sentinelle Vitest `anticache-fichiers-modifies`, qui compare des COMMITS.
+· **Trois erreurs de banc pré-existantes** dans `sentinelle-note-non-constructible-326` :
+  `repararPortfoliosEleves` lève `ReferenceError: cle is not defined`, avalée par un `catch` de
+  l'application. Le test passe ; l'erreur est réelle et masquée.
+· Les trois identifiants morts de `js/cartouches.js` signalés par la session du matin.
+
+---
+
 ## ▶ POUR LA SESSION QUI PREND LE RELAIS — 30 AOÛT 2026, FIN DE JOURNÉE
 
 ### 📄 LA CONSIGNE DE DÉMARRAGE EST ÉCRITE — la lire AVANT ce fichier

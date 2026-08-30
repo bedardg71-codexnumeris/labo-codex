@@ -3252,6 +3252,48 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     démarrage : la course y est théorique — **vérifier avant de convertir, ce lot est sans doute plus
     petit qu'il n'en a l'air**.
 
+  ✅ **LOT 4 LIVRÉ le 30 août 2026** (1.106.4) — le contrat du helper `BibliothequeUI` passe de
+  `lireListe`/`ecrireListe` à `modifierListe(mutateur)` : **dix descripteurs, sept fichiers, cinq
+  familles** corrigées d'un seul changement. ⚠⚠ **ET LE BANC A MENTI UNE SECONDE FOIS** : forcer
+  `useIndexedDB` ne suffit PAS. La fausse connexion du lot 1 range et rend la RÉFÉRENCE de l'objet,
+  alors qu'IndexedDB **clone** à l'écriture comme à la lecture. Deux lecteurs concurrents recevaient
+  donc le même tableau : le break-test a REFUSÉ de rougir sur du code cassé. Clone structuré ajouté →
+  le rouge est venu. Patron corrigé dans `sentinelle-522-lot4-bibliotheques-serialisees`.
+
+  ✅ **LOT 2 CLOS le 30 août 2026 — et il faisait 54 sites, pas 39.**
+  ⚠⚠ **ÉCART DE PRÉMISSE, MESURÉ AVANT DE COMMENCER.** Le rapport d'audit annonce « 39 sites,
+  2 fichiers » ; la mesure refaite en donne **54, sur CINQ fichiers** — `cartouches.js`,
+  `donnees-v2.js` et `spe-specifications.js` en portent un chacun. Seule `niveauxEchelle` tombait
+  juste (6/6). L'audit n'avait laissé **aucun outil** : il a été reconstruit, et resservira aux
+  lots 3 et 5.
+  · **Bloc 2a** — `niveauxEchelle`, **7 sites** (`echelles.js`). Sentinelle 12 cas, break-test
+    4 mutations / 4 rouges. ⚠ La clé n'est PAS namespacée par trimestre (`db.get('niveauxEchelle')`
+    sans `cle()`), contrairement à `echellesTemplates` juste à côté : défaut latent et neutre,
+    laissé tel quel — on n'en corrige pas un pendant un refactor. **À inscrire.**
+  · **Bloc 2b** — `echellesTemplates`, **21 sites** (`echelles.js`, `donnees-v2.js`). Sentinelle
+    12 cas, break-test 4/4.
+  · **Bloc 2c** — `grillesTemplates`, **26 sites** (`grilles.js`, `cartouches.js`,
+    `spe-specifications.js`). Sentinelle 14 cas, break-test 4/4.
+  ⮕ **HUIT SITES PORTAIENT UNE FENÊTRE D'ATTENTE HUMAINE, et ce sont les pires du lot** :
+  `dupliquerEchelle` et `dupliquerGrille` (un `prompt` de nom), `sauvegarderGrilleTemplate` et
+  `sauvegarderEchelleComplete` (la question du doublon), quatre suppressions à confirmation. Tout ce
+  qui s'enregistrait pendant que la question était à l'écran était écrasé par la collection lue AVANT.
+  C'est le défaut de `partagerPratique`, sur d'autres clés. Remède : lire hors file pour POSER la
+  question, relire DANS la file pour ÉCRIRE.
+  ⮕ **DEUX DÉFAUTS MIS AU JOUR PAR LA CONVERSION** : `assurerGrilleGenerique` vérifiait la présence de
+  la grille d'exemple HORS file — deux appels concurrents au démarrage la semaient DEUX FOIS ; et la
+  **garde d'identité #476** de `ajouterGrilleIndividuelle` / `ajouterEchelleIndividuelle` s'appliquait
+  à une collection lue hors file, donc un doublon ajouté entre-temps passait.
+  ⮕ **DEUX CLIQUETS EXISTANTS ONT ROUGI ET ONT ÉTÉ RECALÉS, SANS ÊTRE AFFAIBLIS.** #476 mesurait une
+  PROXIMITÉ TEXTUELLE de 200 caractères entre `conflit` et le message de refus — elle mesurait la mise
+  en page, pas l'invariant ; le contrôle porte désormais sur le CHAÎNAGE (le nom affiché vient de
+  `garde.conflit`) et sur TOUTES les occurrences du message, pas la première (`pratiques-gestion.js`
+  en porte une générique avant le refus nommé : chercher la première rendait un faux rouge). #358
+  exigeait l'argument littéral de `db.set` et rougissait sur un chemin devenu MEILLEUR. **Les deux ont
+  été break-testés APRÈS recalage** et rougissent toujours sur une vraie violation.
+  **Vitest 4153/4153 (398 fichiers)** · **Playwright 207/207**.
+  ⏳ **RESTE : lots 3 et 5** — productions (12) + cartouches (9), puis étudiants (3) + divers (12).
+
 - [x] **#523 CLOS 26 août 2026 — c'était GitHub Desktop, et c'est Grégoire qui l'a trouvé.**
   ⮕ **MESURE CONCLUANTE** : suite WebKit rejouée machine au repos ET **GitHub Desktop fermé** (hook
   pré-push de la release 1.99.2) → « aucune rougeur nouvelle, 8 échecs connus, **inchangé** ». Les
