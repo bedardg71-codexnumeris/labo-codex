@@ -4,9 +4,13 @@ Consigne de démarrage à froid — rédigée le 30 août 2026 en fin de session
 
 Ouvre le dépôt Monitorage_v6. Rituel d'abord : délègue l'audit de début de session
 au subagent `audit-debut-session`, puis lis la section « POUR LA SESSION QUI PREND
-LE RELAIS — 30 AOÛT (SOIR) » en tête de RELAIS.md. On est à la 1.106.3
-(build 0830-0815), mais la 1.106.4 est DUE : trois commits de code sont partis
-après la release, et rien n'est poussé.
+LE RELAIS — 30 AOÛT (SOIR) » en tête de RELAIS.md.
+
+⚠ CETTE CONSIGNE A ÉTÉ ÉCRITE À 9 h 32 ET LE DÉPÔT A BOUGÉ APRÈS. Elle disait
+« 1.106.3, 1.106.4 due, rien n'est poussé » : les trois sont périmés. La 1.106.4
+a été publiée à 9 h 50 par une seconde session, tout est poussé, et #522 lot 2
+était en cours à la fermeture. Fie-toi à l'audit de début de session et à
+RELAIS.md pour la version réelle, jamais à ce paragraphe.
 
 ⚠ SI TU N'OUVRES PAS LE DÉPÔT COMME DOSSIER DE TRAVAIL, le subagent
 `audit-debut-session` n'existera PAS et l'échec est silencieux : hors du dépôt,
@@ -39,8 +43,8 @@ trois gestes est au §8 bis. Le bandeau, lui, s'éteint bien seul.
 
 ENSUITE — propose-moi un choix fermé entre :
 (a) #522 lot 2 — grilles (19) + échelles (14) + niveauxEchelle (6), deux fichiers.
-    Patron connu (celui du lot 1 et du lot 4), aucune décision à prendre, gros
-    volume mécanique. L'audit est fait, ne le refais pas :
+    ⚠ ENGAGÉ PAR UNE AUTRE SESSION à la fermeture (lots 2a et 2b commités) :
+    MESURE CE QUI RESTE avant de l'ouvrir. L'audit est fait, ne le refais pas :
     Rapports/AUDIT-522-courses-lecture-ecriture-2026-08-30.md
 (b) #522 lot 3 — productions (12) + cartouches (9).
 (c) #595 — les 78 variables CSS fantômes, par familles de nom. Chantier de rendu :
@@ -67,8 +71,9 @@ js/echelles.js:1495. L'item annonce aussi `nomEchelleTemplate ×3` là où il y 
 et `btnDupliquerEchelle` n'est pas dupliqué du tout. Recale la liste avant l'ablation.
 
 ÉTAT DU DÉPÔT À LA FERMETURE
-· Trois commits de doc et de report le matin, deux commits de code l'après-midi.
-  Rien n'est poussé : origin/main est resté à 6c13b50f.
+· Six commits de ma session, TOUS POUSSÉS. Une seconde session a ensuite publié
+  la 1.106.4 (9 h 50) et enchaîné sur #522 lot 2 — vérifie où elle en est avant
+  d'ouvrir ce lot, il est peut-être déjà fait.
 · La branche `origin/claude/relais-md-continuation-b7i2jq` portait une SECONDE
   release 1.106.3. Son seul livrable (#555·2 et sa sentinelle) a été reporté sur
   main ; ses deux commits de version sont écartés. La branche distante existe
