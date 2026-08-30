@@ -75,11 +75,26 @@ describe('#558 B1 · le retrait des fichiers importés est persisté', () => {
 });
 
 describe('#558 B1 aggravé · le remplacement ne détruit plus avant de savoir', () => {
-    it('l’import précède la mise en corbeille', () => {
+    // #604 (30 août 2026) — MÊME FAUX PAS QUE LE TEST DU FILTRE PLUS HAUT, à
+    // l'autre bout du fichier : la fenêtre était bornée par une LONGUEUR (700),
+    // pas par la fin de la branche. `sansCommentaires` laisse les lignes vides
+    // des commentaires retirés ; documenter le défaut #604 au-dessus du code a
+    // donc suffi à pousser `deplacerEnCorbeille` hors de la fenêtre, et les
+    // deux tests sont passés au rouge sans que le code ait perdu quoi que ce
+    // soit. Une fenêtre trop courte rend un faux ROUGE comme une fenêtre trop
+    // longue rendait un faux VERT — dans les deux cas, elle ne mesure pas la
+    // branche. Bornée par la branche suivante, elle la mesure.
+    const brancheRemplacer = () => {
         const nu = sansCommentaires(srcUI);
-        const posBloc = nu.indexOf("choix === 'remplacer'");
-        expect(posBloc, 'le cas « remplacer » doit exister').toBeGreaterThan(-1);
-        const bloc = nu.slice(posBloc, posBloc + 700);
+        const debut = nu.indexOf("choix === 'remplacer'");
+        expect(debut, 'le cas « remplacer » doit exister').toBeGreaterThan(-1);
+        const fin = nu.indexOf("choix === 'additionnel'", debut);
+        expect(fin, 'la branche suivante doit borner celle-ci').toBeGreaterThan(debut);
+        return nu.slice(debut, fin);
+    };
+
+    it('l’import précède la mise en corbeille', () => {
+        const bloc = brancheRemplacer();
 
         const posImport = bloc.indexOf('await travauxImport.importerFichier');
         const posCorbeille = bloc.indexOf('deplacerEnCorbeille');
@@ -90,10 +105,7 @@ describe('#558 B1 aggravé · le remplacement ne détruit plus avant de savoir',
     });
 
     it('l’échec du remplacement est DIT, pas seulement journalisé', () => {
-        const nu = sansCommentaires(srcUI);
-        const posBloc = nu.indexOf("choix === 'remplacer'");
-        const bloc = nu.slice(posBloc, posBloc + 700);
-        expect(bloc).toContain('notifications.erreur');
+        expect(brancheRemplacer()).toContain('notifications.erreur');
     });
 });
 

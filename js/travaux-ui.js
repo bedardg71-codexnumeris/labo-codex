@@ -3887,6 +3887,12 @@
         // Phase 4 : traiter les doublons détectés
         if (resultat.doublons && resultat.doublons.length > 0) {
             await traiterDoublonsImport(resultat.doublons);
+            // #604 — Les fichiers écrits pendant l'arbitrage sont passés APRÈS
+            // le ménage de `importerTous` : les retirer maintenant, sinon la
+            // file les affiche encore alors qu'ils sont déjà stockés.
+            if (typeof travauxImport.purgerFichiersImportes === 'function') {
+                travauxImport.purgerFichiersImportes();
+            }
         }
 
         // Phase Jetons : appliquer les jetons de reprise pour les fichiers importés comme reprises
@@ -4008,12 +4014,30 @@
                 // l'utilisateur se retrouvait sans l'ancien ET sans le nouveau,
                 // sans le savoir. Le remplacement ne détruit plus rien tant que
                 // le remplaçant n'est pas là.
+                //
+                // #604 — L'ordre était juste, la VÉRIFICATION manquait. Deux
+                // manques, et il fallait les deux :
+                //   1. `remplaceExistant` — sans ce drapeau, `importerFichier`
+                //      retrouve l'existant (toujours en place à cet instant,
+                //      justement parce que l'ordre a été inversé) et refuse
+                //      d'écrire ;
+                //   2. la lecture de la valeur rendue — le refus n'est pas une
+                //      exception, c'est un OBJET `{doublon:true}`. Un `await`
+                //      qui rend un objet d'échec ressemble en tout point à un
+                //      succès : le `catch` ne voyait rien, et la corbeille
+                //      avalait l'original.
+                d.fichierPrepare.remplaceExistant = true;
                 try {
-                    await travauxImport.importerFichier(d.fichierPrepare, d.productionId);
+                    var remplacant = await travauxImport.importerFichier(d.fichierPrepare, d.productionId);
+                    if (!remplacant || remplacant.doublon || !remplacant.id) {
+                        throw new Error('Le fichier de remplacement n\'a pas été écrit (aucun identifiant rendu).');
+                    }
                     travauxStockage.deplacerEnCorbeille(d.fichierExistant.id);
                 } catch (e) {
                     console.error('[Travaux-UI] Erreur import remplacement:', e);
                     notifications.erreur('Le remplacement a échoué : le fichier d\'origine a été conservé.');
+                } finally {
+                    d.fichierPrepare.remplaceExistant = false;
                 }
             } else if (choix === 'additionnel') {
                 // Livrable additionnel : importer sans déclencher la détection
