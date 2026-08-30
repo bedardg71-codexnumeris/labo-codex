@@ -3593,6 +3593,47 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **Règle** : après un lot qui change une primitive de `db`, chercher les stubs `db` de TOUS les
   bancs qui CHARGENT le module, et lire le CODE DE SORTIE, pas seulement le compte.
 
+- [ ] **#604 — « Remplacer l'existant » jette l'ancien fichier À LA CORBEILLE SANS jamais importer le
+  nouveau. Les deux disparaissent.** 🔴 PERTE DE DONNÉES
+  Trouvé le 30 août 2026 sur l'import réel de Grégoire (601-101 gr.00007, « Portrait de lecteur -
+  lectrice », 49 fichiers). Symptôme rapporté : « j'ai cliqué pour remplacer les travaux existants…
+  ces travaux n'ont finalement pas été importés et j'ai dû le faire à part ».
+  **LE MÉCANISME.** `importerFichier` (`travaux-import.js:640`) refuse d'importer et rend un SENTINEL
+  `{ doublon: true, … }` dès qu'il trouve un fichier actif pour le même couple `(etudiantDA,
+  productionId)`. Trois drapeaux le contournent — `estReprise`, `livrableAdditionnel`, et la
+  `productionId` vide de la branche « orphelin ». **La branche `remplacer` n'en pose AUCUN**
+  (`travaux-ui.js:4004`). Elle rappelle donc `importerFichier` sur le même couple, récupère le
+  sentinel, **ne regarde pas la valeur rendue**, et enchaîne sur
+  `travauxStockage.deplacerEnCorbeille(d.fichierExistant.id)`.
+  ⮕ Résultat net : le remplaçant n'est jamais écrit, l'existant part à la corbeille. L'`await` réussit,
+  aucune exception n'est levée, le `catch` ne se déclenche pas, la notification annonce un succès.
+  ⚠ **Le commentaire `#558 B1` juste au-dessus dit exactement ce qui manque** : « le remplacement ne
+  détruit plus rien tant que le remplaçant n'est pas là ». L'ORDRE a bien été inversé — mais rien ne
+  VÉRIFIE que le remplaçant est là. Un `await` qui rend un objet d'échec ressemble à un succès.
+  ⮕ **Correction** : drapeau `remplaceExistant` qui contourne la garde, ET lecture de la valeur rendue
+  avant la mise à la corbeille — un sentinel `doublon` doit interrompre le remplacement.
+  ⮕ **Données de Grégoire à récupérer** : les fichiers ainsi jetés sont dans la corbeille, blob intact
+  (`deplacerEnCorbeille` copie les métadonnées et ne touche pas le blob) — restaurables.
+
+- [ ] **#603 — Le suffixe de page `-p2` d'une remise Léa est lu comme un NOM DE PRODUCTION différent :
+  ni assemblage multi-pages, ni reconnaissance des pages entre elles, et un faux doublon.**
+  Trouvé le 30 août 2026, même import que [[#604]] — dont il est la cause amont.
+  `parserNomFichierLea` (`travaux-import.js:98`) coupe le nom sur `_Remis_le_`, prend tout ce qui suit
+  le DA et l'appelle `nomProduction`. Sur les deux pages d'une même remise :
+  · `Breton_9000200_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.jpg` → « Portrait de lecteur-p1 »
+  · `Breton_9000200_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.jpg` → « Portrait de lecteur-p2 »
+  Le `groupeDocumentId` en dérive (`da + '_' + nomProduction`) : **deux clés différentes pour un seul
+  document.** Trois conséquences en cascade, toutes observées :
+  1. `assemblerGroupesPipeline` ne voit que des groupes d'UNE image → aucun assemblage.
+  2. `detecterDoublonsStockage` exempte les pages qui partagent un `groupeDocumentId` — l'exemption ne
+     s'applique pas → **« présent 2 fois dans la file » sur deux fichiers pourtant uniques.**
+  3. À l'import, les deux entrées survivent jusqu'à `importerFichier` → doublon réel → modale
+     « Remplacer » → [[#604]] détruit les deux.
+  ⚠ Les remises multi-fichiers SANS suffixe (Moreau, Boucher, Thibodeau…) passent bien : même
+  `nomProduction`, donc même clé, donc assemblage. **Le défaut ne frappe QUE les pages numérotées** —
+  c'est-à-dire précisément celles que Grégoire renomme lui-même en dézippant une remise Léa.
+  ⮕ **Correction** : isoler le suffixe de page dans un champ `page` du parse, hors du `nomProduction`.
+
 - [ ] **#602 — Les trois filets anti-cache ne voient QUE les fichiers portant une balise `<script src>`
   dans `index.html`. Tout ce qui est servi autrement passe, en silence.**
   Créé le 30 août 2026, en publiant la 1.106.5. `release.mjs` l'a dit lui-même dans sa sortie :

@@ -89,14 +89,28 @@
        =============================== */
 
     /**
+     * Suffixe de PAGE d'une remise multi-fichiers, en fin de nom de production.
+     *
+     * #603 — Une remise Lea qui arrive en plusieurs pages est numerotee a la
+     * main au dezippage : « …_Portrait_de_lecteur-p1__Remis_le_… » et
+     * « …-p2__Remis_le_… ». Ce suffixe designe LA PAGE, pas une autre
+     * production : le laisser dans `nomProduction` donne deux
+     * `groupeDocumentId` differents pour un seul document.
+     *
+     * Formes reconnues, en FIN de chaine seulement : « -p2 », « _p 2 »,
+     * « page 2 », « partie 2 », « part2 », « (2) ».
+     */
+    const SUFFIXE_PAGE = /[\s\-_]*(?:\((\d{1,3})\)|(?:p(?:age)?|part(?:ie)?)\s*(\d{1,3}))$/i;
+
+    /**
      * Parse un nom de fichier au format Lea :
      * NOM_DA_Production_Remis_le_AAAA-MM-JJ_HHhMMmSSs.ext
      * ou NOM_DA_Production__Remis_le_AAAA-MM-JJ_HHhMMmSSs.ext
      * @param {string} nomFichier - Le nom complet du fichier
-     * @returns {Object} { nom, da, nomProduction, dateRemise, raw }
+     * @returns {Object} { nom, da, nomProduction, page, dateRemise, raw }
      */
     function parserNomFichierLea(nomFichier) {
-        const resultat = { nom: '', da: '', nomProduction: '', dateRemise: null, raw: nomFichier };
+        const resultat = { nom: '', da: '', nomProduction: '', page: null, dateRemise: null, raw: nomFichier };
 
         // Retirer l'extension
         const sanExt = nomFichier.replace(/\.[^.]+$/, '');
@@ -131,6 +145,21 @@
 
             // Production = tout apres le DA (nettoye des separateurs)
             resultat.nomProduction = partieIdentite.substring(indexDA + resultat.da.length).replace(/^[_\-]+/, '').replace(/_/g, ' ').trim();
+
+            // #603 — Detacher le suffixe de page AVANT que `nomProduction` ne
+            // serve de cle de regroupement. Sans cela, « -p1 » et « -p2 »
+            // fabriquent deux documents la ou il n'y en a qu'un : pas
+            // d'assemblage multi-pages, et un faux doublon a la confirmation
+            // d'import. Le suffixe n'est retire que s'il RESTE un nom de
+            // production apres coup — « 9000200_p2 » sans titre garde le sien.
+            const matchPage = resultat.nomProduction.match(SUFFIXE_PAGE);
+            if (matchPage) {
+                const resteProduction = resultat.nomProduction.slice(0, matchPage.index).replace(/[\s\-_]+$/, '').trim();
+                if (resteProduction) {
+                    resultat.page = parseInt(matchPage[1] || matchPage[2], 10);
+                    resultat.nomProduction = resteProduction;
+                }
+            }
         }
 
         return resultat;
@@ -637,9 +666,16 @@
 
         // Phase 4 : vérifier s'il existe déjà un fichier actif avec (etudiantDA, productionId)
         // Les fichiers de reprise (jeton) et les livrables additionnels assumés
-        // ne sont pas des doublons — ils coexistent avec l'original
+        // ne sont pas des doublons — ils coexistent avec l'original.
+        //
+        // #604 — `remplaceExistant` est le TROISIÈME contournement, et il
+        // manquait. Sans lui, la branche « Remplacer l'existant » rappelait
+        // cette fonction sur le même couple, récupérait le sentinel
+        // `{doublon:true}` — donc n'importait RIEN — puis jetait quand même
+        // l'ancien fichier à la corbeille. Les deux disparaissaient.
         if (fichierPrepare.etudiantDA && productionId &&
-            !fichierPrepare.estReprise && !fichierPrepare.livrableAdditionnel) {
+            !fichierPrepare.estReprise && !fichierPrepare.livrableAdditionnel &&
+            !fichierPrepare.remplaceExistant) {
             const existants = travauxStockage.obtenirFichiersGroupeActif()
                 .filter(f => f.etudiantDA === fichierPrepare.etudiantDA && f.productionId === productionId);
             if (existants.length > 0) {
@@ -768,6 +804,25 @@
         persisterFileDAttente();
 
         return { importes, erreurs, doublons: doublonsDetectes, total };
+    }
+
+    /**
+     * Retire de la file les fichiers effectivement ecrits, et persiste le retrait.
+     *
+     * #604 — `importerTous` fait ce menage AVANT que les doublons ne soient
+     * arbitres : les fichiers importes depuis la modale « Doublon detecte »
+     * (remplacement, jeton, livrable additionnel, orphelin) restaient donc dans
+     * la file, deja stockes mais affiches comme s'ils attendaient encore.
+     * L'appelant rejoue ce menage APRES l'arbitrage.
+     *
+     * @returns {number} Nombre de fichiers retires
+     */
+    function purgerFichiersImportes() {
+        const avant = fichiersEnAttente.length;
+        fichiersEnAttente = fichiersEnAttente.filter(f => f.statut !== 'importe');
+        const retires = avant - fichiersEnAttente.length;
+        if (retires > 0) persisterFileDAttente();
+        return retires;
     }
 
     /**
@@ -1089,9 +1144,15 @@
             if (!groupes.has(cle)) groupes.set(cle, []);
             groupes.get(cle).push(f);
         });
-        // Trier au sein de chaque groupe par dateRemise
+        // Trier au sein de chaque groupe : numero de page d'abord, date ensuite.
+        // #603 — Les pages d'une meme remise portent la MEME `dateRemise`
+        // (Lea horodate la remise, pas le fichier) : la date seule ne departage
+        // rien et l'ordre des pages retombait sur l'ordre de selection.
         groupes.forEach(fichiers => {
             fichiers.sort((a, b) => {
+                const pa = a.parseLea && a.parseLea.page;
+                const pb = b.parseLea && b.parseLea.page;
+                if (pa && pb && pa !== pb) return pa - pb;
                 const da = a.parseLea.dateRemise;
                 const db = b.parseLea.dateRemise;
                 if (!da && !db) return 0;
@@ -1715,6 +1776,7 @@
         ajouterFichiersEnAttente: ajouterFichiersEnAttente,
         obtenirFileDAttente: obtenirFileDAttente,
         viderFileDAttente: viderFileDAttente,
+        purgerFichiersImportes: purgerFichiersImportes,
         changerEtudiant: changerEtudiant,
         retirerFichier: retirerFichier,
         monterFichier: monterFichier,

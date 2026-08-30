@@ -1,0 +1,307 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { chargerScript } from './_helpers/charger-script.js';
+
+// #603 + #604 — L'IMPORT DU 30 AOÛT 2026, ET SES DEUX DÉFAUTS ENCHAÎNÉS.
+//
+// Mesuré sur l'import réel de Grégoire : 601-101 gr.00007, « Portrait de
+// lecteur - lectrice », 49 fichiers tirés de Léa. Deux élèves — Breton et
+// Tremblay — avaient remis leur travail en DEUX pages, dézippées puis
+// numérotées à la main : « …_Portrait_de_lecteur-p1__Remis_le_… » et
+// « …-p2__Remis_le_… ». Ce sont les seuls fichiers que l'application a
+// signalés comme doublons, et les seuls qui ne sont jamais arrivés.
+//
+// #603 — LA CAUSE AMONT. `parserNomFichierLea` prend tout ce qui suit le DA
+// pour un nom de production. « Portrait de lecteur-p1 » et « Portrait de
+// lecteur-p2 » deviennent donc deux productions distinctes, donc deux
+// `groupeDocumentId`, donc DEUX DOCUMENTS là où il n'y en a qu'un. Trois
+// conséquences, toutes observées : pas d'assemblage multi-pages, un faux
+// « présent 2 fois dans la file » à la confirmation, et deux entrées qui
+// survivent jusqu'à l'import.
+//
+// ⚠ Les remises multi-fichiers SANS suffixe (Moreau, Boucher, Thibodeau…)
+// passent correctement : même `nomProduction`, même clé, donc assemblage. Le
+// défaut ne frappe QUE les pages numérotées.
+//
+// #604 — LE DÉFAUT DESTRUCTEUR. `importerFichier` refuse d'écrire et rend un
+// SENTINEL `{doublon:true}` quand le couple (etudiantDA, productionId) existe
+// déjà. Trois drapeaux le contournent ; la branche « Remplacer l'existant »
+// n'en posait aucun, ET ne lisait pas la valeur rendue. Elle récupérait donc
+// le sentinel — rien d'écrit — puis jetait quand même l'existant à la
+// corbeille. Un `await` qui rend un objet d'échec ressemble en tout point à un
+// succès : aucune exception, `catch` muet, notification de réussite.
+//
+// ⮕ L'ORDRE avait déjà été corrigé (#558 B1, « importer d'abord, jeter
+// ensuite »). C'est la VÉRIFICATION qui manquait. Les deux moitiés sont
+// verrouillées ici : le contournement côté import, la lecture du retour côté UI.
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const racineProjet = path.resolve(__dirname, '..', '..');
+const sourceUI = readFileSync(path.join(racineProjet, 'js', 'travaux-ui.js'), 'utf8');
+
+/* -------------------------------------------------------------------------
+   Banc
+   ---------------------------------------------------------------------- */
+
+const ETUDIANTS = [
+    { da: '9000200', nom: 'B.', prenom: 'Amélie' },
+    { da: '9000264', nom: 'T.', prenom: 'Anabelle' },
+    { da: '9000193', nom: 'Moreau', prenom: 'Léo' }
+];
+
+// Un vrai PDF minimal : `validerMagicBytes` lit les quatre premiers octets.
+const OCTETS_PDF = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x34]);
+
+function faireFichier(nom, type = 'application/pdf') {
+    const blob = new Blob([OCTETS_PDF], { type });
+    // `preparerFichier` lit name / size / lastModified ; `validerMagicBytes`
+    // appelle slice().arrayBuffer(). Un Blob nommé suffit aux deux.
+    blob.name = nom;
+    blob.lastModified = Date.UTC(2026, 7, 21, 15, 36, 32);
+    return blob;
+}
+
+let win;
+let magasin; // fichiers « déjà stockés », vus par obtenirFichiersGroupeActif
+let ecrits;  // fichiers réellement écrits par ajouterFichierTravail
+
+function monter() {
+    magasin = [];
+    ecrits = [];
+
+    const travauxStockage = {
+        obtenirFichiersGroupeActif: () => magasin,
+        ajouterFichierTravail: (meta) => {
+            const f = Object.assign({ id: 'ft_' + (ecrits.length + 1) }, meta);
+            ecrits.push(f);
+            magasin.push(f);
+            return f;
+        },
+        stockerBlob: async () => true,
+        supprimerFichierTravail: (id) => {
+            const i = magasin.findIndex(f => f.id === id);
+            if (i !== -1) magasin.splice(i, 1);
+        },
+        genererMiniaturePDF: async () => ({ thumbnail: '', nombrePages: 1 }),
+        genererMiniatureImage: async () => '',
+        stockerThumbnail: () => {}
+    };
+
+    return chargerScript('js/travaux-import.js', {
+        obtenirDonneesSelonMode: (quoi) => (quoi === 'groupeEtudiants' ? ETUDIANTS : []),
+        travauxStockage,
+        db: { getSync: () => null, setSync: () => {} },
+        notifications: { succes: () => {}, erreur: () => {}, info: () => {} }
+    });
+}
+
+beforeEach(() => { win = monter(); });
+
+/* -------------------------------------------------------------------------
+   #603 — le suffixe de page n'est pas un nom de production
+   ---------------------------------------------------------------------- */
+
+describe('#603 — le suffixe de page est détaché du nom de production', () => {
+
+    it('les deux pages de la remise de Breton portent le MÊME nom de production', () => {
+        const p1 = win.travauxImport.parserNomFichierLea(
+            'Breton_9000200_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.jpg');
+        const p2 = win.travauxImport.parserNomFichierLea(
+            'Breton_9000200_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.jpg');
+
+        expect(p1.nomProduction).toBe('Portrait de lecteur');
+        expect(p2.nomProduction).toBe('Portrait de lecteur');
+        expect(p1.nomProduction).toBe(p2.nomProduction);
+        expect(p1.page).toBe(1);
+        expect(p2.page).toBe(2);
+    });
+
+    it('un fichier sans suffixe garde son nom de production, et n\'a pas de page', () => {
+        const r = win.travauxImport.parserNomFichierLea(
+            'Moreau_9000193_Portrait_de_lecteur__Remis_le_2026-08-25_09h43m56s.jpg');
+        expect(r.nomProduction).toBe('Portrait de lecteur');
+        expect(r.page).toBe(null);
+    });
+
+    it('reconnaît les autres formes de numérotation de page', () => {
+        const formes = [
+            ['Breton_9000200_Portrait_de_lecteur_p2__Remis_le_2026-08-21_11h36m32s.jpg', 2],
+            ['Breton_9000200_Portrait_de_lecteur_page_3__Remis_le_2026-08-21_11h36m32s.jpg', 3],
+            ['Breton_9000200_Portrait_de_lecteur_partie_2__Remis_le_2026-08-21_11h36m32s.jpg', 2],
+            ['Breton_9000200_Portrait_de_lecteur_(2)__Remis_le_2026-08-21_11h36m32s.jpg', 2]
+        ];
+        for (const [nom, page] of formes) {
+            const r = win.travauxImport.parserNomFichierLea(nom);
+            expect(r.nomProduction, nom).toBe('Portrait de lecteur');
+            expect(r.page, nom).toBe(page);
+        }
+    });
+
+    it('ne mange PAS un nom de production qui se réduirait à son suffixe', () => {
+        // Rien avant le suffixe : le retirer laisserait une production sans nom,
+        // et deux remises différentes se retrouveraient sous la même clé vide.
+        const r = win.travauxImport.parserNomFichierLea(
+            'Breton_9000200_p2__Remis_le_2026-08-21_11h36m32s.jpg');
+        expect(r.nomProduction).toBe('p2');
+        expect(r.page).toBe(null);
+    });
+
+    it('un chiffre seul en fin de titre n\'est pas un numéro de page', () => {
+        // « Artefact 9 » est un titre, pas la 9e page de « Artefact ».
+        const r = win.travauxImport.parserNomFichierLea(
+            'Breton_9000200_Artefact_9__Remis_le_2026-08-21_11h36m32s.jpg');
+        expect(r.nomProduction).toBe('Artefact 9');
+        expect(r.page).toBe(null);
+    });
+
+    it('les deux pages tombent dans UN SEUL groupe de document', () => {
+        win.travauxImport.ajouterFichiersEnAttente([
+            faireFichier('Breton_9000200_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.pdf'),
+            faireFichier('Breton_9000200_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.pdf')
+        ]);
+        const groupes = win.travauxImport.regrouperParDocument();
+        expect(groupes.size).toBe(1);
+        expect([...groupes.values()][0]).toHaveLength(2);
+    });
+
+    it('les pages sont ordonnées par NUMÉRO, pas par ordre de dépôt', () => {
+        // Léa horodate la REMISE : les deux pages portent la même `dateRemise`,
+        // qui ne départage donc rien. Déposées à l'envers, elles doivent
+        // ressortir p1 puis p2 — sans quoi le PDF assemblé sort dans le désordre.
+        win.travauxImport.ajouterFichiersEnAttente([
+            faireFichier('Breton_9000200_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.pdf'),
+            faireFichier('Breton_9000200_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.pdf')
+        ]);
+        const pages = [...win.travauxImport.regrouperParDocument().values()][0];
+        expect(pages.map(f => f.parseLea.page)).toEqual([1, 2]);
+    });
+
+    it('deux pages d\'un même travail ne sont PLUS annoncées comme doublons', () => {
+        // Le symptôme exact de la capture du 30 août :
+        // « B., Amélie — Portrait de lecteur - lectrice (présent 2 fois dans la file) ».
+        win.travauxImport.setProductionGlobale('prod_portrait');
+        win.travauxImport.ajouterFichiersEnAttente([
+            faireFichier('Breton_9000200_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.pdf'),
+            faireFichier('Breton_9000200_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.pdf')
+        ]);
+        expect(win.travauxImport.detecterDoublonsStockage()).toEqual([]);
+    });
+
+    it('deux travaux VRAIMENT distincts restent signalés comme doublons', () => {
+        // Le témoin inverse : la correction ne doit pas éteindre la détection.
+        win.travauxImport.setProductionGlobale('prod_portrait');
+        win.travauxImport.ajouterFichiersEnAttente([
+            faireFichier('Breton_9000200_Portrait_de_lecteur__Remis_le_2026-08-21_11h36m32s.pdf'),
+            faireFichier('Breton_9000200_Autre_travail__Remis_le_2026-08-22_09h00m00s.pdf')
+        ]);
+        expect(win.travauxImport.detecterDoublonsStockage()).toHaveLength(1);
+    });
+});
+
+/* -------------------------------------------------------------------------
+   #604 — remplacer sans perdre
+   ---------------------------------------------------------------------- */
+
+describe('#604 — « Remplacer l\'existant » écrit le remplaçant', () => {
+
+    const prepare = (extra = {}) => Object.assign({
+        fichier: new Blob([OCTETS_PDF], { type: 'application/pdf' }),
+        nomFichier: 'Breton_9000200_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.pdf',
+        typeMIME: 'application/pdf',
+        estPDF: true,
+        estImage: false,
+        etudiantDA: '9000200',
+        parseLea: null,
+        operations: []
+    }, extra);
+
+    it('SANS le drapeau, l\'import refuse d\'écrire et rend le sentinel', async () => {
+        // Le comportement de base, inchangé : c'est lui qui ouvre la modale.
+        magasin.push({ id: 'ft_existant', etudiantDA: '9000200', productionId: 'prod_portrait' });
+        const r = await win.travauxImport.importerFichier(prepare(), 'prod_portrait');
+        expect(r.doublon).toBe(true);
+        expect(ecrits).toHaveLength(0);
+    });
+
+    it('AVEC `remplaceExistant`, le remplaçant est réellement écrit', async () => {
+        // L'existant est TOUJOURS en place à cet instant — c'est tout l'objet de
+        // l'ordre inversé #558 B1. Sans contournement, la garde le retrouve et
+        // refuse d'écrire ; l'appelant jetait alors l'original pour rien.
+        magasin.push({ id: 'ft_existant', etudiantDA: '9000200', productionId: 'prod_portrait' });
+        const r = await win.travauxImport.importerFichier(
+            prepare({ remplaceExistant: true }), 'prod_portrait');
+        expect(r.doublon).toBeUndefined();
+        expect(r.id).toBeTruthy();
+        expect(ecrits).toHaveLength(1);
+    });
+
+    it('les trois autres contournements restent en place', async () => {
+        for (const drapeau of ['estReprise', 'livrableAdditionnel']) {
+            win = monter();
+            magasin.push({ id: 'ft_existant', etudiantDA: '9000200', productionId: 'prod_portrait' });
+            const r = await win.travauxImport.importerFichier(
+                prepare({ [drapeau]: true }), 'prod_portrait');
+            expect(r.doublon, drapeau).toBeUndefined();
+            expect(ecrits, drapeau).toHaveLength(1);
+        }
+    });
+
+    it('la file cesse d\'afficher un fichier déjà écrit', async () => {
+        // `importerTous` fait son ménage AVANT l'arbitrage des doublons : sans
+        // cette purge, un fichier importé depuis la modale restait dans la file,
+        // déjà stocké mais affiché comme s'il attendait encore.
+        win.travauxImport.setProductionGlobale('prod_portrait');
+        const [f] = win.travauxImport.ajouterFichiersEnAttente([
+            faireFichier('Breton_9000200_Portrait_de_lecteur__Remis_le_2026-08-21_11h36m32s.pdf')
+        ]);
+        f.statut = 'importe';
+        expect(win.travauxImport.purgerFichiersImportes()).toBe(1);
+        expect(win.travauxImport.obtenirFileDAttente()).toHaveLength(0);
+    });
+});
+
+/* -------------------------------------------------------------------------
+   #604 — le côté UI : la corbeille attend la preuve de l'écriture
+   ---------------------------------------------------------------------- */
+
+describe('#604 — la mise à la corbeille est conditionnée à un import vérifié', () => {
+
+    // La branche vit dans `traiterDoublonsImport`, au milieu d'un module qui
+    // construit son overlay dans le DOM : elle ne se monte pas sur ce banc.
+    // On lit donc la source — commentaires retirés d'abord, sinon le récit du
+    // défaut, qui cite le code fautif, ferait passer l'assertion à tort.
+    const codeUI = sourceUI
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+
+    const branche = (() => {
+        const debut = codeUI.indexOf("choix === 'remplacer'");
+        const fin = codeUI.indexOf("choix === 'additionnel'", debut);
+        expect(debut, 'branche « remplacer » introuvable').toBeGreaterThan(-1);
+        expect(fin, 'fin de branche introuvable').toBeGreaterThan(debut);
+        return codeUI.slice(debut, fin);
+    })();
+
+    it('pose le drapeau qui autorise l\'écriture', () => {
+        expect(branche).toMatch(/remplaceExistant\s*=\s*true/);
+    });
+
+    it('lit la valeur rendue par l\'import avant de jeter quoi que ce soit', () => {
+        expect(branche).toMatch(/=\s*await\s+travauxImport\.importerFichier/);
+        expect(branche).toMatch(/\.doublon/);
+    });
+
+    it('la corbeille vient APRÈS la vérification, jamais avant', () => {
+        const iVerif = branche.search(/\.doublon/);
+        const iCorbeille = branche.indexOf('deplacerEnCorbeille');
+        expect(iCorbeille, 'deplacerEnCorbeille absent').toBeGreaterThan(-1);
+        expect(iVerif).toBeGreaterThan(-1);
+        expect(iCorbeille).toBeGreaterThan(iVerif);
+    });
+
+    it('relâche le drapeau, y compris quand l\'import échoue', () => {
+        expect(branche).toMatch(/finally\s*\{[\s\S]*remplaceExistant\s*=\s*false/);
+    });
+});
