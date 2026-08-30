@@ -22,10 +22,12 @@ ENSUITE — propose-moi un choix fermé entre :
     l'application le ferait marcher tel quel et lèverait aussi le plafond de
     localStorage. Mais ça change mon geste de lancement et ça emporte l'usage
     tablette et la clé Codex. Pose-moi la question fermée, ne décide pas seul.
-(b) #522 lot 5 — ENGAGÉ, non terminé : les étudiants sont à moitié faits. 29 sites,
-    pas 15 : 20 gestes utilisateur (vraie course) et 9 drapeaux de migration au
-    démarrage (course théorique — les mesurer un par un, ne pas les convertir en
-    bloc). Restent aussi #600 et #601.
+(b) #522 lot 5 — ENGAGÉ, PAS un chantier vierge : les étudiants sont FAITS
+    (7 sites convertis, 1 faux positif nommé). Restent 22 sites en course — les cours,
+    la copie de cartouche entre trimestres, les métadonnées CC, les instantanés, et
+    neuf drapeaux de migration au démarrage dont la course est THÉORIQUE : les mesurer
+    un par un, ne pas les convertir en bloc. La moitié du travail de mesure est déjà
+    faite et vit dans `scripts/mesurer-522.py`. Restent aussi #600 et #601.
 (c) #598 volet B — le réglage global de la balance des blancs dans l'écran
     Optimisation. Le volet A est livré (l'aperçu reflète le traitement). Les pièges
     sont déjà écrits dans l'entrée : SSOT persistant et non état de DOM, `cle()` dès
@@ -39,12 +41,22 @@ et ~17 clés. Tranche le périmètre avant de commencer.
 #520 : le bouton de sauvegarderNiveaux() vit dans le bloc caché à retirer
 (js/echelles.js:3589). Audite les appelants avant toute ablation.
 
-UN OUTIL QUI VA MOURIR S'IL N'EST PAS REPRIS
-L'audit #522 a SOUS-COMPTÉ tous ses lots (35 %, 45 %, 48 %) : ne pars jamais de son
-chiffre. L'outil qui mesure juste — il apparie sur l'EXPRESSION de clé et canonise
-les alias — s'appelle `mesurer-522-v2.py` et vit dans le scratchpad de la session du
-30 août, PAS dans le dépôt. S'il n'a pas été reporté dans `scripts/` entre-temps,
-il est perdu : vérifie d'abord, et redemande-le-moi plutôt que de recompter à la main.
+NE RECOMPTE JAMAIS #522 À LA MAIN — L'OUTIL EST DANS LE DÉPÔT
+L'audit #522 a SOUS-COMPTÉ tous ses lots : lot 2 +38 %, lot 3 +48 %, lot 5 +93 %, et
+#599 pas compté du tout. Ne pars jamais de son chiffre. Sers-toi de :
+
+    python3 scripts/mesurer-522.py                 # tout le dépôt
+    python3 scripts/mesurer-522.py cartouches_     # les clés contenant ce motif
+
+Il apparie sur l'EXPRESSION de clé et non sur une chaîne — sinon les gabarits
+(`cartouches_${grilleId}`) et les appels (`getCleProductions()`) sont invisibles — et
+il canonise les alias, faute de quoi une lecture par l'un et une écriture par l'autre
+passent pour deux clés distinctes.
+⚠ **Il a des faux positifs, et il faut les LIRE.** Une fonction qui lit une clé puis y
+écrit une CONSTANTE est signalée à tort : la valeur écrite ne dérive pas de la lecture.
+Cas connu et nommé dans le code, `reinitialiserEtudiantsV2`, qui écrit `[]`. Le script
+dit où regarder, pas quoi faire. Son en-tête porte les trois pièges et les quatre
+écarts mesurés.
 
 PIÈGES DÉJÀ PAYÉS — ne les réapprends pas
 · Mesurer dans `file://`, pas seulement sous serveur. Le 30 août, « converties en
