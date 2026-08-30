@@ -183,9 +183,34 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   reprise depuis la liste restaure l'originale et laisse le fichier de la reprise actif, plus récent,
   donc gagnant au repli (DA, production). Correctif : exporter `_detacherFichiersDeEvaluation` et
   l'appeler quand `originaleRestauree` est vrai ; étendre la sentinelle #607, ne pas en créer une seconde.
-- [ ] **#613 — S7 · Restauration d'un ZIP : échecs de blobs avalés, « Import réussi » quand même** (constat S8).
-  `js/import-export.js`. Correctif : compter les manquants, poser `blobStatut: 'manquant'`, une seule
-  notification, « Import partiel » quand il en manque.
+- [x] **#613 — LIVRÉ le 30 août 2026 — S7 · Restauration d'un ZIP : échecs de blobs avalés, « Import réussi » quand même** (constat S8).
+  `js/import-export.js`. Un blob refusé aux magic bytes, absent du ZIP ou perdu sur `QuotaExceededError`
+  sortait par un `continue` ou un `catch` muet : l'import s'annonçait « réussi » sur un état amputé, et
+  chaque échec de quota émettait sa propre notification.
+  · **Livré** : `_restaurerBlobsDepuisZip` rend `{ restaures, manquants }`, `stockerBlob` est appelé avec
+  `notifier: false`, les métadonnées sans blob reçoivent `blobStatut: 'manquant'`, et les deux appelants
+  disent « Import partiel » avec le compte exact dès qu'il en manque un.
+  · **Deux écarts du diff de l'audit, corrigés** (confirmés au code par la session c2) : (1) le diff ne
+  convertissait qu'un `return` sur trois — les deux sorties anticipées rendaient un nombre, où l'appelant
+  lisait `.restaures` → `undefined`, affiché comme un zéro ; (2) il invoquait « même contrat que
+  `codex.js` » sans reprendre la garde `blobStatut !== 'exporte'` de `chargerCodex` — un fichier déjà
+  exporté aurait été compté manquant, annonçant « partiel » un import où rien n'est perdu et écrasant une
+  métadonnée juste par une fausse. La garde gouverne les **trois** portes de sortie.
+  · Sentinelle `#613` étendue dans `tests/unit/sentinelle-import-export-383-384-385.test.js` (11 cas
+  ajoutés, pas de second fichier). ROUGE d'abord ; 10 break-tests, 10 rouges obtenus.
+  · ⏳ **Test manuel dû à Grégoire** : importer un ZIP dont un blob est corrompu — l'application doit dire
+  « Import partiel » et la visionneuse « manquant », jamais « Import réussi ».
+- [ ] **#616 — Les sentinelles qui lisent la source bornent par DISTANCE, pas par branche : 31 candidats à trier**.
+  Trouvé pendant #613 (S7, 30 août 2026). `sentinelle-import-export-383-384-385.test.js` verrouillait
+  « magic bytes AVANT `stockerBlob` » par `[\s\S]{0,400}` entre les deux appels — une DISTANCE, pas une
+  SÉQUENCE. Ajouter des commentaires entre les deux l'a fait rougir sans qu'aucun comportement change ;
+  en retirer ailleurs l'aurait fait verdir sur un code cassé. Une borne en caractères ment dans les deux
+  sens. Forme corrigée sur place : extraire le corps de la fonction, retirer les commentaires, comparer
+  deux `indexOf` (helper `corpsSansCommentaires(src, signature)`, réutilisable).
+  · **À trier, mesuré le 30 août 2026** : 32 fichiers de `tests/unit/` contiennent un quantificateur
+  borné `{0,NNN}`, dont **31 lisent de la source** (`readFileSync`) — ce sont les candidats réels. Verts
+  aujourd'hui, faux demain au premier commentaire ajouté ou retiré. Recenser, puis reborner par branche
+  ceux qui asservissent une SÉQUENCE. Le 32ᵉ est celui de #613, déjà corrigé.
 - [x] **#614 — LIVRÉ le 30 août 2026 — S8 · Fusion de codex sans `validerMagicBytes` ; la purge #336 recense la corbeille et la modélisation** (constats S9, S10).
   `js/codex.js`. Commit `785f7887`.
   · **S9 livré** : `_fusionnerTravaux` valide les magic bytes AVANT `stockerBlob`. Un `travaux/FT_x.pdf`

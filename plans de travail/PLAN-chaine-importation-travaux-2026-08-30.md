@@ -28,7 +28,7 @@
 | S4 — Reprise après interruption, rattachement | S1, S2 | À FAIRE | | | #610 · après S3, jamais en parallèle |
 | S5 — Appariement par nom | S3 | À FAIRE | | | #611 |
 | S6 — DA inconnu, groupe absent | S4, S7 | À FAIRE | | | #612 · D2 = A (refus dit) · T6.1 levée : #606 est mergé · **T6.6 activée** (même trou que S5 dans `supprimerEvaluation`) |
-| S7 — Restauration ZIP | S8 | À FAIRE | | | #613 |
+| S7 — Restauration ZIP | S8 | **EN COURS (session du 2026-08-30)** | | | #613 · session e6 · sentinelle #383-384-385 étendue (11 cas ajoutés, 18 au total), 10 break-tests, 10 ROUGE · **deux écarts du diff S8 corrigés** (sorties anticipées non converties ; garde `blobStatut !== 'exporte'` omise, confirmés au code par c2) · trouvaille versée en #616 (bornes par distance dans 31 sentinelles) · ⏳ T7.4 test manuel ZIP à blob corrompu dû à Grégoire · ⏳ T7.5 release en attente de son go |
 | S8 — Codex | S9, S10 | LIVRÉ | 2026-08-30 | `785f7887` + `4b81842f` | #614 · session e8 · sentinelle 15 cas, 8 break-tests, 8 ROUGE · T8.1 mesuré (structure `id` confirmée) · arbitrage **fail-closed** sur la fusion · **pas de release propre — décision Grégoire du 30 août : une seule release groupée à la fin des trois chantiers** · ⏳ divergence fail-open du chemin « ouvrir » à trancher |
 | S9 — Mineurs | M1–M4, M10 | À FAIRE | | | #615 · D3 = A (retirer) |
 | S10 — Tests sur appareil | angles morts | À FAIRE | | | avec Grégoire, iPad + Mac |
@@ -210,9 +210,9 @@ Fichiers : `js/travaux-import.js` (`detecterFichiersDAInconnu`), `js/travaux-ui.
 
 Fichier : `js/import-export.js` (`_restaurerBlobsDepuisZip` et ses deux appelants `:2644`, `:3071`). Risque : faible. Fichier sous surveillance sécurité : `cd tests && npm test` complet avant commit.
 
-- [ ] **T7.1** — Étendre `tests/unit/sentinelle-import-export-383-384-385.test.js` : un blob refusé → `{ restaures, manquants: 1 }` et `blobStatut: 'manquant'` posé. ROUGE d'abord.
-- [ ] **T7.2** — Appliquer le diff S8 : `notifier: false`, compte des manquants, marquage, retour objet ; retirer le bloc vide et le retour numérique.
-- [ ] **T7.3** — Adapter les deux appelants ; message « Import partiel » quand `manquants > 0`.
+- [x] **T7.1** — Étendre `tests/unit/sentinelle-import-export-383-384-385.test.js` : un blob refusé → `{ restaures, manquants: 1 }` et `blobStatut: 'manquant'` posé. ROUGE d'abord. — FAIT : 11 cas ajoutés au fichier existant, ROUGE obtenu d'abord (9 échecs ciblés).
+- [x] **T7.2** — Appliquer le diff S8 : `notifier: false`, compte des manquants, marquage, retour objet ; retirer le bloc vide et le retour numérique. — FAIT, avec DEUX corrections au diff de l'audit : les deux sorties anticipées rendent elles aussi `{ restaures: 0, manquants: 0 }` (le diff n'en convertissait qu'une sur trois), et la garde `blobAttendu = f.blobStatut !== 'exporte'` de `chargerCodex` est reprise — elle gouverne les TROIS portes de sortie, et le marquage n'écrase jamais un `'exporte'`.
+- [x] **T7.3** — Adapter les deux appelants ; message « Import partiel » quand `manquants > 0`. — FAIT : `executerImportLocalStorageBrut` dit « Import partiel » avec le compte et la conduite à tenir ; `executerImportSelectif` ajoute un suffixe « N non restauré(s), marqué(s) manquant » dans ses deux branches. Sans « ⚠ » (zéro emoji dans l'UI).
 - [ ] **T7.4** — Break-test, `npm test` complet, test manuel : ZIP dont un blob est corrompu.
 - [ ] **T7.5** — Commit, release, merge, tableau, `SESSION.md`.
 
