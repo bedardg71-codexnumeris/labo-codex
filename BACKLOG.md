@@ -87,6 +87,51 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ## A faire
 
+### Chaîne d'importation des travaux — audit du 30 août 2026 (sessions S1 à S9)
+
+> Rapport : `Rapports/AUDIT-chaine-importation-travaux-2026-08-30.md`.
+> Plan et tableau d'état : `plans de travail/PLAN-chaine-importation-travaux-2026-08-30.md`.
+> Les neuf identifiants ci-dessous sont **réservés d'un coup le 30 août 2026** (règle : inscrire le
+> #NNN avant de l'employer dans un commit). Une session = un identifiant = une entrée cochée quand
+> elle est livrée, testée et mergée.
+> Trois décisions de cadrage tranchées par Grégoire le **30 août 2026**, toutes option A :
+> **D1** deux remises datées différemment = deux documents · **D2** sans groupe-cours actif,
+> l'import est refusé avec un message · **D3** « Renommer pour distinguer » est retiré.
+
+- [ ] **#607 — S1 · Retirer un jeton de reprise laisse le fichier de reprise actif** (constat S5).
+  `js/evaluation-jetons.js`. Après `retirerJetonReprise`, la résolution « plus récent » donne le
+  fichier de la reprise à l'originale. Correctif : `_detacherFichiersDeEvaluation` appelé avant
+  `_persisterEvaluationsJetons` dans les trois branches.
+- [ ] **#608 — S2 · « Appliquer comme jeton » offert alors que le maximum par production est atteint** (constat S6).
+  `js/travaux-ui.js`. Le fichier est importé, aucun jeton n'est consommé, l'écran annonce le contraire.
+  Correctif : masquer le bouton au-delà du maximum, séparer `rattaches` de `compteur`.
+- [ ] **#609 — S3 · L'assemblage automatique fusionne des fichiers qui ne sont pas des pages d'un même document** (constats B1, M5).
+  `js/travaux-import.js`, `js/travaux-ui.js`. Deux images homonymes sans DA deviennent un document ;
+  deux remises datées différemment aussi. **D1 = A** : la clé porte l'horodatage de remise, et
+  `_solo_` ne lit plus le nom de fichier. Persister la file après le splice.
+- [ ] **#610 — S4 · File non persistée en cours de lot, rattachement des blobs par nom seul** (constats S1, S2).
+  `js/travaux-import.js`, `js/travaux-ui.js`. Un fichier sans DA ni production n'est jamais vu comme
+  doublon ; un re-dépôt rattache un blob à la mauvaise entrée. Correctif : persistance à chaque
+  fichier, détection `(nomFichierLea, tailleFichier)`, `tailleOriginale` au rattachement.
+- [ ] **#611 — S5 · Appariement par nom : sous-chaîne, sans normalisation, premier arrivé gagne** (constat S3).
+  `js/travaux-import.js`. `Martin` s'apparie à `Martineau`, un accent absent fait échouer.
+  Correctif : tokens exacts normalisés, ambiguïté ⇒ `null`, copie locale de `chercherParNomEtendu` retirée.
+- [ ] **#612 — S6 · Un DA inconnu du groupe est stocké en silence ; un import sans groupe actif rend les fichiers invisibles** (constats S4, S7).
+  `js/travaux-import.js`, `js/travaux-ui.js`, `js/liste-evaluations.js`. **D2 = A** : garde
+  `groupeCoursActif` dans `confirmerImportPipeline`, refus dit. Plus bandeau « DA sans élève dans ce
+  groupe » et lignes de rattrapage dans la liste.
+- [ ] **#613 — S7 · Restauration d'un ZIP : échecs de blobs avalés, « Import réussi » quand même** (constat S8).
+  `js/import-export.js`. Correctif : compter les manquants, poser `blobStatut: 'manquant'`, une seule
+  notification, « Import partiel » quand il en manque.
+- [ ] **#614 — S8 · Fusion de codex sans `validerMagicBytes` ; la purge #336 recense la corbeille et la modélisation** (constats S9, S10).
+  `js/codex.js`. Correctif : valider les octets à la fusion, ajouter `corbeilleFichiers` et
+  `fichiersModelisation` au recensement des références.
+- [ ] **#615 — S9 · Lot des mineurs de l'audit** (constats M1, M2, M3, M4, M10).
+  **D3 = A** : « Renommer pour distinguer » retiré avec `renommerDoublon` et `renommerFichierDansFile`.
+  Plus : `_detecterPattern` lit `estReprise` · sort du chemin legacy `lancerImport` s'il est
+  inatteignable · `livrableAdditionnel` persisté ou retiré · `DATA-OWNERSHIP.md` corrigé à 25 Ki.
+
+
 ### Arbitrages du 28 août 2026 (soir) — les deux qui n'avaient pas d'item
 
 > Les vingt et un arbitrages du 28 août sont consignés **dans leurs items respectifs**
@@ -3593,7 +3638,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **Règle** : après un lot qui change une primitive de `db`, chercher les stubs `db` de TOUS les
   bancs qui CHARGENT le module, et lire le CODE DE SORTIE, pas seulement le compte.
 
-- [ ] **#606 — La vue Corbeille empruntait l'en-tête du tableau des évaluations : le nom de fichier
+- [x] **#606 — LIVRÉ le 30 août 2026 (commit `c24036e7`) — La vue Corbeille empruntait l'en-tête du tableau des évaluations : le nom de fichier
   s'affichait sous « Prénom », la date de suppression sous « Statut », les jours restants sous
   « Niveau ».**
   Relevé par Grégoire le 30 août 2026, capture à l'appui : « le contenu des colonnes ne correspond

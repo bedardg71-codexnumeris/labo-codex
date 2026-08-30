@@ -16,16 +16,16 @@
 
 | Session | Constats | Statut | Date | Commit | Note |
 |---|---|---|---|---|---|
-| S0 — Préparation | — | À FAIRE | | | |
-| S1 — Jetons ↔ fichiers | S5 | À FAIRE | | | |
-| S2 — Jeton et maximum par production | S6 | À FAIRE | | | |
-| S3 — Assemblage automatique | B1, M5 | À FAIRE | | | dépend de S0 (décision D1) |
-| S4 — Reprise après interruption, rattachement | S1, S2 | À FAIRE | | | après S3, jamais en parallèle |
-| S5 — Appariement par nom | S3 | À FAIRE | | | |
-| S6 — DA inconnu, groupe absent | S4, S7 | À FAIRE | | | dépend de S0 (décision D2) |
-| S7 — Restauration ZIP | S8 | À FAIRE | | | |
-| S8 — Codex | S9, S10 | À FAIRE | | | |
-| S9 — Mineurs | M1–M4, M10 | À FAIRE | | | dépend de S0 (décision D3) |
+| S0 — Préparation | — | LIVRÉ | 2026-08-30 | | D1=A, D2=A, D3=A · #607–#615 réservés · #606 coché (livré `c24036e7`) |
+| S1 — Jetons ↔ fichiers | S5 | À FAIRE | | | #607 |
+| S2 — Jeton et maximum par production | S6 | À FAIRE | | | #608 |
+| S3 — Assemblage automatique | B1, M5 | À FAIRE | | | #609 · D1 = A (deux documents) |
+| S4 — Reprise après interruption, rattachement | S1, S2 | À FAIRE | | | #610 · après S3, jamais en parallèle |
+| S5 — Appariement par nom | S3 | À FAIRE | | | #611 |
+| S6 — DA inconnu, groupe absent | S4, S7 | À FAIRE | | | #612 · D2 = A (refus dit) · T6.1 levée : #606 est mergé |
+| S7 — Restauration ZIP | S8 | À FAIRE | | | #613 |
+| S8 — Codex | S9, S10 | À FAIRE | | | #614 |
+| S9 — Mineurs | M1–M4, M10 | À FAIRE | | | #615 · D3 = A (retirer) |
 | S10 — Tests sur appareil | angles morts | À FAIRE | | | avec Grégoire, iPad + Mac |
 
 Sessions indépendantes, permutables si une session bloque : S1, S2, S5, S7, S8.
@@ -64,10 +64,10 @@ g. Test manuel consigné (Mac ET iPad si modale ou stockage).
 
 Trois décisions fermées, une recommandation chacune. Les consigner ici, avec la date, avant de commencer S3, S6 ou S9.
 
-- [ ] **T0.1 — Décision D1 (pour S3)** : deux remises Léa d'un même élève à des dates différentes sont-elles deux documents ? Option A (recommandée) : oui, dates distinctes = documents distincts, doublon signalé à l'import. Option B : conserver la fusion actuelle. **Décision : ______ (date : ______)**
-- [ ] **T0.2 — Décision D2 (pour S6)** : sans groupe-cours actif, refuser l'import ? Option A (recommandée) : refus avec message. Option B : autoriser et marquer les fichiers pour réassociation. **Décision : ______ (date : ______)**
-- [ ] **T0.3 — Décision D3 (pour S9)** : retirer « Renommer pour distinguer » de la modale de confirmation ? Option A (recommandée) : retirer. Option B : garder, reformulé. **Décision : ______ (date : ______)**
-- [ ] **T0.4** — Réserver dans `BACKLOG.md`, en une seule écriture, un `#NNN` par session S1 à S9 ; les reporter dans le tableau d'état (colonne Note).
+- [x] **T0.1 — Décision D1 (pour S3)** : deux remises Léa d'un même élève à des dates différentes sont-elles deux documents ? Option A (recommandée) : oui, dates distinctes = documents distincts, doublon signalé à l'import. Option B : conserver la fusion actuelle. **Décision : OPTION A (date : 2026-08-30)** — la clé d'assemblage porte l'horodatage de remise ; deux remises datées différemment ne sont jamais soudées.
+- [x] **T0.2 — Décision D2 (pour S6)** : sans groupe-cours actif, refuser l'import ? Option A (recommandée) : refus avec message. Option B : autoriser et marquer les fichiers pour réassociation. **Décision : OPTION A (date : 2026-08-30)** — garde dans `confirmerImportPipeline`, refus DIT. Le repli de `obtenirFichiersGroupeActif` n'est pas touché (60 appelants non audités).
+- [x] **T0.3 — Décision D3 (pour S9)** : retirer « Renommer pour distinguer » de la modale de confirmation ? Option A (recommandée) : retirer. Option B : garder, reformulé. **Décision : OPTION A (date : 2026-08-30)** — le bouton part avec `renommerDoublon` et `renommerFichierDansFile`.
+- [x] **T0.4** — Réserver dans `BACKLOG.md`, en une seule écriture, un `#NNN` par session S1 à S9 ; les reporter dans le tableau d'état (colonne Note). **Fait le 2026-08-30 : #607 à #615**, section « Chaîne d'importation des travaux » en tête de `## A faire`. Dernier ID utilisé auparavant : #606.
 - [ ] **T0.5** — Committer l'audit et ce plan (`docs(audit): chaîne d'importation des travaux`), pousser.
 
 ---
