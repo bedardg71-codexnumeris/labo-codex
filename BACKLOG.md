@@ -2750,7 +2750,28 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⏳ **À TRANCHER** : passer le statut (et vérifier que les deux autres appelants le font aussi), ou
   retirer la branche. Vérifier les consommateurs AVANT de brancher.
 
-- [ ] **#555 — Le seuil de défi : un défaut à 0,70, des replis qui divergent, et la marque de maîtrise absente.**
+- [x] **#555 — Le seuil de défi : un défaut à 0,70, des replis qui divergent, et la marque de maîtrise absente.**
+  ✅ **CLOS le 30 août 2026 — les deux arbitrages du 29 août sont EXÉCUTÉS, et le premier l'était déjà.**
+  · **#555·1 (option C) — AUCUN CODE À ÉCRIRE, mesuré sur pièces.** La prémisse de l'artefact du 29 août
+    (« la ligne Progrès n'annonce que priorité → acquis ») venait de la puce « Règle d'origine préservée »
+    plus bas, PÉRIMÉE depuis l'après-midi du 28 : la décision « option 3 » prise ce jour-là en séance a mis
+    les trois montées de zone dans les DEUX documents (`construireAmeliorations` côté PDF,
+    `_rendreRecurrentsBilan` côté écran), chacune dite selon sa zone d'arrivée, avec les mots de Grégoire
+    (« Tu as progressé en X » / « tu as fait de beaux progrès : maintenant il faut les consolider »).
+    L'option C du 29 = le comportement déjà en place au commit `44a5aeeb` (28 août, 17 h 22, vérifié au
+    diff). Verrouillé AVANT l'arbitrage par `sentinelle-575-b10-ordre-synthese-pdf` (signalé→acquis,
+    priorité→signalé avec SA phrase, les deux natures disjointes, `null` muet) et
+    `sentinelle-555-lot2-bilan-ecran` (mêmes cas côté écran). ⮕ Si Grégoire veut d'AUTRES mots pour les
+    deux phrases d'arrivée, c'est une ligne par document + leurs sentinelles — rien d'autre ne bouge.
+  · **#555·2 (option A) — LIVRÉ le 30 août 2026.** Le curseur « Seuil de défi spécifique » (Labo → Outils
+    d'observation) dit maintenant les deux faces : il règle le dépistage SEULEMENT ; la « Consolidation des
+    apprentissages » ne lit pas ce curseur, son seuil de maîtrise vient des repères posés sur l'échelle
+    (Conception → Échelles). Aide sous le curseur et infobulle `depist-seuil-defi` alignées (libellé
+    proposé — à retoucher avec les mots de Grégoire s'il en veut d'autres).
+    Sentinelle `sentinelle-555-2-curseur-seuil-defi` (5 cas, 4 mutations, 6 rouges), dont le cas E qui
+    rougit si un « second réglage de maîtrise » (option B écartée) renaît dans cet écran.
+  · **Non-décision NOMMÉE, pas une dette** : les descentes de zone ne sont pas annoncées dans la ligne
+    « Progrès » — aucune option de l'artefact ne l'ajoutait, rien n'est dû.
   ✅ **LOT 2 (d) ET (e) LIVRÉS le 28 août 2026 (soir)** — avec #577, même commit.
   · **(d) le nommage — option A exécutée.** `seuilMaitrise` ne désigne plus que le CODE de niveau porté
     par l'échelle. La matrice de consolidation nomme son score 0-1 `scoreMaitrise` (+ `Deduit`,
@@ -2813,6 +2834,11 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     « Maîtrisé à partir de » de l'échelle EST le réglage utilisateur ; aucun second réglage. Reste : une
     explication à l'écran du curseur « Seuil de défi » (ce qu'il règle : le dépistage ; ce qu'il ne règle
     pas : la matrice), libellé à écrire avec Grégoire. Artefact : voir #578.
+    ⮕ **EXÉCUTION CONSTATÉE le 30 août 2026** — et la puce « Règle d'origine préservée » ci-dessus était
+    DÉJÀ PÉRIMÉE quand l'artefact l'a reprise : écrite le matin du 28 à la livraison du branchement, jamais
+    mise à jour après la décision « option 3 » de l'après-midi qui a mis les trois montées dans le code.
+    L'option C du 29 CONFIRME l'existant, elle ne le change pas. L'explication du curseur est LIVRÉE le
+    30 août. Détail et sentinelles : bloc de clôture en tête d'item.
   · Le test qui CONSTATAIT « 6 sites / 14 comparaisons » est devenu un **ratchet à zéro**. Il n'a pas
     été « réparé » en changeant le chiffre.
   · Deux retraits : `rangOuDernier` (repli `Infinity` devenu inatteignable) et le repli de
