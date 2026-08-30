@@ -1,9 +1,15 @@
 Ouvre le dépôt Monitorage_v6. Rituel d'abord : délègue l'audit de début de session
 au subagent `audit-debut-session`, puis lis la section « POUR LA SESSION QUI PREND
 LE RELAIS — 30 AOÛT 2026, 12 h 30 (SESSION HEIC, TROISIÈME) » en tête de RELAIS.md.
-On est à la 1.106.4 (build 0830-0948), et **rien n'est poussé depuis** : trois
-commits de code attendent une version — `20e4feaf` (#597), `5ccef560` (#599),
-`b96a7cd7` (#522 lots 2-3).
+
+**On est à la 1.106.5 (build 0830-1249), POUSSÉE — `de5e42d0`. Tout est sur `main`,
+rien n'attend, aucun travail en avance.** C'est un départ propre : trois sessions ont
+travaillé dans cet arbre le 30 août et l'ont refermé ensemble. Ne cherche pas de dette
+cachée, il n'y en a pas.
+
+⚠ Première chose à me demander : **est-ce que j'ai rechargé ma page ?** 26 jetons ont
+changé. Si je dis « ça ne marche pas » sur quelque chose qui vient d'être livré,
+soupçonne le cache AVANT le code — ça nous a coûté une matinée le 30 août.
 
 PRIORITÉ DATÉE — À TRAITER AVANT TOUT AUTRE CHANTIER
 #427 + #508, échéance le 1er septembre, décision déjà prise (option A, je tiens la
@@ -22,12 +28,12 @@ ENSUITE — propose-moi un choix fermé entre :
     l'application le ferait marcher tel quel et lèverait aussi le plafond de
     localStorage. Mais ça change mon geste de lancement et ça emporte l'usage
     tablette et la clé Codex. Pose-moi la question fermée, ne décide pas seul.
-(b) #522 lot 5 — ENGAGÉ, PAS un chantier vierge : les étudiants sont FAITS
-    (7 sites convertis, 1 faux positif nommé). Restent 22 sites en course — les cours,
-    la copie de cartouche entre trimestres, les métadonnées CC, les instantanés, et
-    neuf drapeaux de migration au démarrage dont la course est THÉORIQUE : les mesurer
-    un par un, ne pas les convertir en bloc. La moitié du travail de mesure est déjà
-    faite et vit dans `scripts/mesurer-522.py`. Restent aussi #600 et #601.
+(b) #522 lot 5 — le 5a est LIVRÉ et poussé (`cd928f37`) : les étudiants sont faits,
+    7 sites convertis, 1 faux positif nommé. Restent 22 sites en course — les cours, la
+    copie de cartouche entre trimestres, les métadonnées CC, les instantanés, et neuf
+    drapeaux de migration au démarrage dont la course est THÉORIQUE : les mesurer un par
+    un, ne pas les convertir en bloc. Le travail de mesure est fait et vit dans
+    `scripts/mesurer-522.py`. Restent aussi #600, #601 et #602.
 (c) #598 volet B — le réglage global de la balance des blancs dans l'écran
     Optimisation. Le volet A est livré (l'aperçu reflète le traitement). Les pièges
     sont déjà écrits dans l'entrée : SSOT persistant et non état de DOM, `cle()` dès
@@ -69,6 +75,12 @@ PIÈGES DÉJÀ PAYÉS — ne les réapprends pas
 · Le hook anti-cache compte un COMMENTAIRE comme une modification, et son conseil
   (« incrémenter la lettre ») ne s'applique pas à un vieux jeton sans lettre. Le
   suffixe porte le jour du BUILD : 0830-0948 → 20260830a.
+· ⚠ ET LES TROIS FILETS ANTI-CACHE ONT UN TROU (#602) : un fichier tiré par
+  `importScripts` ou par `new Worker(...)` n'est dans le périmètre d'AUCUN d'eux — ils
+  supposent tous qu'un fichier servi porte une balise `<script src>` dans index.html.
+  Son jeton vit en dur dans le code appelant, personne ne le bumpe, et LES TROIS RENDENT
+  UN VERT. Si tu touches à un worker, bumpe son jeton à la main et vérifie par
+  `grep -nE "(new Worker|importScripts)\(['\"][^'\"]*\?v=" js/`.
 · Un total de tests lu AVANT le dernier changement ne vaut rien. Lire aussi le CODE
   DE SORTIE, pas le compte : vitest sort en 1 sur une erreur non gérée même avec
   tous les tests verts.
