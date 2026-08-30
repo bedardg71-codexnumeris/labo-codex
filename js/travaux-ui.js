@@ -2172,7 +2172,20 @@
         document.body.appendChild(input);
         input.addEventListener('change', function() {
             if (input.files && input.files.length > 0) {
-                const rattaches = travauxImport.reattacherBlobs(input.files);
+                // #610 — le retour est un objet, et son `rattaches` était
+                // jusqu'ici calculé puis jeté. Un fichier écarté en silence est
+                // indistinguable d'un fichier rattaché : c'est exactement ce qui
+                // permettait à un blob de rejoindre la mauvaise ligne sans trace.
+                const bilan = travauxImport.reattacherBlobs(input.files);
+                if (bilan.ignores.length > 0) {
+                    notifications.avertissement(
+                        bilan.ignores.length + ' fichier(s) non reconnu(s)',
+                        bilan.ignores.join(', ') + ' \u2014 nom ou taille diff\u00e9rents de ce qui \u00e9tait dans la file. '
+                        + 'V\u00e9rifie qu\u2019il s\u2019agit bien des fichiers d\u00e9pos\u00e9s au d\u00e9part.'
+                    );
+                } else if (bilan.rattaches > 0) {
+                    notifications.succes(bilan.rattaches + ' fichier(s) rattach\u00e9(s)');
+                }
                 rafraichirPipelineUI();
             }
             document.body.removeChild(input);
@@ -3970,6 +3983,21 @@
             var nomProd = prod ? (prod.titre || prod.nom) : d.productionId;
             var compteur = (doublons.length > 1) ? ' (' + (i + 1) + '/' + doublons.length + ')' : '';
 
+            // #610 — le critère de détection est DIT : « même élève, même
+            // production » et « même nom, même taille » n'appellent pas la même
+            // décision, et l'enseignant ne peut pas les distinguer autrement.
+            var explicationCritere = (d.critere === 'nom-taille')
+                // ⚠ `--texte-secondaire`, pas `--couleur-texte-secondaire` : la
+                // seconde est une variable FANTÔME (référencée dans ce fichier,
+                // jamais définie dans styles.css). Le cliquet #595 a refusé mon
+                // premier jet, qui en aurait ajouté un usage — et mon texte
+                // n'aurait eu aucune couleur, il aurait hérité de son parent.
+                ? '<p style="font-size:13px;color:var(--texte-secondaire)">'
+                    + 'Ce fichier porte le m\u00eame nom et la m\u00eame taille qu\u2019un fichier d\u00e9j\u00e0 import\u00e9. '
+                    + 'C\u2019est probablement le m\u00eame document, re-d\u00e9pos\u00e9 apr\u00e8s une interruption.'
+                    + '</p>'
+                : '';
+
             // Vérifier si un jeton de reprise est disponible pour cet élève
             var boutonJeton = '';
             if (jetonsActifs && d.fichierExistant.etudiantDA) {
@@ -3989,6 +4017,7 @@
                     '<div class="modal-contenu" style="max-width:520px;padding:24px">' +
                         '<h3 style="margin-top:0">Doublon d\u00e9tect\u00e9' + echapperHtml(compteur) + '</h3>' +
                         '<p>Un fichier existe d\u00e9j\u00e0 pour <strong>' + echapperHtml(nomEtudiant) + '</strong> \u2014 <strong>' + echapperHtml(nomProd) + '</strong>.</p>' +
+                        explicationCritere +
                         '<p style="font-size:13px;color:var(--couleur-texte-secondaire)">' +
                             'Existant\u00a0: ' + echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(d.fichierExistant.nomFichier, d.fichierExistant.etudiantDA) : d.fichierExistant.nomFichier) + '<br>' +
                             'Nouveau\u00a0: ' + echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(d.fichierPrepare.nomFichier, d.fichierPrepare.etudiantDA) : d.fichierPrepare.nomFichier) +

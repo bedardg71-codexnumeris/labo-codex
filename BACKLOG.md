@@ -167,10 +167,39 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Vitest 408 fichiers / 4265 tests + Playwright 210/210, code de sortie 0.
   ⏳ **Test manuel dû à Grégoire** : un lot de photos iPad contenant deux homonymes ; les deux élèves
   doivent recevoir leur copie.
-- [ ] **#610 — S4 · File non persistée en cours de lot, rattachement des blobs par nom seul** (constats S1, S2).
-  `js/travaux-import.js`, `js/travaux-ui.js`. Un fichier sans DA ni production n'est jamais vu comme
-  doublon ; un re-dépôt rattache un blob à la mauvaise entrée. Correctif : persistance à chaque
-  fichier, détection `(nomFichierLea, tailleFichier)`, `tailleOriginale` au rattachement.
+- [x] **#610 — LIVRÉ le 30 août 2026 (release groupée en attente) — S4 · File non persistée en cours de lot, rattachement des blobs par nom seul** (constats S1, S2).
+  `js/travaux-import.js`, `js/travaux-ui.js`. **Deux défauts, deux pertes différentes.**
+  · **S1 — le doublon que personne ne voit.** La détection exige `etudiantDA && productionId`. Or la
+  confirmation autorise explicitement l'import « sans production associée » et le bandeau « sans DA »
+  n'est pas bloquant. 40 photos sans DA, l'iPad en veille au 25ᵉ fichier : `fichier.statut = 'importe'`
+  n'était persisté qu'APRÈS le dernier, donc la file en affichait 40 « à re-déposer » alors que 25
+  étaient en base. L'enseignant re-dépose, confirme : **25 fichiers en double, aucun avertissement**,
+  et l'écran annonce « 40 fichier(s) importé(s) ».
+  · **S2 — le blob qui change d'élève.** `reattacherBlobs` appariait par NOM SEUL. Deux entrées
+  `devoir.pdf` associées à la main à A et à B, rechargement, re-dépôt des deux en une sélection : le
+  premier `File` rendu par le navigateur prend la première entrée libre, quel que soit son contenu.
+  **Le travail de B se retrouvait sous le DA de A, sans trace.**
+  ➮ **Correctif** : `persisterFileDAttente()` à chaque itération de `importerTous` (celui de fin de
+  lot, #558 B1, RESTE — les deux couvrent des pannes différentes) · détection par
+  `(nomFichierLea, tailleFichier)` pour les fichiers non identifiés, avec `critere: 'nom-taille'` que
+  la modale EXPLIQUE · `tailleOriginale` figée au dépôt, persistée, restaurée, et comparée au
+  rattachement · `reattacherBlobs` rend `{ rattaches, ignores }` (retour numérique nu retiré) et
+  `redeposerFichiers` DIT les fichiers non reconnus, au lieu de jeter le compte qu'il calculait déjà.
+  ⚠ **Le piège du correctif** : jamais `tailleFichier`, qui est la taille APRÈS préparation — un HEIC
+  converti en JPEG n'a plus la taille du fichier déposé, et comparer `tailleFichier` aurait fait
+  échouer le re-dépôt de toutes les photos d'iPhone. Un test le verrouille explicitement.
+  ⚠ **Attrapé par le cliquet #595** : mon premier jet stylait le nouveau paragraphe avec
+  `--couleur-texte-secondaire`, une variable FANTÔME (référencée dans `travaux-ui.js`, jamais définie
+  dans `styles.css`). La vraie est `--texte-secondaire`. Sans le cliquet, le texte serait sorti sans
+  couleur définie, en héritant de son parent.
+  ➮ Sentinelles : `tests/unit/sentinelle-610-reprise-import-et-rattachement.test.js` (9 cas, dont
+  3 témoins qui doivent rester verts) et `sentinelle-558-file-import-survit-reload.test.js` ÉTENDUE
+  (17 → 28 cas). **8 break-tests, 8 ROUGE.** Vitest 410 fichiers / 4307 tests, code de sortie 0.
+  ⚠ **Limite du banc, consignée dans le test** : `compresserImageSiNecessaire` construit un
+  `new Image()`, que Node n'a pas — aucune IMAGE ne peut être importée au banc. Les cas passent par des
+  PDF, qui éprouvent le même chemin (la comparaison porte sur le nom et la taille, pas le type).
+  ⏳ **Test manuel dû à Grégoire** : recharger en cours d'import, puis re-déposer deux homonymes de
+  tailles différentes — chaque élève doit recevoir SON travail.
 - [ ] **#611 — S5 · Appariement par nom : sous-chaîne, sans normalisation, premier arrivé gagne** (constat S3).
   `js/travaux-import.js`. `Martin` s'apparie à `Martineau`, un accent absent fait échouer.
   Correctif : tokens exacts normalisés, ambiguïté ⇒ `null`, copie locale de `chercherParNomEtendu` retirée.

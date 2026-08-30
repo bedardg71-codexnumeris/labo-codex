@@ -156,3 +156,76 @@ describe('#558 B3 · la file persistée porte tout ce qui est consommé', () => 
         }
     });
 });
+
+/* -------------------------------------------------------------------------
+   #610 (S4) — la file persistée survit à une interruption EN COURS de lot
+   ---------------------------------------------------------------------- */
+
+// #558 B1 avait fermé la persistance du retrait — mais APRÈS le lot seulement.
+// L'audit du 30 août (constat S1) mesure le trou restant : dans `importerTous`,
+// `fichier.statut = 'importe'` n'était persisté qu'une fois la boucle terminée.
+// 40 photos, l'iPad en veille au 25e fichier : au retour, la file persistée est
+// encore celle d'avant l'import et affiche 40 fichiers « à re-déposer », alors
+// que 25 sont déjà en base. L'enseignant re-dépose, confirme, et double 25
+// fichiers sans qu'un mot le prévienne.
+//
+// Et #610 (constat S2) ajoute `tailleOriginale` au round-trip : la taille du
+// `File` DÉPOSÉ, distincte de `tailleFichier` qui bouge à la compression et à
+// la conversion HEIC. Un champ ajouté d'un seul côté ne servirait à rien —
+// c'est la symétrie que B3 verrouille déjà, étendue au champ neuf.
+
+describe('#610 · l\'interruption en cours de lot ne fabrique plus de doublons', () => {
+    const corpsImporterTous = corpsDe('importerTous', srcImport);
+
+    it('importerTous est lisible', () => {
+        expect(corpsImporterTous).not.toBe(null);
+    });
+
+    it('la file est persistée DANS la boucle, pas seulement après', () => {
+        // La boucle se referme sur `onProgression`, dernier geste de l'itération.
+        // Le `persisterFileDAttente()` du lot entier vient APRÈS le filtre des
+        // importés : c'est celui de #558 B1, et il ne suffit pas.
+        const iBoucle = corpsImporterTous.indexOf('onProgression(i + 1, total)');
+        const iFiltre = corpsImporterTous.indexOf("filter(f => f.statut !== 'importe')");
+        expect(iBoucle, 'boucle de progression introuvable').toBeGreaterThan(-1);
+        expect(iFiltre, 'filtre de fin de lot introuvable').toBeGreaterThan(-1);
+
+        const dansLaBoucle = corpsImporterTous.slice(iBoucle, iFiltre);
+        expect(dansLaBoucle).toContain('persisterFileDAttente()');
+    });
+
+    it('le persist de fin de lot (#558 B1) est TOUJOURS là', () => {
+        // Les deux sont nécessaires : l'un sauve l'interruption, l'autre le
+        // retrait final. Ce test empêche de remplacer l'un par l'autre.
+        const iFiltre = corpsImporterTous.indexOf("filter(f => f.statut !== 'importe')");
+        expect(corpsImporterTous.slice(iFiltre)).toContain('persisterFileDAttente()');
+    });
+});
+
+describe('#610 · tailleOriginale traverse le round-trip', () => {
+    const corpsPersister = corpsDe('persisterFileDAttente', srcImport);
+    const corpsRestaurer = corpsDe('restaurerFileDAttente', srcImport);
+    const corpsPreparer = corpsDe('preparerFichier', srcImport);
+
+    it('preparerFichier la POSE', () => {
+        expect(corpsPreparer).toContain('tailleOriginale');
+    });
+
+    it('persisterFileDAttente l\'ÉCRIT', () => {
+        expect(corpsPersister).toContain('tailleOriginale');
+    });
+
+    it('restaurerFileDAttente la RELIT (symétrie)', () => {
+        expect(corpsRestaurer).toContain('tailleOriginale');
+    });
+
+    it('le rattachement compare tailleOriginale, JAMAIS tailleFichier', () => {
+        // Le piège du correctif : `tailleFichier` est la taille APRÈS
+        // préparation. Un HEIC converti en JPEG n'a plus la taille du fichier
+        // déposé — comparer `tailleFichier` échouerait sur toutes les photos
+        // d'iPhone, et le re-dépôt n'y rattacherait plus rien.
+        const corpsReattacher = corpsDe('reattacherBlobs', srcImport);
+        expect(corpsReattacher).toContain('tailleOriginale');
+        expect(corpsReattacher).not.toContain('f.tailleFichier');
+    });
+});
