@@ -6,6 +6,92 @@
      ⮕ ÉTAT AU 3 JUILLET 2026 SOIR (VAGUE 3 CLOSE + **MERGÉE MAIN ET DÉPLOYÉE — décision Grégoire du 3 juillet, release 1.27.2**, branche `claude/relais-vague-3-etat-n3owyf` fast-forwardée dans `main` : les 3 vagues 1.27.0/1.27.1/1.27.2 sont EN PRODUCTION ; le point « MERGER en août » du signet est donc RÉGLÉ, les validations TERRAIN restent dues) : bilan factuel des vagues 1-2 = TABLEAU dans le bloc « 3 juillet » ci-dessous (12/12 tâches livrées ou closes par écart de prémisse ; AUCUN reliquat 2a) PUIS file 2b ÉPUISÉE : Tâche A #328 = déjà absorbé (vérifié au code, trace consignée) ; Tâche C #118+#283-T1 LIVRÉS (fix CSS overflow) ; Tâche B #363 LIVRÉ (audit currency, 13 écarts corrigés) ; Tâche D #306 LIVRÉ (Lots 1-2-3 ; décision UX « apparition du formulaire » restée ouverte, consignée). Vitest 1257/1257. ⚠ GRÉGOIRE EN CONGÉ TOUT JUILLET, reprise AOÛT. À la reprise (le merge est FAIT — 3 juillet) : validations terrain (#310/#311/#351/#240/#347 + portes vague 1 #313/#344/#361 + vague 2 #355/#305/#121 + vague 3, 2 modes) ; triage des 5 worktrees AVEC `plans de travail/INVENTAIRE-worktrees-2026-07.md` ; #364 T3/T4/T5 ; trancher #365 (audit blanc). ✅ **FAIT LE 27 AOÛT 2026 AU SOIR** : `rm .git/index.lock .git/HEAD.lock .git/objects/maintenance.lock` — mais ils étaient REVENUS (datés du 27 août 15 h 46, `git maintenance` crashé) et bloquaient tout commit. ⮕ **Ce point traînait depuis juillet et le 28 juin en portait déjà un : c'est un défaut RÉCURRENT du dépôt, pas une malchance.** À traiter comme tel plutôt qu'à re-nettoyer chaque fois. ; le commit local `96f1294c` et le BACKLOG #365 du Mac sont OBSOLÈTES (contenu recréé/poussé par les vagues 1-2) ; le fichier relais vague 2 (`RELAIS-2026-07-02-vague-2.md`) n'a jamais été poussé — le committer du Mac si on veut la trace (le relais vague 3 est, lui, versionné ci-dessous).
      ===================================================================== -->
 <!-- =====================================================================
+     SESSION 0d — 30 AOÛT 2026, 19 h 10 À 19 h 50 : REPRISE APRÈS LE
+     REDÉMARRAGE. TROIS COMMITS, DEUX SUITES VERTES, RELAIS ORGANISÉ.
+
+     ▣ CE QUE J'AI TROUVÉ EN ARRIVANT. Aucun travail en cours de mon fait :
+       je reprends un dépôt laissé par TROIS sessions tuées à 19 h 05 par un
+       incident de trousseau macOS. Leur travail était vivant mais NON
+       COMMITÉ, réparti à dessein entre l'index (S7, e6) et l'arbre de
+       travail (S4, c2) — un découpage qui portait de l'information, et
+       qu'un `git add -A` aurait aplati. Note de passation :
+       `ETAT-AVANT-REDEMARRAGE-2026-08-30.md`, écrite depuis Cowork.
+
+     ▣ UN ÉCART ENTRE LE PLAN ET LE DÉPÔT, RELEVÉ AVANT TOUT GESTE. Le
+       tableau d'état donnait S4 « LIVRÉ, commit COMMIT_S4 » — un
+       placeholder jamais remplacé, sur une session qui n'avait rien
+       commité. Une session suivante l'aurait lu comme un commit
+       introuvable, ou aurait refait le geste. Corrigé en fin de course avec
+       les hachages réels (`f419c467`).
+
+     ▣ LIVRÉ — TROIS COMMITS.
+       · `f2d661dd` — S7 / #613, l'index tel quel, `git commit` SANS chemin
+         (tout chemin passé au commit reprend l'ARBRE et aurait emporté S4).
+       · `9dac5f49` — S4 / #610, l'arbre, par chemins explicites, plus la
+         sentinelle #610 qui n'était pas encore suivie.
+       · `f419c467` — les hachages réels dans le tableau d'état.
+       Avant chaque commit, j'ai lu le diff stagé ENTIER des quatre fichiers
+       partagés, pas seulement `--stat` : aucun bloc étranger. C'est la
+       leçon que e8 avait payée le soir même.
+
+     ▣ VÉRIFICATION — LES DEUX SUITES, SUR L'ÉTAT COMMITÉ.
+       **Vitest 410 fichiers / 4307 tests, code de sortie 0.**
+       **Playwright WebKit 210/210, code de sortie 0, 7,1 min.**
+       ⮕ La spec que la note de 19 h 05 donnait pour ROUGE est VERTE :
+       `confirmations-conception-uniformes.spec.js:151` (« résumé d'import ·
+       aucun \n littéral »). Le rouge observé portait sur un arbre
+       intermédiaire, pas sur le code commité. Rien à corriger — et c'est
+       une raison de plus de ne jamais consigner un rouge sans dire sur quel
+       état il a été obtenu.
+
+     ▣ CE QUE JE N'AI PAS FAIT, ET POURQUOI.
+       · Pas de release : décision de Grégoire, une seule release GROUPÉE
+         pour S4 + S7 + S8 et ce qui suivra. `release.mjs:189-214` réunit
+         l'arbre ET tout ce qui a changé depuis la release précédente.
+       · Pas de push : demandé explicitement par Grégoire.
+       · Je n'ai pas supprimé `_sauvegarde-20260830-1905/` ni
+         `ETAT-AVANT-REDEMARRAGE-2026-08-30.md`, bien que leur condition de
+         suppression soit remplie. Une suppression se demande.
+       · Je n'ai touché à AUCUN fichier `js/` : mon rôle était de sauver le
+         travail des autres, pas d'en ajouter.
+
+     ▣ DEUX SESSIONS FRAÎCHES CADRÉES (`kuekatsheu-ff` → S5 / #611,
+       `kuekatsheu-00` → S6 / #612). Un fichier par session, une seule
+       dépendance d'ordre (T6.3 attend le commit de S5). La répartition vit
+       dans le PLAN, pas seulement dans nos messages — un message ne se
+       relit pas après un redémarrage, et cette journée vient de le prouver
+       deux fois.
+       ⚠ **J'ai gelé git ET l'écriture pendant la suite Playwright** : les
+       specs lisent l'arbre en direct. Deux sessions qui démarrent lancent
+       toutes deux leur audit git dans la première minute — sans le gel, la
+       suite aurait rougi au hasard et j'aurais cherché la cause dans le
+       code. `kuekatsheu-00` m'a justement corrigé sur la portée de ce gel :
+       `git status`, `log` et `diff` NE modifient PAS l'arbre. La règle
+       (#523) vise ce qui ÉCRIT pendant que les specs lisent.
+
+     ▣ TROIS DÉFAUTS TROUVÉS DANS LES DIFFS DE L'AUDIT DU 30 AOÛT — deux en
+       S7 (consignés par e6), un en S5 (trouvé par ff pendant le gel :
+       `every()` sur une liste de tokens vide rend `true`). Et l'ordre
+       prescrit par le plan pour T6.6 s'est révélé fautif à la mesure
+       (00). ⮕ **Le fait à retenir de la journée : les diffs de cet audit
+       sont des esquisses, pas des spécifications.** Quatre sur quatre ont
+       demandé une correction à l'application. Les suivants aussi,
+       probablement : ouvrir le code de référence invoqué, ne jamais
+       appliquer un diff de l'audit tel quel.
+
+     ▣ ⏳ CE QUI RESTE, ET QUI N'EST DÛ QU'À GRÉGOIRE.
+       · **Cinq tests manuels** : S1 (jeton retiré → la ligne de l'originale
+         rouvre le fichier ORIGINAL), S2 (`maxParProduction = 1` + un
+         troisième fichier), S3 (lot iPad avec deux homonymes), S4
+         (recharger en cours d'import, re-déposer deux homonymes de tailles
+         différentes), S7 (ZIP à blob corrompu), S8 (codex à fichier piégé).
+       · **Le go pour la release groupée et le push.**
+       · **Une décision** : la divergence fail-open du chemin « ouvrir » de
+         `codex.js`, laissée ouverte par e8 alors que la fusion est passée
+         fail-closed.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION e6 — 30 AOÛT 2026 : S7 DU PLAN « CHAÎNE D'IMPORTATION DES
      TRAVAUX » (#613) — COMMITÉ, NI POUSSÉ NI RELEASÉ.
 

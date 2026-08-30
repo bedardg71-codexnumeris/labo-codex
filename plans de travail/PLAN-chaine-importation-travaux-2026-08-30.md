@@ -26,8 +26,8 @@
 | S2 — Jeton et maximum par production | S6 | LIVRÉ | 2026-08-30 | `5752c20c` (1.106.10) | #608 · sentinelle Vitest 9 cas, 5 break-tests, 5 ROUGE · ⏳ test manuel `maxParProduction = 1` dû à Grégoire |
 | S3 — Assemblage automatique | B1, M5 | LIVRÉ | 2026-08-30 | `17fb5f2a` (1.106.11) | #609 · D1 = A · sentinelle #603-604 étendue (24 cas), 4 break-tests, 4 ROUGE · ⏳ test manuel lot iPad avec deux homonymes |
 | S4 — Reprise après interruption, rattachement | S1, S2 | LIVRÉ | 2026-08-30 | `9dac5f49` | #610 · sentinelle 9 cas + #558 étendue (28), 8 break-tests, 8 ROUGE · release groupée en attente · ⏳ test manuel dû |
-| S5 — Appariement par nom | S3 | À FAIRE | | | #611 |
-| S6 — DA inconnu, groupe absent | S4, S7 | À FAIRE | | | #612 · D2 = A (refus dit) · T6.1 levée : #606 est mergé · **T6.6 activée** (même trou que S5 dans `supprimerEvaluation`) |
+| S5 — Appariement par nom | S3 | **EN COURS (`kuekatsheu-ff`, 2026-08-30 soir)** | | | #611 · ⚠ **défaut mesuré DANS le diff de l'audit** : `contient()` fait un `.every()` sur les tokens de la fiche — une liste vide rend `true`, la fiche s'apparie alors à TOUS les fichiers et rend `null` tout appariement légitime du groupe ; garde ajoutée et verrouillée · fusion des deux implémentations vérifiée contrat à contrat (même prédicat, même ordre de préférence ; seule la COLLECTION diffère, paramétrée) · ⚠ le nouvel ordre (correspondances complètes sur toute la collection avant repli nom seul) change aussi `detecterFichiersAutreGC`, chemin NON couvert par l'audit : à verrouiller par un cas de sentinelle propre |
+| S6 — DA inconnu, groupe absent | S4, S7 | **EN COURS (`kuekatsheu-00`, 2026-08-30 soir)** | | | #612 · D2 = A (refus dit) · T6.1 levée : #606 est mergé · **T6.6 activée** (même trou que S5 dans `supprimerEvaluation`), et faite EN PREMIER car seule tâche entièrement dans ses fichiers · ⚠ **l'ordre du plan est corrigé** : persister D'ABORD, détacher ensuite, et sur `resultat === true` seulement — `sauvegarderDonneesSelonMode` rend `false`, `true` ou `'quota'`, et `'quota'` est TRUTHY (`modes.js:751`) · T6.3 attend le commit de S5 (`travaux-import.js`) · trouvailles inscrites #617 et #618 |
 | S7 — Restauration ZIP | S8 | **EN COURS (session du 2026-08-30)** | 2026-08-30 | `f2d661dd` | #613 · session e6 · sentinelle #383-384-385 étendue (11 cas ajoutés, 18 au total), 10 break-tests, 10 ROUGE · **deux écarts du diff S8 corrigés** (sorties anticipées non converties ; garde `blobStatut !== 'exporte'` omise, confirmés au code par c2) · trouvaille versée en #616 (bornes par distance dans 31 sentinelles) · ⏳ T7.4 test manuel ZIP à blob corrompu dû à Grégoire · ⏳ T7.5 release en attente de son go |
 | S8 — Codex | S9, S10 | LIVRÉ | 2026-08-30 | `785f7887` + `4b81842f` | #614 · session e8 · sentinelle 15 cas, 8 break-tests, 8 ROUGE · T8.1 mesuré (structure `id` confirmée) · arbitrage **fail-closed** sur la fusion · **pas de release propre — décision Grégoire du 30 août : une seule release groupée à la fin des trois chantiers** · ⏳ divergence fail-open du chemin « ouvrir » à trancher |
 | S9 — Mineurs | M1–M4, M10 | À FAIRE | | | #615 · D3 = A (retirer) |
@@ -35,21 +35,33 @@
 
 Sessions indépendantes, permutables si une session bloque : S1, S2, S5, S7, S8.
 
-### Répartition entre sessions Claude (30 août 2026, fin de journée)
+### Répartition entre sessions Claude — À JOUR AU 30 AOÛT 2026, 19 h 45
 
-Trois sessions terminal sont actives sur le dépôt. La répartition ci-dessous les
-tient hors de conflit ; elle vit ICI, et pas seulement dans les messages
-échangés entre sessions, parce qu'un message ne se relit pas après un
-redémarrage.
+⚠ **La répartition précédente est PÉRIMÉE et ses trois sessions sont MORTES.**
+`kuekatsheu-c2` (S4), `kuekatsheu-e6` (S7) et `kuekatsheu-e8` (S8) ont été tuées
+par le redémarrage de 19 h 05 (incident de trousseau macOS, sans rapport avec le
+dépôt). **Leur travail n'est pas perdu** : il vivait dans l'index et dans l'arbre,
+et `kuekatsheu-0d` l'a commité à 19 h 20 en deux commits séparés — c'est
+exactement pourquoi le découpage index / arbre ne devait pas être aplati.
+⮕ Ne cherche pas à joindre c2, e6 ou e8. Si un fichier de trace les nomme au
+présent, il date d'avant 19 h 05.
+
+**Répartition en vigueur :**
 
 | Session | Prend | Fichiers qui lui appartiennent |
 |---|---|---|
-| `kuekatsheu-c2` | **S4** (#610) | `js/travaux-import.js`, `js/travaux-ui.js` |
-| `kuekatsheu-e6` | **S7** (#613) | `js/import-export.js` |
-| `kuekatsheu-e8` | **S8** (#614) | `js/codex.js` |
+| `kuekatsheu-ff` | **S5** (#611) | `js/travaux-import.js` |
+| `kuekatsheu-00` | **S6** (#612) | `js/liste-evaluations.js`, `js/evaluation-jetons.js`, `js/travaux-ui.js` |
+| session de relais | fichiers partagés, release groupée, push | `BACKLOG.md`, `SESSION.md`, `RELAIS.md`, ce plan |
 
-**Gelées tant que S4 n'est pas livrée** : S5 (#611), S6 (#612) et S9 (#615)
-touchent toutes `travaux-import.js`, `travaux-ui.js` ou `liste-evaluations.js`.
+**Le gel de S5, S6 et S9 est LEVÉ** : il tenait à S4, qui est commité (`9dac5f49`).
+
+**Une seule dépendance d'ordre subsiste** : `T6.3` (`detecterFichiersDAInconnu`)
+vit dans `js/travaux-import.js`, qui appartient à S5. `kuekatsheu-00` fait donc
+`T6.6` d'abord — entièrement dans ses fichiers — et garde `T6.3` pour la fin,
+quand `kuekatsheu-ff` a commité. **S9 (#615) reste non assignée** et touche
+`travaux-ui.js` et `travaux-import.js` : ne pas l'ouvrir tant que S5 et S6
+courent.
 
 **Trois règles de non-collision**, apprises le 30 août :
 
@@ -226,8 +238,19 @@ Fichier : `js/import-export.js` (`_restaurerBlobsDepuisZip` et ses deux appelant
 - [x] **T7.1** — Étendre `tests/unit/sentinelle-import-export-383-384-385.test.js` : un blob refusé → `{ restaures, manquants: 1 }` et `blobStatut: 'manquant'` posé. ROUGE d'abord. — FAIT : 11 cas ajoutés au fichier existant, ROUGE obtenu d'abord (9 échecs ciblés).
 - [x] **T7.2** — Appliquer le diff S8 : `notifier: false`, compte des manquants, marquage, retour objet ; retirer le bloc vide et le retour numérique. — FAIT, avec DEUX corrections au diff de l'audit : les deux sorties anticipées rendent elles aussi `{ restaures: 0, manquants: 0 }` (le diff n'en convertissait qu'une sur trois), et la garde `blobAttendu = f.blobStatut !== 'exporte'` de `chargerCodex` est reprise — elle gouverne les TROIS portes de sortie, et le marquage n'écrase jamais un `'exporte'`.
 - [x] **T7.3** — Adapter les deux appelants ; message « Import partiel » quand `manquants > 0`. — FAIT : `executerImportLocalStorageBrut` dit « Import partiel » avec le compte et la conduite à tenir ; `executerImportSelectif` ajoute un suffixe « N non restauré(s), marqué(s) manquant » dans ses deux branches. Sans « ⚠ » (zéro emoji dans l'UI).
-- [ ] **T7.4** — Break-test, `npm test` complet, test manuel : ZIP dont un blob est corrompu.
-- [ ] **T7.5** — Commit, release, merge, tableau, `SESSION.md`.
+- [~] **T7.4** — Break-test, `npm test` complet, test manuel : ZIP dont un blob est corrompu.
+  **Break-test FAIT** (10 mutations, 10 ROUGE obtenus, par `e6`). **`npm test` complet FAIT le
+  2026-08-30 à 19 h 40 par `kuekatsheu-0d`, sur `f419c467`, arbre propre : Vitest 410 fichiers /
+  4307 tests, code de sortie 0 · Playwright WebKit 210/210, code de sortie 0, 7,1 min.**
+  ⮕ Au passage, la spec que la note de 19 h 05 donnait pour ROUGE est VERTE :
+  `confirmations-conception-uniformes.spec.js:151` (« résumé d'import · aucun \n littéral »). Le
+  rouge observé portait sur un arbre intermédiaire, pas sur le code commité — rien à corriger.
+  ⏳ **RESTE le seul test manuel** : importer un ZIP dont un blob est corrompu ; l'application doit
+  dire « Import partiel » avec le compte, et la visionneuse « manquant ». Dû à Grégoire.
+- [~] **T7.5** — Commit, release, merge, tableau, `SESSION.md`. **Commité `f2d661dd`** par
+  `kuekatsheu-0d` le 30 août à 19 h 20 (les sessions du soir sont mortes avant d'avoir commité leur
+  propre travail). Tableau et `SESSION.md` faits. **RELEASE ET PUSH EN ATTENTE du go de Grégoire**,
+  groupés avec S4 et S8.
 
 **Critère de fin** : une seule notification, compte exact, métadonnées marquées, jamais « réussi » sur un import partiel.
 
