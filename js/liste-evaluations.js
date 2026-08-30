@@ -1983,18 +1983,15 @@ function evaluerProduction(da, productionId) {
 }
 
 /**
- * Supprime une évaluation
- */
-/**
- * Restaure l'évaluation originale quand on supprime/retire une reprise :
- * défait le statut « remplacée » (remplaceeParId & co) posé par
- * appliquerJetonReprise. Mutation in-place du tableau fourni.
+ * L'évaluation ORIGINALE qu'une reprise a archivée, ou `null`. Lecture seule :
+ * sert aussi bien à décider la restauration qu'à ANNONCER, dans la question de
+ * confirmation, ce que la suppression va emporter.
  * @param {Array} evaluations - toutes les évaluations (contient la reprise)
  * @param {string} evaluationId - id de la reprise supprimée
- * @returns {boolean} true si une originale a été restaurée.
+ * @returns {object|null} l'originale à restaurer, ou null.
  */
-function restaurerOriginaleSiReprise(evaluations, evaluationId) {
-    if (!Array.isArray(evaluations)) return false;
+function trouverOriginaleRemplaceePar(evaluations, evaluationId) {
+    if (!Array.isArray(evaluations)) return null;
     // Le lien fait foi du côté de l'ORIGINALE (remplaceeParId === id supprimé).
     // Ne PAS exiger le lien réciproque (repriseDeId) : une reprise peut l'avoir
     // perdu (état orphelin du bug #141 — l'ancienne branche « entériner » de
@@ -2006,7 +2003,22 @@ function restaurerOriginaleSiReprise(evaluations, evaluationId) {
     // note-égale du moteur, MAIS ce n'est PAS une originale archivée par une
     // reprise. Sans ce garde, supprimer le survivant « restaurerait » (=
     // ressusciterait) le doublon → re-double-compte silencieux.
-    const originale = evaluations.find(e => e && e.remplaceeParId === evaluationId && !e.reconcilieParDoublon);
+    return evaluations.find(e => e && e.remplaceeParId === evaluationId && !e.reconcilieParDoublon) || null;
+}
+
+/**
+ * Restaure l'évaluation originale quand on supprime/retire une reprise.
+ * Mutation in-place du tableau fourni.
+ * @param {Array} evaluations - toutes les évaluations (contient la reprise)
+ * @param {string} evaluationId - id de la reprise supprimée
+ * @returns {boolean} true si une originale a été restaurée.
+ */
+function restaurerOriginaleSiReprise(evaluations, evaluationId) {
+    // #612 (T6.6) — la RECHERCHE est extraite parce que la confirmation doit
+    // annoncer le sort du fichier AVANT que la mutation ait décidé. Un seul
+    // critère pour les deux lectures : deux copies finiraient par diverger sur
+    // la garde #360.
+    const originale = trouverOriginaleRemplaceePar(evaluations, evaluationId);
     if (!originale) return false;
     delete originale.remplaceeParId;
     delete originale.dateRemplacement;
@@ -2067,7 +2079,23 @@ function supprimerEvaluation(evaluationId) {
     const quoi = (evaluation.etudiantNom && evaluation.productionNom)
         ? `l'évaluation de ${evaluation.etudiantNom} pour ${evaluation.productionNom}`
         : 'cette évaluation';
-    if (!confirm(`Veux-tu vraiment supprimer ${quoi} ?\n\nCette action est irréversible.`)) {
+    // #612 (T6.6) — MÊME TROU QUE #607, AUTRE PORTE. Supprimer une reprise
+    // restaure son originale (plus bas) et laissait le fichier remis pour la
+    // reprise ACTIF : `evaluationId` mort, mais `dateModification` la plus
+    // récente de la paire. La liste résout le fichier de chaque ligne SANS `id`
+    // (`:60`), donc par le repli (DA, production) → « le plus récent ». La ligne
+    // de l'originale restaurée ouvrait donc le travail de la reprise effacée.
+    // Compté ICI, avant la question, pour que la question le DISE — même
+    // exigence que les deux `confirm` du retrait de jeton.
+    const emporteUneReprise = !!trouverOriginaleRemplaceePar(evaluations, evaluationId);
+    const nbFichiersAnnonces = (emporteUneReprise && typeof window._compterFichiersDeEvaluation === 'function')
+        ? window._compterFichiersDeEvaluation(evaluationId)
+        : 0;
+    const mentionFichiers = nbFichiersAnnonces
+        ? `\n\nLe ou les ${nbFichiersAnnonces} fichier(s) remis pour la reprise iront à la corbeille (récupérables 30 jours).`
+        : '';
+
+    if (!confirm(`Veux-tu vraiment supprimer ${quoi} ?${mentionFichiers}\n\nCette action est irréversible.`)) {
         return;
     }
 
@@ -2078,9 +2106,30 @@ function supprimerEvaluation(evaluationId) {
 
     const evaluationsFiltered = evaluations.filter(ev => ev.id !== evaluationId);
 
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsFiltered)) {
+    const resultatEcriture = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsFiltered);
+    if (!resultatEcriture) {
         notifications.erreur('Erreur', 'Impossible de supprimer en mode anonymisation');
         return;
+    }
+
+    // #612 (T6.6) — le fichier de la reprise part avec elle. Le geste vit dans
+    // `evaluation-jetons.js` (#607) et n'est pas réécrit ici : une seconde
+    // définition finirait par diverger de la première (leçon #557).
+    //
+    // ORDRE : le détachement suit IMMÉDIATEMENT l'écriture des évaluations,
+    // sans point d'attente entre les deux — et seulement si l'écriture a
+    // VRAIMENT eu lieu. `sauvegarderDonneesSelonMode` rend trois valeurs
+    // (`modes.js:751`) : `true`, `false`, et la chaîne `'quota'`, truthy alors
+    // que RIEN n'a été enregistré. Un refus rendu n'est pas une exception, il se
+    // LIT : d'où le `=== true` et non la simple véracité. Détacher plus tôt, ou
+    // sur un `'quota'`, mettrait le fichier à la corbeille pour une suppression
+    // qui n'a pas eu lieu — un état incohérent définitif.
+    // ⚠ Que la SUITE de cette fonction traite `'quota'` comme un succès est un
+    //   défaut PRÉEXISTANT, inscrit en #618. Il n'est pas creusé ici.
+    let nbFichiersCorbeille = 0;
+    if (originaleRestauree && resultatEcriture === true
+        && typeof window._detacherFichiersDeEvaluation === 'function') {
+        nbFichiersCorbeille = window._detacherFichiersDeEvaluation(evaluationId, 'corbeille');
     }
 
 
@@ -2093,7 +2142,10 @@ function supprimerEvaluation(evaluationId) {
     initialiserListeEvaluations();
 
     // Notification de succès
-    notifications.succes(originaleRestauree ? 'Reprise supprimée, originale restaurée' : 'Évaluation supprimée');
+    notifications.succes(originaleRestauree
+        ? 'Reprise supprimée, originale restaurée'
+            + (nbFichiersCorbeille ? ' — ' + nbFichiersCorbeille + ' fichier(s) de reprise mis à la corbeille' : '')
+        : 'Évaluation supprimée');
 }
 
 /**

@@ -930,6 +930,14 @@ window.obtenirStatutJetonsEtudiant = obtenirStatutJetonsEtudiant;
 window.attribuerJetonPersonnalise = attribuerJetonPersonnalise;
 window.retirerJetonPersonnalise = retirerJetonPersonnalise;
 
+// #612 (T6.6) — le trou de #607 avait une seconde porte : `supprimerEvaluation`
+// (`js/liste-evaluations.js`), qui restaure l'originale d'une reprise depuis la
+// LISTE sans toucher au fichier. Le geste est le même, il ne doit pas être
+// réécrit là-bas — une seconde définition finirait par diverger (#557).
+// Les deux IIFE ne se voient que par `window` : le souligné dit « pas une API ».
+window._detacherFichiersDeEvaluation = _detacherFichiersDeEvaluation;
+window._compterFichiersDeEvaluation = _compterFichiersDeEvaluation;
+
 
 
 })();

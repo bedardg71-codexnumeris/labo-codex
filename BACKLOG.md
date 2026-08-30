@@ -260,6 +260,27 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ajoutés, pas de second fichier). ROUGE d'abord ; 10 break-tests, 10 rouges obtenus.
   · ⏳ **Test manuel dû à Grégoire** : importer un ZIP dont un blob est corrompu — l'application doit dire
   « Import partiel » et la visionneuse « manquant », jamais « Import réussi ».
+- [ ] **#617 — `retirerJetonReprise` détache les fichiers AVANT de persister : même défaut latent que celui fermé en T6.6**.
+  Trouvé pendant #612 (S6, 30 août 2026), dans le code livré par #607 lui-même
+  (`js/evaluation-jetons.js:622` et `:679`). Les deux appels à `_detacherFichiersDeEvaluation(..., 'corbeille')`
+  précèdent `_persisterEvaluationsJetons`. Si l'écriture est refusée — mode anonymisation, seul cas où
+  `sauvegarderDonneesSelonMode` rend `false` (`modes.js:756-759`) — le fichier est déjà à la corbeille alors
+  que l'évaluation, elle, reste : état incohérent PERMANENT. Le même raisonnement vaut pour le retour
+  `'quota'`, truthy sans rien avoir écrit. Correctif attendu, identique à celui de `supprimerEvaluation` :
+  lire la valeur rendue, ne détacher que sur `=== true`. **Non corrigé dans #612** — #607 est commité et
+  poussé, et mêler les deux aurait rendu le chantier S6 illisible. Break-test attendu : muter la garde
+  d'écriture doit rougir un cas « écriture refusée → aucun fichier en corbeille ».
+- [ ] **#618 — Onze appelants de `sauvegarderDonneesSelonMode` testent son retour en TRUTHY : `'quota'` passe pour un succès**.
+  Trouvé pendant #612 (S6, 30 août 2026). La fonction rend trois choses (`modes.js:751`) : `true`, `false`
+  (écriture bloquée) et la chaîne `'quota'` (l'écriture a levé `QuotaExceededError`, **rien n'est
+  enregistré**). Or `'quota'` est truthy : `if (!sauvegarderDonneesSelonMode(...))` le lit comme un succès,
+  poursuit, et notifie « supprimé » / « enregistré » sur une écriture qui n'a pas eu lieu. **Mesuré le
+  30 août : 31 appels au total, dont 11 testés en truthy**, répartis sur trois fichiers —
+  `js/evaluation.js`, `js/liste-evaluations.js`, `js/saisie-presences.js`. Le patron correct existe déjà
+  dans le dépôt (`js/evaluation-sauvegarde.js:289` et `:448`, `js/travaux-ui.js:6719-6721`) : c'est lui
+  qu'il faut généraliser. Défaut PRÉEXISTANT, hors périmètre de T6.6, qui n'a fermé que la porte du geste
+  destructeur (`liste-evaluations.js:2133`, `=== true`). Chantier de taille moyenne : 11 sites, un message
+  distinct pour le quota, une sentinelle par fichier.
 - [ ] **#616 — Les sentinelles qui lisent la source bornent par DISTANCE, pas par branche : 31 candidats à trier**.
   Trouvé pendant #613 (S7, 30 août 2026). `sentinelle-import-export-383-384-385.test.js` verrouillait
   « magic bytes AVANT `stockerBlob` » par `[\s\S]{0,400}` entre les deux appels — une DISTANCE, pas une
