@@ -305,3 +305,107 @@ describe('#604 — la mise à la corbeille est conditionnée à un import vérif
         expect(branche).toMatch(/finally\s*\{[\s\S]*remplaceExistant\s*=\s*false/);
     });
 });
+
+/* -------------------------------------------------------------------------
+   #609 — l'assemblage ne soude que ce qui est vraiment UN document
+   ---------------------------------------------------------------------- */
+
+// #609 (S3 du plan « chaîne d'importation des travaux », constat B1 de l'audit
+// du 30 août 2026) — L'ASSEMBLAGE AUTOMATIQUE FUSIONNAIT DES FICHIERS QUI NE
+// SONT PAS LES PAGES D'UN MÊME DOCUMENT.
+//
+// L'assemblage est FORCÉ (la case a été retirée) et regroupe toute paire
+// d'images partageant une clé. Deux clés étaient fautives :
+//
+//  · `_solo_<nomFichier>` — deux images sans DA qui portent le même nom
+//    formaient un « document ». Le scénario mesuré : l'enseignant photographie
+//    des copies avec l'iPad, dépose `IMG_0412.jpg` (élève A, associé à la
+//    main), puis un second lot venu d'un autre appareil qui contient aussi
+//    `IMG_0412.jpg` (élève B). À « Oui, importer », B est retiré de la file et
+//    sa photo devient la page 2 du PDF de A. B reste « Non reçu », et RIEN ne
+//    le signale. L'association manuelle ne recalcule pas `groupeDocumentId` :
+//    la clé reste `_solo_`.
+//
+//  · `DA_nomProduction` sans la date de remise — deux remises Léa distinctes
+//    d'un même élève (v1 lundi, v2 mercredi) partageaient la clé et sortaient
+//    en un seul PDF de deux pages, trié par date, jamais présenté comme
+//    doublon. Le correctif #603 a rendu ce cas PLUS probable en retirant le
+//    suffixe de page sans discriminer par date.
+//
+// DÉCISION D1 (Grégoire, 30 août 2026, option A) : deux remises datées
+// différemment sont DEUX DOCUMENTS. Les pages d'une même remise partagent la
+// date — Léa horodate la REMISE, pas le fichier — donc la date sépare les
+// remises sans jamais séparer les pages.
+
+describe('#609 — deux fichiers ne sont un document que si le document le dit', () => {
+
+    it('deux images HOMONYMES sans DA font DEUX groupes, pas un document de deux pages', () => {
+        // Le nom de fichier ne dit rien de l'élève : deux `IMG_0412.jpg` venus
+        // de deux appareils sont deux copies, pas deux pages.
+        win.travauxImport.ajouterFichiersEnAttente([
+            faireFichier('IMG_0412.jpg', 'image/jpeg'),
+            faireFichier('IMG_0412.jpg', 'image/jpeg')
+        ]);
+        const groupes = win.travauxImport.regrouperParDocument();
+        expect(groupes.size).toBe(2);
+        for (const fichiers of groupes.values()) expect(fichiers).toHaveLength(1);
+    });
+
+    it('trois images sans DA, toutes de noms différents, restent trois groupes', () => {
+        win.travauxImport.ajouterFichiersEnAttente([
+            faireFichier('IMG_0412.jpg', 'image/jpeg'),
+            faireFichier('IMG_0413.jpg', 'image/jpeg'),
+            faireFichier('IMG_0414.jpg', 'image/jpeg')
+        ]);
+        expect(win.travauxImport.regrouperParDocument().size).toBe(3);
+    });
+
+    it('deux remises du MÊME élève à des dates différentes font DEUX groupes (D1 = A)', () => {
+        win.travauxImport.ajouterFichiersEnAttente([
+            faireFichier('Breton_9000200_Portrait_de_lecteur__Remis_le_2026-08-24_09h10m00s.jpg', 'image/jpeg'),
+            faireFichier('Breton_9000200_Portrait_de_lecteur__Remis_le_2026-08-26_14h22m00s.jpg', 'image/jpeg')
+        ]);
+        const groupes = win.travauxImport.regrouperParDocument();
+        expect(groupes.size).toBe(2);
+        for (const fichiers of groupes.values()) expect(fichiers).toHaveLength(1);
+    });
+
+    it('les pages d\'une MÊME remise restent UN seul groupe — la date ne les sépare pas', () => {
+        // Léa horodate la remise : les deux pages portent la même seconde.
+        win.travauxImport.ajouterFichiersEnAttente([
+            faireFichier('Breton_9000200_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.jpg', 'image/jpeg'),
+            faireFichier('Breton_9000200_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.jpg', 'image/jpeg')
+        ]);
+        const groupes = win.travauxImport.regrouperParDocument();
+        expect(groupes.size).toBe(1);
+        expect([...groupes.values()][0]).toHaveLength(2);
+    });
+
+    it('deux remises datées : chacune garde ses propres pages', () => {
+        win.travauxImport.ajouterFichiersEnAttente([
+            faireFichier('Breton_9000200_Portrait_de_lecteur-p1__Remis_le_2026-08-24_09h10m00s.jpg', 'image/jpeg'),
+            faireFichier('Breton_9000200_Portrait_de_lecteur-p2__Remis_le_2026-08-24_09h10m00s.jpg', 'image/jpeg'),
+            faireFichier('Breton_9000200_Portrait_de_lecteur-p1__Remis_le_2026-08-26_14h22m00s.jpg', 'image/jpeg'),
+            faireFichier('Breton_9000200_Portrait_de_lecteur-p2__Remis_le_2026-08-26_14h22m00s.jpg', 'image/jpeg')
+        ]);
+        const groupes = win.travauxImport.regrouperParDocument();
+        expect(groupes.size).toBe(2);
+        for (const fichiers of groupes.values()) expect(fichiers).toHaveLength(2);
+    });
+
+    it('deux élèves DIFFÉRENTS, même production, même date : deux groupes (inchangé)', () => {
+        win.travauxImport.ajouterFichiersEnAttente([
+            faireFichier('Breton_9000200_Portrait_de_lecteur__Remis_le_2026-08-21_11h36m32s.jpg', 'image/jpeg'),
+            faireFichier('Tremblay_9000264_Portrait_de_lecteur__Remis_le_2026-08-21_11h36m32s.jpg', 'image/jpeg')
+        ]);
+        expect(win.travauxImport.regrouperParDocument().size).toBe(2);
+    });
+
+    it('la file persistée bouge avec la file en mémoire : persisterFileDAttente est exposée', () => {
+        // M5 — `assemblerGroupesPipeline` splice la file sans la persister :
+        // après une interruption, les entrées fusionnées ressuscitent au
+        // rechargement comme « à re-déposer ». L'UI ne peut les faire bouger
+        // ensemble que si la fonction lui est accessible.
+        expect(typeof win.travauxImport.persisterFileDAttente).toBe('function');
+    });
+});

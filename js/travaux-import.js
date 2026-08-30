@@ -514,8 +514,16 @@
         // Cle de regroupement pour assemblage multi-pages
         let groupeDocumentId = '';
         if (parseLea.da && parseLea.nomProduction) {
-            // Format LEA complet : DA + nom production
-            groupeDocumentId = parseLea.da + '_' + parseLea.nomProduction.replace(/\s+/g, '-');
+            // #609 (D1, decision Gregoire du 30 aout 2026) — Format LEA complet :
+            // DA + nom production + HORODATAGE DE LA REMISE.
+            // Lea horodate la REMISE, pas le fichier : les pages d'une meme
+            // remise partagent la seconde, deux remises successives ne la
+            // partagent pas. Sans la date, v1 du lundi et v2 du mercredi
+            // etaient soudees en un seul PDF de deux pages, trie par date, et
+            // jamais presente comme doublon. Le correctif #603 a rendu ce cas
+            // PLUS probable en retirant le suffixe de page sans discriminer.
+            const horodatageRemise = parseLea.dateRemise ? '_' + parseLea.dateRemise.getTime() : '';
+            groupeDocumentId = parseLea.da + '_' + parseLea.nomProduction.replace(/\s+/g, '-') + horodatageRemise;
         } else if (daDetecte && productionSelectionnee) {
             // Fallback : DA detecte + production globale selectionnee
             groupeDocumentId = daDetecte + '_' + productionSelectionnee;
@@ -1139,8 +1147,12 @@
      */
     function regrouperParDocument() {
         const groupes = new Map();
-        fichiersEnAttente.forEach(f => {
-            const cle = f.groupeDocumentId || ('_solo_' + f.nomFichier);
+        fichiersEnAttente.forEach((f, i) => {
+            // #609 — un fichier sans cle de document est SEUL. Le nom de fichier
+            // ne dit rien de l'eleve : deux `IMG_0412.jpg` venus de deux
+            // appareils sont deux copies, pas deux pages. L'index de la file
+            // n'est partage par personne, donc chacun garde son groupe.
+            const cle = f.groupeDocumentId || ('_solo_' + i);
             if (!groupes.has(cle)) groupes.set(cle, []);
             groupes.get(cle).push(f);
         });
@@ -1775,6 +1787,10 @@
         // File d'attente
         ajouterFichiersEnAttente: ajouterFichiersEnAttente,
         obtenirFileDAttente: obtenirFileDAttente,
+        // #609 (M5) — expose parce que `assemblerGroupesPipeline` splice la file
+        // en memoire : sans cet appel, la file PERSISTEE garde les entrees
+        // fusionnees, qui ressuscitent au rechargement comme « a re-deposer ».
+        persisterFileDAttente: persisterFileDAttente,
         viderFileDAttente: viderFileDAttente,
         purgerFichiersImportes: purgerFichiersImportes,
         changerEtudiant: changerEtudiant,

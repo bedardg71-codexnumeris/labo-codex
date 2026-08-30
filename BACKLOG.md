@@ -139,10 +139,34 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⏳ **Test manuel dû à Grégoire** : poser `maxParProduction = 1`, accorder une reprise, puis importer
   un troisième fichier pour la même production — le bouton « jeton » ne doit plus paraître, et le
   rattachement doit être annoncé comme tel.
-- [ ] **#609 — S3 · L'assemblage automatique fusionne des fichiers qui ne sont pas des pages d'un même document** (constats B1, M5).
-  `js/travaux-import.js`, `js/travaux-ui.js`. Deux images homonymes sans DA deviennent un document ;
-  deux remises datées différemment aussi. **D1 = A** : la clé porte l'horodatage de remise, et
-  `_solo_` ne lit plus le nom de fichier. Persister la file après le splice.
+- [x] **#609 — LIVRÉ le 30 août 2026 — S3 · L'assemblage automatique fusionnait des fichiers qui ne sont pas des pages d'un même document** (constats B1, M5). **Le BLOQUANT de l'audit.**
+  `js/travaux-import.js`, `js/travaux-ui.js`. L'assemblage est FORCÉ (la case a été retirée) et
+  regroupait toute paire d'images partageant une clé. **Deux clés étaient fautives.**
+  · `_solo_<nomFichier>` — deux images sans DA de même nom formaient un « document ». Scénario mesuré :
+  photos iPad, `IMG_0412.jpg` (élève A, associé à la main), puis un second lot d'un autre appareil qui
+  contient aussi `IMG_0412.jpg` (élève B). À « Oui, importer », B est retiré de la file et sa photo
+  devient la page 2 du PDF de A. **B reste « Non reçu », et rien ne le signale.**
+  · `DA_nomProduction` sans la date — deux remises Léa distinctes d'un même élève (v1 lundi, v2
+  mercredi) sortaient en un seul PDF de deux pages, jamais présenté comme doublon. [[#603]] avait rendu
+  ce cas PLUS probable en retirant le suffixe de page sans discriminer par date.
+  ➮ **Correctif (D1 = A)** : la clé LÉA porte l'horodatage de la remise — Léa horodate la REMISE, pas
+  le fichier, donc la date sépare les remises sans jamais séparer les pages. La clé `_solo_` porte
+  l'index dans la file, que personne ne partage, au lieu du nom de fichier.
+  ➮ **M5** : `assemblerGroupesPipeline` splicait la file en mémoire sans la persister — les entrées
+  fusionnées ressuscitaient au rechargement comme « à re-déposer ». `persisterFileDAttente` est
+  exposée sur `window.travauxImport` et appelée après le splice.
+  ⚠ **Effet voulu du correctif** : `detecterDoublonsStockage` traite deux fichiers de même
+  `groupeDocumentId` comme non-doublons. Deux remises datées différemment ayant désormais des clés
+  distinctes, elles sont SIGNALÉES comme doublons à l'import — c'est exactement ce que D1 demande.
+  ⮕ **Zéro-dette adjacent (T3.2)** : `afficherImport` appelait `regrouperParDocument()` uniquement
+  pour la passer à `genererEtape2Colonnes(queue, groupes)`, qui ne l'a jamais lue. Paramètre mort et
+  appel inutile retirés.
+  ➮ Sentinelle : `tests/unit/sentinelle-603-604-import-pages-et-remplacement.test.js` ÉTENDUE (pas de
+  seconde sentinelle), 24 cas ; **4 break-tests, 4 ROUGE** (clé solo relit le nom · horodatage retiré ·
+  `persisterFileDAttente` non exposée · horodatage aléatoire, qui séparerait aussi les pages).
+  Vitest 408 fichiers / 4265 tests + Playwright 210/210, code de sortie 0.
+  ⏳ **Test manuel dû à Grégoire** : un lot de photos iPad contenant deux homonymes ; les deux élèves
+  doivent recevoir leur copie.
 - [ ] **#610 — S4 · File non persistée en cours de lot, rattachement des blobs par nom seul** (constats S1, S2).
   `js/travaux-import.js`, `js/travaux-ui.js`. Un fichier sans DA ni production n'est jamais vu comme
   doublon ; un re-dépôt rattache un blob à la mauvaise entrée. Correctif : persistance à chaque
