@@ -10,7 +10,17 @@ const db = {
     getSync: (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)),
     setSync: (k, v) => { store[k] = v; },
     set: async (k, v) => { store[k] = v; },
-    get: async (k, d) => (k in store ? store[k] : d)
+    get: async (k, d) => (k in store ? store[k] : d),
+    // #522 (30 août 2026) : `adopterMaquette` écrit par la file par clé.
+    // Même contrat que db.js — le mutateur reçoit la valeur lue, et rendre
+    // `undefined` annule l'écriture.
+    modifier: async (k, mutateur, defaut = null) => {
+        const valeur = (k in store ? store[k] : defaut);
+        const resultat = await mutateur(valeur);
+        if (resultat === undefined) return undefined;
+        store[k] = resultat;
+        return resultat;
+    }
 };
 const cle = (k) => `h2026_${k}`;
 

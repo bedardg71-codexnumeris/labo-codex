@@ -41,7 +41,8 @@
                 '<strong>Correction : vider la corbeille ne d\u00e9truit que ce qu\'elle annonce.</strong> La modale comptait les fichiers du groupe-cours actif, mais la suppression emportait ceux de TOUS les groupes. \u00ab 2 fichiers \u00bb pouvait en effacer cinq, d\u00e9finitivement.',
                 '<strong>Correction : un jeton d\'\u00e9valuation qui n\'a pas pu \u00eatre enregistr\u00e9 te le dit.</strong> En mode anonymisation ou sur une erreur de stockage, l\'\u00e9cran affichait un succ\u00e8s pendant que rien n\'\u00e9tait \u00e9crit ; au rechargement, le jeton avait disparu.',
                 '<strong>Correction : dans le poste de pr\u00e9paration des travaux, la date saisie ne recule plus d\'un jour \u00e0 l\'affichage</strong>, et chaque ouverture ne laisse plus tourner un compteur invisible.',
-                '<strong>La fonctionnalit\u00e9 \u00ab All\u00e9ger \u00bb les fichiers export\u00e9s est retir\u00e9e.</strong> Elle \u00e9tait masqu\u00e9e depuis juin et n\'\u00e9tait plus atteignable ; rien de ce que tu utilises ne dispara\u00eet.'
+                '<strong>La fonctionnalit\u00e9 \u00ab All\u00e9ger \u00bb les fichiers export\u00e9s est retir\u00e9e.</strong> Elle \u00e9tait masqu\u00e9e depuis juin et n\'\u00e9tait plus atteignable ; rien de ce que tu utilises ne dispara\u00eet.',
+                '<strong>Correction : dans l\'\u00e9diteur de pratique, une saisie ne s\'efface plus toute seule.</strong> Quitter un champ pour cliquer dans le suivant lan\u00e7ait deux enregistrements coup sur coup ; le second r\u00e9\u00e9crivait la pratique sans la modification du premier, sans message et sans erreur. M\u00eame chose entre deux zones du m\u00eame \u00e9cran \u2014 un type de travail et un forfait. Et partager une pratique effa\u00e7ait tout ce qui avait \u00e9t\u00e9 enregistr\u00e9 pendant que tu remplissais le formulaire de licence.'
             ]
         },
         {
