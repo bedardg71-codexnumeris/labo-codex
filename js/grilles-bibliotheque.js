@@ -76,25 +76,36 @@ async function ajouterGrilleALaBibliotheque(grille) {
     // B-β — passage obligé par assainirObjet (whitelist + débalisage).
     const grilleSafe = _assainirGrilleSafe(grille);
 
-    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_GRILLES) || [];
+    // #599 — la présence est vérifiée DANS la file. Hors file, deux ajouts
+    // concurrents du même item passaient tous les deux, et la bibliothèque
+    // partagée gardait un doublon que rien ne signalait.
+    let dejaPresente = false;
+    await db.modifier(CLE_BIBLIOTHEQUE_GRILLES, (lues) => {
+        const bibliotheque = lues || [];
 
-    const existe = bibliotheque.some(g => g.id === grilleSafe.id);
-    if (existe) {
+        const existe = bibliotheque.some(g => g.id === grilleSafe.id);
+        if (existe) {
+            dejaPresente = true;
+            return undefined;
+        }
+
+        // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
+        const auteur = grilleSafe.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
+
+        const grilleBiblio = {
+            ...grilleSafe,
+            dansBibliotheque: true,
+            dateAjoutBiblio: new Date().toISOString(),
+            auteur: auteur
+        };
+
+        bibliotheque.push(grilleBiblio);
+        return bibliotheque;
+    }, []);
+
+    if (dejaPresente) {
         return false;
     }
-
-    // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
-    const auteur = grilleSafe.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
-
-    const grilleBiblio = {
-        ...grilleSafe,
-        dansBibliotheque: true,
-        dateAjoutBiblio: new Date().toISOString(),
-        auteur: auteur
-    };
-
-    bibliotheque.push(grilleBiblio);
-    await db.set(CLE_BIBLIOTHEQUE_GRILLES, bibliotheque);
 
     return true;
 }
@@ -105,16 +116,24 @@ async function ajouterGrilleALaBibliotheque(grille) {
  * @returns {Promise<boolean>} true si retirée, false si non trouvée
  */
 async function retirerGrilleDeLaBibliotheque(grilleId) {
-    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_GRILLES) || [];
+    // #599 — le retrait passe par la file. Hors file, un retrait et un ajout
+    // concurrents sur la MÊME bibliothèque partagée s'écrasaient l'un l'autre :
+    // les cinq familles écrivent dans un seul magasin, pas un par famille.
+    let retiree = false;
+    await db.modifier(CLE_BIBLIOTHEQUE_GRILLES, (lues) => {
+        const bibliotheque = lues || [];
+        const restants = bibliotheque.filter(g => g.id !== grilleId);
 
-    const indexAvant = bibliotheque.length;
-    bibliotheque = bibliotheque.filter(g => g.id !== grilleId);
+        // Rien retiré : le mutateur rend `undefined`, aucune écriture.
+        if (restants.length === bibliotheque.length) return undefined;
 
-    if (bibliotheque.length === indexAvant) {
+        retiree = true;
+        return restants;
+    }, []);
+
+    if (!retiree) {
         return false;
     }
-
-    await db.set(CLE_BIBLIOTHEQUE_GRILLES, bibliotheque);
 
     // #327 — hook de cohérence : la grille retirée sort de tout dossier de
     // classement (le moteur range par identité, sans toucher la grille).

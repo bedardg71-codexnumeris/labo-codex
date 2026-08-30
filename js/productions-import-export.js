@@ -425,25 +425,31 @@ window.confirmerImportProductions = async function(donnees) {
         // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequeProductions
         // L'utilisateur consulte puis choisit lesquelles ajouter à sa barre latérale
         const CLE_BIBLIOTHEQUE = window.CLE_BIBLIOTHEQUE_PRODUCTIONS || 'bibliothequeProductions';
-        let bibliotheque = await db.get(CLE_BIBLIOTHEQUE) || [];
-
+        // #599 — la fusion passe par la file : la bibliothèque partagée est
+        // relue à l'instant de l'écriture. Hors file, un import et un ajout
+        // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;
         let nbMisesAJour = 0;
 
-        // Fusionner dans la bibliothèque partagée uniquement
-        productionsImportees.forEach(prod => {
-            const indexBiblio = bibliotheque.findIndex(p => p.id === prod.id);
-            if (indexBiblio >= 0) {
-                bibliotheque[indexBiblio] = { ...prod, dateAjoutBiblio: bibliotheque[indexBiblio].dateAjoutBiblio };
-                nbMisesAJour++;
-            } else {
-                bibliotheque.push({ ...prod, dateAjoutBiblio: new Date().toISOString() });
-                nbAjoutees++;
-            }
-        });
+        await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
+            const bibliotheque = lues || [];
+            nbAjoutees = 0;
+            nbMisesAJour = 0;
 
-        // Sauvegarder uniquement la bibliothèque
-        await db.set(CLE_BIBLIOTHEQUE, bibliotheque);
+            // Fusionner dans la bibliothèque partagée uniquement
+            productionsImportees.forEach(prod => {
+                const indexBiblio = bibliotheque.findIndex(p => p.id === prod.id);
+                if (indexBiblio >= 0) {
+                    bibliotheque[indexBiblio] = { ...prod, dateAjoutBiblio: bibliotheque[indexBiblio].dateAjoutBiblio };
+                    nbMisesAJour++;
+                } else {
+                    bibliotheque.push({ ...prod, dateAjoutBiblio: new Date().toISOString() });
+                    nbAjoutees++;
+                }
+            });
+
+            return bibliotheque;
+        }, []);
 
         // Rafraîchir le modal de bibliothèque s'il est ouvert
         if (document.getElementById('modalBibliothequeProductions')) {

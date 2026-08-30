@@ -517,25 +517,36 @@ async function ajouterPratiqueALaBibliotheque(configuration) {
         ? window.assainirObjet(configuration, window.SCHEMAS_IMPORT.pratique)
         : configuration;
 
-    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRATIQUES) || [];
+    // #599 — la présence est vérifiée DANS la file. Hors file, deux ajouts
+    // concurrents du même item passaient tous les deux, et la bibliothèque
+    // partagée gardait un doublon que rien ne signalait.
+    let dejaPresente = false;
+    await db.modifier(CLE_BIBLIOTHEQUE_PRATIQUES, (lues) => {
+        const bibliotheque = lues || [];
 
-    const existe = bibliotheque.some(p => p.id === configSafe.id);
-    if (existe) {
+        const existe = bibliotheque.some(p => p.id === configSafe.id);
+        if (existe) {
+            dejaPresente = true;
+            return undefined;
+        }
+
+        // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
+        const auteur = configSafe.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
+
+        const configBiblio = {
+            ...configSafe,
+            dansBibliotheque: true,
+            dateAjoutBiblio: new Date().toISOString(),
+            auteur: auteur
+        };
+
+        bibliotheque.push(configBiblio);
+        return bibliotheque;
+    }, []);
+
+    if (dejaPresente) {
         return false;
     }
-
-    // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
-    const auteur = configSafe.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
-
-    const configBiblio = {
-        ...configSafe,
-        dansBibliotheque: true,
-        dateAjoutBiblio: new Date().toISOString(),
-        auteur: auteur
-    };
-
-    bibliotheque.push(configBiblio);
-    await db.set(CLE_BIBLIOTHEQUE_PRATIQUES, bibliotheque);
 
     return true;
 }
@@ -546,21 +557,24 @@ async function ajouterPratiqueALaBibliotheque(configuration) {
  * @returns {Promise<boolean>} true si mise à jour, false si non trouvée
  */
 async function mettreAJourConfigurationPratique(configuration) {
-    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRATIQUES) || [];
+    let miseAJour = false;
+    await db.modifier(CLE_BIBLIOTHEQUE_PRATIQUES, (lues) => {
+        const bibliotheque = lues || [];
 
-    const index = bibliotheque.findIndex(p => p.id === configuration.id);
-    if (index === -1) {
-        return false;
-    }
+        const index = bibliotheque.findIndex(p => p.id === configuration.id);
+        if (index === -1) return undefined;
 
-    bibliotheque[index] = {
-        ...bibliotheque[index],
-        ...configuration,
-        dateModification: new Date().toISOString()
-    };
+        bibliotheque[index] = {
+            ...bibliotheque[index],
+            ...configuration,
+            dateModification: new Date().toISOString()
+        };
 
-    await db.set(CLE_BIBLIOTHEQUE_PRATIQUES, bibliotheque);
-    return true;
+        miseAJour = true;
+        return bibliotheque;
+    }, []);
+
+    return miseAJour;
 }
 
 /**
@@ -575,16 +589,24 @@ async function retirerPratiqueDeLaBibliotheque(configId) {
     // via obtenirToutesLesPratiquesBibliotheque au prochain rafraîchissement.
     // La protection seeds prédéfinis vit désormais dans supprimerPratiqueDeBibliothequePartagee
     // qui distingue correctement "copie IDB" vs "gabarit pur".
-    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRATIQUES) || [];
+    // #599 — le retrait passe par la file. Hors file, un retrait et un ajout
+    // concurrents sur la MÊME bibliothèque partagée s'écrasaient l'un l'autre :
+    // les cinq familles écrivent dans un seul magasin, pas un par famille.
+    let retiree = false;
+    await db.modifier(CLE_BIBLIOTHEQUE_PRATIQUES, (lues) => {
+        const bibliotheque = lues || [];
+        const restants = bibliotheque.filter(p => p.id !== configId);
 
-    const indexAvant = bibliotheque.length;
-    bibliotheque = bibliotheque.filter(p => p.id !== configId);
+        // Rien retiré : le mutateur rend `undefined`, aucune écriture.
+        if (restants.length === bibliotheque.length) return undefined;
 
-    if (bibliotheque.length === indexAvant) {
+        retiree = true;
+        return restants;
+    }, []);
+
+    if (!retiree) {
         return false;
     }
-
-    await db.set(CLE_BIBLIOTHEQUE_PRATIQUES, bibliotheque);
 
     // #320 — cohérence des répertoires : une pratique retirée quitte tout
     // répertoire qui la classait (sinon itemId orphelin). Appel défensif :

@@ -2155,24 +2155,29 @@ window.confirmerImportEchelles = async function(donnees) {
         // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequeEchelles
         // L'utilisateur consulte puis choisit lesquelles ajouter à sa barre latérale
         const CLE_BIBLIOTHEQUE = window.CLE_BIBLIOTHEQUE_ECHELLES || 'bibliothequeEchelles';
-        let bibliotheque = await db.get(CLE_BIBLIOTHEQUE) || [];
-
-        // Fusionner dans la bibliothèque partagée uniquement
+        // #599 — la fusion passe par la file : la bibliothèque partagée est
+        // relue à l'instant de l'écriture. Hors file, un import et un ajout
+        // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;
         let nbMisesAJour = 0;
-        echellesImportees.forEach(echelle => {
-            const indexBiblio = bibliotheque.findIndex(e => e.id === echelle.id);
-            if (indexBiblio >= 0) {
-                bibliotheque[indexBiblio] = { ...echelle, dateAjoutBiblio: bibliotheque[indexBiblio].dateAjoutBiblio };
-                nbMisesAJour++;
-            } else {
-                bibliotheque.push({ ...echelle, dateAjoutBiblio: new Date().toISOString() });
-                nbAjoutees++;
-            }
-        });
 
-        // Sauvegarder uniquement la bibliothèque
-        await db.set(CLE_BIBLIOTHEQUE, bibliotheque);
+        await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
+            const bibliotheque = lues || [];
+            nbAjoutees = 0;
+            nbMisesAJour = 0;
+            echellesImportees.forEach(echelle => {
+                const indexBiblio = bibliotheque.findIndex(e => e.id === echelle.id);
+                if (indexBiblio >= 0) {
+                    bibliotheque[indexBiblio] = { ...echelle, dateAjoutBiblio: bibliotheque[indexBiblio].dateAjoutBiblio };
+                    nbMisesAJour++;
+                } else {
+                    bibliotheque.push({ ...echelle, dateAjoutBiblio: new Date().toISOString() });
+                    nbAjoutees++;
+                }
+            });
+
+            return bibliotheque;
+        }, []);
 
         // Rafraîchir le modal de bibliothèque s'il est ouvert
         if (document.getElementById('modalBibliothequeEchelles')) {
