@@ -3593,6 +3593,30 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **Règle** : après un lot qui change une primitive de `db`, chercher les stubs `db` de TOUS les
   bancs qui CHARGENT le module, et lire le CODE DE SORTIE, pas seulement le compte.
 
+- [ ] **#605 — Le message « Fichier sous … » se déclenche sur TOUTE ligne non reçue d'un élève qui a
+  importé quoi que ce soit. Il ne peut structurellement rien apprendre.**
+  Relevé le 30 août 2026 sur les données réelles de Grégoire, capture à l'appui : un élève ayant
+  remis 1 travail sur 11 récoltait **10 avertissements**, tous exacts et tous inutiles ; un élève
+  n'ayant rien remis n'en avait aucun. Le message donnait l'impression que les travaux à venir
+  étaient associés à celui qui venait d'être importé.
+  **MESURÉ AU CODE**, trois faits :
+  · le tableau pose une ligne par (élève × production), en écartant `type === 'portfolio'`
+    (`liste-evaluations.js:631`) ;
+  · le message se déclenche dès qu'il existe UN fichier de cet élève sur n'importe quelle
+    production connue ≠ celle de la ligne (`liste-evaluations.js:76`) — aucune autre condition ;
+  · la liste des productions « connues » comprend TOUTES les productions, portfolios inclus
+    (`liste-evaluations.js:74`).
+  ➮ **Toute production non-portfolio a donc sa propre ligne.** Un fichier posé là y est déjà
+  affiché, à sa place, avec son statut. Le répéter sur les N−1 autres lignes ne distingue pas le
+  fichier MAL classé du fichier BIEN classé : les deux produisaient exactement le même signal.
+  Un avertissement incapable de séparer les deux cas qu'il prétend arbitrer n'avertit de rien.
+  Même famille que [[#600]] et [[#602]] — un contrôle qui ne sait pas dire ce qu'il ne voit pas.
+  ➮ **Correction (décision Grégoire, 30 août)** : le message ne paraît que si le fichier n'a
+  AUCUNE ligne à lui, seul cas où il est la seule trace du fichier dans ce tableau. La règle de
+  génération des lignes est extraite en `productionGenereUneLigne` et lue par les DEUX sites —
+  sans quoi elles redériveraient. Le cas est atteignable : le sélecteur de production de l'import
+  offre les portfolios comme les autres (`travaux-ui.js:1808`).
+
 - [ ] **#604 — « Remplacer l'existant » jette l'ancien fichier À LA CORBEILLE SANS jamais importer le
   nouveau. Les deux disparaissent.** 🔴 PERTE DE DONNÉES
   Trouvé le 30 août 2026 sur l'import réel de Grégoire (601-101 gr.00007, « Portrait de lecteur -

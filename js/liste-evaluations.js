@@ -14,6 +14,25 @@
 // ============================================
 
 /**
+ * Une production produit-elle une ligne dans le tableau ?
+ *
+ * SSOT de la règle appliquée par `construireLignesEvaluations` — deux lecteurs,
+ * une seule définition. Le portfolio est le contenant : il n'est pas évalué
+ * pour lui-même, donc il n'a pas de ligne.
+ *
+ * #605 — Le second lecteur est le message « Fichier sous … », qui n'a de sens
+ * QUE pour une production sans ligne. Tant que les deux règles vivaient
+ * séparément, le message parlait de productions parfaitement visibles ailleurs
+ * dans le même tableau.
+ *
+ * @param {Object} production
+ * @returns {boolean}
+ */
+function productionGenereUneLigne(production) {
+    return !!production && production.type !== 'portfolio';
+}
+
+/**
  * Calcule le statut workflow d'une ligne d'évaluation.
  * Hiérarchie : non-recu → recu → importe → annote → evalue
  * @param {Object} ligne - La ligne d'évaluation
@@ -70,18 +89,32 @@ function calculerStatutWorkflow(ligne) {
         // n'existe pas, ce qui retombait sur le libellé générique « autre
         // production »). Le fichier orphelin reste traité par la branche
         // « non associé » plus haut.
+        //
+        // #605 — ET IL FAUT UNE SECONDE CONDITION, SANS QUOI LE MESSAGE NE PEUT
+        // JAMAIS APPRENDRE QUOI QUE CE SOIT. Le tableau pose une ligne par
+        // (élève × production qui génère une ligne) : un fichier posé sur une de
+        // ces productions y est DÉJÀ affiché, à sa place, avec son statut. Le
+        // répéter sur les N−1 autres lignes du même élève ne distingue pas le
+        // fichier mal classé du fichier bien classé — les deux produisaient
+        // exactement le même signal. Relevé le 30 août 2026 sur les données de
+        // Grégoire : un élève ayant remis 1 travail sur 11 récoltait 10
+        // avertissements, tous exacts et tous inutiles.
+        // Reste le seul cas où le fichier n'a AUCUNE ligne à lui : une production
+        // que `productionGenereUneLigne` écarte. Là, le message est la seule
+        // trace du fichier dans ce tableau.
         const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
         const productions = obtenirDonneesSelonMode('productions');
-        const productionIdsConnus = new Set(productions.map(p => p.id));
+        const productionsParId = new Map(productions.map(p => [p.id, p]));
         const fichierAutreProduction = fichiers.find(f =>
             f.etudiantDA === ligne.da
             && f.productionId
             && f.productionId !== ligne.productionId
-            && productionIdsConnus.has(f.productionId)
+            && productionsParId.has(f.productionId)
+            && !productionGenereUneLigne(productionsParId.get(f.productionId))
         );
         if (fichierAutreProduction) {
             ligne.fichierAutreProduction = true;
-            const prodReelle = productions.find(p => p.id === fichierAutreProduction.productionId);
+            const prodReelle = productionsParId.get(fichierAutreProduction.productionId);
             ligne.fichierAutreProductionNom = prodReelle
                 ? (prodReelle.titre || prodReelle.nom || '')
                 : '';
@@ -629,8 +662,10 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
         : (typeof obtenirIdPratiqueActive === 'function' ? obtenirIdPratiqueActive() : 'sommative');
     const estPAN = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratiqueId) : pratiqueId) === 'standards';
 
-    // Productions à évaluer (exclure le portfolio lui-même)
-    const productionsAEvaluer = productions.filter(p => p.type !== 'portfolio');
+    // Productions à évaluer (exclure le portfolio lui-même).
+    // #605 — la règle vit dans `productionGenereUneLigne`, lue aussi par le
+    // message « Fichier sous … ». Une seule définition, deux lecteurs.
+    const productionsAEvaluer = productions.filter(productionGenereUneLigne);
 
     // Pour chaque élève et chaque production, créer une ligne
     etudiants.forEach(etudiant => {
@@ -2859,6 +2894,12 @@ window.trierTableauParColonne = trierTableauParColonne;
 // `window._restaurerOriginaleSiReprise` : le souligné dit « pas une API ».
 window._trierLignesParColonne = trierLignesParColonne;
 window._genererLigneHTML = genererLigneHTML;   // #562 — exposé pour le banc d'échappement (patron _trierLignesParColonne)
+// #605 — exposés pour la sentinelle qui vérifie que les DEUX lecteurs de
+// `productionGenereUneLigne` restent d'accord : le tableau et le message
+// « Fichier sous … ». Même convention du souligné : pas une API.
+window._construireLignesEvaluations = construireLignesEvaluations;
+window._calculerStatutWorkflow = calculerStatutWorkflow;
+window._productionGenereUneLigne = productionGenereUneLigne;
 window.rechargerFiltreProduction = rechargerFiltreProduction; // Pour mise à jour après duplication/modification de productions
 
 // Alias pour compatibilité avec le HTML
