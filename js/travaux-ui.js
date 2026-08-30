@@ -861,7 +861,11 @@
 
         const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
         const queue = travauxImport.obtenirFileDAttente();
-        const groupes = travauxImport.regrouperParDocument();
+        // #609 (T3.2) — `regrouperParDocument()` était appelée ici pour être
+        // passée à `genererEtape2Colonnes`, qui ne l'a jamais lue : elle
+        // reconstruit son propre index à partir de `f.groupeDocumentId`.
+        // Retiré avec le paramètre mort, pour qu'aucun lecteur ne croie que le
+        // rendu de l'étape 2 dépend de la clé de regroupement.
 
         const fsapiDispo = travauxStockage.estFSAPIDisponible();
         const fsapiActif = travauxStockage.estFSAPIActif();
@@ -956,7 +960,7 @@
                             <span class="pipeline-etape-titre" data-tooltip="travaux-pipeline-optimisation">Optimisation</span>
                             <span class="pipeline-etape-compteur">${nbImages} ${window.pluriel(nbImages, 'image', 'images')}</span>
                         </div>
-                        ${genererEtape2Colonnes(queue, groupes)}
+                        ${genererEtape2Colonnes(queue)}
                     </div>
 
                     <div class="pipeline-actions-import">
@@ -1696,7 +1700,7 @@
      * @param {Map} groupes - Groupes de documents
      * @returns {string} HTML
      */
-    function genererEtape2Colonnes(queue, groupes) {
+    function genererEtape2Colonnes(queue) {
         const nbImages = queue.filter(f => f.estImage).length;
         const productions = obtenirDonneesSelonMode('productions');
 
@@ -4329,6 +4333,13 @@
                 for (let i = images.length - 1; i >= 1; i--) {
                     const idx = queue.indexOf(images[i]);
                     if (idx !== -1) queue.splice(idx, 1);
+                }
+                // #609 (M5) — la file en mémoire et la file PERSISTÉE bougent
+                // ensemble (cf. #558 B1). Sans cet appel, une interruption après
+                // l'assemblage fait ressusciter les entrées fusionnées au
+                // rechargement, présentées comme « à re-déposer ».
+                if (typeof travauxImport.persisterFileDAttente === 'function') {
+                    travauxImport.persisterFileDAttente();
                 }
 
                 // Transformer le premier en PDF

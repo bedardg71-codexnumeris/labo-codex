@@ -19,7 +19,7 @@
 | S0 — Préparation | — | LIVRÉ | 2026-08-30 | | D1=A, D2=A, D3=A · #607–#615 réservés · #606 coché (livré `c24036e7`) |
 | S1 — Jetons ↔ fichiers | S5 | LIVRÉ | 2026-08-30 | `ba99f483` (1.106.9) | #607 · sentinelle 7 cas, 4 break-tests, 4 ROUGE · ⏳ test manuel Mac+iPad dû à Grégoire · T6.6 activée |
 | S2 — Jeton et maximum par production | S6 | LIVRÉ | 2026-08-30 | `5752c20c` (1.106.10) | #608 · sentinelle Vitest 9 cas, 5 break-tests, 5 ROUGE · ⏳ test manuel `maxParProduction = 1` dû à Grégoire |
-| S3 — Assemblage automatique | B1, M5 | À FAIRE | | | #609 · D1 = A (deux documents) |
+| S3 — Assemblage automatique | B1, M5 | LIVRÉ | 2026-08-30 | COMMIT_S3 | #609 · D1 = A · sentinelle #603-604 étendue (24 cas), 4 break-tests, 4 ROUGE · ⏳ test manuel lot iPad avec deux homonymes |
 | S4 — Reprise après interruption, rattachement | S1, S2 | À FAIRE | | | #610 · après S3, jamais en parallèle |
 | S5 — Appariement par nom | S3 | À FAIRE | | | #611 |
 | S6 — DA inconnu, groupe absent | S4, S7 | À FAIRE | | | #612 · D2 = A (refus dit) · T6.1 levée : #606 est mergé · **T6.6 activée** (même trou que S5 dans `supprimerEvaluation`) |
@@ -108,12 +108,13 @@ Fichier : `js/travaux-ui.js` (`traiterDoublonsImport`, `appliquerJetonsReprisePo
 
 Fichiers : `js/travaux-import.js` (`preparerFichier`, `regrouperParDocument`), `js/travaux-ui.js` (`assemblerGroupesPipeline`). Risque : moyen (#603 vient d'y passer).
 
-- [ ] **T3.1** — Étendre `tests/unit/sentinelle-603-604-import-pages-et-remplacement.test.js` (ne pas créer une seconde sentinelle) avec trois cas : deux images homonymes sans DA → deux groupes ; deux remises Léa même DA/production, dates différentes → deux groupes (si D1 = A) ; pages d'une même remise → un groupe. ROUGE sur le code actuel.
-- [ ] **T3.2** — `regrouperParDocument` : clé `_solo_` + index, jamais le nom de fichier. Vérifier le rendu par groupe (`travaux-ui.js:864`) qui consomme la même fonction.
-- [ ] **T3.3** — `preparerFichier` : `groupeDocumentId` = DA + production + horodatage de remise si présent (seulement si D1 = A).
-- [ ] **T3.4** — `assemblerGroupesPipeline` : persister la file après le splice ; exposer `persisterFileDAttente` sur `window.travauxImport`.
-- [ ] **T3.5** — Break-test, suite complète (la sentinelle #603-604 d'origine reste verte), test manuel : lot de photos iPad avec deux homonymes.
-- [ ] **T3.6** — Commit, release, merge, tableau, `SESSION.md`.
+- [x] **T3.1** — Étendre `tests/unit/sentinelle-603-604-import-pages-et-remplacement.test.js` (ne pas créer une seconde sentinelle) avec trois cas : deux images homonymes sans DA → deux groupes ; deux remises Léa même DA/production, dates différentes → deux groupes (si D1 = A) ; pages d'une même remise → un groupe. ROUGE sur le code actuel.
+- [x] **T3.2** — `regrouperParDocument` : clé `_solo_` + index, jamais le nom de fichier. Vérifier le rendu par groupe (`travaux-ui.js:864`) qui consomme la même fonction.
+  **VÉRIFIÉ : ce site ne consommait rien.** `afficherImport` appelait `regrouperParDocument()` uniquement pour passer le résultat à `genererEtape2Colonnes(queue, groupes)` — qui ne l'a JAMAIS lu : elle reconstruit son propre index à partir de `f.groupeDocumentId`. Paramètre mort et appel inutile RETIRÉS (zéro-dette), pour qu'aucun lecteur ne croie que le rendu de l'étape 2 dépend de la clé de regroupement. Seul vrai consommateur : `assemblerGroupesPipeline` (`:4316`).
+- [x] **T3.3** — `preparerFichier` : `groupeDocumentId` = DA + production + horodatage de remise si présent (seulement si D1 = A).
+- [x] **T3.4** — `assemblerGroupesPipeline` : persister la file après le splice ; exposer `persisterFileDAttente` sur `window.travauxImport`.
+- [x] **T3.5** — Break-test, suite complète (la sentinelle #603-604 d'origine reste verte), test manuel : lot de photos iPad avec deux homonymes.
+- [x] **T3.6** — Commit, release, merge, tableau, `SESSION.md`.
 
 **Critère de fin** : aucun assemblage ne repose sur un nom de fichier ; deux remises datées différemment ne sont jamais soudées.
 

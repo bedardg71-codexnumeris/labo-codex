@@ -123,6 +123,56 @@
        importer un troisième fichier sur la même production — le bouton
        « jeton » ne doit plus paraître.
 
+     ▣ S3 (#609) — LE BLOQUANT DE L'AUDIT EST FERMÉ : L'ASSEMBLAGE NE SOUDE
+       PLUS QUE CE QUI EST VRAIMENT UN DOCUMENT.
+       L'assemblage est FORCÉ (la case a été retirée) et regroupait toute paire
+       d'images partageant une clé. Deux clés étaient fautives :
+       · `_solo_<nomFichier>` — deux images sans DA de même nom formaient un
+         « document ». Photos iPad, `IMG_0412.jpg` (élève A, associé à la main),
+         puis un second lot d'un autre appareil qui contient aussi
+         `IMG_0412.jpg` (élève B) : à « Oui, importer », B est retiré de la file
+         et sa photo devient la page 2 du PDF de A. B RESTE « NON REÇU », ET
+         RIEN NE LE SIGNALE.
+       · `DA_nomProduction` sans la date — v1 du lundi et v2 du mercredi
+         sortaient en un seul PDF de deux pages, jamais présenté comme doublon.
+         #603 avait rendu ce cas PLUS probable en retirant le suffixe de page
+         sans discriminer par date.
+       ➮ D1 = A : la clé LÉA porte l'horodatage de la remise. Léa horodate la
+         REMISE, pas le fichier — la date sépare donc les remises sans jamais
+         séparer les pages. La clé `_solo_` porte l'index dans la file, que
+         personne ne partage, au lieu du nom de fichier.
+       ➮ M5 : `persisterFileDAttente` exposée et appelée après le splice de
+         `assemblerGroupesPipeline` — sans quoi les entrées fusionnées
+         ressuscitaient au rechargement comme « à re-déposer ».
+       ⚠ EFFET VOULU : `detecterDoublonsStockage` traite deux fichiers de même
+         `groupeDocumentId` comme non-doublons. Deux remises datées différemment
+         ayant désormais des clés distinctes, elles sont SIGNALÉES comme
+         doublons à l'import. C'est exactement ce que D1 demande.
+
+     ▣ T3.2 — LE SITE QUE L'AUDIT DÉSIGNAIT COMME CONSOMMATEUR N'EN ÉTAIT PAS
+       UN. `afficherImport` appelait `regrouperParDocument()` uniquement pour la
+       passer à `genererEtape2Colonnes(queue, groupes)` — qui ne l'a JAMAIS lue :
+       elle reconstruit son propre index depuis `f.groupeDocumentId`. Paramètre
+       mort et appel inutile retirés, pour qu'aucun lecteur ne croie que le
+       rendu de l'étape 2 dépend de la clé que je venais de changer. Seul vrai
+       consommateur : `assemblerGroupesPipeline`.
+
+     ▣ SENTINELLE ÉTENDUE, PAS DUPLIQUÉE.
+       `sentinelle-603-604-import-pages-et-remplacement.test.js` passe de 17 à
+       24 cas. Le rouge était CIBLÉ : 4 échecs, les 20 tests #603/#604 d'origine
+       restés verts — la sentinelle discrimine, elle ne rougit pas en bloc.
+       4 break-tests, 4 ROUGE : clé solo qui relit le nom · horodatage retiré ·
+       `persisterFileDAttente` non exposée · horodatage ALÉATOIRE (témoin : il
+       séparerait aussi les pages d'une même remise, ce que le test refuse).
+       Vitest 408 / 4265 + Playwright 210/210, code 0. Release 1.106.11.
+     ⏳ DÛ À GRÉGOIRE : un lot de photos iPad contenant deux homonymes — les
+       deux élèves doivent recevoir leur copie.
+
+     ▣ ÉTAT DU PLAN À LA PAUSE (30 août, 15 h 30) : S0, S1, S2, S3 LIVRÉS,
+       mergés sur `main` et poussés. RESTENT S4 à S10 — voir le tableau d'état
+       du plan, qui est la seule vue d'ensemble. S4 vient ensuite et dépend de
+       S3, qui est fait. Rien n'est en suspens dans l'arbre.
+
      ⚠ SESSION PARALLÈLE DÉTECTÉE SUR LE MÊME DÉPÔT (14 h 54 - 14 h 55) :
        `Rapports/prompts-audit/` (deux fichiers neufs) et
        `scripts/audit-ssot.json`/`.md` régénérés. NON COMMITÉS ICI — ils
