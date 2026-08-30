@@ -173,12 +173,24 @@
        du plan, qui est la seule vue d'ensemble. S4 vient ensuite et dépend de
        S3, qui est fait. Rien n'est en suspens dans l'arbre.
 
-     ⚠ SESSION PARALLÈLE DÉTECTÉE SUR LE MÊME DÉPÔT (14 h 54 - 14 h 55) :
-       `Rapports/prompts-audit/` (deux fichiers neufs) et
-       `scripts/audit-ssot.json`/`.md` régénérés. NON COMMITÉS ICI — ils
-       appartiennent à l'autre chantier, qu'on ne coupe pas en deux. Le bloc
-       « 30 AOÛT (SOIR) » de ce SESSION.md vient d'elle et décrit un commit
-       déjà poussé (88a2a244) : embarqué ici parce que le fichier est partagé.
+     ▣ TRAVAIL COWORK EN PARALLÈLE, DANS LE MÊME DÉPÔT — RÉSOLU LE JOUR MÊME.
+       Pendant ces sessions terminal, Grégoire écrivait depuis Cowork : deux
+       prompts de cadrage d'audit (`Rapports/prompts-audit/`) et la sortie SSOT
+       régénérée (`scripts/audit-ssot.json`/`.md`) sont apparus dans l'arbre à
+       14 h 54 - 14 h 55, sans que je les aie touchés.
+       ➮ Traités par STAGING CHIRURGICAL : chacun de mes trois commits n'a
+         indexé que ses propres fichiers, nommés un par un. Le chantier de
+         l'autre n'a jamais été coupé en deux ni embarqué par accident.
+       ➮ `SESSION.md` est le seul fichier VRAIMENT partagé : le bloc
+         « 30 AOÛT (SOIR) » vient de Cowork et décrit un commit déjà poussé
+         (88a2a244), donc du travail terminé — embarqué ici sans risque.
+       ⮕ CLOS : les deux prompts sont commités sous leur propre message
+         (`8e3e99c9`, à la demande de Grégoire), la sortie SSOT dans
+         `836936d5`. Rien ne reste en suspens.
+       ⚠ Ce qui reste à retenir n'est PAS « une session concurrente » — c'était
+         le travail de Grégoire lui-même. C'est que deux écritures simultanées
+         sur un dépôt ne se distinguent pas à la lecture de `git status` : seul
+         le `--cached --stat` avant chaque commit dit ce qu'on emporte vraiment.
      ===================================================================== -->
 
 
