@@ -12,7 +12,8 @@
 | | |
 |---|---|
 | **Branche à ouvrir** | **`main`** — tout y est. Aucun travail en avance ailleurs. |
-| **Version** | **1.106.2** — build `0829-1813`, **POUSSÉE le 29 août en soirée** (`d1983402`). Patch : l'audit Évaluations du 25 août bouclé (#562, #560, #561, #566, #571, #567, #570, #568, #569, #572). Entrée 1.106 du changelog complétée de six items, jeton bumpé à la main. **Vitest 4074/4074 · Playwright vert.** Bump lancé session ouverte (règle assouplie par Grégoire ce jour : il recharge). |
+| **Version** | **1.106.3** — build `0830-0815`, **poussée le 30 août au matin** (`c2e12dcd`). Patch : **#522 — l'audit des courses lecture-modification-écriture est FAIT, et son lot 1 est livré** (la clé `pratiquesConfigurables` : 22 écritures passent par `db.modifier`). Entrée 1.106 du changelog complétée d'un item, jeton de `changelog-data.js` bumpé à la main. **Vitest 4082/4082 (391 fichiers) · Playwright 207/207.** ⚠ **Grégoire doit recharger sa session `file://`** : cinq jetons ont changé. |
+| **Version précédente** | **1.106.2** — build `0829-1813`, **POUSSÉE le 29 août en soirée** (`d1983402`). Patch : l'audit Évaluations du 25 août bouclé (#562, #560, #561, #566, #571, #567, #570, #568, #569, #572). Entrée 1.106 du changelog complétée de six items, jeton bumpé à la main. **Vitest 4074/4074 · Playwright vert.** Bump lancé session ouverte (règle assouplie par Grégoire ce jour : il recharge). |
 | **Version précédente** | **1.106.1** — build `0829-1113`, **POUSSÉE le 29 août à 12 h 40** (`ecd22a59`). Patch : #578 (cartouche : échelle choisie, listes rebranchées), #594 (bandeau de version au chargement), #563 (case « Reprise ciblée » retirée), #574 (plus d'échelle semée), #593. Entrée 1.106 du changelog complétée de quatre items, jeton bumpé à la main. **Vitest 4032/4032 · Playwright vert.** Session `file://` fermée par Grégoire pour ce bump. |
 | **Version précédente** | **1.106.0** — build `0829-0303`, **POUSSÉE le 29 août à 3 h 20** (`59c615bb`). Minor : les repères de maîtrise se posent partout où l'échelle se pense (#555 lot 2 complet, #577), plus #556, #563, #572 partiel, retrait « Alléger ». Entrée 1.106 du changelog écrite, son jeton bumpé à la main. **Vitest 4011/4011 · Playwright vert** (verdict enregistré au SHA par `pousser.sh`). ⚠ **Grégoire doit recharger sa session `file://`** : 27 jetons ont changé. |
 | **Version précédente** | **1.105.0** — build `0828-1405`, **DÉPLOYÉE le 28 août à 14 h 05**. Minor : une échelle porte ses deux **repères de maîtrise**, et les **32 comparaisons IDME écrites en dur** ont disparu des DEUX documents remis à l'élève (PDF de synthèse : 14 → 0 ; bilan à l'écran : 18 → 0). **Vitest 3887/3887 (364 fichiers) · Playwright 199** au moment du bump. ⚠ **Grégoire doit recharger sa session `file://`** : 28 jetons ont changé. |
@@ -26,7 +27,81 @@
 | ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE, DANS 4 JOURS** | **#427** + **#508**. ✅ **GRÉGOIRE TIENT LA DATE** (arbitré le 28 août au soir, option A ; « repousser » posé et écarté). ⮕ **DÛ PAR LUI, ET PAR PERSONNE D'AUTRE** : les trois noms Cloudflare, la durée de session, la règle `Include` de la policy dormante. ⮕ **MESURÉ le 28 août** : l'avis est bien en ligne aux deux endroits (`accueil.js`, `transitions.js`), et **le bandeau s'éteint SEUL le 1er septembre** — rien à retirer à la main. Reste à réécrire le paragraphe d'accueil **au présent**. |
 | ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. ⮕ **ET C'EST ARRIVÉ UNE SECONDE FOIS LE MÊME JOUR, dans l'autre sens.** Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les `BACKLOG.md` et `SESSION.md` de la session « présences » — l'inscription de l'item **#538** et la renumérotation **#534 → #537** vivent donc dans un commit qui parle d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc non réécrit. **Deux avertissements en un jour : sur ce dépôt, `git add` par chemins explicites n'est pas une préférence, c'est la seule méthode qui tienne.** |
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
-| **Dernière mise à jour** | **29 août 2026, 20 h 15** — session unique (journée entière). **Audit Évaluations bouclé** (#562, #560, #561, #566, #571, #567, #570, #568, #569, #572), #595 et #596 inscrits, artefact de vérification terrain remis. **1.106.2 poussée** (`d1983402`). Entrée précédente : **10 h 30** — session unique (matin). **#578 LIVRÉ** (option A) + régression du 26 août réparée (listes du formulaire de cartouche mortes) ; **#574 retrait LIVRÉ** (option B, sonde due) ; **#593 LIVRÉ** (n° 5-6-7, course fermée) ; **#563 LIVRÉ** (case retirée) ; **#594 LIVRÉ** (bandeau de version au chargement) ; **#562, #560, #561, #566, #571, #567, #570, #568, #569 et #572 LIVRÉS** (après 1.106.1 — **bump 1.106.2 dû**) ; **#595 inscrit** ; **référence unique créée** (`Rapports/SUIVI-conception-evaluations-2026-08.md`) ; #593 inscrit ; 1.106.0 déployée à 3 h. ✅ **1.106.1 poussée à 12 h 40** (`ecd22a59`). Entrée précédente : **3 h 40** — session unique (nuit). **1.106.0 poussée** ; **#578 : le diagnostic console est LIVRÉ** (`await _diagnostiquerEchellesGrilles()`), sentinelle 6 cas / 4 mutations rouges ; **le chiffre est DÛ par Grégoire**. Fait mesuré : l'éditeur de grille n'écrit jamais `echelleId`. Entrée précédente : **28 août, 21 h 15** — session unique (soir). **#555 lot 2 (d) et (e) + #577 LIVRÉS** ; #579 livré pour le cas de l'assistant ; **#592** inscrit. **Vitest 4011/4011** (377 fichiers) · **Playwright 201** (198 verts + 3 instables pré-existantes, vertes au second essai), sur arbre gelé. ⚠ **AUCUN BUMP** : du code a changé (6 fichiers `js/`, `?v=` bougés) mais je ne sais pas si la session `file://` de Grégoire est ouverte — **1.106.0 (minor) est DUE**, à lancer par `node scripts/release.mjs minor` au prochain démarrage. Entrée précédente : **20 h 15** — fin de journée, **trois sessions**. Les **21 arbitrages de Grégoire sont TRANCHÉS et consignés dans leurs items**. Livré : #555 lot 2 (b), #556, #557, l'audit des copies d'échelle, le diagnostic des résolveurs. **Vitest 3983/3983** (374 fichiers) · **Playwright 199/199**, relancés sur arbre gelé avant le push. **Aucun bump** : 1.105.0 tient — que de la documentation, aucun `?v=` à bouger. |
+| **Dernière mise à jour** | **30 août 2026, 8 h 20** — session unique (matin). **#522 : l'AUDIT est fait (213 séquences mesurées, 102 en course) et le LOT 1 est LIVRÉ** — rapport `Rapports/AUDIT-522-courses-lecture-ecriture-2026-08-30.md`. **1.106.3 poussée** (`c2e12dcd`). ⚠⚠ **LE FAIT À RETENIR : `getSync` NE PROTÈGE PAS** — dans `db.set`, l'écriture IndexedDB est attendue AVANT le rafraîchissement de localStorage, donc un concurrent lit encore l'ancienne valeur. ⚠ **Et le banc mentait** : Node n'a pas d'IndexedDB, `db.js` s'y rabat sur localStorage-seul où `set` est synchrone — les six cas passaient au VERT sur le code NON corrigé ; il faut forcer `useIndexedDB` avec une fausse connexion. **Reste 89 sites, quatre lots** ; le plus rentable est le helper `BibliothequeUI` (14 sites, 7 fichiers, un seul changement de contrat pour les cinq familles). Entrée précédente : **29 août 2026, 20 h 15** — session unique (journée entière). **Audit Évaluations bouclé** (#562, #560, #561, #566, #571, #567, #570, #568, #569, #572), #595 et #596 inscrits, artefact de vérification terrain remis. **1.106.2 poussée** (`d1983402`). Entrée précédente : **10 h 30** — session unique (matin). **#578 LIVRÉ** (option A) + régression du 26 août réparée (listes du formulaire de cartouche mortes) ; **#574 retrait LIVRÉ** (option B, sonde due) ; **#593 LIVRÉ** (n° 5-6-7, course fermée) ; **#563 LIVRÉ** (case retirée) ; **#594 LIVRÉ** (bandeau de version au chargement) ; **#562, #560, #561, #566, #571, #567, #570, #568, #569 et #572 LIVRÉS** (après 1.106.1 — **bump 1.106.2 dû**) ; **#595 inscrit** ; **référence unique créée** (`Rapports/SUIVI-conception-evaluations-2026-08.md`) ; #593 inscrit ; 1.106.0 déployée à 3 h. ✅ **1.106.1 poussée à 12 h 40** (`ecd22a59`). Entrée précédente : **3 h 40** — session unique (nuit). **1.106.0 poussée** ; **#578 : le diagnostic console est LIVRÉ** (`await _diagnostiquerEchellesGrilles()`), sentinelle 6 cas / 4 mutations rouges ; **le chiffre est DÛ par Grégoire**. Fait mesuré : l'éditeur de grille n'écrit jamais `echelleId`. Entrée précédente : **28 août, 21 h 15** — session unique (soir). **#555 lot 2 (d) et (e) + #577 LIVRÉS** ; #579 livré pour le cas de l'assistant ; **#592** inscrit. **Vitest 4011/4011** (377 fichiers) · **Playwright 201** (198 verts + 3 instables pré-existantes, vertes au second essai), sur arbre gelé. ⚠ **AUCUN BUMP** : du code a changé (6 fichiers `js/`, `?v=` bougés) mais je ne sais pas si la session `file://` de Grégoire est ouverte — **1.106.0 (minor) est DUE**, à lancer par `node scripts/release.mjs minor` au prochain démarrage. Entrée précédente : **20 h 15** — fin de journée, **trois sessions**. Les **21 arbitrages de Grégoire sont TRANCHÉS et consignés dans leurs items**. Livré : #555 lot 2 (b), #556, #557, l'audit des copies d'échelle, le diagnostic des résolveurs. **Vitest 3983/3983** (374 fichiers) · **Playwright 199/199**, relancés sur arbre gelé avant le push. **Aucun bump** : 1.105.0 tient — que de la documentation, aucun `?v=` à bouger. |
+
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 30 AOÛT 2026, 8 h 30 (MATIN)
+
+### ⏳ D'ABORD, ET AVANT TOUT AUTRE CHANTIER : L'ÉCHÉANCE DU 1er SEPTEMBRE
+
+**#427 + #508.** Grégoire a arbitré le 28 août (option A) : **il tient la date**. Deux versants.
+
+· **DÛ PAR GRÉGOIRE SEUL, dans la console Cloudflare** — aucune session ne peut le mesurer à sa
+  place : les **trois noms**, la **durée de session**, la règle `Include` réellement en place dans la
+  policy dormante. ⮕ Fiche opératoire prête :
+  `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`.
+· **DÛ CÔTÉ CODE, LE 1er SEPTEMBRE** : réécrire le paragraphe d'accueil **au présent**
+  (`js/accueil.js`) — il est encore au futur. **Les deux textes sont écrits d'avance** au §7 de la
+  fiche (refermage réussi / report). Le choix se fait **le jour même**, selon ce qui s'est passé.
+· ✅ **Rien à retirer à la main** : le bandeau daté s'éteint seul (`transitions.js`, condition de date).
+· ⚠ **Ne PAS prolonger la date sans réécrire le message** — « un avis périmé apprend à ne plus lire
+  la zone ».
+
+### CE QUI VIENT ENSUITE — #522, les quatre lots restants (89 sites)
+
+L'audit est FAIT et n'est pas à refaire :
+`Rapports/AUDIT-522-courses-lecture-ecriture-2026-08-30.md`. Le lot 1 (clé des pratiques) est livré
+en 1.106.3. **Ordre conseillé, et le plus rentable n'est pas le plus gros** :
+
+1. **Lot 4 — le helper `BibliothequeUI`** (14 sites, 7 fichiers, UN seul changement de contrat).
+   `dupliquerVersBibliotheque` et `dupliquerEtEditerItem` (`js/bibliotheque-ui.js`) font
+   `var liste = await d.lireListe();` puis `await d.ecrireListe(liste)`. ⮕ Remplacer le couple
+   `lireListe`/`ecrireListe` par un `modifierListe(mutateur)` **corrige les CINQ familles d'un coup**
+   (grilles, échelles, cartouches, productions, pratiques). À faire d'un seul geste, avec les cinq
+   appelants.
+2. **Lot 2 — grilles (19) + échelles (14) + `niveauxEchelle` (6)**, deux fichiers. Patron connu
+   (celui de #510 et du lot 1), aucune décision à prendre, gros volume mécanique.
+3. **Lot 3 — productions (12) + cartouches (9)**.
+4. **Lot 5 — étudiants (3) + divers (12)**, dont des drapeaux de migration qui ne tournent qu'au
+   démarrage : la course y est théorique. ⮕ **Mesurer avant de convertir : ce lot est probablement
+   bien plus petit qu'il n'en a l'air.**
+
+### LES QUATRE ITEMS DEMANDÉS LE 30 AOÛT ET NON TRAITÉS
+
+· **#595 — 78 variables CSS jamais définies** (~270 usages). Le cliquet à liste fermée existe déjà
+  (`sentinelle-567-variables-css-fantomes`) : chaque lot le fait baisser. Traiter **par familles de
+  nom** (bordure, gris, orange, radius, surface) en substituant par la palette. **Aucun alias « pour
+  faire taire »**. ⚠ Chantier de RENDU : Playwright/WebKit est la seule suite qui voit.
+· **#596 — clés `sessionStorage` non namespacées.** ⚠⚠ **ÉCART DE PRÉMISSE MESURÉ LE 30 AOÛT** :
+  l'énoncé dit « 6 clés, 5 fichiers, 21 sites » ; la mesure donne **11 fichiers et ~17 clés
+  distinctes** (53 occurrences). L'énoncé décrit le sous-ensemble `travaux-*` d'Import/Export, pas
+  l'état du dépôt. ⮕ **Trancher le périmètre AVANT d'ouvrir le lot** — namespacer à moitié casse les
+  lectures. Au passage : `travaux-mode-courant` est écrite et JAMAIS lue (à retirer).
+· **#519 — passe design (C1, C2, C3, C5).** ✅ **C2 est DÉBLOQUÉ** : sa dépendance #516 est livrée
+  depuis le 26 août. ⏳ **Arbitrage dû par Grégoire sur C5** (rangée de cinq boutons pleins
+  multicolores, « Supprimer » rouge entre « Dupliquer » et « Annuler », à un clic d'« Enregistrer »).
+· **#520 — ablation de l'« ANCIEN SYSTÈME » des échelles.** Deux blocs `u-hide` dans `index.html`
+  (~155 lignes + 6), ids dupliqués. ⚠⚠ **CE N'EST PAS UNE ABLATION COSMÉTIQUE** :
+  `js/echelles.js:3589` dit que le bouton de `sauvegarderNiveaux()` vit DANS ce bloc caché.
+  ⮕ **Auditer les appelants distants AVANT de retirer quoi que ce soit**, sinon un chemin d'écriture
+  disparaît en silence. Ablation avec sentinelle ratchet.
+
+### CE QUE LA SESSION DU 30 AOÛT A APPRIS, ET QUI RESSERVIRA
+
+· ⚠⚠ **`getSync` NE PROTÈGE D'AUCUNE COURSE.** Dans `db.set`, l'écriture IndexedDB est ATTENDUE
+  avant le rafraîchissement de localStorage : pendant tout cet aller-retour, `getSync` rend encore
+  l'ANCIENNE valeur. Seule une séquence **entièrement synchrone** (`getSync` → `setSync`, sans
+  suspension) est atomique.
+· ⚠⚠ **UN BANC VITEST NE VOIT PAS UNE COURSE D'ÉCRITURE** tant qu'on ne le force pas : Node n'a pas
+  d'IndexedDB, `db.js` s'y rabat sur le mode localStorage-seul où `set` écrit SYNCHRONEMENT. Six cas
+  écrits pour rougir passaient au VERT sur le code NON corrigé. ⮕ Poser `db.db = <fausse connexion>`
+  et `db.useIndexedDB = true` ; patron dans `sentinelle-522-pratiques-serialisees`.
+· **La sentinelle anti-cache ne dit vrai qu'APRÈS le commit de release** : lancée avant, elle a rendu
+  8 faux rouges (fichiers de la release précédente) pour 1 vrai. ⮕ Ordre : `release.mjs` → changelog
+  → commit → sentinelle.
+· **`release.mjs` ne bumpe que les fichiers modifiés AU MOMENT où il tourne.** Toucher au changelog
+  AVANT de le lancer, sinon le jeton de `changelog-data.js` est oublié (c'est le cinquième oubli
+  d'anti-cache en cinq jours, toujours le même motif).
+· **Fermer GitHub Desktop avant toute suite Playwright** — vérifié, respecté, 207/207 sans rougeur.
 
 ## ▶ POUR LA SESSION QUI PREND LE RELAIS — 29 août 2026, 10 h 30 (MATIN, SESSION UNIQUE)
 

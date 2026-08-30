@@ -7,6 +7,69 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 30 AOÛT 2026 (MATIN) : LA COURSE LECTURE-MODIFICATION-ÉCRITURE
+     EST MESURÉE, ET LA CLÉ DES PRATIQUES EST FERMÉE — #522 AUDIT + LOT 1.
+
+     ▣ MANDAT (Grégoire) : poursuivre ce qui n'est pas fait sur #595, #596,
+       #519, #520, #522. Cadrage fermé après audit : #522, le seul des cinq où
+       le défaut est une PERTE DE DONNÉES SILENCIEUSE. Release 1.106.3 poussée.
+
+     ▣ L'AUDIT. 213 séquences lire→écrire sur la même clé dans la même
+       fonction, dont 102 EN COURSE ; les 111 autres sont entièrement
+       synchrones, donc atomiques (mono-thread) — ne pas y toucher.
+       Rapport : `Rapports/AUDIT-522-courses-lecture-ecriture-2026-08-30.md`.
+
+     ▣ ⚠⚠ LE FAIT QUI A REDRESSÉ L'AUDIT, ET QUI VAUT POUR TOUT LE DÉPÔT.
+       `getSync` NE PROTÈGE PAS. Dans `db.set`, l'écriture IndexedDB est
+       ATTENDUE avant le rafraîchissement de localStorage : pendant tout cet
+       aller-retour, `getSync` rend encore l'ANCIENNE valeur. « Lecture
+       synchrone » ne veut donc PAS dire « séquence atomique ». Un audit
+       limité aux lectures `await` aurait manqué tout `pratiques-gestion.js`.
+
+     ▣ LIVRÉ — lot 1, la clé `pratiquesConfigurables`.
+       · 22 écritures passent par `db.modifier`. Six restent hors de la file,
+         NOMMÉES et motivées dans le cliquet à liste fermée.
+       · C'est le SEUL groupe de clés atteint par un déclencheur de SAISIE
+         (dix champs `data-on-change`) — et c'est le site que Grégoire avait
+         signalé en MAI 2026 (le radio « note chiffrée / niveau de performance »
+         qui « souvent n'est pas lu »). L'audit mécanique et son signalement
+         tombent au même endroit.
+       · Trois défauts trouvés en chemin : bornes d'index non vérifiées
+         (TypeError au lieu d'un refus) ; `adopterMaquette` écrivait DEUX fois
+         la collection ; `partagerPratique` relisait, ATTENDAIT la saisie du
+         formulaire de licence, puis réécrivait la collection lue AVANT la
+         question — la plus longue fenêtre du lot.
+       · Retirés : deux replis `catch → setSync` qui remettaient en place
+         l'instantané que la file sert à ne plus perdre.
+       Sentinelle `sentinelle-522-pratiques-serialisees` (8 cas). Break-test
+       4 mutations, 4 rouges, témoin vert.
+       Vitest 4082/4082 (391 fichiers) · Playwright 207/207 (7,2 min).
+
+     ▣ ⚠ FAUX-VERT ATTRAPÉ AU BANC — À RELIRE AVANT LES LOTS SUIVANTS.
+       Node n'a pas d'IndexedDB : `db.js` s'y rabat sur le mode
+       localStorage-seul, où `set` écrit SYNCHRONEMENT. La fenêtre de course
+       n'existe alors pas, et les six cas passaient au VERT sur le code NON
+       corrigé. Le banc doit forcer `useIndexedDB` avec une fausse connexion
+       (patron dans la sentinelle). C'est le piège de #510 sous une autre forme.
+
+     ▣ TROIS BANCS ADAPTÉS, sans affaiblissement : deux stubbaient `db` sans
+       `modifier` ; la sentinelle #476 exigeait `db.getSync` pour la relecture
+       des pratiques, alors que les quatre AUTRES familles utilisaient déjà
+       `await db.get` — les pratiques étaient l'exception, elles ne le sont plus.
+
+     ▣ ⚠ LA SENTINELLE ANTI-CACHE A RENDU 8 FAUX ROUGES + 1 VRAI. Lancée AVANT
+       le commit de release, elle liste les fichiers de la release PRÉCÉDENTE.
+       Le vrai : `changelog-data.js`, modifié APRÈS le passage de `release.mjs`
+       — le script bumpe les jetons des fichiers modifiés AU MOMENT où il tourne.
+       ⮕ Toucher au changelog AVANT de lancer le script, ou bumper à la main.
+
+     ▣ RESTE — 89 sites, quatre lots (détail dans l'item #522). Le plus
+       rentable n'est PAS le plus gros : le helper `BibliothequeUI` (14 sites,
+       7 fichiers) fait `await lireListe()` puis `ecrireListe()` — le corriger
+       UNE fois couvre les cinq familles.
+     =====================================================================
+
+<!-- =====================================================================
      SESSION — 28 AOÛT 2026 (SOIR, 21 h 15) : LES REPÈRES DE MAÎTRISE SE POSENT
      PARTOUT OÙ L'ÉCHELLE SE PENSE — #555 (d)+(e) ET #577 LIVRÉS.
 
