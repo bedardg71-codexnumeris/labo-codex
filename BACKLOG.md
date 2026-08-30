@@ -98,10 +98,26 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 > **D1** deux remises datées différemment = deux documents · **D2** sans groupe-cours actif,
 > l'import est refusé avec un message · **D3** « Renommer pour distinguer » est retiré.
 
-- [ ] **#607 — S1 · Retirer un jeton de reprise laisse le fichier de reprise actif** (constat S5).
-  `js/evaluation-jetons.js`. Après `retirerJetonReprise`, la résolution « plus récent » donne le
-  fichier de la reprise à l'originale. Correctif : `_detacherFichiersDeEvaluation` appelé avant
-  `_persisterEvaluationsJetons` dans les trois branches.
+- [x] **#607 — LIVRÉ le 30 août 2026 — S1 · Retirer un jeton de reprise laissait le fichier de reprise actif** (constat S5).
+  `js/evaluation-jetons.js`. Après `retirerJetonReprise`, la résolution « plus récent » donnait le
+  fichier de la reprise à l'originale : la ligne restaurée ouvrait le travail qu'on venait d'effacer.
+  ➮ **Correctif** : `_detacherFichiersDeEvaluation(evaluationId, mode)` appelée AVANT
+  `_persisterEvaluationsJetons` dans les trois branches — `corbeille` quand la reprise est annulée
+  (le blob reste intact, récupérable 30 jours), `delier` quand c'est l'originale qui disparaît
+  (`archiverOriginale: false` — l'élève a bien remis ce travail, on coupe seulement le lien mort).
+  Les deux `confirm` et les deux notifications ANNONCENT désormais le nombre de fichiers touchés.
+  ⚠ **Un second défaut trouvé en écrivant le correctif** : dans la branche #141, `remplaceeParId`
+  était `delete`é AVANT d'être lu — l'appel rendait `undefined` et ne détachait rien. La sentinelle
+  l'a attrapé ; sans elle le correctif serait passé pour bon sur deux branches sur trois.
+  ➮ Sentinelle `tests/unit/sentinelle-jeton-retire-fichier-reprise.test.js`, 7 cas dont un témoin de
+  mise en place (« sans retrait, le repli rend bien le fichier de la reprise ») ; **4 break-tests,
+  4 ROUGE**. Vitest 407 fichiers / 4249 tests, code de sortie 0.
+  ⏳ **Test manuel dû à Grégoire** (Mac et iPad) : appliquer puis retirer un jeton dans le
+  formulaire ; la ligne de l'originale doit rouvrir le fichier ORIGINAL, et le fichier de reprise
+  doit apparaître dans la Corbeille.
+  ⮕ **Le même trou existe sur le chemin le plus fréquenté** — `supprimerEvaluation`
+  (`js/liste-evaluations.js`) restaure l'originale sans toucher au fichier de la reprise. Inscrit en
+  T6.6 du plan, traité avec [[#612]].
 - [ ] **#608 — S2 · « Appliquer comme jeton » offert alors que le maximum par production est atteint** (constat S6).
   `js/travaux-ui.js`. Le fichier est importé, aucun jeton n'est consommé, l'écran annonce le contraire.
   Correctif : masquer le bouton au-delà du maximum, séparer `rattaches` de `compteur`.
@@ -120,6 +136,11 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `js/travaux-import.js`, `js/travaux-ui.js`, `js/liste-evaluations.js`. **D2 = A** : garde
   `groupeCoursActif` dans `confirmerImportPipeline`, refus dit. Plus bandeau « DA sans élève dans ce
   groupe » et lignes de rattrapage dans la liste.
+  ⮕ **T6.6 activée le 30 août 2026** (vérification T1.4 de [[#607]]) : `supprimerEvaluation`
+  (`js/liste-evaluations.js`) porte le trou de S5 sur le chemin le plus fréquenté — supprimer une
+  reprise depuis la liste restaure l'originale et laisse le fichier de la reprise actif, plus récent,
+  donc gagnant au repli (DA, production). Correctif : exporter `_detacherFichiersDeEvaluation` et
+  l'appeler quand `originaleRestauree` est vrai ; étendre la sentinelle #607, ne pas en créer une seconde.
 - [ ] **#613 — S7 · Restauration d'un ZIP : échecs de blobs avalés, « Import réussi » quand même** (constat S8).
   `js/import-export.js`. Correctif : compter les manquants, poser `blobStatut: 'manquant'`, une seule
   notification, « Import partiel » quand il en manque.

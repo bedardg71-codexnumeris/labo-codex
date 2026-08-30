@@ -17,12 +17,12 @@
 | Session | Constats | Statut | Date | Commit | Note |
 |---|---|---|---|---|---|
 | S0 — Préparation | — | LIVRÉ | 2026-08-30 | | D1=A, D2=A, D3=A · #607–#615 réservés · #606 coché (livré `c24036e7`) |
-| S1 — Jetons ↔ fichiers | S5 | À FAIRE | | | #607 |
+| S1 — Jetons ↔ fichiers | S5 | LIVRÉ | 2026-08-30 | COMMIT_S1 | #607 · sentinelle 7 cas, 4 break-tests, 4 ROUGE · ⏳ test manuel Mac+iPad dû à Grégoire · T6.6 activée |
 | S2 — Jeton et maximum par production | S6 | À FAIRE | | | #608 |
 | S3 — Assemblage automatique | B1, M5 | À FAIRE | | | #609 · D1 = A (deux documents) |
 | S4 — Reprise après interruption, rattachement | S1, S2 | À FAIRE | | | #610 · après S3, jamais en parallèle |
 | S5 — Appariement par nom | S3 | À FAIRE | | | #611 |
-| S6 — DA inconnu, groupe absent | S4, S7 | À FAIRE | | | #612 · D2 = A (refus dit) · T6.1 levée : #606 est mergé |
+| S6 — DA inconnu, groupe absent | S4, S7 | À FAIRE | | | #612 · D2 = A (refus dit) · T6.1 levée : #606 est mergé · **T6.6 activée** (même trou que S5 dans `supprimerEvaluation`) |
 | S7 — Restauration ZIP | S8 | À FAIRE | | | #613 |
 | S8 — Codex | S9, S10 | À FAIRE | | | #614 |
 | S9 — Mineurs | M1–M4, M10 | À FAIRE | | | #615 · D3 = A (retirer) |
@@ -76,12 +76,13 @@ Trois décisions fermées, une recommandation chacune. Les consigner ici, avec l
 
 Fichier : `js/evaluation-jetons.js`. Risque de régression : faible (module isolé, appelants `evaluation-sauvegarde.js:915, 941`).
 
-- [ ] **T1.1** — Sentinelle `tests/unit/sentinelle-jeton-retire-fichier-reprise.test.js` : charger `evaluation-jetons.js` avec un stub `travauxStockage` ; deux évaluations (originale archivée, reprise) et deux fichiers (original sans `evaluationId`, reprise avec) ; `retirerJetonReprise(reprise.id)` doit passer le fichier de reprise par `deplacerEnCorbeille`. La faire ROUGIR sur le code actuel.
-- [ ] **T1.2** — Ajouter `_detacherFichiersDeEvaluation(evaluationId, mode)` (diff S5 de l'audit) ; l'appeler AVANT `_persisterEvaluationsJetons` dans les trois branches : originale supprimée (`archiverOriginale = false`), originale restaurée (#141), reprise retirée. Vérifier que `mettreAJourFichier` accepte `evaluationId` et `estReprise` (`travaux-stockage.js:419`).
-- [ ] **T1.3** — Mettre à jour le texte du `confirm` (`evaluation-jetons.js:579-583`) : annoncer la mise en corbeille du fichier de reprise.
-- [ ] **T1.4** — Vérifier `_restaurerOriginaleSiReprise` dans `liste-evaluations.js` (chemin « supprimer une reprise », sentinelle 2026-06-08) : a-t-il le même trou ? Si oui, l'inscrire comme **T6.6** ; sinon le noter ici comme vérifié.
-- [ ] **T1.5** — Break-test (retirer un appel → rouge), suite complète, test manuel : appliquer puis retirer un jeton dans le formulaire ; la ligne de l'originale doit rouvrir le fichier original.
-- [ ] **T1.6** — Commit, release patch, merge, tableau d'état, `SESSION.md`.
+- [x] **T1.1** — Sentinelle `tests/unit/sentinelle-jeton-retire-fichier-reprise.test.js` : charger `evaluation-jetons.js` avec un stub `travauxStockage` ; deux évaluations (originale archivée, reprise) et deux fichiers (original sans `evaluationId`, reprise avec) ; `retirerJetonReprise(reprise.id)` doit passer le fichier de reprise par `deplacerEnCorbeille`. La faire ROUGIR sur le code actuel.
+- [x] **T1.2** — Ajouter `_detacherFichiersDeEvaluation(evaluationId, mode)` (diff S5 de l'audit) ; l'appeler AVANT `_persisterEvaluationsJetons` dans les trois branches : originale supprimée (`archiverOriginale = false`), originale restaurée (#141), reprise retirée. Vérifier que `mettreAJourFichier` accepte `evaluationId` et `estReprise` (`travaux-stockage.js:419`).
+- [x] **T1.3** — Mettre à jour le texte du `confirm` (`evaluation-jetons.js:579-583`) : annoncer la mise en corbeille du fichier de reprise.
+- [x] **T1.4** — Vérifier `_restaurerOriginaleSiReprise` dans `liste-evaluations.js` (chemin « supprimer une reprise », sentinelle 2026-06-08) : a-t-il le même trou ? Si oui, l'inscrire comme **T6.6** ; sinon le noter ici comme vérifié.
+  **VÉRIFIÉ le 2026-08-30 : OUI, le même trou, sur le chemin le plus fréquenté.** `supprimerEvaluation` (`liste-evaluations.js:2031-2066`) appelle `restaurerOriginaleSiReprise`, retire les quatre marqueurs d'archivage de l'originale, filtre la reprise — et ne touche à aucun fichier. Le fichier de la reprise garde son `evaluationId` mort et sa `dateModification` la plus récente ; la ligne de l'originale restaurée ouvre le travail de la reprise effacée, exactement comme dans S5. La différence est de porte, pas de mécanisme : ici on supprime l'évaluation, là on retire le jeton. ⮕ **Inscrit en T6.6.**
+- [x] **T1.5** — Break-test (retirer un appel → rouge), suite complète, test manuel : appliquer puis retirer un jeton dans le formulaire ; la ligne de l'originale doit rouvrir le fichier original.
+- [x] **T1.6** — Commit, release patch, merge, tableau d'état, `SESSION.md`.
 
 **Critère de fin** : après `retirerJetonReprise`, `trouverFichierPourEvaluation(originale)` rend le fichier original ; le fichier de reprise est en corbeille.
 
@@ -157,7 +158,7 @@ Fichiers : `js/travaux-import.js` (`detecterFichiersDAInconnu`), `js/travaux-ui.
 - [ ] **T6.3** — `travaux-import.js` : `detecterFichiersDAInconnu` + export.
 - [ ] **T6.4** — `travaux-ui.js` : bandeau « DA sans élève dans ce groupe » ; corriger le message « autre GC » (diff S4) ; garde `groupeCoursActif` dans `confirmerImportPipeline` (si D2 = A). Ne PAS retirer le repli de `obtenirFichiersGroupeActif` (60 appelants non audités).
 - [ ] **T6.5** — `liste-evaluations.js` : étendre la condition des lignes de rattrapage ; poser `etudiantManquant: !etudiant` (diff S4).
-- [ ] **T6.6** — (réservé à T1.4 si nécessaire.)
+- [ ] **T6.6** — (réservé à T1.4 — **ACTIVÉ le 2026-08-30**.) `supprimerEvaluation` (`js/liste-evaluations.js`) porte le trou de S5 sur le chemin le plus fréquenté : supprimer une reprise depuis la liste restaure l'originale et laisse le fichier de la reprise actif, plus récent, donc gagnant au repli (DA, production). Correctif : exporter `_detacherFichiersDeEvaluation` (#607, `js/evaluation-jetons.js`) et l'appeler avant `sauvegarderDonneesSelonMode`, mode `corbeille`, quand `originaleRestauree` est vrai. Étendre la sentinelle #607 plutôt que d'en créer une seconde ; le `confirm` de suppression doit annoncer le sort du fichier, comme celui du retrait de jeton.
 - [ ] **T6.7** — Break-test, suite complète, test manuel : fichier `12345678_devoir.pdf` ; supprimer le groupe actif puis tenter un import.
 - [ ] **T6.8** — Commit, release, merge, tableau, `SESSION.md`.
 
