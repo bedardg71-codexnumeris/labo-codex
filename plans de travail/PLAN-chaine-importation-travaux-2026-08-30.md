@@ -212,6 +212,27 @@ Fichier : `js/import-export.js` (`_restaurerBlobsDepuisZip` et ses deux appelant
 
 **Critère de fin** : une seule notification, compte exact, métadonnées marquées, jamais « réussi » sur un import partiel.
 
+> ⚠ **DEUX ÉCARTS DANS LE DIFF S8 DE L'AUDIT** — relevés par la session `kuekatsheu-e6`
+> le 30 août 2026, vérifiés au code par `kuekatsheu-c2`. **Ne pas appliquer le diff tel
+> quel.**
+>
+> 1. **Le diff ne convertit que le retour final.** `_restaurerBlobsDepuisZip`
+>    (`js/import-export.js:1358`) a DEUX sorties anticipées `return 0` — `!donnees._zipTravaux`
+>    et `metadonnees.length === 0`. Converties nulle part par le diff : les appelants liraient
+>    `resBlobs.restaures` sur un nombre, donc `undefined`, valeur qu'on lit comme un zéro sans
+>    le savoir. Les convertir aussi, et poser un cas de sentinelle sur la forme stable
+>    (`{ restaures: 0, manquants: 0 }`). Même défaut que celui fermé en S2 : un retour numérique
+>    nu qui devient un objet ne se convertit pas à un seul endroit.
+> 2. **Le diff perd la moitié du contrat qu'il prétend copier.** Il pousse `idsManquants.push(f.id)`
+>    dans trois branches sans reprendre la garde que `js/codex.js:686-689` porte déjà :
+>    `blobStatut !== 'exporte'` — « un statut `exporte` n'a légitimement pas de blob dans le ZIP,
+>    le blob avait déjà quitté l'app au moment de l'export ». Appliqué tel quel, un import
+>    **complet** s'annoncerait **partiel**, et un `'exporte'` légitime serait écrasé par un
+>    `'manquant'` faux (perte d'information, pas seulement message inexact). La garde doit
+>    gouverner les DEUX gestes : ni compté manquant, ni marqué.
+>    ⮕ Break-test attendu : un ZIP dont tous les fichiers absents sont `blobStatut: 'exporte'`
+>    rend `manquants: 0` et annonce un import COMPLET. Muter la garde doit rougir.
+
 ---
 
 ## S8 — Codex (constats S9, S10)
