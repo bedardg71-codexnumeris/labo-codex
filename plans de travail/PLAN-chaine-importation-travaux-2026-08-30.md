@@ -29,7 +29,7 @@
 | S5 — Appariement par nom | S3 | À FAIRE | | | #611 |
 | S6 — DA inconnu, groupe absent | S4, S7 | À FAIRE | | | #612 · D2 = A (refus dit) · T6.1 levée : #606 est mergé · **T6.6 activée** (même trou que S5 dans `supprimerEvaluation`) |
 | S7 — Restauration ZIP | S8 | À FAIRE | | | #613 |
-| S8 — Codex | S9, S10 | LIVRÉ | 2026-08-30 | `785f7887` | #614 · session c3 · sentinelle 15 cas, 8 break-tests, 8 ROUGE · T8.1 mesuré (structure `id` confirmée) · arbitrage **fail-closed** sur la fusion · ⏳ release en attente du go de Grégoire · ⏳ divergence fail-open du chemin « ouvrir » à trancher |
+| S8 — Codex | S9, S10 | LIVRÉ | 2026-08-30 | `785f7887` + `4b81842f` | #614 · session e8 · sentinelle 15 cas, 8 break-tests, 8 ROUGE · T8.1 mesuré (structure `id` confirmée) · arbitrage **fail-closed** sur la fusion · **pas de release propre — décision Grégoire du 30 août : une seule release groupée à la fin des trois chantiers** · ⏳ divergence fail-open du chemin « ouvrir » à trancher |
 | S9 — Mineurs | M1–M4, M10 | À FAIRE | | | #615 · D3 = A (retirer) |
 | S10 — Tests sur appareil | angles morts | À FAIRE | | | avec Grégoire, iPad + Mac |
 
@@ -250,7 +250,13 @@ Fichier : `js/codex.js` (`_fusionnerTravaux`, plan de purge #336). Risque : faib
 - [x] **T8.3** — `validerMagicBytes` dans `_fusionnerTravaux` (diff S9).
 - [x] **T8.4** — Clés `corbeilleFichiers` et `fichiersModelisation` dans le recensement des références (diff S10).
 - [x] **T8.5** — Break-test, suite complète.
-- [~] **T8.6** — Commit `785f7887` FAIT · tableau et `SESSION.md` FAITS · **release EN ATTENTE du go de Grégoire** (prévenance de c2 et e6 avant `release.mjs`).
+- [x] **T8.6** — Commits `785f7887` (correctif) et `4b81842f` (suivi) · tableau, BACKLOG et `SESSION.md` FAITS.
+  · **Release : AUCUNE pour S8.** Décision de Grégoire, 30 août 2026 — une seule release groupée quand les
+    trois chantiers du soir (S7, S8, S4) sont commités. Motif mesuré : `release.mjs` réunit l'arbre de
+    travail ET tout ce qui a changé depuis la release précédente (`scripts/release.mjs:189-214`), donc une
+    release lancée par une session bumpe dans `index.html` les `?v=` de fichiers que les AUTRES n'ont pas
+    encore commités. Vaut pour S7 (T7.5) et pour S4.
+  · ⏳ Push en attente du vert de c2 — le hook `pre-push` teste l'arbre de travail, pas le commit.
 
 **Critère de fin** : aucun blob n'entre par la fusion sans validation ; la purge ne recense jamais la corbeille ni la modélisation.
 
