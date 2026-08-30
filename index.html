@@ -5331,6 +5331,57 @@
 
                                 <!-- Boutons actions en haut à droite -->
                                 <div class="u-flex-gap-10 u-mb-20 u-text-right" style="justify-content: flex-end">
+                                    <!-- #503 ÉTENDU AUX CARTOUCHES (30 août 2026, demande de Grégoire) —
+                                         les actions de la fiche vivent en tête, à côté de « + Nouvelle
+                                         cartouche », comme pour la grille et l'échelle, plutôt qu'au terme
+                                         d'un écran qu'il faut parcourir pour enregistrer. Elles n'ont de
+                                         sens que si une fiche est ouverte : `lierActionsAuFormulaire`
+                                         (main.js) les fait suivre `#infoCartouche`, en l'observant. -->
+                                    <div id="actionsFicheCartouche" class="u-flex-gap-10 u-hide" style="display: none">
+                                        <!-- Boutons gauche (actions sur la cartouche) -->
+                                        <div class="u-flex-gap-10">
+                                            <button id="btnDupliquerCartouche" class="btn btn-secondaire u-hide" data-action="dupliquerCartoucheActive" title="Créer une copie de cette cartouche">
+                                                Dupliquer
+                                            </button>
+                                        </div>
+                                        <!-- Boutons droite (actions principales) -->
+                                        <div class="u-flex-gap-10">
+                                            <button id="btnSupprimerCartouche" class="btn btn-supprimer u-hide" data-action="supprimerCartoucheActive" title="Supprimer cette cartouche">
+                                                Supprimer
+                                            </button>
+                                            <button class="btn btn-annuler" data-action="annulerFormCartouche">Annuler</button>
+                                            <button class="btn btn-confirmer" data-action="sauvegarderCartoucheComplete">
+                                                Enregistrer
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- LES TROIS ACTIONS DE DOCUMENT, hors de la barre de fiche
+                                         (30 août 2026, demande de Grégoire). Deux raisons distinctes de
+                                         les tenir à part, et elles ne se recouvrent pas :
+
+                                         · `#actionsFicheCartouche` porte les actions de FICHE, et rien
+                                           d'autre — Dupliquer, Supprimer, Annuler, Enregistrer. C'est
+                                           exactement la composition de la grille et de l'échelle, et
+                                           c'est ce qui rend les trois écrans lisibles de la même façon.
+                                         · ⚠ #531 — « Télécharger un modèle » ne porte PAS `u-hide` : il
+                                           sert AVANT qu'une cartouche existe. Le ranger dans une barre
+                                           qui suit la fiche le ferait disparaître exactement quand il
+                                           est utile. Les deux exports, eux, gardent leur `u-hide` :
+                                           cartouches.js les bascule un à un, comme avant le déplacement.
+                                    -->
+                                    <div class="u-flex-gap-10">
+                                        <button id="btnExporterPDFCartouche" class="btn btn-secondaire u-hide" data-action="exporterCartoucheSelectionneeEnPDF" title="Exporter cette cartouche en PDF">
+                                            Exporter en PDF
+                                        </button>
+                                        <button id="btnExporterTexteCartouche" class="btn btn-secondaire u-hide" data-action="exporterCartoucheEnTexte" title="Exporter cette cartouche en format texte modifiable (.md)">
+                                            Exporter en texte
+                                        </button>
+                                        <button id="btnModeleCartouche" class="btn btn-secondaire" data-action="telechargerModeleCartouche" title="Télécharger un modèle texte à faire remplir, puis à réimporter">
+                                            Télécharger un modèle
+                                        </button>
+                                    </div>
+
                                     <button data-action="creerNouvelleCartouche" class="btn btn-principal">
                                         + Nouvelle cartouche
                                     </button>
@@ -5463,39 +5514,6 @@
 
                                 <!-- Panneau métadonnées (Beta 95.1) -->
                                 <div id="panneauMetadonneesCartouche"></div>
-
-                                <!-- Boutons du formulaire -->
-                                <div class="btn-groupe u-flex-between" id="cartoucheBoutonsAction" style="margin-top: 30px">
-                                    <!-- Boutons gauche (actions sur la cartouche) -->
-                                    <!-- Note: Export/Import se font maintenant via la bibliothèque -->
-                                    <div class="u-flex-gap-10">
-                                        <button id="btnDupliquerCartouche" class="btn btn-secondaire u-hide" data-action="dupliquerCartoucheActive" title="Créer une copie de cette cartouche">
-                                            Dupliquer
-                                        </button>
-                                        <button id="btnSupprimerCartouche" class="btn btn-supprimer u-hide" data-action="supprimerCartoucheActive" title="Supprimer cette cartouche">
-                                            Supprimer
-                                        </button>
-                                        <button id="btnExporterPDFCartouche" class="btn btn-secondaire u-hide" data-action="exporterCartoucheSelectionneeEnPDF" title="Exporter cette cartouche en PDF">
-                                            Exporter en PDF
-                                        </button>
-                                        <!-- #531 — le MODÈLE vide, construit depuis la grille et l'échelle choisies.
-                                             Visible en permanence : il sert AVANT qu'une cartouche existe, contrairement
-                                             à « Exporter en texte » qui exporte une cartouche déjà remplie. -->
-                                        <button id="btnModeleCartouche" class="btn btn-secondaire" data-action="telechargerModeleCartouche" title="Télécharger un modèle texte à faire remplir, puis à réimporter">
-                                            Télécharger un modèle
-                                        </button>
-                                        <button id="btnExporterTexteCartouche" class="btn btn-secondaire u-hide" data-action="exporterCartoucheEnTexte" title="Exporter cette cartouche en format texte modifiable (.md)">
-                                            Exporter en texte
-                                        </button>
-                                    </div>
-                                    <!-- Boutons droite (actions principales) -->
-                                    <div class="u-flex-gap-10">
-                                        <button class="btn btn-annuler" data-action="annulerFormCartouche">Annuler</button>
-                                        <button class="btn btn-confirmer" data-action="sauvegarderCartoucheComplete">
-                                            Enregistrer
-                                        </button>
-                                    </div>
-                                </div>
 
                             </div><!-- fin zone-principale -->
 
@@ -14640,7 +14658,7 @@
     <script src="js/export-resultats-finaux.js?v=2026061901"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260830a"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260830b"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
