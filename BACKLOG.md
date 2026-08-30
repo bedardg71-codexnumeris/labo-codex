@@ -3837,10 +3837,28 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ✅ **VÉRIFIÉ le 28 août — sa prémisse est juste** : l'avis est bien en ligne aux deux endroits,
   `js/accueil.js` (le paragraphe d'accueil) et `js/transitions.js` (le bandeau daté).
   ⮕ **ET LE BANDEAU S'ÉTEINT SEUL LE 1er SEPTEMBRE** (`transitions.js`, condition de date) : il n'y a
-  **rien à retirer manuellement**. Le commentaire du code dit la suite : « #508 prend le relais avec un
-  paragraphe d'accueil rédigé au présent ».
-  ⏳ **CE QUI RESTE À FAIRE LE 1er SEPTEMBRE, et rien d'autre** :
-  · réécrire le paragraphe d'accueil **au présent** (`js/accueil.js`) — il est aujourd'hui au futur ;
+  **rien à retirer manuellement POUR L'UTILISATEUR**. Le commentaire du code dit la suite : « #508 prend
+  le relais avec un paragraphe d'accueil rédigé au présent ».
+  ⚠⚠ **MAIS LE DÉPÔT, LUI, A TROIS GESTES À FAIRE — mesuré le 30 août 2026, et cette ligne disait le
+  contraire jusque-là.** « Rien à retirer » était vrai de l'écran et faux du code : l'entrée
+  `avis-identification-2026-09-01` survit à sa propre condition, et **sa spec rougit toute seule le
+  1er septembre**, c'est-à-dire pendant la release du jour même. Détail complet au **§8 bis** de
+  `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`.
+  ⏳ **CE QUI RESTE À FAIRE LE 1er SEPTEMBRE — TROIS GESTES, ET DANS LES DEUX BRANCHES** :
+  · réécrire le paragraphe d'accueil **au présent** (`js/accueil.js:84`) — il est aujourd'hui au futur ;
+    si le refermage n'a PAS eu lieu, le retirer purement et simplement (les deux textes sont au §8) ;
+  · **retirer l'entrée `avis-identification-2026-09-01`** de `js/transitions.js` (sa condition rend
+    `false` dès minuit : elle ne s'affichera plus jamais, mais son texte annonce encore au futur une
+    identification déjà en place ou reportée) et mettre à jour le commentaire de tête de
+    `js/accueil.js` (lignes 53-61) qui la décrit ;
+  · **retirer la spec `tests/integration/avis-identification-bandeau-508.spec.js`** avec elle. Sa
+    partie 3 s'exécute sous l'horloge RÉELLE — la substitution de `Date` est défaite dans le `finally`
+    juste avant — et `evaluerTransitions()` (`transitions.js:254`) filtre sur `t.condition()`. L'avis
+    étant la seule entrée sans champ `sections`, aucune autre ne peut le remplacer sur l'accueil :
+    `transition-bandeau` sera absent et la spec tombe à la PREMIÈRE de ses huit assertions d'affichage.
+    ⚠ Ne PAS la « réparer » en y simulant la date — elle testerait une entrée qui n'existe plus.
+    ✅ `tests/integration/transitions-ciblage-section.spec.js` est immunisée (elle neutralise l'avis par
+    sa préférence) : ne pas y toucher.
   · ne PAS prolonger la date sans réécrire le message : « un avis périmé apprend à ne plus lire la zone »
     (avertissement déjà dans `transitions.js`).
   ✅ **DÉBLOQUÉ le 26 août** : #427 a désormais une DATE (le 1er septembre) et une fiche opératoire.
