@@ -288,12 +288,16 @@ const TOLEREES = {
     // la main, donc rien ne peut s'y intercaler (mono-thread). Les convertir
     // exigerait de les rendre asynchrones, donc d'auditer leurs appelants.
     'js/pratiques-gestion.js': {
-        'copierPratiqueDepuisTrimestre': 'synchrone de bout en bout ; rend son résultat à l\'appelant',
-        // Le helper transversal `BibliothequeUI` fait `await d.lireListe()` : la
-        // course y est réelle, mais il sert AUSSI grilles, échelles, cartouches
-        // et productions. Sa conversion est le lot « bibliothèques » de #522.
-        'dupliquerPratiqueBibliotheque': 'écrit via BibliothequeUI.dupliquerVersBibliotheque (helper transversal)',
-        'dupliquerEtEditerPratique': 'écrit via BibliothequeUI.dupliquerEtEditerItem (helper transversal)'
+        'copierPratiqueDepuisTrimestre': 'synchrone de bout en bout ; rend son résultat à l\'appelant'
+        // ⮕ DEUX ENTRÉES RETIRÉES LE 30 AOÛT (lot 4) : `dupliquerPratiqueBibliotheque`
+        // et `dupliquerEtEditerPratique` n'écrivaient pas elles-mêmes — elles
+        // passaient par le helper transversal `BibliothequeUI`, qui faisait
+        // `await d.lireListe()` puis `await d.ecrireListe(liste)`. Le helper
+        // prend désormais un `modifierListe(mutateur)` sérialisé par
+        // `db.modifier`, et les cinq familles (grilles, échelles, cartouches,
+        // productions, pratiques) sont couvertes par ce seul changement.
+        // Le cliquet les a réclamées de lui-même : c'est son versant inverse,
+        // celui qui refuse qu'une tolérance survive à sa raison d'être.
     },
     'js/pratiques.js': {
         'migrerConfigurationsSpecifiques': 'migration de démarrage, synchrone, exécutée une seule fois',

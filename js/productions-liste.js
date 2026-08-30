@@ -35,8 +35,7 @@ async function dupliquerEtEditerProduction(id) {
     await BibliothequeUI.dupliquerEtEditerItem({
         id: id,
         prefixeId: 'PROD_',
-        lireListe: async () => await db.get(getCleProductions()) || [],
-        ecrireListe: async (liste) => { await db.set(getCleProductions(), liste); },
+        modifierListe: (mutateur) => db.modifier(getCleProductions(), mutateur, []),
         // ✅ D9 + D3 (arbitrage du 24 août) — PLUS DE RETOUCHE ICI. `forkerItem`
         // renomme désormais le champ qui existe : `titre` pour une production, et
         // par `nommerCopie`. Avant, il posait un `nom` que la production n'avait

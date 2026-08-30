@@ -2710,8 +2710,7 @@ async function dupliquerGrilleBibliotheque(id) {
     await BibliothequeUI.dupliquerVersBibliotheque({
         id: id,
         prefixeId: 'GRILLE_',
-        lireListe: async () => await db.get(cle('grillesTemplates')) || [],
-        ecrireListe: async (liste) => { await db.set(cle('grillesTemplates'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
+        modifierListe: (mutateur) => db.modifier(cle('grillesTemplates'), mutateur, []), // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
         nommerLaCopie: (copie, source, liste) => { copie.nom = nommerCopie(source.nom, liste); },
         // ✅ D5 — aligné sur les trois autres familles : `forgerInspireDe` pose
         // aussi `sourceId`, ce qui rend l'arbre de filiation décidable.
@@ -3120,8 +3119,7 @@ async function dupliquerEtEditerGrille(id) {
     await BibliothequeUI.dupliquerEtEditerItem({
         id: id,
         prefixeId: 'GRILLE_',
-        lireListe: async () => await db.get(cle('grillesTemplates')) || [],
-        ecrireListe: async (liste) => { await db.set(cle('grillesTemplates'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
+        modifierListe: (mutateur) => db.modifier(cle('grillesTemplates'), mutateur, []), // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
         rafraichirListe: async () => { await afficherListeGrilles(); },
         chargerPourModif: async (idCopie) => { await chargerGrillePourModif(idCopie); },
         champFocus: 'nomGrilleTemplate'

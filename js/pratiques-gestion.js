@@ -1028,8 +1028,7 @@ async function dupliquerPratiqueBibliotheque(pratiqueId) {
         // seulement par la sérialisation de la persistance. Aligné sur
         // copierPratiqueDepuisTrimestre (Brique C pas 5).
         cloneProfond: true,
-        lireListe: () => db.getSync(cle('pratiquesConfigurables'), null) || [],
-        ecrireListe: (liste) => { db.setSync(cle('pratiquesConfigurables'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
+        modifierListe: (mutateur) => db.modifier(cle('pratiquesConfigurables'), mutateur, []), // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
         // ✅ D3 (arbitrage du 24 août) — `nommerCopie` remplace la concaténation
         // nue, qui empilait « X (copie) (copie) ».
         nommerLaCopie: (copie, source, liste) => { copie.nom = nommerCopie(source.nom, liste); },
@@ -1115,8 +1114,7 @@ async function dupliquerEtEditerPratique(id) {
     await BibliothequeUI.dupliquerEtEditerItem({
         id: id,
         prefixeId: 'pratique_',
-        lireListe: () => db.getSync(cle('pratiquesConfigurables'), null) || [],
-        ecrireListe: (liste) => { db.setSync(cle('pratiquesConfigurables'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
+        modifierListe: (mutateur) => db.modifier(cle('pratiquesConfigurables'), mutateur, []), // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
         repliSource: async (idSource) => (
             typeof obtenirConfigurationPratiqueParId === 'function'
                 ? await obtenirConfigurationPratiqueParId(idSource)
