@@ -1583,13 +1583,18 @@
         // purge QUE le trimestre actif — les copies archivées d'autres trimestres sont
         // des enregistrements figés (reproductibilité des notes), on n'y touche pas.
         try {
-            let templates = db.getSync(cle('grillesTemplates'), []) || [];
-            const avant = templates.length;
-            templates = templates.filter(g => g.id !== grilleId);
-            if (templates.length !== avant) {
-                // security-ok: filtre d'une collection DÉJÀ stockée (retrait d'un id), aucune donnée externe.
-                await db.set(cle('grillesTemplates'), templates);
-            }
+            // ⚠ R2 — « lecture synchrone » ne veut pas dire « séquence atomique » :
+            // dans `db.set`, l'écriture IndexedDB est attendue AVANT le
+            // rafraîchissement de localStorage, et `getSync` rend encore
+            // l'ancienne valeur pendant tout cet aller-retour.
+            // security-ok: filtre d'une collection DÉJÀ stockée (retrait d'un id), aucune donnée externe.
+            await db.modifier(cle('grillesTemplates'), (lues) => {
+                const templates = lues || [];
+                const restants = templates.filter(g => g.id !== grilleId);
+                // Rien retiré : le mutateur rend `undefined`, aucune écriture.
+                if (restants.length === templates.length) return undefined;
+                return restants;
+            }, []);
         } catch (e) {
             console.warn('[donnees-v2] Erreur suppression grille templates:', e.message);
         }
@@ -1630,13 +1635,15 @@
         // #358 Option A : `cle('echellesTemplates')` = `<trim>_echellesTemplates`
         // (trimestre actif uniquement — archives figées intactes, cf. grilles).
         try {
-            let templates = db.getSync(cle('echellesTemplates'), []) || [];
-            const avant = templates.length;
-            templates = templates.filter(e => e.id !== echelleId);
-            if (templates.length !== avant) {
-                // security-ok: filtre d'une collection DÉJÀ stockée (retrait d'un id), aucune donnée externe.
-                await db.set(cle('echellesTemplates'), templates);
-            }
+            // ⚠ R2 — même régime que côté grilles : `getSync` ne protège de rien.
+            // security-ok: filtre d'une collection DÉJÀ stockée (retrait d'un id), aucune donnée externe.
+            await db.modifier(cle('echellesTemplates'), (lues) => {
+                const templates = lues || [];
+                const restants = templates.filter(e => e.id !== echelleId);
+                // Rien retiré : le mutateur rend `undefined`, aucune écriture.
+                if (restants.length === templates.length) return undefined;
+                return restants;
+            }, []);
         } catch (e) {
             console.warn('[donnees-v2] Erreur suppression échelle templates:', e.message);
         }
