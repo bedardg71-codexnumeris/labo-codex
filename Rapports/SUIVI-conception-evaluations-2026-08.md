@@ -9,7 +9,7 @@
 > commit). `RELAIS.md` renvoie ici au lieu de redire. Une ligne sans item est un trou à inscrire, pas
 > à oublier.
 >
-> **État au 29 août 2026, 1.106.1 (+ #562 livré après le bump), `main`.** Créé par Claude Code à la demande de Grégoire
+> **État au 30 août 2026, 1.106.3 sur `main` (+ #555·2 reporté APRÈS le bump — 1.106.4 due).** Créé par Claude Code à la demande de Grégoire
 > (option A : point zéro = 25 août ; la seconde passe du 27 s'y superpose en second bloc).
 
 ---
@@ -107,7 +107,7 @@ Source : `Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md` (§7 Co
 
 | Item | Objet | Statut |
 |---|---|---|
-| #555 | Seuil de défi, replis divergents, marque de maîtrise absente | ✅ Lots 1-2 livrés 27-28 août (1.105.0) ; **deux décisions tranchées le 29 août** : zone intermédiaire = progrès (option C) ; intention « Outils d'observation » close (option A) — **exécution due** |
+| #555 | Seuil de défi, replis divergents, marque de maîtrise absente | ✅ **Clos le 30 août.** Lots 1-2 livrés 27-28 août (1.105.0) ; décisions du 29 août exécutées : option C **était déjà en place** (la décision « option 3 » du 28 après-midi avait mis les trois montées de zone dans les deux documents — la prémisse de l'artefact venait d'une puce périmée du backlog) ; option A **livrée le 30** (le curseur « Seuil de défi » dit ce qu'il règle et ce qu'il ne règle pas, sentinelle `555-2`) |
 | #577 | L'assistant de pratique ignore les repères | ✅ Livré 28 août |
 | #579 | L'échelle embarquée d'une pratique ne reçoit pas ses repères | 🟠 Clos pour le cas de l'assistant ; reste ouvert |
 | #580 | Deux reconstructions d'échelle à liste blanche | ⏳ Ouvert |
@@ -143,7 +143,7 @@ Ordre proposé : d'abord ce qui est **tranché et pas exécuté** (le plus court
 
 ### Évaluations
 
-1. **#555 exécution** — ligne « Progrès » à trois zones (C) dans le PDF et le bilan ; texte d'aide du curseur « Seuil de défi » (A). Libellés = les mots de Grégoire.
+1. ~~**#555 exécution**~~ — close le 30 août : la ligne « Progrès » à trois zones (C) **était déjà codée depuis le 28 août après-midi** (option 3, ses mots, sentinelles à l'appui — la « due » venait d'une trace périmée) ; le texte d'aide du curseur « Seuil de défi » (A) est **livré le 30** (libellé proposé, à retoucher avec ses mots s'il en veut d'autres).
 2. ~~**#563**~~ — livré 29 août ; reste la décision sur le type dans le wizard.
 3. ~~**#562**~~ — livré 29 août.
 4. ~~**#560**~~ — livré 29 août ; reste la portée des suppressions par couple (décision).
@@ -169,6 +169,7 @@ Ordre proposé : d'abord ce qui est **tranché et pas exécuté** (le plus court
 | 28 août | #563 retirer la case ; #571 correctifs oui, tailles non ; #574 retirer seeds/gabarits ; #578 mesurer avant de coder ; #555 repli non lisible = ne rien calculer et le dire (B) ; nommage (A) | items respectifs |
 | 29 août | #555·1 zone intermédiaire = progrès (C) ; #555·2 clore l'intention (A) ; #578 la cartouche ne devine plus (A) | artefact `claude.ai/code/artifact/89f28423-…` |
 | 29 août, 19 h 45 | **Porte terrain relevée sur 1.106.2 : 8/8 conformes** (#594, #578, #593, #563/#574, #560, #566, #561, #571) | artefact `claude.ai/code/artifact/9f92e346-…` |
+| 30 août | **Exécution #555 close.** #555·1 : constat sur pièces — l'option C était déjà codée (28 août, option 3) ; la prémisse « exécution due » venait d'une puce périmée du backlog, corrigée. #555·2 : explication du curseur livrée, sentinelle `sentinelle-555-2-curseur-seuil-defi` (4 mutations, 6 rouges) | #555 (bloc de clôture) |
 
 ---
 
