@@ -350,34 +350,46 @@ async function soumettreEtudiantV2() {
     const cleEtud = cle('groupeEtudiants');
 
     // ✅ CORRECTION (9 jan 2026): Utiliser async pour persistance fiable
-    let etudiants = await db.get(cleEtud) || [];
+    // #522 lot 5 — la liste est relue DANS la file : le refus de #382 (« la
+    // liste a changé depuis l'ouverture du formulaire ») portait sur un
+    // instantané lu hors file, donc il pouvait laisser passer une modification
+    // concurrente survenue APRÈS sa lecture.
+    let introuvable = false;
+    await db.modifier(cleEtud, (lus) => {
+        const etudiants = lus || [];
 
-    if (etudiantEnEditionIndex >= 0) {
-        // Mode édition — #382 (audit 5 août, rapport B4) :
-        // 1. retrouver l'étudiant par son DA d'ORIGINE (l'index capturé à
-        //    l'ouverture écrivait sur le MAUVAIS étudiant si la liste avait
-        //    changé entre-temps) ; refus explicite si introuvable (patron #332,
-        //    jamais de faux succès silencieux) ;
-        // 2. FUSIONNER au lieu de remplacer : l'objet reconstruit du formulaire
-        //    ne porte que 7 champs — le remplacement effaçait `statut`
-        //    (abandon/inactif réintégré aux moyennes en corrigeant une coquille)
-        //    et tout autre champ hors formulaire.
-        const indexReel = etudiantEnEditionDA !== null
-            ? etudiants.findIndex(e => e.da === etudiantEnEditionDA)
-            : -1;
-        if (indexReel === -1) {
-            notifications.erreur('Étudiant introuvable', 'La liste a changé depuis l\'ouverture du formulaire. Resélectionne l\'étudiant avant d\'enregistrer.');
-            return;
+        if (etudiantEnEditionIndex >= 0) {
+            // Mode édition — #382 (audit 5 août, rapport B4) :
+            // 1. retrouver l'étudiant par son DA d'ORIGINE (l'index capturé à
+            //    l'ouverture écrivait sur le MAUVAIS étudiant si la liste avait
+            //    changé entre-temps) ; refus explicite si introuvable (patron #332,
+            //    jamais de faux succès silencieux) ;
+            // 2. FUSIONNER au lieu de remplacer : l'objet reconstruit du formulaire
+            //    ne porte que 7 champs — le remplacement effaçait `statut`
+            //    (abandon/inactif réintégré aux moyennes en corrigeant une coquille)
+            //    et tout autre champ hors formulaire.
+            const indexReel = etudiantEnEditionDA !== null
+                ? etudiants.findIndex(e => e.da === etudiantEnEditionDA)
+                : -1;
+            if (indexReel === -1) {
+                introuvable = true;
+                return undefined;
+            }
+            etudiants[indexReel] = { ...etudiants[indexReel], ...etudiant };
+        } else {
+            // Mode ajout : ajouter un nouvel étudiant
+            etudiants.push(etudiant);
         }
-        etudiants[indexReel] = { ...etudiants[indexReel], ...etudiant };
-        await db.set(cleEtud, etudiants);
-        notifications.succes(`${prenom} ${nom} modifié`);
-    } else {
-        // Mode ajout : ajouter un nouvel étudiant
-        etudiants.push(etudiant);
-        await db.set(cleEtud, etudiants);
-        notifications.succes(`${prenom} ${nom} ajouté`);
+
+        return etudiants;
+    }, []);
+
+    // Les messages vivent HORS du mutateur : la file ne porte que l'écriture.
+    if (introuvable) {
+        notifications.erreur('Étudiant introuvable', 'La liste a changé depuis l\'ouverture du formulaire. Resélectionne l\'étudiant avant d\'enregistrer.');
+        return;
     }
+    notifications.succes(`${prenom} ${nom} ${etudiantEnEditionIndex >= 0 ? 'modifié' : 'ajouté'}`);
 
     // Réinitialiser le formulaire et le mode
     reinitialiserFormEtudiantV2();
@@ -537,14 +549,22 @@ async function supprimerEtudiantV2(da) {
     const cleEtud = cle('groupeEtudiants');
 
     // ✅ CORRECTION (9 jan 2026): Utiliser async pour persistance fiable
-    let etudiants = await db.get(cleEtud) || [];
+    // ⚠ Lecture hors file, pour NOMMER l'étudiant dans la question. La
+    // confirmation ne doit pas tenir la file ouverte : l'index est recalculé
+    // dans le mutateur, car celui d'avant la question ne vaut plus rien.
+    const etudiants = await db.get(cleEtud) || [];
     const index = etudiants.findIndex(e => e.da === da);
     const etudiant = etudiants[index];
 
     if (index === -1 || !confirm(`Supprimer ${etudiant?.prenom || ''} ${etudiant?.nom || ''} ?`)) return;
 
-    etudiants.splice(index, 1);
-    await db.set(cleEtud, etudiants);
+    await db.modifier(cleEtud, (lus) => {
+        const liste = lus || [];
+        const i = liste.findIndex(e => e.da === da);
+        if (i === -1) return undefined;
+        liste.splice(i, 1);
+        return liste;
+    }, []);
 
     chargerListeEtudiantsV2();
 
@@ -587,6 +607,8 @@ async function remarqueEtudiantV2(selectElement, da) {
  */
 async function changerStatutEtudiantV2(da, nouveauStatut) {
     var cleEtud = cle('groupeEtudiants');
+
+    // ⚠ Lecture hors file, pour NOMMER l'étudiant dans la question.
     var etudiants = await db.get(cleEtud) || [];
     var index = etudiants.findIndex(function(e) { return e.da === da; });
 
@@ -601,8 +623,13 @@ async function changerStatutEtudiantV2(da, nouveauStatut) {
         if (!confirm('Marquer ' + nomComplet.trim() + ' en décrochage ?\n\nSes résultats seront affichés jusqu\'à sa dernière présence, mais ne seront plus comptés dans les calculs du groupe.')) return;
     }
 
-    etudiants[index].statut = nouveauStatut;
-    await db.set(cleEtud, etudiants);
+    await db.modifier(cleEtud, function(lus) {
+        var liste = lus || [];
+        var i = liste.findIndex(function(e) { return e.da === da; });
+        if (i === -1) return undefined;
+        liste[i].statut = nouveauStatut;
+        return liste;
+    }, []);
 
     chargerListeEtudiantsV2();
 
@@ -741,17 +768,21 @@ async function confirmerImportV2() {
     const cleEtud = cle('groupeEtudiants');
 
     // ✅ CORRECTION (9 jan 2026): Lire depuis IndexedDB pour avoir les données complètes
-    let etudiants = await db.get(cleEtud) || [];
+    // #522 lot 5 — la liste est relue DANS la file. security-ok: les entrées
+    // viennent du fichier importé, déjà validé en amont ; seul `coursId` est
+    // posé ici, depuis le cours actif.
+    await db.modifier(cleEtud, (lus) => {
+        const etudiants = lus || [];
 
-    donneesImportEnAttenteV2.forEach(e => {
-        etudiants.push({
-            ...e,
-            coursId: coursActif?.id || ''
+        donneesImportEnAttenteV2.forEach(e => {
+            etudiants.push({
+                ...e,
+                coursId: coursActif?.id || ''
+            });
         });
-    });
 
-    // ✅ CORRECTION (9 jan 2026): Utiliser db.set (async) pour écriture fiable
-    await db.set(cleEtud, etudiants);
+        return etudiants;
+    }, []);
 
     // Vérification immédiate
     const verification = db.getSync(cleEtud, []).length;
@@ -814,6 +845,11 @@ async function reinitialiserEtudiantsV2() {
     const cleEtud = cle('groupeEtudiants');
 
     // ✅ CORRECTION (9 jan 2026): Utiliser async pour persistance fiable
+    // ⚠ CE SITE N'EST PAS EN COURSE, et l'outil de mesure le compte à tort :
+    // la lecture ne sert qu'à CHIFFRER la question, et la valeur écrite est une
+    // CONSTANTE (`[]`) qui n'en dérive pas. Un ajout concurrent pendant la
+    // confirmation serait effacé — mais c'est ce que « supprimer tous les
+    // étudiants » veut dire. Passer par la file ne changerait rien au résultat.
     const etudiants = await db.get(cleEtud) || [];
     if (!confirm(`Supprimer les ${etudiants.length} étudiant(s) ? Cette action est irréversible.`)) return;
 
@@ -863,12 +899,14 @@ async function supprimerGroupeSelectionneV2() {
         return;
     }
 
-    // Garder uniquement les étudiants des autres groupes
-    const etudiantsRestants = tousLesEtudiants.filter(e =>
-        String(e.groupe).padStart(5, '0') !== groupeSelectionne
-    );
-
-    await db.set(cleEtud, etudiantsRestants);
+    // Garder uniquement les étudiants des autres groupes. ⚠ Le filtre est
+    // rejoué DANS la file : la liste d'avant la confirmation ne vaut plus rien,
+    // et un étudiant ajouté pendant la question serait sinon effacé.
+    await db.modifier(cleEtud, (lus) => {
+        return (lus || []).filter(e =>
+            String(e.groupe).padStart(5, '0') !== groupeSelectionne
+        );
+    }, []);
 
     // Reset le dropdown à "Tous les groupes"
     const selectGroupe = document.getElementById('v2-selectGroupe');
@@ -901,17 +939,20 @@ async function sauvegarderGroupeEtudiantsV2() {
     const numeroGroupe = coursActif?.groupe || '00001';
 
     // S'assurer que tous les étudiants ont le bon numéro de groupe
-    let modifie = false;
-    etudiants.forEach(e => {
-        if (!e.groupe || e.groupe === '' || e.groupe === '—') {
-            e.groupe = numeroGroupe;
-            modifie = true;
-        }
-    });
+    await db.modifier(cleEtud, (lus) => {
+        const liste = lus || [];
+        let modifie = false;
+        liste.forEach(e => {
+            if (!e.groupe || e.groupe === '' || e.groupe === '—') {
+                e.groupe = numeroGroupe;
+                modifie = true;
+            }
+        });
 
-    if (modifie) {
-        await db.set(cleEtud, etudiants);
-    }
+        // Rien à corriger : le mutateur rend `undefined`, aucune écriture.
+        if (!modifie) return undefined;
+        return liste;
+    }, []);
 
     // Notification de succès
     notifications.succes(`Groupe ${numeroGroupe} sauvegardé (${etudiants.length} étudiants)`);

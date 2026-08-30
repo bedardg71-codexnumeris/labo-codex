@@ -58,7 +58,19 @@ function envEtudiants(etudiants) {
         get: async (k) => store[k],
         set: async (k, v) => { store[k] = v; },
         getSync: (k, d) => (k in store ? store[k] : d),
-        setSync: (k, v) => { store[k] = v; }
+        setSync: (k, v) => { store[k] = v; },
+        // #522 lot 5 : `soumettreEtudiantV2` écrit par la file, et le refus de
+        // #382 (« la liste a changé depuis l'ouverture du formulaire ») vit
+        // désormais DANS le mutateur. Le stub reproduit la file, refus compris —
+        // un mutateur qui rend `undefined` n'écrit RIEN, ce qui est exactement
+        // le chemin que ce fichier vérifie.
+        modifier: async (k, mutateur, defaut = null) => {
+            const lue = k in store ? store[k] : defaut;
+            const resultat = await mutateur(lue);
+            if (resultat === undefined) return undefined;
+            store[k] = resultat;
+            return resultat;
+        }
     };
     const elements = {};
     ['v2-etudiantDA', 'v2-etudiantNom', 'v2-etudiantPrenom', 'v2-etudiantGroupe',

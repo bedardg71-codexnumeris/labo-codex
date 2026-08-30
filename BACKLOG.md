@@ -3491,6 +3491,32 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   lots mesurés l'ont été à 35 %, 45 % et 48 % au-dessus de leur annonce : **remesurer avant d'ouvrir**.
   Et **[[#599]]** — les 20 sites des clés `CLE_BIBLIOTHEQUE_*`, que le lot 4 n'a pas touchés.
 
+  🟠 **LOT 5 — ENGAGÉ, PAS CLOS. Et il fait 29 sites, pas 15 (+93 %).**
+  Mesuré le 30 août par `scripts/mesurer-522.py`. ⮕ **Ce n'est PAS un chantier vierge.**
+  · ✅ **Bloc 5a — les étudiants, 7 sites convertis** (`trimestre-v2-etudiants.js`) : enregistrer une
+    fiche, supprimer, changer un statut, importer une liste, vider un groupe, corriger les numéros de
+    groupe. Tous des GESTES UTILISATEUR. Sentinelle 11 cas, break-test 4 mutations / 4 rouges.
+    ⮕ **Le refus de #382 portait sur un instantané** : « la liste a changé depuis l'ouverture du
+    formulaire » était vérifié HORS file, donc il attrapait les changements antérieurs à SA lecture —
+    pas ceux de la fenêtre qu'il prétendait couvrir. Il vit maintenant dans le mutateur.
+    ⚠ **Un faux positif NOMMÉ** : `reinitialiserEtudiantsV2` lit la liste pour CHIFFRER sa question
+    puis écrit une CONSTANTE (`[]`). La valeur écrite ne dérive pas de la lecture : pas de course.
+    Le script le signale à tort ; **ne pas le « corriger »**.
+  · ⏳ **RESTE 22 sites**, à traiter en connaissance de cause :
+    **Gestes utilisateur (vraie course, ~13)** — `cours.js` (4 : retrait, ajout, import, partage) ·
+    `cartouches.js` copie entre trimestres · `cc-license.js` métadonnées · `snapshots.js` capture ·
+    `donnees-v2.js` suppression définitive · `reserve-ouvrir.js` réimport · `codex.js` fusion de
+    travaux · `echelles.js` migration d'évaluations vers une autre échelle.
+    **Drapeaux de migration au démarrage (course THÉORIQUE, 9)** — `codex.js` (3), `main.js`,
+    `migrations.js`, `travaux-stockage.js`, `demo-activation.js`, `echelles-bibliotheque.js`,
+    `snapshots.js`. ⮕ **Les mesurer un par un, ne pas les convertir en bloc** : la plupart ne
+    tournent qu'une fois au boot, et la file n'y protège de rien.
+
+  🔧 **L'OUTIL DE MESURE EST DANS LE DÉPÔT** : `scripts/mesurer-522.py`. Il apparie sur
+  l'**expression** de clé (gabarits, constantes, appels), canonise les alias, et **signale ses propres
+  faux positifs dans son en-tête**. ⮕ **Ne jamais repartir du chiffre de l'audit** : il a sous-compté
+  le lot 2 de 38 %, le lot 3 de 48 %, le lot 5 de 93 %, et n'a pas compté #599 du tout.
+
   ⏳ **RESTE — et les chiffres de l'énoncé sont FAUX, comme ceux du lot 2** :
   · **Lot 3** — mesuré le 30 août : **31 sites**, pas 21. Cartouches **13** (`cartouches.js`),
     productions **18** (`productions.js` 8, `productions-bibliotheque-ui.js` 5,
