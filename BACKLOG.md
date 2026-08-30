@@ -228,10 +228,13 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   avant comme après). **ROUGE d'abord : 13 rouges / 3 verts. 7 break-tests, 7 ROUGE** (garde des mots
   vides retirée · retour à la sous-chaîne · ambiguïté nom+prénom · ambiguïté nom seul · ordre de
   préférence inversé · normalisation des accents retirée · collection brute remplacée par celle du
-  groupe actif). Vitest **410 fichiers / 4316 tests, code de sortie 0**, mesuré APRÈS le dernier
-  changement — suite lancée en excluant `sentinelle-jeton-retire-fichier-reprise.test.js`, que la
-  session S6 ([[#612]], T6.6) tenait volontairement en ROUGE dans l'arbre au même moment (4 rouges).
-  Ce fichier ne charge pas `travaux-import.js` : vérifié, ses rouges ne viennent pas d'ici.
+  groupe actif). Vitest **410 fichiers / 4316 tests, code de sortie 0** au moment du commit, mesuré
+  APRÈS le dernier changement — suite lancée en excluant `sentinelle-jeton-retire-fichier-reprise.test.js`,
+  que la session S6 ([[#612]], T6.6) tenait alors en ROUGE dans l'arbre (4 rouges, vérifié : ce fichier
+  ne charge pas `travaux-import.js`).
+  ✅ **Réserve levée le 30 août à 19 h 40** : T6.6 livrée (`1e2fc4d0`), suite COMPLÈTE relancée sur
+  `667f3d11`, arbre propre — **411 fichiers / 4334 tests, code de sortie 0**. Les 4 rouges venaient
+  d'une fuite du harnais de la sentinelle #607 (corpus partagé muté en place), pas du code.
   ⏳ **Test manuel dû à Grégoire** : un lot contenant deux homonymes de nom et un nom accentué — les
   homonymes doivent rester à associer à la main, le nom accentué doit se placer seul.
 - [ ] **#612 — S6 · Un DA inconnu du groupe est stocké en silence ; un import sans groupe actif rend les fichiers invisibles** (constats S4, S7).
