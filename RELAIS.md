@@ -51,6 +51,40 @@ la relecture, jamais.
 ⮕ **Et le trou de filet anti-cache (#602) est le même défaut, en plus grave** : il ne
 laisse pas passer un fichier périmé en criant, il le laisse passer en rendant un VERT.
 
+### ⚠ DEUX CAS DU TROU #602 QUI NE PEUVENT PAS ATTENDRE QU'ON CHERCHE L'ITEM
+
+· **`libs/pdf.worker.min.js` est servi SANS AUCUN `?v=`** — par
+  `GlobalWorkerOptions.workerSrc` (`travaux-visionneuse.js:59`), donc hors de toute
+  balise. Ce n'est pas un jeton oublié, c'est l'absence de mécanisme. Et **il a déjà
+  changé** : `410008a6`, 6 février, downgrade PDF.js 4.2.67 → 3.11.174 pour Safari. Un
+  navigateur qui tient l'ancien le servira indéfiniment. Ça touche la visionneuse que
+  Grégoire ouvre tous les jours.
+· **Quatre bibliothèques ont une balise mais aucun jeton** : `chart.min.js`,
+  `chartjs-plugin-annotation.min.js`, `jspdf.umd.min.js`, `jspdf-autotable.min.js`. Les
+  filets les voient, mais sans `?v=` il n'y a rien à comparer.
+
+### ⚠ CE QUE TROIS SESSIONS DANS UN ARBRE ONT APPRIS — QUATRE FORMES D'UN SEUL DÉFAUT
+
+La journée s'est bien passée, mais le même piège s'est présenté **quatre fois sous
+quatre visages**, et aucune vigilance générale ne l'aurait couvert :
+
+1. un `git add` trop large emporte le chantier de l'autre (26 août, et évité ce matin) ;
+2. `release.mjs` écrit dans un fichier qu'une autre session tient STAGÉ (évité à midi,
+   en vérifiant l'arbre avant de lancer le script) ;
+3. un `git commit` sans chemin emporte ce qu'un autre a laissé dans l'index (évité en
+   fin de journée par un `git commit -- BACKLOG.md`) ;
+4. **un `git push` ne pousse pas « ses » commits, il pousse la BRANCHE** — le dernier
+   push de la journée a emporté le commit #602 de l'autre session, qui ne l'avait pas
+   encore lancé. Sans dégât ici (lot documentaire, gardes passées à l'identique), mais
+   le geste n'était pas volontaire.
+
+⮕ **La leçon n'est pas « faire attention ».** C'est que l'arbre de travail, l'index et
+la branche locale sont des ÉTATS PARTAGÉS que personne ne possède. Ce qui a réellement
+protégé la journée : dire ce qu'on tient AVANT d'écrire, et vérifier `--cached --stat`
+dans les deux sens avant chaque commit. Ce qui a tranché les désaccords : mesurer, pas
+argumenter.
+
+
 
 ### ✅ #597 EST CLOS — commit `20e4feaf`, non poussé
 
