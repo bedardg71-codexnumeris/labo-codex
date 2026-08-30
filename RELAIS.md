@@ -28,7 +28,92 @@
 | ⏳ **ÉCHÉANCE DATÉE — 1er SEPTEMBRE, DANS 4 JOURS** | **#427** + **#508**. ✅ **GRÉGOIRE TIENT LA DATE** (arbitré le 28 août au soir, option A ; « repousser » posé et écarté). ⮕ **DÛ PAR LUI, ET PAR PERSONNE D'AUTRE** : les trois noms Cloudflare, la durée de session, la règle `Include` de la policy dormante. ⮕ **MESURÉ le 28 août** : l'avis est bien en ligne aux deux endroits (`accueil.js`, `transitions.js`), et **le bandeau s'éteint SEUL le 1er septembre** — rien à retirer à la main. Reste à réécrire le paragraphe d'accueil **au présent**. |
 | ⚠ **DEUX SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT** | Et elles ne se voyaient pas. Un `git add -A` de la session « audit Conception » a emporté le `js/saisie-presences.js` de l'autre dans son commit de relais ; sorti et rendu avant le push. ⮕ **La consigne du projet vaut : ajouter par chemins EXPLICITES**, jamais `-A`, sur ce dépôt. ⮕ Et le hook pré-push teste l'ARBRE DE TRAVAIL, pas les commits envoyés : tant qu'une autre session y travaille, il rend un verdict sur un mélange des deux — le rouge qu'il annonce peut n'avoir aucun rapport avec ce qu'on pousse. ⮕ **ET C'EST ARRIVÉ UNE SECONDE FOIS LE MÊME JOUR, dans l'autre sens.** Le commit `38c6b574` (« #529 lots 3-4 », profil étudiant) a emporté les `BACKLOG.md` et `SESSION.md` de la session « présences » — l'inscription de l'item **#538** et la renumérotation **#534 → #537** vivent donc dans un commit qui parle d'autre chose. Rien n'est perdu, la trace est fausse ; poussé, donc non réécrit. **Deux avertissements en un jour : sur ce dépôt, `git add` par chemins explicites n'est pas une préférence, c'est la seule méthode qui tienne.** |
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
-| **Dernière mise à jour** | **30 août 2026, fin de journée** — session unique. **#522 lot 4 LIVRÉ** (le helper des bibliothèques, cinq familles d'un geste) · **#503 étendu aux cartouches** · divergence des deux 1.106.3 TRANCHÉE (report de #555·2, branche abandonnée) · **#508 : trois gestes de code**, pas un — la spec rougirait seule le 1er septembre · consigne de démarrage et artefact de refermage écrits. **Vitest 4114/4114 (395 fichiers)** · ⚠ **Playwright NON relancé, et il est DÛ.** 1.106.4 due, rien poussé. Entrée précédente : **30 août 2026, 8 h 20** — session unique (matin). **#522 : l'AUDIT est fait (213 séquences mesurées, 102 en course) et le LOT 1 est LIVRÉ** — rapport `Rapports/AUDIT-522-courses-lecture-ecriture-2026-08-30.md`. **1.106.3 poussée** (`c2e12dcd`). ⚠⚠ **LE FAIT À RETENIR : `getSync` NE PROTÈGE PAS** — dans `db.set`, l'écriture IndexedDB est attendue AVANT le rafraîchissement de localStorage, donc un concurrent lit encore l'ancienne valeur. ⚠ **Et le banc mentait** : Node n'a pas d'IndexedDB, `db.js` s'y rabat sur localStorage-seul où `set` est synchrone — les six cas passaient au VERT sur le code NON corrigé ; il faut forcer `useIndexedDB` avec une fausse connexion. **Reste 89 sites, quatre lots** ; le plus rentable est le helper `BibliothequeUI` (14 sites, 7 fichiers, un seul changement de contrat pour les cinq familles). Entrée précédente : **29 août 2026, 20 h 15** — session unique (journée entière). **Audit Évaluations bouclé** (#562, #560, #561, #566, #571, #567, #570, #568, #569, #572), #595 et #596 inscrits, artefact de vérification terrain remis. **1.106.2 poussée** (`d1983402`). Entrée précédente : **10 h 30** — session unique (matin). **#578 LIVRÉ** (option A) + régression du 26 août réparée (listes du formulaire de cartouche mortes) ; **#574 retrait LIVRÉ** (option B, sonde due) ; **#593 LIVRÉ** (n° 5-6-7, course fermée) ; **#563 LIVRÉ** (case retirée) ; **#594 LIVRÉ** (bandeau de version au chargement) ; **#562, #560, #561, #566, #571, #567, #570, #568, #569 et #572 LIVRÉS** (après 1.106.1 — **bump 1.106.2 dû**) ; **#595 inscrit** ; **référence unique créée** (`Rapports/SUIVI-conception-evaluations-2026-08.md`) ; #593 inscrit ; 1.106.0 déployée à 3 h. ✅ **1.106.1 poussée à 12 h 40** (`ecd22a59`). Entrée précédente : **3 h 40** — session unique (nuit). **1.106.0 poussée** ; **#578 : le diagnostic console est LIVRÉ** (`await _diagnostiquerEchellesGrilles()`), sentinelle 6 cas / 4 mutations rouges ; **le chiffre est DÛ par Grégoire**. Fait mesuré : l'éditeur de grille n'écrit jamais `echelleId`. Entrée précédente : **28 août, 21 h 15** — session unique (soir). **#555 lot 2 (d) et (e) + #577 LIVRÉS** ; #579 livré pour le cas de l'assistant ; **#592** inscrit. **Vitest 4011/4011** (377 fichiers) · **Playwright 201** (198 verts + 3 instables pré-existantes, vertes au second essai), sur arbre gelé. ⚠ **AUCUN BUMP** : du code a changé (6 fichiers `js/`, `?v=` bougés) mais je ne sais pas si la session `file://` de Grégoire est ouverte — **1.106.0 (minor) est DUE**, à lancer par `node scripts/release.mjs minor` au prochain démarrage. Entrée précédente : **20 h 15** — fin de journée, **trois sessions**. Les **21 arbitrages de Grégoire sont TRANCHÉS et consignés dans leurs items**. Livré : #555 lot 2 (b), #556, #557, l'audit des copies d'échelle, le diagnostic des résolveurs. **Vitest 3983/3983** (374 fichiers) · **Playwright 199/199**, relancés sur arbre gelé avant le push. **Aucun bump** : 1.105.0 tient — que de la documentation, aucun `?v=` à bouger. |
+| **Dernière mise à jour** | **30 août 2026, 12 h 30** — **trois sessions dans le même arbre**, coordonnées par messages. **#597 CLOS** (`20e4feaf`, **non poussé**) : le décodeur HEIC fonctionne mais n'a AUCUN chemin en `file://`, et l'application le DIT désormais au lieu de laisser passer un fichier muet en 0 x 0. ⚠⚠ **LE FAIT À RETENIR : un `blob:` worker HÉRITE de la CSP du document, un worker chargé par URL same-origin non** — c'est ce qui ferme la dernière voie, pas le `file://`. ⮕ **Et la leçon de méthode : la mesure du matin était VRAIE et INCOMPLÈTE** — « converties en 3024x4032 » était exact sous serveur, personne n'avait écrit dans quel mode. **Vitest 4195/4195 (402 fichiers)** · Playwright 207/207 sur deux suites. ⏳ **Reste, et c'est une décision de Grégoire à froid : le lanceur local** (servir l'application ferait marcher le décodeur tel quel, mais change son geste de lancement et emporte tablette + clé Codex). Entrée précédente : **30 août 2026, fin de journée** — session unique. **#522 lot 4 LIVRÉ** (le helper des bibliothèques, cinq familles d'un geste) · **#503 étendu aux cartouches** · divergence des deux 1.106.3 TRANCHÉE (report de #555·2, branche abandonnée) · **#508 : trois gestes de code**, pas un — la spec rougirait seule le 1er septembre · consigne de démarrage et artefact de refermage écrits. **Vitest 4114/4114 (395 fichiers)** · ⚠ **Playwright NON relancé, et il est DÛ.** 1.106.4 due, rien poussé. Entrée précédente : **30 août 2026, 8 h 20** — session unique (matin). **#522 : l'AUDIT est fait (213 séquences mesurées, 102 en course) et le LOT 1 est LIVRÉ** — rapport `Rapports/AUDIT-522-courses-lecture-ecriture-2026-08-30.md`. **1.106.3 poussée** (`c2e12dcd`). ⚠⚠ **LE FAIT À RETENIR : `getSync` NE PROTÈGE PAS** — dans `db.set`, l'écriture IndexedDB est attendue AVANT le rafraîchissement de localStorage, donc un concurrent lit encore l'ancienne valeur. ⚠ **Et le banc mentait** : Node n'a pas d'IndexedDB, `db.js` s'y rabat sur localStorage-seul où `set` est synchrone — les six cas passaient au VERT sur le code NON corrigé ; il faut forcer `useIndexedDB` avec une fausse connexion. **Reste 89 sites, quatre lots** ; le plus rentable est le helper `BibliothequeUI` (14 sites, 7 fichiers, un seul changement de contrat pour les cinq familles). Entrée précédente : **29 août 2026, 20 h 15** — session unique (journée entière). **Audit Évaluations bouclé** (#562, #560, #561, #566, #571, #567, #570, #568, #569, #572), #595 et #596 inscrits, artefact de vérification terrain remis. **1.106.2 poussée** (`d1983402`). Entrée précédente : **10 h 30** — session unique (matin). **#578 LIVRÉ** (option A) + régression du 26 août réparée (listes du formulaire de cartouche mortes) ; **#574 retrait LIVRÉ** (option B, sonde due) ; **#593 LIVRÉ** (n° 5-6-7, course fermée) ; **#563 LIVRÉ** (case retirée) ; **#594 LIVRÉ** (bandeau de version au chargement) ; **#562, #560, #561, #566, #571, #567, #570, #568, #569 et #572 LIVRÉS** (après 1.106.1 — **bump 1.106.2 dû**) ; **#595 inscrit** ; **référence unique créée** (`Rapports/SUIVI-conception-evaluations-2026-08.md`) ; #593 inscrit ; 1.106.0 déployée à 3 h. ✅ **1.106.1 poussée à 12 h 40** (`ecd22a59`). Entrée précédente : **3 h 40** — session unique (nuit). **1.106.0 poussée** ; **#578 : le diagnostic console est LIVRÉ** (`await _diagnostiquerEchellesGrilles()`), sentinelle 6 cas / 4 mutations rouges ; **le chiffre est DÛ par Grégoire**. Fait mesuré : l'éditeur de grille n'écrit jamais `echelleId`. Entrée précédente : **28 août, 21 h 15** — session unique (soir). **#555 lot 2 (d) et (e) + #577 LIVRÉS** ; #579 livré pour le cas de l'assistant ; **#592** inscrit. **Vitest 4011/4011** (377 fichiers) · **Playwright 201** (198 verts + 3 instables pré-existantes, vertes au second essai), sur arbre gelé. ⚠ **AUCUN BUMP** : du code a changé (6 fichiers `js/`, `?v=` bougés) mais je ne sais pas si la session `file://` de Grégoire est ouverte — **1.106.0 (minor) est DUE**, à lancer par `node scripts/release.mjs minor` au prochain démarrage. Entrée précédente : **20 h 15** — fin de journée, **trois sessions**. Les **21 arbitrages de Grégoire sont TRANCHÉS et consignés dans leurs items**. Livré : #555 lot 2 (b), #556, #557, l'audit des copies d'échelle, le diagnostic des résolveurs. **Vitest 3983/3983** (374 fichiers) · **Playwright 199/199**, relancés sur arbre gelé avant le push. **Aucun bump** : 1.105.0 tient — que de la documentation, aucun `?v=` à bouger. |
+
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 30 AOÛT 2026, 12 h 30 (SESSION HEIC, TROISIÈME)
+
+### ✅ #597 EST CLOS — commit `20e4feaf`, non poussé
+
+Le décodeur HEIC livré le matin FONCTIONNE. Il n'a simplement aucun chemin d'exécution
+dans le mode où Grégoire ouvre l'application. Ce n'était pas une régression : c'était un
+mode d'usage jamais couvert, et une mesure vraie mais incomplète.
+
+**Ce qui a été mesuré à neuf** (Chrome de Grégoire, banc isolé hors dépôt, le vrai
+`IMG_2179.HEIC` de Breton, 2 909 950 octets) :
+
+| Chemin | Contexte | Résultat |
+|---|---|---|
+| worker classique | app **servie** (http), CSP réelle | **3024 x 4032** — le noyau est bon |
+| worker classique | page en `file://` (double-clic) | `SecurityError`, origine `null` |
+| thread principal | CSP + `'wasm-unsafe-eval'` | `EvalError` (le glue emscripten évalue une chaîne) |
+| blob worker + `importScripts` | `file://` | le blob worker se construit, mais « failed to load » |
+| blob worker + bundle EMBARQUÉ | `file://` | `EvalError` |
+
+⮕ **LE FAIT LE PLUS RÉUTILISABLE DE LA JOURNÉE** : un **`blob:` worker HÉRITE de la CSP
+du document**, un worker chargé par **URL same-origin n'en hérite pas**. C'est ce qui ferme
+la dernière voie — pas le `file://` lui-même. Aucun contournement ne tient sous « zéro
+`eval()` » : **la CSP n'a pas été touchée**.
+
+### Ce que la session a livré
+
+Grégoire a tranché : **refuser proprement maintenant**, décider du lanceur local à froid.
+
+· `decodagePossible()` dans `heic-decodeur.js`, exposé — répond sans construire le worker
+  (il tirerait 1,2 Mo).
+· `marquerHeicNonDecodable()` appelé par `planifierThumbnail`, donc **dès l'entrée dans la
+  file** — et **refait** dans `genererThumbnailQueue`, parce que `reattacherBlobs` (session
+  restaurée) court-circuite le premier et que `heicEchec`/`heicRaison` ne survivent pas au
+  round-trip `sessionStorage`.
+· `heicRaison` porté jusqu'à l'infobulle (échappée). Un HEIC dit maintenant « HEIC non
+  décodé » **et pourquoi**, au lieu de « Dimensions inconnues » — le rendu d'un fichier
+  corrompu.
+· Les libellés de formats ne promettent plus que ce qui est lisible ici
+  (`formatsAcceptesLibelle()` dans `travaux-ui.js` et `accompagnement-contenu-popup.js`).
+· `#598 volet A` et la balance des blancs : sentinelle du matin reprise au commit.
+
+**Sentinelle** `sentinelle-597-heic-dit-son-impossibilite` (5 cas, dont **un
+COMPORTEMENTAL** : le décodeur est exécuté avec un faux `window` pour vérifier
+`decodagePossible()` en `file:` et en `http:`). **Break-test : 7 mutations, 7 rouges
+obtenus.** Vitest **4195/4195** (402 fichiers) · Playwright **207/207** sur deux suites
+complètes · passe ciblée 23/23.
+
+### ⏳ CE QUI RESTE, ET QUI EST UNE DÉCISION DE GRÉGOIRE — PAS UN CHANTIER À OUVRIR
+
+**Le lanceur local.** Tant qu'il n'existe pas, le HEIC n'est pas décodable chez Grégoire —
+l'application le DIT désormais, elle ne le cache plus. Servir l'application (un fichier
+double-cliquable qui démarre un serveur local) ferait fonctionner le décodeur **tel quel**,
+et lèverait au passage le plafond de `localStorage` en `file://`. Mais **ça change son geste
+de lancement, et ça emporte l'usage tablette et la clé Codex** : à trancher à froid, avec
+lui, pas à décider en passant.
+
+**#598 volet B** reste ouvert : le réglage global de la balance des blancs dans l'écran
+Optimisation. Le volet A (l'aperçu reflète le traitement) est livré. Les pièges sont déjà
+écrits dans l'entrée du backlog — SSOT persistant et non état de DOM, `cle()` dès le départ,
+et la sémantique global/par-fichier à trancher.
+
+### ⚠ PIÈGES PAYÉS AUJOURD'HUI — ne les réapprendre pas
+
+· **Mesurer dans `file://`, pas seulement sous serveur.** L'entrée #597 disait « mesuré au
+  navigateur, converties en 3024x4032 » : exact, et pourtant le bug était entier. Personne
+  n'avait écrit DANS QUEL MODE. Toute fonctionnalité qui dépend d'un Worker, d'un WASM ou
+  d'un `fetch` doit être mesurée par double-clic avant d'être dite livrée.
+· **Le hook anti-cache compte un COMMENTAIRE comme une modification.** Premier commit refusé
+  pour `js/modelisation.js`, dont seul un commentaire changeait. Et son conseil
+  (« incrémenter la lettre ») ne s'applique pas à un vieux jeton : `2026022201` n'a pas de
+  lettre. Le suffixe porte le **jour du BUILD** — `0830-0948` → `20260830a`.
+· **Un total de tests lu avant le dernier changement ne vaut rien.** Deux suites complètes
+  vertes ont été obtenues avant deux modifications de texte ; il a fallu relancer.
+· **Dépanner un HEIC hors de l'application** (macOS, rien à installer) :
+  `sips -s format jpeg -s formatOptions 90 photo.HEIC --out photo.jpg` **PUIS** `sips -r 90`.
+  Le second geste est obligatoire : `sips` ne reporte pas la rotation du conteneur HEIF et
+  sort la page couchée. `sips -g orientation` répond `<nil>` et ment. Vérifier à l'œil :
+  `-r 270` la met tête-bêche.
+· **Deux sessions dans le même arbre, et ça s'est bien passé** — par messages, pas par
+  chance. Chacune a annoncé ses fichiers AVANT d'écrire, et les deux fichiers partagés
+  (`index.html`, `BACKLOG.md`) ont été vérifiés dans les deux sens avant chaque commit. Un
+  faux positif a été levé en trois messages (un fichier « orphelin » qui était simplement
+  modifié après l'envoi d'une liste).
+
 
 ## ▶ POUR LA SESSION QUI PREND LE RELAIS — 30 AOÛT 2026, MIDI (SECONDE SESSION)
 
