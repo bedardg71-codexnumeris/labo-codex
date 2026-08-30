@@ -3292,6 +3292,36 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   exigeait l'argument littéral de `db.set` et rougissait sur un chemin devenu MEILLEUR. **Les deux ont
   été break-testés APRÈS recalage** et rougissent toujours sur une vraie violation.
   **Vitest 4153/4153 (398 fichiers)** · **Playwright 207/207**.
+  ✅ **LOT 3 CLOS le 30 août 2026 — 31 sites, pas 21.**
+  · **Bloc 3a — productions**, **18 sites**, cinq fichiers (`productions.js` 8,
+    `productions-bibliotheque-ui.js` 5, `productions-import-export.js` 2, `productions-liste.js` 2,
+    `pratiques-gestion.js` 1). Sentinelle 14 cas, break-test 4 mutations / 4 rouges.
+  · **Bloc 3b — cartouches**, **13 sites** (`cartouches.js`). Sentinelle 13 cas, break-test 4/4.
+  ⮕ **SIX SITES DE PLUS PORTAIENT UNE FENÊTRE D'ATTENTE HUMAINE** (total du chantier : quatorze).
+  ⮕ **UN DÉFAUT DESTRUCTEUR, LATENT, FERMÉ** : `descendreEvaluation` testait
+  `index < evaluations.length - 1`. Pour un id introuvable, `index` vaut -1 et ce test est **vrai** :
+  l'échange écrivait `evaluations[0] = undefined`, puis l'enregistrait. Non atteignable depuis les
+  chevrons, donc jamais vu — mais il détruisait une production.
+  ⮕ **Et `typerProductionCommeTerminale` vérifiait « une seule terminale par trimestre » HORS file** :
+  deux clics rapprochés en typaient deux. Même famille qu'`assurerGrilleGenerique` et
+  `assurerCartoucheGenerique`.
+
+  ⚠⚠ **CE QUE LE PREMIER JET DU BANC 3a A APPRIS, ET QUI VAUT POUR TOUT BANC DE COURSE.** Le témoin —
+  `db.modifier` privé de sa file — ne faisait tomber que **DEUX** des quatre cas de course. Les deux
+  autres passaient sur le code cassé : privés de file, deux écrivains concurrents produisent une
+  **perte de mise à jour** qui satisfaisait quand même leurs assertions (« une seule terminale »,
+  « aucune entrée `undefined` »). ⮕ **Un cas de course doit être une PAIRE D'EFFETS INDÉPENDANTS**, et
+  chacun doit être asserté. Un cas qui ne rougit pas sur la file neutralisée ne mesure pas la course —
+  il mesure autre chose, et il faut le dire.
+
+  ⚠ **Écriture directe restante, NOMMÉE** : `executerImportConfigComplete` (import-export.js) pour la
+  clé des cartouches, `importerProductionsExternes` pour celle des productions. Toutes deux synchrones
+  de bout en bout (R3).
+
+  ⏳ **RESTE : le lot 5** — étudiants (3) + divers (12) d'après l'énoncé, **non remesuré**. Les trois
+  lots mesurés l'ont été à 35 %, 45 % et 48 % au-dessus de leur annonce : **remesurer avant d'ouvrir**.
+  Et **[[#599]]** — les 20 sites des clés `CLE_BIBLIOTHEQUE_*`, que le lot 4 n'a pas touchés.
+
   ⏳ **RESTE — et les chiffres de l'énoncé sont FAUX, comme ceux du lot 2** :
   · **Lot 3** — mesuré le 30 août : **31 sites**, pas 21. Cartouches **13** (`cartouches.js`),
     productions **18** (`productions.js` 8, `productions-bibliotheque-ui.js` 5,
