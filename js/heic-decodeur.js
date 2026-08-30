@@ -95,7 +95,7 @@
         // Meme trou de filet que pour le bundle : ce chemin n'est dans aucune
         // balise <script>, donc aucun des trois filets anti-cache ne le voit.
         try {
-            _worker = new Worker('js/heic-worker.js?v=20260830a');
+            _worker = new Worker('js/heic-worker.js?v=20260830b');
         } catch (e) {
             // Ouverte en `file://`, la page a l'origine `null` et Chrome REFUSE
             // de construire un Worker (SecurityError, mesuré le 30 août 2026).
