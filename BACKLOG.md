@@ -200,9 +200,40 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   PDF, qui éprouvent le même chemin (la comparaison porte sur le nom et la taille, pas le type).
   ⏳ **Test manuel dû à Grégoire** : recharger en cours d'import, puis re-déposer deux homonymes de
   tailles différentes — chaque élève doit recevoir SON travail.
-- [ ] **#611 — S5 · Appariement par nom : sous-chaîne, sans normalisation, premier arrivé gagne** (constat S3).
-  `js/travaux-import.js`. `Martin` s'apparie à `Martineau`, un accent absent fait échouer.
-  Correctif : tokens exacts normalisés, ambiguïté ⇒ `null`, copie locale de `chercherParNomEtendu` retirée.
+- [x] **#611 — LIVRÉ le 30 août 2026 (release groupée en attente) — S5 · Appariement par nom : sous-chaîne, sans normalisation, premier arrivé gagne** (constat S3).
+  `js/travaux-import.js`. **Le fichier partait chez le mauvais élève, et rien ne le disait.**
+  L'appariement cherchait la SOUS-CHAÎNE : `Martineau_Yann_devoir.pdf` contient « martin », donc le
+  devoir de Yann Martineau était rangé sous le DA de Léa Martin — celle des deux qui précède dans la
+  liste. Le bandeau « sans DA » ne se déclenche PAS dans ce cas : il ne parle que des fichiers dont
+  AUCUNE association n'a été faite. Une association *fausse* était donc plus silencieuse qu'une
+  association manquante. Un nom que personne ne porte (`Martinez`) atterrissait chez Martin de la même
+  façon. À l'inverse `Roy` (3 lettres, sous le seuil `nom.length > 3`) et `Côté` (accent dans la fiche,
+  absent du nom de fichier) n'étaient JAMAIS reconnus.
+  ➮ **Correctif** : fonction unique `_apparierParNom(nomFichier, etudiants)` — mots entiers, minuscules,
+  accents retirés (NFD) · nom ET prénom d'abord sur TOUTE la collection, puis repli sur le nom seul ·
+  **ambiguïté ⇒ `null`** (l'enseignant tranche ; une association fausse coûte plus cher qu'une
+  manquante). La copie locale dans `chercherParNomEtendu` est RETIRÉE : `detecterFichiersAutreGC`
+  appelle la même fonction sur la collection BRUTE.
+  ⚠ **Défaut du diff de l'audit, corrigé en l'appliquant** : le prédicat est un `.every()` sur les mots
+  du nom de la FICHE. Une fiche dont le nom ne produit aucun mot après normalisation (ponctuation, ou
+  alphabet que `[^a-z0-9]+` efface) donne `[].every(...) === true` et s'apparie à TOUS les fichiers —
+  ce qui ne casse pas seulement cette fiche : elle rend ambigu, donc `null`, tout appariement légitime
+  du groupe. D'où la garde « liste de mots non vide », verrouillée par un cas.
+  ⚠ **Changement d'ordre, voulu, qui ne se lit pas dans le diff** : l'ancienne boucle évaluait les deux
+  branches ÉLÈVE PAR ÉLÈVE, donc un homonyme placé plus tôt et reconnu par le nom seul l'emportait sur
+  l'élève que le fichier nomme en entier. La fusion l'applique aussi à `detecterFichiersAutreGC`, que
+  l'audit ne visait pas : trois cas de sentinelle passent par ce chemin-là pour que sa dégradation ne
+  puisse pas devenir silencieuse.
+  ➮ Sentinelle : `tests/unit/sentinelle-611-appariement-par-nom.test.js` (16 cas, dont 3 témoins verts
+  avant comme après). **ROUGE d'abord : 13 rouges / 3 verts. 7 break-tests, 7 ROUGE** (garde des mots
+  vides retirée · retour à la sous-chaîne · ambiguïté nom+prénom · ambiguïté nom seul · ordre de
+  préférence inversé · normalisation des accents retirée · collection brute remplacée par celle du
+  groupe actif). Vitest **410 fichiers / 4316 tests, code de sortie 0**, mesuré APRÈS le dernier
+  changement — suite lancée en excluant `sentinelle-jeton-retire-fichier-reprise.test.js`, que la
+  session S6 ([[#612]], T6.6) tenait volontairement en ROUGE dans l'arbre au même moment (4 rouges).
+  Ce fichier ne charge pas `travaux-import.js` : vérifié, ses rouges ne viennent pas d'ici.
+  ⏳ **Test manuel dû à Grégoire** : un lot contenant deux homonymes de nom et un nom accentué — les
+  homonymes doivent rester à associer à la main, le nom accentué doit se placer seul.
 - [ ] **#612 — S6 · Un DA inconnu du groupe est stocké en silence ; un import sans groupe actif rend les fichiers invisibles** (constats S4, S7).
   `js/travaux-import.js`, `js/travaux-ui.js`, `js/liste-evaluations.js`. **D2 = A** : garde
   `groupeCoursActif` dans `confirmerImportPipeline`, refus dit. Plus bandeau « DA sans élève dans ce
