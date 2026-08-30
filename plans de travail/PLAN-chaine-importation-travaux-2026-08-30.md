@@ -18,7 +18,7 @@
 |---|---|---|---|---|---|
 | S0 — Préparation | — | LIVRÉ | 2026-08-30 | | D1=A, D2=A, D3=A · #607–#615 réservés · #606 coché (livré `c24036e7`) |
 | S1 — Jetons ↔ fichiers | S5 | LIVRÉ | 2026-08-30 | `ba99f483` (1.106.9) | #607 · sentinelle 7 cas, 4 break-tests, 4 ROUGE · ⏳ test manuel Mac+iPad dû à Grégoire · T6.6 activée |
-| S2 — Jeton et maximum par production | S6 | LIVRÉ | 2026-08-30 | COMMIT_S2 | #608 · sentinelle Vitest 9 cas, 5 break-tests, 5 ROUGE · ⏳ test manuel `maxParProduction = 1` dû à Grégoire |
+| S2 — Jeton et maximum par production | S6 | LIVRÉ | 2026-08-30 | `5752c20c` (1.106.10) | #608 · sentinelle Vitest 9 cas, 5 break-tests, 5 ROUGE · ⏳ test manuel `maxParProduction = 1` dû à Grégoire |
 | S3 — Assemblage automatique | B1, M5 | À FAIRE | | | #609 · D1 = A (deux documents) |
 | S4 — Reprise après interruption, rattachement | S1, S2 | À FAIRE | | | #610 · après S3, jamais en parallèle |
 | S5 — Appariement par nom | S3 | À FAIRE | | | #611 |
