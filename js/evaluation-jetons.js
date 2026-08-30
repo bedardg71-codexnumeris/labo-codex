@@ -241,6 +241,62 @@ function _persisterEvaluationsJetons(evaluations, geste) {
     return ok;
 }
 
+/**
+ * #607 — combien de fichiers actifs sont liés à cette évaluation. Lecture
+ * seule : sert à ANNONCER dans le `confirm` ce que le geste va emporter, avant
+ * qu'il l'emporte.
+ * @param {string} evaluationId
+ * @returns {number}
+ */
+function _compterFichiersDeEvaluation(evaluationId) {
+    if (!evaluationId) return 0;
+    if (typeof travauxStockage === 'undefined' || !travauxStockage) return 0;
+    return travauxStockage.obtenirFichiersTravaux()
+        .filter(f => f.evaluationId === evaluationId).length;
+}
+
+/**
+ * #607 (constat S5 de l'audit du 30 août 2026) — les fichiers d'une évaluation
+ * qui disparaît ne peuvent pas rester actifs.
+ *
+ * La liste résout le fichier de chaque ligne SANS `id` (`liste-evaluations.js`),
+ * donc par le repli (DA, production) → « le plus récent par dateModification ».
+ * Un fichier de reprise orphelin est TOUJOURS le plus récent de la paire : sans
+ * ce détachement, la ligne de l'originale restaurée ouvre le travail de la
+ * reprise qu'on vient d'effacer.
+ *
+ * Deux modes, parce que les deux gestes ne disent pas la même chose :
+ *  - `corbeille` : la reprise est annulée, le travail remis pour elle n'a plus
+ *    de raison d'être actif — il part à la corbeille (blob intact, restaurable).
+ *  - `delier` : l'originale est supprimée au profit de la reprise
+ *    (`archiverOriginale: false`). L'élève a bien remis ce travail : on ne le
+ *    jette pas, on coupe seulement son lien vers une évaluation disparue.
+ *
+ * À appeler AVANT `_persisterEvaluationsJetons` : les deux écritures sont
+ * synchrones et doivent se suivre sans point d'attente entre elles.
+ *
+ * @param {string} evaluationId - ID de l'évaluation qui disparaît
+ * @param {string} mode - 'corbeille' ou 'delier'
+ * @returns {number} nombre de fichiers touchés
+ */
+function _detacherFichiersDeEvaluation(evaluationId, mode) {
+    if (!evaluationId) return 0;
+    if (typeof travauxStockage === 'undefined' || !travauxStockage) return 0;
+
+    const fichiers = travauxStockage.obtenirFichiersTravaux()
+        .filter(f => f.evaluationId === evaluationId);
+
+    fichiers.forEach(f => {
+        if (mode === 'corbeille') {
+            travauxStockage.deplacerEnCorbeille(f.id);
+        } else {
+            travauxStockage.mettreAJourFichier(f.id, { evaluationId: '', estReprise: false });
+        }
+    });
+
+    return fichiers.length;
+}
+
 /* ===============================
    JETON DE DÉLAI
    =============================== */
@@ -484,6 +540,8 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options
     } else {
         // Option 2: Supprimer l'originale
         evaluations.splice(indexOriginal, 1);
+        // #607 — sans quoi le fichier de l'originale garde un evaluationId mort.
+        _detacherFichiersDeEvaluation(evaluationOriginaleId, 'delier');
     }
 
     // Ajouter la nouvelle évaluation
@@ -536,21 +594,36 @@ function retirerJetonReprise(evaluationId) {
     if (evaluationReprise.remplaceeParId && !evaluationReprise.reconcilieParDoublon) {
         const indexRepriseLiee = evaluations.findIndex(e => e.id === evaluationReprise.remplaceeParId);
         const noteRepriseLiee = indexRepriseLiee !== -1 ? (evaluations[indexRepriseLiee].noteFinale || 0) : null;
+        // #607 — même annonce du côté de l'originale.
+        const nbFichiersLiesAnnonces = _compterFichiersDeEvaluation(evaluationReprise.remplaceeParId);
         const confirmer = confirm(
             'Cette évaluation est l\'ORIGINALE, remplacée par une reprise'
             + (noteRepriseLiee !== null ? ` (${noteRepriseLiee}%)` : '') + '.\n\n'
-            + 'La restaurer supprimera la reprise. Continuer ?'
+            + 'La restaurer supprimera la reprise.'
+            + (nbFichiersLiesAnnonces
+                ? ` Le ou les ${nbFichiersLiesAnnonces} fichier(s) remis pour la reprise iront à la corbeille (récupérables 30 jours).`
+                : '')
+            + ' Continuer ?'
         );
         if (!confirmer) return false;
+
+        // #607 — capturer l'id AVANT le `delete` : sans cela, la lecture plus
+        // bas rendait `undefined` et le fichier de la reprise restait actif.
+        const idRepriseLiee = evaluationReprise.remplaceeParId;
 
         delete evaluationReprise.remplaceeParId;
         delete evaluationReprise.dateRemplacement;
         delete evaluationReprise.archivee;
         delete evaluationReprise.dateArchivage;
+        let nbFichiersLies = 0;
         if (indexRepriseLiee !== -1) {
             evaluations.splice(indexRepriseLiee, 1);
+            // #607 — le fichier remis pour la reprise part avec elle.
+            nbFichiersLies = _detacherFichiersDeEvaluation(idRepriseLiee, 'corbeille');
         }
-        notifications.succes('Originale restaurée' + (indexRepriseLiee !== -1 ? ', reprise supprimée' : ''));
+        notifications.succes('Originale restaurée'
+            + (indexRepriseLiee !== -1 ? ', reprise supprimée' : '')
+            + (nbFichiersLies ? ' — ' + nbFichiersLies + ' fichier(s) de reprise mis à la corbeille' : ''));
     } else {
 
     // Trouver l'évaluation originale si elle existe
@@ -576,9 +649,16 @@ function retirerJetonReprise(evaluationId) {
         const noteOriginale = evaluationOriginale.noteFinale || 0;
         const noteReprise = evaluationReprise.noteFinale || 0;
 
+        // #607 — annoncer le sort du fichier AVANT de le décider.
+        const nbFichiersAnnonces = _compterFichiersDeEvaluation(evaluationId);
+        const mentionFichiers = nbFichiersAnnonces
+            ? `\n\nLe ou les ${nbFichiersAnnonces} fichier(s) remis pour la reprise iront à la corbeille (récupérables 30 jours).`
+            : '';
+
         const confirmer = confirm(
             `Retirer le jeton de reprise ?\n\n` +
-            `La reprise (${noteReprise}%) sera supprimée et l'originale (${noteOriginale}%) sera restaurée.\n\n` +
+            `La reprise (${noteReprise}%) sera supprimée et l'originale (${noteOriginale}%) sera restaurée.` +
+            mentionFichiers + `\n\n` +
             `(Pour conserver la reprise, garde simplement le jeton en place.)`
         );
         if (!confirmer) {
@@ -594,7 +674,12 @@ function retirerJetonReprise(evaluationId) {
         // Supprimer la reprise
         evaluations.splice(indexReprise, 1);
 
-        notifications.succes('Reprise supprimée, originale restaurée');
+        // #607 — le fichier importé pour la reprise part avec elle, sinon il
+        // reste « le plus récent » et la ligne de l'originale l'ouvre.
+        const nbFichiersReprise = _detacherFichiersDeEvaluation(evaluationId, 'corbeille');
+
+        notifications.succes('Reprise supprimée, originale restaurée'
+            + (nbFichiersReprise ? ' — ' + nbFichiersReprise + ' fichier(s) de reprise mis à la corbeille' : ''));
 
         // Recharger l'originale
         if (window.evaluationEnCours?.idModification === evaluationId) {

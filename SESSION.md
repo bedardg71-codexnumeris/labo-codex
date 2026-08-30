@@ -7,6 +7,177 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION — 30 AOÛT 2026 : EXÉCUTION DU PLAN « CHAÎNE D'IMPORTATION DES
+     TRAVAUX » — S0 (PRÉPARATION) ET S1 (JETONS ↔ FICHIERS) LIVRÉS.
+
+     ▣ MANDAT (Grégoire) : « Exécute le plan
+       plans de travail/PLAN-chaine-importation-travaux-2026-08-30.md ».
+
+     ▣ AUDIT DE DÉBUT DE SESSION — DEUX ÉCARTS AVEC LA PRÉMISSE DU PLAN.
+       · T0.5 était à moitié faite : l'audit et le plan étaient commités
+         (88a2a244) mais JAMAIS POUSSÉS. Poussés au commit de S0.
+       · T6.1 était levée d'avance : #606 est mergé (c24036e7), pas « non
+         commité » comme le plan le supposait. Sa case restait décochée au
+         BACKLOG — cochée.
+       Base mesurée avant de commencer : arbre propre, Vitest 406 fichiers /
+       4242 tests, code de sortie 0.
+
+     ▣ S0 — LES TROIS DÉCISIONS, TOUTES OPTION A (Grégoire, 30 août 2026).
+       · D1 (pour S3) : deux remises Léa d'un même élève à des dates
+         différentes sont DEUX documents. La clé d'assemblage portera
+         l'horodatage de remise.
+       · D2 (pour S6) : sans groupe-cours actif, l'import est REFUSÉ avec un
+         message. Le repli de `obtenirFichiersGroupeActif` n'est pas touché
+         (60 appelants non audités).
+       · D3 (pour S9) : « Renommer pour distinguer » est RETIRÉ, avec
+         `renommerDoublon` et `renommerFichierDansFile`.
+       · T0.4 : #607 à #615 réservés EN UNE SEULE ÉCRITURE, un par session
+         S1 à S9, avant tout emploi dans un commit.
+       Commit `8c938841`, poussé.
+
+     ▣ S1 (#607) — RETIRER UN JETON DE REPRISE EMPORTE MAINTENANT SON FICHIER.
+       Le défaut (constat S5 de l'audit) : `retirerJetonReprise` supprimait
+       l'évaluation de reprise sans toucher au fichier importé pour elle. Ce
+       fichier gardait `estReprise: true`, un `evaluationId` mort, et surtout
+       la `dateModification` LA PLUS RÉCENTE de la paire. Comme la liste
+       résout le fichier de chaque ligne SANS `id` (`liste-evaluations.js:60`),
+       le repli (DA, production) → « le plus récent » lui donnait le fichier
+       de la reprise : la ligne de l'originale restaurée ouvrait le travail
+       qu'on venait d'effacer.
+       ➮ `_detacherFichiersDeEvaluation(evaluationId, mode)`, appelée AVANT
+         `_persisterEvaluationsJetons` dans les trois branches. Deux modes,
+         parce que les deux gestes ne disent pas la même chose : `corbeille`
+         quand la reprise est annulée (blob intact, récupérable 30 jours),
+         `delier` quand c'est l'originale qui disparaît
+         (`archiverOriginale: false` — l'élève a bien remis ce travail).
+       ➮ Les deux `confirm` et les deux notifications ANNONCENT le nombre de
+         fichiers touchés, avant et après le geste.
+
+     ⚠⚠ UN SECOND DÉFAUT, TROUVÉ PAR LA SENTINELLE ET NON PAR MOI.
+       Dans la branche #141, `remplaceeParId` est `delete`é AVANT la ligne qui
+       le lit : mon premier jet appelait `_detacherFichiersDeEvaluation(
+       evaluationReprise.remplaceeParId, …)` sur un `undefined`, et ne
+       détachait rien. Deux branches sur trois étaient bonnes, la troisième
+       muette. Sans la sentinelle écrite AVANT le correctif, le vert des deux
+       autres aurait suffi à me convaincre.
+
+     ▣ SENTINELLE ET BREAK-TESTS.
+       `tests/unit/sentinelle-jeton-retire-fichier-reprise.test.js`, 7 cas,
+       dont un TÉMOIN DE MISE EN PLACE : « sans retrait, le repli rend bien le
+       fichier de la reprise » — il vérifie que le piège est reproduit, sinon
+       les six autres seraient verts pour rien.
+       · ROUGE d'abord : 5 échecs sur 7, code de sortie 1.
+       · 4 break-tests, 4 ROUGE : appel de la branche « reprise » retiré ·
+         appel de la branche #141 retiré · appel `delier` retiré · mode
+         `corbeille` remplacé par `delier`. Remis : code 0.
+       ⚠ Une assertion rouge venait du HARNAIS, pas du code : mon test
+       appelait `appliquerJetonReprise('EVAL_A', DA, false, …)` alors que la
+       signature réelle est `(evaluationOriginaleId, archiverOriginale,
+       options)` — trois paramètres. Le `DA` passait pour `archiverOriginale`
+       et branchait sur l'archivage. Corrigé côté test.
+
+     ▣ T1.4 — LE MÊME TROU EXISTE SUR LE CHEMIN LE PLUS FRÉQUENTÉ.
+       `supprimerEvaluation` (`js/liste-evaluations.js`) appelle
+       `restaurerOriginaleSiReprise`, retire les quatre marqueurs d'archivage
+       et filtre la reprise — sans toucher à aucun fichier. Mécanisme
+       identique à S5 ; seule la porte change (supprimer l'évaluation au lieu
+       de retirer le jeton). ⮕ INSCRIT EN T6.6 du plan, à traiter avec #612.
+
+     ▣ ÉTAT : Vitest 407 fichiers / 4249 tests + Playwright 210/210, code de
+       sortie 0. Release 1.106.9 (build 0830-1454), changelog 1.106 complété.
+     ⏳ DÛ À GRÉGOIRE (Mac ET iPad) : appliquer puis retirer un jeton dans le
+       formulaire ; la ligne de l'originale doit rouvrir le fichier ORIGINAL,
+       et le fichier de la reprise doit apparaître dans la Corbeille.
+
+     ⚠ SESSION PARALLÈLE DÉTECTÉE SUR LE MÊME DÉPÔT (14 h 54 - 14 h 55) :
+       `Rapports/prompts-audit/` (deux fichiers neufs) et
+       `scripts/audit-ssot.json`/`.md` régénérés. NON COMMITÉS ICI — ils
+       appartiennent à l'autre chantier, qu'on ne coupe pas en deux. Le bloc
+       « 30 AOÛT (SOIR) » de ce SESSION.md vient d'elle et décrit un commit
+       déjà poussé (88a2a244) : embarqué ici parce que le fichier est partagé.
+     ===================================================================== -->
+
+
+<!-- =====================================================================
+     SESSION — 30 AOÛT 2026 (SOIR) : AUDIT DE LA CHAÎNE D'IMPORTATION DES
+     TRAVAUX — RAPPORT ET PLAN PAR SESSIONS, LIVRÉS ET POUSSÉS.
+
+     ▣ MANDAT (Grégoire) : auditer, en lecture seule, la chaîne fichier
+       déposé → nommage → doublon → appariement → stockage → liste des
+       évaluations → reprise après jeton, dans l'optique d'une cohorte de
+       vingt enseignants en septembre. Puis sauvegarder l'audit et établir
+       un plan d'exécution pour une session Opus 5, par sessions successives.
+
+     ▣ LIVRÉ (commit `88a2a244`, poussé sur origin/main, Vitest vert au hook).
+       · `Rapports/AUDIT-chaine-importation-travaux-2026-08-30.md` — 1
+         BLOQUANT (B1 : l'assemblage automatique soude des fichiers
+         homonymes sans DA, ou deux remises Léa d'un même élève), 10
+         SÉRIEUX (S1 doublons muets sans DA/production + file persistée en
+         fin de lot seulement ; S2 rattachement par nom seul ; S3 appariement
+         par sous-chaîne « Martin/Martineau » ; S4 DA inconnu du groupe sans
+         ligne dans la liste ; S5 retrait de jeton laisse le fichier de
+         reprise actif ; S6 « jeton appliqué » annoncé sans jeton consommé ;
+         S7 import sans groupe actif ; S8 restauration ZIP muette ; S9 fusion
+         de codex sans magic bytes ; S10 purge #336 recense la corbeille), 11
+         MINEUR, correctifs en diff NON appliqués, angles morts appareil.
+         Élargissements assumés : travaux-ui.js, codex.js, db.js, modes.js.
+       · `plans de travail/PLAN-chaine-importation-travaux-2026-08-30.md` —
+         11 sessions S0…S10, tableau d'état en tête (statut/date/commit),
+         tâches TN.n cochables, critère de fin par session, cadre non
+         négociable, séquence a→g par tâche de code.
+
+     ▣ ⚠ DEUX SESSIONS SUR LE MÊME DÉPÔT CE SOIR. Une session d'exécution
+       (Opus 5) a démarré le plan en parallèle : `8c938841` (S0 : D1=A, D2=A,
+       D3=A ; #607–#615 réservés) est déjà dans main, et au moment d'écrire
+       ce bloc son S1 (#607, `js/evaluation-jetons.js` + sentinelle
+       `sentinelle-jeton-retire-fichier-reprise.test.js`) est en cours, NON
+       commité. Ce bloc-ci n'a été ajouté qu'à SESSION.md ; rien d'autre
+       n'est stagé par la session d'audit. Staging chirurgical obligatoire
+       des deux côtés, `--cached --stat` avant tout commit.
+
+     ▣ EN SUSPENS — côté plan (porté par la session d'exécution, à cocher
+       dans le tableau d'état du plan, pas ici) :
+       · T0.5 : la case reste décochée dans le plan alors que le commit
+         `88a2a244` EST poussé — la cocher au prochain passage.
+       · S1 : test manuel Mac + iPad dû à Grégoire (appliquer puis retirer
+         un jeton dans le formulaire ; la ligne de l'originale doit rouvrir
+         le fichier original).
+       · T6.6 ACTIVÉE par la session d'exécution : `supprimerEvaluation`
+         (liste-evaluations.js) a le même trou que S5 — fichier laissé avec
+         un `evaluationId` mort. À traiter en S6.
+       · S2 à S9 : à faire dans l'ordre du plan ; S4 après S3, jamais en
+         parallèle ; S3/S6/S9 débloquées (décisions prises).
+       · S10 : sept tests sur appareil avec Grégoire aux commandes de
+         l'iPad (ordre de la FileList au re-dépôt, veille pendant 40 photos,
+         quota IDB à 100 %, persist() écran d'accueil, FSAPI + codex, onglet
+         fermé juste après import, liste à 450 fichiers).
+
+     ▣ EN SUSPENS — hors plan, constats de l'audit non inscrits au BACKLOG
+       (règle du 24 août : symptôme vécu ou commentaire dans le code) :
+       · M7 `statutRemise` n'est pas la SSOT annoncée (formulaire peut
+         écrire `importe`, la liste l'ignore) ; M8 la liste ne se rafraîchit
+         que par navigation ; M9 pas d'annulation d'un lot importé dans la
+         mauvaise production ; M11 cas limites d'échappement
+         (`import-export.js:1686, 1731→1854/1871/1872`, `travaux-import.js:1325`,
+         `travaux-ui.js:6230/6235/5653/6415`) et 20 `console.log` d'outils
+         console dans `travaux-resolution.js`.
+       · Deux points que l'audit n'a PAS établis : `mapping_anonymisation`
+         peut-il venir d'un fichier importé (`anonymiserNom` non échappé) ;
+         `HeicDecodeur.convertirEnJpeg` non relu.
+       · Doc : `DATA-OWNERSHIP.md` dit 200 Ko pour le seuil IDB-first, le
+         code dit 25 Ki (`db.js:120`) — prévu en S9 (T9.5).
+
+     ▣ MÉMOIRE À CONSERVER DE CETTE SESSION : un audit qui ne trouve que des
+       problèmes n'a pas cherché à se contredire — la section 2.5 « ce qui
+       est solide » a été écrite avec le même niveau de preuve que les
+       constats. Et le sous-audit par trois agents à périmètre disjoint
+       (liste / voies ZIP-codex / sécurité) a tenu parce que chaque agent
+       devait citer fichier:ligne : aucune de leurs affirmations n'a été
+       reprise sans relecture du code cité.
+     ===================================================================== -->
+
+
+<!-- =====================================================================
      SESSION — 30 AOÛT 2026 (MATIN) : LA COURSE LECTURE-MODIFICATION-ÉCRITURE
      EST MESURÉE, ET LA CLÉ DES PRATIQUES EST FERMÉE — #522 AUDIT + LOT 1.
 
