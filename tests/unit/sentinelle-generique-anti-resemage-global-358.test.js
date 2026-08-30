@@ -30,7 +30,18 @@ function dbDepuisStore(store) {
         get: async (c) => (c in store ? store[c] : null),
         getSync: (c, d) => (c in store ? store[c] : (d !== undefined ? d : null)),
         set: async (c, v) => { store[c] = v; },
-        setSync: (c, v) => { store[c] = v; }
+        setSync: (c, v) => { store[c] = v; },
+        // #522 lot 2c : le semis passe désormais par la file. Le stub la
+        // reproduit fidèlement — y compris le refus : un mutateur qui rend
+        // `undefined` n'écrit RIEN, donc la clé reste absente du store, ce qui
+        // est exactement ce que ce fichier vérifie.
+        modifier: async (c, mutateur, defaut = null) => {
+            const lue = c in store ? store[c] : defaut;
+            const resultat = await mutateur(lue);
+            if (resultat === undefined) return undefined;
+            store[c] = resultat;
+            return resultat;
+        }
     };
 }
 
