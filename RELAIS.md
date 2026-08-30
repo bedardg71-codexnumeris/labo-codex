@@ -30,6 +30,57 @@
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
 | **Dernière mise à jour** | **30 août 2026, 12 h 30** — **trois sessions dans le même arbre**, coordonnées par messages. **#597 CLOS** (`20e4feaf`, **non poussé**) : le décodeur HEIC fonctionne mais n'a AUCUN chemin en `file://`, et l'application le DIT désormais au lieu de laisser passer un fichier muet en 0 x 0. ⚠⚠ **LE FAIT À RETENIR : un `blob:` worker HÉRITE de la CSP du document, un worker chargé par URL same-origin non** — c'est ce qui ferme la dernière voie, pas le `file://`. ⮕ **Et la leçon de méthode : la mesure du matin était VRAIE et INCOMPLÈTE** — « converties en 3024x4032 » était exact sous serveur, personne n'avait écrit dans quel mode. **Vitest 4195/4195 (402 fichiers)** · Playwright 207/207 sur deux suites. ⏳ **Reste, et c'est une décision de Grégoire à froid : le lanceur local** (servir l'application ferait marcher le décodeur tel quel, mais change son geste de lancement et emporte tablette + clé Codex). Entrée précédente : **30 août 2026, fin de journée** — session unique. **#522 lot 4 LIVRÉ** (le helper des bibliothèques, cinq familles d'un geste) · **#503 étendu aux cartouches** · divergence des deux 1.106.3 TRANCHÉE (report de #555·2, branche abandonnée) · **#508 : trois gestes de code**, pas un — la spec rougirait seule le 1er septembre · consigne de démarrage et artefact de refermage écrits. **Vitest 4114/4114 (395 fichiers)** · ⚠ **Playwright NON relancé, et il est DÛ.** 1.106.4 due, rien poussé. Entrée précédente : **30 août 2026, 8 h 20** — session unique (matin). **#522 : l'AUDIT est fait (213 séquences mesurées, 102 en course) et le LOT 1 est LIVRÉ** — rapport `Rapports/AUDIT-522-courses-lecture-ecriture-2026-08-30.md`. **1.106.3 poussée** (`c2e12dcd`). ⚠⚠ **LE FAIT À RETENIR : `getSync` NE PROTÈGE PAS** — dans `db.set`, l'écriture IndexedDB est attendue AVANT le rafraîchissement de localStorage, donc un concurrent lit encore l'ancienne valeur. ⚠ **Et le banc mentait** : Node n'a pas d'IndexedDB, `db.js` s'y rabat sur localStorage-seul où `set` est synchrone — les six cas passaient au VERT sur le code NON corrigé ; il faut forcer `useIndexedDB` avec une fausse connexion. **Reste 89 sites, quatre lots** ; le plus rentable est le helper `BibliothequeUI` (14 sites, 7 fichiers, un seul changement de contrat pour les cinq familles). Entrée précédente : **29 août 2026, 20 h 15** — session unique (journée entière). **Audit Évaluations bouclé** (#562, #560, #561, #566, #571, #567, #570, #568, #569, #572), #595 et #596 inscrits, artefact de vérification terrain remis. **1.106.2 poussée** (`d1983402`). Entrée précédente : **10 h 30** — session unique (matin). **#578 LIVRÉ** (option A) + régression du 26 août réparée (listes du formulaire de cartouche mortes) ; **#574 retrait LIVRÉ** (option B, sonde due) ; **#593 LIVRÉ** (n° 5-6-7, course fermée) ; **#563 LIVRÉ** (case retirée) ; **#594 LIVRÉ** (bandeau de version au chargement) ; **#562, #560, #561, #566, #571, #567, #570, #568, #569 et #572 LIVRÉS** (après 1.106.1 — **bump 1.106.2 dû**) ; **#595 inscrit** ; **référence unique créée** (`Rapports/SUIVI-conception-evaluations-2026-08.md`) ; #593 inscrit ; 1.106.0 déployée à 3 h. ✅ **1.106.1 poussée à 12 h 40** (`ecd22a59`). Entrée précédente : **3 h 40** — session unique (nuit). **1.106.0 poussée** ; **#578 : le diagnostic console est LIVRÉ** (`await _diagnostiquerEchellesGrilles()`), sentinelle 6 cas / 4 mutations rouges ; **le chiffre est DÛ par Grégoire**. Fait mesuré : l'éditeur de grille n'écrit jamais `echelleId`. Entrée précédente : **28 août, 21 h 15** — session unique (soir). **#555 lot 2 (d) et (e) + #577 LIVRÉS** ; #579 livré pour le cas de l'assistant ; **#592** inscrit. **Vitest 4011/4011** (377 fichiers) · **Playwright 201** (198 verts + 3 instables pré-existantes, vertes au second essai), sur arbre gelé. ⚠ **AUCUN BUMP** : du code a changé (6 fichiers `js/`, `?v=` bougés) mais je ne sais pas si la session `file://` de Grégoire est ouverte — **1.106.0 (minor) est DUE**, à lancer par `node scripts/release.mjs minor` au prochain démarrage. Entrée précédente : **20 h 15** — fin de journée, **trois sessions**. Les **21 arbitrages de Grégoire sont TRANCHÉS et consignés dans leurs items**. Livré : #555 lot 2 (b), #556, #557, l'audit des copies d'échelle, le diagnostic des résolveurs. **Vitest 3983/3983** (374 fichiers) · **Playwright 199/199**, relancés sur arbre gelé avant le push. **Aucun bump** : 1.105.0 tient — que de la documentation, aucun `?v=` à bouger. |
 
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 30 AOÛT 2026, SOIR (SESSION AUDIT — MÉTHODE COMMUNE DES AUDITS)
+
+**Deux audits livrés sur `main` ce soir, même méthode, et un troisième attendu
+demain qui DOIT la suivre.** Le suivi ne se fait NI ici NI dans SESSION.md :
+chaque plan porte son propre **tableau d'état** en tête (statut / date / commit
+/ note par session de travail), et c'est LUI que la session d'exécution lit en
+premier et met à jour en dernier. Ce bloc-ci ne fait que pointer.
+
+| Audit | Rapport (constats, diffs NON appliqués) | Plan (tableau d'état = point d'entrée) | État au moment d'écrire |
+|---|---|---|---|
+| Chaîne d'importation des travaux | `Rapports/AUDIT-chaine-importation-travaux-2026-08-30.md` (`88a2a244`) | `plans de travail/PLAN-chaine-importation-travaux-2026-08-30.md` | S0 LIVRÉ (D1=A, D2=A, D3=A ; #607–#615 réservés) ; **S1 EN COURS dans une autre session** (`js/evaluation-jetons.js` + sentinelle, non commité) ; S2–S10 À FAIRE |
+| Modèle d'objets Conception | `Rapports/AUDIT-modele-objets-conception-2026-08-30.md` (`836936d5`) | `plans de travail/PLAN-modele-objets-conception-2026-08-30.md` | S0 à trancher (D1–D5, dont un **moratoire proposé sur « Archiver un trimestre »** — `creerSnapshotRessources` écrase les collections vivantes post-#358) ; ses S1–S3 sont des sessions d'AUDIT CIBLÉ qui produiront les diffs, S4+ les applique ; **T0.6 (#NNN) PAS ENCORE FAITE** |
+
+**PROCÉDURE COMMUNE — à reproduire pour l'audit de demain** (référence complète :
+en-tête et « Comment lire et tenir ce plan » de l'un ou l'autre plan, qui servent
+de gabarits) :
+1. AUDIT d'abord, lecture seule, dans `Rapports/AUDIT-<sujet>-AAAA-MM-JJ.md` :
+   constats BLOQUANT/SÉRIEUX/MINEUR, chacun avec fichier:ligne + extrait +
+   scénario de défaillance concret + certitude VÉRIFIÉ/INFÉRÉ/SUPPOSÉ ;
+   correctifs en diff NON appliqués nommant ce qu'ils RETIRENT ; section
+   « ce qui est solide » ; section « angles morts » (tests appareil).
+2. PLAN ensuite, `plans de travail/PLAN-<sujet>-AAAA-MM-JJ.md` : tableau d'état
+   en tête (statuts fermés : À FAIRE · EN COURS (date) · LIVRÉ (commit) ·
+   BLOQUÉ (motif) · ABANDONNÉ (décision Grégoire, date)) ; sessions S0…Sn de
+   90 min = une branche = un merge ; tâches TN.n cochables, cochée = livré-
+   testé-MERGÉ ; S0 = décisions FERMÉES de Grégoire consignées avec date +
+   réservation des #NNN en une seule écriture ; cadre non négociable ;
+   séquence a→g par tâche de code (sentinelle ROUGE d'abord, break-test) ;
+   critère de fin observable par session ; dernière session = tests sur
+   appareil avec Grégoire (« Observé : ___ »).
+3. Committer audit + plan ensemble (`docs(audit): …`), pousser, ajouter la
+   ligne au tableau ci-dessus.
+
+**⚠ COORDINATION MULTI-SESSIONS (au moins trois ce soir sur ce dépôt)** :
+- `#607–#615` sont PRIS (plan importation). Le plan Conception n'a pas encore
+  ses numéros : avant toute réservation, vérifier le DERNIER ID réellement
+  inscrit dans BACKLOG.md (≥ #615) et écrire en une seule fois.
+- Staging chirurgical partout : jamais de `git add` large, `git diff --cached
+  --stat` avant tout commit. `BACKLOG.md`, `SESSION.md` et les plans sont des
+  fichiers PARTAGÉS entre sessions.
+- Deux constats de l'audit Conception croisent d'autres chantiers :
+  `migrerEvaluationsVersNouvelleEchelle` (`echelles.js:4294-4306`) écrit
+  `evaluationsSauvegardees` HORS file `db.modifier` — même famille que #522 ;
+  les lots jetons du plan importation écrivent cette clé via
+  `sauvegarderDonneesSelonMode` (point unique #563), hors file aussi. La mise
+  en file de cette clé est un chantier TRANSVERSAL, à traiter comme un lot
+  #522, pas à absorber dans l'un des deux plans.
+
+---
+
+
 ## ▶ POUR LA SESSION QUI PREND LE RELAIS — 30 AOÛT 2026, 12 h 30 (SESSION HEIC, TROISIÈME)
 
 ### ✅ CLÔTURE — 1.106.5 poussée, et une erreur de comptage corrigée

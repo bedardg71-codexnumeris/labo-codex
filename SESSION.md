@@ -201,6 +201,13 @@
        · Doc : `DATA-OWNERSHIP.md` dit 200 Ko pour le seuil IDB-first, le
          code dit 25 Ki (`db.js:120`) — prévu en S9 (T9.5).
 
+     ▣ AJOUT EN FIN DE SESSION : la méthode audit→plan a été transmise à la
+       session « modèle d'objets Conception », qui l'a appliquée (rapport +
+       plan livrés, commit `836936d5`). Le POINT D'ENTRÉE du suivi des deux
+       audits — et la procédure que l'audit de DEMAIN doit suivre — est le
+       bloc « MÉTHODE COMMUNE DES AUDITS » en tête de `RELAIS.md` ; le suivi
+       d'exécution vit dans le tableau d'état de CHAQUE plan, pas ici.
+
      ▣ MÉMOIRE À CONSERVER DE CETTE SESSION : un audit qui ne trouve que des
        problèmes n'a pas cherché à se contredire — la section 2.5 « ce qui
        est solide » a été écrite avec le même niveau de preuve que les
