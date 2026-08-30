@@ -330,35 +330,42 @@ function creerNouvelleProduction() {
  * @param {string} id - ID de la production à dupliquer
  */
 async function dupliquerProduction(id) {
-    const productions = await db.get(getCleProductions()) || [];
-    const production = productions.find(p => p.id === id);
+    let copieCreee = null;
+    await db.modifier(getCleProductions(), (lues) => {
+        const productions = lues || [];
+        const production = productions.find(p => p.id === id);
 
-    if (!production) return;
+        if (!production) return undefined;
 
-    // Créer une copie avec un nouvel ID. La copie devient un nouvel original
-    // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY).
-    // ✅ D2 + D4 + D5 (arbitrage du 24 août) — ON RENOMME CE QUE L'UTILISATEUR VOIT.
-    // Avant, le `titre` — le champ affiché dans la liste — restait IDENTIQUE à
-    // celui de la source : rien ne distinguait la copie de l'originale. Ce sont
-    // `activiteApprentissage` et `description` qui recevaient « (copie) », et la
-    // description était ÉCRASÉE par l'activité au passage, perdant son texte sans
-    // avertissement. Désormais : le titre passe par `nommerCopie`, les deux autres
-    // champs sont laissés intacts, la provenance est complète et les métadonnées
-    // de partage de la source sont retirées.
-    const copie = {
-        ...production,
-        id: genererIdUnique('PROD_'),
-        titre: nommerCopie(production.titre, productions),
-        auteur: BibliothequeUI.obtenirAuteurActif(),
-        isDemo: false,
-        inspireDe: BibliothequeUI.forgerInspireDe(production),
-        verrouille: false
-    };
-    delete copie.metadata_cc;
-    delete copie.auteurOriginal;
+        // Créer une copie avec un nouvel ID. La copie devient un nouvel original
+        // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY).
+        // ✅ D2 + D4 + D5 (arbitrage du 24 août) — ON RENOMME CE QUE L'UTILISATEUR VOIT.
+        // Avant, le `titre` — le champ affiché dans la liste — restait IDENTIQUE à
+        // celui de la source : rien ne distinguait la copie de l'originale. Ce sont
+        // `activiteApprentissage` et `description` qui recevaient « (copie) », et la
+        // description était ÉCRASÉE par l'activité au passage, perdant son texte sans
+        // avertissement. Désormais : le titre passe par `nommerCopie`, les deux autres
+        // champs sont laissés intacts, la provenance est complète et les métadonnées
+        // de partage de la source sont retirées.
+        const copie = {
+            ...production,
+            id: genererIdUnique('PROD_'),
+            titre: nommerCopie(production.titre, productions),
+            auteur: BibliothequeUI.obtenirAuteurActif(),
+            isDemo: false,
+            inspireDe: BibliothequeUI.forgerInspireDe(production),
+            verrouille: false
+        };
+        delete copie.metadata_cc;
+        delete copie.auteurOriginal;
 
-    productions.push(copie);
-    await db.set(getCleProductions(), productions);
+        productions.push(copie);
+        copieCreee = copie;
+        return productions;
+    }, []);
+
+    if (!copieCreee) return;
+    const copie = copieCreee;
 
     // Recharger la liste
     await afficherListeProductions();
@@ -403,10 +410,11 @@ async function supprimerProductionActive() {
         return;
     }
 
-    let productions = await db.get(getCleProductions()) || [];
-    productions = productions.filter(e => e.id !== productionEnEdition);
-
-    await db.set(getCleProductions(), productions);
+    // ⚠ La collection est relue DANS la file : celle d'avant la confirmation ne
+    // vaut plus rien.
+    await db.modifier(getCleProductions(), (lues) => {
+        return (lues || []).filter(e => e.id !== productionEnEdition);
+    }, []);
 
     // Fermer le formulaire et retourner à l'accueil
     annulerFormProduction();

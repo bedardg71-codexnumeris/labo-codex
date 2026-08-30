@@ -81,7 +81,17 @@ function monterBanc({ productionsDuCours = [], bibliotheque = [] } = {}) {
             get: async (k) => (k in magasins ? magasins[k] : null),
             set: async (k, v) => { magasins[k] = v; },
             getSync: (k, def) => (k in magasins ? magasins[k] : def),
-            setSync: (k, v) => { magasins[k] = v; }
+            setSync: (k, v) => { magasins[k] = v; },
+            // #522 lot 3 : la reprise depuis la bibliothèque écrit par la file.
+            // Le stub la reproduit, refus compris — un mutateur qui rend
+            // `undefined` n'écrit rien.
+            modifier: async (k, mutateur, defaut = null) => {
+                const lue = k in magasins ? magasins[k] : defaut;
+                const resultat = await mutateur(lue);
+                if (resultat === undefined) return undefined;
+                magasins[k] = resultat;
+                return resultat;
+            }
         },
         BibliothequeUI: {
             genererBadgeSource: () => '', genererIdCourt: (id) => String(id).slice(0, 6),

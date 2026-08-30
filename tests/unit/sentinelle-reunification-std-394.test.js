@@ -65,7 +65,18 @@ function chargerChaine(store) {
         getSync: (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)),
         setSync: (k, v) => { store[k] = v; },
         get: async (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)),
-        set: async (k, v) => { store[k] = v; }
+        set: async (k, v) => { store[k] = v; },
+        // #522 lot 3 : `typerProductionCommeTerminale` écrit par la file, et
+        // rejoue DANS le mutateur le test « une seule terminale ». Le stub
+        // reproduit la file, refus compris — un mutateur qui rend `undefined`
+        // n'écrit rien, ce qui est exactement le refus que ce fichier vérifie.
+        modifier: async (k, mutateur, defaut = null) => {
+            const lue = k in store ? store[k] : defaut;
+            const resultat = await mutateur(lue);
+            if (resultat === undefined) return undefined;
+            store[k] = resultat;
+            return resultat;
+        }
     };
     const cle = (k) => k;
     const obtenirDonneesSelonMode = (k) => (k in store ? store[k] : null);
@@ -214,7 +225,18 @@ describe('#394 · règles 3 et 5 — avertissements de transparence + migration 
             getSync: (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)),
             setSync: (k, v) => { store[k] = v; },
             get: async (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)),
-            set: async (k, v) => { store[k] = v; }
+            set: async (k, v) => { store[k] = v; },
+            // #522 lot 3 : `typerProductionCommeTerminale` écrit par la file, et
+            // rejoue DANS le mutateur le test « une seule terminale ». Le stub
+            // reproduit la file, refus compris — un mutateur qui rend `undefined`
+            // n'écrit rien, ce qui est exactement le refus que ce fichier vérifie.
+            modifier: async (k, mutateur, defaut = null) => {
+                const lue = k in store ? store[k] : defaut;
+                const resultat = await mutateur(lue);
+                if (resultat === undefined) return undefined;
+                store[k] = resultat;
+                return resultat;
+            }
         };
         const win = chargerScript('js/pratiques/pratique-registre.js', { db, cle: (k) => k });
         chargerScript('js/productions.js', {
