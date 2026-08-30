@@ -294,22 +294,6 @@
             const gcActifId = gcActif && gcActif.id;
             const normaliser = function(g) { return String(g || '').padStart(5, '0'); };
 
-            // Recherche par nom dans la collection brute (logique alignée avec
-            // trouverEtudiantParNom mais sans filtrage par GC actif).
-            function chercherParNomEtendu(nomFichier) {
-                if (!nomFichier) return null;
-                const nomLower = nomFichier.toLowerCase().replace(/[_\-]/g, ' ');
-                for (let i = 0; i < tousEtudiants.length; i++) {
-                    const e = tousEtudiants[i];
-                    if (!e) continue;
-                    const nom = (e.nom || '').toLowerCase();
-                    const prenom = (e.prenom || '').toLowerCase();
-                    if (nom && prenom && nomLower.indexOf(nom) !== -1 && nomLower.indexOf(prenom) !== -1) return e;
-                    if (nom && nom.length > 3 && nomLower.indexOf(nom) !== -1) return e;
-                }
-                return null;
-            }
-
             const repartition = Object.create(null);
             queue.forEach(function(f) {
                 if (!f) return;
@@ -326,7 +310,10 @@
                     const da = (f.parseLea && f.parseLea.da) || f.etudiantDA || f.daDetecte;
                     if (da) etu = tousEtudiants.find(function(e) { return e && e.da === da; });
                 }
-                if (!etu) etu = chercherParNomEtendu(f.nomFichier);
+                // #611 — meme fonction que l'appariement d'import, sur la
+                // collection BRUTE : `detecterFichiersAutreGC` sert justement a
+                // trouver un eleve qui n'est PAS dans le groupe actif.
+                if (!etu) etu = _apparierParNom(f.nomFichier, tousEtudiants);
                 if (!etu) return;
                 // Retrouver le GC d'appartenance via coursId + groupe
                 const groupeEtu = etu.groupe || etu.groupeReel;
@@ -359,26 +346,99 @@
     }
 
     /**
-     * Tente de jumeler par nom dans le fichier
+     * Minuscules et accents retires, pour comparer un nom de fiche a un nom de
+     * fichier. « Côté » et « Cote » doivent etre le meme mot : Lea ne met pas
+     * toujours les accents, et le systeme de fichiers de l'appareil non plus.
+     *
+     * @param {string} texte
+     * @returns {string}
+     */
+    function _normaliserPourAppariement(texte) {
+        return String(texte || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    /**
+     * Decoupe en MOTS : tout ce qui n'est pas lettre latine ou chiffre separe.
+     *
+     * @param {string} texte
+     * @returns {string[]} les mots, sans les vides
+     */
+    function _motsPourAppariement(texte) {
+        return _normaliserPourAppariement(texte).split(/[^a-z0-9]+/).filter(Boolean);
+    }
+
+    /**
+     * #611 (S5, constat S3 de l'audit du 30 aout 2026) — apparie un nom de
+     * fichier a UN eleve d'une collection donnee, par MOTS ENTIERS normalises.
+     *
+     * L'ancienne version cherchait la SOUS-CHAINE : « Martineau_Yann.pdf »
+     * contient « martin », donc le devoir de Yann Martineau partait chez Lea
+     * Martin — sans un mot, puisque le bandeau « sans DA » ne se declenche que
+     * lorsque AUCUNE association n'a ete faite. A l'inverse, « Roy » (trois
+     * lettres, sous le seuil `nom.length > 3`) et « Côté » (accent absent du
+     * nom de fichier) n'etaient jamais reconnus.
+     *
+     * DEUX CHANGEMENTS DE COMPORTEMENT, VOULUS, verrouilles par la sentinelle
+     * `sentinelle-611-appariement-par-nom.test.js` :
+     * 1. Un nom ambigu rend `null` au lieu de designer le premier de la liste.
+     *    Une association fausse coute plus cher qu'une association manquante :
+     *    elle range le travail sous le DA de quelqu'un d'autre.
+     * 2. Les correspondances COMPLETES (nom ET prenom) sont examinees sur toute
+     *    la collection avant le repli « nom seul ». L'ancienne boucle tranchait
+     *    eleve par eleve, donc un homonyme place plus tot l'emportait sur
+     *    l'eleve que le fichier nomme en entier.
+     *
+     * Fonction unique, appelee par `trouverEtudiantParNom` (collection du
+     * groupe-cours actif) ET par `detecterFichiersAutreGC` (collection BRUTE,
+     * qui doit justement trouver un eleve hors du groupe actif). Ce second
+     * appel portait une copie de la logique fautive : elle est retiree.
+     *
+     * @param {string} nomFichier - Le nom du fichier
+     * @param {Array} etudiants - La collection ou chercher
+     * @returns {Object|null} L'eleve trouve, ou null si aucun ou plusieurs
+     */
+    function _apparierParNom(nomFichier, etudiants) {
+        // Garde reprise de la copie locale de `detecterFichiersAutreGC` :
+        // `trouverEtudiantParNom` LEVAIT sur un nom absent. Ses deux appelants
+        // ont ete verifies un par un — `preparerFichier` passe `fichier.name`,
+        // `reevaluerAssociationsQueue` teste `f.nomFichier` avant d'appeler :
+        // aucun ne s'appuie sur ce jet. C'est cette verification qui autorise
+        // le passage a `null`, pas la propriete du code.
+        if (!nomFichier) return null;
+        const liste = Array.isArray(etudiants) ? etudiants.filter(e => e && e.nom) : [];
+        if (liste.length === 0) return null;
+
+        const motsFichier = new Set(_motsPourAppariement(String(nomFichier).replace(/\.[^.]+$/, '')));
+
+        // Tous les mots de `valeur` figurent dans le nom du fichier, en entier.
+        // La condition `mots.length > 0` n'est PAS une precaution : sans elle,
+        // une fiche dont le nom ne produit aucun mot apres normalisation (nom
+        // fait de ponctuation, ou ecrit dans un alphabet que la decoupe efface)
+        // passerait par `[].every() === true`, s'apparierait a TOUS les
+        // fichiers, et rendrait ambigu — donc `null` — tout appariement
+        // legitime du groupe.
+        const presentEnEntier = (valeur) => {
+            const mots = _motsPourAppariement(valeur);
+            return mots.length > 0 && mots.every(mot => motsFichier.has(mot));
+        };
+
+        // 1. Nom ET prenom presents comme mots entiers : un seul, ou rien.
+        const complets = liste.filter(e => presentEnEntier(e.nom) && presentEnEntier(e.prenom));
+        if (complets.length > 0) return complets.length === 1 ? complets[0] : null;
+
+        // 2. Repli : le nom seul, et un seul eleve de la collection le porte.
+        const parNom = liste.filter(e => presentEnEntier(e.nom));
+        return parNom.length === 1 ? parNom[0] : null;
+    }
+
+    /**
+     * Tente de jumeler par nom dans le fichier, parmi les eleves du
+     * groupe-cours actif.
      * @param {string} nomFichier - Le nom du fichier
      * @returns {Object|null} L'etudiant trouve ou null
      */
     function trouverEtudiantParNom(nomFichier) {
-        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-        const nomLower = nomFichier.toLowerCase().replace(/[_\-]/g, ' ');
-
-        for (const etudiant of etudiants) {
-            const nom = (etudiant.nom || '').toLowerCase();
-            const prenom = (etudiant.prenom || '').toLowerCase();
-
-            if (nom && prenom && nomLower.includes(nom) && nomLower.includes(prenom)) {
-                return etudiant;
-            }
-            if (nom && nom.length > 3 && nomLower.includes(nom)) {
-                return etudiant;
-            }
-        }
-        return null;
+        return _apparierParNom(nomFichier, obtenirDonneesSelonMode('groupeEtudiants'));
     }
 
     /* ===============================

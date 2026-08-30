@@ -6,6 +6,91 @@
      ⮕ ÉTAT AU 3 JUILLET 2026 SOIR (VAGUE 3 CLOSE + **MERGÉE MAIN ET DÉPLOYÉE — décision Grégoire du 3 juillet, release 1.27.2**, branche `claude/relais-vague-3-etat-n3owyf` fast-forwardée dans `main` : les 3 vagues 1.27.0/1.27.1/1.27.2 sont EN PRODUCTION ; le point « MERGER en août » du signet est donc RÉGLÉ, les validations TERRAIN restent dues) : bilan factuel des vagues 1-2 = TABLEAU dans le bloc « 3 juillet » ci-dessous (12/12 tâches livrées ou closes par écart de prémisse ; AUCUN reliquat 2a) PUIS file 2b ÉPUISÉE : Tâche A #328 = déjà absorbé (vérifié au code, trace consignée) ; Tâche C #118+#283-T1 LIVRÉS (fix CSS overflow) ; Tâche B #363 LIVRÉ (audit currency, 13 écarts corrigés) ; Tâche D #306 LIVRÉ (Lots 1-2-3 ; décision UX « apparition du formulaire » restée ouverte, consignée). Vitest 1257/1257. ⚠ GRÉGOIRE EN CONGÉ TOUT JUILLET, reprise AOÛT. À la reprise (le merge est FAIT — 3 juillet) : validations terrain (#310/#311/#351/#240/#347 + portes vague 1 #313/#344/#361 + vague 2 #355/#305/#121 + vague 3, 2 modes) ; triage des 5 worktrees AVEC `plans de travail/INVENTAIRE-worktrees-2026-07.md` ; #364 T3/T4/T5 ; trancher #365 (audit blanc). ✅ **FAIT LE 27 AOÛT 2026 AU SOIR** : `rm .git/index.lock .git/HEAD.lock .git/objects/maintenance.lock` — mais ils étaient REVENUS (datés du 27 août 15 h 46, `git maintenance` crashé) et bloquaient tout commit. ⮕ **Ce point traînait depuis juillet et le 28 juin en portait déjà un : c'est un défaut RÉCURRENT du dépôt, pas une malchance.** À traiter comme tel plutôt qu'à re-nettoyer chaque fois. ; le commit local `96f1294c` et le BACKLOG #365 du Mac sont OBSOLÈTES (contenu recréé/poussé par les vagues 1-2) ; le fichier relais vague 2 (`RELAIS-2026-07-02-vague-2.md`) n'a jamais été poussé — le committer du Mac si on veut la trace (le relais vague 3 est, lui, versionné ci-dessous).
      ===================================================================== -->
 <!-- =====================================================================
+     SESSION ff — 30 AOÛT 2026, SOIR : S5 / #611 — L'APPARIEMENT PAR NOM
+     DONNAIT LE FICHIER AU MAUVAIS ÉLÈVE, ET C'ÉTAIT LE CAS LE PLUS SILENCIEUX.
+
+     ▣ CE QUE J'AI TROUVÉ EN ARRIVANT. Dépôt tenu par `kuekatsheu-0d`, qui
+       m'a confié S5 (#611) et un GEL : une suite Playwright WebKit tournait
+       sur l'arbre de travail. J'ai fait tout mon audit en LECTURE seule,
+       puis vérifié ses chiffres une fois le gel levé — HEAD `f419c467`,
+       3 commits d'avance non poussés, arbre propre hors deux fichiers non
+       suivis. Aucun écart avec ce qu'il m'avait annoncé.
+
+     ▣ LE DÉFAUT. `trouverEtudiantParNom` appariait par SOUS-CHAÎNE :
+       `Martineau_Yann_devoir.pdf` contient « martin », donc le devoir de
+       Yann Martineau était rangé sous le DA de Léa Martin — celle des deux
+       qui précède dans la liste. Le point qui compte : le bandeau « sans
+       DA » ne se déclenche PAS dans ce cas, il ne parle que des fichiers
+       dont AUCUNE association n'a été faite. Une association FAUSSE était
+       donc plus silencieuse qu'une association manquante. À l'inverse,
+       `Roy` (3 lettres, sous le seuil `nom.length > 3`) et `Côté` (accent
+       dans la fiche, absent du nom de fichier) n'étaient jamais reconnus.
+
+     ▣ LIVRÉ. Fonction unique `_apparierParNom(nomFichier, etudiants)` :
+       mots entiers, minuscules, accents retirés (NFD) ; nom ET prénom
+       cherchés sur TOUTE la collection avant le repli « nom seul » ;
+       ambiguïté ⇒ `null`, l'enseignant tranche. La copie locale dans
+       `chercherParNomEtendu` est RETIRÉE (zéro-dette) : `detecterFichiersAutreGC`
+       appelle la même fonction sur la collection BRUTE.
+
+     ▣ DEUX CHOSES QUE LE DIFF DE L'AUDIT NE DISAIT PAS, ET QUI COMPTENT.
+       · **Le diff publié était fautif.** Son prédicat est un `.every()` sur
+         les mots du nom de la FICHE. Une fiche dont le nom ne produit aucun
+         mot après normalisation (ponctuation, ou alphabet que `[^a-z0-9]+`
+         efface) donne `[].every(...) === true` : elle s'apparie à TOUS les
+         fichiers. Le dégât ne s'arrête pas à elle — elle rend ambigu, donc
+         `null`, tout appariement légitime du groupe. Garde ajoutée,
+         verrouillée par un cas. C'est le troisième écart de la journée entre
+         un diff de cet audit et une spécification (S7 en avait deux) :
+         **les diffs de ce rapport sont des esquisses, à relire avant de les
+         appliquer.**
+       · **Un changement d'ordre non demandé.** L'ancienne boucle évaluait
+         les deux branches ÉLÈVE PAR ÉLÈVE : un homonyme placé plus tôt et
+         reconnu par le nom seul l'emportait sur l'élève que le fichier
+         nomme en entier. La version à tokens inverse cet ordre — voulu pour
+         l'import (c'est le bug Martin/Martineau), mais il touche AUSSI
+         `detecterFichiersAutreGC`, que l'audit ne visait pas. Un changement
+         de comportement non demandé et non verrouillé est une régression en
+         attente : 3 cas de la sentinelle passent par ce chemin-là.
+
+     ▣ AVANT DE FUSIONNER LES DEUX IMPLÉMENTATIONS, JE LES AI COMPARÉES
+       LIGNE À LIGNE. Même prédicat (`indexOf !== -1` ≡ `includes`), même
+       ordre de préférence, aucun filtre de groupe caché. Trois écarts
+       seulement : la COLLECTION (raison d'être de la copie, paramétrée),
+       et deux gardes de nullité (`!nomFichier`, `!e`) que la copie avait et
+       l'originale non. La garde `!nomFichier` transforme un jet d'exception
+       en `null` pour `trouverEtudiantParNom` : autorisé parce que j'ai
+       vérifié ses DEUX appelants un par un (`preparerFichier` passe
+       `fichier.name`, `reevaluerAssociationsQueue` teste `f.nomFichier`
+       avant d'appeler), pas parce que « c'est plus propre ».
+
+     ▣ VÉRIFICATION. Sentinelle `tests/unit/sentinelle-611-appariement-par-nom.test.js`,
+       16 cas dont 3 témoins verts avant comme après.
+       **ROUGE D'ABORD OBTENU : 13 rouges / 3 verts sur le code non corrigé.**
+       **7 break-tests, 7 ROUGE** (garde des mots vides retirée · retour à la
+       sous-chaîne · ambiguïté nom+prénom · ambiguïté nom seul · ordre de
+       préférence inversé · normalisation des accents retirée · collection
+       brute remplacée par celle du groupe actif). Restauration après chaque
+       mutation par COPIE d'une référence, jamais `git checkout`, empreinte
+       MD5 vérifiée identique à la fin.
+       **Vitest 410 fichiers / 4316 tests, code de sortie 0**, lu APRÈS le
+       dernier changement — suite lancée en EXCLUANT
+       `sentinelle-jeton-retire-fichier-reprise.test.js`, que la session S6
+       (#612, T6.6) tenait volontairement en ROUGE dans l'arbre au même
+       moment (4 rouges, plus `js/evaluation-jetons.js` et
+       `js/liste-evaluations.js` modifiés par elle). Vérifié avant de
+       conclure : ce fichier de test ne charge pas `travaux-import.js`, ses
+       rouges ne viennent pas d'ici.
+
+     ▣ CE QUI RESTE. Pas de `release.mjs`, pas de push — décision de
+       Grégoire : UNE SEULE release groupée pour S4+S7+S8+S5, sur son go.
+       ⏳ **Test manuel dû à Grégoire** : importer un lot contenant deux
+       homonymes de nom et un nom accentué — les homonymes doivent rester à
+       associer à la main (et non partir chez le premier de la liste), le
+       nom accentué doit se placer seul.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 0d — 30 AOÛT 2026, 19 h 10 À 19 h 50 : REPRISE APRÈS LE
      REDÉMARRAGE. TROIS COMMITS, DEUX SUITES VERTES, RELAIS ORGANISÉ.
 
