@@ -185,7 +185,10 @@ sait pas si Cloudflare recycle les sièges inactifs. À regarder au premier expo
 - [ ] les **trois placeholders** de `DEPLOY.md` remplis ;
 - [x] `ADR-008`, `DEPLOY.md` (v1.6), `SECURITY.md` et `PRIVACY.md` (v1.2) révisés le 27 août 2026 ;
 - [ ] `BACKLOG.md` (#427, #508), `RELAIS.md` et `ETAT-PROJET.md` alignés — **non faits**, voir §10 ;
-- [ ] **#508** : le paragraphe d'accueil posé (§8).
+- [ ] **#508** : le paragraphe d'accueil posé (§8) ;
+- [ ] **#508 bis** : l'entrée `avis-identification-2026-09-01` retirée de
+      `js/transitions.js`, et avec elle la spec
+      `tests/integration/avis-identification-bandeau-508.spec.js` (§8 bis).
 
 ---
 
@@ -201,6 +204,43 @@ sait pas si Cloudflare recycle les sièges inactifs. À regarder au premier expo
 la date sera tenable. ⚠ **Reporter la phrase sans reporter le dispositif est la seule issue à
 éviter** : elle apprendrait au lecteur à ne plus lire cette zone de la page — celle où vivent
 « Par où commencer ? » et l'invitation à la CoP.
+
+---
+
+### §8 bis · Le code mort que les deux branches laissent derrière — et le rouge daté
+
+⚠⚠ **Mesuré le 30 août 2026, et absent de ce dossier jusque-là.** Le §7, l'item `#508` du backlog
+et `RELAIS.md` affirment tous trois qu'« il n'y a rien à retirer manuellement », parce que le
+bandeau s'éteint seul. C'est exact pour ce que voit l'utilisateur, et faux pour le dépôt. Deux
+conséquences, à traiter **le 1er septembre, et dans les DEUX branches** — refermage réussi comme
+report :
+
+1. **L'entrée `avis-identification-2026-09-01` de `js/transitions.js` devient du code mort dont le
+   message est faux.** Sa condition (`js/transitions.js:77`) rend `false` à partir de minuit :
+   l'entrée ne s'affichera plus jamais, mais son texte continue d'annoncer au futur une
+   identification qui, selon la branche, est soit déjà en place, soit reportée. ⮕ **La retirer**,
+   et mettre à jour le commentaire de tête de `js/accueil.js` qui la décrit (lignes 53-61).
+
+2. **La spec `tests/integration/avis-identification-bandeau-508.spec.js` rougit toute seule ce
+   jour-là**, c'est-à-dire pendant la release du 1er septembre. Sa partie 3 (« Affichage sur
+   l'accueil ») s'exécute sous l'horloge RÉELLE : la substitution de `Date` est défaite dans le
+   `finally` avant cette section. Or `evaluerTransitions()` (`js/transitions.js:254`) filtre sur
+   `t.condition()`, et l'avis est la seule entrée sans champ `sections` — sur l'accueil, aucune
+   autre transition ne peut prendre sa place. `transition-bandeau` sera donc absent, et la spec
+   tombe à la PREMIÈRE des huit assertions de cette partie. ⮕ **La retirer avec l'entrée qu'elle
+   verrouille** : elle a fait son travail, qui était de tenir l'avis en place pendant sa fenêtre.
+
+⚠ **Ne pas « réparer » la spec en y simulant la date.** Elle deviendrait le test d'une entrée qui
+n'existe plus — un vert qui ne mesure rien. Le geste est une ablation, pas un raccommodage.
+
+✅ **Immunisée, à ne pas toucher** : `tests/integration/transitions-ciblage-section.spec.js`
+neutralise l'avis par sa préférence (`avis_identification_2026_09_vue` posée à `true`) et ne
+dépend donc pas de la date.
+
+⮕ **Ordre du jour même** : le paragraphe d'accueil (§8) · l'entrée de `transitions.js` · la spec ·
+**puis seulement** `release.mjs` → changelog → commit → sentinelle anti-cache. Une suite Playwright
+lancée AVANT ces trois retraits rend un rouge ATTENDU, pas une régression : ne pas le lire comme un
+signal d'alarme.
 
 ---
 
