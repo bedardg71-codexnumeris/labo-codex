@@ -1,0 +1,44 @@
+Voici un modèle de consigne de démarrage à froid pour Claude Code :
+
+--
+
+Ouvre le dépôt Monitorage_v6. Rituel d'abord : délègue l'audit de début de session
+au subagent `audit-debut-session`, puis lis la section « POUR LA SESSION QUI PREND
+LE RELAIS — 30 AOÛT » en tête de RELAIS.md. On est à la 1.106.3 (build 0830-0815).
+
+PRIORITÉ DATÉE — À TRAITER AVANT TOUT AUTRE CHANTIER
+#427 + #508, échéance le 1er septembre, décision déjà prise (option A, je tiens la
+date). Deux versants : ce qui est dû par moi dans la console Cloudflare (les trois
+noms, la durée de session, la règle Include), et ce qui est dû côté code le jour
+même — réécrire le paragraphe d'accueil au présent dans js/accueil.js. Les deux
+textes sont écrits d'avance au §7 de
+`plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md` ; le choix se fait le
+jour même. Le bandeau s'éteint seul, il n'y a rien à retirer à la main.
+
+ENSUITE — propose-moi un choix fermé entre :
+(a) #522 lot 4 — le helper BibliothequeUI : 14 sites, 7 fichiers, mais UN seul
+    changement de contrat qui corrige les cinq familles d'un coup. Le meilleur
+    rapport effort/portée du reste. L'audit est fait, ne le refais pas :
+    Rapports/AUDIT-522-courses-lecture-ecriture-2026-08-30.md
+(b) #522 lot 2 — grilles + échelles + niveauxEchelle, 39 sites, patron connu,
+    aucune décision à prendre.
+(c) #595 — les 78 variables CSS fantômes, par familles de nom. Chantier de rendu :
+    Playwright est la seule suite qui voit.
+(d) #519 — la passe design ; C2 est débloqué depuis #516, mais tu auras un
+    arbitrage à me demander sur C5.
+
+DEUX ITEMS À NE PAS OUVRIR SANS MESURER D'ABORD
+#596 : l'énoncé dit « 6 clés, 5 fichiers » ; la mesure du 30 août donne 11 fichiers
+et ~17 clés. Tranche le périmètre avant de commencer.
+#520 : le bouton de sauvegarderNiveaux() vit dans le bloc caché à retirer
+(js/echelles.js:3589). Audite les appelants avant toute ablation.
+
+PIÈGES DÉJÀ PAYÉS — ne les réapprends pas
+· getSync ne protège d'aucune course : dans db.set, l'écriture IndexedDB est
+  attendue AVANT le rafraîchissement de localStorage.
+· Un banc Vitest ne voit pas une course d'écriture : Node n'a pas d'IndexedDB.
+  Force db.useIndexedDB avec une fausse connexion, sinon le test est vert sur du
+  code cassé. Patron dans sentinelle-522-pratiques-serialisees.
+· Vitest se lance depuis tests/. Ferme GitHub Desktop avant Playwright.
+· Ordre de release : release.mjs → changelog → commit → sentinelle anti-cache.
+  Touche au changelog AVANT de lancer le script, sinon son jeton est oublié.
