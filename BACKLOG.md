@@ -3593,6 +3593,50 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **Règle** : après un lot qui change une primitive de `db`, chercher les stubs `db` de TOUS les
   bancs qui CHARGENT le module, et lire le CODE DE SORTIE, pas seulement le compte.
 
+- [ ] **#602 — Les trois filets anti-cache ne voient QUE les fichiers portant une balise `<script src>`
+  dans `index.html`. Tout ce qui est servi autrement passe, en silence.**
+  Créé le 30 août 2026, en publiant la 1.106.5. `release.mjs` l'a dit lui-même dans sa sortie :
+  « non référencés dans index.html, ignorés : `js/heic-worker.js` ». Analyse complète dans le message
+  du commit `de5e42d0`.
+  **LE POSTULAT COMMUN, ET C'EST LUI LE DÉFAUT.** Les trois filets supposent qu'un fichier servi porte
+  une balise `<script src>` dans `index.html` : `release.mjs` balaie les modifiés et cherche leur `?v=`
+  dans `index.html` ; la sentinelle Vitest `anticache-fichiers-modifies` borne son périmètre à `js/`,
+  `styles.css` et `css/` ; le hook pré-commit lit l'index et les mêmes balises. Un fichier tiré par
+  `importScripts`, par `new Worker(...)` ou par un `workerSrc` n'est dans aucun des trois — et son
+  jeton, quand il en a un, vit **en dur dans le code appelant**.
+  ⮕ **Ce qui rend ce trou dangereux n'est pas qu'il laisse passer un fichier périmé : c'est qu'il le
+  laisse passer SANS RIEN DIRE.** Les trois filets rendent un vert. Même famille que [[#600]] — un
+  contrôle incapable de distinguer « vérifié et bon » de « hors de mon périmètre ».
+
+  **MESURÉ le 30 août** (`grep -rnE "(new Worker|importScripts|workerSrc)" js/`) — trois cas, et le
+  troisième n'était pas connu :
+  · `js/heic-worker.js` — jeton en dur dans `heic-decodeur.js:98` (`20260830b`), bumpé À LA MAIN à la
+    release. **0 référence dans `index.html`.**
+  · `libs/libheif-bundle.js` — jeton en dur dans `heic-worker.js:38` (`20260830a`). **0 référence.**
+    Il n'a pas changé le 30 août, donc son jeton est juste — mais personne ne l'aurait signalé s'il
+    avait changé.
+  · ⚠ **`libs/pdf.worker.min.js` — servi SANS AUCUN `?v=`**, par
+    `pdfjsLib.GlobalWorkerOptions.workerSrc = 'libs/pdf.worker.min.js'` (`travaux-visionneuse.js:59`).
+    1 Mo, suivi par git, **et il A DÉJÀ CHANGÉ** : commit `410008a6` du 6 février 2026, downgrade
+    PDF.js 4.2.67 → 3.11.174 pour Safari. ⮕ **S'il change à nouveau, un navigateur qui tient l'ancien
+    le servira indéfiniment.** Ce n'est pas une hypothèse : c'est le même fichier, le même chemin, et
+    déjà une version de différence dans l'historique.
+
+  📌 **UN QUATRIÈME CAS, VOISIN, TROUVÉ EN MESURANT** : quatre bibliothèques ONT une balise dans
+  `index.html` mais **aucun jeton** — `chart.min.js`, `chartjs-plugin-annotation.min.js`,
+  `jspdf.umd.min.js`, `jspdf-autotable.min.js`. Les filets les voient, mais sans `?v=` il n'y a rien à
+  comparer : le même angle mort par l'autre bout. (Les trois autres libs en ont un, versionné par leur
+  numéro : `pdf.min.js?v=3.11.174`.)
+
+  ⮕ **LE GESTE DE VÉRIFICATION QUI MANQUE, et il tient en une ligne** : chercher les `?v=` qui vivent
+  AILLEURS que dans `index.html`, et les fichiers servis sans jeton du tout.
+  `grep -rnE "(new Worker|importScripts|workerSrc)\s*\(?\s*['\"\`]" js/`
+  ⮕ **À trancher** : (a) étendre `release.mjs` et la sentinelle à ces chemins, ou (b) refuser
+  l'existence même d'un jeton hors `index.html` — un fichier servi hors balise déclare son chemin dans
+  une constante d'`index.html`, et le filet la voit. **L'option (b) est plus sûre** : elle supprime la
+  classe de défaut au lieu de l'instrumenter. Mais elle touche le chargement d'un worker, donc à faire
+  avec une sentinelle qui rougit d'abord.
+
 - [ ] **#601 — La clé `niveauxEchelle` n'est PAS namespacée par trimestre, contrairement à sa voisine
   `echellesTemplates`.**
   Créé le 30 août 2026, pendant le lot 2a de #522. **Mesuré** : `db.get('niveauxEchelle')` et
