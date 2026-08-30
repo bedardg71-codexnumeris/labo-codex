@@ -4778,21 +4778,24 @@ async function ajouterCartouchesABibliotheque() {
             const cartouche = cartouchesBibliotheque.find(c => c.id === id);
 
             if (cartouche) {
-                // Trouver ou créer la grille correspondante
-                let grilles = await db.get(cle('grillesTemplates')) || [];
-                let grilleParente = grilles.find(g => g.id === cartouche.grilleId);
+                // Trouver ou créer la grille correspondante. ⚠ La présence est
+                // vérifiée DANS la file : deux ajouts concurrents créaient
+                // sinon deux fois la même grille parente, ou en perdaient une.
+                // security-ok: la grille forgée vient d'une cartouche déjà
+                // validée par le chemin d'import de la bibliothèque.
+                await db.modifier(cle('grillesTemplates'), (lues) => {
+                    const grilles = lues || [];
+                    if (grilles.some(g => g.id === cartouche.grilleId)) return undefined;
 
-                if (!grilleParente) {
                     // Créer une grille minimale si elle n'existe pas
-                    grilleParente = {
+                    grilles.push({
                         id: cartouche.grilleId,
                         nom: cartouche.grilleNom || cartouche.discipline || 'Grille importée',
                         criteres: cartouche.criteres || [],
                         discipline: cartouche.discipline || ''
-                    };
-                    grilles.push(grilleParente);
-                    await db.set(cle('grillesTemplates'), grilles);
-                }
+                    });
+                    return grilles;
+                }, []);
 
                 // Ajouter la cartouche
                 const cartouchesGrille = await db.get(`cartouches_${cartouche.grilleId}`) || [];

@@ -620,7 +620,11 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
         return;
     }
 
-    let grilles = await db.get(cle('grillesTemplates')) || [];
+    // ⚠ Cette lecture sert à POSER LA QUESTION du doublon, pas de base à
+    // l'écriture : `verifierEtGererDoublon` peut attendre l'utilisateur. La
+    // collection écrite plus bas est relue DANS la file.
+    const grilles = await db.get(cle('grillesTemplates')) || [];
+    let ecraserLeDoublon = false;
 
     // ✅ AJOUT (6 jan 2026) : Vérification des doublons
     const idActuel = grilleTemplateActuelle?.id || null;
@@ -641,8 +645,8 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
         }
 
         if (resultat && resultat.action === 'ecraser') {
-            // Supprimer la grille existante avec le même nom
-            grilles = grilles.filter(g => g.nom !== nomGrille);
+            // Le retrait de l'homonyme est REPORTÉ dans la file, avec l'écriture.
+            ecraserLeDoublon = true;
         }
     }
 
@@ -650,6 +654,17 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
     const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
         ? GabaritsUtils.lirePratiquesSelectionnees('grille')
         : [];
+
+    let horsTrimestreActif = false;
+
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+    let grillesEnFile = lues || [];
+
+    // L'homonyme n'est retiré qu'ici : entre la question et l'écriture, la
+    // collection a pu changer.
+    if (ecraserLeDoublon) {
+        grillesEnFile = grillesEnFile.filter(g => g.nom !== nomGrille);
+    }
 
     if (grilleTemplateActuelle) {
         // Mode édition
@@ -663,20 +678,16 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
             grilleTemplateActuelle = ajouterContributeurSiNecessaire(grilleTemplateActuelle);
         }
 
-        const index = grilles.findIndex(g => g.id === grilleTemplateActuelle.id);
+        const index = grillesEnFile.findIndex(g => g.id === grilleTemplateActuelle.id);
         if (index === -1) {
             // 🔧 #466/CO-16 (21 août 2026) : la branche absente produisait un
             // « sauvegardée ! » SANS écriture quand la grille éditée n'est pas
             // dans le namespace du trimestre actif (édition à cheval sur une
             // bascule). Refus bruyant, patron de la sentinelle horaire (29 mai).
-            console.warn('[Grilles] Sauvegarde refusée : grille', grilleTemplateActuelle.id, 'absente du trimestre actif', cle('grillesTemplates'));
-            notifications.erreur(
-                'Impossible d\'enregistrer cette grille',
-                'Elle n\'appartient pas au trimestre actif. Bascule sur son trimestre pour la modifier.'
-            );
-            return;
+            horsTrimestreActif = true;
+            return undefined;
         }
-        grilles[index] = grilleTemplateActuelle;
+        grillesEnFile[index] = grilleTemplateActuelle;
     } else {
         // Mode création
         // 🆕 Beta 95.3 : Capturer discipline depuis infoCours
@@ -702,14 +713,24 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
                 contributeurs: []
             }
         };
-        grilles.push(nouvelleGrille);
+        grillesEnFile.push(nouvelleGrille);
         grilleTemplateActuelle = nouvelleGrille;
 
         // Nettoyer les critères temporaires
         window.tempCriteres = [];
     }
 
-    await db.set(cle('grillesTemplates'), grilles);
+    return grillesEnFile;
+    }, []);
+
+    if (horsTrimestreActif) {
+        console.warn('[Grilles] Sauvegarde refusée : grille', grilleTemplateActuelle.id, 'absente du trimestre actif', cle('grillesTemplates'));
+        notifications.erreur(
+            'Impossible d\'enregistrer cette grille',
+            'Elle n\'appartient pas au trimestre actif. Bascule sur son trimestre pour la modifier.'
+        );
+        return;
+    }
 
     // Recharger la liste des grilles
     await chargerListeGrillesTemplates();
@@ -915,9 +936,9 @@ async function supprimerGrille(grilleId) {
         window.marquerRessourceSupprimee(grilleId);
     }
 
-    let grilles = await db.get(cle('grillesTemplates')) || [];
-    grilles = grilles.filter(g => g.id !== grilleId);
-    await db.set(cle('grillesTemplates'), grilles);
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        return (lues || []).filter(g => g.id !== grilleId);
+    }, []);
 
     // Rafraîchir le modal
     await afficherGrillesCriteres();
@@ -956,6 +977,9 @@ async function supprimerGrille(grilleId) {
  * 5. Charge la nouvelle grille
  */
 async function dupliquerGrille(grilleId) {
+    // ⚠ Lecture hors file : elle sert à proposer un nom de copie. Le `prompt`
+    // ci-dessous est la plus longue fenêtre du geste — la collection est relue
+    // DANS la file au moment d'écrire.
     const grilles = await db.get(cle('grillesTemplates')) || [];
     const grilleOriginale = grilles.find(g => g.id === grilleId);
 
@@ -1001,8 +1025,11 @@ async function dupliquerGrille(grilleId) {
     };
 
     // Sauvegarder
-    grilles.push(nouvelleGrille);
-    await db.set(cle('grillesTemplates'), grilles);
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const liste = lues || [];
+        liste.push(nouvelleGrille);
+        return liste;
+    }, []);
 
     // Charger la nouvelle grille en édition
     grilleTemplateActuelle = nouvelleGrille;
@@ -1418,19 +1445,21 @@ function retourVueHierarchique() {
  * qui n'ont pas encore ce flag (migration une seule fois)
  */
 async function migrerGrillesVersBibliotheque() {
-    const grilles = await db.get(cle('grillesTemplates')) || [];
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
 
-    let nbMigrees = 0;
-    grilles.forEach(grille => {
-        if (grille.dansBibliotheque === undefined) {
-            grille.dansBibliotheque = true;
-            nbMigrees++;
-        }
-    });
+        let nbMigrees = 0;
+        grilles.forEach(grille => {
+            if (grille.dansBibliotheque === undefined) {
+                grille.dansBibliotheque = true;
+                nbMigrees++;
+            }
+        });
 
-    if (nbMigrees > 0) {
-        await db.set(cle('grillesTemplates'), grilles);
-    }
+        // Rien à migrer : le mutateur rend `undefined`, aucune écriture.
+        if (nbMigrees === 0) return undefined;
+        return grilles;
+    }, []);
 }
 
 /**
@@ -1448,11 +1477,9 @@ async function assurerGrilleGenerique() {
     // trimestre actif établi (navigation.js:223).
     if (cle('grillesTemplates') === 'grillesTemplates') return;
 
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-
-    // Vérifier si la grille générique existe déjà ou a été supprimée volontairement
-    const existe = grilles.some(g => g.id === 'GRILLE_GENERIQUE');
-    if (existe || window.estRessourceSupprimee('GRILLE_GENERIQUE')) return;
+    // Vérifier si elle a été supprimée volontairement : ce test ne dépend pas de
+    // la collection, il reste ici. La présence, elle, se vérifie DANS la file.
+    if (window.estRessourceSupprimee('GRILLE_GENERIQUE')) return;
 
 
     const grilleGenerique = {
@@ -1471,8 +1498,14 @@ async function assurerGrilleGenerique() {
         dansBibliotheque: true
     };
 
-    grilles.push(grilleGenerique);
-    await db.set(cle('grillesTemplates'), grilles);
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        // Semer deux fois est le défaut que la file empêche : la présence est
+        // vérifiée à l'instant de l'écriture, pas avant.
+        if (grilles.some(g => g.id === 'GRILLE_GENERIQUE')) return undefined;
+        grilles.push(grilleGenerique);
+        return grilles;
+    }, []);
 }
 
 async function initialiserModuleGrilles() {
@@ -1784,16 +1817,6 @@ async function importerDansGrilleActive(event) {
                 return;
             }
 
-            // Récupérer les grilles
-            const grilles = await db.get(cle('grillesTemplates')) || [];
-            const index = grilles.findIndex(g => g.id === grilleTemplateActuelle);
-
-            if (index === -1) {
-                alert('Grille introuvable.');
-                event.target.value = '';
-                return;
-            }
-
             // Préserver l'ID original et remplacer les données
             const grilleMiseAJour = {
                 ...grilleImportee,
@@ -1805,11 +1828,26 @@ async function importerDansGrilleActive(event) {
                 grilleMiseAJour.metadata_cc = metadata;
             }
 
-            // Remplacer dans le tableau
-            grilles[index] = grilleMiseAJour;
+            // ⚠ La collection est relue DANS la file : celle d'avant la
+            // confirmation ne vaut plus rien. security-ok: `grilleImportee` est
+            // déjà passée par la validation d'import en amont.
+            let remplacee = false;
+            await db.modifier(cle('grillesTemplates'), (lues) => {
+                const grilles = lues || [];
+                const index = grilles.findIndex(g => g.id === grilleTemplateActuelle);
+                if (index === -1) return undefined;
 
-            // Sauvegarder
-            await db.set(cle('grillesTemplates'), grilles);
+                // Remplacer dans le tableau
+                grilles[index] = grilleMiseAJour;
+                remplacee = true;
+                return grilles;
+            }, []);
+
+            if (!remplacee) {
+                alert('Grille introuvable.');
+                event.target.value = '';
+                return;
+            }
 
             // Recharger la grille dans le formulaire
             await chargerGrillePourModif(grilleTemplateActuelle);
@@ -2507,23 +2545,35 @@ async function importerUneGrilleTrimestre(srcId, grilleId) {
  */
 async function ajouterGrilleIndividuelle(id) {
     try {
-        let grilles = await db.get(cle('grillesTemplates')) || [];
+        // ⚠ La garde d'identité de #476 doit voir la collection telle qu'elle
+        // est AU MOMENT DE L'ÉCRITURE : lue hors file, elle laisserait passer un
+        // doublon ajouté entre-temps. Tout le geste entre dans la file, et les
+        // deux messages sortent APRÈS — la file ne porte que l'écriture.
+        let grille = null;
+        let nomEnConflit = null;
+        let sourceIntrouvable = false;
 
-        // Vérifier si la grille existe déjà (par ID direct ou par idOriginal pour les imports)
-        let grille = grilles.find(g => g.id === id);
-        if (!grille) {
-            grille = grilles.find(g => g.idOriginal === id);
-        }
+        await db.modifier(cle('grillesTemplates'), async (lues) => {
+            let grilles = lues || [];
 
-        if (!grille) {
-            // C'est une grille de la bibliothèque externe, il faut l'importer
-            const toutesGrilles = await obtenirToutesLesGrillesBibliotheque();
-            const grilleSource = toutesGrilles.find(g => g.id === id);
+            // Vérifier si la grille existe déjà (par ID direct ou par idOriginal pour les imports)
+            let trouvee = grilles.find(g => g.id === id);
+            if (!trouvee) {
+                trouvee = grilles.find(g => g.idOriginal === id);
+            }
 
-            if (grilleSource) {
+            if (!trouvee) {
+                // C'est une grille de la bibliothèque externe, il faut l'importer
+                const toutesGrilles = await obtenirToutesLesGrillesBibliotheque();
+                const grilleSource = toutesGrilles.find(g => g.id === id);
+                if (!grilleSource) {
+                    sourceIntrouvable = true;
+                    return undefined;
+                }
+
                 // Générer un nouvel ID pour éviter les conflits (pattern Productions)
                 const nouvelId = genererIdUnique('GRILLE_');
-                grille = {
+                trouvee = {
                     ...grilleSource,
                     id: nouvelId,
                     idOriginal: grilleSource.id,
@@ -2534,24 +2584,30 @@ async function ajouterGrilleIndividuelle(id) {
                 // ci-dessus ne couvrent que `id` et `idOriginal` ; un exemplaire
                 // arrivé par un paquet collègue porte son ascendance dans
                 // `inspireDe`, et passait donc au travers.
-                const gardeGrille = ajouterAvecGardeIdentite(grilles, grille);
+                const gardeGrille = ajouterAvecGardeIdentite(grilles, trouvee);
                 if (!gardeGrille.ajoute) {
-                    const nomEnPlace = (gardeGrille.conflit && gardeGrille.conflit.nom) || 'Une grille';
-                    alert(`« ${nomEnPlace} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
-                    return;
+                    nomEnConflit = (gardeGrille.conflit && gardeGrille.conflit.nom) || 'Une grille';
+                    return undefined;
                 }
                 grilles = gardeGrille.liste;
             } else {
-                alert('Grille introuvable');
-                return;
+                // Grille existante ou déjà importée, simplement la marquer comme dans la bibliothèque
+                trouvee.dansBibliotheque = true;
             }
-        } else {
-            // Grille existante ou déjà importée, simplement la marquer comme dans la bibliothèque
-            grille.dansBibliotheque = true;
-        }
 
-        // Sauvegarder
-        await db.set(cle('grillesTemplates'), grilles);
+            grille = trouvee;
+            return grilles;
+        }, []);
+
+        if (nomEnConflit) {
+            alert(`« ${nomEnConflit} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
+            return;
+        }
+        if (sourceIntrouvable) {
+            alert('Grille introuvable');
+            return;
+        }
+        if (!grille) return;
 
         // ⚠ NE PAS ANNONCER UN SUCCÈS SANS L'AVOIR VÉRIFIÉ (patron du 22 août).
         // `db.set` fait un `return;` NU quand une garde refuse l'écriture
@@ -2582,15 +2638,15 @@ async function ajouterGrilleIndividuelle(id) {
  * @param {string} id - ID de la grille à retirer
  */
 async function retirerGrilleDeBibliotheque(id) {
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === id);
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const grille = grilles.find(g => g.id === id);
+        if (!grille) return undefined;
 
-    if (!grille) return;
-
-    // Soft delete : marquer comme non présente dans la bibliothèque
-    grille.dansBibliotheque = false;
-
-    await db.set(cle('grillesTemplates'), grilles);
+        // Soft delete : marquer comme non présente dans la bibliothèque
+        grille.dansBibliotheque = false;
+        return grilles;
+    }, []);
 
     // Rafraîchir les affichages
     await afficherListeGrilles();
@@ -2604,6 +2660,9 @@ async function retirerGrilleDeBibliotheque(id) {
  * @param {string} id - ID de la grille à supprimer
  */
 async function supprimerGrilleDefinitivement(id) {
+    // ⚠ Lecture hors file, pour NOMMER la grille dans la question. La
+    // confirmation ne doit pas tenir la file ouverte : tout ce qui s'enregistre
+    // pendant serait écrasé par une collection lue avant la question.
     const grilles = await db.get(cle('grillesTemplates')) || [];
     const grille = grilles.find(g => g.id === id);
 
@@ -2626,9 +2685,10 @@ async function supprimerGrilleDefinitivement(id) {
         window.marquerRessourceSupprimee(id);
     }
 
-    // Suppression définitive du store local
-    const nouvellesGrilles = grilles.filter(g => g.id !== id);
-    await db.set(cle('grillesTemplates'), nouvellesGrilles);
+    // Suppression définitive du store local, DANS la file.
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        return (lues || []).filter(g => g.id !== id);
+    }, []);
 
     // Suppression du store partagé
     if (typeof retirerGrilleDeLaBibliotheque === 'function') {
@@ -2735,38 +2795,42 @@ async function ajouterGrillesABibliotheque() {
         return;
     }
 
-    const grilles = await db.get(cle('grillesTemplates')) || [];
     const grillesBibliotheque = await obtenirToutesLesGrillesBibliotheque();
 
     let nbAjoutees = 0;
 
-    checkboxes.forEach(checkbox => {
-        const grilleId = checkbox.value;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        nbAjoutees = 0;
 
-        // Trouver la grille dans la bibliothèque
-        const grilleBiblio = grillesBibliotheque.find(g => g.id === grilleId);
-        if (!grilleBiblio) return;
+        checkboxes.forEach(checkbox => {
+            const grilleId = checkbox.value;
 
-        // Vérifier si déjà présente
-        const grilleExistante = grilles.find(g => g.id === grilleId);
+            // Trouver la grille dans la bibliothèque
+            const grilleBiblio = grillesBibliotheque.find(g => g.id === grilleId);
+            if (!grilleBiblio) return;
 
-        if (grilleExistante) {
-            // Réactiver une grille retirée
-            grilleExistante.dansBibliotheque = true;
-            nbAjoutees++;
-        } else {
-            // Ajouter nouvelle grille
-            const nouvelleGrille = {
-                ...grilleBiblio,
-                id: grilleId + '-local',  // Ajouter suffix pour éviter conflits
-                dansBibliotheque: true
-            };
-            grilles.push(nouvelleGrille);
-            nbAjoutees++;
-        }
-    });
+            // Vérifier si déjà présente
+            const grilleExistante = grilles.find(g => g.id === grilleId);
 
-    await db.set(cle('grillesTemplates'), grilles);
+            if (grilleExistante) {
+                // Réactiver une grille retirée
+                grilleExistante.dansBibliotheque = true;
+                nbAjoutees++;
+            } else {
+                // Ajouter nouvelle grille
+                const nouvelleGrille = {
+                    ...grilleBiblio,
+                    id: grilleId + '-local',  // Ajouter suffix pour éviter conflits
+                    dansBibliotheque: true
+                };
+                grilles.push(nouvelleGrille);
+                nbAjoutees++;
+            }
+        });
+
+        return grilles;
+    }, []);
 
     // Rafraîchir les affichages
     await afficherListeGrilles();
@@ -3021,13 +3085,18 @@ function deplacerCritereTempBas(index) {
  */
 async function deplacerCritereGrilleHaut(grilleId, index) {
     if (index <= 0) return;
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === grilleId);
-    if (!grille || !grille.criteres) return;
+    let grille = null;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const g = grilles.find(x => x.id === grilleId);
+        if (!g || !g.criteres || !g.criteres[index] || !g.criteres[index - 1]) return undefined;
 
-    [grille.criteres[index - 1], grille.criteres[index]] = [grille.criteres[index], grille.criteres[index - 1]];
-    grille.dateModification = new Date().toISOString();
-    await db.set(cle('grillesTemplates'), grilles);
+        [g.criteres[index - 1], g.criteres[index]] = [g.criteres[index], g.criteres[index - 1]];
+        g.dateModification = new Date().toISOString();
+        grille = g;
+        return grilles;
+    }, []);
+    if (!grille) return;
 
     // FIX (10 jan 2026) : Synchroniser grilleTemplateActuelle
     if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
@@ -3041,14 +3110,20 @@ async function deplacerCritereGrilleHaut(grilleId, index) {
  * Déplace un critère de grille vers le bas
  */
 async function deplacerCritereGrilleBas(grilleId, index) {
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === grilleId);
-    if (!grille || !grille.criteres) return;
-    if (index >= grille.criteres.length - 1) return;
+    let grille = null;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const g = grilles.find(x => x.id === grilleId);
+        if (!g || !g.criteres) return undefined;
+        // Le dernier critère ne descend pas : refus, l'écriture est annulée.
+        if (index >= g.criteres.length - 1) return undefined;
 
-    [grille.criteres[index], grille.criteres[index + 1]] = [grille.criteres[index + 1], grille.criteres[index]];
-    grille.dateModification = new Date().toISOString();
-    await db.set(cle('grillesTemplates'), grilles);
+        [g.criteres[index], g.criteres[index + 1]] = [g.criteres[index + 1], g.criteres[index]];
+        g.dateModification = new Date().toISOString();
+        grille = g;
+        return grilles;
+    }, []);
+    if (!grille) return;
 
     // FIX (10 jan 2026) : Synchroniser grilleTemplateActuelle
     if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
@@ -3445,10 +3520,7 @@ async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
  * @param {number} critereIndex - Index du critère
  */
 async function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === grilleId);
-
-    if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return;
+    let grille = null;
 
     // Sous-critères par défaut (vos 11 catégories)
     const sousCriteresParDefaut = [
@@ -3531,10 +3603,16 @@ async function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
         }
     ];
 
-    grille.criteres[critereIndex].sousCriteres = sousCriteresParDefaut;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const g = grilles.find(x => x.id === grilleId);
+        if (!g || !g.criteres || !g.criteres[critereIndex]) return undefined;
 
-    // Sauvegarder dans localStorage
-    await db.set(cle('grillesTemplates'), grilles);
+        g.criteres[critereIndex].sousCriteres = sousCriteresParDefaut;
+        grille = g;
+        return grilles;
+    }, []);
+    if (!grille) return;
 
     // Réafficher la grille
     afficherCriteresGrille(grille);
@@ -3547,31 +3625,32 @@ async function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
  * @param {number} critereIndex - Index du critère
  */
 async function ajouterSousCritere(grilleId, critereIndex) {
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === grilleId);
+    let grille = null;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const g = grilles.find(x => x.id === grilleId);
+        if (!g || !g.criteres || !g.criteres[critereIndex]) return undefined;
 
-    if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return;
+        // Initialiser le tableau sousCriteres si nécessaire
+        if (!g.criteres[critereIndex].sousCriteres) {
+            g.criteres[critereIndex].sousCriteres = [];
+        }
 
-    // Initialiser le tableau sousCriteres si nécessaire
-    if (!grille.criteres[critereIndex].sousCriteres) {
-        grille.criteres[critereIndex].sousCriteres = [];
-    }
+        // Générer un ID unique et un code par défaut
+        const nouveauCode = g.criteres[critereIndex].sousCriteres.length;
 
-    // Générer un ID unique et un code par défaut
-    const nouveauCode = grille.criteres[critereIndex].sousCriteres.length;
+        g.criteres[critereIndex].sousCriteres.push({
+            id: genererIdUnique('SC_'),
+            code: nouveauCode.toString(),
+            nom: '',
+            ponderation: 1.0,
+            retroaction: ''
+        });
 
-    const nouveauSousCritere = {
-        id: genererIdUnique('SC_'),
-        code: nouveauCode.toString(),
-        nom: '',
-        ponderation: 1.0,
-        retroaction: ''
-    };
-
-    grille.criteres[critereIndex].sousCriteres.push(nouveauSousCritere);
-
-    // Sauvegarder dans localStorage
-    await db.set(cle('grillesTemplates'), grilles);
+        grille = g;
+        return grilles;
+    }, []);
+    if (!grille) return;
 
     // Réafficher la grille
     afficherCriteresGrille(grille);
@@ -3587,18 +3666,20 @@ async function ajouterSousCritere(grilleId, critereIndex) {
  * @param {any} valeur - Nouvelle valeur
  */
 async function modifierSousCritere(grilleId, critereIndex, sousCritereIndex, champ, valeur) {
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === grilleId);
+    // ⚠ C'est LE geste de #510 : le `change` d'un champ de sous-critère part au
+    // blur, donc au moment précis où l'on clique dans le champ suivant.
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const g = grilles.find(x => x.id === grilleId);
 
-    if (!grille || !grille.criteres || !grille.criteres[critereIndex] ||
-        !grille.criteres[critereIndex].sousCriteres ||
-        !grille.criteres[critereIndex].sousCriteres[sousCritereIndex]) return;
+        if (!g || !g.criteres || !g.criteres[critereIndex] ||
+            !g.criteres[critereIndex].sousCriteres ||
+            !g.criteres[critereIndex].sousCriteres[sousCritereIndex]) return undefined;
 
-    // Mettre à jour le champ
-    grille.criteres[critereIndex].sousCriteres[sousCritereIndex][champ] = valeur;
-
-    // Sauvegarder dans localStorage
-    await db.set(cle('grillesTemplates'), grilles);
+        // Mettre à jour le champ
+        g.criteres[critereIndex].sousCriteres[sousCritereIndex][champ] = valeur;
+        return grilles;
+    }, []);
 
 }
 
@@ -3611,17 +3692,20 @@ async function modifierSousCritere(grilleId, critereIndex, sousCritereIndex, cha
 async function supprimerSousCritere(grilleId, critereIndex, sousCritereIndex) {
     if (!confirm('Supprimer ce sous-critère ?')) return;
 
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === grilleId);
+    let grille = null;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const g = grilles.find(x => x.id === grilleId);
 
-    if (!grille || !grille.criteres || !grille.criteres[critereIndex] ||
-        !grille.criteres[critereIndex].sousCriteres) return;
+        if (!g || !g.criteres || !g.criteres[critereIndex] ||
+            !g.criteres[critereIndex].sousCriteres) return undefined;
 
-    // Supprimer le sous-critère
-    grille.criteres[critereIndex].sousCriteres.splice(sousCritereIndex, 1);
-
-    // Sauvegarder dans localStorage
-    await db.set(cle('grillesTemplates'), grilles);
+        // Supprimer le sous-critère
+        g.criteres[critereIndex].sousCriteres.splice(sousCritereIndex, 1);
+        grille = g;
+        return grilles;
+    }, []);
+    if (!grille) return;
 
     // Réafficher la grille
     afficherCriteresGrille(grille);
@@ -3633,29 +3717,29 @@ async function supprimerSousCritere(grilleId, critereIndex, sousCritereIndex) {
  * @param {string} grilleId - ID de la grille
  */
 async function ajouterCritereGrille(grilleId) {
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === grilleId);
+    let grille = null;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const g = grilles.find(x => x.id === grilleId);
+        if (!g) return undefined;
 
+        // Initialiser le tableau de critères si nécessaire
+        if (!g.criteres) {
+            g.criteres = [];
+        }
+
+        // Créer un nouveau critère avec des valeurs par défaut
+        g.criteres.push({
+            nom: 'Nouveau critère',
+            type: 'holistique',
+            ponderation: 0,
+            description: ''
+        });
+
+        grille = g;
+        return grilles;
+    }, []);
     if (!grille) return;
-
-    // Initialiser le tableau de critères si nécessaire
-    if (!grille.criteres) {
-        grille.criteres = [];
-    }
-
-    // Créer un nouveau critère avec des valeurs par défaut
-    const nouveauCritere = {
-        nom: 'Nouveau critère',
-        type: 'holistique',
-        ponderation: 0,
-        description: ''
-    };
-
-    // Ajouter le critère à la grille
-    grille.criteres.push(nouveauCritere);
-
-    // Sauvegarder dans localStorage
-    await db.set(cle('grillesTemplates'), grilles);
 
     // Réafficher la liste des critères (calculera automatiquement le total)
     afficherCriteresGrille(grille);
@@ -3672,17 +3756,19 @@ async function supprimerCritereGrille(grilleId, critereIndex) {
         return;
     }
 
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === grilleId);
+    let grille = null;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const g = grilles.find(x => x.id === grilleId);
+        if (!g || !g.criteres || !g.criteres[critereIndex]) return undefined;
 
-    if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return;
-
-    // Supprimer le critère
-    grille.criteres.splice(critereIndex, 1);
-    grille.dateModification = new Date().toISOString();
-
-    // Sauvegarder dans IndexedDB
-    await db.set(cle('grillesTemplates'), grilles);
+        // Supprimer le critère
+        g.criteres.splice(critereIndex, 1);
+        g.dateModification = new Date().toISOString();
+        grille = g;
+        return grilles;
+    }, []);
+    if (!grille) return;
 
     // FIX (10 jan 2026) : Synchroniser grilleTemplateActuelle
     if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
@@ -3706,33 +3792,40 @@ function definirGrilleActive(id) {
 }
 
 async function dupliquerGrilleDepuisSidebar(id) {
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === id);
+    let copieCreee = null;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const grille = grilles.find(g => g.id === id);
 
-    if (!grille) return;
+        if (!grille) return undefined;
 
-    // ✅ D1 + D4 + D5 (arbitrage du 24 août) — LA COPIE DEVIENT CELLE DE
-    // L'UTILISATEUR. Avant, cette voie se contentait d'étaler la source : elle ne
-    // posait ni `auteur`, ni `isDemo`, ni `inspireDe`, et gardait `metadata_cc`.
-    // Or `BibliothequeUI.estItemDemo` rend vrai sur `isDemo === true` OU sur
-    // l'auteur « Demo Labo Codex » — la copie gardait LES DEUX, et
-    // `appliquerModeLectureSeuleDemo` désactivait alors tous ses champs :
-    // dupliquer un exemple depuis la barre latérale rendait une copie qu'on ne
-    // pouvait toujours pas modifier, soit exactement ce que le geste doit débloquer.
-    const copie = {
-        ...grille,
-        id: genererIdUnique('GRILLE_'),
-        nom: nommerCopie(grille.nom, grilles),
-        auteur: BibliothequeUI.obtenirAuteurActif(),
-        isDemo: false,
-        inspireDe: BibliothequeUI.forgerInspireDe(grille),
-        verrouille: false
-    };
-    delete copie.metadata_cc;
-    delete copie.auteurOriginal;
+        // ✅ D1 + D4 + D5 (arbitrage du 24 août) — LA COPIE DEVIENT CELLE DE
+        // L'UTILISATEUR. Avant, cette voie se contentait d'étaler la source : elle ne
+        // posait ni `auteur`, ni `isDemo`, ni `inspireDe`, et gardait `metadata_cc`.
+        // Or `BibliothequeUI.estItemDemo` rend vrai sur `isDemo === true` OU sur
+        // l'auteur « Demo Labo Codex » — la copie gardait LES DEUX, et
+        // `appliquerModeLectureSeuleDemo` désactivait alors tous ses champs :
+        // dupliquer un exemple depuis la barre latérale rendait une copie qu'on ne
+        // pouvait toujours pas modifier, soit exactement ce que le geste doit débloquer.
+        const copie = {
+            ...grille,
+            id: genererIdUnique('GRILLE_'),
+            nom: nommerCopie(grille.nom, grilles),
+            auteur: BibliothequeUI.obtenirAuteurActif(),
+            isDemo: false,
+            inspireDe: BibliothequeUI.forgerInspireDe(grille),
+            verrouille: false
+        };
+        delete copie.metadata_cc;
+        delete copie.auteurOriginal;
 
-    grilles.push(copie);
-    await db.set(cle('grillesTemplates'), grilles);
+        grilles.push(copie);
+        copieCreee = copie;
+        return grilles;
+    }, []);
+
+    if (!copieCreee) return;
+    const copie = copieCreee;
 
     await afficherListeGrilles();
     await chargerGrillePourModif(copie.id);
@@ -3772,15 +3865,23 @@ async function supprimerGrilleDepuisSidebar(id) {
 
     if (!confirm('Supprimer cette grille ?')) return;
 
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const index = grilles.findIndex(g => g.id === id);
+    // ⚠ L'index est recalculé DANS la file : celui d'avant la confirmation ne
+    // vaut plus rien.
+    let supprimee = false;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const i = grilles.findIndex(g => g.id === id);
+        if (i === -1) return undefined;
 
-    if (index !== -1) {
         if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(id)) {
             window.marquerRessourceSupprimee(id);
         }
-        grilles.splice(index, 1);
-        await db.set(cle('grillesTemplates'), grilles);
+        grilles.splice(i, 1);
+        supprimee = true;
+        return grilles;
+    }, []);
+
+    if (supprimee) {
         await afficherListeGrilles();
         document.getElementById('conteneurEditionGrille').classList.add('u-hide');
         // Note: optionsImportExportGrilles supprimé en Beta 92
@@ -3834,14 +3935,20 @@ async function supprimerGrilleActive() {
         return;
     }
 
-    const grilles = await db.get(cle('grillesTemplates')) || [];
     // ✅ CORRIGÉ (6 jan 2026) : grilleTemplateActuelle est un objet, pas un ID
-    const index = grilles.findIndex(g => g.id === grilleTemplateActuelle.id);
+    // ⚠ L'index est recalculé DANS la file, après la confirmation.
+    let supprimee = false;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const i = grilles.findIndex(g => g.id === grilleTemplateActuelle.id);
+        if (i === -1) return undefined;
+        grilles.splice(i, 1);
+        supprimee = true;
+        return grilles;
+    }, []);
 
-    if (index !== -1) {
+    if (supprimee) {
         const nomGrille = grilleTemplateActuelle.nom || 'Grille';
-        grilles.splice(index, 1);
-        await db.set(cle('grillesTemplates'), grilles);
 
         // ✅ CORRIGÉ (16 mars 2026) : marquer comme supprimée pour empêcher assurerGrilleGenerique() de la réinjecter
         window.marquerRessourceSupprimee(grilleTemplateActuelle.id);
@@ -3926,12 +4033,13 @@ async function afficherConfigurationCategoriesErreurs(grilleId, critereIndex) {
         critere.categoriesErreurs = categoriesParDefaut;
 
         // Sauvegarder immédiatement dans localStorage
-        const grilles = await db.get(cle('grillesTemplates')) || [];
-        const grilleIndex = grilles.findIndex(g => g.id === grilleId);
-        if (grilleIndex !== -1) {
+        await db.modifier(cle('grillesTemplates'), (lues) => {
+            const grilles = lues || [];
+            const grilleIndex = grilles.findIndex(g => g.id === grilleId);
+            if (grilleIndex === -1) return undefined;
             grilles[grilleIndex] = grille;
-            await db.set(cle('grillesTemplates'), grilles);
-        }
+            return grilles;
+        }, []);
     }
 
     // Créer le modal de configuration
@@ -3986,12 +4094,13 @@ async function sauvegarderCategoriesErreurs(grilleId, critereIndex) {
     });
 
     // Sauvegarder dans localStorage
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grilleIndex = grilles.findIndex(g => g.id === grilleId);
-    if (grilleIndex !== -1) {
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const grilleIndex = grilles.findIndex(g => g.id === grilleId);
+        if (grilleIndex === -1) return undefined;
         grilles[grilleIndex] = grille;
-        await db.set(cle('grillesTemplates'), grilles);
-    }
+        return grilles;
+    }, []);
 
     // Fermer le modal et rafraîchir l'affichage
     fermerModalCategoriesErreurs();
@@ -4033,36 +4142,38 @@ async function migrerCategoriesVersSousCriteres() {
     // clé GLOBALE nue que #358 interdit de réécrire. Sans effet aujourd'hui
     // (global vide), mais c'est la famille « code dormant qui se réveille ».
     if (cle('grillesTemplates') === 'grillesTemplates') return;
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    let nbMigrations = 0;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        let nbMigrations = 0;
 
-    grilles.forEach(grille => {
-        if (!grille.criteres) return;
+        grilles.forEach(grille => {
+            if (!grille.criteres) return;
 
-        grille.criteres.forEach(critere => {
-            // Détecter l'ancienne structure avec categoriesErreurs
-            if (critere.categoriesErreurs && critere.categoriesErreurs.length > 0 && !critere.sousCriteres) {
+            grille.criteres.forEach(critere => {
+                // Détecter l'ancienne structure avec categoriesErreurs
+                if (critere.categoriesErreurs && critere.categoriesErreurs.length > 0 && !critere.sousCriteres) {
 
-                // Convertir chaque catégorie en sous-critère
-                critere.sousCriteres = critere.categoriesErreurs.map(cat => ({
-                    id: `sc_${cat.code}`,
-                    code: cat.code,
-                    nom: cat.nom || `Catégorie ${cat.code}`,
-                    ponderation: 1.0, // Par défaut, toutes les anciennes catégories valent 1.0
-                    retroaction: cat.retroaction || ''
-                }));
+                    // Convertir chaque catégorie en sous-critère
+                    critere.sousCriteres = critere.categoriesErreurs.map(cat => ({
+                        id: `sc_${cat.code}`,
+                        code: cat.code,
+                        nom: cat.nom || `Catégorie ${cat.code}`,
+                        ponderation: 1.0, // Par défaut, toutes les anciennes catégories valent 1.0
+                        retroaction: cat.retroaction || ''
+                    }));
 
-                // Marquer comme migré (garder l'ancienne structure pour compatibilité temporaire)
-                critere._categoriesmigrees = true;
+                    // Marquer comme migré (garder l'ancienne structure pour compatibilité temporaire)
+                    critere._categoriesmigrees = true;
 
-                nbMigrations++;
-            }
+                    nbMigrations++;
+                }
+            });
         });
-    });
 
-    if (nbMigrations > 0) {
-        await db.set(cle('grillesTemplates'), grilles);
-    }
+        // Rien migré : le mutateur rend `undefined`, aucune écriture.
+        if (nbMigrations === 0) return undefined;
+        return grilles;
+    }, []);
 }
 
 // Exécuter la migration au chargement du module

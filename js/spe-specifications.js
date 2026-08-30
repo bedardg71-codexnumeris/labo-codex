@@ -891,9 +891,12 @@ La structure est claire (intro, développement, conclusion)"></textarea>
         };
 
         // Sauvegarder dans les grilles (clé globale grillesTemplates)
-        let grilles = await db.get(cle('grillesTemplates')) || [];
-        grilles.push(nouvelleGrille);
-        await db.set(cle('grillesTemplates'), grilles);
+        // security-ok: la grille est forgée localement à partir du formulaire SPE.
+        await db.modifier(cle('grillesTemplates'), (lues) => {
+            const grilles = lues || [];
+            grilles.push(nouvelleGrille);
+            return grilles;
+        }, []);
 
         // Ajouter aussi à la bibliothèque partagée
         if (typeof ajouterGrilleALaBibliotheque === 'function') {
