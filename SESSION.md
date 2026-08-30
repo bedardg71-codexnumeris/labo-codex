@@ -7,11 +7,11 @@
      ===================================================================== -->
 
 <!-- =====================================================================
-     SESSION c3 — 30 AOÛT 2026 : S8 DU PLAN « CHAÎNE D'IMPORTATION DES
+     SESSION e8 — 30 AOÛT 2026 : S8 DU PLAN « CHAÎNE D'IMPORTATION DES
      TRAVAUX » (#614) — LIVRÉ, RELEASE EN ATTENTE DU GO.
 
      ▣ CADRE. Trois sessions en parallèle sur le même dépôt ce soir : c2
-       (S1→S3 livrés, S4 demain), e6 (S7 / #613), c3 (S8 / #614, ce bloc).
+       (S1→S3 livrés, S4 demain), e6 (S7 / #613), e8 (S8 / #614, ce bloc).
        S8 a été proposée par c2 parce qu'elle ne touche qu'un fichier,
        `js/codex.js`, qu'aucune autre session n'ouvre. Grégoire a tranché
        « S8 en entier ».
@@ -97,8 +97,17 @@
        second paramètre optionnel — rétrocompatible, les trois fichiers de
        tests existants passent inchangés.
 
-     ▣ RESTE À FAIRE SUR S8 : la release (T8.6), en attente du go de
-       Grégoire, avec prévenance de c2 et e6 avant de lancer `release.mjs`.
+     ▣ RELEASE — AUCUNE POUR S8. Décision de Grégoire, 30 août : une seule
+       release groupée quand les trois chantiers du soir sont commités.
+       Motif MESURÉ, pas de principe : `release.mjs` réunit l'arbre de
+       travail ET tout ce qui a changé depuis la release précédente
+       (`scripts/release.mjs:189-214`). Une release lancée par une session
+       bumpe donc dans `index.html` les `?v=` de fichiers que les AUTRES
+       n'ont pas encore commités — leur propre hook anti-cache les laisserait
+       ensuite passer sur un bump qu'elles n'ont pas posé. Vaut aussi pour
+       T7.5 (e6) et pour S4 (c2).
+
+     ▣ RESTE À FAIRE SUR S8 : pousser, quand c2 sera revenue au vert.
 
      ▣ COORDINATION — CE QUI A ÉTÉ APPRIS CE SOIR.
        · Le hook `pre-push` lance Vitest sur l'ARBRE DE TRAVAIL, pas sur le
