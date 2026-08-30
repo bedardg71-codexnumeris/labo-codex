@@ -5,6 +5,119 @@
      #326 (réactivation du comparateur, « bloqueur CoP » n°1) = CLOS le 28 juin (release 1.26.0).
      ⮕ ÉTAT AU 3 JUILLET 2026 SOIR (VAGUE 3 CLOSE + **MERGÉE MAIN ET DÉPLOYÉE — décision Grégoire du 3 juillet, release 1.27.2**, branche `claude/relais-vague-3-etat-n3owyf` fast-forwardée dans `main` : les 3 vagues 1.27.0/1.27.1/1.27.2 sont EN PRODUCTION ; le point « MERGER en août » du signet est donc RÉGLÉ, les validations TERRAIN restent dues) : bilan factuel des vagues 1-2 = TABLEAU dans le bloc « 3 juillet » ci-dessous (12/12 tâches livrées ou closes par écart de prémisse ; AUCUN reliquat 2a) PUIS file 2b ÉPUISÉE : Tâche A #328 = déjà absorbé (vérifié au code, trace consignée) ; Tâche C #118+#283-T1 LIVRÉS (fix CSS overflow) ; Tâche B #363 LIVRÉ (audit currency, 13 écarts corrigés) ; Tâche D #306 LIVRÉ (Lots 1-2-3 ; décision UX « apparition du formulaire » restée ouverte, consignée). Vitest 1257/1257. ⚠ GRÉGOIRE EN CONGÉ TOUT JUILLET, reprise AOÛT. À la reprise (le merge est FAIT — 3 juillet) : validations terrain (#310/#311/#351/#240/#347 + portes vague 1 #313/#344/#361 + vague 2 #355/#305/#121 + vague 3, 2 modes) ; triage des 5 worktrees AVEC `plans de travail/INVENTAIRE-worktrees-2026-07.md` ; #364 T3/T4/T5 ; trancher #365 (audit blanc). ✅ **FAIT LE 27 AOÛT 2026 AU SOIR** : `rm .git/index.lock .git/HEAD.lock .git/objects/maintenance.lock` — mais ils étaient REVENUS (datés du 27 août 15 h 46, `git maintenance` crashé) et bloquaient tout commit. ⮕ **Ce point traînait depuis juillet et le 28 juin en portait déjà un : c'est un défaut RÉCURRENT du dépôt, pas une malchance.** À traiter comme tel plutôt qu'à re-nettoyer chaque fois. ; le commit local `96f1294c` et le BACKLOG #365 du Mac sont OBSOLÈTES (contenu recréé/poussé par les vagues 1-2) ; le fichier relais vague 2 (`RELAIS-2026-07-02-vague-2.md`) n'a jamais été poussé — le committer du Mac si on veut la trace (le relais vague 3 est, lui, versionné ci-dessous).
      ===================================================================== -->
+<!-- =====================================================================
+     SESSION e6 — 30 AOÛT 2026 : S7 DU PLAN « CHAÎNE D'IMPORTATION DES
+     TRAVAUX » (#613) — COMMITÉ, NI POUSSÉ NI RELEASÉ.
+
+     ▣ CADRE. Trois sessions en parallèle sur le même dépôt ce soir : c2
+       (S1→S4), e8 (S8 / #614), e6 (S7 / #613, ce bloc). S7 m'a été proposée
+       par c2 parce qu'elle ne touche qu'un fichier, `js/import-export.js`,
+       qu'aucune autre session n'ouvre. #613 était déjà réservé : employé tel
+       quel, rien de neuf réservé pour lui. #616 inscrit AVANT usage.
+
+     ▣ AUDIT DE DÉBUT DE SESSION — AUCUN ÉCART AVEC LA PRÉMISSE. Arbre
+       propre, `main` synchro, 1.106.11 (build 0830-1525), HEAD `c7cd6cc3`.
+
+     ▣ CE QUE FAISAIT LA RESTAURATION D'UN ZIP. Un blob refusé aux magic
+       bytes, absent de l'archive ou perdu sur `QuotaExceededError` sortait
+       par un `continue` ou un `catch` muet. `_restaurerBlobsDepuisZip`
+       rendait un nombre de RESTAURÉS, jamais un compte d'échecs, et les
+       appelants annonçaient « Import réussi ! » sur un état amputé.
+       L'enseignant découvrait le trou plus tard, devant un cadre vide, sans
+       moyen de savoir quels travaux manquaient ni pourquoi. En prime, chaque
+       échec de quota émettait sa propre notification — une avalanche de
+       bandeaux sur un import massif.
+
+     ▣ LIVRÉ. `_restaurerBlobsDepuisZip` rend `{ restaures, manquants }` ;
+       `stockerBlob` est appelé avec `notifier: false` ; les métadonnées dont
+       le blob n'est pas arrivé reçoivent `blobStatut: 'manquant'`, que la
+       visionneuse sait déjà afficher ; les deux appelants disent « Import
+       partiel » avec le compte exact et la conduite à tenir.
+
+     ▣ LES DEUX ÉCARTS DU DIFF DE L'AUDIT — LE VRAI TRAVAIL DE LA SESSION.
+       Le diff S8 du rapport n'avait pas été exécuté. Confrontation au code,
+       deux défauts, tous deux confirmés au code par c2 :
+
+       · Il ne convertissait qu'un `return` sur trois. La fonction a DEUX
+         sorties anticipées (`!donnees._zipTravaux`, `metadonnees.length === 0`)
+         restées numériques. L'appelant y aurait lu `.restaures` sur un nombre
+         → `undefined`, qui s'affiche comme un zéro sans que rien ne le dise.
+
+       · Il invoquait « même contrat que codex.js » pour le marquage sans
+         reprendre la garde `blobStatut !== 'exporte'` qui vit à côté. Un
+         fichier déjà exporté hors de l'application n'a LÉGITIMEMENT pas de
+         blob dans le ZIP : le diff l'aurait compté manquant, annonçant
+         « partiel » un import où rien n'est perdu, et aurait écrasé une
+         métadonnée juste par une fausse.
+         ⮕ Précision due à c2 : la garde gouverne DEUX gestes, ne pas compter
+         ET ne pas marquer. Et due à e8 : dans codex.js elle vit dans le
+         chemin « ouvrir » (`chargerCodex`), PAS dans la fusion, où le cas est
+         structurellement absent — le commentaire nomme donc le chemin.
+         Une référence croisée qui ne dit pas de quelle branche elle parle
+         finit par être copiée dans la mauvaise.
+       ⮕ Leçon versée en mémoire : un diff d'audit est une esquisse, pas une
+         spécification. Grepper TOUS les `return` avant de changer une forme
+         de retour ; ouvrir le code de référence invoqué plutôt que la ligne
+         citée.
+
+     ▣ UN INVARIANT QUI FUYAIT PAR UNE PORTE SUR TROIS. J'avais d'abord
+       signalé le `catch` non gardé comme un cas de bord à ne pas fermer, au
+       motif que je ne savais pas le provoquer. c2 a corrigé le cadrage, à
+       raison : la règle « ne pas empiler de gardes sur un cas non
+       reproductible » vise les bugs latents PRÉEXISTANTS, pas un invariant
+       qu'on vient d'écrire et dont une branche se contredit. Fermé, et
+       break-testé.
+
+     ▣ VÉRIFICATION. Sentinelle #613 ÉTENDUE dans le fichier existant
+       (`sentinelle-import-export-383-384-385.test.js`, 7 → 18 cas), pas de
+       second fichier. ROUGE d'abord, ciblé : 9 échecs, les 7 cas #383/#384/
+       #385 d'origine restés verts. **10 break-tests, 10 ROUGE obtenus.**
+       Vitest 410 fichiers / 4307 tests, code de sortie 0.
+
+     ▣ UNE SENTINELLE PRÉEXISTANTE QUI MESURAIT UNE DISTANCE, PAS UNE
+       SÉQUENCE — TROUVAILLE VERSÉE EN #616. Le cas #385 verrouillait
+       « magic bytes AVANT stockerBlob » par `[\s\S]{0,400}` entre les deux
+       appels. Mes commentaires ont dépassé la borne : rouge, sans qu'aucun
+       comportement ne change. En retirer ailleurs l'aurait fait verdir sur du
+       code cassé. Une borne en caractères ment dans les deux sens. Reborné
+       sur le CORPS de la fonction commentaires retirés, et la distance
+       remplacée par une comparaison d'ordre (`indexOf` < `indexOf`) — le
+       verrou est plus fort qu'avant, pas plus laxiste.
+       ⮕ #616 : **32** fichiers de `tests/unit/` portent un `{0,NNN}`, dont
+       **31 lisent de la source** — candidats réels, verts aujourd'hui, faux
+       demain. Le 32ᵉ était le mien, corrigé sur place. Chiffre MESURÉ, pas
+       repris. Helper réutilisable : `corpsSansCommentaires(src, signature)`.
+
+     ▣ CE QUE LE PARTAGE D'ARBRE À TROIS A COÛTÉ, ET LA RÈGLE QUI EN SORT.
+       `index.html` est le fichier le plus exposé du dépôt, plus que
+       `BACKLOG.md` : chaque session y touche à CHAQUE commit par le `?v=`.
+       Mon arbre portait deux bumps de c2 (`travaux-import.js` e→f,
+       `travaux-ui.js` g→h) en plus du mien. `--stat` annonçait
+       `index.html | 6 +-` là où mon geste n'en changeait qu'une : c'est ce
+       chiffre invraisemblable qui a fait ouvrir le diff entier. Restagé
+       depuis HEAD (`git show HEAD:<f>` → mes seules transformations →
+       `hash-object` + `update-index`), méthode d'e8. Idem pour `BACKLOG.md`
+       (le bloc #610 de c2 y était) et pour le plan.
+       ⮕ Sur un fichier qu'une autre session peut toucher, `--stat` repère un
+       fichier étranger, jamais un BLOC étranger dans un fichier attendu.
+
+     ▣ CE QUE JE N'AI PAS FAIT, ET POURQUOI.
+       · Pas de release — décision de Grégoire : une seule release groupée
+         quand S4, S7 et S8 seront commités. Motif mesuré par e8 :
+         `release.mjs:189-214` réunit l'arbre ET tout ce qui a changé depuis
+         la release précédente, donc bumperait les `?v=` de fichiers que les
+         autres sessions n'ont pas commités.
+       · Pas de push — il emporterait les commits de c2 et d'e8 sous mon
+         annonce. Et le hook `pre-push` teste l'ARBRE de travail, pas le
+         commit poussé : tant qu'une des trois sessions est entre son rouge et
+         son vert, aucune des trois ne peut pousser.
+
+     ▣ ⏳ CE QUI RESTE — T7.4 et T7.5, ouvertes au plan.
+       · TEST MANUEL DÛ À GRÉGOIRE : importer un ZIP dont un blob est
+         corrompu. L'application doit dire « Import partiel » avec le compte,
+         et la visionneuse « manquant » — jamais « Import réussi ».
+       · Release groupée et push, sur son go.
+     ===================================================================== -->
 
 <!-- =====================================================================
      SESSION e8 — 30 AOÛT 2026 : S8 DU PLAN « CHAÎNE D'IMPORTATION DES

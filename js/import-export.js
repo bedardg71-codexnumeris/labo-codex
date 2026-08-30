@@ -1353,10 +1353,14 @@ function previsualiserImport(event) {
  * 🆕 Restaure les blobs travaux depuis un ZIP importé
  * Utilisé par executerImport() et executerImportLocalStorageBrut()
  * @param {Object} donnees - Données importées, avec éventuellement _zipTravaux
- * @returns {Promise<number>} Nombre de blobs restaurés
+ * @returns {Promise<{restaures: number, manquants: number}>} Bilan de la restauration
  */
 async function _restaurerBlobsDepuisZip(donnees) {
-    if (!donnees._zipTravaux || typeof travauxStockage === 'undefined') return 0;
+    // #613 (audit chaîne d'importation 30 août 2026, constat S8) : le retour est
+    // un BILAN, jamais un nombre nu — y compris sur les sorties anticipées. Un
+    // appelant qui lirait `.restaures` sur un nombre obtiendrait `undefined`,
+    // qui s'affiche comme un zéro sans que rien ne le signale.
+    if (!donnees._zipTravaux || typeof travauxStockage === 'undefined') return { restaures: 0, manquants: 0 };
 
     const zip = donnees._zipTravaux;
     // #384 : TOUTES les clés fichiersTravaux (une par trimestre) — symétrique
@@ -1366,10 +1370,19 @@ async function _restaurerBlobsDepuisZip(donnees) {
         if (Array.isArray(donnees[cleFT])) metadonnees.push(...donnees[cleFT]);
     }
 
-    if (metadonnees.length === 0) return 0;
+    if (metadonnees.length === 0) return { restaures: 0, manquants: 0 };
 
     let nbRestores = 0;
+    const idsManquants = [];
     for (const f of metadonnees) {
+        // #613 : même garde que `chargerCodex` (codex.js, chemin « ouvrir » —
+        // PAS la fusion, qui itère sur les entrées réellement présentes dans le
+        // ZIP et où le cas est structurellement absent). Ici on itère sur les
+        // MÉTADONNÉES, donc la garde est nécessaire : un `blobStatut: 'exporte'`
+        // n'a LÉGITIMEMENT pas de blob dans le ZIP (le blob avait quitté l'app
+        // au moment de l'export). Le compter manquant annoncerait « partiel »
+        // un import où rien n'est perdu.
+        const blobAttendu = f.blobStatut !== 'exporte';
         try {
             const entries = zip.file(new RegExp('^travaux/' + f.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\.'));
             if (entries && entries.length > 0) {
@@ -1382,20 +1395,44 @@ async function _restaurerBlobsDepuisZip(donnees) {
                     const magicOk = await window.travauxImport.validerMagicBytes(blob);
                     if (!magicOk) {
                         console.warn(`[Import ZIP] Blob refusé (magic bytes invalides) pour ${f.id}`);
+                        idsManquants.push(f.id);
                         continue;
                     }
                 }
-                await travauxStockage.stockerBlob(f.id, blob, f.etudiantDA, f.productionId);
+                // #613 : notifier:false — une notification de quota PAR blob
+                // refusé est une avalanche de bandeaux ; le bilan est rendu une
+                // seule fois par l'appelant (même patron que `chargerCodex`).
+                await travauxStockage.stockerBlob(f.id, blob, f.etudiantDA, f.productionId, { notifier: false });
                 nbRestores++;
+            } else if (blobAttendu) {
+                console.warn(`[Import ZIP] Blob attendu mais absent du ZIP pour ${f.id}`);
+                idsManquants.push(f.id);
             }
         } catch (e) {
             console.warn(`[Import ZIP] Erreur restauration blob ${f.id}:`, e);
+            // #613 : `blobAttendu` gouverne les TROIS portes de sortie, sinon la
+            // même question reçoit deux réponses selon la branche empruntée.
+            if (blobAttendu) idsManquants.push(f.id);
         }
     }
 
-    if (nbRestores > 0) {
+    // #613 : marquer les métadonnées dont le blob n'est pas arrivé, pour que la
+    // visionneuse affiche « manquant » plutôt qu'un cadre vide. Les clés
+    // fichiersTravaux viennent d'être écrites par l'appelant : on relit l'état
+    // réellement stocké au lieu du snapshot importé. Un `'exporte'` n'est jamais
+    // écrasé — ce serait perdre l'information que le blob a quitté l'app.
+    if (idsManquants.length > 0) {
+        const manquants = new Set(idsManquants);
+        for (const cleFT of Object.keys(donnees).filter(c => c.includes('fichiersTravaux'))) {
+            const liste = await db.get(cleFT, []);
+            if (!Array.isArray(liste)) continue;
+            liste.forEach(f => {
+                if (manquants.has(f.id) && f.blobStatut !== 'exporte') f.blobStatut = 'manquant';
+            });
+            await db.set(cleFT, liste);
+        }
     }
-    return nbRestores;
+    return { restaures: nbRestores, manquants: idsManquants.length };
 }
 
 /* ===============================
@@ -2632,15 +2669,20 @@ async function executerImportLocalStorageBrut(config) {
         }
 
         // 🆕 Restauration des blobs travaux depuis le ZIP
-        const nbRestores = await _restaurerBlobsDepuisZip({ ...donnees, _zipTravaux: zipTravaux });
+        const resBlobs = await _restaurerBlobsDepuisZip({ ...donnees, _zipTravaux: zipTravaux });
 
         // Fermer le modal
         fermerModalPreviewConfigComplete();
 
-        const msgBlobs = nbRestores > 0 ? ` + ${nbRestores} fichier(s) travaux` : '';
+        const msgBlobs = resBlobs.restaures > 0 ? ` + ${resBlobs.restaures} fichier(s) travaux` : '';
+        // #613 : ne jamais annoncer « réussi » sur un import amputé. Le compte
+        // exact et la conduite à tenir, une seule fois, à la fin.
+        const msgManquants = resBlobs.manquants
+            ? `\n\nAttention : ${resBlobs.manquants} fichier(s) n'ont pas pu être restaurés (espace insuffisant ou contenu refusé). Ils sont marqués « manquant » ; libère de l'espace et refais l'import du même ZIP.`
+            : '';
 
         // Notification et rechargement
-        alert(`Import réussi !\n\n${nbCles} clé(s) de données importée(s)${msgBlobs}.`);
+        alert(`Import ${resBlobs.manquants ? 'partiel' : 'réussi'}\n\n${nbCles} clé(s) de données importée(s)${msgBlobs}.${msgManquants}`);
 
         // Écritures IDB pendantes terminées AVANT le reload (bug terrain
         // iPad 10 juin 2026 — cf. codex.js actionOuvrir, même patron).
@@ -3068,11 +3110,15 @@ async function executerImportSelectif() {
                 for (var cleB of Object.keys(donnees)) {
                     if (cleB.includes('fichiersTravaux')) donneesBlobs[cleB] = parseValeur(donnees[cleB]);
                 }
-                var nbBlobs = await _restaurerBlobsDepuisZip(donneesBlobs);
-                if (nbBlobs > 0) {
-                    details.push(nbFichiers + ' fichier(s) travaux + ' + nbBlobs + ' PDF restauré(s)');
+                var resBlobs = await _restaurerBlobsDepuisZip(donneesBlobs);
+                // #613 : les fichiers non restaurés sont dits, pas avalés.
+                var suffixeManquants = resBlobs.manquants
+                    ? ' — ' + resBlobs.manquants + ' non restauré(s), marqué(s) « manquant »'
+                    : '';
+                if (resBlobs.restaures > 0) {
+                    details.push(nbFichiers + ' fichier(s) travaux + ' + resBlobs.restaures + ' PDF restauré(s)' + suffixeManquants);
                 } else {
-                    details.push(nbFichiers + ' fichier(s) travaux (métadonnées)');
+                    details.push(nbFichiers + ' fichier(s) travaux (métadonnées)' + suffixeManquants);
                 }
             } else if (nbFichiers > 0) {
                 details.push(nbFichiers + ' fichier(s) travaux (métadonnées, sans blobs)');
