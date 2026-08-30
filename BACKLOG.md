@@ -3292,7 +3292,93 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   exigeait l'argument littéral de `db.set` et rougissait sur un chemin devenu MEILLEUR. **Les deux ont
   été break-testés APRÈS recalage** et rougissent toujours sur une vraie violation.
   **Vitest 4153/4153 (398 fichiers)** · **Playwright 207/207**.
-  ⏳ **RESTE : lots 3 et 5** — productions (12) + cartouches (9), puis étudiants (3) + divers (12).
+  ⏳ **RESTE — et les chiffres de l'énoncé sont FAUX, comme ceux du lot 2** :
+  · **Lot 3** — mesuré le 30 août : **31 sites**, pas 21. Cartouches **13** (`cartouches.js`),
+    productions **18** (`productions.js` 8, `productions-bibliotheque-ui.js` 5,
+    `productions-import-export.js` 2, `productions-liste.js` 2, `pratiques-gestion.js` 1).
+    ⚠ **Piège de mesure, payé** : `getCleProductions()` et `cleProductions` sont DEUX écritures pour
+    UNE clé — les deux valent `cle('productions')`. Sans les canoniser, une lecture par l'une et une
+    écriture par l'autre dans la même fonction passent pour deux clés différentes, et la course est
+    invisible. L'outil de mesure canonise ; **tout lot suivant doit vérifier ses alias de clé avant de
+    compter**.
+  · **Lot 5** — étudiants (3) + divers (12), non remesuré. ⮕ **Le remesurer avant de l'ouvrir** : les
+    deux lots précédents étaient sous-comptés de 35 % et 45 %.
+  · ⮕ **Nouveau : voir [[#599]]** — le lot 4 n'a fermé que le contrat du helper, 20 sites restent en
+    course sur les clés `CLE_BIBLIOTHEQUE_*`.
+
+  📌 **TROUVAILLES DE PASSAGE, inscrites ici et NON en items séparés** (règle du 24 août : une
+  trouvaille sans symptôme vécu ne devient pas un item qui regarde Grégoire) :
+  · **`descendreEvaluation` (`productions.js`) détruit une donnée sur un id introuvable.** `index` vaut
+    alors `-1`, la condition `index < evaluations.length - 1` est **vraie**, et l'échange écrit
+    `evaluations[0] = undefined` — puis enregistre. Non atteignable depuis les chevrons de l'interface
+    (l'id vient de la ligne affichée), donc latent. ⮕ **Fermé avec la conversion du lot 3**, comme le
+    lot 1 a fermé ses bornes d'index.
+  · **Trois erreurs de banc pré-existantes** dans `sentinelle-note-non-constructible-326` :
+    `repararPortfoliosEleves` lève `ReferenceError: cle is not defined`, avalée par un `catch` de
+    l'application. Le test passe au vert, l'erreur est réelle et masquée. Le banc ne stubbe pas `cle`.
+  · **Trois identifiants morts dans `js/cartouches.js`** — `btnExporterCartouche`,
+    `btnImporterCartouche`, `btnImporterCartoucheTxt` : cités, jamais définis dans `index.html`,
+    gardés par `if (btn)` donc inoffensifs. Relevé par la session du matin du 30 août.
+
+- [ ] **#599 — Le lot 4 de #522 n'a fermé que le contrat du helper : vingt sites restent en course sur
+  les clés `CLE_BIBLIOTHEQUE_*`.**
+  Créé le 30 août 2026, en mesurant le périmètre du lot 3. **Le lot 4 est annoncé LIVRÉ**, et il l'est
+  pour ce qu'il visait : `BibliothequeUI.dupliquerVersBibliotheque` et `dupliquerEtEditerItem` passent
+  par `modifierListe(mutateur)`, dix descripteurs, cinq familles. **Mais la ligne « bibliothèques
+  (`CLE_BIBLIOTHEQUE*`, 5 constantes) — 14 sites » du rapport d'audit ne décrivait QUE les appelants du
+  helper.** Les écritures DIRECTES du magasin partagé n'y sont pas.
+  **Mesuré** : **20 sites en course**, cinq fichiers —
+  `pratiques-bibliotheque.js` (3 : `ajouterPratiqueALaBibliotheque`, `mettreAJourConfigurationPratique`,
+  `retirerPratiqueDeLaBibliotheque`) · `spe-specifications.js` (3 : les trois `creer*SPESiInexistante`) ·
+  `productions-bibliotheque.js` (2) · `pratiques-gestion.js` (1) · `productions-import-export.js` (1),
+  plus le reste du balayage.
+  ⚠ **Les trois `creer*SPESiInexistante` sont le même défaut qu'`assurerGrilleGenerique`** (corrigé au
+  lot 2c) : ils vérifient l'existence HORS file, donc deux appels concurrents sèment deux fois.
+  ⮕ **À traiter comme un lot à part entière**, pas comme un reliquat : même patron que les lots 2 et 4,
+  outil de mesure disponible (`mesurer-522-v2`, apparie sur l'EXPRESSION de clé, pas sur une chaîne).
+
+- [ ] **#600 — Le rituel de release contient un vert creux : la sentinelle anti-cache lancée après le
+  commit ne vérifie RIEN et se tait.**
+  Créé le 30 août 2026, pendant la release 1.106.4. L'ordre inscrit partout — `release.mjs` → changelog
+  → commit → **sentinelle anti-cache** — fait lancer `scripts/verifier-anticache-stage.mjs` APRÈS le
+  commit. Or ce script ne regarde que **les fichiers STAGÉS** : après un commit, l'index est vide, il
+  ne vérifie aucun fichier, et **sort en code 0 sans imprimer une seule ligne**. Un vert indiscernable
+  d'un vrai.
+  **Ce n'est pas un défaut du script** : son en-tête le dit, c'est un garde de PRÉ-commit, branché au
+  hook `pre-commit`, et il y fait son travail. **C'est le rituel qui le nomme à la mauvaise étape.**
+  La vraie vérification post-commit est la sentinelle Vitest `anticache-fichiers-modifies`, qui compare
+  des COMMITS.
+  ⮕ **Deux corrections possibles, à trancher** : (a) corriger la phrase du rituel (DEPLOY.md, CLAUDE.md,
+  skill `release-et-changelog`) pour nommer la sentinelle Vitest à l'étape post-commit ; (b) faire dire
+  au script « rien de stagé, je n'ai rien vérifié » au lieu de se taire. ⮕ **Les deux valent mieux
+  qu'une** : un contrôle qui ne peut pas distinguer « vérifié et bon » de « rien à vérifier » finira par
+  rassurer quelqu'un à tort.
+
+  ⚠⚠ **ET LE MÊME JOUR, UN SECOND VERT QUI N'EN EST PAS UN — celui-là a coûté un push.**
+  `vitest run` **sort en code 1 dès qu'il y a une erreur NON GÉRÉE**, même avec tous les tests verts.
+  Le résumé affiche alors « Tests 4153 passed » ET « Errors 3 errors ». Le hook `pre-push` ne lit que
+  le CODE DE SORTIE : il annonce « Corrige les tests rouges » alors qu'aucun test n'est rouge.
+  ⮕ **Le compte de tests n'est PAS le verdict.** Trois fois de suite, la ligne « Tests … passed » a été
+  lue comme un vert alors que la ligne « Errors » juste en dessous était coupée par un `tail`.
+  ⮕ **Cause mesurée le 30 août** : une fonction qui s'exécute AU CHARGEMENT d'un module (ici
+  `migrerCategoriesVersSousCriteres()`, appelée à la fin de `grilles.js`) et qui appelle une primitive
+  absente d'un stub de banc lève un rejet non capté — silencieux dans le rapport, fatal pour le code
+  de sortie. Trois bancs étaient concernés : `sentinelle-cle-conception-namespacee-briqueB`,
+  `sentinelle-505-rendus-blocs-executent` et `sentinelle-generique-anti-resemage-global-358`.
+  ⮕ **Règle** : après un lot qui change une primitive de `db`, chercher les stubs `db` de TOUS les
+  bancs qui CHARGENT le module, et lire le CODE DE SORTIE, pas seulement le compte.
+
+- [ ] **#601 — La clé `niveauxEchelle` n'est PAS namespacée par trimestre, contrairement à sa voisine
+  `echellesTemplates`.**
+  Créé le 30 août 2026, pendant le lot 2a de #522. **Mesuré** : `db.get('niveauxEchelle')` et
+  `db.modifier('niveauxEchelle', …)` — sans `cle()` — dans `js/echelles.js`, alors que
+  `echellesTemplates` est lue et écrite par `cle('echellesTemplates')` dix lignes plus loin.
+  **Conséquence** : les niveaux de l'éditeur « ancien système » sont PARTAGÉS entre tous les trimestres.
+  Basculer de trimestre ne les change pas.
+  ⚠ **Latent et neutre AUJOURD'HUI**, et laissé tel quel à dessein : on ne corrige pas un bug dormant
+  pendant un refactor. ⮕ **Mais ça cesse d'être neutre à [[#520]]** — l'ablation de l'« ANCIEN SYSTÈME »
+  des échelles touche exactement ce code. **Trancher là-bas** : namespacer, ou retirer la clé avec le
+  bloc caché. Ne pas retirer l'un sans l'autre.
 
 - [x] **#523 CLOS 26 août 2026 — c'était GitHub Desktop, et c'est Grégoire qui l'a trouvé.**
   ⮕ **MESURE CONCLUANTE** : suite WebKit rejouée machine au repos ET **GitHub Desktop fermé** (hook
