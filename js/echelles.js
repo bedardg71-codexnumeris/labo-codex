@@ -1241,20 +1241,30 @@ function afficherTableauNiveaux(niveaux) {
  * - Autres champs en string
  */
 async function modifierNiveau(index, champ, valeur) {
-    let niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
-    niveaux[index][champ] = valeur;
-    await db.set('niveauxEchelle',  niveaux);
+    let niveauxApres = null;
+    await db.modifier('niveauxEchelle', (lus) => {
+        const niveaux = lus || niveauxDefaut;
+        // ⚠ Les bornes du niveau, pas seulement l'existence du tableau : sans ce
+        // test, un index hors bornes lève une TypeError au lieu de refuser.
+        if (!niveaux[index]) return undefined;
+        niveaux[index][champ] = valeur;
+        niveauxApres = niveaux;
+        return niveaux;
+    }, null);
+    if (!niveauxApres) return;
+    const niveaux = niveauxApres;
 
     // ✅ FIX (10 jan 2026) : Synchroniser avec echelleTemplateActuelle et echellesTemplates
     if (echelleTemplateActuelle && echelleTemplateActuelle.id) {
         echelleTemplateActuelle.niveaux = niveaux;
-        let echelles = await db.get(cle('echellesTemplates')) || [];
-        const idx = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
-        if (idx !== -1) {
+        await db.modifier(cle('echellesTemplates'), (lues) => {
+            const echelles = lues || [];
+            const idx = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
+            if (idx === -1) return undefined;
             echelles[idx].niveaux = niveaux;
             echelles[idx].dateModification = new Date().toISOString();
-            await db.set(cle('echellesTemplates'), echelles);
-        }
+            return echelles;
+        }, []);
     }
 
     // Mise à jour immédiate de l'aperçu de couleur sans recharger tout le tableau
@@ -1298,19 +1308,24 @@ async function ajouterNiveau() {
     }
 
     // Sinon, comportement ancien (pour compatibilité)
-    let niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
+    let niveaux = null;
+    await db.modifier('niveauxEchelle', (lus) => {
+        const liste = lus || niveauxDefaut;
 
-    niveaux.push({
-        code: 'N',
-        nom: 'Nouveau niveau',
-        description: '',
-        min: 0,
-        max: 100,
-        valeurCalcul: 50,
-        couleur: 'var(--bleu-moyen)'
-    });
+        liste.push({
+            code: 'N',
+            nom: 'Nouveau niveau',
+            description: '',
+            min: 0,
+            max: 100,
+            valeurCalcul: 50,
+            couleur: 'var(--bleu-moyen)'
+        });
 
-    await db.set('niveauxEchelle',  niveaux);
+        niveaux = liste;
+        return liste;
+    }, null);
+
     afficherTableauNiveaux(niveaux);
     afficherApercuEchelle(niveaux);
 }
@@ -1336,9 +1351,16 @@ async function ajouterNiveau() {
 async function supprimerNiveau(index) {
     if (!confirm('Supprimer ce niveau ?')) return;
 
-    let niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
-    niveaux.splice(index, 1);
-    await db.set('niveauxEchelle',  niveaux);
+    let niveaux = null;
+    await db.modifier('niveauxEchelle', (lus) => {
+        const liste = lus || niveauxDefaut;
+        if (!liste[index]) return undefined;
+        liste.splice(index, 1);
+        niveaux = liste;
+        return liste;
+    }, null);
+    if (!niveaux) return;
+
     afficherTableauNiveaux(niveaux);
     afficherApercuEchelle(niveaux);
 }
@@ -1363,12 +1385,19 @@ async function supprimerNiveau(index) {
 async function deplacerNiveauHaut(index) {
     if (index === 0) return;
 
-    let niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
+    let niveaux = null;
+    await db.modifier('niveauxEchelle', (lus) => {
+        const liste = lus || niveauxDefaut;
+        if (!liste[index] || !liste[index - 1]) return undefined;
 
-    // Échanger avec le niveau précédent
-    [niveaux[index - 1], niveaux[index]] = [niveaux[index], niveaux[index - 1]];
+        // Échanger avec le niveau précédent
+        [liste[index - 1], liste[index]] = [liste[index], liste[index - 1]];
 
-    await db.set('niveauxEchelle',  niveaux);
+        niveaux = liste;
+        return liste;
+    }, null);
+    if (!niveaux) return;
+
     afficherTableauNiveaux(niveaux);
     afficherApercuEchelle(niveaux);
 }
@@ -1391,14 +1420,21 @@ async function deplacerNiveauHaut(index) {
  * - Désactivé pour le dernier niveau
  */
 async function deplacerNiveauBas(index) {
-    let niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
+    let niveaux = null;
+    await db.modifier('niveauxEchelle', (lus) => {
+        const liste = lus || niveauxDefaut;
 
-    if (index === niveaux.length - 1) return;
+        // Le dernier niveau ne descend pas : refus, l'écriture est annulée.
+        if (!liste[index] || index === liste.length - 1) return undefined;
 
-    // Échanger avec le niveau suivant
-    [niveaux[index], niveaux[index + 1]] = [niveaux[index + 1], niveaux[index]];
+        // Échanger avec le niveau suivant
+        [liste[index], liste[index + 1]] = [liste[index + 1], liste[index]];
 
-    await db.set('niveauxEchelle',  niveaux);
+        niveaux = liste;
+        return liste;
+    }, null);
+    if (!niveaux) return;
+
     afficherTableauNiveaux(niveaux);
     afficherApercuEchelle(niveaux);
 }
@@ -1425,14 +1461,20 @@ async function deplacerNiveauBas(index) {
  * - Opacité réduite si verrouillé
  */
 async function basculerVerrouillageNiveau(index) {
-    let niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
+    let niveaux = null;
+    let estVerrouille = false;
+    await db.modifier('niveauxEchelle', (lus) => {
+        const liste = lus || niveauxDefaut;
+        if (!liste[index]) return undefined;
 
-    // Toggle le verrouillage
-    niveaux[index].verrouille = !niveaux[index].verrouille;
-    const estVerrouille = niveaux[index].verrouille;
+        // Toggle le verrouillage
+        liste[index].verrouille = !liste[index].verrouille;
+        estVerrouille = liste[index].verrouille;
 
-    // Sauvegarder dans localStorage
-    await db.set('niveauxEchelle',  niveaux);
+        niveaux = liste;
+        return liste;
+    }, null);
+    if (!niveaux) return;
 
     // Mettre à jour le cadenas dans le DOM immédiatement
     const cadenasElement = document.getElementById(`cadenas-niveau-${index}`);
