@@ -10,6 +10,11 @@
 - Chaque session contient des **tâches identifiées** (`T3.2` = session 3, tâche 2). Une tâche est une case à cocher. Une tâche cochée est une tâche **livrée, testée et mergée** — jamais « en cours ».
 - Le **tableau d'état** ci-dessous est la seule vue d'ensemble. Le mettre à jour en fin de chaque session (statut + date + commit). C'est ce tableau que la session suivante lit en premier.
 - Statuts autorisés : `À FAIRE` · `EN COURS (session du AAAA-MM-JJ)` · `LIVRÉ (commit abcdef0)` · `BLOQUÉ (motif)` · `ABANDONNÉ (décision Grégoire, date)`.
+- ⚠ **Consigne de Grégoire, 30 août 2026 au soir** : **cocher les tâches au fur et à mesure**, pas en
+  fin de session. Une case laissée décochée sur une tâche faite coûte plus cher qu'un oubli de
+  documentation : la session suivante la relit comme du travail restant et refait le geste, ou pire,
+  la contourne. Vaut pour les trois sessions actives. Vérifié le 30 août : `T0.5` était décochée
+  alors qu'elle était livrée.
 - Une session qui ne termine pas passe sa dernière tâche à `EN COURS`, remplit `RELAIS.md`, et note dans la colonne « Note » ce qui reste exactement.
 
 ## Tableau d'état
@@ -24,7 +29,7 @@
 | S5 — Appariement par nom | S3 | À FAIRE | | | #611 |
 | S6 — DA inconnu, groupe absent | S4, S7 | À FAIRE | | | #612 · D2 = A (refus dit) · T6.1 levée : #606 est mergé · **T6.6 activée** (même trou que S5 dans `supprimerEvaluation`) |
 | S7 — Restauration ZIP | S8 | À FAIRE | | | #613 |
-| S8 — Codex | S9, S10 | À FAIRE | | | #614 |
+| S8 — Codex | S9, S10 | LIVRÉ | 2026-08-30 | `785f7887` | #614 · session c3 · sentinelle 15 cas, 8 break-tests, 8 ROUGE · T8.1 mesuré (structure `id` confirmée) · arbitrage **fail-closed** sur la fusion · ⏳ release en attente du go de Grégoire · ⏳ divergence fail-open du chemin « ouvrir » à trancher |
 | S9 — Mineurs | M1–M4, M10 | À FAIRE | | | #615 · D3 = A (retirer) |
 | S10 — Tests sur appareil | angles morts | À FAIRE | | | avec Grégoire, iPad + Mac |
 
@@ -100,7 +105,8 @@ Trois décisions fermées, une recommandation chacune. Les consigner ici, avec l
 - [x] **T0.2 — Décision D2 (pour S6)** : sans groupe-cours actif, refuser l'import ? Option A (recommandée) : refus avec message. Option B : autoriser et marquer les fichiers pour réassociation. **Décision : OPTION A (date : 2026-08-30)** — garde dans `confirmerImportPipeline`, refus DIT. Le repli de `obtenirFichiersGroupeActif` n'est pas touché (60 appelants non audités).
 - [x] **T0.3 — Décision D3 (pour S9)** : retirer « Renommer pour distinguer » de la modale de confirmation ? Option A (recommandée) : retirer. Option B : garder, reformulé. **Décision : OPTION A (date : 2026-08-30)** — le bouton part avec `renommerDoublon` et `renommerFichierDansFile`.
 - [x] **T0.4** — Réserver dans `BACKLOG.md`, en une seule écriture, un `#NNN` par session S1 à S9 ; les reporter dans le tableau d'état (colonne Note). **Fait le 2026-08-30 : #607 à #615**, section « Chaîne d'importation des travaux » en tête de `## A faire`. Dernier ID utilisé auparavant : #606.
-- [ ] **T0.5** — Committer l'audit et ce plan (`docs(audit): chaîne d'importation des travaux`), pousser.
+- [x] **T0.5** — Committer l'audit et ce plan (`docs(audit): chaîne d'importation des travaux`), pousser.
+  **Était à moitié faite** : l'audit et le plan étaient commités (`88a2a244`) mais JAMAIS poussés — écart relevé par l'audit de début de session du 30 août. Poussés avec le commit de S0 (`8c938841`).
 
 ---
 
