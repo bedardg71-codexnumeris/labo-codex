@@ -467,8 +467,18 @@ async function typerProductionCommeTerminale(productionId) {
         alert('Une évaluation terminale est déjà typée (« ' + (dejaTypee.titre || dejaTypee.id) + ' ») : une seule par trimestre. Rien n\'a été modifié.');
         return;
     }
-    prod.type = 'terminale';
-    await db.set(getCleProductions(), productionsListe); // security-ok: réécriture de la liste déjà en stockage, seul le champ type (valeur fixe locale) change
+    // ⚠ Le test « une seule terminale par trimestre » est REJOUÉ dans la file :
+    // vérifié hors file, deux clics concurrents en typeraient deux.
+    // security-ok: réécriture de la liste déjà en stockage, seul le champ type
+    // (valeur fixe locale) change.
+    await db.modifier(getCleProductions(), (lues) => {
+        const liste = lues || [];
+        const cible = liste.find(p => p && p.id === productionId);
+        if (!cible) return undefined;
+        if (liste.find(p => p && p.type === 'terminale')) return undefined;
+        cible.type = 'terminale';
+        return liste;
+    }, []);
 
     // Recalculer les indices avec le nouveau rôle, puis rafraîchir la vue.
     if (typeof calculerEtStockerIndicesCP === 'function') calculerEtStockerIndicesCP();
@@ -1995,47 +2005,62 @@ async function sauvegarderProduction() {
 
     // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
     const cleProductions = cle('productions');
-    let evaluations = await db.get(cleProductions) || [];
 
-    const resultatDoublons = await gererDoublonProduction(donnees.titre, evaluations, productionEnEdition);
+    // ⚠ Cette lecture sert à POSER LA QUESTION du doublon, pas de base à
+    // l'écriture : `gererDoublonProduction` peut attendre l'utilisateur, et tout
+    // ce qui s'enregistre pendant serait écrasé par la collection lue avant.
+    const evaluationsLues = await db.get(cleProductions) || [];
+
+    const resultatDoublons = await gererDoublonProduction(donnees.titre, evaluationsLues, productionEnEdition);
     if (resultatDoublons.annule) return;
-    evaluations = resultatDoublons.evaluations;
     donnees.titre = resultatDoublons.titre;
 
-    const productionData = construireProductionData(donnees, evaluations, productionEnEdition);
+    // Ce que la gestion du doublon a RETIRÉ, relevé PAR IDENTIFIANT : le retrait
+    // est rejoué dans la file, sur la collection de l'instant. Reprendre la liste
+    // qu'elle rend remettrait en place tout ce qui a été enregistré entre-temps.
+    const idsRetires = evaluationsLues
+        .filter(e => !resultatDoublons.evaluations.some(x => x.id === e.id))
+        .map(e => e.id);
 
-    if (productionEnEdition) {
-        // Modifier la production existante
-        const index = evaluations.findIndex(e => e.id === productionEnEdition);
-        if (index !== -1) {
-            evaluations[index] = { ...evaluations[index], ...productionData };
-            // 🆕 Beta 99.05 : Mise à jour dateModification systématique
-            evaluations[index].dateModification = new Date().toISOString();
+    let productionData = null;
+    await db.modifier(cleProductions, (lues) => {
+        const evaluations = (lues || []).filter(e => !idsRetires.includes(e.id));
 
-            // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
-            if (typeof ajouterContributeurSiNecessaire === 'function') {
-                evaluations[index] = ajouterContributeurSiNecessaire(evaluations[index]);
+        productionData = construireProductionData(donnees, evaluations, productionEnEdition);
+
+        if (productionEnEdition) {
+            // Modifier la production existante
+            const index = evaluations.findIndex(e => e.id === productionEnEdition);
+            if (index !== -1) {
+                evaluations[index] = { ...evaluations[index], ...productionData };
+                // 🆕 Beta 99.05 : Mise à jour dateModification systématique
+                evaluations[index].dateModification = new Date().toISOString();
+
+                // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
+                if (typeof ajouterContributeurSiNecessaire === 'function') {
+                    evaluations[index] = ajouterContributeurSiNecessaire(evaluations[index]);
+                }
+            } else {
+                console.error('❌ Index non trouvé pour ID:', productionEnEdition);
             }
         } else {
-            console.error('❌ Index non trouvé pour ID:', productionEnEdition);
+            // Ajouter nouvelle production
+            productionData.id = genererIdUnique('PROD_');
+            // 🆕 Beta 99.05 : Dates de création et modification
+            productionData.dateCreation = new Date().toISOString();
+            productionData.dateModification = new Date().toISOString();
+
+            // Auteur CC = identité de l'utilisateur (Plan 1 §4.4)
+            if (!productionData.metadata_cc) productionData.metadata_cc = {};
+            productionData.metadata_cc.auteur_original = obtenirIdentiteCCUtilisateur();
+            productionData.metadata_cc.date_creation = new Date().toISOString().split('T')[0];
+            if (!productionData.metadata_cc.contributeurs) productionData.metadata_cc.contributeurs = [];
+
+            evaluations.push(productionData);
         }
-    } else {
-        // Ajouter nouvelle production
-        productionData.id = genererIdUnique('PROD_');
-        // 🆕 Beta 99.05 : Dates de création et modification
-        productionData.dateCreation = new Date().toISOString();
-        productionData.dateModification = new Date().toISOString();
 
-        // Auteur CC = identité de l'utilisateur (Plan 1 §4.4)
-        if (!productionData.metadata_cc) productionData.metadata_cc = {};
-        productionData.metadata_cc.auteur_original = obtenirIdentiteCCUtilisateur();
-        productionData.metadata_cc.date_creation = new Date().toISOString().split('T')[0];
-        if (!productionData.metadata_cc.contributeurs) productionData.metadata_cc.contributeurs = [];
-
-        evaluations.push(productionData);
-    }
-
-    await db.set(cleProductions, evaluations);
+        return evaluations;
+    }, []);
 
     // 🆕 BETA 95.1 : Garder l'ID pour réafficher après sauvegarde
     const idSauvegarde = productionEnEdition || productionData.id;
@@ -2124,10 +2149,9 @@ async function modifierProduction(id) {
  */
 async function supprimerProduction(id) {
     if (confirm('Es-tu sûr de vouloir supprimer cette production ?')) {
-        let evaluations = await db.get(getCleProductions()) || [];
-        evaluations = evaluations.filter(e => e.id !== id);
-
-        await db.set(getCleProductions(), evaluations);
+        await db.modifier(getCleProductions(), (lues) => {
+            return (lues || []).filter(e => e.id !== id);
+        }, []);
         await afficherTableauProductions();
         await afficherToutesLesProductionsParType();
         await mettreAJourPonderationTotale();
@@ -2157,29 +2181,37 @@ async function supprimerProduction(id) {
  */
 async function verrouillerEvaluation(id) {
 
-    let evaluations = await db.get(getCleProductions()) || [];
+    let statutApres = null;
+    let idsAuMomentDuRefus = null;
+    await db.modifier(getCleProductions(), (lues) => {
+        const evaluations = lues || [];
+        const index = evaluations.findIndex(e => e.id === id);
+        if (index === -1) {
+            // Relevé pour le message de refus : la liste telle qu'elle était à
+            // l'instant du refus, pas celle d'avant.
+            idsAuMomentDuRefus = evaluations.map(e => ({ id: e.id, titre: e.titre }));
+            return undefined;
+        }
 
-    // Debug détaillé de la recherche
-    evaluations.forEach((e, idx) => {
-        const match = e.id === id;
-    });
-
-    const index = evaluations.findIndex(e => e.id === id);
-
-    if (index !== -1) {
         evaluations[index].verrouille = !evaluations[index].verrouille;
-        await db.set(getCleProductions(), evaluations);
+        statutApres = evaluations[index].verrouille;
+        return evaluations;
+    }, []);
+
+    if (statutApres !== null) {
         await afficherTableauProductions();
         await afficherToutesLesProductionsParType();
 
-        // Notification de succès
-        const statut = evaluations[index].verrouille ? 'verrouillée' : 'déverrouillée';
+        // Notification de succès. ⚠ Le statut vient du MUTATEUR : la collection
+        // lue n'existe plus ici, et c'est voulu — l'état annoncé est celui qui
+        // a réellement été écrit, pas celui d'un instantané d'avant.
+        const statut = statutApres ? 'verrouillée' : 'déverrouillée';
         notifications.succes(`Production ${statut}`);
     } else {
         // Si l'évaluation n'est pas trouvée, afficher une erreur
         console.error('❌ Production non trouvée!');
         console.error('ID recherché:', id);
-        console.error('IDs disponibles:', evaluations.map(e => ({ id: e.id, titre: e.titre })));
+        console.error('IDs disponibles:', idsAuMomentDuRefus);
 
         notifications.erreur('Évaluation introuvable', `ID: ${id}`);
     }
@@ -2207,12 +2239,18 @@ async function verrouillerEvaluation(id) {
  * 5. Rafraîchit l'affichage
  */
 async function monterEvaluation(id) {
-    let evaluations = await db.get(getCleProductions()) || [];
-    const index = evaluations.findIndex(e => e.id === id);
+    let deplacee = false;
+    await db.modifier(getCleProductions(), (lues) => {
+        const evaluations = lues || [];
+        const index = evaluations.findIndex(e => e.id === id);
+        if (index <= 0) return undefined;
 
-    if (index > 0) {
         [evaluations[index - 1], evaluations[index]] = [evaluations[index], evaluations[index - 1]];
-        await db.set(getCleProductions(), evaluations);
+        deplacee = true;
+        return evaluations;
+    }, []);
+
+    if (deplacee) {
         await afficherTableauProductions();
         await afficherToutesLesProductionsParType();
     }
@@ -2240,12 +2278,23 @@ async function monterEvaluation(id) {
  * 5. Rafraîchit l'affichage
  */
 async function descendreEvaluation(id) {
-    let evaluations = await db.get(getCleProductions()) || [];
-    const index = evaluations.findIndex(e => e.id === id);
+    let deplacee = false;
+    await db.modifier(getCleProductions(), (lues) => {
+        const evaluations = lues || [];
+        const index = evaluations.findIndex(e => e.id === id);
 
-    if (index < evaluations.length - 1) {
+        // ⚠ `index === -1` PASSAIT ce test : la condition `index < length - 1`
+        // est vraie pour -1. L'échange écrivait alors `evaluations[0] = undefined`
+        // et l'enregistrait. Non atteignable depuis les chevrons (l'id vient de
+        // la ligne affichée), donc latent — mais destructeur. Fermé ici.
+        if (index === -1 || index >= evaluations.length - 1) return undefined;
+
         [evaluations[index], evaluations[index + 1]] = [evaluations[index + 1], evaluations[index]];
-        await db.set(getCleProductions(), evaluations);
+        deplacee = true;
+        return evaluations;
+    }, []);
+
+    if (deplacee) {
         await afficherTableauProductions();
         await afficherToutesLesProductionsParType();
     }
@@ -2877,17 +2926,21 @@ async function ajouterProductionAuType(type) {
 async function migrerProductionsVersBibliotheque() {
     const productions = await db.get(getCleProductions()) || [];
 
-    let nbMigrees = 0;
-    productions.forEach(prod => {
-        if (prod.dansBibliotheque === undefined) {
-            prod.dansBibliotheque = true;
-            nbMigrees++;
-        }
-    });
+    await db.modifier(getCleProductions(), (lues) => {
+        const productions = lues || [];
 
-    if (nbMigrees > 0) {
-        await db.set(getCleProductions(), productions);
-    }
+        let nbMigrees = 0;
+        productions.forEach(prod => {
+            if (prod.dansBibliotheque === undefined) {
+                prod.dansBibliotheque = true;
+                nbMigrees++;
+            }
+        });
+
+        // Rien à migrer : le mutateur rend `undefined`, aucune écriture.
+        if (nbMigrees === 0) return undefined;
+        return productions;
+    }, []);
 }
 
 function initialiserModuleProductions() {
@@ -3187,13 +3240,20 @@ const supprimerProductionOriginale = window.supprimerProduction;
 window.supprimerProduction = async function(id) {
     if (!confirm('Supprimer cette production ?')) return;
 
-    const productions = await db.get(getCleProductions()) || [];
-    const index = productions.findIndex(p => p.id === id);
+    // ⚠ L'index est recalculé DANS la file : celui d'avant la confirmation ne
+    // vaut plus rien.
+    let supprimee = false;
+    await db.modifier(getCleProductions(), (lues) => {
+        const productions = lues || [];
+        const index = productions.findIndex(p => p.id === id);
+        if (index === -1) return undefined;
 
-    if (index === -1) return;
+        productions.splice(index, 1);
+        supprimee = true;
+        return productions;
+    }, []);
 
-    productions.splice(index, 1);
-    await db.set(getCleProductions(), productions);
+    if (!supprimee) return;
 
     // Recharger la sidebar
     await afficherListeProductions();

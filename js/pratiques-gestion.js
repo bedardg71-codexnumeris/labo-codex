@@ -2713,14 +2713,18 @@ function genererCheckboxesCategorie(productions, categorie) {
  * 🆕 Beta 95.4 : Toggle une production dans une catégorie (exclusif)
  */
 async function toggleProductionCategorie(prodId, categorie, checked) {
-    const cleProductions = cle('productions');
-    const productions = await db.get(cleProductions) || [];
-    const prod = productions.find(p => p.id === prodId);
+    let trouvee = false;
+    await db.modifier(cle('productions'), (lues) => {
+        const productions = lues || [];
+        const prod = productions.find(p => p.id === prodId);
+        if (!prod) return undefined;
 
-    if (prod) {
         prod.categorie = checked ? categorie : null;
-        await db.set(cleProductions, productions);
+        trouvee = true;
+        return productions;
+    }, []);
 
+    if (trouvee) {
         // Rafraîchir les deux listes (pour gérer l'exclusivité)
         chargerProductionsPourCategories();
     }

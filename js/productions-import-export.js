@@ -235,16 +235,6 @@ async function importerDansProductionActive(event) {
                 return;
             }
 
-            // Récupérer les productions
-            const productions = await db.get(getCleProductions()) || [];
-            const index = productions.findIndex(p => p.id === productionId);
-
-            if (index === -1) {
-                alert('Production introuvable.');
-                event.target.value = '';
-                return;
-            }
-
             // Préserver l'ID original et remplacer les données
             const productionMiseAJour = {
                 ...productionImportee,
@@ -256,11 +246,26 @@ async function importerDansProductionActive(event) {
                 productionMiseAJour.metadata_cc = metadata;
             }
 
-            // Remplacer dans le tableau
-            productions[index] = productionMiseAJour;
+            // ⚠ La collection est relue DANS la file : celle d'avant la
+            // confirmation ne vaut plus rien. security-ok: `productionImportee`
+            // est déjà passée par la validation d'import en amont.
+            let remplacee = false;
+            await db.modifier(getCleProductions(), (lues) => {
+                const productions = lues || [];
+                const index = productions.findIndex(p => p.id === productionId);
+                if (index === -1) return undefined;
 
-            // Sauvegarder
-            await db.set(getCleProductions(), productions);
+                // Remplacer dans le tableau
+                productions[index] = productionMiseAJour;
+                remplacee = true;
+                return productions;
+            }, []);
+
+            if (!remplacee) {
+                alert('Production introuvable.');
+                event.target.value = '';
+                return;
+            }
 
             // Recharger la production dans le formulaire
             await afficherFormProduction(productionId);
@@ -597,26 +602,34 @@ function fermerModalMigration() {
  * Sauvegarde les catégories assignées via l'assistant de migration
  */
 async function sauvegarderMigrationCategories() {
-    const productions = await db.get(getCleProductions()) || [];
     let nbMises = 0;
 
     // Parcourir les selects du modal
     const selects = document.querySelectorAll('[id^="migration-cat-"]');
-    selects.forEach(select => {
-        const prodId = select.id.replace('migration-cat-', '');
-        const categorie = select.value;
 
-        if (categorie) {
-            const prod = productions.find(p => p.id === prodId);
-            if (prod) {
-                prod.categorie = categorie;
-                nbMises++;
+    await db.modifier(getCleProductions(), (lues) => {
+        const productions = lues || [];
+        nbMises = 0;
+
+        selects.forEach(select => {
+            const prodId = select.id.replace('migration-cat-', '');
+            const categorie = select.value;
+
+            if (categorie) {
+                const prod = productions.find(p => p.id === prodId);
+                if (prod) {
+                    prod.categorie = categorie;
+                    nbMises++;
+                }
             }
-        }
-    });
+        });
+
+        // Aucune catégorie assignée : le mutateur rend `undefined`, rien n'est écrit.
+        if (nbMises === 0) return undefined;
+        return productions;
+    }, []);
 
     if (nbMises > 0) {
-        await db.set(getCleProductions(), productions);
 
         // Notification
         notifications.succes(`${nbMises} catégorie(s) assignée(s)`, 'Les productions ont été mises à jour.');

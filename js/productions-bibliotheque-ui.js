@@ -281,8 +281,18 @@ async function ajouterProductionIndividuelle(id) {
         // `db.set(getCleProductions(), ...)` final se résoudrait sous le NOUVEAU
         // namespace et écrirait le tableau lu sous l'ANCIEN → contamination.
         const cleProductions = getCleProductions();
-        let productions = await db.get(cleProductions) || [];
-        let prod = productions.find(p => p.id === id);
+
+        // ⚠ La garde d'identité de #476 doit voir la collection telle qu'elle est
+        // AU MOMENT DE L'ÉCRITURE : lue hors file, elle laisserait passer un
+        // exemplaire ajouté entre-temps. Tout le geste entre donc dans la file,
+        // et les deux messages sortent APRÈS — la file ne porte que l'écriture.
+        let prod = null;
+        let titreEnConflit = null;
+        let sourceIntrouvable = false;
+
+        await db.modifier(cleProductions, async (lues) => {
+        let productions = lues || [];
+        prod = productions.find(p => p.id === id);
 
         // Si pas trouvée dans le cours actuel, chercher dans la bibliothèque partagée
         if (!prod) {
@@ -290,8 +300,8 @@ async function ajouterProductionIndividuelle(id) {
             const prodBiblio = bibliotheque.find(p => p.id === id);
 
             if (!prodBiblio) {
-                notifications.erreur('Production introuvable dans le cours actuel ni dans la bibliothèque.');
-                return;
+                sourceIntrouvable = true;
+                return undefined;
             }
 
             // Copier la production de la bibliothèque vers le cours actuel
@@ -322,20 +332,34 @@ async function ajouterProductionIndividuelle(id) {
             // `inspireDe`) passait au travers et s'empilait.
             const gardeProd = ajouterAvecGardeIdentite(productions, prod);
             if (!gardeProd.ajoute) {
-                const enPlace = gardeProd.conflit || {};
-                notifications.info(
-                    `« ${enPlace.titre || 'Cette production'} » est déjà dans ta sélection.`,
-                    'Pour en avoir un second exemplaire, utilise « Dupliquer ».');
-                return;
+                // Le nom affiché est TIRÉ du conflit rendu par la garde, en une
+                // seule liaison : #476 vérifie ce chaînage, et un intermédiaire
+                // le rompt sans rien casser à l'écran.
+                titreEnConflit = (gardeProd.conflit || {}).titre || 'Cette production';
+                return undefined;
             }
             productions = gardeProd.liste;
-            await db.set(cleProductions, productions);
 
         } else {
             // Production déjà dans le cours, juste la marquer comme visible
             prod.dansBibliotheque = true;
-            await db.set(cleProductions, productions);
         }
+
+        return productions;
+        }, []);
+
+        // Les messages vivent HORS du mutateur : la file ne porte que l'écriture.
+        if (titreEnConflit) {
+            notifications.info(
+                `« ${titreEnConflit} » est déjà dans ta sélection.`,
+                'Pour en avoir un second exemplaire, utilise « Dupliquer ».');
+            return;
+        }
+        if (sourceIntrouvable) {
+            notifications.erreur('Production introuvable dans le cours actuel ni dans la bibliothèque.');
+            return;
+        }
+        if (!prod) return;
 
         // ⚠ NE PAS ANNONCER UN SUCCÈS SANS L'AVOIR VÉRIFIÉ.
         //
@@ -634,16 +658,22 @@ async function retirerProductionDeBibliotheque(id) {
     }
 
     try {
-        const productions = await db.get(getCleProductions()) || [];
-        const production = productions.find(p => p.id === id);
+        // ⚠ La collection est relue DANS la file : celle d'avant la confirmation
+        // ne vaut plus rien.
+        let trouvee = false;
+        await db.modifier(getCleProductions(), (lues) => {
+            const productions = lues || [];
+            const production = productions.find(p => p.id === id);
+            if (!production) return undefined;
 
-        if (!production) {
+            production.dansBibliotheque = false;
+            trouvee = true;
+            return productions;
+        }, []);
+
+        if (!trouvee) {
             throw new Error('Production introuvable');
         }
-
-        production.dansBibliotheque = false;
-
-        await db.set(getCleProductions(), productions);
 
 
         fermerModalBibliothequeProductions();
@@ -661,6 +691,8 @@ async function retirerProductionDeBibliotheque(id) {
  * @param {string} id - ID de la production à supprimer
  */
 async function supprimerProductionDefinitivement(id) {
+    // ⚠ Lecture hors file, pour NOMMER la production dans la question. La
+    // confirmation ne doit pas tenir la file ouverte.
     const productions = await db.get(getCleProductions()) || [];
     const production = productions.find(p => p.id === id);
 
@@ -677,9 +709,11 @@ async function supprimerProductionDefinitivement(id) {
         return;
     }
 
-    // Suppression définitive du store local
-    const nouvellesProductions = productions.filter(p => p.id !== id);
-    await db.set(getCleProductions(), nouvellesProductions);
+    // Suppression définitive du store local, DANS la file : la collection
+    // filtrée est celle qui existe au moment de l'écriture.
+    await db.modifier(getCleProductions(), (lues) => {
+        return (lues || []).filter(p => p.id !== id);
+    }, []);
 
     // Suppression du store partagé
     if (typeof retirerDeLaBibliotheque === 'function') {
@@ -755,8 +789,11 @@ async function ajouterProductionsABibliotheque() {
     }
 
     try {
-        const productions = await db.get(getCleProductions()) || [];
         let ajoutees = 0;
+
+        await db.modifier(getCleProductions(), (lues) => {
+        const productions = lues || [];
+        ajoutees = 0;
 
         checkboxes.forEach(checkbox => {
             const id = checkbox.value;
@@ -781,8 +818,8 @@ async function ajouterProductionsABibliotheque() {
             }
         });
 
-        await db.set(getCleProductions(), productions);
-
+        return productions;
+        }, []);
 
         fermerModalBibliothequeProductions();
         await afficherListeProductions();
