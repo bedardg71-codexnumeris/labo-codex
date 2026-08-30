@@ -495,8 +495,9 @@
      * @param {Object} d                    - descripteur de famille
      * @param {string} d.id                 - id de l'item à dupliquer
      * @param {string} d.prefixeId          - préfixe d'ID de la famille ('GRILLE_'…)
-     * @param {Function} d.lireListe        - () => liste (peut être asynchrone)
-     * @param {Function} d.ecrireListe      - (liste) => void (peut être asynchrone)
+     * @param {Function} d.modifierListe    - (mutateur) => Promise, sérialisé par
+     *   `db.modifier` : le mutateur reçoit la liste lue et rend la liste à
+     *   écrire, ou `undefined` pour annuler l'écriture. #522 lot 4.
      * @param {Function} [d.repliSource]    - (id) => source, si absente de la liste
      * @param {Function} [d.retoucherCopie] - (copie, source) => void, après forkerItem
      * @param {Function} [d.rafraichirListe]- () => void, avant le chargement en édition
@@ -504,23 +505,38 @@
      * @param {string} [d.champFocus]       - id DOM du champ de nom
      */
     BibliothequeUI.dupliquerEtEditerItem = async function (d) {
-        var liste = await d.lireListe();
-        if (!Array.isArray(liste)) liste = [];
+        // #522 lot 4 — la copie naît DANS la section critique ; elle en ressort
+        // par cette variable, parce que `db.modifier` rend la liste écrite, pas
+        // l'élément ajouté, et que le chargement en édition a besoin de son id.
+        var copieCreee = null;
 
-        var source = liste.find(function (x) { return x && x.id === d.id; });
-        if (!source && typeof d.repliSource === 'function') {
-            source = await d.repliSource(d.id);
-        }
-        if (!source) return;
+        await d.modifierListe(async function (liste) {
+            if (!Array.isArray(liste)) liste = [];
 
-        var copie = BibliothequeUI.forkerItem(source, d.prefixeId, liste);
-        if (typeof d.retoucherCopie === 'function') d.retoucherCopie(copie, source);
+            var source = liste.find(function (x) { return x && x.id === d.id; });
+            if (!source && typeof d.repliSource === 'function') {
+                source = await d.repliSource(d.id);
+            }
+            // `undefined` ANNULE l'écriture : rien n'est touché, la file passe
+            // à l'opération suivante. C'est l'ancien `return` sec.
+            if (!source) return undefined;
 
-        liste.push(copie);
-        await d.ecrireListe(liste);
+            var copie = BibliothequeUI.forkerItem(source, d.prefixeId, liste);
+            if (typeof d.retoucherCopie === 'function') d.retoucherCopie(copie, source);
 
+            liste.push(copie);
+            copieCreee = copie;
+            return liste;
+        });
+
+        if (!copieCreee) return;
+
+        // ⚠ HORS de la section critique, et il faut que ça le reste : ces trois
+        // rappels touchent l'UI (rafraîchissement, chargement du formulaire,
+        // focus). Les tenir dans le mutateur retiendrait la file de la clé
+        // pendant un rendu, pour rien.
         if (typeof d.rafraichirListe === 'function') await d.rafraichirListe();
-        if (typeof d.chargerPourModif === 'function') await d.chargerPourModif(copie.id);
+        if (typeof d.chargerPourModif === 'function') await d.chargerPourModif(copieCreee.id);
         BibliothequeUI.focaliserChamp(d.champFocus);
     };
 
@@ -545,8 +561,9 @@
      * @param {Object} d
      * @param {string} d.id                  - id de l'item source
      * @param {string} d.prefixeId           - préfixe d'ID de la famille
-     * @param {Function} d.lireListe         - () => liste (sync ou async)
-     * @param {Function} d.ecrireListe       - (liste) => void (sync ou async)
+     * @param {Function} d.modifierListe     - (mutateur) => Promise, sérialisé par
+     *   `db.modifier` : le mutateur reçoit la liste lue et rend la liste à
+     *   écrire, ou `undefined` pour annuler l'écriture. #522 lot 4.
      * @param {Function} d.nommerLaCopie     - (copie, source, liste) => void
      * @param {Function} d.forgerProvenance  - (source) => objet `inspireDe`
      * @param {boolean} [d.cloneProfond]     - clone JSON au lieu d'un étalement
@@ -556,45 +573,61 @@
      * @returns {Object|null} la copie écrite, ou null si la source est absente
      */
     BibliothequeUI.dupliquerVersBibliotheque = async function (d) {
-        var liste = await d.lireListe();
-        if (!Array.isArray(liste)) liste = [];
+        // #522 lot 4 — voir dupliquerEtEditerItem : la copie et le cas « source
+        // absente » sortent de la section critique par ces deux variables.
+        var copieCreee = null;
+        var sourceIntrouvable = false;
 
-        var source = liste.find(function (x) { return x && x.id === d.id; });
-        if (!source) {
+        await d.modifierListe(async function (liste) {
+            if (!Array.isArray(liste)) liste = [];
+
+            var source = liste.find(function (x) { return x && x.id === d.id; });
+            if (!source) {
+                sourceIntrouvable = true;
+                return undefined;   // annule l'écriture
+            }
+
+            var genererId = window.genererIdUnique || function (p) {
+                return (p || 'ITEM_') + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+            };
+
+            // Étalement ou clone profond : seules les pratiques exigent le second
+            // (sous-objets `configuration` / `jetons` partagés sinon — invariant
+            // « source immuable », durcissement de la Brique C).
+            var copie = d.cloneProfond
+                ? JSON.parse(JSON.stringify(source))
+                : Object.assign({}, source);
+
+            copie.id = genererId(d.prefixeId);
+            d.nommerLaCopie(copie, source, liste);
+            copie.auteur = BibliothequeUI.obtenirAuteurActif();
+            copie.isDemo = false;
+            copie.inspireDe = d.forgerProvenance(source);
+            copie.dansBibliotheque = true;
+            copie.dateCreation = new Date().toISOString();
+
+            // La copie devient un original de l'utilisateur : les métadonnées de
+            // partage de la source n'ont plus cours.
+            delete copie.metadata_cc;
+            delete copie.auteurOriginal;
+            if (typeof d.retoucherCopie === 'function') d.retoucherCopie(copie, source);
+
+            liste.push(copie);
+            copieCreee = copie;
+            return liste;
+        });
+
+        // ⚠ Le message d'absence est posé APRÈS la file, pas dedans : le tenir
+        // dans le mutateur retiendrait la clé pendant un rendu d'UI. L'ordre vu
+        // par l'utilisateur est inchangé.
+        if (sourceIntrouvable) {
             if (typeof d.siIntrouvable === 'function') d.siIntrouvable();
             return null;
         }
-
-        var genererId = window.genererIdUnique || function (p) {
-            return (p || 'ITEM_') + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-        };
-
-        // Étalement ou clone profond : seules les pratiques exigent le second
-        // (sous-objets `configuration` / `jetons` partagés sinon — invariant
-        // « source immuable », durcissement de la Brique C).
-        var copie = d.cloneProfond
-            ? JSON.parse(JSON.stringify(source))
-            : Object.assign({}, source);
-
-        copie.id = genererId(d.prefixeId);
-        d.nommerLaCopie(copie, source, liste);
-        copie.auteur = BibliothequeUI.obtenirAuteurActif();
-        copie.isDemo = false;
-        copie.inspireDe = d.forgerProvenance(source);
-        copie.dansBibliotheque = true;
-        copie.dateCreation = new Date().toISOString();
-
-        // La copie devient un original de l'utilisateur : les métadonnées de
-        // partage de la source n'ont plus cours.
-        delete copie.metadata_cc;
-        delete copie.auteurOriginal;
-        if (typeof d.retoucherCopie === 'function') d.retoucherCopie(copie, source);
-
-        liste.push(copie);
-        await d.ecrireListe(liste);
+        if (!copieCreee) return null;
 
         if (typeof d.rafraichirUI === 'function') await d.rafraichirUI();
-        return copie;
+        return copieCreee;
     };
 
     /**

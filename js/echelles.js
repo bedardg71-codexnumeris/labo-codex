@@ -2612,8 +2612,7 @@ async function dupliquerEchelleBibliotheque(id) {
     await BibliothequeUI.dupliquerVersBibliotheque({
         id: id,
         prefixeId: 'ECH_',
-        lireListe: async () => await db.get(cle('echellesTemplates')) || [],
-        ecrireListe: async (liste) => { await db.set(cle('echellesTemplates'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
+        modifierListe: (mutateur) => db.modifier(cle('echellesTemplates'), mutateur, []), // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
         nommerLaCopie: (copie, source, liste) => { copie.nom = nommerCopie(source.nom, liste); },
         forgerProvenance: (source) => BibliothequeUI.forgerInspireDe(source),
         siIntrouvable: () => alert('Échelle introuvable'),
@@ -3358,8 +3357,7 @@ async function dupliquerEtEditerEchelle(id) {
     await BibliothequeUI.dupliquerEtEditerItem({
         id: id,
         prefixeId: 'ECH_',
-        lireListe: async () => await db.get(cle('echellesTemplates')) || [],
-        ecrireListe: async (liste) => { await db.set(cle('echellesTemplates'), liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
+        modifierListe: (mutateur) => db.modifier(cle('echellesTemplates'), mutateur, []), // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
         rafraichirListe: async () => { await afficherListeEchelles(); },
         chargerPourModif: async (idCopie) => { await chargerEchellePourModif(idCopie); },
         champFocus: 'nomEchelleTemplate'

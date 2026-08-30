@@ -727,8 +727,7 @@ async function dupliquerProductionBibliotheque(id) {
     await BibliothequeUI.dupliquerVersBibliotheque({
         id: id,
         prefixeId: 'PROD_',
-        lireListe: async () => await db.get(getCleProductions()) || [],
-        ecrireListe: async (liste) => { await db.set(getCleProductions(), liste); },
+        modifierListe: (mutateur) => db.modifier(getCleProductions(), mutateur, []),
         // ✅ D3 (arbitrage du 24 août) — `nommerCopie` remplace la concaténation
         // nue `${source.titre} (copie)`, qui empilait « X (copie) (copie) ». Les
         // productions nomment par `titre` : c'est ce champ qui est renommé.

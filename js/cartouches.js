@@ -4726,8 +4726,7 @@ async function dupliquerEtEditerCartouche(id) {
     await BibliothequeUI.dupliquerEtEditerItem({
         id: id,
         prefixeId: 'CART_',
-        lireListe: async () => await db.get(`cartouches_${grilleId}`) || [],
-        ecrireListe: async (liste) => { await db.set(`cartouches_${grilleId}`, liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
+        modifierListe: (mutateur) => db.modifier(`cartouches_${grilleId}`, mutateur, []), // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
         chargerPourModif: async (idCopie) => { await chargerCartouchePourModif(idCopie, grilleId); },
         champFocus: 'nomCartouche'
     });
@@ -4739,8 +4738,7 @@ async function dupliquerCartoucheBibliotheque(id, grilleId) {
     await BibliothequeUI.dupliquerVersBibliotheque({
         id: id,
         prefixeId: 'CART_',
-        lireListe: async () => await db.get(`cartouches_${grilleId}`) || [],
-        ecrireListe: async (liste) => { await db.set(`cartouches_${grilleId}`, liste); }, // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
+        modifierListe: (mutateur) => db.modifier(`cartouches_${grilleId}`, mutateur, []), // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
         nommerLaCopie: (copie, source, liste) => { copie.nom = nommerCopie(source.nom, liste); },
         forgerProvenance: (source) => BibliothequeUI.forgerInspireDe(source),
         siIntrouvable: () => alert('Cartouche introuvable'),
