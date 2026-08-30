@@ -216,15 +216,18 @@
      */
     async function creerEchelleSPESiInexistante() {
         // Ajouter à la bibliothèque partagée (clé correcte)
-        let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_ECHELLES) || [];
+        // ⚠ #599 — la présence est vérifiée DANS la file. Vérifiée avant, deux
+        // appels concurrents au démarrage semaient DEUX gabarits SPE. C'est le
+        // défaut d'`assurerGrilleGenerique`, corrigé au lot 2c.
+        await db.modifier(CLE_BIBLIOTHEQUE_ECHELLES, (lues) => {
+            const bibliotheque = lues || [];
 
-        // Vérifier si l'échelle SPE existe déjà
-        const echelleSPE = bibliotheque.find(e => e.id === ECHELLE_SPE_ID);
+            // Vérifier si l'échelle SPE existe déjà
+            if (bibliotheque.find(e => e.id === ECHELLE_SPE_ID)) return undefined;
 
-        if (!echelleSPE) {
             bibliotheque.push({ ...ECHELLE_SPE_DEFAUT });
-            await db.set(CLE_BIBLIOTHEQUE_ECHELLES, bibliotheque);
-        }
+            return bibliotheque;
+        }, []);
     }
 
     /**
@@ -232,26 +235,29 @@
      */
     async function creerGrilleSPESiInexistante() {
         // Ajouter à la bibliothèque partagée
-        let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_GRILLES) || [];
-        let nbAjoutees = 0;
+        // ⚠ #599 — les présences sont vérifiées DANS la file (cf. l'échelle SPE).
+        await db.modifier(CLE_BIBLIOTHEQUE_GRILLES, (lues) => {
+            const bibliotheque = lues || [];
+            let nbAjoutees = 0;
 
-        // Gabarit principal (Prise de position)
-        if (!bibliotheque.find(g => g.id === GRILLE_SPE_GABARIT.id)) {
-            bibliotheque.push({ ...GRILLE_SPE_GABARIT });
-            nbAjoutees++;
-        }
-
-        // Gabarits supplémentaires (Portfolio, Test, Oral)
-        for (const gabarit of GABARITS_GRILLES_SPE) {
-            if (!bibliotheque.find(g => g.id === gabarit.id)) {
-                bibliotheque.push({ ...gabarit });
+            // Gabarit principal (Prise de position)
+            if (!bibliotheque.find(g => g.id === GRILLE_SPE_GABARIT.id)) {
+                bibliotheque.push({ ...GRILLE_SPE_GABARIT });
                 nbAjoutees++;
             }
-        }
 
-        if (nbAjoutees > 0) {
-            await db.set(CLE_BIBLIOTHEQUE_GRILLES, bibliotheque);
-        }
+            // Gabarits supplémentaires (Portfolio, Test, Oral)
+            for (const gabarit of GABARITS_GRILLES_SPE) {
+                if (!bibliotheque.find(g => g.id === gabarit.id)) {
+                    bibliotheque.push({ ...gabarit });
+                    nbAjoutees++;
+                }
+            }
+
+            // Rien à semer : le mutateur rend `undefined`, aucune écriture.
+            if (nbAjoutees === 0) return undefined;
+            return bibliotheque;
+        }, []);
     }
 
     /**
@@ -259,13 +265,14 @@
      */
     async function creerProductionSPESiInexistante() {
         // Ajouter à la bibliothèque partagée des productions
-        const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRODUCTIONS) || [];
-        const existe = bibliotheque.find(p => p.id === PRODUCTION_SPE_GABARIT.id);
+        // ⚠ #599 — la présence est vérifiée DANS la file (cf. l'échelle SPE).
+        await db.modifier(CLE_BIBLIOTHEQUE_PRODUCTIONS, (lues) => {
+            const bibliotheque = lues || [];
+            if (bibliotheque.find(p => p.id === PRODUCTION_SPE_GABARIT.id)) return undefined;
 
-        if (!existe) {
             bibliotheque.push({ ...PRODUCTION_SPE_GABARIT });
-            await db.set(CLE_BIBLIOTHEQUE_PRODUCTIONS, bibliotheque);
-        }
+            return bibliotheque;
+        }, []);
     }
 
     // =========================================================================

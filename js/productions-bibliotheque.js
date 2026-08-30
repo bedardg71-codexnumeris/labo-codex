@@ -81,32 +81,43 @@ async function ajouterALaBibliotheque(production) {
         ? window.assainirObjet(production, window.SCHEMAS_IMPORT.production)
         : production;
 
-    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRODUCTIONS) || [];
+    // #599 — la présence est vérifiée DANS la file. Hors file, deux ajouts
+    // concurrents du même item passaient tous les deux, et la bibliothèque
+    // partagée gardait un doublon que rien ne signalait.
+    let dejaPresente = false;
+    await db.modifier(CLE_BIBLIOTHEQUE_PRODUCTIONS, (lues) => {
+        const bibliotheque = lues || [];
 
-    // Vérifier si déjà présente (par ID)
-    const existe = bibliotheque.some(p => p.id === productionSafe.id);
-    if (existe) {
+        // Vérifier si déjà présente (par ID)
+        const existe = bibliotheque.some(p => p.id === productionSafe.id);
+        if (existe) {
+            dejaPresente = true;
+            return undefined;
+        }
+
+        // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
+        let auteur = productionSafe.auteur;
+        if (!auteur && typeof obtenirProfilAuteurActifSync === 'function') {
+            const profil = obtenirProfilAuteurActifSync();
+            auteur = profil?.auteur_original || 'Inconnu';
+        }
+        if (!auteur) auteur = 'Inconnu';
+
+        // Marquer comme partagée et ajouter métadonnées
+        const productionBiblio = {
+            ...productionSafe,
+            dansBibliotheque: true,
+            dateAjoutBiblio: new Date().toISOString(),
+            auteur: auteur
+        };
+
+        bibliotheque.push(productionBiblio);
+        return bibliotheque;
+    }, []);
+
+    if (dejaPresente) {
         return false;
     }
-
-    // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
-    let auteur = productionSafe.auteur;
-    if (!auteur && typeof obtenirProfilAuteurActifSync === 'function') {
-        const profil = obtenirProfilAuteurActifSync();
-        auteur = profil?.auteur_original || 'Inconnu';
-    }
-    if (!auteur) auteur = 'Inconnu';
-
-    // Marquer comme partagée et ajouter métadonnées
-    const productionBiblio = {
-        ...productionSafe,
-        dansBibliotheque: true,
-        dateAjoutBiblio: new Date().toISOString(),
-        auteur: auteur
-    };
-
-    bibliotheque.push(productionBiblio);
-    await db.set(CLE_BIBLIOTHEQUE_PRODUCTIONS, bibliotheque);
 
     return true;
 }
@@ -117,16 +128,24 @@ async function ajouterALaBibliotheque(production) {
  * @returns {Promise<boolean>} true si retirée, false si non trouvée
  */
 async function retirerDeLaBibliotheque(productionId) {
-    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRODUCTIONS) || [];
+    // #599 — le retrait passe par la file. Hors file, un retrait et un ajout
+    // concurrents sur la MÊME bibliothèque partagée s'écrasaient l'un l'autre :
+    // les cinq familles écrivent dans un seul magasin, pas un par famille.
+    let retiree = false;
+    await db.modifier(CLE_BIBLIOTHEQUE_PRODUCTIONS, (lues) => {
+        const bibliotheque = lues || [];
+        const restants = bibliotheque.filter(p => p.id !== productionId);
 
-    const indexAvant = bibliotheque.length;
-    bibliotheque = bibliotheque.filter(p => p.id !== productionId);
+        // Rien retiré : le mutateur rend `undefined`, aucune écriture.
+        if (restants.length === bibliotheque.length) return undefined;
 
-    if (bibliotheque.length === indexAvant) {
+        retiree = true;
+        return restants;
+    }, []);
+
+    if (!retiree) {
         return false;
     }
-
-    await db.set(CLE_BIBLIOTHEQUE_PRODUCTIONS, bibliotheque);
 
     // #327 — hook de cohérence : la production retirée sort de tout dossier de
     // classement (le moteur range par identité, sans toucher la production).

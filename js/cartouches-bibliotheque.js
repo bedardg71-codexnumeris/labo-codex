@@ -80,25 +80,36 @@ async function ajouterCartoucheALaBibliotheque(cartouche) {
         ? window.assainirObjet(cartouche, window.SCHEMAS_IMPORT.cartouche)
         : cartouche;
 
-    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
+    // #599 — la présence est vérifiée DANS la file. Hors file, deux ajouts
+    // concurrents du même item passaient tous les deux, et la bibliothèque
+    // partagée gardait un doublon que rien ne signalait.
+    let dejaPresente = false;
+    await db.modifier(CLE_BIBLIOTHEQUE_CARTOUCHES, (lues) => {
+        const bibliotheque = lues || [];
 
-    const existe = bibliotheque.some(c => c.id === cartoucheSafe.id);
-    if (existe) {
-        return false;
-    }
+        const existe = bibliotheque.some(c => c.id === cartoucheSafe.id);
+        if (existe) {
+            dejaPresente = true;
+            return undefined;
+        }
 
-    // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
-    const auteur = cartoucheSafe.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
+        // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
+        const auteur = cartoucheSafe.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
 
-    const cartoucheBiblio = {
+        const cartoucheBiblio = {
         ...cartoucheSafe,
         dansBibliotheque: true,
         dateAjoutBiblio: new Date().toISOString(),
         auteur: auteur
-    };
+        };
 
-    bibliotheque.push(cartoucheBiblio);
-    await db.set(CLE_BIBLIOTHEQUE_CARTOUCHES, bibliotheque);
+        bibliotheque.push(cartoucheBiblio);
+        return bibliotheque;
+    }, []);
+
+    if (dejaPresente) {
+        return false;
+    }
 
     return true;
 }
@@ -109,16 +120,24 @@ async function ajouterCartoucheALaBibliotheque(cartouche) {
  * @returns {Promise<boolean>} true si retirée, false si non trouvée
  */
 async function retirerCartoucheDeLaBibliotheque(cartoucheId) {
-    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
+    // #599 — le retrait passe par la file. Hors file, un retrait et un ajout
+    // concurrents sur la MÊME bibliothèque partagée s'écrasaient l'un l'autre :
+    // les cinq familles écrivent dans un seul magasin, pas un par famille.
+    let retiree = false;
+    await db.modifier(CLE_BIBLIOTHEQUE_CARTOUCHES, (lues) => {
+        const bibliotheque = lues || [];
+        const restants = bibliotheque.filter(c => c.id !== cartoucheId);
 
-    const indexAvant = bibliotheque.length;
-    bibliotheque = bibliotheque.filter(c => c.id !== cartoucheId);
+        // Rien retiré : le mutateur rend `undefined`, aucune écriture.
+        if (restants.length === bibliotheque.length) return undefined;
 
-    if (bibliotheque.length === indexAvant) {
+        retiree = true;
+        return restants;
+    }, []);
+
+    if (!retiree) {
         return false;
     }
-
-    await db.set(CLE_BIBLIOTHEQUE_CARTOUCHES, bibliotheque);
     return true;
 }
 

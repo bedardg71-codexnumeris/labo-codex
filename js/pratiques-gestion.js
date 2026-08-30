@@ -2464,29 +2464,35 @@ window.confirmerImportPratiques = async function(donnees) {
         // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequePratiques
         // L'utilisateur consulte puis choisit lesquelles ajouter à sa barre latérale
         const CLE_BIBLIOTHEQUE = window.CLE_BIBLIOTHEQUE_PRATIQUES || 'bibliothequePratiques';
-        let bibliotheque = await db.get(CLE_BIBLIOTHEQUE) || [];
-
+        // #599 — la fusion passe par la file : la bibliothèque partagée est
+        // relue à l'instant de l'écriture. Hors file, un import et un ajout
+        // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;
         let nbMisesAJour = 0;
 
-        for (const config of pratiquesImportees) {
-            // Ajouter avec un nouvel ID si nécessaire
-            if (!config.id) {
-                config.id = genererIdUnique('PRAT_');
+        await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
+            const bibliotheque = lues || [];
+            nbAjoutees = 0;
+            nbMisesAJour = 0;
+
+            for (const config of pratiquesImportees) {
+                // Ajouter avec un nouvel ID si nécessaire
+                if (!config.id) {
+                    config.id = genererIdUnique('PRAT_');
+                }
+
+                const indexBiblio = bibliotheque.findIndex(c => c.id === config.id);
+                if (indexBiblio >= 0) {
+                    bibliotheque[indexBiblio] = { ...config, dateAjoutBiblio: bibliotheque[indexBiblio].dateAjoutBiblio };
+                    nbMisesAJour++;
+                } else {
+                    bibliotheque.push({ ...config, dateAjoutBiblio: new Date().toISOString() });
+                    nbAjoutees++;
+                }
             }
 
-            const indexBiblio = bibliotheque.findIndex(c => c.id === config.id);
-            if (indexBiblio >= 0) {
-                bibliotheque[indexBiblio] = { ...config, dateAjoutBiblio: bibliotheque[indexBiblio].dateAjoutBiblio };
-                nbMisesAJour++;
-            } else {
-                bibliotheque.push({ ...config, dateAjoutBiblio: new Date().toISOString() });
-                nbAjoutees++;
-            }
-        }
-
-        // Sauvegarder uniquement la bibliothèque
-        await db.set(CLE_BIBLIOTHEQUE, bibliotheque);
+            return bibliotheque;
+        }, []);
 
         // Rafraîchir le modal de bibliothèque s'il est ouvert
         if (document.getElementById('modalBibliothequePratiques')) {

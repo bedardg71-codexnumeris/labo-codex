@@ -1977,34 +1977,39 @@ window.confirmerImportGrilles = async function(donnees) {
         // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequeGrilles
         // L'utilisateur consulte puis choisit lesquelles ajouter à sa barre latérale
         const CLE_BIBLIOTHEQUE = window.CLE_BIBLIOTHEQUE_GRILLES || 'bibliothequeGrilles';
-        let bibliotheque = await db.get(CLE_BIBLIOTHEQUE) || [];
-
-        // Fusionner dans la bibliothèque partagée uniquement
+        // #599 — la fusion passe par la file : la bibliothèque partagée est
+        // relue à l'instant de l'écriture. Hors file, un import et un ajout
+        // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;
         let nbMisesAJour = 0;
-        grillesImportees.forEach(grille => {
-            // Préserver les métadonnées CC dans la grille importée
-            if (metadata && metadata.licence) {
-                grille.metadata_cc = {
-                    auteur_original: metadata.auteur_original,
-                    date_creation: metadata.date_creation,
-                    licence: metadata.licence,
-                    contributeurs: metadata.contributeurs || []
-                };
-            }
 
-            const indexBiblio = bibliotheque.findIndex(g => g.id === grille.id);
-            if (indexBiblio >= 0) {
-                bibliotheque[indexBiblio] = { ...grille, dateAjoutBiblio: bibliotheque[indexBiblio].dateAjoutBiblio };
-                nbMisesAJour++;
-            } else {
-                bibliotheque.push({ ...grille, dateAjoutBiblio: new Date().toISOString() });
-                nbAjoutees++;
-            }
-        });
+        await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
+            const bibliotheque = lues || [];
+            nbAjoutees = 0;
+            nbMisesAJour = 0;
+            grillesImportees.forEach(grille => {
+                // Préserver les métadonnées CC dans la grille importée
+                if (metadata && metadata.licence) {
+                    grille.metadata_cc = {
+                        auteur_original: metadata.auteur_original,
+                        date_creation: metadata.date_creation,
+                        licence: metadata.licence,
+                        contributeurs: metadata.contributeurs || []
+                    };
+                }
 
-        // Sauvegarder uniquement la bibliothèque
-        await db.set(CLE_BIBLIOTHEQUE, bibliotheque);
+                const indexBiblio = bibliotheque.findIndex(g => g.id === grille.id);
+                if (indexBiblio >= 0) {
+                    bibliotheque[indexBiblio] = { ...grille, dateAjoutBiblio: bibliotheque[indexBiblio].dateAjoutBiblio };
+                    nbMisesAJour++;
+                } else {
+                    bibliotheque.push({ ...grille, dateAjoutBiblio: new Date().toISOString() });
+                    nbAjoutees++;
+                }
+            });
+
+            return bibliotheque;
+        }, []);
 
         // Rafraîchir le modal de bibliothèque s'il est ouvert
         if (document.getElementById('modalBibliothequeGrilles')) {

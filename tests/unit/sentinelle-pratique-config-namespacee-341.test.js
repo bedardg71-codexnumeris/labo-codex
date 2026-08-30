@@ -19,7 +19,16 @@ function dbDepuisStore(store) {
         get: async (c) => (c in store ? store[c] : null),
         getSync: (c, d) => (c in store ? store[c] : (d !== undefined ? d : null)),
         set: async () => {},
-        setSync: () => {}
+        setSync: () => {},
+        // #599 : ce banc a un `set` MUET — il mesure les CLÉS lues, pas les
+        // écritures. Le stub `modifier` l'est donc aussi : il exécute le
+        // mutateur (pour que le code aille au bout) et n'écrit rien, exactement
+        // comme `set` ici. Un stub qui écrirait rendrait ce banc plus permissif
+        // que ce qu'il veut mesurer.
+        modifier: async (c, mutateur, defaut = null) => {
+            const lue = c in store ? store[c] : defaut;
+            return await mutateur(lue);
+        }
     };
 }
 

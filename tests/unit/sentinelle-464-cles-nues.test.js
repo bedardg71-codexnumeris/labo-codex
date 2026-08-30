@@ -27,6 +27,16 @@ const racineProjet = path.resolve(__dirname, '..', '..');
 
 function dbDepuisStore(store) {
     return {
+        // #599 : les bibliothèques partagées écrivent par la file. Le stub la
+        // reproduit fidèlement, refus compris — un mutateur qui rend `undefined`
+        // n'écrit RIEN, ce qui est le chemin du « déjà présent ».
+        modifier: async (c, mutateur, defaut = null) => {
+            const lue = c in store ? store[c] : defaut;
+            const resultat = await mutateur(lue);
+            if (resultat === undefined) return undefined;
+            store[c] = resultat;
+            return resultat;
+        },
         get: async (c) => (c in store ? store[c] : null),
         getSync: (c, d) => (c in store ? store[c] : (d !== undefined ? d : null)),
         set: async (c, v) => { store[c] = v; },

@@ -67,25 +67,36 @@ async function ajouterEchelleALaBibliotheque(echelle) {
         ? window.assainirObjet(echelle, window.SCHEMAS_IMPORT.echelle)
         : echelle;
 
-    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_ECHELLES) || [];
+    // #599 — la présence est vérifiée DANS la file. Hors file, deux ajouts
+    // concurrents du même item passaient tous les deux, et la bibliothèque
+    // partagée gardait un doublon que rien ne signalait.
+    let dejaPresente = false;
+    await db.modifier(CLE_BIBLIOTHEQUE_ECHELLES, (lues) => {
+        const bibliotheque = lues || [];
 
-    const existe = bibliotheque.some(e => e.id === echelleSafe.id);
-    if (existe) {
+        const existe = bibliotheque.some(e => e.id === echelleSafe.id);
+        if (existe) {
+            dejaPresente = true;
+            return undefined;
+        }
+
+        // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
+        const auteur = echelleSafe.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
+
+        const echelleBiblio = {
+            ...echelleSafe,
+            dansBibliotheque: true,
+            dateAjoutBiblio: new Date().toISOString(),
+            auteur: auteur
+        };
+
+        bibliotheque.push(echelleBiblio);
+        return bibliotheque;
+    }, []);
+
+    if (dejaPresente) {
         return false;
     }
-
-    // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
-    const auteur = echelleSafe.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
-
-    const echelleBiblio = {
-        ...echelleSafe,
-        dansBibliotheque: true,
-        dateAjoutBiblio: new Date().toISOString(),
-        auteur: auteur
-    };
-
-    bibliotheque.push(echelleBiblio);
-    await db.set(CLE_BIBLIOTHEQUE_ECHELLES, bibliotheque);
 
     return true;
 }
@@ -131,23 +142,28 @@ async function migrerEchellesColleguesVersBibliotheque() {
     // d'écrasement d'une version présente), tombstones respectés. Contenu
     // interne sûr (littéraux ci-dessus) — pas d'assainissement requis.
     const supprimees = (await db.get('ressourcesSupprimees')) || [];
-    const bibliotheque = (await db.get(CLE_BIBLIOTHEQUE_ECHELLES)) || [];
-    let nbVersees = 0;
-    for (const def of DEFS) {
-        if (supprimees.includes(def.id)) continue;
-        if (bibliotheque.some(e => e.id === def.id)) continue;
-        bibliotheque.push(Object.assign({}, def, {
-            auteur: 'Labo Codex',
-            verrouille: false,
-            dansBibliotheque: true,
-            dateCreation: '2026-01-03T00:00:00.000Z',
-            dateAjoutBiblio: new Date().toISOString()
-        }));
-        nbVersees++;
-    }
-    if (nbVersees > 0) {
-        await db.set(CLE_BIBLIOTHEQUE_ECHELLES, bibliotheque);
-    }
+    // #599 — le versement passe par la file : les présences sont vérifiées à
+    // l'instant de l'écriture. Vérifiées avant, un ajout concurrent d'une de ces
+    // échelles pendant le boot serait écrasé par ce versement en lot.
+    await db.modifier(CLE_BIBLIOTHEQUE_ECHELLES, (lues) => {
+        const bibliotheque = lues || [];
+        let nbVersees = 0;
+        for (const def of DEFS) {
+            if (supprimees.includes(def.id)) continue;
+            if (bibliotheque.some(e => e.id === def.id)) continue;
+            bibliotheque.push(Object.assign({}, def, {
+                auteur: 'Labo Codex',
+                verrouille: false,
+                dansBibliotheque: true,
+                dateCreation: '2026-01-03T00:00:00.000Z',
+                dateAjoutBiblio: new Date().toISOString()
+            }));
+            nbVersees++;
+        }
+        // Rien à verser : le mutateur rend `undefined`, aucune écriture.
+        if (nbVersees === 0) return undefined;
+        return bibliotheque;
+    }, []);
     db.setSync(FLAG, true);
 }
 window.migrerEchellesColleguesVersBibliotheque = migrerEchellesColleguesVersBibliotheque;
@@ -158,16 +174,24 @@ window.migrerEchellesColleguesVersBibliotheque = migrerEchellesColleguesVersBibl
  * @returns {Promise<boolean>} true si retirée, false si non trouvée
  */
 async function retirerEchelleDeLaBibliotheque(echelleId) {
-    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_ECHELLES) || [];
+    // #599 — le retrait passe par la file. Hors file, un retrait et un ajout
+    // concurrents sur la MÊME bibliothèque partagée s'écrasaient l'un l'autre :
+    // les cinq familles écrivent dans un seul magasin, pas un par famille.
+    let retiree = false;
+    await db.modifier(CLE_BIBLIOTHEQUE_ECHELLES, (lues) => {
+        const bibliotheque = lues || [];
+        const restants = bibliotheque.filter(e => e.id !== echelleId);
 
-    const indexAvant = bibliotheque.length;
-    bibliotheque = bibliotheque.filter(e => e.id !== echelleId);
+        // Rien retiré : le mutateur rend `undefined`, aucune écriture.
+        if (restants.length === bibliotheque.length) return undefined;
 
-    if (bibliotheque.length === indexAvant) {
+        retiree = true;
+        return restants;
+    }, []);
+
+    if (!retiree) {
         return false;
     }
-
-    await db.set(CLE_BIBLIOTHEQUE_ECHELLES, bibliotheque);
 
     // #327 — hook de cohérence : l'échelle retirée sort de tout dossier de
     // classement (le moteur range par identité, sans toucher l'échelle).
