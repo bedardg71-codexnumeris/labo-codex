@@ -36,25 +36,32 @@ est là pour qu'on ne le remette pas par réflexe de gabarit au cycle suivant.
 
 ## §0 · Préalable — à lire avant de toucher à quoi que ce soit
 
-⚠⚠ **NE JOUE PAS CES PORTES TANT QUE DES SESSIONS ÉCRIVENT DANS L'ARBRE.**
-Le 30 août au soir, `kuekatsheu-ff` (S5) et `kuekatsheu-00` (S6) travaillaient
-dans `js/travaux-import.js`, `js/liste-evaluations.js`, `js/evaluation-jetons.js`
-et `js/travaux-ui.js` — les quatre fichiers que ces portes éprouvent. Ton clone
-EST la source `file://` de ton application : tu verrais un état intermédiaire,
-mi-corrigé mi-en-chantier, et **un faux rouge venu de là est indétectable au
-récit** — il décrit exactement l'état d'avant le correctif, qui est précisément
-ce que la porte teste. Attends que les deux aient commité.
+✅ **C'EST OUVERT — mesuré à 19 h 55, et les deux avertissements de la version
+précédente de ce fichier sont LEVÉS.** Ils ont tenu quarante minutes ; le détail
+est gardé plus bas parce qu'il dit ce qu'il faut re-vérifier au prochain cycle,
+pas parce qu'il vaut encore.
 
-⚠⚠ **LE NUMÉRO DE VERSION NE PROUVE RIEN CE COUP-CI, ET C'EST INHABITUEL.**
-Le repère habituel — lire le numéro en bas de page — est **inopérant** ici : la
-release groupée n'est pas lancée, donc l'application affiche encore
-**1.106.11 (build 0830-1525)** alors que le code sur ton disque contient S4, S7
-et S5. Ne conclus pas « le correctif n'est pas là » parce que le numéro n'a pas
-bougé. Le repère de remplacement est dans la porte P3, rangée 3.1 : une ligne à
-coller dans la console qui doit répondre `true`.
+- `git status -- js index.html` ne rend **rien** : aucun fichier que ton
+  application charge ne porte de travail non commité.
+- `main` est à **0 commit d'avance** sur `origin/main` — tout est poussé
+  (`540531e3`).
+- **Release 1.106.12 faite, build `0830-1947`.** Elle contient S4, S5, S7, S8
+  **et T6.6** — donc le correctif dont dépend la porte P1.
+- Vitest **411 fichiers / 4334 tests, code de sortie 0**, mesuré à 19 h 53,
+  **hors `tests/unit/sentinelle-612-da-inconnu.test.js`** — ce fichier est rouge
+  **par construction** (c'est le « rouge d'abord » de la tâche T6.3, dont le
+  correctif n'est pas écrit). Il ne touche à rien de ce que tu vois :
+  `index.html` ne charge pas `tests/`.
 
-- **Rien à tirer** : les sessions ont commité dans ton clone. Pas de `git pull`.
-  Recharge l'application, c'est tout.
+⮕ **LE NUMÉRO DE VERSION EST REDEVENU TON REPÈRE, et c'est le bon.** Recharge
+l'application et lis le bas de page : tu dois voir **1.106.12 · build 0830-1947**.
+Si tu vois encore 1.106.11, c'est du cache — recharge en forçant. *(La version
+précédente de ce fichier disait que ce repère était inopérant : c'était vrai
+avant la release de 19 h 47, ce ne l'est plus.)*
+
+- **Rien à tirer, et ne tire rien** : les sessions ont commité et poussé depuis
+  ton clone. Pas de `git pull` — et surtout pas pendant qu'une suite de tests
+  tourne à côté. Recharge l'application, c'est tout.
 - **Backup Codex avant P1, P3 et P4** — les trois écrivent sur ton corpus.
 - **`allow pasting`** dans la console avant la rangée 3.1.
 - Les deux appareils quand la porte porte le tag `iPad`.
@@ -141,7 +148,7 @@ les trancher à ta place. Chacun attend une phrase écrite, pas une case cochée
 | # | Décision | Ce qui est en jeu |
 |---|---|---|
 | D1 | **Le chemin « ouvrir » d'un codex reste fail-open.** La FUSION a été passée fail-closed le 30 août (#614) : un blob sans magic bytes valides est refusé. Le chemin « ouvrir » ne l'a pas été. | Cohérence : deux portes d'entrée, deux réponses à la même question. Fermer la seconde peut refuser l'ouverture d'un vieux codex légitime. |
-| D2 | **Go pour la release groupée et le push ?** **Dix** commits locaux attendent (S5 livré : `349b780d` + `20c67e2f` ; S6/T6.6 : `1e2fc4d0` + `667f3d11`). ⚠ **Le go seul ne suffit pas : il faut un ARBRE VERT à l'instant du push**, parce que le hook `pre-push` teste l'arbre de travail, pas les commits envoyés — un seul de nous entre son rouge et son vert bloque le push de tout le monde. **Mesuré à 19 h 40, arbre propre : 411 fichiers / 4334 tests, code de sortie 0** — donc à cette minute, le push passerait. Mais S6 n'est pas finie (T6.2 à T6.5 restent) et chacun de ses break-tests remettra l'arbre au rouge quelques minutes. ⮕ Ce n'est donc pas « attendre la fin de S6 », c'est **demander à la session qui lance la release de vérifier le vert juste avant**. | Ton application affichera un nouveau numéro et 25+ jetons anti-cache changeront : tu devras recharger ta session `file://`. |
+| D2 | ~~Go pour la release groupée et le push ?~~ **TRANCHÉ ET FAIT, 30 août 19 h 47.** Tu as donné le go ; la release groupée **1.106.12** est lancée et les douze commits sont poussés (`3208ab0e..540531e3`). Elle emporte S4, S5, S7, S8 et T6.6. ⮕ **Il te reste une seule chose à faire de ce côté : recharger ta session `file://`** — 25+ jetons anti-cache ont changé. | Sans objet désormais. |
 | D3 | **Supprimer `_sauvegarde-20260830-1905/` et `ETAT-AVANT-REDEMARRAGE-2026-08-30.md` ?** Leur condition de suppression est remplie — le travail qu'ils protégeaient est commité. | Rien à perdre, mais une suppression se demande. |
 
 ---
