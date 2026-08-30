@@ -19,6 +19,18 @@
 (function() {
 'use strict';
 
+/**
+ * Les formats que l'application peut RÉELLEMENT lire dans ce contexte (#597).
+ * Ouverte par double-clic, elle ne sait pas décoder un HEIC : l'aide ne doit pas
+ * l'annoncer, sous peine de promettre un format refusé ensuite. Prudent par
+ * défaut si le décodeur n'est pas encore chargé.
+ */
+function formatsAcceptesLibelle() {
+    const heicLisible = typeof window.HeicDecodeur !== 'undefined'
+        && window.HeicDecodeur.decodagePossible();
+    return heicLisible ? 'PDF, JPEG, PNG, HEIC' : 'PDF, JPEG, PNG';
+}
+
 const AIDE_CONTEXTUELLE = {
 
     // =========================================================================
@@ -456,7 +468,7 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: 'Étapes',
                 items: [
-                    'Dépose tes fichiers (PDF, JPEG, PNG, HEIC) par glisser-déposer ou en cliquant pour parcourir',
+                    'Dépose tes fichiers (' + formatsAcceptesLibelle() + ') par glisser-déposer ou en cliquant pour parcourir',
                     'Le processus optimise les images, regroupe les pages d\'une même copie et propose une association automatique à partir du nom de fichier',
                     'Vérifie ou ajuste l\'étudiant·e et la production de chaque fichier dans l\'inspecteur central',
                     'Clique sur « Importer » : les copies sont stockées et prêtes pour « Annoter et évaluer »'

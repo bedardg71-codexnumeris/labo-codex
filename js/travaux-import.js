@@ -178,8 +178,34 @@
     }
 
     function planifierThumbnail(fichierPrepare) {
+        marquerHeicNonDecodable(fichierPrepare);
         _thumbFile.push(fichierPrepare);
         _traiterThumbQueue();
+    }
+
+    /**
+     * Marque, DÈS L'ENTRÉE DANS LA FILE, un HEIC que ce contexte ne peut pas décoder.
+     *
+     * Sans ce marquage, l'impossibilité ne se découvrait qu'au moment de la
+     * miniature : le fichier s'affichait « Dimensions inconnues », comme un
+     * fichier corrompu, et ne disait ni ce qu'il était ni quoi faire (#597).
+     * Ouverte par double-clic, l'application ne PEUT PAS décoder un HEIC — voir
+     * `HeicDecodeur.decodagePossible()`. Autant le dire tout de suite.
+     *
+     * @param {Object} fichierPrepare - Le fichier prepare (modifie sur place)
+     * @returns {boolean} true si le fichier a été marqué comme non décodable
+     */
+    function marquerHeicNonDecodable(fichierPrepare) {
+        if (!fichierPrepare || fichierPrepare.heicConverti) return false;
+        if (typeof window.HeicDecodeur === 'undefined') return false;
+        if (!window.HeicDecodeur.estHeic(fichierPrepare.fichier, fichierPrepare.nomFichier)) return false;
+        if (window.HeicDecodeur.decodagePossible()) return false;
+
+        fichierPrepare.heicEchec = true;
+        fichierPrepare.heicRaison = 'L\'application est ouverte directement depuis le disque : '
+            + 'elle ne peut pas décoder le format HEIC dans ce mode. Convertis la photo en JPEG '
+            + 'avant de l\'importer, ou demande une remise en JPEG.';
+        return true;
     }
 
     /* ===============================
@@ -560,12 +586,23 @@
      * @returns {Promise<Object>} Le fichier importe
      */
     async function importerFichier(fichierPrepare, productionId) {
-        const typeMIME = fichierPrepare.typeMIME;
-        let blob = fichierPrepare.fichier;
-
-        if (!blob) {
+        if (!fichierPrepare.fichier) {
             throw new Error('Le fichier original n\'est plus disponible (session expirée). Veuillez re-déposer le fichier.');
         }
+
+        // Filet : la file peut contenir un HEIC non converti si la génération de
+        // miniature n'a pas eu lieu (blob rattaché tardivement, échec passager).
+        // Sans ce second passage, on archiverait un fichier illisible.
+        try {
+            await convertirSiHeic(fichierPrepare);
+        } catch (e) {
+            throw new Error('Le fichier « ' + (fichierPrepare.nomFichier || 'inconnu')
+                + ' » est au format HEIC et n\'a pas pu être converti : ' + (e.message || e)
+                + '. Demande une remise en JPEG ou en PDF.');
+        }
+
+        const typeMIME = fichierPrepare.typeMIME;
+        let blob = fichierPrepare.fichier;
 
         // Validation magic bytes (A2 — audit sécurité)
         var magicValide = await validerMagicBytes(blob);
@@ -620,7 +657,12 @@
             productionId: productionId,
             coursId: coursActif ? coursActif.id : '',
             groupeCoursId: gcActif ? gcActif.id : '',
-            nomFichier: fichierPrepare.nomFichier,
+            // Un HEIC converti est archivé sous un nom en .jpg : le nom voyage
+            // jusque dans l'export, et « .HEIC » sur un contenu JPEG ferait
+            // échouer l'ouverture chez qui reçoit le fichier.
+            nomFichier: fichierPrepare.heicConverti
+                ? window.HeicDecodeur.renommerEnJpg(fichierPrepare.nomFichier)
+                : fichierPrepare.nomFichier,
             typeMIME: typeMIME,
             tailleFichier: blob.size,
             nombrePages: nombrePages,
@@ -942,11 +984,70 @@
     }
 
     /**
+     * Convertit un HEIC en JPEG, sur place, dans l'entrée de la file.
+     *
+     * Aucun navigateur sauf Safari ne décode le HEIC : sans cette conversion,
+     * le fichier traverse tout le pipeline sans miniature, sans dimensions et
+     * sans être annotable (#597). On remplace donc le blob dès l'entrée, pour
+     * que rien en aval n'ait à connaître ce format.
+     *
+     * Idempotente : rappelée sur une entrée déjà convertie, elle ne fait rien.
+     *
+     * @param {Object} fichierPrepare - Le fichier prepare (modifie sur place)
+     * @returns {Promise<boolean>} true si une conversion a eu lieu
+     */
+    async function convertirSiHeic(fichierPrepare) {
+        if (!fichierPrepare || fichierPrepare.heicConverti) return false;
+        if (!fichierPrepare.fichier) return false;
+        if (typeof window.HeicDecodeur === 'undefined') return false;
+        if (!window.HeicDecodeur.estHeic(fichierPrepare.fichier, fichierPrepare.nomFichier)) return false;
+
+        const resultat = await window.HeicDecodeur.convertirEnJpeg(fichierPrepare.fichier);
+
+        // Le HEIC d'origine n'est lisible par rien ici : le remplacer PARTOUT,
+        // y compris `fichierOriginal`, dont l'aperçu « Originaux » fait un
+        // <img> direct (travaux-ui.js) qui échouerait sur le HEIC.
+        fichierPrepare.fichier = resultat.blob;
+        fichierPrepare.fichierOriginal = resultat.blob;
+        fichierPrepare.typeMIME = 'image/jpeg';
+        fichierPrepare.tailleFichier = resultat.blob.size;
+        fichierPrepare.estImage = true;
+        fichierPrepare.estPDF = false;
+        fichierPrepare.largeurOriginale = resultat.largeur;
+        fichierPrepare.hauteurOriginale = resultat.hauteur;
+        fichierPrepare.heicConverti = true;
+
+        // `nomFichier` reste celui du dépôt : c'est la clé de correspondance de
+        // reattacherBlobs (session restaurée) et la source du parse Léa. Le
+        // renommage en .jpg se fait à l'import, sur les métadonnées.
+        return true;
+    }
+
+    /**
      * Genere la thumbnail d'un fichier en attente (async, fire-and-forget)
      * @param {Object} fichierPrepare - Le fichier prepare
      */
     async function genererThumbnailQueue(fichierPrepare) {
         try {
+            // Avant toute chose : un HEIC devient un JPEG, sinon tout ce qui
+            // suit échoue en silence.
+            // Le marquage est REFAIT ici parce que `reattacherBlobs` (session
+            // restaurée) appelle cette fonction SANS passer par
+            // `planifierThumbnail` — et `heicEchec`/`heicRaison` ne survivent pas
+            // au round-trip sessionStorage. Idempotent.
+            marquerHeicNonDecodable(fichierPrepare);
+            try {
+                await convertirSiHeic(fichierPrepare);
+            } catch (e) {
+                console.warn('[Travaux-Import] Conversion HEIC echouee (' + fichierPrepare.nomFichier + '):', e.message || e);
+                fichierPrepare.heicEchec = true;
+                // La raison voyage jusqu'a l'interface : un echec qui ne dit pas
+                // POURQUOI se lit comme un fichier corrompu (#597).
+                if (!fichierPrepare.heicRaison) {
+                    fichierPrepare.heicRaison = String(e.message || e);
+                }
+            }
+
             if (fichierPrepare.estImage) {
                 fichierPrepare.thumbnailDataUrl = await travauxStockage.genererMiniatureImage(fichierPrepare.fichier);
                 // Stocker les dimensions originales pour detection paysage
@@ -1607,6 +1708,9 @@
         // Validation
         estTypeAccepte: estTypeAccepte,
         validerMagicBytes: validerMagicBytes,
+        // Conversion HEIC (#597) — exposee pour les sentinelles
+        convertirSiHeic: convertirSiHeic,
+        marquerHeicNonDecodable: marquerHeicNonDecodable,
         // File d'attente
         ajouterFichiersEnAttente: ajouterFichiersEnAttente,
         obtenirFileDAttente: obtenirFileDAttente,
