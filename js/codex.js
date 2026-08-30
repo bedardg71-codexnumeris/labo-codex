@@ -1631,8 +1631,9 @@ function _restaurerPlanPurge() {
  * - clés : seules les clés namespacées par trimestre (`h2026_…`) sont
  *   candidates. Les clés globales (trimestres, bibliothèques, préférences,
  *   `_codex_*`, espace démo `demo_…`) ne sont JAMAIS touchées.
- * - blobs : seuls les blobs du store fichiers non référencés par les
- *   `fichiersTravaux` importés (tous trimestres du codex confondus).
+ * - blobs : seuls les blobs du store fichiers non référencés par le codex
+ *   importé — travaux actifs, corbeille ET modélisation, tous trimestres
+ *   confondus (#614 S10 : les deux dernières familles manquaient).
  *
  * @param {Object} donnees - dataset du codex qui vient d'être écrit
  * @param {string[]} clesStockage - toutes les clés présentes en stockage (db.keys())
@@ -1653,9 +1654,20 @@ function _planifierPurgeEspace(donnees, clesStockage, blobIdsStockage) {
             !clesNouvelEspace[c];
     });
 
+    // #614 (S10) — tout ce qui REFERENCE un blob du store `fichiers`, pas
+    // seulement les travaux actifs. La corbeille conserve le blob intact et
+    // reste restaurable (`deplacerEnCorbeille`, travaux-stockage.js:965) ; la
+    // modelisation stocke ses fichiers sous le meme id que ses metadonnees
+    // (modelisation.js:276 et :290). Les omettre revenait a recenser des
+    // blobs VIVANTS en « orphelins » : un enseignant qui suivait la console
+    // apres ouverture d'un codex detruisait sa corbeille restaurable.
+    var CLES_REFERENCANT_BLOBS = ['fichiersTravaux', 'corbeilleFichiers', 'fichiersModelisation'];
     var idsReferences = {};
     Object.keys(donnees || {}).forEach(function(c) {
-        if (c.indexOf('fichiersTravaux') === -1) return;
+        var referenceDesBlobs = CLES_REFERENCANT_BLOBS.some(function(motif) {
+            return c.indexOf(motif) !== -1;
+        });
+        if (!referenceDesBlobs) return;
         var liste = donnees[c];
         if (!Array.isArray(liste)) return;
         liste.forEach(function(f) { if (f && f.id) idsReferences[f.id] = true; });
@@ -2312,6 +2324,29 @@ async function _fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, 
             }
 
             var blobData = await entree.async('blob');
+
+            // #614 (S9) — meme regle que le chemin « ouvrir » (:698-706) : un
+            // codex recu d'un collegue peut contenir un blob deguise en PDF,
+            // que travaux-visionneuse servirait ensuite. La fusion ecrit dans
+            // le MEME store `fichiers` : elle valide avant de stocker.
+            //
+            // FAIL-CLOSED, la ou le chemin « ouvrir » est fail-open : un
+            // module de validation absent ne vaut pas « validation reussie ».
+            // Le message nomme la cause, pour ne pas faire passer un
+            // chargement incomplet pour un fichier corrompu.
+            var validerOctets = window.travauxImport && window.travauxImport.validerMagicBytes;
+            if (typeof validerOctets !== 'function') {
+                erreurs.push(chemin + ' : validation impossible (module travauxImport non charge)');
+                ignores++;
+                continue;
+            }
+            if (!(await window.travauxImport.validerMagicBytes(blobData))) {
+                console.warn('📂 Fusion : blob refuse (magic bytes invalides) pour ' + idFichier);
+                erreurs.push(chemin + ' : contenu refuse (pas une image ni un PDF)');
+                ignores++;
+                continue;
+            }
+
             var meta = indexFT[idFichier];
             var etudiantDA = meta ? meta.etudiantDA : '';
             var productionId = meta ? meta.productionId : '';
@@ -3723,6 +3758,9 @@ window.Codex = {
     _planifierPurgeEspace: _planifierPurgeEspace,
     _executerPurgeEspace: _executerPurgeEspace,
     _restaurerPlanPurge: _restaurerPlanPurge,
+    // #614 — la fusion est une voie d'entrée de blobs vers le store `fichiers`
+    // au même titre que `chargerCodex` : elle doit être testable directement.
+    _fusionnerTravaux: _fusionnerTravaux,
 
     // #336 Lot D (phase preview) : exécution manuelle du dernier plan de purge
     purgerEspacePrecedent: purgerEspacePrecedent,

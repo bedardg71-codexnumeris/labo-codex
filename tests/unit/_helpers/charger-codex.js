@@ -13,13 +13,19 @@ const racineProjet = path.resolve(__dirname, '..', '..', '..');
 // `db` avec les méthodes minimales.
 // Extrait de codex.test.js le 11 juin 2026 (#334 session A) pour être
 // partagé avec sentinelle-prevol-stockage-2026-06.test.js.
-export function chargerCodex(dbOverride = null) {
+// #614 : `_fusionnerTravaux` et le chemin « ouvrir » consomment deux globaux
+// que la sandbox ne fournissait pas — `travauxStockage` (bare) et
+// `window.travauxImport`. Ils sont injectables par `globaux`, et valent
+// `undefined` quand on ne les passe pas : `typeof travauxStockage` répond
+// alors toujours 'undefined', donc les appels existants ne changent pas.
+export function chargerCodex(dbOverride = null, globaux = {}) {
     const code = readFileSync(path.join(racineProjet, 'js/codex.js'), 'utf8');
 
     const fauxWindow = {
         addEventListener: () => {},
         removeEventListener: () => {}
     };
+    if (globaux.travauxImport) fauxWindow.travauxImport = globaux.travauxImport;
     const fauxDocument = {
         readyState: 'loading',          // ← empêche l'auto-init synchrone
         addEventListener: () => {},
@@ -57,9 +63,11 @@ export function chargerCodex(dbOverride = null) {
 
     const fn = new Function(
         'window', 'document', 'console', 'localStorage', 'sessionStorage', 'db',
+        'travauxStockage',
         '"use strict";\n' + code
     );
-    fn(fauxWindow, fauxDocument, console, fauxStorage(), fauxStorage(), db);
+    fn(fauxWindow, fauxDocument, console, fauxStorage(), fauxStorage(), db,
+       globaux.travauxStockage);
 
     return fauxWindow;
 }
