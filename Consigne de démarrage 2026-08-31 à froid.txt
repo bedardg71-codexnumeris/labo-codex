@@ -1,0 +1,109 @@
+Consigne de démarrage à froid — rédigée le 30 août 2026 en fin de session.
+
+--
+
+Ouvre le dépôt Monitorage_v6. Rituel d'abord : délègue l'audit de début de session
+au subagent `audit-debut-session`, puis lis la section « POUR LA SESSION QUI PREND
+LE RELAIS — 30 AOÛT (SOIR) » en tête de RELAIS.md. On est à la 1.106.3
+(build 0830-0815), mais la 1.106.4 est DUE : trois commits de code sont partis
+après la release, et rien n'est poussé.
+
+⚠ SI TU N'OUVRES PAS LE DÉPÔT COMME DOSSIER DE TRAVAIL, le subagent
+`audit-debut-session` n'existera PAS et l'échec est silencieux : hors du dépôt,
+les agents et les skills de `.claude/` ne sont pas chargés. La parade, mesurée le
+30 août : lire `.claude/agents/audit-debut-session.md`, puis passer ses
+instructions à un agent générique en lui donnant le chemin du skill
+`.claude/skills/debut-de-session-labo-codex/` à lire à la main.
+
+PRIORITÉ DATÉE — À TRAITER AVANT TOUT AUTRE CHANTIER
+#427 + #508, échéance le 1er septembre, décision déjà prise (option A, je tiens la
+date). Un artefact de travail a été préparé pour cette séance : il porte la
+séquence complète, mes relevés à faire, les trois gestes de code et les deux
+textes de rechange. Ouvre-le en premier —
+https://claude.ai/code/artifact/fa3cb0e1-3dfc-40b1-85cf-cbfcd91dcb4a
+
+⚠ CE QUI A CHANGÉ LE 30 AOÛT, ET QUI N'EST PAS DANS LES VIEILLES NOTES : le
+1er septembre demande TROIS gestes de code, pas un. La fiche, l'item #508 et
+RELAIS disaient tous trois « rien à retirer manuellement » — c'est vrai de
+l'écran et FAUX du dépôt.
+  1. réécrire le paragraphe d'accueil au présent (js/accueil.js:84) — ou le
+     RETIRER si le refermage n'a pas eu lieu (la branche « report » n'est pas une
+     réécriture) ;
+  2. retirer l'entrée `avis-identification-2026-09-01` de js/transitions.js : sa
+     condition rend false dès minuit, mais son texte annonce encore au futur ;
+  3. retirer la spec tests/integration/avis-identification-bandeau-508.spec.js,
+     qui ROUGIRA TOUTE SEULE le 1er septembre, en pleine release.
+Les deux textes sont écrits d'avance au §8 (pas au §7) de
+`plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md` ; le détail des
+trois gestes est au §8 bis. Le bandeau, lui, s'éteint bien seul.
+
+ENSUITE — propose-moi un choix fermé entre :
+(a) #522 lot 2 — grilles (19) + échelles (14) + niveauxEchelle (6), deux fichiers.
+    Patron connu (celui du lot 1 et du lot 4), aucune décision à prendre, gros
+    volume mécanique. L'audit est fait, ne le refais pas :
+    Rapports/AUDIT-522-courses-lecture-ecriture-2026-08-30.md
+(b) #522 lot 3 — productions (12) + cartouches (9).
+(c) #595 — les 78 variables CSS fantômes, par familles de nom. Chantier de rendu :
+    Playwright est la seule suite qui voit.
+(d) #519 — la passe design ; C2 est débloqué depuis #516, mais tu auras un
+    arbitrage à me demander sur C5. Note que sa rangée de boutons a été DÉPLACÉE
+    le 30 août (écran Cartouche) sans être redessinée : C5 est plus visible qu'avant.
+
+DÛ AVANT TOUT BUMP, ET PAR TOI
+Playwright n'a pas tourné depuis deux chantiers d'interface : #522 lot 4 (cinq
+flux de duplication) et #503 étendu aux cartouches (des boutons déplacés). Vitest
+tourne dans node et ne voit AUCUN rendu. Demande-moi de fermer GitHub Desktop et
+lance la suite avant de proposer la 1.106.4.
+
+DEUX ITEMS À NE PAS OUVRIR SANS MESURER D'ABORD
+#596 : l'énoncé dit « 6 clés, 5 fichiers » ; la mesure du 30 août donne 11 fichiers,
+13 clés littérales et au moins 3 calculées. Tranche le périmètre avant de
+commencer — namespacer à moitié casse les lectures. Au passage :
+`travaux-mode-courant` est écrite et JAMAIS lue (à retirer, pas à brancher).
+#520 : l'énoncé situe le bouton de sauvegarderNiveaux() en js/echelles.js:3589 —
+c'est FAUX, cette ligne est un commentaire. Les vrais sites : le bouton en
+index.html:5247, le bloc caché en index.html:5141-5294, la fonction en
+js/echelles.js:1495. L'item annonce aussi `nomEchelleTemplate ×3` là où il y en a 2,
+et `btnDupliquerEchelle` n'est pas dupliqué du tout. Recale la liste avant l'ablation.
+
+ÉTAT DU DÉPÔT À LA FERMETURE
+· Trois commits de doc et de report le matin, deux commits de code l'après-midi.
+  Rien n'est poussé : origin/main est resté à 6c13b50f.
+· La branche `origin/claude/relais-md-continuation-b7i2jq` portait une SECONDE
+  release 1.106.3. Son seul livrable (#555·2 et sa sentinelle) a été reporté sur
+  main ; ses deux commits de version sont écartés. La branche distante existe
+  toujours — sa suppression est mon geste, pas le tien.
+· Une SECONDE SESSION travaillait dans le même arbre : #597 (décodeur HEIC) et
+  #598 (l'aperçu du pipeline) sont à elle, non commités, en attente de ma
+  validation. Ne commite jamais BACKLOG.md ni index.html par fichier entier :
+  stage par hunk. Prochain ID libre : #599.
+
+PIÈGES DÉJÀ PAYÉS — ne les réapprends pas
+· getSync ne protège d'aucune course : dans db.set, l'écriture IndexedDB est
+  attendue AVANT le rafraîchissement de localStorage.
+· Un banc Vitest ne voit pas une course d'écriture : Node n'a pas d'IndexedDB.
+  Force db.useIndexedDB avec une fausse connexion — MAIS CE N'EST PAS ASSEZ. La
+  fausse base doit aussi CLONER à l'écriture et à la lecture, comme le fait
+  IndexedDB. Sans clone, deux lecteurs concurrents partagent le même tableau,
+  poussent dedans tous les deux, et le break-test refuse de rougir sur du code
+  cassé. Mesuré le 30 août. Patron corrigé dans
+  sentinelle-522-lot4-bibliotheques-serialisees.
+· Un vert ne vaut rien sans un ROUGE OBTENU. Muter les deux côtés, restaurer par
+  COPIE (jamais `git checkout <fichier>`, qui efface aussi le travail non commité),
+  et vérifier la restauration au md5.
+· Vitest se lance depuis tests/. Ferme GitHub Desktop avant Playwright.
+· Ordre de release : release.mjs → changelog → commit → sentinelle anti-cache.
+  Touche au changelog AVANT de lancer le script, sinon son jeton est oublié.
+· Le jeton `?v=` porte le jour du BUILD, pas la lettre suivante : le hook conseille
+  la lettre et induit en erreur. La lettre n'avance que si le fichier est déjà au
+  jour du build.
+· Un fichier chargé par `importScripts` depuis un worker (libs/libheif-bundle.js)
+  n'apparaît nulle part dans index.html : ni release.mjs, ni la sentinelle
+  anti-cache, ni le hook pré-commit ne le voient. Trou de filet connu, à fermer
+  quand #597 sera commité.
+
+À INSCRIRE, TROUVÉ LE 30 AOÛT ET NON CORRIGÉ
+Trois identifiants morts dans js/cartouches.js : `btnExporterCartouche`,
+`btnImporterCartouche`, `btnImporterCartoucheTxt` — cités, jamais définis dans
+index.html, gardés par `if (btn)` donc inoffensifs. Latents et neutres : on ne les
+corrige pas pendant un autre chantier, mais ça vaut un item.
