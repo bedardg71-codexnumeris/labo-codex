@@ -61,6 +61,11 @@
  * @returns {Promise<Array>} - Tableau des cartouches (toujours un tableau)
  */
 async function obtenirCartouchesGrille(grilleId) {
+    // ⚠ La LECTURE reste hors file, délibérément : cette fonction est appelée
+    // vingt-quatre fois, et sérialiser des lectures derrière la file d'écriture
+    // les ralentirait sans rien protéger. Seule la RÉPARATION entre dans la
+    // file — et elle y revérifie la forme, car elle a pu être corrigée
+    // entre-temps par un appel concurrent.
     let cartouches = await db.get(`cartouches_${grilleId}`) || [];
 
     // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
@@ -68,7 +73,10 @@ async function obtenirCartouchesGrille(grilleId) {
     if (cartouches && !Array.isArray(cartouches)) {
         cartouches = [cartouches];
         // Optionnel: Corriger le stockage pour les prochaines fois
-        await db.set(`cartouches_${grilleId}`, cartouches);
+        await db.modifier(`cartouches_${grilleId}`, (lues) => {
+            if (Array.isArray(lues)) return undefined;   // déjà réparé
+            return lues ? [lues] : [];
+        }, []);
     }
 
     return cartouches;
@@ -155,9 +163,11 @@ async function assurerCartoucheGenerique() {
     if (!grilleGenerique) return;
 
     // Vérifier si la cartouche générique existe déjà ou a été supprimée volontairement
-    const cartouches = await db.get('cartouches_GRILLE_GENERIQUE') || [];
-    const existe = cartouches.some(c => c.id === 'CART_GENERIQUE');
-    if (existe || window.estRessourceSupprimee('CART_GENERIQUE')) return;
+    // La suppression volontaire ne dépend pas de la collection : ce test reste
+    // ici. La PRÉSENCE, elle, se vérifie DANS la file — vérifiée avant, deux
+    // appels concurrents au démarrage sèment deux fois (défaut jumeau de
+    // `assurerGrilleGenerique`, corrigé au lot 2c).
+    if (window.estRessourceSupprimee('CART_GENERIQUE')) return;
 
     const cartoucheGenerique = {
         id: 'CART_GENERIQUE',
@@ -200,8 +210,12 @@ async function assurerCartoucheGenerique() {
         dansBibliotheque: true
     };
 
-    cartouches.push(cartoucheGenerique);
-    await db.set('cartouches_GRILLE_GENERIQUE', cartouches);
+    await db.modifier('cartouches_GRILLE_GENERIQUE', (lues) => {
+        const cartouches = lues || [];
+        if (cartouches.some(c => c.id === 'CART_GENERIQUE')) return undefined;
+        cartouches.push(cartoucheGenerique);
+        return cartouches;
+    }, []);
 }
 
 /**
@@ -939,7 +953,11 @@ async function sauvegarderCartouche() {
     }
 
     const grilleId = cartoucheActuel.grilleId;
-    let cartouches = await db.get(`cartouches_${grilleId}`) || [];
+
+    // ⚠ Cette lecture sert à POSER LA QUESTION du doublon, pas de base à
+    // l'écriture : `verifierEtGererDoublon` peut attendre l'utilisateur.
+    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+    let ecraserLeDoublon = false;
 
     // ✅ AJOUT (6 jan 2026) : Vérification des doublons
     const idActuel = cartoucheActuel?.id || null;
@@ -961,8 +979,8 @@ async function sauvegarderCartouche() {
         }
 
         if (resultat && resultat.action === 'ecraser') {
-            // Supprimer la cartouche existante avec le même nom
-            cartouches = cartouches.filter(c => c.nom !== nom);
+            // Le retrait de l'homonyme est REPORTÉ dans la file, avec l'écriture.
+            ecraserLeDoublon = true;
         }
     }
 
@@ -999,20 +1017,29 @@ async function sauvegarderCartouche() {
     // 🆕 Beta 99.05 : Mise à jour dateModification systématique
     cartoucheActuel.dateModification = new Date().toISOString();
 
-    // Vérifier si la cartouche existe déjà
-    const index = cartouches.findIndex(c => c.id === cartoucheActuel.id);
-    if (index >= 0) {
-        // Mise à jour
-        if (typeof ajouterContributeurSiNecessaire === 'function') {
-            cartoucheActuel = ajouterContributeurSiNecessaire(cartoucheActuel);
+    // Sauvegarder. La collection est relue DANS la file : celle d'avant la
+    // question du doublon ne vaut plus rien.
+    await db.modifier(`cartouches_${grilleId}`, (lues) => {
+        let liste = lues || [];
+
+        // L'homonyme n'est retiré qu'ici.
+        if (ecraserLeDoublon) {
+            liste = liste.filter(c => c.nom !== nom);
         }
-        cartouches[index] = cartoucheActuel;
-    } else {
-        cartouches.push(cartoucheActuel);
-    }
-    
-    // Sauvegarder
-    await db.set(`cartouches_${grilleId}`, cartouches);
+
+        // Vérifier si la cartouche existe déjà
+        const index = liste.findIndex(c => c.id === cartoucheActuel.id);
+        if (index >= 0) {
+            // Mise à jour
+            if (typeof ajouterContributeurSiNecessaire === 'function') {
+                cartoucheActuel = ajouterContributeurSiNecessaire(cartoucheActuel);
+            }
+            liste[index] = cartoucheActuel;
+        } else {
+            liste.push(cartoucheActuel);
+        }
+        return liste;
+    }, []);
 
     // NOUVELLE INTERFACE (Beta 80.2): Rafraîchir la banque
     await afficherBanqueCartouches();
@@ -1545,16 +1572,22 @@ async function afficherToutesLesGrillesEtCartouches() {
  * - Change l'opacité des boutons
  */
 async function basculerVerrouillageCartouche(cartoucheId, grilleId) {
-    let cartouches = await db.get(`cartouches_${grilleId}`) || [];
-    const index = cartouches.findIndex(c => c.id === cartoucheId);
+    let statutApres = null;
+    await db.modifier(`cartouches_${grilleId}`, (lues) => {
+        const cartouches = lues || [];
+        const index = cartouches.findIndex(c => c.id === cartoucheId);
+        if (index === -1) return undefined;
 
-    if (index !== -1) {
         // Basculer directement l'état (pas de checkbox, juste un span cliquable)
         cartouches[index].verrouille = !cartouches[index].verrouille;
-        await db.set(`cartouches_${grilleId}`, cartouches);
+        statutApres = cartouches[index].verrouille;
+        return cartouches;
+    }, []);
 
-        // Afficher une notification spécifique
-        const statut = cartouches[index].verrouille ? 'verrouillée' : 'déverrouillée';
+    if (statutApres !== null) {
+        // Afficher une notification spécifique. Le statut vient du MUTATEUR :
+        // c'est l'état réellement écrit, pas celui d'un instantané d'avant.
+        const statut = statutApres ? 'verrouillée' : 'déverrouillée';
 
         // DÉSACTIVÉ Beta 80.5+ : ancienne interface remplacée par sidebar
         // afficherListeCartouches(cartouches, grilleId);
@@ -1594,39 +1627,45 @@ async function basculerVerrouillageCartouche(cartoucheId, grilleId) {
  * - Chargement automatique de la copie
  */
 async function dupliquerCartouche(cartoucheId, grilleId) {
-    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
-    const cartoucheOriginal = cartouches.find(c => c.id === cartoucheId);
-    
-    if (cartoucheOriginal) {
-        const nouveauCartouche = {
-            ...cartoucheOriginal,
-            id: genererIdUnique('CART_'),
-            nom: nommerCopie(cartoucheOriginal.nom, cartouches),
-            auteur: BibliothequeUI.obtenirAuteurActif(),
-            isDemo: false,
-            inspireDe: BibliothequeUI.forgerInspireDe(cartoucheOriginal),
-            verrouille: false,
-            dansBibliotheque: true,  // ✅ AJOUT (8 décembre 2025) : Copie visible par défaut
-            commentaires: { ...cartoucheOriginal.commentaires }
-        };
+    let copieCreee = null;
+        await db.modifier(`cartouches_${grilleId}`, (lues) => {
+        const cartouches = lues || [];
+        const cartoucheOriginal = cartouches.find(c => c.id === cartoucheId);
 
-        // ✅ D4 (arbitrage du 24 août) — les métadonnées de partage de la source
-        // n'ont plus cours : la copie est un original de l'utilisateur. Avant,
-        // cette voie les conservait, contrairement à sa voisine de bibliothèque.
-        delete nouveauCartouche.metadata_cc;
-        delete nouveauCartouche.auteurOriginal;
+        if (cartoucheOriginal) {
+            const nouveauCartouche = {
+                ...cartoucheOriginal,
+                id: genererIdUnique('CART_'),
+                nom: nommerCopie(cartoucheOriginal.nom, cartouches),
+                auteur: BibliothequeUI.obtenirAuteurActif(),
+                isDemo: false,
+                inspireDe: BibliothequeUI.forgerInspireDe(cartoucheOriginal),
+                verrouille: false,
+                dansBibliotheque: true,  // ✅ AJOUT (8 décembre 2025) : Copie visible par défaut
+                commentaires: { ...cartoucheOriginal.commentaires }
+            };
 
-        cartouches.push(nouveauCartouche);
-        await db.set(`cartouches_${grilleId}`, cartouches); // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
+            // ✅ D4 (arbitrage du 24 août) — les métadonnées de partage de la source
+            // n'ont plus cours : la copie est un original de l'utilisateur. Avant,
+            // cette voie les conservait, contrairement à sa voisine de bibliothèque.
+            delete nouveauCartouche.metadata_cc;
+            delete nouveauCartouche.auteurOriginal;
 
+            cartouches.push(nouveauCartouche); // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
+            copieCreee = nouveauCartouche;
+            return cartouches;
+        }
+        return undefined;
+    }, []);
+
+    if (copieCreee) {
         // NOUVELLE INTERFACE (Beta 80.5+): Charger directement la copie
-        await chargerCartouchePourModif(nouveauCartouche.id, grilleId);
+        await chargerCartouchePourModif(copieCreee.id, grilleId);
 
         // Rafraîchir la banque sidebar (Beta 80.5+)
         if (typeof afficherBanqueCartouches === 'function') {
             await afficherBanqueCartouches();
         }
-
     }
 }
 
@@ -1778,8 +1817,11 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
         if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(cartoucheId)) {
             window.marquerRessourceSupprimee(cartoucheId);
         }
-        const nouveauxCartouches = cartouches.filter(c => c.id !== cartoucheId);
-        await db.set(`cartouches_${grilleId}`, nouveauxCartouches);
+        // La collection est relue DANS la file : celle d'avant la confirmation
+        // ne vaut plus rien.
+        await db.modifier(`cartouches_${grilleId}`, (lues) => {
+            return (lues || []).filter(c => c.id !== cartoucheId);
+        }, []);
 
         // NOUVELLE INTERFACE (Beta 80.2): Rafraîchir la banque
         await afficherBanqueCartouches();
@@ -2929,16 +2971,6 @@ function importerDansCartoucheActive(event) {
                 return;
             }
 
-            // Récupérer les cartouches
-            const cartouches = await db.get(`cartouches_${grilleId}`) || [];
-            const index = cartouches.findIndex(c => c.id === cartoucheId);
-
-            if (index === -1) {
-                alert('Cartouche introuvable.');
-                event.target.value = '';
-                return;
-            }
-
             // Préserver l'ID original et le grilleId, puis remplacer les données
             const cartoucheMiseAJour = {
                 ...cartoucheImportee,
@@ -2951,11 +2983,26 @@ function importerDansCartoucheActive(event) {
                 cartoucheMiseAJour.metadata_cc = metadata;
             }
 
-            // Remplacer dans le tableau
-            cartouches[index] = cartoucheMiseAJour;
+            // ⚠ La collection est relue DANS la file : celle d'avant la
+            // confirmation ne vaut plus rien. security-ok: `cartoucheImportee`
+            // est déjà passée par la validation d'import en amont.
+            let remplacee = false;
+            await db.modifier(`cartouches_${grilleId}`, (lues) => {
+                const cartouches = lues || [];
+                const index = cartouches.findIndex(c => c.id === cartoucheId);
+                if (index === -1) return undefined;
 
-            // Sauvegarder
-            await db.set(`cartouches_${grilleId}`, cartouches);
+                // Remplacer dans le tableau
+                cartouches[index] = cartoucheMiseAJour;
+                remplacee = true;
+                return cartouches;
+            }, []);
+
+            if (!remplacee) {
+                alert('Cartouche introuvable.');
+                event.target.value = '';
+                return;
+            }
 
             // Recharger la cartouche dans le formulaire
             await chargerCartouchePourModif(cartoucheId, grilleId);
@@ -3915,10 +3962,13 @@ function importerCartoucheJSON(event) {
             cartouche.id = genererIdUnique('CART_');
             cartouche.grilleId = grilleId;
 
-            // Sauvegarder
-            const cartouchesExistantes = await db.get(`cartouches_${grilleId}`) || [];
-            cartouchesExistantes.push(cartouche);
-            await db.set(`cartouches_${grilleId}`, cartouchesExistantes);
+            // Sauvegarder. security-ok: `cartouche` vient du fichier importé,
+            // déjà validé en amont, et reçoit ici un identifiant neuf.
+            await db.modifier(`cartouches_${grilleId}`, (lues) => {
+                const cartouchesExistantes = lues || [];
+                cartouchesExistantes.push(cartouche);
+                return cartouchesExistantes;
+            }, []);
 
             // Rafraîchir l'affichage
             await afficherBanqueCartouches();
@@ -4565,8 +4615,17 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
         }
         const grilleIdLocal = grilleLocale ? grilleLocale.id : grilleId;
 
-        let cartouches = await db.get(`cartouches_${grilleIdLocal}`) || [];
-        let cartouche = cartouches.find(c => c.id === id);
+        // ⚠ La garde d'identité de #476 doit voir la collection telle qu'elle est
+        // AU MOMENT DE L'ÉCRITURE : lue hors file, elle laisserait passer un
+        // exemplaire ajouté entre-temps. Les messages sortent APRÈS le mutateur.
+        let cartouche = null;
+        let nomEnConflit = null;
+        let sourceIntrouvable = false;
+        let grilleManquante = false;
+
+        await db.modifier(`cartouches_${grilleIdLocal}`, async (lues) => {
+        let cartouches = lues || [];
+        cartouche = cartouches.find(c => c.id === id);
         if (!cartouche) {
             cartouche = cartouches.find(c => c.idOriginal === id);
         }
@@ -4576,8 +4635,8 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
             const cartoucheSource = toutesCartouches.find(c => c.id === id);
             if (cartoucheSource) {
                 if (!grilleLocale) {
-                    alert('Veuillez d\'abord importer la grille associée depuis la bibliothèque de grilles.');
-                    return;
+                    grilleManquante = true;
+                    return undefined;
                 }
                 // Générer un nouvel ID pour éviter les conflits (pattern Productions)
                 const nouvelId = genererIdUnique('CART_');
@@ -4591,20 +4650,35 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
                 // #476 — garde d'identité au point d'écriture (cf. grilles.js).
                 const gardeCartouche = ajouterAvecGardeIdentite(cartouches, cartouche);
                 if (!gardeCartouche.ajoute) {
-                    const nomEnPlace = (gardeCartouche.conflit && gardeCartouche.conflit.nom) || 'Une cartouche';
-                    alert(`« ${nomEnPlace} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
-                    return;
+                    nomEnConflit = (gardeCartouche.conflit && gardeCartouche.conflit.nom) || 'Une cartouche';
+                    return undefined;
                 }
                 cartouches = gardeCartouche.liste;
             } else {
-                alert('Cartouche introuvable');
-                return;
+                sourceIntrouvable = true;
+                return undefined;
             }
         } else {
             cartouche.dansBibliotheque = true;
         }
 
-        await db.set(`cartouches_${grilleIdLocal}`, cartouches);
+        return cartouches;
+        }, []);
+
+        // Les messages vivent HORS du mutateur : la file ne porte que l'écriture.
+        if (grilleManquante) {
+            alert('Veuillez d\'abord importer la grille associée depuis la bibliothèque de grilles.');
+            return;
+        }
+        if (nomEnConflit) {
+            alert(`« ${nomEnConflit} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
+            return;
+        }
+        if (sourceIntrouvable) {
+            alert('Cartouche introuvable');
+            return;
+        }
+        if (!cartouche) return;
 
         // ⚠ Relecture-vérification : `db.set` refuse en silence (cf. grilles.js).
         const verifCartouche = await db.get(`cartouches_${grilleIdLocal}`) || [];
@@ -4627,13 +4701,18 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
 }
 
 async function retirerCartoucheDeBibliotheque(id, grilleId) {
-    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
-    const cartouche = cartouches.find(c => c.id === id);
+    let trouvee = false;
+    await db.modifier(`cartouches_${grilleId}`, (lues) => {
+        const cartouches = lues || [];
+        const cartouche = cartouches.find(c => c.id === id);
+        if (!cartouche) return undefined;
 
-    if (cartouche) {
         cartouche.dansBibliotheque = false;
-        await db.set(`cartouches_${grilleId}`, cartouches);
+        trouvee = true;
+        return cartouches;
+    }, []);
 
+    if (trouvee) {
         // Rafraîchir le modal et la sidebar
         fermerModalBibliothequeCartouches();
         await afficherBanqueCartouches();
@@ -4647,6 +4726,8 @@ async function retirerCartoucheDeBibliotheque(id, grilleId) {
  * @param {string} grilleId - ID de la grille associée
  */
 async function supprimerCartoucheDefinitivement(id, grilleId) {
+    // ⚠ Lecture hors file, pour NOMMER la cartouche dans la question. La
+    // confirmation ne doit pas tenir la file ouverte.
     const cartouches = await db.get(`cartouches_${grilleId}`) || [];
     const cartouche = cartouches.find(c => c.id === id);
 
@@ -4662,9 +4743,10 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
         window.marquerRessourceSupprimee(id);
     }
 
-    // Suppression définitive du store local
-    const nouveauxCartouches = cartouches.filter(c => c.id !== id);
-    await db.set(`cartouches_${grilleId}`, nouveauxCartouches);
+    // Suppression définitive du store local, DANS la file.
+    await db.modifier(`cartouches_${grilleId}`, (lues) => {
+        return (lues || []).filter(c => c.id !== id);
+    }, []);
 
     // Suppression du store partagé
     if (typeof retirerCartoucheDeLaBibliotheque === 'function') {
@@ -4763,14 +4845,15 @@ async function ajouterCartouchesABibliotheque() {
 
         // Cas 1: Cartouche locale
         if (grilleId && grilleId !== 'undefined') {
-            const cartouches = await db.get(`cartouches_${grilleId}`) || [];
-            const cartouche = cartouches.find(c => c.id === id);
+            const marquee = await db.modifier(`cartouches_${grilleId}`, (lues) => {
+                const cartouches = lues || [];
+                const cartouche = cartouches.find(c => c.id === id);
+                if (!cartouche) return undefined;
 
-            if (cartouche) {
                 cartouche.dansBibliotheque = true;
-                await db.set(`cartouches_${grilleId}`, cartouches);
-                nbAjoutees++;
-            }
+                return cartouches;
+            }, []);
+            if (marquee) nbAjoutees++;
         }
         // Cas 2: Cartouche de la bibliothèque partagée - copier dans localStorage
         else {
@@ -4797,15 +4880,18 @@ async function ajouterCartouchesABibliotheque() {
                     return grilles;
                 }, []);
 
-                // Ajouter la cartouche
-                const cartouchesGrille = await db.get(`cartouches_${cartouche.grilleId}`) || [];
-                const nouvelleCartouche = {
-                    ...cartouche,
-                    id: genererIdUnique('CART_'),
-                    dansBibliotheque: true
-                };
-                cartouchesGrille.push(nouvelleCartouche);
-                await db.set(`cartouches_${cartouche.grilleId}`, cartouchesGrille);
+                // Ajouter la cartouche. security-ok: copie d'une cartouche déjà
+                // validée par le chemin d'import de la bibliothèque, avec un
+                // identifiant neuf.
+                await db.modifier(`cartouches_${cartouche.grilleId}`, (lues) => {
+                    const cartouchesGrille = lues || [];
+                    cartouchesGrille.push({
+                        ...cartouche,
+                        id: genererIdUnique('CART_'),
+                        dansBibliotheque: true
+                    });
+                    return cartouchesGrille;
+                }, []);
                 nbAjoutees++;
             }
         }
