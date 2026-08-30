@@ -81,6 +81,18 @@
        `js/liste-evaluations.js` modifiés par elle). Vérifié avant de
        conclure : ce fichier de test ne charge pas `travaux-import.js`, ses
        rouges ne viennent pas d'ici.
+       ✅ **RÉSERVE LEVÉE à 19 h 40**, et je l'ai remesurée plutôt que de la
+       croire sur parole : T6.6 livrée (`1e2fc4d0`), suite COMPLÈTE relancée
+       sur `667f3d11`, arbre propre — **411 fichiers / 4334 tests, code de
+       sortie 0**. Ses 4 rouges venaient d'une fuite du HARNAIS, pas du code :
+       le dernier cas de la sentinelle #607 montait les constantes partagées
+       `EVAL_ORIGINALE` / `EVAL_REPRISE` SANS COPIE, et `retirerJetonReprise`
+       retire les marqueurs d'archivage EN PLACE — le `describe` suivant
+       héritait d'une originale déjà « restaurée ». ⮕ **À retenir pour nos
+       sentinelles** : un corpus partagé entre `describe` et muté en place
+       fabrique un faux vert à retardement aussi souvent qu'un faux rouge.
+       Ma sentinelle #611 n'y est pas exposée — vérifié : `travaux-import.js`
+       ne mute aucune fiche élève, il n'en garde que la référence.
 
      ▣ CE QUI RESTE. Pas de `release.mjs`, pas de push — décision de
        Grégoire : UNE SEULE release groupée pour S4+S7+S8+S5, sur son go.
