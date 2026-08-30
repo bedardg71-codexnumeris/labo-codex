@@ -11680,7 +11680,8 @@
                             <p><strong>1. Déposer les fichiers :</strong></p>
                             <ul>
                                 <li><strong>Zone de dépôt (glisser-déposer)</strong> : Glisse tes fichiers directement dans la zone prévue</li>
-                                <li><strong>Formats acceptés</strong> : PDF, JPEG, PNG, HEIC, WebP</li>
+                                <li><strong>Formats acceptés</strong> : PDF, JPEG, PNG, WebP</li>
+                                <li><strong>Photos d'iPhone (HEIC)</strong> : à convertir en JPEG avant l'import. Ouverte directement depuis le disque, l'application ne peut pas décoder ce format — elle te le dira plutôt que de laisser passer une page vide.</li>
                                 <li>Tu peux aussi cliquer sur la zone pour ouvrir le sélecteur de fichiers</li>
                             </ul>
 
@@ -14535,7 +14536,7 @@
     <script src="js/presences-apercu.js?v=2025121017"></script>
     <script src="js/presences-rapport.js?v=20260827a"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
     <script src="js/boite-outils.js?v=20260810a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
-    <script src="js/modelisation.js?v=2026022201"></script> <!-- Modélisation : annotation en projection -->
+    <script src="js/modelisation.js?v=20260830a"></script> <!-- Modélisation : annotation en projection -->
     <script src="js/rythme.js?v=20260806a"></script> <!-- Semaine dimanche→samedi (format direction des études, 6 août) -->
 
     <!-- Module Bilan réflexif -->
@@ -14570,7 +14571,8 @@
     <script src="js/codex-data-ui.js?v=2026050603"></script> <!-- #251 : UI Réglages > Données carte 3 -->
     <script src="js/labo-codex-data.js?v=2026050603"></script> <!-- #252 : loader codex data dans le Labo -->
     <script src="js/travaux-preparation.js?v=20260829a"></script> <!-- #559 : les options d'import ne visent plus un fichier étranger -->
-    <script src="js/travaux-import.js?v=20260828a"></script> <!-- Beta 99.31 b0502-0907 : flag livrableAdditionnel pour skip détection doublon (palier 3) ; #558 la file survit au rechargement -->
+    <script src="js/heic-decodeur.js?v=20260830c"></script> <!-- #597 : conversion HEIC vers JPEG a l'entree de la file ; le bundle libheif (1,2 Mo) est charge par le worker, seulement quand un HEIC se presente -->
+    <script src="js/travaux-import.js?v=20260830b"></script> <!-- Beta 99.31 b0502-0907 : flag livrableAdditionnel pour skip détection doublon (palier 3) ; #558 la file survit au rechargement -->
     <script src="js/travaux-visionneuse.js?v=2026050102"></script> <!-- Beta 99.30 b0501-1830 : cleanup PDF.js + ouvrirPDF try/catch + zoom margin-aware + split nav buttons -->
     <script src="js/travaux-outils.js?v=20260829d"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 menu ⋮ dans modales Personnaliser tampons + codes erreurs -->
     <script src="js/tampons-bibliotheque.js?v=20260511c"></script> <!-- Beta 99.41 : #264 progression sur exporterBibliotheque (sealing) -->
@@ -14582,7 +14584,7 @@
     <script src="js/travaux-resolution.js?v=20260702a"></script> <!-- #145 (2 juil.) : refus de la résolution par DA seul (PDF étranger) -->
     <script src="js/travaux-doublons-ui.js?v=2026050225"></script> <!-- Beta 99.31 b0502-0940 : db.setSync (écriture localStorage immédiate) — bandeau se met à jour après validations -->
     <script src="js/migration-diagnostic.js?v=2026062701"></script>
-    <script src="js/travaux-ui.js?v=20260829g"></script> <!-- #313 (2 juil.) : le sélecteur global n'écrase plus un choix par-fichier ; #558 choix DPI mémorisé + remplacement non destructif -->
+    <script src="js/travaux-ui.js?v=20260830c"></script> <!-- #313 (2 juil.) : le sélecteur global n'écrase plus un choix par-fichier ; #558 choix DPI mémorisé + remplacement non destructif -->
     <script src="js/actions-rlo.js?v=20260808b"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
@@ -14650,8 +14652,8 @@
     <script src="js/accompagnement.js?v=20260821a"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20260830b"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
-    <script src="js/accompagnement-contenu-popup.js?v=20260829a"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
+    <script src="js/accompagnement-contenu-hover.js?v=20260830c"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-popup.js?v=20260830a"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20260809a"></script>
     <script src="js/guides-pedagogiques.js?v=20260629a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
     <script src="js/comparateur-pratiques.js?v=20260821a"></script> <!-- Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->

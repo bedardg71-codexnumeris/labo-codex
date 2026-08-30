@@ -814,6 +814,45 @@
        =============================== */
 
     /**
+     * Liste les formats que l'application peut RÉELLEMENT lire ici.
+     *
+     * Le HEIC n'est annoncé que si ce contexte sait le décoder. Ouverte par
+     * double-clic, l'application ne le peut pas (#597) : l'annoncer quand même
+     * promettait un format qu'elle refusait ensuite en silence.
+     *
+     * @returns {string} La liste des formats, pour un texte d'interface
+     */
+    function formatsAcceptesLibelle() {
+        const heicLisible = typeof window.HeicDecodeur !== 'undefined'
+            && window.HeicDecodeur.decodagePossible();
+        return heicLisible ? 'PDF, JPEG, PNG, HEIC' : 'PDF, JPEG, PNG';
+    }
+
+    /**
+     * Dit, à l'endroit où l'utilisateur clique, si le dossier choisi sera
+     * mémorisé d'une session à l'autre.
+     *
+     * L'ancien texte disait « Recommandé sur Mac » : doublement inexact. Ce
+     * n'est pas la machine qui décide mais le NAVIGATEUR (`showDirectoryPicker`
+     * n'existe ni dans Safari ni dans Firefox — sur une tablette, aucun
+     * navigateur ne l'a, et ce bloc ne s'affiche même pas). Et surtout, il
+     * passait sous silence la raison pour laquelle le stockage « ne tient pas »
+     * au rechargement : la persistance du dossier est DÉSACTIVÉE PAR DÉFAUT,
+     * par choix de sécurité (Défense D, MODELE-MENACES §D-03). Sans cette
+     * phrase, le réglage se cherche dans Réglages sans savoir qu'il existe.
+     *
+     * @returns {string} Le rappel à afficher sous le bouton
+     */
+    function messageRappelDossierFSAPI() {
+        const memorise = window.db && typeof window.db.getFSAPIPersistance === 'function'
+            && window.db.getFSAPIPersistance();
+        return memorise
+            ? 'Le dossier choisi est mémorisé d\'une session à l\'autre.'
+            : 'L\'accès au dossier sera redemandé à chaque démarrage. Pour le mémoriser : '
+              + 'Réglages > Préférences > Sécurité.';
+    }
+
+    /**
      * Affiche la sous-section Import en mode pipeline vertical
      */
     function afficherImport() {
@@ -881,7 +920,7 @@
                     ${fsapiActif
                         ? '<span class="travaux-fsapi-statut actif">Stockage sur disque actif</span>'
                         : `<button class="btn btn-secondaire" data-action="travauxUI.configurerFSAPI">Configurer le stockage sur disque</button>
-                           <span class="texte-muted">Recommandé sur Mac</span>`
+                           <span class="texte-muted">${messageRappelDossierFSAPI()}</span>`
                     }
                 </div>` : ''}
 
@@ -902,7 +941,7 @@
                             <div class="travaux-drop-zone-contenu">
                                 <div class="travaux-drop-zone-icone"><img src="icons/icon-plus.svg" alt="" class="drop-zone-icon"></div>
                                 <p>Glisse tes fichiers ici</p>
-                                <p class="texte-muted">PDF, JPEG, PNG, HEIC — ou clique pour parcourir</p>
+                                <p class="texte-muted">${formatsAcceptesLibelle()} — ou clique pour parcourir</p>
                             </div>
                         </div>
                     </div>
@@ -1335,6 +1374,89 @@
         return Math.round(w * h * 0.3);
     }
 
+    /* ===============================
+       TRAITEMENT AUTOMATIQUE DES IMAGES (#598)
+       =============================== */
+
+    // Réglage global de la balance des blancs. Constante POUR L'INSTANT : les
+    // cases de l'écran Optimisation ont été retirées en Beta 99.30 (1er mai
+    // 2026) et le volet B de #598 les fera revenir sous forme de réglage
+    // persistant. Ce qui compte aujourd'hui, c'est qu'un SEUL endroit décide.
+    const BALANCE_GLOBALE_ACTIVE = true;
+
+    /**
+     * Dit si un fichier reçoit la balance des blancs.
+     *
+     * SSOT de la décision (#598 volet A). Avant, trois sites décidaient chacun
+     * de leur côté : l'import lisait `optBalance = true` en dur, tandis que les
+     * deux aperçus lisaient `pipeline-opt-balance`, un élément retiré de l'UI et
+     * recréé nulle part. `?.checked` rendait donc `undefined` — les aperçus
+     * n'appliquaient JAMAIS la balance, alors que l'import l'appliquait
+     * TOUJOURS. Ce que l'utilisateur validait à l'écran n'était pas ce qui était
+     * archivé, et aucun réglage n'aurait pu corriger ça : la condition était
+     * constante.
+     *
+     * @param {Object} f - Le fichier de la file d'attente
+     * @returns {boolean} true si la balance doit être appliquée
+     */
+    function balanceActiveePour(f) {
+        // `skipBalance` est une EXCEPTION par fichier, posée dans « Modifier ».
+        // Elle ne peut qu'enlever le traitement, jamais l'ajouter.
+        return BALANCE_GLOBALE_ACTIVE && !(f && f.skipBalance);
+    }
+
+    /**
+     * Applique la balance des blancs sur un canvas d'aperçu, sur place.
+     *
+     * Même algorithme que `travauxPreparation.autoBalanceBlancs`, qui traite les
+     * fichiers à l'import : moyenne RVB des 5 % de pixels les plus clairs, gain
+     * par canal plafonné entre 0,5 et 2,0. L'aperçu opère sur le canvas déjà
+     * réduit plutôt que sur le blob d'origine — 44 vignettes en pleine
+     * résolution seraient prohibitives — mais le résultat visuel est le même.
+     *
+     * @param {CanvasRenderingContext2D} ctx - Le contexte du canvas d'aperçu
+     * @param {number} cw - Largeur du canvas
+     * @param {number} ch - Hauteur du canvas
+     */
+    function appliquerBalanceBlancsCanvas(ctx, cw, ch) {
+        const imgData = ctx.getImageData(0, 0, cw, ch);
+        const d = imgData.data;
+        const totalPixels = d.length / 4;
+
+        const luminosites = new Float32Array(totalPixels);
+        for (let i = 0; i < totalPixels; i++) {
+            const idx = i * 4;
+            luminosites[i] = 0.299 * d[idx] + 0.587 * d[idx + 1] + 0.114 * d[idx + 2];
+        }
+
+        const sorted = Float32Array.from(luminosites).sort();
+        const seuil = sorted[Math.floor(totalPixels * 0.95)];
+
+        let sumR = 0, sumG = 0, sumB = 0, count = 0;
+        for (let i = 0; i < totalPixels; i++) {
+            if (luminosites[i] >= seuil) {
+                const idx = i * 4;
+                sumR += d[idx];
+                sumG += d[idx + 1];
+                sumB += d[idx + 2];
+                count++;
+            }
+        }
+
+        if (count === 0) return;
+
+        const rFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(sumR / count, 1)));
+        const gFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(sumG / count, 1)));
+        const bFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(sumB / count, 1)));
+
+        for (let i = 0; i < d.length; i += 4) {
+            d[i]     = Math.min(255, Math.round(d[i]     * rFactor));
+            d[i + 1] = Math.min(255, Math.round(d[i + 1] * gFactor));
+            d[i + 2] = Math.min(255, Math.round(d[i + 2] * bFactor));
+        }
+        ctx.putImageData(imgData, 0, 0);
+    }
+
     /**
      * Genere un thumbnail de preview avec effets de traitement appliques
      * @param {Object} f - Fichier prepare
@@ -1355,7 +1477,7 @@
         }
 
         // Cache : réutiliser la preview déjà générée (évite de re-décoder le blob)
-        const optBalance = document.getElementById('pipeline-opt-balance')?.checked;
+        const optBalance = balanceActiveePour(f);
         const cacheKey = optBalance ? 'bal' : 'raw';
         // Cache double : garder les deux versions (bal/raw) pour éviter de recalculer au toggle
         if (!f._previewCache) f._previewCache = {};
@@ -1398,44 +1520,9 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, cw, ch);
 
-            // Appliquer balance des blancs si checkbox cochee
+            // #598 volet A : l'apercu montre ce qui sera reellement archive.
             if (optBalance) {
-                const imgData = ctx.getImageData(0, 0, cw, ch);
-                const d = imgData.data;
-                const totalPixels = d.length / 4;
-
-                const luminosites = new Float32Array(totalPixels);
-                for (let i = 0; i < totalPixels; i++) {
-                    const idx = i * 4;
-                    luminosites[i] = 0.299 * d[idx] + 0.587 * d[idx + 1] + 0.114 * d[idx + 2];
-                }
-
-                const sorted = Float32Array.from(luminosites).sort();
-                const seuil = sorted[Math.floor(totalPixels * 0.95)];
-
-                let sumR = 0, sumG = 0, sumB = 0, count = 0;
-                for (let i = 0; i < totalPixels; i++) {
-                    if (luminosites[i] >= seuil) {
-                        const idx = i * 4;
-                        sumR += d[idx];
-                        sumG += d[idx + 1];
-                        sumB += d[idx + 2];
-                        count++;
-                    }
-                }
-
-                if (count > 0) {
-                    const rFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(sumR / count, 1)));
-                    const gFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(sumG / count, 1)));
-                    const bFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(sumB / count, 1)));
-
-                    for (let i = 0; i < d.length; i += 4) {
-                        d[i]     = Math.min(255, Math.round(d[i]     * rFactor));
-                        d[i + 1] = Math.min(255, Math.round(d[i + 1] * gFactor));
-                        d[i + 2] = Math.min(255, Math.round(d[i + 2] * bFactor));
-                    }
-                    ctx.putImageData(imgData, 0, 0);
-                }
+                appliquerBalanceBlancsCanvas(ctx, cw, ch);
             }
 
             const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
@@ -1651,9 +1738,23 @@
             const nomFichierAff = typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier;
             const nomLeaAff = typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.parseLea.nom, f.etudiantDA) : f.parseLea.nom;
             const nomCourt = (nomLeaAff || nomFichierAff).substring(0, 18);
-            const resolution = (f.largeurOriginale && f.hauteurOriginale)
-                ? `${f.largeurOriginale} x ${f.hauteurOriginale}`
-                : 'PDF';
+            // #597 : ce libellé disait « PDF » dès que les dimensions manquaient.
+            // Un HEIC non décodé s'affichait donc comme un PDF — c'est ce qui a
+            // fait chercher la panne du côté de la prévisualisation PDF, qui
+            // fonctionnait. Le libellé dit maintenant ce qu'il sait.
+            // #597 : un fichier dont le décodage a échoué le DIT, plutôt que de
+            // laisser une vignette vide sans explication. « Dimensions inconnues »
+            // remplace l'ancien repli « PDF », qui affichait un HEIC comme un PDF.
+            let resolution;
+            if (f.largeurOriginale && f.hauteurOriginale) {
+                resolution = `${f.largeurOriginale} x ${f.hauteurOriginale}`;
+            } else if (f.estPDF) {
+                resolution = 'PDF';
+            } else if (f.heicEchec) {
+                resolution = 'HEIC non décodé';
+            } else {
+                resolution = 'Dimensions inconnues';
+            }
             const poids = travauxStockage.formaterTaille(f.tailleFichier);
             const selectionne = (index === fichierSelectionneIndex);
 
@@ -1680,7 +1781,7 @@
                 </div>
                 <div class="pipeline-fichier-meta-col">
                     <span class="pipeline-meta-nom" title="${echapperHtml(nomFichierAff)}">${echapperHtml(nomCourt)}</span>
-                    <span class="pipeline-meta-resolution">${resolution}</span>
+                    <span class="pipeline-meta-resolution"${f.heicRaison ? ` title="${echapperHtml(f.heicRaison)}"` : ''}>${resolution}</span>
                     <span class="pipeline-meta-taille">${poids}</span>
                 </div>
                 <button class="pipeline-btn-retirer" data-stop data-action="travauxUI.retirerFichierPipeline" data-param="${index}" title="Retirer ce fichier"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
@@ -2145,45 +2246,9 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, cw, ch);
 
-            // Appliquer balance des blancs si checkbox cochee
-            const optBalance = document.getElementById('pipeline-opt-balance')?.checked;
-            if (optBalance) {
-                const imgData = ctx.getImageData(0, 0, cw, ch);
-                const d = imgData.data;
-                const totalPixels = d.length / 4;
-
-                const luminosites = new Float32Array(totalPixels);
-                for (let i = 0; i < totalPixels; i++) {
-                    const idx = i * 4;
-                    luminosites[i] = 0.299 * d[idx] + 0.587 * d[idx + 1] + 0.114 * d[idx + 2];
-                }
-
-                const sorted = Float32Array.from(luminosites).sort();
-                const seuil = sorted[Math.floor(totalPixels * 0.95)];
-
-                let sumR = 0, sumG = 0, sumB = 0, count = 0;
-                for (let i = 0; i < totalPixels; i++) {
-                    if (luminosites[i] >= seuil) {
-                        const idx = i * 4;
-                        sumR += d[idx];
-                        sumG += d[idx + 1];
-                        sumB += d[idx + 2];
-                        count++;
-                    }
-                }
-
-                if (count > 0) {
-                    const rFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(sumR / count, 1)));
-                    const gFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(sumG / count, 1)));
-                    const bFactor = Math.max(0.5, Math.min(2.0, 255 / Math.max(sumB / count, 1)));
-
-                    for (let i = 0; i < d.length; i += 4) {
-                        d[i]     = Math.min(255, Math.round(d[i]     * rFactor));
-                        d[i + 1] = Math.min(255, Math.round(d[i + 1] * gFactor));
-                        d[i + 2] = Math.min(255, Math.round(d[i + 2] * bFactor));
-                    }
-                    ctx.putImageData(imgData, 0, 0);
-                }
+            // #598 volet A : l'apercu montre ce qui sera reellement archive.
+            if (balanceActiveePour(f)) {
+                appliquerBalanceBlancsCanvas(ctx, cw, ch);
             }
 
             const imgResult = document.createElement('img');
@@ -3749,7 +3814,6 @@
         // Beta 99.30 : balance des blancs et assemblage automatique appliqués
         // par défaut (les checkbox UI ont été retirées pour simplifier le pipeline).
         // Documenté via le tooltip de l'étape Optimisation et la section Aide.
-        const optBalance = true;
         const optAssemblage = true;
 
         // === Traitement batch (images a-optimiser) ===
@@ -3766,7 +3830,7 @@
                     let blob = f.fichier;
 
                     // Balance des blancs auto (globale + par fichier : activee sauf si skipBalance)
-                    if (optBalance && !f.skipBalance && typeof travauxPreparation.autoBalanceBlancs === 'function') {
+                    if (balanceActiveePour(f) && typeof travauxPreparation.autoBalanceBlancs === 'function') {
                         try {
                             blob = await travauxPreparation.autoBalanceBlancs(blob);
                         } catch (e) {

@@ -245,6 +245,10 @@
     function ouvrirFichierLocal() {
         var input = document.createElement('input');
         input.type = 'file';
+        // #597 : ce sélecteur annonce le .heic, que ce contexte ne sait pas
+        // toujours décoder (aucun décodage possible quand l'application est
+        // ouverte par double-clic — voir HeicDecodeur.decodagePossible). Le
+        // pipeline d'import le DIT désormais ; ce chemin-ci ne le dit pas encore.
         input.accept = '.pdf,.jpg,.jpeg,.png,.heic';
         input.style.display = 'none';
 

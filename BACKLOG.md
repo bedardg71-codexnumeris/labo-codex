@@ -2726,6 +2726,175 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   effectivement rendu selon l'onglet actif. ⮕ **Manipulation requise** : ouvrir Évaluations, passer
   chaque sous-onglet, relever l'arbre de titres rendu.
 
+- [ ] **#598 — La balance des blancs est appliquée sans être ni réglable ni visible.**
+  Créé le 30 août 2026. **Symptôme vécu par Grégoire**, pendant l'import du Portrait de lecteur :
+  « des modifications par défaut étaient appliquées aux photos (contraste, balance des blancs) mais
+  je ne vois pas de confirmation ou de réglage à cet effet dans l'écran d'optimisation ».
+
+  **Trois faits mesurés.**
+  1. La balance des blancs EST toujours appliquée, **en dur** : `const optBalance = true;`
+     (`travaux-ui.js:3756`). Le commentaire dit que les cases ont été retirées en Beta 99.30
+     « pour simplifier le pipeline ». Seul « Rés. max. » subsiste comme réglage global.
+  2. **L'aperçu ne montre JAMAIS le traitement.** `genererPreviewThumbnail` (l. 1358) et
+     `genererPreviewCentre` (l. 2153) lisent `document.getElementById('pipeline-opt-balance')`.
+     Grep sur tout le dépôt : **deux lectures, aucune écriture** — l'élément n'est créé nulle part,
+     `?.checked` rend `undefined`. Ce que l'utilisateur regarde avant « Importer » n'est donc pas
+     ce qui sera archivé — et **structurellement** : aucun réglage ne peut changer un aperçu dont
+     la condition est constante.
+     ⮕ **Motif : « clé lue, jamais écrite ».** Une lecture sur une clé que personne n'écrit rend
+     toujours la même chose, donc toute garde ou tout affichage qui en dépend est constant sans que
+     rien ne le signale — ni erreur, ni test rouge. Le geste de diagnostic qui tranche est de
+     **grepper l'ÉCRITURE avant la lecture**, jamais l'inverse : ici, deux `getElementById` se
+     lisent comme un mécanisme vivant, et c'est l'absence de tout site de création qui révèle le
+     défaut. Symétrique du même motif, déjà relevé dans #596 : `travaux-mode-courant` est ÉCRITE et
+     jamais lue — celle-là est à retirer, pas à brancher.
+  3. Le **contraste n'est PAS ajusté automatiquement**. `autoBalanceBlancs`
+     (`travaux-preparation.js:2800`) échantillonne les 5 % de pixels les plus clairs et applique un
+     gain par canal RVB plafonné entre 0,5 et 2,0 : c'est une correction de dominante colorée, pas
+     un étirement de contraste. Contraste et luminosité restent des curseurs manuels de « Modifier ».
+     ⮕ `js/etats-vides.js:121` promet pourtant « optimisées automatiquement (contraste, luminosité,
+     etc.) ». Les deux autres textes (aide contextuelle, section Aide d'`index.html`) sont exacts.
+
+  **Décision de Grégoire (30 août 2026) — LES DEUX VOLETS**, l'un ne remplace pas l'autre :
+  · **A. L'aperçu doit refléter le traitement.** Les vignettes de la colonne « Aperçu » et le grand
+    aperçu central montrent l'image telle qu'elle sera archivée, balance appliquée.
+  · **B. Le réglage global doit revenir.** Une commande dans l'écran Optimisation, à côté de
+    « Rés. max. », qui active ou désactive la balance des blancs pour tout le lot.
+
+  **Pièges relevés avant d'implémenter.**
+  ⚠ Le réglage doit être un SSOT persistant, PAS un état de DOM. C'est exactement le défaut B2 de
+  #558 : « Rés. max. » ne vivait que dans le select, re-généré à chaque rendu, et tout choix autre
+  que le défaut était écrasé en silence. Reproduire le patron déjà corrigé — variable de module
+  `dpiPipelineChoisi` (l. 33), lecture au démarrage, écriture dans `mettreAJourPreviewsPipeline`
+  (l. 1459-1469).
+  ⚠ **Ne pas créer une septième clé `sessionStorage` non namespacée.** `travaux-pipeline-dpi` et
+  `travaux-pipeline-production` font partie des six clés de **#596**. Le nouveau réglage passe par
+  `cle()` dès le départ, ou #596 hérite d'une septième.
+  ⚠ **Sémantique globale/par fichier à trancher.** Le test actuel est `optBalance && !f.skipBalance`
+  (l. 3773) : `skipBalance` (case « Ne pas appliquer la balance des blancs à ce document », dans
+  « Modifier ») est une EXCEPTION au global. Si le global passe à OFF, un fichier sans `skipBalance`
+  ne doit pas être traité quand même — et l'exception par fichier doit rester lisible dans l'UI.
+  ⚠ Le cache d'aperçu prévoit déjà le cas : `cacheKey = optBalance ? 'bal' : 'raw'` (l. 1359). Il
+  devra être invalidé au changement de réglage, sinon l'aperçu montre l'état précédent.
+  ⚠ Coût : appliquer la balance sur 44 vignettes n'est pas gratuit. Mesurer avant de l'appliquer à
+  chaque rendu ; le cache existe pour ça.
+  ⮕ `etats-vides.js:121` promet un ajustement de contraste que le code ne fait pas. **NON corrigé
+  volontairement** : si le volet B ajoute un vrai ajustement, ce texte devient exact au lieu d'être
+  à réécrire. La décision de Grégoire le tranchera.
+
+  ✅ **VOLET A LIVRÉ le 30 août 2026.** SSOT de la décision dans `travaux-ui.js` :
+  `BALANCE_GLOBALE_ACTIVE` + `balanceActiveePour(f)`, consommé par les DEUX aperçus et par
+  l'import — les trois sites qui décidaient chacun de leur côté. Le calcul, jusque-là copié à
+  l'identique dans les deux aperçus, est factorisé en `appliquerBalanceBlancsCanvas`.
+  **Mesuré au navigateur** sur une copie réelle (Boucher, 4284x5712), en extrayant le VRAI texte
+  des deux fonctions du dépôt :
+  · écart moyen aperçu vs fichier importé **AVANT : 43,68** par canal sur 255
+  · **APRÈS : 0,95** — facteurs RVB des deux chemins concordants à 0,006 près
+  · témoin posé (vignette sans balance) : c'est lui qui donne le 43,68, donc la mesure discrimine
+  **Sentinelle** `sentinelle-598-apercu-reflete-traitement` (6 cas) ; **break-test** 4 mutations,
+  4 rouges obtenus, restauration vérifiée. Vitest **4113/4113** (395 fichiers).
+
+  ⏳ **VOLET B EN ATTENTE — décision de Grégoire (30 août)** : il tranche APRÈS avoir vu ses
+  44 images avec la balance enfin visible dans l'aperçu. Trois issues possibles, à documenter le
+  moment venu : (a) restaurer le seul réglage de balance ; (b) ajouter un vrai rehaussement
+  automatique luminosité/contraste, qui n'a **jamais existé** dans le dépôt (vérifié sur tout
+  l'historique : cases `pipeline-opt-*` ayant existé, fonctions `auto*`, commits touchant
+  `ctx.filter`, et les dépôts v5/v3) ; (c) statu quo documenté.
+  ⚠ **Ce qui a réellement existé et disparu**, pour que personne ne recherche autre chose : trois
+  CASES À COCHER (Balance des blancs, Détection doublons, Assemblage automatique), retirées le
+  1er mai 2026 par le commit `78dd6137` (Beta 99.30). Luminosité et contraste n'ont jamais été
+  appliqués automatiquement — mais l'effet de la balance (les 5 % les plus clairs poussés vers 255)
+  éclaircit et creuse le contraste, ce qui explique qu'on puisse s'en souvenir ainsi. Le texte de
+  `etats-vides.js` l'affirme d'ailleurs depuis le 19 avril 2026, alors que le code du même commit
+  ne faisait déjà que la balance.
+
+- [ ] **#597 — Les remises HEIC ne s'affichent nulle part : aucun décodeur dans le dépôt.**
+  Créé le 30 août 2026, pendant l'import réel du Portrait de lecteur (601-101, 49 fichiers).
+  **Mesuré** : deux remises `.HEIC` (Breton, 4032 x 3024, brand `ftypheic`, magic bytes valides)
+  entrent dans la file, passent `validerMagicBytes`, et ressortent sans miniature — `thumb: false`,
+  dimensions `0 x 0`. Les 5 PDF et les 42 JPEG de la même file sont intacts (`thumb: true`).
+  **Cause** : `heic` n'apparaît dans le dépôt QUE dans les listes de formats acceptés
+  (`TYPES_ACCEPTES`, `EXTENSIONS_ACCEPTEES`, `input.accept`, textes d'aide) — jamais dans un
+  traitement. Tout le pipeline image repose sur `new Image()`, donc sur le décodage natif du
+  navigateur : Safari décode le HEIC, Chrome non. `compresserImageSiNecessaire` retombe sur
+  `resolve(blob)` en silence (`travaux-import.js`, branche `img.onerror`), l'original est conservé
+  tel quel, et l'échec ne remonte nulle part.
+  ⚠ **La conséquence dépasse l'aperçu** : sans décodage, ces fichiers ne sont pas annotables non
+  plus — la visionneuse bute sur le même `new Image()`. Le format est annoncé comme accepté dans
+  quatre textes d'interface (dont `index.html` l. 11663 « Formats acceptés : PDF, JPEG, PNG, HEIC,
+  WebP ») : l'app promet un format qu'elle ne sait pas lire hors de Safari.
+  **Décision de Grégoire (30 août)** : décodeur embarqué, chargé paresseusement à la première
+  rencontre d'un HEIC, conversion en JPEG dès l'entrée dans la file — un seul point d'insertion,
+  tout le pipeline aval inchangé.
+
+  ✅ **LIVRÉ le 30 août 2026.** `libs/libheif-bundle.js` (WASM embarqué en base64, hors ligne),
+  `js/heic-worker.js`, `js/heic-decodeur.js`, câblage dans `travaux-import.js` (conversion dans
+  `genererThumbnailQueue`, filet dans `importerFichier`), libellé corrigé dans `travaux-ui.js`.
+  **Sentinelle** `sentinelle-597-heic-decode-avant-pipeline` (10 cas) ; **break-test** 4 mutations,
+  4 rouges obtenus, restauration vérifiée. Vitest **4105/4105** (394 fichiers).
+  **Mesuré au navigateur** (Chrome 151, modules du dépôt, CSP réelle) : les deux remises de Breton
+  converties en 3024x4032, 2,3 s et 3,0 s, affichées dans un `<img>`.
+  ⚠ **Choix de bibliothèque — ce qui est mesuré, et ce qui ne l'est pas.** heic2any (essayé
+  d'abord) réclame `document` puis `window` **tel qu'il se charge par `importScripts`** : deux
+  échecs successifs. Ce n'est pas une impossibilité démontrée en absolu — un stub de DOM plus
+  complet pourrait aboutir — mais c'est de la dette contre les internes d'une lib minifiée. Ce qui
+  a réellement tranché est l'écart de vitesse, lui pleinement mesuré : **2,5 s contre 8,5-11 s**
+  sur le même fichier.
+  ⛔ **LIMITE STRUCTURELLE DÉCOUVERTE AU TERRAIN (30 août, sur signalement de Grégoire).**
+  Ouverte par double-clic sur `index.html`, la page tourne en `file://` avec l'origine `null` :
+  Chrome **refuse de construire le Worker** — `SecurityError: Failed to construct 'Worker'`,
+  message relevé sur sa machine. Le décodage HEIC est donc indisponible dans ce mode.
+  ⮕ **Un repli sur le thread principal a été écrit, mesuré, puis RETIRÉ le jour même** : il ne peut
+  pas fonctionner sous la CSP du dépôt. Les DEUX builds de libheif évaluent une chaîne de
+  caractères — le WASM (`CompileError` sur `WebAssembly.Module()`) comme l'asm.js (`EvalError`), ce
+  dernier pourtant sans une seule occurrence de `WebAssembly`. Ajouter `'wasm-unsafe-eval'` à
+  `script-src` **ne suffit pas** : mesuré, l'`EvalError` subsiste. Seul `'unsafe-eval'` les
+  débloquerait, ce que les règles non négociables interdisent (« zéro `eval()` », CLAUDE.md).
+  **La CSP n'a pas été touchée.** Du code qui ne peut jamais réussir est du code mort : il est parti.
+  ⮕ **Ce qui reste** : le worker, qui fonctionne partout où l'application est SERVIE (en ligne, ou
+  par un serveur local). En `file://`, l'échec est désormais EXPLICITE — message nommant la cause,
+  et libellé « HEIC non décodé » dans la colonne de gauche au lieu d'une vignette muette.
+  ⚠ **Portée qui dépasse le HEIC** : `file://` est un mode où AUCUN Web Worker n'est disponible. Ça
+  vaut pour toute fonctionnalité future qui en voudrait un, pas seulement pour ce décodeur.
+
+  ⚠ **Une mesure intermédiaire s'est révélée fausse et a été retirée** : « l'interface gèle 11 s »
+  venait d'un compteur `setInterval` dans un onglet piloté, donc en arrière-plan, où Chrome ramène
+  les timers à ~1 Hz. Témoin passé ensuite, page sans aucun travail lourd : 6 ticks sur 119
+  attendus, faux « blocage » d'exactement 1000 ms. Le choix du worker reste fondé — le décodage
+  sort du thread principal par construction — mais le gel n'a jamais été chronométré.
+  ⮕ **Second défaut, corrigé dans la même passe** : `travaux-ui.js` affiche le libellé **« PDF »**
+  dès que les dimensions manquent (`f.largeurOriginale && f.hauteurOriginale ? … : 'PDF'`).
+  Un HEIC non décodé s'affiche donc comme un PDF. Ce libellé a fait porter le premier diagnostic
+  sur la prévisualisation PDF — qui, elle, fonctionne.
+
+  ✅ **SECONDE PASSE — 30 août 2026, sur signalement de Grégoire (capture de l'étape 2).**
+  La passe précédente se croyait complète : elle avait mesuré, documenté la limite `file://`, et
+  annoncé un « échec EXPLICITE ». Sur le terrain, les deux Breton s'affichaient « **Dimensions
+  inconnues** » — pas « HEIC non décodé » — et **les quatre textes d'interface annonçaient toujours
+  le format**. L'application continuait donc de promettre ce qu'elle refusait.
+  **Mesuré à neuf** (Chrome de Grégoire, banc isolé hors dépôt, `IMG_2179.HEIC` réel, 2 909 950 o) :
+  worker classique + app **servie** + CSP du projet → **3024 x 4032** ; même worker en `file://` →
+  `SecurityError`, origine `null` ; thread principal + `'wasm-unsafe-eval'` → `EvalError` ;
+  blob worker + `importScripts` d'un `file://` → « failed to load » ; blob worker + **bundle
+  embarqué dans le blob** → `EvalError`. **Fait neuf et réutilisable** : un `blob:` worker HÉRITE de
+  la CSP du document, contrairement à un worker chargé par URL same-origin — c'est ce qui ferme la
+  dernière voie, et non le `file://` lui-même.
+  **Décision de Grégoire** : refuser proprement maintenant ; le lanceur local (servir l'application)
+  reste une décision à prendre à froid, elle emporte l'usage iPad et la clé Codex.
+  **Livré** : `decodagePossible()` dans le décodeur (exposé) ; `marquerHeicNonDecodable()` appelé
+  par `planifierThumbnail`, donc **dès l'entrée dans la file** et non au moment de la miniature ;
+  `heicRaison` porté jusqu'à l'interface (infobulle échappée sur la résolution) ; libellé des
+  formats rendu dynamique dans `travaux-ui.js` et `accompagnement-contenu-popup.js`
+  (`formatsAcceptesLibelle()`) ; texte d'aide d'`index.html` réécrit ; deux commentaires d'en-tête
+  qui décrivaient un repli RETIRÉ corrigés (`heic-worker.js`, `heic-decodeur.js`).
+  **Sentinelle** `sentinelle-597-heic-dit-son-impossibilite` (5 cas, dont **un comportemental** : le
+  décodeur est exécuté avec un faux `window` pour vérifier `decodagePossible()` en `file:` et en
+  `http:`). **Break-test : 6 mutations, 6 rouges obtenus**, restauration par copie vérifiée.
+  ⮕ **Constat de passage, non traité** : `js/modelisation.js` annonce lui aussi `.heic` dans son
+  sélecteur, sans le dire. Commentaire laissé sur place plutôt qu'un item de plus.
+  ⮕ **Reste ouvert** : le lanceur local. Tant qu'il n'existe pas, le HEIC n'est pas décodable chez
+  Grégoire — l'application le DIT désormais, elle ne le cache plus.
+
 - [ ] **#553 — Le rabotage de clé `startsWith('francais')` : un pansement sur un appariement qui échoue.**
   Créé le 27 août 2026, sorti du chantier #552. **Huit sites** rabotent la clé d'un critère vers
   `'francais'` : `calculs.js` (526, 675, 696) · `helpers.js` (670) · `sections-affichage.js` (1101) ·

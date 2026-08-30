@@ -403,7 +403,7 @@ const TOOLTIPS = {
     'travaux-pipeline-optimisation':
         'Traitements automatiques appliqués aux images : balance des blancs, uniformisation DPI selon le sélecteur, compression JPEG. Les fichiers d\'un même étudiant pour une même production sont regroupés (multi-pages). Les PDF sont importés tels quels.',
     'travaux-fsapi-config':
-        'Stocke les fichiers importés directement sur le disque local au lieu d\'IndexedDB. Recommandé sur ordinateur pour éviter les limites de stockage du navigateur.',
+        'Stocke les fichiers importés directement sur le disque au lieu de la base du navigateur, ce qui lève ses limites de taille. Disponible seulement dans les navigateurs qui le permettent — ni Safari, ni Firefox, ni aucun navigateur de tablette. Par défaut, l\'accès au dossier est redemandé à chaque démarrage : c\'est un choix de sécurité, qu\'on peut lever dans Réglages > Préférences > Sécurité. Choisis un dossier local et stable, hors d\'un dossier synchronisé (iCloud, OneDrive) : un fichier évincé vers le nuage n\'est plus lisible.',
 
     // --- Actions sur les travaux ---
 
