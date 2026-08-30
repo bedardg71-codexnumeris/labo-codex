@@ -245,12 +245,12 @@ Fichier : `js/import-export.js` (`_restaurerBlobsDepuisZip` et ses deux appelant
 
 Fichier : `js/codex.js` (`_fusionnerTravaux`, plan de purge #336). Risque : faible.
 
-- [ ] **T8.1** — Vérifier que les entrées de `fichiersModelisation` portent `id` (`modelisation.js:25-26, 238`) — non relu par l'audit.
-- [ ] **T8.2** — Sentinelle : plan de purge avec une corbeille non vide → zéro orphelin recensé ; fusion avec un blob sans magic bytes → refusé, compté dans `erreurs`. ROUGE d'abord.
-- [ ] **T8.3** — `validerMagicBytes` dans `_fusionnerTravaux` (diff S9).
-- [ ] **T8.4** — Clés `corbeilleFichiers` et `fichiersModelisation` dans le recensement des références (diff S10).
-- [ ] **T8.5** — Break-test, suite complète.
-- [ ] **T8.6** — Commit, release, merge, tableau, `SESSION.md`.
+- [x] **T8.1** — Vérifier que les entrées de `fichiersModelisation` portent `id` (`modelisation.js:25-26, 238`) — non relu par l'audit.
+- [x] **T8.2** — Sentinelle : plan de purge avec une corbeille non vide → zéro orphelin recensé ; fusion avec un blob sans magic bytes → refusé, compté dans `erreurs`. ROUGE d'abord.
+- [x] **T8.3** — `validerMagicBytes` dans `_fusionnerTravaux` (diff S9).
+- [x] **T8.4** — Clés `corbeilleFichiers` et `fichiersModelisation` dans le recensement des références (diff S10).
+- [x] **T8.5** — Break-test, suite complète.
+- [~] **T8.6** — Commit `785f7887` FAIT · tableau et `SESSION.md` FAITS · **release EN ATTENTE du go de Grégoire** (prévenance de c2 et e6 avant `release.mjs`).
 
 **Critère de fin** : aucun blob n'entre par la fusion sans validation ; la purge ne recense jamais la corbeille ni la modélisation.
 

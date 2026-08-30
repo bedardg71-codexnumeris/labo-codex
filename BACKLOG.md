@@ -186,9 +186,31 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 - [ ] **#613 — S7 · Restauration d'un ZIP : échecs de blobs avalés, « Import réussi » quand même** (constat S8).
   `js/import-export.js`. Correctif : compter les manquants, poser `blobStatut: 'manquant'`, une seule
   notification, « Import partiel » quand il en manque.
-- [ ] **#614 — S8 · Fusion de codex sans `validerMagicBytes` ; la purge #336 recense la corbeille et la modélisation** (constats S9, S10).
-  `js/codex.js`. Correctif : valider les octets à la fusion, ajouter `corbeilleFichiers` et
-  `fichiersModelisation` au recensement des références.
+- [x] **#614 — LIVRÉ le 30 août 2026 — S8 · Fusion de codex sans `validerMagicBytes` ; la purge #336 recense la corbeille et la modélisation** (constats S9, S10).
+  `js/codex.js`. Commit `785f7887`.
+  · **S9 livré** : `_fusionnerTravaux` valide les magic bytes AVANT `stockerBlob`. Un `travaux/FT_x.pdf`
+  contenant du HTML, reçu d'un collègue, n'entre plus dans le store que la visionneuse sert ensuite.
+  · **Arbitrage tranché — FAIL-CLOSED** : là où le chemin « ouvrir » (`codex.js:698-706`) est fail-open,
+  la fusion refuse quand `window.travauxImport` n'est pas chargé, et le message nomme la cause
+  (« validation impossible ») au lieu de laisser croire à un fichier corrompu. Un module de validation
+  absent ne vaut pas « validation réussie » sur un chemin qui écrit dans le blob store.
+  · **S10 livré** : le recensement des références couvre `fichiersTravaux`, `corbeilleFichiers` ET
+  `fichiersModelisation`. La corbeille conserve le blob intact et reste restaurable — elle était
+  recensée « orpheline », donc un enseignant qui suivait la console la détruisait.
+  · **T8.1 mesuré** (l'audit ne l'avait pas relu) : `modelisation.js` génère l'id `:261`, le pose dans les
+  métadonnées `:276` et l'emploie comme clé de blob `:290` — tableau d'objets portant `id`, structure
+  compatible. Vérifié en plus, non demandé : la corbeille conserve l'`id` de l'entrée d'origine
+  (`travaux-stockage.js:965`), et l'export collecte TOUTES les clés (`codex.js:303-304`) — sans quoi le
+  correctif S10 aurait pu être « appliqué » sans jamais mordre.
+  · **Ce qui n'a PAS été fait, et pourquoi** : la garde `blobStatut !== 'exporte'` n'est pas reprise dans
+  la fusion. `_fusionnerTravaux` itère sur les chemins réellement présents dans le ZIP, donc un `exporte`
+  n'y entre jamais — cas structurellement absent, pas gardé. Un commentaire le dit, pour que personne
+  n'ajoute la garde « par prudence » en croyant fermer quelque chose.
+  · **Sentinelle** : `tests/unit/sentinelle-codex-fusion-purge-614.test.js`, 15 cas, 8 break-tests,
+  8 rouges obtenus. `_fusionnerTravaux` est exporté pour les tests, et le helper `charger-codex.js`
+  injecte désormais `travauxStockage` et `window.travauxImport`.
+  · **À TRANCHER, hors périmètre** : le chemin « ouvrir » reste fail-open. Deux comportements divergents
+  dans le même fichier sur la même question — voir la note en fin de `SESSION.md`.
 - [ ] **#615 — S9 · Lot des mineurs de l'audit** (constats M1, M2, M3, M4, M10).
   **D3 = A** : « Renommer pour distinguer » retiré avec `renommerDoublon` et `renommerFichierDansFile`.
   Plus : `_detecterPattern` lit `estReprise` · sort du chemin legacy `lancerImport` s'il est

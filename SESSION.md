@@ -7,6 +7,114 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION c3 — 30 AOÛT 2026 : S8 DU PLAN « CHAÎNE D'IMPORTATION DES
+     TRAVAUX » (#614) — LIVRÉ, RELEASE EN ATTENTE DU GO.
+
+     ▣ CADRE. Trois sessions en parallèle sur le même dépôt ce soir : c2
+       (S1→S3 livrés, S4 demain), e6 (S7 / #613), c3 (S8 / #614, ce bloc).
+       S8 a été proposée par c2 parce qu'elle ne touche qu'un fichier,
+       `js/codex.js`, qu'aucune autre session n'ouvre. Grégoire a tranché
+       « S8 en entier ».
+
+     ▣ AUDIT DE DÉBUT DE SESSION — AUCUN ÉCART AVEC LA PRÉMISSE. Arbre
+       propre, `main` synchro avec `origin`, version 1.106.11 (build
+       0830-1525), #607 à #615 bien réservés au BACKLOG. #614 employé tel
+       quel, rien de neuf réservé.
+
+     ▣ T8.1 — LA TÂCHE PRÉALABLE QUE L'AUDIT N'AVAIT PAS RELUE : MESURÉE,
+       ELLE PASSE. `modelisation.js` génère l'id `:261`, le pose dans les
+       métadonnées `:276` et l'emploie comme clé de blob `:290`. C'est bien
+       un tableau d'objets portant `id`, ce que le recensement de purge lit.
+
+       Deux vérifications que l'audit ne demandait pas et dont le correctif
+       dépendait autant :
+       · `deplacerEnCorbeille` (`travaux-stockage.js:965`) copie l'entrée de
+         `fichiersTravaux` en conservant son `id` — même identifiant de blob.
+       · L'export du codex collecte TOUTES les clés sauf `_codex_*`
+         (`codex.js:303-304`). Sans cette seconde vérification, le correctif
+         S10 aurait pu être « appliqué » sans jamais mordre, et rien ne
+         l'aurait dit.
+
+     ▣ S9 LIVRÉ — LA FUSION VALIDE LES OCTETS. `_fusionnerTravaux` stockait
+       les blobs d'un codex externe sans `validerMagicBytes`, alors que le
+       chemin « ouvrir » l'applique. Un `travaux/FT_x.pdf` contenant du HTML,
+       reçu d'un collègue, était stocké puis servi par la visionneuse.
+
+     ▣ S10 LIVRÉ — LA PURGE NE RECENSE PLUS LA CORBEILLE. Le plan #336 ne
+       tenait pour référencés que les ids des clés `fichiersTravaux` : les
+       blobs de `corbeilleFichiers` (conservés intacts, restaurables) et de
+       `fichiersModelisation` sortaient « orphelins ». Un enseignant qui
+       suivait la console après ouverture d'un codex détruisait sa corbeille.
+
+     ▣ UN ÉCART DU DIFF DE L'AUDIT, ET L'ARBITRAGE QUI EN DÉCOULE. Le diff
+       S9 proposé écrivait `await window.travauxImport.validerMagicBytes(...)`
+       sans garde d'existence, alors que le chemin « ouvrir » (`:698-706`)
+       teste d'abord que le module est chargé — et tombe donc en FAIL-OPEN
+       s'il ne l'est pas.
+
+       Tranché pour la fusion : FAIL-CLOSED, et le code DIT pourquoi
+       (« validation impossible (module travauxImport non chargé) »). Un
+       module de validation absent ne peut pas valoir « validation réussie »
+       sur un chemin qui écrit dans le blob store, et un message qui nomme la
+       cause évite de faire passer un chargement incomplet pour un fichier
+       corrompu.
+
+     ▣ ⚠ À TRANCHER PAR GRÉGOIRE — HORS PÉRIMÈTRE DE #614. Le chemin
+       « ouvrir » (`codex.js:698-706`) reste fail-open. Le fichier porte donc
+       maintenant DEUX comportements divergents sur la même question : la
+       fusion refuse quand le validateur manque, l'ouverture accepte. La
+       divergence est signalée plutôt que corrigée en douce, parce que
+       changer le chemin « ouvrir » sortait du périmètre voté. Ce n'est pas
+       une dette qu'on découvre : c'est une décision qui attend.
+
+     ▣ CE QUE LE CORRECTIF NE FAIT PAS, ET POURQUOI. La garde
+       `blobStatut !== 'exporte'` du chemin « ouvrir » n'est PAS reprise dans
+       la fusion. c2 avait signalé le risque ; vérification au code :
+       `_fusionnerTravaux` itère sur `cheminsAImporter`, qui remonte à
+       `zip.forEach` (`:1086-1089`) sur les entrées RÉELLEMENT présentes dans
+       le ZIP. Un `exporte` n'a pas d'entrée, donc n'entre jamais dans la
+       boucle. Cas structurellement absent, pas gardé — et un commentaire le
+       dit, pour que le prochain lecteur n'ajoute pas la garde « par
+       prudence » en croyant fermer quelque chose. c2 a confirmé et retenu la
+       formule.
+
+     ▣ MESURES. Sentinelle `tests/unit/sentinelle-codex-fusion-purge-614.test.js`
+       — 15 cas, ROUGE d'abord (11 rouges, tous pour la bonne raison), puis
+       VERT. 8 break-tests, 8 ROUGES OBTENUS, aucun témoin aveugle : retrait
+       de la validation, inversion de la validation, bascule fail-open,
+       retrait de chacun des trois motifs du recensement, `some` → `every`,
+       et inversion de l'ordre validation/stockage. Restauration PAR COPIE
+       après mutations, jamais `git checkout`.
+       Vitest 409 fichiers / 4291 tests, code de sortie 0.
+       Playwright 210/210, code de sortie 0.
+       Commit `785f7887`. Anti-cache : `codex.js` passé de `20260808b` à
+       `20260830k` (jour du BUILD, pas lettre suivante du vieux suffixe).
+
+     ▣ PLOMBERIE DE TEST AJOUTÉE. `_fusionnerTravaux` est exporté sur
+       `window.Codex` (convention « internes exposés pour Vitest » du
+       fichier), et le helper partagé `tests/unit/_helpers/charger-codex.js`
+       injecte désormais `travauxStockage` et `window.travauxImport` via un
+       second paramètre optionnel — rétrocompatible, les trois fichiers de
+       tests existants passent inchangés.
+
+     ▣ RESTE À FAIRE SUR S8 : la release (T8.6), en attente du go de
+       Grégoire, avec prévenance de c2 et e6 avant de lancer `release.mjs`.
+
+     ▣ COORDINATION — CE QUI A ÉTÉ APPRIS CE SOIR.
+       · Le hook `pre-push` lance Vitest sur l'ARBRE DE TRAVAIL, pas sur le
+         commit poussé. Tant qu'une des trois sessions est entre son rouge et
+         son vert, AUCUNE des trois ne peut pousser. Ce n'est pas un motif de
+         `--no-verify` : garder ses commits en local et pousser au vert.
+       · `import-export.js` et sa sentinelle sont apparus modifiés dans
+         l'arbre pendant mon travail — c'était e6. Le staging chirurgical
+         (fichier par fichier, `--cached --stat` ET le diff complet des
+         fichiers partagés relus) a suffi à ne rien emporter.
+       · `index.html` est partagé par les trois sessions : mon diff stagé a
+         été relu en entier, une seule ligne, la mienne.
+     ===================================================================== -->
+
+
+<!-- =====================================================================
      SESSION — 30 AOÛT 2026 : EXÉCUTION DU PLAN « CHAÎNE D'IMPORTATION DES
      TRAVAUX » — S0 (PRÉPARATION) ET S1 (JETONS ↔ FICHIERS) LIVRÉS.
 
