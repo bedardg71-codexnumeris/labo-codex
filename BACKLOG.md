@@ -3593,6 +3593,38 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **Règle** : après un lot qui change une primitive de `db`, chercher les stubs `db` de TOUS les
   bancs qui CHARGENT le module, et lire le CODE DE SORTIE, pas seulement le compte.
 
+- [ ] **#606 — La vue Corbeille empruntait l'en-tête du tableau des évaluations : le nom de fichier
+  s'affichait sous « Prénom », la date de suppression sous « Statut », les jours restants sous
+  « Niveau ».**
+  Relevé par Grégoire le 30 août 2026, capture à l'appui : « le contenu des colonnes ne correspond
+  pas aux en-têtes ». Vu en allant récupérer les fichiers perdus par [[#604]].
+  **DEUX MÉCANISMES SE COMPOSAIENT, et il fallait défaire les deux.**
+  · **L'en-tête emprunté.** `afficherVueCorbeille` écrit ses lignes dans le `tbody` du tableau des
+    évaluations, dont le `thead` n'était jamais échangé. Neuf colonnes d'évaluation pour six
+    données de corbeille : l'écart était comblé par des `colspan` (2 sur l'élève, 3 sur les
+    actions) qui **déplaçaient** la lecture au lieu de l'aligner.
+  · **Le sélecteur de colonnes.** `toggleColonneEval` masque par RANG DE CELLULE
+    (`th:nth-child(n)`), pas par colonne logique. Dans la corbeille, décocher « Jeton » retirait la
+    5ᵉ cellule — la date — et décalait d'un cran de plus tout ce qui suivait. C'est ce second
+    mécanisme qui explique la capture : « Jeton » y était décoché.
+  ➮ **Correction** : la corbeille a son propre `<tr>` d'en-tête dans `index.html` (Élève, Fichier,
+  Production, Supprimé le, Expire dans, Actions), une cellule par colonne, zéro `colspan` ; une
+  seule rangée visible à la fois via `appliquerEnTeteSelonVue()`, appelée par les TROIS chemins qui
+  changent de vue ; le sélecteur de colonnes disparaît avec la vue Évaluations et refuse d'agir même
+  appelé de force.
+  ➮ **Deux corollaires trouvés en corrigeant.** Le `th:nth-child(n)` non qualifié atteignait
+  désormais aussi le nouvel en-tête — restreint à `#entete-evaluations`. Et `vueCorbeilleActive`,
+  déclaré en `let` près de la section Corbeille, se retrouvait **sous** ses nouveaux lecteurs
+  (`afficherTableauEvaluations`, `toggleColonneEval`) : zone morte temporelle, inoffensive tant que
+  personne n'appelle pendant le chargement, ReferenceError le jour où ça arrive. Déclaration
+  remontée en tête de module.
+  ➮ **L'alignement RÉEL ne se mesure qu'au rendu** : banc Playwright
+  `integration/corbeille-entete-606.spec.js`, qui relève les boîtes et cherche, pour chaque
+  cellule, l'en-tête qui la surplombe. La sentinelle Vitest jumelle ne verrouille que le comptage.
+  ⚠ Piège du banc lui-même : sans `naviguerVers('evaluations', 'liste')`, la SOUS-section reste en
+  `display:none` et toutes les boîtes mesurent zéro — le test « passe » sans avoir rien vu. Un
+  garde-fou exige désormais une largeur non nulle avant de mesurer.
+
 - [ ] **#605 — Le message « Fichier sous … » se déclenche sur TOUTE ligne non reçue d'un élève qui a
   importé quoi que ce soit. Il ne peut structurellement rien apprendre.**
   Relevé le 30 août 2026 sur les données réelles de Grégoire, capture à l'appui : un élève ayant

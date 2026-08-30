@@ -163,6 +163,13 @@ let triEvaluationsActuel = {
     ordre: 'asc'     // 'asc' ou 'desc'
 };
 
+// Vue Corbeille active ? Déclaré ICI et pas près de la section Corbeille :
+// depuis #606, `afficherTableauEvaluations` et `toggleColonneEval` le lisent,
+// et tous deux sont définis bien avant elle. Un `let` déclaré plus bas les
+// laisserait dans sa zone morte temporelle — inoffensif tant que personne
+// n'appelle pendant le chargement, et une ReferenceError le jour où ça arrive.
+let vueCorbeilleActive = false;
+
 // ============================================
 // INITIALISATION
 // ============================================
@@ -557,6 +564,10 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
     if (zoneChargement) {
         zoneChargement.classList.add('u-hide');
     }
+
+    // #606 — Le retour à la liste passe toujours par ici : l'en-tête des
+    // évaluations et le sélecteur de colonnes reviennent avec elle.
+    appliquerEnTeteSelonVue();
 
     // Construire la liste complète : évaluations existantes + non évaluées
     const lignes = construireLignesEvaluations(evaluations, productions, etudiants);
@@ -2481,7 +2492,39 @@ const colonneIndexMap = {
     'note': 8
 };
 
+/**
+ * Fait correspondre l'en-tête du tableau à la vue affichée.
+ *
+ * #606 — La corbeille écrivait ses lignes dans le tableau des évaluations et
+ * héritait de SON en-tête, qui nomme de tout autres données : « Prénom »
+ * surmontait un nom de fichier, « Statut » une date de suppression, « Niveau »
+ * un nombre de jours. Les colspan des lignes de corbeille (2 puis 3) achevaient
+ * de décaler la lecture, et masquer une colonne dans le sélecteur décalait les
+ * cellules d'un cran de plus — le sélecteur agit par rang de cellule, pas par
+ * colonne logique.
+ *
+ * Les deux rangées d'en-tête vivent dans `index.html` ; une seule est visible.
+ * Le sélecteur de colonnes disparaît avec la vue Évaluations : ses colonnes
+ * n'existent pas dans la corbeille, et l'y laisser en ferait un levier qui
+ * abîme l'alignement sans rien dire.
+ */
+function appliquerEnTeteSelonVue() {
+    const enteteEval = document.getElementById('entete-evaluations');
+    const enteteCorbeille = document.getElementById('entete-corbeille');
+    const selecteurColonnes = document.getElementById('eval-colonnes-selecteur');
+
+    if (enteteEval) enteteEval.classList.toggle('u-hide', vueCorbeilleActive);
+    if (enteteCorbeille) enteteCorbeille.classList.toggle('u-hide', !vueCorbeilleActive);
+    if (selecteurColonnes) selecteurColonnes.classList.toggle('u-hide', vueCorbeilleActive);
+}
+
 function toggleColonneEval(checkbox) {
+    // #606 — La corbeille n'a pas ces colonnes. Agir ici décalerait ses cellules
+    // sans que rien ne le dise. Le sélecteur est masqué dans cette vue ; cette
+    // garde tient aussi pour un appel programmatique (restauration des
+    // préférences au retour à la liste).
+    if (vueCorbeilleActive) return;
+
     const colonne = checkbox.getAttribute('data-colonne');
     const index = colonneIndexMap[colonne];
     if (!index) return;
@@ -2489,7 +2532,10 @@ function toggleColonneEval(checkbox) {
     const tableau = document.querySelector('#conteneur-tableau-evaluations .tableau');
     if (!tableau) return;
 
-    const cellules = tableau.querySelectorAll(`th:nth-child(${index}), td:nth-child(${index})`);
+    // #606 — Portée RESTREINTE à la rangée d'en-tête des évaluations : depuis
+    // qu'une seconde rangée existe, un `th:nth-child(n)` non qualifié atteignait
+    // aussi la colonne de même rang dans l'en-tête de la corbeille.
+    const cellules = tableau.querySelectorAll(`#entete-evaluations th:nth-child(${index}), tbody td:nth-child(${index})`);
     cellules.forEach(cell => {
         if (checkbox.checked) {
             cell.classList.remove('u-hide');
@@ -2566,8 +2612,8 @@ function verifierDebordementTableau() {
 // ============================================
 // CORBEILLE FICHIERS
 // ============================================
-
-let vueCorbeilleActive = false;
+// `vueCorbeilleActive` est déclaré en tête du module (#606) : ses lecteurs
+// vivent bien plus haut dans le fichier.
 
 /**
  * Met à jour le bouton corbeille dans la zone de filtres
@@ -2610,6 +2656,7 @@ function mettreAJourBoutonCorbeille() {
 function basculerVueCorbeille() {
     vueCorbeilleActive = !vueCorbeilleActive;
     mettreAJourBoutonCorbeille();
+    appliquerEnTeteSelonVue();
 
     if (vueCorbeilleActive) {
         afficherVueCorbeille();
@@ -2623,6 +2670,10 @@ function basculerVueCorbeille() {
  */
 function afficherVueCorbeille() {
     if (typeof travauxStockage === 'undefined') return;
+
+    // #606 — posé ici aussi : cette fonction est rappelée directement après une
+    // restauration ou une suppression, sans repasser par `basculerVueCorbeille`.
+    appliquerEnTeteSelonVue();
 
     const corbeille = travauxStockage.obtenirCorbeille();
     const corpsTableau = document.getElementById('corps-tableau-evaluations');
@@ -2659,8 +2710,11 @@ function afficherVueCorbeille() {
     const elemNbProductions = document.getElementById('nb-productions');
     if (elemNbProductions) elemNbProductions.textContent = '';
 
-    // En-tête corbeille + bouton vider
-    let html = `<tr><td colspan="9" style="padding: 10px 12px; background: var(--surface-alt);">
+    // Bandeau d'information + bouton vider.
+    // #606 — colspan 6 : la corbeille a SIX colonnes (Élève, Fichier,
+    // Production, Supprimé le, Expire dans, Actions), pas les neuf du tableau
+    // des évaluations.
+    let html = `<tr><td colspan="6" style="padding: 10px 12px; background: var(--surface-alt);">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <span style="font-size: 0.85em; color: var(--texte-secondaire);">Les fichiers sont supprimés automatiquement après 30 jours.</span>
             <button class="btn btn-danger btn-sm" data-action="viderTouteCorbeille">Vider la corbeille</button>
@@ -2681,13 +2735,17 @@ function afficherVueCorbeille() {
         const msRestants = (dateSup.getTime() + 30 * 24 * 60 * 60 * 1000) - Date.now();
         const joursRestants = Math.max(0, Math.ceil(msRestants / (24 * 60 * 60 * 1000)));
 
+        // #606 — Une cellule par colonne, dans l'ordre de `#entete-corbeille`.
+        // Les colspan d'avant (2 sur l'élève, 3 sur les actions) servaient à
+        // remplir les neuf colonnes d'un en-tête emprunté : ils décalaient la
+        // lecture au lieu de l'aligner.
         html += `<tr>
-            <td class="td-left" colspan="2">${echapperHtml(nomEtudiant)}</td>
+            <td class="td-left">${echapperHtml(nomEtudiant)}</td>
             <td class="td-left">${echapperHtml(nomFichier)}</td>
             <td class="td-left">${echapperHtml(nomProduction)}</td>
             <td class="td-center">${dateAffichee}</td>
             <td class="td-center">${joursRestants} jour(s)</td>
-            <td class="td-center" colspan="3">
+            <td class="td-center">
                 <button class="btn btn-secondaire btn-sm" data-action="restaurerFichierCorbeille" data-param="${fichier.id}">Restaurer</button>
                 <button class="btn btn-danger btn-sm" data-action="supprimerFichierDefinitivement" data-param="${fichier.id}">Supprimer</button>
             </td>
