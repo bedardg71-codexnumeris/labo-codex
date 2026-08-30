@@ -28,7 +28,19 @@ function dbDepuisStore(store) {
         get: async (c) => (c in store ? store[c] : null),
         getSync: (c, d) => (c in store ? store[c] : (d !== undefined ? d : null)),
         set: async (c, v) => { store[c] = v; },
-        setSync: (c, v) => { store[c] = v; }
+        setSync: (c, v) => { store[c] = v; },
+        // #522 lot 2c : `migrerCategoriesVersSousCriteres()` s'exécute AU
+        // CHARGEMENT de grilles.js et écrit désormais par la file. Sans
+        // `modifier`, ce module lève un rejet NON GÉRÉ au chargement — les
+        // tests restent verts, mais `vitest run` sort en code 1 et le hook
+        // pré-push bloque. Le stub reproduit la file, refus compris.
+        modifier: async (c, mutateur, defaut = null) => {
+            const lue = c in store ? store[c] : defaut;
+            const resultat = await mutateur(lue);
+            if (resultat === undefined) return undefined;
+            store[c] = resultat;
+            return resultat;
+        }
     };
 }
 

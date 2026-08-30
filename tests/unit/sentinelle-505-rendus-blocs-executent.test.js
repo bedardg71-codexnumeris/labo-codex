@@ -34,7 +34,17 @@ function charger(module, elements) {
         db: {
             get: async () => null,
             getSync: (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)),
-            set: async () => {}, setSync: () => {}
+            set: async () => {}, setSync: () => {},
+            // #522 lot 2c : `migrerCategoriesVersSousCriteres()` s'exécute AU
+            // CHARGEMENT de grilles.js et écrit par la file. Sans `modifier`,
+            // ce module lève un rejet NON GÉRÉ : les tests restent verts, mais
+            // `vitest run` sort en code 1 et le hook pré-push bloque.
+            modifier: async (k, mutateur) => {
+                const resultat = await mutateur(null);
+                if (resultat === undefined) return undefined;
+                store[k] = resultat;
+                return resultat;
+            }
         },
         cle: (k) => 'a2026_' + k,
         echapperHtml: (t) => String(t == null ? '' : t)
