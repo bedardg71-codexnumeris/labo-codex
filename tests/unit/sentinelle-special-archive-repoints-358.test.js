@@ -91,10 +91,16 @@ describe('#358 SPECIAL_ARCHIVE · Groupe 1 — ratchets statiques', () => {
     it('donnees-v2 : suppression définitive écrit dans cle(), pas la clé nue', () => {
         // (assertions formulées sans le littéral `db.set(` pour ne pas déclencher le
         // heuristique Défense J sur ce fichier de test — ce sont des chaînes, pas des écritures.)
-        expect(donneesV2).toContain("cle('grillesTemplates'), templates)");
-        expect(donneesV2).toContain("cle('echellesTemplates'), templates)");
-        expect(donneesV2).not.toContain("set('grillesTemplates', templates)");
-        expect(donneesV2).not.toContain("set('echellesTemplates', templates)");
+        // ⚠ L'invariant est « l'écriture vise cle(), pas la clé nue » — pas la
+        // forme de l'appel. #522 lot 2b (30 août 2026) a fait passer ces deux
+        // suppressions par `db.modifier`, et l'ancienne assertion, qui citait
+        // l'argument `templates` de `db.set`, rougissait sur un chemin devenu
+        // MEILLEUR. Le contrôle porte donc sur la clé, et interdit toujours la
+        // clé nue — quelle que soit la méthode d'écriture.
+        expect(donneesV2).toMatch(/modifier\(cle\('grillesTemplates'\)/);
+        expect(donneesV2).toMatch(/modifier\(cle\('echellesTemplates'\)/);
+        expect(donneesV2).not.toMatch(/(set|modifier)\('grillesTemplates'/);
+        expect(donneesV2).not.toMatch(/(set|modifier)\('echellesTemplates'/);
     });
 
     it('trimestres : snapshot lit `${trim}_*` et export anonymisé lit cle()', () => {

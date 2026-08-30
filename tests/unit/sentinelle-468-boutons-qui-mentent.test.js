@@ -139,7 +139,17 @@ function chargerEchelles(store, idsPresents = []) {
         get: async (c) => (c in store ? store[c] : null),
         getSync: (c, d) => (c in store ? store[c] : (d !== undefined ? d : null)),
         set: async (c, v) => { store[c] = v; },
-        setSync: (c, v) => { store[c] = v; }
+        setSync: (c, v) => { store[c] = v; },
+        // #522 lot 2b : l'éditeur d'échelles écrit désormais par la file. Le
+        // stub la reproduit fidèlement — lecture, mutation, écriture — y compris
+        // le refus : un mutateur qui rend `undefined` n'écrit RIEN.
+        modifier: async (c, mutateur, defaut = null) => {
+            const lue = c in store ? store[c] : defaut;
+            const resultat = await mutateur(lue);
+            if (resultat === undefined) return undefined;
+            store[c] = resultat;
+            return resultat;
+        }
     };
     const win = chargerScript('js/echelles.js', {
         db,

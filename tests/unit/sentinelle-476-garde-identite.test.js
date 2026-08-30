@@ -147,10 +147,35 @@ describe('#476 · les cinq points d\'écriture sont gardés', () => {
     });
 
     it('chaque refus NOMME l\'exemplaire en place, jamais un échec muet', () => {
+        // ⚠ Le contrôle ne repose PLUS sur la proximité textuelle entre `conflit`
+        // et le message (#522 lot 2b, 30 août 2026) : la capture du nom et son
+        // affichage se sont éloignés dans `echelles.js`, où le refus sort
+        // désormais du mutateur avant d'être dit. La proximité mesurait la mise
+        // en page, pas l'invariant. Ce qui compte est le CHAÎNAGE : le nom
+        // affiché doit venir du conflit rendu par la garde.
         for (const fichier of Object.keys(FAMILLES)) {
             const src = lire(fichier);
-            expect(src, `${fichier} : le message de refus ne cite pas le conflit`)
-                .toMatch(/conflit[\s\S]{0,200}est déjà dans ta sélection/);
+
+            // ⚠ TOUTES les occurrences, pas la première : `pratiques-gestion.js`
+            // porte d'abord un message générique sans nom, et le refus nommé
+            // vient après. Chercher la première aurait rendu un faux rouge.
+            const positions = [...src.matchAll(/est déjà dans ta sélection/g)].map((m) => m.index);
+            expect(positions.length, `${fichier} : message de refus absent`).toBeGreaterThan(0);
+
+            const noms = [];
+            const nomme = positions.some((pos) => {
+                const amont = src.slice(Math.max(0, pos - 120), pos);
+                const interpoles = [...amont.matchAll(/\$\{\s*([A-Za-z0-9_$]+)/g)].map((m) => m[1]);
+                noms.push(...interpoles);
+                // Le nom affiché doit venir du `conflit` rendu par la garde.
+                return interpoles.some((nom) =>
+                    new RegExp('\\b' + nom + '\\s*=[^;]*\\.conflit\\b').test(src));
+            });
+
+            expect(nomme,
+                `${fichier} : aucun refus ne nomme l'exemplaire en place à partir de garde.conflit`
+                + ` (noms interpolés vus : ${noms.join(', ') || 'aucun'})`
+            ).toBe(true);
         }
     });
 
