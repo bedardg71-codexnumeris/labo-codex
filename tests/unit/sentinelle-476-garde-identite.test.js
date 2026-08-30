@@ -162,7 +162,11 @@ describe('#476 · les cinq points d\'écriture sont gardés', () => {
             'echelles.js': /const verifEchelle = await db\.get\(/,
             'cartouches.js': /const verifCartouche = await db\.get\(/,
             'productions-bibliotheque-ui.js': /const verification = await db\.get\(/,
-            'pratiques-gestion.js': /const verifPratiques = db\.getSync\(/
+            // #522 (30 août 2026) : les pratiques relisaient en `getSync` — la
+            // seule famille sur cinq à le faire. Leur écriture passe désormais
+            // par `db.modifier`, et leur relecture s'aligne sur les quatre
+            // autres. L'exigence est la même, la forme cesse d'être l'exception.
+            'pratiques-gestion.js': /const verifPratiques = await db\.get\(/
         };
         for (const [fichier, motif] of Object.entries(relectures)) {
             expect(lire(fichier), `${fichier} : relecture-vérification absente`).toMatch(motif);

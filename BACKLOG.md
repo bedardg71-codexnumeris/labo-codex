@@ -3192,6 +3192,40 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   passent. Tout autre autosave en lecture-modification-écriture porte la même course. Recoupe
   [[project-autosaves-a-auditer]].
 
+  🟢 **AUDIT FAIT + LOT 1 LIVRÉ le 30 août 2026 — L'ITEM RESTE OUVERT (4 lots).**
+  Rapport complet : `Rapports/AUDIT-522-courses-lecture-ecriture-2026-08-30.md`.
+  **Mesure** : 213 sites lire→écrire sur la même clé dans la même fonction, dont **102 en course** ;
+  111 sont sûrs (séquence entièrement synchrone — le mono-thread les rend atomiques, ne pas y toucher).
+  ⚠⚠ **LE FAIT QUI A REDRESSÉ L'AUDIT** : `getSync` NE protège PAS. Dans `db.set`, l'écriture IndexedDB
+  est ATTENDUE avant le rafraîchissement de localStorage — pendant tout cet aller-retour, `getSync` rend
+  encore l'ANCIENNE valeur. Un audit qui n'aurait visé que les lectures `await` aurait manqué tout
+  `pratiques-gestion.js`, qui lit en `getSync`.
+  ⮕ **UN SEUL groupe de clés est atteint par un déclencheur de SAISIE** (le geste de #510, le `change`
+  qui part au blur) : `pratiquesConfigurables`. **C'est le site que Grégoire avait signalé en mai 2026**
+  (le radio « note chiffrée / niveau de performance » qui « souvent n'est pas lu »).
+  ✅ **LOT 1 (clé des pratiques) LIVRÉ** : **22 écritures** passent par `db.modifier` ; six restent hors
+  de la file, NOMMÉES et motivées dans le cliquet à liste fermée (trois synchrones, une qui rend un
+  compteur, deux via le helper transversal). **Trois défauts trouvés en chemin** : les bornes d'index non
+  vérifiées (`TypeError` au lieu d'un refus) ; `adopterMaquette` qui écrivait DEUX fois la collection ;
+  et **`partagerPratique`, la plus longue fenêtre du lot** — elle relisait, ATTENDAIT que l'utilisateur
+  remplisse un formulaire, puis réécrivait la collection lue AVANT la question. Retirés aussi : deux
+  replis `catch → setSync` qui remettaient en place l'instantané que la file sert à ne plus perdre.
+  **Sentinelle** `sentinelle-522-pratiques-serialisees` (8 cas) ; **break-test 4 mutations, 4 rouges**,
+  témoin vert. Vitest **4082/4082** (391 fichiers).
+  ⚠ **FAUX-VERT ATTRAPÉ AU BANC, à retenir pour les lots suivants** : Node n'a pas d'IndexedDB, donc
+  `db.js` s'y rabat sur le mode localStorage-seul, où `set` écrit SYNCHRONEMENT — la fenêtre de course
+  n'existe alors pas et les six cas passaient au vert sur le code NON corrigé. Le banc doit forcer
+  `useIndexedDB` avec une fausse connexion (patron dans la sentinelle).
+  ⏳ **RESTE — 89 sites en course, quatre lots** :
+  · **Lot 2** grilles (19) + échelles (14) + `niveauxEchelle` (6) — patron connu, aucune décision.
+  · **Lot 4** le helper `BibliothequeUI` (14 sites, 7 fichiers) : `dupliquerVersBibliotheque` fait
+    `await lireListe()` puis `ecrireListe()`. **Le corriger UNE fois dans le helper corrige les cinq
+    familles** — remplacer le couple par un `modifierListe(mutateur)`. Meilleur rapport effort/portée.
+  · **Lot 3** productions (12) + cartouches (9).
+  · **Lot 5** étudiants (3) + divers (12), dont des drapeaux de migration qui ne tournent qu'au
+    démarrage : la course y est théorique — **vérifier avant de convertir, ce lot est sans doute plus
+    petit qu'il n'en a l'air**.
+
 - [x] **#523 CLOS 26 août 2026 — c'était GitHub Desktop, et c'est Grégoire qui l'a trouvé.**
   ⮕ **MESURE CONCLUANTE** : suite WebKit rejouée machine au repos ET **GitHub Desktop fermé** (hook
   pré-push de la release 1.99.2) → « aucune rougeur nouvelle, 8 échecs connus, **inchangé** ». Les

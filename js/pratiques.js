@@ -1163,23 +1163,32 @@ async function supprimerPratique(id) {
  * @returns {Promise<boolean>} true si adoptée ; false si introuvable ou déjà aboutie.
  */
 async function adopterMaquette(id) {
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
-    const pratique = pratiques.find(p => p.id === id);
-    if (!pratique || pratique.estMaquette !== true) return false;
+    // #522 (30 août 2026) — une seule écriture, dans la file par clé. Le code
+    // écrivait DEUX fois la collection (`setSync` puis `set`) sur le même
+    // instantané lu hors file : deux occasions de perdre une modification
+    // voisine, pour une seule bascule de drapeau.
+    let nomAdoptee = null;
+    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+        const pratiques = lues || [];
+        const pratique = pratiques.find(p => p.id === id);
+        if (!pratique || pratique.estMaquette !== true) return undefined;
 
-    // estMaquette bascule ; tout le reste (inspireDe/sourceId inclus) est préservé.
-    pratique.estMaquette = false;
-    // #468/CO-12 (21 août 2026) : l'adoption remet aussi la pratique DANS la
-    // bibliothèque. Les maquettes créées avant le correctif de dupliquerPratique
-    // portent `dansBibliotheque:false` : sans cette ligne, « Maquette adoptée »
-    // s'affichait sur une pratique qui restait introuvable dans la sidebar.
-    pratique.dansBibliotheque = true;
-    db.setSync(cle('pratiquesConfigurables'), pratiques);
-    if (db.set) await db.set(cle('pratiquesConfigurables'), pratiques);
+        // estMaquette bascule ; tout le reste (inspireDe/sourceId inclus) est préservé.
+        pratique.estMaquette = false;
+        // #468/CO-12 (21 août 2026) : l'adoption remet aussi la pratique DANS la
+        // bibliothèque. Les maquettes créées avant le correctif de dupliquerPratique
+        // portent `dansBibliotheque:false` : sans cette ligne, « Maquette adoptée »
+        // s'affichait sur une pratique qui restait introuvable dans la sidebar.
+        pratique.dansBibliotheque = true;
+        nomAdoptee = pratique.nom || 'Sans titre';
+        return pratiques;
+    }, []);
+
+    if (nomAdoptee === null) return false;   // introuvable, ou déjà adoptée
 
     if (typeof afficherListePratiques === 'function') await afficherListePratiques();
     if (typeof notifications !== 'undefined' && notifications.succes) {
-        notifications.succes('Maquette adoptée', `« ${pratique.nom || 'Sans titre'} » rejoint tes pratiques.`);
+        notifications.succes('Maquette adoptée', `« ${nomAdoptee} » rejoint tes pratiques.`);
     }
     return true;
 }
@@ -1605,16 +1614,21 @@ function fermerModalBibliothequePratiques() {
  * Retire une pratique de la bibliothèque
  */
 async function retirerPratiqueDeBibliotheque(pratiqueId) {
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
-    const pratique = pratiques.find(p => p.id === pratiqueId);
+    let trouvee = false;
+    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+        const pratiques = lues || [];
+        const pratique = pratiques.find(p => p.id === pratiqueId);
+        if (!pratique) return undefined;
 
-    if (!pratique) {
+        pratique.dansBibliotheque = false;
+        trouvee = true;
+        return pratiques;
+    }, []);
+
+    if (!trouvee) {
         alert('Pratique introuvable');
         return;
     }
-
-    pratique.dansBibliotheque = false;
-    db.setSync(cle('pratiquesConfigurables'), pratiques);
 
 
     // Rafraîchir la sidebar d'abord
@@ -1629,16 +1643,21 @@ async function retirerPratiqueDeBibliotheque(pratiqueId) {
  * Ajoute une pratique individuelle à la bibliothèque
  */
 async function ajouterPratiqueIndividuelle(pratiqueId) {
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
-    const pratique = pratiques.find(p => p.id === pratiqueId);
+    let trouvee = false;
+    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+        const pratiques = lues || [];
+        const pratique = pratiques.find(p => p.id === pratiqueId);
+        if (!pratique) return undefined;
 
-    if (!pratique) {
+        pratique.dansBibliotheque = true;
+        trouvee = true;
+        return pratiques;
+    }, []);
+
+    if (!trouvee) {
         alert('Pratique introuvable');
         return;
     }
-
-    pratique.dansBibliotheque = true;
-    db.setSync(cle('pratiquesConfigurables'), pratiques);
 
 
     // Rafraîchir la sidebar d'abord
@@ -1688,12 +1707,16 @@ async function supprimerPratiqueHorsBibliotheque(pratiqueId) {
     }
 
     try {
-        // Supprimer de pratiquesConfigurables
-        const index = pratiques.findIndex(p => p.id === pratiqueId);
-        if (index !== -1) {
-            pratiques.splice(index, 1);
-            db.setSync(cle('pratiquesConfigurables'), pratiques);
-        }
+        // Supprimer de pratiquesConfigurables — dans la file : la collection
+        // lue plus haut a servi aux vérifications, la question de confirmation
+        // s'est intercalée entre-temps.
+        await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+            const fraiches = lues || [];
+            const index = fraiches.findIndex(p => p.id === pratiqueId);
+            if (index === -1) return undefined;
+            fraiches.splice(index, 1);
+            return fraiches;
+        }, []);
 
 
         // Rafraîchir le modal
@@ -1718,7 +1741,7 @@ async function supprimerPratiqueHorsBibliotheque(pratiqueId) {
  */
 async function partagerPratique(pratiqueId) {
     try {
-        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
+        const pratiques = await db.get(cle('pratiquesConfigurables'), null) || [];
         const pratique = pratiques.find(p => p.id === pratiqueId);
 
         if (!pratique) {
@@ -1733,14 +1756,23 @@ async function partagerPratique(pratiqueId) {
             return; // Annulé par l'utilisateur
         }
 
-        // Marquer comme partagée (retirer de ma sélection)
-        pratique.dansBibliotheque = false;
+        // #522 (30 août 2026) — ⚠ LA PLUS LONGUE FENÊTRE DU LOT. Entre la
+        // lecture ci-dessus et l'écriture, on ATTEND que l'utilisateur remplisse
+        // un formulaire : réécrire ensuite la collection lue avant la question
+        // effaçait tout ce qui avait été enregistré pendant ce temps. Les deux
+        // champs sont donc posés sur la collection FRAÎCHE, dans la file.
+        await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+            const fraiches = lues || [];
+            const aPartager = fraiches.find(p => p.id === pratiqueId);
+            if (!aPartager) return undefined;
 
-        // Ajouter métadonnées CC
-        pratique.metadata_cc = metadata;
+            // Marquer comme partagée (retirer de ma sélection)
+            aPartager.dansBibliotheque = false;
 
-        // Sauvegarder
-        db.setSync(cle('pratiquesConfigurables'), pratiques);
+            // Ajouter métadonnées CC
+            aPartager.metadata_cc = metadata;
+            return fraiches;
+        }, []);
 
         // Rafraîchir modal et sidebar
         fermerModalBibliothequePratiques();
