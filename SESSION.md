@@ -403,6 +403,78 @@
        du plan, qui est la seule vue d'ensemble. S4 vient ensuite et dépend de
        S3, qui est fait. Rien n'est en suspens dans l'arbre.
 
+     ▣ S4 (#610) — L'IMPORT INTERROMPU NE FABRIQUE PLUS DE DOUBLONS MUETS, ET
+       UN BLOB NE CHANGE PLUS D'ÉLÈVE.
+       · S1 — la détection de doublon exige `etudiantDA && productionId`, alors
+         que la confirmation autorise l'import « sans production associée » et
+         que le bandeau « sans DA » n'est pas bloquant. 40 photos, iPad en
+         veille au 25e fichier : `statut = 'importe'` n'était persisté qu'APRÈS
+         le dernier, donc la file en affichait 40 « à re-déposer » quand 25
+         étaient déjà en base. Re-dépôt, confirmation : 25 doublons, aucun
+         avertissement, « 40 fichier(s) importé(s) » à l'écran.
+       · S2 — `reattacherBlobs` appariait par NOM SEUL. Deux `devoir.pdf`
+         associés à la main à deux élèves, rechargement, re-dépôt des deux en
+         une sélection : le premier `File` prend la première entrée libre.
+         LE TRAVAIL D'UN ÉLÈVE SE RETROUVAIT SOUS LE DA D'UN AUTRE, sans trace.
+       ➮ `persisterFileDAttente()` à chaque itération (celui de fin de lot,
+         #558 B1, RESTE — les deux couvrent des pannes différentes) · détection
+         `(nomFichierLea, tailleFichier)` pour les non identifiés, avec un
+         critère que la modale EXPLIQUE · `tailleOriginale` figée au dépôt,
+         persistée, restaurée, comparée au rattachement · `reattacherBlobs` rend
+         `{ rattaches, ignores }` et `redeposerFichiers` DIT les non reconnus —
+         il calculait déjà `rattaches` et le jetait.
+       ⚠ LE PIÈGE DU CORRECTIF : jamais `tailleFichier`, qui est la taille APRÈS
+         préparation. Un HEIC converti en JPEG n'a plus la taille du fichier
+         déposé — comparer `tailleFichier` aurait cassé le re-dépôt de toutes
+         les photos d'iPhone. Un test le verrouille nommément.
+
+     ⚠⚠ LE CLIQUET #595 A ATTRAPÉ MON PREMIER JET. Je stylais le nouveau
+       paragraphe de la modale avec `--couleur-texte-secondaire` — copiée sur la
+       ligne voisine. C'est une variable FANTÔME : référencée dans
+       `travaux-ui.js`, jamais définie dans `styles.css`. La vraie est
+       `--texte-secondaire`. Sans le cliquet, le texte serait sorti sans couleur
+       définie, en héritant de son parent, et personne ne l'aurait vu au banc.
+       ⮕ Copier le style de la ligne d'à côté propage ses défauts.
+
+     ▣ SENTINELLES. `sentinelle-610-reprise-import-et-rattachement.test.js`
+       (9 cas, dont 3 TÉMOINS qui doivent rester verts : taille différente ⇒ pas
+       un doublon, clé (DA, production) toujours prioritaire, contournements
+       assumés toujours honorés) et `sentinelle-558-file-import-survit-reload`
+       ÉTENDUE de 17 à 28 cas. 8 break-tests, 8 ROUGE.
+       Vitest 410 fichiers / 4307 tests, code de sortie 0.
+     ⚠ LIMITE DU BANC, consignée dans le test : `compresserImageSiNecessaire`
+       construit un `new Image()`, absent de Node — AUCUNE image ne peut être
+       importée au banc (`ReferenceError` avant même la détection de doublon).
+       Les cas passent par des PDF, qui éprouvent le même chemin : la
+       comparaison porte sur le nom et la taille, jamais sur le type.
+     ⏳ DÛ À GRÉGOIRE : recharger en cours d'import, puis re-déposer deux
+       homonymes de tailles différentes — chaque élève doit recevoir SON travail.
+
+     ▣ TROIS SESSIONS, ET DEUX RÈGLES CORRIGÉES PAR LES AUTRES.
+       · `kuekatsheu-e6` (S7, #613) a trouvé que le diff S8 de l'audit ne
+         reprenait qu'une moitié du contrat qu'il prétendait copier, et que sa
+         propre sentinelle #385 bornait en CARACTÈRES ce qu'elle croyait
+         vérifier en séquence. 31 fichiers de `tests/unit/` portent la même
+         forme — versé au backlog, pas traité ce soir.
+       · `kuekatsheu-e8` (S8, #614) a corrigé DEUX de mes affirmations. La
+         première : la garde `blobStatut` ne concerne pas la fusion de codex, où
+         le cas est structurellement absent, pas gardé. La seconde, plus
+         coûteuse : ma règle « `git add` par fichier + `--cached --stat` » est
+         INSUFFISANTE — le `--stat` repère un fichier étranger, pas un BLOC
+         étranger dans un fichier attendu. Un `git add BACKLOG.md` avait failli
+         emporter le bloc d'une autre session, écrit dans un hunk contigu.
+       ⮕ Les deux corrections sont inscrites dans le plan, pas seulement
+         échangées entre sessions.
+
+     ▣ RELEASE : AUCUNE ce soir, décision de Grégoire. Une seule, groupée, quand
+       S4, S7 et S8 seront tous commités. Motif mesuré par e8 : `release.mjs`
+       réunit l'arbre de travail ET tout ce qui a changé depuis la release
+       précédente — sur un arbre partagé, il bumpe donc le `?v=` de fichiers que
+       d'autres n'ont pas encore commités, et leur hook anti-cache voit ensuite
+       un suffixe déjà changé et les laisse passer SANS GARDE. L'incident du
+       23 août à l'envers : pas un bump oublié, un bump posé par quelqu'un
+       d'autre.
+
      ▣ TRAVAIL COWORK EN PARALLÈLE, DANS LE MÊME DÉPÔT — RÉSOLU LE JOUR MÊME.
        Pendant ces sessions terminal, Grégoire écrivait depuis Cowork : deux
        prompts de cadrage d'audit (`Rapports/prompts-audit/`) et la sortie SSOT

@@ -538,6 +538,11 @@
             nomFichier: fichier.name,
             typeMIME: typeMIME,
             tailleFichier: fichier.size,
+            // #610 (S2) — la taille du `File` DÉPOSÉ, figée une fois pour toutes.
+            // `tailleFichier` bouge : la préparation compresse, et un HEIC devient
+            // un JPEG (`convertirSiHeic`). Rattacher un blob en comparant
+            // `tailleFichier` échouerait donc sur toutes les photos d'iPhone.
+            tailleOriginale: fichier.size,
             daDetecte: daDetecte,
             etudiantAssocie: etudiant,
             etudiantDA: etudiant ? etudiant.da : daDetecte,
@@ -691,6 +696,39 @@
             }
         }
 
+        // #610 (S1) — LE DOUBLON DES FICHIERS QU'ON NE PEUT PAS IDENTIFIER.
+        // La clé (DA, production) ci-dessus ne peut rien dire d'un fichier sans
+        // DA ou sans production — or la confirmation autorise explicitement
+        // l'import « sans production associée », et le bandeau « sans DA » n'est
+        // pas bloquant. Scénario mesuré : 40 photos sans DA, l'iPad en veille au
+        // 25e fichier ; au retour la file en affiche 40 « à re-déposer » ;
+        // l'enseignant re-dépose et confirme. 25 fichiers en double, aucun
+        // avertissement, et l'écran annonce « 40 fichier(s) importé(s) ».
+        //
+        // À défaut d'identité, on reconnaît les mêmes OCTETS : nom d'origine et
+        // taille, dans le groupe-cours actif. `blob.size` est la taille après
+        // compression, donc comparable au `tailleFichier` stocké.
+        //
+        // Les trois contournements assumés valent ici comme au-dessus : un
+        // remplacement et un livrable additionnel ne sont pas des doublons.
+        if ((!fichierPrepare.etudiantDA || !productionId)
+            && !fichierPrepare.estReprise
+            && !fichierPrepare.livrableAdditionnel
+            && !fichierPrepare.remplaceExistant) {
+            const memesOctets = travauxStockage.obtenirFichiersGroupeActif()
+                .filter(f => f.nomFichierLea === fichierPrepare.nomFichier
+                          && f.tailleFichier === blob.size);
+            if (memesOctets.length > 0) {
+                return {
+                    doublon: true,
+                    fichierExistant: memesOctets[0],
+                    fichierPrepare: fichierPrepare,
+                    productionId: productionId,
+                    critere: 'nom-taille'
+                };
+            }
+        }
+
         // Identifier le cours actif pour taguer le fichier
         const coursActif = (typeof db !== 'undefined') ? db.getSync('infoCours', null) : null;
         const gcActif = (typeof db !== 'undefined') ? db.getSync('groupeCoursActif', null) : null;
@@ -797,6 +835,13 @@
             if (onProgression) {
                 onProgression(i + 1, total);
             }
+
+            // #610 (S1) — persister à CHAQUE pas, pas seulement en fin de lot.
+            // Le retrait d'un fichier importé doit survivre à une interruption :
+            // iPad en veille, onglet fermé, batterie. Sans cela, la file
+            // persistée reste celle d'avant l'import, et tout le lot revient
+            // « à re-déposer » alors que la moitié est déjà en base.
+            persisterFileDAttente();
         }
 
         importEnCours = false;
@@ -870,6 +915,9 @@
                 nomFichier: f.nomFichier,
                 typeMIME: f.typeMIME,
                 tailleFichier: f.tailleFichier,
+                // #610 — persister sans restaurer ne servirait à rien : la
+                // symétrie des deux mappings est ce qui rend le champ utile.
+                tailleOriginale: f.tailleOriginale || f.tailleFichier || 0,
                 daDetecte: f.daDetecte,
                 etudiantDA: f.etudiantDA,
                 estPDF: f.estPDF,
@@ -943,6 +991,9 @@
                 nomFichier: d.nomFichier || '',
                 typeMIME: d.typeMIME || '',
                 tailleFichier: d.tailleFichier || 0,
+                // #610 — pendant de l'écriture ci-dessus. Le repli sur
+                // `tailleFichier` couvre les files persistées AVANT ce correctif.
+                tailleOriginale: d.tailleOriginale || d.tailleFichier || 0,
                 daDetecte: d.daDetecte || '',
                 etudiantAssocie: d.etudiantDA ? trouverEtudiantParDA(d.etudiantDA) : null,
                 etudiantDA: d.etudiantDA || '',
@@ -1475,15 +1526,32 @@
 
     /**
      * Re-attache les blobs File aux entrées de la queue restaurée depuis sessionStorage.
-     * Correspondance par nom de fichier exact (nomFichier === fichier.name).
+     *
+     * #610 (S2) — LA CORRESPONDANCE EXIGE LE NOM **ET** LA TAILLE D'ORIGINE.
+     * Par nom seul, deux entrées `devoir.pdf` associées à la main à deux élèves
+     * différents recevaient les blobs dans l'ordre où le navigateur les rend :
+     * le premier `File` prenait la première entrée libre, quel que soit son
+     * contenu. Le travail d'un élève se retrouvait stocké sous le DA d'un autre,
+     * sans trace et sans message.
+     *
+     * ⚠ `tailleOriginale`, jamais `tailleFichier` : la seconde est la taille
+     * APRÈS préparation (compression, conversion HEIC → JPEG) et ne correspond
+     * plus au fichier que l'enseignant re-dépose.
+     *
      * @param {FileList|Array} fichiers - Les fichiers re-déposés par l'utilisateur
-     * @returns {number} Le nombre de fichiers rattachés
+     * @returns {{rattaches: number, ignores: string[]}} les noms ignorés sont DITS
+     *   à l'enseignant : un fichier muettement écarté est indistinguable d'un
+     *   fichier rattaché.
      */
     function reattacherBlobs(fichiers) {
         let rattaches = 0;
+        const ignores = [];
         for (const fichier of fichiers) {
-            const index = fichiersEnAttente.findIndex(f => f.nomFichier === fichier.name && !f.fichier);
-            if (index === -1) continue;
+            const index = fichiersEnAttente.findIndex(f =>
+                f.nomFichier === fichier.name
+                && f.tailleOriginale === fichier.size
+                && !f.fichier);
+            if (index === -1) { ignores.push(fichier.name); continue; }
             fichiersEnAttente[index].fichier = fichier;
             fichiersEnAttente[index].fichierOriginal = fichier;
             if (!fichiersEnAttente[index].thumbnailDataUrl) {
@@ -1494,7 +1562,7 @@
             rattaches++;
         }
         if (rattaches > 0) persisterFileDAttente();
-        return rattaches;
+        return { rattaches: rattaches, ignores: ignores };
     }
 
     /* ===============================

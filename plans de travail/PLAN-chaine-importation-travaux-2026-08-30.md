@@ -25,7 +25,7 @@
 | S1 — Jetons ↔ fichiers | S5 | LIVRÉ | 2026-08-30 | `ba99f483` (1.106.9) | #607 · sentinelle 7 cas, 4 break-tests, 4 ROUGE · ⏳ test manuel Mac+iPad dû à Grégoire · T6.6 activée |
 | S2 — Jeton et maximum par production | S6 | LIVRÉ | 2026-08-30 | `5752c20c` (1.106.10) | #608 · sentinelle Vitest 9 cas, 5 break-tests, 5 ROUGE · ⏳ test manuel `maxParProduction = 1` dû à Grégoire |
 | S3 — Assemblage automatique | B1, M5 | LIVRÉ | 2026-08-30 | `17fb5f2a` (1.106.11) | #609 · D1 = A · sentinelle #603-604 étendue (24 cas), 4 break-tests, 4 ROUGE · ⏳ test manuel lot iPad avec deux homonymes |
-| S4 — Reprise après interruption, rattachement | S1, S2 | À FAIRE | | | #610 · après S3, jamais en parallèle |
+| S4 — Reprise après interruption, rattachement | S1, S2 | LIVRÉ | 2026-08-30 | COMMIT_S4 | #610 · sentinelle 9 cas + #558 étendue (28), 8 break-tests, 8 ROUGE · release groupée en attente · ⏳ test manuel dû |
 | S5 — Appariement par nom | S3 | À FAIRE | | | #611 |
 | S6 — DA inconnu, groupe absent | S4, S7 | À FAIRE | | | #612 · D2 = A (refus dit) · T6.1 levée : #606 est mergé · **T6.6 activée** (même trou que S5 dans `supprimerEvaluation`) |
 | S7 — Restauration ZIP | S8 | **EN COURS (session du 2026-08-30)** | | | #613 · session e6 · sentinelle #383-384-385 étendue (11 cas ajoutés, 18 au total), 10 break-tests, 10 ROUGE · **deux écarts du diff S8 corrigés** (sorties anticipées non converties ; garde `blobStatut !== 'exporte'` omise, confirmés au code par c2) · trouvaille versée en #616 (bornes par distance dans 31 sentinelles) · ⏳ T7.4 test manuel ZIP à blob corrompu dû à Grégoire · ⏳ T7.5 release en attente de son go |
@@ -61,8 +61,21 @@ touchent toutes `travaux-import.js`, `travaux-ui.js` ou `liste-evaluations.js`.
    `git diff --cached --stat` LU avant chaque commit. Le 30 août, trois fichiers
    non touchés par la session sont apparus dans son index — c'était le travail
    Cowork de Grégoire en parallèle. `git status` ne distingue pas les auteurs.
-3. **`BACKLOG.md`, `SESSION.md` et `RELAIS.md` sont partagés** : on y ajoute son
-   bloc, on n'écrase jamais celui d'un autre.
+3. **`BACKLOG.md`, `SESSION.md`, `RELAIS.md` et ce plan sont partagés** : on y ajoute
+   son bloc, on n'écrase jamais celui d'un autre.
+   ⚠ **Corrigé le 30 août au soir par `kuekatsheu-e8`, après un incident évité de
+   justesse** : `git diff --cached --stat` repère un fichier étranger, **pas un bloc
+   étranger DANS un fichier attendu**. Un `git add BACKLOG.md` avait emporté le bloc
+   d'une autre session, écrit dans un hunk contigu ; le compte de lignes paraissait
+   plausible. Sur ces quatre fichiers, c'est le **diff stagé ENTIER** qu'il faut lire.
+   Le geste de réparation : reconstruire l'index depuis `HEAD` (`git show HEAD:<fichier>`
+   → ses seules transformations → `git hash-object -w` → `git update-index --cacheinfo`),
+   puis **`git commit` SANS nommer de chemin** — `--only`, ou tout chemin passé au commit,
+   reprend l'ARBRE et écrase le blob qu'on vient de poser.
+4. **Les lettres du `?v=` sont par FICHIER, pas globales.** Mesuré le 30 août :
+   `js/init-inline.js` et `js/changelog-data.js` portent tous deux `20260830i` sans
+   conséquence. Un suffixe doit différer de ce que SON fichier portait avant, rien de
+   plus — inutile de se réserver des lettres entre sessions.
 
 ⚠ Les identifiants #607 à #615 sont **déjà réservés** (T0.4) : les employer tels
 quels, n'en réserver aucun de plus.
@@ -162,14 +175,14 @@ Fichiers : `js/travaux-import.js` (`preparerFichier`, `regrouperParDocument`), `
 
 Fichiers : `js/travaux-import.js` (`importerFichier`, `importerTous`, `persisterFileDAttente`, `restaurerFileDAttente`, `reattacherBlobs`), `js/travaux-ui.js` (`redeposerFichiers`, modale doublon). Risque : moyen.
 
-- [ ] **T4.1** — Étendre `tests/unit/sentinelle-558-file-import-survit-reload.test.js` : la file est persistée à chaque fichier importé ; `tailleOriginale` survit au round-trip. ROUGE d'abord.
-- [ ] **T4.2** — Nouvelle sentinelle : un fichier sans DA ré-importé (même `nomFichierLea`, même taille, même groupe) rend `{ doublon: true, critere: 'nom-taille' }`. ROUGE d'abord.
-- [ ] **T4.3** — `importerTous` : `persisterFileDAttente()` à chaque itération.
-- [ ] **T4.4** — `importerFichier` : détection `(nomFichierLea, tailleFichier)` pour les fichiers sans DA ou sans production (diff S1).
-- [ ] **T4.5** — `traiterDoublonsImport` : afficher le critère `nom-taille` ; masquer « jeton » quand il n'y a pas d'élève.
-- [ ] **T4.6** — `tailleOriginale` dans `preparerFichier`, persistance, restauration ; `reattacherBlobs` exige nom + `tailleOriginale` et rend `{ rattaches, ignores }` (retirer le retour numérique nu) ; `redeposerFichiers` affiche les ignorés. Rappel : ne jamais comparer `tailleFichier` (change à la conversion HEIC, `:1068`).
-- [ ] **T4.7** — Break-test, suite complète, test manuel : recharger en cours d'import, re-déposer deux homonymes de tailles différentes.
-- [ ] **T4.8** — Commit, release, merge, tableau, `SESSION.md`.
+- [x] **T4.1** — Étendre `tests/unit/sentinelle-558-file-import-survit-reload.test.js` : la file est persistée à chaque fichier importé ; `tailleOriginale` survit au round-trip. ROUGE d'abord.
+- [x] **T4.2** — Nouvelle sentinelle : un fichier sans DA ré-importé (même `nomFichierLea`, même taille, même groupe) rend `{ doublon: true, critere: 'nom-taille' }`. ROUGE d'abord.
+- [x] **T4.3** — `importerTous` : `persisterFileDAttente()` à chaque itération.
+- [x] **T4.4** — `importerFichier` : détection `(nomFichierLea, tailleFichier)` pour les fichiers sans DA ou sans production (diff S1).
+- [x] **T4.5** — `traiterDoublonsImport` : afficher le critère `nom-taille` ; masquer « jeton » quand il n'y a pas d'élève.
+- [x] **T4.6** — `tailleOriginale` dans `preparerFichier`, persistance, restauration ; `reattacherBlobs` exige nom + `tailleOriginale` et rend `{ rattaches, ignores }` (retirer le retour numérique nu) ; `redeposerFichiers` affiche les ignorés. Rappel : ne jamais comparer `tailleFichier` (change à la conversion HEIC, `:1068`).
+- [x] **T4.7** — Break-test, suite complète, test manuel : recharger en cours d'import, re-déposer deux homonymes de tailles différentes.
+- [~] **T4.8** — Commit, release, merge, tableau, `SESSION.md`. **Commit, tableau et `SESSION.md` faits ; RELEASE EN ATTENTE** — décision de Grégoire du 30 août au soir : une seule release groupée quand S4, S7 et S8 seront tous commités (motif sous T8.6).
 
 **Critère de fin** : un import interrompu puis rejoué ne crée aucun doublon muet ; un re-dépôt ne rattache jamais un blob à la mauvaise entrée.
 
