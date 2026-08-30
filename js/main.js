@@ -276,7 +276,10 @@ document.addEventListener('DOMContentLoaded', function () {
     [
         ['formulaireProduction', 'actionsFicheProduction'],
         ['conteneurEditionGrille', 'actionsFicheGrille'],
-        ['conteneurEditionEchelle', 'actionsFicheEchelle']
+        ['conteneurEditionEchelle', 'actionsFicheEchelle'],
+        // 30 août 2026 — la cartouche rejoint les trois autres. Son formulaire
+        // est `#infoCartouche`, basculé par `u-hide` dans cartouches.js.
+        ['infoCartouche', 'actionsFicheCartouche']
     ].forEach(function(couple) {
         window.lierActionsAuFormulaire(couple[0], couple[1]);
     });

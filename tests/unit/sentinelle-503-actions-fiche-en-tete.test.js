@@ -55,14 +55,17 @@ describe('#503 · les actions de la fiche ont monté en tête', () => {
         expect(barre[0]).toContain('display: none');
     });
 
-    it('d. LES TROIS ÉCRANS sont liés au démarrage', () => {
+    it('d. LES QUATRE ÉCRANS sont liés au démarrage', () => {
         // ⚠ La garde ne cherche plus un appel littéral : les trois couples sont
         // déclarés dans une table. Ce qui compte est qu'aucun écran ne soit
         // oublié — une barre non liée reste visible sur un écran vide.
         for (const [formulaire, actions] of [
             ['formulaireProduction', 'actionsFicheProduction'],
             ['conteneurEditionGrille', 'actionsFicheGrille'],
-            ['conteneurEditionEchelle', 'actionsFicheEchelle']
+            ['conteneurEditionEchelle', 'actionsFicheEchelle'],
+            // 30 août 2026 — la cartouche, quatrième écran. Son formulaire est
+            // `#infoCartouche` : c'est lui que cartouches.js bascule (`u-hide`).
+            ['infoCartouche', 'actionsFicheCartouche']
         ]) {
             expect(mainJs, formulaire).toContain(`['${formulaire}', '${actions}']`);
             expect(indexHtml, actions).toContain(`id="${actions}"`);
@@ -70,8 +73,8 @@ describe('#503 · les actions de la fiche ont monté en tête', () => {
         expect(mainJs).toContain('window.lierActionsAuFormulaire(couple[0], couple[1])');
     });
 
-    it('d2. Les barres de la grille et de l\'échelle naissent masquées elles aussi', () => {
-        for (const id of ['actionsFicheGrille', 'actionsFicheEchelle']) {
+    it('d2. Les barres de la grille, de l\'échelle et de la cartouche naissent masquées', () => {
+        for (const id of ['actionsFicheGrille', 'actionsFicheEchelle', 'actionsFicheCartouche']) {
             const barre = indexHtml.match(new RegExp('<div id="' + id + '"[^>]*>'));
             expect(barre, id).toBeTruthy();
             expect(barre[0], id).toContain('u-hide');
@@ -82,10 +85,48 @@ describe('#503 · les actions de la fiche ont monté en tête', () => {
     it('d3. Leurs formulaires ne gardent pas de barre orpheline', () => {
         for (const [debutMarq, finMarq, action] of [
             ['id="conteneurEditionGrille"', 'Fin conteneurEditionGrille', 'sauvegarderGrilleComplete'],
-            ['id="conteneurEditionEchelle"', 'Fin conteneurEditionEchelle', 'sauvegarderEchelleComplete']
+            ['id="conteneurEditionEchelle"', 'Fin conteneurEditionEchelle', 'sauvegarderEchelleComplete'],
+            // La cartouche n'a pas de marqueur « Fin » : son formulaire se termine
+            // au panneau de métadonnées, qui le suit immédiatement.
+            ['id="infoCartouche"', 'id="panneauMetadonneesCartouche"', 'sauvegarderCartoucheComplete']
         ]) {
             const dedans = indexHtml.slice(indexHtml.indexOf(debutMarq), indexHtml.indexOf(finMarq));
             expect(dedans, action).not.toContain('data-action="' + action + '"');
+        }
+    });
+
+    it('d4. CARTOUCHE — la barre de fiche porte les QUATRE mêmes actions que la grille et l\'échelle', () => {
+        // Composition arrêtée le 30 août : la barre de fiche des trois écrans
+        // porte la même chose, ni plus ni moins. Les actions de DOCUMENT
+        // (les deux exports, le modèle vide) vivent à côté, pas dedans.
+        const barre = indexHtml.match(/<div id="actionsFicheCartouche"[\s\S]*?\n {36}<\/div>/);
+        expect(barre, 'barre actionsFicheCartouche trouvée').toBeTruthy();
+        for (const action of ['dupliquerCartoucheActive', 'supprimerCartoucheActive',
+                              'annulerFormCartouche', 'sauvegarderCartoucheComplete']) {
+            expect(barre[0], action).toContain(action);
+        }
+        for (const dehors of ['btnExporterPDFCartouche', 'btnExporterTexteCartouche', 'btnModeleCartouche']) {
+            expect(barre[0], `${dehors} est une action de document, pas de fiche`).not.toContain(dehors);
+        }
+    });
+
+    it('d5. CARTOUCHE — « Télécharger un modèle » reste visible SANS fiche ouverte (#531)', () => {
+        // ⚠⚠ L'INVARIANT QUI SE PERDRAIT LE PLUS FACILEMENT. Ce bouton sert
+        // AVANT qu'une cartouche existe : le ranger dans la barre qui suit
+        // `#infoCartouche`, ou lui poser `u-hide` comme à ses deux voisins, le
+        // ferait disparaître exactement quand il est utile. Un futur ménage qui
+        // uniformiserait « les trois boutons de document » casserait #531 sans
+        // qu'aucun test ne parle — celui-ci parle.
+        const modele = indexHtml.match(/<button id="btnModeleCartouche"[^>]*>/);
+        expect(modele, 'btnModeleCartouche trouvé').toBeTruthy();
+        expect(modele[0], 'le modèle vide reste visible sans fiche ouverte').not.toContain('u-hide');
+        // Il vit en tête, avant le formulaire.
+        expect(indexHtml.indexOf('id="btnModeleCartouche"'))
+            .toBeLessThan(indexHtml.indexOf('id="infoCartouche"'));
+        // Ses deux voisins, EUX, gardent `u-hide` : cartouches.js les bascule.
+        for (const id of ['btnExporterPDFCartouche', 'btnExporterTexteCartouche']) {
+            const b = indexHtml.match(new RegExp('<button id="' + id + '"[^>]*>'));
+            expect(b[0], `${id} doit rester masqué tant qu'aucune cartouche n'est ouverte`).toContain('u-hide');
         }
     });
 
