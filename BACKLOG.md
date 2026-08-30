@@ -118,9 +118,27 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **Le même trou existe sur le chemin le plus fréquenté** — `supprimerEvaluation`
   (`js/liste-evaluations.js`) restaure l'originale sans toucher au fichier de la reprise. Inscrit en
   T6.6 du plan, traité avec [[#612]].
-- [ ] **#608 — S2 · « Appliquer comme jeton » offert alors que le maximum par production est atteint** (constat S6).
-  `js/travaux-ui.js`. Le fichier est importé, aucun jeton n'est consommé, l'écran annonce le contraire.
-  Correctif : masquer le bouton au-delà du maximum, séparer `rattaches` de `compteur`.
+- [x] **#608 — LIVRÉ le 30 août 2026 — S2 · « Appliquer comme jeton » était offert alors que le maximum par production était atteint** (constat S6).
+  `js/travaux-ui.js`. **Deux défauts qui se composaient en un mensonge d'écran.**
+  · Le bouton de la modale de doublon ne lisait que le compte GLOBAL de jetons de l'élève
+  (`verifierDisponibiliteJeton`), jamais `maxParProduction`. Le maximum est vérifié ailleurs — dans
+  `appliquerJetonReprise`, qui rend `null` SANS UN MOT quand `silencieux` est posé. Résultat : bouton
+  offert, fichier importé comme reprise, aucun jeton consommé, rien de dit.
+  · Le balayage post-import comptait comme « jeton appliqué » un fichier simplement RATTACHÉ à une
+  reprise déjà accordée. « 1 jeton(s) de reprise appliqué(s) » pour zéro jeton accordé — et la
+  première reprise se retrouvait avec deux fichiers.
+  ➮ **Correctif** : `_jetonRepriseOffrable(etudiantDA, productionId)` lit les DEUX bornes à l'endroit
+  où le bouton se décide. La branche « jeton » de la modale DIT le refus au lieu de le taire.
+  `appliquerJetonsReprisePostImport` rend `{ jetons, rattaches }` au lieu d'un nombre nu — les deux
+  comptes ne sont jamais additionnés, et le rattachement a sa propre annonce, qui nomme l'élève.
+  Le retour numérique nu est retiré, son seul appelant adapté.
+  ➮ Sentinelle `tests/unit/sentinelle-608-jeton-maximum-par-production.test.js`, 9 cas ;
+  **5 break-tests, 5 ROUGE** (borne par production retirée · borne globale retirée · rattachement
+  recompté comme jeton · annonce du rattachement anonymisée · `<` devenu `<=`).
+  Vitest 408 fichiers / 4258 tests + Playwright 210/210, code de sortie 0.
+  ⏳ **Test manuel dû à Grégoire** : poser `maxParProduction = 1`, accorder une reprise, puis importer
+  un troisième fichier pour la même production — le bouton « jeton » ne doit plus paraître, et le
+  rattachement doit être annoncé comme tel.
 - [ ] **#609 — S3 · L'assemblage automatique fusionne des fichiers qui ne sont pas des pages d'un même document** (constats B1, M5).
   `js/travaux-import.js`, `js/travaux-ui.js`. Deux images homonymes sans DA deviennent un document ;
   deux remises datées différemment aussi. **D1 = A** : la clé porte l'horodatage de remise, et

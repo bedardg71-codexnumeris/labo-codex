@@ -18,7 +18,7 @@
 |---|---|---|---|---|---|
 | S0 — Préparation | — | LIVRÉ | 2026-08-30 | | D1=A, D2=A, D3=A · #607–#615 réservés · #606 coché (livré `c24036e7`) |
 | S1 — Jetons ↔ fichiers | S5 | LIVRÉ | 2026-08-30 | `ba99f483` (1.106.9) | #607 · sentinelle 7 cas, 4 break-tests, 4 ROUGE · ⏳ test manuel Mac+iPad dû à Grégoire · T6.6 activée |
-| S2 — Jeton et maximum par production | S6 | À FAIRE | | | #608 |
+| S2 — Jeton et maximum par production | S6 | LIVRÉ | 2026-08-30 | COMMIT_S2 | #608 · sentinelle Vitest 9 cas, 5 break-tests, 5 ROUGE · ⏳ test manuel `maxParProduction = 1` dû à Grégoire |
 | S3 — Assemblage automatique | B1, M5 | À FAIRE | | | #609 · D1 = A (deux documents) |
 | S4 — Reprise après interruption, rattachement | S1, S2 | À FAIRE | | | #610 · après S3, jamais en parallèle |
 | S5 — Appariement par nom | S3 | À FAIRE | | | #611 |
@@ -92,12 +92,13 @@ Fichier : `js/evaluation-jetons.js`. Risque de régression : faible (module isol
 
 Fichier : `js/travaux-ui.js` (`traiterDoublonsImport`, `appliquerJetonsReprisePostImport`). Risque : faible.
 
-- [ ] **T2.1** — Sentinelle sur `appliquerJetonsReprisePostImport` si la fonction est extractible au banc ; sinon test Playwright. Consigner lequel dans la Note.
-- [ ] **T2.2** — Modale : n'afficher « Appliquer comme jeton de reprise » que si `reprisesProd < maxParProduction` (diff S6).
-- [ ] **T2.3** — Branche `jeton` : quand `appliquerJetonReprise` rend `null`, notification d'erreur explicite (fichier importé comme reprise, aucun jeton consommé).
-- [ ] **T2.4** — Post-import : séparer `rattaches` de `compteur` ; deux notifications distinctes (« jetons appliqués » / « fichiers rattachés à une reprise déjà accordée »). Retirer le `compteur++` de la branche `repriseExistante`.
-- [ ] **T2.5** — Break-test, suite complète, test manuel avec `maxParProduction = 1` et un troisième fichier.
-- [ ] **T2.6** — Commit, release, merge, tableau, `SESSION.md`.
+- [x] **T2.1** — Sentinelle sur `appliquerJetonsReprisePostImport` si la fonction est extractible au banc ; sinon test Playwright. Consigner lequel dans la Note.
+  **VITEST, pas Playwright.** `js/travaux-ui.js` se charge entier dans le sandbox `chargerScript` dès qu'on lui donne un `window.addEventListener` (il en pose un au top-level) : aucun autre effet de bord ne l'en empêche. Les deux points de décision sont exposés sous un souligné — `travauxUI._jetonRepriseOffrable` et `travauxUI._appliquerJetonsReprisePostImport` — le souligné disant « pas une API », comme `window._restaurerOriginaleSiReprise` dans `liste-evaluations.js`. La modale elle-même reste hors banc : sa DÉCISION est testée, son rendu attend le test manuel.
+- [x] **T2.2** — Modale : n'afficher « Appliquer comme jeton de reprise » que si `reprisesProd < maxParProduction` (diff S6).
+- [x] **T2.3** — Branche `jeton` : quand `appliquerJetonReprise` rend `null`, notification d'erreur explicite (fichier importé comme reprise, aucun jeton consommé).
+- [x] **T2.4** — Post-import : séparer `rattaches` de `compteur` ; deux notifications distinctes (« jetons appliqués » / « fichiers rattachés à une reprise déjà accordée »). Retirer le `compteur++` de la branche `repriseExistante`.
+- [x] **T2.5** — Break-test, suite complète, test manuel avec `maxParProduction = 1` et un troisième fichier.
+- [x] **T2.6** — Commit, release, merge, tableau, `SESSION.md`.
 
 **Critère de fin** : maximum atteint → pas de bouton « jeton » ; un rattachement n'est jamais annoncé comme un jeton appliqué.
 

@@ -3896,7 +3896,7 @@
         }
 
         // Phase Jetons : appliquer les jetons de reprise pour les fichiers importés comme reprises
-        const nbJetons = await appliquerJetonsReprisePostImport();
+        const bilanJetons = await appliquerJetonsReprisePostImport();
 
         afficherImport();
 
@@ -3904,8 +3904,46 @@
         var details = [];
         if (resultat.erreurs > 0) details.push(resultat.erreurs + ' erreur(s)');
         if (resultat.doublons && resultat.doublons.length > 0) details.push(resultat.doublons.length + ' doublon(s) traité(s)');
-        if (nbJetons > 0) details.push(nbJetons + ' jeton(s) de reprise appliqué(s)');
+        // #608 — deux mentions distinctes : un rattachement n'est jamais annoncé
+        // comme un jeton appliqué.
+        if (bilanJetons.jetons > 0) details.push(bilanJetons.jetons + ' jeton(s) de reprise appliqué(s)');
+        if (bilanJetons.rattaches.length > 0) details.push(bilanJetons.rattaches.length + ' fichier(s) rattaché(s) à une reprise déjà accordée');
         notifications.succes(msg, details.join(' — '));
+    }
+
+    /**
+     * #608 (constat S6 de l'audit du 30 août 2026) — un jeton de reprise ne
+     * s'offre que s'il peut réellement être consommé.
+     *
+     * LE DÉFAUT. La modale de doublon ne regardait que le compte GLOBAL de
+     * jetons de l'élève (`verifierDisponibiliteJeton`). Le maximum PAR
+     * PRODUCTION est vérifié ailleurs — dans `appliquerJetonReprise`, qui rend
+     * `null` SANS UN MOT quand `silencieux` est posé. Au-delà du maximum, le
+     * bouton s'affichait, le fichier était importé comme reprise, aucun jeton
+     * n'était consommé, et l'écran annonçait le contraire.
+     *
+     * Les deux bornes sont donc lues ICI, à l'endroit où le bouton se décide.
+     *
+     * @param {string} etudiantDA
+     * @param {string} productionId
+     * @returns {boolean} true si un jeton de reprise peut être accordé
+     */
+    function _jetonRepriseOffrable(etudiantDA, productionId) {
+        if (!etudiantDA) return false;
+        if (typeof verifierDisponibiliteJeton !== 'function') return false;
+        if (!verifierDisponibiliteJeton(etudiantDA, 'reprise')) return false;
+
+        var configJetons = (typeof obtenirConfigJetons === 'function') ? obtenirConfigJetons() : null;
+        var maxParProduction = (configJetons && configJetons.reprise && configJetons.reprise.maxParProduction) || 1;
+
+        var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        var reprisesProduction = evaluations.filter(function(e) {
+            return e.etudiantDA === etudiantDA
+                && e.productionId === productionId
+                && e.jetonRepriseApplique === true;
+        }).length;
+
+        return reprisesProduction < maxParProduction;
     }
 
     /**
@@ -3930,9 +3968,9 @@
 
             // Vérifier si un jeton de reprise est disponible pour cet élève
             var boutonJeton = '';
-            if (jetonsActifs && d.fichierExistant.etudiantDA && typeof verifierDisponibiliteJeton === 'function') {
-                var jetonDispo = verifierDisponibiliteJeton(d.fichierExistant.etudiantDA, 'reprise');
-                if (jetonDispo) {
+            if (jetonsActifs && d.fichierExistant.etudiantDA) {
+                // #608 — les DEUX bornes : jetons restants ET maximum par production.
+                if (_jetonRepriseOffrable(d.fichierExistant.etudiantDA, d.productionId)) {
                     boutonJeton = '<button class="btn btn-secondaire" data-choix="jeton" style="border-color:var(--alerte-texte-attention);">Appliquer comme jeton de reprise' +
                         '<span style="display:block;font-size:11px;font-weight:400;opacity:0.8;">Les deux fichiers sont conserv\u00e9s. L\u2019\u00e9valuation originale est archiv\u00e9e.</span>' +
                     '</button>';
@@ -3995,7 +4033,16 @@
                         });
                         if (evalActive) {
                             var nouvelleEval = appliquerJetonReprise(evalActive.id, null, { silencieux: true });
-                            if (nouvelleEval) {
+                            if (!nouvelleEval) {
+                                // #608 — le refus était muet : le fichier entrait
+                                // comme reprise, aucun jeton n'était consommé, et
+                                // rien à l'écran ne le disait.
+                                notifications.erreur(
+                                    'Jeton non appliqu\u00e9',
+                                    'Le fichier de ' + nomEtudiant + ' est import\u00e9 comme reprise, mais aucun jeton n\u2019a \u00e9t\u00e9 consomm\u00e9 '
+                                    + '(maximum de reprises atteint pour cette production). \u00c0 v\u00e9rifier dans la liste des \u00e9valuations.'
+                                );
+                            } else {
                                 travauxStockage.mettreAJourFichier(fichierImporte.id, { evaluationId: nouvelleEval.id });
                                 if (!d.fichierExistant.evaluationId) {
                                     travauxStockage.mettreAJourFichier(d.fichierExistant.id, { evaluationId: evalActive.id });
@@ -4072,10 +4119,19 @@
     /**
      * Applique automatiquement les jetons de reprise pour les fichiers importés comme reprises.
      * Cherche l'évaluation active correspondante, crée la nouvelle éval, et lie les fichiers.
-     * @returns {number} Nombre de jetons appliqués
+     * @returns {{jetons: number, rattaches: string[]}} #608 — les jetons RÉELLEMENT
+     *   accordés d'un côté, les fichiers seulement rattachés à une reprise déjà
+     *   accordée de l'autre. Jamais additionnés : ils ne disent pas la même chose.
      */
     async function appliquerJetonsReprisePostImport() {
-        if (typeof travauxStockage === 'undefined' || typeof appliquerJetonReprise !== 'function') return 0;
+        // #608 — REND UN OBJET, plus un nombre nu. Le nombre confondait deux
+        // choses que l'enseignant ne doit jamais confondre : un jeton accordé
+        // (une reprise de plus) et un simple rattachement à une reprise DÉJÀ
+        // accordée (aucun jeton consommé, la même reprise gagne un fichier).
+        // L'écran annonçait « 1 jeton(s) de reprise appliqué(s) » dans les deux
+        // cas.
+        var bilan = { jetons: 0, rattaches: [] };
+        if (typeof travauxStockage === 'undefined' || typeof appliquerJetonReprise !== 'function') return bilan;
 
         // Trouver les fichiers marqués comme reprises sans evaluationId
         // #572 — RESTREINT au groupe-cours actif. `obtenirFichiersTravaux()`
@@ -4089,7 +4145,7 @@
             return f.estReprise && !f.evaluationId && f.etudiantDA && f.productionId;
         });
 
-        if (fichiersReprise.length === 0) return 0;
+        if (fichiersReprise.length === 0) return bilan;
 
         // Dédoublonner : garder seulement le fichier le plus récent par (DA, productionId)
         var parCle = {};
@@ -4103,7 +4159,6 @@
         fichiersReprise = Object.values(parCle);
 
         var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-        var compteur = 0;
         var echecsSansEval = [];
 
         for (var i = 0; i < fichiersReprise.length; i++) {
@@ -4118,9 +4173,10 @@
                     e.jetonRepriseApplique && !e.remplaceeParId;
             });
             if (repriseExistante) {
-                // Jeton déjà appliqué — lier le fichier à l'évaluation existante
+                // Jeton déjà appliqué — lier le fichier à l'évaluation existante.
+                // #608 : ce n'est PAS un jeton de plus. Compté à part, et dit à part.
                 travauxStockage.mettreAJourFichier(fichier.id, { evaluationId: repriseExistante.id });
-                compteur++;
+                bilan.rattaches.push(nomEtudiant);
                 continue;
             }
 
@@ -4163,7 +4219,7 @@
 
             // Rafraîchir la liste des évaluations pour la prochaine itération
             evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-            compteur++;
+            bilan.jetons++;
         }
 
         // Notification consolidée
@@ -4175,7 +4231,17 @@
             );
         }
 
-        return compteur;
+        // #608 — le rattachement a sa propre annonce, distincte de celle des
+        // jetons : l'enseignant doit savoir que la reprise déjà accordée a
+        // maintenant un fichier de plus, et qu'aucun jeton n'a été consommé.
+        if (bilan.rattaches.length > 0) {
+            notifications.info(
+                'Fichiers rattachés à une reprise déjà accordée',
+                bilan.rattaches.join(', ') + ' \u2014 aucun jeton suppl\u00e9mentaire n\u2019a \u00e9t\u00e9 consomm\u00e9.'
+            );
+        }
+
+        return bilan;
     }
 
     /**
@@ -6982,6 +7048,12 @@
 
     window.travauxUI = {
         initialiser: initialiserModuleTravaux,
+        // #608 — exposés pour la sentinelle. Le souligné dit « pas une API » :
+        // les deux points de décision de la chaîne « jeton de reprise » sont
+        // enfouis dans une modale et dans un balayage post-import, que Vitest ne
+        // peut atteindre autrement.
+        _jetonRepriseOffrable: _jetonRepriseOffrable,
+        _appliquerJetonsReprisePostImport: appliquerJetonsReprisePostImport,
         // Sous-sections
         afficherImport: afficherImport,
         afficherFichiers: afficherFichiers,

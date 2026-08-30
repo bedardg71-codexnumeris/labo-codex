@@ -89,6 +89,40 @@
        formulaire ; la ligne de l'originale doit rouvrir le fichier ORIGINAL,
        et le fichier de la reprise doit apparaître dans la Corbeille.
 
+     ▣ S2 (#608) — LE JETON OFFERT EST MAINTENANT UN JETON QU'ON PEUT
+       CONSOMMER, ET UN RATTACHEMENT N'EST PLUS ANNONCÉ COMME UN JETON.
+       Deux défauts (constat S6) qui se composaient en un mensonge d'écran :
+       · le bouton « Appliquer comme jeton de reprise » ne lisait que le compte
+         GLOBAL de jetons de l'élève, jamais `maxParProduction`. Ce maximum est
+         vérifié ailleurs — dans `appliquerJetonReprise`, qui rend `null` SANS
+         UN MOT quand `silencieux` est posé. Bouton offert, fichier importé
+         comme reprise, aucun jeton consommé, rien de dit.
+       · le balayage post-import comptait comme « jeton appliqué » un fichier
+         simplement RATTACHÉ à une reprise déjà accordée : « 1 jeton(s) de
+         reprise appliqué(s) » pour zéro jeton, et la première reprise gagnait
+         un second fichier.
+       ➮ `_jetonRepriseOffrable(etudiantDA, productionId)` lit les DEUX bornes
+         à l'endroit où le bouton se décide. La branche « jeton » DIT le refus.
+         `appliquerJetonsReprisePostImport` rend `{ jetons, rattaches }` au lieu
+         d'un nombre nu — jamais additionnés, chacun sa mention. Le retour
+         numérique nu est RETIRÉ, son seul appelant adapté.
+
+     ▣ T2.1 TRANCHÉE : VITEST, PAS PLAYWRIGHT. `js/travaux-ui.js` (7 100
+       lignes) se charge entier dans le sandbox `chargerScript` dès qu'on lui
+       donne un `window.addEventListener` — il en pose un au top-level, et
+       c'était le seul obstacle. Les deux points de décision sont exposés sous
+       un souligné (`travauxUI._jetonRepriseOffrable`,
+       `travauxUI._appliquerJetonsReprisePostImport`), patron déjà employé par
+       `window._restaurerOriginaleSiReprise`. La modale reste hors banc : sa
+       DÉCISION est testée, son rendu attend le test manuel.
+       Sentinelle 9 cas ; 5 break-tests, 5 ROUGE — borne par production retirée,
+       borne globale retirée, rattachement recompté comme jeton, annonce du
+       rattachement anonymisée, `<` devenu `<=`.
+       Vitest 408 / 4258 + Playwright 210/210, code 0. Release 1.106.10.
+     ⏳ DÛ À GRÉGOIRE : poser `maxParProduction = 1`, accorder une reprise, puis
+       importer un troisième fichier sur la même production — le bouton
+       « jeton » ne doit plus paraître.
+
      ⚠ SESSION PARALLÈLE DÉTECTÉE SUR LE MÊME DÉPÔT (14 h 54 - 14 h 55) :
        `Rapports/prompts-audit/` (deux fichiers neufs) et
        `scripts/audit-ssot.json`/`.md` régénérés. NON COMMITÉS ICI — ils
