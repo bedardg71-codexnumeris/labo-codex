@@ -334,15 +334,18 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 > `Rapports/AUDIT-modele-objets-conception-2026-08-30.md`.
 > ⚠ Ces numéros sont PRIS. Une autre session qui réserve part de **#630**.
 
-- [ ] **#619 — S1 · Audit ciblé Z1 : cartouches, frontière de portée, archivage** (constats B1, B2, M1). Lecture seule.
-- [ ] **#620 — S2 · Audit ciblé Z2 : politique de suppression et intégrité référentielle** (constats S1, S2, S6, M7). Lecture seule ; inventaire des orphelins, dont l'incident #542.
+- [x] **#619 — S1 · Audit ciblé Z1 : cartouches, frontière de portée, archivage** (constats B1, B2, M1). Lecture seule. ✅ **LIVRÉ le 30 août 2026** (`4a88b6af`) — `Rapports/AUDIT-conception-Z1-cartouches-archivage-2026-08-30.md`, 686 lignes. ⏳ T1.2 (diagnostic console) en attente de Grégoire.
+- [x] **#620 — S2 · Audit ciblé Z2 : politique de suppression et intégrité référentielle** (constats S1, S2, S6, M7). Lecture seule. ✅ **LIVRÉ le 30 août 2026** (`3f9edcd1`) — `Rapports/AUDIT-conception-Z2-suppressions-integrite-2026-08-30.md`, 917 lignes, 1 BLOQUANT et 5 SÉRIEUX. ⏳ T2.2 (diagnostic console) en attente de Grégoire.
 - [ ] **#621 — S3 · Audit ciblé Z3 : le legacy vivant des quatre sections** (constats S4, S5, S9). Lecture + instrumentation locale jamais commitée.
 - [ ] **#622 — S4 · Archivage de trimestre** (constat B1). Après S1. ⚠ D1 = A : moratoire actif sur « Archiver un trimestre » jusqu'à la livraison de cet item.
 - [ ] **#623 — S5 · Régime des cartouches** (constat B2). Après S1 et D2. ⚠ Migration de données réelles : sauvegarde préalable par copie obligatoire.
-- [ ] **#624 — S6 · Politique de suppression et réparation des orphelins** (constats S1, S2). Après S2 et D3. Absorbe la réparation #542.
+- [ ] **#624 — S6 · Politique de suppression : refermer les CHEMINS qui produisent des orphelins, et traiter les `ECHELLE_DEMO` résiduelles** (constats S1, S2). Après **S5** (ordre strict S4→S5→S6), D3-A **qualifiée**.
+  ⚠ **Reformulé le 30 août 2026.** L'énoncé précédent disait « absorbe la réparation #542 ». **#542 a été réparé le 26 août** (`scripts/reparation-542-echelle-orpheline.js` ; deux commits, dont `e3d5af34` qui corrige la réparation elle-même). Ce qui reste n'est pas la réparation : c'est **la CAUSE, inconnue**, et les `ECHELLE_DEMO` résiduelles. ⮕ Chiffres 383 → 44 **RAPPORTÉS, non remesurés** : le diagnostic de T2.2 rendra celui du jour.
+  ⚠ **D3-A est qualifiée, pas appliquée à la lettre** : bloquer + NOMMER les référents (quoi, combien, quel trimestre) + **CONSERVER et généraliser la porte de sortie « réassigner vers un autre objet »** là où elle existe. Sur les échelles, le chemin actuel PROPOSE de migrer les évaluations : un D3-A strict retirerait cette issue et laisserait un refus indéfaisable. Un blocage sans issue n'est pas une garde.
 - [ ] **#625 — S7 · États d'édition : `tempCriteres` et création d'échelle** (constat S3). Indépendant.
 - [ ] **#626 — S8 · Retraits sûrs statiquement** (constats S5 partie morte, M2–M5, M8, M11). Indépendant, après D5.
-- [ ] **#627 — S9 · Unification des remaps d'import** (constats S6, M6). Après S2. `import-export.js` est sous surveillance sécurité : suite complète avant commit.
+- [ ] **#627 — S9 · Unification des remaps d'import sur l'implémentation de `reserve-ouvrir.js:1057`, PAS sur #448 seul** (constats S6, M6). Après S2. `import-export.js` est sous surveillance sécurité : suite complète avant commit.
+  ⚠ **Reformulé le 30 août 2026.** Z2 recense un **quatrième** remap que l'audit du 30 août ignorait : `reserve-ouvrir.js:1057`, et c'est **le plus complet des quatre** — il réécrit `cartouche.grilleId`, ce qui déplace la clé de stockage : exactement le trou de #448. ⮕ Un défaut y est mesuré : il patche `config.echelleId` alors que le seul écrivain écrit `configuration.echelleId` — **le remap des pratiques y est inopérant**. ⮕ **Le vrai travail est de construire la table `remapCartouches`**, qui n'existe pas.
 - [ ] **#628 — S10 · Retrait du legacy des quatre sections** (constats S4, S9). Après S3 et D4. Probablement scindé en S10a (échelles) et S10b (les trois autres).
 - [ ] **#629 — S11 · Mineurs restants du plan Conception** (constats M1 si non absorbé par S4, M7, M9, M10).
 - [ ] **#630 — Diagnostic en lecture seule : combien de modèles ne survivraient PAS à un archivage**.
