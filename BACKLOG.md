@@ -418,6 +418,23 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Ce qui manque, c'est son application — `:174-178` ne patche que `grilleId`.
   ⮕ Conséquence : le lot **S9 / #627** est plus petit qu'annoncé de ce côté. Corriger l'énoncé de Z2 avant que S9
   s'en serve comme spécification. **Un diff d'audit est une esquisse, jamais une spécification.**
+- [ ] **#653 — CONSTAT · Les deux blocs de la modal de suppression sont MASQUÉS sans être VIDÉS : ils gardent le contenu de l'ouverture précédente**.
+  Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur mesure de `kuekatsheu-94`.
+  ⚠ **Ce constat a déjà trompé un lecteur, et ce n'est pas un risque théorique** : le premier passage du témoin de
+  #647 a rendu un **faux positif sur trois types**, en lisant le `textContent` du bloc d'avertissements sans lire sa
+  **visibilité**. Corrigé au second passage. Un faux positif de ce genre est **vert** — personne ne le voit.
+  `ouvrirModalSuppressionRessource` (`js/donnees-v2.js`) fait, pour chacun de ses deux blocs :
+  liste non vide → `listeX.innerHTML = …` puis `divX.classList.remove('u-hide')` ; liste vide →
+  `divX.classList.add('u-hide')` **et rien d'autre**. L'`innerHTML` de l'ouverture précédente reste en place.
+  · **`#liste-avertissements`** — **MESURÉ**, c'est celui qui a produit le faux positif.
+  · **`#liste-dependances-bloquantes`** — ⚠ **INFÉRÉ de la symétrie du code, PAS mesuré.** À vérifier avant de le
+    tenir pour acquis. S'il se confirme, c'est **le plus dangereux des deux** : c'est celui qui **bloque** la
+    suppression, et démasqué au mauvais moment il annoncerait les dépendances bloquantes d'une **autre** ressource.
+  ⮕ **Remède : une ligne par bloc** — vider l'`innerHTML` en même temps qu'on masque, plutôt que masquer seul.
+  ⮕ **Pourquoi un ID plutôt qu'une note de consigne** (argument de `kuekatsheu-94`, retenu) : une consigne de
+  démarrage est lue une fois et **périme en silence** ; un ID se grep. Et c'est la même famille que **#649** — sans
+  symptôme aujourd'hui, mais il fabrique des verdicts faux dès qu'on l'approche. Un dispositif dormant qui ment quand
+  on le réveille mérite une trace, pas une mémoire.
 - [ ] **#651 — Depuis la liste des évaluations, « annoter » ouvre la page sans AUCUNE palette quand on vient du mode Évaluer**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, à la demande de `kuekatsheu-5d` qui porte le
   correctif sous le pilotage direct de Grégoire. Retour terrain de Grégoire, avec capture.
