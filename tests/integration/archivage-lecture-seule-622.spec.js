@@ -35,9 +35,18 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 const patternsAttendus = [
     /version\.json.*access control/i,
     /Cross origin requests are only supported/i,
-    /Not allowed to load local resource.*\.(svg|png)/i,
-    /clé ABSENTE des registres/i
+    /Not allowed to load local resource.*\.(svg|png)/i
 ];
+// ⚠ Une entrée `/clé ABSENTE des registres/i` a été retirée d'ici le 31 août 2026.
+// Elle était INERTE depuis son écriture, et pas seulement périmée : son émetteur
+// unique (`js/trimestres.js:374`) est un `console.warn`, or le collecteur
+// ci-dessous ne pousse que `msg.type() === 'error'`. Le motif n'a donc jamais été
+// confronté à quoi que ce soit. Recopiée sur trois specs sans être re-dérivée une
+// seule fois, elle annonçait une source de bruit surveillée par rien — et serait
+// devenue porteuse en silence le jour où quelqu'un aurait élargi le collecteur
+// aux `warning`, masquant alors un vrai signal que personne n'aurait voulu masquer.
+// ⮕ Une garde peut naître morte. Avant d'ajouter un motif ici, vérifie qu'il peut
+// atteindre le collecteur : le TYPE du message décide, pas son texte.
 
 function brancherEcouteurs(page) {
     const erreurs = [];
