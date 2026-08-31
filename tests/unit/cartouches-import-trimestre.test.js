@@ -263,21 +263,37 @@ describe('Cartouches · import depuis un autre trimestre', () => {
         expect(liste[0].nombre).toBe(1);
     });
 
-    it('5b · une grille présente À L\'IDENTIQUE dans le trimestre actif est EXCLUE', async () => {
-        // Le vrai risque du repli sur la clé globale : `cartouches_<id>` est un
-        // magasin unique. Si la même grille (même id) vit dans les deux trimestres,
-        // ce ne serait pas un import — ce serait proposer à l'enseignant ses propres
-        // cartouches, et les « importer » en ferait des doublons.
+    // ⚠⚠ CAS RETOURNÉ PAR S5/#623 LE 31 AOÛT 2026 — la prémisse d'origine est morte.
+    //
+    // Il s'intitulait « une grille présente À L'IDENTIQUE dans le trimestre actif est
+    // EXCLUE », et son motif était écrit : « `cartouches_<id>` est un magasin unique,
+    // ce serait proposer à l'enseignant ses propres cartouches ».
+    //
+    // Sous D2-A le magasin n'est plus unique : chaque trimestre a ses propres
+    // `<trim>_cartouches_<id>`, et deux trimestres portant la même grille ont des
+    // cartouches DIFFÉRENTES. L'exclusion rendait donc invisible le cas où l'import a
+    // le PLUS de sens — rapatrier le travail fait l'an dernier sur la même grille.
+    //
+    // ⮕ Le cas n'est pas supprimé, il est INVERSÉ : ce qui était la garde devient le
+    // sujet. Un constat retiré en silence redevient une source qu'on ne peut plus
+    // recouper.
+    it('5b · une grille présente dans les DEUX trimestres est PROPOSÉE, avec les cartouches de la source', async () => {
         const partage = monter({
             a2025_grillesTemplates: [{ id: 'GR_PARTAGEE', nom: 'Grille partagée', criteres: [], dansBibliotheque: true }],
             h2026_grillesTemplates: [{ id: 'GR_PARTAGEE', nom: 'Grille partagée', criteres: [], dansBibliotheque: true }],
-            cartouches_GR_PARTAGEE: [CARTOUCHE('CART_P1', 'Déjà sous les yeux')]
+            a2025_cartouches_GR_PARTAGEE: [CARTOUCHE('CART_P1', 'Le travail de l\'an dernier')],
+            h2026_cartouches_GR_PARTAGEE: [CARTOUCHE('CART_H1', 'Celui de cette année')]
         });
 
-        expect(await partage.win.lotsCartouchesDuTrimestre('a2025'),
-            'rien à importer : le magasin est le même des deux côtés').toEqual([]);
-        expect(await partage.win.listerTrimestresAvecCartouches(),
-            'et le trimestre n\'est pas proposé').toEqual([]);
+        const lots = await partage.win.lotsCartouchesDuTrimestre('a2025');
+        expect(lots, 'la grille partagée est proposée : les deux magasins ont divergé').toHaveLength(1);
+        expect(lots[0].grille.id).toBe('GR_PARTAGEE');
+        expect(lots[0].cartouches.map(c => c.id),
+            'ce sont les cartouches de la SOURCE, pas celles du trimestre actif').toEqual(['CART_P1']);
+
+        const liste = await partage.win.listerTrimestresAvecCartouches();
+        expect(liste, 'et le trimestre source est proposé').toHaveLength(1);
+        expect(liste[0].id).toBe('a2025');
     });
 
     it('6 · listerTrimestresAvecCartouches compte les cartouches et ignore le trimestre actif', async () => {
