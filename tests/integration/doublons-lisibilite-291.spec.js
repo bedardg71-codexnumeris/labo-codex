@@ -67,7 +67,7 @@ const SEMER = async () => {
         { id: 'PROD_bbbb_444444', titre: 'Artefact 1', type: 'portfolio', ponderation: 0, dansBibliotheque: true }]);
     await db.set('bibliothequeProductions', []);
     // security-ok: jeu d'essai littéral d'un test, aucune source externe.
-    await db.set('cartouches_' + G, [
+    await db.set(cle('cartouches_' + G), [
         { id: 'CART_aaaa_555555', nom: 'Cartouche A', grilleId: G, dansBibliotheque: true },
         { id: 'CART_bbbb_666666', nom: 'Cartouche A', grilleId: G, dansBibliotheque: true }]);
     await db.set('bibliothequeCartouches', []);

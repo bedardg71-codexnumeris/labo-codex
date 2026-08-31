@@ -212,7 +212,10 @@ function fusionnerDemoVersGlobaux() {
             var nom = clesPack[p];
             if (nom.indexOf('cartouches_') !== 0) continue;
             var cartouchesPack = pack[nom] || [];
-            var cartouches = db.getSync(nom, []) || [];
+            // namespacé : sans `cle()`, le matériel démo serait POSÉ sous la clé nue
+            // et LU sous la clé namespacée — donc invisible. Prédit au §2.3 de Z1.
+            // S5/#623 : `nom` est la clé du PACK, toujours nue. Le magasin, lui, est
+            var cartouches = db.getSync(cle(nom), []) || [];
             for (var c = 0; c < cartouchesPack.length; c++) {
                 var cartouche = cartouchesPack[c];
                 var existeCart = cartouches.some(function(x) { return x.id === cartouche.id; });
@@ -220,7 +223,7 @@ function fusionnerDemoVersGlobaux() {
                     cartouches.push(Object.assign({}, cartouche, { estDemo: true }));
                 }
             }
-            db.setSync(nom, cartouches);
+            db.setSync(cle(nom), cartouches);
         }
     }
 }
@@ -442,13 +445,13 @@ function retirerItemsDemoDesGlobaux() {
                     if (cartPack[k] && cartPack[k].id) idsCart.add(cartPack[k].id);
                 }
             }
-            var cartouches = (db.getSync(nom, []) || []).filter(function(c) {
+            var cartouches = (db.getSync(cle(nom), []) || []).filter(function(c) {
                 return !(idsCart.has(c.id) && estItemDemo(c));
             });
             if (cartouches.length === 0) {
-                db.removeSync(nom);
+                db.removeSync(cle(nom));
             } else {
-                db.setSync(nom, cartouches);
+                db.setSync(cle(nom), cartouches);
             }
         }
     }

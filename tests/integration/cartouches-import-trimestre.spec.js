@@ -83,7 +83,7 @@ test('PREUVE · trimestre VIVANT (jamais archivé) : la section apparaît quand 
         await db.set('h2026_grillesTemplates', [{ id: 'GR_H26', nom: 'Grille-5 FR-HOLIS H26', criteres: [], dansBibliotheque: true }]);
         // AUCUNE copie d'archive : ce trimestre n'a jamais été archivé.
         // security-ok: fixture de test, littéral écrit par le spec — aucune source externe.
-        await db.set('cartouches_GR_H26', [
+        await db.set(cleSource('cartouches_GR_H26', 'h2026'), [
             { id: 'C1', nom: 'Stratégies de lecture', grilleId: 'GR_H26', commentaires: {} },
             { id: 'C2', nom: 'Plan de rédaction', grilleId: 'GR_H26', commentaires: {} }
         ]);
@@ -142,7 +142,7 @@ test('PREUVE · importer une cartouche copie sa grille et une SEULE cartouche', 
         await new Promise(res => setTimeout(res, 500));
 
         const grilles = await db.get('h2026_grillesTemplates') || [];
-        const cartouches = grilles.length ? (await db.get('cartouches_' + grilles[0].id) || []) : [];
+        const cartouches = grilles.length ? (await db.get(cle('cartouches_' + grilles[0].id)) || []) : [];
         return {
             nbGrilles: grilles.length,
             nomGrille: grilles[0] && grilles[0].nom,
@@ -175,7 +175,7 @@ test('PREUVE · réimporter la même cartouche ne crée pas de doublon', async (
         await new Promise(res => setTimeout(res, 400));
 
         const grilles = await db.get('h2026_grillesTemplates') || [];
-        const cartouches = grilles.length ? (await db.get('cartouches_' + grilles[0].id) || []) : [];
+        const cartouches = grilles.length ? (await db.get(cle('cartouches_' + grilles[0].id)) || []) : [];
         return {
             nbGrilles: grilles.length,
             nbCartouches: cartouches.length,
@@ -206,7 +206,7 @@ test('PREUVE · « Tout importer » copie le lot entier sous UNE seule grille', 
         await new Promise(res => setTimeout(res, 600));
 
         const grilles = await db.get('h2026_grillesTemplates') || [];
-        const cartouches = grilles.length ? (await db.get('cartouches_' + grilles[0].id) || []) : [];
+        const cartouches = grilles.length ? (await db.get(cle('cartouches_' + grilles[0].id)) || []) : [];
         return {
             nbGrilles: grilles.length,
             nbCartouches: cartouches.length,
