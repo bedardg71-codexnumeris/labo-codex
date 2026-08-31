@@ -338,6 +338,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 - [x] **#620 — S2 · Audit ciblé Z2 : politique de suppression et intégrité référentielle** (constats S1, S2, S6, M7). Lecture seule. ✅ **LIVRÉ le 30 août 2026** (`3f9edcd1`) — `Rapports/AUDIT-conception-Z2-suppressions-integrite-2026-08-30.md`, 917 lignes, 1 BLOQUANT et 5 SÉRIEUX. ⏳ T2.2 (diagnostic console) en attente de Grégoire.
 - [x] **#621 — S3 · Audit ciblé Z3 : le legacy vivant des quatre sections** (constats S4, S5, S9). ✅ **LIVRÉ le 30 août 2026** (`e766339a`) — `Rapports/AUDIT-conception-Z3-legacy-2026-08-30.md`. **Aucune instrumentation n'a été nécessaire** : la question se répond statiquement. ⚠ Renverse la prémisse de S10 — les 26 identifiants sont lus par du code atteignable, aucun bloc n'est mort.
 - [ ] **#622 — S4 · Archivage de trimestre** (constat B1). Après S1. ⚠ D1 = A : moratoire actif sur « Archiver un trimestre » jusqu'à la livraison de cet item.
+  ⮕ **CODE LIVRÉ ET COMMITÉ le 31 août 2026** (`b888d6b2`, `kuekatsheu-f3`) — §6.1 (B1+B3) et §6.2 (B2) du rapport Z1,
+  plus le troisième défaut de B1 relevé au plan. Archiver un trimestre est désormais une **LECTURE** : les trois
+  `db.setSync` qui réécrivaient les collections de travail avec le sous-ensemble filtré sont retirés, les pratiques
+  se lisent dans le namespace du trimestre ARCHIVÉ et non plus via `cle()` (qui route par l'ACTIF), et le snapshot
+  enregistre les collections **complètes** et les cartouches elles-mêmes au lieu d'un nombre.
+  Sentinelle 14 cas, **rouge obtenu d'abord** (11 échecs), **break-test 7 mutations / 7 rouges**.
+  Vitest 414 fichiers / 4367 tests, code de sortie 0.
+  ⏳ **L'ITEM RESTE OUVERT, ET IL N'EST PAS EN RETARD** — il attend deux gestes qui ne sont pas ceux d'une session :
+  **T4.3**, le test manuel sur un trimestre jetable, et **T4.4**, la **levée du moratoire D1**, qui est une décision
+  de Grégoire. ⛔ **Le moratoire à trois gestes reste ACTIF tant qu'il ne l'a pas levé lui-même.**
 - [ ] **#623 — S5 · Régime des cartouches** (constat B2). Après S1 et D2. ⚠ Migration de données réelles : sauvegarde préalable par copie obligatoire.
 - [ ] **#624 — S6 · Politique de suppression : refermer les CHEMINS qui produisent des orphelins, et traiter les `ECHELLE_DEMO` résiduelles** (constats S1, S2). Après **S5** (ordre strict S4→S5→S6), D3-A **qualifiée**.
   ⚠ **Reformulé le 30 août 2026.** L'énoncé précédent disait « absorbe la réparation #542 ». **#542 a été réparé le 26 août** (`scripts/reparation-542-echelle-orpheline.js` ; deux commits, dont `e3d5af34` qui corrige la réparation elle-même). Ce qui reste n'est pas la réparation : c'est **la CAUSE, inconnue**, et les `ECHELLE_DEMO` résiduelles. ⮕ Chiffres 383 → 44 **RAPPORTÉS, non remesurés** : le diagnostic de T2.2 rendra celui du jour.
@@ -405,6 +415,47 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ Applique la règle de Grégoire sur les portes terrain à l'envers, et c'est le bon sens : **une porte
   n'existe que si aucune machine ne peut répondre.** Ici une machine peut répondre.
   ⮕ Sert directement à dimensionner S4 (#622).
+
+- [ ] **#633 — Les deux `annulerFormProduction` sont VIVANTES toutes les deux, et les fusionner change le comportement**.
+  Inscrit le 31 août 2026 par `kuekatsheu-f3`, à la demande de `kuekatsheu-e5` (S8 / #626), **avant tout usage**.
+  ⮕ **SORTI DE S8 DÉLIBÉRÉMENT** : S8 s'appelle « retraits sûrs **statiquement** », et cet item ne l'est pas.
+  Le wrapper `productions.js:3218` est bien la seule implémentation atteinte par `window` (data-action
+  `index.html:4577`, `productions-liste.js:420`), mais l'originale `l.2091` est appelée **en interne** deux fois
+  — `l.2069` (fin de `sauvegarderProduction`) et `l.3263` (wrapper de `supprimerProduction`) — et depuis l'IIFE
+  ces appels résolvent vers la fonction du MODULE, pas vers `window`. Mesuré par `e5` le 31 août.
+  ⮕ **Les deux corps diffèrent** : l'originale remet `productionEnEdition = null` et ne touche pas la barre
+  latérale ; le wrapper masque les options, affiche l'accueil, nettoie le surlignage, et ne remet PAS
+  `productionEnEdition`. Une fusion en une seule couche change donc les QUATRE sites d'appel.
+  ⮕ **Elle répare aussi un défaut latent** : supprimer la production affichée laisse aujourd'hui un surlignage
+  mort dans la barre latérale. Un correctif de comportement ne se glisse pas dans un lot de retraits — il porte
+  son propre item et son propre test manuel.
+  ⏳ **Test manuel dû (Mac et iPad)** : enregistrer une production (le formulaire doit se rouvrir) · supprimer la
+  production affichée (l'accueil revient, aucun surlignage résiduel) · annuler le formulaire.
+- [ ] **#634 — Le repli vers la bibliothèque de pratiques partagée n'a jamais fonctionné : faut-il qu'il fonctionne ?**
+  Inscrit le 31 août 2026 par `kuekatsheu-f3`, à la demande de `kuekatsheu-e5` (S8 / #626), **avant tout usage**.
+  `tableau-bord-apercu.js:1446` lisait `bibliotheque-pratiques` (kebab) ; la vraie clé est `bibliothequePratiques`.
+  Le repli n'a donc **jamais** rien trouvé. S8 le RETIRE, ce qui préserve le comportement à l'identique.
+  ⮕ **La question qui reste est métier, et elle est pour Grégoire** : le corriger ferait trouver un seuil de
+  portfolio là où il n'en est trouvé aucun aujourd'hui. Ce n'est pas une coquille à réparer sans le demander.
+  ⮕ ⚠ **Ne pas le « corriger » sans arbitrage** — c'est un changement de comportement déguisé en typo.
+
+### Constats de l'audit du 30 août RÉFUTÉS à la mesure (31 août 2026)
+
+> Inscrits ici plutôt que corrigés en silence : un audit dont on retire un constat sans le dire
+> redevient une source qu'on ne peut plus recouper. Mesurés par `kuekatsheu-e5`, S8 / #626.
+
+- **M11 — « `planificationCarte.etat` exposé sans consommateur » est FAUX.** `planification-export.js:46`
+  (`function carte() { return window.planificationCarte; }`) le consomme aux l.336, 363 et 375 : c'est
+  **l'export du plan de cours**. Quatre sentinelles Vitest s'en servent aussi (`api.etat.noeuds`). Le retirer
+  casserait l'export ET la suite. **Item retiré du lot S8.**
+- **M5 — « `sauvegarderModeCalculObjectifs` a zéro appelant et est un export mort » est FAUX deux fois.**
+  Un appelant : `pratique-notation-v2.js:367`, dans `changerModeCalculObjectifs`. Et aucun
+  `window.sauvegarderModeCalculObjectifs` n'existe — c'est une fonction PRIVÉE, pas un export. Elle est bien
+  inerte (son appelant n'est atteint que derrière `if (modeEl)` sur `#v2-objectifs-mode-calcul`), mais son
+  retrait emporte sa ligne d'appel, ce que l'audit n'avait pas prévu.
+- **Chemin erroné dans le plan ET dans l'audit** : `js/pratique-interface.js` **n'existe pas et n'a jamais
+  existé** (`git log` vide). Le fichier réel est `js/pratiques/pratique-interface.js` (doc périmée de M5 aux
+  l.296-316). Corrigé dans le périmètre de S8.
 
 
 ### Arbitrages du 28 août 2026 (soir) — les deux qui n'avaient pas d'item
