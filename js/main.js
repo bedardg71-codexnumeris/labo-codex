@@ -972,16 +972,23 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Chantier 3 : Section par défaut selon contexte
-    const _modeExpert = !!obtenirPreference('modeExpert');
-    const _demoActif = db.getSync('demo-actif', null) === 'true';
-    if (_demoActif) {
-        naviguerVers('suivi', 'groupe');
-    } else if (_modeExpert) {
-        naviguerVers('suivi', 'groupe');
-    } else {
-        afficherSection('accueil');
-    }
+    // Section d'ouverture : TOUJOURS l'accueil (décision de Grégoire, 31 août 2026).
+    //
+    // Le « Chantier 3 » ouvrait sur Suivi › groupe dans deux cas — mode démo actif
+    // (clé `demo-actif`) ou mode expert — et sur l'accueil sinon. Les deux
+    // dérivations sont retirées : la porte d'entrée est la même pour tout le monde.
+    //
+    // Le motif est le parcours de rentrée, pas la simplification. Un enseignant qui
+    // explore en démo gagne à voir « Par où commencer ? », les guides et l'invitation
+    // à la communauté de pratique, plutôt qu'un tableau de bord déjà rempli de
+    // données fictives dont il ne sait pas encore lire les indices. Constaté le
+    // 31 août sur l'application en ligne : la démo laissée active renvoyait
+    // directement au Suivi, sans jamais montrer l'accueil.
+    //
+    // ⚠ Le retrait vaut AUSSI pour le mode expert, qui perd donc son raccourci.
+    // C'est délibéré (« dans tous les cas »), et c'est la ligne à remettre si
+    // l'usage montre que c'était de trop.
+    afficherSection('accueil');
 
 // ===============================
     // 2. CHARGEMENTS CONDITIONNELS
