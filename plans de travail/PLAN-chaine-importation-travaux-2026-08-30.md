@@ -50,9 +50,27 @@ présent, il date d'avant 19 h 05.
 
 | Session | Prend | Fichiers qui lui appartiennent |
 |---|---|---|
-| `kuekatsheu-ff` | **S5** (#611) | `js/travaux-import.js` |
-| `kuekatsheu-00` | **S6** (#612) | `js/liste-evaluations.js`, `js/evaluation-jetons.js`, `js/travaux-ui.js` |
-| session de relais | fichiers partagés, release groupée, push | `BACKLOG.md`, `SESSION.md`, `RELAIS.md`, ce plan |
+| ~~`kuekatsheu-ff`~~ | ~~**S5** (#611)~~ | **TERMINÉE** — travail commité (`349b780d`, `20c67e2f`), session disparue |
+| ~~`kuekatsheu-00`~~ | ~~**S6** (#612)~~ | **TERMINÉE** — T6.6 (`1e2fc4d0`) et T6.3 (`15ef1c45`) commitées, session disparue ; T6.2, T6.4, T6.5, T6.7, T6.8 REMISES par Grégoire |
+| ~~`kuekatsheu-0d`~~ | ~~relais du 30 août~~ | **TERMINÉE** le 31 août au matin ; ne tenait plus aucun fichier |
+| **`kuekatsheu-bc`** | **relais du 31 août** | `BACKLOG.md`, `SESSION.md`, `RELAIS.md`, ce plan, la release et le push |
+
+### Répartition du 31 août 2026 — session `kuekatsheu-bc`
+
+**Vérifié par `ListAgents` le 31 août** : `ff`, `00` et `0d` ne sont plus
+joignables ; leur travail est commité et ancêtre de `main`. Ne cherche pas à les
+joindre. Deux sessions supplémentaires sont annoncées par Grégoire pour la
+journée — **elles doivent s'inscrire ICI, avec les fichiers `js/` qu'elles
+prennent, AVANT d'y écrire.** Les fichiers partagés restent à `kuekatsheu-bc`,
+qui tient aussi la release et le push : personne d'autre ne lance
+`release.mjs`.
+
+⚠ **Les commits d'avance et leur push.** `main` portait 8 commits d'avance sur
+`origin/main` le 31 août au matin, dont `15ef1c45` qui est du CODE — aucune
+suite navigateur ne l'avait vu, le dernier verdict Playwright étant antérieur.
+**Go de Grégoire obtenu le 31 août** : relance de la suite WebKit sur l'arbre
+gelé, puis push si elle est verte. Un go de push est PONCTUEL et ne s'étend pas
+au suivant — celui d'hier soir avait été consommé par la release 1.106.12.
 
 **Le gel de S5, S6 et S9 est LEVÉ** : il tenait à S4, qui est commité (`9dac5f49`).
 
