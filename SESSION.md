@@ -6,6 +6,68 @@
      ⮕ ÉTAT AU 3 JUILLET 2026 SOIR (VAGUE 3 CLOSE + **MERGÉE MAIN ET DÉPLOYÉE — décision Grégoire du 3 juillet, release 1.27.2**, branche `claude/relais-vague-3-etat-n3owyf` fast-forwardée dans `main` : les 3 vagues 1.27.0/1.27.1/1.27.2 sont EN PRODUCTION ; le point « MERGER en août » du signet est donc RÉGLÉ, les validations TERRAIN restent dues) : bilan factuel des vagues 1-2 = TABLEAU dans le bloc « 3 juillet » ci-dessous (12/12 tâches livrées ou closes par écart de prémisse ; AUCUN reliquat 2a) PUIS file 2b ÉPUISÉE : Tâche A #328 = déjà absorbé (vérifié au code, trace consignée) ; Tâche C #118+#283-T1 LIVRÉS (fix CSS overflow) ; Tâche B #363 LIVRÉ (audit currency, 13 écarts corrigés) ; Tâche D #306 LIVRÉ (Lots 1-2-3 ; décision UX « apparition du formulaire » restée ouverte, consignée). Vitest 1257/1257. ⚠ GRÉGOIRE EN CONGÉ TOUT JUILLET, reprise AOÛT. À la reprise (le merge est FAIT — 3 juillet) : validations terrain (#310/#311/#351/#240/#347 + portes vague 1 #313/#344/#361 + vague 2 #355/#305/#121 + vague 3, 2 modes) ; triage des 5 worktrees AVEC `plans de travail/INVENTAIRE-worktrees-2026-07.md` ; #364 T3/T4/T5 ; trancher #365 (audit blanc). ✅ **FAIT LE 27 AOÛT 2026 AU SOIR** : `rm .git/index.lock .git/HEAD.lock .git/objects/maintenance.lock` — mais ils étaient REVENUS (datés du 27 août 15 h 46, `git maintenance` crashé) et bloquaient tout commit. ⮕ **Ce point traînait depuis juillet et le 28 juin en portait déjà un : c'est un défaut RÉCURRENT du dépôt, pas une malchance.** À traiter comme tel plutôt qu'à re-nettoyer chaque fois. ; le commit local `96f1294c` et le BACKLOG #365 du Mac sont OBSOLÈTES (contenu recréé/poussé par les vagues 1-2) ; le fichier relais vague 2 (`RELAIS-2026-07-02-vague-2.md`) n'a jamais été poussé — le committer du Mac si on veut la trace (le relais vague 3 est, lui, versionné ci-dessous).
      ===================================================================== -->
 <!-- =====================================================================
+     SESSION 14 — 31 AOÛT 2026, SOIRÉE (QUATRIÈME CYCLE) : LES PLANS FABLE 5,
+     UN LOT LIVRÉ, DEUX PRÉPARÉS — ET DEUX RETARDS QUE PERSONNE N'AVAIT VUS.
+
+     ▣ RÉPARTITION. `kuekatsheu-14` = coordination + BACKLOG + relais.
+       `kuekatsheu-80` = S10a (#628 + #659). `kuekatsheu-f2` = S9a (#627 + #663).
+       `kuekatsheu-c6` = quatrième session, pilotée DIRECTEMENT par Grégoire
+       (zoom trackpad). Aucune collision, aucun ID doublé, aucun verdict faussé.
+
+     ▣ LIVRÉ : #660 + #661 (`24eeaa89`, zoom molette proportionnel + recalage
+       mesuré au lieu de déduit) · #665 (`e373bd8a`) · onze constats inscrits
+       (`c57b6631` puis `e373bd8a`), #654 à #661, #663, #664, #665.
+
+     ⚠⚠ DEUX RETARDS SOLDÉS, ET AUCUN N'ÉTAIT VISIBLE.
+       1. HUIT COMMITS N'ÉTAIENT PAS POUSSÉS — `origin/main` pointait sur
+          `69be8a40` (13 h 34) : tout le travail du troisième trio, SON PROPRE
+          RELAIS COMPRIS, ne vivait que sur cette machine.
+       2. LA SUITE PLAYWRIGHT N'AVAIT PAS TOURNÉ DEPUIS LE 26 AOÛT — 299 commits,
+          dont 35 touchant `tests/integration/`. Lancée enfin : ROUGE.
+
+     ⮕ ET LA CAUSE DU SECOND EST STRUCTURELLE : le hook pre-push lance VITEST
+       SEULEMENT. Pour Playwright il constate qu'aucun verdict local n'existe et
+       LAISSE PASSER. La suite dure plus de DIX minutes (pas les « ~4 min »
+       annoncés) et six minutes de silence ferment la connexion (#533) : le hook
+       NE PEUT PAS la lancer. Depuis le 26 août, aucun push n'a été bloqué par un
+       rouge Playwright parce qu'aucun push ne l'a jamais consultée.
+       ⮕ « Push réussi » ne signifie pas « suite complète verte ».
+
+     ⚠⚠ #665 — LE BUMP A QUATRE EMPLACEMENTS, PAS TROIS. `version.js` (racine)
+       est le jumeau généré de `version.json`, créé parce qu'en `file://` fetch et
+       XHR sont refusés par WebKit (#495), et `js/init-inline.js:235-237` lui donne
+       la PRIORITÉ sur les constantes en dur. Un bump manuel sur « les trois
+       emplacements » a donc laissé l'application afficher 1.106.13 alors que le
+       dépôt était à 1.106.14. TROUVÉ PAR UN TEST (`bandeau-maj-chargement`), pas
+       par une relecture. La convention transmise par la coordinatrice était fausse.
+
+     ▣ LA TROUVAILLE DE MÉTHODE : LA RELECTURE CROISÉE. Née d'une attente (Grégoire
+       pilotait l'écran, le trio ne pouvait ni écrire ni rouler). Quatre défauts
+       réels trouvés, dont un `id:` inconditionnel qui écrasait une valeur assainie
+       sur un fichier sous surveillance sécurité.
+       ⮕ SA CONDITION, mesurée : la relectrice avait CARTOGRAPHIÉ L'ÉTAT AVANT
+         plutôt que de lire le patch seul. Lire un patch seul, c'est lire ce que
+         l'auteur a décidé de montrer.
+       ⮕ ET SON ARGUMENT, donné par la session qui en a fait les frais : on ne voit
+         pas dans son propre code ce qu'on vient d'écrire, même en sachant
+         exactement quoi chercher. Elle avait nommé le risque en désignant la cible
+         à sa relectrice — DIX MINUTES APRÈS L'AVOIR COMMIS.
+
+     ▣ NON DÉPOSÉ, ET PRÊT : les deux lots vivent dans
+       `/Users/kuekatsheu/Documents/GitHub/lots-en-attente-2026-08-31/`, hors dépôt,
+       empreintes vérifiées une par une, chacun avec son fichier de reprise.
+       ⚠ Aucun n'a obtenu son rouge d'abord sous vitest : PRÊTS, pas FAITS.
+
+     ⚠ RESTE ROUGE, CAUSE NON ÉTABLIE (isolément, machine libre — donc réels) :
+       `modal-soutien.spec.js` et `palettes-drag-rendu.spec.js`. Le second touche la
+       palette d'ANNOTATION, l'écran que #660/#661 viennent de modifier.
+     ⚠ PORTE TERRAIN iPad DE #660/#661 : DUE, non donnée.
+
+     ⮕ Détail complet, pièges et choix fermé : bloc en tête de `RELAIS.md` et
+       `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION F3 — 31 AOÛT 2026, MATIN : LA PHASE D'EXÉCUTION DU PLAN
      CONCEPTION S'OUVRE, ET TROIS DE SES HUIT SESSIONS SONT LIVRÉES EN
      PARALLÈLE. Release groupée 1.106.13. Zéro collision.

@@ -7,6 +7,343 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 31 AOÛT 2026, SOIRÉE (QUATRIÈME CYCLE)
+
+> Écrit par `kuekatsheu-14`, coordinatrice d'un trio (`80`, `f2`) sur les **plans de
+> travail issus des audits Fable 5**, plus une quatrième session (`c6`) pilotée
+> **directement par Grégoire** sur un retour terrain de zoom.
+> Ce bloc **remplace** celui du troisième trio, plus bas, qui reste valable pour tout
+> ce qu'il décrit.
+> **Zéro collision d'index, aucun fichier écrit par deux sessions, aucun ID doublé.**
+
+**Branche `main`. Version `1.106.14`, build `0831-1552`.**
+**Vitest : VERT** (par le hook pre-push, deux fois).
+⚠⚠ **Playwright WebKit : ROUGE À DEUX.** `modal-soutien.spec.js` et
+`palettes-drag-rendu.spec.js`, **cause NON établie**. Mesurés **isolément, machine
+libre** — ce ne sont ni de la contention ni du flaky.
+
+**⮕ DEUX RETARDS SOLDÉS CE SOIR, QUE PERSONNE N'AVAIT VUS.**
+1. **Huit commits n'étaient pas poussés.** `origin/main` pointait encore sur
+   `69be8a40` (13 h 34) : tout le travail du troisième trio (#645, #647, #650,
+   S6/#624) **et son propre relais** vivaient sur cette machine seulement.
+2. **La suite Playwright n'avait pas tourné depuis le 26 août** — 299 commits, dont 35
+   touchant `tests/integration/`. Personne ne l'avait remarqué, **et il y a une raison
+   structurelle** (voir piège 2).
+
+⚠ **À FAIRE AU RITUEL DE DÉBUT, les deux, ils prennent dix secondes :**
+```
+git log --oneline origin/main..HEAD | wc -l      # doit rendre 0
+cd tests && node ../scripts/verifier-playwright.mjs   # >10 min, mais c'est le seul verdict
+```
+
+---
+
+### ⛔ CE QUI N'A PAS BOUGÉ, ET QU'IL NE FAUT PAS CROIRE RÉPARÉ
+
+**LE MORATOIRE À TROIS GESTES EST TOUJOURS ACTIF.** Rien de ce cycle ne l'a approché.
+Ses deux trous tiennent : le fichier « Exporter » n'a **aucun chemin de restauration**,
+le snapshot d'archivage n'a **aucun lecteur**.
+
+**LA PORTE TERRAIN iPad DE #660/#661 EST DUE.** ⚠ L'item dit « vérifié Chrome ET Safari
+par Grégoire » — **la ligne suivante dit que l'iPad ne l'est pas**, et le lot a touché le
+chemin du pincement, qui est celui de l'iPad. Qui lit la première ligne sans la seconde
+croira le lot clos.
+
+**LES DEUX ROUGES PLAYWRIGHT.** `palettes-drag-rendu` teste la palette d'**ANNOTATION**,
+c'est-à-dire l'écran que #660/#661 viennent de modifier. **À regarder pour lui-même : un
+vert ailleurs ne le blanchit pas.**
+
+---
+
+### ⚠⚠ LES DEUX PIÈGES QUI ONT COÛTÉ LE PLUS CE SOIR
+
+**1. LE BUMP DE VERSION A QUATRE EMPLACEMENTS, PAS TROIS — et le quatrième est le seul
+que l'application lise. (#665, CORRIGÉ `e373bd8a`.)**
+`version.js` (RACINE) est généré par `release.mjs`, jumeau de `version.json`, créé parce
+qu'en `file://` **`fetch` et XHR sont refusés par WebKit** (#495). Il est chargé par
+`index.html:14404`, et `js/init-inline.js:235-237` lui donne la **PRIORITÉ** :
+```js
+if (window.__VERSION__.build) BUILD_ID = window.__VERSION__.build;
+```
+⮕ **Les trois emplacements habituels sont un REPLI. `version.js` décide de ce que
+Grégoire voit à l'écran.**
+Le bump `1.106.13 → 1.106.14` a été fait à la main sur trois emplacements, sur la foi
+d'une convention qui en documentait trois — **transmise par la coordinatrice elle-même**.
+L'application a donc continué d'afficher `1.106.13` : **le bump n'a eu aucun effet
+visible**.
+⚠ **Le bump MANUEL est le seul chemin qui puisse les désynchroniser** : `release.mjs`
+écrit les deux fichiers ensemble et documente lui-même les 4 endroits. Or le bump manuel
+est exactement ce qu'on fait quand plusieurs sessions partagent le dépôt et qu'on refuse
+`release.mjs`, qui recalcule les jetons de tout l'arbre.
+⮕ **RÈGLE : après tout bump manuel, `grep` l'ANCIEN build dans tout le dépôt et exiger
+ZÉRO.** Vérifier « les quatre » ne suffit pas si on ne sait pas qu'il y en a quatre.
+⚠ Le jeton de `version.js` suit un AUTRE format : `MMJJHHMM` (le build sans tiret), pas
+le `AAAAMMJJ`+lettre des autres.
+
+**2. « PUSH RÉUSSI » NE SIGNIFIE PAS « SUITE COMPLÈTE VERTE », ET NE LE SIGNIFIERA
+JAMAIS.** Le hook pre-push lance **Vitest seulement**. Pour Playwright, il constate
+qu'aucun verdict local n'existe pour le commit **et laisse passer** :
+```
+✓ Hook pré-push : suite Vitest verte.
+⚠ Sentinelle Playwright : aucun verdict local pour ce commit.
+  Push laissé passer — la CI le jugera.
+```
+⮕ **Et ce n'est pas une prudence, c'est une impossibilité structurelle** (mesuré par
+`kuekatsheu-80`) : la suite dure **plus de dix minutes** sur cette machine — pas les
+« ~4 min » annoncés — et six minutes de silence ferment la connexion au serveur (#533).
+**Le hook ne PEUT pas la lancer.**
+⮕ Conséquence à retenir : **depuis le 26 août, aucun push n'a été bloqué par un rouge
+Playwright — parce qu'aucun push ne l'a jamais consultée.** C'est ainsi que #665 a vécu
+une heure sur `main` et que deux rouges dorment peut-être depuis cinq jours.
+⮕ Pour juger avant de pousser : `scripts/pousser.sh`, ou `node
+scripts/verifier-playwright.mjs` depuis `tests/`.
+⮕ **Un spec seul se lance en secondes** et départage mieux qu'une suite : `cd tests &&
+npx playwright test integration/<spec>.js`. C'est ce geste qui a tranché ce soir.
+
+---
+
+### ⚠ LES AUTRES PIÈGES DU CYCLE
+
+**3. LE MODE D'ÉCHEC DOMINANT DE LA MESURE PAR GREP : UN ZÉRO SANS TÉMOIN.**
+Cinq occurrences en une soirée, dans **trois sessions différentes**. À chaque fois un
+motif trop étroit rend un zéro rassurant pour la mauvaise raison : `grep -c "config'"`
+qui n'attrape que les occurrences suivies d'une apostrophe · `^/\*\*$` ancré sans
+tolérer l'indentation, qui rend 2 au lieu de 6 · `grep -c 'configuration'` sur le mot NU,
+qui compte `configurations` et la prose des commentaires et rend **157 au lieu de 45**.
+⮕ **Le témoin d'un zéro, c'est LE MÊME MOTIF RENDANT NON-ZÉRO AILLEURS.** Publier les
+deux comptes côte à côte, jamais le zéro seul.
+⚠ **À chaque fois, le raisonnement tenait quand même.** Le risque n'est pas pour la
+conclusion, il est pour **l'ÉCRIT** : un item qui porte un nombre obtenu par un motif non
+dit est invérifiable dans six mois. ⮕ **Inscrire la MÉTHODE avec le nombre.**
+
+**4. LA LIMITE DE L'AUTORELECTURE, DÉMONTRÉE.** Une session a introduit dans son propre
+patch un défaut qu'elle venait de nommer **dix minutes plus tôt** en désignant la cible
+à sa relectrice — un `id:` inconditionnel qui écrasait la valeur assainie par le brut du
+fichier importé, sur un fichier **sous surveillance sécurité**, dans un lot dont ce
+n'était pas le sujet.
+⮕ Sa formule : *c'est la limite de l'autorelecture, pas une étourderie.* **On ne voit
+pas dans son propre code ce qu'on vient d'écrire, même en sachant exactement quoi
+chercher.**
+
+**5. UN JSDoc N'EST RELIÉ À SA FONCTION QUE PAR LA POSITION.** Une extraction déplace le
+CORPS ; le bloc de doc reste, une fonction neuve se glisse dessous. **La doc n'a pas
+vieilli : elle a changé de sujet sans bouger d'une ligne.** `node --check` VERT, aucune
+sentinelle ne le voit. ⮕ Deux questions dans l'ordre : **à quelle fonction ce bloc est-il
+collé MAINTENANT ?** puis « qu'affirme-t-il ? ». ⚠ Le motif « `*/` suivi de `/**` » n'est
+**pas** discriminant (6 occurrences saines dans `echelles.js`, 3 dans `grilles.js`) : le
+restreindre au **DIFF**.
+
+**6. LE GARDE ANTI-CACHE NE SURVEILLE QUE `main.js`** (`js/main.js:20-22`, #285). Tout
+autre fichier corrigé peut arriver **périmé** dans un navigateur sans aucun signal. Coût
+mesuré : **Grégoire a jugé le comportement de Safari sur du code qui n'était pas celui du
+disque**, et il a fallu bumper le jeton une seconde fois. ⮕ **Une porte terrain rendue
+sans bump vérifié porte sur du code inconnu.**
+
+**7. LE HOOK PRE-COMMIT REFUSE UN BUMP QUI N'A PAS BUMPÉ SES PROPRES FICHIERS.** Bumper
+le build modifie `js/init-inline.js` et `js/main.js` : ils ont besoin de jetons neufs **en
+plus** de ceux du lot. Un premier commit a été refusé pour ça, et le hook avait raison.
+⮕ Corollaire non prévu par les mandats : **tout lot touchant un `js/` touche
+mécaniquement le bloc des balises d'`index.html`.** Trois sessions s'y sont retrouvées
+sans que leurs périmètres l'annoncent. **L'inscrire dans le périmètre dès le mandat.**
+
+**8. `head -n -1` N'EXISTE PAS SUR CE MAC.** Il échoue, et **sa redirection produit un
+fichier de 0 octet**. Une session a écrasé sa propre sentinelle par du vide ; **`node
+--check` a PASSÉ** — un fichier vide est syntaxiquement valide — et un `echo "OK — 17
+cas"` écrit en dur dans la commande a annoncé un compte que personne n'avait mesuré.
+⮕ `sed '$d'`. Et **après toute réécriture, mesurer l'EFFET** (`wc -l` + `grep -c` d'un
+marqueur) : un contrôle de syntaxe ne distingue pas « correct » de « vide ».
+
+**9. `js/pratiques/` EST CITÉ À PLAT — TROIS FOIS EN VINGT-QUATRE HEURES.** Le dossier
+contient 16 fichiers dont 8 commencent par `pratique-` : le nom répète le dossier.
+⮕ **La combinaison est la pire : le fait est juste, le chemin est faux.** Personne ne
+remet le fait en cause, et personne ne peut le recouper. Dans un cas, ce chemin
+inexistant était le **seul appui écrit** d'une décision de conception. ⮕ `ls` avant
+d'écrire un chemin.
+
+**10. UNE ASSERTION PEUT ÊTRE VRAIE, PERTINENTE, ET NE TUER AUCUNE MUTATION.**
+`toBeGreaterThanOrEqual(2)` sur un fichier qui porte **quatre** appels : en retirer un
+en laisse trois, et `3 >= 2` reste vrai. Un chemin d'import entier cessait de remapper
+sans qu'aucune assertion ne bouge. ⮕ **Chaque fois qu'une assertion porte une borne,
+demander quelle mutation elle laisse passer.**
+
+**11. UN BREAK-TEST VERT PEUT VENIR D'UNE MUTATION JAMAIS APPLIQUÉE.** On en conclurait
+« ce cas est décoratif » et on retirerait un cas VALIDE. ⮕ **Un témoin par mutation,
+ciblé sur ce que CETTE mutation change**, lu AVANT de lancer. Mesuré : un marqueur
+générique rend 4 avant, 3 après une mutation, **4 après les deux autres**.
+⚠ **`git hash-object` est le seul témoin de restauration exacte** ; `wc -l` et `grep -c`
+sont des témoins de non-catastrophe. Et **valider la COPIE DE RÉFÉRENCE au moment où on
+la prend**, sinon les contrôles disent « identique à ma copie » sans dire qu'elle est
+bonne.
+
+**12. LE PRE-PUSH NE RAISONNE PAS PAR FICHIER, IL RAISONNE PAR ARBRE.** `core.hooksPath`
+vaut `scripts/hooks`, le hook **ne contient ni `stash`, ni `worktree`, ni `checkout`**, et
+il teste l'arbre tel quel avec `testDir: './integration'`. **Une spec déposée entre dans
+la suite du prochain push, quel qu'en soit l'auteur.** ⮕ La citation qui a emporté
+l'affaire (#534) : *« un refus injustifié est ce qui apprend à taper `--no-verify` : la
+garde se perd par ses faux refus, pas par ses vrais. »*
+
+**13. `js/` EST BALAYÉ PAR 24 SENTINELLES EN `readdirSync`** — un fichier temporaire
+déposé là fabrique des rouges **ailleurs que dans le lot**. Les bancs de mutation vivent
+hors de `js/` (**aucune sentinelle ne balaie la racine**, mesuré). ⚠ Et la CSP
+(`index.html:10`) ne porte **aucun chemin** : `'self'` est une origine. Un refus CSP ne
+ressemble pas à un échec de test — **il ressemble à une fonction qui n'existe pas**.
+
+---
+
+### LA RELECTURE CROISÉE — la trouvaille de méthode de ce cycle
+
+Née d'une contrainte : Grégoire pilotait l'écran, le trio ne pouvait ni écrire ni
+rouler. Plutôt que de laisser deux sessions inactives, chacune a relu le lot de l'autre.
+
+**Ce qu'elle a produit, et qu'aucune des deux n'aurait trouvé seule :**
+· un `id:` inconditionnel qui écrasait une valeur assainie — trois protections tombées,
+  sur un fichier sous surveillance sécurité ;
+· un remap visant `.config` quand les vraies pratiques rangent sous `.configuration` ;
+· une correction de « cinq passes » en trois, qui aurait produit deux cas décoratifs ;
+· un chemin de fichier inexistant servant de seul appui à une décision.
+
+⚠ **LA CONDITION QUI LA REND EFFICACE, mesurée** : la relectrice avait **cartographié
+l'état AVANT** plutôt que de lire le patch seul. *Lire un patch seul, c'est lire ce que
+l'auteur a décidé de montrer.* Sa cartographie disait **où le risque naîtrait s'il
+naissait** — un seul `return item`, aucune sortie anticipée, compteur lu une seule fois.
+⚠ **Piège de mise en œuvre** : un patch qui vit dans le scratchpad d'une session n'est
+pas relisible par une autre. La première consigne de relecture était impraticable pour
+cette raison. **Faire transiter le patch explicitement.**
+
+---
+
+### LE PROTOCOLE DE CRÉNEAUX — ce qu'il est devenu à quatre sessions
+
+· **GRÉGOIRE N'EST PAS SOUMIS AU PROTOCOLE.** Sa session PRÉVIENT, elle ne demande pas.
+  Un créneau accordé signifie « personne d'autre du TRIO ne touche l'arbre », **pas**
+  « l'arbre est gelé ». Le dire explicitement : sinon une session instruit comme un
+  défaut un rouge venu d'une écriture qu'elle ignorait.
+· **LE GESTE QUI DÉCALE PASSE EN DERNIER.** Un retrait de 165 lignes dans `index.html`
+  périme tout repère en aval ; une insertion ne périme rien.
+· **`BACKLOG.md` APPARTIENT À LA COORDINATRICE SEULE.** Les sessions passent le texte
+  prêt, elle inscrit et confirme. Corrigé en cours de cycle après qu'une session eut
+  relevé que la consigne organisait elle-même la collision qu'elle prétendait éviter.
+· ⚠ **DEUX SUITES CONCURRENTES SE POLLUENT COMME DEUX WORKERS.** `playwright.config.js`
+  l'explique pour `workers: 1` : tous les specs ouvrent le MÊME `index.html` en `file://`
+  et partagent le `localStorage` de cette origine. **Un run tué en cours laisse cet état
+  arbitraire.** (Ce soir, ce n'était PAS la cause des rouges — le spec se protège par
+  `addInitScript` avant `goto` — mais le risque est réel pour tout spec qui ne le fait
+  pas.)
+
+---
+
+### LES DEUX LOTS PRÉPARÉS, SAUVÉS HORS DÉPÔT, NON DÉPOSÉS
+
+⚠ **Aucun des deux n'a obtenu son rouge d'abord sous vitest. Ils sont PRÊTS, pas FAITS.**
+Les deux vivent dans `/Users/kuekatsheu/Documents/GitHub/lots-en-attente-2026-08-31/`,
+**hors du dépôt**, avec leurs empreintes vérifiées une par une.
+
+**`S9a-627/` — unification des remaps d'import (`kuekatsheu-f2`). 16 fichiers, 408 Ko.**
+· `S9a-627.patch` — 845 lignes, 7 fichiers, `git apply --check` code 0 contre `24eeaa89`.
+· `break-test-module.js` — **la preuve, rejouable** : recharge le module en contexte `vm`,
+  mute la source EN MÉMOIRE, rejoue cinq cas. **Valide le témoin de chaque mutation AVANT
+  de l'appliquer et sort en code 1 si une mutation n'a pas pris.**
+· `fichiers-prets/js/import-remap.js` — 122 lignes, **fichier NEUF**. ⚠ Il lui faut sa
+  balise `<script>` avant `js/reserve-ouvrir.js` — sans quoi `window.ImportRemap` n'existe
+  pas au runtime **pendant que le banc reste vert** (il monte le module à la main).
+· Deux sentinelles : `sentinelle-627` (18 cas), `sentinelle-663` (6 cas).
+· `LISEZ-MOI.md`, `message-commit.txt` (⚠ **17 accents graves → `git commit -F -` avec
+  heredoc quoté, JAMAIS `-m`**), `rapport-fin-S9a.md`, items #656 · #657 · #664.
+⮕ **Le lot fait DEUX choses, à dire séparément dans le commit** : il UNIFIE quatre remaps
+divergents sur une règle extraite de `reserve-ouvrir` (**pas** de #448 : l'audit Z2 §S9-a
+corrige sciemment le plan) — et il RÉPARE, `cartouche.echelleId` n'étant remappé par
+aucune des quatre.
+⚠ **SON CRITÈRE DE FIN TIENT À TROIS RÉGIMES, ET LE TROISIÈME N'EST PAS ATTEINT** :
+comportemental (le module + `prefixerEntites`) · statique (les deux chemins
+d'`import-export` et `reserve-ouvrir`, inexerçables — un `let` de module et un
+`getElementById`) · **NON ATTEINT** (les pratiques du chemin sélectif laissent une
+référence pendante, cause mesurée, inscrite en **#664**). Le rapport porte ce tableau
+EN TÊTE, exprès.
+
+**`S10a-628-659/` — legacy des échelles (`kuekatsheu-80`). 6 fichiers + `REPRISE.md`.**
+⚠ **Elle n'a jamais rien écrit dans l'arbre de tout le cycle.** Son étape 0 (run de
+référence) a expiré à 10 minutes sans verdict ; les étapes 1 à 5 n'ont pas commencé.
+· **Geste 1 (#659)** — couper l'écriture non sollicitée depuis le chemin de LECTURE.
+  ⮕ **C'est le seul correctif préparé qui arrête quelque chose d'ACTIF** : entrer dans la
+  section Échelles écrit `configEchelle` en base **à chaque visite, sans aucune action de
+  l'utilisateur**, avec `typeEchelle: undefined` et un `seuilReussite: 60` en dur.
+  Chaîne mesurée : `main.js:1089` → `initialiserModuleEchelles()` → garde franchie →
+  `chargerConfigurationEchelle()` (`:647`) → `changerTypeEchelle()` (`:1021`) →
+  `sauvegarderConfigEchelle()` (`:1094`, **inconditionnel**). **Sa documentation affirmait
+  que ce chemin n'existait pas.**
+· **Geste 2 (#628)** — retrait du legacy, **165 lignes** (blocs `5125-5135` et
+  `5141-5294`, comptés par imbrication). Tout ce qui suit remonte de 165.
+⮕ **Sa cartographie, qui vaut même si quelqu'un d'autre reprend le lot :**
+  · **8 identifiants DOM en double, tous des échelles** — le rapport Z3 n'en documentait
+    que 2. Stubs `5128-5134` contre porteurs `5147 · 5155 · 5194 · 5202 · 5208 · 5240 ·
+    5266`.
+  · ⚠⚠ **`nomEchelleTemplate` se retire par le BAS, pas par le haut.** Ses deux porteurs
+    sont de vrais `<input>` : le premier (`:5095`) est dans l'éditeur **MODERNE**, le
+    second (`:5158`) dans le legacy. **Appliquer « retirer le premier » casserait
+    l'éditeur que la sentinelle doit protéger.**
+  · **91 exports `window.X = X` dans `js/echelles.js`, en DEUX blocs** : `2204-2231` (22)
+    et `4684-4777` (69). Qui « nettoie le bloc d'exports » en rate **69 sur 91**, et un
+    export orphelin fait **cesser tout le fichier de s'évaluer**.
+  · Périmètre réel : `index.html` zones **4800-5300 ET ligne 14490** (le jeton).
+  · Deux sites laissés exprès pour le geste 2 : `echelles.js:753` (seconde écriture qui
+    écrase celle de `:741`) et les 4 gardes `IDS_GABARITS_HARDCODES` (**#662**).
+
+---
+
+### CE QUI ATTEND UNE DÉCISION DE GRÉGOIRE — trois choses, aucune urgente
+
+· **#656 — la Brique C se ferme-t-elle ?** Le report `D-C4` devait être statué au pas 4 ;
+  le pas 4 est LIVRÉ (`82fd4e9f`, 26 juin) **sans avoir touché `partage-section.js` ni son
+  témoin**. Ce n'est pas un report tranché, c'est un **report jamais statué qui a traversé
+  son échéance**. Rien n'est cassé aujourd'hui.
+· **La porte terrain iPad de #660/#661.** Due, non donnée.
+· **#663 sur DONNÉES** : quel format les `.codex` réels portent. Le code dit ce que les
+  écrivains produisent ; seules les données diraient ce que les fichiers contiennent.
+
+---
+
+### CE QUI A ÉTÉ FAIT — trois lots livrés, onze constats inscrits
+
+| ID | État |
+|---|---|
+| **#660** | **LIVRÉ** `24eeaa89` — le zoom courait à la CADENCE des événements, pas à l'amplitude ; et le chemin molette n'avait **aucun aperçu** — c'est ce défaut-là qui produisait la saccade. ⚠ Porte iPad DUE |
+| **#661** | **LIVRÉ** `24eeaa89` — le recalage déduisait l'origine du canvas de `margin-left`, que `justify-content: center` absorbe. **588 px d'erreur.** PRÉEXISTANT |
+| **#665** | **LIVRÉ** `e373bd8a` — le quatrième emplacement de version. Trouvé **par un test**, pas par une relecture |
+| **#654** | CONSTAT — aucun des quatre remaps ne mémorise l'id neuf d'une cartouche. ⚠ **Bascule armée** : la peupler activera le remap sur les quatre chemins d'un coup |
+| **#655** | CONSTAT — l'import sélectif écrit les cartouches hors namespace. Omission de S5/#623, **datée** |
+| **#656** | **À TRANCHER (Grégoire)** — le report D-C4 n'a jamais été statué |
+| **#657** | CONSTAT (prévention) — rien ne vérifie qu'un `js/` neuf est déclaré. **Aucun défaut ouvert** : 188 sur disque, 184 déclarés, 4 écarts tous légitimes |
+| **#658** | CONSTAT — `afficherToutesLesEchellesNiveaux` écrit dans un stub caché |
+| **#659** | PRÉPARÉ — le chemin de LECTURE écrit en base à chaque entrée |
+| **#663** | CONSTAT — le remap des pratiques vise `.config`, format quasi mort |
+| **#664** | CONSTAT — le bloc des pratiques s'exécute **avant** ses tables de remap |
+
+⚠ **Distinguez le LIVRÉ du CONSTAT.** Huit des onze sont des constats, et trois portent
+une réserve explicite sur ce qui n'a PAS été mesuré. **Ne les citez pas comme des faits
+acquis sans lire la réserve.**
+
+**Dernier ID utilisé : #665.** Prochain libre : **#666**. ⚠ **#662 est RÉSERVÉ** (les 4
+gardes `IDS_GABARITS_HARDCODES` de `js/echelles.js`, à écrire quand le fichier sera libre).
+
+---
+
+### ⮕ PROPOSE-LUI UN CHOIX FERMÉ ENTRE
+
+**(a)** **Les deux rouges Playwright** — `modal-soutien` et `palettes-drag-rendu`, cause
+non établie, mesurés isolément donc réels. Le second touche l'écran que #660/#661 viennent
+de modifier. **C'est le seul chantier qui porte une incertitude sur du code déjà poussé.**
+**(b)** **Déposer les deux lots préparés** — tout est écrit, break-testé sur son cœur, et
+sauvé. Reste le rouge d'abord sous vitest, le `npm test` complet, et deux commits.
+**Ordre obligé : `#659` d'abord** (il arrête une écriture active), **puis S9a/#627**,
+**puis `#628`** — le retrait de 165 lignes passe en dernier.
+**(c)** **La porte terrain iPad** — #660/#661, et seul Grégoire peut la donner.
+**(d)** **Le volet ÉCHELLES de #624**, ouvert depuis le troisième cycle :
+`supprimerEchelle` et `supprimerEchelleDefinitivement` sont nus, et la sixième porte a son
+corps propre dans `js/donnees-v2.js:1624`.
+
+⮕ **Une seule décision principale par session.**
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 31 AOÛT 2026, SOIRÉE (TROISIÈME CYCLE)
 
 > Écrit par `kuekatsheu-9f`, coordinatrice d'un trio (`67`, `94`) sur **S6 / #624**,
