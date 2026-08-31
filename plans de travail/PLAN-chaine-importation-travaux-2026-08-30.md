@@ -52,12 +52,12 @@ présent, il date d'avant 19 h 05.
 |---|---|---|
 | ~~`kuekatsheu-ff`~~ | ~~**S5** (#611)~~ | **TERMINÉE** — travail commité (`349b780d`, `20c67e2f`), session disparue |
 | ~~`kuekatsheu-00`~~ | ~~**S6** (#612)~~ | **TERMINÉE** — T6.6 (`1e2fc4d0`) et T6.3 (`15ef1c45`) commitées, session disparue ; T6.2, T6.4, T6.5, T6.7, T6.8 REMISES par Grégoire |
-| ~~`kuekatsheu-0d`~~ | ~~relais du 30 août~~ | **TERMINÉE** le 31 août au matin ; ne tenait plus aucun fichier |
-| **`kuekatsheu-bc`** | **relais du 31 août** | `BACKLOG.md`, `SESSION.md`, `RELAIS.md`, ce plan, la release et le push |
+| ~~`kuekatsheu-0d`~~ | ~~relais du 30 août~~ | **TERMINÉE** le 30 août vers 20 h 30 ; ne tenait plus aucun fichier |
+| **`kuekatsheu-bc`** | **relais du 30 août, soirée** | `BACKLOG.md`, `SESSION.md`, `RELAIS.md`, ce plan, la release et le push |
 
-### Répartition du 31 août 2026 — session `kuekatsheu-bc`
+### Répartition du 30 août 2026 (soirée) — session `kuekatsheu-bc`
 
-**Vérifié par `ListAgents` le 31 août** : `ff`, `00` et `0d` ne sont plus
+**Vérifié par `ListAgents` le 30 août à 20 h 30** : `ff`, `00` et `0d` ne sont plus
 joignables ; leur travail est commité et ancêtre de `main`. Ne cherche pas à les
 joindre. Deux sessions supplémentaires sont annoncées par Grégoire pour la
 journée — **elles doivent s'inscrire ICI, avec les fichiers `js/` qu'elles
@@ -66,10 +66,12 @@ qui tient aussi la release et le push : personne d'autre ne lance
 `release.mjs`.
 
 ⚠ **Les commits d'avance et leur push.** `main` portait 8 commits d'avance sur
-`origin/main` le 31 août au matin, dont `15ef1c45` qui est du CODE — aucune
+`origin/main` le 30 août au soir, dont `15ef1c45` qui est du CODE — aucune
 suite navigateur ne l'avait vu, le dernier verdict Playwright étant antérieur.
-**Go de Grégoire obtenu le 31 août** : relance de la suite WebKit sur l'arbre
-gelé, puis push si elle est verte. Un go de push est PONCTUEL et ne s'étend pas
+**Go de Grégoire obtenu le 30 août à 20 h 25, dans la session `kuekatsheu-bc`
+et par ce canal seulement** : relance de la suite WebKit sur l'arbre gelé, puis
+push. ✅ **FAIT** : WebKit vert (aucune rougeur nouvelle), Vitest vert au hook,
+poussé à 20 h 36 (`540531e3..4cff5b92`). Un go de push est PONCTUEL et ne s'étend pas
 au suivant — celui d'hier soir avait été consommé par la release 1.106.12.
 
 **Le gel de S5, S6 et S9 est LEVÉ** : il tenait à S4, qui est commité (`9dac5f49`).

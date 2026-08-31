@@ -326,6 +326,27 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   inatteignable · `livrableAdditionnel` persisté ou retiré · `DATA-OWNERSHIP.md` corrigé à 25 Ki.
 
 
+### Plan « modèle d'objets de l'onglet Conception » — identifiants réservés le 30 août 2026
+
+> Réservés EN UNE SEULE ÉCRITURE par la session `kuekatsheu-bc` (T0.6 du plan), après
+> vérification que le dernier ID réellement inscrit était **#618**. Plan :
+> `plans de travail/PLAN-modele-objets-conception-2026-08-30.md`. Audit source :
+> `Rapports/AUDIT-modele-objets-conception-2026-08-30.md`.
+> ⚠ Ces numéros sont PRIS. Une autre session qui réserve part de **#630**.
+
+- [ ] **#619 — S1 · Audit ciblé Z1 : cartouches, frontière de portée, archivage** (constats B1, B2, M1). Lecture seule.
+- [ ] **#620 — S2 · Audit ciblé Z2 : politique de suppression et intégrité référentielle** (constats S1, S2, S6, M7). Lecture seule ; inventaire des orphelins, dont l'incident #542.
+- [ ] **#621 — S3 · Audit ciblé Z3 : le legacy vivant des quatre sections** (constats S4, S5, S9). Lecture + instrumentation locale jamais commitée.
+- [ ] **#622 — S4 · Archivage de trimestre** (constat B1). Après S1. ⚠ D1 = A : moratoire actif sur « Archiver un trimestre » jusqu'à la livraison de cet item.
+- [ ] **#623 — S5 · Régime des cartouches** (constat B2). Après S1 et D2. ⚠ Migration de données réelles : sauvegarde préalable par copie obligatoire.
+- [ ] **#624 — S6 · Politique de suppression et réparation des orphelins** (constats S1, S2). Après S2 et D3. Absorbe la réparation #542.
+- [ ] **#625 — S7 · États d'édition : `tempCriteres` et création d'échelle** (constat S3). Indépendant.
+- [ ] **#626 — S8 · Retraits sûrs statiquement** (constats S5 partie morte, M2–M5, M8, M11). Indépendant, après D5.
+- [ ] **#627 — S9 · Unification des remaps d'import** (constats S6, M6). Après S2. `import-export.js` est sous surveillance sécurité : suite complète avant commit.
+- [ ] **#628 — S10 · Retrait du legacy des quatre sections** (constats S4, S9). Après S3 et D4. Probablement scindé en S10a (échelles) et S10b (les trois autres).
+- [ ] **#629 — S11 · Mineurs restants du plan Conception** (constats M1 si non absorbé par S4, M7, M9, M10).
+
+
 ### Arbitrages du 28 août 2026 (soir) — les deux qui n'avaient pas d'item
 
 > Les vingt et un arbitrages du 28 août sont consignés **dans leurs items respectifs**
