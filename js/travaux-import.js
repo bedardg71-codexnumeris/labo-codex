@@ -1789,6 +1789,43 @@
     }
 
     /**
+     * #612 (T6.3, constat S4 de l'audit du 30 août 2026) — les fichiers de la
+     * file dont le nom porte un DA qui ne correspond à AUCUN élève du groupe
+     * actif. Distinct de `detecterFichiersSansDA` : ici l'association n'est pas
+     * ABSENTE, elle est FAUSSE. Le fichier part quand même sous ce DA
+     * (`etudiantDA: etudiant ? etudiant.da : daDetecte`, `preparerFichier`),
+     * donc dans un groupe où l'élève n'existe pas — et il n'a alors aucune
+     * ligne dans la liste des évaluations. Cas nommés par le constat : faute de
+     * frappe, `12345678_devoir.pdf` tronqué à sept chiffres par
+     * `PATTERNS_DA[2]`, élève non inscrit ici.
+     *
+     * Les deux détecteurs PARTITIONNENT la file : aucun fichier dans les deux,
+     * aucun fichier non associé hors des deux. C'est ce trou-là que S4 décrit.
+     *
+     * ⚠ Le prédicat porte sur `daDetecte` SEUL, pas sur
+     * `(f.parseLea && f.parseLea.da) || f.daDetecte` comme son voisin. Ce n'est
+     * pas une omission, c'est mesuré : `parseLea.da` vaut
+     * `detecterDA(partieIdentite)`, où `partieIdentite` est un PRÉFIXE du nom
+     * complet dont `daDetecte` est tiré. Un DA trouvé dans le préfixe l'est
+     * forcément dans le nom entier — `parseLea.da` non vide implique
+     * `daDetecte` non vide. Aligner les deux expressions ne changerait rien.
+     *
+     * @returns {Array<Object>} Les entrées concernées de la file d'attente.
+     */
+    function detecterFichiersDAInconnu() {
+        try {
+            const queue = obtenirFileDAttente();
+            if (!queue || queue.length === 0) return [];
+            return queue.filter(function(f) {
+                return !!(f && f.daDetecte && !f.etudiantAssocie);
+            });
+        } catch (e) {
+            console.warn('[Travaux-Import] Erreur detecterFichiersDAInconnu:', e);
+            return [];
+        }
+    }
+
+    /**
      * Beta 99.30 : Détecte les fichiers de la file d'attente qui dupliquent un
      * fichier déjà importé dans le GC actif (même couple etudiantDA + productionId)
      * ou un autre fichier de la file. Une entrée par fichier "nouveau" en doublon.
@@ -1901,6 +1938,7 @@
         trouverEtudiantParDA: trouverEtudiantParDA,
         detecterFichiersAutreGC: detecterFichiersAutreGC,
         detecterFichiersSansDA: detecterFichiersSansDA,
+        detecterFichiersDAInconnu: detecterFichiersDAInconnu,   // #612 (T6.3)
         detecterDoublonsStockage: detecterDoublonsStockage,
         reevaluerAssociationsQueue: reevaluerAssociationsQueue,
         renommerFichierDansFile: renommerFichierDansFile,
