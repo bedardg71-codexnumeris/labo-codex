@@ -1,5 +1,35 @@
 # Portes terrain — chaîne d'importation des travaux (30 août 2026)
 
+> # ⛔ ABANDONNÉES — décision de Grégoire, 30 août 2026 au soir
+>
+> **Ces quatre portes ne sont pas à jouer.** Elles sont complètes et exactes ; elles
+> ne sont simplement pas dues. Le fichier est gardé parce que son §1 dit ce qu'il
+> faudra regarder si un symptôme apparaît, et parce que son tri documente une
+> méthode.
+>
+> **Le motif, et il vaut pour les cycles suivants.** Aucun des quatre ratés visés
+> n'est IRRÉVERSIBLE : un fichier en corbeille se restaure (la rangée 1.5 le
+> vérifiait elle-même), des doublons se suppriment, un statut « exporté » écrasé est
+> une perte d'information, pas de travail. La règle 2 du skill `portes-terrain` les
+> écarte donc toutes les quatre — le tri initial l'avait appliquée à S2 et S8, sans
+> la retourner contre les quatre retenues.
+> ⮕ Et un fait que le tri n'avait pas vu : **la porte P3 demandait d'importer dans
+> le corpus réel, de recharger en plein milieu et de confirmer un re-dépôt.** Si le
+> correctif avait un défaut, la porte mettait Grégoire dans l'état exact qu'elle
+> prétendait prévenir, dans ses vraies données, à trois jours de la rentrée. **Le
+> test coûtait le risque qu'il mesurait.**
+>
+> **Ce qui les remplace, et c'est tout** : au premier import d'un vrai lot en
+> septembre, regarder **l'attribution des copies**. C'est le seul défaut du lot qui
+> soit SILENCIEUX — une copie sous le nom d'un autre élève ne se signale pas, et
+> pourrait faire annoter le travail de l'un pour l'autre. Tout le reste se voit en
+> usage normal et se dit.
+>
+> **Ce qui rend cet abandon raisonnable** : les correctifs ne sont pas « probablement
+> bons », ils sont mesurés — 4344 tests verts, et surtout des **break-tests avec
+> rouges obtenus**, chaque correctif muté pour vérifier que sa sentinelle savait
+> échouer. Ce que le banc ne voit pas est étroit : le rendu et l'iPad.
+
 > Jumeau markdown de l'artefact interactif. L'artefact sert à COCHER, ce fichier
 > sert à RETROUVER — une session qui fait son rituel de début doit savoir ce qui
 > reste dû sans accès à la conversation.
