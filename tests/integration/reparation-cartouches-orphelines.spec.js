@@ -23,8 +23,19 @@ test('PREUVE · le script de réparation liste puis rattache réellement', async
         await db.set('a2026_grillesTemplates', [
             { id: 'GR_VIVANTE', nom: 'Grille-5 FR-HOLIS A26', criteres: [], dansBibliotheque: true }
         ]);
+        // ⚠ LA DESTINATION EST NAMESPACÉE (corrigé le 31 août 2026, #636).
+        // Ce « déjà là » était posé sous la clé NUE `cartouches_GR_VIVANTE`. Depuis
+        // S5 (#623), l'application lit et écrit `<trimestreId>_cartouches_<grilleId>` :
+        // la clé nue n'est plus une destination, c'est un RÉSIDU que plus rien ne lit.
+        // Le lot conservé doit donc être posé là où l'app le cherche, sinon ce cas ne
+        // mesure plus la fusion — il mesure une adresse morte.
+        // ⮕ MESURÉ, pas déduit : avec le « déjà là » sous la clé nue, la destination
+        // namespacée reçoit 2 cartouches (les orphelines seules) et la fusion n'est
+        // PAS exercée ; avec ce même lot à l'adresse namespacée, elle en reçoit 3 —
+        // « Déjà là » en tête, les deux orphelines ajoutées. C'est la seconde forme
+        // qui prouve « on ajoute sans écraser », c'est-à-dire l'invariant du cas.
         // security-ok: fixture de test, littéral écrit par le spec — aucune source externe.
-        await db.set('cartouches_GR_VIVANTE', [{ id: 'DEJA', nom: 'Déjà là', grilleId: 'GR_VIVANTE' }]);
+        await db.set(cle('cartouches_GR_VIVANTE'), [{ id: 'DEJA', nom: 'Déjà là', grilleId: 'GR_VIVANTE' }]);
         // Le lot orphelin : sa grille n'existe plus.
         // security-ok: fixture de test, littéral écrit par le spec — aucune source externe.
         await db.set('cartouches_GRILLE_DISPARUE', [
@@ -41,8 +52,14 @@ test('PREUVE · le script de réparation liste puis rattache réellement', async
         await window.reparerOrphelines(1, 'A');
         await new Promise(res => setTimeout(res, 400));
         return {
-            destination: (await db.get('cartouches_GR_VIVANTE') || []).map(c => ({ nom: c.nom, grilleId: c.grilleId })),
-            origineIntacte: (await db.get('cartouches_GRILLE_DISPARUE') || []).length
+            // L'oracle vise l'adresse que l'APPLICATION lit — `cle()` la calcule,
+            // on ne la réécrit pas à la main ici : une adresse recopiée dans le test
+            // se désaligne en silence le jour où le routage change, et c'est
+            // exactement ce qui est arrivé à ce fichier.
+            destination: (await db.get(cle('cartouches_GR_VIVANTE')) || []).map(c => ({ nom: c.nom, grilleId: c.grilleId })),
+            origineIntacte: (await db.get('cartouches_GRILLE_DISPARUE') || []).length,
+            // Le résidu nu ne doit PAS devenir une seconde destination silencieuse.
+            residuNu: (await db.get('cartouches_GR_VIVANTE') || []).length
         };
     });
 
@@ -54,4 +71,5 @@ test('PREUVE · le script de réparation liste puis rattache réellement', async
     expect(r.destination.map(c => c.nom)).toContain('Carte mentale A26');
     expect(r.destination.every(c => c.grilleId === 'GR_VIVANTE'), 'toutes pointent la grille d\'accueil').toBe(true);
     expect(r.origineIntacte, 'le lot d\'origine est laissé intact — rien de destructif').toBe(2);
+    expect(r.residuNu, 'rien n\'est écrit sous la clé NUE : elle n\'est plus une destination').toBe(0);
 });

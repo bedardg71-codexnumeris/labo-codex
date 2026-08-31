@@ -30,12 +30,69 @@
           ==== DIAG CARTOUCHES · <date> ====
         S'il commence autrement, c'est une ancienne copie : refais `git pull`.
      5. Copie tout le bloc et colle-le dans la conversation.
+   ─────────────────────────────────────────────────────────────────────────
+   ⚠ RÉGIME DES CLÉS DEPUIS S5/#623 — LIRE AVANT DE TOUCHER À UNE CLÉ ICI.
+
+   `cartouches_<grilleId>` n'est plus une clé de stockage. Le magasin vit sous
+   `<trimestreId>_cartouches_<grilleId>`, un exemplaire PAR TRIMESTRE (la
+   migration au boot a copié le lot dans chacun — js/trimestres.js:1044).
+
+   TROIS RÈGLES, et la deuxième est l'inverse de la première :
+     R1 · LIRE   = balayer TOUS les trimestres, et NOMMER lequel. Ce n'est pas
+                   une précaution : un outil qui ne lirait que le trimestre
+                   actif sous-compterait PAR CONSTRUCTION, puisque le même lot
+                   existe légitimement dans chaque trimestre.
+     R2 · ÉCRIRE = exiger un trimestre EXPLICITE, et refuser sans lui. Balayer
+                   en écriture recréerait exactement le partage entre trimestres
+                   que S5 vient de refermer.
+     R3 · Une source DATÉE (dump, backup) garde ses clés d'époque : ce qui
+                   décide, c'est le RÉGIME de la donnée, pas son support.
+   ⮕ Donc `'cartouches_' + id` demande DEUX traitements OPPOSÉS selon qu'elle
+     lit ou qu'elle écrit — parfois à quarante lignes d'écart dans un fichier.
+
+   ⚠⚠ « SURVIVRE AU GREP » ≠ « JUSTE APRÈS S5 ». Un prédicat sur ces clés a
+   TROIS issues, pas deux (mesuré le 31 août 2026 sur les deux régimes) :
+     · ancré   (`startsWith`, `indexOf(…)===0`, `/^cartouches_/`) → MENT PAR
+       ZÉRO : ne voit plus rien, et « 0 trouvé » se lit « rien à réparer » ;
+     · lâche   (`indexOf(…) !== -1`) → MENT PAR INFLATION : voit les copies de
+       TOUS les trimestres et compte la même grille autant de fois ;
+     · décomposé (ci-dessous) → voit ET attribue. C'est le seul juste.
    ============================================================================ */
 (async function diagCartouches() {
     'use strict';
     const out = [];
     const L = s => out.push(s);
     const ko = n => Math.round(n / 1024) + ' Ki';
+
+    /**
+     * Décompose une clé de cartouches dans les DEUX régimes.
+     * @returns {{trimestre: string|null, grilleId: string}|null}
+     *   trimestre === null ⇒ clé NUE (résidu pré-S5 non migré : à signaler,
+     *   c'est un état que la migration au boot aurait dû résorber).
+     * Ni ancré ni lâche : c'est la troisième issue, celle qui attribue.
+     *
+     * ⚠ LE PRÉFIXE DOIT ÊTRE UN ID DE TRIMESTRE, ET C'EST UNE GARDE PAYÉE.
+     * Premier jet : « le motif suit un `_` » — trop large. Il happait
+     * `migration_cartouches_namespacees_done`, le DRAPEAU POSÉ PAR LA MIGRATION
+     * S5 ELLE-MÊME (js/main.js:735), dont la valeur est un booléen : le rapport
+     * plantait sur `.forEach`. Trouvé par Playwright le 31 août 2026, pas à la
+     * relecture. C'est exactement le défaut « prédicat lâche » décrit en tête de
+     * fichier — desserrer un ancrage happe des clés d'une AUTRE famille.
+     * ⮕ `[ahe]\d{4}` couvre les trois sessions (`creerTrimestre` accepte 'A',
+     *   'H' et 'E' — js/trimestres.js), `demo` couvre le pack de démonstration.
+     *   Si la fabrique d'ids change, ce motif doit changer AVEC elle.
+     */
+    const RE_TRIMESTRE = /^([ahe]\d{4}|demo)$/;
+    const decomposerCleCartouches = (k) => {
+        if (typeof k !== 'string') return null;
+        const i = k.indexOf('cartouches_');
+        if (i === -1) return null;
+        // Nue = commence par le motif ; namespacée = un ID DE TRIMESTRE puis `_`.
+        if (i === 0) return { trimestre: null, grilleId: k.slice('cartouches_'.length) };
+        const prefixe = k.slice(0, i - 1);
+        if (k[i - 1] !== '_' || !RE_TRIMESTRE.test(prefixe)) return null;
+        return { trimestre: prefixe, grilleId: k.slice(i + 'cartouches_'.length) };
+    };
 
     L('==== DIAG CARTOUCHES · ' + new Date().toISOString() + ' ====');
 
@@ -54,55 +111,124 @@
     L('');
     L('-- GRILLES DU TRIMESTRE ACTIF : ' + grilles.length + ' --');
 
+    // R1 restreint au trimestre ACTIF : cette section-ci décrit ce que la barre
+    // latérale montre, donc l'actif et lui seul. Le balayage de tous les
+    // trimestres est la section 3. `cle()` résout vers `<actif>_cartouches_<id>`.
+    //
+    // ⚠ Sans `cle()`, on NE retombe PAS sur la clé nue : elle ne désigne plus
+    // rien depuis S5, et la lire rendrait un 0 qui se lirait « aucune cartouche »
+    // au lieu de « je n'ai pas su où regarder ». Le script le DIT et s'abstient.
+    const routageDispo = (typeof cle === 'function');
+    if (!routageDispo) {
+        L('  ⛔ `cle()` indisponible — es-tu bien dans l\'onglet de l\'app ? Sans elle,');
+        L('     ce script ne peut PAS savoir où vivent les cartouches du trimestre actif.');
+        L('     Section NON CONCLUANTE (ce n\'est pas « aucune cartouche »).');
+    }
     let totalCartouches = 0;
     for (const g of grilles) {
         if (!g || !g.id) { L('  (entrée sans id)'); continue; }
-        const lot = await db.get('cartouches_' + g.id) || [];
+        L('  ' + (g.nom || 'sans nom') + '  [' + g.id + ']');
+        if (!routageDispo) { L('     (clé non résolue — voir ci-dessus)'); continue; }
+        const cleLot = cle('cartouches_' + g.id);
+        const lot = await db.get(cleLot) || [];
         const visibles = lot.filter(c => c && c.dansBibliotheque !== false).length;
         totalCartouches += lot.length;
-        L('  ' + (g.nom || 'sans nom') + '  [' + g.id + ']');
-        L('     cartouches_' + g.id + ' : ' + lot.length + ' cartouche(s), '
+        L('     ' + cleLot + ' : ' + lot.length + ' cartouche(s), '
           + visibles + ' visible(s) en barre latérale, ' + ko(JSON.stringify(lot).length));
         lot.forEach(c => L('        · ' + (c.nom || 'sans nom')
           + (c.dansBibliotheque === false ? '  [MASQUÉE : dansBibliotheque=false]' : '')
           + (c.inspireDeTrimestre ? '  [importée de ' + c.inspireDeTrimestre + ']' : '')));
     }
-    L('  TOTAL : ' + totalCartouches + ' cartouche(s) rattachée(s) aux grilles de ce trimestre.');
+    L('  TOTAL : ' + (routageDispo
+        ? totalCartouches + ' cartouche(s) rattachée(s) aux grilles de ce trimestre.'
+        : 'NON MESURÉ (routage indisponible) — ne pas lire ce total comme un zéro.'));
 
-    // ── 3. TOUTES les clés cartouches_* du stockage, y compris orphelines
+    // ── 3. TOUTES les clés de cartouches du stockage, y compris orphelines
     //    C'est le cœur du diagnostic : une cartouche écrite sous une grille qui
-    //    n'est pas (ou plus) dans le trimestre actif existe, mais reste
-    //    INVISIBLE — la barre latérale n'énumère que les grilles de l'actif.
+    //    n'est pas (ou plus) dans SON trimestre existe, mais reste INVISIBLE —
+    //    la barre latérale n'énumère que les grilles du trimestre actif.
+    //
+    // ⚠ R1 — CE QUI A CHANGÉ AVEC S5, ET POURQUOI LE PRÉDICAT LÂCHE NE SUFFIT PAS.
+    // Le test `indexOf('cartouches_') !== -1` voit toujours les clés (il n'a pas
+    // menti par zéro), mais il ne dit plus À QUI elles appartiennent. Or la
+    // migration a copié le même lot dans CHAQUE trimestre : comparer aux grilles
+    // du trimestre ACTIF marquait « ⚠ ORPHELINE » toutes les copies des autres
+    // trimestres — un faux positif par trimestre et par grille. On décompose donc
+    // la clé et on juge chaque lot DANS SON PROPRE trimestre.
     L('');
-    L('-- TOUTES LES CLÉS cartouches_* DU STOCKAGE --');
-    const idsGrillesActif = new Set(grilles.map(g => g && g.id).filter(Boolean));
+    L('-- TOUTES LES CLÉS DE CARTOUCHES DU STOCKAGE (tous trimestres) --');
+
+    // Catalogue des grilles PAR trimestre — le référentiel d'orphelinat.
+    const grillesParTrimestre = new Map();   // trimestreId → Set(grilleId)
+    try {
+        const tousTrimestres = (typeof obtenirTrimestres === 'function') ? (obtenirTrimestres() || []) : [];
+        for (const t of tousTrimestres) {
+            if (!t || !t.id) continue;
+            const lot = await db.get(t.id + '_grillesTemplates') || [];
+            grillesParTrimestre.set(t.id, new Set(lot.map(g => g && g.id).filter(Boolean)));
+        }
+    } catch (e) { L('  (catalogue des grilles par trimestre indisponible : ' + (e && e.message) + ')'); }
+
     const vues = new Set();
+    let nues = 0;
 
     const ajouterCle = async (k) => {
-        if (!k || k.indexOf('cartouches_') === -1 || vues.has(k)) return;
+        const d = decomposerCleCartouches(k);
+        if (!d || vues.has(k)) return;
         vues.add(k);
         const lot = await db.get(k) || [];
-        const idGrille = k.slice(k.indexOf('cartouches_') + 'cartouches_'.length);
-        const rattachee = idsGrillesActif.has(idGrille);
-        L('  ' + k + ' : ' + (Array.isArray(lot) ? lot.length + ' cartouche(s)' : 'forme inattendue')
-          + (rattachee ? '' : '   ⚠ ORPHELINE — sa grille n\'est PAS dans le trimestre actif'));
+        const taille = Array.isArray(lot) ? lot.length + ' cartouche(s)' : 'forme inattendue';
+
+        if (d.trimestre === null) {
+            // Clé NUE encore présente : la migration au boot ne l'a pas résorbée.
+            // Ce n'est pas un orphelin, c'est un RÉSIDU — état distinct, et le
+            // confondre avec un orphelin enverrait vers la mauvaise réparation.
+            nues++;
+            L('  ' + k + ' : ' + taille + '   ⚠ CLÉ NUE (régime pré-S5) — la migration '
+              + 'au boot ne l\'a pas migrée ; plus aucun écran ne la lit.');
+            return;
+        }
+
+        const connuesDuTrimestre = grillesParTrimestre.get(d.trimestre);
+        if (!connuesDuTrimestre) {
+            L('  ' + k + ' : ' + taille + '   ⚠ trimestre « ' + d.trimestre
+              + ' » INCONNU du registre — clé sans propriétaire.');
+            return;
+        }
+        const rattachee = connuesDuTrimestre.has(d.grilleId);
+        L('  ' + k + ' : ' + taille + '   [trimestre ' + d.trimestre + ']'
+          + (rattachee ? '' : '   ⚠ ORPHELINE — la grille ' + d.grilleId
+             + ' n\'est PAS dans les grilles de ' + d.trimestre));
         if (!rattachee && Array.isArray(lot)) {
             lot.slice(0, 8).forEach(c => L('        · ' + (c && c.nom || 'sans nom')));
             if (lot.length > 8) L('        · … et ' + (lot.length - 8) + ' autre(s)');
         }
     };
 
-    try { for (let i = 0; i < localStorage.length; i++) await ajouterCle(localStorage.key(i)); } catch (e) {}
-    try { if (db.memoryCache) for (const k of db.memoryCache.keys()) await ajouterCle(k); } catch (e) {}
+    // Compter les clés VUES à chaque étage : c'est le témoin qui donne son sens
+    // au zéro final. Un « 0 cartouche » sur 0 clé examinée dit « je n'ai rien
+    // regardé » ; sur 400 clés examinées il dit « il n'y a rien ». Sans ce
+    // compteur, les deux s'écrivent pareil.
+    let clesExaminees = 0;
+    try { for (let i = 0; i < localStorage.length; i++) { clesExaminees++; await ajouterCle(localStorage.key(i)); } } catch (e) {}
+    try { if (db.memoryCache) for (const k of db.memoryCache.keys()) { clesExaminees++; await ajouterCle(k); } } catch (e) {}
     try {
         if (typeof db.keys === 'function') {
             const toutes = await db.keys();
             if (toutes && typeof toutes.forEach === 'function') {
-                for (const k of toutes) await ajouterCle(k);
+                for (const k of toutes) { clesExaminees++; await ajouterCle(k); }
             }
         }
     } catch (e) { L('  (énumération db.keys indisponible : ' + (e && e.message) + ')'); }
-    if (vues.size === 0) L('  (aucune clé cartouches_* trouvée)');
+    if (vues.size === 0) {
+        L(clesExaminees === 0
+            ? '  ⛔ AUCUNE CLÉ EXAMINÉE — énumération du stockage indisponible. Ce n\'est PAS'
+              + ' « aucune cartouche » : le script n\'a rien pu regarder.'
+            : '  (aucune clé de cartouches parmi les ' + clesExaminees + ' clés examinées)');
+    } else {
+        L('  → ' + vues.size + ' clé(s) de cartouches sur ' + clesExaminees + ' clé(s) examinée(s)'
+          + (nues ? '   ⚠ dont ' + nues + ' NUE(S), non migrée(s)' : ''));
+    }
 
     // ── 4. Les grilles des AUTRES trimestres, pour situer
     L('');

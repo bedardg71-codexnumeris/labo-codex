@@ -2,6 +2,41 @@
 /**
  * scripts/restaurer-isoler-cartouches-A25.mjs
  *
+ * ╔════════════════════════════════════════════════════════════════════════╗
+ * ║ ⛔ GELÉ LE 31 AOÛT 2026 (#636) — ÉCRIT SOUS LE RÉGIME PRÉ-S5.          ║
+ * ║    NE PAS RELANCER TEL QUEL. NE PAS « ROUTER » SES CLÉS.               ║
+ * ╚════════════════════════════════════════════════════════════════════════╝
+ *
+ * POURQUOI. Ce script est un one-shot de juin 2026 (commit a1e42328, #62). Il
+ * a été écrit quand `cartouches_<grilleId>` était une clé de stockage GLOBALE.
+ * Depuis S5/#623 elle ne l'est plus : le magasin vit sous
+ * `<trimestreId>_cartouches_<grilleId>`, un exemplaire par trimestre.
+ *
+ * SES TROIS POINTS DE DÉCISION, ET POURQUOI ILS NE SE CORRIGENT PAS UN À UN :
+ *   · `backup['cartouches_' + ancienId]` (lecture du dump du 4 février 2026) est
+ *     JUSTE et doit le rester — R3 : une source DATÉE garde les clés de son
+ *     époque. Router cette lecture-là casserait le script.
+ *   · `codex['cartouches_' + nouvelId] = …` (écriture) dépose aujourd'hui une
+ *     clé que plus aucun écran ne lit. Et si le codex produit est réimporté dans
+ *     une installation où la migration au boot n'a pas encore tourné, cette clé
+ *     nue serait recopiée dans TOUS les trimestres (js/trimestres.js:1044) —
+ *     c'est-à-dire l'exact contraire de l'isolation A25/H26 que ce script existe
+ *     pour établir. Les deux issues sont mauvaises, en sens opposés.
+ *   · `codex['cartouches_' + e.grilleId]` (contrôle d'orphelins) ne trouve plus
+ *     rien dans un codex post-S5 et déclarerait orpheline CHAQUE cartouche.
+ *
+ * ⮕ Router ces sites donnerait à un outil périmé l'apparence de la fraîcheur.
+ *   Le régime de la donnée a changé sous lui : ce n'est pas une clé à mettre à
+ *   jour, c'est une hypothèse de conception qui n'est plus vraie.
+ *
+ * SI LE BESOIN REVIENT : réécrire à partir du régime namespacé (décider quel
+ * trimestre reçoit quoi, explicitement — R2), en repartant du backup daté. Ce
+ * fichier reste comme trace de ce qui a été fait en juin, pas comme outil.
+ *
+ * (Il est en DRY-RUN par défaut : `--ecrire` est opt-in. Rien ne se produit
+ * sans ce drapeau — le gel ne dépend pas de cette garde, il s'y ajoute.)
+ *
+ * ─────────────────────────── texte d'origine ────────────────────────────
  * §8.4 — PLAN-restauration-longitudinale-A25.md (« recréation propre »).
  * Couche ESSENTIELLE : restaure les cartouches A25 RÉELLES depuis le backup
  * du 4 février 2026 et ISOLE la grille FR-ALGO partagée avec H26.
@@ -36,7 +71,8 @@
  *
  *   (sans --ecrire : DRY-RUN, rapport seulement, aucune écriture.)
  *
- * Codes de sortie : 0 = succès · 2 = erreur (source manquante/incohérente).
+ * Codes de sortie : 0 = succès · 2 = erreur (source manquante/incohérente, ou
+ *   ÉCRITURE REFUSÉE par le gel #636 — voir l'encadré en tête de fichier).
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -78,6 +114,45 @@ function lireArgs(argv) {
         process.exit(2);
     }
     if (a.ecrire && !a.sortie) { console.error('--ecrire exige --sortie <chemin>'); process.exit(2); }
+
+    // GEL #636 — LE SEUL CHEMIN DANGEREUX EST BLOQUÉ, PAS LE SCRIPT ENTIER.
+    // Un avertissement en en-tête n'arrête personne : c'est du texte. Le
+    // dry-run reste consultable (il documente ce qui a été fait en juin), mais
+    // l'ÉCRITURE, qui produirait un codex porteur de clés nues sous un régime
+    // qui n'en veut plus, refuse et dit pourquoi. R2 : ce qui ne peut pas
+    // savoir dans quel trimestre écrire le DIT, il ne devine pas.
+    if (a.ecrire) {
+        console.error(
+'\n⛔ ÉCRITURE REFUSÉE — ce script est GELÉ depuis le 31 août 2026 (#636).\n' +
+'\n' +
+'POURQUOI. Il compose des clés `cartouches_<grilleId>` NUES. Depuis S5/#623 ce ne\n' +
+'sont plus des clés de stockage : le magasin est `<trimestre>_cartouches_<grille>`,\n' +
+'un exemplaire par trimestre. Le codex produit serait donc soit ILLISIBLE par\n' +
+'l\'app, soit — s\'il est réimporté avant que la migration au boot ait tourné —\n' +
+'recopié dans TOUS les trimestres, ce qui défait exactement l\'isolation A25/H26\n' +
+'que ce script existe pour établir.\n' +
+'\n' +
+'COMMENT LEVER LE GEL. Trois sites à traiter, et ils ne prennent PAS le même\n' +
+'traitement — c\'est pour ça qu\'un simple « router les clés » ne suffit pas :\n' +
+'  1. transformer(), lecture du backup : `backup[\'cartouches_\' + g.ancienId]`\n' +
+'     ⮕ NE PAS TOUCHER. Le backup est le dump du 4 février 2026 : ses clés sont\n' +
+'       nues par fait historique. La router casserait la lecture.\n' +
+'  2. transformer(), écriture : `codex[\'cartouches_\' + g.nouvelId] = restaurees`\n' +
+'     ⮕ DÉCIDER EXPLICITEMENT le trimestre de destination et l\'écrire dans la\n' +
+'       clé : `codex[TRIMESTRE + \'_cartouches_\' + g.nouvelId]`. La constante\n' +
+'       TRIMESTRE (= \'a2025\') est déjà en tête de fichier. Ne PAS écrire dans\n' +
+'       tous les trimestres : ce serait le partage que S5 referme.\n' +
+'  3. transformer(), contrôle d\'orphelins : `codex[\'cartouches_\' + e.grilleId]`\n' +
+'     ⮕ Même préfixe que le magasin d\'évaluations lu juste au-dessus\n' +
+'       (`TRIMESTRE + \'_evaluationsSauvegardees\'`), sans quoi CHAQUE cartouche\n' +
+'       sera déclarée orpheline.\n' +
+'Puis retirer ce bloc de refus, et dater le retrait dans l\'encadré d\'en-tête.\n' +
+'\n' +
+'EN ATTENDANT : le DRY-RUN reste entier — retire `--ecrire`. Il imprime le même\n' +
+'rapport (cartouches, re-pointages, orphelins restants, pondérations déviantes)\n' +
+'et documente le geste de juin. On bloque l\'écriture, pas le diagnostic.\n');
+        process.exit(2);
+    }
     return a;
 }
 

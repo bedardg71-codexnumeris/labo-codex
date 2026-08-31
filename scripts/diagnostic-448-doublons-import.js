@@ -106,8 +106,22 @@
                 }
             }
         }
+        // S5/#623 — la famille des cartouches est NAMESPACÉE comme les autres :
+        // `<trimestreId>_cartouches_<grilleId>`. Le test ancré `indexOf(…)===0`
+        // ne trouvait plus rien (0 après S5, contre 2 avant) et son zéro se
+        // lisait « aucun doublon de cartouches ». Même forme que la boucle des
+        // familles namespacées juste au-dessus : nue OU préfixée. R1 : on veut
+        // les copies de TOUS les trimestres, c'est le sujet d'un dédoublonneur.
+        // ⚠ Le préfixe doit être un ID DE TRIMESTRE. Un simple « le motif suit un
+        // `_` » happe `migration_cartouches_namespacees_done`, le drapeau de la
+        // migration S5 (js/main.js:735), qui vaut un booléen : le dédoublonneur
+        // l'examinerait comme une collection. Mesuré le 31 août 2026 (#636).
+        var RE_TRI = /^([ahe]\d{4}|demo)$/;
         for (var g = 0; g < cles.length; g++) {
-            if (cles[g].indexOf('cartouches_') === 0) {
+            var iCart = cles[g].indexOf('cartouches_');
+            var estCart = iCart === 0
+                || (iCart > 0 && cles[g][iCart - 1] === '_' && RE_TRI.test(cles[g].slice(0, iCart - 1)));
+            if (estCart) {
                 aExaminer.push({ nom: 'Cartouches', cle: cles[g] });
             }
         }

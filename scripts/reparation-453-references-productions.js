@@ -179,10 +179,27 @@
             return { restaurables: 0, refus: 0 };
         }
 
-        // Quels magasins `cartouches_{id}` existent encore ? C'est la seule
-        // trace qui survit à une renumérotation de grille : le magasin garde
-        // l'ANCIEN identifiant dans son nom de clé.
-        const magasinsCartouches = new Set(cles.filter((c) => c.indexOf('cartouches_') === 0));
+        // Quels magasins de cartouches existent encore ? C'est la seule trace qui
+        // survit à une renumérotation de grille : le magasin garde l'ANCIEN
+        // identifiant de grille dans son nom de clé.
+        //
+        // ⚠ S5/#623 — LA CLÉ N'EST PLUS NUE : `<trimestreId>_cartouches_<grilleId>`.
+        // Le test ancré `indexOf(…)===0` rendait un ensemble VIDE, donc la trace
+        // « cartouches_… EXISTE ENCORE » — que le rapport désigne explicitement
+        // comme « le fil à tirer » — ne s'imprimait plus jamais. Un outil de
+        // réparation qui perd sa seule trace ne dit pas qu'il l'a perdue : il dit
+        // qu'il n'y a rien à réparer. Mesuré : 2 clés avant S5, 0 après.
+        //
+        // R1 · on indexe par GRILLE (la question est « cette grille a-t-elle
+        // existé ? », pas « dans quel trimestre »), tous trimestres confondus.
+        const RE_CARTOUCHES = /^(?:([ahe]\d{4}|demo)_)?cartouches_(.+)$/;
+        const magasinsCartouches = new Map();   // grilleId → [clés, tous trimestres]
+        for (const c of cles) {
+            const m = typeof c === 'string' ? c.match(RE_CARTOUCHES) : null;
+            if (!m) continue;
+            if (!magasinsCartouches.has(m[2])) magasinsCartouches.set(m[2], []);
+            magasinsCartouches.get(m[2]).push(c);
+        }
 
         const plan = [];          // { cle, liste, gestes: [...] }
         const casA = [];          // restaurables
@@ -232,11 +249,22 @@
                     let ou = null;
 
                     if (champ === 'cartoucheId') {
-                        // La cartouche vit dans `cartouches_{grilleId}` — clé
-                        // GLOBALE, sans préfixe de trimestre. Sans grille
-                        // retenue, elle n'est joignable par personne.
+                        // ⚠ S5/#623 — CE COMMENTAIRE DISAIT « clé GLOBALE, sans
+                        // préfixe de trimestre ». Ce n'est plus vrai : la
+                        // cartouche vit dans `{trimestre}_cartouches_{grilleId}`.
+                        // Sans grille retenue, elle n'est joignable par personne.
+                        //
+                        // ⚠⚠ ICI, R1 (« balayer tous les trimestres ») SERAIT FAUX.
+                        // La question posée est « cette cartouche est-elle joignable
+                        // POUR CET ARTEFACT ? ». L'artefact vit dans le trimestre
+                        // `prefixe` ; seule la copie de CE trimestre le rend
+                        // joignable. Trouver la cartouche dans un autre trimestre
+                        // et répondre « oui » serait un faux positif — et c'est
+                        // exactement le partage inter-trimestres que S5 referme.
+                        // Le trimestre explicite ne vient donc pas d'un choix mais
+                        // de la donnée : c'est celui du magasin de productions lu.
                         if (grilleRetenue) {
-                            const cartes = (await lire('cartouches_' + grilleRetenue)) || [];
+                            const cartes = (await lire(prefixe + '_cartouches_' + grilleRetenue)) || [];
                             const c = Array.isArray(cartes) ? cartes.find((x) => x && x.id === temoin.valeur) : null;
                             if (c) { joignable = true; nomCible = nomDe(c); }
                         }
@@ -247,8 +275,13 @@
                             // Distinguer « pas de magasin du tout » de « magasin
                             // présent mais cette cartouche-là n'y est plus » :
                             // ce n'est pas la même histoire ni le même remède.
+                            // Index par grilleId, tous trimestres confondus : ici
+                            // la question est « un magasin existe-t-il quelque
+                            // part ? », pas « est-il joignable » (traité ci-dessus).
                             magasinPresent: grilleRetenue
-                                ? (magasinsCartouches.has('cartouches_' + grilleRetenue) ? 'oui' : 'NON')
+                                ? (magasinsCartouches.has(grilleRetenue)
+                                    ? 'oui (' + magasinsCartouches.get(grilleRetenue).join(', ') + ')'
+                                    : 'NON')
                                 : 'sans grille'
                         });
                         if (joignable) gestes.push({ idx: i, champ: champ, valeur: temoin.valeur, horsR2: true });
@@ -270,8 +303,8 @@
                     else {
                         // Fantôme. Seule trace possible d'une grille renumérotée :
                         // son magasin de cartouches, qui porte l'ANCIEN id en clé.
-                        fiche.trace = (champ === 'grilleId' && magasinsCartouches.has('cartouches_' + temoin.valeur))
-                            ? 'cartouches_' + temoin.valeur + ' EXISTE ENCORE'
+                        fiche.trace = (champ === 'grilleId' && magasinsCartouches.has(temoin.valeur))
+                            ? magasinsCartouches.get(temoin.valeur).join(', ') + ' EXISTE ENCORE'
                             : 'aucune trace';
                         casB2.push(fiche);
                     }
@@ -315,7 +348,7 @@
             L('     a disparu. Le témoin pointe un fantôme — la ressource a très');
             L('     probablement été RENUMÉROTÉE (import, famille #448) et vit aujourd\'hui');
             L('     sous un autre identifiant.');
-            L('   ⮕ Les lignes « trace : cartouches_… EXISTE ENCORE » sont le fil à tirer :');
+            L('   ⮕ Les lignes « trace : …_cartouches_… EXISTE ENCORE » sont le fil à tirer :');
             L('     ce magasin porte l\'ANCIEN identifiant dans son nom et a survécu à la');
             L('     renumérotation. Son contenu permet de reconnaître la grille d\'origine.');
         }

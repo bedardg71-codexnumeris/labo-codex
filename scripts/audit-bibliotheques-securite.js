@@ -12,6 +12,23 @@
  * Référence : MODELE-MENACES.md §8.4 étape 1 (audit a priori) + §A.1.
  *
  * Le script est en lecture seule — il ne modifie aucune donnée.
+ *
+ * ─────────────────────────────────────────────────────────────────────────
+ * ⚠ RÉGIME DES CLÉS DEPUIS S5/#623 (voir le patron commenté en tête de
+ * scripts/diagnostic-cartouches-non-persistees.js).
+ *   R1 · LIRE   = balayer TOUS les trimestres, et dire lequel.
+ *   R2 · ÉCRIRE = trimestre EXPLICITE, refuser sans lui. (Sans objet ici :
+ *                 ce script est en lecture seule.)
+ *   R3 · Une source DATÉE garde ses clés d'époque.
+ * ⮕ « Survivre au grep » ≠ « juste après S5 » : un prédicat ancré
+ *   (`indexOf(…)===0`) MENT PAR ZÉRO, un prédicat lâche (`!== -1`) MENT PAR
+ *   INFLATION. Ici la lecture veut TOUTES les copies, donc le prédicat large
+ *   est le bon — mais le compte doit dire sur combien de clés il porte.
+ *
+ * ⚠ LE POINT nº 4 DE L'USAGE CI-DESSUS EST UN PIÈGE À LUI SEUL : « 0
+ * trouvaille → bibliothèques saines » n'est vrai QUE si l'audit a
+ * effectivement scanné quelque chose. C'est pourquoi le script imprime
+ * désormais le nombre de clés examinées à côté de chaque zéro.
  */
 
 (function () {
@@ -105,32 +122,94 @@
                 console.warn('[audit] db.get a échoué pour', cle, e);
             }
         }
+        // CONSTAT NON CORRIGÉ (31 août 2026, hors #636 — antérieur à S5 et
+        // indépendant de lui ; inscrit ici plutôt qu'au backlog).
+        // Ce repli sur localStorage confond deux états quand `db.get` LÈVE :
+        // une valeur trop grosse vit en IndexedDB et n'est pas dans
+        // localStorage, donc `getItem` rend null et la clé part en
+        // `clesAbsentes` — l'audit dit « absente » là où il faudrait lire
+        // « présente mais ILLISIBLE ». Même famille de défaut que celui traité
+        // par #636 quelques lignes plus bas : un vide dont on tait la cause.
+        // Portée réelle limitée : `db.get` est essayé EN PREMIER et réussit dans
+        // le cas courant. À mesurer avant d'y toucher.
         var raw = localStorage.getItem(cle);
         if (raw === null) return null;
         try { return JSON.parse(raw); } catch (e) { return raw; }
     }
 
+    /**
+     * Vrai si `k` est une clé de la famille des cartouches PAR GRILLE, dans l'UN
+     * OU L'AUTRE régime : `cartouches_<grilleId>` (nu, pré-S5) ou
+     * `<trimestreId>_cartouches_<grilleId>` (S5/#623, régime courant).
+     *
+     * ⚠ NE PAS REVENIR À `indexOf('cartouches_') === 0`. Cet ancrage était juste
+     * tant que la clé était globale ; depuis S5/#623 le magasin vit sous le
+     * préfixe du trimestre, et l'ancrage ne trouve plus RIEN. Dans un audit de
+     * sécurité, ce zéro-là est le pire des résultats : il se lit « bibliothèques
+     * saines » (en-tête §USAGE, point 4) alors qu'il signifie « je n'ai rien
+     * regardé ». Mesuré le 31 août 2026 : 2 clés trouvées avant S5, 0 après.
+     */
+    function estCleCartouches(k) {
+        if (typeof k !== 'string') return false;
+        var i = k.indexOf('cartouches_');
+        if (i === 0) return true;                       // clé nue (résidu pré-S5)
+        // Le préfixe doit être un ID DE TRIMESTRE, pas n'importe quoi suivi d'un
+        // `_`. Sans cette garde, le motif happe `migration_cartouches_namespacees_done`
+        // — le drapeau posé par la migration S5 elle-même (js/main.js:735), qui
+        // vaut un booléen. Ici la conséquence serait plus sournoise qu'un
+        // plantage : un drapeau booléen entrerait dans la liste des clés
+        // « scannées », gonflant le compte d'un audit de sécurité avec une clé
+        // qui n'a rien à scanner. Défaut mesuré le 31 août 2026 (#636).
+        // `[ahe]` couvre les trois sessions acceptées par `creerTrimestre`.
+        return i > 0 && k[i - 1] === '_' && /^([ahe]\d{4}|demo)$/.test(k.slice(0, i - 1));
+    }
+
     async function listerCartouchesParGrille() {
-        // Les `cartouches_<grilleId>` sont les cartouches PAR grille — clés
-        // séparées de la bibliothèque partagée. À scanner aussi.
+        // Les cartouches PAR grille — clés séparées de la bibliothèque partagée
+        // `bibliothequeCartouches`, qui elle reste GLOBALE par conception
+        // (js/cartouches-bibliotheque.js:11-20) et figure déjà plus haut.
+        //
+        // R1 (S5/#623) : on BALAIE tous les trimestres. Ce n'est pas une
+        // précaution — la migration au boot a copié le lot dans CHAQUE trimestre
+        // (js/trimestres.js:1044), et un payload injecté dans une copie doit être
+        // trouvé quel que soit le trimestre actif au moment de l'audit.
+        //
+        // ⚠ DEUX CAUSES DE VIDE, À NE PAS CONFONDRE. Ce repli existait pour
+        // « db.keys() a ÉCHOUÉ » et se déclenchait sur `cles.length === 0`. Depuis
+        // S5 ce test se déclenche aussi pour « db.keys() a RÉUSSI et rendu zéro »
+        // — donc le repli masquait la raison du vide au lieu de la dire. On sépare
+        // l'échec (drapeau explicite) du résultat vide (fait mesuré).
         var cles = [];
+        var enumerationDb = false;   // db.keys() a-t-il ABOUTI ?
+        var vuesDb = 0;              // combien de clés a-t-il rendues ?
         if (typeof window.db !== 'undefined' && typeof window.db.keys === 'function') {
             try {
                 var toutes = await window.db.keys();
+                enumerationDb = true;
+                vuesDb = toutes.length;
                 for (var i = 0; i < toutes.length; i++) {
-                    if (toutes[i].indexOf('cartouches_') === 0) cles.push(toutes[i]);
+                    if (estCleCartouches(toutes[i])) cles.push(toutes[i]);
                 }
             } catch (e) {
-                console.warn('[audit] db.keys() a échoué, fallback localStorage', e);
+                console.warn('[audit] db.keys() a échoué, repli sur localStorage', e);
             }
         }
-        if (cles.length === 0) {
+        var vuesLs = 0;
+        if (!enumerationDb) {
             for (var k = 0; k < localStorage.length; k++) {
                 var n = localStorage.key(k);
-                if (n && n.indexOf('cartouches_') === 0) cles.push(n);
+                vuesLs++;
+                if (estCleCartouches(n)) cles.push(n);
             }
         }
-        return cles;
+        return {
+            cles: cles,
+            // Le TÉMOIN du zéro : « 0 sur 400 clés examinées » est un fait,
+            // « 0 sur 0 » est un aveu. Les deux s'écrivaient pareil avant.
+            examinees: enumerationDb ? vuesDb : vuesLs,
+            source: enumerationDb ? 'db.keys()' : 'localStorage (repli : db.keys() a échoué)',
+            enumerationDb: enumerationDb
+        };
     }
 
     async function executer() {
@@ -139,9 +218,23 @@
         console.log('Patterns testés : ' + PATTERNS.length);
         console.log('Champs ignorés (blobs base64) : ' + CHAMPS_IGNORES.join(', '));
 
-        var cartouchesParGrille = await listerCartouchesParGrille();
+        var releve = await listerCartouchesParGrille();
+        var cartouchesParGrille = releve.cles;
         var aScanner = CLES_BIBLIOTHEQUES.concat(cartouchesParGrille);
-        console.log('Clés à scanner : ' + aScanner.length + ' (dont ' + cartouchesParGrille.length + ' cartouches_<grilleId>)');
+        console.log('Clés à scanner : ' + aScanner.length + ' (dont ' + cartouchesParGrille.length
+            + ' magasin(s) de cartouches par grille, tous trimestres)');
+        console.log('Énumération du stockage : ' + releve.source + ' — '
+            + releve.examinees + ' clé(s) examinée(s)');
+        // Le zéro ne parle QUE s'il porte son témoin. Sans cette ligne, « 0
+        // magasin » couvre indifféremment « il n'y en a pas » et « je n'ai pas
+        // su regarder » — et l'en-tête du script invite à lire « 0 » comme sain.
+        if (cartouchesParGrille.length === 0) {
+            console.warn(releve.examinees === 0
+                ? '[audit] ⛔ AUCUNE CLÉ EXAMINÉE — l\'énumération du stockage n\'a rien rendu. '
+                  + 'Les cartouches par grille n\'ont PAS été auditées. Ce n\'est pas un résultat sain.'
+                : '[audit] 0 magasin de cartouches par grille sur ' + releve.examinees
+                  + ' clé(s) examinée(s) — résultat mesuré, pas un défaut d\'énumération.');
+        }
 
         for (var i = 0; i < aScanner.length; i++) {
             var cle = aScanner[i];
