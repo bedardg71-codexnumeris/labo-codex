@@ -774,6 +774,60 @@ function chargerGrilleSelectionnee() {
             });
         }
 
+        // #645 — REPORTER AUSSI LA SAISIE ALGORITHMIQUE, pas seulement les niveaux.
+        //
+        // Le bloc ci-dessus reporte les NIVEAUX d'une grille à l'autre, par ID puis
+        // par NOM de critère — précisément pour qu'un changement de grille ne coûte
+        // pas la saisie. `donneesAlgorithmiques` (erreurs, mots, codes) n'était pas
+        // du voyage : le critère algorithmique renaissait les champs VIDES, et rien
+        // ne relançait son calcul. Signalé par Grégoire le 31 août 2026 sur une
+        // grille « français seul » : compte d'erreurs reparti à zéro et résultat
+        // bloqué à « -- erreurs sur -- mots ».
+        //
+        // ⚠ Ce n'est pas qu'un problème d'affichage : la sauvegarde suivante
+        // persiste ce que portent les champs. Une saisie non réaffichée est une
+        // saisie que le prochain enregistrement écrase par du vide.
+        //
+        // Même correspondance que les niveaux (ID puis NOM), pour la même raison :
+        // une grille refaite porte les mêmes critères sous d'autres identifiants.
+        if (grille) {
+            const mapNomAlgo = {};
+            if (ancienneGrille && evaluationEnCours.donneesAlgorithmiques) {
+                ancienneGrille.criteres.forEach(c => {
+                    const donnees = evaluationEnCours.donneesAlgorithmiques[c.id];
+                    if (donnees) mapNomAlgo[c.nom.toLowerCase().trim()] = donnees;
+                });
+            }
+            grille.criteres.forEach(critere => {
+                if (critere.type !== 'algorithmique') return;
+                const existantes = (evaluationEnCours.donneesAlgorithmiques || {})[critere.id]
+                    || mapNomAlgo[critere.nom.toLowerCase().trim()];
+                if (!existantes) return;
+
+                if (!evaluationEnCours.donneesAlgorithmiques) evaluationEnCours.donneesAlgorithmiques = {};
+                evaluationEnCours.donneesAlgorithmiques[critere.id] = existantes;
+
+                const inputMots = document.getElementById(`eval_mots_${critere.id}`);
+                if (inputMots && existantes.mots !== undefined) inputMots.value = existantes.mots;
+
+                const inputCategories = document.getElementById(`eval_categories_${critere.id}`);
+                if (inputCategories && Array.isArray(existantes.codes)) {
+                    inputCategories.value = existantes.codes.join(';');
+                }
+
+                const nbErreurs = existantes.erreurs !== undefined ? existantes.erreurs : existantes.totalErreurs;
+                const inputErreurs = document.getElementById(`eval_erreurs_${critere.id}`);
+                if (inputErreurs && nbErreurs !== undefined) inputErreurs.value = nbErreurs;
+
+                // RELANCER LE CALCUL. Remplir les champs ne suffit pas : la ligne de
+                // résultat et la note ne se recalculent que sur `input`. C'est le même
+                // évènement que la saisie au clavier — on ne réécrit pas le calcul ici,
+                // on emprunte le chemin qui existe déjà.
+                const declencheur = inputCategories || inputErreurs;
+                if (declencheur) declencheur.dispatchEvent(new Event('input', { bubbles: true }));
+            });
+        }
+
         // Recalculer la note avec les nouvelles pondérations
         setTimeout(() => calculerNote(), 50);
     }
@@ -1086,8 +1140,21 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                                    data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}">
                         </div>
                     </div>
+                    <!-- #645 — LA LIGNE DE RESULTAT ETAIT DU TEXTE FIGE, et le calcul
+                         n'avait donc nulle part ou ecrire. Elle affichait « -- erreurs sur
+                         -- mots » quoi qu'il arrive : calculerNoteAlgorithmiqueSimple
+                         cherchait « total_erreurs_simple_<id> » et ses voisins, ne les
+                         trouvait pas, et renoncait par ses gardes — en silence. Mesure le
+                         31 aout 2026 sur ce chemin : « eval_erreurs_<id> » existait,
+                         « total_erreurs_simple_<id> » non, et le calcul rendait pourtant
+                         note, pourcentage, niveau et retroaction. Ce n'etait pas un calcul
+                         en panne, c'etait un afficheur absent.
+                         Memes id que le chemin jumeau (cartoucheSelectionnee), qui les
+                         portait deja : on ne cree pas un second vocabulaire.
+                         ⚠ Pas d'accent grave dans ce commentaire : il vit DANS un litteral
+                         de gabarit, ou un accent grave termine le gabarit. -->
                     <div id="resultat_algo_${critere.id}" class="eval-resultat-algo">
-                        -- erreurs sur -- mots
+                        <span id="total_erreurs_simple_${critere.id}">--</span> erreurs sur <span id="mots_simple_${critere.id}">--</span> mots &rarr; <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
                     </div>
                     <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
                             data-on-change="niveauSelectionne" data-param="${critere.id}">

@@ -418,6 +418,102 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Ce qui manque, c'est son application — `:174-178` ne patche que `grilleId`.
   ⮕ Conséquence : le lot **S9 / #627** est plus petit qu'annoncé de ce côté. Corriger l'énoncé de Z2 avant que S9
   s'en serve comme spécification. **Un diff d'audit est une esquisse, jamais une spécification.**
+- [ ] **#647 — S6 · L'avertissement de suppression d'une cartouche annonce une perte qui n'a pas lieu, et tait une survivance qui a lieu**.
+  Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur mesure de `kuekatsheu-94`. Lot de #624.
+  `supprimerCartoucheDefinitivement` (`js/donnees-v2.js:1608`) n'appelle que `retirerCartoucheDeLaBibliotheque`, qui
+  écrit **uniquement** `bibliothequeCartouches` (clé nue, `cartouches-bibliotheque.js:20`). Elle ne touche **jamais**
+  `cle('cartouches_<grilleId>')`. Or la modal annonce « N évaluation(s) — les rétroactions associées seront perdues ».
+  ⮕ **Les évaluations lisent la cartouche depuis l'ANCRAGE, jamais depuis la bibliothèque** — trois sites indépendants,
+  tous sur `cle('cartouches_<grilleId>')` : `evaluation-retroaction.js:250-251`, `evaluation-chargement.js:810`,
+  `evaluation.js:302-303`. Donc retirer de la bibliothèque ne fait perdre **aucune** rétroaction, et la cartouche
+  **survit** dans son ancrage — ce qui n'est annoncé nulle part.
+  ⮕ Effet croisé mesuré sur le reste de #624 : `compterCartouchesGrille` continue de la compter, donc la garde côté
+  grilles bloque en citant une cartouche que l'enseignant croit supprimée, et l'avertissement de cascade l'inclut dans
+  son N. **L'enseignant valide un nombre faux.**
+  ⮕ **REMÈDE RETENU — option 2 : l'avertissement cesse de mentir** (`verifierDependancesCartouche:1121` décrit ce qui
+  se passe réellement). Motif de l'arbitrage, et il est décisif : **l'option 2 est vraie quel que soit le choix produit
+  futur.** Tant que le comportement est celui qu'il est, l'avertissement ment ; le corriger n'engage aucun futur.
+  ⚠ **L'option 1 écartée n'était PAS « détruire plus »** : atteindre l'ancrage **fabriquerait** la perte que
+  l'avertissement annonce aujourd'hui à tort — le texte deviendrait vrai parce qu'on aurait rendu vrai ce qu'il
+  annonçait. Elle ne serait de plus qu'une demi-suppression (`cle()` = trimestre actif seul), et la compléter
+  heurterait l'invariant écrit à `donnees-v2.js:1581-1583` (archives figées, reproductibilité des notes).
+  ⏳ **DÉCISION PRODUIT EN SUSPENS, POUR GRÉGOIRE, à froid** : « retirer une cartouche de la bibliothèque doit-il la
+  détacher de sa grille, oui ou non ? » Le reste en découle mécaniquement. Non posée le 31 août au soir : il avait déjà
+  tranché deux fois dans la session.
+  ⚠ **Reste dû dans le même lot** : les libellés « Supprimer définitivement » et « Cette action est irréversible »
+  (`index.html`, cf. `donnees-v2.js:1408`) sont inexacts si l'objet survit dans l'ancrage. Corriger l'avertissement
+  sans eux **déplace** le mensonge au lieu de le retirer.
+  ⚠ **Portée de la preuve** : établi par lecture de code, pas par exécution. La structure dit que la cartouche survit ;
+  seules les DONNÉES diraient combien sont dans les deux magasins à la fois. Ne pas citer ceci comme un comptage.
+- [ ] **#650 — S6 · La porte de sortie des échelles écrit HORS FILE, entre deux dialogues — généraliser le patron généraliserait la course**.
+  Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur mesure de `kuekatsheu-67`, **rejouée par la
+  coordinatrice**. Lot de #624.
+  `migrerEvaluationsVersNouvelleEchelle` (`js/echelles.js:4294`) fait `db.get` → mutation en mémoire → **`db.set`**.
+  Lecture-modification-écriture non atomique sur `cle('evaluationsSauvegardees')`, et elle s'exécute **après** un
+  `confirm` puis un `prompt` : tout ce qui s'enregistre pendant les deux dialogues est écrasé au retour.
+  ⮕ La **suppression** juste en dessous a déjà été corrigée pour passer par `db.modifier` (index recalculé DANS la
+  file, après les questions) ; la **migration**, non. C'est le même motif que #300 et #599, à un seul endroit resté.
+  ⚠ **C'est ce qui rend l'item urgent plutôt que cosmétique** : #624 prescrit de **généraliser** cette porte de sortie
+  aux grilles. La généraliser telle quelle généraliserait la course avec elle — le défaut passerait de un site à trois.
+  **Convertir AVANT de porter le patron ailleurs.**
+  ⮕ **Absorbé dans le même lot** : le commentaire `js/echelles.js:2621` « Pas de dépendances directes pour les
+  échelles » est **faux** — il est posé dans `supprimerEchelleDefinitivement` (`:2610`), le plus destructeur des cinq
+  chemins (local **et** bibliothèque partagée), et les évaluations en dépendent bien (cf. #648). Un piège écrit en
+  commentaire n'arrête pas la main suivante ; un commentaire **faux** l'arme.
+- [ ] **#648 — CONSTAT · La garde de suppression d'échelle de l'onglet Données compte le mauvais référent, et le compte sur un seul trimestre**.
+  Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**. Mesures convergentes de `kuekatsheu-67` (lecture)
+  et `kuekatsheu-94` (écriture). Lot de #624, **non corrigé le 31 août** : arbitrage de référent, écarté en fin de session.
+  `verifierDependancesEchelle` (`js/donnees-v2.js:1146`) compte **les pratiques seulement** puis **désactive le bouton**
+  de confirmation sans aucune issue — troisième régime, après « refuser avec porte de sortie » et « cascader ».
+  ⮕ **Les évaluations, elles, ne sont pas comptées** — et elles dépendent bien de l'échelle : le champ est **peuplé**
+  (`evaluation-sauvegarde.js:204`, `echelleId` depuis `selectEchelle1`), **relu** (`evaluation-retroaction.js:712, 844,
+  919, 947`), et `supprimerEchelleDepuisSidebar` sait précisément **les migrer** (`echelles.js:4305`). Elles sont
+  orphelinées sans blocage ni avertissement.
+  ⮕ **Et le blocage qu'elle exerce est trop étroit** : elle lit `db.getSync(cle('pratiquesConfigurables'))`, or `cle()`
+  préfixe par le trimestre **actif** (`trimestres.js:316`). C'est le **seul** des cinq gardes à être monotrimestre — les
+  quatre autres énumèrent `enumererTrimestres()`. Une pratique d'un autre trimestre ne bloque rien.
+  ⚠ Cible de tout remède : **`js/donnees-v2.js:1624`**, l'ombre locale — **pas** `js/echelles.js:2610`. Deux corps
+  distincts, même nom, deux fichiers. N'en inscrire qu'un refermerait une porte en laissant l'autre.
+- [ ] **#649 — CONSTAT · `retirerProductionDeLaBibliotheque` n'existe pas : le garde est mort et le « fallback » est l'unique chemin depuis toujours**.
+  Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur mesure de `kuekatsheu-94`, **rejouée avec
+  témoin** par la coordinatrice. Lot de #624, **non corrigé le 31 août** : aucun symptôme actuel.
+  `js/donnees-v2.js:1659` teste `typeof retirerProductionDeLaBibliotheque === 'function'`. Le symbole ne rend que
+  **deux** occurrences dans tout le dépôt : le garde `:1659` et son propre appel `:1660`. **Aucune déclaration.**
+  Témoin (le motif trouve bien ce qui existe) : `retirerPratiqueDeLaBibliotheque` → `pratiques-bibliotheque.js:585` ·
+  `retirerGrilleDeLaBibliotheque` → `grilles-bibliotheque.js:118` · `retirerCartoucheDeLaBibliotheque` →
+  `cartouches-bibliotheque.js:122` · `retirerEchelleDeLaBibliotheque` → `echelles-bibliotheque.js:176`.
+  ⮕ **Rassurant** : le « fallback » écrit `'bibliothequeProductions'`, qui est bien la clé canonique
+  (`productions-bibliotheque.js:20`, non namespacée). Aucun décalage de clé aujourd'hui.
+  ⚠ **Latent** : le jour où quelqu'un déclare une fonction de ce nom, le chemin bascule **en silence** vers une
+  sémantique que personne n'a comparée. **Un garde mort est une bascule armée** — c'est la version « branchement » de
+  la garde née morte de S5.
+- [ ] **#645 — Après un changement de grille, le nombre d'erreurs est perdu et le calcul algorithmique ne rend plus de résultat** (grille « français seul »).
+  Inscrit le 31 août 2026 par `kuekatsheu-9f` (coordinatrice), **avant tout usage**, à la demande de `kuekatsheu-5d`
+  qui porte le correctif sous le pilotage direct de Grégoire. Retour terrain de Grégoire.
+  Arbitrage de Grégoire le 31 août : **correctif CIBLÉ** (reporter les tampons et relancer le calcul après un
+  changement de grille), et **non** le chantier de fond du double stockage — celui-là est inscrit à part en #646.
+  ⚠ **Condition posée par la session avant d'écrire une ligne** : la première mesure doit être un ROUGE qui reproduit
+  le symptôme (tampons posés → changement de grille → le compte d'erreurs ne revient pas). Sans ce rouge d'abord,
+  rien ne distingue « j'ai corrigé » de « j'ai ajouté du code qui ne sert à rien ». Si le rouge est trop coûteux à
+  monter, la session doit le dire plutôt que livrer un correctif non éprouvé.
+- [ ] **#646 — CONSTAT (pas un correctif) : `evaluationEnCours` désigne DEUX emplacements distincts sous un seul nom**.
+  Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur mesure de `kuekatsheu-5d`. Écarté du travail
+  du soir par Grégoire : 126 lectures du nom nu, 94 usages de `window`, 8 fichiers — « pas un soir ».
+  **MESURÉ** (deux faits de langage, insensibles à l'état applicatif, donc non affectés par le chevauchement de runs
+  `file://` pendant lequel ils ont été pris) : avant toute écriture, `'evaluationEnCours' in window` rend **false** ;
+  après `window.evaluationEnCours = {marqueur}`, le **nom nu** rend toujours **null**.
+  ⮕ Cause : `js/config.js:173` déclare `let evaluationEnCours = null`. Un `let` de premier niveau vit dans le
+  *Script scope*, **pas** sur `globalThis` — il ne crée aucune propriété `window`. Or `js/evaluation.js:143`, `:1431`
+  et `js/evaluation-chargement.js:511` écrivent `window.evaluationEnCours = {…}`, tandis que
+  `js/evaluation-chargement.js:412` écrit le **nom nu**. Deux emplacements, un seul nom.
+  ⚠ **RAISONNÉ, PAS ENCORE MESURÉ — à ne pas citer comme un fait** : que `js/evaluation-calcul.js:96`
+  (`if (!evaluationEnCours) return;`) lise le `let` et sorte donc par anticipation quand seul le chemin `window` a
+  écrit. L'argument est solide (`grep` sur les déclarations ne rend **qu'une** occurrence dans tout le dépôt,
+  `js/config.js:173` — aucune re-déclaration, aucune ombre locale, et tous ces fichiers sont des scripts classiques
+  partageant un seul *Script scope*), mais **le sens de la résolution dépend du fichier qui LIT, pas de celui qui
+  écrit**. La mesure qui fermerait le constat : appeler la vraie fonction et constater sa sortie anticipée.
+  ⮕ Même motif, retourné, que l'ombre locale de `js/donnees-v2.js` relevée le même soir sous #624 : deux emplacements,
+  un seul nom, et personne ne le voit. Là une IIFE masque un `window.X` ; ici un `let` l'empêche d'exister.
 - [ ] **#644 — Le cadenas de la palette Paramètres n'était exempté par aucune classe : le glisser de barre avalait son clic, et déverrouiller une évaluation était impossible**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f` (coordinatrice), **avant tout usage**, à la demande de `kuekatsheu-5d`
   qui porte le correctif. Retour terrain de Grégoire depuis l'écran Évaluation.
