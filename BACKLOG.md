@@ -454,6 +454,36 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   aussitôt écrasée. Ne pas payer ça pour un défaut dont le chemin exact est connu.
   ⚠ **Condition avant toute ligne de code** : un ROUGE qui reproduit la combinaison (mode d'avant = `evaluer` + rappel
   posé). Si ce rouge est trop coûteux à monter, le dire plutôt que livrer un correctif non éprouvé.
+- [ ] **#665 — Le bump de version a QUATRE emplacements, pas trois : `version.js` est le seul que l'application lise en `file://`, et il était resté à l'ancienne version**.
+  Inscrit le 31 août 2026 par `kuekatsheu-14`, **avant tout usage**. **CORRIGÉ dans le même commit.**
+  **Le fait.** `version.js` (RACINE) est généré par `scripts/release.mjs`, jumeau de `version.json`, créé parce qu'en
+  `file://` **`fetch` et XHR sont refusés par WebKit** (#495). Il est chargé par `index.html:14404`, et
+  `js/init-inline.js:235-237` lui donne la **PRIORITÉ** sur les constantes en dur :
+  `if (window.__VERSION__.build) BUILD_ID = window.__VERSION__.build;`
+  ⮕ **Les trois emplacements habituels sont un REPLI. `version.js` décide de ce que Grégoire voit à l'écran.**
+  **Ce qui s'est passé.** Le bump `1.106.13 → 1.106.14` du 31 août au soir a été fait **à la main** sur trois
+  emplacements (`version.json`, `js/init-inline.js`, `js/main.js`), sur la foi d'une convention qui en documentait
+  trois. `version.js` est resté à `{"build":"0831-0734","beta":"1.106.13"}`. **L'application a donc continué
+  d'afficher `1.106.13`** — le bump n'a eu aucun effet visible pour l'utilisateur.
+  ⚠ **Le bump MANUEL est le seul chemin qui puisse les désynchroniser** : `release.mjs` écrit `version.json` et
+  `version.js` ensemble, et documente lui-même que « le build/version vit dans 4 endroits ». Or le bump manuel est
+  précisément ce qu'on fait quand plusieurs sessions partagent le dépôt et qu'on refuse `release.mjs`, qui recalcule
+  les jetons de tout l'arbre.
+  **Comment ç'a été trouvé — par un TEST, pas par une relecture.** `tests/integration/bandeau-maj-chargement.spec.js`
+  compare `version.json.build` à ce que la page pose réellement dans `localStorage`. **Ses 4 cas ont rougi** :
+  attendu `0831-1552`, reçu `0831-0734`. ⮕ Le spec a fait exactement son travail. Il n'avait pas tourné depuis le
+  26 août, parce que **le hook pre-push ne lance jamais Playwright** (voir plus bas).
+  ⮕ **CORRIGÉ** : `version.js` remis à `{"build":"0831-1552","beta":"1.106.14"}` et son jeton `index.html:14404`
+  passé de `08310734` à `08311552` (format `MMJJHHMM`, le build sans tiret — différent du `AAAAMMJJ`+lettre des
+  autres). Refermé sur l'EFFET : `grep -rn "0831-0734\|08310734"` rend **zéro** dans tout le dépôt, les quatre
+  emplacements concordent, et les **4 cas du spec passent** (9,4 s).
+  ⮕ **Règle à retenir : après tout bump manuel, `grep` l'ANCIEN build dans tout le dépôt et exiger zéro.** Vérifier
+  les quatre emplacements ne suffit pas si on ne sait pas qu'il y en a quatre.
+  ⚠ **RESTE ROUGE, cause NON établie** (rouges isolément, machine libre, donc réels) :
+  `modal-soutien.spec.js` › « Échap et clic sur l'arrière-plan ferment » · `palettes-drag-rendu.spec.js` › « #144
+  layout annotation : palette Annotation déplaçable ». ⮕ Le second touche la palette d'ANNOTATION, soit l'écran que
+  `#660`/`#661` viennent de modifier — **à regarder pour lui-même, un vert ailleurs ne le blanchit pas.**
+
 - [ ] **#664 — CONSTAT · Import SÉLECTIF : le bloc des pratiques s'exécute AVANT que les tables de remap soient peuplées — un remap y serait décoratif**.
   Inscrit le 31 août 2026 par `kuekatsheu-f2`, **avant tout usage**, sur mandat de `kuekatsheu-14`, qui a recoupé
   l'ordre. Sorti de S9a/#627 : le remède est un déplacement de bloc, pas une unification.
