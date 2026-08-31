@@ -454,6 +454,257 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   aussitôt écrasée. Ne pas payer ça pour un défaut dont le chemin exact est connu.
   ⚠ **Condition avant toute ligne de code** : un ROUGE qui reproduit la combinaison (mode d'avant = `evaluer` + rappel
   posé). Si ce rouge est trop coûteux à monter, le dire plutôt que livrer un correctif non éprouvé.
+- [ ] **#664 — CONSTAT · Import SÉLECTIF : le bloc des pratiques s'exécute AVANT que les tables de remap soient peuplées — un remap y serait décoratif**.
+  Inscrit le 31 août 2026 par `kuekatsheu-f2`, **avant tout usage**, sur mandat de `kuekatsheu-14`, qui a recoupé
+  l'ordre. Sorti de S9a/#627 : le remède est un déplacement de bloc, pas une unification.
+  **Le fait.** Ordre réel des blocs de `executerImportSelectif` (`js/import-export.js`), mesuré sur `e99de10f` :
+  `Pratiques :2756` · `Grilles :2782` · `Échelles :2820` · `Productions :2849` · `Cartouches :2910`.
+  Les tables `ancienId -> nouvelId` ne sont peuplées qu'aux blocs Grilles et Échelles. **Un
+  `ImportRemap.patcher(p, 'pratique', ctx)` placé dans le bloc pratiques lirait donc des tables VIDES** : il ne
+  remapperait jamais rien, tout en ayant l'air de traiter le cas. Un appel décoratif.
+  ⮕ **Conséquence sur le critère de fin de #627**, à ne pas laisser implicite : sur le chemin sélectif, une pratique
+  importée qui cite une échelle renumérotée garde l'ancien id. **Ce chemin laisse donc une référence pendante**, et
+  #627 ne la referme pas. C'est une limite MESURÉE du lot, pas un oubli.
+  ⮕ `reserve-ouvrir.js` fait l'inverse, et le documente (`:1092-1093`, cité verbatim) : « *grilles et échelles d'abord
+  (sources des remaps), puis productions/cartouches/pratiques (qui peuvent dépendre des remaps)* ». Le patron correct
+  existe déjà dans le dépôt.
+  ⚠ **Le chemin CODEX n'est PAS concerné** : il n'importe aucune pratique. La seule mention dans `2372-2600` est
+  `m.pratiqueActive` (le miroir M6-parent). **Absence justifiée, pas absence subie** — les deux se ressemblent à froid.
+  **LES DEUX QUESTIONS À RÉPONDRE AVANT DE DÉPLACER LE BLOC.** Sans elles, le déplacement est un pari sur l'ordre
+  d'une fonction d'import, et un pari de ce genre se paie en données :
+  · **(a) Le bloc pratiques lit-il quelque chose que les blocs `2782-2848` produisent ?**
+    ⮕ Première lecture (à CONFIRMER, non exhaustive) : il ne lit que `donnees.pratiquesConfigurables`,
+    `db.getSync(cle('pratiquesConfigurables'))` et son propre `selectedIds`. Rien des blocs grilles ou échelles.
+  · **(b) Un bloc ultérieur lit-il quelque chose que le bloc pratiques pose ?**
+    ⮕ Première lecture (à CONFIRMER) : aucune mention de « pratique » entre `:2779` et `:2960`. Le bloc écrit
+    `cle('pratiquesConfigurables')`, `compteurs.ressources` et `details`.
+    ⮕ **Recoupé par `kuekatsheu-14`** : `awk` sur `2779-2960` cherchant `pratique` rend **zéro ligne**. La réponse
+    provisoire à (b) tient sur deux mesures indépendantes.
+  ⚠ **Un effet observable même si (a) et (b) sont négatifs** : `details` est un ACCUMULATEUR affiché à l'utilisateur —
+  `let details = []` (`:2749`), puis un `details.push` par bloc, **dans l'ordre des blocs** (`:2777` pratiques, `:2816`
+  grilles, `:2844` échelles, `:2906` productions, `:2942` cartouches). Déplacer le bloc change donc l'ORDRE du message
+  de fin : « N pratique(s) » cesserait d'être annoncé en premier. Mineur, mais visible par Grégoire — **à décider, pas
+  à découvrir.**
+
+- [ ] **#663 — Le remap des références de pratiques vise `.config`, un format que presque personne n'écrit — les vraies pratiques rangent sous `.configuration`**.
+  Inscrit le 31 août 2026 par `kuekatsheu-14` sur trouvaille de `kuekatsheu-80`, **avant tout usage**. Trouvé en relisant
+  l'état AVANT du lot S9a/#627, **non touché** : c'est un correctif de comportement, et le laisser dans le lot
+  d'unification donnerait à la sentinelle de S9a deux choses à garder sans dire laquelle a cédé.
+  `js/reserve-ouvrir.js:1072` remappe `item.config.echelleId` pour les pratiques — le seul des quatre remaps de
+  `_patcherReferences` (`:1055-1078`) qui descende dans un sous-objet. Or `js/comparateur-pratiques.js:728-729` porte,
+  depuis un correctif du 16 juin 2026 : « *Config exécutable RÉSOLUE (les vraies pratiques rangent sous `.configuration`,
+  pas `.config` — cf. fix 16 juin) ; null si non configurable (famille codée).* »
+  **MESURE** (`grep -c "\.config\b"` et `grep -c "\.configuration\b"`, comptes de LIGNES ; les occurrences donnent
+  50/20/10 contre 2/0/0) :
+  | Fichier | `.configuration` | `.config` |
+  |---|---|---|
+  | `js/pratiques-gestion.js` | 45 | 2 |
+  | `js/wizard-pratique-v2.js` | 18 | 0 |
+  | `js/pratiques-bibliotheque.js` | 10 | 0 |
+  ⚠ **Méthode inscrite exprès, parce qu'une première mesure était fausse.** `kuekatsheu-14` avait annoncé 157/29/81 :
+  c'était `grep -c 'configuration'` — le mot NU, en comptes de LIGNES, donc `configurations` (le tableau), `reconfiguration`
+  et le mot en prose dans les commentaires. Ce motif ne mesure pas l'accès à la propriété. Remesuré par `kuekatsheu-80`,
+  recoupé par `kuekatsheu-14` : les nombres ci-dessus sont ceux du motif ancré `\.configuration\b`.
+  ⮕ **Le remap des pratiques est donc vraisemblablement inopérant sur le cas général** : il cherche une propriété que
+  les écrivains de pratiques ne produisent quasiment plus. Une pratique réimportée garderait son ancien `echelleId`,
+  pointant vers une échelle qui n'existe pas dans le trimestre cible — sans erreur, sans trace.
+  ⮕ **Périmètre plus étroit qu'il n'y paraît** (mesuré par `kuekatsheu-f2`) : `SCHEMAS_IMPORT.pratique`
+  (`import-export.js:702`) porte `configuration` et **pas** `config`, et `assainirObjet` filtre sur le schéma — sur le
+  chemin sélectif, une pratique importée perd son `config` avant qu'un remap puisse le voir. Et le chemin codex
+  n'importe aucune pratique. **Cet item ne concerne donc que `reserve-ouvrir.js` et `partage-import.js`.**
+  ⚠ **RÉSERVE, à lever avant de traiter cet item** : ceci est établi sur du CODE, pas sur des DONNÉES. Le code dit ce
+  que les écrivains produisent aujourd'hui ; il ne dit pas quel format portent les fichiers `.codex` que Grégoire a
+  réellement sur disque, ni les pratiques déjà en base. Une pratique ancienne peut porter `.config`. **Le correctif
+  traite les DEUX formats, il ne remplace jamais l'un par l'autre.** La vérification sur données réelles appartient à
+  Grégoire.
+  ⮕ Lié à S9a/#627, qui traite déjà les deux formats dans son diff : cet item porte la SENTINELLE séparée du format
+  `configuration`, pas le code.
+
+- [ ] **#661 — Le recalage du zoom déduisait l'origine du canvas de `margin-left`, que le centrage flex déplace d'une quantité variable**.
+  Inscrit le 31 août 2026 par `kuekatsheu-c6`. **PRÉEXISTANT** — le calcul était identique avant #660. **LIVRÉ** —
+  `24eeaa89`, même commit.
+  Symptôme rapporté par Grégoire, captures à l'appui : après un dézoom, le paragraphe visé n'est plus sous le curseur ;
+  **surtout au dézoom**, peu visible au zoom avant.
+  **MESURÉ** (sonde console, Chrome) : le conteneur porte `justify-content: center` et `padding: 16px`, le wrapper
+  `margin: 100vh 100vw`. Le centrage **absorbe une part de la marge de départ**, et cette part **DÉPEND DE LA TAILLE
+  DU CONTENU** — donc change à chaque zoom. Origine **supposée 810 px**, origine **réelle 222 px** : **588 px
+  d'erreur en X**, croissante avec l'ampleur du zoom. Le `padding` ajoutait la sienne, **16 px, visible en Y** où le
+  centrage ne joue pas (`align-items: flex-start`).
+  ⮕ Une correction de mai (**99.30**) avait déjà vu que **la marge ne scale pas** avec le zoom ; elle n'avait pas vu
+  que **la marge n'est pas l'origine**. Le commentaire qu'elle a laissé décrivait donc un remède exact pour une cause
+  partielle.
+  ⮕ **CORRIGÉ** — `rezoomerEnGardantLePoint` **MESURE** la position du canvas (`getBoundingClientRect` avant et après
+  le re-rendu) au lieu de la déduire, et mémorise le point visé comme une **FRACTION du document**, qui survit au
+  changement d'échelle. `getMarginWrapper` **retirée** : plus aucun appelant.
+  ⮕ **Touchait aussi le bouton de pourcentage** (`zoom100`), qui partageait la formule. Corrigé du même geste.
+  ⮕ **Vérifié** : dérive du point visé **mesurée à 1 px sur un zoom ×3** (Safari, après correctif).
+  ⚠ **Le cas Z6 de la sentinelle est STATIQUE et c'est assumé** : le recalage dépend du layout réel, que le bac à
+  sable de Vitest ne calcule pas. Z6 tient la RÈGLE D'ÉCRITURE (ne pas revenir à `getMarginWrapper` / `marginLeft`),
+  pas l'effet.
+
+- [ ] **#660 — Le zoom au trackpad courait à la CADENCE des événements au lieu de l'AMPLITUDE du geste, et rien ne bougeait à l'écran avant la fin**.
+  Inscrit le 31 août 2026 par `kuekatsheu-c6`, **après correctif validé à l'écran par Grégoire**, sur retour terrain
+  (« le zoom sur trackpad est très saccadé », page annoter/évaluer, Chrome/macOS). **LIVRÉ** — `24eeaa89`.
+  **MESURÉ en console chez Grégoire, trois sondes** : un pincement de ~6 s produit **183 événements `wheel`, dont 70
+  avec `ctrlKey`**, `|deltaY|` médian **0,80**, minimum **0** ; zéro `gesture`, zéro `touch`, `visualViewport.scale`
+  inchangé → c'est le chemin `wheel` de `onWheelZoom`. Et un pincement de **834 ms** emmenait le zoom de **50 % à
+  227 %**, soit **×4,5**, relevé palier par palier.
+  ⚠ **Hypothèse RÉFUTÉE par la mesure, à ne pas ressortir** : « des re-rendus en rafale pendant le geste ». Un seul
+  écart supérieur à 100 ms sur tout le geste.
+  ⮕ **Trois défauts** : le pas fixe de 3 % ignorait `deltaY`, donc le zoom suivait la cadence du trackpad (~60 Hz) et
+  non les doigts · `e.deltaY > 0 ? 0.97 : 1.03` **n'a deux branches que pour une grandeur qui en a trois** — le NUL
+  tombait dans « zoom avant » **par défaut d'écriture, pas par décision** · le chemin `wheel` n'avait **aucun aperçu**
+  pendant le geste, là où le pincement Safari applique un `transform` CSS : **c'est ce défaut-là qui produisait la
+  saccade**, les deux autres produisaient l'emballement.
+  ⮕ **CORRIGÉ** — facteur `Math.exp(-deltaY × ZOOM_SENSIBILITE_MOLETTE)` borné à ×1,25 par événement (une molette de
+  souris envoie des `deltaY` de ~100, soit ×12 d'un seul cran sans plafond) ; garde `if (!e.deltaY) return;` ; aperçu
+  `transform` CSS avec `zoomActuel` intact jusqu'à la finalisation ; une seule fonction de finalisation pour les deux
+  chemins.
+  ⮕ **`ZOOM_SENSIBILITE_MOLETTE = 0.025` est un CALIBRAGE, pas une mesure** : calé à l'usage par Grégoire. Sur son
+  geste de référence il rend ×2,8 ; 0,015 rendrait ×1,8. La sentinelle ne le verrouille **pas**, exprès.
+  ⮕ **Sentinelle** `tests/unit/sentinelle-zoom-molette-proportionnel.test.js`, 6 cas, **break-testée** (6 mutations,
+  6 rouges, chacune tuée par le cas qui la vise).
+  ⚠ **Vérifié Chrome ET Safari par Grégoire. iPad NON vérifié** — ce lot touche le chemin du pincement, qui est celui
+  de l'iPad. **Porte terrain due.**
+  ⚠ **`zoomAvant` et `zoomArriere` sont exportées SANS AUCUN APPELANT** (grep `js/` + `index.html`) : seul `zoom100`
+  est branché. Inscrit, pas touché — parenté de #649.
+  ⮕ **Le même patron vit en trois exemplaires jamais comparés** : `travaux-preparation.js:1248` et
+  `planification-carte.js:8046` portent **les mêmes trois défauts**, non mesurés sur leur écran.
+
+- [ ] **#659 — Le chemin de LECTURE de la configuration d'échelle écrit en base à chaque entrée dans la section**.
+  Inscrit le 31 août 2026 par `kuekatsheu-80`, **avant tout usage**. Correctif de comportement, séparé du retrait de legacy
+  #628 par arbitrage de Grégoire : deux gestes, deux rouges lisibles.
+  Chaîne mesurée, chaque maillon vérifié : `js/main.js:1089` (ou `js/navigation.js:228`) → `initialiserModuleEchelles()` →
+  garde `if (!elementTypeEchelle) return` franchie → `chargerConfigurationEchelle()` (`:647`) → `changerTypeEchelle()`
+  (`:1021`) → `await sauvegarderConfigEchelle()` (`:1094`, **inconditionnel**, après le if/else) → `db.set('configEchelle', …)`.
+  **Aucune action de l'utilisateur n'est requise.** Et comme `typeEchelle`/`seuilReussite` sont ombrés par les stubs
+  `index.html:5130-5131`, la valeur écrite est `typeEchelle: undefined` avec le repli métier en dur `seuilReussite: 60`.
+  ⚠ **La documentation affirmait le contraire** : le bloc `:1029-1043` listait comme appelants « Changement dans les champs
+  de configuration » et « `enregistrerCommeEchelle()` ». Elle était fausse dans les DEUX sens — `enregistrerCommeEchelle`
+  (`:874`) n'appelle pas cette fonction, et le chemin de chargement n'y figurait pas. Corrigée par ce lot.
+  **Correctif** : extraction de `refleterTypeEchelle()` (affichage seul, rend un booléen pour conserver à l'identique les
+  gardes qui empêchaient déjà la sauvegarde) ; `changerTypeEchelle` = reflet + sauvegarde ; `chargerConfigurationEchelle`
+  n'appelle plus que le reflet. Sentinelle `tests/integration/sentinelle-659-lecture-n-ecrit-pas.spec.js`, **transitoire** :
+  ses cas 2 et 3 perdent leur sujet quand #628 retire le legacy ; relève nommée dans son en-tête.
+  ⮕ Note d'inscription (`kuekatsheu-14`) : les numéros de la chaîne ci-dessus sont des **sites d'appel**, pas des
+  définitions — vérifié, `:647` est l'appel dans `initialiserModuleEchelles` (définie `:608`), `:1021` l'appel dans
+  `chargerConfigurationEchelle` (définie `:999`), et `changerTypeEchelle` est définie `:1073`.
+
+- [ ] **#658 — CONSTAT · `afficherToutesLesEchellesNiveaux` écrit dans un stub caché : le bouton « Modifier » qu'elle génère est inatteignable, et `chargerEchelleTemplate` n'a plus de déclencheur visible**.
+  Inscrit le 31 août 2026 par `kuekatsheu-80`, **avant tout usage**. Trouvé en cartographiant S10a/#628, **non touché** :
+  c'est un constat d'atteignabilité, pas un retrait, et le corriger dans le lot de retrait rendrait sa sentinelle illisible.
+  `js/echelles.js:214` écrit dans `document.getElementById('vueEchellesNiveaux')` — porteur unique à `index.html:5127`,
+  **dans le bloc « Conteneurs cachés pour compatibilité » (5126-5135)**. Tout le rendu de la fonction est donc invisible,
+  y compris le bouton généré à `:324` (`data-action="chargerEchelleTemplate"`). Or c'était le **seul** déclencheur de
+  `chargerEchelleTemplate` hors du bloc ancien système : ses deux autres sites sont `index.html:5148` (bloc caché
+  5142-5294, mesuré par comptage d'imbrication) et `js/echelles.js:357`, dans `ajouterNiveauAEchelle`, que l'audit Z3 §2.4
+  classe sans appelant.
+  ⮕ Portée AU-DELÀ de S10a : le motif « le travail est fait à chaque affichage, dans un élément que personne ne regarde »
+  que le rapport Z3 §2.3 documente pour les productions **existe aussi côté échelles**. À verser au périmètre de S10b.
+
+- [ ] **#657 — CONSTAT (prévention) · Rien ne vérifie qu'un fichier `js/` neuf est DÉCLARÉ dans `index.html` : il entrerait sans bruit et ne se chargerait jamais**.
+  Inscrit le 31 août 2026 par `kuekatsheu-f2`, **avant tout usage**, sur mandat de `kuekatsheu-14`. Sorti de S9a/#627 :
+  le lot pose son propre cas pour son module, mais l'angle mort est GÉNÉRAL. **Aucun défaut ouvert aujourd'hui** — voir
+  la mesure ci-dessous. C'est une prévention, pas une réparation.
+  **Le mode d'échec.** Un fichier `js/` neuf sans balise `<script>` produit un `window.X` **undefined** au runtime, et
+  ses appelants lèvent un `TypeError` au premier usage réel. Rien ne l'attrape en amont : un banc unitaire qui monte le
+  module par `chargerScript` le charge DIRECTEMENT depuis le disque, donc **il reste vert**, et une assertion statique
+  qui lit le source du consommateur reste verte aussi. Le vert du banc n'atteste pas que l'application charge le module.
+  **Mesure du 31 août 2026 (`e99de10f`)** : **188** fichiers `.js` sous `js/`, **184** déclarés dans `index.html`,
+  **4** sur disque et non déclarés, **0** déclaré sans exister (aucune balise fantôme).
+  ⮕ **Recoupée indépendamment par `kuekatsheu-14`** le même soir (`find js -name "*.js"` contre les `src="js/…"` d'`index.html`,
+  comparés par `comm`) : mêmes trois nombres, mêmes quatre fichiers, zéro fantôme.
+  ⮕ **Les quatre écarts sont LÉGITIMES, et trois sont déjà documentés** — vérifié un par un, pas déduit du compte :
+  · `js/heic-worker.js` — chargé par `new Worker('js/heic-worker.js?v=…')` (`heic-decodeur.js:98`).
+  · `js/pack-demo-20.js` — chargé par `script.src` dynamique (`demo-namespace.js:115`).
+  · `js/_archives/entites-ui.js` — archive.
+  · `js/pratiques/pratique-interface.js` — **fichier de DOCUMENTATION jamais servi** (contrat `IPratique`), déjà inscrit
+    comme tel dans `RELAIS.md:386-387` et `BACKLOG.md:862-863`, avec la consigne de ne pas le servir.
+  ⚠ **La sentinelle n'est donc PAS « tout `js/` doit être déclaré »** : écrite ainsi, elle serait rouge dès sa première
+  exécution sur quatre cas valides. Elle demande une liste de tolérance — et une liste de tolérance **se périme en
+  silence**. La forme à trancher est là, pas dans le principe : soit tolérer par MOTIF vérifiable (un fichier non
+  déclaré doit être référencé par `new Worker(` ou par un `script.src` dynamique, ce qui se mesure), soit tolérer par
+  liste nommée et datée. Le premier régime ne se périme pas ; il est aussi plus long à écrire.
+  ⮕ Effort estimé : petit (une trentaine de lignes). Valeur : elle couvre tout fichier neuf à venir, pas seulement
+  celui de #627.
+
+- [ ] **#656 — À TRANCHER (Grégoire, à froid) · Le report D-C4 devait être statué au pas 4 de la Brique C ; le pas 4 est livré, D-C4 n'a jamais été statué**.
+  Inscrit le 31 août 2026 par `kuekatsheu-f2`, **avant tout usage**, sur mandat de `kuekatsheu-14`. **Ce n'est pas un
+  constat de défaut : c'est une décision de conception restée ouverte, à prendre à froid.** Rien n'est cassé aujourd'hui.
+  **(i) Ce que le cadrage a écrit.** `plans de travail/CADRAGE-briques-C-D-namespacing.md` §2.4 : « **Report assumé D-C4**
+  (pas 4) : `echelleId` d'une copie n'est pas remappé au pas 3, verrouillé par un test-témoin qui RUGIRA au pas 4
+  (= signal attendu, mettre à jour le témoin) », et, dans la même phrase, « D-C4 plus léger que craint pour le chemin
+  grille+cartouches ; **à statuer au pas 4** ». Le §2.5 le confirme : « Il ne reste, pour la Brique C, que le report
+  assumé D-C4 ».
+  **(ii) Ce que le pas 4 a fait.** Le pas 4 est marqué **✓ LIVRÉ** (`82fd4e9f`, 26 juin 2026, « Brique C pas 4 — import
+  inter-trimestre de grilles (COPIE) + garde D-C7 »). Mesuré : il touche `index.html`, `js/grilles.js` et une spec
+  d'import — **ni `js/partage-section.js`, ni le témoin**. Le pas qui devait statuer D-C4 est passé à côté du fichier
+  concerné, et le témoin n'a jamais rugi.
+  ⮕ **D-C4 n'est donc pas un report tranché : c'est un report jamais statué, qui a traversé son échéance.** La nuance
+  décide de qui peut y toucher — un report assumé se respecte, un report jamais statué se tranche.
+  **(iii) Ce qui verrouille quoi aujourd'hui.** `tests/unit/sentinelle-duplication-source-briqueC.test.js:178-187`
+  (« TÉMOIN D-C4 (report assumé) — echelleId NON remappé au pas 3 ») exerce `dupliquerGrillePartagee`, c'est-à-dire le
+  chemin de **DUPLICATION**. Il reste vert et il garde toujours le non-remap sur ce chemin.
+  ⚠ **S9a/#627 n'y touche pas.** L'unification des remaps porte sur les quatre chemins d'**IMPORT**, où `cartouche.echelleId`
+  est désormais remappé — sans quoi un import laisserait une référence vers un id absent de la destination, soit la
+  référence pendante que #627 existe pour supprimer. Import et duplication sont deux objets ; le rapport Z2 rattachait
+  `prefixerEntites` à D-C4, mais ce rattachement est une inférence du rapport, non un invariant verrouillé par un test.
+  **La question à trancher** : la Brique C se ferme-t-elle en remappant aussi `echelleId` sur le chemin de duplication
+  (ce qui ferait rugir le témoin — signal attendu, témoin à mettre à jour), ou le non-remap y est-il la règle voulue ?
+  Aucune urgence : le comportement actuel est stable et verrouillé des deux côtés.
+
+- [ ] **#654 — CONSTAT · Aucun des quatre remaps d'import ne mémorise l'id neuf d'une cartouche : `production.cartoucheId` n'est remappé nulle part**.
+  Inscrit le 31 août 2026 par `kuekatsheu-f2`, **avant tout usage**, sur mandat de `kuekatsheu-14`. Sorti de S9a/#627
+  délibérément : le remède n'est pas local, et le mêler à l'unification rendrait illisible le rouge de sa sentinelle.
+  Les quatre implémentations frappent un id neuf pour une cartouche en collision, aucune ne le retient. `remapCartouches`
+  n'existe dans aucune des quatre, et le module unifié de #627 n'en prépare que la PLACE : tant que la table est vide,
+  `production.cartoucheId` reste non remappé. **Le trou est nommé, pas fermé.**
+  Deux remèdes, mesurés le 31 août sur `e99de10f` :
+  · `js/reserve-ouvrir.js` — le patron existe huit lignes plus haut. `_preparerEtCollecter(items, prefix, TABLE)` (`:1043`)
+    mémorise à `:1048` (`if (table && item.id) table[item.id] = copie.id;`) ; son jumeau `_preparerEtPatcher(items, prefix, TYPE)`
+    (`:1079`) n'a pas de paramètre `table`. Les deux passes « collecter » (`:1094` grilles, `:1095` échelles) mémorisent ;
+    les trois passes « patcher » (`:1096` productions, `:1097` cartouches, `:1098` pratiques) non. Ajouter le paramètre suffit.
+  · `js/import-export.js` — le mint n'est PAS dans la branche cartouches : il est dans `fusionnerParIdentite`, helper partagé
+    par CINQ collections, **neuf sites d'appel** (`grep -n "fusionnerParIdentite(" js/import-export.js` rend dix lignes,
+    la dixième étant la définition `:134` — remesuré, conforme). Lui faire rendre ses renommages couvre les cinq d'un geste,
+    et referme aussi les quatre familles oubliées : échelles, grilles, productions et pratiques dont les mints n'entrent pas
+    non plus dans `remapEchelles`/`remapGrilles`.
+  ⚠ **Écart de comptage inscrit, NON tranché.** L'addendum #638 du rapport Z2 annonce que
+  `grep -c "window\.cle(\|[^.a-zA-Z]cle(" js/import-export.js` rend **16** ; rejoué le 31 août il rend **18**. Le hash de
+  péremption de l'addendum (`6006474e`) n'a PAS bougé — ce n'est donc **pas** une péremption. Deux hypothèses subsistent et
+  ne se départagent pas sans un `git log -S` de plus : comptage faux à l'écriture, ou code arrivé depuis sans toucher
+  `fusionnerParIdentite`. **Ne pas trancher sans remesurer.** Cela n'affecte pas la conclusion de l'addendum : le masquage
+  de `cle()` dans `js/partage-import.js` reste inoffensif (zéro appel, et le zéro porte son témoin — la même commande en
+  trouve 18 ailleurs).
+  ⚠⚠ **CETTE TABLE VIDE EST UNE BASCULE ARMÉE — parenté avec #649.** Relevé par `kuekatsheu-80` en relisant le lot,
+  confirmé par `kuekatsheu-f2`. **Peupler `ctx.cartouches` ACTIVE le remap de `production.cartoucheId` sur les QUATRE
+  chemins d'un coup**, sans que sa sémantique ait été comparée à l'attendu — celui qui traitera cet item croira
+  n'ajouter qu'une table. Différence avec #649 : ici la bascule est documentée et couverte par un cas qui fige l'état
+  actuel ; la mécanique, elle, est la même.
+  ⮕ **Le cas de `sentinelle-627` qui fige la table vide DOIT rougir ce jour-là : c'est le signal, pas une régression —
+  ne le « réparez » pas.** C'est un verrou de convention, au sens du piège n°8 : la question n'est pas « ce scénario
+  peut-il se produire ? » mais « cette règle peut-elle être défaite de bonne foi ? ».
+
+- [ ] **#655 — CONSTAT · L'import SÉLECTIF écrit les cartouches sous la clé NUE, hors namespace de trimestre — le chemin codex, lui, namespace**.
+  Inscrit le 31 août 2026 par `kuekatsheu-f2`, **avant tout usage**. Trouvé en lisant le site voisin pendant S9a/#627,
+  **non touché** : ce n'est pas du remap, et le corriger dans le lot d'unification rendrait sa sentinelle illisible.
+  `js/import-export.js:2919` ouvre `Object.keys(donnees).forEach(cle => {` — la variable de boucle **masque la fonction
+  globale `cle()`** dans tout le bloc. Les deux accès à la base y emploient donc la clé NUE venue du fichier importé :
+  `:2923` `db.getSync(cle, [])` et `:2935` `db.setSync(cle, cartouchesFusionnees)`. Jamais `cle('cartouches_…')`.
+  Or `cle()` (`js/trimestres.js:316`) namespace par trimestre actif, et son propre commentaire porte la règle :
+  **S5/#623 a namespacé la famille `cartouches_<grilleId>` « comme toute clé namespacée, y compris hors archive »**.
+  Le chemin codex du MÊME fichier passe bien par `cle()` (`:2552`, `:2563`). Deux chemins, deux régimes de stockage.
+  **DATATION — c'est une omission de S5, pas une régression de S9.** Le dernier commit à toucher ce bloc est `f04e092e`
+  (#448, v1.75.0), **antérieur** à `06edcb47` (S5/#623). Le bloc n'a pas été revu quand le régime a changé.
+  ⚠ **La conséquence est une INFÉRENCE, pas une mesure.** La structure du code dit qu'un import sélectif de cartouches
+  déposerait sous une clé que le trimestre actif ne lit pas. **Aucun import n'a été exécuté** : seules les DONNÉES diraient
+  si le cas s'est déjà produit chez Grégoire, et combien de cartouches dorment sous des clés nues.
+  ⮕ **Même famille que l'incident « productions A25 écrites sous clé H2026 »** (résurrection IndexedDB, #340 en attente) :
+  une écriture qui atterrit hors du namespace que la lecture interroge. Le dépôt en garde la trace ; les rapprocher évitera
+  de rechercher deux fois la même cause.
+  ⚠ Le masquage de `cle` est bien plus large que les deux sites annoncés par le rapport Z2 (`:2786`, `:2861`) : le fichier
+  en porte une vingtaine (cf. l'écart de comptage versé à #654).
+
 - [ ] **#652 — CONSTAT · Une attente expire sur des éléments qui sont là : « Timeout génération selects critères »**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur observation de `kuekatsheu-5d` dans un rapport
   de bug de Grégoire. **Rien de mesuré** — c'est une observation, pas un diagnostic.
