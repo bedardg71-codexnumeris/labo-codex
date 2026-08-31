@@ -357,6 +357,36 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   **T4.3**, le test manuel sur un trimestre jetable, et **T4.4**, la **levée du moratoire D1**, qui est une décision
   de Grégoire. ⛔ **Le moratoire à trois gestes reste ACTIF tant qu'il ne l'a pas levé lui-même.**
 - [ ] **#623 — S5 · Régime des cartouches** (constat B2). Après S1 et D2. ⚠ Migration de données réelles : sauvegarde préalable par copie obligatoire.
+  ⚠⚠ **BLOQUÉ PAR #635 — la sauvegarde préalable n'a pas d'instrument vérifié.** La migration
+  **SUPPRIME les clés nues** après copie, et il n'existe aucune annulation. Tant que le trajet
+  aller-retour n'est pas démontré, **rien ne s'exécute sur les données de Grégoire.**
+  ⚠ **Le diff du §6.3(c) de Z1 est PÉRIMÉ, et c'est S4 qui l'a périmé** : `creerSnapshotRessources`
+  construit désormais un `cartouchesSnapshot` tout en gardant la copie `db.setSync` et le compteur.
+  S5 doit faire lire la boucle sur `${trimestreId}_cartouches_<id>` et retirer le `setSync` et
+  `nbCartouchesCopies`. **Ouvrir le code, ne pas recopier le diff.**
+  ⮕ **`purgerCopiesModelesArchive` perd sa branche cartouches DANS LE MÊME COMMIT** — sinon
+  désarchiver efface la seule donnée du trimestre. Même perte que #358/#359 pour les grilles.
+  ⮕ ⚠ `cartouches.js:230` d'abord (Z1-M3) : un `const cle` LOCAL masque la fonction `cle()`. Le
+  renommer avant d'envelopper quoi que ce soit, sinon `TypeError`.
+- [ ] **#635 — La sauvegarde préalable de S5 n'a pas d'instrument vérifié, et la migration est sans retour**.
+  Inscrit le 31 août 2026 par `kuekatsheu-f3`, **avant tout usage**. **Bloque #623 / S5.**
+  Le plan et le rapport Z1 exigent tous deux une « sauvegarde préalable PAR COPIE obligatoire » avant S5.
+  **Personne n'avait établi AVEC QUOI.** Mesuré le 31 août en lisant `js/import-export.js:3215` :
+  **`exporterConfigurationComplete()` n'est pas une sauvegarde fidèle**, pour trois raisons cumulées :
+  ⮕ **(1)** il ramasse les cartouches par `key.startsWith('cartouches_')` — **les clés NUES uniquement**.
+  Avant migration c'est bon ; **APRÈS migration il en trouverait ZÉRO, en silence**, les clés devenant
+  `<trim>_cartouches_<id>`. ⚠ **C'est une SEIZIÈME énumération par préfixe**, même famille que les quinze
+  de Z1-S1 — **vérifier si elle figure dans leur liste, elle pourrait y manquer.**
+  ⮕ **(2)** il **FILTRE** par `filtrerRessourcesNonDemo`, une heuristique : ce qu'elle juge « démo ou
+  importé » ne part pas dans le fichier. Un fichier nommé « configuration complète » qui ne l'est pas.
+  ⮕ **(3)** il lit grilles / échelles / productions par `cle(...)`, donc **le seul trimestre ACTIF**.
+  ⮕ **Autre candidat, NON vérifié** : le Codex (`js/codex.js` — `actionExporterSelection`, et surtout
+  `actionFusionner`, seul chemin de RETOUR repéré).
+  ⮕ **CRITÈRE À SATISFAIRE, et il est simple** : produire un fichier, puis **démontrer qu'on peut en
+  restaurer les `cartouches_*` dans une base vide**. Un aller sans retour démontré n'est pas une sauvegarde.
+  ⮕ Rappel de contexte : le fichier « Exporter » d'un trimestre n'a **aucun** chemin de restauration
+  (`type: 'archive-trimestre'` n'apparaît qu'à l'écriture), et le snapshot d'archivage **n'a aucun
+  lecteur**. Ni l'un ni l'autre ne peut servir ici.
 - [ ] **#624 — S6 · Politique de suppression : refermer les CHEMINS qui produisent des orphelins, et traiter les `ECHELLE_DEMO` résiduelles** (constats S1, S2). Après **S5** (ordre strict S4→S5→S6), D3-A **qualifiée**.
   ⚠ **Reformulé le 30 août 2026.** L'énoncé précédent disait « absorbe la réparation #542 ». **#542 a été réparé le 26 août** (`scripts/reparation-542-echelle-orpheline.js` ; deux commits, dont `e3d5af34` qui corrige la réparation elle-même). Ce qui reste n'est pas la réparation : c'est **la CAUSE, inconnue**, et les `ECHELLE_DEMO` résiduelles. ⮕ Chiffres 383 → 44 **RAPPORTÉS, non remesurés** : le diagnostic de T2.2 rendra celui du jour.
   ⚠ **D3-A est qualifiée, pas appliquée à la lettre** : bloquer + NOMMER les référents (quoi, combien, quel trimestre) + **CONSERVER et généraliser la porte de sortie « réassigner vers un autre objet »** là où elle existe. Sur les échelles, le chemin actuel PROPOSE de migrer les évaluations : un D3-A strict retirerait cette issue et laisserait un refus indéfaisable. Un blocage sans issue n'est pas une garde.
