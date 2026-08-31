@@ -651,9 +651,14 @@
      * @returns {Object} IDs des templates utilisés {grilleIds, echelleIds, pratiqueIds}
      */
     function identifierTemplatesUtilises(trimestreId) {
-        // Récupérer les productions du trimestre
-        const productions = db.getSync(`${trimestreId}_productions`, [])
-            || db.getSync(`${trimestreId}_productionsPedagogiques`, [])
+        // Récupérer les productions du trimestre.
+        // #622/B1 : les défauts étaient `[]`, et `[]` est TRUTHY — les deux replis `||`
+        // ne s'exécutaient donc JAMAIS et la forme legacy n'était jamais lue. Le défaut
+        // est `null` (signature `getSync(key, defaultValue = null)`, db.js:1466) : on
+        // ne se rabat que sur une clé réellement ABSENTE. Une clé présente et vide est
+        // une réponse, pas un silence.
+        const productions = db.getSync(`${trimestreId}_productions`, null)
+            || db.getSync(`${trimestreId}_productionsPedagogiques`, null)
             || [];
 
         // 🆕 C2 (#358) : les ÉVALUATIONS sont la source grade-bearing des modèles
@@ -736,40 +741,68 @@
             // Récupérer les modèles de travail du trimestre concerné.
             // #358 Option A : la source des grilles/échelles est la copie namespacée
             // `${trimestreId}_grillesTemplates` (peuplée par C1 au boot et maintenue par
-            // les writers `cle()`), plus le global hérité. Le filtrage par ids utilisés
-            // + l'écriture vers `${trimestreId}_*` (plus bas) restent inchangés.
-            const toutesGrilles = db.getSync(`${trimestreId}_grillesTemplates`, []);
-            const toutesEchelles = db.getSync(`${trimestreId}_echellesTemplates`, []);
-            const toutesPratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
+            // les writers `cle()`).
+            // #622/B3 : `cle()` route par le trimestre ACTIF, et on ne peut archiver
+            // qu'un trimestre NON actif (garde plus haut dans archiverTrimestre) :
+            // lire les pratiques par `cle()` garantissait de lire un AUTRE trimestre,
+            // puis d'écrire le résultat sous celui qu'on archive. Le trimestre archivé
+            // est nommé — on lit son namespace explicitement, comme les deux autres.
+            const toutesGrilles   = db.getSync(`${trimestreId}_grillesTemplates`, []);
+            const toutesEchelles  = db.getSync(`${trimestreId}_echellesTemplates`, []);
+            const toutesPratiques = db.getSync(`${trimestreId}_pratiquesConfigurables`, null) || [];
 
-            // Filtrer pour ne garder que les utilisés
+            // Quels modèles ont réellement servi. Cette information reste utile
+            // (statistiques finales, futur élagage EXPLICITE) — ce qui était fautif,
+            // c'est de s'en servir pour ÉCRIRE. Elle part désormais en métadonnée du
+            // snapshot, et nulle part ailleurs.
             const grillesUtilisees = toutesGrilles.filter(g => grilleIds.has(g.id));
             const echellesUtilisees = toutesEchelles.filter(e => echelleIds.has(e.id));
             const pratiquesUtilisees = toutesPratiques.filter(p => pratiqueIds.has(p.id));
 
-            // ✅ AJOUT (28 jan 2026) : Copier vers des clés namespacées pour l'archivage
-            // Ces copies seront utilisées quand le trimestre est en mode archive
-            db.setSync(`${trimestreId}_grillesTemplates`, grillesUtilisees);
-            db.setSync(`${trimestreId}_echellesTemplates`, echellesUtilisees);
-            db.setSync(`${trimestreId}_pratiquesConfigurables`, pratiquesUtilisees);
+            // #622/B1 — RETIRÉ : les trois `db.setSync` qui réécrivaient les clés de
+            // TRAVAIL avec le sous-ensemble filtré. Écrites en janvier 2026, quand
+            // `<id>_*Templates` étaient des copies d'archive neuves ; depuis #358
+            // (28 juin 2026) ce sont les collections VIVANTES du trimestre. Archiver
+            // retirait donc du stockage tout modèle non « utilisé », sans copie de
+            // secours — le snapshot ci-dessous n'enregistrait que les survivants.
+            // Mesuré sur les données réelles (#630) : archiver Hiver 2026 détruisait
+            // ses dix pratiques, l'intersection avec le trimestre actif étant vide.
+            // L'archivage est désormais une LECTURE : il n'écrit que le snapshot.
 
             // ✅ AJOUT (28 jan 2026) : Copier les cartouches des grilles utilisées
             let nbCartouchesCopies = 0;
+            const cartouchesSnapshot = {};
             grilleIds.forEach(grilleId => {
                 const cartouches = db.getSync(`cartouches_${grilleId}`, []);
                 if (cartouches.length > 0) {
                     db.setSync(`${trimestreId}_cartouches_${grilleId}`, cartouches);
+                    cartouchesSnapshot[grilleId] = cartouches;
                     nbCartouchesCopies += cartouches.length;
                 }
             });
 
             // Ressources pour le snapshot (backup complet)
             const ressources = {
-                productions: db.getSync(`${trimestreId}_productions`) || db.getSync('productions', []),
-                grilles: grillesUtilisees,
-                echelles: echellesUtilisees,
-                pratiques: pratiquesUtilisees,
-                cartouches: nbCartouchesCopies,
+                // #622/B1 : `getSync` sans valeur par défaut rend `null` — le repli sur
+                // la clé NUE `productions` était donc ATTEIGNABLE, et le snapshot
+                // pouvait enregistrer, sous le nom du trimestre archivé, le contenu
+                // d'une clé partagée entre trimestres. Le snapshot d'un trimestre ne
+                // lit que le namespace de ce trimestre.
+                productions: db.getSync(`${trimestreId}_productions`, []),
+                // #622/B1 : le snapshot enregistrait le sous-ensemble filtré — il ne
+                // pouvait donc rien restaurer de ce que l'archivage venait de retirer,
+                // alors que son propre commentaire annonce un « backup complet ». Il
+                // enregistre désormais les collections COMPLÈTES, et les cartouches
+                // elles-mêmes plutôt que leur compte : un nombre ne restaure rien.
+                grilles:    toutesGrilles,
+                echelles:   toutesEchelles,
+                pratiques:  toutesPratiques,
+                cartouches: cartouchesSnapshot,
+                utilises: {
+                    grilleIds:   Array.from(grilleIds),
+                    echelleIds:  Array.from(echelleIds),
+                    pratiqueIds: Array.from(pratiqueIds)
+                },
                 _meta: {
                     trimestreId: trimestreId,
                     dateCreation: new Date().toISOString(),
@@ -784,12 +817,22 @@
             return {
                 success: true,
                 cleSnapshot: cleSnapshot,
+                // #622/B1 : le résumé comptait les SURVIVANTS du filtre en les
+                // nommant comme le contenu du snapshot. Chiffres exacts, libellé
+                // faux — et c'est ce libellé qui a fait croire pendant sept mois
+                // que le backup était complet. Il compte désormais ce que le
+                // snapshot contient VRAIMENT, et dit à part combien ont servi.
                 resume: {
                     productions: ressources.productions.length,
-                    grilles: grillesUtilisees.length,
-                    echelles: echellesUtilisees.length,
-                    pratiques: pratiquesUtilisees.length,
-                    cartouches: nbCartouchesCopies
+                    grilles: toutesGrilles.length,
+                    echelles: toutesEchelles.length,
+                    pratiques: toutesPratiques.length,
+                    cartouches: nbCartouchesCopies,
+                    utilises: {
+                        grilles: grillesUtilisees.length,
+                        echelles: echellesUtilisees.length,
+                        pratiques: pratiquesUtilisees.length
+                    }
                 }
             };
         } catch (error) {
@@ -1121,25 +1164,28 @@
                 }
             });
 
-            // Cours liés au trimestre
+            // Cours liés au trimestre. `cours` est une clé GLOBALE : chaque cours porte
+            // son `trimestreId`, le filtre est donc la bonne lecture ici.
             const listeCours = db.getSync('cours', []);
             exportData.donnees.cours = listeCours.filter(c => c.trimestreId === id);
 
-            // Étudiants, évaluations, présences liés aux cours du trimestre
-            const coursIds = exportData.donnees.cours.map(c => c.id);
-
-            // ✅ NAMESPACING (Beta 95.5) - obtenirDonneesSelonMode filtre deja par coursId
-            const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-            exportData.donnees.etudiants = etudiants.filter(e => coursIds.includes(e.coursId));
-
-            const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-            exportData.donnees.evaluations = evaluations.filter(e => coursIds.includes(e.coursId));
-
-            const presences = obtenirDonneesSelonMode('presences');
-            exportData.donnees.presences = presences.filter(p => coursIds.includes(p.coursId));
-
-            const snapshots = db.getSync(cle('snapshots'), { hebdomadaires: [], interventions: [] });
-            exportData.donnees.snapshots = snapshots;
+            // #622/B2 — RETIRÉ : quatre lectures via `obtenirDonneesSelonMode` et
+            // `cle()`, qui résolvent toutes leur clé par le trimestre ACTIF (modes.js,
+            // via `obtenirTrimestreId`). Elles servaient un export dont la CIBLE est
+            // `id`, un trimestre par construction NON actif — on exporte pour archiver,
+            // pour supprimer, ou depuis une ligne inactive.
+            // Deux d'entre elles ÉCRASAIENT en outre des champs que la boucle
+            // CLES_NAMESPACEES ci-dessus avait déjà remplis correctement : `presences`
+            // et `snapshots` sont l'une et l'autre au registre. Résultat mesuré :
+            // présences VIDÉES, captures d'un AUTRE trimestre — dans le fichier même
+            // que la modale de suppression définitive présente comme une copie de
+            // secours (trimestre-v2-liste.js).
+            // Les deux champs alias `etudiants` et `evaluations` partent avec elles :
+            // ils dupliquaient `groupeEtudiants` et `evaluationsSauvegardees` sous un
+            // autre nom, avec une valeur fausse, et aucun lecteur nulle part ne les
+            // attend (grep du 31 août : les occurrences d'`import-export.js` portent
+            // sur `analyse.donnees.*`, un objet d'analyse à `.count`/`.cles`, pas sur
+            // le champ d'un fichier d'archive).
 
             // Déclencher le téléchargement
             const nomFichier = `trimestre-${id}-archive-${new Date().toISOString().split('T')[0]}.json`;
