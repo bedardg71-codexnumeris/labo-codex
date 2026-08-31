@@ -336,7 +336,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 - [x] **#619 — S1 · Audit ciblé Z1 : cartouches, frontière de portée, archivage** (constats B1, B2, M1). Lecture seule. ✅ **LIVRÉ le 30 août 2026** (`4a88b6af`) — `Rapports/AUDIT-conception-Z1-cartouches-archivage-2026-08-30.md`, 686 lignes. ⏳ T1.2 (diagnostic console) en attente de Grégoire.
 - [x] **#620 — S2 · Audit ciblé Z2 : politique de suppression et intégrité référentielle** (constats S1, S2, S6, M7). Lecture seule. ✅ **LIVRÉ le 30 août 2026** (`3f9edcd1`) — `Rapports/AUDIT-conception-Z2-suppressions-integrite-2026-08-30.md`, 917 lignes, 1 BLOQUANT et 5 SÉRIEUX. ⏳ T2.2 (diagnostic console) en attente de Grégoire.
-- [ ] **#621 — S3 · Audit ciblé Z3 : le legacy vivant des quatre sections** (constats S4, S5, S9). Lecture + instrumentation locale jamais commitée.
+- [x] **#621 — S3 · Audit ciblé Z3 : le legacy vivant des quatre sections** (constats S4, S5, S9). ✅ **LIVRÉ le 30 août 2026** (`e766339a`) — `Rapports/AUDIT-conception-Z3-legacy-2026-08-30.md`. **Aucune instrumentation n'a été nécessaire** : la question se répond statiquement. ⚠ Renverse la prémisse de S10 — les 26 identifiants sont lus par du code atteignable, aucun bloc n'est mort.
 - [ ] **#622 — S4 · Archivage de trimestre** (constat B1). Après S1. ⚠ D1 = A : moratoire actif sur « Archiver un trimestre » jusqu'à la livraison de cet item.
 - [ ] **#623 — S5 · Régime des cartouches** (constat B2). Après S1 et D2. ⚠ Migration de données réelles : sauvegarde préalable par copie obligatoire.
 - [ ] **#624 — S6 · Politique de suppression : refermer les CHEMINS qui produisent des orphelins, et traiter les `ECHELLE_DEMO` résiduelles** (constats S1, S2). Après **S5** (ordre strict S4→S5→S6), D3-A **qualifiée**.
@@ -357,8 +357,18 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   · **Même famille que #542, sur l'autre champ, et plus gros.** #542 portait sur `evaluation.echelleId`
     (383 → 44, réparé le 26 août — **vérifié tenu** le 30 août : il ne reste que `ECHELLE_DEMO` ×44,
     aucun autre id). Celui-ci porte sur `evaluation.grilleId` et n'a jamais été réparé.
-  · ⚠ **CE QUI EST EN JEU** : Hiver 2026 est un trimestre passé, ses notes sont finales. Une note dont
-    la grille a disparu ne peut plus être JUSTIFIÉE — c'est le dossier d'un élève qui conteste.
+  · ⚠⚠ **REQUALIFIÉ LE 30 AOÛT AU SOIR PAR L'AUDIT Z2, APRÈS MESURE — CE N'EST PAS UNE PERTE EN COURS,
+    C'EST UN GEL.** L'hypothèse de départ (le patron de #453 : le vide de l'affichage qui devient le vide
+    du disque) a été **instruite puis RÉFUTÉE** : les trois chemins d'écriture refusent. L'auto-save sort
+    deux fois (grille absente, puis évaluation verrouillée) ; les deux sauvegardes explicites refusent
+    bruyamment via `_validerReferencesSauv` / `_validerReferencesMod`. **Aucune note n'est écrasée, et
+    rien ne se dégrade en attendant.**
+  · ⮕ **LE SYMPTÔME RÉEL POUR GRÉGOIRE** : il **ne peut plus modifier aucune des 408 évaluations**. Le
+    message qu'il reçoit — « La grille de critères sélectionnée n'existe plus » — ne dit **ni laquelle,
+    ni qu'elles sont 408, ni quoi faire**. Les lectures dégradent proprement (trois replis posés à trois
+    dates : #576 pour le bilan, `_appliquerFallbackGrilleManquanteModif` pour l'écran, #348-résiduel pour
+    le calcul). C'est un problème vivant, ce n'est pas une urgence de sauvetage.
+  · ⏳ **NON MESURÉ** : l'export PDF face à une grille disparue. Première tâche de #632.
   · 🔑 **PISTE DE RECONSTRUCTION, mesurée** : les magasins de cartouches des trois grilles SURVIVENT
     (`cartouches_grille_1770742838756_23q82vbsk` = 5 cartouches, `cartouches_grille_1772187755149_uq1oiiafa`
     = 4, `cartouches_GRILLE1759529438501` = 2 — soit **11 cartouches**, tous recensés parmi les 16
@@ -368,6 +378,14 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     pointent `GRILLE1759529438501`) : la réparation doit couvrir les deux.
   · ⮕ **NE RIEN SUPPRIMER en attendant** : les 16 « magasins fantômes » de #620 ressemblent à du déchet
     à nettoyer. Onze d'entre eux sont la seule trace restante de trois grilles portant 408 notes.
+    Requalifiés dans le rapport Z2 : « à conserver, source de reconstruction potentielle ».
+  · 🔑 **CE QUE LA RECONSTRUCTION AURA, ET CE QUI LUI MANQUERA** (mesuré au code par Z1 et Z2, le 30 août) :
+    une cartouche persiste `criteres:[{id,nom}]` et `niveaux:[{code,nom}]` — la reconstruction des critères
+    est donc **directe**, pas déductive. **Mais la PONDÉRATION n'y est pas** : les critères se retrouvent,
+    la note ne se recalcule pas. Par ailleurs chaque évaluation enregistre `grilleNom` et
+    `criteres:[{critereId, critereNom, niveauSelectionne, retroaction, ponderation}]` — la structure est
+    riche. ⚠ **Mais le code dit que la structure EXISTE, il ne dit pas qu'elle est PEUPLÉE pour ces 408** :
+    `_collecterCriteresSauv` rend `[]` si la grille manquait déjà à l'enregistrement.
 - [ ] **#632 — Réparation des 408 références de #631** (le correctif ; #631 est le constat).
   Réservé le 30 août 2026 par `kuekatsheu-bc` pour `kuekatsheu-82`, **avant usage**.
   Spécifié en diff NON appliqué dans le rapport Z2. Doit distinguer deux cas et les nommer :

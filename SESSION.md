@@ -82,10 +82,49 @@
          réparation de #542 n'a pas tenu — ou n'a jamais tourné — et S6 passe
          d'important à URGENT.
 
-     ▣ SENTINELLES : AUCUNE. Les deux audits Z sont en lecture seule ; les
+     ▣ CLÔTURE — LA PHASE DE MESURE DU PLAN CONCEPTION EST FERMÉE.
+       Z1 `fc203e58` · Z2 `56562f85` · Z3 `e766339a`. Les sessions d'exécution
+       n'auront plus à auditer : elles ouvrent sur des diffs déjà spécifiés,
+       avec les décisions prises et les identifiants réservés (#619 à #632).
+
+     ▣ Z3 RENVERSE LA PRÉMISSE DE S10. Les stubs cachés des quatre sections ne
+       sont pas du legacy inerte : les 26 identifiants sont lus par du code
+       ATTEIGNABLE. Un BLOQUANT : `typeEchelle` et `seuilReussite` existent DEUX
+       fois dans `index.html` (stub caché 5130-5131, vrais champs 5194 et 5202) ;
+       `getElementById` rend le premier, donc le div vide, et
+       `sauvegarderConfigEchelle` (`echelles.js:1044`) le lit SANS garde puis
+       ÉCRIT `db.set('configEchelle', {typeEchelle: undefined, seuilReussite: 60})`.
+       La valeur saisie n'est jamais lue, et 60 est une valeur métier en dur.
+       ⮕ T3.1 (neutralisation) est devenu SECONDAIRE : la vraie question n'était
+       pas « qu'est-ce qui casse si on éteint le moteur » mais « quel état vit
+       dans ces div », et elle se répond statiquement.
+
+     ▣ #631 / #632 — TROUVÉS HORS PLAN, SUR LES DONNÉES RÉELLES. 408 évaluations
+       d'Hiver 2026 pointent vers trois grilles qui n'existent nulle part. Les
+       trois audits de CODE ne pouvaient pas le voir.
+       ⚠ REQUALIFIÉ APRÈS MESURE : ce n'est PAS une perte en cours, c'est un GEL.
+       L'hypothèse du patron #453 a été instruite puis RÉFUTÉE — les trois chemins
+       d'écriture refusent. Symptôme réel : Grégoire ne peut plus MODIFIER ces 408
+       évaluations, et le message ne dit ni laquelle, ni combien, ni quoi faire.
+       ⮕ NE PURGER AUCUN des 16 magasins fantômes : onze sont la seule trace des
+       trois grilles. Requalifiés « à conserver, source de reconstruction ».
+       ⮕ PAR OÙ REPRENDRE : combien des 408 portent un `criteres[]` NON VIDE. Le
+       code dit que la structure existe, pas qu'elle est peuplée. Aucun diff de
+       reconstruction avant ce chiffre — les deux sessions ont refusé de conclure.
+
+     ▣ SENTINELLES : AUCUNE. Les trois audits Z sont en lecture seule ; les
        sentinelles exigées sont spécifiées DANS les diffs, avec leur break-test.
        Le cas décisif nommé par Z2 : un objet référencé dans un AUTRE trimestre
-       que l'actif doit faire ROUGIR.
+       que l'actif doit faire ROUGIR. Celui nommé par Z3 : remettre le div en tête
+       du document doit faire ROUGIR — et cette sentinelle-là doit être Playwright,
+       Vitest ne voit pas l'ordre du DOM d'`index.html`.
+
+     ▣ LE FAIT DE MÉTHODE DE LA SOIRÉE, ET IL VAUT D'ÊTRE GARDÉ. Chacune des trois
+       sessions a corrigé au moins une de ses PROPRES affirmations, sur mesure, et
+       aucune ne l'a gommée : un total gonflé par un scénario impossible (attrapé
+       par un témoin, pas par une relecture) ; un « structurellement garanti »
+       démenti par les données ; une hypothèse de perte réfutée en l'instruisant.
+       C'est ce qui rend les trois rapports lisibles à froid.
      ===================================================================== -->
 
 <!-- =====================================================================

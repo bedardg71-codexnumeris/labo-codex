@@ -32,6 +32,73 @@
 | ⚠ **TROIS SESSIONS ONT TRAVAILLÉ DANS CE DÉPÔT LE 26 AOÛT AU SOIR** | Et une **quatrième journée de collisions d'index** s'y est ajoutée : un `git add` suivi d'un `git commit` a emporté le travail d'une autre session entre les deux gestes. Défait et rendu avant tout push. ⮕ **La méthode qui tient : `git add -N <fichiers neufs>` puis `git commit -- <chemins explicites>` DANS LA MÊME COMMANDE.** `--only` seul refuse un fichier neuf (« did not match any file(s) known to git ») ; `git add` puis `commit` rouvre la fenêtre. ⮕ **Et le même oubli d'anti-cache s'est produit QUATRE fois en deux jours, sur trois sessions et trois chantiers sans rapport** : un fichier modifié dont le `?v=` ne suit pas. Ce n'est plus une étourderie — **c'est une lacune du filet**, inscrite en **#547** : la sentinelle compare des COMMITS, elle ne peut donc rien voir tant que le travail est dans l'arbre, et le hook `pre-push` la lit trop tard. Le geste correcteur est connu de tous et appliqué correctement à chaque fois ; ce qui manque, c'est le RAPPEL AU BON MOMENT. |
 | **Dernière mise à jour** | **30 août 2026, 12 h 30** — **trois sessions dans le même arbre**, coordonnées par messages. **#597 CLOS** (`20e4feaf`, **non poussé**) : le décodeur HEIC fonctionne mais n'a AUCUN chemin en `file://`, et l'application le DIT désormais au lieu de laisser passer un fichier muet en 0 x 0. ⚠⚠ **LE FAIT À RETENIR : un `blob:` worker HÉRITE de la CSP du document, un worker chargé par URL same-origin non** — c'est ce qui ferme la dernière voie, pas le `file://`. ⮕ **Et la leçon de méthode : la mesure du matin était VRAIE et INCOMPLÈTE** — « converties en 3024x4032 » était exact sous serveur, personne n'avait écrit dans quel mode. **Vitest 4195/4195 (402 fichiers)** · Playwright 207/207 sur deux suites. ⏳ **Reste, et c'est une décision de Grégoire à froid : le lanceur local** (servir l'application ferait marcher le décodeur tel quel, mais change son geste de lancement et emporte tablette + clé Codex). Entrée précédente : **30 août 2026, fin de journée** — session unique. **#522 lot 4 LIVRÉ** (le helper des bibliothèques, cinq familles d'un geste) · **#503 étendu aux cartouches** · divergence des deux 1.106.3 TRANCHÉE (report de #555·2, branche abandonnée) · **#508 : trois gestes de code**, pas un — la spec rougirait seule le 1er septembre · consigne de démarrage et artefact de refermage écrits. **Vitest 4114/4114 (395 fichiers)** · ⚠ **Playwright NON relancé, et il est DÛ.** 1.106.4 due, rien poussé. Entrée précédente : **30 août 2026, 8 h 20** — session unique (matin). **#522 : l'AUDIT est fait (213 séquences mesurées, 102 en course) et le LOT 1 est LIVRÉ** — rapport `Rapports/AUDIT-522-courses-lecture-ecriture-2026-08-30.md`. **1.106.3 poussée** (`c2e12dcd`). ⚠⚠ **LE FAIT À RETENIR : `getSync` NE PROTÈGE PAS** — dans `db.set`, l'écriture IndexedDB est attendue AVANT le rafraîchissement de localStorage, donc un concurrent lit encore l'ancienne valeur. ⚠ **Et le banc mentait** : Node n'a pas d'IndexedDB, `db.js` s'y rabat sur localStorage-seul où `set` est synchrone — les six cas passaient au VERT sur le code NON corrigé ; il faut forcer `useIndexedDB` avec une fausse connexion. **Reste 89 sites, quatre lots** ; le plus rentable est le helper `BibliothequeUI` (14 sites, 7 fichiers, un seul changement de contrat pour les cinq familles). Entrée précédente : **29 août 2026, 20 h 15** — session unique (journée entière). **Audit Évaluations bouclé** (#562, #560, #561, #566, #571, #567, #570, #568, #569, #572), #595 et #596 inscrits, artefact de vérification terrain remis. **1.106.2 poussée** (`d1983402`). Entrée précédente : **10 h 30** — session unique (matin). **#578 LIVRÉ** (option A) + régression du 26 août réparée (listes du formulaire de cartouche mortes) ; **#574 retrait LIVRÉ** (option B, sonde due) ; **#593 LIVRÉ** (n° 5-6-7, course fermée) ; **#563 LIVRÉ** (case retirée) ; **#594 LIVRÉ** (bandeau de version au chargement) ; **#562, #560, #561, #566, #571, #567, #570, #568, #569 et #572 LIVRÉS** (après 1.106.1 — **bump 1.106.2 dû**) ; **#595 inscrit** ; **référence unique créée** (`Rapports/SUIVI-conception-evaluations-2026-08.md`) ; #593 inscrit ; 1.106.0 déployée à 3 h. ✅ **1.106.1 poussée à 12 h 40** (`ecd22a59`). Entrée précédente : **3 h 40** — session unique (nuit). **1.106.0 poussée** ; **#578 : le diagnostic console est LIVRÉ** (`await _diagnostiquerEchellesGrilles()`), sentinelle 6 cas / 4 mutations rouges ; **le chiffre est DÛ par Grégoire**. Fait mesuré : l'éditeur de grille n'écrit jamais `echelleId`. Entrée précédente : **28 août, 21 h 15** — session unique (soir). **#555 lot 2 (d) et (e) + #577 LIVRÉS** ; #579 livré pour le cas de l'assistant ; **#592** inscrit. **Vitest 4011/4011** (377 fichiers) · **Playwright 201** (198 verts + 3 instables pré-existantes, vertes au second essai), sur arbre gelé. ⚠ **AUCUN BUMP** : du code a changé (6 fichiers `js/`, `?v=` bougés) mais je ne sais pas si la session `file://` de Grégoire est ouverte — **1.106.0 (minor) est DUE**, à lancer par `node scripts/release.mjs minor` au prochain démarrage. Entrée précédente : **20 h 15** — fin de journée, **trois sessions**. Les **21 arbitrages de Grégoire sont TRANCHÉS et consignés dans leurs items**. Livré : #555 lot 2 (b), #556, #557, l'audit des copies d'échelle, le diagnostic des résolveurs. **Vitest 3983/3983** (374 fichiers) · **Playwright 199/199**, relancés sur arbre gelé avant le push. **Aucun bump** : 1.105.0 tient — que de la documentation, aucun `?v=` à bouger. |
 
+## ▶ POUR LA SESSION QUI PREND LE RELAIS — 30 AOÛT 2026, 22 h 30 (SESSION `bc`, TROIS SESSIONS)
+
+**Tu arrives sur un dépôt tout poussé, tout vert, et sur une phase de projet qui
+vient de se fermer.** Trois sessions ont travaillé en parallèle ce soir sans une
+seule collision : `kuekatsheu-c5` (Z1), `kuekatsheu-82` (Z2), `kuekatsheu-bc`
+(Z3, fichiers partagés, release et push). Aucune n'a écrit dans `js/`,
+`index.html` ni `tests/` — c'était le cadre, et il a tenu.
+
+**LIS D'ABORD** : `CONSIGNE-DEMARRAGE-2026-08-31.md`, réécrite pour toi ce soir.
+Puis le **tableau d'état** de `plans de travail/PLAN-modele-objets-conception-2026-08-30.md`,
+qui est la seule vue d'ensemble.
+
+**CE QUI EST FERMÉ** : la phase de MESURE du plan Conception, entièrement.
+S0 (les cinq décisions, toutes option A), S1/Z1 (`e766339a` pour Z3, `fc203e58`
+pour Z1, `56562f85` pour Z2). Les sessions d'exécution n'auront plus à auditer :
+elles ouvrent sur des diffs déjà spécifiés.
+
+⛔ **CE QUI PRIME SUR TOUT LE RESTE, ET C'EST MESURÉ SUR LES DONNÉES RÉELLES** :
+**archiver Hiver 2026 aujourd'hui détruirait ses DIX pratiques.** Pas « substituerait » —
+détruirait. Le trimestre actif (`a2026`) n'a qu'UNE pratique, aucun identifiant ne se
+recoupe, l'intersection est donc vide et l'archivage écrirait un tableau vide par-dessus.
+Il n'existe **aucune copie de secours** : le snapshot n'enregistre que les survivants, et le
+fichier « Exporter » n'a **aucun chemin de restauration** dans l'application.
+⮕ **S4 (#622) n'est pas dû, il est URGENT.** Le moratoire élargi est ce qui tient la porte
+d'ici là — voir l'en-tête de ce fichier.
+
+**LES TROIS DIAGNOSTICS ONT ÉTÉ EXÉCUTÉS PAR GRÉGOIRE.** Leurs résultats sont
+consignés dans les rapports. Deux choses n'y sont PAS et devraient y être si
+Grégoire a encore ses sorties : le **JSON brut** de T1.2 et de #630, aux §3 et
+§3bis du rapport Z1 (ce qui y est aujourd'hui est un relevé de seconde main, et
+c'est écrit comme tel).
+
+**#631 / #632 — ce qui a été trouvé hors plan.** 408 évaluations d'Hiver 2026
+pointent vers trois grilles qui n'existent nulle part. ⚠ **Ce n'est PAS une perte
+en cours** : l'hypothèse a été instruite puis RÉFUTÉE — les trois chemins
+d'écriture refusent, aucune note n'est écrasée. C'est un **gel** : Grégoire ne
+peut plus modifier ces 408 évaluations, et le message qu'il reçoit ne dit ni
+laquelle, ni combien, ni quoi faire. **Rien ne se dégrade en attendant.**
+⮕ **NE PURGE AUCUN des 16 « magasins fantômes » de cartouches** : onze d'entre eux
+sont la seule trace restante des trois grilles disparues.
+
+**LA QUESTION PAR OÙ REPRENDRE #632**, et elle n'est pas tranchée : **combien des
+408 portent un `criteres[]` non vide ?** Le code établit que la structure existe
+et qu'elle est riche ; il n'établit PAS qu'elle est peuplée pour ces 408-là —
+`_collecterCriteresSauv` rend `[]` si la grille manquait déjà à l'enregistrement.
+**Aucun diff de reconstruction ne doit être écrit avant ce chiffre** : il porterait
+sur un matériau dont on ignore s'il existe. Les deux sessions ont refusé de conclure
+là-dessus, délibérément.
+
+⚠ **Z3 RENVERSE LA PRÉMISSE DE S10.** Les stubs cachés des quatre sections ne sont
+pas du legacy inerte : **les 26 identifiants sont lus par du code ATTEIGNABLE**. Le
+retrait en bloc est impossible tel quel. Séquence D1 → D2 → D3 → D4 du §3 de Z3, et
+D2 est un **refactor**, pas une suppression. La décision D4 de Grégoire reste
+valable ; c'est sa CONDITION qui change.
+
+**Coordination.** Les trois sessions du soir sont terminées. Vérifie par
+`ListAgents` avant d'écrire à qui que ce soit. La table de répartition en tête du
+plan d'importation est à jour ; **inscris-toi dedans** avant d'ouvrir un `js/`.
+
+**Le fait de méthode de la soirée, et il vaut d'être gardé** : chacune des trois
+sessions a corrigé au moins une de ses propres affirmations, sur mesure — un total
+gonflé par un scénario impossible, un « structurellement garanti » démenti par les
+données, une hypothèse de perte réfutée en l'instruisant. Aucune ne l'a gommée.
+C'est ce qui rend les rapports lisibles à froid.
+
+---
+
 ## ▶ POUR LA SESSION QUI PREND LE RELAIS — 30 AOÛT 2026, 19 h 50 (SESSION `0d`)
 
 **Tu arrives sur un dépôt à trois commits d'avance, tout vert, et deux sessions
