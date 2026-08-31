@@ -14,9 +14,15 @@ LE RELAIS » en tête de RELAIS.md. On est à la **1.106.12** (build `0830-1947`
 poussée hier soir.
 
 ÉTAT MESURÉ AU 30 AOÛT, 20 h 20 — ne le refais pas si l'arbre n'a pas bougé
-- `main` porte **5 commits d'avance** sur `origin/main`, tous documentaires
-  (portes terrain, plan, blocs de session). **Pousse-les tôt**, avant d'ouvrir un
-  chantier : ils n'attendent rien.
+- `main` porte **6 commits d'avance** sur `origin/main`, et **l'un d'eux est du
+  CODE** : `15ef1c45` (#612, T6.3 — `detecterFichiersDAInconnu`). Les cinq autres
+  sont documentaires.
+  ⚠ **Conséquence, et c'est pour ça que le chiffre compte** : le dernier verdict
+  Playwright a été obtenu AVANT ce commit. **Relance la suite WebKit avant de
+  pousser**, sinon tu pousses du code qu'aucune suite navigateur n'a vu. Vitest,
+  lui, couvre bien `15ef1c45` (412 fichiers / 4344 tests, code de sortie 0).
+  *(Une version antérieure de cette consigne disait « 5 commits, tous
+  documentaires » : les deux moitiés étaient fausses.)*
 - Arbre propre, hors deux fichiers non suivis à trier : `_sauvegarde-20260830-1905/`
   et `ETAT-AVANT-REDEMARRAGE-2026-08-30.md`. Leur condition de suppression est
   remplie ; demande-moi avant de les retirer.
