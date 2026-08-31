@@ -348,6 +348,26 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⚠ **Reformulé le 30 août 2026.** Z2 recense un **quatrième** remap que l'audit du 30 août ignorait : `reserve-ouvrir.js:1057`, et c'est **le plus complet des quatre** — il réécrit `cartouche.grilleId`, ce qui déplace la clé de stockage : exactement le trou de #448. ⮕ Un défaut y est mesuré : il patche `config.echelleId` alors que le seul écrivain écrit `configuration.echelleId` — **le remap des pratiques y est inopérant**. ⮕ **Le vrai travail est de construire la table `remapCartouches`**, qui n'existe pas.
 - [ ] **#628 — S10 · Retrait du legacy des quatre sections** (constats S4, S9). Après S3 et D4. Probablement scindé en S10a (échelles) et S10b (les trois autres).
 - [ ] **#629 — S11 · Mineurs restants du plan Conception** (constats M1 si non absorbé par S4, M7, M9, M10).
+- [ ] **#631 — BLOQUANT · 408 évaluations d'Hiver 2026 pointent vers trois grilles qui n'existent NULLE PART**.
+  Trouvé le 30 août 2026 par le diagnostic #620 sur les **données réelles de Grégoire**. Ni l'audit du
+  30 août, ni Z1, ni Z2 ne l'avaient vu : ce sont des audits de CODE, celui-ci est une mesure de DONNÉES.
+  · `grille_1770742838756_23q82vbsk` — **225** évaluations · `grille_1772187755149_uq1oiiafa` — **94**
+    · `GRILLE1759529438501` — **89**. Colonne `ailleurs` : **« nulle part »** pour les trois — elles ne
+    survivent dans aucun trimestre, et la clé globale nue `grillesTemplates` est VIDE (#630).
+  · **Même famille que #542, sur l'autre champ, et plus gros.** #542 portait sur `evaluation.echelleId`
+    (383 → 44, réparé le 26 août — **vérifié tenu** le 30 août : il ne reste que `ECHELLE_DEMO` ×44,
+    aucun autre id). Celui-ci porte sur `evaluation.grilleId` et n'a jamais été réparé.
+  · ⚠ **CE QUI EST EN JEU** : Hiver 2026 est un trimestre passé, ses notes sont finales. Une note dont
+    la grille a disparu ne peut plus être JUSTIFIÉE — c'est le dossier d'un élève qui conteste.
+  · 🔑 **PISTE DE RECONSTRUCTION, mesurée** : les magasins de cartouches des trois grilles SURVIVENT
+    (`cartouches_grille_1770742838756_23q82vbsk` = 5 cartouches, `cartouches_grille_1772187755149_uq1oiiafa`
+    = 4, `cartouches_GRILLE1759529438501` = 2 — soit **11 cartouches**, tous recensés parmi les 16
+    « magasins fantômes » de #620). Les commentaires d'une cartouche sont indexés `<critereId>_<code>` :
+    **les identifiants de critères des trois grilles disparues y sont donc encodés.**
+  · ⚠ Les mêmes grilles sont aussi référencées par des `pratique.configuration.grilleId` (dont quatre
+    pointent `GRILLE1759529438501`) : la réparation doit couvrir les deux.
+  · ⮕ **NE RIEN SUPPRIMER en attendant** : les 16 « magasins fantômes » de #620 ressemblent à du déchet
+    à nettoyer. Onze d'entre eux sont la seule trace restante de trois grilles portant 408 notes.
 - [x] **#630 — Diagnostic en lecture seule : combien de modèles ne survivraient PAS à un archivage**. ✅ **LIVRÉ le 30 août 2026** (`b3e1f74a`, §3bis du rapport Z1). Contrôlé indépendamment par `kuekatsheu-bc` : 9 appels, **tous `db.getSync`**, zéro écriture, une ligne. ⏳ **Exécution due par Grégoire.**
   Inscrit le 30 août 2026 par `kuekatsheu-bc`, à la demande de `kuekatsheu-c5` (Z1), **avant tout usage**.
   ⮕ **Ce qu'il remplace, et pourquoi c'est mieux** : T1.3 du plan Conception demandait d'instruire
