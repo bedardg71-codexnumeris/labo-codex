@@ -21,7 +21,7 @@
 | S1 — Audit Z1 : cartouches et archivage | B1, B2, M1 | **LIVRÉ** | 2026-08-30 | `4a88b6af` | **#619** · `Rapports/AUDIT-conception-Z1-cartouches-archivage-2026-08-30.md`, 686 lignes · T1.1, T1.3 (par LECTURE, sans exécution — moratoire), T1.4, T1.5 faites · ⏳ **T1.2 EN ATTENTE de Grégoire** : le §3 du rapport porte l'emplacement du résultat brut du diagnostic console · le critère de fin est atteint pour les quatre questions du §3-Z1 sauf le chiffre de (b), qui dépend de T1.2 · la case §4.1 de l'audit parent (archivage sur trimestre jetable) reste ouverte et bascule en validation POST-S4 · **S4 absorbe un diff de plus** : la réparation d'`exporterTrimestreArchive` (§6.2 du rapport), même fichier, fonction voisine de B1 |
 | S2 — Audit Z2 : suppressions et intégrité | S1, S2, S6, M7 | **LIVRÉ** | 2026-08-30 | `3f9edcd1` | **#620** · `Rapports/AUDIT-conception-Z2-suppressions-integrite-2026-08-30.md`, 917 lignes · 1 BLOQUANT, 5 SÉRIEUX, diffs pour S6/S9/S8 · ⏳ **T2.2 EN ATTENTE de Grégoire** : le tableau d'inventaire du §4 reste à remplir · ⚠ **trois corrections de comptage à l'audit du 30 août** : CINQ chemins de grille retirent d'une collection de travail (pas quatre) ; `productions-bibliotheque-ui.js:693` retire aussi du travail, sans garde ; `afficherGrillesCriteres` est MORTE (son conteneur `#listeGrilles` n'existe pas) · sur 16 chemins qui écrivent, 14 passent par `db.modifier` ; les 2 exceptions sont les chemins de pratique |
 | S3 — Audit Z3 : legacy vivant | S4, S5, S9 | **LIVRÉ** | 2026-08-30 | `e766339a` | **#621** · `Rapports/AUDIT-conception-Z3-legacy-2026-08-30.md` · ⚠⚠ **RENVERSE LA PRÉMISSE DE S10** : les 26 identifiants des quatre blocs de stubs sont lus par du code ATTEIGNABLE, aucun bloc n'est mort · 1 BLOQUANT (deux identifiants EN DOUBLE dans `index.html`, le code lit le div vide et ÉCRIT en base) · T3.1 (neutralisation) devenu **secondaire**, la question se répond statiquement · **`export-pdf.js` à ajouter au périmètre** |
-| S4 — Archivage de trimestre | B1 | À FAIRE | | | **#622** · après S1 · ⚠⚠ **D1 = A, MORATOIRE ACTIF DEPUIS LE 30 AOÛT 2026 : ne pas utiliser « Archiver un trimestre » jusqu'à la livraison de cet item** (bouton `trimestre-v2-liste.js:179` → `creerSnapshotRessources`, `trimestres.js:728`) |
+| S4 — Archivage de trimestre | B1 | **EN COURS (session du 2026-08-31)** | 2026-08-31 | `b888d6b2` | **#622** · **T4.1 et T4.2 LIVRÉES ET COMMITÉES** : §6.1 (B1+B3) et §6.2 (B2) du rapport Z1, plus le troisième défaut de B1 du plan (les deux `getSync` asymétriques). Sentinelle `tests/unit/sentinelle-622-archivage-lecture-seule.test.js`, 14 cas — **ROUGE obtenu d'abord** (11 échecs, tous sur assertions métier ; harnais corrigé deux fois pour que le rouge vienne du code) · **break-test 7 mutations / 7 ROUGES**, restauration par copie · Vitest 414 fichiers / 4367 tests, code de sortie 0. ⮕ **§6.4 (M1+M2) NON absorbé** : Z1 l'alloue à S11/#629 et il ne doit pas précéder §6.1 ; le garder ici gonflait le diff le jour où le moratoire se lève. ⏳ **T4.3 — test manuel sur trimestre jetable : DÛ PAR GRÉGOIRE.** ⏳ **T4.4 — LEVÉE DU MORATOIRE D1 : DÉCISION DE GRÉGOIRE, pas de la session.** Le moratoire reste ACTIF tant qu'il ne l'a pas levé. |
 | S5 — Régime des cartouches | B2 | À FAIRE | | | **#623** · après S1 · D2 = A (namespacée par trimestre + migration) · ⚠ migration de DONNÉES RÉELLES : sauvegarde préalable PAR COPIE obligatoire |
 | S6 — Politique de suppression + orphelins | S1, S2 | À FAIRE | | | **#624** · après S2 · D3 = A (bloquer tant que référencé, message qui NOMME les référents) · absorbe la réparation #542 |
 | S7 — États d'édition (tempCriteres et échelles) | S3 | À FAIRE | | | **#625** · indépendant, permutable tôt |
@@ -42,6 +42,53 @@ Sessions permutables entre elles : S1, S2, S3 (les trois audits) ; S7 et S8 peuv
 · ⚠ **VÉRIFIÉ PAR `kuekatsheu-bc` LE 30 AOÛT — l'écart le plus actionnable de Z2 est exact.** `supprimerGrilleActive` (`js/grilles.js:3933`, bouton `index.html:4872`) fait son propre `confirm` puis un `splice` dans `db.modifier` : **il ne vérifie AUCUNE dépendance**. Son jumeau `supprimerEchelleActive` (`js/echelles.js:4426`) **délègue en deux lignes** au chemin gardé `supprimerEchelleDepuisSidebar`. Et `dupliquerGrilleActive`, **six lignes plus haut dans le même fichier**, délègue déjà de la même façon. Le garde du 24 août n'est jamais descendu jusqu'à ce bouton. Le diff de S6 le fait déléguer — le patron existe déjà à côté, il n'y a rien à inventer.
 · ⚠ **UN TROISIÈME DÉFAUT DE B1, trouvé par `kuekatsheu-c5` en écrivant #630, VÉRIFIÉ par `kuekatsheu-bc`** — deux lignes d'apparence identique, comportements opposés, dans la même fonction d'archivage. `trimestres.js:655-657` : `db.getSync(k, [])` rend `[]` quand la clé manque, et **`[]` est TRUTHY** — les deux replis `||` ne s'exécutent donc JAMAIS, et le filtre de B1 est plus étroit qu'il n'en a l'air. Cent lignes plus loin, `trimestres.js:768` écrit le même motif **sans valeur par défaut** : là `getSync` rend `null` (signature `getSync(key, defaultValue = null)`, `db.js:1466`) et le repli sur **la clé globale NUE `productions`** EST atteignable — le snapshot peut donc enregistrer, sous le nom du trimestre archivé, le contenu d'une clé partagée. À unifier dans le diff du §6.1 de Z1.
 · **S5 avant S6** — le site `donnees-v2.js:1564` (`db.remove('cartouches_' + grilleId)`) devient correct TOUT SEUL une fois D2-A livrée, en devenant `cle('cartouches_' + grilleId)`. Dans l'autre ordre, il faut une garde inter-trimestres explicite dans `donnees-v2.js` qui deviendra inutile après S5. Le diff de S6 sur ce site se spécifie donc **en supposant D2-A déjà livrée**.
+
+### Corrections apportées au plan et à l'audit le 31 août 2026 (mesurées, pas supposées)
+
+> Trois erreurs du plan ou de l'audit parent, trouvées en les APPLIQUANT. Elles sont
+> inscrites ici plutôt que corrigées en silence : un plan dont on retire un constat
+> sans le dire redevient une source qu'on ne peut plus recouper.
+
+· **Le périmètre de S8 portait un chemin de fichier qui n'existe pas.** `js/pratique-interface.js`
+  n'a **jamais** existé (`git log` vide) ; le fichier réel est **`js/pratiques/pratique-interface.js`**
+  (doc périmée de M5, l.296-316). Mesuré par `kuekatsheu-e5`.
+· **Constat M11 partiellement FAUX — `planificationCarte.etat` A des consommateurs.**
+  `planification-export.js:46` le lit aux l.336, 363 et 375 : c'est **l'export du plan de cours**.
+  Quatre sentinelles Vitest s'en servent aussi. Le retirer casserait l'export ET la suite.
+  **Item retiré du lot S8.** Mesuré par `kuekatsheu-e5`.
+· **Constat M5 FAUX deux fois sur `sauvegarderModeCalculObjectifs`** : elle a un appelant
+  (`pratique-notation-v2.js:367`) et n'est pas exportée sur `window` — ce n'est pas un « export
+  mort » mais une fonction privée inerte. Son retrait emporte sa ligne d'appel, ce que l'audit
+  n'avait pas prévu. Mesuré par `kuekatsheu-e5`.
+· **Sorti de S8 vers son propre item, #633** : la fusion des deux `annulerFormProduction`. Les DEUX
+  implémentations sont vivantes (l'originale est appelée en interne aux l.2069 et 3263, où l'IIFE
+  résout vers le module et non vers `window`), leurs corps diffèrent, et la fusion change les quatre
+  sites d'appel — **ce n'est pas un retrait sûr statiquement**, c'est un correctif de comportement
+  qui répare en outre un défaut latent. Il porte son propre test manuel.
+
+### Répartition du 31 août 2026 (journée) — trois sessions en parallèle
+
+**La contrainte réelle est le FICHIER, pas la session.** Sur les huit sessions de code
+restantes, une seule combinaison à trois se parallélise sans collision : S5 et S6 écrivent
+dans `js/trimestres.js` comme S4 (et l'ordre S4 → S5 → S6 est mesuré, pas préférentiel),
+et S7 et S8 se recoupaient sur `js/echelles.js`.
+
+| Session | Prend | Écrit uniquement dans |
+|---|---|---|
+| `kuekatsheu-f3` | **S4 / #622** + coordination, release, push | `js/trimestres.js` + les fichiers PARTAGÉS (`BACKLOG.md`, `SESSION.md`, `RELAIS.md`, ce plan, `index.html`, `version.json`) |
+| `kuekatsheu-9a` | **S7 / #625** + le rider M11 `marquerChampRefuseEchelle` | `js/grilles.js`, `js/echelles.js`, `tests/unit/sentinelle-625-*` |
+| `kuekatsheu-e5` | **S8 / #626**, amputé de `js/echelles.js` et `js/grilles.js` | ses 14 autres fichiers `js/`, `tests/unit/sentinelle-626-*`, et deux listes de sentinelles existantes (557, 338) |
+
+⚠ **Règles de non-collision, en plus de celles du 30 août :**
+6. **Un fichier, un propriétaire.** Le rider M11 a été transféré à `9a` pour cette seule raison :
+   il vivait dans `echelles.js`, que S7 tenait déjà.
+7. **Le hook anti-cache impose un passage par le coordinateur.** Il refuse tout commit qui touche
+   un `js/` dont le `?v=` d'`index.html` n'a pas bougé — or `index.html` est partagé. Chaque session
+   prévient `f3` AVANT de committer ; `f3` bumpe, puis donne le go. ⮕ Et le conseil affiché par le
+   hook induit en erreur : le jeton porte le **jour du BUILD**, pas une lettre incrémentée.
+8. **Un rouge transitoire de la suite complète n'est pas une régression** tant que trois sessions
+   écrivent leurs sentinelles dans le même arbre. Le seul verdict qui compte est celui repris sur
+   **arbre GELÉ** avant la release.
 
 ### Répartition du 30 août 2026 (soirée) — trois sessions en parallèle
 
