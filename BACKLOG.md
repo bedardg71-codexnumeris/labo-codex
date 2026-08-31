@@ -383,7 +383,35 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   mode création = il en ajoute une), jamais par lecture directe.
   ⏳ **RESTENT DUS PAR GRÉGOIRE : les tests manuels §4.4 et §4.5, Mac ET iPad.** Vitest tourne dans node et ne voit
   pas le rendu.
-- [ ] **#626 — S8 · Retraits sûrs statiquement** (constats S5 partie morte, M2–M5, M8, M11). Indépendant, après D5.
+- [x] **#626 — S8 · Retraits sûrs statiquement** (constats S5 partie morte, M2–M5, M8, M11). ✅ **LIVRÉ le 31 août 2026** (`78c18b53`, `kuekatsheu-e5`).
+  **17 symboles retirés** : `creerNouvellePratique` (pratiques-gestion) · les clusters `listerTrimestresAvecGrilles` /
+  `listerTrimestresAvecCartouches` et leurs deux satellites chacun · `changerVariantePANStandards`,
+  `sauvegarderPratiqueBaseV2`, `sauvegarderModeCalculObjectifs` (pratique-notation-v2) · `onChangeGrilleCartouche` et
+  la seconde pose de `window.exporterCartoucheActive` · la seconde définition de `supprimerProduction` et le wrapper de
+  `sauvegarderProduction` · le `case 'pratique'` de cc-license · le repli kebab · le volet 3 de la migration
+  `decouplerPN` · les deux entrées `conception-apercu-legacy` · le no-op `lire()`→`remplacer()` · le bloc de doc périmé ·
+  `js/.fuse_hidden0000002000000001`.
+  Sentinelle `sentinelle-626-retraits-surs.test.js`, 34 cas (retraits ET témoins) + un contrôle des `/**` orphelins sur
+  les 16 fichiers du périmètre. **Break-test : 3 mutations, 3 ROUGE — une par CÔTÉ** (retrait · réfutation · fusion).
+  ⚠ **TROIS CONSTATS DE L'AUDIT DU 30 AOÛT RÉFUTÉS, PAS CORRIGÉS EN SILENCE** : M11 sur `planificationCarte.etat`
+  (trois consommateurs vivants dans `planification-export.js` — non retiré, et **la réfutation est figée par la
+  sentinelle**) · M5 sur `sauvegarderModeCalculObjectifs` (ni exporté, ni sans appelant) · M4 sur
+  `annulerFormProduction` (deux corps vivants → **#633**).
+  ⚠ **Le plan et l'audit citent `js/pratique-interface.js`, chemin qui n'a JAMAIS existé.** Le vrai est
+  `js/pratiques/pratique-interface.js`, **un fichier de DOCUMENTATION jamais servi** (contrat `IPratique`) :
+  **ne pas le supprimer parce qu'il ne se charge pas.**
+  ⚠ **`js/.fuse_hidden0000002000000001` supprimé — ignoré par git, donc le message du commit `78c18b53` est sa SEULE
+  trace.** Il différait du `changelog-data.js` actuel : c'était une version figée du 4 juin, pas un doublon.
+  ⮕ **Question fermée au passage** : les deux autres modules bibliothèque portent le même motif mais sont VIVANTS
+  (`listerTrimestresAvecEchelles` ← `echelles.js:2387` ; `listerTrimestresAvecProductions` ←
+  `productions-bibliotheque-ui.js:143`). M3 visait exactement les deux bons.
+  ⮕ **Trois cliquets existants ont dû suivre** : **#557** (9 → 6 doublons connus) · **#338** (deux noms passés en
+  `V2_RETIRES`, péremption datée `bbf17df4` / 9 août) · **#389** (liste **SCINDÉE** en deux familles, pas raccourcie ;
+  l'interdit de la boucle `localStorage` reste sur les quatre).
+  ✅ **T8.3 FAIT** : suite WebKit complète sur arbre gelé, 210 passés, 3 instables pré-existantes, code de sortie 0.
+  ⏳ **T8.4 DÛ PAR GRÉGOIRE** : parcourir les six sous-sections de Conception, **et vérifier que le bouton
+  « nouvelle pratique » ouvre bien le wizard V2** — c'est le seul geste dont le comportement dépend du retrait le plus
+  visible.
 - [ ] **#627 — S9 · Unification des remaps d'import sur l'implémentation de `reserve-ouvrir.js:1057`, PAS sur #448 seul** (constats S6, M6). Après S2. `import-export.js` est sous surveillance sécurité : suite complète avant commit.
   ⚠ **Reformulé le 30 août 2026.** Z2 recense un **quatrième** remap que l'audit du 30 août ignorait : `reserve-ouvrir.js:1057`, et c'est **le plus complet des quatre** — il réécrit `cartouche.grilleId`, ce qui déplace la clé de stockage : exactement le trou de #448. ⮕ Un défaut y est mesuré : il patche `config.echelleId` alors que le seul écrivain écrit `configuration.echelleId` — **le remap des pratiques y est inopérant**. ⮕ **Le vrai travail est de construire la table `remapCartouches`**, qui n'existe pas.
 - [ ] **#628 — S10 · Retrait du legacy des quatre sections** (constats S4, S9). Après S3 et D4. Probablement scindé en S10a (échelles) et S10b (les trois autres).

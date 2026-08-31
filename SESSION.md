@@ -6,6 +6,102 @@
      ⮕ ÉTAT AU 3 JUILLET 2026 SOIR (VAGUE 3 CLOSE + **MERGÉE MAIN ET DÉPLOYÉE — décision Grégoire du 3 juillet, release 1.27.2**, branche `claude/relais-vague-3-etat-n3owyf` fast-forwardée dans `main` : les 3 vagues 1.27.0/1.27.1/1.27.2 sont EN PRODUCTION ; le point « MERGER en août » du signet est donc RÉGLÉ, les validations TERRAIN restent dues) : bilan factuel des vagues 1-2 = TABLEAU dans le bloc « 3 juillet » ci-dessous (12/12 tâches livrées ou closes par écart de prémisse ; AUCUN reliquat 2a) PUIS file 2b ÉPUISÉE : Tâche A #328 = déjà absorbé (vérifié au code, trace consignée) ; Tâche C #118+#283-T1 LIVRÉS (fix CSS overflow) ; Tâche B #363 LIVRÉ (audit currency, 13 écarts corrigés) ; Tâche D #306 LIVRÉ (Lots 1-2-3 ; décision UX « apparition du formulaire » restée ouverte, consignée). Vitest 1257/1257. ⚠ GRÉGOIRE EN CONGÉ TOUT JUILLET, reprise AOÛT. À la reprise (le merge est FAIT — 3 juillet) : validations terrain (#310/#311/#351/#240/#347 + portes vague 1 #313/#344/#361 + vague 2 #355/#305/#121 + vague 3, 2 modes) ; triage des 5 worktrees AVEC `plans de travail/INVENTAIRE-worktrees-2026-07.md` ; #364 T3/T4/T5 ; trancher #365 (audit blanc). ✅ **FAIT LE 27 AOÛT 2026 AU SOIR** : `rm .git/index.lock .git/HEAD.lock .git/objects/maintenance.lock` — mais ils étaient REVENUS (datés du 27 août 15 h 46, `git maintenance` crashé) et bloquaient tout commit. ⮕ **Ce point traînait depuis juillet et le 28 juin en portait déjà un : c'est un défaut RÉCURRENT du dépôt, pas une malchance.** À traiter comme tel plutôt qu'à re-nettoyer chaque fois. ; le commit local `96f1294c` et le BACKLOG #365 du Mac sont OBSOLÈTES (contenu recréé/poussé par les vagues 1-2) ; le fichier relais vague 2 (`RELAIS-2026-07-02-vague-2.md`) n'a jamais été poussé — le committer du Mac si on veut la trace (le relais vague 3 est, lui, versionné ci-dessous).
      ===================================================================== -->
 <!-- =====================================================================
+     SESSION F3 — 31 AOÛT 2026, MATIN : LA PHASE D'EXÉCUTION DU PLAN
+     CONCEPTION S'OUVRE, ET TROIS DE SES HUIT SESSIONS SONT LIVRÉES EN
+     PARALLÈLE. Release groupée 1.106.13. Zéro collision.
+
+     ▣ RÉPARTITION, ET SON MOTIF. `kuekatsheu-f3` = S4 (#622) + coordination,
+       fichiers partagés, release, push. `kuekatsheu-9a` = S7 (#625).
+       `kuekatsheu-e5` = S8 (#626).
+       ⮕ LA CONTRAINTE RÉELLE EST LE FICHIER, PAS LA SESSION. Sur les huit
+       sessions de code restantes, UNE SEULE combinaison à trois se parallélise :
+       S5 et S6 écrivent dans `js/trimestres.js` comme S4 (et l'ordre
+       S4 → S5 → S6 est mesuré, pas préférentiel), et S7 et S8 se recoupaient
+       sur `js/echelles.js`. Le rider M11 a été transféré à la session qui
+       tenait déjà ce fichier. UN FICHIER, UN PROPRIÉTAIRE.
+
+     ▣ CE QUI EST LIVRÉ.
+       S4 / #622 (`b888d6b2` + `5a6891f6`) — archiver un trimestre est
+         désormais une LECTURE. Les trois `db.setSync` qui réécrivaient les
+         collections de travail avec le sous-ensemble filtré sont retirés ; les
+         pratiques se lisent dans le namespace du trimestre ARCHIVÉ et non plus
+         via `cle()` (qui route par l'ACTIF) ; le snapshot enregistre les
+         collections COMPLÈTES et les cartouches, plus la métadonnée `utilises`.
+         L'export d'archive cesse de lire le trimestre actif : présences vidées
+         et captures d'un AUTRE trimestre, dans le fichier même que la modale de
+         suppression présente comme un filet.
+       S7 / #625 (`1530873b`) — #466/CO-16 avait posé un reset dans les quatre
+         éditeurs, mais chacun ne purgeait que le POINTEUR. Les TAMPONS de
+         création étaient oubliés dans deux éditeurs sur quatre : à la bascule,
+         la branche CRÉATION du save restait armée et les critères saisis dans
+         l'ancien trimestre partaient dans le namespace du NOUVEAU.
+       S8 / #626 (`78c18b53`) — 17 symboles retirés, trois cliquets ajustés.
+
+     ▣ TROIS CONSTATS DE L'AUDIT DU 30 AOÛT SONT FAUX, ET SONT INSCRITS PLUTÔT
+       QUE CORRIGÉS EN SILENCE. M11 (`planificationCarte.etat` a trois
+       consommateurs vivants — le retirer aurait cassé l'export du plan de cours
+       ET quatre sentinelles), M5 (`sauvegarderModeCalculObjectifs` a un
+       appelant et n'est pas exportée), et un chemin de fichier qui n'a jamais
+       existé. ⮕ Un audit dont on retire un constat sans le dire redevient une
+       source qu'on ne peut plus recouper.
+
+     ▣ DEUX ITEMS SORTIS D'UN LOT PLUTÔT QUE BÂCLÉS DEDANS. #633 (les deux
+       `annulerFormProduction` sont vivantes ; la fusion change quatre sites
+       d'appel et répare un défaut latent — ce n'est pas un retrait sûr
+       statiquement) et #634 (le repli kebab n'a jamais fonctionné ; le corriger
+       serait un changement de comportement déguisé en coquille).
+
+     ▣ LA PORTE TERRAIN T4.3 A ÉTÉ SUPPRIMÉE, PAS REPORTÉE. Règle 1 du skill
+       `portes-terrain` : aucune porte si une machine peut répondre, et le défaut
+       par défaut est d'écrire le test même s'il coûte plus cher à la session.
+       `tests/integration/archivage-lecture-seule-622.spec.js` archive un
+       trimestre jetable dans WebKit contre le vrai `index.html` — et RELIT le
+       fichier réellement téléchargé, ce qu'un test manuel ne fait pas. Or c'est
+       le contenu qui était faux. Il reste UN test manuel pour Grégoire (T8.4).
+
+     ▣ VERDICTS, SUR ARBRE GELÉ (zéro fichier suivi modifié) :
+       Vitest 415 fichiers / 4408 tests, code de sortie 0.
+       Playwright WebKit 210 passés + 3 instables PRÉ-EXISTANTES, code 0.
+       19 break-tests sur les trois sessions, 19 ROUGE obtenu.
+
+     ▣ CINQ CHOSES APPRISES, À NE PAS RÉAPPRENDRE.
+       1. ⚠⚠ `chargerScript` passe les variables de MODULE en PARAMÈTRES de la
+          fonction sandbox. Une réassignation interne est invisible depuis le
+          test, et un `win.X = {…}` posé par le test n'atteint jamais le code :
+          `expect(win.grilleTemplateActuelle).toBeNull()` PASSE SUR `undefined`
+          sans rien vérifier. Un pointeur de module ne se teste que par son EFFET
+          observable, posé par le vrai chemin d'entrée. Trouvé par `9a` dans un
+          banc qui rendait DÉJÀ six rouges — un rouge obtenu quelque part ne dit
+          rien de ce que les autres cas assertent.
+       2. ⚠ Le hook anti-cache compare l'`index.html` STAGÉ à celui de HEAD. Un
+          bump commité À PART fait échouer le commit SUIVANT : le jeton doit
+          voyager dans le MÊME commit que son fichier `js/`. Sur un dépôt à
+          plusieurs sessions, le coordinateur bumpe et LÈVE l'interdit sur
+          `index.html` pour ce commit-là. Et le conseil affiché par le hook
+          (« incrémenter la lettre ») induit en erreur : le jeton porte le JOUR
+          DU BUILD.
+       3. ⚠ Retirer du code mort emporte parfois l'unique SUJET d'une assertion
+          voisine. Trois cliquets ont dû suivre S8. Sur #389, le bon geste a été
+          de SCINDER la liste en deux familles — pas de la raccourcir, ce qui
+          l'aurait affaiblie sans laisser trace du pourquoi.
+       4. ⚠ Un break-test doit muter chaque CÔTÉ. `e5` a muté le côté RÉFUTATION
+          pour vérifier que la garde protégeant un constat réfuté mord vraiment.
+       5. ⚠ UN MOTIF RECONNU N'EST PAS UN FAIT MESURÉ. `f3` a lu
+          « `20260830i -> 20260831a` » dans la sortie de `release.mjs`, reconnu
+          le trou #547, et annoncé à Grégoire un défaut inexistant : le commit
+          `15ef1c45` avait bien bumpé le jeton. Corrigé avant le push, mais
+          l'affirmation était déjà partie. Le commit intermédiaire se lit AVANT
+          de conclure.
+
+     ▣ CE QUI RESTE DÛ PAR GRÉGOIRE, ET C'EST COURT.
+       ⛔ La LEVÉE DU MORATOIRE (T4.4) — décision qui lui appartient. Le code est
+          livré et vérifié ; la décision ne l'est pas.
+       ⏳ T8.4 — parcourir les six sous-sections de Conception, et vérifier que
+          « nouvelle pratique » ouvre le wizard V2.
+       ⏳ Le sort des deux fichiers non suivis à la racine.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION BC — 30 AOÛT 2026, SOIR : LE PLAN CONCEPTION EST OUVERT, SES
      DEUX PREMIERS AUDITS SONT LIVRÉS, ET LE MORATOIRE D1 A DOUBLÉ DE TAILLE
      EN COURS DE SOIRÉE. Trois sessions en parallèle, coordonnées par messages.
