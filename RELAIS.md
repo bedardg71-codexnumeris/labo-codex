@@ -7,6 +7,119 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 31 AOÛT 2026, SOIRÉE (TROISIÈME CYCLE)
+
+> Écrit par `kuekatsheu-9f`, coordinatrice d'un trio (`67`, `94`) sur **S6 / #624**,
+> plus une quatrième session (`5d`) pilotée **directement par Grégoire** sur des
+> retours terrain. Ce bloc **remplace** celui du second trio, plus bas, qui reste
+> valable pour tout ce qu'il décrit.
+> **Zéro collision d'index, aucun fichier écrit par deux sessions, aucun ID doublé.**
+
+**Branche : `main`.** **Aucune release** — version inchangée **1.106.13**, build
+`0831-0734`. **5 jetons `?v=` posés** : `20260831g` `h` `i` `j` `k`
+(`travaux-outils`, `evaluation-chargement`, `donnees-v2`, `echelles`, `grilles`).
+⚠ **Recharger la session `file://`.**
+
+**Vitest 421 fichiers / 4464 tests · Playwright WebKit 226 passés · codes de
+sortie lus APRÈS le dernier changement.**
+**Dernier ID utilisé : #653.** Prochain libre : **#654**.
+
+**CINQ LOTS LIVRÉS, CINQ COMMITS**
+- **#644** (`69be8a40`) — le cadenas de la palette Paramètres ne répondait à rien.
+  ⚠ La cause n'était **pas** `preventDefault()` mais `setPointerCapture()` : la
+  capture redirige le `pointerup` vers la barre, les deux extrémités du clic
+  n'atterrissent plus sur la même cible, aucun `click` ne se forme. Mesuré, les deux
+  gestes isolés. L'exemption porte désormais sur `closest('button')`, pas sur une
+  classe de plus.
+- **#645** (`94d80101`) — la saisie algorithmique perdue à un changement de grille.
+  **DEUX causes**, et la seconde a été trouvée parce qu'un montage de banc a buté sur
+  un élément absent — pas par relecture. Sans elle, le correctif aurait rempli les
+  champs et l'écran serait resté à « -- ».
+- **#647** (`183b515b`) — la modal de suppression annonçait une perte qui n'a pas
+  lieu et taisait une survivance qui a lieu.
+- **#650** (`066b8df4`) — la porte de sortie des échelles écrivait **hors file**,
+  entre deux dialogues. Le rouge accuse pire que la course : `annonce 2 migrée(s),
+  0 réellement en base`. La porte fabriquait l'orphelin qu'elle prévient, **en le
+  déclarant réussi**.
+- **#624** (`572c8bf3`) — quatre portes de suppression de grille sous deux politiques
+  opposées, réduites à un chemin unique **avec une issue**.
+
+⛔ **LE MORATOIRE À TROIS GESTES N'EST PAS LEVÉ.** Rien ce soir ne l'a approché.
+⚠ Et l'un de ses deux trous a servi d'argument dans un arbitrage réel : une session
+allait détruire une entrée de bibliothèque pour prouver son correctif. Elle ne l'a pas
+fait, et elle a montré que c'était **inutile** — ses blocs vivaient tous dans le chemin
+d'affichage, donc ouvrir/lire/annuler les exerçait tous. **La bonne question n'était
+pas « puis-je me permettre de détruire » mais « ai-je besoin de détruire pour
+prouver ».**
+
+---
+
+### ⚠⚠ CE QUE CE CYCLE A APPRIS — la coordination autant que le code
+
+**LA TROUVAILLE DE MÉTHODE : LE PROTOCOLE DE CRÉNEAUX.** Il n'existait pas ce matin.
+Une seule session à la fois touche `file://` — qu'elle **roule une suite** ou qu'elle
+**écrive dans un fichier de production**, les deux faussent le verdict de celle qui
+roule, et la seconde peut produire **un rouge qui ressemble à un vrai défaut**. Les
+autres préparent hors dépôt. Le créneau se rend **explicitement**. Un seul push groupé.
+
+⚠ **ET L'ORDRE DES CRÉNEAUX SE FAIT SUR LES DÉPENDANCES DE CONTENU, PAS SUR LES
+PÉRIMÈTRES DE FICHIERS.** Erreur commise : deux sessions sur des fichiers disjoints,
+mais la sentinelle de l'une visait le code de l'autre. Elle l'a vu avant moi. Le vrai
+coût n'était pas le conflit : l'arbre aurait porté, entre les deux dépôts, **une
+sentinelle que personne n'a jamais vue verte**, que le push groupé aurait avalée.
+
+**CINQ FOIS UNE SESSION M'A CORRIGÉ AVEC UNE MESURE, CINQ FOIS ELLE AVAIT RAISON.**
+Deux ont changé le remède, une a changé un périmètre, une a défait une note du dépôt
+**fausse depuis mai**, une a corrigé un ordre de travail. C'est le rendement principal
+du dispositif : **une consigne de coordinatrice se vérifie comme le reste.**
+
+**LES PIÈGES NEUFS, chacun payé ce soir :**
+1. **Une somme cohérente peut coiffer un fichier dont le correctif a disparu** — une
+   sauvegarde antérieure au correctif, restaurée de bonne foi. **Referme sur l'EFFET.**
+2. **Une somme sans sa méthode ne compare rien** — `shasum` ≠ `git hash-object`.
+   **Méthode commune : `git hash-object`.**
+3. **Annoncer et agir dans le même geste revient à ne pas demander.**
+4. **Un état du dépôt rapporté est un souvenir** — un lot décrit comme non commité
+   l'était depuis longtemps.
+5. **Un extrait cité sans dire ce qu'on en a retiré est faux à l'usage** — quatre
+   lignes élidées ont fait instrumenter un défaut inexistant.
+6. **Une réponse juste à la question posée peut laisser dehors la moitié qui compte** —
+   deux fois. Le mode d'échec est pire qu'un rouge : des cas qui **échouent pour une
+   raison qui n'est pas celle qu'ils testent**.
+7. **Un cas de test peut porter le bon nom et la mauvaise donnée** — vert avec le
+   garde, vert sans lui.
+8. **« Cas de défaut » et « verrou de convention » sont deux objets différents.** Pour
+   le premier : *ce scénario peut-il se produire ?* Pour le second : *cette règle
+   peut-elle être défaite de bonne foi ?* J'avais ordonné de retirer un cas sans
+   producteur réel ; c'était le **seul** témoin d'une convention documentée.
+9. **Une assertion branchée sur un dérivé ne teste pas sa source** — trois occurrences.
+10. **Un identifiant de critère contient déjà un souligné** : découper la clé
+    `critereId_niveauCode` au premier souligné échoue sur **100 %** des cartouches ;
+    au dernier aussi (codes de niveau vides, soulignés dans les codes personnalisés).
+11. **Élargir un filtre sans compter ce qu'on cesse de voir troque un faux positif
+    contre un angle mort silencieux.** Témoin pris avant : 1 bascule sur 21.
+12. **Un accent grave dans un commentaire écrit DANS un littéral de gabarit termine le
+    gabarit** — symptôme sans rapport avec la cause. `node --check` après chaque patch.
+
+**LE MOTIF QUI EST APPARU DEUX FOIS LE MÊME SOIR, SOUS DEUX FORMES INVERSES :**
+*deux emplacements, un seul nom, personne ne le voit.* Une IIFE qui masque un
+`window.X` (#624), et un `let` de premier niveau qui empêche le `window.X` d'exister
+(#646).
+
+---
+
+**MÉTHODE DE COORDINATION — ce qui a fonctionné, trois trios de suite**
+· La coordinatrice tient SEULE les identifiants, les commits et les jetons `?v=`.
+· **Un périmètre d'ÉCRITURE par session** — mais la **lecture est libre partout**, et
+  c'est ce qui a permis à deux sessions de trouver ce qui manquait à l'autre.
+· La coordinatrice lit le diff **entier** avant de committer.
+· Toute fenêtre de mutation s'annonce **aux deux bouts**, se ferme sur `git
+  hash-object` **et** sur un marqueur d'effet, et se restaure **par copie**.
+· **Exiger un rouge OBTENU par cas, et demander ce qu'il accuse.**
+· **Vérifier ses propres consignes.**
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 31 AOÛT 2026, SOIRÉE (SECOND CYCLE)
 
 > Écrit par `kuekatsheu-85`, coordinatrice d'un second trio du même jour
