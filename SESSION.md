@@ -6,6 +6,104 @@
      ⮕ ÉTAT AU 3 JUILLET 2026 SOIR (VAGUE 3 CLOSE + **MERGÉE MAIN ET DÉPLOYÉE — décision Grégoire du 3 juillet, release 1.27.2**, branche `claude/relais-vague-3-etat-n3owyf` fast-forwardée dans `main` : les 3 vagues 1.27.0/1.27.1/1.27.2 sont EN PRODUCTION ; le point « MERGER en août » du signet est donc RÉGLÉ, les validations TERRAIN restent dues) : bilan factuel des vagues 1-2 = TABLEAU dans le bloc « 3 juillet » ci-dessous (12/12 tâches livrées ou closes par écart de prémisse ; AUCUN reliquat 2a) PUIS file 2b ÉPUISÉE : Tâche A #328 = déjà absorbé (vérifié au code, trace consignée) ; Tâche C #118+#283-T1 LIVRÉS (fix CSS overflow) ; Tâche B #363 LIVRÉ (audit currency, 13 écarts corrigés) ; Tâche D #306 LIVRÉ (Lots 1-2-3 ; décision UX « apparition du formulaire » restée ouverte, consignée). Vitest 1257/1257. ⚠ GRÉGOIRE EN CONGÉ TOUT JUILLET, reprise AOÛT. À la reprise (le merge est FAIT — 3 juillet) : validations terrain (#310/#311/#351/#240/#347 + portes vague 1 #313/#344/#361 + vague 2 #355/#305/#121 + vague 3, 2 modes) ; triage des 5 worktrees AVEC `plans de travail/INVENTAIRE-worktrees-2026-07.md` ; #364 T3/T4/T5 ; trancher #365 (audit blanc). ✅ **FAIT LE 27 AOÛT 2026 AU SOIR** : `rm .git/index.lock .git/HEAD.lock .git/objects/maintenance.lock` — mais ils étaient REVENUS (datés du 27 août 15 h 46, `git maintenance` crashé) et bloquaient tout commit. ⮕ **Ce point traînait depuis juillet et le 28 juin en portait déjà un : c'est un défaut RÉCURRENT du dépôt, pas une malchance.** À traiter comme tel plutôt qu'à re-nettoyer chaque fois. ; le commit local `96f1294c` et le BACKLOG #365 du Mac sont OBSOLÈTES (contenu recréé/poussé par les vagues 1-2) ; le fichier relais vague 2 (`RELAIS-2026-07-02-vague-2.md`) n'a jamais été poussé — le committer du Mac si on veut la trace (le relais vague 3 est, lui, versionné ci-dessous).
      ===================================================================== -->
 <!-- =====================================================================
+     SESSION 00 — 30 AOÛT 2026, SOIR : S6 / #612 — LE FICHIER D'UNE REPRISE
+     SUPPRIMÉE VOLAIT LA LIGNE DE L'ORIGINALE, ET UN DA FAUX N'ÉTAIT DIT
+     NULLE PART. Deux tâches livrées, S6 volontairement laissée ouverte.
+
+     ▣ CE QUE J'AI TROUVÉ EN ARRIVANT. Dépôt tenu par `kuekatsheu-0d`, qui
+       m'a confié S6 (#612) et un GEL Playwright. Audit en LECTURE seule,
+       puis vérification de ses chiffres une fois le gel levé : HEAD
+       `f419c467`, 3 commits d'avance, arbre propre hors deux fichiers non
+       suivis. Aucun écart. J'ai en revanche relevé que son gel interdisait
+       `git status`/`log`/`diff`, qui ne touchent pas l'arbre de travail :
+       la règle #523 vise les commandes qui ÉCRIVENT pendant que les specs
+       lisent. Il a corrigé la consigne.
+
+     ▣ T6.6 LIVRÉE (`1e2fc4d0`) — LA SECONDE PORTE DE #607. `supprimerEvaluation`
+       restaurait l'originale d'une reprise et ne touchait à aucun fichier.
+       Celui de la reprise gardait un `evaluationId` mort ET la
+       `dateModification` la plus récente : il gagnait le repli
+       (DA, production) de `liste-evaluations.js:60`, et la ligne de
+       l'originale restaurée ouvrait le travail qu'on venait d'effacer.
+       #607 avait fermé le chemin des jetons ; celui-ci est le plus fréquenté.
+       Le geste n'est pas réécrit : `_detacherFichiersDeEvaluation` et
+       `_compterFichiersDeEvaluation` sont exportés (`window._`, appels gardés
+       par `typeof`) — une seconde définition aurait divergé (leçon #557).
+       `trouverOriginaleRemplaceePar` extrait en lecture seule, parce que le
+       `confirm` doit annoncer le sort du fichier AVANT que la mutation décide.
+
+     ▣ ⚠ L'ORDRE DU PLAN ÉTAIT FAUX, ET L'INVERSER NE SUFFISAIT PAS. Le plan
+       disait de détacher AVANT `sauvegarderDonneesSelonMode`. Sur un refus,
+       le fichier serait à la corbeille et l'évaluation encore là —
+       incohérence permanente. Mais `sauvegarderDonneesSelonMode` rend TROIS
+       valeurs (`modes.js:751`) : `true`, `false`, et la chaîne `'quota'`,
+       TRUTHY alors que rien n'est enregistré. Le détachement est donc
+       conditionné à `=== true`. Un refus RENDU n'est pas une exception : il
+       se lit. `kuekatsheu-0d` a validé l'écart et fourni la mesure du
+       `'quota'`, que je n'avais pas vue.
+
+     ▣ T6.3 LIVRÉE (`15ef1c45`) — UN DA FAUX EST DIT. Le seul avertissement
+       pré-import visait les fichiers SANS DA. Un DA faux (faute de frappe,
+       `12345678_devoir.pdf` tronqué à sept chiffres par `PATTERNS_DA[2]`,
+       élève non inscrit) passait sans un mot, et le fichier partait sous ce
+       DA inexistant, sans aucune ligne dans la liste. `detecterFichiersDAInconnu`
+       PARTITIONNE la file avec `detecterFichiersSansDA` : aucun fichier dans
+       les deux, aucun fichier non associé hors des deux.
+       ⚠ RIEN NE LA CONSOMME ENCORE : le bandeau est T6.4.
+
+     ▣ DEUX FOIS, LE HARNAIS ÉTAIT FAUX, PAS LE CODE. (1) Le dernier cas de la
+       sentinelle #607 montait le corpus partagé SANS COPIE, et
+       `retirerJetonReprise` le vide en place : mon `describe` T6.6, qui
+       s'exécute après, héritait d'une originale déjà « restaurée » — quatre
+       faux rouges sur un correctif qui fonctionnait. (2) Une assertion de mon
+       banc T6.3 affirmait qu'un fichier apparié par le NOM n'était recensé
+       nulle part ; il reste dans « sans DA », et c'est voulu. Les deux fois,
+       c'est l'assertion qui a été corrigée, jamais le code — et les deux fois
+       le motif est écrit dans le banc.
+
+     ▣ VÉRIFICATION. T6.6 : sentinelle #607 étendue de 7 à 18 cas, 6 break-tests,
+       6 ROUGE. T6.3 : sentinelle neuve 10 cas, ROUGE d'abord 10/10, 5
+       break-tests, 5 ROUGE (les DEUX côtés du `&&`, prédicat inversé, export
+       retiré, sortie anticipée). Vitest final : **412 fichiers / 4344 tests,
+       code de sortie 0**.
+
+     ▣ L'ACCROC DE LA SOIRÉE, à retenir. `kuekatsheu-ff` a annoncé « ton arbre
+       est propre, je pars là-dessus » et lancé la release groupée. C'était
+       déjà faux quand elle l'écrivait : je venais d'écrire une sentinelle
+       ROUGE par construction, que le hook pre-push aurait vue. Elle avait posé
+       la bonne règle — avoir COMMITÉ, pas avoir été prévenu — puis l'avait
+       contournée en remplaçant ma confirmation par son propre `git status`.
+       ⮕ **Une mesure d'arbre partagé est vraie à l'instant où on la prend et
+         fausse une seconde après.** C'est pour ça que la règle demande une
+         confirmation, pas un `git status`. Son `--dry-run` a rattrapé ce que
+         son raisonnement avait lâché.
+       ⮕ **Et `ls .git/hooks/` ne dit RIEN sur ce dépôt** : `core.hooksPath`
+         vaut `scripts/hooks`. Un `ls` au mauvais endroit a failli lui faire
+         affirmer qu'aucune garde n'existait, juste après que cette garde avait
+         réellement arrêté sa release.
+
+     ▣ TROUVAILLES INSCRITES, NON CORRIGÉES. **#617** — `retirerJetonReprise`
+       (le code de #607) porte le même ordre inverse, `evaluation-jetons.js:622`
+       et `:679`. **#618** — mesuré : 31 appels à `sauvegarderDonneesSelonMode`,
+       dont **11 testés en truthy**, dans `evaluation.js`, `liste-evaluations.js`
+       et `saisie-presences.js` ; le patron correct existe déjà
+       (`evaluation-sauvegarde.js:289`, `travaux-ui.js:6719`).
+
+     ▣ S6 RESTE OUVERTE — DÉCISION DE GRÉGOIRE, pas un abandon. Question fermée
+       posée en cours de session, réponse « continuer, T6.3 seule ». Restent
+       **T6.2, T6.4, T6.5, T6.7, T6.8**. Une trouvaille les attend, écrite dans
+       l'item T6.4 : depuis #611, le bandeau « sans DA » dit « l'association
+       devra être faite manuellement », ce qui est INEXACT pour un fichier
+       apparié par le nom — son élève EST trouvé. À reformuler avec le message
+       « autre GC ». Et le plan comme l'audit nomment `confirmerImportPipeline`,
+       **qui n'existe pas** : la fonction réelle est `appliquerEtImporter`
+       (`travaux-ui.js:3641`). Les deux gardes de T6.4 s'y posent.
+
+     ▣ ⏳ DÛ À GRÉGOIRE (Vitest ne voit pas le rendu) : supprimer une reprise
+       depuis la Liste des évaluations — la question doit annoncer le fichier,
+       et la ligne de l'originale rouvrir le travail ORIGINAL. C'est la porte P1.
+     ===================================================================== -->
+<!-- =====================================================================
      SESSION ff — 30 AOÛT 2026, SOIR : S5 / #611 — L'APPARIEMENT PAR NOM
      DONNAIT LE FICHIER AU MAUVAIS ÉLÈVE, ET C'ÉTAIT LE CAS LE PLUS SILENCIEUX.
 
