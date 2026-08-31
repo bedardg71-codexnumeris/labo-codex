@@ -876,9 +876,15 @@ await (async function(){var R={trimestres:[],pendantes:{},magasinsFantomes:[],ca
 | `evaluation.productionId` pendantes | inconnu — c'est la classe que S5 ci-dessus n'a jamais gardée | ______ |
 | `production.cartoucheId` pendantes | inconnu — trou commun aux quatre remaps (S7) | ______ |
 | `cartouche.echelleId` introuvable | inconnu — jamais remappé, jamais gardé | ______ |
-| Magasins `cartouches_*` sans grille vivante | > 0 attendu (symptôme du 24 août, chemins S1) | ______ |
+| Magasins `cartouches_*` sans grille vivante | > 0 attendu (symptôme du 24 août, chemins S1) — **ce ne sont PAS des déchets, voir l'encadré ci-dessous** | ______ |
 | `groupesCours[].pratiqueId` pendantes | inconnu — le garde qui devait l'empêcher lit la mauvaise clé (S3) | ______ |
 | `carte.metadata.productionId` pendantes | inconnu ; le contrôle #425 n'existe que sur le chemin inter-trimestre | ______ |
+
+> ### ⚠ Les magasins de cartouches sans grille vivante ne sont PAS des déchets à nettoyer
+>
+> Le libellé « magasin fantôme » invite à purger. **Il ne faut pas.** Le croisement des sorties du 30 août au soir (mesuré par la session de coordination sur les données réelles) établit que **trois des grilles disparues de Hiver 2026 ont chacune un magasin de cartouches survivant** — `cartouches_grille_1770742838756_23q82vbsk` (5 cartouches), `cartouches_grille_1772187755149_uq1oiiafa` (4), `cartouches_GRILLE1759529438501` (2). Onze cartouches, pour trois grilles qui portent **408 évaluations**.
+>
+> Les commentaires d'une cartouche sont indexés par des clés `<critereId>_<code>` : **les identifiants de critères des grilles mortes y sont encodés**. Ces onze magasins sont donc, avec les évaluations elles-mêmes, la matière première d'une reconstruction. **Statut : à conserver, source de reconstruction potentielle.** Aucun diff de S6 ne les purge, et aucun ne doit le faire avant que #632 ait tranché.
 
 **Ce que le relevé décide.** Si `evaluation.echelleId` fait apparaître un id autre que `ECHELLE_DEMO`, la réparation de #542 s'est défaite une seconde fois et S6 devient urgent plutôt qu'important — c'est le seul chiffre de ce tableau qui change l'ordonnancement. Les autres alimentent le périmètre de réparation de S6 : pour chaque famille, la colonne « ailleurs » dit si la réparation est un re-pointage (l'id survit dans un autre trimestre) ou une recréation (« nulle part »).
 
@@ -908,10 +914,64 @@ Ce que le code seul n'établit pas. Mac et iPad séparément quand la mention le
 
 ---
 
+## 6. Addendum du 30 août au soir — #631 (constat) et #632 (correctif)
+
+Après l'exécution des trois diagnostics par Grégoire, la session de coordination a inscrit **#631** : dans **Hiver 2026**, `evaluation.grilleId` porte **408** références sur **trois** identifiants introuvables — `grille_1770742838756_23q82vbsk` (225), `grille_1772187755149_uq1oiiafa` (94), `GRILLE1759529438501` (89) — tous « nulle part », y compris dans la clé globale nue `grillesTemplates`, mesurée vide par #630. Quatre pratiques pointent en outre `GRILLE1759529438501` par `configuration.grilleId`. C'est la même famille que #542, sur l'autre champ, et plus gros. **#632** porte le correctif.
+
+**Ce que la prédiction posée d'avance a permis de trancher** : le §4 de ce rapport disait qu'un seul chiffre changerait l'ordonnancement — un id autre que `ECHELLE_DEMO` dans `evaluation.echelleId`. La mesure a rendu `ECHELLE_DEMO` **seul**, 44 fois. **La réparation de #542 a tenu.** S6 reste importante, elle ne devient pas urgente.
+
+### 6.1 Mesure — ce que l'application fait aujourd'hui d'une évaluation dont le `grilleId` est introuvable
+
+**VÉRIFIÉ** (lecture des trois chemins d'écriture et des trois chemins de lecture), **SUPPOSÉ** (le rendu à l'écran et l'export PDF, non exécutés).
+
+**Une hypothèse envisagée, puis RÉFUTÉE — et il faut le dire avant le reste.** J'ai d'abord suspecté le patron de #453 : le vide de l'affichage qui devient le vide du disque. `_collecterCriteresSauv(grille)` rend un tableau vide quand la grille manque (`evaluation-sauvegarde.js:185`), `calculerNote()` sort par `return` **avant** de toucher `window.noteCalculeeCourante` (`evaluation-calcul.js:514`), cette variable n'est réinitialisée nulle part entre deux évaluations, et deux des trois sites d'écriture retombent sur `: 0`. La chaîne semblait complète : re-sauvegarder aurait écrit `criteres: []` et une note fausse — 0, ou la note de l'évaluation ouverte juste avant.
+
+**Les trois chemins d'écriture refusent.** Mesuré un par un :
+
+| Chemin | Garde | Effet |
+|---|---|---|
+| Auto-save silencieux — `_autoSauvegarderCriteres` (evaluation-chargement.js:1376) | `if (!grille \|\| !grille.criteres) return;` (l.1387) **et** `if (evaluations[idx].verrouillee === true) return;` (l.1420) | ne fait rien, deux fois |
+| Sauvegarde explicite — `sauvegarderEvaluation` (evaluation-sauvegarde.js:363) | `_validerReferencesSauv` (l.162-165) | refuse **bruyamment** : « Grille introuvable — La grille de critères sélectionnée n'existe plus » |
+| Modification — `sauvegarderEvaluationModifiee` (evaluation.js:1896) | garde verrouillage (l.1918) puis `_validerReferencesMod` (l.1930) | refuse deux fois |
+
+⮕ **Aucune note n'est écrasée. #631 n'est pas une perte en cours ; c'est un gel.** Le repli `: 0` de `evaluation-sauvegarde.js:209` et `evaluation-chargement.js:1327` reste un défaut de forme — le troisième site, corrigé par #572, retombe correctement sur `evalExistante.noteFinale` (evaluation-chargement.js:1303) — mais il est aujourd'hui **inatteignable** sur ce chemin. À aligner en S6 par cohérence, pas en urgence.
+
+**Les lectures dégradent proprement, et c'était déjà su.** Trois replis existent, écrits à trois dates différentes :
+- `_appliquerFallbackGrilleManquanteModif` (evaluation.js:1512-1528) : réaffiche les critères **depuis l'évaluation enregistrée** et remet à l'écran `noteFinale` et `niveauFinal` sauvegardés ;
+- le bilan de l'élève : `_chargerGrilleDefBilan` rend `null` sans lever, et `_collecterCriteresBilan(grilleDef, ec, evalEnregistree)` prend l'évaluation enregistrée en source de secours — le commentaire le dit en toutes lettres (« #576 — la source de secours des NOMS de critères quand la grille a disparu ») ;
+- `calculerNote()` sort silencieusement, et la branche jumelle « échelle absente » (l.548-556) affiche `--` plutôt que de crier (#348-résiduel).
+
+⮕ **Le symptôme réel pour Grégoire n'est donc ni une erreur ni une note fausse : c'est qu'il ne peut plus modifier aucune de ces 408 évaluations.** Le message qu'il reçoit — « La grille de critères sélectionnée n'existe plus » — ne dit pas laquelle, ne dit pas qu'elles sont 408, et ne propose rien.
+
+**Reste à mesurer (non fait, non commencé)** : l'export PDF. `export-pdf.js:1588-1640` lit `exportPDF-grille` et `cartouches_<grilleId>` ; le comportement quand la grille manque n'a pas été établi. À faire en tête de #632.
+
+### 6.2 Réparation — ce qui est spécifiable ce soir, et ce qui ne l'est pas
+
+**Deux cas, à ne pas confondre.**
+- **Re-pointage** — une grille équivalente existe sous un autre id. C'est le patron #542 : les valeurs survivent, seul l'identifiant a disparu. La colonne « ailleurs » du diagnostic du §4 est faite pour ça ; ici elle dit « nulle part » pour les trois grilles, donc **le re-pointage n'est pas disponible en l'état** — sauf si une grille de contenu équivalent existe sous un id que le diagnostic ne rapproche pas (il compare des ids, pas des contenus). Un oracle de contenu reste à écrire.
+- **Reconstruction** — recréer la grille sous son id d'origine à partir des traces. C'est la voie qui reste.
+
+**Ce que je NE spécifie pas ce soir, et pourquoi.** La qualité de toute la réparation dépend d'une question qui n'est pas encore tranchée sur les données. Elle est inscrite ici telle qu'elle a été posée, pour survivre à la nuit :
+
+> **Première question de #632** : les évaluations portent-elles une copie des critères ? Les clés de commentaires d'une cartouche donnent les ids de critères, pas leurs libellés ni leurs pondérations. Il faut regarder si les évaluations elles-mêmes portent une copie des critères — si oui, la reconstruction est bien meilleure que par les cartouches seules. *Je te le dis quand je l'aurai mesuré, pas avant.*
+
+**Ce que la lecture du code établit déjà** (VÉRIFIÉ ; ce n'est pas la réponse, c'en est la moitié) : la **structure** existe et elle est riche. Chaque évaluation enregistre `grilleNom` (`evaluation-sauvegarde.js:238`) et `criteres: [{critereId, critereNom, niveauSelectionne, retroaction, ponderation}]` (l.190-196, structure documentée l.134). Nom de la grille, id **et** nom **et** pondération de chaque critère : de quoi reconstruire une grille utilisable, pas seulement une coquille d'ids.
+
+**Ce qui reste ouvert, et que seule une mesure sur les données peut dire** : combien des **408** évaluations portent effectivement un `criteres[]` **non vide**. Deux raisons de ne pas le supposer — `_collecterCriteresSauv` rend `[]` si la grille manquait déjà à l'enregistrement, et un repli d'extraction depuis la rétroaction (evaluation.js:1464-1475) ne s'active que si la grille est présente. Une évaluation enregistrée **après** la disparition de la grille peut donc porter un tableau vide. **Tant que ce chiffre n'est pas mesuré, aucun diff de reconstruction ne doit être écrit** : il porterait sur un matériau dont on ignore s'il existe.
+
+⮕ **Le diagnostic de #632 s'écrit avant son correctif.** Il doit rendre, pour chacun des trois ids morts : le nombre d'évaluations, combien portent un `criteres[]` non vide, l'union des `critereId` rencontrés avec leurs `critereNom` et `ponderation` (et signaler les divergences entre évaluations — deux noms pour un même id est un signal, pas un détail), le `grilleNom` porté par les évaluations, et le recoupement avec les ids de critères encodés dans les clés de commentaires des onze cartouches survivantes. C'est ce croisement qui décide si la reconstruction est fidèle ou approximative — et Grégoire doit le savoir avant qu'on écrive quoi que ce soit dans ses données.
+
+**Périmètre confirmé de #632, en plus des évaluations** : `pratique.configuration.grilleId` — quatre pratiques pointent `GRILLE1759529438501`. La réparation traite les **deux** champs, sur le même id, dans le même passage ; sinon la grille reconstruite est vue par les évaluations et pas par les pratiques.
+
+**Deux préalables non négociables**, du même patron que #542 et #448 : sauvegarde Codex préalable **par copie** (jamais un `git checkout`), et **dry-run relu** avant toute écriture.
+
+---
+
 ## Ce que ce rapport ne couvre pas
 
 - **La portée et l'archivage des cartouches** (B2, M1 de l'audit de carte) : périmètre Z1. Le constat B1 ci-dessus y touche par sa cause ; il a été transmis à la session de coordination pour recoupement, et l'ordre S5 → S6 en découle.
 - **La cause de #542** : non établie, et ce rapport ne prétend pas la trouver. Il établit que deux chemins vivants **suffisent** à produire l'effet, ce qui est une condition nécessaire, pas une preuve d'origine.
 - **Les états d'édition transitoires** (S3 de l'audit de carte, `tempCriteres`) : périmètre S7.
 - **Le legacy des quatre sections** (S4, S5, S9 de l'audit de carte) : périmètre Z3. Le shadowing de `cle` (M3) y touche et lui est signalé.
+- **L'export PDF face à une grille disparue** (§6.1) : non mesuré, non commencé. Première tâche de #632 avec la question ouverte du §6.2.
 - **Aucun diff n'a été appliqué.** Aucun fichier de `js/`, `index.html` ou `tests/` n'a été ouvert en écriture pendant cet audit.
