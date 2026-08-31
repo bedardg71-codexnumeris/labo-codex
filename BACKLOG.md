@@ -417,8 +417,28 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Ce qui manque, c'est son application — `:174-178` ne patche que `grilleId`.
   ⮕ Conséquence : le lot **S9 / #627** est plus petit qu'annoncé de ce côté. Corriger l'énoncé de Z2 avant que S9
   s'en serve comme spécification. **Un diff d'audit est une esquisse, jamais une spécification.**
+- [ ] **#640 — La section d'ouverture n'est verrouillée par AUCUNE sentinelle : l'accueil doit rester la porte d'entrée quelle que soit la valeur de `demo-actif` et du mode expert**.
+  Inscrit le 31 août 2026 par `kuekatsheu-c8`, **avant tout usage**. Demandé par Grégoire. Suite de `8f4ff85d`.
+  `js/main.js:991` — `afficherSection('accueil')`, désormais **inconditionnel**. Le « Chantier 3 » dérivait
+  vers `naviguerVers('suivi', 'groupe')` dans DEUX cas : `db.getSync('demo-actif') === 'true'` **ou**
+  `obtenirPreference('modeExpert')`. Les deux dérivations sont retirées.
+  ⮕ **Aucune sentinelle ne verrouillait cette règle** — ni avant, ni après le changement. C'est tout l'objet
+  de l'item : une décision de parcours qu'un refactor peut défaire sans que rien ne rougisse.
+  ⚠ **La sentinelle porte sur les DEUX dérivations, pas seulement sur `demo-actif`.** Le mode expert a perdu
+  son raccourci volontairement (`8f4ff85d` : « dans tous les cas »). Muter un seul côté laisserait l'autre
+  libre de revenir — muter les DEUX côtés, et exiger un ROUGE OBTENU pour chacun.
+  ⚠ **Ne pas asserter que `demo-actif` est mort** : la clé a encore **24 références** dans `js/`
+  (`modes.js:1053`, `bibliotheque-ui.js:84`, `modal-backup-reminder.js:38`…). Elle ne pilote plus
+  l'OUVERTURE, c'est tout. Une assertion trop large rougirait sur du code sain.
+  ⮕ **Vitest peut asserter l'APPEL** (`afficherSection` appelée avec `'accueil'` quelles que soient les deux
+  valeurs) ; **seul Playwright/WebKit démontre l'ÉCRAN**. Les deux sont dus — Vitest ne voit pas le rendu.
+  ⮕ Le commentaire en place à `js/main.js:986-990` **nomme la ligne à remettre** si l'usage montre que le
+  retrait du raccourci expert était de trop. La sentinelle doit donc verrouiller la règle **sans rendre le
+  retour en arrière illisible** : c'est une décision de parcours révisable, pas un invariant de sûreté.
 - [ ] **#639 — L'entrée `avis-identification-2026-09-01` devient du code mort au message FAUX dans la nuit du 31 août au 1er septembre**.
   Inscrit le 31 août 2026 par `kuekatsheu-c8`, **avant tout usage**. Suite de #508 (`af75bc8a`).
+  ⮕ **Distinct de [[#640]]** : #640 verrouille la SECTION d'ouverture (`js/main.js`), #639 retire une
+  ENTRÉE d'avis (`js/transitions.js`). Deux fichiers, deux règles — ne pas les traiter comme un seul lot.
   `js/transitions.js:77-79` — la condition `new Date() < new Date(2026, 8, 1, 0, 0, 0)` éteint le bandeau
   à **minuit, heure locale de l'appareil de chaque lecteur**. Ce n'est pas une date serveur : un appareil
   mal réglé bascule au mauvais moment.
