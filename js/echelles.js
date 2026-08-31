@@ -2617,7 +2617,21 @@ async function supprimerEchelleDefinitivement(id) {
 
     if (!echelle) return;
 
-    // Pas de dépendances directes pour les échelles
+    // ⚠ #650 (31 août 2026) — CE CHEMIN NE VÉRIFIE AUCUNE DÉPENDANCE, ET CE
+    // N'EST PAS PARCE QU'IL N'Y EN A PAS. La ligne qui tenait cette place
+    // affirmait « Pas de dépendances directes pour les échelles ». C'était
+    // faux, et un commentaire faux ne se contente pas de ne pas aider : il
+    // arme la main suivante, qui le lit comme un fait vérifié.
+    //
+    // Une échelle EST référencée : les évaluations portent `ev.echelleId`
+    // (#624), et #648 recense les autres porteurs. Supprimer ici laisse ces
+    // références pointer dans le vide — sans compte, sans avertissement, sans
+    // trace : un gel silencieux, pas une perte visible.
+    //
+    // La garde et sa porte de sortie existent, mais dans UN seul chemin :
+    // `supprimerEchelleDepuisSidebar` (`verifierUtilisationEchelle` puis
+    // `migrerEvaluationsVersNouvelleEchelle`). Les porter ici est le lot #624,
+    // pas #650 — d'ici là, cette ligne dit ce qui manque au lieu de le nier.
 
     // Confirmation
     if (!confirm(`Supprimer définitivement l'échelle «${echelle.nom}» ?\n\nCette action est irréversible.`)) {
@@ -4292,17 +4306,40 @@ async function verifierUtilisationEchelle(echelleId) {
  * @returns {number} Nombre d'évaluations migrées
  */
 async function migrerEvaluationsVersNouvelleEchelle(ancienneEchelleId, nouvelleEchelleId) {
-    const evaluations = await db.get(cle('evaluationsSauvegardees')) || [];
+    // #650 (31 août 2026) — LA RÉAFFECTATION EST UNE SEULE SÉQUENCE ATOMIQUE.
+    //
+    // Avant : `db.get` … `db.set`, et entre les deux l'appelant pose DEUX
+    // dialogues (le `confirm` « veux-tu migrer ? » puis le `prompt` de choix
+    // de l'échelle de remplacement). La collection réécrite était donc celle
+    // lue AVANT la réflexion de l'enseignant : tout ce qui s'enregistrait
+    // pendant — une note saisie dans un autre onglet du même écran, une
+    // auto-sauvegarde — était écrasé sans erreur et sans message.
+    //
+    // ⚠ Le compte est tenu HORS du mutateur, et c'est le point à ne pas rater :
+    // `db.modifier` rend CE QUE LE MUTATEUR REND, or le mutateur doit rendre la
+    // liste à écrire. L'appelant, lui, attend un NOMBRE (`nbMigrees`) pour la
+    // notification. Compter dans le `return` du mutateur annoncerait un tableau.
     let nbMigrees = 0;
 
-    evaluations.forEach(ev => {
-        if (ev.echelleId === ancienneEchelleId) {
-            ev.echelleId = nouvelleEchelleId;
-            nbMigrees++;
-        }
-    });
+    await db.modifier(cle('evaluationsSauvegardees'), (lues) => {
+        const evaluations = lues || [];
+        nbMigrees = 0;
 
-    await db.set(cle('evaluationsSauvegardees'), evaluations);
+        evaluations.forEach(ev => {
+            if (ev.echelleId === ancienneEchelleId) {
+                ev.echelleId = nouvelleEchelleId;
+                nbMigrees++;
+            }
+        });
+
+        // Aucune évaluation ne référence plus cette échelle : le mutateur rend
+        // `undefined`, donc rien n'est écrit. Réécrire la collection « telle
+        // quelle » serait une occasion de plus de perdre ce qu'une autre
+        // rafale vient d'y poser.
+        if (nbMigrees === 0) return undefined;
+        return evaluations;
+    }, []);
+
     return nbMigrees;
 }
 
