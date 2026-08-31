@@ -40,8 +40,14 @@ la phase de mesure s'est fermée hier soir, celle d'exécution s'est ouverte ce 
 livré trois de ses huit sessions.** `kuekatsheu-f3` (S4, coordination, release, push),
 `kuekatsheu-9a` (S7), `kuekatsheu-e5` (S8). Aucune collision.
 
-**LIS D'ABORD** le tableau d'état de `plans de travail/PLAN-modele-objets-conception-2026-08-30.md`,
-puis sa section « Répartition du 31 août ». **Ne crois pas un `LIVRÉ` sur parole : vérifie dans `main`.**
+**LIS D'ABORD** `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` à la racine, réécrite pour toi le
+31 août — elle porte le détail de S5 et de la suite. Puis le tableau d'état de
+`plans de travail/PLAN-modele-objets-conception-2026-08-30.md` et sa section « Répartition du
+31 août ». **Ne crois pas un `LIVRÉ` sur parole : vérifie dans `main`.**
+⚠ **Il n'y a plus qu'UNE consigne à la racine, et son nom ne porte pas de date** :
+`CONSIGNE-DEMARRAGE-2026-08-31.md` a été retirée (elle est dans l'historique git). Deux consignes
+datées cohabitaient le 31 au matin, dont une du 30 encore présentée comme courante — un nom qui
+ne peut pas rôtir vaut mieux qu'une date qu'on oublie de retirer.
 
 ⛔ **CE QUI PRIME ENCORE, ET QUI N'A PAS CHANGÉ DE STATUT : LE MORATOIRE EST TOUJOURS ACTIF.**
 Le code ne détruit plus rien — c'est mesuré, en Vitest ET dans WebKit contre le vrai `index.html`.
