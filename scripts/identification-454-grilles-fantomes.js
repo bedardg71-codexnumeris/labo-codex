@@ -117,10 +117,18 @@
           + (ecartesDemo ? '   (' + ecartesDemo + ' écartée(s) : pack démo)' : ''));
 
         // ── Les magasins de cartouches dont la grille n'existe plus ─────────
+        // ⚠ S5/#623 — le magasin vit sous `<trimestreId>_cartouches_<grilleId>`,
+        // plus sous la clé nue. Le test ancré `indexOf(…) !== 0` ne trouvait plus
+        // aucune clé : ce script d'IDENTIFICATION concluait « aucune grille
+        // fantôme », soit précisément le contraire de ce qu'il existe pour dire.
+        // Mesuré : 2 clés avant S5, 0 après. R1 : on balaie tous les trimestres.
+        const RE_CARTOUCHES = /^(?:([ahe]\d{4}|demo)_)?cartouches_(.+)$/;
         const fantomes = [];
         for (const c of cles) {
-            if (c.indexOf('cartouches_') !== 0) continue;
-            const idGrille = c.slice('cartouches_'.length);
+            const m = typeof c === 'string' ? c.match(RE_CARTOUCHES) : null;
+            if (!m) continue;
+            const trimestreDeLaCle = m[1] || null;   // null ⇒ clé NUE (résidu pré-S5)
+            const idGrille = m[2];
             if (idsVivants.has(idGrille)) continue;         // grille bien vivante
             const cartes = await lire(c);
             if (!Array.isArray(cartes) || !cartes.length) continue;
@@ -140,8 +148,16 @@
                 }
                 if (ct.echelleId) echelles.add(ct.echelleId);
             }
+            // R1 · NOMMER OÙ. Le critère d'orphelinat reste volontairement GLOBAL
+            // (`idsVivants` agrège tous les magasins de grilles, voir plus haut) :
+            // une grille vivante dans un trimestre suffit à ne pas déclarer son
+            // magasin orphelin. S5/#623 rendrait défendable un critère PAR
+            // trimestre — un magasin h2026 dont la grille ne vit qu'en a2025 —
+            // mais ce serait un changement de définition, pas un routage de clé.
+            // Le trimestre est donc RAPPORTÉ, et la décision laissée à qui lit.
             fantomes.push({
-                cle: c, idGrille: idGrille, cartouches: cartes.map(nomDe),
+                cle: c, idGrille: idGrille, trimestre: trimestreDeLaCle,
+                cartouches: cartes.map(nomDe),
                 idsCriteres: idsCriteres, nomsCriteres: nomsCriteres,
                 niveaux: [...niveaux], echelles: [...echelles]
             });
@@ -185,7 +201,9 @@
         for (const f of fantomes) {
             L('');
             L('════ FANTÔME : ' + f.idGrille);
-            L('  magasin survivant : ' + f.cle);
+            L('  magasin survivant : ' + f.cle
+              + (f.trimestre ? '   [trimestre ' + f.trimestre + ']'
+                             : '   [⚠ CLÉ NUE — régime pré-S5, non migrée]'));
             L('  cartouches gardées (' + f.cartouches.length + ') : ' + f.cartouches.join(' · '));
             L('  critères de la grille disparue (' + f.nomsCriteres.size + ') : '
               + [...f.nomsCriteres].join(' · '));

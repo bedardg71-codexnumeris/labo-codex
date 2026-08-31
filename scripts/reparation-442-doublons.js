@@ -50,7 +50,8 @@
     // Collections visées.
     // · globales (jamais préfixées) : magasins d'entités + catalogues de gabarits ;
     // · suffixes : modèles de TRAVAIL, namespacés par trimestre depuis #358 ;
-    // · préfixe : une clé `cartouches_<idGrille>` par grille.
+    // · cartouches : une clé par grille ET par trimestre depuis S5/#623
+    //   (`<trimestreId>_cartouches_<idGrille>`) ; voir estCleCartouches.
     // Remplace `scripts/dedoublonner-biblios.js` (10 août 2026, soir), qui visait
     // encore les globales NUES `grillesTemplates`/`echellesTemplates` — vidées
     // au boot depuis #358, donc sans effet — et n'avait ni dry-run ni annulation.
@@ -60,7 +61,30 @@
         'bibliothequePratiques', 'bibliothequeProductions'
     ];
     const SUFFIXES_MODELES = ['echellesTemplates', 'grillesTemplates'];
-    const PREFIXES_VISES = ['cartouches_'];
+
+    // S5/#623 — LES CARTOUCHES SONT DEVENUES NAMESPACÉES, COMME LES MODÈLES.
+    // `cartouches_<grilleId>` n'est plus une clé de stockage : le magasin vit
+    // sous `<trimestreId>_cartouches_<grilleId>`. La famille rejoint donc la
+    // forme de `SUFFIXES_MODELES` juste au-dessus — nue OU préfixée — au lieu
+    // du `startsWith` seul, qui ne trouvait plus rien (mesuré : 2 clés avant
+    // S5, 0 après). R1 : un dédoublonneur doit voir TOUTES les copies.
+    // ⚠ Le suffixe est ici un PRÉFIXE COMPOSÉ (`cartouches_` + un id de
+    // grille), pas un nom fixe : d'où le test sur la position du motif plutôt
+    // qu'une égalité. Ne pas le replier dans SUFFIXES_MODELES, dont les entrées
+    // sont des noms entiers.
+    const estCleCartouches = (k) => {
+        if (typeof k !== 'string') return false;
+        const i = k.indexOf('cartouches_');
+        if (i === 0) return true;                       // clé nue (résidu pré-S5)
+        // Le préfixe doit être un ID DE TRIMESTRE, pas n'importe quoi suivi d'un
+        // `_`. Sans cette garde, le motif happe la clé
+        // `migration_cartouches_namespacees_done` — le drapeau posé par la
+        // migration S5 elle-même (js/main.js:735), dont la valeur est un booléen
+        // et non une liste de cartouches. Défaut mesuré par Playwright le
+        // 31 août 2026, invisible à la relecture. `[ahe]` couvre les trois
+        // sessions que `creerTrimestre` accepte (A, H, E), `demo` le pack démo.
+        return i > 0 && k[i - 1] === '_' && /^([ahe]\d{4}|demo)$/.test(k.slice(0, i - 1));
+    };
 
     function _nomLisible(item) {
         if (!item) return '?';
@@ -102,7 +126,7 @@
         const retenues = toutes.filter(k =>
             CLES_GLOBALES_VISEES.includes(k) ||
             SUFFIXES_MODELES.some(s => k === s || k.endsWith('_' + s)) ||
-            PREFIXES_VISES.some(p => k.startsWith(p))
+            estCleCartouches(k)
         );
         return retenues.sort();
     }

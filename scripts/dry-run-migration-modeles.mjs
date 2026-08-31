@@ -85,10 +85,38 @@ function lireArgs(argv) {
     return a;
 }
 
+/**
+ * Trimestres présents dans un codex, déduits de ses propres clés.
+ *
+ * ⚠ LE MOTIF A ÉTÉ ÉLARGI (31 août 2026, #636). Il était `^([ah]\d{4})_`, ce qui
+ * ratait DEUX familles pourtant réelles :
+ *   · la session ÉTÉ — `creerTrimestre` accepte 'A', 'H' ET 'E'
+ *     (js/trimestres.js), donc `e2026` est un id légitime ;
+ *   · le pack de démonstration, dont les clés sont préfixées `demo_`.
+ * Tant que ce helper ne servait qu'au rapport de ce dry-run, l'angle mort
+ * coûtait une ligne manquante. Depuis #636 il porte aussi le routage des
+ * cartouches côté node : un trimestre non détecté devient un magasin non
+ * examiné, c'est-à-dire un zéro qui se lit « rien à réparer ».
+ *
+ * ⮕ Le registre fait AUTORITÉ quand il est là. `trimestres` est une clé globale
+ * (CLES_GLOBALES, js/trimestres.js) donc présente dans tout codex exporté ; on
+ * ne retombe sur le balayage des clés que si elle manque ou n'apprend rien.
+ */
 function detecterTrimestres(codex) {
     const set = new Set();
-    for (const k of Object.keys(codex)) {
-        const m = k.match(/^([ah]\d{4})_(evaluationsSauvegardees|productions)$/);
+
+    // 1. Le registre, source de vérité quand il est présent.
+    const registre = codex && codex['trimestres'];
+    if (Array.isArray(registre)) {
+        for (const t of registre) if (t && typeof t.id === 'string' && t.id) set.add(t.id);
+    }
+
+    // 2. Repli/complément : déduire des clés. `[ahe]` couvre les trois sessions,
+    //    `demo` le pack de démonstration. Un trimestre porteur de données mais
+    //    absent du registre doit quand même être vu — c'est précisément l'état
+    //    incohérent qu'un outil de réparation existe pour trouver.
+    for (const k of Object.keys(codex || {})) {
+        const m = k.match(/^([ahe]\d{4}|demo)_(evaluationsSauvegardees|productions)$/);
         if (m) set.add(m[1]);
     }
     return [...set].sort();

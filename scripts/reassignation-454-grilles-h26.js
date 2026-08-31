@@ -26,8 +26,11 @@
    ── CE QUE LE SCRIPT FAIT, DANS CET ORDRE ───────────────────────────────────
    ÉTAPE 1 — DÉMÉNAGER LES CARTOUCHES. Repointer la grille ne suffirait pas :
      les cartouches vivent encore dans le tiroir de l'ANCIEN identifiant, et le
-     sélecteur lit `cartouches_{grilleId}`. Elles sont donc recopiées dans le
+     sélecteur lit le tiroir de la grille. Elles sont donc recopiées dans le
      tiroir de la grille vivante, avec leur `grilleId` mis à jour.
+     ⚠ MISE À JOUR S5/#623 : ce tiroir n'est plus `cartouches_{grilleId}` mais
+     `{trimestre}_cartouches_{grilleId}`. Voir CLE_CARTOUCHES plus bas — et ne
+     pas relire la ligne ci-dessus comme une description du régime courant.
      ⚠ Fusion PAR IDENTITÉ (leçon #448) : une cartouche déjà présente sous le
      même identifiant et au même contenu est IGNORÉE, pas dupliquée. Même
      identifiant mais contenu DIFFÉRENT ⇒ **REFUS** : on n'écrase pas une
@@ -67,6 +70,29 @@
 
     const VERSION_OUTIL = 'r2 · 11 août 2026 (échelle découplée du repointage)';
     const TRIMESTRE = 'h2026';
+
+    // ═══ S5/#623 — LES CARTOUCHES SONT DEVENUES NAMESPACÉES ════════════════
+    // `cartouches_<grilleId>` n'est plus une clé de stockage : le magasin vit
+    // sous `<trimestreId>_cartouches_<grilleId>`, un exemplaire par trimestre.
+    //
+    // Ce fichier namespaçait DÉJÀ tout le reste à la main (`TRIMESTRE + '_…'`,
+    // voir les lectures de grilles/échelles/productions/évals plus bas) ; seules
+    // les deux clés de cartouches étaient restées nues, parce qu'à l'époque
+    // elles étaient GLOBALES. Elles rejoignent donc l'idiome du fichier.
+    //
+    //   R1 · LIRE   = balayer tous les trimestres et dire lequel. Ici, sans
+    //                 objet : l'outil est borné à h2026 par construction
+    //                 (`TRIMESTRE`), et ce bornage EST le trimestre explicite.
+    //   R2 · ÉCRIRE = trimestre explicite, jamais de balayage. Satisfait par
+    //                 la même constante — écrire nu produirait une clé que plus
+    //                 aucun écran ne lit, et l'outil annoncerait un succès.
+    //   R3 · Une source datée garde ses clés d'époque (sans objet ici).
+    //
+    // ⚠ NE PAS « SIMPLIFIER » EN RETIRANT LE PRÉFIXE : la clé nue ne mène plus
+    // à rien. En LECTURE elle rend 0 et l'étape 0 conclut « magasin absent ou
+    // vide », donc annule le déménagement en silence ; en ÉCRITURE elle dépose
+    // les cartouches dans une case morte.
+    const CLE_CARTOUCHES = (grilleId) => TRIMESTRE + '_cartouches_' + grilleId;
 
     // ⚠ DONNÉES TAPÉES À LA MAIN — REVÉRIFIÉES PLUS BAS CONTRE LES DONNÉES.
     const CORRESPONDANCES = [
@@ -132,10 +158,10 @@
         L('── ÉTAPE 0 · revérification des correspondances (elles viennent de MOI)');
         const valides = [];
         for (const c of CORRESPONDANCES) {
-            const ancien = await lire('cartouches_' + c.fantome);
+            const ancien = await lire(CLE_CARTOUCHES(c.fantome));   // S5/#623 : namespacée
             const vivante = grilles.find((g) => g && g.id === c.vivante);
             if (!Array.isArray(ancien) || !ancien.length) {
-                L('  ⛔ ' + c.libelle + ' : le magasin cartouches_' + c.fantome + ' est absent ou vide.');
+                L('  ⛔ ' + c.libelle + ' : le magasin ' + CLE_CARTOUCHES(c.fantome) + ' est absent ou vide.');
                 continue;
             }
             if (!vivante) {
@@ -177,7 +203,8 @@
         const joignablesApres = new Map();   // grilleVivante → Set(idCartouche)
         let refusCartouches = 0;
         for (const c of valides) {
-            const cleCible = 'cartouches_' + c.vivante;
+            // R2 · destination EXPLICITE (TRIMESTRE), jamais nue ni balayée.
+            const cleCible = CLE_CARTOUCHES(c.vivante);
             const enPlace = (await lire(cleCible)) || [];
             const parId = new Map();
             for (const ct of enPlace) if (ct && ct.id) parId.set(ct.id, ct);

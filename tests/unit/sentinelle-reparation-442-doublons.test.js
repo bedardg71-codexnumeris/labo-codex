@@ -229,10 +229,24 @@ describe('#442 · script de nettoyage des doublons', () => {
         // `grillesTemplates`/`echellesTemplates` — vidées au boot depuis #358,
         // donc sans effet. Ce script le remplace : sa portée doit couvrir les
         // familles que l'ancien traitait, sans quoi le retrait perdrait du terrain.
+        // ⚠ DEUX RÉGIMES DE CLÉ, ET IL FAUT LES DEUX (ajouté le 31 août 2026, #636).
+        // Ce corpus ne portait que la clé NUE `cartouches_GRILLE_A`. Conséquence
+        // mesurée : ce cas était vert AVANT S5, vert PENDANT toute la régression du
+        // régime des cartouches, et vert APRÈS sa correction — il n'a jamais pu voir
+        // le défaut qu'il est censé border, parce que son corpus décrivait un régime
+        // que S5 a fait disparaître. C'est le vert qui sert d'alibi.
+        // ⮕ La famille namespacée est AJOUTÉE, la nue est GARDÉE : on ne raccourcit
+        // pas le corpus d'une sentinelle, on le scinde. Les deux doivent être
+        // dédoublonnées — la nue parce qu'un résidu pré-migration existe encore chez
+        // qui n'a pas redémarré, la namespacée parce que c'est le régime d'aujourd'hui.
         const { store, db } = fauxStockage({
             cartouches_GRILLE_A: [
                 { id: 'CART_1', nom: 'Rétroaction dissertation' },
                 { id: 'CART_1', nom: 'Rétroaction dissertation' }
+            ],
+            h2026_cartouches_GRILLE_B: [
+                { id: 'CART_2', nom: 'Rétroaction analyse' },
+                { id: 'CART_2', nom: 'Rétroaction analyse' }
             ],
             bibliothequePratiques: [
                 { id: 'PRAT_1', nom: 'PAN-Standards' },
@@ -244,7 +258,8 @@ describe('#442 · script de nettoyage des doublons', () => {
         const win = chargerScriptReparation(db);
         await win.reparer442({ executer: true });
 
-        expect(store.cartouches_GRILLE_A).toHaveLength(1);
+        expect(store.cartouches_GRILLE_A, 'résidu pré-migration : la clé nue est encore dédoublonnée').toHaveLength(1);
+        expect(store.h2026_cartouches_GRILLE_B, 'régime d\'aujourd\'hui : la clé namespacée aussi').toHaveLength(1);
         expect(store.bibliothequePratiques).toHaveLength(1);
         expect(store.bibliothequeProductions).toHaveLength(1);
     });

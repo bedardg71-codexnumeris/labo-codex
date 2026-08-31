@@ -297,26 +297,50 @@
             }
         }
 
-        /* --- Les cartouches : une clé par grille --------------------------- */
+        /* --- Les cartouches : une clé par grille ET par trimestre ---------- */
         // `db.keys()` est ASYNCHRONE (js/db.js:861) : sans `await`, on filtrerait
         // une promesse et le bloc cartouches serait silencieusement vide.
+        //
+        // ⚠ S5/#623 — LE MOTIF ANCRÉ `/^cartouches_/` NE TROUVE PLUS RIEN. Le
+        // magasin vit sous `<trimestreId>_cartouches_<grilleId>`, un exemplaire
+        // par trimestre. Mesuré : 2 clés avant S5, 0 après — et ce zéro
+        // s'imprimait « aucun magasin trouvé », qui se lit « rien à signaler ».
+        // R1 : un dédoublonneur veut les copies de TOUS les trimestres, et doit
+        // dire de quel trimestre vient chaque magasin, sans quoi il présente
+        // comme doublons des lots qui appartiennent légitimement à deux
+        // trimestres différents.
+        const RE_CARTOUCHES = /^(?:([ahe]\d{4}|demo)_)?cartouches_(.+)$/;
         const toutesLesCles = (typeof db.keys === 'function') ? (await db.keys()) : [];
         const clesCartouches = (Array.isArray(toutesLesCles) ? toutesLesCles : [])
-            .filter((k) => /^cartouches_/.test(k));
+            .filter((k) => typeof k === 'string' && RE_CARTOUCHES.test(k));
+        // `bibliothequeCartouches` reste GLOBALE par conception
+        // (js/cartouches-bibliotheque.js:11-20) : elle n'est PAS namespacée et
+        // ne doit pas l'être. Vérifié aux registres de js/trimestres.js.
         const cartouchesPartagees = (await db.get('bibliothequeCartouches')) || [];
 
         if (!clesCartouches.length) {
-            console.log('Cartouches : aucun magasin `cartouches_<grilleId>` trouvé.');
+            // Le zéro porte son témoin : sans le nombre de clés examinées, « aucun
+            // magasin » couvre aussi bien « il n'y en a pas » que « je n'ai pas su
+            // regarder ». Les deux s'écrivaient pareil.
+            const examinees = Array.isArray(toutesLesCles) ? toutesLesCles.length : 0;
+            console.log(examinees === 0
+                ? 'Cartouches : ⛔ AUCUNE CLÉ EXAMINÉE — énumération du stockage indisponible. '
+                  + 'Ce n\'est PAS « aucun magasin ».'
+                : 'Cartouches : aucun magasin de cartouches parmi les ' + examinees + ' clé(s) examinée(s).');
             console.log(LIGNE);
         }
         for (const cleCart of clesCartouches) {
             const locaux = (await db.get(cleCart)) || [];
             if (!locaux.length) continue;
-            const grilleId = cleCart.replace(/^cartouches_/, '');
+            const m = cleCart.match(RE_CARTOUCHES);
+            const trimestre = m[1] || null;   // null ⇒ clé NUE, résidu pré-S5
+            const grilleId = m[2];
             const partagesDeCetteGrille = cartouchesPartagees.filter(
                 (c) => c && c.grilleId === grilleId);
             const bilan = rapporterUnMagasin(
-                'Cartouches · grille ' + idCourt(grilleId), locaux, partagesDeCetteGrille, 'nom');
+                'Cartouches · grille ' + idCourt(grilleId)
+                    + (trimestre ? ' · trimestre ' + trimestre : ' · ⚠ CLÉ NUE (pré-S5)'),
+                locaux, partagesDeCetteGrille, 'nom');
             releve.familles.push(bilan.donnees);
             totalGroupes += bilan.groupes;
             totalCollisions += bilan.collisions;

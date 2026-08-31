@@ -80,7 +80,23 @@ const MODELES = {
     cartouche: {
         label: 'cartouches',
         extraire: e => (e && e.cartoucheId) ? e.cartoucheId : null,
-        // pas de collection unique : les cartouches vivent sous cartouches_<grilleId>.
+        // Historiquement : pas de collection unique à interroger — les cartouches
+        // vivaient sous des clés GLOBALES `cartouches_<grilleId>`, une par grille,
+        // donc partagées par tous les trimestres. D'où `collections: []` : la
+        // sentinelle ne pouvait pas dire qui les possédait.
+        //
+        // ⚠ CONSTAT NON TRAITÉ (31 août 2026, #636). Depuis S5/#623 elles ONT un
+        // domicile par trimestre : `<trimestreId>_cartouches_<grilleId>`. Ce
+        // `collections: []` n'est donc plus une impossibilité, c'est un ANGLE
+        // MORT : la sentinelle d'isolation ne vérifie pas une famille qu'elle
+        // pourrait désormais couvrir, et son vert ne dit rien des cartouches.
+        //
+        // ⚠⚠ SI TU L'ÉTENDS : élargir son périmètre et élargir son MOTIF sont un
+        // SEUL geste. Déclarer la famille couverte sans que le motif la trouve
+        // donnerait un vert qui ressemble à une preuve — une garde à qui on prête
+        // un mérite qu'elle n'a pas finit par servir d'alibi. Le motif doit
+        // reconnaître les deux régimes (`/^(?:([ahe]\d{4}|demo)_)?cartouches_(.+)$/`), et un
+        // témoin doit prouver qu'il rougit sur un partage fabriqué exprès.
         collections: []
     }
 };

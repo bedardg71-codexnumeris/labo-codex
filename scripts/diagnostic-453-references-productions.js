@@ -122,10 +122,23 @@
         // ── Où vit chaque ressource, tous trimestres confondus ────────────
         const grilleOu = new Map();     // id → [{cle, nom}]
         const echelleOu = new Map();
-        const magasinsCartouches = new Set();
+        // S5/#623 — un magasin de cartouches par grille ET PAR TRIMESTRE
+        // (`<trimestreId>_cartouches_<grilleId>`). On indexe donc par GRILLE, pas
+        // par clé : la question posée plus bas est « un magasin atteste-t-il que
+        // cette grille a existé ? », et la réponse ne dépend pas du trimestre.
+        // ⚠ Le test ancré `indexOf(…)===0` d'avant ne trouvait plus rien, et son
+        // ensemble vide rendait « ⛔ aucun magasin » pour TOUTES les productions.
+        const RE_CARTOUCHES = /^(?:([ahe]\d{4}|demo)_)?cartouches_(.+)$/;
+        const magasinsCartouches = new Map();   // grilleId → [clés, tous trimestres]
 
         for (const c of cles) {
-            if (c.indexOf('cartouches_') === 0) { magasinsCartouches.add(c); continue; }
+            const mCart = typeof c === 'string' ? c.match(RE_CARTOUCHES) : null;
+            if (mCart) {
+                const g = mCart[2];
+                if (!magasinsCartouches.has(g)) magasinsCartouches.set(g, []);
+                magasinsCartouches.get(g).push(c);
+                continue;
+            }
             let cible = null;
             if (/grillesTemplates$|bibliothequeGrilles$/.test(c)) cible = grilleOu;
             else if (/echellesTemplates$|bibliothequeEchelles$/.test(c)) cible = echelleOu;
@@ -248,9 +261,15 @@
                     });
                 }
 
-                const cleCart = p.grilleId ? 'cartouches_' + p.grilleId : null;
-                ligne.cartouches = !cleCart ? '—'
-                    : (magasinsCartouches.has(cleCart) ? '✓ magasin présent' : '⛔ aucun magasin');
+                // R1 · on interroge par GRILLE et on NOMME les trimestres où le
+                // magasin existe. Composer une clé nue ici rendrait « ⛔ aucun
+                // magasin » partout, ce qui se lit « la grille n'a jamais existé »
+                // — le contraire du fil que cette colonne sert à tirer.
+                const magasins = p.grilleId ? (magasinsCartouches.get(p.grilleId) || []) : null;
+                ligne.cartouches = !magasins ? '—'
+                    : (magasins.length
+                        ? '✓ magasin présent (' + magasins.join(', ') + ')'
+                        : '⛔ aucun magasin');
                 lignes.push(ligne);
             }
 
