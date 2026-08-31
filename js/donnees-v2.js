@@ -1117,12 +1117,52 @@
 
     /**
      * Vérifie les dépendances avant suppression d'une cartouche
+     *
+     * #647 — l'ancien avertissement annonçait une perte qui n'a pas lieu et taisait
+     * une survivance qui a lieu. Deux mesures le fondent :
+     *
+     * 1. `supprimerCartoucheDefinitivement` (plus bas) n'appelle que
+     *    `retirerCartoucheDeLaBibliotheque`, qui n'écrit que la bibliothèque partagée
+     *    (cartouches-bibliotheque.js:122-141). L'ancrage de la grille n'est JAMAIS
+     *    touché — la cartouche y reste attachée.
+     * 2. Les évaluations lisent leur cartouche DEPUIS L'ANCRAGE, jamais depuis la
+     *    bibliothèque : evaluation-retroaction.js:250, evaluation-chargement.js:810,
+     *    evaluation.js:302. Aucune rétroaction n'est donc perdue.
+     *
+     * Ce que ce correctif NE fait PAS : atteindre l'ancrage. Le faire fabriquerait la
+     * perte que l'ancien texte annonçait à tort. La question de fond — retirer de la
+     * bibliothèque doit-il détacher de la grille ? — est inscrite dans #647 pour être
+     * tranchée à froid.
      */
     function verifierDependancesCartouche(cartoucheId) {
         const dependances = []; // Les cartouches n'ont pas de dépendances bloquantes
         const avertissements = [];
 
-        // Vérifier les évaluations (avertissement seulement)
+        // La survivance dans l'ancrage est MESURÉE, jamais supposée : on ne l'annonce
+        // que si la cartouche s'y trouve vraiment. Clé EXACTE, aucun balayage de la
+        // famille — donc rien qui puisse happer le drapeau de migration homonyme.
+        let resteDansGrille = false;
+        let nomGrille = '';
+        try {
+            const biblio = obtenirToutesLesCartouchesBibliothequeSync() || [];
+            const cartouche = biblio.find(c => c.id === cartoucheId);
+            const grilleId = cartouche && cartouche.grilleId;
+            if (grilleId) {
+                nomGrille = obtenirNomGrilleAssociee(grilleId);
+                const ancrage = db.getSync(cle(`cartouches_${grilleId}`)) || [];
+                resteDansGrille = ancrage.some(c => c.id === cartoucheId);
+            }
+        } catch (e) {
+            console.warn('[donnees-v2] Erreur lecture ancrage cartouche:', e.message);
+        }
+
+        if (resteDansGrille) {
+            avertissements.push(`Retrait de la bibliothèque partagée seulement : la cartouche reste attachée à la grille « ${nomGrille} ».`);
+        } else {
+            avertissements.push('Retrait de la bibliothèque partagée. Aucune copie n\'a été trouvée dans une grille du trimestre actif.');
+        }
+
+        // Les évaluations : on donne le compte, et ce qui leur arrive RÉELLEMENT.
         try {
             const trimestres = enumererTrimestres();
             let evalCount = 0;
@@ -1131,13 +1171,15 @@
                 evalCount += evaluations.filter(ev => ev.cartoucheId === cartoucheId).length;
             });
             if (evalCount > 0) {
-                avertissements.push(`Utilisée dans ${evalCount} évaluation(s) - les rétroactions associées seront perdues`);
+                avertissements.push(resteDansGrille
+                    ? `${evalCount} évaluation(s) l'emploient — leurs rétroactions restent intactes.`
+                    : `${evalCount} évaluation(s) l'emploient — cette suppression ne change rien pour elles.`);
             }
         } catch (e) {
             console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
-        return { dependances, avertissements };
+        return { dependances, avertissements, resteDansGrille };
     }
 
     /**
@@ -1346,6 +1388,7 @@
         let ressource = null;
         let dependances = [];
         let avertissements = [];
+        let cartoucheResteDansGrille = false; // #647 — cartouches seulement
 
         if (type === 'pratique') {
             const pratiques = obtenirToutesPratiquesUtilisateur();
@@ -1369,6 +1412,8 @@
             const deps = verifierDependancesCartouche(id);
             dependances = deps.dependances;
             avertissements = deps.avertissements;
+            // #647 — pilote les deux libellés plus bas. Ne concerne QUE les cartouches.
+            cartoucheResteDansGrille = deps.resteDansGrille;
         } else if (type === 'echelle') {
             const echellesBiblio = obtenirToutesLesEchellesBibliothequeSync();
             ressource = echellesBiblio.find(e => e.id === id);
@@ -1407,12 +1452,22 @@
                          type === 'grille' ? 'grille de critères' :
                          type === 'echelle' ? 'échelle de niveaux' :
                          type === 'production' ? 'production' : 'cartouche de rétroaction';
+        // #647 — pour une cartouche qui reste ancrée à sa grille, l'acte n'est PAS une
+        // suppression définitive : c'est un retrait de la bibliothèque partagée. Les
+        // deux phrases changent ensemble ; n'en corriger qu'une déplacerait le mensonge
+        // d'un paragraphe.
+        const phraseActe = cartoucheResteDansGrille
+            ? `Tu es sur le point de retirer de la bibliothèque partagée la ${typeLabel} :`
+            : `Tu es sur le point de supprimer définitivement la ${typeLabel} :`;
+        const phrasePortee = cartoucheResteDansGrille
+            ? 'Le retrait de la bibliothèque est irréversible ; la cartouche reste dans sa grille.'
+            : 'Cette action est irréversible.';
         infoDiv.innerHTML = `
-            <p>Tu es sur le point de supprimer définitivement la ${typeLabel} :</p>
+            <p>${phraseActe}</p>
             <p style="font-size: 1.2rem; font-weight: bold; color: var(--accent-primaire); margin: 15px 0;">
                 ${escapeHtml(ressource.nom)}
             </p>
-            <p class="text-muted">Cette action est irréversible.</p>
+            <p class="text-muted">${phrasePortee}</p>
         `;
 
         // Dépendances bloquantes
@@ -1452,7 +1507,11 @@
             inputConfirmation.value = '';
             nomAttendu.textContent = ressource.nom;
             btnConfirmer.disabled = true;
-            btnConfirmer.textContent = 'Supprimer définitivement';
+            // #647 — le bouton nomme l'ACTE : retrait, pas suppression définitive,
+            // quand la cartouche reste ancrée à sa grille.
+            btnConfirmer.textContent = cartoucheResteDansGrille
+                ? 'Retirer de la bibliothèque'
+                : 'Supprimer définitivement';
         }
 
         // Afficher la modal
