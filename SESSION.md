@@ -6,6 +6,89 @@
      ⮕ ÉTAT AU 3 JUILLET 2026 SOIR (VAGUE 3 CLOSE + **MERGÉE MAIN ET DÉPLOYÉE — décision Grégoire du 3 juillet, release 1.27.2**, branche `claude/relais-vague-3-etat-n3owyf` fast-forwardée dans `main` : les 3 vagues 1.27.0/1.27.1/1.27.2 sont EN PRODUCTION ; le point « MERGER en août » du signet est donc RÉGLÉ, les validations TERRAIN restent dues) : bilan factuel des vagues 1-2 = TABLEAU dans le bloc « 3 juillet » ci-dessous (12/12 tâches livrées ou closes par écart de prémisse ; AUCUN reliquat 2a) PUIS file 2b ÉPUISÉE : Tâche A #328 = déjà absorbé (vérifié au code, trace consignée) ; Tâche C #118+#283-T1 LIVRÉS (fix CSS overflow) ; Tâche B #363 LIVRÉ (audit currency, 13 écarts corrigés) ; Tâche D #306 LIVRÉ (Lots 1-2-3 ; décision UX « apparition du formulaire » restée ouverte, consignée). Vitest 1257/1257. ⚠ GRÉGOIRE EN CONGÉ TOUT JUILLET, reprise AOÛT. À la reprise (le merge est FAIT — 3 juillet) : validations terrain (#310/#311/#351/#240/#347 + portes vague 1 #313/#344/#361 + vague 2 #355/#305/#121 + vague 3, 2 modes) ; triage des 5 worktrees AVEC `plans de travail/INVENTAIRE-worktrees-2026-07.md` ; #364 T3/T4/T5 ; trancher #365 (audit blanc). ✅ **FAIT LE 27 AOÛT 2026 AU SOIR** : `rm .git/index.lock .git/HEAD.lock .git/objects/maintenance.lock` — mais ils étaient REVENUS (datés du 27 août 15 h 46, `git maintenance` crashé) et bloquaient tout commit. ⮕ **Ce point traînait depuis juillet et le 28 juin en portait déjà un : c'est un défaut RÉCURRENT du dépôt, pas une malchance.** À traiter comme tel plutôt qu'à re-nettoyer chaque fois. ; le commit local `96f1294c` et le BACKLOG #365 du Mac sont OBSOLÈTES (contenu recréé/poussé par les vagues 1-2) ; le fichier relais vague 2 (`RELAIS-2026-07-02-vague-2.md`) n'a jamais été poussé — le committer du Mac si on veut la trace (le relais vague 3 est, lui, versionné ci-dessous).
      ===================================================================== -->
 <!-- =====================================================================
+     SESSION BC — 30 AOÛT 2026, SOIR : LE PLAN CONCEPTION EST OUVERT, SES
+     DEUX PREMIERS AUDITS SONT LIVRÉS, ET LE MORATOIRE D1 A DOUBLÉ DE TAILLE
+     EN COURS DE SOIRÉE. Trois sessions en parallèle, coordonnées par messages.
+
+     ▣ RÉPARTITION. `kuekatsheu-c5` = Z1 (#619). `kuekatsheu-82` = Z2 (#620).
+       `kuekatsheu-bc` = Z3 (#621) + fichiers partagés + release + push.
+       Les trois audits Z sont en LECTURE SEULE : c'est la seule phase du plan
+       qui se parallélise sans collision dans `js/`. Aucune session n'a écrit
+       dans `js/`, `index.html` ni `tests/` de la soirée. Zéro collision d'index.
+
+     ▣ CE QUI A ÉTÉ POUSSÉ EN ARRIVANT. 8 commits d'avance dont `15ef1c45` qui
+       était du CODE, jamais vu par une suite navigateur. WebKit relancé sur
+       l'arbre gelé (aucune rougeur nouvelle), Vitest vert au hook, poussé
+       `540531e3..4cff5b92`. Le go de Grégoire était PONCTUEL, obtenu dans cette
+       session-ci et par ce canal seulement — consigné comme tel.
+
+     ▣ S0 LIVRÉE. Les cinq décisions D1 à D5 sont tranchées, TOUTES OPTION A,
+       relevé transmis par le canal de `kuekatsheu-0d`. LES CINQ MOTIFS SONT
+       VIDES et consignés tels quels : Grégoire a suivi les cinq recommandations,
+       aucune justification n'a été reconstruite. D2, D3 et D4 ont été tranchées
+       AVANT les audits Z dont elles dépendent — si un Z les contredit, elles
+       doivent lui être REPRÉSENTÉES, pas appliquées par inertie.
+       #619 à #629 réservés en une seule écriture (dernier ID mesuré : #618),
+       puis #630 pour le diagnostic de remplacement de T1.3.
+
+     ▣ LE FAIT LE PLUS COÛTEUX DE LA SOIRÉE, ET IL ÉTAIT ÉCRIT DANS DEUX
+       DOCUMENTS. Le plan et l'audit affirmaient tous deux que les modèles
+       détruits par l'archivage « survivent dans le snapshot de backup ».
+       FAUX : `trimestres.js:766-779` construit ce snapshot avec
+       `grillesUtilisees` / `echellesUtilisees` / `pratiquesUtilisees` — le
+       sous-ensemble DÉJÀ FILTRÉ, donc les survivants — et `cartouches` n'y est
+       qu'un NOMBRE. Le commentaire du code annonce « backup complet ».
+       Cette phrase avait servi à formuler l'option B de D1.
+       ⮕ Corrigée dans le plan ET dans l'audit parent.
+
+     ▣ LE MORATOIRE D1 PASSE DE UN À TROIS GESTES (décision de Grégoire, même
+       soir, question fermée) : « Archiver », « Supprimer… » un trimestre, et
+       « Exporter » sur une ligne NON ACTIVE. L'export du trimestre ACTIF reste
+       correct. Porté en tête de `RELAIS.md`, dans T0.1 et au tableau d'état.
+
+     ▣ TROIS MESURES FAITES PAR `kuekatsheu-bc`, hors périmètre des deux Z :
+       · `exporterTrimestreArchive` — `presences` et `snapshots` sont dans
+         `CLES_NAMESPACEES` (`trimestres.js:51-75`), leur contenu juste est donc
+         ÉCRASÉ. Et `groupeEtudiants` / `evaluationsSauvegardees` y sont aussi,
+         mais l'export écrit sous `donnees.etudiants` / `donnees.evaluations` —
+         des noms DIFFÉRENTS : le fichier porte les DEUX versions, sous deux
+         noms, avec des contenus différents.
+       · Ces deux champs alias n'ont AUCUN consommateur (vérification que le
+         rapport Z1 disait explicitement ne pas avoir faite). ⚠ Piège : les
+         occurrences d'`import-export.js` sont un FAUX POSITIF —
+         `analyse.donnees.etudiants` y est un objet d'ANALYSE (`.count`, `.cles`).
+       · ⚠⚠ `type: 'archive-trimestre'` (`trimestres.js:1105`) n'apparaît QU'UNE
+         SEULE FOIS dans tout le dépôt, à l'écriture. AUCUN importateur ne le
+         reconnaît. Le fichier que `trimestre-v2-liste.js:396-408` présente comme
+         la « copie de secours » avant une suppression définitive NE PEUT ÊTRE
+         RECHARGÉ PAR AUCUN CHEMIN de l'application. Les données ne sont pas
+         perdues — c'est du JSON lisible — mais il n'existe pas de restauration.
+
+     ▣ ORDRE STRICT ÉTABLI : S4 → S5 → S6, avec son motif au plan.
+       `purgerCopiesModelesArchive` détruit `<trim>_cartouches_X` ; correct
+       aujourd'hui car ce sont des doublons, mais sous D2-A ce serait la SEULE
+       donnée du trimestre désarchivé.
+
+     ▣ RESTANT, ET C'EST DÛ PAR GRÉGOIRE, PAR PERSONNE D'AUTRE :
+       · T1.2 et T2.2 — les deux diagnostics console, à coller dans Safari sur
+         ses vraies données. Les deux ont été VÉRIFIÉS par `kuekatsheu-bc`
+         (`node --check`, inventaire des appels à la base, recherche d'écritures) :
+         `db.get` / `db.getSync` / `db.keysSync` uniquement, zéro écriture.
+       · Une vérification à deux minutes : ouvrir un fichier produit par
+         « Exporter » sur une ligne NON ACTIVE et regarder `donnees.presences`.
+         Elle transforme le seul INFÉRÉ de B2 en fait.
+       · ⚠ LE CHIFFRE QUI CHANGE L'ORDONNANCEMENT : si `evaluation.echelleId`
+         fait apparaître, en h2026, un id AUTRE que `ECHELLE_DEMO`, alors la
+         réparation de #542 n'a pas tenu — ou n'a jamais tourné — et S6 passe
+         d'important à URGENT.
+
+     ▣ SENTINELLES : AUCUNE. Les deux audits Z sont en lecture seule ; les
+       sentinelles exigées sont spécifiées DANS les diffs, avec leur break-test.
+       Le cas décisif nommé par Z2 : un objet référencé dans un AUTRE trimestre
+       que l'actif doit faire ROUGIR.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 00 — 30 AOÛT 2026, SOIR : S6 / #612 — LE FICHIER D'UNE REPRISE
      SUPPRIMÉE VOLAIT LA LIGNE DE L'ORIGINALE, ET UN DA FAUX N'ÉTAIT DIT
      NULLE PART. Deux tâches livrées, S6 volontairement laissée ouverte.
