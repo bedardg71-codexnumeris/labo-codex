@@ -17,6 +17,18 @@
     const ZOOM_MIN = 0.25;
     const ZOOM_MAX = 4.0;
     const ZOOM_PAS = 0.1;
+    // Zoom molette/trackpad : le facteur suit l'AMPLITUDE du geste (deltaY).
+    // Avant, un pas fixe de 3 % par evenement ignorait deltaY. MESURE au trackpad
+    // Chrome/macOS le 31 aout 2026 : un pincement de 834 ms emmenait le zoom de
+    // 50 % a 227 %, soit x4,5 -- le zoom courait plus vite que les doigts.
+    // CALCULE depuis cette mesure (et non observe) : ~51 evenements pour ce geste,
+    // |deltaY| median 0,80, donc une somme d'amplitude d'environ 41. A 0,025, le
+    // meme geste rend x2,8. Baisser cette constante ralentit proportionnellement :
+    // 0,015 rendrait x1,8. Calee a l'usage par Gregoire, pas depuis un ideal.
+    const ZOOM_SENSIBILITE_MOLETTE = 0.025;
+    // Borne par evenement : une molette de souris envoie des deltaY de ~100,
+    // qui donneraient un facteur x12 d'un seul cran sans ce plafond.
+    const ZOOM_FACTEUR_MAX_EVENEMENT = 1.25;
     const ZOOM_DEFAUT = 1.0;
     const ZOOM_FIT = 'fit'; // Ajuster a la fenetre
     const ZOOM_FIT_WIDTH = 'fit-width';   // Pleine largeur
@@ -448,7 +460,11 @@
     /**
      * Met a jour l'affichage de la navigation de pages
      */
-    function mettreAJourNavigation() {
+    /**
+     * @param {number} [zoomAffiche] - Zoom a afficher pendant un geste en cours,
+     *   quand l'apercu CSS devance le re-rendu et que zoomActuel n'a pas encore bouge.
+     */
+    function mettreAJourNavigation(zoomAffiche) {
         const indicateur = document.getElementById('travaux-indicateur-page');
         if (indicateur) {
             indicateur.textContent = `${pageActuelle} / ${nombrePagesTotal}`;
@@ -474,7 +490,7 @@
         // Zoom — mettre à jour le bouton zoom100 avec le pourcentage réel
         var btnZoom100 = document.getElementById('travaux-btn-zoom100');
         if (btnZoom100) {
-            btnZoom100.textContent = Math.round(zoomActuel * 100) + '%';
+            btnZoom100.textContent = Math.round((zoomAffiche || zoomActuel) * 100) + '%';
         }
     }
 
@@ -488,37 +504,72 @@
     /**
      * Zoom avec recentrage : préserve le point focal (centre de la vue)
      */
-    async function zoomAvecRecentrage(ancienZoom) {
+    /**
+     * Change le zoom en gardant sous le meme point de l'ecran la portion de
+     * document qui s'y trouvait.
+     *
+     * ⚠ La position du canvas dans la zone defilable est MESUREE, jamais
+     * deduite des marges du wrapper. MESURE du 31 aout 2026, ecran de Gregoire :
+     * le conteneur porte `justify-content: center`, et le centrage absorbe une
+     * part de la marge de depart -- part qui DEPEND DE LA TAILLE DU CONTENU,
+     * donc qui change a chaque zoom. Le code deduisait l'origine du canvas de
+     * `margin-left` (810 px mesures) alors que le canvas commencait a 222 :
+     * 588 px d'erreur en X, croissante avec l'ampleur du zoom, maximale sur un
+     * gros dezoom. Le `padding: 16px` du conteneur ajoutait la sienne, de 16 px,
+     * visible en Y ou le centrage ne joue pas (`align-items: flex-start`).
+     * Une correction de mai (99.30) avait deja vu que la marge ne scale pas avec
+     * le zoom ; elle n'avait pas vu que la marge n'est pas l'origine.
+     *
+     * @param {Function} appliquerZoom - Applique le zoom et re-rend (async)
+     * @param {number} viseX - Point focal en X, relatif au conteneur
+     * @param {number} viseY - Point focal en Y, relatif au conteneur
+     */
+    async function rezoomerEnGardantLePoint(appliquerZoom, viseX, viseY) {
+        const conteneur = conteneurGestesZoom;
+        if (!conteneur || !canvasDocument) {
+            await appliquerZoom();
+            return;
+        }
+
+        // Ou tombe le point vise DANS le canvas, en fraction de sa taille ?
+        // Une fraction survit au changement d'echelle ; une distance en pixels non.
+        const avantC = conteneur.getBoundingClientRect();
+        const avantK = canvasDocument.getBoundingClientRect();
+        const fx = avantK.width ? (viseX - (avantK.left - avantC.left)) / avantK.width : 0.5;
+        const fy = avantK.height ? (viseY - (avantK.top - avantC.top)) / avantK.height : 0.5;
+
+        await appliquerZoom();
+
+        // Remettre cette meme fraction sous le point vise. L'origine du canvas
+        // est relue APRES le re-rendu : le centrage a pu la deplacer.
+        const apresC = conteneur.getBoundingClientRect();
+        const apresK = canvasDocument.getBoundingClientRect();
+        const origineX = (apresK.left - apresC.left) + conteneur.scrollLeft;
+        const origineY = (apresK.top - apresC.top) + conteneur.scrollTop;
+        conteneur.scrollLeft = origineX + fx * apresK.width - viseX;
+        conteneur.scrollTop = origineY + fy * apresK.height - viseY;
+    }
+
+    async function zoomAvecRecentrage() {
         if (!conteneurGestesZoom) {
             await reRendrePageActuelle();
             return;
         }
-        // Point focal = centre de la vue en coordonnees du contenu.
-        // Symetrie (99.30) : appliquer la meme formule margin-aware que
-        // finaliserPinchZoom (l. 803) et onWheelZoom -- la marge CSS du wrapper
-        // ne scale pas avec le zoom, donc traiter cX*ratio comme uniformement
-        // scale over-shifte le scroll de margin*(ratio-1) par clic. Sur 10
-        // clics +/-, drift cumule ~100px du focal point.
-        var viewX = conteneurGestesZoom.clientWidth / 2;
-        var viewY = conteneurGestesZoom.clientHeight / 2;
-        var contentX = conteneurGestesZoom.scrollLeft + viewX;
-        var contentY = conteneurGestesZoom.scrollTop + viewY;
-        var margin = getMarginWrapper();
-        var ratio = ancienZoom > 0 ? zoomActuel / ancienZoom : 1;
-
-        await reRendrePageActuelle();
-
-        conteneurGestesZoom.scrollLeft = (contentX - margin.left) * ratio + margin.left - viewX;
-        conteneurGestesZoom.scrollTop = (contentY - margin.top) * ratio + margin.top - viewY;
+        // Les boutons +/- et 100 % n'ont pas de curseur : le point garde est le
+        // centre de la vue.
+        await rezoomerEnGardantLePoint(
+            () => reRendrePageActuelle(),
+            conteneurGestesZoom.clientWidth / 2,
+            conteneurGestesZoom.clientHeight / 2
+        );
     }
 
     async function zoomAvant() {
         modeZoom = 'manual';
-        var ancien = zoomActuel;
         zoomActuel = Math.min(zoomActuel + ZOOM_PAS, ZOOM_MAX);
         mettreAJourNavigation();
         cachePages.clear();
-        await zoomAvecRecentrage(ancien);
+        await zoomAvecRecentrage();
     }
 
     /**
@@ -526,11 +577,10 @@
      */
     async function zoomArriere() {
         modeZoom = 'manual';
-        var ancien = zoomActuel;
         zoomActuel = Math.max(zoomActuel - ZOOM_PAS, ZOOM_MIN);
         mettreAJourNavigation();
         cachePages.clear();
-        await zoomAvecRecentrage(ancien);
+        await zoomAvecRecentrage();
     }
 
     /**
@@ -568,10 +618,9 @@
      */
     async function zoom100() {
         modeZoom = 'manual';
-        var ancien = zoomActuel;
         zoomActuel = 1.0;
         cachePages.clear();
-        await zoomAvecRecentrage(ancien);
+        await zoomAvecRecentrage();
     }
 
     /**
@@ -611,10 +660,10 @@
     let gesteZoomMolette = {
         actif: false,
         zoomDepart: 1,
+        zoomCible: null,
+        origineFixee: false,
         viewX: 0,
         viewY: 0,
-        scrollXDepart: 0,
-        scrollYDepart: 0,
         timer: null
     };
 
@@ -807,34 +856,36 @@
     /**
      * Re-rend le document a la resolution finale apres un pinch
      */
-    async function finaliserPinchZoom() {
+    /**
+     * Applique le zoom vise a la fin d'un geste -- pinch Safari OU molette/trackpad.
+     * Retire l'apercu CSS, re-rend a la resolution finale, puis recale le
+     * defilement pour que le point vise reste sous les doigts ou le curseur.
+     * @param {number} zoomCible - Zoom a appliquer
+     * @param {number} centreX - Point focal en X, relatif au conteneur
+     * @param {number} centreY - Point focal en Y, relatif au conteneur
+     */
+    async function finaliserZoomGeste(zoomCible, centreX, centreY) {
         // Retirer le transform CSS de preview
         if (wrapperGestesZoom) {
             wrapperGestesZoom.style.transform = '';
             wrapperGestesZoom.style.transformOrigin = '';
         }
 
-        const zoomCible = pinchState.zoomCible;
         if (!zoomCible || Math.abs(zoomCible - zoomActuel) < 0.01) return;
 
-        const ancienZoom = zoomActuel;
-        const ratio = zoomCible / ancienZoom;
-        const viewX = pinchState.centreX || (conteneurGestesZoom.clientWidth / 2);
-        const viewY = pinchState.centreY || (conteneurGestesZoom.clientHeight / 2);
-        const contentX = conteneurGestesZoom.scrollLeft + viewX;
-        const contentY = conteneurGestesZoom.scrollTop + viewY;
-        const margin = getMarginWrapper();
+        const viseX = centreX || (conteneurGestesZoom.clientWidth / 2);
+        const viseY = centreY || (conteneurGestesZoom.clientHeight / 2);
 
-        modeZoom = 'manual';
-        zoomActuel = zoomCible;
-        cachePages.clear();
+        await rezoomerEnGardantLePoint(async () => {
+            modeZoom = 'manual';
+            zoomActuel = zoomCible;
+            cachePages.clear();
+            await reRendrePageActuelle();
+        }, viseX, viseY);
+    }
 
-        await reRendrePageActuelle();
-
-        // Ajuster pour les marges fixes (seul le canvas scale, pas les marges)
-        conteneurGestesZoom.scrollLeft = (contentX - margin.left) * ratio + margin.left - viewX;
-        conteneurGestesZoom.scrollTop = (contentY - margin.top) * ratio + margin.top - viewY;
-
+    async function finaliserPinchZoom() {
+        await finaliserZoomGeste(pinchState.zoomCible, pinchState.centreX, pinchState.centreY);
         pinchState.zoomCible = null;
     }
 
@@ -850,41 +901,60 @@
 
         e.preventDefault();
 
-        const facteur = e.deltaY > 0 ? 0.97 : 1.03;
-        const nouveauZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoomActuel * facteur));
-        if (Math.abs(nouveauZoom - zoomActuel) < 0.001) return;
+        // Un deltaY nul est un evenement neutre : le trackpad en emet (minimum
+        // mesure = 0). L'ancien `deltaY > 0 ? 0.97 : 1.03` les versait tous dans
+        // la branche « zoom avant » -- le zoom avancait sur un geste immobile.
+        if (!e.deltaY) return;
 
         const rect = conteneurGestesZoom.getBoundingClientRect();
 
         if (!gesteZoomMolette.actif) {
             gesteZoomMolette.actif = true;
             gesteZoomMolette.zoomDepart = zoomActuel;
-            gesteZoomMolette.scrollXDepart = conteneurGestesZoom.scrollLeft;
-            gesteZoomMolette.scrollYDepart = conteneurGestesZoom.scrollTop;
+            gesteZoomMolette.zoomCible = zoomActuel;
+            gesteZoomMolette.origineFixee = false;
+            // Le point focal se fige au PREMIER evenement du geste, et il est le
+            // MEME pour l'apercu et pour le recalage final. Le reecrire a chaque
+            // evenement faisait zoomer l'apercu autour du point de depart, puis
+            // recaler le defilement sur le point d'ARRIVEE du curseur : le
+            // document derivait d'autant que les doigts avaient bouge. Plus
+            // visible au dezoom, ou le pincement vers l'interieur deplace le
+            // curseur davantage (retour de Gregoire, 31 aout 2026).
+            gesteZoomMolette.viewX = e.clientX - rect.left;
+            gesteZoomMolette.viewY = e.clientY - rect.top;
         }
 
-        gesteZoomMolette.viewX = e.clientX - rect.left;
-        gesteZoomMolette.viewY = e.clientY - rect.top;
+        // Le facteur suit l'amplitude du geste, et se cumule sur la CIBLE du
+        // geste en cours -- pas sur zoomActuel, qui reste celui du canvas rendu.
+        const facteurBrut = Math.exp(-e.deltaY * ZOOM_SENSIBILITE_MOLETTE);
+        const facteur = Math.min(ZOOM_FACTEUR_MAX_EVENEMENT,
+            Math.max(1 / ZOOM_FACTEUR_MAX_EVENEMENT, facteurBrut));
+        const zoomCible = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, gesteZoomMolette.zoomCible * facteur));
+        gesteZoomMolette.zoomCible = zoomCible;
+
+        // Apercu immediat par transform CSS, sans re-rendu : c'est le patron du
+        // pinch Safari, que ce chemin n'avait pas. Sans lui, rien ne bouge a
+        // l'ecran pendant le geste et le document saute d'un bloc a la fin.
+        if (wrapperGestesZoom) {
+            if (!gesteZoomMolette.origineFixee) {
+                const wrapperRect = wrapperGestesZoom.getBoundingClientRect();
+                wrapperGestesZoom.style.transformOrigin =
+                    (e.clientX - wrapperRect.left) + 'px ' + (e.clientY - wrapperRect.top) + 'px';
+                gesteZoomMolette.origineFixee = true;
+            }
+            wrapperGestesZoom.style.transform =
+                'scale(' + (zoomCible / gesteZoomMolette.zoomDepart) + ')';
+        }
 
         modeZoom = 'manual';
-        zoomActuel = nouveauZoom;
-        mettreAJourNavigation();
+        mettreAJourNavigation(zoomCible);
 
         if (gesteZoomMolette.timer) clearTimeout(gesteZoomMolette.timer);
         gesteZoomMolette.timer = setTimeout(async () => {
-            const ratio = zoomActuel / gesteZoomMolette.zoomDepart;
-            const contentX = gesteZoomMolette.scrollXDepart + gesteZoomMolette.viewX;
-            const contentY = gesteZoomMolette.scrollYDepart + gesteZoomMolette.viewY;
-            const margin = getMarginWrapper();
-
-            cachePages.clear();
-            await reRendrePageActuelle();
-
-            // Ajuster pour les marges fixes (seul le canvas scale, pas les marges)
-            conteneurGestesZoom.scrollLeft = (contentX - margin.left) * ratio + margin.left - gesteZoomMolette.viewX;
-            conteneurGestesZoom.scrollTop = (contentY - margin.top) * ratio + margin.top - gesteZoomMolette.viewY;
-
             gesteZoomMolette.actif = false;
+            await finaliserZoomGeste(gesteZoomMolette.zoomCible,
+                gesteZoomMolette.viewX, gesteZoomMolette.viewY);
+            gesteZoomMolette.zoomCible = null;
         }, 100);
     }
 
@@ -1032,15 +1102,6 @@
     /**
      * Retourne le margin du wrapper (pour les calculs de zoom centrage)
      */
-    function getMarginWrapper() {
-        if (!wrapperGestesZoom) return { left: 0, top: 0 };
-        var cs = getComputedStyle(wrapperGestesZoom);
-        return {
-            left: parseInt(cs.marginLeft, 10) || 0,
-            top: parseInt(cs.marginTop, 10) || 0
-        };
-    }
-
     function estModePanActif() {
         return panState.spaceActif || panState.actif;
     }
