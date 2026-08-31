@@ -234,6 +234,43 @@ Deux nuances importantes, en faveur de D2-A :
 - **`js/reserve.js` traite DÉJÀ les deux formes.** Sa l.660 teste `nomCourt.indexOf('cartouches_') === 0` où `nomCourt` est la partie dénamespacée d'une clé `<trim>_*` — le commentaire l.659 le dit (« Cartouches namespacés par trimestre archivé : laisser passer »). Sous D2-A, cette branche couvre le cas courant, et c'est la passe globale de la l.696 qui devient un RÉSIDU à retirer. Le pipeline Codex USB n'est donc pas à réécrire, seulement à élaguer.
 - **`demo-activation.js` itère les clés du PACK, pas du magasin** (`Object.keys(PACK_DEMARRAGE)`, l.209 et 433). Les deux sites doivent composer `cle(nom)` à l'écriture et à la purge, sinon le matériel démo est posé sous la clé nue et lu sous la clé namespacée.
 
+##### Recomptage du 31 août 2026 — correction additive
+
+*Ajouté par `kuekatsheu-67`, mandatée par `kuekatsheu-c8`. Le titre et le tableau ci-dessus restent lisibles tels qu'écrits le 30 août : un constat retiré en silence redevient une source qu'on ne peut plus recouper. Ce bloc dit ce qui est faux et pourquoi.*
+
+**Les deux chiffres du titre sont faux, et le tableau ne compte pas ce qu'il annonce.** Le titre dit « quinze énumérations […] dans neuf fichiers » ; le tableau en énumère quatorze, dans dix fichiers. Le recompte exhaustif en trouve **dix-neuf dans onze fichiers** pour `js/`, plus **sept dans six fichiers** pour `scripts/`, jamais recensés.
+
+**Commande qui l'établit** (couvre `startsWith`, `indexOf(…) === 0` et `!== 0`, les trois formes de guillemets, et `/^cartouches_/`) :
+
+```
+grep -rnE "startsWith\(\s*[\"'\`]cartouches_|indexOf\(\s*[\"'\`]cartouches_[\"'\`]\s*\)\s*(===|!==|==|!=)\s*0|\^cartouches_" js/
+```
+
+Les formes `includes`, `match` et `test` sont absentes de `js/` — zéro obtenu **avec témoin** : un fichier portant les cinq formes a été soumis aux mêmes commandes, et chacune attrape bien les siennes. Sans ce témoin, le zéro ne distinguerait pas « rien à trouver » de « rien regardé ».
+
+**Le défaut du constat n'est pas le chiffre : c'est que les quatorze lignes mélangent des familles dont une seule casse en silence.** Vérification faite sur ce que chaque site ITÈRE, pas sur le fait qu'il teste un préfixe.
+
+| Famille | Sites | Sous D2-A |
+|---|---|---|
+| **A — énumèrent le magasin vivant** (`db.keysSync`/`db.keys`) | `cartouches.js:1895` · `evaluation.js:290` · `echelles.js:578` · `import-export.js:3239` · `reserve.js:696` | **Rendent une collection vide, en silence.** La vraie famille du constat : **cinq sites**, pas quinze. `reserve.js:696` devient un résidu à retirer, pas à corriger. |
+| **B — énumèrent un fichier importé ou un objet en mémoire** | `import-export.js:2101, 2920` · `reserve-ouvrir.js:265` · `codex-data.js:240, 261` · `demo-activation.js:213, 437` | Le test de préfixe SURVIT. Ce qui casse est l'accord avec le producteur du fichier, ou l'accès voisin en clé nue (`import-export.js:2923`, `demo-activation.js:215`). Réparation différente. |
+| **C — le routage lui-même** | `trimestres.js:334, 344, 399, 408` | Absents du tableau d'origine. C'est ce que **T5.2 retire** ; ils ne « cassent » pas, ils disparaissent. |
+| **D — déjà tolérants** (clé dénamespacée en amont) | `reserve.js:660` · `codex.js:504` | Sans effet. Pour `codex.js`, le strip est explicite : `cle.replace(/^[aeh]\d{4}_/, '')`, l.492. |
+| **E — branche non atteinte** | `labo-codex-data.js:430` | Aucun appelant ne passe de clé `cartouches_*` : `lireBibliothequeGlobale` n'est appelée qu'à `consolidation.js:202`, avec `'echellesTemplates'`. Rien à réparer ; code dormant, à verser en note sous #628. |
+
+**Les deux nuances du bloc précédent sont exactes, mais elles contredisent le tableau qu'elles suivent.** `reserve.js` et `demo-activation.js` y sont décrits comme des cas à part, et comptés dans le tableau comme des sites du constat. Le tableau ci-dessus lève la contradiction sans retirer les nuances.
+
+**Un écart mesuré au passage — et il est plus étroit qu'il n'en a l'air.** `reserve.js` écrit **deux formes de clé** dans la même archive : clé complète `<trim>_cartouches_<id>` à la l.661, clé nue aux l.697-699. Trois lecteurs ne testent que la forme nue, et les conséquences diffèrent :
+
+- **`reserve-ouvrir.js:265` — perte réelle, aujourd'hui.** Une clé namespacée échoue au test, la fonction sort par `return`, et la cartouche n'apparaît pas dans la liste de réouverture. C'est un symptôme visible par l'utilisateur. ⮕ **#637**, à confirmer sur données réelles : la mesure ci-dessus est STATIQUE.
+- **`codex-data.js:240` et `:261` — écart de classement, pas disparition.** Les deux `indexOf` ratent ENSEMBLE, et leurs ratés se compensent : `_extraireBibliotheques` (l.240) ne hisse pas la clé namespacée dans `biblio.cartouches`, et `_retirerBibliothequesDuGroupe` (l.261) ne la retire pas non plus du groupe. Elle reste donc dans les données du groupe. Vérifié que les deux fonctions opèrent bien sur le même objet : `_construireCodexData` les appelle aux l.288 et 307. Rien n'est perdu, le rangement est faux.
+
+Dire « déjà invisible » des trois lecteurs aurait été une affirmation plus forte que la mesure. Correction portée par `kuekatsheu-c8` à la relecture, vérifiée avant d'être retenue.
+
+**Sept sites d'outillage, absents des trois audits — #636.** `scripts/diagnostic-453-references-productions.js:128` · `scripts/reparation-cartouches-orphelines.js:47` · `scripts/diagnostic-448-doublons-import.js:110` · `scripts/reparation-453-references-productions.js:185` · `scripts/identification-454-grilles-fantomes.js:122` · `scripts/audit-bibliotheques-securite.js:121, 130`. Ce sont des outils de diagnostic et de **réparation** lancés sur les données réelles. Sous D2-A ils rendraient zéro, et un diagnostic qui rend zéro se lit « rien à réparer ». C'est la famille la plus dangereuse des six, et elle n'était nulle part.
+
+**Datation de la liste.** `git log -S "indexOf('cartouches_')" -- js/ scripts/` et son équivalent en `startsWith`. Dernier commit à modifier l'un des deux motifs : **`50f946d8`** (2026-08-29, « fix(#574) »), qui ajoute la seule ligne `echelles.js:578` — la veille de cet audit. **Hash de péremption : `50f946d8`.** La liste ci-dessus est exacte tant que ces deux commandes ne rendent rien de plus récent que ce hash. Le vérifier avant de s'en servir comme checklist : une liste de tolérance périme en silence.
+
 #### Z1-S2 — `purgerCopiesModelesArchive` deviendrait destructive sous D2-A [CONFLIT latent]
 
 `js/trimestres.js:1017-1045`. **VÉRIFIÉ.**

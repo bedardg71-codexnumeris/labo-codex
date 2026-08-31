@@ -387,6 +387,36 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ Rappel de contexte : le fichier « Exporter » d'un trimestre n'a **aucun** chemin de restauration
   (`type: 'archive-trimestre'` n'apparaît qu'à l'écriture), et le snapshot d'archivage **n'a aucun
   lecteur**. Ni l'un ni l'autre ne peut servir ici.
+- [ ] **#636 — Sept énumérations par préfixe `cartouches_` dans `scripts/` ne sont dans AUCUN périmètre de session, et mentiraient par ZÉRO**.
+  Inscrit le 31 août 2026 par `kuekatsheu-c8`, **avant tout usage**, sur mesure de `kuekatsheu-67`, recoupée indépendamment.
+  Les trois audits Z1/Z2/Z3 ne recensent que `js/`. `scripts/` en porte **sept de plus, dans six fichiers** :
+  `diagnostic-453-references-productions.js:128` · `reparation-cartouches-orphelines.js:47` ·
+  `diagnostic-448-doublons-import.js:110` · `reparation-453-references-productions.js:185` ·
+  `identification-454-grilles-fantomes.js:122` · `audit-bibliotheques-securite.js:121, 130`.
+  ⮕ **Pourquoi c'est la famille la plus dangereuse** : ce sont des outils de DIAGNOSTIC et de RÉPARATION lancés en
+  console sur les données réelles. Sous namespacement (S5 / D2-A) ils rendraient zéro — et **un diagnostic qui rend
+  zéro se lit « rien à réparer »**. Un outil qui ment par zéro est pire qu'un outil absent.
+  ⮕ **À traiter DANS le périmètre de S5**, pas après : le jour où la migration passe, ces sept-là sont déjà faux.
+- [ ] **#637 — `reserve.js` écrit DEUX formes de clé de cartouches dans la même archive, et un lecteur sur deux n'en voit qu'une**.
+  Inscrit le 31 août 2026 par `kuekatsheu-c8`, sur mesure de `kuekatsheu-67`, recoupée indépendamment.
+  ⚠ **Défaut ACTUEL, pas un coût futur de S5** — mais **mesuré STATIQUEMENT seulement** : à confirmer sur données
+  réelles avant d'y croire.
+  `js/reserve.js:661` écrit la clé COMPLÈTE `<trim>_cartouches_<id>` (branche « cartouches namespacés par trimestre
+  archivé ») ; `js/reserve.js:697-699` écrit en plus la clé NUE (passe « cartouches globales »).
+  ⮕ **`js/reserve-ouvrir.js:265` ne teste que la forme NUE** (`k.indexOf('cartouches_') !== 0` → `return`) : une
+  cartouche namespacée **n'apparaît pas dans la liste de réouverture**. Vérifié qu'aucun traitement alternatif
+  n'existe ailleurs dans le fichier.
+  ⮕ **`js/codex-data.js` : ce n'est PAS une perte, c'est un écart de CLASSEMENT.** `:240` ne hisse que la forme nue
+  dans `biblio.cartouches`, mais son voisin `_retirerBibliothequesDuGroupe` (`:261`) ne strippe que la forme nue lui
+  aussi : la clé namespacée **reste dans les données du groupe**. Les deux `indexOf` ratent ensemble et se compensent.
+  ⚠ Ne pas propager « déjà invisible » aux deux lecteurs : l'affirmation serait plus forte que la mesure.
+- [ ] **#638 — Z2:830 surestime le travail de S9 sur `partage-import.js` : la table de correspondance EXISTE, c'est son APPLICATION qui manque**.
+  Inscrit le 31 août 2026 par `kuekatsheu-c8`, sur mesure de `kuekatsheu-67`.
+  Z2:830 affirme que « les quatre implémentations attribuent un id neuf à une cartouche sans le mémoriser ».
+  **Faux pour `js/partage-import.js`** : la table est là (`correspondance.cartouche`, `:152-156`, par préfixe).
+  Ce qui manque, c'est son application — `:174-178` ne patche que `grilleId`.
+  ⮕ Conséquence : le lot **S9 / #627** est plus petit qu'annoncé de ce côté. Corriger l'énoncé de Z2 avant que S9
+  s'en serve comme spécification. **Un diff d'audit est une esquisse, jamais une spécification.**
 - [ ] **#624 — S6 · Politique de suppression : refermer les CHEMINS qui produisent des orphelins, et traiter les `ECHELLE_DEMO` résiduelles** (constats S1, S2). Après **S5** (ordre strict S4→S5→S6), D3-A **qualifiée**.
   ⚠ **Reformulé le 30 août 2026.** L'énoncé précédent disait « absorbe la réparation #542 ». **#542 a été réparé le 26 août** (`scripts/reparation-542-echelle-orpheline.js` ; deux commits, dont `e3d5af34` qui corrige la réparation elle-même). Ce qui reste n'est pas la réparation : c'est **la CAUSE, inconnue**, et les `ECHELLE_DEMO` résiduelles. ⮕ Chiffres 383 → 44 **RAPPORTÉS, non remesurés** : le diagnostic de T2.2 rendra celui du jour.
   ⚠ **D3-A est qualifiée, pas appliquée à la lettre** : bloquer + NOMMER les référents (quoi, combien, quel trimestre) + **CONSERVER et généraliser la porte de sortie « réassigner vers un autre objet »** là où elle existe. Sur les échelles, le chemin actuel PROPOSE de migrer les évaluations : un D3-A strict retirerait cette issue et laisserait un refus indéfaisable. Un blocage sans issue n'est pas une garde.
