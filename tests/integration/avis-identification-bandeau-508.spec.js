@@ -18,6 +18,12 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // Le point 4 est le plus important. L'avis annonce un futur ; passé la date, il
 // annonce un futur révolu, et un avis périmé apprend au lecteur à ne plus lire
 // cette zone de l'écran — celle où vivent aussi les jalons du parcours.
+//
+// ⚠ CE SPEC NE DÉPEND PAS DU JOUR OÙ ON LE JOUE. Toutes ses assertions tournent
+// sous date simulée (`simulerDate`). Sa première version ne le faisait que pour
+// la condition, et son bloc d'affichage serait devenu rouge de lui-même le
+// 1er septembre 2026 : un harnais qui se met à mentir à date fixe est pire que
+// pas de harnais. Si tu ajoutes une assertion ici, mets-la sous simulation.
 
 const patternsAttendus = [
     /version\.json.*access control/i,
@@ -93,6 +99,13 @@ test('#508 — avis daté : visible sur l\'accueil, clé unique, et s\'éteint l
         }
 
         // --- Affichage sur l'accueil ----------------------------------------
+        // ⚠ Sous DATE SIMULÉE, et ce n'est pas un détail : la condition de l'avis
+        // est temporelle. Sans cette simulation, ce bloc passait tant qu'on était
+        // avant le 1er septembre 2026 et rougissait tout seul le lendemain — une
+        // sentinelle à retardement, exactement ce qu'un harnais ne doit pas être.
+        // On rejoue donc le 31 août pour vérifier le comportement d'affichage, la
+        // condition datée étant déjà couverte plus haut.
+        simulerDate(2026, 7, 31);
         window.definirPreference(avis.dejaVuePref, false);
         window.transitions.fermerBandeau();
         window.afficherSection('accueil');
@@ -113,6 +126,11 @@ test('#508 — avis daté : visible sur l\'accueil, clé unique, et s\'éteint l
             disparu = !document.getElementById('transition-bandeau');
             prefApresFermeture = window.obtenirPreference(avis.dejaVuePref);
         }
+
+        // Rendre la vraie Date avant de sortir : tout ce qui suit doit retrouver
+        // l'horloge réelle, y compris les specs joués après celui-ci.
+        window.Date = VraiDate;
+        window.transitions.fermerBandeau();
 
         // Remettre l'état par défaut pour ne pas polluer les specs suivants
         // (workers:1, localStorage partagé sur l'origine file://).
