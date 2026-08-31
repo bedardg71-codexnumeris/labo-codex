@@ -2036,82 +2036,6 @@ async function supprimerForfaitMat(indexForfait) {
 }
 
 /* ===============================
-   CRÉATION DE PRATIQUE
-   =============================== */
-
-/**
- * Crée une nouvelle pratique
- */
-async function creerNouvellePratique() {
-
-    // Générer un ID unique
-    const nouvelId = genererIdUnique('pratique_');
-
-    // Auteur CC = identité de l'utilisateur (Plan 1 §4.4)
-    const identiteUtilisateur = obtenirIdentiteCCUtilisateur();
-
-    const nouvellePratique = {
-        id: nouvelId,
-        nom: 'Nouvelle pratique',
-        description: '',
-        type: 'pan-standards',
-        pratiques: ['STD'],
-        auteur: identiteUtilisateur,
-        discipline: '',
-        dateCreation: new Date().toISOString(),
-        dansBibliotheque: true,
-        configuration: {
-            varianteCalcul: 'n-meilleurs',
-            portfolio: {
-                methodeSelection: 'meilleurs',
-                nombreARetenir: 5,
-                minimumCompletion: 5,
-                nombreTotal: 10,
-                decouplerPN: false
-            }
-        },
-        metadata_cc: {
-            auteur_original: identiteUtilisateur,
-            date_creation: new Date().toISOString().split('T')[0],
-            contributeurs: []
-        }
-    };
-
-    // 🆕 FIX (20 jan 2026) : Sauvegarde avec vérification explicite
-    try {
-        // #522 — l'ajout se fait DANS la file : lire la collection ici et la
-        // réécrire ensuite effacerait une pratique créée entre les deux.
-        await db.modifier(cle('pratiquesConfigurables'), (lues) => {
-            const configurations = lues || [];
-            configurations.push(nouvellePratique);
-            return configurations;
-        }, []);
-
-        // Vérifier que la sauvegarde a réussi en relisant les données
-        const verification = await db.get(cle('pratiquesConfigurables'), null) || [];
-        const pratiqueTrouvee = verification.find(p => p.id === nouvelId);
-
-        if (!pratiqueTrouvee) {
-            // ⚠ Le repli d'origine réécrivait la collection entière hors de la
-            // file (`setSync`) ; il remettait donc en place l'instantané que la
-            // file sert à ne plus perdre. La vérification devient un constat.
-            console.error('[pratiques-gestion] ❌ Vérification échouée après écriture:', nouvelId);
-            throw new Error('Sauvegarde impossible dans IndexedDB et localStorage');
-        }
-
-
-        // Rafraîchir la sidebar et charger la nouvelle pratique
-        await afficherListePratiquesMateriel();
-        await chargerPratiquePourModif(nouvelId);
-
-        notifications.succes('Nouvelle pratique créée et sauvegardée');
-    } catch (erreur) {
-        console.error('[pratiques-gestion] ❌ Erreur sauvegarde pratique:', erreur);
-        notifications.erreur('Erreur : la pratique n\'a pas pu être sauvegardée. Veuillez réessayer.');
-    }
-}
-
-/* ===============================
    MISE À JOUR DES CHAMPS
    =============================== */
 
@@ -2907,7 +2831,6 @@ function ouvrirReglagesPratique(pratiqueId) {
 }
 window.ouvrirReglagesPratique = ouvrirReglagesPratique;
 window.dupliquerEtEditerPratique = dupliquerEtEditerPratique;
-window.creerNouvellePratique = creerNouvellePratique;
 window.dupliquerPratiqueMateriel = dupliquerPratiqueMateriel;
 window.supprimerPratiqueMateriel = supprimerPratiqueMateriel;
 window.appliquerPratiqueAuCours = appliquerPratiqueAuCours;

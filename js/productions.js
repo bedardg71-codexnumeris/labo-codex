@@ -2068,6 +2068,12 @@ async function sauvegarderProduction() {
 
     annulerFormProduction();
     await rafraichirInterfaceApresSauvegarde(idSauvegarde, estModification);
+
+    // #626 (31 août 2026) — fusion des couches d'override (constat M4). Ce
+    // rafraîchissement de la barre latérale vivait dans un wrapper posé en fin de
+    // fichier, qui rappelait la fonction ci-dessus puis l'ajoutait. Une seule
+    // couche désormais ; l'ordre des deux gestes est inchangé.
+    await afficherListeProductions();
 }
 
 /* ===============================
@@ -2123,39 +2129,6 @@ function annulerFormProduction() {
  */
 async function modifierProduction(id) {
     await afficherFormProduction(id);
-}
-
-/* ===============================
-   FONCTION: SUPPRIMER PRODUCTION
-   Supprime une production après confirmation
-   ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
-   =============================== */
-
-/**
- * Supprime une production de la liste
- * 
- * @param {string} id - ID de la production à supprimer
- * 
- * UTILISÉ PAR:
- * - Bouton "Supprimer" dans la liste des productions
- * 
- * FONCTIONNEMENT:
- * 1. Demande confirmation
- * 2. Charge la liste des productions
- * 3. Filtre pour retirer la production ciblée
- * 4. Sauvegarde dans localStorage
- * 5. Rafraîchit l'affichage
- * 6. Met à jour les pondérations
- */
-async function supprimerProduction(id) {
-    if (confirm('Es-tu sûr de vouloir supprimer cette production ?')) {
-        await db.modifier(getCleProductions(), (lues) => {
-            return (lues || []).filter(e => e.id !== id);
-        }, []);
-        await afficherTableauProductions();
-        await afficherToutesLesProductionsParType();
-        await mettreAJourPonderationTotale();
-    }
 }
 
 /* ===============================
@@ -3200,19 +3173,20 @@ async function peuplerEchellesProduction() {
 
 
 /**
- * Adapte la fonction sauvegarderProduction existante pour le nouveau layout
- * Cette fonction override la fonction originale pour ajouter le support sidebar
- */
-const sauvegarderProductionOriginale = window.sauvegarderProduction;
-window.sauvegarderProduction = async function() {
-    if (typeof sauvegarderProductionOriginale === 'function') {
-        await sauvegarderProductionOriginale();
-    }
-    await afficherListeProductions();
-};
-
-/**
  * Adapte la fonction annulerFormProduction pour le nouveau layout
+ *
+ * ⚠ #633 — CETTE COUCHE RESTE, ET C'EST DÉLIBÉRÉ. #626 a fusionné les deux
+ * autres couches d'override de ce fichier (constat M4) mais PAS celle-ci : ses
+ * deux corps sont vivants, pas un seul. Ce wrapper est atteint depuis `window`
+ * (data-action « annulerFormProduction », productions-liste.js) ; la fonction
+ * plus haut est atteinte depuis l'IIFE (fin de `sauvegarderProduction`, et le
+ * `supprimerProduction` ci-dessous), où le nom résout vers le module, pas vers
+ * `window`. Les deux corps DIFFÈRENT : celui-ci ne remet pas `productionEnEdition`
+ * à null, l'autre ne touche ni les options, ni l'accueil, ni le surlignage.
+ * Fusionner change quatre sites d'appel et répare au passage un défaut latent
+ * (le surlignage de la barre latérale survit à la suppression de la production
+ * affichée) : c'est un changement de comportement, il demande son propre item et
+ * un test manuel. Ne pas le faire ici.
  */
 const annulerFormProductionOriginale = window.annulerFormProduction;
 window.annulerFormProduction = function() {
@@ -3234,10 +3208,19 @@ window.annulerFormProduction = function() {
 };
 
 /**
- * Adapte la fonction supprimerProduction pour le nouveau layout
+ * Supprime une production après confirmation.
+ *
+ * ⚠ NE PAS RENOMMER - Référencé dans noms_stables.json
+ *
+ * UTILISÉ PAR : bouton « Supprimer » de la liste (data-action).
+ *
+ * #626 (31 août 2026) — couche unique (constat M4). Il existait plus haut dans
+ * ce fichier une SECONDE définition, plus ancienne, que ce bloc écrasait sur
+ * `window` sans jamais l'appeler : elle filtrait la collection HORS de la file,
+ * c'est-à-dire le motif que #522 a précisément retiré. C'est elle qui est
+ * partie ; la version dans la file est celle qui reste.
  */
-const supprimerProductionOriginale = window.supprimerProduction;
-window.supprimerProduction = async function(id) {
+async function supprimerProduction(id) {
     if (!confirm('Supprimer cette production ?')) return;
 
     // ⚠ L'index est recalculé DANS la file : celui d'avant la confirmation ne
@@ -3264,7 +3247,7 @@ window.supprimerProduction = async function(id) {
     }
 
     notifications.succes('Production supprimée');
-};
+}
 
 
 })();

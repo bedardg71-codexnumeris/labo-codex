@@ -4,7 +4,6 @@
  *
  * Consommé par pratiques-bibliotheque.js pour afficher et éditer la
  * configuration pédagogique structurante d'une pratique :
- * - PAN-Standards (variantes) — changerVariantePANStandards
  * - PAN-Standards par-objectifs (modes de calcul) — chargerConfigParObjectifs
  * - PAN-Spécifications (types de travaux + forfaits/bundles) —
  *   chargerConfigSpecifications, afficherTypesTravauxSpec, afficherForfaitsSpec
@@ -141,44 +140,6 @@
      */
 
     /**
-     * Appelé quand l'utilisateur change la variante PAN-Standards
-     */
-    function changerVariantePANStandards() {
-        const variante = document.getElementById('v2-variante-calcul')?.value || '';
-        const descEl = document.getElementById('v2-variante-description');
-
-        if (!descEl) return;
-
-        const varianteInfo = VARIANTES_PAN_STANDARDS[variante];
-
-        if (varianteInfo) {
-            let html = `<strong>${varianteInfo.nom}</strong><br>${varianteInfo.description}`;
-            if (varianteInfo.exemple) {
-                html += `<br><em style="color: var(--gris-moyen);">Ex: ${varianteInfo.exemple}</em>`;
-            }
-            descEl.innerHTML = html;
-            descEl.classList.remove('u-hide');
-        } else {
-            descEl.classList.add('u-hide');
-        }
-
-        // ✅ NOUVEAU (Beta 95) : Afficher/masquer la configuration par-objectifs
-        const configObjectifs = document.getElementById('v2-config-par-objectifs');
-        if (configObjectifs) {
-            if (variante === 'par-objectifs') {
-                configObjectifs.classList.remove('u-hide');
-                // Charger les données de configuration
-                chargerConfigParObjectifs();
-            } else {
-                configObjectifs.classList.add('u-hide');
-            }
-        }
-
-        // Sauvegarder
-        sauvegarderPratiqueBaseV2();
-    }
-
-    /**
      * Affiche la description taxonomique correspondant au type sélectionné
      */
 
@@ -190,38 +151,6 @@
     // =========================================================================
     // SAUVEGARDE
     // =========================================================================
-
-    /**
-     * Sauvegarde les informations de base
-     */
-    function sauvegarderPratiqueBaseV2() {
-        let modalites = {};
-        try {
-            modalites = window.modalitesEvaluation.lire();
-        } catch (e) {
-            console.error('[pratique-notation-v2] Erreur lecture modalitesEvaluation:', e);
-            modalites = {};
-        }
-
-        modalites.nomPratique = document.getElementById('v2-pratique-nom')?.value || '';
-        // #328 L2-b2 : le miroir modalites.pratique n'est plus écrit — le type
-        // sélectionné ne sert plus qu'à la condition de variante ci-dessous.
-        const typeSelectionne = document.getElementById('v2-pratique-type')?.value || 'sommative';
-        modalites.description = document.getElementById('v2-pratique-description')?.value || '';
-        modalites.echelleId = document.getElementById('v2-echelle-id')?.value || '';
-
-        // Variante PAN-Standards (si applicable)
-        const varianteSelect = document.getElementById('v2-variante-calcul');
-        if (varianteSelect && typeSelectionne === 'pan-standards') {
-            modalites.varianteCalcul = varianteSelect.value || '';
-        }
-
-        try {
-            window.modalitesEvaluation.remplacer(modalites);
-        } catch (e) {
-            console.error('[pratique-notation-v2] ❌ Erreur sauvegarde:', e);
-        }
-    }
 
     /**
      * Sauvegarde la structure des évaluations
@@ -363,8 +292,9 @@
         // Charger les paramètres spécifiques au mode
         chargerParametresMode(mode);
 
-        // Sauvegarder
-        sauvegarderModeCalculObjectifs();
+        // #626 (31 août 2026) : la sauvegarde qui suivait est retirée avec
+        // `sauvegarderModeCalculObjectifs` — elle lisait `#v2-objectifs-mode-calcul`,
+        // parti d'index.html avec #434. C'est le formulaire `mat-*` qui persiste.
     }
 
     /**
@@ -400,23 +330,6 @@
                 if (methodeEl) methodeEl.value = hol.methodeSuggestion || 'mode';
                 break;
         }
-    }
-
-    /**
-     * Sauvegarde le mode de calcul sélectionné
-     */
-    function sauvegarderModeCalculObjectifs() {
-        let modalites = window.modalitesEvaluation.lire();
-        if (!modalites.parObjectifs) {
-            modalites.parObjectifs = { ...CONFIG_PAR_OBJECTIFS_DEFAUT };
-        }
-
-        const modeEl = document.getElementById('v2-objectifs-mode-calcul');
-        if (modeEl) {
-            modalites.parObjectifs.modeCalcul = modeEl.value;
-        }
-
-        window.modalitesEvaluation.remplacer(modalites);
     }
 
     /**
@@ -1209,9 +1122,6 @@
     // =========================================================================
     // EXPORTS GLOBAUX
     // =========================================================================
-
-    window.changerVariantePANStandards = changerVariantePANStandards;
-    window.sauvegarderPratiqueBaseV2 = sauvegarderPratiqueBaseV2;
 
     // Exports par-objectifs (Beta 95 - variante unifiée avec 4 modes)
     window.chargerConfigParObjectifs = chargerConfigParObjectifs;

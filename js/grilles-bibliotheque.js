@@ -201,74 +201,6 @@ async function migrerGrillesVersBibliotheque(cleSource) {
 }
 
 /**
- * Lister tous les trimestres qui ont des grilles
- * @returns {Array<{cle: string, code: string, nom: string, nombre: number}>}
- */
-function listerTrimestresAvecGrilles() {
-    const trimestres = [];
-    const trimestreActuel = window.trimestreActif || '';
-
-    // #389 : keysSync (localStorage ∪ memoryCache) — un trimestre dont la
-    // collection a basculé hors localStorage (quota) était invisible au scan.
-    const clesStockage = db.keysSync();
-    for (let i = 0; i < clesStockage.length; i++) {
-        const cle = clesStockage[i];
-        if (cle && cle.endsWith('_grilles')) {
-            try {
-                const data = db.getSync(cle, null);
-                if (Array.isArray(data) && data.length > 0) {
-                    const codeTrimestre = cle.replace('_grilles', '');
-
-                    if (codeTrimestre !== trimestreActuel) {
-                        const nomTrimestre = formaterNomTrimestreGrilles(codeTrimestre);
-                        trimestres.push({
-                            cle: cle,
-                            code: codeTrimestre,
-                            nom: nomTrimestre,
-                            nombre: data.length
-                        });
-                    }
-                }
-            } catch (e) {
-                // Ignorer
-            }
-        }
-    }
-
-    trimestres.sort((a, b) => b.code.localeCompare(a.code));
-    return trimestres;
-}
-
-/**
- * Formater un code trimestre pour affichage
- */
-function formaterNomTrimestreGrilles(code) {
-    if (!code) return 'Inconnu';
-    const saison = code.charAt(0).toLowerCase();
-    const annee = code.substring(1);
-    const saisons = { 'a': 'Automne', 'h': 'Hiver', 'e': 'Été' };
-    return `${saisons[saison] || saison.toUpperCase()} ${annee}`;
-}
-
-/**
- * Obtenir les grilles d'un trimestre spécifique
- * @param {string} cleOuCode - Clé complète ou code trimestre
- * @returns {Array}
- */
-function obtenirGrillesTrimestre(cleOuCode) {
-    const cle = cleOuCode.includes('_') ? cleOuCode : `${cleOuCode}_grilles`;
-    try {
-        const data = db.getSync(cle, null);
-        if (data) {
-            return data;
-        }
-    } catch (e) {
-        console.error('[Bibliothèque Grilles] Erreur lecture trimestre:', e);
-    }
-    return [];
-}
-
-/**
  * Obtenir le nombre de grilles dans la bibliothèque
  * @returns {number}
  */
@@ -288,9 +220,6 @@ window.retirerGrilleDeLaBibliotheque = retirerGrilleDeLaBibliotheque;
 window.importerGrillesDansBibliotheque = importerGrillesDansBibliotheque;
 window.exporterBibliothequeGrilles = exporterBibliothequeGrilles;
 window.migrerGrillesVersBibliotheque = migrerGrillesVersBibliotheque;
-window.listerTrimestresAvecGrilles = listerTrimestresAvecGrilles;
-window.formaterNomTrimestreGrilles = formaterNomTrimestreGrilles;
-window.obtenirGrillesTrimestre = obtenirGrillesTrimestre;
 window.getNombreGrillesBibliotheque = getNombreGrillesBibliotheque;
 window.CLE_BIBLIOTHEQUE_GRILLES = CLE_BIBLIOTHEQUE_GRILLES;
 
