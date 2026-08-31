@@ -161,7 +161,26 @@ async function chargerGrilleTemplate(grilleId) {
 
         // Initialiser avec un tableau vide
         grilleTemplateActuelle = null;
-        window.tempCriteres = window.tempCriteres || [];
+        // 🔧 #625 (31 août 2026) — T7.3, décision C. Cette porte d'ENTRÉE en
+        // création remet à zéro, comme `creerNouvelleGrille` : elle ne PRÉSERVE
+        // plus le résidu (`|| []`), qui était précisément le chemin par lequel
+        // des critères fantômes revenaient dans une grille neuve.
+        // ⚠ CETTE BRANCHE EST PRÉSUMÉE MORTE au 31 août 2026, par MESURE
+        // STATIQUE et SANS exécution du test §4.4 : `#selectGrilleTemplate` est
+        // un `<div>` vide du bloc « Conteneurs cachés pour compatibilité »
+        // (index.html), aucun `addEventListener` n'existe dans ce fichier, et
+        // les quatre appelants de `chargerGrilleTemplate` passent tous l'id
+        // d'une grille EXISTANTE. Le JSDoc de la fonction décrit donc une UI
+        // disparue. Le retrait du div et de cette branche appartient à
+        // S10 / #628 ; cette ligne est là pour que le résidu soit inoffensif
+        // AU CAS OÙ la branche serait atteignable par un chemin que la mesure
+        // statique n'a pas vu — une inférence statique ne distingue pas
+        // « aucun chemin » de « aucun chemin que j'ai su voir ».
+        // ⮕ Ce n'est pas une ceinture sur une bretelle : la purge posée dans
+        // `retourVueHierarchique` ferme le cas où l'on abandonne puis revient ;
+        // celle-ci couvre ce qui reste, c'est-à-dire toute autre entrée par ce
+        // chemin avec un tampon encore plein.
+        window.tempCriteres = [];
         afficherListeCriteres(window.tempCriteres, null);
     } else {
         // Charger la grille existante
@@ -1407,6 +1426,13 @@ function retourVueHierarchique() {
     // Réinitialiser l'état global
     grilleTemplateActuelle = null;
     critereEnEdition = null;
+    // 🔧 #625 (31 août 2026) : le TAMPON DE CRÉATION aussi, pas seulement le
+    // pointeur d'édition. Sans cette ligne, les critères saisis dans une grille
+    // abandonnée survivaient à l'abandon et repartaient dans la grille suivante
+    // (constat S3 de l'audit du 30 août). `annulerFormEchelle` (echelles.js)
+    // nettoyait déjà les siens : c'est ce contraste entre les deux éditeurs qui
+    // a révélé l'oubli.
+    window.tempCriteres = [];
 
     // Rafraîchir la vue hiérarchique
     afficherToutesLesGrillesCriteres();
@@ -2052,7 +2078,16 @@ window.sauvegarderGrilleTemplate = sauvegarderGrilleTemplate;
 // 🆕 #466/CO-16 (21 août 2026) : appelé par changerTrimestreActifV2 — le pointeur
 // d'édition ne survit pas à la bascule (sinon : « sauvegardée ! » sans écriture,
 // ou édition fantôme d'une grille de l'ancien trimestre).
-function reinitialiserEditeurGrillesApresBascule() { grilleTemplateActuelle = null; }
+// 🔧 #625 (31 août 2026) : le TAMPON DE CRÉATION non plus. #466 ne purgeait que le
+// pointeur : `grilleTemplateActuelle` devenait nul, `tempCriteres` restait plein, et
+// la branche CRÉATION du save (l. ~703, `criteres: window.tempCriteres || []`) était
+// donc encore armée. Les critères saisis dans l'ancien trimestre partaient en base
+// dans le namespace du NOUVEAU — une écriture inter-trimestre, pas un défaut
+// d'affichage. Constat S3 de l'audit du 30 août, angle mort §4.5.
+function reinitialiserEditeurGrillesApresBascule() {
+    grilleTemplateActuelle = null;
+    window.tempCriteres = [];
+}
 window.reinitialiserEditeurGrillesApresBascule = reinitialiserEditeurGrillesApresBascule;
 window.sauvegarderNomGrille = sauvegarderNomGrille;
 window.afficherGrillesCriteres = afficherGrillesCriteres;

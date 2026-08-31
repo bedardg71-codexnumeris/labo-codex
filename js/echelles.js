@@ -4647,7 +4647,18 @@ function ouvrirFilePickerImportEchelles() {
 window.afficherListeEchelles = afficherListeEchelles;
 // 🆕 #466/CO-16 (21 août 2026) : appelé par changerTrimestreActifV2 (même patron
 // que grilles) — le pointeur d'édition ne survit pas à la bascule.
-function reinitialiserEditeurEchellesApresBascule() { echelleTemplateActuelle = null; }
+// 🔧 #625 (31 août 2026) : les TAMPONS DE CRÉATION non plus. #466 ne purgeait que le
+// pointeur, alors que la branche création de `sauvegarderEchelleComplete`
+// (`!echelleTemplateActuelle && window._niveauxNouvelleEchelle`) restait armée : les
+// niveaux saisis dans l'ancien trimestre partaient en base dans le namespace du
+// NOUVEAU. Les deux tampons vont par PAIRE — des repères sans leurs niveaux sont
+// tout aussi fantômes (#555 lot 2 (e)), et `annulerFormEchelle` les nettoie déjà
+// ensemble. Constat S3 de l'audit du 30 août, angle mort §4.5.
+function reinitialiserEditeurEchellesApresBascule() {
+    echelleTemplateActuelle = null;
+    window._niveauxNouvelleEchelle = null;
+    window._reperesNouvelleEchelle = null;
+}
 window.reinitialiserEditeurEchellesApresBascule = reinitialiserEditeurEchellesApresBascule;
 window.creerNouvelleEchelle = creerNouvelleEchelle;
 window.annulerFormEchelle = annulerFormEchelle;
@@ -4714,8 +4725,12 @@ window.modifierRepereTemp = modifierRepereTemp;                              // 
 window.reperesNouvelleEchellePourEnregistrement = reperesNouvelleEchellePourEnregistrement; // #555 lot 2 (e) — testabilité
 window.apercuNiveauxEchelleHtml = apercuNiveauxEchelleHtml;                  // #555 lot 2 (e) — testabilité
 window.modifierRepereEchelle = modifierRepereEchelle;                        // #555
-window.ecrireRepereEchelle = ecrireRepereEchelle;
-window.marquerChampRefuseEchelle = marquerChampRefuseEchelle;                // #577 — le même marquage de refus dans l'assistant                            // #577 — l'assistant écrit sans redessiner l'éditeur
+window.ecrireRepereEchelle = ecrireRepereEchelle;                            // #577 — l'assistant écrit sans redessiner l'éditeur
+// 🔧 #625 / M11 (31 août 2026) : le second `window.marquerChampRefuseEchelle` vivait
+// ici (doublon exact de l'export #524, ~230 lignes plus haut). Retiré. Son commentaire
+// « #577 — le même marquage de refus dans l'assistant » disait la même chose que celui
+// de #524 ; en revanche la ligne portait aussi, concaténé après un long blanc, le
+// commentaire ORPHELIN d'`ecrireRepereEchelle` — rendu ci-dessus à sa fonction.
 window.blocReperesEchelle = blocReperesEchelle;                              // #577 — le même bloc dans l'assistant
 window.refusRepereEchelle = refusRepereEchelle;                              // #555
 window.optionsRepereEchelle = optionsRepereEchelle;                          // #555
