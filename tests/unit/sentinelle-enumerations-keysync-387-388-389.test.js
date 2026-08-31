@@ -94,11 +94,39 @@ describe('#389 · les 7 sites à risque énumèrent via db.keysSync()', () => {
         expect(lire('cartouches.js')).not.toMatch(/const allKeys = Object\.keys\(localStorage\);/);
     });
 
-    it('les 4 scans de bibliothèques (grilles/échelles/cartouches/productions)', () => {
-        for (const f of ['grilles-bibliotheque.js', 'echelles-bibliotheque.js', 'cartouches-bibliotheque.js', 'productions-bibliotheque.js']) {
-            const src = lire(f);
-            expect(src, f).toMatch(/const clesStockage = db\.keysSync\(\);/);
-            expect(src, f).not.toMatch(/for \(let i = 0; i < localStorage\.length; i\+\+\)/);
+    // ⚠ LES QUATRE MODULES BIBLIOTHÈQUE NE SE RESSEMBLENT PLUS DEPUIS LE
+    //   31 AOÛT 2026 (S8 / #626), et la liste est SCINDÉE plutôt que raccourcie.
+    //   `grilles-bibliotheque.js` et `cartouches-bibliotheque.js` n'énumèrent
+    //   plus rien : leur seul `db.keysSync()` vivait DANS le cluster
+    //   `listerTrimestresAvec*` retiré par #626 — un cluster mort, shadowé par
+    //   une définition chargée après, et qui scannait de surcroît les suffixes
+    //   obsolètes `_grilles` / `_cartouches`. Les deux autres scannent toujours,
+    //   et leurs scans sont VIVANTS (appelés par echelles.js:2387 et
+    //   productions-bibliotheque-ui.js:143, mesuré le 31 août).
+    //   ⮕ NE PAS « RÉPARER » l'absence de `keysSync` dans les deux premiers en
+    //     en remettant un : il n'y a rien à y énumérer.
+    const BIBLIOTHEQUES_QUI_SCANNENT = ['echelles-bibliotheque.js', 'productions-bibliotheque.js'];
+    const BIBLIOTHEQUES_SANS_SCAN = ['grilles-bibliotheque.js', 'cartouches-bibliotheque.js'];
+
+    it('les 2 scans de bibliothèques encore vivants passent par db.keysSync()', () => {
+        for (const f of BIBLIOTHEQUES_QUI_SCANNENT) {
+            expect(lire(f), f).toMatch(/const clesStockage = db\.keysSync\(\);/);
+        }
+    });
+
+    it('les 2 bibliothèques dont le scan est retiré (#626) n\'énumèrent plus du tout', () => {
+        for (const f of BIBLIOTHEQUES_SANS_SCAN) {
+            expect(lire(f), `${f} ne doit plus énumérer le stockage`).not.toMatch(/db\.keysSync\(\)/);
+        }
+    });
+
+    // L'interdit de tête reste sur les QUATRE : c'est lui le cliquet de #389, et
+    // il vaut aussi — surtout — pour un module qui n'énumère plus rien
+    // aujourd'hui. Le jour où l'un d'eux se remet à scanner, la mauvaise façon
+    // doit rougir avant d'être commitée.
+    it('aucune des 4 bibliothèques ne revient à une boucle sur localStorage', () => {
+        for (const f of [...BIBLIOTHEQUES_QUI_SCANNENT, ...BIBLIOTHEQUES_SANS_SCAN]) {
+            expect(lire(f), f).not.toMatch(/for \(let i = 0; i < localStorage\.length; i\+\+\)/);
         }
     });
 });

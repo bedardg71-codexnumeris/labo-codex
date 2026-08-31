@@ -1441,13 +1441,12 @@ function afficherMetriquesGlobales(etudiants) {
         const pratiquesConfig = db.getSync(cle('pratiquesConfigurables'), null) || [];
         let pratiqueActive = pratiquesConfig.find(p => p.id === groupeActif.pratiqueId);
 
-        // 1b. Si pas trouvée, chercher dans la bibliothèque partagée
-        if (!pratiqueActive) {
-            const bibliotheque = db.getSync('bibliotheque-pratiques', []);
-            pratiqueActive = bibliotheque.find(p => p.id === groupeActif.pratiqueId);
-            if (pratiqueActive) {
-            }
-        }
+        // #626 (31 août 2026) — le repli « chercher dans la bibliothèque
+        // partagée » est retiré : il lisait une clé en kebab que RIEN n'écrit
+        // (la vraie s'écrit en camel, module propriétaire pratiques-bibliotheque.js).
+        // Le retrait est neutre — le repli n'a jamais rien trouvé. Le corriger en
+        // pointant la vraie clé ferait TROUVER un seuil là où il n'y en avait
+        // pas : changement de comportement, arbitrage de Grégoire, item #634.
 
         if (pratiqueActive) {
             // Chercher minimumCompletion dans différents chemins possibles

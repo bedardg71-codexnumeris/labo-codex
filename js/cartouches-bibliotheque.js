@@ -199,74 +199,6 @@ async function migrerCartouchesVersBibliotheque(cleSource) {
 }
 
 /**
- * Lister tous les trimestres qui ont des cartouches
- * @returns {Array<{cle: string, code: string, nom: string, nombre: number}>}
- */
-function listerTrimestresAvecCartouches() {
-    const trimestres = [];
-    const trimestreActuel = window.trimestreActif || '';
-
-    // #389 : keysSync (localStorage ∪ memoryCache) — un trimestre dont la
-    // collection a basculé hors localStorage (quota) était invisible au scan.
-    const clesStockage = db.keysSync();
-    for (let i = 0; i < clesStockage.length; i++) {
-        const cle = clesStockage[i];
-        if (cle && cle.endsWith('_cartouches')) {
-            try {
-                const data = db.getSync(cle, null);
-                if (Array.isArray(data) && data.length > 0) {
-                    const codeTrimestre = cle.replace('_cartouches', '');
-
-                    if (codeTrimestre !== trimestreActuel) {
-                        const nomTrimestre = formaterNomTrimestreCartouches(codeTrimestre);
-                        trimestres.push({
-                            cle: cle,
-                            code: codeTrimestre,
-                            nom: nomTrimestre,
-                            nombre: data.length
-                        });
-                    }
-                }
-            } catch (e) {
-                // Ignorer
-            }
-        }
-    }
-
-    trimestres.sort((a, b) => b.code.localeCompare(a.code));
-    return trimestres;
-}
-
-/**
- * Formater un code trimestre pour affichage
- */
-function formaterNomTrimestreCartouches(code) {
-    if (!code) return 'Inconnu';
-    const saison = code.charAt(0).toLowerCase();
-    const annee = code.substring(1);
-    const saisons = { 'a': 'Automne', 'h': 'Hiver', 'e': 'Été' };
-    return `${saisons[saison] || saison.toUpperCase()} ${annee}`;
-}
-
-/**
- * Obtenir les cartouches d'un trimestre spécifique
- * @param {string} cleOuCode - Clé complète ou code trimestre
- * @returns {Array}
- */
-function obtenirCartouchesTrimestre(cleOuCode) {
-    const cle = cleOuCode.includes('_') ? cleOuCode : `${cleOuCode}_cartouches`;
-    try {
-        const data = db.getSync(cle, null);
-        if (data) {
-            return data;
-        }
-    } catch (e) {
-        console.error('[Bibliothèque Cartouches] Erreur lecture trimestre:', e);
-    }
-    return [];
-}
-
-/**
  * Obtenir le nombre de cartouches dans la bibliothèque
  * @returns {number}
  */
@@ -287,9 +219,6 @@ window.retirerCartoucheDeLaBibliotheque = retirerCartoucheDeLaBibliotheque;
 window.importerCartouchesDansBibliotheque = importerCartouchesDansBibliotheque;
 window.exporterBibliothequeCartouches = exporterBibliothequeCartouches;
 window.migrerCartouchesVersBibliotheque = migrerCartouchesVersBibliotheque;
-window.listerTrimestresAvecCartouches = listerTrimestresAvecCartouches;
-window.formaterNomTrimestreCartouches = formaterNomTrimestreCartouches;
-window.obtenirCartouchesTrimestre = obtenirCartouchesTrimestre;
 window.getNombreCartouchesBibliotheque = getNombreCartouchesBibliotheque;
 window.CLE_BIBLIOTHEQUE_CARTOUCHES = CLE_BIBLIOTHEQUE_CARTOUCHES;
 

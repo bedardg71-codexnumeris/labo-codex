@@ -3287,13 +3287,11 @@ window.creerNouvelleCartouche = creerNouvelleCartouche;
 window.populerDropdownsCartouche = populerDropdownsCartouche;
 window.populerDropdownGrilleCartouche = populerDropdownGrilleCartouche; // Alias compatibilité
 window.onChangeSelectionCartouche = onChangeSelectionCartouche;
-window.onChangeGrilleCartouche = onChangeGrilleCartouche; // Deprecated
 window.initialiserNouveauCartoucheAvecEchelle = initialiserNouveauCartoucheAvecEchelle;
 window.importerDepuisMarkdown = importerDepuisMarkdown;
 window.importerPartiel = importerPartiel;
 window.exporterCartouches = exporterCartouches;
 window.importerCartouches = importerCartouches;
-window.exporterCartoucheActive = exporterCartoucheActive;
 window.importerCartoucheJSON = importerCartoucheJSON;
 window.importerCartoucheDepuisTxt = importerCartoucheDepuisTxt;
 window.exporterCartoucheEnTexte = exporterCartoucheEnTexte;
@@ -3702,14 +3700,6 @@ async function initialiserNouveauCartoucheAvecEchelle(grilleId, echelleId) {
     await afficherMatriceRetroaction();
     mettreAJourMetriques();
     document.getElementById('matriceRetroaction').classList.remove('u-hide');
-}
-
-/**
- * @deprecated Utiliser onChangeSelectionCartouche() à la place
- */
-async function onChangeGrilleCartouche(grilleId) {
-    // Rediriger vers la nouvelle fonction unifiée
-    await onChangeSelectionCartouche();
 }
 
 /**

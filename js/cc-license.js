@@ -1320,12 +1320,13 @@ async function afficherModalEditionMetadonnees(typeRessource, ressourceId) {
                 }
             }
             break;
-        case 'pratique':
-            // 🆕 Beta 95.4 : Support des pratiques
-            const pratiques = await db.get('pratiques_configurations') || [];
-            ressource = pratiques.find(p => p.id === ressourceId);
-            cleStockage = 'pratiques_configurations';
-            break;
+        // #626 (31 août 2026, décision D5 du plan Conception) — le cas
+        // 'pratique' est retiré : il lisait la clé `pratiques_configurations`,
+        // que RIEN dans `js/` n'écrit. Éditer les métadonnées CC d'une pratique
+        // aboutissait donc toujours à « Ressource non trouvée ». La collection
+        // vivante est `pratiquesConfigurables`, namespacée par trimestre ; y
+        // brancher ce chemin est un ajout de fonction, pas un retrait, et il
+        // n'appartient pas à ce lot.
     }
 
     if (!ressource) {

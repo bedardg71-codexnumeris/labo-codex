@@ -734,7 +734,6 @@ function chargerConfigurationPratique(id) {
     }
 
     const config = pratique.config;
-    const modalites = window.modalitesEvaluation.lire();
 
     // ✅ NOUVEAU (9 décembre 2025) : Stocker l'ID de la pratique sélectionnée pour l'affichage sidebar
     sessionStorage.setItem('pratiqueSelectionnee', id);
@@ -768,8 +767,11 @@ function chargerConfigurationPratique(id) {
     // #328 L2-c : la config des jetons n'est plus MIROIRÉE dans modalitesEvaluation —
     // obtenirConfigJetons() la dérive de la pratique active (configuration/config/jetons).
 
-    // Sauvegarder dans modalitesEvaluation
-    window.modalitesEvaluation.remplacer(modalites);
+    // #626 (31 août 2026) — l'aller-retour `lire()` → `remplacer()` est retiré.
+    // Les deux miroirs qui mutaient l'objet ENTRE les deux appels sont partis
+    // avec #436 G2-b et #328 L2-c : il ne restait qu'une réécriture à l'identique.
+    // Elle n'était pas seulement inutile — sur un trimestre dépourvu de la clé,
+    // `lire()` rend `{}` et `remplacer({})` CRÉAIT une entrée vide.
 
     // ✅ 4. Masquer/afficher les sections selon la configuration
     afficherSectionsSelonConfig(config);

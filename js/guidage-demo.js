@@ -56,10 +56,6 @@ const GUIDAGE_TEXTES = {
         titre: 'Exporter et archiver',
         texte: 'Exporter les PDF annotés aux étudiants et archiver le semestre.'
     },
-    'conception-apercu-legacy': {
-        titre: 'Construction de la note \u2014 Aper\u00e7u',
-        texte: 'Ici se construit ton dispositif d\u2019\u00e9valuation\u00a0: productions \u00e9tudiantes, grilles de crit\u00e8res, \u00e9chelles de performance et cartouches de r\u00e9troaction. La d\u00e9mo inclut 11\u00a0productions et 3\u00a0grilles configur\u00e9es.'
-    },
     'conception-grille-criteres': {
         titre: 'Grilles de crit\u00e8res',
         texte: 'Les grilles d\u00e9finissent les crit\u00e8res d\u2019\u00e9valuation et leur pond\u00e9ration. La d\u00e9mo inclut 3\u00a0grilles pr\u00eates \u00e0 l\u2019emploi que tu peux explorer et dupliquer.'

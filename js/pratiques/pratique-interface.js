@@ -294,28 +294,6 @@
 // ============================================================================
 
 /**
- * STRUCTURE : Modalités d'évaluation (modalitesEvaluation.lire() — module
- * propriétaire js/pratiques/modalites-evaluation.js, clé namespacée)
- *
- * {
- *   pratique: "pan-maitrise" | "sommative" | "pan-specifications" | "denotation",
- *
- *   // Configuration PAN-Standards
- *   configPAN: {
- *     nombreCours: 3 | 7 | 12,      // Nombre de cours dans le programme
- *     nombreARetenir: number         // N meilleurs artefacts (ex: 3)
- *   },
- *
- *   // Seuils d'interprétation (universel)
- *   seuils: {
- *     fragile: 0.70,   // 70%
- *     acceptable: 0.80, // 80%
- *     bon: 0.85        // 85%
- *   }
- * }
- */
-
-/**
  * STRUCTURE : Indices CP (db.getSync('indicesCP'))
  *
  * {

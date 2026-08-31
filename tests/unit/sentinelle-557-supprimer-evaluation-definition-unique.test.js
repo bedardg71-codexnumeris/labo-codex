@@ -187,16 +187,22 @@ describe('#557 · une seule définition de supprimerEvaluation', () => {
     // TROIS fichiers) et `afficherSousSection`.
     // ⮕ Un cliquet ne vaut que ce que vaut son détecteur : celui-ci doit
     //   couvrir TOUTES les formes d'exposition, pas la plus courante.
+    // ⮕ LA LISTE A RACCOURCI DE NEUF À SIX LE 31 AOÛT 2026 (#626, S8 du plan
+    //   Conception). Trois doublons ne sont plus des doublons : la définition
+    //   PERDANTE a été retirée dans chaque cas, celle que l'ordre de chargement
+    //   d'index.html écrasait déjà en silence. `creerNouvellePratique` :
+    //   pratiques-gestion.js retirée, pratiques.js (le wizard V2) reste.
+    //   `listerTrimestresAvecGrilles` / `listerTrimestresAvecCartouches` : les
+    //   versions des deux modules `*-bibliotheque.js` scannaient les suffixes
+    //   obsolètes `_grilles` / `_cartouches` et rendaient toujours `[]`.
+    //   C'est ce banc qui a signalé qu'il fallait raccourcir la liste.
     const DOUBLONS_CONNUS = [
         '_apresOuvertureFichier',            // profil-etudiant-actions.js / liste-evaluations.js
         'afficherSection',                   // rapport-bug.js / bilan-reflexif.js / planification.js
         'afficherSousSection',               // bilan-reflexif.js / planification.js
         'afficherTableauProductions',        // donnees-v2.js / productions.js
-        'creerNouvellePratique',             // pratiques-gestion.js / pratiques.js
         'evaluerProduction',                 // profil-etudiant-actions.js / evaluation.js
-        'fermerModalBibliothequePratiques',  // pratiques-gestion.js / pratiques.js
-        'listerTrimestresAvecCartouches',    // cartouches-bibliotheque.js / cartouches.js
-        'listerTrimestresAvecGrilles'        // grilles-bibliotheque.js / grilles.js
+        'fermerModalBibliothequePratiques'   // pratiques-gestion.js / pratiques.js
     ];
 
     it('aucun NOUVEAU nom de fonction n\'est posé sur window par deux modules', () => {

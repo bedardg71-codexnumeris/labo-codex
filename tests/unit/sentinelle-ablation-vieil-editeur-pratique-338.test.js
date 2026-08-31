@@ -73,7 +73,18 @@ const SYMBOLES_VIVANTS = [
 // Branche pratique-notation-v2.js : l'éditeur AUTONOME mort (bootstrap +
 // chargement/sauvegarde/type-selection sur le DOM `v2-pratique-type` disparu)
 // est retiré ; le moteur de config consommé par la bibliothèque reste.
+// ⚠ DEUX NOMS ONT CHANGÉ DE LISTE LE 31 AOÛT 2026 (#626, S8 du plan Conception),
+// et leur date de péremption est datable : `changerVariantePANStandards` et
+// `sauvegarderPratiqueBaseV2` figuraient en V2_VIVANTS, avec la note « atteint
+// par changerVariantePANStandards (vivant) ». C'était vrai en juin. Ça a cessé
+// de l'être le 9 août 2026 au commit `bbf17df4` (#434 Phase D — une seule
+// question sur la construction de la note), qui a retiré le dernier appelant
+// avec le DOM `v2-*` qu'ils lisaient. Entre le 9 et le 31 août, la liste
+// affirmait donc vivant un code que plus rien n'atteignait — un cliquet ne vaut
+// que ce que vaut la date de sa dernière vérification.
 const V2_RETIRES = [
+    'changerVariantePANStandards',   // #626 — dernier appelant parti avec bbf17df4 (#434, 9 août 2026)
+    'sauvegarderPratiqueBaseV2',     // #626 — n'était atteint que par le précédent
     'initialiserPratiqueNotationV2',
     'chargerDropdownEchellesV2',
     'afficherPreviewEchelleV2',
@@ -91,9 +102,7 @@ const V2_VIVANTS = [
     'chargerConfigParObjectifs',
     'chargerConfigSpecifications',
     'afficherTypesTravauxSpec',
-    'afficherForfaitsSpec',
-    'changerVariantePANStandards',
-    'sauvegarderPratiqueBaseV2'   // atteint par changerVariantePANStandards (vivant)
+    'afficherForfaitsSpec'
 ];
 
 let source;

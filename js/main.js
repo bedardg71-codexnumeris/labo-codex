@@ -408,17 +408,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (biblioModifiee) db.setSync('bibliothequePratiques', biblioPratiques);
                 }
 
-                // 3. pratiquesPersonnalisees[*].config.portfolio.decouplerPR
-                const pratiquesPerso = db.getSync('pratiquesPersonnalisees', []);
-                let persoModifiee = false;
-                if (Array.isArray(pratiquesPerso)) {
-                    pratiquesPerso.forEach(p => {
-                        if (p?.config?.portfolio && renommerDansObjet(p.config.portfolio)) {
-                            persoModifiee = true;
-                        }
-                    });
-                    if (persoModifiee) db.setSync('pratiquesPersonnalisees', pratiquesPerso);
-                }
+                // #626 (31 août 2026) — le volet 3 est retiré. Il renommait un
+                // champ dans une collection dont ces trois lignes étaient le SEUL
+                // accès de tout le dépôt, lecture comprise : la migration
+                // entretenait une donnée que personne ne lit. Les volets 1 et 2
+                // ci-dessus restent : leurs deux clés ont des lecteurs vivants.
             } catch(e) {
                 console.warn('[migration_decoupler_pn] erreur partielle ignorée:', e);
             }

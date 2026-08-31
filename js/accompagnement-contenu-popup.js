@@ -110,42 +110,9 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Si ton devis indique « Repérer et classer des thèmes », tu pourrais te demander : « Comment je sais qu'un étudiant repère bien les thèmes ? » Tes réponses deviennent tes critères : identification des thèmes, précision du vocabulaire, organisation du classement, etc."
             }
         ],
-        voirAussi: ['construction-grilles', 'construction-echelles', 'conception-apercu-legacy']
+        voirAussi: ['construction-grilles', 'construction-echelles']
     },
 
-    // =========================================================================
-    // CONSTRUCTION - APERÇU
-    // =========================================================================
-
-    'conception-apercu-legacy': {
-        titre: "Vue d'ensemble du matériel pédagogique",
-        sections: [
-            {
-                type: 'texte',
-                contenu: "Cette page présente un résumé de tout le matériel pédagogique configuré pour ton cours : productions, grilles de critères, échelles de performance et pratiques de notation."
-            },
-            {
-                type: 'liste',
-                titre: "Éléments affichés",
-                items: [
-                    "Productions : travaux à évaluer (examens, devoirs, projets)",
-                    "Grilles : critères d'évaluation pour chaque production",
-                    "Échelles : niveaux de performance (pourcentages, lettres, etc.)",
-                    "Pratiques : méthode de calcul de la note finale"
-                ]
-            },
-            {
-                type: 'conseil',
-                contenu: "Configure ton matériel dans cet ordre : 1) Échelles de performance, 2) Pratiques de notation, 3) Grilles de critères, 4) Productions. Chaque élément dépend du précédent. Note : les réglages de base (trimestre, horaire, groupes) doivent être complétés au préalable."
-            },
-            {
-                type: 'alerte',
-                niveau: 'important',
-                contenu: "Prendre le temps de réfléchir à tes objectifs d'apprentissage avant de configurer ton matériel peut t'aider à créer des grilles plus cohérentes. Clique sur le bouton d'aide « Réfléchir à tes objectifs » si tu veux des pistes de réflexion."
-            }
-        ],
-        voirAussi: ['construction-objectifs-reflexion', 'conception-productions', 'construction-grilles', 'construction-pratiques']
-    },
 
     // =========================================================================
     // PHASE 1 - CRITIQUES (5 aides)
