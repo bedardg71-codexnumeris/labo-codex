@@ -48,7 +48,7 @@ n'apparaît qu'une fois dans tout le dépôt, à l'écriture.
 ne pas supprimer un trimestre, ne pas exporter depuis une ligne NON ACTIVE. Il est
 en tête de RELAIS.md. **S4 (#622) n'est pas dû, il est urgent.**
 
-## PRIORITÉ DATÉE — LE 1er SEPTEMBRE, DEMAIN
+## PRIORITÉ DATÉE — LE **1er SEPTEMBRE 2026**
 
 **#427 + #508.** Décision prise (option A, Grégoire tient la date). Deux versants :
 ce qui est dû par lui dans la console Cloudflare (les trois noms, la durée de
@@ -56,7 +56,7 @@ session, la règle `Include`), et ce qui est dû côté code **le jour même** �
 le paragraphe d'accueil au présent dans `js/accueil.js`. Les deux textes sont écrits
 d'avance au §7 de `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`. Le
 bandeau s'éteint seul.
-⮕ **C'est demain. Ne le laisse pas passer derrière le plan Conception.**
+⮕ **Compte les jours toi-même à partir de la date du jour ; ne te fie pas à un mot comme « demain » écrit ici.** Cette consigne a été rédigée le 30 août au soir. Ne laisse pas cette échéance passer derrière le plan Conception.
 
 ## OÙ EN EST LE PLAN CONCEPTION — LA PHASE DE MESURE EST CLOSE
 
@@ -102,8 +102,8 @@ ne s'écrit avant ce chiffre.** Les deux sessions ont refusé de conclure, déli
 
 ## PROPOSE-LUI UN CHOIX FERMÉ ENTRE
 
-(a) **#427 + #508 d'abord** — c'est daté, c'est demain, et personne d'autre ne peut le
-    faire. Court. **Le seul qui porte une date.**
+(a) **#427 + #508 d'abord** — échéance au **1er septembre 2026**, et personne d'autre ne peut
+    le faire. Court. **Le seul des quatre qui porte une DATE.**
 (b) **S4 / #622 — l'archivage** — urgent au sens mesuré du terme, et c'est lui qui lève
     le moratoire à trois gestes. Le rapport Z1 porte ses diffs, plus celui
     d'`exporterTrimestreArchive` qu'il absorbe. ⚠ Son test manuel revient à Grégoire.
