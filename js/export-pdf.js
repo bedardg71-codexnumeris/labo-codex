@@ -1330,7 +1330,7 @@ async function exporterCartoucheSelectionneeEnPDF() {
                 return;
             }
 
-            let cartouches = await db.get(`cartouches_${grilleId}`) || [];
+            let cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
             if (!Array.isArray(cartouches)) cartouches = [cartouches];
             cartouche = cartouches.find(c => c.id === cartoucheId);
         }
@@ -1473,7 +1473,7 @@ async function afficherApercuCartoucheSelectionnee() {
         const cartoucheId = document.getElementById('selectCartouche')?.value;
 
         if (grilleId && cartoucheId) {
-            let cartouches = await db.get(`cartouches_${grilleId}`) || [];
+            let cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
             if (!Array.isArray(cartouches)) cartouches = [cartouches];
 
             const cartouche = cartouches.find(c => c.id === cartoucheId);
@@ -1605,7 +1605,7 @@ async function mettreAJourApercuPDF() {
 
     // Charger les cartouches disponibles pour la grille selectionnee
     if (grilleId && sectionCartouche && selectCartouche) {
-        const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+        const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
         if (cartouches.length > 0) {
             sectionCartouche.classList.remove('u-hide');
             const currentValue = selectCartouche.value;
@@ -1640,7 +1640,7 @@ async function mettreAJourApercuPDF() {
 
         let cartouche = null;
         if (cartoucheId && grilleId) {
-            const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+            const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
             cartouche = cartouches.find(c => c.id === cartoucheId);
         }
 
@@ -2474,7 +2474,7 @@ async function exporterPDFCombine() {
         // Cartouche (optionnel)
         let cartouche = null;
         if (cartoucheId) {
-            const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+            const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
             cartouche = cartouches.find(c => c.id === cartoucheId);
         }
 
@@ -2872,7 +2872,7 @@ async function mettreAJourOptionsPreparationPDF() {
 
     // Charger les cartouches disponibles pour la grille selectionnee
     if (grilleId && sectionCartouche && selectCartouche) {
-        const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+        const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
         if (cartouches.length > 0) {
             sectionCartouche.classList.remove('u-hide');
             const currentValue = selectCartouche.value;
@@ -2944,7 +2944,7 @@ async function ouvrirApercuPDF() {
         // Cartouche (optionnel)
         let cartouche = null;
         if (cartoucheId) {
-            const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+            const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
             cartouche = cartouches.find(c => c.id === cartoucheId);
         }
 
@@ -3556,7 +3556,7 @@ async function mettreAJourOptionsInlinePDF() {
     const gridContainer = scope.querySelector('#inlinePDF-grid-selects');
 
     if (grilleId && selectCartouche) {
-        const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+        const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
         if (cartouches.length > 0) {
             selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>' +
                 cartouches.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.nom || 'Cartouche sans nom')}</option>`).join('');
@@ -3629,7 +3629,7 @@ async function ouvrirApercuPDFPour(ids) {
 
     let cartouche = null;
     if (cartoucheId) {
-        const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+        const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
         cartouche = cartouches.find(c => c.id === cartoucheId) || null;
     }
 

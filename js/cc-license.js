@@ -1312,10 +1312,10 @@ async function afficherModalEditionMetadonnees(typeRessource, ressourceId) {
             // Les cartouches sont stockés par grille, on doit chercher dans toutes
             const grillesTemplates = await db.get(cle('grillesTemplates')) || [];
             for (const grille of grillesTemplates) {
-                const cartouches = await db.get(`cartouches_${grille.id}`) || [];
+                const cartouches = await db.get(cle(`cartouches_${grille.id}`)) || [];
                 ressource = cartouches.find(c => c.id === ressourceId);
                 if (ressource) {
-                    cleStockage = `cartouches_${grille.id}`;
+                    cleStockage = cle(`cartouches_${grille.id}`);
                     break;
                 }
             }

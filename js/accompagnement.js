@@ -534,7 +534,7 @@ ajouterEntrees({
                 // au moins une cartouche locale existe pour une grille quelconque
                 var grilles = db.getSync(cle('grillesTemplates'), []) || [];
                 for (var i = 0; i < grilles.length; i++) {
-                    var cs = db.getSync('cartouches_' + grilles[i].id, []) || [];
+                    var cs = db.getSync(cle('cartouches_' + grilles[i].id), []) || [];
                     if (cs.length > 0) return false;
                 }
                 return true;

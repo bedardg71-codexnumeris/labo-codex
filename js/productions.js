@@ -1490,7 +1490,7 @@ async function peuplerCartouchesProduction(grilleId) {
         selectCartouche.innerHTML = '<option value="">Aucune</option>';
         return;
     }
-    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+    const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
     // security-ok: id et nom passent par echapperHtml dans l'interpolation interne
     selectCartouche.innerHTML = '<option value="">Aucune</option>' +
         cartouches.map(c => `<option value="${echapperHtml(c.id)}">${echapperHtml(c.nom)}</option>`).join('');

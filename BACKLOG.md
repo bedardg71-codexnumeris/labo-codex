@@ -417,6 +417,20 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Ce qui manque, c'est son application — `:174-178` ne patche que `grilleId`.
   ⮕ Conséquence : le lot **S9 / #627** est plus petit qu'annoncé de ce côté. Corriger l'énoncé de Z2 avant que S9
   s'en serve comme spécification. **Un diff d'audit est une esquisse, jamais une spécification.**
+- [ ] **#643 — Le fichier de partage `.lcz` ne porte pas le trimestre d'où viennent les cartouches ; seule la modale le dit**.
+  Inscrit le 31 août 2026 par `kuekatsheu-c8`, **avant tout usage**. Mesure de `kuekatsheu-67`. Suite de S5/#623.
+  Décision de Grégoire du 31 août : une grille partagée qui vit dans deux trimestres envoie les cartouches du
+  **trimestre ACTIF**, et l'export **doit le dire**. La moitié « écran » est livrée (`confirmerExport`,
+  `js/partage-export.js:180`, phrase affichée seulement si la grille existe dans plusieurs trimestres).
+  ⮕ **La moitié « fichier » ne l'est pas, et c'est délibéré.** Le schéma du manifeste est **FERMÉ** —
+  `js/partage-schemas.js:22` : « sous-schéma fermé — champ inconnu = rejet ». Y ajouter un champ ferait
+  **rejeter le paquet par notre propre auto-contrôle à l'export** (`js/partage-export.js:313-318` valide avant
+  d'émettre) puis par la validation d'import.
+  ⮕ C'est donc une **évolution de format de partage**, pas un ajout de champ : elle touche `partage-schemas.js`,
+  et un fichier produit par la nouvelle version devra rester lisible par l'ancienne (ou le refus devra être
+  explicite, pas un rejet muet).
+  ⚠ **Conséquence tant que l'item est ouvert** : une collègue qui reçoit le fichier ne peut pas savoir de quel
+  trimestre viennent les cartouches. L'information existe au moment d'envoyer, elle ne voyage pas.
 - [ ] **#642 — Le masquage par PARAMÈTRE de fonction échappe à toutes les commandes de détection employées jusqu'ici, et c'est la forme la plus fréquente dans les fichiers de partage**.
   Inscrit le 31 août 2026 par `kuekatsheu-c8`, **avant tout usage**, pendant S5. Mesure de `kuekatsheu-67`.
   Le dossier a sous-compté le shadowing de `cle()` **quatre fois** : Z2:275 annonce 2 sites dans

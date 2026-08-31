@@ -620,7 +620,7 @@
         verifier(1, 'construirePackage(grille) → validerPackage valide', r1.valide);
 
         var cartouchesAttendues = (typeof db !== 'undefined' && db.getSync)
-            ? (db.getSync('cartouches_' + grilleSource.id, []) || []).length : 0;
+            ? (db.getSync((typeof cle === 'function') ? cle('cartouches_' + grilleSource.id) : 'cartouches_' + grilleSource.id, []) || []).length : 0;
         var cartouchesIncluses = pkgConstruit ? (pkgConstruit.entites.cartouches || []).length : 0;
         if (cartouchesAttendues === 0) {
             console.warn('[Test Phase 1] #2 — aucune cartouche en storage pour ' + grilleSource.id + ' : vérification structurelle seulement');

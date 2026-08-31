@@ -1195,7 +1195,7 @@
      */
     function compterCartouchesGrille(grilleId) {
         try {
-            const cartouches = db.getSync(`cartouches_${grilleId}`) || [];
+            const cartouches = db.getSync(cle(`cartouches_${grilleId}`)) || [];
             return cartouches.length;
         } catch (e) {
             return 0;
@@ -1568,7 +1568,7 @@
         }
         // Supprimer les cartouches associées à cette grille
         try {
-            await db.remove(`cartouches_${grilleId}`);
+            await db.remove(cle(`cartouches_${grilleId}`));
         } catch (e) {
             console.warn('[donnees-v2] Erreur suppression cartouches grille:', e.message);
         }

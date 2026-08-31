@@ -26,6 +26,18 @@ import { chargerScript } from './_helpers/charger-script.js';
 
 /* ------------------------------------------------------------------ harnais */
 
+// ⚠ CLÉ MIGRÉE PAR S5/#623 LE 31 AOÛT 2026. Le corpus semait sous la clé NUE
+// `cartouches_G1` ; `js/cartouches.js` route désormais ses lectures et ses
+// écritures par `cle(...)`, donc vers `a2026_cartouches_G1`. Le corpus ne
+// correspondait plus à ce que le code lit — d'où des valeurs `undefined` et des
+// textes qui semblaient perdus, alors que rien n'était cassé.
+// ⮕ La clé est DÉRIVÉE du même préfixe que le stub `cle` ci-dessous, jamais
+//   recopiée : si le stub change, le corpus suit. Un préfixe écrit deux fois
+//   est un désaccord qui attend son heure.
+const PREFIXE_TRIMESTRE = 'a2026_';
+const CLE_CART = PREFIXE_TRIMESTRE + 'cartouches_G1';
+
+
 function elementFictif(valeur = '') {
     return {
         value: valeur, innerHTML: '', textContent: '', checked: false,
@@ -38,7 +50,7 @@ function elementFictif(valeur = '') {
 
 function monter({ cartouches = [], echelles = [], grilles = null, cartoucheOuverte = null } = {}) {
     const store = {
-        'cartouches_G1': cartouches,
+        [CLE_CART]: cartouches,
         'a2026_echellesTemplates': echelles,
         'a2026_grillesTemplates': grilles || [{
             id: 'G1', nom: 'Grille du test', echelleId: 'ECH_1',
@@ -72,7 +84,7 @@ function monter({ cartouches = [], echelles = [], grilles = null, cartoucheOuver
                 return resultat;
             }
         },
-        cle: (k) => 'a2026_' + k,
+        cle: (k) => PREFIXE_TRIMESTRE + k,
         echapperHtml: (t) => String(t == null ? '' : t),
         alert: () => {}, confirm: () => true,
         verifierEtGererDoublon: async () => null,
@@ -141,7 +153,7 @@ describe('#573 · « Enregistrer » ne ferme plus la cartouche qu\'il enregistre
         els['comm_CR_1_W'] = elementFictif('Commentaire tapé APRÈS avoir enregistré');
         await win.sauvegarderCommentaire('CR_1_W');
 
-        const enBase = store['cartouches_G1'].find(c => c.id === 'CART_EXISTANTE');
+        const enBase = store[CLE_CART].find(c => c.id === 'CART_EXISTANTE');
         expect(enBase.commentaires['CR_1_W']).toBe('Commentaire tapé APRÈS avoir enregistré');
     });
 

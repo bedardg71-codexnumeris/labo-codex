@@ -2549,7 +2549,7 @@ async function executerImportConfigComplete() {
                 }
 
                 // Récupérer les cartouches existantes pour cette grille
-                const cartouchesExistantes = db.getSync(`cartouches_${grilleIdFinal}`, []);
+                const cartouchesExistantes = db.getSync(cle(`cartouches_${grilleIdFinal}`), []);
 
                 // Sanitiser chaque cartouche reçu avant fusion. Les commentaires
                 // (clés dynamiques `<critereId>_<niveauCode>`) sont assainis via
@@ -2560,7 +2560,7 @@ async function executerImportConfigComplete() {
                 // à l'identique n'est pas réimportée. C'est ce chemin qui a
                 // produit les quatre paires 75/0, 79/0, 50/0, 50/0 du 24 mars.
                 const fusionC = fusionnerParIdentite(cartouchesExistantes, cartouchesAssainis, 'cartouches');
-                db.setSync(`cartouches_${grilleIdFinal}`, fusionC.liste);
+                db.setSync(cle(`cartouches_${grilleIdFinal}`), fusionC.liste);
 
                 nbCartouchesTotal += fusionC.ajoutes;
             });

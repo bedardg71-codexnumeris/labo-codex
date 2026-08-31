@@ -7,6 +7,49 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 31 AOÛT 2026, FIN DE JOURNÉE
+
+> Écrit par `kuekatsheu-c8`, coordinatrice de trois sessions parallèles
+> (`c8`, `4c`, `67`). **Zéro collision d'index, aucun fichier partagé.**
+> La consigne complète est à la racine : `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`.
+
+**Branche à ouvrir : `main`.** Tout y est. **Aucune release** aujourd'hui — la version
+reste **1.106.13** (build `0831-0734`) — mais **14 jetons `?v=` ont bougé** :
+⚠ **Grégoire doit recharger sa session `file://`.**
+
+**Vitest 419 fichiers / 4452 tests, code de sortie 0**, relu par la coordinatrice
+APRÈS le dernier changement et APRÈS le bump anti-cache.
+
+**CE QUI A ÉTÉ LIVRÉ**
+- **S5 / #623 — le régime des cartouches passe de GLOBAL à NAMESPACÉ par trimestre.**
+  Les quatre volets dans le même commit : routage (`cle()`/`cleSource()`), migration au
+  boot, les deux fonctions d'archivage, et **54 sites routés**. Deux trimestres portant
+  la même grille ne s'écrasent plus.
+- **Un fil de détente ajouté** : l'archivage **REFUSE** et **NOMME** les grilles si des
+  cartouches vivent encore sous clé nue, au lieu d'écrire un snapshot amputé — et
+  `archiverTrimestre` **lit ce refus AVANT** de poser le moindre drapeau.
+- **#640** — la section d'ouverture est verrouillée (16 cas, 11 rouges obtenus).
+- **Corrections d'audit** : Z1-S1 recompté en **cinq familles** (la vraie famille du
+  constat compte **cinq** sites, pas quinze) ; Z2:830 **faux sur trois implémentations
+  sur quatre**, et le remède tient dans un helper partagé par **cinq** collections.
+- **Sept items inscrits** : #636 à #643. **Dernier ID utilisé : #643.**
+
+**CE QUI RESTE, ET QUI N'EST PAS BLOQUÉ**
+1. **La spec Playwright/WebKit de S5 — le seul angle du lot sans preuve.** Elle doit
+   montrer que la barre latérale des cartouches et la matrice affichent celles du
+   trimestre ACTIF après migration, et qu'un trimestre désarchivé retrouve les siennes.
+   ⚠ **Vitest ne voit pas le rendu.** Ne la suppose pas couverte : elle ne l'est pas.
+2. **#636** — les 15 sites de `scripts/`, **deux sous-cas et deux remèdes** (voir la
+   consigne). Ce sont des outils de RÉPARATION : ils mentiront par zéro.
+3. **#643** — le fichier `.lcz` ne porte pas le trimestre source des cartouches ; le
+   schéma du manifeste est FERMÉ, c'est une évolution de format.
+
+⛔ **LE MORATOIRE À TROIS GESTES N'EST PAS LEVÉ.** S5 referme le régime des cartouches ;
+il ne rend ni chemin de restauration à l'export, ni lecteur au snapshot. **La levée est
+une décision de Grégoire.**
+
+---
+
 ## État
 
 | | |

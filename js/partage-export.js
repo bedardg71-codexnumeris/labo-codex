@@ -53,6 +53,40 @@
     // Résolution de l'entité (par type, dans ses collections réelles)
     // ------------------------------------------------------------------
 
+    /**
+     * Clé de stockage des cartouches d'une grille, dans le TRIMESTRE ACTIF.
+     * S5/#623 : `cartouches_<grilleId>` est namespacée depuis D2-A. Le `cle()`
+     * est posé ICI, au site d'appel — jamais dans un lecteur dont le paramètre
+     * s'appelle `cle` (cf. `partage-format.js:150`, où `cle(cle)` lèverait un
+     * TypeError invisible à la relecture).
+     */
+    function cleCartouches(grilleId) {
+        var brute = 'cartouches_' + grilleId;
+        return (typeof window.cle === 'function') ? window.cle(brute) : brute;
+    }
+
+    /**
+     * Noms des trimestres dont la collection de travail contient cette grille.
+     * Sert UNIQUEMENT à décider si la modale doit nommer le trimestre source :
+     * une grille qui n'existe que dans le trimestre actif n'a pas d'ambiguïté à
+     * lever, et l'annoncer ajouterait du bruit à chaque partage.
+     * Coût : un `getSync` par trimestre — celui que `toutesGrillesTravail` paie
+     * déjà à chaque appel.
+     */
+    function trimestresPortantGrille(grilleId) {
+        if (!grilleId || typeof window.obtenirTrimestres !== 'function'
+            || typeof db === 'undefined' || !db.getSync) return [];
+        var noms = [];
+        window.obtenirTrimestres().forEach(function (t) {
+            if (!t || !t.id) return;
+            var liste = db.getSync(t.id + '_grillesTemplates', []) || [];
+            if (liste.some(function (g) { return g && g.id === grilleId; })) {
+                noms.push(t.nom || t.id);
+            }
+        });
+        return noms;
+    }
+
     function getSyncSur(cle) {
         if (typeof db === 'undefined' || !db.getSync) return [];
         var v = db.getSync(cle, []);
@@ -92,16 +126,24 @@
                 return clesP;
             }
             case 'cartouche': {
-                // Ancrage réel : cartouches_{grilleId}. Avec contexte, direct ;
-                // sans contexte, balayage des grilles connues.
-                if (contexteId) return ['cartouches_' + contexteId];
+                // Ancrage réel : `<trim>_cartouches_{grilleId}` depuis S5/#623.
+                // ⚠ DÉCISION DE GRÉGOIRE (31 août 2026) : une grille peut vivre dans
+                // PLUSIEURS trimestres à la fois (#358 — `migrerModelesVersNamespace`
+                // copie la grille dans chaque trimestre qui l'utilise), et ses
+                // cartouches y divergent depuis D2-A. « Le trimestre propriétaire »
+                // n'a donc pas de réponse unique. Règle retenue : **on partage les
+                // cartouches du trimestre ACTIF**. La modale de confirmation NOMME ce
+                // trimestre quand la grille existe ailleurs aussi — sans quoi on
+                // remplacerait un partage silencieux par un choix silencieux.
+                if (contexteId) return [cleCartouches(contexteId)];
                 var clesC = [];
-                // #358 : balayer les grilles de travail de TOUS les trimestres (pool)
-                // pour retrouver les cartouches d'une grille créée dans n'importe lequel.
+                // Le balayage reste inter-trimestres pour ÉNUMÉRER les grilles (une
+                // grille créée ailleurs doit rester exportable), mais chaque clé est
+                // résolue dans le trimestre actif.
                 var grillesScan = (typeof window.toutesGrillesTravail === 'function')
                     ? window.toutesGrillesTravail() : getSyncSur('grillesTemplates');
                 grillesScan.forEach(function (g) {
-                    if (g && g.id) clesC.push('cartouches_' + g.id);
+                    if (g && g.id) clesC.push(cleCartouches(g.id));
                 });
                 return clesC;
             }
@@ -205,6 +247,29 @@
                 carte.appendChild(el('p', null,
                     'Le package embarque aussi ' + nbDeps + ' ressource(s) liée(s) '
                     + '(grille et cartouches associées), pour que l\'item fonctionne chez la personne qui l\'importe.'));
+            }
+
+            // S5/#623 — DIRE d'où viennent les cartouches. Décision de Grégoire du
+            // 31 août 2026 : on partage celles du trimestre ACTIF. Mais une grille
+            // peut vivre dans plusieurs trimestres (#358), où ses cartouches
+            // divergent depuis D2-A : dans ce cas seulement, le choix doit être
+            // ANNONCÉ. Sur une grille qui n'existe qu'ici, la phrase serait du bruit.
+            var cartouchesEmbarquees = (dependances.entites && dependances.entites.cartouches) || [];
+            if (cartouchesEmbarquees.length > 0) {
+                var grilleAncrage = null;
+                for (var iC = 0; iC < cartouchesEmbarquees.length && !grilleAncrage; iC++) {
+                    if (cartouchesEmbarquees[iC]) grilleAncrage = cartouchesEmbarquees[iC].grilleId || null;
+                }
+                var porteurs = trimestresPortantGrille(grilleAncrage);
+                if (porteurs.length > 1) {
+                    var actif = (typeof window.obtenirTrimestreActif === 'function')
+                        ? window.obtenirTrimestreActif() : null;
+                    var nomActif = (actif && (actif.nom || actif.id)) || 'trimestre actif';
+                    carte.appendChild(el('p', 'texte-avertissement',
+                        'Cette grille est utilisée dans ' + porteurs.length + ' trimestres ('
+                        + porteurs.join(', ') + '). Les cartouches envoyées sont celles de « '
+                        + nomActif + ' » — les autres trimestres peuvent en avoir de différentes.'));
+                }
             }
 
             var identite = (typeof obtenirIdentiteCCUtilisateur === 'function')

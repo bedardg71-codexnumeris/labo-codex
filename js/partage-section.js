@@ -190,7 +190,7 @@
                 return cc;
             });
             // Clé neuve (ancrage de la grille copiée) — rien d'existant à préserver.
-            ecrire('cartouches_' + copie.id, copies);
+            ecrire(window.cle('cartouches_' + copie.id), copies);
         }
         return { grille: copie, nbCartouches: cartouchesLiees.length };
     }

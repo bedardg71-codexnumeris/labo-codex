@@ -2709,7 +2709,7 @@ async function supprimerGrilleDefinitivement(id) {
     if (!grille) return;
 
     // Vérifier dépendances : cartouches liées à cette grille
-    const cartouches = await db.get(`cartouches_${id}`) || [];
+    const cartouches = await db.get(cle(`cartouches_${id}`)) || [];
     if (cartouches.length > 0) {
         alert(`Impossible de supprimer cette grille.\n\n${cartouches.length} cartouche(s) y sont associée(s).\nSupprimez d'abord les cartouches.`);
         return;
@@ -3890,7 +3890,7 @@ async function supprimerGrilleDepuisSidebar(id) {
     // `supprimerGrilleDefinitivement` portait DÉJÀ cette garde. Ce chemin-ci —
     // celui de la corbeille de la barre latérale, le plus utilisé — ne l'avait
     // jamais reçue. Deux chemins, une même action, une seule protégée.
-    const cartouchesLiees = await db.get(`cartouches_${id}`) || [];
+    const cartouchesLiees = await db.get(cle(`cartouches_${id}`)) || [];
     if (cartouchesLiees.length > 0) {
         const noms = cartouchesLiees.slice(0, 5).map(c => (c && c.nom) || 'sans nom').join(', ');
         const reste = cartouchesLiees.length > 5 ? `, et ${cartouchesLiees.length - 5} autre(s)` : '';
