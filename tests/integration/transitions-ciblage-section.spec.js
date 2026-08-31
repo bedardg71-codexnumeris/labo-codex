@@ -54,14 +54,12 @@ test('transitions — bandeau de jalon ciblé par section (accueil propre, Suivi
         if (typeof window.definirPreference === 'function') {
             ['transition_num_crois_vue', 'transition_crois_obs_vue', 'transition_obs_comp_vue']
                 .forEach((p) => window.definirPreference(p + '_demo', false));
-
-            // #508 — l'avis daté « identification au 1er septembre » est en tête
-            // du tableau, sans ciblage de section : il s'afficherait sur l'accueil
-            // et masquerait la régression que ce test surveille. Ce test porte sur
-            // le ciblage des JALONS ; l'avis est neutralisé ici, et couvert par son
-            // propre test. Clé unique (ignorerModeDemo), donc sans suffixe _demo.
-            window.definirPreference('avis_identification_2026_09_vue', true);
         }
+        // Aucune neutralisation à poser ici : depuis le retrait de l'avis daté
+        // (#639, 31 août 2026), TOUTES les entrées de transitions.js sont des
+        // jalons ciblés par section. Si une entrée SANS `sections` réapparaît un
+        // jour, ce test rougira sur l'accueil — et c'est exactement ce qu'on veut
+        // qu'il fasse, plutôt que de la neutraliser d'avance.
 
         const attendre = (ms) => new Promise((r) => setTimeout(r, ms));
 

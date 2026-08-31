@@ -25821,48 +25821,14 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     opacity: 1;
 }
 
-/* Colonne de texte (titre optionnel + message) — remplace le flex:1 qui était
-   porté par le <p> quand le bandeau n'avait pas de titre. */
+/* Colonne de texte du bandeau — remplace le flex:1 qui était porté par le <p>
+   lui-même. Le régime des avis datés (#508) y ajoutait un titre au-dessus du
+   message ; il a été retiré le 31 août 2026 avec sa seule entrée (#639), et
+   avec lui `.transition-bandeau-titre` et la variante `--avis`. */
 .transition-bandeau-texte {
     flex: 1;
     min-width: 0;
 }
-
-.transition-bandeau-titre {
-    margin: 0 0 4px 0;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-
-/* ------------------------------------------------------------------
-   Variante « avis » — annonce datée, distincte des jalons de parcours
-   ------------------------------------------------------------------
-   Aucune couleur en dur : tout passe par les jetons d'alerte, qui sont
-   redéfinis dans .mode-clair (styles.css §MODE CLAIR). Le bandeau suit
-   donc le thème sans règle dédiée par mode.
-
-   Le fond teinté est posé en background-image plutôt qu'en background-color :
-   --alerte-fond-attention est un rgba semi-transparent, et le bandeau est en
-   position:fixed — un simple background-color le composerait avec la page qui
-   défile derrière, pas avec la surface de la carte. La superposition
-   image-sur-couleur garantit le même rendu dans les deux thèmes. */
-.transition-bandeau--avis {
-    border-left-color: var(--alerte-bordure-attention);
-    background-color: var(--surface-carte);
-    background-image: linear-gradient(
-        var(--alerte-fond-attention),
-        var(--alerte-fond-attention)
-    );
-}
-
-.transition-bandeau--avis .transition-bandeau-titre {
-    color: var(--alerte-texte-attention);
-}
-
-/* Le corps du message reste en --texte-principal (hérité de .transition-bandeau) :
-   la couleur d'attention sert à signaler, pas à porter la lecture. */
 
 /* iPad : pleine largeur */
 @media (max-width: 1024px) {
@@ -25870,18 +25836,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
         left: 12px;
         right: 12px;
         max-width: none;
-    }
-}
-
-/* Contraste renforcé : le fond teinté peut disparaître, la bordure doit rester
-   lisible et le titre ne plus dépendre d'une nuance. */
-@media (prefers-contrast: more) {
-    .transition-bandeau--avis {
-        border-left-width: 6px;
-    }
-
-    .transition-bandeau--avis .transition-bandeau-titre {
-        color: var(--texte-principal);
     }
 }
 

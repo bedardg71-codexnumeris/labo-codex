@@ -200,9 +200,16 @@ sait pas si Cloudflare recycle les sièges inactifs. À regarder au premier expo
 - [x] `ADR-008`, `DEPLOY.md` (v1.6), `SECURITY.md` et `PRIVACY.md` (v1.2) révisés le 27 août 2026 ;
 - [ ] `BACKLOG.md` (#427, #508), `RELAIS.md` et `ETAT-PROJET.md` alignés — **non faits**, voir §10 ;
 - [x] **#508** : le paragraphe d'accueil posé (§8), `js/accueil.js:88`, commit `af75bc8a` ;
-- [ ] **#508 bis — inscrit au backlog sous #639** : l'entrée `avis-identification-2026-09-01` retirée de
+- [x] **#508 bis — inscrit au backlog sous #639** : l'entrée `avis-identification-2026-09-01` retirée de
       `js/transitions.js`, et avec elle la spec
       `tests/integration/avis-identification-bandeau-508.spec.js` (§8 bis).
+      ✅ **FAIT le 31 août 2026 au soir**, volontairement, avant que la condition ne s'éteigne à minuit.
+      ⚠ **Il y avait DEUX specs #508, et cette liste n'en nommait qu'une.** `bandeau-non-modal-508.spec.js`
+      tirait son bandeau de `TRANSITIONS[0]` sans jamais nommer l'avis : elle a rougi sur « bandeau non
+      affiché ». Son invariant (« le bandeau informe, il ne bloque pas ») reste vrai pour tout bandeau —
+      elle a donc été RELOGÉE sur un jalon, pas supprimée. Voir #639 au BACKLOG.
+      ⮕ Le régime des avis datés est parti entier (champs `variante`/`titre`/`ignorerModeDemo`, préférence,
+      CSS) : **le reposer sera un geste explicite**, pas une case à remplir.
 
 ---
 

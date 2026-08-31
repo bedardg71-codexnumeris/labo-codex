@@ -494,8 +494,39 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ Le commentaire en place à `js/main.js:986-990` **nomme la ligne à remettre** si l'usage montre que le
   retrait du raccourci expert était de trop. La sentinelle doit donc verrouiller la règle **sans rendre le
   retour en arrière illisible** : c'est une décision de parcours révisable, pas un invariant de sûreté.
-- [ ] **#639 — L'entrée `avis-identification-2026-09-01` devient du code mort au message FAUX dans la nuit du 31 août au 1er septembre**.
+- [x] **#639 — L'entrée `avis-identification-2026-09-01` devient du code mort au message FAUX dans la nuit du 31 août au 1er septembre**. ✅ **LIVRÉ le 31 août 2026** (`kuekatsheu-85`, coordinatrice).
   Inscrit le 31 août 2026 par `kuekatsheu-c8`, **avant tout usage**. Suite de #508 (`af75bc8a`).
+
+  ▣ **CE QUE LA FICHE N'AVAIT PAS VU, ET QU'IL FAUT RETENIR : IL Y AVAIT DEUX SPECS #508, PAS UNE.**
+  La fiche nommait `avis-identification-bandeau-508.spec.js` et prévenait, à juste titre, que le retrait
+  emporterait son sujet. Elle ne nommait pas **`tests/integration/bandeau-non-modal-508.spec.js`**, qui
+  tirait son bandeau de **`TRANSITIONS[0]`** — c'est-à-dire de l'entrée retirée, sans jamais la nommer.
+  ⮕ **Mesuré, pas déduit** : l'entrée retirée, cette spec rougit sur `montage : {"erreur":"bandeau non
+  affiché"}`. `TRANSITIONS[0]` était devenu `numerisation-croisement`, ciblé `sections: ['evaluations']`,
+  donc absent de l'accueil où la spec l'attendait.
+  ⮕ **Elle n'a pas été supprimée : son invariant reste VRAI.** « Le bandeau informe, il ne bloque pas »
+  (`pointer-events: none`) vaut pour TOUT `.transition-bandeau`, pas pour un avis. Elle a été **RELOGÉE**
+  sur un jalon de parcours (Suivi, seed démo), puis re-verrouillée par break-test.
+  ⮕ **La fragilité n'était pas le retrait, c'était l'ANCRAGE** : un montage accroché au « premier élément »
+  d'une collection appartient à l'exemplaire qui s'y trouve ce jour-là, pas à ce qu'il prétend prouver.
+  C'est « asserte le résultat, jamais le moyen » appliqué au MONTAGE. À relire avant tout retrait d'entrée
+  dans une collection lue par des tests.
+
+  **TÉMOINS OBTENUS** (deux rouges, chacun accusant une chose distincte) :
+  · neutralisation de l'avis retirée de `transitions-ciblage-section.spec.js` → ROUGE, `surAccueil`
+    `false` → `true`. Accuse le ciblage par section — et prouve que l'avis s'affichait bien encore le
+    31 août au soir, la fenêtre n'étant pas close.
+  · `pointer-events: auto` sur `.transition-bandeau` → ROUGE, « le bandeau capte encore les clics en son
+    centre ». Accuse l'invariant non-modal APRÈS relogement : la sentinelle mesure toujours son sujet.
+
+  **RETIRÉ AVEC L'ENTRÉE — le régime des avis n'avait plus de porteur** (zéro-dette, `CLAUDE.md` : « pas
+  de code mort pour plus tard ») : les champs `variante`, `titre` et `ignorerModeDemo` de `transitions.js`
+  (plus aucun consommateur), la branche `role="alert"`, la préférence `avis_identification_2026_09_vue`
+  de `js/preferences.js`, et 5 blocs CSS (`.transition-bandeau-titre`, `.transition-bandeau--avis` et sa
+  règle `prefers-contrast`). ⚠ **Reposer un avis daté est désormais un geste explicite**, pas une case à
+  remplir — c'est dit en tête de `js/transitions.js`.
+  ⮕ `js/accueil.js` : le paragraphe d'accueil **porte seul l'information** désormais. C'est le seul endroit
+  où le lecteur apprend comment l'accès fonctionne.
   ⮕ **Distinct de [[#640]]** : #640 verrouille la SECTION d'ouverture (`js/main.js`), #639 retire une
   ENTRÉE d'avis (`js/transitions.js`). Deux fichiers, deux règles — ne pas les traiter comme un seul lot.
   `js/transitions.js:77-79` — la condition `new Date() < new Date(2026, 8, 1, 0, 0, 0)` éteint le bandeau
