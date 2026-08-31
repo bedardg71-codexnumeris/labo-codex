@@ -348,7 +348,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⚠ **Reformulé le 30 août 2026.** Z2 recense un **quatrième** remap que l'audit du 30 août ignorait : `reserve-ouvrir.js:1057`, et c'est **le plus complet des quatre** — il réécrit `cartouche.grilleId`, ce qui déplace la clé de stockage : exactement le trou de #448. ⮕ Un défaut y est mesuré : il patche `config.echelleId` alors que le seul écrivain écrit `configuration.echelleId` — **le remap des pratiques y est inopérant**. ⮕ **Le vrai travail est de construire la table `remapCartouches`**, qui n'existe pas.
 - [ ] **#628 — S10 · Retrait du legacy des quatre sections** (constats S4, S9). Après S3 et D4. Probablement scindé en S10a (échelles) et S10b (les trois autres).
 - [ ] **#629 — S11 · Mineurs restants du plan Conception** (constats M1 si non absorbé par S4, M7, M9, M10).
-- [ ] **#630 — Diagnostic en lecture seule : combien de modèles ne survivraient PAS à un archivage**.
+- [x] **#630 — Diagnostic en lecture seule : combien de modèles ne survivraient PAS à un archivage**. ✅ **LIVRÉ le 30 août 2026** (`b3e1f74a`, §3bis du rapport Z1). Contrôlé indépendamment par `kuekatsheu-bc` : 9 appels, **tous `db.getSync`**, zéro écriture, une ligne. ⏳ **Exécution due par Grégoire.**
   Inscrit le 30 août 2026 par `kuekatsheu-bc`, à la demande de `kuekatsheu-c5` (Z1), **avant tout usage**.
   ⮕ **Ce qu'il remplace, et pourquoi c'est mieux** : T1.3 du plan Conception demandait d'instruire
   l'archivage sur un trimestre jetable. Un archivage jetable ne dirait rien des VRAIES données de
