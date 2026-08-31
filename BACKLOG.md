@@ -368,6 +368,15 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     pointent `GRILLE1759529438501`) : la réparation doit couvrir les deux.
   · ⮕ **NE RIEN SUPPRIMER en attendant** : les 16 « magasins fantômes » de #620 ressemblent à du déchet
     à nettoyer. Onze d'entre eux sont la seule trace restante de trois grilles portant 408 notes.
+- [ ] **#632 — Réparation des 408 références de #631** (le correctif ; #631 est le constat).
+  Réservé le 30 août 2026 par `kuekatsheu-bc` pour `kuekatsheu-82`, **avant usage**.
+  Spécifié en diff NON appliqué dans le rapport Z2. Doit distinguer deux cas et les nommer :
+  **re-pointage** (une grille équivalente existe sous un autre identifiant) et **reconstruction**
+  (à partir des cartouches survivantes, et de ce que les évaluations portent elles-mêmes).
+  Couvre les DEUX champs : `evaluation.grilleId` et `pratique.configuration.grilleId`.
+  ⮕ Préalable dû par `82` : mesurer ce que l'application fait AUJOURD'HUI d'une évaluation dont le
+  `grilleId` est introuvable — affichage, recalcul, export PDF, bilan de l'élève. C'est ce qui décide
+  si #631 est un problème d'archive ou un problème vivant.
 - [x] **#630 — Diagnostic en lecture seule : combien de modèles ne survivraient PAS à un archivage**. ✅ **LIVRÉ le 30 août 2026** (`b3e1f74a`, §3bis du rapport Z1). Contrôlé indépendamment par `kuekatsheu-bc` : 9 appels, **tous `db.getSync`**, zéro écriture, une ligne. ⏳ **Exécution due par Grégoire.**
   Inscrit le 30 août 2026 par `kuekatsheu-bc`, à la demande de `kuekatsheu-c5` (Z1), **avant tout usage**.
   ⮕ **Ce qu'il remplace, et pourquoi c'est mieux** : T1.3 du plan Conception demandait d'instruire
