@@ -43,15 +43,17 @@ pas parce qu'il vaut encore.
 
 - `git status -- js index.html` ne rend **rien** : aucun fichier que ton
   application charge ne porte de travail non commité.
-- `main` est à **0 commit d'avance** sur `origin/main` — tout est poussé
-  (`540531e3`).
+- `main` porte **4 commits d'avance** sur `origin/main`, non poussés — ils sont
+  POSTÉRIEURS à la release et **ne changent rien à ce que tu testes** : de la
+  documentation, plus une fonction ajoutée (`detecterFichiersDAInconnu`) que
+  **rien n'appelle encore** — vérifié par grep, son seul usage est son propre
+  export. Son bandeau viendra plus tard (T6.4).
 - **Release 1.106.12 faite, build `0830-1947`.** Elle contient S4, S5, S7, S8
   **et T6.6** — donc le correctif dont dépend la porte P1.
-- Vitest **411 fichiers / 4334 tests, code de sortie 0**, mesuré à 19 h 53,
-  **hors `tests/unit/sentinelle-612-da-inconnu.test.js`** — ce fichier est rouge
-  **par construction** (c'est le « rouge d'abord » de la tâche T6.3, dont le
-  correctif n'est pas écrit). Il ne touche à rien de ce que tu vois :
-  `index.html` ne charge pas `tests/`.
+- Vitest **412 fichiers / 4344 tests, code de sortie 0**, mesuré à 20 h 03,
+  **suite entière, sans aucune exclusion**. *(Une version antérieure de cette page
+  annonçait 4334 tests « hors une sentinelle rouge par construction » : cette
+  sentinelle est passée au vert à 20 h, son correctif ayant été écrit.)*
 
 ⮕ **LE NUMÉRO DE VERSION EST REDEVENU TON REPÈRE, et c'est le bon.** Recharge
 l'application et lis le bas de page : tu dois voir **1.106.12 · build 0830-1947**.
@@ -116,6 +118,14 @@ Le travail d'un élève pouvait se retrouver sous le nom d'un autre.
 | 3.4 | Re-dépose deux fichiers de MÊME NOM et de TAILLES DIFFÉRENTES | Chacun retrouve SON entrée ; les fichiers non reconnus sont **nommés à l'écran**, pas écartés en silence | |
 | 3.5 | Confirme l'import | Aucun doublon silencieux. Un doublon détecté est annoncé avec son motif : « même nom et même taille » | ⚠⚠ Données |
 | 3.6 | Refais 3.2 sur l'iPad, en laissant l'appareil se mettre en veille pendant le lot | Même comportement qu'au Mac | iPad · ⚠⚠ Données |
+
+
+⚠ **Un message inexact que tu vas peut-être croiser, et qui n'est PAS un échec de
+cette porte.** Le bandeau « sans DA » annonce « l'association devra être faite
+manuellement ». Depuis #611, c'est faux pour un fichier dont l'élève a été trouvé
+par son NOM : l'association est déjà faite. Le message reste juste pour le
+regroupement multi-pages. Défaut connu, relevé le 30 août au soir, à reformuler
+en T6.4 — ne le coche pas en échec.
 
 ### P4 · Aller-retour d'un codex — #613 (S7)
 
