@@ -52,11 +52,19 @@ application self-hosted (documentation Cloudflare consultée le 27 août 2026,
 
 ## §3 · Avant le 1er septembre — ce que Grégoire seul peut faire
 
+> ⚠️ **CETTE FICHE DÉCRIT UN GESTE DÉJÀ POSÉ.** Le refermage a eu lieu le **31 août 2026 vers
+> 08 h 36**, la veille de la date annoncée, pour être en place avant le cours de 8 h du
+> 1er septembre. Relevé au tableau de bord Cloudflare, captures à l'appui — les valeurs ne
+> viennent pas de `DEPLOY.md` : ce sont `DEPLOY.md` et l'ADR-008 qui en découlent.
+> Les gestes ci-dessous sont conservés **tels qu'ils avaient été écrits**, et annotés de ce
+> qu'ils sont devenus : une consigne rayée reste lisible, une consigne effacée ne se recoupe
+> plus. Correction portée le 31 août 2026 par `kuekatsheu-c8`.
+
 | | Geste | Où |
 |---|---|---|
 | 3.1 | Relever le **nom de la team Zero Trust**, le **nom de l'application**, le **nom de la policy** | `one.dash.cloudflare.com` |
-| 3.2 | Relever la **durée de session actuelle** avant de la modifier (pour la consignation) | `Access → Applications → [app]` |
-| 3.3 | Relever la **règle `Include` réelle** de la policy dormante | `Access → Applications → [app] → Policies` |
+| 3.2 | ~~Relever la **durée de session actuelle**~~ → **relevée sur la POLICY**, pas sur l'application : **6 hours**. ✅ FAIT le 31 août | `Access → Applications → [app] → Policies → [policy]` |
+| 3.3 | ~~Règle `Include` de la policy « dormante »~~ → **`Everyone`**, et la policy n'était PAS dormante : son action était `Bypass`. ✅ FAIT le 31 août | `Access → Applications → [app] → Policies` |
 | 3.3 bis | **Décider quoi faire de l'URL Netlify directe** (voir l'encadré ci-dessous) | Tableau de bord Netlify |
 | 3.4 | Me transmettre ces relevés : ils remplacent les `[À COMPLÉTER]` de `DEPLOY.md` §3.1, §3.2 et §3.3 | — |
 
@@ -81,9 +89,9 @@ secondes, et c'est le geste 3.3 bis.
 
 | | Geste | Attendu |
 |---|---|---|
-| 4.1 | `Access → Applications → [app] → Policies → [policy]` : **réactiver** la policy | La policy passe à l'état actif |
-| 4.2 | Vérifier que la règle `Include` est bien **`Everyone`** — la corriger si la policy dormante a gardé une liste d'`Emails` | La règle affiche `Everyone` |
-| 4.3 | `Access → Applications → [app]` : porter **Session duration** à **1 month** | La valeur est enregistrée |
+| 4.1 | ~~**Réactiver** la policy~~ — **SANS OBJET.** Elle n'a jamais été désactivée ; le geste réel a été de porter son **action** de `Bypass` à **`Allow`**. ✅ FAIT le 31 août à 08 h 36 | L'action affiche `Allow` |
+| 4.2 | ~~Corriger `Include` si la policy dormante a gardé une liste d'`Emails`~~ — **SANS OBJET**, la prémisse était fausse. `Include` valait déjà `Everyone` et n'a pas bougé. ✅ VÉRIFIÉ le 31 août | La règle affiche `Everyone` |
+| 4.3 | ⚠ **Sur la POLICY, pas sur l'application** : porter **Session duration** à **1 month**. La durée de la policy **écrase** celle de l'application et la globale — le tableau de bord l'écrit sous le champ. 6 hours → 1 month. ✅ FAIT le 31 août | La valeur est enregistrée sur la policy |
 | 4.4 | Vérifier que le fournisseur **One-time PIN** est actif : `Integrations → Identity providers` | OTP présent et actif |
 | 4.5 | **Se déconnecter, ouvrir `app.codexnumeris.org` en fenêtre privée** | Un code OTP est demandé par courriel |
 | 4.6 | Entrer le code reçu | L'application s'ouvre |
@@ -91,9 +99,10 @@ secondes, et c'est le geste 3.3 bis.
 | 4.8 | `curl -I https://app.codexnumeris.org` | **HTTP/2 302** vers le login Access (cf. `DEPLOY.md` §3.5) |
 
 ⚠ **4.5, 4.7 et 4.8 ne sont pas facultatives.** Le sens du test a changé : il ne s'agit plus de
-vérifier qu'on bloque, mais qu'on **laisse passer tout en identifiant**. Une policy dormante
-depuis trois mois peut se réveiller avec la règle `Emails` de janvier, ce qui refermerait la
-porte sans que rien ne le signale. Le §4.7 est le seul geste qui l'attrape.
+vérifier qu'on bloque, mais qu'on **laisse passer tout en identifiant**. ~~Une policy dormante depuis trois mois peut se réveiller avec la règle `Emails` de janvier.~~
+⮕ **Cette crainte est SANS OBJET** : la policy n'a jamais été dormante et `Include` valait déjà
+`Everyone`. Le §4.7 reste dû pour autant — il vérifie que la porte laisse passer une adresse
+hors du réseau collégial, ce qu'aucun relevé de tableau de bord ne démontre.
 
 ⚠ **Vérifier le fournisseur OTP, plutôt que le supposer présent.** La documentation Cloudflare
 (`developers.cloudflare.com/cloudflare-one/integrations/identity-providers/one-time-pin/`,
@@ -190,8 +199,8 @@ sait pas si Cloudflare recycle les sièges inactifs. À regarder au premier expo
 - [x] **fournisseur d'identité** vérifié : One-time PIN, unique intégration de l'espace ;
 - [x] `ADR-008`, `DEPLOY.md` (v1.6), `SECURITY.md` et `PRIVACY.md` (v1.2) révisés le 27 août 2026 ;
 - [ ] `BACKLOG.md` (#427, #508), `RELAIS.md` et `ETAT-PROJET.md` alignés — **non faits**, voir §10 ;
-- [ ] **#508** : le paragraphe d'accueil posé (§8) ;
-- [ ] **#508 bis** : l'entrée `avis-identification-2026-09-01` retirée de
+- [x] **#508** : le paragraphe d'accueil posé (§8), `js/accueil.js:88`, commit `af75bc8a` ;
+- [ ] **#508 bis — inscrit au backlog sous #639** : l'entrée `avis-identification-2026-09-01` retirée de
       `js/transitions.js`, et avec elle la spec
       `tests/integration/avis-identification-bandeau-508.spec.js` (§8 bis).
 
@@ -199,13 +208,15 @@ sait pas si Cloudflare recycle les sièges inactifs. À regarder au premier expo
 
 ## §8 · #508 — le paragraphe d'accueil
 
-**Si la réactivation a lieu le 1er** (à poser dans `js/accueil.js`) :
+✅ **BRANCHE APPLIQUÉE — la réactivation a eu lieu** (le 31 août, veille de la date). Le
+paragraphe est POSÉ dans `js/accueil.js:88` (commit `af75bc8a`). Texte **cité verbatim depuis le
+code**, apostrophes typographiques U+2019 comprises — copier-coller, ne pas retranscrire :
 
-> L'identification est requise pour accéder à Labo Codex. Tu donnes ton courriel, tu reçois un
-> code, et tu n'y repenses plus pendant un mois — après quoi tu redonnes ton courriel et c'est
-> reparti. Rien ne se ferme, et tes données restent sur ton appareil.
+```
+L’identification est requise pour accéder à Labo Codex. Tu donnes ton courriel, tu reçois un code, et tu n’y repenses plus pendant un mois — après quoi tu redonnes ton courriel et c’est reparti. Rien ne se ferme, et tes données restent sur ton appareil.
+```
 
-**Si elle n'a PAS lieu le 1er** : retirer le paragraphe, purement et simplement. Le reposer quand
+~~**Si elle n'a PAS lieu le 1er**~~ — **branche non retenue**, conservée pour mémoire : retirer le paragraphe, purement et simplement. Le reposer quand
 la date sera tenable. ⚠ **Reporter la phrase sans reporter le dispositif est la seule issue à
 éviter** : elle apprendrait au lecteur à ne plus lire cette zone de la page — celle où vivent
 « Par où commencer ? » et l'invitation à la CoP.

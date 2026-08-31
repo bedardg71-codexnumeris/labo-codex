@@ -417,6 +417,21 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Ce qui manque, c'est son application — `:174-178` ne patche que `grilleId`.
   ⮕ Conséquence : le lot **S9 / #627** est plus petit qu'annoncé de ce côté. Corriger l'énoncé de Z2 avant que S9
   s'en serve comme spécification. **Un diff d'audit est une esquisse, jamais une spécification.**
+- [ ] **#639 — L'entrée `avis-identification-2026-09-01` devient du code mort au message FAUX dans la nuit du 31 août au 1er septembre**.
+  Inscrit le 31 août 2026 par `kuekatsheu-c8`, **avant tout usage**. Suite de #508 (`af75bc8a`).
+  `js/transitions.js:77-79` — la condition `new Date() < new Date(2026, 8, 1, 0, 0, 0)` éteint le bandeau
+  à **minuit, heure locale de l'appareil de chaque lecteur**. Ce n'est pas une date serveur : un appareil
+  mal réglé bascule au mauvais moment.
+  ⮕ **« S'éteint seul » est vrai pour l'ÉCRAN, faux pour le DÉPÔT.** Passé cette nuit, l'entrée reste en
+  place, ne s'affiche plus, et son titre (« À partir du 1ᵉʳ septembre ») annonce au futur un geste posé le
+  31 août. Du code mort qui porte un message faux.
+  ⮕ **Zéro-dette : la retirer AVEC sa spec** `tests/integration/avis-identification-bandeau-508.spec.js`.
+  ⚠ La spec ne rougira PAS d'elle-même pour le signaler : `af75bc8a` l'a justement mise sous **date simulée**
+  (son bloc d'affichage tournait sur l'horloge réelle et serait devenu rouge demain — une sentinelle à
+  retardement, ce qu'un harnais ne doit jamais être). Le retrait est donc à faire **volontairement** : plus
+  aucun rouge ne viendra le rappeler.
+  ⚠ **Retirer l'entrée emporterait le SUJET de la spec.** Les deux partent ensemble, ou aucune : une spec
+  privée de son sujet devient verte pour de mauvaises raisons.
 - [ ] **#624 — S6 · Politique de suppression : refermer les CHEMINS qui produisent des orphelins, et traiter les `ECHELLE_DEMO` résiduelles** (constats S1, S2). Après **S5** (ordre strict S4→S5→S6), D3-A **qualifiée**.
   ⚠ **Reformulé le 30 août 2026.** L'énoncé précédent disait « absorbe la réparation #542 ». **#542 a été réparé le 26 août** (`scripts/reparation-542-echelle-orpheline.js` ; deux commits, dont `e3d5af34` qui corrige la réparation elle-même). Ce qui reste n'est pas la réparation : c'est **la CAUSE, inconnue**, et les `ECHELLE_DEMO` résiduelles. ⮕ Chiffres 383 → 44 **RAPPORTÉS, non remesurés** : le diagnostic de T2.2 rendra celui du jour.
   ⚠ **D3-A est qualifiée, pas appliquée à la lettre** : bloquer + NOMMER les référents (quoi, combien, quel trimestre) + **CONSERVER et généraliser la porte de sortie « réassigner vers un autre objet »** là où elle existe. Sur les échelles, le chemin actuel PROPOSE de migrer les évaluations : un D3-A strict retirerait cette issue et laisserait un refus indéfaisable. Un blocage sans issue n'est pas une garde.
