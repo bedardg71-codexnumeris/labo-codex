@@ -829,6 +829,33 @@ Le plan (T2.4) prescrit d'unifier sur l'implémentation #448 (`import-export.js:
 
 **Ce que ce diff ne fait pas, et qui doit être dit** : il ne crée pas de `remapCartouches`. Les quatre implémentations attribuent aujourd'hui un id neuf à une cartouche sans le mémoriser. Construire cette table est le vrai travail de S9 ; le module ci-dessus en prépare seulement la place. Tant qu'elle est vide, `production.cartoucheId` reste non remappé — le trou est nommé, pas encore fermé.
 
+##### Recomptage du 31 août 2026 — correction additive (#638)
+
+*Ajouté par `kuekatsheu-67`, mandatée par `kuekatsheu-c8`. Le paragraphe ci-dessus reste lisible tel qu'écrit le 30 août. Un constat retiré en silence redevient une source qu'on ne peut plus recouper.*
+
+**« Les quatre implémentations attribuent aujourd'hui un id neuf à une cartouche sans le mémoriser » est faux pour trois d'entre elles**, et pour deux il désigne le mauvais endroit du code.
+
+| Implémentation | Id neuf frappé ? | Mémorisé ? |
+|---|---|---|
+| import codex #448 (`import-export.js:2429`) | oui — `fusionnerParIdentite:169-170`, appelée `:2562` | **non** : la paire part en `console.warn` `:173`, le retour `:187` ne rend que des compteurs |
+| import sélectif (`:2750`) | oui — même helper, appelé `:2933` | **non** : idem, l'appelant ne lit que `.liste` |
+| partage `prefixerEntites` (`partage-import.js:146`) | oui — `:152-158` | **OUI, table complète** : `correspondance.cartouche[ancien] = prefixe + ancien` |
+| reserve-ouvrir (`:1036`) | oui — `_faireCopie:983` via `_preparerEtPatcher` `:1097` | **non, par asymétrie** (voir ci-dessous) |
+
+**Le remède change de place pour les deux chemins de `import-export.js`.** Le mint n'est pas dans la branche cartouches : il est dans `fusionnerParIdentite`, helper **partagé par cinq collections** — échelles (`:2463`, `:2842`), grilles (`:2489`, `:2814`), productions (`:2533`, `:2904`), cartouches (`:2562`, `:2933`) et **pratiques** (`:2775`), soit **neuf sites d'appel** — `grep -n "fusionnerParIdentite(" js/import-export.js` en rend dix lignes, la dixième étant la définition `:134`. Faire rendre au helper ses renommages couvre les cinq d'un seul geste — et referme un trou que ce rapport ne nomme pas : les mints du helper pour **échelles, grilles, productions et pratiques** n'entrent pas non plus dans `remapEchelles`/`remapGrilles`. Quatre familles oubliées en plus des cartouches.
+
+**`partage-import.js` n'a rien à construire.** La table existe, et l'id neuf y est une fonction PURE de l'ancien (`prefixe + item.id`, `:156`) : recalculable même sans table. Seule l'APPLICATION manque — `:174-178` ne patche que `grilleId`, alors que `correspondance.cartouche` et `correspondance.echelle` sont remplies à côté.
+
+**`reserve-ouvrir.js` a déjà le patron, huit lignes plus haut.** `_preparerEtCollecter(items, prefix, table)` mémorise (`:1048`, `if (table && item.id) table[item.id] = copie.id;`) ; son jumeau `_preparerEtPatcher` n'a pas de paramètre `table`. Les deux passes « collecter » (grilles `:1094`, échelles `:1095`) mémorisent ; les trois passes « patcher » (productions `:1096`, cartouches `:1097`, pratiques `:1098`) non. Ajouter le troisième paramètre suffit.
+
+⮕ **S9 / #627 est donc plus petit qu'annoncé sur trois implémentations sur quatre.** Un diff d'audit est une esquisse, jamais une spécification : le grepper avant de le chiffrer.
+
+**Le piège M3 ne s'étend pas à `partage-import.js`.** Un seul masquage (`:245`, `var cle = CLES_STOCKAGE[type]`), et le fichier ne fait AUCUN appel à `cle()` — le masquage y est inoffensif. Témoin du zéro : `grep -c "window\.cle(\|[^.a-zA-Z]cle(" js/partage-import.js` rend 0, la même commande sur `js/import-export.js` rend 16 ; la commande sait trouver des appels, le zéro est donc un vrai zéro. Le sous-comptage du shadowing reste un motif à surveiller (`import-export.js` : 2 annoncés / 20 mesurés · `cartouches.js` : 1 / 4), pas une loi vérifiée partout — forcer le troisième cas aurait été fabriquer la régularité qu'on prétend mesurer.
+
+**Datation.** `git log -S` sur `fusionnerParIdentite` (`js/import-export.js`), `_preparerEtPatcher` (`js/reserve-ouvrir.js`) et `prefixerEntites` (`js/partage-import.js`). Le plus récent des trois : **`6006474e`** (2026-08-18) ; `prefixerEntites` et sa table datent de `d09100e5` (2026-06-10), `_preparerEtPatcher` de `4949b2e6` (2026-04-28). **Hash de péremption : `6006474e`** — rejouer les trois commandes avant de se servir du tableau ci-dessus.
+
+**Ce que cette correction n'établit pas.** Tout ci-dessus est statique : aucun import n'a été exécuté. « La paire est jetée » est une lecture du retour de la fonction (`:187`), pas l'observation d'une référence pendante en base. Et le `console.warn` de `:173` n'a pas été cherché récursivement du côté d'un éventuel lecteur.
+
 ### S8-a — Duplication partagée : le garde bruyant sur les trois champs, pas sur un
 
 ```diff
