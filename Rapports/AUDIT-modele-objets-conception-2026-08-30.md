@@ -106,7 +106,19 @@ Les quatre autres globaux du cadrage — `planificationDonnees`, `modalitesEvalu
 
 `trimestres.js:728-799` (`creerSnapshotRessources`, appelé par `archiverTrimestre` l.601-644). **VÉRIFIÉ** (code), **SUPPOSÉ** (perte effective — à trancher par test).
 
-- Lignes 741-742 : lecture de `<id>_grillesTemplates` / `<id>_echellesTemplates` ; filtrage aux modèles « utilisés » (référencés par une production ou une évaluation) ; lignes 752-753 : **réécriture des mêmes clés** avec le sous-ensemble filtré. Avant #358 ces clés étaient des copies d'archive neuves ; depuis #358 ce sont les **collections de travail vivantes** du trimestre. Archiver retire donc du stockage toute grille ou échelle du trimestre non « utilisée » (elle ne survit que dans le snapshot de backup, l.782).
+- Lignes 741-742 : lecture de `<id>_grillesTemplates` / `<id>_echellesTemplates` ; filtrage aux modèles « utilisés » (référencés par une production ou une évaluation) ; lignes 752-753 : **réécriture des mêmes clés** avec le sous-ensemble filtré. Avant #358 ces clés étaient des copies d'archive neuves ; depuis #358 ce sont les **collections de travail vivantes** du trimestre. Archiver retire donc du stockage toute grille ou échelle du trimestre non « utilisée ».
+
+  > ⚠⚠ **CORRECTION DU 30 AOÛT 2026 AU SOIR — la phrase d'origine disait « elle ne survit que dans le
+  > snapshot de backup, l.782 ». C'EST FAUX**, mesuré par `kuekatsheu-c5` (audit Z1) et vérifié par
+  > `kuekatsheu-bc`. `trimestres.js:766-779` construit `ressources` avec `grilles: grillesUtilisees`,
+  > `echelles: echellesUtilisees` et `pratiques: pratiquesUtilisees` — **le sous-ensemble déjà filtré,
+  > c'est-à-dire les survivants** — et `cartouches: nbCartouchesCopies`, qui est **un nombre**, pas les
+  > cartouches. Le commentaire du code annonce pourtant « backup complet ». **Les modèles retirés ne
+  > survivent NULLE PART.** Cette phrase avait servi à formuler l'option B de la décision D1 (« archiver
+  > quand même en acceptant le risque, un snapshot existe ») : ce filet n'existe pas. Grégoire a tranché
+  > l'option A, donc aucun dommage — la correction est ici pour que la phrase ne se relise pas comme un
+  > fait vérifié. Conséquence : le **moratoire D1 a été élargi le même soir à trois gestes** (archiver,
+  > supprimer, exporter une ligne non active) — voir T0.1 du plan et l'en-tête de `RELAIS.md`.
 - Ligne 743 : les pratiques snapshotées sont lues via `cle('pratiquesConfigurables')` — le trimestre **ACTIF** — alors qu'on ne peut archiver qu'un trimestre non actif (l.615-618). Le snapshot écrit dans `<id>_pratiquesConfigurables` (l.754) un filtrage de la collection **d'un autre trimestre** : lecture sous un namespace, écriture sous un autre — la classe de l'incident #340, dans le code actuel, sans garde (la garde #340 ne couvre que `productions`).
 - `identifierTemplatesUtilises` (l.653-716) lit en outre la clé globale nue `grillesTemplates` (l.676) — vidée au boot par `viderModelesGlobalHerite` (l.884-913) — pour en tirer `g.echelleId`, champ retiré des grilles (#574/#578). Contribution nulle en régime post-#358 : bloc mort dans une fonction dangereuse. VÉRIFIÉ (lecture) / INFÉRÉ (nullité).
 
