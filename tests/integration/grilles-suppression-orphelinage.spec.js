@@ -25,12 +25,12 @@ const SEMER = `async () => {
         { id: 'GR_SANS', nom: 'Grille sans cartouche', criteres: [], dansBibliotheque: true }
     ]);
     // security-ok: fixture de test, littéral écrit par le spec — aucune source externe.
-    await db.set('cartouches_GR_AVEC', [
+    await db.set(cle('cartouches_GR_AVEC'), [
         { id: 'C1', nom: 'Carte mentale A26', grilleId: 'GR_AVEC' },
         { id: 'C2', nom: 'Plan de rédaction A26', grilleId: 'GR_AVEC' }
     ]);
     // security-ok: fixture de test, littéral écrit par le spec — aucune source externe.
-    await db.set('cartouches_GR_SANS', []);
+    await db.set(cle('cartouches_GR_SANS'), []);
 }`;
 
 test('PREUVE · supprimer une grille PORTEUSE de cartouches est refusé, et le dit', async ({ page }) => {
@@ -46,7 +46,7 @@ test('PREUVE · supprimer une grille PORTEUSE de cartouches est refusé, et le d
         await new Promise(res => setTimeout(res, 400));
         return {
             grilles: (await db.get('a2026_grillesTemplates') || []).map(g => g.id),
-            cartouches: (await db.get('cartouches_GR_AVEC') || []).map(c => c.nom)
+            cartouches: (await db.get(cle('cartouches_GR_AVEC')) || []).map(c => c.nom)
         };
     }, SEMER);
 

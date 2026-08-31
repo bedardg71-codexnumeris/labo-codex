@@ -4289,17 +4289,32 @@ async function lireCartouchesDuTrimestre(srcId, grilleId) {
  */
 async function lotsCartouchesDuTrimestre(srcId) {
     const grilles = await db.get(cleSource('grillesTemplates', srcId)) || [];
-    const grillesActives = await db.get(cle('grillesTemplates')) || [];
-    const idsActifs = new Set(grillesActives.map(g => g && g.id).filter(Boolean));
 
     const lots = [];
     for (const grille of grilles) {
         if (!grille || !grille.id) continue;
-        // Une grille présente À L'IDENTIQUE dans le trimestre actif partage son
-        // magasin de cartouches — `cartouches_<id>` est global. Ce ne serait pas
-        // un import : ce serait proposer à l'enseignant ses propres cartouches,
-        // et les « importer » en ferait des doublons.
-        if (idsActifs.has(grille.id)) continue;
+        // ⚠⚠ SAUT RETIRÉ PAR S5/#623 — SA PRÉMISSE EST MORTE, ET ELLE ÉTAIT ÉCRITE.
+        //
+        // Le code sautait ici toute grille présente aussi dans le trimestre actif,
+        // et il en donnait la raison : « `cartouches_<id>` est global », donc les
+        // deux trimestres partageaient le même magasin et l'import n'aurait fait que
+        // proposer à l'enseignant ses propres cartouches.
+        //
+        // Sous D2-A cette phrase est FAUSSE. Chaque trimestre a ses propres
+        // `<trim>_cartouches_<id>`, et deux trimestres portant la même grille ont
+        // des cartouches DIFFÉRENTES. C'est même le cas où l'import a le plus de
+        // sens : rapatrier le travail fait l'an dernier sur la même grille.
+        //
+        // ⮕ Garder le saut aurait rendu ces lots invisibles — sans erreur, sans
+        // message. Détecté par la sentinelle WebKit `cartouches-import-trimestre`,
+        // que Vitest ne pouvait pas voir.
+        //
+        // ⮕ `grillesActives` et `idsActifs` ont été retirés AVEC le saut : ils ne
+        // servaient qu'à lui. Les laisser aurait été garder un calcul dont plus
+        // personne ne lit le résultat.
+        //
+        // ⚠ Le doublon que l'ancien commentaire redoutait n'est plus possible ici :
+        // la source et la destination sont deux magasins distincts.
         const cartouches = await lireCartouchesDuTrimestre(srcId, grille.id);
         if (cartouches.length > 0) lots.push({ grille, cartouches });
     }

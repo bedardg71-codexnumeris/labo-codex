@@ -32,7 +32,7 @@ const SEMER_CARTOUCHES = `async () => {
     await db.set('a2026_grillesTemplates', []);
     await db.set('h2026_grillesTemplates', [{ id: 'GR_H26', nom: 'Grille-5 FR-HOLIS H26', criteres: [], dansBibliotheque: true }]);
     // Assez de cartouches pour que le modal défile réellement.
-    await db.set('cartouches_GR_H26', Array.from({ length: 15 }, (_, i) => ({
+    await db.set(cleSource('cartouches_GR_H26', 'h2026'), Array.from({ length: 15 }, (_, i) => ({
         id: 'C' + i, nom: 'Cartouche ' + i, grilleId: 'GR_H26', commentaires: {}
     })));
 }`;
