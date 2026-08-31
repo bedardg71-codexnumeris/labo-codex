@@ -417,6 +417,24 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Ce qui manque, c'est son application — `:174-178` ne patche que `grilleId`.
   ⮕ Conséquence : le lot **S9 / #627** est plus petit qu'annoncé de ce côté. Corriger l'énoncé de Z2 avant que S9
   s'en serve comme spécification. **Un diff d'audit est une esquisse, jamais une spécification.**
+- [ ] **#641 — Deux fonctions `migrerCartouchesVersBibliotheque` coexistent avec des signatures différentes ; l'exportée n'a aucun appelant**.
+  Inscrit le 31 août 2026 par `kuekatsheu-c8`, **avant tout usage**, pendant l'étape préalable de S5.
+  · `js/cartouches.js:225` — `migrerCartouchesVersBibliotheque()`, **sans argument**, PRIVÉE (dans l'IIFE
+  l.18-5006) et **vivante** : appelée à `js/cartouches.js:148`, dans la même IIFE.
+  · `js/cartouches-bibliotheque.js:189` — `migrerCartouchesVersBibliotheque(cleSource)`, **un argument**,
+  exportée sur `window` à `:221`. ⮕ **Aucun appelant**, vérifié dans tout le dépôt (`grep -rn` hors
+  `node_modules`, `.git` et le dossier de sauvegarde : seuls les rapports d'audit citent le nom).
+  ⮕ **Pourquoi ce n'est pas qu'un doublon.** Il n'y a PAS de bug aujourd'hui : l'IIFE fait gagner la version
+  locale quel que soit l'ordre de chargement, et `cartouches-bibliotheque.js` se charge d'ailleurs AVANT
+  (`index.html:14491` puis `:14492`). Le risque est de LECTURE : qui grep le nom trouve deux définitions, et
+  celle qui **paraît** publique est la morte. C'est un piège direct pour S5, dont le périmètre traverse ces
+  deux fichiers.
+  ⮕ **Ne pas retirer pendant un autre lot** : candidat à **#628** (retrait du legacy), avec ses règles —
+  grep du nom dans `js/` ET `index.html` (`data-action` compris) ET les chaînes, puis `window.<Nom>` dans le
+  résidu après retrait.
+  ⚠ **Fait annexe, à connaître avant S5** : `migrerCartouchesVersBibliotheque` (la vivante) n'est couverte par
+  **AUCUN test** — mesuré le 31 août, zéro fichier de `tests/` ne la nomme. Or c'est elle qui porte la clé de
+  stockage `cartouches_<grilleId>` que S5 doit router. Un vert de suite ne dit rien sur elle.
 - [ ] **#640 — La section d'ouverture n'est verrouillée par AUCUNE sentinelle : l'accueil doit rester la porte d'entrée quelle que soit la valeur de `demo-actif` et du mode expert**.
   Inscrit le 31 août 2026 par `kuekatsheu-c8`, **avant tout usage**. Demandé par Grégoire. Suite de `8f4ff85d`.
   `js/main.js:991` — `afficherSection('accueil')`, désormais **inconditionnel**. Le « Chantier 3 » dérivait

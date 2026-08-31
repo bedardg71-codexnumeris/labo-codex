@@ -227,8 +227,8 @@ async function migrerCartouchesVersBibliotheque() {
     let nbMigrees = 0;
 
     for (const grille of grilles) {
-        const cle = `cartouches_${grille.id}`;
-        let cartouches = await db.get(cle) || [];
+        const cleCartouches = `cartouches_${grille.id}`;
+        let cartouches = await db.get(cleCartouches) || [];
 
         // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
         if (cartouches && !Array.isArray(cartouches)) {
@@ -243,7 +243,7 @@ async function migrerCartouchesVersBibliotheque() {
         });
 
         if (cartouches.length > 0) {
-            await db.set(cle, cartouches);
+            await db.set(cleCartouches, cartouches);
         }
     }
 
@@ -2478,8 +2478,8 @@ function lignesMatriceCartouche(criteres, niveaux, commentaires) {
         lignes.push('## ' + critere.nom);
         lignes.push('');
         (niveaux || []).forEach(niveau => {
-            const cle = critere.id + '_' + niveau.code;
-            lignes.push('**' + critere.nom + ' (' + niveau.code + ')** : ' + (dit[cle] || ''));
+            const cleCommentaire = critere.id + '_' + niveau.code;
+            lignes.push('**' + critere.nom + ' (' + niveau.code + ')** : ' + (dit[cleCommentaire] || ''));
         });
         if (index < (criteres || []).length - 1) {
             lignes.push('');
@@ -3823,10 +3823,10 @@ function importerDepuisMarkdown() {
         if (!confirmer) return;
 
         // Remplir la matrice
-        Object.keys(commentairesParsed).forEach(cle => {
-            const textareaComment = document.getElementById(`comment_${cle}`);
+        Object.keys(commentairesParsed).forEach(cleCommentaire => {
+            const textareaComment = document.getElementById(`comment_${cleCommentaire}`);
             if (textareaComment) {
-                textareaComment.value = commentairesParsed[cle];
+                textareaComment.value = commentairesParsed[cleCommentaire];
             }
         });
 
@@ -3896,14 +3896,14 @@ function importerPartiel() {
     const criteresSelectionnes = Array.from(checkboxes).map(cb => cb.value);
     let nbImportes = 0;
 
-    Object.keys(commentairesParsed).forEach(cle => {
+    Object.keys(commentairesParsed).forEach(cleCommentaire => {
         // Extraire le critère de la clé (format: CRITERE_NIVEAU)
-        const critere = cle.split('_')[0];
+        const critere = cleCommentaire.split('_')[0];
 
         if (criteresSelectionnes.includes(critere)) {
-            const textareaComment = document.getElementById(`comment_${cle}`);
+            const textareaComment = document.getElementById(`comment_${cleCommentaire}`);
             if (textareaComment) {
-                textareaComment.value = commentairesParsed[cle];
+                textareaComment.value = commentairesParsed[cleCommentaire];
                 nbImportes++;
             }
         }
