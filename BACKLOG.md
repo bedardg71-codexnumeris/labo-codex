@@ -417,6 +417,33 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Ce qui manque, c'est son application — `:174-178` ne patche que `grilleId`.
   ⮕ Conséquence : le lot **S9 / #627** est plus petit qu'annoncé de ce côté. Corriger l'énoncé de Z2 avant que S9
   s'en serve comme spécification. **Un diff d'audit est une esquisse, jamais une spécification.**
+- [ ] **#642 — Le masquage par PARAMÈTRE de fonction échappe à toutes les commandes de détection employées jusqu'ici, et c'est la forme la plus fréquente dans les fichiers de partage**.
+  Inscrit le 31 août 2026 par `kuekatsheu-c8`, **avant tout usage**, pendant S5. Mesure de `kuekatsheu-67`.
+  Le dossier a sous-compté le shadowing de `cle()` **quatre fois** : Z2:275 annonce 2 sites dans
+  `import-export.js`, il y en a 20 ; le plan et la consigne en annoncent 1 dans `cartouches.js`, il y en a 4.
+  ⮕ **La cause est mesurée, et ce n'est pas l'inattention.** Les commandes employées — les miennes comme
+  celles de `kuekatsheu-67` — cherchaient `const|let|var cle =` et les flèches. Elles ne cherchaient PAS
+  `function f(cle)`. Or c'est cette forme qui domine dans `js/partage-section.js` (`lire:89`, `ecrire:95`,
+  `ajouterACollection:138`) et `js/donnees-v2.js` (`supprimerParametreConfig:878`).
+  ⮕ **Cinq formes à couvrir**, établies en écrivant un analyseur de portées plutôt qu'un grep : paramètre de
+  fonction · paramètre de flèche entre parenthèses · **flèche SANS parenthèses** (`cle => …`) · `const/let/var`
+  · variable de boucle `for…of`. Un grep ne calcule pas une portée ; l'appariement d'accolades, si.
+  ⚠ **LE REMÈDE PAR ALIAS NE FONCTIONNE PAS — mesuré par EXÉCUTION, pas par raisonnement.** Poser
+  `const routerCle = cle;` en tête de portée pour contourner un masquage échoue dans les trois cas, parce
+  qu'un masquage couvre la portée ENTIÈRE, y compris au-dessus de sa déclaration :
+  · paramètre → `TypeError: routerCle is not a function` ;
+  · `const` → `ReferenceError: Cannot access 'cle' before initialization` (zone morte temporelle) ;
+  · `var` → `TypeError` **à l'appel seulement** : hoisté à `undefined`, rien ne lève à l'écriture. **Bombe à
+  retardement.** ⮕ Le seul geste correct, quand un masquage mord, est de renommer **le masquage**, jamais
+  d'aliaser la fonction.
+  ⮕ **Ce que l'item demande** : une commande (ou un petit analyseur versionné) qui couvre les cinq formes, et
+  un recomptage des trois chiffres publiés dans Z2:275 et le plan. ⚠ **`cleSource` n'a jamais été cherché**,
+  sous aucune forme.
+  ⮕ **Sans objet pour S5** : l'intersection entre les 74 sites de composition et les 14 portées masquées est
+  **ZÉRO**, avec témoin (une ligne prise dans chacune des 14 portées : 14 mordues sur 14, l'outil mord quand
+  il doit). Aucun renommage n'est dû dans ce lot. Seule discipline à tenir : poser le `cle()` au **site
+  d'appel**, jamais dans un wrapper dont le paramètre s'appelle `cle` — `js/partage-format.js:150-154` est le
+  seul endroit du périmètre où l'erreur serait possible.
 - [ ] **#641 — Deux fonctions `migrerCartouchesVersBibliotheque` coexistent avec des signatures différentes ; l'exportée n'a aucun appelant**.
   Inscrit le 31 août 2026 par `kuekatsheu-c8`, **avant tout usage**, pendant l'étape préalable de S5.
   · `js/cartouches.js:225` — `migrerCartouchesVersBibliotheque()`, **sans argument**, PRIVÉE (dans l'IIFE
@@ -3469,6 +3496,22 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   critère est donc **filtré du diagnostic, sans un mot**.
   ⮕ **Le geste** : une seule fonction de normalisation, partagée par les deux côtés de l'appariement,
   et le retrait des huit rabotages. Pas de valeur métier : c'est un défaut technique.
+  ⚠⚠ **CE GESTE VISE UNE CAUSE QUI N'EXISTE PAS — mesuré le 31 août 2026 par `kuekatsheu-c8`, en passant,
+  sans ouvrir le lot.** Les normalisations sont DÉJÀ identiques. `cleCritere` (`js/profil-etudiant-helpers.js:806`)
+  fait quatre opérations — `toLowerCase` · `normalize('NFD')` · retrait des diacritiques · retrait des espaces —
+  et les copies en ligne (`profil-etudiant-helpers.js:850` · `profil-etudiant-calculs.js:842, 871, 888`) font
+  **les mêmes quatre, dans le même ordre**. Les unifier ne changerait donc RIEN à l'appariement.
+  ⮕ **Le désaccord n'est pas entre deux normalisations, il est entre deux CHAÎNES SOURCE.** Un côté normalise
+  le nom du critère de la grille (« Français écrit » → `francaisecrit`) ; l'autre détient déjà `francais`, venu
+  d'ailleurs. C'est le rabotage qui les fait coïncider. **Le retirer sans savoir d'où vient l'autre clé casserait
+  l'appariement au lieu de le réparer.**
+  ⮕ **#553 demande donc un DIAGNOSTIC avant un correctif**, et il n'en a pas. La question à trancher d'abord :
+  d'où vient la clé `francais` du côté receveur ? Elle exigera probablement les données réelles de Grégoire —
+  quels noms de critères existent, et ce que contient `moyennes`. Aucune session ne peut la mesurer seule.
+  ⮕ **Contexte à connaître avant d'ouvrir le lot** : #553 touche au dépistage, et le dépistage est en cours de
+  refonte avec une orthopédagogue qui rejoint l'équipe — retrait des éléments codés en dur liés à SOLO, pour que
+  le dépistage suive les souhaits de l'utilisateur. Le contrat de nommage des clés de critères fait donc partie
+  d'un chantier plus large, mené avec Cowork. **Ne pas corriger #553 isolément sans ce cadrage.**
 
 - [ ] **#554 — `determinerCibleIntervention` ne reçoit jamais le statut de décrochage.**
   Créé le 27 août 2026, constaté pendant #552 et **volontairement non corrigé** : brancher un site
