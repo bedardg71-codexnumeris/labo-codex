@@ -7,6 +7,128 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 31 AOÛT 2026, SOIRÉE (SECOND CYCLE)
+
+> Écrit par `kuekatsheu-85`, coordinatrice d'un second trio du même jour
+> (`85`, `5d`, `dc`). Ce bloc **remplace** celui de la fin d'après-midi, plus bas,
+> qui reste valable pour tout ce qu'il décrit — S5 y compris.
+> **Zéro collision d'index, aucun fichier partagé, aucun ID consommé.**
+
+**Branche : `main`.** **Aucune release** — version inchangée **1.106.13**, build
+`0831-0734`. **4 jetons `?v=` bumpés en `20260831f`** (`transitions.js`,
+`preferences.js`, `accueil.js`, `styles.css`) : ⚠ **recharger la session `file://`**.
+
+**Vitest 419 fichiers / 4452 tests · Playwright WebKit 222 passés · code de sortie
+0 pour les deux**, lus APRÈS le dernier changement. (218 → 222 : +5 cas de la
+nouvelle spec S5, −1 spec retirée avec #639.)
+**Dernier ID utilisé : #643. Aucun nouvel item ouvert.**
+
+**CE QUI A ÉTÉ LIVRÉ — trois lots, trois commits**
+- **#639** (`b8ba7504`) — l'avis daté retiré avant de devenir du code mort au
+  message faux. Le régime des avis part entier (champs, préférence, 5 blocs CSS) :
+  le reposer est désormais un geste explicite. `js/accueil.js` porte seul
+  l'information sur l'accès.
+- **#623** (`3eda7d0d`) — la spec WebKit dédiée à S5 qui manquait : 5 cas, 5
+  témoins. Plus deux tolérances **nées mortes** retirées de `622` et `466`.
+- **#636** (`aa87f9e0`) — les 22 points de décision de `scripts/` (pas 15). Trois
+  règles : lire = balayer et nommer où ; écrire = trimestre explicite ou refus ;
+  source datée = clé de son époque. `restaurer-isoler-cartouches-A25.mjs` **gelé**.
+
+⛔ **LE MORATOIRE À TROIS GESTES N'EST PAS LEVÉ.** Rien ce soir ne l'approche.
+⏳ **Un geste revient à Grégoire** : `restaurer-isoler-cartouches-A25.mjs` **refuse
+désormais d'écrire** (`--ecrire` → code 2, le dry-run reste entier). Restriction
+d'outil délibérée, et le refus dit comment le lever, site par site.
+
+---
+
+### ⚠⚠ CE QUE CE CYCLE A APPRIS, ET QUI VAUT AU-DELÀ DE SES TROIS LOTS
+
+**QUATRE dispositifs décoratifs démasqués. Aucun par une relecture ; tous par une
+mutation ou une mesure.** S'ils avaient tenu, chacun aurait servi d'alibi.
+
+1. **Une garde peut NAÎTRE morte.** On savait qu'une liste de tolérance périme en
+   silence. Le motif `/clé ABSENTE des registres/i` visait un `console.warn` alors
+   que les trois collecteurs qui le portaient ne ramassent que
+   `msg.type() === 'error'` : il n'a **jamais** pu être confronté à quoi que ce
+   soit, et avait voyagé par copie sur trois fichiers sans être re-dérivé.
+   ⮕ La question à poser à un motif de tolérance n'est pas seulement « est-il
+   encore juste ? » mais **« peut-il seulement atteindre son collecteur ? »**. Le
+   TYPE du message décide, pas son texte. Une garde née morte est plus dure à voir
+   qu'une garde périmée : elle ne produit jamais le moindre symptôme.
+2. **Une sentinelle peut garder un régime disparu.**
+   `sentinelle-reparation-442-doublons` montait son corpus sous la clé NUE : verte
+   avant S5, verte **pendant toute la régression**, verte après. Remède : **ajouter**
+   la famille namespacée, **garder** la nue. On ne raccourcit pas le corpus d'une
+   sentinelle, on le scinde. Break-test : rouge sur la seule assertion ajoutée,
+   **les 12 autres cas verts sous la même mutation**.
+3. **Un drapeau peut rester VRAI sur un geste entièrement neutralisé.**
+   `js/main.js:735` pose `migration_cartouches_namespacees_done` dès que
+   `rapport.echecs` est vide — or un rapport qui n'a RIEN fait n'a rien à échouer.
+   Une sentinelle branchée sur ce drapeau serait restée verte sur une migration
+   supprimée. ⮕ **Asserter l'EFFET (l'écran, les copies, la clé source), jamais le
+   drapeau qui prétend l'attester.**
+4. **Un oracle peut viser une adresse que l'application ne lit plus.**
+   `reparation-cartouches-orphelines.spec` interrogeait la clé nue. ⚠ **Et corriger
+   le seul oracle n'aurait pas suffi** : la destination recevait 2 pour 3 attendus,
+   le réflexe suivant aurait été d'ajuster l'attente à 2 — le test serait devenu
+   vert **en cessant d'exercer la fusion sans écrasement**, son invariant.
+   ⮕ **Une assertion qu'on aligne sur le comportement observé cesse d'être un test.**
+   Remède : poser la fixture à l'adresse réelle, faire passer fixture ET oracle par
+   `cle()` plutôt que de réécrire l'adresse à la main, et AJOUTER une assertion
+   (`residuNu === 0`). La sentinelle couvre plus qu'avant, pas moins.
+
+**⚠ UN NOM DE CLÉ QUI EST UN PIÈGE EN SOI — deux sessions, deux codes, même erreur.**
+`migration_cartouches_namespacees_done` contient un BOOLÉEN, et **tout filtre sur
+la famille `cartouches_` l'attrape** (`indexOf` le trouve précédé d'un `_`).
+Il a fait planter les scripts de #636 (`l.cartouches.forEach is not a function`)
+**puis, dix minutes plus tard, le banc écrit pour les vérifier.**
+⮕ **Le drapeau d'une migration porte le nom de la famille qu'il migre.** Remède
+retenu : **deux gardes qui ne peuvent pas se tromper ensemble** — l'une sur le NOM
+(`^([ahe]\d{4}|demo)$` ; le `e` parce que `creerTrimestre` accepte la session Été),
+l'autre sur la VALEUR (est-ce une liste ?).
+
+**⚠ LIRE UN CODE DE SORTIE : le pipe n'est pas le seul piège.**
+`grep -c` qui compte **zéro** sort en code **1** et **coupe un `&&`** — la commande
+suivante n'est jamais exécutée, et le `$?` lu appartient au grep. Erreur commise
+ce soir, sur une vérification de restauration.
+⮕ **Le code lu appartient à la dernière commande EXÉCUTÉE, pas à celle qu'on croit
+avoir lancée** ; une commande sautée n'en produit aucun. Même méfiance après `&&`
+qu'après un pipe.
+
+**⚠ UN NOMBRE SE TRANSMET AVEC LE SCÉNARIO QUI L'A PRODUIT, DANS LA MÊME PHRASE.**
+Un « 3 » rapporté était juste — sous trois appels — mais la spec n'en fait qu'un,
+où le résultat est 2. Les conditions étaient dans le message, un paragraphe plus
+loin : trop loin pour voyager avec le chiffre. Un remède a failli être construit
+dessus. ⮕ **Un chiffre dont les conditions ne voyagent pas avec lui est faux à
+l'usage, même quand la mesure était bonne.** C'est la version chiffrée de la mesure
+de seconde main.
+
+**⚠ UNE RÈGLE APPLIQUÉE PARTOUT DEVIENT UN RÉFLEXE.** « Lire = balayer tous les
+trimestres » est juste — sauf à `reparation-453:256`, où la question est « cette
+cartouche est-elle joignable POUR CET ARTEFACT ». Y balayer produirait un faux
+positif, et précisément le partage que S5 referme. ⮕ **Chercher la frontière d'une
+règle vaut plus que la règle.**
+
+**⚠ ET LE PLI QUI SE REFERME LE PLUS SOUVENT : un piège écrit en commentaire
+n'arrête pas celui qui l'a écrit.** Troisième occurrence en deux jours — un
+avertissement contre le prédicat lâche était en tête du fichier même où le prédicat
+lâche a été écrit. Une garde, si.
+
+**MÉTHODE DE COORDINATION — ce qui a fonctionné, deux trios de suite**
+· La coordinatrice tient SEULE les identifiants, les commits et le jeton `?v=`.
+· **Un périmètre de FICHIERS par session**, jamais de sujet. Ici : `tests/` (un
+  fichier neuf), `scripts/`, et le reste à la coordinatrice.
+· **Toute fenêtre de mutation sur l'arbre partagé s'annonce aux DEUX bouts**, et se
+  ferme sur une somme SHA comparée — pas sur « j'ai restauré ». Aucun commit
+  pendant.
+· **Toute attente a une fin explicite annoncée** (« cycle fini »).
+· **Les deux sessions ont contesté mes prémisses avec des mesures, et elles avaient
+  raison les deux fois** (`cle()` EST disponible en console ; le compte du hook
+  n'était pas celui que je citais). ⮕ Une consigne de coordinatrice se vérifie
+  comme le reste.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 31 AOÛT 2026, FIN DE JOURNÉE
 
 > Écrit par `kuekatsheu-c8`, coordinatrice de trois sessions parallèles
