@@ -2035,8 +2035,33 @@
         // Pointer Events : couvre souris, doigt (iPad) et Apple Pencil avec une
         // seule mécanique. Nécessite touch-action:none sur la barre (styles.css)
         // pour que le geste ne soit pas happé par le défilement natif.
+        // ⚠⚠ L'EXEMPTION PORTE SUR `button`, PAS SUR UNE CLASSE — ET C'EST MESURÉ.
+        //
+        // Avant le 31 août 2026, elle nommait `.palette-flottante-toggle` et
+        // `.travaux-palette-toggle`. Le cadenas de la palette Paramètres
+        // (`travaux-ui.js`, `#btnVerrouPalette`, classes `btn btn-compact`) n'en
+        // portait aucune : appuyer dessus ne faisait RIEN — pas d'action, pas de
+        // message, pas d'erreur. Signalé par Grégoire depuis l'écran Évaluation, où
+        // il rendait le déverrouillage d'une évaluation IMPOSSIBLE (#644).
+        //
+        // ⚠ LA CAUSE N'EST PAS `preventDefault()`, ET C'EST CONTRE-INTUITIF. Mesuré
+        // dans WebKit, les deux gestes isolés : `preventDefault()` seul laisse passer
+        // le `click` (1/1) ; `setPointerCapture()` seule le supprime (0/1), témoin
+        // sans geste à 1/1. C'est la CAPTURE qui mord : elle redirige le `pointerup`
+        // vers la barre, `pointerdown` et `pointerup` n'atterrissent plus sur la même
+        // cible, et aucun `click` ne se forme. La spec Pointer Events ne tranche pas
+        // ce point — le moteur décide, donc on le mesure.
+        //
+        // ⮕ POURQUOI `button` PLUTÔT QUE D'AJOUTER LA CLASSE AU CADENAS : le défaut
+        // n'est pas ce bouton-là, c'est que TOUT bouton posé dans une barre de palette
+        // sans la classe magique est avalé en silence. Vérifié avant d'élargir : les
+        // 13 éléments qui portent les deux classes exemptées sont TOUS des `<button>`,
+        // donc `closest('button')` les subsume sans rien changer pour eux. Le titre et
+        // la poignée ne sont pas des boutons : le glisser reste entier.
+        // Verrouillé par `tests/integration/palette-barre-boutons-clic-644.spec.js`,
+        // qui rougit dans les DEUX sens (clic avalé / glisser mangé).
         barre.addEventListener('pointerdown', function(e) {
-            if (e.target.closest('.palette-flottante-toggle') || e.target.closest('.travaux-palette-toggle')) return;
+            if (e.target.closest('button')) return;
             if (!e.isPrimary) return;
             e.preventDefault();
             const pointerId = e.pointerId;
@@ -2070,8 +2095,10 @@
         });
 
         // Double-clic sur la barre : reset taille et position sauvegardée
+        // Même exemption qu'au `pointerdown` ci-dessus, et pour la même raison : un
+        // double-clic sur un bouton de la barre ne doit pas réinitialiser la palette.
         barre.addEventListener('dblclick', function(e) {
-            if (e.target.closest('.palette-flottante-toggle') || e.target.closest('.travaux-palette-toggle')) return;
+            if (e.target.closest('button')) return;
             palette.style.width = '';
             palette.style.height = '';
             sauvegarderPositionPalette(palette);

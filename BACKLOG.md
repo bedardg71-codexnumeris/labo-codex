@@ -418,6 +418,25 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Ce qui manque, c'est son application — `:174-178` ne patche que `grilleId`.
   ⮕ Conséquence : le lot **S9 / #627** est plus petit qu'annoncé de ce côté. Corriger l'énoncé de Z2 avant que S9
   s'en serve comme spécification. **Un diff d'audit est une esquisse, jamais une spécification.**
+- [ ] **#644 — Le cadenas de la palette Paramètres n'était exempté par aucune classe : le glisser de barre avalait son clic, et déverrouiller une évaluation était impossible**.
+  Inscrit le 31 août 2026 par `kuekatsheu-9f` (coordinatrice), **avant tout usage**, à la demande de `kuekatsheu-5d`
+  qui porte le correctif. Retour terrain de Grégoire depuis l'écran Évaluation.
+  `#btnVerrouPalette` (`js/travaux-ui.js:4707`, classes `btn btn-compact`) ne portait ni `.palette-flottante-toggle`
+  ni `.travaux-palette-toggle`, les deux seules classes que le handler `pointerdown` de la barre exemptait — ses
+  voisins ↔ ↕ − les portaient, donc eux répondaient. Appuyer sur le cadenas ne produisait **rien** : pas d'action,
+  pas de message, pas d'erreur.
+  ⚠ **La cause n'est pas `preventDefault()`, et c'est contre-intuitif.** Mesuré dans WebKit, les deux gestes isolés :
+  `preventDefault()` seul laisse passer le `click` (1/1) ; `setPointerCapture()` seule le supprime (0/1), témoin sans
+  geste à 1/1. C'est la **capture** qui mord — le `pointerup` est redirigé vers la barre, les deux extrémités du clic
+  n'atterrissent plus sur la même cible, et aucun `click` ne se forme. La spec Pointer Events ne tranche pas ce
+  point : le moteur décide, donc on le mesure.
+  ⮕ **Remède élargi exprès** : l'exemption porte sur `closest('button')`, pas sur une classe de plus. Le défaut n'est
+  pas ce bouton-là, c'est que **tout** bouton posé dans une barre de palette sans la classe magique est avalé en
+  silence. Vérifié avant d'élargir : les 13 éléments qui portent les deux classes exemptées sont tous des `<button>`,
+  donc `closest('button')` les subsume ; le titre et la poignée n'en sont pas, le glisser reste entier.
+  ⮕ Rouge obtenu au banc **avant** correctif avec la vraie `travauxOutils.configurerDragPalette` : `{verrou: 0,
+  toggle: 1}` — le voisin exempté sert de témoin, sans lui un zéro des deux côtés ne dirait rien. Vert après :
+  `{verrou: 1, toggle: 1}`, garde-fou inverse (glisser par le titre) inchangé.
 - [ ] **#643 — Le fichier de partage `.lcz` ne porte pas le trimestre d'où viennent les cartouches ; seule la modale le dit**.
   Inscrit le 31 août 2026 par `kuekatsheu-c8`, **avant tout usage**. Mesure de `kuekatsheu-67`. Suite de S5/#623.
   Décision de Grégoire du 31 août : une grille partagée qui vit dans deux trimestres envoie les cartouches du
