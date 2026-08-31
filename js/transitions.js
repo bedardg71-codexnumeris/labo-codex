@@ -7,9 +7,12 @@
  *
  * Architecture :
  * - Des entrées avec condition() + message + clé de mémorisation + sections cibles
- * - Deux familles cohabitent : les JALONS du parcours (conditionnés par les
- *   données de l'utilisateur) et les AVIS datés (conditionnés par une date,
- *   variante visuelle « avis », placés en tête pour passer devant les jalons)
+ * - Une seule famille : les JALONS du parcours, conditionnés par les données de
+ *   l'utilisateur. Une seconde famille a existé — les AVIS datés, conditionnés
+ *   par une date et placés en tête pour passer devant les jalons (#508). Elle a
+ *   été retirée le 31 août 2026 avec son unique entrée (#639) : le mécanisme
+ *   n'avait plus de porteur, et un moteur qu'aucune donnée n'exerce n'est plus
+ *   testé. Le reposer est un geste explicite, pas une case à remplir.
  * - Déclenchement : écoute l'événement `sectionAffichee` + re-évaluation
  * - Ciblage : chaque bandeau ne s'affiche que dans sa/ses section(s) pertinente(s)
  *   (champ `sections`) — sinon il déborde hors contexte (ex. sur l'accueil)
@@ -49,41 +52,6 @@ function nbTrim(nomCle) {
 // Configuration des transitions (3 entrées, ordre = parcours utilisateur)
 // =========================================================================
 var TRANSITIONS = [
-    {
-        // ------------------------------------------------------------------
-        // AVIS DATÉ — #508 · identification à l'entrée au 1er septembre 2026
-        // ------------------------------------------------------------------
-        // En tête du tableau : evaluerTransitions() affiche la PREMIÈRE entrée
-        // éligible, donc l'avis passe devant les jalons du parcours pendant sa
-        // fenêtre. Les jalons ne sont pas perdus : ils réapparaissent dès que
-        // l'avis est fermé ou expiré.
-        //
-        // Pas de champ `sections` : l'avis doit être vu quelle que soit la
-        // section ouverte. Pas de `messageDemo` non plus, et `ignorerModeDemo`
-        // maintient une clé unique — l'avis porte sur l'accès au site, pas sur
-        // le contenu de l'espace de travail.
-        //
-        // ⚠ Fenêtre courte et unilatérale. L'application est DERRIÈRE la porte
-        // Cloudflare : à partir du 1er septembre, quiconque lit ce bandeau a
-        // déjà franchi l'identification, et l'avertir ne sert plus à rien. La
-        // condition l'éteint donc à cette date, et #508 prend le relais avec un
-        // paragraphe d'accueil rédigé au présent. Ne pas prolonger la date sans
-        // réécrire le message : un avis périmé apprend à ne plus lire la zone.
-        id: 'avis-identification-2026-09-01',
-        dejaVuePref: 'avis_identification_2026_09_vue',
-        ignorerModeDemo: true,
-        variante: 'avis',
-        titre: '\u00c0 partir du 1\u1d49\u02b3 septembre',
-        condition: function() {
-            // Bascule à minuit, heure locale de l'utilisateur (mois 8 = septembre).
-            return new Date() < new Date(2026, 8, 1, 0, 0, 0);
-        },
-        // ⚠ Le mois doit se lire comme un RENOUVELLEMENT, jamais comme une
-        // échéance. « L'accès reste ouvert un mois » se lisait « au bout d'un
-        // mois, je perds l'accès » (retour de Grégoire, 27 août). D'où la
-        // deuxième phrase, qui n'est pas un ornement : elle porte la nuance.
-        message: 'L\u2019acc\u00e8s \u00e0 Labo Codex demandera une identification\u00a0: tu entres ton courriel, tu re\u00e7ois un code, et tu n\u2019y repenses plus pendant un mois. Apr\u00e8s quoi tu r\u00e9entres ton courriel et c\u2019est reparti pour un mois\u00a0: rien ne se ferme, il n\u2019y a ni compte \u00e0 cr\u00e9er ni mot de passe \u00e0 retenir. Tes donn\u00e9es, elles, restent sur ton appareil, comme avant.'
-    },
     {
         id: 'numerisation-croisement',
         dejaVuePref: 'transition_num_crois_vue',
@@ -145,10 +113,6 @@ function estEnModeDemoLocal() {
 }
 
 function prefPourMode(transition) {
-    // Les avis datés gardent une clé unique : ils portent sur l'accès au site,
-    // pas sur le contenu de l'espace, et n'ont donc pas à se ré-afficher quand
-    // l'utilisateur entre ou sort de la démo.
-    if (transition.ignorerModeDemo) return transition.dejaVuePref;
     return estEnModeDemoLocal()
         ? transition.dejaVuePref + '_demo'
         : transition.dejaVuePref;
@@ -177,26 +141,16 @@ function afficherBandeau(transition) {
     var div = document.createElement('div');
     div.id = ID_BANDEAU;
     div.className = 'transition-bandeau';
-    if (transition.variante) {
-        div.classList.add('transition-bandeau--' + transition.variante);
-    }
-    // Un avis daté n'est pas une félicitation de parcours : il demande une
-    // annonce polie mais ferme au lecteur d'écran, d'où role="alert".
-    div.setAttribute('role', transition.variante === 'avis' ? 'alert' : 'status');
+    // Un jalon est une félicitation de parcours : il s'annonce sans interrompre,
+    // d'où role="status". Le role="alert" du régime des avis datés est parti
+    // avec eux (#639) ; le reposer suppose de reposer d'abord un avis.
+    div.setAttribute('role', 'status');
 
     var contenu = document.createElement('div');
     contenu.className = 'transition-bandeau-contenu';
 
-    // Colonne de texte : titre optionnel + message.
     var texte = document.createElement('div');
     texte.className = 'transition-bandeau-texte';
-
-    if (transition.titre) {
-        var h = document.createElement('p');
-        h.className = 'transition-bandeau-titre';
-        h.textContent = transition.titre;
-        texte.appendChild(h);
-    }
 
     var p = document.createElement('p');
     p.textContent = messagePourMode(transition);

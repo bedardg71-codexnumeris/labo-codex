@@ -55,13 +55,17 @@ function afficherAccueil() {
  * POSÉ le 31 août 2026 à 08 h 36, la veille, pour être en place avant un cours
  * de 8 h. Le paragraphe ci-dessous est passé au présent le même jour ; il dit
  * le renouvellement du mois, parce que « valable un mois » se lisait comme une
- * date de péremption. La
- * phrase d'avis (4e des 5 blocs du corps, avant l'invitation à la CoP) est
- * doublée d'un bandeau daté (js/transitions.js, entrée
- * `avis-identification-2026-09-01`), parce qu'un avis vivant dans un accordéon
- * repliable n'est pas lu. Le bandeau s'éteint seul le 1er septembre ; c'est
- * alors ce paragraphe-ci qu'il faut réécrire au présent, ou retirer si le
- * geste n'a pas eu lieu — les deux textes sont au §8 de
+ * date de péremption. La phrase d'avis (4e des 5 blocs du corps, avant
+ * l'invitation à la CoP) a été doublée, du 27 au 31 août, d'un bandeau daté
+ * (js/transitions.js, entrée `avis-identification-2026-09-01`), parce qu'un avis
+ * vivant dans un accordéon repliable n'est pas lu.
+ *
+ * 31 août 2026 (#639) : le bandeau est RETIRÉ. Sa condition l'éteignait seule à
+ * minuit, mais « s'éteint seul » est vrai pour l'écran et faux pour le dépôt —
+ * l'entrée serait restée en place, invisible, sous un titre (« À partir du
+ * 1ᵉʳ septembre ») qui annonçait au futur un geste déjà posé. Le paragraphe
+ * ci-dessous, lui, PORTE SEUL l'information désormais : c'est le seul endroit
+ * où le lecteur apprend comment l'accès fonctionne. Textes de référence au §8 de
  * `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`.
  * Cf. ADR-008 (révision 27 août 2026), DEPLOY.md (révision v1.6).
  * Source texte d'origine : docs/refonte-textes/textes-manquants-bloc4.md

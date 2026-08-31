@@ -8,7 +8,16 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 
 // SENTINELLE #508 — LE BANDEAU INFORME, IL NE BLOQUE PAS.
 //
-// CE QUI EST ARRIVÉ, ET QU'AUCUN TEST NE VOYAIT. Le bandeau d'avis daté est posé
+// ⚠ LE NOM DE CE FICHIER DIT SON ORIGINE, PAS SON SUJET. L'invariant est né avec
+// l'avis daté de #508 ; il ne lui appartient pas. Le 31 août 2026, #639 a retiré
+// cet avis, et ce fichier a rougi sur « bandeau non affiché » — il tirait son
+// bandeau de `TRANSITIONS[0]`, qui n'était plus le même et n'était plus ciblé sur
+// l'accueil. Il a donc été RELOGÉ sur un JALON de parcours (Suivi, seed démo).
+// ⮕ La leçon, et c'est elle qu'il faut retenir : l'invariant vaut pour TOUT
+// bandeau `.transition-bandeau`, pas pour un avis. Le rattacher à une entrée
+// précise du tableau était la fragilité, pas le retrait de cette entrée.
+//
+// CE QUI EST ARRIVÉ, ET QU'AUCUN TEST NE VOYAIT. Le bandeau est posé
 // en `position: fixed` au BAS de l'écran, centré sur 600 px, `z-index: 950`. Il
 // recouvre donc la zone de travail — et, tant qu'il captait les clics, tout ce
 // qui se trouvait dessous était INATTEIGNABLE : un nœud de carte mentale, un
@@ -50,7 +59,7 @@ function brancherErreurs(page, erreurs) {
     });
 }
 
-test('#508 — les clics traversent le bandeau d\'avis, sauf sur son bouton', async ({ page }) => {
+test('#508 — les clics traversent le bandeau, sauf sur son bouton', async ({ page }) => {
     const erreurs = [];
     brancherErreurs(page, erreurs);
 
@@ -58,20 +67,24 @@ test('#508 — les clics traversent le bandeau d\'avis, sauf sur son bouton', as
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
-    // Afficher l'avis, puis poser un TÉMOIN juste dessous : un élément qui
+    // Afficher un bandeau, puis poser un TÉMOIN juste dessous : un élément qui
     // occupe la même zone, avec un z-index inférieur. C'est le rôle que tenait,
     // sans le savoir, le nœud de carte mentale de `planif-alignement`.
     const mesures = await page.evaluate(async () => {
+        if (typeof window.activerModeDemo !== 'function') return { erreur: 'activerModeDemo absent' };
         if (!window.transitions || typeof window.transitions.fermerBandeau !== 'function') {
             return { erreur: 'window.transitions absent' };
         }
         const attendre = (ms) => new Promise((r) => setTimeout(r, ms));
-        const avis = (window.transitions.TRANSITIONS || [])[0];
-        if (!avis) return { erreur: 'aucune transition' };
 
-        window.definirPreference(avis.dejaVuePref, false);
+        // Seed démo : groupe-cours actif + évaluations enregistrées → les
+        // conditions des jalons sont remplies, et le Suivi en montre un.
+        await window.activerModeDemo();
+        ['transition_num_crois_vue', 'transition_crois_obs_vue', 'transition_obs_comp_vue']
+            .forEach((p) => window.definirPreference(p + '_demo', false));
+
         window.transitions.fermerBandeau();
-        window.afficherSection('accueil');
+        window.afficherSection('suivi');
         await attendre(900);
 
         const bandeau = document.getElementById('transition-bandeau');
@@ -120,7 +133,7 @@ test('#508 — les clics traversent le bandeau d\'avis, sauf sur son bouton', as
     ).toBe(false);
     expect(mesures.idSousLeCentre).toBe('temoin-sous-bandeau');
 
-    // 2. Le bouton de fermeture, LUI, reste atteignable — sinon l'avis serait
+    // 2. Le bouton de fermeture, LUI, reste atteignable — sinon le bandeau serait
     //    informatif et infermable.
     expect(mesures.boutonEstLeBouton,
         'le bouton de fermeture n\'est plus atteignable : `pointer-events: auto` a sauté'
@@ -133,7 +146,7 @@ test('#508 — les clics traversent le bandeau d\'avis, sauf sur son bouton', as
         () => Number(document.getElementById('temoin-sous-bandeau').dataset.clics));
     expect(clicsRecus, 'un clic au centre du bandeau n\'a pas atteint l\'élément dessous').toBe(1);
 
-    // 4. Et le clic sur le bouton ferme bien l'avis.
+    // 4. Et le clic sur le bouton ferme bien le bandeau.
     await page.mouse.click(mesures.bouton.x, mesures.bouton.y);
     await page.waitForTimeout(600);
     const restant = await page.evaluate(() => !!document.getElementById('transition-bandeau'));
