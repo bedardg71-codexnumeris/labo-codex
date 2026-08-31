@@ -43,7 +43,9 @@ Autoportant : lisible seul.
 | **Cartouche** | **`cartouches_<grilleId>`** | **GLOBALE — partagée par tous les trimestres** |
 | Copie d'archive d'une cartouche | `<trim>_cartouches_<grilleId>` | Écrite à l'archivage, lue **uniquement** si le trimestre actif est archivé, détruite au désarchivage |
 
-Le même `grilleId` présent dans plusieurs trimestres est le cas **nominal**, et même **garanti** : la migration #358 a conservé les ids, et surtout `assurerGrilleGenerique` (`grilles.js:1469-1509`) écrit `cle('grillesTemplates')` — donc `<trim>_grillesTemplates` — à chaque initialisation du module sur un trimestre non archivé (`grilles.js:1516-1521`). **Tout trimestre non archivé reçoit donc une grille portant l'id `GRILLE_GENERIQUE`**, pendant que `cartouches.js:213` sème `cartouches_GRILLE_GENERIQUE` en clé nue, une seule fois pour tous. VÉRIFIÉ. Autrement dit : dès qu'il existe deux trimestres vivants, il existe au moins une clé de cartouches partagée — le partage n'est pas un cas de figure, c'est l'état par défaut de toute installation. Les cartouches des exemplaires homonymes n'ont **qu'une seule collection pour tous**.
+Le même `grilleId` présent dans plusieurs trimestres est **possible** : la migration #358 a conservé les ids, et `assurerGrilleGenerique` (`grilles.js:1469-1509`) écrit `cle('grillesTemplates')` — donc `<trim>_grillesTemplates` — à chaque initialisation du module sur un trimestre non archivé (`grilles.js:1516-1521`). Les cartouches des exemplaires homonymes n'ont alors **qu'une seule collection pour tous**, puisque `cartouches.js:213` sème `cartouches_GRILLE_GENERIQUE` en clé nue, une seule fois.
+
+⚠ **CORRECTION D'UNE AFFIRMATION DE CE RAPPORT, par la mesure du 30 août au soir.** J'avais écrit que le partage était « garanti » et que « dès qu'il existe deux trimestres vivants, il existe au moins une clé de cartouches partagée ». **C'est faux, et le diagnostic T1.2 le réfute : `nbGrillesHomonymes: 0` sur les données réelles de Grégoire.** Ce que j'avais manqué : `assurerGrilleGenerique` est gardée l.1482 par `window.estRessourceSupprimee('GRILLE_GENERIQUE')`, et `ressourcesSupprimees` est une clé **globale** (`main.js:121-124`, lue nue, absente de `CLES_NAMESPACEES`). **Un seul tombstone ferme donc le semis pour tous les trimestres, y compris ceux qui n'existent pas encore.** Le mécanisme de semis est réel — `GRILLE_GENERIQUE` figure bien dans les modèles d'Hiver 2026 (cf. §3bis) — mais il a cessé d'opérer le jour où Grégoire a supprimé le gabarit, et il ne reprendra pas. Le partage de clés de cartouches dépend donc de la réutilisation effective d'ids (migration #358, imports inter-trimestres), pas d'un semis universel. C'est ce qui rend D2-A **préventive** et non réparatrice (§3bis).
 
 Une cartouche porte son propre instantané de structure :
 `{ id, nom, criteres:[{id,nom}], niveaux:[{code,nom}], commentaires: { '<critereId>_<code>': texte }, verrouille, dansBibliotheque }` (`cartouches.js:180-211`).
@@ -294,7 +296,7 @@ Note incidente sur le régime actuel : la copie n'a lieu que `if (cartouches.len
 
 ---
 
-## 3. Le diagnostic console (T1.1) — écrit, testé, non exécuté sur les données réelles
+## 3. Le diagnostic console cartouches (T1.1/T1.2) — écrit, testé, EXÉCUTÉ
 
 Livré à `kuekatsheu-bc` le 30 août au soir pour exécution par Grégoire (T1.2). Lecture seule stricte : uniquement `db.keysSync()` et `db.getSync()`, aucun `db.set`, aucun `db.remove`.
 
@@ -306,9 +308,26 @@ Livré à `kuekatsheu-bc` le 30 août au soir pour exécution par Grégoire (T1.
 
 Sept compteurs rendus : `nbTrimestres`, `nbClesNues`, `nbCopiesNamespacees`, `nbGrillesHomonymes`, `nbHomonymesCriteresDivergents`, `nbHomonymesAvecCommentairesOrphelins`, `nbArchivesDivergentes`. JSON complet en console et dans `window.__DIAG619`.
 
-**T1.2 — résultat sur les données réelles de Grégoire : EN ATTENTE.** À consigner ici tel quel, brut, quand il l'aura exécuté. Le §4-Q(b) reste sans réponse chiffrée jusque-là, et c'est lui qui règle la sous-décision du §4-Q(a).
+**T1.2 — EXÉCUTÉ par Grégoire le 30 août 2026 au soir, sur ses données réelles.**
 
-### 3bis. Le diagnostic de perte simulée (#630) — écrit, testé, non exécuté sur les données réelles
+⚠ **Provenance, à ne pas perdre** : les chiffres ci-dessous m'ont été **relayés par `kuekatsheu-bc`**, qui les a reçus de Grégoire. Je n'ai pas vu le JSON brut. Ce qui est consigné ici est donc un relevé de seconde main, fidèle à ce qui m'a été transmis, et non la sortie brute que la tâche demandait. **Le JSON complet reste à coller ici** — leçon du 11 août : un chiffre rapporté sans sa source se relit dans six mois comme s'il avait été lu.
+
+| Mesure | Valeur | Ce qu'elle tranche |
+|---|---|---|
+| `nbGrillesHomonymes` | **0** | Aucun `grilleId` n'existe dans deux trimestres. Donc **aucune clé `cartouches_*` n'est aujourd'hui partagée** |
+| `nbHomonymesCriteresDivergents` | 0 (conséquence) | Sans homonyme, pas de divergence de critères possible |
+| `nbHomonymesAvecCommentairesOrphelins` | 0 (conséquence) | Aucun commentaire désaligné par le partage |
+| `copiesNamespacees` | **`[]`** | **Automne 2025 est `archive: true` et n'a AUCUNE copie `a2025_cartouches_*`** |
+
+**Le zéro est un VRAI zéro, et c'est #630 qui le prouve.** Un `nbGrillesHomonymes: 0` pourrait signifier « rien n'est partagé » ou « les clés `<trim>_grillesTemplates` sont vides, donc je ne compare rien ». #630 lève l'ambiguïté : les trois trimestres portent respectivement 3, 4 et 3 grilles. Les collections sont peuplées, la comparaison a bien eu lieu, et elle ne trouve aucun homonyme.
+
+⮕ **RÉPONSE À LA QUESTION §4-Q(b) : aucune clé n'est partagée aujourd'hui, et rien n'a divergé.** Conséquence directe sur le §4-Q(a) : la sous-décision A-copie / A-attribution **perd son enjeu** — sans grille homonyme, chaque clé `cartouches_X` n'a qu'un seul trimestre propriétaire, et la migration est une simple relocalisation, sans duplication ni arbitrage. La règle A-copie reste la bonne règle *écrite*, parce qu'elle doit rester correcte si un homonyme apparaît d'ici S5 (un import inter-trimestre suffit) ; mais elle ne s'appliquera vraisemblablement à aucun cas.
+
+⮕ **ET DONC : D2-A EST PRÉVENTIVE, PAS RÉPARATRICE.** Elle ne répare aucun dégât existant. Elle ferme une classe de défaut avant qu'elle ne frappe. Cela ne l'annule pas — B4(d), la suppression destructrice de `donnees-v2.js:1571`, reste armée et n'attend qu'un homonyme — mais **cela change le ton de S5** : ce n'est pas une urgence de réparation, c'est une mise en conformité de portée. À arbitrer par Grégoire au regard de S4, qui, lui, est une urgence mesurée (§3bis).
+
+**L'observation qui compte le plus, et que personne n'avait cherchée : `copiesNamespacees: []`.** Automne 2025 est archivé et ne possède **aucune** copie `a2025_cartouches_*`. Conséquence vérifiée dans le code : `cle()` cherche la copie l.335-337, ne la trouve pas, et **retombe sur la clé globale** (l.339, « Fallback vers la clé globale »). **Les écrans d'évaluation d'Automne 2025 lisent donc aujourd'hui la clé NUE, partagée.** Le « cerveau divisé » de B4(c) n'existe pas pour a2025 — il n'y a pas deux stockages, il n'y en a qu'un, et c'est le stockage commun. Ce que cela implique pour la migration est traité au §6.3(b).
+
+### 3bis. Le diagnostic de perte simulée (#630) — écrit, testé, EXÉCUTÉ
 
 Écrit à la demande de `kuekatsheu-bc` après la livraison de Z1 ; ID #630 inscrit avant emploi. Il répond à l'angle mort **A1**, et il remplace le test d'archivage sur trimestre jetable du §5 : il donne le **volume exact de la perte sur les vraies données**, sans rien détruire — ce qu'un trimestre jetable ne pourrait par construction pas dire.
 
@@ -327,7 +346,27 @@ Ce qu'il rend, par trimestre : les grilles et les échelles **perdues** (id et n
 
 ⚠ **Un défaut de mon premier jet, trouvé par le témoin 1 et corrigé.** Le résumé additionnait les pertes de **tous** les trimestres, y compris le trimestre **actif** — qu'on ne peut précisément pas archiver (garde `trimestres.js:615-618`). Les chiffres étaient exacts et le libellé faux : un total gonflé par un scénario impossible. Le résumé distingue désormais `SI_ARCHIVE_MAINTENANT` (trimestres ni actifs ni déjà archivés — le chiffre qui compte ce soir) de `SI_DESARCHIVE_PUIS_REARCHIVE` (trimestres déjà archivés, que Grégoire peut désarchiver en un clic), et nomme explicitement le trimestre actif exclu des deux. Le détail par trimestre, lui, reste complet.
 
-**Résultat sur les données réelles : EN ATTENTE**, à consigner ici brut. C'est ce résultat qui remplit la case A1 du §7 et qui dira si S4 est urgent ou simplement dû.
+**EXÉCUTÉ par Grégoire le 30 août 2026 au soir, sur ses données réelles.** Même réserve de provenance qu'au §3 : chiffres **relayés par `kuekatsheu-bc`**, JSON brut non vu par moi, à coller ici.
+
+**Ma prédiction, posée AVANT le résultat, est vérifiée.** J'avais annoncé que `GRILLE_GENERIQUE`, semée puis presque jamais notée, devrait apparaître dans les `perdues` de chaque trimestre archivable — et que si elle n'y était pas, c'était mon diagnostic qu'il fallait relire, pas les données. **Elle y est**, dans les perdues d'Hiver 2026, accompagnée d'`ECHELLE_GENERIQUE`. Le diagnostic fait ce qu'il annonce.
+
+**Le bloc mort est confirmé mort, et le témoin 2 rend ce zéro interprétable** : `tailleCleNueGrillesTemplates: 0` et `apportDuBlocMortEchelles: 0` sur tous les trimestres. Le témoin 2 avait montré que ce compteur passe à 1 dès qu'on repeuple la clé nue — ce 0 dit donc « le bloc ne contribue rien », et non « le diagnostic ne regarde pas ». **Z1-M2 se retire sans risque**, et le diff §6.4 peut être appliqué en confiance.
+
+⮕ **LE CHIFFRE DE B3, ET IL EST PIRE QUE CE QUE J'AVAIS ÉCRIT.** J'avais qualifié l'effet de « substitution silencieuse » : la version de l'actif remplaçant celle de l'archivé. La mesure dit autre chose.
+
+| | |
+|---|---|
+| Trimestre actif | `a2026` |
+| Clé réellement lue par `creerSnapshotRessources` | `a2026_pratiquesConfigurables` — **1 pratique** |
+| Hiver 2026 possède | **10 pratiques** |
+| Ce qu'un archivage d'Hiver 2026 écrirait aujourd'hui | **0 pratique** |
+| Automne 2025 (déjà archivé) perdrait, au désarchivage puis réarchivage | ses **3** pratiques |
+
+Aucun id ne se recoupe entre la collection d'`a2026` et les pratiques utilisées par Hiver 2026 : l'intersection est **vide**. Ce n'est donc pas une substitution, c'est une **destruction totale** — `db.setSync` écrirait un tableau vide par-dessus dix pratiques.
+
+**Et mon propre `substituees: 0` était un faux soulagement.** Un 0 sur ce compteur ne veut pas dire « rien n'est abîmé » : il veut dire qu'aucune pratique n'a d'homonyme dans la collection lue — c'est-à-dire que **tout** part dans `disparues`. Les deux compteurs se lisent ensemble, jamais séparément. Je le note parce que c'est exactement le piège que le témoin 1 avait déjà tendu une fois dans cette session : un compteur juste sous un libellé qui invite à mal le lire.
+
+⮕ **RÉPONSE À LA CASE A1 DU §7, ET VERDICT SUR L'URGENCE DE S4.** Archiver Hiver 2026 aujourd'hui détruirait ses dix pratiques, plus les grilles et échelles non notées dont `GRILLE_GENERIQUE` et `ECHELLE_GENERIQUE`, **sans aucune copie de secours** (§2.2-B1) et **sans fichier rechargeable** (§2.2-B2). **S4 n'est pas simplement dû : il est urgent, et le moratoire élargi est ce qui tient la porte d'ici là.** C'est le chiffre à mettre devant Grégoire s'il se demande dans quel ordre attaquer demain.
 
 ---
 
@@ -354,7 +393,7 @@ Ce qu'il rend, par trimestre : les grilles et les échelles **perdues** (id et n
   Le chiffre qui dit si A-copie coûte cher est `nbGrillesHomonymes` du diagnostic — d'où la dépendance à T1.2.
 
 **(b) Quelles clés sont effectivement partagées, et les contenus ont-ils divergé ?**
-Sans réponse chiffrée : le diagnostic est écrit et testé, son exécution appartient à Grégoire (T1.2). Le mécanisme, lui, est VÉRIFIÉ, et le partage est **structurellement garanti** — pas seulement possible — dès qu'un `grilleId` existe dans deux trimestres, ce que la migration #358 à id conservé rend nominal. La question ouverte n'est donc pas « est-ce partagé » mais « le partage a-t-il déjà produit des commentaires désalignés », et de combien.
+**RÉPONDU par la mesure du 30 août : AUCUNE, et rien n'a divergé.** `nbGrillesHomonymes: 0`, et c'est un vrai zéro — #630 confirme que les trois collections `<trim>_grillesTemplates` sont peuplées (3, 4 et 3 grilles), donc que la comparaison a bien eu lieu. Détail et provenance au §3. Le mécanisme de partage reste VÉRIFIÉ dans le code, mais il ne s'est **pas** réalisé chez Grégoire : j'avais écrit « structurellement garanti », la mesure me contredit, et la raison est au §2.1 (le tombstone global `ressourcesSupprimees`). **D2-A est donc préventive.**
 
 **(c) L'archivage détruit-il effectivement des modèles vivants, et le snapshot pratiques croise-t-il les namespaces ?**
 **Oui aux deux, VÉRIFIÉ par lecture, sans exécution** — voir B1 et B3. La destruction est inconditionnelle (`db.setSync` du sous-ensemble filtré sur la clé de travail), le croisement de namespaces est garanti par la garde anti-actif elle-même. Ce que la lecture n'établit pas, c'est le **volume** chez Grégoire : combien de ses grilles et échelles A2025 ne sont référencées par aucune production ni évaluation, et de combien ses deux collections de pratiques divergent. Ces deux chiffres demandent une mesure sur ses données, pas une exécution d'archivage — voir §7, angles morts A1 et A3, et §8, proposition de diagnostic complémentaire.
@@ -600,6 +639,10 @@ Symétriquement dans `cleSource()` : retirer `|| nomCle.startsWith('cartouches_'
 +        }
 ```
 
+⚠ **CE QUI ARRIVE À AUTOMNE 2025, mesuré le 30 août** (§3, `copiesNamespacees: []`). Automne 2025 est `archive: true` et n'a **aucune** copie `a2025_cartouches_*`. Il ne tombe donc pas dans la première branche de la migration (« trimestre archivé dont la copie existe : conservé tel quel »), et c'est **voulu** : sans copie, `cle()` retombe aujourd'hui sur la clé globale (l.339), et les écrans d'évaluation d'a2025 lisent déjà cette clé nue. **Copier la collection globale vers `a2025_cartouches_X` préserve donc exactement ce qu'a2025 affiche aujourd'hui** — la migration est, pour lui, une relocalisation à contenu identique, sans changement visible. C'est la bonne issue, mais elle doit être dite plutôt que subie.
+
+⚠ Pourquoi a2025 n'a-t-il pas ses copies, alors que `creerSnapshotRessources` en écrit ? Trois explications tiennent au code, et **je ne peux pas trancher entre elles sans exécution** : (1) il a été archivé avant janvier 2026, quand la copie des cartouches n'existait pas encore ; (2) aucune de ses grilles « utilisées » n'avait de cartouche au moment de l'archivage — la copie est gardée par `if (cartouches.length > 0)`, `trimestres.js:760` ; (3) il a été désarchivé à un moment, `purgerCopiesModelesArchive` a retiré les copies, et son drapeau `archive` a été reposé par un chemin qui ne repasse pas par `creerSnapshotRessources`. La troisième serait un défaut à part entière. À départager par un coup d'œil à `trimestre.dateFin` et `trimestre.snapshotRessources` d'a2025 — **une lecture, pas une exécution** ; ajouté aux angles morts (§7-A8).
+
 ⚠ **Migration de DONNÉES RÉELLES.** Le plan l'impose déjà pour S5 : **sauvegarde préalable PAR COPIE obligatoire** (jamais `git checkout`, jamais l'export automatique — qui est troué tant que §6.2 n'est pas livré ; c'est une raison de plus pour l'ordre S4 → S5).
 
 **(c) Les deux fonctions d'archivage, dans le MÊME commit** :
@@ -701,6 +744,7 @@ Mac et iPad séparément. Les cases restent vides : je n'ai rien exécuté.
 - **A4 — Cartouches partagées, manifestation à l'écran (B4).** Modifier une grille homonyme dans un seul trimestre, éditer sa cartouche, basculer : que voit l'autre trimestre ? C'est le test §4.2 de l'audit parent ; le diagnostic T1.2 donne les chiffres, pas l'écran. Observé : ______
 - **A5 — Le fichier d'export, ouvert (B2).** Ouvrir un fichier produit par « Exporter » sur une ligne **non active** et lire `donnees.presences` et `donnees.snapshots`. C'est la vérification la moins coûteuse de tout ce rapport, et elle confirme ou infirme le seul INFÉRÉ de B2. Observé : ______
 - **A6 — Consommateurs des champs alias. LEVÉ le 30 août au soir.** Le grep annoncé au §6.2 a été fait par `kuekatsheu-bc` et revérifié ici : `donnees.etudiants` et `donnees.evaluations` n'ont aucun consommateur (les occurrences d'`import-export.js` sont des faux positifs — `analyse.donnees.*`, autre structure). Le retrait des deux alias est sûr. Détail en §2.2-B2.
+- **A8 — Pourquoi Automne 2025 n'a pas ses copies de cartouches.** Lire `trimestre.dateFin` et `trimestre.snapshotRessources` d'a2025 dans le registre `trimestres` : une date antérieure à janvier 2026, ou un `snapshotRessources: null`, départagent les trois explications du §6.3(b). Si c'est la troisième — drapeau `archive` reposé sans passer par `creerSnapshotRessources` — c'est un défaut à part entière, à ouvrir. Lecture seule. Observé : ______
 - **A7 — Les quinze énumérations, une par une.** J'ai établi qu'elles filtrent sur le préfixe et ce que le changement de clé leur fait. Je n'ai lu en entier que `reserve.js`, `demo-activation.js` et `cartouches.js:1895`. Les douze autres demandent une lecture individuelle au moment du diff §6.3(d) — le tableau de Z1-S1 est un inventaire, pas une spécification.
 
 ---
@@ -721,16 +765,46 @@ Je n'écris ni dans `BACKLOG.md`, ni dans `SESSION.md`, ni dans `RELAIS.md`, ni 
 
 **✅ FAIT — #630 attribué et le diagnostic écrit.** Voir §3bis. ID inscrit avant emploi, conformément au cadre §9.
 
-**⏳ EN ATTENTE — deux exécutions par Grégoire, toutes deux en lecture seule :**
-- **T1.2**, diagnostic cartouches (§3) — remplit le §4-Q(b) et règle la sous-décision du §4-Q(a).
-- **#630**, diagnostic de perte simulée (§3bis) — remplit l'angle mort A1 et dira si S4 est urgent ou simplement dû.
-Les deux résultats se consignent **bruts** dans leur section.
+**✅ FAIT — les deux diagnostics ont été exécutés par Grégoire le 30 août au soir.** Résultats consignés aux §3 et §3bis, avec leur réserve de provenance (relayés par `kuekatsheu-bc`, JSON brut non vu par moi — **à coller dans les deux sections**). Ils tranchent trois choses : D2-A est préventive et non réparatrice ; B3 est une destruction totale et non une substitution, ce qui rend S4 urgent ; le bloc mort de Z1-M2 est confirmé mort et se retire sans risque.
 
 **⏳ EN ATTENTE — la vérification à deux minutes du §7-A5**, sans risque : ouvrir un fichier produit par « Exporter » sur une ligne **non active** et lire `donnees.presences`. Elle transforme le seul INFÉRÉ de B2 en fait.
 
 **Pour `kuekatsheu-82` (Z2)** : B4(d), `donnees-v2.js:1564-1574` — transmis via `kuekatsheu-bc`. Sa cause est dans Z1, son correctif dans Z2.
 
-**Cases à cocher** : T1.1 fait, T1.4 fait, T1.5 fait. **T1.2 en attente**. **T1.3 fait par lecture**, sans exécution, moratoire respecté — et le diagnostic #630 rend l'archivage sur trimestre jetable inutile pour spécifier S4 ; la case §4.1 de l'audit parent bascule en validation **post-S4**.
+**Cases à cocher** : T1.1, T1.2, T1.3, T1.4 et T1.5 faits — **S1 est complète**. **T1.3 fait par lecture**, sans exécution, moratoire respecté — et le diagnostic #630 rend l'archivage sur trimestre jetable inutile pour spécifier S4 ; la case §4.1 de l'audit parent bascule en validation **post-S4**.
+
+---
+
+## 8bis. Piste ouverte pour une session à venir — reconstruction des grilles mortes (#631)
+
+**NON INSTRUITE. Ouverte le 30 août au soir, refermée aussitôt : elle demande une session entière. Aucun ID pris pour elle** — #631 est le constat de `kuekatsheu-82`, #632 son correctif ; l'instruction de reconstruction recevra son propre numéro, inscrit avant emploi.
+
+**Le constat, mesuré par `kuekatsheu-82` sur les données réelles** : 408 évaluations d'Hiver 2026 pointent vers trois `grilleId` qui n'existent nulle part — `grille_1770742838756_23q82vbsk` (225 évaluations), `grille_1772187755149_uq1oiiafa` (94), `GRILLE1759529438501` (89). Même famille que #542, sur `grilleId` au lieu d'`echelleId`. Hiver 2026 est un trimestre passé : ces notes sont finales.
+
+**Ce qui relève de Z1** : `kuekatsheu-bc` a croisé les deux diagnostics — les trois grilles mortes ont chacune un magasin de cartouches **survivant** (5, 4 et 2 cartouches, onze en tout). Question à instruire : les identifiants de critères des trois grilles sont-ils reconstructibles à partir de ces onze cartouches, et cela suffit-il à re-justifier une note ?
+
+**Ce que j'ai en main avant d'avoir refermé, et qui ne doit pas se perdre.** Deux lectures, faites avant l'arrêt, établissent déjà la moitié de la réponse — VÉRIFIÉ :
+
+```js
+// cartouches.js:460-473 (création) et 3687-3698 (reconstruction depuis la grille)
+cartoucheActuel = {
+    id: genererIdUnique('CART_'), nom: '', grilleId: grilleId,
+    echelleId: echelleChoisie ? echelleChoisie.id : '',
+    criteres: criteres.map(c => ({ id: c.id, nom: c.nom })),
+    niveaux:  niveaux.map(n => ({ code: n.code, nom: n.nom })),
+    commentaires: {}, ...
+};
+```
+
+Et `sauvegarderCartouche` (`cartouches.js:1022-1042`) persiste l'objet **entier** dans `cartouches_<grilleId>`.
+
+⮕ **Une cartouche porte donc son propre instantané de la grille** : les ids ET les noms des critères, les codes ET les noms des niveaux, plus l'`echelleId` employé. La reconstruction ne se fait pas par déduction depuis les clés `<critereId>_<code>` des commentaires — elle est **directe**, le champ existe.
+
+⮕ **Mais elle est partielle, et c'est le point qui décide.** La grille, elle, porte des critères de forme `{ id, code, nom, ponderation, description, type }` (`grilles.js:1492`). La cartouche n'en garde que `{ id, nom }`. **La PONDÉRATION de chaque critère n'est pas dans la cartouche.** Or c'est elle qui transforme des niveaux atteints en une note. Récupérer les critères d'une grille morte ne suffit donc **pas** à recalculer la note ; cela suffit à dire ce qui a été évalué et sous quel nom.
+
+⮕ **La question qui reste entière, et par où reprendre** : l'évaluation elle-même conserve-t-elle les pondérations, ou seulement les niveaux atteints par critère ? Si les évaluations les portent, la grille est reconstructible **par les évaluations plus les cartouches**, et les 408 notes redeviennent justifiables. Sinon, les onze magasins de cartouches sont la seule trace de ce qui a été évalué, et la note reste un nombre sans justification reconstructible. Je n'ai pas mené cette lecture ; je m'arrête ici plutôt que de la conclure à moitié.
+
+⛔ **CONSÉQUENCE IMMÉDIATE, déjà transmise à `kuekatsheu-82` par `kuekatsheu-bc` et répétée ici parce qu'elle est destructrice si on l'oublie : les seize « magasins fantômes » NE DOIVENT PAS ÊTRE PURGÉS.** Ils ressemblent à du déchet — des clés `cartouches_X` dont la grille n'existe plus. Onze d'entre eux sont la seule trace subsistante de trois grilles qui portent 408 notes. La règle de conservation bruyante que la migration D2-A applique déjà à ces clés (§6.3(b) : « laissées en place et journalisées, jamais supprimées ») est exactement la bonne, et cette mesure vient de lui donner sa raison d'être.
 
 ---
 
