@@ -345,6 +345,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 - [ ] **#627 — S9 · Unification des remaps d'import** (constats S6, M6). Après S2. `import-export.js` est sous surveillance sécurité : suite complète avant commit.
 - [ ] **#628 — S10 · Retrait du legacy des quatre sections** (constats S4, S9). Après S3 et D4. Probablement scindé en S10a (échelles) et S10b (les trois autres).
 - [ ] **#629 — S11 · Mineurs restants du plan Conception** (constats M1 si non absorbé par S4, M7, M9, M10).
+- [ ] **#630 — Diagnostic en lecture seule : combien de modèles ne survivraient PAS à un archivage**.
+  Inscrit le 30 août 2026 par `kuekatsheu-bc`, à la demande de `kuekatsheu-c5` (Z1), **avant tout usage**.
+  ⮕ **Ce qu'il remplace, et pourquoi c'est mieux** : T1.3 du plan Conception demandait d'instruire
+  l'archivage sur un trimestre jetable. Un archivage jetable ne dirait rien des VRAIES données de
+  Grégoire, et le moratoire D1 l'interdit de toute façon. Le diagnostic compte, trimestre par trimestre,
+  les grilles / échelles / pratiques qui ne passeraient pas le filtre `identifierTemplatesUtilises` —
+  c'est-à-dire **le volume exact de la perte, mesuré sans rien détruire**.
+  ⮕ Applique la règle de Grégoire sur les portes terrain à l'envers, et c'est le bon sens : **une porte
+  n'existe que si aucune machine ne peut répondre.** Ici une machine peut répondre.
+  ⮕ Sert directement à dimensionner S4 (#622).
 
 
 ### Arbitrages du 28 août 2026 (soir) — les deux qui n'avaient pas d'item
