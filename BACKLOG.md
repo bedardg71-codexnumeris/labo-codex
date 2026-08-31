@@ -345,6 +345,14 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   enregistre les collections **complètes** et les cartouches elles-mêmes au lieu d'un nombre.
   Sentinelle 14 cas, **rouge obtenu d'abord** (11 échecs), **break-test 7 mutations / 7 rouges**.
   Vitest 414 fichiers / 4367 tests, code de sortie 0.
+  ⚠⚠ **ET VOICI CE QUI COMPTE VRAIMENT, VÉRIFIÉ LE 31 AOÛT — LE SNAPSHOT N'A AUCUN LECTEUR.** Grep de
+  `snapshot_`, `snapshotRessources` et `isolationArchive` dans tout `js/` : la clé est ÉCRITE, pointée par
+  `trimestre.snapshotRessources`, et **jamais relue par aucun chemin de l'application**. Même famille que
+  `type: 'archive-trimestre'`, qui n'apparaît lui aussi qu'une fois, à l'écriture.
+  ⮕ **Donc la vraie réparation n'est PAS « le backup fonctionne maintenant » — c'est « il n'y a plus rien à
+  restaurer, parce que plus rien n'est détruit ».** Les collections de travail survivent à l'archivage : c'est
+  ça, le correctif. Le snapshot complété est une ceinture par-dessus les bretelles, utile le jour où quelqu'un
+  écrira un chemin de restauration, inutile aujourd'hui. **Ne pas présenter le snapshot comme un filet.**
   ⏳ **L'ITEM RESTE OUVERT, ET IL N'EST PAS EN RETARD** — il attend deux gestes qui ne sont pas ceux d'une session :
   **T4.3**, le test manuel sur un trimestre jetable, et **T4.4**, la **levée du moratoire D1**, qui est une décision
   de Grégoire. ⛔ **Le moratoire à trois gestes reste ACTIF tant qu'il ne l'a pas levé lui-même.**
@@ -352,11 +360,52 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 - [ ] **#624 — S6 · Politique de suppression : refermer les CHEMINS qui produisent des orphelins, et traiter les `ECHELLE_DEMO` résiduelles** (constats S1, S2). Après **S5** (ordre strict S4→S5→S6), D3-A **qualifiée**.
   ⚠ **Reformulé le 30 août 2026.** L'énoncé précédent disait « absorbe la réparation #542 ». **#542 a été réparé le 26 août** (`scripts/reparation-542-echelle-orpheline.js` ; deux commits, dont `e3d5af34` qui corrige la réparation elle-même). Ce qui reste n'est pas la réparation : c'est **la CAUSE, inconnue**, et les `ECHELLE_DEMO` résiduelles. ⮕ Chiffres 383 → 44 **RAPPORTÉS, non remesurés** : le diagnostic de T2.2 rendra celui du jour.
   ⚠ **D3-A est qualifiée, pas appliquée à la lettre** : bloquer + NOMMER les référents (quoi, combien, quel trimestre) + **CONSERVER et généraliser la porte de sortie « réassigner vers un autre objet »** là où elle existe. Sur les échelles, le chemin actuel PROPOSE de migrer les évaluations : un D3-A strict retirerait cette issue et laisserait un refus indéfaisable. Un blocage sans issue n'est pas une garde.
-- [ ] **#625 — S7 · États d'édition : `tempCriteres` et création d'échelle** (constat S3). Indépendant.
+- [x] **#625 — S7 · Les états de création ne survivent plus à l'abandon ni à la bascule** (constat S3). ✅ **LIVRÉ le 31 août 2026** (`1530873b`, `kuekatsheu-9a`).
+  #466/CO-16 avait posé un reset dans les quatre éditeurs, mais chacun ne purgeait que le **POINTEUR** d'édition :
+  les **TAMPONS de création** étaient oubliés dans deux éditeurs sur quatre.
+  ⮕ **Ce n'était pas un défaut d'affichage** : à la bascule, le pointeur devenait nul et le tampon restait plein,
+  donc la branche **CRÉATION** du save restait armée — les critères et niveaux saisis dans l'ancien trimestre
+  partaient en base **dans le namespace du NOUVEAU** (angle mort §4.5 de l'audit).
+  ⮕ Purge ajoutée dans `retourVueHierarchique` et dans les deux resets de bascule ; côté échelles les deux tampons
+  sont vidés **en PAIRE**, comme `annulerFormEchelle` le faisait déjà (#555 lot 2 (e)).
+  ⮕ **T7.3 tranché option C** : la branche création de `chargerGrilleTemplate` remet `tempCriteres` à `[]` au lieu
+  de le préserver, et la mesure statique qui la dit morte est versée à **#628** pour son retrait.
+  ⮕ **M11 absorbé** : double export `marquerChampRefuseEchelle` réduit à un, et son commentaire orphelin **rendu**
+  à `ecrireRepereEchelle` au lieu d'être jeté avec le doublon.
+  ⮕ Sentinelle `tests/unit/sentinelle-625-etats-edition-purges.test.js`, 14 cas, **break-test : 6 mutations,
+  6 ROUGES obtenus** (abandon · reset grilles · les DEUX côtés de la paire échelles · T7.3 · doublon remis).
+  ⚠⚠ **LE FAIT DE MÉTHODE À RETENIR, ET IL VAUT POUR TOUTE SENTINELLE FUTURE SUR CES FICHIERS** : la première
+  version du banc rendait déjà six rouges, mais **trois assertions étaient VIDES**. `chargerScript` passe les
+  variables de module (`grilleTemplateActuelle`, `echelleTemplateActuelle`) en **PARAMÈTRES** de la fonction
+  sandbox : une réassignation interne est invisible depuis le test, et un `win.X = {…}` posé par le test
+  n'atteint jamais le code. `expect(win.grilleTemplateActuelle).toBeNull()` **passait sur `undefined`**.
+  ⮕ Le remède appliqué : tester le pointeur **par son EFFET** (mode édition = le save réécrit la grille pointée ;
+  mode création = il en ajoute une), jamais par lecture directe.
+  ⏳ **RESTENT DUS PAR GRÉGOIRE : les tests manuels §4.4 et §4.5, Mac ET iPad.** Vitest tourne dans node et ne voit
+  pas le rendu.
 - [ ] **#626 — S8 · Retraits sûrs statiquement** (constats S5 partie morte, M2–M5, M8, M11). Indépendant, après D5.
 - [ ] **#627 — S9 · Unification des remaps d'import sur l'implémentation de `reserve-ouvrir.js:1057`, PAS sur #448 seul** (constats S6, M6). Après S2. `import-export.js` est sous surveillance sécurité : suite complète avant commit.
   ⚠ **Reformulé le 30 août 2026.** Z2 recense un **quatrième** remap que l'audit du 30 août ignorait : `reserve-ouvrir.js:1057`, et c'est **le plus complet des quatre** — il réécrit `cartouche.grilleId`, ce qui déplace la clé de stockage : exactement le trou de #448. ⮕ Un défaut y est mesuré : il patche `config.echelleId` alors que le seul écrivain écrit `configuration.echelleId` — **le remap des pratiques y est inopérant**. ⮕ **Le vrai travail est de construire la table `remapCartouches`**, qui n'existe pas.
 - [ ] **#628 — S10 · Retrait du legacy des quatre sections** (constats S4, S9). Après S3 et D4. Probablement scindé en S10a (échelles) et S10b (les trois autres).
+  ⮕ **MESURE VERSÉE PAR S7 / #625 (31 août 2026, `kuekatsheu-9a`) — le div `#selectGrilleTemplate` et la branche
+  création de `chargerGrilleTemplate` partent ENSEMBLE.** `#selectGrilleTemplate` (`index.html:4986`) n'est pas un
+  `<select>` : c'est un `<div>` vide du bloc « Conteneurs cachés pour compatibilité ». Il n'émet donc aucun `change`,
+  et **aucun `addEventListener` n'existe dans `grilles.js`**. Les QUATRE seuls appelants de `chargerGrilleTemplate`
+  passent tous l'id d'une grille EXISTANTE : `chargerGrilleEnEdition` (l.904), `dupliquerGrille` (l.1042),
+  `ajouterCritereAGrille` (l.1357), et le `data-action` généré à l.1324 (toujours avec `data-param`). Grep élargi au
+  dépôt entier — pas au seul `index.html`, **le HTML généré par le JS inclus** : aucun autre appelant, aucun
+  `data-action` sans param ; hors `grilles.js`/`config.js` il ne reste que deux mentions documentaires
+  (`noms_stables.json`, `docs/modules/AUDIT_EVALUATION.md`).
+  ⮕ **Le JSDoc de `chargerGrilleTemplate` décrit une UI disparue** (« Select "Créer ou modifier une grille"
+  (événement onchange) ») : à retirer avec le reste, sinon il survivra au code qu'il décrit.
+  ⚠ **PIÈGE À NE PAS REDÉCOUVRIR : `select.value = x` sur un DIV pose une propriété d'expando qui PERSISTE** — ce
+  n'est pas un no-op. Quatre sites l'écrivent, dont `retourVueHierarchique` qui la remet à `''`. Le retrait du div
+  doit donc retirer AUSSI ces écritures, sinon elles deviennent des `TypeError` sur `null`.
+  ⮕ **Statut de cette mesure : STATIQUE, sans exécution du test §4.4.** #625 a posé un `window.tempCriteres = []`
+  dans la branche pour la rendre inoffensive en attendant ; ce n'est pas la fermeture du dossier.
+  ⚠⚠ **COUPLAGE À NE PAS DÉCOUVRIR DANS TROIS SEMAINES** : le cas **E.a** de
+  `tests/unit/sentinelle-625-etats-edition-purges.test.js` exerce cette branche. **Si S10 la retire, ce cas doit être
+  retiré avec elle** — sinon il rougira sans rien signaler d'utile.
 - [ ] **#629 — S11 · Mineurs restants du plan Conception** (constats M1 si non absorbé par S4, M7, M9, M10).
 - [ ] **#631 — BLOQUANT · 408 évaluations d'Hiver 2026 pointent vers trois grilles qui n'existent NULLE PART**.
   Trouvé le 30 août 2026 par le diagnostic #620 sur les **données réelles de Grégoire**. Ni l'audit du
