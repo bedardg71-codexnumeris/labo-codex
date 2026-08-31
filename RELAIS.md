@@ -17,8 +17,35 @@
 reste **1.106.13** (build `0831-0734`) — mais **14 jetons `?v=` ont bougé** :
 ⚠ **Grégoire doit recharger sa session `file://`.**
 
-**Vitest 419 fichiers / 4452 tests, code de sortie 0**, relu par la coordinatrice
-APRÈS le dernier changement et APRÈS le bump anti-cache.
+**Vitest 419 fichiers / 4452 tests · Playwright WebKit 218 passés · code de sortie 0
+pour les deux**, relus par la coordinatrice APRÈS le dernier changement ET après le
+bump anti-cache. **15 jetons `?v=` bumpés.**
+**⚠⚠ L'ÉPISODE LE PLUS INSTRUCTIF DE LA JOURNÉE — À LIRE AVANT DE DÉCLARER UN LOT COMPLET**
+
+S5 a été déclaré complet avec **4452 tests Vitest verts**. Le push a été **REFUSÉ**
+par la sentinelle Playwright : **8 specs rouges, toutes sur du RENDU**, dont une
+**perte fonctionnelle réelle**. Trois causes, et deux étaient du code :
+
+1. **Le matériel démo était posé sous la clé NUE** (`js/demo-activation.js`, cinq
+   accès). Écrit à un endroit, lu à un autre. **Prédit mot pour mot au §2.3 de Z1** —
+   et absent du périmètre de tout le monde, parce que l'inventaire recensait les
+   **compositions** de clé, pas les clés **reçues en paramètre**.
+2. **Une prémisse morte, écrite dans le code.** `lotsCartouchesDuTrimestre` sautait
+   toute grille présente aussi dans le trimestre actif, en donnant sa raison :
+   « `cartouches_<id>` est global ». Sous D2-A c'est faux — et le saut rendait
+   invisible le cas où l'import a le PLUS de sens.
+3. **Cinq specs semaient encore la clé nue**, et deux ont rejoué le piège
+   `cle()`/`cleSource()`.
+
+⮕ **Un fichier de sentinelles ne couvre que ce qu'il regarde, et Vitest ne regarde
+pas le DOM.** Un total vert n'est pas une couverture. La garde Playwright du push est
+le seul filet qui a vu.
+⮕ **Le piège `cle()` vs `cleSource()` s'est refermé TROIS fois dans la journée**, sur
+trois personnes différentes. Si tu écris `cle(...)` dans une fonction qui reçoit un
+id de trimestre, ou dans un test dont l'actif n'est pas le sujet, tu viens
+probablement de le rejouer.
+
+
 
 **CE QUI A ÉTÉ LIVRÉ**
 - **S5 / #623 — le régime des cartouches passe de GLOBAL à NAMESPACÉ par trimestre.**
@@ -35,10 +62,10 @@ APRÈS le dernier changement et APRÈS le bump anti-cache.
 - **Sept items inscrits** : #636 à #643. **Dernier ID utilisé : #643.**
 
 **CE QUI RESTE, ET QUI N'EST PAS BLOQUÉ**
-1. **La spec Playwright/WebKit de S5 — le seul angle du lot sans preuve.** Elle doit
-   montrer que la barre latérale des cartouches et la matrice affichent celles du
-   trimestre ACTIF après migration, et qu'un trimestre désarchivé retrouve les siennes.
-   ⚠ **Vitest ne voit pas le rendu.** Ne la suppose pas couverte : elle ne l'est pas.
+1. **Une spec WebKit DÉDIÉE à S5.** La suite existante est verte et a déjà attrapé la
+   régression ci-dessus — mais **aucune spec ne vise S5 nommément**. Il en faut une :
+   la barre latérale des cartouches et la matrice affichent celles du trimestre ACTIF
+   après migration, et un trimestre désarchivé retrouve les siennes.
 2. **#636** — les 15 sites de `scripts/`, **deux sous-cas et deux remèdes** (voir la
    consigne). Ce sont des outils de RÉPARATION : ils mentiront par zéro.
 3. **#643** — le fichier `.lcz` ne porte pas le trimestre source des cartouches ; le

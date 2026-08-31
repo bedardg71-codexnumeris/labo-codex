@@ -65,7 +65,12 @@ c'est que tu as muté la mauvaise moitié.
 
 ### CE QUI RESTE DE S5, ET RIEN N'EST BLOQUÉ
 
-1. **La spec Playwright.** Dix sites peuplent des `<select>`, et l'annonce de partage
+1. **Une spec WebKit dédiée.** ⚠⚠ **Ne crois pas ce lot couvert par ses 4452 tests
+   Vitest : il ne l'était pas.** Le push a été refusé par la sentinelle Playwright,
+   8 specs rouges, dont une perte fonctionnelle réelle — le matériel démo posé sous la
+   clé nue, et une prémisse morte qui rendait l'import inter-trimestre invisible. La
+   suite est verte depuis, mais **aucune spec ne vise S5 nommément**.
+   Dix sites peuplent des `<select>`, et l'annonce de partage
    est un `<p>` dans une modale : **Vitest ne voit rien de tout ça**. ⚠ Pour que la
    phrase d'annonce s'affiche, il faut une grille présente dans **deux** trimestres —
    sans quoi le test ne mesure rien.
