@@ -946,32 +946,21 @@ async function chargerGrilleEnEdition(grilleId) {
  * 4. Rafraîchit le modal
  */
 async function supprimerGrille(grilleId) {
-    if (!confirm('Es-tu sûr de vouloir supprimer cette grille ?')) {
-        return;
-    }
+    // #624 — PORTE NUE REFERMEE. Ce chemin supprimait sans vérifier AUCUNE
+    // dépendance : les cartouches ancrées sous `cartouches_<grilleId>` devenaient
+    // introuvables, sans un mot. Il passe désormais par le chemin unique, qui
+    // bloque, nomme les cartouches, et offre de les déplacer.
+    await supprimerGrilleAvecPorteDeSortie(grilleId, {
+        apres: async () => {
 
-    // Marquer comme supprimée si c'est un gabarit hardcodé
-    if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(grilleId)) {
-        window.marquerRessourceSupprimee(grilleId);
-    }
-
-    await db.modifier(cle('grillesTemplates'), (lues) => {
-        return (lues || []).filter(g => g.id !== grilleId);
-    }, []);
-
-    // Rafraîchir le modal
-    await afficherGrillesCriteres();
-
-    // Recharger le select
-    await chargerListeGrillesTemplates();
-
-    // Rafraîchir la nouvelle vue hiérarchique
-    await afficherToutesLesGrillesCriteres();
-
-    // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
-    await afficherListeGrilles();
-
-    notifications.succes('Grille supprimée');
+            // Rafraîchir le modal, le select, la vue hiérarchique et la barre
+            // latérale. La notification est posée par le chemin unique.
+            await afficherGrillesCriteres();
+            await chargerListeGrillesTemplates();
+            await afficherToutesLesGrillesCriteres();
+            await afficherListeGrilles();
+        }
+    });
 }
 
 /* ===============================
@@ -2094,6 +2083,9 @@ window.afficherGrillesCriteres = afficherGrillesCriteres;
 window.fermerModalGrilles = fermerModalGrilles;
 window.chargerGrilleEnEdition = chargerGrilleEnEdition;
 window.supprimerGrille = supprimerGrille;
+window.verifierUtilisationGrille = verifierUtilisationGrille;
+window.deplacerCartouchesVersAutreGrille = deplacerCartouchesVersAutreGrille;
+window.supprimerGrilleAvecPorteDeSortie = supprimerGrilleAvecPorteDeSortie;
 window.dupliquerGrille = dupliquerGrille;
 window.basculerVerrouillageCritere = basculerVerrouillageCritere;
 window.getTypeCritereLabel = getTypeCritereLabel;
@@ -2699,47 +2691,349 @@ async function retirerGrilleDeBibliotheque(id) {
  * ✅ AJOUT (28 janvier 2026) : Supprimer définitivement une grille (hard delete)
  * @param {string} id - ID de la grille à supprimer
  */
-async function supprimerGrilleDefinitivement(id) {
-    // ⚠ Lecture hors file, pour NOMMER la grille dans la question. La
-    // confirmation ne doit pas tenir la file ouverte : tout ce qui s'enregistre
-    // pendant serait écrasé par une collection lue avant la question.
+/**
+ * Vérifie si une grille porte des cartouches (dépendance d'ancrage).
+ *
+ * ⚠ Les cartouches ne vivent pas DANS la grille : elles sont ancrées à part,
+ * sous `cartouches_{grilleId}`. Retirer la grille sans toucher à cette clé ne
+ * détruit rien — mais plus personne ne peut lire ce qu'elle contient, puisque la
+ * barre latérale et la bibliothèque n'énumèrent que les cartouches des grilles
+ * PRÉSENTES. C'est le diagnostic du 24 août de Grégoire : « Carte mentale A26 »,
+ * « Plan de rédaction A26 » et « Stratégies de lecture A26 » vivantes dans des
+ * clés dont la grille avait disparu.
+ *
+ * ⚠ `Array.isArray` PLUTÔT QUE `|| []`, ET CE N'EST PAS DE LA DÉCORATION. Le
+ * `|| []` de l'ancienne garde ne protège que de `null`/`undefined` : sur une
+ * valeur BOOLÉENNE, `true || []` rend `true`, `.length` rend `undefined`, et
+ * `undefined > 0` est faux — la garde passerait en silence. Or le dépôt porte
+ * déjà une clé de ce genre (`migration_cartouches_namespacees_done`, un booléen
+ * dans la famille `cartouches_`) qui a fait tomber deux codes différents le
+ * 31 août. Ici on lit une clé EXACTE, donc ce piège précis n'est pas atteignable
+ * — mais la garde sur le TYPE coûte une ligne et ferme la classe entière.
+ *
+ * @param {string} grilleId
+ * @returns {Promise<{utilisee: boolean, nbCartouches: number, cartouches: Array}>}
+ */
+async function verifierUtilisationGrille(grilleId) {
+    let cartouches = await db.get(cle(`cartouches_${grilleId}`));
+    if (!Array.isArray(cartouches)) cartouches = [];
+
+    return {
+        utilisee: cartouches.length > 0,
+        nbCartouches: cartouches.length,
+        cartouches
+    };
+}
+
+/**
+ * Déplace les cartouches d'une grille vers une autre, en REMAPPANT leurs critères.
+ *
+ * ⚠⚠ POURQUOI CE N'EST PAS LE MÊME GESTE QUE MIGRER UNE ÉVALUATION.
+ * Une évaluation ne fait que POINTER son échelle (`ev.echelleId`) : changer le
+ * pointeur suffit, et c'est pourquoi `migrerEvaluationsVersNouvelleEchelle` tient
+ * en huit lignes. Une cartouche, elle, COPIE les critères de sa grille
+ * (`criteres: criteres.map(c => ({id: c.id, nom: c.nom}))`, cartouches.js:465) et
+ * indexe TOUS ses commentaires par `critereId_niveauCode`. Déplacée telle quelle,
+ * elle reste cohérente avec elle-même mais ne correspond plus à la grille qui
+ * l'accueille — on aurait remplacé un orphelinage par un autre, en silence.
+ *
+ * ⮕ REMÈDE : correspondance par ID PUIS par NOM, le patron que le projet emploie
+ * déjà pour reporter les niveaux d'une grille à l'autre (`chargerGrilleSelectionnee`,
+ * js/evaluation-chargement.js:705). Les commentaires dont le critère ne trouve
+ * AUCUNE correspondance ne sont pas jetés en silence : ils sont RENDUS à l'appelant
+ * pour qu'il les nomme. Décision de Grégoire du 31 août 2026.
+ *
+ * ⚠ Les NIVEAUX ne sont pas remappés, et c'est voulu : ils viennent de l'échelle,
+ * pas de la grille. Seule la moitié `critereId` de la clé de commentaire change.
+ *
+ * @param {string} ancienneGrilleId
+ * @param {string} nouvelleGrilleId
+ * @returns {Promise<{nbDeplacees: number, orphelins: Array<{cartouche: string, critere: string, nbCommentaires: number}>}>}
+ */
+async function deplacerCartouchesVersAutreGrille(ancienneGrilleId, nouvelleGrilleId) {
     const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === id);
+    const nouvelleGrille = grilles.find(g => g.id === nouvelleGrilleId);
+    const criteresCible = (nouvelleGrille && nouvelleGrille.criteres) || [];
 
-    if (!grille) return;
+    let aDeplacer = await db.get(cle(`cartouches_${ancienneGrilleId}`));
+    if (!Array.isArray(aDeplacer)) aDeplacer = [];
 
-    // Vérifier dépendances : cartouches liées à cette grille
-    const cartouches = await db.get(cle(`cartouches_${id}`)) || [];
-    if (cartouches.length > 0) {
-        alert(`Impossible de supprimer cette grille.\n\n${cartouches.length} cartouche(s) y sont associée(s).\nSupprimez d'abord les cartouches.`);
-        return;
-    }
+    const orphelins = [];
+    let sansCritere = 0;
 
-    // Confirmation
-    if (!confirm(`Supprimer définitivement la grille «${grille.nom}» ?\n\nCette action est irréversible.`)) {
-        return;
-    }
+    const remappees = aDeplacer.map(cartouche => {
+        const criteresSource = Array.isArray(cartouche.criteres) ? cartouche.criteres : [];
 
-    // Marquer comme supprimée si c'est un gabarit hardcodé
-    if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(id)) {
-        window.marquerRessourceSupprimee(id);
-    }
+        // Table ancienCritereId -> nouveauCritère, par ID d'abord, par NOM ensuite.
+        const correspondance = {};
+        criteresSource.forEach(cs => {
+            let cible = criteresCible.find(cc => cc.id === cs.id);
+            if (!cible && cs.nom) {
+                cible = criteresCible.find(cc => cc.nom === cs.nom);
+            }
+            if (cible) correspondance[cs.id] = cible;
+        });
 
-    // Suppression définitive du store local, DANS la file.
-    await db.modifier(cle('grillesTemplates'), (lues) => {
-        return (lues || []).filter(g => g.id !== id);
+        // Réindexer les commentaires. La clé est `critereId_niveauCode`.
+        //
+        // ⚠⚠ NE PAS DÉCOUPER LA CLÉ. Un identifiant de critère est produit par
+        // `genererIdUnique('CR_')` (grilles.js:351, :371, :1033) : il CONTIENT
+        // déjà un souligné. Un `clef.indexOf('_')` ou un `clef.split('_')[0]`
+        // rendrait « CR », pas « CR_a1b2c3 » — et le remappage viserait un critère
+        // qui n'existe pas, en silence. Première version de ce bloc écrite avec
+        // ce défaut, attrapée au pré-vol.
+        //
+        // ⮕ Remède : on ne LIT pas l'identifiant dans la clé, on le RECONNAÎT.
+        // Les identifiants sources sont connus ; on cherche celui qui préfixe la
+        // clé, en gardant le PLUS LONG au cas où l'un préfixerait l'autre.
+        const commentaires = cartouche.commentaires || {};
+        const commentairesRemappes = {};
+        const perdusParCritere = {};
+
+        Object.keys(commentaires).forEach(clef => {
+            let source = null;
+            criteresSource.forEach(cs => {
+                if (!cs.id) return;
+                if (clef.startsWith(cs.id + '_') && (!source || cs.id.length > source.id.length)) {
+                    source = cs;
+                }
+            });
+            // Une clé qu'aucun critère de la cartouche ne revendique n'est pas une
+            // perte imputable au déplacement : elle était déjà orpheline AVANT. On la
+            // transporte telle quelle plutôt que de la faire disparaître à l'occasion
+            // d'un geste qui n'a pas ça pour objet.
+            //
+            // ⚠ MAIS ELLE NE VOYAGE PAS MUETTE. Elle référence un critère qui n'existe
+            // nulle part ; si l'annonce disait « tout est passé » sans la mentionner,
+            // l'enseignant lirait un déplacement propre alors qu'il emporte des
+            // commentaires que rien ne raccroche. On la compte, et l'appelant la dit.
+            if (!source) {
+                commentairesRemappes[clef] = commentaires[clef];
+                if (commentaires[clef]) sansCritere++;
+                return;
+            }
+
+            const suffixe = clef.slice(source.id.length);
+            const cible = correspondance[source.id];
+
+            if (cible) {
+                commentairesRemappes[cible.id + suffixe] = commentaires[clef];
+            } else if (commentaires[clef]) {
+                // Seuls les commentaires NON VIDES comptent comme une perte : une
+                // cellule jamais remplie n'est rien à annoncer.
+                perdusParCritere[source.nom || source.id] =
+                    (perdusParCritere[source.nom || source.id] || 0) + 1;
+            }
+        });
+
+        Object.keys(perdusParCritere).forEach(nom => {
+            orphelins.push({
+                cartouche: cartouche.nom || 'sans nom',
+                critere: nom,
+                nbCommentaires: perdusParCritere[nom]
+            });
+        });
+
+        return {
+            ...cartouche,
+            grilleId: nouvelleGrilleId,
+            criteres: criteresSource
+                .filter(cs => correspondance[cs.id])
+                .map(cs => ({ id: correspondance[cs.id].id, nom: correspondance[cs.id].nom })),
+            commentaires: commentairesRemappes
+        };
+    });
+
+    // ⚠ LES DEUX ÉCRITURES PASSENT PAR LA FILE, et dans cet ordre : on AJOUTE à la
+    // destination avant de vider la source. Si la seconde échoue, les cartouches
+    // existent en double — récupérable. L'ordre inverse les ferait disparaître.
+    // (Motif de #650 : `db.set` après un dialogue écrase ce qui s'est enregistré
+    // pendant. Ici les dialogues sont TOUS passés avant d'arriver ici.)
+    await db.modifier(cle(`cartouches_${nouvelleGrilleId}`), (lues) => {
+        const existantes = Array.isArray(lues) ? lues : [];
+        const idsExistants = new Set(existantes.map(c => c.id));
+        const ajouts = remappees.filter(c => !idsExistants.has(c.id));
+        if (ajouts.length === 0) return undefined;
+        return existantes.concat(ajouts);
     }, []);
 
-    // Suppression du store partagé
-    if (typeof retirerGrilleDeLaBibliotheque === 'function') {
-        await retirerGrilleDeLaBibliotheque(id);
+    await db.modifier(cle(`cartouches_${ancienneGrilleId}`), (lues) => {
+        if (!Array.isArray(lues) || lues.length === 0) return undefined;
+        return [];
+    }, []);
+
+    return { nbDeplacees: remappees.length, orphelins, sansCritere };
+}
+
+/**
+ * LE CHEMIN UNIQUE DE SUPPRESSION D'UNE GRILLE — bloque, NOMME, et offre l'issue.
+ *
+ * ⚠⚠ POURQUOI UN SEUL CHEMIN. Avant le 31 août 2026, `js/grilles.js` portait
+ * QUATRE portes pour le même geste, sous DEUX politiques opposées :
+ *   · `supprimerGrille` (:948)              — aucune garde, orphelinage silencieux
+ *   · `supprimerGrilleDefinitivement`(:2702)— bloque avec un alert
+ *   · `supprimerGrilleDepuisSidebar` (:3876)— bloque (garde ajoutée le 24 août)
+ *   · `supprimerGrilleActive` (:3968)       — aucune garde, orphelinage silencieux
+ * Trois boutons réels de l'interface menaient aux deux portes nues. Même geste,
+ * quatre portes, deux issues — et l'enseignant ne pouvait pas savoir laquelle il
+ * actionnait. Ajouter une cinquième copie de la garde aurait été une cinquième
+ * chose à faire dériver : elles passent toutes ici.
+ *
+ * ⚠ #624 : « un blocage sans issue n'est pas une garde ». On bloque, on nomme les
+ * référents, et on offre la porte de sortie — comme le fait déjà le chemin des
+ * échelles (`supprimerEchelleDepuisSidebar`, js/echelles.js:4309).
+ *
+ * @param {string} grilleId
+ * @param {{apres?: Function, marquerToujours?: boolean}} options
+ *        `apres`           — rafraîchissement propre à l'écran appelant.
+ *        `marquerToujours` — voir la note sur le tombstone plus bas.
+ * @returns {Promise<boolean>} true si la grille a été supprimée.
+ */
+async function supprimerGrilleAvecPorteDeSortie(grilleId, options = {}) {
+    const grilles = await db.get(cle('grillesTemplates')) || [];
+    const grille = grilles.find(g => g.id === grilleId);
+    if (!grille) return false;
+
+    const nomGrille = grille.nom || 'cette grille';
+    const utilisation = await verifierUtilisationGrille(grilleId);
+
+    if (utilisation.utilisee) {
+        const autresGrilles = grilles.filter(g => g.id !== grilleId);
+        const noms = utilisation.cartouches.slice(0, 5).map(c => (c && c.nom) || 'sans nom').join(', ');
+        const reste = utilisation.nbCartouches > 5
+            ? `, et ${utilisation.nbCartouches - 5} autre(s)`
+            : '';
+
+        // ⚠ NOMMER LES RÉFÉRENTS : quoi, combien, et où. Un compte seul ne dit pas
+        // à l'enseignant ce qu'il s'apprête à perdre.
+        let message = `La grille « ${nomGrille} » porte ${utilisation.nbCartouches} cartouche(s) : ${noms}${reste}.\n\n`;
+
+        if (autresGrilles.length === 0) {
+            message += 'Impossible de la supprimer : il n\'existe aucune autre grille vers laquelle déplacer ces cartouches.\n\n';
+            message += 'Crée d\'abord une autre grille, ou supprime ces cartouches.';
+            alert(message);
+            return false;
+        }
+
+        message += 'Ces cartouches deviendraient introuvables si la grille partait sans elles.\n\n';
+        message += 'Veux-tu les déplacer vers une autre grille ?';
+
+        if (!confirm(message)) {
+            alert('Suppression annulée. Les cartouches sont préservées.');
+            return false;
+        }
+
+        let liste = 'Sélectionne la grille d\'accueil :\n\n';
+        autresGrilles.forEach((g, idx) => {
+            liste += `${idx + 1}. ${g.nom} (${(g.criteres || []).length} critère(s))\n`;
+        });
+
+        const choix = parseInt(prompt(liste + '\nEntre le numéro de la grille :'), 10);
+        if (!choix || choix < 1 || choix > autresGrilles.length) {
+            alert('Déplacement annulé. La grille n\'a pas été supprimée.');
+            return false;
+        }
+
+        const cible = autresGrilles[choix - 1];
+        const { nbDeplacees, orphelins, sansCritere } = await deplacerCartouchesVersAutreGrille(grilleId, cible.id);
+
+        // ⚠ DIRE CE QUI N'A PAS SUIVI, PLUTÔT QUE DE LE PERDRE EN SILENCE. Les
+        // critères de la cartouche sont mis en correspondance par ID puis par NOM ;
+        // ceux qui n'ont aucun équivalent dans la grille d'accueil emportent leurs
+        // commentaires. L'enseignant l'apprend ICI, pas en s'en apercevant plus tard.
+        if (orphelins.length > 0 || sansCritere > 0) {
+            let avis = 'Déplacement effectué, avec une réserve à te signaler.\n\n';
+
+            if (orphelins.length > 0) {
+                const detail = orphelins
+                    .map(o => `· « ${o.critere} » (cartouche « ${o.cartouche} ») : ${o.nbCommentaires} commentaire(s)`)
+                    .join('\n');
+                avis += `Ces critères n'existent pas dans « ${cible.nom} », ni par identifiant ni par nom. `;
+                avis += `Leurs commentaires n'ont pas pu suivre :\n\n${detail}\n\n`;
+            }
+
+            // ⚠ LIGNE DISTINCTE, PAS FONDUE DANS LA PRÉCÉDENTE. Ces commentaires-là
+            // ne sont pas perdus par le déplacement : ils référençaient déjà un
+            // critère absent de leur propre cartouche. Ils ont suivi, intacts, mais
+            // rien ne les raccroche. Les compter avec les vraies pertes ferait un
+            // chiffre juste dans une phrase fausse.
+            if (sansCritere > 0) {
+                avis += `${sansCritere} commentaire(s) ont été transportés sans critère d'origine : `;
+                avis += `ils étaient déjà détachés avant ce déplacement, et le restent.`;
+            }
+
+            alert(avis);
+        }
+
+        const supprimee = await _retirerGrilleDeLaListe(grilleId, options);
+        if (supprimee) {
+            if (typeof options.apres === 'function') await options.apres();
+            notifications.succes(
+                `Grille « ${nomGrille} » supprimée`,
+                `${nbDeplacees} cartouche(s) déplacée(s) vers « ${cible.nom} ».`
+            );
+        }
+        return supprimee;
     }
 
-    // Rafraîchir UI
-    fermerModalBibliothequeGrilles();
-    await afficherListeGrilles();
-    await afficherBibliothequeGrilles();
+    if (!confirm(`Supprimer la grille « ${nomGrille} » ?`)) return false;
 
+    const supprimee = await _retirerGrilleDeLaListe(grilleId, options);
+    if (supprimee) {
+        if (typeof options.apres === 'function') await options.apres();
+        notifications.succes(`Grille « ${nomGrille} » supprimée`);
+    }
+    return supprimee;
+}
+
+/**
+ * Retrait de la grille de sa collection. ⚠ L'index est recalculé DANS la file :
+ * celui d'avant les questions posées à l'enseignant ne vaut plus rien.
+ *
+ * ⚠ SUR `marquerToujours` — UN BUG LATENT PRÉSERVÉ EXPRÈS, PAS UN OUBLI.
+ * `supprimerGrilleActive` appelait `marquerRessourceSupprimee` INCONDITIONNELLEMENT,
+ * là où les trois autres chemins ne le font que pour les gabarits codés en dur.
+ * Le tombstone ne sert qu'à empêcher les `assurer*()` de réinjecter un gabarit
+ * codé en dur : pour tout autre id, il ne fait qu'enfler `ressourcesSupprimees`
+ * sans effet. Aligner sans le dire changerait un comportement en silence pendant
+ * un lot qui n'a pas ça pour objet ; on préserve, on inscrit, on traite à part.
+ */
+async function _retirerGrilleDeLaListe(grilleId, options = {}) {
+    let supprimee = false;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const liste = lues || [];
+        const i = liste.findIndex(g => g.id === grilleId);
+        if (i === -1) return undefined;
+
+        if (options.marquerToujours ||
+            (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(grilleId))) {
+            window.marquerRessourceSupprimee(grilleId);
+        }
+        liste.splice(i, 1);
+        supprimee = true;
+        return liste;
+    }, []);
+    return supprimee;
+}
+
+async function supprimerGrilleDefinitivement(id) {
+    // #624 — CE CHEMIN PORTAIT DEJA UNE GARDE, mais un blocage sans issue n'en est
+    // pas une : il refusait en citant le nombre de cartouches et laissait
+    // l'enseignant sans autre recours que de les supprimer une a une. Il passe
+    // desormais par le chemin unique, qui bloque, NOMME les cartouches, et offre de
+    // les deplacer vers une autre grille.
+    await supprimerGrilleAvecPorteDeSortie(id, {
+        apres: async () => {
+            // Le store partage n'est pas touche par le chemin unique : il ne connait
+            // que la collection locale. On le retire ici, apres la suppression.
+            if (typeof retirerGrilleDeLaBibliotheque === 'function') {
+                await retirerGrilleDeLaBibliotheque(id);
+            }
+            fermerModalBibliothequeGrilles();
+            await afficherListeGrilles();
+            await afficherBibliothequeGrilles();
+        }
+    });
 }
 
 /**
@@ -3874,60 +4168,28 @@ async function dupliquerGrilleDepuisSidebar(id) {
 }
 
 async function supprimerGrilleDepuisSidebar(id) {
-    // ⚠ GARDE D'ORPHELINAGE (24 août 2026, sur relevé du corpus de Grégoire).
+    // #624 — LA GARDE D'ORPHELINAGE DU 24 AOUT EST CONSERVEE, ET ELLE A MAINTENANT
+    // UNE ISSUE.
     //
-    // Les cartouches ne vivent pas DANS la grille : elles sont ancrées à part,
-    // dans `cartouches_{grilleId}`. Retirer la grille de la liste sans toucher à
-    // cette clé ne détruit rien — mais plus personne ne peut lire ce qu'elle
-    // contient : la barre latérale et la bibliothèque n'énumèrent que les
-    // cartouches des grilles PRÉSENTES. Les cartouches deviennent invisibles, et
-    // l'enseignant conclut qu'elles n'ont pas été enregistrées.
+    // Les cartouches ne vivent pas DANS la grille : elles sont ancrees a part, sous
+    // `cartouches_{grilleId}`. Retirer la grille sans toucher a cette cle ne detruit
+    // rien — mais plus personne ne peut lire ce qu'elle contient, la barre laterale
+    // et la bibliotheque n'enumerant que les cartouches des grilles PRESENTES.
+    // Le diagnostic du 24 aout de Gregoire a retrouve « Carte mentale A26 », « Plan
+    // de redaction A26 » et « Strategies de lecture A26 » vivantes dans des cles dont
+    // la grille avait disparu de son trimestre.
     //
-    // C'est exactement ce qui s'est passé : son diagnostic du 24 août a retrouvé
-    // « Carte mentale A26 », « Plan de rédaction A26 » et « Stratégies de lecture
-    // A26 » vivantes dans des clés dont la grille avait disparu de son trimestre.
-    //
-    // `supprimerGrilleDefinitivement` portait DÉJÀ cette garde. Ce chemin-ci —
-    // celui de la corbeille de la barre latérale, le plus utilisé — ne l'avait
-    // jamais reçue. Deux chemins, une même action, une seule protégée.
-    const cartouchesLiees = await db.get(cle(`cartouches_${id}`)) || [];
-    if (cartouchesLiees.length > 0) {
-        const noms = cartouchesLiees.slice(0, 5).map(c => (c && c.nom) || 'sans nom').join(', ');
-        const reste = cartouchesLiees.length > 5 ? `, et ${cartouchesLiees.length - 5} autre(s)` : '';
-        alert(
-            `Impossible de supprimer cette grille.\n\n` +
-            `${cartouchesLiees.length} cartouche(s) y sont rattachée(s) : ${noms}${reste}.\n\n` +
-            `Supprime-les d'abord, ou déplace-les vers une autre grille — sinon elles ` +
-            `deviendraient introuvables.`
-        );
-        return;
-    }
-
-    if (!confirm('Supprimer cette grille ?')) return;
-
-    // ⚠ L'index est recalculé DANS la file : celui d'avant la confirmation ne
-    // vaut plus rien.
-    let supprimee = false;
-    await db.modifier(cle('grillesTemplates'), (lues) => {
-        const grilles = lues || [];
-        const i = grilles.findIndex(g => g.id === id);
-        if (i === -1) return undefined;
-
-        if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(id)) {
-            window.marquerRessourceSupprimee(id);
+    // Ce chemin avait recu la garde ce jour-la ; deux des quatre ne l'avaient jamais
+    // eue. Les quatre passent maintenant par le meme corps, et le refus s'accompagne
+    // d'une porte de sortie — « un blocage sans issue n'est pas une garde » (#624).
+    await supprimerGrilleAvecPorteDeSortie(id, {
+        apres: async () => {
+            await afficherListeGrilles();
+            document.getElementById('conteneurEditionGrille').classList.add('u-hide');
+            // Note: optionsImportExportGrilles supprime en Beta 92
+            document.getElementById('accueilGrilles').classList.remove('u-hide');
         }
-        grilles.splice(i, 1);
-        supprimee = true;
-        return grilles;
-    }, []);
-
-    if (supprimee) {
-        await afficherListeGrilles();
-        document.getElementById('conteneurEditionGrille').classList.add('u-hide');
-        // Note: optionsImportExportGrilles supprimé en Beta 92
-        document.getElementById('accueilGrilles').classList.remove('u-hide');
-        notifications.succes('Grille supprimée');
-    }
+    });
 }
 
 /**
@@ -3967,41 +4229,28 @@ async function dupliquerGrilleActive() {
  */
 async function supprimerGrilleActive() {
     if (!grilleTemplateActuelle) {
-        alert('Aucune grille en cours d\'édition');
+        alert('Aucune grille en cours d\'edition');
         return;
     }
 
-    if (!confirm('Es-tu sûr de vouloir supprimer cette grille ?')) {
-        return;
-    }
-
-    // ✅ CORRIGÉ (6 jan 2026) : grilleTemplateActuelle est un objet, pas un ID
-    // ⚠ L'index est recalculé DANS la file, après la confirmation.
-    let supprimee = false;
-    await db.modifier(cle('grillesTemplates'), (lues) => {
-        const grilles = lues || [];
-        const i = grilles.findIndex(g => g.id === grilleTemplateActuelle.id);
-        if (i === -1) return undefined;
-        grilles.splice(i, 1);
-        supprimee = true;
-        return grilles;
-    }, []);
-
-    if (supprimee) {
-        const nomGrille = grilleTemplateActuelle.nom || 'Grille';
-
-        // ✅ CORRIGÉ (16 mars 2026) : marquer comme supprimée pour empêcher assurerGrilleGenerique() de la réinjecter
-        window.marquerRessourceSupprimee(grilleTemplateActuelle.id);
-
-        // Fermer le formulaire et retourner à l'accueil
-        annulerFormGrille();
-
-        // Recharger la liste
-        await afficherListeGrilles();
-
-        // ✅ Notification au lieu d'alert
-        notifications.succes(`Grille "${nomGrille}" supprimée`);
-    }
+    // #624 — PORTE NUE REFERMEE. Ce chemin — le bouton « Supprimer cette grille » de
+    // l'editeur — ne verifiait AUCUNE dependance, alors que son jumeau
+    // `dupliquerGrilleActive`, six lignes plus haut, delegue deja au chemin commun.
+    //
+    // ⚠ `marquerToujours` PRESERVE UN BUG LATENT, IL NE LE CORRIGE PAS. Ce chemin
+    // appelait `marquerRessourceSupprimee` INCONDITIONNELLEMENT, la ou les trois
+    // autres ne le font que pour les gabarits codes en dur. Le tombstone ne sert qu'a
+    // empecher les `assurer*()` de reinjecter un gabarit code en dur : pour tout autre
+    // identifiant il ne fait qu'enfler `ressourcesSupprimees`, sans effet. Aligner
+    // sans le dire changerait un comportement en silence pendant un lot qui n'a pas
+    // ca pour objet — on preserve, on inscrit, on traite a part.
+    await supprimerGrilleAvecPorteDeSortie(grilleTemplateActuelle.id, {
+        marquerToujours: true,
+        apres: async () => {
+            annulerFormGrille();
+            await afficherListeGrilles();
+        }
+    });
 }
 
 /**

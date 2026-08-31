@@ -418,6 +418,34 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Ce qui manque, c'est son application — `:174-178` ne patche que `grilleId`.
   ⮕ Conséquence : le lot **S9 / #627** est plus petit qu'annoncé de ce côté. Corriger l'énoncé de Z2 avant que S9
   s'en serve comme spécification. **Un diff d'audit est une esquisse, jamais une spécification.**
+- [ ] **#651 — Depuis la liste des évaluations, « annoter » ouvre la page sans AUCUNE palette quand on vient du mode Évaluer**.
+  Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, à la demande de `kuekatsheu-5d` qui porte le
+  correctif sous le pilotage direct de Grégoire. Retour terrain de Grégoire, avec capture.
+  ⚠ **CAUSE LUE DANS LE CODE, PAS ENCORE MESURÉE** — à ne pas citer comme un fait avant le rouge.
+  `travaux-ui.js:3288` : `if (modeAvantNavigation === 'evaluer' && !window._apresOuvertureFichier && ...)` puis
+  `else if (modeAvantNavigation !== 'evaluer')`. Si le mode d'avant est `evaluer` **et** qu'un rappel
+  `_apresOuvertureFichier` est posé, **aucune des deux branches ne s'exécute** — ni bascule, ni installation du mode
+  annotation. Or `ouvrirAnnotationDepuisListe` (`liste-evaluations.js:1381`) pose précisément ce rappel, et son corps
+  est un **no-op assumé** (« empêche la restauration d'une session précédente »).
+  ⮕ **Le drapeau porte DEUX sens** : « ne restaure pas la session » et « l'appelant installera le mode lui-même ».
+  Ce chemin déclare le second et ne l'honore pas. Explique aussi le libellé « Évaluer » resté sur le bouton d'actions :
+  personne n'a appelé `_majLabelBtnActions`.
+  ⮕ **Remède envisagé, le plus étroit** : faire honorer au rappel ce qu'il déclare (`basculerMode('annoter')`, dont la
+  branche fait déjà `fermerModeEvaluation`, `afficherPalettesAnnotation`, classes, libellé, zoom).
+  ⚠ Élargir le `else` de `ouvrirFichier` serait plus général **mais casserait les appelants dont le rappel bascule VERS
+  l'évaluation** (`profil-etudiant-actions`, `consulterEvaluation`) : ils recevraient une installation d'annotation
+  aussitôt écrasée. Ne pas payer ça pour un défaut dont le chemin exact est connu.
+  ⚠ **Condition avant toute ligne de code** : un ROUGE qui reproduit la combinaison (mode d'avant = `evaluer` + rappel
+  posé). Si ce rouge est trop coûteux à monter, le dire plutôt que livrer un correctif non éprouvé.
+- [ ] **#652 — CONSTAT · Une attente expire sur des éléments qui sont là : « Timeout génération selects critères »**.
+  Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur observation de `kuekatsheu-5d` dans un rapport
+  de bug de Grégoire. **Rien de mesuré** — c'est une observation, pas un diagnostic.
+  Trois erreurs console à 13 h 57 : `❌ Timeout: selects de critères non générés`, puis `Erreur lors du chargement de
+  l'évaluation: Timeout génération selects critères` (`evaluation.js:1277`) — **alors que le même rapport imprime le
+  contenu de `listeCriteresGrille1` et qu'il contient bien les cartes de critères**.
+  ⮕ Deux hypothèses, aucune vérifiée : l'attente guette le **mauvais sélecteur**, ou elle guette **trop tôt**.
+  ⮕ Ressemble à la famille de #645 (deux chemins de rendu qui divergent, l'un émettant les éléments attendus et l'autre
+  non), mais **le rapprochement n'est pas mesuré non plus**. À traiter comme une piste, pas comme une cause.
 - [ ] **#647 — S6 · L'avertissement de suppression d'une cartouche annonce une perte qui n'a pas lieu, et tait une survivance qui a lieu**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur mesure de `kuekatsheu-94`. Lot de #624.
   `supprimerCartoucheDefinitivement` (`js/donnees-v2.js:1608`) n'appelle que `retirerCartoucheDeLaBibliotheque`, qui
@@ -661,6 +689,22 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 - [ ] **#624 — S6 · Politique de suppression : refermer les CHEMINS qui produisent des orphelins, et traiter les `ECHELLE_DEMO` résiduelles** (constats S1, S2). Après **S5** (ordre strict S4→S5→S6), D3-A **qualifiée**.
   ⚠ **Reformulé le 30 août 2026.** L'énoncé précédent disait « absorbe la réparation #542 ». **#542 a été réparé le 26 août** (`scripts/reparation-542-echelle-orpheline.js` ; deux commits, dont `e3d5af34` qui corrige la réparation elle-même). Ce qui reste n'est pas la réparation : c'est **la CAUSE, inconnue**, et les `ECHELLE_DEMO` résiduelles. ⮕ Chiffres 383 → 44 **RAPPORTÉS, non remesurés** : le diagnostic de T2.2 rendra celui du jour.
   ⚠ **D3-A est qualifiée, pas appliquée à la lettre** : bloquer + NOMMER les référents (quoi, combien, quel trimestre) + **CONSERVER et généraliser la porte de sortie « réassigner vers un autre objet »** là où elle existe. Sur les échelles, le chemin actuel PROPOSE de migrer les évaluations : un D3-A strict retirerait cette issue et laisserait un refus indéfaisable. Un blocage sans issue n'est pas une garde.
+  ⚠ **AVANCÉ le 31 août 2026, PAS CLOS** (`kuekatsheu-9f`, trio `67`/`94`). Ne pas le cocher.
+  **LIVRÉ** — le volet « chemins » côté GRILLES : les quatre portes de `js/grilles.js` (`supprimerGrille:948`,
+  `supprimerGrilleDefinitivement:2702`, `supprimerGrilleDepuisSidebar:3876`, `supprimerGrilleActive:3968`) déléguaient
+  à quatre corps distincts sous **deux politiques opposées** — deux nues, deux bloquantes. Elles passent maintenant par
+  `supprimerGrilleAvecPorteDeSortie`, qui bloque, NOMME les cartouches, et offre de les **déplacer vers une autre
+  grille** avec remappage des critères par ID puis par NOM (décision de Grégoire, 31 août). Plus #650 en précondition.
+  **RESTE OUVERT, et c'est la moitié du titre :**
+  · **les `ECHELLE_DEMO` résiduelles et la CAUSE de #542** — pas touchées, pas même remesurées. Les chiffres 383 → 44
+    restent **RAPPORTÉS, non remesurés**.
+  · **#648** — la garde d'échelle de l'onglet Données compte le mauvais référent, et sur un seul trimestre.
+  · **#649** — le garde mort de la production.
+  · **les chemins nus côté ÉCHELLES** (`supprimerEchelle:953`, `supprimerEchelleDefinitivement:2610`) : le commentaire
+    faux y a été rendu vrai (#650), mais **la garde et sa porte de sortie n'y ont pas été portées**.
+  · **l'implémentation parallèle de l'onglet Données** : cinq homonymes dans l'IIFE de `js/donnees-v2.js` qui masquent
+    les publiques. Seul le cas cartouche a été traité (#647). Les quatre autres paires n'ont pas été comparées.
+
 - [x] **#625 — S7 · Les états de création ne survivent plus à l'abandon ni à la bascule** (constat S3). ✅ **LIVRÉ le 31 août 2026** (`1530873b`, `kuekatsheu-9a`).
   #466/CO-16 avait posé un reset dans les quatre éditeurs, mais chacun ne purgeait que le **POINTEUR** d'édition :
   les **TAMPONS de création** étaient oubliés dans deux éditeurs sur quatre.

@@ -284,7 +284,17 @@ const SETSYNC_ADMIS = {
 };
 
 const PAR_LA_FILE = {
-    'js/grilles.js': 27,
+    // ⚠ 27 -> 24 le 31 août 2026 (#624), ET LE MOTIF COMPTE AUTANT QUE LE CHIFFRE.
+    // Ce n'est PAS une attente alignée sur l'observé : la baisse est le BUT du lot.
+    // Les quatre portes de suppression de grille portaient chacune leur propre
+    // `db.modifier(cle('grillesTemplates'))` — quatre copies du même geste sous deux
+    // politiques opposées. Elles délèguent maintenant toutes à un chemin unique, dont
+    // l'unique écriture vit dans `_retirerGrilleDeLaListe`.
+    //   27 − 4 (les quatre portes) + 1 (`_retirerGrilleDeLaListe`) = 24.
+    // ⮕ C.d verrouille que la consolidation n'a pas fait DISPARAÎTRE l'invariant :
+    //   il a changé d'adresse. Ne baisse jamais ce nombre sans montrer où le geste
+    //   retiré est parti.
+    'js/grilles.js': 24,
     'js/cartouches.js': 1,
     'js/spe-specifications.js': 1,
     'js/donnees-v2.js': 1
@@ -318,13 +328,32 @@ describe('#522 lot 2c · C — la course ne peut pas se rouvrir en silence', () 
         // Le défaut le plus coûteux du lot : une collection lue avant une
         // question, réécrite après. Chacune doit porter un `db.modifier`.
         const src = lire('js/grilles.js');
-        for (const nom of ['dupliquerGrille', 'sauvegarderGrilleTemplate', 'supprimerGrille',
-                           'supprimerGrilleDefinitivement', 'supprimerGrilleDepuisSidebar']) {
+        // ⚠ LISTE RÉÉCRITE le 31 août 2026 (#624), PAS RACCOURCIE. Les trois chemins
+        // de suppression ne portent plus l'écriture eux-mêmes : ils délèguent. Retirer
+        // simplement leurs noms aurait emporté le SUJET de l'assertion et rendu la
+        // sentinelle verte en ne surveillant plus rien. L'invariant — « toute fenêtre
+        // d'attente humaine écrit DANS la file » — reste vrai ; il a changé d'adresse,
+        // et le maillon de délégation est vérifié juste en dessous.
+        for (const nom of ['dupliquerGrille', 'sauvegarderGrilleTemplate',
+                           '_retirerGrilleDeLaListe']) {
             const debut = src.indexOf('function ' + nom + '(');
             expect(debut, `${nom} : introuvable`).toBeGreaterThan(-1);
             const corps = src.slice(debut, debut + 5000);
             expect(corps, `${nom} : n'écrit pas par la file`)
                 .toMatch(/db\.modifier\(cle\('grillesTemplates'\)/);
+        }
+
+        // ⮕ LE MAILLON AJOUTÉ, pas remplacé (#624). Les quatre portes de suppression
+        // doivent atteindre la file PAR le chemin unique. Sans cette assertion, une
+        // porte qui cesserait de déléguer — en redevenant nue, le défaut d'origine —
+        // laisserait la boucle ci-dessus parfaitement verte.
+        for (const nom of ['supprimerGrille', 'supprimerGrilleDefinitivement',
+                           'supprimerGrilleDepuisSidebar', 'supprimerGrilleActive']) {
+            const debut = src.indexOf('function ' + nom + '(');
+            expect(debut, `${nom} : introuvable`).toBeGreaterThan(-1);
+            const corps = src.slice(debut, debut + 5000);
+            expect(corps, `${nom} : ne délègue pas au chemin gardé`)
+                .toMatch(/supprimerGrilleAvecPorteDeSortie\(/);
         }
     });
 

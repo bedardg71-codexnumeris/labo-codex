@@ -50,7 +50,16 @@ const VOCABULAIRE_CONFIRMATION =
 // Le même vocabulaire employé pour dire qu'une action N'A PAS eu lieu : une
 // annulation, un refus d'écriture. Ces alertes-là sont légitimes — elles
 // signalent un échec que l'enseignant doit voir avant de continuer.
-const NEGATIONS = /n'a (?:pas|PAS)|n'ont pas|annulée/;
+// ⚠ ÉLARGI le 31 août 2026 (#624), sur DEUX ratés mesurés — pas sur un cas gênant.
+// 1. L'APOSTROPHE ÉCHAPPÉE. Dans une source JS entre quotes simples, la négation
+//    s'écrit `n\'a pas` : le backslash cassait l'appariement, et TOUTE négation
+//    ainsi échappée passait à travers. Faiblesse latente, pas propre à une ligne.
+// 2. LE GENRE. Le motif n'avait que « annulée ». « Déplacement annulé » au
+//    masculin n'était pas reconnu.
+// Témoin avant élargissement : sur les 21 alertes du dépôt à vocabulaire de
+// confirmation, UNE SEULE bascule de « signalée » à « exemptée ». La sentinelle
+// ne perd donc rien d'autre — vérifié, pas supposé.
+const NEGATIONS = /n\\?'a (?:pas|PAS)|n\\?'ont pas|annulé(?:e)?/;
 
 // Soupape pour un faux positif que la négation ne couvre pas. Vide à dessein :
 // toute entrée ajoutée ici doit être justifiée en commentaire — ce n'est pas un
