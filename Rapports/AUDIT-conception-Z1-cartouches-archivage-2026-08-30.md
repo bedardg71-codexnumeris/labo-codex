@@ -127,7 +127,22 @@ Les l.1132-1136 (`etudiants`, `evaluations`) souffrent du même défaut de lectu
 2. **`confirmerSuppressionTrimestre` (#361), `trimestre-v2-liste.js:398-405`** : cet export est **le filet de sécurité d'une suppression définitive et irréversible** de tout un trimestre. Le code en fait une condition explicite — si l'export échoue, la modale demande « Supprimer quand même, SANS copie de secours ? ». L'utilisateur est donc informé qu'un filet existe. Ce filet perd les présences et emporte les captures d'un autre trimestre.
 3. Le bouton « Exporter » est offert sur **chaque ligne** de l'écran Trimestres (`trimestre-v2-liste.js:116, 122, 140`). Sur la ligne du trimestre **actif**, `id` égale le trimestre actif : les l.1139 et 1142 tombent juste, l'export est correct. Sur **toute autre ligne**, le fichier produit n'est pas une sauvegarde fidèle — et rien ne le distingue à l'œil.
 
-**Conséquence pour le périmètre du moratoire D1.** Le moratoire, tel qu'écrit, couvre « ne pas utiliser Archiver un trimestre ». Il ne couvre ni « Supprimer… » ni « Exporter » sur une ligne non active. Recommandation en §8.
+**Conséquence pour le périmètre du moratoire D1.** Le moratoire, tel qu'écrit le 30 août au matin, couvrait « ne pas utiliser Archiver un trimestre ». Il ne couvrait ni « Supprimer… » ni « Exporter » sur une ligne non active. **Élargi aux trois gestes le 30 août au soir, décision de Grégoire, question fermée** (relayée par `kuekatsheu-bc`). Détail en §8.
+
+**Aggravation : le fichier produit n'est rechargeable par aucun chemin de l'application.** Trouvé par `kuekatsheu-bc` en vérifiant l'angle mort A6 ; **je l'ai vérifié indépendamment plutôt que de le reprendre**, et je le confirme.
+
+```js
+// trimestres.js:1105 — seule occurrence de cette chaîne dans TOUT le dépôt
+                    type: 'archive-trimestre',
+```
+
+`grep -rn "archive-trimestre" js/ index.html scripts/ tests/ docs/` ne rend **que cette ligne**, celle de l'écriture. Aucun importateur ne reconnaît ce type. Et le seul détecteur de format d'un JSON déposé, `detecterFormatConfig` (`import-export.js:1547-1568`), examine `Object.keys(config)` au **premier niveau** — pour un fichier d'archive, `['meta', 'trimestre', 'donnees']` : aucune des huit clés de `clesBrut` n'y figure, et aucune ne correspond au patron `/^(?:[ahe]\d{4}|demo)_/`. Le fichier est donc classé **`'inconnu'`**. VÉRIFIÉ.
+
+**À formuler prudemment, et je le formule ainsi** : les données ne sont pas perdues — c'est du JSON lisible, reconstructible à la main, et il contient les collections namespacées justes pour tout ce que les l.1139/1142 n'écrasent pas. Mais **il n'existe aucun chemin de restauration dans l'application**. Le fichier n'est pas une sauvegarde au sens où la modale de suppression le laisse entendre (« Un export de sauvegarde sera téléchargé automatiquement avant la suppression », `trimestre-v2-liste.js:378` ; « Supprimer quand même, SANS copie de secours ? », l.404). C'est un vidage, pas une sauvegarde restaurable.
+
+⚠ **Piège à ne pas retomber dedans, signalé par `kuekatsheu-bc` et vérifié ici** : `import-export.js` contient une douzaine d'occurrences de `donnees.etudiants` et `donnees.evaluations` (l.1841-1878). Ce sont des **faux positifs** — il s'agit de `analyse.donnees.*`, un objet d'ANALYSE portant `.count` et `.cles`, pas le champ d'un fichier d'archive. Même chemin de propriété, structure différente.
+
+**L'angle mort A6 est donc levé** : les deux champs alias `donnees.etudiants` et `donnees.evaluations` n'ont **aucun consommateur** — leurs seules occurrences hors faux positifs sont les deux écritures de `trimestres.js:1133` et `:1136`. Leur retrait au §6.2 est sûr.
 
 #### B3 — Le snapshot de pratiques ne croise pas les namespaces : il REMPLACE la collection du trimestre archivé [CONFLIT]
 
@@ -255,6 +270,15 @@ Note incidente sur le régime actuel : la copie n'a lieu que `if (cartouches.len
   1. La clé nue `grillesTemplates` est vidée au boot par `viderModelesGlobalHerite` (l.884-913) : elle ne contient au mieux que des orphelins non capturés, jamais les modèles de travail.
   2. **Aucune grille ne porte plus de champ `echelleId`.** Deux témoins dans le dépôt, tous deux du 29 août 2026, la veille de l'audit parent. Le diagnostic #578, `cartouches.js:3250` : « Aucune grille ne porte d'echelleId : lire `grille.echelleId` laisserait TOUTE cartouche neuve sans colonnes — c'est pourquoi la cartouche prend son échelle du FORMULAIRE, jamais de la grille (option A, 29 août 2026). » Et le gabarit lui-même, `grilles.js:1489-1490` : « #574/#578 (29 août 2026) : plus d'`echelleId` — l'échelle générique n'est plus semée, et une grille dit les CRITÈRES ; l'échelle se choisit là où on s'en sert. »
   Contribution nulle sur les deux plans. VÉRIFIÉ. À retirer — c'est un bloc mort dans une fonction dangereuse, et c'est lui qui prive `echelleIds` de sa seule source indirecte (voir B1).
+- **Z1-M6 [RÉSIDU]** — `trimestres.js:655-657` : le repli sur la clé legacy est **inatteignable**, et il resserre le filtre de B1 sans le dire.
+  ```js
+  // trimestres.js:655-657
+  const productions = db.getSync(`${trimestreId}_productions`, [])
+      || db.getSync(`${trimestreId}_productionsPedagogiques`, [])
+      || [];
+  ```
+  `getSync(key, [])` rend la valeur par défaut quand la clé est absente (`db.js:1466-1484`), et `[]` est **truthy** : le premier appel ne peut jamais rendre une valeur fausse, donc les deux replis ne s'exécutent **jamais**. VÉRIFIÉ. Conséquence concrète pour B1 : un trimestre dont les productions vivent encore sous la clé legacy `<T>_productionsPedagogiques` (« legacy en extinction » au registre, `trimestres.js:98`) voit `grilleIds` alimenté par ses seules évaluations — le filtre est plus étroit qu'il n'en a l'air, et la perte plus large.
+  ⚠ **Asymétrie trompeuse, cent lignes plus bas** : `trimestres.js:768` écrit le même motif, mais **sans valeur par défaut** au premier appel — `db.getSync(\`${trimestreId}_productions\`) || db.getSync('productions', [])`. Là, `getSync` rend `null` quand la clé manque, et le repli **est atteignable** : le snapshot peut alors enregistrer, sous le nom du trimestre archivé, le contenu de la clé globale nue `productions`. Deux lignes d'apparence identique, deux comportements opposés, à cent lignes d'écart, dans la même fonction d'archivage. À unifier dans le diff du §6.1.
 - **Z1-M3 [INCOHÉRENCE]** — `cartouches.js:230` déclare `const cle = \`cartouches_${grille.id}\`` **à l'intérieur** de `migrerCartouchesVersBibliotheque`, qui appelle la fonction globale `cle('grillesTemplates')` quatre lignes plus haut (l.226). Il n'y a pas de bug aujourd'hui : le `const` est porté par le bloc `for`, la l.226 est hors de ce bloc et résout vers la fonction globale. Mais c'est un piège direct pour le diff D2-A, qui doit précisément introduire un appel à `cle()` dans ce corps de boucle — il y lèverait un `TypeError`. À renommer avant, pas pendant.
 - **Z1-M4 [RÉSIDU, hors périmètre]** — `db.js:1667` définit un second `obtenirDonneesSelonMode`, non exporté et sans appelant (`db.js:1916` le documente : « exportée par modes.js »). Ce n'est pas la double définition `window` dangereuse de la classe habituelle — l'ordre de chargement n'arbitre rien — mais c'est une fonction morte de 22 lignes dans le fichier le plus lu du projet. Signalé parce que je l'ai croisé en établissant qui gagne pour B2 ; il n'appartient à aucune des trois zones Z.
 - **Z1-M5 [RÉSIDU, hors périmètre]** — `planification-carte.js:7815` cherche `echelles.find(e => e.id === grille.echelleId)` : même champ retiré que Z1-M2, donc toujours `undefined`. Appartient au périmètre de la carte mentale, pas au mien. Inscrit ici pour ne pas le perdre.
@@ -283,6 +307,27 @@ Livré à `kuekatsheu-bc` le 30 août au soir pour exécution par Grégoire (T1.
 Sept compteurs rendus : `nbTrimestres`, `nbClesNues`, `nbCopiesNamespacees`, `nbGrillesHomonymes`, `nbHomonymesCriteresDivergents`, `nbHomonymesAvecCommentairesOrphelins`, `nbArchivesDivergentes`. JSON complet en console et dans `window.__DIAG619`.
 
 **T1.2 — résultat sur les données réelles de Grégoire : EN ATTENTE.** À consigner ici tel quel, brut, quand il l'aura exécuté. Le §4-Q(b) reste sans réponse chiffrée jusque-là, et c'est lui qui règle la sous-décision du §4-Q(a).
+
+### 3bis. Le diagnostic de perte simulée (#630) — écrit, testé, non exécuté sur les données réelles
+
+Écrit à la demande de `kuekatsheu-bc` après la livraison de Z1 ; ID #630 inscrit avant emploi. Il répond à l'angle mort **A1**, et il remplace le test d'archivage sur trimestre jetable du §5 : il donne le **volume exact de la perte sur les vraies données**, sans rien détruire — ce qu'un trimestre jetable ne pourrait par construction pas dire.
+
+Mêmes contraintes que T1.1, et vérifiées de la même façon : une seule ligne physique ; zéro arrow function ; zéro `const` et zéro `let` ; **zéro écriture** — le contrôle mécanique ne trouve que neuf appels, tous `db.getSync`, aucun `db.set`, `db.remove` ni `db.modifier`.
+
+**Principe : il ne corrige rien, il RÉPLIQUE fidèlement le code fautif.** Il refait, trimestre par trimestre, exactement ce que `identifierTemplatesUtilises` puis `creerSnapshotRessources` feraient — **bloc mort compris** — et compare le résultat aux collections réelles. Ce que le code garderait, ce qu'il retirerait, nommément.
+
+Ce qu'il rend, par trimestre : les grilles et les échelles **perdues** (id et nom, pas seulement un compte) ; pour les pratiques, la clé qu'il **lirait réellement** (`<actif>_pratiquesConfigurables`, la mécanique de B3), la taille de ce qui serait écrit, les pratiques **disparues** (présentes chez ce trimestre, absentes du résultat) et les pratiques **substituées** (même id des deux côtés, objet différent — la perte silencieuse de B3). Plus `apportDuBlocMortEchelles`, la contribution réelle du bloc de Z1-M2.
+
+**Validation avant remise — trois témoins, dont un qui a corrigé le diagnostic lui-même :**
+
+- *Cas réel* — corpus à deux trimestres, trois grilles dont une seule notée, deux échelles dont une seule, collections de pratiques divergentes : rend 2 grilles perdues, 1 échelle perdue, 1 pratique disparue, 1 pratique substituée.
+- *Témoin 1, collections de pratiques concordantes* : disparues et substituées tombent à 0, les pertes de grilles et d'échelles restent à 2 et 1 — les compteurs sont indépendants.
+- *Témoin 2, clé nue `grillesTemplates` repeuplée* : `apportDuBlocMortEchelles` passe de 0 à 1. C'est le contrôle **discriminant** de Z1-M2 : un 0 sur les données réelles signifiera « le bloc est mort », et non « le diagnostic ne regarde pas ».
+- *Témoin 3, corpus où tout est référencé* : tous les compteurs à 0. Les compteurs ne sont pas bloqués sur une valeur.
+
+⚠ **Un défaut de mon premier jet, trouvé par le témoin 1 et corrigé.** Le résumé additionnait les pertes de **tous** les trimestres, y compris le trimestre **actif** — qu'on ne peut précisément pas archiver (garde `trimestres.js:615-618`). Les chiffres étaient exacts et le libellé faux : un total gonflé par un scénario impossible. Le résumé distingue désormais `SI_ARCHIVE_MAINTENANT` (trimestres ni actifs ni déjà archivés — le chiffre qui compte ce soir) de `SI_DESARCHIVE_PUIS_REARCHIVE` (trimestres déjà archivés, que Grégoire peut désarchiver en un clic), et nomme explicitement le trimestre actif exclu des deux. Le détail par trimestre, lui, reste complet.
+
+**Résultat sur les données réelles : EN ATTENTE**, à consigner ici brut. C'est ce résultat qui remplit la case A1 du §7 et qui dira si S4 est urgent ou simplement dû.
 
 ---
 
@@ -336,7 +381,7 @@ Le moratoire interdit d'archiver, y compris un trimestre jetable. Le test §4.1 
 
 **Ce que seule une exécution établirait**, et que je n'ai pas produit : le volume réel de la perte chez Grégoire, et ce que l'écran affiche après coup (une collection de modèles vide se manifeste-t-elle par un message ou par un silence).
 
-**Mon avis sur la nécessité d'exécuter** — c'est un avis, pas un verdict, et la décision appartient à Grégoire : **le test d'archivage sur trimestre jetable n'est pas nécessaire pour spécifier les diffs de S4.** Les six lignes du tableau sont VÉRIFIÉES au niveau du mécanisme, et aucun diff du §6 n'attend un chiffre pour être écrit. Ce qu'un test jetable apporterait — le volume — se mesure **sans archiver**, par un diagnostic en lecture seule qui compte, pour chaque trimestre, les modèles qui ne survivraient pas au filtre. C'est strictement plus sûr et plus informatif qu'un archivage jetable, qui ne dirait rien des données réelles. Je propose ce diagnostic complémentaire au §8 ; il n'est pas écrit, faute d'un accord préalable sur son opportunité.
+**Mon avis sur la nécessité d'exécuter** — c'est un avis, pas un verdict, et la décision appartient à Grégoire : **le test d'archivage sur trimestre jetable n'est pas nécessaire pour spécifier les diffs de S4.** Les six lignes du tableau sont VÉRIFIÉES au niveau du mécanisme, et aucun diff du §6 n'attend un chiffre pour être écrit. Ce qu'un test jetable apporterait — le volume — se mesure **sans archiver**, par un diagnostic en lecture seule qui compte, pour chaque trimestre, les modèles qui ne survivraient pas au filtre. C'est strictement plus sûr et plus informatif qu'un archivage jetable, qui ne dirait rien des données réelles. Ce diagnostic est **écrit et testé** : voir §3bis (#630).
 
 Reste une case que rien ne remplace : **après la livraison de S4**, archiver un trimestre jetable pour vérifier que le correctif tient. Cela appartient à S4, pas à S1.
 
@@ -650,37 +695,50 @@ Symétriquement dans `cleSource()` : retirer `|| nomCle.startsWith('cartouches_'
 
 Mac et iPad séparément. Les cases restent vides : je n'ai rien exécuté.
 
-- **A1 — Volume de la perte à l'archivage (B1).** Combien de grilles et d'échelles de chaque trimestre ne sont référencées par aucune production ni aucune évaluation. Mesurable **sans archiver** (§8). Observé : ______
+- **A1 — Volume de la perte à l'archivage (B1 et B3).** Combien de grilles, d'échelles et de pratiques de chaque trimestre ne survivraient pas au filtre. **Mesurable sans archiver : le diagnostic #630 du §3bis est écrit et testé, en attente d'exécution par Grégoire.** Observé : ______
 - **A2 — Le trimestre archivé est-il vraiment en lecture seule (B4-c) ?** Ouvrir la section Cartouches sur un trimestre archivé : l'éditeur est-il accessible, la sauvegarde aboutit-elle, et l'écran d'évaluation du même trimestre montre-t-il alors un autre contenu ? Observé : ______
 - **A3 — Divergence des collections de pratiques (B3).** À quel point `a2025_pratiquesConfigurables` et `h2026_pratiquesConfigurables` diffèrent aujourd'hui. Détermine si la substitution de B3 change les notes ou seulement les objets. Observé : ______
 - **A4 — Cartouches partagées, manifestation à l'écran (B4).** Modifier une grille homonyme dans un seul trimestre, éditer sa cartouche, basculer : que voit l'autre trimestre ? C'est le test §4.2 de l'audit parent ; le diagnostic T1.2 donne les chiffres, pas l'écran. Observé : ______
 - **A5 — Le fichier d'export, ouvert (B2).** Ouvrir un fichier produit par « Exporter » sur une ligne **non active** et lire `donnees.presences` et `donnees.snapshots`. C'est la vérification la moins coûteuse de tout ce rapport, et elle confirme ou infirme le seul INFÉRÉ de B2. Observé : ______
-- **A6 — Consommateurs des champs alias.** Le grep annoncé au §6.2 sur `donnees.etudiants` / `donnees.evaluations` : non fait, à faire avant d'appliquer ce diff.
+- **A6 — Consommateurs des champs alias. LEVÉ le 30 août au soir.** Le grep annoncé au §6.2 a été fait par `kuekatsheu-bc` et revérifié ici : `donnees.etudiants` et `donnees.evaluations` n'ont aucun consommateur (les occurrences d'`import-export.js` sont des faux positifs — `analyse.donnees.*`, autre structure). Le retrait des deux alias est sûr. Détail en §2.2-B2.
 - **A7 — Les quinze énumérations, une par une.** J'ai établi qu'elles filtrent sur le préfixe et ce que le changement de clé leur fait. Je n'ai lu en entier que `reserve.js`, `demo-activation.js` et `cartouches.js:1895`. Les douze autres demandent une lecture individuelle au moment du diff §6.3(d) — le tableau de Z1-S1 est un inventaire, pas une spécification.
 
 ---
 
-## 8. Ce que je transmets à `kuekatsheu-bc` pour inscription
+## 8. Ce que je transmets à `kuekatsheu-bc` — état au 30 août, fin de soirée
 
-Je n'écris ni dans `BACKLOG.md`, ni dans `SESSION.md`, ni dans `RELAIS.md`, ni dans les deux plans. Voici ce qui doit y aller.
+Je n'écris ni dans `BACKLOG.md`, ni dans `SESSION.md`, ni dans `RELAIS.md`, ni dans les deux plans. Cette section est le relais, et elle porte l'état réel de chaque point.
 
-**À REPRÉSENTER À GRÉGOIRE CE SOIR — élargissement du moratoire D1.** Question fermée : le moratoire couvre-t-il, jusqu'à la livraison de S4, trois gestes de l'écran Trimestres au lieu d'un ?
-  (a) « Archiver » — déjà couvert ;
-  (b) « Supprimer… » un trimestre — son filet de sécurité est troué (B2) ;
-  (c) « Exporter » sur une ligne **non active** — le fichier n'est pas une sauvegarde fidèle (B2). Sur la ligne du trimestre **actif**, l'export reste correct et utilisable.
-C'est un élargissement de périmètre, pas une décision neuve.
+**✅ FAIT — élargissement du moratoire D1.** Représenté à Grégoire en question fermée le 30 août au soir ; il a tranché « élargir ». Le moratoire couvre désormais **trois** gestes de l'écran Trimestres jusqu'à la livraison de S4 : (a) « Archiver » ; (b) « Supprimer… » un trimestre, dont le filet de sécurité est troué (B2) ; (c) « Exporter » sur une ligne **non active**, dont le fichier n'est pas une sauvegarde fidèle (B2). Sur la ligne du trimestre **actif**, l'export reste correct et demeure le seul utilisable. Inscrit par `kuekatsheu-bc` en tête de `RELAIS.md`, dans T0.1 et au tableau d'état (`8ff5b76b`, `539aa7aa`).
 
-**Corrections factuelles à porter aux documents partagés** (les deux disent une chose fausse) :
-- `plans de travail/PLAN-modele-objets-conception-2026-08-30.md`, T0.1, option B : « un snapshot de backup existe, trimestres.js:782 » — **faux**, le snapshot n'enregistre que les survivants (§2.2-B1).
-- `Rapports/AUDIT-modele-objets-conception-2026-08-30.md` §2.2-B1 : même phrase, et §2.2-B1 dit « ajoute » là où le code **remplace** (§2.2-B3).
+**✅ FAIT — les deux corrections factuelles**, portées au plan (T0.1, option B) et à l'audit parent (§2.2-B1) : le snapshot enregistre le sous-ensemble déjà filtré et n'a des cartouches qu'un compte ; et le code **remplace** la collection de pratiques du trimestre archivé là où l'audit parent écrivait « reçoit un extrait ».
 
-**Ordonnancement à inscrire au tableau d'état** :
-- **S4 (#622) strictement AVANT S5 (#623)** — Z1-S2 : `purgerCopiesModelesArchive` deviendrait destructive sous D2-A, et le filet d'export doit être réparé avant qu'une migration de données réelles s'appuie dessus. Les deux touchent `trimestres.js` de toute façon.
-- **S5 (#623) AVANT S6 (#624)** — B4(d) : sous D2-A, la suppression de `donnees-v2.js:1571` devient correcte sans changer la politique. Dans l'autre ordre, S6 doit écrire une garde inter-trimestres que S5 rendra inutile.
-- **S4 absorbe le diff §6.2** (même fichier, même fonction voisine) plutôt que d'ouvrir un item séparé.
+**✅ FAIT — ordonnancement S4 → S5 → S6**, inscrit au tableau d'état avec ses deux motifs (`purgerCopiesModelesArchive` deviendrait destructive sous D2-A ; `donnees-v2.js:1564` devient correct tout seul une fois D2-A livrée).
 
-**Pour `kuekatsheu-82` (Z2)** : B4(d), `donnees-v2.js:1564-1574` — déjà transmis. Sa cause est dans Z1, son correctif dans Z2.
+**✅ FAIT — S4 absorbe le diff §6.2** (`exporterTrimestreArchive`), même fichier, fonction voisine de B1.
 
-**Numéro neuf demandé** : le diagnostic complémentaire du §5 (compter, en lecture seule et sans archiver, les modèles de chaque trimestre qui ne survivraient pas au filtre `identifierTemplatesUtilises`) n'a **pas** d'ID. Il donne le chiffre A1 et rend inutile tout archivage jetable. Je ne l'ai pas écrit et je n'ai employé aucun numéro : si Grégoire le veut, `kuekatsheu-bc` inscrit l'ID avant que je l'emploie.
+**✅ FAIT — l'angle mort A6 est levé.** Le grep que j'avais annoncé sans le faire a été mené par `kuekatsheu-bc` et revérifié ici : aucun consommateur des deux champs alias. Le retrait est sûr. Le piège du faux positif (`analyse.donnees.*` dans `import-export.js`) est consigné en §2.2-B2 pour que personne n'y retombe.
 
-**Cases à cocher** : T1.1 fait, T1.4 fait, T1.5 fait. **T1.2 en attente** de l'exécution par Grégoire — le §3 est à compléter avec son résultat brut. **T1.3 fait par lecture**, sans exécution, moratoire respecté ; la case « archivage sur trimestre jetable » de l'audit parent §4.1 reste ouverte et appartient désormais à la validation **post-S4**.
+**✅ FAIT — #630 attribué et le diagnostic écrit.** Voir §3bis. ID inscrit avant emploi, conformément au cadre §9.
+
+**⏳ EN ATTENTE — deux exécutions par Grégoire, toutes deux en lecture seule :**
+- **T1.2**, diagnostic cartouches (§3) — remplit le §4-Q(b) et règle la sous-décision du §4-Q(a).
+- **#630**, diagnostic de perte simulée (§3bis) — remplit l'angle mort A1 et dira si S4 est urgent ou simplement dû.
+Les deux résultats se consignent **bruts** dans leur section.
+
+**⏳ EN ATTENTE — la vérification à deux minutes du §7-A5**, sans risque : ouvrir un fichier produit par « Exporter » sur une ligne **non active** et lire `donnees.presences`. Elle transforme le seul INFÉRÉ de B2 en fait.
+
+**Pour `kuekatsheu-82` (Z2)** : B4(d), `donnees-v2.js:1564-1574` — transmis via `kuekatsheu-bc`. Sa cause est dans Z1, son correctif dans Z2.
+
+**Cases à cocher** : T1.1 fait, T1.4 fait, T1.5 fait. **T1.2 en attente**. **T1.3 fait par lecture**, sans exécution, moratoire respecté — et le diagnostic #630 rend l'archivage sur trimestre jetable inutile pour spécifier S4 ; la case §4.1 de l'audit parent bascule en validation **post-S4**.
+
+---
+
+## 9. Ce que ce rapport ne prouve pas
+
+À relire avant de s'appuyer dessus.
+
+- Rien n'a été exécuté dans un navigateur. Les deux diagnostics sont écrits, contrôlés et éprouvés sur des corpus synthétiques avec témoins — pas exécutés sur les données de Grégoire.
+- Les niveaux de certitude sont posés constat par constat. Les trois SUPPOSÉ (volume de la perte, manifestation à l'écran de B4, divergence réelle des pratiques) ne deviendront des faits que par les §3, §3bis et §7.
+- Sept angles morts sont nommés au §7, dont l'un — A7 — dit explicitement que le tableau des quinze énumérations par préfixe est un **inventaire, pas une spécification** : trois d'entre elles seulement ont été lues en entier.
+- Mon avis n'est pas celui d'un pair. Ce que j'apporte ici, ce sont des extraits de code, des numéros de ligne relus dans l'arbre, et des scénarios de défaillance nommés. Les arbitrages — élargir un moratoire, retenir D2-A, ordonner les sessions — appartiennent à Grégoire.
