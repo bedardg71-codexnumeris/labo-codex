@@ -92,7 +92,11 @@ describe('lot P2 · résolution des entités par type', () => {
     it('cartouche : ancrage cartouches_{grilleId} avec contexte, balayage sans contexte', () => {
         const w = charger({
             grillesTemplates: [{ id: 'G1' }, { id: 'G2' }],
-            cartouches_G2: [{ id: 'C1', nom: 'Cartouche', grilleId: 'G2' }]
+            // ⚠ CLÉ MIGRÉE PAR S5/#623 LE 31 AOÛT 2026 : semée nue, elle vivait dans
+            // une case que `resoudreEntite` ne lit plus (routage par `cle(...)`,
+            // stub `h2026_` + k, l.42). Les deux chemins du cas — ancrage par
+            // grilleId ET balayage sans contexte — doivent la retrouver ici.
+            h2026_cartouches_G2: [{ id: 'C1', nom: 'Cartouche', grilleId: 'G2' }]
         });
         expect(w.partageExport.resoudreEntite('cartouche', 'C1', 'G2').nom).toBe('Cartouche');
         expect(w.partageExport.resoudreEntite('cartouche', 'C1').nom).toBe('Cartouche'); // scan

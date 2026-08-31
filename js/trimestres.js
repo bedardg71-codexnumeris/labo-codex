@@ -330,18 +330,18 @@
                 // Fallback vers la clé globale si pas de copie (rétrocompatibilité)
             }
 
-            // Cas 2: Cartouches (format cartouches_{grilleId})
-            if (nomCle.startsWith('cartouches_')) {
-                const cleArchivee = `${trimestreId}_${nomCle}`;
-                if (db.getSync(cleArchivee, null) !== null) {
-                    return cleArchivee;
-                }
-                // Fallback vers la clé globale
-            }
+            // Cas 2 (cartouches) RETIRÉ par S5/#623 : sous D2-A la famille composée
+            // `cartouches_<grilleId>` est namespacée comme toute clé namespacée, y
+            // compris hors archive. Le routage général plus bas rend la même valeur,
+            // sans le repli SILENCIEUX vers la clé globale — repli qui était la
+            // mécanique même du partage entre trimestres que ce lot referme.
         }
 
         // Vérifier si c'est une clé globale (jamais namespacée sauf archive)
-        if (CLES_GLOBALES.includes(nomCle) || nomCle.startsWith('cartouches_')) {
+        // ⚠ S5/#623 : `cartouches_<grilleId>` N'EST PLUS ICI. Cette disjonction
+        // faisait des cartouches une collection GLOBALE — une seule case pour tous
+        // les trimestres. Deux trimestres portant la même grille s'y écrasaient.
+        if (CLES_GLOBALES.includes(nomCle)) {
             return nomCle;
         }
 
@@ -352,6 +352,16 @@
 
         // Vérifier si c'est une clé à namespacer
         if (CLES_NAMESPACEES.includes(nomCle)) {
+            return `${trimestreId}_${nomCle}`;
+        }
+
+        // S5/#623 — FAMILLE COMPOSÉE `cartouches_<grilleId>`.
+        // Elle ne peut pas figurer dans CLES_NAMESPACEES, qui liste des noms fixes :
+        // son suffixe est un id de grille. D'où cette branche, qui la traite comme
+        // une clé namespacée ordinaire. Pas de vérification d'existence, pas de
+        // repli : la migration au boot (js/main.js) garantit la copie, et un repli
+        // rendrait le partage entre trimestres possible à nouveau, en silence.
+        if (nomCle.startsWith('cartouches_')) {
             return `${trimestreId}_${nomCle}`;
         }
 
@@ -396,7 +406,7 @@
         // 1. Copie namespacée du trimestre source (templates archivés ou cartouches) :
         //    si elle existe, c'est la version propre à ce trimestre (cas archivé, ou
         //    futur régime hybride D-D1). Prioritaire sur la clé globale partagée.
-        if (CLES_TEMPLATES_ARCHIVES.includes(nomCle) || nomCle.startsWith('cartouches_')) {
+        if (CLES_TEMPLATES_ARCHIVES.includes(nomCle)) {
             const cleCopie = `${trimestreSourceId}_${nomCle}`;
             if (db.getSync(cleCopie, null) !== null) {
                 return cleCopie;
@@ -405,12 +415,18 @@
         }
 
         // 2. Clé globale partagée (jamais préfixée hors copie d'archivage).
-        if (CLES_GLOBALES.includes(nomCle) || nomCle.startsWith('cartouches_')) {
+        // ⚠ S5/#623 : `cartouches_<grilleId>` retirée d'ici, comme dans cle().
+        if (CLES_GLOBALES.includes(nomCle)) {
             return nomCle;
         }
 
         // 3. Clé namespacée : emplacement canonique = préfixe du trimestre source.
         if (CLES_NAMESPACEES.includes(nomCle)) {
+            return `${trimestreSourceId}_${nomCle}`;
+        }
+
+        // 3 bis. S5/#623 — famille composée `cartouches_<grilleId>`, miroir de cle().
+        if (nomCle.startsWith('cartouches_')) {
             return `${trimestreSourceId}_${nomCle}`;
         }
 
@@ -623,6 +639,23 @@
         // 🆕 BETA 96: Créer des snapshots des ressources
         const snapshotResult = creerSnapshotRessources(id);
 
+        // ⚠⚠ S5/#623 — LE REFUS SE LIT AVANT LE GESTE, PAS APRÈS.
+        //
+        // `creerSnapshotRessources` peut désormais REFUSER (fil de détente : des
+        // cartouches vivent encore sous la clé nue, la migration n'a pas eu lieu).
+        // Ce refus est une valeur RENDUE, pas une exception : rien ne l'attrape tout
+        // seul. Sans cette lecture, la fonction poursuivait et posait `archive = true`
+        // avec un snapshot amputé — le refus aurait été décoratif.
+        //
+        // ⮕ On s'arrête AVANT de toucher au trimestre. Aucun drapeau posé, aucune
+        // date de fin écrite : l'état reste exactement celui d'avant l'appel.
+        if (snapshotResult && snapshotResult.refus === 'cartouches-non-migrees') {
+            if (typeof notifications !== 'undefined' && notifications && notifications.erreur) {
+                notifications.erreur(snapshotResult.message);
+            }
+            return { success: false, refus: snapshotResult.refus, message: snapshotResult.message };
+        }
+
         // Marquer comme archivé
         trimestre.archive = true;
         trimestre.dateFin = new Date().toISOString().split('T')[0];
@@ -769,17 +802,78 @@
             // ses dix pratiques, l'intersection avec le trimestre actif étant vide.
             // L'archivage est désormais une LECTURE : il n'écrit que le snapshot.
 
-            // ✅ AJOUT (28 jan 2026) : Copier les cartouches des grilles utilisées
-            let nbCartouchesCopies = 0;
+            // Cartouches des grilles utilisées — RÉÉCRIT par S5/#623.
+            //
+            // AVANT : la boucle lisait la clé NUE `cartouches_<grilleId>` (collection
+            // globale) et en ÉCRIVAIT une copie sous `<trimestreId>_cartouches_<id>`.
+            // Sous D2-A cette copie n'a plus lieu d'être : la donnée du trimestre vit
+            // DÉJÀ sous la clé namespacée. L'écrire reviendrait à la copier sur
+            // elle-même, et lire la clé nue reviendrait à ramasser ce qui reste d'un
+            // régime que ce lot supprime.
+            //
+            // ⚠ L'ARCHIVAGE RESTE UNE LECTURE (#622/B1) : rien n'est écrit ici.
             const cartouchesSnapshot = {};
+            const grillesNonMigrees = [];
             grilleIds.forEach(grilleId => {
-                const cartouches = db.getSync(`cartouches_${grilleId}`, []);
+                // ⚠ `cleSource`, PAS `cle`. `cle()` route par le trimestre ACTIF ;
+                // cette fonction reçoit `trimestreId` en PARAMÈTRE et peut archiver un
+                // trimestre qui n'est pas l'actif. Router par l'actif lirait alors les
+                // cartouches du mauvais trimestre — un snapshot juste en apparence,
+                // rempli des données d'un autre. C'est exactement la question à
+                // laquelle `cleSource` répond : « où vit cette clé POUR ce trimestre ».
+                const cartouches = db.getSync(cleSource(`cartouches_${grilleId}`, trimestreId), []);
                 if (cartouches.length > 0) {
-                    db.setSync(`${trimestreId}_cartouches_${grilleId}`, cartouches);
                     cartouchesSnapshot[grilleId] = cartouches;
-                    nbCartouchesCopies += cartouches.length;
+                    return;
+                }
+
+                // ⚠⚠ FIL DE DÉTENTE S5/#623 — L'ÉTAT « ENCORE SOUS CLÉ NUE ».
+                //
+                // Rien sous la clé namespacée. Deux causes possibles, et elles ne se
+                // traitent pas pareil : soit cette grille n'a réellement aucune
+                // cartouche (cas normal, on n'écrit rien), soit la migration au boot
+                // n'a pas tourné et la donnée vit ENCORE sous la clé nue.
+                //
+                // Dans le second cas, se taire produirait un snapshot d'archivage
+                // AMPUTÉ de ses cartouches — sans erreur, sans message. Or l'archivage
+                // est le filet de la suppression définitive : le trou ne se verrait
+                // qu'au moment de rouvrir, quand il est trop tard.
+                //
+                // On ne se rabat PAS non plus sur la clé nue en silence : un repli
+                // discret rendrait une migration ratée indétectable, ce qui est
+                // exactement le défaut que ce lot referme.
+                //
+                // ⮕ Donc on MESURE la différence, et on la DIT. Un code qui ne peut
+                // pas faire ce qu'on lui demande doit le dire.
+                const restee = db.getSync(`cartouches_${grilleId}`, []);
+                if (Array.isArray(restee) && restee.length > 0) {
+                    grillesNonMigrees.push(grilleId);
                 }
             });
+
+            // Refus BRUYANT plutôt que snapshot amputé. Après la migration du volet (b),
+            // cet état n'existe plus : si ce refus se déclenche, c'est que la migration
+            // a échoué — et c'est ce qu'il faut apprendre MAINTENANT, pas au
+            // désarchivage.
+            if (grillesNonMigrees.length > 0) {
+                const details = grillesNonMigrees.join(', ');
+                console.error(
+                    `[Trimestres] ARCHIVAGE REFUSÉ pour ${trimestreId} : les cartouches de ` +
+                    `${grillesNonMigrees.length} grille(s) vivent encore sous la clé NUE ` +
+                    `(${details}). La migration des cartouches n'a pas eu lieu pour ce ` +
+                    `trimestre. Archiver maintenant produirait un snapshot SANS ces ` +
+                    `cartouches. Recharger l'application (la migration s'exécute au ` +
+                    `démarrage), puis réessayer.`
+                );
+                return {
+                    success: false,
+                    refus: 'cartouches-non-migrees',
+                    grilles: grillesNonMigrees,
+                    message: `Archivage refusé : les cartouches de ${grillesNonMigrees.length} ` +
+                             `grille(s) (${details}) n'ont pas encore été migrées. ` +
+                             `Recharge l'application, puis réessaie.`
+                };
+            }
 
             // Ressources pour le snapshot (backup complet)
             const ressources = {
@@ -827,7 +921,11 @@
                     grilles: toutesGrilles.length,
                     echelles: toutesEchelles.length,
                     pratiques: toutesPratiques.length,
-                    cartouches: nbCartouchesCopies,
+                    // S5/#623 : `nbCartouchesCopies` retiré avec la copie qu'il comptait.
+                    // Le rapport dit désormais combien de GRILLES portent des cartouches
+                    // dans le snapshot — l'archivage ne copiant plus rien, un « nombre de
+                    // cartouches copiées » n'aurait plus de référent.
+                    cartouches: Object.keys(cartouchesSnapshot).length,
                     utilises: {
                         grilles: grillesUtilisees.length,
                         echelles: echellesUtilisees.length,
@@ -888,6 +986,121 @@
      *
      * @returns {{trimestres: Object}} rapport par trimestre/famille
      */
+    /**
+     * S5/#623 — MIGRATION DES CARTOUCHES VERS LE NAMESPACE DE LEUR TRIMESTRE.
+     *
+     * AVANT : `cartouches_<grilleId>` était une clé GLOBALE. Tous les trimestres
+     * lisaient et écrivaient la même case ; deux trimestres portant la même grille
+     * s'écrasaient mutuellement, en silence.
+     *
+     * APRÈS : chaque trimestre a ses propres `<trimestreId>_cartouches_<grilleId>`.
+     *
+     * POURQUOI ON COPIE VERS **CHAQUE** TRIMESTRE, et non vers un seul. Aujourd'hui
+     * tous voient la collection globale ; leur donner à tous la même copie préserve
+     * donc EXACTEMENT ce que chacun affichait. Ils divergeront ensuite, chacun de son
+     * côté — ce qui est le but. Écrire la copie dans un seul trimestre ferait
+     * disparaître les cartouches de tous les autres.
+     *
+     * ⚠ CETTE MIGRATION SUPPRIME LES CLÉS NUES, ET IL N'Y A AUCUNE ANNULATION.
+     * D'où l'ordre strict : copier → DRAINER → RELIRE chaque copie et la comparer à
+     * sa source → et seulement alors supprimer. Une copie qui ne se relit pas
+     * interrompt tout : rien n'est supprimé, le drapeau n'est pas posé, et le prochain
+     * démarrage réessaie (la fonction est idempotente).
+     *
+     * @returns {Promise<Object>} rapport { migrees, trimestres, nuesSupprimees, echecs }
+     */
+    async function migrerCartouchesVersNamespace() {
+        const rapport = { migrees: 0, trimestres: 0, nuesSupprimees: 0, echecs: [] };
+
+        const trimestres = enumererTrimestres();
+        if (trimestres.length === 0) return rapport;
+
+        // 1. Recenser les clés NUES `cartouches_<grilleId>`.
+        //
+        // ⚠ UNE CLAUSE A ÉTÉ RETIRÉE ICI, ET SON RETRAIT EST DÉLIBÉRÉ. La première
+        // version filtrait aussi `!prefixes.some(pfx => k.startsWith(pfx))`, censée
+        // empêcher qu'une clé déjà namespacée soit reprise et redouble son préfixe.
+        // Mesuré par break-test (kuekatsheu-4c, 31 août 2026) : la neutraliser laisse
+        // les 10 cas VERTS. Elle ne protégeait de rien — une clé qui commence par
+        // `h2026_` ne commence pas par `cartouches_`, donc la condition ci-dessous
+        // l'écarte déjà. Les deux ne pouvaient être vraies ensemble que pour un
+        // trimestre dont l'id serait littéralement `cartouches`.
+        //
+        // ⮕ Et dans ce cas dégénéré, elle était NUISIBLE : son préfixe `cartouches_`
+        // aurait exclu TOUTES les clés nues, et la migration n'aurait rien fait, en
+        // silence. Une garde qui ne garde rien et qui casse dans son seul cas
+        // d'application n'est pas une ceinture : c'est un alibi.
+        //
+        // La protection réelle contre le double préfixe est le `startsWith` ci-dessous.
+        const clesNues = (db.keysSync() || []).filter(k =>
+            typeof k === 'string' && k.startsWith('cartouches_')
+        );
+        if (clesNues.length === 0) return rapport;
+
+        // 2. COPIER vers chaque trimestre. Idempotent : une copie déjà présente et non
+        //    vide n'est pas écrasée — un second passage ne doit pas détruire le travail
+        //    fait depuis la première migration.
+        clesNues.forEach(cleNue => {
+            const valeur = db.getSync(cleNue, null);
+            if (!Array.isArray(valeur) || valeur.length === 0) return;
+            trimestres.forEach(tr => {
+                const cible = `${tr.id}_${cleNue}`;
+                const dejaLa = db.getSync(cible, null);
+                if (Array.isArray(dejaLa) && dejaLa.length > 0) return;
+                db.setSync(cible, valeur);
+                rapport.migrees++;
+            });
+        });
+        rapport.trimestres = trimestres.length;
+
+        // 3. DRAINER avant de vérifier. Sans ce flush, on relirait le cache et non ce
+        //    qui est réellement durable — et on supprimerait la source sur la foi
+        //    d'une écriture qui n'a pas atterri.
+        if (db && typeof db.flush === 'function') {
+            await db.flush();
+        }
+
+        // 4. RELIRE chaque copie et la comparer à sa source. C'est la condition de la
+        //    suppression, et elle porte sur CHAQUE trimestre : il suffit d'une copie
+        //    manquante pour qu'on renonce à supprimer la clé nue.
+        clesNues.forEach(cleNue => {
+            const source = db.getSync(cleNue, null);
+            if (!Array.isArray(source) || source.length === 0) return;
+            const manquantes = trimestres.filter(tr => {
+                const copie = db.getSync(`${tr.id}_${cleNue}`, null);
+                return !Array.isArray(copie) || copie.length === 0;
+            }).map(tr => tr.id);
+            if (manquantes.length > 0) {
+                rapport.echecs.push({ cle: cleNue, trimestresSansCopie: manquantes });
+            }
+        });
+
+        // 5. Un seul échec suffit à tout retenir. On ne supprime PAS partiellement :
+        //    un état mi-migré est plus difficile à diagnostiquer qu'un état non migré,
+        //    et le fil de détente de `creerSnapshotRessources` sait reconnaître ce
+        //    dernier.
+        if (rapport.echecs.length > 0) {
+            console.error(
+                `[Trimestres] Migration des cartouches INTERROMPUE : ${rapport.echecs.length} ` +
+                `clé(s) n'ont pas pu être recopiées dans tous les trimestres. Aucune clé nue ` +
+                `n'a été supprimée, rien n'est perdu, et la migration sera retentée au ` +
+                `prochain démarrage.`, rapport.echecs
+            );
+            return rapport;
+        }
+
+        // 6. Supprimer les clés nues. C'est le geste irréversible, et il n'a lieu que
+        //    lorsque chaque copie a été relue.
+        clesNues.forEach(cleNue => {
+            const source = db.getSync(cleNue, null);
+            if (!Array.isArray(source) || source.length === 0) return;
+            db.removeSync(cleNue);
+            rapport.nuesSupprimees++;
+        });
+
+        return rapport;
+    }
+
     function migrerModelesVersNamespace() {
         const rapport = { trimestres: {} };
         const trimestres = obtenirTrimestres().filter(t => t && t.id);
@@ -1044,13 +1257,19 @@
      * archivage (creerSnapshotRessources) a posées pour un trimestre — opération
      * symétrique de cette création. À appeler au désarchivage : hors mode archive,
      * cle() ne lit plus ces copies, qui ne sont donc plus que des orphelins.
+     * ⮕ Vaut pour les MODÈLES (grilles, échelles, pratiques). PAS pour les cartouches
+     * depuis S5/#623 — voir l'avertissement plus bas.
      *
      * NE TOUCHE PAS au snapshot de sauvegarde `snapshot_<id>_*` : c'est un backup
      * historique délibéré, pointé par `trimestre.snapshotRessources`.
      *
-     * Les grilleIds des cartouches sont re-dérivés par identifierTemplatesUtilises(id)
-     * — la même source que l'archivage a utilisée pour CRÉER les copies (le trimestre
-     * étant en lecture seule pendant l'archive, cet ensemble est stable). removeSync
+     * ⚠ S5/#623 — CETTE FONCTION NE TOUCHE PLUS AUX CARTOUCHES, et ce n'est pas un
+     * oubli. Elle re-dérivait leurs grilleIds par identifierTemplatesUtilises(id) pour
+     * purger `<id>_cartouches_<grilleId>`. Sous D2-A ces clés ne sont plus des copies :
+     * ce sont les cartouches MÊMES du trimestre. Les purger au désarchivage les
+     * détruirait. La branche a été retirée ; voir le bloc commenté dans le corps.
+     *
+     * removeSync
      * retire la clé de toutes les couches (localStorage + cache + IDB), donc un orphelin
      * refoulé en IDB-seul par la saturation (#353) est bien nettoyé.
      *
@@ -1078,11 +1297,24 @@
             .filter(nomCle => CLES_GLOBALES.includes(nomCle))
             .forEach(nomCle => retirer(`${id}_${nomCle}`));
 
-        // Copies de cartouches, une par grille utilisée (mêmes grilleIds qu'à l'archivage).
-        // Les cartouches restent GLOBALES (`cartouches_<grilleId>`) → leur copie
-        // namespacée redevient bien orpheline au désarchivage : on la purge toujours.
-        const { grilleIds } = identifierTemplatesUtilises(id);
-        grilleIds.forEach(grilleId => retirer(`${id}_cartouches_${grilleId}`));
+        // ⛔ BRANCHE CARTOUCHES RETIRÉE PAR S5/#623 — NE PAS LA REMETTRE.
+        //
+        // Elle purgeait `<id>_cartouches_<grilleId>` au désarchivage. Ce geste était
+        // CORRECT tant que les cartouches étaient globales : la copie namespacée
+        // n'était qu'un doublon, et le trimestre désarchivé retrouvait la collection
+        // globale intacte.
+        //
+        // Sous D2-A la même ligne DÉTRUIT DES DONNÉES VIVANTES : `<id>_cartouches_<x>`
+        // n'est plus une copie, c'est la SEULE cartouche du trimestre. La purger, c'est
+        // les perdre — sans erreur, sans message, au moment précis où l'utilisateur
+        // croit rouvrir son trimestre.
+        //
+        // ⚠ C'est mot pour mot la perte que #358/#359 ont corrigée pour les grilles.
+        // Verrouillé par `tests/unit/sentinelle-623-s5-cartouches-namespacees.test.js` :
+        // remettre cette boucle rend ROUGE le cas « les cartouches d'A2025 survivent à
+        // archivage PUIS désarchivage ».
+        //
+        // ⮕ Rien ne remplace cette boucle : il n'y a plus de copie à purger.
 
         return clesRetirees;
     }
@@ -2583,6 +2815,7 @@
     // 🆕 C1 (#358) : socle de migration (peuplement des copies namespacées). Exposé
     // pour la sentinelle d'intégrité + le câblage boot (migration_modeles_namespacees_done).
     window.migrerModelesVersNamespace = migrerModelesVersNamespace;
+    window.migrerCartouchesVersNamespace = migrerCartouchesVersNamespace;
     // 🆕 G4 (#358) : vidage de la clé globale héritée (dernière étape, au boot après C1).
     // Exposé pour le câblage boot + la sentinelle (préservation des orphelins non capturés).
     window.viderModelesGlobalHerite = viderModelesGlobalHerite;

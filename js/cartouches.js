@@ -66,14 +66,14 @@ async function obtenirCartouchesGrille(grilleId) {
     // les ralentirait sans rien protéger. Seule la RÉPARATION entre dans la
     // file — et elle y revérifie la forme, car elle a pu être corrigée
     // entre-temps par un appel concurrent.
-    let cartouches = await db.get(`cartouches_${grilleId}`) || [];
+    let cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
 
     // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
     // Le pack-demarrage peut stocker un objet au lieu d'un tableau
     if (cartouches && !Array.isArray(cartouches)) {
         cartouches = [cartouches];
         // Optionnel: Corriger le stockage pour les prochaines fois
-        await db.modifier(`cartouches_${grilleId}`, (lues) => {
+        await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
             if (Array.isArray(lues)) return undefined;   // déjà réparé
             return lues ? [lues] : [];
         }, []);
@@ -210,7 +210,7 @@ async function assurerCartoucheGenerique() {
         dansBibliotheque: true
     };
 
-    await db.modifier('cartouches_GRILLE_GENERIQUE', (lues) => {
+    await db.modifier(cle('cartouches_GRILLE_GENERIQUE'), (lues) => {
         const cartouches = lues || [];
         if (cartouches.some(c => c.id === 'CART_GENERIQUE')) return undefined;
         cartouches.push(cartoucheGenerique);
@@ -227,7 +227,7 @@ async function migrerCartouchesVersBibliotheque() {
     let nbMigrees = 0;
 
     for (const grille of grilles) {
-        const cleCartouches = `cartouches_${grille.id}`;
+        const cleCartouches = cle(`cartouches_${grille.id}`);
         let cartouches = await db.get(cleCartouches) || [];
 
         // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
@@ -330,7 +330,7 @@ async function chargerCartouchesRetroaction(cartoucheIdAGarder = null) {
     }
     
     // Charger les cartouches existantes pour cette grille
-    let cartouches = await db.get(`cartouches_${grilleId}`) || [];
+    let cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
 
     // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
     if (cartouches && !Array.isArray(cartouches)) {
@@ -542,7 +542,7 @@ async function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam 
     }
 
     // Charger la cartouche existante
-    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+    const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
     cartoucheActuel = cartouches.find(c => c.id === cartoucheId);
 
     if (cartoucheActuel) {
@@ -804,7 +804,7 @@ async function persisterCartouchePartielle(appliquer, cible = cartoucheActuel) {
     // #593 — `cible` : la cartouche visée au moment du geste, pas celle qui est
     // ouverte au moment où la promesse se résout.
     if (!cible || !cible.id || !cible.grilleId) return false;
-    const resultat = await db.modifier(`cartouches_${cible.grilleId}`, (lues) => {
+    const resultat = await db.modifier(cle(`cartouches_${cible.grilleId}`), (lues) => {
         const cartouches = lues || [];
         const enBase = cartouches.find(c => c.id === cible.id);
         if (!enBase) return undefined;              // pas encore enregistrée
@@ -956,7 +956,7 @@ async function sauvegarderCartouche() {
 
     // ⚠ Cette lecture sert à POSER LA QUESTION du doublon, pas de base à
     // l'écriture : `verifierEtGererDoublon` peut attendre l'utilisateur.
-    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+    const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
     let ecraserLeDoublon = false;
 
     // ✅ AJOUT (6 jan 2026) : Vérification des doublons
@@ -1019,7 +1019,7 @@ async function sauvegarderCartouche() {
 
     // Sauvegarder. La collection est relue DANS la file : celle d'avant la
     // question du doublon ne vaut plus rien.
-    await db.modifier(`cartouches_${grilleId}`, (lues) => {
+    await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
         let liste = lues || [];
 
         // L'homonyme n'est retiré qu'ici.
@@ -1469,7 +1469,7 @@ async function afficherToutesLesGrillesEtCartouches() {
     // ✅ CORRECTION: Utiliser for...of au lieu de map() pour supporter await
     const htmlSections = [];
     for (const grille of grilles) {
-        const cartouches = await db.get(`cartouches_${grille.id}`) || [];
+        const cartouches = await db.get(cle(`cartouches_${grille.id}`)) || [];
         const nomGrilleEchappe = echapperHtml(grille.nom);
 
         htmlSections.push(`
@@ -1573,7 +1573,7 @@ async function afficherToutesLesGrillesEtCartouches() {
  */
 async function basculerVerrouillageCartouche(cartoucheId, grilleId) {
     let statutApres = null;
-    await db.modifier(`cartouches_${grilleId}`, (lues) => {
+    await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
         const cartouches = lues || [];
         const index = cartouches.findIndex(c => c.id === cartoucheId);
         if (index === -1) return undefined;
@@ -1628,7 +1628,7 @@ async function basculerVerrouillageCartouche(cartoucheId, grilleId) {
  */
 async function dupliquerCartouche(cartoucheId, grilleId) {
     let copieCreee = null;
-        await db.modifier(`cartouches_${grilleId}`, (lues) => {
+        await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
         const cartouches = lues || [];
         const cartoucheOriginal = cartouches.find(c => c.id === cartoucheId);
 
@@ -1682,7 +1682,7 @@ async function dupliquerCartouche(cartoucheId, grilleId) {
  */
 async function chargerCartouchePourModif(cartoucheId, grilleId) {
 
-    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+    const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
 
@@ -1805,7 +1805,7 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
  * - Confirmation obligatoire
  */
 async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
-    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+    const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
     if (cartouche && cartouche.verrouille) {
@@ -1819,7 +1819,7 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
         }
         // La collection est relue DANS la file : celle d'avant la confirmation
         // ne vaut plus rien.
-        await db.modifier(`cartouches_${grilleId}`, (lues) => {
+        await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
             return (lues || []).filter(c => c.id !== cartoucheId);
         }, []);
 
@@ -1892,8 +1892,19 @@ async function exporterCartouches() {
     const allKeys = db.keysSync();
     for (let i = 0; i < allKeys.length; i++) {
         const key = allKeys[i];
-        if (key && key.startsWith('cartouches_')) {
-            const grilleId = key.replace('cartouches_', '');
+        // S5/#623 — ÉNUMÉRATION PAR PRÉFIXE, RÉÉCRITE.
+        //
+        // Avant : `key.startsWith('cartouches_')` sur les clés du magasin. Sous D2-A
+        // les clés sont `<trimestreId>_cartouches_<grilleId>` : ce test aurait trouvé
+        // ZÉRO, et la fonction aurait rendu une collection vide — sans erreur, sans
+        // message. C'est le coût caché que le rapport Z1-S1 recense (famille A).
+        //
+        // ⮕ On énumère désormais sous le préfixe du trimestre ACTIF, en dérivant le
+        // motif de `cle()` plutôt qu'en le réécrivant à la main : si le routage change
+        // encore, ce site suit sans qu'on ait à y repenser.
+        const motif = cle('cartouches_');
+        if (key && key.startsWith(motif)) {
+            const grilleId = key.slice(motif.length);
             const toutesCartouches = await db.get(key) || [];
 
             // ✅ MODIFIÉ (6 jan 2026) : Utiliser détection heuristique pour filtrer démo + importées
@@ -2864,7 +2875,7 @@ async function exporterCartoucheActive() {
     const cartoucheId = cartoucheActuel.id;
 
     // Récupérer la cartouche
-    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+    const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
     if (!cartouche) {
@@ -2993,7 +3004,7 @@ function importerDansCartoucheActive(event) {
             // confirmation ne vaut plus rien. security-ok: `cartoucheImportee`
             // est déjà passée par la validation d'import en amont.
             let remplacee = false;
-            await db.modifier(`cartouches_${grilleId}`, (lues) => {
+            await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
                 const cartouches = lues || [];
                 const index = cartouches.findIndex(c => c.id === cartoucheId);
                 if (index === -1) return undefined;
@@ -3413,7 +3424,7 @@ async function afficherBanqueCartouches(grilleIdFiltre = '') {
     // Récupérer toutes les cartouches de toutes les grilles
     // ✅ CORRECTION: Utiliser for...of au lieu de forEach pour supporter await
     for (const grille of grilles) {
-        let cartouches = await db.get(`cartouches_${grille.id}`) || [];
+        let cartouches = await db.get(cle(`cartouches_${grille.id}`)) || [];
 
         // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
         // Le pack-demarrage peut stocker un objet au lieu d'un tableau
@@ -3960,7 +3971,7 @@ function importerCartoucheJSON(event) {
 
             // Sauvegarder. security-ok: `cartouche` vient du fichier importé,
             // déjà validé en amont, et reçoit ici un identifiant neuf.
-            await db.modifier(`cartouches_${grilleId}`, (lues) => {
+            await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
                 const cartouchesExistantes = lues || [];
                 cartouchesExistantes.push(cartouche);
                 return cartouchesExistantes;
@@ -4028,7 +4039,7 @@ async function preparerDonneesBibliothequeCartouches() {
     // Récupérer les cartouches locales (de toutes les grilles)
     let cartouchesLocales = [];
     for (const grille of grilles) {
-        let cartouches = await db.get(`cartouches_${grille.id}`) || [];
+        let cartouches = await db.get(cle(`cartouches_${grille.id}`)) || [];
         if (cartouches && !Array.isArray(cartouches)) cartouches = [cartouches];
         cartouches.forEach(cart => {
             cartouchesLocales.push({ ...cart, grilleId: grille.id, grilleNom: grille.nom });
@@ -4410,7 +4421,7 @@ async function copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSour
     }
 
     // Chemin 2 — la grille de même lignée est déjà là : la cartouche s'y range.
-    const cleDest = `cartouches_${grilleAccueil.id}`;
+    const cleDest = cle(`cartouches_${grilleAccueil.id}`);
     const existantes = await db.get(cleDest) || [];
 
     const copie = {
@@ -4619,7 +4630,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
         let sourceIntrouvable = false;
         let grilleManquante = false;
 
-        await db.modifier(`cartouches_${grilleIdLocal}`, async (lues) => {
+        await db.modifier(cle(`cartouches_${grilleIdLocal}`), async (lues) => {
         let cartouches = lues || [];
         cartouche = cartouches.find(c => c.id === id);
         if (!cartouche) {
@@ -4677,7 +4688,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
         if (!cartouche) return;
 
         // ⚠ Relecture-vérification : `db.set` refuse en silence (cf. grilles.js).
-        const verifCartouche = await db.get(`cartouches_${grilleIdLocal}`) || [];
+        const verifCartouche = await db.get(cle(`cartouches_${grilleIdLocal}`)) || [];
 
         fermerModalBibliothequeCartouches();
         await afficherBanqueCartouches();
@@ -4698,7 +4709,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
 
 async function retirerCartoucheDeBibliotheque(id, grilleId) {
     let trouvee = false;
-    await db.modifier(`cartouches_${grilleId}`, (lues) => {
+    await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
         const cartouches = lues || [];
         const cartouche = cartouches.find(c => c.id === id);
         if (!cartouche) return undefined;
@@ -4724,7 +4735,7 @@ async function retirerCartoucheDeBibliotheque(id, grilleId) {
 async function supprimerCartoucheDefinitivement(id, grilleId) {
     // ⚠ Lecture hors file, pour NOMMER la cartouche dans la question. La
     // confirmation ne doit pas tenir la file ouverte.
-    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+    const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
     const cartouche = cartouches.find(c => c.id === id);
 
     if (!cartouche) return;
@@ -4740,7 +4751,7 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
     }
 
     // Suppression définitive du store local, DANS la file.
-    await db.modifier(`cartouches_${grilleId}`, (lues) => {
+    await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
         return (lues || []).filter(c => c.id !== id);
     }, []);
 
@@ -4804,7 +4815,7 @@ async function dupliquerEtEditerCartouche(id) {
     await BibliothequeUI.dupliquerEtEditerItem({
         id: id,
         prefixeId: 'CART_',
-        modifierListe: (mutateur) => db.modifier(`cartouches_${grilleId}`, mutateur, []), // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
+        modifierListe: (mutateur) => db.modifier(cle(`cartouches_${grilleId}`), mutateur, []), // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement par forkerItem — aucune source externe
         chargerPourModif: async (idCopie) => { await chargerCartouchePourModif(idCopie, grilleId); },
         champFocus: 'nomCartouche'
     });
@@ -4816,7 +4827,7 @@ async function dupliquerCartoucheBibliotheque(id, grilleId) {
     await BibliothequeUI.dupliquerVersBibliotheque({
         id: id,
         prefixeId: 'CART_',
-        modifierListe: (mutateur) => db.modifier(`cartouches_${grilleId}`, mutateur, []), // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
+        modifierListe: (mutateur) => db.modifier(cle(`cartouches_${grilleId}`), mutateur, []), // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
         nommerLaCopie: (copie, source, liste) => { copie.nom = nommerCopie(source.nom, liste); },
         forgerProvenance: (source) => BibliothequeUI.forgerInspireDe(source),
         siIntrouvable: () => alert('Cartouche introuvable'),
@@ -4841,7 +4852,7 @@ async function ajouterCartouchesABibliotheque() {
 
         // Cas 1: Cartouche locale
         if (grilleId && grilleId !== 'undefined') {
-            const marquee = await db.modifier(`cartouches_${grilleId}`, (lues) => {
+            const marquee = await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
                 const cartouches = lues || [];
                 const cartouche = cartouches.find(c => c.id === id);
                 if (!cartouche) return undefined;
@@ -4879,7 +4890,7 @@ async function ajouterCartouchesABibliotheque() {
                 // Ajouter la cartouche. security-ok: copie d'une cartouche déjà
                 // validée par le chemin d'import de la bibliothèque, avec un
                 // identifiant neuf.
-                await db.modifier(`cartouches_${cartouche.grilleId}`, (lues) => {
+                await db.modifier(cle(`cartouches_${cartouche.grilleId}`), (lues) => {
                     const cartouchesGrille = lues || [];
                     cartouchesGrille.push({
                         ...cartouche,
@@ -4969,7 +4980,7 @@ window.importerCartouchesExternes = function(nouveauxCartouches, options) {
 
     for (var gi = 0; gi < grillesIds.length; gi++) {
         var grilleId = grillesIds[gi];
-        var cleStockage = 'cartouches_' + grilleId;
+        var cleStockage = cle('cartouches_' + grilleId);
         var existants = db.getSync(cleStockage, []) || [];
         if (!Array.isArray(existants)) existants = [];
 

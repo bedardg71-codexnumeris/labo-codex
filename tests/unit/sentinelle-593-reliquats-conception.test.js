@@ -84,8 +84,13 @@ function elementFictif(valeur = '') {
 describe("#593 · 3 — l'écriture d'une cellule atterrit dans la cartouche qui la portait", () => {
     it("même si une cartouche NEUVE est ouverte pendant l'await de la complétion", async () => {
         const A = { id: 'CA', grilleId: 'G1', nom: 'A', criteres: [{ id: 'CR', nom: 'C' }], niveaux: [{ code: 'W', nom: 'w' }], commentaires: {} };
+        // ⚠ CLÉ MIGRÉE PAR S5/#623 LE 31 AOÛT 2026 : ce corpus semait sous la clé NUE
+        // `cartouches_G1`. `js/cartouches.js` route désormais par `cle(...)`, et le
+        // stub `cle` de ce cas rend `a2026_` + k — comme pour les échelles et les
+        // grilles ci-dessous, qui étaient DÉJÀ namespacées. La clé nue était le seul
+        // reliquat, et c'est elle qui faisait lire une collection vide.
         const store = {
-            cartouches_G1: [JSON.parse(JSON.stringify(A))],
+            a2026_cartouches_G1: [JSON.parse(JSON.stringify(A))],
             a2026_echellesTemplates: [{ id: 'E1', niveaux: [{ code: 'W', nom: 'w' }] }],
             a2026_grillesTemplates: [{ id: 'G1', nom: 'Grille', criteres: [{ id: 'CR', nom: 'C' }] }]
         };
@@ -124,7 +129,7 @@ describe("#593 · 3 — l'écriture d'une cellule atterrit dans la cartouche qui
         // La bascule a bien eu lieu : la cartouche ouverte est la neuve, jamais écrite.
         expect(win.cartoucheActuel.id).toBe('CART_neuve');
         // Et le texte est en base sous A — la cartouche qui portait la cellule.
-        const enBase = Object.fromEntries(store.cartouches_G1.map(c => [c.id, c.commentaires.CR_W || '']));
+        const enBase = Object.fromEntries(store.a2026_cartouches_G1.map(c => [c.id, c.commentaires.CR_W || '']));
         expect(enBase.CA).toBe('texte tapé dans A');
         expect(Object.keys(enBase)).toEqual(['CA']);
     });

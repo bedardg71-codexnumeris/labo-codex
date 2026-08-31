@@ -96,8 +96,12 @@ function charger({ production = ARTEFACT, reglages = null } = {}) {
         'a2026_productions': production ? [production] : [],
         'a2026_grillesTemplates': [GRILLE_PROD, GRILLE_AUTRE],
         'a2026_echellesTemplates': [ECHELLE_PROD, ECHELLE_AUTRE],
-        'cartouches_GR_PROD': [CARTOUCHE],
-        'cartouches_GR_AUTRE': []
+        // ⚠ CLÉS MIGRÉES PAR S5/#623 LE 31 AOÛT 2026 : ce corpus semait sous la clé
+        // NUE. Le code lit désormais par `cle(...)`, et le stub de ce fichier rend
+        // `a2026_` + k (plus bas). La cartouche vivait donc dans une case que
+        // personne ne lit plus, et son contexte n'atteignait jamais l'aperçu.
+        'a2026_cartouches_GR_PROD': [CARTOUCHE],
+        'a2026_cartouches_GR_AUTRE': []
     };
     if (reglages) store['exportPDF_derniersReglages'] = reglages;
 

@@ -47,6 +47,13 @@ function charger(deepCopy = true) {
     return w;
 }
 
+// ⚠ DESTINATIONS MIGRÉES PAR S5/#623 LE 31 AOÛT 2026. Les copies de cartouches
+// atterrissaient sous la clé NUE `cartouches_<id>` ; `js/…` route désormais ses
+// écritures par `cle(...)`, et le stub de ce fichier rend `h2026_` + k. Les
+// SOURCES `a2025_cartouches_*` ne bougent pas : elles sont délibérément celles
+// d'un AUTRE trimestre, c'est tout le sujet de l'import inter-trimestre.
+// ⮕ La destination est DÉRIVÉE du stub `w.cle`, jamais recopiée.
+const DEST = (id) => 'h2026_cartouches_' + id;
 // Source « trimestre » : cartouches par CLÉ a2025_cartouches_{grilleId}
 // (ce que cleSource produit pour un trimestre source — cleSource testé séparément).
 function lireCartouchesParCle(grille) {
@@ -72,7 +79,7 @@ describe('Brique C · dupliquerGrillePartagee — lecture de cartouches injecté
         const r = w.partageSection.dupliquerGrillePartagee(grille, lireCartouchesParCle);
         expect(r.grille.id).toBe('GRILLE_NEUF_1');
         expect(r.nbCartouches).toBe(1);
-        const copies = db.getSync('cartouches_GRILLE_NEUF_1', []);
+        const copies = db.getSync(DEST('GRILLE_NEUF_1'), []);
         expect(copies).toHaveLength(1);
         expect(copies[0].grilleId).toBe('GRILLE_NEUF_1');
         expect(copies[0].id).toMatch(/^CART_NEUF_/);
@@ -95,7 +102,7 @@ describe('Brique C · dupliquerGrillePartagee — lecture de cartouches injecté
         ]);
         const r = w.partageSection.dupliquerGrillePartagee(grille, lireCartouchesPlat);
         expect(r.nbCartouches).toBe(1); // seule CART_A est liée à GR_PLAT
-        expect(db.getSync('cartouches_' + r.grille.id, [])[0].grilleId).toBe(r.grille.id);
+        expect(db.getSync(DEST(r.grille.id), [])[0].grilleId).toBe(r.grille.id);
     });
 
     it('LECTEUR PAR DÉFAUT omis → lecteur Voûte (partage_cartouches)', () => {
@@ -131,7 +138,7 @@ describe('Brique C · dupliquerGrillePartagee — lecture de cartouches injecté
         const srcAvant = JSON.stringify(db._donnees['a2025_cartouches_GR_REF']);
         const r = w.partageSection.dupliquerGrillePartagee(grille, lecteurRef);
         // la COPIE a un grilleId remappé...
-        expect(db.getSync('cartouches_' + r.grille.id, [])[0].grilleId).toBe(r.grille.id);
+        expect(db.getSync(DEST(r.grille.id), [])[0].grilleId).toBe(r.grille.id);
         // ...mais la cartouche SOURCE n'est pas mutée (grilleId d'origine conservé)
         expect(JSON.stringify(db._donnees['a2025_cartouches_GR_REF'])).toBe(srcAvant);
         expect(db._donnees['a2025_cartouches_GR_REF'][0].grilleId).toBe('GR_REF');
@@ -144,7 +151,7 @@ describe('Brique C · dupliquerGrillePartagee — lecture de cartouches injecté
             { id: 'CART_2', grilleId: 'GR_M' }
         ]);
         const r = w.partageSection.dupliquerGrillePartagee(grille, lireCartouchesParCle);
-        const copies = db.getSync('cartouches_' + r.grille.id, []);
+        const copies = db.getSync(DEST(r.grille.id), []);
         expect(copies).toHaveLength(2);
         copies.forEach((c) => {
             expect(c.grilleId).toBe(r.grille.id);
@@ -161,7 +168,7 @@ describe('Brique C · dupliquerGrillePartagee — lecture de cartouches injecté
             commentaires: { C1_M: 'Bien structuré' }
         }]);
         const r = w.partageSection.dupliquerGrillePartagee(grille, lireCartouchesParCle);
-        const copie = db.getSync('cartouches_' + r.grille.id, [])[0];
+        const copie = db.getSync(DEST(r.grille.id), [])[0];
         // ids internes de critères et clés de commentaires NON régénérés (sinon
         // rétroactions orphelines : la clé 'critereId_niveauCode' se désynchronise).
         expect(copie.criteres[0].id).toBe('C1');
@@ -174,7 +181,7 @@ describe('Brique C · dupliquerGrillePartagee — lecture de cartouches injecté
         const r = w.partageSection.dupliquerGrillePartagee(grille, lireCartouchesParCle);
         // deep-copy sans remappage : echelleId source conservé sur la grille ET la cartouche.
         expect(r.grille.echelleId).toBe('ECH_A25');
-        expect(db.getSync('cartouches_' + r.grille.id, [])[0].echelleId).toBe('ECH_A25');
+        expect(db.getSync(DEST(r.grille.id), [])[0].echelleId).toBe('ECH_A25');
         // → quand le pas 4 (D-C4) copiera+remappera l'échelle, CES assertions rougiront
         //   et signaleront qu'il faut mettre à jour ce témoin.
     });
@@ -186,7 +193,7 @@ describe('Brique C · dupliquerGrillePartagee — lecture de cartouches injecté
         const r2 = w.partageSection.dupliquerGrillePartagee(grille, lireCartouchesParCle);
         expect(r1.grille.id).not.toBe(r2.grille.id);
         expect(db.getSync('h2026_grillesTemplates', [])).toHaveLength(2);
-        expect(db.getSync('cartouches_' + r1.grille.id, [])[0].id)
-            .not.toBe(db.getSync('cartouches_' + r2.grille.id, [])[0].id);
+        expect(db.getSync(DEST(r1.grille.id), [])[0].id)
+            .not.toBe(db.getSync(DEST(r2.grille.id), [])[0].id);
     });
 });

@@ -78,7 +78,17 @@ function storeAvantArchivage() {
         a2025_grillesTemplates:      [{ id: 'G1', nom: 'Utilisée' }, { id: 'G2', nom: 'Jamais notée' }],
         a2025_echellesTemplates:     [{ id: 'E1', nom: 'Utilisée' }, { id: 'E2', nom: 'Jamais notée' }],
         a2025_pratiquesConfigurables: [{ id: 'PR1', nom: 'Utilisée' }, { id: 'PR2', nom: 'Jamais notée' }],
-        cartouches_G1: [{ id: 'CART1', nom: 'Cartouche de G1' }],
+        // ⚠ CLÉ MISE À JOUR PAR S5/#623 LE 31 AOÛT 2026 : ce corpus posait
+        // `cartouches_G1` — la clé NUE du régime global. Les cartouches suivent
+        // désormais le régime de leur grille, et `creerSnapshotRessources` lit
+        // `cleSource('cartouches_G1', trimestreId)`. Laisser la clé nue faisait
+        // lire une case VIDE, sauter le `if (… > 0)`, et rendre `snapshot.cartouches`
+        // sans sa grille : le cas plus bas mourait sur un `undefined`.
+        // ⮕ Le cas « clé nue SEULEMENT » n'a pas disparu pour autant : c'est
+        //   l'état d'un trimestre non encore migré, et il a sa propre sentinelle —
+        //   l'archivage doit alors REFUSER en le disant, pas produire un snapshot
+        //   amputé en silence.
+        a2025_cartouches_G1: [{ id: 'CART1', nom: 'Cartouche de G1' }],
 
         // Le trimestre ACTIF : ses pratiques n'ont AUCUN identifiant en commun.
         h2026_pratiquesConfigurables: [{ id: 'PRX', nom: 'Pratique du trimestre actif' }],
@@ -86,6 +96,105 @@ function storeAvantArchivage() {
         grillesTemplates: []
     };
 }
+
+/* --------------------- S5/#623 : le fil de détente des cartouches non migrées */
+
+/**
+ * Le même décor, mais avec les cartouches restées sous la clé NUE — l'état d'un
+ * trimestre que la migration du volet (b) n'a pas encore touché. C'était le
+ * corpus de ce fichier jusqu'au 31 août 2026 ; il est conservé ICI, exprès,
+ * parce qu'il est devenu un cas à part entière.
+ */
+function storeCartouchesNonMigrees() {
+    const store = storeAvantArchivage();
+    delete store.a2025_cartouches_G1;
+    store.cartouches_G1 = [{ id: 'CART1', nom: 'Cartouche de G1' }];
+    return store;
+}
+
+describe('#623/S5 · cartouches non migrées : l\'archivage REFUSE au lieu d\'amputer', () => {
+
+    // ⚠⚠ LE CAS LE PLUS IMPORTANT DE CE FICHIER — il verrouille la seule perte
+    // SILENCIEUSE identifiée le 31 août 2026.
+    //
+    // Sous S5, `creerSnapshotRessources` lit `cleSource('cartouches_<g>', trimestreId)`.
+    // Un trimestre dont les cartouches vivent encore sous la clé NUE rend donc une
+    // case VIDE. Le `if (cartouches.length > 0)` sautait alors sans rien dire, et le
+    // snapshot partait AMPUTÉ — or ce snapshot est le filet de la suppression
+    // définitive (`trimestre-v2-liste.js:398-405`). Rien n'aurait signalé la perte
+    // avant qu'on en ait besoin.
+    //
+    // Le remède retenu (décision `kuekatsheu-c8`, 31 août) n'est PAS d'ordonner les
+    // volets — livrer la migration avant le routage déplacerait la fenêtre sans la
+    // fermer : elle resterait ouverte si la migration échoue, ou si un chemin
+    // archive avant elle. C'est un FIL DE DÉTENTE : après le volet (b), cet état
+    // n'existe plus, et si ce refus se déclenche un jour, c'est que la migration a
+    // échoué — ce qu'on veut apprendre à ce moment-là, pas au désarchivage.
+    //
+    // ⚠ Et surtout : PAS de repli silencieux sur la clé nue. Un repli discret
+    // rendrait une migration ratée indétectable, c'est-à-dire exactement le défaut
+    // qu'on referme.
+
+    it('REFUSE le snapshot et NOMME les grilles concernées', () => {
+        const store = storeCartouchesNonMigrees();
+        const win = chargerTrimestres(store);
+
+        const r = win.creerSnapshotRessources('a2025');
+
+        expect(r.success).toBe(false);
+        expect(r.refus).toBe('cartouches-non-migrees');
+        // NOMMER, pas seulement refuser : sans le nom de la grille, l'utilisateur
+        // ne sait pas quoi réparer, et le message ne vaut pas mieux qu'un silence.
+        expect(r.grilles).toEqual(['G1']);
+        expect(r.message).toMatch(/G1/);
+    });
+
+    it('n\'écrit AUCUN snapshot — pas même un snapshot amputé', () => {
+        const store = storeCartouchesNonMigrees();
+        const win = chargerTrimestres(store);
+
+        win.creerSnapshotRessources('a2025');
+
+        // La perte se produisait par un snapshot ÉCRIT mais incomplet : c'est lui
+        // qu'on refuse, pas seulement le verdict.
+        expect(Object.keys(store).filter(k => k.startsWith('snapshot_'))).toEqual([]);
+    });
+
+    it('archiverTrimestre LIT le refus : le trimestre n\'est PAS archivé', () => {
+        // ⚠ La seconde moitié de la garde, et sans elle la première est décorative.
+        // `archiverTrimestre` posait `trimestre.archive = true` sans lire le retour
+        // de `creerSnapshotRessources` : le refus aurait été ignoré et le trimestre
+        // archivé quand même, avec son snapshot manquant.
+        // Un refus RENDU n'est pas une exception — rien ne l\'attrape tout seul.
+        const store = storeCartouchesNonMigrees();
+        const win = chargerTrimestres(store);
+
+        const r = win.archiverTrimestre('a2025');
+
+        expect(r.success).toBe(false);
+        expect(r.refus).toBe('cartouches-non-migrees');
+
+        // L'état est EXACTEMENT celui d'avant l'appel : aucun drapeau, aucune date.
+        const t = store.trimestres.find(x => x.id === 'a2025');
+        expect(t.archive).toBe(false);
+        expect('dateFin' in t).toBe(false);
+    });
+
+    it('une fois les cartouches migrées, l\'archivage repart normalement', () => {
+        // Contre-épreuve : la garde ne bloque QUE l'état non migré. Sans ce cas,
+        // une garde devenue trop large (refusant toujours) passerait inaperçue —
+        // les trois cas ci-dessus resteraient verts.
+        const store = storeAvantArchivage();   // corpus MIGRÉ (a2025_cartouches_G1)
+        const win = chargerTrimestres(store);
+
+        const r = win.creerSnapshotRessources('a2025');
+
+        expect(r.success).not.toBe(false);
+        expect(r.refus).toBeUndefined();
+        expect(store[r.cleSnapshot].cartouches.G1.map(c => c.id)).toEqual(['CART1']);
+    });
+
+});
 
 /* ------------------------------------------------------- B1 : ne rien détruire */
 

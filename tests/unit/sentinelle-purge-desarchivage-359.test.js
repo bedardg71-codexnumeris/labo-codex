@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+
+const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 // #359 (RÉCONCILIÉ #358, Option A) — desarchiverTrimestre ne purge QUE les copies qui
 // REDEVIENNENT ORPHELINES une fois `archive` retiré : celles dont cle() retombe sur une
@@ -66,11 +71,21 @@ describe('#359 (réconcilié #358) · désarchiver préserve les modèles vivant
         expect('a2025_pratiquesConfigurables' in store).toBe(true);
     });
 
-    it('PURGE la copie de cartouche orpheline (restée globale)', () => {
+    it('CONSERVE les cartouches du trimestre — elles ne sont plus des orphelines', () => {
+        // ⚠ CAS RETOURNÉ PAR S5/#623 LE 31 AOÛT 2026. Il attendait l'INVERSE :
+        // `a2025_cartouches_G1` devait être PURGÉE au désarchivage. Ce geste était
+        // juste tant que les cartouches étaient globales — la copie namespacée
+        // n'était alors qu'un doublon, et le trimestre désarchivé retrouvait la
+        // collection commune intacte.
+        // Sous S5 la même ligne DÉTRUIT LA SEULE COPIE : `<id>_cartouches_<x>` est
+        // la donnée vivante du trimestre. La branche a été retirée de
+        // `purgerCopiesModelesArchive`, et ce cas garde la porte fermée.
+        // Perte verrouillée en bout de chaîne par
+        // tests/unit/sentinelle-623-s5-cartouches-namespacees.test.js.
         const store = storeArchive();
         const win = chargerTrimestres(store);
         win.desarchiverTrimestre('a2025');
-        expect('a2025_cartouches_G1' in store).toBe(false);
+        expect('a2025_cartouches_G1' in store).toBe(true);
     });
 
     it('CONSERVE le snapshot de sauvegarde historique (pas un orphelin)', () => {
@@ -90,12 +105,37 @@ describe('#359 (réconcilié #358) · désarchiver préserve les modèles vivant
         expect(t.statistiquesFinales).toEqual({ nbEtudiants: 20, nbCours: 1 });
     });
 
-    it('rapporte les clés effectivement purgées (copiesPurgees = la cartouche orpheline seule)', () => {
+    it('rapporte les clés effectivement purgées — aucune, et c\'est le régime attendu', () => {
+        // ⚠ CAS RETOURNÉ PAR S5/#623 LE 31 AOÛT 2026 : il attendait
+        // `['a2025_cartouches_G1']`. Les deux familles ont quitté la purge pour
+        // deux raisons DISTINCTES, et il faut les garder distinctes :
+        //   · les MODÈLES (grilles/échelles/pratiques) depuis #358/Option A — ils
+        //     sont namespacés, donc données vivantes ; le cas ci-dessus le tient ;
+        //   · les CARTOUCHES depuis S5/#623 — même raison, appliquée plus tard.
+        // La purge n'est PAS morte pour autant : sa condition reste dérivée du
+        // REGISTRE (cas suivant), donc toute clé qui redeviendrait globale serait
+        // de nouveau purgée, sans qu'on ait à retoucher ce fichier.
         const store = storeArchive();
         const win = chargerTrimestres(store);
         const r = win.desarchiverTrimestre('a2025');
-        // Plus aucune copie de modèle namespacée vivante dans la purge → seule la cartouche.
-        expect(r.copiesPurgees).toEqual(['a2025_cartouches_G1']);
+        expect(r.copiesPurgees).toEqual([]);
+    });
+
+    it('la purge reste DÉRIVÉE DU REGISTRE, pas d\'une liste figée', () => {
+        // Le mécanisme de #359, que les deux cas retournés ci-dessus pourraient
+        // laisser croire mort : `purgerCopiesModelesArchive` ne purge pas « rien »,
+        // elle purge ce que le REGISTRE désigne encore comme GLOBAL. Aujourd'hui
+        // l'intersection est vide ; elle se remplirait d'elle-même si une clé
+        // repassait au régime global. Sans ce cas, quelqu'un pourrait vider la
+        // fonction en constatant qu'elle ne retire jamais rien.
+        const src = readFileSync(path.join(racine, 'js', 'trimestres.js'), 'utf8');
+        const debut = src.indexOf('function purgerCopiesModelesArchive');
+        expect(debut).toBeGreaterThan(-1);
+        const corps = src.slice(debut, debut + 2000);
+        expect(corps).toContain('CLES_TEMPLATES_ARCHIVES');
+        expect(corps).toContain('CLES_GLOBALES.includes(nomCle)');
+        // Et la branche cartouches ne revient pas par la porte de derrière.
+        expect(corps).not.toMatch(/retirer\(`\$\{id\}_cartouches_/);
     });
 
     it('GARDE — appel sur un trimestre non archivé : refusé, copies intactes', () => {

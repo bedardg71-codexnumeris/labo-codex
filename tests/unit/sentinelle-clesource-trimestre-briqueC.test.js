@@ -42,15 +42,19 @@ describe('Brique C · cleSource lit un trimestre nommé sans swap', () => {
         expect(win.cleSource('cartouches_GRILLE_A25', 'a2025')).toBe('a2025_cartouches_GRILLE_A25');
     });
 
-    it('ROUTAGE SOURCE — #358 : grilles/échelles namespacées (clé de la source) ; cartouches/cours globales', () => {
+    it('ROUTAGE SOURCE — #358 + S5 : grilles/échelles ET cartouches namespacées (clé de la source) ; cours globale', () => {
         const store = { trimestres: [{ id: 'h2026', actif: true, archive: false }] };
         const win = chargerTrimestres(store);
         // Option A : grilles/échelles ont rejoint CLES_NAMESPACEES → clé namespacée de la SOURCE
         // (même sans copie matérialisée — emplacement canonique du trimestre nommé).
         expect(win.cleSource('grillesTemplates', 'a2025')).toBe('a2025_grillesTemplates');
         expect(win.cleSource('echellesTemplates', 'a2025')).toBe('a2025_echellesTemplates');
-        // Restent globales (catalogue commun) : cartouches, cours.
-        expect(win.cleSource('cartouches_GRILLE_A25', 'a2025')).toBe('cartouches_GRILLE_A25');
+        // ⚠ CAS RETOURNÉ PAR S5/#623 LE 31 AOÛT 2026 : les cartouches ont quitté le
+        // catalogue commun pour suivre le régime de leur grille. `cleSource` rend
+        // désormais l'emplacement canonique de la SOURCE, même sans copie
+        // matérialisée — exactement comme pour grilles et échelles depuis #358.
+        expect(win.cleSource('cartouches_GRILLE_A25', 'a2025')).toBe('a2025_cartouches_GRILLE_A25');
+        // `cours`, elle, reste bien un catalogue commun : S5 n'y touche pas.
         expect(win.cleSource('cours', 'a2025')).toBe('cours');
     });
 

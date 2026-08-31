@@ -154,13 +154,21 @@
     }
 
     /**
-     * Lecteurs par DÉFAUT : les collections de l'utilisateur. Les cartouches y
-     * sont ancrées par clé (`cartouches_{grilleId}`), les grilles vivent dans
-     * le pool de travail de tous les trimestres (#358).
+     * Lecteurs par DÉFAUT : les collections de l'utilisateur. Les grilles vivent
+     * dans le pool de travail de TOUS les trimestres (#358) ; les cartouches, elles,
+     * sont namespacées depuis S5/#623 (`<trim>_cartouches_{grilleId}`). Les deux
+     * portées ne coïncident donc plus : une grille peut exister dans plusieurs
+     * trimestres avec des cartouches différentes. Règle tranchée par Grégoire le
+     * 31 août 2026 — on lit celles du trimestre ACTIF, et `confirmerExport`
+     * (`partage-export.js`) le DIT quand la grille existe ailleurs aussi.
      */
     var LECTEURS_UTILISATEUR = {
         cartouchesDeGrille: function (grilleId) {
-            return lireCollection('cartouches_' + grilleId);
+            // S5/#623 : `cartouches_<grilleId>` est namespacée. Le `cle()` est posé
+            // ICI, au site d'appel — surtout PAS dans `lireCollection` (:150), dont
+            // le paramètre s'appelle `cle` et y masquerait la fonction globale.
+            var brute = 'cartouches_' + grilleId;
+            return lireCollection((typeof window.cle === 'function') ? window.cle(brute) : brute);
         },
         grilleParId: function (grilleId) {
             var trouvee = null;

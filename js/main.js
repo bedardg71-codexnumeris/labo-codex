@@ -718,6 +718,57 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        // S5/#623 — MIGRATION DES CARTOUCHES VERS LE NAMESPACE DE LEUR TRIMESTRE.
+        //
+        // ⚠ L'ORDRE EST CONTRAINT, PAS PRÉFÉRENTIEL : APRÈS le bloc
+        // `migration_modeles_namespacees_done` ci-dessus. La migration des cartouches
+        // énumère les trimestres et écrit sous leurs préfixes ; elle suppose donc le
+        // registre des trimestres et les copies de modèles déjà stables.
+        //
+        // ⚠⚠ ELLE SUPPRIME LES CLÉS NUES, SANS ANNULATION. La fonction ne le fait
+        // qu'après avoir DRAINÉ puis RELU chaque copie (voir son en-tête) : un seul
+        // échec de relecture retient toute la suppression. Le drapeau n'est posé que
+        // si le rapport ne porte aucun échec — sinon le prochain démarrage réessaie,
+        // la fonction étant idempotente.
+        if (!db.getSync('migration_cartouches_namespacees_done', false)) {
+            try {
+                if (typeof migrerCartouchesVersNamespace === 'function') {
+                    const rapport = await migrerCartouchesVersNamespace();
+
+                    if (rapport && Array.isArray(rapport.echecs) && rapport.echecs.length > 0) {
+                        // Rien n'a été supprimé. On NE POSE PAS le drapeau : réessai au
+                        // prochain démarrage. L'état reste « encore sous clé nue », que
+                        // le fil de détente de `creerSnapshotRessources` sait reconnaître
+                        // et qui fait refuser l'archivage plutôt que de l'amputer.
+                        console.error(
+                            '[migration_cartouches_namespacees] INTERROMPUE — aucune clé nue ' +
+                            'supprimée, rien de perdu. Réessai au prochain démarrage.',
+                            rapport.echecs
+                        );
+                    } else {
+                        // Drainer AVANT de poser le drapeau : sans ce flush, on pourrait
+                        // obtenir « drapeau posé » alors que les suppressions n'ont pas
+                        // atterri — le boot suivant ne réessaierait pas. Même raison
+                        // qu'au bloc des modèles ci-dessus.
+                        if (db && typeof db.flush === 'function') {
+                            await db.flush();
+                        }
+                        db.setSync('migration_cartouches_namespacees_done', true);
+                        if (rapport && rapport.migrees > 0) {
+                            console.log(
+                                `[migration_cartouches_namespacees] ${rapport.migrees} copie(s) ` +
+                                `posée(s) dans ${rapport.trimestres} trimestre(s), ` +
+                                `${rapport.nuesSupprimees} clé(s) nue(s) retirée(s).`
+                            );
+                        }
+                    }
+                }
+            } catch(e) {
+                // Drapeau NON posé : réessai au prochain démarrage.
+                console.error('[migration_cartouches_namespacees] erreur —  drapeau non posé, réessai au prochain démarrage :', e);
+            }
+        }
+
         // Migration #326 R1 (16 juin 2026) : le flag transitoire de maquette
         // d'exploration passe de `estEssai` à `estMaquette` (renommage zéro-dette).
         // Préserve les maquettes créées en terrain (iPad) en réécrivant le champ

@@ -20,8 +20,20 @@ import { chargerScript } from './_helpers/charger-script.js';
 
 /* ------------------------------------------------------------------ harnais */
 
+// ⚠ CLÉ MIGRÉE PAR S5/#623 LE 31 AOÛT 2026. Le corpus semait sous la clé NUE
+// `cartouches_G1` ; `js/cartouches.js` route désormais ses lectures et ses
+// écritures par `cle(...)`, donc vers `a2026_cartouches_G1`. Le corpus ne
+// correspondait plus à ce que le code lit — d'où des valeurs `undefined` et des
+// textes qui semblaient perdus, alors que rien n'était cassé.
+// ⮕ La clé est DÉRIVÉE du même préfixe que le stub `cle` ci-dessous, jamais
+//   recopiée : si le stub change, le corpus suit. Un préfixe écrit deux fois
+//   est un désaccord qui attend son heure.
+const PREFIXE_TRIMESTRE = 'a2026_';
+const CLE_CART = PREFIXE_TRIMESTRE + 'cartouches_G1';
+
+
 function monter({ cartouches = [], cartoucheOuverte = null, champs = {} } = {}) {
-    const store = { 'cartouches_G1': cartouches };
+    const store = { [CLE_CART]: cartouches };
     const journal = [];
     const els = {};
     Object.keys(champs).forEach(id => { els[id] = { value: champs[id] }; });
@@ -55,7 +67,7 @@ function monter({ cartouches = [], cartoucheOuverte = null, champs = {} } = {}) 
                 };
             })()
         },
-        cle: (k) => 'a2026_' + k,
+        cle: (k) => PREFIXE_TRIMESTRE + k,
         echapperHtml: (t) => String(t == null ? '' : t),
         alert: (m) => journal.push(['alert', String(m)]),
         confirm: () => { journal.push(['confirm']); return true; },
@@ -100,7 +112,7 @@ describe('#517 · A — chaque cellule de la matrice s\'enregistre seule', () =>
         await win.sauvegarderCommentaire('CR_1_M');
 
         // Avant #517 : la base ne bougeait pas tant qu'on n'avait pas cliqué.
-        expect(store['cartouches_G1'][0].commentaires['CR_1_M'])
+        expect(store[CLE_CART][0].commentaires['CR_1_M'])
             .toBe('Ta démonstration est complète.');
     });
 
@@ -131,7 +143,7 @@ describe('#517 · A — chaque cellule de la matrice s\'enregistre seule', () =>
 
         await win.sauvegarderCommentaire('CR_1_M');
 
-        expect(store['cartouches_G1']).toEqual([]);
+        expect(store[CLE_CART]).toEqual([]);
         expect(ouverte.commentaires['CR_1_M'], 'la mémoire, elle, a bien reçu').toBe('un texte');
     });
 
@@ -142,7 +154,7 @@ describe('#517 · A — chaque cellule de la matrice s\'enregistre seule', () =>
             champs: { 'comm_CR_1_M': 'neuf' }
         });
         await win.sauvegarderCommentaire('CR_1_M');
-        expect(store['cartouches_G1'][0].commentaires['CR_1_I']).toBe('texte de départ');
+        expect(store[CLE_CART][0].commentaires['CR_1_I']).toBe('texte de départ');
     });
 });
 
@@ -158,7 +170,7 @@ describe('#517 · B — le contexte ouvre chaque rétroaction : il ne se perd pl
 
         await win.sauvegarderContexteCartouche();
 
-        expect(store['cartouches_G1'][0].contexte).toBe('Ce travail portait sur Nelligan.');
+        expect(store[CLE_CART][0].contexte).toBe('Ce travail portait sur Nelligan.');
     });
 
     it('B.b le NOM, lui, reste au bouton — et c\'est délibéré', async () => {
@@ -172,7 +184,7 @@ describe('#517 · B — le contexte ouvre chaque rétroaction : il ne se perd pl
             champs: { 'contexteCartouche': 'x' }
         });
         await win.sauvegarderContexteCartouche();
-        expect(store['cartouches_G1'][0].nom, 'le nom n\'a pas bougé').toBe('Cartouche de français');
+        expect(store[CLE_CART][0].nom, 'le nom n\'a pas bougé').toBe('Cartouche de français');
         expect(journal).toEqual([]);
     });
 });
@@ -192,7 +204,7 @@ describe('#517 · C — deux cellules quittées coup sur coup gardent leurs deux
             win.sauvegarderCommentaire('CR_2_E')
         ]);
 
-        const enBase = store['cartouches_G1'][0].commentaires;
+        const enBase = store[CLE_CART][0].commentaires;
         expect(enBase['CR_1_M'], 'la première saisie ne doit pas être écrasée').toBe('TEXTE-A');
         expect(enBase['CR_2_E']).toBe('TEXTE-B');
     });

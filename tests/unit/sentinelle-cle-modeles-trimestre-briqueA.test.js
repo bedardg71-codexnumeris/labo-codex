@@ -37,14 +37,20 @@ function chargerTrimestres(store) {
 }
 
 describe('Brique A · cle() route les modèles d’évaluation par trimestre', () => {
-    it('RÉGIME #358 — trimestre actif NON archivé : grilles/échelles namespacées, cartouches globales', () => {
+    it('RÉGIME #358 + S5 — trimestre actif NON archivé : grilles/échelles ET cartouches namespacées', () => {
         const store = { trimestres: [{ id: 'h2026', actif: true, archive: false }] };
         const win = chargerTrimestres(store);
         // Option A : grilles/échelles ont rejoint CLES_NAMESPACEES → clé préfixée.
         expect(win.cle('grillesTemplates')).toBe('h2026_grillesTemplates');
         expect(win.cle('echellesTemplates')).toBe('h2026_echellesTemplates');
-        // Cartouches restent GLOBALES (hors périmètre Bloc 1).
-        expect(win.cle('cartouches_GRILLE1759529438501')).toBe('cartouches_GRILLE1759529438501');
+        // ⚠ CAS RETOURNÉ PAR S5/#623 LE 31 AOÛT 2026. Il attendait la clé NUE
+        // `cartouches_<grilleId>` : les cartouches étaient alors GLOBALES, hors
+        // périmètre du Bloc 1. S5 les a fait rejoindre le régime de leur grille,
+        // parce qu'une seule case pour tous les trimestres les faisait s'écraser
+        // entre eux (cf. tests/unit/sentinelle-623-s5-cartouches-namespacees.test.js).
+        // Qui relira « cartouches globales » dans l'historique de ce fichier lira
+        // une décision révolue, pas une régression.
+        expect(win.cle('cartouches_GRILLE1759529438501')).toBe('h2026_cartouches_GRILLE1759529438501');
     });
 
     it('RÉSOLUTION ARCHIVE — A25 archivé AVEC copies : cle() rend la clé namespacée', () => {
@@ -60,15 +66,18 @@ describe('Brique A · cle() route les modèles d’évaluation par trimestre', (
         expect(win.cle('cartouches_GRILLE_A2025_FR_ALGO')).toBe('a2025_cartouches_GRILLE_A2025_FR_ALGO');
     });
 
-    it('ARCHIVÉ SANS COPIE — grilles/échelles routent vers la clé namespacée (plus de repli global #358) ; cartouches globales', () => {
+    it('ARCHIVÉ SANS COPIE — grilles/échelles ET cartouches routent vers la clé namespacée (plus aucun repli global)', () => {
         const store = { trimestres: [{ id: 'a2025', actif: true, archive: true }] };
         const win = chargerTrimestres(store);
         // #358 : grilles/échelles namespacées → clé du trimestre même sans copie
         // matérialisée (post-C1 elle existe ; le routage ne retombe plus sur le global).
         expect(win.cle('grillesTemplates')).toBe('a2025_grillesTemplates');
         expect(win.cle('echellesTemplates')).toBe('a2025_echellesTemplates');
-        // Cartouches restent globales → repli global conservé.
-        expect(win.cle('cartouches_GRILLE_A2025_FR_ALGO')).toBe('cartouches_GRILLE_A2025_FR_ALGO');
+        // ⚠ CAS RETOURNÉ PAR S5/#623 LE 31 AOÛT 2026. Le repli vers la clé globale
+        // a été RETIRÉ de `cle()` avec la branche « Cas 2 » : c'était lui, le
+        // mécanisme du partage entre trimestres — un trimestre archivé sans copie
+        // retombait sur la case commune et lisait les cartouches d'un autre.
+        expect(win.cle('cartouches_GRILLE_A2025_FR_ALGO')).toBe('a2025_cartouches_GRILLE_A2025_FR_ALGO');
     });
 
     describe('RATCHET statique — le flux de consultation ne relit plus la clé nue', () => {

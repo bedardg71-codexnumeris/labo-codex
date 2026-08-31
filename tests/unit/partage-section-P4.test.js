@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
 
+// ⚠ DESTINATIONS MIGRÉES PAR S5/#623 LE 31 AOÛT 2026. Les copies de cartouches
+// atterrissaient sous la clé NUE ; `js/partage-section.js` route désormais ses
+// écritures par `cle(...)`, et le stub de ce fichier rend `h2026_` + k (l.48).
+// DÉRIVÉE du stub, jamais recopiée.
+const DEST = (id) => 'h2026_cartouches_' + id;
+
+
 // #329 Voûte Phase 1 · lot P4 — sentinelles de la section « Partagés ».
 // Couvre la DUPLICATION vers les documents de l'utilisateur (par type, avec
 // dépendances : grille → cartouches, production → grille → cartouches,
@@ -156,7 +163,7 @@ describe('lot P4 · duplication grille (avec cartouches)', () => {
 
     it('duplique les cartouches partagées de la grille dans cartouches_{nouvelId}, grilleId remappé', () => {
         w.partageSection.dupliquerVersMesDocuments('grille', 'PARTAGE_abc_GR_X');
-        const cartouches = db.getSync('cartouches_GRILLE_NEUF_1', []);
+        const cartouches = db.getSync(DEST('GRILLE_NEUF_1'), []);
         expect(cartouches).toHaveLength(1);
         expect(cartouches[0].id).toMatch(/^CART_NEUF_/);
         expect(cartouches[0].grilleId).toBe('GRILLE_NEUF_1');
@@ -169,7 +176,7 @@ describe('lot P4 · duplication cartouche → sa grille entière', () => {
         const r = w.partageSection.dupliquerVersMesDocuments('cartouche', 'PARTAGE_abc_CART_1');
         expect(r).not.toBeNull();
         expect(db.getSync('h2026_grillesTemplates', [])).toHaveLength(1);
-        expect(db.getSync('cartouches_' + r.idNouveau, [])).toHaveLength(1);
+        expect(db.getSync(DEST(r.idNouveau), [])).toHaveLength(1);
     });
 
     it('cartouche orpheline (grille parente absente des partagés) → null, rien d\'écrit', () => {
@@ -188,7 +195,7 @@ describe('lot P4 · duplication production (avec sa grille partagée)', () => {
         expect(productions).toHaveLength(1);
         expect(grilles).toHaveLength(1);
         expect(productions[0].grilleId).toBe(grilles[0].id);
-        expect(db.getSync('cartouches_' + grilles[0].id, [])).toHaveLength(1);
+        expect(db.getSync(DEST(grilles[0].id), [])).toHaveLength(1);
         expect(r.libelle).toContain('avec sa grille');
     });
 
@@ -304,10 +311,13 @@ describe('suppression · portée', () => {
 
     it('les documents de l\'utilisateur ne sont jamais touchés', () => {
         db.setSync('h2026_grillesTemplates', [{ id: 'GRILLE_A_MOI', nom: 'Ma grille' }]); // security-ok: littéral de test, aucune source externe
-        db.setSync('cartouches_GRILLE_A_MOI', [{ id: 'CART_A_MOI', grilleId: 'GRILLE_A_MOI' }]); // security-ok: littéral de test, aucune source externe
+        db.setSync(DEST('GRILLE_A_MOI'), [{ id: 'CART_A_MOI', grilleId: 'GRILLE_A_MOI' }]); // security-ok: littéral de test, aucune source externe
         w.partageSection.supprimerDuPartage('grille', 'PARTAGE_abc_GR_X');
         expect(db.getSync('h2026_grillesTemplates', [])).toHaveLength(1);
-        expect(db.getSync('cartouches_GRILLE_A_MOI', [])).toHaveLength(1);
+        // ⚠ Migré bien qu'il PASSAIT déjà : posée sous la clé nue, cette cartouche
+        // vivait dans une case que le code ne lit plus. « Intouchée » n'y prouvait
+        // donc plus rien — l'assertion était devenue vraie par construction.
+        expect(db.getSync(DEST('GRILLE_A_MOI'), [])).toHaveLength(1);
     });
 
     it('id introuvable → null, aucune écriture', () => {
