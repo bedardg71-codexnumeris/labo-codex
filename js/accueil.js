@@ -51,7 +51,11 @@ function afficherAccueil() {
  * CoP. Cf. DEPLOY.md v1.4 §3, ADR-008 (révision 2 juin 2026), BACKLOG.md #298.
  *
  * 27 août 2026 (#427/#508) : Cloudflare Access est réactivé le 1er septembre
- * 2026, porte ouverte (`Include → Everyone`) + OTP, session d'un mois. La
+ * 2026, porte ouverte (`Include → Everyone`) + OTP, session d'un mois — GESTE
+ * POSÉ le 31 août 2026 à 08 h 36, la veille, pour être en place avant un cours
+ * de 8 h. Le paragraphe ci-dessous est passé au présent le même jour ; il dit
+ * le renouvellement du mois, parce que « valable un mois » se lisait comme une
+ * date de péremption. La
  * phrase d'avis (4e des 5 blocs du corps, avant l'invitation à la CoP) est
  * doublée d'un bandeau daté (js/transitions.js, entrée
  * `avis-identification-2026-09-01`), parce qu'un avis vivant dans un accordéon
@@ -81,7 +85,7 @@ function genererBanniereBienvenue() {
             <p>Labo Codex est un outil de soutien à l’enseignement et de suivi des apprentissages. L’application te propose de numériser ton travail. Tu peux planifier, concevoir, évaluer et suivre la progression de tes étudiant·es. Les mêmes gestes que sur papier, mais dans un seul outil numérique et portable ! Labo Codex est gratuit, ouvert et indépendant !</p>
             <p><strong>Par où commencer ?</strong> Configure ton trimestre, ton cours et ton groupe dans l’onglet Cadre : tu saisis tout une fois, l’app s’en sert partout. Ensuite, crée tes productions et tes évaluations. Tu peux les élaborer et les partager facilement avec tes collègues.</p>
             <p><strong>Certains concepts sont nouveaux pour toi ?</strong> Trois guides pédagogiques t’expliquent en quelques pages la taxonomie SOLO, les micro-données et le modèle RàI — accessibles en tout temps par les boutons « Guide » des Outils d’observation.</p>
-            <p>À partir du 1<sup>er</sup> septembre, l’identification sera obligatoire pour utiliser l’application.</p>
+            <p>L’identification est requise pour accéder à Labo Codex. Tu donnes ton courriel, tu reçois un code, et tu n’y repenses plus pendant un mois — après quoi tu redonnes ton courriel et c’est reparti. Rien ne se ferme, et tes données restent sur ton appareil.</p>
             ${paragrapheCommunaute}
             <div class="banniere-bienvenue-actions">
                 <button class="btn btn-primaire" data-action="demarrerTourGuide">

@@ -172,9 +172,37 @@ précédentes. Seul l'état de la policy change.
 **Fiche opératoire** : `plans de travail/REFERMAGE-2026-09-01-cloudflare-access.md`,
 réécrite le 27 août pour la policy ouverte.
 
-⏳ **À compléter au moment du geste** : date effective, valeur réelle relevée de
-la durée de session avant modification, et les trois placeholders Cloudflare de
-`DEPLOY.md` (nom de la team Zero Trust, nom de l'application, nom de la policy).
+✅ **GESTE POSÉ LE 31 AOÛT 2026, vers 08 h 36** (la veille de la date annoncée,
+pour être en place avant le cours de 8 h du 1er septembre). Consignation :
+
+| | Relevé avant | Après |
+|---|---|---|
+| Équipe Zero Trust | `labo-codex` (offre Zero Trust Free) | inchangé |
+| Application | `Codex Numeris beta`, auto-hébergée, `app.codexnumeris.org` | renommée **`Labo Codex`** — l'ancienne portait le nom du blog, pas celui du projet |
+| Stratégie (unique) | `Test Labo Codex`, créée le 6 décembre 2025 | nom inchangé (renomination en « CoP Labo Codex » envisagée puis écartée) |
+| **Action** | **`Bypass` (Contourner)** | **`Allow` (Autoriser)** |
+| Règle `Include` | `Everyone` | inchangée |
+| Durée de session de la **policy** | **6 hours** | **1 month** |
+| Durée de session de l'application | 1 semaine | 1 month (sans effet : la policy prime) |
+| Fournisseur d'identité | One-time PIN, unique | inchangé |
+
+⚠️ **La découverte du geste, à ne pas perdre.** Ce document, `DEPLOY.md` et
+`PRIVACY.md` affirmaient tous trois que « seule la policy est désactivée ».
+C'était faux : la policy n'a jamais été désactivée, son **action** était
+`Bypass`. Access était donc en place et actif depuis juin, laissant simplement
+tout passer. La réactivation n'a pas consisté à rallumer un dispositif éteint,
+mais à faire passer une action de `Bypass` à `Allow`.
+
+⚠️ **Le piège de la durée, à ne pas perdre non plus.** Cloudflare applique la
+durée de session de la POLICY, qui écrase celle de l'application et la globale
+(le tableau de bord l'écrit sous le champ). La fiche opératoire et `DEPLOY.md`
+§3.2 désignaient la durée de l'application : régler celle-là seule aurait laissé
+les utilisateurs se réauthentifier toutes les six heures, contre le mois annoncé
+partout ailleurs.
+
+⏳ **Reste à faire** : le test de bout en bout en navigation privée, et #508
+(réécrire au présent le paragraphe d'accueil, le bandeau daté s'éteignant dans
+la nuit du 31 août au 1er septembre).
 
 ---
 

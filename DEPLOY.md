@@ -367,7 +367,7 @@ finissaient.
 URL : **`https://one.dash.cloudflare.com`** (le tableau Zero Trust, distinct
 du tableau DNS classique `dash.cloudflare.com`).
 
-Organisation : *[À COMPLÉTER — nom de la team Zero Trust]*
+Organisation (nom de l'équipe Zero Trust) : **`labo-codex`** — relevé le 31 août 2026 dans le tableau de bord. Offre : **Zero Trust Free**.
 
 ### 3.2 Application Access protégée
 
@@ -375,12 +375,12 @@ Organisation : *[À COMPLÉTER — nom de la team Zero Trust]*
 
 | Paramètre | Valeur actuelle | Référence |
 |---|---|---|
-| **Application name** | *[À COMPLÉTER — ex : « Labo Codex »]* | Nom affiché à l'authentification |
+| **Application name** | **`Labo Codex`** — renommée le 31 août 2026 (elle s'appelait `Codex Numeris beta`, du nom du blog et non du projet). Type : auto-hébergée | Nom affiché à l'authentification, donc lu par l'utilisateur avant de saisir son adresse |
 | **Type** | Self-hosted | Type d'application Cloudflare Access |
 | **Application domain** | `app.codexnumeris.org` | Domaine protégé |
-| **Session duration** | **1 semaine** (confirmé 22 mai 2026) → **1 mois** au 1er septembre 2026 | Durée de cookie de session. Le passage à un mois est un **changement assumé**, pas une restauration |
+| **Session duration** (application) | **1 semaine** (confirmé 22 mai 2026) | Durée de cookie de session au niveau de l'application. ⚠️ **Cette valeur ne fait pas foi** : voir la durée de la policy ci-dessous |
 | **App launcher visible** | Activé / Désactivé *[à confirmer]* | Visible dans le launcher Cloudflare |
-| **Authentication** | **One-time PIN (OTP) par courriel** (confirmé 22 mai 2026) | Méthode d'auth — seule méthode active |
+| **Authentication** | **One-time PIN (OTP) par courriel** — vérifié le 31 août 2026 : c'est l'unique fournisseur d'identité de l'espace Zero Trust | Méthode d'auth, seule méthode active. Cloudflare précise qu'à défaut de fournisseur configuré, l'OTP est de toute façon la méthode par défaut |
 
 **Identités enregistrées au 20 mai 2026** : **51** (auteur compris), dont **4 sièges
 Access actifs**, selon l'export `User_Seats_Log_2026-05-20T20_03_38Z.csv`. *Corrigé le
@@ -394,9 +394,17 @@ cours d'hiver ; ces identités se sont enregistrées d'elles-mêmes par une port
 
 | Paramètre | Valeur |
 |---|---|
-| **Policy name** | *[À COMPLÉTER — ex : « Collègues invités »]* |
-| **Action** | Allow |
+| **Policy name** | **`Test Labo Codex`** — unique stratégie de l'unique application, créée le 6 décembre 2025, id `b9db35f4-b080-4d5a-922f-cb6175025bb2`. ⚠️ Le nom dit « Test » et une renomination en « CoP Labo Codex » a été envisagée le 31 août puis écartée par Grégoire. À ne pas lire comme un accès restreint : la règle est `Everyone` |
+| **Action** | **Allow** depuis le 31 août 2026. ⚠️ *Découvert ce jour-là : la policy n'avait jamais été « désactivée » comme l'affirmait ce document et l'ADR-008 — son action était **`Bypass` (Contourner)** avec `Include → Everyone`. C'est ce qui rendait l'application ouverte depuis juin : Access était en place et laissait tout passer. Le geste de réactivation n'a donc pas été de rallumer une policy éteinte, mais de faire passer son action de `Bypass` à `Allow`.* |
 | **Include rule** | **`Everyone`** (au 1er septembre 2026). *Corrigé le 27 août 2026 : cette ligne indiquait une liste blanche d'`Emails`, ce qui décrivait l'état de janvier 2026 seulement.* |
+
+⚠️ **La durée de session qui fait foi est celle de la POLICY, pas celle de l'application.**
+Le tableau de bord l'écrit noir sur blanc sous le champ : « Cette durée de session remplacera
+les durées de session de l'application et globales ». Elle était à **6 hours** au 31 août 2026 ;
+la valeur visée est **1 month**, **appliquée le 31 août 2026 à 08 h 36**. *Corrigé le 31 août 2026 : ce document et la fiche opératoire
+désignaient tous deux la durée de l'application (§3.2), qui est le mauvais réglage. Régler
+l'application sans régler la policy laisserait les utilisateurs se réauthentifier toutes les six
+heures, alors que le bandeau, la page d'accueil, `PRIVACY.md` et le courriel CoP annoncent un mois.*
 
 **Aucune liste blanche.** La règle `Include` est `Everyone` : toute adresse capable de
 recevoir le code OTP entre. Les identités enregistrées se consultent dans

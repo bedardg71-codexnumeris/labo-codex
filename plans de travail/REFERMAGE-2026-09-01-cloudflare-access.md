@@ -178,11 +178,16 @@ sait pas si Cloudflare recycle les sièges inactifs. À regarder au premier expo
 
 ## §7 · Après le geste — à consigner le jour même
 
-- [ ] **date effective** de la réactivation ;
-- [ ] **motif** (savoir qui utilise, désormais inscrit à l'ADR) ;
-- [ ] **durée de session relevée avant modification**, et la nouvelle valeur ;
-- [ ] **règle `Include` trouvée** dans la policy dormante (`Everyone` ou résidu d'`Emails`) ;
-- [ ] les **trois placeholders** de `DEPLOY.md` remplis ;
+- [x] **date effective** : 31 août 2026, vers 08 h 36 (veille de la date annoncée, pour être en
+  place avant le cours de 8 h du 1er septembre) ;
+- [x] **motif** : savoir qui utilise, inscrit à l'ADR ;
+- [x] **durée de session relevée avant modification** : **6 hours** sur la policy (1 semaine sur
+  l'application, sans effet) → **1 month** sur la policy ;
+- [x] **règle `Include` trouvée** : `Everyone`. ⚠️ Mais l'**action** était `Bypass`, pas une policy
+  désactivée comme le dossier l'affirmait — c'est le vrai geste qui a été posé ;
+- [x] les **trois placeholders** de `DEPLOY.md` remplis : équipe `labo-codex`, application
+  `Labo Codex` (renommée depuis `Codex Numeris beta`), stratégie `Test Labo Codex` ;
+- [x] **fournisseur d'identité** vérifié : One-time PIN, unique intégration de l'espace ;
 - [x] `ADR-008`, `DEPLOY.md` (v1.6), `SECURITY.md` et `PRIVACY.md` (v1.2) révisés le 27 août 2026 ;
 - [ ] `BACKLOG.md` (#427, #508), `RELAIS.md` et `ETAT-PROJET.md` alignés — **non faits**, voir §10 ;
 - [ ] **#508** : le paragraphe d'accueil posé (§8) ;
