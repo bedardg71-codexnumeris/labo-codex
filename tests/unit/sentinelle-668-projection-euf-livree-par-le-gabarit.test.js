@@ -564,11 +564,18 @@ describe('#668 · H — la règle ne vit plus qu\'à un seul endroit', () => {
         expect(registre).toBeLessThan(html.indexOf('js/evaluation-calcul.js?'));
     });
 
-    it('le jeton anti-cache du registre voyage avec son js/', () => {
-        // Sans bump, Grégoire jugerait du code périmé au prochain essai terrain.
+    it('le registre est servi sous un jeton anti-cache, comme ses voisins', () => {
+        // ⚠ CETTE ASSERTION EXIGEAIT L'ÉGALITÉ DES DEUX JETONS. C'était trop fort,
+        // et elle a rougi à tort le 1er septembre : `evaluation-calcul.js` avait
+        // été modifié (garde #671) et pas le registre. Deux fichiers ne bougent
+        // pas toujours ensemble — coupler leurs jetons, c'est forcer à bumper un
+        // fichier intact, ce que la sentinelle anti-cache du dépôt refuse par
+        // ailleurs. L'invariant réel : le registre EST servi sous un jeton, et
+        // c'est `sentinelle-anticache-fichiers-modifies` qui vérifie que tout
+        // fichier MODIFIÉ en porte un du jour du build.
         const html = lire('index.html');
-        const jeton = (f) => (html.match(new RegExp(f.replace('.', '\\.') + '\\?v=([A-Za-z0-9]+)')) || [])[1];
-        expect(jeton('js/evaluation-projection.js')).toBe(jeton('js/evaluation-calcul.js'));
+        const jeton = (f) => (html.match(new RegExp(f.replace(/\./g, '\\.') + '\\?v=([A-Za-z0-9]+)')) || [])[1];
+        expect(jeton('js/evaluation-projection.js')).toMatch(/^\d{8}[a-z]+$/);
     });
 });
 

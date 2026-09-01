@@ -388,9 +388,24 @@ function chargerEvaluationsEtudiant() {
     const champsMots = document.querySelectorAll('input[id^="eval_mots_"]');
     const zonesResultat = document.querySelectorAll('div[id^="resultat_algo_"]');
 
-    champsCategories.forEach(input => input.value = '');
-    champsErreurs.forEach(input => input.value = '');
-    champsMots.forEach(input => input.value = '');
+    // #671 — ON VIDE, ET ON MARQUE À QUI LE PANNEAU APPARTIENT DÉSORMAIS.
+    //
+    // Les ids `eval_erreurs_<critereId>` portent le CRITÈRE, pas l'élève : les
+    // mêmes champs servent aux 27 copies. La bascule d'une copie à l'autre est
+    // asynchrone (`preRemplirEvaluation` réessaie jusqu'à 1,5 s), et pendant
+    // cette fenêtre les champs portent encore les valeurs du précédent. Une
+    // sauvegarde qui part là écrit le compte du voisin sous le nom du nouvel
+    // élève — mesuré sur 5 copies réelles le 31 août 2026.
+    //
+    // Le correctif de décembre 2025 (`5d2d41c7`) couvrait la course par un
+    // DÉLAI de 350 ms. Un délai n'est pas une synchronisation : la course est
+    // revenue dès que les données ont grossi. Ce marquage-ci ne dépend d'aucune
+    // horloge — il dit une IDENTITÉ, et le calcul refuse quand elle ne
+    // correspond pas (voir `_panneauAppartientALEvaluation`).
+    const marquer = (input) => { input.value = ''; input.dataset.da = etudiantDA || ''; };
+    champsCategories.forEach(marquer);
+    champsErreurs.forEach(marquer);
+    champsMots.forEach(marquer);
     zonesResultat.forEach(div => {
         // Réinitialiser le contenu avec les placeholders
         const spans = div.querySelectorAll('span');
