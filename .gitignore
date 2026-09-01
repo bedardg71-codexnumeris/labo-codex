@@ -118,3 +118,9 @@ undefined/
 # Verdict local de la sentinelle Playwright (#533) — état de MA machine,
 # rattaché à un SHA. Il ne veut rien dire ailleurs : jamais versionné.
 scripts/.verdict-playwright.json
+
+# Dossier de quarantaine créé le 1er septembre 2026 par un push depuis un shell
+# sans clé SSH : git y abandonne des `index.lock-*` qu'il ne sait pas effacer.
+# TRANSITOIRE — cette ligne peut partir dès que le dossier est supprimé. Elle
+# n'est là que pour qu'un `git add -A` distrait ne les fasse pas entrer.
+_to_delete/
