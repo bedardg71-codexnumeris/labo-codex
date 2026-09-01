@@ -366,6 +366,29 @@
        F. CRITÈRES
        ===================================================================== */
 
+    // #672 — LES AMORCES DE SAISIE, TEXTUELLEMENT.
+    //
+    // Ce sont les textes que le gabarit pose dans le div `comm_<critereId>` avant toute
+    // saisie. Ils viennent de trois endroits, et cette liste doit les suivre :
+    //   · js/evaluation-chargement.js:1029 et :1195 (les deux chemins de rendu) ;
+    //   · js/evaluation-calcul.js:518 (mode catégories, remise à l'état initial).
+    // ⚠ Une liste de reconnaissance périme en silence : si quelqu'un réécrit une de ces
+    // phrases sans toucher ici, la garde cesse d'agir sans rien dire.
+    // ⮕ `tests/unit/sentinelle-672-retroaction-mode-simple.test.js` va relire ces trois
+    // fichiers et exiger que chaque phrase y soit ENCORE, hors commentaires.
+    const AMORCES_DE_SAISIE = [
+        'Saisissez les erreurs et le nombre de mots',
+        'Saisissez les codes des sous-critères (ex: 1;4;6;1;4)',
+        'Sélectionne un niveau'
+    ];
+
+    function estAmorceDeSaisie(texte) {
+        // Le div est engendré par un gabarit multiligne : son textContent porte
+        // l'indentation du source. Comparer au texte nu passerait à côté.
+        const nu = String(texte == null ? '' : texte).trim();
+        return nu !== '' && AMORCES_DE_SAISIE.includes(nu);
+    }
+
     function construireCriteres(evaluation, grille, cartouche) {
         const criteres = Array.isArray(evaluation.criteres) ? evaluation.criteres : [];
         const grilleCriteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres : [];
@@ -386,8 +409,16 @@
             const retroAlgo = (donneesAlgoCrit && donneesAlgoCrit.retroaction)
                 ? String(donneesAlgoCrit.retroaction).trim()
                 : '';
+            // #672 — UNE AMORCE DE SAISIE N'EST PAS UNE RÉTROACTION, ET ELLE EST TRUTHY.
+            // Le repli `retroAlgo` ci-dessus était écrit POUR empêcher le placeholder
+            // d'atteindre le PDF ; il ne le pouvait pas, parce que le placeholder
+            // n'arrivait pas par le vide mais par `c.retroaction` — non vide, donc
+            // gagnant. Les évaluations enregistrées avant la correction du mode simple
+            // portent cette amorce en base : c'est ici, et seulement ici, qu'elles sont
+            // rattrapées.
+            const retroPersistee = estAmorceDeSaisie(c.retroaction) ? '' : (c.retroaction && c.retroaction.trim());
             const commentaireBrut =
-                (c.retroaction && c.retroaction.trim()) ||
+                retroPersistee ||
                 retroAlgo ||
                 (cartouche && cleCart && cartouche.commentaires && cartouche.commentaires[cleCart]) ||
                 '';
@@ -1247,7 +1278,15 @@
         construireFeedback: construireFeedback,
         // Exposés pour le rendu et les tests
         FAMILY_COLOR: FAMILY_COLOR,
-        FAMILY_ORDER: FAMILY_ORDER
+        FAMILY_ORDER: FAMILY_ORDER,
+        // #673 — EXPOSÉ POUR QUE LA LISTE RESTE UNIQUE. L'écran d'évaluation doit
+        // reconnaître les mêmes amorces pour savoir ce qu'il a le droit d'effacer
+        // (`_effacerRetroactionMachine`, evaluation-calcul.js). Recopier la liste
+        // là-bas créerait deux inventaires qui divergeraient en silence — le défaut
+        // que la sentinelle statique de #672 existe précisément pour empêcher.
+        // Ce module charge AVANT evaluation-calcul.js (index.html l. 14602 vs 14645),
+        // et l'appel a lieu bien après le chargement complet de toute façon.
+        estAmorceDeSaisie: estAmorceDeSaisie
         // #575 — `SCALE_FALLBACK` était exposée ici ; elle n'avait aucun lecteur
         // hors du module. Sa remplaçante (`COULEUR_NIVEAU_NEUTRE`) reste privée
         // plutôt que d'ajouter un export que personne n'appelle.

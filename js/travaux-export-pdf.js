@@ -907,6 +907,14 @@
             if (evaluation.criteres && evaluation.criteres.length > 0) {
                 html += '<ul class="travaux-revision-criteres">';
                 for (const c of evaluation.criteres) {
+                    // ⚠ #672 — APERÇU ENSEIGNANT, pas le PDF remis. Sur une évaluation
+                    // enregistrée AVANT le 1er septembre 2026 en mode simple,
+                    // `c.retroaction` porte l'amorce « Saisissez les erreurs et le nombre
+                    // de mots » : le div `comm_<critereId>` recevait `.value` au lieu de
+                    // `textContent`. Le PDF remis est rattrapé par la garde d'amorces de
+                    // `synthese-retroaction-data.js` ; cet extrait de 80 caractères, non.
+                    // Laissé tel quel volontairement : il ne va à personne d'autre qu'à
+                    // l'enseignant·e, et le doubler ici dupliquerait la cascade.
                     // ✅ ANONYMISATION (Tier 0.3) : anonymiser les prénoms dans les rétroactions
                     const retroTexte = typeof anonymiserTexteRetroaction === 'function'
                         ? anonymiserTexteRetroaction(c.retroaction || '', evaluation.etudiantDA)

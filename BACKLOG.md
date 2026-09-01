@@ -505,6 +505,176 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `evaluationEnCours`. Une garde d'identité au moment d'écrire coûte trois lignes et ne dépend d'aucune horloge.
   ⚠ **Mon relevé date de l'export de 22h30.** Grégoire a navigué depuis : il peut y avoir PLUS de cinq copies
   touchées. Recompter avant de réparer, ne pas partir de cette liste-ci.
+- [ ] **#674 — ⚠️ DONNÉES · Un critère laissé sans niveau fait MONTER la note, et rien ne le déclare**.
+  Inscrit le 1er septembre 2026 **avant tout usage de l'ID**. Né d'une mesure demandée par Grégoire au titre de
+  [[#673]], **mais il n'en dépend pas** : n'importe quel critère laissé sans niveau, par simple oubli en corrigeant,
+  produit le défaut aujourd'hui. **Ça touche des notes réelles, déjà en base.**
+  ▣ **MESURÉ le 1er septembre 2026 sous WebKit, grille 50 / 30 / 20, échelle à valeurs ponctuelles.**
+  | état | note | niveau |
+  |---|---|---|
+  | les trois critères renseignés (E, E, I) | **84,0 %** | M |
+  | le critère à 20 % perd son niveau | **95,0 %** | **E** |
+  | ce que ça vaudrait si le poids manquant comptait pour zéro | 76,0 % | — |
+  ⮕ **Onze points, et un niveau de plus.** Pas une dégradation : une AMÉLIORATION silencieuse. C'est ce qui la rend
+  indétectable à la relecture — une note trop basse se conteste, une note trop haute passe.
+  ⮕ **MÉCANISME**, `calculerNote()` (`js/evaluation-calcul.js:812-858`) : `if (niveau)` saute le critère, donc il
+  quitte le numérateur ET `ponderationTotal`. La division finale renormalise les pondérations restantes à 100 %.
+  `ponderationTotal` n'a que **trois** occurrences dans tout `js/` (l. 811, 844, 856) : **aucune ne le compare à 1**.
+  ▣ **ET LE CRITÈRE NE DISPARAÎT PAS QUE DE LA NOTE — IL DISPARAÎT DU DOCUMENT.**
+  `_collecterCriteresSauv` (`evaluation-sauvegarde.js:183`) ne pousse un critère que `if (niveau)` : il est absent du
+  tableau `criteres[]` enregistré. `construireCriteres` (`synthese-retroaction-data.js`) mappe ce tableau : **le PDF
+  remis à l'élève ne porte aucune trace qu'un critère existait.** Une grille amputée est indistinguable d'une grille
+  qui n'a jamais eu ce critère. La perte n'est pas récupérable par inspection du livrable.
+  ▣ **FORME VOULUE PAR GRÉGOIRE (1er septembre 2026) : la ligne passe entre l'ÉTAT DE TRAVAIL et le LIVRABLE.**
+  ⛔ **Pas de refus pendant la saisie** — une évaluation en cours est forcément incomplète, bloquer serait
+  insupportable. Au moment de **produire le PDF** ou d'**arrêter la note finale**, l'application doit refuser de
+  conclure **en NOMMANT les critères sans niveau**.
+  ⮕ **LES DEUX SURFACES DE LIVRABLE, MESURÉES** :
+  · `sauvegarderEvaluation()` (`evaluation-sauvegarde.js:363`) et `sauvegarderEvaluationModifiee()`. Le patron de
+    refus y existe déjà : `_validerReferencesSauv` et `_validerReferencesNonDemoSauv` rendent `false` et sortent.
+  · `travaux-export-pdf.js:707` — le seul appelant de `construireFeedback`, donc la porte du PDF de l'élève.
+  ⚠⚠ **CE QUE LA MESURE A TROUVÉ ET QUI COMPLIQUE LA LIGNE — À TRANCHER AVANT DE CODER.**
+  L'auto-save écrit DÉJÀ la note renormalisée en base, et **crée l'évaluation** si elle n'existe pas
+  (`_autoSauvegarderCriteres`, `evaluation-chargement.js`) : il suffit qu'**un seul** critère porte un niveau.
+  `noteFinale` y prend `window.noteCalculeeCourante` — la valeur renormalisée. Or les consommateurs ne distinguent
+  pas un brouillon d'une évaluation conclue : `calculerDetailsNoteFinale` filtre sur `!e.remplaceeParId`
+  (`profil-etudiant-actions.js:240`, `:366`), et la synthèse sur `noteFinale != null`. `verrouillee` existe, mais
+  signifie « archivée, lecture seule », pas « conclue ».
+  ⮕ **Il n'existe donc, dans les DONNÉES, aucune marque qui sépare le travail du livrable.** Un refus posé aux deux
+  portes ci-dessus laisserait intacte la note renormalisée déjà persistée et déjà agrégée au portfolio.
+  ▣▣ **LA PISTE RETENUE — DIRECTION DE GRÉGOIRE, 1er septembre 2026. Instruire CELLE-CI, pas les autres.**
+  J'avais posé la question « qu'est-ce qui marque une évaluation comme CONCLUE ? ». **Elle est écartée**, et le motif
+  vaut plus que la réponse : un état « brouillon vs conclue » ajoute un état de FLUX DE TRAVAIL — un geste de plus,
+  un champ de plus, une intention à deviner — pour une question qui n'en demande pas.
+  ⮕ **CE QUI MANQUE N'EST PAS UN ÉTAT, C'EST UNE PORTÉE.** `noteFinale` circule sans dire **sur quoi elle porte**.
+  Or `ponderationTotal` est DÉJÀ calculée à chaque appel de `calculerNote()` (`evaluation-calcul.js:811`), puis
+  **jetée**. La persister à côté de `noteFinale` suffit : chaque consommateur décide alors pour lui-même — le PDF
+  refuse de conclure et nomme les critères manquants, le portfolio avertit.
+  ⮕ **Trois propriétés qui font la différence** : aucun geste nouveau pour l'enseignant·e ; aucune intention à
+  deviner ; et **valable RÉTROACTIVEMENT** — la portée se recalcule sur les évaluations déjà en base à partir de
+  leur `criteres[]` et de leur grille.
+  ⚠⚠ **À MESURER AVANT DE CODER — ET C'EST UNE QUESTION PÉDAGOGIQUE, PAS TECHNIQUE.**
+  **Le modèle permet-il qu'un critère reste DÉLIBÉRÉMENT non noté, parce qu'il ne s'applique pas à cette
+  production ?** Si oui, une couverture sous 100 % est parfois VOULUE, et le correctif change de forme : il ne
+  s'agirait plus de refuser sous 100 %, mais de distinguer un critère écarté d'un critère oublié. **Répondre à ça
+  avant d'écrire une ligne** — un refus qui se déclenche sur une pratique légitime serait retiré en trois jours.
+  ⏳ **NON CODÉ, et #674 n'est pas ouvert.** Rien n'a été touché : la mesure était la commande.
+- [x] **#673 — Un calcul redevenu inapplicable laisse un texte de rétroaction PÉRIMÉ dans le div, et la sauvegarde le persiste**.
+  Inscrit le 1er septembre 2026 **avant tout usage de l'ID**. **ID distinct de [[#672]], délibérément** : #672 est clos
+  avec son verdict et ses trois mutations tuées ; le symptôme diffère (un texte périmé PLAUSIBLE, pas une amorce
+  reconnaissable), les sites diffèrent (les deux chemins de remise à zéro), et la règle ci-dessous demande ses propres
+  break-tests. Verser ce geste dans un item clos rendrait les deux inauditables.
+  ⮕ **LE DÉFAUT.** Quand la saisie redevient incalculable — l'enseignant·e efface le nombre de mots, ou la formule
+  cesse d'être applicable — les deux chemins de remise à zéro nettoient la note, le pourcentage et le niveau, mais
+  **ne touchent pas au div `comm_<critereId>`** : `_viderResultatAlgoSimple` (`evaluation-calcul.js:306`) ne le
+  regarde pas, et `_resetAffichageAlgoCategories` (`:274`) non plus. Le div garde la rétroaction de la saisie
+  PRÉCÉDENTE — « Ta rédaction contient 7 erreurs de français pour 460 mots. » — pendant que l'écran affiche « -- ».
+  Les trois collecteurs lisent ce div : c'est ce texte-là qui part en base, puis au PDF.
+  ⚠ **PIRE QU'UNE AMORCE, et c'est le motif de l'item** : une amorce se reconnaît (« Saisissez… »), un compte
+  d'erreurs périmé est **plausible**. Personne ne le détecte à la lecture.
+  ⛔ **CE QU'IL NE FAUT SURTOUT PAS FAIRE : effacer le div sans condition.** Il porte AUSSI les commentaires
+  personnalisés de Grégoire. Un nettoyage aveugle détruirait son texte — le contraire du service rendu.
+  ▣ **RÈGLE TRANCHÉE PAR GRÉGOIRE, 1er septembre 2026 : n'effacer QUE ce que le code a lui-même écrit.**
+  On efface si, et seulement si, le contenu courant du div correspond EXACTEMENT (aux blancs près) :
+  · soit à `donneesAlgorithmiques[critereId].retroaction` — le dernier texte engendré par la machine ;
+  · soit à l'une des trois amorces déjà déclarées dans `synthese-retroaction-data.js` (#672).
+  **Sinon, on ne touche à rien.** Même discipline que le script de réparation de la veille : agir uniquement sur une
+  correspondance exacte avec du contenu machine, jamais sur une ressemblance.
+  ✅ **CORRIGÉ le 1er septembre 2026.** `_effacerRetroactionMachine` (`evaluation-calcul.js`), appelée depuis les
+  DEUX chemins de remise à zéro (`_viderResultatAlgoSimple`, `_resetAffichageAlgoCategories`).
+  ▣ **DEUX EMPLACEMENTS, PAS UN — et la mesure l'a montré, la règle seule ne le disait pas.** Le texte périmé vit
+  aussi dans `donneesAlgorithmiques[critereId].retroaction`, où la cascade du PDF (#672) le prend **en repli dès que
+  le div est vide**. Ne vider que le div aurait DÉPLACÉ le défaut au lieu de le retirer, et le test aurait été vert.
+  ⮕ Cette moitié-là est inconditionnelle : cette clé ne contient jamais que du texte engendré. Le div, lui, reste
+  soumis à la règle d'égalité exacte.
+  ▣ **LA LISTE D'AMORCES N'A PAS ÉTÉ RECOPIÉE.** `synthese-retroaction-data.js` expose désormais
+  `estAmorceDeSaisie` ; l'écran d'évaluation l'appelle. Ordre de chargement vérifié (`index.html` l. 14602 avant
+  l. 14645), et l'appel a lieu bien après le chargement de toute façon. Si le module manquait, rien n'est classé
+  **donc rien n'est effacé** — le repli sûr.
+  ▣ **SIX MUTATIONS, SIX ROUGES OBTENUS** (source restaurée par COPIE, vérifiée identique aux deux fichiers) :
+  | mutation | ce qui rougit |
+  |---|---|
+  | retirer l'appel du mode simple | le cas simple SEUL ; catégories reste vert |
+  | **nettoyage INCONDITIONNEL** | **les DEUX cas** — c'est la faute que la règle interdit |
+  | `includes` au lieu de l'égalité | « la phrase engendrée AUGMENTÉE à la main survit » SEUL |
+  | ne vider que le div, garder la mémoire | les deux assertions de mémoire |
+  | retirer l'appel du mode catégories | le cas catégories SEUL |
+  | retirer l'export du prédicat d'amorces | le cas de l'amorce SEUL |
+  ⚠ **UNE MUTATION A D'ABORD SURVÉCU, et c'est la trouvaille du lot.** Retirer l'appel du mode catégories ne faisait
+  rougir personne : mon cas catégories n'assertait que la moitié « préserve », jamais la moitié « efface ». Une
+  assertion vraie qui ne tue aucune mutation ne verrouille rien. **La sentinelle a été corrigée, pas le code.**
+  ⮕ Et le break-test `includes` a révélé un cas d'usage que je n'avais pas couvert : l'enseignant·e qui **garde** la
+  phrase engendrée et ajoute la sienne à la suite. Le div CONTIENT alors le texte machine sans lui être égal — une
+  comparaison relâchée aurait détruit l'ajout. C'est maintenant un cas nommé du test.
+  ⚠ **BRANCHE MORTE MESURÉE, PAS RETIRÉE.** `calculerNoteAlgorithmiqueAvecCategories` écrase le div SANS CONDITION
+  quand `codeDominant === null`. Mesuré : `_trouverCodeDominant` ne rend `null` que sur une liste VIDE, et une liste
+  vide donne `totalErreurs === 0`, déjà intercepté par la garde du dessus qui sort par `return`. **Inatteignable** —
+  c'est pourquoi cet écrasement n'a jamais détruit le texte de personne. J'y avais d'abord posé une garde : retirée,
+  elle protégeait du code mort. ⛔ **Retirer le bloc demande de traiter #672 en même temps** : sa chaîne est la SEULE
+  occurrence de la troisième amorce dans `js/`, et la sentinelle statique l'exige présente. La chaîne devrait rester
+  dans la liste de reconnaissance de toute façon — des évaluations ENREGISTRÉES la portent encore.
+  ⛔ **LE NIVEAU ORPHELIN RESTE EN PLACE — DÉCISION PRISE, PUIS RETIRÉE PAR GRÉGOIRE LE MÊME JOUR, SUR MESURE.**
+  Après une remise à zéro, `donneesAlgorithmiques` garde `niveau`, `noteCalculee` et `pourcentage` de la saisie
+  précédente (mesuré : `mots: 0` avec `niveau: "D"` et une note de 12,39), et `evaluationEnCours.criteres[id]` garde
+  le niveau. Grégoire avait tranché « on retire le niveau s'il vient du calcul, pas du sélecteur manuel », **puis a
+  demandé de mesurer d'abord ce que fait `calculerNote()` quand un critère perd son niveau.** La mesure a invalidé
+  la décision : la note est RENORMALISÉE en silence et le critère disparaît du PDF — voir [[#674]].
+  ⮕ **Le retrait aurait produit une note silencieusement fausse au lieu d'un trou visible**, l'inverse du but.
+  **Rien n'a été codé de ce côté**, et cette partie attend #674 : c'est lui qui doit rendre le trou visible avant
+  qu'on puisse se permettre d'en creuser un.
+  ⚠ **Ce que ce détour vaut, indépendamment du résultat** : la décision était juste dans son intention et fausse dans
+  ses effets, et seule la mesure d'un chemin qu'on n'avait pas regardé (`calculerNote`) pouvait le dire.
+- [x] **#672 — ⚠️ DONNÉES · En mode simple, la rétroaction de français n'est JAMAIS écrite : l'amorce du gabarit part au PDF à sa place**.
+  Inscrit le 1er septembre 2026 **avant tout usage de l'ID**. Signalé par Grégoire, qui ne pouvait pas le voir lui-même :
+  il évalue en mode CATÉGORIES, et ce chemin-là est correct.
+  ⚠ **CE QUE LA MESURE A CORRIGÉ DANS LA FORMULATION DE DÉPART — la portée est plus large que « sans sous-critères ».**
+  Le mode ne vient PAS de la présence de sous-critères sur le critère. Il vient de **deux choses** :
+  · la modalité GLOBALE `modalitesEvaluation.activerCategorisationErreurs` (`evaluation-chargement.js:926`), avec un
+    forçage par critère quand `donneesAlgorithmiques[id].codes` existe déjà (`:931`) ;
+  · et surtout : **le chemin de rendu SANS cartouche (`afficherCriteresDepuisGrille`, `:1073`) n'a AUCUNE branche
+    catégories.** Il rend le mode simple pour TOUS les critères algorithmiques, sous-critères ou pas, modalité ou pas.
+  ⮕ Autrement dit, quiconque évalue sans cartouche sélectionnée était touché — y compris Grégoire, dont le sélecteur
+  affichait « — Choisir une cartouche — » au #645. La cohorte 1 de mi-septembre l'aurait été par défaut.
+  ⮕ **MESURÉ le 1er septembre 2026 au matin, à la lecture des quatre sites, avant toute correction.**
+  · `js/evaluation-calcul.js:630-632` (mode simple) écrit `champCommentaire.value = retroactionGenerique`
+    sur `comm_<critereId>`, qui est un **`<div>`** (`js/evaluation-chargement.js:1028` et `:1194`, les DEUX chemins de
+    rendu). `.value` sur un `<div>` pose une propriété JS parasite ; `textContent` **ne bouge pas**.
+  · `js/evaluation-calcul.js:517` et `:526` (mode catégories) écrivent `commDiv.textContent = …` sur le MÊME div.
+    **C'est l'asymétrie qui prouve l'erreur** : le même élément, deux modes, deux accès, un seul correct.
+  · Ce que le div contient donc en mode simple : l'amorce du gabarit,
+    « Saisissez les erreurs et le nombre de mots » — jamais remplacée.
+  ▣ **TROIS lecteurs collectent `commDiv.textContent`** et persistent donc l'amorce sous `criteres[].retroaction` :
+  `_collecterCriteresAutoSave` (`evaluation-chargement.js:1376`), `_collecterCriteresMod` (`evaluation.js:1742`),
+  `_collecterCriteresSauv` (`evaluation-sauvegarde.js:189`). **À chaque enregistrement, pas parfois.**
+  ⚠⚠ **ET LE GARDE-FOU DU PDF NE PEUT PAS JOUER — il se croit protégé et ne l'est pas.**
+  `js/synthese-retroaction-data.js:389` cascade `(c.retroaction && c.retroaction.trim()) || retroAlgo || cartouche`.
+  Son commentaire annonce : « Sans ce fallback, le PDF affiche le placeholder "Saisissez les erreurs et le nombre de
+  mots" ». Or `c.retroaction` **porte** ce placeholder, et il est TRUTHY : le repli `retroAlgo` n'est jamais atteint.
+  Le PDF remis à l'élève imprime l'amorce **à la place** de « Ta rédaction contient X erreurs… » et de la projection EUF.
+  ⮕ La vraie rétroaction, elle, EST correctement persistée dans `donneesAlgorithmiques[critereId].retroaction`
+  (`evaluation-calcul.js:645`). **Rien n'est perdu : c'est la cascade qui choisit la mauvaise des deux.**
+  ✅ **CORRIGÉ le 1er septembre 2026, LES DEUX MOITIÉS** — l'une ne suffisait pas.
+  1. **La symétrie** : `evaluation-calcul.js:630` écrit désormais `champCommentaire.textContent`, comme le mode
+     catégories le fait depuis toujours sur le même div. Répare les évaluations À VENIR.
+  2. **La cascade** : `synthese-retroaction-data.js` reconnaît les trois amorces de saisie et refuse de les laisser
+     évincer la rétroaction calculée. **Seule cette moitié rattrape les évaluations DÉJÀ enregistrées**, qui portent
+     l'amorce en base — celles de la nuit du 31 août comprises.
+  ▣ **DEUX ROUGES OBTENUS AVANT DE CORRIGER, chacun sur le banc qui peut le juger.**
+  · `tests/integration/retroaction-mode-simple-672.spec.js` (WebKit) — la cause amont. Mesuré AVANT correction :
+    `divSimple` = « Saisissez les erreurs et le nombre de mots », `divCateg` = « Ta rédaction contient 3 erreurs… ».
+    **Les deux modes, le même div, dans le même rendu** : c'est l'asymétrie qui fait la preuve, et le témoin
+    catégories interdit de conclure « la mesure ne sait pas lire un div ».
+    ⚠ Un banc Vitest **ne peut pas** juger cette moitié : son DOM est fait d'objets écrits à la main, où `.value` et
+    `textContent` sont indépendants **par construction du stub**. Le test serait vrai sans rien mesurer.
+  · `tests/unit/sentinelle-672-retroaction-mode-simple.test.js` (Vitest) — la cascade du PDF, du calcul pur sur des
+    données : un banc Node la juge honnêtement. 11 cas.
+  ▣ **TROIS MUTATIONS, TROIS ROUGES OBTENUS** (source restaurée par COPIE, vérifiée identique) :
+  retirer la garde → 3 rouges · inverser `retroAlgo || retroPersistee` → le témoin « un texte personnalisé garde la
+  priorité » rougit SEUL · réécrire l'amorce dans le gabarit sans toucher à la garde → la sentinelle statique rougit.
+  ⚠ **Cette troisième mutation est celle qui compte** : une liste de reconnaissance périme en silence. La sentinelle
+  relit les trois fichiers d'origine, **commentaires filtrés** — sans quoi elle serait vraie grâce aux commentaires
+  de #672 eux-mêmes, qui citent les amorces mot pour mot.
+  **Vitest 425 fichiers / 4572 tests, code 0**, lu APRÈS le dernier changement.
 - [x] **#670 — CORRIGÉ · Une migration de largeurs de panneau empêchait l'application de démarrer quand localStorage est plein**.
   ⚠ **Mesuré en production le 31 août 2026 à 22 h 36**, chez Grégoire, écran d'évaluation bloqué sur « Chargement… ».
   `js/travaux-ui.js:321` posait son drapeau de migration par un `localStorage.setItem` **brut, situé APRÈS son propre
