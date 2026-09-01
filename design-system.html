@@ -1027,6 +1027,44 @@
     <p class="guide-section-intro">4 types d'alertes, badges d'évaluation et badges de notation.</p>
 
     <div class="guide-component">
+        <h3 class="guide-component-title">La grammaire des bandeaux d'import — ce que la couleur PROMET</h3>
+        <p class="guide-section-intro">
+            Fixée par Grégoire le <strong>1er septembre 2026</strong>, après que la question
+            « de quelle couleur ce bandeau&nbsp;? » soit revenue une fois de trop. Elle ne décrit pas
+            une intensité mais une <strong>conséquence sur les données</strong> : c'est ce qui la rend
+            déductible plutôt qu'affaire de goût.
+        </p>
+        <table class="guide-table">
+            <thead>
+                <tr><th>Couleur</th><th>Ce qu'elle promet</th><th>Exemple vivant</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Bleu</strong></td>
+                    <td>Informatif — <strong>rien n'est perdu</strong>.</td>
+                    <td><code>.travaux-bandeau-sans-da</code> — pas de DA, mais l'élève est trouvé par son nom&nbsp;; seul le regroupement multi-pages ne se fait pas.</td>
+                </tr>
+                <tr>
+                    <td><strong>Orange</strong></td>
+                    <td>Le fichier <strong>n'ira pas où je crois</strong>, mais rien n'est détruit et je peux passer outre.</td>
+                    <td><code>.travaux-bandeau-autre-gc</code>, <code>.travaux-bandeau-da-inconnu</code> — l'import se fait, le fichier atterrit ailleurs que prévu.</td>
+                </tr>
+                <tr>
+                    <td><strong>Rouge</strong></td>
+                    <td>Quelque chose peut être <strong>ÉCRASÉ</strong>.</td>
+                    <td><code>.travaux-bandeau-doublon</code> — un fichier déjà importé pour le même couple élève + production.</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="guide-section-intro">
+            ⚠ <strong>Un bandeau neuf se déduit de cette table, il ne se choisit pas.</strong>
+            Et il n'est pas fini tant que sa classe n'existe pas dans <code>styles.css</code> :
+            les bancs de test lisent le DOM et le texte, jamais le rendu — une classe employée sans
+            être définie leur est invisible (voir #679).
+        </p>
+    </div>
+
+    <div class="guide-component">
         <h3 class="guide-component-title">Alertes</h3>
         <div class="ref-dual">
             <div class="ref-panel ref-panel-sombre">
