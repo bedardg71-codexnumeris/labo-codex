@@ -72,9 +72,21 @@ rendrait un « non » qui accuserait le mauvais coupable.
    passée sur cette base** : les libellés du §3 n'y sont pas.
 2. **Recharger avec vidage de cache** (Cmd+Option+R sur Mac). Les jetons du jour
    vont jusqu'à `20260901f` ; sans ce geste, tu juges du code d'hier.
-3. Se placer dans un **trimestre où le matériel semé n'a pas été modifié**. Si
-   les trois pièces ont déjà été renommées ou retouchées, cette porte ne mesure
-   plus rien — le dire et s'arrêter là.
+3. ⚠⚠ **DIRE DANS QUEL TRIMESTRE ON SE PLACE, ET LE VÉRIFIER.** « Un trimestre où
+   le matériel n'a pas été modifié » ne suffit pas : **le matériel n'est pas le
+   même d'un trimestre à l'autre.** Mesuré le 1er septembre — chez Grégoire,
+   `GRILLE_GENERIQUE` vit dans h2026 seulement, `ECHELLE_IDME_DEPART` dans a2026
+   seulement. Le triptyque est **incomplet dans le trimestre où il travaille**.
+   ⮕ Le trimestre est donc une **variable de cette porte**, pas un décor.
+   L'inscrire en tête de la grille de relevé, et refaire la passe pour chaque
+   trimestre que la porte prétend couvrir.
+   ⮕ Si la sonde rapporte une absence dans le trimestre choisi, **la porte 2 ne
+   peut pas être passée là** : ce n'est pas le §3 qu'elle mesurerait, c'est
+   **#683** — le semis ne tourne qu'au chargement de la page ou à l'ouverture de
+   l'onglet, jamais à la bascule ; et une suppression faite dans un trimestre pose
+   un tombstone GLOBAL qui interdit la pièce dans tous les autres.
+4. Si les trois pièces ont déjà été renommées ou retouchées **par toi**, cette
+   porte ne mesure plus rien — le dire et s'arrêter là.
 
 ---
 
@@ -154,6 +166,10 @@ mot que tes élèves lisent, et le nom se change en dix secondes.
 ---
 
 ## §5 — GRILLE DE RELEVÉ
+
+**Trimestre de la passe : `____________`** — à remplir AVANT de commencer. Le
+matériel semé diffère d'un trimestre à l'autre (#683) : un relevé sans cette
+mention n'est pas interprétable.
 
 | Porte | Mac | iPad | Note (une ligne) |
 |---|---|---|---|
