@@ -3,9 +3,8 @@
 > **Ce fichier est un point d'entrée léger, chargé à chaque session.**
 > Tout ce qui est volumineux ou conditionnel vit dans `.claude/skills/`
 > et se charge à la demande. Ne rien ajouter ici sans retirer autant.
-> **Cible : moins de 250 lignes** — relevée de 200 le 1er sept. 2026, parce que
-> ce fichier porte désormais la règle qui dit ce qui remonte jusqu'à Grégoire.
-> C'est le seul texte lu par toutes les sessions : il doit la porter.
+> **Cible : moins de 250 lignes.** C'est le seul texte lu par TOUTES les sessions :
+> ce qui y entre doit valoir la place qu'il prend à chacune.
 
 ---
 
@@ -17,7 +16,13 @@ ne passe à « fait » qu'avec sa phrase « vérifié comment ». Puis
 `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` (état mesuré, mandat courant) et
 `OBJECTIF-COHORTE-1.md` (la ligne d'arrivée, arrêtée).
 
-⚠ `docs/00-START-HERE.md` date du **3 juillet 2026** : plan des lieux, pas état.
+### Qui écrit quoi dans la consigne de démarrage (1er sept. 2026)
+
+**Claude Code rend l'ÉTAT MESURÉ** en fin de session : des faits datés, rien d'autre.
+**Cowork écrit le MANDAT** et la séquence, à froid, avec Grégoire. Motif : une session
+qui rédige sa propre consigne de relais **se relit elle-même** — elle transmet ce
+qu'elle a vu, pas ce qu'elle a manqué. C'est l'argument de la relecture croisée,
+appliqué au relais.
 
 ---
 
@@ -25,10 +30,9 @@ ne passe à « fait » qu'avec sa phrase « vérifié comment ». Puis
 
 **REGLE DE RELAIS (8 août 2026)** : on FUSIONNE vers `main` à la fin de CHAQUE
 session. Si un merge doit vraiment attendre, remplir `RELAIS.md` à la racine et
-le pousser sur `main` SEUL. Motif : le 8 août, deux sessions sont parties du même
-commit sans se voir, chacune a livré une « 1.55.0 » différente et pris les mêmes
-identifiants de backlog. `RELAIS.md` est le seul point que toute session lit,
-quelle que soit la branche ouverte.
+le pousser sur `main` SEUL — c'est le seul point que toute session lit, quelle que
+soit la branche. Motif : le 8 août, deux sessions parties du même commit ont livré
+deux « 1.55.0 » et pris les mêmes identifiants.
 
 **EN TOUT PREMIER, AU DÉBUT DE CHAQUE SESSION** : **déléguer le rituel au
 subagent `audit-debut-session`** (skill `debut-de-session-labo-codex` en contexte
@@ -39,19 +43,16 @@ prémisse reçue. Lecture seule. Acté le 28 mai 2026 après un écart de 24 h.
 ⚠ **Vitest se lance DEPUIS `tests/`**, jamais de la racine : de la racine il
 balaie `.claude/worktrees/` sans la config et rend 217 fichiers rouges.
 
-⚠ **Lectures ciblées obligatoires.** `SESSION.md` fait **12 000 lignes (1,3 Mo)**,
-`BACKLOG.md` **7 300 (930 Ko)** et `RELAIS.md` **3 350 (236 Ko)**, avec des lignes
-de plusieurs milliers de caractères. **Ne
-jamais les lire sans `offset`/`limit`** : un `Read` par défaut sur `SESSION.md`
-coûte ~106 000 tokens. Lire l'en-tête, puis cibler.
+⚠ **Lectures ciblées obligatoires.** `SESSION.md`, `BACKLOG.md` et `RELAIS.md` pèsent
+chacun des centaines de milliers d'octets, sur des lignes de plusieurs milliers de
+caractères. **Ne jamais les lire sans `offset`/`limit`** : un `Read` par défaut sur
+`SESSION.md` coûte plus de 100 000 tokens. Lire l'en-tête, puis cibler.
 
 Ensuite, selon le chantier :
 
-1. `docs/00-START-HERE.md`
-2. `BACKLOG.md` (tâches en attente) et `SESSION.md` (contexte récent)
-3. `ETAT-PROJET.md` pour se situer vis-à-vis des objectifs de stabilité,
-   pérennité et qualité, et de l'avancement des plans
-4. Le module concerné dans `docs/modules/`, et `docs/legacy/` pour les
+1. `BACKLOG.md` (tâches en attente) et `SESSION.md` (contexte récent)
+2. `ETAT-PROJET.md` pour les objectifs de stabilité, pérennité et qualité
+3. Le module concerné dans `docs/modules/`, et `docs/legacy/` pour les
    problèmes connus
 
 **Les skills métier se chargent tout seuls** selon le chantier (architecture,
@@ -75,8 +76,8 @@ Les retours utilisateurs passent AVANT le backlog prévu.
 ### Ce qui entre au BACKLOG (24 août 2026)
 
 **Un item n'entre que s'il a un symptôme que Grégoire a VÉCU, ou s'il bloque un
-chantier en cours.** Motif : 76 items ouverts, nourris par les sessions — « les
-tâches s'accumulent sans jamais voir la fin ». Au 1er septembre 2026 : **159**.
+chantier en cours.** Motif, dans ses mots : « les tâches s'accumulent sans jamais
+voir la fin ». Le compte d'items monte quand on cherche mieux : il ne mesure rien.
 
 ### Ce qu'une trouvaille devient — TROIS ISSUES, PAS DEUX (1er septembre 2026)
 
@@ -130,8 +131,6 @@ vaut À L'INTÉRIEUR d'un lot, ce n'est pas une licence pour l'agrandir.
 
 - Un chantier n'est pas fini tant que l'ancien système n'est pas retiré. Pas
   d'alias « au cas où », pas de code mort « pour plus tard ».
-- Refactoriser est **attendu** si cela améliore la stabilité, même si le scope
-  s'élargit.
 - Avant de changer un défaut de préférence, un flag ou une signature : auditer
   les call-sites pour détecter le code dormant qui pourrait se réveiller.
   (Cas d'école : commit `51e5cdc` du 20 avril, primo-accueil réveillé.)
@@ -152,15 +151,11 @@ Les données sont préfixées par trimestre (`h2026_groupeEtudiants`,
 
 ---
 
-## Architecture des données
-
-**Document fondateur** : `docs/architecture/ECOSYSTEME-DONNEES.md` (26 avril 2026)
-— quatre concepts : Codex, Archives, Codex data, Voûte. À lire AVANT de toucher à
-`codex.js`, `import-export.js`, `db.js` ou `travaux-stockage.js`.
-
----
-
 ## Contraintes techniques
+
+**Architecture des données** : `docs/architecture/ECOSYSTEME-DONNEES.md` — quatre
+concepts (Codex, Archives, Codex data, Voûte). À lire AVANT de toucher à `codex.js`,
+`import-export.js`, `db.js` ou `travaux-stockage.js`.
 
 - **Stack** : HTML5 / CSS3 / JavaScript ES6+ pur (aucune dépendance externe sauf Chart.js)
 - **Stockage** : hybride localStorage (< 200 Ko) + IndexedDB/memoryCache (> 200 Ko) via `db.js`
@@ -195,11 +190,8 @@ Documentation : `docs/securite/TESTS-AUTOMATISES.md`.
 
 ## Zones protégées
 
-**NE JAMAIS MODIFIER sans autorisation** :
-
-- `js/config.js` — configuration navigation
-- `js/navigation.js` — logique navigation
-- `noms_stables.json` — registre des noms protégés
+**NE JAMAIS MODIFIER sans autorisation** : `js/config.js` et `js/navigation.js`
+(navigation), `noms_stables.json` (registre des noms protégés).
 
 ---
 
@@ -214,8 +206,7 @@ Documentation : `docs/securite/TESTS-AUTOMATISES.md`.
 7. Documenter, committer et pousser seulement après validation
 8. En fin de session : ce qui est fait, ce qui reste, les risques
 
-**Travail visuel ou UI** → le skill `design-interface` se charge ; `design-system.html`
-reste la source de vérité.
+**Travail visuel ou UI** : `design-system.html` reste la source de vérité.
 
 ---
 
@@ -234,9 +225,8 @@ la recopier ici. **Confirmer avec Grégoire avant un `major`.**
 
 ## Ce qui remonte jusqu'à Grégoire — et ce qui ne remonte pas
 
-**RÉVISÉ LE 1er SEPT. 2026.** Ce paragraphe disait « pose la question plutôt que
-de supposer ». Juste quand le projet était petit ; à l'échelle actuelle, ça lui
-fait arbitrer une quinzaine de décisions par session.
+**RÉVISÉ LE 1er SEPT. 2026** — « pose la question plutôt que de supposer » lui
+faisait arbitrer une quinzaine de décisions par session.
 
 **Le défaut est maintenant : DÉCIDE, puis DIS-LE en une ligne.** Tranche
 toi-même les questions techniques (nommage, découpage, ordre des lots, forme
