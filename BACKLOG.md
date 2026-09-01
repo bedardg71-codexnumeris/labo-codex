@@ -357,7 +357,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⏳ **L'ITEM RESTE OUVERT, ET IL N'EST PAS EN RETARD** — il attend deux gestes qui ne sont pas ceux d'une session :
   **T4.3**, le test manuel sur un trimestre jetable, et **T4.4**, la **levée du moratoire D1**, qui est une décision
   de Grégoire. ⛔ **Le moratoire à trois gestes reste ACTIF tant qu'il ne l'a pas levé lui-même.**
-- [ ] **#623 — S5 · Régime des cartouches** (constat B2). Après S1 et D2. ⚠ Migration de données réelles : sauvegarde préalable par copie obligatoire.
+- [x] **#623 — S5 · Régime des cartouches** (constat B2). Après S1 et D2. ⚠ Migration de données réelles : sauvegarde préalable par copie obligatoire.
   ⚠⚠ **BLOQUÉ PAR #635 — la sauvegarde préalable n'a pas d'instrument vérifié.** La migration
   **SUPPRIME les clés nues** après copie, et il n'existe aucune annulation. Tant que le trajet
   aller-retour n'est pas démontré, **rien ne s'exécute sur les données de Grégoire.**
@@ -369,7 +369,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   désarchiver efface la seule donnée du trimestre. Même perte que #358/#359 pour les grilles.
   ⮕ ⚠ `cartouches.js:230` d'abord (Z1-M3) : un `const cle` LOCAL masque la fonction `cle()`. Le
   renommer avant d'envelopper quoi que ce soit, sinon `TypeError`.
-- [ ] **#635 — La sauvegarde préalable de S5 n'a pas d'instrument vérifié, et la migration est sans retour**.
+- [x] **#635 — La sauvegarde préalable de S5 n'a pas d'instrument vérifié, et la migration est sans retour**.
   Inscrit le 31 août 2026 par `kuekatsheu-f3`, **avant tout usage**. **Bloque #623 / S5.**
   Le plan et le rapport Z1 exigent tous deux une « sauvegarde préalable PAR COPIE obligatoire » avant S5.
   **Personne n'avait établi AVEC QUOI.** Mesuré le 31 août en lisant `js/import-export.js:3215` :
@@ -388,7 +388,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ Rappel de contexte : le fichier « Exporter » d'un trimestre n'a **aucun** chemin de restauration
   (`type: 'archive-trimestre'` n'apparaît qu'à l'écriture), et le snapshot d'archivage **n'a aucun
   lecteur**. Ni l'un ni l'autre ne peut servir ici.
-- [ ] **#636 — Sept énumérations par préfixe `cartouches_` dans `scripts/` ne sont dans AUCUN périmètre de session, et mentiraient par ZÉRO**.
+- [x] **#636 — Sept énumérations par préfixe `cartouches_` dans `scripts/` ne sont dans AUCUN périmètre de session, et mentiraient par ZÉRO**.
   Inscrit le 31 août 2026 par `kuekatsheu-c8`, **avant tout usage**, sur mesure de `kuekatsheu-67`, recoupée indépendamment.
   Les trois audits Z1/Z2/Z3 ne recensent que `js/`. `scripts/` en porte **sept de plus, dans six fichiers** :
   `diagnostic-453-references-productions.js:128` · `reparation-cartouches-orphelines.js:47` ·
@@ -411,7 +411,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   dans `biblio.cartouches`, mais son voisin `_retirerBibliothequesDuGroupe` (`:261`) ne strippe que la forme nue lui
   aussi : la clé namespacée **reste dans les données du groupe**. Les deux `indexOf` ratent ensemble et se compensent.
   ⚠ Ne pas propager « déjà invisible » aux deux lecteurs : l'affirmation serait plus forte que la mesure.
-- [ ] **#638 — Z2:830 surestime le travail de S9 sur `partage-import.js` : la table de correspondance EXISTE, c'est son APPLICATION qui manque**.
+- [x] **#638 — Z2:830 surestime le travail de S9 sur `partage-import.js` : la table de correspondance EXISTE, c'est son APPLICATION qui manque**.
   Inscrit le 31 août 2026 par `kuekatsheu-c8`, sur mesure de `kuekatsheu-67`.
   Z2:830 affirme que « les quatre implémentations attribuent un id neuf à une cartouche sans le mémoriser ».
   **Faux pour `js/partage-import.js`** : la table est là (`correspondance.cartouche`, `:152-156`, par préfixe).
@@ -459,7 +459,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `sousCriteres` — les onze rétroactions de français se perdent au partage, comme au #511 pour l'import/export.
   Et `js/grilles.js:268`, `:279`, `:383` lisent `getElementById('critereFormule')` **sans garde**, sur un id absent
   d'`index.html` (champ « formule » décoratif hérité, sans lien avec le calcul).
-- [ ] **#671 — ⚠️ DONNÉES · La bascule de copie contamine le compte d'erreurs avec celui de la copie précédente**.
+- [x] **#671 — ⚠️ DONNÉES · La bascule de copie contamine le compte d'erreurs avec celui de la copie précédente**.
   **MESURÉ le 31 août 2026 à 23 h, sur 27 copies réelles** (601-101-MQ gr.00007, « Portrait de lecteur/lectrice »),
   par comparaison du `donneesAlgorithmiques[].erreurs` stocké au **comptage des tampons `errfr_*` de l'annotation** —
   la seule source de vérité. **21 concordent, 5 DIVERGENT** :
@@ -826,7 +826,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   aussitôt écrasée. Ne pas payer ça pour un défaut dont le chemin exact est connu.
   ⚠ **Condition avant toute ligne de code** : un ROUGE qui reproduit la combinaison (mode d'avant = `evaluer` + rappel
   posé). Si ce rouge est trop coûteux à monter, le dire plutôt que livrer un correctif non éprouvé.
-- [ ] **#665 — Le bump de version a QUATRE emplacements, pas trois : `version.js` est le seul que l'application lise en `file://`, et il était resté à l'ancienne version**.
+- [x] **#665 — Le bump de version a QUATRE emplacements, pas trois : `version.js` est le seul que l'application lise en `file://`, et il était resté à l'ancienne version**.
   Inscrit le 31 août 2026 par `kuekatsheu-14`, **avant tout usage**. **CORRIGÉ dans le même commit.**
   **Le fait.** `version.js` (RACINE) est généré par `scripts/release.mjs`, jumeau de `version.json`, créé parce qu'en
   `file://` **`fetch` et XHR sont refusés par WebKit** (#495). Il est chargé par `index.html:14404`, et
@@ -1143,7 +1143,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   sans eux **déplace** le mensonge au lieu de le retirer.
   ⚠ **Portée de la preuve** : établi par lecture de code, pas par exécution. La structure dit que la cartouche survit ;
   seules les DONNÉES diraient combien sont dans les deux magasins à la fois. Ne pas citer ceci comme un comptage.
-- [ ] **#650 — S6 · La porte de sortie des échelles écrit HORS FILE, entre deux dialogues — généraliser le patron généraliserait la course**.
+- [x] **#650 — S6 · La porte de sortie des échelles écrit HORS FILE, entre deux dialogues — généraliser le patron généraliserait la course**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur mesure de `kuekatsheu-67`, **rejouée par la
   coordinatrice**. Lot de #624.
   `migrerEvaluationsVersNouvelleEchelle` (`js/echelles.js:4294`) fait `db.get` → mutation en mémoire → **`db.set`**.
@@ -1185,7 +1185,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⚠ **Latent** : le jour où quelqu'un déclare une fonction de ce nom, le chemin bascule **en silence** vers une
   sémantique que personne n'a comparée. **Un garde mort est une bascule armée** — c'est la version « branchement » de
   la garde née morte de S5.
-- [ ] **#645 — Après un changement de grille, le nombre d'erreurs est perdu et le calcul algorithmique ne rend plus de résultat** (grille « français seul »).
+- [x] **#645 — Après un changement de grille, le nombre d'erreurs est perdu et le calcul algorithmique ne rend plus de résultat** (grille « français seul »).
   Inscrit le 31 août 2026 par `kuekatsheu-9f` (coordinatrice), **avant tout usage**, à la demande de `kuekatsheu-5d`
   qui porte le correctif sous le pilotage direct de Grégoire. Retour terrain de Grégoire.
   Arbitrage de Grégoire le 31 août : **correctif CIBLÉ** (reporter les tampons et relancer le calcul après un
@@ -1212,7 +1212,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   écrit**. La mesure qui fermerait le constat : appeler la vraie fonction et constater sa sortie anticipée.
   ⮕ Même motif, retourné, que l'ombre locale de `js/donnees-v2.js` relevée le même soir sous #624 : deux emplacements,
   un seul nom, et personne ne le voit. Là une IIFE masque un `window.X` ; ici un `let` l'empêche d'exister.
-- [ ] **#644 — Le cadenas de la palette Paramètres n'était exempté par aucune classe : le glisser de barre avalait son clic, et déverrouiller une évaluation était impossible**.
+- [x] **#644 — Le cadenas de la palette Paramètres n'était exempté par aucune classe : le glisser de barre avalait son clic, et déverrouiller une évaluation était impossible**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f` (coordinatrice), **avant tout usage**, à la demande de `kuekatsheu-5d`
   qui porte le correctif. Retour terrain de Grégoire depuis l'écran Évaluation.
   `#btnVerrouPalette` (`js/travaux-ui.js:4707`, classes `btn btn-compact`) ne portait ni `.palette-flottante-toggle`
@@ -1290,7 +1290,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⚠ **Fait annexe, à connaître avant S5** : `migrerCartouchesVersBibliotheque` (la vivante) n'est couverte par
   **AUCUN test** — mesuré le 31 août, zéro fichier de `tests/` ne la nomme. Or c'est elle qui porte la clé de
   stockage `cartouches_<grilleId>` que S5 doit router. Un vert de suite ne dit rien sur elle.
-- [ ] **#640 — La section d'ouverture n'est verrouillée par AUCUNE sentinelle : l'accueil doit rester la porte d'entrée quelle que soit la valeur de `demo-actif` et du mode expert**.
+- [x] **#640 — La section d'ouverture n'est verrouillée par AUCUNE sentinelle : l'accueil doit rester la porte d'entrée quelle que soit la valeur de `demo-actif` et du mode expert**.
   Inscrit le 31 août 2026 par `kuekatsheu-c8`, **avant tout usage**. Demandé par Grégoire. Suite de `8f4ff85d`.
   `js/main.js:991` — `afficherSection('accueil')`, désormais **inconditionnel**. Le « Chantier 3 » dérivait
   vers `naviguerVers('suivi', 'groupe')` dans DEUX cas : `db.getSync('demo-actif') === 'true'` **ou**
@@ -2755,7 +2755,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - ⚠ **Pas de bump de version** : l'application de Grégoire est ouverte en `file://` et le bump est
     dû à la clôture de #540. Une release à la fois.
 
-- [ ] **#540 — La durée hebdomadaire du cours n'est ni exigée, ni recoupée avec l'horaire.**
+- [x] **#540 — La durée hebdomadaire du cours n'est ni exigée, ni recoupée avec l'horaire.**
   Constaté le 26 août 2026 sur une capture du formulaire Cours envoyée par Grégoire : « le nombre
   d'heures de cours par semaine n'est pas dans les formulaires ». **Audit : il y est, mais dérivé
   et jamais vérifié.** `_parserPonderation` (`trimestre-v2-cours.js:732`) découpe déjà « 2-2-3 », et
@@ -3300,7 +3300,30 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   « reproduit en harnais Node, non vérifié en navigateur » ; ce n'est plus le cas.
   ⏳ **CE QUI RESTE, INSCRIT À PART : #578** (le choix de l'échelle d'une cartouche neuve).
 
-- [ ] **#581 — La rétroaction de français parle d'EUF et du CAF à tout le monde.** (rapport du 27 août, §3 n° 12)
+- [ ] **#581 — Le mot « français » est écrit en dur dans la rétroaction et dans le PDF de l'élève, quelle que soit la discipline.**
+  ⚠ **TITRE RÉÉCRIT le 1er septembre 2026 (Lot A).** L'ancien — « la rétroaction de français parle d'EUF et
+  du CAF à tout le monde » (rapport du 27 août, §3 n° 12) — décrit une part que **#668 a déjà traitée** : l'EUF
+  et le nom du service d'aide sont sortis du moteur vers `js/evaluation-projection.js`. Le laisser tel quel
+  ferait rouvrir l'item sur une cible morte, et manquer le défaut qui reste.
+  ⚠⚠ **CE QUI RESTE, ET QUI EST PIRE : `synthese-retroaction-rendu.js:510` est IMPRIMÉ DANS LE PDF REMIS À
+  L'ÉLÈVE** — « Français écrit · 2 catégories les plus fréquentes ». Un enseignant de chimie qui compte des
+  erreurs voit son critère **rebaptisé « français » dans la copie de son élève**.
+  **Huit littéraux, VÉRIFIÉS LIGNE À LIGNE le 1er septembre 2026** (pas repris du cadrage) — deux natures,
+  à ne pas traiter pareil :
+  · **(A) En-têtes et libellés** → doivent porter le **nom du critère tel qu'il est dans la grille**, déjà
+    disponible ; aucun registre à créer. `synthese-retroaction-rendu.js:510` (le PDF) ·
+    `evaluation-retroaction.js:478` « Erreurs de français (N) » · `synthese-retroaction-data.js:837`
+    « Français : N erreurs ».
+  · **(B) Phrases engendrées** → même geste que #667 et #668 : un modèle réglable depuis le gabarit, pas une
+    chaîne dans le moteur. `evaluation-calcul.js:502` et `:680` « Ta rédaction contient N erreurs de français
+    pour M mots » — sort pour TOUT critère algorithmique. ⚠ **« rédaction » est aussi faux que « français »**
+    pour qui compte autre chose. Puis `evaluation-retroaction.js:785`, `:854` et
+    `synthese-retroaction-data.js:728`.
+  ⛔ **NE PROPOSER AUCUNE RÉGÉNÉRATION DE MASSE** — leçon du 31 août : changer une phrase engendrée ne change
+  QUE les évaluations à venir ; les anciennes portent leur texte gelé dans `donneesAlgorithmiques[id].retroaction`,
+  et régénérer écraserait le paragraphe de catégorie dominante.
+  ⮕ **Fini quand** : un critère algorithmique nommé autrement que « Français écrit » produit un PDF où le mot
+  « français » n'apparaît nulle part, sauf si l'utilisateur l'a écrit lui-même.
   ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A : CONFIGURABLES, en couche 2**, comme SRPNF et
   les autres concepts pédagogiques.
   ⮕ Sa règle de conception, dans ses mots : « *La rétroaction est envoyée à chaque élève individuellement
@@ -4271,7 +4294,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `etats-vides.js` l'affirme d'ailleurs depuis le 19 avril 2026, alors que le code du même commit
   ne faisait déjà que la balance.
 
-- [ ] **#597 — Les remises HEIC ne s'affichent nulle part : aucun décodeur dans le dépôt.**
+- [x] **#597 — Les remises HEIC ne s'affichent nulle part : aucun décodeur dans le dépôt.**
   Créé le 30 août 2026, pendant l'import réel du Portrait de lecteur (601-101, 49 fichiers).
   **Mesuré** : deux remises `.HEIC` (Breton, 4032 x 3024, brand `ftypheic`, magic bytes valides)
   entrent dans la file, passent `validerMagicBytes`, et ressortent sans miniature — `thumb: false`,
@@ -5040,6 +5063,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   lot 2c) : ils vérifient l'existence HORS file, donc deux appels concurrents sèment deux fois.
   ⮕ **À traiter comme un lot à part entière**, pas comme un reliquat : même patron que les lots 2 et 4,
   outil de mesure disponible (`mesurer-522-v2`, apparie sur l'EXPRESSION de clé, pas sur une chaîne).
+  ⚠ **NE PAS COCHER — et le cadrage du 1er septembre se trompe sur ce point.** Son §4 range #599 parmi les
+  17 cases « livrées ». Vérifié le 1er septembre 2026 : **aucun commit ne nomme #599**, et le mot « LIVRÉ »
+  de cette fiche désigne le **lot 4 de #522**, pas #599 — l'item existe précisément pour dire que ce lot 4
+  n'a fermé QUE le contrat du helper. Les 20 sites en course n'ont pas été traités.
 
 - [ ] **#600 — Le rituel de release contient un vert creux : la sentinelle anti-cache lancée après le
   commit ne vérifie RIEN et se tait.**
@@ -5104,7 +5131,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `display:none` et toutes les boîtes mesurent zéro — le test « passe » sans avoir rien vu. Un
   garde-fou exige désormais une largeur non nulle avant de mesurer.
 
-- [ ] **#605 — Le message « Fichier sous … » se déclenche sur TOUTE ligne non reçue d'un élève qui a
+- [x] **#605 — Le message « Fichier sous … » se déclenche sur TOUTE ligne non reçue d'un élève qui a
   importé quoi que ce soit. Il ne peut structurellement rien apprendre.**
   Relevé le 30 août 2026 sur les données réelles de Grégoire, capture à l'appui : un élève ayant
   remis 1 travail sur 11 récoltait **10 avertissements**, tous exacts et tous inutiles ; un élève
@@ -5128,7 +5155,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   sans quoi elles redériveraient. Le cas est atteignable : le sélecteur de production de l'import
   offre les portfolios comme les autres (`travaux-ui.js:1808`).
 
-- [ ] **#604 — « Remplacer l'existant » jette l'ancien fichier À LA CORBEILLE SANS jamais importer le
+- [x] **#604 — « Remplacer l'existant » jette l'ancien fichier À LA CORBEILLE SANS jamais importer le
   nouveau. Les deux disparaissent.** 🔴 PERTE DE DONNÉES
   Trouvé le 30 août 2026 sur l'import réel de Grégoire (601-101 gr.00007, « Portrait de lecteur -
   lectrice », 49 fichiers). Symptôme rapporté : « j'ai cliqué pour remplacer les travaux existants…
@@ -5150,7 +5177,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ **Données de Grégoire à récupérer** : les fichiers ainsi jetés sont dans la corbeille, blob intact
   (`deplacerEnCorbeille` copie les métadonnées et ne touche pas le blob) — restaurables.
 
-- [ ] **#603 — Le suffixe de page `-p2` d'une remise Léa est lu comme un NOM DE PRODUCTION différent :
+- [x] **#603 — Le suffixe de page `-p2` d'une remise Léa est lu comme un NOM DE PRODUCTION différent :
   ni assemblage multi-pages, ni reconnaissance des pages entre elles, et un faux doublon.**
   Trouvé le 30 août 2026, même import que [[#604]] — dont il est la cause amont.
   `parserNomFichierLea` (`travaux-import.js:98`) coupe le nom sur `_Remis_le_`, prend tout ce qui suit
@@ -5628,12 +5655,12 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **⚠ DETTE ADJACENTE, non traitée** : le **titre** d'une carte de bibliothèque (`opts.nom` de `renderCarteSelection`/`renderCarteDisponible`) n'est pas échappé. Pas un oubli : `js/echelles.js:2244` y injecte délibérément un badge HTML, et corriger proprement demande de démêler 7 appelants dont plusieurs HORS bibliothèques (cours.js, trimestre-v2-liste.js, tampons-bibliotheque.js, planification-bibliotheque.js, partage-section.js). Le plan interdisait d'élargir là.
   - **⚠ DETTE DE FOND, non traitée** : faire rendre un booléen à `db.set`/`db.setSync` (js/db.js:449 et :1458) au lieu d'un `return;` nu. *Tous* les écrivains gardés partagent cet angle mort ; la surface d'appel est trop large pour être auditée dans ce chantier.
   - **📋 PLAN (23 août 2026)** : même document que #291, `plans de travail/PLAN-291-476-gestion-des-doublons.md`. **Recommandation rendue** sur les **33** fonctions `dupliquer*` mesurées (24 en bibliothèque, 9 hors périmètre) : **ne pas poser 24 gardes — une seule, au point d'ÉCRITURE et non au clic** ; dupliquer reste une action VOULUE, jamais bloquée ; le vrai défaut de CO-24 (« X (copie) (copie) (copie) ») se règle par un helper de nommage. **Volet 2 à créer après ce chantier** : fusionner les 24 `dupliquer*` (refactor sans changement de comportement, plus sûr une fois les sentinelles posées). CT-15 (groupes-cours, courriels enseignant, `creerCours`) = Lot 6, optionnel.
-- [ ] ⚠️ **Anti-cache : `release.mjs --build-only` et sa sentinelle n'ont PAS la même base de comparaison** — constat mesuré du 24 août 2026, aucun identifiant neuf alloué.
+- [ ] **#675 — ⚠️ Anti-cache : `release.mjs --build-only` et sa sentinelle n'ont PAS la même base de comparaison.** Constat mesuré du 24 août 2026 ; **identifiant alloué le 1er septembre 2026** (Lot A) — l'item existait sans `#NNN`, donc invisible à toute priorisation par identifiant.
   - **Ce qui s'est passé.** Après le Lot E de #476, `node scripts/release.mjs --build-only` a bumpé le build (0823-1534 → 0824-1141) et l'anti-cache des **10 fichiers du chantier courant**. La sentinelle `sentinelle-anticache-fichiers-modifies` est restée ROUGE en nommant **7 autres fichiers** — `changelog-data.js`, `cours.js`, `entites/cours-entite.js`, `identite-naturelle.js`, `trimestre-v2-{cours,enseignants,groupes-cours}.js` — tous issus du chantier CT-15 de la veille.
   - **La cause.** La sentinelle prend pour base `git log -3 -- version.json` puis diffe `commits[1]..HEAD` : **tout fichier modifié depuis la release PRÉCÉDENTE** doit porter un `?v=` du jour du build courant. Déplacer le jour du build périme donc mécaniquement tous les fichiers bumpés lors de la release précédente. `release.mjs --build-only`, lui, ne bumpe que les fichiers du chantier courant. **Les deux ont raison séparément et se contredisent ensemble.**
   - **Contourné à la main** le 24 août (les 7 alignés sur `20260824a`), mais ça se reproduira à chaque build bumpé un jour différent de la release précédente. ⮕ Faire converger les deux bases : soit `release.mjs` adopte la base de la sentinelle, soit la sentinelle n'exige le jour du build que pour les fichiers modifiés **depuis le dernier build**, pas depuis la dernière release.
   - ✅ **Ce que la sentinelle a réellement évité ce jour-là** : `js/pratiques.js` était modifié (correctif D8) et gardait `?v=20260821b`. Sans elle, le navigateur de Grégoire aurait servi l'ANCIEN fichier, et la porte terrain 2.3 aurait échoué en **faux rouge** — exactement l'incident du 23 août. Le cliquet fait son travail ; c'est sa coordination avec le script qui manque.
-- [ ] 🔴 **CI — deux pannes distinctes, à ne pas confondre** (constat mesuré du 23 août 2026, aucun identifiant neuf alloué)
+- [ ] **#676 — 🔴 CI : deux pannes distinctes, à ne pas confondre.** Constat mesuré du 23 août 2026 ; **identifiant alloué le 1er septembre 2026** (Lot A) — l'item existait sans `#NNN`.
   - **(a) LE JOB NE DÉMARRE PLUS depuis le 21 août 16 h 21 UTC.** 26 runs d'affilée « échouent » en 3-5 s avec `runner_id: 0`, `runner_name: ""` et aucune étape enregistrée : le job n'est jamais dispatché. Le workflow est pourtant `state: active`, et aucun commit n'a touché `.github/workflows/tests.yml` ni `tests/package-lock.json` dans la fenêtre. **Cause non établissable depuis le dépôt** : la signature est celle de minutes Actions indisponibles sur un dépôt privé (privé depuis le 23 juin, cf. DEPLOY.md §8.3), mais le champ `billable` de l'API renvoie 0 pour TOUS les runs — y compris un qui a tourné 868 s — donc inexploitable. ⮕ **À vérifier par Grégoire : Settings › Billing › Actions.** Rien dans le dépôt ne rétablit des minutes épuisées.
   - **(b) ET AVANT DE S'ARRÊTER, ELLE ÉTAIT DÉJÀ ROUGE.** Dernier run complet (18 août, run 574) : Vitest 2738/2738 vert, puis **Playwright 88 passés / 5 ÉCHOUÉS** en 12,5 min. Les cinq :
     - `planif-alignement.spec.js:59` — « à +40 px du repère, aucune aimantation ne doit jouer » (un snap rendait 400)
@@ -5825,7 +5852,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **2 sentinelles, 26 cas, 17 break-tests.** Deux faux-verts attrapés : (1) « la remontée touche tous les ancêtres » testait `dureeRollupNoeud`, qui récurse tout seul et préexistait — on testait le calcul en croyant tester le rafraîchissement ; (2) « cible tactile iPad » se satisfaisait d'un AUTRE bloc `@media (hover: none)` du fichier.
   - ⮕ **Porte terrain** : saisie de durée au doigt sur iPad, et lisibilité de l'en-tête sur un nœud étroit (le lot « largeur » n'est pas fait).
 
-- [ ] **#508** ⏳ **ÉCHÉANCE : 1er SEPTEMBRE 2026** — l'avis d'identification sur la page d'accueil.
+- [x] **#508** ⏳ **ÉCHÉANCE : 1er SEPTEMBRE 2026** — l'avis d'identification sur la page d'accueil.
   ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 au soir — option A : IL TIENT LA DATE.**
   ⚠ **CETTE DÉCISION A FAILLI N'ÊTRE CONSIGNÉE NULLE PART.** C'était la seule des vingt et un
   arbitrages à porter une échéance, et aucune des trois sessions ne l'avait inscrite : chacune a
@@ -5936,7 +5963,8 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   accessible, sans création de compte ». Leur publication n'est **pas établie** (la note les range
   sous « à coordonner » avec Fanny Joussemet). À vérifier avant le geste.
   Énoncé d'origine :
-- [ ] **~~#427~~** Refermer l'accès public — réactiver Cloudflare Access (OTP par courriel) — créé 8 août 2026 (demande Grégoire). ⮕ **ÉCHÉANCE REPORTÉE À SEPTEMBRE 2026** (décision Grégoire, 8 août soir — l'échéance initiale du ~20 août n'est plus visée). Checklist dashboard prête : `plans de travail/Checklist Levée Cloudflare Access .txt`.
+- [x] **~~#427~~ — DOUBLON FUSIONNÉ le 1er septembre 2026.** L'entrée VIVANTE de #427 est la première du fichier (celle qui porte « DATE FIXÉE AU 1er SEPTEMBRE 2026 »). Cette ligne-ci est l'entrée d'ORIGINE du 8 août : elle était barrée mais sa case restait ouverte, donc comptée deux fois. **Cochée pour le compte, pas parce que le geste est fait** — le refermage reste dû, et il est suivi par l'entrée vivante. Le corps ci-dessous est conservé pour la traçabilité (dont les trois placeholders `[À COMPLÉTER]` de `DEPLOY.md`, lignes 269 / 277 / 293), il n'est plus tenu à jour.
+- Refermer l'accès public — réactiver Cloudflare Access (OTP par courriel) — créé 8 août 2026 (demande Grégoire). ⮕ **ÉCHÉANCE REPORTÉE À SEPTEMBRE 2026** (décision Grégoire, 8 août soir — l'échéance initiale du ~20 août n'est plus visée). Checklist dashboard prête : `plans de travail/Checklist Levée Cloudflare Access .txt`.
   - **Ce que Grégoire veut** : que les utilisateurs passent de nouveau par un **code envoyé par courriel** (OTP), comme au printemps ; retrouver le **contrôle des 50 sièges gratuits** ; et **savoir qui a accès à l'application et qui est vraiment un utilisateur**. Échéance visée : **septembre 2026** (reportée du ~20 août par Grégoire le 8 août au soir).
   - ✔ **Bonne nouvelle : rien à construire.** La configuration est intégralement documentée et le DNS n'a jamais été défait — « Cloudflare Access reste configuré côté DNS / proxy orange ; seule la policy est désactivée. La réactivation est une opération de quelques minutes dans le dashboard Zero Trust » (`DEPLOY.md` §3.6). Procédure : `DEPLOY.md` §3.1→§3.5 (config Access) + §4 (gestion de la liste blanche).
   - ⚠ **C'est une RÉVISION D'ADR, pas un changement de config silencieux.** La décision d'ouverture publique est formalisée dans `docs/adr/008-cloudflare-access.md` (révisé le 2 juin 2026) et reprise dans `DEPLOY.md` v1.4 et `SECURITY.md`. Refermer exige de réviser les trois, avec date effective et raison déclenchante — c'est explicitement demandé par le §3.6.
@@ -6125,7 +6153,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - ⚠ **Registre à ne PAS diluer à l'intégration** (décision Grégoire du 29 mai, §1 du plan) : le guide ne dit jamais que l'app *garantit* la conformité — les verbes sont *aider*, *cadrer*, *aligner*. Motif : `seuilReussite` est configurable (`echelles.js`), un guide qui promettrait la conformité serait factuellement faux et exposerait l'enseignant qui s'y fierait.
   - À l'intégration, retirer le contenu PAN du §5.2 de `PLAN_guides_pedagogiques.md` (zéro-dette : deux sources de vérité, le plan maître le demande lui-même).
   - **« Enseignement explicite », 4 pages** (§4.3 du plan maître, contenu rédigé ; Gauthier, Bissonnette, Richard 2013). ⚠ **Son gabarit HTML du §4.1 est PÉRIMÉ** — il est bâti sur le patron `.option-accompagnement`, retiré le 9 août faute de porteur. Suivre le patron accordéon des cinq cartes réelles. La préférence `enseignementExpliciteDefaut` du §4.1 n'existe pas non plus : à créer dans les DEFAUTS de `preferences.js` (pas de clé sauvage) si on garde l'idée de l'override local.
-- [ ] **#440** 🟡 SRPNF codé en dur dans l'**affichage** des diagnostics — signalé le 23 mai, jamais versé au backlog — créé 9 août 2026 (audit `Plan Accompagnement/`).
+- [x] **#440** 🟡 SRPNF codé en dur dans l'**affichage** des diagnostics — signalé le 23 mai, jamais versé au backlog — créé 9 août 2026 (audit `Plan Accompagnement/`).
   - **Le signal a mis deux mois et demi à arriver ici.** Le §7 de `PLAN_guides_pedagogiques.md` écrivait « signalé pour le backlog » le 23 mai ; `grep SRPNF BACKLOG.md` rendait **zéro occurrence** le 9 août. C'est le trajet plan → backlog qui a manqué, pas le diagnostic.
   - ⚠ **L'état réel est plus favorable que ce que le plan décrivait — et le reste est plus précis.** Le **calcul** a été généralisé depuis (Beta 90, pratique active) : `calculerMoyennesCriteres` (`profil-etudiant-calculs.js:104`) construit ses accumulateurs **depuis la grille de référence**, et `calculerForcesEtDefis` (`:625`) itère les critères de la grille. Ce qui reste en dur :
     1. `profil-etudiant-diagnostics.js:85` — le tableau des scores itère la liste littérale `['structure','rigueur','plausibilite','nuance','francais']` ;
@@ -6134,6 +6162,65 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **Conséquence à vérifier au terrain avant de coder** : un enseignant dont la grille porte d'autres critères obtient des `moyennes` correctement calculées **sur ses clés à lui**, mais un tableau de scores et des barres **vides** (chaque critère rend `''` faute de correspondance). Forces/défis, eux, s'affichent. C'est une incohérence d'affichage, pas un faux chiffre — à confirmer sur une grille non-SRPNF avant de dimensionner le correctif.
   - Le dispatch `defisInfo.type === 'srpnf'` vient de `pratique-pan-standards.js:612` : il vise **toute la famille PAN-Standards**, pas la seule pratique de Grégoire. L'aspiration d'universalité de `SKILL_RaI.md` (« rien ne doit être codé en dur pour une pratique personnelle ») est donc bien en cause. Coût M. Sentinelle : rendu sur une grille à critères arbitraires.
   - ▣ Bonne nouvelle du même signalement, revérifiée le 9 août : **ELLAC n'apparaît dans aucun `.js`** — c'est resté purement conceptuel.
+  ✅ **FERMÉ le 1er septembre 2026 (Lot A) — l'énoncé décrivait un état DISPARU.** Réglé par **#529** le
+  26 août. ⚠ **Les TROIS emplacements de cette fiche ont été vérifiés un à un dans le code d'aujourd'hui**,
+  pas les deux qu'annonçait le cadrage :
+  · **(1)** `profil-etudiant-diagnostics.js:85` — la liste littérale est remplacée par
+    `criteresDeLaGrillePourAffichage()`, et le commentaire de #529 nomme le défaut retiré (« pour toute
+    autre grille, elle rendait *Français* quel que soit le critère »).
+  · **(2)** les barres graduées (~`:433`) — plus aucune liste littérale ; motif introuvable.
+  · **(3)** le regex de `identifierDefiSpecifique` — n'existe plus qu'en **commentaire historique**
+    (`profil-etudiant-calculs.js:1655`). Témoin : « RIGUEUR » ne rend plus qu'UNE occurrence dans ce
+    fichier, et c'est ce commentaire.
+  ⮕ **Le résidu réel du même endroit est d'une AUTRE nature et vit désormais en #677** — des constantes
+  pédagogiques non réglables, pas de la littérature. Ne pas rouvrir #440 pour ça.
+- [ ] **#677 — Le seuil de « force » et l'échelle de couleurs des diagnostics sont des constantes pédagogiques non réglables**.
+  Ouvert le 1er septembre 2026 (Lot A), en séparant le résidu réel de **#440** que son énoncé masquait.
+  **MESURÉ, pas repris du cadrage** : le seuil `0.7125` est écrit en clair **cinq fois dans deux fichiers**
+  — `profil-etudiant-diagnostics.js:71`, `:79` (le libellé « seuil force : 0.7125 » montré à l'écran), `:99`,
+  `:100`, et `profil-etudiant-sections-affichage.js:4259`.
+  ⚠ **Le cadrage du 1er septembre dit « quatre fois » puis liste cinq emplacements**, et abrège le second
+  fichier en `sections-affichage.js` — son vrai nom est `profil-etudiant-sections-affichage.js`.
+  ⮕ L'échelle de couleurs est du même ordre : `0.85` → bleu · `0.75` → vert · `0.7125` → vert · `0.65` →
+  jaune (`profil-etudiant-diagnostics.js:69-73`).
+  ▣ **Observation de passage, à ne PAS traiter comme un défaut** : les branches `0.75` et `0.7125` rendent
+  la MÊME couleur (`var(--vert-succes)`). La seconde étend donc le vert vers le bas — c'est son rôle, pas
+  une redondance à supprimer. Le noter évite qu'une session « nettoie » la branche et déplace le seuil.
+  ⏳ **Ce n'est pas un bug d'usage** : aucun symptôme vécu. L'item existe parce que le critère de Grégoire
+  vise le codé en dur, et qu'un seuil de jugement pédagogique en fait partie. **Décision de conception due** :
+  réglable par l'utilisateur, dérivé de l'échelle, ou assumé comme constante documentée ?
+- [ ] **#678 — Des `alert()` bloquants sur le parcours de la première chronique Labo (créer un trimestre, créer un groupe-cours)**.
+  Ouvert le 1er septembre 2026 (Lot A), en détachant le reste que **#540** portait dans son corps avant d'être clos.
+  ⚠ **MOTIF D'ENTRÉE : le PREMIER CONTACT, pas l'hygiène** (décision de Grégoire, 1er septembre). Ces fichiers sont
+  sur le chemin de sa première chronique Labo : un nouvel utilisateur qui suit le tutoriel peut y arriver dans ses
+  premières minutes. Le filtre « symptôme vécu » du CLAUDE.md ne s'applique pas ici — personne n'a encore suivi ce
+  tutoriel.
+  ⚠⚠ **ET L'ÉNONCÉ DE #540 ÉTAIT FAUX DANS LES DEUX SENS — mesuré le 1er septembre 2026, pas repris.**
+  · **Trop LARGE sur son propre fichier.** #540 comptait « cinq `alert()` dans `trimestre-v2-cours.js` ».
+    Les cinq existent (`:372`, `:599`, `:608`, `:654`, `:663`), mais **aucun n'est atteignable par un
+    utilisateur** :
+    — `:599`, `:608` (`modifierCoursSelectionneV2`) et `:654`, `:663` (`dupliquerCoursSelectionneV2`) vivent dans
+      deux fonctions **sans aucun déclencheur d'interface**. Exportées sur `window` (`:1402-1403`), elles n'ont
+      qu'un seul appelant dans tout le dépôt : le spec Playwright `ponderation-requise-540.spec.js:178`.
+      `index.html` ne porte aucun bouton « modifier » ou « dupliquer » un cours — seul le `<select id="v2-selectCours">`
+      (`index.html:6513`) existe, et il appelle `changerCoursSelectionneV2`, pas ces deux-là.
+    — `:372` est une **garde défensive de repli** : elle ne parle que si `cours.js` n'a pas chargé. Or
+      `supprimerFicheCoursAvecGarde` y est bien défini (`cours.js:498`, exporté `:987`) et `cours.js` est bien
+      chargé par `index.html`. Le commentaire du code assume ce choix (« si la fonction manque, on le DIT »).
+    ⮕ **Compter ces cinq-là comme une gêne au premier contact serait mentir** : quatre sont dans du code sans
+    appelant, le cinquième ne parle que si l'application est déjà cassée.
+  · **Trop ÉTROIT sur le parcours réel.** Le chemin du tutoriel porte **51 `alert()` dans sept fichiers**, pas cinq
+    dans un seul : `trimestre-v2-liste.js` **19** · `cours.js` **15** · `trimestre-v2-cours.js` 5 ·
+    `trimestre-v2-etudiants.js` 4 · `trimestre-v2-horaires.js` 4 · `trimestre-v2-init.js` 3 ·
+    `trimestre-v2-groupes-cours.js` 1.
+  ⏳ **CE QUI N'EST PAS ENCORE MESURÉ, et qu'il faut faire AVANT de convertir quoi que ce soit** : l'atteignabilité
+  des 46 autres. Le compte de 51 est un compte de littéraux, pas un compte de gênes réelles — c'est exactement
+  l'erreur que cet item vient de corriger sur les cinq premiers. **Instruire fichier par fichier, en commençant par
+  `trimestre-v2-liste.js` et `cours.js`**, avant d'annoncer un périmètre.
+  ⮕ Le patron de remplacement existe déjà dans ce même fichier : `trimestre-v2-cours.js:1296` note un refus passé
+  « par `notifications.erreur` et non plus par `alert()` ».
+  ▣ **Le bump de version que #540 portait en attente est sans objet** : une release patch suit ce lot (décision de
+  Grégoire, 1er septembre).
 - [x] **#447** 🟡 Fraîcheur des indices C/P — **la prémisse était FAUSSE, un vrai trou a été trouvé à côté** — créé 10 août 2026, traité le 10 août au soir (1.67.3).
   - ⚠⚠ **CE QUI ÉTAIT ÉCRIT ICI ÉTAIT INEXACT, et c'est le principal enseignement de l'item.** L'entrée disait « l'aperçu LIT le stocké sans recalculer ». **`tableau-bord-apercu.js:1069` appelle `calculerEtStockerIndicesCP()` à CHAQUE rendu.** Vérifié au navigateur (Chromium, pack démo) par une expérience décisive : on FAUSSE `indicesCP` dans le stockage (tous les P à 0, `dateCalcul` à 1999), on rend l'aperçu **sans** passer par la Liste — les valeurs justes reviennent et `dateCalcul` est réécrite. ⮕ **Le diagnostic avait été posé par lecture de code, jamais exécuté.**
   - ⮕ **Le « Incomplet : 23 » du 10 août n'était donc pas un défaut de fraîcheur** : c'était l'aperçu rendant fidèlement des données cassées — productions désappariées (#154, réparé le jour même) et contexte de trimestre croisé (#446, corrigé en 1.67.0/1.67.1). Les deux causes ont disparu.
