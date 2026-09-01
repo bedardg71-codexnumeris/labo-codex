@@ -505,60 +505,63 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `evaluationEnCours`. Une garde d'identité au moment d'écrire coûte trois lignes et ne dépend d'aucune horloge.
   ⚠ **Mon relevé date de l'export de 22h30.** Grégoire a navigué depuis : il peut y avoir PLUS de cinq copies
   touchées. Recompter avant de réparer, ne pas partir de cette liste-ci.
-- [ ] **#674 — ⚠️ DONNÉES · Un critère laissé sans niveau fait MONTER la note, et rien ne le déclare**.
-  Inscrit le 1er septembre 2026 **avant tout usage de l'ID**. Né d'une mesure demandée par Grégoire au titre de
-  [[#673]], **mais il n'en dépend pas** : n'importe quel critère laissé sans niveau, par simple oubli en corrigeant,
-  produit le défaut aujourd'hui. **Ça touche des notes réelles, déjà en base.**
-  ▣ **MESURÉ le 1er septembre 2026 sous WebKit, grille 50 / 30 / 20, échelle à valeurs ponctuelles.**
+- [ ] **#674 — PRÉVENTION · Un critère laissé sans niveau fait MONTER la note, et rien ne le déclare**.
+  Inscrit le 1er septembre 2026. **Ouvert à froid — échéance : la cohorte 1, mi-septembre 2026.**
+  ▣ **POURQUOI « PRÉVENTION » ET PAS « URGENCE » : mesuré, pas supposé.** La sonde
+  `scripts/diagnostic-674-couverture-ponderation.js` (lecture seule) a tourné sur le corpus réel de Grégoire le
+  1er septembre. **Sur le trimestre en cours (`a2026`, 27 évaluations, 4 grilles) : ZÉRO écart de couverture et
+  ZÉRO évaluation indécidable.** Les 27 sont complètes, et toutes ont été RÉELLEMENT examinées — le zéro porte son
+  témoin. Rien à réparer aujourd'hui ; tout à empêcher avant la cohorte.
+  ▣ **LE DÉFAUT, mesuré sous WebKit** (grille 50 / 30 / 20, échelle à valeurs ponctuelles) :
   | état | note | niveau |
   |---|---|---|
-  | les trois critères renseignés (E, E, I) | **84,0 %** | M |
+  | les trois critères renseignés | **84,0 %** | M |
   | le critère à 20 % perd son niveau | **95,0 %** | **E** |
-  | ce que ça vaudrait si le poids manquant comptait pour zéro | 76,0 % | — |
-  ⮕ **Onze points, et un niveau de plus.** Pas une dégradation : une AMÉLIORATION silencieuse. C'est ce qui la rend
-  indétectable à la relecture — une note trop basse se conteste, une note trop haute passe.
-  ⮕ **MÉCANISME**, `calculerNote()` (`js/evaluation-calcul.js:812-858`) : `if (niveau)` saute le critère, donc il
-  quitte le numérateur ET `ponderationTotal`. La division finale renormalise les pondérations restantes à 100 %.
+  ⮕ **Onze points, et un niveau de plus.** Pas une dégradation : une AMÉLIORATION silencieuse — c'est ce qui la rend
+  indétectable à la relecture. Une note trop basse se conteste, une note trop haute passe.
+  ⮕ **MÉCANISME**, `calculerNote()` (`js/evaluation-calcul.js:812-858`) : `if (niveau)` saute le critère, qui quitte
+  le numérateur ET `ponderationTotal`. La division finale renormalise les pondérations restantes à 100 %.
   `ponderationTotal` n'a que **trois** occurrences dans tout `js/` (l. 811, 844, 856) : **aucune ne le compare à 1**.
   ▣ **ET LE CRITÈRE NE DISPARAÎT PAS QUE DE LA NOTE — IL DISPARAÎT DU DOCUMENT.**
   `_collecterCriteresSauv` (`evaluation-sauvegarde.js:183`) ne pousse un critère que `if (niveau)` : il est absent du
-  tableau `criteres[]` enregistré. `construireCriteres` (`synthese-retroaction-data.js`) mappe ce tableau : **le PDF
-  remis à l'élève ne porte aucune trace qu'un critère existait.** Une grille amputée est indistinguable d'une grille
-  qui n'a jamais eu ce critère. La perte n'est pas récupérable par inspection du livrable.
-  ▣ **FORME VOULUE PAR GRÉGOIRE (1er septembre 2026) : la ligne passe entre l'ÉTAT DE TRAVAIL et le LIVRABLE.**
-  ⛔ **Pas de refus pendant la saisie** — une évaluation en cours est forcément incomplète, bloquer serait
-  insupportable. Au moment de **produire le PDF** ou d'**arrêter la note finale**, l'application doit refuser de
-  conclure **en NOMMANT les critères sans niveau**.
-  ⮕ **LES DEUX SURFACES DE LIVRABLE, MESURÉES** :
-  · `sauvegarderEvaluation()` (`evaluation-sauvegarde.js:363`) et `sauvegarderEvaluationModifiee()`. Le patron de
-    refus y existe déjà : `_validerReferencesSauv` et `_validerReferencesNonDemoSauv` rendent `false` et sortent.
-  · `travaux-export-pdf.js:707` — le seul appelant de `construireFeedback`, donc la porte du PDF de l'élève.
-  ⚠⚠ **CE QUE LA MESURE A TROUVÉ ET QUI COMPLIQUE LA LIGNE — À TRANCHER AVANT DE CODER.**
-  L'auto-save écrit DÉJÀ la note renormalisée en base, et **crée l'évaluation** si elle n'existe pas
-  (`_autoSauvegarderCriteres`, `evaluation-chargement.js`) : il suffit qu'**un seul** critère porte un niveau.
-  `noteFinale` y prend `window.noteCalculeeCourante` — la valeur renormalisée. Or les consommateurs ne distinguent
-  pas un brouillon d'une évaluation conclue : `calculerDetailsNoteFinale` filtre sur `!e.remplaceeParId`
-  (`profil-etudiant-actions.js:240`, `:366`), et la synthèse sur `noteFinale != null`. `verrouillee` existe, mais
-  signifie « archivée, lecture seule », pas « conclue ».
-  ⮕ **Il n'existe donc, dans les DONNÉES, aucune marque qui sépare le travail du livrable.** Un refus posé aux deux
-  portes ci-dessus laisserait intacte la note renormalisée déjà persistée et déjà agrégée au portfolio.
-  ▣▣ **LA PISTE RETENUE — DIRECTION DE GRÉGOIRE, 1er septembre 2026. Instruire CELLE-CI, pas les autres.**
-  J'avais posé la question « qu'est-ce qui marque une évaluation comme CONCLUE ? ». **Elle est écartée**, et le motif
-  vaut plus que la réponse : un état « brouillon vs conclue » ajoute un état de FLUX DE TRAVAIL — un geste de plus,
-  un champ de plus, une intention à deviner — pour une question qui n'en demande pas.
+  tableau `criteres[]` enregistré, et `construireCriteres` mappe ce tableau. **Le PDF remis ne porte aucune trace
+  qu'un critère existait.** Une grille amputée est indistinguable d'une grille qui n'a jamais eu ce critère.
+  ▣▣ **LA PISTE À INSTRUIRE — DIRECTION DE GRÉGOIRE. Celle-ci, et pas une autre.**
+  ⛔ **Pas d'état « brouillon / conclue ».** Ce serait ajouter un état de FLUX DE TRAVAIL — un geste de plus, un champ
+  de plus, une intention à deviner — pour une question qui n'en demande pas. Écartée, et le motif vaut plus que la
+  réponse. Les autres formes envisagées en séance sont écartées avec elle : **ne pas les rouvrir**.
   ⮕ **CE QUI MANQUE N'EST PAS UN ÉTAT, C'EST UNE PORTÉE.** `noteFinale` circule sans dire **sur quoi elle porte**.
   Or `ponderationTotal` est DÉJÀ calculée à chaque appel de `calculerNote()` (`evaluation-calcul.js:811`), puis
   **jetée**. La persister à côté de `noteFinale` suffit : chaque consommateur décide alors pour lui-même — le PDF
-  refuse de conclure et nomme les critères manquants, le portfolio avertit.
+  refuse de conclure et NOMME les critères sans niveau, le portfolio avertit.
   ⮕ **Trois propriétés qui font la différence** : aucun geste nouveau pour l'enseignant·e ; aucune intention à
-  deviner ; et **valable RÉTROACTIVEMENT** — la portée se recalcule sur les évaluations déjà en base à partir de
-  leur `criteres[]` et de leur grille.
-  ⚠⚠ **À MESURER AVANT DE CODER — ET C'EST UNE QUESTION PÉDAGOGIQUE, PAS TECHNIQUE.**
-  **Le modèle permet-il qu'un critère reste DÉLIBÉRÉMENT non noté, parce qu'il ne s'applique pas à cette
-  production ?** Si oui, une couverture sous 100 % est parfois VOULUE, et le correctif change de forme : il ne
-  s'agirait plus de refuser sous 100 %, mais de distinguer un critère écarté d'un critère oublié. **Répondre à ça
-  avant d'écrire une ligne** — un refus qui se déclenche sur une pratique légitime serait retiré en trois jours.
-  ⏳ **NON CODÉ, et #674 n'est pas ouvert.** Rien n'a été touché : la mesure était la commande.
+  deviner ; **valable RÉTROACTIVEMENT** — la portée se recalcule sur les évaluations en base depuis leur `criteres[]`
+  et leur grille.
+  ▣ **LA LIGNE, ET LES DEUX PORTES — mesurées.** Pas de refus pendant la saisie : une évaluation en cours est
+  forcément incomplète, bloquer serait insupportable. Le refus va au LIVRABLE :
+  · `sauvegarderEvaluation()` (`evaluation-sauvegarde.js:363`) et `sauvegarderEvaluationModifiee()`. Le patron de
+    refus y existe déjà : `_validerReferencesSauv` rend `false` et sort.
+  · `travaux-export-pdf.js:707` — seul appelant de `construireFeedback`, donc porte unique du PDF de l'élève.
+  ⮕ **Les deux portes peuvent refuser franchement** : une couverture sous 100 % est TOUJOURS un défaut, jamais une
+  intention. Décision de Grégoire, 1er septembre : *un critère dont on ne tient pas compte n'est pas un critère non
+  noté — c'est une grille différente.* Il n'y a donc rien à modéliser du côté « critère délibérément écarté ».
+  ⚠ **CE QUE LE CORRECTIF DEVRA REGARDER EN PLUS** : l'auto-save écrit `noteFinale` en base et **crée** l'évaluation
+  dès qu'UN critère porte un niveau (`_autoSauvegarderCriteres`). La portée doit donc être écrite par le même chemin
+  que la note, sans quoi elle manquerait précisément sur les évaluations nées de l'auto-save.
+  ▣ **CE QUE LA SONDE A TROUVÉ AILLEURS, ET COMMENT LE LIRE.** Sur les 505 évaluations jugées tous trimestres
+  confondus, 16 portaient une couverture < 100 % — **et ce chiffre brut alarme pour rien s'il n'est pas trié** :
+  · la majorité sont des évaluations **JAMAIS COMMENCÉES** — couverture 0 %, note 0, statut `non-remis`. Aucune note
+    n'y est renormalisée : rien n'a été évalué, et le zéro est VISIBLE. Ce n'est pas le défaut de cet item.
+  · une minorité sont de **vraies notes renormalisées**, toutes sur des trimestres CLOS.
+  ⮕ **Un chiffre qui alarme pour rien finit par ne plus alarmer** : la sonde r2, si elle est écrite un jour, doit
+  séparer ces deux familles AVANT de rendre un compte.
+  ⛔ **PÉRIMÈTRE, DÉCISION PÉDAGOGIQUE DÉFINITIVE DE GRÉGOIRE (1er septembre 2026).** Les notes d'**A2025** et
+  d'**H2026** ne sont pas rouvertes. Elles sont remises, les élèves sont rendus ailleurs dans leur parcours. **Ce
+  n'est pas un oubli.** Aucune session ne doit proposer de les recompter, les corriger ou les signaler — et la
+  question des évaluations indécidables de ces trimestres n'a plus d'objet : elle est CLOSE, pas en attente.
+  **Seul l'automne 2026 compte.** Voir aussi la fiche mémoire `project-notes-a2025-h2026-intouchables`.
+  ⏳ **RIEN N'EST CODÉ.** L'item est ouvert, la piste est posée, la mesure est faite.
+
 - [x] **#673 — Un calcul redevenu inapplicable laisse un texte de rétroaction PÉRIMÉ dans le div, et la sauvegarde le persiste**.
   Inscrit le 1er septembre 2026 **avant tout usage de l'ID**. **ID distinct de [[#672]], délibérément** : #672 est clos
   avec son verdict et ses trois mutations tuées ; le symptôme diffère (un texte périmé PLAUSIBLE, pas une amorce
