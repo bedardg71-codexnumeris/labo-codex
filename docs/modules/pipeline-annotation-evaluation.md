@@ -207,6 +207,65 @@ initial → annote → exporte → archive → fac-simile
 
 ---
 
+## La chaine de la retroaction par critere (ajoute le 1er septembre 2026, #672 / #673)
+
+> Documente ici parce que **personne ne pouvait la voir** : deux defauts de donnees ont
+> vecu des mois dans cette chaine, et aucun test ne les couvrait.
+
+**Le porteur est un `<div>`, pas un champ.** Pour chaque critere, le gabarit rend
+`comm_<critereId>` — un `<div>` **masque** (`display:none` sur le chemin cartouche,
+`u-hide` sur le chemin sans cartouche). Il n'est donc jamais lu a l'ecran : c'est un
+porteur de donnee, pas un affichage.
+
+**Deux ecrivains, un seul element.**
+
+| mode | fonction | ce qu'elle ecrit |
+|---|---|---|
+| categories | `calculerNoteAlgorithmiqueAvecCategories` | `commDiv.textContent = retroaction` |
+| simple | `calculerNoteAlgorithmiqueSimple` | `champCommentaire.textContent = …` (**etait `.value`** avant #672) |
+
+⚠ `.value` sur un `<div>` pose une propriete JS parasite et laisse `textContent` intact.
+C'est ce qui a fait vivre #672 sans que rien ne rougisse : le mode categories, lui, ecrivait
+correctement — **la dissymetrie entre deux ecrivains du meme element est ce qui cache le
+defaut**.
+
+**Trois lecteurs, et ils lisent `textContent`.**
+`_collecterCriteresAutoSave` (`evaluation-chargement.js`), `_collecterCriteresMod`
+(`evaluation.js`) et `_collecterCriteresSauv` (`evaluation-sauvegarde.js`) poussent ce texte
+dans `criteres[].retroaction` de l'evaluation enregistree.
+⚠ **Ils ne poussent un critere que `if (niveau)`** : un critere sans niveau est ABSENT du
+tableau enregistre, donc absent du PDF (voir #674).
+
+**La cascade du PDF**, `synthese-retroaction-data.js`, `construireCriteres` :
+
+```
+(retroaction persistee, si ce n'est pas une amorce de saisie)   ← #672
+  || donneesAlgorithmiques[id].retroaction                       (le repli)
+  || cartouche.commentaires[critereId_niveau]
+  || ''
+```
+
+⚠ **Le repli ne protege pas d'un texte parasite non vide.** Avant #672, l'amorce du gabarit
+(« Saisissez les erreurs et le nombre de mots ») arrivait par le PREMIER terme, non vide donc
+gagnant : le repli ecrit pour l'empecher ne pouvait jamais s'executer. La liste des amorces
+reconnues vit dans `synthese-retroaction-data.js` (`AMORCES_DE_SAISIE`) et n'est recopiee
+NULLE PART — l'ecran d'evaluation appelle le meme predicat via
+`window.syntheseRetroactionData.estAmorceDeSaisie`.
+
+**Ce qui s'efface, et ce qui ne s'efface pas** (#673). Quand un calcul redevient
+inapplicable, `_effacerRetroactionMachine` retire du div **uniquement** ce que le code a
+lui-meme ecrit : egalite EXACTE avec le dernier texte engendre, ou une amorce. Un
+commentaire ecrit a la main n'est jamais touche — y compris quand l'enseignant·e a GARDE la
+phrase engendree et ajoute la sienne a la suite (le div CONTIENT alors le texte machine sans
+lui etre egal).
+⚠ Le texte perime vit a **deux** endroits : le div, et `donneesAlgorithmiques[id].retroaction`
+d'ou la cascade le reprendrait en repli. Les deux sont nettoyes.
+
+**Tests** : `tests/unit/sentinelle-672-retroaction-mode-simple.test.js` (la cascade, banc
+Node) et `tests/integration/retroaction-mode-simple-672.spec.js` +
+`retroaction-perimee-673.spec.js` (le div, WebKit — un banc Node ne peut pas juger la
+semantique reelle d'un `<div>`).
+
 ## Donnees et stockage
 
 ### Cles localStorage (namespacees via `cle()`)

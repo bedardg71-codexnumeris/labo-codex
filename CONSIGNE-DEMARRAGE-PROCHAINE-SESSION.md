@@ -9,7 +9,8 @@
 > c'est elle qui fait foi. Un nom qui ne peut pas rôtir vaut mieux qu'une date qu'on
 > oublie de retirer.
 >
-> **↻ MISE À JOUR le 1er septembre 2026 au matin, depuis Cowork, avec Grégoire.**
+> **↻ MISE À JOUR le 1er septembre 2026, FIN DE MATINÉE, depuis Claude Code.**
+> (Une première mise à jour avait eu lieu le matin même depuis Cowork.)
 > Deux sections seulement ont été refaites : **l'état mesuré** et **le mandat**.
 > Tout le reste — les pièges, le moratoire, le protocole de créneaux, le piège du
 > bump à quatre emplacements — date du 31 août et **reste valable**. Ne pas le
@@ -40,8 +41,11 @@ propre relais compris**, ne vivait que sur cette machine. Personne ne l'avait vu
 cd tests && node ../scripts/verifier-playwright.mjs
 ```
 ⮕ **La suite Playwright n'avait pas tourné depuis le 26 août** — 299 commits, dont 35
-touchant `tests/integration/`. Quand on l'a enfin lancée, elle était **rouge**. Elle
-l'est encore à deux (voir plus bas).
+touchant `tests/integration/`. Quand on l'a enfin lancée, elle était **rouge à deux**.
+↻ **CORRIGÉ le 1er septembre : elle est VERTE, code 0, zéro échec.** Les deux spécs
+incriminées passent en 6,9 s. ⚠ Et le mot juste est « passent », pas « ont été réparées » :
+**personne ne les a touchées**. Même arbre, verdicts opposés à quelques heures d'écart —
+leur diagnostic « ni contention ni flaky » du 31 août ne tient donc pas.
 
 ⚠⚠ **ET VOICI POURQUOI PERSONNE NE L'AVAIT VU — la chose la plus importante de ce
 fichier. « PUSH RÉUSSI » NE SIGNIFIE PAS « SUITE COMPLÈTE VERTE », ET NE LE SIGNIFIERA
@@ -104,44 +108,54 @@ pas le `AAAAMMJJ`+lettre des autres.
 
 ---
 
-## ÉTAT MESURÉ — 1er SEPTEMBRE 2026, 10 h
+## ÉTAT MESURÉ — 1er SEPTEMBRE 2026, FIN DE MATINÉE
 
-**Branche `main`, version `1.106.14`, build `0831-1552`** — aucune release depuis le
-31 août, conformément au §4.3 de la consigne du chantier #668, qui attend un `minor`
-à la fin.
+**Branche `main`, version `1.106.14`, build `0831-1552`** — toujours aucune release,
+conformément au §4.3 de la consigne de #668, qui attend un `minor` à la FIN du chantier.
 
-**`HEAD` = `origin/main` = `ceb99dd8`. ZÉRO commit non poussé.** Mesuré, pas supposé.
+**`HEAD` = `origin/main` = `5de00472`. ZÉRO commit non poussé.** Mesuré, pas supposé.
 
-**Vitest : VERT** au dernier rituel (424 fichiers / 4561 tests, code 0).
+**Vitest : VERT** — 425 fichiers / 4572 tests, code de sortie 0, lu APRÈS le dernier
+changement.
 
-⚠⚠ **Playwright : NON REJOUÉ depuis les correctifs #671 de la nuit.** Et les **deux
-rouges du 31 août** (`modal-soutien.spec.js`, `palettes-drag-rendu.spec.js`) n'ont pas
-été re-mesurés depuis. **Ne pas les croire réparés.** Rappel du haut de ce fichier :
-un spec seul se lance en secondes et départage mieux qu'une suite de dix minutes.
+**Playwright WebKit : VERT** — code 0, zéro échec, **et le jeton de verdict porte le bon
+commit** (`976054c1`, le dernier lot touchant `js/`). ⮕ Les deux rouges annoncés le
+31 août au soir (`modal-soutien`, `palettes-drag-rendu`) sont passés **en 6,9 s** : la
+consigne du 31 août était en retard sur son propre `RELAIS.md`, qui les donnait déjà verts.
 
-**Dernier ID utilisé : #671.** Prochain libre : **#672**.
-⚠ **#662 est toujours RÉSERVÉ** — les 4 gardes `IDS_GABARITS_HARDCODES` de
-`js/echelles.js` (957, 2642, 2681, 4350).
-IDs consommés le 31 août au soir : **#668** (projection EUF paramétrable),
-**#669** (`sousCriteres` absent de `partage-schemas.js`), **#670** (migration de
-largeurs empêchant le démarrage), **#671** (contamination du compte d'erreurs).
+⚠ **Les jetons anti-cache sont à `20260831s`** — jour du BUILD, pas du calendrier.
 
-### ⚠ LA NUIT DU 31 AOÛT A REMIS DE FAUX PDF À DES ÉLÈVES
+**Dernier ID utilisé : #674.** Prochain libre : **#675**.
+⚠ **#662 est toujours RÉSERVÉ** — les 4 gardes `IDS_GABARITS_HARDCODES` de `js/echelles.js`.
+IDs consommés ce matin : **#672** (l'amorce partait au PDF), **#673** (le texte périmé
+restait dans le div), **#674** (la note renormalisée en silence — OUVERT, non codé).
 
-Cinq copies sur 27 portaient le compte d'erreurs de leur **voisin** dans le tableau.
-Réparé et vérifié. **Lire le bloc « 1er SEPTEMBRE — NUIT (#671, DONNÉES) » en tête de
-`RELAIS.md` avant de toucher à quoi que ce soit dans la chaîne d'évaluation.** Il
-contient trois zéros qui ont menti dans la même nuit, dont un outil de réparation muet
-qui certifiait la santé de ce qu'il n'avait pas lu.
+### ⛔⛔ LA DÉCISION À CONNAÎTRE AVANT TOUT LE RESTE
+
+**Les notes d'A2025 et d'H2026 ne sont PAS rouvertes.** Décision pédagogique de Grégoire,
+1er septembre, explicitement sans retour : les notes sont remises, les élèves sont rendus
+ailleurs dans leur parcours.
+
+⮕ Une sonde a trouvé ce matin **quatre notes réellement faussées et déjà remises**, sur
+A2025. **Ne pas les rouvrir, ne pas proposer de les recompter, ne pas les signaler.** Les
+remonter, c'est ignorer une décision, pas rendre service.
+⮕ **Seul l'automne 2026 compte** — et il est SAIN : sur ses 27 évaluations, zéro écart de
+couverture et zéro évaluation indécidable.
 
 ### ⏳ DEUX GESTES DUS PAR GRÉGOIRE, hors code
 
 - Effacer `_to_delete/` à la racine du dépôt (déjà dans `.gitignore`).
 - Passer le **facteur de normalisation de 500 à 600** sur la grille
-  *Grille-1 FR-ALGO seul A26* — la norme de son département a changé pour le 601-101.
-  ⚠ **À faire entre deux évaluations, jamais au milieu d'une correction** : deux
-  copies notées sous deux facteurs différents ne sont pas comparables.
+  *Grille-1 FR-ALGO seul A26* — la norme du département a changé pour le 601-101.
+  ⚠ **À faire entre deux évaluations, jamais au milieu d'une correction** : deux copies
+  notées sous deux facteurs différents ne sont pas comparables.
 
+### ⚠ LA NUIT DU 31 AOÛT A REMIS DE FAUX PDF À DES ÉLÈVES — réparé, mais à lire
+
+Cinq copies sur 27 portaient le compte d'erreurs de leur **voisin**. Réparé et vérifié.
+**Lire le bloc « 1er SEPTEMBRE — NUIT (#671, DONNÉES) » de `RELAIS.md` avant de toucher à
+la chaîne d'évaluation** : il contient trois zéros qui ont menti dans la même nuit, dont un
+outil de réparation muet qui certifiait la santé de ce qu'il n'avait pas lu.
 ---
 
 ## LES DEUX LOTS PRÊTS, SAUVÉS HORS DÉPÔT, NON DÉPOSÉS
@@ -241,53 +255,41 @@ sur du code inconnu.**
 
 ---
 
-## LE MANDAT DE CETTE SESSION — #668, Lot 3b
+## LE MANDAT DE LA PROCHAINE SESSION — #668, Lot 4, avec #669 dans le même geste
 
-⮕ **Lis d'abord `plans de travail/CONSIGNE-projection-euf-parametrable.md`** (535
-lignes). C'est la consigne du chantier, tenue à jour tout au long du 31 août. **Ne
-re-dérive rien** : son inventaire §2 et ses décisions §6 / §6bis ont été *mesurés*,
-pas supposés, et plusieurs portent la trace de ce qui les a fait changer.
+⮕ **Lis d'abord `plans de travail/CONSIGNE-projection-euf-parametrable.md`** (535 lignes).
+Elle est **enfin au dépôt** (`5de00472`) : elle ne vivait que sur cette machine jusqu'à ce
+matin, alors que les lots 0 à 3 de #668 étaient déjà poussés. **Ne re-dérive rien** : son
+inventaire §2 et ses décisions §6 / §6bis ont été *mesurés*, pas supposés.
 
-### De quoi #668 retourne, en trois phrases
+### Pourquoi le Lot 4 plutôt que le Lot 3b
 
-La projection vers l'épreuve uniforme de français — « tu fais en moyenne 1 erreur à
-chaque N mots, le seuil de l'épreuve est de 1 erreur / 30 mots » — existait déjà dans
-l'application, mais **codée en dur** : seuils, textes, nom du service d'aide. Le
-chantier la remonte vers le gabarit de la grille, exactement comme #667 vient de le
-faire pour la formule de note. **Lots 0 à 3 livrés et poussés.**
+Le Lot 3b (replier les cinq paliers derrière un en-tête qui les résume) **n'a pas été
+fait** — la session du 1er septembre a été détournée par deux défauts de données trouvés en
+chemin. Il reste valable et **il attend**, mais c'est du confort : il n'a pas d'échéance.
 
-⚠ Distinction à ne jamais confondre : l'élève est **noté** selon la norme de son cours
-(le `facteurNormalisation`, 600 / 700 / 900 selon le cours), et **situé** selon celle
-de l'épreuve (900 mots / 30 erreurs, fixe). La projection ne lit JAMAIS
-`facteurNormalisation`.
+**Le Lot 4 en a une, et elle est datée : la première rencontre de la cohorte 1,
+mi-septembre.** Il porte le transport (`import-export.js`, `partage-schemas.js`), avec
+**#669** dans le même geste : `sousCriteres` **ne voyage pas au partage**, et le
+destinataire bascule **en silence** du mode catégories au mode simple.
 
-### Le Lot 3b, en une phrase
+⚠⚠ **ET VOICI CE QUE LA SESSION DU 1er SEPTEMBRE A APPRIS QUI CHANGE LA LECTURE DE #669.**
+Le mode simple — celui vers lequel le destinataire bascule — est **exactement** le chemin
+qui portait #672 : la rétroaction n'y était jamais écrite dans le div, et l'amorce du
+gabarit partait au PDF de l'élève. C'est corrigé. **Mais le destinataire perd toujours ses
+onze catégories sans un mot.** La cohorte 1, ce sont des expérimentateur·rices qui vont
+recevoir les grilles de Grégoire : le silence est ce qui coûte, pas la bascule.
 
-Dans le gabarit de grille, **les cinq paliers de projection se replient derrière un
-en-tête qui les RÉSUME** ; le modèle, la norme, le nom du service d'aide et son lien
-restent visibles.
+### Trois choses à savoir avant de coder
 
-Le détail complet est dans la consigne, section **Lot 3b**, entre les lots 3 et 4.
-
-### Deux décisions prises avec Grégoire — ne pas les rouvrir
-
-- **Aucune case à cocher pour la projection.** Elle ferait doublon avec le modèle
-  « Aucune projection » livré au Lot 3 : deux contrôles pour une seule décision, et
-  deux contrôles qui peuvent se contredire.
-- **Les sous-critères restent exactement tels quels** — ni case, ni repli.
-  `sousCriteres.length > 0` (`evaluation-calcul.js:869`) **EST** le mode de calcul ;
-  une case devrait trancher entre supprimer onze catégories et leurs longs textes, ou
-  les masquer pendant que le calcul continue de les voir.
-
-### Trois exigences
-
-1. **L'en-tête résume ce qu'il cache** (« Cinq paliers · seuil d'échec à 1 erreur /
-   30 mots »). Sans résumé, on échange de l'espace vertical contre de l'opacité, et une
-   configuration fautive devient invisible tant que personne n'ouvre le panneau.
-2. **Réutiliser le patron d'accordéon déjà employé dans l'app**, pas en inventer un.
-   Regarder la sentinelle **#573** : l'état d'un panneau a déjà causé un défaut ici.
-3. **`echapperHtml()` sur les textes de paliers** — c'est du texte libre saisi par
-   l'enseignant·e, rendu en `innerHTML`.
+1. **Le périmètre inclut le bloc des balises d'`index.html`.** Tout lot touchant un `js/`
+   l'exige (le hook réclame un jeton neuf). L'inscrire dès le mandat — trois sessions du
+   cycle précédent s'y sont retrouvées ensemble sans l'avoir prévu.
+2. **Les jetons portent le jour du BUILD**, pas du calendrier. Ils sont à `20260831s`.
+3. **Le golden de #668 est un oracle mort-né si on le « met à jour »** :
+   `tests/unit/sentinelle-668-*.test.js` porte 20 cas dont les chaînes ont été EXTRAITES de
+   `genererRetroactionEUF` avant que le Lot 2 ne la supprime. La fonction n'existe plus :
+   **ces littéraux SONT l'oracle**.
 
 ⛔ **Ne pas ouvrir le Lot 6 (le bloc dans le PDF).** Il est bloqué sur une décision de
 conception qui appartient à Grégoire — le doublon entre la phrase déjà écrite dans le
@@ -297,17 +299,19 @@ commentaire et le bloc neuf. Les trois voies sont posées au §3 Lot 6 de la con
 
 ## SI GRÉGOIRE VEUT AUTRE CHOSE — choix fermé
 
-**(a)** **Playwright** — non rejoué depuis les correctifs #671, et les deux rouges du
-31 août jamais re-mesurés. *C'est le seul chantier qui porte une incertitude sur du
-code déjà poussé.*
-**(b)** **#668 Lot 4** — le transport (`import-export.js`, `partage-schemas.js`), avec
-**#669** dans le même geste : `sousCriteres` ne voyage pas au partage, et le
-destinataire bascule en silence du mode catégories au mode simple. Échéance réelle : la
-première rencontre de la cohorte 1, mi-septembre.
-**(c)** **Le mode simple n'écrit jamais sa rétroaction dans le DOM** —
-`calculerNoteAlgorithmiqueSimple` fait `champCommentaire.value = …` sur un `<div>`.
-**Constaté le 1er septembre, PAS corrigé.** C'est la cause amont des rétroactions
-d'amorce persistées.
-**(d)** **Déposer les deux lots préparés hors dépôt** — ordre obligé, voir plus haut.
+**(a)** **#674 — la note renormalisée en silence.** OUVERT en prévention le 1er septembre,
+échéance la cohorte 1. Un critère laissé sans niveau fait MONTER la note (84,0 % → 95,0 %,
+M → E sur une grille 50/30/20) et disparaît du PDF. **Une seule piste est à instruire** :
+persister `ponderationTotal` à côté de `noteFinale`, plutôt qu'un état « brouillon /
+conclue » — explicitement écarté, ne pas le rouvrir. *Rien n'est urgent : l'automne 2026
+est mesuré sain.*
+**(b)** **#668 Lot 3b** — le repli des cinq paliers derrière un en-tête qui les RÉSUME.
+Périmètre connu, décisions prises, aucune échéance. *Le mandat d'hier, resté sur la table.*
+**(c)** **Déposer les deux lots préparés hors dépôt** (`S9a-627`, `S10a-628-659`). Le geste
+1 de S10a est le seul correctif prêt qui **arrête quelque chose d'ACTIF** : entrer dans la
+section Échelles écrit en base à chaque visite, sans aucune action de l'utilisateur.
+**(d)** **#631 / #632** — les 408 évaluations d'H2026 qui pointent vers trois grilles
+disparues. ⚠ **À instruire comme un problème d'ARCHIVE, jamais comme une révision de
+notes** : les notes d'H2026 ne se rouvrent pas.
 
 ⮕ **Une seule décision principale par session.**

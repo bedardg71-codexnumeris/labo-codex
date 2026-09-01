@@ -7,6 +7,130 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 1er SEPTEMBRE 2026, MATIN (#672, #673, #674)
+
+> Session solo, pilotée par Grégoire. Ce bloc **s'ajoute** aux deux suivants, qui
+> restent valables pour tout ce qu'ils décrivent — la nuit #671 et le chantier #668.
+
+**Branche `main`. Version `1.106.14`, build `0831-1552` — AUCUNE RELEASE.** Le §4.3 de la
+consigne de #668 attend un `minor` à la FIN de ce chantier, pas avant.
+**`HEAD` = `origin/main`. ZÉRO commit non poussé** — mesuré, pas supposé.
+**Vitest : 425 fichiers / 4561→4572 tests, code 0.**
+**Playwright WebKit : code 0, zéro échec, et le JETON PORTE LE BON COMMIT** (`976054c1`,
+le dernier lot touchant `js/`). Les deux rouges annoncés le 31 août au soir
+(`modal-soutien`, `palettes-drag-rendu`) sont passés ici en 6,9 s : la consigne du
+31 août était en retard sur son propre RELAIS.
+⚠ **Les jetons anti-cache sont à `20260831s`** — jour du BUILD, pas du calendrier.
+
+---
+
+### ⛔⛔ LA DÉCISION À CONNAÎTRE AVANT DE LIRE LE RESTE
+
+**Les notes d'A2025 et d'H2026 ne sont PAS rouvertes.** Décision pédagogique de Grégoire,
+1er septembre, explicitement sans retour : les notes sont remises, les élèves sont rendus
+ailleurs dans leur parcours.
+
+⮕ Une sonde a trouvé aujourd'hui **quatre notes réellement faussées et déjà remises**, sur
+A2025. **Ne pas les rouvrir, ne pas proposer de les recompter, ne pas les signaler.** Les
+remonter, c'est ignorer une décision, pas rendre service.
+⮕ **Seul l'automne 2026 compte.** Et il est SAIN : sur ses 27 évaluations, zéro écart de
+couverture et zéro évaluation indécidable — mesuré par Grégoire dans sa console.
+
+---
+
+### CE QUI EST LIVRÉ ET POUSSÉ
+
+| Commit | Contenu |
+|---|---|
+| `13a037b7` | **#672 + #673** — code et sentinelles |
+| `976054c1` | la consigne de démarrage (modifs de Grégoire, Cowork) |
+| `f6086f0a` | **#674** ouvert en prévention + la sonde de couverture |
+| `5de00472` | **la consigne du chantier #668** entre au dépôt — 535 lignes qui ne vivaient que sur cette machine |
+
+**#672 — l'amorce du gabarit partait au PDF de l'élève.** Le mode simple écrivait
+`champCommentaire.value` sur `comm_<critereId>`, qui est un `<div>` : `.value` y pose une
+propriété JS parasite et laisse `textContent` intact. Le mode CATÉGORIES écrit
+`textContent` sur le MÊME div depuis toujours — **c'est cette dissymétrie qui a caché le
+défaut pendant des mois**. Les trois collecteurs lisent `textContent` : ils persistaient
+l'amorce sous `criteres[].retroaction`, à chaque enregistrement.
+⚠ **Et le garde-fou du PDF ne POUVAIT pas jouer** : son repli `retroAlgo` était écrit POUR
+empêcher le placeholder d'atteindre le document, mais celui-ci n'arrivait pas par le vide
+— il arrivait par `c.retroaction`, non vide donc gagnant dans la cascade. **Un garde-fou
+qui se croit protégé et ne l'est pas est pire que pas de garde-fou.**
+⮕ Corrigé des DEUX côtés, et il fallait les deux : `textContent` répare l'avenir, la garde
+d'amorces de la cascade est la SEULE moitié qui rattrape les évaluations déjà en base.
+⮕ **Portée plus large qu'annoncée** : le mode ne dépend pas des sous-critères mais de la
+modalité globale `activerCategorisationErreurs` — et surtout, le rendu SANS cartouche
+(`afficherCriteresDepuisGrille`) **n'a aucune branche catégories** : il rend le mode simple
+pour tous les critères algorithmiques.
+
+**#673 — un calcul redevenu inapplicable laissait un texte périmé.** L'écran repassait à
+« -- » pendant que le div gardait la rétroaction de la saisie précédente, que la
+sauvegarde persistait. **Pire qu'une amorce** : une amorce se reconnaît, un compte
+d'erreurs périmé est plausible.
+⮕ Règle de Grégoire : n'effacer QUE ce que le code a lui-même écrit — égalité EXACTE avec
+le dernier texte engendré, ou une amorce. Sinon on ne touche à rien : le div porte aussi
+les commentaires écrits à la main.
+⚠ **DEUX EMPLACEMENTS, PAS UN.** Le texte périmé vit aussi dans
+`donneesAlgorithmiques[id].retroaction`, où la cascade du PDF le prend en repli dès que le
+div est vide. **Ne vider que le div aurait déplacé le défaut**, et le test aurait été vert.
+
+---
+
+### ⚠⚠ CE QUE CETTE SESSION A APPRIS, ET QUI COÛTERA CHER À QUI L'IGNORE
+
+**1. UNE MUTATION A SURVÉCU, ET C'EST LA TROUVAILLE DU LOT.** Retirer l'appel de nettoyage
+du mode catégories ne faisait rougir personne : mon cas n'assertait que la moitié
+« préserve », jamais la moitié « efface ». **Une assertion vraie qui ne tue aucune mutation
+ne verrouille rien.** La sentinelle a été corrigée, pas le code.
+
+**2. UN BREAK-TEST A DÉCOUVERT UN CAS D'USAGE QUE PERSONNE N'AVAIT PRÉVU.** En muant
+l'égalité en `includes`, le cas « l'enseignant·e GARDE la phrase engendrée et ajoute la
+sienne à la suite » est apparu : le div CONTIENT alors le texte machine sans lui être égal,
+et une comparaison relâchée aurait détruit son ajout. **Grégoire lui-même n'y avait pas
+pensé en posant la règle.** Le break-test n'a pas seulement vérifié le code — il a instruit
+la spécification.
+
+**3. UN JSDoc N'EST RELIÉ À SA FONCTION QUE PAR LA POSITION — et j'y suis tombé.** Mes deux
+fonctions neuves se sont insérées ENTRE le JSDoc de `_viderResultatAlgoSimple` et sa
+fonction : ce bloc documentait le mauvais code. **C'est la relecture du diff STAGÉ qui l'a
+attrapé**, pas les tests — une suite verte ne dit rien de la documentation déplacée.
+
+**4. UNE DÉCISION JUSTE DANS SON INTENTION PEUT ÊTRE FAUSSE DANS SES EFFETS.** Grégoire
+avait tranché « on retire le niveau orphelin », puis demandé de mesurer d'abord ce que fait
+`calculerNote()` quand un critère perd son niveau. **La mesure a invalidé la décision** : la
+note est renormalisée en silence et le critère disparaît du PDF. Le retrait aurait produit
+une note faussée au lieu d'un trou visible. ⮕ **La question qu'on n'a pas posée est celle
+qui coûte.**
+
+**5. JE NE PEUX PAS LIRE LE CORPUS DE GRÉGOIRE.** Ses données vivent dans le localStorage et
+l'IndexedDB de SON Safari sous `file://` ; Playwright ouvre un profil vierge. Toute mesure
+sur ses données réelles passe par une sonde qu'il colle dans sa console. **Ne pas prétendre
+mesurer son corpus depuis le terminal.**
+
+---
+
+### ⏳ CE QUI RESTE DÛ
+
+- **#674 — ouvert en PRÉVENTION, échéance la cohorte 1 de mi-septembre.** La piste est
+  posée et **une seule est à instruire** : persister `ponderationTotal` à côté de
+  `noteFinale`. Elle est déjà calculée à chaque appel de `calculerNote()`, puis jetée.
+  ⛔ **Un état « brouillon / conclue » est explicitement ÉCARTÉ** — il ajouterait un état de
+  flux de travail pour une question qui n'en demande pas. Ne pas le rouvrir.
+  ⚠ Le correctif devra écrire la portée **par le même chemin que la note** : l'auto-save
+  crée l'évaluation et écrit `noteFinale` dès qu'UN critère porte un niveau.
+- **#668 lots 4, 5b, 6** — le chantier de la projection n'est pas fini. Sa consigne est
+  MAINTENANT au dépôt (`plans de travail/CONSIGNE-projection-euf-parametrable.md`).
+- **Les deux lots préparés hors dépôt** (`S9a-627`, `S10a-628-659`) — toujours non déposés.
+  Le geste 1 de S10a est le seul correctif prêt qui arrête quelque chose d'ACTIF.
+- **Deux gestes de Grégoire, hors code** : le facteur de normalisation 500 → 600 sur
+  *Grille-1 FR-ALGO seul A26* (⚠ entre deux évaluations, jamais au milieu d'une
+  correction), et effacer `_to_delete/`.
+- ✅ **Le mode simple qui n'écrivait jamais sa rétroaction : CORRIGÉ** (#672). Le retirer
+  des « restes dus » du bloc de la nuit #671, qui le porte encore.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 1er SEPTEMBRE 2026, NUIT (#671, DONNÉES)
 
 > **Urgence de données traitée et CLOSE.** Ce bloc s'ajoute à celui du chantier
