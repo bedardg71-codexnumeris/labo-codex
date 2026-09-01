@@ -423,6 +423,8 @@ const CLES_ECHELLE_NON_TRANSPORTEES = {
  *   Types reconnus : 'string', 'number', 'boolean', 'array', 'object',
  *                    'mapStrings' (object à clés dynamiques, valeurs assainies en strings),
  *                    'mapObjets' (object à clés dynamiques, valeurs = objets assainis par spec.schema),
+ *                    'numberOrNull' (nombre dont `null` est une valeur signifiante,
+ *                                    non un vide : `'number'` le coercerait en 0),
  *                    'arrayStrings' (tableau de chaînes, chacune assainie),
  *                    'stringOrNumber' (id qui peut arriver soit en string soit en number).
  * @returns {Object} Objet nettoyé (seules les clés du schéma sont conservées)
@@ -444,6 +446,18 @@ function assainirObjet(obj, schema) {
                 break;
             case 'number':
                 resultat[cle] = typeof valeur === 'number' ? valeur : 0;
+                break;
+            case 'numberOrNull':
+                // Un nombre dont `null` est une VALEUR, pas une absence.
+                // ⚠ Pourquoi ce type existe (#668 Lot 4) : `'number'` coerce
+                // `null` en `0`, et un `paliersProjection[].ratioMax` à 0 n'est
+                // pas un palier terminal — c'est un seuil. La lecture le
+                // rattrape (`evaluation-projection.js:282`, `max <= 0 → null`),
+                // mais elle rattraperait une donnée déjà fausse EN BASE, et
+                // `_palierNeuf` (`grilles.js:4874`) lit les paliers bruts sans
+                // passer par ce rattrapage.
+                resultat[cle] = valeur === null ? null
+                    : (typeof valeur === 'number' ? valeur : 0);
                 break;
             case 'boolean':
                 resultat[cle] = !!valeur;
@@ -606,6 +620,38 @@ const SCHEMAS_IMPORT = {
                         facteurNormalisation: { type: 'number' },
                         motsParErreurCible: { type: 'number' },
                         pointsParErreur: { type: 'number' }
+                    }
+                },
+
+                // #668 Lot 4 — LA PROJECTION EUF SE PERDAIT DE MÊME. Aucun des
+                // trois champs n'était déclaré ici : une grille importée
+                // projetait selon le modèle de MIGRATION et ses paliers
+                // d'origine, quel que soit le réglage de son auteur·e.
+                // ⚠ TROIS champs, pas deux. `modeleProjection` est le seul qui
+                // décide du modèle (`evaluation-projection.js:315`) :
+                // transporter les paramètres sans lui les ferait lire par un
+                // modèle reconstitué — la classe de défaut de #667.
+                modeleProjection: { type: 'string', maxLen: 60 },
+                paramsProjection: {
+                    type: 'object',
+                    schema: {
+                        motsReference: { type: 'number' },
+                        erreursTolerees: { type: 'number' },
+                        nomServiceAide: { type: 'string', maxLen: 200 },
+                        lienServiceAide: { type: 'string', maxLen: 500 }
+                    }
+                },
+                paliersProjection: {
+                    type: 'array',
+                    schema: {
+                        cle: { type: 'string', maxLen: 100 },
+                        libelle: { type: 'string', maxLen: 200 },
+                        sansErreur: { type: 'boolean' },
+                        // `null` = palier TERMINAL. Voir `numberOrNull` : le
+                        // type `'number'` en ferait un 0, c'est-à-dire un seuil.
+                        ratioMax: { type: 'numberOrNull' },
+                        texte: { type: 'string', maxLen: 5000 },
+                        texteAide: { type: 'string', maxLen: 5000 }
                     }
                 },
 
