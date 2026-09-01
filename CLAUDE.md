@@ -11,8 +11,11 @@
 
 ## Lecture obligatoire
 
-**Commence TOUJOURS par** : `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` (racine) —
-état mesuré et mandat courant. Puis `OBJECTIF-COHORTE-1.md` : la ligne d'arrivée.
+**Commence TOUJOURS par** : `OU-EN-EST-ON.md` (racine) — où en est chacun des huit
+gestes, en français, sans numéros de fiche ; mis à jour EN FIN DE SESSION, et une ligne
+ne passe à « fait » qu'avec sa phrase « vérifié comment ». Puis
+`CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` (état mesuré, mandat courant) et
+`OBJECTIF-COHORTE-1.md` (la ligne d'arrivée, arrêtée).
 
 ⚠ `docs/00-START-HERE.md` date du **3 juillet 2026** : plan des lieux, pas état.
 
