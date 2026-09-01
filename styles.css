@@ -6891,6 +6891,29 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
 
 /* Beta 99.30 : Bandeau d'avertissement dans la modale d'import quand la
    queue contient des fichiers correspondant à des étudiants d'un autre GC. */
+/* #612 T6.4 (1er sept. 2026) — Bandeau « DA sans élève dans ce groupe ».
+   ORANGE par déduction, selon la grammaire des bandeaux d'import fixée par
+   Grégoire le 1er sept. 2026 et inscrite dans `design-system.html` :
+     bleu   = informatif, rien n'est perdu ;
+     orange = le fichier n'ira pas où je crois, mais rien n'est détruit et je
+              peux passer outre ;
+     rouge  = quelque chose peut être ÉCRASÉ.
+   Ici l'import se fait quand même et aucune donnée n'est détruite : orange.
+   ⚠ Cette règle n'existait pas quand ce bandeau a été écrit — la classe a été
+   posée dans `travaux-ui.js` sans être définie ici, et les quatre specs
+   Playwright sont restés VERTS : ils lisent le DOM, jamais le rendu (#679). */
+.travaux-bandeau-da-inconnu {
+    margin: 0 0 12px 0;
+    padding: 10px 12px;
+    background: rgba(230, 126, 34, 0.12);
+    border: 1px solid rgba(230, 126, 34, 0.35);
+    border-left: 3px solid var(--alerte-bordure-attention);
+    border-radius: var(--radius-moyen);
+}
+.travaux-bandeau-da-inconnu p { margin: 0 0 6px 0; }
+.travaux-bandeau-da-inconnu ul { margin: 4px 0 6px 18px; padding: 0; }
+.travaux-bandeau-da-inconnu li { margin: 0; }
+
 .travaux-bandeau-autre-gc {
     margin: 0 0 12px 0;
     padding: 10px 12px;
