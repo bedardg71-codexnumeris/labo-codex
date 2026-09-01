@@ -4065,6 +4065,23 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   css-fantomes` : les quatre à zéro, leurs remplaçantes définies dans les deux thèmes, et un **cliquet à liste fermée**
   (variable → usages tolérés) qui rougit sur toute variable fantôme NEUVE, tout usage en hausse, et toute entrée devenue
   inutile. **Break-test** : 3 mutations, 3 rouges — après un faux vert : `sed '0,/…/'` (GNU) ne fait rien sous BSD.
+- [ ] **#679 — Aucune vérification ne dit qu'une classe CSS employée dans `js/` existe dans `styles.css`**.
+  Ouvert le 1er septembre 2026 (issue 2 — **inscrire et continuer**, décision de Grégoire), sur un cas RÉEL
+  rencontré le jour même en livrant #612 T6.4 : `travaux-ui.js` posait `class="travaux-bandeau-da-inconnu"`
+  et **cette classe n'existait nulle part dans `styles.css`** — zéro occurrence, quand ses trois voisines en
+  comptaient 4, 4 et 7. Le bandeau s'affichait sans encadré ni couleur, au milieu d'une modale où les trois
+  autres sont stylés.
+  ⚠ **CE QUI REND CE TROU STRUCTUREL, et c'est le point de l'item** : les bancs de ce dépôt lisent le DOM et
+  le `textContent` — jamais le RENDU. Une classe référencée mais non définie leur est **structurellement
+  invisible**. Les quatre specs Playwright de #612 étaient verts, et le bandeau était sans style. Ni Vitest
+  ni Playwright ne pouvaient le voir ; c'est un `grep` qui l'a trouvé.
+  ⮕ **Forme envisagée** : une sentinelle statique qui balaie les `class="..."` littéraux de `js/*.js` et
+  vérifie que chaque nom existe dans `styles.css`. ⚠ Elle demandera une liste de tolérance (classes
+  d'utilitaires, classes venues du HTML, noms construits par concaténation) — donc **la dater et l'assortir
+  d'un témoin**, sinon elle périmera en silence.
+  ⮕ **Même famille que [[#595]]** (78 variables CSS employées et jamais définies) : le même angle mort, un
+  cran plus haut. Les traiter ensemble serait cohérent.
+  ⏳ Aucun symptôme vécu par Grégoire — le seul cas connu a été corrigé le jour même.
 - [ ] **#595 — 78 variables CSS employées et jamais définies (≈270 usages).**
   Créé le 29 août 2026 en livrant #567. Mesure : `node` sur `index.html`, `styles.css`, `js/*.js`, `css/*.css`, commentaires
   retirés — 303 variables utilisées, 270 définies. Les plus fréquentes : `--bordure` (25), `--orange-attention` (15),
