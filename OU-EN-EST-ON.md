@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 1er septembre 2026, en soirée (troisième passe).**
+**Dernière mise à jour : 1er septembre 2026, en soirée (quatrième passe).**
 
 ---
 
@@ -142,6 +142,17 @@ couvre exactement.**
   prévention pour la cohorte qui arrive : c'est une **réparation pour des
   utilisateurs déjà en place**, dont l'application ment aujourd'hui. Ça change son
   poids, pas seulement son rang.
+↻ **1er septembre, tard — le §3 (« le matériel semé se dit utilisable ») est livré
+dans le code et n'atteint personne.** Les trois pièces s'appellent maintenant
+« Grille de départ », « Cartouche de départ », « Échelle de départ (IDME) »… **dans
+un espace neuf seulement**. Sur une base qui porte déjà l'objet, le semis vérifie
+l'identifiant et sort sans écrire : il ne recrée pas, donc **il ne renomme jamais**.
+L'écran de Grégoire affiche encore les anciens noms. *(#682, ouvert — la décision de
+renommer ou non ses copies lui appartient, une sonde la prépare sans rien écrire)*
+⮕ **La porte terrain du §3 est SUSPENDUE** : elle jugeait de libellés qui ne sont
+pas arrivés, et elle envoyait dans un onglet « Matériel » qui n'existe pas. Le vrai
+chemin est **Conception › Échelles de performance**.
+
 ⮕ Cette ligne reste donc « éprouvé par Grégoire » et ne devient pas « fait » :
 ce qui a été mesuré, c'est la chaîne du NOUVEL utilisateur, pas le parcours
 complet de l'énoncé 2.

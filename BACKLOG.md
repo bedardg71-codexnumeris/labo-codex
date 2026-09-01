@@ -697,6 +697,35 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   priver le rapport de son témoin `clesLues`, ou casser la syntaxe — **l'ancienne assertion restait
   VERTE dans les trois cas, la nouvelle rougit dans les trois.**
 
+- [ ] **#683 — Le matériel semé n'est PAS dans tous les trimestres : deux mécanismes, un seul symptôme**.
+  Inscrit le 1er septembre 2026. **Trouvé par la colonne « où » de la sonde #682** — c'est elle qui a
+  montré que `GRILLE_GENERIQUE` vit dans h2026 SEULEMENT, `ECHELLE_IDME_DEPART` dans a2026 seulement, et
+  `CART_GENERIQUE` dans les trois. **Notre hypothèse du tombstone était fausse** : la grille n'est pas
+  supprimée, elle est AILLEURS.
+  ⮕ **Dans le trimestre où Grégoire travaille (a2026), le triptyque est incomplet : pas de grille de
+  départ.** C'est le **geste 2** de la ligne d'arrivée qui est en jeu — « évaluer sans rien créer » se
+  casse là.
+  ▣ **DEUX MÉCANISMES MESURÉS SOUS WEBKIT, sur un boot RÉEL** (pas un appel direct aux `assurerX`) :
+  **(i) LA BASCULE NE SÈME RIEN.** `changerTrimestreActifV2` recharge quatorze surfaces et réinitialise
+  les quatre éditeurs de Conception — mais n'appelle AUCUN `assurerXGenerique`. Mesuré : après une
+  bascule vers un trimestre vierge, il reste vide, grilles ET échelles. Le semis ne tourne qu'au
+  CHARGEMENT de la page (`main.js`) ou à l'OUVERTURE de l'onglet (`navigation.js`).
+  ⮕ **Un enseignant qui crée son second trimestre et va directement en évaluation n'y a RIEN**, jusqu'à
+  ce qu'il recharge la page. Il ne peut pas le deviner.
+  **(ii) LA SUPPRESSION EST PAR TRIMESTRE, LE TOMBSTONE EST GLOBAL.** `supprimerGrille…` retire la copie
+  de `cle('grillesTemplates')` — namespacée — puis appelle `marquerRessourceSupprimee`, qui écrit dans
+  `ressourcesSupprimees`, **clé GLOBALE non namespacée** (`main.js:126-131`).
+  ⮕ Supprimer la grille de départ dans UN trimestre l'interdit dans **TOUS**, y compris ceux créés
+  demain. La copie des autres trimestres reste — d'où exactement le tableau observé.
+  ⚠ **Ça touche l'énoncé 8** : « la portée d'une suppression est celle qu'on annonce ». Ici, on annonce
+  une suppression et on pose une interdiction perpétuelle, à une portée que rien ne dit.
+  ▣ **LEQUEL S'APPLIQUE CHEZ GRÉGOIRE ? La mesure le dira, pas nous.**
+  `scripts/renommage-682-materiel-seme.js` rend désormais les **absences PAR TRIMESTRE** avec, pour
+  chacune, `tombstone: OUI/non` et `ailleurs: oui/nulle part` — les deux mécanismes se distinguent d'un
+  coup d'œil. `tombstone=OUI` ⮕ (ii) ; `tombstone=non, ailleurs=oui` ⮕ (i).
+  ⏳ **RIEN N'EST CODÉ.** ⚠ Et (ii) ne se corrige pas sans décision : rendre le tombstone namespacé
+  changerait le sens de suppressions déjà faites — c'est de la donnée, donc c'est à Grégoire.
+
 - [ ] **#682 — Le renommage du §3 n'atteint QUE les espaces neufs : les copies déjà semées gardent l'ancien nom**.
   Inscrit le 1er septembre 2026, **trouvé en préparant la porte terrain du §3** — qui s'est révélée
   inexécutable et a découvert mieux qu'elle ne cherchait.
@@ -733,8 +762,23 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     DEUX moitiés — « Conception » seul ne suffit pas à trouver ;
   · la porte terrain du §3 est **SUSPENDUE** tant que cet item n'est pas tranché : sur une base
     existante, elle jugerait des libellés qui n'y sont pas encore arrivés.
-  ⏳ **Décision attendue de Grégoire — trois formes** : (a) ne rien faire ; (b) renommer UNIQUEMENT les
-  « ancien nom du code », aucun de ses choix n'étant touché ; (c) autre chose, qu'il dira.
+  ✅ **TRANCHÉ PAR GRÉGOIRE, 1er septembre 2026 : option (b)** — renommer uniquement les libellés qui
+  portent encore, au caractère près, un texte écrit par le code. Sa sonde a rendu **5 sur 5 dans cette
+  catégorie, 0 nom choisi par lui, 0 absent**, sur 3 trimestres et 71 clés lues : aucun de ses choix
+  n'est en jeu.
+  ▣ **LIVRÉ** : `scripts/renommage-682-materiel-seme.js`. Deux modes — il COMPTE par défaut, il n'écrit
+  que sur `{ executer: true }`, et publie alors un **compte AVANT / APRÈS** ligne à ligne : c'est un
+  geste sur un corpus réel, il doit pouvoir se vérifier.
+  ⚠⚠ **LA CONDITION D'ÉCRITURE EST UNE CONDITION, PAS UNE PRÉCAUTION.** Un nom n'est réécrit que s'il
+  est STRICTEMENT égal, caractère pour caractère, à un libellé du code. Pas de `toLowerCase`, pas de
+  `startsWith`, pas de normalisation d'accents. **Et elle vaut pour le jour où ce script tournera chez
+  quelqu'un d'autre**, dont on ne connaît ni les habitudes ni les renommages — c'est pour ce cas-là
+  qu'elle est écrite ainsi, pas pour le corpus d'aujourd'hui.
+  ▣ **La condition est revérifiée DANS le mutateur**, à l'instant de l'écriture. Break-test : ce
+  garde-fou n'a mordu qu'au troisième essai — retirer la revérification ne changeait rien aux cinq
+  premiers tests, parce qu'un nom personnel y est déjà écarté à la lecture. Il a fallu construire **le
+  cas de course** (l'utilisateur renomme entre la lecture et l'écriture) pour le faire rougir. Une règle
+  que personne ne fait rougir n'est pas une règle verrouillée — le cas est devenu l'assertion F.
 
 - [ ] **#680 — Le canal de PARTAGE laisse d'autres champs d'échelle en chemin, et personne n'a écrit lesquels**.
   Inscrit le 1er septembre 2026, **issue 2 (inscrire et continuer)** : trouvaille faite en corrigeant `valeur`,
