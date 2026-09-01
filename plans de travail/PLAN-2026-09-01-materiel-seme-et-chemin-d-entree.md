@@ -354,6 +354,36 @@ porte) — **mais c'est une lecture, pas une mesure.**
 ⮕ Si les neuf portes passent, le **geste 2** de la ligne d'arrivée peut passer
 d'« éprouvé par Grégoire » à « fait ».
 
+### ⛔ ↻ LA PORTE EST SUSPENDUE — et son échec a trouvé le vrai défaut
+
+*1er septembre 2026, en soirée.*
+
+⚠⚠ **LE §3 N'ATTEINT PAS LES BASES DÉJÀ OUVERTES.** Le code porte « Échelle de
+départ (IDME) » ; l'écran de Grégoire affiche « Échelle IDME (point de départ) ».
+Mesuré sous WebKit sur deux passages de la même base : **le semis est idempotent
+par identifiant** — il vérifie la présence de l'id et sort sans écrire. Il ne
+recrée pas, **donc il ne renomme jamais**.
+
+⮕ **Un lot de libellés qui n'atteint que les espaces neufs n'est pas livré, il
+est semé.** Le §3 ne change rien pour qui a déjà ouvert l'application. C'est la
+même forme que le corollaire de #674 : ce qu'on répare pour les nouveaux
+n'atteint pas ceux qui sont déjà là.
+
+⮕ Inscrit en **#682**, **non corrigé** : renommer une copie en base, c'est écrire
+dans les données de quelqu'un. `scripts/sonde-682-materiel-seme-noms.js` sépare
+le nom **jamais touché** (renommable sans rien prendre) du nom **choisi par
+l'utilisateur** (à ne jamais écraser) — et laisse la décision à Grégoire.
+
+⚠ Deux fautes de la porte elle-même, corrigées : elle envoyait dans un onglet
+« Matériel » **qui n'existe pas** (elle recopiait le message d'erreur de l'app,
+faux depuis longtemps, et que le §4-2 avait recopié à son tour — les deux disent
+maintenant « Conception → Échelles de performance ») ; et l'absence de la grille
+et de la cartouche chez Grégoire s'explique vraisemblablement par un tombstone,
+c'est-à-dire par **la durabilité qui fonctionne**, ce que la sonde dit désormais
+au lieu de le supposer.
+
+⮕ **Le geste 2 ne bouge pas. Il reste « éprouvé par Grégoire ».**
+
 ---
 
 ## 4. QUE L'ÉCRAN D'ÉVALUATION CESSE DE MENTIR
