@@ -86,8 +86,18 @@ travail réel.
 que `ECHELLE_GENERIQUE` et les `GABARIT_ECHELLE_*`, et ne regarde pas la
 bibliothèque partagée. Les huit-ci lui étaient **invisibles**.
 
-⮕ Si la sonde rend zéro partout, il n'y a rien à décider. Sinon, la question
-« qu'en faire » est à Grégoire, et le silence qu'elles produisent est **#674**.
+✅ **ELLE A TOURNÉ, le 1er septembre.** **Zéro dans la bibliothèque, zéro copie
+dans les trois trimestres, zéro usage** — et le zéro porte son témoin : 3
+trimestres et la bibliothèque partagée réellement lus. Rien à décider sur ses
+données.
+
+⚠⚠ **MAIS CE ZÉRO NE COUVRE QUE SON CORPUS, et c'est le corollaire qui compte.**
+Un enseignant qui a ouvert l'application avant aujourd'hui a pu ajouter l'échelle
+« Chimie » à sa sélection : sa copie reste muette et rend 0,0 % sans un mot. Il
+n'est ni sondable, ni joignable, et **on ne sait pas combien ils sont**.
+⮕ **#674 est le seul filet qui atteint ces gens-là.** Ce n'est plus une
+prévention pour la cohorte : c'est une réparation pour des utilisateurs déjà en
+place. Ça change son poids, pas seulement son rang.
 
 ### ⚰ S'AJOUTE AU §1 — `js/spe-specifications.js` retiré *(#681)*
 
@@ -120,12 +130,25 @@ exposés sur `window`, 786 fichiers balayés (`js/`, `tests/`, `scripts/`,
 `DOMContentLoaded`, un `setTimeout(100)`, `window.onload` + `setTimeout(500)`.
 Personne ne l'appelait — il s'appelait.
 
-⏳ **LES DONNÉES DÉJÀ SEMÉES, EN DEUX TEMPS.** `scripts/nettoyage-681-spe.js` est
-le PREMIER temps : il compte et il affiche, **il ne supprime rien** (vérifié par
-assertion, pas promis). En console : `await nettoyage681()`.
-⚠ **Un objet référencé par une évaluation n'est pas supprimé, il est NOMMÉ** —
-une grille qui a servi à noter quelqu'un n'est plus du matériel de démarrage,
-c'est la trace d'un jugement posé. Le second temps appartient à Grégoire.
+✅ **VÉRIFIÉ À L'ÉCRAN.** Grégoire a supprimé les cinq gabarits `[SPE]` depuis la
+bibliothèque et **rechargé deux fois : aucun retour.** Le semis est mort dans les
+données comme dans le code — et c'était le symptôme d'origine de ce plan, « des
+documents qui reviennent comme des zombies quand je les supprime ».
+⚠ Ces cinq-là n'avaient AUCUN tombstone, contrairement aux huit échelles : rien
+ne rendait leur suppression durable. La question s'éteint avec le semis.
+
+✅ **LA SONDE A TOURNÉ** : les cinq objets présents, **zéro référence, tous
+LIBRES**, 15 clés ouvertes. Rien de ce qui est parti ne portait la trace d'un
+jugement posé — c'est ce qui a permis de supprimer sans arbitrage.
+
+⚠ **L'INVITATION, ELLE, A RATÉ.** `await nettoyage681()` a rendu `ReferenceError`
+au premier essai : l'étape 2 avait voyagé sans l'étape 1. La consigne était dans
+l'en-tête du fichier et elle était bonne — **elle n'a pas voyagé avec
+l'invitation.** ⮕ Une invitation à lancer une sonde porte désormais les trois
+gestes, dont `pbcopy < ~/…/scripts/<fichier>`, et nomme l'asymétrie :
+`_sonderEchellesDisciplinaires()` vit dans un fichier qu'`index.html` CHARGE — un
+appel suffit, sans rien coller ; `nettoyage681()` non. **Deux sondes du même
+jour, deux gestes différents.**
 
 ---
 
