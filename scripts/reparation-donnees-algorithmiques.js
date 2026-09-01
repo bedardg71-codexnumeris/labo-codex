@@ -14,7 +14,8 @@
  * Usage console :
  *   1. Coller ce fichier en entier → mode PREVIEW (rien n'est écrit).
  *   2. Vérifier window.__reparationAlgo.aReparer (liste des modifications).
- *   3. Pour appliquer pour de vrai : window.__reparationAlgo.appliquer()
+ *   3. Pour appliquer pour de vrai : await window.__reparationAlgo.appliquer()
+ *      ⚠ ASYNCHRONE : ne recharger qu'APRÈS avoir vu « ÉCRITURE DRAINÉE ».
  */
 (function() {
     'use strict';
@@ -219,7 +220,16 @@
         return { aReparer: aReparer, ignores: ignores };
     }
 
-    function appliquerReparations() {
+    /**
+     * ⚠ ASYNCHRONE, ET C'EST NÉCESSAIRE (#671, 1er septembre 2026).
+     * `db.setSync` sur une valeur volumineuse bascule en IDB-FIRST
+     * (`db.js:1536`, seuil 25 Kio) : il RETIRE la copie localStorage, met la
+     * valeur dans `memoryCache` — VOLATILE — et lance l'écriture IndexedDB EN
+     * ARRIÈRE-PLAN. Annoncer un compte avant `db.flush()`, c'est attester le
+     * CALCUL et non l'ÉCRITURE. Éprouvé le 31 août au soir sur le script des
+     * rétroactions d'amorce : compte annoncé, rechargement immédiat, alerte.
+     */
+    async function appliquerReparations() {
         const cleEvals = cle('evaluationsSauvegardees');
         const evaluations = db.getSync(cleEvals, []) || [];
         const grilles = db.getSync('grillesTemplates', []) || [];
@@ -279,9 +289,20 @@
         // qui doit écrire dans la clé namespacée du trimestre actif)
         db.setSync(cleEvals, evaluations);
 
-        console.log(`[Réparation] ${nbModifs} divergences corrigées sur ${Object.keys(evalsTouchees).length} évaluations.`);
-        console.log('[Réparation] Rouvre l\'app ou recharge la page pour voir les changements dans les PDF.');
-        return { applique: nbModifs, evalsTouchees: Object.keys(evalsTouchees).length };
+        // ⚠ ATTENDRE QUE L'ÉCRITURE ATTERRISSE AVANT DE DIRE QU'ELLE EST FAITE.
+        if (typeof db.flush === 'function') {
+            await db.flush();
+        } else {
+            console.warn('[Réparation] db.flush() absent : NE PAS recharger tout de suite.');
+        }
+        const restantes = (db._pendingWrites && db._pendingWrites.size) || 0;
+        if (restantes) {
+            console.warn('[Réparation] ' + restantes + ' écriture(s) encore en attente après flush.');
+        }
+
+        console.log(`[Réparation] ${nbModifs} divergences corrigées sur ${Object.keys(evalsTouchees).length} évaluations, ÉCRITURE DRAINÉE.`);
+        console.log('[Réparation] Recharge la page, puis réexporte les PDF.');
+        return { applique: nbModifs, evalsTouchees: Object.keys(evalsTouchees).length, ecrituresEnAttente: restantes };
     }
 
     // === MODE PREVIEW (par défaut) ===
@@ -300,7 +321,7 @@
         })));
     }
     console.groupEnd();
-    console.log('Pour appliquer : window.__reparationAlgo.appliquer()');
+    console.log('Pour appliquer : await window.__reparationAlgo.appliquer()  — attendre « ÉCRITURE DRAINÉE »');
 
     window.__reparationAlgo = {
         aReparer: preview.aReparer,
