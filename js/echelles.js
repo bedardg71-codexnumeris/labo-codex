@@ -498,6 +498,112 @@ async function migrerEchellesVersBibliotheque() {
 //
 // ⚠ Sonde AVANT toute décision sur les données existantes : `await _sonder574()`.
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   ⚠⚠ LA CONTRADICTION APPARENTE — À LIRE AVANT DE DÉFAIRE CE SEMIS
+
+   Une session qui lit deux faits du dépôt — « le SOLO codé en dur a été retiré du
+   dépistage cet été » et « on sème une échelle SOLO » — peut conclure à une
+   incohérence et défaire ce semis EN CROYANT BIEN FAIRE. Ce paragraphe existe
+   pour l'en empêcher, et il est écrit ici, à côté du code, pas dans un plan.
+
+   CE N'EST PAS UNE CONTRADICTION. Retirer le code en dur n'est pas retirer la
+   proposition. Le dépistage ne doit plus EXIGER SOLO ; l'échelle semée le
+   PROPOSE, et l'enseignant la remplace s'il veut. C'est la différence entre
+   « imposé par le code » et « offert par défaut », et c'est toute la doctrine du
+   chantier de l'été.
+
+   ET CE N'EST PAS NON PLUS UN RENVERSEMENT DE #574. #574 n'interdisait pas de
+   semer une échelle : il interdisait de semer une échelle SANS VALEURS
+   EXPLOITABLES. L'ancienne `ECHELLE_GENERIQUE` portait `valeur: 45/67/82/95` et
+   jamais `valeurCalcul` — c'est ce qui la rendait muette, et c'est exactement le
+   défaut des huit échelles disciplinaires retirées le 1er septembre. Grégoire
+   avait par ailleurs déjà tranché la règle générale, par écrit, le 26 août
+   (BACKLOG.md, règle posée pour #529) :
+
+       « SEEDER est permis : livrer IDME comme valeur de départ, modifiable, dans
+         les données. C'est une commodité d'accueil, pas une contrainte.
+         CODER EN DUR est interdit : inscrire les codes ou les noms dans la LOGIQUE. »
+
+   ⮕ Semer une échelle IDME MUNIE de `valeurCalcul` est donc l'APPLICATION de
+   #574, pas son renversement.
+
+   ⚠ LA SEULE CONTRAINTE QUI SURVIT, et elle tient : les valeurs sont un POINT DE
+   DÉPART, jamais une norme du projet. L'échelle est modifiable et supprimable
+   comme n'importe quelle autre, son nom le dit, sa description le dit.
+
+   ⮕ Si tu t'apprêtes à retirer ce semis : le motif ne peut pas être « SOLO est
+   codé en dur » (il ne l'est pas, il est proposé) ni « #574 l'interdit » (il ne
+   l'interdit pas). S'il en existe un autre, il est neuf — écris-le.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Sème l'échelle IDME de départ dans le trimestre actif — la pièce manquante du
+ * triptyque (§2 du `plans de travail/PLAN-2026-09-01-materiel-seme-et-chemin-d-entree.md`).
+ *
+ * POURQUOI ELLE EXISTE. `GRILLE_GENERIQUE` et `CART_GENERIQUE` sont semées et
+ * fonctionnent ; aucune échelle ne l'était depuis #574. Or sans échelle,
+ * `calculerNote` sort en silence et `chargerGrilleSelectionnee` ne rend aucun
+ * critère : le nouvel utilisateur avait deux tiers d'un triptyque et un écran qui
+ * ne réagissait pas.
+ *
+ * POURQUOI IDME, et pas une échelle neutre. Deux motifs, et le second est celui
+ * de Grégoire :
+ *   1. l'application la SUPPOSE DÉJÀ — I/D/M/E est le repli codé en dur
+ *      d'`afficherCriteresDepuisGrille` (evaluation-chargement.js) quand aucun
+ *      niveau n'est trouvé. La semer ne fait qu'expliciter ce que le code fait
+ *      déjà en cachette ;
+ *   2. elle introduit la taxonomie SOLO et rend le dépistage possible — ce que
+ *      l'application a de singulier. Une échelle neutre priverait le nouvel
+ *      utilisateur de la porte d'entrée vers ce qui la distingue.
+ *
+ * ⚠ LES NIVEAUX SONT UNE COPIE PROFONDE DE `niveauxDefaut`, la forme canonique du
+ * module (marquée « NE PAS MODIFIER — référence par défaut »). Aucune valeur n'est
+ * inventée ici, et la copie évite qu'une modification de l'utilisateur ne remonte
+ * dans la constante partagée par une douzaine de lecteurs.
+ *
+ * ⚠ IDENTIFIANT NEUF, jamais `ECHELLE_GENERIQUE`. Réutiliser l'ancien ferait se
+ * confondre cette échelle avec les copies CASSÉES qui vivent encore dans les
+ * données de qui l'a connue — la collision d'identité de #524, rejouée.
+ * `ECHELLE_IDME_DEPART` entre dans `IDS_GABARITS_HARDCODES` (main.js) : sans quoi
+ * l'utilisateur qui la supprime la verrait revenir au prochain boot, et
+ * « ce qu'un utilisateur détruit, il l'a voulu » (énoncé 8) serait faux.
+ */
+async function assurerEchelleIdmeDeDepart() {
+    // 🆕 Garde anti-resemage du global hérité — JUMELLE de celle
+    // d'`assurerGrilleGenerique` (#358). Au boot, avant que `trimestreActif` soit
+    // réhydraté, `cle()` retombe sur la clé GLOBALE nue : semer là recréerait
+    // l'exemple dans le global que #358 retire. La navigation vers la section
+    // rappelle ce module une fois le trimestre actif établi.
+    if (cle('echellesTemplates') === 'echellesTemplates') return;
+
+    // Supprimée volontairement : on ne la réinjecte pas. Ce test ne dépend pas de
+    // la collection, il reste hors de la file.
+    if (window.estRessourceSupprimee && window.estRessourceSupprimee('ECHELLE_IDME_DEPART')) return;
+
+    const echelle = {
+        id: 'ECHELLE_IDME_DEPART',
+        nom: 'Échelle IDME (point de départ)',
+        description: 'Quatre niveaux — Insuffisant, en Développement, Maîtrisé, Étendu. '
+            + 'Les valeurs ponctuelles sont un point de départ : modifie-les, ou remplace '
+            + 'l\'échelle entière. Rien ici n\'est une norme du projet.',
+        // Copie PROFONDE : la constante partagée ne doit jamais devenir mutable
+        // par l'utilisateur (une douzaine de lecteurs s'appuient dessus).
+        niveaux: JSON.parse(JSON.stringify(niveauxDefaut)),
+        verrouille: false,
+        dansBibliotheque: true
+    };
+
+    await db.modifier(cle('echellesTemplates'), (lues) => {
+        const echelles = lues || [];
+        // #599 — la présence se vérifie À L'INSTANT DE L'ÉCRITURE. Vérifiée avant,
+        // deux boots concurrents sèmeraient deux fois.
+        if (echelles.some(e => e && e.id === 'ECHELLE_IDME_DEPART')) return undefined;
+        echelles.push(echelle);
+        return echelles;
+    }, []);
+}
+window.assurerEchelleIdmeDeDepart = assurerEchelleIdmeDeDepart;
+
 /**
  * Sonde LECTURE SEULE #574 : dans TOUS les trimestres, quelles échelles sont
  * fabriquées par le code (générique semée, copies de gabarits), combien de
@@ -601,9 +707,13 @@ async function _sonder574() {
 // les 8 échelles dans CHAQUE trimestre à chaque boot et, appelée avant que le
 // trimestre actif soit établi, recréait la clé NUE echellesTemplates que #358
 // interdit (CO-11 — sa jumelle assurerEchelleGenerique, retirée par #574, portait la garde, pas
-// elle). Le contenu est devenu du CATALOGUE : versé une fois dans la
-// bibliothèque partagée par migrerEchellesColleguesVersBibliotheque()
-// (echelles-bibliotheque.js), supprimable et modifiable comme le reste.
+// elle). Le contenu est alors devenu du CATALOGUE, versé une fois dans la
+// bibliothèque partagée.
+// ↻ **ET CE VERSEMENT EST RETIRÉ À SON TOUR** (1er sept. 2026) : les huit
+// échelles n'avaient pas de `valeurCalcul` et ne pouvaient donc rien calculer.
+// Plus AUCUN chemin du code ne les sème. Ce qui reste chez les utilisateurs
+// existants est de la donnée, pas du semis — pierre tombale complète et sonde
+// de mesure dans `js/echelles-bibliotheque.js`.
 
 async function initialiserModuleEchelles() {
 
@@ -615,16 +725,24 @@ async function initialiserModuleEchelles() {
         // ✅ AJOUT (8 décembre 2025) : Migration vers système de bibliothèque
         await migrerEchellesVersBibliotheque();
 
-        // #574 (29 août 2026) : plus d'échelle générique semée ici — voir _sonder574.
+        // §2 du PLAN-2026-09-01 : l'échelle IDME de départ est semée ici, sous la
+        // MÊME garde archivé que la migration ci-dessus — une consultation d'un
+        // trimestre archivé ne doit rien écrire dans sa copie d'archive.
+        // ⚠ Ce n'est pas le retour de l'`ECHELLE_GENERIQUE` de #574 : celle-là
+        // n'avait pas de `valeurCalcul` et ne pouvait rien calculer. Le motif
+        // complet est écrit à côté de `assurerEchelleIdmeDeDepart`, LIS-LE avant
+        // de retirer cet appel.
+        await assurerEchelleIdmeDeDepart();
     }
 
-    // 🆕 #464/D2 (21 août 2026) : versement one-shot des 8 échelles « collègues »
-    // dans la bibliothèque partagée (globale — indépendante du trimestre actif,
-    // donc HORS de la garde archivé ci-dessus). Remplace l'ancien semis par
-    // trimestre d'assurerEchellesPersonnalisees, retirée.
-    if (typeof migrerEchellesColleguesVersBibliotheque === 'function') {
-        await migrerEchellesColleguesVersBibliotheque();
-    }
+    // ⚰ #574 étendu (1er septembre 2026) — LE VERSEMENT DES HUIT ÉCHELLES
+    // « COLLÈGUES » EST RETIRÉ, avec la fonction qui le faisait.
+    // #464/D2 les avait sorties d'ici pour en faire du catalogue versé une fois
+    // dans la bibliothèque partagée. Mesuré depuis : leurs 32 niveaux portaient
+    // `valeur:` et jamais `valeurCalcul:`, donc toute évaluation faite avec l'une
+    // d'elles affichait 0,0 % sans un mot. On les retire au lieu de les réparer —
+    // leur poser des valeurs refabriquerait l'arbitrage que #526/#527 ont supprimé.
+    // Motif complet et sonde de mesure : `js/echelles-bibliotheque.js`.
 
     // Afficher la sidebar avec la liste des échelles (Beta 80.5+)
     if (typeof afficherListeEchelles === 'function') {

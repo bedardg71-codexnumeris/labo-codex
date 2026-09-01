@@ -15,22 +15,27 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 1er septembre 2026, en soirée.**
+**Dernière mise à jour : 1er septembre 2026, en soirée (deuxième passe).**
 
 ---
 
 ## La règle de lecture
 
-Trois états, et un seul est confortable :
+Quatre états. Le quatrième a été ajouté le 1er septembre au soir, parce que trois
+mentaient dans les deux sens :
 
 - **Fait** : vérifié, et la façon de le vérifier est écrite à côté.
+- **Éprouvé par Grégoire** : il a parcouru l'écran lui-même, en écrivant ses
+  chroniques Labo Codex, et ça marchait. C'est la meilleure preuve qui existe, et
+  elle a une portée : c'est l'AUTEUR qui a mesuré, sur SES données et SES réglages.
+  Ce qu'un débutant rencontre par un autre chemin reste à voir.
 - **Pas fait** : on sait ce qui cloche, et c'est nommé.
 - **Jamais vérifié** : personne n'a regardé. **Ce n'est pas « probablement
   correct ».** C'est la confusion qui a coûté le plus cher dans ce projet.
 
 ---
 
-## Le compte du jour : 3 faits, 3 pas faits, 2 jamais vérifiés
+## Le compte du jour : 3 faits, 2 éprouvés par Grégoire, 3 pas faits, 0 jamais vérifié
 
 ---
 
@@ -81,20 +86,70 @@ fichier ? *(#647, #648, #649)*
 
 ---
 
-## JAMAIS VÉRIFIÉ
+## ÉPROUVÉ PAR GRÉGOIRE
 
-⚠ **Ce sont les deux premiers pas d'un nouvel enseignant.** Aucune trace de
-vérification n'existe, nulle part, pour l'un ni pour l'autre.
+↻ **Corrigé le 1er septembre au soir.** Ces deux gestes étaient inscrits « jamais
+vérifié ». C'était faux : Grégoire les a parcourus lui-même en écrivant les
+chroniques Labo Codex, et il a vérifié à chaque fois que tout fonctionnait.
+Le dépôt n'en portait aucune trace, et une session qui ne lit que le dépôt conclut
+« personne n'a regardé ». **La trace manquait, pas la vérification.**
 
 ### Créer un trimestre, créer un groupe-cours, prendre les présences
-**Ce qu'on sait déjà qui tombe dedans** : des fenêtres d'alerte bloquantes sur ce
-parcours exact. *(#678)*
+**Éprouvé** par Grégoire, chronique 1.
+**Ce qui reste sous cet écran** : des fenêtres d'alerte bloquantes sur ce parcours
+exact. Il les a traversées sans être arrêté ; un débutant les lira autrement.
+*(#678)*
 
 ### Créer une grille, une échelle, une cartouche
-**Ce qu'on sait déjà qui tombe dedans** : les huit échelles « disciplinaires » de
-la bibliothèque (Chimie, Bio, Philo, Info, Géo…) donnent **zéro à la première
-évaluation**, en silence. Un enseignant de chimie qui fait la chose sensée
-obtient 0,0 %. *(mesuré le 1er septembre, plan du semis §1)*
+**Éprouvé** par Grégoire, chronique 2, avec SES grilles et SES échelles.
+**Ce qui restait sous cet écran, et qu'il n'a pas pu rencontrer** : les huit
+échelles « disciplinaires » de la bibliothèque (Chimie, Bio, Philo, Info, Géo…)
+donnaient **zéro à la première évaluation, en silence**. Il ne s'en sert pas ; un
+enseignant de chimie qui ouvrait la bibliothèque, lui, tombait dessus au premier
+geste. *(mesuré le 1er septembre, plan du semis §1)*
+
+↻ **Traité le 1er septembre en fin d'après-midi — et il faut lire ce que ça
+couvre exactement.**
+· ✅ **La source est tarie** : le versement des huit échelles est retiré, avec ses
+  définitions et son appel. **Un nouvel enseignant ne les recevra jamais.**
+· ✅ **L'échelle manquante est semée** : `ECHELLE_IDME_DEPART`, avec ses quatre
+  `valeurCalcul`, modifiable et supprimable. Mesuré de bout en bout sous WebKit —
+  espace vide, grille générique + échelle semée, « Maîtrisé » coché : **79,5 %,
+  niveau M**. Le triptyque est complet et il calcule.
+· ✅ **L'écran ne ment plus sur ce qu'il attend** : le texte d'attente nomme ses
+  trois pièces, et choisir une grille sans échelle DIT ce qui manque.
+· ⏳ **Ce qui n'est PAS réglé** : les copies déjà présentes chez qui a lancé
+  l'application avant aujourd'hui restent muettes, et le `0,0 %` qu'elles
+  produisent reste silencieux. **C'est #674**, et une sonde attend Grégoire pour
+  mesurer combien de ses données sont concernées :
+  `await _sonderEchellesDisciplinaires()`.
+⮕ Cette ligne reste donc « éprouvé par Grégoire » et ne devient pas « fait » :
+ce qui a été mesuré, c'est la chaîne du NOUVEL utilisateur, pas le parcours
+complet de l'énoncé 2.
+
+---
+
+## L'ÉVALUATION — ce que l'audit du 25 août a déjà réglé
+
+C'est le morceau qui inquiète, et il est moins ouvert qu'il n'en a l'air.
+
+Un audit de l'onglet Évaluations (les quatre sous-onglets, le PDF de rétroaction,
+le design) a relevé **20 constats le 25 août**. Au 30 août : **19 réglés, 1 partiel,
+0 ouvert**, plus la section « mineurs » livrée. Les 17 fiches qui les portent sont
+**toutes cochées au backlog**, vérifié le 1er septembre.
+
+**Le partiel est le seul qui reste, et il t'attend** : la portée des suppressions par
+couple. Le garde a été livré le 29 août, la règle métier non. C'est le geste 8 de
+cette page. *(#560)*
+
+⚠ **Trois trous ont été découverts EN corrigeant**, et ils sont ouverts : neuf
+fonctions définies deux fois sur `window`, 78 variables CSS fantômes, des clés de
+session non préfixées. *(#587, #595, #596)*
+
+⚠ **Ce que cet audit ne couvrait pas** : le calcul de la note lui-même. Il visait les
+enregistrements, le PDF et le design. Le défaut mesuré le 1er septembre au soir (une
+pondération incomplète qui affiche 0,0 %) n'est dans aucun des 20 constats. Un audit
+propre ne dit rien de ce qu'il n'a pas regardé.
 
 ---
 

@@ -207,7 +207,13 @@ const lire = (f) => readFileSync(path.join(racine, f), 'utf8')
 // Les neuf fichiers qui écrivent un magasin partagé, et le compte attendu.
 const PAR_LA_FILE = {
     'js/grilles-bibliotheque.js': 2,
-    'js/echelles-bibliotheque.js': 3,
+    // ↻ 3 → 2 le 1er septembre 2026 : le versement des huit échelles
+    // « disciplinaires » (`migrerEchellesColleguesVersBibliotheque`) est RETIRÉ —
+    // ses niveaux n'avaient pas de `valeurCalcul` et rendaient 0,0 % sans un mot.
+    // Le site perdu écrivait bien par la file ; c'est l'écriture qui a disparu,
+    // pas sa sérialisation. Ce cliquet a fait son travail : il a vu le compte
+    // bouger.
+    'js/echelles-bibliotheque.js': 2,
     'js/cartouches-bibliotheque.js': 2,
     'js/productions-bibliotheque.js': 2,
     'js/pratiques-bibliotheque.js': 3,
@@ -237,7 +243,9 @@ describe('#599 · C — la course ne peut pas se rouvrir en silence', () => {
             expect(n, `${f} : écritures par la file`).toBe(attendu);
             total += n;
         }
-        expect(total, 'les vingt sites de #599').toBe(20);
+        // ↻ 20 → 19 le 1er septembre 2026, même cause : un site retiré avec le
+        // versement des huit échelles disciplinaires.
+        expect(total, 'les dix-neuf sites de #599').toBe(19);
     });
 
     // ⚠ CE CLIQUET A ÉTÉ REFAIT APRÈS UN BREAK-TEST QUI A REFUSÉ DE ROUGIR.

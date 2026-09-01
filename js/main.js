@@ -141,6 +141,10 @@ window.IDS_GABARITS_HARDCODES = [
     'ECHELLE_ISABELLE_BIO', 'ECHELLE_HELENE_PHILO', 'ECHELLE_MARIEHELENE_LITT',
     'ECHELLE_ETIENNE_ADMIN', 'ECHELLE_OLIVIER_GEO', 'ECHELLE_JORDAN_PHILO',
     'GRILLE_GENERIQUE', 'CART_GENERIQUE',
+    // §2 du PLAN-2026-09-01 (1er sept. 2026) — l'échelle IDME de départ est semée
+    // à chaque initialisation du module Échelles. Sans son id ICI, l'utilisateur
+    // qui la supprime la verrait revenir au boot suivant.
+    'ECHELLE_IDME_DEPART',
     'GABARIT_ECHELLE_IDME', 'GABARIT_ECHELLE_STD_MASTERY',
     'GABARIT_GRILLE_ANALYTIQUE', 'GABARIT_GRILLE_CHECKLIST_SPE',
     'GABARIT_GRILLE_STD_OBJECTIFS'

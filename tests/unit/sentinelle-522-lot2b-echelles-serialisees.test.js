@@ -271,9 +271,15 @@ describe('#522 lot 2b · C — la course ne peut pas se rouvrir en silence', () 
         expect(noms).toEqual(['importerEchellesExternes']);
     });
 
-    it('C.c les vingt-quatre écritures-modifications passent par la file', () => {
+    it('C.c les vingt-cinq écritures-modifications passent par la file', () => {
+        // ↻ 24 → 25 le 1er septembre 2026 : `assurerEchelleIdmeDeDepart` (§2 du
+        // PLAN-2026-09-01) sème l'échelle IDME de départ, et elle le fait PAR LA
+        // FILE — deux boots concurrents sèmeraient sinon deux fois. Le compte
+        // monte parce qu'une écriture de plus respecte la règle, pas parce que la
+        // règle a cédé : C.a et C.b ci-dessus continuent d'exiger qu'AUCUNE
+        // écriture directe ne subsiste.
         const parLaFile = (echelles.match(/db\.modifier\(cle\('echellesTemplates'\)/g) || []).length;
-        expect(parLaFile, 'lot 2b, lot 4 et les conversions antérieures').toBe(24);
+        expect(parLaFile, 'lot 2b, lot 4, les conversions antérieures et le semis IDME').toBe(25);
     });
 
     it('C.d les trois fenêtres d\'attente humaine lisent hors file et écrivent DANS la file', () => {

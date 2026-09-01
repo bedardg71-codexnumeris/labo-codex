@@ -102,71 +102,127 @@ async function ajouterEchelleALaBibliotheque(echelle) {
 }
 
 /**
- * 🆕 #464 / décision D2 du triage (21 août 2026) — Versement ONE-SHOT des huit
- * échelles « collègues » dans la bibliothèque partagée. Elles étaient CODÉES EN
- * DUR dans echelles.js (assurerEchellesPersonnalisees, retirée) et re-semées
- * dans CHAQUE trimestre à chaque boot — en recréant au passage la clé nue
- * echellesTemplates que #358 interdit (CO-11). Désormais : contenu de CATALOGUE,
- * versé une fois ici, supprimable et modifiable comme le reste. Les copies déjà
- * semées dans les trimestres existants restent (données utilisateur désormais).
- * Passe par ajouterEchelleALaBibliotheque (assainissement + push sans replace) ;
- * les suppressions passées (ressourcesSupprimees) sont respectées.
+ * ⚰ #574 étendu — LES HUIT ÉCHELLES « DISCIPLINAIRES » SONT RETIRÉES
+ * (1er septembre 2026, §1 du `plans de travail/PLAN-2026-09-01-materiel-seme-et-chemin-d-entree.md`).
+ *
+ * `migrerEchellesColleguesVersBibliotheque` versait ici huit échelles de
+ * catalogue — Chimie, Info, Bio, Philo ×2, Littérature, Admin, Géo. **Leurs 32
+ * niveaux portaient `valeur:` et jamais `valeurCalcul:`.**
+ *
+ * CE QUE ÇA PRODUISAIT, mesuré sous WebKit le 1er septembre : depuis le retrait
+ * du repli milieu-de-plage (#527), `valeurNumeriqueDuNiveau` rend `null` pour un
+ * niveau sans `valeurCalcul`. Tous les critères sortent alors du total,
+ * `ponderationTotal` tombe à 0, et `calculerNote` affiche **0,0 % · niveau `--`,
+ * sans un mot**. Un enseignant de chimie qui faisait la chose sensée — ouvrir la
+ * bibliothèque, prendre l'échelle « Chimie » — obtenait zéro à sa première
+ * évaluation.
+ *
+ * ⮕ **DÉCISION DE GRÉGOIRE : on les RETIRE, on ne les répare pas.** Leur poser
+ * des `valeurCalcul` choisies par le projet referait exactement l'arbitrage
+ * pédagogique que #526/#527 ont supprimé — et ce sont, dans ses mots, du
+ * « matériel fictif qu'on croit utile dans d'autres disciplines alors qu'il ne
+ * l'est pas ».
+ *
+ * ⚠⚠ CE QUE CE RETRAIT NE FAIT PAS, ET QU'IL NE FAUT PAS CROIRE QU'IL FAIT.
+ * Il tarit la SOURCE : un nouvel utilisateur ne recevra plus jamais ces huit
+ * échelles. Il ne touche AUCUNE donnée déjà en place. Chez qui a déjà lancé
+ * l'application, le drapeau `migration_echelles_collegues_biblio_done` est posé
+ * et les huit échelles vivent dans `bibliothequeEchelles` — ce sont des données
+ * utilisateur depuis #464/D2, et elles restent muettes. Les copies importées
+ * dans un trimestre (`<trim>_echellesTemplates`) aussi.
+ * ⮕ Ce qu'elles produisent est le sujet de **#674** ; ce qu'il faut en faire est
+ * un geste de Grégoire, éclairé par `_sonderEchellesDisciplinaires()` ci-dessous.
+ *
+ * ⚠ Leurs identifiants RESTENT dans `IDS_GABARITS_HARDCODES` (main.js), et c'est
+ * voulu : cette liste est ce qui fait poser un tombstone à la suppression. Sans
+ * elle, quelqu'un qui supprime son échelle « Chimie » la verrait revenir au
+ * prochain import. Un retrait de semis n'emporte pas la durabilité d'une
+ * suppression — ce sont deux sujets, et le second survit au premier.
  */
-async function migrerEchellesColleguesVersBibliotheque() {
-    const FLAG = 'migration_echelles_collegues_biblio_done';
-    if (db.getSync(FLAG, false)) return;
 
-    const DEFS = [
-        { id: 'ECHELLE_BRUNO_CHIMIE', nom: 'Échelle Chimie organique', description: 'Échelle 4 niveaux pour standards. Seuil maîtrise: 75%.', discipline: 'Chimie',
-          niveaux: [ { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' }, { code: 'D', nom: 'en Développement', min: 55, max: 74, valeur: 65, couleur: '#fd7e14' }, { code: 'M', nom: 'Maîtrisé', min: 75, max: 89, valeur: 82, couleur: '#28a745' }, { code: 'E', nom: 'Étendu', min: 90, max: 100, valeur: 95, couleur: '#007bff' } ] },
-        { id: 'ECHELLE_XAVIER_INFO', nom: 'Échelle Interfaces/BD', description: 'Échelle 4 niveaux numériques. Niveau 3 = seuil passage, niveau 4 = bonus.', discipline: 'Informatique',
-          niveaux: [ { code: '1', nom: 'Non atteint', min: 0, max: 49, valeur: 40, couleur: '#dc3545' }, { code: '2', nom: 'En développement', min: 50, max: 64, valeur: 55, couleur: '#fd7e14' }, { code: '3', nom: 'Maîtrisé', min: 65, max: 84, valeur: 80, couleur: '#28a745' }, { code: '4', nom: 'Excellence', min: 85, max: 100, valeur: 95, couleur: '#007bff' } ] },
-        { id: 'ECHELLE_ISABELLE_BIO', nom: 'Échelle Anatomie', description: 'Échelle IDME qualitative pour jugement global. Pas de seuils chiffrés stricts.', discipline: 'Biologie', avertissement: 'Échelle pour jugement professionnel - les seuils sont indicatifs',
-          niveaux: [ { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 40, couleur: '#dc3545' }, { code: 'D', nom: 'en Développement', min: 50, max: 64, valeur: 57, couleur: '#fd7e14' }, { code: 'M', nom: 'Maîtrisé', min: 65, max: 84, valeur: 75, couleur: '#28a745' }, { code: 'E', nom: 'Étendu', min: 85, max: 100, valeur: 92, couleur: '#007bff' } ] },
-        { id: 'ECHELLE_HELENE_PHILO', nom: 'Échelle Philosophie', description: 'Échelle 4 niveaux pour cours de philosophie. Seuils: 70/60/50.', discipline: 'Philosophie',
-          niveaux: [ { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 35, couleur: '#dc3545' }, { code: 'D', nom: 'en Développement', min: 50, max: 59, valeur: 55, couleur: '#fd7e14' }, { code: 'M', nom: 'Maîtrisé', min: 60, max: 79, valeur: 70, couleur: '#28a745' }, { code: 'E', nom: 'Étendu', min: 80, max: 100, valeur: 90, couleur: '#007bff' } ] },
-        { id: 'ECHELLE_MARIEHELENE_LITT', nom: 'Échelle Littérature', description: 'Échelle 4 niveaux pour cours de littérature. Seuils: 75/65/55.', discipline: 'Littérature',
-          niveaux: [ { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' }, { code: 'D', nom: 'en Développement', min: 55, max: 64, valeur: 60, couleur: '#fd7e14' }, { code: 'M', nom: 'Maîtrisé', min: 65, max: 84, valeur: 75, couleur: '#28a745' }, { code: 'E', nom: 'Étendu', min: 85, max: 100, valeur: 92, couleur: '#007bff' } ] },
-        { id: 'ECHELLE_ETIENNE_ADMIN', nom: 'Échelle Comptabilité', description: 'Échelle 4 niveaux pour cours d\'administration. Seuils: 80/70/60.', discipline: 'Administration',
-          niveaux: [ { code: 'I', nom: 'Incomplet', min: 0, max: 59, valeur: 45, couleur: '#dc3545' }, { code: 'D', nom: 'en Développement', min: 60, max: 69, valeur: 65, couleur: '#fd7e14' }, { code: 'M', nom: 'Maîtrisé', min: 70, max: 89, valeur: 80, couleur: '#28a745' }, { code: 'E', nom: 'Étendu', min: 90, max: 100, valeur: 95, couleur: '#007bff' } ] },
-        { id: 'ECHELLE_OLIVIER_GEO', nom: 'Échelle Géographie', description: 'Échelle 4 niveaux pour cours de géographie. Seuils: 70/65/55.', discipline: 'Géographie',
-          niveaux: [ { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' }, { code: 'D', nom: 'en Développement', min: 55, max: 64, valeur: 60, couleur: '#fd7e14' }, { code: 'M', nom: 'Maîtrisé', min: 65, max: 79, valeur: 72, couleur: '#28a745' }, { code: 'E', nom: 'Étendu', min: 80, max: 100, valeur: 90, couleur: '#007bff' } ] },
-        { id: 'ECHELLE_JORDAN_PHILO', nom: 'Échelle Philosophie 101', description: 'Échelle 4 niveaux pour cours de philosophie. Seuils: 80/60/50.', discipline: 'Philosophie',
-          niveaux: [ { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 35, couleur: '#dc3545' }, { code: 'D', nom: 'en Développement', min: 50, max: 59, valeur: 55, couleur: '#fd7e14' }, { code: 'M', nom: 'Maîtrisé', min: 60, max: 79, valeur: 70, couleur: '#28a745' }, { code: 'E', nom: 'Étendu', min: 80, max: 100, valeur: 90, couleur: '#007bff' } ] }
-    ];
+/**
+ * Sonde LECTURE SEULE — que reste-t-il des huit échelles disciplinaires chez cet
+ * utilisateur, et ces copies sont-elles calculables ?
+ *
+ * Écrite parce que le §1 du plan l'exige avant toute décision sur les données :
+ * « retirer de la bibliothèque ne retire pas la copie déjà importée — et cette
+ * copie est cassée. Si le cas existe, il faut le DIRE à l'utilisateur ».
+ * Cette sonde donne le chiffre ; elle ne décide de rien et n'écrit RIEN.
+ *
+ * ⚠ Complète `_sonder574()` (echelles.js) plutôt qu'elle ne la répète : celle-là
+ * ne connaît que `ECHELLE_GENERIQUE` et les `GABARIT_ECHELLE_*`, et ne regarde
+ * pas la bibliothèque partagée. Les huit-ci lui sont invisibles.
+ *
+ * À lancer en console : await _sonderEchellesDisciplinaires()
+ *
+ * @returns {Promise<{bibliotheque:Array, copies:Array, usages:Object}>}
+ */
+async function _sonderEchellesDisciplinaires() {
+    const IDS = ['ECHELLE_BRUNO_CHIMIE', 'ECHELLE_XAVIER_INFO', 'ECHELLE_ISABELLE_BIO',
+                 'ECHELLE_HELENE_PHILO', 'ECHELLE_MARIEHELENE_LITT', 'ECHELLE_ETIENNE_ADMIN',
+                 'ECHELLE_OLIVIER_GEO', 'ECHELLE_JORDAN_PHILO'];
+    const estVisee = (e) => !!e && (IDS.indexOf(e.id) >= 0 || IDS.indexOf(e.idOriginal) >= 0);
+    // Un niveau est MUET s'il ne peut rendre aucun nombre — c'est la règle de
+    // `valeurNumeriqueDuNiveau` (#525), pas une seconde règle écrite ici.
+    const muet = (n) => !n || n.valeurCalcul == null || String(n.valeurCalcul).trim() === '' || isNaN(Number(n.valeurCalcul));
 
-    // Versement en LOT (1 lecture + 1 écriture) : la boucle par
-    // ajouterEchelleALaBibliotheque coûtait ~17 allers-retours IndexedDB
-    // séquentiels au boot — mesuré au harnais Playwright (chaque test au
-    // storage vierge les payait). Même contrat : push sans replace (jamais
-    // d'écrasement d'une version présente), tombstones respectés. Contenu
-    // interne sûr (littéraux ci-dessus) — pas d'assainissement requis.
-    const supprimees = (await db.get('ressourcesSupprimees')) || [];
-    // #599 — le versement passe par la file : les présences sont vérifiées à
-    // l'instant de l'écriture. Vérifiées avant, un ajout concurrent d'une de ces
-    // échelles pendant le boot serait écrasé par ce versement en lot.
-    await db.modifier(CLE_BIBLIOTHEQUE_ECHELLES, (lues) => {
-        const bibliotheque = lues || [];
-        let nbVersees = 0;
-        for (const def of DEFS) {
-            if (supprimees.includes(def.id)) continue;
-            if (bibliotheque.some(e => e.id === def.id)) continue;
-            bibliotheque.push(Object.assign({}, def, {
-                auteur: 'Labo Codex',
-                verrouille: false,
-                dansBibliotheque: true,
-                dateCreation: '2026-01-03T00:00:00.000Z',
-                dateAjoutBiblio: new Date().toISOString()
-            }));
-            nbVersees++;
+    const decrire = (e, ou) => ({
+        ou: ou, id: e.id, nom: e.nom || '', idOriginal: e.idOriginal || '',
+        niveaux: (e.niveaux || []).length,
+        niveauxMuets: (e.niveaux || []).filter(muet).length
+    });
+
+    const bibliotheque = ((await db.get(CLE_BIBLIOTHEQUE_ECHELLES)) || [])
+        .filter(estVisee).map(e => decrire(e, 'bibliothequeEchelles'));
+
+    let trimestres = [];
+    try { trimestres = (db.getSync('trimestres', []) || []).filter(t => t && t.id); } catch (e) { trimestres = []; }
+
+    const copies = [];
+    const idsPresents = {};
+    const clesVues = {};
+    for (const t of trimestres) {
+        for (const cleEssai of [t.id + '_echellesTemplates', 'echellesTemplates']) {
+            if (clesVues[cleEssai]) continue;
+            const liste = await db.get(cleEssai);
+            if (!Array.isArray(liste)) continue;
+            clesVues[cleEssai] = true;
+            liste.filter(estVisee).forEach(e => { copies.push(decrire(e, cleEssai)); idsPresents[e.id] = true; });
+            break;
         }
-        // Rien à verser : le mutateur rend `undefined`, aucune écriture.
-        if (nbVersees === 0) return undefined;
-        return bibliotheque;
-    }, []);
-    db.setSync(FLAG, true);
+    }
+
+    // Ce qui DÉSIGNE une de ces copies : c'est ce chiffre, et lui seul, qui dit
+    // si le sujet est théorique ou s'il touche du travail réel.
+    const usages = { evaluations: 0, productions: 0 };
+    for (const t of trimestres) {
+        for (const [nomCle, type] of [['_evaluationsSauvegardees', 'evaluations'], ['_productions', 'productions']]) {
+            const liste = await db.get(t.id + nomCle);
+            (Array.isArray(liste) ? liste : []).forEach(item => {
+                if (item && item.echelleId && idsPresents[item.echelleId]) usages[type]++;
+            });
+        }
+    }
+
+    // ⚠ `console` assumé et nommé : la sortie EST le produit de cette sonde,
+    // même statut que `_sonder574` et `_diagnostiquerResolutionEchelles`.
+    if (typeof console !== 'undefined' && console.table) {
+        if (bibliotheque.length) console.table(bibliotheque);
+        if (copies.length) console.table(copies);
+    }
+    console.log('[Sonde échelles disciplinaires] dans la bibliothèque : ' + bibliotheque.length
+        + ' · copies dans les trimestres : ' + copies.length
+        + ' · dont MUETTES (aucun niveau calculable) : '
+        + bibliotheque.concat(copies).filter(e => e.niveaux > 0 && e.niveauxMuets === e.niveaux).length);
+    console.log('[Sonde échelles disciplinaires] désignent une de ces copies — évaluations : '
+        + usages.evaluations + ' · productions : ' + usages.productions);
+    if (!bibliotheque.length && !copies.length) {
+        console.log('[Sonde échelles disciplinaires] ZÉRO — et ce zéro porte son témoin : '
+            + trimestres.length + ' trimestre(s) et la bibliothèque partagée ont été RÉELLEMENT lus.');
+    }
+    return { bibliotheque: bibliotheque, copies: copies, usages: usages };
 }
-window.migrerEchellesColleguesVersBibliotheque = migrerEchellesColleguesVersBibliotheque;
+window._sonderEchellesDisciplinaires = _sonderEchellesDisciplinaires;
 
 /**
  * Retirer une échelle de la bibliothèque
