@@ -620,6 +620,11 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   · `js/evaluation-chargement.js:1415` — la création par l'auto-save.
   ⮕ `typeof 0 === 'number'` : **un zéro fabriqué franchit ces trois portes exactement comme une vraie note.** C'est
   le même point de passage que celui nommé plus haut pour l'auto-save — la portée devra être écrite par ce chemin-là.
+  ⏳ **GESTE DÛ À GRÉGOIRE — la mesure que le code ne peut pas faire.** Combien de ces copies muettes
+  vivent réellement dans ses données, et combien d'évaluations les désignent ? En console :
+  `await _sonderEchellesDisciplinaires()` (`js/echelles-bibliotheque.js`, lecture seule vérifiée par
+  assertion). Elle complète `_sonder574()`, qui ne connaît ni ces huit identifiants ni la bibliothèque
+  partagée. **Si elle rend zéro partout, il n'y a rien à décider ici** — et ce zéro portera son témoin.
   ▣ **CE QUE LE RETRAIT DES HUIT ÉCHELLES (§1 du PLAN) NE REFERME PAS.** Retirer une échelle de la bibliothèque ne
   retire pas les copies déjà importées : elles vivent dans `echellesTemplates`, ce sont des données utilisateur, et
   elles restent muettes. §1 tarit la SOURCE ; il ne répare aucune donnée déjà en base. C'est #674 qui doit rendre le

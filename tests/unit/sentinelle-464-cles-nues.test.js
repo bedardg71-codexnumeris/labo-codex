@@ -179,30 +179,88 @@ describe('#464 · 5 — ratchets statiques (CO-09, CO-11, CT-11)', () => {
     });
 });
 
-describe('#464 · 6 — versement des 8 échelles collègues dans la bibliothèque (D2)', () => {
-    function chargerBiblio(store) {
-        return chargerScript('js/echelles-bibliotheque.js', { db: dbDepuisStore(store) });
-    }
+describe('#574 étendu · 6 — le versement des 8 échelles collègues est RETIRÉ (1er sept. 2026)', () => {
 
-    it('one-shot : 8 échelles versées, push sans replace, flag posé, pas de doublon au 2e run', async () => {
-        const store = { bibliothequeEchelles: [{ id: 'ECHELLE_BRUNO_CHIMIE', nom: 'Version utilisateur' }] };
-        const win = chargerBiblio(store);
-        await win.migrerEchellesColleguesVersBibliotheque();
-        const ids = store.bibliothequeEchelles.map(e => e.id);
-        expect(ids.filter(i => i === 'ECHELLE_BRUNO_CHIMIE').length, 'push sans replace : pas de doublon').toBe(1);
-        expect(store.bibliothequeEchelles.find(e => e.id === 'ECHELLE_BRUNO_CHIMIE').nom, 'la version présente n\'est pas remplacée').toBe('Version utilisateur');
-        expect(store.bibliothequeEchelles.length, '1 existante + 7 versées').toBe(8);
-        expect(store.migration_echelles_collegues_biblio_done).toBe(true);
-        await win.migrerEchellesColleguesVersBibliotheque();
-        expect(store.bibliothequeEchelles.length, '2e run : no-op').toBe(8);
+    // ⚰ Ce bloc REMPLACE celui qui gardait le versement de #464/D2. Il n'est pas
+    // « réaligné » : la fonctionnalité est partie, donc son test part avec elle —
+    // un test réaligné sur du code absent devient un vert qui n'exclut rien.
+    //
+    // POURQUOI LE RETRAIT. Les 32 niveaux des huit échelles portaient `valeur:` et
+    // jamais `valeurCalcul:`. Depuis #527, `valeurNumeriqueDuNiveau` rend alors
+    // `null`, tous les critères sortent du total, et l'écran affiche 0,0 % sans un
+    // mot. Décision de Grégoire : les RETIRER, pas leur poser des valeurs — ce
+    // serait refabriquer l'arbitrage pédagogique que #526/#527 ont supprimé.
+    //
+    // Break-test du 1er septembre, sur la source EN MÉMOIRE : remettre une seule
+    // des huit définitions → A rougit ; remettre l'appel dans `echelles.js` → B
+    // rougit ; retirer la sonde → C rougit. Trois assertions, trois sujets.
+
+    // `js` est défini dans le describe voisin : il n'en sort pas. On le redéfinit
+    // ici plutôt que de le hisser — hisser un helper hors de son bloc change la
+    // portée de tests qu'on ne relit pas.
+    const js = (f) => readFileSync(path.join(racineProjet, 'js', f), 'utf8');
+
+    const IDS_DISCIPLINAIRES = ['ECHELLE_BRUNO_CHIMIE', 'ECHELLE_XAVIER_INFO', 'ECHELLE_ISABELLE_BIO',
+        'ECHELLE_HELENE_PHILO', 'ECHELLE_MARIEHELENE_LITT', 'ECHELLE_ETIENNE_ADMIN',
+        'ECHELLE_OLIVIER_GEO', 'ECHELLE_JORDAN_PHILO'];
+
+    it('A — plus AUCUNE des huit définitions n\'est écrite dans js/ (hors commentaires)', () => {
+        const { readdirSync } = require('node:fs');
+        const fichiers = readdirSync(path.join(racineProjet, 'js')).filter(f => f.endsWith('.js'));
+        const fautifs = [];
+        for (const f of fichiers) {
+            // Une définition, c'est `id: 'ECHELLE_X'` — pas un identifiant cité dans
+            // une phrase, une liste de tombstones ou une sonde. Les commentaires
+            // sont retirés d'abord : c'est la leçon des assertions statiques.
+            const src = js(f)
+                .replace(/\/\*[\s\S]*?\*\//g, '')
+                .split('\n').map(l => l.replace(/\/\/.*$/, '')).join('\n');
+            for (const id of IDS_DISCIPLINAIRES) {
+                if (src.includes("id: '" + id + "'")) fautifs.push(f + ' → ' + id);
+            }
+        }
+        expect(fautifs, 'une échelle disciplinaire est re-semée quelque part').toEqual([]);
     });
 
-    it('les suppressions passées (ressourcesSupprimees) sont respectées', async () => {
-        const store = { ressourcesSupprimees: ['ECHELLE_JORDAN_PHILO'] };
-        const win = chargerBiblio(store);
-        await win.migrerEchellesColleguesVersBibliotheque();
-        const ids = store.bibliothequeEchelles.map(e => e.id);
-        expect(ids.includes('ECHELLE_JORDAN_PHILO'), 'tombstone honoré').toBe(false);
-        expect(store.bibliothequeEchelles.length).toBe(7);
+    it('B — plus aucun chemin du code ne verse ces échelles : la fonction et son appel sont partis', () => {
+        const biblio = js('echelles-bibliotheque.js');
+        expect(biblio.includes('async function migrerEchellesColleguesVersBibliotheque'),
+            'la fonction de versement est revenue').toBe(false);
+        expect(biblio.includes('window.migrerEchellesColleguesVersBibliotheque ='),
+            'son export est revenu').toBe(false);
+        const src = js('echelles.js')
+            .replace(/\/\*[\s\S]*?\*\//g, '')
+            .split('\n').map(l => l.replace(/\/\/.*$/, '')).join('\n');
+        expect(src.includes('migrerEchellesColleguesVersBibliotheque'),
+            'initialiserModuleEchelles rappelle le versement').toBe(false);
+    });
+
+    it('C — la sonde de mesure reste offerte : un retrait de semis ne mesure pas les données déjà en place', () => {
+        const biblio = js('echelles-bibliotheque.js');
+        expect(biblio).toContain('async function _sonderEchellesDisciplinaires');
+        expect(biblio).toContain('window._sonderEchellesDisciplinaires = _sonderEchellesDisciplinaires;');
+        // Elle ne DOIT rien écrire : c'est ce qui autorise Grégoire à la lancer
+        // sur ses données réelles sans préalable.
+        const corps = biblio.slice(biblio.indexOf('async function _sonderEchellesDisciplinaires'));
+        const fin = corps.indexOf('\nwindow._sonderEchellesDisciplinaires');
+        const code = corps.slice(0, fin)
+            .replace(/\/\*[\s\S]*?\*\//g, '')
+            .split('\n').map(l => l.replace(/\/\/.*$/, '')).join('\n');
+        for (const ecriture of ['db.set(', 'db.setSync(', 'db.modifier(', 'db.supprimer(']) {
+            expect(code.includes(ecriture), 'la sonde ÉCRIT (' + ecriture + ') — elle doit être en lecture seule').toBe(false);
+        }
+    });
+
+    it('D — les identifiants restent dans IDS_GABARITS_HARDCODES : une suppression doit rester durable', () => {
+        // ⚠ Retirer le semis n'emporte PAS la durabilité d'une suppression. Chez
+        // qui a déjà lancé l'application, les huit échelles sont dans sa
+        // bibliothèque : sans tombstone, celle qu'il supprime reviendrait au
+        // prochain import. Deux sujets, et le second survit au premier.
+        const source = readFileSync(path.join(racineProjet, 'js', 'main.js'), 'utf8');
+        const debut = source.indexOf('window.IDS_GABARITS_HARDCODES = [');
+        const bloc = source.slice(debut, source.indexOf('];', debut));
+        for (const id of IDS_DISCIPLINAIRES) {
+            expect(bloc, id + ' a quitté la liste des tombstones').toContain(id);
+        }
     });
 });

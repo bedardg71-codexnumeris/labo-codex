@@ -24,10 +24,13 @@ Entre un espace de travail vide et une première production évaluée :
 
 ---
 
-## 1. ⚠ LE DÉFAUT QUI DOIT PARTIR EN PREMIER
+## 1. ✅ LIVRÉ — LE DÉFAUT QUI DEVAIT PARTIR EN PREMIER
 
-**Les huit échelles « disciplinaires » de la bibliothèque produisent une note de
-zéro, sans un mot.**
+*↻ 1er septembre 2026. Le versement est retiré ; les données déjà en place ne
+sont pas touchées, et c'est délibéré — voir « ce que le retrait ne fait pas ».*
+
+**Les huit échelles « disciplinaires » de la bibliothèque produisaient une note
+de zéro, sans un mot.**
 
 `js/echelles-bibliotheque.js:115-160` livre huit échelles — Chimie, Info, Bio,
 Philo ×2, Littérature, Admin, Géo. Leurs **32 niveaux portent `valeur:` au lieu
@@ -43,14 +46,99 @@ prendre l'échelle « Chimie » — obtient **zéro à sa première évaluation*
 exactement le « matériel fictif qu'on croit utile dans d'autres disciplines
 alors qu'il ne l'est pas ».
 
-⚠ **À mesurer avant de retirer** : quelqu'un a-t-il déjà importé une de ces
-échelles ? Retirer de la bibliothèque ne retire pas la copie déjà importée — et
-cette copie est cassée. Si le cas existe, il faut le dire à l'utilisateur, pas
-le laisser avec une échelle muette.
+### Ce qui a été fait, et ce qui ne l'a pas été
+
+✅ **La SOURCE est tarie.** `migrerEchellesColleguesVersBibliotheque` est retirée
+avec ses huit définitions, et son appel dans `initialiserModuleEchelles` avec
+elle. Plus aucun chemin du code ne sème ces échelles : **un nouvel utilisateur ne
+les recevra jamais.** Quatre assertions le verrouillent (`sentinelle-464-cles-nues`),
+et le break-test a rendu trois rouges sur trois sujets distincts.
+
+⛔ **AUCUNE DONNÉE N'EST TOUCHÉE, et c'est délibéré.** Chez qui a déjà lancé
+l'application, le drapeau `migration_echelles_collegues_biblio_done` est posé et
+les huit échelles vivent dans `bibliothequeEchelles` — ce sont des données
+utilisateur depuis #464/D2. Les supprimer serait détruire ce que Grégoire n'a pas
+demandé de détruire, et le moratoire à trois gestes vaut ici comme ailleurs.
+
+⚠ **Leurs identifiants RESTENT dans `IDS_GABARITS_HARDCODES`.** C'est cette liste
+qui fait poser un tombstone à la suppression : sans elle, l'utilisateur qui
+supprime son échelle « Chimie » la reverrait au prochain import. Un retrait de
+semis n'emporte pas la durabilité d'une suppression.
+
+### ⏳ LE GESTE QUI RESTE À GRÉGOIRE — la mesure que le code ne peut pas faire
+
+Le plan demandait de mesurer avant de retirer : *quelqu'un a-t-il déjà importé
+une de ces échelles ?* Cette mesure porte sur des données réelles, dans son
+navigateur. Elle est maintenant **outillée** :
+
+```js
+await _sonderEchellesDisciplinaires()
+```
+
+Lecture seule, aucune écriture — c'est vérifié par une assertion, pas promis.
+Elle rend, pour les huit identifiants : ce qui reste dans `bibliothequeEchelles`,
+les copies présentes dans chaque `<trim>_echellesTemplates`, combien de leurs
+niveaux sont MUETS, et **combien d'évaluations et de productions les désignent**.
+C'est ce dernier chiffre qui dit si le sujet est théorique ou s'il touche du
+travail réel.
+
+⚠ Elle complète `_sonder574()` plutôt qu'elle ne la répète : celle-là ne connaît
+que `ECHELLE_GENERIQUE` et les `GABARIT_ECHELLE_*`, et ne regarde pas la
+bibliothèque partagée. Les huit-ci lui étaient **invisibles**.
+
+⮕ Si la sonde rend zéro partout, il n'y a rien à décider. Sinon, la question
+« qu'en faire » est à Grégoire, et le silence qu'elles produisent est **#674**.
 
 ---
 
-## 2. SEMER LE TRIPTYQUE — grille, échelle, cartouche
+## 2. ✅ LIVRÉ — SEMER LE TRIPTYQUE : grille, échelle, cartouche
+
+*↻ 1er septembre 2026. L'échelle manquante est semée, et la chaîne complète a été
+mesurée de bout en bout.*
+
+**`assurerEchelleIdmeDeDepart`** (`js/echelles.js`) sème `ECHELLE_IDME_DEPART`
+dans le trimestre actif, sous la même garde archivé et la même garde anti-clé-nue
+(#358) que `assurerGrilleGenerique`, et **par la file** (#599) — deux boots
+concurrents sèmeraient sinon deux fois.
+
+▣ **CE QUI A ÉTÉ MESURÉ, ET QUI EST LA SEULE QUESTION QUI COMPTE** : avec ce que
+l'application sème toute seule et **sans rien créer**, une première évaluation
+produit-elle une note ? Spec WebKit `triptyque-seme-produit-une-note.spec.js` —
+espace vide, grille générique + échelle semée, « Maîtrisé » coché sur les quatre
+critères ⮕ **79,5 % · niveau M**. Le banc n'exige pas « quelque chose de non
+nul » : il exige **la valeur ponctuelle exacte du niveau coché**, sans quoi un
+chiffre venu d'ailleurs passerait.
+
+▣ **ET UN TÉMOIN NÉGATIF, dans le même fichier** : la même chaîne, sur une échelle
+à `valeur:` (la forme des huit retirées au §1), rend **`0.0 %` · `--`**. Sans lui,
+le 79,5 % n'exclurait rien. ⚠ Ce témoin documente un défaut **qui existe encore**
+— le silence est #674. Le jour où #674 sera livré, ce test rougira : ce sera la
+bonne nouvelle, et il faudra le corriger, pas élargir sa tolérance.
+
+▣ **Décisions prises en écrivant, et pourquoi.**
+· **Identifiant NEUF**, jamais `ECHELLE_GENERIQUE` : le réutiliser ferait se
+  confondre l'échelle semée avec les copies CASSÉES encore présentes chez qui l'a
+  connue — la collision d'identité de #524, rejouée.
+· **`ECHELLE_IDME_DEPART` entre dans `IDS_GABARITS_HARDCODES`** : sans son id
+  dans cette liste, l'utilisateur qui la supprime la reverrait au boot suivant, et
+  l'énoncé 8 (« ce qu'un utilisateur détruit, il l'a voulu ») serait faux.
+· **Les niveaux sont une copie PROFONDE de `niveauxDefaut`**, la forme canonique
+  du module. Aucune valeur n'est inventée, et une modification de l'utilisateur ne
+  peut pas remonter dans la constante que douze lecteurs partagent — un test le
+  vérifie en saccageant la copie puis en resemant.
+· **Le paragraphe de garde est écrit DANS le code**, comme ce plan l'exigeait,
+  et une assertion vérifie qu'il y est encore.
+
+▣ **Deux ratchets voisins ont vu passer ce lot, et ils ont bien travaillé** :
+`sentinelle-522-lot2b` (24 → 25 écritures par la file : le semis en ajoute une, et
+elle respecte la règle) et `sentinelle-599` (3 → 2 dans `echelles-bibliotheque.js` :
+le versement retiré emportait une écriture). Les deux comptes sont mis à jour
+**avec leur motif**, pas silencieusement.
+
+---
+
+### Ce qui suit — l'état des lieux qui a mené à ce semis
+
 
 ### Ce qui est déjà semé (et fonctionne)
 
