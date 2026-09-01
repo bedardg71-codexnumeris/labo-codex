@@ -55,7 +55,29 @@ function commeAvant(erreurs, mots, critere) {
 
 const GOLDEN = [
     { nom: "zéro erreur, texte mesuré", erreurs: 0, mots: 460, attendu: " En prévision de l'EUF, l'absence d'erreur est exceptionnelle." },
-    { nom: "zéro erreur ET zéro mot", erreurs: 0, mots: 0, attendu: " En prévision de l'EUF, l'absence d'erreur est exceptionnelle." },
+    // LA SEULE LIGNE DE CE GOLDEN QUI A ETE DEPLACEE, ET VOICI POURQUOI.
+    // ---------------------------------------------------------------------
+    // L'ancienne fonction rendait ICI « l'absence d'erreur est exceptionnelle ».
+    // Elle testait `erreurs === 0` AVANT `mots === 0`, et le cas etait MORT :
+    // le site d'appel coupait sur `if (mots === 0) return;`.
+    //
+    // #667 l'a rendu VIVANT le matin meme — mesure, pas suppose. La garde du
+    // mode simple est devenue `if (motsRequisSimple && mots === 0)`, ou
+    // `motsRequisSimple` vient de `modele.utiliseMots`, et le modele neuf
+    // `penalite_par_erreur` porte `utiliseMots: false`. Un critere ou
+    // l'enseignant·e a regle « la longueur ne compte pas ici », sans un seul mot
+    // saisi, annoncait donc a l'eleve que son absence d'erreur est exceptionnelle
+    // EN PREVISION D'UNE EPREUVE CALIBREE SUR UN NOMBRE DE MOTS.
+    //
+    // `utiliseMots` est un attribut du modele de NOTE. Le besoin en mots de la
+    // PROJECTION est inconditionnel : « 1 erreur / N mots » n'a aucun sens sans
+    // N. La garde vit donc dans le registre, au-dessus du palier zero.
+    //
+    // CE N'EST PAS UN GOLDEN « MIS A JOUR POUR FAIRE PASSER UN TEST ». C'est une
+    // deviation decidee, dont l'etendue est MESUREE et VERROUILLEE plus bas :
+    // l'empreinte prouve qu'elle touche CE couple et aucun autre, 1 sur 481 401.
+    // Decision du 1er septembre 2026, §6bis de la consigne.
+    { nom: "zéro erreur ET zéro mot — DÉVIATION NOMMÉE, voir ci-dessus", erreurs: 0, mots: 0, attendu: "" },
     { nom: "zéro mot, erreurs saisies", erreurs: 59, mots: 0, attendu: "" },
     { nom: "excellent — frontière EXACTE 100", erreurs: 1, mots: 100, attendu: " Tu fais en moyenne 1 erreur à chaque 100 mots. En prévision de l'EUF, ce ratio est excellent." },
     { nom: "excellent — large", erreurs: 4, mots: 460, attendu: " Tu fais en moyenne 1 erreur à chaque 115 mots. En prévision de l'EUF, ce ratio est excellent." },
@@ -83,24 +105,63 @@ describe('#668 · A — équivalence au caractère près avec le comportement d\
         });
     });
 
-    // ⚠ POURQUOI UNE EMPREINTE EN PLUS DES CAS NOMMÉS. Vingt cas nommés
-    // couvrent les branches et les frontières, mais pas la surface. Une dérive
-    // sur l\'arrondi, ou sur un intervalle que personne n\'a nommé, passerait
-    // entre eux. L\'empreinte balaie 481 401 couples et tient en une ligne.
-    // Si elle rougit SEULE (tous les cas nommés verts), ce n\'est pas un
-    // mystère : lancer le générateur de l\'entrée de journal #668 pour situer
-    // le premier couple qui diverge.
-    it(`l\'empreinte de 481 401 couples est inchangée`, async () => {
+    // POURQUOI UNE EMPREINTE EN PLUS DES CAS NOMMES. Vingt cas nommes couvrent
+    // les branches et les frontieres, mais pas la surface. Une derive sur
+    // l'arrondi, ou sur un intervalle que personne n'a nomme, passerait entre
+    // eux. Les cas nommes disent OU ca casse ; l'empreinte dit QUE ca casse.
+
+    // Calculee sur les sorties de `genererRetroactionEUF` ELLE-MEME, le
+    // 1er septembre 2026. Elle decrit le comportement HISTORIQUE.
+    const EMPREINTE_HISTORIQUE = '08ece479c49b884356d78607bc898aa2228724afbd92ee89c54574896fba3cba';
+
+    // Le texte que l'ancienne fonction rendait sur le couple devie — conserve
+    // ici pour pouvoir REJOUER l'histoire, jamais pour etre rendu a un eleve.
+    const TEXTE_HISTORIQUE_ZERO_ZERO = " En prévision de l'EUF, l'absence d'erreur est exceptionnelle.";
+
+    it("l'empreinte prouve que la déviation touche UN couple, et aucun autre", async () => {
+        // On rejoue le balayage sur le registre d'aujourd'hui en REMETTANT a la
+        // main la seule reponse qu'on a decide de changer. Si l'empreinte
+        // historique revient, c'est que tout le reste est intact au caractere
+        // pres : 481 400 couples inchanges, 1 devie, et la preuve tient en une
+        // ligne. Si elle ne revient pas, une SECONDE divergence s'est glissee
+        // quelque part — et les cas nommes ci-dessus diront laquelle.
         const { createHash } = await import('node:crypto');
         const h = createHash('sha256');
+        const rejoue = (e, m) => (e === 0 && m === 0) ? TEXTE_HISTORIQUE_ZERO_ZERO : commeAvant(e, m);
         for (let e = 0; e <= 200; e++) {
-            for (let m = 0; m <= 1200; m++) h.update(e + '|' + m + '|' + commeAvant(e, m) + '\n');
+            for (let m = 0; m <= 1200; m++) h.update(e + '|' + m + '|' + rejoue(e, m) + '\n');
         }
         for (let demi = 1; demi <= 400; demi++) {
             const e = demi / 2;
-            for (let m = 1; m <= 600; m++) h.update(e + '|' + m + '|' + commeAvant(e, m) + '\n');
+            for (let m = 1; m <= 600; m++) h.update(e + '|' + m + '|' + rejoue(e, m) + '\n');
         }
-        expect(h.digest('hex')).toBe('08ece479c49b884356d78607bc898aa2228724afbd92ee89c54574896fba3cba');
+        expect(h.digest('hex')).toBe(EMPREINTE_HISTORIQUE);
+    });
+
+    it('la déviation est NOMMÉE : le registre dit pourquoi il ne conclut pas', () => {
+        const r = P.calculer({}, { erreurs: 0, mots: 0 });
+        expect(r.applicable).toBe(false);
+        expect(r.raison).toBe('mots-absents');
+        expect(r.texte).toBe('');
+        // et le palier zero erreur reste vivant des qu'un texte a ete mesure
+        expect(P.calculer({}, { erreurs: 0, mots: 1 }).palier.cle).toBe('sans_erreur');
+    });
+
+    it("le besoin en mots de la projection ne dépend d'AUCUNE formule", () => {
+        // C'est le couplage que #667 a cree par accident, et que cette
+        // sentinelle refuse de laisser revenir : `utiliseMots` appartient au
+        // modele de NOTE ; la projection a son propre besoin, inconditionnel.
+        // Commentaires retires avant d'asserter : le commentaire de la deviation
+        // PARLE de `utiliseMots` pour expliquer le couplage qu'il refuse. Sans
+        // ce filtrage, l'assertion echouerait sur la phrase qui la justifie.
+        const codeSeul = lire('js/evaluation-projection.js')
+            .replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+        expect(codeSeul).not.toContain('utiliseMots');
+        for (const modele of ['penalite_normalisee', 'ratio_cible', 'penalite_par_erreur']) {
+            const critere = { modeleFormule: modele };
+            expect(P.calculer(critere, { erreurs: 0, mots: 0 }).applicable, modele).toBe(false);
+            expect(P.calculer(critere, { erreurs: 3, mots: 0 }).applicable, modele).toBe(false);
+        }
     });
 });
 
