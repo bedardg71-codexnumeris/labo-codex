@@ -1,5 +1,16 @@
 # Plan de travail — chaîne d'importation des travaux (post-audit du 30 août 2026)
 
+> ⚠ **↻ AVERTISSEMENT AJOUTÉ LE 1er SEPTEMBRE 2026 — LES CIBLES DE CE PLAN ONT VIEILLI.**
+> Une cible nommée ici s'est révélée inexistante en la cherchant (`confirmerImportPipeline`, T6.4 —
+> corrigée sur place). **C'est la troisième fois dans la même journée qu'un document de ce dépôt
+> désigne une fonction, un fichier ou un compte qui a bougé** : la ligne `evaluation-calcul.js:869`
+> (vraie ligne : 992), le fichier `sections-affichage.js` (vrai nom :
+> `profil-etudiant-sections-affichage.js`), et celle-ci.
+> ⮕ **Règle qui en découle, pour toute session qui reprend ce plan** : `grep` la cible AVANT de
+> planifier le geste. Un plan est une intention datée, pas un état du code. Quand une cible a bougé,
+> **corriger le plan dans le même commit que le code** — sinon la session suivante cherchera la même
+> fonction inexistante.
+
 **Destinataire** : une session Claude Code (Opus 5), à froid, une session à la fois.
 **Source unique des constats** : `Rapports/AUDIT-chaine-importation-travaux-2026-08-30.md` (sections 2.2, 2.3 et 3 à lire avant toute session). Ce plan ordonne, il ne redit pas.
 **Objectif** : fermer les constats BLOQUANT et SÉRIEUX avant la cohorte de septembre 2026, sans perte de données ni empilement de code.
@@ -239,7 +250,7 @@ Fichier : `js/travaux-import.js` (`trouverEtudiantParNom`, `chercherParNomEtendu
 Fichiers : `js/travaux-import.js` (`detecterFichiersDAInconnu`), `js/travaux-ui.js` (bandeau, message « autre GC » `:3685`, garde `groupeCoursActif`), `js/liste-evaluations.js` (lignes de rattrapage). Risque : moyen.
 
 - [x] **T6.1** — Vérifier l'état de `liste-evaluations.js` : #606 était non commité le 30 août. — LEVÉE : `c24036e7` est dans `main`, vérifié au log le 30 août.
-- [ ] **T6.2** — Sentinelle : `detecterFichiersDAInconnu` rend les entrées `daDetecte && !etudiantAssocie` ; lignes de rattrapage de la liste : un fichier « DA inconnu + production valide » a une ligne `etudiantManquant: true`. ROUGE d'abord.
+- [x] **T6.2** — LIVRÉ le 1er sept. 2026. ROUGE d'abord : **8 rouges obtenus sur 8** nouveaux cas avant toute ligne de code (les 11 cas de T6.3 restant verts). Sentinelle #612 ÉTENDUE (19 cas), pas de second fichier. — Sentinelle : `detecterFichiersDAInconnu` rend les entrées `daDetecte && !etudiantAssocie` ; lignes de rattrapage de la liste : un fichier « DA inconnu + production valide » a une ligne `etudiantManquant: true`. ROUGE d'abord.
 - [x] **T6.3** — LIVRÉ `15ef1c45`. `travaux-import.js` : `detecterFichiersDAInconnu` + export.
   ⮕ Sentinelle neuve `tests/unit/sentinelle-612-da-inconnu.test.js`, 10 cas, **ROUGE d'abord (10/10)**,
   **5 break-tests, 5 ROUGE** (les DEUX côtés du `&&`, prédicat inversé, export retiré, sortie anticipée).
@@ -249,13 +260,14 @@ Fichiers : `js/travaux-import.js` (`detecterFichiersDAInconnu`), `js/travaux-ui.
   `detecterDA(partieIdentite)`, un PRÉFIXE du nom dont `daDetecte` est tiré — le second ne peut pas être
   vide quand le premier ne l'est pas. La partition avec `detecterFichiersSansDA` tient, et un cas la vérifie.
   ⚠ **Rien ne consomme encore la fonction** : son bandeau est T6.4. La sentinelle en est le seul appelant.
-- [ ] **T6.4** — ⮕ **À savoir avant d'ouvrir** (trouvé pendant T6.3) : le bandeau « sans DA » existant dit
+- [x] **T6.4** — LIVRÉ le 1er sept. 2026. — ⮕ **À savoir avant d'ouvrir** (trouvé pendant T6.3) : le bandeau « sans DA » existant dit
   « l'association devra être faite manuellement ». Depuis #611, c'est **inexact** pour un fichier apparié
   par le NOM — il n'a pas de DA, donc il est bien recensé « sans DA », mais son élève EST trouvé. Le
   message vaut toujours pour le regroupement multi-pages, pas pour l'association. À reformuler en même
   temps que le message « autre GC ».
-  `travaux-ui.js` : bandeau « DA sans élève dans ce groupe » ; corriger le message « autre GC » (diff S4) ; garde `groupeCoursActif` dans `confirmerImportPipeline` (si D2 = A). Ne PAS retirer le repli de `obtenirFichiersGroupeActif` (60 appelants non audités).
-- [ ] **T6.5** — `liste-evaluations.js` : étendre la condition des lignes de rattrapage ; poser `etudiantManquant: !etudiant` (diff S4).
+  `travaux-ui.js` : bandeau « DA sans élève dans ce groupe » ; corriger le message « autre GC » (diff S4) ; garde `groupeCoursActif` dans ~~`confirmerImportPipeline`~~ **`executerImportPipeline`** (si D2 = A). Ne PAS retirer le repli de `obtenirFichiersGroupeActif` (60 appelants non audités).
+  ↻ **CIBLE CORRIGÉE le 1er septembre 2026** (session Claude Code, pendant #612) : **`confirmerImportPipeline` n'existe pas** — `grep` rend zéro dans tout le dépôt. La fonction est **`executerImportPipeline` (`js/travaux-ui.js:3838`)**, appelée par le bouton « Oui, importer » de la modale (`:3814`). ⮕ Et le point d'insertion du bandeau est meilleur que ce que ce plan laissait croire : la modale assemble déjà `bandeauAutreGC` + `bandeauSansDA` + `bandeauDoublons` — le bandeau neuf s'y ajoute dans un patron qui existe, rien à inventer.
+- [x] **T6.5** — LIVRÉ le 1er sept. 2026. `daInscrits` ajouté à la condition de rattrapage, et `etudiantManquant: !etudiant` posé DYNAMIQUEMENT (un `true` en dur ferait dire « Étudiant·e introuvable » sur un élève inscrit — c'est le témoin T6.5.d). — `liste-evaluations.js` : étendre la condition des lignes de rattrapage ; poser `etudiantManquant: !etudiant` (diff S4).
 - [x] **T6.6** — LIVRÉ `1e2fc4d0`. (réservé à T1.4 — **ACTIVÉ le 2026-08-30**.) `supprimerEvaluation` (`js/liste-evaluations.js`) porte le trou de S5 sur le chemin le plus fréquenté : supprimer une reprise depuis la liste restaure l'originale et laisse le fichier de la reprise actif, plus récent, donc gagnant au repli (DA, production). Correctif : exporter `_detacherFichiersDeEvaluation` (#607, `js/evaluation-jetons.js`) et l'appeler avant `sauvegarderDonneesSelonMode`, mode `corbeille`, quand `originaleRestauree` est vrai. Étendre la sentinelle #607 plutôt que d'en créer une seconde ; le `confirm` de suppression doit annoncer le sort du fichier, comme celui du retrait de jeton.
   ⮕ **FAIT** : deux helpers exportés (`window._detacherFichiersDeEvaluation`, `window._compterFichiersDeEvaluation`),
   finder `trouverOriginaleRemplaceePar` extrait en lecture seule pour que le `confirm` annonce avant que la
@@ -266,7 +278,7 @@ Fichiers : `js/travaux-import.js` (`detecterFichiersDAInconnu`), `js/travaux-ui.
   sur un `'quota'`, mettrait le fichier à la corbeille pour une suppression qui n'a pas eu lieu.
   ⏳ **Test manuel dû à Grégoire** (Vitest ne voit pas le rendu) : supprimer une reprise depuis la Liste —
   la question doit annoncer le fichier, et la ligne de l'originale rouvrir le travail ORIGINAL.
-- [ ] **T6.7** — Break-test, suite complète, test manuel : fichier `12345678_devoir.pdf` ; supprimer le groupe actif puis tenter un import.
+- [x] **T6.7** — Break-test FAIT le 1er sept. 2026 : **6 mutations, chacune tue ses témoins CIBLÉS**, dépôt restauré octet à octet (`/tmp/break-test-612/breaktest.py`, rejouable). Vitest 426 fichiers / 4601 tests, code 0. ⏳ **Test manuel dû à Grégoire** (Vitest ne voit pas le rendu) : fichier `12345678_devoir.pdf` sur un groupe où ce DA n'existe pas → le bandeau doit apparaître AVANT l'import et la ligne « Non associé » APRÈS ; puis retirer le groupe actif et tenter un import → refus dit. — Break-test, suite complète, test manuel : fichier `12345678_devoir.pdf` ; supprimer le groupe actif puis tenter un import.
 - [ ] **T6.8** — Commit, release, merge, tableau, `SESSION.md`.
 
 **Critère de fin** : un DA inconnu est annoncé avant l'import et visible après ; sans groupe actif, l'import est refusé avec un message.

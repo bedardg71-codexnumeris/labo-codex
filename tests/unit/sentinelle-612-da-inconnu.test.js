@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const racineT6 = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 // #612 · T6.3 (S6 du plan « chaîne d'importation des travaux », constat S4 de
 // l'audit du 30 août 2026) — UN DA QUI NE CORRESPOND À PERSONNE DOIT ÊTRE DIT
@@ -197,5 +202,130 @@ describe('#612 · detecterFichiersDAInconnu — un DA sans élève dans ce group
 
         expect(nomsRecenses(win.travauxImport.detecterFichiersDAInconnu()))
             .toEqual(['1000001_devoir.pdf']);
+    });
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   T6.2 — CE QUE LE DÉTECTEUR DIT AVANT L'IMPORT DOIT SE VOIR APRÈS
+
+   T6.3 a livré `detecterFichiersDAInconnu`, et le plan le note lui-même :
+   « rien ne consomme encore la fonction ». Les cas ci-dessous verrouillent les
+   deux consommateurs — la LISTE (T6.5) et la modale d'import (T6.4) — et ils
+   sont écrits AVANT le code qu'ils décrivent.
+
+   Le défaut, en une phrase : un fichier dont le DA ne correspond à aucun élève
+   du groupe est stocké SOUS ce DA. S'il porte en plus une production valide, il
+   ne tombe dans aucune des deux branches de rattrapage de la liste — ni « sans
+   DA », ni « production orpheline ». Il n'a donc AUCUNE ligne, nulle part.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const PRODUCTIONS_T6 = [{ id: 'p_devoir', titre: 'Devoir 1', type: 'artefact' }];
+const INSCRIT = { da: '1000001', nom: 'Roy', prenom: 'Camille', groupe: '00007' };
+
+function chargerListe(fichiers, productions = PRODUCTIONS_T6) {
+    return chargerScript('js/liste-evaluations.js', {
+        db: { get: async () => null, getSync: (k, d) => (d !== undefined ? d : null), set: async () => {}, setSync: () => {}, removeSync: () => {} },
+        cle: (k) => 'test_' + k,
+        echapperHtml: (t) => (t == null ? '' : String(t)),
+        obtenirLibelleStatut: (s) => 'Statut ' + s,
+        obtenirDonneesSelonMode: (quoi) => (quoi === 'productions' ? productions : []),
+        obtenirNomCartouche: () => '-',
+        obtenirNoteAffichee: () => '-',
+        notifications: { succes() {}, erreur() {}, info() {}, warning() {} },
+        travauxStockage: {
+            obtenirFichiersTravaux: () => fichiers,
+            obtenirFichiersGroupeActif: () => fichiers,
+            obtenirAnnotationFichier: () => null
+        },
+        travauxResolution: { trouverFichierPourEvaluation: () => null },
+        annotationContientDuContenu: () => false
+    });
+}
+
+const lignesDuFichier = (lignes, id) => lignes.filter(l => l.fichierId === id);
+
+describe('#612 · T6.5 — un DA inconnu laisse une trace VISIBLE dans la liste', () => {
+    // ⚠ LE CAS CENTRAL, et celui qui n'a aucune ligne aujourd'hui.
+    // `etudiantDA` est renseigné (donc pas la branche « sans DA ») et la
+    // production est CONNUE (donc pas la branche « orpheline »).
+    it('T6.5.a un fichier « DA inconnu + production valide » a une ligne', () => {
+        const fichier = { id: 'f_inc', etudiantDA: '9999999', productionId: 'p_devoir', nomFichier: '9999999_devoir.pdf' };
+        const win = chargerListe([fichier]);
+        const lignes = win._construireLignesEvaluations([], PRODUCTIONS_T6, [INSCRIT]);
+        expect(lignesDuFichier(lignes, 'f_inc'),
+            'sans ligne, le fichier est invisible : c\'est le défaut de #612').toHaveLength(1);
+    });
+
+    it('T6.5.b cette ligne porte `etudiantManquant: true`', () => {
+        const fichier = { id: 'f_inc', etudiantDA: '9999999', productionId: 'p_devoir', nomFichier: '9999999_devoir.pdf' };
+        const win = chargerListe([fichier]);
+        const lignes = win._construireLignesEvaluations([], PRODUCTIONS_T6, [INSCRIT]);
+        expect(lignesDuFichier(lignes, 'f_inc')[0].etudiantManquant).toBe(true);
+    });
+
+    // L'infobulle de `genererLigneHTML` choisit son texte sur ce drapeau :
+    // « Étudiant·e introuvable » ou « Aucune production liée ». Sans lui, un
+    // fichier orphelin dont l'élève est INCONNU affiche le mauvais diagnostic.
+    it('T6.5.c un fichier orphelin dont le DA est inconnu porte le drapeau', () => {
+        const fichier = { id: 'f_orph', etudiantDA: '9999999', productionId: 'p_disparue', nomFichier: '9999999_x.pdf' };
+        const win = chargerListe([fichier]);
+        const lignes = win._construireLignesEvaluations([], PRODUCTIONS_T6, [INSCRIT]);
+        expect(lignesDuFichier(lignes, 'f_orph')[0].etudiantManquant).toBe(true);
+    });
+
+    // ⚠ LE TÉMOIN. Sans ce cas, poser `etudiantManquant: true` en dur passerait
+    // les trois précédents — et ferait dire « Étudiant·e introuvable » sur un
+    // fichier dont l'élève EST inscrit.
+    it('T6.5.d un fichier orphelin dont le DA est CONNU ne porte pas le drapeau', () => {
+        const fichier = { id: 'f_ok', etudiantDA: INSCRIT.da, productionId: 'p_disparue', nomFichier: 'devoir.pdf' };
+        const win = chargerListe([fichier]);
+        const lignes = win._construireLignesEvaluations([], PRODUCTIONS_T6, [INSCRIT]);
+        expect(lignesDuFichier(lignes, 'f_ok')[0].etudiantManquant).toBe(false);
+    });
+
+    // Non-régression : un fichier bien associé n'est pas du rattrapage.
+    it('T6.5.e un fichier correctement associé n\'a pas de ligne de rattrapage', () => {
+        const fichier = { id: 'f_bon', etudiantDA: INSCRIT.da, productionId: 'p_devoir', nomFichier: 'devoir.pdf' };
+        const win = chargerListe([fichier]);
+        const lignes = win._construireLignesEvaluations([], PRODUCTIONS_T6, [INSCRIT]);
+        expect(lignesDuFichier(lignes, 'f_bon').filter(l => l.estFichierNonAssocie)).toEqual([]);
+    });
+});
+
+describe('#612 · T6.4 — la modale d\'import dit ce qui va se passer', () => {
+    const source = () => readFileSync(path.join(racineT6, 'js', 'travaux-ui.js'), 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+    it('T6.4.a un bandeau « DA sans élève » est construit et rendu', () => {
+        const src = source();
+        expect(src, 'le détecteur de T6.3 doit avoir un consommateur')
+            .toMatch(/detecterFichiersDAInconnu\s*\(/);
+        expect(src).toMatch(/bandeauDAInconnu/);
+    });
+
+    it('T6.4.b le bandeau est INCLUS dans le corps de la modale, pas seulement calculé', () => {
+        // Le piège du 31 août : une variable construite puis jamais concaténée
+        // laisse le banc vert et l'écran muet.
+        const src = source();
+        const appel = src.match(/afficherModalePipeline\([^;]*?bandeauDoublons[^;]*?\)/s);
+        expect(appel, 'appel de la modale introuvable — le banc a perdu sa cible').toBeTruthy();
+        expect(appel[0]).toContain('bandeauDAInconnu');
+    });
+
+    it('T6.4.c l\'import est REFUSÉ sans groupe-cours actif, et le refus le dit', () => {
+        const src = source();
+        const fn = src.slice(src.indexOf('async function executerImportPipeline'));
+        const corps = fn.slice(0, fn.indexOf('\n    }'));
+        expect(corps, 'la garde D2=A doit vivre dans le chemin d\'import')
+            .toMatch(/groupeCoursActif/);
+    });
+
+    // ⚠ Le message d'origine annonçait une conséquence DISPARUE depuis #611 :
+    // un fichier apparié par le NOM n'a pas de DA, mais son élève EST trouvé.
+    // La règle de Grégoire : dire la conséquence RÉELLE et le geste qui la lève.
+    it('T6.4.d le message « sans DA » ne promet plus une association manuelle', () => {
+        const src = source();
+        expect(src).not.toMatch(/association devra être faite manuellement/);
+        expect(src).toMatch(/ne seront pas regroupées/);
     });
 });
