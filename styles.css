@@ -15464,6 +15464,20 @@ tr.etudiant-inactif td {
     margin-bottom: 8px;
 }
 
+/* #667 — Ligne de formule chiffrée, sous le résultat algorithmique.
+   Elle montre le calcul qui a produit la note, avec les valeurs de la
+   grille. Volontairement discrète : c'est une justification, pas un
+   résultat — la note reste ce que l'oeil doit trouver en premier. */
+.eval-formule-algo {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--bordure-claire, rgba(0, 0, 0, 0.12));
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--gris-moyen);
+    line-height: 1.45;
+}
+
 /* Grille 2 colonnes (critères algorithmiques) */
 .eval-grille-algo {
     display: grid;

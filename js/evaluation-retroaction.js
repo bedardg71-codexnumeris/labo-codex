@@ -761,10 +761,18 @@ function _detecterAlgoA0Bilan(grilleDef, ec, totalErreursFr) {
         // Source 2 : comptage direct des codes d'erreur annotés
         if (!algoA0 && totalErreursFr > 0) {
             var pond = gc.ponderation || 20;
-            var facteur = gc.facteurNormalisation || 500;
             var motsEstime = parseInt((document.getElementById('eval_mots_' + gc.id) || {}).value) || 500;
-            var noteEstimee = pond - (totalErreursFr / motsEstime * facteur);
-            if (noteEstimee <= 0) {
+            // #667 — quatrième site où la formule était réécrite à la main. Il
+            // sert à DÉTECTER un critère effondré, pas à noter, mais s'il ne
+            // suit pas la formule du gabarit il détecte selon une autre règle
+            // que celle qui a produit la note affichée.
+            var resEstimee = window.formulesAlgo.calculer(gc, {
+                ponderation: pond,
+                erreurs: totalErreursFr,
+                mots: motsEstime
+            });
+            var noteEstimee = resEstimee.applicable ? resEstimee.note : null;
+            if (noteEstimee !== null && noteEstimee <= 0) {
                 algoA0 = { critereNom: gc.nom, erreurs: totalErreursFr, mots: motsEstime };
             }
         }

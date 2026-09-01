@@ -592,6 +592,23 @@ const SCHEMAS_IMPORT = {
                 obligatoire: { type: 'boolean' },
                 facteurNormalisation: { type: 'number' },
 
+                // #667 — le modèle de formule choisi par l'utilisateur et ses
+                // paramètres. Absents du schéma, ils se perdaient au transport
+                // et la grille importée calculait selon une AUTRE formule que
+                // celle de son auteur·e.
+                modeleFormule: { type: 'string', maxLen: 60 },
+                // ⚠ Schéma FERMÉ, jamais `{ type: 'object' }` nu : sans schéma,
+                // assainirObjet recopie la valeur telle quelle et un fichier
+                // d'import ferait entrer un objet arbitraire dans la base.
+                paramsFormule: {
+                    type: 'object',
+                    schema: {
+                        facteurNormalisation: { type: 'number' },
+                        motsParErreurCible: { type: 'number' },
+                        pointsParErreur: { type: 'number' }
+                    }
+                },
+
                 // #511 — LES ONZE RÉTROACTIONS DE FRANÇAIS SE PERDAIENT AUSSI.
                 // Un critère algorithmique porte ses catégories d'erreurs : ce
                 // sont ELLES qui contiennent les textes rendus à l'étudiant·e,

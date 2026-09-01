@@ -294,7 +294,11 @@ const PAR_LA_FILE = {
     // ⮕ C.d verrouille que la consolidation n'a pas fait DISPARAÎTRE l'invariant :
     //   il a changé d'adresse. Ne baisse jamais ce nombre sans montrer où le geste
     //   retiré est parti.
-    'js/grilles.js': 24,
+    // 24 → 26 le 31 août 2026 (#667) : `modifierFormuleCritereGrille` et
+    // `modifierParamFormuleCritereGrille` écrivent le modèle de formule d'un
+    // critère. Elles passent par la file comme les autres — c'est justement
+    // ce que cette sentinelle exige, pas une exception qu'on lui concède.
+    'js/grilles.js': 26,
     'js/cartouches.js': 1,
     'js/spe-specifications.js': 1,
     'js/donnees-v2.js': 1

@@ -954,6 +954,8 @@ function cartoucheSelectionnee() {
         <div id="resultat_algo_${critere.id}" class="eval-resultat-algo">
             <span id="total_erreurs_${critere.id}">--</span> erreurs / <span id="mots_formule_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span><br>
             <strong>Catégorie dominante:</strong> <span id="cat_dominante_${critere.id}" class="eval-badge-algo">--</span>
+            <!-- #667 — formule chiffrée, remplie par _afficherFormuleAlgo -->
+            <div id="formule_algo_${critere.id}" class="eval-formule-algo u-hide"></div>
         </div>
         <div>
             <label data-tooltip="eval-niveau-idme" class="eval-label">Niveau IDME (modifiable manuellement) :</label>
@@ -987,6 +989,8 @@ function cartoucheSelectionnee() {
         </div>
         <div id="resultat_algo_${critere.id}" class="eval-resultat-algo">
             <span id="total_erreurs_simple_${critere.id}">--</span> erreurs sur <span id="mots_simple_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
+            <!-- #667 — formule chiffrée, remplie par _afficherFormuleAlgo -->
+            <div id="formule_algo_${critere.id}" class="eval-formule-algo u-hide"></div>
         </div>
         <div>
             <label data-tooltip="eval-niveau-idme" class="eval-label">Niveau IDME (modifiable manuellement) :</label>
@@ -1155,6 +1159,8 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                          de gabarit, ou un accent grave termine le gabarit. -->
                     <div id="resultat_algo_${critere.id}" class="eval-resultat-algo">
                         <span id="total_erreurs_simple_${critere.id}">--</span> erreurs sur <span id="mots_simple_${critere.id}">--</span> mots &rarr; <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
+                        <!-- #667 — formule chiffrée (mode consultation) -->
+                        <div id="formule_algo_${critere.id}" class="eval-formule-algo u-hide"></div>
                     </div>
                     <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
                             data-on-change="niveauSelectionne" data-param="${critere.id}">

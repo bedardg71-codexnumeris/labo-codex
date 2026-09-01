@@ -207,6 +207,23 @@
                         ponderation: { type: 'nombre', minValeur: 0, maxValeur: 100 },
                         type: { type: 'chaine', max: 50 },
                         formule: { type: 'chaine', max: 500 },
+                        // #667 — LA FORMULE D'UN CRITÈRE ALGORITHMIQUE VOYAGE.
+                        // La projection ne copie que les champs déclarés ici :
+                        // sans ces trois lignes, une grille algorithmique
+                        // partagée arrivait avec le modèle historique et le
+                        // facteur par défaut, quel que soit le choix de son
+                        // auteur·e — sans un mot, puisque le calcul, lui,
+                        // continuait de fonctionner.
+                        modeleFormule: { type: 'chaine', max: 60 },
+                        paramsFormule: {
+                            type: 'objet',
+                            schema: {
+                                facteurNormalisation: { type: 'nombre', minValeur: 1, maxValeur: 10000 },
+                                motsParErreurCible: { type: 'nombre', minValeur: 1, maxValeur: 10000 },
+                                pointsParErreur: { type: 'nombre', minValeur: 0, maxValeur: 100 }
+                            }
+                        },
+                        facteurNormalisation: { type: 'nombre', minValeur: 1, maxValeur: 10000 },
                         niveauSOLO: { type: 'chaine', max: 50 },
                         verrouille: { type: 'booleen' }
                     }
