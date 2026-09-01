@@ -843,9 +843,24 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
             });
         });
 
-        // Fichiers avec DA valide mais productionId orphelin ou vide
+        // Fichiers avec DA renseigné mais qui ont besoin d'un rattrapage :
+        // production orpheline ou vide, OU — #612 T6.5 — DA qui ne correspond à
+        // aucun·e élève de ce groupe.
+        //
+        // ⚠ POURQUOI LE TROISIÈME CAS. Un fichier dont le DA est inconnu est
+        // stocké SOUS ce DA (`travaux-import.js` : `etudiantDA: etudiant ?
+        // etudiant.da : daDetecte`). S'il porte en plus une production VALIDE,
+        // il échappait aux deux branches — ni « sans DA » (son DA est
+        // renseigné), ni « production orpheline » (sa production existe). Il
+        // n'avait donc aucune ligne, nulle part : c'est le silence que #612
+        // vient fermer.
+        const daInscrits = new Set(etudiants.map(e => e.da));
         const fichiersOrphelins = fichiers.filter(f =>
-            f.etudiantDA && (!f.productionId || !productionIdsConnus.has(f.productionId))
+            f.etudiantDA && (
+                !f.productionId
+                || !productionIdsConnus.has(f.productionId)
+                || !daInscrits.has(f.etudiantDA)
+            )
         );
 
         // Indexer les fichiers correctement associés par DA (pour détection doublon)
@@ -887,6 +902,11 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                 prenom: etudiant ? etudiant.prenom : (nomFichier || 'Fichier non identifié'),
                 groupe: etudiant ? (etudiant.groupe || '') : '',
                 productionId: '', productionNom: nomFichier || 'Fichier non associé',
+                // #612 T6.5 — DYNAMIQUE, jamais `true` en dur : l'infobulle de
+                // `genererLigneHTML` choisit son diagnostic là-dessus. Posé à
+                // `true` sans condition, un fichier dont l'élève EST inscrit se
+                // verrait annoncer « Étudiant·e introuvable ».
+                etudiantManquant: !etudiant,
                 associationManquante: true, estFichierNonAssocie: true, fichierId: fichier.id,
                 estDoublon, diagnosticDoublon,
                 grilleNom: '-', cartoucheId: null, cartoucheNom: '-',

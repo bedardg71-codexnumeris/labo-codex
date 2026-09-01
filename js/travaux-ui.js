@@ -3739,7 +3739,36 @@
             bandeauSansDA = '<div class="travaux-bandeau-sans-da">'
                 + '<p><strong>Fichier' + (fichiersSansDA.length > 1 ? 's' : '') + ' sans DA détectable :</strong></p>'
                 + '<ul>' + lignesND + '</ul>'
-                + '<p class="texte-muted u-texte-petit">Le numéro DA (7 chiffres) doit apparaître dans le nom de fichier pour permettre l\'association automatique à un étudiant et le regroupement multi-pages. Tu peux importer quand même, mais l\'association devra être faite manuellement.</p>'
+                // #612 T6.4 — TEXTE DE GRÉGOIRE, posé tel quel (1er sept. 2026).
+                // L'ancien annonçait que « l'association devra être faite
+                // manuellement » : conséquence DISPARUE depuis #611, qui apparie
+                // par le NOM. Un fichier sans DA n'a donc pas de DA — il est bien
+                // recensé ici — mais son élève EST trouvé. Ce qu'il perd, c'est le
+                // regroupement multi-pages, et rien d'autre.
+                // ⮕ La règle : dire la conséquence RÉELLE et le geste qui la lève.
+                + '<p class="texte-muted u-texte-petit">Ces fichiers ne portent pas de DA. L\'élève peut tout de même être trouvé par son nom, mais les pages d\'une même production ne seront pas regroupées automatiquement. Ajoutez le DA au nom du fichier pour que le regroupement se fasse.</p>'
+                + '</div>';
+        }
+
+        // #612 T6.4 — LE DA QUI NE CORRESPOND À PERSONNE DANS CE GROUPE.
+        // `detecterFichiersDAInconnu` (T6.3) existait sans consommateur : le
+        // fichier était stocké sous un DA inexistant, et rien ne le disait.
+        // Même règle de rédaction que ci-dessus : ce qui se passe, et quoi faire.
+        const fichiersDAInconnu = (typeof travauxImport.detecterFichiersDAInconnu === 'function')
+            ? travauxImport.detecterFichiersDAInconnu()
+            : [];
+        let bandeauDAInconnu = '';
+        if (fichiersDAInconnu.length > 0) {
+            const lignesDI = fichiersDAInconnu.map(function(f) {
+                const nomAff = typeof anonymiserNomFichier === 'function'
+                    ? anonymiserNomFichier(f.nomFichier, f.etudiantDA)
+                    : f.nomFichier;
+                return '<li>' + echapperHtml(nomAff) + ' <span class="texte-muted">(DA ' + echapperHtml(f.daDetecte || '?') + ')</span></li>';
+            }).join('');
+            bandeauDAInconnu = '<div class="travaux-bandeau-da-inconnu">'
+                + '<p><strong>DA sans élève dans ce groupe :</strong></p>'
+                + '<ul>' + lignesDI + '</ul>'
+                + '<p class="texte-muted u-texte-petit">Le DA lu dans ces noms de fichiers ne correspond à aucun·e élève inscrit·e dans le groupe-cours actif. Les fichiers seront importés et apparaîtront dans la liste des évaluations comme non associés, sans note possible. Vérifiez le DA dans le nom du fichier, ou basculez sur le groupe-cours auquel appartiennent ces élèves.</p>'
                 + '</div>';
         }
 
@@ -3808,7 +3837,7 @@
         }
 
         afficherModalePipeline('Confirmer l\u2019import',
-            bandeauAutreGC + bandeauSansDA + bandeauDoublons + `<p>${nbFichiers} fichier(s) seront importés ${msgGroupe} et ${msgProduction}.</p>
+            bandeauAutreGC + bandeauSansDA + bandeauDAInconnu + bandeauDoublons + `<p>${nbFichiers} fichier(s) seront importés ${msgGroupe} et ${msgProduction}.</p>
             <p>Confirmer l\u2019importation ?</p>`,
             [
                 { label: 'Oui, importer', classe: 'btn-principal', action: () => executerImportPipeline() },
@@ -3836,6 +3865,25 @@
     }
 
     async function executerImportPipeline() {
+        // #612 T6.4 — D2 = A : REFUS DIT, pas import silencieux.
+        //
+        // Sans groupe-cours actif, les fichiers sont stockés mais n'apparaissent
+        // NULLE PART : la liste des évaluations lit `obtenirFichiersGroupeActif`,
+        // qui n'a alors aucun groupe où chercher. L'enseignant·e voit un import
+        // « réussi » et un écran vide, sans rien pour relier les deux.
+        //
+        // ⚠ La garde vit ICI et pas dans la modale : c'est la dernière porte
+        // avant l'écriture, et c'est elle que toute autre entrée devra franchir.
+        // ⚠ Et elle ne touche PAS au repli de `obtenirFichiersGroupeActif` —
+        // 60 appelants non audités (garde-fou du plan S6).
+        const gcActifImport = (typeof db !== 'undefined') ? db.getSync('groupeCoursActif', null) : null;
+        if (!gcActifImport || !gcActifImport.id) {
+            if (typeof notifications !== 'undefined' && typeof notifications.erreur === 'function') {
+                notifications.erreur('Import refusé : aucun groupe-cours actif. Les fichiers seraient enregistrés sans groupe et n\'apparaîtraient dans aucune liste. Choisissez un groupe-cours dans l\'en-tête, puis relancez l\'import.');
+            }
+            return;
+        }
+
         const queue = travauxImport.obtenirFileDAttente();
 
         const dpiCible = parseInt(document.getElementById('pipeline-opt-dpi')?.value) || 0;

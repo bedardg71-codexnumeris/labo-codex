@@ -238,7 +238,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   d'une fuite du harnais de la sentinelle #607 (corpus partagé muté en place), pas du code.
   ⏳ **Test manuel dû à Grégoire** : un lot contenant deux homonymes de nom et un nom accentué — les
   homonymes doivent rester à associer à la main, le nom accentué doit se placer seul.
-- [ ] **#612 — S6 · Un DA inconnu du groupe est stocké en silence ; un import sans groupe actif rend les fichiers invisibles** (constats S4, S7).
+- [x] **#612 — S6 · Un DA inconnu du groupe est stocké en silence ; un import sans groupe actif rend les fichiers invisibles** (constats S4, S7).
   `js/travaux-import.js`, `js/travaux-ui.js`, `js/liste-evaluations.js`. **D2 = A** : garde
   `groupeCoursActif` dans `confirmerImportPipeline`, refus dit. Plus bandeau « DA sans élève dans ce
   groupe » et lignes de rattrapage dans la liste.
@@ -247,6 +247,33 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   reprise depuis la liste restaure l'originale et laisse le fichier de la reprise actif, plus récent,
   donc gagnant au repli (DA, production). Correctif : exporter `_detacherFichiersDeEvaluation` et
   l'appeler quand `originaleRestauree` est vrai ; étendre la sentinelle #607, ne pas en créer une seconde.
+  ✅ **LIVRÉ le 1er septembre 2026 — T6.2, T6.4, T6.5, T6.7.** (T6.1, T6.3, T6.6 l'étaient depuis le 30 août.)
+  ⮕ **T6.5 — le trou était plus large que « le DA est stocké en silence ».** Les lignes de rattrapage de la
+  liste avaient DEUX branches : « sans DA » et « production orpheline ». Un fichier au DA **inconnu** mais à
+  la production **valide** ne tombait dans ni l'une ni l'autre — **aucune ligne, nulle part**. Condition
+  étendue par `daInscrits`, et `etudiantManquant` posé **dynamiquement** (`!etudiant`) : en dur, l'infobulle
+  de `genererLigneHTML` annoncerait « Étudiant·e introuvable » sur un élève bien inscrit. C'est le témoin
+  T6.5.d, et il existe parce que la mutation « `true` en dur » n'était tuée par personne.
+  ⮕ **T6.4 — le détecteur de T6.3 a enfin son consommateur.** Le plan le notait lui-même : « rien ne
+  consomme encore la fonction ». Bandeau « DA sans élève dans ce groupe » ajouté au patron existant de la
+  modale, et garde `groupeCoursActif` posée dans `executerImportPipeline` — **refus DIT** (D2 = A), pas
+  import muet. ⚠ Le repli de `obtenirFichiersGroupeActif` n'est PAS touché (60 appelants non audités).
+  ⮕ **Le message « sans DA » est réécrit — texte de Grégoire, posé tel quel.** L'ancien promettait que
+  « l'association devra être faite manuellement » : conséquence **disparue depuis #611**, qui apparie par le
+  NOM. Le message annonçait donc un fait faux sans que personne le voie. La règle appliquée aux deux
+  bandeaux : **dire la conséquence RÉELLE et le geste qui la lève**.
+  ⚠ **CIBLE PÉRIMÉE DANS LE PLAN, corrigée à la source** : `PLAN-chaine-importation-travaux-2026-08-30.md`
+  désignait `confirmerImportPipeline` — fonction **inexistante**, `grep` à zéro. La vraie est
+  `executerImportPipeline` (`travaux-ui.js:3838`). Le plan porte la correction datée **et** un avertissement
+  en tête : c'était la **troisième** cible périmée trouvée dans un document du dépôt le même jour
+  (`evaluation-calcul.js:869` → 992 ; `sections-affichage.js` → `profil-etudiant-sections-affichage.js`).
+  ⮕ Sentinelle #612 **étendue à 19 cas** (pas de second fichier). **ROUGE D'ABORD : 8 sur 8** avant toute
+  ligne de code. **Break-test : 6 mutations, chacune tue ses témoins CIBLÉS**, dépôt restauré octet à octet.
+  Vitest **426 fichiers / 4601 tests, code 0**.
+  ⏳ **TEST MANUEL DÛ À GRÉGOIRE** (Vitest ne voit pas le rendu) : (1) mettre `12345678_devoir.pdf` dans un
+  groupe où ce DA n'existe pas → le bandeau « DA sans élève » doit s'afficher AVANT l'import, et la ligne
+  « Non associé » apparaître APRÈS dans la liste ; (2) sans groupe-cours actif, tenter un import → refus
+  explicite, aucun fichier écrit.
 - [x] **#613 — LIVRÉ le 30 août 2026 — S7 · Restauration d'un ZIP : échecs de blobs avalés, « Import réussi » quand même** (constat S8).
   `js/import-export.js`. Un blob refusé aux magic bytes, absent du ZIP ou perdu sur `QuotaExceededError`
   sortait par un `continue` ou un `catch` muet : l'import s'annonçait « réussi » sur un état amputé, et
