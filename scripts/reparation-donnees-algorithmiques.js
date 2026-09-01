@@ -20,6 +20,39 @@
 (function() {
     'use strict';
 
+    /**
+     * #671 — LIRE SOUS LA CLÉ DU TRIMESTRE, ET DIRE SOUS LAQUELLE ON A LU.
+     *
+     * ⚠ CE SCRIPT A ÉTÉ MUET PENDANT TOUTE LA SOIRÉE DU 31 AOÛT 2026, ET SON
+     * SILENCE RESSEMBLAIT À UN SUCCÈS. Il lisait les évaluations sous la clé
+     * NAMESPACÉE (`cle('evaluationsSauvegardees')` → `a2026_…`) mais les
+     * grilles et les échelles sous la clé NUE. En trimestre a2026 la clé nue
+     * est vide : `grilles.find(...)` rendait `undefined`, la boucle sortait par
+     * `return` pour les 27 copies — AVANT même de regarder une annotation.
+     * Résultat affiché : « Rien à réparer », 0 à réparer ET 0 ignoré. Un zéro
+     * qui ne portait aucun témoin, sur des données réellement divergentes.
+     *
+     * ⮕ On lit la clé du trimestre d'abord, la clé nue en repli, et on NOMME
+     * celle qui a servi. Un zéro doit pouvoir dire d'où il vient.
+     */
+    function _lireNamespace(base) {
+        const nommee = (typeof cle === 'function') ? cle(base) : base;
+        let valeur = db.getSync(nommee, null);
+        if (Array.isArray(valeur) && valeur.length) {
+            console.log('[Réparation] ' + base + ' lu sous « ' + nommee + ' » : ' + valeur.length + ' entrée(s).');
+            return valeur;
+        }
+        valeur = db.getSync(base, null);
+        if (Array.isArray(valeur) && valeur.length) {
+            console.warn('[Réparation] ' + base + ' introuvable sous « ' + nommee
+                + ' », lu sous la clé NUE « ' + base + ' » : ' + valeur.length + ' entrée(s).');
+            return valeur;
+        }
+        console.warn('[Réparation] ' + base + ' VIDE sous « ' + nommee + ' » ET sous « ' + base
+            + ' ». Rien ne pourra être réparé, et ce n\'est pas une bonne nouvelle.');
+        return [];
+    }
+
     function compterErrfrAnnotation(annotation) {
         if (!annotation || !annotation.pages) return 0;
         let total = 0;
@@ -45,7 +78,9 @@
                 ? { niveaux: p.config.echelle.niveaux }
                 : null;
         }
-        const echelles = db.getSync('echellesTemplates', []) || [];
+        // #671 — LA CLÉ DU TRIMESTRE, PAS LA CLÉ NUE. Voir la note de
+        // `_lireNamespace` : c'est ce qui rendait ce script muet en a2026.
+        const echelles = _lireNamespace('echellesTemplates');
         return echelles.find(e => e.id === echelleId) || null;
     }
 
@@ -126,7 +161,7 @@
     function calculerReparations() {
         const cleEvals = cle('evaluationsSauvegardees');
         const evaluations = db.getSync(cleEvals, []) || [];
-        const grilles = db.getSync('grillesTemplates', []) || [];
+        const grilles = _lireNamespace('grillesTemplates');
         exigerRegistres();
         const aReparer = [];
         const ignores = [];
@@ -232,7 +267,7 @@
     async function appliquerReparations() {
         const cleEvals = cle('evaluationsSauvegardees');
         const evaluations = db.getSync(cleEvals, []) || [];
-        const grilles = db.getSync('grillesTemplates', []) || [];
+        const grilles = _lireNamespace('grillesTemplates');
         const { aReparer } = calculerReparations();
         if (!aReparer.length) {
             console.log('[Réparation] Rien à réparer.');
