@@ -14487,6 +14487,7 @@
     <script src="js/productions-liste.js?v=20260830d"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js · #522 lot 4 : le descripteur de production écrit par db.modifier -->
     <script src="js/productions-bibliotheque-ui.js?v=20260830d"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide · #522 lot 4 : le descripteur de production écrit par db.modifier -->
     <script src="js/evaluation-formules.js?v=20260831p"></script> <!-- #667 : registre des modèles de formule algorithmique — CHARGÉ AVANT grilles.js et evaluation-calcul.js, qui l'appellent tous les deux -->
+    <script src="js/evaluation-projection.js?v=20260831q"></script> <!-- #668 : registre des modèles de projection (norme externe / EUF) — MÊME CONTRAINTE D'ORDRE que le registre de formules : grilles.js et evaluation-calcul.js l'appellent tous les deux -->
     <script src="js/grilles-bibliotheque.js?v=20260831b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/grilles.js?v=20260831p"></script> <!-- Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
     <script src="js/echelles-bibliotheque.js?v=20260830b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
@@ -14641,7 +14642,7 @@
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=20260830c"></script> <!-- #612 T6.6 : detachement des fichiers exporte a la liste ; #563 -->
     <script src="js/evaluation-chargement.js?v=20260831p"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
-    <script src="js/evaluation-calcul.js?v=20260831p"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
+    <script src="js/evaluation-calcul.js?v=20260831q"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
     <script src="js/evaluation-retroaction.js?v=20260831p"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
     <script src="js/evaluation-sauvegarde.js?v=20260829e"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
     <script src="js/evaluation.js?v=20260829c"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
