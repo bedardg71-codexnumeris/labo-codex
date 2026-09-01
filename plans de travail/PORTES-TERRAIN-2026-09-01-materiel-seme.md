@@ -1,0 +1,123 @@
+# Porte terrain — le matériel semé se dit-il utilisable ? (§3)
+
+> **Mandat** : c'est la condition de fin du §3 du
+> `PLAN-2026-09-01-materiel-seme-et-chemin-d-entree.md`, et elle ne peut pas être
+> remplie par un banc.
+>
+> ⚠ **POURQUOI CETTE PORTE EXISTE, alors que Vitest et Playwright sont verts.**
+> Un lot de libellés ne se prouve pas par un banc vert. Les suites lisent le
+> texte livré et le trouvent conforme à ce qu'on leur a dit d'attendre : elles ne
+> disent rien de ce qu'un enseignant COMPREND en le lisant. La seule question du
+> §3 — « est-ce que je peux m'en servir tel quel ? » — n'a pas de témoin
+> mécanique.
+>
+> **Règle de tête du skill `portes-terrain` appliquée** : aucune porte si une
+> machine peut répondre. Tout ce qui est mécaniquement vérifiable a été retiré
+> d'ici — les noms, l'exclusion d'export et le calcul de la note sont tenus par
+> `sentinelle-materiel-seme-se-dit-utilisable`, `sentinelle-echelle-idme-de-depart`
+> et `triptyque-seme-produit-une-note.spec.js`. **Il ne reste que du jugement.**
+>
+> **Postes** : Mac (Safari) **et** iPad. Le §3 vise le premier écran d'un nouvel
+> enseignant, et la moitié d'entre eux arriveront par l'iPad.
+>
+> **Les écarts se NOTENT, rien ne se répare en cours de passe.**
+
+---
+
+## §0 — Préparation
+
+1. **Recharger avec vidage de cache** (Cmd+Option+R sur Mac). Les jetons du jour
+   vont jusqu'à `20260901e` ; sans ce geste, tu juges du code d'hier.
+2. Se placer dans un **trimestre où le matériel semé n'a pas été modifié**. Si
+   les trois pièces ont déjà été renommées ou retouchées, cette porte ne mesure
+   plus rien — le dire et s'arrêter là.
+
+---
+
+## §1 — P1 · CE QUE LES TROIS PIÈCES DISENT D'ELLES-MÊMES *(jugement, Mac + iPad)*
+
+Ouvrir **Matériel**, et regarder les trois listes sans rien faire d'autre.
+
+**Attendu** : « Grille de départ », « Cartouche de départ »,
+« Échelle de départ (IDME) ».
+
+| # | Question | Mac | iPad |
+|---|---|---|---|
+| 1.1 | En lisant ces trois noms, est-ce que tu comprends que tu peux **évaluer avec, telles quelles** ? | | |
+| 1.2 | Est-ce qu'elles se reconnaissent comme **un ensemble** (le mot « départ » les relie) ? | | |
+| 1.3 | Est-ce que l'une des trois te semble encore dire « ceci n'est qu'une illustration » ? | | |
+
+⚠ **Si 1.1 est NON, le §3 n'est pas livré**, quels que soient les bancs. C'est la
+seule question qui décide de ce lot.
+
+---
+
+## §2 — P2 · LE PARCOURS SANS RIEN CRÉER *(le geste 2 de la ligne d'arrivée)*
+
+De l'espace de travail jusqu'à une première évaluation, **sans créer aucune
+grille, aucune échelle, aucune cartouche**.
+
+| # | Geste | Attendu | Mac | iPad |
+|---|---|---|---|---|
+| 2.1 | Ouvrir l'écran d'évaluation sans rien choisir | Le texte d'attente nomme **trois** pièces : grille, échelle de performance, cartouche | | |
+| 2.2 | Choisir « Grille de départ » **sans** choisir d'échelle | L'écran DIT qu'il manque l'échelle, et dit quoi faire | | |
+| 2.3 | Choisir « Échelle de départ (IDME) » | Les quatre critères apparaissent, chacun avec ses niveaux I/D/M/E | | |
+| 2.4 | Cocher « Maîtrisé » sur les quatre | Une note s'affiche — **et ce n'est pas 0,0 %** | | |
+| 2.5 | Enregistrer l'évaluation | Elle s'enregistre sans refus ni avertissement | | |
+
+⚠ **2.5 est la marche qu'aucun banc n'a franchie.** Les specs appellent le calcul
+directement ; ils ne passent pas la garde de sauvegarde. La lecture du code dit
+qu'elle ne devrait pas se déclencher (`estItemDemo` ne teste que `isDemo` et
+l'auteur, et aucune des trois pièces ne les porte) — **mais c'est une lecture,
+pas une mesure.**
+
+---
+
+## §3 — P3 · LE MOT QUE L'ÉLÈVE LIT *(à faire une fois, Mac suffit)*
+
+Exporter le **PDF de rétroaction** de l'évaluation faite en P2.
+
+| # | Question | Verdict |
+|---|---|---|
+| 3.1 | Sous « Évaluation : … », quel nom est imprimé ? | |
+| 3.2 | Ce nom est-il **digne du document d'un élève** ? | |
+
+⚠ **C'est la trouvaille qui a motivé une bonne part de ce lot** : ce champ vient
+de `evaluation.grilleNom`. Avant aujourd'hui, un élève lisait donc
+« Évaluation : Grille générique (exemple) » sur son propre document.
+⮕ **Si « Grille de départ » ne te convient pas là, c'est TA décision** — c'est un
+mot que tes élèves lisent, et le nom se change en dix secondes.
+
+---
+
+## §4 — CE QUE CETTE PORTE NE COUVRE PAS
+
+- **Les copies déjà modifiées** : un enseignant qui a renommé sa grille de départ
+  n'est plus concerné par le §3, et son export change de comportement (voir #674
+  et la note sur `estRessourceDemo`).
+- **Le premier lancement à froid** : décision de Grégoire, hors de la ligne
+  d'arrivée.
+- **Les trois trouvailles du §5 du plan**, qui restent en attente et n'ont pas été
+  touchées : le « niveau NEUF », la copie de la démo vers un vrai trimestre, et
+  les trois gabarits de grilles + trois modèles de pratiques à auditer.
+  **Ne rien retirer sans avoir mesuré.**
+
+---
+
+## §5 — GRILLE DE RELEVÉ
+
+| Porte | Mac | iPad | Note (une ligne) |
+|---|---|---|---|
+| 1.1 · « je peux m'en servir tel quel » | | | |
+| 1.2 · les trois font un ensemble | | | |
+| 1.3 · plus rien ne dit « illustration » | | | |
+| 2.1 · trois pièces nommées | | | |
+| 2.2 · l'échelle manquante est dite | | | |
+| 2.3 · les critères apparaissent | | | |
+| 2.4 · une note, pas 0,0 % | | | |
+| 2.5 · l'évaluation s'enregistre | | | |
+| 3.1-3.2 · le nom sur le PDF de l'élève | | | |
+
+⮕ **Si les neuf passent sur les deux postes**, le geste 2 de
+`OBJECTIF-COHORTE-1.md` peut passer d'« éprouvé par Grégoire » à **« fait »** —
+et la phrase qui dit *comment* il a été vérifié, c'est ce document.

@@ -1499,8 +1499,20 @@ async function assurerGrilleGenerique() {
 
     const grilleGenerique = {
         id: 'GRILLE_GENERIQUE',
-        nom: 'Grille générique (exemple)',
-        description: 'Grille 4 critères - Modifie ou duplique selon tes besoins',
+        // §3 du PLAN-2026-09-01 — « générique (exemple) » disait « ceci ILLUSTRE » à
+        // qui avait besoin de lire « ceci SERT ». Le nom porte seul le message :
+        // mesuré le 1er septembre, la `description` d'une grille n'est affichée
+        // dans AUCUNE liste — elle ne sort que sur les PDF de la grille.
+        // ⚠ ET CE NOM VOYAGE JUSQU'À L'ÉLÈVE : `travaux-export-pdf.js` l'imprime
+        // sous « Évaluation : … ». Un élève lisait donc le mot « exemple » sur son
+        // propre document. C'est la première raison de ce changement, avant même
+        // le confort du nouvel enseignant.
+        nom: 'Grille de départ',
+        // La description s'IMPRIME sur les PDF de la grille (`export-pdf.js`) :
+        // elle décrit la grille pour ses lecteurs, elle ne porte pas un message de
+        // statut adressé au propriétaire. « Modifie ou duplique selon tes besoins »
+        // était une consigne d'interface égarée dans un document.
+        description: 'Quatre critères pondérés à parts égales : compréhension, application, analyse, synthèse.',
         // #574/#578 (29 août 2026) : plus d'`echelleId` — l'échelle générique n'est plus
         // semée, et une grille dit les CRITÈRES ; l'échelle se choisit là où on s'en sert.
         criteres: [

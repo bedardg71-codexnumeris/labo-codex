@@ -582,7 +582,9 @@ async function assurerEchelleIdmeDeDepart() {
 
     const echelle = {
         id: 'ECHELLE_IDME_DEPART',
-        nom: 'Échelle IDME (point de départ)',
+        // §3 : « de départ » d'abord, la précision ensuite — c'est le mot commun
+        // aux trois pièces semées, et c'est lui qui doit se voir dans une liste.
+        nom: 'Échelle de départ (IDME)',
         description: 'Quatre niveaux — Insuffisant, en Développement, Maîtrisé, Étendu. '
             + 'Les valeurs ponctuelles sont un point de départ : modifie-les, ou remplace '
             + 'l\'échelle entière. Rien ici n\'est une norme du projet.',
