@@ -7,6 +7,77 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 1er SEPTEMBRE 2026, NUIT (#671, DONNÉES)
+
+> **Urgence de données traitée et CLOSE.** Ce bloc s'ajoute à celui du chantier
+> #668, plus bas, qui reste valable pour tout ce qu'il décrit.
+
+**Branche `main`. Vitest 424 fichiers / 4561 tests, code 0.**
+⚠ **Playwright NON rejoué après les correctifs #671** — à lancer avant tout push.
+
+### CE QUI S'EST PASSÉ
+
+Des PDF **faux avaient déjà été remis aux élèves sur Léa**. Cinq copies sur 27
+portaient un compte d'erreurs qui n'était pas le leur — trois fois celui de leur
+**voisin immédiat** dans l'ordre du tableau stocké.
+
+**Réparé, et vérifié après coup** : `DIVERGENTES: 0` sur les 27, les cinq
+niveaux inchangés. Boucher 59→23, Bourgeois 11→4, Houle 24→25, Morissette 16→17,
+Nanthavong 8→16.
+
+### ⚠⚠ TROIS ZÉROS QUI ONT MENTI DANS LA MÊME NUIT
+
+**1. LE PIRE : un outil de réparation MUET qui ressemblait à un succès.**
+`reparation-donnees-algorithmiques.js` lisait les évaluations sous la clé DU
+TRIMESTRE et les grilles sous la clé **NUE**. En a2026 la clé nue est vide :
+`grilles.find()` rendait `undefined`, la boucle sortait par `return` pour les 27
+**avant même de regarder une annotation**. Affichage : « Rien à réparer »,
+**0 à réparer ET 0 ignoré**. Un zéro sans témoin ne dit pas « rien à faire », il
+dit « je n'ai rien regardé » — et sur un outil qui répare des données, c'est le
+pire mode de panne possible : il certifie la santé de ce qu'il n'a pas lu.
+⮕ `_lireNamespace()` NOMME désormais la clé qui a servi. Famille #636.
+
+**2. MA PREMIÈRE MESURE VALIDAIT LA CONTAMINATION.** J'ai comparé `pourcentage`
+à `erreurs/mots` et conclu « 25 sur 27 cohérentes ». Mais si le compte est
+écrasé et le pourcentage recalculé dessus, tout devient cohérent ET FAUX. J'ai
+mesuré la cohérence interne en croyant mesurer la vérité, et j'ai écarté
+l'hypothèse de Grégoire sur cette base. **La seule source de vérité est le
+comptage des tampons `errfr_*` de l'annotation.**
+
+**3. `appliquer()` NE RECHARGE PAS LE FICHIER.** Après correction du script,
+rappeler `window.__reparationAlgo.appliquer()` rejoue l'objet du collage
+PRÉCÉDENT. Il faut recoller le fichier entier. Deux tentatives perdues là-dessus.
+
+### CE QUI A ÉTÉ CORRIGÉ EN CODE
+
+- **#671, la course** : `chargerEvaluationsEtudiant` MARQUE chaque champ algo
+  avec le DA de l'élève (`input.dataset.da`) ; `_panneauAppartientALEvaluation`
+  compare cette marque à `evaluationEnCours.etudiantDA` et REFUSE le calcul
+  quand elles diffèrent. **Aucune horloge.** Break-test : 6 témoins, 2 mutations,
+  2 rouges.
+  ⛔ **Le correctif de décembre 2025 (`5d2d41c7`) couvrait cette même course par
+  un DÉLAI de 350 ms.** Un délai n'est pas une synchronisation. Le chemin de
+  bascule porte encore une quinzaine de constantes de temporisation : **ne pas en
+  ajouter une seizième.**
+- **Les deux scripts de réparation attendent `db.flush()`** avant d'annoncer leur
+  compte. `db.setSync` au-dessus de 25 Kio écrit IndexedDB en arrière-plan et
+  retire localStorage : annoncer avant le drainage atteste le calcul, pas
+  l'écriture.
+
+### ⏳ CE QUI RESTE DÛ
+
+- **Playwright** avant push.
+- **23 `localStorage.setItem` bruts** dans `js/` (famille #670).
+- **localStorage SATURÉ** — geste destructeur, moratoire actif, à froid.
+- **#668 lots 4, 5b, 6** — le chantier de la projection n'est pas fini.
+- ⚠ **Le mode simple n'écrit jamais sa rétroaction dans le DOM** :
+  `calculerNoteAlgorithmiqueSimple` fait `champCommentaire.value = …` sur un
+  `<div>`. `.value` sur un div ne fait rien de visible — d'où l'amorce persistée
+  par l'autosave. **Constaté, PAS corrigé.** C'est la cause amont des
+  rétroactions d'amorce du 31 août.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 1er SEPTEMBRE 2026 (CHANTIER #668)
 
 > Session solo, pilotée directement par Grégoire depuis Cowork. Ce bloc **remplace**
