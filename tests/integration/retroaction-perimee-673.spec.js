@@ -35,6 +35,19 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //   4. n'effacer que le div, sans vider `donneesAlgorithmiques[id].retroaction` → « la
 //      rétroaction périmée quitte AUSSI donneesAlgorithmiques » rougit seul. C'est la
 //      mutation qui distingue un nettoyage réel d'un nettoyage cosmétique.
+//   5. retirer l'appel de `_resetAffichageAlgoCategories` → le cas CATÉGORIES rougit seul.
+//   6. retirer l'export `estAmorceDeSaisie` de synthese-retroaction-data.js → le cas de
+//      l'amorce rougit seul (le prédicat devient indisponible, donc rien n'est classé,
+//      donc rien n'est effacé — le repli sûr, mais qui ne fait plus son travail).
+//
+// ⚠ LES SIX ONT ÉTÉ JOUÉES LE 1er SEPTEMBRE 2026, ET LA 5e A D'ABORD SURVÉCU.
+// Le cas CATÉGORIES n'assertait alors que la moitié « préserve » : retirer l'appel ne
+// faisait rougir personne. Une assertion vraie qui ne tue aucune mutation ne verrouille
+// rien. C'est la SENTINELLE qui a été corrigée — la moitié « efface » ajoutée — pas le
+// code. La 3e (`includes`) a fait mieux encore : elle a révélé le cas d'usage
+// « je garde la phrase engendrée et j'ajoute la mienne à la suite », que personne
+// n'avait prévu en posant la règle. Un break-test n'a pas seulement vérifié le code :
+// il a instruit la spécification.
 
 const MONTER = `() => {
     const trim = (typeof obtenirTrimestreId === 'function' && obtenirTrimestreId()) || '';
