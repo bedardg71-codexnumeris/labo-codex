@@ -7,6 +7,110 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 1er SEPTEMBRE 2026 (CHANTIER #668)
+
+> Session solo, pilotée directement par Grégoire depuis Cowork. Ce bloc **remplace**
+> celui du quatrième cycle, plus bas, qui reste valable pour tout ce qu'il décrit.
+
+**Branche `main`. Version `1.106.14`, build `0831-1552` — AUCUNE RELEASE ce cycle.**
+**Vitest : VERT, 424 fichiers / 4561 tests, code de sortie 0.**
+**Playwright WebKit : VERT, code de sortie 0, zéro échec** — les deux rouges annoncés
+par le quatrième cycle (`modal-soutien`, `palettes-drag-rendu`) sont passés ici, à
+trois reprises, machine libre. ⮕ **Leur diagnostic « ni contention ni flaky » ne tient
+pas** : même arbre, verdicts opposés à quelques heures d'écart.
+
+⚠ **LES JETONS ANTI-CACHE SONT À `20260831q`, PAS AU JOUR CALENDAIRE.** La sentinelle
+anti-cache exige le jour du BUILD (`0831-1552`). J'ai d'abord écrit `20260901a` : refusé,
+à raison. Si une release a lieu, `release.mjs` les recalculera seul.
+
+---
+
+### CE QUI EST LIVRÉ — #668, la projection EUF devient un réglage du gabarit
+
+Prolongement direct de #667 : ce qui appartient à la pratique d'une personne remonte
+dans le gabarit ; le code ne garde que la mécanique.
+
+| Lot | État | Commit |
+|---|---|---|
+| 0.1 committer #667 | ✅ | `192b2a58` |
+| 1 registre `js/evaluation-projection.js` | ✅ | `191359db` |
+| 5 (part registre) golden + sentinelles | ✅ | `a03479f9` |
+| déviation nommée (0 erreur, 0 mot) | ✅ | `91581211` |
+| 2 un seul lieu de vérité | ✅ | `e5372d9d` |
+| 3 le gabarit | ✅ | `484da181` |
+| **4 transport (avec #669)** | ⏳ **DÛ** | — |
+| **5 (part branchement) + 6 (PDF)** | ⏳ **DÛ** | — |
+
+**Consigne canonique** : `plans de travail/CONSIGNE-projection-euf-parametrable.md`.
+Elle a été modifiée DEUX fois en cours de session (Lot 6 ajouté, point « service
+d'aide » réécrit, §6bis créé). **La relire en entier, ne pas se fier à un souvenir.**
+
+⚠ **LE GOLDEN EST UN ORACLE MORT-NÉ SI ON LE « MET À JOUR ».**
+`tests/unit/sentinelle-668-*.test.js` porte 20 cas nommés dont les chaînes ont été
+EXTRAITES DE `genererRetroactionEUF` avant que le Lot 2 ne la supprime. **La fonction
+n'existe plus** : ces littéraux SONT l'oracle désormais. Une empreinte SHA-256 de
+481 401 couples prouve que la seule déviation touche `(0 erreur, 0 mot)` et rien
+d'autre. Les modifier demande la même délibération qu'un changement de note remise.
+
+---
+
+### ⚠⚠ CE QUE CETTE SESSION A APPRIS ET QUI COÛTERA CHER À QUI L'IGNORE
+
+**1. UN COMPTEUR CALCULÉ AVANT L'ÉCRITURE MENT — et j'y suis tombé.**
+Mon script de réparation imprimait « 27 effacées » puis invitait à recharger. Or
+`db.setSync` au-dessus de **25 Kio** (`SEUIL_IDB_FIRST`, `db.js:1536`) bascule en
+IDB-FIRST : il RETIRE la copie localStorage, met la valeur dans `memoryCache` — VOLATILE —
+et lance l'écriture IndexedDB EN ARRIÈRE-PLAN. Le compteur attestait le CALCUL.
+⮕ **Tout script qui écrit doit `await db.flush()` avant d'annoncer quoi que ce soit.**
+Le drain sur `pagehide` a sauvé la mise ce soir. On ne construit pas là-dessus.
+
+**2. #670 — UNE COMMODITÉ D'AFFICHAGE EMPÊCHAIT L'APPLICATION DE DÉMARRER.**
+`travaux-ui.js:321` posait son drapeau de migration par un `localStorage.setItem` BRUT,
+**après** son propre `catch`. localStorage saturé → `QuotaExceededError` NON RATTRAPÉ
+dans une IIFE de haut niveau → écran d'évaluation bloqué sur « Chargement… ».
+Corrigé. ⏳ **23 AUTRES `localStorage.setItem` BRUTS subsistent dans `js/`** (hors
+`db.js`) : même famille, chacun peut tuer l'init de son module. À auditer un par un.
+
+**3. ⛔ LE localStorage DE GRÉGOIRE EST SATURÉ.** Le quota refusait une écriture de
+**QUATRE octets**. `Codex.purgerEspacePrecedent()` existe pour 30 clés orphelines
+`a2024_*` + snapshots — **geste destructeur, moratoire actif, à instruire à froid.**
+Non fait, délibérément.
+
+**4. UN BREAK-TEST MESURE CE QU'IL EXERCE.** Deux mutations ont « survécu » à mon
+premier passage : c'était mon HARNAIS qui était plus étroit que le fichier de test.
+Un survivant mal instruit se conclut en « sentinelle tautologique » alors qu'il ne dit
+rien. **Deux vraies faiblesses ont été trouvées ainsi** : une assertion qui vérifiait
+qu'une fonction de refus EXISTE au lieu de vérifier qu'elle est APPELÉE, et un motif de
+formule en dur qui visait un nom de variable plutôt que la forme du calcul.
+
+**5. UN DÉTECTEUR QUI COMPTE DES SOUS-CHAÎNES FABRIQUE DES FAUX ROUGES.** Mon témoin de
+rendu a crié à la fuite XSS parce que `onerror=` APPARAISSAIT dans la sortie — inerte,
+dans une valeur d'attribut échappée. **Un faux rouge use la confiance aussi sûrement
+qu'un faux vert.**
+
+**6. LA CASCADE DU PDF : LA CARTOUCHE N'ÉCRASE RIEN.** `synthese-retroaction-data.js:389`
+va `c.retroaction` → `retroAlgo` → cartouche. La cartouche est TROISIÈME : elle ne comble
+qu'un trou. Seul un **texte personnalisé** évince la rétroaction engendrée. La consigne
+d'origine disait le contraire ; corrigé chez elle.
+
+---
+
+### ⏳ CE QUI EST DÛ À GRÉGOIRE
+
+- **Le facteur 500 → 600** sur *Grille-1 FR-ALGO seul A26* (Lot 0.2). Non fait.
+  Mesuré : la copie de référence passerait de **65,55** à **58,66**.
+- **Le nom du service d'aide.** Les rétroactions disent encore « Centre d'aide en
+  français (CAF) », **service qui n'existe plus** — devenu Passerelle +. La migration
+  reproduit l'existant au mot près, c'est voulu ; le corriger est un geste de gabarit
+  (Conception → Grilles → bloc projection → « Nom du service d'aide en français »).
+- **Décider d'une release.** Aucune ce cycle. Le §4.3 de la consigne attend un
+  **`minor`** à la FIN du chantier, pas avant.
+
+⏳ **`_to_delete/` à la racine** — deux `index.lock-*` orphelins, ignorés par
+`.gitignore` avec une ligne qui se dit TRANSITOIRE. Elle peut partir avec le dossier.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 31 AOÛT 2026, SOIRÉE (QUATRIÈME CYCLE)
 
 > Écrit par `kuekatsheu-14`, coordinatrice d'un trio (`80`, `f2`) sur les **plans de
