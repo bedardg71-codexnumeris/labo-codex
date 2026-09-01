@@ -459,6 +459,52 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `sousCriteres` — les onze rétroactions de français se perdent au partage, comme au #511 pour l'import/export.
   Et `js/grilles.js:268`, `:279`, `:383` lisent `getElementById('critereFormule')` **sans garde**, sur un id absent
   d'`index.html` (champ « formule » décoratif hérité, sans lien avec le calcul).
+- [ ] **#671 — ⚠️ DONNÉES · La bascule de copie contamine le compte d'erreurs avec celui de la copie précédente**.
+  **MESURÉ le 31 août 2026 à 23 h, sur 27 copies réelles** (601-101-MQ gr.00007, « Portrait de lecteur/lectrice »),
+  par comparaison du `donneesAlgorithmiques[].erreurs` stocké au **comptage des tampons `errfr_*` de l'annotation** —
+  la seule source de vérité. **21 concordent, 5 DIVERGENT** :
+  | élève | stocké | réel (tampons) | d'où vient le faux compte |
+  |---|---|---|---|
+  | Maélia B. | 59 | **23** | Allache (59), index VOISIN dans le tableau |
+  | Victor B. | 11 | **4** | Dumont (11), index VOISIN |
+  | Dylan N. | 8 | **16** | Patenaude / Potvin (8), index VOISIN |
+  | Félix H. | 24 | **25** | écart d'UNE unité — tampon ajouté après l'enregistrement, autre cause probable |
+  | Lucas M. | 16 | **17** | idem |
+  ⮕ **MÉCANISME.** `preRemplirEvaluation` (`js/travaux-ui.js:5145`) est une boucle de reprise ASYNCHRONE : jusqu'à
+  10 tentatives à 150 ms, suivie de `attendreOptionProduction`. La bascule d'une copie à l'autre s'étale sur **plus
+  d'une seconde**, pendant laquelle les champs `eval_erreurs_<critereId>` — **partagés entre toutes les copies, l'id
+  porte le CRITÈRE, pas l'élève** — portent encore les valeurs du précédent. Une sauvegarde qui part dans cette
+  fenêtre écrit le compte du voisin sous le nom du nouvel élève.
+  ▣ **Symptôme rapporté par Grégoire, et c'est lui qui a vu le motif** : « la note d'Allache apparaît en premier dans
+  la copie de Boucher, puis ensuite apparaît son vrai résultat ». Sa lecture — un décalage lié à l'ordre de la liste
+  après réimportation — était juste ; l'ordre en cause est celui du TABLEAU stocké, pas l'alphabétique.
+  ⚠ **CE QUE LES NIVEAUX SAUVENT.** `criteres[].niveauSelectionne` est JUSTE sur les 27 : il a été posé depuis le bon
+  compte, avant l'écrasement. Les jugements de Grégoire sont intacts. Seuls les chiffres affichés et la projection
+  EUF sont faux, sur cinq PDF.
+  ⚠ **ORDRE DES GESTES, NON NÉGOCIABLE** : corriger la course AVANT de réparer les données. Réparer d'abord, c'est se
+  faire recontaminer à la navigation suivante.
+  ⮕ La réparation elle-même existe : `scripts/reparation-donnees-algorithmiques.js` recompte les tampons et réaligne
+  erreurs / note / pourcentage / rétroaction. Il ne touche pas à `niveauSelectionne`.
+  ▣ **Famille #645.** Antérieur au chantier #668 : `travaux-ui.js` n'a été touché ce soir que par #670.
+  ━━━ **CE DÉFAUT EST UNE RÉCIDIVE, ET LA PREMIÈRE RÉPARATION ÉTAIT SUPERFICIELLE** ━━━
+  Signalé par Grégoire (« ce problème est déjà survenu cet hiver »), puis retrouvé :
+  **`5d2d41c7`, 15 décembre 2025, « Beta 94.1 — Correctifs quota localStorage et données algorithmiques ».**
+  ⚠ **Ce commit porte les DEUX défauts de la soirée du 31 août 2026** : il a introduit le cache mémoire du quota
+  localStorage — celui qui a mordu avec #670 et avec le drainage manquant du script de réparation — ET le correctif
+  de la course, formulé ainsi dans son propre message :
+  > · Vider les champs `eval_categories_*`, `eval_erreurs_*`, `eval_mots_*` au changement d'étudiant
+  > · **Augmenter délai recalcul note (350 ms) pour attendre restauration données algo**
+  ⮕ **UN DÉLAI N'EST PAS UNE SYNCHRONISATION.** La course a été rendue moins probable, pas impossible. Et
+  `preRemplirEvaluation` réessaie jusqu'à **10 × 150 ms = 1,5 s** — plus de quatre fois le délai censé la couvrir.
+  ⮕ **LE MOTIF A FAIT ÉCOLE.** Le délai de 350 ms a disparu, mais le chemin de bascule porte aujourd'hui une
+  QUINZAINE de constantes de temporisation (50, 100, 150 ×2, 200 ×4, 250, 300, 350, 1500, 8000 ms) qui tiennent lieu
+  de séquencement. Tant qu'on couvre une course par un délai, elle revient dès que la machine ralentit ou que les
+  données grossissent — 54 Mo de `donnees.json` et un localStorage saturé, en l'occurrence.
+  ⛔ **NE PAS RÉPARER CELUI-CI PAR UN DÉLAI DE PLUS.** Le remède est de rendre la bascule SÉQUENTIELLE : vider,
+  charger, PUIS autoriser la sauvegarde — ou refuser d'écrire tant que l'identité du panneau ne correspond pas à
+  `evaluationEnCours`. Une garde d'identité au moment d'écrire coûte trois lignes et ne dépend d'aucune horloge.
+  ⚠ **Mon relevé date de l'export de 22h30.** Grégoire a navigué depuis : il peut y avoir PLUS de cinq copies
+  touchées. Recompter avant de réparer, ne pas partir de cette liste-ci.
 - [x] **#670 — CORRIGÉ · Une migration de largeurs de panneau empêchait l'application de démarrer quand localStorage est plein**.
   ⚠ **Mesuré en production le 31 août 2026 à 22 h 36**, chez Grégoire, écran d'évaluation bloqué sur « Chargement… ».
   `js/travaux-ui.js:321` posait son drapeau de migration par un `localStorage.setItem` **brut, situé APRÈS son propre
