@@ -3317,27 +3317,7 @@ function afficherCriteresTemp() {
                            data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="description">
                 </div>
             </div>
-            ${critere.type === 'algorithmique' ? `
-            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem; color: var(--gris-moyen);">Facteur de normalisation (nombre de mots)</label>
-                        <input type="number"
-                               class="controle-form"
-                               value="${critere.facteurNormalisation || 500}"
-                               min="1"
-                               placeholder="500"
-                               data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="facteurNormalisation" data-parse-int
-                               title="Nombre de mots de référence pour le calcul (défaut: 500)">
-                    </div>
-                    <div style="grid-column: span 2;">
-                        <p style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0; padding-top: 8px;">
-                            <strong>Formule:</strong> Note = Pondération − (Erreurs ÷ Mots × ${critere.facteurNormalisation || 500})
-                        </p>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+            ${rendreBlocFormuleAlgo(critere, { mode: "temp", index: index })}
         </div>
     `).join('');
 
@@ -3352,6 +3332,140 @@ function afficherCriteresTemp() {
 /**
  * Modifie un critère temporaire
  */
+/**
+ * #667 — LE BLOC « FORMULE » DU GABARIT, POUR LES DEUX ÉCRANS DE GRILLE.
+ *
+ * Il était écrit deux fois (critère temporaire et critère enregistré), avec
+ * dans chacun le texte de la formule TAPÉ À LA MAIN — donc libre de mentir sur
+ * le calcul réellement appliqué. Un seul rendu, engendré par le registre.
+ *
+ * @param {object} critere - le critère de grille
+ * @param {object} ctx - {mode: 'temp'|'grille', index, grilleId}
+ * @returns {string} HTML du bloc, ou '' si le critère n'est pas algorithmique
+ */
+function rendreBlocFormuleAlgo(critere, ctx) {
+    if (!critere || critere.type !== 'algorithmique') return '';
+    if (typeof window.formulesAlgo === 'undefined') return '';
+
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t)) : '');
+    const f = window.formulesAlgo.normaliser(critere);
+    const modeles = window.formulesAlgo.listerModeles();
+
+    const estTemp = ctx.mode === 'temp';
+    const handlerModele = estTemp ? 'modifierModeleFormuleTempHandler' : 'modifierModeleFormuleGrilleHandler';
+    const handlerParam = estTemp ? 'modifierParamFormuleTempHandler' : 'modifierParamFormuleGrilleHandler';
+    const datasCommunes = estTemp
+        ? `data-critere-index="${ctx.index}"`
+        : `data-grille-id="${esc(ctx.grilleId)}" data-critere-index="${ctx.index}"`;
+
+    const options = modeles.map(m =>
+        `<option value="${esc(m.id)}"${m.id === f.modeleId ? ' selected' : ''}>${esc(m.nom)}</option>`
+    ).join('');
+
+    const champsParams = f.modele.parametres.map(p => `
+                    <div class="groupe-form">
+                        <label style="font-size: 0.85rem; color: var(--gris-moyen);">${esc(p.libelle)}</label>
+                        <input type="number"
+                               class="controle-form"
+                               value="${esc(f.params[p.cle])}"
+                               min="${esc(p.min)}"
+                               max="${esc(p.max)}"
+                               data-on-change="${handlerParam}" ${datasCommunes} data-param-cle="${esc(p.cle)}"
+                               title="${esc(p.aide)}">
+                    </div>`).join('');
+
+    // ⚠ Le texte de la formule N'EST PAS écrit ici : il sort du registre, de la
+    // même source que le calcul. C'est tout l'objet de #667.
+    //
+    // `sansCadre` : l'écran des grilles enregistrées pose déjà un conteneur
+    // encadré autour de la formule ET des sous-critères. Sans cette option, le
+    // bloc s'y dessinerait dans un second cadre imbriqué.
+    const ouvre = ctx.sansCadre ? '<div>' : '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">';
+    return `
+            ${ouvre}
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Modèle de formule</label>
+                    <select class="controle-form"
+                            data-on-change="${handlerModele}" ${datasCommunes}>
+                        ${options}
+                    </select>
+                    <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">${esc(f.modele.description)}</small>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+                    ${champsParams}
+                </div>
+                <p style="font-size: 0.85rem; color: var(--gris-moyen); margin: 10px 0 0 0;">
+                    <strong>Formule appliquée :</strong> ${esc(window.formulesAlgo.libelleSymbolique(critere))}
+                </p>
+                <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">
+                    ${f.modele.utiliseMots
+                        ? 'Lors de l\'évaluation, tu saisiras le nombre d\'erreurs et le nombre de mots de la rédaction.'
+                        : 'Lors de l\'évaluation, seul le nombre d\'erreurs entre dans la note. Le nombre de mots reste saisi pour la rétroaction.'}
+                </small>${f.herite && critere.modeleFormule ? `
+                <small style="font-size: 0.78rem; color: var(--orange-accent); display: block; margin-top: 4px;">
+                    Le modèle « ${esc(critere.modeleFormule)} » enregistré dans cette grille est inconnu de cette version. Le modèle historique est appliqué en attendant.
+                </small>` : ''}
+            </div>`;
+}
+
+/**
+ * #667 — Écrit le modèle de formule et ses paramètres sur un critère ENREGISTRÉ.
+ *
+ * Une écriture unique plutôt que trois appels à `modifierCritereGrille` : le
+ * modèle, ses paramètres et le miroir `facteurNormalisation` doivent atterrir
+ * ensemble. Trois écritures séparées laisseraient, entre deux, une grille dont
+ * le modèle ne correspond pas à ses paramètres.
+ */
+async function modifierFormuleCritereGrille(grilleId, critereIndex, modeleId, params) {
+    let grilleModifiee = null;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const grille = grilles.find(g => g.id === grilleId);
+        if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return undefined;
+        window.formulesAlgo.appliquerAuCritere(grille.criteres[critereIndex], modeleId, params);
+        grille.dateModification = new Date().toISOString();
+        grilleModifiee = grille;
+        return grilles;
+    }, []);
+
+    if (!grilleModifiee) return null;
+    if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
+        grilleTemplateActuelle = grilleModifiee;
+    }
+    return grilleModifiee;
+}
+
+/**
+ * #667 — Change UN paramètre de formule d'un critère enregistré.
+ *
+ * La lecture des paramètres actuels et leur réécriture se font DANS le
+ * mutateur : lire d'abord la grille pour fusionner ensuite, hors du verrou,
+ * rejouerait le bug #510 — deux champs quittés coup sur coup liraient le même
+ * instantané et le second écraserait le premier, sans erreur ni message.
+ */
+async function modifierParamFormuleCritereGrille(grilleId, critereIndex, cleParam, valeur) {
+    let grilleModifiee = null;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const grille = grilles.find(g => g.id === grilleId);
+        if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return undefined;
+        const critere = grille.criteres[critereIndex];
+        const f = window.formulesAlgo.normaliser(critere);
+        const params = Object.assign({}, f.params);
+        params[cleParam] = valeur;
+        window.formulesAlgo.appliquerAuCritere(critere, f.modeleId, params);
+        grille.dateModification = new Date().toISOString();
+        grilleModifiee = grille;
+        return grilles;
+    }, []);
+
+    if (!grilleModifiee) return null;
+    if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
+        grilleTemplateActuelle = grilleModifiee;
+    }
+    return grilleModifiee;
+}
+
 function modifierCritereTemp(index, champ, valeur) {
     if (!window.tempCriteres || !window.tempCriteres[index]) return;
     window.tempCriteres[index][champ] = valeur;
@@ -3614,26 +3728,7 @@ function afficherCriteresGrille(grille) {
             </div>
             ${critere.type === 'algorithmique' ? `
             <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem; color: var(--gris-moyen);">Facteur de normalisation (nombre de mots)</label>
-                        <input type="number"
-                               class="controle-form"
-                               value="${critere.facteurNormalisation || 500}"
-                               min="1"
-                               placeholder="500"
-                               data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="facteurNormalisation" data-parse-int
-                               title="Nombre de mots de référence pour le calcul (défaut: 500)">
-                    </div>
-                    <div style="grid-column: span 2;">
-                        <p style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0; padding-top: 8px;">
-                            <strong>Formule:</strong> Note = Pondération − (Erreurs ÷ Mots × ${critere.facteurNormalisation || 500})
-                        </p>
-                        <p style="font-size: 0.75rem; color: var(--gris-clair); margin: 4px 0 0 0;">
-                            Lors de l'évaluation, tu saisiras le nombre d'erreurs et le nombre de mots de la rédaction.
-                        </p>
-                    </div>
-                </div>
+                ${rendreBlocFormuleAlgo(critere, { mode: "grille", index: index, grilleId: grille.id, sansCadre: true })}
 
                 <!-- Gestion des sous-critères -->
                 <div class="sous-criteres-conteneur">
@@ -4494,6 +4589,53 @@ function modifierCritereTempHandler(el) {
     modifierCritereTemp(index, champ, valeur);
 }
 
+/**
+ * #667 — Handlers du bloc « formule » du gabarit.
+ *
+ * Ils passent tous par `formulesAlgo.appliquerAuCritere`, jamais par une
+ * écriture directe de champ : c'est lui qui borne les valeurs, pose les défauts
+ * déclarés du modèle et tient à jour le miroir `facteurNormalisation`.
+ *
+ * Ils re-rendent l'écran parce que changer de modèle change les paramètres à
+ * afficher ET le texte de la formule. Le déclencheur est `change` (au blur),
+ * pas `input` : personne ne perd le focus en cours de frappe.
+ */
+function modifierModeleFormuleTempHandler(el) {
+    var index = parseInt(el.dataset.critereIndex);
+    if (!window.tempCriteres || !window.tempCriteres[index]) return;
+    // params null : le nouveau modèle repart de SES défauts déclarés — ceux de
+    // l'ancien ne veulent rien dire pour lui.
+    window.formulesAlgo.appliquerAuCritere(window.tempCriteres[index], el.value, null);
+    afficherCriteresTemp();
+}
+
+function modifierParamFormuleTempHandler(el) {
+    var index = parseInt(el.dataset.critereIndex);
+    if (!window.tempCriteres || !window.tempCriteres[index]) return;
+    var critere = window.tempCriteres[index];
+    var f = window.formulesAlgo.normaliser(critere);
+    var params = Object.assign({}, f.params);
+    params[el.dataset.paramCle] = el.value;
+    window.formulesAlgo.appliquerAuCritere(critere, f.modeleId, params);
+    afficherCriteresTemp();
+}
+
+async function modifierModeleFormuleGrilleHandler(el) {
+    var grilleId = el.dataset.grilleId;
+    var index = parseInt(el.dataset.critereIndex);
+    await modifierFormuleCritereGrille(grilleId, index, el.value, null);
+    // ⚠ obtenirGrilleParId est ASYNC (cf. #466/CO-21) : sans await, le renderer
+    // reçoit une Promise et affiche « Aucun critère défini ».
+    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+}
+
+async function modifierParamFormuleGrilleHandler(el) {
+    var grilleId = el.dataset.grilleId;
+    var index = parseInt(el.dataset.critereIndex);
+    await modifierParamFormuleCritereGrille(grilleId, index, el.dataset.paramCle, el.value);
+    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+}
+
 /** Handler délégué pour modifierCritereTemp + afficherCriteresTemp (type change) */
 function modifierTypeCritereTempHandler(el) {
     var index = parseInt(el.dataset.critereIndex);
@@ -4579,6 +4721,13 @@ function ouvrirFilePickerImportGrilles() {
 }
 
 window.modifierCritereTempHandler = modifierCritereTempHandler;
+// #667 — le dispatcher data-on-change résout les handlers par NOM dans window.
+// Sans ces quatre lignes, le bloc « formule » du gabarit s'affiche et ne réagit
+// à rien, en silence.
+window.modifierModeleFormuleTempHandler = modifierModeleFormuleTempHandler;
+window.modifierParamFormuleTempHandler = modifierParamFormuleTempHandler;
+window.modifierModeleFormuleGrilleHandler = modifierModeleFormuleGrilleHandler;
+window.modifierParamFormuleGrilleHandler = modifierParamFormuleGrilleHandler;
 window.modifierTypeCritereTempHandler = modifierTypeCritereTempHandler;
 window.modifierCritereGrilleHandler = modifierCritereGrilleHandler;
 window.modifierTypeCritereGrilleHandler = modifierTypeCritereGrilleHandler;

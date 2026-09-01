@@ -110,12 +110,17 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
         return;
     }
 
-    // Calcul selon la formule: Pondération − (Erreurs ÷ Mots × Facteur)
-    const noteCalculee = ponderation - (erreurs / mots * facteur);
-    const pourcentage = (noteCalculee / ponderation) * 100;
-
-    // Limiter entre 0 et 100%
-    const pctFinal = Math.max(0, Math.min(100, pourcentage));
+    // #667 — branchée sur le registre comme les autres. Cette fonction n'a
+    // aucun appelant (voir l'en-tête du module), mais une règle de calcul qui
+    // dort dans du code mort est exactement ce qui finit par diverger de la
+    // règle vivante. Elle est donc alignée, pas laissée de côté.
+    const resFormuleMorte = window.formulesAlgo.calculer(
+        _critereFormulePourCalcul(critereId, facteur),
+        { ponderation: ponderation, erreurs: erreurs, mots: mots }
+    );
+    if (!resFormuleMorte.applicable) return;
+    const noteCalculee = resFormuleMorte.note;
+    const pctFinal = resFormuleMorte.pctBorne;
 
     // Déterminer le niveau IDME selon l'échelle
     const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
@@ -224,6 +229,7 @@ function _resetAffichageAlgoCategories(critereId) {
     document.getElementById(`pct_algo_${critereId}`).textContent = '--';
     document.getElementById(`niveau_algo_${critereId}`).textContent = '--';
     document.getElementById(`cat_dominante_${critereId}`).textContent = '--';
+    _masquerFormuleAlgo(critereId);
     _appliquerStyleResultatAlgo(critereId, null);
     const retroDiv = document.getElementById(`retroaction_cat_${critereId}`);
     if (retroDiv) retroDiv.classList.add('u-hide');
@@ -242,15 +248,111 @@ function _obtenirSousCriteresGrille(critereId) {
     return [];
 }
 
-function _calculerScoreAlgoCategories(codesSousCriteres, sousCriteres, ponderation, mots, facteur) {
+/**
+ * #667 — Remet le bloc résultat du mode SIMPLE à l'état « pas de conclusion ».
+ *
+ * Extrait tel quel de la garde `mots === 0` de calculerNoteAlgorithmiqueSimple,
+ * y compris le fix #110 v3 : erreurs et mots restent écrits dans
+ * donneesAlgorithmiques même quand le calcul ne tourne pas, sinon la sauvegarde
+ * repersiste l'ancienne valeur.
+ */
+function _viderResultatAlgoSimple(critereId, erreurs, mots) {
+    var noteEl = document.getElementById(`note_algo_${critereId}`);
+    var pctEl = document.getElementById(`pct_algo_${critereId}`);
+    var nivEl = document.getElementById(`niveau_algo_${critereId}`);
+    var totalErreursElem = document.getElementById(`total_erreurs_simple_${critereId}`);
+    var motsElem = document.getElementById(`mots_simple_${critereId}`);
+    if (noteEl) noteEl.textContent = '--';
+    if (pctEl) pctEl.textContent = '--';
+    if (nivEl) nivEl.textContent = '--';
+    if (totalErreursElem) totalErreursElem.textContent = '--';
+    if (motsElem) motsElem.textContent = '--';
+    _masquerFormuleAlgo(critereId);
+    _appliquerStyleResultatAlgo(critereId, null);
+    if (!evaluationEnCours.donneesAlgorithmiques) evaluationEnCours.donneesAlgorithmiques = {};
+    evaluationEnCours.donneesAlgorithmiques[critereId] = Object.assign(
+        evaluationEnCours.donneesAlgorithmiques[critereId] || {},
+        { erreurs: erreurs, mots: mots }
+    );
+}
+
+/**
+ * #667 — Écrit la formule CHIFFRÉE sous le résultat, dans le module Évaluer.
+ *
+ * C'est la demande d'origine : voir le calcul, pas seulement son produit. Le
+ * texte est engendré par le registre à partir du même modèle et des mêmes
+ * paramètres que le calcul — il ne peut pas décrire autre chose que ce qui a
+ * été fait.
+ *
+ * textContent, jamais innerHTML : le libellé contient des valeurs venues de la
+ * grille de l'utilisateur.
+ */
+function _afficherFormuleAlgo(critereId, critere, donnees) {
+    var el = document.getElementById(`formule_algo_${critereId}`);
+    if (!el) return;
+    var texte = '';
+    try {
+        texte = window.formulesAlgo.libelleChiffre(critere, donnees);
+    } catch (e) {
+        console.warn('[_afficherFormuleAlgo] libellé indisponible', critereId, e);
+    }
+    if (texte) {
+        el.textContent = texte;
+        el.classList.remove('u-hide');
+    } else {
+        _masquerFormuleAlgo(critereId);
+    }
+}
+
+/** #667 — Cache la ligne de formule : mieux vaut rien qu'un calcul en tirets. */
+function _masquerFormuleAlgo(critereId) {
+    var el = document.getElementById(`formule_algo_${critereId}`);
+    if (!el) return;
+    el.textContent = '';
+    el.classList.add('u-hide');
+}
+
+/**
+ * #667 — Retrouve le critère de grille pour lire SA formule (modèle + paramètres).
+ *
+ * Les fonctions de calcul ne reçoivent que `(critereId, ponderation, facteur)` :
+ * la formule, elle, vit sur le critère de la grille. On va donc la chercher là.
+ *
+ * Quand la grille est introuvable (hors mode Évaluer, grille supprimée), on
+ * reconstitue un critère minimal à partir du facteur reçu en argument : le
+ * registre le lira comme le modèle historique et le calcul restera identique
+ * à celui d'avant #667. Aucune note ne change parce qu'une grille manque.
+ */
+function _critereFormulePourCalcul(critereId, facteurRecu) {
+    try {
+        const grilles = db.getSync(cle('grillesTemplates'), []);
+        const grille = grilles.find(g => g.id === evaluationEnCours?.grilleId);
+        const critere = grille?.criteres?.find(c => c.id === critereId);
+        if (critere) return critere;
+    } catch (e) {
+        console.warn('[_critereFormulePourCalcul] grille illisible', critereId, e);
+    }
+    return { facteurNormalisation: facteurRecu };
+}
+
+function _calculerScoreAlgoCategories(codesSousCriteres, sousCriteres, ponderation, mots, facteur, critereId) {
     let sommePonderee = 0;
     codesSousCriteres.forEach(code => {
         const sc = sousCriteres.find(s => s.code === code);
         sommePonderee += sc && sc.ponderation !== undefined ? sc.ponderation : 1.0;
     });
-    const noteCalculee = ponderation - (sommePonderee / mots * facteur);
-    const pourcentage = (noteCalculee / ponderation) * 100;
-    return { sommePonderee, noteCalculee, pctFinal: Math.max(0, Math.min(100, pourcentage)) };
+    // #667 — la formule vient du gabarit de la grille, plus du code. En mode
+    // catégories, c'est la somme PONDÉRÉE des codes qui tient lieu d'erreurs.
+    const critere = _critereFormulePourCalcul(critereId, facteur);
+    const res = window.formulesAlgo.calculer(critere, {
+        ponderation: ponderation,
+        erreurs: sommePonderee,
+        mots: mots
+    });
+    if (!res.applicable) {
+        return { sommePonderee, noteCalculee: 0, pctFinal: 0, applicable: false };
+    }
+    return { sommePonderee, noteCalculee: res.note, pctFinal: res.pctBorne, applicable: true };
 }
 
 function _determinerNiveauIDMEAlgo(pctFinal) {
@@ -337,10 +439,18 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
 
     const sousCriteres = _obtenirSousCriteresGrille(critereId);
     const { sommePonderee, noteCalculee, pctFinal } = _calculerScoreAlgoCategories(
-        codesSousCriteres, sousCriteres, ponderation, mots, facteur
+        codesSousCriteres, sousCriteres, ponderation, mots, facteur, critereId
     );
     const niveauIDME = _determinerNiveauIDMEAlgo(pctFinal);
     _appliquerResultatsAlgoCategories(critereId, noteCalculee, pctFinal, niveauIDME);
+    // #667 — en mode catégories, ce sont les codes PONDÉRÉS qui tiennent lieu
+    // d'erreurs : la formule affichée doit montrer cette somme, pas le nombre
+    // brut de codes saisis, sinon elle ne redonne pas la note.
+    _afficherFormuleAlgo(critereId, _critereFormulePourCalcul(critereId, facteur), {
+        ponderation: ponderation,
+        erreurs: sommePonderee,
+        mots: mots
+    });
 
     const { codeDominant, maxFreq } = _trouverCodeDominant(codesSousCriteres);
 
@@ -397,34 +507,32 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     if (totalErreursElem) totalErreursElem.textContent = erreurs;
     if (motsElem) motsElem.textContent = mots;
 
-    if (mots === 0) {
-        // Réinitialiser l'affichage (guards si éléments pas encore dans le DOM)
-        var noteEl = document.getElementById(`note_algo_${critereId}`);
-        var pctEl = document.getElementById(`pct_algo_${critereId}`);
-        var nivEl = document.getElementById(`niveau_algo_${critereId}`);
-        if (noteEl) noteEl.textContent = '--';
-        if (pctEl) pctEl.textContent = '--';
-        if (nivEl) nivEl.textContent = '--';
-        if (totalErreursElem) totalErreursElem.textContent = '--';
-        if (motsElem) motsElem.textContent = '--';
-        _appliquerStyleResultatAlgo(critereId, null);
-        // Fix #110 v3 (restauré 24 mai 2026, perdu lors du refactoring du 20 mai) :
-        // préserver erreurs+mots même quand le calcul ne tourne pas, sinon la
-        // sauvegarde persiste l'ancienne valeur de donneesAlgorithmiques.
-        if (!evaluationEnCours.donneesAlgorithmiques) evaluationEnCours.donneesAlgorithmiques = {};
-        evaluationEnCours.donneesAlgorithmiques[critereId] = Object.assign(
-            evaluationEnCours.donneesAlgorithmiques[critereId] || {},
-            { erreurs: erreurs, mots: mots }
-        );
+    // #667 — la garde ne présume plus que TOUTE formule a besoin des mots :
+    // c'est le modèle choisi dans le gabarit qui le dit (`utiliseMots`). Une
+    // pénalité fixe par erreur se calcule sans nombre de mots.
+    const motsRequisSimple = window.formulesAlgo
+        .normaliser(_critereFormulePourCalcul(critereId, facteur)).modele.utiliseMots;
+    if (motsRequisSimple && mots === 0) {
+        _viderResultatAlgoSimple(critereId, erreurs, mots);
         return;
     }
 
-    // Calcul selon la formule: Pondération − (Total Erreurs ÷ Mots × Facteur)
-    const noteCalculee = ponderation - (erreurs / mots * facteur);
-    const pourcentage = (noteCalculee / ponderation) * 100;
-
-    // Limiter entre 0 et 100%
-    const pctFinal = Math.max(0, Math.min(100, pourcentage));
+    // #667 — la formule vient du gabarit de la grille (modèle + paramètres),
+    // plus d'une expression écrite ici. Le libellé affiché sort de la MÊME
+    // source que le calcul : les deux ne peuvent plus diverger.
+    const critereFormuleAlgo = _critereFormulePourCalcul(critereId, facteur);
+    const resFormule = window.formulesAlgo.calculer(critereFormuleAlgo, {
+        ponderation: ponderation,
+        erreurs: erreurs,
+        mots: mots
+    });
+    if (!resFormule.applicable) {
+        _viderResultatAlgoSimple(critereId, erreurs, mots);
+        return;
+    }
+    const noteCalculee = resFormule.note;
+    const pctFinal = resFormule.pctBorne;
+    _afficherFormuleAlgo(critereId, critereFormuleAlgo, { ponderation, erreurs, mots });
 
     // Déterminer le niveau IDME selon l'échelle
     const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;

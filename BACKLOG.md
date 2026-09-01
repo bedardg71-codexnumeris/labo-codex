@@ -435,6 +435,30 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   démarrage est lue une fois et **périme en silence** ; un ID se grep. Et c'est la même famille que **#649** — sans
   symptôme aujourd'hui, mais il fabrique des verdicts faux dès qu'on l'approche. Un dispositif dormant qui ment quand
   on le réveille mérite une trace, pas une mémoire.
+- [x] **#667 — LIVRÉ · La formule d'un critère algorithmique est choisie dans le gabarit de la grille, et s'affiche dans le calcul de la note**.
+  Inscrit le 31 août 2026 **après usage dans le code, pas avant — l'erreur est notée ici** : `#650` a d'abord été employé
+  dans ~30 commentaires, alors qu'il désigne déjà la porte de sortie des échelles. Renommé en `#667` avant tout commit,
+  ligne `js/grilles.js:2850` (référence légitime au vrai #650) préservée.
+  Demande de Grégoire, avec deux captures : la formule était **codée en dur en quatre sites de calcul** (`evaluation-calcul.js`
+  ×3 dont un mort, `evaluation-retroaction.js` ×1) et **réécrite à la main en trois sites d'affichage** (`grilles.js` ×2,
+  `index.html` ×1). Sept lieux pour une règle : rien n'empêchait le texte affiché de mentir sur le calcul appliqué.
+  Livré : registre `js/evaluation-formules.js` (module pur, aucun DOM, aucune DB) — trois modèles (pénalité normalisée,
+  ratio mots par erreur, pénalité fixe par erreur), paramètres saisis dans le gabarit, **libellé engendré par le registre**
+  donc incapable de diverger du calcul. Ligne de formule chiffrée ajoutée sous le résultat dans les trois blocs du module
+  Évaluer. `modeleFormule`/`paramsFormule` ajoutés aux DEUX schémas de transport (le partage les perdait silencieusement).
+  Migration à la lecture, sans écriture de masse : un critère sans modèle est lu comme « pénalité normalisée » avec son
+  facteur — **35,87/100 reproduit au centième** sur le cas réel de la capture (59 erreurs, 460 mots, facteur 500).
+  Sentinelle `tests/unit/sentinelle-667-formule-livree-par-le-gabarit.test.js` (22 cas). ⚠ **Un test a été ajouté parce
+  qu'une mutation n'était tuée par personne** : tous les cas portaient un facteur de 500, qui est AUSSI le défaut — une
+  migration ignorant `critere.facteurNormalisation` passait au vert, et les grilles réglées à 300 auraient été relues à 500.
+  Vitest **423 fichiers / 4493 tests, code de sortie 0**. Témoin de rendu WebKit hors dépôt : sélecteur peuplé, formule
+  suivant le paramètre, changement de modèle emportant le champ périmé, 0 résidu, 0 erreur de page.
+  ⏳ **DÛ À GRÉGOIRE** : valider les **défauts métier des deux modèles neufs** (ratio visé 60 mots/erreur ; 1 point par
+  erreur) — ce sont mes valeurs, pas les siennes. Et un essai terrain sur une vraie grille.
+  ⚠ **Hors périmètre, constaté au passage** : le schéma de partage (`partage-schemas.js`) ne transporte toujours PAS
+  `sousCriteres` — les onze rétroactions de français se perdent au partage, comme au #511 pour l'import/export.
+  Et `js/grilles.js:268`, `:279`, `:383` lisent `getElementById('critereFormule')` **sans garde**, sur un id absent
+  d'`index.html` (champ « formule » décoratif hérité, sans lien avec le calcul).
 - [ ] **#651 — Depuis la liste des évaluations, « annoter » ouvre la page sans AUCUNE palette quand on vient du mode Évaluer**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, à la demande de `kuekatsheu-5d` qui porte le
   correctif sous le pilotage direct de Grégoire. Retour terrain de Grégoire, avec capture.

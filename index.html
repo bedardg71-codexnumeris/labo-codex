@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260831f"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260831p"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -11114,11 +11114,13 @@
                             <p><strong>Navigation :</strong> Conception → Grilles de critères</p>
 
                             <p><strong>Qu'est-ce qu'un critère algorithmique ?</strong></p>
-                            <p>Un critère <strong>algorithmique</strong> est un type spécial de critère qui calcule automatiquement une note basée sur une formule mathématique. Le cas d'usage principal est l'<strong>évaluation du français écrit</strong> selon la formule :</p>
+                            <p>Un critère <strong>algorithmique</strong> est un type spécial de critère qui calcule automatiquement une note. <strong>C'est toi qui choisis la formule</strong>, dans le gabarit de la grille : un modèle dans la liste, puis ses paramètres. Le cas d'usage principal est l'<strong>évaluation du français écrit</strong>, avec le modèle « Pénalité normalisée » :</p>
 
                             <div class="u-p-15" style="background: var(--bleu-tres-pale); border-radius: 6px; margin: 15px 0">
                                 <code class="u-texte-moyen">Note = Pondération − (Erreurs pondérées ÷ Mots × Facteur de normalisation)</code>
                             </div>
+
+                            <p>Les autres modèles offerts sont le <strong>ratio mots par erreur</strong> (atteindre un ratio visé donne la note complète) et la <strong>pénalité fixe par erreur</strong> (chaque erreur retire un nombre de points donné, sans égard à la longueur). La formule retenue, avec tes valeurs, s'affiche dans le gabarit de la grille et sous le résultat au moment d'évaluer.</p>
 
                             <p><strong>Pourquoi des sous-critères ?</strong></p>
                             <p>Les sous-critères permettent de <strong>catégoriser les erreurs</strong> avec des <strong>pondérations différentes</strong>. Par exemple, dans certains cégeps, les erreurs de ponctuation comptent pour un demi-point (0.5) au lieu d'un point complet (1.0).</p>
@@ -11135,7 +11137,7 @@
                                 <li>Dans ta grille de critères, ajouter un nouveau critère</li>
                                 <li>Sélectionner le type <strong>«Algorithmique»</strong></li>
                                 <li>Définir la pondération (ex: 30%)</li>
-                                <li>Définir le facteur de normalisation (défaut: 500 mots)</li>
+                                <li>Choisir le modèle de formule, puis fixer ses paramètres (pour « Pénalité normalisée » : le facteur de normalisation, 500 mots par défaut)</li>
                             </ol>
 
                             <p><strong>Étape 2 : Ajouter des sous-critères</strong></p>
@@ -14484,8 +14486,9 @@
     <script src="js/productions-import-export.js?v=20260830c"></script> <!-- Refactor étape 3 (16 mai 2026) : extrait de productions.js (lignes 2630-3276) -->
     <script src="js/productions-liste.js?v=20260830d"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js · #522 lot 4 : le descripteur de production écrit par db.modifier -->
     <script src="js/productions-bibliotheque-ui.js?v=20260830d"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide · #522 lot 4 : le descripteur de production écrit par db.modifier -->
+    <script src="js/evaluation-formules.js?v=20260831p"></script> <!-- #667 : registre des modèles de formule algorithmique — CHARGÉ AVANT grilles.js et evaluation-calcul.js, qui l'appellent tous les deux -->
     <script src="js/grilles-bibliotheque.js?v=20260831b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/grilles.js?v=20260831k"></script> <!-- Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
+    <script src="js/grilles.js?v=20260831p"></script> <!-- Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
     <script src="js/echelles-bibliotheque.js?v=20260830b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/echelles.js?v=20260831j"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
     <script src="js/cartouches-bibliotheque.js?v=20260831b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
@@ -14616,7 +14619,7 @@
          labo-codex-partage-v1 + signature ECDSA (Défense F, D2) + confiance TOFU (D3).
          Ordre requis : après cc-license.js et bibliotheque-ui.js, avant import-export.js ;
          signature.js avant partage-format.js (construirePackageSigne). -->
-    <script src="js/partage-schemas.js?v=2026061001"></script>
+    <script src="js/partage-schemas.js?v=20260831p"></script>
     <script src="js/partage-validation.js?v=20260831a"></script>
     <script src="js/signature.js?v=2026061002"></script>
     <script src="js/trust-tofu.js?v=2026061003"></script>
@@ -14624,7 +14627,7 @@
     <script src="js/partage-export.js?v=20260831a"></script>
     <script src="js/partage-import.js?v=20260824b"></script>
     <script src="js/partage-section.js?v=20260831a"></script>
-    <script src="js/import-export.js?v=20260831a"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
+    <script src="js/import-export.js?v=20260831p"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
     <script src="js/codex.js?v=20260830l"></script> <!-- #614 : la fusion valide les magic bytes ; la purge #336 ne recense plus la corbeille ni la modélisation -->
     <script src="js/liste-evaluations.js?v=20260830d"></script> <!-- #612 T6.6 : supprimer une reprise emporte son fichier ; #556 + #557 -->
     <script src="js/journal.js?v=2026041706"></script>
@@ -14637,9 +14640,9 @@
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=20260830c"></script> <!-- #612 T6.6 : detachement des fichiers exporte a la liste ; #563 -->
-    <script src="js/evaluation-chargement.js?v=20260831h"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
-    <script src="js/evaluation-calcul.js?v=20260829b"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
-    <script src="js/evaluation-retroaction.js?v=20260828a"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
+    <script src="js/evaluation-chargement.js?v=20260831p"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
+    <script src="js/evaluation-calcul.js?v=20260831p"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
+    <script src="js/evaluation-retroaction.js?v=20260831p"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
     <script src="js/evaluation-sauvegarde.js?v=20260829e"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
     <script src="js/evaluation.js?v=20260829c"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
     <script src="js/evaluation-handlers.js?v=20260518d"></script> <!-- Beta 99.48 : session A étape 3 refactor (3 fonctions extraites) -->

@@ -49,6 +49,13 @@ function chargerCalcul(elements, evaluationEnCours, dbStub) {
     // genererRetroaction reste dans le résidu ; ici on stube pour ne pas crasher.
     fauxWindow.genererRetroaction = () => {};
 
+    // #667 — le calcul lit désormais sa formule dans le registre. On charge le
+    // VRAI registre dans le même faux window, pas un stub : un stub testerait
+    // une formule inventée pour le test, alors que l'invariant #350 porte sur
+    // ce que la vraie chaîne de calcul écrit dans donneesAlgorithmiques.
+    const codeFormules = readFileSync(path.join(racine, 'js/evaluation-formules.js'), 'utf8');
+    new Function('window', '"use strict";\n' + codeFormules)(fauxWindow);
+
     // Globaux bare-access consommés par le module :
     //   evaluationEnCours (let global), db.getSync, cle(), console
     const cle = (k) => k; // identité : trimestre non pertinent pour cet invariant
