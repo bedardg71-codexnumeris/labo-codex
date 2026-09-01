@@ -697,6 +697,45 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   priver le rapport de son témoin `clesLues`, ou casser la syntaxe — **l'ancienne assertion restait
   VERTE dans les trois cas, la nouvelle rougit dans les trois.**
 
+- [ ] **#682 — Le renommage du §3 n'atteint QUE les espaces neufs : les copies déjà semées gardent l'ancien nom**.
+  Inscrit le 1er septembre 2026, **trouvé en préparant la porte terrain du §3** — qui s'est révélée
+  inexécutable et a découvert mieux qu'elle ne cherchait.
+  ▣ **LE FAIT.** Le code porte « Échelle de départ (IDME) » ; l'écran de Grégoire affiche « Échelle IDME
+  (point de départ) », le nom d'avant.
+  ▣ **LE MÉCANISME, mesuré sous WebKit sur deux passages de la même base.** Le semis est **idempotent par
+  identifiant** : `assurerEchelleIdmeDeDepart` et `assurerGrilleGenerique` vérifient la présence de l'id
+  DANS le mutateur et sortent sans écrire si l'objet est là. **Ils ne recréent pas, donc ils ne renomment
+  jamais.** Un espace vide reçoit « Grille de départ » ; une base portant « Grille générique (exemple) »
+  la GARDE, telle quelle.
+  ⮕ **Un lot de libellés qui n'atteint que les espaces neufs n'est pas livré, il est semé.** Le §3 ne
+  change rien pour qui a déjà ouvert l'application — ni pour Grégoire, ni pour les utilisateurs déjà en
+  place, **dont on ignore le nombre**. Même famille que le corollaire de #674 : ce qu'on répare pour les
+  nouveaux n'atteint pas ceux qui sont déjà là.
+  ⛔ **NON CORRIGÉ, ET C'EST VOULU. La décision appartient à Grégoire** : renommer une copie en base,
+  c'est ÉCRIRE DANS SES DONNÉES. Et les deux cas n'ont rien à voir —
+  · un nom **qu'il n'a jamais touché** porte encore, mot pour mot, un libellé posé par le code. Le
+    renommer ne lui prend rien ;
+  · un nom **qu'il a choisi** est son travail. L'écraser serait le perdre sans qu'il l'ait demandé, et
+    ce serait irréversible.
+  ⮕ **La sonde SÉPARE les deux**, elle ne tranche pas : `scripts/sonde-682-materiel-seme-noms.js`,
+  lecture seule (vérifié par assertion — le magasin est comparé octet pour octet avant/après).
+  Les trois gestes : `pbcopy < ~/…/scripts/sonde-682-materiel-seme-noms.js`, coller, `await sonde682()`.
+  ▣ **ET UNE ABSENCE N'EST PAS UN BUG.** La grille et la cartouche de départ sont absentes chez Grégoire.
+  La sonde regarde `ressourcesSupprimees` AVANT de conclure : un identifiant qui s'y trouve veut dire
+  qu'il les a supprimées et que le tombstone tient — **c'est la durabilité qui FONCTIONNE**. Vérifié au
+  navigateur : tombstone posé, le semis ne repose rien. Sans tombstone, l'absence reste une absence, et
+  la sonde le DIT ainsi plutôt que d'inventer une cause.
+  ▣ **DEUX AUTRES FAUTES CORRIGÉES DANS LE MÊME PASSAGE** (celles-là étaient à moi) :
+  · le message « Aller dans Matériel › Niveaux de performance » envoyait dans un onglet **qui n'existe
+    pas** — zéro occurrence de « Matériel » dans `index.html`. Le §4-2 avait recopié ce chemin faux du
+    message préexistant (`evaluation-chargement.js:297`). **Les deux disent maintenant
+    « Conception → Échelles de performance »**, le vocabulaire du reste de l'app, et le banc exige les
+    DEUX moitiés — « Conception » seul ne suffit pas à trouver ;
+  · la porte terrain du §3 est **SUSPENDUE** tant que cet item n'est pas tranché : sur une base
+    existante, elle jugerait des libellés qui n'y sont pas encore arrivés.
+  ⏳ **Décision attendue de Grégoire — trois formes** : (a) ne rien faire ; (b) renommer UNIQUEMENT les
+  « ancien nom du code », aucun de ses choix n'étant touché ; (c) autre chose, qu'il dira.
+
 - [ ] **#680 — Le canal de PARTAGE laisse d'autres champs d'échelle en chemin, et personne n'a écrit lesquels**.
   Inscrit le 1er septembre 2026, **issue 2 (inscrire et continuer)** : trouvaille faite en corrigeant `valeur`,
   hors du lot en cours.

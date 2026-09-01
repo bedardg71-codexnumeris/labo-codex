@@ -156,7 +156,18 @@ test('§4-2 · quand AUCUNE échelle n\'existe, l\'écran dit d\'en créer une (
     expect(r.erreur, `Erreur : ${r.erreur}`).toBeUndefined();
     expect(r.messageVisible).toBe(true);
     expect(r.texte, 'il faut dire de la CRÉER').toMatch(/crée-la/i);
-    expect(r.texte, 'et dire OÙ — sinon le message ne sert à rien').toMatch(/Matériel/i);
+    // ⚠ CE BANC A ROUGI LE 1er SEPTEMBRE, ET IL AVAIT RAISON. Il exigeait le mot
+    // « Matériel » — un onglet qui N'EXISTE PAS : zéro occurrence dans
+    // `index.html`. Le message d'origine (`evaluation-chargement.js:297`) portait
+    // ce chemin faux, et je l'avais recopié en écrivant le §4-2 : dire OÙ ne sert
+    // à rien si le OÙ n'existe pas.
+    // ⮕ Le banc exige désormais le chemin RÉEL, dans le vocabulaire du reste de
+    // l'app (« Gérer les échelles dans Conception → Échelles de performance »),
+    // et il exige les DEUX moitiés : la section et l'onglet. Une seule des deux
+    // laisserait repasser un chemin à moitié faux.
+    expect(r.texte, 'la SECTION doit être nommée').toMatch(/Conception/i);
+    expect(r.texte, 'et l\'ONGLET aussi — « Conception » seul ne suffit pas à trouver')
+        .toMatch(/Échelles de performance/i);
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 

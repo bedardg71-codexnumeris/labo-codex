@@ -24,11 +24,55 @@
 
 ---
 
-## §0 — Préparation
+## ⛔ SUSPENDUE — ET CE QU'ELLE A TROUVÉ EN ÉCHOUANT
 
-1. **Recharger avec vidage de cache** (Cmd+Option+R sur Mac). Les jetons du jour
-   vont jusqu'à `20260901e` ; sans ce geste, tu juges du code d'hier.
-2. Se placer dans un **trimestre où le matériel semé n'a pas été modifié**. Si
+*↻ 1er septembre 2026, en soirée. La première version de cette porte était
+**inexécutable**. Elle a découvert mieux qu'elle ne cherchait.*
+
+**1. ⚠ LE §3 N'ATTEINT PAS LES BASES DÉJÀ OUVERTES — c'est le vrai défaut.**
+Le code porte « Échelle de départ (IDME) » ; l'écran de Grégoire affiche
+« Échelle IDME (point de départ) », le nom d'avant. Mesuré sous WebKit sur deux
+passages de la même base : **le semis est idempotent par identifiant**. Il vérifie
+la présence de l'id et sort sans écrire — il ne recrée pas, donc **il ne renomme
+jamais**. Un espace neuf reçoit le nom neuf ; une base déjà semée garde l'ancien,
+indéfiniment.
+⮕ Le §3 ne change donc rien pour qui a déjà ouvert l'application — ni pour
+Grégoire, ni pour les utilisateurs déjà en place, dont on ignore le nombre.
+**Un lot de libellés qui n'atteint que les espaces neufs n'est pas livré, il est
+semé.** Inscrit en **#682**, non corrigé : renommer une copie en base, c'est
+écrire dans les données de quelqu'un, et c'est une décision de Grégoire.
+
+**2. Le chemin qu'elle donnait n'existait pas.** Elle envoyait dans un onglet
+« Matériel » : **zéro occurrence** dans `index.html`. Elle recopiait le message
+d'erreur de l'application, qui portait ce chemin faux depuis longtemps — et que
+le §4-2 avait recopié à son tour. Les deux messages sont corrigés : le vrai
+chemin est **Conception → Échelles de performance**, et un banc exige désormais
+les DEUX moitiés.
+
+**3. La grille et la cartouche de départ sont absentes chez Grégoire.** Une
+absence n'est pas un bug : `scripts/sonde-682-materiel-seme-noms.js` regarde
+`ressourcesSupprimees` avant de conclure. Un identifiant qui s'y trouve signifie
+qu'il les a supprimées et que le tombstone tient — **c'est la durabilité qui
+FONCTIONNE**. Vérifié au navigateur : tombstone posé, le semis ne repose rien.
+
+⮕ **CETTE PORTE NE SE PASSE PAS TANT QUE #682 N'EST PAS TRANCHÉ.** Sur une base
+existante, elle jugerait des libellés qui n'y sont pas encore arrivés — et
+rendrait un « non » qui accuserait le mauvais coupable.
+
+⮕ **LE GESTE 2 NE BOUGE PAS.** Il reste « éprouvé par Grégoire ».
+
+---
+
+## §0 — Préparation *(quand la porte sera rouverte)*
+
+1. **LANCER LA SONDE D'ABORD**, et lire ce qu'elle rend. Au terminal :
+   `pbcopy < ~/Documents/GitHub/Monitorage_v6/scripts/sonde-682-materiel-seme-noms.js`
+   puis Cmd+V dans la console du navigateur, Entrée, puis `await sonde682()`.
+   ⮕ Si elle rapporte des « ancien nom du code », **cette porte ne peut pas être
+   passée sur cette base** : les libellés du §3 n'y sont pas.
+2. **Recharger avec vidage de cache** (Cmd+Option+R sur Mac). Les jetons du jour
+   vont jusqu'à `20260901f` ; sans ce geste, tu juges du code d'hier.
+3. Se placer dans un **trimestre où le matériel semé n'a pas été modifié**. Si
    les trois pièces ont déjà été renommées ou retouchées, cette porte ne mesure
    plus rien — le dire et s'arrêter là.
 
@@ -36,7 +80,12 @@
 
 ## §1 — P1 · CE QUE LES TROIS PIÈCES DISENT D'ELLES-MÊMES *(jugement, Mac + iPad)*
 
-Ouvrir **Matériel**, et regarder les trois listes sans rien faire d'autre.
+Ouvrir **Conception**, et regarder les onglets « Grilles de critères »,
+« Échelles de performance » et « Cartouches de rétroaction » sans rien faire
+d'autre.
+
+⚠ Il n'y a **pas** d'onglet « Matériel » — c'est ce que disait la première
+version de cette porte, et c'est faux.
 
 **Attendu** : « Grille de départ », « Cartouche de départ »,
 « Échelle de départ (IDME) ».

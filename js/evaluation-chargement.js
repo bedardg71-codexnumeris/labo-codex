@@ -294,7 +294,14 @@ function chargerEchellePerformance() {
 
     if ((!echelles || echelles.length === 0) && !echellePratique) {
         console.error('❌ Aucune échelle de performance configurée');
-        select.innerHTML = '<option value="">Aucune échelle configurée — Aller dans Matériel › Niveaux de performance</option>';
+        // ⚠ CHEMIN CORRIGÉ le 1er septembre 2026 — « Matériel › Niveaux de
+        // performance » n'existe pas : ZÉRO occurrence de « Matériel » dans
+        // `index.html`, et l'onglet s'appelle « Échelles de performance ». Ce
+        // message envoyait donc l'enseignant nulle part, au moment précis où il
+        // n'a pas d'échelle. Le vocabulaire employé ici est celui du reste de
+        // l'app (`index.html` : « Gérer les échelles dans Conception → Échelles
+        // de performance »).
+        select.innerHTML = '<option value="">Aucune échelle configurée — Conception → Échelles de performance</option>';
         document.getElementById('noteProduction1').textContent = '--';
         document.getElementById('niveauProduction1').textContent = '--';
         return;
@@ -749,7 +756,7 @@ function messageEchelleManquante() {
     const echellePratique = _resoudreEchellePratique();
     const aucuneEchelle = (!Array.isArray(echelles) || echelles.length === 0) && !echellePratique;
     return aucuneEchelle
-        ? 'Grille chargée. Aucune échelle de performance n’existe encore : crée-la dans Matériel › Niveaux de performance. Sans échelle, les critères ne peuvent pas apparaître.'
+        ? 'Grille chargée. Aucune échelle de performance n’existe encore : crée-la dans Conception → Échelles de performance. Sans échelle, les critères ne peuvent pas apparaître.'
         : 'Grille chargée. Choisis maintenant une échelle de performance : sans elle, les critères ne peuvent pas apparaître.';
 }
 
