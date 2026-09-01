@@ -710,6 +710,28 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   Lots : 1 registre `js/evaluation-projection.js` (module pur, seuils stockés en **ratio normalisé**, pas en
   mots-par-erreur) · 2 un seul lieu de vérité pour le texte · 3 gabarit · 4 transport (avec **#669**) ·
   5 sentinelles + break-test · 6 le PDF de rétroaction (`synthese-retroaction-*`), APRÈS les lots 1 à 5.
+  ✅ **Lot 4 LIVRÉ le 1er septembre 2026** — le transport, avec **#669** dans le même geste.
+  ⚠ **TROIS champs, pas deux.** La consigne nommait `paramsProjection` et `paliersProjection` ; `modeleProjection`
+  manquait, et c'est le SEUL qui décide du modèle (`evaluation-projection.js:315`). Transporter les paramètres sans
+  lui les aurait fait lire par un modèle reconstitué : la classe de défaut de #667, reconduite dans le lot censé la
+  refermer.
+  ⚠ **Aucun des trois n'était déclaré dans `import-export.js` non plus.** Le trou était des DEUX côtés, alors que la
+  consigne ne l'annonçait qu'au partage — mesuré, pas déduit du texte de la consigne.
+  ⮕ **Type `numberOrNull` ajouté au dialecte d'assainissement.** `ratioMax: null` est le palier TERMINAL ; le type
+  `'number'` le coerçait en `0`, c'est-à-dire en SEUIL. La lecture le rattrape (`_paliersRetenus`, `max <= 0 → null`),
+  mais elle rattraperait une donnée déjà FAUSSE en base — et `_palierNeuf` (`grilles.js:4874`) lit les paliers bruts
+  sans passer par ce rattrapage.
+  ⮕ Sentinelle `tests/unit/sentinelle-668-lot4-669-transport-projection.test.js` — **20 cas**. A.c porte le cœur de
+  #669 : le critère arrive du bon CÔTÉ de la bascule (`sousCriteres.length > 0`), pas seulement avec ses textes ; un
+  transport rendant un tableau VIDE passerait les tests de contenu et basculerait quand même le destinataire.
+  **Break-test : 6 mutations, chacune tue ses témoins CIBLÉS**, dépôt restauré octet à octet — script rejouable
+  `/tmp/break-test-668-lot4/breaktest.py`.
+  ⚠ **Portée resserrée, et pourquoi** : l'assertion « aucun `{ type: 'object' }` nu » ne couvre que le schéma de
+  GRILLE. `pratique` en porte trois (`configuration`, `ponderation`, `seuils`) qui sont un choix ÉCRIT et assumé
+  (« modélisation exhaustive trop coûteuse, copié brut, trade-off accepté »). Élargir demande de rouvrir cette
+  décision, pas d'étendre un motif.
+  Vitest **426 fichiers / 4592 tests, code 0** (425/4572 avant). Playwright WebKit **code 0, baseline vide**.
+  Jetons anti-cache `partage-schemas.js` et `import-export.js` portés à `20260831t` (jour du BUILD, pas du calendrier).
   ⚠ **Le « CAF » codé en dur est FAUX** : le Centre d'aide en français n'existe plus au collège, il est devenu
   « Passerelle + » et la transition n'est pas finie. L'application dit aujourd'hui à des élèves de s'inscrire à un
   service disparu. Deux paramètres : `nomServiceAide` (texte libre) et `lienServiceAide` (**facultatif**, vide pour
@@ -744,7 +766,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   identifiant**, la trace est ici.
   ⏳ **DÛ À GRÉGOIRE** : le nom exact du service pendant la transition, et le lien le jour où il existera.
   Ne bloque pas le chantier — le champ reste vide.
-- [ ] **#669 — `sousCriteres` ne traverse pas le schéma de partage : le destinataire bascule du mode catégories au mode simple, en silence**.
+- [x] **#669 — `sousCriteres` ne traverse pas le schéma de partage : le destinataire bascule du mode catégories au mode simple, en silence**.
   ⮕ **À faire DANS le Lot 4 de #668** — même fichier, même classe de défaut que #667. Livrer le transport de la
   projection en laissant `sousCriteres` se perdre, ce serait empiler.
   **MESURÉ EN EXÉCUTION le 1er septembre 2026**, pas déduit d'une lecture de schéma. `grep 'sousCritere'
@@ -754,11 +776,37 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   pondérés : `projeterEntite(grille, 'grille')` rend le critère **sans `sousCriteres`**, silencieusement, code de
   sortie 0. `js/import-export.js:618` le déclare, lui — l'écart est **propre au partage**.
   ⚠ **L'effet est plus large que « les onze rétroactions se perdent »** : à l'arrivée,
-  `js/evaluation-calcul.js:869` choisit le mode de calcul sur `critere.sousCriteres.length > 0`. Sans sous-critères,
+  `js/evaluation-calcul.js:992` choisit le mode de calcul sur `critere.sousCriteres.length > 0`. Sans sous-critères,
   l'évaluation bascule du mode **catégories** au mode **simple** — le destinataire perd les onze catégories ET la
   pondération décimale, celle-là même qui sert la **demi-faute de ponctuation** employée par d'autres collèges.
   La grille arrive, calcule autre chose que ce que son auteur·e a réglé, et ne dit rien : exactement le défaut
   que #667 vient de corriger pour la formule.
+  ✅ **LIVRÉ le 1er septembre 2026**, dans le Lot 4 de #668 comme prévu. `sousCriteres` (id, code, nom,
+  ponderation, retroaction) et `categoriesErreurs` voyagent désormais en schéma FERMÉ, bornés à 5 000 caractères par
+  rétroaction — la borne des commentaires de cartouche, que ce format transporte depuis toujours.
+  ⚠ **LA QUESTION POSÉE AVANT DE CODER — l'absence était-elle DÉLIBÉRÉE ?** Une projection volontairement légère
+  aurait pu écarter ces textes pour la charge ; les rajouter aurait alors défait un choix sans le savoir. **Mesuré,
+  pas supposé.** `git log -S 'sousCriteres' -- js/partage-schemas.js` rend **vide** sur les quatre commits de vie du
+  fichier (témoin : le même geste sur `criteres` rend `661d671c`) — le champ n'y a jamais été, il n'a donc pas été
+  retiré. Aucune trace d'allègement nulle part : `PLAN-VOUTE-PHASES-1-8.md` ne mentionne jamais `sousCriteres`
+  (témoin : 8 « grille », 9 « critère »), et le motif « allég/léger » rend 46 occurrences dans le dépôt, aucune sur le
+  partage. La préoccupation de taille EXISTE, mais elle est traitée par un **plafond global** (`tailleMaxPackageOctets`
+  10 Mo, confirmé par Grégoire le 10 juin 2026), jamais par une liste de champs écartés.
+  ⮕ **Et la seule décision ÉCRITE sur exactement cette question dit le contraire** : le commentaire de #511 dans
+  `import-export.js` nomme les « plusieurs centaines de mots chacun » comme la RAISON de les transporter, pas de les
+  exclure. #511 (`5cca483b`, 25 août) n'a touché qu'`import-export.js` — la couture ne tenait que d'un bord.
+  ⮕ **VERDICT, rendu par l'ASYMÉTRIE de la mesure (décision de Grégoire, 1er septembre) : l'omission était
+  ACCIDENTELLE, pas délibérée.** L'argument n'est pas « je n'ai rien trouvé » — c'est que **ce dépôt SAIT écrire ses
+  décisions d'exclusion quand il en prend une**, et qu'il en a écrit une, juste à côté. Les trois `{ type: 'object' }`
+  nus du schéma `pratique` (`configuration`, `ponderation`, `seuils`) portent leur motif en toutes lettres :
+  « modélisation exhaustive trop coûteuse pour le bénéfice — copié brut · trade-off accepté ». Le mécanisme
+  `champsInterdits` nomme de même ce qui est écarté exprès (`coursId`, `dateEcheance`, `etablissement`) — et il est
+  **vide** pour `grille`. Une trace existe donc là où un choix a été fait, et **il n'en existe aucune pour
+  `sousCriteres`**. C'est cette asymétrie qui répond, pas le silence seul.
+  ⮕ **Ce que la mesure ne peut toujours pas prouver** : l'absence d'une décision NON écrite. Aucune trace trouvée —
+  dit comme tel, pas déduit.
+  ⮕ Le drapeau `_categoriesmigrees` NE voyage pas (tout champ préfixé `_` est interdit au partage). Sans
+  conséquence : la garde de la migration est `!critere.sousCriteres`, et ceux-ci arrivent désormais.
 - [ ] **#651 — Depuis la liste des évaluations, « annoter » ouvre la page sans AUCUNE palette quand on vient du mode Évaluer**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, à la demande de `kuekatsheu-5d` qui porte le
   correctif sous le pilotage direct de Grégoire. Retour terrain de Grégoire, avec capture.

@@ -224,6 +224,82 @@
                             }
                         },
                         facteurNormalisation: { type: 'nombre', minValeur: 1, maxValeur: 10000 },
+                        // #668 Lot 4 — LA PROJECTION EUF VOYAGE AVEC LA GRILLE.
+                        // Même classe de défaut que #667 : sans ces champs, une
+                        // grille partagée projette selon le modèle de MIGRATION
+                        // et ses paliers d'origine, quel que soit le réglage de
+                        // son auteur·e — sans un mot, puisque la projection
+                        // continue de fonctionner.
+                        // ⚠ TROIS champs, pas deux. `modeleProjection` est le
+                        // seul qui décide du modèle (`evaluation-projection.js`
+                        // :315) : transporter les paramètres sans lui les
+                        // ferait lire par un modèle reconstitué.
+                        modeleProjection: { type: 'chaine', max: 60 },
+                        paramsProjection: {
+                            type: 'objet',
+                            schema: {
+                                motsReference: { type: 'nombre', minValeur: 1, maxValeur: 100000 },
+                                erreursTolerees: { type: 'nombre', minValeur: 1, maxValeur: 10000 },
+                                nomServiceAide: { type: 'chaine', max: 200 },
+                                lienServiceAide: { type: 'chaine', max: 500 }
+                            }
+                        },
+                        // ⚠ `ratioMax: null` est le palier TERMINAL — une valeur
+                        // signifiante, pas une absence. `nullable` est ce qui
+                        // l'empêche d'être rejetée à l'arrivée ; sans lui, tout
+                        // package portant des paliers serait refusé en bloc.
+                        paliersProjection: {
+                            type: 'tableau', max: 20,
+                            schema: {
+                                cle: { type: 'chaine', requis: true, max: 100 },
+                                libelle: { type: 'chaine', max: 200 },
+                                sansErreur: { type: 'booleen' },
+                                ratioMax: { type: 'nombre', nullable: true, minValeur: 0, maxValeur: 100 },
+                                texte: { type: 'chaine', max: 5000 },
+                                texteAide: { type: 'chaine', max: 5000 }
+                            }
+                        },
+                        // #669 — LES ONZE RÉTROACTIONS DE FRANÇAIS SE PERDAIENT
+                        // AUSSI AU PARTAGE. #511 a comblé ce trou du côté
+                        // import/export le 25 août (`5cca483b`) sans ouvrir ce
+                        // fichier-ci : la couture ne tenait que d'un bord.
+                        // ⚠ L'effet dépasse la perte des textes.
+                        // `evaluation-calcul.js:992` choisit le MODE DE CALCUL
+                        // sur `sousCriteres.length > 0`. Sans eux, l'évaluation
+                        // bascule du mode catégories au mode simple : le
+                        // destinataire perd les onze catégories ET la
+                        // pondération décimale — la demi-faute de ponctuation.
+                        sousCriteres: {
+                            type: 'tableau', max: 30,
+                            schema: {
+                                id: { type: 'chaine', max: 100 },
+                                // Chaîne dans les DEUX sources réelles mesurées
+                                // (`grilles.js:4090`, `pack-demo-20.js:14093`).
+                                // Un code numérique ferait rejeter le package —
+                                // bruyamment, ce qui vaut mieux qu'un silence.
+                                code: { type: 'chaine', max: 20 },
+                                nom: { type: 'chaine', max: 200 },
+                                ponderation: { type: 'nombre', minValeur: 0, maxValeur: 100 },
+                                retroaction: { type: 'chaine', max: 5000 }
+                            }
+                        },
+                        // Structure antérieure aux sous-critères, encore lue par
+                        // la migration de `grilles.js:4673` : la transporter est
+                        // ce qui permet à cette migration de travailler chez le
+                        // destinataire.
+                        // ⚠ Son drapeau `_categoriesmigrees` NE PEUT PAS voyager
+                        // (tout champ préfixé `_` est interdit au partage). La
+                        // migration se redéclenchera donc à l'arrivée — sans
+                        // effet : sa garde est `!critere.sousCriteres`, et ceux-ci
+                        // voyagent désormais.
+                        categoriesErreurs: {
+                            type: 'tableau', max: 30,
+                            schema: {
+                                code: { type: 'chaine', max: 20 },
+                                nom: { type: 'chaine', max: 200 },
+                                retroaction: { type: 'chaine', max: 5000 }
+                            }
+                        },
                         niveauSOLO: { type: 'chaine', max: 50 },
                         verrouille: { type: 'booleen' }
                     }
