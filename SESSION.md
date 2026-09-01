@@ -5,6 +5,71 @@
      #326 (réactivation du comparateur, « bloqueur CoP » n°1) = CLOS le 28 juin (release 1.26.0).
      ⮕ ÉTAT AU 3 JUILLET 2026 SOIR (VAGUE 3 CLOSE + **MERGÉE MAIN ET DÉPLOYÉE — décision Grégoire du 3 juillet, release 1.27.2**, branche `claude/relais-vague-3-etat-n3owyf` fast-forwardée dans `main` : les 3 vagues 1.27.0/1.27.1/1.27.2 sont EN PRODUCTION ; le point « MERGER en août » du signet est donc RÉGLÉ, les validations TERRAIN restent dues) : bilan factuel des vagues 1-2 = TABLEAU dans le bloc « 3 juillet » ci-dessous (12/12 tâches livrées ou closes par écart de prémisse ; AUCUN reliquat 2a) PUIS file 2b ÉPUISÉE : Tâche A #328 = déjà absorbé (vérifié au code, trace consignée) ; Tâche C #118+#283-T1 LIVRÉS (fix CSS overflow) ; Tâche B #363 LIVRÉ (audit currency, 13 écarts corrigés) ; Tâche D #306 LIVRÉ (Lots 1-2-3 ; décision UX « apparition du formulaire » restée ouverte, consignée). Vitest 1257/1257. ⚠ GRÉGOIRE EN CONGÉ TOUT JUILLET, reprise AOÛT. À la reprise (le merge est FAIT — 3 juillet) : validations terrain (#310/#311/#351/#240/#347 + portes vague 1 #313/#344/#361 + vague 2 #355/#305/#121 + vague 3, 2 modes) ; triage des 5 worktrees AVEC `plans de travail/INVENTAIRE-worktrees-2026-07.md` ; #364 T3/T4/T5 ; trancher #365 (audit blanc). ✅ **FAIT LE 27 AOÛT 2026 AU SOIR** : `rm .git/index.lock .git/HEAD.lock .git/objects/maintenance.lock` — mais ils étaient REVENUS (datés du 27 août 15 h 46, `git maintenance` crashé) et bloquaient tout commit. ⮕ **Ce point traînait depuis juillet et le 28 juin en portait déjà un : c'est un défaut RÉCURRENT du dépôt, pas une malchance.** À traiter comme tel plutôt qu'à re-nettoyer chaque fois. ; le commit local `96f1294c` et le BACKLOG #365 du Mac sont OBSOLÈTES (contenu recréé/poussé par les vagues 1-2) ; le fichier relais vague 2 (`RELAIS-2026-07-02-vague-2.md`) n'a jamais été poussé — le committer du Mac si on veut la trace (le relais vague 3 est, lui, versionné ci-dessous).
      ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION 15 — 1er SEPTEMBRE 2026 : #668, LA PROJECTION EUF DEVIENT UN
+     RÉGLAGE DU GABARIT — ET DEUX DÉFAUTS TROUVÉS EN CHEMIN.
+
+     ▣ Session SOLO, pilotée directement par Grégoire depuis Cowork, sur une
+       consigne préparée. Huit commits, `192b2a58` → `de1c080a`.
+
+     ▣ LIVRÉ. #668 lots 0 à 3 : registre `js/evaluation-projection.js` (module
+       pur), golden figé, déviation nommée, branchement (la fonction en dur
+       disparaît), gabarit réglable. Plus #670 (quota) et le script de
+       réparation des rétroactions d'amorce. RESTENT les lots 4, 5b et 6.
+
+     ⮕ LA DÉCISION DE MÉTHODE QUI A TOUT TENU : AVANCER LE GOLDEN AVANT LE
+       LOT 2. Le Lot 2 SUPPRIME `genererRetroactionEUF`, seul oracle de
+       l'équivalence. Une fois partie, « reproduit au caractère près » n'aurait
+       plus été vérifiable — seulement répété. Le golden a donc été EXTRAIT de
+       la fonction vivante et figé : 20 cas nommés + une empreinte SHA-256 de
+       481 401 couples. C'est Grégoire qui a durci le motif ; je n'avais invoqué
+       que « mes mesures vont disparaître avec la session ».
+
+     ⚠⚠ CE QUE J'AI RATÉ, ET QUI A COÛTÉ UNE ALERTE DONNÉES À 22 H 32.
+       Mon script de réparation imprimait « 27 effacées » puis invitait à
+       recharger. `db.setSync` au-dessus de 25 Kio bascule en IDB-FIRST : il
+       RETIRE localStorage, met la valeur dans `memoryCache` VOLATILE, et écrit
+       IndexedDB EN ARRIÈRE-PLAN. Le compteur attestait le CALCUL, pas
+       l'ÉCRITURE — la faute même que les sentinelles de ce dépôt traquent.
+       Corrigé : `appliquer()` attend `db.flush()`. Le drain sur `pagehide` avait
+       sauvé la mise ; on ne construit pas sur un « avait sauvé ».
+       ⮕ Vérifié après coup sur les données réelles : IDB = 27, enAttente = 0,
+         amorces = 0, `donneesAlgorithmiques` peuplée 27/27.
+
+     ⚠ ET LE VRAI COUPABLE DE L'ÉCRAN BLOQUÉ N'ÉTAIT NI MON SCRIPT NI MES LOTS.
+       #670 : `travaux-ui.js:321` posait son drapeau de migration par un
+       `localStorage.setItem` BRUT, APRÈS son propre `catch` (ligne du 27 février).
+       Magasin saturé → QuotaExceededError NON RATTRAPÉ dans une IIFE de haut
+       niveau → init du module interrompue. Une migration de LARGEURS DE PANNEAU
+       empêchait l'application de démarrer. Établi par mesure, pas par déduction :
+       `git log 192b2a58..HEAD -- js/travaux-ui.js` rend ZÉRO commit.
+
+     ▣ TROIS FOIS OÙ MES PROPRES OUTILS M'ONT REPRIS, ET C'EST LE POINT.
+       · La sentinelle #668 a invalidé une assertion que j'avais écrite sur
+         `paliersMigration()` — le nom du service vit à UN seul endroit, le
+         défaut déclaré du paramètre, pas dans les paliers.
+       · Le break-test a tué DEUX de mes assertions : l'une vérifiait qu'une
+         fonction de refus EXISTE au lieu de vérifier qu'elle est APPELÉE ;
+         l'autre visait un nom de variable au lieu de la forme du calcul.
+       · La sentinelle anti-cache a refusé `20260901a` : le jeton porte le jour
+         du BUILD, pas du calendrier. Elle avait raison.
+
+     ⮕ ET DEUX FOIS OÙ MES OUTILS ONT MENTI DANS L'AUTRE SENS. Mon harnais de
+       break-test, plus étroit que le fichier de test, a fabriqué deux faux
+       survivants. Mon témoin de rendu a crié à la fuite XSS parce que
+       « onerror= » APPARAISSAIT — inerte, dans un attribut échappé. Un faux
+       rouge use la confiance aussi sûrement qu'un faux vert.
+
+     ▣ CORRECTION APPORTÉE À LA CONSIGNE ELLE-MÊME : la cartouche est TROISIÈME
+       dans la cascade du PDF, elle ne recouvre rien. Seul un texte personnalisé
+       évince la rétroaction engendrée. Il y a donc DEUX chemins de perte.
+
+     ⏳ DÛ À GRÉGOIRE : le facteur 500 → 600 (la copie de référence passerait de
+       65,55 à 58,66) · le nom du service d'aide, « CAF » étant devenu faux ·
+       la décision de release (aucune ce cycle ; `minor` attendu en fin de chantier).
+     ===================================================================== -->
+
 <!-- =====================================================================
      SESSION 14 — 31 AOÛT 2026, SOIRÉE (QUATRIÈME CYCLE) : LES PLANS FABLE 5,
      UN LOT LIVRÉ, DEUX PRÉPARÉS — ET DEUX RETARDS QUE PERSONNE N'AVAIT VUS.
