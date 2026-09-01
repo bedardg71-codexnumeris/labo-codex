@@ -715,10 +715,19 @@ const SCHEMAS_IMPORT = {
                 // ⚠ LES DEUX VOYAGENT, ET CE N'EST PAS UNE REDONDANCE.
                 // `valeur` est le champ des échelles de CATALOGUE
                 // (`echelles-bibliotheque.js`) ; `valeurCalcul` est celui que
-                // l'ÉDITEUR écrit (`echelles.js:1540`, `data-champ="valeurCalcul"`)
-                // et que lisent `profil-etudiant-calculs.js:395` et
-                // `consolidation.js:217`. Les données réelles portent l'un ou
-                // l'autre selon leur origine. Ne transporter que `valeur` — l'état
+                // les TROIS éditeurs d'echelles.js écrivent
+                // (`data-champ="valeurCalcul"` dans `afficherTableauNiveaux`,
+                // `afficherNiveauxNouvelleEchelle` et `afficherNiveauxEchelle`),
+                // et que lisent `valeurNumeriqueDuNiveau` (echelles.js — LA règle
+                // depuis #525), `_tableDepuisNiveaux` (profil-etudiant-calculs.js)
+                // et `_construireConversion` (consolidation.js). Les données
+                // réelles portent l'un ou l'autre selon leur origine.
+                // ⚠ Cités par NOM et non par numéro de ligne : deux des trois
+                // renvois de ce commentaire avaient glissé (`echelles.js:1540` ne
+                // porte plus rien de tel ; `profil-etudiant-calculs.js:395` tombe
+                // dans un JSDoc de diagnostic, pas dans une lecture). Un renvoi
+                // faux est pire qu'aucun renvoi : il se recoupe une fois, échoue,
+                // et on cesse d'y croire. Ne transporter que `valeur` — l'état
                 // d'avant le 28 août — faisait retomber toute échelle importée sur
                 // le repli `(min + max) / 2` : des notes calculées avec des valeurs
                 // que l'utilisateur n'a jamais choisies (audit du 28 août 2026).

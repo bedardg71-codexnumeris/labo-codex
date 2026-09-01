@@ -327,6 +327,24 @@
                         min: { type: 'nombre', minValeur: 0, maxValeur: 100 },
                         max: { type: 'nombre', minValeur: 0, maxValeur: 100 },
                         valeurCalcul: { type: 'nombre', minValeur: 0, maxValeur: 100 },
+                        // ⚠ `valeur` VOYAGE AUSSI — mesuré le 1er septembre 2026.
+                        // Le canal d'import-export transporte les DEUX depuis
+                        // l'audit du 28 août (`SCHEMAS_IMPORT.echelle`), pour une
+                        // raison qui vaut identiquement ici : les données réelles
+                        // portent l'un OU l'autre selon leur origine — `valeur`
+                        // pour les échelles de catalogue (`echelles-bibliotheque.js`),
+                        // `valeurCalcul` pour celles qu'un éditeur a écrites.
+                        //
+                        // Ce schéma est FERMÉ et `projeterEntite` (partage-format.js)
+                        // ne copie que les champs déclarés : une échelle à `valeur`
+                        // partait donc SANS AUCUNE valeur ponctuelle, sans erreur ni
+                        // avertissement. Témoin WebKit du 1er septembre — l'échelle
+                        // « Chimie organique » projetée rendait des niveaux réduits à
+                        // {code, nom, min, max, couleur}, et `valeurNumeriqueDuNiveau`
+                        // rendait `null` chez le destinataire : sa première évaluation
+                        // affichait 0,0 % sans un mot. La liste blanche ne signale pas
+                        // ce qu'elle oublie, elle le fait disparaître (#511).
+                        valeur: { type: 'nombre', minValeur: 0, maxValeur: 100 },
                         couleur: { type: 'chaine', max: 30 }
                     }
                 },

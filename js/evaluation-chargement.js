@@ -717,6 +717,52 @@ function _selectionnerCartoucheProduction(cartoucheId) {
  * UTILISÉ PAR:
  * - onchange="#selectGrille1" dans le HTML
  */
+/* ─────────────────────────────────────────────────────────────────────────
+   LES TROIS PIÈCES DE L'ÉCRAN D'ÉVALUATION (1er septembre 2026)
+
+   L'écran a besoin de TROIS pièces pour rendre ses critères : la grille dit
+   QUOI évaluer, l'échelle AVEC QUELS NIVEAUX, la cartouche AVEC QUELS
+   COMMENTAIRES. Le texte d'attente n'en nommait que deux — « une grille et une
+   cartouche ». L'échelle, seule pièce sans laquelle RIEN ne s'affiche, était la
+   pièce muette : un nouvel enseignant choisissait sa grille, ne voyait rien
+   bouger, et n'avait aucun moyen de savoir pourquoi.
+
+   ⚠ DEUX SOURCES, UN SEUL TEXTE. Le littéral de `MESSAGE_ATTENTE_CRITERES` est
+   aussi écrit en dur dans `index.html` (#listeCriteresGrille1) : l'état initial
+   de la page ne peut appeler aucun JS. `tests/unit/sentinelle-attente-criteres-
+   trois-pieces.test.js` exige que les deux disent la même chose — la seule
+   vérité est tenue par un test, pas par la vigilance.
+   ───────────────────────────────────────────────────────────────────────── */
+const MESSAGE_ATTENTE_CRITERES = 'Sélectionne une grille, une échelle de performance et une cartouche.';
+
+/**
+ * Ce que l'écran DIT quand une grille est choisie sans échelle.
+ *
+ * Deux situations, deux gestes différents — et c'est la distinction que
+ * `chargerEchellePerformance` fait déjà pour peupler son select : soit aucune
+ * échelle n'existe encore (il faut en CRÉER une), soit il en existe mais aucune
+ * n'est choisie (il faut en CHOISIR une). Envoyer quelqu'un choisir dans une
+ * liste vide est la deuxième façon de mentir sur cet écran.
+ */
+function messageEchelleManquante() {
+    const echelles = db.getSync(cle('echellesTemplates'), []);
+    const echellePratique = _resoudreEchellePratique();
+    const aucuneEchelle = (!Array.isArray(echelles) || echelles.length === 0) && !echellePratique;
+    return aucuneEchelle
+        ? 'Grille chargée. Aucune échelle de performance n’existe encore : crée-la dans Matériel › Niveaux de performance. Sans échelle, les critères ne peuvent pas apparaître.'
+        : 'Grille chargée. Choisis maintenant une échelle de performance : sans elle, les critères ne peuvent pas apparaître.';
+}
+
+/** Écrit un texte d'attente dans la zone des critères. Texte constant, jamais de donnée utilisateur. */
+function ecrireAttenteCriteres(texte) {
+    const zone = document.getElementById('listeCriteresGrille1');
+    if (!zone) return;
+    const p = document.createElement('p');
+    p.className = 'eval-texte-placeholder';
+    p.textContent = texte;
+    zone.replaceChildren(p);
+}
+
 function chargerGrilleSelectionnee() {
     const grilleId = document.getElementById('selectGrille1').value;
 
@@ -845,6 +891,14 @@ function chargerGrilleSelectionnee() {
 
         // Recalculer la note avec les nouvelles pondérations
         setTimeout(() => calculerNote(), 50);
+    } else {
+        // ⚠ SANS ÉCHELLE, CE BLOC NE RENDAIT RIEN — ET NE LE DISAIT PAS.
+        // `afficherCriteresDepuisGrille` a besoin d'un `echelleId` pour bâtir
+        // les selects de niveaux : sans lui, la fonction entière était sautée en
+        // silence. L'enseignant choisissait sa grille, la zone des critères
+        // gardait son texte d'attente, et rien ne distinguait « il manque une
+        // pièce » de « l'application ne réagit pas ».
+        ecrireAttenteCriteres(messageEchelleManquante());
     }
 }
 
@@ -1531,6 +1585,13 @@ window.chargerEchellePerformance = chargerEchellePerformance;
 window.chargerEvaluationsEtudiant = chargerEvaluationsEtudiant;
 window.chargerProduction = chargerProduction;
 window.chargerGrilleSelectionnee = chargerGrilleSelectionnee;
+
+// Les trois pièces de l'écran d'évaluation — consommés par `evaluation.js`
+// (reinitialiserEvaluation, reinitialiserFormulaire) et par la sentinelle qui
+// compare le littéral au texte statique d'`index.html`.
+window.MESSAGE_ATTENTE_CRITERES = MESSAGE_ATTENTE_CRITERES;
+window.ecrireAttenteCriteres = ecrireAttenteCriteres;
+window.messageEchelleManquante = messageEchelleManquante;
 window.cartoucheSelectionnee = cartoucheSelectionnee;
 window.niveauSelectionne = niveauSelectionne;
 

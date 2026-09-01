@@ -532,7 +532,12 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `evaluationEnCours`. Une garde d'identité au moment d'écrire coûte trois lignes et ne dépend d'aucune horloge.
   ⚠ **Mon relevé date de l'export de 22h30.** Grégoire a navigué depuis : il peut y avoir PLUS de cinq copies
   touchées. Recompter avant de réparer, ne pas partir de cette liste-ci.
-- [ ] **#674 — PRÉVENTION · Un critère laissé sans niveau fait MONTER la note, et rien ne le déclare**.
+- [ ] **#674 — Une note repose sur une pondération incomplète, et rien ne le déclare**.
+  ↻ **REQUALIFIÉ le 1er septembre 2026 : ce n'est plus de la PRÉVENTION.** Le titre disait « PRÉVENTION »
+  parce que la sonde n'avait trouvé aucun écart sur le trimestre en cours. Elle mesurait la couverture des
+  CRITÈRES ; elle ne pouvait pas voir le second mécanisme, mesuré depuis (bloc ▣▣ en fin de fiche), qui produit
+  le même `ponderationTotal = 0` par un autre chemin — et celui-là existe déjà dans les données de quiconque a
+  importé l'une des huit échelles disciplinaires.
   Inscrit le 1er septembre 2026. **Ouvert à froid — échéance : la cohorte 1, mi-septembre 2026.**
   ▣ **POURQUOI « PRÉVENTION » ET PAS « URGENCE » : mesuré, pas supposé.** La sonde
   `scripts/diagnostic-674-couverture-ponderation.js` (lecture seule) a tourné sur le corpus réel de Grégoire le
@@ -587,7 +592,70 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   n'est pas un oubli.** Aucune session ne doit proposer de les recompter, les corriger ou les signaler — et la
   question des évaluations indécidables de ces trimestres n'a plus d'objet : elle est CLOSE, pas en attente.
   **Seul l'automne 2026 compte.** Voir aussi la fiche mémoire `project-notes-a2025-h2026-intouchables`.
+  ▣▣ **LE SECOND MÉCANISME — MESURÉ SOUS WEBKIT LE 1er SEPTEMBRE 2026, ET INSCRIT NULLE PART JUSQU'ICI.**
+  Le mécanisme du haut de fiche vide `ponderationTotal` **critère par critère** (un niveau non choisi). Celui-ci le
+  vide **d'un coup** : l'échelle est choisie, mais aucun de ses niveaux n'a de `valeurCalcul`, donc
+  `valeurNumeriqueDuNiveau` rend `null` pour tous (`echelles.js`, règle #525/#527), le map `valeurs` reste vide, et
+  **tous** les critères sortent du total. C'est le cas des huit échelles disciplinaires de
+  `js/echelles-bibliotheque.js` (32 niveaux en `valeur:`, aucun en `valeurCalcul:`) — voir §1 du
+  `plans de travail/PLAN-2026-09-01-materiel-seme-et-chemin-d-entree.md`.
+  ▣ **LE TÉMOIN DISCRIMINANT.** Même grille (2 critères, 40/60), mêmes critères cochés « M », même échelle
+  « Chimie organique » prise telle quelle dans la bibliothèque. La SEULE variable est le nom du champ :
+  | cas | note affichée | niveau | `noteCalculeeCourante` | message |
+  |---|---|---|---|---|
+  | niveaux en `valeur:` (les 8 de la bibliothèque) | **`0.0 %`** | `--` | **`0`** | **aucun** |
+  | témoin — la MÊME échelle en `valeurCalcul:` | `82.0 %` | `M` | `82` | aucun |
+  | aucune échelle choisie | `--` | `--` | `null` | aucun |
+  ⮕ Le zéro vient bien de l'absence de `valeurCalcul`, et de rien d'autre. Piégés et muets : `afficherToast`,
+  `alert`, tout ajout au texte visible de la page, et la console.
+  ⮕ **CE N'EST PAS UN `--`, C'EST UN CHIFFRE.** `0,0 %` se lit comme un résultat. La troisième ligne du tableau
+  montre que l'écran SAIT dire « je ne peux pas » — il le dit quand aucune échelle n'est choisie, et il ne le dit
+  pas quand l'échelle est là mais muette. C'est la même famille que le haut de fiche : la note ne descend pas, elle
+  ment.
+  ▣ **LE ZÉRO EST PERSISTABLE — TROIS SITES, TOUS AVEC LE MÊME TEST.** `calculerNote()` pose
+  `window.noteCalculeeCourante = 0` et `evaluationEnCours.noteMoyenne = 0`. Les trois écritures de `noteFinale`
+  testent `typeof window.noteCalculeeCourante === 'number'` :
+  · `js/evaluation-sauvegarde.js:209` — la sauvegarde manuelle ;
+  · `js/evaluation-chargement.js:1391` — la mise à jour d'une évaluation existante ;
+  · `js/evaluation-chargement.js:1415` — la création par l'auto-save.
+  ⮕ `typeof 0 === 'number'` : **un zéro fabriqué franchit ces trois portes exactement comme une vraie note.** C'est
+  le même point de passage que celui nommé plus haut pour l'auto-save — la portée devra être écrite par ce chemin-là.
+  ▣ **CE QUE LE RETRAIT DES HUIT ÉCHELLES (§1 du PLAN) NE REFERME PAS.** Retirer une échelle de la bibliothèque ne
+  retire pas les copies déjà importées : elles vivent dans `echellesTemplates`, ce sont des données utilisateur, et
+  elles restent muettes. §1 tarit la SOURCE ; il ne répare aucune donnée déjà en base. C'est #674 qui doit rendre le
+  trou visible pour celles-là — et c'est pourquoi la portée doit se recalculer rétroactivement, comme la fiche le
+  prévoit déjà.
+  ▣ **CE QUI A ÉTÉ LIVRÉ LE 1er SEPTEMBRE, ET QUI N'EST PAS ÇA.** Le §4 du PLAN a corrigé les deux défauts
+  MÉCANIQUES du même écran (texte d'attente à deux pièces ; grille choisie sans échelle qui ne produisait rien).
+  Le silence du `0,0 %`, lui, a été **laissé hors du lot par décision de Grégoire** : il se traite ici, pas
+  séparément.
   ⏳ **RIEN N'EST CODÉ.** L'item est ouvert, la piste est posée, la mesure est faite.
+
+- [ ] **#680 — Le canal de PARTAGE laisse d'autres champs d'échelle en chemin, et personne n'a écrit lesquels**.
+  Inscrit le 1er septembre 2026, **issue 2 (inscrire et continuer)** : trouvaille faite en corrigeant `valeur`,
+  hors du lot en cours.
+  ▣ **CE QUI EST MESURÉ.** Les deux schémas d'échelle du dépôt ont été comparés champ par champ, sous WebKit, sur
+  l'application chargée (`SCHEMA_ENTITE.echelle` de `partage-schemas.js` contre `SCHEMAS_IMPORT.echelle` de
+  `import-export.js`). Le canal de partage ne déclare pas :
+  · au NIVEAU — `description`, `niveauSOLO` (et `valeur`, **corrigé le 1er septembre**) ;
+  · à la RACINE — `seuilSuffisance`, `seuilMaitrise`, `description`, `discipline`
+    (plus `auteur`, `auteurOriginal`, `dateImport`, `dateAjoutBiblio`, `estDemo`, `isDemo`, `verrouille` — ceux-là
+    sont des champs LOCAUX qu'un package ne doit **pas** transporter : le manifeste porte l'auteur, et un item démo
+    est refusé à l'entrée. Ils ne sont pas le sujet).
+  ▣ **POURQUOI ÇA COMPTE.** `projeterEntite` ne copie que les champs déclarés : ce qui n'est pas au schéma part
+  sans erreur ni avertissement. `seuilSuffisance` et `seuilMaitrise` sont **les deux repères de maîtrise de #555**,
+  et `import-export.js` les documente comme tels ; `niveauSOLO` est l'étiquette qui rend le dépistage possible.
+  ⚠ **ET IL N'EXISTE AUCUN REGISTRE D'EXCLUSION CÔTÉ PARTAGE.** `import-export.js` tient
+  `CLES_ECHELLE_NON_TRANSPORTEES` — chaque clé non transportée y est inscrite AVEC SA RAISON, et
+  `tests/unit/sentinelle-transport-echelles.test.js` fait rougir tout oubli. `partage-schemas.js` n'a rien de tel :
+  ses absences ne sont ni décidées ni datées, elles sont simplement là.
+  ▣ **CE QUI N'EST PAS MESURÉ, ET QU'IL FAUT MESURER AVANT DE CODER.** Ce que le destinataire PERD réellement,
+  écran par écran, quand ces champs manquent. Un schéma incomplet n'est un défaut que si un lecteur en aval s'en
+  sert : la question à poser pour chaque champ est « qui le lit chez celui qui reçoit ? ». Sans ce chiffre, allonger
+  la liste blanche est un geste à l'aveugle — et c'est exactement ce que la sentinelle du 28 août reproche.
+  ⮕ **Rattachement** : énoncé 6 d'`OBJECTIF-COHORTE-1.md` (« une grille partagée arrive complète »), à confirmer
+  par la mesure ci-dessus. Jumeau de #511 et de la sentinelle de transport des échelles.
+  ⏳ **RIEN N'EST CODÉ.**
 
 - [x] **#673 — Un calcul redevenu inapplicable laisse un texte de rétroaction PÉRIMÉ dans le div, et la sauvegarde le persiste**.
   Inscrit le 1er septembre 2026 **avant tout usage de l'ID**. **ID distinct de [[#672]], délibérément** : #672 est clos
