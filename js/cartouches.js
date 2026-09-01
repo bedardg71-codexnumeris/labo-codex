@@ -171,11 +171,14 @@ async function assurerCartoucheGenerique() {
 
     const cartoucheGenerique = {
         id: 'CART_GENERIQUE',
-        nom: 'Cartouche générique (exemple)',
+        // §3 du PLAN-2026-09-01 — même geste que pour la grille et l'échelle : les
+        // trois pièces semées se reconnaissent désormais par « de départ », et
+        // aucune ne se présente comme une simple illustration.
+        nom: 'Cartouche de départ',
         grilleId: 'GRILLE_GENERIQUE',
         // #574 (29 août 2026) : plus d'`echelleId` — l'échelle générique n'est plus semée ;
         // la matrice se rend depuis les `niveaux` portés ci-dessous.
-        contexte: 'Exemple de cartouche de rétroaction - Modifie ou duplique selon tes besoins',
+        contexte: 'Commentaires de rétroaction pour les quatre critères de la grille de départ.',
         criteres: [
             { id: 'CR_COMPREHENSION', nom: 'Compréhension' },
             { id: 'CR_APPLICATION', nom: 'Application' },

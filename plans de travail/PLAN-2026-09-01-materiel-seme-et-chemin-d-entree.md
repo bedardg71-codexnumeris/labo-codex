@@ -282,16 +282,77 @@ chantier de l'été.
 
 ---
 
-## 3. QUE LE MATÉRIEL SEMÉ SE DISE UTILISABLE
+## 3. ✅ LIVRÉ — QUE LE MATÉRIEL SEMÉ SE DISE UTILISABLE
 
-Aujourd'hui l'application sème trois exemples et n'en dit rien. Un nouvel
-enseignant croit devoir tout construire.
+*↻ 1er septembre 2026. Livré, avec une porte terrain qui reste due : un lot de
+libellés ne se prouve pas par un banc vert.*
 
 Le geste : que les trois pièces se présentent comme **un point de départ prêt à
 l'emploi**, et qu'on puisse évaluer avec elles sans rien créer.
 
-⚠ Ce lot touche des libellés et de la présentation, pas du calcul. Il ne
-s'élargit pas au design général.
+| avant | après |
+|---|---|
+| Grille générique (exemple) | **Grille de départ** |
+| Cartouche générique (exemple) | **Cartouche de départ** |
+| Échelle IDME (point de départ) | **Échelle de départ (IDME)** |
+
+⮕ Le mot **« de départ »** relie désormais les trois : dans une liste, elles se
+reconnaissent comme un ensemble. « Générique » était froid, et « (exemple) »
+disait « ceci ILLUSTRE » à qui avait besoin de lire « ceci SERT ».
+
+### ⚠ CE QUE LA MESURE A CHANGÉ AU PLAN — deux fois
+
+**1. Les descriptions ne servaient à rien pour ce lot.** Le §3 supposait qu'on
+réécrirait libellés *et* descriptions. Mesuré sous WebKit : la `description`
+d'une grille, d'une échelle ou d'une cartouche **n'est affichée dans AUCUNE
+liste**. Seul le NOM est visible, dans les `<select>` de l'écran d'évaluation.
+⮕ Tout le message devait tenir dans le nom. Les descriptions ont quand même été
+reprises, mais pour une autre raison : elles **s'impriment sur les PDF de la
+grille**, et « Modifie ou duplique selon tes besoins » y était une consigne
+d'écran égarée dans un document.
+
+**2. ⚠⚠ LE NOM DE LA GRILLE VOYAGE JUSQU'À L'ÉLÈVE, et le plan l'ignorait.**
+`travaux-export-pdf.js` imprime « Évaluation : <nom de la grille> » sur le
+document remis, depuis `evaluation.grilleNom`. **Un élève lisait donc le mot
+« exemple » sur son propre travail.** C'est devenu la première raison de ce
+changement, avant le confort du nouvel enseignant.
+⮕ Et ça déplace une frontière : « les libellés sont des mots d'enseignants »
+était vrai pour l'échelle et la cartouche (vérifié : leurs noms ne sortent nulle
+part vers l'élève), **faux pour la grille**. Le nom retenu est digne des deux
+contextes, mais il reste **à valider par Grégoire** — c'est un mot que ses élèves
+lisent (porte terrain §3).
+
+### ⚠ L'EFFET DE BORD NEUTRALISÉ — sans quoi ce lot n'était pas un lot de libellés
+
+`estRessourceDemo` (`import-export.js`) exclut des exports tout ce dont le NOM
+contient « exemple » ou « grille générique ». **Renommer aurait donc fait entrer
+la grille et la cartouche semées dans les exports — en silence.** Un lot annoncé
+comme « des libellés et de la présentation » aurait changé ce qui voyage.
+
+⮕ L'exclusion est désormais ancrée sur les **identifiants**, qui ne bougent pas
+quand le vocabulaire bouge. Comportement rigoureusement inchangé pour la grille
+et la cartouche. Seule `ECHELLE_IDME_DEPART` est nouvellement reconnue : son nom
+n'a jamais porté ces mots, elle échappait au filtre que ses deux sœurs
+subissaient. **Les trois pièces du même triptyque sont enfin traitées pareil.**
+
+⛔ **Ce qui n'a PAS été touché** : aucune valeur, aucun calcul, aucune règle de
+design. Les listes d'interface n'ont pas de filtre par nom — mesuré : les trois
+sites qui appellent `filtrerRessourcesNonDemo` sur ces familles sont **tous des
+exports**, jamais un rendu.
+
+### ⏳ LA CONDITION DE FIN — elle n'est pas remplie par les bancs
+
+`plans de travail/PORTES-TERRAIN-2026-09-01-materiel-seme.md` — neuf portes, Mac
+et iPad. Vitest et Playwright lisent le texte livré et le trouvent conforme à ce
+qu'on leur a dit d'attendre ; ils ne disent rien de ce qu'un enseignant COMPREND.
+⚠ Et une marche n'a été franchie par AUCUN banc : **enregistrer** l'évaluation
+faite avec le matériel semé. Les specs appellent le calcul directement, sans
+passer la garde de sauvegarde. La lecture du code dit qu'elle ne se déclenche pas
+(`estItemDemo` ne teste que `isDemo` et l'auteur, qu'aucune des trois pièces ne
+porte) — **mais c'est une lecture, pas une mesure.**
+
+⮕ Si les neuf portes passent, le **geste 2** de la ligne d'arrivée peut passer
+d'« éprouvé par Grégoire » à « fait ».
 
 ---
 

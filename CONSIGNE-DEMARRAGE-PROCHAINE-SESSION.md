@@ -125,9 +125,66 @@ pas le `AAAAMMJJ`+lettre des autres.
 
 ---
 
-## ÉTAT MESURÉ — 1er SEPTEMBRE 2026, FIN D'APRÈS-MIDI
+## ÉTAT MESURÉ — 1er SEPTEMBRE 2026, SOIRÉE
 
-**Branche `main`, version `1.106.15`, build `0901-1354`.** Release patch livrée
+*↻ Réécrit en soirée, depuis Claude Code, après le chantier du matériel semé
+(§1 à §4 du `PLAN-2026-09-01`, plus #681). Le bloc de fin d'après-midi qui suit
+reste sous celui-ci : ce qu'il dit du build et des pièges vaut toujours.*
+
+**Branche `main`. `HEAD` = `origin/main`, ZÉRO commit non poussé.** Mesuré après
+le dernier push, pas supposé.
+
+**Vitest : VERT — 431 fichiers / 4628 tests, code de sortie 0**, lancé DEPUIS
+`tests/`, lu APRÈS le dernier changement.
+**Playwright WebKit : VERT — code 0, aucune rougeur nouvelle**, suite complète
+passée trois fois dans la soirée sur trois états successifs.
+
+⚠ **Jetons anti-cache : jusqu'à `20260901e`.** Quatre lots ont bumpé dans la
+soirée (`c`, `d`, puis `e`). Une session `file://` ouverte avant doit recharger.
+
+**Dernier ID utilisé : #681.** Prochain libre : **#682**.
+IDs consommés en soirée : **#680** (le canal de partage laisse des champs
+d'échelle en chemin — INSCRIT, non traité), **#681** (`js/spe-specifications.js`
+retiré — LIVRÉ et vérifié à l'écran).
+
+### Ce que la soirée a livré, et ce qu'elle laisse
+
+✅ **§4-1 et §4-2** — l'écran d'évaluation nomme ses trois pièces, et choisir une
+grille sans échelle DIT ce qui manque (il ne produisait RIEN auparavant).
+✅ **§1** — le versement des huit échelles « disciplinaires » est retiré : leurs
+32 niveaux portaient `valeur:` et rendaient 0,0 % sans un mot.
+✅ **§2** — `ECHELLE_IDME_DEPART` est semée, avec ses `valeurCalcul`. Mesuré de
+bout en bout : espace vide → 79,5 % · niveau M, sans rien créer.
+✅ **§3** — les trois pièces semées se disent « de départ » et non plus
+« générique (exemple) ».
+✅ **#681** — le module SPE autonome retiré (1009 lignes, zéro consommateur
+vivant), vérifié à l'écran par Grégoire : cinq gabarits supprimés, deux
+rechargements, aucun retour.
+✅ **Le canal de partage** ne déshabille plus une échelle à `valeur:` (énoncé 6).
+
+⏳ **CE QUI RESTE DÛ, et qui n'est PAS du code** :
+· **la porte terrain du §3** — `plans de travail/PORTES-TERRAIN-2026-09-01-materiel-seme.md`,
+  neuf portes, Mac **et** iPad. C'est la condition de fin de ce lot, et elle ne
+  peut pas être remplie par un banc : un lot de libellés ne se prouve pas par un
+  vert. ⮕ Si les neuf passent, le **geste 2** de `OBJECTIF-COHORTE-1.md` passe
+  d'« éprouvé par Grégoire » à « fait ».
+· **une décision de Grégoire** : le nom « Grille de départ » s'imprime sur le PDF
+  de l'élève, sous « Évaluation : … ». C'est un mot que ses élèves lisent.
+
+⚠⚠ **#674 A CHANGÉ DE POIDS, et c'est le fait le plus important de la soirée.**
+Les deux sondes ont rendu ZÉRO sur le corpus de Grégoire — mais ce zéro ne couvre
+que le sien. Un enseignant qui a ouvert l'application avant aujourd'hui a pu
+ajouter l'échelle « Chimie » à sa sélection : **sa copie reste muette et rend
+0,0 % sans un mot.** Il n'est ni sondable, ni joignable, et on ne sait pas
+combien ils sont. ⮕ #674 n'est plus une prévention pour la cohorte qui arrive,
+c'est une **réparation pour des utilisateurs déjà en place**. Le correctif devra
+valoir RÉTROACTIVEMENT.
+
+---
+
+### Bloc précédent — fin d'après-midi (conservé)
+
+**Version `1.106.15`, build `0901-1354`.** Release patch livrée
 aujourd'hui — ⚠ ce n'est PAS le `minor` que le §4.3 de la consigne de #668 attend
 à la FIN de ce chantier : les lots 5b et 6 restent dus, ce patch ne le consomme pas.
 
@@ -334,6 +391,16 @@ sur du code inconnu.**
 ---
 
 ## LE MANDAT DE LA PROCHAINE SESSION — Lot B, le mot « français » dans le PDF
+
+> ↻ **CONFIRMÉ le 1er septembre au soir par Grégoire, depuis Cowork.** Ce mandat
+> tient : il n'a PAS été fait. La journée du 1er est passée par le plan du semis
+> (§1, §2, §4-1, §4-2 livrés, plus `js/spe-specifications.js` retiré en #681), et
+> le §3 de ce même plan est en cours au moment où ceci s'écrit. **Le Lot B est le
+> premier geste de la session suivante**, avant tout le reste.
+>
+> ⚠ Cette section est tenue par Cowork (règle de `CLAUDE.md`, « qui écrit quoi
+> dans la consigne de démarrage »). Une session qui rend son état mesuré ne la
+> réécrit pas : elle réécrit l'ÉTAT, au-dessus.
 
 ⮕ **Lis d'abord, dans cet ordre** : `CLAUDE.md` (il a changé), `OBJECTIF-COHORTE-1.md`
 (les huit énoncés arrêtés), puis

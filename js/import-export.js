@@ -301,6 +301,24 @@ function estRessourceDemo(ressource, type) {
 
     const nom = (ressource.nom || '').toLowerCase();
 
+    // ⚠ LE MATÉRIEL SEMÉ EST RECONNU PAR SON IDENTIFIANT, PAS PAR SON NOM
+    // (1er septembre 2026, §3 du PLAN-2026-09-01).
+    //
+    // Ces trois pièces étaient exclues de l'export parce que leur nom contenait
+    // « (exemple) » ou « grille générique ». Le §3 les a renommées — elles se
+    // disent maintenant « de départ », prêtes à servir telles quelles — et cette
+    // heuristique de NOM serait tombée avec les anciens mots : un lot annoncé
+    // comme « des libellés et de la présentation » aurait changé, en silence, ce
+    // qui part dans un export.
+    //
+    // ⮕ L'identifiant ne bouge pas quand le vocabulaire bouge. Le comportement
+    // d'export est donc RIGOUREUSEMENT INCHANGÉ pour la grille et la cartouche.
+    // Seule `ECHELLE_IDME_DEPART` est nouvellement reconnue : son nom n'a jamais
+    // porté ces mots, elle échappait au filtre que ses deux sœurs subissaient.
+    // Les trois pièces du même triptyque sont désormais traitées pareil.
+    const IDS_MATERIEL_SEME = ['GRILLE_GENERIQUE', 'CART_GENERIQUE', 'ECHELLE_IDME_DEPART'];
+    if (ressource.id && IDS_MATERIEL_SEME.indexOf(ressource.id) >= 0) return true;
+
     // Patterns communs pour les données démo
     const patternsDemo = [
         'démo', 'demo', '(exemple)', 'exemple',
