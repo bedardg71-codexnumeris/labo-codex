@@ -121,7 +121,7 @@ function nouvelleEvaluation() {
     document.getElementById('selectCartoucheEval').value = '';
     document.getElementById('remiseProduction1').value = 'non-recu';
     window.mettreAJourPillStatut('non-recu');
-    document.getElementById('listeCriteresGrille1').innerHTML = '<p class="eval-texte-placeholder">Sélectionne une grille et une cartouche</p>';
+    window.ecrireAttenteCriteres(window.MESSAGE_ATTENTE_CRITERES);
     document.getElementById('retroactionFinale1').value = '';
     document.getElementById('noteProduction1').textContent = '0.0';
     document.getElementById('niveauProduction1').textContent = '--';
@@ -175,7 +175,7 @@ function nouvelleEvaluation() {
  */
 function reinitialiserFormulaire() {
     // Réinitialiser uniquement les éléments du formulaire de notation
-    document.getElementById('listeCriteresGrille1').innerHTML = '<p class="eval-texte-placeholder">Sélectionne une grille et une cartouche</p>';
+    window.ecrireAttenteCriteres(window.MESSAGE_ATTENTE_CRITERES);
     document.getElementById('retroactionFinale1').value = '';
     document.getElementById('noteProduction1').textContent = '0.0';
     document.getElementById('niveauProduction1').textContent = '--';

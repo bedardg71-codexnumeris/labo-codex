@@ -148,29 +148,68 @@ s'élargit pas au design général.
 
 ## 4. QUE L'ÉCRAN D'ÉVALUATION CESSE DE MENTIR
 
-Trois défauts mesurés, tous sur le premier écran qu'un nouvel enseignant utilise :
+*↻ Mesuré et traité le 1er septembre 2026 (fin d'après-midi). Les défauts 1 et 2
+sont **LIVRÉS** ; le 3 est **mesuré et laissé hors du lot**, par décision de
+Grégoire. Ce §4 est désormais un compte rendu, plus un programme.*
 
-1. **Le texte d'attente est faux.** Il dit « Sélectionne une grille **et une
-   cartouche** » (`evaluation.js:124`, `index.html:8548`). L'écran a besoin de
-   grille **+ échelle +** cartouche.
-2. **Choisir une grille sans échelle ne produit RIEN de visible.**
-   `chargerGrilleSelectionnee` ne rend les critères que si une échelle est déjà
-   choisie (`evaluation-chargement.js:748`). L'enseignant clique, rien ne bouge,
-   aucune explication.
-3. **`ponderationTotal = 0` affiche 0,0.** Même famille que **#674**, et c'est
-   l'**énoncé 5** de `OBJECTIF-COHORTE-1.md`.
-   ⚠ **À MESURER AVANT D'EN FAIRE UN ARGUMENT — deux chemins à ne pas confondre :**
-   · *aucune échelle choisie* → l'application le DIT déjà
-     (`evaluation-chargement.js:296-297` : « Aucune échelle configurée — Aller
-     dans Matériel › Niveaux de performance »), et #555 lot 1 a livré « la matrice
-     ne calcule RIEN et le dit » ;
-   · *une échelle choisie dont les niveaux n'ont pas de `valeurCalcul`* — le cas
-     des huit échelles du §1. **C'est là que le silence est soupçonné**, et il
-     n'est inscrit nulle part.
-   ⮕ Mesurer le second chemin. S'il parle déjà, ce point tombe.
+1. ✅ **LIVRÉ — le texte d'attente nommait deux pièces sur trois.** Il disait
+   « Sélectionne une grille **et une cartouche** » alors que l'écran a besoin de
+   grille **+ échelle +** cartouche — et omettait précisément la seule sans
+   laquelle rien ne s'affiche.
+   ⚠ **Le plan citait deux sites ; il y en avait TROIS.** `evaluation.js:124`
+   (`reinitialiserEvaluation`), `evaluation.js:178` (`reinitialiserFormulaire`)
+   et `index.html`. Les trois passent maintenant par une source unique,
+   `MESSAGE_ATTENTE_CRITERES` — sauf le texte statique d'`index.html`, qui ne
+   peut appeler aucun JS et qu'une sentinelle Vitest oblige à dire le même mot à
+   le mot.
+2. ✅ **LIVRÉ — choisir une grille sans échelle ne produisait rien de visible.**
+   `chargerGrilleSelectionnee` enveloppait tout son travail dans un
+   `if (echelleId)` sans `else`. L'écran DIT désormais ce qui manque, et
+   distingue deux gestes : *choisir* une échelle quand il en existe, *en créer
+   une* (et où) quand il n'en existe aucune. Trois specs WebKit, dont un témoin
+   qui exige que le message DISPARAISSE une fois l'échelle choisie.
+3. ⏳ **MESURÉ, ET LAISSÉ HORS DU LOT — il se traite avec #674.**
+   ⚠⚠ **LA MESURE A ÉTÉ FAITE, ET LE POINT NE TOMBE PAS : il est plus dur que ce
+   paragraphe ne le supposait.** Témoin WebKit, même grille, mêmes critères
+   cochés, la seule variable étant le nom du champ dans les niveaux :
+   | cas | note affichée | niveau | message |
+   |---|---|---|---|
+   | échelle choisie, niveaux en `valeur:` (les 8 du §1) | **`0.0 %`** | `--` | **aucun** |
+   | témoin — la MÊME échelle en `valeurCalcul:` | `82.0 %` | `M` | aucun |
+   | aucune échelle choisie | `--` | `--` | aucun |
+   ⮕ Ce n'est pas un `--`, c'est un **chiffre** : `0,0 %` se lit comme un
+   résultat. Et il est **persistable** — les trois écritures de `noteFinale`
+   testent `typeof === 'number'`, et `typeof 0 === 'number'`.
+   ⚠ **CORRECTION À CE PLAN — « l'application le DIT déjà » était faux dans un
+   cas sur deux.** Le message cité ici (`evaluation-chargement.js:297`,
+   « Aucune échelle configurée — Aller dans Matériel › Niveaux de performance »)
+   ne se déclenche **que si aucune échelle n'existe dans les données**. Dès
+   qu'il en existe une et qu'aucune n'est choisie, l'écran affichait `--` sans un
+   mot : honnête, mais muet. C'est ce trou-là qu'a refermé le défaut 2 ci-dessus.
+   ⮕ Le détail complet de la mesure — témoin discriminant, trois sites de
+   sauvegarde, et ce que le §1 ne referme PAS pour les données déjà en base —
+   est écrit **dans la fiche #674 elle-même**, qui cesse d'être de la prévention.
 
 ⮕ Le 3 se traite **avec #674**, pas séparément : c'est le même défaut, vu depuis
 un autre écran.
+
+### ⚠ TROUVÉ EN CHEMIN — le canal de partage déshabillait l'échelle
+
+Mesuré le même jour, en vérifiant que `partage-schemas.js:329` ne transporte que
+`valeurCalcul` : une échelle à `valeur:` **arrivait NUE** chez son destinataire.
+`projeterEntite` ne copie que les champs déclarés, et le schéma ignorait `valeur`
+— sans erreur ni avertissement. C'est l'**énoncé 6** (« une grille partagée
+arrive complète »), et c'est **corrigé et verrouillé** le 1er septembre.
+
+⚠ **Ce que ce correctif ne fait PAS** : transporter `valeur` rend l'échelle
+*fidèle*, pas *calculable*. `valeurNumeriqueDuNiveau` ne lit que `valeurCalcul`
+depuis #525. Une échelle à `valeur` reste muette chez son auteur comme chez son
+destinataire — ce silence-là est #674. **Le partage ne dégrade plus ; il ne
+répare pas.**
+
+⮕ Les autres champs que ce canal laisse en chemin (`seuilSuffisance`,
+`seuilMaitrise`, `niveauSOLO`, `description`, `discipline`) sont inscrits en
+**#680**, avec la mesure qui reste à faire avant d'y toucher.
 
 ---
 
