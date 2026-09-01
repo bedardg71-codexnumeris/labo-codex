@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 1er septembre 2026, en soirée (deuxième passe).**
+**Dernière mise à jour : 1er septembre 2026, en soirée (troisième passe).**
 
 ---
 
@@ -118,11 +118,23 @@ couvre exactement.**
   niveau M**. Le triptyque est complet et il calcule.
 · ✅ **L'écran ne ment plus sur ce qu'il attend** : le texte d'attente nomme ses
   trois pièces, et choisir une grille sans échelle DIT ce qui manque.
+· ✅ **L'autre source de matériel fictif est tarie aussi** : le module
+  `js/spe-specifications.js` resemait **cinq** objets `[SPE]` signés « Labo Codex »
+  à CHAQUE ouverture de la page — c'est pourquoi ils revenaient après chaque
+  suppression. 1009 lignes retirées, zéro consommateur vivant, mesuré sur 24
+  symboles. ⚠ **La pratique de notation par spécifications, elle, est intacte**, et
+  une assertion la garde contre un futur retrait « de cohérence ». *(#681)*
 · ⏳ **Ce qui n'est PAS réglé** : les copies déjà présentes chez qui a lancé
   l'application avant aujourd'hui restent muettes, et le `0,0 %` qu'elles
   produisent reste silencieux. **C'est #674**, et une sonde attend Grégoire pour
   mesurer combien de ses données sont concernées :
-  `await _sonderEchellesDisciplinaires()`.
+  `await _sonderEchellesDisciplinaires()`. Et les **cinq** objets `[SPE]` déjà semés
+  dans ses bibliothèques sont toujours là : `await nettoyage681()` les compte sans
+  rien détruire. Ce qu'il cherchera dans ses listes, aux libellés exacts —
+  **une échelle** « [SPE] Acceptable / Non acceptable », **trois grilles**
+  « [SPE] Gabarit - Prise de position », « - Portfolio », « - Présentation orale »,
+  et **une production** « [SPE] Gabarit - Prise de position » (même libellé que la
+  grille, autre famille : le chercher dans les deux listes).
 ⮕ Cette ligne reste donc « éprouvé par Grégoire » et ne devient pas « fait » :
 ce qui a été mesuré, c'est la chaîne du NOUVEL utilisateur, pas le parcours
 complet de l'énoncé 2.
