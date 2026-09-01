@@ -459,6 +459,48 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `sousCriteres` — les onze rétroactions de français se perdent au partage, comme au #511 pour l'import/export.
   Et `js/grilles.js:268`, `:279`, `:383` lisent `getElementById('critereFormule')` **sans garde**, sur un id absent
   d'`index.html` (champ « formule » décoratif hérité, sans lien avec le calcul).
+- [ ] **#668 — La projection EUF est paramétrable depuis le gabarit de la grille, comme la formule de #667**.
+  Consigne : `plans de travail/CONSIGNE-projection-euf-parametrable.md` (préparée en Cowork le 1er septembre 2026,
+  modifiée le même jour : ajout du Lot 6, réécriture du point « service d'aide » du Lot 2).
+  ⚠ **Ne rien reconstruire** : la projection EXISTE et fonctionne, en dur, dans `genererRetroactionEUF`
+  (`js/evaluation-calcul.js:178`), avec deux appelants réels (`:407` mode catégories, `:565` mode simple).
+  Le travail est de la REMONTER vers le gabarit, sur le patron exact de #667.
+  **Deux normes à ne jamais confondre** : la norme de NOTATION du cours (`facteurNormalisation`, 600/700/900 mots
+  selon 601-101/102/103) et la norme de l'EUF (**30 erreurs pour 900 mots**, fixe). La projection ne lit
+  **jamais** `facteurNormalisation` — c'est tout l'intérêt du dispositif : en 101 l'élève est noté sur 600 mots
+  et situé face à 900.
+  Lots : 1 registre `js/evaluation-projection.js` (module pur, seuils stockés en **ratio normalisé**, pas en
+  mots-par-erreur) · 2 un seul lieu de vérité pour le texte · 3 gabarit · 4 transport (avec **#669**) ·
+  5 sentinelles + break-test · 6 le PDF de rétroaction (`synthese-retroaction-*`), APRÈS les lots 1 à 5.
+  ⚠ **Le « CAF » codé en dur est FAUX** : le Centre d'aide en français n'existe plus au collège, il est devenu
+  « Passerelle + » et la transition n'est pas finie. L'application dit aujourd'hui à des élèves de s'inscrire à un
+  service disparu. Deux paramètres : `nomServiceAide` (texte libre) et `lienServiceAide` (**facultatif**, vide pour
+  l'instant) — le rendu sans lien est le cas NORMAL, pas un cas dégradé.
+  ⚠ **Deux voies distinctes pour les textes par défaut** : la migration à la lecture reproduit l'existant **au mot
+  près**, « CAF » compris (la fidélité au comportement prime) ; le gabarit livré aux nouveaux utilisateurs ne porte
+  **aucun** nom d'établissement.
+  ⚠ **Seconde source de vérité à traiter dans le même chantier** : `scripts/reparation-donnees-algorithmiques.js`
+  porte une COPIE INTÉGRALE de `genererRetroactionEUF` (ligne 60, utilisée ligne 167) **et** recalcule la note avec
+  la formule historique en dur (ligne 164, `ponderation - (errfrLive / mots * facteur)`) sans consulter
+  `modeleFormule` — ce second point est un trou ouvert par #667, mesuré à la passe « connexions » du 1er septembre.
+  La sentinelle D de #667 ne le voit pas : sa liste `SITES_DE_CALCUL` ne balaie que `js/`.
+  ⏳ **DÛ À GRÉGOIRE** : le nom exact du service pendant la transition, et le lien le jour où il existera.
+  Ne bloque pas le chantier — le champ reste vide.
+- [ ] **#669 — `sousCriteres` ne traverse pas le schéma de partage : le destinataire bascule du mode catégories au mode simple, en silence**.
+  ⮕ **À faire DANS le Lot 4 de #668** — même fichier, même classe de défaut que #667. Livrer le transport de la
+  projection en laissant `sousCriteres` se perdre, ce serait empiler.
+  **MESURÉ EN EXÉCUTION le 1er septembre 2026**, pas déduit d'une lecture de schéma. `grep 'sousCritere'
+  js/partage-schemas.js` rend **zéro** ; le schéma de `grille.criteres` est FERMÉ et déclare 11 champs, celui-là
+  n'y est pas. Puis, avec les trois modules réels (`partage-schemas`, `partage-validation`, `partage-format`)
+  chargés par le harnais `chargerScript` et une grille dont le critère algorithmique porte deux sous-critères
+  pondérés : `projeterEntite(grille, 'grille')` rend le critère **sans `sousCriteres`**, silencieusement, code de
+  sortie 0. `js/import-export.js:618` le déclare, lui — l'écart est **propre au partage**.
+  ⚠ **L'effet est plus large que « les onze rétroactions se perdent »** : à l'arrivée,
+  `js/evaluation-calcul.js:869` choisit le mode de calcul sur `critere.sousCriteres.length > 0`. Sans sous-critères,
+  l'évaluation bascule du mode **catégories** au mode **simple** — le destinataire perd les onze catégories ET la
+  pondération décimale, celle-là même qui sert la **demi-faute de ponctuation** employée par d'autres collèges.
+  La grille arrive, calcule autre chose que ce que son auteur·e a réglé, et ne dit rien : exactement le défaut
+  que #667 vient de corriger pour la formule.
 - [ ] **#651 — Depuis la liste des évaluations, « annoter » ouvre la page sans AUCUNE palette quand on vient du mode Évaluer**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, à la demande de `kuekatsheu-5d` qui porte le
   correctif sous le pilotage direct de Grégoire. Retour terrain de Grégoire, avec capture.
