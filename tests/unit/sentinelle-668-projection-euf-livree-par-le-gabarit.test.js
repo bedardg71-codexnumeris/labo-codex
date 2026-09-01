@@ -493,3 +493,81 @@ describe('#668 · G — aucune dépendance, aucune surface d\'exécution neuve',
         expect(P.listerModeles().map((m) => m.id)).toEqual(['norme_externe', 'aucune']);
     });
 });
+
+// ---------------------------------------------------------------------
+// H. LE BRANCHEMENT (Lot 2) — UN SEUL LIEU DE VÉRITÉ POUR LE TEXTE
+// ---------------------------------------------------------------------
+// Le registre ne sert à rien tant que quelqu'un d'autre calcule la même chose
+// ailleurs. Ces assertions verrouillent la disparition des copies, pas leur
+// remplacement : un alias laissé derrière ferait revenir le problème.
+
+describe('#668 · H — la règle ne vit plus qu\'à un seul endroit', () => {
+    const sansCommentaires = (src) =>
+        src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+    it('`genererRetroactionEUF` a DISPARU du code applicatif — pas d\'alias', () => {
+        // Zéro-dette : la fonction ne doit pas survivre sous un autre nom, ni
+        // en repli « au cas où ». Les commentaires peuvent la nommer pour
+        // raconter d'où l'on vient ; le code, non.
+        for (const f of ['js/evaluation-calcul.js', 'js/evaluation-retroaction.js',
+                         'scripts/reparation-donnees-algorithmiques.js']) {
+            expect(sansCommentaires(lire(f)), f).not.toContain('genererRetroactionEUF');
+        }
+    });
+
+    it('aucun site ne réécrit les paliers de l\'EUF à la main', () => {
+        // Les cinq verdicts étaient des chaînes littérales en quatre endroits.
+        // Si l'un d'eux revient, c'est que quelqu'un a recopié plutôt qu'appelé.
+        for (const f of ['js/evaluation-calcul.js', 'js/evaluation-retroaction.js',
+                         'js/grilles.js', 'scripts/reparation-donnees-algorithmiques.js']) {
+            const code = sansCommentaires(lire(f));
+            expect(code, f).not.toContain('ce ratio est excellent');
+            expect(code, f).not.toContain('mènerait à un échec automatique');
+            expect(code, f).not.toContain('Centre d\'aide en français');
+        }
+    });
+
+    it('les DEUX appelants passent par le registre, et ils sont bien deux', () => {
+        const code = sansCommentaires(lire('js/evaluation-calcul.js'));
+        expect((code.match(/_projectionEUF\(/g) || []).length).toBe(3);   // 1 déclaration + 2 appels
+        expect(code).toContain('window.projectionAlgo.calculer(');
+    });
+
+    it('le script de réparation REFUSE d\'écrire sans les registres', () => {
+        // Il écrit dans les données réelles. Un repli silencieux le ferait
+        // réparer selon une règle que le gabarit ne pilote plus — c'est-à-dire
+        // détruire proprement.
+        const code = lire('scripts/reparation-donnees-algorithmiques.js');
+        const codeSeul = sansCommentaires(code);
+        expect(code).toMatch(/throw new Error\('\[reparation-algo\] REFUS/);
+        expect(codeSeul).toContain('window.formulesAlgo.calculer(');
+
+        // ⚠ VÉRIFIER L'APPEL, PAS SEULEMENT LA DÉCLARATION. Une première version
+        // de cette assertion cherchait `exigerRegistres` dans le fichier : elle
+        // restait VERTE quand on retirait l'appel, puisque la déclaration porte
+        // le même nom. Trouvé par break-test. On compte donc les DEUX.
+        expect(codeSeul).toMatch(/function\s+exigerRegistres\s*\(/);
+        expect(codeSeul).toMatch(/^\s*exigerRegistres\s*\(\s*\)\s*;/m);
+
+        // ⚠ ET LE MOTIF DE LA FORMULE EN DUR NE VISE PAS UN NOM DE VARIABLE.
+        // La première version cherchait `/ mots * facteur` : réécrire la même
+        // formule avec la constante 500 la contournait. C'est la MULTIPLICATION
+        // après une division par les mots qui trahit la pénalité recopiée.
+        expect(codeSeul).not.toMatch(/\/\s*mots\s*\*/);
+    });
+
+    it('le registre est chargé AVANT ses deux consommateurs dans index.html', () => {
+        const html = lire('index.html');
+        const registre = html.indexOf('js/evaluation-projection.js');
+        expect(registre).toBeGreaterThan(-1);
+        expect(registre).toBeLessThan(html.indexOf('js/grilles.js?'));
+        expect(registre).toBeLessThan(html.indexOf('js/evaluation-calcul.js?'));
+    });
+
+    it('le jeton anti-cache du registre voyage avec son js/', () => {
+        // Sans bump, Grégoire jugerait du code périmé au prochain essai terrain.
+        const html = lire('index.html');
+        const jeton = (f) => (html.match(new RegExp(f.replace('.', '\\.') + '\\?v=([A-Za-z0-9]+)')) || [])[1];
+        expect(jeton('js/evaluation-projection.js')).toBe(jeton('js/evaluation-calcul.js'));
+    });
+});

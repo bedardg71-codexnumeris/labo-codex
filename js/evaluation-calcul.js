@@ -6,8 +6,11 @@
 
    6 fonctions migrées :
      · calculerNoteAlgorithmique (privée à l'IIFE — pas d'export)
-     · genererRetroactionEUF (privée à l'IIFE — helper texte EUF appelé uniquement
-       par les 3 fns calcul algorithmique)
+     · _projectionEUF (privée à l'IIFE — délègue au registre evaluation-projection.js).
+       DEUX appelants réels, pas trois : _construireRetroactionAlgoCategories
+       (mode catégories) et calculerNoteAlgorithmiqueSimple. L'ancien en-tête en
+       annonçait trois — calculerNoteAlgorithmique est du code mort et n'a jamais
+       appelé ce helper. Corrigé au passage (#668).
      · calculerNoteAlgorithmiqueAvecCategories (cyc 42 — héritage Cat-B accepté,
        sous le seuil proposé N=50)
      · calculerNoteAlgorithmiqueSimple
@@ -38,8 +41,7 @@
        window.calculerNoteAlgorithmiqueSimple et window.calculerNoteAlgorithmique
        AvecCategories — PAS calculerNoteAlgorithmique sans suffixe. Donc cette
        fonction est apparemment dead code (préservation Cat-B post-merge).
-     · genererRetroactionEUF : helper interne uniquement utilisé par les 3
-       fonctions algorithmiques au sein du même IIFE.
+     · _projectionEUF : helper interne, DEUX appelants au sein du même IIFE.
 
    Patches §5.6 appliqués DANS ce sous-module :
      · 3 sites `genererRetroaction(1)` → `window.genererRetroaction(1)` aux
@@ -166,40 +168,40 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
 }
 
 /**
- * Génère une rétroaction sur le ratio d'erreurs en prévision de l'EUF
- * Formule: motsParErreur = Mots ÷ Erreurs
- * Interprétation: 1 erreur à chaque X mots
- * Seuil EUF: minimum 1 erreur à chaque 30 mots pour réussir
+ * #668 — La projection EUF vient du GABARIT de la grille, plus du code.
  *
- * @param {number} erreurs - Nombre total d'erreurs
- * @param {number} mots - Nombre de mots
- * @returns {string} Rétroaction EUF
+ * Remplace `genererRetroactionEUF`, qui portait en dur cinq verdicts, quatre
+ * seuils et le nom d'un service d'aide propre au collège de son auteur — un
+ * service qui n'existe d'ailleurs plus (le Centre d'aide en français est devenu
+ * Passerelle +). L'application disait à des élèves de s'inscrire à un service
+ * disparu, et personne ne pouvait le corriger sans toucher au code.
+ *
+ * Le registre `evaluation-projection.js` porte la mécanique ; le critère de
+ * grille porte les réglages. Le texte rendu ici est donc celui que
+ * l'enseignant·e a écrit, pas celui qu'un développeur a écrit pour elle.
+ *
+ * ⚠ L'ESPACE INITIALE APPARTIENT AU SITE DE CONCATÉNATION. Le registre rend une
+ * phrase autonome (le PDF du Lot 6 en a besoin comme paragraphe) ; c'est ici
+ * qu'elle devient une queue de phrase. La sentinelle #668 compare exactement
+ * cette forme-ci au golden extrait de l'ancienne fonction.
+ *
+ * @param {string} critereId - le critère évalué, qui porte les réglages
+ * @param {number} erreurs - compte d'erreurs (brut, comme avant #668)
+ * @param {number} mots - nombre de mots du texte
+ * @returns {string} le fragment à concaténer, ou '' si rien à conclure
  */
-function genererRetroactionEUF(erreurs, mots) {
-    if (erreurs === 0) {
-        return ' En prévision de l\'EUF, l\'absence d\'erreur est exceptionnelle.';
+function _projectionEUF(critereId, erreurs, mots) {
+    if (!window.projectionAlgo) {
+        // Ne pas deviner un texte de remplacement : un module absent est un
+        // défaut de chargement, pas un cas d'usage. Mieux vaut aucune projection
+        // qu'une projection dont personne ne pilote la règle.
+        console.warn('[_projectionEUF] registre de projection absent', critereId);
+        return '';
     }
-    if (mots === 0) return '';
-
-    // Calcul: 1 erreur à chaque X mots
-    const motsParErreur = mots / erreurs;
-
-    let retroactionEUF = ` Tu fais en moyenne 1 erreur à chaque ${Math.round(motsParErreur)} mots.`;
-
-    // Seuil EUF: minimum 30 mots par erreur pour réussir
-    if (motsParErreur >= 100) {
-        retroactionEUF += ' En prévision de l\'EUF, ce ratio est excellent.';
-    } else if (motsParErreur >= 75) {
-        retroactionEUF += ' En prévision de l\'EUF, ce ratio est très bien.';
-    } else if (motsParErreur >= 60) {
-        retroactionEUF += ' En prévision de l\'EUF, ce ratio est bien.';
-    } else if (motsParErreur >= 30) {
-        retroactionEUF += ' En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec. Il est recommandé de t\'inscrire au Centre d\'aide en français (CAF).';
-    } else {
-        retroactionEUF += ' En prévision de l\'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t\'inscrire au Centre d\'aide en français (CAF).';
-    }
-
-    return retroactionEUF;
+    var resultat = window.projectionAlgo.calculer(
+        _critereDeGrille(critereId), { erreurs: erreurs, mots: mots }
+    );
+    return resultat.applicable ? ' ' + resultat.texte : '';
 }
 
 /**
@@ -323,16 +325,20 @@ function _masquerFormuleAlgo(critereId) {
  * registre le lira comme le modèle historique et le calcul restera identique
  * à celui d'avant #667. Aucune note ne change parce qu'une grille manque.
  */
-function _critereFormulePourCalcul(critereId, facteurRecu) {
+function _critereDeGrille(critereId) {
     try {
         const grilles = db.getSync(cle('grillesTemplates'), []);
         const grille = grilles.find(g => g.id === evaluationEnCours?.grilleId);
         const critere = grille?.criteres?.find(c => c.id === critereId);
         if (critere) return critere;
     } catch (e) {
-        console.warn('[_critereFormulePourCalcul] grille illisible', critereId, e);
+        console.warn('[_critereDeGrille] grille illisible', critereId, e);
     }
-    return { facteurNormalisation: facteurRecu };
+    return null;
+}
+
+function _critereFormulePourCalcul(critereId, facteurRecu) {
+    return _critereDeGrille(critereId) || { facteurNormalisation: facteurRecu };
 }
 
 function _calculerScoreAlgoCategories(codesSousCriteres, sousCriteres, ponderation, mots, facteur, critereId) {
@@ -398,13 +404,19 @@ function _trouverCodeDominant(codesSousCriteres) {
     return { codeDominant, maxFreq };
 }
 
-function _construireRetroactionAlgoCategories(totalErreurs, sommePonderee, mots, scDominant) {
+function _construireRetroactionAlgoCategories(critereId, totalErreurs, sommePonderee, mots, scDominant) {
     let retroaction = `Ta rédaction contient ${totalErreurs} erreur${totalErreurs > 1 ? 's' : ''} de français`;
     if (scDominant && scDominant.retroaction && Math.abs(sommePonderee - totalErreurs) > 0.01) {
         retroaction += ` (${sommePonderee.toFixed(1)} points)`;
     }
     retroaction += ` pour ${mots} mots.`;
-    const retroactionEUF = genererRetroactionEUF(totalErreurs, mots);
+    // #668 — LE COMPTE BRUT, PAS LA SOMME PONDÉRÉE. Comportement d'avant,
+    // conservé tel quel : la note suit la pondération par catégorie, la
+    // projection suit le nombre d'erreurs réellement commises. Les deux
+    // répondent à des questions différentes. Faire suivre la pondération à la
+    // projection serait une décision pédagogique — elle déplacerait des
+    // verdicts déjà rendus — pas un ajustement de code.
+    const retroactionEUF = _projectionEUF(critereId, totalErreurs, mots);
     if (retroactionEUF) retroaction += retroactionEUF;
     if (scDominant && scDominant.retroaction) retroaction += ` ${scDominant.retroaction}`;
     return retroaction;
@@ -464,7 +476,7 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
         document.getElementById(`cat_dominante_${critereId}`).textContent =
             `${nomDominant} (${maxFreq} occurrence${maxFreq > 1 ? 's' : ''} du code ${codeDominant})`;
 
-        const retroaction = _construireRetroactionAlgoCategories(totalErreurs, sommePonderee, mots, scDominant);
+        const retroaction = _construireRetroactionAlgoCategories(critereId, totalErreurs, sommePonderee, mots, scDominant);
         const commDiv = document.getElementById(`comm_${critereId}`);
         if (commDiv) commDiv.textContent = retroaction;
 
@@ -562,7 +574,7 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     let retroactionGenerique = `Ta rédaction contient ${erreurs} erreur${erreurs > 1 ? 's' : ''} de français pour ${mots} mots.`;
 
     // Ajouter la rétroaction EUF (Épreuve Uniforme de Français)
-    const retroactionEUF = genererRetroactionEUF(erreurs, mots);
+    const retroactionEUF = _projectionEUF(critereId, erreurs, mots);
     if (retroactionEUF) {
         retroactionGenerique += retroactionEUF;
     }

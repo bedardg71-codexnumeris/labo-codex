@@ -57,17 +57,29 @@
         return n ? n.code : null;
     }
 
-    function genererRetroactionEUF(erreurs, mots) {
-        if (erreurs === 0) return ' En prévision de l\'EUF, l\'absence d\'erreur est exceptionnelle.';
-        if (mots === 0) return '';
-        const motsParErreur = mots / erreurs;
-        let txt = ` Tu fais en moyenne 1 erreur à chaque ${Math.round(motsParErreur)} mots.`;
-        if (motsParErreur >= 100) txt += ' En prévision de l\'EUF, ce ratio est excellent.';
-        else if (motsParErreur >= 75) txt += ' En prévision de l\'EUF, ce ratio est très bien.';
-        else if (motsParErreur >= 60) txt += ' En prévision de l\'EUF, ce ratio est bien.';
-        else if (motsParErreur >= 30) txt += ' En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec. Il est recommandé de t\'inscrire au Centre d\'aide en français (CAF).';
-        else txt += ' En prévision de l\'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t\'inscrire au Centre d\'aide en français (CAF).';
-        return txt;
+    // #668 — LA REGLE VIENT DU GABARIT, PAS D'ICI.
+    //
+    // Ce fichier portait une COPIE INTEGRALE de `genererRetroactionEUF` : une
+    // seconde source de verite, qui aurait repare les donnees selon une regle
+    // que le gabarit ne pilote plus. Elle est retiree.
+    //
+    // Ce script se colle dans la console de l'application : les registres y sont
+    // charges. S'ils ne le sont pas, on REFUSE — un outil qui ECRIT dans les
+    // donnees reelles ne doit pas se rabattre sur une regle de secours que
+    // personne n'a choisie.
+    function exigerRegistres() {
+        const manquants = [];
+        if (!window.projectionAlgo) manquants.push('projectionAlgo (js/evaluation-projection.js)');
+        if (!window.formulesAlgo) manquants.push('formulesAlgo (js/evaluation-formules.js)');
+        if (manquants.length) {
+            throw new Error('[reparation-algo] REFUS : registre(s) absent(s) — ' + manquants.join(', ')
+                + '. Coller ce script dans la console de l\'application, pas ailleurs.');
+        }
+    }
+
+    function projectionEUF(critere, erreurs, mots) {
+        const r = window.projectionAlgo.calculer(critere || null, { erreurs: erreurs, mots: mots });
+        return r.applicable ? ' ' + r.texte : '';
     }
 
     function recalculerNoteFinale(evaluation, grille, echelle) {
@@ -114,6 +126,7 @@
         const cleEvals = cle('evaluationsSauvegardees');
         const evaluations = db.getSync(cleEvals, []) || [];
         const grilles = db.getSync('grillesTemplates', []) || [];
+        exigerRegistres();
         const aReparer = [];
         const ignores = [];
 
@@ -151,7 +164,6 @@
 
                 const mots = (typeof da.mots === 'number') ? da.mots : 0;
                 const ponderation = (typeof crit.ponderation === 'number') ? crit.ponderation : 20;
-                const facteur = (typeof crit.facteurNormalisation === 'number') ? crit.facteurNormalisation : 500;
                 const echelle = resoudreEchelle(ev.echelleId);
 
                 let nouvelleNoteCalculee = null;
@@ -159,12 +171,21 @@
                 let nouveauNiveau = null;
                 let nouvelleRetroaction = da.retroaction || '';
 
-                if (mots > 0) {
-                    nouvelleNoteCalculee = ponderation - (errfrLive / mots * facteur);
-                    const pctRaw = (nouvelleNoteCalculee / ponderation) * 100;
-                    nouveauPct = Math.max(0, Math.min(100, pctRaw));
+                // #668 — LA FORMULE AUSSI VIENT DU GABARIT.
+                // Ce site recalculait `ponderation - (errfrLive / mots * facteur)`
+                // en dur, sans consulter `modeleFormule`. C'etait sans effet tant
+                // qu'une seule formule existait ; depuis #667 il y en a trois, et
+                // ce script aurait REECRIT les notes d'un critere regle sur
+                // << ratio mots par erreur >> avec la formule historique. Trou
+                // ouvert par #667, referme ici.
+                const resFormule = window.formulesAlgo.calculer(crit, {
+                    ponderation: ponderation, erreurs: errfrLive, mots: mots
+                });
+                if (resFormule.applicable) {
+                    nouvelleNoteCalculee = resFormule.note;
+                    nouveauPct = resFormule.pctBorne;
                     nouveauNiveau = determinerNiveauIDME(nouveauPct, echelle);
-                    nouvelleRetroaction = `Ta rédaction contient ${errfrLive} erreur${errfrLive > 1 ? 's' : ''} de français pour ${mots} mots.${genererRetroactionEUF(errfrLive, mots)}`;
+                    nouvelleRetroaction = `Ta rédaction contient ${errfrLive} erreur${errfrLive > 1 ? 's' : ''} de français pour ${mots} mots.${projectionEUF(crit, errfrLive, mots)}`;
                 }
 
                 aReparer.push({
