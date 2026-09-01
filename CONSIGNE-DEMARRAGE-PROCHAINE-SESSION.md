@@ -224,26 +224,54 @@ reprise — **lis-le avant de toucher au lot**.
 
 ---
 
-## LE PROTOCOLE DE CRÉNEAUX — il a tenu à quatre sessions
+## TRAVAILLER À PLUSIEURS SESSIONS — sept règles
 
-· **Une seule session à la fois touche `file://`** — qu'elle roule une suite ou qu'elle
-  écrive dans un fichier de production.
-· **Le créneau se rend explicitement**, et en deux temps : « rendu, stabilisé » ou
-  « rendu, mais j'y reviens ». Ce n'est pas la même chose pour qui va rouler une suite.
-· **Une annonce qui n'attend pas de réponse est une notification, pas une demande.**
-· **GRÉGOIRE N'EST PAS SOUMIS AU PROTOCOLE, et c'est normal.** Sa session PRÉVIENT, elle
-  ne demande pas. Un créneau accordé signifie « personne d'autre du TRIO ne touche
-  l'arbre », **pas** « l'arbre est gelé ». **Le dire explicitement aux sessions** : sinon
-  elles instruisent comme un défaut un rouge venu d'une écriture qu'elles ignoraient.
-· **Le geste qui DÉCALE passe en dernier.** Un retrait de 165 lignes périme tout repère en
-  aval ; une insertion ne périme rien.
-· **`BACKLOG.md` appartient à la coordinatrice seule** : les sessions passent le texte
-  prêt, elle inscrit et confirme.
-· ⚠ **Tout lot touchant un `js/` touche mécaniquement le bloc des balises d'`index.html`**
-  (le hook exige un jeton neuf). **L'inscrire dans le périmètre dès le mandat** — aucun
-  mandat de ce cycle ne l'avait prévu, et trois sessions s'y sont retrouvées ensemble.
-· ⚠ **Deux suites concurrentes se polluent comme deux workers** : tous les specs ouvrent
-  le MÊME `index.html` en `file://` et partagent le `localStorage` de cette origine.
+*↻ Réécrit le 1er septembre 2026. L'ancien protocole de créneaux était tiré des
+incidents ; celui-ci part des contraintes mécaniques de la pile, qui ne se
+négocient pas.*
+
+⮕ **Le test préalable, avant même de constituer une équipe** : *peut-on nommer
+trois mandats dont les ENSEMBLES DE FICHIERS ne se croisent pas ?* Si non, une
+seule session. Le travail du 1er septembre (#612 : `travaux-ui.js`, `styles.css`,
+`index.html`, `tests/`) n'était pas séparable — trois sessions s'y seraient
+piétinées toute la journée.
+
+**1. Une seule session écrit dans `js/`.** Tout changement dans `js/` oblige à
+bumper le bloc de jetons d'`index.html` (le hook l'exige) : deux sessions s'y
+heurtent mécaniquement, quel que soit leur soin.
+
+**2. Une seule session lance une suite.** Toutes les specs ouvrent le même
+`index.html` en `file://` et partagent le `localStorage` de cette origine. Deux
+suites concurrentes se polluent comme deux workers.
+
+**3. La coordinatrice ne code pas.** Elle alloue les identifiants, tient
+`BACKLOG.md`, fait transiter les patches d'une session à l'autre, écrit le
+relais. Si elle code, elle devient une quatrième source de collision et plus
+personne ne tient la carte.
+
+**4. Chaque mandat NOMME ses fichiers.** Pas « fais #595 » — « tu touches
+`styles.css`, rien d'autre ». Un mandat qui ne nomme pas ses fichiers ne peut
+pas être vérifié disjoint.
+
+**5. Aucune session ne pousse. La coordinatrice pousse.** C'est le 8 août en une
+ligne : deux sessions parties du même commit, deux « 1.55.0 », les mêmes
+identifiants.
+
+**6. Une trouvaille hors de ses fichiers ne se corrige JAMAIS** — elle remonte à
+la coordinatrice, qui l'inscrit. C'est l'issue 2 de `CLAUDE.md` appliquée au
+parallélisme.
+
+**7. Grégoire ne parle qu'à la coordinatrice.**
+⚠ **C'est la règle qui cassera en premier**, et c'est prévisible : il répondra
+naturellement à la session qui l'interpelle. Dès qu'il le fait, la coordinatrice
+perd la carte et redevient un intermédiaire de plus. Si une session a besoin de
+lui, elle passe par elle.
+
+⮕ **Et la règle qui vaut toujours** : *parallélise la LECTURE, sérialise
+l'ÉCRITURE.* Deux balayages en lecture seule menés en parallèle le 1er septembre
+(carte des audits, mesure du chemin d'entrée) n'ont demandé aucune coordination
+et n'ont couru aucun risque. Le triage des rapports orphelins, #595, la
+documentation se séparent proprement. L'écriture dans `js/`, non.
 
 ---
 
