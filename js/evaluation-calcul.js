@@ -205,6 +205,51 @@ function _projectionEUF(critereId, erreurs, mots) {
 }
 
 /**
+ * #671 — LE PANNEAU APPARTIENT-IL BIEN À L'ÉVALUATION EN COURS ?
+ *
+ * Les champs `eval_erreurs_<critereId>` portent le CRITÈRE dans leur id, pas
+ * l'élève : les mêmes champs servent aux 27 copies d'un lot. La bascule d'une
+ * copie à l'autre est ASYNCHRONE — `preRemplirEvaluation` (travaux-ui.js:5145)
+ * réessaie jusqu'à 10 fois à 150 ms, puis attend encore la production. Pendant
+ * cette fenêtre de plus d'une seconde, les champs portent ENCORE les valeurs de
+ * la copie précédente pendant que `evaluationEnCours` désigne déjà la nouvelle.
+ * Un calcul déclenché là écrit le compte du voisin sous le nom du nouvel élève.
+ *
+ * MESURÉ le 31 août 2026 sur 27 copies réelles : 5 contaminées, dont 3 par le
+ * voisin immédiat (Boucher a reçu le 59 d'Allache, Bourgeois le 11 de Dumont,
+ * Nanthavong le 8 de Patenaude). Des PDF faux étaient déjà remis aux élèves.
+ *
+ * ⚠ POURQUOI PAS UN DÉLAI DE PLUS. Le correctif du 15 décembre 2025
+ * (`5d2d41c7`) couvrait déjà cette course en « augmentant le délai de recalcul
+ * à 350 ms ». Un délai n'est pas une synchronisation : il rend la course moins
+ * probable et la fait revenir dès que la machine ralentit ou que les données
+ * grossissent. Cette garde-ci ne consulte aucune horloge — elle compare une
+ * IDENTITÉ, et refuse quand elle ne correspond pas.
+ *
+ * Le marquage est posé par `chargerEvaluationsEtudiant` au moment où le panneau
+ * est lié à un élève. Un champ SANS marque n'est pas refusé : il n'a jamais été
+ * lié, donc il est vide, donc il ne peut rien contaminer.
+ */
+function _panneauAppartientALEvaluation(critereId) {
+    var attendu = (window.evaluationEnCours && evaluationEnCours.etudiantDA) || '';
+    if (!attendu) return true;
+    var ids = ['eval_erreurs_' + critereId, 'eval_mots_' + critereId, 'eval_categories_' + critereId];
+    for (var i = 0; i < ids.length; i++) {
+        var el = document.getElementById(ids[i]);
+        if (!el || !el.dataset) continue;
+        var marque = el.dataset.da;
+        if (marque === undefined || marque === '') continue;   // jamais lié : rien à contaminer
+        if (String(marque) !== String(attendu)) {
+            console.warn('[#671] Calcul REFUSÉ : le panneau porte encore la copie de ' + marque
+                + ' alors que l\'évaluation en cours est ' + attendu
+                + '. Aucune écriture. Le calcul repartira quand le panneau sera chargé.');
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
  * Calcule la note algorithmique AVEC catégorisation des erreurs
  * Formule: Note = Pondération − (Total Erreurs ÷ Mots × Facteur)
  * + Calcul du mode (catégorie dominante) pour rétroaction différenciée
@@ -431,6 +476,7 @@ function _sauvegarderDonneesAlgo(critereId, donnees) {
 
 function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur, critereGrilleId) {
     if (!evaluationEnCours) return;
+    if (!_panneauAppartientALEvaluation(critereId)) return;   // #671
 
     const { codesSousCriteres, mots, totalErreurs } = _parserCodesAlgoCategories(critereId);
     document.getElementById(`total_erreurs_${critereId}`).textContent = totalErreurs;
@@ -506,6 +552,7 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
  */
 function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     if (!evaluationEnCours) return;
+    if (!_panneauAppartientALEvaluation(critereId)) return;   // #671
 
     const erreursInput = document.getElementById(`eval_erreurs_${critereId}`);
     const motsInput = document.getElementById(`eval_mots_${critereId}`);
