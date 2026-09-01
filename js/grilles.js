@@ -3318,6 +3318,7 @@ function afficherCriteresTemp() {
                 </div>
             </div>
             ${rendreBlocFormuleAlgo(critere, { mode: "temp", index: index })}
+            ${rendreBlocProjectionAlgo(critere, { mode: "temp", index: index })}
         </div>
     `).join('');
 
@@ -3406,6 +3407,139 @@ function rendreBlocFormuleAlgo(critere, ctx) {
                     Le modèle « ${esc(critere.modeleFormule)} » enregistré dans cette grille est inconnu de cette version. Le modèle historique est appliqué en attendant.
                 </small>` : ''}
             </div>`;
+}
+
+/**
+ * #668 — Le bloc PROJECTION du gabarit, sous le même patron que la formule.
+ *
+ * Deux normes cohabitent sur le même critère, et l'écran doit les tenir
+ * distinctes : la formule dit combien de points l'élève perd (norme du COURS,
+ * 600 mots en 601-101) ; la projection dit où il se situe face à l'épreuve
+ * uniforme (norme FIXE, 900 mots). Le bloc est donc voisin, jamais fondu dans
+ * celui de la formule.
+ *
+ * Rien n'est écrit ici : les textes viennent du registre, comme la formule
+ * depuis #667. Zéro handler inline, `esc()` sur tout — les textes de paliers
+ * sont saisis par l'enseignant·e.
+ */
+function rendreBlocProjectionAlgo(critere, ctx) {
+    if (!critere || critere.type !== 'algorithmique') return '';
+    if (typeof window.projectionAlgo === 'undefined') return '';
+
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t)) : '');
+    const nb = (v) => (v === undefined || v === null || v === '') ? '' : esc(v);
+    const p = window.projectionAlgo.normaliser(critere);
+    const modeles = window.projectionAlgo.listerModeles();
+
+    const estTemp = ctx.mode === 'temp';
+    const hModele = estTemp ? 'modifierModeleProjectionTempHandler' : 'modifierModeleProjectionGrilleHandler';
+    const hParam = estTemp ? 'modifierParamProjectionTempHandler' : 'modifierParamProjectionGrilleHandler';
+    const hPalier = estTemp ? 'modifierPalierProjectionTempHandler' : 'modifierPalierProjectionGrilleHandler';
+    const datas = estTemp
+        ? `data-critere-index="${ctx.index}"`
+        : `data-grille-id="${esc(ctx.grilleId)}" data-critere-index="${ctx.index}"`;
+    const actionAjout = estTemp ? 'ajouterPalierProjectionTemp' : 'ajouterPalierProjectionGrille';
+    const actionRetrait = estTemp ? 'supprimerPalierProjectionTemp' : 'supprimerPalierProjectionGrille';
+    const paramsAction = estTemp ? `data-param="${ctx.index}"` : `data-param="${esc(ctx.grilleId)}" data-param2="${ctx.index}"`;
+    const paramPalier = estTemp ? 'data-param2' : 'data-param3';
+
+    const options = modeles.map(m =>
+        `<option value="${esc(m.id)}"${m.id === p.modeleId ? ' selected' : ''}>${esc(m.nom)}</option>`
+    ).join('');
+
+    const enTete = `
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Modèle de projection</label>
+                    <select class="controle-form" data-on-change="${hModele}" ${datas}>
+                        ${options}
+                    </select>
+                    <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">${esc(p.modele.description)}</small>
+                </div>`;
+
+    // « Aucune projection » : rien d'autre à régler. Le dire, plutôt que de
+    // laisser un bloc vide qui ressemble à un chargement raté.
+    if (!p.modele.projette) {
+        return `${enTete}
+                <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 6px;">
+                    Aucune projection ne sera proposée à l'élève pour ce critère.
+                </small>`;
+    }
+
+    const champsParams = p.modele.parametres.map(par => {
+        const commun = `data-on-change="${hParam}" ${datas} data-param-cle="${esc(par.cle)}" title="${esc(par.aide)}"`;
+        const champ = (par.type === 'texte')
+            ? `<input type="text" class="controle-form" value="${esc(p.params[par.cle])}" ${par.max ? `maxlength="${esc(par.max)}"` : ''} ${commun}>`
+            : `<input type="number" class="controle-form" value="${nb(p.params[par.cle])}" min="${nb(par.min)}" max="${nb(par.max)}" ${commun}>`;
+        return `
+                    <div class="groupe-form">
+                        <label style="font-size: 0.85rem; color: var(--gris-moyen);">${esc(par.libelle)}</label>
+                        ${champ}
+                    </div>`;
+    }).join('');
+
+    // Le seuil dans les DEUX unités — comme libelleSymbolique dit la formule.
+    // Le ratio normalisé, lui, ne s'affiche jamais à l'élève ; ici il sert à
+    // l'enseignant·e, toujours accompagné de son équivalent en mots.
+    const paliers = p.paliers.map((pal, i) => {
+        const mpe = window.projectionAlgo.motsParErreurDuRatio(critere, pal.ratioMax);
+        const seuilCol = pal.sansErreur
+            ? `<span style="font-size: 0.78rem; color: var(--gris-clair);">aucune erreur</span>`
+            : (pal.ratioMax === null
+                ? `<span style="font-size: 0.78rem; color: var(--gris-clair);">au-delà du dernier seuil</span>`
+                : `<input type="number" class="controle-form sous-critere-input-standard"
+                          value="${esc(pal.ratioMax)}" min="0.01" max="100" step="0.05"
+                          data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="ratioMax"
+                          title="Seuil en ratio normalisé. 1 = exactement au seuil de l'épreuve.">
+                   <small style="font-size: 0.72rem; color: var(--gris-clair);">soit 1 erreur / ${mpe === null ? '?' : esc(Math.round(mpe * 10) / 10)} mots</small>`);
+        return `
+                        <div class="sous-critere-item">
+                            <div class="sous-critere-champs-grid">
+                                <div class="groupe-form">
+                                    <label class="sous-critere-label-petit">Palier</label>
+                                    <input type="text" class="controle-form sous-critere-input-standard"
+                                           value="${esc(pal.libelle || pal.cle)}"
+                                           data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="libelle">
+                                </div>
+                                <div class="groupe-form">
+                                    <label class="sous-critere-label-petit">Jusqu'à</label>
+                                    ${seuilCol}
+                                </div>
+                                <button class="btn btn-supprimer btn-tres-compact"
+                                        data-action="${actionRetrait}" ${paramsAction} ${paramPalier}="${i}"
+                                        title="Supprimer ce palier">✕</button>
+                            </div>
+                            <div class="groupe-form sous-critere-description-groupe">
+                                <label class="sous-critere-label-petit">Ce que l'élève lit</label>
+                                <textarea class="controle-form sous-critere-textarea" rows="2"
+                                          data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="texte">${esc(pal.texte || '')}</textarea>
+                            </div>
+                            <div class="groupe-form sous-critere-description-groupe">
+                                <label class="sous-critere-label-petit">Phrase de recommandation (facultative)</label>
+                                <textarea class="controle-form sous-critere-textarea" rows="2"
+                                          placeholder="Laisser vide pour ne rien recommander à ce palier"
+                                          data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="texteAide">${esc(pal.texteAide || '')}</textarea>
+                                <small style="font-size: 0.72rem; color: var(--gris-clair);">
+                                    Écris ${esc(window.projectionAlgo.JETON_SERVICE)} là où le nom du service doit apparaître. S'il est vide, ${esc(window.projectionAlgo.JETON_SERVICE)} disparaît proprement.
+                                </small>
+                            </div>
+                        </div>`;
+    }).join('');
+
+    return `${enTete}
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+                    ${champsParams}
+                </div>
+                <p style="font-size: 0.85rem; color: var(--gris-moyen); margin: 10px 0 0 0;">
+                    <strong>Seuil de l'épreuve :</strong> ${esc(window.projectionAlgo.libelleSeuil(critere))}
+                </p>
+                <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">
+                    Ce seuil est indépendant du facteur de normalisation de la formule : l'élève est noté selon la norme du cours, et situé selon celle de l'épreuve.
+                </small>
+                <div class="sous-criteres-liste-conteneur" style="margin-top: 10px;">
+                    ${paliers}
+                </div>
+                <button class="btn btn-secondaire btn-tres-compact" style="margin-top: 8px;"
+                        data-action="${actionAjout}" ${paramsAction}>+ Ajouter un palier</button>`;
 }
 
 /**
@@ -3729,6 +3863,7 @@ function afficherCriteresGrille(grille) {
             ${critere.type === 'algorithmique' ? `
             <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">
                 ${rendreBlocFormuleAlgo(critere, { mode: "grille", index: index, grilleId: grille.id, sansCadre: true })}
+                ${rendreBlocProjectionAlgo(critere, { mode: "grille", index: index, grilleId: grille.id, sansCadre: true })}
 
                 <!-- Gestion des sous-critères -->
                 <div class="sous-criteres-conteneur">
@@ -4600,6 +4735,191 @@ function modifierCritereTempHandler(el) {
  * afficher ET le texte de la formule. Le déclencheur est `change` (au blur),
  * pas `input` : personne ne perd le focus en cours de frappe.
  */
+/**
+ * #668 — Écrit le modèle de projection, ses paramètres et ses paliers sur un
+ * critère ENREGISTRÉ, en UNE seule écriture.
+ *
+ * Même raison qu'au #667 : trois écritures séparées laisseraient, entre deux,
+ * une grille dont les paliers ne correspondent pas à leur modèle.
+ */
+async function modifierProjectionCritereGrille(grilleId, critereIndex, muter) {
+    let grilleModifiee = null;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const grille = grilles.find(g => g.id === grilleId);
+        if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return undefined;
+        if (muter(grille.criteres[critereIndex]) === false) return undefined;
+        grille.dateModification = new Date().toISOString();
+        grilleModifiee = grille;
+        return grilles;
+    }, []);
+
+    if (!grilleModifiee) return null;
+    if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
+        grilleTemplateActuelle = grilleModifiee;
+    }
+    return grilleModifiee;
+}
+
+/**
+ * #668 — Les paliers d'un critère MIGRÉ ne sont pas encore écrits : ils vivent
+ * dans le registre, par migration à la lecture. Le premier geste d'édition doit
+ * donc les matérialiser sur le critère — sinon l'utilisateur modifierait une
+ * liste qui n'existe pas, et son geste se perdrait sans un mot.
+ *
+ * C'est la SEULE écriture que ce chantier provoque sur des données existantes,
+ * et elle est déclenchée par un geste explicite, jamais en masse.
+ */
+function _paliersEditablesDuCritere(critere) {
+    const p = window.projectionAlgo.normaliser(critere);
+    return p.paliers.map((x) => Object.assign({}, x));
+}
+
+function _appliquerPaliers(critere, paliers) {
+    const p = window.projectionAlgo.normaliser(critere);
+    window.projectionAlgo.appliquerAuCritere(critere, p.modeleId, p.params, paliers);
+}
+
+function _muterPalier(critere, index, champ, valeur) {
+    const paliers = _paliersEditablesDuCritere(critere);
+    if (!paliers[index]) return false;
+    if (champ === 'ratioMax') {
+        const n = parseFloat(valeur);
+        // Un seuil illisible n'est pas « zéro » : on refuse le geste plutôt que
+        // de déplacer un palier vers une valeur que personne n'a voulue.
+        if (isNaN(n) || n <= 0) return false;
+        paliers[index].ratioMax = n;
+    } else {
+        paliers[index][champ] = String(valeur);
+    }
+    _appliquerPaliers(critere, paliers);
+    return true;
+}
+
+function modifierModeleProjectionTempHandler(el) {
+    var index = parseInt(el.dataset.critereIndex);
+    if (!window.tempCriteres || !window.tempCriteres[index]) return;
+    // params null ET paliers null : le nouveau modèle repart de SES défauts.
+    window.projectionAlgo.appliquerAuCritere(window.tempCriteres[index], el.value, null, null);
+    delete window.tempCriteres[index].paliersProjection;
+    afficherCriteresTemp();
+}
+
+function modifierParamProjectionTempHandler(el) {
+    var index = parseInt(el.dataset.critereIndex);
+    if (!window.tempCriteres || !window.tempCriteres[index]) return;
+    var critere = window.tempCriteres[index];
+    var p = window.projectionAlgo.normaliser(critere);
+    var params = Object.assign({}, p.params);
+    params[el.dataset.paramCle] = el.value;
+    window.projectionAlgo.appliquerAuCritere(critere, p.modeleId, params, critere.paliersProjection);
+    afficherCriteresTemp();
+}
+
+function modifierPalierProjectionTempHandler(el) {
+    var index = parseInt(el.dataset.critereIndex);
+    if (!window.tempCriteres || !window.tempCriteres[index]) return;
+    if (_muterPalier(window.tempCriteres[index], parseInt(el.dataset.palierIndex), el.dataset.champ, el.value) === false) {
+        if (typeof marquerChampRefuse === 'function') marquerChampRefuse(el, 'Le seuil doit être un nombre supérieur à zéro.');
+        return;
+    }
+    afficherCriteresTemp();
+}
+
+async function modifierModeleProjectionGrilleHandler(el) {
+    var grilleId = el.dataset.grilleId;
+    var index = parseInt(el.dataset.critereIndex);
+    var valeur = el.value;
+    await modifierProjectionCritereGrille(grilleId, index, function(critere) {
+        window.projectionAlgo.appliquerAuCritere(critere, valeur, null, null);
+        delete critere.paliersProjection;
+    });
+    // ⚠ obtenirGrilleParId est ASYNC (#466/CO-21) : sans await, le renderer
+    // reçoit une Promise et affiche « Aucun critère défini ».
+    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+}
+
+async function modifierParamProjectionGrilleHandler(el) {
+    var grilleId = el.dataset.grilleId;
+    var index = parseInt(el.dataset.critereIndex);
+    var cleParam = el.dataset.paramCle;
+    var valeur = el.value;
+    await modifierProjectionCritereGrille(grilleId, index, function(critere) {
+        var p = window.projectionAlgo.normaliser(critere);
+        var params = Object.assign({}, p.params);
+        params[cleParam] = valeur;
+        window.projectionAlgo.appliquerAuCritere(critere, p.modeleId, params, critere.paliersProjection);
+    });
+    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+}
+
+async function modifierPalierProjectionGrilleHandler(el) {
+    var grilleId = el.dataset.grilleId;
+    var index = parseInt(el.dataset.critereIndex);
+    var palierIndex = parseInt(el.dataset.palierIndex);
+    var champ = el.dataset.champ;
+    var valeur = el.value;
+    var res = await modifierProjectionCritereGrille(grilleId, index, function(critere) {
+        return _muterPalier(critere, palierIndex, champ, valeur);
+    });
+    if (!res) {
+        if (typeof marquerChampRefuse === 'function') marquerChampRefuse(el, 'Le seuil doit être un nombre supérieur à zéro.');
+        return;
+    }
+    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+}
+
+/** Un palier neuf naît AU-DESSUS du terminal, avec un seuil visible et vide de texte. */
+function _palierNeuf(paliers) {
+    var avecSeuil = paliers.filter(function(x) { return !x.sansErreur && x.ratioMax !== null; });
+    var dernier = avecSeuil.length ? avecSeuil[avecSeuil.length - 1].ratioMax : 0.5;
+    return {
+        cle: 'palier_' + Date.now().toString(36),
+        libelle: 'Nouveau palier',
+        ratioMax: Math.round((dernier + 0.1) * 100) / 100,
+        texte: '',
+        texteAide: ''
+    };
+}
+
+function ajouterPalierProjectionTemp(index) {
+    if (!window.tempCriteres || !window.tempCriteres[index]) return;
+    var critere = window.tempCriteres[index];
+    var paliers = _paliersEditablesDuCritere(critere);
+    paliers.push(_palierNeuf(paliers));
+    _appliquerPaliers(critere, paliers);
+    afficherCriteresTemp();
+}
+
+function supprimerPalierProjectionTemp(index, palierIndex) {
+    if (!window.tempCriteres || !window.tempCriteres[index]) return;
+    var critere = window.tempCriteres[index];
+    var paliers = _paliersEditablesDuCritere(critere);
+    if (!paliers[palierIndex]) return;
+    paliers.splice(palierIndex, 1);
+    _appliquerPaliers(critere, paliers);
+    afficherCriteresTemp();
+}
+
+async function ajouterPalierProjectionGrille(grilleId, index) {
+    await modifierProjectionCritereGrille(grilleId, index, function(critere) {
+        var paliers = _paliersEditablesDuCritere(critere);
+        paliers.push(_palierNeuf(paliers));
+        _appliquerPaliers(critere, paliers);
+    });
+    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+}
+
+async function supprimerPalierProjectionGrille(grilleId, index, palierIndex) {
+    await modifierProjectionCritereGrille(grilleId, index, function(critere) {
+        var paliers = _paliersEditablesDuCritere(critere);
+        if (!paliers[palierIndex]) return false;
+        paliers.splice(palierIndex, 1);
+        _appliquerPaliers(critere, paliers);
+    });
+    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+}
+
 function modifierModeleFormuleTempHandler(el) {
     var index = parseInt(el.dataset.critereIndex);
     if (!window.tempCriteres || !window.tempCriteres[index]) return;
@@ -4724,6 +5044,16 @@ window.modifierCritereTempHandler = modifierCritereTempHandler;
 // #667 — le dispatcher data-on-change résout les handlers par NOM dans window.
 // Sans ces quatre lignes, le bloc « formule » du gabarit s'affiche et ne réagit
 // à rien, en silence.
+window.modifierModeleProjectionTempHandler = modifierModeleProjectionTempHandler;
+window.modifierParamProjectionTempHandler = modifierParamProjectionTempHandler;
+window.modifierPalierProjectionTempHandler = modifierPalierProjectionTempHandler;
+window.modifierModeleProjectionGrilleHandler = modifierModeleProjectionGrilleHandler;
+window.modifierParamProjectionGrilleHandler = modifierParamProjectionGrilleHandler;
+window.modifierPalierProjectionGrilleHandler = modifierPalierProjectionGrilleHandler;
+window.ajouterPalierProjectionTemp = ajouterPalierProjectionTemp;
+window.supprimerPalierProjectionTemp = supprimerPalierProjectionTemp;
+window.ajouterPalierProjectionGrille = ajouterPalierProjectionGrille;
+window.supprimerPalierProjectionGrille = supprimerPalierProjectionGrille;
 window.modifierModeleFormuleTempHandler = modifierModeleFormuleTempHandler;
 window.modifierParamFormuleTempHandler = modifierParamFormuleTempHandler;
 window.modifierModeleFormuleGrilleHandler = modifierModeleFormuleGrilleHandler;

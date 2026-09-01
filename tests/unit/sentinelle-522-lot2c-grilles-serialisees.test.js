@@ -298,7 +298,13 @@ const PAR_LA_FILE = {
     // `modifierParamFormuleCritereGrille` écrivent le modèle de formule d'un
     // critère. Elles passent par la file comme les autres — c'est justement
     // ce que cette sentinelle exige, pas une exception qu'on lui concède.
-    'js/grilles.js': 26,
+    // 26 → 27 le 1er septembre 2026 (#668) : `modifierProjectionCritereGrille`
+    // écrit le modèle de PROJECTION, ses paramètres et ses paliers. UNE seule
+    // fonction pour les trois — elle prend un mutateur, là où #667 en avait
+    // écrit deux. Six handlers du gabarit s'y adossent sans ajouter d'écriture :
+    // c'est la direction que cette sentinelle récompense, moins de portes pour
+    // plus de gestes. Le +1 est donc un ajout de CAPACITÉ, pas de dispersion.
+    'js/grilles.js': 27,
     'js/cartouches.js': 1,
     'js/spe-specifications.js': 1,
     'js/donnees-v2.js': 1

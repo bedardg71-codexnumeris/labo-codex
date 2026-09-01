@@ -571,3 +571,87 @@ describe('#668 · H — la règle ne vit plus qu\'à un seul endroit', () => {
         expect(jeton('js/evaluation-projection.js')).toBe(jeton('js/evaluation-calcul.js'));
     });
 });
+
+// ---------------------------------------------------------------------
+// I. LE GABARIT (Lot 3) — CE QUI EST OFFERT À L'ÉCRAN
+// ---------------------------------------------------------------------
+
+describe('#668 · I — le bloc projection du gabarit', () => {
+    const grilles = lire('js/grilles.js');
+    const sansCommentaires = (src) =>
+        src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+    const code = sansCommentaires(grilles);
+
+    it('les deux écrans de grille rendent le bloc, par le MÊME appel', () => {
+        // Comme pour la formule (#667) : un seul rendu, deux contextes. Deux
+        // rendus divergeraient le jour où l'un des deux serait modifié seul.
+        // `${...}` : on compte les APPELS dans les gabarits, pas la déclaration.
+        expect((code.match(/\$\{rendreBlocProjectionAlgo\(critere,/g) || []).length).toBe(2);
+        expect(code).toContain('mode: "temp"');
+        expect(code).toContain('mode: "grille"');
+    });
+
+    it('les dix handlers du bloc sont exportés — sinon il ne réagit à rien', () => {
+        // Un export manquant produit un ReferenceError MUET : le champ ne fait
+        // simplement rien, et l'enseignant·e croit avoir réglé quelque chose.
+        [
+            'modifierModeleProjectionTempHandler', 'modifierParamProjectionTempHandler',
+            'modifierPalierProjectionTempHandler', 'modifierModeleProjectionGrilleHandler',
+            'modifierParamProjectionGrilleHandler', 'modifierPalierProjectionGrilleHandler',
+            'ajouterPalierProjectionTemp', 'supprimerPalierProjectionTemp',
+            'ajouterPalierProjectionGrille', 'supprimerPalierProjectionGrille'
+        ].forEach((h) => {
+            expect(code, h).toContain('window.' + h + ' = ' + h + ';');
+        });
+    });
+
+    it('zéro handler inline : tout passe par data-on-change ou data-action', () => {
+        // Le bloc injecte du texte libre en innerHTML. Un onclick= dans cette
+        // zone serait une surface d'exécution offerte au contenu saisi.
+        const bloc = code.slice(code.indexOf('function rendreBlocProjectionAlgo'),
+                                code.indexOf('function modifierProjectionCritereGrille'));
+        expect(bloc.length).toBeGreaterThan(500);
+        expect(bloc).not.toMatch(/\bon(click|change|input|blur|focus)\s*=/);
+        expect(bloc).toContain('data-on-change=');
+        expect(bloc).toContain('data-action=');
+    });
+
+    it('tout texte saisi par l\'enseignant·e est échappé avant injection', () => {
+        const bloc = code.slice(code.indexOf('function rendreBlocProjectionAlgo'),
+                                code.indexOf('function modifierProjectionCritereGrille'));
+        // Les quatre porteurs de texte libre : libellé, verdict, phrase d'aide,
+        // et le nom du service. Aucun ne doit atteindre le DOM sans esc().
+        ['pal.libelle', 'pal.texte', 'pal.texteAide'].forEach((champ) => {
+            const motif = new RegExp('\\$\\{esc\\(' + champ.replace('.', '\\.'), 'g');
+            expect(bloc, champ).toMatch(motif);
+        });
+        expect(bloc).toContain('esc(p.params[par.cle])');
+    });
+
+    it('un seuil illisible est REFUSÉ, jamais interprété comme zéro', () => {
+        // Un palier qui glisse vers 0 changerait silencieusement les verdicts
+        // de toutes les copies suivantes.
+        expect(code).toContain('if (isNaN(n) || n <= 0) return false;');
+        expect(code).toContain('marquerChampRefuse');
+    });
+
+    it('changer de modèle repart des défauts du NOUVEAU modèle', () => {
+        // Garder les paliers de l'ancien modèle laisserait une grille dont les
+        // seuils ne veulent plus rien dire pour le modèle affiché.
+        expect(code).toContain('delete critere.paliersProjection;');
+        expect(code).toMatch(/appliquerAuCritere\(window\.tempCriteres\[index\], el\.value, null, null\)/);
+    });
+
+    it('l\'écriture côté grille enregistrée est UNIQUE, pas trois appels', () => {
+        // Trois écritures séparées laisseraient, entre deux, une grille dont
+        // les paliers ne correspondent pas à leur modèle.
+        expect(code).toContain('async function modifierProjectionCritereGrille');
+        expect(code).toMatch(/await db\.modifier\(cle\('grillesTemplates'\)/);
+    });
+
+    it('le jeton anti-cache de grilles.js a suivi sa modification', () => {
+        const html = lire('index.html');
+        const j = (f) => (html.match(new RegExp(f.replace(/\./g, '\\.') + '\\?v=([A-Za-z0-9]+)')) || [])[1];
+        expect(j('js/grilles\\.js')).toBe(j('js/evaluation-projection\\.js'));
+    });
+});
