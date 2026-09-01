@@ -8,6 +8,12 @@
 > ⚠ **Ce fichier porte un nom sans date, exprès.** La date d'écriture est en tête ;
 > c'est elle qui fait foi. Un nom qui ne peut pas rôtir vaut mieux qu'une date qu'on
 > oublie de retirer.
+>
+> **↻ MISE À JOUR le 1er septembre 2026 au matin, depuis Cowork, avec Grégoire.**
+> Deux sections seulement ont été refaites : **l'état mesuré** et **le mandat**.
+> Tout le reste — les pièges, le moratoire, le protocole de créneaux, le piège du
+> bump à quatre emplacements — date du 31 août et **reste valable**. Ne pas le
+> relire en diagonale sous prétexte qu'il est ancien : c'est la partie chère.
 
 ---
 
@@ -98,24 +104,43 @@ pas le `AAAAMMJJ`+lettre des autres.
 
 ---
 
-## ÉTAT MESURÉ À LA FERMETURE
+## ÉTAT MESURÉ — 1er SEPTEMBRE 2026, 10 h
 
-**Branche `main`, version `1.106.14`, build `0831-1552`.** `origin/main` = **`e373bd8a`**,
-**zéro commit non poussé**. Arbre propre (trois non suivis antérieurs au cycle).
+**Branche `main`, version `1.106.14`, build `0831-1552`** — aucune release depuis le
+31 août, conformément au §4.3 de la consigne du chantier #668, qui attend un `minor`
+à la fin.
 
-**Vitest : VERT** (hook pre-push, deux fois).
-⚠⚠ **Playwright WebKit : ROUGE À DEUX, cause NON établie.** Mesurés **isolément, machine
-libre** — ce ne sont ni de la contention ni du flaky :
-- `modal-soutien.spec.js` › « modale Soutien : Échap et clic sur l'arrière-plan ferment »
-- `palettes-drag-rendu.spec.js` › « #144 · layout annotation : palette Annotation
-  déplaçable, position hors zone bornée »
+**`HEAD` = `origin/main` = `ceb99dd8`. ZÉRO commit non poussé.** Mesuré, pas supposé.
 
-⚠ **Le second touche la palette d'ANNOTATION, c'est-à-dire l'écran que #660/#661 viennent
-de modifier.** À regarder pour lui-même : **un vert ailleurs ne le blanchit pas.**
+**Vitest : VERT** au dernier rituel (424 fichiers / 4561 tests, code 0).
 
-**Dernier ID utilisé : #665.** Prochain libre : **#666**.
-⚠ **#662 est RÉSERVÉ** — les 4 gardes `IDS_GABARITS_HARDCODES` de `js/echelles.js`
-(957, 2642, 2681, 4350), à écrire quand ce fichier sera libre.
+⚠⚠ **Playwright : NON REJOUÉ depuis les correctifs #671 de la nuit.** Et les **deux
+rouges du 31 août** (`modal-soutien.spec.js`, `palettes-drag-rendu.spec.js`) n'ont pas
+été re-mesurés depuis. **Ne pas les croire réparés.** Rappel du haut de ce fichier :
+un spec seul se lance en secondes et départage mieux qu'une suite de dix minutes.
+
+**Dernier ID utilisé : #671.** Prochain libre : **#672**.
+⚠ **#662 est toujours RÉSERVÉ** — les 4 gardes `IDS_GABARITS_HARDCODES` de
+`js/echelles.js` (957, 2642, 2681, 4350).
+IDs consommés le 31 août au soir : **#668** (projection EUF paramétrable),
+**#669** (`sousCriteres` absent de `partage-schemas.js`), **#670** (migration de
+largeurs empêchant le démarrage), **#671** (contamination du compte d'erreurs).
+
+### ⚠ LA NUIT DU 31 AOÛT A REMIS DE FAUX PDF À DES ÉLÈVES
+
+Cinq copies sur 27 portaient le compte d'erreurs de leur **voisin** dans le tableau.
+Réparé et vérifié. **Lire le bloc « 1er SEPTEMBRE — NUIT (#671, DONNÉES) » en tête de
+`RELAIS.md` avant de toucher à quoi que ce soit dans la chaîne d'évaluation.** Il
+contient trois zéros qui ont menti dans la même nuit, dont un outil de réparation muet
+qui certifiait la santé de ce qu'il n'avait pas lu.
+
+### ⏳ DEUX GESTES DUS PAR GRÉGOIRE, hors code
+
+- Effacer `_to_delete/` à la racine du dépôt (déjà dans `.gitignore`).
+- Passer le **facteur de normalisation de 500 à 600** sur la grille
+  *Grille-1 FR-ALGO seul A26* — la norme de son département a changé pour le 601-101.
+  ⚠ **À faire entre deux évaluations, jamais au milieu d'une correction** : deux
+  copies notées sous deux facteurs différents ne sont pas comparables.
 
 ---
 
@@ -216,17 +241,73 @@ sur du code inconnu.**
 
 ---
 
-## PROPOSE-LUI UN CHOIX FERMÉ ENTRE
+## LE MANDAT DE CETTE SESSION — #668, Lot 3b
 
-**(a)** **Les deux rouges Playwright** — cause non établie, mesurés isolément donc réels,
-et `palettes-drag-rendu` touche l'écran que #660/#661 viennent de modifier. **C'est le
-seul chantier qui porte une incertitude sur du code déjà poussé.**
-**(b)** **Déposer les deux lots préparés** — tout est écrit, break-testé sur son cœur,
-sauvé. **Ordre obligé : `#659` d'abord** (il arrête une écriture active), **puis
-S9a/#627**, **puis `#628`** (le retrait de 165 lignes passe en dernier).
-**(c)** **La porte terrain iPad** de #660/#661 — seul Grégoire peut la donner.
-**(d)** **Le volet ÉCHELLES de #624**, ouvert depuis le troisième cycle :
-`supprimerEchelle` et `supprimerEchelleDefinitivement` sont nus, et la sixième porte a son
-corps propre dans `js/donnees-v2.js:1624`.
+⮕ **Lis d'abord `plans de travail/CONSIGNE-projection-euf-parametrable.md`** (535
+lignes). C'est la consigne du chantier, tenue à jour tout au long du 31 août. **Ne
+re-dérive rien** : son inventaire §2 et ses décisions §6 / §6bis ont été *mesurés*,
+pas supposés, et plusieurs portent la trace de ce qui les a fait changer.
+
+### De quoi #668 retourne, en trois phrases
+
+La projection vers l'épreuve uniforme de français — « tu fais en moyenne 1 erreur à
+chaque N mots, le seuil de l'épreuve est de 1 erreur / 30 mots » — existait déjà dans
+l'application, mais **codée en dur** : seuils, textes, nom du service d'aide. Le
+chantier la remonte vers le gabarit de la grille, exactement comme #667 vient de le
+faire pour la formule de note. **Lots 0 à 3 livrés et poussés.**
+
+⚠ Distinction à ne jamais confondre : l'élève est **noté** selon la norme de son cours
+(le `facteurNormalisation`, 600 / 700 / 900 selon le cours), et **situé** selon celle
+de l'épreuve (900 mots / 30 erreurs, fixe). La projection ne lit JAMAIS
+`facteurNormalisation`.
+
+### Le Lot 3b, en une phrase
+
+Dans le gabarit de grille, **les cinq paliers de projection se replient derrière un
+en-tête qui les RÉSUME** ; le modèle, la norme, le nom du service d'aide et son lien
+restent visibles.
+
+Le détail complet est dans la consigne, section **Lot 3b**, entre les lots 3 et 4.
+
+### Deux décisions prises avec Grégoire — ne pas les rouvrir
+
+- **Aucune case à cocher pour la projection.** Elle ferait doublon avec le modèle
+  « Aucune projection » livré au Lot 3 : deux contrôles pour une seule décision, et
+  deux contrôles qui peuvent se contredire.
+- **Les sous-critères restent exactement tels quels** — ni case, ni repli.
+  `sousCriteres.length > 0` (`evaluation-calcul.js:869`) **EST** le mode de calcul ;
+  une case devrait trancher entre supprimer onze catégories et leurs longs textes, ou
+  les masquer pendant que le calcul continue de les voir.
+
+### Trois exigences
+
+1. **L'en-tête résume ce qu'il cache** (« Cinq paliers · seuil d'échec à 1 erreur /
+   30 mots »). Sans résumé, on échange de l'espace vertical contre de l'opacité, et une
+   configuration fautive devient invisible tant que personne n'ouvre le panneau.
+2. **Réutiliser le patron d'accordéon déjà employé dans l'app**, pas en inventer un.
+   Regarder la sentinelle **#573** : l'état d'un panneau a déjà causé un défaut ici.
+3. **`echapperHtml()` sur les textes de paliers** — c'est du texte libre saisi par
+   l'enseignant·e, rendu en `innerHTML`.
+
+⛔ **Ne pas ouvrir le Lot 6 (le bloc dans le PDF).** Il est bloqué sur une décision de
+conception qui appartient à Grégoire — le doublon entre la phrase déjà écrite dans le
+commentaire et le bloc neuf. Les trois voies sont posées au §3 Lot 6 de la consigne.
+
+---
+
+## SI GRÉGOIRE VEUT AUTRE CHOSE — choix fermé
+
+**(a)** **Playwright** — non rejoué depuis les correctifs #671, et les deux rouges du
+31 août jamais re-mesurés. *C'est le seul chantier qui porte une incertitude sur du
+code déjà poussé.*
+**(b)** **#668 Lot 4** — le transport (`import-export.js`, `partage-schemas.js`), avec
+**#669** dans le même geste : `sousCriteres` ne voyage pas au partage, et le
+destinataire bascule en silence du mode catégories au mode simple. Échéance réelle : la
+première rencontre de la cohorte 1, mi-septembre.
+**(c)** **Le mode simple n'écrit jamais sa rétroaction dans le DOM** —
+`calculerNoteAlgorithmiqueSimple` fait `champCommentaire.value = …` sur un `<div>`.
+**Constaté le 1er septembre, PAS corrigé.** C'est la cause amont des rétroactions
+d'amorce persistées.
+**(d)** **Déposer les deux lots préparés hors dépôt** — ordre obligé, voir plus haut.
 
 ⮕ **Une seule décision principale par session.**
