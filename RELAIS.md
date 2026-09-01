@@ -7,6 +7,110 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 1er SEPTEMBRE 2026, FIN D'APRÈS-MIDI
+
+> Session solo, pilotée par Grégoire, de la fin de matinée au milieu de l'après-midi.
+> Ce bloc **s'ajoute** aux suivants, qui restent valables pour ce qu'ils décrivent.
+
+**Branche `main`. Version `1.106.15`, build `0901-1354`.** Release patch livrée
+aujourd'hui. ⚠ Ce n'est **pas** le `minor` que le §4.3 de #668 attend à la FIN du
+chantier — les lots 5b et 6 restent dus.
+**`HEAD` = `origin/main` = `7a0b11e3`. ZÉRO commit non poussé** — mesuré.
+**Vitest : 426 fichiers / 4601 tests, code 0**, lancé depuis `tests/`.
+**Playwright WebKit : code 0, baseline VIDE, jeton portant `7a0b11e3`.**
+⚠ **Jetons anti-cache : `20260901a` et `20260901b`** — jour du BUILD.
+**Dernier ID : #679.** Libre : **#680**. (#662 toujours RÉSERVÉ.)
+**Backlog : 160 cases ouvertes**, toutes porteuses d'un `#NNN`.
+
+---
+
+### ⛔ LIRE AVANT DE CODER — deux fichiers ont changé et priment sur tout le reste
+
+**`CLAUDE.md`** — le défaut n'est plus « pose la question », c'est **DÉCIDE puis
+DIS-LE en une ligne**. Ne remontent que : la pédagogie, les données réelles de
+Grégoire, les mots que ses élèves liront, ce qui l'engage publiquement. Un doute qui
+se lève par un `grep` n'est pas une question.
+⮕ Il porte aussi la précision du jour sur les **trois issues** d'une trouvaille :
+elles arbitrent du code **ÉTRANGER**. Une classe que tu viens d'écrire sans la
+définir n'est pas une trouvaille — **c'est ton lot qui n'est pas fini**.
+
+**`OBJECTIF-COHORTE-1.md`** — les huit énoncés sont **ARRÊTÉS** par Grégoire. Liste
+FERMÉE. Une trouvaille reçoit une seule question : est-ce que ça empêche un des huit ?
+
+---
+
+### CE QUI EST LIVRÉ ET POUSSÉ AUJOURD'HUI
+
+| Commit | Contenu |
+|---|---|
+| `0c261b40` | **#668 Lot 4 + #669** — le transport de la projection et des sous-critères |
+| `190473ad` | **Lot A** — backlog réconcilié (177 → 159), cadrage corrigé |
+| `f480efd3` | **release 1.106.15** |
+| `989b02e9` | la séquence réécrite par Grégoire entre au dépôt |
+| `494a7d60` | **#612** — un DA sans élève est dit avant l'import, visible après |
+| `a84b67f7` | **#612** — les quatre essais manuels deviennent quatre specs |
+| `ce630406` | **docs** — la règle de remontée, la cible arrêtée, #679 |
+| `7a0b11e3` | **#612** — le bandeau a son style ; la grammaire des couleurs au design system |
+
+**#669 — l'omission était ACCIDENTELLE, et c'est l'ASYMÉTRIE qui l'a prouvé.** Pas le
+silence seul : ce dépôt ÉCRIT ses décisions d'exclusion quand il en prend une (les
+trois objets nus de `pratique` portent « trade-off accepté » ; `champsInterdits` nomme
+`coursId`, `dateEcheance`, `etablissement`), et il n'a rien écrit pour `sousCriteres`.
+
+**#612 — le trou était plus large que son énoncé.** Un fichier au DA inconnu mais à la
+production VALIDE ne tombait dans aucune des deux branches de rattrapage : aucune
+ligne, nulle part.
+
+---
+
+### ⚠⚠ CE QUE CETTE SESSION A APPRIS — la partie chère
+
+**UN BANC VERT PEUT COUVRIR UN ÉCRAN CASSÉ.** Le bandeau de #612 portait une classe
+CSS **définie nulle part**. **Les quatre specs Playwright du même lot étaient VERTS** :
+ils lisent le DOM et le `textContent`, jamais le RENDU. C'est un `grep` qui l'a trouvé.
+⮕ Inscrit en **#679**, non traité. Même famille que #595.
+
+**TROIS CIBLES PÉRIMÉES DANS DES DOCUMENTS DU DÉPÔT, LE MÊME JOUR** :
+`evaluation-calcul.js:869` (vraie ligne **992**) · `sections-affichage.js` (vrai nom
+**`profil-etudiant-sections-affichage.js`**) · `confirmerImportPipeline` (**n'existe
+pas** — c'est `executerImportPipeline`, `travaux-ui.js:3838`).
+⮕ **`grep` la cible AVANT de planifier le geste**, et corriger le document dans le
+**MÊME commit** que le code. Un plan est une intention datée, pas un état du code.
+
+**UN CADRAGE SE VÉRIFIE, MÊME BON.** Celui du 1er septembre annonçait 17 cases
+livrées : **#599 ne l'était pas**. Une case retournée à tort coûte plus cher qu'une
+case oubliée.
+
+**UN TÉMOIN VAUT PLUS QUE TROIS CAS POSITIFS.** Dans `import-bandeaux-612.spec.js`, le
+cas 4 (« un import normal n'affiche AUCUN bandeau ») est le SEUL que tue la mutation
+`if (true)`. Sans lui, trois tests « le bandeau apparaît » passeraient au vert sur un
+code qui avertit à chaque import.
+
+**UN EXTRACTEUR TROP LARGE MENT COMME UN ZÉRO SANS TÉMOIN.** Le premier break-test du
+spec lisait la sortie TEXTE et rendait « les quatre rouges » à chaque mutation. Repris
+sur le reporter JSON. ⮕ Le pendant du zéro sans témoin : **un rouge rassurant pour la
+mauvaise raison**.
+
+**LA MÉTHODE QUI FAIT JUGER UN PUSH PAR PLAYWRIGHT** : committer, PUIS
+`node ../scripts/verifier-playwright.mjs`, PUIS pousser. Le hook affiche alors
+« verdict vert à jour pour ce commit ». Un commit après le verdict le périme.
+
+---
+
+### ⏳ DÛ PAR GRÉGOIRE
+
+- **Test manuel de #612** — le rendu réel des bandeaux (les 4 cas sont désormais des specs).
+- Effacer `_to_delete/` · facteur **500 → 600** sur *Grille-1 FR-ALGO seul A26*,
+  ⚠ entre deux évaluations.
+- La règle métier de **#560** · les portes terrain **#568 / #572 / #660 / #661** ·
+  **#598 volet B** · le nom du service d'aide (CAF → Passerelle +).
+
+**⮕ MANDAT SUIVANT : Lot B** — le mot « français » imprimé dans le PDF d'un élève de
+chimie (`synthese-retroaction-rendu.js:510`). Huit littéraux, deux natures. Détail dans
+`CONSIGNE-2026-09-01-pret-pour-les-nouveaux-utilisateurs.md` §2 et dans **#581**.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 1er SEPTEMBRE 2026, MATIN (#672, #673, #674)
 
 > Session solo, pilotée par Grégoire. Ce bloc **s'ajoute** aux deux suivants, qui
