@@ -5655,7 +5655,22 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   - **⚠ DETTE ADJACENTE, non traitée** : le **titre** d'une carte de bibliothèque (`opts.nom` de `renderCarteSelection`/`renderCarteDisponible`) n'est pas échappé. Pas un oubli : `js/echelles.js:2244` y injecte délibérément un badge HTML, et corriger proprement demande de démêler 7 appelants dont plusieurs HORS bibliothèques (cours.js, trimestre-v2-liste.js, tampons-bibliotheque.js, planification-bibliotheque.js, partage-section.js). Le plan interdisait d'élargir là.
   - **⚠ DETTE DE FOND, non traitée** : faire rendre un booléen à `db.set`/`db.setSync` (js/db.js:449 et :1458) au lieu d'un `return;` nu. *Tous* les écrivains gardés partagent cet angle mort ; la surface d'appel est trop large pour être auditée dans ce chantier.
   - **📋 PLAN (23 août 2026)** : même document que #291, `plans de travail/PLAN-291-476-gestion-des-doublons.md`. **Recommandation rendue** sur les **33** fonctions `dupliquer*` mesurées (24 en bibliothèque, 9 hors périmètre) : **ne pas poser 24 gardes — une seule, au point d'ÉCRITURE et non au clic** ; dupliquer reste une action VOULUE, jamais bloquée ; le vrai défaut de CO-24 (« X (copie) (copie) (copie) ») se règle par un helper de nommage. **Volet 2 à créer après ce chantier** : fusionner les 24 `dupliquer*` (refactor sans changement de comportement, plus sûr une fois les sentinelles posées). CT-15 (groupes-cours, courriels enseignant, `creerCours`) = Lot 6, optionnel.
-- [ ] **#675 — ⚠️ Anti-cache : `release.mjs --build-only` et sa sentinelle n'ont PAS la même base de comparaison.** Constat mesuré du 24 août 2026 ; **identifiant alloué le 1er septembre 2026** (Lot A) — l'item existait sans `#NNN`, donc invisible à toute priorisation par identifiant.
+- [ ] **#675 — ⚠️ Anti-cache : `release.mjs --build-only` et sa sentinelle n'ont PAS la même base de comparaison.**
+  ⚠ **DEUXIÈME OCCURRENCE, 1er septembre 2026 — et la cause est maintenant NOMMÉE.** La release `1.106.15`
+  a bumpé **14** fichiers ; la sentinelle en a réclamé **18 autres**, et **c'est elle qui avait raison**.
+  ⮕ **Les deux bases, mesurées** : `release.mjs:204` prend `git log -1 -- version.json`, donc le DERNIER
+  commit ayant touché ce fichier. La sentinelle, elle, prend `git log -3` et retient `commits[1]` — la
+  release PRÉCÉDENTE.
+  ⮕ **Ce qui les fait diverger : un commit qui touche `version.json` SANS être une release.** Ici
+  `24eeaa89` (« fix(#660, #661) : le zoom trackpad… », 31 août). Le script est donc parti de ce fix, la
+  sentinelle de `b6e7593b` (release 1.106.13) — et les 18 fichiers modifiés entre les deux auraient été
+  servis périmés sous une URL inchangée.
+  ⮕ **Le repère du script est le mauvais** : « dernier commit touchant `version.json` » n'est pas
+  « dernière release ». Faire converger sur le repère de la sentinelle, ou marquer les commits de release.
+  ⚠ Le conseil affiché par la sentinelle (« relancer `node scripts/release.mjs --build-only` ») **ne
+  répare pas** ce cas : le script recalculerait depuis le même mauvais repère et ne verrait toujours pas
+  les 18. Ils ont été bumpés à la main.
+ Constat mesuré du 24 août 2026 ; **identifiant alloué le 1er septembre 2026** (Lot A) — l'item existait sans `#NNN`, donc invisible à toute priorisation par identifiant.
   - **Ce qui s'est passé.** Après le Lot E de #476, `node scripts/release.mjs --build-only` a bumpé le build (0823-1534 → 0824-1141) et l'anti-cache des **10 fichiers du chantier courant**. La sentinelle `sentinelle-anticache-fichiers-modifies` est restée ROUGE en nommant **7 autres fichiers** — `changelog-data.js`, `cours.js`, `entites/cours-entite.js`, `identite-naturelle.js`, `trimestre-v2-{cours,enseignants,groupes-cours}.js` — tous issus du chantier CT-15 de la veille.
   - **La cause.** La sentinelle prend pour base `git log -3 -- version.json` puis diffe `commits[1]..HEAD` : **tout fichier modifié depuis la release PRÉCÉDENTE** doit porter un `?v=` du jour du build courant. Déplacer le jour du build périme donc mécaniquement tous les fichiers bumpés lors de la release précédente. `release.mjs --build-only`, lui, ne bumpe que les fichiers du chantier courant. **Les deux ont raison séparément et se contredisent ensemble.**
   - **Contourné à la main** le 24 août (les 7 alignés sur `20260824a`), mais ça se reproduira à chaque build bumpé un jour différent de la release précédente. ⮕ Faire converger les deux bases : soit `release.mjs` adopte la base de la sentinelle, soit la sentinelle n'exige le jour du build que pour les fichiers modifiés **depuis le dernier build**, pas depuis la dernière release.
@@ -6213,10 +6228,25 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
     dans un seul : `trimestre-v2-liste.js` **19** · `cours.js` **15** · `trimestre-v2-cours.js` 5 ·
     `trimestre-v2-etudiants.js` 4 · `trimestre-v2-horaires.js` 4 · `trimestre-v2-init.js` 3 ·
     `trimestre-v2-groupes-cours.js` 1.
-  ⏳ **CE QUI N'EST PAS ENCORE MESURÉ, et qu'il faut faire AVANT de convertir quoi que ce soit** : l'atteignabilité
-  des 46 autres. Le compte de 51 est un compte de littéraux, pas un compte de gênes réelles — c'est exactement
-  l'erreur que cet item vient de corriger sur les cinq premiers. **Instruire fichier par fichier, en commençant par
-  `trimestre-v2-liste.js` et `cours.js`**, avant d'annoncer un périmètre.
+  ⮕ **LE PÉRIMÈTRE EST BORNÉ, ET CE N'EST PAS « FICHIER PAR FICHIER »** (précision de Grégoire, 1er septembre).
+  Les chroniques Labo qu'il publie décrivent **trois parcours**, et ce sont exactement les chemins que les
+  nouveaux utilisateurs suivront, tutoriel en main. **La question de cet item est donc : lesquelles des alertes
+  se déclenchent sur CES trois parcours ? Le reste attend.**
+  · **(1) créer un trimestre, créer un groupe-cours, prendre les présences** — **53** littéraux :
+    `trimestre-v2-liste.js` 19 · `cours.js` 15 · `trimestre-v2-cours.js` 5 · `trimestre-v2-etudiants.js` 4 ·
+    `trimestre-v2-horaires.js` 4 · `trimestre-v2-init.js` 3 · `saisie-presences.js` 2 ·
+    `trimestre-v2-groupes-cours.js` 1.
+  · **(2) créer grilles, échelles, cartouches** — **121** littéraux : `cartouches.js` 52 · `grilles.js` 36 ·
+    `echelles.js` 33. ⚠ **C'est le parcours le plus chargé, et de loin** — plus du double du premier, sur lequel
+    #540 s'était concentré.
+  · **(3) importer des productions** — **39** littéraux : `travaux-ui.js` 17 · `productions-import-export.js` 12 ·
+    `productions.js` 4 · `travaux-import.js` 4 · `productions-liste.js` 2.
+  ⮕ **213 littéraux sur les trois parcours**, sur 406 dans tout `js/` — mesuré le 1er septembre 2026, commentaires
+  exclus (une occurrence en commentaire dans `trimestre-v2-cours.js:1296` fausse tout `grep -c` naïf).
+  ⛔ **ET CES 213 NE SONT PAS 213 GÊNES.** C'est un compte de LITTÉRAUX, exactement comme les cinq de #540 qui se
+  sont tous révélés inatteignables. **Annoncer 213 comme un périmètre de travail referait la même erreur à plus
+  grande échelle.** L'atteignabilité reste à instruire — mais parcours par parcours, en suivant la chronique, et
+  **en commençant par le (2)**, qui porte 121 des 213.
   ⮕ Le patron de remplacement existe déjà dans ce même fichier : `trimestre-v2-cours.js:1296` note un refus passé
   « par `notifications.erreur` et non plus par `alert()` ».
   ▣ **Le bump de version que #540 portait en attente est sans objet** : une release patch suit ce lot (décision de
