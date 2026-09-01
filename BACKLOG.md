@@ -636,6 +636,34 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   séparément.
   ⏳ **RIEN N'EST CODÉ.** L'item est ouvert, la piste est posée, la mesure est faite.
 
+- [x] **#681 — `js/spe-specifications.js` retiré : 1009 lignes de code mort qui semaient du matériel fictif**.
+  Livré le 1er septembre 2026. **Geste 2 de la ligne d'arrivée** — créer une grille, une échelle, une
+  cartouche : du matériel signé « Labo Codex » dans les listes d'un nouvel enseignant est exactement ce que
+  ce geste doit cesser de faire.
+  ⛔ **CE QUI N'EST PAS TOUCHÉ, et qu'il ne faut pas confondre.** La pratique de notation PAR SPÉCIFICATIONS
+  reste, comme celle par standards : elles sont codées et configurables dans le système de pratiques.
+  `js/pratiques/pratique-pan-specifications.js` et l'écran `mat-config-pan-specifications` d'`index.html`
+  ne sont pas concernés. Seul le module autonome du 2 janvier 2026 part.
+  ▣ **LA MESURE, faite AVANT de couper.** 24 symboles exposés sur `window`, 786 fichiers balayés
+  (`js/`, `tests/`, `scripts/`, `index.html`), commentaires retirés avant lecture :
+  · **23 n'ont AUCUN usage** hors du module ;
+  · le 24e, `creerEchelleSPESiInexistante`, n'apparaît que comme CHAÎNE dans
+    `tests/unit/sentinelle-599-…` — un banc qui surveille le fichier, pas un consommateur métier.
+  ⮕ **Zéro consommateur vivant.** Les chemins qu'un grep ne voit pas ont été instruits séparément :
+  · l'unique « SPE » de `main.js` est `GABARIT_GRILLE_CHECKLIST_SPE`, l'identifiant d'un gabarit de
+    GRILLE — aucun rapport ;
+  · `index.html` ne portait que la balise `<script>` et deux textes d'interface décrivant la PRATIQUE ;
+  · les appels dynamiques `window[nom]` : les 3 `data-action` du module pointent vers ses propres
+    fonctions, dans du HTML qu'il génère lui-même ;
+  · les 5 identifiants semés ne sont cités NULLE PART ailleurs.
+  ▣ **Le module ne démarrait que par lui-même** — trois auto-déclencheurs de fin de fichier
+  (`DOMContentLoaded`, un `setTimeout(100)`, `window.onload` + `setTimeout(500)`). Personne ne l'appelait ;
+  il s'appelait.
+  ⏳ **LES DONNÉES DÉJÀ SEMÉES, EN DEUX TEMPS ET JAMAIS EN UN SEUL.** `scripts/nettoyage-681-spe.js`
+  COMPTE et n'écrit rien : combien des cinq objets sont présents, et combien d'évaluations les
+  référencent. **Un objet référencé par une évaluation n'est pas supprimé, il est NOMMÉ.** C'est le corpus
+  réel de Grégoire, et le second temps lui appartient.
+
 - [ ] **#680 — Le canal de PARTAGE laisse d'autres champs d'échelle en chemin, et personne n'a écrit lesquels**.
   Inscrit le 1er septembre 2026, **issue 2 (inscrire et continuer)** : trouvaille faite en corrigeant `valeur`,
   hors du lot en cours.
