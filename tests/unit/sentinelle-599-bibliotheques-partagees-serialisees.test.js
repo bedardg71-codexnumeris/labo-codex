@@ -217,7 +217,10 @@ const PAR_LA_FILE = {
     'js/cartouches-bibliotheque.js': 2,
     'js/productions-bibliotheque.js': 2,
     'js/pratiques-bibliotheque.js': 3,
-    'js/spe-specifications.js': 3,
+    // ⚰ Retiré le 1er septembre 2026 avec `js/spe-specifications.js` (#681) :
+    // 1009 lignes, 24 symboles exposés, ZÉRO consommateur vivant. Les 3 sites
+    // qu'il portait écrivaient correctement par la file — c'est le fichier qui
+    // est parti, pas sa discipline.
     'js/grilles.js': 1,
     'js/echelles.js': 1,
     'js/cartouches.js': 1,
@@ -245,7 +248,9 @@ describe('#599 · C — la course ne peut pas se rouvrir en silence', () => {
         }
         // ↻ 20 → 19 le 1er septembre 2026, même cause : un site retiré avec le
         // versement des huit échelles disciplinaires.
-        expect(total, 'les dix-neuf sites de #599').toBe(19);
+        // ↻ 19 → 16 le 1er septembre 2026 : `js/spe-specifications.js` retiré (#681)
+        // emportait ses 3 sites.
+        expect(total, 'les seize sites de #599').toBe(16);
     });
 
     // ⚠ CE CLIQUET A ÉTÉ REFAIT APRÈS UN BREAK-TEST QUI A REFUSÉ DE ROUGIR.
@@ -271,26 +276,12 @@ describe('#599 · C — la course ne peut pas se rouvrir en silence', () => {
         return null;
     }
 
-    it('C.c les trois créations SPE vérifient la présence DANS le mutateur', () => {
-        // Vérifier avant d'entrer dans la file laisse deux semis concurrents
-        // passer tous les deux — c'est le défaut d'`assurerGrilleGenerique`.
-        const src = lire('js/spe-specifications.js');
-        for (const nom of ['creerEchelleSPESiInexistante', 'creerGrilleSPESiInexistante',
-                           'creerProductionSPESiInexistante']) {
-            const corps = corpsDeLaFonction(src, nom);
-            expect(corps, `${nom} : introuvable`).toBeTruthy();
-
-            const posFile = corps.indexOf('db.modifier(');
-            expect(posFile, `${nom} : la file est absente`).toBeGreaterThan(-1);
-
-            // Ce qui suit l'ouverture de la file, DANS cette fonction seulement.
-            const dansLaFile = corps.slice(posFile);
-            expect(dansLaFile, `${nom} : aucun test de présence dans le mutateur`)
-                .toMatch(/bibliotheque\.find\(/);
-            expect(dansLaFile, `${nom} : aucun refus « return undefined » dans le mutateur`)
-                .toMatch(/return undefined;/);
-        }
-    });
+    // ⚰ « C.c les trois créations SPE vérifient la présence DANS le mutateur » est
+    // RETIRÉ le 1er septembre 2026 : `js/spe-specifications.js` n'existe plus
+    // (#681). Le test n'est pas réaligné sur un autre fichier — il gardait CES
+    // trois fonctions-là, elles sont parties, et un test qui survit à son sujet
+    // devient un vert qui n'exclut rien. C.d ci-dessous garde la même discipline
+    // sur les cinq « ajouter » qui, eux, existent toujours.
 
     it('C.d les cinq « ajouter » vérifient la présence DANS le mutateur', () => {
         const cas = {

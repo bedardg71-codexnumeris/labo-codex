@@ -89,6 +89,44 @@ bibliothèque partagée. Les huit-ci lui étaient **invisibles**.
 ⮕ Si la sonde rend zéro partout, il n'y a rien à décider. Sinon, la question
 « qu'en faire » est à Grégoire, et le silence qu'elles produisent est **#674**.
 
+### ⚰ S'AJOUTE AU §1 — `js/spe-specifications.js` retiré *(#681)*
+
+*Même chantier : retirer le matériel fictif. Décidé par Grégoire le 1er septembre.*
+
+1009 lignes du 2 janvier 2026 qui semaient cinq objets signés « Labo Codex » —
+une échelle, trois gabarits de grille, une production — dans les listes d'un
+nouvel enseignant. **Geste 2 de la ligne d'arrivée.**
+
+⛔ **CE QUI N'EST PAS TOUCHÉ.** La pratique de notation PAR SPÉCIFICATIONS reste,
+comme celle par standards : elles sont codées et configurables dans le système de
+pratiques. `js/pratiques/pratique-pan-specifications.js` et l'écran
+`mat-config-pan-specifications` d'`index.html` sont intacts, et une assertion les
+garde — pour qu'un retrait « de cohérence » ne les emporte pas plus tard.
+
+▣ **LA MESURE, faite avant de couper — c'est la partie qui comptait.** 24 symboles
+exposés sur `window`, 786 fichiers balayés (`js/`, `tests/`, `scripts/`,
+`index.html`), commentaires retirés avant lecture :
+
+| | |
+|---|---|
+| symboles sans AUCUN usage hors du module | **23 sur 24** |
+| le 24e (`creerEchelleSPESiInexistante`) | cité comme CHAÎNE dans `sentinelle-599`, un banc qui surveillait le fichier — pas un consommateur métier |
+| l'unique « SPE » de `main.js` | `GABARIT_GRILLE_CHECKLIST_SPE`, identifiant d'un gabarit de GRILLE — aucun rapport |
+| `index.html` | la balise `<script>`, plus deux textes décrivant la PRATIQUE |
+| appels dynamiques `window[nom]` | les 3 `data-action` du module pointaient vers ses propres fonctions, dans du HTML qu'il générait lui-même |
+| les 5 identifiants semés | cités **nulle part** ailleurs |
+
+⮕ **Zéro consommateur vivant.** Et le module ne démarrait que par lui-même :
+`DOMContentLoaded`, un `setTimeout(100)`, `window.onload` + `setTimeout(500)`.
+Personne ne l'appelait — il s'appelait.
+
+⏳ **LES DONNÉES DÉJÀ SEMÉES, EN DEUX TEMPS.** `scripts/nettoyage-681-spe.js` est
+le PREMIER temps : il compte et il affiche, **il ne supprime rien** (vérifié par
+assertion, pas promis). En console : `await nettoyage681()`.
+⚠ **Un objet référencé par une évaluation n'est pas supprimé, il est NOMMÉ** —
+une grille qui a servi à noter quelqu'un n'est plus du matériel de démarrage,
+c'est la trace d'un jugement posé. Le second temps appartient à Grégoire.
+
 ---
 
 ## 2. ✅ LIVRÉ — SEMER LE TRIPTYQUE : grille, échelle, cartouche

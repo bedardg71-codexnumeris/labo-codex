@@ -8,7 +8,8 @@ import { chargerScript } from './_helpers/charger-script.js';
 //
 // Vingt-six sites lisaient `grillesTemplates`, y changeaient une entrée, puis
 // réécrivaient la collection ENTIÈRE : vingt-quatre dans `js/grilles.js`, un
-// dans `js/cartouches.js`, un dans `js/spe-specifications.js`.
+// dans `js/cartouches.js`, un dans `js/spe-specifications.js` (ce dernier fichier
+// a été RETIRÉ le 1er septembre 2026, #681 — voir la liste PAR_LA_FILE).
 //
 // ⮕ LE SITE LE PLUS EXPOSÉ EST `modifierSousCritere` : c'est le geste de #510
 // mot pour mot. L'éditeur de sous-critères est un tableau de champs dont le
@@ -306,7 +307,9 @@ const PAR_LA_FILE = {
     // plus de gestes. Le +1 est donc un ajout de CAPACITÉ, pas de dispersion.
     'js/grilles.js': 27,
     'js/cartouches.js': 1,
-    'js/spe-specifications.js': 1,
+    // ⚰ Retiré le 1er septembre 2026 avec `js/spe-specifications.js` (#681) :
+    // code mort, zéro consommateur vivant. Son unique site écrivait bien par la
+    // file ; c'est le fichier qui est parti.
     'js/donnees-v2.js': 1
 };
 
