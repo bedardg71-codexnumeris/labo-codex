@@ -6637,6 +6637,12 @@
         let criteresHTML = '';
         if (evaluation.criteres && evaluation.criteres.length > 0) {
             const lignes = evaluation.criteres.map(c => {
+                // ⚠ #672 — TABLEAU DE RÉVISION, côté enseignant·e. Même remarque qu'à
+                // `travaux-export-pdf.js` : une évaluation enregistrée avant le
+                // 1er septembre 2026 en mode simple porte l'amorce du gabarit dans
+                // `c.retroaction`. Le PDF remis à l'élève est rattrapé par la garde
+                // d'amorces de `synthese-retroaction-data.js` ; cet extrait ne l'est pas,
+                // et c'est assumé — il ne sort pas de l'écran de l'enseignant·e.
                 // ✅ ANONYMISATION (Tier 0.3) : anonymiser les prénoms dans les rétroactions
                 const retroTexte = typeof anonymiserTexteRetroaction === 'function'
                     ? anonymiserTexteRetroaction(c.retroaction || '', evaluation.etudiantDA)

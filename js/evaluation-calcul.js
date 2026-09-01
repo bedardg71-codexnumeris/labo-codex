@@ -272,6 +272,7 @@ function _parserCodesAlgoCategories(critereId) {
 }
 
 function _resetAffichageAlgoCategories(critereId) {
+    _effacerRetroactionMachine(critereId);   // #673 — même règle qu'en mode simple
     document.getElementById(`note_algo_${critereId}`).textContent = '--';
     document.getElementById(`pct_algo_${critereId}`).textContent = '--';
     document.getElementById(`niveau_algo_${critereId}`).textContent = '--';
@@ -295,6 +296,53 @@ function _obtenirSousCriteresGrille(critereId) {
     return [];
 }
 
+/** #673 — Le prédicat d'amorce, emprunté à son propriétaire. Voir le bloc ci-dessous. */
+function _estAmorceDeSaisieAlgo(texte) {
+    // La liste vit dans synthese-retroaction-data.js (#672) et n'est pas recopiée ici :
+    // deux inventaires divergeraient en silence. Si le module manque, on ne classe rien
+    // — et faute de classement, on n'efface rien.
+    const api = window.syntheseRetroactionData;
+    return !!(api && typeof api.estAmorceDeSaisie === 'function' && api.estAmorceDeSaisie(texte));
+}
+
+/**
+ * #673 — RETIRE LA RÉTROACTION PÉRIMÉE, ET RIEN D'AUTRE.
+ *
+ * LE DÉFAUT. Quand un calcul redevient inapplicable, l'écran repasse à « -- » mais le
+ * div `comm_<critereId>` garde la rétroaction de la saisie PRÉCÉDENTE. Les trois
+ * collecteurs lisent ce div : un compte d'erreurs périmé partait en base, puis au PDF.
+ * Pire qu'une amorce — une amorce se reconnaît, un compte périmé est PLAUSIBLE.
+ *
+ * ⛔ CE QU'IL NE FAUT SURTOUT PAS FAIRE : vider le div sans condition. Il porte AUSSI
+ * les commentaires que l'enseignant·e écrit à la main.
+ *
+ * LA RÈGLE (décision de Grégoire, 1er septembre 2026) : n'effacer QUE ce que le code a
+ * lui-même écrit. Le div ne part que s'il correspond EXACTEMENT au dernier texte
+ * engendré, ou à l'une des amorces de saisie. Sinon on n'y touche pas. Même discipline
+ * que les scripts de réparation de la veille : correspondance exacte avec du contenu
+ * machine, jamais une ressemblance.
+ *
+ * ⚠ ET LES DEUX EMPLACEMENTS, PAS UN. Le texte périmé vit aussi dans
+ * `donneesAlgorithmiques[critereId].retroaction`, où la cascade du PDF (#672) le prend
+ * en REPLI dès que le div est vide. Ne vider que le div déplacerait le défaut au lieu
+ * de le retirer. Cette moitié-là est inconditionnelle : cette clé ne contient jamais
+ * que du texte engendré.
+ */
+function _effacerRetroactionMachine(critereId) {
+    const memo = (evaluationEnCours && evaluationEnCours.donneesAlgorithmiques)
+        ? evaluationEnCours.donneesAlgorithmiques[critereId]
+        : null;
+    // Lu AVANT le retrait : c'est lui qui sert de pièce de comparaison.
+    const engendre = String((memo && memo.retroaction) || '').trim();
+
+    const div = document.getElementById(`comm_${critereId}`);
+    const courant = String((div && div.textContent) || '').trim();
+    const estTexteMachine = (engendre !== '' && courant === engendre) || _estAmorceDeSaisieAlgo(courant);
+    if (div && courant !== '' && estTexteMachine) div.textContent = '';
+
+    if (memo) delete memo.retroaction;
+}
+
 /**
  * #667 — Remet le bloc résultat du mode SIMPLE à l'état « pas de conclusion ».
  *
@@ -304,6 +352,7 @@ function _obtenirSousCriteresGrille(critereId) {
  * repersiste l'ancienne valeur.
  */
 function _viderResultatAlgoSimple(critereId, erreurs, mots) {
+    _effacerRetroactionMachine(critereId);
     var noteEl = document.getElementById(`note_algo_${critereId}`);
     var pctEl = document.getElementById(`pct_algo_${critereId}`);
     var nivEl = document.getElementById(`niveau_algo_${critereId}`);
@@ -514,6 +563,16 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
 
     if (codeDominant === null) {
         document.getElementById(`cat_dominante_${critereId}`).textContent = '--';
+        // ⚠ #673 — BRANCHE INATTEIGNABLE, MESURÉE le 1er septembre 2026, PAS retirée.
+        // `_trouverCodeDominant` ne rend `null` que sur une liste VIDE ; une liste vide
+        // donne `totalErreurs === 0`, déjà intercepté par la garde du dessus, qui sort
+        // par `return`. Aucun chemin n'arrive donc ici.
+        // ⮕ Ce qui explique qu'un écrasement inconditionnel du div ait pu survivre ici
+        // sans jamais détruire le texte de personne : il ne s'exécute pas.
+        // ⛔ NE PAS retirer ce bloc à la légère : sa chaîne est la SEULE occurrence de la
+        // troisième amorce dans `js/`, et la sentinelle statique de #672 l'exige présente.
+        // La retirer demande de traiter les deux ensemble — et de garder la chaîne dans la
+        // liste de reconnaissance, puisque des évaluations ENREGISTRÉES la portent encore.
         const commDiv = document.getElementById(`comm_${critereId}`);
         if (commDiv) commDiv.textContent = 'Saisissez les codes des sous-critères (ex: 1;4;6;1;4)';
     } else {
@@ -626,10 +685,16 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
         retroactionGenerique += retroactionEUF;
     }
 
-    // Afficher dans le champ commentaire standard
+    // #672 — `textContent`, PAS `.value`. `comm_<critereId>` est un `<div>`
+    // (evaluation-chargement.js:1028 et :1194, les deux chemins de rendu) : `.value`
+    // y posait une propriété JS parasite et laissait le texte du gabarit en place.
+    // Le mode catégories écrit `textContent` sur ce même div depuis toujours (l.517
+    // et :526) — c'est cette dissymétrie qui a caché le défaut. Les trois collecteurs
+    // de sauvegarde lisent `textContent` : ce qu'ils persistaient sous
+    // `criteres[].retroaction`, c'était l'amorce « Saisissez les erreurs… ».
     const champCommentaire = document.getElementById(`comm_${critereId}`);
     if (champCommentaire) {
-        champCommentaire.value = retroactionGenerique;
+        champCommentaire.textContent = retroactionGenerique;
     }
 
     // === SAUVEGARDE DANS evaluationEnCours ===
