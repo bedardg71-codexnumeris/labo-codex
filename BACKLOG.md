@@ -459,6 +459,25 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `sousCriteres` — les onze rétroactions de français se perdent au partage, comme au #511 pour l'import/export.
   Et `js/grilles.js:268`, `:279`, `:383` lisent `getElementById('critereFormule')` **sans garde**, sur un id absent
   d'`index.html` (champ « formule » décoratif hérité, sans lien avec le calcul).
+- [x] **#670 — CORRIGÉ · Une migration de largeurs de panneau empêchait l'application de démarrer quand localStorage est plein**.
+  ⚠ **Mesuré en production le 31 août 2026 à 22 h 36**, chez Grégoire, écran d'évaluation bloqué sur « Chargement… ».
+  `js/travaux-ui.js:321` posait son drapeau de migration par un `localStorage.setItem` **brut, situé APRÈS son propre
+  `catch`** (ligne écrite le 27 février 2026, `a4cd2a94`). Magasin saturé → `QuotaExceededError` **non rattrapé** dans
+  une IIFE de haut niveau → l'initialisation du module s'arrête, et l'écran ne finit jamais de charger.
+  ⮕ **Le comble** : cette migration ne sert qu'à OUBLIER DES LARGEURS DE PANNEAU. Une commodité d'affichage
+  empêchait l'application de démarrer. Le drapeau est désormais posé DANS le `try` ; la migration est idempotente,
+  elle sera simplement retentée au prochain démarrage.
+  ⚠ **Le reste de l'application survit au quota** : `db.js` bascule sur cache mémoire + IndexedDB, et les
+  avertissements « Quota localStorage dépassé » passent sans dommage. C'est ce `setItem` brut qui échappait à la
+  protection — pas le régime de stockage.
+  ⏳ **DEUX SUITES, à froid** :
+  · **23 autres `localStorage.setItem` bruts** subsistent dans `js/` (hors `db.js`). Même famille : chacun peut
+    tuer l'init de son module quand le magasin est plein. À auditer un par un, pas par le compte.
+  · **localStorage est SATURÉ** — le quota refusait une écriture de QUATRE octets. La console propose
+    `Codex.purgerEspacePrecedent()` pour 30 clés orphelines `a2024_*` + snapshots a2025/h2026. ⛔ **Geste
+    destructeur sur d'anciennes données, moratoire actif : à instruire à froid, pas un soir d'urgence.**
+  ▣ Trouvé pendant l'urgence des rétroactions d'amorce du 31 août au soir. **Sans rapport avec #668** : aucun commit
+  du chantier ne touche `travaux-ui.js`, vérifié par `git log 192b2a58..HEAD -- js/travaux-ui.js` (zéro commit).
 - [ ] **#668 — La projection EUF est paramétrable depuis le gabarit de la grille, comme la formule de #667**.
   Consigne : `plans de travail/CONSIGNE-projection-euf-parametrable.md` (préparée en Cowork le 1er septembre 2026,
   modifiée le même jour : ajout du Lot 6, réécriture du point « service d'aide » du Lot 2).

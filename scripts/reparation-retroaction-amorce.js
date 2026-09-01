@@ -57,7 +57,9 @@
  *      → mode PREVIEW : RIEN n'est écrit.
  *   2. Lire le tableau. Il dit combien d'évaluations sont touchées, sur quelle
  *      production, et ce qui remplacera l'amorce.
- *   3. Pour appliquer : window.__amorces.appliquer()
+ *   3. Pour appliquer : await window.__amorces.appliquer()
+ *      ⚠ `appliquer` est ASYNCHRONE et attend le drainage de l'écriture IndexedDB.
+ *      Ne recharge la page QU'APRÈS avoir vu « ÉCRITURE DRAINÉE » dans la console.
  */
 (function() {
     'use strict';
@@ -172,7 +174,24 @@
         return { cleEvals: cleEvals, evaluations: evaluations, aEffacer: aEffacer, refuses: refuses };
     }
 
-    function appliquer() {
+    /**
+     * ⚠ DÉFAUT TROUVÉ EN PRODUCTION LE 1er SEPTEMBRE 2026, APRÈS APPLICATION.
+     *
+     * `db.setSync` sur une valeur volumineuse bascule en IDB-FIRST
+     * (`db.js:1536-1541`) : il RETIRE la copie localStorage, met la valeur dans
+     * `memoryCache` — volatile — et lance l'écriture IndexedDB EN ARRIÈRE-PLAN,
+     * suivie dans `_pendingWrites`.
+     *
+     * La version précédente de ce script imprimait « N effacées » puis invitait
+     * à recharger IMMÉDIATEMENT. Ce compteur attestait le CALCUL, pas
+     * l'ÉCRITURE : rien ne garantissait que l'écriture IDB avait atterri, et le
+     * cache mémoire, lui, meurt au rechargement.
+     *
+     * `appliquer` est donc ASYNCHRONE et attend `db.flush()`. Le message de fin
+     * n'est imprimé qu'APRÈS le drainage — un compteur ne se dit qu'une fois ce
+     * qu'il compte réellement fait.
+     */
+    async function appliquer() {
         var etat = calculer();
         if (!etat.aEffacer.length) {
             console.warn('[amorces] Rien à effacer — aucune écriture.');
@@ -201,10 +220,24 @@
         });
 
         db.setSync(etat.cleEvals, etat.evaluations);
+
+        // ⚠ ATTENDRE QUE L'ÉCRITURE ATTERRISSE AVANT DE DIRE QU'ELLE EST FAITE.
+        if (typeof db.flush === 'function') {
+            await db.flush();
+        } else {
+            console.warn('[amorces] db.flush() absent : NE PAS recharger tout de suite, '
+                + 'l\'écriture IndexedDB peut être encore en vol.');
+        }
+        var restantes = (db._pendingWrites && db._pendingWrites.size) || 0;
+        if (restantes) {
+            console.warn('[amorces] ' + restantes + ' écriture(s) encore en attente après flush — '
+                + 'attendre quelques secondes avant de recharger.');
+        }
+
         console.log('[amorces] ' + n + ' rétroaction(s) d\'amorce effacée(s) sur '
-            + Object.keys(touchees).length + ' évaluation(s).');
-        console.log('[amorces] Recharge la page, puis réexporte le PDF.');
-        return { efface: n, evaluations: Object.keys(touchees).length };
+            + Object.keys(touchees).length + ' évaluation(s), ÉCRITURE DRAINÉE.');
+        console.log('[amorces] Tu peux recharger la page, puis réexporter le PDF.');
+        return { efface: n, evaluations: Object.keys(touchees).length, ecrituresEnAttente: restantes };
     }
 
     // ===================== MODE PREVIEW (par défaut) =====================
@@ -250,7 +283,7 @@
             + 'ne rien appliquer, et le dire.');
     }
 
-    console.log('Pour appliquer : window.__amorces.appliquer()');
+    console.log('Pour appliquer : await window.__amorces.appliquer()  — attendre « ÉCRITURE DRAINÉE »');
     console.groupEnd();
 
     window.__amorces = {
