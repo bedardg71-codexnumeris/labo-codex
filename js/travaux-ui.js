@@ -317,8 +317,19 @@
                 delete obj['eval-retro'];
                 localStorage.setItem(STORAGE_KEY_PANNEAUX, JSON.stringify(obj));
             }
+            // ⚠ LE DRAPEAU EST POSÉ DANS LE MÊME try QUE LA MIGRATION (1er sept. 2026).
+            // Il vivait DEHORS, après le catch. Quand localStorage est saturé, ce
+            // `setItem` de deux octets lève un QuotaExceededError NON RATTRAPÉ, dans
+            // une IIFE de haut niveau : l'initialisation du module s'arrête là, et
+            // l'écran d'évaluation reste sur « Chargement… » pour toujours.
+            // Mesuré chez Grégoire le 31 août 2026 au soir, magasin plein — le même
+            // quota refusait aussi une écriture de QUATRE octets.
+            // ⮕ La migration est une COMMODITÉ d'affichage (des largeurs de panneau).
+            // Elle n'a pas le droit d'empêcher l'application de démarrer. Si le
+            // drapeau ne peut pas être posé, la migration sera simplement retentée
+            // au prochain démarrage : elle est idempotente.
+            localStorage.setItem(MIGRATION_KEY, '1');
         } catch (_) { console.warn('[Travaux-UI] eval widths migration skipped:', _.message || _); }
-        localStorage.setItem(MIGRATION_KEY, '1');
     })();
 
     /**
