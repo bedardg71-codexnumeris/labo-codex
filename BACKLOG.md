@@ -484,6 +484,26 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   la formule historique en dur (ligne 164, `ponderation - (errfrLive / mots * facteur)`) sans consulter
   `modeleFormule` — ce second point est un trou ouvert par #667, mesuré à la passe « connexions » du 1er septembre.
   La sentinelle D de #667 ne le voit pas : sa liste `SITES_DE_CALCUL` ne balaie que `js/`.
+  ⚠ **RÉGRESSION DE #667 TROUVÉE ET CORRIGÉE ICI, LE 1er SEPTEMBRE — ne pas la réintroduire.**
+  `genererRetroactionEUF` testait `erreurs === 0` **avant** `mots === 0` : une copie sans un seul mot saisi,
+  et sans erreur, recevait « En prévision de l'EUF, l'absence d'erreur est exceptionnelle ». Le cas était **mort**,
+  parce que le site d'appel du mode simple coupait sur `if (mots === 0) return;`.
+  ⮕ **#667 l'a rendu vivant le matin même.** La garde est devenue `if (motsRequisSimple && mots === 0)`, où
+  `motsRequisSimple` vient de `modele.utiliseMots` — et le modèle neuf **`penalite_par_erreur` porte
+  `utiliseMots: false`**. Un critère où l'enseignant·e a réglé « la longueur ne compte pas ici », sans un mot saisi,
+  annonçait donc à l'élève que son absence d'erreur est exceptionnelle **en prévision d'une épreuve calibrée sur un
+  nombre de mots**. Mesuré sur les trois modèles, pas déduit : les deux modèles qui consomment les mots sont coupés
+  par la garde, le troisième non.
+  ⮕ **Corrigé DANS le registre, en déviation nommée** : le besoin en mots de la PROJECTION est **inconditionnel**
+  (« 1 erreur / N mots » n'a aucun sens sans N), alors que `utiliseMots` est un attribut du modèle de **NOTE**.
+  Corriger au site d'appel aurait reconduit le couplage que #667 a créé par accident. La garde vit au-dessus du
+  palier zéro, et le commentaire du code porte tout ce paragraphe.
+  ⮕ **Étendue MESURÉE** : sur les 481 401 couples du balayage, **exactement 1** diverge du comportement historique —
+  `(0 erreur, 0 mot)`. L'empreinte du fichier de test le PROUVE en rejouant l'ancienne réponse sur ce seul couple :
+  si l'empreinte historique revient, tout le reste est intact au caractère près.
+  ⚠ **Exposition réelle quasi nulle** : le seul modèle qui déclenche le cas est né le matin même et aucune grille
+  existante ne l'emploie. Défaut corrigé proprement avant livraison, pas incident colmaté — **pas de nouvel
+  identifiant**, la trace est ici.
   ⏳ **DÛ À GRÉGOIRE** : le nom exact du service pendant la transition, et le lien le jour où il existera.
   Ne bloque pas le chantier — le champ reste vide.
 - [ ] **#669 — `sousCriteres` ne traverse pas le schéma de partage : le destinataire bascule du mode catégories au mode simple, en silence**.

@@ -393,11 +393,10 @@ function _texteDuPalier(palier, params) {
  * @returns {object} `applicable: false` avec une `raison` nommée quand le code
  *          ne peut pas conclure. Il ne devine jamais un verdict.
  *
- * ⚠ ORDRE FIDÈLE À L'EXISTANT. `genererRetroactionEUF` teste `erreurs === 0`
- * AVANT `mots === 0` : une copie à zéro erreur et zéro mot rend donc la phrase
- * « l'absence d'erreur est exceptionnelle », pas le silence. Le comportement
- * est reproduit tel quel — le signaler est un geste, le changer en serait un
- * autre, qui appartient à Grégoire.
+ * FIDÈLE À L'EXISTANT, SAUF SUR UN POINT NOMMÉ. Le comportement d'avant #668
+ * est reproduit au caractère près partout, à une exception documentée : le
+ * besoin en mots de la projection passe AVANT le palier zéro erreur. Voir la
+ * déviation nommée dans le corps de la fonction, et §6bis de la consigne.
  */
 function calculer(critere, donnees) {
     var p = normaliser(critere);
@@ -418,6 +417,33 @@ function calculer(critere, donnees) {
         return _nonApplicable(base, 'projection-desactivee');
     }
 
+    // ⚠ DÉVIATION NOMMÉE — LE BESOIN EN MOTS DE LA PROJECTION EST INCONDITIONNEL.
+    //
+    // L'ancienne fonction testait `erreurs === 0` AVANT `mots === 0` : une copie
+    // sans aucun mot saisi, et sans erreur, recevait « l'absence d'erreur est
+    // exceptionnelle ». C'était sans conséquence tant que le site d'appel
+    // coupait sur `if (mots === 0) return;` — le cas était MORT.
+    //
+    // #667 l'a rendu vivant, le matin même : la garde du mode simple est passée
+    // à `if (motsRequisSimple && mots === 0)`, où `motsRequisSimple` vient de
+    // `modele.utiliseMots` — et le modèle neuf `penalite_par_erreur` porte
+    // `utiliseMots: false`. Un critère où l'enseignant·e a dit « la longueur ne
+    // compte pas ici », sans un mot saisi, annonçait donc à l'élève que son
+    // absence d'erreur est exceptionnelle EN PRÉVISION D'UNE ÉPREUVE CALIBRÉE
+    // SUR UN NOMBRE DE MOTS.
+    //
+    // ⮕ `utiliseMots` est un attribut du modèle de NOTE. La projection a son
+    // propre besoin en mots, et il ne dépend d'aucune formule : « 1 erreur /
+    // N mots » n'a aucun sens sans N. La garde vit donc ICI, au-dessus du palier
+    // zéro — corriger au site d'appel reconduirait le couplage que #667 a créé
+    // par accident, et le registre porterait une règle que son appelant
+    // contredit.
+    //
+    // C'est la SEULE ligne du golden qui bouge, et elle porte sa justification
+    // dans le fichier de test. Voir §6bis de la consigne.
+    if (mots <= 0) return _nonApplicable(base, 'mots-absents');
+    if (erreurs < 0) return _nonApplicable(base, 'erreurs-negatives');
+
     var sansErreur = _palierSansErreur(p.paliers);
     if (erreurs === 0) {
         if (!sansErreur) return _nonApplicable(base, 'palier-zero-erreur-absent');
@@ -426,9 +452,6 @@ function calculer(critere, donnees) {
             palier: sansErreur, indice: 0, params: p.params, mots: mots
         });
     }
-
-    if (mots <= 0) return _nonApplicable(base, 'mots-absents');
-    if (erreurs < 0) return _nonApplicable(base, 'erreurs-negatives');
 
     var seuilMotsParErreur = p.modele.seuil(p.params);
     if (!seuilMotsParErreur || !isFinite(seuilMotsParErreur)) {
