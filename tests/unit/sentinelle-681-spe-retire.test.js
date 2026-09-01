@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import vm from 'node:vm';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -62,9 +63,42 @@ describe('#681 · le module SPE autonome est retiré, la PRATIQUE reste', () => 
         expect(lire('index.html')).not.toContain('spe-specifications');
     });
 
-    it('C · le script de nettoyage COMPTE et n\'écrit rien — c\'est ce qui l\'autorise sur le corpus réel', () => {
+    it('C · le script de nettoyage est ATTEIGNABLE — il se colle, il s\'expose, il répond', async () => {
+        // ⚠ CE TEST A ÉTÉ REFAIT LE 1er SEPTEMBRE, APRÈS UNE FRICTION VÉCUE.
+        // Sa première version se contentait de `expect(src).toContain('async
+        // function nettoyage681')`. C'est un VERT QUI NE DIT RIEN : il atteste
+        // qu'une chaîne existe dans un fichier, pas que le geste marche. Même
+        // famille que le bandeau de #612 qui portait une classe CSS jamais
+        // définie — la source disait oui, l'écran disait non.
+        //
+        // Ce qu'on éprouve ici est le GESTE : coller le fichier dans une console,
+        // puis appeler la fonction. On l'évalue donc pour de vrai, dans un
+        // sandbox avec le seul global dont il dépend (`db`), et on l'APPELLE.
         const src = lire('scripts/nettoyage-681-spe.js');
-        expect(src).toContain('async function nettoyage681');
+        const faux = { trimestres: [] };
+        const db = {
+            get: async (c) => (c in faux ? faux[c] : null),
+            getSync: (c, d) => (c in faux ? faux[c] : (d !== undefined ? d : null))
+        };
+        const bac = { window: {}, console: { log: () => {}, table: () => {} }, db };
+        bac.globalThis = bac;
+        vm.createContext(bac);
+        vm.runInContext(src, bac);
+
+        // 1. Le geste « coller » expose bien la fonction sous le nom ANNONCÉ.
+        expect(typeof bac.window.nettoyage681,
+            'le script ne pose pas `nettoyage681` — l\'invitation renverrait ReferenceError').toBe('function');
+
+        // 2. Elle RÉPOND, sur des données vides, sans planter.
+        const rapport = await bac.window.nettoyage681();
+        expect(rapport, 'la sonde ne rend rien').toBeTruthy();
+        for (const champ of ['presences', 'references', 'libres', 'retenus', 'clesLues']) {
+            expect(rapport, 'le rapport n\'a pas de `' + champ + '`').toHaveProperty(champ);
+        }
+        // 3. Un zéro qui porte son témoin : la sonde dit toujours ce qu'elle a lu.
+        expect(Array.isArray(rapport.clesLues), '`clesLues` doit permettre de distinguer\n'
+            + '« rien trouvé » de « rien regardé »').toBe(true);
+
         const code = src
             .replace(/\/\*[\s\S]*?\*\//g, '')
             .split('\n').map(l => l.replace(/\/\/.*$/, '')).join('\n');

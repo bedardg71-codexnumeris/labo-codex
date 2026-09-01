@@ -29,10 +29,29 @@
    toujours combien de trimestres et combien de clés ont été RÉELLEMENT ouverts.
    « Zéro » et « je n'ai rien regardé » ne doivent pas se ressembler.
 
-   USAGE — console du navigateur, dans l'onglet de l'app :
-     1. coller CE FICHIER EN ENTIER, Entrée ;
-     2. `await nettoyage681()`
+   ── USAGE ───────────────────────────────────────────────────────────────────
+   ⚠ CE SCRIPT N'EST PAS CHARGÉ PAR L'APPLICATION. Il vit dans `scripts/`, qu'aucune
+   balise d'`index.html` ne réclame : dans la console, `nettoyage681` n'existe pas
+   tant que le fichier n'y a pas été collé. Appeler la fonction en premier rend
+   `ReferenceError: Can't find variable` — c'est arrivé le 1er septembre 2026,
+   parce que l'invitation avait voyagé sans son étape 1.
+
+   ⮕ LES TROIS GESTES, dans l'ordre. Le premier est au TERMINAL, les deux autres
+   dans la console du navigateur, sur l'onglet de l'app :
+
+       pbcopy < ~/Documents/GitHub/Monitorage_v6/scripts/nettoyage-681-spe.js
+
+   puis Cmd+V dans la console, Entrée, puis :
+
+       await nettoyage681()
+
    Repère : le rapport commence par « ==== #681 · ce que SPE a laissé ».
+
+   ⚠ NE PAS CONFONDRE AVEC `_sonderEchellesDisciplinaires()`, l'autre sonde de ce
+   chantier : celle-là vit dans `js/echelles-bibliotheque.js`, qu'`index.html`
+   CHARGE — elle est donc déjà en mémoire, et un appel suffit, sans rien coller.
+   Deux sondes du même jour, deux gestes différents : c'est ce qui rend l'erreur
+   facile, et c'est pourquoi c'est écrit ici.
    ========================================================================== */
 
 async function nettoyage681() {

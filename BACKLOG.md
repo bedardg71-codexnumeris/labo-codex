@@ -533,7 +533,12 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⚠ **Mon relevé date de l'export de 22h30.** Grégoire a navigué depuis : il peut y avoir PLUS de cinq copies
   touchées. Recompter avant de réparer, ne pas partir de cette liste-ci.
 - [ ] **#674 — Une note repose sur une pondération incomplète, et rien ne le déclare**.
-  ↻ **REQUALIFIÉ le 1er septembre 2026 : ce n'est plus de la PRÉVENTION.** Le titre disait « PRÉVENTION »
+  ↻ **REQUALIFIÉ DEUX FOIS le 1er septembre 2026 — et la seconde fois compte plus que la première.**
+  ⮕ *Le matin* : « PRÉVENTION » tombe (voir ci-dessous). *Le soir* : ce n'est même plus de la prévention
+  pour la cohorte qui ARRIVE, c'est une **réparation pour des utilisateurs DÉJÀ EN PLACE**, dont
+  l'application ment aujourd'hui et qu'on ne peut ni sonder ni joindre. Le corollaire est en fin de fiche,
+  et c'est lui qui fixe le poids de cet item.
+  ↻ **Première requalification : ce n'est plus de la PRÉVENTION.** Le titre disait « PRÉVENTION »
   parce que la sonde n'avait trouvé aucun écart sur le trimestre en cours. Elle mesurait la couverture des
   CRITÈRES ; elle ne pouvait pas voir le second mécanisme, mesuré depuis (bloc ▣▣ en fin de fiche), qui produit
   le même `ponderationTotal = 0` par un autre chemin — et celui-là existe déjà dans les données de quiconque a
@@ -620,11 +625,21 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   · `js/evaluation-chargement.js:1415` — la création par l'auto-save.
   ⮕ `typeof 0 === 'number'` : **un zéro fabriqué franchit ces trois portes exactement comme une vraie note.** C'est
   le même point de passage que celui nommé plus haut pour l'auto-save — la portée devra être écrite par ce chemin-là.
-  ⏳ **GESTE DÛ À GRÉGOIRE — la mesure que le code ne peut pas faire.** Combien de ces copies muettes
-  vivent réellement dans ses données, et combien d'évaluations les désignent ? En console :
-  `await _sonderEchellesDisciplinaires()` (`js/echelles-bibliotheque.js`, lecture seule vérifiée par
-  assertion). Elle complète `_sonder574()`, qui ne connaît ni ces huit identifiants ni la bibliothèque
-  partagée. **Si elle rend zéro partout, il n'y a rien à décider ici** — et ce zéro portera son témoin.
+  ✅ **LA SONDE A TOURNÉ — 1er septembre 2026, corpus réel de Grégoire.**
+  `_sonderEchellesDisciplinaires()` : **zéro dans la bibliothèque, zéro copie dans les trois trimestres,
+  zéro usage.** Et le zéro porte son témoin — 3 trimestres et la bibliothèque partagée RÉELLEMENT lus,
+  le rapport le dit. Rien à décider sur ses données.
+  ⚠⚠ **ET C'EST PRÉCISÉMENT CE ZÉRO QUI CHANGE LE POIDS DE CET ITEM — corollaire arrêté par Grégoire
+  le 1er septembre.** Ce zéro ne couvre QUE son corpus. Un enseignant qui a ouvert l'application avant
+  aujourd'hui a pu ajouter l'échelle « Chimie » à sa sélection : **sa copie reste muette, et rend 0,0 %
+  sans un mot.** Il n'est ni sondable, ni joignable, et **on ne sait pas combien ils sont** — le trafic
+  n'est pas mesuré.
+  ⮕ **#674 est le SEUL filet qui atteint ces gens-là.** Ce n'est plus une prévention pour la cohorte
+  qui arrive : c'est une **réparation** pour des utilisateurs déjà en place, dont l'application ment
+  aujourd'hui. Ça change son POIDS, pas seulement son rang dans une file.
+  ⮕ Et ça fixe une exigence sur la forme du correctif : il doit valoir **rétroactivement**, sur les
+  données telles qu'elles sont — ce que la piste de la PORTÉE permet déjà (elle se recalcule depuis
+  `criteres[]` et la grille), et ce qu'un état de flux de travail n'aurait jamais permis.
   ▣ **CE QUE LE RETRAIT DES HUIT ÉCHELLES (§1 du PLAN) NE REFERME PAS.** Retirer une échelle de la bibliothèque ne
   retire pas les copies déjà importées : elles vivent dans `echellesTemplates`, ce sont des données utilisateur, et
   elles restent muettes. §1 tarit la SOURCE ; il ne répare aucune donnée déjà en base. C'est #674 qui doit rendre le
@@ -659,10 +674,28 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ▣ **Le module ne démarrait que par lui-même** — trois auto-déclencheurs de fin de fichier
   (`DOMContentLoaded`, un `setTimeout(100)`, `window.onload` + `setTimeout(500)`). Personne ne l'appelait ;
   il s'appelait.
-  ⏳ **LES DONNÉES DÉJÀ SEMÉES, EN DEUX TEMPS ET JAMAIS EN UN SEUL.** `scripts/nettoyage-681-spe.js`
-  COMPTE et n'écrit rien : combien des cinq objets sont présents, et combien d'évaluations les
-  référencent. **Un objet référencé par une évaluation n'est pas supprimé, il est NOMMÉ.** C'est le corpus
-  réel de Grégoire, et le second temps lui appartient.
+  ✅ **VÉRIFIÉ À L'ÉCRAN — 1er septembre 2026.** Grégoire a supprimé les cinq gabarits `[SPE]` depuis la
+  bibliothèque et **rechargé deux fois : aucun retour.** Le semis est mort dans les données comme dans le
+  code. C'était le symptôme d'origine — « des documents qui reviennent comme des zombies quand je les
+  supprime » — et il avait son mécanisme : trois auto-déclencheurs qui resemaient à chaque ouverture.
+  ⚠ Ces cinq-là n'avaient AUCUN tombstone : contrairement aux huit échelles disciplinaires, leurs
+  identifiants ne sont pas dans `IDS_GABARITS_HARDCODES`. **Rien ne rendait leur suppression durable.**
+  La question s'éteint avec le semis, mais elle méritait d'être nommée.
+  ✅ **LA SONDE A TOURNÉ.** `nettoyage681()` : les cinq objets présents, **zéro référence, donc tous
+  LIBRES**, sur **15 clés ouvertes**. Rien de ce qui est parti ne portait la trace d'un jugement posé —
+  c'est ce qui a permis à Grégoire de supprimer sans arbitrage.
+  ⚠ **L'INVITATION A RATÉ AVANT LA SONDE.** `await nettoyage681()` a rendu `ReferenceError` au premier
+  essai : l'invitation donnait l'étape 2 sans l'étape 1. La consigne d'usage était dans l'en-tête du
+  fichier, et elle était bonne — **mais elle n'a pas voyagé avec l'invitation.** Corrigé : l'en-tête
+  porte les trois gestes dont `pbcopy < ~/…/scripts/nettoyage-681-spe.js`, et nomme l'asymétrie avec
+  l'autre sonde du jour — `_sonderEchellesDisciplinaires()` vit dans un fichier qu'`index.html` CHARGE,
+  donc un appel suffit, sans rien coller. **Deux sondes du même jour, deux gestes différents.**
+  ⚠ **Et la sentinelle mentait à sa façon.** Elle vérifiait que le fichier contient
+  `async function nettoyage681` : un vert qui n'atteste qu'une chaîne dans un fichier, jamais que le
+  geste marche — même famille que le bandeau de #612 qui portait une classe CSS jamais définie.
+  Elle CHARGE désormais le script dans un bac à sable et l'APPELLE. Break-test : retirer l'export,
+  priver le rapport de son témoin `clesLues`, ou casser la syntaxe — **l'ancienne assertion restait
+  VERTE dans les trois cas, la nouvelle rougit dans les trois.**
 
 - [ ] **#680 — Le canal de PARTAGE laisse d'autres champs d'échelle en chemin, et personne n'a écrit lesquels**.
   Inscrit le 1er septembre 2026, **issue 2 (inscrire et continuer)** : trouvaille faite en corrigeant `valeur`,

@@ -124,17 +124,24 @@ couvre exactement.**
   suppression. 1009 lignes retirées, zéro consommateur vivant, mesuré sur 24
   symboles. ⚠ **La pratique de notation par spécifications, elle, est intacte**, et
   une assertion la garde contre un futur retrait « de cohérence ». *(#681)*
-· ⏳ **Ce qui n'est PAS réglé** : les copies déjà présentes chez qui a lancé
-  l'application avant aujourd'hui restent muettes, et le `0,0 %` qu'elles
-  produisent reste silencieux. **C'est #674**, et une sonde attend Grégoire pour
-  mesurer combien de ses données sont concernées :
-  `await _sonderEchellesDisciplinaires()`. Et les **cinq** objets `[SPE]` déjà semés
-  dans ses bibliothèques sont toujours là : `await nettoyage681()` les compte sans
-  rien détruire. Ce qu'il cherchera dans ses listes, aux libellés exacts —
-  **une échelle** « [SPE] Acceptable / Non acceptable », **trois grilles**
-  « [SPE] Gabarit - Prise de position », « - Portfolio », « - Présentation orale »,
-  et **une production** « [SPE] Gabarit - Prise de position » (même libellé que la
-  grille, autre famille : le chercher dans les deux listes).
+  ⮕ **VÉRIFIÉ À L'ÉCRAN par Grégoire le 1er septembre** : les cinq gabarits
+  supprimés depuis la bibliothèque, deux rechargements, **aucun retour**. Les
+  sondes avaient d'abord mesuré zéro référence : rien de ce qui est parti ne
+  portait la trace d'un jugement posé.
+· ✅ **LES DEUX SONDES ONT TOURNÉ sur le corpus réel, le 1er septembre.**
+  `_sonderEchellesDisciplinaires()` : **zéro partout** — bibliothèque, copies dans
+  les trois trimestres, usages. Et le zéro porte son témoin : 3 trimestres et la
+  bibliothèque partagée réellement lus. `nettoyage681()` : les cinq objets présents,
+  **zéro référence, tous libres**, sur 15 clés ouvertes.
+· ⏳ **CE QUI N'EST PAS RÉGLÉ, ET QUI A CHANGÉ DE NATURE CE SOIR.** Ce zéro ne
+  couvre que le corpus de Grégoire. **Un enseignant qui a ouvert l'application
+  avant aujourd'hui a pu ajouter l'échelle « Chimie » à sa sélection : sa copie
+  reste muette et rend 0,0 % sans un mot.** Il n'est ni sondable, ni joignable, et
+  **on ne sait pas combien ils sont** — le trafic n'est pas mesuré.
+  ⮕ **#674 est le seul filet qui atteint ces gens-là.** Ce n'est plus une
+  prévention pour la cohorte qui arrive : c'est une **réparation pour des
+  utilisateurs déjà en place**, dont l'application ment aujourd'hui. Ça change son
+  poids, pas seulement son rang.
 ⮕ Cette ligne reste donc « éprouvé par Grégoire » et ne devient pas « fait » :
 ce qui a été mesuré, c'est la chaîne du NOUVEL utilisateur, pas le parcours
 complet de l'énoncé 2.
