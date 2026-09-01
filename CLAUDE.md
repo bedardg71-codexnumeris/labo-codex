@@ -3,13 +3,18 @@
 > **Ce fichier est un point d'entrée léger, chargé à chaque session.**
 > Tout ce qui est volumineux ou conditionnel vit dans `.claude/skills/`
 > et se charge à la demande. Ne rien ajouter ici sans retirer autant.
-> Cible : moins de 200 lignes.
+> **Cible : moins de 250 lignes** — relevée de 200 le 1er sept. 2026, parce que
+> ce fichier porte désormais la règle qui dit ce qui remonte jusqu'à Grégoire.
+> C'est le seul texte lu par toutes les sessions : il doit la porter.
 
 ---
 
 ## Lecture obligatoire
 
-**Commence TOUJOURS par** : `docs/00-START-HERE.md`
+**Commence TOUJOURS par** : `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` (racine) —
+état mesuré et mandat courant. Puis `OBJECTIF-COHORTE-1.md` : la ligne d'arrivée.
+
+⚠ `docs/00-START-HERE.md` date du **3 juillet 2026** : plan des lieux, pas état.
 
 ---
 
@@ -31,8 +36,9 @@ prémisse reçue. Lecture seule. Acté le 28 mai 2026 après un écart de 24 h.
 ⚠ **Vitest se lance DEPUIS `tests/`**, jamais de la racine : de la racine il
 balaie `.claude/worktrees/` sans la config et rend 217 fichiers rouges.
 
-⚠ **Lectures ciblées obligatoires.** `SESSION.md` fait ~7 600 lignes et
-`BACKLOG.md` ~1 300, avec des lignes de plusieurs milliers de caractères. **Ne
+⚠ **Lectures ciblées obligatoires.** `SESSION.md` fait **12 000 lignes (1,3 Mo)**,
+`BACKLOG.md` **7 300 (930 Ko)** et `RELAIS.md` **3 350 (236 Ko)**, avec des lignes
+de plusieurs milliers de caractères. **Ne
 jamais les lire sans `offset`/`limit`** : un `Read` par défaut sur `SESSION.md`
 coûte ~106 000 tokens. Lire l'en-tête, puis cibler.
 
@@ -66,9 +72,39 @@ Les retours utilisateurs passent AVANT le backlog prévu.
 ### Ce qui entre au BACKLOG (24 août 2026)
 
 **Un item n'entre que s'il a un symptôme que Grégoire a VÉCU, ou s'il bloque un
-chantier en cours.** Les trouvailles de passage deviennent un **commentaire dans
-le code concerné**, pas un item qui le regarde. Motif : 76 items ouverts, nourris
-par les sessions — « les tâches s'accumulent sans jamais voir la fin ».
+chantier en cours.** Motif : 76 items ouverts, nourris par les sessions — « les
+tâches s'accumulent sans jamais voir la fin ». Au 1er septembre 2026 : **159**.
+
+### Ce qu'une trouvaille devient — TROIS ISSUES, PAS DEUX (1er septembre 2026)
+
+Toute découverte faite en chemin reçoit l'une de ces trois issues, et tu la
+NOMMES dans ton rapport :
+
+1. **Corriger maintenant** — seulement si ça casse le parcours qu'on est en train
+   de livrer, ou si ça touche quelque chose que des élèves ont déjà entre les mains.
+2. **Inscrire et continuer** — réel, mais hors du lot en cours. ⮕ **C'EST LE
+   DÉFAUT.** Dans le doute, c'est celui-là.
+3. **Commenter dans le code et oublier** — vrai, sans conséquence observable.
+
+⚠ Le premier niveau était devenu le défaut de fait. C'est ce qui produit les
+corrections de corrections, et ce qui fait grossir le backlog à chaque fois qu'on
+s'y attaque.
+
+⚠⚠ **CES TROIS NIVEAUX ARBITRENT DES TROUVAILLES SUR DU CODE ÉTRANGER — pas ton
+propre lot** (précision du 1er sept. 2026, née d'un cas réel en #612). Une classe
+CSS écrite dans `js/` et jamais définie dans `styles.css`, un export posé sans
+consommateur, une fonction livrée que rien n'appelle : **ce ne sont pas des
+trouvailles, c'est le lot qui n'est pas fini.** Les terminer n'élargit aucun
+périmètre, et ne se négocie pas.
+⮕ Le test qui départage : **est-ce que je viens de l'écrire ?** Si oui, finis. Si
+c'était là avant toi, applique les trois niveaux.
+
+### Ce qu'un audit doit produire
+
+**Un audit n'est pas terminé quand il est déposé** — mesuré le 1er sept. 2026 :
+sur 51 rapports, **22 n'ont jamais eu de suite**. Il est terminé quand chacun de
+ses constats porte, **dans le fichier d'audit lui-même**, l'une de trois
+dispositions : *inscrit* (avec le numéro), *refusé* (avec le motif), *périmé*.
 
 ⮕ Même esprit pour les portes terrain : les **deux règles de tête** du skill
 `portes-terrain` (aucune porte si une machine peut répondre ; préalable dû
@@ -80,10 +116,14 @@ seulement si un raté est irréversible).
 
 ### Stabilité zéro-dette (21 avril 2026)
 
-> Dans un projet sans base d'utilisateurs, il n'y a pas de contrainte de
-> rétro-compatibilité au-delà de la préservation des données personnelles du
-> développeur. Tout nouveau chantier RETIRE ce qu'il remplace, il ne l'empile
-> pas à côté. La stabilité prime sur la vitesse de livraison.
+> Tout nouveau chantier RETIRE ce qu'il remplace, il ne l'empile pas à côté.
+> La stabilité prime sur la vitesse de livraison.
+
+⚠ **RÉVISÉ LE 1er SEPT. 2026 : la prémisse « sans base d'utilisateurs » a expiré**
+— la cohorte 1 arrive à la mi-septembre. La rétro-compat couvre désormais aussi
+**ce qui voyage** (grilles partagées, paquets d'import, exports). Et
+**l'élargissement de scope n'est plus gratuit** : « refactoriser est attendu »
+vaut À L'INTÉRIEUR d'un lot, ce n'est pas une licence pour l'agrandir.
 
 - Un chantier n'est pas fini tant que l'ancien système n'est pas retiré. Pas
   d'alias « au cas où », pas de code mort « pour plus tard ».
@@ -184,17 +224,32 @@ confiance). Le filet mécanique (contrôle `innerHTML` au commit, Vitest au push
 s'active seul via le hook SessionStart. Le §4 adverse reste à ta charge : c'est
 l'étape que le biais d'auteur saute.
 
-Puis le skill `release-et-changelog` pour le bump de version et le changelog.
-En résumé : décider l'intention (`patch` / `minor` / `major`, **confirmer avec
-Grégoire avant un `major`**), lancer `node scripts/release.mjs <intention>`,
-vérifier `git diff`, puis `cd tests && npm test`.
-
-> `version.json` est la **source unique de vérité**. « Bêta publique » est un
-> libellé d'affichage, pas le numéro.
+Puis le skill `release-et-changelog` — il porte la procédure complète. Ne pas
+la recopier ici. **Confirmer avec Grégoire avant un `major`.**
 
 ---
 
-## En cas de doute
+## Ce qui remonte jusqu'à Grégoire — et ce qui ne remonte pas
 
-**Pose la question plutôt que de supposer.**
-Grégoire a la mémoire contextuelle réelle du projet.
+**RÉVISÉ LE 1er SEPT. 2026.** Ce paragraphe disait « pose la question plutôt que
+de supposer ». Juste quand le projet était petit ; à l'échelle actuelle, ça lui
+fait arbitrer une quinzaine de décisions par session.
+
+**Le défaut est maintenant : DÉCIDE, puis DIS-LE en une ligne.** Tranche
+toi-même les questions techniques (nommage, découpage, ordre des lots, forme
+d'un test, emplacement d'un correctif) et tout ce qui est **mesurable** : un
+doute qui se lève par un `grep` n'est pas une question, c'est une mesure que tu
+n'as pas faite.
+
+**Demande-lui — et attends sa réponse — seulement pour :**
+1. **la pédagogie et sa didactique** — ce qu'une note veut dire, ce qu'un critère
+   mesure, ce qu'une suppression doit emporter ;
+2. **ses données réelles** — tout geste irréversible sur ses trimestres, ses
+   grilles, ses évaluations ;
+3. **les mots que ses élèves liront** — la prose des rétroactions ;
+4. **ce qui l'engage publiquement** — une release `major`, un partage, une
+   communication.
+
+⚠ Grégoire a la mémoire contextuelle réelle du projet : quand tu décides seul,
+**dis ce que tu as supposé**. Une supposition nommée se corrige en dix secondes ;
+une supposition tue se découvre trois jours plus tard.

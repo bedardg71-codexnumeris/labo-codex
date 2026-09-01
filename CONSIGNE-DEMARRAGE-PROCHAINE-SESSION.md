@@ -108,7 +108,7 @@ pas le `AAAAMMJJ`+lettre des autres.
 
 ---
 
-## ÉTAT MESURÉ — 1er SEPTEMBRE 2026, FIN DE MATINÉE
+## ÉTAT MESURÉ — 1er SEPTEMBRE 2026, MATINÉE
 
 **Branche `main`, version `1.106.14`, build `0831-1552`** — toujours aucune release,
 conformément au §4.3 de la consigne de #668, qui attend un `minor` à la FIN du chantier.
