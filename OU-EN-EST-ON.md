@@ -299,10 +299,10 @@ Ce qui change, en gestes :
   choisi sur Rigueur, Plausibilité ou Nuance était lu sur Structure, et **n'a jamais été
   enregistré**. ↻ Précisé par toi à 19 h 30 : l'évaluation de Daniel était un test et
   **aucune autre évaluation n'utilise encore cette grille** — rien n'est perdu. Avant les
-  vraies évaluations : donner un identifiant à ses quatre critères (ta grille, ton
-  accord) et refaire ou supprimer le test de Daniel. Pour les autres enseignants, dont
-  l'éditeur a pu créer les mêmes grilles depuis octobre 2025, une réparation automatique
-  est **à décider à froid**. Rien n'a été écrit. Détail dans la consigne de démarrage.
+  vraies évaluations : donner un identifiant à ses quatre critères. ↻ **Fait par toi à
+  19 h 45** (critères supprimés et recréés dans l'éditeur : « tout fonctionne »). Pour
+  les autres enseignants, dont l'éditeur a pu créer les mêmes grilles depuis octobre
+  2025, une réparation automatique est **à décider à froid**. Détail dans la consigne.
 - **Sur le PDF de l'élève** : pas de bandeau « Niveau général » ; à sa place, la
   phrase que tu as arrêtée le 2 septembre en soirée : « Cette copie n’a pas de niveau
   général : Langue (20 %) reste à évaluer. » L'export te le dit avant la remise.
