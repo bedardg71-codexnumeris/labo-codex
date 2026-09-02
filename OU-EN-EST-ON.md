@@ -15,8 +15,8 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 2 septembre 2026, 12 h 15 (onzième passe) — release 1.110.0,
-commitée et NON POUSSÉE : elle attend que Grégoire regarde deux écrans.**
+**Dernière mise à jour : 2 septembre 2026, 12 h 50 (douzième passe) — release 1.110.0,
+EN LIGNE, suite complète verte, et le QUATRIÈME ÉNONCÉ passe au vert.**
 
 ---
 
@@ -38,7 +38,7 @@ mentaient dans les deux sens :
 
 ---
 
-## Le compte du jour : 4 faits, 2 éprouvés par Grégoire, 3 pas faits, 0 jamais vérifié
+## Le compte du jour : 5 faits, 2 éprouvés par Grégoire, 2 pas faits, 0 jamais vérifié
 
 ---
 
@@ -75,25 +75,6 @@ maintenant avec la grille. L'évaluation du destinataire ne bascule plus de mode
 à son insu.
 **Vérifié comment** : tests automatiques sur le transport —
 `cd tests && npm run test:unit` (433 fichiers / 4638 tests, code 0). *(#669)*
-
-### Le numéro de version affiché correspond au code qui tourne
-Sans ça, aucun rapport de bug n'est interprétable, ni le sien ni celui d'un
-utilisateur.
-**Vérifié comment** : tests sur le bandeau de version, et les quatre points de
-vérité mesurés PAR TÉMOIN à la release **1.109.2** (build `0902-1006`) —
-`grep -rl '1\.109\.1' --include=*.js --include=*.json --include=*.html .` rend
-**0**. ⚠ Le témoin dit aussi son périmètre : sur tout le dépôt, `1.109` rend encore
-**11** fichiers de prose datée.
-⚠ **Fragile** : ça se re-périme à chaque release. Le 2 septembre, **quatre versions
-se sont succédé en une matinée** — cette ligne a cité un numéro périmé entre
-chacune.
-⮕ Le bump est passé par `scripts/release.mjs`, qui écrit les quatre points de
-façon atomique **et** bumpe les jetons anti-cache d'`index.html` (11 ce matin,
-qu'il liste). Le danger reste le bump fait à la main, et lui seul. *(#665)*
-
----
-
-## PAS FAIT
 
 ### Une rétroaction ne parle que de la discipline de celui qui l'écrit
 ↻ **Descendue de FAIT à PAS FAIT le 2 septembre à 11 h.** Ce n'est pas une
@@ -220,6 +201,65 @@ texte gelé, et c'est voulu. On tarit la source, on ne réécrit pas ce qui est 
 les gens. Le mot reste aussi gravé dans les identifiants de champs du volet
 confidentiel. *(#440 résiduel)*
 
+↻ **PASSE À « FAIT » LE 2 SEPTEMBRE À 12 h 45.** Le code est en ligne (1.110.0), la suite
+COMPLÈTE est verte, **et Grégoire a parcouru les deux écrans lui-même.**
+
+**Vérifié comment, au complet :**
+· `cd tests && npm test` — **436 fichiers / 4710 tests** ET **239 essais Playwright, 0 échec,
+  0 instable, en 8,0 min**, sur `672e3c5f`. ⚠ **C'est le premier verdict NAVIGATEUR pris sur
+  ce lot** : 1.110.0 était partie sans, le garde pré-push ne jugeant que Vitest.
+· Sentinelle neuve `#690`, quatre gardes break-testées.
+· ▣ **ÉPROUVÉ PAR GRÉGOIRE, sur ses vraies données, le 2 septembre** : Conception ›
+  Pratiques › « Partir d'un modèle » affiche ce qui a été décidé ; et le champ « Nom du
+  service d'aide » (Conception › Grilles de critères › critère algorithmique › Modèle de
+  projection) tient ce qu'il y écrit.
+  ⮕ **Et c'est LUI qui a trouvé, en le faisant, que le jeton s'écrit `{service}` avec des
+  ACCOLADES** : il avait tapé `[service]`, que le code ne remplace jamais — l'élève aurait lu
+  le crochet. **Aucun test ne voyait ça.** C'est la démonstration de ce que vaut un passage à
+  l'écran.
+
+### ⚠ LE DERNIER MOT DE L'ÉNONCÉ, QUE PERSONNE N'AVAIT MESURÉ : le SRPNF
+
+L'énoncé en nomme quatre — SRPNF, EUF, CAF, littérature. Les trois derniers ont été traités ;
+**le SRPNF ne l'avait jamais été.** Mesuré depuis Cowork le 2 septembre à 12 h 50 :
+
+```bash
+grep -rn "SRPNF" js/ --include=*.js
+grep -c "copierCriteresSRPNF" index.html
+```
+
+▣ Un seul endroit l'affichait encore à un enseignant : `js/evaluation.js:3087`,
+`notifications.succes('Copié', 'SRPNF copiés dans le presse-papiers')`, dans
+`copierCriteresSRPNF()`.
+▣ **Cette fonction n'a aucun appelant** : `grep -c` sur `index.html` rend **0**.
+**Témoin** : au même test, `sauvegarderEvaluation` rend **2** et `supprimerEvaluation` **1**.
+Le zéro mesure donc quelque chose. L'élément `criteresCopier` qu'elle lit n'est pas non plus
+dans `index.html`.
+⮕ **Le bouton n'existe plus ; la fonction est restée.** Personne ne voit cette notification.
+· Les autres occurrences de SRPNF sont des noms de fonctions, des commentaires, une entrée de
+  changelog, et `pratiques-predefines.js` — **le fichier mort** (voir plus haut).
+⮕ **Inscrit comme code mort, PAS corrigé** — issue 2 de `CLAUDE.md`. Ça n'empêche aucun des
+huit énoncés.
+
+### Le numéro de version affiché correspond au code qui tourne
+Sans ça, aucun rapport de bug n'est interprétable, ni le sien ni celui d'un
+utilisateur.
+**Vérifié comment** : tests sur le bandeau de version, et les quatre points de
+vérité mesurés PAR TÉMOIN à la release **1.109.2** (build `0902-1006`) —
+`grep -rl '1\.109\.1' --include=*.js --include=*.json --include=*.html .` rend
+**0**. ⚠ Le témoin dit aussi son périmètre : sur tout le dépôt, `1.109` rend encore
+**11** fichiers de prose datée.
+⚠ **Fragile** : ça se re-périme à chaque release. Le 2 septembre, **quatre versions
+se sont succédé en une matinée** — cette ligne a cité un numéro périmé entre
+chacune.
+⮕ Le bump est passé par `scripts/release.mjs`, qui écrit les quatre points de
+façon atomique **et** bumpe les jetons anti-cache d'`index.html` (11 ce matin,
+qu'il liste). Le danger reste le bump fait à la main, et lui seul. *(#665)*
+
+---
+
+## PAS FAIT
+
 ### Aucune note remise ne repose sur une pondération incomplète sans le dire
 Un critère laissé sans niveau donne **0,0 %**, sans un mot, et ce zéro
 s'enregistre comme une vraie note.
@@ -328,13 +368,39 @@ complet de l'énoncé 2.
 C'est le morceau qui inquiète, et il est moins ouvert qu'il n'en a l'air.
 
 Un audit de l'onglet Évaluations (les quatre sous-onglets, le PDF de rétroaction,
-le design) a relevé **20 constats le 25 août**. Au 30 août : **19 réglés, 1 partiel,
-0 ouvert**, plus la section « mineurs » livrée. Les 17 fiches qui les portent sont
-**toutes cochées au backlog**, vérifié le 1er septembre.
+le design) a relevé **20 constats le 25 août**. ↻ **Remesuré le 2 septembre, et
+écrit DANS le rapport** (`Rapports/AUDIT-evaluation-onglet-2026-08-25.md`, temps 1) :
+**15 inscrits et livrés, 4 partiels, 1 refusé avec motif** (les tailles du PDF, ta
+décision), plus la section « mineurs » — partielle elle aussi. Les 17 fiches sont
+cochées au backlog ; **coché ne veut pas dire couvert**, c'est ce que le rapport dit
+maintenant constat par constat. ⚠ Et vingt constats LUS, **zéro écran parcouru** :
+un audit fermé n'est pas une section vérifiée (temps 3, pas fait).
 
-**Le partiel est le seul qui reste, et il t'attend** : la portée des suppressions par
-couple. Le garde a été livré le 29 août, la règle métier non. C'est le geste 8 de
-cette page. *(#560)*
+**Le quatrième site est corrigé — et il t'attend** *(temps 2, 2 septembre après-midi,
+non poussé)*. #572 disait « la valeur calculée est la source » et avait corrigé
+trois sites ; **rouvrir une copie déjà corrigée et la réenregistrer** passait par un
+quatrième (`js/evaluation.js`, chemin de modification) qui relisait l'écran.
+**Reproduit sur le chemin réel avant de corriger** : `79,46` calculé → **`79,5`
+stocké** (l'arrondi de l'affichage) ; écran « -- » (rendu différé, #321) →
+**`0` stocké** par-dessus la vraie note. Le second effet est réel, et c'est celui qui
+départageait « arrondi bénin » et « zéro qui remplace une note ». Corrigé au même
+patron que les trois sœurs ; la sentinelle #572 ne vérifie plus une liste tapée à la
+main mais **tous les fichiers de `js/`, lus à chaque exécution** — c'est la leçon du
+jour : elle était verte depuis le 29 août pendant que le défaut vivait.
+**Vérifié comment** : test de reproduction en 3 cas (les 2 effets rouges avant, verts
+après ; témoin que le chemin aboutit) ; break-tests : réintroduire la lecture d'écran
+dans `evaluation.js` → rouge, l'introduire dans un fichier jamais listé → rouge ;
+`grep -rn "parseFloat(.*noteProduction1" js/` rend **zéro**, et le témoin
+`noteCalculeeCourante === 'number'` en rend **quatre**. Vitest 437 f. / 4715 t.
+⮕ **Ce que tu dois aller voir** : ouvrir une copie que tu as déjà corrigée, ne rien
+changer, réenregistrer, et vérifier que la note affichée est identique au centième.
+⚠ **Ce que ça ne règle pas** : les quatre chemins écrivent toujours `0` quand la note
+n'est pas calculable — c'est #674, l'énoncé 5, forme déjà tranchée (persister
+`ponderationTotal`). Et les évaluations déjà enregistrées avec une note arrondie ou à
+zéro gardent ce qu'elles portent : rien n'a été écrit dans tes données.
+
+**L'autre partiel qui t'attend** : la portée des suppressions par couple. Le garde a
+été livré le 29 août, la règle métier non. C'est le geste 8 de cette page. *(#560)*
 
 ⚠ **Trois trous ont été découverts EN corrigeant**, et ils sont ouverts : neuf
 fonctions définies deux fois sur `window`, 78 variables CSS fantômes, des clés de

@@ -1,566 +1,229 @@
-# Consigne du jour
+# Consigne du jour — la note qui se réécrit depuis l'écran
 
-> **Réécrite le 2 septembre 2026 à 11 h 20 (heure de Drummondville), par Cowork.**
-> Elle remplace la version de 10 h 54, dont le frein est LEVÉ (voir ci-dessous).
+> **Écrite le 2 septembre 2026 à 13 h 10 (heure de Drummondville), par Cowork, avec Grégoire.**
+> Elle REMPLACE la consigne du geste 4 et son addendum, tous deux exécutés et publiés.
 >
-> ⚠ **Si tu lis ceci plus de quelques heures après cette heure-là, ou si `HEAD` a
-> bougé, NE L'EXÉCUTE PAS telle quelle** : remesure d'abord, et dis à Grégoire ce
-> qui a changé (règle 1 de `PROTOCOLE.md`).
-
-## ✅ LE FREIN DE 10 H 54 EST LEVÉ — remesure du 2 septembre à 11 h
-
-La version précédente disait « ce n'est PAS le mandat d'aujourd'hui, arrête ».
-**Grégoire a choisi ce mandat à 11 h, en connaissance du compte de la matinée.**
-La séance du matin est close ; celle-ci en est une nouvelle.
-
-**État du dépôt, remesuré à 11 h (règle 1, chaque chiffre porte sa commande) :**
-
-- `cat version.json` rend `{"build":"0902-1006","beta":"1.109.2"}`.
-- `git rev-list --count origin/main..HEAD` rend **0** — **tout est poussé**, la
-  release 1.109.2 comprise. La consigne de 10 h 54 annonçait « UN commit non
-  poussé » : c'est périmé, il est parti.
-- `HEAD` = `b2683bd3` (10 h 45), contre `5a5229a1` quand la consigne fut écrite.
-  ⮕ **Les deux commits intercalaires sont `docs:` seulement** (`78864564`,
-  `b2683bd3`). **Aucun fichier de `js/` n'a bougé** : toutes les mesures de
-  lignes et de fichiers ci-dessous tiennent. Rejoue-les quand même — c'est la règle.
-
-## Le mandat — FINIR L'ÉNONCÉ 4, en deux gestes
-
-L'énoncé, dans les mots de Grégoire : *« Aucun élève ne reçoit un PDF où son
-critère est rebaptisé "français". Aucun enseignant ne lit dans son interface le
-SRPNF, l'EUF, le CAF ou la littérature s'il n'en fait pas. »*
-**La première phrase est faite** (1.108.0). **La seconde tient dans les deux
-gestes ci-dessous, et elle seule empêche l'énoncé 4 d'être vert.**
-
-⮕ **Les deux gestes vont ensemble dans une seule livraison**, à la fin de la
-séance, que Grégoire regarde avant que ça parte.
+> ⚠ **Si tu lis ceci plus de quelques heures après 13 h 10, ou si `HEAD` a bougé, remesure
+> d'abord et dis ce qui a changé** (règle 1 de `PROTOCOLE.md`).
+>
+> **État au moment de l'écrire** : `1.110.0`, `HEAD` = `672e3c5f`, **tout est publié**.
+> Suite COMPLÈTE verte sur ce commit : 436 fichiers / 4710 tests **et** 239 essais
+> Playwright, 0 échec, 0 instable.
+>
+> **Source** : `plans de travail/PLAN-2026-09-02-evaluation-avant-la-chronique.md`, temps 2,
+> première moitié. Ce fichier exécute ; le plan explique.
 
 ---
 
-## GESTE 1 — plus aucun nom de personne dans le code
+## Le mandat — le quatrième site, et la garde qui ne le voyait pas
 
-**Décision de Grégoire, 2 septembre 2026, en deux temps : « on retire absolument
-tout nom de collègue », puis, après mesure : « on retire TOUS les noms. »**
+**#572 a déclaré : « LA VALEUR CALCULÉE EST LA SOURCE, l'écran n'en est que l'affichage. »**
+Elle a compté **trois** sites et en a corrigé trois. **Il y en avait quatre.**
 
-Le motif est le sien et il tient en une phrase : ce code est servi au navigateur de
-tout le monde. Un nom gravé dedans est un nom publié, par quelqu'un d'autre que son
-porteur, sans qu'on le lui ait demandé.
+⚠ **Ce lot est un « corriger maintenant »** (issue 1 de `CLAUDE.md`) : il touche le parcours
+que Grégoire s'apprête à décrire dans sa chronique sur l'évaluation.
 
-⚠ **La mesure a trouvé plus large que la fiche #690** : ce n'est pas trois entrées,
-c'est **trois familles de natures différentes**. ↻ **Corrigé le 2 septembre à 11 h :
-les trois sont gratuites.** J'avais annoncé qu'une ne le serait pas ; je m'appuyais
-sur un commentaire du code que je n'avais pas remesuré, et il était périmé. La
-mesure est dans la famille 2. **Aucune écriture dans les données de personne n'est
-nécessaire nulle part dans ce lot.**
-
----
-
-### FAMILLE 1 — les pratiques offertes à l'adoption · À FAIRE
-
-`js/pratiques/pratiques-predefines.js`. Mesuré le 2 septembre à 10 h 40, à rejouer :
+**Mesure, faite par Cowork le 2 septembre à 11 h 40, rejouée à 12 h 45, à REJOUER encore :**
 
 ```bash
-grep -nE "id: 'pan-[a-z-]+'|^const PRATIQUE_|discipline: '" js/pratiques/pratiques-predefines.js
+grep -rn "parseFloat(.*noteProduction1" js/ --include=*.js
+grep -rn "noteCalculeeCourante" js/ --include=*.js
 ```
 
-**Quatre identifiants et leurs constantes portent un prénom** :
-`pan-standards-bruno` (l. 22-23), `pan-specifications-fah` (l. 264),
-`pan-objectifs-ponderes-michel` (l. 474-475), `pan-jugement-global-isabelle`
-(l. 701-702), plus leurs entrées dans le tableau d'export (l. 811-816).
+▣ **Trois sites écrivent la valeur calculée** — `evaluation-sauvegarde.js:209`,
+`evaluation-chargement.js:1452`, `evaluation-chargement.js:1476`.
+▣ **Le quatrième relit l'écran** — `js/evaluation.js:1784`, dans `_lireChampsDOMMod` :
 
-**Et au moins six entrées déclarent une matière** dans un champ `discipline:` :
-Chimie (l. 28, 269), Littérature (l. 163, 365), Mathématiques – Calcul différentiel
-(l. 480), Philosophie 101 (l. 599), Biologie – Anatomie et physiologie 3 (l. 707).
+```js
+noteFinale: parseFloat(document.getElementById('noteProduction1').textContent) || 0,
+```
 
-⮕ **Traite les deux d'un coup : c'est le même fichier et la même décision.**
-· Les identifiants et les noms de constantes : un nom qui décrit la PRATIQUE, pas la
-  personne (`pan-standards-cinq-niveaux`, par exemple — tranche toi-même et dis-le).
-· Le champ `discipline:` : la valeur devient `'Général'`, comme les cinq modèles
-  neutralisés hier. Si l'origine informe vraiment, elle passe dans la `description`,
-  sans nommer personne.
-
-⚠⚠ **CE MODULE EST VIVANT** : chargé par `index.html`, lu par `js/bibliotheque-ui.js`
-et `js/pratiques/pratique-configurable.js`. Ces pratiques sont **offertes à
-l'adoption**, contrairement au matériel mort retiré hier.
-⮕ **MESURE D'ABORD ce que devient la copie de quelqu'un qui en a adopté une.**
-Si la fusion à la lecture saute le prédéfini quand l'utilisateur porte déjà son id
-(le patron de `pratiques-bibliotheque.js`), renommer fait réapparaître le prédéfini
-À CÔTÉ de sa copie. Ce n'est pas grave — mais **dis-le dans ton état mesuré**, et
-n'écris rien dans sa base pour l'éviter.
+▣ **Il est appelé UNE SEULE FOIS**, à `js/evaluation.js:1959` — **le chemin qui enregistre la
+MODIFICATION d'une évaluation existante** (il pose `verrouillee: true`, puis écrit par
+`sauvegarderDonneesSelonMode('evaluationsSauvegardees', …)`).
+▣ **La source, elle, est posée par le calcul** : `evaluation-calcul.js:914`
+`window.noteCalculeeCourante = pourcentage;` — et `:806` la met à `null` quand rien n'est
+calculable.
+▣ **L'affichage est un rendu** : `evaluation-calcul.js:917`,
+`document.getElementById('noteProduction1').textContent = pourcentage.toFixed(1) + ' %';`
 
 ---
 
-### FAMILLE 2 — les huit identifiants d'échelles · À FAIRE, et c'est GRATUIT
+## ⛔ L'ORDRE EST IMPOSÉ : REPRODUIRE, PUIS CORRIGER
 
-`js/main.js:139-143` (`window.IDS_GABARITS_HARDCODES`) et
-`js/echelles-bibliotheque.js:161` (la sonde `_sonderEchellesDisciplinaires`).
+**Les deux effets ci-dessous sont LUS, pas exécutés. Ne corrige rien avant d'avoir vu du
+rouge.** C'est la règle du break-test, et ici elle porte tout le lot : sans reproduction, on
+ne saura pas lequel des deux effets est réel.
 
-`ECHELLE_BRUNO_CHIMIE` · `ECHELLE_XAVIER_INFO` · `ECHELLE_ISABELLE_BIO` ·
-`ECHELLE_HELENE_PHILO` · `ECHELLE_MARIEHELENE_LITT` · `ECHELLE_ETIENNE_ADMIN` ·
-`ECHELLE_OLIVIER_GEO` · `ECHELLE_JORDAN_PHILO`
+**Effet 1 — l'arrondi.** `toFixed(1)` arrondit au dixième. Rouvrir une évaluation et la
+réenregistrer stockerait donc une note arrondie, pas la valeur calculée. Écart max 0,05 point.
+⮕ **Le test rouge** : une note calculée dont la décimale se perd à l'arrondi (par exemple
+`79,46`), passée par le chemin de modification, doit ressortir `79,46` et non `79,5`.
 
-⚠⚠ **LE COMMENTAIRE DU CODE MENT, ET IL A FAILLI FAIRE RENONCER À CE LOT.**
-`js/echelles-bibliotheque.js:136-140` affirme que ces identifiants doivent rester,
-« sinon quelqu'un qui supprime son échelle "Chimie" la verrait revenir au prochain
-import ». **C'est faux depuis le retrait du semis, le 1er septembre.** Ce
-commentaire a survécu au changement qui l'a périmé.
-
-**La mesure, faite depuis Cowork le 2 septembre à 11 h — rejoue-la :**
-
-```bash
-grep -rn "estRessourceSupprimee" js/ --include=*.js
-grep -rn "estRessourceSupprimee\|ressourcesSupprimees" js/import-export.js js/codex.js js/partage-section.js
-grep -rn "ECHELLE_BRUNO_CHIMIE\|ECHELLE_XAVIER_INFO\|ECHELLE_JORDAN_PHILO" js/ --include=*.js
-```
-
-▣ Le tombstone a **cinq lecteurs, et aucun ne concerne ces huit échelles** :
-`echelles.js:581` ne regarde que `ECHELLE_IDME_DEPART` · `grilles.js:1497` que
-`GRILLE_GENERIQUE` · `cartouches.js:170` que `CART_GENERIQUE` ·
-`gabarits-utils.js:390` que les `GABARIT_*`.
-▣ **Le chemin d'import ne consulte pas le tombstone du tout** — la deuxième
-commande rend **zéro**. Témoin du périmètre : la première en rend cinq.
-▣ **Plus aucun code ne sème ces échelles** — la troisième ne rend rien hors de la
-liste et de la sonde.
-
-⮕ **Conclusion : ces huit identifiants sont INERTES.** Leur seul effet aujourd'hui
-est d'écrire, à la suppression, une marque que personne ne relit. **Les retirer ne
-coûte rien : pas de migration, pas d'écriture dans les données de personne.**
-
-**Ce que tu fais :**
-
-1. Retire les huit de `IDS_GABARITS_HARDCODES` (`js/main.js`). ⚠ **Ne touche pas
-   aux cinq autres entrées** — `ECHELLE_GENERIQUE`, `GRILLE_GENERIQUE`,
-   `CART_GENERIQUE`, `ECHELLE_IDME_DEPART` et les `GABARIT_*` sont vivantes et
-   gardées par des sentinelles.
-2. Retire-les de la sonde `_sonderEchellesDisciplinaires`
-   (`js/echelles-bibliotheque.js:161`). ⚠ **Mesure d'abord si la sonde sert encore
-   à quelque chose sans eux** : c'était son sujet entier. Si elle devient vide de
-   sens, propose de la retirer — ne la laisse pas en coquille.
-3. **CORRIGE LE COMMENTAIRE PÉRIMÉ** de `js/echelles-bibliotheque.js:136-140`, dans
-   le MÊME commit. C'est lui qui a failli faire renoncer au lot ; le laisser en
-   place ferait renoncer la prochaine session.
-
-⛔ **LA SENTINELLE VA ROUGIR, ET SA PRÉMISSE EST L'AFFIRMATION PÉRIMÉE.**
-`tests/unit/sentinelle-464-cles-nues.test.js`, cas **D** : *« les identifiants
-restent dans IDS_GABARITS_HARDCODES : une suppression doit rester durable »*.
-⮕ **Réoriente-la, ne la désarme pas.** Ce qu'elle doit garder désormais : *les
-identifiants dont un semis dépend encore restent dans la liste* — c'est-à-dire les
-cinq vivantes, nommément. Break-teste : retirer `ECHELLE_IDME_DEPART` doit la faire
-rougir, retirer `ECHELLE_BRUNO_CHIMIE` ne doit plus rien changer.
-⚠ Vérifie aussi `sentinelle-468-boutons-qui-mentent` (l. 683) et
-`sentinelle-echelle-idme-de-depart` (cas E), qui lisent la même liste.
-
-⚠ **Ce que ça NE règle pas, et qu'il faut dire** : les copies de ces huit échelles
-vivent toujours dans la base des utilisateurs qui les ont reçues avant le
-1er septembre — c'est `bibliothequeEchelles`, ce sont **leurs** données, et elles
-restent muettes. Ce n'est pas ce lot, c'est **#674**.
+**Effet 2 — le zéro.** Si `#noteProduction1` n'affiche pas un nombre à cet instant — `--`,
+vide, ou un rendu différé (le motif **#321** est nommé dans le commentaire de #572) —
+`parseFloat` rend `NaN`, et le `|| 0` écrit **0**.
+⮕ **Le test rouge** : mettre l'affichage dans cet état, passer par le chemin de modification,
+et constater qu'un **0** atterrit dans `evaluationsSauvegardees` alors que
+`noteCalculeeCourante` porte une vraie note.
+⚠ **C'est CE cas-là qui départage** « arrondi bénin » et « zéro qui remplace une note ». S'il
+n'est pas atteignable, dis-le : ce serait une bonne nouvelle, et elle doit être écrite.
 
 ---
 
-### FAMILLE 3 — les commentaires · À FAIRE, sauf un cas
+## La correction
 
-Mesuré, à rejouer :
+`_lireChampsDOMMod` lit `window.noteCalculeeCourante`, **comme ses trois sœurs**, avec le
+même patron exactement :
 
-```bash
-grep -rniE "bruno|michel|isabelle|xavier|helene|hélène|etienne|étienne|olivier|jordan|francois|françois|V." js/ tests/ scripts/ --include=*.js
+```js
+noteFinale: (typeof window.noteCalculeeCourante === 'number') ? window.noteCalculeeCourante : 0,
 ```
 
-**Ce qui part** : les mentions qui servent d'étiquette de circonstance —
-« Bug Bruno » (`js/grilles.js:1032` et `:4577`), « cours François »
-(`js/pratiques/pratique-pan-specifications.js:58`), « Ex: Bruno »
-(`js/pratiques/pratique-configurable.js:569`), « (François) »
-(`js/pratiques.js:1871`), « Ex: 'pan-standards-bruno' »
-(`js/pratiques/pratique-manager.js:37`), et les crédits de retour terrain
-(« FIX, retour Jean-François » — `js/main.js:222`, `js/saisie-presences.js:871`
-et `:1866`). Remplace par ce que le commentaire dit vraiment : la date, le
-symptôme, le numéro de fiche.
+⚠ **Ne dévie pas du patron des trois autres**, même si tu le trouves perfectible — voir la
+note sur le `: 0` plus bas. Quatre chemins qui se ressemblent se relisent ; quatre chemins qui
+divergent produisent le défaut d'aujourd'hui.
 
-⚠ **LE CAS À NE PAS TRAITER SEUL.** Deux mentions ne sont pas des étiquettes, ce
-sont des **attributions d'idée** : « l'algorithme propose, le jugement tranche —
-Voisard » (`js/pratiques/pratique-pan-standards.js:35`,
-`js/pratiques/denotation-saisie-ui.js:8`).
-
-⮕ **Si cette formule vient d'une source PUBLIÉE** (un texte, une communication), la
-bonne correction n'est pas de l'effacer : c'est de la citer en règle — auteur,
-œuvre, année — ou de reformuler l'idée sans la citation. Effacer une attribution
-n'est pas de la protection, c'est de l'effacement.
-⮕ **Si elle vient d'une remarque de collègue jamais publiée**, elle part.
-
-**Tu ne peux pas trancher ça : DEMANDE-LE À GRÉGOIRE**, en lui montrant les deux
-lignes exactes. C'est une question d'honnêteté intellectuelle, pas de code.
+⚠ **`niveauFinal` reste lu depuis le DOM** (`evaluation.js:1785`), et c'est hors de ce lot :
+le niveau n'a pas de source calculée équivalente à `noteCalculeeCourante`. **Ne l'improvise
+pas.** Si tu juges que c'est un défaut, **inscris-le** (issue 2).
 
 ---
 
+## ⛔ LA SENTINELLE : RÉORIENTE-LA, N'ÉLARGIS PAS SA LISTE À LA MAIN
+
+`tests/unit/sentinelle-572-mineurs-liste-annoter-design.test.js`, cas
+*« le calcul pose noteCalculeeCourante (nombre ou null), et plus personne ne relit le DOM »*,
+**ligne 77** :
+
+```js
+for (const [nom, src] of [['evaluation-sauvegarde', sauvegarde], ['evaluation-chargement', chargement]]) {
+```
+
+**`evaluation.js` n'y est pas.** Le titre dit « plus personne » ; le cas en vérifie deux sur
+trois. Il est vert depuis le 29 août pendant que le défaut vit.
+
+⮕ **Ce qu'elle doit garder désormais** : *aucun fichier de `js/` ne relit la note depuis
+`#noteProduction1`.* ⚠⚠ **La liste des fichiers se DÉDUIT du dépôt — elle ne s'écrit pas à la
+main.** Ajouter `evaluation.js` à la liste corrigerait le cas d'aujourd'hui et laisserait
+exactement le même piège pour le prochain fichier. **C'est la leçon du 2 septembre, et c'est
+la vraie valeur de ce lot** : une garde dont le périmètre est figé à la main mesure l'état du
+jour où on l'a tapée, pas l'invariant.
+
+**Break-test, deux mutations, deux rouges attendus :**
+1. Réintroduire le `parseFloat(...noteProduction1)` dans `evaluation.js` → **doit rougir**.
+   (Aujourd'hui, ça ne change rien : c'est la contre-épreuve du défaut.)
+2. L'introduire dans un fichier de `js/` qui n'a jamais été dans aucune liste → **doit rougir
+   aussi**. C'est ce cas-là qui prouve que le périmètre est déduit et non énuméré.
+
+⚠ **Vérifie les deux autres cas du même fichier** avant de le toucher : il porte aussi les
+mineurs Liste et Design (la purge des annotations, le tutoiement, les badges de jetons).
+**Ne les casse pas.**
+
 ---
 
-## GESTE 2 — le service d'aide cesse d'être servi à qui n'en a pas *(#539)*
+## ⏳ CE QUI N'EST PAS DANS CE LOT, ET QU'IL FAUT ÉCRIRE
 
-**Mesuré le 2 septembre à 11 h 15, à rejouer :**
+**Les quatre chemins écrivent `0` quand la note n'est pas calculable.** Après ta correction,
+c'est encore vrai : `evaluation-calcul.js:806` pose `noteCalculeeCourante = null`, et le
+patron `? … : 0` retombe sur zéro.
+⮕ **C'est #674, l'énoncé 5, et sa forme est DÉJÀ tranchée par Grégoire** : persister
+`ponderationTotal` à côté de `noteFinale` — **pas** un état « brouillon / conclue »,
+explicitement écarté.
+⛔ **Ne l'ouvre pas ici.** *Inscris et continue* (issue 2). Mais **dis-le dans ton état
+mesuré** : ce lot ferme une porte sur deux.
 
-```bash
-grep -n "CAF\|Services adaptés\|Centre d'aide" js/pratiques/pratique-sommative.js
-sed -n '600,700p' js/pratiques/pratique-sommative.js
-```
+⚠ **TARIR N'EST PAS RÉPARER** : les évaluations déjà enregistrées gardent la note qu'elles
+portent. **N'écris rien dans les données de personne**, et dis-le.
 
-Trois chaînes, dans le plan de rattrapage du niveau 3 de la RàI :
+---
 
-| l. | Aujourd'hui |
-|---|---|
-| 642 | `'Référence aux services de soutien (SA, CAF, etc.)'` |
-| 648 | `'Services adaptés (SA)'` |
-| 649 | `'Centre d\'aide (CAF)'` |
-
-⚠ **Le CAF n'existe plus** : le Centre d'aide en français du collège de Grégoire
-est devenu « Passerelle + ». Et surtout, **un enseignant dont l'établissement n'a
-ni CAF ni services adaptés lit ces trois lignes quand même.**
-
-### ↻ TRANCHÉ PAR GRÉGOIRE, le 2 septembre à 11 h — les mots exacts
-
-Il a validé les trois remplacements, puis le registre après mesure. **Ne les
-réinvente pas, ne les « améliore » pas :**
-
-| Aujourd'hui | Devient |
-|---|---|
-| `Référence aux services de soutien (SA, CAF, etc.)` | `Référence aux services de soutien du collège` |
-| `Services adaptés (SA)` | `Services adaptés du collège` |
-| `Centre d'aide (CAF)` | `Centre d'aide du collège` |
-
-⮕ **Pourquoi « du » et pas « de ton »** : la mesure de l'entourage a départagé.
-Les vingt et quelques autres étiquettes de cette liste (`sed -n '600,700p'`)
-**n'adressent personne** — « Rencontre individuelle pour identifier les
-obstacles », « Mentorat par les pairs ». Ce sont des étiquettes nominales, pas des
-phrases. `de ton collège` aurait été la seule ligne à parler à quelqu'un.
-Grégoire avait d'abord validé `de ton`, puis tranché `du` **une fois la mesure
-sous les yeux**. ⚠ **C'est le registre de la liste qui commande** : si tu
-découvres que la liste tutoie ailleurs, ne tranche pas seul — dis-le.
-
-### ⚠⚠ LE « PATRON PROPRE » PORTE LUI-MÊME LE DÉFAUT — mesuré à 11 h 30
-
-**La consigne de 11 h 20 désignait `js/evaluation-projection.js` comme le patron
-sain à réutiliser. C'est faux, et c'est une trouvaille de vérification.** Ce fichier
-porte « en français » à **trois endroits vivants**. Mesure, à rejouer :
+## Fini quand
 
 ```bash
-grep -rn "en français" js/evaluation-projection.js js/pratiques/pratique-sommative.js
+grep -rn "parseFloat(.*noteProduction1" js/ --include=*.js
 ```
 
-⮕ **Témoin du périmètre** : la commande rend **cinq** lignes, dont **deux sont des
-commentaires** (l. 67 et 588) qui décrivent la transition CAF → Passerelle +. Elles
-restent — elles expliquent le pourquoi. **Trois sont du texte servi :**
+⮕ rend **zéro**. ▣ **Témoin obligatoire** : le même motif sur `noteCalculeeCourante` doit
+rendre **quatre** sites, pas trois — c'est lui qui prouve que la commande mesure encore
+quelque chose.
 
-| l. | Qui le lit | Aujourd'hui |
-|---|---|---|
-| **163** | **L'ÉLÈVE** | `'au service d\'aide en français de ton collège : ' + JETON_SERVICE + '.'` |
-| 211 | L'enseignant, écran de réglages | `libelle: 'Nom du service d\'aide en français'` |
-| 213 | Qui n'a rien réglé | `defaut: 'Centre d\'aide en français (CAF)'` |
-
-### ↻ LES TROIS, TRANCHÉES PAR GRÉGOIRE le 2 septembre à 11 h 30
-
-**l. 163 — la phrase de l'élève. Il l'a tranchée lui-même, c'est sa prose :**
-⮕ **Retirer « en français », et rien d'autre.**
-`'au service d'aide de ton collège : ' + JETON_SERVICE + '.'`
-Sans nom réglé, elle se rend donc : *« … au service d'aide de ton collège. »*
-
-⚠ **NE TOUCHE À RIEN D'AUTRE DANS CETTE PHRASE.** Le commentaire des l. **145-150**
-porte une contrainte que le code ne peut pas deviner : **la préposition voyage avec
-le nom.** « t'inscrire AU Centre d'aide » se dit ; « t'inscrire AU Passerelle + » ne
-se dit pas. C'est pour ça que le gabarit neuf passe par un **deux-points**, qui
-n'impose aucun genre. Le deux-points reste.
-
-⚠ **Et le tutoiement de la l. 163 RESTE.** Ce n'est pas une incohérence avec le
-« du collège » du geste 2 ci-dessus : cette phrase-là parle à l'ÉLÈVE, les
-étiquettes de `pratique-sommative.js` parlent à l'ENSEIGNANT, dans une liste qui
-n'adresse personne. **Deux registres, deux publics, mesurés séparément.** Si tu es
-tenté d'« harmoniser » les deux, ne le fais pas : dis-le.
-
-**l. 211 — le libellé du réglage** : perd « en français ».
-⮕ `libelle: 'Nom du service d'aide'`
-
-**l. 213 — le défaut servi à qui n'a rien réglé** :
-⮕ `defaut: 'Centre d'aide du collège'`
-· Son texte d'aide **garde** la phrase *« Laisser vide pour ne recommander aucun
-  service »* — c'est elle qui couvre l'établissement qui n'a rien.
-
-### ⚠ CE QUE LA MESURE A ENCORE TROUVÉ, ET QUI CHANGE LE COMPTE
-
-`js/evaluation-projection.js:598` — `gabaritNeuf()` initialise déjà
-`nomServiceAide: ''`, **vide**. Autrement dit : le `defaut` de la l. 213 n'est PAS
-ce que reçoit un gabarit neuf ; c'est le repli du formulaire de réglages.
-⮕ **MESURE QUI VOIT QUOI AVANT DE PLANIFIER** — quel chemin sert la l. 213 à un
-utilisateur réel, et lequel sert la 598. Le commentaire de la l. 588 dit que le
-gabarit de MIGRATION, lui, porte le CAF. **Ne suppose pas : `grep` les deux
-appelants et dis ce que tu as trouvé.** C'est une mesure, pas une question.
-
-### Les deux ressources de la pratique sommative deviennent réglables aussi
-
-⮕ **Réutilise le patron `nomServiceAide` / `lienServiceAide`** pour les deux
-ressources du geste 2 ci-dessus, avec les défauts que Grégoire a arrêtés :
-`'Centre d'aide du collège'` et `'Services adaptés du collège'`.
-
-⚠⚠ **TARIR N'EST PAS RÉPARER, et ici le stock existe.** Un enseignant qui a déjà
-réglé son `nomServiceAide` porte sa valeur en base : **changer le défaut ne la
-touche pas, et c'est voulu.** Ne va rien réécrire chez personne. ⮕ **Dis-le dans
-ton état mesuré**, avec le compte de ce qui reste : source tarie, stock intact.
-
-⚠ **Chez Grégoire, un geste à lui, pas à toi** : il écrira **`Passerelle +`**
-(majuscule, espace, plus) dans son propre réglage. **Ne l'écris pas dans le code,
-ne l'écris pas dans ses données.** C'est un réglage d'utilisateur, il le pose lui-même.
-
-### Le reste du mot « français », et ce qui n'est PAS dans ce lot
-
-⛔ **Les identifiants de champs du volet confidentiel** portent encore le mot, et
-ils ne sont **pas** dans ce lot : ce sont des clés de données, pas des libellés
-lus. C'est `#440` résiduel. **Inscris et continue** (issue 2 de `CLAUDE.md`).
-
-## Les tests
-
-`grep -rn` les mêmes noms dans `tests/` : au moins huit fichiers en portent, dont
-`sentinelle-attribution-cc-defaut-342`, `sentinelle-inspirede-auteur-457` et
-`seeds-demo-labo-codex-296`.
-
-⚠ Certains **testent précisément le défaut d'attribution** (#342 : une pratique de
-littérature de Grégoire s'affichait « par Bruno V. »). Un test qui vérifie
-qu'un nom ne s'affiche PAS a besoin de ce nom pour le vérifier. **Ne les casse pas
-par un remplacement aveugle** : distingue le test qui UTILISE le nom comme donnée
-d'un test qui le porte par habitude.
-
-⮕ **Ajoute une sentinelle neuve** : *aucun identifiant, aucune constante et aucun
-libellé du code applicatif ne contient de prénom.* Break-teste-la en réintroduisant
-un des noms retirés — elle doit rougir.
-
-## Le pack de démonstration
-
-⛔ **N'y touche pas.** `js/pack-demo-20.js` et `js/demo-namespace.js` portent des
-noms d'élèves fictifs, choisis exprès (#351, figures historiques et culturelles).
-Ce sont des données de démonstration assumées, pas des noms de personnes réelles.
-
-## Fini quand — les deux gestes, avec leur témoin
-
-**Geste 1** : la commande de la famille 3 ne rend plus, dans `js/` hors pack de
-démonstration, que des mentions que Grégoire a explicitement décidé de garder.
-Et `grep -n "discipline: '"` sur `pratiques-predefines.js` ne rend plus que
-`'Général'`.
-
-**Geste 2** : `grep -rn "CAF\|(SA)\|en français" js/pratiques/pratique-sommative.js
-js/evaluation-projection.js` ne rend plus rien qu'un utilisateur ou un élève puisse
-LIRE — ni libellé, ni valeur par défaut, ni texte d'aide, ni palier.
-⮕ **Témoin obligatoire** : la commande ne doit PAS rendre zéro. Les deux
-commentaires de `evaluation-projection.js` (l. 67 et 588) qui expliquent la
-transition CAF → Passerelle + **restent**, et ce sont eux qui prouvent que la
-commande mesure encore quelque chose. Un zéro ici voudrait dire que tu as effacé
-l'explication avec le défaut.
-
-**L'énoncé lui-même, qui est la vraie cible** : un enseignant qui n'enseigne pas le
-français, et dont l'établissement n'a ni CAF ni services adaptés, ne rencontre
-**aucun** de ces quatre mots dans son interface — sauf s'il les a écrits lui-même.
-
-⚠ **Publie le compte AVANT et APRÈS, avec son témoin** — un motif qui rend zéro
-partout ne mesure rien. Le pack de démonstration est un bon témoin : il doit rester
-non-zéro. **Rappel de ce matin** : un « fini quand » qui cherche un MOT se trompe de
-cible ; il faut chercher une OFFRE. Le mot « Chimie » est un défaut dans un libellé
-et une donnée officielle dans un code de programme du ministère.
+⮕ **Et le vrai fini quand** : rouvrir une copie déjà corrigée et la réenregistrer **ne change
+pas sa note**, ni d'un centième.
 
 ## L'ordre
 
-Règle 6 : **tu committes, puis tu t'arrêtes.** Pas de verdict, pas de push. Tu dis
-ce qui est prêt et ce que Grégoire doit aller voir. Il regarde, puis il décide.
+- `cd tests && npm run test:unit` pour travailler ; **`npm test` (suite complète) avant de
+  dire que c'est prêt** — ce lot touche le calcul d'une note, pas un libellé.
+- Bump du bloc de jetons d'`index.html` (`js/` est touché).
+- Règle 6 : **tu commites, puis tu t'arrêtes.** Pas de release, pas de push.
+- ⮕ **CE QUE GRÉGOIRE DOIT ALLER VOIR — et cette fois il y a quelque chose :**
+  **ouvrir une copie qu'il a déjà corrigée, ne rien changer, réenregistrer, et vérifier que
+  la note affichée est identique au centième près.** Dis-le-lui dans ces mots-là.
+- Ce fichier se commite avec ton lot.
 
-⮕ **Ce qu'il devra aller voir, nomme-le en français, jamais par un numéro :**
-· Conception › Pratiques › « Partir d'un modèle » — **aucune des pratiques offertes
-  ne doit afficher une matière** (ni Chimie, ni Littérature, ni Maths, ni Philo,
-  ni Bio). Seules SES propres pratiques peuvent en porter une.
-· L'écran de réglages de la pratique sommative — **le nom du service d'aide doit
-  être un champ qu'il peut remplir**, avec « Centre d'aide du collège » comme
-  valeur de départ. C'est là qu'il écrira « Passerelle + » lui-même.
-Bump du bloc de jetons d'`index.html`. `cd tests && npm run test:unit`, pas `npm test`.
-Ce fichier se commite avec ton lot.
 
 ---
 
-# ✅ EXÉCUTÉE — 2 septembre 2026, 11 h 27 → midi · release **1.110.0**
+# ✅ EXÉCUTÉE — 2 septembre 2026, 13 h 02 → 13 h 30 · committée, NON poussée
 
-**Toutes les mesures de la consigne ont été rejouées et confirmées** (HEAD
-`b2683bd3`, `origin/main..HEAD` = 0, `version.json` = `0902-1006` / `1.109.2`).
-La consigne avait 7 minutes ; rien n'avait bougé.
+**Remesure** : HEAD `672e3c5f`, tout publié, `version.json` 1.110.0 — conforme. Les deux
+greps rendaient exactement ce qui était annoncé : un `parseFloat(...noteProduction1)`
+(`evaluation.js:1784`), cinq `noteCalculeeCourante` (trois lectures, deux écritures).
 
-## Ce que la remesure a trouvé de PLUS, et qui change le compte
+## Reproduit AVANT de corriger — les deux effets sont réels
 
-1. **`js/pratiques/pratiques-predefines.js` n'est PAS le catalogue que lit
-   l'écran « Partir d'un modèle ».** Cet écran passe par
-   `obtenirOptionsModeles()` (`wizard-pratique-v2.js:1062`) →
-   `obtenirToutesLesPratiquesBibliothequeSync()` → **`MODELES_PRATIQUES_PREDEFINIS`**
-   (`js/pratiques-bibliotheque.js:26`), qui est **déjà propre depuis #687** : cinq
-   modèles, tous `discipline: 'Général'`, tous « Gabarit / Demo Labo Codex ».
-   ⮕ `window.PRATIQUES_PREDEFINES` n'a que **deux** lecteurs, tous deux dans
-   `pratique-manager.js` : `initialiserPratiquesPredefines()` (l. 281) — **aucun
-   appelant dans tout le dépôt** — et un `Object.keys()` (l. 159) qui compare des
-   **noms de constantes** à des `p.id` : **il ne matche jamais**.
-   ⮕ **Réponse à la question posée par la consigne** (« que devient la copie de
-   quelqu'un qui en a adopté une ») : **personne n'a pu en adopter une par ce
-   chemin.** Le patron de fusion `if (!idsExistants.has(gabarit.id))` existe bien,
-   mais il opère sur l'AUTRE catalogue. Renommer est donc sans effet observable —
-   et c'est ce qui le rend gratuit. Le bug de `Object.keys` : **inscrit, continué**.
-2. **Un cinquième identifiant à prénom, et un sixième en initiales**, non listés :
-   `sommative-remplacement-jordan` (l. 594) et `sommative-traditionnelle-mhl`
-   (l. 158). Traités avec les autres.
-3. **Le champ `etablissement:`** nommait des collèges réels (Laurendeau,
-   Valleyfield, Champlain Lennoxville, Drummond). Combiné à `discipline:` et à
-   « jugement professionnel de l'enseignante requis », il **désigne une personne
-   aussi sûrement qu'un prénom**. Neutralisé à `'Cégep'` — décidé, et dit ici.
-4. **`gabaritNeuf()` n'a aucun appelant applicatif** (seulement son export et le
-   test #668). Le `defaut` de la l. 213 est donc **le seul chemin qui serve un
-   utilisateur réel** — via `normaliser()`, appelé par `grilles.js` (5 sites).
-   C'était la mesure demandée. **Inscrit, continué.**
-5. **Les trois chaînes de `pratique-sommative.js` ne sont lues par personne
-   aujourd'hui** : leur unique consommateur, `genererCarteCibleIntervention`, est
-   mort depuis #551. ⮕ **Les mots de Grégoire sont posés quand même** (gratuit,
-   tarit la source si le câblage #307 reprend). ⛔ **Mais la machinerie de réglage
-   n'a PAS été construite** pour ces deux ressources : `PratiqueSommative` n'a
-   AUCUN système de paramètres (`grep -c parametres` rend **0**), il aurait fallu
-   en inventer un pour une méthode qu'aucun écran n'atteint. **Inscrit, continué.**
-6. **Le commentaire de `evaluation-projection.js:588` était périmé par mon propre
-   changement** — il exigeait que le défaut reste « CAF ». Corrigé dans le même
-   commit, comme le commentaire de `echelles-bibliotheque.js:136-140`.
-7. **Le golden de la sentinelle #668 HÉRITAIT tacitement de ce défaut.** Il déclare
-   désormais le nom d'alors ; **ses vingt chaînes n'ont pas bougé d'un caractère**.
+Test comportemental sur le chemin réel (`sauvegarderEvaluationModifiee`, chargé dans le
+bac à sable avec une évaluation existante en base, l'écran dans un état donné, et la
+capture de ce que `sauvegarderDonneesSelonMode` reçoit) :
 
-## Le compte, avec ses témoins
+| Effet | Écran | `noteCalculeeCourante` | Stocké AVANT | Stocké APRÈS |
+|---|---|---|---|---|
+| 1 · arrondi | `79.5 %` | 79,46 | **79,5** | 79,46 |
+| 2 · zéro | `--` | 79,46 | **0** | 79,46 |
 
-| Mesure | Avant | Après |
-|---|---|---|
-| Noms de personnes, `js/` hors pack démo | **86** | **5** |
-| …dont identifiant, constante ou libellé | plusieurs | **0** |
-| `grep "CAF\|(SA)\|en français"` sur les 2 fichiers | **9** | **3** ⮕ *les trois commentaires qui expliquent la transition — le témoin exigé* |
-| `discipline:` de `pratiques-predefines.js` | 7 valeurs, 6 matières | **`'Général'` seul** |
-| `etablissement:` | 4 collèges réels | **`'Cégep'` seul** |
-| Vitest | 435 f. / 4701 t. | **436 f. / 4710 t., code 0** |
+⮕ **L'effet 2 est atteignable** : un « -- » à l'écran au moment d'enregistrer une
+modification écrivait `0` par-dessus une vraie note. Ce n'était pas la bonne nouvelle
+espérée ; c'est écrit. Un troisième cas, témoin, vérifie que le chemin aboutit vraiment
+(`verrouillee: true`, `niveauFinal` conservé) — sinon les deux autres seraient verts par
+absence d'écriture.
+⚠ Le premier rouge était un rouge de MONTAGE (`evaluationEnCours` lu comme global nu
+par `_collecterCriteresMod`, à passer au bac à sable), pas celui du défaut. Distingué,
+corrigé dans le test, puis le vrai rouge est venu.
 
-⚠ **Le pack de démonstration n'est PAS un bon témoin pour ce motif-ci** : il rend
-**zéro**, parce que ses vingt élèves fictifs sont des figures historiques (#351),
-pas les collègues visés. La sentinelle neuve porte donc **deux témoins mesurés** à
-la place : le balayage lit >100 fichiers et >1 Mo, et le motif reconnaît la ligne
-de contrôle `id: 'pan-standards-bruno'` sans rougir sur sa version neuve.
+## Corrigé
 
-**Les 5 restants dans `js/`, et pourquoi** : deux sont l'attribution « Voisard »
-(en attente de la référence, voir ci-dessous) ; deux nomment un fichier SUPPRIMÉ
-(`config-francois-chimie.js`, verrouillé par la sentinelle #687) ; la cinquième est
-`js/config.js` (**zone protégée**, fiches d'élèves fictives).
-Dans `tests/` et `scripts/`, ce qui reste porte le nom comme **donnée mesurée** :
-#342 (le repli fautif EST « Bruno V. », et `scripts/audit-attribution-cc.mjs:52`
-le porte en constante pour le détecter), #296, #687, #464 et la sentinelle #690
-elle-même, qui doit nommer ce qu'elle empêche de revenir.
+`js/evaluation.js:1784` → le patron exact des trois sœurs, sans dévier. `niveauFinal`
+reste lu depuis le DOM, comme demandé — **inscrit, non improvisé** : le niveau n'a pas de
+source calculée équivalente, ce serait un chantier à part.
 
-## Break-tests joués
+## La sentinelle — réorientée, périmètre DÉDUIT
 
-· `pan-standards-bruno` réintroduit → **rouge** · une `discipline` → **rouge** ·
-un `etablissement` → **rouge** · « en français » dans le libellé → **rouge** ·
-dans le défaut → **rouge** · `ECHELLE_IDME_DEPART` retiré de la liste → **rouge** ·
-`ECHELLE_BRUNO_CHIMIE` retiré (déjà parti) → **ne change rien**, résultat attendu ·
-`ECHELLE_BRUNO_CHIMIE` réintroduit → **rouge**.
+`sentinelle-572-mineurs-liste-annoter-design.test.js` : la liste tapée (`sauvegarde`,
+`chargement`) est remplacée par **le balayage de tous les `.js` de `js/`** (récursif,
+commentaires retirés, >100 fichiers exigés comme témoin). Deux cas : aucun fichier ne
+relit `#noteProduction1` ; et le témoin — le patron `noteCalculeeCourante === 'number'`
+compte **exactement quatre** sites sur tout `js/`. Les cas Liste, annotations et Design
+du même fichier n'ont pas bougé (11/11).
+**Break-tests, les deux demandés** : réintroduire dans `evaluation.js` → **2 rouges** ;
+l'introduire dans `js/entites/horaires.js` (jamais dans aucune liste) → **rouge**. Restauré.
 
-## ⚠ Ce qui reste dû, et qui n'appartient qu'à Grégoire
+## Fini quand
 
-**La référence de l'attribution.** Il a répondu que « l'algorithme propose, le
-jugement tranche — Voisard » vient d'une **source publiée**. **La référence exacte
-(auteur, œuvre, année) n'a pas été donnée** : les deux lignes
-(`pratique-pan-standards.js:35`, `denotation-saisie-ui.js:8`) sont **laissées
-intactes** d'ici là. Effacer une attribution n'est pas de la protection.
+`grep -rn "parseFloat(.*noteProduction1" js/` → **zéro** · témoin
+`grep -rn "noteCalculeeCourante === 'number'" js/` → **4**. Vitest **437 f. / 4715 t.**
+(+1 fichier, +5 tests). Suite complète `npm test` lancée avant de dire « prêt » — verdict
+dans le message de commit. Jeton `js/evaluation.js?v=20260902a` bumpé.
 
-## Ce qu'il doit aller voir, avant que ça parte
+## Ce qui n'est PAS dans ce lot — écrit, pas ouvert
 
-· **Conception › Pratiques › « Partir d'un modèle »** — aucune pratique offerte
-  n'affiche de matière. ⚠ Mesuré : cet écran était **déjà** propre depuis #687 ;
-  le travail d'aujourd'hui portait sur un catalogue que rien n'affiche.
-· **L'écran de réglages de la pratique sommative** — « Nom du service d'aide » est
-  un champ à remplir, valeur de départ « Centre d'aide du collège ». **C'est là
-  qu'il écrira « Passerelle + » lui-même** ; ce n'est écrit ni dans le code, ni
-  dans ses données.
+- **Le `: 0` des quatre chemins** quand `noteCalculeeCourante` est `null` : #674,
+  énoncé 5, forme tranchée (`ponderationTotal` persisté). Ce lot ferme une porte sur deux.
+- **Tarir n'est pas réparer** : les évaluations déjà enregistrées avec `79,5` ou `0`
+  gardent ce qu'elles portent. **Rien n'a été écrit dans les données de personne.**
+- `niveauFinal` lu depuis le DOM (issue 2).
 
-⛔ **Rien n'a été écrit dans les données de personne.** Source tarie, stock intact :
-un `nomServiceAide` déjà réglé garde sa valeur ; les copies des huit échelles et
-des pratiques adoptées restent telles quelles. C'est **#674**.
+## Ce que Grégoire doit aller voir
 
-**Non poussé** (règle 6). Committé, arrêté, en attente de son regard.
-
----
-
-# ADDENDUM — tranché par Grégoire le 2 septembre à 12 h 30
-
-> **À exécuter AVANT le push de 1.110.0.** C'est le dernier point ouvert du lot que tu
-> viens de commiter, et il est minuscule : deux lignes de commentaire.
-
-## Les deux attributions « — Voisard » : l'idée reste, le nom part
-
-**La question posée à Grégoire était : source publiée ou remarque de collègue ?**
-⮕ **Sa réponse, le 2 septembre à 12 h 30** : c'est une **paraphrase** tirée d'une chronique
-Substack — *« mais je ne sais pas laquelle »*.
-
-**Le raisonnement, pour qu'une session future ne le refasse pas :**
-· Ce n'est **pas une citation** : un appareil de référence porte auteur, titre, date, et
-  permet au lecteur d'aller voir. « — Voisard » ne permet rien.
-· Et c'est une **paraphrase** : la formulation « l'algorithme propose, le jugement tranche »
-  est vraisemblablement celle de Grégoire, pour l'idée d'un autre. Il n'y a pas de phrase
-  empruntée à créditer.
-· Une attribution que personne ne peut vérifier **publie un nom sans servir le lecteur** —
-  exactement le motif du lot.
-⮕ **Donc : le principe reste écrit en toutes lettres, le nom part.**
-
-**Les deux lignes, et leur remplacement exact :**
-
-`js/pratiques/denotation-saisie-ui.js` (l. 7-8) :
-```
- *  - suggestion statistique en ANCRAGE (« l'algorithme propose, le jugement tranche »
- *    — Voisard), modifiable, jamais imposée ;
-```
-⮕ devient :
-```
- *  - suggestion statistique en ANCRAGE (« l'algorithme propose, le jugement tranche »),
- *    modifiable, jamais imposée ;
-```
-
-`js/pratiques/pratique-pan-standards.js` (l. 35-36) :
-```
- *    (« l'algorithme propose, le jugement tranche » — Voisard), jamais comme valeur
- *    finale du calcul.
-```
-⮕ devient :
-```
- *    (« l'algorithme propose, le jugement tranche »), jamais comme valeur
- *    finale du calcul.
-```
-
-⛔ **NE TOUCHE À RIEN D'AUTRE DANS CES DEUX BLOCS.** Le principe qu'ils décrivent — la
-suggestion statistique est un ANCRAGE modifiable, jamais la valeur finale — est une position
-pédagogique de Grégoire, pas une tournure à améliorer.
-
-## Ce que ça fait au compte, et le témoin
-
-`grep -rniE "bruno|michel|isabelle|xavier|hélène|helene|etienne|étienne|olivier|jordan|françois|francois|V." js/ --include=*.js | grep -viE "pack-demo|demo-namespace"`
-
-⮕ **Passe de 5 à 3.** Et les trois qui restent doivent rester — **c'est le témoin** :
-· `js/profil-etudiant-sections-affichage.js:1764-1765` — deux lignes qui EXPLIQUENT un
-  retrait (`testerPratiqueFrancois`, `config-francois-chimie.js`, partis avec #687). Les
-  effacer effacerait la trace de ce qui a été fait.
-· `js/config.js:250` — « Olivier Dubois », fiche fictive, **zone protégée**.
-⚠ **Un zéro ici serait un défaut, pas un succès.**
-
-## Une décision technique qui est à toi — tranche et dis-le
-
-La sentinelle du lot garde les identifiants, les constantes, les libellés, `discipline:` et
-`etablissement:`. **Elle ne garde pas les commentaires** — c'est pourquoi les deux lignes
-Voisard ont survécu au lot sans la faire rougir, et c'était voulu : elles attendaient une
-décision de Grégoire.
-⮕ Maintenant qu'elle est prise : **faut-il étendre la sentinelle aux commentaires ?**
-⚠ Le piège est nommé d'avance : les trois mentions qui RESTENT sont, elles aussi, dans des
-commentaires. Une garde qui interdit les prénoms en commentaire ferait rougir la trace même
-de ce qu'on vient de retirer. **Si tu l'étends, elle doit distinguer une étiquette de
-circonstance d'une explication de retrait — et si tu ne vois pas comment le faire sans
-fragilité, ne l'étends pas, et écris pourquoi.**
-
-## L'ordre
-
-Petit lot, même règle : **tu commites, puis tu t'arrêtes.** Bump du bloc de jetons
-d'`index.html`, `cd tests && npm run test:unit`. Ce fichier se commite avec.
-⮕ **Ce que Grégoire doit aller voir : rien à l'écran.** Ce sont deux commentaires ; aucun
-utilisateur ne les rencontre. **Dis-le-lui plutôt que de lui inventer une vérification.**
-⮕ Ensuite, le push de 1.110.0 (ou 1.110.1) lui revient.
+**Ouvrir une copie qu'il a déjà corrigée, ne rien changer, réenregistrer, et vérifier
+que la note affichée est identique au centième près.**

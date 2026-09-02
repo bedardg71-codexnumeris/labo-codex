@@ -1781,7 +1781,12 @@ function _lireChampsDOMMod(maintenant) {
         statutRemise: document.getElementById('remiseProduction1').value,
         statutIntegrite: document.getElementById('statutIntegrite').value || 'recevable',
         notesIntegrite: document.getElementById('notesIntegrite').value || '',
-        noteFinale: parseFloat(document.getElementById('noteProduction1').textContent) || 0,
+        // #572, quatrième site (2 sept. 2026) — LA VALEUR CALCULÉE EST LA SOURCE. Ce
+        // chemin (modification d'une évaluation existante) relisait l'écran : un
+        // rendu arrondi (`toFixed(1)`) redevenait la note stockée, et un affichage
+        // « -- » (rendu différé, #321) écrivait 0 par-dessus une vraie note. Les deux
+        // effets ont été reproduits avant correction. Même patron que les trois sœurs.
+        noteFinale: (typeof window.noteCalculeeCourante === 'number') ? window.noteCalculeeCourante : 0,
         niveauFinal: document.getElementById('niveauProduction1').textContent,
         retroactionFinale: document.getElementById('retroactionFinale1').value
     };
