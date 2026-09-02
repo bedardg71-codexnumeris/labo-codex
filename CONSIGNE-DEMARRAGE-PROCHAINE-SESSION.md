@@ -125,60 +125,72 @@ pas le `AAAAMMJJ`+lettre des autres.
 
 ---
 
-## ÉTAT MESURÉ — 1er SEPTEMBRE 2026, SOIRÉE
+## ÉTAT MESURÉ — 1er SEPTEMBRE 2026, FIN DE SOIRÉE
 
-*↻ Réécrit en soirée, depuis Claude Code, après le chantier du matériel semé
-(§1 à §4 du `PLAN-2026-09-01`, plus #681). Le bloc de fin d'après-midi qui suit
-reste sous celui-ci : ce qu'il dit du build et des pièges vaut toujours.*
+*↻ Réécrit depuis Claude Code, à la clôture du chantier du matériel semé (§1 à §4
+du `PLAN-2026-09-01`, plus #681 à #684). Le bloc de fin d'après-midi qui suit
+reste sous celui-ci : ce qu'il dit des pièges vaut toujours.*
+⚠ **Cette section est l'ÉTAT MESURÉ, écrit par Claude Code. Le MANDAT plus bas est
+tenu par Cowork — ne pas le réécrire** (règle de `CLAUDE.md`, 1er sept.).
 
-**Branche `main`. `HEAD` = `origin/main`, ZÉRO commit non poussé.** Mesuré après
-le dernier push, pas supposé.
+**Branche `main`. `HEAD` = `origin/main`, ZÉRO commit non poussé.** Mesuré après le
+dernier push par `git rev-list --count origin/main..HEAD`, pas supposé.
 
-**Vitest : VERT — 431 fichiers / 4628 tests, code de sortie 0**, lancé DEPUIS
+**Vitest : VERT — 433 fichiers / 4638 tests, code de sortie 0**, lancé DEPUIS
 `tests/`, lu APRÈS le dernier changement.
 **Playwright WebKit : VERT — code 0, aucune rougeur nouvelle**, suite complète
-passée trois fois dans la soirée sur trois états successifs.
+passée quatre fois dans la soirée sur quatre états successifs.
 
-⚠ **Jetons anti-cache : jusqu'à `20260901e`.** Quatre lots ont bumpé dans la
-soirée (`c`, `d`, puis `e`). Une session `file://` ouverte avant doit recharger.
+⚠ **Jetons anti-cache : jusqu'à `20260901f`.** Cinq lots ont bumpé (`c`, `d`, `e`,
+`f`). Une session `file://` ouverte avant doit recharger avec vidage de cache.
 
-**Dernier ID utilisé : #681.** Prochain libre : **#682**.
-IDs consommés en soirée : **#680** (le canal de partage laisse des champs
-d'échelle en chemin — INSCRIT, non traité), **#681** (`js/spe-specifications.js`
-retiré — LIVRÉ et vérifié à l'écran).
+**Dernier ID utilisé : #684.** Prochain libre : **#685**.
 
-### Ce que la soirée a livré, et ce qu'elle laisse
+### Ce que la soirée a livré
 
-✅ **§4-1 et §4-2** — l'écran d'évaluation nomme ses trois pièces, et choisir une
-grille sans échelle DIT ce qui manque (il ne produisait RIEN auparavant).
-✅ **§1** — le versement des huit échelles « disciplinaires » est retiré : leurs
-32 niveaux portaient `valeur:` et rendaient 0,0 % sans un mot.
-✅ **§2** — `ECHELLE_IDME_DEPART` est semée, avec ses `valeurCalcul`. Mesuré de
-bout en bout : espace vide → 79,5 % · niveau M, sans rien créer.
-✅ **§3** — les trois pièces semées se disent « de départ » et non plus
-« générique (exemple) ».
-✅ **#681** — le module SPE autonome retiré (1009 lignes, zéro consommateur
-vivant), vérifié à l'écran par Grégoire : cinq gabarits supprimés, deux
-rechargements, aucun retour.
+✅ **§4-1 / §4-2** — l'écran nomme ses trois pièces ; choisir une grille sans
+échelle DIT ce qui manque (il ne produisait RIEN avant).
+✅ **§1** — les huit échelles « disciplinaires » ne sont plus versées.
+✅ **§2** — `ECHELLE_IDME_DEPART` semée, mesurée de bout en bout : espace vide →
+79,5 % · niveau M, sans rien créer.
+✅ **§3** — les trois pièces se disent « de départ ».
+✅ **#681** — module SPE autonome retiré (1009 lignes, zéro consommateur vivant),
+**vérifié à l'écran** : cinq gabarits supprimés, deux rechargements, aucun retour.
 ✅ **Le canal de partage** ne déshabille plus une échelle à `valeur:` (énoncé 6).
+✅ **#682** — renommage (b) **exécuté sur le corpus de Grégoire** : 5 renommés,
+0 nom personnel touché, 0 autre écriture, relance de contrôle à zéro.
 
-⏳ **CE QUI RESTE DÛ, et qui n'est PAS du code** :
-· **la porte terrain du §3** — `plans de travail/PORTES-TERRAIN-2026-09-01-materiel-seme.md`,
-  neuf portes, Mac **et** iPad. C'est la condition de fin de ce lot, et elle ne
-  peut pas être remplie par un banc : un lot de libellés ne se prouve pas par un
-  vert. ⮕ Si les neuf passent, le **geste 2** de `OBJECTIF-COHORTE-1.md` passe
-  d'« éprouvé par Grégoire » à « fait ».
-· **une décision de Grégoire** : le nom « Grille de départ » s'imprime sur le PDF
-  de l'élève, sous « Évaluation : … ». C'est un mot que ses élèves lisent.
+### ⚠ LE FIL QUI TRAVERSE TOUTE LA SOIRÉE — à lire avant de coder demain
 
-⚠⚠ **#674 A CHANGÉ DE POIDS, et c'est le fait le plus important de la soirée.**
-Les deux sondes ont rendu ZÉRO sur le corpus de Grégoire — mais ce zéro ne couvre
-que le sien. Un enseignant qui a ouvert l'application avant aujourd'hui a pu
-ajouter l'échelle « Chimie » à sa sélection : **sa copie reste muette et rend
-0,0 % sans un mot.** Il n'est ni sondable, ni joignable, et on ne sait pas
-combien ils sont. ⮕ #674 n'est plus une prévention pour la cohorte qui arrive,
-c'est une **réparation pour des utilisateurs déjà en place**. Le correctif devra
-valoir RÉTROACTIVEMENT.
+**« Tarir n'est pas réparer »** est entré dans `CLAUDE.md` (Principes directeurs).
+Tout l'état de l'app vit chez l'utilisateur : un correctif tarit la SOURCE, il ne
+touche pas le STOCK déjà écrit chez les gens — **et le vert des bancs ne voit
+jamais la différence, puisqu'ils partent d'un espace vide.**
+⮕ **Quatre fois dans la même journée** : les huit échelles · **#674** · **#682** ·
+**#684**. Le quatrième est d'une forme nouvelle — une réparation du stock qui n'a
+atteint QU'UNE PERSONNE, parce qu'elle a voyagé par un script collé à la main au
+lieu du code. **Un script n'est pas un canal de distribution.**
+⮕ **À chaque correctif de demain : source, stock, ou les deux ?**
+
+### ⏳ CE QUI EST DÛ, ET QUI N'EST PAS DU CODE
+
+· **#684 — une décision, avant la cohorte** : l'application porte-t-elle une
+  migration des libellés (même condition stricte, idempotente, datée), ou
+  assume-t-on que le §3 ne vaut que pour les nouveaux espaces ? Le coût de la
+  seconde option n'est pas le libellé : c'est qu'un enseignant lira une chronique
+  qui ne correspond pas à son écran. **Le silence n'est pas une issue.**
+· **#683 — deux mécanismes mesurés, aucun corrigé** : la bascule de trimestre ne
+  sème rien (le matériel n'arrive qu'au chargement de la page), et la suppression
+  est par trimestre alors que le tombstone est GLOBAL. Le second touche l'énoncé 8,
+  et le corriger changerait le sens de suppressions déjà faites.
+· **#674 — requalifié en RÉPARATION**, pas en prévention : des utilisateurs déjà
+  en place ont des échelles muettes qui rendent 0,0 % sans un mot. Ni sondables,
+  ni joignables, nombre inconnu. Le correctif devra valoir rétroactivement.
+· **La porte terrain du §3 est SUSPENDUE** — elle jugerait des libellés qui ne
+  sont pas arrivés. Son §0 exige désormais de NOMMER le trimestre de la passe :
+  le matériel n'est pas le même de l'un à l'autre (#683).
+
+⮕ **Le geste 2 de `OBJECTIF-COHORTE-1.md` ne bouge pas : « éprouvé par Grégoire ».**
 
 ---
 

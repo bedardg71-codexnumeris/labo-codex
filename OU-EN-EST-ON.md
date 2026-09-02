@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 1er septembre 2026, en soirée (quatrième passe).**
+**Dernière mise à jour : 1er septembre 2026, en soirée (sixième passe).**
 
 ---
 
@@ -147,11 +147,27 @@ dans le code et n'atteint personne.** Les trois pièces s'appellent maintenant
 « Grille de départ », « Cartouche de départ », « Échelle de départ (IDME) »… **dans
 un espace neuf seulement**. Sur une base qui porte déjà l'objet, le semis vérifie
 l'identifiant et sort sans écrire : il ne recrée pas, donc **il ne renomme jamais**.
-L'écran de Grégoire affiche encore les anciens noms. *(#682, ouvert — la décision de
-renommer ou non ses copies lui appartient, une sonde la prépare sans rien écrire)*
+*(#682)*
+⮕ ✅ **Réglé chez Grégoire le 1er septembre au soir** : il a tranché (b) — renommer
+uniquement ce qui portait encore, au caractère près, un libellé écrit par le code.
+**5 renommés, 0 nom personnel touché, 0 autre écriture**, vérifié par une relance de
+la sonde. ⚠ **Mais chez les autres utilisateurs, rien n'a changé** : le renommage
+est un script qu'il a lancé, pas une migration que l'application porte. Pour eux,
+#682 est entier — et c'est encore « tarir n'est pas réparer ».
 ⮕ **La porte terrain du §3 est SUSPENDUE** : elle jugeait de libellés qui ne sont
 pas arrivés, et elle envoyait dans un onglet « Matériel » qui n'existe pas. Le vrai
 chemin est **Conception › Échelles de performance**.
+
+↻ **Et la sonde a trouvé plus gros que le renommage** *(#683, ouvert)*. Deux
+mécanismes, mesurés :
+· **Changer de trimestre ne sème rien.** Le matériel de départ n'arrive qu'au
+  chargement de la page. Un enseignant qui crée son second trimestre et va droit
+  à l'évaluation n'y trouve rien, jusqu'à ce qu'il recharge — et rien ne le lui dit.
+· **La suppression est par trimestre, l'interdiction est globale.** Supprimer la
+  grille de départ dans un trimestre l'interdit dans TOUS, y compris ceux créés
+  demain, pendant que les autres copies restent en place. ⮕ Ça touche aussi le
+  geste 8 : la portée annoncée n'est pas la portée réelle. **Décision de Grégoire** :
+  corriger changerait le sens de suppressions déjà faites.
 
 ⮕ Cette ligne reste donc « éprouvé par Grégoire » et ne devient pas « fait » :
 ce qui a été mesuré, c'est la chaîne du NOUVEL utilisateur, pas le parcours

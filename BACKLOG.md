@@ -697,6 +697,31 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   priver le rapport de son témoin `clesLues`, ou casser la syntaxe — **l'ancienne assertion restait
   VERTE dans les trois cas, la nouvelle rougit dans les trois.**
 
+- [ ] **#684 — Le renommage du §3 est un SCRIPT, pas une migration : il n'a atteint qu'une personne**.
+  Inscrit le 1er septembre 2026, **à trancher avant la cohorte 1**.
+  ▣ **LE FAIT.** #682 a renommé les cinq libellés de Grégoire, par un script qu'il a collé lui-même
+  dans sa console. **Les utilisateurs déjà en place gardent les anciens noms** — « Grille générique
+  (exemple) », « Échelle IDME (point de départ) » — et **rien ne les rattrapera** : le semis ne renomme
+  jamais (#682), et aucun code de l'application ne porte ce renommage.
+  ⚠⚠ **QUATRIÈME CAS DE « TARIR N'EST PAS RÉPARER » DANS LA MÊME JOURNÉE — et le premier d'une forme
+  nouvelle.** Les trois autres (les huit échelles, #674, #682) sont des correctifs qui réparent la
+  SOURCE et laissent le STOCK. Celui-ci est **une réparation du stock qui n'a atteint qu'une personne**,
+  parce qu'elle a voyagé par un geste manuel au lieu du code. Un script n'est pas un canal de
+  distribution.
+  ▣ **DEUX ISSUES, ET IL FAUT EN CHOISIR UNE — le silence n'en est pas une.**
+  · **(A) L'application porte une migration au chargement.** Même condition stricte que le script :
+    égalité **au caractère près** avec un libellé écrit par le code, revérifiée dans le mutateur ; tout
+    autre nom appartient à l'utilisateur et n'est jamais touché. Elle doit être **idempotente** et
+    **datée** (drapeau de migration), et elle écrit dans les données de gens qui ne l'ont pas demandé —
+    c'est ce qui la rend sérieuse, pas difficile.
+  · **(B) On assume que le §3 ne vaut que pour les nouveaux espaces.** C'est défendable : les libellés
+    ne cassent rien, et les utilisateurs en place ont déjà appris à lire les anciens. Mais alors
+    **ça s'écrit** — dans le plan, dans `OU-EN-EST-ON.md`, et dans la porte terrain — au lieu de se
+    découvrir à la mi-septembre devant un écran qui ne ressemble pas à la documentation.
+  ⮕ **Ce qui ne se fait pas : laisser la question ouverte.** Le coût de (B) n'est pas le libellé, c'est
+  qu'un enseignant de la cohorte 1 lira une capture ou une chronique qui ne correspond pas à son écran.
+  ⏳ **Décision de Grégoire.** Rien n'est codé.
+
 - [ ] **#683 — Le matériel semé n'est PAS dans tous les trimestres : deux mécanismes, un seul symptôme**.
   Inscrit le 1er septembre 2026. **Trouvé par la colonne « où » de la sonde #682** — c'est elle qui a
   montré que `GRILLE_GENERIQUE` vit dans h2026 SEULEMENT, `ECHELLE_IDME_DEPART` dans a2026 seulement, et
@@ -774,6 +799,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `startsWith`, pas de normalisation d'accents. **Et elle vaut pour le jour où ce script tournera chez
   quelqu'un d'autre**, dont on ne connaît ni les habitudes ni les renommages — c'est pour ce cas-là
   qu'elle est écrite ainsi, pas pour le corpus d'aujourd'hui.
+  ✅ **EXÉCUTÉ sur le corpus de Grégoire, 1er septembre au soir : 5 renommés, 0 intouchable,
+  0 autre écriture**, relance de contrôle à « 0 à renommer ». Le garde a tenu.
+  ⚠ **MAIS C'EST UN SCRIPT, PAS UNE MIGRATION** — voir **#684**. Les autres utilisateurs gardent les
+  anciens libellés, et rien ne les rattrapera.
   ▣ **La condition est revérifiée DANS le mutateur**, à l'instant de l'écriture. Break-test : ce
   garde-fou n'a mordu qu'au troisième essai — retirer la revérification ne changeait rien aux cinq
   premiers tests, parce qu'un nom personnel y est déjà écarté à la lecture. Il a fallu construire **le
