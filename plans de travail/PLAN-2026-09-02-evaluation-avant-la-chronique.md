@@ -1,6 +1,8 @@
 # Plan — « Annoter et évaluer », avant la chronique
 
-> **Écrit le 2 septembre 2026 à 11 h 50 (heure de Drummondville), par Cowork, avec Grégoire.**
+> **Écrit le 2 septembre 2026 à 11 h 50, par Cowork, avec Grégoire.**
+> **↻ REMESURÉ à 12 h 45, après l'atterrissage de 1.110.0** — voir « Ce qui a changé
+> depuis l'écriture », plus bas. La trouvaille centrale, elle, **tient inchangée**.
 > **Ce n'est pas une consigne** : c'est le plan dont les consignes sortiront, une par séance
 > (règle 6). La consigne en cours porte le geste 4 et ne doit pas être remplacée.
 >
@@ -20,8 +22,13 @@
 · le geste 4 le modifie (l. **163**, **211**, **213** — le mot « français ») ;
 · l'écran d'annotation le lit, via `js/evaluation-calcul.js` et `js/evaluation-enonces.js`.
 
-⮕ **Toute mesure prise sur ce fichier avant l'atterrissage du geste 4 est périmée d'avance.**
-Ce plan n'y touche pas, et aucune de ses trois étapes n'en dépend.
+↻ **12 h 45 — LE LOT A ATTERRI (1.110.0, commit `6ea20e23`), LE CROISEMENT EST LEVÉ.**
+`git show --stat 6ea20e23` : le lot a touché `js/evaluation-projection.js` (25 lignes) et
+`js/grilles.js` (5 lignes) — **et aucun des quatre modules du cœur de ce plan**
+(`evaluation.js`, `evaluation-calcul.js`, `evaluation-sauvegarde.js`,
+`evaluation-chargement.js`). ⮕ **Les mesures de ce plan sont donc bonnes**, et
+`evaluation-projection.js` est désormais mesurable sans attendre.
+⚠ **1.110.0 est commitée et non poussée** au moment d'écrire ceci.
 ⮕ **Témoin de la règle de parallélisme** (`PROTOCOLE.md`) : une seule session écrit dans
 `js/`. Cowork ne fait que mesurer ; c'est Claude Code qui écrit, un lot à la fois.
 
@@ -144,6 +151,41 @@ reproduire est la première tâche du temps 2, avant tout correctif.**
 
 ---
 
+## ↻ CE QUI A CHANGÉ DEPUIS L'ÉCRITURE — remesure du 2 septembre à 12 h 45
+
+*Règle 1 : une connaissance transportée se remesure. Trois heures ont passé et un lot a
+atterri ; voici ce qui a bougé, et ce qui n'a pas bougé.*
+
+**▣ LA TROUVAILLE TIENT, INCHANGÉE.** Rejouée à 12 h 45 :
+
+```bash
+grep -rn "parseFloat(.*noteProduction1" js/ --include=*.js
+grep -n "for (const \[nom, src\]" tests/unit/sentinelle-572-mineurs-liste-annoter-design.test.js
+```
+
+· La première rend **une seule ligne** : `js/evaluation.js:1784`. Le quatrième site est
+  toujours là.
+· Les trois sites corrigés sont intacts (`evaluation-sauvegarde.js:209`,
+  `evaluation-chargement.js:1452`, `:1476`).
+· La sentinelle boucle toujours sur **deux** fichiers (l. **77**), et `evaluation.js` n'y est
+  toujours pas.
+
+**▣ CE QUI A BOUGÉ** : `evaluation-projection.js` (25 lignes modifiées, **taille inchangée à
+642**) et `js/grilles.js` (5) — le nom du service d'aide et son libellé. Rien dans le cœur du
+plan.
+⚠ **Correction faite dans la minute** : Cowork avait d'abord écrit « 654 lignes, +12 » en
+lisant le `+25` d'un `git show --stat` comme un ajout net. **`--stat` compte les lignes
+TOUCHÉES, pas la croissance.** `wc -l` rend 642, avant comme après.
+
+⚠ **ET UNE CHOSE APPRISE À MIDI, À NE PAS OUBLIER EN ARRIVANT AU TEMPS 3** : le champ « Nom
+du service d'aide » vit **par critère**, dans Conception › Grilles de critères › un critère
+*algorithmique* › bloc « Modèle de projection ». Pas dans un écran de réglages global.
+⮕ **Cowork s'est trompé deux fois le 2 septembre en déduisant un emplacement d'écran depuis
+un fichier**, au lieu de remonter depuis l'écran. **Le temps 3 est précisément l'antidote :
+il exécute au lieu de lire.** Ne planifie aucun parcours d'après un nom de fichier.
+
+---
+
 ## LE PLAN, EN TROIS TEMPS
 
 *Une seule décision principale par séance (règle 6) : ces trois temps sont trois séances, pas
@@ -189,9 +231,11 @@ DÉDUIT du dépôt, elle ne s'écrit pas à la main. Break-test : réintroduire 
 
 **d) Puis l'audit de la zone jamais regardée.** L'en-tête du 25 août dit son périmètre :
 *« enregistrements, logique, PDF de rétroaction et design »*. **Le calcul de la note n'y est
-pas.** La chaîne fait 2 500 lignes : `evaluation-calcul.js` (1046), `evaluation-projection.js`
-(642, ⚠ **attendre l'atterrissage du geste 4**), `evaluation-enonces.js` (450),
-`evaluation-formules.js` (362).
+pas.** La chaîne fait environ 2 500 lignes — **recomptées à 12 h 45, après 1.110.0** :
+`evaluation-calcul.js` (1046), `evaluation-projection.js` (**642**, inchangé : le lot y a
+modifié 25 lignes sans en ajouter),
+`evaluation-enonces.js` (450), `evaluation-formules.js` (362). ↻ **Plus d'attente** : le
+geste 4 a atterri.
 ⮕ **La question directrice, une seule** : *par quels chemins une note peut-elle être écrite
 sans être calculée, ou calculée sur une pondération incomplète ?* **#674 est dans cette zone**,
 et sa forme est déjà tranchée : persister `ponderationTotal` à côté de `noteFinale` — **pas**
