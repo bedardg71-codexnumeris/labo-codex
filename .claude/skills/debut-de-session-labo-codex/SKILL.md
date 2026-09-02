@@ -170,14 +170,30 @@ chaque push de toute façon. **Le manque était la lecture.**
 **La mesure, dix secondes, une commande — pas de script neuf :**
 
 ```bash
-gh run list --branch main --limit 1 --json conclusion,createdAt,headSha,workflowName \
-  --jq '.[0] | "\(.workflowName) · \(.conclusion) · \(.createdAt) · commit \(.headSha[0:8])"'
+gh run list --branch main --limit 1 --json databaseId,conclusion,createdAt,headSha \
+  --jq '.[0] | "run \(.databaseId) · \(.conclusion) · \(.createdAt) · commit \(.headSha[0:8])"'
+gh run view $(gh run list --branch main --limit 1 --json databaseId --jq '.[0].databaseId') \
+  --json jobs --jq '.jobs[] | "  \(.name) · \(.conclusion)"'
 git rev-parse --short=8 HEAD
 ```
 
-⮕ **À rendre en UNE ligne, en français, dans le rapport d'état** : *la dernière
-vérification de GitHub sur `main` a réussi / échoué, le <date>, sur le commit <sha>* — et
-**si ce commit est `HEAD`**. C'est la leçon du jeton Playwright, calquée sur
+⚠⚠ **LIRE LES JOBS, PAS SEULEMENT LE RUN** (depuis le 2 septembre au soir). Le workflow
+a deux jobs : `Vitest`, toujours, et `Playwright (WebKit)`, **seulement si le push touche
+un chemin observable au navigateur** (liste `OBSERVABLE` de `tests.yml`). **Un run peut
+donc rendre `success` avec Playwright `skipped`** — et c'est exactement la confusion qui a
+coûté deux jours : un verdict absent pris pour un verdict bon. La seconde commande rend
+un état PAR JOB ; c'est lui qu'on rapporte.
+
+⮕ **À rendre en français, dans le rapport d'état, en distinguant TROIS états** :
+· **jugé et vert** — les deux jobs `success` ;
+· **jugé et rouge** — un job `failure` : lequel, et (`gh run view <id> --log-failed`)
+  quelle étape, quel(s) fichier(s) ;
+· **NON JUGÉ, et pourquoi** — Playwright `skipped` : *« Playwright n'a pas tourné : le
+  push ne touchait rien d'observable au navigateur »*. ⚠ Vérifier que c'est vrai :
+  `git diff --name-only HEAD~1` ne doit montrer aucun chemin de `OBSERVABLE`. Si le push
+  touchait du code et que Playwright a sauté quand même, **la condition est trop
+  étroite : le dire**, ne pas la corriger dans le rituel.
+Et toujours : *le <date>, sur le commit <sha>* — **et si ce commit est `HEAD`**. C'est la leçon du jeton Playwright, calquée sur
 `scripts/lire-verdict.mjs` : **un verdict qui ne porte pas le SHA jugé ne dit pas sur quoi
 il porte.** Un vert vieux de trois semaines n'est pas un vert.
 
@@ -396,4 +412,5 @@ aucun commit, aucun push. En particulier :
 |------------|-----------------------------------------------------------|
 | 2026-05-28 | Création. Pendant inverse du skill `fin-de-session-labo-codex`. Acté après écart de 24 h sur le Lot A ✴ : prémisse demandait un travail déjà livré au commit `11f87a1`. |
 | 2026-06-11 | Format de version aligné sur SemVer (`X.Y.Z`). Déduplication : §8 et ANTI-PATTERNS resserrés (la consigne « lecture seule / ne pas prendre la prémisse pour argent comptant » n'est plus répétée 3×, elle renvoie à la Justification). |
+| 2026-09-02 (soir) | §2.1 : la commande lit les JOBS, pas le run — le workflow est devenu deux jobs et Playwright peut être `skipped` sans que le run cesse d'être `success`. Trois états à distinguer, dont NON JUGÉ. |
 | 2026-09-02 | §2.1 : le verdict de GitHub entre dans le rituel (une commande `gh`, une ligne rendue, SHA comparé à `HEAD`, deux cas d'écart distingués, conduite à tenir devant un rouge, conduite sans `gh`). Motif : « je ne vois pas de rouge » alors que huit runs consécutifs étaient rouges sur `main`. |

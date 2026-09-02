@@ -30,6 +30,15 @@ import { fileURLToPath } from 'node:url';
 // BREAK-TEST (fait le 23 août 2026) — faire lire `docs/DEPLOY.md` à un test
 // (`readFileSync(path.join(racine, 'docs', 'x.md'))`) → le cliquet rougit en
 // nommant le fichier et le chemin ignoré.
+//
+// ↻ BLOC 2, AJOUTÉ LE 2 SEPTEMBRE 2026 — LA MÊME RÈGLE POUR LA CONDITION
+// PLAYWRIGHT. Le workflow est devenu deux jobs : `vitest` juge tout, `playwright`
+// ne tourne que si le push touche un chemin de la liste `OBSERVABLE` (env du job
+// `vitest`). Même gain, même risque, même cliquet : si un spec de
+// tests/integration/ se met à LIRE un chemin absent de cette liste, sa régression
+// passerait sans Playwright. Ce bloc lie la liste à ce que les specs lisent.
+// BREAK-TESTS (faits le 2 septembre) — retirer `scripts/` de OBSERVABLE → rouge
+// (deux specs lisent scripts/) ; faire lire `docs/x.md` à un spec → rouge.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -132,5 +141,74 @@ describe('CI · le `paths-ignore` du workflow ne masque aucun test', () => {
         expect(ignores.some((p) => p.startsWith('.claude')),
             'sentinelle-skill-alignement.test.js lit .claude/skills/alignement/SKILL.md : ' +
             'ignorer ce dossier rendrait sa régression invisible').toBe(false);
+    });
+});
+
+describe('CI · le job Playwright ne saute que si RIEN d\'observable n\'a bougé', () => {
+    /** La liste `OBSERVABLE` du job `vitest` — l'unique source que le shell lit. */
+    function cheminsObservables() {
+        const m = /^\s*OBSERVABLE:\s*"([^"]+)"/m.exec(workflow);
+        return m ? m[1].trim().split(/\s+/) : null;
+    }
+    const estObservable = (chemin, liste) => liste.some((e) =>
+        e.endsWith('/') ? chemin.startsWith(e) : chemin === e);
+
+    it('le workflow a deux jobs, Vitest sans condition, Playwright conditionné par la décision de Vitest', () => {
+        expect(workflow).toMatch(/^  vitest:\n/m);
+        expect(workflow).toMatch(/^  playwright:\n(?:.*\n)*?    needs: vitest\n    if: needs\.vitest\.outputs\.playwright == 'oui'\n/m);
+        // Vitest juge TOUT : aucun `if:` au niveau du job.
+        const blocVitest = workflow.slice(workflow.indexOf('\n  vitest:\n'), workflow.indexOf('\n  playwright:\n'));
+        expect(blocVitest).not.toMatch(/^    if:/m);
+        // Un job sauté doit rester `skipped` : pas de `continue-on-error`, pas de
+        // `if: always()` qui transformerait un saut en vert.
+        expect(workflow).not.toMatch(/if:\s*always\(\)/);
+    });
+
+    it('la liste OBSERVABLE existe, et elle porte ce qu\'index.html charge', () => {
+        const liste = cheminsObservables();
+        expect(liste, '`OBSERVABLE:` introuvable dans le job vitest').not.toBeNull();
+        for (const attendu of ['js/', 'index.html', 'styles.css', 'tests/', '.github/workflows/tests.yml']) {
+            expect(liste, attendu + ' absent de OBSERVABLE').toContain(attendu);
+        }
+    });
+
+    it('AUCUN spec Playwright ne LIT un chemin qui ne déclencherait pas Playwright', () => {
+        const liste = cheminsObservables() || [];
+        const dossierInt = path.join(dossierTests, 'integration');
+        const coupables = [];
+        for (const fichier of fichiersDeTest(dossierInt)) {
+            const src = sansCommentaires(readFileSync(fichier, 'utf8'));
+            // Les chemins construits depuis la racine du projet — c'est là que
+            // vivent les fichiers hors tests/ que les specs peuvent lire.
+            const appels = src.match(/path\.(?:join|resolve)\(\s*(?:racineProjet|racine)\s*,[^)]*\)/g) || [];
+            for (const appel of appels) {
+                const segments = [...appel.matchAll(/'([^']+)'/g)].map((m) => m[1]).filter((x) => x !== '..');
+                if (!segments.length) continue;
+                const chemin = segments.join('/');
+                if (!estObservable(chemin, liste)) {
+                    coupables.push(`${path.relative(racineProjet, fichier)} → ${chemin}\n      ${appel.trim()}`);
+                }
+            }
+        }
+        expect(
+            coupables,
+            'Ces specs Playwright LISENT un chemin qui ne déclenche PAS le job Playwright :\n' +
+            'leur régression passerait sans navigateur. Deux issues : ajouter le chemin à\n' +
+            'OBSERVABLE (job vitest de tests.yml), ou cesser de le lire.\n  ' +
+            coupables.join('\n  ')
+        ).toEqual([]);
+    });
+
+    it('témoin — le bloc voit bien des lectures : scripts/ et version.json sont lus par des specs', () => {
+        // Un cliquet qui ne trouve aucun appel rend une liste vide pour rien.
+        const liste = cheminsObservables() || [];
+        expect(liste).toContain('scripts/');
+        expect(liste).toContain('version.json');
+        const dossierInt = path.join(dossierTests, 'integration');
+        let lectures = 0;
+        for (const fichier of fichiersDeTest(dossierInt)) {
+            lectures += (sansCommentaires(readFileSync(fichier, 'utf8')).match(/path\.(?:join|resolve)\(\s*(?:racineProjet|racine)\s*,/g) || []).length;
+        }
+        expect(lectures).toBeGreaterThan(50);
     });
 });
