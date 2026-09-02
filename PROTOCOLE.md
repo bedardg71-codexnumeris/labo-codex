@@ -294,6 +294,42 @@ performance.
 « le verdict » : chacun se dit en clair la première fois qu'il apparaît dans une
 séance.
 
+### Les consignes passent par un FICHIER, pas par un bloc à copier
+
+*Arrêté le 2 septembre 2026, après qu'un bloc relayé eut été **tronqué à la
+copie** : Claude Code a reçu une demi-consigne, coupée en plein milieu d'une
+mesure, et ni Grégoire ni lui n'avaient de quoi s'en apercevoir. Il l'a rattrapé
+en remesurant lui-même — c'était la bonne réaction, mais on ne bâtit pas une
+méthode sur la vigilance d'une session.*
+
+**Cowork écrit la consigne dans `plans de travail/CONSIGNE-DU-JOUR.md`.**
+Grégoire ne colle plus qu'une ligne :
+
+```
+Lis « plans de travail/CONSIGNE-DU-JOUR.md » et exécute-la.
+```
+
+Rien de long à copier, donc rien à tronquer. Et la consigne reste dans le dépôt :
+relisible si quelque chose cloche, au lieu de vivre dans une conversation qui
+défile.
+
+**Trois conditions, et elles ne sont pas décoratives :**
+
+**1. Le fichier porte SA DATE ET SON HEURE d'écriture en tête, et la version de
+l'application à ce moment-là.** Le nom ne peut pas rôtir ; le contenu, oui. Une
+consigne qui date de plus de quelques heures **se signale au lieu de s'exécuter** :
+l'état du dépôt a pu changer entre-temps.
+
+**2. Claude Code commite ce fichier AVEC son lot.** La consigne est la spécification
+du lot : les séparer, c'est perdre la trace de ce qui avait été demandé. C'est
+l'exception à la règle du commit séparé pour les fichiers de Cowork.
+
+**3. ⚠ Grégoire ne voit plus ce qu'il transmet — et c'est le prix de ce
+mécanisme.** Il devient donc OBLIGATOIRE, et non plus seulement souhaitable, que
+Cowork dise **dans la conversation, en une ou deux phrases de français
+d'utilisateur, ce que la consigne va produire à l'écran.** Sans quoi on a résolu
+la troncature en fabriquant un chèque en blanc.
+
 ### La mesure d'efficacité
 
 Efficace ne veut pas dire « beaucoup livré ». Ça veut dire : **à la fin de la
