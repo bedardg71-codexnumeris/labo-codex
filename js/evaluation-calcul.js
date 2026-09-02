@@ -968,7 +968,19 @@ function verifierPorteeAvantSauvegarde() {
     calculerNote();
     const portee = window.porteeCalculeeCourante;
     if (!portee || !portee.incomplete) return true;
-    const details = phrasesPorteeIncomplete(portee).join(' ') + ' Complète l\'évaluation, puis enregistre.';
+    // ⚠⚠ LE REFUS NE JETTE RIEN. `sauvegarderEvaluation` ANNULE l'auto-save en attente
+    // avant d'arriver ici (« la sauvegarde manuelle prend le relais », fix #109) : tant
+    // que la sauvegarde manuelle écrivait toujours, rien ne se perdait. Un refus qui
+    // n'écrit rien laissait la copie sans AUCUNE évaluation en base — mesuré par
+    // Grégoire le 2 septembre 2026 à 17 h 53 : badge « Importé », export Léa « aucune
+    // évaluation trouvée ». Le brouillon est donc écrit ICI, tout de suite, exactement
+    // comme l'auto-save l'aurait fait 1,5 s plus tard : la note AVEC sa portée, non
+    // verrouillée. La copie reste exportable, et son PDF dit qu'il ne conclut pas.
+    if (typeof window._autoSauvegarderCriteres === 'function') {
+        window._autoSauvegarderCriteres(null);
+    }
+    const details = phrasesPorteeIncomplete(portee).join(' ')
+        + ' Ton travail est conservé en brouillon : complète l\'évaluation, puis enregistre.';
     if (typeof notifications !== 'undefined' && notifications && typeof notifications.erreur === 'function') {
         notifications.erreur('Évaluation incomplète', details);
     }

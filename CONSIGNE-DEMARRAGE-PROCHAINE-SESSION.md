@@ -167,7 +167,46 @@ d'enseignant ; (B) ouvrait sur « Évaluation incomplète », qu'un élève peut
 « ta copie est incomplète » ; (C) part de la copie, nomme, pointe la suite, tient en une
 ligne et fonctionne sans liste. Il a aussi confirmé le « -- » à l'écran.
 
+### ↻ CE QUE LE COUP D'ŒIL DE GRÉGOIRE A TROUVÉ (17 h 53) — corrigé, troisième commit
+
+**Le symptôme** : après le refus d'Enregistrer sur une copie incomplète, la copie
+restait « **Importé** », et l'export Léa rendait « Aucune évaluation trouvée pour ces
+critères » (capture d'écran). Son inférence — « je ne peux pas enregistrer une
+évaluation incomplète, donc je ne peux pas exporter de PDF » — était juste dans les
+faits, fausse dans la cause : l'export Léa ne filtre pas sur le verrouillage
+(`selectionnerEvaluationsLea`, `!remplaceeParId` seulement) ; un brouillon
+s'exporterait. Il n'y avait AUCUNE évaluation en base, pas même le brouillon.
+
+**La cause** : `sauvegarderEvaluation` **annule l'auto-save en attente** avant toute
+validation (« la sauvegarde manuelle prend le relais », fix #109). Tant qu'Enregistrer
+écrivait toujours, rien ne se perdait. Un refus qui n'écrit rien laissait le travail
+nulle part — et, à la navigation, `_flusherAutoSave` n'avait plus de snapshot à
+écrire. **Régression de ce lot**, issue 1 (elle casse le parcours livré).
+
+**Le correctif** : `verifierPorteeAvantSauvegarde` écrit le brouillon sur-le-champ
+(`window._autoSauvegarderCriteres(null)`, la note AVEC sa portée, non verrouillé),
+exactement ce que l'auto-save aurait fait 1,5 s plus tard, puis refuse en le disant
+(« Ton travail est conservé en brouillon : complète l'évaluation, puis enregistre. »).
+La copie passe « Évalué », reste exportable, et son PDF porte la phrase (C).
+Vérifié : `npx vitest run unit/sentinelle-674-les-portes-refusent-l-incomplet.test.js`
+— 17 cas, dont les trois refus qui exigent maintenant UN brouillon non verrouillé
+(helper `seulUnBrouillon`) et un témoin sans auto-save chargé (rien n'est écrit).
+Break-test : retirer l'appel → rouge (voir le rapport de session).
+
+⚠ **Ce que ça révèle, à inscrire** : un chemin de refus quel qu'il soit, posé après
+l'annulation de l'auto-save dans `sauvegarderEvaluation`, jette le travail en cours.
+`_validerReferencesSauv` et `_validerReferencesNonDemoSauv` sont dans ce cas depuis
+toujours (une grille disparue, une référence démo) — moins probable, même trou.
+
+⚠ **Trou dans le filet, nommé** : la suite complète était verte avec le défaut. Aucun
+test n'exerçait « refus, puis que reste-t-il en base ? ». C'est le coup d'œil de
+Grégoire à l'écran qui l'a vu — la règle 6 a fait exactement ce pour quoi elle existe.
+
 ### Trouvailles en chemin — issue 2 (inscrire et continuer), aucune corrigée
+
+- **Tout refus placé après l'annulation de l'auto-save jette le brouillon en attente**
+  (`_validerReferencesSauv`, `_validerReferencesNonDemoSauv`) — même famille que la
+  régression ci-dessus, hors de ce lot.
 
 - **Le portfolio et la Liste des évaluations ne lisent pas encore la portée** : une
   évaluation née de l'auto-save avec « 95 sur 80 % » entre dans l'agrégat à 95, comme

@@ -279,8 +279,12 @@ Ce qui change, en gestes :
   80 % de la grille. »). Renseigné, la note revient et la ligne disparaît. Une échelle
   muette est nommée de la même façon, avec quoi faire.
 - **À l'enregistrement** (bouton Enregistrer, création ou modification) : refus
-  nommé, rien n'est écrit. L'auto-save, lui, continue d'écrire pendant la saisie —
-  la note AVEC sa portée (`ponderationCouverte`, à côté de `noteFinale`).
+  nommé, et **le brouillon est conservé** (écrit sur-le-champ, non verrouillé, la
+  note AVEC sa portée `ponderationCouverte` à côté de `noteFinale`) : la copie passe
+  « Évalué » et reste exportable, son PDF dira qu'il ne conclut pas. ↻ Trouvé par
+  Grégoire le 2 septembre à 17 h 53 : la première version du refus n'écrivait rien,
+  et comme Enregistrer annule l'auto-save en attente, la copie restait « Importé »
+  et l'export Léa rendait « aucune évaluation trouvée ». Corrigé le soir même.
 - **Sur le PDF de l'élève** : pas de bandeau « Niveau général » ; à sa place, la
   phrase que tu as arrêtée le 2 septembre en soirée : « Cette copie n’a pas de niveau
   général : Langue (20 %) reste à évaluer. » L'export te le dit avant la remise.
