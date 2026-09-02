@@ -184,7 +184,7 @@ donc rendre `success` avec Playwright `skipped`** — et c'est exactement la con
 coûté deux jours : un verdict absent pris pour un verdict bon. La seconde commande rend
 un état PAR JOB ; c'est lui qu'on rapporte.
 
-⮕ **À rendre en français, dans le rapport d'état, en distinguant TROIS états** :
+⮕ **À rendre en français, dans le rapport d'état, en distinguant QUATRE états** :
 · **jugé et vert** — les deux jobs `success` ;
 · **jugé et rouge** — un job `failure` : lequel, et (`gh run view <id> --log-failed`)
   quelle étape, quel(s) fichier(s) ;
@@ -193,6 +193,18 @@ un état PAR JOB ; c'est lui qu'on rapporte.
   `git diff --name-only HEAD~1` ne doit montrer aucun chemin de `OBSERVABLE`. Si le push
   touchait du code et que Playwright a sauté quand même, **la condition est trop
   étroite : le dire**, ne pas la corriger dans le rituel.
+· **jugé PARTIELLEMENT, N essais exclus de cette plateforme** — depuis le 2 septembre
+  au soir, six essais (cinq specs du planificateur et un bandeau) ne tournent pas sur le
+  runner WebKit Linux, où ils ne peuvent pas juger ; ils restent jugés par
+  `npm run test:int` sur macOS. Le job Playwright le DIT dans le nom d'une étape :
+  ```bash
+  gh run view <id> --json jobs --jq '.jobs[] | select(.name | test("Playwright")) | .steps[] | select(.name | test("NON JUGÉS")) | .name'
+  ```
+  ⮕ rend `6 essais NON JUGÉS ici (5 specs, WebKit Linux ≠ Safari macOS)`. **Un vert de
+  Playwright sur GitHub est TOUJOURS un vert sur 233, pas 239** : le dire dans la ligne.
+  La liste vit dans `tests/playwright.config.js` (`EXCLUS_WEBKIT_LINUX`), verrouillée par
+  le cliquet `sentinelle-ci-paths-ignore` (bloc 3) : elle ne grandit pas sans qu'on l'ait
+  décidé.
 Et toujours : *le <date>, sur le commit <sha>* — **et si ce commit est `HEAD`**. C'est la leçon du jeton Playwright, calquée sur
 `scripts/lire-verdict.mjs` : **un verdict qui ne porte pas le SHA jugé ne dit pas sur quoi
 il porte.** Un vert vieux de trois semaines n'est pas un vert.
@@ -412,5 +424,6 @@ aucun commit, aucun push. En particulier :
 |------------|-----------------------------------------------------------|
 | 2026-05-28 | Création. Pendant inverse du skill `fin-de-session-labo-codex`. Acté après écart de 24 h sur le Lot A ✴ : prémisse demandait un travail déjà livré au commit `11f87a1`. |
 | 2026-06-11 | Format de version aligné sur SemVer (`X.Y.Z`). Déduplication : §8 et ANTI-PATTERNS resserrés (la consigne « lecture seule / ne pas prendre la prémisse pour argent comptant » n'est plus répétée 3×, elle renvoie à la Justification). |
+| 2026-09-02 (soir, 2) | §2.1 : quatrième état — *jugé partiellement, N essais exclus de cette plateforme* (six essais du planificateur exclus sur WebKit Linux, dits par le nom d'une étape du job Playwright). Un vert Playwright sur GitHub porte sur 233, pas 239. |
 | 2026-09-02 (soir) | §2.1 : la commande lit les JOBS, pas le run — le workflow est devenu deux jobs et Playwright peut être `skipped` sans que le run cesse d'être `success`. Trois états à distinguer, dont NON JUGÉ. |
 | 2026-09-02 | §2.1 : le verdict de GitHub entre dans le rituel (une commande `gh`, une ligne rendue, SHA comparé à `HEAD`, deux cas d'écart distingués, conduite à tenir devant un rouge, conduite sans `gh`). Motif : « je ne vois pas de rouge » alors que huit runs consécutifs étaient rouges sur `main`. |
