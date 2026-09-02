@@ -240,6 +240,71 @@ sans jamais se heurter, le test préalable est trop strict.
 
 ---
 
+## Règle 6 — L'environnement de travail de Grégoire se prépare sans qu'il le demande
+
+*Arrêtée le 2 septembre 2026, après une matinée où il a perdu ses repères : deux
+versions livrées, huit consignes relayées, et à 8 h il ne savait plus où il en
+était dans son propre projet. Ces règles ne sont pas un confort, ce sont les
+conditions pour qu'il décide en connaissance de cause.*
+
+### Ce que Cowork fait à l'OUVERTURE de chaque session, sans qu'on le demande
+
+1. Lire les fichiers de cadrage et **mesurer** l'état réel du dépôt.
+2. **Mettre à jour la console** (voir plus bas) et lui dire, en une ligne, ce qui
+   y a changé depuis la dernière fois.
+3. Rendre l'état **en gestes d'utilisateur**, jamais en compte d'items de backlog.
+
+### La console : « Les huit gestes »
+
+C'est un artefact publié, sa vue d'`OU-EN-EST-ON.md`. **Il n'y en a qu'une.** Ne
+jamais en fabriquer une seconde : deux pages qui divergent seraient pires que rien.
+Si son adresse manque, la demander plutôt que de la deviner.
+
+Elle porte : où on en est (les huit), **ce qu'on fait en ce moment et pourquoi**,
+ce qui attend une décision de lui, et ce qu'il doit aller voir à l'écran.
+
+⮕ **Cowork la met à jour à la fin de chaque lot**, et annonce en une ligne ce qui
+y a changé. C'est le travail de Cowork, pas le sien.
+
+### Les six règles de forme
+
+**1. Jamais un numéro de fiche sans sa phrase en français.** « #690 » ne lui dit
+rien ; « les trois pratiques offertes qui se déclarent en chimie et en maths » lui
+dit tout. La console porte les deux côte à côte, parce que le terminal, lui,
+n'affiche que les numéros.
+
+**2. Les blocs à relayer sont écrits pour Claude Code, pas pour lui.** Il n'a pas
+à les lire. **Une phrase au-dessus** doit dire ce que le bloc va produire, en
+français d'utilisateur. Rien d'autre n'est à comprendre.
+
+**3. Chaque lot se termine à l'écran, pas dans un rapport.** Quand c'est livré :
+quel onglet ouvrir, ce qui devrait être différent, et une question à laquelle il
+répond en trente secondes. C'est sa façon de vérifier depuis toujours — celle des
+chroniques — et aucun banc vert ne la remplace.
+
+**4. Une seule livraison par séance, à la fin, et il regarde avant.** Le rythme
+des machines n'est pas le sien. Deux versions livrées avant huit heures du matin
+sur une application que des gens utilisent est un défaut de méthode, pas une
+performance.
+
+**5. Une seule décision principale par séance.** Les décisions de fond se prennent
+à froid, pas en rafale au milieu d'un lot.
+
+**6. Pas de raccourci de métier sans sa traduction.** « colle le bloc », « pousse »,
+« le verdict » : chacun se dit en clair la première fois qu'il apparaît dans une
+séance.
+
+### La mesure d'efficacité
+
+Efficace ne veut pas dire « beaucoup livré ». Ça veut dire : **à la fin de la
+journée, Grégoire sait ce qui a changé et pourquoi.** Une journée qui livre moins
+mais qu'il peut reprendre le lendemain sans tout reconstruire vaut mieux.
+
+**Ce qui la falsifierait** : s'il dit se sentir freiné plutôt que situé, le curseur
+est mal placé et c'est lui qui le déplace.
+
+---
+
 ## Ce qui reste hors protocole
 
 **Le canal unique n'est pas automatisé, et c'est délibéré.** Le 1er septembre, le
