@@ -10,6 +10,50 @@
   publish = "."
 
 # ============================================================================
+# Redirections de domaine — fermer les portes de service (1er sept. 2026)
+#
+# L'application est servie à plusieurs adresses. Seule `app.codexnumeris.org`
+# passe par Cloudflare Access ; les sous-domaines `*.netlify.app` servaient la
+# MÊME application, complète, sans aucune authentification (mesuré le 1er sept.
+# 2026 : 200 sur les deux, `etag` identique à la production).
+#
+# Ce n'est PAS une fuite de données — l'application est locale d'abord, un
+# visiteur par cette porte n'obtient qu'un espace vide, le sien. Le défaut est
+# que Netlify compte ces visiteurs et qu'Access ne les voit jamais : le nombre
+# d'utilisateurs affiché ne veut rien dire, et ces gens-là n'entrent dans
+# aucune liste de contacts.
+#
+# ⚠ `force = true` est INDISPENSABLE : sans lui, Netlify sert le fichier
+# statique existant (`/index.html`) au lieu de rediriger.
+#
+# ⚠ Les aperçus de PR (`deploy-preview-<N>--codexnumeris-051225.netlify.app`)
+# ne sont VOLONTAIREMENT pas redirigés : ils servent à éprouver un chantier sur
+# iPad avant la fusion, et une redirection les rendrait inutilisables.
+#
+# ⚠ Deux hôtes NOMMÉS suffisent : les déploiements de branche sont désactivés,
+# mesuré le 1er sept. 2026 (une branche réelle rend 404, comme un témoin
+# inventé ; seul `main--…` rendait 200, parce que `main` est la production).
+# Si on les activait un jour, `from` n'accepte PAS de joker sur l'hôte : ça se
+# réglerait dans le tableau de bord Netlify, pas ici. Détail dans DEPLOY.md §1.2.
+#
+# ⚠ Le 301 est PERMANENT et retenu durablement par les navigateurs (Safari en
+# particulier). Rouvrir une de ces adresses coûtera plus que de retirer ces
+# lignes : les navigateurs qui l'ont apprise redirigeront d'eux-mêmes.
+# ============================================================================
+
+[[redirects]]
+  from = "https://codexnumeris-051225.netlify.app/*"
+  to = "https://app.codexnumeris.org/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://main--codexnumeris-051225.netlify.app/*"
+  to = "https://app.codexnumeris.org/:splat"
+  status = 301
+  force = true
+
+# ============================================================================
 # Headers de cache — évite que les navigateurs (Safari iPad en particulier)
 # servent des versions périmées après un déploiement.
 # ============================================================================

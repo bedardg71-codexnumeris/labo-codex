@@ -1,6 +1,6 @@
 # Guide de déploiement — Labo Codex
 
-> **Version** : 1.6 (27 août 2026 — réactivation de Cloudflare Access au 1er septembre 2026 avec une policy ouverte ; quatre affirmations fausses corrigées ; §4.4 refondue en export périodique des identités ; voir historique)
+> **Version** : 1.7 (1er septembre 2026 — les deux sous-domaines `*.netlify.app` servaient l'application sans authentification, MESURÉ ; redirigés en 301 vers `app.codexnumeris.org` dans `netlify.toml`. Historique antérieur : v1.6, 27 août 2026 — réactivation de Cloudflare Access au 1er septembre 2026 avec une policy ouverte ; quatre affirmations fausses corrigées ; §4.4 refondue en export périodique des identités)
 > **Public** : Grégoire Bédard (mainteneur principal) + co-mainteneur éventuel
 > **Document apparenté** : [`PRIVACY.md`](PRIVACY.md), [`INCIDENTS.md`](INCIDENTS.md)
 
@@ -56,7 +56,8 @@ pour les personnes invitées.
 | URL | Rôle | Accessible |
 |---|---|---|
 | `app.codexnumeris.org` | URL publique principale | Publique sans authentification du 28 mai au 31 août 2026 ; **identification par OTP à partir du 1er septembre 2026** (porte ouverte, cf. §3) |
-| `main--codexnumeris-051225.netlify.app` | Origin Netlify de la production | Accessible — c'est la branche `main` servie par Netlify. ⚠️ **À vérifier avant le 1er septembre 2026** : cette URL ne semble pas passer par le proxy Cloudflare, auquel cas elle contournerait Access et constituerait une entrée ne laissant aucune identité. **Non testé** — un `curl -I` tranche en dix secondes. Sans conséquence tant que l'application est ouverte à tous |
+| `codexnumeris-051225.netlify.app` | Sous-domaine Netlify par défaut du site | ↻ **Redirigé en 301 vers `app.codexnumeris.org` depuis le 1er septembre 2026** (`netlify.toml`). Servait auparavant l'application complète sans authentification |
+| `main--codexnumeris-051225.netlify.app` | Origin Netlify de la production (branche `main`) | ↻ **Redirigé en 301 vers `app.codexnumeris.org` depuis le 1er septembre 2026** (`netlify.toml`). ⚠️ **MESURÉ le 1er septembre 2026, le doute est levé** : cette URL ne passait PAS par le proxy Cloudflare — `curl` rendait **200**, avec le même `etag` que la production. Elle contournait donc Access et ne laissait aucune identité |
 | `deploy-preview-<N>--codexnumeris-051225.netlify.app` | **Aperçu automatique de la pull request n° N** | Accessible dès que la PR est ouverte, ~30 s après le push |
 | `github.com/bedardg71-codexnumeris/Monitorage_v6` | Code source | **Privé** |
 
@@ -71,6 +72,37 @@ URL complète et isolée, sans toucher à la production. C'est le moyen d'éprou
 un chantier sur iPad avant de fusionner. ⚠ C'est une **origine différente**
 d'`app.codexnumeris.org` : le stockage du navigateur n'y est pas partagé, l'app
 y démarre donc vide.
+⚠️ **Les aperçus de PR ne sont VOLONTAIREMENT pas redirigés**, contrairement aux
+deux sous-domaines Netlify ci-dessus. Ce sont donc les seules portes `*.netlify.app`
+encore ouvertes — le prix assumé pour pouvoir éprouver un chantier sur iPad avant
+de fusionner. Elles n'existent que le temps d'une PR ouverte.
+
+✅ **Les déploiements de branche sont DÉSACTIVÉS — mesuré le 1er septembre 2026.**
+La question valait d'être posée : si chaque branche poussée recevait son
+`<branche>--codexnumeris-051225.netlify.app`, les deux redirections fermeraient deux
+hôtes NOMMÉS sans fermer la CLASSE — et `from` n'accepte pas de joker sur l'hôte, ce
+qui se réglerait dans le tableau de bord, pas ici. **Elle ne se pose pas** :
+
+| Hôte interrogé | Code |
+|---|---|
+| `claude-relais-md-continuation-b7i2jq--…` (branche réelle) | 404 |
+| `branche-qui-n-existe-pas-temoin--…` (témoin inventé) | 404 |
+| `main--…` (branche de production) | **200** |
+
+Une branche réelle rend le même 404 qu'une branche inventée : aucun déploiement de
+branche n'existe. Le 200 de `main--…` est le **témoin positif** — il prouve que la
+forme d'URL atteint bien le routeur de Netlify, et que le 404 signifie « pas de
+déploiement » plutôt qu'une mesure cassée. `main--…` n'était joignable que parce que
+`main` est la branche de production.
+⚠ **À revérifier si les déploiements de branche sont activés un jour** : la commande
+est `curl -sI -m 12 -o /dev/null -w "%{http_code}" https://<branche>--codexnumeris-051225.netlify.app/`,
+avec un nom de branche inventé comme témoin.
+
+⚠️ **Le 301 est PERMANENT, et les navigateurs le retiennent durablement** — Safari en
+particulier. Rouvrir un jour l'une de ces deux adresses coûtera plus cher que de
+retirer la règle de `netlify.toml` : les navigateurs qui l'ont apprise continueront de
+rediriger d'eux-mêmes, sans redemander au serveur. C'est assumé (l'intention est bien
+que ces portes restent fermées), mais ça se sait d'avance plutôt qu'après coup.
 
 ⚠️ L'ancien sous-domaine `labo.codexnumeris.org` (référencé dans la
 version 1.0 de ce document) n'a plus d'enregistrement DNS et n'est
