@@ -202,6 +202,45 @@ toujours (une grille disparue, une référence démo) — moins probable, même 
 test n'exerçait « refus, puis que reste-t-il en base ? ». C'est le coup d'œil de
 Grégoire à l'écran qui l'a vu — la règle 6 a fait exactement ce pour quoi elle existe.
 
+### ↻↻ 18 h 04 : « C'est inchangé » — le troisième commit ne suffisait pas, quatrième commit
+
+**Le symptôme, capture à l'appui** : nouveau code chargé (le refus dit bien « conservé en
+brouillon »), et pourtant la copie reste « Importé », pastille « En cours », export Léa
+« aucune évaluation ».
+
+**La cause, MESURÉE dans le vrai flux** (nouveau banc
+`tests/integration/evaluation-674-refus-conserve-le-brouillon.spec.js`, WebKit, qui
+rejoue fonction par fonction la séquence de `travaux-ui.js` à l'ouverture d'une copie,
+puis le geste) : `evaluationEnCours` désigne **deux objets** — c'est le constat #646 du
+31 août, écarté par Grégoire (« pas un soir »). `config.js` déclare `let evaluationEnCours`
+(aucune propriété sur `window`) ; le flux Travaux pose `window.evaluationEnCours`
+(`demarrerEvaluationDepuisFichier`) PUIS le nom nu (`chargerEvaluationsEtudiant`).
+`niveauSelectionne` écrit les niveaux dans le nu ; l'auto-save lit `window`.
+Annotation du banc, telle quelle : *nu === window : **false** · critères nu ["c1","c2"]
+· critères window [] · brouillons écrits par l'auto-save débouncé : **0***.
+⮕ Les bancs unitaires ne pouvaient pas le voir : ils donnent le MÊME objet au bac à
+sable sous les deux noms. Seul un banc dans le navigateur, avec les deux emplacements
+tels que l'application les crée, pouvait rougir — il a rougi (0 brouillon), puis verdi.
+
+**Le correctif** (`_instantanePourBrouillon`, evaluation-calcul.js) : la porte donne à
+l'auto-save un instantané qui prend les critères LÀ OÙ ILS SONT (les deux emplacements,
+le nu l'emportant — c'est lui que `calculerNote` vient de lire) et les identifiants là
+où l'enregistrement manuel les prend (les sélecteurs d'abord) ; l'`idModification`
+posé par l'auto-save est rendu aux deux objets. Break-test : ne plus lire le nu → le
+banc réel rougit. Ce n'est PAS la réparation de #646 : c'est le chemin qui la contourne
+pour ce geste.
+
+⚠⚠ **CE QUE LE BANC A MESURÉ EN PLUS, ET QUI CHANGE UNE PRÉMISSE DE LA CONSIGNE** :
+dans « Annoter et évaluer », **l'auto-save débouncé n'écrit AUCUN brouillon** — depuis
+avant ce lot, pour la même raison (il lit `window`, les niveaux sont dans le nu). La
+consigne disait « les évaluations nées de l'auto-save, c'est-à-dire la majorité » ; dans
+ce flux, c'est zéro : tout vient de l'enregistrement manuel. Conséquences : (1) le
+travail en cours n'est PAS conservé si l'on quitte une copie sans enregistrer ; (2) la
+portée n'a d'évaluation à accompagner que par les portes. **C'est #646 — inscrit à sa
+fiche, pas corrigé ici** (126 lectures du nom nu, 94 de `window`, 8 fichiers). Le
+remède de fond tient peut-être en un mot dans une zone protégée (`let` → `var` dans
+`config.js` unifie les deux emplacements) : **décision de Grégoire**, pas d'une session.
+
 ### Trouvailles en chemin — issue 2 (inscrire et continuer), aucune corrigée
 
 - **Tout refus placé après l'annulation de l'auto-save jette le brouillon en attente**
