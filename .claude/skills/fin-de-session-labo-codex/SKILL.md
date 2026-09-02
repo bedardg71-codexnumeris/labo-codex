@@ -142,8 +142,12 @@ Si l'une des **zones protégées** est modifiée (CLAUDE.md), signaler comme
 **Objectif** : exécuter la suite de tests sécurité (Vitest + Playwright).
 
 ```bash
-cd tests && npm test
+cd tests && npm run test:unit
 ```
+
+⛔ **PAS `npm test`** (corrigé le 2 septembre 2026 ; ce skill le prescrivait
+encore). Il enchaîne Vitest ET Playwright, plus de dix minutes. Le verdict
+Playwright se prend séparément, et à un moment précis : voir §4.5.
 
 Reporter :
 - Nombre de tests passés / échoués
@@ -217,6 +221,50 @@ modifier.
 
 ⏸ Rapporter à Grégoire les réserves (tests tautologiques) et les écarts récit↔code.
 Pas de correction automatique.
+
+---
+
+## 4.5 L'ORDRE DU VERDICT ET DU PUSH (promu le 2 septembre 2026)
+
+*Promotion depuis la consigne de démarrage, règle 3 de `PROTOCOLE.md`.*
+
+### ⚠⚠ « Push réussi » ne signifie pas « suite complète verte », et ne le signifiera jamais
+
+Le hook pre-push lance **Vitest seulement**. Pour Playwright, il constate qu'aucun
+verdict local n'existe **et laisse passer**. Ce n'est pas une prudence, c'est une
+**impossibilité structurelle** : la suite dure plus de dix minutes sur cette
+machine, et six minutes de silence ferment la connexion au serveur (#533). **Le
+hook ne PEUT pas la lancer.**
+
+### La méthode qui ferme ce trou
+
+Le hook ne peut pas lancer la suite, **mais il sait lire un verdict**. L'ordre qui
+marche, vérifié quatre fois le 1er septembre 2026 :
+
+```
+commit → relecture croisée → corrections → verdict → push
+```
+
+```bash
+# 1. committer d'abord
+# 2. (règle 2 de PROTOCOLE.md, si le lot est dans son périmètre) relecture croisée
+# 3. seulement ensuite :
+cd tests && node ../scripts/verifier-playwright.mjs
+# 4. puis pousser
+```
+
+Le jeton porte alors le SHA du commit, et le hook affiche « ✓ Sentinelle
+Playwright : **verdict vert à jour pour ce commit** » au lieu de « aucun verdict
+local ». **C'est la seule façon qu'un push soit réellement jugé.**
+
+⚠ **Un commit APRÈS le verdict le périme.** Refaire dans cet ordre, ou accepter
+que le push passe sans jugement, et le DIRE.
+⚠ **Le verdict est le DERNIER geste avant le push, jamais avant la relecture** :
+toute correction issue de la relecture périme un verdict déjà pris. Le
+1er septembre, **cinq lancements ont été gaspillés pour un seul verdict utile**.
+⚠ Lire le **jeton** (`scripts/.verdict-playwright.json`), pas un code de sortie
+tuyauté. Il porte aussi `instables` : un vert rattrapé au second essai ne
+ressemble plus à un vert franc (#685).
 
 ---
 

@@ -362,6 +362,31 @@ pas une note mentale » — le dire dans l'en-tête, et le tenir au retour.
 
 ---
 
+## LE GARDE ANTI-CACHE NE SURVEILLE QUE `main.js` (promu le 2 septembre 2026)
+
+*Promotion depuis la consigne de démarrage, règle 3 de `PROTOCOLE.md`.*
+
+Tout fichier corrigé **autre que `js/main.js`** peut arriver **périmé** dans un
+navigateur sans aucun signal. Grégoire a jugé Safari sur du code qui n'était pas
+celui du disque.
+
+⮕ **Une porte terrain rendue sans bump vérifié porte sur du code inconnu**, et son
+verdict ne vaut rien, ni le vert ni le rouge.
+
+**Avant d'envoyer une porte terrain** :
+1. Vérifier que le bloc de jetons `?v=` d'`index.html` a été bumpé pour les
+   fichiers du lot.
+2. Le dire dans la porte : version, build, et le jeton attendu.
+3. Demander un rechargement **avec vidage de cache** si une session `file://`
+   était déjà ouverte.
+
+⚠ Et une porte terrain ne se rend pas sur ce qui n'est pas arrivé : le
+1er septembre, une porte a dû être SUSPENDUE parce qu'elle jugeait des libellés
+que le code ne posait que dans un espace neuf, et envoyait dans un onglet qui
+n'existe pas.
+
+---
+
 ## HISTORIQUE
 
 | Date | Changement |

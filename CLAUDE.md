@@ -195,16 +195,18 @@ Playwright (>10 min) ; Vitest seul = `npm run test:unit`. Doc : `docs/securite/T
 **NE JAMAIS MODIFIER sans autorisation** : `js/config.js` et `js/navigation.js`
 (navigation), `noms_stables.json` (registre des noms protégés).
 
+**Les notes d'A2025 et d'H2026 ne sont PAS rouvertes** (décision de Grégoire,
+1er sept. 2026, explicitement sans retour). Des notes faussées et déjà remises y
+ont été trouvées : ne pas les rouvrir, ne pas proposer de les recompter, ne pas
+les signaler. Seul l'automne 2026 compte.
+
 ---
 
 ## Procédure de développement
 
 1. Discussion (Cowork au besoin), puis LIRE les fichiers concernés avant de planifier
-2. Planification détaillée, étape par étape
-3. Anticiper les erreurs utilisateur sur Mac et iPad **séparément**
-4. Implémenter UN fichier à la fois, valider et déboguer après chacun
-5. Documenter, committer et pousser après validation ; en fin de session, dire ce
-   qui est fait, ce qui reste, les risques
+2. Planifier étape par étape, en anticipant Mac et iPad **séparément**
+3. Implémenter UN fichier à la fois, valider et déboguer après chacun
 
 **Travail visuel ou UI** : `design-system.html` reste la source de vérité.
 
@@ -212,12 +214,14 @@ Playwright (>10 min) ; Vitest seul = `npm run test:unit`. Doc : `docs/securite/T
 
 ## Avant chaque commit
 
-**Lancer `/fin-de-session`** — rituel complet, dont le break-test du §4 : faire
-ROUGIR chaque sentinelle de correctif données/sécurité/SSOT avant de lui faire
-confiance. Le filet mécanique (`innerHTML` au commit, Vitest au push) s'active
-seul ; le §4 adverse reste à ta charge — c'est l'étape que le biais d'auteur saute.
-Puis le skill `release-et-changelog`, qui porte la procédure. Ne pas la recopier
-ici. **Confirmer avec Grégoire avant un `major`.**
+**Lancer `/fin-de-session`**, qui porte le rituel complet, puis le skill
+`release-et-changelog`. Ne pas les recopier ici. **Confirmer avec Grégoire avant
+un `major`.**
+
+⚠ **« PUSH RÉUSSI » NE SIGNIFIE PAS « SUITE COMPLÈTE VERTE ».** Le hook pre-push
+ne lance que Vitest ; faute de verdict Playwright local, il laisse passer. L'ordre
+qui fait qu'un push est jugé est au §4.5 de `fin-de-session` : commit, relecture,
+**puis** verdict, **puis** push.
 
 ---
 
