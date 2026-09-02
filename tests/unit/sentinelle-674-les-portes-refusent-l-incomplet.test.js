@@ -366,18 +366,18 @@ describe('#674 · porte 2 — le PDF de l\'élève refuse de conclure et nomme c
         expect(fb.portee.texte).toBe('sans niveau : Langue (20 %)');
     });
 
+    // Les mots de l'élève, arrêtés par Grégoire le 2 septembre 2026 (option C) :
+    // « Cette copie n’a pas de niveau général : Langue (20 %) reste à évaluer. »
     it('…et le rendu REFUSE DE CONCLURE : pas de bandeau « E », les mots de l\'élève nomment Langue (20 %)', () => {
         const { feedback, html } = monterPdf();
         const page = html(feedback(EVAL_INCOMPLETE_AVANT_LOT));
-        expect(page).toContain('n’est pas conclue');
-        expect(page).toContain('Langue (20 %)');
-        expect(page).toContain('Aucun niveau général');
+        expect(page).toContain('Cette copie n’a pas de niveau général : Langue (20 %) reste à évaluer.');
         // Le bandeau coloré du niveau global (44 px, code seul) n'est PAS rendu.
         expect(page).not.toMatch(/font-size: 44px[^>]*>E</);
         expect(page).not.toContain('Niveau général · Étendu');
     });
 
-    it('la copie MUETTE d\'avant ce lot (note 0, niveau « -- ») : conclusion refusée, motif nommé', () => {
+    it('la copie MUETTE d\'avant ce lot (note 0, niveau « -- ») : conclusion refusée, les trois nommés au pluriel', () => {
         const { feedback, html } = monterPdf({ echelle: ECHELLE_MUETTE });
         const ev = {
             id: 'EV3', etudiantDA: '111', grilleId: 'G1', echelleId: 'E1', noteFinale: 0, niveauFinal: '--',
@@ -387,8 +387,17 @@ describe('#674 · porte 2 — le PDF de l\'élève refuse de conclure et nomme c
         expect(fb.portee.incomplete).toBe(true);
         expect(fb.portee.criteresHorsNote.map((c) => c.motif)).toEqual(['niveau-sans-valeur', 'niveau-sans-valeur', 'niveau-sans-valeur']);
         const page = html(fb);
-        expect(page).toContain('n’est pas conclue');
-        expect(page).toContain('Contenu (M)');
+        expect(page).toContain('Cette copie n’a pas de niveau général : Contenu (M), Organisation (M), Langue (M) restent à évaluer.');
+    });
+
+    it('sans liste (niveau général jamais établi, rien à nommer) : la phrase s\'arrête au premier membre', () => {
+        const { feedback, html } = monterPdf();
+        const fb = feedback(EVAL_COMPLETE);
+        // Une copie commencée, déclarée complète, mais dont aucun niveau général n'a été établi.
+        const sansConclusion = Object.assign({}, fb, { overall: { code: '', label: '', color: '#767169' } });
+        const page = html(sansConclusion);
+        expect(page).toContain('Cette copie n’a pas de niveau général.');
+        expect(page).not.toContain('à évaluer');
     });
 
     it('témoin — une évaluation COMPLÈTE s\'exporte SANS UN MOT DE PLUS : bandeau « M », rien d\'autre', () => {
@@ -396,8 +405,8 @@ describe('#674 · porte 2 — le PDF de l\'élève refuse de conclure et nomme c
         const fb = feedback(EVAL_COMPLETE);
         expect(fb.portee).toMatchObject({ incomplete: false, ponderationCouverte: 100 });
         const page = html(fb);
-        expect(page).not.toContain('n’est pas conclue');
-        expect(page).not.toContain('Aucun niveau général');
+        expect(page).not.toContain('n’a pas de niveau général');
+        expect(page).not.toContain('à évaluer');
         expect(page).toContain('Niveau général · Maîtrisé');
     });
 

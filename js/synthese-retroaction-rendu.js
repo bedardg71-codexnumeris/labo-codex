@@ -378,24 +378,27 @@
        ===================================================================== */
 
     // #674 — LES MOTS QUE L'ÉLÈVE LIT quand la rétroaction n'est pas conclue.
-    // ⚠ FORMULATION PROVISOIRE, proposée à Grégoire le 2 septembre 2026 avec deux
-    // variantes : c'est du texte que ses élèves reçoivent, et c'est lui qui l'arrête.
-    // Le comportement, lui, est tranché (1er septembre) : le PDF refuse de conclure
-    // — pas de bandeau « Niveau général » — et NOMME ce qui manque.
-    const TEXTE_PORTEE_INCOMPLETE_AVANT = 'Cette rétroaction n’est pas conclue : la note ne porte pas sur toute la grille.';
-    const TEXTE_PORTEE_INCOMPLETE_APRES = 'Aucun niveau général n’est établi pour cette copie.';
+    // ▣ ARRÊTÉS PAR GRÉGOIRE le 2 septembre 2026 (option C, sur trois proposées) :
+    //   « Cette copie n’a pas de niveau général : Langue (20 %) reste à évaluer. »
+    // Part de la copie, dit ce qui manque en un mot que l'élève comprend, nomme le
+    // critère avec son poids, et pointe la suite sans désigner de fautif. Sans liste
+    // (copie muette d'avant ce lot, niveau général jamais établi), la phrase s'arrête
+    // au premier membre. Le comportement, lui, était tranché le 1er septembre : le
+    // PDF refuse de conclure — pas de bandeau « Niveau général » — et NOMME ce qui
+    // manque. ⚠ C'est du texte que ses élèves reçoivent : il ne se réécrit pas sans lui.
+    const TEXTE_PORTEE_INCOMPLETE = 'Cette copie n’a pas de niveau général';
 
     function renderPorteeIncomplete(ctx, portee) {
         const liste = (portee.criteresHorsNote || []).map(c =>
             c.motif === 'niveau-sans-valeur' ? `${c.nom} (${c.niveau})` : `${c.nom} (${c.ponderation} %)`);
-        const attente = liste.length
-            ? ` Critère${liste.length > 1 ? 's' : ''} en attente : ${liste.join(', ')}.`
-            : '';
+        const suite = liste.length
+            ? ` : ${liste.join(', ')} ${liste.length > 1 ? 'restent' : 'reste'} à évaluer.`
+            : '.';
         return `
             <section style="margin-bottom: 10px;">
                 <div style="padding: 10px 12px; border: 1.5px solid ${MUTED}; border-radius: 3px; color: ${INK}; font-size: 10px; line-height: 1.5;">
                     <div style="${styleMonoLabel()} margin-bottom: 4px;">Niveau général</div>
-                    ${esc(TEXTE_PORTEE_INCOMPLETE_AVANT)}${esc(attente)} ${esc(TEXTE_PORTEE_INCOMPLETE_APRES)}
+                    ${esc(TEXTE_PORTEE_INCOMPLETE + suite)}
                 </div>
             </section>`;
     }

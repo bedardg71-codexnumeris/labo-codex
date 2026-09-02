@@ -281,10 +281,9 @@ Ce qui change, en gestes :
 - **À l'enregistrement** (bouton Enregistrer, création ou modification) : refus
   nommé, rien n'est écrit. L'auto-save, lui, continue d'écrire pendant la saisie —
   la note AVEC sa portée (`ponderationCouverte`, à côté de `noteFinale`).
-- **Sur le PDF de l'élève** : pas de bandeau « Niveau général » ; à sa place, une
-  phrase qui nomme les critères en attente. ⚠ **Sa formulation est PROVISOIRE et
-  t'appartient** (trois propositions dans la consigne de démarrage). L'export te le
-  dit avant la remise.
+- **Sur le PDF de l'élève** : pas de bandeau « Niveau général » ; à sa place, la
+  phrase que tu as arrêtée le 2 septembre en soirée : « Cette copie n’a pas de niveau
+  général : Langue (20 %) reste à évaluer. » L'export te le dit avant la remise.
 - **Rétroactif** : les évaluations déjà en base sont relues depuis leurs critères,
   leur grille et leur échelle — les copies muettes d'avant sont vues.
 
