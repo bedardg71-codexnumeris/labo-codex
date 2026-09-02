@@ -697,6 +697,28 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   priver le rapport de son témoin `clesLues`, ou casser la syntaxe — **l'ancienne assertion restait
   VERTE dans les trois cas, la nouvelle rougit dans les trois.**
 
+- [ ] **#692 — Piège dormant : harmoniser le filtre « mode démo » ferait disparaître 3 des 5 modèles**.
+  Inscrit le 2 septembre 2026, signalé par Cowork et **caractérisé ici par la mesure**.
+  ▣ **LE FAIT.** `BibliothequeUI.estItemDemo` (`bibliotheque-ui.js:93`) rend `true` dès que
+  `item.auteur === 'Demo Labo Codex'`. Or **TROIS des cinq modèles prédéfinis portent
+  exactement cet auteur** : `SPE-simple` (l. 66), `STD-n-meilleurs` (l. 154),
+  `STD-n-recents` (l. 174). ⮕ Les familles **SPE et STD se videraient d'un coup**.
+  ▣ **CE N'EST PAS UN BUG AUJOURD'HUI** : `grep -c "filtrerParModeDemo"
+  js/pratiques-bibliotheque.js` rend **0** — la bibliothèque des pratiques ne filtre pas.
+  **Témoin** : les quatre autres, elles, filtrent — `echelles.js:2369`, `grilles.js:2161`,
+  `cartouches.js:3449`, et `grep -rl "filtrerParModeDemo" js/` rend **8** fichiers.
+  ▣ **LE DANGER EST L'HARMONISATION.** Le jour où quelqu'un uniformise les cinq
+  bibliothèques — geste raisonnable, et que la cohérence appelle — trois modèles
+  disparaissent **en silence** hors mode démo. C'est précisément le défaut que #687 vient
+  de corriger à l'écran (une liste vide qui ne dit rien), rendu possible par la porte d'à côté.
+  ▣ **CE QU'IL FAUT DÉCIDER** : soit `auteur` cesse d'être un marqueur de démo (il est
+  trop facile à porter par accident), soit les gabarits prédéfinis reçoivent un auteur qui
+  n'est pas « Demo Labo Codex ». ⚠ Le second geste touche des données d'affichage : mesurer
+  d'abord si `auteur` est lu ailleurs.
+  ▣ ⚠ **LA CONSIGNE QUI L'A SIGNALÉ ÉTAIT TRONQUÉE** (coupée sur « grilles.js:2161, ») :
+  ce qui précède est ce que la mesure établit, pas ce que Cowork a écrit. **À confronter
+  avec sa version complète** avant de trancher.
+
 - [ ] **#688 — `MODELES_SPECIFICATIONS` n'a AUCUN lecteur, et `modele-simple` y reste seul**.
   Inscrit le 2 septembre 2026, mesuré pendant **#687**.
   ▣ **LE FAIT.** `grep -rn "MODELES_SPECIFICATIONS" js/` rend **2** lignes : sa déclaration

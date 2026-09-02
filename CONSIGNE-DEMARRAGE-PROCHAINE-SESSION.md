@@ -125,6 +125,74 @@ pas le `AAAAMMJJ`+lettre des autres.
 
 ---
 
+## ÉTAT MESURÉ — 2 SEPTEMBRE 2026, FIN DE MATINÉE (release 1.109.1, #691 livré)
+
+> Écrit à la clôture du LOT (règle 4). Chaque chiffre porte sa commande (règle 1).
+
+**La version** — `cat version.json` rend `{"build":"0902-0929","beta":"1.109.1"}`.
+**Les tests** — `cd tests && npm run test:unit` : **435 fichiers / 4698 tests, code 0**.
+Sentinelle #687 portée à **25 cas**, **8 break-testés** (dont la mutation « liste vide,
+muette » que la consigne désignait).
+
+### Ce que le lot a fait — et le demi-tour qu'il a fallu
+
+⚠ **UNE CONSIGNE A ÉTÉ CORRIGÉE EN COURS DE LOT.** La première demandait de RETIRER le
+modèle sommatif ; je l'avais retiré (non commité) quand Grégoire a précisé sa décision :
+le modèle **reste**, mais ne doit être associé à **aucune** discipline — pas même la sienne.
+L'entrée a été **récupérée de `HEAD`** (`git show HEAD:js/pratiques-bibliotheque.js | awk …`),
+pas réécrite de mémoire.
+
+**LE NOM ÉTAIT DÉJÀ NEUTRE ; C'EST LA CONFIGURATION QUI RESTAIT UNE PRATIQUE DE
+LITTÉRATURE** — et c'est elle que voit l'enseignant qui adopte le modèle. #687 avait
+regardé les LIBELLÉS et déclaré le travail fait. Sont partis : « Analyse partielle »,
+« Portfolio », « Travail équipe », « Analyse finale » ; « Cohérence textuelle », « Respect
+de la structure », « Qualité de la langue » ; `doubleVerrou` et `portfolioNombreTravaux:
+'5-7'`. ⮕ Remplacés par **deux travaux + deux examens** (20/20/30/30) et **les quatre
+critères de `GRILLE_GENERIQUE`** — qui prend la grille de départ ET ce modèle voit
+maintenant le même vocabulaire des deux côtés.
+**Vérifié comment** : la configuration entière est sérialisée et fouillée par le banc —
+`awk "/'SOM-litterature': \{/,/^    \},/" js/pratiques-bibliotheque.js | grep -v "^\s*//"`
+rend **0** terme de matière ; **témoin** : la même commande sur `HEAD` en rend **9**.
+
+⚠ **L'`id` `SOM-litterature` NE CHANGE PAS**, et le fichier dit pourquoi : offert depuis le
+28 mai 2026, donc avant l'ouverture publique du 1er juin — quelqu'un a pu l'adopter, et
+l'`id` est la clé qui empêche le prédéfini de réapparaître à côté de sa copie. Le sort des
+identifiants qui nomment est **dû à Grégoire (#690)**.
+
+### ⛔ CE QUE LE NAVIGATEUR A TROUVÉ ET QU'AUCUN BANC NE VOYAIT
+
+L'écran a été ouvert pour de vrai (`python3 -m http.server`, Chrome, rendu de
+`genererSelecteurModelesPratiques`). **Deux défauts, tous deux invisibles aux tests :**
+
+1. **Le message débordait et se coupait** : « …crée la tienne avec "Enregistrer la
+   configura▸ ». Un message tronqué ne se lit pas — et c'était toute sa raison d'être.
+   Raccourci à **54 caractères**. Un cas de banc garde désormais la LONGUEUR (≤ 70).
+2. **« crée la tienne »** — accord fautif. Le féminin renvoyait à « configuration » ;
+   la phrase parle d'un **modèle**. C'est « le tien ».
+
+⮕ Et un troisième défaut, trouvé en rejouant la consigne : **le message ne NOMMAIT PAS la
+famille**, alors que mon propre commentaire de #687 affirmait qu'il le faisait — au point
+que la consigne du lendemain matin l'a cru sur parole. Il dit maintenant « Aucun modèle
+« **Sommative** » fourni », en lisant `TYPE_BADGES`, le registre canonique des familles,
+que le wizard **n'exposait pas** alors qu'un de ses commentaires le disait déjà « partagé ».
+
+⮕ **La leçon, et elle est la même que la veille** : un commentaire faux se propage dans les
+consignes. §8.1 de `verification-adverse` — un banc vert peut couvrir un écran cassé.
+
+### Ce qui reste ouvert
+
+- **#692 (neuf)** — piège dormant : `estItemDemo` rend `true` sur
+  `auteur === 'Demo Labo Codex'`, que **3 des 5** modèles portent. `pratiques-bibliotheque.js`
+  ne filtre pas (`grep -c` rend **0** ; témoin : **8** fichiers appellent ce filtre) — mais
+  **harmoniser les bibliothèques viderait SPE et STD en silence**. ⚠ La consigne qui l'a
+  signalé était **tronquée** : la fiche porte ce que la mesure établit, à confronter avec
+  la version complète de Cowork.
+- **#688, #689, #690** inchangés.
+- **La famille sommative n'est pas vide** : le cas « famille sans modèle » reste donc
+  éprouvé au banc et au navigateur, jamais en usage réel.
+
+---
+
 ## ÉTAT MESURÉ — 2 SEPTEMBRE 2026, MI-MATINÉE (release 1.109.0, Lot 1 / #687 livré)
 
 > Écrit à la clôture du LOT (règle 4). Chaque chiffre porte sa commande (règle 1).
