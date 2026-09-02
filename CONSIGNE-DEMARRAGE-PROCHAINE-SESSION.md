@@ -268,17 +268,22 @@ rien. Le chemin modal (`sauvegarderCritere`) posait l'identifiant depuis toujour
 Correctif : `id: genererIdUnique('CR_')` à la naissance, sentinelle sur la vraie
 fonction. ⚠ **Tarir n'est pas réparer** : aucune grille ni évaluation n'est touchée.
 
-**Le stock — À MESURER, PUIS À DÉCIDER PAR GRÉGOIRE, à froid** :
+**Le stock — PRÉCISÉ PAR GRÉGOIRE à 19 h 30 : rien n'est perdu.** L'évaluation de
+Daniel T. était un TEST ; **aucune autre évaluation n'utilise cette grille
+aujourd'hui** — il y en aura plus tard dans le trimestre. Les 27 évaluations d'A26 sont
+sur d'autres grilles. Donc, avant les vraies évaluations sur « Grille-5 FR-ALGO A26 » :
+**donner un identifiant à ses quatre critères** (une écriture dans SA grille : son
+accord), et supprimer ou refaire l'évaluation-test de Daniel (elle porte quatre entrées
+`critereId=undefined` qui ne se rattacheront plus qu'au nom). Trois voies proposées :
+(1) supprimer et recréer les quatre critères dans l'éditeur — ils naissent maintenant
+avec un identifiant, mais tout est à retaper ; (2) un script console qui pose un
+identifiant aux critères qui n'en ont pas, sur cette grille seulement, après
+sauvegarde — à préparer sur son feu vert ; (3) une réparation automatique au démarrage,
+pour TOUTES les grilles de TOUS les utilisateurs (l'éditeur créait des critères sans
+identifiant depuis le 30 octobre 2025, `6214d69c`) — écrit dans les données de
+quelqu'un : **décision de Grégoire, à froid, avec Cowork**. La sonde
 `scripts/diagnostic-674-criteres-sans-id.js` (lecture seule, `await diag674SansId()`)
-liste toutes les grilles à critères sans identifiant, tous trimestres, et toutes les
-évaluations qui en portent, avec les niveaux ENREGISTRÉS (identiques entre eux quand le
-mécanisme a joué). Sur a2026 : 27 évaluations, « Portrait de lecteur/lectrice (28) ».
-⚠ Ce que la sonde ne pourra pas rendre : les jugements distincts que Grégoire a faits
-à l'écran sur Rigueur, Plausibilité, Nuance. Ils n'existent nulle part. Réparer la
-GRILLE (poser des identifiants) est un geste simple ; réparer les ÉVALUATIONS demande
-de réévaluer ces critères, copie par copie, ou de dire en bloc que le niveau de
-Structure valait pour les quatre. **C'est de la didactique et ce sont ses données :
-lui seul tranche.** Rien n'a été écrit.
+mesure le stock local, tous trimestres, avant tout geste. Rien n'a été écrit.
 
 ⚠ **Ce que l'énoncé 5 n'aurait pas vu** : la couverture de ces évaluations est 100 %
 (quatre entrées, quatre pondérations). La note ne ment pas sur sa PORTÉE ; elle ment
