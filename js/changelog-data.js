@@ -21,6 +21,20 @@
 
     var CHANGELOG = [
         {
+            version: '1.111',
+            couleur: 'orange',
+            titre: 'La note dit sur quoi elle porte',
+            items: [
+                '<strong>Un critère laissé sans niveau ne fait plus monter la note en silence.</strong> Avant, il sortait du calcul et les autres critères se partageaient ses points : sur une grille 50/30/20, une copie à 84 % passait à 95 % dès que le critère à 20 % n\'avait pas de niveau. Maintenant la note affiche « -- », et une ligne sous elle <strong>nomme le critère et son poids</strong>. Dès qu\'il reçoit son niveau, la note revient, sans un mot de plus.',
+                '<strong>Enregistrer refuse une évaluation incomplète, et te dit pourquoi</strong> — mais <strong>ton travail est conservé en brouillon</strong> : la copie reste ouverte, rien ne se perd, tu complètes et tu enregistres.',
+                '<strong>Le PDF de l\'élève refuse de conclure</strong> tant que la note ne porte pas sur toute la grille : à la place du niveau général, il écrit « Cette copie n’a pas de niveau général : <em>tel critère</em> reste à évaluer. » Et l\'export te l\'annonce avant la remise.',
+                '<strong>Une échelle dont les niveaux n\'ont pas de valeur ponctuelle est dite</strong>, au lieu de rendre « 0,0 % » comme un résultat. C\'était le cas des copies des anciennes échelles disciplinaires : la ligne sous la note te dit quels niveaux sont muets, et où leur donner une valeur.',
+                '<strong>Chaque évaluation enregistre désormais sur quelle part de la grille sa note a été calculée.</strong> Les évaluations déjà en base sont relues à partir de leurs critères : celles qui étaient incomplètes le sont dites, sans qu\'aucune note soit réécrite.',
+                '<strong>Le nom de la grille est imprimé dans l\'en-tête du PDF</strong>, sous la ligne de l\'élève.',
+                '⚠ <strong>Un critère ajouté dans l\'éditeur de grille en lignes naît maintenant avec son identifiant.</strong> Depuis octobre 2025, cet éditeur en créait sans, et l\'écran d\'évaluation confondait alors ces critères en un seul : le niveau choisi sur l\'un valait pour tous, et le PDF répétait la description du premier. <strong>Si le PDF d\'une copie répète la même description sous plusieurs critères, ta grille est concernée</strong> : supprime ces critères et recrée-les dans l\'éditeur, puis réévalue les copies faites avec.'
+            ]
+        },
+        {
             version: '1.110',
             couleur: 'orange',
             titre: 'Ton interface ne parle plus d\'une mati\u00e8re ni d\'un service qui ne sont pas les tiens',
