@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
@@ -70,14 +70,51 @@ describe('#572 · annotations purgées avec le fichier', () => {
     });
 });
 
+// ↻ RÉORIENTÉ LE 2 SEPT. 2026 — LE PÉRIMÈTRE SE DÉDUIT DU DÉPÔT, IL NE S'ÉCRIT PAS À LA MAIN.
+// Ce cas itérait sur une liste tapée : `evaluation-sauvegarde` et `evaluation-chargement`.
+// Son titre disait « plus personne ne relit le DOM » ; il en vérifiait deux sur trois, et
+// il est resté vert du 29 août au 2 septembre pendant que `js/evaluation.js:1784`
+// (`_lireChampsDOMMod`, le chemin de MODIFICATION) relisait l'écran — arrondi `toFixed(1)`
+// stocké à la place de la valeur, et 0 écrit quand l'écran affiche « -- ». Les deux effets
+// sont reproduits sur le chemin réel dans `sentinelle-572-quatrieme-site-note-modification`.
+// ⮕ Ajouter `evaluation` à la liste aurait fermé ce cas et laissé le même piège au fichier
+// suivant. Une garde dont le périmètre est figé mesure l'état du jour où on l'a tapée, pas
+// l'invariant. Ici, la liste des fichiers est CELLE DU DÉPÔT, lue à chaque exécution.
+function fichiersJs(dossier, acc = []) {
+    for (const e of readdirSync(dossier, { withFileTypes: true })) {
+        const p = path.join(dossier, e.name);
+        if (e.isDirectory()) fichiersJs(p, acc);
+        else if (e.name.endsWith('.js')) acc.push(p);
+    }
+    return acc;
+}
+
 describe('#572 · Annoter — la note finale vient de la valeur calculée', () => {
-    it('le calcul pose noteCalculeeCourante (nombre ou null), et plus personne ne relit le DOM', () => {
+    it('le calcul pose noteCalculeeCourante (nombre ou null)', () => {
         expect(calcul).toContain('window.noteCalculeeCourante = pourcentage;');
         expect(calcul).toContain('window.noteCalculeeCourante = null;');
-        for (const [nom, src] of [['evaluation-sauvegarde', sauvegarde], ['evaluation-chargement', chargement]]) {
-            expect(src, nom).not.toMatch(/parseFloat\([^)]*noteProduction1/);
-            expect(src, nom).toContain("typeof window.noteCalculeeCourante === 'number'");
+    });
+
+    it('et plus AUCUN fichier de js/ ne relit la note depuis #noteProduction1 — périmètre déduit', () => {
+        const fichiers = fichiersJs(path.join(racine, 'js'));
+        expect(fichiers.length, 'le balayage ne voit presque rien').toBeGreaterThan(100);
+        const fautifs = [];
+        for (const f of fichiers) {
+            const src = nettoyer(readFileSync(f, 'utf8'));
+            if (/parseFloat\([^)]*noteProduction1/.test(src)) fautifs.push(path.relative(racine, f));
         }
+        expect(fautifs, 'un fichier relit la note depuis l\'écran').toEqual([]);
+    });
+
+    it('témoin — les sites qui écrivent noteFinale lisent la source, et ils sont QUATRE (pas trois)', () => {
+        // Un motif qui rend zéro partout ne prouve rien : celui-ci doit trouver les quatre
+        // écritures — trois d'avant, plus le chemin de modification. Compté sur tout js/.
+        let sites = 0;
+        for (const f of fichiersJs(path.join(racine, 'js'))) {
+            const src = nettoyer(readFileSync(f, 'utf8'));
+            sites += (src.match(/typeof window\.noteCalculeeCourante === 'number'/g) || []).length;
+        }
+        expect(sites).toBe(4);
     });
 });
 
