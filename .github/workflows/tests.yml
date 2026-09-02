@@ -276,9 +276,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          liste=$(node -e "import('./playwright.config.js').then(m => console.log(m.EXCLUS_WEBKIT_LINUX.map(e => e.fichier + ' › ' + e.titre).join('\n')))")
-          essais=$(echo "$liste" | grep -c .)
-          specs=$(echo "$liste" | cut -d'›' -f1 | sort -u | grep -c .)
+          # ⚠ Les comptes sont calculés PAR NODE, pas par cut/sort : le premier
+          # essai de cette étape passait sous bash sur macOS et échouait sur le
+          # runner — `cut -d'›'` refuse un délimiteur multi-octet sous GNU
+          # coreutils (run 33676985866, 2 sept.). Rien ici ne dépend de la
+          # plateforme : node lit la liste, node compte.
+          liste=$(node -e "import('./playwright.config.js').then(m => console.log(m.EXCLUS_WEBKIT_LINUX.map(e => e.fichier + ' - ' + e.titre).join('\n')))")
+          read -r essais specs < <(node -e "import('./playwright.config.js').then(m => console.log(m.EXCLUS_WEBKIT_LINUX.length + ' ' + new Set(m.EXCLUS_WEBKIT_LINUX.map(e => e.fichier)).size))")
           echo "Essais NON JUGÉS sur cette plateforme : $essais ($specs specs) — WebKit Linux ≠ Safari macOS (voir le journal de tests.yml, point 5)."
           echo "$liste" | sed 's/^/  · /'
           {

@@ -164,3 +164,16 @@ automatiquement nulle part, leur filet est la passe locale macOS. Suite : **437 
 Ce push touche `tests/` et `tests.yml` → Playwright tourne, sur 233. Attendu : `success`
 sur les deux jobs, **et** le nom d'étape « 6 essais NON JUGÉS » visible dans le job
 Playwright. Un vert sans cette mention serait un échec du lot. Rien à voir à l'écran.
+
+## ⚠ ADDENDUM — 16 h 40 · le verdict du push : la GARDE a échoué sur le runner, pas Playwright
+
+Run `33676985866` sur `be2ac69d` : Vitest **vert** ; Playwright `failure` **à l'étape de
+garde elle-même**, en 1 min 20 — Playwright n'a pas tourné. Le log dit :
+`cut: the delimiter must be a single character`. GNU `cut` (runner Linux) refuse le `›`
+multi-octet que BSD `cut` (macOS) acceptait : **vert ici, rouge là-bas — le piège de la
+journée, une troisième fois** (zsh/bash ce matin, `navigator`/Node 20 ce midi).
+⮕ Corrigé (`corriger maintenant`, issue 1 : c'est le parcours qu'on livre) : les deux
+comptes sont calculés **par node**, qui lit déjà la liste ; le séparateur d'affichage
+devient un tiret ASCII. Plus rien dans l'étape ne dépend de la plateforme. Rejouée sous
+bash : `essais=6 specs=5`, garde OK ; cliquet 13/13. Committée, non poussée : le témoin
+reste après le prochain push.
