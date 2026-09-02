@@ -367,3 +367,35 @@ recopiaient le §4 de `fin-de-session`, et l'étape 5 de §Procédure de dévelo
 qui est intégralement ce rituel. `CLAUDE.md` est passé de 246 à **250 lignes,
 exactement au plafond**. La prochaine promotion vers lui exigera un retrait
 délibéré, pas une compression.
+
+---
+
+## Règle 7 — un vert local ne prouve rien sur ce que la CI exécute
+
+*Inscrite le 2 septembre 2026. **Trois occurrences le même jour**, ce qui est exactement le seuil
+que la règle 3 fixe pour faire monter une leçon.*
+
+| ce qui a cassé | sur le poste | sur le runner |
+|---|---|---|
+| un script de session (matin) | `zsh` | `bash` |
+| `sentinelle-635` (midi) | Node 24 expose `navigator` | Node 20 ne l'a pas |
+| la garde des essais non jugés (soir) | BSD `cut` accepte un séparateur multi-octet | GNU `cut` le refuse |
+
+▣ **Ce n'est pas trois défauts, c'est un angle mort unique** : le poste de Grégoire est plus
+permissif que le serveur, et il rend vert ce qui ne l'est pas. **Le vert local est la chose
+même qui a masqué les trois.**
+
+⮕ **La règle** : *ce que la CI exécute ne s'écrit pas avec les outils du poste.* Quand un calcul
+doit tourner là-bas, il va dans l'interpréteur le moins dépendant de la plateforme disponible —
+en pratique **`node`**, qui est déjà installé et dont la version est **déclarée dans le workflow**.
+⛔ **Pas de `cut`, `sed`, `awk`, `date`, `readlink`, `sort -V` dans une étape de CI** dès qu'un
+équivalent `node` existe. Leurs dialectes diffèrent silencieusement entre BSD et GNU.
+
+⮕ **Et le corollaire, qui vaut pour les tests** : un bac à sable qui n'énumère pas ses globals
+en emprunte à l'interpréteur. Le test réussit alors **pour une raison qui n'est pas la sienne**.
+⚠ Un test vert sur un global qu'il n'a pas déclaré est un test qui ne garde rien — il attend
+seulement une machine assez généreuse.
+
+▣ **Le témoin de la règle** : le 2 septembre, la correction retenue chaque fois a été la même —
+**déplacer le calcul dans `node`**, ou **déclarer le global manquant**. Jamais « ajuster pour que
+ça passe ici ».
