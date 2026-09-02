@@ -1,179 +1,166 @@
-# Consigne du jour — six essais qui ne peuvent pas juger sur Linux cessent d'y rougir
+# Consigne — la note dit sur quoi elle porte *(énoncé 5, #674)*
 
 > **Écrite le 2 septembre 2026 en soirée, par Cowork, avec Grégoire.**
-> Elle REMPLACE la consigne de la CI en deux jobs, exécutée, poussée et **dont le verdict est
-> tombé** : Vitest vert, Playwright **rouge sur six specs**, run `33671445284`, commit `5f6eb365`.
+> **Promue consigne du jour le 2 septembre au soir**, le lot de la CI étant clos et vert.
 >
-> ⚠ **Remesure `HEAD` avant d'exécuter** (règle 1).
-> Un fichier non commité dans l'arbre : `plans de travail/CADRAGE-2026-09-02-badges-texte-troue.md`
-> — **ne le commite pas**, il est à Grégoire.
+> ▣ **État à la promotion, mesuré** : `HEAD` = `9fe13749`, **tout est poussé**. Run
+> `33678001180` — **Vitest 437 fichiers / 4724 tests vert · Playwright 233 passés, 0 échoué,
+> 0 instable en 27,4 min**. ⚠ **Ce vert porte sur 233 essais, pas 239** : six sont déclarés non
+> jugeables sous WebKit Linux, et l'étape de garde les nomme. **C'est la première fois depuis le
+> 31 août que le filet juge de bout en bout.**
+>
+> ⚠ **Remesure avant d'exécuter** (règle 1). Les numéros de ligne ci-dessous ont été relevés le
+> 2 septembre au soir, et **ils avaient déjà bougé depuis la fiche du 1er** — preuve qu'il faut
+> les rejouer, pas les suivre.
+>
+> ⛔ **OUVRE UNE SESSION NEUVE POUR CE LOT.** Il touche le calcul d'une note. Cette consigne est
+> écrite pour être lue à froid, par quelqu'un qui ne sait rien du reste de la journée.
+>
+> ⚠ **Quatre `.md` non commités traînent dans `plans de travail/` et un dans la racine
+> (`PROTOCOLE.md`, règle 7)** : ils sont à Grégoire, **ne les commite pas avec ton lot.**
 
 ---
 
-## Le mandat, et pourquoi il passe AVANT le cinquième geste
+## Le mandat
 
-Le lot précédent a rendu la CI capable de juger. **Elle a jugé, et elle est rouge sur six
-essais.** ▣ **Cinq des six étaient DÉJÀ nommés rouges dans l'en-tête de `tests.yml` le 18 août**,
-pour la même cause : glisser-déposer et mise en page du planificateur **sous WebKit Linux, qui
-n'est pas le Safari de macOS**. Les 239 passent sur la machine de Grégoire.
+**Énoncé 5 d'`OBJECTIF-COHORTE-1.md`** : *« Aucune note remise ne repose sur une pondération
+incomplète sans le dire. Un critère laissé sans niveau ne peut pas disparaître en silence et
+faire monter la note. »*
 
-⮕ **Ces six ne mesurent donc rien d'utile là où elles tournent** — et elles rendent le verdict
-rouge en permanence.
+⮕ **C'est le seul défaut ouvert que des utilisateurs ont dans les mains aujourd'hui.** Requalifié
+le 1er septembre : ce n'est plus une prévention pour la cohorte qui arrive, c'est une
+**réparation** pour des gens déjà en place, qu'on ne peut ni sonder ni joindre.
 
-⚠⚠ **C'est le piège de la journée, sous une autre forme.** La CI a été rouge deux jours, Grégoire
-a regardé, et il a répondu « je ne vois pas de rouge ». **Un rouge qui dure cesse d'être un
-signal.** Le laisser une semaine annulerait tout le travail du 2 septembre.
+## Le défaut — et il ne fait PAS ce que son titre laisse croire
 
-⮕ **Motif de l'ordre, décidé par Grégoire** : le cinquième geste est plus important, mais ce
-lot-ci protège l'instrument qui dira si le cinquième est réussi. Vingt minutes.
+⚠⚠ **Il ne baisse pas la note. Il la MONTE.** Mesuré sous WebKit, grille 50/30/20 :
 
-## Les six
+| état | note | niveau |
+|---|---|---|
+| les trois critères renseignés | **84,0 %** | M |
+| le critère à 20 % perd son niveau | **95,0 %** | **E** |
 
-| spec | ce qu'elle voit échouer |
-|---|---|
-| `bandeau-non-modal-508` | les clics ne traversent pas le bandeau |
-| `planif-alignement` | un bloc glissé à +40 px se fait aimanter |
-| `planif-drag-pointer-148` | ×2 — un glissé souris ne déplace pas le nœud |
-| `planif-toolbar` | la barre ne commande qu'une palette au lieu de deux |
-| `portes-relais-cadre` | un champ n'est pas atteignable en son centre |
+⮕ **Onze points et un niveau de plus.** Une note trop basse se conteste ; **une note trop haute
+passe.** C'est ce qui la rend indétectable à la relecture.
 
-▣ **Toutes rouges deux fois sur deux** (`retries: 1`) — donc **échecs francs, pas instabilité.**
+### Mécanisme 1 — critère par critère
 
----
+`calculerNote()`, `js/evaluation-calcul.js`. Un `if (niveau)` saute le critère, qui quitte le
+numérateur **et** `ponderationTotal` ; la division finale renormalise les pondérations restantes
+à 100 %.
 
-## Ce que tu fais
+**Relevé le 2 septembre au soir** — `grep -rn "ponderationTotal" js/` :
+l. **831** (init à 0) · l. **864** (`+= ponderation`) · l. **876** (`if (… > 0)`) · l. **878**
+(la division). ▣ **Aucune ne le compare à 1.** ⚠ La fiche #674 en annonçait *trois* aux lignes
+811/844/856 : **le compte et les lignes ont changé. Rejoue le grep.**
 
-### ⮕ L'EXCLUSION VA DANS LA CI, PAS DANS LES SPECS
+### Mécanisme 2 — tout d'un coup, et il est déjà chez des gens
 
-⛔ **Ne touche à aucun des cinq fichiers de spec.** Ils sont justes ; c'est la plateforme qui
-diffère. Un `skip` écrit dans le fichier suivrait la spec partout, **y compris sur le macOS de
-Grégoire où elle est la seule à mesurer quelque chose.**
+L'échelle est choisie, mais aucun de ses niveaux n'a de `valeurCalcul` : `valeurNumeriqueDuNiveau`
+rend `null` pour tous, le map des valeurs reste vide, **tous** les critères sortent du total, et
+`ponderationTotal` tombe à **0**.
+⮕ **C'est le cas des huit échelles disciplinaires** (32 niveaux en `valeur:`, aucun en
+`valeurCalcul:`). Le semis est tari depuis le 1er septembre — **mais les copies restent dans la
+base de quiconque en avait adopté une avant.**
 
-⮕ **Exclus-les à l'étape Playwright de la CI**, et là seulement. `tests/package.json` porte
-`"test:int": "playwright test"` ; `playwright.config.js` a `testDir: './integration'`.
-⮕ **Le mécanisme est à toi** — un `--grep-invert`, un `testIgnore` conditionné par une variable
-d'environnement posée par le job, un projet Playwright distinct. **Tranche et dis pourquoi en une
-ligne.** ⛔ Pas d'action tierce.
+### ▣ ET LE CRITÈRE NE DISPARAÎT PAS QUE DE LA NOTE — IL DISPARAÎT DU DOCUMENT
 
-⚠ **Critère de choix, et il tranche à lui seul** : `cd tests && npm run test:int` **sur la machine
-de Grégoire doit continuer de lancer les 239**, sans variable à poser, sans drapeau à retenir. Si
-ton mécanisme l'oblige à taper quoi que ce soit de plus, il est mauvais.
-
-### ⛔ LA GARDE — ET C'EST TOUT LE LOT
-
-**Un essai non jugé ne doit jamais ressembler à un essai vert.**
-
-⮕ **Le job doit DIRE, dans sa sortie, combien d'essais n'ont pas été jugés et pourquoi.** Pas en
-commentaire dans un fichier : **dans ce que le rituel d'ouverture lit.**
-⮕ **Et la ligne du matin (`§2.1` du skill) doit la reprendre.** Elle dit aujourd'hui trois états ;
-il lui en faut un quatrième : *jugé-vert · jugé-rouge · non jugé (job sauté) · **jugé partiellement,
-N essais exclus de cette plateforme***.
-
-⚠ **Sans cette ligne, ce lot est une régression déguisée en correction** : on aurait acheté du vert
-en cachant six rouges. C'est exactement ce que la config refuse déjà de faire ailleurs — voir le
-commentaire de `retries: 1` : *« Monter ce chiffre reviendrait à acheter du vert. »*
-
-### Le cliquet
-
-`tests/unit/sentinelle-ci-paths-ignore.test.js` garde déjà les optimisations de CI.
-⮕ **Ajoute-lui un cas** : *la liste des exclus est celle-ci, nommément, et pas une de plus.*
-⚠ **C'est la garde contre la dérive** — celle qui empêche qu'on ajoute un septième nom un jour où
-il rougit, sans que personne ne l'ait décidé. **Une exclusion qui peut grandir en silence finit par
-tout exclure.**
-
-### Le journal
-
-`tests.yml` porte un journal daté. ⮕ **Entrée courte** : la date, le verdict du run
-`33671445284` (233 passés / 6 échoués en 32 min 35), la cause — WebKit Linux ≠ Safari macOS, déjà
-nommée le 18 août — et **ce à quoi on renonce** : *le planificateur n'est plus jugé
-automatiquement nulle part ; son filet devient la passe locale sur macOS.*
+`_collecterCriteresSauv` (`js/evaluation-sauvegarde.js`) ne pousse un critère que `if (niveau)` :
+il est **absent du tableau `criteres[]` enregistré**, et `construireCriteres` mappe ce tableau.
+⮕ **Le PDF remis ne porte aucune trace qu'un critère existait.** Une grille amputée est
+indistinguable d'une grille qui n'a jamais eu ce critère.
 
 ---
 
-## ⚠ CE QUE CE LOT NE RÈGLE PAS, ET QUI DOIT ÊTRE INSCRIT
+## La forme du correctif — TRANCHÉE, et fermée
 
-**La vraie question reste ouverte** : ces gestes de pointeur se comportent-ils réellement
-autrement sous WebKit Linux, ou les specs présument-elles une géométrie de macOS ? ⮕ **Personne
-ne l'a mesuré.** C'est un autre lot, il n'est pas urgent — aucun des six ne touche les huit
-gestes — mais **il ne doit pas disparaître avec le rouge.** *Inscris-le* (issue 2 de `CLAUDE.md`).
+⛔ **PAS d'état « brouillon / conclue ».** Écarté par Grégoire le 1er septembre, **avec les
+autres formes envisagées en séance. Ne les rouvre pas.** Motif : ce serait ajouter un état de
+flux de travail — un geste de plus, un champ de plus, une intention à deviner — pour une
+question qui n'en demande aucune.
 
-⛔ **N'essaie PAS de les réparer dans ce lot.** Ce serait un chantier de plusieurs heures sur du
-code qui ne bloque aucun énoncé.
+⮕ **CE QUI MANQUE N'EST PAS UN ÉTAT, C'EST UNE PORTÉE.** `noteFinale` circule sans dire **sur
+quoi elle porte**. Or `ponderationTotal` est **déjà calculée à chaque appel** de `calculerNote()`,
+puis **jetée**.
+
+⮕ **La persister à côté de `noteFinale`.** Chaque consommateur décide alors pour lui-même.
+
+**Trois propriétés qui font que c'est celle-là et pas une autre :**
+1. aucun geste nouveau pour l'enseignant ;
+2. aucune intention à deviner ;
+3. ▣ **valable RÉTROACTIVEMENT** — la portée se recalcule sur les évaluations déjà en base, depuis
+   leur `criteres[]` et leur grille. **C'est cette propriété qui a écarté l'état de flux**, qui
+   n'aurait jamais pu réparer l'existant.
+
+## Les deux portes — le refus va au LIVRABLE, jamais à la saisie
+
+⛔ **Aucun refus pendant la saisie.** Une évaluation en cours est forcément incomplète ; bloquer
+serait insupportable.
+
+· **`sauvegarderEvaluation()` et `sauvegarderEvaluationModifiee()`** (`js/evaluation-sauvegarde.js`).
+  ▣ **Le patron de refus y existe déjà** : `_validerReferencesSauv` (défini l. **151**, appelé
+  l. **388**) rend `false` et sort. **Calque-toi dessus, n'invente pas un second patron.**
+· **`js/travaux-export-pdf.js:707`** — **seul appelant** de `construireFeedback`
+  (`js/synthese-retroaction-data.js:86`), donc **porte unique** du PDF de l'élève.
+
+⮕ **Les deux portes peuvent refuser franchement.** Décision de Grégoire, 1er septembre :
+*« un critère dont on ne tient pas compte n'est pas un critère non noté — c'est une grille
+différente. »* Une couverture sous 100 % est **toujours** un défaut, jamais une intention. **Il
+n'y a donc rien à modéliser du côté "critère délibérément écarté".**
+
+## ⚠ CE QUE LE CORRECTIF DOIT REGARDER EN PLUS
+
+**L'auto-save écrit `noteFinale` en base et CRÉE l'évaluation** dès qu'un seul critère porte un
+niveau (`_autoSauvegarderCriteres`). ⮕ **La portée doit être écrite par le même chemin que la
+note**, sans quoi elle manquerait précisément sur les évaluations nées de l'auto-save — c'est-à-dire
+sur la majorité.
+
+▣ **Et il y a maintenant QUATRE chemins qui écrivent `noteFinale`**, pas trois : le lot #572 du
+2 septembre a montré qu'un quatrième avait été oublié. `grep -rn "noteCalculeeCourante" js/` les
+rend tous. **La portée doit accompagner la note aux quatre.**
+
+---
+
+## ⛔ PÉRIMÈTRE — DÉCISION PÉDAGOGIQUE DÉFINITIVE
+
+**Les notes d'A2025 et d'H2026 ne sont pas rouvertes.** Elles sont remises, les élèves sont rendus
+ailleurs dans leur parcours. **Ce n'est pas un oubli.** ⛔ Ne propose ni de les recompter, ni de les
+corriger, ni de les signaler. **Seul l'automne 2026 compte.**
+
+## ⚠ CE QUI EST DÛ PAR GRÉGOIRE, ET QU'IL FAUT LUI DEMANDER
+
+**Les mots que l'élève lira.** Le comportement est tranché — le PDF refuse de conclure et **nomme**
+les critères sans niveau — **mais la formulation ne l'est pas.** ⮕ **Ne l'invente pas.** Propose-lui
+deux ou trois phrases exactes et laisse-le trancher : c'est du texte que ses élèves reçoivent.
+
+---
+
+## L'ordre du travail — reproduire, puis corriger
+
+1. **Rejoue les deux mécanismes** avant de toucher quoi que ce soit, et montre le rouge. Le
+   témoin du haut de fiche (84 % → 95 %) est reproductible ; le second l'est avec une échelle
+   sans `valeurCalcul`.
+2. **Persiste la portée**, aux quatre chemins d'écriture.
+3. **Les deux portes**, sur le patron existant.
+4. **Une sentinelle** dont le périmètre se DÉDUIT du dépôt — *aucun chemin n'écrit `noteFinale`
+   sans sa portée*. ⚠ **Pas une liste de fichiers tapée à la main** : c'est la faute exacte de la
+   sentinelle #572, verte pendant que le défaut vivait.
 
 ## Fini quand
 
-1. `cd tests && npm run test:int` sur la machine de Grégoire lance toujours **239**.
-2. Après le push, la commande du rituel rend **`success`** sur le commit poussé.
-3. ▣ **Et le témoin qui compte plus que le vert** : la sortie du job **nomme les six**, et la ligne
-   du matin dit qu'ils n'ont pas été jugés.
-   ⚠ **Un vert sans cette mention est un échec de ce lot**, pas un succès.
+**Une évaluation dont un critère n'a pas de niveau ne peut pas être remise sans que ce soit dit.**
 
-## L'ordre
+▣ **Le témoin qui compte** : rejouer le cas 50/30/20 rend **84,0 %** — ou un refus nommé — mais
+**plus jamais 95,0 % en silence.**
+⚠ **Et le second témoin, souvent oublié** : une évaluation COMPLÈTE doit continuer de s'enregistrer
+et de s'exporter **sans un mot de plus**. Un correctif qui avertit tout le monde n'avertit personne.
 
-- **Rien dans `js/`** ⮕ pas de bump de jetons, pas de release.
-- Ce lot touche `tests/` (le cliquet) : `cd tests && npm run test:unit` avant de dire que c'est prêt.
-- Règle 6 : **tu commites, puis tu t'arrêtes.**
-- ⚠ **Exception nommée** : le verdict ne se prend qu'APRÈS le push, puisque c'est la CI qu'on
-  règle. Grégoire pousse, **puis** tu lis et tu rapportes.
-- ⮕ **Ce que Grégoire doit aller voir : RIEN à l'écran.** Dis-le-lui.
+## L'ordre (règle 6)
+
+- ⚠ **Ce lot touche le calcul d'une note. `npm test` — suite COMPLÈTE — avant de dire que c'est
+  prêt**, pas seulement `test:unit`.
+- Bump du bloc de jetons d'`index.html` (`js/` est touché).
+- **Tu commites, puis tu t'arrêtes.** Pas de release, pas de push.
+- ⮕ **Ce que Grégoire devra aller voir, et c'est un vrai geste** : ouvrir une évaluation, laisser
+  un critère sans niveau, et vérifier que l'application **le dit** au lieu de monter la note.
 - Ce fichier se commite avec ton lot.
-
----
-
-# ✅ EXÉCUTÉE — 2 septembre 2026, 15 h 55 → 16 h 25 · committée, NON poussée
-
-**Remesure** : HEAD `5f6eb365`, poussé — conforme. Quatre fichiers non suivis dans
-`plans de travail/` (CADRAGE, CONSIGNE-PROCHAINE, EBAUCHE, NOTE) : **tous laissés hors du
-commit**, ils ne sont pas mon lot.
-
-## Le mécanisme, tranché : `grepInvert` dans `playwright.config.js`, sous une variable que seule la CI pose
-
-`EXCLUS_WEBKIT_LINUX` = six paires `{ fichier, titre }` ; `grepInvert` n'est construit que si
-`PW_EXCLURE_WEBKIT_LINUX=1`, posée par l'étape Playwright de `tests.yml` et nulle part
-ailleurs (ni `package.json`). **Pourquoi là** : la liste vit dans UN fichier lisible par le
-cliquet et par le job ; et sur macOS, `npm run test:int` lance les 239 sans rien à taper —
-mesuré : `--list` rend **239** sans la variable, **233** avec. Aucun spec touché.
-
-### ⚠ La trouvaille qui a changé le lot — attrapée par le cliquet, pas par la CI
-Ma première version excluait **par fichier**. Le cliquet a rougi : « expected 6 to be 17 ».
-**Les cinq fichiers portent 17 essais** ; six sont rouges, **onze sont verts** et mesurent
-quelque chose sur Linux. Exclure par fichier les aurait sacrifiés sans le dire. ⮕ Exclusion
-**par titre exact**, un motif `fichier.*titre` par essai — et un `diff` des deux `--list`
-prouve que les six manquants sont exactement les six rouges du run 33671445284.
-
-### La garde — le job DIT
-Une étape nommée **`6 essais NON JUGÉS ici (5 specs, WebKit Linux ≠ Safari macOS)`**
-précède Playwright : elle lit la liste depuis le config, l'écrit dans le log et dans le
-résumé du job, et **échoue si son nom ne correspond plus à la liste**. Jouée en local sous
-bash : `essais=6 specs=5`, garde OK. Le rituel (`§2.1`) porte un **quatrième état** —
-*jugé partiellement, N essais exclus de cette plateforme* — avec la commande qui lit ce nom
-d'étape, et la phrase : **un vert Playwright sur GitHub est un vert sur 233, pas 239.**
-
-### Le cliquet — bloc 3, cinq cas
-La liste est celle-ci nommément ; chaque titre existe encore tel quel dans son fichier (un
-titre reformulé ferait revenir le rouge : mieux vaut le savoir ici) ; sans variable
-`grepInvert` est `undefined` et chaque motif matche son essai sans déborder sur un voisin ;
-le nom d'étape compte juste ; la variable n'est posée que sur l'étape Playwright de la CI.
-**Break-tests** : une 7ᵉ entrée → **rouge** ; le compte du nom d'étape → **rouge**. 13/13.
-
-**Journal** : point (5) de `tests.yml`. **Inscrit, pas réglé** : personne n'a mesuré si ces
-gestes se comportent vraiment autrement sous WebKit Linux ; ces six ne sont plus jugés
-automatiquement nulle part, leur filet est la passe locale macOS. Suite : **437 / 4724**.
-
-## Fini quand — après le push de Grégoire
-Ce push touche `tests/` et `tests.yml` → Playwright tourne, sur 233. Attendu : `success`
-sur les deux jobs, **et** le nom d'étape « 6 essais NON JUGÉS » visible dans le job
-Playwright. Un vert sans cette mention serait un échec du lot. Rien à voir à l'écran.
-
-## ⚠ ADDENDUM — 16 h 40 · le verdict du push : la GARDE a échoué sur le runner, pas Playwright
-
-Run `33676985866` sur `be2ac69d` : Vitest **vert** ; Playwright `failure` **à l'étape de
-garde elle-même**, en 1 min 20 — Playwright n'a pas tourné. Le log dit :
-`cut: the delimiter must be a single character`. GNU `cut` (runner Linux) refuse le `›`
-multi-octet que BSD `cut` (macOS) acceptait : **vert ici, rouge là-bas — le piège de la
-journée, une troisième fois** (zsh/bash ce matin, `navigator`/Node 20 ce midi).
-⮕ Corrigé (`corriger maintenant`, issue 1 : c'est le parcours qu'on livre) : les deux
-comptes sont calculés **par node**, qui lit déjà la liste ; le séparateur d'affichage
-devient un tiret ASCII. Plus rien dans l'étape ne dépend de la plateforme. Rejouée sous
-bash : `essais=6 specs=5`, garde OK ; cliquet 13/13. Committée, non poussée : le témoin
-reste après le prochain push.

@@ -137,7 +137,83 @@ test('§1+§2 · BOUT EN BOUT — sans rien créer, une première évaluation pr
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
-test('§1 · TÉMOIN NÉGATIF — la même chaîne sur une échelle SANS `valeurCalcul` rend 0,0 % muet', async ({ page }) => {
+// #674 (énoncé 5) — LE GESTE QUE GRÉGOIRE FAIT POUR VÉRIFIER : ouvrir une évaluation,
+// laisser un critère sans niveau, et voir que l'application LE DIT au lieu de monter
+// la note. Avant le 2 septembre 2026, `calculerNote()` renormalisait les pondérations
+// restantes à 100 % (grille 50/30/20 : 84,0 % avec les trois critères, 95,0 % quand
+// celui à 20 % perd son niveau — onze points et un niveau de plus, sans un mot). Le
+// témoin exact 84 → 95 est rejoué sur la fonction réelle par
+// `tests/unit/sentinelle-674-la-note-dit-sur-quoi-elle-porte.test.js` ; ce banc-ci
+// juge la CHAÎNE dans le vrai DOM : élément `#porteeNote1`, classe `u-hide`, texte.
+test('§1+§2 · #674 — un critère laissé sans niveau : l\'écran RETIENT la note et NOMME le critère ; renseigné, la note revient sans un mot de plus', async ({ page }) => {
+    const erreurs = [];
+    attacherCaptureErreurs(page, erreurs);
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(700);
+
+    const prep = await poserUnTrimestreEtSemer(page);
+    expect(prep.erreur, `Erreur : ${prep.erreur}`).toBeUndefined();
+
+    const r = await page.evaluate(() => {
+        const grille = window.db.getSync('a2026_grillesTemplates', [])[0];
+        const echelle = window.db.getSync('a2026_echellesTemplates', [])[0];
+
+        evaluationEnCours = { grilleId: grille.id, echelleId: echelle.id, criteres: {} };
+        window.evaluationEnCours = evaluationEnCours;
+        const selEch = document.getElementById('selectEchelle1');
+        if (selEch) selEch.value = echelle.id;
+        window.afficherCriteresDepuisGrille(grille.id, echelle.id);
+
+        const lire = () => {
+            const p = document.getElementById('porteeNote1');
+            return {
+                note: document.getElementById('noteProduction1').textContent,
+                niveau: document.getElementById('niveauProduction1').textContent,
+                porteeVisible: !!p && !p.classList.contains('u-hide'),
+                porteeTexte: p ? p.textContent : '(élément absent)',
+                ponderationCouverte: window.porteeCalculeeCourante ? window.porteeCalculeeCourante.ponderationCouverte : null
+            };
+        };
+
+        // Tous les critères SAUF le dernier : le geste exact du défaut mesuré.
+        const dernier = grille.criteres[grille.criteres.length - 1];
+        grille.criteres.forEach(c => { if (c.id !== dernier.id) evaluationEnCours.criteres[c.id] = 'M'; });
+        window.calculerNote();
+        const incomplet = lire();
+
+        // Puis le critère manquant reçoit son niveau.
+        evaluationEnCours.criteres[dernier.id] = 'M';
+        window.calculerNote();
+        const complet = lire();
+
+        return {
+            dernierNom: dernier.nom,
+            dernierPond: Number(dernier.ponderation) || 0,
+            sommeGrille: grille.criteres.reduce((s, c) => s + (Number(c.ponderation) || 0), 0),
+            valeurM: (echelle.niveaux.find(n => n.code === 'M') || {}).valeurCalcul,
+            incomplet, complet
+        };
+    });
+
+    // Incomplet : la note est retenue, le critère est nommé AVEC son poids, la portée est publiée.
+    expect(r.incomplet.note, 'plus jamais une note renormalisée en silence').toBe('--');
+    expect(r.incomplet.niveau).toBe('--');
+    expect(r.incomplet.porteeVisible, 'la portée doit être DITE sous la note').toBe(true);
+    expect(r.incomplet.porteeTexte).toContain(r.dernierNom);
+    expect(r.incomplet.porteeTexte).toContain(r.dernierPond + ' %');
+    expect(r.incomplet.ponderationCouverte).toBe(r.sommeGrille - r.dernierPond);
+
+    // Complet : la note revient, et PAS UN MOT DE PLUS.
+    expect(r.complet.note).toBe(r.valeurM.toFixed(1) + ' %');
+    expect(r.complet.niveau).toBe('M');
+    expect(r.complet.porteeVisible, 'une évaluation complète ne reçoit aucun avertissement').toBe(false);
+    expect(r.complet.porteeTexte).toBe('');
+    expect(r.complet.ponderationCouverte).toBe(r.sommeGrille);
+    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
+});
+
+test('§1 · TÉMOIN NÉGATIF — la même chaîne sur une échelle SANS `valeurCalcul` retient la note (« -- ») et DIT ce qui manque (#674)', async ({ page }) => {
     const erreurs = [];
     attacherCaptureErreurs(page, erreurs);
     await page.goto(indexHtml);
@@ -168,20 +244,28 @@ test('§1 · TÉMOIN NÉGATIF — la même chaîne sur une échelle SANS `valeur
         grille.criteres.forEach(c => { evaluationEnCours.criteres[c.id] = 'M'; });
         window.calculerNote();
 
+        const portee = document.getElementById('porteeNote1');
         return {
             note: document.getElementById('noteProduction1').textContent,
-            niveau: document.getElementById('niveauProduction1').textContent
+            niveau: document.getElementById('niveauProduction1').textContent,
+            porteeVisible: !!portee && !portee.classList.contains('u-hide'),
+            porteeTexte: portee ? portee.textContent : '(élément absent)',
+            nomsCriteres: grille.criteres.map(c => c.nom)
         };
     });
 
-    // ⚠ CE BANC DOCUMENTE UN DÉFAUT QUI EXISTE ENCORE — il n'est pas une
-    // aspiration. Le silence du 0,0 % est #674, laissé hors du lot du 1er
-    // septembre par décision de Grégoire. Ce témoin est ici pour que le test
-    // précédent EXCLUE quelque chose : sans lui, un « 79.5 % » pourrait venir
-    // de n'importe où. Le jour où #674 est livré, CE test rougira — et ce sera
-    // la bonne nouvelle, pas une régression. Le corriger alors, ne pas le
-    // « réparer » en élargissant sa tolérance.
-    expect(r.note, 'l\'écran ne rend plus 0.0 % : #674 est peut-être livré — voir le commentaire').toBe('0.0 %');
+    // Ce témoin documentait un défaut : jusqu'au 2 septembre 2026, l'écran rendait
+    // ici « 0.0 % · -- » comme un résultat, sans un mot (#674, mécanisme 2). Il a
+    // rougi le jour où #674 a été livré — la bonne nouvelle annoncée — et il garde
+    // maintenant le comportement corrigé : la note est RETENUE (« -- »), et ce qui
+    // manque est NOMMÉ sous elle, critère par critère. Il continue de servir de
+    // témoin négatif au test précédent : sans lui, un « 79.5 % » pourrait venir
+    // de n'importe où.
+    expect(r.note, 'l\'écran ne doit plus rendre 0.0 % comme un résultat (#674)').toBe('--');
     expect(r.niveau).toBe('--');
+    expect(r.porteeVisible, 'la portée doit être DITE sous la note').toBe(true);
+    for (const nom of r.nomsCriteres) {
+        expect(r.porteeTexte, 'chaque critère hors note est nommé').toContain(nom);
+    }
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

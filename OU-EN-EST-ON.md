@@ -15,8 +15,9 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 2 septembre 2026, 12 h 50 (douzième passe) — release 1.110.0,
-EN LIGNE, suite complète verte, et le QUATRIÈME ÉNONCÉ passe au vert.**
+**Dernière mise à jour : 2 septembre 2026, en soirée (treizième passe) — release 1.110.0
+toujours EN LIGNE ; le CINQUIÈME ÉNONCÉ est corrigé dans le dépôt, commité, NON poussé :
+il attend le coup d'œil de Grégoire (règle 6). Pour les gens en ligne, rien n'a changé.**
 
 ---
 
@@ -38,7 +39,7 @@ mentaient dans les deux sens :
 
 ---
 
-## Le compte du jour : 5 faits, 2 éprouvés par Grégoire, 2 pas faits, 0 jamais vérifié
+## Le compte du jour : 5 faits, 2 éprouvés par Grégoire, 2 pas faits (dont 1 corrigé en local, pas encore livré), 0 jamais vérifié
 
 ---
 
@@ -261,10 +262,52 @@ qu'il liste). Le danger reste le bump fait à la main, et lui seul. *(#665)*
 ## PAS FAIT
 
 ### Aucune note remise ne repose sur une pondération incomplète sans le dire
-Un critère laissé sans niveau donne **0,0 %**, sans un mot, et ce zéro
-s'enregistre comme une vraie note.
-**Mesuré le 1er septembre en soirée**, avec un témoin qui isole la cause : ce
-n'était plus un soupçon. *(#674)*
+↻ **CORRIGÉ DANS LE DÉPÔT le 2 septembre 2026 en soirée — commité, NON poussé : il
+attend ton coup d'œil (règle 6).** Pour qui utilise l'application en ligne, rien n'a
+encore changé ; c'est pourquoi la ligne reste ici.
+
+Ce que le défaut faisait, mesuré : il ne baissait pas la note, il la **montait**.
+Grille 50/30/20, les trois critères renseignés → **84,0 %** (M) ; le critère à 20 %
+sans niveau → **95,0 %** (E), sans un mot. Et une échelle dont les niveaux n'ont pas
+de valeur (la forme des huit échelles disciplinaires retirées le 1er septembre, dont
+les copies restent chez qui les avait adoptées) donnait **0,0 %** comme un résultat.
+
+Ce qui change, en gestes :
+- **À l'écran** : un critère sans niveau → la note et le niveau affichent « -- », et
+  une ligne sous la note nomme le critère et son poids (« Pas de note tant qu'un
+  critère est sans niveau — Langue (20 %). Sans lui, la note ne porterait que sur
+  80 % de la grille. »). Renseigné, la note revient et la ligne disparaît. Une échelle
+  muette est nommée de la même façon, avec quoi faire.
+- **À l'enregistrement** (bouton Enregistrer, création ou modification) : refus
+  nommé, rien n'est écrit. L'auto-save, lui, continue d'écrire pendant la saisie —
+  la note AVEC sa portée (`ponderationCouverte`, à côté de `noteFinale`).
+- **Sur le PDF de l'élève** : pas de bandeau « Niveau général » ; à sa place, une
+  phrase qui nomme les critères en attente. ⚠ **Sa formulation est PROVISOIRE et
+  t'appartient** (trois propositions dans la consigne de démarrage). L'export te le
+  dit avant la remise.
+- **Rétroactif** : les évaluations déjà en base sont relues depuis leurs critères,
+  leur grille et leur échelle — les copies muettes d'avant sont vues.
+
+**Vérifié comment** (depuis `tests/`) :
+`npx vitest run unit/sentinelle-674-la-note-dit-sur-quoi-elle-porte.test.js` rejoue
+le cas 50/30/20 sur la fonction réelle — 10 cas, dont B (« 95.0 % » attendu « -- »)
+et C (« 0.0 % » attendu « -- ») **rouges avant le correctif**, verts après ;
+`npx vitest run unit/sentinelle-674-les-portes-refusent-l-incomplet.test.js` — 15 cas
+(les deux portes, l'auto-save, le PDF, l'échappement) ;
+`npx vitest run unit/sentinelle-674-la-portee-accompagne-la-note.test.js` — périmètre
+DÉDUIT de `js/` (4 chemins trouvés, aucun sans portée, break-test intégré) ;
+`npx playwright test integration/triptyque-seme-produit-une-note.spec.js` — 4 essais
+WebKit, dont le geste ci-dessous. Break-tests par mutation : portée retirée d'un
+chemin → 1 rouge ; porte retirée → 5 ; règle forcée à « complète » → 12 ; rendu qui
+conclut quand même → 3 ; restauration vérifiée par empreinte.
+Suite complète (`cd tests && npm test`) : Vitest **440 f. / 4753 t.** ; Playwright
+**240 passés, 0 échoué, 0 instable, 7,9 min** en local — le verdict au jeton se prend
+après ton coup d'œil, avant le push.
+
+⮕ **Ce que tu dois aller voir** : Travaux → ouvrir une copie → laisser un critère
+sans niveau. La note doit afficher « -- » et la ligne sous elle nommer le critère.
+Cliquer Enregistrer : refus nommé. Donner le niveau : la note revient, plus un mot.
+*(#674)*
 
 ### Ce qu'un utilisateur détruit, il l'a voulu ; ce qu'il garde, il le retrouve
 
@@ -425,6 +468,8 @@ changer, réenregistrer, et vérifier que la note affichée est identique au cen
 n'est pas calculable — c'est #674, l'énoncé 5, forme déjà tranchée (persister
 `ponderationTotal`). Et les évaluations déjà enregistrées avec une note arrondie ou à
 zéro gardent ce qu'elles portent : rien n'a été écrit dans tes données.
+↻ **2 septembre en soirée** : les quatre chemins écrivent maintenant la portée à côté
+de la note — voir le cinquième geste, plus bas.
 
 **L'autre partiel qui t'attend** : la portée des suppressions par couple. Le garde a
 été livré le 29 août, la règle métier non. C'est le geste 8 de cette page. *(#560)*

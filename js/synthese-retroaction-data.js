@@ -113,7 +113,41 @@
             // artefacts ultérieurs sont entrés dans le portfolio agrégé depuis
             // la remise de CET artefact — auquel cas la synthèse ne reflète plus
             // la rétroaction historique reçue par l'élève au moment de la remise.
-            recalculee: detecterRecalculPosteriori(evaluation)
+            recalculee: detecterRecalculPosteriori(evaluation),
+            // #674 — SUR QUOI PORTE LA NOTE. Relue sur l'évaluation telle qu'elle est
+            // en base (rétroactif : les copies muettes d'avant ce lot sont vues) ;
+            // le rendu refuse de conclure et NOMME ce qui manque.
+            portee: construirePortee(evaluation, grille)
+        };
+    }
+
+    /**
+     * #674 — La portée de la note de CETTE évaluation, pour le PDF de l'élève.
+     *
+     * La règle est celle du calcul (`porteeDepuisEvaluation`, evaluation-calcul.js),
+     * pas une seconde lecture écrite ici. L'échelle est résolue par la voie unique
+     * (`obtenirEchelleResolue`, #542) : ses niveaux BRUTS, avec `valeurCalcul`, sont
+     * ce que la règle attend — `lireEchelle` ci-dessus les réduit pour le rendu.
+     *
+     * @returns {Object|null} `{incomplete, commencee, ponderationCouverte,
+     *   ponderationGrille, criteresHorsNote, texte}` — `null` si la règle n'est pas chargée
+     */
+    function construirePortee(evaluation, grille) {
+        if (typeof porteeDepuisEvaluation !== 'function') return null;
+        const echelle = (typeof obtenirEchelleResolue === 'function')
+            ? obtenirEchelleResolue(evaluation.echelleId || null)
+            : null;
+        const niveaux = (echelle && Array.isArray(echelle.niveaux)) ? echelle.niveaux : [];
+        const p = porteeDepuisEvaluation(evaluation, grille, niveaux);
+        return {
+            incomplete: !!p.incomplete,
+            commencee: !!p.commencee,
+            ponderationCouverte: p.ponderationCouverte,
+            ponderationGrille: p.ponderationGrille,
+            criteresHorsNote: (p.criteresHorsNote || []).map(c => ({
+                critereId: c.critereId, nom: c.nom, ponderation: c.ponderation, motif: c.motif, niveau: c.niveau
+            })),
+            texte: (typeof texteCriteresHorsNote === 'function') ? texteCriteresHorsNote(p) : ''
         };
     }
 

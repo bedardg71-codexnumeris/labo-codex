@@ -61,6 +61,133 @@ se déclarent en chimie et en maths » lui dit tout.
 
 ---
 
+## ÉTAT MESURÉ — 2 SEPTEMBRE 2026, EN SOIRÉE (#674, énoncé 5 : la note dit sur quoi elle porte) — ⏸ COMMITÉ, NON POUSSÉ
+
+> Écrit par Claude Code à la clôture du LOT (règle 4), depuis la consigne du jour
+> promue le 2 septembre au soir. Chaque chiffre porte sa commande (règle 1).
+> **Le lot est commité et la session s'est ARRÊTÉE** : ni release, ni verdict au
+> jeton, ni push. Grégoire regarde l'écran d'abord ; le verdict Playwright au jeton
+> (`node ../scripts/verifier-playwright.mjs`) se prend APRÈS son coup d'œil.
+
+**Le dépôt** — parti de `9fe13749` (tout poussé, Vitest 437 f. / 4724 t., Playwright
+233/233 sur le run `33678001180`), mesuré par le rituel de début de session : **zéro
+écart** avec la consigne. Un commit ajouté, non poussé (son SHA est dans `git log -1`).
+`git diff --stat 9fe13749 -- js/ index.html styles.css tests/` : **11 fichiers hors
+docs**, 7 dans `js/`. ⚠ `BACKLOG.md`, `PROTOCOLE.md` et six `.md` non suivis de
+`plans de travail/` sont à Grégoire et à Cowork : **laissés hors du commit**, comme
+la consigne l'exigeait. `CONSIGNE-DU-JOUR.md` (la spécification du lot) est commitée
+avec lui.
+
+**Les tests** — `cd tests && npm test` (suite COMPLÈTE, exigée par la consigne : le lot
+touche le calcul d'une note) : Vitest **440 fichiers / 4753 tests, code 0** (437 + 3
+fichiers neufs, 4724 + 29 cas) ; Playwright **240 passés, 0 échoué, 0 instable, en
+7,9 min** (les 239 + le geste de Grégoire ajouté au triptyque), en local sous WebKit
+macOS — ⚠ ce n'est pas encore le verdict au jeton, qui se prend après son coup d'œil.
+Le rouge a été montré AVANT le correctif : sur la fonction réelle `calculerNote()`
+chargée en bac à sable, le cas B rendait **« 95.0 % »** (attendu « -- ») et le cas C
+**« 0.0 % »** — les deux mécanismes de la fiche, reproduits.
+Break-tests par mutation, restauration vérifiée par empreinte `md5` :
+
+| mutation | test attendu rouge | rouges obtenus |
+|---|---|---|
+| portée retirée du chemin de création (`evaluation-sauvegarde.js`) | sentinelle déduite | 1 (nomme `js/evaluation-sauvegarde.js:222`) |
+| porte d'enregistrement retirée | portes | 5 |
+| règle forcée à « complète » (`incomplete: false`) | reproduction + portes | 12 |
+| rendu qui conclut quand même | portes (PDF) | 3 |
+
+**Audit sécurité statique** (rituel §2, sur les 412 lignes ajoutées de `js/` +
+`index.html`) : aucun `innerHTML`, aucun handler inline, aucun `eval`, aucun
+`console.log`, aucune écriture `db.set`, aucune zone protégée. Un `console.warn`
+(refus d'enregistrement nommé). Les noms de critères passent par `textContent` à
+l'écran et par `esc()` dans le rendu du PDF (cas testé avec un nom piégé).
+
+**La version** — inchangée, **1.110.0 / 0902-1218** sur les quatre points (pas de
+release : consigne). Les jetons anti-cache d'`index.html` sont bumpés pour les huit
+fichiers servis (7 `js/` + `styles.css`).
+
+### Ce que le lot fait, en gestes d'utilisateur
+
+1. **À l'écran** (`calculerNote`) : un critère pondéré sans niveau, ou dont le niveau
+   n'a pas de valeur dans l'échelle → note et niveau « -- », et une ligne sous la note
+   (`#porteeNote1`) nomme ce qui manque, avec le poids et quoi faire. Renseigné : la
+   note revient, la ligne disparaît. Une évaluation VIDE (aucun niveau) n'est pas
+   « incomplète » : son zéro est visible, et un jeton de délai seul s'enregistre.
+2. **La portée voyage avec la note** : `window.porteeCalculeeCourante` est publiée à
+   côté de `window.noteCalculeeCourante`, et les QUATRE chemins écrivent
+   `ponderationCouverte` (points de pondération comptés, même unité que
+   `criteres[].ponderation`) à côté de `noteFinale` — `grep -rn "porteeCalculeeCourante" js/`
+   en rend 4 sur des écritures. L'auto-save écrit « 95 sur 80 % » sans refuser.
+3. **Porte 1, l'enregistrement** (`sauvegarderEvaluation`, `sauvegarderEvaluationModifiee`) :
+   refus nommé sur le patron `_validerReferencesSauv`, via `verifierPorteeAvantSauvegarde`
+   (evaluation-calcul.js), qui **rappelle `calculerNote()` avant de juger**.
+4. **Porte 2, le PDF de l'élève** (`construireFeedback` → `portee`, rendu) : la page est
+   produite mais **refuse de conclure** — pas de bandeau « Niveau général », une phrase
+   nomme les critères en attente — et l'export **le dit à l'enseignant** (export
+   unitaire et dossier complet). Rétroactif : `porteeDepuisEvaluation` relit les
+   évaluations d'avant ce lot depuis `criteres[]`, la grille et l'échelle ; quand la
+   déclaration `ponderationCouverte` existe, elle fait foi pour le nombre.
+5. **Sentinelle déduite** : tout `js/` est lu à chaque exécution ; une écriture de
+   `noteFinale` depuis la valeur calculée sans `ponderationCouverte` à ±6 lignes
+   rougit, fichier et ligne nommés. Pas de liste tapée à la main (leçon #572).
+
+### Ce que j'ai décidé seul — dis-le-moi en dix secondes si c'est faux
+
+- **Le nom et l'unité** : `ponderationCouverte`, en points de pondération (80 pour
+  50 + 30), pas la fraction 0,8 — même unité que les voisins ; la complétude se juge
+  contre la somme de la grille, pas contre 100 (une grille à 90 % reste jugeable).
+- **L'écran retient la note** (« -- ») plutôt que d'afficher « 95,0 % » avec sa
+  portée : « le dit AU LIEU de monter la note ». Si tu préfères le chiffre accompagné
+  de sa portée, c'est une ligne dans `calculerNote` (`portee.incomplete ? '--' : …`).
+- **Un critère de pondération nulle n'est jamais « hors note »** : il ne peut pas
+  déplacer la note.
+- **Le PDF est produit** (conclusion retenue + phrase), pas refusé en bloc — parce
+  que la consigne parle des mots que l'ÉLÈVE lira.
+- **Le PDF refuse aussi de conclure quand des critères ont un niveau mais qu'aucun
+  niveau général n'est établi** (copie muette d'avant ce lot dont l'échelle aurait
+  été réparée depuis) : la note en base reste 0, il faut la rouvrir.
+- **Les mots de l'ENSEIGNANT** (ligne écran, refus, alerte d'export) sont de moi.
+- Le témoin Playwright « 0,0 % muet » a été **retitré et retourné** (il annonçait
+  qu'il rougirait le jour où #674 serait livré : il a rougi, puis a été corrigé, pas
+  élargi), et un essai a été ajouté : le geste exact de Grégoire.
+
+### ⏳ CE QUI EST DÛ PAR GRÉGOIRE — les mots que l'élève lira (question fermée)
+
+Le PDF porte une formulation **PROVISOIRE** (`synthese-retroaction-rendu.js`,
+constantes `TEXTE_PORTEE_INCOMPLETE_AVANT/APRES`). Trois propositions, avec l'exemple
+« Langue (20 %) » :
+
+- **(A) en place** — « Cette rétroaction n’est pas conclue : la note ne porte pas sur
+  toute la grille. Critère en attente : Langue (20 %). Aucun niveau général n’est
+  établi pour cette copie. »
+- **(B)** — « Évaluation incomplète : le critère Langue (20 %) n’a pas reçu de niveau.
+  Aucune note ni niveau général ne sont établis pour cette copie. »
+- **(C)** — « Cette copie n’a pas de niveau général : Langue (20 %) reste à évaluer. »
+
+Une lettre suffit ; le changement tient en deux lignes.
+
+### Trouvailles en chemin — issue 2 (inscrire et continuer), aucune corrigée
+
+- **Le portfolio et la Liste des évaluations ne lisent pas encore la portée** : une
+  évaluation née de l'auto-save avec « 95 sur 80 % » entre dans l'agrégat à 95, comme
+  avant. La fiche #674 disait « le portfolio avertit » ; ce n'est pas dans ce lot.
+- **L'export unitaire (`exporterPDF`) ignorait la `raison` de #565** : quand la page de
+  synthèse est omise, seul le « dossier complet » l'annonçait. J'y ai branché
+  l'avertissement #674, pas la raison #565 — à aligner.
+- **Un repli mort dans `calculerNote`** : si `valeurNumeriqueDuNiveau` manquait, le
+  code local retomberait sur `(min + max) / 2`, retiré par #527 — inerte en
+  production (`echelles.js` toujours chargé). Issue 3 : à commenter, pas à corriger.
+
+### Ce qui reste ouvert
+
+- ⏸ **Le push attend Grégoire.** Ce qu'il doit voir : Travaux → une copie → laisser un
+  critère sans niveau → « -- » et la ligne qui nomme le critère ; Enregistrer → refus
+  nommé ; donner le niveau → la note revient, plus un mot. Puis le verdict au jeton,
+  puis le push (§4.5 de `fin-de-session`).
+- **La formulation de l'élève** (ci-dessus).
+- #688, #689, #690, #692 inchangés.
+
+---
+
 ## ÉTAT MESURÉ — 2 SEPTEMBRE 2026, 10 h (release 1.109.2, parts égales) — ✅ POUSSÉ
 
 > Écrit à la clôture du LOT (règle 4). Chaque chiffre porte sa commande (règle 1).

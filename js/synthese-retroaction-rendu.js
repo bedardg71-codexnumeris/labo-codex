@@ -377,8 +377,40 @@
        4. BANDEAU NIVEAU GLOBAL
        ===================================================================== */
 
+    // #674 — LES MOTS QUE L'ÉLÈVE LIT quand la rétroaction n'est pas conclue.
+    // ⚠ FORMULATION PROVISOIRE, proposée à Grégoire le 2 septembre 2026 avec deux
+    // variantes : c'est du texte que ses élèves reçoivent, et c'est lui qui l'arrête.
+    // Le comportement, lui, est tranché (1er septembre) : le PDF refuse de conclure
+    // — pas de bandeau « Niveau général » — et NOMME ce qui manque.
+    const TEXTE_PORTEE_INCOMPLETE_AVANT = 'Cette rétroaction n’est pas conclue : la note ne porte pas sur toute la grille.';
+    const TEXTE_PORTEE_INCOMPLETE_APRES = 'Aucun niveau général n’est établi pour cette copie.';
+
+    function renderPorteeIncomplete(ctx, portee) {
+        const liste = (portee.criteresHorsNote || []).map(c =>
+            c.motif === 'niveau-sans-valeur' ? `${c.nom} (${c.niveau})` : `${c.nom} (${c.ponderation} %)`);
+        const attente = liste.length
+            ? ` Critère${liste.length > 1 ? 's' : ''} en attente : ${liste.join(', ')}.`
+            : '';
+        return `
+            <section style="margin-bottom: 10px;">
+                <div style="padding: 10px 12px; border: 1.5px solid ${MUTED}; border-radius: 3px; color: ${INK}; font-size: 10px; line-height: 1.5;">
+                    <div style="${styleMonoLabel()} margin-bottom: 4px;">Niveau général</div>
+                    ${esc(TEXTE_PORTEE_INCOMPLETE_AVANT)}${esc(attente)} ${esc(TEXTE_PORTEE_INCOMPLETE_APRES)}
+                </div>
+            </section>`;
+    }
+
     function renderNiveauGlobal(ctx) {
         const o = ctx.feedback.overall || {};
+        // #674 — LE PDF REFUSE DE CONCLURE quand la note ne porte pas sur toute la
+        // grille, ou quand des critères ont un niveau mais qu'aucun niveau général
+        // n'a pu être établi (copie muette d'avant ce lot). Avant, le bandeau était
+        // simplement omis : une grille amputée était indistinguable d'une grille qui
+        // n'avait jamais eu ce critère.
+        const portee = ctx.feedback.portee || null;
+        if (portee && (portee.incomplete || (portee.commencee && !o.code))) {
+            return renderPorteeIncomplete(ctx, portee);
+        }
         if (!o.code) return '';
 
         const couleur = ctx.codeColor[o.code] || o.color || MUTED;

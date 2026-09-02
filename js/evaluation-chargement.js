@@ -1450,6 +1450,7 @@ function _collecterCriteresAutoSave(grille, ec) {
 function _majEvaluationExistanteAutoSave(evalExistante, ec, criteres) {
     evalExistante.criteres = criteres;
     evalExistante.noteFinale = (typeof window.noteCalculeeCourante === 'number') ? window.noteCalculeeCourante : evalExistante.noteFinale;   // #572
+    evalExistante.ponderationCouverte = (window.porteeCalculeeCourante && typeof window.porteeCalculeeCourante.ponderationCouverte === 'number') ? window.porteeCalculeeCourante.ponderationCouverte : evalExistante.ponderationCouverte;   // #674 — la portée voyage avec la note
     evalExistante.niveauFinal = (document.getElementById('niveauProduction1') || {}).textContent || evalExistante.niveauFinal;
     var retroEl = document.getElementById('retroactionFinale1');
     if (retroEl) evalExistante.retroactionFinale = retroEl.value;
@@ -1474,6 +1475,7 @@ function _lireChampsDOMAutoSave() {
         statutIntegrite: (document.getElementById('statutIntegrite') || {}).value || 'recevable',
         notesIntegrite: (document.getElementById('notesIntegrite') || {}).value || '',
         noteFinale: (typeof window.noteCalculeeCourante === 'number') ? window.noteCalculeeCourante : 0,   // #572
+        ponderationCouverte: (window.porteeCalculeeCourante && typeof window.porteeCalculeeCourante.ponderationCouverte === 'number') ? window.porteeCalculeeCourante.ponderationCouverte : null,   // #674 — la portée voyage avec la note
         niveauFinal: (document.getElementById('niveauProduction1') || {}).textContent || '',
         retroactionFinale: (document.getElementById('retroactionFinale1') || {}).value || ''
     };

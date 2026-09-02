@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260901c"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260902a"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -8569,6 +8569,9 @@
                                         </div>
                                     </div>
                                 </div>
+                                <!-- #674 : ce qui manque à la note, nommé sous elle (evaluation-calcul.js,
+                                     `_ecrirePorteeEcran`, textContent). Vide et masqué quand rien ne manque. -->
+                                <p id="porteeNote1" class="portee u-hide"></p>
                             </div>
 
                     </div>
@@ -14602,9 +14605,9 @@
     <script src="js/tampons-bibliotheque.js?v=20260511c"></script> <!-- Beta 99.41 : #264 progression sur exporterBibliotheque (sealing) -->
     <script src="js/travaux-annotation.js?v=20260829b"></script>
     <script src="js/travaux-archivage.js?v=20260829c"></script> <!-- Beta 99.41 : #264 progression sur lancerExport{Etudiant,Production,} ; #565 try/catch par item + bilan d'export -->
-    <script src="js/synthese-retroaction-data.js?v=20260902a"></script>
-    <script src="js/synthese-retroaction-rendu.js?v=20260902a"></script>
-    <script src="js/travaux-export-pdf.js?v=20260901a"></script> <!-- Beta 99.42 : ultrareview 2 Commit 2 — icones via forme.icone, pointille, sym-* ; #565 la synthese omise est dite -->
+    <script src="js/synthese-retroaction-data.js?v=20260902b"></script>
+    <script src="js/synthese-retroaction-rendu.js?v=20260902b"></script>
+    <script src="js/travaux-export-pdf.js?v=20260902a"></script> <!-- Beta 99.42 : ultrareview 2 Commit 2 — icones via forme.icone, pointille, sym-* ; #565 la synthese omise est dite -->
     <script src="js/travaux-resolution.js?v=20260702a"></script> <!-- #145 (2 juil.) : refus de la résolution par DA seul (PDF étranger) -->
     <script src="js/travaux-doublons-ui.js?v=2026050225"></script> <!-- Beta 99.31 b0502-0940 : db.setSync (écriture localStorage immédiate) — bandeau se met à jour après validations -->
     <script src="js/migration-diagnostic.js?v=2026062701"></script>
@@ -14644,11 +14647,11 @@
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=20260830c"></script> <!-- #612 T6.6 : detachement des fichiers exporte a la liste ; #563 -->
-    <script src="js/evaluation-chargement.js?v=20260901g"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
-    <script src="js/evaluation-calcul.js?v=20260902a"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
+    <script src="js/evaluation-chargement.js?v=20260902a"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
+    <script src="js/evaluation-calcul.js?v=20260902b"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
     <script src="js/evaluation-retroaction.js?v=20260902a"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
-    <script src="js/evaluation-sauvegarde.js?v=20260829e"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
-    <script src="js/evaluation.js?v=20260902a"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
+    <script src="js/evaluation-sauvegarde.js?v=20260902a"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
+    <script src="js/evaluation.js?v=20260902b"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
     <script src="js/evaluation-handlers.js?v=20260518d"></script> <!-- Beta 99.48 : session A étape 3 refactor (3 fonctions extraites) -->
 
     <!-- RAPPEL BACKUP - Avertissement perte de données (Beta 95) -->

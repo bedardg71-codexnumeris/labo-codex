@@ -180,6 +180,19 @@ function _validerReferencesNonDemoSauv(productionId, grilleId) {
     return true;
 }
 
+/**
+ * #674 — LA PORTE DE L'ENREGISTREMENT : une note qui ne porte pas sur toute la grille
+ * ne s'enregistre pas. Même patron que `_validerReferencesSauv` (dit pourquoi, rend
+ * `false`, l'appelant sort). La règle et le message vivent dans `evaluation-calcul.js`
+ * (`verifierPorteeAvantSauvegarde`), à côté du calcul dont ils sont la portée.
+ * ⚠ Jamais appelée par l'auto-save : pendant la saisie, l'évaluation est incomplète
+ * par nature, et elle continue de s'écrire — avec sa portée.
+ */
+function _validerPorteeSauv() {
+    if (typeof window.verifierPorteeAvantSauvegarde !== 'function') return true;
+    return window.verifierPorteeAvantSauvegarde();
+}
+
 function _collecterCriteresSauv(grille) {
     const criteres = [];
     if (!grille || !grille.criteres) return criteres;
@@ -207,6 +220,7 @@ function _lireChampsDOMSauv() {
         statutIntegrite: document.getElementById('statutIntegrite').value || 'recevable',
         notesIntegrite: document.getElementById('notesIntegrite').value || '',
         noteFinale: (typeof window.noteCalculeeCourante === 'number') ? window.noteCalculeeCourante : 0,   // #572 — la valeur calculée, pas l'écran
+        ponderationCouverte: (window.porteeCalculeeCourante && typeof window.porteeCalculeeCourante.ponderationCouverte === 'number') ? window.porteeCalculeeCourante.ponderationCouverte : null,   // #674 — la portée voyage avec la note
         niveauFinal: document.getElementById('niveauProduction1').textContent,
         retroactionFinale: document.getElementById('retroactionFinale1').value
     };
@@ -393,6 +407,10 @@ function sauvegarderEvaluation() {
     if (typeof window._forcerRecalculAlgorithmiqueAvantSauvegarde === 'function') {
         window._forcerRecalculAlgorithmiqueAvantSauvegarde(grille);
     }
+
+    // #674 — après le recalcul algorithmique, avant toute collecte : la portée jugée
+    // est celle de la note qui serait écrite.
+    if (!_validerPorteeSauv()) return;
 
     const criteres = _collecterCriteresSauv(grille);
     const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;

@@ -750,6 +750,250 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
    🧮 CALCUL DE LA NOTE
    =============================== */
 
+/* ===============================
+   #674 — LA NOTE DIT SUR QUOI ELLE PORTE (énoncé 5, cohorte 1)
+   =============================== */
+
+/**
+ * La portée d'une note : sur quelle part de la grille elle a été calculée.
+ *
+ * ⚠⚠ LE DÉFAUT QUE CETTE RÈGLE FERME NE BAISSAIT PAS LA NOTE, IL LA MONTAIT.
+ * `calculerNote` sautait tout critère sans niveau : il quittait le numérateur ET
+ * `ponderationTotal`, et la division finale renormalisait les pondérations restantes
+ * à 100 %. Mesuré sous WebKit le 1er septembre 2026, grille 50/30/20 : les trois
+ * critères renseignés rendent 84,0 % (M) ; le critère à 20 % sans niveau rend
+ * 95,0 % (E). Onze points et un niveau de plus, sans un mot — une note trop basse
+ * se conteste, une note trop haute passe. Même silence quand l'échelle est choisie
+ * mais qu'aucun de ses niveaux n'a de `valeurCalcul` (la forme des huit échelles
+ * disciplinaires retirées le 1er septembre, dont les copies restent chez qui les
+ * avait adoptées) : tous les critères sortent du total et l'écran rendait « 0.0 % »
+ * comme un résultat.
+ *
+ * ⮕ CE QUI MANQUAIT N'EST PAS UN ÉTAT, C'EST UNE PORTÉE (décision de Grégoire,
+ * 1er septembre : pas d'état « brouillon / conclue », aucun geste de plus, aucune
+ * intention à deviner). `ponderationTotal` était calculée à chaque appel puis jetée.
+ * Elle est désormais publiée à côté de la note (`window.porteeCalculeeCourante`,
+ * jumelle de `window.noteCalculeeCourante`, #572), écrite en base avec elle
+ * (`ponderationCouverte`, sur les quatre chemins qui écrivent `noteFinale`), et
+ * chaque consommateur décide pour lui-même : l'écran retient la conclusion et NOMME
+ * ce qui manque ; l'enregistrement refuse ; le PDF de l'élève refuse de conclure.
+ * ⛔ Jamais de refus pendant la saisie : une évaluation en cours est forcément
+ * incomplète, et l'auto-save continue d'écrire — la note AVEC sa portée.
+ *
+ * ▣ UNE SEULE RÈGLE pour « ce critère compte-t-il ? », partagée par le calcul de la
+ * note (sur l'état vivant de l'écran) et par la relecture des évaluations déjà en
+ * base (`porteeDepuisEvaluation`). Un critère compte quand il a un niveau ET que ce
+ * niveau a une valeur — la valeur ponctuelle de l'échelle, ou le pourcentage exact
+ * d'un critère algorithmique. Un critère de pondération nulle ne peut pas déplacer
+ * la note : il n'est jamais « hors note ».
+ *
+ * ▣ « INCOMPLÈTE » = commencée ET au moins un critère pondéré hors note. Une
+ * évaluation où AUCUN critère n'a de niveau n'est pas incomplète, elle est vide :
+ * son zéro est visible et ne renormalise rien (c'est aussi ce qui laisse passer un
+ * enregistrement fait pour poser un jeton de délai seul).
+ *
+ * @param {Array}    criteresGrille - les critères de la grille (id, nom, ponderation)
+ * @param {Function} niveauDe       - critère → code du niveau choisi, ou vide
+ * @param {Function} valeurDe       - (critère, niveau) → valeur numérique, ou undefined
+ * @returns {{ponderationCouverte:number, ponderationGrille:number, criteresComptes:Array,
+ *   criteresHorsNote:Array, nbCriteresAvecNiveau:number, commencee:boolean, incomplete:boolean}}
+ */
+function calculerPortee(criteresGrille, niveauDe, valeurDe) {
+    const criteresComptes = [];
+    const criteresHorsNote = [];
+    let ponderationCouverte = 0;
+    let ponderationGrille = 0;
+    let nbCriteresAvecNiveau = 0;
+
+    (Array.isArray(criteresGrille) ? criteresGrille : []).forEach(critere => {
+        const ponderation = Number(critere.ponderation) || 0;
+        ponderationGrille += ponderation;
+        const niveau = niveauDe(critere);
+        if (!niveau) {
+            if (ponderation > 0) {
+                criteresHorsNote.push({ critereId: critere.id, nom: critere.nom || critere.id, ponderation: ponderation, motif: 'sans-niveau', niveau: '' });
+            }
+            return;
+        }
+        nbCriteresAvecNiveau++;
+        const valeur = valeurDe(critere, niveau);
+        // Même test que le calcul historique : seule l'ABSENCE de valeur exclut.
+        if (valeur === undefined) {
+            if (ponderation > 0) {
+                criteresHorsNote.push({ critereId: critere.id, nom: critere.nom || critere.id, ponderation: ponderation, motif: 'niveau-sans-valeur', niveau: niveau });
+            }
+            return;
+        }
+        criteresComptes.push({ critere: critere, niveau: niveau, valeur: valeur });
+        ponderationCouverte += ponderation;
+    });
+
+    const commencee = nbCriteresAvecNiveau > 0;
+    return {
+        ponderationCouverte: ponderationCouverte,
+        ponderationGrille: ponderationGrille,
+        criteresComptes: criteresComptes,
+        criteresHorsNote: criteresHorsNote,
+        nbCriteresAvecNiveau: nbCriteresAvecNiveau,
+        commencee: commencee,
+        incomplete: commencee && criteresHorsNote.length > 0
+    };
+}
+
+/**
+ * La portée d'une évaluation DÉJÀ EN BASE, depuis ses `criteres[]`, sa grille et les
+ * niveaux de son échelle — c'est ce qui rend le correctif RÉTROACTIF. Les évaluations
+ * écrites avant ce lot n'ont pas de `ponderationCouverte`, et c'est précisément chez
+ * les utilisateurs déjà en place que le défaut vit (copies muettes des huit échelles).
+ *
+ * ▣ Quand la déclaration existe (`evaluation.ponderationCouverte`), elle fait foi
+ * pour le NOMBRE : c'est la portée de la note telle qu'elle a été calculée et
+ * écrite. Une grille ou une échelle modifiée depuis ne réécrit pas cette note ; la
+ * relecture sert alors à NOMMER ce qui manque, pas à trancher.
+ *
+ * ⚠ Un critère algorithmique compte par son pourcentage exact (`donneesAlgorithmiques`),
+ * comme au calcul. Sinon, la valeur ponctuelle du niveau choisi, par la règle unique
+ * de `echelles.js` (`valeurNumeriqueDuNiveau`, #525/#527) : jamais de milieu de plage.
+ *
+ * @param {Object} evaluation     - l'évaluation enregistrée
+ * @param {Object} grille         - sa grille, résolue par l'appelant dans le bon trimestre
+ * @param {Array}  niveauxEchelle - les niveaux BRUTS de son échelle (avec `valeurCalcul`)
+ * @returns {Object} même forme que `calculerPortee`
+ */
+function porteeDepuisEvaluation(evaluation, grille, niveauxEchelle) {
+    const parId = {};
+    const parNom = {};
+    (Array.isArray(evaluation && evaluation.criteres) ? evaluation.criteres : []).forEach(c => {
+        if (!c) return;
+        if (c.critereId) parId[c.critereId] = c;
+        if (c.critereNom) parNom[c.critereNom] = c;
+    });
+    const valeurs = {};
+    (Array.isArray(niveauxEchelle) ? niveauxEchelle : []).forEach(n => {
+        if (!n) return;
+        const v = (typeof valeurNumeriqueDuNiveau === 'function')
+            ? valeurNumeriqueDuNiveau(n)
+            : ((n.valeurCalcul != null && n.valeurCalcul !== '' && !isNaN(Number(n.valeurCalcul))) ? Number(n.valeurCalcul) : null);
+        if (v !== null && !isNaN(v)) valeurs[n.code] = v;
+    });
+    const algo = (evaluation && evaluation.donneesAlgorithmiques) || {};
+
+    const portee = calculerPortee(
+        (grille && Array.isArray(grille.criteres)) ? grille.criteres : [],
+        critere => {
+            const c = parId[critere.id] || parNom[critere.nom];
+            return c ? (c.niveauSelectionne || '') : '';
+        },
+        (critere, niveau) => {
+            const a = algo[critere.id];
+            if (a && a.pourcentage !== undefined) return a.pourcentage;
+            return valeurs[niveau];
+        }
+    );
+
+    if (evaluation && typeof evaluation.ponderationCouverte === 'number') {
+        portee.ponderationCouverte = evaluation.ponderationCouverte;
+        portee.incomplete = portee.commencee && (portee.ponderationCouverte < portee.ponderationGrille - 0.001);
+    }
+    return portee;
+}
+
+/**
+ * Ce qui manque, en une liste courte — « Langue (20 %) », « Démarche (M) ». Partagé par
+ * l'écran, le refus d'enregistrement et l'avertissement d'export. Du TEXTE, jamais du
+ * HTML : les noms de critères sont des données utilisateur (règle 1), l'appelant pose
+ * par `textContent` ou échappe.
+ */
+function texteCriteresHorsNote(portee) {
+    const hors = (portee && Array.isArray(portee.criteresHorsNote)) ? portee.criteresHorsNote : [];
+    const sansNiveau = hors.filter(c => c.motif === 'sans-niveau').map(c => c.nom + ' (' + c.ponderation + ' %)');
+    const sansValeur = hors.filter(c => c.motif === 'niveau-sans-valeur').map(c => c.nom + ' (' + c.niveau + ')');
+    const parts = [];
+    if (sansNiveau.length) parts.push('sans niveau : ' + sansNiveau.join(', '));
+    if (sansValeur.length) parts.push('niveau sans valeur dans l\'échelle : ' + sansValeur.join(', '));
+    return parts.join(' ; ');
+}
+
+/**
+ * Ce que l'enseignant·e lit quand la portée est incomplète : ce qui manque, pourquoi
+ * ça compte, et quoi faire. Une phrase par mécanisme, les deux si les deux jouent.
+ * (Texte pour l'enseignant·e ; les mots que l'ÉLÈVE lit sont dans le rendu de la
+ * synthèse, et c'est Grégoire qui les arrête.)
+ */
+function phrasesPorteeIncomplete(portee) {
+    const hors = (portee && Array.isArray(portee.criteresHorsNote)) ? portee.criteresHorsNote : [];
+    const sansNiveau = hors.filter(c => c.motif === 'sans-niveau');
+    const sansValeur = hors.filter(c => c.motif === 'niveau-sans-valeur');
+    const phrases = [];
+    if (sansNiveau.length) {
+        const pct = portee.ponderationGrille > 0 ? Math.round((portee.ponderationCouverte / portee.ponderationGrille) * 100) : 0;
+        phrases.push('Pas de note tant qu\'un critère est sans niveau — '
+            + sansNiveau.map(c => c.nom + ' (' + c.ponderation + ' %)').join(', ')
+            + '. Sans ' + (sansNiveau.length > 1 ? 'eux' : 'lui') + ', la note ne porterait que sur ' + pct + ' % de la grille.');
+    }
+    if (sansValeur.length) {
+        phrases.push('Pas de note : ' + (sansValeur.length > 1 ? 'les niveaux choisis n\'ont pas de valeur' : 'le niveau choisi n\'a pas de valeur')
+            + ' dans l\'échelle — ' + sansValeur.map(c => c.nom + ' (' + c.niveau + ')').join(', ')
+            + '. Donne une valeur ponctuelle à chaque niveau (Conception → Échelles de performance).');
+    }
+    return phrases;
+}
+
+/**
+ * L'écran DIT ce qui manque, sous la note — et se tait quand rien ne manque : un
+ * correctif qui avertit tout le monde n'avertit personne. Posé par `textContent`.
+ */
+function _ecrirePorteeEcran(portee) {
+    const el = document.getElementById('porteeNote1');
+    if (!el) return;
+    if (!portee || !portee.incomplete) {
+        el.textContent = '';
+        el.classList.add('u-hide');
+        return;
+    }
+    el.textContent = phrasesPorteeIncomplete(portee).join(' ');
+    el.classList.remove('u-hide');
+}
+
+/**
+ * La porte de l'ENREGISTREMENT — même patron que `_validerReferencesSauv` : dit
+ * pourquoi, rend `false`, et l'appelant sort. Recalcule d'abord : la portée lue est
+ * celle de la note qui va être écrite (#572, la valeur calculée est la source).
+ * Appelée par `sauvegarderEvaluation` et `sauvegarderEvaluationModifiee`. Jamais par
+ * l'auto-save. Décision de Grégoire, 1er septembre : « un critère dont on ne tient
+ * pas compte n'est pas un critère non noté — c'est une grille différente » ; une
+ * couverture sous 100 % est toujours un défaut, jamais une intention.
+ */
+function verifierPorteeAvantSauvegarde() {
+    calculerNote();
+    const portee = window.porteeCalculeeCourante;
+    if (!portee || !portee.incomplete) return true;
+    const details = phrasesPorteeIncomplete(portee).join(' ') + ' Complète l\'évaluation, puis enregistre.';
+    if (typeof notifications !== 'undefined' && notifications && typeof notifications.erreur === 'function') {
+        notifications.erreur('Évaluation incomplète', details);
+    }
+    console.warn('[Évaluation] #674 enregistrement refusé — ' + texteCriteresHorsNote(portee));
+    return false;
+}
+
+/**
+ * La valeur qui entre dans la note pour un critère de l'écran — extraite telle quelle
+ * du corps historique de `calculerNote` (#674), pour que la même résolution serve au
+ * calcul ET à la portée. Pour un critère algorithmique, le pourcentage exact calculé
+ * (ex. 61,5 % au lieu des 32 % du niveau I) SAUF si un niveau a été choisi à la main
+ * (jeton de reprise ciblée) ; sinon la valeur ponctuelle du niveau, ou `undefined`.
+ */
+function _valeurCritereEnCours(critere, niveau, valeurs) {
+    // Vérifier si le select du critère est en mode manuel (valeur non vide)
+    const selectCritere = document.getElementById(`eval_${critere.id}`);
+    const niveauManuel = selectCritere?.value; // vide si "-- Utiliser le niveau calculé --"
+    const algo = evaluationEnCours.donneesAlgorithmiques && evaluationEnCours.donneesAlgorithmiques[critere.id];
+    if (algo && algo.pourcentage !== undefined && !niveauManuel) {
+        return algo.pourcentage; // algorithme exact
+    }
+    return valeurs[niveau]; // niveau par défaut, ou manuel (jeton)
+}
+
 /**
  * Calcule la note finale basée sur les critères évalués
  *
@@ -761,6 +1005,7 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
  */
 function calculerNote() {
     if (!evaluationEnCours) return;
+    window.porteeCalculeeCourante = null;   // #674 — inconnue tant qu'elle n'est pas calculée
 
     const grilleId = evaluationEnCours.grilleId;
     const grilles = db.getSync(cle('grillesTemplates'), []);
@@ -804,6 +1049,7 @@ function calculerNote() {
         if (elNote) elNote.textContent = '--';
         if (elNiveau) elNiveau.textContent = '--';
         window.noteCalculeeCourante = null;   // #572 — pas de note calculable
+        _ecrirePorteeEcran(null);             // #674 — rien à nommer : l'échelle manque, l'écran le dit déjà
         return;
     }
 
@@ -827,47 +1073,25 @@ function calculerNote() {
         if (valeur !== null && !isNaN(valeur)) valeurs[niveau.code] = valeur;
     });
 
+    // #674 — QUELS CRITÈRES COMPTENT : une seule règle (`calculerPortee`), la même
+    // qui relit les évaluations déjà en base. La boucle historique décidait ici, en
+    // silence, quels critères entraient dans le total ; elle ne fait plus que sommer.
+    const portee = calculerPortee(
+        grille.criteres,
+        critere => evaluationEnCours.criteres[critere.id],
+        (critere, niveau) => _valeurCritereEnCours(critere, niveau, valeurs)
+    );
+
     let noteTotal = 0;
     let ponderationTotal = 0;
     const notesCriteres = []; // Pour collecter les notes à copier-coller
 
-    grille.criteres.forEach(critere => {
-        const niveau = evaluationEnCours.criteres[critere.id];
-        if (niveau) {
-            const ponderation = (critere.ponderation || 0) / 100;
-
-            // IMPORTANT: Pour les critères algorithmiques, utiliser le pourcentage exact calculé
-            // au lieu de la valeur par défaut du niveau (ex: 61.5% au lieu de 32% pour I)
-            // SAUF si l'utilisateur a manuellement sélectionné un niveau différent (jeton de reprise ciblée)
-            let valeurCritere = valeurs[niveau];
-            let sourceValeur = 'niveau défaut';
-
-            // Vérifier si le select du critère est en mode manuel (valeur non vide)
-            const selectCritere = document.getElementById(`eval_${critere.id}`);
-            const niveauManuel = selectCritere?.value; // Niveau sélectionné manuellement (vide si "-- Utiliser le niveau calculé --")
-
-            if (evaluationEnCours.donneesAlgorithmiques &&
-                evaluationEnCours.donneesAlgorithmiques[critere.id] &&
-                evaluationEnCours.donneesAlgorithmiques[critere.id].pourcentage !== undefined &&
-                !niveauManuel) { // Utiliser l'algorithme SEULEMENT si pas de sélection manuelle
-                // Utiliser le pourcentage exact du calcul algorithmique
-                valeurCritere = evaluationEnCours.donneesAlgorithmiques[critere.id].pourcentage;
-                sourceValeur = 'algorithme exact';
-            } else if (niveauManuel) {
-                // Niveau sélectionné manuellement : utiliser la valeur par défaut du niveau
-                sourceValeur = 'manuel (jeton)';
-            }
-
-            if (valeurCritere !== undefined) {
-                const contribution = valeurCritere * ponderation;
-                noteTotal += contribution;
-                ponderationTotal += ponderation;
-
-                // Collecter le niveau IDME du critère pour l'export (ex: M, D, E, I)
-                notesCriteres.push(niveau);
-
-            }
-        }
+    portee.criteresComptes.forEach(({ critere, niveau, valeur }) => {
+        const ponderation = (critere.ponderation || 0) / 100;
+        noteTotal += valeur * ponderation;
+        ponderationTotal += ponderation;
+        // Collecter le niveau IDME du critère pour l'export (ex: M, D, E, I)
+        notesCriteres.push(niveau);
     });
 
     let pourcentage = 0;
@@ -908,14 +1132,24 @@ function calculerNote() {
 
     }
 
+    // #674 — L'ÉCRAN RETIENT LA CONCLUSION QUAND LA PORTÉE EST INCOMPLÈTE, ET DIT
+    // POURQUOI. Un « 95,0 % » calculé sur 80 % de la grille n'est pas une note sur
+    // 100 : il ne s'affiche plus comme telle. Le niveau global est retenu avec elle.
+    if (portee.incomplete) niveauGlobal = '--';
+
     // #572 — LA VALEUR CALCULÉE EST LA SOURCE, l'écran n'en est que l'affichage.
     // La sauvegarde relisait `parseFloat(textContent)` : un rendu arrondi, ou
     // tronqué par un affichage différé (#321), redevenait la note stockée.
+    // #674 — et la valeur voyage AVEC sa portée : les quatre chemins d'écriture lisent
+    // les deux ensemble. « 95 sur 80 % » est une donnée honnête que chaque
+    // consommateur peut juger ; « 95 » seul ne l'était pas.
     window.noteCalculeeCourante = pourcentage;
+    window.porteeCalculeeCourante = portee;
 
     // Mettre à jour l'affichage
-    document.getElementById('noteProduction1').textContent = pourcentage.toFixed(1) + ' %';
+    document.getElementById('noteProduction1').textContent = portee.incomplete ? '--' : (pourcentage.toFixed(1) + ' %');
     document.getElementById('niveauProduction1').textContent = niveauGlobal;
+    _ecrirePorteeEcran(portee);
 
     // Afficher les notes des critères pour copier-coller
     const criteresCopierElement = document.getElementById('criteresCopier');
@@ -1042,5 +1276,15 @@ window.obtenirCouleurNiveau = obtenirCouleurNiveau;
 // Restauration fix #110 v3 (24 mai 2026) — appelé par sauvegarderEvaluation
 // (evaluation-sauvegarde.js) et sauvegarderEvaluationModifiee (evaluation.js) :
 window._forcerRecalculAlgorithmiqueAvantSauvegarde = _forcerRecalculAlgorithmiqueAvantSauvegarde;
+
+// #674 — la portée de la note (énoncé 5). `calculerPortee` est la règle unique ;
+// `porteeDepuisEvaluation` la relit sur ce qui est déjà en base (PDF de l'élève,
+// `synthese-retroaction-data.js`) ; `verifierPorteeAvantSauvegarde` est la porte des
+// deux enregistrements manuels ; `texteCriteresHorsNote` nomme ce qui manque à
+// l'export. Sentinelle : `tests/unit/sentinelle-674-*.test.js`.
+window.calculerPortee = calculerPortee;
+window.porteeDepuisEvaluation = porteeDepuisEvaluation;
+window.verifierPorteeAvantSauvegarde = verifierPorteeAvantSauvegarde;
+window.texteCriteresHorsNote = texteCriteresHorsNote;
 
 })();

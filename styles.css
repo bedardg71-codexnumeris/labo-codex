@@ -5628,6 +5628,21 @@ body:not(.mode-clair) .badge-source--partage {
     color: var(--gris-moyen);
 }
 
+/* #674 — ce qui manque à la note, nommé sous elle. Masqué (u-hide) quand rien ne
+   manque : un correctif qui avertit tout le monde n'avertit personne. Variables
+   d'alerte « attention » : définies dans les deux modes. */
+.boite-note-finale .portee {
+    margin: 10px 0 0;
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    background: var(--alerte-fond-attention);
+    border-left: 3px solid var(--alerte-bordure-attention);
+    border-radius: var(--radius-moyen);
+    color: var(--alerte-texte-attention);
+}
+
 /* Zone de critères d'évaluation */
 .zone-criteres {
     padding: 15px;
