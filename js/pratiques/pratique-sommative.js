@@ -639,14 +639,14 @@ class PratiqueSommative {
                 cible.strategies = [
                     'Rencontre d\'urgence avec l\'étudiant',
                     'Évaluation des difficultés (académiques, personnelles)',
-                    'Référence aux services de soutien (SA, CAF, etc.)',
+                    'Référence aux services de soutien du collège',
                     'Plan d\'action intensif individualisé'
                 ];
             }
 
             cible.ressources = [
-                'Services adaptés (SA)',
-                'Centre d\'aide (CAF)',
+                'Services adaptés du collège',
+                'Centre d\'aide du collège',
                 'Mentorat par les pairs',
                 'Capsules de révision'
             ];

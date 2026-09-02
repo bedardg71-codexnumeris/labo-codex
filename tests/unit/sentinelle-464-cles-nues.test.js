@@ -251,16 +251,67 @@ describe('#574 étendu · 6 — le versement des 8 échelles collègues est RETI
         }
     });
 
-    it('D — les identifiants restent dans IDS_GABARITS_HARDCODES : une suppression doit rester durable', () => {
-        // ⚠ Retirer le semis n'emporte PAS la durabilité d'une suppression. Chez
-        // qui a déjà lancé l'application, les huit échelles sont dans sa
-        // bibliothèque : sans tombstone, celle qu'il supprime reviendrait au
-        // prochain import. Deux sujets, et le second survit au premier.
+    // ↻ RÉORIENTÉ LE 2 SEPT. 2026 (#690) — CE CAS GARDAIT UNE AFFIRMATION PÉRIMÉE.
+    //
+    // Il exigeait que les huit identifiants RESTENT dans `IDS_GABARITS_HARDCODES`,
+    // au motif que « sans tombstone, l'échelle supprimée reviendrait au prochain
+    // import ». Ce motif était vrai avant le retrait du semis du 1er septembre ;
+    // il ne l'était plus après, et il a survécu au changement qui l'a périmé.
+    //
+    // ⮕ CE QUI A ÉTÉ MESURÉ LE 2 SEPTEMBRE, ET QUI TRANCHE :
+    //   · `estRessourceSupprimee` a QUATRE lecteurs, et pas un ne regarde ces
+    //     huit-là — `echelles.js` ne voit que `ECHELLE_IDME_DEPART`, `grilles.js`
+    //     que `GRILLE_GENERIQUE`, `cartouches.js` que `CART_GENERIQUE`,
+    //     `gabarits-utils.js` que les `GABARIT_*` ;
+    //   · le chemin d'import ne consulte le tombstone À AUCUN moment :
+    //     `grep -rn "estRessourceSupprimee\\|ressourcesSupprimees" js/import-export.js
+    //     js/codex.js js/partage-section.js` rend zéro ;
+    //   · plus aucun code ne sème ces échelles (cas A et B ci-dessus).
+    // Leur seul effet était donc d'écrire, à la suppression, une marque que
+    // personne ne relit — et leur identifiant portait le prénom du collègue dont
+    // l'échelle venait, dans un fichier servi au navigateur de tout le monde.
+    //
+    // ⮕ CE QUE CE CAS GARDE MAINTENANT, ET QUI EST LE VRAI SUJET : les
+    // identifiants DONT UN SEMIS DÉPEND ENCORE restent dans la liste, nommément.
+    // Ceux-là sont re-semés par un `assurer*()` à chaque chargement : les retirer
+    // rendrait une suppression réversible, et c'est ça qu'il faut empêcher.
+    //
+    // Break-testé le 2 septembre, sur la source en mémoire : retirer
+    // `ECHELLE_IDME_DEPART` de la liste → rouge ; retirer `ECHELLE_BRUNO_CHIMIE`
+    // (déjà parti) → ne change rien, et c'est le résultat attendu.
+    const IDS_DONT_UN_SEMIS_DEPEND = ['ECHELLE_GENERIQUE', 'GRILLE_GENERIQUE',
+        'CART_GENERIQUE', 'ECHELLE_IDME_DEPART', 'GABARIT_ECHELLE_IDME',
+        'GABARIT_ECHELLE_STD_MASTERY', 'GABARIT_GRILLE_ANALYTIQUE',
+        'GABARIT_GRILLE_CHECKLIST_SPE', 'GABARIT_GRILLE_STD_OBJECTIFS'];
+
+    const blocTombstones = () => {
         const source = readFileSync(path.join(racineProjet, 'js', 'main.js'), 'utf8');
         const debut = source.indexOf('window.IDS_GABARITS_HARDCODES = [');
-        const bloc = source.slice(debut, source.indexOf('];', debut));
-        for (const id of IDS_DISCIPLINAIRES) {
-            expect(bloc, id + ' a quitté la liste des tombstones').toContain(id);
+        return source.slice(debut, source.indexOf('];', debut));
+    };
+
+    it('D — les identifiants dont un semis dépend ENCORE restent dans IDS_GABARITS_HARDCODES', () => {
+        const bloc = blocTombstones();
+        for (const id of IDS_DONT_UN_SEMIS_DEPEND) {
+            expect(bloc, id + ' a quitté la liste des tombstones : sa suppression redeviendrait réversible').toContain(id);
         }
+    });
+
+    it('D bis — et les huit disciplinaires en sont PARTIES : plus de prénom de collègue dans main.js', () => {
+        const bloc = blocTombstones();
+        for (const id of IDS_DISCIPLINAIRES) {
+            expect(bloc, id + ' est revenu dans la liste des tombstones').not.toContain(id);
+        }
+    });
+
+    it('D ter — et la sonde ne les nomme plus non plus : elle mesure son sujet au lieu de le recopier', () => {
+        const biblio = js('echelles-bibliotheque.js');
+        const debut = biblio.indexOf('async function _sonderEchellesDisciplinaires');
+        const corps = biblio.slice(debut, biblio.indexOf('\nwindow._sonderEchellesDisciplinaires', debut));
+        for (const id of IDS_DISCIPLINAIRES) {
+            expect(corps, id + ' est réécrit en dur dans la sonde').not.toContain(id);
+        }
+        // …et elle vise toujours quelque chose : le critère mesuré remplace la liste.
+        expect(corps).toContain('estGabaritVivant');
     });
 });

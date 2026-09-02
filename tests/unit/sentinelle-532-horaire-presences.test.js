@@ -9,7 +9,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 // ET LE LIEN QUI NE DÉBOUCHE NULLE PART
 // =======================================================================
 //
-// Retour de Jean-François, 26 août 2026 (1.99.2, build 0826-1008), gravité
+// Retour d'un testeur, 26 août 2026 (1.99.2, build 0826-1008), gravité
 // BLOQUANT : « Dans la section Suivi > Présences, je ne peux pas entrer les
 // présences, un message d'erreur en couleur jaune doré m'indique que l'horaire
 // n'est pas configuré (alors qu'il l'est dans la section Cadre). Un hyperlien
@@ -51,7 +51,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 //   E. le bandeau et son lien existent dans index.html, et l'action visée est
 //      réellement exportée quelque part.
 //
-// ⚠ CE QUE CETTE SENTINELLE NE COUVRE PAS : que l'horaire de Jean-François soit
+// ⚠ CE QUE CETTE SENTINELLE NE COUVRE PAS : que l'horaire du testeur soit
 // bien RATTACHÉ à son groupe-cours. Si le bandeau reparaît chez lui après ce
 // correctif, il dira alors la vérité — et le défaut sera dans le rattachement
 // (`groupesCours[].horaireId`), pas ici.
@@ -124,7 +124,7 @@ const SEANCES = [
 
 describe('#532 · A — le bandeau se décide sur les séances, et sur rien d\'autre', () => {
 
-    it('A.a LE CAS DE JEAN-FRANÇOIS : horaire configuré → aucun bandeau', () => {
+    it('A.a LE CAS DU RETOUR DU 26 AOÛT : horaire configuré → aucun bandeau', () => {
         const { estVisible } = monter({ seances: SEANCES });
         expect(
             estVisible(),

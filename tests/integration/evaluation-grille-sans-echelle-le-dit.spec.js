@@ -54,7 +54,7 @@ const GRILLE = {
 };
 // L'échelle RÉELLE de la bibliothèque (`echelles-bibliotheque.js`) — `valeur:`.
 const ECHELLE = {
-    id: 'ECHELLE_BRUNO_CHIMIE',
+    id: 'ECHELLE_TEST_SANS_NIVEAUX',
     nom: 'Échelle Chimie organique',
     niveaux: [
         { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeurCalcul: 40, couleur: '#dc3545' },

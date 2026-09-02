@@ -370,9 +370,9 @@
     window._demoAlerteCleChangee = function () {
         return trustTofu.demanderDecisionCleChangee({
             statut: 'cle_changee',
-            auteur: 'Marie-Hélène <script>Tremblay</script>', // doit s'afficher tel quel (textContent)
+            auteur: 'Ada <script>Lovelace</script>', // doit s'afficher tel quel (textContent)
             clePresentee: 'CLE_B',
-            fiche: { nom: 'Marie-Hélène Tremblay', clePubliqueB64: 'CLE_A', premierContact: '2026-05-12T10:00:00Z', nbImports: 3 }
+            fiche: { nom: 'Ada Lovelace', clePubliqueB64: 'CLE_A', premierContact: '2026-05-12T10:00:00Z', nbImports: 3 }
         }).then(function (decision) {
             console.warn('[_demoAlerteCleChangee] décision :', decision);
             return decision;

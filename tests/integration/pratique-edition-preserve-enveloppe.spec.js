@@ -36,7 +36,7 @@ const SETUP = () => {
     const pratique = {
         id: 'pratique_co01_test',
         nom: 'SOM copiée',
-        auteur: 'Bruno V.',
+        auteur: 'Ada Lovelace',
         etablissement: 'Cégep de Drummondville',
         description: 'Copie de la souche, pour test CO-01',
         discipline: 'Chimie',
@@ -85,8 +85,8 @@ test('CO-01 · « Éditer puis Enregistrer » préserve l\'enveloppe (inspireDe,
     }, { setupSrc: SETUP.toString().replace(/^[^{]*\{/, '').replace(/\}$/, '') });
 
     // L'ouverture en édition recharge l'AUTEUR dans les champs du formulaire
-    expect(r.reponsesApresOuverture.prenom, 'prenom rechargé à l\'ouverture').toBe('Bruno');
-    expect(r.reponsesApresOuverture.nomAuteur, 'nom rechargé à l\'ouverture').toBe('V.');
+    expect(r.reponsesApresOuverture.prenom, 'prenom rechargé à l\'ouverture').toBe('Ada');
+    expect(r.reponsesApresOuverture.nomAuteur, 'nom rechargé à l\'ouverture').toBe('Lovelace');
 
     // Pas de doublon : l'édition modifie EN PLACE
     expect(r.nbPratiques).toBe(1);
@@ -101,7 +101,7 @@ test('CO-01 · « Éditer puis Enregistrer » préserve l\'enveloppe (inspireDe,
     expect(r.apres.isDemo).toBe(false);
     expect(r.apres.dateCreation, 'la date de création n\'est pas réécrite').toBe('2026-06-01T00:00:00.000Z');
     expect(r.apres.dansBibliotheque, 'dansBibliotheque n\'est pas forcé à true').toBe(false);
-    expect(r.apres.auteur, 'l\'auteur d\'origine survit au round-trip').toBe('Bruno V.');
+    expect(r.apres.auteur, 'l\'auteur d\'origine survit au round-trip').toBe('Ada Lovelace');
 
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

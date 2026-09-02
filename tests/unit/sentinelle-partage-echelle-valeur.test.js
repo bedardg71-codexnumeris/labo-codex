@@ -46,7 +46,7 @@ beforeEach(() => {
 
 function projeter(niveaux) {
     return win.partageFormat.projeterEntite({
-        id: 'ECHELLE_BRUNO_CHIMIE',
+        id: 'ECHELLE_TEST_PARTAGE',
         nom: 'Échelle Chimie organique',
         niveaux
     }, 'echelle');

@@ -133,11 +133,18 @@ async function ajouterEchelleALaBibliotheque(echelle) {
  * ⮕ Ce qu'elles produisent est le sujet de **#674** ; ce qu'il faut en faire est
  * un geste de Grégoire, éclairé par `_sonderEchellesDisciplinaires()` ci-dessous.
  *
- * ⚠ Leurs identifiants RESTENT dans `IDS_GABARITS_HARDCODES` (main.js), et c'est
- * voulu : cette liste est ce qui fait poser un tombstone à la suppression. Sans
- * elle, quelqu'un qui supprime son échelle « Chimie » la verrait revenir au
- * prochain import. Un retrait de semis n'emporte pas la durabilité d'une
- * suppression — ce sont deux sujets, et le second survit au premier.
+ * ↻ CORRIGÉ LE 2 SEPT. 2026 (#690) — CE PARAGRAPHE DISAIT LE CONTRAIRE, ET IL
+ * A SURVÉCU AU CHANGEMENT QUI L'A PÉRIMÉ. Il affirmait que leurs identifiants
+ * devaient RESTER dans `IDS_GABARITS_HARDCODES` (main.js), « sinon quelqu'un qui
+ * supprime son échelle "Chimie" la verrait revenir au prochain import ».
+ * C'est faux depuis le retrait du semis, le 1er septembre. Mesuré le 2 septembre :
+ * le tombstone a QUATRE lecteurs, et aucun ne regarde ces huit échelles
+ * (`echelles.js` ne voit que `ECHELLE_IDME_DEPART`, `grilles.js` que
+ * `GRILLE_GENERIQUE`, `cartouches.js` que `CART_GENERIQUE`, `gabarits-utils.js`
+ * que les `GABARIT_*`) ; et le chemin d'import ne consulte pas le tombstone du
+ * tout — `grep -rn "estRessourceSupprimee\|ressourcesSupprimees" js/import-export.js`
+ * rend zéro. Les huit identifiants étaient donc INERTES : leur seul effet était
+ * d'écrire, à la suppression, une marque que personne ne relit. Ils sont retirés.
  */
 
 /**
@@ -158,10 +165,28 @@ async function ajouterEchelleALaBibliotheque(echelle) {
  * @returns {Promise<{bibliotheque:Array, copies:Array, usages:Object}>}
  */
 async function _sonderEchellesDisciplinaires() {
-    const IDS = ['ECHELLE_BRUNO_CHIMIE', 'ECHELLE_XAVIER_INFO', 'ECHELLE_ISABELLE_BIO',
-                 'ECHELLE_HELENE_PHILO', 'ECHELLE_MARIEHELENE_LITT', 'ECHELLE_ETIENNE_ADMIN',
-                 'ECHELLE_OLIVIER_GEO', 'ECHELLE_JORDAN_PHILO'];
-    const estVisee = (e) => !!e && (IDS.indexOf(e.id) >= 0 || IDS.indexOf(e.idOriginal) >= 0);
+    // #690 (2 sept. 2026) — la sonde vise le MEME sujet qu'avant, sans le nommer.
+    // Elle listait huit identifiants ecrits en dur, dont chacun portait le prenom
+    // du collegue dont l'echelle venait ; ce fichier est servi au navigateur de
+    // tout le monde. Le critere est desormais mesure, pas recopie : est visee
+    // toute echelle PRESENTE DANS LA BIBLIOTHEQUE PARTAGEE qui n'est pas un
+    // gabarit vivant. C'est exactement le meme ensemble — la bibliotheque ne
+    // contient rien d'autre — et il attrape en plus ce qu'une liste figee ignore.
+    const IDS_VIVANTS = ['ECHELLE_GENERIQUE', 'ECHELLE_IDME_DEPART'];
+    const estGabaritVivant = (id) => IDS_VIVANTS.indexOf(id) >= 0 || String(id || '').indexOf('GABARIT_') === 0;
+    // Un id SEMÉ est en capitales avec soulignés (`ECHELLE_X_Y`) ; un id CRÉÉ par
+    // l'utilisateur porte l'horodatage minuscule de sa fabrique
+    // (`echelle_1772187755149_uq1oiiafa`). Le critère départage donc le matériel
+    // livré d'autrefois des échelles de l'enseignant, sans nommer personne.
+    const estIdSeme = (id) => /^ECHELLE_[A-Z0-9_]+$/.test(String(id || ''));
+    const idsVises = {};   // alimenté par la lecture de la bibliothèque, ci-dessous
+    // ⚠ Une copie peut survivre dans un trimestre alors que la bibliothèque a été
+    // vidée : la viser par le SEUL contenu de la bibliothèque la manquerait. D'où
+    // l'union — ce que la bibliothèque a montré, OU tout id semé qui n'est pas un
+    // gabarit vivant.
+    const estVisee = (e) => !!e && (idsVises[e.id] === true || idsVises[e.idOriginal] === true
+        || (estIdSeme(e.id) && !estGabaritVivant(e.id))
+        || (estIdSeme(e.idOriginal) && !estGabaritVivant(e.idOriginal)));
     // Un niveau est MUET s'il ne peut rendre aucun nombre — c'est la règle de
     // `valeurNumeriqueDuNiveau` (#525), pas une seconde règle écrite ici.
     const muet = (n) => !n || n.valeurCalcul == null || String(n.valeurCalcul).trim() === '' || isNaN(Number(n.valeurCalcul));
@@ -173,7 +198,9 @@ async function _sonderEchellesDisciplinaires() {
     });
 
     const bibliotheque = ((await db.get(CLE_BIBLIOTHEQUE_ECHELLES)) || [])
-        .filter(estVisee).map(e => decrire(e, 'bibliothequeEchelles'));
+        .filter(e => !!e && e.id && !estGabaritVivant(e.id) && estIdSeme(e.id))
+        .map(e => { idsVises[e.id] = true; if (e.idOriginal) idsVises[e.idOriginal] = true;
+                    return decrire(e, 'bibliothequeEchelles'); });
 
     let trimestres = [];
     try { trimestres = (db.getSync('trimestres', []) || []).filter(t => t && t.id); } catch (e) { trimestres = []; }

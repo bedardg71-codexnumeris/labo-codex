@@ -55,7 +55,7 @@ class PratiquePanSpecifications {
 
             // Table de correspondance : bundles → notes
             tableBundles: [
-                // EXEMPLE (cours François) :
+                // EXEMPLE :
                 // { noteFixe: 100, label: 'A', requis: {'prise-position': 2, 'test': 2, 'portfolio': 1}, description: 'Excellence' },
                 // { noteFixe: 80, label: 'B', requis: {'prise-position': 2, 'test': 1, 'portfolio': 1}, description: 'Bonne performance' },
                 // { noteFixe: 70, label: 'C+', requis: {'prise-position': 1, 'test': 1, 'portfolio': 1}, description: 'Maîtrise acceptable' },

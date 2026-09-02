@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 2 septembre 2026, au matin (neuvième passe) — release 1.108.0.**
+**Dernière mise à jour : 2 septembre 2026, 11 h (dixième passe) — release 1.109.2, en ligne.**
 
 ---
 
@@ -37,7 +37,7 @@ mentaient dans les deux sens :
 
 ---
 
-## Le compte du jour : 5 faits, 2 éprouvés par Grégoire, 2 pas faits, 0 jamais vérifié
+## Le compte du jour : 4 faits, 2 éprouvés par Grégoire, 3 pas faits, 0 jamais vérifié
 
 ---
 
@@ -75,42 +75,17 @@ maintenant avec la grille. L'évaluation du destinataire ne bascule plus de mode
 **Vérifié comment** : tests automatiques sur le transport —
 `cd tests && npm run test:unit` (433 fichiers / 4638 tests, code 0). *(#669)*
 
-### Une rétroaction ne parle que de la discipline de celui qui l'écrit
-Un enseignant qui compte des erreurs de calcul ne voit plus son critère rebaptisé
-« Français écrit » dans le PDF remis à son élève, et la phrase engendrée ne dit
-plus « Ta rédaction contient N erreurs de français ». Le titre porte le nom qu'il
-a donné à son critère ; les quatre phrases se règlent depuis le gabarit de la
-grille et voyagent avec elle quand il la partage.
-**Vérifié comment** : la commande de contrôle du mandat —
-`grep -n "Français écrit\|Erreurs de français\|Français : \|Ta rédaction contient\|qualité du français"`
-sur les quatre fichiers du moteur — rend **7 lignes, toutes des COMMENTAIRES**
-décrivant le défaut corrigé, zéro littéral de code. **Témoin** : le même motif
-rend **277** lignes sur `js/pack-demo-20.js` (données de démonstration) et **7**
-sur `js/evaluation-enonces.js`, le registre qui doit les porter — la mesure
-mesure donc bien quelque chose. Sentinelle de 31 cas, **11 break-testés**
-(`cd tests && npm run test:unit` → 434 fichiers / 4670 tests, code 0).
-⮕ **Et la fidélité est prouvée en NAVIGATEUR, pas seulement en Node** :
-`cd tests && npx playwright test integration/grille-changee-donnees-algo-645.spec.js`
-imprime la rétroaction que la vraie chaîne produit — « Ta rédaction contient 7
-erreurs de français pour 460 mots. » — pour un critère nommé « français ». Les
-élèves de Grégoire ne voient aucune différence.
-⚠ **Ce que ça ne règle pas** : les évaluations DÉJÀ enregistrées gardent leur
-texte gelé, et c'est voulu — on tarit la source, on ne réécrit pas ce qui est
-chez les gens. `js/pratiques/pratique-sommative.js` sert toujours « Services
-adaptés » et « Centre d'aide » à tout le monde, et le mot reste gravé dans les
-identifiants de champs du volet confidentiel. **L'écran du gabarit n'a été
-parcouru par personne à la main.** *(#581 ; restent #440 résiduel, #539)*
-
 ### Le numéro de version affiché correspond au code qui tourne
 Sans ça, aucun rapport de bug n'est interprétable, ni le sien ni celui d'un
 utilisateur.
 **Vérifié comment** : tests sur le bandeau de version, et les quatre points de
-vérité mesurés PAR TÉMOIN à la release **1.108.0** —
-`grep -rl 1.107.0 --include=*.js --include=*.json --include=*.html .` rend **0**,
-comme `0901-2050` et `09012050`. ⚠ Le témoin dit aussi son périmètre : sur tout le
-dépôt, `1.107` rend encore 7 fichiers de prose datée.
-⚠ **Fragile** : ça se re-périme à chaque release, et cette ligne-ci en est la
-preuve — elle citait encore 1.107.0 une heure après que 1.108.0 fut posée.
+vérité mesurés PAR TÉMOIN à la release **1.109.2** (build `0902-1006`) —
+`grep -rl '1\.109\.1' --include=*.js --include=*.json --include=*.html .` rend
+**0**. ⚠ Le témoin dit aussi son périmètre : sur tout le dépôt, `1.109` rend encore
+**11** fichiers de prose datée.
+⚠ **Fragile** : ça se re-périme à chaque release. Le 2 septembre, **quatre versions
+se sont succédé en une matinée** — cette ligne a cité un numéro périmé entre
+chacune.
 ⮕ Le bump est passé par `scripts/release.mjs`, qui écrit les quatre points de
 façon atomique **et** bumpe les jetons anti-cache d'`index.html` (11 ce matin,
 qu'il liste). Le danger reste le bump fait à la main, et lui seul. *(#665)*
@@ -118,6 +93,114 @@ qu'il liste). Le danger reste le bump fait à la main, et lui seul. *(#665)*
 ---
 
 ## PAS FAIT
+
+### Une rétroaction ne parle que de la discipline de celui qui l'écrit
+↻ **Descendue de FAIT à PAS FAIT le 2 septembre à 11 h.** Ce n'est pas une
+régression : la ligne était classée « fait » sur la première moitié de l'énoncé
+seulement, et la seconde n'a jamais été livrée. **C'est le classement qui mentait,
+pas le code.**
+
+**Ce qui est livré, et en ligne** — quatre versions le 2 septembre, un seul fil :
+
+- Le mot « français » ne s'imprime plus dans le PDF d'un élève dont le critère
+  s'appelle autrement ; les quatre phrases engendrées se règlent depuis le gabarit
+  de la grille et voyagent avec elle quand on la partage. *(1.108.0, #581)*
+- Les modèles de pratique nommés « Chimie », « Géographie », « Philosophie »,
+  « Comptabilité » ne sont plus offerts, et les modes de calcul perdent leur
+  parenthèse disciplinaire. *(1.109.0, #687)*
+- Le modèle sommatif cesse de reproduire la pratique de son auteur : sa
+  configuration était un cours de littérature. *(1.109.1)*
+- Ses quatre évaluations passent à **parts égales, 25 % chacune** — une pondération
+  est une position pédagogique, pas un point de départ. `20/20/30/30` mettait 60 %
+  du poids sur les examens, servi comme départ à des programmes où les examens sont
+  minoritaires ou absents. *(1.109.2)*
+
+**Vérifié comment** : `cd tests && npm run test:unit` rend **435 fichiers / 4701
+tests, code 0** ; sentinelle #687 à **27 cas**, break-testée 4 fois, dont la
+mutation `20/20/30/30`. Les quatre points de version mesurés PAR TÉMOIN :
+`grep -rl '1\.109\.1' --include=*.js --include=*.json --include=*.html .` rend
+**0** ; témoin du périmètre, `grep -rl '1\.109' .` rend **11** fichiers de prose
+datée.
+⮕ **Et Grégoire a regardé l'écran avant que ça parte** : Conception › Pratiques ›
+« Partir d'un modèle » — cinq modèles fournis, aucun nommé par discipline.
+⚠ **Une relecture croisée a rattrapé un trou avant l'envoi** : un critère nommé
+« Maîtrise de la langue **française** » n'était pas reconnu et basculait en silence
+sur le texte neutre. Le motif exigeait un non-alphabétique après « francais » ; la
+forme fléchie échouait.
+
+**La seconde phrase est livrée le 2 septembre à midi *(1.110.0)*, et elle attend
+le regard de Grégoire :**
+
+- **Plus aucune pratique offerte n'affiche de matière ni d'établissement.** Sept
+  entrées de `js/pratiques/pratiques-predefines.js` déclaraient Chimie,
+  Littérature, Mathématiques, Philosophie ou Biologie, et nommaient un cégep
+  précis ; six identifiants et quatre constantes portaient un prénom de collègue.
+  ⚠ **Mesure qui corrige la prémisse** : ce module n'est PAS celui que lit l'écran
+  « Partir d'un modèle ». Ce dernier lit `MODELES_PRATIQUES_PREDEFINIS`
+  (`js/pratiques-bibliotheque.js`), **déjà propre depuis #687**. Les sept entrées
+  de `pratiques-predefines.js` n'ont pour lecteur vivant qu'un
+  `Object.keys()` de `pratique-manager.js:159`, dans un test d'appartenance qui
+  compare des NOMS DE CONSTANTES à des `id` — il ne matche jamais. Le renommage
+  est donc sans effet observable, et c'est ce qui le rend gratuit. *(#690)*
+- **Les huit identifiants d'échelles disciplinaires sont retirés** de
+  `IDS_GABARITS_HARDCODES` (`js/main.js`) et de la sonde
+  (`js/echelles-bibliotheque.js`), et le commentaire périmé qui exigeait leur
+  maintien est corrigé sur place. **Mesuré inerte** : le tombstone a quatre
+  lecteurs, aucun ne les regarde, et le chemin d'import ne le consulte pas —
+  `grep -rn "estRessourceSupprimee\|ressourcesSupprimees" js/import-export.js
+  js/codex.js js/partage-section.js` rend **zéro** ; témoin du périmètre, la même
+  commande sur `js/` rend **six**. *(#690)*
+- **Le service d'aide cesse d'être servi à qui n'en a pas.** Six chaînes :
+  les trois du plan de rattrapage (`pratique-sommative.js` l. 642/648/649) et les
+  trois de `evaluation-projection.js` (l. 163 la phrase de l'élève, l. 211 le
+  libellé du réglage, l. 213 le défaut). Mots arrêtés par Grégoire le 2 septembre
+  à 11 h et 11 h 30 ; le tutoiement de la l. 163 reste, celui de l'élève, et les
+  étiquettes de l'enseignant restent nominales. *(#539)*
+- **Plus aucun nom de personne dans le code applicatif** : 86 occurrences avant,
+  **5** après dans `js/` hors pack de démonstration, et aucune n'est un
+  identifiant, une constante ni un libellé — quatre sont des commentaires, la
+  cinquième est `js/config.js` (zone protégée, fiches fictives). *(#690)*
+
+**Vérifié comment** : `cd tests && npm run test:unit` rend **436 fichiers / 4710
+tests, code 0** (contre 435 / 4701 avant : la sentinelle neuve `#690`). Quatre
+gardes break-testées : réintroduire `pan-standards-bruno` → rouge, une
+`discipline` → rouge, un `etablissement` → rouge, « en français » dans le libellé
+ou le défaut → rouge. Cas D de la sentinelle #464 **réorienté, pas désarmé** :
+retirer `ECHELLE_IDME_DEPART` rougit, retirer `ECHELLE_BRUNO_CHIMIE` ne change
+plus rien — les deux break-tests joués. **Témoin du geste 2** :
+`grep -rn "CAF\|(SA)\|en français"` sur les deux fichiers passe de **9** à **3**,
+et les trois restants sont les commentaires qui expliquent la transition CAF →
+Passerelle + — un zéro ici aurait voulu dire que l'explication est partie avec le
+défaut.
+
+⚠ **TARIR N'EST PAS RÉPARER, et le stock est nommé** : un enseignant qui a déjà
+inscrit son `nomServiceAide` porte sa valeur en base ; le changement de défaut ne
+la touche pas, **et c'est voulu**. Les copies des huit échelles et des pratiques
+adoptées restent elles aussi telles quelles. Rien n'a été écrit dans les données
+de personne. *(#674)*
+
+⚠ **Ce qui reste dû, et que Grégoire seul peut trancher** : la formule
+« l'algorithme propose, le jugement tranche — Voisard »
+(`js/pratiques/pratique-pan-standards.js:35`, `js/pratiques/denotation-saisie-ui.js:8`)
+vient d'une **source publiée** — il l'a dit le 2 septembre. **La référence exacte
+(auteur, œuvre, année) reste à fournir** ; les deux lignes sont laissées intactes
+d'ici là, parce qu'effacer une attribution n'est pas de la protection.
+
+**Fini quand** : un enseignant qui n'enseigne pas le français, et dont
+l'établissement n'a ni CAF ni services adaptés, ne rencontre aucun de ces quatre
+mots dans son interface — sauf s'il les a écrits lui-même.
+⮕ **Ce qui reste avant de cocher, et ce n'est pas du code** : Grégoire doit
+regarder DEUX écrans. Conception › Pratiques › « Partir d'un modèle » — aucune
+pratique offerte n'affiche de matière. Et l'écran de réglages de la pratique
+sommative — le nom du service d'aide est un champ qu'il peut remplir, avec
+« Centre d'aide du collège » comme valeur de départ ; c'est là qu'il écrira
+« Passerelle + » lui-même. **Ce réglage lui appartient : personne ne l'écrit à sa
+place, ni dans le code, ni dans ses données.**
+
+⚠ **Ce que ça ne réglera pas** : les évaluations DÉJÀ enregistrées gardent leur
+texte gelé, et c'est voulu. On tarit la source, on ne réécrit pas ce qui est chez
+les gens. Le mot reste aussi gravé dans les identifiants de champs du volet
+confidentiel. *(#440 résiduel)*
 
 ### Aucune note remise ne repose sur une pondération incomplète sans le dire
 Un critère laissé sans niveau donne **0,0 %**, sans un mot, et ce zéro
@@ -253,9 +336,31 @@ Aucune session ne peut trancher ces points à sa place.
 - **La règle de suppression d'un fichier** : que doit-elle emporter ?
 - **Le facteur de normalisation 500 → 600** sur sa grille de première session.
   ⚠ Entre deux évaluations, jamais au milieu d'une correction.
-- **Le nom du service d'aide** pendant la transition du CAF vers « Passerelle + ».
+↻ **Tranché le 2 septembre à 11 h 30, et retiré de cette liste : le nom du service
+d'aide.** Trois décisions, dans ses mots :
+  · Ce que lit un enseignant qui n'a rien réglé : un libellé générique —
+    « Centre d'aide du collège », « Services adaptés du collège », et le nom reste
+    un réglage qu'il peut remplir.
+  · Ce que lit l'ÉLÈVE, dans la phrase du gabarit neuf : « au service d'aide de ton
+    collège : … » — on retire « en français », et rien d'autre. Le deux-points reste,
+    parce que la préposition voyage avec le nom (« t'inscrire au Passerelle + » ne se
+    dit pas).
+  · Chez lui : **« Passerelle + »**, qu'il écrira lui-même dans son réglage — le code
+    n'écrit pas dans ses données.
 - **Les essais à la main** que les tests ne remplacent pas : l'écran réel sur Mac
   et sur iPad.
+- **Deux attributions d'idée** inscrites dans le code (« l'algorithme propose, le
+  jugement tranche — Voisard ») : si la formule vient d'une source publiée, elle se
+  cite en règle plutôt que de disparaître ; sinon elle part. Question d'honnêteté
+  intellectuelle, pas de code.
+- **Le message à la communauté de pratique** sur l'adresse unique. C'est le seul
+  canal qui atteint quelqu'un ayant un vieux signet : le changelog s'affiche dans
+  l'application, donc *derrière* la porte. *(rédigé, attend sa correction)*
+
+↻ **Retiré de cette liste le 2 septembre** : les identifiants du code qui portent un
+prénom de collègue. **Il a tranché — ils partent tous** — et la mesure a montré que
+le retrait ne coûte rien : les huit identifiants d'échelles sont inertes, aucune
+écriture dans les données de personne n'est nécessaire. *(#690)*
 
 ---
 

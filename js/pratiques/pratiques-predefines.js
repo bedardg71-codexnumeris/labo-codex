@@ -16,16 +16,16 @@
 'use strict';
 
 // ============================================================================
-// PRATIQUE 1 : PAN-Standards 5 niveaux (Chimie)
+// PRATIQUE 1 : PAN-Standards 5 niveaux
 // ============================================================================
 
-const PRATIQUE_PAN_STANDARDS_BRUNO = {
-    id: 'pan-standards-bruno',
+const PRATIQUE_PAN_STANDARDS_CINQ_NIVEAUX = {
+    id: 'pan-standards-cinq-niveaux',
     nom: 'PAN-Standards (5 niveaux)',
     auteur: 'Labo Codex',
-    etablissement: 'Cégep Laurendeau',
+    etablissement: 'Cégep',
     description: 'Système à 5 niveaux avec reprises multiples, niveau non rétrogradable',
-    discipline: 'Chimie',
+    discipline: 'Général',
     version: '1.0',
     date_creation: '2025-11-25',
 
@@ -151,16 +151,16 @@ const PRATIQUE_PAN_STANDARDS_BRUNO = {
 };
 
 // ============================================================================
-// PRATIQUE 2 : Sommative traditionnelle (Littérature)
+// PRATIQUE 2 : Sommative traditionnelle
 // ============================================================================
 
 const PRATIQUE_SOMMATIVE_TRADITIONNELLE = {
-    id: 'sommative-traditionnelle-mhl',
+    id: 'sommative-traditionnelle',
     nom: 'Sommative traditionnelle',
     auteur: 'Labo Codex',
-    etablissement: 'Cégep Valleyfield',
+    etablissement: 'Cégep',
     description: 'Moyenne pondérée traditionnelle avec critères fixes',
-    discipline: 'Littérature',
+    discipline: 'Général',
     version: '1.0',
     date_creation: '2025-11-25',
 
@@ -257,16 +257,16 @@ const PRATIQUE_SOMMATIVE_TRADITIONNELLE = {
 };
 
 // ============================================================================
-// PRATIQUE 3 : PAN-Spécifications (Chimie)
+// PRATIQUE 3 : PAN-Spécifications (notes fixes)
 // ============================================================================
 
 const PRATIQUE_PAN_SPECIFICATIONS = {
-    id: 'pan-specifications-fah',
+    id: 'pan-specifications-notes-fixes',
     nom: 'PAN-Spécifications (notes fixes)',
     auteur: 'Labo Codex',
-    etablissement: 'Cégep Laurendeau',
+    etablissement: 'Cégep',
     description: 'Notes fixes (50, 60, 80, 100%) selon critères atteints',
-    discipline: 'Chimie',
+    discipline: 'Général',
     version: '1.0',
     date_creation: '2025-11-25',
 
@@ -360,9 +360,9 @@ const PRATIQUE_PAN_MAITRISE = {
     id: 'pan-maitrise-json',
     nom: 'PAN-Standards (IDME + SRPNF)',
     auteur: 'Labo Codex',
-    etablissement: 'Cégep Drummond',
+    etablissement: 'Cégep',
     description: 'Échelle IDME 4 niveaux, critères SRPNF, sélection des N meilleurs artefacts',
-    discipline: 'Littérature',
+    discipline: 'Général',
     version: '1.0',
     date_creation: '2025-11-26',
 
@@ -471,13 +471,13 @@ const PRATIQUE_PAN_MAITRISE = {
 // PRATIQUE 5 : PAN-Objectifs pondérés
 // ============================================================================
 
-const PRATIQUE_PAN_OBJECTIFS_PONDERES_MICHEL = {
-    id: 'pan-objectifs-ponderes-michel',
+const PRATIQUE_PAN_OBJECTIFS_PONDERES = {
+    id: 'pan-objectifs-ponderes',
     nom: 'PAN-Objectifs pondérés',
     auteur: 'Labo Codex',
-    etablissement: 'Cégep (Mathématiques)',
+    etablissement: 'Cégep',
     description: '13 objectifs évalués en mode PAN avec pondérations variables selon importance',
-    discipline: 'Mathématiques - Calcul différentiel',
+    discipline: 'Général',
     version: '1.0',
     date_creation: '2025-11-26',
 
@@ -587,16 +587,16 @@ const PRATIQUE_PAN_OBJECTIFS_PONDERES_MICHEL = {
 };
 
 // ============================================================================
-// PRATIQUE 6 : Sommative avec remplacement (Philosophie)
+// PRATIQUE 6 : Sommative avec remplacement
 // ============================================================================
 
-const PRATIQUE_SOMMATIVE_REMPLACEMENT_JORDAN = {
-    id: 'sommative-remplacement-jordan',
+const PRATIQUE_SOMMATIVE_REMPLACEMENT = {
+    id: 'sommative-remplacement',
     nom: 'Sommative avec remplacement',
     auteur: 'Labo Codex',
-    etablissement: 'Cégep (Philosophie)',
+    etablissement: 'Cégep',
     description: 'Évaluation finale peut remplacer mi-session si note supérieure. Valorise la progression.',
-    discipline: 'Philosophie 101',
+    discipline: 'Général',
     version: '1.0',
     date_creation: '2025-11-26',
 
@@ -695,16 +695,16 @@ const PRATIQUE_SOMMATIVE_REMPLACEMENT_JORDAN = {
 };
 
 // ============================================================================
-// PRATIQUE 7 : PAN-Jugement global (Biologie)
+// PRATIQUE 7 : PAN-Jugement global
 // ============================================================================
 
-const PRATIQUE_PAN_JUGEMENT_GLOBAL_ISABELLE = {
-    id: 'pan-jugement-global-isabelle',
+const PRATIQUE_PAN_JUGEMENT_GLOBAL = {
+    id: 'pan-jugement-global',
     nom: 'PAN-Jugement global',
     auteur: 'Labo Codex',
-    etablissement: 'Cégep Champlain Lennoxville',
+    etablissement: 'Cégep',
     description: 'Calcul mode statistique comme suggestion. Jugement professionnel de l\'enseignante requis.',
-    discipline: 'Biologie - Anatomie et physiologie 3',
+    discipline: 'Général',
     version: '1.0',
     date_creation: '2025-11-26',
 
@@ -808,12 +808,12 @@ const PRATIQUE_PAN_JUGEMENT_GLOBAL_ISABELLE = {
 
 window.PRATIQUES_PREDEFINES = {
     PRATIQUE_PAN_MAITRISE,
-    PRATIQUE_PAN_STANDARDS_BRUNO,
+    PRATIQUE_PAN_STANDARDS_CINQ_NIVEAUX,
     PRATIQUE_SOMMATIVE_TRADITIONNELLE,
     PRATIQUE_PAN_SPECIFICATIONS,
-    PRATIQUE_PAN_OBJECTIFS_PONDERES_MICHEL,
-    PRATIQUE_SOMMATIVE_REMPLACEMENT_JORDAN,
-    PRATIQUE_PAN_JUGEMENT_GLOBAL_ISABELLE
+    PRATIQUE_PAN_OBJECTIFS_PONDERES,
+    PRATIQUE_SOMMATIVE_REMPLACEMENT,
+    PRATIQUE_PAN_JUGEMENT_GLOBAL
 };
 
 

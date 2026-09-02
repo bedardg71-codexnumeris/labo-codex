@@ -868,7 +868,7 @@ function sauvegarderPresencesSansValidation(dateStr) {
 /**
  * Vérifie que l'horaire du groupe-cours actif porte des séances
  *
- * FIX (26 août 2026, retour Jean-François) : la condition lisait AUSSI
+ * FIX (26 août 2026, retour d'un testeur) : la condition lisait AUSSI
  * `db.getSync('formatHoraire')` — une clé que PLUS PERSONNE N'ÉCRIT depuis que
  * le format vit dans l'entité Horaire du groupe-cours (`horaire.formatHoraire`,
  * js/entites/horaires.js). Grep exhaustif du dépôt : trois lectures, zéro
@@ -1862,8 +1862,8 @@ function obtenirDerniereDataSaisie(da = null) {
    🔗 WRAPPERS DÉLÉGATION (Phase 5 — Lot 5.14c)
    =============================== */
 
-// naviguerVersReglagesTrimestre() RETIRÉE d'ici le 26 août 2026 (retour
-// Jean-François) : elle était définie DEUX FOIS — ici et dans main.js, que
+// naviguerVersReglagesTrimestre() RETIRÉE d'ici le 26 août 2026 (retour d'un
+// testeur) : elle était définie DEUX FOIS — ici et dans main.js, que
 // index.html charge APRÈS ce fichier. La définition de main.js gagnait donc
 // toujours, et c'était la mauvaise. Une seule implémentation subsiste, dans main.js
 // (wrappers de navigation globaux), et elle mène à Cadre, pas à Réglages.

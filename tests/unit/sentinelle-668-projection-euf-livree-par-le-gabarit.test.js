@@ -44,8 +44,26 @@ const P = require(path.join(racine, 'js/evaluation-projection.js'));
  * site de concaténation, pas au texte. Cet adaptateur rétablit la forme
  * historique — et c\'est LUI qu\'on compare au golden, pas autre chose.
  */
+// ↻ 2 SEPT. 2026 (#690) — LE GOLDEN DECLARE DESORMAIS LE NOM D'ALORS, AU LIEU
+// DE L'HERITER DU DEFAUT. Les vingt chaines ci-dessous n'ont pas bouge d'un
+// caractere : c'est l'ORACLE, et il reste ce qu'il etait. Ce qui a change, c'est
+// d'ou vient « Centre d'aide en français (CAF) » quand on le rejoue. Il venait
+// du `defaut` declare du parametre `nomServiceAide` — que Gregoire a change ce
+// jour-la pour « Centre d'aide du college », parce que le service n'existe plus
+// et que l'etablissement d'un autre enseignant n'en a peut-etre aucun.
+// ⮕ Le golden mesure l'EQUIVALENCE DU CALCUL, pas la valeur d'un defaut de
+// libelle. Le lui faire heriter etait une dependance tacite : le jour ou le
+// defaut bouge pour une raison editoriale, vingt cas rougissent et la vraie
+// mesure — les paliers, les frontieres, les arrondis — se trouve noyee. Le nom
+// d'alors est donc PASSE, en clair, une fois pour toutes ; le defaut vivant est
+// verrouille separement au cas F.
+const NOM_DU_SERVICE_A_L_EPOQUE = 'Centre d\'aide en français (CAF)';
+
 function commeAvant(erreurs, mots, critere) {
-    const r = P.calculer(critere || {}, { erreurs, mots });
+    const base = critere || P.appliquerAuCritere({}, 'norme_externe', {
+        nomServiceAide: NOM_DU_SERVICE_A_L_EPOQUE
+    });
+    const r = P.calculer(base, { erreurs, mots });
     return r.applicable ? ' ' + r.texte : '';
 }
 
@@ -264,7 +282,13 @@ describe('#668 · C — zéro erreur, zéro mot, et le refus de deviner', () => 
     });
 
     it('un modèle INCONNU (grille d\'une version plus récente) ne casse rien, et se DIT', () => {
-        const futur = { modeleProjection: 'norme_du_futur' };
+        // Le nom du service est réglé DES DEUX CÔTÉS, à la même valeur : ce que
+        // ce cas mesure est le repli du modèle, pas le libellé du défaut. Sans
+        // ça, il comparerait deux choses qui diffèrent pour une raison qui n'est
+        // pas la sienne (2 sept. 2026, #690).
+        const futur = P.appliquerAuCritere({ modeleProjection: 'norme_du_futur' },
+            'norme_du_futur', { nomServiceAide: NOM_DU_SERVICE_A_L_EPOQUE });
+        futur.modeleProjection = 'norme_du_futur';
         expect(P.normaliser(futur).herite).toBe(true);
         expect(P.normaliser(futur).modeleId).toBe('norme_externe');
         expect(commeAvant(15, 584, futur)).toBe(commeAvant(15, 584));
@@ -413,7 +437,7 @@ describe('#668 · F — le service d\'aide est un réglage, et son absence se re
         // phrase encore utile vaut mieux qu'une phrase qui disparaît.
         const neuf = P.gabaritNeuf();
         const t = P.calculer(neuf, donnees).texte;
-        expect(t).toContain('service d\'aide en français de ton collège.');
+        expect(t).toContain('service d\'aide de ton collège.');
         expect(t).not.toContain(P.JETON_SERVICE);
         expect(t).not.toMatch(/[:—–-]\s*\./);
     });
@@ -437,9 +461,33 @@ describe('#668 · F — le service d\'aide est un réglage, et son absence se re
         // change pour de bon.
         expect(JSON.stringify(P.paliersMigration())).not.toMatch(/CAF|Centre d'aide/);
         expect(JSON.stringify(P.paliersMigration())).toContain(P.JETON_SERVICE);
-        expect(P.normaliser({}).params.nomServiceAide).toBe('Centre d\'aide en français (CAF)');
+    });
+
+    // ↻ 2 SEPT. 2026 (#690) — CE QUE LE DEFAUT NE DOIT PLUS NOMMER.
+    // Ce cas remplace celui qui verrouillait « Centre d'aide en français (CAF) »
+    // comme defaut. Ce n'est pas un desarmement : la garde a change de sujet
+    // parce que la decision a change. Le defaut est le texte servi a l'enseignant
+    // qui n'a rien regle — et un enseignant qui n'enseigne pas le francais, dont
+    // l'etablissement n'a ni CAF ni services adaptes, le lisait quand meme.
+    // Ce qui est garde maintenant : le defaut existe, il atteint bien l'eleve sur
+    // un critere migre, et il ne nomme NI discipline NI etablissement.
+    it('le défaut servi à qui n\'a rien réglé ne nomme aucune discipline', () => {
+        const defaut = P.normaliser({}).params.nomServiceAide;
+        expect(defaut).toBe('Centre d\'aide du collège');
+        expect(defaut).not.toMatch(/français|CAF|EUF|littérature/i);
         // et c'est bien ce nom-là qui atteint l'élève sur un critère migré
-        expect(P.calculer({}, donnees).texte).toContain('Centre d\'aide en français (CAF).');
+        expect(P.calculer({}, donnees).texte).toContain('Centre d\'aide du collège.');
+    });
+
+    it('aucun libellé de réglage ne nomme une discipline', () => {
+        const modele = P.obtenirModele('norme_externe');
+        const service = modele.parametres.filter(function(p) {
+            return p.cle === 'nomServiceAide' || p.cle === 'lienServiceAide';
+        });
+        expect(service.length).toBe(2);
+        service.forEach(function(p) {
+            expect(p.libelle, p.cle).not.toMatch(/français|CAF|EUF|littérature/i);
+        });
     });
 
     it('le lien voyage À PART, il n\'entre jamais dans le texte', () => {

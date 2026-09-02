@@ -160,7 +160,7 @@ var PALIERS_GABARIT_NEUF = PALIERS_MIGRATION.map(function(p) {
         // en même temps — les deux champs sont côte à côte dans le gabarit.
         texteAide: p.texteAide
             ? p.texteAide.split('au ' + JETON_SERVICE + '.')
-                         .join('au service d\'aide en français de ton collège : ' + JETON_SERVICE + '.')
+                         .join('au service d\'aide de ton collège : ' + JETON_SERVICE + '.')
             : ''
     };
 });
@@ -208,9 +208,9 @@ var MODELES = [
             {
                 cle: 'nomServiceAide',
                 type: 'texte',
-                libelle: 'Nom du service d\'aide en français',
+                libelle: 'Nom du service d\'aide',
                 aide: 'Affiché dans les paliers qui recommandent de s\'y inscrire. Laisser vide pour ne recommander aucun service.',
-                defaut: 'Centre d\'aide en français (CAF)',
+                defaut: 'Centre d\'aide du collège',
                 max: 200
             },
             {
@@ -584,10 +584,21 @@ function paliersGabaritNeuf() {
  *
  * ⚠ Pourquoi ce n'est PAS le défaut du modèle. `normaliser` ne peut pas
  * distinguer un critère d'avant #668 d'un critère tout neuf : les deux n'ont
- * aucun champ de projection. Le défaut déclaré du modèle doit donc rester
- * celui de la MIGRATION (« Centre d'aide en français (CAF) »), sans quoi la
- * reproduction au mot près tombe. Le gabarit neuf, lui, ÉCRIT ses valeurs :
- * c'est un artefact livré, pas une lecture.
+ * aucun champ de projection. Le défaut déclaré du modèle est donc ce que lit
+ * TOUT critère migré ; le gabarit neuf, lui, ÉCRIT ses valeurs (`nomServiceAide`
+ * vide) : c'est un artefact livré, pas une lecture.
+ *
+ * ↻ CORRIGÉ LE 2 SEPT. 2026 (#690). Ce paragraphe disait que le défaut « doit
+ * rester celui de la MIGRATION (Centre d'aide en français (CAF)), sans quoi la
+ * reproduction au mot près tombe ». Ce n'est plus vrai, et ça ne l'était qu'à
+ * moitié : le golden de la sentinelle #668 HÉRITAIT tacitement de ce défaut au
+ * lieu de déclarer le nom d'alors. Il le déclare maintenant, et ses vingt
+ * chaînes n'ont pas bougé d'un caractère. Le défaut, lui, est devenu « Centre
+ * d'aide du collège » — décision de Grégoire : le service nommé n'existe plus,
+ * et un enseignant dont l'établissement n'a ni CAF ni services adaptés lisait
+ * ces mots quand même. ⚠ TARIR N'EST PAS RÉPARER : ce changement tarit la
+ * SOURCE. Un enseignant qui a déjà réglé son `nomServiceAide` porte sa valeur
+ * en base, elle n'est pas touchée, et c'est voulu.
  */
 function gabaritNeuf() {
     return {
