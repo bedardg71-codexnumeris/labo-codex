@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 1er septembre 2026, en soirée (sixième passe).**
+**Dernière mise à jour : 1er septembre 2026, en soirée (septième passe).**
 
 ---
 
@@ -217,6 +217,14 @@ Aucune session ne peut trancher ces points à sa place.
 ⚠ **Des utilisateurs sont DÉJÀ dans l'application. Combien : inconnu.**
 Le trafic n'est mesuré ni sur Netlify ni sur Cloudflare. On ne sait pas s'il y en
 a un, vingt, ou aucun aujourd'hui.
+
+↻ **1er septembre au soir — on sait maintenant POURQUOI on ne sait pas.** L'application
+est servie à **deux adresses**, et une seule a une porte : `app.codexnumeris.org` passe
+par Cloudflare Access, mais le domaine Netlify par défaut sert la même application,
+complète, **sans aucune authentification**. Netlify compte les deux, Access une seule.
+Ce n'est pas une fuite — l'application est locale d'abord, ce visiteur n'obtient qu'un
+espace vide. Mais la porte ne compte pas ce qu'on croit. ⮕ **Redirection à l'ordre du
+jour du 2 septembre.**
 
 ⮕ **Ce que ça change pour toute session** : on ne développe plus « avant les
 utilisateurs ». Un défaut livré est un défaut que quelqu'un rencontre peut-être
