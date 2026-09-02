@@ -241,6 +241,50 @@ fiche, pas corrigé ici** (126 lectures du nom nu, 94 de `window`, 8 fichiers). 
 remède de fond tient peut-être en un mot dans une zone protégée (`let` → `var` dans
 `config.js` unifie les deux emplacements) : **décision de Grégoire**, pas d'une session.
 
+### ↻↻↻ 18 h 50 → 19 h 15 : LA TROUVAILLE QUI PÈSE LE PLUS — des critères SANS IDENTIFIANT
+
+**Ce que Grégoire a vu** : le PDF imprimait la MÊME description sous ses quatre critères
+holistiques ; au retour sur la copie, un seul des quatre niveaux était restauré. **Ce que
+la sonde a mesuré** (`scripts/diagnostic-674-ids-criteres.js`, lecture seule, sur
+« Grille-5 FR-ALGO A26 ») : **4 critères sur 5 ont `id: undefined`** (seul « Français
+écrit », algorithmique, porte un identifiant — un `CR1759…` de 2025, hérité de la grille
+A25). À l'écran : quatre sélecteurs `eval_undefined`. Dans les deux `evaluationEnCours` :
+`{"undefined": "I"}`. Dans le brouillon : quatre entrées `critereId=undefined`, toutes au
+niveau I, note 40 sur une portée de 80.
+
+**La mécanique, lue dans le code** : l'écran, la note, la cartouche, le PDF et la
+réouverture d'une copie retrouvent un critère PAR IDENTIFIANT (`eval_<id>`,
+`criteres[id]`, `comm_<id>`, `find(gc => gc.id === critereId)`). Quatre critères sans
+identifiant y deviennent UN SEUL : `getElementById('eval_undefined')` rend toujours le
+premier, `niveauSelectionne` lit donc le sélecteur de *Structure* quel que soit celui
+que l'enseignant a touché, et **les niveaux choisis sur Rigueur, Plausibilité et Nuance
+n'ont jamais été enregistrés**. La note porte le niveau de Structure sur 80 % de la
+grille. Le PDF imprime la description et le commentaire du premier sous les quatre.
+
+**La source, nommée et TARIE** : `grilles.js`, `ajouterCritereGrille` — l'éditeur de
+grille EN LIGNES (celui de la capture) poussait `{ nom: 'Nouveau critère', type,
+ponderation, description }` **sans `id`**. Il travaille par index, donc il ne voyait
+rien. Le chemin modal (`sauvegarderCritere`) posait l'identifiant depuis toujours.
+Correctif : `id: genererIdUnique('CR_')` à la naissance, sentinelle sur la vraie
+fonction. ⚠ **Tarir n'est pas réparer** : aucune grille ni évaluation n'est touchée.
+
+**Le stock — À MESURER, PUIS À DÉCIDER PAR GRÉGOIRE, à froid** :
+`scripts/diagnostic-674-criteres-sans-id.js` (lecture seule, `await diag674SansId()`)
+liste toutes les grilles à critères sans identifiant, tous trimestres, et toutes les
+évaluations qui en portent, avec les niveaux ENREGISTRÉS (identiques entre eux quand le
+mécanisme a joué). Sur a2026 : 27 évaluations, « Portrait de lecteur/lectrice (28) ».
+⚠ Ce que la sonde ne pourra pas rendre : les jugements distincts que Grégoire a faits
+à l'écran sur Rigueur, Plausibilité, Nuance. Ils n'existent nulle part. Réparer la
+GRILLE (poser des identifiants) est un geste simple ; réparer les ÉVALUATIONS demande
+de réévaluer ces critères, copie par copie, ou de dire en bloc que le niveau de
+Structure valait pour les quatre. **C'est de la didactique et ce sont ses données :
+lui seul tranche.** Rien n'a été écrit.
+
+⚠ **Ce que l'énoncé 5 n'aurait pas vu** : la couverture de ces évaluations est 100 %
+(quatre entrées, quatre pondérations). La note ne ment pas sur sa PORTÉE ; elle ment
+sur ce qu'elle porte. C'est un défaut de l'énoncé 2 (créer une grille… la retrouver)
+qui se paie à l'énoncé 5.
+
 ### Trouvailles en chemin — issue 2 (inscrire et continuer), aucune corrigée
 
 - **Tout refus placé après l'annulation de l'auto-save jette le brouillon en attente**
