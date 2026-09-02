@@ -16,12 +16,9 @@ ne passe à « fait » qu'avec sa phrase « vérifié comment ». Puis
 `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` (état mesuré, mandat courant) et
 `OBJECTIF-COHORTE-1.md` (la ligne d'arrivée, arrêtée).
 
-### Qui écrit quoi dans la consigne de démarrage (1er sept. 2026)
-
-**Claude Code rend l'ÉTAT MESURÉ** en fin de session : des faits datés, rien d'autre.
-**Cowork écrit le MANDAT** et la séquence, à froid, avec Grégoire. Motif : une session
-qui rédige sa propre consigne **se relit elle-même** — elle transmet ce qu'elle a vu,
-pas ce qu'elle a manqué. La relecture croisée, appliquée au relais.
+**Puis `PROTOCOLE.md` (racine)** — comment nous trois travaillons ensemble : les rôles,
+la preuve exigée d'une mesure, la relecture croisée, ce qui monte hors de la consigne.
+Seul fichier de coordination lu par Cowork ET Claude Code (Cowork ne lit pas `.claude/`).
 
 ### Une porte terrain a DEUX livrables jumeaux
 
