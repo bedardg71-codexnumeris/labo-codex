@@ -922,28 +922,19 @@ const ETAPES_WIZARD = {
                     id: 'modeleBundle',
                     type: 'radio-cards',
                     required: true,
-                    options: [
-                        {
-                            value: 'sciences',
-                            label: 'Modèle Sciences',
-                            description: 'Forfaits progressifs avec reprises limitées. Idéal pour les disciplines scientifiques.'
-                        },
-                        {
-                            value: 'simple',
-                            label: 'Modèle Simple',
-                            description: 'Un seul forfait pour tous les travaux. Configuration minimale.'
-                        },
-                        {
-                            value: 'litterature',
-                            label: 'Modèle Littérature',
-                            description: 'Forfaits flexibles avec accent sur la révision. Idéal pour les disciplines littéraires.'
-                        },
-                        {
-                            value: 'personnalise',
-                            label: 'Personnalisé',
-                            description: 'Crée tes propres forfaits de spécifications.'
-                        }
-                    ]
+                    // #687 — LES QUATRE LIBELLÉS VIENNENT DU MODULE PUR, PAS D'ICI.
+                    // Ils s'appelaient « Modèle Sciences » / « Modèle Littérature »
+                    // et invitaient « les disciplines scientifiques » ou
+                    // « littéraires » à se reconnaître, alors que ce qui les
+                    // distingue est le nombre de forfaits et la place laissée à la
+                    // reprise. Le résumé d'attributs affiche les MÊMES libellés
+                    // pour les pratiques déjà créées : une seule source, donc les
+                    // deux écrans ne peuvent plus diverger.
+                    options: (window.ConstructionAttributs
+                        ? window.ConstructionAttributs.MODELES_FORFAITS
+                        : []).map(function(m) {
+                            return { value: m.value, label: m.label, description: m.description };
+                        })
                 }
             ];
         },

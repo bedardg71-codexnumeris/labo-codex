@@ -15,7 +15,7 @@ import path from 'node:path';
 // SEUL consommateur, dans toute l'application, de `pratique.identifierPattern(da)`
 // et de `pratique.genererCibleIntervention(da)`. Les CINQ implémentations de
 // `identifierPattern` (PAN-Standards, Sommative, PAN-Spécifications,
-// Configurable, Test) ne sont donc plus atteintes que par `testerPratiqueFrancois`
+// Configurable, Test) ne sont donc plus atteintes que par `testerPratiqueTest`
 // et `testerPratiqueTest`, deux fonctions de console jamais appelées.
 //
 // ⚠ ET C'EST EXACTEMENT CE QUE CETTE SENTINELLE PROTÈGE. Le geste devait retirer

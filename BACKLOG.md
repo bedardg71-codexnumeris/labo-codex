@@ -697,6 +697,49 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   priver le rapport de son témoin `clesLues`, ou casser la syntaxe — **l'ancienne assertion restait
   VERTE dans les trois cas, la nouvelle rougit dans les trois.**
 
+- [ ] **#688 — `MODELES_SPECIFICATIONS` n'a AUCUN lecteur, et `modele-simple` y reste seul**.
+  Inscrit le 2 septembre 2026, mesuré pendant **#687**.
+  ▣ **LE FAIT.** `grep -rn "MODELES_SPECIFICATIONS" js/` rend **2** lignes : sa déclaration
+  et le commentaire posé au-dessus par #687. **ZÉRO LECTURE**, ni dans le fichier ni ailleurs.
+  ⚠ Le chiffre était « 1 » à la première rédaction de cette fiche, et mon propre commentaire
+  l'a périmé dans la même heure — d'où la commande, qui se rejoue, plutôt que le nombre seul.
+  **Témoin du périmètre** : le même grep sur `MODELES_PRATIQUES_PREDEFINIS` rend **10** lignes
+  dans plusieurs fichiers — la mesure sait donc trouver un lecteur quand il y en a un.
+  ▣ #687 en a retiré les deux entrées qui se réclamaient d'une discipline. `modele-simple`
+  reste **seul dans une structure morte** — de la dette, au sens strict de la zéro-dette.
+  ▣ **CE QU'IL FAUT FAIRE** : retirer la constante entière et faire de
+  `MODELES_PRATIQUES_PREDEFINIS` (entrée `SPE-simple`) la source unique pour SPE. Non fait
+  dans #687 parce que ça touche `modele-simple`, hors du périmètre que Grégoire avait arrêté.
+
+- [ ] **#689 — `assurerGrilleGenerique` et `assurerCartoucheGenerique` sèment « de départ »**.
+  Inscrit le 2 septembre 2026 (demandé par la consigne du lot 1).
+  ▣ Les deux fonctions de semis portent encore « Générique » alors qu'elles sèment
+  « Grille de départ » et « Cartouche de départ » depuis 1.107.0. **Invisible pour
+  l'utilisateur, trompeur pour qui lit le code** : une session qui cherche « générique »
+  trouve la fonction et croit avoir trouvé le libellé.
+  ▣ **Le lot 2 le corrigera** — il touche déjà le semis, et une décision de Grégoire
+  le concerne encore. Ne pas le faire à part : renommer une fonction de semis sans
+  toucher au semis, c'est deux passages pour un geste.
+
+- [ ] **#690 — `js/pratiques/pratiques-predefines.js` sert encore du matériel fictif, et il est VIVANT**.
+  Inscrit le 2 septembre 2026, trouvé pendant **#687** ; **hors de son périmètre**.
+  ▣ **LE FAIT.** 821 lignes, chargées par `index.html`, **et consommées** :
+  `pratique-manager.js:159` et `:290` lisent `window.PRATIQUES_PREDEFINES`. Il porte
+  `discipline: 'Chimie'`, `discipline: 'Philosophie 101'`,
+  `etablissement: 'Cégep (Mathématiques)'` — exactement le matériel que la décision du
+  2 septembre écarte : engendré par une IA, validé par aucun enseignant de ces matières.
+  ▣ ⚠ **ET LES `id` PORTENT DES PRÉNOMS DE COLLÈGUES** : `pan-standards-bruno`,
+  `pan-objectifs-ponderes-michel`, `pan-specifications-fah`, `sommative-traditionnelle-mhl`.
+  C'est le motif qui a fait partir `modele-francois` et `config-francois-chimie.js` dans
+  #687 — mais **ceux-là étaient morts, celui-ci est lu**.
+  ▣ **POURQUOI PAS DANS #687** : retirer des entrées qu'un module consomme est un lot en
+  soi (risque de régression sur `pratique-manager`), alors que #687 ne retirait que du
+  matériel fusionné à la lecture, sans stock. ⚠ **Mesurer d'abord si un utilisateur a pu
+  ADOPTER une de ces pratiques** : si oui, sa copie lui appartient et ne se touche pas.
+  ▣ **Vérifié comment** : `grep -c "PRATIQUES_PREDEFINES" js/pratiques/pratique-manager.js`
+  rend **5**. Témoin : le même grep sur `js/pratiques-bibliotheque.js` rend **0** — le module
+  qui porte l'AUTRE registre n'a rien à voir avec celui-ci.
+
 - [ ] **#686 — Une grille introuvable fait changer le texte reçu par l'élève, alors que le nom existe ailleurs**.
   Inscrit le 2 septembre 2026, trouvé par la **relecture croisée du lot #581** (règle 2 de `PROTOCOLE.md`).
   ▣ **LE FAIT, CARACTÉRISÉ.** `_critereDeGrille` (`evaluation-calcul.js`) rend `null` quand
