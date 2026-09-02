@@ -234,6 +234,45 @@ schémas de transport déclareraient des champs morts, ce que la zéro-dette
 interdit. Classes et variables CSS vérifiées définies dans `styles.css` (#679) ;
 zéro handler inline, zéro `console.log`.
 
+### La relecture croisée (règle 2) — ce qu'elle a trouvé que je n'avais pas vu
+
+**Elle a tenu sa promesse dès la première application du périmètre.** Cowork a
+cartographié l'état AVANT de lire le patch, comme la règle l'exige. Verdict :
+**ne pas pousser en l'état**, deux bloquants — dont **un que je n'avais pas
+nommé**, alors que j'avais désigné mes trois cibles de risque dix minutes plus tôt.
+
+**1. `_nomDitFrancais` ratait « française ».** Le motif
+`/(^|[^a-z])francais([^a-z]|$)/` exigeait un non-alphabétique APRÈS le mot, si
+bien qu'un critère nommé « **Maîtrise de la langue française** » — parfaitement
+courant au collégial — basculait EN SILENCE sur le générique. ⮕ Ça rendait aussi
+FAUSSE la promesse du changelog. Corrigé en `francais(e|es)?`.
+**Break-testé DANS LES DEUX SENS**, parce qu'un témoin qui ne bascule que d'un
+côté ne prouve rien : avec l'ancien motif, `A.e` rougit et `A.f` reste verte ;
+avec un motif qui accepte tout, `A.e` reste verte et `A.f` rougit.
+
+**2. Changer de modèle jetait quatre phrases rédigées, en un clic, sans un mot.**
+J'avais nommé le risque et l'avais écarté en invoquant le patron de #668. ⮕ **Cet
+argument joue CONTRE la reprise du patron** : #668 réinitialise des seuils
+numériques, qui se retrouvent ; de la prose ne se retrouve pas. C'est la forme de
+l'énoncé 8 — « ce qu'un utilisateur détruit, il l'a voulu ». Tranché sur l'issue
+**(b)** : `enoncesRediges()` conserve ce qui a été écrit, les zones restées au
+défaut prennent celui du nouveau modèle. La question ne se pose donc plus à
+l'utilisateur au lieu de lui être posée. Sentinelle : groupe **H**, 4 cas.
+
+⮕ **La leçon, et elle est chère** : j'avais nommé trois cibles de risque en
+sachant exactement quoi chercher, et le défaut le plus atteignable des trois
+n'était dans aucune. *On ne voit pas dans son propre code ce qu'on vient
+d'écrire.* Le dispositif de la règle 2 n'est pas une formalité de procédure.
+
+**Ce que la relecture a ACCEPTÉ tel quel** : le repli de `echapperHtml` vers `''`
+est fermé, pas ouvert — aucune injection possible, et suivre le patron de
+`_rendreSignalesBilan` vaut mieux qu'une divergence locale.
+
+**Tests après corrections** : `cd tests && npm run test:unit` rend **434 fichiers
+/ 4675 tests, code 0** (36 cas dans la sentinelle #581, contre 31 avant).
+
+---
+
 ### Ce qui reste ouvert sur ce lot
 
 - **Le stock n'est pas touché, et c'est voulu.** Les évaluations enregistrées
@@ -246,6 +285,12 @@ zéro handler inline, zéro `console.log`.
   n'est pas traité : identifiants, pas texte à l'écran.
 - **L'écran du gabarit n'a été éprouvé par personne à la main.** Les trois spécs
   de grille passent, mais aucune n'ouvre le nouveau bloc. C'est une porte terrain.
+- **#686 inscrit** (ID neuf, 2 sept.) : une grille introuvable fait tomber un
+  critère nommé « Français écrit » sur le texte générique — ça mord sur les
+  grilles h2026 désappariées. **Le chemin de correction est déjà écrit dans la
+  fiche** : le nom vit aussi dans l'évaluation enregistrée
+  (`evaluation-chargement.js:1440` écrit `critereNom: c.nom`), donc l'appelant
+  passe `{ nom: critereNom }` au lieu de `null`. Le registre n'a rien à changer.
 
 ---
 

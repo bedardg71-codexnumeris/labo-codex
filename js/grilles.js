@@ -4959,8 +4959,12 @@ function _enoncesEditesDepuis(critere, cleModifiee, valeur) {
 function modifierModeleEnoncesTempHandler(el) {
     var index = parseInt(el.dataset.critereIndex);
     if (!window.tempCriteres || !window.tempCriteres[index]) return;
-    // Textes null : le nouveau modèle repart de SES défauts.
-    window.enoncesAlgo.appliquerAuCritere(window.tempCriteres[index], el.value, null);
+    // ⚠ CE QUI A ÉTÉ RÉDIGÉ SURVIT — voir `enoncesRediges`. Les zones restées
+    // au défaut prennent celui du nouveau modèle ; les phrases écrites à la
+    // main restent. Changer de modèle ne détruit donc rien qu'on n'ait voulu.
+    var critere = window.tempCriteres[index];
+    window.enoncesAlgo.appliquerAuCritere(critere, el.value,
+        window.enoncesAlgo.enoncesRediges(critere));
     afficherCriteresTemp();
 }
 
@@ -4979,7 +4983,9 @@ async function modifierModeleEnoncesGrilleHandler(el) {
     var index = parseInt(el.dataset.critereIndex);
     var valeur = el.value;
     await modifierProjectionCritereGrille(grilleId, index, function(critere) {
-        window.enoncesAlgo.appliquerAuCritere(critere, valeur, null);
+        // Même règle que côté temp : la prose rédigée survit au changement.
+        window.enoncesAlgo.appliquerAuCritere(critere, valeur,
+            window.enoncesAlgo.enoncesRediges(critere));
     });
     // ⚠ obtenirGrilleParId est ASYNC (#466/CO-21) : sans await, le renderer
     // reçoit une Promise et affiche « Aucun critère défini ».
