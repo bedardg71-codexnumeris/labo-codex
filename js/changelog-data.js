@@ -21,6 +21,20 @@
 
     var CHANGELOG = [
         {
+            version: '1.107',
+            couleur: 'vert',
+            titre: 'Le matériel de départ calcule, et se dit « de départ »',
+            items: [
+                '<strong>Les huit échelles « disciplinaires » de la bibliothèque (Chimie, Bio, Philo, Info, Géo…) sont retirées.</strong> Aucun de leurs niveaux ne portait de valeur de calcul : une première évaluation faite avec l\'une d\'elles rendait <strong>0,0 %</strong>, sans un mot. ⚠ Si tu en avais déjà ajouté une à ta sélection, <strong>ta copie reste telle quelle</strong> — l\'application ne réécrit pas ce qui est déjà chez toi. Remplace-la par l\'échelle de départ ci-dessous.',
+                '<strong>Une échelle de départ qui calcule vraiment arrive dans un espace neuf.</strong> Grille, cartouche et échelle : le triptyque est maintenant complet dès la première ouverture, et une première évaluation produit une vraie note. Elle est modifiable et supprimable comme les tiennes.',
+                '<strong>Le matériel fourni se dit « de départ ».</strong> Grille de départ, Cartouche de départ, Échelle de départ (IDME) — pour qu\'on ne le confonde plus avec ce que tu as créé toi-même. ⚠ Dans un espace déjà en place, les noms actuels ne changent pas.',
+                '<strong>Choisir une grille sans échelle dit maintenant ce qui manque</strong>, au lieu de ne rien afficher du tout.',
+                '<strong>Cinq gabarits « [SPE] » qui revenaient après chaque suppression sont retirés pour de bon.</strong> Ils se réinscrivaient à chaque ouverture de la page. La pratique de notation par spécifications, elle, est intacte.',
+                '<strong>À l\'import de productions, un numéro d\'élève absent du groupe est annoncé avant</strong>, et le fichier reste visible dans la liste après, au lieu de disparaître sans trace. Un import lancé sans groupe-cours actif est refusé, et le refus est dit.',
+                '<strong>L\'application n\'est plus accessible que par app.codexnumeris.org.</strong> Si tu avais mis en signet une adresse en .netlify.app, elle t\'y redirige. On te demandera ton adresse courriel, puis tu y recevras un code de connexion. Il ouvre une session valable un mois.'
+            ]
+        },
+        {
             version: '1.106',
             couleur: 'vert',
             titre: 'Les rep\u00e8res se posent partout o\u00f9 l\'\u00e9chelle se pense',
