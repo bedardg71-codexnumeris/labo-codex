@@ -133,6 +133,14 @@ CODE_PW=$?
 # 0 = verdict vert, rendu sur CE commit.
 if [ $CODE_PW -eq 0 ]; then
     printf "${VERT}✓ Sentinelle Playwright : verdict vert à jour pour ce commit.${RAZ}\n"
+    # #685, 1er sept. 2026 — un vert RATTRAPÉ au second essai ne doit pas
+    # ressembler à un vert franc. Le jeton porte désormais la liste ; sans cette
+    # ligne, elle n'existerait que dans le stderr d'un run que personne ne relit.
+    INSTABLES=$(node -e "try{const j=require('$REPO_ROOT/scripts/.verdict-playwright.json');(j.instables||[]).forEach(s=>console.log('    · '+s))}catch{}" 2>/dev/null)
+    if [ -n "$INSTABLES" ]; then
+        printf "${JAUNE}⚠ …mais vert AU SECOND ESSAI pour :${RAZ}\n%s\n" "$INSTABLES"
+        printf "${JAUNE}  ⮕ Ne bloque pas. Si la même revient, c'est un vrai sujet (#685).${RAZ}\n"
+    fi
     exit 0
 fi
 
