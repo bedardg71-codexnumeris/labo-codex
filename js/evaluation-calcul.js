@@ -956,6 +956,42 @@ function _ecrirePorteeEcran(portee) {
 }
 
 /**
+ * L'instantané que la porte donne à l'auto-save pour écrire le brouillon.
+ *
+ * ⚠⚠ `evaluationEnCours` DÉSIGNE DEUX EMPLACEMENTS (#646, constat du 31 août) : le nom
+ * nu (`let` de `config.js`, qui ne crée aucune propriété sur `window`), où
+ * `niveauSelectionne` écrit les niveaux et que `calculerNote` vient de lire ; et
+ * `window.evaluationEnCours`, que le flux Travaux crée à part
+ * (`demarrerEvaluationDepuisFichier`) et que l'auto-save lit — sans y trouver un seul
+ * critère. Il rendait donc la main sans écrire, en silence : c'est pourquoi le second
+ * correctif du 2 septembre (`_autoSauvegarderCriteres(null)`) n'a rien changé à
+ * l'écran de Grégoire (captures de 18 h 04). Mesuré en Playwright dans le vrai flux
+ * (`tests/integration/evaluation-674-refus-conserve-le-brouillon.spec.js`) : nu ≠
+ * window, critères nu [c1, c2], critères window [].
+ *
+ * ⮕ L'instantané prend les critères LÀ OÙ ILS SONT (les deux, le nu l'emportant) et
+ * les identifiants là où l'enregistrement manuel les prend (les sélecteurs d'abord).
+ * Ce n'est pas la réparation de #646 — c'est le chemin qui la contourne, pour ce
+ * geste-ci. L'auto-save DÉBOUNCÉ, lui, lit toujours `window` : dans ce flux, il
+ * n'écrit rien (mesuré, même banc) ; c'est #646.
+ */
+function _instantanePourBrouillon() {
+    const nu = (typeof evaluationEnCours !== 'undefined' && evaluationEnCours) ? evaluationEnCours : {};
+    const w = window.evaluationEnCours || {};
+    const val = (id) => { const el = document.getElementById(id); return (el && el.value) ? el.value : ''; };
+    const algoNu = nu.donneesAlgorithmiques && Object.keys(nu.donneesAlgorithmiques).length ? nu.donneesAlgorithmiques : null;
+    return {
+        etudiantDA: val('selectEtudiantEval') || w.etudiantDA || nu.etudiantDA || '',
+        productionId: val('selectProduction1') || w.productionId || nu.productionId || '',
+        grilleId: val('selectGrille1') || nu.grilleId || w.grilleId || '',
+        echelleId: val('selectEchelle1') || nu.echelleId || w.echelleId || '',
+        cartoucheId: val('selectCartoucheEval') || nu.cartoucheId || w.cartoucheId || '',
+        criteres: Object.assign({}, w.criteres || {}, nu.criteres || {}),
+        donneesAlgorithmiques: JSON.parse(JSON.stringify(algoNu || w.donneesAlgorithmiques || {}))
+    };
+}
+
+/**
  * La porte de l'ENREGISTREMENT — même patron que `_validerReferencesSauv` : dit
  * pourquoi, rend `false`, et l'appelant sort. Recalcule d'abord : la portée lue est
  * celle de la note qui va être écrite (#572, la valeur calculée est la source).
@@ -977,7 +1013,14 @@ function verifierPorteeAvantSauvegarde() {
     // comme l'auto-save l'aurait fait 1,5 s plus tard : la note AVEC sa portée, non
     // verrouillée. La copie reste exportable, et son PDF dit qu'il ne conclut pas.
     if (typeof window._autoSauvegarderCriteres === 'function') {
-        window._autoSauvegarderCriteres(null);
+        const instantane = _instantanePourBrouillon();
+        window._autoSauvegarderCriteres(instantane);
+        // L'auto-save pose `idModification` sur ce qu'il reçoit : le rendre aux deux
+        // emplacements, pour que le prochain Enregistrer modifie ce brouillon-là.
+        if (instantane.idModification) {
+            if (window.evaluationEnCours) window.evaluationEnCours.idModification = instantane.idModification;
+            if (evaluationEnCours) evaluationEnCours.idModification = instantane.idModification;
+        }
     }
     const details = phrasesPorteeIncomplete(portee).join(' ')
         + ' Ton travail est conservé en brouillon : complète l\'évaluation, puis enregistre.';

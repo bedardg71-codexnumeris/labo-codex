@@ -284,7 +284,14 @@ Ce qui change, en gestes :
   « Évalué » et reste exportable, son PDF dira qu'il ne conclut pas. ↻ Trouvé par
   Grégoire le 2 septembre à 17 h 53 : la première version du refus n'écrivait rien,
   et comme Enregistrer annule l'auto-save en attente, la copie restait « Importé »
-  et l'export Léa rendait « aucune évaluation trouvée ». Corrigé le soir même.
+  et l'export Léa rendait « aucune évaluation trouvée ». ↻↻ Et à 18 h 04, capture à
+  l'appui, le second correctif n'avait rien changé : dans « Annoter et évaluer »,
+  `evaluationEnCours` désigne DEUX objets (constat #646), les niveaux vont dans l'un
+  et l'auto-save lit l'autre — il rendait la main sans écrire. Corrigé en soirée par
+  un instantané qui prend les critères là où ils sont ; **prouvé par un banc Playwright
+  qui rejoue ta séquence exacte** (rouge avant, vert après).
+  ⚠ Ce banc a mesuré au passage que **l'auto-save débouncé n'écrit AUCUN brouillon dans
+  ce flux** — depuis avant ce lot. C'est #646, pas #674 ; inscrit, pas corrigé.
 - **Sur le PDF de l'élève** : pas de bandeau « Niveau général » ; à sa place, la
   phrase que tu as arrêtée le 2 septembre en soirée : « Cette copie n’a pas de niveau
   général : Langue (20 %) reste à évaluer. » L'export te le dit avant la remise.
