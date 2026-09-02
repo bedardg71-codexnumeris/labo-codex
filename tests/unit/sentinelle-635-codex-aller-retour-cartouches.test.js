@@ -230,11 +230,19 @@ function monterCodex(db, options = {}) {
         'js/codex.js',
         ['window', 'document', 'console', 'localStorage', 'sessionStorage', 'db',
             'travauxStockage', 'JSZip', 'FileReader', 'requestAnimationFrame',
-            'uiDialogues', 'validerZipSecurite', 'setTimeout'],
+            'uiDialogues', 'validerZipSecurite', 'setTimeout', 'navigator'],
         [win, doc, consoleSandbox, stockage(), stockage(), db,
             undefined, JSZip, FauxFileReader, (cb) => setTimeout(cb, 0),
             { confirmerAction: async () => true, demanderSaisie: async () => null },
-            options.validerZipSecurite, setTimeoutRapide],
+            options.validerZipSecurite, setTimeoutRapide,
+            // `navigator` (2 sept. 2026) — `_identifierAppareil` (codex.js:394) lit
+            // `navigator.userAgent` sur le trajet. Ce global manquait au bac à sable :
+            // le test passait en l'EMPRUNTANT à Node 24 (qui l'expose), et rougissait
+            // sur le runner GitHub sous Node 20 (qui ne l'a pas) — huit runs de suite.
+            // Reproduit ici même avec `--no-experimental-global-navigator`. Le seul
+            // membre consommé est `userAgent` ; `storage`, `share`, `clipboard`
+            // restent absents, et leurs gardes `if (navigator.storage && …)` tiennent.
+            { userAgent: 'BacASable/635 (Node; test)' }],
         options.muter || null
     );
     return win.Codex;

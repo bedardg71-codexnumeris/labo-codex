@@ -1,170 +1,150 @@
-# Consigne du jour — le verdict de GitHub entre dans le rituel d'ouverture
+# Consigne du jour — rendre la CI verte, pour qu'elle recommence à juger
 
 > **Écrite le 2 septembre 2026 en fin d'après-midi, par Cowork, avec Grégoire.**
-> Elle REMPLACE la consigne du quatrième site (#572), exécutée et publiée.
+> Elle REMPLACE la consigne du verdict d'ouverture, exécutée (`15d38c2a`).
 >
-> **État à l'écriture** : `1.110.0`, `HEAD` = `3d3a57be`, **tout est publié**. Un fichier non
-> commité dans l'arbre : `plans de travail/CADRAGE-2026-09-02-badges-texte-troue.md` — c'est
-> du texte, Grégoire l'enregistre lui-même.
->
-> ⚠ **Si `HEAD` a bougé ou si plusieurs heures ont passé, remesure et dis-le** (règle 1).
+> ⚠ **Remesure `HEAD` et le verdict avant d'exécuter** (règle 1). Grégoire devait pousser
+> `15d38c2a` ; si ce n'est pas fait, dis-le et arrête.
 
 ---
 
-## Le mandat — un verdict qui existe et que personne ne va chercher
+## Le mandat — une CI rouge en continu ne juge plus rien
 
-**Point de départ, dans les mots de Grégoire.** Question posée : *« Quand la vérification de
-GitHub échoue après un push, est-ce que tu l'apprends ? »* Réponse : **« Je ne sais pas. »**
-Puis, après avoir regardé : **« Je ne vois pas de rouge. »**
+**Trouvé par toi-même le 2 septembre**, dès la première ouverture du rituel neuf : **huit
+exécutions consécutives en échec sur `main` depuis le 31 août** (dernier vert : `efd357e5`).
 
-⮕ **Le trou est donc probablement théorique — et « probablement » n'est pas « vert ».** C'est
-exactement la confusion que `OU-EN-EST-ON.md` nomme comme la plus coûteuse du projet.
+⚠⚠ **Et ça annule une affirmation de Cowork, qu'il faut corriger ici.** Cet après-midi, Cowork
+a écrit — et fait écrire dans une consigne — que *« la CI juge chaque push de toute façon »*,
+pour justifier de ne pas durcir le hook pré-push. **C'était faux depuis le 31 août** : le job
+s'arrête à l'étape Vitest, donc **Playwright n'a jamais tourné sur GitHub depuis cette date**.
+Le filet compensatoire invoqué n'existait plus.
 
-### ⛔ CE QUI A ÉTÉ ENVISAGÉ PUIS ÉCARTÉ, ET POURQUOI — ne le repropose pas
+⮕ **Le hook reste inchangé** — la décision du 26 août tient, et le motif GitHub Desktop aussi.
+**Ce lot répare le filet, pas le garde.**
 
-**Cowork avait d'abord recommandé de faire BLOQUER le hook pré-push** quand aucun verdict
-Playwright n'existe. **Recommandation retirée après mesure**, le 2 septembre. Trois faits, tous
-lus dans `scripts/hooks/pre-push` :
+## La cause, mesurée — et elle n'est pas où on la croit
 
-1. **Le hook bloque déjà le cas qui compte** : `lire-verdict.mjs` code **1** — une rougeur
-   connue — refuse le push (l. 148-152).
-2. **Le fail-open du code 3 est une décision documentée du 26 août**, pas un oubli. Son
-   commentaire : *« La première version refusait. Elle a bloqué un push lancé depuis GITHUB
-   DESKTOP, en donnant pour seule issue une commande de terminal : un refus dont la solution
-   est hors de portée de l'outil où il se produit. »* ⚠ **Grégoire pousse depuis GitHub
-   Desktop.** Rétablir le refus reproduirait exactement ce blocage.
-3. **La CI juge chaque push de toute façon** : `.github/workflows/tests.yml` lance
-   `npm run test:unit` **et** `npm run test:int` (Playwright WebKit), avec les traces en
-   artefact à l'échec.
+Un seul fichier rouge sur 437 : `tests/unit/sentinelle-635-codex-aller-retour-cartouches.test.js`,
+**10 cas sur 11**, tous sur `ReferenceError: navigator is not defined`.
 
-⮕ **Donc on ne touche pas au hook. Le manque est ailleurs : le verdict existe, personne ne le
-lit.**
+▣ **Le code applicatif n'est PAS en cause.** `js/codex.js:394` lit `navigator.userAgent` — dans
+un navigateur, `navigator` existe toujours. ⛔ **Ne « corrige » pas `js/codex.js` en gardant
+cet appel** : tu déguiserais un défaut de test en défaut d'application.
+
+▣ **C'est le bac à sable du test qui est incomplet.** `monterSource` (l. **230**) reçoit la
+liste des globals fournis : `window`, `document`, `console`, `localStorage`, `sessionStorage`,
+`db`, `travauxStockage`, `JSZip`, `FileReader`, `requestAnimationFrame`, `uiDialogues`,
+`validerZipSecurite`, `setTimeout`. **`navigator` n'y est pas.**
+
+▣ **Pourquoi c'est vert ici et rouge là-bas — et ce n'est pas Linux, c'est Node.** La machine
+de Grégoire expose `navigator` comme global du langage ; le serveur tourne sous **Node 20**
+(`.github/workflows/tests.yml:106`), qui ne l'a pas. Le test réussissait en **empruntant un
+global à Node**, pas en le recevant de son bac à sable.
 
 ---
 
 ## Ce que tu fais
 
-### Étape 1 — MESURE D'ABORD : de quoi disposes-tu pour lire ce verdict ?
+**Ajoute `navigator` aux globals du bac à sable**, à sa place dans les deux listes parallèles de
+`monterSource` : le nom dans la première, un objet minimal dans la seconde.
+⮕ Le seul membre consommé par le trajet est **`userAgent`** — une chaîne suffit. ⚠ **Vérifie-le
+plutôt que de me croire** : `grep -n "navigator\." js/codex.js`. Si le trajet en consomme
+d'autres, fournis-les, et dis lesquels.
 
-⚠⚠ **Cowork ne peut pas répondre à cette question et ne l'a pas fait.** Son shell est une
-machine virtuelle distincte de la tienne ; `which gh` y rend « absent », **et ça ne dit rien de
-la machine de Grégoire**. C'est une erreur que Cowork a commise deux fois aujourd'hui —
-conclure d'un poste sur un autre. **Mesure toi-même :**
+⛔ **Ne touche à rien d'autre dans ce fichier de test.** Les onze cas gardent l'aller-retour des
+cartouches ; ce n'est pas leur sujet qui est en cause, c'est leur bac à sable.
+
+### ⚠ LA MÊME FUITE EST-ELLE AILLEURS ? — mesure, et inscris
+
+Ce test réussissait en empruntant un global à Node. **D'autres le font peut-être.** Mesure :
 
 ```bash
-which gh && gh auth status
+grep -rln "navigator" tests/unit/*.test.js
 ```
 
-· **Si `gh` est présent et authentifié** → va à l'étape 2.
-· **S'il est absent, ou présent mais non authentifié** → ⛔ **N'INSTALLE RIEN, NE CONNECTE
-  RIEN.** Un outil qui s'authentifie au compte GitHub de Grégoire est une décision qui lui
-  appartient. **Arrête-toi, dis ce que tu as mesuré, et propose-lui le choix** — sans le faire.
-
-### Étape 2 — ajoute la mesure au rituel d'ouverture
-
-Le fichier : `.claude/skills/debut-de-session-labo-codex/SKILL.md`, **§2 « ÉTAT DES TESTS »**,
-juste après le bloc des deux mesures d'ouverture (`git rev-list`, `verifier-playwright.mjs`),
-vers la l. **145**.
-
-**Ce que la nouvelle mesure doit rendre** — en une ligne, lisible par Grégoire :
-· le verdict de la **dernière** exécution sur `main` : réussie ou échouée ;
-· **sa date**, pour qu'un vert vieux de trois semaines ne se confonde pas avec un vert frais ;
-· **le commit jugé**, et s'il correspond à `HEAD`.
-
-⚠ **Le troisième point est le plus important, et c'est la leçon du jeton Playwright** : un
-verdict qui ne porte pas le SHA jugé ne dit pas sur QUOI il porte. `scripts/lire-verdict.mjs`
-fait déjà exactement cette vérification pour Playwright — **relis-le, et calque-toi dessus.**
-
-⛔ **N'écris PAS de script neuf si une commande suffit.** Ce rituel doit rester à dix secondes ;
-tout ce qui l'allonge finira par être sauté, et un rituel sauté ne mesure rien.
-
-### Étape 3 — écris ce qu'on fait du rouge
-
-Ajoute au skill, en deux lignes, **ce qu'une session fait quand le verdict est rouge** :
-⮕ **Elle le DIT à Grégoire en français, en tête de son rapport d'ouverture, avant tout le
-reste. Elle ne corrige rien d'elle-même** — un rouge de CI sur un commit déjà publié n'est pas
-le mandat du jour, c'est une trouvaille, et elle reçoit la question habituelle : *est-ce que ça
-empêche un des huit énoncés ?*
+⮕ **Pour chacun : le global est-il FOURNI par le bac à sable, ou EMPRUNTÉ à Node ?**
+⛔ **Ne les corrige pas dans ce lot** — un seul sujet par lot. **Inscris ce que tu trouves**
+(issue 2 de `CLAUDE.md`), avec les noms de fichiers. Si le compte est important, c'est un
+chantier à part, et il porte un vrai risque : *un bac à sable qui laisse fuir les globals de
+Node rend un test vert pour une raison qui n'est pas la sienne.*
 
 ---
 
-## Ce que ce lot n'est PAS
+## ⚠ CE QUI VA ARRIVER QUAND CE SERA VERT — préviens plutôt que d'être surpris
 
-⛔ **Aucune modification de `scripts/hooks/pre-push`.** Si tu te retrouves à l'éditer, tu es
-sorti du lot : arrête et dis-le.
-⛔ **Aucune modification de la CI** (`.github/workflows/tests.yml`).
-⛔ **Aucune installation, aucune authentification** sans un « oui » de Grégoire.
+Une fois Vitest réparé, **la CI atteindra Playwright pour la première fois depuis le 31 août**.
+▣ **Rien ne garantit qu'il sera vert.** Le verdict Playwright local, lui, a tourné aujourd'hui
+sur `672e3c5f` : 239 passés, 0 échec — mais **sur la machine de Grégoire, sous WebKit local**,
+pas sur le serveur.
+
+⮕ **Si la CI rougit à l'étape Playwright après ta correction : c'est un SUCCÈS de ce lot**, pas
+un échec. Ça voudra dire que le filet s'est remis à juger et qu'il a trouvé quelque chose que
+personne ne voyait depuis deux jours. **Rapporte-le, ne le corrige pas** : nouveau sujet,
+nouveau lot.
 
 ## Fini quand
 
-Une session qui ouvre le rituel `debut-de-session-labo-codex` rend, dans son rapport d'état,
-**une ligne en français disant si la dernière vérification de GitHub sur `main` a réussi, quand,
-et sur quel commit** — ou, faute d'outil, une ligne disant **pourquoi elle ne peut pas le lire**.
-
-⚠ **Les deux issues sont des succès de ce lot.** Un « je ne peux pas lire ce verdict, voici
-pourquoi » vaut infiniment mieux qu'un silence : c'est le silence qui a produit « je ne sais
-pas ».
+1. `cd tests && npm run test:unit` : **437 fichiers verts**, dont les onze cas du 635.
+2. ▣ **Le témoin qui compte, et il n'est pas local** : après le push, la commande du rituel
+   (`§2.1` du skill) rend **`success`** sur le commit poussé.
+   ⚠ **C'est le seul verdict qui prouve quelque chose ici** — un vert local est précisément ce
+   qui a masqué ce défaut pendant deux jours.
+3. Si la CI reste rouge, mais **à une autre étape**, dis-le et arrête : ce lot a fait son
+   travail.
 
 ## L'ordre
 
-- **Lot documentaire et outillage** : le skill, et rien dans `js/`. ⮕ **Pas de bump du bloc de
-  jetons d'`index.html`**, pas de release.
-- `cd tests && npm run test:unit` une fois, comme témoin que rien n'a bougé.
+- **Un fichier de test, rien dans `js/`.** ⮕ Pas de bump du bloc de jetons, pas de release.
 - Règle 6 : **tu commites, puis tu t'arrêtes.**
-- ⮕ **Ce que Grégoire doit aller voir : RIEN à l'écran.** Dis-le-lui plutôt que de lui inventer
-  une vérification. Ce qu'il verra, c'est la ligne neuve à l'ouverture de ta prochaine séance.
+- ⚠ **Exception nommée, et elle est le sujet du lot** : ici, le verdict ne peut être pris
+  qu'APRÈS le push, puisque c'est la CI qu'on répare. ⮕ Grégoire pousse, **puis** tu lis le
+  verdict et tu le rapportes.
+- ⮕ **Ce que Grégoire doit aller voir : RIEN à l'écran.** Dis-le-lui.
 - Ce fichier se commite avec ton lot.
 
 ---
 
-# ✅ EXÉCUTÉE — 2 septembre 2026, 14 h 24 → 14 h 50 · committée, NON poussée
+# ✅ EXÉCUTÉE — 2 septembre 2026, 14 h 31 → 14 h 45 · committée, NON poussée
 
-**Remesure** : HEAD `3d3a57be`, tout publié, 1.110.0 — conforme. Un fichier non commité
-dans l'arbre, `CADRAGE-2026-09-02-badges-texte-troue.md` : **laissé hors du commit**, comme
-demandé.
+**Remesure** : HEAD `15d38c2a`, poussé, 1.110.0 — conforme.
 
-## Étape 1 — la mesure que Cowork ne pouvait pas faire
+## La cause, vérifiée plutôt que crue
 
-`which gh` → `/Users/kuekatsheu/.local/bin/gh` · `gh auth status` → **connecté**, compte
-`bedardg71-codexnumeris`, protocole ssh, portées `gist`, `read:org`, `repo`. ⮕ Étape 2,
-rien installé, rien connecté.
+`grep -n "navigator\." js/codex.js` rend **17 lignes**, mais le trajet aller-retour n'en
+consomme qu'un membre : **`userAgent`** (`_identifierAppareil`, l. 394 et 3631). Les autres
+(`storage`, `share`, `canShare`, `platform`, `clipboard`) sont derrière des gardes
+(`if (navigator.storage && …)`) ou dans des chemins que le trajet ne prend pas — le
+commentaire l. 46 du test le disait déjà pour `storage.estimate()`. **Une chaîne suffit.**
 
-## ⚠⚠ CE QUE LA MESURE A RENDU — le trou n'était PAS théorique
+## Reproduit AVANT de corriger — sur cette machine, sans attendre GitHub
 
-`gh run list --branch main --limit 8` : **huit runs consécutifs en échec ou annulés**, le
-plus récent sur **`HEAD` exact** (`3d3a57be`, 13 h 22 heure de Drummondville, run
-33660682487). **« Je ne vois pas de rouge »** — il y en avait sur chaque push du jour.
-**Dernier run VERT sur `main` : le 31 août, 10 h 08 UTC, commit `efd357e5`.**
+Node 24 accepte `--no-experimental-global-navigator`, qui le fait se comporter comme Node 20
+sur ce point. `NODE_OPTIONS=--no-experimental-global-navigator npx vitest run …635…` →
+**10 rouges sur 11, `navigator is not defined`** — le rouge de la CI, à l'identique, en
+local. Après l'ajout de `navigator` aux deux listes parallèles de `monterSource`
+(`{ userAgent: 'BacASable/635 (Node; test)' }`) : **11/11 sous le flag, 11/11 sans.**
+Rien d'autre touché dans le fichier ; `js/codex.js` intact.
 
-**Pourquoi c'est rouge, mesuré (`gh run view --log-failed`)** : le job s'arrête à l'étape
-**Vitest** — Playwright n'est jamais atteint. **1 fichier rouge sur 437** :
-`tests/unit/sentinelle-635-codex-aller-retour-cartouches.test.js`, **10 cas sur 11**.
-⮕ **Ce fichier est VERT sur cette machine** (437 f. / 4715 t., rejoué à 14 h 45) et
-**ROUGE sur le runner Linux**. Il est né le 31 août (`69c0de12`), **après** le dernier
-run vert : la CI n'a jamais été verte avec lui. ⮕ Est-ce que ça empêche un des huit
-énoncés ? **Non, pas directement** — c'est une sentinelle de l'aller-retour Codex (#635),
-et le code qu'elle garde passe sur macOS. Mais une CI rouge en continu ne juge plus rien :
-un vrai rouge y serait invisible. **Issue : inscrire et continuer** — rien corrigé ici,
-comme la consigne l'exige. La cause (Linux ≠ macOS : casse de chemin, locale, ordre ?) est
-une mesure à faire dans une séance à elle.
+## La même fuite ailleurs ? — mesurée sur du réel, pas au grep
 
-## Étape 2 — la mesure entre dans le rituel
+Le grep rend 8 fichiers ; **tous FOURNISSENT `navigator`** à leur bac à sable
+(`harnais-parite-exports-424`, `sentinelle-556`, `-416`, `-431`, `-424` : `navigator: {}`
+ou `{ storage: null }`), ou ne l'exécutent pas (`codex.test.js` : un `it.todo` en
+commentaire ; `sentinelle-prevol-stockage` : lecture de source). **Le 635 était le seul
+emprunteur.** Puis la preuve qui compte : **toute la suite sous le flag → 437 f. / 4715 t.
+verts.** Aucun autre test n'emprunte `navigator` à Node.
+⚠ **Limite de cette mesure, inscrite** : le flag ne retire QUE `navigator`. D'autres
+globals que Node 24 expose et que Node 20 n'a pas (`WebSocket`, `CustomEvent`,
+`localStorage` expérimental…) ne sont pas couverts. Le vrai témoin, c'est le runner sous
+Node 20 — et il va parler après le push. **Pas de chantier ouvert** : rien de mesuré ne le
+justifie ; si la CI rougit sur un autre global, ce sera son lot.
 
-`.claude/skills/debut-de-session-labo-codex/SKILL.md`, **§2.1 neuf**, après les deux
-mesures d'ouverture. **Une commande, pas de script** — jouée telle quelle, elle rend :
-`Tests · failure · 2026-09-02T17:22:40Z · commit 3d3a57be` puis `3d3a57be`. Calquée sur
-`lire-verdict.mjs` : le SHA jugé est comparé à `HEAD`, et **les deux cas d'écart sont
-distingués** — `HEAD` documentaire (aucun run, c'est normal, `paths-ignore`) contre `HEAD`
-de code sans run (pas démarré, ou pas fini). La ligne « Reporter » du §2 s'y réfère.
+## Fini quand
 
-## Étape 3 — ce qu'on fait du rouge
+1. `npm run test:unit` : **437 / 4715**, dont les onze du 635. ✔
+2. **Le témoin qui compte n'est pas local** : après le push de Grégoire, la commande du
+   §2.1 doit rendre `success` sur le commit poussé — **c'est la première fois depuis le
+   31 août que Playwright tournera sur GitHub.** S'il rougit à CETTE étape-là, c'est un
+   succès de ce lot : le filet s'est remis à juger. À rapporter, pas à corriger.
 
-Écrit au §2.1 : **le dire en français, en tête du rapport d'ouverture, avant tout le
-reste — job, étape, fichier(s) ; ne rien corriger soi-même** ; question habituelle (un des
-huit énoncés ?), puis l'une des trois issues. Et la conduite sans `gh` : rendre la ligne
-quand même, avec le motif, sans rien installer ni connecter.
-
-## Fini quand — les deux issues étaient des succès ; c'est la première
-
-Une session qui ouvre le rituel rend désormais la ligne. Vitest témoin : **437 / 4715**,
-rien de `js/` touché, pas de jeton, pas de release. Rien à voir à l'écran.
+Rien dans `js/`, pas de jeton, pas de release. Rien à voir à l'écran.
