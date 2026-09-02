@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -210,5 +210,73 @@ describe('CI · le job Playwright ne saute que si RIEN d\'observable n\'a bougé
             lectures += (sansCommentaires(readFileSync(fichier, 'utf8')).match(/path\.(?:join|resolve)\(\s*(?:racineProjet|racine)\s*,/g) || []).length;
         }
         expect(lectures).toBeGreaterThan(50);
+    });
+});
+
+// ↻ BLOC 3, AJOUTÉ LE 2 SEPTEMBRE 2026 (SOIR) — LES EXCLUS DE WEBKIT LINUX SONT
+// NOMMÉS, COMPTÉS, ET DITS. Six essais (dans cinq specs) ne peuvent pas juger sur
+// le runner Linux ; ils sont exclus PAR TITRE à l'étape Playwright de la CI, et là
+// seulement. Ce bloc est la garde contre la dérive : une exclusion qui peut
+// grandir en silence finit par tout exclure. Il exige que la liste soit CELLE-CI,
+// pas une de plus ; que chaque titre existe encore dans son fichier (un titre
+// reformulé ferait revenir le rouge — mieux vaut le savoir ici) ; que le job CI
+// la DISE (nom d'étape, avec le compte) ; et que la variable qui l'active ne soit
+// posée QUE dans la CI.
+// ⚠ POURQUOI PAR TITRE : la première version excluait par fichier — les cinq
+// fichiers portent 17 essais, dont onze verts. Ce cliquet l'a attrapé avant la CI
+// (« expected 6 to be 17 »).
+// BREAK-TESTS (faits le 2 septembre) — ajouter une septième entrée à la liste →
+// rouge ; changer le compte dans le nom de l'étape → rouge.
+describe('CI · les essais exclus de WebKit Linux sont nommés, comptés, et dits', () => {
+    const EXCLUS_ATTENDUS = [
+        ['bandeau-non-modal-508.spec.js',   '#508 — les clics traversent le bandeau, sauf sur son bouton'],
+        ['planif-alignement.spec.js',       '⚠ un bloc glissé près d’un autre COLLE, et un guide dit pourquoi'],
+        ['planif-drag-pointer-148.spec.js', 'CAS D — un drag souris déplace un nœud libre'],
+        ['planif-drag-pointer-148.spec.js', 'CAS B — tirer une évaluation HORS de sa leçon la détache (le geste du terrain)'],
+        ['planif-toolbar.spec.js',          'planificateur — il CADRE la carte, il ne la filtre plus ; palettes commandées par la barre'],
+        ['portes-relais-cadre.spec.js',     '#371 · Semaines spéciales : empilées, la borne de fin de planification est atteignable']
+    ];
+    const cle = (e) => e.fichier + ' › ' + e.titre;
+
+    it('la liste est CELLE-CI, nommément — pas une de plus, pas une de moins', async () => {
+        const cfg = await import('../playwright.config.js');
+        expect(cfg.EXCLUS_WEBKIT_LINUX.map(cle).sort())
+            .toEqual(EXCLUS_ATTENDUS.map(([fichier, titre]) => cle({ fichier, titre })).sort());
+    });
+
+    it('chaque titre exclu existe ENCORE, tel quel, dans son fichier', async () => {
+        const cfg = await import('../playwright.config.js');
+        for (const e of cfg.EXCLUS_WEBKIT_LINUX) {
+            const chemin = path.join(dossierTests, 'integration', e.fichier);
+            expect(existsSync(chemin), e.fichier + ' n\'existe plus').toBe(true);
+            const src = readFileSync(chemin, 'utf8');
+            expect(src.includes("test('" + e.titre + "'"), 'titre introuvable tel quel dans ' + e.fichier + ' : « ' + e.titre + ' »').toBe(true);
+        }
+    });
+
+    it('sans la variable, RIEN n\'est exclu : sur macOS, npm run test:int lance tout', async () => {
+        expect(process.env.PW_EXCLURE_WEBKIT_LINUX).toBeUndefined();
+        const cfg = await import('../playwright.config.js');
+        expect(cfg.default.grepInvert).toBeUndefined();
+        // …et chaque motif, lui, matche bien la forme « fichier … titre » de Playwright.
+        cfg.MOTIFS_EXCLUS_WEBKIT_LINUX.forEach((re, k) => {
+            const e = cfg.EXCLUS_WEBKIT_LINUX[k];
+            expect(re.test('[webkit] › integration/' + e.fichier + ':1:1 › ' + e.titre), 'motif ' + k).toBe(true);
+            expect(re.test('[webkit] › integration/' + e.fichier + ':1:1 › autre essai'), 'motif ' + k + ' trop large').toBe(false);
+        });
+    });
+
+    it('la CI DIT le compte : le nom de l\'étape annonce les essais et les specs de la liste', () => {
+        const m = /- name: "(\d+) essais NON JUGÉS ici \((\d+) specs, WebKit Linux ≠ Safari macOS\)"/.exec(workflow);
+        expect(m, 'l\'étape « N essais NON JUGÉS ici » a disparu du job Playwright').not.toBeNull();
+        expect(Number(m[1]), 'le nom de l\'étape ne compte pas les essais de la liste').toBe(EXCLUS_ATTENDUS.length);
+        expect(Number(m[2]), 'le nom de l\'étape ne compte pas les specs de la liste').toBe(new Set(EXCLUS_ATTENDUS.map(([f]) => f)).size);
+    });
+
+    it('la variable d\'exclusion n\'est posée QUE sur l\'étape Playwright de la CI', () => {
+        const occurrences = (workflow.match(/PW_EXCLURE_WEBKIT_LINUX: "1"/g) || []).length;
+        expect(occurrences).toBe(1);
+        expect(workflow).toMatch(/- name: Run integration tests \(Playwright WebKit\)\n\s+working-directory: tests\n\s+env:\n\s+PW_EXCLURE_WEBKIT_LINUX: "1"/);
+        expect(readFileSync(path.join(dossierTests, 'package.json'), 'utf8')).not.toContain('PW_EXCLURE');
     });
 });

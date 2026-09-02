@@ -63,6 +63,25 @@
 #        jugé-rouge et NON JUGÉ. Écarté par Grégoire : les shards (ils
 #        raccourcissent l'attente, pas la facture).
 #
+# (5) 2 SEPTEMBRE 2026, SOIR — SIX ESSAIS NE PEUVENT PAS JUGER SUR LINUX. Premier
+#     verdict complet de Playwright sur GitHub depuis le 31 août, run 33671445284
+#     (5f6eb365) : 233 passés, 6 échoués en 32 min 35, chacun rouge deux fois sur
+#     deux. Cinq des six sont EXACTEMENT ceux du point (2), 18 août : glisser-
+#     déposer et mise en page du planificateur sous WebKit Linux ≠ Safari macOS.
+#     Les 239 passent sur la machine de Grégoire. Un rouge qui dure cesse d'être
+#     un signal (c'est ce qui a produit « je ne vois pas de rouge »).
+#     ⮕ Exclus PAR TITRE (les cinq fichiers portent 17 essais, onze restent jugés)
+#     À L'ÉTAPE PLAYWRIGHT DE LA CI SEULEMENT (PW_EXCLURE_WEBKIT_LINUX=1, lue par
+#     tests/playwright.config.js, liste EXCLUS_WEBKIT_LINUX) : sur macOS,
+#     `npm run test:int` lance toujours les 239, sans rien à taper. L'étape qui
+#     précède Playwright DIT le compte dans son nom, son log et son résumé, et
+#     échoue si le nom ne correspond plus à la liste ; le cliquet (bloc 3) la
+#     verrouille nommément. ⚠ CE À QUOI ON RENONCE : le planificateur n'est plus
+#     jugé automatiquement nulle part ; son filet devient la passe locale sur
+#     macOS. ⏳ Inscrit, pas réglé : personne n'a mesuré si ces gestes se
+#     comportent vraiment autrement sous WebKit Linux, ou si les specs présument
+#     une géométrie de macOS.
+#
 # Deux leviers, dans l'ordre de poids :
 #   1. `paths-ignore` — un commit qui ne touche que de la doc ne déclenche plus
 #      rien. ⚠ La liste est VÉRIFIÉE par un cliquet
@@ -246,8 +265,34 @@ jobs:
         working-directory: tests
         run: npx playwright install webkit
 
+      # ⚠ LA GARDE DE CE LOT : un essai non jugé ne doit jamais ressembler à un
+      # essai vert. Cette étape DIT, dans ce que le rituel d'ouverture lit (le nom
+      # de l'étape, le log, le résumé), combien d'essais sont exclus ici et
+      # pourquoi. Elle échoue si le nom ci-dessous ne correspond plus à la liste
+      # (tests/playwright.config.js, EXCLUS_WEBKIT_LINUX) — même compte, même
+      # source, vérifié aussi par le cliquet sentinelle-ci-paths-ignore (bloc 3).
+      - name: "6 essais NON JUGÉS ici (5 specs, WebKit Linux ≠ Safari macOS)"
+        working-directory: tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          liste=$(node -e "import('./playwright.config.js').then(m => console.log(m.EXCLUS_WEBKIT_LINUX.map(e => e.fichier + ' › ' + e.titre).join('\n')))")
+          essais=$(echo "$liste" | grep -c .)
+          specs=$(echo "$liste" | cut -d'›' -f1 | sort -u | grep -c .)
+          echo "Essais NON JUGÉS sur cette plateforme : $essais ($specs specs) — WebKit Linux ≠ Safari macOS (voir le journal de tests.yml, point 5)."
+          echo "$liste" | sed 's/^/  · /'
+          {
+            echo "## $essais essais NON JUGÉS ici ($specs specs)"
+            echo ""
+            echo "Glisser-déposer et mise en page du planificateur sous WebKit **Linux**, qui n'est pas le Safari de macOS. Ces specs restent jugées par \`npm run test:int\` sur macOS."
+            echo "$liste" | sed 's/^/- /'
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ "$essais" = "6" ] && [ "$specs" = "5" ] || { echo "::error::le nom de cette étape annonce 6 essais / 5 specs ; la liste en a $essais / $specs — mettre les deux d'accord, et le DIRE"; exit 1; }
+
       - name: Run integration tests (Playwright WebKit)
         working-directory: tests
+        env:
+          PW_EXCLURE_WEBKIT_LINUX: "1"
         run: npm run test:int
 
       - name: Upload Playwright traces on failure

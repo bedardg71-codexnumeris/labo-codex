@@ -1,163 +1,166 @@
-# Consigne du jour — la CI redevient capable d'être verte, sans devenir trop chère pour tourner
+# Consigne du jour — six essais qui ne peuvent pas juger sur Linux cessent d'y rougir
 
 > **Écrite le 2 septembre 2026 en soirée, par Cowork, avec Grégoire.**
-> Elle REMPLACE la version précédente (plafond seul), retirée avant exécution.
+> Elle REMPLACE la consigne de la CI en deux jobs, exécutée, poussée et **dont le verdict est
+> tombé** : Vitest vert, Playwright **rouge sur six specs**, run `33671445284`, commit `5f6eb365`.
 >
-> ⚠ **Remesure `HEAD` avant d'exécuter** (règle 1). Un fichier non commité dans l'arbre :
-> `plans de travail/CADRAGE-2026-09-02-badges-texte-troue.md` — **ne le commite pas**, il est à
-> Grégoire.
+> ⚠ **Remesure `HEAD` avant d'exécuter** (règle 1).
+> Un fichier non commité dans l'arbre : `plans de travail/CADRAGE-2026-09-02-badges-texte-troue.md`
+> — **ne le commite pas**, il est à Grégoire.
 
 ---
 
-## Le mandat — deux gestes, et ils vont ensemble
+## Le mandat, et pourquoi il passe AVANT le cinquième geste
 
-**Ce que la mesure a établi aujourd'hui**, par toi puis par Cowork :
+Le lot précédent a rendu la CI capable de juger. **Elle a jugé, et elle est rouge sur six
+essais.** ▣ **Cinq des six étaient DÉJÀ nommés rouges dans l'en-tête de `tests.yml` le 18 août**,
+pour la même cause : glisser-déposer et mise en page du planificateur **sous WebKit Linux, qui
+n'est pas le Safari de macOS**. Les 239 passent sur la machine de Grégoire.
 
-· `.github/workflows/tests.yml:97` porte `timeout-minutes: 15`. Le run de `ed6aac3c` a duré
-  **15 min 26** et s'est fait couper à **105 specs sur 239**, sans un seul échec.
-· Ce plafond date d'une suite de **88-93 specs** ; elle en compte **239**.
-· Projection : 239 × ~7 s ≈ 28 min, plus ~3 min d'installation ≈ **31 min**.
+⮕ **Ces six ne mesurent donc rien d'utile là où elles tournent** — et elles rendent le verdict
+rouge en permanence.
 
-⚠⚠ **ET LA CONTRAINTE QUI COMMANDE, LUE DANS L'EN-TÊTE DU MÊME FICHIER.** Au 23 août :
-*« Depuis le 21 août, le job ne démarre plus. Vingt-six runs d'affilée échouent en 3 à 5 s…
-Cette signature est typiquement celle de minutes Actions indisponibles sur un dépôt privé
-(quota du compte épuisé). »*
+⚠⚠ **C'est le piège de la journée, sous une autre forme.** La CI a été rouge deux jours, Grégoire
+a regardé, et il a répondu « je ne vois pas de rouge ». **Un rouge qui dure cesse d'être un
+signal.** Le laisser une semaine annulerait tout le travail du 2 septembre.
 
-⮕ **Les minutes de Grégoire sont une contrainte réelle, avec un antécédent.** Relever le
-plafond SEUL ferait passer chaque push de code de 12,5 à ~31 minutes. **On réparerait la CI en
-la rendant trop chère pour tourner.** C'est pourquoi les deux gestes sont dans le même lot.
+⮕ **Motif de l'ordre, décidé par Grégoire** : le cinquième geste est plus important, mais ce
+lot-ci protège l'instrument qui dira si le cinquième est réussi. Vingt minutes.
+
+## Les six
+
+| spec | ce qu'elle voit échouer |
+|---|---|
+| `bandeau-non-modal-508` | les clics ne traversent pas le bandeau |
+| `planif-alignement` | un bloc glissé à +40 px se fait aimanter |
+| `planif-drag-pointer-148` | ×2 — un glissé souris ne déplace pas le nœud |
+| `planif-toolbar` | la barre ne commande qu'une palette au lieu de deux |
+| `portes-relais-cadre` | un champ n'est pas atteignable en son centre |
+
+▣ **Toutes rouges deux fois sur deux** (`retries: 1`) — donc **échecs francs, pas instabilité.**
 
 ---
 
-## Geste 1 — le plafond
+## Ce que tu fais
 
-`.github/workflows/tests.yml`, l. **97** : `timeout-minutes: 15` ⮕ **40**.
+### ⮕ L'EXCLUSION VA DANS LA CI, PAS DANS LES SPECS
 
-⛔ **Le plafond ne disparaît pas.** Un job sans limite qui part en boucle consomme jusqu'à
-épuisement — et ce dépôt en a déjà fait l'expérience. On le déplace, on ne le retire pas.
-⚠ **40 est une projection à partir de 105 specs, pas une mesure.** Si le run réel dépasse,
-**dis-le avec la durée observée** ; ne remonte pas le chiffre en boucle.
+⛔ **Ne touche à aucun des cinq fichiers de spec.** Ils sont justes ; c'est la plateforme qui
+diffère. Un `skip` écrit dans le fichier suivrait la spec partout, **y compris sur le macOS de
+Grégoire où elle est la seule à mesurer quelque chose.**
 
-## Geste 2 — Playwright cesse de tourner à chaque push
+⮕ **Exclus-les à l'étape Playwright de la CI**, et là seulement. `tests/package.json` porte
+`"test:int": "playwright test"` ; `playwright.config.js` a `testDir: './integration'`.
+⮕ **Le mécanisme est à toi** — un `--grep-invert`, un `testIgnore` conditionné par une variable
+d'environnement posée par le job, un projet Playwright distinct. **Tranche et dis pourquoi en une
+ligne.** ⛔ Pas d'action tierce.
 
-**Décision de Grégoire, 2 septembre :** *« Je ne crois pas que 239 essais en navigateur doivent
-tourner à chaque push. »*
+⚠ **Critère de choix, et il tranche à lui seul** : `cd tests && npm run test:int` **sur la machine
+de Grégoire doit continuer de lancer les 239**, sans variable à poser, sans drapeau à retenir. Si
+ton mécanisme l'oblige à taper quoi que ce soit de plus, il est mauvais.
 
-**L'intention, et c'est elle qui compte** : **Vitest continue de juger tout ce qui déclenche la
-CI** ; **Playwright ne tourne que lorsque le push touche quelque chose d'observable au
-navigateur** — en pratique `js/`, `index.html`, les feuilles de style, et `tests/`.
+### ⛔ LA GARDE — ET C'EST TOUT LE LOT
 
-⮕ **Le mécanisme est à toi.** Deux étapes dans un job, une condition sur la seconde ; ou deux
-jobs ; ou un filtre de chemins. **Tranche et dis pourquoi**, en une ligne. ⛔ **N'ajoute pas
-d'action tierce** si un `git diff --name-only` suffit.
+**Un essai non jugé ne doit jamais ressembler à un essai vert.**
 
-### ⛔ LES DEUX GARDES, ET ELLES NE SONT PAS NÉGOCIABLES
+⮕ **Le job doit DIRE, dans sa sortie, combien d'essais n'ont pas été jugés et pourquoi.** Pas en
+commentaire dans un fichier : **dans ce que le rituel d'ouverture lit.**
+⮕ **Et la ligne du matin (`§2.1` du skill) doit la reprendre.** Elle dit aujourd'hui trois états ;
+il lui en faut un quatrième : *jugé-vert · jugé-rouge · non jugé (job sauté) · **jugé partiellement,
+N essais exclus de cette plateforme***.
 
-**1. Un Playwright SAUTÉ ne doit jamais ressembler à un Playwright VERT.**
-C'est la faute exacte qui a coûté deux jours cette semaine : un verdict absent s'est confondu
-avec un verdict bon. ⮕ Le résultat lu par le rituel d'ouverture (`§2.1` du skill) doit
-**distinguer les trois états** : *jugé et vert* · *jugé et rouge* · **_non jugé, et pourquoi_**.
-⚠ **Si ton mécanisme fait rendre `success` à un run qui n'a pas lancé Playwright, c'est un
-angle mort — et tu viens d'en fabriquer un.** Vérifie ce que la commande du rituel rend dans ce
-cas, et si elle ment, corrige-la : elle fait partie de ce lot.
+⚠ **Sans cette ligne, ce lot est une régression déguisée en correction** : on aurait acheté du vert
+en cachant six rouges. C'est exactement ce que la config refuse déjà de faire ailleurs — voir le
+commentaire de `retries: 1` : *« Monter ce chiffre reviendrait à acheter du vert. »*
 
-**2. Le cliquet doit couvrir la nouvelle règle.**
-`tests/unit/sentinelle-ci-paths-ignore.test.js` existe précisément pour ça : il vérifie
-qu'aucun test ne LIT un chemin exclu, *« sans quoi l'optimisation créerait un angle mort
-silencieux »*. ⮕ **Étends-le à ta nouvelle condition**, dans le même esprit : si un spec
-Playwright se met à dépendre d'un chemin qui ne le déclenche pas, la sentinelle doit rougir.
-⚠ **Une optimisation de CI sans son cliquet est refusée dans ce dépôt.** C'est écrit dans
-l'en-tête de la sentinelle, daté du 23 août.
+### Le cliquet
 
-⚠ **Et le `paths-ignore` existant ne bouge pas.** Il porte un commentaire qui explique pourquoi
-`.claude/**` en est volontairement absent (`sentinelle-skill-alignement` lit un SKILL.md). **Ne
-le « nettoie » pas.**
+`tests/unit/sentinelle-ci-paths-ignore.test.js` garde déjà les optimisations de CI.
+⮕ **Ajoute-lui un cas** : *la liste des exclus est celle-ci, nommément, et pas une de plus.*
+⚠ **C'est la garde contre la dérive** — celle qui empêche qu'on ajoute un septième nom un jour où
+il rougit, sans que personne ne l'ait décidé. **Une exclusion qui peut grandir en silence finit par
+tout exclure.**
 
-## Le journal de l'en-tête
+### Le journal
 
-`tests.yml` porte un journal de pannes daté. ⮕ **Ajoutes-y une entrée courte** : la date, les
-deux causes mesurées (plafond hérité d'une suite trois fois plus petite ; 239 specs à chaque
-push sur un compte dont le quota a déjà été épuisé), et les deux décisions. **Ce journal est la
-mémoire de ce fichier** ; une modification muette s'y perdrait.
+`tests.yml` porte un journal daté. ⮕ **Entrée courte** : la date, le verdict du run
+`33671445284` (233 passés / 6 échoués en 32 min 35), la cause — WebKit Linux ≠ Safari macOS, déjà
+nommée le 18 août — et **ce à quoi on renonce** : *le planificateur n'est plus jugé
+automatiquement nulle part ; son filet devient la passe locale sur macOS.*
+
+---
+
+## ⚠ CE QUE CE LOT NE RÈGLE PAS, ET QUI DOIT ÊTRE INSCRIT
+
+**La vraie question reste ouverte** : ces gestes de pointeur se comportent-ils réellement
+autrement sous WebKit Linux, ou les specs présument-elles une géométrie de macOS ? ⮕ **Personne
+ne l'a mesuré.** C'est un autre lot, il n'est pas urgent — aucun des six ne touche les huit
+gestes — mais **il ne doit pas disparaître avec le rouge.** *Inscris-le* (issue 2 de `CLAUDE.md`).
+
+⛔ **N'essaie PAS de les réparer dans ce lot.** Ce serait un chantier de plusieurs heures sur du
+code qui ne bloque aucun énoncé.
 
 ## Fini quand
 
-▣ **Le témoin n'est pas local.** Après le push, la commande du rituel rend un verdict **sur le
-commit poussé**, et tu rapportes lequel des trois états.
-
-**Quatre issues, et trois sont des succès :**
-1. **Vert, Playwright inclus** → le filet juge de bout en bout pour la première fois depuis le
-   31 août.
-2. **Rouge à l'étape Playwright** → **succès.** La suite va au bout et elle a trouvé quelque
-   chose. **Rapporte les noms des specs, ne corrige rien.**
-3. **Vert avec Playwright non lancé** → **succès seulement si c'est DIT.** Ce push touchait-il
-   du code observable ? Si non, c'est le comportement voulu. Si oui, ta condition est trop
-   étroite : dis-le.
-4. **Coupé encore** → la projection était fausse. **Dis la durée observée**, n'augmente rien.
+1. `cd tests && npm run test:int` sur la machine de Grégoire lance toujours **239**.
+2. Après le push, la commande du rituel rend **`success`** sur le commit poussé.
+3. ▣ **Et le témoin qui compte plus que le vert** : la sortie du job **nomme les six**, et la ligne
+   du matin dit qu'ils n'ont pas été jugés.
+   ⚠ **Un vert sans cette mention est un échec de ce lot**, pas un succès.
 
 ## L'ordre
 
+- **Rien dans `js/`** ⮕ pas de bump de jetons, pas de release.
+- Ce lot touche `tests/` (le cliquet) : `cd tests && npm run test:unit` avant de dire que c'est prêt.
 - Règle 6 : **tu commites, puis tu t'arrêtes.**
 - ⚠ **Exception nommée** : le verdict ne se prend qu'APRÈS le push, puisque c'est la CI qu'on
-  répare. Grégoire pousse, **puis** tu lis et tu rapportes.
-- ⚠ **Ce lot touche `tests/`** (le cliquet) : `cd tests && npm run test:unit` avant de dire que
-  c'est prêt. Rien dans `js/` ⮕ pas de bump de jetons, pas de release.
+  règle. Grégoire pousse, **puis** tu lis et tu rapportes.
 - ⮕ **Ce que Grégoire doit aller voir : RIEN à l'écran.** Dis-le-lui.
 - Ce fichier se commite avec ton lot.
 
 ---
 
-# ✅ EXÉCUTÉE — 2 septembre 2026, 15 h 01 → 15 h 25 · committée, NON poussée
+# ✅ EXÉCUTÉE — 2 septembre 2026, 15 h 55 → 16 h 25 · committée, NON poussée
 
-**Remesure, et un écart avec la prémisse** : HEAD `8b0dd728`, **1 commit non poussé** — le
-geste 1 (plafond 15 → 40, point (4) du journal), que la version précédente de cette consigne
-avait mandaté et que j'avais committé avant qu'elle soit « retirée ». Il n'a pas été défait :
-c'est le même geste 1. Ce lot s'empile dessus ; **les deux commits partent ensemble**.
-`CADRAGE-…badges-texte-troue.md` laissé hors du commit.
+**Remesure** : HEAD `5f6eb365`, poussé — conforme. Quatre fichiers non suivis dans
+`plans de travail/` (CADRAGE, CONSIGNE-PROCHAINE, EBAUCHE, NOTE) : **tous laissés hors du
+commit**, ils ne sont pas mon lot.
 
-## Geste 1 — déjà fait (`8b0dd728`), inchangé
+## Le mécanisme, tranché : `grepInvert` dans `playwright.config.js`, sous une variable que seule la CI pose
 
-## Geste 2 — le mécanisme, tranché : DEUX JOBS
+`EXCLUS_WEBKIT_LINUX` = six paires `{ fichier, titre }` ; `grepInvert` n'est construit que si
+`PW_EXCLURE_WEBKIT_LINUX=1`, posée par l'étape Playwright de `tests.yml` et nulle part
+ailleurs (ni `package.json`). **Pourquoi là** : la liste vit dans UN fichier lisible par le
+cliquet et par le job ; et sur macOS, `npm run test:int` lance les 239 sans rien à taper —
+mesuré : `--list` rend **239** sans la variable, **233** avec. Aucun spec touché.
 
-`vitest` (toujours, 15 min) puis `playwright` (`needs: vitest`,
-`if: needs.vitest.outputs.playwright == 'oui'`, 40 min). **Pourquoi deux jobs et pas une
-étape conditionnelle** : un job sauté apparaît `skipped` dans `gh run view --json jobs` —
-c'est ce qui rend le non-jugé LISIBLE — et les trois minutes d'installation de WebKit ne
-sont pas payées quand il saute. Aucune action tierce : la décision est un `git diff
---name-only ${before} ${sha}` en `shell: bash` (`fetch-depth: 0` pour atteindre `before`),
-avec repli « on juge tout » si la base est introuvable (premier push, push forcé).
+### ⚠ La trouvaille qui a changé le lot — attrapée par le cliquet, pas par la CI
+Ma première version excluait **par fichier**. Le cliquet a rougi : « expected 6 to be 17 ».
+**Les cinq fichiers portent 17 essais** ; six sont rouges, **onze sont verts** et mesurent
+quelque chose sur Linux. Exclure par fichier les aurait sacrifiés sans le dire. ⮕ Exclusion
+**par titre exact**, un motif `fichier.*titre` par essai — et un `diff` des deux `--list`
+prouve que les six manquants sont exactement les six rouges du run 33671445284.
 
-**La liste `OBSERVABLE`** (env du job `vitest`, **une seule source**, lue par le shell ET
-par le cliquet) : `js/ css/ icons/ img/ libs/ index.html styles.css version.js
-version.json noms_stables.json scripts/ tests/ .github/workflows/tests.yml`. Mesurée :
-Playwright ouvre `index.html` en `file://` — tout ce qu'il charge est observable ; trois
-specs lisent `scripts/`, une lit `version.json` ; le workflow doit se juger lui-même.
+### La garde — le job DIT
+Une étape nommée **`6 essais NON JUGÉS ici (5 specs, WebKit Linux ≠ Safari macOS)`**
+précède Playwright : elle lit la liste depuis le config, l'écrit dans le log et dans le
+résumé du job, et **échoue si son nom ne correspond plus à la liste**. Jouée en local sous
+bash : `essais=6 specs=5`, garde OK. Le rituel (`§2.1`) porte un **quatrième état** —
+*jugé partiellement, N essais exclus de cette plateforme* — avec la commande qui lit ce nom
+d'étape, et la phrase : **un vert Playwright sur GitHub est un vert sur 233, pas 239.**
 
-**Simulé sous bash avant de pousser** (⚠ zsh ne découpe pas `$OBSERVABLE` — première
-simulation fausse, corrigée) : `docs/ + plans de travail/ + OU-EN-EST-ON.md` → **non** ;
-`js/evaluation.js` → **oui** ; `.github/workflows/tests.yml` → **oui** ; `index.html` →
-**oui** ; `jsx/faux.js`, `index.html.bak` → **non** (pas de faux positif par préfixe).
+### Le cliquet — bloc 3, cinq cas
+La liste est celle-ci nommément ; chaque titre existe encore tel quel dans son fichier (un
+titre reformulé ferait revenir le rouge : mieux vaut le savoir ici) ; sans variable
+`grepInvert` est `undefined` et chaque motif matche son essai sans déborder sur un voisin ;
+le nom d'étape compte juste ; la variable n'est posée que sur l'étape Playwright de la CI.
+**Break-tests** : une 7ᵉ entrée → **rouge** ; le compte du nom d'étape → **rouge**. 13/13.
 
-### Garde 1 — un Playwright sauté ne ressemble pas à un vert
-Le rituel (`§2.1` du skill d'ouverture) **lit désormais les JOBS, pas le run** : seconde
-commande `gh run view <id> --json jobs`, et **trois états nommés** — jugé-vert, jugé-rouge,
-**non jugé et pourquoi** (`skipped` + vérification par `git diff --name-only HEAD~1`). Le
-run, lui, rendra `success` avec Playwright `skipped` : c'est **dit**, dans le skill et dans
-le journal de `tests.yml`. Le résumé du job (`$GITHUB_STEP_SUMMARY`) porte la raison.
-
-### Garde 2 — le cliquet couvre la nouvelle règle
-`sentinelle-ci-paths-ignore.test.js`, **bloc 2** (4 cas) : deux jobs et la condition
-exacte présents, Vitest sans `if:` ; `OBSERVABLE` existe et porte `js/`, `index.html`,
-`styles.css`, `tests/`, le workflow ; **aucun spec de `tests/integration/` ne lit un
-chemin hors de `OBSERVABLE`** (lecture des `path.join(racine…)`, commentaires retirés) ;
-témoin : >50 lectures vues, `scripts/` et `version.json` présents.
-**Break-tests joués** : retirer `scripts/` de `OBSERVABLE` → **2 rouges** ; faire lire
-`docs/x.md` à un spec → **2 rouges** (bloc 1 ET bloc 2). Restauré, 8/8.
-Le `paths-ignore` existant et son commentaire sur `.claude/**` : **intacts**.
-
-**Journal** : point (4) de `tests.yml` réécrit en (4a) plafond et (4b) deux jobs.
-**Suite** : `npm run test:unit` → **437 f. / 4719 t.** (+4, le bloc 2). Rien dans `js/`.
+**Journal** : point (5) de `tests.yml`. **Inscrit, pas réglé** : personne n'a mesuré si ces
+gestes se comportent vraiment autrement sous WebKit Linux ; ces six ne sont plus jugés
+automatiquement nulle part, leur filet est la passe locale macOS. Suite : **437 / 4724**.
 
 ## Fini quand — après le push de Grégoire
-Ce push touche `tests.yml` et `tests/` → **Playwright DOIT tourner** (simulé : oui). Quatre
-issues, trois sont des succès ; à rapporter par JOB. Rien à voir à l'écran.
+Ce push touche `tests/` et `tests.yml` → Playwright tourne, sur 233. Attendu : `success`
+sur les deux jobs, **et** le nom d'étape « 6 essais NON JUGÉS » visible dans le job
+Playwright. Un vert sans cette mention serait un échec du lot. Rien à voir à l'écran.
