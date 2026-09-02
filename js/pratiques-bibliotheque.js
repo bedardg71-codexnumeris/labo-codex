@@ -6,7 +6,7 @@
    - Indépendante du trimestre (clé non-namespacée)
    - Stockage dans IndexedDB/localStorage
    - Import/export avec collègues
-   - Inclut les modèles prédéfinis (Chimie, Simple, Littérature)
+   - Inclut les modèles prédéfinis, un par famille (DEN, SPE, STD, SOM)
 
    Clé de stockage: 'bibliothequePratiques' (sans namespace)
    =============================== */
@@ -58,30 +58,6 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     },
 
     // === PAN-SPÉCIFICATIONS ===
-    'SPE-chimie-contrats': {
-        id: 'SPE-chimie-contrats',
-        nom: 'Modèle Chimie',
-        description: 'Notation par contrats',
-        type: 'specifications',
-        auteur: 'Gabarit Labo Codex',
-        discipline: 'Chimie',
-        estGabarit: true,
-        pratiques: ['SPE'],
-        configuration: {
-            seuilAcceptable: 75,
-            typesTravaux: [
-                { id: 1, nom: 'Prise de position', description: 'Travail écrit argumentatif' },
-                { id: 2, nom: 'Test', description: 'Évaluation des connaissances' },
-                { id: 3, nom: 'Portfolio', description: 'Dossier d\'apprentissage' },
-                { id: 4, nom: 'Oral', description: 'Présentation orale' }
-            ],
-            forfaits: [
-                { id: 1, lettre: 'A', note: 90, travaux: { 1: 3, 2: 2, 3: 1, 4: 1 } },
-                { id: 2, lettre: 'B', note: 80, travaux: { 1: 2, 2: 2, 3: 1, 4: 1 } },
-                { id: 3, lettre: 'C', note: 60, travaux: { 1: 1, 2: 2, 3: 0, 4: 0 } }
-            ]
-        }
-    },
     'SPE-simple': {
         id: 'SPE-simple',
         nom: 'Modèle simple',
@@ -150,139 +126,32 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         }
     },
     // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Chimie organique
-    // Standards avec critères par standard, meilleurs résultats (N=1)
-    // ============================================================================
-    // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Informatique
-    // 6 objectifs, tous niveau 3+ requis, calcul conditionnel
-    // ============================================================================
-    // ============================================================================
     // PRATIQUES SOMMATIVES TRADITIONNELLES
     // ============================================================================
 
     // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Administration
-    // Sommative traditionnelle - Comptabilité et numérique
-    // ============================================================================
-    'SOM-comptabilite': {
-        id: 'SOM-comptabilite',
-        nom: 'SOM Comptabilité',
-        description: 'Sommative traditionnelle. Examens écrits et travaux pratiques. Moyenne pondérée.',
-        type: 'sommative',
-        auteur: 'Gabarit Labo Codex',
-        discipline: 'Administration',
-        etablissement: 'Cégep de l\'Abitibi-Témiscamingue',
-        estGabarit: true,
-        pratiques: ['SOM'],
-        configuration: {
-            methodeCalcul: 'moyenne-ponderee',
-            evaluations: [
-                { id: 1, nom: 'Examen 1', type: 'examen', ponderation: 30 },
-                { id: 2, nom: 'Examen 2', type: 'examen', ponderation: 30 },
-                { id: 3, nom: 'Travaux pratiques', type: 'tp', ponderation: 40 }
-            ],
-            criteres: {
-                type: 'variables',
-                description: 'Exactitude des réponses, démarche, transfert de connaissance'
-            }
-        },
-        seuils: {
-            vaBien: 80,
-            difficulte: 70,
-            grandeDifficulte: 60
-        }
-    },
-
-    // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Géographie
-    // Sommative traditionnelle - Introduction en géographie
-    // ============================================================================
-    'SOM-geographie': {
-        id: 'SOM-geographie',
-        nom: 'SOM Géographie',
-        description: 'Sommative traditionnelle. Examens 55%, travaux pratiques 45%. Quiz formatifs non notés.',
-        type: 'sommative',
-        auteur: 'Gabarit Labo Codex',
-        discipline: 'Géographie',
-        etablissement: 'Collège Montmorency',
-        estGabarit: true,
-        pratiques: ['SOM'],
-        configuration: {
-            methodeCalcul: 'moyenne-ponderee',
-            evaluations: [
-                { id: 1, nom: 'Examens écrits', type: 'examen', ponderation: 55 },
-                { id: 2, nom: 'Travaux pratiques', type: 'tp', ponderation: 45 }
-            ],
-            criteres: {
-                type: 'variables',
-                examens: 'Connaissances, liens entre connaissances',
-                travaux: 'Méthodologie, normes, structure'
-            }
-        },
-        seuils: {
-            vaBien: 70,
-            difficulte: 65,
-            grandeDifficulte: 55
-        }
-    },
-
-    // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Philosophie
-    // Sommative hybride avec portfolio formatif
-    // ============================================================================
-    'SOM-philo-portfolio': {
-        id: 'SOM-philo-portfolio',
-        nom: 'SOM Philo + Portfolio',
-        description: 'Hybride sommative/PAN. Portfolio 30% avec progression évaluée, erreurs non pénalisées.',
-        type: 'sommative',
-        auteur: 'Gabarit Labo Codex',
-        discipline: 'Philosophie',
-        etablissement: 'Cégep Gérald-Godin',
-        estGabarit: true,
-        pratiques: ['SOM'],
-        configuration: {
-            methodeCalcul: 'moyenne-ponderee',
-            evaluations: [
-                { id: 1, nom: 'Rédaction 1', type: 'redaction', ponderation: 15 },
-                { id: 2, nom: 'Rédaction 2', type: 'redaction', ponderation: 20 },
-                { id: 3, nom: 'Dissertation/Analyse', type: 'dissertation', ponderation: 35 },
-                { id: 4, nom: 'Portfolio', type: 'portfolio', ponderation: 30 }
-            ],
-            criteres: {
-                type: 'fixes',
-                liste: [
-                    'Exploitation adéquate du genre',
-                    'Qualité de la problématisation',
-                    'Qualité de l\'argumentation',
-                    'Définition et utilisation des concepts'
-                ]
-            },
-            particularites: {
-                portfolioFormatif: true,
-                erreursNonPenalisees: true,
-                progressionEvaluee: true
-            }
-        },
-        seuils: {
-            vaBien: 70,
-            difficulte: 60,
-            grandeDifficulte: 50
-        }
-    },
-
-    // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Littérature
-    // Sommative avec critères fixes et double verrou
+    // MODÈLE SOMMATIF — la seule famille qui n'aurait plus aucun modèle sans lui
+    // Sommative avec critères fixes et double verrou. #687 : le nom ne se
+    // réclame plus d'une discipline ; l'origine est dans la `description`.
     // ============================================================================
     'SOM-litterature': {
         id: 'SOM-litterature',
-        nom: 'SOM Littérature',
-        description: 'Sommative avec analyse finale 50% (double verrou). Portfolio 20%. Critères fixes.',
+        // #687 — LE NOM NE SE RÉCLAME PLUS D'UNE DISCIPLINE. Il est conservé
+        // parce qu'il vient d'une PRATIQUE RÉELLE, pas parce qu'il illustre une
+        // matière : sans lui, la famille sommative — la plus courante —
+        // n'offrirait aucun modèle. L'origine passe dans la description, où
+        // elle informe au lieu de se présenter comme une offre disciplinaire.
+        // ⚠ L'`id` NE CHANGE PAS : il est la clé d'adoption d'une copie déjà
+        // prise par un utilisateur (`idsExistants` dans la fusion à la lecture).
+        nom: 'Modèle sommatif',
+        description: 'Sommative avec analyse finale 50% (double verrou). Portfolio 20%. Critères fixes. Inspiré d\'une pratique réelle en littérature au collégial.',
         type: 'sommative',
         auteur: 'Gabarit Labo Codex',
-        discipline: 'Littérature',
-        etablissement: 'Cégep de Valleyfield',
+        // 'Général' comme les quatre autres modèles offerts : le champ existe,
+        // et c'est sa VALEUR qui ne doit nommer aucune matière. `etablissement`
+        // part — « Cégep de Valleyfield » désignait un établissement réel pour
+        // un gabarit que personne là-bas n'a validé.
+        discipline: 'Général',
         estGabarit: true,
         pratiques: ['SOM'],
         configuration: {
@@ -316,55 +185,6 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         }
     },
 
-    // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Biologie
-    // PAN-Standards avec jugement global (holistique)
-    // ============================================================================
-    // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Philosophie
-    // Sommative avec mécanisme de remplacement
-    // ============================================================================
-    'SOM-philo-remplacement': {
-        id: 'SOM-philo-remplacement',
-        nom: 'SOM Philo + Remplacement',
-        description: 'Sommative avec remplacement progressif. Note finale peut remplacer mi-session si supérieure.',
-        type: 'sommative',
-        auteur: 'Gabarit Labo Codex',
-        discipline: 'Philosophie',
-        etablissement: 'Cégep',
-        estGabarit: true,
-        pratiques: ['SOM'],
-        configuration: {
-            methodeCalcul: 'remplacement-progression',
-            evaluations: [
-                { id: 1, nom: 'Examen mi-session', type: 'examen', ponderation: 10, paire: 'examen' },
-                { id: 2, nom: 'Examen final', type: 'examen', ponderation: 20, paire: 'examen', remplace: 1 },
-                { id: 3, nom: 'Texte mi-session', type: 'texte', ponderation: 20, paire: 'texte' },
-                { id: 4, nom: 'Texte final', type: 'texte', ponderation: 40, paire: 'texte', remplace: 3 }
-            ],
-            remplacement: {
-                description: 'Si note finale > note mi-session, elle la remplace',
-                paires: [
-                    { initial: 1, final: 2, poidsInitial: 10, poidsFinal: 20 },
-                    { initial: 3, final: 4, poidsInitial: 20, poidsFinal: 40 }
-                ],
-                regle: 'max'
-            },
-            criteres: {
-                type: 'variables',
-                examens: 'Exactitude (réponses courtes)',
-                textes: 'Argumentation, conceptualisation, problématisation'
-            },
-            autresPoints: {
-                description: 'Notes de lecture, activités classe, textes réflexifs (points de complétion)'
-            }
-        },
-        seuils: {
-            vaBien: 80,
-            difficulte: 60,
-            grandeDifficulte: 50
-        }
-    }
 };
 
 /**
@@ -889,6 +709,22 @@ async function genererSelecteurModelesPratiques(typeFiltre = null) {
         html += '</optgroup>';
     }
 
+    // #687 — L'ÉCRAN NE SE VIDE PLUS EN SILENCE.
+    // Quand aucune configuration ne survit au filtre, le sélecteur ne portait
+    // que « -- Sélectionner une configuration -- » : rien ne distinguait
+    // « aucun modèle pour cette famille » de « la liste n'a pas fini de
+    // charger ». C'est le défaut qu'on vient de corriger ailleurs — choisir une
+    // grille sans échelle ne produisait rien du tout — et retirer cinq gabarits
+    // en rend l'occurrence plus probable, pas moins.
+    // ⚠ Le texte NOMME la famille filtrée quand il y en a une : « aucun modèle »
+    // sans dire de quoi laisse chercher.
+    if (gabaritsFiltres.length === 0 && personnalisesFiltres.length === 0) {
+        const quoi = typeFiltre
+            ? `Aucune configuration pour ce type de pratique`
+            : `Aucune configuration disponible`;
+        html += `<option value="" disabled>${echapperHtml(quoi)} — crée la tienne avec « Enregistrer la configuration »</option>`;
+    }
+
     return html;
 }
 
@@ -983,7 +819,5 @@ window.appliquerModeleSelectionne = appliquerModeleSelectionne;
 window.ouvrirModaleSauvegardeConfig = ouvrirModaleSauvegardeConfig;
 window.CLE_BIBLIOTHEQUE_PRATIQUES = CLE_BIBLIOTHEQUE_PRATIQUES;
 window.MODELES_PRATIQUES_PREDEFINIS = MODELES_PRATIQUES_PREDEFINIS;
-
-
 
 })();

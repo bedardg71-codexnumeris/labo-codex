@@ -138,6 +138,54 @@
         _ajouterEchelle(config, out);
     }
 
+    /**
+     * Les modèles de FORFAITS de spécifications — #687.
+     *
+     * ⚠ CE SONT DES MÉCANIQUES DE REPRISE, PAS DES DISCIPLINES. Ils
+     * s'appelaient « Modèle Sciences », « Modèle Littérature », et leur
+     * description disait « Idéal pour les disciplines scientifiques » : un
+     * enseignant de la « mauvaise » matière était invité à passer son chemin,
+     * alors que ce qui les distingue est le nombre de forfaits et la place
+     * laissée à la reprise. Le nom dit maintenant le mécanisme.
+     *
+     * ⚠⚠ LA `value` NE CHANGE PAS, ET C'EST NON NÉGOCIABLE : elle est
+     * PERSISTÉE dans `pratique.configuration.modeleBundle`
+     * (`wizard-pratique-v2.js:2782`). La renommer réécrirait la configuration
+     * de pratiques déjà créées — ce qu'on ne fait pas aux données de quelqu'un.
+     *
+     * ⮕ LA TABLE VIT ICI, et pas dans le wizard, pour deux raisons mesurées :
+     * ce module est chargé AVANT lui (`index.html` 14532 contre 14545), et il
+     * est PUR — testable sans DOM. Le wizard la lit pour ses options ; il n'y a
+     * donc qu'une source pour ces quatre libellés.
+     */
+    var MODELES_FORFAITS = [
+        { value: 'sciences',     label: 'Forfaits progressifs',
+          description: 'Plusieurs forfaits, du plus exigeant au plus accessible. Les reprises sont limitées.' },
+        { value: 'simple',       label: 'Forfait unique',
+          description: 'Un seul forfait pour tous les travaux. Configuration minimale.' },
+        { value: 'litterature',  label: 'Forfaits flexibles',
+          description: 'Plusieurs forfaits, avec de la place pour la révision et la reprise.' },
+        { value: 'personnalise', label: 'Personnalisé',
+          description: 'Crée tes propres forfaits de spécifications.' }
+    ];
+
+    /**
+     * Le libellé d'un modèle de forfaits, pour l'AFFICHAGE.
+     *
+     * ⚠ Le résumé d'attributs montrait la `value` brute : une pratique créée
+     * avant ce lot affichait « Modèle litterature » — sans accent, et avec le
+     * nom d'une discipline. Débaptiser le wizard sans corriger ceci aurait
+     * laissé le défaut à l'écran pour toutes les pratiques déjà créées.
+     * Une valeur inconnue est rendue telle quelle : mieux vaut un mot brut
+     * qu'un trou.
+     */
+    function libelleModeleForfaits(value) {
+        for (var i = 0; i < MODELES_FORFAITS.length; i++) {
+            if (MODELES_FORFAITS[i].value === value) return MODELES_FORFAITS[i].label;
+        }
+        return value == null ? '' : String(value);
+    }
+
     function _specifiquesSpecifications(config, out) {
         var seuil = _lire(config, 'seuilAcceptabilite');
         out.push(_row('seuilAcceptabilite', 'Seuil d\'acceptabilité',
@@ -145,7 +193,7 @@
         var modele = _lire(config, 'modeleBundle');
         var bundles = _lire(config, 'tableBundles');
         out.push(_row('forfaits', 'Forfaits (bundles)',
-            modele ? ('Modèle ' + modele) : (Array.isArray(bundles) ? (bundles.length + ' palier(s)') : '—')));
+            modele ? libelleModeleForfaits(modele) : (Array.isArray(bundles) ? (bundles.length + ' palier(s)') : '—')));
         _ajouterEchelle(config, out);
     }
 
@@ -207,6 +255,8 @@
     }
 
     var api = {
+        MODELES_FORFAITS: MODELES_FORFAITS,
+        libelleModeleForfaits: libelleModeleForfaits,
         extraire: extraire,
         AXES_ANCRES: AXES_ANCRES.slice()
     };

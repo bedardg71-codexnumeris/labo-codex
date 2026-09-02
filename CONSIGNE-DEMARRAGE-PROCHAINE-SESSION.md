@@ -125,6 +125,90 @@ pas le `AAAAMMJJ`+lettre des autres.
 
 ---
 
+## ÉTAT MESURÉ — 2 SEPTEMBRE 2026, MI-MATINÉE (release 1.109.0, Lot 1 / #687 livré)
+
+> Écrit à la clôture du LOT (règle 4). Chaque chiffre porte sa commande (règle 1).
+
+**Le dépôt** — HEAD sur `main`, arbre propre. **La version** : `cat version.json` rend
+`{"build":"0902-0746","beta":"1.109.0"}`. Quatre points alignés, mesurés PAR TÉMOIN :
+`grep -rl '1\.108\.0' --include=*.js --include=*.json --include=*.html .` rend **0**,
+comme `0902-0652`. **Témoin du périmètre** : `grep -rl '1\.108' .` sur tout le dépôt rend
+encore **6** fichiers de prose datée.
+
+**Les tests** — `cd tests && npm run test:unit` rend **435 fichiers / 4692 tests, code 0**
+(contre 434 / 4675 avant le lot). Sentinelle `sentinelle-687-materiel-sans-discipline.test.js`,
+18 cas, **8 break-testés** un à un.
+
+### Le « fini quand » — le compte, avec sa commande et son témoin
+
+`grep -rniE "(Chimie|Biologie|Philosophie|Géographie|Comptabilité|Sciences|Mathémat|Informatique)" js/`
+
+| | |
+|---|---|
+| **AVANT** | **105** |
+| **APRÈS** | **71** |
+
+⚠ **CE N'EST PAS ZÉRO, ET CE NE DOIT PAS L'ÊTRE.** Les 71 se répartissent en quatre
+natures, et trois sont légitimes :
+
+- **A — DONNÉES OFFICIELLES (24)** : `etudiants.js` (13) et `wizard-pratique-v2.js` (11)
+  portent les **codes de programme du ministère** — « 202 Chimie », « 420 Informatique »,
+  « 340 Philosophie ». Ce sont les choix OFFERTS à l'utilisateur pour déclarer SA matière :
+  l'inverse exact du défaut visé. Les retirer casserait l'écran.
+- **B — COMMENTAIRES documentant un retrait DÉJÀ FAIT (9)** : `echelles-bibliotheque.js`
+  (les huit échelles du 1er sept.), `changelog-data.js` (ce qu'on annonce aux utilisateurs).
+- **C — ATTRIBUTIONS ACADÉMIQUES (6)** : « Linda B. Nilson (2014) et un collègue en chimie ».
+  Une source citée n'est pas une offre. Et `cc-license.js` : « Ex : Littérature, Philosophie »
+  est un *placeholder* de champ, donc un exemple de saisie.
+- **D — LE SEUL RÉSIDU RÉEL (13)** : `js/pratiques/pratiques-predefines.js`. ⮕ **INSCRIT
+  #690**, pas corrigé : il est **VIVANT** (`grep -c PRATIQUES_PREDEFINES
+  js/pratiques/pratique-manager.js` rend **5** ; témoin : **0** sur `pratiques-bibliotheque.js`).
+
+⮕ **La leçon du compte** : le « fini quand » cherchait un MOT ; ce qu'il faut chercher est
+une OFFRE. Le même mot est un défaut dans un libellé de gabarit et une donnée officielle
+dans un code de programme. Le banc #687 traque l'offre, pas le mot, et son commentaire le dit.
+
+### Ce que le lot a fait, au-delà des six points de la consigne
+
+**Deux décisions de périmètre, prises et dites :**
+
+1. **`js/pratiques/config-francois-chimie.js` RETIRÉ** (217 lignes + sa balise). Non nommé
+   à la consigne. Motif : mêmes deux critères que `modele-francois`, qu'elle faisait partir
+   — un **prénom de collègue dans une URL servie aux utilisateurs**, pour du matériel se
+   réclamant d'une discipline — **et zéro lecteur** (`CONFIG_FRANCOIS_CHIMIE` et
+   `creerPratiqueFrancoisChimie` : 0 usage hors du fichier ; le dépôt l'atteste lui-même en
+   `profil-etudiant-sections-affichage.js:1763`, « fonctions de console jamais appelées »).
+2. **`construction-attributs.js` corrigé**, sans quoi le lot ne tenait pas sa promesse :
+   il affichait `'Modèle ' + modeleBundle`, **la valeur brute**. Une pratique créée avant ce
+   lot affichait donc « Modèle litterature » — sans accent, avec le nom d'une discipline.
+   Débaptiser le wizard seul aurait laissé le défaut à l'écran pour toutes les pratiques
+   existantes. La table de libellés vit dans ce module PUR, chargé AVANT le wizard
+   (`index.html` 14532 contre 14545), et le wizard la lit : une seule source.
+   ⚠ **Les `value` persistées n'ont PAS changé** (`configuration.modeleBundle`,
+   `wizard-pratique-v2.js:2782`) : les renommer réécrirait la configuration de pratiques
+   déjà créées.
+
+**Et sept bannières de commentaires ORPHELINES**, laissées par mes propres suppressions
+(« PRATIQUE PERSONNALISÉE : Chimie organique », « : Géographie »…), plus trois commentaires
+périmés par le lot. Retirées dans le même commit. ⮕ C'est le test de `CLAUDE.md` : *est-ce
+que je viens de l'écrire ?* Si oui, ce n'est pas une trouvaille, c'est le lot qui n'est pas fini.
+
+**Le point (6) était un vrai défaut, pas une précaution.** `genererSelecteurModelesPratiques`
+ne rendait que « -- Sélectionner une configuration -- » quand rien ne survivait au filtre :
+rien ne distinguait « aucun modèle » de « la liste n'a pas fini de charger ». Corrigé, et
+l'option est `disabled` — sélectionnable, elle aurait lancé `appliquerModele` sur une chaîne vide.
+
+### Ce qui reste ouvert
+
+- **#688** — `MODELES_SPECIFICATIONS` n'a aucun lecteur et `modele-simple` y reste seul.
+- **#689** — `assurerGrilleGenerique` / `assurerCartoucheGenerique` sèment « de départ ».
+- **#690** — `pratiques-predefines.js` : matériel fictif VIVANT, et des prénoms de collègues
+  dans les `id` (`pan-standards-bruno`, `pan-objectifs-ponderes-michel`…).
+- **Aucune famille ne se vide** (DEN 1, SPE 1, STD 2, SOM 1), mais **personne n'a ouvert
+  l'écran à la main**. Porte terrain.
+
+---
+
 ## ÉTAT MESURÉ — 2 SEPTEMBRE 2026, MATIN (release 1.108.0, Lot B / #581 livré)
 
 > Écrit à la clôture du LOT, pas de la session (règle 4 de `PROTOCOLE.md`).

@@ -88,10 +88,10 @@
      * traces comptent, pénalisant les erreurs initiales).
      *
      * ✅ NOUVEAU (Beta 95) : Ajout de la variante "par-objectifs" avec 4 modes de calcul :
-     * - Comptage (Chimie)
-     * - Moyenne pondérée (Mathématiques)
-     * - Seuils critiques (Informatique)
-     * - Holistique (Biologie)
+     * - Comptage
+     * - Moyenne pondérée
+     * - Seuils critiques
+     * - Holistique
      */
     const VARIANTES_PAN_STANDARDS = {
         'n-meilleurs': {
@@ -111,7 +111,7 @@
         },
         'par-objectifs': {
             nom: 'Par objectifs (4 modes de calcul)',
-            description: 'Évaluation par objectifs d\'apprentissage avec choix du mode de calcul : <strong>Comptage</strong> (Chimie), <strong>Moyenne pondérée</strong> (Mathématiques), <strong>Seuils critiques</strong> (Informatique), ou <strong>Holistique</strong> (Biologie).',
+            description: 'Évaluation par objectifs d\'apprentissage avec choix du mode de calcul : <strong>Comptage</strong>, <strong>Moyenne pondérée</strong>, <strong>Seuils critiques</strong>, ou <strong>Holistique</strong>.',
             exemple: 'Objectifs essentiels/complémentaires | Pondérations variables | Seuils non-linéaires'
         },
         'autre': {
@@ -176,23 +176,28 @@
     // =========================================================================
 
     /**
-     * Les 4 modes de calcul disponibles
+     * Les 4 modes de calcul disponibles.
+     *
+     * ⚠ #687 — CE SONT DES MÉCANIQUES, PAS DES DISCIPLINES. Chacun portait une
+     * matière entre parenthèses (« Comptage (Chimie) »), comme si le mode
+     * appartenait à qui l'avait inspiré. On retire la parenthèse, on ne
+     * supprime rien : le calcul, lui, est réel et sert à tout le monde.
      */
     const MODES_CALCUL_OBJECTIFS = {
         'comptage': {
-            nom: 'Comptage (Chimie)',
+            nom: 'Comptage',
             description: 'Note = nombre d\'objectifs maîtrisés. Plafond si essentiels non maîtrisés.'
         },
         'moyenne-ponderee': {
-            nom: 'Moyenne pondérée (Mathématiques)',
+            nom: 'Moyenne pondérée',
             description: 'Note = moyenne des niveaux × pondération de chaque objectif.'
         },
         'seuils-critiques': {
-            nom: 'Seuils critiques (Informatique)',
+            nom: 'Seuils critiques',
             description: 'Tous les objectifs doivent atteindre niveau 3+. Bonus pour niveau 4.'
         },
         'holistique': {
-            nom: 'Holistique (Biologie)',
+            nom: 'Holistique',
             description: 'Suggestion statistique + validation par l\'enseignant.'
         }
     };
@@ -1011,21 +1016,17 @@
     /**
      * Définitions des modèles prédéfinis pour PAN-Spécifications
      */
+    /**
+     * ⚠ #687 — CETTE CONSTANTE N'A AUCUN LECTEUR, ET C'EST MESURÉ.
+     * `grep -n "MODELES_SPECIFICATIONS" js/*.js js/**\/*.js` rend UNE ligne :
+     * celle-ci. Ni dans ce fichier, ni ailleurs. Les deux entrées qui se
+     * réclamaient d'une discipline sont parties ; `modele-simple` reste SEUL
+     * dans une structure que personne ne lit.
+     * ⮕ Le retrait complet et le passage à `MODELES_PRATIQUES_PREDEFINIS`
+     * comme source unique pour SPE sont INSCRITS (#688), pas exécutés ici :
+     * ils touchent `modele-simple`, hors du périmètre de ce lot.
+     */
     const MODELES_SPECIFICATIONS = {
-        'modele-francois': {
-            nom: 'Modèle Chimie',
-            description: 'Basé sur une pratique en Chimie',
-            typesTravaux: [
-                { id: 1, nom: 'Prise de position', description: 'Travail écrit argumentatif' },
-                { id: 2, nom: 'Test', description: 'Évaluation des connaissances' },
-                { id: 3, nom: 'Portfolio', description: 'Dossier d\'apprentissage' }
-            ],
-            forfaits: [
-                { id: 1, lettre: 'A', note: 100, travaux: { 1: 2, 2: 2, 3: 1 } },
-                { id: 2, lettre: 'B', note: 80, travaux: { 1: 2, 2: 1, 3: 1 } },
-                { id: 3, lettre: 'C', note: 60, travaux: { 1: 1, 2: 1, 3: 0 } }
-            ]
-        },
         'modele-simple': {
             nom: 'Modèle simple',
             description: 'Pour commencer avec PAN-Spécifications',
@@ -1038,20 +1039,6 @@
                 { id: 2, lettre: 'Réussite', note: 70, travaux: { 1: 1, 2: 1 } }
             ]
         },
-        'modele-litterature': {
-            nom: 'Modèle littérature',
-            description: 'Adapté aux cours de français et littérature',
-            typesTravaux: [
-                { id: 1, nom: 'Analyse littéraire', description: 'Analyse d\'un texte ou d\'une œuvre' },
-                { id: 2, nom: 'Dissertation', description: 'Texte argumentatif structuré' },
-                { id: 3, nom: 'Portfolio de lecture', description: 'Traces de lecture et réflexions' }
-            ],
-            forfaits: [
-                { id: 1, lettre: 'A', note: 100, travaux: { 1: 2, 2: 1, 3: 1 } },
-                { id: 2, lettre: 'B', note: 80, travaux: { 1: 2, 2: 1, 3: 0 } },
-                { id: 3, lettre: 'C', note: 60, travaux: { 1: 1, 2: 1, 3: 0 } }
-            ]
-        }
     };
 
     /**

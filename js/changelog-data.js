@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.109',
+            couleur: 'orange',
+            titre: 'Le mat\u00e9riel fourni ne se r\u00e9clame plus d\'une discipline',
+            items: [
+                '<strong>Cinq mod\u00e8les de pratique nomm\u00e9s par discipline sont retir\u00e9s</strong> (Chimie, Comptabilit\u00e9, G\u00e9ographie, Philosophie \u00d72). Ils avaient \u00e9t\u00e9 engendr\u00e9s par une IA, <strong>aucun enseignant de ces mati\u00e8res ne les avait valid\u00e9s</strong>, et leur justesse \u00e9tait inconnue. C\'est la m\u00eame raison qui avait fait retirer les huit \u00e9chelles disciplinaires. ⚠ <strong>Si tu en avais adopt\u00e9 un dans tes propres pratiques, ta copie reste telle quelle</strong> — elle t\'appartient.',
+                '<strong>Il reste au moins un mod\u00e8le par famille</strong> (jugement, sp\u00e9cifications, standards, sommative). Le mod\u00e8le sommatif est conserv\u00e9 et s\'appelle maintenant « Mod\u00e8le sommatif » : il vient d\'une pratique r\u00e9elle au coll\u00e9gial, ce que sa description dit d\u00e9sormais, au lieu de se pr\u00e9senter comme le mod\u00e8le d\'une mati\u00e8re.',
+                '<strong>Les quatre modes de calcul par objectifs perdent leur \u00e9tiquette de mati\u00e8re.</strong> « Comptage (Chimie) » devient « Comptage », et ainsi de suite : ce sont des m\u00e9caniques de calcul, utilisables dans n\'importe quelle discipline. Rien n\'est supprim\u00e9, seulement d\u00e9baptis\u00e9.',
+                '<strong>Les mod\u00e8les de forfaits disent ce qu\'ils font</strong> : « Forfaits progressifs », « Forfait unique », « Forfaits flexibles » — au lieu de « Mod\u00e8le Sciences » et « Mod\u00e8le Litt\u00e9rature », qui invitaient une discipline \u00e0 se reconna\u00eetre. Tes pratiques d\u00e9j\u00e0 cr\u00e9\u00e9es affichent le nouveau nom sans rien changer \u00e0 leur configuration.',
+                '<strong>Quand aucun mod\u00e8le n\'est disponible, l\'\u00e9cran le dit</strong> au lieu de rester vide sans explication.'
+            ]
+        },
+        {
             version: '1.108',
             couleur: 'vert',
             titre: 'Une r\u00e9troaction ne parle que de ta discipline',
