@@ -37,20 +37,31 @@
 #     plus vite que les 12,5 min du job — et une bonne part de ces runs partait
 #     sur des commits PUREMENT DOCUMENTAIRES.
 #
-# (4) 2 SEPTEMBRE 2026 — LE PLAFOND COUPAIT PLAYWRIGHT EN PLEIN VOL. Une fois
-#     Vitest redevenu vert sous Node 20 (le bac à sable de #635 n'exposait pas
-#     `navigator`, ed6aac3c), le job a atteint Playwright pour la première fois
+# (4) 2 SEPTEMBRE 2026 — DEUX CAUSES MESURÉES, DEUX DÉCISIONS.
+#     Une fois Vitest redevenu vert sous Node 20 (le bac à sable de #635 n'exposait
+#     pas `navigator`, ed6aac3c), le job a atteint Playwright pour la première fois
 #     depuis le 31 août — et s'est fait annuler par `timeout-minutes: 15` :
 #     15 min 26 au total, ~3 min d'installation et de Vitest, puis 12,5 min de
 #     Playwright pour 105 specs sur 239, 0 échec, `The operation was canceled`.
-#     Ce plafond datait d'une suite de 88-93 specs (point 2) ; elle en compte
-#     239. Mesuré ~7 s par spec sur ce runner (2 s sur la machine de Grégoire).
-#     ⮕ Plafond relevé à 40 : projection 239 × 7 s + 3 min ≈ 31 min, plus un
-#     tiers de marge. C'est une PROJECTION depuis 105 specs, pas une mesure ;
-#     si un run réel la dépasse, on le DIT, on ne remonte pas le chiffre en
-#     boucle. Écarté ce soir par Grégoire : les shards (raccourcissent l'attente,
-#     pas la facture). Lot suivant, distinct : ne plus lancer 239 essais en
-#     navigateur à chaque push.
+#     a) Le plafond datait d'une suite de 88-93 specs (point 2) ; elle en compte
+#        239, à ~7 s l'une sur ce runner (2 s sur la machine de Grégoire).
+#        ⮕ Plafond du job Playwright relevé à 40 : projection 239 × 7 s + 3 min
+#        ≈ 31 min, plus un tiers de marge. PROJECTION depuis 105 specs, pas une
+#        mesure : si un run réel la dépasse, on le dit, on ne remonte pas le
+#        chiffre en boucle. Le plafond se déplace, il ne disparaît pas.
+#     b) 239 essais en navigateur à chaque push, sur un compte dont le quota a
+#        déjà été épuisé (point 1) : relever le plafond seul aurait fait passer
+#        chaque push de code de 12,5 à ~31 min. Décision de Grégoire : « je ne
+#        crois pas que 239 essais en navigateur doivent tourner à chaque push ».
+#        ⮕ Le workflow devient DEUX jobs. `vitest` juge tout ce qui déclenche la
+#        CI. `playwright` ne tourne que si le push touche quelque chose
+#        d'OBSERVABLE AU NAVIGATEUR — la liste `OBSERVABLE` du job `vitest`, une
+#        seule source, lue par le shell ET par le cliquet
+#        (tests/unit/sentinelle-ci-paths-ignore.test.js, bloc 2). Un job sauté
+#        est `skipped`, jamais `success` : le rituel d'ouverture (§2.1 du skill
+#        debut-de-session) lit les JOBS, pas le run, et distingue jugé-vert,
+#        jugé-rouge et NON JUGÉ. Écarté par Grégoire : les shards (ils
+#        raccourcissent l'attente, pas la facture).
 #
 # Deux leviers, dans l'ordre de poids :
 #   1. `paths-ignore` — un commit qui ne touche que de la doc ne déclenche plus
@@ -106,12 +117,98 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tests:
-    name: Vitest + Playwright (WebKit)
+  # ── Job 1 : Vitest, TOUJOURS. Et il décide si le job 2 doit tourner. ──
+  vitest:
+    name: Vitest
     runs-on: ubuntu-latest
-    # 2 sept. 2026 : 15 -> 40. Voir le point (4) du journal en tete. Le plafond
-    # se DEPLACE, il ne disparait pas : un job sans limite qui part en boucle
-    # consomme des minutes jusqu'a epuisement.
+    timeout-minutes: 15
+    outputs:
+      playwright: ${{ steps.decision.outputs.playwright }}
+    env:
+      # ⚠ UNE SEULE SOURCE DE VÉRITÉ, deux lecteurs : le shell de l'étape
+      # « Décider » ci-dessous, et le cliquet tests/unit/sentinelle-ci-paths-ignore
+      # (bloc 2), qui vérifie qu'aucun spec Playwright ne LIT un chemin absent
+      # d'ici. Une entrée finissant par `/` couvre le dossier ; sinon, c'est un
+      # fichier exact. Playwright ouvre index.html en file:// : tout ce
+      # qu'index.html charge est observable (js/, css/, icons/, styles.css,
+      # version.js) ; s'y ajoutent ce que les specs lisent (version.json,
+      # scripts/, tests/) et ce workflow lui-même, qui doit se juger.
+      OBSERVABLE: "js/ css/ icons/ img/ libs/ index.html styles.css version.js version.json noms_stables.json scripts/ tests/ .github/workflows/tests.yml"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # L'historique complet : `git diff` doit pouvoir atteindre
+          # `github.event.before`, qui peut être plusieurs commits derrière.
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: tests/package-lock.json
+
+      - name: Install dependencies
+        working-directory: tests
+        run: npm ci
+
+      - name: Run unit tests (Vitest)
+        working-directory: tests
+        run: npm run test:unit
+
+      - name: Décider si Playwright doit tourner
+        id: decision
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="${{ github.event.before }}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          fi
+          decision=oui
+          raison=""
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ] \
+             || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            raison="base introuvable (premier push, branche neuve ou push forcé) : on juge tout"
+          else
+            fichiers=$(git diff --name-only "$BASE" "${{ github.sha }}")
+            decision=non
+            touches=""
+            while IFS= read -r f; do
+              [ -z "$f" ] && continue
+              for e in $OBSERVABLE; do
+                case "$e" in
+                  */) case "$f" in "$e"*) decision=oui; touches="$touches $f";; esac ;;
+                  *)  [ "$f" = "$e" ] && { decision=oui; touches="$touches $f"; } ;;
+                esac
+              done
+            done <<< "$fichiers"
+            if [ "$decision" = oui ]; then
+              raison="fichiers observables au navigateur dans ce push :$touches"
+            else
+              raison="aucun fichier observable au navigateur dans ce push ($(echo "$fichiers" | grep -c . ) fichier(s), tous hors de : $OBSERVABLE)"
+            fi
+          fi
+          echo "playwright=$decision" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Playwright : ${decision^^}"
+            echo ""
+            echo "$raison"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "Playwright : $decision — $raison"
+
+  # ── Job 2 : Playwright, SEULEMENT si le push touche du code observable. ──
+  # ⚠ Sauté = `skipped`, jamais `success`. C'est ce que le rituel d'ouverture lit.
+  playwright:
+    name: Playwright (WebKit)
+    needs: vitest
+    if: needs.vitest.outputs.playwright == 'oui'
+    runs-on: ubuntu-latest
+    # 2 sept. 2026 : 15 -> 40. Voir le point (4a) du journal en tête. Le plafond
+    # se DÉPLACE, il ne disparaît pas : un job sans limite qui part en boucle
+    # consomme des minutes jusqu'à épuisement.
     timeout-minutes: 40
 
     steps:
@@ -148,10 +245,6 @@ jobs:
         if: steps.cache-webkit.outputs.cache-hit != 'true'
         working-directory: tests
         run: npx playwright install webkit
-
-      - name: Run unit tests (Vitest)
-        working-directory: tests
-        run: npm run test:unit
 
       - name: Run integration tests (Playwright WebKit)
         working-directory: tests
