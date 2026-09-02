@@ -188,8 +188,8 @@ exemples et modèle de menaces : skill `securite-donnees`.)
    fonction pure → Vitest `tests/unit/` ; navigateur → Playwright `tests/integration/`.
 
 Avant un commit touchant `js/securite-*.js`, `js/import-export.js`,
-`js/cc-license.js` ou la CSP d'`index.html` : `cd tests && npm test`.
-Documentation : `docs/securite/TESTS-AUTOMATISES.md`.
+`js/cc-license.js` ou la CSP : `cd tests && npm test` — il enchaîne Vitest ET
+Playwright (>10 min) ; Vitest seul = `npm run test:unit`. Doc : `docs/securite/TESTS-AUTOMATISES.md`.
 
 ---
 
