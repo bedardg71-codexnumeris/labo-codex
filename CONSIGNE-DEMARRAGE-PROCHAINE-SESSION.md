@@ -125,6 +125,130 @@ pas le `AAAAMMJJ`+lettre des autres.
 
 ---
 
+## ÉTAT MESURÉ — 2 SEPTEMBRE 2026, MATIN (release 1.108.0, Lot B / #581 livré)
+
+> Écrit à la clôture du LOT, pas de la session (règle 4 de `PROTOCOLE.md`).
+> Chaque chiffre porte sa commande (règle 1). Les commandes se rejouent.
+
+**Le dépôt** — `git log --oneline -1` rend `181d608a`. `git rev-list --count
+origin/main..HEAD` rend **2** : le lot (`f2ef0910`) et le tri de la consigne de
+Cowork (`181d608a`), délibérément séparés. `git status --short` rend **vide**.
+⚠ **Ces deux commits ne sont pas encore poussés** — la relecture croisée
+(règle 2) précède le verdict, qui précède le push.
+
+**La version** — `cat version.json` rend `{"build":"0902-0652","beta":"1.108.0"}`.
+Les QUATRE points de vérité sont alignés, mesurés PAR TÉMOIN :
+`grep -rl '1\.107\.0' --include=*.js --include=*.json --include=*.html .` rend
+**0**, comme `0901-2050` et `09012050`. **Témoin du périmètre** : `grep -rl
+'1\.107' .` sur tout le dépôt rend encore **7** fichiers de prose datée — la
+mesure mesure donc bien quelque chose. Le bump est passé par `scripts/release.mjs`.
+
+⚠ **UNE PRÉMISSE TRANSPORTÉE ÉTAIT PÉRIMÉE, ET ELLE EST CORRIGÉE ICI** :
+`release.mjs` **bumpe bien** les jetons anti-cache `?v=` d'`index.html` — il en a
+bumpé **11** ce matin, et il les liste. Une note retenue du 29 juin affirmait
+l'inverse (« bump manuel, ~115 en retard »). Règle 1(b) : une connaissance
+transportée se remesure. `node scripts/release.mjs minor --dry-run` le montre
+sans rien écrire.
+
+**Les tests** — `cd tests && npm run test:unit` rend **434 fichiers / 4670 tests,
+code 0**. **Témoin que la mesure mesure** : avant réparation des quatre bancs qui
+construisent un faux `window`, la même commande rendait **4 fichiers et 12 cas
+rouges**. La dépendance au nouveau registre était donc réelle, pas un artefact —
+ces bancs chargent maintenant le VRAI registre, comme ils chargent déjà celui des
+formules depuis #667.
+
+⏳ **Le verdict Playwright n'est PAS pris** : il est le dernier geste avant le
+push, jamais avant la relecture. Trois spécs de grille ont toutefois été lancées
+seules pour départager, en 9,1 s :
+`cd tests && npx playwright test integration/repertoires-grilles-T1-rendu.spec.js
+integration/grille-changee-donnees-algo-645.spec.js
+integration/evaluation-grille-sans-echelle-le-dit.spec.js` → **5 passed**.
+
+---
+
+### Le lot #581 — ce qui est fait, et comment c'est vérifié
+
+**Zéro littéral de discipline dans le moteur.** La commande de contrôle du mandat,
+rejouée : `grep -n "Français écrit\|Erreurs de français\|Français : \|Ta rédaction
+contient\|qualité du français" js/synthese-retroaction-rendu.js
+js/synthese-retroaction-data.js js/evaluation-retroaction.js js/evaluation-calcul.js`
+rend **7 lignes, toutes des COMMENTAIRES** qui décrivent le défaut corrigé — zéro
+littéral de code. **Témoin** : le même motif rend **277** lignes sur
+`js/pack-demo-20.js` (données de démonstration, hors périmètre) et **7** sur
+`js/evaluation-enonces.js`, le registre, qui DOIT les porter.
+
+**⚠ HUIT LITTÉRAUX, PAS SEPT.** `evaluation-retroaction.js` portait « Aucun tampon
+ni erreur de français annotés. » — l'état vide du volet spécifique. La commande de
+contrôle du mandat ne cherche pas ce motif-là. Trouvé par un périmètre plus large :
+`grep -nEi "français|francais"` sur les quatre fichiers. ⮕ **La leçon n'est pas
+« il en manquait un », c'est qu'une commande de contrôle prouve ce qu'elle
+cherche, jamais l'absence.**
+
+**⚠ TROIS COMMENTAIRES PÉRIMÉS, PAS DEUX.** Les deux du mandat
+(`evaluation-calcul.js`, `evaluation-retroaction.js`) plus
+`synthese-retroaction-data.js:411`, qui citait « ex. Français écrit : "Ta
+rédaction contient X erreurs…" ». Corrigés dans le même commit.
+
+**Le texte d'hier est reproduit AU CARACTÈRE PRÈS — prouvé en navigateur, pas
+seulement en Node.** Le spec `grille-changee-donnees-algo-645.spec.js` imprime la
+rétroaction que la vraie chaîne produit sur le pack de démo :
+« Ta rédaction contient 7 erreurs de français pour 460 mots. Tu fais en moyenne
+1 erreur à chaque 66 mots. En prévision de l'EUF, ce ratio est bien. »
+⮕ Cela prouve d'un coup que le registre est CHARGÉ par `index.html`, que la
+migration à la lecture choisit le bon modèle sur le nom du critère, et que la
+projection EUF (#668) continue de s'y agréger. Un banc Node n'aurait montré aucun
+des trois.
+
+**La sentinelle** — `tests/unit/sentinelle-581-enonces-sans-discipline.test.js`,
+31 cas. **11 BREAK-TESTÉS un à un** : chacun a été rendu ROUGE par une mutation,
+puis restauré. ⚠ **Le 11e n'a rougi qu'au second essai** : la première mutation
+retirait la clé `decompte` du schéma d'import alors que le cas lit `concentre`.
+Un break-test qui passe est un break-test mal ciblé, pas une sentinelle solide.
+
+**Ce qui a été CORRIGÉ dans l'acquis non commité** trouvé dans l'arbre en début de
+session (deux fichiers modifiés + `js/evaluation-enonces.js` non suivi, que la
+prémisse du matin ne mentionnait pas) :
+1. le module n'était **chargé nulle part** — `grep -rn "evaluation-enonces"
+   index.html tests/ scripts/` rendait **0**. `window.enoncesAlgo` n'existait
+   donc pas au runtime, et les deux sites recâblés repliaient en silence ;
+2. le repli de TITRE servait aussi en milieu de PHRASE : « Concentre-toi sur
+   **Erreurs annotées** » partait vers un élève ;
+3. `rendre()` refermait le trou d'un jeton en repassant sur TOUT le texte —
+   « Attention : 3 erreurs ; revois ! » ressortait « Attention: 3 erreurs;
+   revois! ». **Le registre réécrivait la typographie française de l'enseignant,
+   dans un lot dont tout l'objet est de respecter sa prose.**
+
+**Une décision de Grégoire, prise sur les chiffres** (2 sept.) : le décompte
+générique ne porte PAS le nom du critère — « Ta production contient 12 erreurs
+pour 500 mots. » La condition posée par Cowork a été **mesurée avant de trancher** :
+les DEUX consommateurs de `donneesAlgorithmiques[].retroaction` affichent déjà le
+nom à côté (`evaluation-retroaction.js:162` en en-tête de paragraphe,
+`synthese-retroaction-rendu.js:363-370` en colonne de gauche du PDF). Aucun chemin
+ne sort la phrase nue.
+
+**Le périmètre a été ÉLARGI d'un cran, et c'est assumé** : le bloc de gabarit
+(`rendreBlocEnoncesAlgo` + 4 handlers dans `grilles.js`) n'était pas nommé au
+mandat. Motif : le mandat exige « un modèle **réglable depuis le gabarit** » —
+sans l'UI, rien n'est réglable, `modeleEnonces` n'est jamais écrit, et les deux
+schémas de transport déclareraient des champs morts, ce que la zéro-dette
+interdit. Classes et variables CSS vérifiées définies dans `styles.css` (#679) ;
+zéro handler inline, zéro `console.log`.
+
+### Ce qui reste ouvert sur ce lot
+
+- **Le stock n'est pas touché, et c'est voulu.** Les évaluations enregistrées
+  gardent leur texte gelé dans `donneesAlgorithmiques[id].retroaction`. On tarit
+  la source. Régénérer écraserait le paragraphe de catégorie dominante.
+- **`js/pratiques/pratique-sommative.js:648`** sert toujours « Services adaptés
+  (SA) » et « Centre d'aide (CAF) » à tout le monde. Hors périmètre du lot,
+  même famille, toujours ouvert pour l'énoncé 4.
+- **#539** (le mot gravé dans les identifiants de champs du volet confidentiel)
+  n'est pas traité : identifiants, pas texte à l'écran.
+- **L'écran du gabarit n'a été éprouvé par personne à la main.** Les trois spécs
+  de grille passent, mais aucune n'ouvre le nouveau bloc. C'est une porte terrain.
+
+---
+
 ## ÉTAT MESURÉ — 1er SEPTEMBRE 2026, NUIT (après la release 1.107.0)
 
 *↻ Écrit par Claude Code à la clôture du lot Netlify + release. Le bloc de fin

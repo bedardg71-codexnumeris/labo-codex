@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 1er septembre 2026, dans la nuit (huitième passe).**
+**Dernière mise à jour : 2 septembre 2026, au matin (neuvième passe) — release 1.108.0.**
 
 ---
 
@@ -37,7 +37,7 @@ mentaient dans les deux sens :
 
 ---
 
-## Le compte du jour : 4 faits, 2 éprouvés par Grégoire, 3 pas faits, 0 jamais vérifié
+## Le compte du jour : 5 faits, 2 éprouvés par Grégoire, 2 pas faits, 0 jamais vérifié
 
 ---
 
@@ -75,27 +75,49 @@ maintenant avec la grille. L'évaluation du destinataire ne bascule plus de mode
 **Vérifié comment** : tests automatiques sur le transport —
 `cd tests && npm run test:unit` (433 fichiers / 4638 tests, code 0). *(#669)*
 
+### Une rétroaction ne parle que de la discipline de celui qui l'écrit
+Un enseignant qui compte des erreurs de calcul ne voit plus son critère rebaptisé
+« Français écrit » dans le PDF remis à son élève, et la phrase engendrée ne dit
+plus « Ta rédaction contient N erreurs de français ». Le titre porte le nom qu'il
+a donné à son critère ; les quatre phrases se règlent depuis le gabarit de la
+grille et voyagent avec elle quand il la partage.
+**Vérifié comment** : la commande de contrôle du mandat —
+`grep -n "Français écrit\|Erreurs de français\|Français : \|Ta rédaction contient\|qualité du français"`
+sur les quatre fichiers du moteur — rend **7 lignes, toutes des COMMENTAIRES**
+décrivant le défaut corrigé, zéro littéral de code. **Témoin** : le même motif
+rend **277** lignes sur `js/pack-demo-20.js` (données de démonstration) et **7**
+sur `js/evaluation-enonces.js`, le registre qui doit les porter — la mesure
+mesure donc bien quelque chose. Sentinelle de 31 cas, **11 break-testés**
+(`cd tests && npm run test:unit` → 434 fichiers / 4670 tests, code 0).
+⮕ **Et la fidélité est prouvée en NAVIGATEUR, pas seulement en Node** :
+`cd tests && npx playwright test integration/grille-changee-donnees-algo-645.spec.js`
+imprime la rétroaction que la vraie chaîne produit — « Ta rédaction contient 7
+erreurs de français pour 460 mots. » — pour un critère nommé « français ». Les
+élèves de Grégoire ne voient aucune différence.
+⚠ **Ce que ça ne règle pas** : les évaluations DÉJÀ enregistrées gardent leur
+texte gelé, et c'est voulu — on tarit la source, on ne réécrit pas ce qui est
+chez les gens. `js/pratiques/pratique-sommative.js` sert toujours « Services
+adaptés » et « Centre d'aide » à tout le monde, et le mot reste gravé dans les
+identifiants de champs du volet confidentiel. **L'écran du gabarit n'a été
+parcouru par personne à la main.** *(#581 ; restent #440 résiduel, #539)*
+
 ### Le numéro de version affiché correspond au code qui tourne
 Sans ça, aucun rapport de bug n'est interprétable, ni le sien ni celui d'un
 utilisateur.
 **Vérifié comment** : tests sur le bandeau de version, et les quatre points de
-vérité mesurés PAR TÉMOIN à la release 1.107.0 —
-`grep -rl 1.106.15 --include=*.js --include=*.json --include=*.html .` rend **0**,
-comme `0901-1354` et `09011354`. ⚠ Le témoin dit aussi son périmètre : sur tout le
-dépôt, `1.106.15` rend encore 3 fichiers de prose datée.
-⚠ **Fragile** : ça se re-périme à chaque changement de version fait à la main.
-⮕ Re-vérifié le 1er sept. au soir, après six commits `js/` livrés sans bump : la
-ligne était re-périmée, la release 1.107.0 l'a remise à jour. *(#665)*
+vérité mesurés PAR TÉMOIN à la release **1.108.0** —
+`grep -rl 1.107.0 --include=*.js --include=*.json --include=*.html .` rend **0**,
+comme `0901-2050` et `09012050`. ⚠ Le témoin dit aussi son périmètre : sur tout le
+dépôt, `1.107` rend encore 7 fichiers de prose datée.
+⚠ **Fragile** : ça se re-périme à chaque release, et cette ligne-ci en est la
+preuve — elle citait encore 1.107.0 une heure après que 1.108.0 fut posée.
+⮕ Le bump est passé par `scripts/release.mjs`, qui écrit les quatre points de
+façon atomique **et** bumpe les jetons anti-cache d'`index.html` (11 ce matin,
+qu'il liste). Le danger reste le bump fait à la main, et lui seul. *(#665)*
 
 ---
 
 ## PAS FAIT
-
-### Une rétroaction ne parle que de la discipline de celui qui l'écrit
-Un enseignant de chimie qui compte des erreurs voit encore « **Français écrit** »
-imprimé dans le PDF remis à son élève. Le même mot est gravé dans les
-identifiants de champs du volet confidentiel.
-**C'est le prochain lot.** *(#581, #539)*
 
 ### Aucune note remise ne repose sur une pondération incomplète sans le dire
 Un critère laissé sans niveau donne **0,0 %**, sans un mot, et ce zéro
