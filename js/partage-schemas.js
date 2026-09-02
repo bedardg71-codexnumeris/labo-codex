@@ -259,6 +259,31 @@
                                 texteAide: { type: 'chaine', max: 5000 }
                             }
                         },
+                        // #581 — LES ÉNONCÉS D'UN CRITÈRE ALGORITHMIQUE VOYAGENT.
+                        // Troisième fois que ce trou se creuse, après #667 (la
+                        // formule) et #668 (la projection) : la projection ne
+                        // copie que les champs déclarés ici. Sans ces deux
+                        // lignes, un critère dont l'auteur·e a réécrit les
+                        // phrases arriverait chez le destinataire avec les
+                        // phrases par défaut — sans un mot, puisque les phrases
+                        // continueraient de sortir.
+                        // ⚠ DEUX champs, et `modeleEnonces` est celui qui décide
+                        // du modèle : transporter les textes sans lui les ferait
+                        // lire sous un modèle reconstitué depuis le NOM du
+                        // critère, qui peut ne pas être celui qu'on a réglé.
+                        modeleEnonces: { type: 'chaine', max: 60 },
+                        // ⚠ Schéma FERMÉ, quatre clés nommées. Une chaîne VIDE
+                        // est signifiante — elle fait taire l'énoncé — et doit
+                        // donc traverser telle quelle.
+                        enonces: {
+                            type: 'objet',
+                            schema: {
+                                decompte:  { type: 'chaine', max: 2000 },
+                                priorite:  { type: 'chaine', max: 2000 },
+                                concentre: { type: 'chaine', max: 2000 },
+                                aucune:    { type: 'chaine', max: 2000 }
+                            }
+                        },
                         // #669 — LES ONZE RÉTROACTIONS DE FRANÇAIS SE PERDAIENT
                         // AUSSI AU PARTAGE. #511 a comblé ce trou du côté
                         // import/export le 25 août (`5cca483b`) sans ouvrir ce

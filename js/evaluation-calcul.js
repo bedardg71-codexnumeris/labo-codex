@@ -499,11 +499,23 @@ function _trouverCodeDominant(codesSousCriteres) {
 }
 
 function _construireRetroactionAlgoCategories(critereId, totalErreurs, sommePonderee, mots, scDominant) {
-    let retroaction = `Ta rédaction contient ${totalErreurs} erreur${totalErreurs > 1 ? 's' : ''} de français`;
-    if (scDominant && scDominant.retroaction && Math.abs(sommePonderee - totalErreurs) > 0.01) {
-        retroaction += ` (${sommePonderee.toFixed(1)} points)`;
-    }
-    retroaction += ` pour ${mots} mots.`;
+    // #581 — LA PHRASE VIENT DU GABARIT DE LA GRILLE, PLUS DU MOTEUR. Elle
+    // disait « Ta rédaction contient N erreurs de français » à TOUT critère
+    // algorithmique : celui qui compte des erreurs de calcul comme celui qui
+    // compte des fautes d'orthographe. Même geste que #667 (les formules) et
+    // #668 (la projection).
+    // ⚠ LA MENTION PONDÉRÉE RESTE CALCULÉE ICI, pas dans le registre : c'est
+    // une donnée du calcul, pas un choix de rédaction. Elle arrive comme le
+    // jeton {points}, avec son espace de tête, exactement là où elle était.
+    const critereEnonces = _critereDeGrille(critereId);
+    const mentionPoints = (scDominant && scDominant.retroaction && Math.abs(sommePonderee - totalErreurs) > 0.01)
+        ? ` (${sommePonderee.toFixed(1)} points)`
+        : '';
+    let retroaction = window.enoncesAlgo.enonce(critereEnonces, 'decompte', {
+        erreurs: totalErreurs,
+        mots: mots,
+        points: mentionPoints
+    });
     // #668 — LE COMPTE BRUT, PAS LA SOMME PONDÉRÉE. Comportement d'avant,
     // conservé tel quel : la note suit la pondération par catégorie, la
     // projection suit le nombre d'erreurs réellement commises. Les deux
@@ -603,7 +615,10 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
 /**
  * Calcule la note algorithmique SIMPLE (sans catégorisation des erreurs)
  * Formule: Note = Pondération − (Total Erreurs ÷ Mots × Facteur)
- * Rétroaction générique: "Ta rédaction contient X erreurs de français pour Y mots."
+ * Rétroaction générique : l'énoncé `decompte` du gabarit de la grille (#581),
+ * rendu par `window.enoncesAlgo`. La chaîne « Ta rédaction contient X erreurs
+ * de français pour Y mots. » n'est plus écrite ici : c'est le défaut du modèle
+ * `discipline_francais`, choisi quand le nom du critère dit « français ».
  *
  * @param {string} critereId - ID du critère
  * @param {number} ponderation - Pondération du critère (ex: 30)
@@ -677,7 +692,11 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     _appliquerStyleResultatAlgo(critereId, niveauIDME);
 
     // Construire la rétroaction générique simple
-    let retroactionGenerique = `Ta rédaction contient ${erreurs} erreur${erreurs > 1 ? 's' : ''} de français pour ${mots} mots.`;
+    // #581 — même registre que le mode catégories ci-dessus : la phrase est
+    // celle que le gabarit de la grille porte, et elle ne nomme aucune
+    // discipline que son auteur·e n'a pas écrite.
+    let retroactionGenerique = window.enoncesAlgo.enonce(
+        _critereDeGrille(critereId), 'decompte', { erreurs: erreurs, mots: mots });
 
     // Ajouter la rétroaction EUF (Épreuve Uniforme de Français)
     const retroactionEUF = _projectionEUF(critereId, erreurs, mots);

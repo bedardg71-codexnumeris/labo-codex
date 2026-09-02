@@ -469,13 +469,21 @@ function genererRetroactionSpecifique() {
         });
     }
 
-    // Erreurs de français
+    // Erreurs annotées sur la copie
+    // #581 — le titre et l'état vide nommaient « français » à toute discipline.
+    // Le nom vient du critère algorithmique de la grille ; l'état vide vient du
+    // gabarit. Les deux sont des DONNÉES UTILISATEUR posées dans `innerHTML` :
+    // `echapperHtml` n'est pas optionnel (règle 1 de `CLAUDE.md`).
+    var ech581 = function(t) { return (typeof echapperHtml === 'function') ? echapperHtml(String(t == null ? '' : t)) : ''; };
+    var critereAlgo581 = window.enoncesAlgo.critereAlgorithmique(_chargerGrilleDefBilan(
+        (typeof evaluationEnCours !== 'undefined' && evaluationEnCours) ? evaluationEnCours.grilleId : null));
+
     if (totalErreurs > 0) {
         var codesErreurs = travauxOutils.CODES_ERREURS_FR;
         var retroFr = travauxOutils.obtenirRetroactionsErreursFr();
         var typesTriees = Object.keys(erreurs).sort(function(a, b) { return erreurs[b] - erreurs[a]; }).slice(0, 3);
 
-        html += '<h5>Erreurs de français (' + totalErreurs + ')</h5>';
+        html += '<h5>' + ech581(window.enoncesAlgo.libelleCritere(critereAlgo581)) + ' (' + totalErreurs + ')</h5>';
         typesTriees.forEach(function(type) {
             var codeDef = codesErreurs.find(function(c) { return c.id === type; });
             var nom = codeDef ? codeDef.nom : type;
@@ -484,7 +492,10 @@ function genererRetroactionSpecifique() {
     }
 
     if (!html) {
-        html = '<p class="eval-vide">Aucun tampon ni erreur de français annotés.</p>';
+        // #581 — HUITIÈME LITTÉRAL, absent de la liste des sept : la commande de
+        // contrôle du mandat ne cherchait pas ce motif-là. Trouvé le 2 septembre
+        // par `grep -nEi "français|francais"` sur les quatre fichiers.
+        html = '<p class="eval-vide">' + ech581(window.enoncesAlgo.enonce(critereAlgo581, 'aucune', {})) + '</p>';
     }
 
     conteneur.innerHTML = html;
@@ -755,7 +766,9 @@ function _detecterAlgoA0Bilan(grilleDef, ec, totalErreursFr) {
         if (ec.donneesAlgorithmiques && ec.donneesAlgorithmiques[gc.id]) {
             var da = ec.donneesAlgorithmiques[gc.id];
             if (da.pourcentage !== undefined && da.pourcentage <= 0 && da.erreurs > 0) {
-                algoA0 = { critereNom: gc.nom, erreurs: da.erreurs, mots: da.mots };
+                // #581 — le CRITÈRE voyage, pas seulement son nom : c'est lui
+                // qui porte le modèle d'énoncé réglé dans le gabarit.
+                algoA0 = { critere: gc, critereNom: gc.nom, erreurs: da.erreurs, mots: da.mots };
             }
         }
         // Source 2 : comptage direct des codes d'erreur annotés
@@ -773,7 +786,7 @@ function _detecterAlgoA0Bilan(grilleDef, ec, totalErreursFr) {
             });
             var noteEstimee = resEstimee.applicable ? resEstimee.note : null;
             if (noteEstimee !== null && noteEstimee <= 0) {
-                algoA0 = { critereNom: gc.nom, erreurs: totalErreursFr, mots: motsEstime };
+                algoA0 = { critere: gc, critereNom: gc.nom, erreurs: totalErreursFr, mots: motsEstime };
             }
         }
     });
@@ -782,7 +795,15 @@ function _detecterAlgoA0Bilan(grilleDef, ec, totalErreursFr) {
 
 function _rendreAlgoA0Bilan(algoA0) {
     if (!algoA0) return '';
-    return '<p>- <strong>la qualité du français écrit est à travailler en priorité</strong> (' + algoA0.critereNom + ' : ' + algoA0.erreurs + ' erreur' + (algoA0.erreurs > 1 ? 's' : '') + ' sur ' + algoA0.mots + ' mots, Insuffisant)</p>';
+    // #581 — la phrase vient du gabarit. Elle affirmait « la qualité du français
+    // écrit est à travailler en priorité » quel que soit le critère effondré.
+    // ⚠ `echapperHtml` EST NEUF ICI, et c'est une correction, pas un ajout
+    // gratuit : `critereNom` était déjà posé nu dans `innerHTML` (donnée
+    // utilisateur), et l'énoncé l'est désormais entièrement.
+    var ech = function (t) { return (typeof echapperHtml === 'function') ? echapperHtml(String(t == null ? '' : t)) : ''; };
+    var phrase = window.enoncesAlgo.enonce(algoA0.critere, 'priorite', {});
+    if (!phrase) return '';
+    return '<p>- <strong>' + ech(phrase) + '</strong> (' + ech(algoA0.critereNom) + ' : ' + algoA0.erreurs + ' erreur' + (algoA0.erreurs > 1 ? 's' : '') + ' sur ' + algoA0.mots + ' mots, Insuffisant)</p>';
 }
 
 function _rendreDefisBilan(defis, algoA0, nomsPatrons, niveauDe) {
@@ -845,13 +866,21 @@ function _rendreSignalesBilan(signales, niveauDe) {
     return '<h5>Acquis en développement, à consolider :</h5>' + lignes;
 }
 
-function _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente) {
+function _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente, critereAlgo) {
     // ⚠ #555 lot 2 — l'évaluation PRÉCÉDENTE est lue dans SON échelle, pas dans
     // celle du bilan en cours : deux barèmes différents ne disent pas la même
     // chose du même code.
     var zonePrecedente = _lecteurZoneBilan(evalPrecedente && evalPrecedente.echelleId);
     if (totalErreursFr > 0) {
-        return '<p>Tous les critères sont maîtrisés. Concentre-toi sur la qualité du français (' + totalErreursFr + ' erreur' + (totalErreursFr > 1 ? 's' : '') + ' annotée' + (totalErreursFr > 1 ? 's' : '') + ').</p>';
+        // #581 — « Concentre-toi sur la qualité du français » sortait à qui
+        // compte des erreurs de calcul. ⚠ MÊMES MOTS QUE LE PDF DE SYNTHÈSE,
+        // et c'est obligatoire : `copierToutRetroaction` copie ce bilan dans le
+        // document de l'autre. Les deux sites lisent donc le MÊME énoncé
+        // `concentre` du même gabarit — c'est ce qui garantit qu'ils ne peuvent
+        // plus diverger, là où deux chaînes jumelles le pouvaient.
+        var ech = function (t) { return (typeof echapperHtml === 'function') ? echapperHtml(String(t == null ? '' : t)) : ''; };
+        var phrase = window.enoncesAlgo.enonce(critereAlgo, 'concentre', {});
+        return '<p>Tous les critères sont maîtrisés.' + (phrase ? ' ' + ech(phrase) : '') + ' (' + totalErreursFr + ' erreur' + (totalErreursFr > 1 ? 's' : '') + ' annotée' + (totalErreursFr > 1 ? 's' : '') + ').</p>';
     }
     // Verifier si maitrise depuis 2+ artefacts (garde length > 0 :
     // .every() retourne true sur tableau vide via vacuite JS).
@@ -1089,7 +1118,8 @@ function genererRetroactionBilan() {
         // trouvé par une spec WebKit alors que Vitest restait vert.
         html += _rendreSignalesBilan(signales, niveauDe);
     } else if (tousMaitrises) {
-        html += _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente);
+        html += _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente,
+            window.enoncesAlgo.critereAlgorithmique(grilleDef));
     } else if (criteres.length === 0 && !algoA0) {
         // #576 — LE SILENCE ÉTAIT LA MOITIÉ DU DÉFAUT. Sans critère lisible, le
         // bilan affichait « Présentement, il faut se concentrer sur : » suivi de

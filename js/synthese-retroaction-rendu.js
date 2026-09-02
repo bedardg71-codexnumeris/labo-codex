@@ -506,8 +506,14 @@
             ? `<span style="font-family: ${FONT_MONO}; font-size: 8px; color: ${MUTED};">/ ${esc(total)} erreur${total > 1 ? 's' : ''}</span>`
             : '';
 
+        // #581 — CE TITRE S'IMPRIME SUR LE PDF REMIS À L'ÉLÈVE.
+        // Il disait « Français écrit » à tout le monde, y compris à l'élève
+        // d'un enseignant de chimie dont le critère porte un tout autre nom.
+        // Le nom vient maintenant de la grille (`errorsLabel`, construit dans
+        // le module data) ; le repli n'invente aucune discipline.
+        const titre = ctx.feedback.errorsLabel || 'Erreurs annotées';
         return `
-            ${sectionHeader('Français écrit · 2 catégories les plus fréquentes', droite)}
+            ${sectionHeader(`${titre} · 2 catégories les plus fréquentes`, droite)}
             <div style="border: 1px solid ${LINE}; border-radius: 3px; padding: 6px 10px;">${lignes}</div>`;
     }
 

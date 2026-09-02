@@ -673,6 +673,26 @@ const SCHEMAS_IMPORT = {
                     }
                 },
 
+                // #581 — LES ÉNONCÉS DU CRITÈRE SE PERDRAIENT DE MÊME. Même
+                // classe que #667 et #668 : un critère dont l'auteur·e a
+                // réécrit les phrases arriverait avec celles par défaut.
+                // ⚠ `modeleEnonces` est celui qui décide du modèle ; sans lui,
+                // les textes seraient lus sous un modèle reconstitué depuis le
+                // NOM du critère.
+                modeleEnonces: { type: 'string', maxLen: 60 },
+                // ⚠ Schéma FERMÉ, jamais `{ type: 'object' }` nu : sans schéma,
+                // assainirObjet recopie la valeur telle quelle et un fichier
+                // d'import ferait entrer un objet arbitraire dans la base.
+                enonces: {
+                    type: 'object',
+                    schema: {
+                        decompte:  { type: 'string', maxLen: 2000 },
+                        priorite:  { type: 'string', maxLen: 2000 },
+                        concentre: { type: 'string', maxLen: 2000 },
+                        aucune:    { type: 'string', maxLen: 2000 }
+                    }
+                },
+
                 // #511 — LES ONZE RÉTROACTIONS DE FRANÇAIS SE PERDAIENT AUSSI.
                 // Un critère algorithmique porte ses catégories d'erreurs : ce
                 // sont ELLES qui contiennent les textes rendus à l'étudiant·e,
