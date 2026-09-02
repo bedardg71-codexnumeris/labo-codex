@@ -15,7 +15,8 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 2 septembre 2026, 11 h (dixième passe) — release 1.109.2, en ligne.**
+**Dernière mise à jour : 2 septembre 2026, 12 h 15 (onzième passe) — release 1.110.0,
+commitée et NON POUSSÉE : elle attend que Grégoire regarde deux écrans.**
 
 ---
 
@@ -142,6 +143,23 @@ le regard de Grégoire :**
   `Object.keys()` de `pratique-manager.js:159`, dans un test d'appartenance qui
   compare des NOMS DE CONSTANTES à des `id` — il ne matche jamais. Le renommage
   est donc sans effet observable, et c'est ce qui le rend gratuit. *(#690)*
+  ⮕ ↻ **Contre-mesure de Cowork, 12 h 10 — il y a un SECOND lecteur mort, et il
+  faut l'inscrire** : `pratique-manager.js:281`, `initialiserPratiquesPredefines()`,
+  qui **écrirait ces sept pratiques dans la base d'un nouvel utilisateur**. Elle a
+  **0 appelant** : `grep -rn "initialiserPratiquesPredefines" js/ index.html tests/`
+  ne rend que sa définition. ▣ **Témoin** : sur le même objet,
+  `migrerVersBibliotheque` en a 4, `obtenirPratiques` 9, `sauvegarderPratique` 26 —
+  le zéro mesure donc quelque chose. **C'est un semis débranché, pas un semis
+  absent** : il appartient au chantier « le matériel de départ cesse d'être semé ».
+  *Inscrit, continué.*
+  ⛔ **ET UNE ERREUR DE COWORK, À NE PAS REDÉCOUVRIR COMME UNE TROUVAILLE.** La
+  passe de 11 h affirmait ici : *« six pratiques offertes à l'adoption… ce module
+  est VIVANT, c'est ce que les gens peuvent prendre. »* **C'était faux.** Cowork
+  avait conclu « vivant » d'un `grep` dont les résultats étaient des **commentaires
+  JSDoc** (« Référence : PRATIQUE_… dans pratiques-predefines.js ») et une balise
+  `<script>`. **Un fichier chargé n'est pas un fichier lu.** Troisième occurrence
+  le 2 septembre de la même faute : *chercher un MOT là où il faut chercher une
+  OFFRE.*
 - **Les huit identifiants d'échelles disciplinaires sont retirés** de
   `IDS_GABARITS_HARDCODES` (`js/main.js`) et de la sonde
   (`js/echelles-bibliotheque.js`), et le commentaire périmé qui exigeait leur

@@ -32,7 +32,7 @@
  *  - STD (mode holistique) l'appelle ci-dessous — comportement strictement identique
  *    à l'avant-extraction (sentinelle de parité, golden master) ;
  *  - l'UI de saisie DEN (couche 2, DEN-2) l'appellera comme ANCRAGE de la note
- *    (« l'algorithme propose, le jugement tranche » — Voisard), jamais comme valeur
+ *    (« l'algorithme propose, le jugement tranche »), jamais comme valeur
  *    finale du calcul.
  *
  * @param {Array<{note:number}|null>} niveauxParObjectif - niveaux atteints par objectif

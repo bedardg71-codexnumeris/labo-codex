@@ -24,6 +24,17 @@
  *    sur place, et cette documentation doit pouvoir citer ce qui est parti ;
  *    un grep naïf rougirait sur la trace du correctif au lieu du correctif.
  *    Même piège, même parade qu'aux sentinelles #542 et #551.
+ *    ↻ Tranché le 2 sept. 2026 (addendum), après le retrait des deux dernières
+ *    attributions « — Voisard » : la garde N'EST PAS étendue aux commentaires.
+ *    La seule distinction qui compte — une ÉTIQUETTE DE CIRCONSTANCE (« Bug
+ *    Bruno ») contre une EXPLICATION DE RETRAIT (« config-francois-chimie.js
+ *    est parti avec #687 ») — n'est pas mesurable : dans les deux cas le nom
+ *    n'apparaît nulle part ailleurs dans le code vivant, et toute heuristique
+ *    (mots-clés « parti », « retiré », liste blanche de lignes) est une liste à
+ *    maintenir qui rougit à chaque reformulation. Ce que le lot a retiré des
+ *    commentaires, c'est la relecture qui l'a fait, pas une machine — et
+ *    c'est ce qu'il faudra refaire la prochaine fois. Les trois mentions qui
+ *    restent dans js/ sont le témoin : un zéro là serait un défaut.
  * 2. LE PACK DE DÉMONSTRATION EST HORS PÉRIMÈTRE (#351). `pack-demo-20.js` et
  *    `demo-namespace.js` portent des noms d'élèves FICTIFS, choisis exprès parmi
  *    des figures historiques et culturelles. Ce sont des données de démonstration
