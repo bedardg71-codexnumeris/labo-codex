@@ -88,6 +88,146 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ## A faire
 
+### Ménage des répertoires — mesuré le 2 septembre 2026 depuis Cowork
+
+- [ ] **#694 — Six dossiers de retours nominatifs sont suivis par git contre la règle ; et le dossier de 92 Mo, lui, ne l'a jamais été**.
+  Inscrit le 2 septembre 2026 depuis Cowork, **sur demande de Grégoire**. ⛔ **Aucune suppression
+  n'est proposée ici.** ⚠ Et ce n'est **pas urgent** : le poids d'un dépôt n'empêche aucun des huit
+  énoncés. À prendre après le cinquième et le huitième geste.
+  ▣ **L'ÉTAT, MESURÉ** : `Retours des testeurs/` **317 fichiers / 92 Mo** · `docs/` 36 / 6,4 Mo ·
+  `plans de travail/` **146 / 3,1 Mo** · `Rapports/` 58 / 1,5 Mo · racine 31 fichiers.
+  Les quatre gros de la racine : `SESSION.md` **1,3 Mo**, `BACKLOG.md` **964 Ko**,
+  `BACKLOG-ARCHIVE.md` 276 Ko, `RELAIS.md` 244 Ko.
+  ↻ **CORRECTION DU 2 SEPTEMBRE AU SOIR — LE TITRE DE CETTE FICHE ÉTAIT FAUX, ET DANS LES DEUX
+  SENS.** Cowork avait mesuré le dossier LOCAL et écrit « le dépôt porte 103 Mo ». **Remesuré :**
+  ```bash
+  for d in andree-anne bruno elise gregoire "jean-françois" jordan olivier stephane; do
+    grep -qF "Retours des testeurs/$d/" .gitignore && echo -n "ignoré " || echo -n "NON-IGNORÉ "
+    git log --oneline -1 -- "Retours des testeurs/$d"; done
+  ```
+  ▣ **`Retours des testeurs/gregoire/` — 289 fichiers, 92 Mo — est dans `.gitignore` et n'a JAMAIS
+  été suivi.** Il n'a jamais pesé sur le dépôt : personne qui clone ne le reçoit. **C'est un
+  encombrement du disque de Grégoire, pas du dépôt.** ⮕ Il le sortira lui-même au Finder ; aucune
+  session n'a à y toucher.
+  ▣▣ **ET LE VRAI SUJET EST L'INVERSE, PLUS PETIT ET PLUS SÉRIEUX.** Six dossiers de retours
+  **nominatifs de collègues** SONT suivis par git, alors que la règle dit qu'ils ne devraient pas
+  l'être :
+  | dossier | poids | dans `.gitignore` | suivi |
+  |---|---|---|---|
+  | `bruno` · `jordan` · `olivier` | 224 Ko | oui | **oui** |
+  | `elise` · `stephane` | 32 Ko | oui | **oui** |
+  | **`jean-françois`** | 8 Ko | **NON** | **oui** |
+  ⮕ **Cause** : ils ont été commités AVANT que la règle d'ignorance soit écrite. **Un fichier déjà
+  suivi reste suivi** — `.gitignore` ne désuit rien. Et `jean-françois` n'est même pas dans la liste.
+  ⚠ **Le dépôt est privé** — indice décisif : les minutes d'Actions ne se facturent que sur un dépôt
+  privé, et le quota de Grégoire s'est épuisé en août ; un dépôt public en a sans limite. **Donc
+  aucune urgence.** ⛔ Mais la visibilité n'a pas été vérifiée depuis le dépôt : **elle ne se lit pas
+  dans une copie locale.** À confirmer sur la page GitHub.
+  ⮕ **CE QUI RESTE VRAI MALGRÉ LE PRIVÉ, et c'est le motif de garder cet item** : *une règle que la
+  réalité dément cesse d'être une règle.* `.gitignore` annonce une protection qui n'a pas lieu pour
+  six dossiers. Et le jour où ce dépôt s'ouvre à un collaborateur, **ils partent avec.**
+  ⮕ **Remède** : retirer ces six du suivi (`git rm --cached`, le contenu reste sur le disque), et
+  ajouter `jean-françois` à `.gitignore`. ⚠ **Regarder ce qu'ils contiennent AVANT** — ce sont des
+  retours de personnes nommées.
+
+  ▣ **A · Les 92 Mo ne sont pas des retours.** `find "Retours des testeurs" -type f | sed 's/.*\.//' | sort | uniq -c`
+  rend **209 `.txt`**, **97 `.png`**, 5 `.md`, 5 `.DS_Store`, 1 `.json`. Les cinq `.md` sont les
+  vrais documents (`SUIVI-BUGS.md`, 126 Ko, en est le cœur) ; le reste est de la capture, sous
+  `gregoire/` (250 entrées), `bruno/` et `jordan/` (février).
+  ⚠ **Ce sont des données de terrain, pas du bruit.** ⮕ **Question à Grégoire, et elle décide de
+  tout** : ces captures servent-elles encore, ou sont-elles la trace d'un moment ?
+  ⮕ **Recommandation de Cowork** : les archiver HORS du dépôt, **en laissant sur place un `README`
+  qui dit où elles sont allées et à quelle date**. Un déplacement muet est une perte différée.
+  ▣ **B · `plans de travail/` : 62 fichiers sur 121 ne sont cités nulle part.**
+  ```bash
+  for f in "plans de travail"/*.md; do b=$(basename "$f")
+    grep -rqF "$b" CLAUDE.md .claude/ BACKLOG.md OU-EN-EST-ON.md PROTOCOLE.md OBJECTIF-COHORTE-1.md \
+    || echo "$b"; done
+  ```
+  **59 cités · 62 jamais cités.** ⚠⚠ **« Jamais cité » ne veut PAS dire « inutile »** : un cadrage lu
+  une fois pendant un chantier a fait son travail sans jamais être cité. **Ce compte mesure la
+  référence, pas la valeur. Ne pas en faire une liste de suppression.**
+  ▣ **L'âge dit mieux** : 4 en avril · 8 en mai · **39 en juin** · 2 en juillet · **79 en août** ·
+  9 en septembre. ⮕ Le dossier n'est pas encombré d'archives, **il est encombré de l'été en cours**.
+  ⮕ **Remède proposé** : un sous-dossier daté (`plans de travail/2026-T2/`), n'y descendre que ce qui
+  a **plus de trois mois** ET n'est **pas cité** — **les deux critères ensemble, jamais un seul** — puis
+  `grep` des chemins déplacés dans TOUT le dépôt, skills compris. ⚠ **Un lien mort dans un skill est
+  pire qu'un dossier encombré.**
+  ▣ **C · Cinq `.DS_Store` sont suivis.** Bruit pur, aucune valeur, aucun risque. ⮕ **Le seul cas
+  franc : à faire tout de suite, il ne se discute pas.**
+  ▣ **D · `SESSION.md`, 1,3 Mo.** Le patron d'archive existe déjà (`BACKLOG-ARCHIVE.md`). ⚠ **Mais
+  des skills et des sessions le LISENT** : le dégonfler change ce qu'elles trouvent. ⮕ **Mesurer QUI
+  le lit et ce qu'il y cherche AVANT toute coupe.** Aucune ligne retirée avant cette mesure.
+  ⛔ **CONTRAINTE D'EXÉCUTION, mesurée** : `device_bash` (le shell de Cowork) **ne peut pas
+  supprimer** — `rm` y rend « Operation not permitted ». Tout ménage passe donc par Claude Code ou
+  par une permission accordée par Grégoire. **C'est une contrainte utile : elle force le passage
+  par lui.**
+  ⮕ **ORDRE PROPOSÉ** : C (les `.DS_Store`) · puis A (décider du sort des 92 Mo) · puis B · puis D.
+  ▣ Le plan long : `plans de travail/PLAN-2026-09-02-menage-des-repertoires.md`.
+
+### Retour d'usage — 2 septembre 2026 (Grégoire, en travaillant sa carte d'alignement)
+
+- [ ] **#695 — L'Inspecteur d'une leçon affiche « SEMAINE 3 », pas la date où elle aura lieu**.
+  Inscrit le 2 septembre 2026 depuis Cowork, **sur un usage réel** : Grégoire préparait son cours
+  et a demandé « que la date réelle de la leçon soit affichée dans l'Inspecteur ».
+  ▣ **CE QU'IL VOIT** : l'Inspecteur d'un nœud `LEÇON` porte TITRE, DESCRIPTION, **SEMAINE** (un
+  nombre nu), puis « Dupliquer » et « Supprimer ce nœud ». L'en-tête du bloc sur la carte, lui,
+  affiche déjà **`S3`** et **`B`**.
+  ▣ **LES DEUX MOITIÉS DU CALCUL EXISTENT DÉJÀ — mesuré :**
+  · **Le placement de la leçon** : `js/planification-carte.js:7673-7676` lit
+    `lecon.metadata.semaine` **ET** `lecon.metadata.rangSeance`, avec le commentaire qui dit la
+    règle : *« Une leçon sans semaine OU sans rang n'est pas située. »* ⮕ **C'est donc le COUPLE
+    (semaine, rang) qui situe une leçon**, pas la semaine seule — et l'Inspecteur n'en montre
+    qu'une moitié.
+  · **Le calendrier** : `js/trimestre.js:141-223` construit `numSemParDate`, une table
+    **date → numéro de semaine**, qui tient compte des jours ouvrables et des congés du collège
+    (« un samedi n'y figure pas, `numSemParDate` le laisse vide »).
+  ⮕ **Le geste est donc une JOINTURE, pas un calcul neuf** : inverser `numSemParDate` pour obtenir
+  les dates de la semaine N, puis prendre la n-ième selon `rangSeance`.
+  ⚠ **LE CAS À NE PAS ESCAMOTER, et il décide de la qualité du remède** : une leçon **sans
+  `rangSeance`** n'est pas située — le code le dit déjà. ⮕ L'Inspecteur doit alors afficher
+  **quelque chose de vrai** (« semaine 3, séance non fixée ») **et non une date devinée**. Une date
+  fausse dans un plan de cours est pire qu'une date absente : elle se recopie.
+  ⚠ **Deuxième cas** : le calendrier scolaire porte les congés. Si la n-ième séance de la semaine
+  tombe un jour férié, la date n'existe pas. **Mesurer ce que le calendrier rend AVANT de coder**,
+  et le dire à l'écran plutôt que de sauter au jour suivant en silence.
+  ⮕ **Remède proposé** : sous « SEMAINE », une ligne de lecture seule — *« Mercredi 16 septembre
+  (séance B) »* — jamais un champ modifiable. **La date est une CONSÉQUENCE du couple
+  (semaine, rang) et du calendrier ; la rendre modifiable créerait une troisième source de vérité.**
+  ⛔ **N'empêche aucun des huit énoncés.** La carte d'alignement n'est sur aucun. **Inscrit et
+  continué.** ⮕ Mais c'est un item d'**usage réel de l'auteur en train de préparer un cours**, pas
+  une idée d'amélioration : il vaut plus qu'un confort d'interface.
+
+- [ ] **#693 — L'Inspecteur d'un nœud annonce la famille de clones, mais n'offre pas d'en sortir**.
+  Inscrit le 2 septembre 2026 depuis Cowork, **sur un usage réel** : Grégoire travaillait sa carte
+  et a demandé « la possibilité de *décloner* une carte ». **La fonction existe, entière.**
+  ▣ **Mesuré** : `detacherDeLaFamille(noeudIds)` (`js/planification-carte.js:3628`) désindexe le
+  clone, remet `cloneSourceId` à `null`, recalcule l'indicateur 🧬 de l'original ET des membres
+  restants, enregistre un point d'annulation, et rend le nombre de blocs détachés. Son bouton
+  existe aussi : `index.html:4184`, `id="planif-btn-detacher-clone"`, libellé **« Détacher de sa
+  famille de clones »**, dans le **menu Actions** de la carte. Il agit sur la multisélection, se
+  désactive quand rien de sélectionné n'appartient à une famille, et dit ce qu'il a fait.
+  ⮕ **Rien à corriger dans le comportement.** Il est complet et prudent.
+  ▣ **LE DÉFAUT EST UN EMPLACEMENT.** L'Inspecteur offre « Copier », « Cloner (lié) » et
+  « Supprimer ce nœud » — trois gestes de la famille — et **affiche même « 2 instances · Voir les
+  autres »**. Il NOMME la famille, puis n'offre pas d'en sortir. Celui qui la voit là cherche la
+  sortie là.
+  ⚠ **Et le mot « décloner » n'existe nulle part dans l'application** : le geste s'appelle
+  « détacher ». Qui cherche le premier ne trouve pas le second.
+  ⮕ **REMÈDE** : ajouter le bouton à l'Inspecteur, à côté de « Cloner (lié) », visible seulement
+  quand le nœud porte un `cloneSourceId` ou qu'il a des clones. ⛔ **Sans dupliquer la logique** —
+  le même `detacherDeLaFamille`, le même toast, la même annulation. ⚠ **Et sans retirer celui du
+  menu Actions**, qui sert la multisélection que l'Inspecteur ne couvre pas.
+  ⛔ **N'empêche aucun des huit énoncés** — la carte d'alignement n'est sur aucun, et le geste est
+  déjà possible. **Inscrit et continué** ; à prendre le jour où quelqu'un touchera l'Inspecteur
+  pour une autre raison.
+  ⚠ **LA LEÇON, PLUS LARGE QUE LA FICHE.** Grégoire a cherché **au bon endroit** et n'a pas trouvé.
+  C'est la troisième fois le 2 septembre que quelque chose EXISTE et que personne ne va le chercher
+  là où il est : la CI rouge que personne ne lisait, le verdict Playwright jamais consulté, ce
+  bouton dans le mauvais menu. ⮕ **L'auteur est celui qui connaît le mieux l'application. S'il ne
+  trouve pas, personne ne trouvera.**
+
+
 ### Chaîne d'importation des travaux — audit du 30 août 2026 (sessions S1 à S9)
 
 > Rapport : `Rapports/AUDIT-chaine-importation-travaux-2026-08-30.md`.
