@@ -46,6 +46,15 @@ beforeAll(() => {
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')),
         notifications: { info: () => {}, succes: () => {}, erreur: () => {} }
     });
+    // #691 — LE VRAI REGISTRE DE FAMILLES, dans le MÊME sandbox. L'écran nomme
+    // la famille qu'il filtre en lisant `window.TYPE_BADGES` ; un stub testerait
+    // des libellés inventés pour le banc, pas ceux que l'utilisateur lit.
+    chargerScript('js/wizard-pratique-v2.js', {
+        db: { getSync: (_k, d) => (d !== undefined ? d : null), get: async () => null, set: async () => {} },
+        cle: (k) => k,
+        echapperHtml: (t) => (t == null ? '' : String(t)),
+        notifications: { info: () => {}, succes: () => {}, erreur: () => {} }
+    }, biblio);
 });
 
 /* ================================================ A — LE MATÉRIEL FICTIF EST PARTI */
@@ -79,14 +88,16 @@ describe('#687 · A — les cinq entrées disciplinaires ne reviennent pas', () 
         expect(som.nom).toBe('Modèle sommatif');
     });
 
-    it('A.d le nom ne se réclame plus d\'une discipline, mais l\'origine reste DITE', () => {
+    it('A.d ni le nom NI LA DESCRIPTION ne renvoient à une matière — #691', () => {
+        // ⚠ RÉORIENTÉE le 2 septembre. #687 avait déplacé l'origine dans la
+        // description (« inspiré d'une pratique réelle en littérature ») en
+        // croyant qu'informer suffisait. Décision de Grégoire : le modèle ne
+        // doit être associé à AUCUNE discipline, pas même à la sienne. La
+        // description est maintenant celle d'un gabarit de démarrage.
         const som = Object.values(biblio.MODELES_PRATIQUES_PREDEFINIS).find(m => m.id === 'SOM-litterature');
         expect(som.nom.toLowerCase()).not.toMatch(/littérature/);
-        // L'origine informe dans la description au lieu de se présenter comme
-        // une offre : il est conservé parce qu'il vient d'une pratique RÉELLE.
-        expect(som.description).toMatch(/pratique réelle en littérature/);
-        // Et le champ `discipline` porte le neutre, comme les quatre autres :
-        // c'est sa VALEUR qui en faisait une offre disciplinaire.
+        expect(som.description.toLowerCase()).not.toMatch(/littérature/);
+        expect(som.description).toBe('Pour débuter avec une pratique sommative');
         expect(som.discipline).toBe('Général');
     });
 
@@ -99,6 +110,82 @@ describe('#687 · A — les cinq entrées disciplinaires ne reviennent pas', () 
             // « Cégep de Valleyfield » désignait un établissement réel pour un
             // gabarit que personne là-bas n'a validé.
             expect(m.etablissement, `« ${m.id} » nomme un établissement`).toBeUndefined();
+        });
+    });
+});
+
+/* ======================== A bis — LA CONFIGURATION, PAS SEULEMENT LE LIBELLÉ */
+
+describe('#691 · A bis — aucune matière ne survit DANS LA CONFIGURATION', () => {
+    /**
+     * ⚠ C'EST LE TROU DU LOT PRÉCÉDENT, ET IL ÉTAIT ENTIER. Le banc de #687
+     * regardait `nom`, `description` et `discipline` — les LIBELLÉS. Or ce que
+     * voit l'enseignant qui adopte un modèle, c'est sa CONFIGURATION : le
+     * sommatif portait encore « Analyse partielle », « Portfolio », « Travail
+     * équipe », « Cohérence textuelle », « Respect de la structure », un
+     * `doubleVerrou` et « 5-7 travaux ». Le nom était neutre depuis #687 ; la
+     * pratique de son auteur, non.
+     *
+     * ⮕ Ce point sérialise la configuration ENTIÈRE et y cherche le vocabulaire
+     * d'une matière. Il ne peut pas être satisfait en renommant une étiquette.
+     */
+    const MOTS_DE_MATIERE = [
+        'littérature', 'littéraire', 'rédaction', 'dissertation', 'analyse partielle',
+        'cohérence textuelle', 'qualité de la langue', 'chimie', 'biologie',
+        'philosophie', 'géographie', 'comptabilité', 'informatique', 'mathémat'
+    ];
+
+    it('A bis.a la configuration d\'aucun modèle offert ne parle une matière', () => {
+        Object.values(biblio.MODELES_PRATIQUES_PREDEFINIS).forEach(m => {
+            const texte = JSON.stringify(m.configuration || {}).toLowerCase();
+            MOTS_DE_MATIERE.forEach(mot => {
+                expect(texte, `« ${m.id} » porte « ${mot} » dans sa configuration`)
+                    .not.toContain(mot);
+            });
+        });
+    });
+
+    it('A bis.b TÉMOIN — la mesure sait trouver ces mots quand ils sont là', () => {
+        // Sans ce témoin, une `configuration` absente ou un `JSON.stringify`
+        // qui rendrait '{}' passerait A bis.a sans rien prouver.
+        const avant = JSON.stringify({
+            evaluations: [{ nom: 'Analyse partielle' }],
+            criteres: { liste: ['Cohérence textuelle'] }
+        }).toLowerCase();
+        expect(MOTS_DE_MATIERE.some(mot => avant.includes(mot))).toBe(true);
+        // Et chaque modèle offert a bien une configuration NON VIDE à inspecter.
+        Object.values(biblio.MODELES_PRATIQUES_PREDEFINIS).forEach(m => {
+            expect(JSON.stringify(m.configuration || {}).length,
+                `« ${m.id} » n'a rien à inspecter`).toBeGreaterThan(2);
+        });
+    });
+
+    it('A bis.c les réglages PERSONNELS sont partis, pas déplacés', () => {
+        const som = Object.values(biblio.MODELES_PRATIQUES_PREDEFINIS).find(m => m.id === 'SOM-litterature');
+        // `doubleVerrou` et « 5-7 travaux » étaient les réglages d'une personne.
+        expect(som.configuration.particularites).toBeUndefined();
+        expect(JSON.stringify(som.configuration)).not.toMatch(/doubleVerrou/);
+    });
+
+    it('A bis.d le sommatif reprend les QUATRE critères de la grille de départ', () => {
+        // Cohérence gratuite : qui prend la grille de départ ET ce modèle voit
+        // le même vocabulaire des deux côtés.
+        const som = Object.values(biblio.MODELES_PRATIQUES_PREDEFINIS).find(m => m.id === 'SOM-litterature');
+        expect(som.configuration.criteres.liste)
+            .toEqual(['Compréhension', 'Application', 'Analyse', 'Synthèse']);
+        // TÉMOIN : ce sont bien ceux de `GRILLE_GENERIQUE`, lus dans grilles.js.
+        const grilles = readFileSync(path.join(racine, 'js/grilles.js'), 'utf8');
+        ['Compréhension', 'Application', 'Analyse', 'Synthèse'].forEach(c => {
+            expect(grilles).toMatch(new RegExp(`nom: '${c}'`));
+        });
+    });
+
+    it('A bis.e les pondérations font 100, en nombres ronds', () => {
+        const som = Object.values(biblio.MODELES_PRATIQUES_PREDEFINIS).find(m => m.id === 'SOM-litterature');
+        const total = som.configuration.evaluations.reduce((n, e) => n + e.ponderation, 0);
+        expect(total).toBe(100);
+        som.configuration.evaluations.forEach(e => {
+            expect(e.ponderation % 5, `« ${e.nom} » n'est pas une pondération ronde`).toBe(0);
         });
     });
 });
@@ -127,9 +214,41 @@ describe('#687 · B — chaque famille garde au moins un modèle', () => {
 /* ==================================== C — L'ÉCRAN NE SE VIDE PLUS EN SILENCE */
 
 describe('#687 · C — quand il n\'y a rien à offrir, l\'écran le DIT', () => {
-    it('C.a un type sans aucun modèle produit un message, pas un sélecteur nu', async () => {
+    it('C.a une famille sans aucun modèle produit un message, pas un sélecteur nu', async () => {
         const html = await biblio.genererSelecteurModelesPratiques('type-qui-nexiste-pas');
-        expect(html).toMatch(/Aucune configuration pour ce type/);
+        expect(html).toMatch(/Aucun modèle fourni pour ce type — enregistre le tien/);
+    });
+
+    it('C.a bis ⚠ LE MESSAGE NOMME LA FAMILLE, et il ne le faisait PAS', () => {
+        // Mesuré le 2 septembre : le texte disait « pour ce type de pratique ».
+        // « Aucun modèle » sans dire de quoi laisse chercher — et le commentaire
+        // d'origine affirmait pourtant qu'il nommait la famille, si bien qu'une
+        // consigne l'a cru sur parole trois heures plus tard.
+        // On vide artificiellement la famille sommative pour éprouver le cas.
+        const sauvegarde = biblio.MODELES_PRATIQUES_PREDEFINIS['SOM-litterature'];
+        delete biblio.MODELES_PRATIQUES_PREDEFINIS['SOM-litterature'];
+        return biblio.genererSelecteurModelesPratiques('sommative').then(html => {
+            biblio.MODELES_PRATIQUES_PREDEFINIS['SOM-litterature'] = sauvegarde;
+            // « Sommative » vient de TYPE_BADGES, le registre canonique.
+            expect(html).toMatch(/Aucun modèle « Sommative » fourni — enregistre le tien/);
+        }, (e) => {
+            biblio.MODELES_PRATIQUES_PREDEFINIS['SOM-litterature'] = sauvegarde;
+            throw e;
+        });
+    });
+
+    it('C.a ter ⚠ LE MESSAGE RESTE COURT — un texte tronqué ne se lit pas', () => {
+        // Trouvé AU NAVIGATEUR le 2 septembre, jamais par un banc : le texte
+        // finissait par « — crée la tienne avec "Enregistrer la configuration" »
+        // et s'affichait « …avec "Enregistrer la configura▸ » dans le `<option>`.
+        // La limite est empirique : 70 caractères tiennent dans la largeur du
+        // sélecteur observée. Ce n'est pas une élégance, c'est la lisibilité.
+        return biblio.genererSelecteurModelesPratiques('type-qui-nexiste-pas').then(html => {
+            const texte = (html.match(/<option value="" disabled>([^<]*)</) || [])[1] || '';
+            expect(texte.length, `message de ${texte.length} caractères : « ${texte} »`)
+                .toBeLessThanOrEqual(70);
+            expect(texte.length).toBeGreaterThan(10);   // témoin : il existe
+        });
     });
 
     it('C.b le message est INERTE — il ne peut pas être choisi par mégarde', () => {
@@ -140,11 +259,11 @@ describe('#687 · C — quand il n\'y a rien à offrir, l\'écran le DIT', () =>
         });
     });
 
-    it('C.c TÉMOIN — un type qui EXISTE rend bien ses modèles, pas le message', async () => {
+    it('C.c TÉMOIN — une famille qui a des modèles les rend, pas le message', async () => {
         // Sans ce témoin, un message affiché en toutes circonstances passerait C.a.
         const html = await biblio.genererSelecteurModelesPratiques('sommative');
         expect(html).toMatch(/Modèle sommatif/);
-        expect(html).not.toMatch(/Aucune configuration/);
+        expect(html).not.toMatch(/Aucun modèle/);
     });
 });
 

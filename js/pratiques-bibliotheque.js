@@ -79,6 +79,67 @@ const MODELES_PRATIQUES_PREDEFINIS = {
             ]
         }
     },
+    // === SOMMATIVE ===
+    'SOM-litterature': {
+        // ⚠⚠ L'IDENTIFIANT NOMME UNE DISCIPLINE ALORS QUE PLUS RIEN DE VISIBLE
+        // NE LE FAIT — ET IL RESTE. Ce gabarit est offert depuis le 28 mai 2026
+        // (`git log -S "SOM-litterature"`), donc AVANT l'ouverture publique du
+        // 1er juin : quelqu'un a pu l'adopter. L'`id` est la clé qui empêche le
+        // prédéfini de réapparaître à côté de sa copie (`idsExistants` dans la
+        // fusion à la lecture). Le renommer ferait donc apparaître DEUX entrées
+        // pour une seule pratique, chez la personne la plus ancienne.
+        // ⮕ Le sort des identifiants qui portent un nom propre ou une matière
+        // est une DÉCISION DUE À GRÉGOIRE, inscrite en **#690** avec les
+        // prénoms de collègues de `pratiques-predefines.js`. Ne pas trancher
+        // ici en passant.
+        id: 'SOM-litterature',
+        // #691 — LE NOM ÉTAIT DÉJÀ NEUTRE ; C'EST LA CONFIGURATION QUI RESTAIT
+        // UNE PRATIQUE DE LITTÉRATURE, et c'est elle que voit l'enseignant qui
+        // adopte le modèle. « Analyse partielle », « Portfolio », « Cohérence
+        // textuelle », le double verrou, « 5-7 travaux » : autant de réglages
+        // d'une personne, servis comme un défaut à tout le monde.
+        // ⮕ Le patron est `SPE-simple` : court, générique, fait pour DÉMARRER,
+        // pas pour reproduire la pratique de quelqu'un.
+        nom: 'Modèle sommatif',
+        description: 'Pour débuter avec une pratique sommative',
+        type: 'sommative',
+        auteur: 'Gabarit Labo Codex',
+        discipline: 'Général',
+        estGabarit: true,
+        pratiques: ['SOM'],
+        configuration: {
+            methodeCalcul: 'moyenne-ponderee',
+            // Une répartition que n'importe quelle discipline reconnaît : deux
+            // travaux, deux examens, pondérations rondes. Rien à décoder.
+            evaluations: [
+                { id: 1, nom: 'Travail 1', type: 'travail', ponderation: 20 },
+                { id: 2, nom: 'Travail 2', type: 'travail', ponderation: 20 },
+                { id: 3, nom: 'Examen de mi-session', type: 'examen', ponderation: 30 },
+                { id: 4, nom: 'Examen final', type: 'examen', ponderation: 30 }
+            ],
+            // ⮕ LES QUATRE CRITÈRES DE LA GRILLE DE DÉPART (`grilles.js`,
+            // GRILLE_GENERIQUE). Cohérence gratuite : qui prend la grille de
+            // départ ET ce modèle voit le même vocabulaire des deux côtés.
+            criteres: {
+                type: 'fixes',
+                liste: [
+                    'Compréhension',
+                    'Application',
+                    'Analyse',
+                    'Synthèse'
+                ]
+            }
+            // `particularites` RETIRÉ : `doubleVerrou` et
+            // `portfolioNombreTravaux: '5-7'` étaient deux réglages personnels,
+            // pas un défaut. Un gabarit de démarrage n'impose pas de mécanique.
+        },
+        // Les seuils ne nomment rien et ne supposent aucune matière : conservés.
+        seuils: {
+            vaBien: 75,
+            difficulte: 65,
+            grandeDifficulte: 55
+        }
+    },
     // === PAN-STANDARDS ===
     // #435 (9 août 2026) : les quatre gabarits « par objectifs » (Par objectifs
     // (Pondéré), STD Chimie organique, STD Interfaces et BD, STD Anatomie) sont
@@ -129,61 +190,6 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     // PRATIQUES SOMMATIVES TRADITIONNELLES
     // ============================================================================
 
-    // ============================================================================
-    // MODÈLE SOMMATIF — la seule famille qui n'aurait plus aucun modèle sans lui
-    // Sommative avec critères fixes et double verrou. #687 : le nom ne se
-    // réclame plus d'une discipline ; l'origine est dans la `description`.
-    // ============================================================================
-    'SOM-litterature': {
-        id: 'SOM-litterature',
-        // #687 — LE NOM NE SE RÉCLAME PLUS D'UNE DISCIPLINE. Il est conservé
-        // parce qu'il vient d'une PRATIQUE RÉELLE, pas parce qu'il illustre une
-        // matière : sans lui, la famille sommative — la plus courante —
-        // n'offrirait aucun modèle. L'origine passe dans la description, où
-        // elle informe au lieu de se présenter comme une offre disciplinaire.
-        // ⚠ L'`id` NE CHANGE PAS : il est la clé d'adoption d'une copie déjà
-        // prise par un utilisateur (`idsExistants` dans la fusion à la lecture).
-        nom: 'Modèle sommatif',
-        description: 'Sommative avec analyse finale 50% (double verrou). Portfolio 20%. Critères fixes. Inspiré d\'une pratique réelle en littérature au collégial.',
-        type: 'sommative',
-        auteur: 'Gabarit Labo Codex',
-        // 'Général' comme les quatre autres modèles offerts : le champ existe,
-        // et c'est sa VALEUR qui ne doit nommer aucune matière. `etablissement`
-        // part — « Cégep de Valleyfield » désignait un établissement réel pour
-        // un gabarit que personne là-bas n'a validé.
-        discipline: 'Général',
-        estGabarit: true,
-        pratiques: ['SOM'],
-        configuration: {
-            methodeCalcul: 'moyenne-ponderee',
-            evaluations: [
-                { id: 1, nom: 'Analyse partielle', type: 'analyse', ponderation: 15 },
-                { id: 2, nom: 'Portfolio', type: 'portfolio', ponderation: 20 },
-                { id: 3, nom: 'Travail équipe', type: 'atelier', ponderation: 15 },
-                { id: 4, nom: 'Analyse finale', type: 'analyse', ponderation: 50, doubleVerrou: true }
-            ],
-            criteres: {
-                type: 'fixes',
-                liste: [
-                    'Pertinence',
-                    'Justesse',
-                    'Clarté',
-                    'Qualité de la langue',
-                    'Respect de la structure',
-                    'Cohérence textuelle'
-                ]
-            },
-            particularites: {
-                doubleVerrou: true,
-                portfolioNombreTravaux: '5-7'
-            }
-        },
-        seuils: {
-            vaBien: 75,
-            difficulte: 65,
-            grandeDifficulte: 55
-        }
-    },
 
 };
 
@@ -716,13 +722,28 @@ async function genererSelecteurModelesPratiques(typeFiltre = null) {
     // charger ». C'est le défaut qu'on vient de corriger ailleurs — choisir une
     // grille sans échelle ne produisait rien du tout — et retirer cinq gabarits
     // en rend l'occurrence plus probable, pas moins.
-    // ⚠ Le texte NOMME la famille filtrée quand il y en a une : « aucun modèle »
-    // sans dire de quoi laisse chercher.
+    // ⚠ #691 — LE TEXTE NOMME LA FAMILLE, ET IL NE LE FAISAIT PAS.
+    // Il disait « pour ce type de pratique » : « aucun modèle » sans dire de
+    // quoi laisse chercher. Le commentaire d'origine affirmait pourtant qu'il
+    // nommait la famille — une consigne l'a cru sur parole trois heures plus
+    // tard. Le libellé vient de `TYPE_BADGES`, le registre canonique des
+    // familles, désormais exposé par le wizard ; le repli reste générique
+    // plutôt que d'inventer un nom.
     if (gabaritsFiltres.length === 0 && personnalisesFiltres.length === 0) {
-        const quoi = typeFiltre
-            ? `Aucune configuration pour ce type de pratique`
-            : `Aucune configuration disponible`;
-        html += `<option value="" disabled>${echapperHtml(quoi)} — crée la tienne avec « Enregistrer la configuration »</option>`;
+        const badge = (typeof window !== 'undefined' && window.TYPE_BADGES)
+            ? window.TYPE_BADGES[typeFiltre] : null;
+        // ⚠ COURT, ET C'EST UNE CORRECTION VENUE DE L'ÉCRAN, PAS DU BANC.
+        // Le texte se terminait par « — crée la tienne avec "Enregistrer la
+        // configuration" » : dans un `<option>`, il DÉBORDAIT et s'affichait
+        // « …avec "Enregistrer la configura▸ ». Un message tronqué ne se lit
+        // pas, et aucun test unitaire ne pouvait le voir — seul le rendu.
+        // ⚠ « le tien » et non « la tienne » : le féminin renvoyait à
+        // « configuration », mais la phrase parle maintenant d'un MODÈLE.
+        const quoi = badge
+            ? `Aucun modèle « ${badge.label} » fourni — enregistre le tien`
+            : (typeFiltre ? `Aucun modèle fourni pour ce type — enregistre le tien`
+                          : `Aucun modèle fourni — enregistre le tien`);
+        html += `<option value="" disabled>${echapperHtml(quoi)}</option>`;
     }
 
     return html;
