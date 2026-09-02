@@ -103,12 +103,37 @@ describe('#581 · A — les élèves de Grégoire ne voient aucune différence',
             .toBe('Aucun tampon ni erreur de français annotés.');
     });
 
-    it('A.e le nom est lu SANS accent ni casse, et le mot est entier', () => {
-        // « FRANCAIS », « Qualité du français » : même modèle, mêmes textes.
-        expect(enonces.normaliser({ nom: 'FRANCAIS' }).modeleId).toBe('discipline_francais');
-        expect(enonces.normaliser({ nom: 'Qualité du français' }).modeleId).toBe('discipline_francais');
-        // ⚠ La frontière est le MOT, pas la sous-chaîne : « Franchise » ne passe pas.
-        expect(enonces.normaliser({ nom: 'Franchise du propos' }).modeleId).toBe('generique');
+    it('A.e le nom est lu SANS accent ni casse, et LA FORME FLÉCHIE COMPTE', () => {
+        // ⚠ LES TROIS DERNIERS SONT LE DÉFAUT TROUVÉ PAR LA RELECTURE CROISÉE
+        // du 2 septembre : le motif exigeait un non-alphabétique après
+        // « francais », donc « Maîtrise de la langue FRANÇAISE » — un nom
+        // courant au collégial — basculait EN SILENCE sur le générique.
+        [
+            'Français écrit',
+            'FRANCAIS',
+            'Qualité du français',
+            'Langue française',
+            'Maîtrise de la langue française',
+            'Compétence française'
+        ].forEach(nom => {
+            expect(enonces.normaliser({ nom }).modeleId, `« ${nom} » doit garder les textes d'hier`)
+                .toBe('discipline_francais');
+        });
+    });
+
+    it('A.f TÉMOIN DE L\'AUTRE CÔTÉ — la frontière est le MOT, pas la sous-chaîne', () => {
+        // Un témoin qui ne bascule que dans un sens ne prouve rien : élargir un
+        // motif jusqu'à tout accepter passerait le cas ci-dessus sans rien dire.
+        [
+            'Franchise du propos',
+            'Notation musicale',
+            'Orthographe',
+            'Qualité de la langue',
+            'Précision des calculs'
+        ].forEach(nom => {
+            expect(enonces.normaliser({ nom }).modeleId, `« ${nom} » ne doit PAS nommer une discipline`)
+                .toBe('generique');
+        });
     });
 });
 
@@ -319,6 +344,51 @@ describe('#581 · F — ce que l\'auteur·e a réglé ARRIVE chez le destinatair
     it('F.e `modeleEnonces` est déclaré des DEUX côtés — sans lui, les textes seraient lus sous un autre modèle', () => {
         expect(win.partageSchemas.SCHEMA_ENTITE.grille.champs.criteres.schema.modeleEnonces).toBeDefined();
         expect(winIE.SCHEMAS_IMPORT.grille.criteres.schema.modeleEnonces).toBeDefined();
+    });
+});
+
+/* ================================ H — CHANGER DE MODÈLE NE JETTE PAS DE PROSE */
+
+describe('#581 · H — ce que l\'enseignant·e a rédigé survit au changement de modèle', () => {
+    /**
+     * Trouvé par la relecture croisée du 2 septembre 2026. Le patron de #668
+     * remet tout aux défauts du nouveau modèle : il le peut, parce qu'il remet
+     * des SEUILS, qui se retrouvent. Quatre phrases rédigées ne se retrouvent
+     * pas, et le geste est un clic sur un `<select>`.
+     */
+    it('H.a une phrase écrite à la main n\'est pas emportée par la bascule', () => {
+        const c = critereChimie({
+            modeleEnonces: 'generique',
+            enonces: { concentre: 'Revois la conduite du calcul.' }
+        });
+        // La bascule, telle que le handler du gabarit la fait.
+        enonces.appliquerAuCritere(c, 'discipline_francais', enonces.enoncesRediges(c));
+        expect(c.modeleEnonces).toBe('discipline_francais');
+        expect(enonces.enonce(c, 'concentre', {})).toBe('Revois la conduite du calcul.');
+    });
+
+    it('H.b une zone restée AU DÉFAUT prend bien celui du nouveau modèle', () => {
+        // C'est le changement demandé : sans lui, changer de modèle ne ferait rien.
+        const c = critereChimie({
+            modeleEnonces: 'generique',
+            enonces: { concentre: 'Revois la conduite du calcul.' }
+        });
+        enonces.appliquerAuCritere(c, 'discipline_francais', enonces.enoncesRediges(c));
+        expect(enonces.enonce(c, 'decompte', { erreurs: 12, mots: 500 }))
+            .toBe('Ta rédaction contient 12 erreurs de français pour 500 mots.');
+    });
+
+    it('H.c une zone VIDÉE survit aussi — la vider est un choix, pas une absence', () => {
+        const c = critereChimie({ modeleEnonces: 'generique', enonces: { priorite: '' } });
+        enonces.appliquerAuCritere(c, 'discipline_francais', enonces.enoncesRediges(c));
+        expect(enonces.enonce(c, 'priorite', {})).toBe('');
+    });
+
+    it('H.d un critère JAMAIS édité bascule entièrement, sans rien traîner', () => {
+        const c = critereChimie();
+        enonces.appliquerAuCritere(c, 'discipline_francais', enonces.enoncesRediges(c));
+        expect(c.enonces).toBeUndefined();
+        expect(enonces.enonce(c, 'concentre', {})).toBe('Concentre-toi sur la qualité du français');
     });
 });
 

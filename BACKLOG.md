@@ -697,6 +697,26 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   priver le rapport de son témoin `clesLues`, ou casser la syntaxe — **l'ancienne assertion restait
   VERTE dans les trois cas, la nouvelle rougit dans les trois.**
 
+- [ ] **#686 — Une grille introuvable fait changer le texte reçu par l'élève, alors que le nom existe ailleurs**.
+  Inscrit le 2 septembre 2026, trouvé par la **relecture croisée du lot #581** (règle 2 de `PROTOCOLE.md`).
+  ▣ **LE FAIT, CARACTÉRISÉ.** `_critereDeGrille` (`evaluation-calcul.js`) rend `null` quand
+  `evaluationEnCours.grilleId` ne trouve aucune grille. `enoncesAlgo.normaliser` reçoit alors un objet
+  sans `nom`, `_nomDitFrancais(undefined)` rend `false`, et le critère tombe sur `MODELE_PAR_DEFAUT`
+  = `generique`. ⮕ **Sur les grilles h2026 désappariées de Grégoire, un critère qui S'APPELLE
+  « Français écrit » reçoit donc le texte générique.** Avant #581 la chaîne était en dur et ne pouvait
+  pas varier : c'est un **changement de comportement réel**, sur un état qu'on sait déjà défectueux.
+  ▣ **LE CHEMIN DE CORRECTION EST DÉJÀ TROUVÉ — ne pas le rechercher.** Le nom du critère existe
+  ailleurs que dans la grille : l'ÉVALUATION ENREGISTRÉE le porte. `evaluation-chargement.js:1440`
+  écrit `critereNom: c.nom`, et le tableau `[{critereId, critereNom, niveauSelectionne}]` est
+  documenté en `evaluation-retroaction.js:622-623`. **Quand la lecture de grille échoue, l'appelant
+  passe `{ nom: critereNom }` au lieu de `null`** — le registre n'a rien à changer.
+  ▣ **POURQUOI CE N'EST PAS BLOQUANT** : ça ne mord que sur un état déjà cassé, et le correctif touche
+  des APPELANTS, pas le registre — donc un autre lot. ⚠ Ne pas le confondre avec une réparation des
+  données : on ne réécrit pas les grilles de Grégoire, on lit un nom qui est déjà là.
+  ▣ **Vérifié comment, le jour de l'inscription** : `grep -n "critereNom: c.nom" js/evaluation-chargement.js`
+  rend la ligne 1440. Témoin : `grep -rn "critereNom" js/ | wc -l` rend non-zéro sur plusieurs modules,
+  donc le champ est bien un porteur établi, pas une trouvaille isolée.
+
 - [ ] **#684 — Le renommage du §3 est un SCRIPT, pas une migration : il n'a atteint qu'une personne**.
   Inscrit le 1er septembre 2026, **à trancher avant la cohorte 1**.
   ▣ **LE FAIT.** #682 a renommé les cinq libellés de Grégoire, par un script qu'il a collé lui-même

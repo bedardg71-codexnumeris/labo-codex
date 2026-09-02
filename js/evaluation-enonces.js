@@ -205,6 +205,13 @@ var MODELE_PAR_DEFAUT = 'generique';
  * Accents et casse sont neutralisés : « Français écrit », « FRANCAIS »,
  * « Qualité du français » passent tous. Un critère nommé « Franchise » ne
  * passe pas — la frontière est le mot, pas la sous-chaîne.
+ *
+ * ⚠ LA FORME FLÉCHIE COMPTE, ET SON ABSENCE ÉTAIT UN DÉFAUT SILENCIEUX.
+ * Trouvé par la relecture croisée du 2 septembre 2026 : le motif exigeait un
+ * non-alphabétique APRÈS « francais », si bien que « Maîtrise de la langue
+ * FRANÇAISE » — un nom courant au collégial — basculait sur le générique sans
+ * rien dire, et le texte reçu par l'élève changeait. Pour un lecteur humain,
+ * « française » dit français ; le code devait le dire aussi.
  */
 function _nomDitFrancais(nom) {
     if (typeof nom !== 'string' || !nom) return false;
@@ -214,7 +221,7 @@ function _nomDitFrancais(nom) {
     // écrit nous intéressent ici.
     nu = nu.replace(/[àâä]/g, 'a').replace(/[çÇ]/g, 'c').replace(/[éèêë]/g, 'e')
            .replace(/[îï]/g, 'i').replace(/[ôö]/g, 'o').replace(/[ùûü]/g, 'u');
-    return /(^|[^a-z])francais([^a-z]|$)/.test(nu);
+    return /(^|[^a-z])francais(e|es)?([^a-z]|$)/.test(nu);
 }
 
 function listerModeles() {
@@ -381,6 +388,31 @@ function appliquerAuCritere(critere, modeleId, enonces) {
     return critere;
 }
 
+/**
+ * Ce que l'enseignant·e a RÉDIGÉ, à conserver quand le modèle change.
+ *
+ * ⚠ CHANGER DE MODÈLE NE JETTE PAS DE LA PROSE. Le patron de #668 remet tout
+ * aux défauts du nouveau modèle : il le peut, parce qu'il remet des SEUILS
+ * NUMÉRIQUES, qui se retrouvent. Quatre phrases rédigées ne se retrouvent pas,
+ * et le geste est atteignable en un clic sur un `<select>`. Relecture croisée
+ * du 2 septembre 2026 : « ce qu'un utilisateur détruit, il l'a voulu » —
+ * ici il ne l'aurait pas voulu.
+ *
+ * ⮕ Ce qui est rédigé est exactement ce que `appliquerAuCritere` a jugé digne
+ * d'être écrit : les clés de `critere.enonces`. Une zone restée au défaut n'y
+ * est pas, et prendra donc le défaut du NOUVEAU modèle — c'est bien le
+ * changement demandé. Une zone VIDÉE y est, parce que la vider est un choix.
+ */
+function enoncesRediges(critere) {
+    var source = (critere && critere.enonces && typeof critere.enonces === 'object')
+        ? critere.enonces : {};
+    var propres = {};
+    CLES.forEach(function(c) {
+        if (typeof source[c.cle] === 'string') propres[c.cle] = source[c.cle];
+    });
+    return propres;
+}
+
 /** Les énoncés par défaut d'un modèle — pour préremplir le gabarit. */
 function enoncesParDefaut(modeleId) {
     var modele = obtenirModele(modeleId) || obtenirModele(MODELE_PAR_DEFAUT);
@@ -408,6 +440,7 @@ var api = {
     libelleCritere: libelleCritere,
     critereAlgorithmique: critereAlgorithmique,
     appliquerAuCritere: appliquerAuCritere,
+    enoncesRediges: enoncesRediges,
     enoncesParDefaut: enoncesParDefaut
 };
 
