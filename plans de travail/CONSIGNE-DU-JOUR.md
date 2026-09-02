@@ -481,3 +481,86 @@ un `nomServiceAide` déjà réglé garde sa valeur ; les copies des huit échell
 des pratiques adoptées restent telles quelles. C'est **#674**.
 
 **Non poussé** (règle 6). Committé, arrêté, en attente de son regard.
+
+---
+
+# ADDENDUM — tranché par Grégoire le 2 septembre à 12 h 30
+
+> **À exécuter AVANT le push de 1.110.0.** C'est le dernier point ouvert du lot que tu
+> viens de commiter, et il est minuscule : deux lignes de commentaire.
+
+## Les deux attributions « — Voisard » : l'idée reste, le nom part
+
+**La question posée à Grégoire était : source publiée ou remarque de collègue ?**
+⮕ **Sa réponse, le 2 septembre à 12 h 30** : c'est une **paraphrase** tirée d'une chronique
+Substack — *« mais je ne sais pas laquelle »*.
+
+**Le raisonnement, pour qu'une session future ne le refasse pas :**
+· Ce n'est **pas une citation** : un appareil de référence porte auteur, titre, date, et
+  permet au lecteur d'aller voir. « — Voisard » ne permet rien.
+· Et c'est une **paraphrase** : la formulation « l'algorithme propose, le jugement tranche »
+  est vraisemblablement celle de Grégoire, pour l'idée d'un autre. Il n'y a pas de phrase
+  empruntée à créditer.
+· Une attribution que personne ne peut vérifier **publie un nom sans servir le lecteur** —
+  exactement le motif du lot.
+⮕ **Donc : le principe reste écrit en toutes lettres, le nom part.**
+
+**Les deux lignes, et leur remplacement exact :**
+
+`js/pratiques/denotation-saisie-ui.js` (l. 7-8) :
+```
+ *  - suggestion statistique en ANCRAGE (« l'algorithme propose, le jugement tranche »
+ *    — Voisard), modifiable, jamais imposée ;
+```
+⮕ devient :
+```
+ *  - suggestion statistique en ANCRAGE (« l'algorithme propose, le jugement tranche »),
+ *    modifiable, jamais imposée ;
+```
+
+`js/pratiques/pratique-pan-standards.js` (l. 35-36) :
+```
+ *    (« l'algorithme propose, le jugement tranche » — Voisard), jamais comme valeur
+ *    finale du calcul.
+```
+⮕ devient :
+```
+ *    (« l'algorithme propose, le jugement tranche »), jamais comme valeur
+ *    finale du calcul.
+```
+
+⛔ **NE TOUCHE À RIEN D'AUTRE DANS CES DEUX BLOCS.** Le principe qu'ils décrivent — la
+suggestion statistique est un ANCRAGE modifiable, jamais la valeur finale — est une position
+pédagogique de Grégoire, pas une tournure à améliorer.
+
+## Ce que ça fait au compte, et le témoin
+
+`grep -rniE "bruno|michel|isabelle|xavier|hélène|helene|etienne|étienne|olivier|jordan|françois|francois|V." js/ --include=*.js | grep -viE "pack-demo|demo-namespace"`
+
+⮕ **Passe de 5 à 3.** Et les trois qui restent doivent rester — **c'est le témoin** :
+· `js/profil-etudiant-sections-affichage.js:1764-1765` — deux lignes qui EXPLIQUENT un
+  retrait (`testerPratiqueFrancois`, `config-francois-chimie.js`, partis avec #687). Les
+  effacer effacerait la trace de ce qui a été fait.
+· `js/config.js:250` — « Olivier Dubois », fiche fictive, **zone protégée**.
+⚠ **Un zéro ici serait un défaut, pas un succès.**
+
+## Une décision technique qui est à toi — tranche et dis-le
+
+La sentinelle du lot garde les identifiants, les constantes, les libellés, `discipline:` et
+`etablissement:`. **Elle ne garde pas les commentaires** — c'est pourquoi les deux lignes
+Voisard ont survécu au lot sans la faire rougir, et c'était voulu : elles attendaient une
+décision de Grégoire.
+⮕ Maintenant qu'elle est prise : **faut-il étendre la sentinelle aux commentaires ?**
+⚠ Le piège est nommé d'avance : les trois mentions qui RESTENT sont, elles aussi, dans des
+commentaires. Une garde qui interdit les prénoms en commentaire ferait rougir la trace même
+de ce qu'on vient de retirer. **Si tu l'étends, elle doit distinguer une étiquette de
+circonstance d'une explication de retrait — et si tu ne vois pas comment le faire sans
+fragilité, ne l'étends pas, et écris pourquoi.**
+
+## L'ordre
+
+Petit lot, même règle : **tu commites, puis tu t'arrêtes.** Bump du bloc de jetons
+d'`index.html`, `cd tests && npm run test:unit`. Ce fichier se commite avec.
+⮕ **Ce que Grégoire doit aller voir : rien à l'écran.** Ce sont deux commentaires ; aucun
+utilisateur ne les rencontre. **Dis-le-lui plutôt que de lui inventer une vérification.**
+⮕ Ensuite, le push de 1.110.0 (ou 1.110.1) lui revient.

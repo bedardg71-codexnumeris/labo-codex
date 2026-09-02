@@ -4,8 +4,8 @@
  * Quand la pratique active du groupe-cours est une Dénotation, le profil étudiant
  * offre un PANNEAU DE JUGEMENT (SPEC §6) :
  *  - liste des cibles avec une case « atteinte » PAR cible (garde-fou Dyer natif) ;
- *  - suggestion statistique en ANCRAGE (« l'algorithme propose, le jugement tranche »
- *    — Voisard), modifiable, jamais imposée ;
+ *  - suggestion statistique en ANCRAGE (« l'algorithme propose, le jugement tranche »),
+ *    modifiable, jamais imposée ;
  *  - champ note finale (saisie) + justification narrative (traçabilité) ;
  *  - garde visible : tant qu'une cible n'est pas confirmée, la note ne peut pas
  *    certifier (≥ 60) — sans empêcher la saisie d'un 59 (RREC échec).
