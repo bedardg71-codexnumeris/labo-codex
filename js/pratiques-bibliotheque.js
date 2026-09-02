@@ -110,12 +110,30 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         configuration: {
             methodeCalcul: 'moyenne-ponderee',
             // Une répartition que n'importe quelle discipline reconnaît : deux
-            // travaux, deux examens, pondérations rondes. Rien à décoder.
+            // travaux, deux examens. Rien à décoder.
+            //
+            // ⚠⚠ LES QUATRE PARTS SONT ÉGALES, ET C'EST DÉLIBÉRÉ — NE PAS
+            // « CORRIGER » CES 25 % EN LES TROUVANT TROP PLATS.
+            // Décision de Grégoire, 2 septembre 2026. Les NOMS sont neutres :
+            // « Examen de mi-session » est du vocabulaire commun à tous les
+            // programmes. La PONDÉRATION, elle, ne l'était pas : `20/20/30/30`
+            // met 60 % du poids sur les examens, et c'est une position
+            // pédagogique, pas un point de départ. En arts, en techniques, en
+            // éducation physique, les examens sont minoritaires ou absents —
+            // un enseignant de ces programmes aurait lu, dans un gabarit
+            // FOURNI PAR L'APPLICATION, une opinion sur la bonne façon d'évaluer.
+            //
+            // ⮕ Des parts égales ne disent rien. Et surtout : quatre nombres
+            // identiques SE VOIENT comme un réglage à poser, là où `20/20/30/30`
+            // se lit comme un réglage déjà décidé par quelqu'un d'autre.
+            // C'est la suite directe de #691 : une pondération qui ressemble à
+            // une vraie pratique reproduit la pratique de son auteur, en plus
+            // discret qu'un libellé.
             evaluations: [
-                { id: 1, nom: 'Travail 1', type: 'travail', ponderation: 20 },
-                { id: 2, nom: 'Travail 2', type: 'travail', ponderation: 20 },
-                { id: 3, nom: 'Examen de mi-session', type: 'examen', ponderation: 30 },
-                { id: 4, nom: 'Examen final', type: 'examen', ponderation: 30 }
+                { id: 1, nom: 'Travail 1', type: 'travail', ponderation: 25 },
+                { id: 2, nom: 'Travail 2', type: 'travail', ponderation: 25 },
+                { id: 3, nom: 'Examen de mi-session', type: 'examen', ponderation: 25 },
+                { id: 4, nom: 'Examen final', type: 'examen', ponderation: 25 }
             ],
             // ⮕ LES QUATRE CRITÈRES DE LA GRILLE DE DÉPART (`grilles.js`,
             // GRILLE_GENERIQUE). Cohérence gratuite : qui prend la grille de

@@ -188,6 +188,32 @@ describe('#691 · A bis — aucune matière ne survit DANS LA CONFIGURATION', ()
             expect(e.ponderation % 5, `« ${e.nom} » n'est pas une pondération ronde`).toBe(0);
         });
     });
+
+    it('A bis.f ⚠ AUCUNE ÉVALUATION D\'UN MODÈLE FOURNI NE PÈSE PLUS QU\'UNE AUTRE', () => {
+        // ⚠ RÉORIENTÉ le 2 septembre : A bis.e ci-dessus passait déjà avec
+        // `20/20/30/30` ET avec `25/25/25/25` — il gardait la somme et
+        // l'arrondi, pas la RÉPARTITION. Or c'est elle qui portait une position
+        // pédagogique : 60 % du poids sur les examens, servi comme point de
+        // départ à des programmes où les examens sont minoritaires ou absents.
+        // ⮕ L'invariant est l'ÉGALITÉ, et il vaut pour tout modèle fourni :
+        // un gabarit propose une structure, il ne tranche pas ce qui compte le plus.
+        Object.values(biblio.MODELES_PRATIQUES_PREDEFINIS).forEach(m => {
+            const evals = (m.configuration && m.configuration.evaluations) || [];
+            if (!evals.length) return;   // tous les modèles n'ont pas d'évaluations
+            const parts = evals.map(e => e.ponderation);
+            expect(new Set(parts).size,
+                `« ${m.id} » pondère inégalement : ${parts.join(' / ')}`).toBe(1);
+        });
+    });
+
+    it('A bis.g TÉMOIN — il y a bien des évaluations à peser', () => {
+        // Sans lui, un modèle sans `evaluations` ferait passer A bis.f par le
+        // `return` ci-dessus, et l'invariant ne garderait plus rien.
+        const som = Object.values(biblio.MODELES_PRATIQUES_PREDEFINIS).find(m => m.id === 'SOM-litterature');
+        expect(som.configuration.evaluations.length).toBe(4);
+        // Et la mesure sait voir une inégalité quand il y en a une.
+        expect(new Set([20, 20, 30, 30]).size).toBe(2);
+    });
 });
 
 /* ============================================= B — AUCUNE FAMILLE NE SE VIDE */

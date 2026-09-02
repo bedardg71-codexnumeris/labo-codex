@@ -125,6 +125,66 @@ pas le `AAAAMMJJ`+lettre des autres.
 
 ---
 
+## ÉTAT MESURÉ — 2 SEPTEMBRE 2026, 10 h (release 1.109.2, parts égales) — ⏸ NON POUSSÉ
+
+> Écrit à la clôture du LOT (règle 4). Chaque chiffre porte sa commande (règle 1).
+
+⏸ **LE COMMIT EXISTE, LE PUSH N'A PAS EU LIEU, ET C'EST VOULU.** Première
+application de la **règle 6** : une seule livraison par séance, à la fin, et
+Grégoire regarde avant. Le verdict Playwright n'est pas pris non plus — il se
+périmerait à la moindre correction issue de son coup d'œil.
+
+**La version** — `cat version.json` rend `{"build":"0902-1006","beta":"1.109.2"}`.
+Quatre points alignés, mesurés PAR TÉMOIN : `grep -rl '1\.109\.1' --include=*.js
+--include=*.json --include=*.html .` rend **0** ; **témoin du périmètre** :
+`grep -rl '1\.109' .` sur tout le dépôt rend **11** fichiers de prose datée.
+
+**Les tests** — `cd tests && npm run test:unit` : **435 fichiers / 4701 tests,
+code 0**. Sentinelle #687 à **27 cas**, dont deux neufs, **break-testés 4 fois**
+(y compris la mutation `20/20/30/30` que la consigne désignait).
+
+### Le lot — une seule ligne de données, et un raisonnement à ne pas perdre
+
+Les quatre évaluations du modèle sommatif passent de `20/20/30/30` à **`25` chacune**.
+Rien d'autre ne bouge : ni les noms, ni les types, ni les critères, ni les seuils,
+ni l'identifiant.
+
+**Le motif est inscrit EN COMMENTAIRE au-dessus du bloc**, pour qu'une session
+future ne « corrige » pas ces 25 % en les trouvant trop plats : les NOMS étaient
+déjà neutres, la PONDÉRATION ne l'était pas. `20/20/30/30` met **60 % du poids
+sur les examens** — une position pédagogique servie comme point de départ à des
+programmes (arts, techniques, éducation physique) où les examens sont
+minoritaires ou absents. Des parts égales ne disent rien, et **quatre nombres
+identiques se voient comme un réglage à poser**.
+
+### ⚠ CE QUE LA SENTINELLE NE GARDAIT PAS, ET QUE LA CONSIGNE M'A FAIT VÉRIFIER
+
+La consigne demandait de mesurer si un cas affirmait les pondérations. **Réponse :
+un cas les touchait sans les garder.** `A bis.e` vérifiait la SOMME (100) et
+l'arrondi (multiples de 5) — il passait donc à l'identique avec `20/20/30/30` ET
+avec `25/25/25/25`. Il ne gardait pas la RÉPARTITION, qui est pourtant ce qui
+portait la position pédagogique.
+⮕ **`A bis.f` ajouté** : *aucune évaluation d'un modèle fourni ne pèse plus qu'une
+autre*, sur TOUS les modèles offerts, pas seulement le sommatif. Plus `A bis.g`
+en témoin — sans lui, un modèle sans `evaluations` passerait par le `return` de
+garde et l'invariant ne garderait plus rien.
+⮕ La leçon : **un cas qui touche une donnée ne la garde pas forcément.** « Il y a
+un test dessus » ne dit pas lequel des invariants il tient.
+
+**Le changelog n'est pas touché** : l'entrée `1.109` dit « deux travaux et deux
+examens » et ne mentionne aucune pondération (`grep` sur `changelog-data.js` :
+les deux autres occurrences de « pondération » sont dans des entrées anciennes,
+sans rapport). Convention du dépôt : une entrée par version mineure.
+
+### Ce qui reste ouvert
+
+- ⏸ **Le push attend Grégoire.** Ce qu'il doit voir : Conception › Pratiques ›
+  « Partir d'un modèle » › **Modèle sommatif** — ses quatre évaluations doivent
+  afficher **25 % chacune**.
+- **#688, #689, #690, #692** inchangés.
+
+---
+
 ## ÉTAT MESURÉ — 2 SEPTEMBRE 2026, FIN DE MATINÉE (release 1.109.1, #691 livré)
 
 > Écrit à la clôture du LOT (règle 4). Chaque chiffre porte sa commande (règle 1).
