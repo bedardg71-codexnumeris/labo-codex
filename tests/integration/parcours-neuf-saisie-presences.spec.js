@@ -10,7 +10,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // LE PARCOURS D'UN UTILISATEUR NEUF, JUSQU'À LA PREMIÈRE PRÉSENCE SAISIE
 // =======================================================================
 //
-// Retour de Jean-François, 26 août 2026, BLOQUANT : « Dans Suivi > Présences, je
+// Retour d'un testeur, 26 août 2026, BLOQUANT : « Dans Suivi > Présences, je
 // ne peux pas entrer les présences, un message d'erreur jaune doré m'indique que
 // l'horaire n'est pas configuré (alors qu'il l'est dans Cadre). »
 //
@@ -25,7 +25,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //   qu'au bout du parcours, une présence est RÉELLEMENT saisissable. Pas que le
 //   bandeau se cache — qu'il y ait un tableau, des élèves, et un champ qui prend
 //   une valeur. Un écran sans avertissement mais sans saisie possible serait un
-//   faux vert, et c'est exactement ce que Jean-François a vécu à l'envers.
+//   faux vert, et c'est exactement ce que le testeur a vécu à l'envers.
 //
 // ⚠ IL PART D'UN STOCKAGE VIDÉ. Les specs partagent le localStorage de l'origine
 // file:// (d'où `workers: 1`). Hériter de l'état d'une spec précédente ferait
@@ -197,7 +197,7 @@ test('parcours neuf · de la configuration à la première présence saisissable
     expect(r.seancesVues, 'obtenirSeancesHoraire() ne voit pas les séances du groupe-cours actif').toBeGreaterThan(0);
     expect(
         r.bandeauVisible,
-        'LE CAS DE JEAN-FRANÇOIS : horaire configuré ET rattaché, le bandeau doit se taire'
+        'LE CAS DU RETOUR DU 26 AOÛT : horaire configuré ET rattaché, le bandeau doit se taire'
     ).toBe(false);
 
     // ── LA question ──────────────────────────────────────────────────────────

@@ -234,11 +234,19 @@ l'adoption**. Ce n'est plus du matériel mort, c'est ce que les gens peuvent pre
 · **(a) Le champ `discipline:` et tout ce qui l'affiche** : c'est du texte, ça se
   corrige. Neutralise la valeur comme le lot d'hier l'a fait ailleurs (`'Général'`),
   et déplace l'origine dans la `description` si elle informe.
-· **(b) Les identifiants : ⛔ NE LES TOUCHE PAS.** Un enseignant a pu adopter une de
-  ces pratiques ; son enregistrement pointe vers l'identifiant. Les renommer
-  casserait sa référence. **C'est une migration, donc une décision de Grégoire, et
-  elle est déjà inscrite comme telle.** Nomme-la dans ton état mesuré, ne la prends
-  pas.
+· **(b) Les identifiants : ↻ TRANCHÉ PAR GRÉGOIRE le 2 septembre — ils partent.**
+  « On retire absolument tout nom de collègue », puis, après mesure : « on retire
+  TOUS les noms. » Le motif est le sien : ce code est servi au navigateur de tout le
+  monde, et un nom gravé dedans est un nom publié sans qu'on l'ait demandé à son
+  porteur.
+  ⮕ **La mesure a trouvé trois familles, pas une**, et ↻ **les trois sont gratuites** :
+  les huit identifiants d'échelles de `IDS_GABARITS_HARDCODES` sont **inertes** — le
+  tombstone a cinq lecteurs, aucun ne les concerne, et l'import ne le consulte pas.
+  ⚠ Un commentaire du code affirme le contraire ; **il est périmé depuis le retrait du
+  semis du 1er septembre**, et il doit être corrigé dans le même commit.
+  **Le détail exécutable est dans
+  `plans de travail/CONSIGNE-DU-JOUR.md`, écrit le 2 septembre à 10 h 54. Lis-le : ce
+  mandat-ci le résume, il ne le remplace pas.**
 
 ### Geste 2 — le CAF et les services adaptés servis à tout le monde *(#539)*
 
@@ -296,8 +304,14 @@ les familles spécifications et standards se vident **en silence**.
   changelog s'affiche DANS l'application, donc derrière la porte : quelqu'un qui a
   un vieux signet rencontre l'écran de code AVANT de pouvoir le lire. *(Rédigé,
   attend sa correction.)*
-- **Les identifiants qui portent un prénom de collègue** *(#690b)* : migration ou
-  statu quo. Voir le mandat.
+- ✅ **Les identifiants qui portent un prénom de collègue** *(#690b)* : **tranché le
+  2 septembre — ils partent tous, et le retrait ne coûte rien.** Mesuré : les huit
+  identifiants d'échelles sont inertes. Plus rien ne lui est dû sur ce point ; la
+  consigne du jour porte le geste.
+- **Deux attributions d'idée** (« l'algorithme propose, le jugement tranche —
+  Voisard ») : si la formule vient d'une source publiée, elle se cite en règle au
+  lieu de disparaître ; sinon elle part. **Question d'honnêteté intellectuelle, pas
+  de code** — elle lui sera posée avec les deux lignes exactes sous les yeux.
 - **Une porte terrain** sur « Partir d'un modèle » : cinq modèles fournis, aucun
   nommé par discipline. *Fait le 2 septembre pour la liste ; le contenu du modèle
   sommatif reste à ouvrir.*

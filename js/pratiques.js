@@ -1868,7 +1868,7 @@ function afficherConfigSpecType() {
 }
 
 /**
- * Ajoute un type de travail dans la configuration binaire (François)
+ * Ajoute un type de travail dans la configuration binaire (PAN-Spécifications)
  */
 function ajouterTypeTravailSpec() {
     const liste = document.getElementById('wizard-spec-types-travaux-liste');
@@ -1965,7 +1965,7 @@ function retirerPalierBundle(btn) {
 }
 
 /**
- * Génère la liste des objectifs d'apprentissage (Xavier - niveaux)
+ * Génère la liste des objectifs d'apprentissage (échelle à niveaux)
  */
 function genererObjectifsSpec() {
     const nbObjectifs = parseInt(document.getElementById('wizard-spec-nb-objectifs').value) || 6;

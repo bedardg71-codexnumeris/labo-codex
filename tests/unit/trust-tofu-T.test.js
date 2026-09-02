@@ -74,14 +74,14 @@ describe('lot T · les 3 états (+ indeterminable)', () => {
 
 describe('lot T · normalisation du nom (anti-contournement)', () => {
     it('casse et espaces différents → même fiche', () => {
-        tofu.memoriserContact(paquet('Marie-Hélène Tremblay', 'CLE_A'));
-        expect(tofu.verifierConfianceTOFU(paquet('  marie-hélène   TREMBLAY ', 'CLE_A')).statut).toBe('verifiee');
-        expect(tofu.verifierConfianceTOFU(paquet('  marie-hélène   TREMBLAY ', 'CLE_B')).statut).toBe('cle_changee');
+        tofu.memoriserContact(paquet('Anne-Amélie Rousseau', 'CLE_A'));
+        expect(tofu.verifierConfianceTOFU(paquet('  anne-amélie   ROUSSEAU ', 'CLE_A')).statut).toBe('verifiee');
+        expect(tofu.verifierConfianceTOFU(paquet('  anne-amélie   ROUSSEAU ', 'CLE_B')).statut).toBe('cle_changee');
     });
 
     it('NFD (macOS) et NFC → même fiche', () => {
-        tofu.memoriserContact(paquet('Hélène'.normalize('NFC'), 'CLE_A'));
-        expect(tofu.verifierConfianceTOFU(paquet('Hélène'.normalize('NFD'), 'CLE_A')).statut).toBe('verifiee');
+        tofu.memoriserContact(paquet('Amélie'.normalize('NFC'), 'CLE_A'));
+        expect(tofu.verifierConfianceTOFU(paquet('Amélie'.normalize('NFD'), 'CLE_A')).statut).toBe('verifiee');
     });
 
     it('deux auteurs réellement différents restent distincts', () => {

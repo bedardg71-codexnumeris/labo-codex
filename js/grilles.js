@@ -1029,7 +1029,7 @@ async function dupliquerGrille(grilleId) {
         // construit à la main sur trois clés : deux grilles homonymes rendaient la
         // filiation indécidable.
         inspireDe: BibliothequeUI.forgerInspireDe(grilleOriginale),
-        dansBibliotheque: true  // ✅ AJOUT (Beta 95.2 - Bug Bruno) - Grille dupliquée dans bibliothèque
+        dansBibliotheque: true  // ✅ AJOUT (Beta 95.2) — la copie doit atterrir dans la bibliothèque
     };
 
     // Sauvegarder
@@ -4574,7 +4574,8 @@ async function supprimerGrilleActive() {
 
 /**
  * Sauvegarde complète de la grille (nom + critères)
- * ✅ CORRIGÉ (6 jan 2026 - Bug Bruno) : Utiliser sauvegarderGrilleTemplate directement
+ * ✅ CORRIGÉ (6 janv. 2026) : passer par sauvegarderGrilleTemplate directement —
+ * sauvegarderNomGrille() ne traite que les grilles déjà existantes.
  */
 async function sauvegarderGrilleComplete() {
     // ✅ CORRIGÉ : Appeler sauvegarderGrilleTemplate avec await

@@ -74,7 +74,7 @@
             formatHoraire: '1x3h',
             actif: false,
             dansBibliotheque: true,
-            enseignant: 'Jean-François Bélanger',
+            enseignant: 'Enseignant·e 2',   // #690 : nom de collègue retiré (2 sept. 2026)
             discipline: 'Biologie'
         },
         {

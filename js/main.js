@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0902-1006';
+window._SCRIPT_BUILD_main = '0902-1148';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -136,10 +136,18 @@ window.marquerRessourceSupprimee = function(id) {
 // Ils étaient re-semés à CHAQUE chargement sans que leur suppression laisse la
 // moindre trace — cette liste est ce qui fait poser le tombstone, donc ce qui
 // rend la suppression durable.
+// ↻ #690 (2 sept. 2026) — LES HUIT ÉCHELLES DISCIPLINAIRES SONT RETIRÉES D'ICI.
+// Elles y étaient au motif, écrit dans `echelles-bibliotheque.js`, qu'une
+// suppression doit rester durable. Ce motif est périmé depuis le retrait du semis
+// du 1er septembre : mesuré, le tombstone n'a que quatre lecteurs et aucun ne les
+// regarde, et le chemin d'import ne le consulte pas du tout. Elles n'y faisaient
+// plus qu'écrire une marque que personne ne relit. Leur identifiant portait le
+// prénom du collègue dont l'échelle venait, dans un fichier servi au navigateur
+// de tout le monde. ⚠ Ce qui reste dans cette liste est VIVANT : chacun de ces
+// identifiants est semé par un `assurer*()`, et l'y retirer rendrait une
+// suppression réversible. La sentinelle #464, cas D, garde nommément les cinq.
 window.IDS_GABARITS_HARDCODES = [
-    'ECHELLE_GENERIQUE', 'ECHELLE_BRUNO_CHIMIE', 'ECHELLE_XAVIER_INFO',
-    'ECHELLE_ISABELLE_BIO', 'ECHELLE_HELENE_PHILO', 'ECHELLE_MARIEHELENE_LITT',
-    'ECHELLE_ETIENNE_ADMIN', 'ECHELLE_OLIVIER_GEO', 'ECHELLE_JORDAN_PHILO',
+    'ECHELLE_GENERIQUE',
     'GRILLE_GENERIQUE', 'CART_GENERIQUE',
     // §2 du PLAN-2026-09-01 (1er sept. 2026) — l'échelle IDME de départ est semée
     // à chaque initialisation du module Échelles. Sans son id ICI, l'utilisateur
@@ -219,7 +227,7 @@ window.genererBadgePratique = function(type, compact = false) {
 // archive, lien du bandeau d'alerte des présences), seule leur DESTINATION
 // est corrigée.
 //
-// FIX (26 août 2026, retour Jean-François) : « le lien ne débouche nulle
+// FIX (26 août 2026, retour d'un testeur) : « le lien ne débouche nulle
 // part ». Deux fautes cumulées, chacune suffisante :
 //   1. cette fonction faisait `location.href = '#calendrier-trimestre'` — le
 //      dépôt n'a AUCUN routeur de hash (grep hashchange/location.hash = 0) —

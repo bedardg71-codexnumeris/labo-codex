@@ -34,7 +34,7 @@ const PratiqueManager = {
         // miroir modalitesEvaluation.pratique n'existe plus.
         const pratiqueId = (typeof window.obtenirPratiqueActiveGroupeCours === 'function')
             ? window.obtenirPratiqueActiveGroupeCours()
-            : null; // Ex: 'pan-standards-bruno'
+            : null; // Ex: 'pan-standards-cinq-niveaux'
 
         if (!pratiqueId) {
             console.warn('[PratiqueManager] Aucune pratique configurée');

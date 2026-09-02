@@ -55,8 +55,8 @@ describe('#457 · forgerInspireDe retrouve l’auteur où qu’il soit rangé', 
     });
 
     it('matériel reçu d’un autre enseignant (auteur dans auteurOriginal)', () => {
-        const cartouche = { id: 'CART_1', nom: 'Cartouche partagée', auteurOriginal: 'Bruno V.' };
-        expect(BibliothequeUI.forgerInspireDe(cartouche).auteur).toBe('Bruno V.');
+        const cartouche = { id: 'CART_1', nom: 'Cartouche partagée', auteurOriginal: 'Ada Lovelace' };
+        expect(BibliothequeUI.forgerInspireDe(cartouche).auteur).toBe('Ada Lovelace');
     });
 
     it('copie issue d’une duplication (champ auteur racine) — inchangé', () => {

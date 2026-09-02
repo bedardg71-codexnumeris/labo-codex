@@ -20,8 +20,8 @@ const CC_LICENSE_DEFAULTS = {
     // #342 : aucune coordonnée personnelle par défaut. Sans identité résolue
     // (Cadre › Trimestre › Enseignant·e ou enseignant marqué actif), l'auteur est « Inconnu »
     // et NI courriel NI site ne sont gravés — plutôt qu'un nom ou des coordonnées
-    // posés silencieusement (cf. « par Bruno V. » sur une pratique de
-    // littérature de Grégoire). Quand un enseignant réel est résolu, ses propres
+    // posés silencieusement (le repli gravait le nom d'un collègue sur une
+    // pratique de Grégoire). Quand un enseignant réel est résolu, ses propres
     // courriel/site sont utilisés.
     auteur_original: "Inconnu",
     email_auteur: "",
@@ -76,8 +76,8 @@ function obtenirProfilAuteurActifSync() {
 
         // 3. (#342) Aucune désignation explicite : ON N'ATTRIBUE À PERSONNE.
         // L'ancien repli `enseignantsReels[0]` gravait un enseignant arbitraire
-        // (premier de la liste) sur le matériel — c'est lui qui a stampé
-        // « Bruno V. » sur une pratique de littérature de Grégoire.
+        // (premier de la liste) sur le matériel — c'est lui qui a stampé le nom
+        // d'un collègue sur une pratique de Grégoire.
         if (!enseignant) {
             console.warn('[CC License] #342 : aucun enseignant désigné (ni sélection Cadre › Trimestre › Enseignant·e, ni marqué actif) — attribution « Inconnu ».');
             return null;

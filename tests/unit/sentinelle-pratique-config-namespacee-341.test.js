@@ -8,7 +8,8 @@ import { chargerScript } from './_helpers/charger-script.js';
 // retrouvait AUCUNE configuration : obtenirConfigurationPratiqueParId lisait la
 // clé GLOBALE 'pratiquesConfigurables' (vestige du fix Beta 95.2), alors que les
 // configs vivent dans la clé namespacée par trimestre (h2026_pratiquesConfigurables)
-// depuis 99.64. Symptôme : « Configuration introuvable » pour pan-standards-bruno
+// depuis 99.64. Symptôme : « Configuration introuvable » pour une pratique dont
+// la configuration existait, mais sous la clé namespacée du trimestre.
 // ET pour une copie fraîchement dupliquée, blocage probable de la reconstitution A25.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -38,14 +39,14 @@ describe('#341 · obtenirConfigurationPratiqueParId résout la clé namespacée'
     it('retrouve une config qui ne vit que dans h2026_pratiquesConfigurables', async () => {
         const store = {
             // La config réelle de Grégoire (PAN-Littérature A25), namespacée H26.
-            h2026_pratiquesConfigurables: [{ id: 'pan-standards-bruno', nom: 'PAN-Littérature A25' }],
+            h2026_pratiquesConfigurables: [{ id: 'pan-standards-cinq-niveaux', nom: 'PAN-Littérature A25' }],
             // Clé nue legacy volontairement vide — reproduit l'état du terrain.
             pratiquesConfigurables: []
         };
         const win = chargerScript('js/pratiques-bibliotheque.js', { db: dbDepuisStore(store), cle: cleH2026 });
-        const config = await win.obtenirConfigurationPratiqueParId('pan-standards-bruno');
+        const config = await win.obtenirConfigurationPratiqueParId('pan-standards-cinq-niveaux');
         expect(config).toBeTruthy();
-        expect(config.id).toBe('pan-standards-bruno');
+        expect(config.id).toBe('pan-standards-cinq-niveaux');
     });
 
     it('repli legacy : retrouve encore une config rangée sous la clé nue', async () => {

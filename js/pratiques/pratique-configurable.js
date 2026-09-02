@@ -566,7 +566,7 @@ class PratiqueConfigurable {
     }
 
     /**
-     * Calcule note par conversion de niveaux (ex: Bruno)
+     * Calcule note par conversion de niveaux (échelle à 5 niveaux)
      * @private
      */
     calculerParConversionNiveaux(evaluations) {
@@ -592,7 +592,7 @@ class PratiqueConfigurable {
     }
 
     /**
-     * Calcule moyenne pondérée classique (ex: Marie-Hélène)
+     * Calcule moyenne pondérée classique (sommative traditionnelle)
      * @private
      */
     calculerMoyennePonderee(evaluations) {
@@ -621,7 +621,7 @@ class PratiqueConfigurable {
      * Calcule note par remplacement progressif
      * Pour chaque paire d'évaluations, utilise max(initiale, finale) × poids.
      *
-     * Référence : PRATIQUE_SOMMATIVE_REMPLACEMENT_JORDAN dans pratiques-predefines.js
+     * Référence : PRATIQUE_SOMMATIVE_REMPLACEMENT dans pratiques-predefines.js
      * @private
      */
     calculerParRemplacementProgression(evaluations) {

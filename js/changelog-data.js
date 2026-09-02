@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.110',
+            couleur: 'orange',
+            titre: 'Ton interface ne parle plus d\'une mati\u00e8re ni d\'un service qui ne sont pas les tiens',
+            items: [
+                '<strong>Le service d\'aide propos\u00e9 \u00e0 tes \u00e9l\u00e8ves porte le nom que TU lui donnes.</strong> Le r\u00e9glage existait ; ce qui changeait, c\'est ce qu\'il proposait par d\u00e9faut. Il annon\u00e7ait « Centre d\'aide en fran\u00e7ais (CAF) » \u2014 un service qui n\'existe pas dans tous les coll\u00e8ges, et qui a chang\u00e9 de nom dans certains. Le d\u00e9part est maintenant <strong>« Centre d\'aide du coll\u00e8ge »</strong>, et le champ s\'appelle simplement « Nom du service d\'aide ». ⚠ <strong>Si tu avais d\u00e9j\u00e0 inscrit le tien, ta valeur ne bouge pas.</strong>',
+                '<strong>La phrase lue par l\'\u00e9l\u00e8ve ne nomme plus de discipline</strong> : « … au service d\'aide de ton coll\u00e8ge : <em>le nom que tu as inscrit</em>. » Si tu laisses le nom vide, la recommandation dispara\u00eet proprement au lieu de laisser une phrase bancale.',
+                '<strong>Le plan de rattrapage ne pr\u00e9suppose plus les services de ton \u00e9tablissement.</strong> Les trois lignes qui nommaient des sigles (« SA », « CAF ») disent d\u00e9sormais « du coll\u00e8ge », sans supposer qu\'il en existe un.',
+                '<strong>Aucune pratique offerte \u00e0 l\'adoption n\'affiche plus de mati\u00e8re.</strong> Sept d\'entre elles annon\u00e7aient Chimie, Litt\u00e9rature, Math\u00e9matiques, Philosophie ou Biologie, et nommaient un c\u00e9gep pr\u00e9cis. Elles n\'annoncent plus rien de tel : seules TES pratiques peuvent porter ta discipline.',
+                '<strong>Plus aucun nom de personne dans le code de l\'application.</strong> Des identifiants, des constantes et une quarantaine de commentaires portaient le pr\u00e9nom du coll\u00e8gue ou du testeur dont le mat\u00e9riel avait servi d\'exemple. Ce code est servi au navigateur de tout le monde : un nom grav\u00e9 dedans est un nom publi\u00e9 sans qu\'on l\'ait demand\u00e9 \u00e0 son porteur.'
+            ]
+        },
+        {
             version: '1.109',
             couleur: 'orange',
             titre: 'Le mat\u00e9riel fourni ne se r\u00e9clame plus d\'une discipline',
