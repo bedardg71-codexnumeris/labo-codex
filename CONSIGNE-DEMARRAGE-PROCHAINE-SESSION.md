@@ -125,6 +125,101 @@ pas le `AAAAMMJJ`+lettre des autres.
 
 ---
 
+## ÉTAT MESURÉ — 1er SEPTEMBRE 2026, NUIT (après la release 1.107.0)
+
+*↻ Écrit par Claude Code à la clôture du lot Netlify + release. Le bloc de fin
+de soirée qui suit reste sous celui-ci.*
+⚠ **Section tenue par Claude Code — faits datés, rien d'autre. Le MANDAT plus bas
+est tenu par Cowork** (`PROTOCOLE.md`, « Qui écrit quoi »).
+⚠ **Par la règle 1 de `PROTOCOLE.md`, chaque chiffre porte sa commande.** Rejoue-les
+plutôt que de me croire.
+
+**Branche `main`, à jour avec l'origine.**
+`git rev-list --count origin/main..HEAD` → **0**.
+`git status --porcelain | wc -l` → **0** (propre pour la première fois de la
+soirée : `_sauvegarde-*/` est entré au `.gitignore`).
+
+**Version `1.107.0`, build `0901-2050`** — `cat version.json`.
+Les **quatre** points de vérité concordent, vérifiés par témoin :
+`grep -rl <motif> --include=*.js --include=*.json --include=*.html .`
+→ `1.106.15` : 0 · `0901-1354` : 0 · `09011354` : 0.
+⚠ **Périmètre étroit, dit exprès** : sur TOUT le dépôt, `1.106.15` rend encore
+3 fichiers et `0901-1354` en rend 2 (BACKLOG, CONSIGNE, RELAIS) — de la prose
+datée, qui doit garder son ancien numéro.
+
+**Vitest : VERT — 433 fichiers / 4638 tests, code 0.**
+`cd tests && npm run test:unit`. ⚠ **PAS `npm test`** : il enchaîne Vitest ET
+Playwright (>10 min). Corrigé dans `CLAUDE.md` ce soir.
+
+**Playwright WebKit : VERT — code 0, `echecsConnus: 0`, `instables: []`**, jeton
+estampillé `66fb35bd`. `cd tests && node ../scripts/verifier-playwright.mjs`.
+⚠ **Le jeton est périmé de deux commits** (HEAD = `e49df72f`) : les deux derniers
+lots ne portent aucun fichier observable — vérifié en soumettant leur liste à
+`lot_observable` (`scripts/lot-observable.sh`), qui rend NON observable.
+
+**Jetons anti-cache : jusqu'à `20260901g`** — `grep -ohE 'v=20260901[a-z]' index.html | sort -u | tail`.
+
+**Dernier ID utilisé : #685.** Prochain libre : **#686**.
+`grep -ohE '#(6[0-9]{2})' BACKLOG.md | sort -u | tail -2`.
+**Backlog : 166 cases ouvertes** — `grep -c '^- \[ \]' BACKLOG.md`.
+
+### Ce que la nuit a livré — cinq commits, `b350f756..e49df72f`
+
+✅ **Les deux portes de service Netlify sont fermées** (`2f910305`). La consigne
+n'en nommait qu'une ; la mesure en a trouvé deux. **Preuve après déploiement** :
+`curl -sI https://codexnumeris-051225.netlify.app/` → **301** vers
+`app.codexnumeris.org` ; idem pour `main--…` ; un chemin profond conserve son
+`:splat` (`/index.html` → `/index.html`). **Témoin** : `app.codexnumeris.org`
+rend toujours **403** Cloudflare — aucune boucle.
+⚠ Les aperçus de PR restent ouverts VOLONTAIREMENT (éprouver sur iPad avant
+fusion). Les déploiements de branche sont DÉSACTIVÉS, mesuré avec témoin : une
+branche réelle rend 404, comme un témoin inventé, tandis que `main--…` rend 200.
+⚠ Le 301 est PERMANENT et retenu durablement par les navigateurs : rouvrir une de
+ces adresses coûtera plus que de retirer les lignes de `netlify.toml`.
+
+✅ **#685 inscrit et son garde-fou livré** (`4dc6f54a`). Le jeton Playwright porte
+désormais `instables` : un vert rattrapé au second essai ne ressemble plus à un
+vert franc, et le hook l'imprime. Break-test à 4 cas, témoin dans les deux sens.
+⚠ **#685 lui-même n'est PAS corrigé** — la spec `triptyque-seme-produit-une-note`
+porte trois `waitForTimeout(700)` fixes et aucune attente d'état. À mesurer avant
+de corriger.
+
+✅ **Release `1.107.0`** (`cbf6f98f`), tranchée `minor` par Grégoire. Entrée
+changelog neuve, 7 items. ⚠ **Ce minor n'est PAS celui que le §4.3 de #668 attend
+à la fin de son chantier** : les lots 5b et 6 restent dus et en recevront un autre.
+
+✅ **`PROTOCOLE.md` (racine) entre au dépôt** (`e49df72f`). Il porte comment
+Cowork, Claude Code et Grégoire travaillent ensemble. **À lire au début de toute
+session**, avec `OU-EN-EST-ON.md`. `CLAUDE.md` y pointe et redescend à **246
+lignes** (il était à 249 sur 250).
+
+### ⏳ CE QUI EST DÛ — repris tel quel, rien n'est réglé
+
+· **Le tri de la consigne (règle 3) N'A PAS ÉTÉ FAIT**, et c'est une décision, pas
+  un oubli. Ce fichier fait 29 Ko et mélange deux durées de vie ; le tri décide ce
+  qui se perd, et une session entamée le fait mal. **Deux promotions sont déjà
+  arrêtées** : le piège du bump à quatre emplacements → skill `release-et-changelog` ;
+  « push réussi n'est pas suite verte » → `CLAUDE.md`. Le reste suit le tableau de
+  `PROTOCOLE.md`.
+· **`index.html` l. 14666** : le commentaire du jeton de `changelog-data.js` nomme
+  encore « Entrée 1.106 […] (1.106.12) » alors que le fichier porte 1.107. Niveau 3.
+  Remplacement prêt : `<!-- Entrée 1.107 : matériel de départ, huit échelles
+  retirées, redirection Netlify (1.107.0) -->`. À poser au prochain lot qui touche
+  `index.html` — la prochaine release le fera.
+· **#684** — migration des libellés, ou assumer que le §3 ne vaut que pour les
+  nouveaux espaces. **Le silence n'est pas une issue.**
+· **#683** — deux mécanismes mesurés, aucun corrigé (la bascule de trimestre ne
+  sème rien ; la suppression est par trimestre, le tombstone est global).
+· **#674** — requalifié en RÉPARATION : des utilisateurs déjà en place ont des
+  échelles muettes qui rendent 0,0 %. Ni sondables, ni joignables.
+· **La porte terrain du §3 reste SUSPENDUE.**
+· **Le doublage de l'annonce de la redirection.** Le changelog s'affiche DANS
+  l'application, donc **derrière la porte** : la personne qui a un signet
+  `.netlify.app` rencontre l'écran de code AVANT de pouvoir le lire. Courriel à la
+  communauté ou ligne sur le blog — geste de Grégoire.
+
+---
+
 ## ÉTAT MESURÉ — 1er SEPTEMBRE 2026, FIN DE SOIRÉE
 
 *↻ Réécrit depuis Claude Code, à la clôture du chantier du matériel semé (§1 à §4
