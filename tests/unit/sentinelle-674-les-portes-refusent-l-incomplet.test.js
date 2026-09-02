@@ -149,6 +149,9 @@ function monterEnregistrement({ niveaux, echelle = ECHELLE, modification = false
         copierEnFormatTSV() {}, setTimeout: () => 0, clearTimeout() {}
     };
     chargerScript('js/evaluation-calcul.js', globaux, win);
+    // L'auto-save vit dans evaluation-chargement.js : c'est lui que la porte appelle
+    // pour écrire le brouillon quand elle refuse.
+    chargerScript('js/evaluation-chargement.js', globaux, win);
     chargerScript('js/evaluation-sauvegarde.js', globaux, win);
     chargerScript('js/evaluation.js', globaux, win);
     return { win, ecran, ec, ecritures, refus, succes };
@@ -160,15 +163,30 @@ function evaluationEcrite(ecritures, id) {
     return e.v.find((ev) => ev.id === id) || null;
 }
 
+/** Ce qu'un refus a le droit d'écrire : un BROUILLON (non verrouillé), jamais une conclusion. */
+function seulUnBrouillon(ecritures) {
+    const ecrits = ecritures.filter((x) => x.k === 'evaluationsSauvegardees');
+    expect(ecrits, 'le refus doit écrire le brouillon, une fois').toHaveLength(1);
+    expect(ecrits[0].v.every((ev) => ev.verrouillee !== true), 'aucune évaluation verrouillée ne doit sortir d\'un refus').toBe(true);
+    return ecrits[0].v;
+}
+
 describe('#674 · porte 1 — l\'enregistrement refuse ce qui ne porte pas sur toute la grille', () => {
-    it('création INCOMPLÈTE (Langue sans niveau) → refus nommé, RIEN n\'est écrit', () => {
+    // ⚠ Un refus qui n'écrivait RIEN laissait la copie sans aucune évaluation en base :
+    // `sauvegarderEvaluation` annule l'auto-save en attente avant d'arriver à la porte.
+    // Mesuré par Grégoire le 2 septembre 2026 à 17 h 53 (badge « Importé », export Léa
+    // « aucune évaluation trouvée »). Le refus écrit donc le brouillon, et le dit.
+    it('création INCOMPLÈTE (Langue sans niveau) → refus nommé, et le BROUILLON est conservé (note 95 sur 80 %, non verrouillé)', () => {
         const { win, ecritures, refus } = monterEnregistrement({ niveaux: INCOMPLET });
         win.sauvegarderEvaluation();
         expect(refus).toHaveLength(1);
         expect(refus[0].titre).toBe('Évaluation incomplète');
         expect(refus[0].details).toContain('Langue (20 %)');
         expect(refus[0].details).toContain('80 % de la grille');
-        expect(ecritures.filter((x) => x.k === 'evaluationsSauvegardees')).toEqual([]);
+        expect(refus[0].details).toContain('conservé en brouillon');
+        const brouillon = seulUnBrouillon(ecritures).find((ev) => ev.id === 'EVAL_NEUF');
+        expect(brouillon, 'le brouillon doit exister : la copie reste exportable').toBeTruthy();
+        expect(brouillon).toMatchObject({ noteFinale: 95, ponderationCouverte: 80, verrouillee: false, niveauFinal: '--' });
     });
 
     it('création COMPLÈTE → écrite, note 84 AVEC sa portée 100, et pas un mot de plus', () => {
@@ -183,14 +201,15 @@ describe('#674 · porte 1 — l\'enregistrement refuse ce qui ne porte pas sur t
         expect(succes.length).toBeGreaterThan(0);
     });
 
-    it('création sur une échelle MUETTE (niveaux sans valeurCalcul) → refus nommé, motif dit', () => {
+    it('création sur une échelle MUETTE (niveaux sans valeurCalcul) → refus nommé, motif dit, brouillon « 0 sur 0 % » conservé', () => {
         const { win, ecritures, refus } = monterEnregistrement({ niveaux: { c1: 'M', c2: 'M', c3: 'M' }, echelle: ECHELLE_MUETTE });
         win.sauvegarderEvaluation();
         expect(refus).toHaveLength(1);
         expect(refus[0].details).toContain('valeur');
         expect(refus[0].details).toContain('Contenu (M)');
         expect(refus[0].details).toContain('Échelles de performance');
-        expect(ecritures.filter((x) => x.k === 'evaluationsSauvegardees')).toEqual([]);
+        const brouillon = seulUnBrouillon(ecritures).find((ev) => ev.id === 'EVAL_NEUF');
+        expect(brouillon).toMatchObject({ noteFinale: 0, ponderationCouverte: 0, verrouillee: false });
     });
 
     it('témoin — une évaluation VIDE (aucun niveau : jeton de délai seul) s\'enregistre, portée 0 déclarée', () => {
@@ -203,13 +222,15 @@ describe('#674 · porte 1 — l\'enregistrement refuse ce qui ne porte pas sur t
         expect(ev.ponderationCouverte).toBe(0);
     });
 
-    it('modification INCOMPLÈTE → refus nommé, l\'évaluation existante n\'est pas réécrite', () => {
+    it('modification INCOMPLÈTE → refus nommé ; l\'existante est mise à jour en BROUILLON, jamais verrouillée', () => {
         const { win, ecritures, refus } = monterEnregistrement({ niveaux: INCOMPLET, modification: true });
         win.sauvegarderEvaluationModifiee();
         expect(refus).toHaveLength(1);
         expect(refus[0].titre).toBe('Évaluation incomplète');
         expect(refus[0].details).toContain('Langue (20 %)');
-        expect(ecritures.filter((x) => x.k === 'evaluationsSauvegardees')).toEqual([]);
+        const ev = seulUnBrouillon(ecritures).find((x) => x.id === 'EV1');
+        expect(ev).toBeTruthy();
+        expect(ev).toMatchObject({ noteFinale: 95, ponderationCouverte: 80, verrouillee: false });
     });
 
     it('modification COMPLÈTE → réécrite, note 84 AVEC sa portée 100, verrouillée', () => {
@@ -229,6 +250,14 @@ describe('#674 · porte 1 — l\'enregistrement refuse ce qui ne porte pas sur t
         win.porteeCalculeeCourante = { ponderationCouverte: 100, ponderationGrille: 100, criteresHorsNote: [], commencee: true, incomplete: false };
         win.sauvegarderEvaluation();
         // …ne compte pas : la porte a rappelé calculerNote() et jugé l'état réel.
+        expect(refus).toHaveLength(1);
+        seulUnBrouillon(ecritures);
+    });
+
+    it('témoin du brouillon — sans auto-save chargé, le refus ne peut rien conserver et reste un refus (rien n\'est écrit)', () => {
+        const { win, ecritures, refus } = monterEnregistrement({ niveaux: INCOMPLET });
+        delete win._autoSauvegarderCriteres;
+        win.sauvegarderEvaluation();
         expect(refus).toHaveLength(1);
         expect(ecritures.filter((x) => x.k === 'evaluationsSauvegardees')).toEqual([]);
     });
