@@ -4383,6 +4383,18 @@ async function ajouterCritereGrille(grilleId) {
 
         // Créer un nouveau critère avec des valeurs par défaut
         g.criteres.push({
+            // ⚠⚠ UN CRITÈRE NAÎT AVEC SON IDENTIFIANT (2 septembre 2026, sonde sur les
+            // données de Grégoire). Cet éditeur travaille par INDEX et ne s'en apercevait
+            // pas ; l'écran d'évaluation, le PDF et la réouverture d'une copie travaillent
+            // par IDENTIFIANT : quatre critères sans `id` y devenaient UN SEUL
+            // (`eval_undefined`), le niveau choisi sur l'un était lu sur le premier, la note
+            // portait ce seul niveau sur leur poids cumulé, et le PDF imprimait la
+            // description du premier sous les quatre. Mesuré sur « Grille-5 FR-ALGO A26 » :
+            // 4 critères sur 5 sans identifiant, 27 évaluations d'A26 sur cette grille.
+            // Le chemin modal (`sauvegarderCritere`) posait déjà l'identifiant ; celui-ci
+            // l'oubliait. Tarir n'est pas réparer : les grilles déjà écrites gardent leurs
+            // critères sans identifiant — voir `scripts/diagnostic-674-criteres-sans-id.js`.
+            id: genererIdUnique('CR_'),
             nom: 'Nouveau critère',
             type: 'holistique',
             ponderation: 0,

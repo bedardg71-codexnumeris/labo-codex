@@ -292,6 +292,14 @@ Ce qui change, en gestes :
   qui rejoue ta séquence exacte** (rouge avant, vert après).
   ⚠ Ce banc a mesuré au passage que **l'auto-save débouncé n'écrit AUCUN brouillon dans
   ce flux** — depuis avant ce lot. C'est #646, pas #674 ; inscrit, pas corrigé.
+- ⚠⚠ **À 18 h 50, ta comparaison de trois captures a mené à la trouvaille la plus lourde
+  de la journée** : quatre des cinq critères de « Grille-5 FR-ALGO A26 » n'ont **aucun
+  identifiant** (sonde, lecture seule). L'éditeur de grille en lignes les créait ainsi
+  (tari le soir même) ; l'écran d'évaluation, lui, les confond en UN seul : le niveau
+  choisi sur Rigueur, Plausibilité ou Nuance était lu sur Structure, et **n'a jamais été
+  enregistré**. Tes 27 évaluations d'A26 sur cette grille sont à mesurer
+  (`scripts/diagnostic-674-criteres-sans-id.js`), puis **à décider par toi, à froid** :
+  rien n'a été écrit dans tes données. Détail dans la consigne de démarrage.
 - **Sur le PDF de l'élève** : pas de bandeau « Niveau général » ; à sa place, la
   phrase que tu as arrêtée le 2 septembre en soirée : « Cette copie n’a pas de niveau
   général : Langue (20 %) reste à évaluer. » L'export te le dit avant la remise.
