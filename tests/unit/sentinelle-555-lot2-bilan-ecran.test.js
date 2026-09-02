@@ -96,6 +96,10 @@ function chargerBilan({ echelles, evaluationEnCours, historique = [], elements, 
         body: { addEventListener: () => {}, appendChild: () => {}, setAttribute: () => {}, getAttribute: () => null, style: {}, classList: { add: () => {}, remove: () => {} } },
         documentElement: { addEventListener: () => {} }
     };
+    // #581 — le bilan lit ses phrases dans le registre d'énoncés. On charge le
+    // VRAI registre dans le sandbox AVANT le module testé, et on l'enchaîne par
+    // le 3e paramètre : un stub testerait des phrases inventées pour le banc.
+    const wEnonces581 = chargerScript('js/evaluation-enonces.js');
     const w = chargerScript('js/evaluation-retroaction.js', {
         document: fauxDocument,
         db: {
@@ -117,7 +121,7 @@ function chargerBilan({ echelles, evaluationEnCours, historique = [], elements, 
         zoneDuNiveau: calculs.zoneDuNiveau,
         echellesComparables: calculs.echellesComparables,
         obtenirEchelleResolue: calculs.obtenirEchelleResolue
-    });
+    }, wEnonces581);
     w.evaluationEnCours = evaluationEnCours;
     return w;
 }

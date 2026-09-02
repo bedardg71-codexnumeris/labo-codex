@@ -3331,6 +3331,7 @@ function afficherCriteresTemp() {
             </div>
             ${rendreBlocFormuleAlgo(critere, { mode: "temp", index: index })}
             ${rendreBlocProjectionAlgo(critere, { mode: "temp", index: index })}
+            ${rendreBlocEnoncesAlgo(critere, { mode: "temp", index: index })}
         </div>
     `).join('');
 
@@ -3434,6 +3435,81 @@ function rendreBlocFormuleAlgo(critere, ctx) {
  * depuis #667. Zéro handler inline, `esc()` sur tout — les textes de paliers
  * sont saisis par l'enseignant·e.
  */
+/**
+ * #581 — Le bloc ÉNONCÉS du gabarit, sous le même patron que la formule (#667)
+ * et la projection (#668).
+ *
+ * Ce que ce bloc règle : les PHRASES qu'un critère algorithmique engendre.
+ * Elles étaient écrites dans le moteur et nommaient la discipline de leur
+ * auteur — « Ta rédaction contient N erreurs de français » sortait pour un
+ * critère qui compte des erreurs de calcul, et le PDF remis à l'élève
+ * rebaptisait son critère « Français écrit ».
+ *
+ * ⚠ CES TEXTES SONT LUS PAR DES ÉLÈVES. Chaque zone porte le texte du modèle
+ * choisi ; la vider fait TAIRE l'énoncé, elle ne le remet pas au défaut —
+ * c'est `normaliser` qui tranche, et la distinction (`''` = choix,
+ * `undefined` = absence) est ce qui rend le silence possible.
+ *
+ * Zéro handler inline, `esc()` sur tout : les textes sont saisis par
+ * l'enseignant·e et relus par l'élève.
+ */
+function rendreBlocEnoncesAlgo(critere, ctx) {
+    if (!critere || critere.type !== 'algorithmique') return '';
+    if (typeof window.enoncesAlgo === 'undefined') return '';
+
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
+    const e = window.enoncesAlgo.normaliser(critere);
+    const modeles = window.enoncesAlgo.listerModeles();
+    const cles = window.enoncesAlgo.listerCles();
+
+    const estTemp = ctx.mode === 'temp';
+    const handlerModele = estTemp ? 'modifierModeleEnoncesTempHandler' : 'modifierModeleEnoncesGrilleHandler';
+    const handlerTexte  = estTemp ? 'modifierTexteEnonceTempHandler'  : 'modifierTexteEnonceGrilleHandler';
+    const datasCommunes = estTemp
+        ? `data-critere-index="${ctx.index}"`
+        : `data-grille-id="${esc(ctx.grilleId)}" data-critere-index="${ctx.index}"`;
+
+    const options = modeles.map(m =>
+        `<option value="${esc(m.id)}"${m.id === e.modeleId ? ' selected' : ''}>${esc(m.nom)}</option>`
+    ).join('');
+    const modeleCourant = modeles.find(m => m.id === e.modeleId);
+
+    const champs = cles.map(c => `
+                    <div class="groupe-form">
+                        <label style="font-size: 0.85rem; color: var(--gris-moyen);">${esc(c.libelle)}</label>
+                        <textarea class="controle-form" rows="2"
+                                  data-on-change="${handlerTexte}" ${datasCommunes} data-enonce-cle="${esc(c.cle)}"
+                                  title="${esc(c.aide)}">${esc(e.enonces[c.cle])}</textarea>
+                        <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 2px;">${esc(c.aide)}</small>
+                    </div>`).join('');
+
+    const ouvre = ctx.sansCadre ? '<div>' : '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">';
+    return `
+            ${ouvre}
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Modèle de rétroaction</label>
+                    <select class="controle-form"
+                            data-on-change="${handlerModele}" ${datasCommunes}>
+                        ${options}
+                    </select>
+                    <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">${esc(modeleCourant ? modeleCourant.description : '')}</small>
+                </div>
+                <div style="margin-top: 10px;">
+                    ${champs}
+                </div>
+                <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">
+                    Écris ${esc(window.enoncesAlgo.JETON_CRITERE)} là où le nom de ce critère doit apparaître,
+                    ${esc(window.enoncesAlgo.JETON_ERREURS)} pour le nombre d'erreurs et
+                    ${esc(window.enoncesAlgo.JETON_MOTS)} pour le nombre de mots.
+                    Un repère que la phrase n'a pas à remplir disparaît proprement.
+                    Une zone laissée VIDE fait taire l'énoncé.
+                </small>${e.herite && critere.modeleEnonces ? `
+                <small style="font-size: 0.78rem; color: var(--orange-accent); display: block; margin-top: 4px;">
+                    Le modèle « ${esc(critere.modeleEnonces)} » enregistré dans cette grille est inconnu de cette version. Un modèle par défaut est appliqué en attendant.
+                </small>` : ''}
+            </div>`;
+}
+
 function rendreBlocProjectionAlgo(critere, ctx) {
     if (!critere || critere.type !== 'algorithmique') return '';
     if (typeof window.projectionAlgo === 'undefined') return '';
@@ -3876,6 +3952,7 @@ function afficherCriteresGrille(grille) {
             <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">
                 ${rendreBlocFormuleAlgo(critere, { mode: "grille", index: index, grilleId: grille.id, sansCadre: true })}
                 ${rendreBlocProjectionAlgo(critere, { mode: "grille", index: index, grilleId: grille.id, sansCadre: true })}
+                ${rendreBlocEnoncesAlgo(critere, { mode: "grille", index: index, grilleId: grille.id, sansCadre: true })}
 
                 <!-- Gestion des sous-critères -->
                 <div class="sous-criteres-conteneur">
@@ -4865,6 +4942,63 @@ async function modifierParamProjectionGrilleHandler(el) {
     afficherCriteresGrille(await obtenirGrilleParId(grilleId));
 }
 
+/* ---------------------------------------------------------------------
+   #581 — Les énoncés d'un critère algorithmique
+   --------------------------------------------------------------------- */
+
+function _enoncesEditesDepuis(critere, cleModifiee, valeur) {
+    // ⚠ ON REPART DES TEXTES RENDUS, PAS DE `critere.enonces`. Un critère
+    // migré n'a rien d'écrit : ses textes vivent dans le registre. Sans cette
+    // lecture, le premier geste d'édition effacerait les trois autres zones.
+    var e = window.enoncesAlgo.normaliser(critere);
+    var textes = Object.assign({}, e.enonces);
+    if (cleModifiee) textes[cleModifiee] = String(valeur);
+    return textes;
+}
+
+function modifierModeleEnoncesTempHandler(el) {
+    var index = parseInt(el.dataset.critereIndex);
+    if (!window.tempCriteres || !window.tempCriteres[index]) return;
+    // Textes null : le nouveau modèle repart de SES défauts.
+    window.enoncesAlgo.appliquerAuCritere(window.tempCriteres[index], el.value, null);
+    afficherCriteresTemp();
+}
+
+function modifierTexteEnonceTempHandler(el) {
+    var index = parseInt(el.dataset.critereIndex);
+    if (!window.tempCriteres || !window.tempCriteres[index]) return;
+    var critere = window.tempCriteres[index];
+    var e = window.enoncesAlgo.normaliser(critere);
+    window.enoncesAlgo.appliquerAuCritere(critere, e.modeleId,
+        _enoncesEditesDepuis(critere, el.dataset.enonceCle, el.value));
+    afficherCriteresTemp();
+}
+
+async function modifierModeleEnoncesGrilleHandler(el) {
+    var grilleId = el.dataset.grilleId;
+    var index = parseInt(el.dataset.critereIndex);
+    var valeur = el.value;
+    await modifierProjectionCritereGrille(grilleId, index, function(critere) {
+        window.enoncesAlgo.appliquerAuCritere(critere, valeur, null);
+    });
+    // ⚠ obtenirGrilleParId est ASYNC (#466/CO-21) : sans await, le renderer
+    // reçoit une Promise et affiche « Aucun critère défini ».
+    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+}
+
+async function modifierTexteEnonceGrilleHandler(el) {
+    var grilleId = el.dataset.grilleId;
+    var index = parseInt(el.dataset.critereIndex);
+    var cleEnonce = el.dataset.enonceCle;
+    var valeur = el.value;
+    await modifierProjectionCritereGrille(grilleId, index, function(critere) {
+        var e = window.enoncesAlgo.normaliser(critere);
+        window.enoncesAlgo.appliquerAuCritere(critere, e.modeleId,
+            _enoncesEditesDepuis(critere, cleEnonce, valeur));
+    });
+    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+}
+
 async function modifierPalierProjectionGrilleHandler(el) {
     var grilleId = el.dataset.grilleId;
     var index = parseInt(el.dataset.critereIndex);
@@ -5062,6 +5196,10 @@ window.modifierPalierProjectionTempHandler = modifierPalierProjectionTempHandler
 window.modifierModeleProjectionGrilleHandler = modifierModeleProjectionGrilleHandler;
 window.modifierParamProjectionGrilleHandler = modifierParamProjectionGrilleHandler;
 window.modifierPalierProjectionGrilleHandler = modifierPalierProjectionGrilleHandler;
+window.modifierModeleEnoncesTempHandler = modifierModeleEnoncesTempHandler;
+window.modifierTexteEnonceTempHandler = modifierTexteEnonceTempHandler;
+window.modifierModeleEnoncesGrilleHandler = modifierModeleEnoncesGrilleHandler;
+window.modifierTexteEnonceGrilleHandler = modifierTexteEnonceGrilleHandler;
 window.ajouterPalierProjectionTemp = ajouterPalierProjectionTemp;
 window.supprimerPalierProjectionTemp = supprimerPalierProjectionTemp;
 window.ajouterPalierProjectionGrille = ajouterPalierProjectionGrille;

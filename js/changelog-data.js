@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.108',
+            couleur: 'vert',
+            titre: 'Une r\u00e9troaction ne parle que de ta discipline',
+            items: [
+                '<strong>Le mot « fran\u00e7ais » ne s\'imprime plus dans le PDF d\'un \u00e9l\u00e8ve dont le crit\u00e8re s\'appelle autrement.</strong> Un crit\u00e8re qui compte des erreurs \u00e9tait titr\u00e9 « Fran\u00e7ais \u00e9crit » sur la copie remise, et la phrase engendr\u00e9e annon\u00e7ait « Ta r\u00e9daction contient N erreurs de fran\u00e7ais » — quelle que soit la mati\u00e8re enseign\u00e9e. Le titre porte maintenant <strong>le nom que tu as donn\u00e9 \u00e0 ton crit\u00e8re</strong>, et la phrase ne nomme plus aucune discipline.',
+                '<strong>Tes textes actuels ne changent pas d\'un caract\u00e8re.</strong> Un crit\u00e8re dont le nom dit « fran\u00e7ais » garde exactement les phrases d\'avant : tes \u00e9l\u00e8ves ne verront aucune diff\u00e9rence. Les \u00e9valuations d\u00e9j\u00e0 enregistr\u00e9es gardent aussi le texte qu\'elles portaient — rien n\'est r\u00e9\u00e9crit dans ton dos.',
+                '<strong>Les quatre phrases d\'un crit\u00e8re \u00e0 compte d\'erreurs se r\u00e8glent depuis le gabarit de la grille</strong> : le d\u00e9compte, le d\u00e9fi prioritaire, ce qui reste \u00e0 travailler, et l\'\u00e9tat « aucune annotation ». Tu peux les r\u00e9\u00e9crire dans tes mots, ou <strong>vider une zone pour faire taire la phrase</strong>. Deux mod\u00e8les de d\u00e9part : g\u00e9n\u00e9rique, ou les formulations d\'origine.',
+                '<strong>Ces phrases voyagent avec la grille</strong> quand tu la partages ou l\'exportes. Ce que tu as r\u00e9\u00e9crit arrive chez la personne qui la re\u00e7oit, au lieu d\'\u00eatre remplac\u00e9 en silence par les textes par d\u00e9faut.'
+            ]
+        },
+        {
             version: '1.107',
             couleur: 'vert',
             titre: 'Le matériel de départ calcule, et se dit « de départ »',

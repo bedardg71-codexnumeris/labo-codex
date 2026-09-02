@@ -102,6 +102,12 @@
             stamps:    construireStamps(stats),
             errors:    construireErrors(stats),
             errorsTotal: stats ? stats.totalErreursFr : 0,
+            // #581 — LE NOM QUI TITRE LE DÉCOMPTE VIENT DE LA GRILLE.
+            // Il était écrit « Français écrit » dans le module de rendu, et il
+            // s'imprimait tel quel sur le PDF remis à l'élève : un enseignant de
+            // chimie voyait son critère rebaptisé. Le nom existe déjà dans la
+            // grille, il n'y avait rien à créer pour aller le chercher.
+            errorsLabel: libelleErreurs(grille),
             bilan:     construireBilan(evaluation, grille, echelle, stats),
             // Drapeau « vue recalculée a posteriori » (#347). Vrai quand des
             // artefacts ultérieurs sont entrés dans le portfolio agrégé depuis
@@ -402,10 +408,15 @@
             const donneesAlgoCrit = (estAlgorithmique && donneesAlgo[c.critereId]) ? donneesAlgo[c.critereId] : null;
             const ponderationCrit = (typeof c.ponderation === 'number') ? c.ponderation : (def.ponderation || 0);
 
-            // Rétroaction algorithmique (ex. Français écrit : « Ta rédaction
-            // contient X erreurs… ») persistée sur l'évaluation au moment de
+            // Rétroaction algorithmique persistée sur l'évaluation au moment de
             // la saisie. Sans ce fallback, le PDF affiche le placeholder
             // « Saisissez les erreurs et le nombre de mots ».
+            // ⚠ #581 — CE TEXTE EST GELÉ, ET C'EST VOULU. Il a été engendré par
+            // le registre d'énoncés au moment de la saisie ; changer le gabarit
+            // aujourd'hui ne le réécrit pas, et ne DOIT pas : régénérer
+            // écraserait le paragraphe de catégorie dominante que l'enseignant·e
+            // a sous les yeux. Un correctif tarit la source, il ne touche pas au
+            // stock déjà écrit.
             const retroAlgo = (donneesAlgoCrit && donneesAlgoCrit.retroaction)
                 ? String(donneesAlgoCrit.retroaction).trim()
                 : '';
@@ -545,8 +556,25 @@
     }
 
     /* =====================================================================
-       I. ERREURS FRANÇAIS ÉCRIT
+       I. ERREURS ANNOTÉES SUR LA COPIE
        ===================================================================== */
+
+    /**
+     * Le nom qui titre le décompte d'erreurs — #581.
+     *
+     * Les erreurs comptées ici sont des ANNOTATIONS sur la copie (`errfr_*`),
+     * et les données ne les rattachent à aucun critère. Le seul nom vrai
+     * disponible est donc celui du critère algorithmique de la grille : c'est
+     * lui que l'enseignant·e a écrit, et lui que l'élève reconnaît.
+     * Sans critère algorithmique lisible, le registre rend un libellé neutre —
+     * jamais le nom d'une discipline.
+     */
+    function libelleErreurs(grille) {
+        if (typeof window === 'undefined' || !window.enoncesAlgo) return '';
+        return window.enoncesAlgo.libelleCritere(
+            window.enoncesAlgo.critereAlgorithmique(grille)
+        );
+    }
 
     function construireErrors(stats) {
         if (!stats || !stats.erreursFr) return [];
@@ -680,7 +708,7 @@
         return {
             intro:         BILAN_INTRO,
             concentration: construireConcentration(evaluation, grille, echelle, historique, stats),
-            recurrents:    construireRecurrents(evaluation, echelle, evalPrecedente, historique, stats),
+            recurrents:    construireRecurrents(evaluation, echelle, evalPrecedente, historique, stats, grille),
             jetons:        construireJetons(da),
             note:          construireNoteProvisoire(da)
         };
@@ -725,7 +753,14 @@
         if (tousMaitrises) {
             const totErr = stats ? (stats.totalErreursFr || 0) : 0;
             if (totErr > 0) {
-                messageGlobal = `Tous les critères sont maîtrisés. Concentre-toi sur la qualité du français (${totErr} erreur${totErr > 1 ? 's' : ''} annotée${totErr > 1 ? 's' : ''}).`;
+                // #581 — MÊMES MOTS QUE LE BILAN DE L'APP, et c'est obligatoire :
+                // `copierToutRetroaction` copie l'un dans le document de l'autre.
+                // Les deux lisent maintenant le MÊME énoncé `concentre` du même
+                // gabarit ; deux chaînes jumelles pouvaient diverger, un registre
+                // partagé ne le peut plus.
+                const phraseConcentre = window.enoncesAlgo.enonce(
+                    window.enoncesAlgo.critereAlgorithmique(grille), 'concentre', {});
+                messageGlobal = `Tous les critères sont maîtrisés.${phraseConcentre ? ` ${phraseConcentre}` : ''} (${totErr} erreur${totErr > 1 ? 's' : ''} annotée${totErr > 1 ? 's' : ''}).`;
             } else {
                 // Garde length > 0 : .every() retourne true sur tableau vide (vacuité JS).
                 // ⚠ L'évaluation précédente porte SON échelle, pas forcément celle-ci.
@@ -764,9 +799,9 @@
 
     /* ----- J.2 — Points récurrents ----- */
 
-    function construireRecurrents(evaluation, echelle, evalPrecedente, historique, stats) {
+    function construireRecurrents(evaluation, echelle, evalPrecedente, historique, stats, grille) {
         const tampons = construireTamponsRecurrents(stats);
-        const francais = construireFrancaisResume(stats);
+        const francais = construireFrancaisResume(stats, grille);
         const progression = construireProgressionResume(evaluation, evalPrecedente, historique);
         const ameliorations = construireAmeliorations(evaluation, evalPrecedente);
         const force = construireForce(evaluation, echelle);
@@ -826,7 +861,14 @@
             .slice(0, 2);
     }
 
-    function construireFrancaisResume(stats) {
+    /**
+     * La ligne « points récurrents » du décompte d'erreurs.
+     *
+     * #581 — elle s'ouvrait sur « Français : », quelle que soit la discipline.
+     * Elle porte maintenant le nom du critère, exactement comme l'en-tête de la
+     * section du PDF : les deux disent le même mot du même décompte.
+     */
+    function construireFrancaisResume(stats, grille) {
         if (!stats || !stats.totalErreursFr) return '';
         const codes = (typeof travauxOutils !== 'undefined' && travauxOutils.CODES_ERREURS_FR) ? travauxOutils.CODES_ERREURS_FR : [];
         const total = stats.totalErreursFr;
@@ -834,7 +876,8 @@
             .sort((a, b) => stats.erreursFr[b] - stats.erreursFr[a])[0];
         const meta = principal ? codes.find(c => c.id === principal) : null;
         const nomPrinc = meta ? meta.nom : '';
-        return `Français : ${total} erreur${total > 1 ? 's' : ''}${nomPrinc ? ` (principalement : ${nomPrinc})` : ''}`;
+        const titre = libelleErreurs(grille);
+        return `${titre} : ${total} erreur${total > 1 ? 's' : ''}${nomPrinc ? ` (principalement : ${nomPrinc})` : ''}`;
     }
 
     /**

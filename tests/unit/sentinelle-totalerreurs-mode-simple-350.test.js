@@ -56,6 +56,14 @@ function chargerCalcul(elements, evaluationEnCours, dbStub) {
     const codeFormules = readFileSync(path.join(racine, 'js/evaluation-formules.js'), 'utf8');
     new Function('window', '"use strict";\n' + codeFormules)(fauxWindow);
 
+    // #581 — même raison, même geste : la RÉTROACTION du critère vient
+    // désormais du registre d'énoncés, comme la formule vient du registre de
+    // formules depuis #667. Le VRAI registre, pas un stub : l'invariant #350
+    // porte sur ce que la vraie chaîne écrit dans `donneesAlgorithmiques`, et
+    // ce que la rétroaction dit en fait partie.
+    const codeEnonces = readFileSync(path.join(racine, 'js/evaluation-enonces.js'), 'utf8');
+    new Function('window', '"use strict";\n' + codeEnonces)(fauxWindow);
+
     // Globaux bare-access consommés par le module :
     //   evaluationEnCours (let global), db.getSync, cle(), console
     const cle = (k) => k; // identité : trimestre non pertinent pour cet invariant
