@@ -6788,6 +6788,22 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ### Tests d'intégration — specs rouges découvertes le 12 août 2026 (recomptées à SIX le 18)
 
+- [ ] **#685** `triptyque-seme-produit-une-note.spec.js` passe **au second essai** — verte, mais instable.
+  Observé le 1er septembre 2026, au premier des deux runs de la soirée (le second l'a passée du
+  premier coup — c'est bien une intermittence, pas une rougeur).
+  ⚠ **Ne PAS rattacher à #534, qui est CLOS** : #534 portait sur un délai global refusant un push
+  légitime, et son hypothèse initiale a été réfutée le jour même. Ranger celle-ci dans cette
+  fiche-là reviendrait à l'inscrire dans un tiroir fermé. Signalé par la relecture croisée Cowork.
+  **Hypothèse, mesurée mais non éprouvée** : la spec porte **trois `waitForTimeout(700)` fixes**
+  (lignes 82, 101, 145) et **aucune attente d'état** — ni `dbReady`, ni `waitForFunction`. C'est
+  exactement la forme que le correctif de #534 avait retirée de `cours-refonte-rendu.spec.js`,
+  où `page.goto` sur `index.html` coûte 400 à 700 ms : la marge est nulle par construction.
+  ⮕ Le correctif probable est le même — attendre l'ÉTAT (`waitForFunction(() => window.dbReady === true)`)
+  plutôt qu'un délai. **À mesurer avant de corriger** : faire rougir la spec en l'état, pas la
+  réparer sur la foi de la ressemblance.
+  ⚠ **L'endroit est cher** : cette spec couvre le matériel semé du 1er septembre (§1+§2), donc la
+  toute première chose qu'un membre de la cohorte 1 rencontrera dans un espace vide.
+
 - [x] **#534 CLOS** Un seul dépassement de délai suffit à refuser un push légitime — créé 26 août 2026, **hypothèse initiale RÉFUTÉE le jour même par la mesure**.
   ✅ **TRANCHÉ PAR GRÉGOIRE le 27 août 2026 : durcir la SEULE spec qui a un manque objectif.**
   `cours-refonte-rendu.spec.js` n'attendait jamais `window.dbReady` — ses montages posaient un

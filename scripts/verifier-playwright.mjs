@@ -58,7 +58,7 @@ const VERDICT = process.env.VERDICT_PLAYWRIGHT || path.join(__dirname, '.verdict
  * jeton non écrit fait retomber le hook sur « pas de verdict » — il redemandera
  * la garde. C'est le bon repli : jamais un push non vérifié.
  */
-function deposerVerdict(code, echecs) {
+function deposerVerdict(code, echecs, instables = []) {
     try {
         const tete = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: RACINE, encoding: 'utf8' });
         if (tete.status !== 0) return;
@@ -67,6 +67,12 @@ function deposerVerdict(code, echecs) {
             sha: tete.stdout.trim(),
             code,
             echecsConnus: echecs.length,
+            // #685, 1er sept. 2026 — l'instabilité ne survivait pas au jeton.
+            // Elle sortait sur stderr, que personne ne relit ; le jeton, lui, est
+            // ce que le hook et la session suivante lisent, et il disait « vert »
+            // sans dire « au second essai ». Un vert rattrapé ressemblait à un
+            // vert franc — exactement ce que la doc de flakyDuRapport() interdit.
+            instables,
             rendule: new Date().toISOString()
         }, null, 4)}\n`, 'utf8');
     } catch {
@@ -238,7 +244,7 @@ if (reparees.length > 0) {
 }
 
 if (nouveaux.length > 0) {
-    deposerVerdict(1, echecs);
+    deposerVerdict(1, echecs, instables);
     process.stderr.write(`\n${ROUGE}✗ ${nouveaux.length} spec(s) Playwright NOUVELLEMENT rouge(s) — push bloqué.${RAZ}\n\n`);
     for (const spec of nouveaux) process.stderr.write(`    · ${spec}\n`);
     process.stderr.write(`\n${ROUGE}Ces specs ne sont pas dans la dette connue de #456 : c'est une régression.${RAZ}\n`);
@@ -246,6 +252,6 @@ if (nouveaux.length > 0) {
     process.exit(1);
 }
 
-deposerVerdict(0, echecs);
+deposerVerdict(0, echecs, instables);
 process.stderr.write(`${VERT}✓ Sentinelle Playwright : aucune rougeur nouvelle (${echecs.length} échec(s) connu(s), inchangé).${RAZ}\n`);
 process.exit(0);
