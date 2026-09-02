@@ -40,6 +40,9 @@ docs/**/*.pdf
 
 # Sauvegardes confidentielles
 sauvegarde-CONFIDENTIEL-*.json
+# Dossiers de sauvegarde datés déposés à la racine (peuvent contenir des
+# données d'élèves). Ignorés, JAMAIS supprimés d'office : c'est à Grégoire.
+_sauvegarde-*/
 
 # Captures d'ecran (conservees localement)
 Captures clair/
