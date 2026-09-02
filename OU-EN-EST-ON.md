@@ -267,6 +267,33 @@ s'enregistre comme une vraie note.
 n'était plus un soupçon. *(#674)*
 
 ### Ce qu'un utilisateur détruit, il l'a voulu ; ce qu'il garde, il le retrouve
+
+↻ **TRANCHÉ PAR GRÉGOIRE le 2 septembre 2026 en fin de journée — et ça change la NATURE du
+lot, pas seulement son contenu.**
+
+**La question posée** : tu supprimes définitivement la copie d'un élève, qu'est-ce qui part
+avec ? Trois issues lui ont été rendues : le fichier seul ; le fichier et son évaluation ; tout
+ce qui touche le couple (cet élève, cette production).
+
+⮕ **Sa réponse : TOUT CE QUI TOUCHE LE COUPLE.** Originale, reprises, évaluation d'un fichier
+réimporté.
+
+▣ **Donc le comportement actuel du code est le BON.** Le constat B5 de l'audit du 25 août
+décrivait cette portée comme un défaut (« suppressions par couple trop larges ») ; **elle ne
+l'est pas.** Ce qui est fautif, c'est que **l'écran ne l'annonce pas**.
+
+⮕ **Ce qui reste à faire n'est plus une règle métier, c'est la vérité des messages** — les
+trois défauts déjà ouverts : ils annoncent des pertes qui n'ont pas lieu, et taisent des
+survivances qui ont lieu. *(#647, #648, #649)*
+⮕ **Le lot devient beaucoup plus petit**, et il ne touche plus au modèle de données.
+⚠ **Le détail exact des trois fiches n'a pas été relu au moment de cette décision** (la machine
+de Grégoire s'était déconnectée). **À rejouer avant d'écrire la consigne** :
+`grep -n -A8 "\*\*#647 \|\*\*#648 \|\*\*#649 " BACKLOG.md`.
+
+⚠ **Ce que la décision ne couvre pas, et qu'il faudra lui reposer** : la portée de la
+suppression du matériel de DÉPART (supprimer la grille de départ dans un trimestre l'interdit
+dans TOUS). C'est #683, une autre question — et elle tombe d'elle-même si le semis disparaît.
+
 Trois défauts ouverts sur les messages de suppression : ils annoncent des pertes
 qui n'ont pas lieu, et taisent des survivances qui ont lieu.
 **Attend une décision de Grégoire** : que doit emporter la suppression d'un

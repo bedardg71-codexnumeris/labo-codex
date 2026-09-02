@@ -37,6 +37,21 @@
 #     plus vite que les 12,5 min du job — et une bonne part de ces runs partait
 #     sur des commits PUREMENT DOCUMENTAIRES.
 #
+# (4) 2 SEPTEMBRE 2026 — LE PLAFOND COUPAIT PLAYWRIGHT EN PLEIN VOL. Une fois
+#     Vitest redevenu vert sous Node 20 (le bac à sable de #635 n'exposait pas
+#     `navigator`, ed6aac3c), le job a atteint Playwright pour la première fois
+#     depuis le 31 août — et s'est fait annuler par `timeout-minutes: 15` :
+#     15 min 26 au total, ~3 min d'installation et de Vitest, puis 12,5 min de
+#     Playwright pour 105 specs sur 239, 0 échec, `The operation was canceled`.
+#     Ce plafond datait d'une suite de 88-93 specs (point 2) ; elle en compte
+#     239. Mesuré ~7 s par spec sur ce runner (2 s sur la machine de Grégoire).
+#     ⮕ Plafond relevé à 40 : projection 239 × 7 s + 3 min ≈ 31 min, plus un
+#     tiers de marge. C'est une PROJECTION depuis 105 specs, pas une mesure ;
+#     si un run réel la dépasse, on le DIT, on ne remonte pas le chiffre en
+#     boucle. Écarté ce soir par Grégoire : les shards (raccourcissent l'attente,
+#     pas la facture). Lot suivant, distinct : ne plus lancer 239 essais en
+#     navigateur à chaque push.
+#
 # Deux leviers, dans l'ordre de poids :
 #   1. `paths-ignore` — un commit qui ne touche que de la doc ne déclenche plus
 #      rien. ⚠ La liste est VÉRIFIÉE par un cliquet
@@ -94,7 +109,10 @@ jobs:
   tests:
     name: Vitest + Playwright (WebKit)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 2 sept. 2026 : 15 -> 40. Voir le point (4) du journal en tete. Le plafond
+    # se DEPLACE, il ne disparait pas : un job sans limite qui part en boucle
+    # consomme des minutes jusqu'a epuisement.
+    timeout-minutes: 40
 
     steps:
       - name: Checkout
