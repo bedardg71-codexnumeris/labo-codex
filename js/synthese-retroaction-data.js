@@ -95,6 +95,9 @@
             student:   construireStudent(evaluation),
             course:    construireCourse(evaluation),
             artefact:  construireArtefact(evaluation, cartouche),
+            // Demande de Grégoire, 2 septembre 2026 : le nom de la grille sur le PDF.
+            // Le nom vivant d'abord ; celui gravé sur l'évaluation si la grille a disparu.
+            grille:    { nom: (grille && grille.nom) || evaluation.grilleNom || '' },
             trimestre: construireTrimestre(evaluation),
             scale:     echelle,
             criteria:  construireCriteres(evaluation, grille, cartouche),

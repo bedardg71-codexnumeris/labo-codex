@@ -439,6 +439,19 @@ describe('#674 · porte 2 — le PDF de l\'élève refuse de conclure et nomme c
         expect(page).toContain('Niveau général · Maîtrisé');
     });
 
+    it('le nom de la grille est imprimé dans l\'en-tête (demande de Grégoire, 2 sept. 2026), échappé, et gravé si la grille a disparu', () => {
+        const { feedback, html } = monterPdf();
+        const fb = feedback(EVAL_COMPLETE);
+        expect(fb.grille).toEqual({ nom: 'Grille témoin 50/30/20' });
+        expect(html(fb)).toContain('grille Grille témoin 50/30/20');
+        // Grille disparue : le nom gravé sur l'évaluation prend le relais.
+        const orpheline = Object.assign({}, EVAL_COMPLETE, { grilleId: 'G_DISPARUE', grilleNom: 'Grille <gravée>' });
+        const fb2 = feedback(orpheline);
+        expect(fb2.grille.nom).toBe('Grille <gravée>');
+        expect(html(fb2)).toContain('grille Grille &lt;gravée&gt;');
+        expect(html(fb2)).not.toContain('<gravée>');
+    });
+
     it('les noms de critères passent par l\'échappement (règle 1) : un « < » ne sort pas nu dans la page', () => {
         const { feedback, html } = monterPdf();
         const ev = JSON.parse(JSON.stringify(EVAL_INCOMPLETE_AVANT_LOT));

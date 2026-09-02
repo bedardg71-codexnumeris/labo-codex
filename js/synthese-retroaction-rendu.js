@@ -157,6 +157,13 @@
             s.group ? `Gr. ${esc(s.group)}` : '',
             a.corrected ? `évalué ${esc(formaterDateLongue(a.corrected))}` : ''   // #571 — le repli `return iso` rend la chaîne brute
         ].filter(Boolean).join(' · ');
+        // Le nom de la grille, sous la ligne de l'élève (demande de Grégoire, 2 sept. 2026) :
+        // c'est ce qui dit à l'élève sur quoi la copie a été lue. Nom de grille = donnée
+        // utilisateur, échappé.
+        const g = f.grille || {};
+        const ligneGrille = g.nom
+            ? `<div style="font-family: ${FONT_MONO}; font-size: 9px; color: ${MUTED}; margin-top: 1px;">grille ${esc(g.nom)}</div>`
+            : '';
 
         const titreHTML = a.title
             ? `<h1 style="font-size: 20px; margin: 2px 0 0 0; font-weight: 700; letter-spacing: -0.4px;">${esc(a.title)}${a.activity ? `<span style="font-weight: 500; color: ${MUTED};"> — ${esc(a.activity)}</span>` : ''}</h1>`
@@ -167,6 +174,7 @@
                 ${meta ? `<div style="${styleMonoLabel()} font-size: 8.5px;">${esc(meta)}</div>` : ''}
                 ${titreHTML}
                 ${ligneEleve ? `<div style="font-family: ${FONT_MONO}; font-size: 9px; color: ${MUTED}; margin-top: 2px;">${ligneEleve}</div>` : ''}
+                ${ligneGrille}
             </div>`;
 
         const trimestreBar = renderTrimestreBar(ctx);
