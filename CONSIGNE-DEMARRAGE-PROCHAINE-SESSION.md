@@ -284,6 +284,9 @@ identifiant depuis le 30 octobre 2025, `6214d69c`) — écrit dans les données 
 quelqu'un : **décision de Grégoire, à froid, avec Cowork**. La sonde
 `scripts/diagnostic-674-criteres-sans-id.js` (lecture seule, `await diag674SansId()`)
 mesure le stock local, tous trimestres, avant tout geste. Rien n'a été écrit.
+↻ **19 h 45 — VOIE 1 FAITE PAR GRÉGOIRE** : les quatre critères supprimés et recréés
+dans l'éditeur, nés avec leur identifiant ; « tout fonctionne maintenant ». Sa grille
+est saine. **Reste pour demain : la voie 3** (les autres enseignants), à décider à froid.
 
 ⚠ **Ce que l'énoncé 5 n'aurait pas vu** : la couverture de ces évaluations est 100 %
 (quatre entrées, quatre pondérations). La note ne ment pas sur sa PORTÉE ; elle ment
