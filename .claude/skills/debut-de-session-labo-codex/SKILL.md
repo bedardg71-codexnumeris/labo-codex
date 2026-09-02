@@ -58,6 +58,25 @@ explicitement une demande sur un travail déjà en cours.
 
 **Objectif** : connaître le HEAD réel et l'état du dépôt.
 
+### 0.5 ⛔ LE PIÈGE DU RÉPERTOIRE DE DÉMARRAGE (promu le 2 septembre 2026)
+
+*Payé six jours de suite avant d'être nommé. Promotion depuis la consigne de
+démarrage, règle 3 de `PROTOCOLE.md`.*
+
+**Si la session s'ouvre dans `/Users/kuekatsheu` et non dans le dépôt, les skills
+et les agents de `.claude/` ne se chargent PAS, et rien ne le dit.** Aucun message,
+aucune erreur : le travail se fait sans les conventions du projet.
+
+```bash
+pwd     # doit rendre .../Documents/GitHub/Monitorage_v6
+```
+
+⚠ **Un `cd` fait APRÈS le démarrage ne recharge pas ce qui n'a pas été lu à
+l'ouverture.** Si le répertoire est faux, la bonne réponse est de quitter et de
+relancer depuis le dépôt, pas de se déplacer. Le repli, si la session ne peut pas
+être coupée : lire à la main les `SKILL.md` de `.claude/skills/` concernés, et le
+DIRE dans le rapport.
+
 ### 1.0 ⚠ D'ABORD : où vit le travail ? (ajouté le 8 août 2026)
 
 **Deux gestes, dans cet ordre, AVANT le reste.**
@@ -111,8 +130,32 @@ Produire :
 un nouveau chantier.
 
 ```bash
-cd tests && npm test
+cd tests && npm run test:unit
 ```
+
+⛔ **PAS `npm test`** (corrigé le 2 septembre 2026 ; ce skill le prescrivait
+encore). Il enchaîne Vitest ET Playwright : **plus de dix minutes** sur cette
+machine, et six minutes de silence ferment la connexion au serveur (#533).
+
+**Et deux mesures d'ouverture que personne n'avait faites pendant cinq jours.**
+Elles prennent dix secondes et elles ont trouvé deux retards le 31 août.
+
+```bash
+git rev-list --count origin/main..HEAD    # doit rendre 0
+cd tests && node ../scripts/verifier-playwright.mjs
+```
+
+⮕ La première rendait **8** : tout le travail d'un trio, son propre relais compris,
+ne vivait que sur cette machine.
+⮕ La seconde n'avait pas tourné depuis cinq jours, sur 299 commits dont 35
+touchant `tests/integration/`. **Aucun push n'avait été bloqué par un rouge
+Playwright, parce qu'aucun push ne l'avait jamais consultée.**
+
+⚠ **Lire le JETON** (`scripts/.verdict-playwright.json`), pas un code de sortie
+tuyauté : `echo "CODE=$?"` après un `| tail` rend le code de `tail`. Le jeton porte
+le SHA du commit jugé ; **s'il ne correspond pas à `HEAD`, le verdict est périmé.**
+⚠ **Un spec seul se lance en secondes** et départage mieux qu'une suite complète :
+`cd tests && npx playwright test integration/<spec>.js`.
 
 Reporter :
 - Nombre de tests passés / échoués (Vitest + Playwright)

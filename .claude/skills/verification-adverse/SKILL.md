@@ -478,3 +478,63 @@ l'import mais pas au changement de trimestre) a émergé d'une couture entre
 chantiers. Analyse complète : `.claude/skills/verification-adverse/ANALYSE-verification-adverse.md`.
 **Révision attendue** : à chaque découverte d'un nouveau motif d'attestation
 trompeuse ou de défaut transversal, quel que soit le projet.
+
+---
+
+## 8. SIX PIÈGES MESURÉS (promus le 2 septembre 2026)
+
+*Promotion depuis la consigne de démarrage, règle 3 de `PROTOCOLE.md`. Chacun a
+frappé au moins une session réelle entre le 31 août et le 1er septembre 2026.*
+
+### 8.1 Un banc vert peut couvrir un écran cassé
+
+Le bandeau d'un lot portait une classe CSS **définie nulle part** : il s'affichait
+sans encadré ni couleur. **Les quatre specs Playwright de ce même lot étaient
+VERTS.** Ils lisent le DOM et le `textContent`, **jamais le RENDU**. Ni Vitest ni
+Playwright ne pouvaient le voir ; c'est un `grep` qui l'a trouvé (#679).
+
+⮕ **Toute classe CSS posée par un lot se vérifie par `grep` dans les feuilles de
+style.** Un test qui passe ne dit rien de ce qu'il ne regarde pas.
+
+### 8.2 `grep` la cible AVANT de planifier le geste
+
+Trois cibles périmées trouvées dans des documents du dépôt **le même jour** :
+`evaluation-calcul.js:869` (vraie ligne : 992) · `sections-affichage.js` (vrai
+nom : `profil-etudiant-sections-affichage.js`) · `confirmerImportPipeline`
+(n'existe pas, c'est `executerImportPipeline`).
+
+⮕ **Un plan est une intention datée, pas un état du code.**
+⮕ **Et corriger le document dans le MÊME commit que le code**, sinon la session
+suivante cherche la même fonction inexistante. Cela vaut aussi pour les
+commentaires et les JSDoc qui citent une chaîne que le lot vient de changer.
+
+### 8.3 Une assertion peut être vraie et ne tuer aucune mutation
+
+`toBeGreaterThanOrEqual(2)` sur quatre appels : en retirer un en laisse trois, et
+`3 >= 2` reste vrai.
+
+⮕ **Toute assertion qui porte une borne : demander quelle mutation elle laisse
+passer.**
+
+### 8.4 Un break-test vert peut venir d'une mutation jamais appliquée
+
+⮕ **Un témoin par mutation, ciblé sur ce que CETTE mutation change**, lu AVANT de
+lancer.
+⮕ Et son pendant : **un extracteur trop large ment comme un zéro sans témoin.** Un
+break-test qui lisait la sortie TEXTE rendait « les quatre cas rouges » à chaque
+mutation ; repris sur le reporter JSON, chaque mutation tue exactement son cas.
+*Un rouge rassurant pour la mauvaise raison est aussi coûteux qu'un zéro sans
+témoin.*
+
+### 8.5 Un JSDoc n'est relié à sa fonction que par la POSITION
+
+Une extraction déplace le corps ; la doc reste et change de sujet sans bouger.
+
+⮕ **À quelle fonction ce bloc est-il collé MAINTENANT ?**
+
+### 8.6 `ls` avant d'écrire un chemin
+
+`js/pratiques/` a été cité à plat trois fois en 24 h. Le fait était juste, le
+chemin faux : personne ne remet le fait en cause, et personne ne peut le recouper.
+
+⮕ **Un chemin faux dans un document vrai est plus coûteux qu'une erreur visible.**

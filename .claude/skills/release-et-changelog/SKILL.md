@@ -65,16 +65,73 @@ node scripts/release.mjs patch --dry-run  # prévisualiser sans écrire
 ```
 
 Le script calcule le numéro SemVer, horodate le build (Toronto, `MMJJ-HHMM`) et
-synchronise `version.json`, les deux fallbacks de `js/init-inline.js` et le
-snapshot de `js/main.js`. **Plus de recopie manuelle, plus de désync « scripts
-périmés ».**
+écrit les **quatre points de vérité**, de façon atomique. **Plus de recopie
+manuelle, plus de désync « scripts périmés ».**
+
+### ⚠⚠ LES QUATRE POINTS SONT BIEN QUATRE, ET `version.js` EN FAIT PARTIE
+
+*Corrigé le 2 septembre 2026 (promotion depuis la consigne de démarrage, règle 3
+de `PROTOCOLE.md`). Ce skill énumérait « version.json, les deux fallbacks de
+`js/init-inline.js` et le snapshot de `js/main.js` » : quatre éléments, mais pas
+les bons. `version.js` n'y était pas nommé une seule fois.*
+
+| Point | Rôle |
+|---|---|
+| `version.json` (racine) | **Source unique de vérité.** |
+| `version.js` (racine) | **Le seul que l'application lise en `file://`.** |
+| `js/init-inline.js` | Deux fallbacks (`VERSION_MAJEURE`, `BUILD_ID`). |
+| `js/main.js` | Snapshot (`_SCRIPT_BUILD_main`). |
+
+**Pourquoi `version.js` existe** : en `file://`, WebKit refuse `fetch` et XHR
+(#495). `version.json` y est donc illisible, et un jumeau en JavaScript le
+remplace. `js/init-inline.js:235-237` lui donne la **PRIORITÉ** :
+
+```js
+if (window.__VERSION__.build) BUILD_ID = window.__VERSION__.build;
+```
+
+⮡ **Les trois autres points sont un REPLI. `version.js` décide de ce que Grégoire
+voit à l'écran.**
+
+✅ **Le script fait le travail** : il génère `version.js` (`scripts/release.mjs`,
+l. 357-362) et pose son anti-cache dans `index.html` (l. 364-374). Mesuré le
+2 septembre 2026. Il n'y a donc **rien à faire de plus quand on passe par lui**.
+
+⛔ **LE DANGER EST LE BUMP MANUEL, ET LUI SEUL.** C'est le seul chemin qui puisse
+désynchroniser les quatre. Le 1er septembre, un bump `1.106.13 → 1.106.14` fait à
+la main sur trois points a laissé `version.js` en arrière : **l'application a
+continué d'afficher `1.106.13`**, et quatre cas de `bandeau-maj-chargement.spec.js`
+ont rougi. Vérifier « les trois habituels » ne suffit pas quand on ignore qu'il y
+en a quatre.
+
+⮕ **RÈGLE : après tout bump manuel, `grep` l'ANCIEN build dans tout le dépôt et
+exiger ZÉRO** (avec son témoin : le même motif rendant non-zéro ailleurs).
+
+⚠ **Le jeton anti-cache de `version.js` suit un AUTRE format** : `MMJJHHMM`, le
+build sans tiret, et non le `AAAAMMJJ`+lettre des autres. Mesuré :
+`index.html:14410` porte `version.js?v=09012050` pour le build `0901-2050`.
+
+⚠ Le hook pre-commit **refuse** un bump qui n'a pas bumpé les jetons de
+`js/init-inline.js` et `js/main.js`, les deux fichiers que le bump lui-même
+modifie.
 
 ---
 
 ## 4. Vérifier
 
-1. `git diff` — les quatre points sont cohérents
-2. `cd tests && npm test`
+1. `git diff` — les quatre points sont cohérents (`version.json`, `version.js`,
+   `js/init-inline.js`, `js/main.js`)
+2. `cd tests && npm run test:unit`
+
+⛔ **PAS `npm test`.** Il enchaîne Vitest ET Playwright : **plus de dix minutes**
+sur cette machine, et six minutes de silence ferment la connexion au serveur
+(#533). Corrigé ici le 2 septembre 2026 ; ce skill disait encore `npm test`.
+
+⚠ **« Push réussi » ne signifie pas « suite complète verte ».** Le hook pre-push
+ne lance que Vitest ; pour Playwright, il constate qu'aucun verdict local n'existe
+et **laisse passer**. L'ordre qui fait qu'un push est réellement jugé est dans le
+skill `fin-de-session-labo-codex` : **committer d'abord**, puis
+`cd tests && node ../scripts/verifier-playwright.mjs`, puis pousser.
 
 > `version.json` reste la **source unique de vérité**. « Bêta publique » est un
 > libellé d'affichage (`init-inline.js`, `rapport-bug.js`), pas le numéro.

@@ -329,3 +329,19 @@ Les pièges propres à chaque catégorie (setTimeout masquant un timing 2.6,
   deux modules directement (import/appel croisé) — violations d'architecture.
 - ❌ Faire du refactoring «tant qu'on y est» dans le même commit que le fix.
 - ❌ Oublier la rétrocompatibilité avec les fichiers/données importés avant le fix.
+
+---
+
+## Contraintes mesurées de cette machine (promu le 2 septembre 2026)
+
+*Promotion depuis la consigne de démarrage, règle 3 de `PROTOCOLE.md`.*
+
+### ⛔ `head -n -1` N'EXISTE PAS sur le Mac de Grégoire
+
+Il échoue, et **sa redirection produit un fichier de 0 octet que `node --check`
+valide**. Le silence de `node --check` sur un fichier vide est le piège : la
+commande a échoué, le fichier est détruit, et le contrôle dit « valide ».
+
+⮕ Utiliser `sed '$d'`.
+⮕ **Et mesurer l'EFFET après toute réécriture de fichier**, pas seulement le code
+de sortie de la commande : `wc -l` et `wc -c` sur le résultat, avant de continuer.
