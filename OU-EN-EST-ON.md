@@ -297,9 +297,12 @@ Ce qui change, en gestes :
   identifiant** (sonde, lecture seule). L'éditeur de grille en lignes les créait ainsi
   (tari le soir même) ; l'écran d'évaluation, lui, les confond en UN seul : le niveau
   choisi sur Rigueur, Plausibilité ou Nuance était lu sur Structure, et **n'a jamais été
-  enregistré**. Tes 27 évaluations d'A26 sur cette grille sont à mesurer
-  (`scripts/diagnostic-674-criteres-sans-id.js`), puis **à décider par toi, à froid** :
-  rien n'a été écrit dans tes données. Détail dans la consigne de démarrage.
+  enregistré**. ↻ Précisé par toi à 19 h 30 : l'évaluation de Daniel était un test et
+  **aucune autre évaluation n'utilise encore cette grille** — rien n'est perdu. Avant les
+  vraies évaluations : donner un identifiant à ses quatre critères (ta grille, ton
+  accord) et refaire ou supprimer le test de Daniel. Pour les autres enseignants, dont
+  l'éditeur a pu créer les mêmes grilles depuis octobre 2025, une réparation automatique
+  est **à décider à froid**. Rien n'a été écrit. Détail dans la consigne de démarrage.
 - **Sur le PDF de l'élève** : pas de bandeau « Niveau général » ; à sa place, la
   phrase que tu as arrêtée le 2 septembre en soirée : « Cette copie n’a pas de niveau
   général : Langue (20 %) reste à évaluer. » L'export te le dit avant la remise.
