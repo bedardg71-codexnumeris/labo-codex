@@ -150,20 +150,22 @@ fichiers servis (7 `js/` + `styles.css`).
   qu'il rougirait le jour où #674 serait livré : il a rougi, puis a été corrigé, pas
   élargi), et un essai a été ajouté : le geste exact de Grégoire.
 
-### ⏳ CE QUI EST DÛ PAR GRÉGOIRE — les mots que l'élève lira (question fermée)
+### ✅ ARRÊTÉ PAR GRÉGOIRE — les mots que l'élève lira (2 septembre 2026, en soirée)
 
-Le PDF porte une formulation **PROVISOIRE** (`synthese-retroaction-rendu.js`,
-constantes `TEXTE_PORTEE_INCOMPLETE_AVANT/APRES`). Trois propositions, avec l'exemple
-« Langue (20 %) » :
+Trois formulations lui ont été proposées avec l'exemple « Langue (20 %) » ; **il a
+retenu la (C)**, dans un second commit qui suit le lot :
 
-- **(A) en place** — « Cette rétroaction n’est pas conclue : la note ne porte pas sur
-  toute la grille. Critère en attente : Langue (20 %). Aucun niveau général n’est
-  établi pour cette copie. »
-- **(B)** — « Évaluation incomplète : le critère Langue (20 %) n’a pas reçu de niveau.
-  Aucune note ni niveau général ne sont établis pour cette copie. »
-- **(C)** — « Cette copie n’a pas de niveau général : Langue (20 %) reste à évaluer. »
+> « Cette copie n’a pas de niveau général : Langue (20 %) reste à évaluer. »
 
-Une lettre suffit ; le changement tient en deux lignes.
+Au pluriel : « … : Contenu (M), Organisation (M), Langue (M) restent à évaluer. » Sans
+liste (copie muette d'avant ce lot, niveau général jamais établi) : « Cette copie n’a
+pas de niveau général. » Constante `TEXTE_PORTEE_INCOMPLETE` dans
+`synthese-retroaction-rendu.js` ; les mots exacts sont gardés par quatre cas de
+`sentinelle-674-les-portes-refusent-l-incomplet.test.js`. Motif de la préférence
+(lecture de Claude Code, tranchée par lui) : (A) ouvrait sur deux abstractions
+d'enseignant ; (B) ouvrait sur « Évaluation incomplète », qu'un élève peut lire comme
+« ta copie est incomplète » ; (C) part de la copie, nomme, pointe la suite, tient en une
+ligne et fonctionne sans liste. Il a aussi confirmé le « -- » à l'écran.
 
 ### Trouvailles en chemin — issue 2 (inscrire et continuer), aucune corrigée
 
