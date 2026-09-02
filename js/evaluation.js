@@ -1733,6 +1733,16 @@ function _validerReferencesNonDemoMod(productionId, grilleId) {
     return true;
 }
 
+/**
+ * #674 — LA PORTE DE L'ENREGISTREMENT, côté modification : même patron que
+ * `_validerReferencesMod`, même règle que `_validerPorteeSauv` (evaluation-sauvegarde.js).
+ * La règle et le message vivent dans `evaluation-calcul.js` (`verifierPorteeAvantSauvegarde`).
+ */
+function _validerPorteeMod() {
+    if (typeof window.verifierPorteeAvantSauvegarde !== 'function') return true;
+    return window.verifierPorteeAvantSauvegarde();
+}
+
 function _collecterCriteresMod(grille) {
     const criteres = [];
     if (!grille || !grille.criteres) return criteres;
@@ -1787,6 +1797,7 @@ function _lireChampsDOMMod(maintenant) {
         // « -- » (rendu différé, #321) écrivait 0 par-dessus une vraie note. Les deux
         // effets ont été reproduits avant correction. Même patron que les trois sœurs.
         noteFinale: (typeof window.noteCalculeeCourante === 'number') ? window.noteCalculeeCourante : 0,
+        ponderationCouverte: (window.porteeCalculeeCourante && typeof window.porteeCalculeeCourante.ponderationCouverte === 'number') ? window.porteeCalculeeCourante.ponderationCouverte : null,   // #674 — la portée voyage avec la note
         niveauFinal: document.getElementById('niveauProduction1').textContent,
         retroactionFinale: document.getElementById('retroactionFinale1').value
     };
@@ -1941,6 +1952,9 @@ function sauvegarderEvaluationModifiee() {
     if (typeof window._forcerRecalculAlgorithmiqueAvantSauvegarde === 'function') {
         window._forcerRecalculAlgorithmiqueAvantSauvegarde(grille);
     }
+
+    // #674 — après le recalcul algorithmique, avant toute collecte (cf. evaluation-sauvegarde.js).
+    if (!_validerPorteeMod()) return;
 
     const criteres = _collecterCriteresMod(grille);
     const maintenant = new Date();

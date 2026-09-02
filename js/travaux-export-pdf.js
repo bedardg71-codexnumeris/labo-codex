@@ -69,10 +69,14 @@
         }
 
         try {
-            const { doc, nomSortie } = await genererDocPDF(fichierId);
+            const { doc, nomSortie, synthese } = await genererDocPDF(fichierId);
             if (_hasProg) window.majProgression(90, 'Téléchargement…');
             doc.save(nomSortie);
             travauxStockage.marquerExporte(fichierId);
+            // #674 — le PDF est livré, mais si sa rétroaction ne conclut pas, on le DIT.
+            if (synthese && synthese.ajoutee && synthese.avertissement) {
+                alert('Le PDF a été exporté, mais ' + synthese.avertissement + '.');
+            }
         } catch (e) {
             console.error('[Travaux-Export] Erreur export PDF:', e);
             alert('Erreur lors de l\'export PDF. Voir la console.');
@@ -707,6 +711,15 @@
         const feedback = syntheseRetroactionData.construireFeedback(evaluation, fichier, annotation);
         if (!feedback) return { ajoutee: false, raison: 'les données de rétroaction n\'ont pas pu être assemblées' };
 
+        // #674 — LA PORTE DU PDF DE L'ÉLÈVE (seul appelant de `construireFeedback`).
+        // Quand la note ne porte pas sur toute la grille, la page est produite mais
+        // REFUSE DE CONCLURE (pas de niveau général, ce qui manque est nommé — rendu),
+        // et l'enseignant·e l'apprend ICI, avant de remettre la copie, pas en la
+        // relisant : une note trop haute passe, un avertissement ne passe pas.
+        const avertissement = (feedback.portee && feedback.portee.incomplete)
+            ? 'la note de cette copie ne porte pas sur toute la grille (' + feedback.portee.texte + ') : la page de rétroaction le dit et ne conclut pas'
+            : null;
+
         // 5. Générer le HTML
         const html = syntheseRetroactionRendu.rendreSyntheseHTML(feedback);
 
@@ -740,7 +753,7 @@
             doc.addPage([pageW, pageH], 'portrait');
             const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
             doc.addImage(dataUrl, 'JPEG', 0, 0, pageW, pageH);
-            return { ajoutee: true, raison: null };
+            return { ajoutee: true, raison: null, avertissement: avertissement };
         } catch (e) {
             console.error('[Synthèse] Échec de rasterisation :', e);
             return { ajoutee: false, raison: 'échec de la mise en image : ' + (e && e.message ? e.message : e) };
@@ -847,6 +860,9 @@
             // annoté reste bon, ce n'est pas un échec d'export.
             if (synthese && !synthese.ajoutee) {
                 alert('Le PDF a été exporté, mais SANS sa page de rétroaction (' + synthese.raison + ').');
+            } else if (synthese && synthese.avertissement) {
+                // #674 — la page est là, mais elle ne conclut pas : dit avant la remise.
+                alert('Le PDF a été exporté, mais ' + synthese.avertissement + '.');
             }
 
         } catch (e) {
