@@ -157,8 +157,54 @@ le SHA du commit jugé ; **s'il ne correspond pas à `HEAD`, le verdict est pér
 ⚠ **Un spec seul se lance en secondes** et départage mieux qu'une suite complète :
 `cd tests && npx playwright test integration/<spec>.js`.
 
+### 2.1 ⚠ LE VERDICT DE GITHUB — une troisième mesure d'ouverture (ajoutée le 2 septembre 2026)
+
+**Pourquoi.** Question de Grégoire, le 2 septembre : *« Quand la vérification de GitHub
+échoue après un push, est-ce que tu l'apprends ? »* Réponse : *« Je ne sais pas. »* Puis :
+*« Je ne vois pas de rouge. »* La mesure du même jour a rendu **huit runs consécutifs en
+échec ou annulés sur `main`, y compris sur `HEAD`**. Le verdict existait ; personne ne
+l'allait chercher. Le hook pré-push n'y peut rien (il laisse passer faute de verdict
+local, par décision du 26 août — Grégoire pousse depuis GitHub Desktop) ; la CI juge
+chaque push de toute façon. **Le manque était la lecture.**
+
+**La mesure, dix secondes, une commande — pas de script neuf :**
+
+```bash
+gh run list --branch main --limit 1 --json conclusion,createdAt,headSha,workflowName \
+  --jq '.[0] | "\(.workflowName) · \(.conclusion) · \(.createdAt) · commit \(.headSha[0:8])"'
+git rev-parse --short=8 HEAD
+```
+
+⮕ **À rendre en UNE ligne, en français, dans le rapport d'état** : *la dernière
+vérification de GitHub sur `main` a réussi / échoué, le <date>, sur le commit <sha>* — et
+**si ce commit est `HEAD`**. C'est la leçon du jeton Playwright, calquée sur
+`scripts/lire-verdict.mjs` : **un verdict qui ne porte pas le SHA jugé ne dit pas sur quoi
+il porte.** Un vert vieux de trois semaines n'est pas un vert.
+
+⚠ **Si le SHA ne correspond pas à `HEAD`, deux cas, à distinguer avant de conclure :**
+· `HEAD` ne touche que de la documentation (`paths-ignore` de
+  `.github/workflows/tests.yml`) → **aucun run ne le porte, et c'est normal** ; le verdict
+  vaut pour le dernier commit qui touchait du code. Le dire tel quel.
+· `HEAD` touche du code et aucun run ne le porte → le run n'a pas démarré (quota Actions,
+  cf. l'en-tête de `tests.yml`) ou n'est pas fini (`status` ≠ `completed`). Le dire.
+
+⚠ **Si `gh` est absent ou non authentifié** (`which gh && gh auth status`) : ⛔ **ne rien
+installer, ne rien connecter** — un outil qui s'authentifie au compte GitHub de Grégoire
+est une décision qui lui appartient. **Rendre la ligne quand même** : *« je ne peux pas lire
+le verdict de GitHub : <motif> »*. Un « je ne peux pas, voici pourquoi » vaut infiniment
+mieux qu'un silence : c'est le silence qui a produit « je ne sais pas ».
+
+**Ce qu'une session fait d'un ROUGE.** Elle le **dit à Grégoire en français, en tête de
+son rapport d'ouverture, avant tout le reste** — quel job, quelle étape, quel(s) fichier(s)
+de test, en une ligne chacun (`gh run view <id> --log-failed`). **Elle ne corrige rien
+d'elle-même** : un rouge de CI sur un commit déjà publié n'est pas le mandat du jour, c'est
+une trouvaille, et elle reçoit la question habituelle — *est-ce que ça empêche un des huit
+énoncés ?* — puis l'une des trois issues de `CLAUDE.md`.
+
 Reporter :
 - Nombre de tests passés / échoués (Vitest + Playwright)
+- **Le verdict de GitHub sur `main`** : réussi/échoué, date, commit jugé, = `HEAD` ?
+  (§2.1) — ou pourquoi il n'est pas lisible
 - Si écart avec un nombre attendu par la prémisse, le signaler
 - Temps total
 - Si échec : nom du test, fichier, ligne, message condensé
@@ -350,3 +396,4 @@ aucun commit, aucun push. En particulier :
 |------------|-----------------------------------------------------------|
 | 2026-05-28 | Création. Pendant inverse du skill `fin-de-session-labo-codex`. Acté après écart de 24 h sur le Lot A ✴ : prémisse demandait un travail déjà livré au commit `11f87a1`. |
 | 2026-06-11 | Format de version aligné sur SemVer (`X.Y.Z`). Déduplication : §8 et ANTI-PATTERNS resserrés (la consigne « lecture seule / ne pas prendre la prémisse pour argent comptant » n'est plus répétée 3×, elle renvoie à la Justification). |
+| 2026-09-02 | §2.1 : le verdict de GitHub entre dans le rituel (une commande `gh`, une ligne rendue, SHA comparé à `HEAD`, deux cas d'écart distingués, conduite à tenir devant un rouge, conduite sans `gh`). Motif : « je ne vois pas de rouge » alors que huit runs consécutifs étaient rouges sur `main`. |
