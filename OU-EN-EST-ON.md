@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 1er septembre 2026, en soirée (septième passe).**
+**Dernière mise à jour : 1er septembre 2026, dans la nuit (huitième passe).**
 
 ---
 
@@ -24,7 +24,9 @@
 Quatre états. Le quatrième a été ajouté le 1er septembre au soir, parce que trois
 mentaient dans les deux sens :
 
-- **Fait** : vérifié, et la façon de le vérifier est écrite à côté.
+- **Fait** : vérifié, et la façon de le vérifier est écrite à côté. ↻ **Depuis le
+  1er septembre, la phrase porte LA COMMANDE**, pas seulement la méthode (règle 1
+  de `PROTOCOLE.md`) : « des tests » est invérifiable, une commande se rejoue.
 - **Éprouvé par Grégoire** : il a parcouru l'écran lui-même, en écrivant ses
   chroniques Labo Codex, et ça marchait. C'est la meilleure preuve qui existe, et
   elle a une portée : c'est l'AUTEUR qui a mesuré, sur SES données et SES réglages.
@@ -35,11 +37,28 @@ mentaient dans les deux sens :
 
 ---
 
-## Le compte du jour : 3 faits, 2 éprouvés par Grégoire, 3 pas faits, 0 jamais vérifié
+## Le compte du jour : 4 faits, 2 éprouvés par Grégoire, 3 pas faits, 0 jamais vérifié
 
 ---
 
 ## FAIT
+
+### On sait par où les gens entrent — et il n'y a plus qu'une porte
+L'application était servie à **deux** adresses `.netlify.app` en plus de la
+sienne, complètes et sans aucune authentification. Netlify comptait ces
+visiteurs, Cloudflare Access ne les voyait jamais : c'est tout l'écart entre
+« 17 » et « 0 ». Les deux redirigent maintenant vers `app.codexnumeris.org`.
+**Vérifié comment** : après déploiement, `curl -sI https://codexnumeris-051225.netlify.app/`
+rend **301** et `location: https://app.codexnumeris.org/` ; idem sur
+`main--codexnumeris-051225.netlify.app` ; `/index.html` conserve son chemin.
+**Témoin** : `app.codexnumeris.org` rend toujours **403** (Cloudflare), donc la
+porte principale n'a pas été cassée et il n'y a pas de boucle.
+⚠ **Ce que ça ne règle pas** : on ne sait toujours pas COMBIEN ils sont, ni qui.
+La redirection ferme la porte, elle ne compte pas rétroactivement.
+⚠ **Et l'annonce n'atteint pas sa cible** : le changelog s'affiche dans
+l'application, donc derrière la porte. Quelqu'un qui a un signet `.netlify.app`
+verra l'écran de code AVANT de pouvoir le lire. Le doublage (courriel, blog)
+reste à faire. *(geste de Grégoire)*
 
 ### Importer des productions, et savoir ce qui se passe quand ça rate
 Un import lancé sans groupe-cours actif est refusé, et le refus est dit. Un
@@ -53,14 +72,20 @@ une relecture du rendu à l'écran (les tests seuls ne voient pas les couleurs).
 Les sous-critères, leurs rétroactions et les réglages de projection voyagent
 maintenant avec la grille. L'évaluation du destinataire ne bascule plus de mode
 à son insu.
-**Vérifié comment** : tests automatiques sur le transport. *(#669)*
+**Vérifié comment** : tests automatiques sur le transport —
+`cd tests && npm run test:unit` (433 fichiers / 4638 tests, code 0). *(#669)*
 
 ### Le numéro de version affiché correspond au code qui tourne
 Sans ça, aucun rapport de bug n'est interprétable, ni le sien ni celui d'un
 utilisateur.
-**Vérifié comment** : tests sur le bandeau de version.
+**Vérifié comment** : tests sur le bandeau de version, et les quatre points de
+vérité mesurés PAR TÉMOIN à la release 1.107.0 —
+`grep -rl 1.106.15 --include=*.js --include=*.json --include=*.html .` rend **0**,
+comme `0901-1354` et `09011354`. ⚠ Le témoin dit aussi son périmètre : sur tout le
+dépôt, `1.106.15` rend encore 3 fichiers de prose datée.
 ⚠ **Fragile** : ça se re-périme à chaque changement de version fait à la main.
-*(#665)*
+⮕ Re-vérifié le 1er sept. au soir, après six commits `js/` livrés sans bump : la
+ligne était re-périmée, la release 1.107.0 l'a remise à jour. *(#665)*
 
 ---
 
