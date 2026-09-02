@@ -414,6 +414,25 @@ sur du code inconnu.**
 > dans la consigne de démarrage »). Une session qui rend son état mesuré ne la
 > réécrit pas : elle réécrit l'ÉTAT, au-dessus.
 
+### ⏱ AVANT le Lot B — un geste de dix minutes, décidé par Grégoire le 1er sept. au soir
+
+**Fermer la porte de service : rediriger `codexnumeris-051225.netlify.app` vers
+`app.codexnumeris.org`**, en 301, dans `netlify.toml` (aucune redirection n'y existe
+aujourd'hui — vérifié).
+
+**Ce que la mesure a montré.** Cloudflare Access protège `app.codexnumeris.org`. Le
+domaine Netlify par défaut sert **la même application, complète, sans aucune
+authentification** — ouvert et vérifié le 1er septembre. Netlify compte les deux
+adresses, Access une seule : c'est tout l'écart entre « 17 » et « 0 ».
+⚠ **Ce n'est PAS une fuite de données** : l'application est locale d'abord, un
+visiteur par cette porte n'obtient qu'un espace vide, le sien. Le défaut est que la
+porte ne compte pas ce qu'on croit, et que la liste de contacts que Grégoire bâtit
+avec Access ne verra jamais ces gens-là.
+⚠ **Effet sur les utilisateurs** : quelqu'un qui a mis l'adresse Netlify en signet se
+retrouvera devant un code à saisir. C'est assumé — mais le dire dans le changelog.
+
+---
+
 ⮕ **Lis d'abord, dans cet ordre** : `CLAUDE.md` (il a changé), `OBJECTIF-COHORTE-1.md`
 (les huit énoncés arrêtés), puis
 `plans de travail/CONSIGNE-2026-09-01-pret-pour-les-nouveaux-utilisateurs.md` §2.
