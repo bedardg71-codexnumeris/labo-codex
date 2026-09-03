@@ -109,8 +109,26 @@
        ▣ CE QUE GRÉGOIRE DOIT ALLER VOIR (C) : Conception › grilles — sa liste porte ALGO,
          HOLIS, MIXTE selon ses critères, plus de cases sous le nom ; échelles, cartouches,
          objectifs, productions : plus de cases, plus de badge de pratique. Ne rien modifier.
-     ▣ PAS FAIT, VOULU : pas de release, pas de push. Le verdict au jeton est rendu après le
-       commit de C (§4.5) pour que la pile, si Grégoire la pousse, soit jugée.
+     ▣ COUP D'ŒIL DE GRÉGOIRE SUR A ET B (3 sept., 17 h) — deux retouches, un commit à part :
+       · « Il n'est pas possible de fermer la palette de couleurs quand je clique à côté. »
+         Un <details> natif ne se referme que par son résumé, et rien ne le refermait
+         ailleurs — vrai pour TOUS les sélecteurs (palette, échelles, sous-critères), pas
+         seulement le neuf. ⮕ UNE définition, à côté du gestionnaire #287 qui refermait
+         déjà les autres à l'ouverture : tout `pointerdown` posé hors d'un sélecteur
+         ouvert le referme (souris et doigt, avant tout clic).
+       · « Je préférerais que le message soit disponible quand on clique sur la roue
+         d'engrenage […] le message occupe une place trop grande dans l'espace de travail
+         et il est lié aux paramètres qui sont bloqués. » ⮕ Le bandeau de la palette est
+         RETIRÉ ; l'engrenage reste rendu sur une copie gouvernée, son titre est la phrase,
+         et l'écran qu'il ouvre ne montre que la phrase (la garde du lot A+B). Le choix
+         « bouton masqué » du lot A+B est donc défait, dit ici.
+       Témoins mis au pas : U.b/U.d (sources), spec `source-unique-codes` (pas de bandeau,
+       engrenage présent avec la phrase pour titre, modale = phrase + 0 champ ; repli :
+       « Personnaliser ») + un cas « sélecteur ouvert, clic ailleurs ⮕ fermé » ;
+       break-tests (remise par empreinte) : fermeture retirée ⮕ rouge ; titre sans la
+       phrase ⮕ rouge.
+     ▣ PAS FAIT, VOULU : pas de release, pas de push. Le verdict au jeton est rendu après ce
+       dernier commit (§4.5) pour que la pile, si Grégoire la pousse, soit jugée.
      ===================================================================== -->
 
 <!-- =====================================================================

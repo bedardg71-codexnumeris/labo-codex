@@ -6,8 +6,9 @@
  *
  *   U.a la phrase arrêtée par Grégoire est écrite TELLE QUELLE, et « X » est le
  *       nom de la grille, jamais un identifiant ;
- *   U.b sous gouvernance, la palette ne rend pas « Personnaliser » et l'écran de
- *       réglage n'offre que la phrase ; l'édition du REPLI n'est pas retirée ;
+ *   U.b sous gouvernance, l'engrenage reste et porte la phrase, la palette ne
+ *       porte pas de bandeau, l'écran de réglage n'offre que la phrase ;
+ *       l'édition du REPLI n'est pas retirée (coup d'œil de Grégoire, 3 sept.) ;
  *   U.c le gabarit n'a plus d'`<input type="color">` nu : le sélecteur de la
  *       palette (douze pastilles + « Personnalisé… ») est appelé, pas copié.
  */
@@ -31,20 +32,26 @@ describe('source unique des codes · sources', () => {
         expect(f).not.toMatch(/_grilleCourante\.id/);
     });
 
-    it('U.b gouvernée : pas de « Personnaliser », l\'écran de réglage n\'offre que la phrase ; le repli reste éditable', () => {
+    it('U.b gouvernée : l\'engrenage reste et porte la phrase, pas de bandeau, l\'écran de réglage n\'offre que la phrase ; le repli reste éditable', () => {
         const s = outils();
-        // Le bouton est conditionné à la gouvernance…
+        // L'engrenage est toujours rendu, et son titre est la phrase sous gouvernance…
         const barre = s.slice(s.indexOf("palette.id = 'travaux-palette-erreurs-fr'"), s.indexOf("id=\"travaux-errfr-contenu\""));
-        expect(barre).toMatch(/if \(!_copieGouvernee\(\)\) \{[\s\S]*ouvrirEditionRetroErreursFr/);
-        // …la palette porte la phrase…
-        const contenu = s.slice(s.indexOf('function genererContenuErreursFr'), s.indexOf("html += '<div class=\"travaux-errfr-liste\">'"));
-        expect(contenu).toMatch(/_copieGouvernee\(\)[\s\S]*travaux-errfr-source/);
+        expect(barre).toMatch(/_copieGouvernee\(\) \? _phraseSourceCodes\(\) : 'Personnaliser'/);
+        expect(barre).not.toMatch(/if \(!_copieGouvernee\(\)\)/);
+        // …la palette ne porte PAS de bandeau (coup d'œil : trop de place)…
+        const contenu = s.slice(s.indexOf('function genererContenuErreursFr'), s.indexOf('function genererContenuTampons'));
+        expect(contenu).not.toMatch(/travaux-errfr-source/);
         // …et l'écran de réglage se garde AVANT de lire les codes du repli.
         const ecran = s.slice(s.indexOf('function ouvrirEditionRetroErreursFr'), s.indexOf('function reinitialiserRetroErreursFr'));
         expect(ecran.indexOf('_copieGouvernee()')).toBeLessThan(ecran.indexOf('obtenirCodesOrdonnes()'));
         // L'édition du repli n'est pas retirée : les écrivains des quatre clés sont là.
         ['sauvegarderPersonnalisationErreursFr(persObj)', 'sauvegarderOrdreErreursFr(ordre)', 'sauvegarderRetroactionsErreursFr(retroObj)']
             .forEach(w => expect(s).toContain(w));
+    });
+
+    it('U.d un sélecteur ouvert se referme au pointeur posé ailleurs — une définition pour tous', () => {
+        const s = outils();
+        expect(s).toMatch(/addEventListener\('pointerdown'[\s\S]*details\.travaux-retro-couleur-picker\[open\][\s\S]*d\.contains\(cible\)\) d\.open = false/);
     });
 
     it('U.c le gabarit appelle le sélecteur de la palette, il ne le copie pas', () => {

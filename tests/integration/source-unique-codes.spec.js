@@ -7,9 +7,10 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 // UNE SEULE SOURCE POUR LES CODES, ET UNE SEULE FAÇON DE CHOISIR UNE COULEUR
 // (consigne du 3 septembre 2026, 16 h) — dans un vrai WebKit.
 //
-//   · copie gouvernée par sa grille (case cochée) : la palette des codes affiche
-//     la phrase de Grégoire avec le NOM de la grille, ne rend pas « Personnaliser »,
-//     et l'écran de réglage, s'il est ouvert, n'offre que la phrase ;
+//   · copie gouvernée par sa grille (case cochée) : la palette des codes ne porte
+//     PAS de bandeau (coup d'œil de Grégoire : trop de place), l'engrenage reste et
+//     porte la phrase de Grégoire avec le NOM de la grille, et l'écran qu'il ouvre
+//     n'offre que la phrase ;
 //   · copie sans grille : ni phrase ni garde, « Personnaliser » présent, l'écran
 //     édite les dix — et la personnalisation de Grégoire (noms courts, couleurs,
 //     ordre) s'y lit au caractère près et n'a pas bougé ;
@@ -49,11 +50,13 @@ const LIRE_PALETTE = `() => {
     travauxOutils.togglePaletteErreursFrancais();
     const pal = document.getElementById('travaux-palette-erreurs-fr');
     const src = pal.querySelector('.travaux-errfr-source');
+    const engrenage = pal.querySelector('[data-action="travauxOutils.ouvrirEditionRetroErreursFr"]');
     travauxOutils.ouvrirEditionRetroErreursFr();
     const modal = document.getElementById('modal-retro-erreurs-fr');
     const r = {
-        phrase: src ? src.textContent : null,
-        boutonPersonnaliser: !!pal.querySelector('[data-action="travauxOutils.ouvrirEditionRetroErreursFr"]'),
+        bandeau: src ? src.textContent : null,
+        boutonPersonnaliser: !!engrenage,
+        titreEngrenage: engrenage ? engrenage.getAttribute('title') : null,
         items: [...pal.querySelectorAll('.travaux-errfr-item')].map(el => el.querySelector('.travaux-errfr-numero').textContent + ':' + el.querySelector('.travaux-errfr-nom').textContent),
         modalPhrase: modal ? (modal.querySelector('.travaux-errfr-source') || {}).textContent || null : null,
         modalChampsNom: modal ? modal.querySelectorAll('input[data-nom-id]').length : -1,
@@ -66,7 +69,7 @@ const LIRE_PALETTE = `() => {
     return r;
 }`;
 
-test('source unique · copie gouvernée : la phrase, pas de « Personnaliser », l\'écran n\'édite pas', async ({ page }) => {
+test('source unique · copie gouvernée : pas de bandeau, l\'engrenage porte la phrase, l\'écran n\'édite pas', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(900);
@@ -78,10 +81,12 @@ test('source unique · copie gouvernée : la phrase, pas de « Personnaliser »,
         return eval(lire)();
     }, LIRE_PALETTE);
     console.log('GOUVERNÉE →', JSON.stringify(gouvernee));
-    expect(gouvernee.phrase).toBe('Les codes de cette copie viennent de sa grille « Philo activée ». Pour les modifier, ouvre la grille.');
-    expect(gouvernee.boutonPersonnaliser).toBe(false);
+    const PHRASE = 'Les codes de cette copie viennent de sa grille « Philo activée ». Pour les modifier, ouvre la grille.';
+    expect(gouvernee.bandeau, 'pas de bandeau dans l\'espace de travail').toBeNull();
+    expect(gouvernee.boutonPersonnaliser, 'l\'engrenage reste').toBe(true);
+    expect(gouvernee.titreEngrenage).toBe(PHRASE);
     expect(gouvernee.items).toEqual(['1:Thèse non dégagée', '2:Argument circulaire']);
-    expect(gouvernee.modalPhrase).toBe(gouvernee.phrase);
+    expect(gouvernee.modalPhrase).toBe(PHRASE);
     expect(gouvernee.modalChampsNom, 'aucun champ à éditer sous gouvernance').toBe(0);
     expect(gouvernee.perso, 'la personnalisation globale n\'a pas bougé').toBe(persoAvant);
 });
@@ -101,8 +106,9 @@ test('source unique · copie sans grille : l\'édition du repli, intacte au cara
         return eval(lire)();
     }, LIRE_PALETTE);
     console.log('REPLI →', JSON.stringify(repli));
-    expect(repli.phrase).toBeNull();
+    expect(repli.bandeau).toBeNull();
     expect(repli.boutonPersonnaliser).toBe(true);
+    expect(repli.titreEngrenage).toBe('Personnaliser');
     expect(repli.modalChampsNom).toBe(10);
     // Les noms courts de Grégoire, dans SON ordre : « Accord PP » (errfr_6) est premier.
     expect(repli.modalNoms[0]).toBe('Accord PP');
@@ -140,6 +146,12 @@ test('source unique · gabarit : le champ Couleur est le sélecteur de la palett
     // La couleur hors des douze déjà enregistrée reste affichée telle quelle.
     expect(rendu[1].affichee.replace(/\s/g, '')).toMatch(/rgb\(171,205,239\)|#abcdef/);
     expect(rendu[0].inputsColorNus).toBe(0);
+
+    // Ouvert, puis un clic ailleurs : il se referme (coup d'œil de Grégoire).
+    await pickers.nth(1).locator('summary').click();
+    await expect(pickers.nth(1)).toHaveAttribute('open', '');
+    await page.locator('#nomGrilleTemplate').click();
+    await expect(pickers.nth(1)).not.toHaveAttribute('open', '');
 
     // Choisir une pastille sur le premier sous-critère : la couleur s'écrit.
     await pickers.nth(0).locator('summary').click();
