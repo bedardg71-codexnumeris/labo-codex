@@ -1,24 +1,33 @@
 /* ===============================
-   MODULE TAMPONS-ERREURS — la liste des tampons d'annotation d'une copie
+   MODULE CODES-ANNOTATION — la liste des codes d'annotation d'une copie
 
-   RAISON D'ÊTRE (3 septembre 2026 — cadrage « les tampons cessent d'être une
+   ⚠ NOMENCLATURE, arrêtée par Grégoire le 3 septembre 2026 : « Les CODES sont
+   des numéros auxquels on associe un type d'erreur ou un commentaire ; les
+   TAMPONS servent à la rétroaction. Le tampon commente le travail, tandis que
+   le code identifie des éléments de ce travail, associés aux critères
+   d'évaluation. » Ce module ne connaît que les CODES — ① Syntaxe, ② Accord…,
+   numérotés, comptés, rattachés aux critères. Les tampons (Repérage, Rupture,
+   Relation… : `#travaux-palette-tampons`, `AUTOCOLLANTS`) sont une autre
+   palette, hors d'ici.
+
+   RAISON D'ÊTRE (3 septembre 2026 — cadrage « les codes cessent d'être une
    liste de français, longue de dix »)
-   Les codes d'erreur qu'on tamponne sur une copie étaient DIX, écrits dans le
-   code (`travaux-outils.js`), et ils disaient le français : un enseignant de
-   philosophie qui voulait tamponner « thèse non dégagée » n'avait aucun chemin.
+   Les codes d'erreur qu'on pose sur une copie étaient DIX, écrits dans le code
+   source (`travaux-outils.js`), et ils disaient le français : un enseignant de
+   philosophie qui voulait poser « thèse non dégagée » n'avait aucun chemin.
    Or la grille portait DÉJÀ une liste par code : les SOUS-CRITÈRES de son
    critère algorithmique — {code, nom, pondération, rétroaction} — que
    l'évaluation lit par le code (`evaluation-calcul.js`, mode « catégories »).
    Deux listes, alignées à la main par le numéro. Décision de Grégoire, le
-   3 septembre : « les tampons sont les sous-critères ».
+   3 septembre : « les codes sont les sous-critères ».
 
    CE QUE CE MODULE REND — une seule source de lecture
-     listeTampons(grille)   les tampons de CETTE grille, dans l'ordre d'affichage
-     tampon(grille, id)     l'entrée d'un identifiant posé, JAMAIS null
+     listeCodes(grille)     les codes de CETTE grille, dans l'ordre d'affichage
+     code(grille, id)       l'entrée d'un identifiant posé, JAMAIS null
      estActive(grille)      le drapeau est posé ET au moins un sous-critère pèse
      grilleDeCopie(fichier) la grille d'une copie, via sa production, ou null
 
-   Chaque tampon : { id, code, numero, nom, nomCourt, couleur, retroaction, source }
+   Chaque code : { id, code, numero, nom, nomCourt, couleur, retroaction, source }
      id        ce qui est écrit sur la copie : `errfr_<code>`. ⚠ LE PRÉFIXE RESTE,
                ET C'EST DIT PLUTÔT QUE RENOMMÉ : il vit dans les annotations déjà
                posées, un identifiant n'est pas un libellé, et personne ne le lit.
@@ -28,7 +37,7 @@
                curseur, le PDF et la palette suivaient tous l'ordre, pas l'id).
 
    LE REPLI = HIER, AU CARACTÈRE PRÈS
-   Une grille sans le geste d'activation (`tamponsDepuisSousCriteres`), une copie
+   Une grille sans le geste d'activation (`codesDepuisSousCriteres`), une copie
    orpheline, une grille sans critère algorithmique : les dix codes d'hier, avec
    les quatre clés globales que l'écran Annoter › palette continue de régler —
    `personnalisationErreursFr` (noms, couleurs), `ordreErreursFr`,
@@ -37,12 +46,12 @@
    rien à tarir : sans geste, rien ne change pour personne.
 
    ⚠ ACTIVATION PAR GESTE, PARTOUT — décision de Grégoire (3 sept.). Sans elle,
-   la palette lirait ses sous-critères dès la livraison : ses tampons prendraient
+   la palette lirait ses sous-critères dès la livraison : ses codes prendraient
    les noms courts de sa grille et ses élèves liraient les rétroactions de la
    grille au lieu de ses textes personnalisés. Ce que les élèves lisent ne change
    pas sans qu'il l'ait voulu.
 
-   ⚠ UN SOUS-CRITÈRE DE PONDÉRATION 0 N'EST PAS UN TAMPON — supposition nommée,
+   ⚠ UN SOUS-CRITÈRE DE PONDÉRATION 0 N'EST PAS UN CODE — supposition nommée,
    une ligne à retourner : « 0 — Aucune erreur » (pondération 0) n'a aucun sens
    posé sur une copie.
 
@@ -54,7 +63,7 @@
 'use strict';
 
 var PREFIXE = 'errfr_';
-var DRAPEAU = 'tamponsDepuisSousCriteres';
+var DRAPEAU = 'codesDepuisSousCriteres';
 
 // ---------------------------------------------------------------------
 // LE REPLI — les dix codes d'hier, repris de travaux-outils.js au caractère
@@ -76,7 +85,7 @@ var REPLI_DEFAUT = [
 ];
 
 // Les couleurs des dix, par position : c'est ce qu'un sous-critère sans
-// couleur reçoit sous une grille activée (le 11e reprend la première).
+// couleur reçoit sous une grille activée (le 11e code reprend la première).
 var COULEURS_DEFAUT = REPLI_DEFAUT.map(function(t) { return t.couleur; });
 
 // Les rétroactions par défaut des dix codes — DÉPLACÉES de travaux-outils.js
@@ -171,7 +180,7 @@ function _repli() {
 }
 
 // ---------------------------------------------------------------------
-// La grille — ses sous-critères sont ses tampons
+// La grille — ses sous-critères sont ses codes
 // ---------------------------------------------------------------------
 
 function _depuisSousCriteres(critere) {
@@ -180,16 +189,16 @@ function _depuisSousCriteres(critere) {
     var scs = (critere && Array.isArray(critere.sousCriteres)) ? critere.sousCriteres : [];
     scs.forEach(function(sc) {
         if (!sc || !(Number(sc.ponderation) > 0)) return;
-        var code = (sc.code === undefined || sc.code === null) ? '' : String(sc.code).trim();
-        // Sans code, rien à écrire sur la copie ; un code en double, le premier
-        // gagne — deux tampons de même identifiant seraient indiscernables.
-        if (!code || vus[code]) return;
-        vus[code] = true;
-        var nom = (typeof sc.nom === 'string' && sc.nom.trim()) ? sc.nom.trim() : 'Code ' + code;
+        var numero = (sc.code === undefined || sc.code === null) ? '' : String(sc.code).trim();
+        // Sans numéro, rien à écrire sur la copie ; un numéro en double, le
+        // premier gagne — deux codes de même identifiant seraient indiscernables.
+        if (!numero || vus[numero]) return;
+        vus[numero] = true;
+        var nom = (typeof sc.nom === 'string' && sc.nom.trim()) ? sc.nom.trim() : 'Code ' + numero;
         liste.push({
-            id: PREFIXE + code,
-            code: code,
-            numero: code,
+            id: PREFIXE + numero,
+            code: numero,
+            numero: numero,
             nom: nom,
             nomCourt: nom,
             couleur: (typeof sc.couleur === 'string' && sc.couleur) ? sc.couleur
@@ -212,19 +221,19 @@ function estActive(grille) {
     return _depuisSousCriteres(critere).length > 0;
 }
 
-/** Les tampons de cette grille, dans l'ordre d'affichage. */
-function listeTampons(grille) {
+/** Les codes de cette grille, dans l'ordre d'affichage. */
+function listeCodes(grille) {
     if (estActive(grille)) return _depuisSousCriteres(_critereAlgo(grille));
     return _repli();
 }
 
 /**
- * L'entrée d'un identifiant posé sur une copie. ⚠ JAMAIS NULL : un tampon posé
- * ne disparaît pas d'une copie parce que sa grille ne connaît plus ce code — il
+ * L'entrée d'un identifiant posé sur une copie. ⚠ JAMAIS NULL : un code posé
+ * ne disparaît pas d'une copie parce que sa grille ne le connaît plus — il
  * s'affiche avec son numéro et un nom neutre, jamais effacé, jamais muet.
  */
-function tampon(grille, id) {
-    var liste = listeTampons(grille);
+function code(grille, id) {
+    var liste = listeCodes(grille);
     for (var i = 0; i < liste.length; i++) if (liste[i].id === id) return liste[i];
     var brut = (typeof id === 'string') ? id : String(id || '');
     var num = (brut.indexOf(PREFIXE) === 0) ? brut.slice(PREFIXE.length) : brut;
@@ -269,12 +278,12 @@ var api = {
     COULEURS_DEFAUT: COULEURS_DEFAUT.slice(),
     RETROACTIONS_DEFAUT: RETROACTIONS_DEFAUT,
     estActive: estActive,
-    listeTampons: listeTampons,
-    tampon: tampon,
+    listeCodes: listeCodes,
+    code: code,
     grilleDeCopie: grilleDeCopie
 };
 
-if (typeof window !== 'undefined') window.tamponsErreurs = api;
+if (typeof window !== 'undefined') window.codesAnnotation = api;
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
 
 })();

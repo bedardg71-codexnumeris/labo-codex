@@ -109,6 +109,12 @@
         pageActuelle = 1;
         modeZoom = ZOOM_FIT;
 
+        // 3 sept. 2026 (codes par grille, lot 2) — AVANT le premier rendu de
+        // page : la palette des codes et leur dessin sur la copie suivent la grille
+        // de CETTE copie (`travaux-outils.js`, `_poserGrilleCourante`). Le pendant
+        // de `travaux-fichier-ferme`, émis à la fermeture.
+        window.dispatchEvent(new CustomEvent('travaux-fichier-ouvert', { detail: { fichier: fichier } }));
+
         if (fichier.typeMIME === 'application/pdf') {
             await ouvrirPDF(blob);
         } else if (fichier.typeMIME.startsWith('image/')) {

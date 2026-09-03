@@ -7,7 +7,7 @@
      ===================================================================== -->
 
 <!-- =====================================================================
-     SESSION 19 — 3 SEPTEMBRE 2026, APRÈS-MIDI : LES TAMPONS PAR GRILLE — LA LISTE
+     SESSION 19 — 3 SEPTEMBRE 2026, APRÈS-MIDI : LES CODES PAR GRILLE — LA LISTE
      EXISTE DÉJÀ, C'EST CELLE DES SOUS-CRITÈRES.
 
      ▣ Session Claude Code sur « applique le plan » : `plans de travail/
@@ -15,7 +15,7 @@
        « rien n'est à coder, remesure tout, cinq points à trancher avec Grégoire ».
        ⮕ REMESURÉ, puis consigne PROPOSÉE (`CONSIGNE-PROPOSEE-2026-09-03-tampons-par-
        grille.md`, non commitée, comme les cadrages du jour), puis GO de Grégoire sur trois
-       questions fermées : (1) les tampons SONT les sous-critères ; (2) activation par
+       questions fermées : (1) les codes SONT les sous-critères ; (2) activation par
        GESTE partout, rien ne change sans lui ; (3) mots approuvés — bouton « Utiliser ces
        sous-critères comme tampons d'annotation », titre « Rétroactions — Codes
        d'annotation » (« (repli) » sorti du titre, mis dans la phrase d'explication :
@@ -48,10 +48,10 @@
        3 le gabarit (bouton d'activation, `sc.couleur`, les DEUX schémas, titre de l'écran)
        · 4 aide, doc, changelog. Chaque lot : commit, tests, jetons.
 
-     ▣ LOT 1 LIVRÉ — `js/tampons-erreurs.js` (module pur, lecture seule) :
-       `listeTampons(grille)` → [{id, code, numero, nom, nomCourt, couleur, retroaction,
-       source}] ; `tampon(grille, id)` JAMAIS null (inconnu = « Code N », #888888, jamais
-       effacé) ; `estActive(grille)` = drapeau `tamponsDepuisSousCriteres === true` strict
+     ▣ LOT 1 LIVRÉ — `js/codes-annotation.js` (module pur, lecture seule) :
+       `listeCodes(grille)` → [{id, code, numero, nom, nomCourt, couleur, retroaction,
+       source}] ; `code(grille, id)` JAMAIS null (inconnu = « Code N », #888888, jamais
+       effacé) ; `estActive(grille)` = drapeau `codesDepuisSousCriteres === true` strict
        ET ≥ 1 sous-critère de pondération > 0 (⚠ SUPPOSITION NOMMÉE : pondération 0 =
        « aucune erreur », pas un tampon) ; `grilleDeCopie(fichier)` (E ci-dessus, mode
        démo respecté). REPLI = les dix d'hier au caractère près (ids, noms, noms courts,
@@ -74,22 +74,60 @@
        · synthese-retroaction-data.js (2 sites) : `construireErrors(stats, grille)` — code,
          nom, couleur, texte depuis la liste ; `construireFrancaisResume` : id inconnu ne
          nomme rien, comme hier.
-       · index.html : `tampons-erreurs.js?v=20260903a` chargé APRÈS evaluation-enonces.js,
+       · index.html : `codes-annotation.js?v=20260903a` chargé APRÈS evaluation-enonces.js,
          AVANT travaux-outils / synthese-retroaction-data / evaluation-retroaction ;
          jetons bumpés : travaux-outils 0903a, synthese-retroaction-data 0903a,
          evaluation-retroaction 0903a.
        ▣ ÉCARTS ASSUMÉS, tous sur un identifiant INCONNU (impossible aujourd'hui : les ids
          sont errfr_1..10) : nom « Code N » au lieu de l'id brut / « undefined » ; couleur
          #888888 au lieu de #141414 dans la synthèse.
-     ▣ TÉMOINS lot 1 : sentinelle `sentinelle-tampons-par-grille-lot1.test.js` (20) —
+     ▣ TÉMOINS lot 1 : sentinelle `sentinelle-codes-par-grille-lot1.test.js` (20) —
        A repli au caractère près (sha256 des dix textes `ac157daf…`, mesuré sur HEAD
        43f7a57b), B quatre clés (règles d'hier), C grille activée, D jamais null,
        E copie → grille, F sources (constante partie, ordre de chargement). Break-tests :
        7 mutations, 7 rouges, module revenu à l'identique (empreinte, remise qui LIT avant
        d'écrire — leçon de la session 18). Existant : #240, export-pdf, #581, 414, drag,
        563, 572, ci-paths (134/134) ; WebKit 672, 645, erreurs-saisie, bilan-reflexif (4/4).
-     ▣ RESTE : lots 2, 3, 4 (voir la consigne proposée §5) ; la spec WebKit de la palette
-       (repli 10 / grille activée N / copie orpheline / code inconnu visible) vient au lot 2.
+     ▣ CORRECTION DE NOMENCLATURE (Grégoire, avant le commit du lot 2) : « Les CODES sont
+       des numéros auxquels on associe un type d'erreur ou un commentaire ; les TAMPONS
+       servent à la rétroaction. » Le module parlait des codes sous le nom des tampons, et
+       une palette « tampons » existe déjà (`#travaux-palette-tampons`). ⮕ RENOMMÉ :
+       `js/tampons-erreurs.js` → `js/codes-annotation.js` (tranché « annotation » plutôt
+       qu'« erreurs » : c'est le mot du titre d'écran approuvé, et un code identifie « un
+       type d'erreur OU un commentaire ») ; global `codesAnnotation` ; `listeTampons` →
+       `listeCodes`, `tampon()` → `code()`, `estActive` inchangé ; drapeau de donnée
+       `codesDepuisSousCriteres` (aucune donnée ne le portait encore) ; `errfr_<n>`
+       INCHANGÉ. Témoin : dans le module, « tampon » 26 → 4 (les quatre = la note qui
+       distingue les deux palettes), « code » 47 → 64. Aucun texte visible ne disait
+       « tampon » pour un code (palette « Codes », notification « Codes d'erreurs… ») ; le
+       titre de l'écran de réglage vient au lot 3. Aucun essai n'a changé de sens : la
+       sentinelle du lot 1 est renommée et rejouée telle quelle (symboles substitués).
+     ▣ LOT 2 LIVRÉ — L'ANNOTATION SUIT LA GRILLE (même commit que le renommage, demandé
+       avant lui) :
+       · travaux-visionneuse.js : `travaux-fichier-ouvert` {fichier} émis dès que le fichier
+         est connu, AVANT le premier rendu de page (pendant de `travaux-fichier-ferme`).
+       · travaux-outils.js : `_poserGrilleCourante(grille)` sur les deux événements
+         (`codesAnnotation.grilleDeCopie` ; null = repli) — régénère `OUTILS.errfr_*`
+         (`_regenererOutilsCodes`, aussi au chargement et après l'écran de réglage),
+         invalide les curseurs, rend au stylo un code actif disparu, re-rend palettes et
+         compteurs ; `grilleCourante()` exporté ; le curseur lit `numero` dans la liste ;
+         les compteurs comptent TOUT `errfr_*` (un code posé sous une autre grille reste
+         dans le total, les badges ne montrent que la palette) ; sélection visuelle par
+         `data-param` (l'ancien motif `onclick` ne trouvait plus rien) ;
+         `obtenirOrdreErreursFr` RETIRÉ (plus aucun lecteur ; l'écrivain reste).
+       · travaux-annotation.js (`dessinerErreurFrancais`) et travaux-export-pdf.js
+         (`_grilleExport` posée dans `genererDocPDF`, que la prévisualisation emprunte) :
+         le numéro vient de la liste de la copie DESSINÉE / EXPORTÉE, pas de l'écran.
+       · index.html : jetons visionneuse 0903a, outils 0903b, annotation 0903a, export 0903a.
+       ▣ TÉMOINS lot 2 : `sentinelle-codes-par-grille-lot2.test.js` (5, sources) ; spec WebKit
+         `codes-par-grille-palette.spec.js` (3) : grille activée → 3 codes nommés/numérotés
+         par leur code, 0 exclu, code inconnu « 9 » conservé ; sans geste / sans grille /
+         orpheline / fermeture → les dix d'hier avec leurs noms ; code actif 7 → stylo.
+         Break-tests WebKit (2 mutations, remise par empreinte) : outils non régénérés ⮕
+         rouge ; fermeture sans repli ⮕ rouge. Existant rejoué : 240, export-pdf, 581, 572,
+         563 ; WebKit 672, 645, erreurs-saisie.
+     ▣ RESTE : lots 3 (gabarit : bouton d'activation, `sc.couleur`, les DEUX schémas, titre
+       de l'écran de réglage) et 4 (aide, doc, changelog).
      ===================================================================== -->
 
 <!-- =====================================================================

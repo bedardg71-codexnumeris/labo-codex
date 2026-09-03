@@ -274,16 +274,14 @@
         },
     };
 
-    // 3 sept. 2026 — LES DIX CODES DU REPLI sont générés depuis
-    // `tamponsErreurs.REPLI_DEFAUT` (js/tampons-erreurs.js) : une seule source
-    // pour l'identifiant, le nom et la couleur. Plus d'icône Unicode ①…⑩ :
-    // aucun chemin ne la lisait — le curseur, la copie et le PDF DESSINENT le
-    // nombre (`genererCurseurErrFr`, `dessinerErreurFrancais`, export-pdf).
-    // Sans le module (bancs Node qui ne chargent que ce fichier), aucun code :
-    // rien ne casse, rien ne s'affiche.
-    (_tampons() ? _tampons().REPLI_DEFAUT : []).forEach(function(r) {
-        OUTILS[r.id] = { id: r.id, nom: r.nomCourt, couleurBouton: r.couleur, curseur: 'crosshair', type: 'symbole', taille: 24 };
-    });
+    // 3 sept. 2026 — LES CODES D'ERREUR SONT GÉNÉRÉS depuis la liste courante
+    // (`codesAnnotation`, js/codes-annotation.js) : les dix du repli au chargement,
+    // ceux de la grille de la copie dès qu'une copie est ouverte
+    // (`_regenererOutilsCodes`). Une seule source pour l'identifiant, le nom et
+    // la couleur. Plus d'icône Unicode ①…⑩ : aucun chemin ne la lisait — le
+    // curseur, la copie et le PDF DESSINENT le nombre. Sans le module (bancs Node
+    // qui ne chargent que ce fichier), aucun code : rien ne casse.
+    _regenererOutilsCodes();
 
     /* ===============================
        AUTOCOLLANTS (Tampons de retroaction)
@@ -554,23 +552,60 @@
        PALETTE ERREURS DE FRANÇAIS
        =============================== */
 
-    // 3 sept. 2026 — LA LISTE DES TAMPONS VIENT DE `tamponsErreurs`
-    // (js/tampons-erreurs.js, chargé avant ce module). La constante des dix
+    // 3 sept. 2026 — LA LISTE DES CODES VIENT DE `codesAnnotation`
+    // (js/codes-annotation.js, chargé avant ce module). La constante des dix
     // codes n'existe plus ici : les dix codes d'hier sont le REPLI du module, et
     // une grille dont le critère algorithmique porte le geste d'activation
     // fournit les siens — ses sous-critères. Ce fichier ne garde que l'ÉCRAN qui
     // règle le repli (noms, couleurs, ordre, textes : quatre clés globales) et
     // la palette.
-    //   _tamponsRepli()     les dix, personnalisés — l'écran de réglage, les défauts
-    //   _tamponsCourants()  ceux de la copie ouverte (sa grille, sinon le repli)
+    //   _codesRepli()     les dix, personnalisés — l'écran de réglage, les défauts
+    //   _codesCourants()  ceux de la copie ouverte (sa grille, sinon le repli)
     // `_grilleCourante` est posée à l'ouverture d'une copie (lot 2) ; nulle, la
     // palette montre le repli — exactement hier.
     var _grilleCourante = null;
-    function _tampons() {
-        return (typeof window !== 'undefined' && window.tamponsErreurs) ? window.tamponsErreurs : null;
+    function _codes() {
+        return (typeof window !== 'undefined' && window.codesAnnotation) ? window.codesAnnotation : null;
     }
-    function _tamponsRepli() { var t = _tampons(); return t ? t.listeTampons(null) : []; }
-    function _tamponsCourants() { var t = _tampons(); return t ? t.listeTampons(_grilleCourante) : []; }
+    function _codesRepli() { var t = _codes(); return t ? t.listeCodes(null) : []; }
+    function _codesCourants() { var t = _codes(); return t ? t.listeCodes(_grilleCourante) : []; }
+
+    /** Les entrées `errfr_*` d'OUTILS suivent la liste courante — et rien d'autre n'y reste. */
+    function _regenererOutilsCodes() {
+        Object.keys(OUTILS).forEach(function(k) { if (k.indexOf('errfr_') === 0) delete OUTILS[k]; });
+        _codesCourants().forEach(function(t) {
+            OUTILS[t.id] = { id: t.id, nom: t.nomCourt, couleurBouton: t.couleur, curseur: 'crosshair', type: 'symbole', taille: 24 };
+        });
+    }
+
+    /**
+     * Lot 2 (3 sept. 2026) — la copie ouverte impose sa grille. Appelé à
+     * `travaux-fichier-ouvert` (visionneuse) avec la grille résolue par
+     * `codesAnnotation.grilleDeCopie` — copie orpheline, grille sans geste ou
+     * introuvable : null, donc le repli — et à `travaux-fichier-ferme` avec null.
+     * Régénère les outils, invalide les curseurs (le numéro d'un même code peut
+     * changer d'une grille à l'autre), rend la palette et les compteurs. Un code
+     * actif que la liste ne connaît plus laisse la place au stylo.
+     */
+    function _poserGrilleCourante(grille) {
+        _grilleCourante = grille || null;
+        _regenererOutilsCodes();
+        invaliderCacheCurseurs();
+        if (typeof outilActif === 'string' && outilActif.indexOf('errfr_') === 0 && !OUTILS[outilActif]) {
+            setOutilActif('stylo');
+        }
+        rafraichirPalettesApresPersonnalisation();
+        mettreAJourCompteursErreurs();
+    }
+
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+        window.addEventListener('travaux-fichier-ouvert', function(e) {
+            var t = _codes();
+            var fichier = (e && e.detail) ? e.detail.fichier : null;
+            _poserGrilleCourante(t ? t.grilleDeCopie(fichier) : null);
+        });
+        window.addEventListener('travaux-fichier-ferme', function() { _poserGrilleCourante(null); });
+    }
 
     // Valeurs par defaut des symboles (crochet/croix/interrogation)
     const _defautsSymboles = {
@@ -582,7 +617,7 @@
     // Sauvegarder les valeurs par defaut des erreurs FR avant toute personnalisation
     const _defautsNomsErrFr = {};
     const _defautsCouleursErrFr = {};
-    (_tampons() ? _tampons().REPLI_DEFAUT : []).forEach(r => {
+    (_codes() ? _codes().REPLI_DEFAUT : []).forEach(r => {
         _defautsNomsErrFr[r.id] = r.nom;
         _defautsCouleursErrFr[r.id] = r.couleur;
     });
@@ -623,7 +658,7 @@
     };
 
     // 3 sept. 2026 — les rétroactions par défaut des dix codes ont été DÉPLACÉES
-    // dans js/tampons-erreurs.js (`RETROACTIONS_DEFAUT`), texte pour texte.
+    // dans js/codes-annotation.js (`RETROACTIONS_DEFAUT`), texte pour texte.
 
     /* ===============================
        LECTURE / ECRITURE RETROACTIONS PERSONNALISEES
@@ -635,7 +670,7 @@
     }
 
     function obtenirRetroactionsErreursFr() {
-        return db.getSync('retroactionsErreursFr', null) || (_tampons() ? _tampons().RETROACTIONS_DEFAUT : {});
+        return db.getSync('retroactionsErreursFr', null) || (_codes() ? _codes().RETROACTIONS_DEFAUT : {});
     }
 
     function sauvegarderRetroactionsObservations(obj) {
@@ -956,12 +991,9 @@
         db.setSync('personnalisationErreursFr', obj);
     }
 
-    function obtenirOrdreErreursFr() {
-        const ids = (_tampons() ? _tampons().REPLI_DEFAUT : []).map(r => r.id);
-        const ordre = db.getSync('ordreErreursFr', null);
-        if (ordre && Array.isArray(ordre) && ordre.length === ids.length) return ordre;
-        return ids;
-    }
+    // `obtenirOrdreErreursFr` est parti (lot 2) : l'ordre du repli se lit dans
+    // `codesAnnotation` (numéro = position), et plus personne ne le lisait ici.
+    // `sauvegarderOrdreErreursFr` reste : c'est l'écran de réglage qui l'écrit.
 
     function sauvegarderOrdreErreursFr(arr) {
         db.setSync('ordreErreursFr', arr);
@@ -969,7 +1001,7 @@
 
     /** Les dix du repli, dans l'ordre personnalisé — ce que l'écran de réglage édite. */
     function obtenirCodesOrdonnes() {
-        return _tamponsRepli();
+        return _codesRepli();
     }
 
     /* ===============================
@@ -1135,7 +1167,7 @@
     /**
      * Applique les personnalisations (noms, images, couleurs) directement
      * sur les objets AUTOCOLLANTS et OUTILS (les codes d'erreur se lisent dans
-     * `tamponsErreurs` ; seule leur couleur est recopiée sur l'outil).
+     * `codesAnnotation` ; seule leur couleur est recopiée sur l'outil).
      * Appelée au démarrage et après chaque sauvegarde.
      */
     function appliquerPersonnalisations() {
@@ -1206,12 +1238,9 @@
             });
         }
 
-        // --- Codes d'erreur du repli : la couleur personnalisée suit sur l'outil.
-        // Les NOMS ne se copient plus nulle part : ils se lisent dans la liste
-        // (`tamponsErreurs`), personnalisation comprise.
-        _tamponsRepli().forEach(t => {
-            if (OUTILS[t.id]) OUTILS[t.id].couleurBouton = t.couleur;
-        });
+        // --- Codes d'erreur : les outils suivent la liste courante (repli
+        // personnalisé, ou grille de la copie ouverte) — noms et couleurs compris.
+        _regenererOutilsCodes();
 
         // Invalider le cache de curseurs (couleurs/images ont pu changer)
         invaliderCacheCurseurs();
@@ -1232,7 +1261,7 @@
      */
     function genererContenuErreursFr() {
         let html = '<div class="travaux-errfr-liste">';
-        _tamponsCourants().forEach((c) => {
+        _codesCourants().forEach((c) => {
             const actif = outilActif === c.id ? ' actif' : '';
             const raccourci = obtenirRaccourciPourItem(c.id);
             html += `<div class="travaux-errfr-item${actif}" data-action="travauxOutils.setOutilActif" data-param="${c.id}" title="${echapperHtml(c.nom)}${raccourci ? ' [' + raccourci + ']' : ''}">`;
@@ -1615,8 +1644,9 @@
         if (_curseurCache[outilId]) return _curseurCache[outilId];
         const outil = OUTILS[outilId];
         if (!outil) return 'crosshair';
-        const ordre = obtenirOrdreErreursFr();
-        const code = ordre.indexOf(outilId) + 1 || outilId.replace('errfr_', '');
+        // Lot 2 — le numéro vient de la liste de la grille courante (ou du repli :
+        // la position dans l'ordre, comme hier).
+        const code = _codes() ? _codes().code(_grilleCourante, outilId).numero : outilId.replace('errfr_', '');
         const couleur = outil.couleurBouton || '#888';
         const taille = 32;
         const c = document.createElement('canvas');
@@ -1858,9 +1888,10 @@
         const paletteErrFr = document.getElementById('travaux-palette-erreurs-fr');
         if (paletteErrFr) {
             paletteErrFr.querySelectorAll('.travaux-errfr-item').forEach(item => {
-                const onclick = item.getAttribute('onclick') || '';
-                const match = onclick.match(/setOutilActif\('(errfr_\d+)'\)/);
-                item.classList.toggle('actif', match && match[1] === outilActif);
+                // Lot 2 — les items portent `data-param` (zéro handler inline) ; l'ancien
+                // motif `onclick` ne trouvait plus rien, et un code non numérique n'y
+                // aurait pas passé.
+                item.classList.toggle('actif', item.dataset.param === outilActif);
             });
         }
 
@@ -2234,15 +2265,18 @@
 
     function compterErreursFrancais() {
         const compteurs = {};
-        _tamponsCourants().forEach(t => { compteurs[t.id] = 0; });
+        _codesCourants().forEach(t => { compteurs[t.id] = 0; });
         const annotation = travauxAnnotation.getAnnotationCourante();
         if (!annotation || !annotation.pages) return compteurs;
         for (const pageKey of Object.keys(annotation.pages)) {
             const page = annotation.pages[pageKey];
             if (!page.shapes) continue;
             for (const forme of page.shapes) {
-                if (forme.type && compteurs.hasOwnProperty(forme.type)) {
-                    compteurs[forme.type]++;
+                // Lot 2 — TOUT code errfr_* compte, connu de la liste courante ou
+                // non : un code posé sous une autre grille reste une erreur sur la
+                // copie, et il ne disparaît pas du total parce que la palette a changé.
+                if (forme.type && typeof forme.type === 'string' && forme.type.indexOf('errfr_') === 0) {
+                    compteurs[forme.type] = (compteurs[forme.type] || 0) + 1;
                 }
             }
         }
@@ -2253,10 +2287,11 @@
         const palette = document.getElementById('travaux-palette-erreurs-fr');
         if (!palette) return;
         const compteurs = compterErreursFrancais();
-        let total = 0;
-        _tamponsCourants().forEach(c => {
+        // Le total additionne TOUS les codes posés ; les badges ne montrent que
+        // ceux que la palette affiche.
+        const total = Object.keys(compteurs).reduce((somme, id) => somme + (compteurs[id] || 0), 0);
+        _codesCourants().forEach(c => {
             const count = compteurs[c.id] || 0;
-            total += count;
             const badge = palette.querySelector('.travaux-errfr-compteur[data-erreur="' + c.id + '"]');
             if (badge) {
                 badge.textContent = count > 0 ? count : '';
@@ -3733,6 +3768,8 @@
         // Retroactions personnalisées
         obtenirRetroactionsObservations: obtenirRetroactionsObservations,
         obtenirRetroactionsErreursFr: obtenirRetroactionsErreursFr,
+        // Lot 2 — la grille de la copie ouverte (null = repli), lue par le dessin et le PDF.
+        grilleCourante: function() { return _grilleCourante; },
         ouvrirEditionRetroObservations: ouvrirEditionRetroObservations,
         ouvrirEditionRetroErreursFr: ouvrirEditionRetroErreursFr,
         enregistrerRetroObservations: enregistrerRetroObservations,
@@ -3764,7 +3801,6 @@
         obtenirNomsCategories: obtenirNomsCategories,
         obtenirOrdreCategories: obtenirOrdreCategories,
         // Ordre personnalisé des erreurs FR
-        obtenirOrdreErreursFr: obtenirOrdreErreursFr,
         // Mode synthèse erreurs FR (principale / toutes)
         changerModeSyntheseErrFr: changerModeSyntheseErrFr,
         obtenirModeSyntheseErrFr: obtenirModeSyntheseErrFr,

@@ -2795,12 +2795,13 @@
         const mx = (x1 + x2) / 2;
         const my = (y1 + y2) / 2;
         const rayon = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1)) / 2;
-        // Utiliser la position dans l'ordre personnalisé (palette) plutôt que le numéro du ID
+        // Lot 2 (3 sept. 2026) — le numéro vient de la liste de la grille de la
+        // copie ouverte (`codesAnnotation`) : le code du sous-critère sous une
+        // grille activée, la position dans l'ordre personnalisé en repli (hier).
+        // Un code que la liste ne connaît pas garde son numéro : jamais effacé.
         let numero = type.replace('errfr_', '');
-        if (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirOrdreErreursFr) {
-            const ordre = travauxOutils.obtenirOrdreErreursFr();
-            const idx = ordre.indexOf(type);
-            if (idx !== -1) numero = idx + 1;
+        if (typeof codesAnnotation !== 'undefined' && typeof travauxOutils !== 'undefined' && travauxOutils.grilleCourante) {
+            numero = codesAnnotation.code(travauxOutils.grilleCourante(), type).numero;
         }
 
         // Cercle rempli

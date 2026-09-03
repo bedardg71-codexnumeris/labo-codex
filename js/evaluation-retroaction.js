@@ -189,12 +189,12 @@ function _rendreObservationsAnnotations(statsAnnot) {
 function _rendreErreursFrancaisAnnotations(statsAnnot) {
     if (statsAnnot.totalErreursFr <= 0) return '';
     // 3 sept. 2026 — numéro, nom et texte viennent de la liste de la grille de
-    // l'évaluation (ou du repli, à l'identique) : `tamponsErreurs`. L'ordre est
+    // l'évaluation (ou du repli, à l'identique) : `codesAnnotation`. L'ordre est
     // celui de la liste ; un identifiant qu'elle ne connaît pas passe après,
     // trié par son numéro, et n'est jamais tu.
     const grilleDef = _chargerGrilleDefBilan(
         (typeof evaluationEnCours !== 'undefined' && evaluationEnCours) ? evaluationEnCours.grilleId : null);
-    const liste = window.tamponsErreurs.listeTampons(grilleDef);
+    const liste = window.codesAnnotation.listeCodes(grilleDef);
     const rang = (id) => { const i = liste.findIndex(t => t.id === id); return i === -1 ? Infinity : i; };
     const typesTriés = Object.entries(statsAnnot.erreursFr).sort((a, b) => {
         const ra = rang(a[0]), rb = rang(b[0]);
@@ -203,7 +203,7 @@ function _rendreErreursFrancaisAnnotations(statsAnnot) {
     });
     let texte = '--- Langue ---\n\n';
     for (const [type, count] of typesTriés) {
-        const t = window.tamponsErreurs.tampon(grilleDef, type);
+        const t = window.codesAnnotation.code(grilleDef, type);
         if (t.retroaction) texte += `Code ${t.numero} – ${t.nom} (×${count}) :\n${t.retroaction}\n\n`;
     }
     return texte;
@@ -486,9 +486,9 @@ function genererRetroactionSpecifique() {
         html += '<h5>' + ech581(window.enoncesAlgo.libelleCritere(critereAlgo581)) + ' (' + totalErreurs + ')</h5>';
         typesTriees.forEach(function(type) {
             // 3 sept. 2026 — nom et texte viennent de la liste de la grille (ou du
-            // repli) : `tamponsErreurs`. Le nom est une donnée utilisateur posée
+            // repli) : `codesAnnotation`. Le nom est une donnée utilisateur posée
             // dans innerHTML : échappé (règle 1), il ne l'était pas.
-            var t = window.tamponsErreurs.tampon(grilleDef581, type);
+            var t = window.codesAnnotation.code(grilleDef581, type);
             html += '<p><strong>' + ech581(t.nom) + '</strong> (' + erreurs[type] + ') — ' + ech581((t.retroaction || '').substring(0, 120)) + '</p>';
         });
     }
