@@ -52,7 +52,10 @@ describe('codes par grille · lot 2 — l\'annotation suit la grille (sources)',
         // Posée à l'entrée de l'export, que la prévisualisation emprunte aussi.
         const entree = pdf.indexOf('async function genererDocPDF(');
         expect(pdf.indexOf('_poserGrilleExport(fichier);', entree)).toBeGreaterThan(entree);
-        expect(pdf.indexOf("await genererDocPDF(fichierId)", pdf.indexOf('async function previsualiserPDF('))).toBeGreaterThan(-1);
+        // Relecture croisée : sans cette borne, une prévisualisation disparue laissait l'assertion verte.
+        const previsu = pdf.indexOf('async function previsualiserPDF(');
+        expect(previsu).toBeGreaterThan(-1);
+        expect(pdf.indexOf("await genererDocPDF(fichierId)", previsu)).toBeGreaterThan(previsu);
     });
 
     it('L2.d `obtenirOrdreErreursFr` n\'existe plus nulle part — l\'écrivain de l\'ordre reste', () => {

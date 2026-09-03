@@ -194,6 +194,21 @@ describe('codes par grille · C — une grille activée rend ses sous-critères'
         expect(m.listeCodes(undefined)).toEqual(m.listeCodes(null));
     });
 
+    it('C.e un code doit pouvoir vivre dans un identifiant, une couleur doit être hexadécimale (relecture croisée du 3 sept.)', () => {
+        const m = charger().codesAnnotation;
+        const liste = m.listeCodes(grille([
+            { code: '3"onmouseover="x', nom: 'Piégé', ponderation: 1 },
+            { code: 'a b', nom: 'Espace', ponderation: 1 },
+            { code: 'ab-cd_9', nom: 'Sûr', ponderation: 1, couleur: 'red' },
+            { code: '4', nom: 'Hex court', ponderation: 1, couleur: '#abc' },
+            { code: 'x'.repeat(21), nom: 'Trop long', ponderation: 1 }
+        ]));
+        expect(liste.map(t => t.id)).toEqual(['errfr_ab-cd_9', 'errfr_4']);
+        // « red » n'est pas une couleur ici : la couleur des dix par position.
+        expect(liste[0].couleur).toBe(m.COULEURS_DEFAUT[0]);
+        expect(liste[1].couleur).toBe('#abc');
+    });
+
     it('C.d un code numérique ou à deux chiffres passe tel quel — la série Unicode n\'est pas une limite', () => {
         const liste = charger().codesAnnotation.listeCodes(grille([
             { code: 12, nom: 'Douze', ponderation: 1 }, { code: ' 7 ', nom: 'Sept', ponderation: 2 }

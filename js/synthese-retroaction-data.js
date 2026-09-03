@@ -619,13 +619,13 @@
         // grille de l'évaluation (ou du repli, à l'identique) : `codesAnnotation`.
         // Un identifiant que la liste ne connaît pas garde son numéro et un nom
         // neutre — il n'est jamais retiré du PDF.
-        const tampons = (typeof window !== 'undefined' && window.codesAnnotation) ? window.codesAnnotation : null;
-        if (!tampons) return [];
+        const codes = (typeof window !== 'undefined' && window.codesAnnotation) ? window.codesAnnotation : null;
+        if (!codes) return [];
 
         return Object.keys(stats.erreursFr)
             .map(id => {
                 const count = stats.erreursFr[id] || 0;
-                const t = tampons.code(grille, id);
+                const t = codes.code(grille, id);
                 return {
                     code:        t.inconnu ? null : t.code,
                     name:        t.nom,
@@ -903,13 +903,13 @@
      */
     function construireFrancaisResume(stats, grille) {
         if (!stats || !stats.totalErreursFr) return '';
-        const tampons = (typeof window !== 'undefined' && window.codesAnnotation) ? window.codesAnnotation : null;
+        const codes = (typeof window !== 'undefined' && window.codesAnnotation) ? window.codesAnnotation : null;
         const total = stats.totalErreursFr;
         const principal = Object.keys(stats.erreursFr || {})
             .sort((a, b) => stats.erreursFr[b] - stats.erreursFr[a])[0];
         // 3 sept. 2026 — le nom vient de la liste de la grille (`codesAnnotation`) ;
         // un identifiant inconnu ne nomme rien, comme hier.
-        const meta = (principal && tampons) ? tampons.code(grille, principal) : null;
+        const meta = (principal && codes) ? codes.code(grille, principal) : null;
         const nomPrinc = (meta && !meta.inconnu) ? meta.nom : '';
         const titre = libelleErreurs(grille);
         return `${titre} : ${total} erreur${total > 1 ? 's' : ''}${nomPrinc ? ` (principalement : ${nomPrinc})` : ''}`;

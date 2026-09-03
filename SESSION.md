@@ -7,6 +7,68 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 20 — 3 SEPTEMBRE 2026, FIN D'APRÈS-MIDI : UNE SEULE SOURCE POUR LES CODES,
+     ET UNE SEULE FAÇON DE CHOISIR UNE COULEUR.
+
+     ▣ Session Claude Code sur consigne FICHIER (`plans de travail/CONSIGNE-DU-JOUR.md`,
+       Cowork 16 h 15, avec Grégoire — née de son coup d'œil sur les lots 1 et 2).
+       Exécutée APRÈS la clôture du chantier des codes par grille (lot 4 commité
+       `f16b8f24`, relecture croisée passée, `nomCourt` retiré) : « ce lot rejoint la pile,
+       il ne la précède pas ». Pile à l'ouverture de ce lot : 6 commits devant
+       `origin/main`, non poussés.
+     ▣ VERDICT GITHUB SUR 1.113.0 (rituel §2.1) : inchangé depuis le matin — run 33760167678
+       VERT (Vitest ; Playwright WebKit 233, 6 non jugés sur Linux) ; rien n'a été poussé
+       depuis.
+
+     ▣ REMESURÉ : le sélecteur de la palette (`renderPickerCouleur`, #287) est EXPORTÉ et
+       déjà appelé depuis Conception par `echelles.js` (2 appels) — appelable depuis
+       `grilles.js` sans extraction ; les douze couleurs (`COULEURS`) n'existent qu'UNE fois
+       dans le dépôt (aucun doublon d'origine). La palette des codes n'existe qu'en FLOTTANT
+       (`#travaux-errfr-contenu`) ; le conteneur « ancré » que `rafraichirPalettesApres-
+       Personnalisation` cherche (`#annot-errfr-contenu`) n'est créé nulle part — résidu,
+       laissé (commenter et oublier).
+
+     ▣ A · LIVRÉ — grilles.js : `rendreCouleurSousCritere` appelle
+       `travauxOutils.renderPickerCouleur(couleur, {dataAttrs: on-change/grille-id/
+       critere-index/sc-index/champ})` : l'input caché posé par le sélecteur porte le
+       `data-on-change`, une pastille passe par `modifierSousCritereHandler` comme les autres
+       champs. Une couleur déjà enregistrée hors des douze s'affiche telle quelle (témoin
+       `#abcdef`). `grep -c 'type="color"' js/grilles.js` = 0 ; appels de
+       `renderPickerCouleur` dans js/ : 7 → 8.
+     ▣ B · LIVRÉ — travaux-outils.js : `_copieGouvernee()` = grille courante activée ;
+       `_phraseSourceCodes()` = la phrase de Grégoire TELLE QUELLE, « X » = `grille.nom`
+       (« sans nom » si vide, jamais un id). ⮕ CHOIX (dit) : bandeau
+       `.travaux-errfr-source` en tête de la liste des codes ; bouton « Personnaliser »
+       MASQUÉ (non rendu) sous gouvernance ; et GARDE dans `ouvrirEditionRetroErreursFr` :
+       atteint par un autre chemin, l'écran n'offre que la phrase et « Fermer », aucun champ.
+       L'édition du REPLI est intacte : mêmes écrivains des quatre clés, mêmes champs.
+     ▣ TÉMOINS : `sentinelle-source-unique-codes.test.js` (3, sources) ; spec WebKit
+       `source-unique-codes.spec.js` (3) : gouvernée (phrase avec « Philo activée », pas de
+       bouton, écran = phrase + 0 champ, personnalisation inchangée) ; repli après fermeture
+       (pas de phrase, bouton, 10 champs, « Accord PP » premier dans SON ordre, « Accord GV »
+       troisième, les deux clés à l'octet près) ; gabarit (2 sélecteurs × 12 pastilles +
+       « Personnalisé… », `#abcdef` affiché, pastille `#22c55e` écrite et relue par
+       `listeCodes`). Break-tests WebKit (remise par empreinte) : garde retirée ⮕ rouge ;
+       bandeau retiré ⮕ rouge ; « Personnaliser » rendu ⮕ rouge. La sentinelle S.c.3 du lot 3
+       attendait l'ancien `<input type="color">` : ajustée à la consigne (elle exige maintenant
+       le sélecteur et zéro input nu).
+     ▣ INCLUS DANS CE COMMIT, hors consigne mais dus avant que le lot 3 parte — les constats
+       de la relecture croisée isolée (voir SESSION 19) : code `[A-Za-z0-9_-]{1,20}` et
+       couleur hexadécimale exigés par le module (C.e), `data-param`/`data-erreur` échappés,
+       `CSS.escape` dans le sélecteur des compteurs, L2.c bornée, case décochable à n=0,
+       variable `tampons` → `codes` dans la synthèse, « tamponne » → « pose » dans le
+       changelog proposé.
+     ▣ CE QUE GRÉGOIRE DOIT ALLER VOIR (recharger avec vidage de cache ; jetons grilles 0903g,
+       travaux-outils 0903e, styles 0903f, codes-annotation 0903c) : la palette des codes sur
+       une copie dont la grille a la case cochée — la phrase, pas d'engrenage ; sur une copie
+       sans grille — l'engrenage, l'écran avec ses noms courts intacts. Ne rien modifier.
+       ⚠ iPad : le sélecteur natif derrière « Personnalisé… » et le bandeau — non éprouvés
+       hors WebKit de bureau.
+     ▣ PAS FAIT, VOULU : pas de release, pas de push. Le verdict au jeton est rendu après ce
+       commit (§4.5) pour que la pile, si Grégoire la pousse, soit jugée.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 19 — 3 SEPTEMBRE 2026, APRÈS-MIDI : LES CODES PAR GRILLE — LA LISTE
      EXISTE DÉJÀ, C'EST CELLE DES SOUS-CRITÈRES.
 
@@ -172,7 +234,7 @@
        Sous le critère algorithmique, coche « Utiliser ces sous-critères comme codes
        d'annotation » : dans Annoter, la palette Codes montre tes sous-critères — numéro,
        nom, couleur et rétroaction — pour toute copie évaluée avec cette grille. Un enseignant
-       de philosophie tamponne « Thèse non dégagée » ; il n'avait aucun chemin. ·
+       de philosophie pose « Thèse non dégagée » ; il n'avait aucun chemin. ·
        <strong>Rien ne change tant que tu ne coches pas.</strong> Les dix codes de départ
        restent la palette de toute grille sans ce geste, avec tes noms, couleurs, ordre et
        textes. · <strong>Chaque sous-critère porte sa couleur</strong> dans le gabarit ; sans
@@ -206,6 +268,28 @@
        et je viens de l'écrire ⮕ ce n'est pas une trouvaille, c'est le lot qui n'était pas fini :
        `nomCourt` RETIRÉ du module, `OUTILS[errfr_N].nom` = le nom de la liste (long,
        personnalisé) — rien de visible ne change, et il n'y a plus deux noms pour un code.
+     ▣ RELECTURE CROISÉE EN CONTEXTE ISOLÉ (subagent, carte AVANT puis diffs, 51 outils) :
+       rien de bloquant pour le repli ni pour les données ; repli comparé un à un et sha256
+       recalculé sur l'état AVANT ; zéro écriture ; schémas fermés prouvés sur `assainirObjet`
+       et `projeterEntite` réels ; couture d'ouverture (`travaux-fichier-ouvert` avant
+       `activerAnnotation`) sans croisement A/B. Ses constats, avec leur disposition :
+       (1) MOYEN — `data-param`/`data-erreur` de la palette posaient `c.id` sans échappement
+       alors que `c.id` vient maintenant de `sc.code`, champ libre ; un « " » cassait
+       l'attribut et faisait lever le sélecteur des compteurs ⮕ CORRIGÉ : le module ne
+       laisse passer qu'un code `[A-Za-z0-9_-]{1,20}` et une couleur hexadécimale (sinon
+       pas posable / couleur des dix), la palette échappe quand même, `CSS.escape` dans le
+       sélecteur ; test C.e. (2) l'arbre bougeait (retrait de `nomCourt`) ⮕ Vitest rejoué
+       après : 4881/4881. (3) assertion L2.c qui ne mordait pas ⮕ CORRIGÉE (borne).
+       (4) nomenclature : variable `tampons` pour les codes dans synthese-retroaction-data.js
+       ⮕ RENOMMÉE `codes` ; « tamponne » dans le changelog proposé ⮕ « pose » ; commentaires
+       préexistants hors lot (evaluation-calcul.js:1277/1289, travaux-outils.js:2309,
+       travaux-annotation.js:974) ⮕ inscrire et continuer. (5) case `disabled` à n=0 même
+       cochée ⮕ CORRIGÉE (`n === 0 && !actif`). (6) préexistant : la synthèse PDF écrit
+       `code` = numéro d'identifiant là où copie et curseur écrivent la position ⮕ inscrire
+       et continuer (`numero` existe, une ligne, symptôme non vécu). (7) ordre avec inconnu ⮕
+       commenté dans le module, oublié. (8) préexistant : `value="${sc.code || scIndex}"` et
+       `sc.nom` non échappés dans le formulaire des sous-critères (grilles.js) ⮕ inscrire et
+       continuer. Non vérifié par elle : break-tests (lecture seule), Playwright, rendu réel.
      ▣ TROUVAILLES du chantier (trois issues) : (1) `.sous-critere-item` sert aussi aux paliers
        de projection — COMMENTÉ dans la spec, oublié. (2) La sélection visuelle d'un code dans
        la palette flottante cherchait un `onclick` que plus personne ne posait — CORRIGÉ dans

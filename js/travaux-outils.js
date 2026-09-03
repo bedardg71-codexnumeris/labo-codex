@@ -570,6 +570,29 @@
     function _codesRepli() { var t = _codes(); return t ? t.listeCodes(null) : []; }
     function _codesCourants() { var t = _codes(); return t ? t.listeCodes(_grilleCourante) : []; }
 
+    /**
+     * Consigne du 3 sept. 2026 (16 h) — UNE SEULE SOURCE PAR COPIE, ET L'ÉCRAN LE
+     * DIT. Règle arrêtée par Grégoire : les paramètres de la palette sont
+     * indépendants de la grille ; mais quand une grille algorithmique a coché
+     * « Utiliser ces sous-critères comme codes d'annotation », ils sont en
+     * LECTURE SEULE, et la source est la grille. La copie ouverte est alors
+     * GOUVERNÉE : la palette porte la phrase ci-dessous, le bouton
+     * « Personnaliser » n'est pas rendu, et l'écran de réglage, s'il est atteint
+     * par un autre chemin, n'offre que la phrase. ⛔ L'édition du REPLI n'est pas
+     * retirée : les dix codes portent les noms courts, couleurs et ordre de
+     * Grégoire, et c'est ici la seule façon de les régler.
+     */
+    function _copieGouvernee() {
+        var t = _codes();
+        return !!(t && _grilleCourante && t.estActive(_grilleCourante));
+    }
+
+    /** La phrase de Grégoire, telle quelle. « X » est le NOM de la grille, jamais un identifiant. */
+    function _phraseSourceCodes() {
+        var nom = (_grilleCourante && typeof _grilleCourante.nom === 'string') ? _grilleCourante.nom.trim() : '';
+        return 'Les codes de cette copie viennent de sa grille « ' + (nom || 'sans nom') + ' ». Pour les modifier, ouvre la grille.';
+    }
+
     /** Les entrées `errfr_*` d'OUTILS suivent la liste courante — et rien d'autre n'y reste. */
     function _regenererOutilsCodes() {
         Object.keys(OUTILS).forEach(function(k) { if (k.indexOf('errfr_') === 0) delete OUTILS[k]; });
@@ -1260,14 +1283,21 @@
      * @returns {string} HTML de la .travaux-errfr-liste
      */
     function genererContenuErreursFr() {
-        let html = '<div class="travaux-errfr-liste">';
+        let html = '';
+        // Copie gouvernée par sa grille : la palette DIT d'où viennent les codes.
+        if (_copieGouvernee()) {
+            html += '<div class="travaux-errfr-source">' + echapperHtml(_phraseSourceCodes()) + '</div>';
+        }
+        html += '<div class="travaux-errfr-liste">';
         _codesCourants().forEach((c) => {
             const actif = outilActif === c.id ? ' actif' : '';
             const raccourci = obtenirRaccourciPourItem(c.id);
-            html += `<div class="travaux-errfr-item${actif}" data-action="travauxOutils.setOutilActif" data-param="${c.id}" title="${echapperHtml(c.nom)}${raccourci ? ' [' + raccourci + ']' : ''}">`;
+            // `c.id` vient d'un champ libre du gabarit (le code d'un sous-critère) :
+            // échappé, règle 1 — même si le module ne laisse passer qu'un jeton sûr.
+            html += `<div class="travaux-errfr-item${actif}" data-action="travauxOutils.setOutilActif" data-param="${echapperHtml(c.id)}" title="${echapperHtml(c.nom)}${raccourci ? ' [' + raccourci + ']' : ''}">`;
             html += `<span class="travaux-errfr-numero" style="background:${echapperHtml(c.couleur)}">${echapperHtml(String(c.numero))}</span>`;
             html += `<span class="travaux-errfr-nom">${echapperHtml(c.nom)}</span>`;
-            html += `<span class="travaux-errfr-compteur u-hide" data-erreur="${c.id}"></span>`;
+            html += `<span class="travaux-errfr-compteur u-hide" data-erreur="${echapperHtml(c.id)}"></span>`;
             if (raccourci) html += `<span class="raccourci-badge">${raccourci}</span>`;
             html += '</div>';
         });
@@ -1386,7 +1416,10 @@
 
         // Barre de titre
         let html = '<div class="palette-flottante-barre">';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
+        // Copie gouvernée par sa grille : rien à personnaliser ici, le bouton n'est pas rendu.
+        if (!_copieGouvernee()) {
+            html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
+        }
         html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Codes <span id="travaux-errfr-total-header" style="font-weight:400; font-size:0.75rem; color:var(--texte-secondaire);"></span></span>';
         html += '<div style="display:flex; gap:2px;">';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-erreurs-fr" title="Disposition horizontale">\u2194</button>';
@@ -2292,7 +2325,8 @@
         const total = Object.keys(compteurs).reduce((somme, id) => somme + (compteurs[id] || 0), 0);
         _codesCourants().forEach(c => {
             const count = compteurs[c.id] || 0;
-            const badge = palette.querySelector('.travaux-errfr-compteur[data-erreur="' + c.id + '"]');
+            const idSur = (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') ? CSS.escape(c.id) : c.id.replace(/["\\]/g, '');
+            const badge = palette.querySelector('.travaux-errfr-compteur[data-erreur="' + idSur + '"]');
             if (badge) {
                 badge.textContent = count > 0 ? count : '';
                 badge.classList.toggle('u-hide', count === 0);
@@ -3358,6 +3392,20 @@
     function ouvrirEditionRetroErreursFr() {
         const existant = document.getElementById('modal-retro-erreurs-fr');
         if (existant) existant.remove();
+
+        // Copie gouvernée par sa grille : l'écran n'édite pas, il dit où aller.
+        if (_copieGouvernee()) {
+            const garde = document.createElement('div');
+            garde.id = 'modal-retro-erreurs-fr';
+            garde.className = 'modal-overlay actif';
+            garde.innerHTML = '<div class="modal-contenu travaux-retro-modal">'
+                + '<h2 style="margin-top:0">Rétroactions — Codes d\'annotation</h2>'
+                + '<p class="travaux-errfr-source">' + echapperHtml(_phraseSourceCodes()) + '</p>'
+                + '<div class="travaux-retro-actions"><button class="btn btn-principal" data-action="travauxOutils.fermerModalRetroErreursFr">Fermer</button></div>'
+                + '</div>';
+            document.body.appendChild(garde);
+            return;
+        }
 
         const retroActuelles = obtenirRetroactionsErreursFr();
         const codesOrdonnes = obtenirCodesOrdonnes();

@@ -1,163 +1,198 @@
-# Consigne du jour — le texte troué, ÉTAPE 1 : les quatre énoncés de rétroaction
+# Consigne du jour — une seule source, une seule façon de choisir, et un badge qui dit vrai
 
-> **Écrite le 3 septembre 2026 à 12 h (heure de Grégoire), par Cowork, avec lui.**
+> **Écrite le 3 septembre 2026 à 16 h 15 (heure de Grégoire), par Cowork, avec lui.**
 > **Application au moment de l'écriture : `1.113.0`, build `0903-0906`.**
-> Elle remplace la consigne de l'audit, exécutée (`5887532e`, commité non poussé).
+> ▣ **État mesuré** : `HEAD` = `74e22bd0`, **5 commits devant `origin/main`**, non poussés —
+> témoin, `HEAD..origin/main` rend **0**. Arbre : `OU-EN-EST-ON.md` et `PROTOCOLE.md` sont à
+> Cowork, **ne les commite pas**.
 >
-> ▣ **État à l'écriture, mesuré** : `HEAD` = `5887532e`,
-> `git rev-list --count origin/main..HEAD` rend **1** (le lot d'audit, non poussé) — témoin,
-> `HEAD..origin/main` rend **0**. Arbre propre sauf `OU-EN-EST-ON.md` et `PROTOCOLE.md`, à
-> Cowork : **ne les commite pas.**
+> ⚠ **CETTE CONSIGNE VIENT DU COUP D'ŒIL DE GRÉGOIRE**, pas d'une mesure de Cowork. Il a
+> regardé l'écran des lots 1 et 2, et il a vu deux choses que les essais ne pouvaient pas voir.
 >
-> ⚠ **Le lot d'audit attend son push.** Si tu le trouves encore non poussé, **dis-le et
-> demande** avant d'empiler dessus.
+> ⛔ **Cinq commits attendent déjà d'être poussés.** ⮕ **Ce lot les rejoint, il ne les
+> précède pas.** Si tu juges que la pile devient trop haute, dis-le.
 >
-> **Source** : `plans de travail/CADRAGE-2026-09-02-badges-texte-troue.md`. **Lis-le d'abord** :
-> il porte le pourquoi, la distinction des deux familles de variables, et ce qui est arrêté.
-> Cette consigne n'en exécute que **la première étape**.
+> ⚠ **REMESURE** (règle 1). Les lignes citées ont été relevées en lecture seule à 16 h.
 
 ---
 
-## ⛔ LE DÉCOUPAGE, ET C'EST LUI QUI DÉFINIT LE LOT
+## A · Une seule façon de choisir une couleur
 
-**Décision de Grégoire, 3 septembre : on découpe, étape par étape.**
+▣ **Ce que Grégoire a vu** : deux sélecteurs de couleur coexistent, et ils ne suivent pas la
+même convention.
 
-Le cadrage compte `2 × N paliers + 4` champs de texte à convertir — **douze** avec quatre
-paliers. ⛔ **Ce lot n'en fait QUE QUATRE** : les quatre énoncés du **bloc 3**
-(`rendreBlocEnoncesAlgo`, `js/grilles.js:3456`).
+| où | ce que c'est |
+|---|---|
+| **palette des codes** (Annoter) | **12 pastilles prédéfinies + « Personnalisé… »** qui ouvre le sélecteur du système (`js/travaux-outils.js`, `choisirCouleurPalette` / `ouvrirCouleurPerso`) |
+| **sous-critères** (Conception, écran neuf du lot 2) | `<input type="color">` **nu** — `js/grilles.js:4083`. Spectre complet, RGB, pipette. **Aucune convention.** |
 
-⮕ **Motif** : c'est ce que le cadrage appelle « la vraie prise ». Aujourd'hui l'enseignant
-choisit entre deux formulations toutes faites — « Générique » et « Français écrit » — et s'il
-n'est ni l'un ni l'autre, **il prend la moins fausse**. C'est aussi le seul des trois blocs qui
-produit **ce que l'élève lit**.
+▣ **Le module de la palette énonce lui-même le principe** (`js/travaux-outils.js:118`) :
+*« permettre une couleur hors-palette tout en gardant la convention 12 couleurs prédéfinies »*.
+⮕ **L'écran neuf a pris la porte de sortie sans la maison.**
 
-⛔ **HORS DU LOT, et n'y touche pas** : les paliers de projection (bloc 2), le modèle de formule
-(bloc 1 — il ne contient aucun texte, **il n'y a rien à trouer**), les badges personnalisés
-(version ultérieure, arrêté par Grégoire).
+↻ **DEMANDE DE GRÉGOIRE** : *« Simplifier le choix des couleurs, et conserver le système
+prédéfini dans la palette pour monter des collections. »*
+
+⮕ **À faire** : le champ **Couleur** des sous-critères adopte le sélecteur de la palette — les
+douze pastilles, plus « Personnalisé… ».
+
+⛔ **NE DUPLIQUE PAS LE SÉLECTEUR.** Il existe. **Mesure s'il est appelable depuis Conception ;
+s'il ne l'est pas, extrais-le en UNE fonction appelée des deux côtés.** *Une définition, deux
+appels* — comme `detacherDeLaFamille`.
+⚠ **La liste des douze est UNE constante partagée, pas une copie.** ▣ **Si tu en trouves déjà
+deux copies dans le dépôt, dis-le : c'est le doublon d'origine, et il explique le reste.**
+⚠ **Les couleurs déjà choisies hors des douze restent affichées telles quelles.** ⛔ **On change
+le CHOIX, pas ce qui est enregistré.** *Tarir n'est pas réparer.*
 
 ---
 
-## ▣ LA PALETTE N'EST PAS À INVENTER — ELLE EST DÉJÀ DANS LE CODE
+## B · Une seule source de vérité pour les codes — et l'écran le DIT
 
-⚠⚠ **CORRECTION DU CADRAGE, mesurée le 3 septembre.** Le cadrage proposait dix badges. **Le
-bloc 3 n'en connaît pas dix.** `grep -n "^var JETON_" js/evaluation-enonces.js` rend **cinq**
-déclarations :
+### La règle, arrêtée par Grégoire
 
-| jeton | ce qu'il vaut | badge ? |
+> **« Il faut une SSOT. C'est maintenant la grille. »**
+> ⮕ Précisé par lui, et c'est la formulation qui fait foi :
+> **« Une grille analytique pourrait utiliser les mêmes codes. Donc les paramètres de la
+> palette sont INDÉPENDANTS de la grille. Mais dans une grille algorithmique, si l'on coche
+> "Utiliser ces sous-critères comme codes d'annotation", les paramètres de la palette sont en
+> LECTURE SEULE, dont la source est la grille. »**
+
+▣ **La SSOT n'est pas « un seul écran ». C'est UNE SEULE SOURCE PAR COPIE.**
+
+| la copie | qui commande | ce que la palette fait |
 |---|---|---|
-| `{critere}` | le nom du critère, tel qu'il est dans la grille | **oui** |
-| `{erreurs}` | le nombre d'erreurs | **oui** |
-| `{mots}` | le nombre de mots | **oui** |
-| `{points}` | la mention pondérée, avec son espace de tête, ou vide | **oui** |
-| `{s}` | « s » quand `{erreurs}` est au pluriel, vide sinon | ⛔ **NON** |
+| gouvernée par une grille (case cochée, `codesDepuisSousCriteres`) | **la grille, seule** | **lecture seule** — elle dit d'où viennent les codes |
+| sans grille | **le repli** (les dix, avec la personnalisation globale) | **éditable, comme aujourd'hui** |
 
-⛔ **`{s}` n'est PAS un badge.** C'est un accord grammatical qui suit `{erreurs}`, et le module
-le documente ainsi : *« un texte qui ne porte pas `{erreurs}` ne porte pas `{s}` non plus »*
-(`js/evaluation-enonces.js:349`). ⮕ **Il ne s'offre pas à la pose.** S'il doit apparaître, c'est
-comme conséquence de `{erreurs}`, jamais comme geste de l'enseignant.
-⚠ **Remesure cette liste** avant de coder : elle est le contrat du lot.
+⛔ **NE RETIRE PAS L'ÉDITION DU REPLI.** ▣ **Motif** : les dix portent les noms courts de
+Grégoire — « Accord GV », « Accord PP » — ses couleurs et son ordre, dans
+`personnalisationErreursFr` et `ordreErreursFr`. **Appliquer « SSOT = la grille » à la lettre
+lui retirerait la seule façon de les régler.** Le module le dit déjà
+(`js/codes-annotation.js:43`) : ce sont *« les clés globales que l'écran Annoter › palette
+continue de régler »*.
 
----
+### Ce qui manque, et c'est le travail
 
-## ↻ LA RÈGLE ARRÊTÉE PAR GRÉGOIRE — un champ n'offre que ce qui peut y valoir
+**Aujourd'hui la palette n'annonce rien.** Quand une copie est gouvernée par sa grille, elle
+affiche encore ses champs de nom et de couleur **comme s'ils comptaient**.
+⮕ **C'est exactement le silence que les huit énoncés ont passé deux jours à supprimer** : un
+écran qui laisse croire qu'un geste aura un effet.
 
-**Chaque champ n'offre que les badges qui peuvent valoir quelque chose dedans.**
+↻ **LA PHRASE, ARRÊTÉE PAR GRÉGOIRE — écris-la telle quelle :**
 
-▣ **Le cas qui l'a fait trancher** : « Aucune annotation » s'affiche *« quand la copie ne porte
-ni tampon ni erreur »* (`js/evaluation-enonces.js:173`). Y offrir `{erreurs}` proposerait de
-composer une phrase avec un nombre qui vaudra **toujours zéro**.
+```
+Les codes de cette copie viennent de sa grille « X ». Pour les modifier, ouvre la grille.
+```
 
-⮕ **C'est la même logique que tout ce qui a été livré depuis hier** : un écran n'annonce pas ce
-qui n'aura pas lieu. Un badge offert là où il ne peut rien valoir est un piège.
-
-⚠ **La correspondance champ → badges n'est PAS décidée.** Les quatre clés sont `decompte`,
-`priorite`, `concentre`, `aucune` (`js/evaluation-enonces.js:170-173`).
-⮕ **MESURE-LA** : lis ce que chaque énoncé reçoit réellement à l'appel, et **propose la table à
-Grégoire dans ton rapport**. ⛔ **Ne la devine pas, et ne l'implante pas avant qu'il l'ait vue**
-si tu as le moindre doute sur une case.
-
----
-
-## Ce que le geste doit être
-
-▣ **Le motif d'origine, dans les mots de Grégoire** : *« La page du critère algorithmique est
-vraiment très complexe, et je crains que cette complexité ne fasse fuir les utilisateurs. Elle
-est très codage entre guillemets. »* Son modèle : **la cellule de formule dans Numbers**, où les
-variables sont des pastilles qu'on manipule, pas du texte à taper.
-
-▣ **La preuve que ça règle une vraie erreur, et elle est de lui** : le 2 septembre, il a tapé
-`[service]` au lieu de `{service}`. Le texte avait l'air juste à l'écran, **et son élève aurait
-lu le crochet**. ⮕ **Un badge ne se tape pas, il se pose. Cette classe d'erreur disparaît.**
-
-⛔ **LE CLIC EST LE CHEMIN PRINCIPAL**, pas le glissé. ▣ **Motif, arrêté au cadrage** : Grégoire
-travaille sur iPad, et le glisser-déposer au doigt n'est pas celui de la souris. **Un clic sur
-le badge l'insère au curseur.** Le glissé, s'il existe, est un confort — jamais le seul chemin.
-
-⚠ **Le champ reste éditable à la main.** Quelqu'un qui tape `{erreurs}` au clavier doit
-continuer d'obtenir le même résultat. **On ajoute un chemin, on n'en ferme aucun.**
+▣ **Motif de son choix, en une ligne** : *quelqu'un qui lit ça veut agir, pas comprendre
+l'architecture.* Une seconde formulation, qui expliquait ce que l'écran sert encore, a été
+écartée pour cette raison.
+⚠ **« X » est le nom réel de la grille.** ⛔ **Ne mets pas d'identifiant.**
+⮕ **Ce que tu décides seul** : la forme (bandeau, encart), et si les champs sont grisés ou
+masqués. ⚠ **Dis ce que tu as choisi.**
 
 ---
 
-## ⛔ CE QUI NE DOIT PAS BOUGER — trois garde-fous
+## C · Les cases « Pratiques compatibles » partent, et le badge dit enfin quelque chose de vrai
 
-**1. Les textes déjà écrits continuent de fonctionner, tels quels.** Les grilles existantes
-portent des phrases avec ou sans jetons. ▣ *Tarir n'est pas réparer* — et ici **il n'y a même
-rien à tarir** : le format du gabarit ne change pas. ⛔ **Ce lot ne touche AUCUNE donnée
-enregistrée.** `critere.enonces` reste `{cle: texte}`, du texte libre.
+⛔ **VOLET DÉTACHABLE. Si le lot devient trop gros, fais A et B, commite, et dis que C attend.**
 
-**2. Le rendu final ne change pas d'un caractère.** `engendrer...` continue de produire les
-mêmes phrases pour les mêmes gabarits. ▣ **Témoin exigé** : la sentinelle existante des énoncés
-passe **sans être modifiée**. Si tu dois la toucher, tu as changé le comportement — **arrête-toi
-et dis-le.**
+### Ce qui est mesuré
 
-**3. La règle du jeton sans valeur existe déjà, et elle est fine.** *« Un jeton que l'appel ne
-fournit pas est retiré du texte, jamais rendu littéralement : un élève ne doit pas lire
-`{critere}` sur son PDF »* (`js/evaluation-enonces.js:44`). ⛔ **Réutilise-la. Ne la réinvente
-pas.**
+▣ **Les cases ne font RIEN.** `pratiquesCompatibles` rend **29 lectures hors `grilles.js`**, et
+le motif qui cherche un filtre, une garde ou un refus autour d'elles rend **0**. Ce sont des
+lectures d'affichage et de transport (import/export).
+▣ **Confirmé par Grégoire** : *« Les cases ici sont sans conséquence. Elles ne font que nommer
+l'intention de l'auteur. Elles pourraient disparaître et ça n'aurait aucun effet. »*
+⚠ **Une fonction `filtrerParPratique` existe** (`js/gabarits-utils.js:88`) — **personne ne
+l'appelle pour bloquer**. Quelqu'un avait prévu ce filtrage. **Mesure ses appelants avant de
+décider de son sort**, et applique les trois issues de `CLAUDE.md`.
 
----
+▣ **CINQ OBJETS PORTENT CES CASES, pas seulement les grilles** :
+`lirePratiquesSelectionnees` est appelé pour **`grille`, `cartouche`, `echelle`, `objectifs`,
+`production`**. Le badge est rendu sur les mêmes, plus la liste des productions.
 
-## Ce qui remplace la petite note du bas
+### ↻ CE QUE GRÉGOIRE A TRANCHÉ
 
-Le bloc porte aujourd'hui, sous les quatre champs, une phrase qui EXPLIQUE les jetons :
-*« Écris {critere} là où le nom de ce critère doit apparaître, {erreurs} pour le nombre
-d'erreurs et {mots} pour le nombre de mots. »* (`js/grilles.js:3501-3506`).
+> **« Il serait mieux de les retirer. »** puis, sur le périmètre : **« Tout d'un coup. Les
+> grilles sont indépendantes des pratiques de toute façon. »**
 
-⮕ **Si les badges se posent, cette phrase n'a plus à apprendre une syntaxe.** Ce qui doit
-survivre, en revanche, et que la note dit déjà : *« Un repère que la phrase n'a pas à remplir
-disparaît proprement. Une zone laissée VIDE fait taire l'énoncé. »*
-⚠ **Ces deux comportements sont invisibles autrement. Ne les perds pas en retirant la note.**
+1. **La SAISIE part des cinq objets.** L'écran n'offre plus de cocher une pratique.
+2. **Les grilles gagnent un badge déduit** — voir ci-dessous.
+3. **Les quatre autres objets perdent leur badge**, sans remplaçant. ▣ **Accepté par lui** :
+   rien ne permet de déduire une pratique d'une échelle ou d'une cartouche.
+
+### ⛔ CE QUI NE DOIT PAS BOUGER — le champ reste dans les données
+
+**On retire la SAISIE, pas le CHAMP.** `pratiquesCompatibles` vit dans ses grilles enregistrées,
+et il **voyage dans les imports-exports** (`js/import-export.js`, validé en `arrayStrings`).
+⛔ **Ne le supprime d'aucune donnée. Ne l'écris plus, c'est tout.** ⚠ **Le schéma d'import et de
+partage continue de l'accepter** — une grille reçue d'un collègue en version antérieure le
+portera. *Tarir n'est pas réparer.*
+
+### Le badge neuf — sur les grilles seulement
+
+**Il ne nomme plus une pratique. Il nomme la COMPOSITION de la grille**, déduite des types de
+ses critères. ▣ **Décision de Grégoire** : *« Le type quand il est unique, "Mixte" sinon. »*
+
+| la grille | le badge |
+|---|---|
+| tous ses critères sont algorithmiques | **ALGO** |
+| tous holistiques | **HOLIS** |
+| tous analytiques | **ANALY** |
+| plusieurs types | **MIXTE** |
+| aucun critère | *(rien)* |
+
+⚠ **Les libellés exacts sont à Grégoire** — ceux du tableau sont une proposition. **Montre-lui
+ce que tu écris avant de commiter si tu t'en écartes.**
+
+▣ **Motif, et il est mesuré à l'écran** : **Grégoire encode déjà cette information à la main
+dans ses noms de grilles** — « G5 FR-**HOLIS** A26 », « G5 FR-**ALGO** A26 », « G1 FR-**ALGO
+seul** A26 ». ⮕ **Le badge le dispense de le faire, et il dit vrai même quand un type de critère
+change après coup.**
+⮕ **C'est l'esprit de tout ce qui a été livré aujourd'hui : l'écran annonce ce qui EST, pas ce
+qu'on a déclaré.**
+
+⚠ **`genererBadgesPratiques` est appelé sur six sites** (3 dans `grilles.js`, et un dans
+`cartouches.js`, `echelles.js`, `objectifs.js`, `productions-liste.js`). ⮕ **Ne le détourne
+pas** : les cinq autres objets n'ont pas de critères. **Une fonction neuve pour les grilles, et
+les appels des autres objets rendent une chaîne vide.**
 
 ---
 
 ## Fini quand
 
-**Un enseignant compose la phrase que ses élèves liront sans jamais taper une accolade.**
+**Un enseignant sait toujours d'où viennent les codes qu'il voit, et n'a jamais deux endroits
+pour régler la même chose.**
 
-▣ **Le témoin** : dans le bloc « Modèle de rétroaction » d'un critère algorithmique, chacun des
-quatre champs porte ses badges posables, et un clic sur un badge l'insère au curseur.
-▣ **Le témoin négatif, qui compte autant** : une grille existante ouverte après ce lot affiche
-**exactement les mêmes textes qu'avant**, et le PDF engendré est identique au caractère près.
-▣ **Le témoin du piège évité** : le champ « Aucune annotation » n'offre pas de badge qui vaudrait
-toujours zéro.
+▣ **Le témoin** : sur une copie dont la grille a la case cochée, la palette affiche la phrase et
+n'édite plus. Sur une copie sans grille, elle édite exactement comme avant.
+▣ **Le témoin négatif, qui compte autant** : les dix codes de repli restent **modifiables**, et
+la personnalisation de Grégoire (noms courts, couleurs, ordre) est intacte au caractère près.
+▣ **Le témoin du sélecteur** : `grep -c "type=\"color\"" js/grilles.js` rend **0**, et le
+compte des appels au sélecteur de la palette a augmenté d'autant.
+▣ **Le témoin du volet C** : `grep -rn "lirePratiquesSelectionnees" js/` ne rend plus que sa
+définition — **zéro appelant**. ⚠ **Et le témoin INVERSE, qui compte autant** :
+`grep -rn "pratiquesCompatibles" js/import-export.js` rend **le même compte qu'avant**. **Si
+celui-là a bougé, tu as touché au transport des données.**
 
 ---
 
 ## L'ordre
 
-1. **Rapporte le verdict de GitHub sur `1.113.0`** (rituel d'ouverture, §2.1), et **dis où en
-   est le lot d'audit `5887532e`** — commité, poussé ?
-2. **Lis le cadrage** avant de coder.
-3. **Mesure la correspondance champ → badges**, et rends-la en tableau **avant** de l'implanter.
-4. Ce lot touche `js/` ⮕ **bump du bloc de jetons d'`index.html`**.
-5. `cd tests && npm run test:unit` pour travailler ; **`npm test` complet avant de dire que
+1. **Rapporte le verdict de GitHub sur `1.113.0`**, et **dis où en est la pile des 5 commits**.
+2. **A d'abord** (le sélecteur) — c'est le plus petit, et il ne touche pas la logique.
+3. **Puis B.**
+4. **C en dernier, et seulement si le lot reste tenable.** ⛔ **Il touche cinq écrans : c'est
+   celui qui peut faire déborder.** Mieux vaut trois lots vérifiables qu'un lot que Grégoire ne
+   peut pas parcourir.
+5. Ce lot touche `js/` ⮕ **bump du bloc de jetons d'`index.html`**.
+6. `cd tests && npm run test:unit` pour travailler ; **`npm test` complet avant de dire que
    c'est prêt.** ⚠ Vitest se lance **depuis `tests/`**.
-6. ⛔ **Tu commites, puis tu t'arrêtes.** Pas de release, pas de push, pas de verdict au jeton :
-   Grégoire regarde l'écran d'abord. ▣ **Ce lot touche ce que ses élèves lisent** — son coup
-   d'œil n'est pas une formalité ici.
-7. **Ce fichier se commite avec ton lot.** Nomme tes fichiers ; pas de `git add -A`.
+7. ⛔ **Tu commites, puis tu t'arrêtes.**
+8. **Ce fichier se commite avec ton lot.** Nomme tes fichiers ; pas de `git add -A`.
 
-⮕ **CE QUE GRÉGOIRE DOIT ALLER VOIR** : Conception › une grille avec un critère
-**algorithmique** › le bloc « Modèle de rétroaction ». Il doit pouvoir **cliquer un badge et le
-voir apparaître dans la phrase**, sans rien taper. ⚠ **Et vérifier que ses propres textes sont
-intacts.**
+⮕ **CE QUE GRÉGOIRE DOIT ALLER VOIR** : ouvrir la palette des codes sur une copie **dont la
+grille a la case cochée** — elle doit afficher la phrase et ne plus éditer. Puis sur une copie
+**sans grille** — elle doit éditer comme avant, avec ses noms courts intacts. ⚠ **Ne rien
+modifier**, lire suffit.

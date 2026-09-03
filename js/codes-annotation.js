@@ -187,6 +187,18 @@ function _repli() {
 // La grille — ses sous-critères sont ses codes
 // ---------------------------------------------------------------------
 
+// Ce qu'un code peut être pour vivre dans un identifiant `errfr_<code>`, dans un
+// attribut `data-*` et dans un sélecteur CSS : lettres, chiffres, tiret,
+// souligné, vingt caractères au plus (la borne des deux schémas). Relecture
+// croisée du 3 sept. 2026 : `sc.code` est un champ libre du gabarit ; un « " »
+// dedans cassait un attribut de la palette et faisait lever le sélecteur des
+// compteurs. Un code qui ne passe pas n'est pas posable — il ne devient pas
+// un identifiant approximatif.
+var CODE_VALIDE = /^[A-Za-z0-9_-]{1,20}$/;
+// Une couleur est hexadécimale (#rgb, #rrggbb, #rrggbbaa) ou n'est pas :
+// elle finit dans un `style="background:…"`.
+var COULEUR_VALIDE = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+
 function _depuisSousCriteres(critere) {
     var vus = {};
     var liste = [];
@@ -194,9 +206,10 @@ function _depuisSousCriteres(critere) {
     scs.forEach(function(sc) {
         if (!sc || !(Number(sc.ponderation) > 0)) return;
         var numero = (sc.code === undefined || sc.code === null) ? '' : String(sc.code).trim();
-        // Sans numéro, rien à écrire sur la copie ; un numéro en double, le
-        // premier gagne — deux codes de même identifiant seraient indiscernables.
-        if (!numero || vus[numero]) return;
+        // Sans numéro, ou un numéro qui ne peut pas vivre dans un identifiant :
+        // rien à écrire sur la copie ; un numéro en double, le premier gagne —
+        // deux codes de même identifiant seraient indiscernables.
+        if (!numero || !CODE_VALIDE.test(numero) || vus[numero]) return;
         vus[numero] = true;
         var nom = (typeof sc.nom === 'string' && sc.nom.trim()) ? sc.nom.trim() : 'Code ' + numero;
         liste.push({
@@ -204,7 +217,7 @@ function _depuisSousCriteres(critere) {
             code: numero,
             numero: numero,
             nom: nom,
-            couleur: (typeof sc.couleur === 'string' && sc.couleur) ? sc.couleur
+            couleur: (typeof sc.couleur === 'string' && COULEUR_VALIDE.test(sc.couleur)) ? sc.couleur
                 : COULEURS_DEFAUT[(liste.length) % COULEURS_DEFAUT.length],
             retroaction: (typeof sc.retroaction === 'string') ? sc.retroaction : '',
             source: 'grille'
