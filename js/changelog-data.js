@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.113',
+            couleur: 'vert',
+            titre: '« Décloner » : un seul mot, et le geste là où on le cherche',
+            items: [
+                '<strong>« Détacher de sa famille de clones » s\'appelle désormais « Décloner ».</strong> Le mot que tu cherchais dans l\'application y est maintenant, dans les boutons comme dans l\'aide.',
+                '<strong>L\'Inspecteur d\'un bloc cloné offre « Décloner »</strong>, à côté de « N instances · Voir les autres ». Là où tu vois les instances, tu peux en sortir — sans passer par le menu Actions.',
+                '<strong>Rien n\'est supprimé.</strong> Le bloc devient indépendant : il cesse de suivre son original, et son contenu ne bouge pas. Sur l\'original, ce sont tous ses clones qui deviennent indépendants.',
+                'Le menu Actions garde « Décloner la sélection » pour plusieurs blocs à la fois, et l\'aide de la carte nomme les deux chemins.'
+            ]
+        },
+        {
             version: '1.112',
             couleur: 'vert',
             titre: 'Supprimer une échelle, c\'est la remplacer',
