@@ -54,7 +54,11 @@ test('texte troué · chaque zone offre ses repères, et « Aucune annotation »
         [...document.querySelectorAll('#listeCriteres .groupe-form:has(textarea[data-enonce-cle])')].map(g => ({
             cle: g.querySelector('textarea').dataset.enonceCle,
             reperes: [...g.querySelectorAll('[data-action="insererRepereEnonce"]')].map(b => b.dataset.jeton),
-            visibles: [...g.querySelectorAll('[data-action="insererRepereEnonce"]')].every(b => b.offsetParent !== null)
+            visibles: [...g.querySelectorAll('[data-action="insererRepereEnonce"]')].every(b => b.offsetParent !== null),
+            // La palette AVANT l'établi (Grégoire, 3 sept. après-midi) : la rangée
+            // précède la zone, et l'aide suit la zone — c'est le champ qu'elle décrit.
+            rangeeAvantZone: !!(g.querySelector('.reperes-enonce').compareDocumentPosition(g.querySelector('textarea')) & Node.DOCUMENT_POSITION_FOLLOWING),
+            aideApresZone: !!(g.querySelector('textarea').compareDocumentPosition(g.querySelector('small')) & Node.DOCUMENT_POSITION_FOLLOWING)
         })));
     console.log('OFFERTS →', JSON.stringify(offerts));
     const parCle = Object.fromEntries(offerts.map(o => [o.cle, o.reperes]));
@@ -63,6 +67,8 @@ test('texte troué · chaque zone offre ses repères, et « Aucune annotation »
     expect(parCle.concentre).toEqual(['{critere}']);
     expect(parCle.aucune).toEqual(['{critere}']);
     expect(offerts.every(o => o.visibles), 'les repères sont à l\'écran').toBe(true);
+    expect(offerts.every(o => o.rangeeAvantZone), 'la rangée « Poser » précède la zone').toBe(true);
+    expect(offerts.every(o => o.aideApresZone), 'l\'aide reste attachée au champ, sous lui').toBe(true);
     expect(offerts.flatMap(o => o.reperes)).not.toContain('{s}');
 });
 
