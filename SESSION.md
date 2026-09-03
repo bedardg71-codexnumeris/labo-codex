@@ -81,6 +81,11 @@
        changelog (nomme l'ancien mot une fois), release 1.113.0 (minor : geste nouveau
        + renommage), Vitest après le commit du bump, puis verdict au jeton et push par
        `scripts/pousser.sh`.
+     ↻ 9 h 16 : POUSSÉ — release 1.113.0 (`324421db`, build 0903-0906), jeton Playwright
+       vert FRANC sur ce SHA (code 0, 0 échec connu, 0 instable), hook Vitest vert. GitHub :
+       run 33760167678 lancé sur `324421db` (à lire à l'ouverture de la prochaine session,
+       §2.1) ; le run 33746552531 sur `e028695b` (1.112.0) est passé au VERT entre-temps.
+       `origin/main..main` = 0.
      ===================================================================== -->
 
 <!-- =====================================================================
