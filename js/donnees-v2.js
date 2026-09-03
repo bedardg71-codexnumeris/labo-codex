@@ -1712,24 +1712,23 @@
 
     /**
      * Supprime définitivement une production de la bibliothèque
+     *
+     * #649 (3 septembre 2026) — le garde `typeof retirerProductionDeLaBibliotheque
+     * === 'function'` testait un symbole que rien n'a jamais déclaré : la fonction
+     * réelle s'appelle `retirerDeLaBibliotheque` (productions-bibliotheque.js). Son
+     * « repli » était donc l'unique chemin depuis toujours, et le jour où quelqu'un
+     * aurait déclaré le nom attendu, la suppression aurait basculé en silence vers
+     * une sémantique que personne n'avait comparée. Un seul chemin, nommé, par la
+     * file (#599) — et la production sort aussi des dossiers de classement (#327),
+     * ce que le repli ne faisait pas.
      */
     async function supprimerProductionDefinitivement(productionId) {
-        // Retirer de la bibliothèque
-        if (typeof retirerProductionDeLaBibliotheque === 'function') {
-            await retirerProductionDeLaBibliotheque(productionId);
-        } else {
-            // Fallback: suppression directe
-            try {
-                let productions = db.getSync('bibliothequeProductions') || [];
-                productions = productions.filter(p => p.id !== productionId);
-                await db.set('bibliothequeProductions', productions);
-            } catch (e) {
-                console.error('[donnees-v2] Erreur suppression production:', e);
-                return false;
-            }
+        try {
+            return await retirerDeLaBibliotheque(productionId);
+        } catch (e) {
+            console.error('[donnees-v2] Erreur suppression production:', e);
+            return false;
         }
-
-        return true;
     }
 
     // =========================================================================

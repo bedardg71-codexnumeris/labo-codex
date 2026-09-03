@@ -1,166 +1,229 @@
-# Consigne — la note dit sur quoi elle porte *(énoncé 5, #674)*
+# Consigne du jour — les suppressions disent vrai *(énoncé 8, volets A · C · D)*
 
-> **Écrite le 2 septembre 2026 en soirée, par Cowork, avec Grégoire.**
-> **Promue consigne du jour le 2 septembre au soir**, le lot de la CI étant clos et vert.
+> **Écrite le 2 septembre 2026 à 21 h 30 (heure de Grégoire), par Cowork, POUR LA NUIT.**
+> **Application au moment de l'écriture : `1.111.0`, build `0902-1959`.**
+> Elle **remplace** la consigne écrite plus tôt ce soir, mise de côté dans
+> `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-02-soir.md`.
+> ⛔ **Ne la lis pas comme un complément : elle la contredit sur le volet C.**
 >
-> ▣ **État à la promotion, mesuré** : `HEAD` = `9fe13749`, **tout est poussé**. Run
-> `33678001180` — **Vitest 437 fichiers / 4724 tests vert · Playwright 233 passés, 0 échoué,
-> 0 instable en 27,4 min**. ⚠ **Ce vert porte sur 233 essais, pas 239** : six sont déclarés non
-> jugeables sous WebKit Linux, et l'étape de garde les nomme. **C'est la première fois depuis le
-> 31 août que le filet juge de bout en bout.**
+> ▣ **État à l'écriture, mesuré** : `HEAD` = `1402a17c` (2026-09-02 20:00:57 -0400), **CI verte**.
+> `git rev-list --count origin/main..HEAD` rend **0** — témoin, `HEAD..origin/main` rend **0**
+> lui aussi, et `git rev-list --count HEAD` rend **4457** : les deux branches sont au même
+> point, et la commande sait compter.
 >
-> ⚠ **Remesure avant d'exécuter** (règle 1). Les numéros de ligne ci-dessous ont été relevés le
-> 2 septembre au soir, et **ils avaient déjà bougé depuis la fiche du 1er** — preuve qu'il faut
-> les rejouer, pas les suivre.
->
-> ⛔ **OUVRE UNE SESSION NEUVE POUR CE LOT.** Il touche le calcul d'une note. Cette consigne est
-> écrite pour être lue à froid, par quelqu'un qui ne sait rien du reste de la journée.
->
-> ⚠ **Quatre `.md` non commités traînent dans `plans de travail/` et un dans la racine
-> (`PROTOCOLE.md`, règle 7)** : ils sont à Grégoire, **ne les commite pas avec ton lot.**
+> ▣ **Six notes non suivies dans `plans de travail/` sont à Grégoire et à Cowork.
+> Ne les commite pas.** Ce fichier-ci, oui : il est la spécification du lot (règle 6).
 
 ---
 
-## Le mandat
+## ⚠ LIS CECI AVANT TOUT : C'EST UNE SÉANCE DE NUIT
 
-**Énoncé 5 d'`OBJECTIF-COHORTE-1.md`** : *« Aucune note remise ne repose sur une pondération
-incomplète sans le dire. Un critère laissé sans niveau ne peut pas disparaître en silence et
-faire monter la note. »*
+**Grégoire dort. Il ne regardera aucun écran avant le matin.**
 
-⮕ **C'est le seul défaut ouvert que des utilisateurs ont dans les mains aujourd'hui.** Requalifié
-le 1er septembre : ce n'est plus une prévention pour la cohorte qui arrive, c'est une
-**réparation** pour des gens déjà en place, qu'on ne peut ni sonder ni joindre.
+⮕ **Conséquence, et elle n'est pas négociable** : `PROTOCOLE.md` règle 6, forme 4 —
+*une seule livraison par séance, et il regarde avant.* La nuit, « il regarde avant » ne
+peut pas avoir lieu. Donc :
 
-## Le défaut — et il ne fait PAS ce que son titre laisse croire
+- ⛔ **Aucune release. Aucun push. Aucun bump de version.**
+- ⛔ **Aucun verdict Playwright au jeton** : il se prend APRÈS son coup d'œil, jamais avant.
+- ⮕ **Tu commites, et tu t'arrêtes.** Ton rapport l'attend au réveil.
+- ⮕ **Et tu écris, à la fin, CE QU'IL DOIT ALLER VOIR À L'ÉCRAN** : quel onglet, quel geste,
+  ce qui devrait être différent. C'est sa façon de vérifier, et rien ne la remplace.
 
-⚠⚠ **Il ne baisse pas la note. Il la MONTE.** Mesuré sous WebKit, grille 50/30/20 :
+⚠ **Le motif, mesuré le 2 septembre** : quatre versions sont parties avant midi et aucune
+n'avait été regardée par lui. À 8 h, il ne savait plus où il en était dans son propre projet.
 
-| état | note | niveau |
-|---|---|---|
-| les trois critères renseignés | **84,0 %** | M |
-| le critère à 20 % perd son niveau | **95,0 %** | **E** |
-
-⮕ **Onze points et un niveau de plus.** Une note trop basse se conteste ; **une note trop haute
-passe.** C'est ce qui la rend indétectable à la relecture.
-
-### Mécanisme 1 — critère par critère
-
-`calculerNote()`, `js/evaluation-calcul.js`. Un `if (niveau)` saute le critère, qui quitte le
-numérateur **et** `ponderationTotal` ; la division finale renormalise les pondérations restantes
-à 100 %.
-
-**Relevé le 2 septembre au soir** — `grep -rn "ponderationTotal" js/` :
-l. **831** (init à 0) · l. **864** (`+= ponderation`) · l. **876** (`if (… > 0)`) · l. **878**
-(la division). ▣ **Aucune ne le compare à 1.** ⚠ La fiche #674 en annonçait *trois* aux lignes
-811/844/856 : **le compte et les lignes ont changé. Rejoue le grep.**
-
-### Mécanisme 2 — tout d'un coup, et il est déjà chez des gens
-
-L'échelle est choisie, mais aucun de ses niveaux n'a de `valeurCalcul` : `valeurNumeriqueDuNiveau`
-rend `null` pour tous, le map des valeurs reste vide, **tous** les critères sortent du total, et
-`ponderationTotal` tombe à **0**.
-⮕ **C'est le cas des huit échelles disciplinaires** (32 niveaux en `valeur:`, aucun en
-`valeurCalcul:`). Le semis est tari depuis le 1er septembre — **mais les copies restent dans la
-base de quiconque en avait adopté une avant.**
-
-### ▣ ET LE CRITÈRE NE DISPARAÎT PAS QUE DE LA NOTE — IL DISPARAÎT DU DOCUMENT
-
-`_collecterCriteresSauv` (`js/evaluation-sauvegarde.js`) ne pousse un critère que `if (niveau)` :
-il est **absent du tableau `criteres[]` enregistré**, et `construireCriteres` mappe ce tableau.
-⮕ **Le PDF remis ne porte aucune trace qu'un critère existait.** Une grille amputée est
-indistinguable d'une grille qui n'a jamais eu ce critère.
+⛔ **Et la règle qui commande tout le reste** : *jamais un numéro de fiche sans sa phrase en
+français.* « #647 » ne lui dit rien. « L'avertissement qui annonce une perte qui n'a pas
+lieu » lui dit tout.
 
 ---
 
-## La forme du correctif — TRANCHÉE, et fermée
+## Le mandat — le dernier énoncé encore ouvert
 
-⛔ **PAS d'état « brouillon / conclue ».** Écarté par Grégoire le 1er septembre, **avec les
-autres formes envisagées en séance. Ne les rouvre pas.** Motif : ce serait ajouter un état de
-flux de travail — un geste de plus, un champ de plus, une intention à deviner — pour une
-question qui n'en demande aucune.
+*« Ce qu'un utilisateur détruit, il l'a voulu ; ce qu'il garde, il le retrouve. Les messages
+de suppression disent vrai, et la portée d'une suppression est celle qu'on annonce. »*
 
-⮕ **CE QUI MANQUE N'EST PAS UN ÉTAT, C'EST UNE PORTÉE.** `noteFinale` circule sans dire **sur
-quoi elle porte**. Or `ponderationTotal` est **déjà calculée à chaque appel** de `calculerNote()`,
-puis **jetée**.
-
-⮕ **La persister à côté de `noteFinale`.** Chaque consommateur décide alors pour lui-même.
-
-**Trois propriétés qui font que c'est celle-là et pas une autre :**
-1. aucun geste nouveau pour l'enseignant ;
-2. aucune intention à deviner ;
-3. ▣ **valable RÉTROACTIVEMENT** — la portée se recalcule sur les évaluations déjà en base, depuis
-   leur `criteres[]` et leur grille. **C'est cette propriété qui a écarté l'état de flux**, qui
-   n'aurait jamais pu réparer l'existant.
-
-## Les deux portes — le refus va au LIVRABLE, jamais à la saisie
-
-⛔ **Aucun refus pendant la saisie.** Une évaluation en cours est forcément incomplète ; bloquer
-serait insupportable.
-
-· **`sauvegarderEvaluation()` et `sauvegarderEvaluationModifiee()`** (`js/evaluation-sauvegarde.js`).
-  ▣ **Le patron de refus y existe déjà** : `_validerReferencesSauv` (défini l. **151**, appelé
-  l. **388**) rend `false` et sort. **Calque-toi dessus, n'invente pas un second patron.**
-· **`js/travaux-export-pdf.js:707`** — **seul appelant** de `construireFeedback`
-  (`js/synthese-retroaction-data.js:86`), donc **porte unique** du PDF de l'élève.
-
-⮕ **Les deux portes peuvent refuser franchement.** Décision de Grégoire, 1er septembre :
-*« un critère dont on ne tient pas compte n'est pas un critère non noté — c'est une grille
-différente. »* Une couverture sous 100 % est **toujours** un défaut, jamais une intention. **Il
-n'y a donc rien à modéliser du côté "critère délibérément écarté".**
-
-## ⚠ CE QUE LE CORRECTIF DOIT REGARDER EN PLUS
-
-**L'auto-save écrit `noteFinale` en base et CRÉE l'évaluation** dès qu'un seul critère porte un
-niveau (`_autoSauvegarderCriteres`). ⮕ **La portée doit être écrite par le même chemin que la
-note**, sans quoi elle manquerait précisément sur les évaluations nées de l'auto-save — c'est-à-dire
-sur la majorité.
-
-▣ **Et il y a maintenant QUATRE chemins qui écrivent `noteFinale`**, pas trois : le lot #572 du
-2 septembre a montré qu'un quatrième avait été oublié. `grep -rn "noteCalculeeCourante" js/` les
-rend tous. **La portée doit accompagner la note aux quatre.**
+▣ **C'est le seul des huit qui reste.** Cinq sont finis, deux sont éprouvés par Grégoire.
 
 ---
 
-## ⛔ PÉRIMÈTRE — DÉCISION PÉDAGOGIQUE DÉFINITIVE
+## ⚠⚠ CE QUE LA REMESURE DE COWORK A TROUVÉ CE SOIR — ET QUI CHANGE LE LOT
 
-**Les notes d'A2025 et d'H2026 ne sont pas rouvertes.** Elles sont remises, les élèves sont rendus
-ailleurs dans leur parcours. **Ce n'est pas un oubli.** ⛔ Ne propose ni de les recompter, ni de les
-corriger, ni de les signaler. **Seul l'automne 2026 compte.**
+*Règle 1(b) de `PROTOCOLE.md` : une connaissance transportée se remesure avant usage.
+La consigne écrite plus tôt ce soir transportait une mesure du 31 août au MATIN. Elle
+était périmée depuis le 31 août à 14 h 13.*
 
-## ⚠ CE QUI EST DÛ PAR GRÉGOIRE, ET QU'IL FAUT LUI DEMANDER
+### ▣ La moitié du volet C est DÉJÀ FAITE — ne la refais pas
 
-**Les mots que l'élève lira.** Le comportement est tranché — le PDF refuse de conclure et **nomme**
-les critères sans niveau — **mais la formulation ne l'est pas.** ⮕ **Ne l'invente pas.** Propose-lui
-deux ou trois phrases exactes et laisse-le trancher : c'est du texte que ses élèves reçoivent.
+`git log -1 -L 1170,1180:js/donnees-v2.js` rend **`183b515b`, 31 août 14:13:38 -0400,
+« fix(#647): la modal annonçait une perte qui n'a pas lieu, et taisait une survivance qui
+a lieu »**.
+
+⮕ **`verifierDependancesCartouche` (`js/donnees-v2.js:1137`) dit déjà vrai aujourd'hui.**
+Elle mesure la survivance dans l'ancrage au lieu de la supposer, et elle annonce, mot pour
+mot : *« Retrait de la bibliothèque partagée seulement : la cartouche reste attachée à la
+grille « X ». »* et *« N évaluation(s) l'emploient — leurs rétroactions restent intactes. »*
+
+⛔ **N'y touche pas.** Si tu « corriges » ce chemin, tu défais un correctif livré.
+
+### ▣ Mais il y a un SECOND chemin, et le problème y est PIRE que ce qu'on croyait
+
+`grep -rn "supprimerCartoucheDefinitivement" js/ index.html` rend **deux corps de fonction**,
+pas deux appels d'une seule :
+
+| chemin | fichier | ce qu'il écrit | ce qu'il annonce |
+|---|---|---|---|
+| onglet **Données** | `js/donnees-v2.js:1667` | la bibliothèque **seulement** | ✅ la vérité, depuis `183b515b` |
+| **Conception › cartouches** | `js/cartouches.js:4753` | **l'ancrage `cle('cartouches_<grilleId>')` ET la bibliothèque** | ❌ « Cette action est irréversible. » — rien d'autre |
+
+▣ **Témoin du périmètre** : le bouton qui l'appelle est à `js/cartouches.js:4097`
+(`action: 'supprimerCartoucheDefinitivement'`), et un troisième chemin existe à côté,
+`supprimerCartoucheDeBibliothequePartagee` (`js/cartouches.js:4794`).
+
+⚠⚠ **Ce ne sont donc pas deux messages différents pour un même geste : ce sont deux gestes
+de portées RÉELLEMENT différentes, dont un seul le dit.** Le chemin de Conception détruit
+la cartouche partout, et ne l'annonce pas. Le texte exact qu'il affiche aujourd'hui, à citer
+dans ton rapport avant de le remplacer :
+
+```
+Supprimer définitivement la cartouche «NOM» ?
+
+Cette action est irréversible.
+```
+
+⮕ **C'est un `confirm()` natif** (`js/cartouches.js:4761`), pas une modale de l'application.
+
+⚠ **REMESURE-LE TOI-MÊME.** Ces lignes ont bougé une fois entre le 31 août et ce soir.
+**Chaque `grep` de cette consigne est à rejouer, pas à croire.**
 
 ---
 
-## L'ordre du travail — reproduire, puis corriger
+## Volet C — le second chemin cesse de se taire *(#647, moitié restante)*
 
-1. **Rejoue les deux mécanismes** avant de toucher quoi que ce soit, et montre le rouge. Le
-   témoin du haut de fiche (84 % → 95 %) est reproductible ; le second l'est avec une échelle
-   sans `valeurCalcul`.
-2. **Persiste la portée**, aux quatre chemins d'écriture.
-3. **Les deux portes**, sur le patron existant.
-4. **Une sentinelle** dont le périmètre se DÉDUIT du dépôt — *aucun chemin n'écrit `noteFinale`
-   sans sa portée*. ⚠ **Pas une liste de fichiers tapée à la main** : c'est la faute exacte de la
-   sentinelle #572, verte pendant que le défaut vivait.
+⮕ **Le travail** : `supprimerCartoucheDefinitivement` de `js/cartouches.js` annonce la
+portée qu'elle a réellement — la cartouche part **de la grille et de la bibliothèque
+partagée**, partout — avant le geste.
+
+⚠ **Décide seul de la forme** (`confirm()` conservé ou modale de l'application) : c'est
+technique, ça se tranche par une mesure de ce que fait le reste de l'écran. **Dis ce que tu
+as choisi et pourquoi.**
+
+⛔ **N'ÉLARGIS NI NE RESTREINS AUCUNE PORTÉE.** Tu ne changes pas ce qui est supprimé.
+Tu changes ce qui en est dit.
+
+⚠ **Et vérifie le troisième chemin** (`supprimerCartoucheDeBibliothequePartagee`) : s'il ne
+retire que de la bibliothèque, son texte doit le dire aussi. **Corriger un chemin sur trois
+laisserait les deux tiers du silence en place.**
+
+---
+
+## Volet D — un garde mort *(#649)*
+
+`js/donnees-v2.js:1718` teste `typeof retirerProductionDeLaBibliotheque === 'function'`.
+
+▣ **Remesuré ce soir** : `grep -rn "retirerProductionDeLaBibliotheque" js/` rend **2**
+occurrences — le garde (1718) et son propre appel (1719). **Aucune déclaration.**
+▣ **Témoin, le motif trouve bien ce qui existe** : `retirerPratiqueDeLaBibliotheque` rend
+**5**. Le 2 mesure donc une absence réelle, pas un motif cassé.
+
+⮕ **Rassurant** : le repli écrit `'bibliothequeProductions'`, la clé canonique. Aucun
+décalage aujourd'hui.
+⚠ **Latent** : le jour où quelqu'un déclare une fonction de ce nom, le chemin bascule **en
+silence**. Un garde mort est une bascule armée.
+⮕ **Remède** : retirer le branchement mort, appeler directement le chemin réel.
+⚠ **Zéro symptôme ⮕ c'est le DERNIER des trois**, et il ne justifie rien à lui seul.
+
+---
+
+## Volet A — la copie d'un élève : dire la portée réelle *(#560 résiduel)*
+
+↻ **TRANCHÉ PAR GRÉGOIRE le 2 septembre.** Quand on supprime définitivement la copie d'un
+élève, **TOUT ce qui touche le couple (cet élève, cette production) part** — l'originale,
+les reprises, l'évaluation d'un fichier réimporté.
+
+▣ **Donc le comportement actuel du code est le BON.** Le constat **B5** de l'audit du
+25 août décrivait cette portée comme « trop large » : **elle ne l'est pas.**
+⛔ **N'ÉLARGIS NI NE RESTREINS RIEN.** Ce volet ne touche pas au modèle de données.
+
+### ▣ Ce que la modale dit aujourd'hui — mesuré, à citer dans ton rapport
+
+`js/liste-evaluations.js:2851`, `supprimerFichierDefinitivement()` :
+
+```
+Supprimer définitivement ?
+
+Le fichier sera supprimé de façon permanente.
+Cette action est irréversible.
+```
+
+### ▣ Ce qui part réellement — mesuré dans le même corps de fonction
+
+1. le blob, la miniature (`travaux-stockage.js:1011`) ;
+2. **les annotations du fichier** (`supprimerAnnotationsFichiers([id])`, #572) ;
+3. l'entrée de corbeille ;
+4. **toutes les évaluations du couple `etudiantDA` + `productionId`**
+   (`js/liste-evaluations.js:2888-2895`).
+
+⮕ **La modale dit « le fichier ». Elle emporte les annotations et les évaluations.**
+C'est un mensonge par omission, et c'est exactement ce que l'énoncé 8 interdit.
+
+### ↻ LA PHRASE, ARRÊTÉE PAR GRÉGOIRE LE 2 SEPTEMBRE À 21 h 45
+
+**Trois formulations lui ont été proposées. Il a retenu celle-ci, mot pour mot :**
+
+```
+Supprimer définitivement ?
+
+Le fichier, ses annotations et toutes les évaluations de cet élève pour cette
+production seront effacés.
+
+Cette action est irréversible.
+```
+
+⛔ **ÉCRIS-LA TELLE QUELLE.** Pas de reformulation, pas de synonyme, pas d'ajout « utile ».
+Les mots qu'il lit au moment de détruire quelque chose lui appartiennent (`CLAUDE.md`, ce qui
+remonte jusqu'à lui, point 3), et il vient de les trancher.
+
+⚠ **Ce que tu peux décider seul** : le découpage en paragraphes et le style des éléments
+(`<p>`, couleur d'alerte sur la dernière ligne comme aujourd'hui). **Le texte, non.**
+
+---
 
 ## Fini quand
 
-**Une évaluation dont un critère n'a pas de niveau ne peut pas être remise sans que ce soit dit.**
+**Une fenêtre de suppression annonce ce qui va réellement disparaître, et ce qui va survivre.**
 
-▣ **Le témoin qui compte** : rejouer le cas 50/30/20 rend **84,0 %** — ou un refus nommé — mais
-**plus jamais 95,0 % en silence.**
-⚠ **Et le second témoin, souvent oublié** : une évaluation COMPLÈTE doit continuer de s'enregistrer
-et de s'exporter **sans un mot de plus**. Un correctif qui avertit tout le monde n'avertit personne.
+▣ **Le témoin** : pour chaque volet traité, cite **la phrase AVANT et la phrase APRÈS**, et
+le chemin de code qui la produit.
+⚠ **Et le témoin négatif, qui compte autant** : une suppression **complète et sans surprise**
+doit continuer de se faire **sans un mot de plus**. Une fenêtre qui avertit partout n'avertit
+nulle part.
 
-## L'ordre (règle 6)
+---
 
-- ⚠ **Ce lot touche le calcul d'une note. `npm test` — suite COMPLÈTE — avant de dire que c'est
-  prêt**, pas seulement `test:unit`.
-- Bump du bloc de jetons d'`index.html` (`js/` est touché).
-- **Tu commites, puis tu t'arrêtes.** Pas de release, pas de push.
-- ⮕ **Ce que Grégoire devra aller voir, et c'est un vrai geste** : ouvrir une évaluation, laisser
-  un critère sans niveau, et vérifier que l'application **le dit** au lieu de monter la note.
-- Ce fichier se commite avec ton lot.
+## L'ordre
+
+1. ▣ **Le verdict de GitHub sur `1402a17c` est DÉJÀ RENDU, et il est VERT.** Cowork l'a lu
+   dans le navigateur à 22 h (`gh` n'est pas installé sur le poste) : **passage n°785 du
+   workflow « Tests », `completed successfully`, 32 min 10 s**,
+   `https://github.com/bedardg71-codexnumeris/Monitorage_v6/actions/runs/33698317119`.
+   ▣ **Témoin que l'étiquette distingue** : dans la même liste, les passages **783, 782, 780
+   et 779 sont `failed`** et le **781 `cancelled`**. Le vert du 785 mesure donc quelque chose.
+   ⮕ **Reconfirme-le au démarrage** (le rituel §2.1 l'exige de toi, pas de Cowork), et signale
+   tout écart avec cette ligne.
+2. **Rejoue les mesures de cette consigne avant de coder.** Elles ont été prises par
+   Cowork en lecture seule, à 21 h 30 ; elles ne sont pas les tiennes.
+3. **Volet C d'abord** (le seul qui a un symptôme visible), **puis A** (sa phrase est arrêtée),
+   **puis D** — zéro symptôme, il ne justifie rien à lui seul.
+4. Ce lot touche `js/` ⮕ **bump du bloc de jetons d'`index.html`**.
+5. `cd tests && npm run test:unit` pour travailler ; **`npm test` complet avant de dire que
+   c'est prêt** — ce lot touche des chemins de destruction.
+   ⚠ Vitest se lance **depuis `tests/`**.
+6. ⛔ **Tu commites, puis tu t'arrêtes.** Pas de release, pas de push, pas de verdict au jeton.
+7. **Ce fichier se commite avec ton lot.** Nomme tes fichiers au commit ; pas de `git add -A`.
+
+⮕ **CE QUE GRÉGOIRE DOIT ALLER VOIR AU RÉVEIL, et c'est un vrai geste** : ouvrir
+**Conception › cartouches**, cliquer « Supprimer » sur une cartouche, et **lire ce que la
+fenêtre annonce**. Elle doit dire que la cartouche part de la grille ET de la bibliothèque.
+⚠ **Qu'il ne confirme pas.** Lire suffit.
