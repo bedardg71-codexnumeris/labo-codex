@@ -46,10 +46,6 @@ const NOMS_HIER = [
     'Accord dans le groupe du nom', 'Accord du pronom / lien avec son antécédent', 'Accord du participe passé',
     'Mot invariable', 'Déterminant', 'Vocabulaire / anglicisme', 'Orthographe d’usage / typographie'
 ];
-const NOMS_COURTS_HIER = [
-    'Construction syntaxique', 'Subordonnée seule', 'Ponctuation / guillemets', 'Accord dans le GN',
-    'Accord du pronom', 'Accord part. passé', 'Mot invariable', 'Déterminant', 'Vocabulaire / anglicisme', 'Orthographe / typo'
-];
 const COULEURS_HIER = ['#c62828', '#c62828', '#e65100', '#1565c0', '#1565c0', '#1565c0', '#7b1fa2', '#7b1fa2', '#2e7d32', '#2e7d32'];
 // sha256 des dix textes joints par « \n », dans l'ordre des identifiants,
 // mesuré sur HEAD `43f7a57b` (4 190 caractères). Un texte retouché la change.
@@ -85,11 +81,12 @@ describe('codes par grille · A — le repli est hier, au caractère près', () 
         const liste = charger().codesAnnotation.listeCodes(null);
         expect(liste.map(t => t.id)).toEqual(IDS_HIER);
         expect(liste.map(t => t.nom)).toEqual(NOMS_HIER);
-        expect(liste.map(t => t.nomCourt)).toEqual(NOMS_COURTS_HIER);
         expect(liste.map(t => t.couleur)).toEqual(COULEURS_HIER);
         expect(liste.map(t => t.numero)).toEqual(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
         expect(liste.map(t => t.code)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
         expect(liste.every(t => t.source === 'repli')).toBe(true);
+        // Un code n'a qu'UN nom (relecture croisée du 3 sept. : le « nom court » d'OUTILS n'était lu nulle part).
+        expect(liste.every(t => !('nomCourt' in t))).toBe(true);
     });
 
     it('A.b les dix textes sont ceux d\'hier — empreinte sha256 identique', () => {

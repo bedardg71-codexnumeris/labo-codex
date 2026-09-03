@@ -574,7 +574,7 @@
     function _regenererOutilsCodes() {
         Object.keys(OUTILS).forEach(function(k) { if (k.indexOf('errfr_') === 0) delete OUTILS[k]; });
         _codesCourants().forEach(function(t) {
-            OUTILS[t.id] = { id: t.id, nom: t.nomCourt, couleurBouton: t.couleur, curseur: 'crosshair', type: 'symbole', taille: 24 };
+            OUTILS[t.id] = { id: t.id, nom: t.nom, couleurBouton: t.couleur, curseur: 'crosshair', type: 'symbole', taille: 24 };
         });
     }
 

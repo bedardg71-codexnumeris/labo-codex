@@ -28,7 +28,7 @@
      apercuCodes(critere)   ce que les sous-critères donneraient, geste ou non (gabarit)
      grilleDeCopie(fichier) la grille d'une copie, via sa production, ou null
 
-   Chaque code : { id, code, numero, nom, nomCourt, couleur, retroaction, source }
+   Chaque code : { id, code, numero, nom, couleur, retroaction, source }
      id        ce qui est écrit sur la copie : `errfr_<code>`. ⚠ LE PRÉFIXE RESTE,
                ET C'EST DIT PLUTÔT QUE RENOMMÉ : il vit dans les annotations déjà
                posées, un identifiant n'est pas un libellé, et personne ne le lit.
@@ -69,20 +69,24 @@ var DRAPEAU = 'codesDepuisSousCriteres';
 // ---------------------------------------------------------------------
 // LE REPLI — les dix codes d'hier, repris de travaux-outils.js au caractère
 // près (`CODES_ERREURS_FR` :557-568 pour id, code et nom ; `OUTILS.errfr_*`
-// :276-285 pour la couleur et le nom court). ⚠ Ne pas uniformiser les
-// apostrophes : « d’usage » porte une apostrophe typographique, comme hier.
+// :276-285 pour la couleur). ⚠ Ne pas uniformiser les apostrophes :
+// « d’usage » porte une apostrophe typographique, comme hier.
+// ⚠ Le NOM COURT que portaient les dix entrées d'OUTILS (« Accord dans le
+// GN »…) n'a pas été repris : mesuré le 3 sept. 2026 sur la relecture croisée
+// de Cowork, aucun écran ne le lisait, et la personnalisation ne le touchait
+// pas. Un code n'a qu'un nom, celui que la liste rend.
 // ---------------------------------------------------------------------
 var REPLI_DEFAUT = [
-    { id: 'errfr_1',  code: 1,  nom: 'Construction syntaxique / accord du verbe',   nomCourt: 'Construction syntaxique',  couleur: '#c62828' },
-    { id: 'errfr_2',  code: 2,  nom: 'Subordonnée employée seule',                    nomCourt: 'Subordonnée seule',        couleur: '#c62828' },
-    { id: 'errfr_3',  code: 3,  nom: 'Ponctuation / guillemets',                      nomCourt: 'Ponctuation / guillemets', couleur: '#e65100' },
-    { id: 'errfr_4',  code: 4,  nom: 'Accord dans le groupe du nom',                  nomCourt: 'Accord dans le GN',        couleur: '#1565c0' },
-    { id: 'errfr_5',  code: 5,  nom: 'Accord du pronom / lien avec son antécédent',   nomCourt: 'Accord du pronom',         couleur: '#1565c0' },
-    { id: 'errfr_6',  code: 6,  nom: 'Accord du participe passé',                     nomCourt: 'Accord part. passé',       couleur: '#1565c0' },
-    { id: 'errfr_7',  code: 7,  nom: 'Mot invariable',                                nomCourt: 'Mot invariable',           couleur: '#7b1fa2' },
-    { id: 'errfr_8',  code: 8,  nom: 'Déterminant',                                   nomCourt: 'Déterminant',              couleur: '#7b1fa2' },
-    { id: 'errfr_9',  code: 9,  nom: 'Vocabulaire / anglicisme',                      nomCourt: 'Vocabulaire / anglicisme', couleur: '#2e7d32' },
-    { id: 'errfr_10', code: 10, nom: 'Orthographe d’usage / typographie',        nomCourt: 'Orthographe / typo',       couleur: '#2e7d32' }
+    { id: 'errfr_1',  code: 1,  nom: 'Construction syntaxique / accord du verbe',  couleur: '#c62828' },
+    { id: 'errfr_2',  code: 2,  nom: 'Subordonnée employée seule',        couleur: '#c62828' },
+    { id: 'errfr_3',  code: 3,  nom: 'Ponctuation / guillemets', couleur: '#e65100' },
+    { id: 'errfr_4',  code: 4,  nom: 'Accord dans le groupe du nom',        couleur: '#1565c0' },
+    { id: 'errfr_5',  code: 5,  nom: 'Accord du pronom / lien avec son antécédent',         couleur: '#1565c0' },
+    { id: 'errfr_6',  code: 6,  nom: 'Accord du participe passé',       couleur: '#1565c0' },
+    { id: 'errfr_7',  code: 7,  nom: 'Mot invariable',           couleur: '#7b1fa2' },
+    { id: 'errfr_8',  code: 8,  nom: 'Déterminant',              couleur: '#7b1fa2' },
+    { id: 'errfr_9',  code: 9,  nom: 'Vocabulaire / anglicisme', couleur: '#2e7d32' },
+    { id: 'errfr_10', code: 10, nom: 'Orthographe d’usage / typographie',       couleur: '#2e7d32' }
 ];
 
 // Les couleurs des dix, par position : c'est ce qu'un sous-critère sans
@@ -171,7 +175,6 @@ function _repli() {
             code: t.code,
             numero: String(liste.length + 1),
             nom: p.nom ? p.nom : t.nom,
-            nomCourt: t.nomCourt,
             couleur: p.couleur ? p.couleur : t.couleur,
             retroaction: (typeof textes[id] === 'string') ? textes[id] : '',
             source: 'repli'
@@ -201,7 +204,6 @@ function _depuisSousCriteres(critere) {
             code: numero,
             numero: numero,
             nom: nom,
-            nomCourt: nom,
             couleur: (typeof sc.couleur === 'string' && sc.couleur) ? sc.couleur
                 : COULEURS_DEFAUT[(liste.length) % COULEURS_DEFAUT.length],
             retroaction: (typeof sc.retroaction === 'string') ? sc.retroaction : '',
@@ -249,7 +251,7 @@ function code(grille, id) {
     var brut = (typeof id === 'string') ? id : String(id || '');
     var num = (brut.indexOf(PREFIXE) === 0) ? brut.slice(PREFIXE.length) : brut;
     return {
-        id: brut, code: num, numero: num, nom: 'Code ' + num, nomCourt: 'Code ' + num,
+        id: brut, code: num, numero: num, nom: 'Code ' + num,
         couleur: '#888888', retroaction: '', source: 'inconnu', inconnu: true
     };
 }
@@ -284,7 +286,7 @@ var api = {
     PREFIXE: PREFIXE,
     DRAPEAU: DRAPEAU,
     REPLI_DEFAUT: REPLI_DEFAUT.map(function(t) {
-        return { id: t.id, code: t.code, nom: t.nom, nomCourt: t.nomCourt, couleur: t.couleur };
+        return { id: t.id, code: t.code, nom: t.nom, couleur: t.couleur };
     }),
     COULEURS_DEFAUT: COULEURS_DEFAUT.slice(),
     RETROACTIONS_DEFAUT: RETROACTIONS_DEFAUT,
