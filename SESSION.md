@@ -7,6 +7,92 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 19 — 3 SEPTEMBRE 2026, APRÈS-MIDI : LES TAMPONS PAR GRILLE — LA LISTE
+     EXISTE DÉJÀ, C'EST CELLE DES SOUS-CRITÈRES.
+
+     ▣ Session Claude Code sur « applique le plan » : `plans de travail/
+       CADRAGE-2026-09-03-tampons-par-grille.md` (Cowork, 14 h 58). Le cadrage disait
+       « rien n'est à coder, remesure tout, cinq points à trancher avec Grégoire ».
+       ⮕ REMESURÉ, puis consigne PROPOSÉE (`CONSIGNE-PROPOSEE-2026-09-03-tampons-par-
+       grille.md`, non commitée, comme les cadrages du jour), puis GO de Grégoire sur trois
+       questions fermées : (1) les tampons SONT les sous-critères ; (2) activation par
+       GESTE partout, rien ne change sans lui ; (3) mots approuvés — bouton « Utiliser ces
+       sous-critères comme tampons d'annotation », titre « Rétroactions — Codes
+       d'annotation » (« (repli) » sorti du titre, mis dans la phrase d'explication :
+       supposition nommée).
+
+     ▣ CE QUE LA REMESURE A CORRIGÉ DANS LE CADRAGE (relu ligne à ligne) :
+       · QUATRE clés globales, pas trois : `retroactionsErreursFr` (les TEXTES) manquait ;
+         `personnalisationErreursFr` ne porte que noms et couleurs (travaux-outils.js:642,
+         :956-972, :3619 ; donnees-v2.js:826).
+       · Le NUMÉRO d'un tampon suit l'ORDRE personnalisé, pas l'identifiant (curseur :1626,
+         copie travaux-annotation.js:2799, PDF travaux-export-pdf.js:587, texte
+         evaluation-retroaction.js:202, palette :1243). `errfr_N` est déjà opaque.
+       · La série Unicode ⑳ n'est PAS une limite : le curseur, la copie et le PDF
+         DESSINENT le nombre ; ①…⑩ d'OUTILS n'était lu par aucun chemin (retiré).
+       · ⚠⚠ LE FAIT NON VU : la grille porte DÉJÀ une liste par code — les sous-critères
+         du critère algorithmique {id, code, nom, ponderation, retroaction}
+         (grilles.js:4314), onze par défaut = les dix codes + « 0 Aucune erreur »
+         (:4198), textes identiques (:4204 vs travaux-outils.js:621) ; l'évaluation les
+         résout par `code` (evaluation-calcul.js:262-268, :441, :591). Deux listes
+         alignées à la main par le numéro.
+       · Point ouvert 1 mesuré : copie → production N'EST PAS toujours vrai (copie
+         `orphelin`, travaux-stockage.js:307/:326) ; production → grille = ses
+         ÉVALUATIONS (`_modeleProductionPourEval`, evaluation-chargement.js:596-632,
+         exporté :1624), `prod.grilleId` = repli périmable (#346) ; l'annotation ne
+         connaît que `productionId` (travaux-annotation.js:318). ⮕ PAR GRILLE, résolue
+         depuis la production à l'ouverture de la copie ; « par pratique » ne tient pas.
+
+     ▣ LES QUATRE LOTS : 1 source unique de lecture (ce commit) · 2 l'annotation suit la
+       grille (`_grilleCourante` posée à l'ouverture, curseur/dessin/PDF via la liste) ·
+       3 le gabarit (bouton d'activation, `sc.couleur`, les DEUX schémas, titre de l'écran)
+       · 4 aide, doc, changelog. Chaque lot : commit, tests, jetons.
+
+     ▣ LOT 1 LIVRÉ — `js/tampons-erreurs.js` (module pur, lecture seule) :
+       `listeTampons(grille)` → [{id, code, numero, nom, nomCourt, couleur, retroaction,
+       source}] ; `tampon(grille, id)` JAMAIS null (inconnu = « Code N », #888888, jamais
+       effacé) ; `estActive(grille)` = drapeau `tamponsDepuisSousCriteres === true` strict
+       ET ≥ 1 sous-critère de pondération > 0 (⚠ SUPPOSITION NOMMÉE : pondération 0 =
+       « aucune erreur », pas un tampon) ; `grilleDeCopie(fichier)` (E ci-dessus, mode
+       démo respecté). REPLI = les dix d'hier au caractère près (ids, noms, noms courts,
+       couleurs, apostrophe typographique de « d’usage »), avec les quatre clés : numéro =
+       position dans l'ordre FILTRÉ (règle d'hier : ordre ≠ 10 entrées ignoré, inconnu
+       filtré), objet de textes qui remplace tout clé par clé. Sous-critères activés :
+       id `errfr_<code>`, numéro = code (tel quel, « 12 » compris), nom ou « Code N »,
+       couleur `sc.couleur` sinon les dix par position, code en double = le premier.
+       · travaux-outils.js : `CODES_ERREURS_FR` RETIRÉ (15 sites), les dix `OUTILS.errfr_*`
+         en dur RETIRÉS (générés depuis `REPLI_DEFAUT`, sans icône), textes par défaut
+         DÉPLACÉS (vérifié contre HEAD : identiques) ; helpers `_tampons()`,
+         `_tamponsRepli()` (écran de réglage, défauts), `_tamponsCourants()`
+         (`_grilleCourante`, NULLE au lot 1) ; palette, compteurs, écran de réglage lisent
+         la liste ; `appliquerPersonnalisations` ne recopie plus que la couleur. Sans le
+         module (banc Node #240) : aucun code, rien ne casse — mesuré, 10/10.
+       · evaluation-retroaction.js (2 sites) : texte « --- Langue --- » et volet
+         « spécifique » lisent la liste de la grille du bilan ; ⚠ le NOM et le TEXTE
+         (données utilisateur) sont maintenant ÉCHAPPÉS dans innerHTML (règle 1) — ils ne
+         l'étaient pas ; un id inconnu passe après, trié par numéro, jamais tu.
+       · synthese-retroaction-data.js (2 sites) : `construireErrors(stats, grille)` — code,
+         nom, couleur, texte depuis la liste ; `construireFrancaisResume` : id inconnu ne
+         nomme rien, comme hier.
+       · index.html : `tampons-erreurs.js?v=20260903a` chargé APRÈS evaluation-enonces.js,
+         AVANT travaux-outils / synthese-retroaction-data / evaluation-retroaction ;
+         jetons bumpés : travaux-outils 0903a, synthese-retroaction-data 0903a,
+         evaluation-retroaction 0903a.
+       ▣ ÉCARTS ASSUMÉS, tous sur un identifiant INCONNU (impossible aujourd'hui : les ids
+         sont errfr_1..10) : nom « Code N » au lieu de l'id brut / « undefined » ; couleur
+         #888888 au lieu de #141414 dans la synthèse.
+     ▣ TÉMOINS lot 1 : sentinelle `sentinelle-tampons-par-grille-lot1.test.js` (20) —
+       A repli au caractère près (sha256 des dix textes `ac157daf…`, mesuré sur HEAD
+       43f7a57b), B quatre clés (règles d'hier), C grille activée, D jamais null,
+       E copie → grille, F sources (constante partie, ordre de chargement). Break-tests :
+       7 mutations, 7 rouges, module revenu à l'identique (empreinte, remise qui LIT avant
+       d'écrire — leçon de la session 18). Existant : #240, export-pdf, #581, 414, drag,
+       563, 572, ci-paths (134/134) ; WebKit 672, 645, erreurs-saisie, bilan-reflexif (4/4).
+     ▣ RESTE : lots 2, 3, 4 (voir la consigne proposée §5) ; la spec WebKit de la palette
+       (repli 10 / grille activée N / copie orpheline / code inconnu visible) vient au lot 2.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 18 — 3 SEPTEMBRE 2026, MIDI : LE TEXTE TROUÉ, ÉTAPE 1 — LES QUATRE
      ÉNONCÉS DE RÉTROACTION REÇOIVENT DES REPÈRES POSABLES.
 

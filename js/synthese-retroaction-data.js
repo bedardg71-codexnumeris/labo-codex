@@ -103,7 +103,7 @@
             criteria:  construireCriteres(evaluation, grille, cartouche),
             overall:   construireOverall(evaluation, echelle),
             stamps:    construireStamps(stats),
-            errors:    construireErrors(stats),
+            errors:    construireErrors(stats, grille),
             errorsTotal: stats ? stats.totalErreursFr : 0,
             // #581 — LE NOM QUI TITRE LE DÉCOMPTE VIENT DE LA GRILLE.
             // Il était écrit « Français écrit » dans le module de rendu, et il
@@ -613,29 +613,25 @@
         );
     }
 
-    function construireErrors(stats) {
+    function construireErrors(stats, grille) {
         if (!stats || !stats.erreursFr) return [];
-
-        const codes = (typeof travauxOutils !== 'undefined' && travauxOutils.CODES_ERREURS_FR)
-            ? travauxOutils.CODES_ERREURS_FR
-            : [];
-        const retroactions = (typeof travauxOutils !== 'undefined' && typeof travauxOutils.obtenirRetroactionsErreursFr === 'function')
-            ? travauxOutils.obtenirRetroactionsErreursFr()
-            : {};
-        // OUTILS expose la couleur de chaque code (personnalisable par l'utilisateur)
-        const outils = (typeof travauxOutils !== 'undefined' && travauxOutils.OUTILS) ? travauxOutils.OUTILS : {};
+        // 3 sept. 2026 — code, nom, couleur et texte viennent de la liste de la
+        // grille de l'évaluation (ou du repli, à l'identique) : `tamponsErreurs`.
+        // Un identifiant que la liste ne connaît pas garde son numéro et un nom
+        // neutre — il n'est jamais retiré du PDF.
+        const tampons = (typeof window !== 'undefined' && window.tamponsErreurs) ? window.tamponsErreurs : null;
+        if (!tampons) return [];
 
         return Object.keys(stats.erreursFr)
             .map(id => {
                 const count = stats.erreursFr[id] || 0;
-                const meta = codes.find(c => c.id === id);
-                const couleurOutil = outils[id] && outils[id].couleurBouton;
+                const t = tampons.tampon(grille, id);
                 return {
-                    code:        meta ? meta.code : null,
-                    name:        meta ? meta.nom : id,
+                    code:        t.inconnu ? null : t.code,
+                    name:        t.nom,
                     count:       count,
-                    color:       couleurOutil || '#141414',
-                    retroaction: retroactions[id] || ''
+                    color:       t.couleur,
+                    retroaction: t.retroaction || ''
                 };
             })
             .filter(e => e.count > 0)
@@ -907,12 +903,14 @@
      */
     function construireFrancaisResume(stats, grille) {
         if (!stats || !stats.totalErreursFr) return '';
-        const codes = (typeof travauxOutils !== 'undefined' && travauxOutils.CODES_ERREURS_FR) ? travauxOutils.CODES_ERREURS_FR : [];
+        const tampons = (typeof window !== 'undefined' && window.tamponsErreurs) ? window.tamponsErreurs : null;
         const total = stats.totalErreursFr;
         const principal = Object.keys(stats.erreursFr || {})
             .sort((a, b) => stats.erreursFr[b] - stats.erreursFr[a])[0];
-        const meta = principal ? codes.find(c => c.id === principal) : null;
-        const nomPrinc = meta ? meta.nom : '';
+        // 3 sept. 2026 — le nom vient de la liste de la grille (`tamponsErreurs`) ;
+        // un identifiant inconnu ne nomme rien, comme hier.
+        const meta = (principal && tampons) ? tampons.tampon(grille, principal) : null;
+        const nomPrinc = (meta && !meta.inconnu) ? meta.nom : '';
         const titre = libelleErreurs(grille);
         return `${titre} : ${total} erreur${total > 1 ? 's' : ''}${nomPrinc ? ` (principalement : ${nomPrinc})` : ''}`;
     }
