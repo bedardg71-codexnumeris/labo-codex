@@ -15,9 +15,9 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 2 septembre 2026, en soirée (treizième passe) — release 1.110.0
-toujours EN LIGNE ; le CINQUIÈME ÉNONCÉ est corrigé dans le dépôt, commité, NON poussé :
-il attend le coup d'œil de Grégoire (règle 6). Pour les gens en ligne, rien n'a changé.**
+**Dernière mise à jour : 2 septembre 2026, tard (quatorzième passe) — release 1.110.0 EN LIGNE.
+Le CINQUIÈME ÉNONCÉ est CLOS par Grégoire : corrigé, vérifié par lui à l'écran, commité sur
+`main` — mais NON POUSSÉ. Il ne sera vrai pour les utilisateurs qu'au push.**
 
 ---
 
@@ -39,7 +39,7 @@ mentaient dans les deux sens :
 
 ---
 
-## Le compte du jour : 5 faits, 2 éprouvés par Grégoire, 2 pas faits (dont 1 corrigé en local, pas encore livré), 0 jamais vérifié
+## Le compte du jour : 6 faits (dont 1 commité, PAS ENCORE POUSSÉ), 2 éprouvés par Grégoire, 1 pas fait, 0 jamais vérifié
 
 ---
 
@@ -242,25 +242,6 @@ dans `index.html`.
 ⮕ **Inscrit comme code mort, PAS corrigé** — issue 2 de `CLAUDE.md`. Ça n'empêche aucun des
 huit énoncés.
 
-### Le numéro de version affiché correspond au code qui tourne
-Sans ça, aucun rapport de bug n'est interprétable, ni le sien ni celui d'un
-utilisateur.
-**Vérifié comment** : tests sur le bandeau de version, et les quatre points de
-vérité mesurés PAR TÉMOIN à la release **1.109.2** (build `0902-1006`) —
-`grep -rl '1\.109\.1' --include=*.js --include=*.json --include=*.html .` rend
-**0**. ⚠ Le témoin dit aussi son périmètre : sur tout le dépôt, `1.109` rend encore
-**11** fichiers de prose datée.
-⚠ **Fragile** : ça se re-périme à chaque release. Le 2 septembre, **quatre versions
-se sont succédé en une matinée** — cette ligne a cité un numéro périmé entre
-chacune.
-⮕ Le bump est passé par `scripts/release.mjs`, qui écrit les quatre points de
-façon atomique **et** bumpe les jetons anti-cache d'`index.html` (11 ce matin,
-qu'il liste). Le danger reste le bump fait à la main, et lui seul. *(#665)*
-
----
-
-## PAS FAIT
-
 ### Aucune note remise ne repose sur une pondération incomplète sans le dire
 ↻ **CORRIGÉ DANS LE DÉPÔT le 2 septembre 2026 en soirée — commité, NON poussé : il
 attend ton coup d'œil (règle 6).** Pour qui utilise l'application en ligne, rien n'a
@@ -329,6 +310,73 @@ après ton coup d'œil, avant le push.
 sans niveau. La note doit afficher « -- » et la ligne sous elle nommer le critère.
 Cliquer Enregistrer : refus nommé. Donner le niveau : la note revient, plus un mot.
 *(#674)*
+
+↻ **CLOS PAR GRÉGOIRE le 2 septembre 2026, tard.** Ses mots : *« L'item "Aucune note remise
+ne repose sur une pondération incomplète sans le dire" est clos. »*
+
+⚠⚠ **CLOS N'EST PAS ENCORE EN LIGNE, ET LA DISTINCTION COMPTE.** Le correctif est **commité sur
+`main` et non poussé** — huit commits. ⮕ **Tant qu'il n'est pas parti, les utilisateurs déjà en
+place ont l'ancien comportement** : une note qui monte en silence. **L'énoncé n'est vrai pour eux
+qu'au push.**
+⮕ **Ce qui reste, dans l'ordre** : relecture croisée par Cowork (règle 2 — le lot ajoute un champ
+aux évaluations, qui partira dans les exports : c'est bien « ce qui ne se reprend pas »), puis le
+verdict au jeton (`cd tests && node ../scripts/verifier-playwright.mjs`), puis le push.
+
+**Vérifié comment :**
+· **Reproduit en ROUGE avant de toucher au code**, sur le vrai `calculerNote()` : le cas 50/30/20
+  rendait **95,0 %** quand le critère à 20 % perdait son niveau (84,0 % avec les trois), et une
+  échelle muette rendait **0,0 %** comme un résultat. **Puis vert après.** 10 cas.
+· Portes, auto-save, PDF, échappement : 15 cas verts.
+· **Sentinelle au périmètre DÉDUIT de tout `js/`** — quatre chemins d'écriture trouvés, aucun sans
+  sa portée. ▣ C'est la leçon du lot #572 du même jour, appliquée : **pas une liste de fichiers
+  tapée à la main.**
+· **Quatre break-tests par mutation** : 1, 5, 12 et 3 cas rouges, restauration vérifiée par empreinte.
+· `Vitest` **441 fichiers / 4760 tests** · `Playwright` local **240 passés, 0 échoué, 0 instable**.
+· ▣ **ÉPROUVÉ PAR GRÉGOIRE, à l'écran** : le refus nommé, le brouillon conservé, le PDF portant sa
+  phrase, et sa propre grille réparée au passage.
+
+**Ce que ça donne, en gestes :**
+· **À l'écran** — un critère sans niveau (ou dont le niveau n'a pas de valeur dans l'échelle)
+  **retient** la note et le niveau (« -- »), et une ligne dessous **nomme** le critère, son poids
+  et quoi faire. Renseigné : la note revient, la ligne disparaît.
+· **À l'enregistrement** — refus nommé, rien n'est écrit. ⚠ **L'auto-save continue d'écrire
+  pendant la saisie**, la note avec sa portée : le brouillon n'est jamais perdu.
+· **Sur le PDF de l'élève** — pas de bandeau « Niveau général », et une phrase nomme les critères
+  en attente. ↻ **Les mots sont ceux de Grégoire**, choisis le 2 septembre parmi trois
+  propositions (variante C, augmentée) : *« Cette copie n'a pas de note ni de niveau général :
+  Langue (20 %) reste à évaluer. »* ▣ **Motif du choix** : « Évaluation incomplète » aurait pu se
+  lire comme *le travail de l'élève* qui serait incomplet. **« Reste à évaluer » dit à qui revient
+  le geste.**
+· **Rétroactif** — les évaluations déjà en base sont relues depuis leurs critères, leur grille et
+  leur échelle. ▣ **C'est la propriété qui avait écarté l'état « brouillon / conclue »** : elle
+  seule répare l'existant.
+
+⏳ **Trois trouvailles inscrites, PAS corrigées** : le portfolio et la liste des évaluations ne
+lisent pas encore la portée ; l'export unitaire ignorait déjà la raison de #565 ; un repli mort
+dans `calculerNote` contredit #527, sans effet en production.
+
+⏳ **Et une décision qui reste à Grégoire** : la réparation automatique des grilles des AUTRES
+enseignants — l'éditeur créait des critères sans identifiant depuis octobre 2025. **C'est une
+écriture dans les données de quelqu'un.**
+
+### Le numéro de version affiché correspond au code qui tourne
+Sans ça, aucun rapport de bug n'est interprétable, ni le sien ni celui d'un
+utilisateur.
+**Vérifié comment** : tests sur le bandeau de version, et les quatre points de
+vérité mesurés PAR TÉMOIN à la release **1.109.2** (build `0902-1006`) —
+`grep -rl '1\.109\.1' --include=*.js --include=*.json --include=*.html .` rend
+**0**. ⚠ Le témoin dit aussi son périmètre : sur tout le dépôt, `1.109` rend encore
+**11** fichiers de prose datée.
+⚠ **Fragile** : ça se re-périme à chaque release. Le 2 septembre, **quatre versions
+se sont succédé en une matinée** — cette ligne a cité un numéro périmé entre
+chacune.
+⮕ Le bump est passé par `scripts/release.mjs`, qui écrit les quatre points de
+façon atomique **et** bumpe les jetons anti-cache d'`index.html` (11 ce matin,
+qu'il liste). Le danger reste le bump fait à la main, et lui seul. *(#665)*
+
+---
+
+## PAS FAIT
 
 ### Ce qu'un utilisateur détruit, il l'a voulu ; ce qu'il garde, il le retrouve
 
