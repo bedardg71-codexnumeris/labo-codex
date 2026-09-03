@@ -104,6 +104,10 @@
        ⮕ CE QUE GRÉGOIRE DOIT ALLER VOIR : Conception › cartouches, section 2 de la
          bibliothèque, lire ; puis une échelle et une grille — trois familles, un
          mot. Ne rien confirmer.
+       ↻ 3 SEPTEMBRE, vers 6 h : Grégoire a lu les trois écrans (« c'est fait, on
+         continue ») ⮕ release 1.111.2 (patch), verdict au jeton par
+         scripts/pousser.sh, push. GitHub sur ec111072 (1.111.1) : vert, Vitest et
+         Playwright WebKit (run 33737365376).
      ===================================================================== -->
 
 <!-- =====================================================================
