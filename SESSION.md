@@ -180,6 +180,16 @@
        pondération et une DESCRIPTION, et sert ainsi de code descriptif » (ses mots :
        « … et une description... comme code descriptif ») ⮕ COMMITÉES telles quelles, sans
        discipline en exemple : le code posé EST le sous-critère de la grille.
+     ▣ VALIDATION TERRAIN iPad SUR 1.114.1 (Grégoire, 19 h 30) : les trois défauts FERMÉS
+       au doigt — pastilles sélectionnables, « Personnalisé… » ouvre le sélecteur natif
+       d'iPadOS, plus d'insertion au milieu d'un mot. Le point « invérifiable d'ici » de
+       `40772a0a` est levé. ⚠ Inférence (Cowork) : son premier essai montrait encore le
+       milieu de mot, chemin unique et corrigé ⮕ l'iPad servait vraisemblablement 1.114.0
+       depuis le cache ; sur cet appareil, un rechargement ordinaire ne suffit pas toujours.
+       Une phrase de l'aide complétée (approuvée) : « Décochée, la palette garde les dix
+       codes de départ, qui sont des codes de correction du français. » — la discipline
+       avait quitté l'explication, pas le produit (errfr_1..10) ; un collègue de chimie qui
+       décoche doit le savoir. Six mots, rien d'autre ne bouge.
      ===================================================================== -->
 
 <!-- =====================================================================
