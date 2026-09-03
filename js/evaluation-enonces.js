@@ -350,6 +350,14 @@ function reperesDeCle(cle) {
  * dit) — et après lui quand un mot ou un repère le suit directement.
  * {points} fait exception des deux côtés : il porte déjà son espace de tête.
  *
+ * ⚠ UN REPÈRE NE COUPE JAMAIS UN MOT — essai iPad de Grégoire sur 1.114.0 :
+ * « fran {critere} çais ». Sur iPad comme à la souris, le curseur peut tomber
+ * entre deux lettres. Un point d'insertion à l'intérieur d'un mot est ramené
+ * à la frontière LA PLUS PROCHE de ce mot — son début ou sa fin — et, à
+ * distance égale, à sa fin : on pose un repère après ce qu'on vient de lire.
+ * Un point d'insertion à l'intérieur d'un repère déjà posé ({cri|tere}) est
+ * ramené après lui. Une sélection n'est pas déplacée : elle est voulue.
+ *
  * @param {string} texte - le texte de la zone
  * @param {number} debut - début de la sélection (le curseur, si égal à `fin`)
  * @param {number} fin - fin de la sélection
@@ -358,6 +366,30 @@ function reperesDeCle(cle) {
  *          position du curseur après le repère ; `null` si `jeton` n'est pas
  *          posable — le texte n'est alors pas touché.
  */
+/** Une lettre, un chiffre, une apostrophe ou un trait d'union : ce qui tient un mot ensemble. */
+var _CAR_MOT = /[\p{L}\p{N}'’-]/u;
+
+/**
+ * Le point d'insertion ramené hors d'un mot ou d'un repère (voir `insererRepere`).
+ * Rend `a` inchangé quand il est déjà à une frontière.
+ */
+function _horsDuMot(t, a) {
+    // À l'intérieur d'un repère déjà posé : après lui.
+    var ouvrante = t.lastIndexOf('{', a - 1);
+    if (ouvrante !== -1) {
+        var fermante = t.indexOf('}', ouvrante);
+        if (fermante !== -1 && a > ouvrante && a <= fermante) return fermante + 1;
+    }
+    var gauche = a > 0 && _CAR_MOT.test(t.charAt(a - 1));
+    var droite = a < t.length && _CAR_MOT.test(t.charAt(a));
+    if (!gauche || !droite) return a;
+    var debutMot = a;
+    while (debutMot > 0 && _CAR_MOT.test(t.charAt(debutMot - 1))) debutMot--;
+    var finMot = a;
+    while (finMot < t.length && _CAR_MOT.test(t.charAt(finMot))) finMot++;
+    return (a - debutMot < finMot - a) ? debutMot : finMot;
+}
+
 function insererRepere(texte, debut, fin, jeton) {
     var r = _repere(jeton);
     if (!r) return null;
@@ -370,6 +402,7 @@ function insererRepere(texte, debut, fin, jeton) {
     };
     var a = borne(debut), b = borne(fin);
     if (a > b) { var tmp = a; a = b; b = tmp; }
+    if (a === b) { a = b = _horsDuMot(t, a); }
     var avant = t.slice(0, a), apres = t.slice(b);
     var espaceAvant = (!r.espaceDeTete && /[\p{L}\p{N}}.,;:!?)»…%]$/u.test(avant)) ? ' ' : '';
     var suitUnMot = /^[\p{L}\p{N}]/u.test(apres);

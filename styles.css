@@ -25390,6 +25390,10 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     height: 28px;
 }
 .travaux-btn-couleur-perso {
+    /* Une étiquette (label) depuis le 3 sept. 2026 : elle se dessine en bloc. */
+    display: block;
+    box-sizing: border-box;
+    text-align: center;
     width: 100%;
     padding: 4px 8px;
     background: transparent;

@@ -54,6 +54,19 @@ describe('source unique des codes · sources', () => {
         expect(s).toMatch(/addEventListener\('pointerdown'[\s\S]*details\.travaux-retro-couleur-picker\[open\][\s\S]*d\.contains\(cible\)\) d\.open = false/);
     });
 
+    it('U.e essai iPad : la pastille se repeint dans le module, « Personnalisé… » est une étiquette liée à l\'input', () => {
+        const s = outils();
+        // Un seul chemin repeint la pastille : l'écouteur `input` délégué (la pastille
+        // cliquée dispatche `input`, le sélecteur natif aussi).
+        expect(s).toMatch(/document\.addEventListener\('input'[\s\S]*input\.travaux-retro-couleur-input[\s\S]*pastille\.style\.background = input\.value/);
+        expect(s).not.toMatch(/_repeindrePastille/);
+        expect(s).toMatch(/<label class="travaux-btn-couleur-perso" for="' \+ inputId \+ '">/);
+        expect(s).toMatch(/class="travaux-retro-couleur-input" id="' \+ inputId \+ '"/);
+        expect(s).not.toMatch(/ouvrirCouleurPerso/);
+        // Le câblage local de l'écran de réglage, devenu doublon, est parti.
+        expect(s).not.toMatch(/Wiring: changement couleur/);
+    });
+
     it('U.c le gabarit appelle le sélecteur de la palette, il ne le copie pas', () => {
         const g = source('js/grilles.js');
         expect((g.match(/type="color"/g) || []).length).toBe(0);

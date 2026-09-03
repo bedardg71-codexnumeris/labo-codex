@@ -3476,6 +3476,9 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
     // on n'en ferme aucun. ⚠ Chaque zone n'offre que ce qu'un appel remplit
     // (`reperesDeCle`) : « Aucune annotation » n'offre pas {erreurs}, qui y
     // vaudrait toujours vide. Deux familles, deux couleurs (cadrage du 2 sept.).
+    // ⚠ LE BADGE S'AFFICHE SANS ACCOLADES (« retire les accolades » — Grégoire,
+    // essai iPad du 3 sept.) ; ce qui se pose dans la zone les garde, c'est le
+    // format que le moteur lit (`data-jeton`, `insererRepere`).
     // ⚠ LA RANGÉE PRÉCÈDE LA ZONE, ET C'EST GRÉGOIRE QUI L'A DEMANDÉ au premier
     // coup d'œil (3 sept., après-midi) : il l'a cherchée là sans qu'on le lui
     // dise — une palette d'outils se place avant l'établi, pas après. L'aide,
@@ -3484,7 +3487,7 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
                             <button type="button" class="repere-enonce repere-enonce--${esc(r.famille)}"
                                     data-action="insererRepereEnonce" data-jeton="${esc(r.jeton)}"
                                     title="${esc(r.libelle)} — ${esc(r.aide)}"
-                                    aria-label="Poser ${esc(r.libelle)}, ${esc(r.jeton)}, dans « ${esc(c.libelle)} »">${esc(r.jeton)}</button>`).join('');
+                                    aria-label="Poser ${esc(r.libelle)}, ${esc(r.jeton)}, dans « ${esc(c.libelle)} »">${esc(r.jeton.slice(1, -1))}</button>`).join('');
 
     const champs = cles.map(c => `
                     <div class="groupe-form">

@@ -216,8 +216,9 @@ describe('texte troué · C — `insererRepere` pose au curseur, sans souder', (
         // Rendu : une seule espace quand la mention est là, aucune quand elle est vide.
         expect(enonces.rendre(r.texte, { points: ' (3.5 points)' })).toBe('erreurs (3.5 points) pour');
         expect(enonces.rendre(r.texte, { points: '' })).toBe('erreurs pour');
-        // Après {points}, un mot qui suit reçoit quand même son espace.
-        expect(enonces.insererRepere('erreurspour', 7, 7, '{points}').texte).toBe('erreurs{points} pour');
+        // Après {points}, un mot qui suit directement reçoit quand même son espace
+        // (à une frontière : un repère ne se pose plus DANS un mot, voir C.h).
+        expect(enonces.insererRepere('erreurs (pour', 9, 9, '{points}').texte).toBe('erreurs ({points} pour');
     });
 
     it('C.f une position absente ou hors bornes vaut la fin ; une sélection à l\'envers est remise à l\'endroit', () => {
@@ -226,6 +227,33 @@ describe('texte troué · C — `insererRepere` pose au curseur, sans souder', (
         expect(enonces.insererRepere('abc', -4, -4, '{mots}').texte).toBe('{mots} abc');
         expect(enonces.insererRepere('abc def', 7, 4, '{mots}').texte).toBe('abc {mots}');
         expect(enonces.insererRepere(null, 0, 0, '{mots}').texte).toBe('{mots}');
+    });
+
+    it('C.h un repère ne coupe JAMAIS un mot — essai iPad du 3 sept. : « fran {critere} çais »', () => {
+        const t = 'Concentre-toi sur la qualité du français';
+        // fran|çais : 4 lettres de chaque côté ⮕ la fin, on pose après ce qu'on vient de lire.
+        expect(enonces.insererRepere(t, 36, 36, '{critere}').texte).toBe('Concentre-toi sur la qualité du français {critere}');
+        // fr|ançais : le début est plus proche.
+        expect(enonces.insererRepere(t, 34, 34, '{critere}').texte).toBe('Concentre-toi sur la qualité du {critere} français');
+        // franç|ais : la fin est plus proche.
+        expect(enonces.insererRepere(t, 37, 37, '{critere}').texte).toBe('Concentre-toi sur la qualité du français {critere}');
+        // L'apostrophe et le trait d'union tiennent le mot.
+        expect(enonces.insererRepere("aujourd'hui déjà", 8, 8, '{critere}').texte).toBe("aujourd'hui {critere} déjà");
+        expect(enonces.insererRepere('Concentre-toi sur', 10, 10, '{critere}').texte).toBe('Concentre-toi {critere} sur');
+        // À une frontière, rien ne bouge ; le curseur suit le repère.
+        const r = enonces.insererRepere('sur la qualité', 3, 3, '{critere}');
+        expect(r.texte).toBe('sur {critere} la qualité');
+        // Le curseur suit le repère ; l'espace qui suit était déjà là, elle n'est pas insérée.
+        expect(r.curseur).toBe('sur {critere}'.length);
+    });
+
+    it('C.i un curseur dans un repère déjà posé le laisse entier — le neuf se pose après', () => {
+        expect(enonces.insererRepere('Ta production contient {erreurs} erreur', 27, 27, '{mots}').texte)
+            .toBe('Ta production contient {erreurs} {mots} erreur');
+        expect(enonces.insererRepere('{critere} est', 1, 1, '{mots}').texte).toBe('{critere} {mots} est');
+        expect(enonces.insererRepere('{critere} est', 8, 8, '{mots}').texte).toBe('{critere} {mots} est');
+        // Une sélection, elle, est voulue : elle n'est pas déplacée.
+        expect(enonces.insererRepere('français', 2, 6, '{critere}').texte).toBe('fr {critere} is');
     });
 
     it('C.g tout ce qui n\'est pas posable est refusé, et le texte n\'est pas touché', () => {
@@ -275,6 +303,10 @@ describe('texte troué · E — le gabarit offre les repères par le registre', 
     it('E.a les boutons viennent de `reperesDeCle`, et le clic est un `data-action` sans paramètre', () => {
         const src = grilles();
         expect(src).toMatch(/enoncesAlgo\.reperesDeCle\(/);
+        // « retire les accolades » (Grégoire, essai iPad) : le badge montre le mot nu ;
+        // le jeton posé, lui, garde ses accolades (data-jeton).
+        expect(src).toMatch(/data-jeton="\$\{esc\(r\.jeton\)\}"/);
+        expect(src).toMatch(/>\$\{esc\(r\.jeton\.slice\(1, -1\)\)\}<\/button>/);
         expect(src).toMatch(/data-action="insererRepereEnonce"/);
         expect(src).toMatch(/window\.insererRepereEnonce = insererRepereEnonce/);
     });

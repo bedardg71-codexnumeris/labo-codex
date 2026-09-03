@@ -134,8 +134,41 @@
        `scripts/pousser.sh` : verdict Playwright vert à jour sur `3d816782` (0 échec,
        0 instable), hook Vitest vert, POUSSÉ `5887532e..3d816782` sur `origin/main` à
        17 h 58 ; run GitHub 33810757170 lancé. Pile vidée : 0 devant, 0 derrière.
-     ▣ RESTE À GRÉGOIRE : l'iPad (sélecteur natif derrière « Personnalisé… », fermeture au
-       doigt, bandeau parti, case du gabarit) ; la relecture des deux aides du lot 4.
+     ▣ ESSAIS iPad DE GRÉGOIRE SUR 1.114.0 (18 h) — deux défauts, une correction éditoriale.
+       (1) « fran {critere} çais » : le repère coupait le mot. REPRODUIT SUR BUREAU (module
+       pur : « fran {critere} çais », et un curseur dans un repère existant le coupait aussi :
+       « {err {mots} eurs} »). ⮕ `_horsDuMot` dans `insererRepere` : un point d'insertion
+       dans un mot est ramené à la frontière LA PLUS PROCHE (début ou fin), et à distance
+       égale à la FIN — on pose après ce qu'on vient de lire (règle retenue parmi les deux
+       de Grégoire ; « toujours la fin » aurait été aussi prévisible mais moins fidèle à
+       un tap près du début) ; l'apostrophe et le trait d'union tiennent le mot ; dans un
+       repère existant ⮕ après lui ; une sélection n'est pas déplacée. Témoins C.h/C.i + un
+       cas WebKit (« Concen|tre-toi » ⮕ « {critere} Concentre-toi sur {critere} »).
+       (2) « les couleurs de la palette ne se sélectionnent pas, Personnalisé… ne fait
+       rien » — DEUX causes mesurées, pas une : (a) la couleur s'écrivait bien mais rien
+       ne repeignait la pastille du sélecteur, sauf dans l'écran de réglage par un câblage
+       local — vrai sur TOUT navigateur ⮕ `_repeindrePastille` dans `choisirCouleurPalette`
+       + écouteur `input` délégué pour le sélecteur natif, une définition ; le câblage
+       local retiré ; (b) « Personnalisé… » réveillait par `click()` un input 0 × 0 à
+       opacité nulle, que iPadOS peut refuser hors geste direct ⮕ c'est maintenant une
+       ÉTIQUETTE `<label for>` liée à l'input (id généré) : le navigateur l'active lui-même
+       au doigt comme à la souris ; `ouvrirCouleurPerso` retirée (plus aucun lecteur).
+       ⚠ (b) reste INVÉRIFIABLE d'ici : WebKit de bureau ne dit rien du sélecteur natif
+       d'iPadOS ; la spec n'éprouve que le lien étiquette → input. Témoins : U.e, spec
+       gabarit (pastille repeinte rgb(34,197,94), lien vérifié). Break-tests : frontière
+       retirée ⮕ C.h rouge ; repeinte retirée ⮕ spec rouge.
+       (3) ÉDITORIAL — les deux aides du lot 4 lui conviennent SAUF l'exemple : « plutôt que
+       le français écrit, faire le lien avec des codes que l'enseignant identifie sur la
+       copie et qui sont référencés à des sous-critères » ⮕ texte PROPOSÉ dans le rapport,
+       non commité tant qu'il ne l'a pas lu.
+       ↻ Le break-test « repeinte retirée » est resté VERT : la repeinte explicite dans
+       `choisirCouleurPalette` doublait l'écouteur `input` délégué (la pastille cliquée
+       dispatche `input`) ⮕ doublon RETIRÉ, un seul chemin ; l'écouteur, lui, break-testé
+       rouge. « Retire les accolades » (Grégoire, pendant l'essai) ⮕ les badges des repères
+       montrent le mot nu (critere, erreurs, mots, points) ; ce qui se pose dans la zone
+       garde ses accolades (le format que le moteur lit) — témoins E.a + spec.
+     ▣ RESTE À GRÉGOIRE : l'iPad — le sélecteur natif derrière « Personnalisé… » (étiquette),
+       la pastille repeinte, le milieu de mot au doigt ; et le texte des aides.
      ===================================================================== -->
 
 <!-- =====================================================================

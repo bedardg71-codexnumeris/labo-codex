@@ -52,8 +52,14 @@
      *   - inputExtra: chaîne HTML ajoutée à l'input hidden (rare)
      * @returns {string} HTML : <details>...</details><input type="color" hidden>
      */
+    var _compteurPickerCouleur = 0;
     function renderPickerCouleur(couleurCourante, opts) {
         opts = opts || {};
+        // Essai iPad de Grégoire sur 1.114.0 : « Personnalisé… » ne faisait rien.
+        // Il réveillait l'input caché (0 × 0, opacité nulle) par `click()`, que
+        // iPadOS peut refuser. Une ÉTIQUETTE liée à l'input, elle, est activée
+        // par le navigateur lui-même, au doigt comme à la souris — d'où un id.
+        var inputId = 'travaux-couleur-perso-' + (++_compteurPickerCouleur);
         var summaryClass = opts.summaryClass || 'travaux-retro-couleur';
         var summaryContent = opts.summaryContent || '';
         var dataPastilleAttr = opts.dataPastilleId ? ' data-pastille-id="' + opts.dataPastilleId + '"' : '';
@@ -77,10 +83,10 @@
              +   '<summary class="' + summaryClass + '" style="background:' + couleurCourante + ';"' + dataPastilleAttr + ' title="Changer la couleur">' + summaryContent + '</summary>'
              +   '<div class="travaux-retro-couleur-popover">'
              +     '<div class="travaux-retro-couleur-grille">' + grille + '</div>'
-             +     '<button type="button" class="travaux-btn-couleur-perso" data-action="travauxOutils.ouvrirCouleurPerso">Personnalisé&hellip;</button>'
+             +     '<label class="travaux-btn-couleur-perso" for="' + inputId + '">Personnalisé&hellip;</label>'
              +   '</div>'
              + '</details>'
-             + '<input type="color" class="travaux-retro-couleur-input"'
+             + '<input type="color" class="travaux-retro-couleur-input" id="' + inputId + '"'
              +   inputDataAttrs
              +   inputExtra
              +   ' value="' + couleurCourante + '">';
@@ -101,9 +107,11 @@
         var input = details.parentNode.querySelector('input[type="color"]');
         if (!input) return;
         input.value = couleur;
-        // Marquer l'actif dans la grille
-        details.querySelectorAll('.travaux-btn-couleur').forEach(function(b) { b.classList.remove('actif'); });
-        el.classList.add('actif');
+        // Essai iPad de Grégoire sur 1.114.0 : « les couleurs ne se sélectionnent
+        // pas ». Elles s'écrivaient, mais rien ne repeignait la pastille — seul
+        // l'écran de réglage le faisait, par un câblage à lui. C'est l'événement
+        // `input` dispatché ci-dessous qui la repeint désormais, pour tous les
+        // sélecteurs et les deux chemins (pastille, sélecteur natif) : un seul.
         // Déclencher input + change pour réactiver les sync existants (input :
         // listeners directs tampons ; change : dispatcher data-on-change échelles).
         input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -112,21 +120,21 @@
         details.open = false;
     }
 
-    /**
-     * Handler clic sur « Personnalisé » : déclenche le picker natif macOS sur
-     * l'input couleur frère du <details>. Permet de choisir une couleur
-     * hors-palette tout en gardant la convention 12 couleurs prédéfinies.
-     */
-    function ouvrirCouleurPerso(el) {
-        if (!el) return;
-        var details = el.closest('details');
+    // Toute couleur reçue par l'input d'un sélecteur — pastille cliquée ou
+    // sélecteur natif (« Personnalisé… ») — repeint sa pastille (le <summary>)
+    // et marque la pastille active. Pour tous les sélecteurs, sans câblage par
+    // écran : une définition.
+    document.addEventListener('input', function(e) {
+        var input = e.target;
+        if (!input || !input.matches || !input.matches('input.travaux-retro-couleur-input')) return;
+        var details = input.parentNode && input.parentNode.querySelector('details.travaux-retro-couleur-picker');
         if (!details) return;
-        var input = details.parentNode.querySelector('input[type="color"]');
-        if (input) {
-            details.open = false;
-            input.click();
-        }
-    }
+        var pastille = details.querySelector('summary');
+        if (pastille) pastille.style.background = input.value;
+        details.querySelectorAll('.travaux-btn-couleur').forEach(function(b) {
+            b.classList.toggle('actif', (b.getAttribute('data-couleur') || '').toLowerCase() === String(input.value).toLowerCase());
+        });
+    }, true);
     const RESOLUTION_REFERENCE = 1000; // Largeur de reference pour normaliser l'epaisseur
 
     // Flag pour masquer le bouton « Codes d'erreurs » (mode Modelisation)
@@ -3464,16 +3472,6 @@
         });
         document.body.appendChild(overlay);
 
-        // Wiring: changement couleur → met à jour la pastille en live
-        // (#287 : la pastille est maintenant un <summary> à l'intérieur du
-        // picker custom — sélecteur élargi pour matcher summary ou span).
-        overlay.querySelectorAll('input[data-color-id]').forEach(colorInput => {
-            const pastille = overlay.querySelector('[data-pastille-id="' + colorInput.dataset.colorId + '"]');
-            colorInput.addEventListener('input', function() {
-                if (pastille) pastille.style.background = colorInput.value;
-            });
-        });
-
         // Wiring: drag-and-drop pour réordonner
         configurerDragRetroErrFr(overlay.querySelector('#travaux-retro-errfr-liste'));
     }
@@ -3879,8 +3877,7 @@
         confirmerEtFermerImportTampons: confirmerEtFermerImportTampons,
         // #287 — Picker couleur custom (réutilisable hors travaux-outils)
         renderPickerCouleur: renderPickerCouleur,
-        choisirCouleurPalette: choisirCouleurPalette,
-        ouvrirCouleurPerso: ouvrirCouleurPerso
+        choisirCouleurPalette: choisirCouleurPalette
     };
 
 })();

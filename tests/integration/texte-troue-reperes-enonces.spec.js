@@ -54,6 +54,7 @@ test('texte troué · chaque zone offre ses repères, et « Aucune annotation »
         [...document.querySelectorAll('#listeCriteres .groupe-form:has(textarea[data-enonce-cle])')].map(g => ({
             cle: g.querySelector('textarea').dataset.enonceCle,
             reperes: [...g.querySelectorAll('[data-action="insererRepereEnonce"]')].map(b => b.dataset.jeton),
+            textes: [...g.querySelectorAll('[data-action="insererRepereEnonce"]')].map(b => b.textContent.trim()),
             visibles: [...g.querySelectorAll('[data-action="insererRepereEnonce"]')].every(b => b.offsetParent !== null),
             // La palette AVANT l'établi (Grégoire, 3 sept. après-midi) : la rangée
             // précède la zone, et l'aide suit la zone — c'est le champ qu'elle décrit.
@@ -63,6 +64,8 @@ test('texte troué · chaque zone offre ses repères, et « Aucune annotation »
     console.log('OFFERTS →', JSON.stringify(offerts));
     const parCle = Object.fromEntries(offerts.map(o => [o.cle, o.reperes]));
     expect(parCle.decompte).toEqual(['{critere}', '{erreurs}', '{mots}', '{points}']);
+    // Le badge montre le mot sans accolades ; ce qu'il pose les garde.
+    expect(offerts.find(o => o.cle === 'decompte').textes).toEqual(['critere', 'erreurs', 'mots', 'points']);
     expect(parCle.priorite).toEqual(['{critere}']);
     expect(parCle.concentre).toEqual(['{critere}']);
     expect(parCle.aucune).toEqual(['{critere}']);
@@ -124,6 +127,22 @@ test('texte troué · au milieu d\'une phrase, le repère prend ses espaces, et 
     console.log('MILIEU →', JSON.stringify(r));
     expect(r.valeur).toBe('Ta production contient {mots} {erreurs} erreur{s}{points} pour {mots} mots.');
     expect(r.rendu).toBe('Ta production contient 500 3 erreurs pour 500 mots.');
+});
+
+test('texte troué · un curseur au milieu d\'un mot : le repère se pose à la frontière, jamais dans le mot (essai iPad)', async ({ page }) => {
+    await ouvrir(page);
+    const z = zone(page, 'concentre');
+    await expect(z).toHaveValue('Concentre-toi sur {critere}');
+    await z.click();
+    // « Concentre-toi sur {critere} » : curseur dans « Concen|tre-toi » (6 lettres avant, 7 après le tiret compris).
+    await page.evaluate(() => {
+        const t = document.querySelector('#listeCriteres textarea[data-enonce-cle="concentre"]');
+        t.setSelectionRange(6, 6);
+    });
+    await repere(page, 'concentre', '{critere}').click();
+    const v = await z.inputValue();
+    console.log('MILIEU DE MOT →', JSON.stringify(v));
+    expect(v).toBe('{critere} Concentre-toi sur {critere}');
 });
 
 test('texte troué · une zone jamais visitée reçoit le repère à la fin, pas en tête', async ({ page }) => {
