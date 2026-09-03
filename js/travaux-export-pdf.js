@@ -25,9 +25,20 @@
      * @param {string} fichierId - ID du fichier
      * @returns {Promise<{doc: Object, nomSortie: string, fichierId: string}>}
      */
+    // Lot 2 (3 sept. 2026) — la grille de la copie en cours d'export, posée à
+    // l'entrée (`genererDocPDF`, que la prévisualisation emprunte aussi) et lue
+    // par `dessinerForme` : le numéro d'un code sur le PDF est celui de la liste
+    // de CETTE copie, pas de la copie ouverte à l'écran. Null = repli (position
+    // dans l'ordre, comme hier).
+    let _grilleExport = null;
+    function _poserGrilleExport(fichier) {
+        _grilleExport = (typeof codesAnnotation !== 'undefined' && fichier) ? codesAnnotation.grilleDeCopie(fichier) : null;
+    }
+
     async function genererDocPDF(fichierId, productionIdOverride) {
         const fichier = travauxStockage.obtenirFichierParId(fichierId);
         if (!fichier) throw new Error('Fichier introuvable');
+        _poserGrilleExport(fichier);
 
         const blob = await travauxStockage.recupererBlob(fichierId);
         if (!blob) throw new Error('Blob introuvable');
@@ -583,12 +594,11 @@
                     const mxE = (x1 + x2) / 2;
                     const myE = (y1 + y2) / 2;
                     const rayonE = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1)) / 2;
-                    // Utiliser la position dans l'ordre personnalisé
+                    // Lot 2 — le numéro vient de la liste de la grille de la copie
+                    // exportée (`_grilleExport`) ; repli = position dans l'ordre.
                     let numE = forme.type.replace('errfr_', '');
-                    if (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirOrdreErreursFr) {
-                        const ordreE = travauxOutils.obtenirOrdreErreursFr();
-                        const idxE = ordreE.indexOf(forme.type);
-                        if (idxE !== -1) numE = idxE + 1;
+                    if (typeof codesAnnotation !== 'undefined') {
+                        numE = codesAnnotation.code(_grilleExport, forme.type).numero;
                     }
                     ctx.fillStyle = forme.color || '#888888';
                     ctx.beginPath();

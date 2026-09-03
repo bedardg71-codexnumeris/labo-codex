@@ -1,13 +1,13 @@
 /**
- * Sentinelle — LES TAMPONS PAR GRILLE, lot 1 : une seule source de lecture
+ * Sentinelle — LES CODES PAR GRILLE, lot 1 : une seule source de lecture
  * (3 septembre 2026, cadrage « les tampons cessent d'être une liste de
  * français, longue de dix »).
  *
  * Ce que ce lot change : les dix codes d'erreur quittent `travaux-outils.js`
- * pour devenir le REPLI d'un module pur, `js/tampons-erreurs.js`, et une grille
+ * pour devenir le REPLI d'un module pur, `js/codes-annotation.js`, et une grille
  * dont le critère algorithmique porte le geste d'activation fournit ses
- * propres tampons — ses sous-critères. Décision de Grégoire, le 3 septembre :
- * « les tampons sont les sous-critères », activation par geste partout.
+ * propres codes — ses sous-critères. Décision de Grégoire, le 3 septembre :
+ * « les codes sont les sous-critères », activation par geste partout.
  *
  * Ce que cette sentinelle verrouille :
  *   A  LE REPLI = HIER, AU CARACTÈRE PRÈS — dix identifiants, noms, couleurs,
@@ -17,12 +17,15 @@
  *      remplace tout) ;
  *   C  une grille activée rend ses sous-critères — code, nom, couleur, texte —
  *      et retombe sur le repli dès qu'un maillon manque ;
- *   D  `tampon()` ne rend JAMAIS null : un tampon posé ne se perd pas ;
+ *   D  `code()` ne rend JAMAIS null : un code posé ne se perd pas ;
  *   E  copie → production → grille, chaque maillon manquant rend null ;
  *   F  les témoins de source : la constante est partie, le module est chargé
  *      avant ses trois lecteurs, et après le registre #581.
  *
  * Break-tests joués le 3 septembre 2026 — voir le bloc SESSION 19 de SESSION.md.
+ * Renommé le même jour (tampons → codes), à la demande de Grégoire : « le code
+ * identifie des éléments du travail, le tampon commente » — sans qu'un essai
+ * change de sens.
  */
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
@@ -57,7 +60,7 @@ function charger(magasin = {}, extras = {}) {
     const fenetre = {};
     chargerScript('js/evaluation-enonces.js', {}, fenetre);
     const db = { getSync: (k, d) => (Object.prototype.hasOwnProperty.call(magasin, k) ? magasin[k] : d) };
-    chargerScript('js/tampons-erreurs.js', Object.assign({ db, cle: (k) => 'a2026_' + k }, extras), fenetre);
+    chargerScript('js/codes-annotation.js', Object.assign({ db, cle: (k) => 'a2026_' + k }, extras), fenetre);
     return fenetre;
 }
 
@@ -71,15 +74,15 @@ const SC_PHILO = [
 const grille = (sousCriteres, drapeau = true, extra = {}) => ({
     id: 'G1', nom: 'Philo', criteres: [Object.assign({
         id: 'CR', nom: 'Rigueur', type: 'algorithmique', ponderation: 20,
-        tamponsDepuisSousCriteres: drapeau, sousCriteres
+        codesDepuisSousCriteres: drapeau, sousCriteres
     }, extra)]
 });
 
 /* ============================================================ A — LE REPLI */
 
-describe('tampons par grille · A — le repli est hier, au caractère près', () => {
-    it('A.a dix tampons, mêmes identifiants, mêmes noms, mêmes couleurs, numérotés 1 à 10', () => {
-        const liste = charger().tamponsErreurs.listeTampons(null);
+describe('codes par grille · A — le repli est hier, au caractère près', () => {
+    it('A.a dix codes, mêmes identifiants, mêmes noms, mêmes couleurs, numérotés 1 à 10', () => {
+        const liste = charger().codesAnnotation.listeCodes(null);
         expect(liste.map(t => t.id)).toEqual(IDS_HIER);
         expect(liste.map(t => t.nom)).toEqual(NOMS_HIER);
         expect(liste.map(t => t.nomCourt)).toEqual(NOMS_COURTS_HIER);
@@ -90,55 +93,55 @@ describe('tampons par grille · A — le repli est hier, au caractère près', (
     });
 
     it('A.b les dix textes sont ceux d\'hier — empreinte sha256 identique', () => {
-        const m = charger().tamponsErreurs;
+        const m = charger().codesAnnotation;
         const textes = IDS_HIER.map(id => m.RETROACTIONS_DEFAUT[id]).join('\n');
         expect(createHash('sha256').update(textes, 'utf8').digest('hex')).toBe(SHA_TEXTES_HIER);
-        // Et chaque tampon du repli les porte, sans personnalisation.
-        m.listeTampons(null).forEach(t => expect(t.retroaction).toBe(m.RETROACTIONS_DEFAUT[t.id]));
+        // Et chaque code du repli les porte, sans personnalisation.
+        m.listeCodes(null).forEach(t => expect(t.retroaction).toBe(m.RETROACTIONS_DEFAUT[t.id]));
     });
 
     it('A.c l\'apostrophe typographique de « d’usage » survit — pas d\'uniformisation', () => {
-        expect(charger().tamponsErreurs.listeTampons(null)[9].nom).toContain('’');
+        expect(charger().codesAnnotation.listeCodes(null)[9].nom).toContain('’');
     });
 
     it('A.d ce qui est exporté est une copie : le muter ne touche pas la liste', () => {
-        const m = charger().tamponsErreurs;
+        const m = charger().codesAnnotation;
         m.REPLI_DEFAUT[0].nom = 'CASSÉ';
         m.REPLI_DEFAUT.push({ id: 'errfr_99' });
         m.COULEURS_DEFAUT[0] = '#000000';
-        expect(m.listeTampons(null).map(t => t.nom)).toEqual(NOMS_HIER);
-        expect(m.listeTampons(null)).toHaveLength(10);
-        expect(m.listeTampons(null)[0].couleur).toBe('#c62828');
+        expect(m.listeCodes(null).map(t => t.nom)).toEqual(NOMS_HIER);
+        expect(m.listeCodes(null)).toHaveLength(10);
+        expect(m.listeCodes(null)[0].couleur).toBe('#c62828');
     });
 });
 
 /* ============================================================ B — LA PERSONNALISATION */
 
-describe('tampons par grille · B — les quatre clés globales sont respectées, règles d\'hier', () => {
+describe('codes par grille · B — les quatre clés globales sont respectées, règles d\'hier', () => {
     it('B.a nom et couleur personnalisés par identifiant, les autres intacts', () => {
         const liste = charger({ personnalisationErreursFr: { errfr_3: { nom: 'Ponct.', couleur: '#000001' } } })
-            .tamponsErreurs.listeTampons(null);
+            .codesAnnotation.listeCodes(null);
         expect(liste[2]).toMatchObject({ id: 'errfr_3', nom: 'Ponct.', couleur: '#000001' });
         expect(liste[0]).toMatchObject({ nom: NOMS_HIER[0], couleur: COULEURS_HIER[0] });
     });
 
     it('B.b l\'ordre personnalisé donne les numéros ; un ordre de mauvaise longueur est ignoré ; un inconnu est filtré', () => {
         const inverse = IDS_HIER.slice().reverse();
-        let liste = charger({ ordreErreursFr: inverse }).tamponsErreurs.listeTampons(null);
+        let liste = charger({ ordreErreursFr: inverse }).codesAnnotation.listeCodes(null);
         expect(liste.map(t => t.id)).toEqual(inverse);
         expect(liste[0]).toMatchObject({ id: 'errfr_10', numero: '1', code: 10 });
         // Neuf entrées : `obtenirOrdreErreursFr` d'hier exigeait dix.
-        liste = charger({ ordreErreursFr: IDS_HIER.slice(0, 9) }).tamponsErreurs.listeTampons(null);
+        liste = charger({ ordreErreursFr: IDS_HIER.slice(0, 9) }).codesAnnotation.listeCodes(null);
         expect(liste.map(t => t.id)).toEqual(IDS_HIER);
         // Dix entrées dont une inconnue : filtrée, numéros sur la liste restante.
         const avecInconnu = IDS_HIER.slice(0, 9).concat(['errfr_x']);
-        liste = charger({ ordreErreursFr: avecInconnu }).tamponsErreurs.listeTampons(null);
+        liste = charger({ ordreErreursFr: avecInconnu }).codesAnnotation.listeCodes(null);
         expect(liste).toHaveLength(9);
         expect(liste[8].numero).toBe('9');
     });
 
     it('B.c l\'objet de textes enregistré REMPLACE les défauts, clé par clé — une clé absente est vide', () => {
-        const liste = charger({ retroactionsErreursFr: { errfr_1: 'Mon texte' } }).tamponsErreurs.listeTampons(null);
+        const liste = charger({ retroactionsErreursFr: { errfr_1: 'Mon texte' } }).codesAnnotation.listeCodes(null);
         expect(liste[0].retroaction).toBe('Mon texte');
         expect(liste[1].retroaction).toBe('');
     });
@@ -148,20 +151,20 @@ describe('tampons par grille · B — les quatre clés globales sont respectées
         chargerScript('js/evaluation-enonces.js', {}, fenetre);
         const ecritures = [];
         const db = { getSync: () => null, setSync: (k) => ecritures.push(k), set: (k) => ecritures.push(k) };
-        chargerScript('js/tampons-erreurs.js', { db }, fenetre);
-        fenetre.tamponsErreurs.listeTampons(null);
-        fenetre.tamponsErreurs.tampon(null, 'errfr_2');
-        fenetre.tamponsErreurs.grilleDeCopie({ productionId: 'P' });
+        chargerScript('js/codes-annotation.js', { db }, fenetre);
+        fenetre.codesAnnotation.listeCodes(null);
+        fenetre.codesAnnotation.code(null, 'errfr_2');
+        fenetre.codesAnnotation.grilleDeCopie({ productionId: 'P' });
         expect(ecritures).toEqual([]);
     });
 });
 
 /* ============================================================ C — LA GRILLE */
 
-describe('tampons par grille · C — une grille activée rend ses sous-critères', () => {
+describe('codes par grille · C — une grille activée rend ses sous-critères', () => {
     it('C.a code, nom, couleur, texte — pondération 0 exclue, code en double ignoré, nom vide nommé', () => {
-        const m = charger().tamponsErreurs;
-        const liste = m.listeTampons(grille(SC_PHILO));
+        const m = charger().codesAnnotation;
+        const liste = m.listeCodes(grille(SC_PHILO));
         expect(liste.map(t => t.id)).toEqual(['errfr_1', 'errfr_2', 'errfr_3']);
         expect(liste.map(t => t.numero)).toEqual(['1', '2', '3']);
         expect(liste[0]).toMatchObject({ nom: 'Thèse non dégagée', retroaction: 'La thèse doit être explicite.', couleur: '#c62828', source: 'grille' });
@@ -173,29 +176,29 @@ describe('tampons par grille · C — une grille activée rend ses sous-critère
     });
 
     it('C.b sans le geste, la grille est ignorée — le repli, à l\'identique', () => {
-        const m = charger().tamponsErreurs;
-        expect(m.listeTampons(grille(SC_PHILO, false))).toEqual(m.listeTampons(null));
+        const m = charger().codesAnnotation;
+        expect(m.listeCodes(grille(SC_PHILO, false))).toEqual(m.listeCodes(null));
         // Drapeau ABSENT (une grille d'avant ce lot) — pas `undefined` passé à
         // l'aide, dont la valeur par défaut est `true`.
         const sansDrapeau = grille(SC_PHILO);
-        delete sansDrapeau.criteres[0].tamponsDepuisSousCriteres;
-        expect(m.listeTampons(sansDrapeau)).toEqual(m.listeTampons(null));
+        delete sansDrapeau.criteres[0].codesDepuisSousCriteres;
+        expect(m.listeCodes(sansDrapeau)).toEqual(m.listeCodes(null));
         // Le drapeau est un booléen strict : « 'true' » n'active rien.
-        expect(m.listeTampons(grille(SC_PHILO, 'true'))).toEqual(m.listeTampons(null));
+        expect(m.listeCodes(grille(SC_PHILO, 'true'))).toEqual(m.listeCodes(null));
         expect(m.estActive(grille(SC_PHILO, false))).toBe(false);
     });
 
     it('C.c un geste sur une liste sans poids, ou sans critère algorithmique, retombe sur le repli', () => {
-        const m = charger().tamponsErreurs;
-        expect(m.listeTampons(grille([{ code: '1', nom: 'x', ponderation: 0 }]))).toEqual(m.listeTampons(null));
-        expect(m.listeTampons(grille([]))).toEqual(m.listeTampons(null));
-        expect(m.listeTampons(grille(SC_PHILO, true, { type: 'standard' }))).toEqual(m.listeTampons(null));
-        expect(m.listeTampons({ id: 'G', criteres: [] })).toEqual(m.listeTampons(null));
-        expect(m.listeTampons(undefined)).toEqual(m.listeTampons(null));
+        const m = charger().codesAnnotation;
+        expect(m.listeCodes(grille([{ code: '1', nom: 'x', ponderation: 0 }]))).toEqual(m.listeCodes(null));
+        expect(m.listeCodes(grille([]))).toEqual(m.listeCodes(null));
+        expect(m.listeCodes(grille(SC_PHILO, true, { type: 'standard' }))).toEqual(m.listeCodes(null));
+        expect(m.listeCodes({ id: 'G', criteres: [] })).toEqual(m.listeCodes(null));
+        expect(m.listeCodes(undefined)).toEqual(m.listeCodes(null));
     });
 
     it('C.d un code numérique ou à deux chiffres passe tel quel — la série Unicode n\'est pas une limite', () => {
-        const liste = charger().tamponsErreurs.listeTampons(grille([
+        const liste = charger().codesAnnotation.listeCodes(grille([
             { code: 12, nom: 'Douze', ponderation: 1 }, { code: ' 7 ', nom: 'Sept', ponderation: 2 }
         ]));
         expect(liste.map(t => t.id)).toEqual(['errfr_12', 'errfr_7']);
@@ -205,22 +208,22 @@ describe('tampons par grille · C — une grille activée rend ses sous-critère
 
 /* ============================================================ D — JAMAIS NULL */
 
-describe('tampons par grille · D — un tampon posé ne se perd jamais', () => {
-    it('D.a un identifiant connu rend son entrée ; un inconnu rend un tampon neutre, numéroté, jamais null', () => {
-        const m = charger().tamponsErreurs;
-        expect(m.tampon(null, 'errfr_3')).toMatchObject({ id: 'errfr_3', nom: NOMS_HIER[2], numero: '3' });
+describe('codes par grille · D — un code posé ne se perd jamais', () => {
+    it('D.a un identifiant connu rend son entrée ; un inconnu rend un code neutre, numéroté, jamais null', () => {
+        const m = charger().codesAnnotation;
+        expect(m.code(null, 'errfr_3')).toMatchObject({ id: 'errfr_3', nom: NOMS_HIER[2], numero: '3' });
         const g = grille(SC_PHILO);
-        expect(m.tampon(g, 'errfr_2')).toMatchObject({ nom: 'Argument circulaire', numero: '2' });
-        const inconnu = m.tampon(g, 'errfr_7');
+        expect(m.code(g, 'errfr_2')).toMatchObject({ nom: 'Argument circulaire', numero: '2' });
+        const inconnu = m.code(g, 'errfr_7');
         expect(inconnu).toMatchObject({ id: 'errfr_7', numero: '7', nom: 'Code 7', couleur: '#888888', retroaction: '', inconnu: true });
-        expect(m.tampon(null, undefined)).toMatchObject({ inconnu: true });
-        expect(m.tampon(null, 'sym-x')).toMatchObject({ id: 'sym-x', numero: 'sym-x', inconnu: true });
+        expect(m.code(null, undefined)).toMatchObject({ inconnu: true });
+        expect(m.code(null, 'sym-x')).toMatchObject({ id: 'sym-x', numero: 'sym-x', inconnu: true });
     });
 });
 
 /* ============================================================ E — COPIE → GRILLE */
 
-describe('tampons par grille · E — copie → production → grille, chaque maillon manquant rend null', () => {
+describe('codes par grille · E — copie → production → grille, chaque maillon manquant rend null', () => {
     const G1 = grille(SC_PHILO);
     const G2 = Object.assign({}, grille(SC_PHILO), { id: 'G2' });
     const magasin = () => ({
@@ -229,7 +232,7 @@ describe('tampons par grille · E — copie → production → grille, chaque ma
     });
 
     it('E.a copie orpheline, production absente, grille absente ⮕ null', () => {
-        const m = charger(magasin()).tamponsErreurs;
+        const m = charger(magasin()).codesAnnotation;
         expect(m.grilleDeCopie(null)).toBeNull();
         expect(m.grilleDeCopie({ id: 'F', productionId: '' })).toBeNull();
         expect(m.grilleDeCopie({ id: 'F', productionId: 'P_ABSENTE' })).toBeNull();
@@ -237,29 +240,29 @@ describe('tampons par grille · E — copie → production → grille, chaque ma
     });
 
     it('E.b sans lecteur d\'évaluations, `prod.grilleId` sert de repli', () => {
-        const m = charger(magasin()).tamponsErreurs;
+        const m = charger(magasin()).codesAnnotation;
         expect(m.grilleDeCopie({ id: 'F', productionId: 'P1' })).toBe(G1);
     });
 
     it('E.c les ÉVALUATIONS de la production tranchent avant `prod.grilleId` (#346 : ce champ peut être périmé)', () => {
         const fenetre = charger(magasin());
         fenetre._modeleProductionPourEval = (prod) => ({ grilleId: prod.id === 'P1' ? 'G2' : '' });
-        expect(fenetre.tamponsErreurs.grilleDeCopie({ id: 'F', productionId: 'P1' })).toBe(G2);
+        expect(fenetre.codesAnnotation.grilleDeCopie({ id: 'F', productionId: 'P1' })).toBe(G2);
         fenetre._modeleProductionPourEval = () => ({ grilleId: 'G_DISPARUE' });
-        expect(fenetre.tamponsErreurs.grilleDeCopie({ id: 'F', productionId: 'P1' })).toBeNull();
+        expect(fenetre.codesAnnotation.grilleDeCopie({ id: 'F', productionId: 'P1' })).toBeNull();
     });
 
     it('E.d le mode démo est respecté : `obtenirDonneesSelonMode` passe avant `db`', () => {
         const m = charger(magasin(), {
             obtenirDonneesSelonMode: (nom) => nom === 'productions' ? [{ id: 'P1', grilleId: 'G2' }] : [G2]
-        }).tamponsErreurs;
+        }).codesAnnotation;
         expect(m.grilleDeCopie({ id: 'F', productionId: 'P1' })).toBe(G2);
     });
 });
 
 /* ============================================================ F — LES SOURCES */
 
-describe('tampons par grille · F — la constante est partie, le module est chargé au bon endroit', () => {
+describe('codes par grille · F — la constante est partie, le module est chargé au bon endroit', () => {
     it('F.a `CODES_ERREURS_FR` et les textes par défaut n\'existent plus dans travaux-outils.js ni chez ses lecteurs', () => {
         ['js/travaux-outils.js', 'js/evaluation-retroaction.js', 'js/synthese-retroaction-data.js'].forEach(rel => {
             expect(source(rel).includes('CODES_ERREURS_FR'), `${rel} porte encore la constante`).toBe(false);
@@ -269,18 +272,18 @@ describe('tampons par grille · F — la constante est partie, le module est cha
         expect(source('js/travaux-outils.js')).not.toMatch(/^\s*errfr_\d+:\s*\{/m);
     });
 
-    it('F.b les trois lecteurs passent par `tamponsErreurs`', () => {
+    it('F.b les trois lecteurs passent par `codesAnnotation`', () => {
         ['js/travaux-outils.js', 'js/evaluation-retroaction.js', 'js/synthese-retroaction-data.js'].forEach(rel => {
-            expect(source(rel).includes('tamponsErreurs'), `${rel} ne lit pas le module`).toBe(true);
+            expect(source(rel).includes('codesAnnotation'), `${rel} ne lit pas le module`).toBe(true);
         });
     });
 
     it('F.c index.html charge le module APRÈS le registre #581 et AVANT ses trois lecteurs', () => {
         const html = source('index.html');
         const pos = (f) => html.indexOf(`js/${f}.js`);
-        expect(pos('tampons-erreurs')).toBeGreaterThan(pos('evaluation-enonces'));
+        expect(pos('codes-annotation')).toBeGreaterThan(pos('evaluation-enonces'));
         ['travaux-outils', 'synthese-retroaction-data', 'evaluation-retroaction'].forEach(c => {
-            expect(pos('tampons-erreurs'), `avant ${c}.js`).toBeLessThan(pos(c));
+            expect(pos('codes-annotation'), `avant ${c}.js`).toBeLessThan(pos(c));
         });
     });
 });

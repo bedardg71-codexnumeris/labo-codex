@@ -4,7 +4,7 @@
 > `CADRAGE-2026-09-03-tampons-par-grille.md`** (Cowork, 14 h 58). Le cadrage disait « remesure
 > tout avant d'en tirer une consigne » : c'est fait, en lecture seule, et **trois lignes du
 > cadrage sont corrigées ci-dessous**.
-> ↻ **GO DE GRÉGOIRE, 3 septembre en après-midi** — Q1 : (a) les tampons sont les sous-critères ;
+> ↻ **GO DE GRÉGOIRE, 3 septembre en après-midi** — Q1 : (a) les codes sont les sous-critères ;
 > Q2 : (a) activation par geste partout ; Q3 : oui aux mots proposés. **Ce fichier est devenu la
 > consigne du chantier**, exécutée lot par lot dans l'ordre du §5, un commit par lot (trace :
 > bloc SESSION 19 de `SESSION.md`). Deux suppositions nommées à l'exécution : un sous-critère de
@@ -114,7 +114,7 @@ lui, la palette lirait les sous-critères de la grille de Grégoire dès la livr
 prendraient les noms courts des sous-critères (« Syntaxe » pour « Construction syntaxique »),
 et ses rétroactions viendraient de la grille au lieu de ses textes personnalisés globaux — **ce
 que ses élèves lisent changerait sans qu'il l'ait voulu**. ⮕ Un drapeau sur le critère
-algorithmique (`tamponsDepuisSousCriteres: true`), posé par un bouton du gabarit ; **absent =
+algorithmique (`codesDepuisSousCriteres: true`), posé par un bouton du gabarit ; **absent =
 repli, exactement comme aujourd'hui.** Pour une grille NEUVE, le défaut se décide (§7, Q2).
 
 **Ce qui ne bouge pas, et c'est mesurable :**
@@ -140,8 +140,8 @@ listes n'en font plus qu'une. C'est le vrai gain de la fusion ; il attend son pr
 ## 5. Les lots — quatre, dans cet ordre, chacun livrable seul
 
 **Lot 1 — une seule source de lecture, aucun changement visible.** Un module pur
-`js/tampons-erreurs.js` (patron #667/#668/#581 : sans DOM, testable en Node) :
-`listeTampons(grille)` rend `[{id, code, nom, couleur, retroaction}]` depuis les sous-critères
+`js/codes-annotation.js` (patron #667/#668/#581 : sans DOM, testable en Node) :
+`listeCodes(grille)` rend `[{id, code, nom, couleur, retroaction}]` depuis les sous-critères
 si le drapeau est posé, sinon le **REPLI** = les dix + les quatre clés globales (noms, couleurs,
 ordre, textes) ; `resoudreGrilleDeCopie(fichier)` (§3). Les 15 sites `CODES_ERREURS_FR`, les
 compteurs (`travaux-outils.js:2242-2290`) et `OUTILS.errfr_*` lisent la liste résolue.
