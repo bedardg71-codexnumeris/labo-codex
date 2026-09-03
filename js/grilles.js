@@ -3474,12 +3474,28 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
     ).join('');
     const modeleCourant = modeles.find(m => m.id === e.modeleId);
 
+    // Le texte troué, étape 1 (3 septembre 2026) — sous chaque zone, les
+    // repères qu'elle OFFRE. Un clic pose le repère au curseur
+    // (`insererRepereEnonce`) : rien à taper, donc plus de `[service]` tapé
+    // pour `{service}`. La zone reste éditable à la main — on ajoute un chemin,
+    // on n'en ferme aucun. ⚠ Chaque zone n'offre que ce qu'un appel remplit
+    // (`reperesDeCle`) : « Aucune annotation » n'offre pas {erreurs}, qui y
+    // vaudrait toujours vide. Deux familles, deux couleurs (cadrage du 2 sept.).
+    const reperesDe = (c) => window.enoncesAlgo.reperesDeCle(c.cle).map(r => `
+                            <button type="button" class="repere-enonce repere-enonce--${esc(r.famille)}"
+                                    data-action="insererRepereEnonce" data-jeton="${esc(r.jeton)}"
+                                    title="${esc(r.libelle)} — ${esc(r.aide)}"
+                                    aria-label="Poser ${esc(r.libelle)}, ${esc(r.jeton)}, dans « ${esc(c.libelle)} »">${esc(r.jeton)}</button>`).join('');
+
     const champs = cles.map(c => `
                     <div class="groupe-form">
                         <label style="font-size: 0.85rem; color: var(--gris-moyen);">${esc(c.libelle)}</label>
                         <textarea class="controle-form" rows="2"
                                   data-on-change="${handlerTexte}" ${datasCommunes} data-enonce-cle="${esc(c.cle)}"
                                   title="${esc(c.aide)}">${esc(e.enonces[c.cle])}</textarea>
+                        <div class="reperes-enonce" role="group" aria-label="Repères à poser dans « ${esc(c.libelle)} »">
+                            <span class="reperes-enonce-mot">Poser :</span>${reperesDe(c)}
+                        </div>
                         <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 2px;">${esc(c.aide)}</small>
                     </div>`).join('');
 
@@ -3498,9 +3514,8 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
                     ${champs}
                 </div>
                 <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">
-                    Écris ${esc(window.enoncesAlgo.JETON_CRITERE)} là où le nom de ce critère doit apparaître,
-                    ${esc(window.enoncesAlgo.JETON_ERREURS)} pour le nombre d'erreurs et
-                    ${esc(window.enoncesAlgo.JETON_MOTS)} pour le nombre de mots.
+                    Un clic sur un repère le pose dans la phrase, là où est le curseur — rien à taper.
+                    Le repère bleu est écrit dans la grille ; les verts se remplissent à la correction, copie par copie.
                     Un repère que la phrase n'a pas à remplir disparaît proprement.
                     Une zone laissée VIDE fait taire l'énoncé.
                 </small>${e.herite && critere.modeleEnonces ? `
@@ -4981,13 +4996,32 @@ function modifierModeleEnoncesTempHandler(el) {
     afficherCriteresTemp();
 }
 
-function modifierTexteEnonceTempHandler(el) {
-    var index = parseInt(el.dataset.critereIndex);
-    if (!window.tempCriteres || !window.tempCriteres[index]) return;
+/**
+ * Le texte troué, étape 1 (3 septembre 2026) — l'ÉCRITURE d'une zone, sans son
+ * rendu. Deux gestes y passent : la frappe (`change`, qui re-rend ensuite,
+ * comme tout le gabarit) et la pose d'un repère (`insererRepereEnonce`, qui ne
+ * re-rend PAS — le curseur doit survivre au clic, voir là-bas).
+ */
+function _ecrireTexteEnonceTemp(index, cleEnonce, valeur) {
+    if (!window.tempCriteres || !window.tempCriteres[index]) return false;
     var critere = window.tempCriteres[index];
     var e = window.enoncesAlgo.normaliser(critere);
     window.enoncesAlgo.appliquerAuCritere(critere, e.modeleId,
-        _enoncesEditesDepuis(critere, el.dataset.enonceCle, el.value));
+        _enoncesEditesDepuis(critere, cleEnonce, valeur));
+    return true;
+}
+
+function _ecrireTexteEnonceGrille(grilleId, index, cleEnonce, valeur) {
+    return modifierProjectionCritereGrille(grilleId, index, function(critere) {
+        var e = window.enoncesAlgo.normaliser(critere);
+        window.enoncesAlgo.appliquerAuCritere(critere, e.modeleId,
+            _enoncesEditesDepuis(critere, cleEnonce, valeur));
+    });
+}
+
+function modifierTexteEnonceTempHandler(el) {
+    var index = parseInt(el.dataset.critereIndex);
+    if (!_ecrireTexteEnonceTemp(index, el.dataset.enonceCle, el.value)) return;
     afficherCriteresTemp();
 }
 
@@ -5008,14 +5042,84 @@ async function modifierModeleEnoncesGrilleHandler(el) {
 async function modifierTexteEnonceGrilleHandler(el) {
     var grilleId = el.dataset.grilleId;
     var index = parseInt(el.dataset.critereIndex);
-    var cleEnonce = el.dataset.enonceCle;
-    var valeur = el.value;
-    await modifierProjectionCritereGrille(grilleId, index, function(critere) {
-        var e = window.enoncesAlgo.normaliser(critere);
-        window.enoncesAlgo.appliquerAuCritere(critere, e.modeleId,
-            _enoncesEditesDepuis(critere, cleEnonce, valeur));
-    });
+    await _ecrireTexteEnonceGrille(grilleId, index, el.dataset.enonceCle, el.value);
     afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+}
+
+/**
+ * Le texte troué, étape 1 — un clic sur un repère le pose dans sa zone, au
+ * curseur. `data-action="insererRepereEnonce"`, sans paramètre : le
+ * dispatcher de main.js passe le bouton, et la zone est celle du même
+ * `.groupe-form`.
+ *
+ * ⚠ LA ZONE N'EST PAS RE-RENDUE, ET C'EST LE POINT. Les autres gestes du
+ * gabarit re-rendent tout le bloc après l'écriture ; ici, le rendu détruirait
+ * la zone que l'enseignant·e est en train d'écrire, et son curseur avec. La
+ * valeur est posée dans la zone, le curseur remis après le repère, et
+ * l'écriture part derrière — même chemin que la frappe, sans le rendu. Le
+ * `change` qui suivra, à la sortie de la zone, réécrira la même valeur.
+ *
+ * ⚠ LE CURSEUR N'A DE SENS QU'UNE FOIS LA ZONE VISITÉE. Une zone fraîchement
+ * rendue répond (0, 0) à `selectionStart`, et y poser un repère le mettrait en
+ * tête de phrase. Sans visite depuis le rendu (`data-curseur-vu`, posé au
+ * focus et emporté par tout re-rendu), le repère s'ajoute à la fin.
+ */
+function insererRepereEnonce(el) {
+    if (typeof window.enoncesAlgo === 'undefined') return;
+    var groupe = (el && typeof el.closest === 'function') ? el.closest('.groupe-form') : null;
+    var zone = groupe ? groupe.querySelector('textarea[data-enonce-cle]') : null;
+    if (!zone) return;
+
+    var visitee = zone.dataset.curseurVu === '1';
+    var debut = visitee ? zone.selectionStart : zone.value.length;
+    var fin = visitee ? zone.selectionEnd : zone.value.length;
+    var r = window.enoncesAlgo.insererRepere(zone.value, debut, fin, el.dataset.jeton);
+    if (!r) return;
+
+    zone.value = r.texte;
+    zone.dataset.curseurVu = '1';
+    try {
+        zone.focus({ preventScroll: true });
+        zone.setSelectionRange(r.curseur, r.curseur);
+    } catch (err) {
+        // Un moteur sans setSelectionRange sur un textarea : le repère est
+        // posé quand même, seul le curseur n'est pas replacé.
+    }
+
+    var index = parseInt(zone.dataset.critereIndex);
+    var cleEnonce = zone.dataset.enonceCle;
+    if (zone.dataset.grilleId) {
+        _ecrireTexteEnonceGrille(zone.dataset.grilleId, index, cleEnonce, r.texte)
+            .catch(function(err) {
+                console.warn('[énoncés] le repère est à l\'écran mais pas enregistré :', err);
+            });
+    } else {
+        _ecrireTexteEnonceTemp(index, cleEnonce, r.texte);
+    }
+}
+
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+    // Le drapeau « zone visitée » — voir `insererRepereEnonce`. Il tombe avec
+    // l'élément à chaque rendu du gabarit, et c'est voulu.
+    document.addEventListener('focusin', function(e) {
+        var zone = e.target;
+        if (zone && zone.tagName === 'TEXTAREA' && zone.dataset && zone.dataset.enonceCle !== undefined) {
+            zone.dataset.curseurVu = '1';
+        }
+    });
+    // ⚠ LE CLIC SUR UN REPÈRE NE DOIT PAS PRENDRE LE FOCUS. Sinon la zone le
+    // perd d'abord, son `change` part, le gabarit se re-rend, et le bouton
+    // sous le doigt n'existe plus quand le clic arrive : le premier repère
+    // posé après une frappe se perdait. Annuler `pointerdown` (et `mousedown`,
+    // pour les moteurs qui l'émettent encore) laisse le focus — et le
+    // curseur — dans la zone ; le clic, lui, part quand même.
+    ['pointerdown', 'mousedown'].forEach(function(type) {
+        document.addEventListener(type, function(e) {
+            var cible = e.target;
+            if (!cible || typeof cible.closest !== 'function') return;
+            if (cible.closest('[data-action="insererRepereEnonce"]')) e.preventDefault();
+        });
+    });
 }
 
 async function modifierPalierProjectionGrilleHandler(el) {
@@ -5219,6 +5323,7 @@ window.modifierModeleEnoncesTempHandler = modifierModeleEnoncesTempHandler;
 window.modifierTexteEnonceTempHandler = modifierTexteEnonceTempHandler;
 window.modifierModeleEnoncesGrilleHandler = modifierModeleEnoncesGrilleHandler;
 window.modifierTexteEnonceGrilleHandler = modifierTexteEnonceGrilleHandler;
+window.insererRepereEnonce = insererRepereEnonce;
 window.ajouterPalierProjectionTemp = ajouterPalierProjectionTemp;
 window.supprimerPalierProjectionTemp = supprimerPalierProjectionTemp;
 window.ajouterPalierProjectionGrille = ajouterPalierProjectionGrille;

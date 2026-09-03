@@ -1,198 +1,163 @@
-# Consigne du jour — fermer l'audit du 25 août pour de bon
+# Consigne du jour — le texte troué, ÉTAPE 1 : les quatre énoncés de rétroaction
 
-> **Promue consigne du jour le 3 septembre 2026 à 11 h 20 (heure de Grégoire), par Cowork,
-> avec lui.** Écrite le 2 septembre à 13 h, **remesurée et corrigée avant promotion**.
-> **Application au moment de l'écriture : `1.113.0`, build `0903-0906`, POUSSÉE.**
+> **Écrite le 3 septembre 2026 à 12 h (heure de Grégoire), par Cowork, avec lui.**
+> **Application au moment de l'écriture : `1.113.0`, build `0903-0906`.**
+> Elle remplace la consigne de l'audit, exécutée (`5887532e`, commité non poussé).
 >
-> ▣ **État à l'écriture, mesuré** : `HEAD` = `76cb53c3`,
-> `git rev-list --count origin/main..HEAD` rend **0** — témoin, `HEAD..origin/main` rend **0**
-> lui aussi. Arbre propre sauf `OU-EN-EST-ON.md` et `PROTOCOLE.md`, à Cowork :
-> **ne les commite pas.**
+> ▣ **État à l'écriture, mesuré** : `HEAD` = `5887532e`,
+> `git rev-list --count origin/main..HEAD` rend **1** (le lot d'audit, non poussé) — témoin,
+> `HEAD..origin/main` rend **0**. Arbre propre sauf `OU-EN-EST-ON.md` et `PROTOCOLE.md`, à
+> Cowork : **ne les commite pas.**
 >
-> ▣ **LES HUIT ÉNONCÉS DE LA COHORTE 1 SONT PARCOURUS**, depuis ce matin. Ce lot ne les
-> touche pas : il éteint une dette de méthode.
+> ⚠ **Le lot d'audit attend son push.** Si tu le trouves encore non poussé, **dis-le et
+> demande** avant d'empiler dessus.
 >
-> ⚠ **REMESURE** (règle 1). Les lignes citées datent d'hier.
->
-> **Source** : `plans de travail/PLAN-2026-09-02-evaluation-avant-la-chronique.md`, temps 1.
-> Ce fichier-ci exécute ; le plan explique.
+> **Source** : `plans de travail/CADRAGE-2026-09-02-badges-texte-troue.md`. **Lis-le d'abord** :
+> il porte le pourquoi, la distinction des deux familles de variables, et ce qui est arrêté.
+> Cette consigne n'en exécute que **la première étape**.
 
 ---
 
-## Le mandat — un audit n'est pas fini tant que ses constats n'ont pas de disposition
+## ⛔ LE DÉCOUPAGE, ET C'EST LUI QUI DÉFINIT LE LOT
 
-`CLAUDE.md`, §« Ce qu'un audit doit produire » :
+**Décision de Grégoire, 3 septembre : on découpe, étape par étape.**
 
-> *Un audit n'est pas terminé quand il est déposé — mesuré le 1er sept. : sur 51 rapports,
-> **22 sans suite**. Il l'est quand chaque constat porte, **DANS le fichier d'audit**, l'une
-> de trois dispositions : inscrit (n°), refusé (motif), périmé.*
+Le cadrage compte `2 × N paliers + 4` champs de texte à convertir — **douze** avec quatre
+paliers. ⛔ **Ce lot n'en fait QUE QUATRE** : les quatre énoncés du **bloc 3**
+(`rendreBlocEnoncesAlgo`, `js/grilles.js:3456`).
 
-`Rapports/AUDIT-evaluation-onglet-2026-08-25.md` **n'en porte aucune.** Le compte des
-livraisons vit ailleurs — au backlog et dans `OU-EN-EST-ON.md`. Quelqu'un qui ouvre le
-rapport ne peut pas savoir ce qu'il est devenu.
+⮕ **Motif** : c'est ce que le cadrage appelle « la vraie prise ». Aujourd'hui l'enseignant
+choisit entre deux formulations toutes faites — « Générique » et « Français écrit » — et s'il
+n'est ni l'un ni l'autre, **il prend la moins fausse**. C'est aussi le seul des trois blocs qui
+produit **ce que l'élève lit**.
 
-⮕ **Le livrable est le FICHIER D'AUDIT lui-même.** Rien d'autre ne bouge.
-
-⛔ **CE N'EST PAS UN RÉ-AUDIT.** Tu ne rouvres aucun constat, tu ne relis pas le code pour
-vérifier les seize corrections. **La correspondance est déjà faite et mesurée** (ci-dessous).
-C'est de la transcription, plus quatre corrections nommées.
-⚠ **Si une ligne du tableau ne correspond pas à ce que tu trouves au backlog : NE CORRIGE
-PAS EN SILENCE. Dis l'écart dans ton rapport.** C'est Cowork qui l'a mesuré, et Cowork s'est
-trompé quatre fois aujourd'hui.
+⛔ **HORS DU LOT, et n'y touche pas** : les paliers de projection (bloc 2), le modèle de formule
+(bloc 1 — il ne contient aucun texte, **il n'y a rien à trouer**), les badges personnalisés
+(version ultérieure, arrêté par Grégoire).
 
 ---
 
-## La correspondance — mesurée par Cowork le 2 septembre à 11 h 40
+## ▣ LA PALETTE N'EST PAS À INVENTER — ELLE EST DÉJÀ DANS LE CODE
 
-Commandes qui l'ont produite, à rejouer si tu veux la vérifier :
+⚠⚠ **CORRECTION DU CADRAGE, mesurée le 3 septembre.** Le cadrage proposait dix badges. **Le
+bloc 3 n'en connaît pas dix.** `grep -n "^var JETON_" js/evaluation-enonces.js` rend **cinq**
+déclarations :
 
-```bash
-grep -n "Constats de l'audit de l'onglet ÉVALUATIONS" BACKLOG.md
-awk 'NR>=4145 && NR<=4620' BACKLOG.md | grep -nE "^- \[[ x]\] \*\*#[0-9]+"
-```
+| jeton | ce qu'il vaut | badge ? |
+|---|---|---|
+| `{critere}` | le nom du critère, tel qu'il est dans la grille | **oui** |
+| `{erreurs}` | le nombre d'erreurs | **oui** |
+| `{mots}` | le nombre de mots | **oui** |
+| `{points}` | la mention pondérée, avec son espace de tête, ou vide | **oui** |
+| `{s}` | « s » quand `{erreurs}` est au pluriel, vide sinon | ⛔ **NON** |
 
-Le rapport porte **A1-A2** (2 critiques), **B1-B13** (13 majeurs), **C1-C5** (5 de design) =
-**20**. Sa section **D — « Mineurs (condensé) » — n'est PAS dans les vingt** ; elle a sa
-propre fiche.
-
-| Constat | Disposition à inscrire |
-|---|---|
-| **A1** | *inscrit* → **#556**, livré le 28 août |
-| **A2** | *inscrit* → **#557**, livré le 28 août |
-| **B1, B2, B3** | *inscrit* → **#558**, livré |
-| **B4** | *inscrit* → **#559**, livré |
-| **B5, B8** | *inscrit* → **#560**, ⚠ **PARTIEL** — voir correction 1 |
-| **B6** | *inscrit* → **#561**, livré le 29 août |
-| **B7** | *inscrit* → **#562**, livré le 29 août |
-| **B9** | *inscrit* → **#563**, livré le 29 août |
-| **B10** | *inscrit* → **#564**, livré |
-| **B11, B12** | *inscrit* → **#565**, livré |
-| **B13** | *inscrit* → **#566**, livré le 29 août |
-| **C1** | *inscrit* → **#567**, ⚠ **PARTIEL** — voir correction 2 |
-| **C2** | *inscrit* → **#568**, livré le 29 août |
-| **C3** | *inscrit* → **#569**, livré le 29 août |
-| **C4** | *inscrit* → **#570**, livré le 29 août |
-| **C5** | *inscrit* → **#571**, ⚠ **livré + une part REFUSÉE** — voir correction 3 |
-| **Section D** | *inscrit* → **#572**, ⚠ **PARTIEL** — voir correction 4 |
+⛔ **`{s}` n'est PAS un badge.** C'est un accord grammatical qui suit `{erreurs}`, et le module
+le documente ainsi : *« un texte qui ne porte pas `{erreurs}` ne porte pas `{s}` non plus »*
+(`js/evaluation-enonces.js:349`). ⮕ **Il ne s'offre pas à la pose.** S'il doit apparaître, c'est
+comme conséquence de `{erreurs}`, jamais comme geste de l'enseignant.
+⚠ **Remesure cette liste** avant de coder : elle est le contrat du lot.
 
 ---
 
-## Les quatre corrections — c'est là qu'est le travail
+## ↻ LA RÈGLE ARRÊTÉE PAR GRÉGOIRE — un champ n'offre que ce qui peut y valoir
 
-### Correction 1 · B5/B8 → #560 : ↻ **CE N'EST PLUS « PARTIEL ». C'EST TRANCHÉ ET LIVRÉ.**
+**Chaque champ n'offre que les badges qui peuvent valoir quelque chose dedans.**
 
-⚠⚠ **CETTE LIGNE A CHANGÉ DEPUIS L'ÉCRITURE D'HIER. Ne recopie pas l'ancienne.**
+▣ **Le cas qui l'a fait trancher** : « Aucune annotation » s'affiche *« quand la copie ne porte
+ni tampon ni erreur »* (`js/evaluation-enonces.js:173`). Y offrir `{erreurs}` proposerait de
+composer une phrase avec un nombre qui vaudra **toujours zéro**.
 
-▣ **Le constat B5 est REFUSÉ, et le motif est de Grégoire.** B5 décrivait la portée des
-suppressions par couple `(élève, production)` comme *« trop large »*. **Elle ne l'est pas** :
-tranché le 2 septembre 2026 — *« TOUT ce qui touche le couple part : originale, reprises,
-évaluation d'un fichier réimporté »*. Le code faisait déjà le bon geste ; **c'est l'écran qui
-ne le disait pas.**
+⮕ **C'est la même logique que tout ce qui a été livré depuis hier** : un écran n'annonce pas ce
+qui n'aura pas lieu. Un badge offert là où il ne peut rien valoir est un piège.
 
-▣ **B8, et la part restante de B5 : INSCRIT → livré en 1.111.2**, le 3 septembre au matin.
-La fenêtre annonce désormais, dans les mots de Grégoire :
-*« Le fichier, ses annotations et toutes les évaluations de cet élève pour cette production
-seront effacés. »* ▣ **ÉPROUVÉ PAR GRÉGOIRE à l'écran** le 3 septembre.
-▣ **Témoin négatif tenu** : le déplacement à la corbeille, qui ne détruit rien, ne dit rien de
-plus qu'avant.
-
-⮕ **Dispositions à inscrire dans le fichier d'audit** : pour **B5**, *refusé* — avec le motif
-ci-dessus, en toutes lettres. Pour **B8**, *inscrit* → #560, livré en 1.111.2.
-⚠ **Un refus sans son motif ne vaut rien** : c'est ce qui fait revenir le constat dans six mois.
-
-### Correction 2 · C1 → #567 est PARTIEL
-
-Quatre variables CSS fantômes remplacées ; **les 78 autres tiennent par un cliquet global**.
-⮕ Disposition : **partiel**, avec renvoi à **#595** (78 variables employées et jamais
-définies, ≈ 270 usages — ouvert) et **#679** (rien ne vérifie qu'une classe CSS employée
-dans `js/` existe dans `styles.css` — ouvert).
-
-### Correction 3 · C5 → #571 porte une part REFUSÉE, et le motif est de Grégoire
-
-Le backlog dit : *« les correctifs ; **les tailles restent, par décision** »*. La densité du
-PDF (base 10 px, dates à 6 px) desservait l'usage cellulaire ; Grégoire a tranché de la garder.
-⮕ Disposition : **inscrit** pour les correctifs (lisibilité sur les couleurs d'échelle, date
-échappée) **+ refusé** pour les tailles, **avec le motif nommé**. Un refus sans motif ne vaut
-rien : c'est ce qui fait revenir le constat dans six mois.
-
-### Correction 4 · Section D → #572 est PARTIEL, et sa ligne est FAUSSE
-
-⚠⚠ **C'est la correction qui compte, et elle vaut son paragraphe.**
-
-`#572` déclare, au backlog comme dans le code :
-
-> `// #572 — LA VALEUR CALCULÉE EST LA SOURCE, l'écran n'en est que l'affichage.`
-> *« la note finale n'est plus relue depuis le DOM (`parseFloat(textContent)`, **trois
-> sites**) mais depuis `noteCalculeeCourante` »*
-
-**Il y en avait quatre.** Mesuré par Cowork le 2 septembre à 11 h 40, **rejoué à 12 h 45**,
-inchangé après 1.110.0 :
-
-```bash
-grep -rn "parseFloat(.*noteProduction1" js/ --include=*.js
-grep -rn "noteCalculeeCourante" js/ --include=*.js
-```
-
-▣ Trois sites écrivent bien la valeur calculée : `evaluation-sauvegarde.js:209`,
-`evaluation-chargement.js:1452`, `evaluation-chargement.js:1476`.
-▣ **Le quatrième relit toujours l'écran** — `js/evaluation.js:1784`, dans
-`_lireChampsDOMMod`, appelé **une seule fois**, à `js/evaluation.js:1959`, qui est **le chemin
-de MODIFICATION d'une évaluation existante** :
-
-```js
-noteFinale: parseFloat(document.getElementById('noteProduction1').textContent) || 0,
-```
-
-▣ **Et la sentinelle est verte parce qu'elle ne regarde que deux fichiers.**
-`tests/unit/sentinelle-572-mineurs-liste-annoter-design.test.js`, **l. 77** :
-
-```js
-for (const [nom, src] of [['evaluation-sauvegarde', sauvegarde], ['evaluation-chargement', chargement]]) {
-```
-
-`evaluation.js` n'y est pas. Le titre du cas dit *« et plus personne ne relit le DOM »* ; il
-en vérifie deux sur trois.
-
-⮕ Disposition à inscrire : **partiel**, avec les trois faits ci-dessus, et le renvoi au
-**temps 2** du plan.
-
-⛔ **NE CORRIGE RIEN DE TOUT ÇA DANS CE LOT.** Ni le quatrième site, ni la sentinelle.
-**C'est le temps 2, et c'est une autre séance** (règle 6 : une seule décision principale par
-séance). Ici, tu ÉCRIS que c'est ouvert. *Inscrire et continuer* — issue 2 de `CLAUDE.md`.
+⚠ **La correspondance champ → badges n'est PAS décidée.** Les quatre clés sont `decompte`,
+`priorite`, `concentre`, `aucune` (`js/evaluation-enonces.js:170-173`).
+⮕ **MESURE-LA** : lis ce que chaque énoncé reçoit réellement à l'appel, et **propose la table à
+Grégoire dans ton rapport**. ⛔ **Ne la devine pas, et ne l'implante pas avant qu'il l'ait vue**
+si tu as le moindre doute sur une case.
 
 ---
 
-## Ce que le fichier d'audit doit porter en plus, en tête
+## Ce que le geste doit être
 
-1. **Sa base de REMESURE à côté de sa base d'audit.** Aujourd'hui il annonce
-   *« Base auditée : `main` 1.99.0 (commit `8dfda3ed`) »*. Ajoute la date et la version où
-   les dispositions ont été établies — c'est ce qui dit au lecteur suivant à quel point elles
-   ont vieilli.
-2. **Le rappel que ses numéros de ligne datent de 1.99.0** et ne se suivent pas au doigt.
-3. **Le rappel que ses verdicts sont `[lecture]`** : *« aucun Chromium n'a été lancé »*.
-   ⮕ Vingt constats lus, **zéro écran parcouru**. C'est le temps 3 du plan, et il n'est pas
-   fait. **Ne laisse pas croire qu'un audit fermé est une section vérifiée.**
+▣ **Le motif d'origine, dans les mots de Grégoire** : *« La page du critère algorithmique est
+vraiment très complexe, et je crains que cette complexité ne fasse fuir les utilisateurs. Elle
+est très codage entre guillemets. »* Son modèle : **la cellule de formule dans Numbers**, où les
+variables sont des pastilles qu'on manipule, pas du texte à taper.
+
+▣ **La preuve que ça règle une vraie erreur, et elle est de lui** : le 2 septembre, il a tapé
+`[service]` au lieu de `{service}`. Le texte avait l'air juste à l'écran, **et son élève aurait
+lu le crochet**. ⮕ **Un badge ne se tape pas, il se pose. Cette classe d'erreur disparaît.**
+
+⛔ **LE CLIC EST LE CHEMIN PRINCIPAL**, pas le glissé. ▣ **Motif, arrêté au cadrage** : Grégoire
+travaille sur iPad, et le glisser-déposer au doigt n'est pas celui de la souris. **Un clic sur
+le badge l'insère au curseur.** Le glissé, s'il existe, est un confort — jamais le seul chemin.
+
+⚠ **Le champ reste éditable à la main.** Quelqu'un qui tape `{erreurs}` au clavier doit
+continuer d'obtenir le même résultat. **On ajoute un chemin, on n'en ferme aucun.**
+
+---
+
+## ⛔ CE QUI NE DOIT PAS BOUGER — trois garde-fous
+
+**1. Les textes déjà écrits continuent de fonctionner, tels quels.** Les grilles existantes
+portent des phrases avec ou sans jetons. ▣ *Tarir n'est pas réparer* — et ici **il n'y a même
+rien à tarir** : le format du gabarit ne change pas. ⛔ **Ce lot ne touche AUCUNE donnée
+enregistrée.** `critere.enonces` reste `{cle: texte}`, du texte libre.
+
+**2. Le rendu final ne change pas d'un caractère.** `engendrer...` continue de produire les
+mêmes phrases pour les mêmes gabarits. ▣ **Témoin exigé** : la sentinelle existante des énoncés
+passe **sans être modifiée**. Si tu dois la toucher, tu as changé le comportement — **arrête-toi
+et dis-le.**
+
+**3. La règle du jeton sans valeur existe déjà, et elle est fine.** *« Un jeton que l'appel ne
+fournit pas est retiré du texte, jamais rendu littéralement : un élève ne doit pas lire
+`{critere}` sur son PDF »* (`js/evaluation-enonces.js:44`). ⛔ **Réutilise-la. Ne la réinvente
+pas.**
+
+---
+
+## Ce qui remplace la petite note du bas
+
+Le bloc porte aujourd'hui, sous les quatre champs, une phrase qui EXPLIQUE les jetons :
+*« Écris {critere} là où le nom de ce critère doit apparaître, {erreurs} pour le nombre
+d'erreurs et {mots} pour le nombre de mots. »* (`js/grilles.js:3501-3506`).
+
+⮕ **Si les badges se posent, cette phrase n'a plus à apprendre une syntaxe.** Ce qui doit
+survivre, en revanche, et que la note dit déjà : *« Un repère que la phrase n'a pas à remplir
+disparaît proprement. Une zone laissée VIDE fait taire l'énoncé. »*
+⚠ **Ces deux comportements sont invisibles autrement. Ne les perds pas en retirant la note.**
 
 ---
 
 ## Fini quand
 
-`grep -c` des trois mots de disposition dans le fichier d'audit rend un compte **non nul**,
-et **chacun** des dix-sept blocs (A1, A2, B1→B13, C1→C5, section D) en porte un.
+**Un enseignant compose la phrase que ses élèves liront sans jamais taper une accolade.**
 
-⚠ **Le vrai « fini quand » n'est pas un compte** : c'est qu'une personne qui ouvre
-`Rapports/AUDIT-evaluation-onglet-2026-08-25.md` **sans rien connaître du backlog** sache, pour
-chaque constat, ce qu'il est devenu — sans avoir à ouvrir un autre fichier.
+▣ **Le témoin** : dans le bloc « Modèle de rétroaction » d'un critère algorithmique, chacun des
+quatre champs porte ses badges posables, et un clic sur un badge l'insère au curseur.
+▣ **Le témoin négatif, qui compte autant** : une grille existante ouverte après ce lot affiche
+**exactement les mêmes textes qu'avant**, et le PDF engendré est identique au caractère près.
+▣ **Le témoin du piège évité** : le champ « Aucune annotation » n'offre pas de badge qui vaudrait
+toujours zéro.
+
+---
 
 ## L'ordre
 
-- **Lot documentaire : aucun fichier de `js/` ne bouge.** ⮕ Donc **pas de bump du bloc de
-  jetons d'`index.html`**, et pas de release. Si tu te retrouves à toucher `js/`, tu es sorti
-  du lot : arrête et dis-le.
-- `cd tests && npm run test:unit` **quand même**, une fois, comme témoin que rien n'a bougé
-  — pas comme preuve du lot.
-- Règle 6 : **tu commites, puis tu t'arrêtes.**
-- ⮕ **Ce que Grégoire doit aller voir : RIEN à l'écran.** Aucun utilisateur ne rencontre ce
-  fichier. **Dis-le-lui plutôt que de lui inventer une vérification.** Ce qu'il peut faire,
-  s'il le veut : ouvrir le rapport et vérifier qu'il se lit seul.
-- Ce fichier-ci se commite avec ton lot.
+1. **Rapporte le verdict de GitHub sur `1.113.0`** (rituel d'ouverture, §2.1), et **dis où en
+   est le lot d'audit `5887532e`** — commité, poussé ?
+2. **Lis le cadrage** avant de coder.
+3. **Mesure la correspondance champ → badges**, et rends-la en tableau **avant** de l'implanter.
+4. Ce lot touche `js/` ⮕ **bump du bloc de jetons d'`index.html`**.
+5. `cd tests && npm run test:unit` pour travailler ; **`npm test` complet avant de dire que
+   c'est prêt.** ⚠ Vitest se lance **depuis `tests/`**.
+6. ⛔ **Tu commites, puis tu t'arrêtes.** Pas de release, pas de push, pas de verdict au jeton :
+   Grégoire regarde l'écran d'abord. ▣ **Ce lot touche ce que ses élèves lisent** — son coup
+   d'œil n'est pas une formalité ici.
+7. **Ce fichier se commite avec ton lot.** Nomme tes fichiers ; pas de `git add -A`.
+
+⮕ **CE QUE GRÉGOIRE DOIT ALLER VOIR** : Conception › une grille avec un critère
+**algorithmique** › le bloc « Modèle de rétroaction ». Il doit pouvoir **cliquer un badge et le
+voir apparaître dans la phrase**, sans rien taper. ⚠ **Et vérifier que ses propres textes sont
+intacts.**
