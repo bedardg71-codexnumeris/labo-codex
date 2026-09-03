@@ -272,18 +272,18 @@
             type: 'symbole',
             taille: 30
         },
-        // Erreurs de français (codes 1-10)
-        errfr_1:  { id: 'errfr_1',  nom: 'Construction syntaxique',  icone: '\u2460', couleurBouton: '#c62828', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_2:  { id: 'errfr_2',  nom: 'Subordonnée seule',       icone: '\u2461', couleurBouton: '#c62828', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_3:  { id: 'errfr_3',  nom: 'Ponctuation / guillemets', icone: '\u2462', couleurBouton: '#e65100', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_4:  { id: 'errfr_4',  nom: 'Accord dans le GN',       icone: '\u2463', couleurBouton: '#1565c0', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_5:  { id: 'errfr_5',  nom: 'Accord du pronom',        icone: '\u2464', couleurBouton: '#1565c0', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_6:  { id: 'errfr_6',  nom: 'Accord part. passé',      icone: '\u2465', couleurBouton: '#1565c0', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_7:  { id: 'errfr_7',  nom: 'Mot invariable',          icone: '\u2466', couleurBouton: '#7b1fa2', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_8:  { id: 'errfr_8',  nom: 'Déterminant',             icone: '\u2467', couleurBouton: '#7b1fa2', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_9:  { id: 'errfr_9',  nom: 'Vocabulaire / anglicisme', icone: '\u2468', couleurBouton: '#2e7d32', curseur: 'crosshair', type: 'symbole', taille: 24 },
-        errfr_10: { id: 'errfr_10', nom: 'Orthographe / typo',      icone: '\u2469', couleurBouton: '#2e7d32', curseur: 'crosshair', type: 'symbole', taille: 24 }
     };
+
+    // 3 sept. 2026 — LES DIX CODES DU REPLI sont générés depuis
+    // `tamponsErreurs.REPLI_DEFAUT` (js/tampons-erreurs.js) : une seule source
+    // pour l'identifiant, le nom et la couleur. Plus d'icône Unicode ①…⑩ :
+    // aucun chemin ne la lisait — le curseur, la copie et le PDF DESSINENT le
+    // nombre (`genererCurseurErrFr`, `dessinerErreurFrancais`, export-pdf).
+    // Sans le module (bancs Node qui ne chargent que ce fichier), aucun code :
+    // rien ne casse, rien ne s'affiche.
+    (_tampons() ? _tampons().REPLI_DEFAUT : []).forEach(function(r) {
+        OUTILS[r.id] = { id: r.id, nom: r.nomCourt, couleurBouton: r.couleur, curseur: 'crosshair', type: 'symbole', taille: 24 };
+    });
 
     /* ===============================
        AUTOCOLLANTS (Tampons de retroaction)
@@ -554,18 +554,23 @@
        PALETTE ERREURS DE FRANÇAIS
        =============================== */
 
-    const CODES_ERREURS_FR = [
-        { id: 'errfr_1',  code: 1,  nom: 'Construction syntaxique / accord du verbe' },
-        { id: 'errfr_2',  code: 2,  nom: 'Subordonnée employée seule' },
-        { id: 'errfr_3',  code: 3,  nom: 'Ponctuation / guillemets' },
-        { id: 'errfr_4',  code: 4,  nom: 'Accord dans le groupe du nom' },
-        { id: 'errfr_5',  code: 5,  nom: 'Accord du pronom / lien avec son antécédent' },
-        { id: 'errfr_6',  code: 6,  nom: 'Accord du participe passé' },
-        { id: 'errfr_7',  code: 7,  nom: 'Mot invariable' },
-        { id: 'errfr_8',  code: 8,  nom: 'Déterminant' },
-        { id: 'errfr_9',  code: 9,  nom: 'Vocabulaire / anglicisme' },
-        { id: 'errfr_10', code: 10, nom: 'Orthographe d\u2019usage / typographie' }
-    ];
+    // 3 sept. 2026 — LA LISTE DES TAMPONS VIENT DE `tamponsErreurs`
+    // (js/tampons-erreurs.js, chargé avant ce module). La constante des dix
+    // codes n'existe plus ici : les dix codes d'hier sont le REPLI du module, et
+    // une grille dont le critère algorithmique porte le geste d'activation
+    // fournit les siens — ses sous-critères. Ce fichier ne garde que l'ÉCRAN qui
+    // règle le repli (noms, couleurs, ordre, textes : quatre clés globales) et
+    // la palette.
+    //   _tamponsRepli()     les dix, personnalisés — l'écran de réglage, les défauts
+    //   _tamponsCourants()  ceux de la copie ouverte (sa grille, sinon le repli)
+    // `_grilleCourante` est posée à l'ouverture d'une copie (lot 2) ; nulle, la
+    // palette montre le repli — exactement hier.
+    var _grilleCourante = null;
+    function _tampons() {
+        return (typeof window !== 'undefined' && window.tamponsErreurs) ? window.tamponsErreurs : null;
+    }
+    function _tamponsRepli() { var t = _tampons(); return t ? t.listeTampons(null) : []; }
+    function _tamponsCourants() { var t = _tampons(); return t ? t.listeTampons(_grilleCourante) : []; }
 
     // Valeurs par defaut des symboles (crochet/croix/interrogation)
     const _defautsSymboles = {
@@ -577,9 +582,9 @@
     // Sauvegarder les valeurs par defaut des erreurs FR avant toute personnalisation
     const _defautsNomsErrFr = {};
     const _defautsCouleursErrFr = {};
-    CODES_ERREURS_FR.forEach(c => {
-        _defautsNomsErrFr[c.id] = c.nom;
-        _defautsCouleursErrFr[c.id] = OUTILS[c.id].couleurBouton;
+    (_tampons() ? _tampons().REPLI_DEFAUT : []).forEach(r => {
+        _defautsNomsErrFr[r.id] = r.nom;
+        _defautsCouleursErrFr[r.id] = r.couleur;
     });
 
     /* ===============================
@@ -617,18 +622,8 @@
         'comp-etendu':        "Les concepts sont intégrés et étendus à d'autres contextes."
     };
 
-    const RETROACTIONS_ERREURS_FR_DEFAUT = {
-        'errfr_1':  "La plupart des erreurs concernent la construction syntaxique (sujet, prédicat, complément de phrase ou autres compléments) ou l'accord du verbe (accord avec le sujet, conjugaison, etc.). Il arrive que certaines phrases sont incomplètes ou confuses, ou encore que le lien entre le verbe et son sujet soit erroné. Vérifie que chaque phrase a bien un sujet et un verbe (et parfois un complément) en les identifiant dans l'interligne. Assure-toi qu'il n'y a pas trop de compléments (ce qui pourrait rendre la phrase confuse). Vérifie également la conjugaison et l'accord des verbes en utilisant des tableaux de conjugaison.",
-        'errfr_2':  "La plupart des erreurs sont causées par des subordonnées employées seules. Elles sont construites comme des compléments qui ne se rattachent à aucun prédicat. Relis la phrase pour vérifier sa clarté et assure-toi que chaque subordonnée est rattachée à une phrase principale par un mot de liaison. On peut parfois aussi ajuster la ponctuation pour y remédier.",
-        'errfr_3':  "La plupart des erreurs concernent l'utilisation de la ponctuation. Elle peut être relative au coordonnant, au complément de phrase, au complément du nom, à l'organisateur textuel, à une énumération (dont la juxtaposition de phrases) ou encore à une citation. La ponctuation fautive vient embrouiller la structure et la clarté des idées. Vérifie les règles de ponctuation pour les différents types de phrases et de propositions. Certaines conjonctions rendent obligatoire l'usage de la virgule. Utilise des guides de ponctuation pour vérifier cet usage.",
-        'errfr_4':  "La plupart des erreurs concernent l'accord en genre et en nombre dans le groupe du nom (déterminant, nom, adjectif). Il devient plus difficile de comprendre le lien entre les mots si ces accords ne sont pas faits. Identifie dans l'interligne le genre et le nombre du nom, puis assure-toi que tous les éléments du groupe concordent.",
-        'errfr_5':  "La plupart des erreurs concernent l'accord du pronom ou le lien avec son antécédent. Il devient plus difficile de comprendre l'objet dont on parle ou ce à quoi on fait référence quand il y a de l'ambiguïté sur ce plan. Relis ta phrase pour clarifier à quoi ou à qui chaque pronom se réfère. Assure-toi qu'il n'y a pas d'autres noms qui pourraient faire écran entre les deux. Vérifie le lien du pronom avec son antécédent et assure-toi que l'accord est correct.",
-        'errfr_6':  "La plupart des erreurs concernent l'accord du participe passé. Révise les règles d'accord du participe passé avec avoir (accord avec le COD s'il est placé avant) et avec être (accord avec le sujet). Identifie ces éléments dans l'interligne, fais des flèches et vérifie les accords.",
-        'errfr_7':  "La plupart des erreurs concernent les mots invariables, plus précisément l'usage de la préposition, de l'adverbe ou de la conjonction. L'orthographe de ces mots ne change jamais. Consulte les listes de mots invariables et l'usage qu'on en fait. Vérifie surtout le sens de ces mots, car ils sont parfois confondus les uns avec les autres.",
-        'errfr_8':  "La plupart des erreurs concernent l'usage du déterminant. Choisis le déterminant approprié en fonction du nom et du contexte, puis vérifie qu'il concorde en genre et en nombre avec le nom qu'il accompagne.",
-        'errfr_9':  "La plupart des erreurs concernent le vocabulaire, c'est-à-dire le sens d'un mot ou son utilisation dans un certain contexte. L'utilisation inexacte d'une citation entre aussi dans cette catégorie. Utilise systématiquement un dictionnaire pour vérifier le sens des mots. Surtout, méfie-toi des synonymes parce qu'ils renvoient toujours à un contexte très précis qui n'est peut-être pas celui dans lequel tu écris. Vérifie tes citations en les relisant attentivement dans l'œuvre. Évite les anglicismes (dû à, mettre l'emphase, canceller).",
-        'errfr_10': "La plupart des erreurs concernent l'orthographe d'usage (lettre, chiffre) ou des éléments de typographie (majuscule, minuscule, soulignement, italique, etc.). Relis ton texte et vérifie systématiquement dans le dictionnaire les mots dont l'orthographe est incertain. Dans le cas de mots étrangers ou de noms de personnages, relis bien ton œuvre. N'oublie pas également que les titres d'œuvres ou de chapitres requièrent respectivement l'italique ou le soulignement (les guillemets fonctionnent aussi)."
-    };
+    // 3 sept. 2026 — les rétroactions par défaut des dix codes ont été DÉPLACÉES
+    // dans js/tampons-erreurs.js (`RETROACTIONS_DEFAUT`), texte pour texte.
 
     /* ===============================
        LECTURE / ECRITURE RETROACTIONS PERSONNALISEES
@@ -640,7 +635,7 @@
     }
 
     function obtenirRetroactionsErreursFr() {
-        return db.getSync('retroactionsErreursFr', null) || RETROACTIONS_ERREURS_FR_DEFAUT;
+        return db.getSync('retroactionsErreursFr', null) || (_tampons() ? _tampons().RETROACTIONS_DEFAUT : {});
     }
 
     function sauvegarderRetroactionsObservations(obj) {
@@ -962,20 +957,19 @@
     }
 
     function obtenirOrdreErreursFr() {
+        const ids = (_tampons() ? _tampons().REPLI_DEFAUT : []).map(r => r.id);
         const ordre = db.getSync('ordreErreursFr', null);
-        if (ordre && Array.isArray(ordre) && ordre.length === CODES_ERREURS_FR.length) return ordre;
-        return CODES_ERREURS_FR.map(c => c.id);
+        if (ordre && Array.isArray(ordre) && ordre.length === ids.length) return ordre;
+        return ids;
     }
 
     function sauvegarderOrdreErreursFr(arr) {
         db.setSync('ordreErreursFr', arr);
     }
 
+    /** Les dix du repli, dans l'ordre personnalisé — ce que l'écran de réglage édite. */
     function obtenirCodesOrdonnes() {
-        const ordre = obtenirOrdreErreursFr();
-        const map = {};
-        CODES_ERREURS_FR.forEach(c => { map[c.id] = c; });
-        return ordre.map(id => map[id]).filter(Boolean);
+        return _tamponsRepli();
     }
 
     /* ===============================
@@ -1140,7 +1134,8 @@
 
     /**
      * Applique les personnalisations (noms, images, couleurs) directement
-     * sur les objets AUTOCOLLANTS, CODES_ERREURS_FR et OUTILS.
+     * sur les objets AUTOCOLLANTS et OUTILS (les codes d'erreur se lisent dans
+     * `tamponsErreurs` ; seule leur couleur est recopiée sur l'outil).
      * Appelée au démarrage et après chaque sauvegarde.
      */
     function appliquerPersonnalisations() {
@@ -1211,12 +1206,11 @@
             });
         }
 
-        // --- Erreurs de français ---
-        const persErr = obtenirPersonnalisationErreursFr();
-        CODES_ERREURS_FR.forEach(c => {
-            const pers = persErr[c.id];
-            c.nom = (pers && pers.nom) ? pers.nom : _defautsNomsErrFr[c.id];
-            OUTILS[c.id].couleurBouton = (pers && pers.couleur) ? pers.couleur : _defautsCouleursErrFr[c.id];
+        // --- Codes d'erreur du repli : la couleur personnalisée suit sur l'outil.
+        // Les NOMS ne se copient plus nulle part : ils se lisent dans la liste
+        // (`tamponsErreurs`), personnalisation comprise.
+        _tamponsRepli().forEach(t => {
+            if (OUTILS[t.id]) OUTILS[t.id].couleurBouton = t.couleur;
         });
 
         // Invalider le cache de curseurs (couleurs/images ont pu changer)
@@ -1238,12 +1232,11 @@
      */
     function genererContenuErreursFr() {
         let html = '<div class="travaux-errfr-liste">';
-        obtenirCodesOrdonnes().forEach((c, idx) => {
-            const outil = OUTILS[c.id];
+        _tamponsCourants().forEach((c) => {
             const actif = outilActif === c.id ? ' actif' : '';
             const raccourci = obtenirRaccourciPourItem(c.id);
             html += `<div class="travaux-errfr-item${actif}" data-action="travauxOutils.setOutilActif" data-param="${c.id}" title="${echapperHtml(c.nom)}${raccourci ? ' [' + raccourci + ']' : ''}">`;
-            html += `<span class="travaux-errfr-numero" style="background:${outil.couleurBouton}">${idx + 1}</span>`;
+            html += `<span class="travaux-errfr-numero" style="background:${echapperHtml(c.couleur)}">${echapperHtml(String(c.numero))}</span>`;
             html += `<span class="travaux-errfr-nom">${echapperHtml(c.nom)}</span>`;
             html += `<span class="travaux-errfr-compteur u-hide" data-erreur="${c.id}"></span>`;
             if (raccourci) html += `<span class="raccourci-badge">${raccourci}</span>`;
@@ -2241,7 +2234,7 @@
 
     function compterErreursFrancais() {
         const compteurs = {};
-        CODES_ERREURS_FR.forEach(c => { compteurs[c.id] = 0; });
+        _tamponsCourants().forEach(t => { compteurs[t.id] = 0; });
         const annotation = travauxAnnotation.getAnnotationCourante();
         if (!annotation || !annotation.pages) return compteurs;
         for (const pageKey of Object.keys(annotation.pages)) {
@@ -2261,7 +2254,7 @@
         if (!palette) return;
         const compteurs = compterErreursFrancais();
         let total = 0;
-        CODES_ERREURS_FR.forEach(c => {
+        _tamponsCourants().forEach(c => {
             const count = compteurs[c.id] || 0;
             total += count;
             const badge = palette.querySelector('.travaux-errfr-compteur[data-erreur="' + c.id + '"]');
@@ -3350,7 +3343,6 @@
 
         html += '<div id="travaux-retro-errfr-liste">';
         codesOrdonnes.forEach((c, idx) => {
-            const outil = OUTILS[c.id];
             const texte = retroActuelles[c.id] || '';
             const menuErrHTML = BibliothequeUI.renderMenuActions([
                 { label: 'R\u00e9initialiser au d\u00e9faut', action: 'travauxOutils.reinitialiserCodeErrFr', param: c.id, classe: 'btn-secondaire', title: 'Restaurer le nom et la couleur d\u2019origine' }
@@ -3358,7 +3350,7 @@
             html += '<div class="travaux-retro-row travaux-retro-draggable" data-err-id="' + c.id + '" draggable="true">';
             html += '<div class="travaux-retro-row-haut">';
             html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
-            html += renderPickerCouleur(outil.couleurBouton, {
+            html += renderPickerCouleur(c.couleur, {
                 dataAttrs: { 'color-id': c.id },
                 summaryClass: 'travaux-retro-numero',
                 summaryContent: String(idx + 1),
@@ -3681,7 +3673,6 @@
         COULEURS: COULEURS,
         OUTILS: OUTILS,
         AUTOCOLLANTS: AUTOCOLLANTS,
-        CODES_ERREURS_FR: CODES_ERREURS_FR,
         // Getters
         getOutilActif: getOutilActif,
         getCouleurActive: getCouleurActive,

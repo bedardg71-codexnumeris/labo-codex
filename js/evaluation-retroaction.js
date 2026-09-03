@@ -188,22 +188,23 @@ function _rendreObservationsAnnotations(statsAnnot) {
 
 function _rendreErreursFrancaisAnnotations(statsAnnot) {
     if (statsAnnot.totalErreursFr <= 0) return '';
-    const retroFr = travauxOutils.obtenirRetroactionsErreursFr();
-    const ordreRetro = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirOrdreErreursFr)
-        ? travauxOutils.obtenirOrdreErreursFr() : [];
+    // 3 sept. 2026 — numéro, nom et texte viennent de la liste de la grille de
+    // l'évaluation (ou du repli, à l'identique) : `tamponsErreurs`. L'ordre est
+    // celui de la liste ; un identifiant qu'elle ne connaît pas passe après,
+    // trié par son numéro, et n'est jamais tu.
+    const grilleDef = _chargerGrilleDefBilan(
+        (typeof evaluationEnCours !== 'undefined' && evaluationEnCours) ? evaluationEnCours.grilleId : null);
+    const liste = window.tamponsErreurs.listeTampons(grilleDef);
+    const rang = (id) => { const i = liste.findIndex(t => t.id === id); return i === -1 ? Infinity : i; };
     const typesTriés = Object.entries(statsAnnot.erreursFr).sort((a, b) => {
-        const idxA = ordreRetro.indexOf(a[0]);
-        const idxB = ordreRetro.indexOf(b[0]);
-        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        const ra = rang(a[0]), rb = rang(b[0]);
+        if (ra !== rb) return ra - rb;
         return parseInt(a[0].replace('errfr_', ''), 10) - parseInt(b[0].replace('errfr_', ''), 10);
     });
     let texte = '--- Langue ---\n\n';
     for (const [type, count] of typesTriés) {
-        const def = travauxOutils.CODES_ERREURS_FR.find(c => c.id === type);
-        const idxRetro = ordreRetro.indexOf(type);
-        const numRetro = idxRetro !== -1 ? idxRetro + 1 : def?.code;
-        const txt = retroFr[type];
-        if (txt) texte += `Code ${numRetro} – ${def?.nom} (×${count}) :\n${txt}\n\n`;
+        const t = window.tamponsErreurs.tampon(grilleDef, type);
+        if (t.retroaction) texte += `Code ${t.numero} – ${t.nom} (×${count}) :\n${t.retroaction}\n\n`;
     }
     return texte;
 }
@@ -475,19 +476,20 @@ function genererRetroactionSpecifique() {
     // gabarit. Les deux sont des DONNÉES UTILISATEUR posées dans `innerHTML` :
     // `echapperHtml` n'est pas optionnel (règle 1 de `CLAUDE.md`).
     var ech581 = function(t) { return (typeof echapperHtml === 'function') ? echapperHtml(String(t == null ? '' : t)) : ''; };
-    var critereAlgo581 = window.enoncesAlgo.critereAlgorithmique(_chargerGrilleDefBilan(
-        (typeof evaluationEnCours !== 'undefined' && evaluationEnCours) ? evaluationEnCours.grilleId : null));
+    var grilleDef581 = _chargerGrilleDefBilan(
+        (typeof evaluationEnCours !== 'undefined' && evaluationEnCours) ? evaluationEnCours.grilleId : null);
+    var critereAlgo581 = window.enoncesAlgo.critereAlgorithmique(grilleDef581);
 
     if (totalErreurs > 0) {
-        var codesErreurs = travauxOutils.CODES_ERREURS_FR;
-        var retroFr = travauxOutils.obtenirRetroactionsErreursFr();
         var typesTriees = Object.keys(erreurs).sort(function(a, b) { return erreurs[b] - erreurs[a]; }).slice(0, 3);
 
         html += '<h5>' + ech581(window.enoncesAlgo.libelleCritere(critereAlgo581)) + ' (' + totalErreurs + ')</h5>';
         typesTriees.forEach(function(type) {
-            var codeDef = codesErreurs.find(function(c) { return c.id === type; });
-            var nom = codeDef ? codeDef.nom : type;
-            html += '<p><strong>' + nom + '</strong> (' + erreurs[type] + ') — ' + (retroFr[type] || '').substring(0, 120) + '</p>';
+            // 3 sept. 2026 — nom et texte viennent de la liste de la grille (ou du
+            // repli) : `tamponsErreurs`. Le nom est une donnée utilisateur posée
+            // dans innerHTML : échappé (règle 1), il ne l'était pas.
+            var t = window.tamponsErreurs.tampon(grilleDef581, type);
+            html += '<p><strong>' + ech581(t.nom) + '</strong> (' + erreurs[type] + ') — ' + ech581((t.retroaction || '').substring(0, 120)) + '</p>';
         });
     }
 
