@@ -669,10 +669,6 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
         }
     }
 
-    // Lire les pratiques compatibles sélectionnées
-    const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
-        ? GabaritsUtils.lirePratiquesSelectionnees('grille')
-        : [];
 
     let horsTrimestreActif = false;
 
@@ -689,7 +685,6 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
         // Mode édition
         grilleTemplateActuelle.nom = nomGrille;
         grilleTemplateActuelle.description = document.getElementById('descriptionGrille')?.value?.trim() || '';
-        grilleTemplateActuelle.pratiquesCompatibles = pratiquesCompatibles;
         grilleTemplateActuelle.dateModification = new Date().toISOString();
 
         // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
@@ -720,7 +715,6 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
             id: genererIdUnique('GRILLE_'),
             nom: nomGrille,
             criteres: window.tempCriteres || [],
-            pratiquesCompatibles: pratiquesCompatibles,
             discipline: discipline, // 🆕 Beta 95.3
             description: document.getElementById('descriptionGrille')?.value?.trim() || '',
             dateCreation: new Date().toISOString(),
@@ -2180,15 +2174,16 @@ async function afficherListeGrilles() {
     html += grillesDansBibliotheque.map(grille => {
         const nomGrille = grille.nom || 'Sans titre';
         const nbCriteres = grille.criteres?.length || 0;
-        // Générer badges pratiques compatibles (utilise gabarits-utils.js)
-        const badgesPratiques = typeof GabaritsUtils !== 'undefined'
-            ? GabaritsUtils.genererBadgesPratiques(grille)
+        // Volet C (3 sept. 2026) — le badge dit la COMPOSITION de la grille, déduite
+        // des types de ses critères ; les cases « Pratiques compatibles » sont parties.
+        const badgeComposition = typeof GabaritsUtils !== 'undefined'
+            ? GabaritsUtils.genererBadgeComposition(grille)
             : '';
         const badgeDepistage = genererBadgeGrilleDepistage(grille);
         return `
             <div class="sidebar-item" data-id="${grille.id}" data-action="chargerGrillePourModif" data-param="${grille.id}">
                 <div class="sidebar-item-titre">${echapperHtml(nomGrille)}</div>
-                <div class="sidebar-item-badges">${badgesPratiques}${badgeDepistage} <span class="badge-caracteristique">${nbCriteres} critères</span></div>
+                <div class="sidebar-item-badges">${badgeComposition}${badgeDepistage} <span class="badge-caracteristique">${nbCriteres} critères</span></div>
             </div>
         `;
     }).join('');
@@ -2229,7 +2224,7 @@ async function preparerDonneesBibliothequeGrilles() {
         id: grille.id,
         afficherId: true,
         badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
-        badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '',
+        badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgeComposition(grille) : '',
         metadonnees: BibliothequeUI.formaterMetadonnees(grille, {
             quantite: `${grille.criteres?.length || 0} critère(s)`,
             discipline: true
@@ -2266,7 +2261,7 @@ async function preparerDonneesBibliothequeGrilles() {
             id: grille.id,
             afficherId: true,
             badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
-            badgesPratiques: (typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '') + genererBadgeGrilleDepistage(grille),
+            badgesPratiques: (typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgeComposition(grille) : '') + genererBadgeGrilleDepistage(grille),
             metadonnees: BibliothequeUI.formaterMetadonnees(grille, {
                 quantite: `${grille.criteres?.length || 0} critère(s)`,
                 discipline: true
@@ -3928,13 +3923,6 @@ async function chargerGrillePourModif(id) {
     // Remplir le formulaire
     document.getElementById('nomGrilleTemplate').value = grille.nom || '';
     document.getElementById('descriptionGrille').value = grille.description || '';
-
-    // Afficher les checkboxes pratiques compatibles
-    const containerPratiques = document.getElementById('checkboxesPratiquesGrille');
-    if (containerPratiques && typeof GabaritsUtils !== 'undefined') {
-        const pratiquesActuelles = grille.pratiquesCompatibles || [];
-        containerPratiques.innerHTML = GabaritsUtils.genererCheckboxesPratiques('grille', pratiquesActuelles);
-    }
 
     // ✅ AJOUT (6 jan 2026) : Afficher le panneau métadonnées
     const panneauMeta = document.getElementById('panneauMetadonneesGrille');

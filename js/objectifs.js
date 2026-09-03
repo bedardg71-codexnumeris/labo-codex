@@ -86,14 +86,10 @@ function afficherListeEnsemblesObjectifs() {
     let html = '';
     ensembles.forEach((ensemble, index) => {
         const nbObjectifs = ensemble.objectifs ? ensemble.objectifs.length : 0;
-        // Générer badges pratiques compatibles (utilise gabarits-utils.js)
-        const badgesPratiques = typeof GabaritsUtils !== 'undefined'
-            ? GabaritsUtils.genererBadgesPratiques(ensemble)
-            : '';
         html += `
             <div class="sidebar-item" data-action="afficherEnsembleObjectifs" data-param="${ensemble.id}">
                 <div class="sidebar-item-titre">${ensemble.nom}</div>
-                <div class="sidebar-item-badges">${badgesPratiques} <span class="badge-caracteristique">${nbObjectifs} objectifs</span></div>
+                <div class="sidebar-item-badges"><span class="badge-caracteristique">${nbObjectifs} objectifs</span></div>
             </div>
         `;
     });
@@ -129,7 +125,6 @@ function creerNouvelEnsembleObjectifs() {
         etablissement: '',
         discipline: '',
         description: '',
-        pratiquesCompatibles: [],
         version: '1.0',
         date_creation: new Date().toISOString().split('T')[0],
         objectifs: []
@@ -249,11 +244,6 @@ function genererFormulaireEnsemble(ensemble) {
                            value="${echapperHtml(ensemble.nom)}"
                            placeholder="Ex: Objectifs Calcul différentiel"
                            data-on-input="marquerEnsembleModifie">
-                </div>
-                <div style="flex-shrink: 0;">
-                    ${typeof GabaritsUtils !== 'undefined'
-                        ? GabaritsUtils.genererCheckboxesPratiques('objectifs', ensemble.pratiquesCompatibles || [])
-                        : ''}
                 </div>
             </div>
 
@@ -580,10 +570,6 @@ function sauvegarderEnsembleObjectifs() {
         }
     }
 
-    // Lire les pratiques compatibles sélectionnées
-    const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
-        ? GabaritsUtils.lirePratiquesSelectionnees('objectifs')
-        : [];
 
     // Mettre à jour l'ensemble
     ensembles[index].nom = nom;
@@ -591,7 +577,6 @@ function sauvegarderEnsembleObjectifs() {
     ensembles[index].etablissement = etablissement;
     ensembles[index].discipline = discipline;
     ensembles[index].description = description;
-    ensembles[index].pratiquesCompatibles = pratiquesCompatibles;
     ensembles[index].objectifs = objectifs;
     ensembles[index].date_modification = new Date().toISOString().split('T')[0];
 

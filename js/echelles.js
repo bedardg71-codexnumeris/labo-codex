@@ -921,15 +921,9 @@ async function sauvegarderNomEchelle() {
             echelleTemplateActuelle = { ...echelleActuelleEnStorage };
         }
 
-        // Lire les pratiques compatibles sélectionnées
-        const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
-            ? GabaritsUtils.lirePratiquesSelectionnees('echelle')
-            : [];
-
         // Mettre à jour en mémoire
         echelleTemplateActuelle.nom = nom;
         echelleTemplateActuelle.description = document.getElementById('descriptionEchelle')?.value?.trim() || '';
-        echelleTemplateActuelle.pratiquesCompatibles = pratiquesCompatibles;
         echelleTemplateActuelle.dateModification = new Date().toISOString();
 
         // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
@@ -2382,14 +2376,10 @@ async function afficherListeEchelles() {
     html += echellesDansBibliotheque.map(echelle => {
         const nomEchelle = echelle.nom || 'Sans titre';
         const nbNiveaux = echelle.niveaux?.length || 0;
-        // Générer badges pratiques compatibles (utilise gabarits-utils.js)
-        const badgesPratiques = typeof GabaritsUtils !== 'undefined'
-            ? GabaritsUtils.genererBadgesPratiques(echelle)
-            : '';
         return `
             <div class="sidebar-item" data-id="${echelle.id}" data-action="chargerEchellePourModif" data-param="${echelle.id}">
                 <div class="sidebar-item-titre">${nomEchelle}</div>
-                <div class="sidebar-item-badges">${badgesPratiques} <span class="badge-caracteristique">${nbNiveaux} niveaux</span></div>
+                <div class="sidebar-item-badges"><span class="badge-caracteristique">${nbNiveaux} niveaux</span></div>
             </div>
         `;
     }).join('');
@@ -2428,7 +2418,6 @@ async function preparerDonneesBibliothequeEchelles() {
         id: echelle.id,
         afficherId: true,
         badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
-        badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(echelle) : '',
         metadonnees: BibliothequeUI.formaterMetadonnees(echelle, {
             quantite: `${echelle.niveaux?.length || 0} niveau(x)`,
             discipline: true
@@ -2447,18 +2436,6 @@ async function preparerDonneesBibliothequeEchelles() {
     // via repertoiresBibliotheque.grouper). Chaque carte porte au menu ⋮ les
     // actions « Classer dans … » / « Retirer du dossier » selon son dossier courant.
     const cartesSection2 = echellesDisponibles.map(echelle => {
-        const pratiques = echelle.pratiques || (echelle.gabaritType ? [echelle.gabaritType] : ['all']);
-        let badgesPratiques = '';
-        if (window.GabaritsUtils) {
-            badgesPratiques = window.GabaritsUtils.genererBadgesPratiques(echelle);
-        } else {
-            pratiques.forEach(p => {
-                const label = p === 'all' ? 'Multi' : p;
-                const classeCSS = p === 'all' ? '' : p.toLowerCase();
-                badgesPratiques += `<span class="badge-pratique-compact ${classeCSS}">${label}</span>`;
-            });
-        }
-
         const dejaPresent = echelles.some(e => (e.id === echelle.id || e.idOriginal === echelle.id) && e.dansBibliotheque !== false);
         const estGabarit = echelle.estGabarit === true;
         const styleGabarit = estGabarit ? 'border-left: 4px solid var(--gabarit-couleur); background: var(--gabarit-fond);' : '';
@@ -2481,7 +2458,6 @@ async function preparerDonneesBibliothequeEchelles() {
             id: echelle.id,
             afficherId: true,
             badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
-            badgesPratiques: badgesPratiques,
             metadonnees: BibliothequeUI.formaterMetadonnees(echelle, {
                 quantite: `${echelle.niveaux?.length || 0} niveau(x)`,
                 discipline: true
@@ -3530,13 +3506,6 @@ async function chargerEchellePourModif(id) {
     // Remplir le formulaire
     document.getElementById('nomEchelleTemplate').value = echelle.nom || '';
     document.getElementById('descriptionEchelle').value = echelle.description || '';
-
-    // Afficher les checkboxes pratiques compatibles
-    const containerPratiques = document.getElementById('checkboxesPratiquesEchelle');
-    if (containerPratiques && typeof GabaritsUtils !== 'undefined') {
-        const pratiquesActuelles = echelle.pratiquesCompatibles || [];
-        containerPratiques.innerHTML = GabaritsUtils.genererCheckboxesPratiques('echelle', pratiquesActuelles);
-    }
 
     // ✅ AJOUT (6 jan 2026) : Afficher le panneau métadonnées
     const panneauMeta = document.getElementById('panneauMetadonneesEchelle');
@@ -4725,11 +4694,6 @@ async function sauvegarderEchelleComplete() {
             return;
         }
 
-        // Lire les pratiques compatibles sélectionnées
-        const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
-            ? GabaritsUtils.lirePratiquesSelectionnees('echelle')
-            : [];
-
         // 🆕 Beta 95.3 : Capturer discipline depuis infoCours
         const infoCours = typeof db !== 'undefined' && db.getSync ? db.getSync('infoCours', {}) : {};
         const discipline = infoCours?.discipline || '';
@@ -4745,7 +4709,6 @@ async function sauvegarderEchelleComplete() {
             // #555 lot 2 (e) — uniquement les repères posés : jamais de clé vide.
             ...transport.reperes,
             description: document.getElementById('descriptionEchelle')?.value?.trim() || '',
-            pratiquesCompatibles: pratiquesCompatibles,
             discipline: discipline, // 🆕 Beta 95.3
             dansBibliotheque: true,
             dateCreation: new Date().toISOString(),

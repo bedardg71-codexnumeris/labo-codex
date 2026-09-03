@@ -23,13 +23,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const lire = (...p) => readFileSync(path.resolve(__dirname, '..', '..', ...p), 'utf8');
 
 describe('#343 · descriptions DEN — cibles/critères explicites + note certificative', () => {
-    it('gabarits-utils.js : le tag DEN ne dit plus « autoévaluation guidée » seul, et cite critères explicites', () => {
-        const src = lire('js', 'gabarits-utils.js');
-        // La ligne de description du tag DEN.
-        const ligne = src.split('\n').find(l => l.includes("code: 'DEN'"));
-        expect(ligne, 'tag DEN introuvable').toBeTruthy();
-        expect(ligne).not.toMatch(/autoévaluation guidée/);
-        expect(ligne).toMatch(/critères explicites|cibles et critères/);
+    it('gabarits-utils.js : la liste des pratiques est PARTIE (3 sept. 2026, volet C) — plus aucune description DEN à y relire', () => {
+        // Les cases « Pratiques compatibles » et leur liste `PRATIQUES_DISPONIBLES`
+        // ont quitté ce fichier ; une description DEN qui y reviendrait serait un
+        // doublon des trois sources ci-dessous.
+        const srcSansListe = lire('js', 'gabarits-utils.js');
+        expect(srcSansListe.includes("code: 'DEN'")).toBe(false);
+        expect(srcSansListe).not.toMatch(/autoévaluation guidée/);
     });
 
     it('accompagnement-contenu-terme.js : den-denotation cite critères explicites + note certificative, plus « commentaire plutôt que sur le score »', () => {

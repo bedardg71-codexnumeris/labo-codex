@@ -562,13 +562,6 @@ async function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam 
         const inputContexteSpec = document.getElementById('contexteSpecifiqueCartouche');
         if (inputContexteSpec) inputContexteSpec.value = cartoucheActuel.contexteSpecifique || '';
 
-        // Afficher les checkboxes pratiques compatibles
-        const containerPratiques = document.getElementById('checkboxesPratiquesCartouche');
-        if (containerPratiques && typeof GabaritsUtils !== 'undefined') {
-            const pratiquesActuelles = cartoucheActuel.pratiquesCompatibles || [];
-            containerPratiques.innerHTML = GabaritsUtils.genererCheckboxesPratiques('cartouche', pratiquesActuelles);
-        }
-
         // Afficher la matrice
         await afficherMatriceRetroaction();
         await calculerPourcentageComplete();
@@ -987,10 +980,6 @@ async function sauvegarderCartouche() {
         }
     }
 
-    // Lire les pratiques compatibles sélectionnées
-    const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
-        ? GabaritsUtils.lirePratiquesSelectionnees('cartouche')
-        : [];
 
     // Mettre à jour les champs
     cartoucheActuel.nom = nom;
@@ -1003,7 +992,6 @@ async function sauvegarderCartouche() {
     if (cartoucheActuel.description === undefined) cartoucheActuel.description = '';
     cartoucheActuel.contexte = document.getElementById('contexteCartouche').value.trim();
     cartoucheActuel.contexteSpecifique = (document.getElementById('contexteSpecifiqueCartouche') || {}).value ? document.getElementById('contexteSpecifiqueCartouche').value.trim() : '';
-    cartoucheActuel.pratiquesCompatibles = pratiquesCompatibles;
 
     // Backfill metadata_cc pour cartouches anciennes (Plan 1 §4.4 : auteur = identité utilisateur)
     if (!cartoucheActuel.metadata_cc) cartoucheActuel.metadata_cc = {};
@@ -3490,18 +3478,13 @@ async function afficherBanqueCartouches(grilleIdFiltre = '') {
     html += cartouchesFiltrees.map(cart => {
         const estActive = window.cartoucheActuel?.id === cart.id;
         const verrouIcone = cart.verrouille ? ' <span class="cartouche-texte-warning" title="Verrouillée"><img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"></span>' : '';
-        // Générer badges pratiques compatibles (utilise gabarits-utils.js)
-        const badgesPratiques = typeof GabaritsUtils !== 'undefined'
-            ? GabaritsUtils.genererBadgesPratiques(cart)
-            : '';
-
         return `
             <div class="sidebar-item ${estActive ? 'active' : ''}"
                  data-cartouche-id="${cart.id}"
                  data-grille-id="${cart.grilleId}"
                  data-action="chargerCartouchePourModif" data-param="${cart.id}" data-param2="${cart.grilleId}">
                 <div class="sidebar-item-titre">${echapperHtml(cart.nom)}${verrouIcone}</div>
-                <div class="sidebar-item-badges">${badgesPratiques} <span class="badge-caracteristique">${echapperHtml(cart.grilleNom)}</span></div>
+                <div class="sidebar-item-badges"><span class="badge-caracteristique">${echapperHtml(cart.grilleNom)}</span></div>
             </div>
         `;
     }).join('');
