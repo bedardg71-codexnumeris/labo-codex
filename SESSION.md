@@ -7,6 +7,119 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 18 — 3 SEPTEMBRE 2026, MIDI : LE TEXTE TROUÉ, ÉTAPE 1 — LES QUATRE
+     ÉNONCÉS DE RÉTROACTION REÇOIVENT DES REPÈRES POSABLES.
+
+     ▣ Session Claude Code sur consigne FICHIER (`plans de travail/CONSIGNE-DU-JOUR.md`,
+       Cowork 12 h, avec Grégoire). Source : `CADRAGE-2026-09-02-badges-texte-troue.md`.
+       Ce lot n'exécute que l'ÉTAPE 1 : les quatre énoncés du bloc 3
+       (`rendreBlocEnoncesAlgo`). Hors lot, NON touchés : paliers du bloc 2, bloc 1,
+       badges personnalisés.
+
+     ▣ VERDICT GITHUB SUR 1.113.0 (rituel §2.1, en premier) : run 33760167678 VERT
+       (Vitest vert ; Playwright WebKit vert sur 233, 6 non jugés sur Linux comme
+       d'habitude), sur `324421db`. Les deux commits suivants (`76cb53c3`, `5887532e`)
+       sont docs seuls, dans `paths-ignore`.
+     ▣ LOT D'AUDIT `5887532e` : à l'ouverture (12 h 05), mesuré NON POUSSÉ
+       (`origin/main..HEAD` = 1) — la consigne disait « dis-le et demande avant
+       d'empiler » ; session autonome, j'ai empilé en le disant. ⮕ PÉRIMÉ UNE MINUTE
+       PLUS TARD : le reflog d'`origin/main` porte « update by push » à 12 h 06 sur
+       `5887532e`, depuis ce clone (Grégoire ou Cowork). Au commit de ce lot, `HEAD`
+       n'est donc devant `origin/main` QUE de ce lot (1 / 0). ⚠ Leçon : une mesure de
+       push vieillit en minutes quand une autre instance travaille dans le même clone —
+       refaire `git fetch` avant de conclure, pas seulement à l'ouverture.
+
+     ▣ MESURÉ AVANT DE CODER — la palette : `grep -n "^var JETON_" js/evaluation-enonces.js`
+       = 5 ; {s} exclu (accord, pas geste). Le contrat zone → repères, lu sur les SIX
+       appels de `enoncesAlgo.enonce(` :
+         decompte   {erreurs, mots, points} (evaluation-calcul.js:514, catégories) et
+                    {erreurs, mots} (evaluation-calcul.js:698, simple)  ⮕ offre les 4
+         priorite   {} (evaluation-retroaction.js:804)                  ⮕ offre {critere}
+         concentre  {} (evaluation-retroaction.js:882, synthese-retroaction-data.js:798)
+                                                                        ⮕ offre {critere}
+         aucune     {} (evaluation-retroaction.js:498)                  ⮕ offre {critere}
+       {critere} est toujours fourni par le registre. ⚠ SUPPOSITION NOMMÉE : la table
+       est IMPLANTÉE sans attendre (mesure sans ambiguïté, les valeurs viennent du code) ;
+       elle vit en DONNÉES (`CLES[].reperes`), une case se change en une ligne, et la
+       sentinelle B la relit sur les sites dans les deux sens. Remarque : `priorite` a
+       `erreurs`/`mots` SOUS LA MAIN au site (concaténés en dur après la phrase) mais
+       ne les passe pas ; les offrir exigerait de changer l'appel — hors lot, et ça
+       changerait le rendu d'un texte existant qui les porterait déjà.
+
+     ▣ LIVRÉ (4 fichiers de code, 2 d'essais, la consigne, un commit, fichiers nommés) :
+       · evaluation-enonces.js — `REPERES` (4, deux familles posee/remplie,
+         `espaceDeTete` sur {points}), `CLES[].reperes`, `listerReperes`,
+         `reperesDeCle`, `insererRepere(texte, debut, fin, jeton)` PURE : au curseur ou
+         à la place de la sélection ; espace AVANT après un mot, une ponctuation
+         fermante ou un autre repère (jamais après espace, ouvrante, apostrophe ; jamais
+         pour {points}) ; espace APRÈS devant un mot ou un repère (pas devant {points}) ;
+         hors bornes = fin ; refuse tout non-posable (null). `rendre` INTOUCHÉ.
+       · grilles.js — sous chaque zone, une rangée « Poser : » de `<button
+         data-action="insererRepereEnonce" data-jeton>` ; `insererRepereEnonce(el)`
+         pose, remet le curseur, écrit SANS re-rendre (`_ecrireTexteEnonceTemp/Grille`,
+         extraits des deux handlers de frappe, qui eux re-rendent comme avant) ;
+         listeners délégués : `focusin` pose `data-curseur-vu` (une zone jamais visitée
+         reçoit le repère à la FIN, pas en tête) ; `pointerdown`/`mousedown` annulés sur
+         les repères pour que la zone GARDE le focus (sinon `change` → re-rendu → clic
+         perdu). Note du bas : n'enseigne plus la syntaxe ; garde « disparaît
+         proprement » et « VIDE fait taire ».
+       · styles.css — `.reperes-enonce`, `.repere-enonce`, `--posee` (bleu-pale +
+         accent) / `--remplie` (alerte-fond-succes + alerte-bordure-succes), texte en
+         --texte-principal dans les deux modes, 44 px sur pointeur grossier (iPad).
+       · index.html — jetons bumpés : styles 0903c, evaluation-enonces 0903a,
+         grilles 0903c.
+       · `plans de travail/CONSIGNE-DU-JOUR.md` commitée avec le lot (consigne §7).
+     ▣ SUPPOSITIONS NOMMÉES (dix secondes à corriger si fausses) :
+       · le repère AFFICHE le jeton (`{erreurs}`), pas son libellé (« nombre
+         d'erreurs ») : ce qui est cliqué est ce qui apparaît dans la zone ; libellé et
+         aide sont dans l'infobulle. Flip = `r.jeton` → `r.libelle` dans `reperesDe`.
+       · mot d'interface : « repère » (déjà dans la note d'avant), pas « badge ».
+       · `decompte` OFFRE {critere} : la décision du 2 sept. portait sur le texte PAR
+         DÉFAUT, pas sur ce qu'on peut composer.
+       · {s} reste tapable à la main : une phrase neuve au pluriel exige de l'écrire —
+         limite assumée par la consigne (« il ne s'offre pas à la pose »).
+     ▣ TÉMOINS : sentinelle #581 passe SANS modification (36/36). Sentinelle neuve
+       `sentinelle-texte-troue-etape-1-reperes.test.js` (24) : A palette, B contrat
+       MESURÉ sur les sites (deux sens + témoin), C pose, D rendu identique, E gabarit.
+       Break-tests joués (5 mutations, chacune rouge sur l'assertion attendue, module
+       revenu à l'identique — sha256 vérifié) : aucune+{erreurs} ⮕ B.b B.d ;
+       decompte−{mots} ⮕ B.c B.d ; espace après repère retirée ⮕ C.c C.d ; {points}
+       avec espace ⮕ C.e ; {s} posable ⮕ A.a A.b. Spec WebKit
+       `texte-troue-reperes-enonces.spec.js` (5) : offre par zone, FRAPPE PUIS CLIC
+       (focus gardé, valeur écrite sur le critère, curseur après), milieu de phrase
+       (espaces + rendu identique au tapé), zone jamais visitée (fin), témoin négatif
+       (textes existants tels quels, `enonces` inchangé à l'octet). ⚠ Le premier passage
+       WebKit a attrapé un VRAI défaut : deux repères adjacents se soudaient
+       (« {critere}{critere} », qui rendrait « 5003 ») — corrigé dans `insererRepere`,
+       cas ajouté en C.c/C.d.
+     ▣ VERDICT SUITE COMPLÈTE (`cd tests && npm test`, 12 h 30) : code 0 — Vitest « Test Files  447 passed (447) », « Tests  4845 passed (4845) » ;
+       Playwright WebKit 246 passés sur 246 (8,6 min). ⚠ Premier passage ROUGE : la sentinelle
+       #568 lit le PREMIER bloc `@media (pointer: coarse)` de styles.css, et mon bloc tactile,
+       placé plus haut, était devenu ce premier ⮕ règle `.repere-enonce` déplacée DANS le bloc
+       de #568 (un seul bloc tactile), test étranger non touché.
+     ▣ CE QUE GRÉGOIRE DOIT ALLER VOIR (consigne) : Conception › grille avec un critère
+       algorithmique › « Modèle de rétroaction » : cliquer un repère, le voir apparaître
+       au curseur ; ses propres textes intacts. ⚠ Recharger AVEC vidage de cache si un
+       onglet était ouvert (jetons bumpés). INVÉRIFIABLE ICI : le toucher iPad — le
+       clic ne doit pas faire perdre le focus à la zone ; prouvé dans WebKit Desktop,
+       pas dans iPadOS. Si sur iPad le premier repère touché après une frappe ne
+       s'insère pas, c'est ce chemin ; un second toucher l'ajoute en fin de zone.
+     ▣ PAS FAIT, VOULU (consigne §6) : pas de release, pas de push, pas de verdict au
+       jeton. Rituel `fin-de-session` non lancé en entier (il porte le bump) ; ses
+       vérifications faites à la main : diff audité (0 innerHTML neuf, 0 handler inline,
+       0 console.log, `esc()` sur tout ce qui entre dans le gabarit), tests, break-tests.
+       Changelog PROPOSÉ pour la release : « Rétroaction algorithmique — les quatre
+       phrases se composent en posant des repères d'un clic ({critere}, {erreurs},
+       {mots}, {points}) : plus d'accolade à taper. Chaque zone n'offre que ce qui y
+       vaut quelque chose. Vos textes existants sont inchangés. »
+     ▣ TROUVAILLES, avec leur issue : (1) `priorite` pourrait offrir {erreurs}/{mots}
+       si l'appel les passait ⮕ COMMENTÉ DANS LE CODE (en-tête de `CLES`) ET OUBLIÉ —
+       matière pour l'étape 2, aucun symptôme vécu. (2) `.badge-jeton-*` de styles.css
+       dit « jeton » pour les jetons de reprise/délai, sans rapport ⮕ laissé, d'où
+       le mot « repère » ici.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 17 — 3 SEPTEMBRE 2026, MATIN : « DÉCLONER » — UN SEUL MOT, ET LE GESTE
      LÀ OÙ ON LE CHERCHE (#693).
 

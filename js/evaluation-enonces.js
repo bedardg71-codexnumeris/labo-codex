@@ -44,6 +44,17 @@
    ⚠ Un jeton que l'appel ne fournit pas est retiré du texte, jamais rendu
    littéralement : un élève ne doit pas lire « {critere} » sur son PDF.
 
+   LES REPÈRES POSABLES (le texte troué, étape 1 — 3 septembre 2026)
+     Le gabarit n'exige plus de TAPER un jeton : chaque zone offre des repères
+     qu'un clic pose au curseur (`insererRepere`). La palette est `REPERES` ;
+     {s} n'en fait pas partie — c'est un accord qui suit {erreurs}, pas un
+     geste. Chaque zone n'offre que les repères qu'un site d'appel remplit
+     réellement (`CLES[].reperes`, mesuré sur les appels de `enonce`) : un
+     repère offert là où il vaudra toujours vide est un piège.
+   ⚠ Le format du gabarit ne change pas : `critere.enonces` reste du texte
+   libre, un jeton tapé à la main vaut un repère posé, et `rendre` ne sait
+   rien des repères.
+
    ⚠ CE MODULE N'ENGENDRE QUE DES PHRASES. Le nom qui TITRE une section
    (l'en-tête du PDF, le titre du décompte) n'est pas un énoncé réglable : c'est
    le nom du critère, lu tel quel. `libelleCritere` le rend, et ne passe par
@@ -119,6 +130,36 @@ var JETON_POINTS  = '{points}';
 var JETONS = [JETON_CRITERE, JETON_ERREURS, JETON_PLURIEL, JETON_MOTS, JETON_POINTS];
 
 // ---------------------------------------------------------------------
+// Les repères posables — le texte troué, étape 1 (3 septembre 2026)
+// ---------------------------------------------------------------------
+// Ce que le gabarit OFFRE à la pose, d'un clic, dans une zone d'énoncé. Ce
+// n'est PAS la liste des jetons : {s} n'y est pas. C'est un accord grammatical
+// qui suit {erreurs} — « un texte qui ne porte pas {erreurs} ne porte pas {s}
+// non plus » — jamais un geste de l'enseignant·e. S'il doit apparaître, c'est
+// en conséquence de {erreurs}, tapé à la main : la zone reste du texte libre.
+//
+// Deux familles, arrêtées au cadrage du 2 septembre 2026 et tenues distinctes
+// à l'écran :
+//   posee    la valeur est ÉCRITE par l'enseignant·e, une fois, dans la
+//            grille — le nom du critère ;
+//   remplie  la valeur vient de la CORRECTION, copie par copie — elle
+//            n'existe pas avant, et personne n'a à la saisir dans la grille.
+//
+// `espaceDeTete` : {points} arrive avec son espace de tête (« (3,0 points) »
+// précédé d'une espace, ou vide — voir `_construireRetroactionAlgoCategories`).
+// Un repère posé après un mot reçoit une espace ; celui-là en aurait deux.
+var REPERES = [
+    { jeton: JETON_CRITERE, famille: 'posee',   libelle: 'nom du critère',
+      aide: 'Le nom de ce critère, tel qu\'il est écrit dans la grille.' },
+    { jeton: JETON_ERREURS, famille: 'remplie', libelle: 'nombre d\'erreurs',
+      aide: 'Le nombre d\'erreurs comptées sur la copie, à la correction.' },
+    { jeton: JETON_MOTS,    famille: 'remplie', libelle: 'nombre de mots',
+      aide: 'Le nombre de mots de la production, saisi à la correction.' },
+    { jeton: JETON_POINTS,  famille: 'remplie', libelle: 'points pondérés', espaceDeTete: true,
+      aide: 'Entre parenthèses, le compte en points quand les catégories d\'erreurs ne pèsent pas toutes pareil. Vide autrement.' }
+];
+
+// ---------------------------------------------------------------------
 // LES ÉNONCÉS D'HIER — repris des quatre sites au caractère près
 // ---------------------------------------------------------------------
 // Chaque clé nomme un ENDROIT où une phrase sort, pas une phrase :
@@ -166,11 +207,28 @@ var ENONCES_GENERIQUES = {
 };
 
 // L'ordre et les libellés des clés, pour le gabarit de la grille.
+//
+// `reperes` : ce que CHAQUE zone offre à la pose — et rien d'autre. ⚠ MESURÉ
+// SUR LES SITES D'APPEL, pas décidé : `enonce(critere, cle, valeurs)` ne
+// remplit que ce que l'appelant lui donne, et {critere} vient toujours d'ici.
+//   decompte   evaluation-calcul.js — {erreurs, mots, points} (mode catégories)
+//              et {erreurs, mots} (mode simple)
+//   priorite   evaluation-retroaction.js — {} ; concentre — {} (deux sites) ;
+//   aucune     evaluation-retroaction.js — {}
+// Une zone qui offrirait {erreurs} là où l'appel ne le fournit pas proposerait
+// de composer une phrase avec un nombre toujours vide — le cas qui a fait
+// trancher Grégoire le 3 septembre : « Aucune annotation » s'affiche quand la
+// copie ne porte NI tampon NI erreur. La sentinelle du texte troué relit les
+// sites et rougit si cette table s'en écarte, dans un sens comme dans l'autre.
 var CLES = [
-    { cle: 'decompte',  libelle: 'Décompte des erreurs',        aide: 'La phrase engendrée sous le critère, et reprise dans le PDF de l\'élève.' },
-    { cle: 'priorite',  libelle: 'Défi prioritaire',            aide: 'Mise en tête du bilan quand ce critère est effondré.' },
-    { cle: 'concentre', libelle: 'Quand tout est maîtrisé',     aide: 'Ce qui reste à travailler lorsque tous les critères sont acquis.' },
-    { cle: 'aucune',    libelle: 'Aucune annotation',           aide: 'Affiché à l\'enseignant·e quand la copie ne porte ni tampon ni erreur.' }
+    { cle: 'decompte',  libelle: 'Décompte des erreurs',        aide: 'La phrase engendrée sous le critère, et reprise dans le PDF de l\'élève.',
+      reperes: [JETON_CRITERE, JETON_ERREURS, JETON_MOTS, JETON_POINTS] },
+    { cle: 'priorite',  libelle: 'Défi prioritaire',            aide: 'Mise en tête du bilan quand ce critère est effondré.',
+      reperes: [JETON_CRITERE] },
+    { cle: 'concentre', libelle: 'Quand tout est maîtrisé',     aide: 'Ce qui reste à travailler lorsque tous les critères sont acquis.',
+      reperes: [JETON_CRITERE] },
+    { cle: 'aucune',    libelle: 'Aucune annotation',           aide: 'Affiché à l\'enseignant·e quand la copie ne porte ni tampon ni erreur.',
+      reperes: [JETON_CRITERE] }
 ];
 
 // ---------------------------------------------------------------------
@@ -237,7 +295,88 @@ function obtenirModele(id) {
 
 /** Les clés d'énoncé et leurs libellés, pour le gabarit. */
 function listerCles() {
-    return CLES.map(function(c) { return { cle: c.cle, libelle: c.libelle, aide: c.aide }; });
+    return CLES.map(function(c) {
+        return { cle: c.cle, libelle: c.libelle, aide: c.aide, reperes: c.reperes.slice() };
+    });
+}
+
+// ---------------------------------------------------------------------
+// Les repères — palette, contrat par zone, pose au curseur
+// ---------------------------------------------------------------------
+
+function _copieRepere(r) {
+    return { jeton: r.jeton, famille: r.famille, libelle: r.libelle, aide: r.aide,
+             espaceDeTete: !!r.espaceDeTete };
+}
+
+function _repere(jeton) {
+    for (var i = 0; i < REPERES.length; i++) if (REPERES[i].jeton === jeton) return REPERES[i];
+    return null;
+}
+
+/** La palette des repères posables — jamais {s}. */
+function listerReperes() {
+    return REPERES.map(_copieRepere);
+}
+
+/**
+ * Les repères qu'une zone offre — ceux qu'un appel remplit, et seulement eux.
+ * Une clé inconnue n'offre rien.
+ */
+function reperesDeCle(cle) {
+    for (var i = 0; i < CLES.length; i++) {
+        if (CLES[i].cle !== cle) continue;
+        return CLES[i].reperes.map(_repere).filter(Boolean).map(_copieRepere);
+    }
+    return [];
+}
+
+/**
+ * Pose un repère dans un texte, à la place du curseur ou de la sélection.
+ *
+ * Le geste que ça remplace : taper `{erreurs}` — et le 2 septembre, Grégoire
+ * a tapé `[service]` ; le texte avait l'air juste, l'élève aurait lu le
+ * crochet. Un repère posé ne se tape pas, cette classe d'erreur disparaît.
+ *
+ * ⚠ LE RÉSULTAT EST DU TEXTE ORDINAIRE : ce que cette fonction rend, `rendre`
+ * le lit exactement comme s'il avait été tapé. Rien d'autre ne change.
+ *
+ * Les espaces : sur iPad, toucher un mot pose le curseur à sa FIN, collé à la
+ * dernière lettre. Sans une espace ajoutée, le repère s'y soude
+ * (« contient{erreurs} » ⮕ « contient12 »). Une espace est donc ajoutée
+ * avant le repère quand il suit une lettre, un chiffre ou une ponctuation qui
+ * ferme, ou un autre repère (deux repères soudés rendraient « 5003 ») —
+ * jamais après une espace, une ouvrante ou une apostrophe (« l'{critere} » se
+ * dit) — et après lui quand un mot ou un repère le suit directement.
+ * {points} fait exception des deux côtés : il porte déjà son espace de tête.
+ *
+ * @param {string} texte - le texte de la zone
+ * @param {number} debut - début de la sélection (le curseur, si égal à `fin`)
+ * @param {number} fin - fin de la sélection
+ * @param {string} jeton - un repère de `listerReperes()`, avec ses accolades
+ * @returns {{texte: string, curseur: number}|null} le nouveau texte et la
+ *          position du curseur après le repère ; `null` si `jeton` n'est pas
+ *          posable — le texte n'est alors pas touché.
+ */
+function insererRepere(texte, debut, fin, jeton) {
+    var r = _repere(jeton);
+    if (!r) return null;
+    var t = (typeof texte === 'string') ? texte : '';
+    var n = t.length;
+    // Une position absente ou hors bornes vaut la fin du texte : un repère
+    // posé sans curseur connu s'ajoute, il ne s'intercale pas au hasard.
+    var borne = function(x) {
+        return (typeof x === 'number' && isFinite(x)) ? Math.min(Math.max(Math.round(x), 0), n) : n;
+    };
+    var a = borne(debut), b = borne(fin);
+    if (a > b) { var tmp = a; a = b; b = tmp; }
+    var avant = t.slice(0, a), apres = t.slice(b);
+    var espaceAvant = (!r.espaceDeTete && /[\p{L}\p{N}}.,;:!?)»…%]$/u.test(avant)) ? ' ' : '';
+    var suitUnMot = /^[\p{L}\p{N}]/u.test(apres);
+    var suitUnRepere = apres.charAt(0) === '{' && apres.indexOf(JETON_POINTS) !== 0;
+    var espaceApres = (suitUnMot || suitUnRepere) ? ' ' : '';
+    var insere = espaceAvant + r.jeton + espaceApres;
+    return { texte: avant + insere + apres, curseur: avant.length + insere.length };
 }
 
 // ---------------------------------------------------------------------
@@ -433,6 +572,9 @@ var api = {
     JETON_POINTS: JETON_POINTS,
     listerModeles: listerModeles,
     listerCles: listerCles,
+    listerReperes: listerReperes,
+    reperesDeCle: reperesDeCle,
+    insererRepere: insererRepere,
     obtenirModele: obtenirModele,
     normaliser: normaliser,
     rendre: rendre,
