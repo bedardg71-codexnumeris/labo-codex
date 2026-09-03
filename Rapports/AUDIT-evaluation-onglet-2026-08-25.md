@@ -12,6 +12,12 @@
 > 1.110.0 (`ffc95cec`, 2 septembre) — onze versions mineures plus tard. C'est l'écart qui dit
 > au lecteur suivant à quel point ce qui suit a vieilli.
 >
+> ↻ **Remesurées le 3 septembre 2026, sur `main` 1.113.0 (commit `76cb53c3`).** Trois lignes
+> ont changé depuis le 2 septembre : **B5** (la portée est refusée, motif de Grégoire ; ce que
+> l'écran ne disait pas est livré en 1.111.2), **B8** (livré, site mort retiré), **section D**
+> (le quatrième site de la note est corrigé depuis `3d3a57be`, 1.111.0 ; les restes sont
+> nommés, dont un refus motivé). Le reste est inchangé.
+>
 > Chaque constat porte, DANS ce fichier, l'une des dispositions exigées par `CLAUDE.md`
 > (§« Ce qu'un audit doit produire ») : ***inscrit*** (n° de fiche au `BACKLOG.md`),
 > ***refusé*** (motif), ***périmé*** — plus ***partiel*** quand la fiche est livrée sans
@@ -73,7 +79,7 @@ La modale compte les fichiers de la corbeille **filtrée par groupe-cours actif*
 ### Liste des évaluations
 
 - **B5 · Suppressions par couple (DA, production) trop larges + contournement du garde des modes** : `supprimerFichierDefinitivement` (`liste-evaluations.js:2725-2739`) et le nettoyage de « Vider la corbeille » (2795-2812) suppriment **toutes** les évaluations du couple (originales, reprises, et l'évaluation active d'un fichier réimporté), et écrivent par `db.setSync(cle(...))` direct — esquivant le blocage du mode anonymisation que `supprimerEvaluation` respecte (`modes.js:754-758`).
-  ⮕ **Disposition** : **partiel** → **#560**, livré le 29 août 2026 pour le GARDE (les deux écritures vivantes passent par le garde des modes et disent le refus ; le site mort est retiré). ⏳ **Ce qui reste** : la règle métier de la PORTÉE — quelles suppressions un couple `(DA, production)` doit-il emporter ? — n'est pas livrée. Elle attend une décision de Grégoire : *« que doit emporter la suppression d'un fichier ? »* (geste 8 d'`OBJECTIF-COHORTE-1.md`, #560 résiduel).
+  ⮕ **Disposition** : deux moitiés, deux sorts. **La PORTÉE (« trop large ») est REFUSÉE** — **motif, de Grégoire, tranché le 2 septembre 2026** : *« TOUT ce qui touche le couple (élève, production) part : originale, reprises, évaluation d'un fichier réimporté. »* Le code faisait déjà le bon geste ; c'est l'écran qui ne le disait pas. Ce que l'écran ne disait pas est *inscrit* → **#560**, livré en **1.111.2** le 3 septembre 2026, dans ses mots : *« Le fichier, ses annotations et toutes les évaluations de cet élève pour cette production seront effacés. »* — affichée seulement quand une évaluation du couple existe ; **éprouvé par Grégoire à l'écran** le 3 septembre. Témoin négatif tenu : le déplacement à la corbeille, qui ne détruit rien, ne dit rien de plus qu'avant. **Le CONTOURNEMENT du garde des modes** : *inscrit* → **#560**, livré le 29 août 2026 — les deux écritures vivantes passent par le garde et disent le refus. Plus rien n'est en suspens sur ce constat.
 - **B6 · Réassociation avec jeton de reprise** : `associerProductionDepuisListe` (1627-1641) n'attend pas `travauxUI.changerProductionFichier` (async, peut avorter sur `confirm()` refusé, `travaux-ui.js:4301-4313`) mais marque quand même `estReprise:true` et consomme le jeton → reprise créée sur l'ancienne production.
   ⮕ **Disposition** : *inscrit* → **#561**, livré le 29 août 2026 — la réassociation rend un verdict, et la Liste l'attend avant de marquer la reprise.
 - **B7 · Échappement incomplet** : `${ligne.da}`/`${daAffiche}` et `${ligne.niveauFinal}` injectés sans `echapperHtml` (`liste-evaluations.js:1067, 1120-1121, 1135, 1189-1263`). Le DA est nettoyé à l'import CSV, pas garanti sur les autres chemins d'entrée — violation de la règle 1 (« sans exception »).
@@ -82,7 +88,7 @@ La modale compte les fichiers de la corbeille **filtrée par groupe-cours actif*
 ### Annoter et évaluer
 
 - **B8 · Le jeton personnalisé contourne le garde des modes** (`evaluation.js:3702-3729`) : lecture via `obtenirDonneesSelonMode` puis écriture via `db.setSync(cle(...))` direct. En mode anonymisation, le garde est esquivé ; pire, avec un contexte de simulation posé (#326 R2, `modes.js:626-633`), la lecture peut renvoyer le **corpus injecté**, que l'écriture directe reverserait dans la clé réelle. Toutes les fonctions sœurs passent par `sauvegarderDonneesSelonMode`.
-  ⮕ **Disposition** : **partiel** → **#560**, livré le 29 août 2026 pour le garde des modes (voir B5) ; la portée des suppressions reste ouverte, même décision due.
+  ⮕ **Disposition** : *inscrit* → **#560**, livré le 29 août 2026. ⚠ Mesuré le 28 août : le site du jeton personnalisé (`appliquerJetonPersonnalise`, `evaluation.js`) était **du code mort**, inatteignable depuis juin 2026 — aucun appelant, aucun `data-action` à ce nom, conteneur `jetonsPersonnalisesOptions` absent partout ; il est **retiré** plutôt que routé, exports compris. Le pire cas décrit ici (un corpus de simulation reversé dans la clé réelle) ne pouvait donc pas se produire. Les deux écritures vivantes de la Liste passent par `sauvegarderDonneesSelonMode` et disent le refus (voir B5).
 - **B9 · Décocher « Reprise ciblée » ne retire rien** : la branche est un TODO vide (`evaluation-sauvegarde.js:973-975`) — la case se décoche, le jeton reste appliqué. Et les écritures d'`evaluation-jetons.js` (274, 326, 467, 592, 885, 921) n'examinent jamais le retour de `sauvegarderDonneesSelonMode` : en mode anonymisation, l'échec est silencieux pendant que l'UI se met à jour.
   ⮕ **Disposition** : *inscrit* → **#563**, livré le 29 août 2026 — la case « Reprise ciblée » est retirée, et plus aucun chemin n'applique ce jeton.
 - **B10 · L'auto-save ne couvre que les critères** : son unique déclencheur est la sélection d'un niveau (`evaluation-chargement.js:1198`). Modifier **seulement** la rétroaction finale ou un commentaire (sans toucher un critère dans la même session de formulaire) ne crée aucun snapshot → le flush au changement de fichier ne sauve rien ; seul le bouton « Enregistrer » (`index.html:8383`) persiste. Risque réel de perte de texte en navigation rapide entre copies. (Le reste de la chaîne est sain — voir §E.)
@@ -110,7 +116,7 @@ La modale compte les fichiers de la corbeille **filtrée par groupe-cours actif*
 - **C4 · Mode clair cassé sur les flèches de tri de la Liste** : `var(--gris-clair)` (famille fond-clair, `#777788` en clair) posé sur l'en-tête bleu fixe (`index.html:8296-8317` sur `index.html:3479-3485`) ≈ 2,0:1 de contraste.
   ⮕ **Disposition** : *inscrit* → **#570**, livré le 29 août 2026 — les flèches de tri ont leurs ids, et la couleur de leur en-tête.
 - **C5 · PDF de rétroaction** : le mode fixe inline (hex/px) est **volontaire et documenté** (`synthese-retroaction-rendu.js:6-8`) — correct. Mais la densité dessert l'usage cible cellulaire : base 10 px avec des dates à 6 px (l.204), numéros 6,5 px, pied 7 px — rasterisé, c'est du bitmap à zoomer. Et le texte `PAPER` est posé sur les couleurs d'échelle de l'utilisateur sans garde de luminance (l.179, 300, 313-317, 365-366) : un niveau jaune rend le code IDME illisible. Une date non échappée (`rendu.js:135`, seul oubli du fichier).
-  ⮕ **Disposition** : *inscrit* → **#571**, livré le 29 août 2026 pour les CORRECTIFS (le PDF reste lisible sur les couleurs de l'échelle ; la date est échappée). **Refusé** pour les TAILLES (base 10 px, dates 6 px, numéros 6,5 px, pied 7 px) — **motif, de Grégoire** : la densité du PDF est conservée par décision ; ce n'est pas un oubli, et le constat ne doit pas revenir dans six mois faute d'un motif écrit.
+  ⮕ **Disposition** : *inscrit* → **#571**, livré le 29 août 2026 pour les CORRECTIFS (le PDF reste lisible sur les couleurs de l'échelle ; la date est échappée). **Refusé** pour les TAILLES (base 10 px, dates 6 px, numéros 6,5 px, pied 7 px) — **motif, de Grégoire, arbitré le 28 août 2026** : la densité est conservée par décision — *« Les commentaires seront recueillis dans la communauté de pratique cet automne. On verra ensuite. »* ⮕ Ne pas rouvrir avant l'automne 2026 et les retours de la CoP. Ce n'est pas un oubli, et le constat ne doit pas revenir dans six mois faute d'un motif écrit.
 - Mineurs : hiérarchie h2/h3 incohérente entre écrans (`travaux-ui.js:865, 1162` en h3 ; les autres en h2), un « Cliquez » vouvoyé (`travaux-ui.js:798`), badges jetons en hex dur alors que les variables existent (`styles.css:9528-9629` vs `76-80`), pas de `:focus-visible` sur la toolbar d'annotation, `aria-label` remplacés par `title` sur les boutons-icônes de la visionneuse (`travaux-ui.js:1077-1106`).
   ⮕ **Disposition** : *inscrit* → **#572** (part « Design » des mineurs), livré le 29 août 2026. ⚠ Cette puce n'est pas dans les vingt constats A-C ; elle est traitée avec la section D.
 
@@ -123,27 +129,32 @@ La modale compte les fichiers de la corbeille **filtrée par groupe-cours actif*
 - Annoter : deux blocs `if` vides (`evaluation-sauvegarde.js:629-630, 858-859`) ; note finale lue depuis le DOM (`parseFloat(...textContent)`) plutôt que depuis le SSOT de calcul.
 - Export : barres de progression jamais remises à zéro (`travaux-archivage.js:566-572, 596-602`) ; noms de dossiers ZIP non assainis (un « / » dans un nom crée des sous-dossiers ; fichier sans extension → la version annotée écrase l'original dans le ZIP) ; code mort `lancerAllegement` (652-681) ; `echapperHtml` n'échappe pas les guillemets (`config.js:281-286`) — tient uniquement parce que les IDs sont machine ; couleurs utilisateur interpolées dans des attributs `style` sans échappement (`rendu.js:179` et 7 autres).
 
-⮕ **Disposition de la section D** : **partiel** → **#572**, livré le 29 août 2026 pour les
-mineurs Liste, Annoter et Design — **mais sa ligne « clos » est fausse sur un point, mesuré
-le 2 septembre 2026 (rejoué à 12 h 45, inchangé après 1.110.0)** :
-1. #572 déclare que la note finale « n'est plus relue depuis le DOM (`parseFloat(textContent)`,
-   **trois sites**) mais depuis `noteCalculeeCourante` ». **Il y en avait quatre.** Trois écrivent
-   bien la valeur calculée (`evaluation-sauvegarde.js:209`, `evaluation-chargement.js:1452` et
-   `:1476`) ; **le quatrième relit toujours l'écran** — `js/evaluation.js:1784`, dans
-   `_lireChampsDOMMod`, appelée une seule fois (`js/evaluation.js:1959`), qui est **le chemin de
-   MODIFICATION d'une évaluation existante** :
-   `noteFinale: parseFloat(document.getElementById('noteProduction1').textContent) || 0,`
-2. **La sentinelle est verte parce qu'elle ne regarde que deux fichiers** —
-   `tests/unit/sentinelle-572-mineurs-liste-annoter-design.test.js:77` itère sur
-   `evaluation-sauvegarde` et `evaluation-chargement` ; `evaluation.js` n'y est pas. Le titre du
-   cas dit « et plus personne ne relit le DOM » ; il en vérifie deux sur trois.
-3. Mesure, à rejouer : `grep -rn "parseFloat(.*noteProduction1" js/ --include=*.js` rend **une**
-   ligne (`evaluation.js:1784`) ; `grep -rn "noteCalculeeCourante" js/ --include=*.js` en rend
-   cinq (trois lectures, deux écritures dans `evaluation-calcul.js`).
-⏳ **Ce qui reste** : corriger le quatrième site ET élargir la sentinelle à `evaluation.js` —
-c'est le **temps 2** de `plans de travail/PLAN-2026-09-02-evaluation-avant-la-chronique.md`,
-une autre séance. Rien de ceci n'a été corrigé au moment d'écrire cette disposition ; c'est
-volontaire (inscrire et continuer).
+⮕ **Disposition de la section D** : **partiel** → **#572**, avec ses restes nommés ci-dessous.
+Livré le 28 août 2026 (`43866c56`, `00a81a24`) pour l'**Import** (fuite de `setInterval`, date parsée
+en UTC, balayage des jetons de reprise débordant sur un autre groupe-cours) et l'**Export** (noms de
+dossiers ZIP assainis, fichier sans extension, barres de progression remises à zéro ; `lancerAllegement`
+parti avec le RETRAIT de la fonctionnalité « Alléger », `828981ad`, décision de Grégoire ; guillemets
+d'`echapperHtml` échappés — zone protégée, avec son autorisation) ; livré le 29 août 2026 pour
+**Liste, Annoter et Design**.
+↻ **Le quatrième site de la note.** La fiche #572 disait « trois sites » ; il y en avait quatre, et
+`_lireChampsDOMMod` (`js/evaluation.js`, le chemin de MODIFICATION d'une évaluation existante)
+relisait l'écran : l'arrondi `toFixed(1)` stocké à la place de la valeur, et 0 écrit quand l'écran
+affichait « -- ». Mesuré par Cowork le 2 septembre 2026 à 11 h 40, **corrigé le même jour à 13 h 16**
+(`3d3a57be`, parti en **1.111.0**) : les deux effets ont été reproduits avant correction
+(`sentinelle-572-quatrieme-site-note-modification`), et `sentinelle-572-mineurs-liste-annoter-design`
+ne tape plus sa liste de fichiers à la main — elle lit celle du dépôt. Remesuré le 3 septembre sur
+1.113.0 : `grep -rn "parseFloat(.*noteProduction1" js/` rend **zéro** ligne ; `noteCalculeeCourante`
+est lu aux quatre sites. ⚠ La fiche #572 au backlog ne porte pas cet addendum : elle dit encore
+« trois sites » et « clos ».
+**Refusé** : les « ~25 `console.log` » de `travaux-resolution.js` — **motif** (28 août 2026) : il y en
+a 20, dans `diagnostiquer`, `diagnostiquerDoublons` et `nettoyerDoublonsExacts`, des outils de
+diagnostic dont la SORTIE CONSOLE EST LE PRODUIT ; les retirer casserait l'outil.
+⏳ **Ce qui reste, nommément** : les clés `sessionStorage` non namespacées → **#596** (ouvert : 21 sites,
+6 clés, 5 fichiers dont deux hors Import/Export) ; les couleurs utilisateur interpolées dans des
+attributs `style` (~8 sites dans `synthese-retroaction-rendu.js`, 1 dans `evaluation.js`) — **laissées,
+sans fiche** ; la hiérarchie h2/h3 — porte terrain, hors fiche. Le temps 2 de
+`plans de travail/PLAN-2026-09-02-evaluation-avant-la-chronique.md` (le quatrième site) est fait ;
+le temps 3 (le parcours à l'écran) ne l'est pas.
 
 ---
 

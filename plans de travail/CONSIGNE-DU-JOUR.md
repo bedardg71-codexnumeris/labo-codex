@@ -1,122 +1,198 @@
-# Consigne du jour — « décloner » : un seul mot, et le geste là où on le cherche
+# Consigne du jour — fermer l'audit du 25 août pour de bon
 
-> **Écrite le 3 septembre 2026 à 6 h 45 (heure de Grégoire), par Cowork, avec lui.**
-> **Application au moment de l'écriture : `1.112.0`, build `0903-0642`.**
-> Elle remplace la consigne de l'échelle, exécutée et livrée (`16833e74`, `e028695b`).
+> **Promue consigne du jour le 3 septembre 2026 à 11 h 20 (heure de Grégoire), par Cowork,
+> avec lui.** Écrite le 2 septembre à 13 h, **remesurée et corrigée avant promotion**.
+> **Application au moment de l'écriture : `1.113.0`, build `0903-0906`, POUSSÉE.**
 >
-> ▣ **Grégoire est éveillé** et regardera l'écran dès que tu diras que c'est prêt.
+> ▣ **État à l'écriture, mesuré** : `HEAD` = `76cb53c3`,
+> `git rev-list --count origin/main..HEAD` rend **0** — témoin, `HEAD..origin/main` rend **0**
+> lui aussi. Arbre propre sauf `OU-EN-EST-ON.md` et `PROTOCOLE.md`, à Cowork :
+> **ne les commite pas.**
 >
-> ⚠ **REMESURE TOUT** (règle 1). Les lignes citées ont été relevées par Cowork en lecture
-> seule ; elles bougent souvent dans ce fichier.
+> ▣ **LES HUIT ÉNONCÉS DE LA COHORTE 1 SONT PARCOURUS**, depuis ce matin. Ce lot ne les
+> touche pas : il éteint une dette de méthode.
 >
-> ⛔ **Petit lot. Il n'empêche aucun des huit énoncés.** Si tu le trouves en train de
-> grossir, arrête-toi et dis-le : c'est le signe que tu as glissé dans le chantier voisin
-> (voir la fin).
+> ⚠ **REMESURE** (règle 1). Les lignes citées datent d'hier.
+>
+> **Source** : `plans de travail/PLAN-2026-09-02-evaluation-avant-la-chronique.md`, temps 1.
+> Ce fichier-ci exécute ; le plan explique.
 
 ---
 
-## Le mandat — décision de Grégoire, 3 septembre au matin
+## Le mandat — un audit n'est pas fini tant que ses constats n'ont pas de disposition
 
-**Deux choses, et elles vont ensemble.**
+`CLAUDE.md`, §« Ce qu'un audit doit produire » :
 
-### 1. Le geste s'appelle « Décloner »
+> *Un audit n'est pas terminé quand il est déposé — mesuré le 1er sept. : sur 51 rapports,
+> **22 sans suite**. Il l'est quand chaque constat porte, **DANS le fichier d'audit**, l'une
+> de trois dispositions : inscrit (n°), refusé (motif), périmé.*
 
-▣ **Ses mots** : *« L'idée est de rendre réversible le clonage d'un item. Il serait plus
-approprié de parler de déclonage, plutôt que de prolonger la métaphore génétique ou
-généalogique et parler de famille. »*
+`Rapports/AUDIT-evaluation-onglet-2026-08-25.md` **n'en porte aucune.** Le compte des
+livraisons vit ailleurs — au backlog et dans `OU-EN-EST-ON.md`. Quelqu'un qui ouvre le
+rapport ne peut pas savoir ce qu'il est devenu.
 
-⮕ **« Détacher de sa famille de clones » devient « Décloner ».** Le mot « famille » quitte
-les textes que l'utilisateur lit *pour ce geste*.
-⚠ **Témoin du besoin** : `grep -rni "déclon" js/ index.html` rend **0** aujourd'hui.
-Grégoire a cherché « décloner » dans sa propre application et n'a rien trouvé — **c'est
-l'incident qui a ouvert ce chantier.**
+⮕ **Le livrable est le FICHIER D'AUDIT lui-même.** Rien d'autre ne bouge.
 
-⛔ **LE RISQUE DU MOT, ET IL EST À TRAITER DANS LE TEXTE.** « Décloner » peut se lire
-« supprimer le clone ». **Le geste ne détruit rien** : il rend le bloc indépendant, contenu
-intact. ⮕ **Ce qui accompagne le bouton doit dire ce qui NE se passe pas.** Le texte actuel
-le dit déjà bien (« Son contenu est inchangé ») : **garde cette qualité, ne la perds pas en
-raccourcissant.**
-
-### 2. Le geste s'ajoute à l'Inspecteur, sans quitter le menu Actions
-
-▣ **Le manque, mesuré le 2 septembre** : l'Inspecteur **annonce** la famille de clones
-(`planif-panneau-clone-info`, `js/planification-carte.js:3002` — « 🧬 N instances · Voir les
-autres ») et **n'offre pas d'en sortir**. Celui qui voit la famille là cherche la sortie là.
-
-⮕ **Ajoute le bouton dans l'Inspecteur**, dans ce bloc, visible **seulement** quand le nœud
-porte un `cloneSourceId` ou qu'il a des clones (la condition existe :
-`doitAfficherIndicateurClone`).
-
-⛔ **NE RETIRE PAS celui du menu Actions.** ▣ **Motif mesuré** : `detacherDeLaFamille`
-(`js/planification-carte.js:3628`) prend **une liste de nœuds**, et le bouton du menu sert la
-**multisélection**, que l'Inspecteur ne couvre pas. Le retirer supprimerait le déclonage en
-lot. **Grégoire avait demandé le retrait, puis l'a annulé quand la mesure a été faite.**
-
-⛔ **NE DUPLIQUE PAS LA LOGIQUE.** Même `detacherDeLaFamille`, même message après le geste,
-même point d'annulation. **Deux appels d'une fonction, pas deux fonctions.**
+⛔ **CE N'EST PAS UN RÉ-AUDIT.** Tu ne rouvres aucun constat, tu ne relis pas le code pour
+vérifier les seize corrections. **La correspondance est déjà faite et mesurée** (ci-dessous).
+C'est de la transcription, plus quatre corrections nommées.
+⚠ **Si une ligne du tableau ne correspond pas à ce que tu trouves au backlog : NE CORRIGE
+PAS EN SILENCE. Dis l'écart dans ton rapport.** C'est Cowork qui l'a mesuré, et Cowork s'est
+trompé quatre fois aujourd'hui.
 
 ---
 
-## Les endroits visibles — mesurés, à rejouer
+## La correspondance — mesurée par Cowork le 2 septembre à 11 h 40
 
-| où | ce qu'il dit aujourd'hui |
+Commandes qui l'ont produite, à rejouer si tu veux la vérifier :
+
+```bash
+grep -n "Constats de l'audit de l'onglet ÉVALUATIONS" BACKLOG.md
+awk 'NR>=4145 && NR<=4620' BACKLOG.md | grep -nE "^- \[[ x]\] \*\*#[0-9]+"
+```
+
+Le rapport porte **A1-A2** (2 critiques), **B1-B13** (13 majeurs), **C1-C5** (5 de design) =
+**20**. Sa section **D — « Mineurs (condensé) » — n'est PAS dans les vingt** ; elle a sa
+propre fiche.
+
+| Constat | Disposition à inscrire |
 |---|---|
-| `index.html:4184` | le bouton du menu Actions : **« Détacher de sa famille de clones »** |
-| `js/accompagnement-contenu-hover.js:645` | son infobulle (`planif-detacher-clone`) : « Libère le bloc sélectionné de **sa famille de clones**… » |
-| `js/planification-carte.js:8725` | le refus : « **Rien à détacher** : aucun des blocs sélectionnés n'appartient à une **famille de clones**. » |
-| `js/planification-carte.js:8729-8730` | le succès : « Bloc **détaché** — il ne suivra plus son original… » / « N blocs **détachés** — … » |
-| `js/accompagnement-contenu-popup.js:888` | l'aide copie/clone : « Pour libérer un clone déjà créé : *Actions ▸ Détacher de sa famille de clones* » |
-| `index.html:11684` | l'aide longue : « **Détacher un clone** : sélectionne le bloc, puis **Actions ▸ Détacher de sa famille de clones**… » |
+| **A1** | *inscrit* → **#556**, livré le 28 août |
+| **A2** | *inscrit* → **#557**, livré le 28 août |
+| **B1, B2, B3** | *inscrit* → **#558**, livré |
+| **B4** | *inscrit* → **#559**, livré |
+| **B5, B8** | *inscrit* → **#560**, ⚠ **PARTIEL** — voir correction 1 |
+| **B6** | *inscrit* → **#561**, livré le 29 août |
+| **B7** | *inscrit* → **#562**, livré le 29 août |
+| **B9** | *inscrit* → **#563**, livré le 29 août |
+| **B10** | *inscrit* → **#564**, livré |
+| **B11, B12** | *inscrit* → **#565**, livré |
+| **B13** | *inscrit* → **#566**, livré le 29 août |
+| **C1** | *inscrit* → **#567**, ⚠ **PARTIEL** — voir correction 2 |
+| **C2** | *inscrit* → **#568**, livré le 29 août |
+| **C3** | *inscrit* → **#569**, livré le 29 août |
+| **C4** | *inscrit* → **#570**, livré le 29 août |
+| **C5** | *inscrit* → **#571**, ⚠ **livré + une part REFUSÉE** — voir correction 3 |
+| **Section D** | *inscrit* → **#572**, ⚠ **PARTIEL** — voir correction 4 |
 
-⚠ **Les deux dernières nomment le CHEMIN vers le bouton.** Si l'Inspecteur l'offre aussi,
-**elles doivent le dire** — sinon on reproduit le défaut d'origine : une aide qui envoie à un
-seul endroit alors qu'il y en a deux.
+---
 
-⛔ **`js/changelog-data.js:390` NE SE RÉÉCRIT PAS.** C'est une annonce déjà lue (16 août). ⮕
-**L'annonce NEUVE, elle, dira le renommage** et devra donc nommer l'ancien mot une fois.
+## Les quatre corrections — c'est là qu'est le travail
 
-⚠ **« famille » rend 360 occurrences dans tout le dépôt** : la plupart n'ont rien à voir avec
-les clones. **Ne fais pas un remplacement global.** Le périmètre est le tableau ci-dessus,
-remesuré.
+### Correction 1 · B5/B8 → #560 : ↻ **CE N'EST PLUS « PARTIEL ». C'EST TRANCHÉ ET LIVRÉ.**
+
+⚠⚠ **CETTE LIGNE A CHANGÉ DEPUIS L'ÉCRITURE D'HIER. Ne recopie pas l'ancienne.**
+
+▣ **Le constat B5 est REFUSÉ, et le motif est de Grégoire.** B5 décrivait la portée des
+suppressions par couple `(élève, production)` comme *« trop large »*. **Elle ne l'est pas** :
+tranché le 2 septembre 2026 — *« TOUT ce qui touche le couple part : originale, reprises,
+évaluation d'un fichier réimporté »*. Le code faisait déjà le bon geste ; **c'est l'écran qui
+ne le disait pas.**
+
+▣ **B8, et la part restante de B5 : INSCRIT → livré en 1.111.2**, le 3 septembre au matin.
+La fenêtre annonce désormais, dans les mots de Grégoire :
+*« Le fichier, ses annotations et toutes les évaluations de cet élève pour cette production
+seront effacés. »* ▣ **ÉPROUVÉ PAR GRÉGOIRE à l'écran** le 3 septembre.
+▣ **Témoin négatif tenu** : le déplacement à la corbeille, qui ne détruit rien, ne dit rien de
+plus qu'avant.
+
+⮕ **Dispositions à inscrire dans le fichier d'audit** : pour **B5**, *refusé* — avec le motif
+ci-dessus, en toutes lettres. Pour **B8**, *inscrit* → #560, livré en 1.111.2.
+⚠ **Un refus sans son motif ne vaut rien** : c'est ce qui fait revenir le constat dans six mois.
+
+### Correction 2 · C1 → #567 est PARTIEL
+
+Quatre variables CSS fantômes remplacées ; **les 78 autres tiennent par un cliquet global**.
+⮕ Disposition : **partiel**, avec renvoi à **#595** (78 variables employées et jamais
+définies, ≈ 270 usages — ouvert) et **#679** (rien ne vérifie qu'une classe CSS employée
+dans `js/` existe dans `styles.css` — ouvert).
+
+### Correction 3 · C5 → #571 porte une part REFUSÉE, et le motif est de Grégoire
+
+Le backlog dit : *« les correctifs ; **les tailles restent, par décision** »*. La densité du
+PDF (base 10 px, dates à 6 px) desservait l'usage cellulaire ; Grégoire a tranché de la garder.
+⮕ Disposition : **inscrit** pour les correctifs (lisibilité sur les couleurs d'échelle, date
+échappée) **+ refusé** pour les tailles, **avec le motif nommé**. Un refus sans motif ne vaut
+rien : c'est ce qui fait revenir le constat dans six mois.
+
+### Correction 4 · Section D → #572 est PARTIEL, et sa ligne est FAUSSE
+
+⚠⚠ **C'est la correction qui compte, et elle vaut son paragraphe.**
+
+`#572` déclare, au backlog comme dans le code :
+
+> `// #572 — LA VALEUR CALCULÉE EST LA SOURCE, l'écran n'en est que l'affichage.`
+> *« la note finale n'est plus relue depuis le DOM (`parseFloat(textContent)`, **trois
+> sites**) mais depuis `noteCalculeeCourante` »*
+
+**Il y en avait quatre.** Mesuré par Cowork le 2 septembre à 11 h 40, **rejoué à 12 h 45**,
+inchangé après 1.110.0 :
+
+```bash
+grep -rn "parseFloat(.*noteProduction1" js/ --include=*.js
+grep -rn "noteCalculeeCourante" js/ --include=*.js
+```
+
+▣ Trois sites écrivent bien la valeur calculée : `evaluation-sauvegarde.js:209`,
+`evaluation-chargement.js:1452`, `evaluation-chargement.js:1476`.
+▣ **Le quatrième relit toujours l'écran** — `js/evaluation.js:1784`, dans
+`_lireChampsDOMMod`, appelé **une seule fois**, à `js/evaluation.js:1959`, qui est **le chemin
+de MODIFICATION d'une évaluation existante** :
+
+```js
+noteFinale: parseFloat(document.getElementById('noteProduction1').textContent) || 0,
+```
+
+▣ **Et la sentinelle est verte parce qu'elle ne regarde que deux fichiers.**
+`tests/unit/sentinelle-572-mineurs-liste-annoter-design.test.js`, **l. 77** :
+
+```js
+for (const [nom, src] of [['evaluation-sauvegarde', sauvegarde], ['evaluation-chargement', chargement]]) {
+```
+
+`evaluation.js` n'y est pas. Le titre du cas dit *« et plus personne ne relit le DOM »* ; il
+en vérifie deux sur trois.
+
+⮕ Disposition à inscrire : **partiel**, avec les trois faits ci-dessus, et le renvoi au
+**temps 2** du plan.
+
+⛔ **NE CORRIGE RIEN DE TOUT ÇA DANS CE LOT.** Ni le quatrième site, ni la sentinelle.
+**C'est le temps 2, et c'est une autre séance** (règle 6 : une seule décision principale par
+séance). Ici, tu ÉCRIS que c'est ouvert. *Inscrire et continuer* — issue 2 de `CLAUDE.md`.
+
+---
+
+## Ce que le fichier d'audit doit porter en plus, en tête
+
+1. **Sa base de REMESURE à côté de sa base d'audit.** Aujourd'hui il annonce
+   *« Base auditée : `main` 1.99.0 (commit `8dfda3ed`) »*. Ajoute la date et la version où
+   les dispositions ont été établies — c'est ce qui dit au lecteur suivant à quel point elles
+   ont vieilli.
+2. **Le rappel que ses numéros de ligne datent de 1.99.0** et ne se suivent pas au doigt.
+3. **Le rappel que ses verdicts sont `[lecture]`** : *« aucun Chromium n'a été lancé »*.
+   ⮕ Vingt constats lus, **zéro écran parcouru**. C'est le temps 3 du plan, et il n'est pas
+   fait. **Ne laisse pas croire qu'un audit fermé est une section vérifiée.**
 
 ---
 
 ## Fini quand
 
-**Grégoire cherche « décloner » là où il a vu la famille, et il le trouve.**
+`grep -c` des trois mots de disposition dans le fichier d'audit rend un compte **non nul**,
+et **chacun** des dix-sept blocs (A1, A2, B1→B13, C1→C5, section D) en porte un.
 
-▣ **Le témoin** : `grep -rni "déclon" js/ index.html` rend un compte non nul, et
-`grep -rni "famille de clones" js/ index.html` ne rend plus que l'annonce de changelog du
-16 août.
-▣ **Le témoin négatif, qui compte autant** : le bouton du menu Actions **fonctionne toujours
-sur une multisélection**, et le déclonage en lot n'a pas régressé. Cite l'essai qui le montre.
-▣ **Le témoin de non-duplication** : `grep -n "detacherDeLaFamille" js/` montre **une seule
-définition** et deux appels.
-
----
+⚠ **Le vrai « fini quand » n'est pas un compte** : c'est qu'une personne qui ouvre
+`Rapports/AUDIT-evaluation-onglet-2026-08-25.md` **sans rien connaître du backlog** sache, pour
+chaque constat, ce qu'il est devenu — sans avoir à ouvrir un autre fichier.
 
 ## L'ordre
 
-1. **Rapporte le verdict de GitHub sur la release `1.112.0`** (rituel d'ouverture, §2.1).
-2. **Remesure les six endroits** du tableau avant de toucher au premier.
-3. Ce lot touche `js/` ⮕ **bump du bloc de jetons d'`index.html`**.
-4. `cd tests && npm run test:unit` pour travailler ; **`npm test` complet avant de dire que
-   c'est prêt.** ⚠ Vitest se lance **depuis `tests/`**.
-5. ⛔ **Tu commites, puis tu t'arrêtes.** Pas de release, pas de push, pas de verdict au
-   jeton : Grégoire regarde l'écran d'abord.
-6. **Ce fichier se commite avec ton lot.** Nomme tes fichiers ; pas de `git add -A`.
-
-⮕ **CE QUE GRÉGOIRE DOIT ALLER VOIR** : ouvrir sa carte d'alignement, sélectionner un bloc
-marqué 🧬, ouvrir l'**Inspecteur**, et y trouver « Décloner » à côté de l'annonce des
-instances. ⚠ **Qu'il ne clique pas.** Le voir suffit.
-
----
-
-## ⛔ CE QUI N'EST PAS DANS CE LOT — et c'est ce qui le ferait grossir
-
-**L'Inspecteur qui décrit une SÉLECTION plutôt qu'un bloc.** Idée de Grégoire du 3 septembre,
-cadrée dans `plans de travail/CADRAGE-2026-09-03-inspecteur-selection-multiple.md`.
-
-⛔ **Ne l'entame pas.** Elle refond l'Inspecteur, et elle porte un piège nommé dans le cadrage :
-un champ qui écrit une valeur commune sur toute la sélection détruit en silence ce qui
-différait. **Ce lot-ci ajoute un bouton ; il ne change pas ce que l'Inspecteur est.**
+- **Lot documentaire : aucun fichier de `js/` ne bouge.** ⮕ Donc **pas de bump du bloc de
+  jetons d'`index.html`**, et pas de release. Si tu te retrouves à toucher `js/`, tu es sorti
+  du lot : arrête et dis-le.
+- `cd tests && npm run test:unit` **quand même**, une fois, comme témoin que rien n'a bougé
+  — pas comme preuve du lot.
+- Règle 6 : **tu commites, puis tu t'arrêtes.**
+- ⮕ **Ce que Grégoire doit aller voir : RIEN à l'écran.** Aucun utilisateur ne rencontre ce
+  fichier. **Dis-le-lui plutôt que de lui inventer une vérification.** Ce qu'il peut faire,
+  s'il le veut : ouvrir le rapport et vérifier qu'il se lit seul.
+- Ce fichier-ci se commite avec ton lot.
