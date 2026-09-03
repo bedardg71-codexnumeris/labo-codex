@@ -1818,7 +1818,7 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
 
     // #647 (2 septembre 2026, soir — mots arrêtés par Grégoire) : la question dit
     // la portée réelle. Ce chemin n'écrit QUE l'ancrage de la grille (trimestre
-    // actif) ; il ne touche pas la bibliothèque partagée. Ce qui survit est dit,
+    // actif) ; il ne touche pas la Bibliothèque. Ce qui survit est dit,
     // seulement quand c'est mesuré : la copie qui reste dans la bibliothèque (on
     // peut la rajouter à la grille depuis la section 2), et les rétroactions déjà
     // rédigées des évaluations qui l'emploient (stockées dans l'évaluation,
@@ -1833,7 +1833,7 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
 
     let survivance = '';
     if (biblio.some(c => c.id === cartoucheId)) {
-        survivance += 'Elle reste dans la bibliothèque partagée.\n';
+        survivance += 'Elle reste dans la Bibliothèque.\n';
     }
     if (nbEvaluations > 0) {
         survivance += `${nbEvaluations} évaluation(s) l'emploient : leur rétroaction déjà rédigée est conservée.\n`;
@@ -2149,7 +2149,7 @@ window.confirmerImportCartouches = async function(donnees) {
         // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequeCartouches
         // L'utilisateur consulte puis choisit lesquelles ajouter à sa sélection
         const CLE_BIBLIOTHEQUE = window.CLE_BIBLIOTHEQUE_CARTOUCHES || 'bibliothequeCartouches';
-        // #599 — la fusion passe par la file : la bibliothèque partagée est
+        // #599 — la fusion passe par la file : la Bibliothèque est
         // relue à l'instant de l'écriture. Hors file, un import et un ajout
         // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;
@@ -4769,7 +4769,7 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
 
     // #647 (2 septembre 2026, soir) — ce chemin est le plus destructeur des trois :
     // la cartouche part de sa grille (ancrage du trimestre actif) ET, si elle s'y
-    // trouve, de la bibliothèque partagée. La question le dit AVANT le geste, et ne
+    // trouve, de la Bibliothèque. La question le dit AVANT le geste, et ne
     // nomme la bibliothèque que si la cartouche y est vraiment — mesuré, pas supposé.
     // Ce qui SURVIT est dit aussi, seulement s'il y a quelque chose à dire : les
     // évaluations qui l'emploient gardent leur rétroaction déjà rédigée (elle est
@@ -4783,18 +4783,21 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
     const evaluations = await db.get(cle('evaluationsSauvegardees')) || [];
     const nbEvaluations = evaluations.filter(ev => ev && ev.cartoucheId === id).length;
 
+    // ↻ 3 septembre 2026 (mesuré par Cowork sur une capture de Grégoire) : la grille
+    // se nomme dans TOUS les cas — c'est son ancrage qu'on vide, toujours. Seule
+    // la Bibliothèque reste conditionnelle. Même forme que la liste (1810).
+    const grilles = await db.get(cle('grillesTemplates')) || [];
+    const grille = grilles.find(g => g.id === grilleId);
     let portee = '';
     if (aussiDansBibliotheque) {
-        const grilles = await db.get(cle('grillesTemplates')) || [];
-        const grille = grilles.find(g => g.id === grilleId);
-        portee += `Elle part de sa grille « ${grille ? grille.nom : grilleId} » et de la bibliothèque partagée.\n`;
+        portee += 'Elle part aussi de la Bibliothèque.\n';
     }
     if (nbEvaluations > 0) {
         portee += `${nbEvaluations} évaluation(s) l'emploient : leur rétroaction déjà rédigée est conservée.\n`;
     }
 
     // Confirmation
-    if (!confirm(`Supprimer définitivement la cartouche «${cartouche.nom}» ?\n\n${portee ? portee + '\n' : ''}Cette action est irréversible.`)) {
+    if (!confirm(`Supprimer définitivement la cartouche «${cartouche.nom}» de sa grille « ${grille ? grille.nom : grilleId} » ?\n\n${portee ? portee + '\n' : ''}Cette action est irréversible.`)) {
         return;
     }
 
@@ -4821,7 +4824,7 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
 }
 
 /**
- * Supprimer une cartouche de la bibliothèque partagée uniquement (Section 2)
+ * Supprimer une cartouche de la Bibliothèque uniquement (Section 2)
  * @param {string} id - ID de la cartouche à supprimer
  */
 async function supprimerCartoucheDeBibliothequePartagee(id) {
@@ -4832,18 +4835,18 @@ async function supprimerCartoucheDeBibliothequePartagee(id) {
     if (!cartouche) return;
 
     // #647 (3 septembre 2026) — la même vérité que l'onglet Données, sur l'autre
-    // chemin. Ce retrait n'écrit que la bibliothèque partagée : si la cartouche est
+    // chemin. Ce retrait n'écrit que la Bibliothèque : si la cartouche est
     // aussi ancrée à sa grille (`cartouches_<grilleId>`, clé EXACTE, lue au moment
     // où on parle), elle y RESTE et la question le dit. Sinon la suppression est
     // entière, et elle se fait sans un mot de plus.
     const nomCartouche = cartouche.nom || 'Sans titre';
-    let question = `Supprimer définitivement «${nomCartouche}» de la bibliothèque partagée ?\n\nCette action est irréversible.`;
+    let question = `Supprimer définitivement «${nomCartouche}» de la Bibliothèque ?\n\nCette action est irréversible.`;
     if (cartouche.grilleId) {
         const ancrage = await db.get(cle(`cartouches_${cartouche.grilleId}`)) || [];
         if (ancrage.some(c => c.id === id)) {
             const grilles = await db.get(cle('grillesTemplates')) || [];
             const grille = grilles.find(g => g.id === cartouche.grilleId);
-            question = `Retirer «${nomCartouche}» de la bibliothèque partagée ?\n\nLe retrait est irréversible ; la cartouche reste dans sa grille « ${grille ? grille.nom : cartouche.grilleId} ».`;
+            question = `Retirer «${nomCartouche}» de la Bibliothèque ?\n\nLe retrait est irréversible ; la cartouche reste dans sa grille « ${grille ? grille.nom : cartouche.grilleId} ».`;
         }
     }
     if (!confirm(question)) return;
@@ -4930,7 +4933,7 @@ async function ajouterCartouchesABibliotheque() {
             }, []);
             if (marquee) nbAjoutees++;
         }
-        // Cas 2: Cartouche de la bibliothèque partagée - copier dans localStorage
+        // Cas 2: Cartouche de la Bibliothèque - copier dans localStorage
         else {
             const cartouchesBibliotheque = await obtenirToutesLesCartouchesBibliotheque();
             const cartouche = cartouchesBibliotheque.find(c => c.id === id);

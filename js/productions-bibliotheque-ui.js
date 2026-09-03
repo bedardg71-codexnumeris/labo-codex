@@ -6,7 +6,7 @@
    Périmètre : modale Gestionnaire de bibliothèque + 14 actions associées.
 
    Distinction avec productions-bibliotheque.js (chargé AVANT) :
-   - productions-bibliotheque.js : storage layer (CRUD bibliothèque partagée
+   - productions-bibliotheque.js : storage layer (CRUD Bibliothèque
      `bibliothequeProductions`, non namespacée)
    - productions-bibliotheque-ui.js (ce fichier) : interface utilisateur
      (modale Gestionnaire, sections Sélection/Disponibles, filtres, actions
@@ -294,7 +294,7 @@ async function ajouterProductionIndividuelle(id) {
         let productions = lues || [];
         prod = productions.find(p => p.id === id);
 
-        // Si pas trouvée dans le cours actuel, chercher dans la bibliothèque partagée
+        // Si pas trouvée dans le cours actuel, chercher dans la Bibliothèque
         if (!prod) {
             const bibliotheque = await obtenirToutesLesProductionsBibliotheque();
             const prodBiblio = bibliotheque.find(p => p.id === id);
@@ -399,7 +399,7 @@ async function ajouterProductionIndividuelle(id) {
 }
 
 /**
- * Ajoute toutes les productions du cours actuel à la bibliothèque partagée
+ * Ajoute toutes les productions du cours actuel à la Bibliothèque
  * Permet de rendre ses productions disponibles pour tous les trimestres
  */
 async function ajouterMesProductionsALaBibliotheque() {
@@ -414,8 +414,8 @@ async function ajouterMesProductionsALaBibliotheque() {
 
         // Confirmer avec l'utilisateur
         const confirmation = await uiDialogues.confirmerAction({
-            titre: 'Ajouter à la bibliothèque partagée',
-            message: `Veux-tu ajouter tes ${productions.length} production(s) à la bibliothèque partagée ? Elles seront disponibles dans tous tes trimestres et pourront être partagées avec des collègues.`,
+            titre: 'Ajouter à la Bibliothèque',
+            message: `Veux-tu ajouter tes ${productions.length} production(s) à la Bibliothèque ? Elles seront disponibles dans tous tes trimestres et pourront être partagées avec des collègues.`,
             texteConfirmer: 'Ajouter'
         });
 
@@ -423,7 +423,7 @@ async function ajouterMesProductionsALaBibliotheque() {
             return;
         }
 
-        // Importer dans la bibliothèque partagée
+        // Importer dans la Bibliothèque
         const resultat = await importerDansBibliotheque(productions);
 
         // Rafraîchir l'affichage
@@ -576,8 +576,8 @@ async function importerToutTrimestreModal() {
 
     const coursLabel = coursFiltre ? ` du cours sélectionné` : '';
     const confirmation = await uiDialogues.confirmerAction({
-        titre: 'Importer dans la bibliothèque partagée',
-        message: `Veux-tu importer les ${productions.length} production(s)${coursLabel} de ${nomTrimestre} dans la bibliothèque partagée ?`,
+        titre: 'Importer dans la Bibliothèque',
+        message: `Veux-tu importer les ${productions.length} production(s)${coursLabel} de ${nomTrimestre} dans la Bibliothèque ?`,
         texteConfirmer: 'Importer'
     });
 
@@ -728,7 +728,7 @@ async function supprimerProductionDefinitivement(id) {
 }
 
 /**
- * Supprimer une production de la bibliothèque partagée uniquement (Section 2)
+ * Supprimer une production de la Bibliothèque uniquement (Section 2)
  * @param {string} id - ID de la production à supprimer
  */
 async function supprimerProductionDeBibliothequePartagee(id) {
@@ -739,8 +739,8 @@ async function supprimerProductionDeBibliothequePartagee(id) {
     if (!prod) return;
 
     const okSuppr = await uiDialogues.confirmerAction({
-        titre: 'Supprimer de la bibliothèque partagée',
-        message: `Supprimer définitivement «${prod.titre || 'Sans titre'}» de la bibliothèque partagée ? Cette action est irréversible.`,
+        titre: 'Supprimer de la Bibliothèque',
+        message: `Supprimer définitivement «${prod.titre || 'Sans titre'}» de la Bibliothèque ? Cette action est irréversible.`,
         texteConfirmer: 'Supprimer',
         variante: 'danger'
     });

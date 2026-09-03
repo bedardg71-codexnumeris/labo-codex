@@ -965,7 +965,7 @@ async function supprimerPratiqueDefinitivement(pratiqueId) {
 }
 
 /**
- * Supprime définitivement une pratique de la bibliothèque partagée
+ * Supprime définitivement une pratique de la Bibliothèque
  * (section 2 de la modale Bibliothèque). Refuse les gabarits prédéfinis
  * (seeds présents dans MODELES_PRATIQUES_PREDEFINIS) qui seraient recréés
  * au prochain chargement de toute façon.
@@ -2388,7 +2388,7 @@ window.confirmerImportPratiques = async function(donnees) {
         // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequePratiques
         // L'utilisateur consulte puis choisit lesquelles ajouter à sa barre latérale
         const CLE_BIBLIOTHEQUE = window.CLE_BIBLIOTHEQUE_PRATIQUES || 'bibliothequePratiques';
-        // #599 — la fusion passe par la file : la bibliothèque partagée est
+        // #599 — la fusion passe par la file : la Bibliothèque est
         // relue à l'instant de l'écriture. Hors file, un import et un ajout
         // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;

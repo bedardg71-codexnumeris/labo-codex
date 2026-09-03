@@ -1141,7 +1141,7 @@
                     boutons.push({
                         label: 'Supprimer', action: actions.supprimerPartagee, param: ex.id,
                         classe: 'btn-supprimer',
-                        title: 'Supprimer définitivement de la bibliothèque partagée'
+                        title: 'Supprimer définitivement de la Bibliothèque'
                     });
                 }
 
@@ -1161,7 +1161,7 @@
                         (date ? '<span class="biblio-doublon-date">modifié le ' + echapperHtml(date) + '</span>' : '') +
                         BibliothequeUI.genererBadgeSource(item) +
                         (dansSelection ? '<span class="biblio-doublon-lieu">Dans ta barre latérale</span>'
-                                       : '<span class="biblio-doublon-lieu biblio-doublon-lieu--partagee">Bibliothèque partagée</span>') +
+                                       : '<span class="biblio-doublon-lieu biblio-doublon-lieu--partagee">Bibliothèque</span>') +
                         reperes +
                     '</span>' +
                     '<span class="biblio-doublon-actions">' +

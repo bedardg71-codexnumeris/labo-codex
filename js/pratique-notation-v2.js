@@ -743,7 +743,7 @@
         // Groupe : Bibliothèque
         if (productionsBiblio.length > 0) {
             const optgroup2 = document.createElement('optgroup');
-            optgroup2.label = 'Bibliothèque partagée';
+            optgroup2.label = 'Bibliothèque';
             productionsBiblio.forEach(p => {
                 if (!p || !p.id) return;
                 const option = document.createElement('option');

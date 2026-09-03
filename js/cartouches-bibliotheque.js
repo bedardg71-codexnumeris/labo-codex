@@ -2,7 +2,7 @@
    BIBLIOTHÈQUE DE CARTOUCHES DE RÉTROACTION
    ✅ REFACTORING (2 janvier 2026)
 
-   Bibliothèque partagée de cartouches de rétroaction.
+   Bibliothèque de cartouches de rétroaction.
    - Indépendante du trimestre (clé non-namespacée)
    - Stockage dans IndexedDB/localStorage
    - Import/export avec collègues
@@ -70,7 +70,7 @@ function obtenirDisciplinesDisponiblesCartouches() {
 }
 
 /**
- * Ajouter une cartouche à la bibliothèque partagée
+ * Ajouter une cartouche à la Bibliothèque
  * @param {Object} cartouche - La cartouche à ajouter
  * @returns {Promise<boolean>} true si ajoutée, false si déjà existante
  */
@@ -121,7 +121,7 @@ async function ajouterCartoucheALaBibliotheque(cartouche) {
  */
 async function retirerCartoucheDeLaBibliotheque(cartoucheId) {
     // #599 — le retrait passe par la file. Hors file, un retrait et un ajout
-    // concurrents sur la MÊME bibliothèque partagée s'écrasaient l'un l'autre :
+    // concurrents sur la MÊME Bibliothèque s'écrasaient l'un l'autre :
     // les cinq familles écrivent dans un seul magasin, pas un par famille.
     let retiree = false;
     await db.modifier(CLE_BIBLIOTHEQUE_CARTOUCHES, (lues) => {
@@ -182,7 +182,7 @@ async function exporterBibliothequeCartouches() {
 }
 
 /**
- * Migrer les cartouches d'un trimestre vers la bibliothèque partagée
+ * Migrer les cartouches d'un trimestre vers la Bibliothèque
  * @param {string} cleSource - Clé source (ex: 'a2025_cartouches')
  * @returns {Promise<{ajoutees: number, existantes: number}>}
  */

@@ -2,7 +2,7 @@
    BIBLIOTHÈQUE DE CONFIGURATIONS DE PRATIQUES
    (c) 2 janvier 2026 - Beta 95
 
-   Bibliothèque partagée de configurations de pratiques de notation.
+   Bibliothèque de configurations de pratiques de notation.
    - Indépendante du trimestre (clé non-namespacée)
    - Stockage dans IndexedDB/localStorage
    - Import/export avec collègues
@@ -334,7 +334,7 @@ async function obtenirConfigurationPratiqueParId(configId) {
         return { ...MODELES_PRATIQUES_PREDEFINIS[configId] };
     }
 
-    // 2. Vérifier la bibliothèque partagée
+    // 2. Vérifier la Bibliothèque
     const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRATIQUES) || [];
     const dansBibliotheque = bibliotheque.find(p => p.id === configId);
     if (dansBibliotheque) return dansBibliotheque;
@@ -348,7 +348,7 @@ async function obtenirConfigurationPratiqueParId(configId) {
 }
 
 /**
- * Ajouter une configuration à la bibliothèque partagée
+ * Ajouter une configuration à la Bibliothèque
  * @param {Object} configuration - La configuration à ajouter
  * @returns {Promise<boolean>} true si ajoutée, false si déjà existante
  */
@@ -434,7 +434,7 @@ async function retirerPratiqueDeLaBibliotheque(configId) {
     // La protection seeds prédéfinis vit désormais dans supprimerPratiqueDeBibliothequePartagee
     // qui distingue correctement "copie IDB" vs "gabarit pur".
     // #599 — le retrait passe par la file. Hors file, un retrait et un ajout
-    // concurrents sur la MÊME bibliothèque partagée s'écrasaient l'un l'autre :
+    // concurrents sur la MÊME Bibliothèque s'écrasaient l'un l'autre :
     // les cinq familles écrivent dans un seul magasin, pas un par famille.
     let retiree = false;
     await db.modifier(CLE_BIBLIOTHEQUE_PRATIQUES, (lues) => {

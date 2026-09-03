@@ -314,7 +314,7 @@ function migrerDonneesProto() {
 }
 
 /**
- * Importe un alignement depuis la bibliothèque partagée dans le trimestre actif.
+ * Importe un alignement depuis la Bibliothèque dans le trimestre actif.
  * Deep-clone les données pour éviter les références croisées.
  * @param {Object} alignementBiblio - Item de la bibliothèque { nom, donnees: { compteur, compteurLiens, noeuds, liens } }
  * @returns {string|null} ID de la nouvelle carte créée, ou null si échec

@@ -2004,7 +2004,7 @@ window.confirmerImportGrilles = async function(donnees) {
         // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequeGrilles
         // L'utilisateur consulte puis choisit lesquelles ajouter à sa barre latérale
         const CLE_BIBLIOTHEQUE = window.CLE_BIBLIOTHEQUE_GRILLES || 'bibliothequeGrilles';
-        // #599 — la fusion passe par la file : la bibliothèque partagée est
+        // #599 — la fusion passe par la file : la Bibliothèque est
         // relue à l'instant de l'écriture. Hors file, un import et un ajout
         // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;
@@ -2211,7 +2211,7 @@ async function preparerDonneesBibliothequeGrilles() {
         await obtenirToutesLesGrillesBibliotheque()
     );
     // #291 — `reunirSources` évite la fausse collision : la même grille vit
-    // légitimement dans la sélection ET dans la bibliothèque partagée, avec
+    // légitimement dans la sélection ET dans la Bibliothèque, avec
     // le même `id` (ajouterGrilleALaBibliotheque le conserve).
     const doublonsDetectes = analyserDoublons(
         reunirSources(grillesDansBibliotheque, grillesDisponibles), 'nom');
@@ -3049,7 +3049,7 @@ async function supprimerGrilleDefinitivement(id) {
 }
 
 /**
- * Supprimer une grille de la bibliothèque partagée uniquement (Section 2)
+ * Supprimer une grille de la Bibliothèque uniquement (Section 2)
  * @param {string} id - ID de la grille à supprimer
  */
 async function supprimerGrilleDeBibliothequePartagee(id) {
@@ -3059,7 +3059,7 @@ async function supprimerGrilleDeBibliothequePartagee(id) {
     const grille = biblio.find(g => g.id === id);
     if (!grille) return;
 
-    if (!confirm(`Supprimer définitivement «${grille.nom || 'Sans titre'}» de la bibliothèque partagée ?\n\nCette action est irréversible.`)) return;
+    if (!confirm(`Supprimer définitivement «${grille.nom || 'Sans titre'}» de la Bibliothèque ?\n\nCette action est irréversible.`)) return;
 
     // #468/CO-25 (21 août 2026) : poser le tombstone AVANT le retrait. Sans lui,
     // un gabarit fourni par défaut revenait au prochain chargement — la
@@ -3075,7 +3075,7 @@ async function supprimerGrilleDeBibliothequePartagee(id) {
 }
 
 /**
- * Ajouter toutes les grilles locales à la bibliothèque partagée
+ * Ajouter toutes les grilles locales à la Bibliothèque
  */
 async function ajouterMesGrillesALaBibliotheque() {
     try {
@@ -3086,7 +3086,7 @@ async function ajouterMesGrillesALaBibliotheque() {
             return;
         }
 
-        if (!confirm(`Veux-tu ajouter tes ${grilles.length} grille(s) à la bibliothèque partagée ?\n\nElles seront disponibles dans tous tes trimestres et pourront être partagées avec des collègues.`)) return;
+        if (!confirm(`Veux-tu ajouter tes ${grilles.length} grille(s) à la Bibliothèque ?\n\nElles seront disponibles dans tous tes trimestres et pourront être partagées avec des collègues.`)) return;
 
         const resultat = await importerGrillesDansBibliotheque(grilles);
 

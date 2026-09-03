@@ -623,7 +623,7 @@ async function chargerCodex(fichierZip) {
     for (var i = 0; i < entreesData.length; i++) {
         var cleEntree = entreesData[i][0];
         var valeurEntree = entreesData[i][1];
-        // #292 : filet anti-doublons. Si la clé est une bibliothèque partagée
+        // #292 : filet anti-doublons. Si la clé est une Bibliothèque
         // (collection d'objets avec .id), appliquer verifierUniciteIds avant
         // l'écriture pour éviter de propager les doublons d'ID d'un codex source
         // infecté. Les chemins d'import historiques ont parfois contourné

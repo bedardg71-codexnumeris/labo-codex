@@ -339,7 +339,7 @@ function afficherBibliothequeTampons() {
                     ? '<span class="badge-source badge-source--locale">Personnalisé</span>'
                     : '<span class="badge-source badge-source--id">Intégré</span>',
                 metadonnees: nomCat,
-                boutonPrincipal: { label: 'Partager', action: 'tamponsBibliotheque.partagerTampon', param: t.id, classe: 'btn-confirmer', title: 'Ajouter à la bibliothèque partagée' },
+                boutonPrincipal: { label: 'Partager', action: 'tamponsBibliotheque.partagerTampon', param: t.id, classe: 'btn-confirmer', title: 'Ajouter à la Bibliothèque' },
                 actionsMenu: [
                     { label: 'Exporter', action: 'tamponsBibliotheque.exporterUnTampon', param: t.id, classe: 'btn-secondaire', title: 'Télécharger en JSON' }
                 ]
@@ -360,7 +360,7 @@ function afficherBibliothequeTampons() {
         '</div>' +
         '<p style="font-size:0.8em; color:var(--texte-secondaire); margin-top:8px;">Assure-toi d\'avoir les droits sur les images importées.</p>';
 
-    // Section 2 : Bibliothèque partagée
+    // Section 2 : Bibliothèque
     var biblioItems = obtenirTousSync();
     var customsActuels = db.getSync('tamponsPersonnalises', []);
     var idsActuels = new Set(customsActuels.map(function(c) { return c.id; }));
@@ -369,7 +369,7 @@ function afficherBibliothequeTampons() {
 
     var htmlBiblio = '';
     if (biblioItems.length === 0) {
-        htmlBiblio = '<p style="color:var(--texte-secondaire);">Aucun tampon dans la bibliothèque partagée.<br>Utilise « Partager » pour y ajouter des tampons.</p>';
+        htmlBiblio = '<p style="color:var(--texte-secondaire);">Aucun tampon dans la Bibliothèque.<br>Utilise « Partager » pour y ajouter des tampons.</p>';
     } else {
         biblioItems.forEach(function(item) {
             var dejaPresent = idsActuels.has(item.id);
@@ -402,7 +402,7 @@ function afficherBibliothequeTampons() {
         contenuSection1: htmlMesTampons,
         boutonsApresSection1: boutonsApres,
         sectionImportTrimestre: '',
-        titreSection2: 'Bibliothèque partagée (' + biblioItems.length + ')',
+        titreSection2: 'Bibliothèque (' + biblioItems.length + ')',
         filtresSection2: '',
         contenuIdListe2: 'listeTamponsBibliotheque',
         contenuSection2: htmlBiblio

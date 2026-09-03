@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 // `grep -rn "function supprimerCartouche" js/` rendait SIX déclarations. Cinq
 // vivantes, de portées RÉELLEMENT différentes :
 //   1. onglet Données (`donnees-v2.js`, `supprimerCartoucheDefinitivement`) —
-//      n'écrit QUE la bibliothèque partagée ; la cartouche RESTE dans son ancrage
+//      n'écrit QUE la Bibliothèque ; la cartouche RESTE dans son ancrage
 //      `cartouches_<grilleId>`, et les évaluations (qui lisent l'ancrage) ne
 //      perdent rien. Rendu vrai le 31 août (183b515b), sans sentinelle jusqu'ici.
 //   2. Conception › cartouches, la liste et la zone d'édition (`cartouches.js`,
@@ -18,7 +18,9 @@ import { fileURLToPath } from 'node:url';
 //      disait ni la portée, ni l'irréversibilité. Mots arrêtés par lui le 2 sept.
 //   3. Conception › cartouches, section 1 de la bibliothèque modale
 //      (`supprimerCartoucheDefinitivement`) — le plus destructeur : ancrage ET
-//      bibliothèque. Ne disait que « irréversible ».
+//      Bibliothèque. Ne disait que « irréversible » ; depuis le 3 sept., la grille
+//      est nommée dans TOUS les cas (c'est l'ancrage qu'on vide), la Bibliothèque
+//      seulement quand la cartouche y est.
 //   4. Conception › cartouches, section 2 (`supprimerCartoucheDeBibliothequePartagee`)
 //      — bibliothèque seulement, comme le chemin 1.
 //   †  `supprimerCartouche()` — AUCUN appelant, aucun export : retirée, pas corrigée.
@@ -131,7 +133,7 @@ describe('#647 · chemin 1 — l\'invariant couplé : la fonction ne touche pas 
         expect(c).toContain('retirerCartoucheDeLaBibliotheque(');
     });
 
-    it('retirerCartoucheDeLaBibliotheque n\'écrit que la bibliothèque partagée', () => {
+    it('retirerCartoucheDeLaBibliotheque n\'écrit que la Bibliothèque', () => {
         const c = corps(biblioCartouches, 'retirerCartoucheDeLaBibliotheque');
         expect(c).toContain('db.modifier(CLE_BIBLIOTHEQUE_CARTOUCHES');
         expect(c).not.toContain('cartouches_');
@@ -139,7 +141,7 @@ describe('#647 · chemin 1 — l\'invariant couplé : la fonction ne touche pas 
 
     it('la modal change ses trois libellés ENSEMBLE, pilotés par la survivance mesurée', () => {
         const c = corps(donneesV2, 'ouvrirModalSuppressionRessource');
-        expect(c).toContain('retirer de la bibliothèque partagée la');
+        expect(c).toContain('retirer de la Bibliothèque la');
         expect(c).toContain('la cartouche reste dans sa grille');
         expect(c).toContain("'Retirer de la bibliothèque'");
         expect((c.match(/cartoucheResteDansGrille/g) || []).length).toBeGreaterThanOrEqual(4);
@@ -183,7 +185,7 @@ describe('#647 · chemin 2 (liste et zone d\'édition) — la fenêtre que Grég
         const { questions } = await questionChemin2({ dansBibliotheque: true, evaluations: [{ cartoucheId: 'C1' }, { cartoucheId: 'C1' }, { cartoucheId: 'X' }] });
         expect(questions).toEqual([
             'Supprimer la cartouche «Cartouche 1» de sa grille « Grille A » ?\n\n'
-            + 'Elle reste dans la bibliothèque partagée.\n'
+            + 'Elle reste dans la Bibliothèque.\n'
             + "2 évaluation(s) l'emploient : leur rétroaction déjà rédigée est conservée.\n\n"
             + 'Cette action est irréversible.'
         ]);
@@ -196,7 +198,7 @@ describe('#647 · chemin 2 (liste et zone d\'édition) — la fenêtre que Grég
 
     it('employée mais pas dans la bibliothèque : les évaluations sont nommées, la bibliothèque non', async () => {
         const { questions } = await questionChemin2({ dansBibliotheque: false, evaluations: [{ cartoucheId: 'C1' }] });
-        expect(questions[0]).not.toContain('bibliothèque');
+        expect(questions[0]).not.toContain('Bibliothèque');
         expect(questions[0]).toContain("1 évaluation(s) l'emploient");
     });
 
@@ -261,15 +263,15 @@ async function questionChemin3({ dansBibliotheque, evaluations = [] }) {
 describe('#647 · chemin 3 (section 1) — la question dit d\'où part la cartouche, et ce qui reste', () => {
     it('dans la grille ET la bibliothèque, employée par 2 évaluations : tout est dit', async () => {
         const q = await questionChemin3({ dansBibliotheque: true, evaluations: [{ cartoucheId: 'C1' }, { cartoucheId: 'C1' }, { cartoucheId: 'X' }] });
-        expect(q).toMatch(/^Supprimer définitivement la cartouche «Cartouche 1» \?\n\n/);
-        expect(q).toContain('Elle part de sa grille « Grille A » et de la bibliothèque partagée.');
+        expect(q).toMatch(/^Supprimer définitivement la cartouche «Cartouche 1» de sa grille « Grille A » \?\n\n/);
+        expect(q).toContain('Elle part aussi de la Bibliothèque.');
         expect(q).toContain("2 évaluation(s) l'emploient : leur rétroaction déjà rédigée est conservée.");
         expect(q).toMatch(/\n\nCette action est irréversible\.$/);
     });
 
-    it('témoin négatif : dans sa grille seulement, employée par personne — la question d\'avant, mot pour mot', async () => {
+    it('témoin négatif : dans sa grille seulement, employée par personne — la grille est nommée (3 sept.), rien de plus', async () => {
         const q = await questionChemin3({ dansBibliotheque: false });
-        expect(q).toBe('Supprimer définitivement la cartouche «Cartouche 1» ?\n\nCette action est irréversible.');
+        expect(q).toBe('Supprimer définitivement la cartouche «Cartouche 1» de sa grille « Grille A » ?\n\nCette action est irréversible.');
     });
 
     it('invariant couplé : ce chemin écrit l\'ancrage ET la bibliothèque — la question dit les deux', () => {
@@ -280,7 +282,7 @@ describe('#647 · chemin 3 (section 1) — la question dit d\'où part la cartou
 
     it('dans sa grille seulement, mais employée : la bibliothèque n\'est pas nommée, les évaluations le sont', async () => {
         const q = await questionChemin3({ dansBibliotheque: false, evaluations: [{ cartoucheId: 'C1' }] });
-        expect(q).not.toContain('bibliothèque');
+        expect(q).not.toContain('Bibliothèque');
         expect(q).toContain("1 évaluation(s) l'emploient");
     });
 });
@@ -316,7 +318,7 @@ async function questionChemin4({ dansAncrage }) {
 describe('#647 · chemin 4 (section 2) — un retrait de bibliothèque qui dit ce qui survit', () => {
     it('la cartouche est aussi dans sa grille : « retirer », et elle y reste', async () => {
         const q = await questionChemin4({ dansAncrage: true });
-        expect(q).toMatch(/^Retirer «Cartouche 1» de la bibliothèque partagée \?/);
+        expect(q).toMatch(/^Retirer «Cartouche 1» de la Bibliothèque \?/);
         expect(q).toContain('la cartouche reste dans sa grille « Grille A »');
         expect(q).not.toContain('Supprimer définitivement');
     });
@@ -329,6 +331,6 @@ describe('#647 · chemin 4 (section 2) — un retrait de bibliothèque qui dit c
 
     it('témoin négatif : nulle part ailleurs — la question d\'avant, mot pour mot', async () => {
         const q = await questionChemin4({ dansAncrage: false });
-        expect(q).toBe('Supprimer définitivement «Cartouche 1» de la bibliothèque partagée ?\n\nCette action est irréversible.');
+        expect(q).toBe('Supprimer définitivement «Cartouche 1» de la Bibliothèque ?\n\nCette action est irréversible.');
     });
 });

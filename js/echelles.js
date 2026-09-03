@@ -710,7 +710,7 @@ async function _sonder574() {
 // trimestre actif soit établi, recréait la clé NUE echellesTemplates que #358
 // interdit (CO-11 — sa jumelle assurerEchelleGenerique, retirée par #574, portait la garde, pas
 // elle). Le contenu est alors devenu du CATALOGUE, versé une fois dans la
-// bibliothèque partagée.
+// Bibliothèque.
 // ↻ **ET CE VERSEMENT EST RETIRÉ À SON TOUR** (1er sept. 2026) : les huit
 // échelles n'avaient pas de `valeurCalcul` et ne pouvaient donc rien calculer.
 // Plus AUCUN chemin du code ne les sème. Ce qui reste chez les utilisateurs
@@ -740,7 +740,7 @@ async function initialiserModuleEchelles() {
     // ⚰ #574 étendu (1er septembre 2026) — LE VERSEMENT DES HUIT ÉCHELLES
     // « COLLÈGUES » EST RETIRÉ, avec la fonction qui le faisait.
     // #464/D2 les avait sorties d'ici pour en faire du catalogue versé une fois
-    // dans la bibliothèque partagée. Mesuré depuis : leurs 32 niveaux portaient
+    // dans la Bibliothèque. Mesuré depuis : leurs 32 niveaux portaient
     // `valeur:` et jamais `valeurCalcul:`, donc toute évaluation faite avec l'une
     // d'elles affichait 0,0 % sans un mot. On les retire au lieu de les réparer —
     // leur poser des valeurs refabriquerait l'arbitrage que #526/#527 ont supprimé.
@@ -2275,7 +2275,7 @@ window.confirmerImportEchelles = async function(donnees) {
         // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequeEchelles
         // L'utilisateur consulte puis choisit lesquelles ajouter à sa barre latérale
         const CLE_BIBLIOTHEQUE = window.CLE_BIBLIOTHEQUE_ECHELLES || 'bibliothequeEchelles';
-        // #599 — la fusion passe par la file : la bibliothèque partagée est
+        // #599 — la fusion passe par la file : la Bibliothèque est
         // relue à l'instant de l'écriture. Hors file, un import et un ajout
         // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;
@@ -2783,7 +2783,7 @@ async function supprimerEchelleDefinitivement(id) {
 }
 
 /**
- * Supprimer une échelle de la bibliothèque partagée uniquement (Section 2)
+ * Supprimer une échelle de la Bibliothèque uniquement (Section 2)
  * @param {string} id - ID de l'échelle à supprimer
  */
 async function supprimerEchelleDeBibliothequePartagee(id) {
@@ -2793,7 +2793,7 @@ async function supprimerEchelleDeBibliothequePartagee(id) {
     const echelle = biblio.find(e => e.id === id);
     if (!echelle) return;
 
-    if (!confirm(`Supprimer définitivement «${echelle.nom || 'Sans titre'}» de la bibliothèque partagée ?\n\nCette action est irréversible.`)) return;
+    if (!confirm(`Supprimer définitivement «${echelle.nom || 'Sans titre'}» de la Bibliothèque ?\n\nCette action est irréversible.`)) return;
 
     // #468/CO-25 (21 août 2026) : poser le tombstone AVANT le retrait. Sans lui,
     // un gabarit fourni par défaut revenait au prochain chargement — la
@@ -2809,7 +2809,7 @@ async function supprimerEchelleDeBibliothequePartagee(id) {
 }
 
 /**
- * Ajouter toutes les échelles locales à la bibliothèque partagée
+ * Ajouter toutes les échelles locales à la Bibliothèque
  */
 async function ajouterMesEchellesALaBibliotheque() {
     try {
@@ -2820,7 +2820,7 @@ async function ajouterMesEchellesALaBibliotheque() {
             return;
         }
 
-        if (!confirm(`Veux-tu ajouter tes ${echelles.length} échelle(s) à la bibliothèque partagée ?\n\nElles seront disponibles dans tous tes trimestres et pourront être partagées avec des collègues.`)) return;
+        if (!confirm(`Veux-tu ajouter tes ${echelles.length} échelle(s) à la Bibliothèque ?\n\nElles seront disponibles dans tous tes trimestres et pourront être partagées avec des collègues.`)) return;
 
         const resultat = await importerEchellesDansBibliotheque(echelles);
 
@@ -3013,7 +3013,7 @@ async function importerToutEchellesTrimestreModal() {
     }
 
     const confirmation = confirm(
-        `Veux-tu importer les ${echelles.length} échelle(s) de ${nomTrimestre} dans la bibliothèque partagée ?`
+        `Veux-tu importer les ${echelles.length} échelle(s) de ${nomTrimestre} dans la Bibliothèque ?`
     );
 
     if (!confirmation) return;

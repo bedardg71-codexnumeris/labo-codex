@@ -3554,7 +3554,7 @@ window.filtrerRessourcesNonDemo = filtrerRessourcesNonDemo;
 
 // Sanitisation — exposée pour les modules qui ont leur propre canal d'import
 // (ex. tampons-bibliotheque.js — Défense P du modèle de menaces).
-// Toute écriture vers une bibliothèque partagée depuis une source externe
+// Toute écriture vers une Bibliothèque depuis une source externe
 // devrait passer par `assainirObjet(item, SCHEMAS_IMPORT.<type>)` avant `db.set`.
 window.assainirObjet = assainirObjet;
 window.assainirChaine = assainirChaine;
