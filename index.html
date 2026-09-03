@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260903d"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260903e"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -14504,9 +14504,9 @@
     <script src="js/evaluation-formules.js?v=20260901a"></script> <!-- #667 : registre des modèles de formule algorithmique — CHARGÉ AVANT grilles.js et evaluation-calcul.js, qui l'appellent tous les deux -->
     <script src="js/evaluation-projection.js?v=20260902f"></script>
     <script src="js/evaluation-enonces.js?v=20260903a"></script>
-    <script src="js/codes-annotation.js?v=20260903a"></script> <!-- 3 sept. 2026 : la liste des CODES d'annotation d'une copie (les codes identifient des éléments du travail, rattachés aux critères ; les tampons, eux, commentent — autre palette) — sous-critères de la grille activée, sinon les dix codes d'hier (repli). CHARGÉ AVANT travaux-outils.js, synthese-retroaction-data.js et evaluation-retroaction.js, qui le lisent ; APRÈS evaluation-enonces.js, dont il prend critereAlgorithmique --> <!-- texte troué étape 1 (3 sept.) : repères posables, contrat zone → repères, insertion au curseur · #581 : registre des modeles d'enonce algorithmique - MEME CONTRAINTE D'ORDRE que les deux registres ci-dessus : grilles.js, evaluation-calcul.js, evaluation-retroaction.js et synthese-retroaction-data.js l'appellent tous --> <!-- #668 : registre des modèles de projection (norme externe / EUF) — MÊME CONTRAINTE D'ORDRE que le registre de formules : grilles.js et evaluation-calcul.js l'appellent tous les deux -->
+    <script src="js/codes-annotation.js?v=20260903b"></script> <!-- 3 sept. 2026 : la liste des CODES d'annotation d'une copie (les codes identifient des éléments du travail, rattachés aux critères ; les tampons, eux, commentent — autre palette) — sous-critères de la grille activée, sinon les dix codes d'hier (repli). CHARGÉ AVANT travaux-outils.js, synthese-retroaction-data.js et evaluation-retroaction.js, qui le lisent ; APRÈS evaluation-enonces.js, dont il prend critereAlgorithmique --> <!-- texte troué étape 1 (3 sept.) : repères posables, contrat zone → repères, insertion au curseur · #581 : registre des modeles d'enonce algorithmique - MEME CONTRAINTE D'ORDRE que les deux registres ci-dessus : grilles.js, evaluation-calcul.js, evaluation-retroaction.js et synthese-retroaction-data.js l'appellent tous --> <!-- #668 : registre des modèles de projection (norme externe / EUF) — MÊME CONTRAINTE D'ORDRE que le registre de formules : grilles.js et evaluation-calcul.js l'appellent tous les deux -->
     <script src="js/grilles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/grilles.js?v=20260903e"></script> <!-- texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
+    <script src="js/grilles.js?v=20260903f"></script> <!-- texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
     <script src="js/echelles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/echelles.js?v=20260903d"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
     <script src="js/cartouches-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
@@ -14611,7 +14611,7 @@
     <script src="js/heic-decodeur.js?v=20260830d"></script> <!-- #597 : conversion HEIC vers JPEG a l'entree de la file ; le bundle libheif (1,2 Mo) est charge par le worker, seulement quand un HEIC se presente -->
     <script src="js/travaux-import.js?v=20260831a"></script> <!-- #612 (T6.3) : un DA sans eleve dans ce groupe est recense ; #611 : appariement par nom par MOTS ENTIERS normalisés, ambiguïté ⇒ aucune association ; #558 la file survit au rechargement -->
     <script src="js/travaux-visionneuse.js?v=20260903a"></script> <!-- Beta 1.106.14 b0831 : zoom molette/trackpad proportionnel a deltaY + apercu CSS pendant le geste -->
-    <script src="js/travaux-outils.js?v=20260903b"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 menu ⋮ dans modales Personnaliser tampons + codes erreurs -->
+    <script src="js/travaux-outils.js?v=20260903c"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 menu ⋮ dans modales Personnaliser tampons + codes erreurs -->
     <script src="js/tampons-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.41 : #264 progression sur exporterBibliotheque (sealing) -->
     <script src="js/travaux-annotation.js?v=20260903a"></script>
     <script src="js/travaux-archivage.js?v=20260829c"></script> <!-- Beta 99.41 : #264 progression sur lancerExport{Etudiant,Production,} ; #565 try/catch par item + bilan d'export -->
@@ -14636,7 +14636,7 @@
          labo-codex-partage-v1 + signature ECDSA (Défense F, D2) + confiance TOFU (D3).
          Ordre requis : après cc-license.js et bibliotheque-ui.js, avant import-export.js ;
          signature.js avant partage-format.js (construirePackageSigne). -->
-    <script src="js/partage-schemas.js?v=20260902a"></script>
+    <script src="js/partage-schemas.js?v=20260903a"></script>
     <script src="js/partage-validation.js?v=20260901a"></script>
     <script src="js/signature.js?v=2026061002"></script>
     <script src="js/trust-tofu.js?v=20260902f"></script>
@@ -14644,7 +14644,7 @@
     <script src="js/partage-export.js?v=20260901a"></script>
     <script src="js/partage-import.js?v=20260824b"></script>
     <script src="js/partage-section.js?v=20260901a"></script>
-    <script src="js/import-export.js?v=20260903b"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
+    <script src="js/import-export.js?v=20260903c"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
     <script src="js/codex.js?v=20260903b"></script> <!-- #614 : la fusion valide les magic bytes ; la purge #336 ne recense plus la corbeille ni la modélisation -->
     <script src="js/liste-evaluations.js?v=20260903b"></script> <!-- #560 : supprimer une copie pour de bon dit ce qui part avec elle (annotations, évaluations du couple) -->
     <script src="js/journal.js?v=2026041706"></script>

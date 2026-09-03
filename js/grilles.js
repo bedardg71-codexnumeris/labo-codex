@@ -3529,6 +3529,62 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
             </div>`;
 }
 
+/**
+ * Codes par grille, lot 3 (3 septembre 2026) — le GESTE d'activation.
+ *
+ * Décision de Grégoire : les codes d'annotation d'une grille SONT les
+ * sous-critères de son critère algorithmique, et ça s'active par un geste,
+ * partout. Sans lui, rien ne change : la palette montre les dix codes de
+ * l'écran Annoter › palette, comme avant. Les mots de la case sont les siens
+ * (« Utiliser ces sous-critères comme codes d'annotation »).
+ *
+ * ⚠ ABSENT = REPLI. Le handler n'écrit jamais `false` : décocher RETIRE le
+ * champ. Une grille d'avant ce lot et une grille décochée sont la même chose.
+ */
+function rendreActivationCodes(critere, ctx) {
+    if (typeof window.codesAnnotation === 'undefined') return '';
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
+    const actif = critere.codesDepuisSousCriteres === true;
+    const apercu = window.codesAnnotation.apercuCodes(critere);
+    const n = apercu.length;
+    const sansPoids = (critere.sousCriteres || []).length - n;
+    const note = actif
+        ? `Sur toute copie évaluée avec cette grille, la palette des codes montre ${n === 1 ? 'ce sous-critère' : 'ces ' + n + ' sous-critères'} : le numéro est le code, avec le nom, la couleur et la rétroaction d'ici.`
+        : `Décochée : la palette montre les dix codes de l'écran Annoter › palette, comme avant.`;
+    const precision = sansPoids > 0
+        ? ` Un sous-critère de pondération 0 n'est pas un code posable (${sansPoids === 1 ? 'un ici' : sansPoids + ' ici'}).`
+        : '';
+    return `
+                        <div class="sous-criteres-codes${actif ? ' sous-criteres-codes--actif' : ''}">
+                            <label class="sous-criteres-codes-choix">
+                                <input type="checkbox"
+                                       data-on-change="modifierCodesDepuisSousCriteresHandler" data-grille-id="${esc(ctx.grilleId)}" data-critere-index="${ctx.index}"
+                                       ${actif ? 'checked' : ''}${n === 0 ? ' disabled' : ''}>
+                                Utiliser ces sous-critères comme codes d'annotation
+                            </label>
+                            <small class="sous-criteres-codes-note">${esc(note)}${esc(precision)}</small>
+                        </div>`;
+}
+
+/** La couleur qu'un sous-critère aurait comme code — la sienne, sinon celle des dix par position ; gris s'il ne se pose pas. */
+function couleurDeSousCritere(critere, sc) {
+    if (typeof window.codesAnnotation === 'undefined' || !sc) return '#888888';
+    const code = (sc.code === undefined || sc.code === null) ? '' : String(sc.code).trim();
+    const entree = window.codesAnnotation.apercuCodes(critere).find(c => c.code === code);
+    return entree ? entree.couleur : '#888888';
+}
+
+async function modifierCodesDepuisSousCriteresHandler(el) {
+    var grilleId = el.dataset.grilleId;
+    var index = parseInt(el.dataset.critereIndex);
+    var actif = !!el.checked;
+    await modifierProjectionCritereGrille(grilleId, index, function(critere) {
+        if (actif) critere.codesDepuisSousCriteres = true;
+        else delete critere.codesDepuisSousCriteres;
+    });
+    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+}
+
 function rendreBlocProjectionAlgo(critere, ctx) {
     if (!critere || critere.type !== 'algorithmique') return '';
     if (typeof window.projectionAlgo === 'undefined') return '';
@@ -3992,6 +4048,7 @@ function afficherCriteresGrille(grille) {
 
                     ${critere.sousCriteres && critere.sousCriteres.length > 0 ? `
                     <div class="sous-criteres-liste-conteneur">
+                        ${rendreActivationCodes(critere, { grilleId: grille.id, index: index })}
                         ${critere.sousCriteres.map((sc, scIndex) => `
                         <div class="sous-critere-item">
                             <div class="sous-critere-champs-grid">
@@ -4020,6 +4077,14 @@ function afficherCriteresGrille(grille) {
                                            placeholder="1.0"
                                            data-on-change="modifierSousCritereHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-sc-index="${scIndex}" data-champ="ponderation" data-parse-float
                                            title="Ex: 1.0 pour erreur complète, 0.5 pour demi-point">
+                                </div>
+                                <div class="groupe-form">
+                                    <label class="sous-critere-label-petit">Couleur</label>
+                                    <input type="color"
+                                           class="controle-form sous-critere-input-couleur"
+                                           value="${echapperHtml(couleurDeSousCritere(critere, sc))}"
+                                           data-on-change="modifierSousCritereHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-sc-index="${scIndex}" data-champ="couleur"
+                                           title="La couleur de ce code sur la copie, quand ces sous-critères servent de codes d'annotation">
                                 </div>
                                 <button class="btn btn-supprimer btn-tres-compact"
                                         data-action="supprimerSousCritere" data-param="${grille.id}" data-param2="${index}" data-param3="${scIndex}"
@@ -5328,6 +5393,7 @@ window.modifierTexteEnonceTempHandler = modifierTexteEnonceTempHandler;
 window.modifierModeleEnoncesGrilleHandler = modifierModeleEnoncesGrilleHandler;
 window.modifierTexteEnonceGrilleHandler = modifierTexteEnonceGrilleHandler;
 window.insererRepereEnonce = insererRepereEnonce;
+window.modifierCodesDepuisSousCriteresHandler = modifierCodesDepuisSousCriteresHandler;
 window.ajouterPalierProjectionTemp = ajouterPalierProjectionTemp;
 window.supprimerPalierProjectionTemp = supprimerPalierProjectionTemp;
 window.ajouterPalierProjectionGrille = ajouterPalierProjectionGrille;

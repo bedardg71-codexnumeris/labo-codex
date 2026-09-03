@@ -25,6 +25,7 @@
      listeCodes(grille)     les codes de CETTE grille, dans l'ordre d'affichage
      code(grille, id)       l'entrée d'un identifiant posé, JAMAIS null
      estActive(grille)      le drapeau est posé ET au moins un sous-critère pèse
+     apercuCodes(critere)   ce que les sous-critères donneraient, geste ou non (gabarit)
      grilleDeCopie(fichier) la grille d'une copie, via sa production, ou null
 
    Chaque code : { id, code, numero, nom, nomCourt, couleur, retroaction, source }
@@ -221,6 +222,16 @@ function estActive(grille) {
     return _depuisSousCriteres(critere).length > 0;
 }
 
+/**
+ * Ce que les sous-critères d'un critère DONNERAIENT comme codes, geste posé ou
+ * non — pour le gabarit, qui montre le compte et la couleur de chaque
+ * sous-critère avant que l'enseignant·e n'active. Même règle que la liste
+ * activée ; `[]` sans critère ou sans sous-critère qui pèse.
+ */
+function apercuCodes(critere) {
+    return _depuisSousCriteres(critere);
+}
+
 /** Les codes de cette grille, dans l'ordre d'affichage. */
 function listeCodes(grille) {
     if (estActive(grille)) return _depuisSousCriteres(_critereAlgo(grille));
@@ -278,6 +289,7 @@ var api = {
     COULEURS_DEFAUT: COULEURS_DEFAUT.slice(),
     RETROACTIONS_DEFAUT: RETROACTIONS_DEFAUT,
     estActive: estActive,
+    apercuCodes: apercuCodes,
     listeCodes: listeCodes,
     code: code,
     grilleDeCopie: grilleDeCopie
