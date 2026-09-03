@@ -127,8 +127,15 @@
        « Personnaliser ») + un cas « sélecteur ouvert, clic ailleurs ⮕ fermé » ;
        break-tests (remise par empreinte) : fermeture retirée ⮕ rouge ; titre sans la
        phrase ⮕ rouge.
-     ▣ PAS FAIT, VOULU : pas de release, pas de push. Le verdict au jeton est rendu après ce
-       dernier commit (§4.5) pour que la pile, si Grégoire la pousse, soit jugée.
+     ▣ « Ça fonctionne » (Grégoire, 17 h 40), puis « fais la publication (elle est nécessaire
+       pour mes tests iPad) » ⮕ RELEASE 1.114.0, build 0903-1748 (`release.mjs minor` : quatre
+       points de vérité + 22 jetons), changelog 1.114 (une entrée pour la livraison du jour,
+       six items), commit `3d816782`, Vitest 4895/4895 APRÈS le commit du bump, puis
+       `scripts/pousser.sh` : verdict Playwright vert à jour sur `3d816782` (0 échec,
+       0 instable), hook Vitest vert, POUSSÉ `5887532e..3d816782` sur `origin/main` à
+       17 h 58 ; run GitHub 33810757170 lancé. Pile vidée : 0 devant, 0 derrière.
+     ▣ RESTE À GRÉGOIRE : l'iPad (sélecteur natif derrière « Personnalisé… », fermeture au
+       doigt, bandeau parti, case du gabarit) ; la relecture des deux aides du lot 4.
      ===================================================================== -->
 
 <!-- =====================================================================
