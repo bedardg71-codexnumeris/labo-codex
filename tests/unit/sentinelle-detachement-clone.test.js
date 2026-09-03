@@ -178,6 +178,214 @@ describe('Détacher un clone de sa famille', () => {
         // ⚠ Sans retour visible, un clic qui ne trouve rien à détacher passerait
         // pour une panne. Les deux issues muettes sont DITES.
         expect(source).toMatch(/Sélectionne d’abord un bloc marqué/);
-        expect(source).toMatch(/Rien à détacher/);
+        expect(source).toMatch(/Rien à décloner/);
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DÉCLONER (3 septembre 2026, décision de Grégoire) — un mot, deux entrées,
+// UNE fonction.
+//
+// L'incident : il a cherché « décloner » dans sa propre application et n'a
+// rien trouvé. L'Inspecteur annonçait « 🧬 N instances » sans offrir d'en
+// sortir ; le geste ne vivait qu'au menu Actions, sous « Détacher de sa
+// famille de clones ». Le lot renomme, et pose le bouton là où on le cherche.
+//
+// ⚠ Les deux invariants qui comptent : le menu Actions GARDE son bouton — lui
+// seul sert la multisélection, `detacherDeLaFamille` prend une liste — et la
+// logique n'est PAS dupliquée : deux appels d'une fonction, pas deux fonctions.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Un DOM juste assez vrai pour ouvrir l'Inspecteur et cliquer dedans.
+ * Chaque id rend toujours le MÊME stub (registre), les écouteurs sont
+ * conservés pour être déclenchés, et ce que `afficherToastLien` appose au
+ * <body> est relu comme « ce que l'écran a dit ».
+ */
+function fauxDom() {
+    const registre = new Map();
+    const corps = [];
+    const sansEffet = () => {};
+    function stub(id) {
+        return {
+            id, style: {}, dataset: {}, value: '', textContent: '', innerHTML: '', className: '',
+            title: '', hidden: false, disabled: false, checked: false, tagName: 'DIV', nodeType: 1,
+            children: [], childNodes: [], firstChild: null, parentNode: null, parentElement: null,
+            offsetWidth: 0, offsetHeight: 0, clientWidth: 0, clientHeight: 0, scrollLeft: 0, scrollTop: 0,
+            options: [], selectedIndex: 0, _ecouteurs: {},
+            classList: { add: sansEffet, remove: sansEffet, contains: () => false, toggle: sansEffet },
+            addEventListener(type, fn) { (this._ecouteurs[type] = this._ecouteurs[type] || []).push(fn); },
+            removeEventListener: sansEffet, setAttribute: sansEffet, removeAttribute: sansEffet,
+            getAttribute: () => null, hasAttribute: () => false, matches: () => false, closest: () => null,
+            contains: () => false, appendChild: sansEffet, insertBefore: sansEffet, removeChild: sansEffet,
+            replaceChildren: sansEffet, remove: sansEffet, focus: sansEffet, blur: sansEffet, select: sansEffet,
+            click: sansEffet, cloneNode() { return stub(id); },
+            getBoundingClientRect: () => ({ left: 0, top: 0, width: 0, height: 0, right: 0, bottom: 0 }),
+            querySelector(sel) { return stub(String(sel).replace(/^#/, '')); },
+            querySelectorAll() { return []; }
+        };
+    }
+    const doc = {
+        getElementById(id) { if (!registre.has(id)) registre.set(id, stub(id)); return registre.get(id); },
+        querySelector: () => null, querySelectorAll: () => [],
+        createElement: (tag) => stub(tag),
+        createDocumentFragment: () => stub('fragment'),
+        createTextNode: (t) => ({ textContent: t, nodeType: 3 }),
+        addEventListener: sansEffet, removeEventListener: sansEffet,
+        activeElement: null,
+        body: Object.assign(stub('body'), { appendChild(el) { corps.push(el); } }),
+        documentElement: stub('html')
+    };
+    return {
+        doc,
+        el: (id) => doc.getElementById(id),
+        cliquer(id) { (doc.getElementById(id)._ecouteurs.click || []).forEach(fn => fn({ preventDefault: sansEffet, stopPropagation: sansEffet })); },
+        toasts: () => corps.filter(e => e.className === 'planif-toast-lien').map(e => e.textContent)
+    };
+}
+
+function monterAvecDom() {
+    const dom = fauxDom();
+    const store = {};
+    const fenetre = {
+        addEventListener() {}, removeEventListener() {},
+        innerWidth: 1280, innerHeight: 800, devicePixelRatio: 1,
+        matchMedia: () => ({ matches: false, addEventListener() {}, addListener() {} }),
+        getComputedStyle: () => ({ getPropertyValue: () => '' })
+    };
+    win = chargerScript('js/planification-carte.js', {
+        document: dom.doc,
+        db: {
+            getSync: (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)),
+            setSync: (k, v) => { store[k] = v; },
+            get: async (k, d) => (k in store ? store[k] : d),
+            set: async (k, v) => { store[k] = v; }
+        },
+        cle: (k) => k,
+        echapperHtml: (t) => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;'),
+        // Rien d'asynchrone ne se déclenche : ni boucle d'animation, ni
+        // minuterie — l'essai lit l'état tout de suite après le geste.
+        requestAnimationFrame: () => 0, cancelAnimationFrame() {},
+        setTimeout: () => 0, clearTimeout() {}, setInterval: () => 0, clearInterval() {},
+        getComputedStyle: () => ({ getPropertyValue: () => '' }),
+        matchMedia: () => ({ matches: false, addEventListener() {}, addListener() {} }),
+        navigator: { userAgent: 'essai', platform: 'MacIntel', maxTouchPoints: 0 },
+        location: { href: '', search: '', hash: '', pathname: '' },
+        ResizeObserver: class { observe() {} unobserve() {} disconnect() {} },
+        MutationObserver: class { observe() {} disconnect() {} },
+        IntersectionObserver: class { observe() {} unobserve() {} disconnect() {} },
+        alert() {}, confirm: () => false, prompt: () => null
+    }, fenetre);
+    win.cle = (k) => k;
+    // Le module de données répond à TOUT par un no-op, sauf ce dont la forme
+    // compte : `initialiser()` en appelle une douzaine de méthodes que l'essai
+    // n'exerce pas.
+    const base = {
+        getIndex: () => ({ active: 'c1', cartes: [{ id: 'c1', nom: 'Essai' }] }),
+        listerCartes: () => [{ id: 'c1', nom: 'Essai' }],
+        sauvegarderCarte: () => {}, sauvegarderIndex: () => {}, chargerCarte: () => null,
+        migrerDonneesProto: () => {},
+        initialiserSiNecessaire() { return base.getIndex(); }
+    };
+    win.planificationDonnees = new Proxy(base, {
+        get: (cible, prop) => (prop in cible ? cible[prop] : () => undefined)
+    });
+    return { api: win.planificationCarte, dom };
+}
+
+describe('Décloner (3 sept. 2026) : un mot, deux entrées, une fonction', () => {
+
+    it('⚠⚠ l’Inspecteur offre « Décloner » sur un clone, et le bouton déclone CE bloc, lui seul', () => {
+        const { api, dom } = monterAvecDom();
+        api.initialiser();
+        const ID = familleDEssai(api);
+        api.ouvrirPanneau(ID.c1);
+        const coin = dom.el('planif-panneau-clone-info');
+        expect(coin.style.display).toBe('');
+        expect(coin.innerHTML).toMatch(/id="planif-btn-decloner"/);
+        expect(coin.innerHTML).toMatch(/>Décloner</);
+        const btn = dom.el('planif-btn-decloner');
+        expect(typeof btn.onclick, 'le bouton est dessiné mais ne fait rien').toBe('function');
+
+        btn.onclick();
+        expect(api.etat.noeuds.get(ID.c1).cloneSourceId).toBeNull();
+        // L'autre clone n'a pas bougé : l'Inspecteur décrit UN bloc.
+        expect(api.etat.noeuds.get(ID.c2).cloneSourceId).toBe(ID.orig);
+        // Le message dit ce qui NE se passe pas.
+        expect(dom.toasts().pop()).toBe('Bloc décloné — il ne suivra plus son original, et son original ne le suivra plus. Son contenu est inchangé.');
+        // Plus d'instances à annoncer : le coin s'efface.
+        expect(coin.style.display).toBe('none');
+    });
+
+    it('l’Inspecteur n’offre PAS « Décloner » sur un bloc qui n’a rien à décloner', () => {
+        const { api, dom } = monterAvecDom();
+        api.initialiser();
+        familleDEssai(api, [
+            { id: 'seul', type: 'activite', titre: 'Seul', x: 300, y: 300, parent: null,
+              enfants: [], metadata: {}, cloneSourceId: null }
+        ]);
+        api.ouvrirPanneau('planif-seul');
+        const coin = dom.el('planif-panneau-clone-info');
+        expect(coin.style.display).toBe('none');
+        expect(coin.innerHTML).not.toMatch(/planif-btn-decloner/);
+    });
+
+    it('⚠⚠ TÉMOIN NÉGATIF : le menu Actions déclone encore une MULTISÉLECTION, en un geste', () => {
+        // C'est la raison pour laquelle le bouton du menu n'a pas été retiré.
+        const { api, dom } = monterAvecDom();
+        api.initialiser();
+        const ID = familleDEssai(api);
+        api.etat.multiSelection.add(ID.c1);
+        api.etat.multiSelection.add(ID.c2);
+        dom.cliquer('planif-btn-detacher-clone');
+        expect(api.etat.noeuds.get(ID.c1).cloneSourceId).toBeNull();
+        expect(api.etat.noeuds.get(ID.c2).cloneSourceId).toBeNull();
+        expect(dom.toasts().pop()).toBe('2 blocs déclonés — ils ne se suivent plus. Leur contenu est inchangé.');
+    });
+
+    it('le menu Actions DIT quand la sélection n’a rien à décloner — sans le mot « famille »', () => {
+        const { api, dom } = monterAvecDom();
+        api.initialiser();
+        familleDEssai(api, [
+            { id: 'seul', type: 'activite', titre: 'Seul', x: 300, y: 300, parent: null,
+              enfants: [], metadata: {}, cloneSourceId: null }
+        ]);
+        api.etat.selection = 'planif-seul';
+        dom.cliquer('planif-btn-detacher-clone');
+        const dit = dom.toasts().pop();
+        expect(dit).toMatch(/^Rien à décloner/);
+        expect(dit).not.toMatch(/famille/);
+    });
+
+    it('⚠ NON-DUPLICATION : une seule définition de detacherDeLaFamille, deux appels', () => {
+        // Le témoin de la consigne du 3 septembre : « deux appels d'une
+        // fonction, pas deux fonctions ». L'export ne compte pas comme appel.
+        const definitions = source.match(/function detacherDeLaFamille\(/g) || [];
+        const appels = source.match(/(?<!function )detacherDeLaFamille\(/g) || [];
+        expect(definitions).toHaveLength(1);
+        expect(appels).toHaveLength(2);
+        // …et le message d'après-geste n'existe qu'à UN endroit.
+        expect(source.match(/Son contenu est inchangé\./g)).toHaveLength(1);
+    });
+
+    it('le mot est « Décloner », et « famille de clones » a quitté ce que l’utilisateur lit', () => {
+        const hover = readFileSync(path.join(racine, 'js', 'accompagnement-contenu-hover.js'), 'utf8');
+        const popup = readFileSync(path.join(racine, 'js', 'accompagnement-contenu-popup.js'), 'utf8');
+        // Le bouton du menu Actions porte le mot.
+        expect(html).toMatch(/id="planif-btn-detacher-clone"[^>]*>Décloner la sélection<\/button>/);
+        // L'aide longue nomme les DEUX chemins — sinon elle envoie à un seul
+        // endroit alors qu'il y en a deux, le défaut d'origine.
+        const aide = html.match(/<p><strong>Décloner un bloc :<\/strong>.*?<\/p>/);
+        expect(aide, 'l’aide longue n’a plus de paragraphe « Décloner un bloc »').not.toBeNull();
+        expect(aide[0]).toMatch(/Inspecteur/);
+        expect(aide[0]).toMatch(/Actions/);
+        expect(popup).toMatch(/Décloner/);
+        expect(popup).toMatch(/Inspecteur/);
+        for (const [nom, texte] of [['index.html', html], ['hover', hover], ['popup', popup]]) {
+            expect(texte, nom + ' parle encore de « famille de clones »').not.toMatch(/famille de clones/i);
+        }
+        // Le seul « famille de clones » qui reste dans js/ est l'annonce déjà
+        // lue du 16 août (changelog) — on ne réécrit pas une annonce passée.
+        expect(source).not.toMatch(/'[^'\n]*famille de clones[^'\n]*'/);
     });
 });

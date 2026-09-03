@@ -605,7 +605,7 @@ const TOOLTIPS = {
     'planif-palette':
         'Glisse un élément vers le canevas pour l\'ajouter à la carte. Glisse un bloc sur la corbeille pour le supprimer. Un bloc posé n\'est pas figé : le menu de son en-tête le change en un autre type de la MÊME famille, sans perdre son titre, sa durée ni ses liens.',
     'planif-boutons-action':
-        'Choisis la carte affichée, ouvre le menu Actions (nouvelle carte, cours rattaché, imports, export du plan, détacher un clone) et annule le dernier geste.',
+        'Choisis la carte affichée, ouvre le menu Actions (nouvelle carte, cours rattaché, imports, export du plan, décloner la sélection) et annule le dernier geste.',
     'planif-zoom':
         'Niveau de zoom courant. Zoome à la molette ou au pincement ; « Recentrer » (⌘1) ramène toute la carte à l\'écran.',
 
@@ -642,7 +642,7 @@ const TOOLTIPS = {
     'planif-cloner-lie':
         'Crée un CLONE lié : titre, durée et type se propagent entre toutes ses instances, et un 🧬 apparaît sur chacune. Raccourci : ⇧⌥ en glissant, ou ⇧⌘D. Réservé aux blocs simples — une séquence ou une leçon se copie toujours à l\'indépendant.',
     'planif-detacher-clone':
-        'Libère le bloc sélectionné de sa famille de clones : il cesse de suivre son original. Son contenu ne change pas — détacher arrête ce qui se propagerait ensuite, sans défaire ce qui s\'est déjà propagé. Sur l\'original, c\'est toute la famille qui se dissout.',
+        'Rend le bloc sélectionné indépendant de son original : il cesse de le suivre, et l\'original cesse de le suivre. Rien n\'est supprimé et son contenu ne change pas — décloner arrête ce qui se propagerait ensuite, sans défaire ce qui s\'est déjà propagé. Sur l\'original, ce sont tous ses clones qui deviennent indépendants.',
     'planif-supprimer-noeud':
         'Supprime ce nœud et ses liens de la carte.',
 

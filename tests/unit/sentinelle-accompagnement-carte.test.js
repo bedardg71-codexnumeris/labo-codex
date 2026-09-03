@@ -70,8 +70,9 @@ describe('Accompagnement de la carte · il doit dire ce que l’app FAIT', () =>
         expect(sansContenu, 'ces infobulles s’ouvriraient vides').toEqual([]);
     });
 
-    it('l’infobulle du menu Actions cite le détachement qu’il contient', () => {
-        expect(entree('planif-boutons-action')).toMatch(/d[ée]tacher/i);
+    it('l’infobulle du menu Actions cite le déclonage qu’il contient', () => {
+        // « Décloner » depuis le 3 septembre 2026 — le mot que Grégoire cherche.
+        expect(entree('planif-boutons-action')).toMatch(/d[ée]cloner/i);
     });
 
     it('⚠ l’Inspecteur ne prétend plus régler le TYPE — il a déménagé dans l’en-tête', () => {
@@ -99,7 +100,7 @@ describe('Accompagnement de la carte · il doit dire ce que l’app FAIT', () =>
             popup.indexOf("'labo-etudes'"));
         expect(guide, 'le guide ne distingue pas copie et clone').toMatch(/clone/i);
         expect(guide, 'le guide n’explique pas le menu d’en-tête').toMatch(/même famille|m[êe]me famille/i);
-        expect(guide, 'le guide n’indique pas comment détacher').toMatch(/D[ée]tacher/);
+        expect(guide, 'le guide n’indique pas comment décloner').toMatch(/D[ée]cloner/);
     });
 
     it('⚠ les deux menus d’en-tête gardent un `title` qui DIT quelque chose', () => {

@@ -20992,6 +20992,9 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .planif-btn-cloner:disabled { opacity: 0.4; cursor: not-allowed; }
 .planif-clone-compteur { font-size: 12px; color: #7c3aed; }
 .planif-clone-lien { font-size: 11px; color: #7c3aed; }
+/* Décloner (3 sept. 2026) : l'annonce des instances et sa sortie sur une même ligne de l'Inspecteur. */
+#planif-panneau-clone-info { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; margin: 10px 0 8px; }
+#planif-panneau-clone-info .planif-btn-carte { margin-left: auto; }
 .planif-carte-aide {
     position: absolute;
     top: 12px;

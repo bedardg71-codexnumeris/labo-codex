@@ -212,7 +212,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   continué.** ⮕ Mais c'est un item d'**usage réel de l'auteur en train de préparer un cours**, pas
   une idée d'amélioration : il vaut plus qu'un confort d'interface.
 
-- [ ] **#693 — L'Inspecteur d'un nœud annonce la famille de clones, mais n'offre pas d'en sortir**.
+- [x] **#693 — L'Inspecteur d'un nœud annonce la famille de clones, mais n'offre pas d'en sortir**.
+  ↻ **LIVRÉ le 3 septembre 2026, matin** (consigne Cowork 6 h 45 ; branche `claude/decloner-inspecteur`,
+  worktree, en attente de fusion — une autre instance faisait la release 1.112.0). Décision de
+  Grégoire : le geste s'appelle **« Décloner »**. Bouton « Décloner » dans le bloc des instances
+  de l'Inspecteur, même `detacherDeLaFamille`, message unique (`annoncerDeclonage`) ; menu Actions
+  GARDÉ sous « Décloner la sélection » (multisélection) ; aide longue et aide contextuelle nomment
+  les DEUX chemins ; « famille de clones » ne reste que dans l'annonce du 16 août. **Vérifié
+  comment** : sentinelle +6 essais (DOM factice, Inspecteur ouvert pour de vrai, témoin négatif
+  multisélection), 5 mutations / 5 rouges, Vitest 446 / 4821 ; il reste à Grégoire de le VOIR à
+  l'écran avant la release.
   Inscrit le 2 septembre 2026 depuis Cowork, **sur un usage réel** : Grégoire travaillait sa carte
   et a demandé « la possibilité de *décloner* une carte ». **La fonction existe, entière.**
   ▣ **Mesuré** : `detacherDeLaFamille(noeudIds)` (`js/planification-carte.js:3628`) désindexe le

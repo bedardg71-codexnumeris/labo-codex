@@ -885,7 +885,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: 'Une <strong>copie</strong> et un <strong>clone</strong> ne sont pas la même chose. Une copie est indépendante : la modifier ne touche pas l’original. Un clone reste lié — titre, durée et type se propagent entre toutes ses instances, et un 🧬 apparaît sur chacune. La règle est la même pour les deux gestes : <strong>sans ⇧ c’est une copie, avec ⇧ c’est un clone</strong>. Pour libérer un clone déjà créé : <em>Actions ▸ Détacher de sa famille de clones</em>.'
+                contenu: 'Une <strong>copie</strong> et un <strong>clone</strong> ne sont pas la même chose. Une copie est indépendante : la modifier ne touche pas l’original. Un clone reste lié — titre, durée et type se propagent entre toutes ses instances, et un 🧬 apparaît sur chacune. La règle est la même pour les deux gestes : <strong>sans ⇧ c’est une copie, avec ⇧ c’est un clone</strong>. Pour libérer un clone déjà créé : <em>Décloner</em>, dans l’Inspecteur à côté du compte de ses instances — ou <em>Actions ▸ Décloner la sélection</em> pour plusieurs blocs à la fois. Rien n’est supprimé : le bloc devient indépendant, contenu intact.'
             },
         ],
         voirAussi: ['conception-productions', 'construction-grilles']
