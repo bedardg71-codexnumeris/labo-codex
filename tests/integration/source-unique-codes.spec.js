@@ -137,12 +137,16 @@ test('source unique · gabarit : le champ Couleur est le sélecteur de la palett
         return groupes.map(g => ({
             pastilles: g.querySelectorAll('.travaux-btn-couleur').length,
             perso: !!g.querySelector('.travaux-btn-couleur-perso'),
+            // « Personnalisé… » est une étiquette liée à l'input caché : le navigateur
+            // l'active lui-même, au doigt comme à la souris (essai iPad du 3 sept.).
+            persoLieALInput: g.querySelector('label.travaux-btn-couleur-perso')?.getAttribute('for') === g.querySelector('input.travaux-retro-couleur-input')?.id
+                && !!g.querySelector('input.travaux-retro-couleur-input')?.id,
             affichee: g.querySelector('summary').style.background,
             inputsColorNus: document.querySelectorAll('#listeCriteres input[type="color"]:not(.travaux-retro-couleur-input)').length
         }));
     });
     console.log('SÉLECTEURS →', JSON.stringify(rendu));
-    expect(rendu.every(r => r.pastilles === 12 && r.perso)).toBe(true);
+    expect(rendu.every(r => r.pastilles === 12 && r.perso && r.persoLieALInput)).toBe(true);
     // La couleur hors des douze déjà enregistrée reste affichée telle quelle.
     expect(rendu[1].affichee.replace(/\s/g, '')).toMatch(/rgb\(171,205,239\)|#abcdef/);
     expect(rendu[0].inputsColorNus).toBe(0);
@@ -159,9 +163,13 @@ test('source unique · gabarit : le champ Couleur est le sélecteur de la palett
     await page.waitForTimeout(400);
     const apres = await page.evaluate(async () => {
         const g = (await db.get(cle('grillesTemplates')))[0];
-        return { couleurs: g.criteres[0].sousCriteres.map(sc => sc.couleur), codes: codesAnnotation.listeCodes(g).map(c => c.couleur) };
+        const pastille = document.querySelectorAll('#listeCriteres .sous-critere-couleur-groupe summary')[0];
+        return { couleurs: g.criteres[0].sousCriteres.map(sc => sc.couleur), codes: codesAnnotation.listeCodes(g).map(c => c.couleur),
+                 pastille: pastille.style.background.replace(/\s/g, '') };
     });
     console.log('APRÈS PASTILLE →', JSON.stringify(apres));
     expect(apres.couleurs).toEqual(['#22c55e', '#abcdef']);
     expect(apres.codes).toEqual(['#22c55e', '#abcdef']);
+    // L'écran le montre : la pastille du sélecteur est repeinte (essai iPad : « ne se sélectionne pas »).
+    expect(apres.pastille).toMatch(/rgb\(34,197,94\)|#22c55e/);
 });
