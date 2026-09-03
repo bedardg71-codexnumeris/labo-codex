@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260902b"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260903a"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4181,7 +4181,7 @@
                                                  barre d'outils : c'est un réglage de la carte entière, comme ses
                                                  voisins — et la barre débordait déjà sur iPad en portrait. -->
                                             <button class="planif-action-item" id="planif-btn-liens-contourner">Liens : contourner les blocs</button>
-                                            <button class="planif-action-item" id="planif-btn-detacher-clone" data-tooltip="planif-detacher-clone">D&eacute;tacher de sa famille de clones</button>
+                                            <button class="planif-action-item" id="planif-btn-detacher-clone" data-tooltip="planif-detacher-clone">Décloner la sélection</button>
                                             <button class="planif-action-item" id="planif-btn-dupliquer-carte">Dupliquer cette carte</button>
                                             <button class="planif-action-item" id="planif-btn-importer-carte">Importer une carte (fichier)</button>
                                             <button class="planif-action-item" id="planif-btn-import-trimestre">Importer d'un autre trimestre…</button>
@@ -11681,7 +11681,7 @@
 
                             <p><strong>Copier ou cloner un bloc :</strong> ce sont deux choses diff&eacute;rentes. Une <strong>copie</strong> est ind&eacute;pendante : la modifier ne touche pas l'original. Un <strong>clone</strong> est li&eacute; : titre, dur&eacute;e et type se propagent entre toutes ses instances, et un &#129516; appara&icirc;t sur chacune. La r&egrave;gle est la m&ecirc;me pour les deux gestes &mdash; <strong>sans &#8679; c'est une copie, avec &#8679; c'est un clone</strong> : <code>&#8997;</code> en glissant ou <code>&#8984;D</code> copient ; <code>&#8679;&#8997;</code> en glissant ou <code>&#8679;&#8984;D</code> clonent. L'Inspecteur, lui, offre les deux boutons c&ocirc;te &agrave; c&ocirc;te. Une <strong>S&eacute;quence</strong> ou une <strong>Le&ccedil;on</strong> se duplique toujours en copie ind&eacute;pendante, avec tout son contenu.</p>
 
-                            <p><strong>D&eacute;tacher un clone :</strong> s&eacute;lectionne le bloc, puis <strong>Actions &#9656; D&eacute;tacher de sa famille de clones</strong>. Il cesse de suivre son original &mdash; et son contenu ne bouge pas : d&eacute;tacher arr&ecirc;te les propagations &agrave; venir, il ne d&eacute;fait pas celles qui ont eu lieu. Si tu s&eacute;lectionnes l'<strong>original</strong>, c'est toute la famille qui se dissout, puisqu'il ne peut pas partir en laissant ses clones point&eacute;s vers lui.</p>
+                            <p><strong>Décloner un bloc :</strong> sélectionne-le, puis <strong>Inspecteur &#9656; Décloner</strong>, à côté du compte de ses instances &mdash; ou, pour plusieurs blocs à la fois, <strong>Actions &#9656; Décloner la sélection</strong>. Rien n'est supprimé : le bloc devient indépendant. Il cesse de suivre son original &mdash; et son contenu ne bouge pas : décloner arrête les propagations à venir, il ne défait pas celles qui ont eu lieu. Si tu déclones l'<strong>original</strong>, ce sont tous ses clones qui deviennent indépendants, puisqu'il ne peut pas partir en laissant ses clones pointés vers lui.</p>
 
                             <p><strong>D&eacute;placer un bloc :</strong> la poign&eacute;e <strong>&#10303;</strong>, au coin sup&eacute;rieur gauche de chaque en-t&ecirc;te, sert de prise &mdash; utile au doigt, et n&eacute;cessaire l&agrave; o&ugrave; l'en-t&ecirc;te porte un menu. Le reste du bloc se glisse aussi.</p>
 
@@ -14590,7 +14590,7 @@
     <script src="js/planification-donnees.js?v=20260903b"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
     <script src="js/planification-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260825a"></script> <!-- Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-carte.js?v=20260903a"></script> <!-- Décloner (3 sept.) : bouton dans l'Inspecteur, message d'après-geste unique (annoncerDeclonage) · Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
     <script src="js/planification-export.js?v=20260815a"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) — #416 lot C : la date dérivée du groupe-cours choisi -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
@@ -14688,8 +14688,8 @@
     <script src="js/accompagnement.js?v=20260901a"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20260830d"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
-    <script src="js/accompagnement-contenu-popup.js?v=20260903b"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
+    <script src="js/accompagnement-contenu-hover.js?v=20260903a"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-popup.js?v=20260903c"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20260809a"></script>
     <script src="js/guides-pedagogiques.js?v=20260629a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
     <script src="js/comparateur-pratiques.js?v=20260821a"></script> <!-- Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->

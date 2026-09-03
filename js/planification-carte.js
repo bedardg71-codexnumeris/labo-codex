@@ -2998,15 +2998,35 @@ function ouvrirPanneau(id) {
         sauvegarder();
     };
 
-    // Clone info
+    // Clone info — et la sortie, là où on voit les instances (3 sept. 2026).
+    // ▣ L'Inspecteur ANNONÇAIT « 🧬 N instances » sans offrir d'en sortir :
+    // Grégoire a cherché « décloner » ici, et ne l'a trouvé nulle part. Le
+    // bouton du menu Actions RESTE : lui seul sert la multisélection. Ici, le
+    // geste porte sur LE bloc affiché, même si d'autres sont allumés sur la
+    // carte — l'Inspecteur décrit un bloc, pas une sélection.
     var cloneInfo = document.getElementById('planif-panneau-clone-info');
     if (cloneInfo) {
         if (doitAfficherIndicateurClone(donnees)) {
             var clones = trouverClones(id);
             var nb = clones.length;
             cloneInfo.style.display = '';
-            cloneInfo.innerHTML = '<span class="planif-clone-compteur">\uD83E\uDDEC ' + nb + ' instance' + (nb > 1 ? 's' : '') + '</span>' +
-                ' <a href="#" id="planif-clone-voir-autres" class="planif-clone-lien">Voir les autres</a>';
+            cloneInfo.innerHTML = '<span class="planif-clone-compteur">\uD83E\uDDEC ' + nb + ' instance' + (nb > 1 ? 's' : '') + '</span>' + // security-ok: littéraux statiques et un nombre, aucune donnée utilisateur
+                ' <a href="#" id="planif-clone-voir-autres" class="planif-clone-lien">Voir les autres</a>' +
+                '<button type="button" class="planif-btn-carte" id="planif-btn-decloner" data-tooltip="planif-detacher-clone">Décloner</button>';
+            var btnDecloner = document.getElementById('planif-btn-decloner');
+            if (btnDecloner) {
+                btnDecloner.onclick = function() {
+                    var nDecl = detacherDeLaFamille([id]);
+                    annoncerDeclonage(nDecl);
+                    // Décloné, le bloc n'a plus d'instances à annoncer : ce
+                    // coin s'efface, comme `doitAfficherIndicateurClone` le
+                    // dirait maintenant. Le reste du panneau ne bouge pas.
+                    if (nDecl > 0) {
+                        cloneInfo.style.display = 'none';
+                        cloneInfo.innerHTML = '';
+                    }
+                };
+            }
             var lienVoir = document.getElementById('planif-clone-voir-autres');
             if (lienVoir) {
                 lienVoir.onclick = function(ev) {
@@ -3599,7 +3619,11 @@ function dupliquerNoeud(noeudId, silencieux, lie) {
 }
 
 /**
- * DÉTACHER UN BLOC DE SA FAMILLE DE CLONES (16 août 2026, demande de Grégoire).
+ * DÉCLONER : DÉTACHER UN BLOC DE SES CLONES (16 août 2026, demande de Grégoire).
+ * ⮕ À l'écran, le geste s'appelle « Décloner » depuis le 3 septembre 2026 — ses
+ * mots : rendre le clonage réversible, sans prolonger la métaphore généalogique.
+ * Le nom de la fonction reste : il dit ce que le code fait à la donnée, et il
+ * n'est lu par personne d'autre que nous.
  *
  * ⚠⚠ POURQUOI ÇA MANQUAIT. La distinction copie / clone est livrée le même jour,
  * mais elle ne vaut que pour les gestes À VENIR. Les blocs qu'il a dupliqués
@@ -3665,6 +3689,30 @@ function detacherDeLaFamille(noeudIds) {
     });
     sauvegarder();
     return aDetacher.size;
+}
+
+/**
+ * DÉCLONER — ce que l'écran dit APRÈS le geste, en un seul endroit (3 sept. 2026).
+ *
+ * Deux boutons appellent `detacherDeLaFamille` : le menu Actions, sur la
+ * SÉLECTION (c'est lui qui sert le lot), et l'Inspecteur, sur le bloc affiché
+ * (c'est là qu'on voit les instances, donc là qu'on cherche la sortie). Le
+ * message qui suit ne doit pas diverger d'un bouton à l'autre : il vit ici,
+ * pas dans chaque écouteur.
+ *
+ * ⚠ « Décloner » peut se lire « supprimer le clone ». Le geste ne détruit rien,
+ * et le message le dit en toutes lettres : le contenu est inchangé.
+ *
+ * @param {number} n - ce que `detacherDeLaFamille` a rendu
+ */
+function annoncerDeclonage(n) {
+    if (n === 0) {
+        afficherToastLien('Rien à décloner : aucun des blocs sélectionnés n’est un clone, ni l’original d’un clone.');
+        return;
+    }
+    afficherToastLien(n === 1
+        ? 'Bloc décloné — il ne suivra plus son original, et son original ne le suivra plus. Son contenu est inchangé.'
+        : n + ' blocs déclonés — ils ne se suivent plus. Leur contenu est inchangé.');
 }
 
 /**
@@ -8705,11 +8753,12 @@ function initialiser() {
 
     brancherRecherche();
 
-    // ── Détacher de sa famille de clones (16 août 2026) ──────────────────
+    // ── Décloner la sélection (16 août 2026 ; « Décloner » depuis le 3 sept.) ──
     // ⚠ C'est le SEUL item du menu Actions qui porte sur la SÉLECTION et non
-    // sur la carte. Son libellé le dit donc explicitement, et il se désactive
-    // quand rien de sélectionné n'appartient à une famille — sans quoi le clic
-    // ne produirait rien et Grégoire chercherait la panne du mauvais côté.
+    // sur la carte — et c'est pourquoi il RESTE alors que l'Inspecteur offre le
+    // même geste : lui seul sert la MULTISÉLECTION, le déclonage en lot. Quand
+    // rien de sélectionné n'est cloné, il le DIT — sans quoi le clic ne
+    // produirait rien et Grégoire chercherait la panne du mauvais côté.
     var btnDetacher = document.getElementById('planif-btn-detacher-clone');
     if (btnDetacher) {
         btnDetacher.addEventListener('click', function() {
@@ -8717,17 +8766,11 @@ function initialiser() {
                 ? Array.from(etat.multiSelection)
                 : (etat.selection ? [etat.selection] : []);
             if (!cibles.length) {
-                afficherToastLien('Sélectionne d’abord un bloc marqué 🧬 — c’est lui qui appartient à une famille.');
+                afficherToastLien('Sélectionne d’abord un bloc marqué 🧬 — lui seul se déclone.');
                 return;
             }
             var n = detacherDeLaFamille(cibles);
-            if (n === 0) {
-                afficherToastLien('Rien à détacher : aucun des blocs sélectionnés n’appartient à une famille de clones.');
-                return;
-            }
-            afficherToastLien(n === 1
-                ? 'Bloc détaché — il ne suivra plus son original, et son original ne le suivra plus. Son contenu est inchangé.'
-                : n + ' blocs détachés — ils ne se suivent plus. Leur contenu est inchangé.');
+            annoncerDeclonage(n);
         });
     }
 
@@ -11773,6 +11816,7 @@ window.planificationCarte = {
     atterrirDepuisLoupe: atterrirDepuisLoupe,
     dupliquerNoeud: dupliquerNoeud,
     detacherDeLaFamille: detacherDeLaFamille,
+    ouvrirPanneau: ouvrirPanneau, // sentinelle Décloner (3 sept. 2026) : l'Inspecteur s'ouvre en bac à sable
     deplacerSequenceVersSemaine: deplacerSequenceVersSemaine,
     annuler: annuler,
     retablir: retablir,

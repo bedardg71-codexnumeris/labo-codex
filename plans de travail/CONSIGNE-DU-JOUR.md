@@ -1,143 +1,122 @@
-# Consigne du jour — supprimer une échelle devient la remplacer *(#648)*
+# Consigne du jour — « décloner » : un seul mot, et le geste là où on le cherche
 
-> **Écrite le 3 septembre 2026 à 6 h 10 (heure de Grégoire), par Cowork, avec lui.**
-> **Application au moment de l'écriture : `1.111.2`, build `0903-0544`, POUSSÉE.**
-> Elle remplace la consigne du vocabulaire, exécutée et livrée (`a69fb166`, `225f55e2`,
-> `763f5e46`).
->
-> ▣ **État à l'écriture, mesuré** : `HEAD` = `763f5e46`,
-> `git rev-list --count origin/main..HEAD` rend **0** — témoin, `HEAD..origin/main` rend **0**
-> lui aussi. Arbre propre sauf `OU-EN-EST-ON.md` et `PROTOCOLE.md`, qui sont à Cowork :
-> **ne les commite pas.**
+> **Écrite le 3 septembre 2026 à 6 h 45 (heure de Grégoire), par Cowork, avec lui.**
+> **Application au moment de l'écriture : `1.112.0`, build `0903-0642`.**
+> Elle remplace la consigne de l'échelle, exécutée et livrée (`16833e74`, `e028695b`).
 >
 > ▣ **Grégoire est éveillé** et regardera l'écran dès que tu diras que c'est prêt.
 >
-> ⚠ **REMESURE TOUT** (règle 1). Les lignes citées ici ont été prises par Cowork en lecture
-> seule ; elles ne sont pas les tiennes.
+> ⚠ **REMESURE TOUT** (règle 1). Les lignes citées ont été relevées par Cowork en lecture
+> seule ; elles bougent souvent dans ce fichier.
 >
-> ⮕ **La décision complète, avec ses motifs, est dans
-> `plans de travail/DECISION-2026-09-03-echelle-remplacement.md`. LIS-LA D'ABORD.**
-> Cette consigne en est l'exécution, pas le résumé.
-
----
-
-## ⛔ LE POINT QUI COMMANDE TOUT LE RESTE — TU VAS ÉCRIRE DANS SES DONNÉES
-
-**Migrer des évaluations vers une autre échelle, c'est réécrire des évaluations réelles de
-Grégoire.** C'est le point 2 de ce qui remonte jusqu'à lui (`CLAUDE.md`), et c'est le
-périmètre exact de la **règle 2** de `PROTOCOLE.md` : relecture croisée obligatoire, parce
-que ça ne se reprend pas.
-
-⮕ **Ce que ça t'impose, et ce n'est pas négociable :**
-1. **La migration ne s'exécute jamais sans que l'utilisateur ait vu le compte AVANT.**
-2. **Aucun essai sur ses trimestres réels.** Bancs et données forgées seulement.
-3. ⛔ **Tu ne répares aucun stock existant d'office.** « Tarir n'est pas réparer » : ce
-   correctif change ce qui se passera, pas ce qui est déjà écrit chez les gens.
-4. **Le lot passe par la relecture croisée de Cowork avant tout verdict.** Dis-le quand tu es
-   prêt ; ne prends pas le verdict au jeton avant.
+> ⛔ **Petit lot. Il n'empêche aucun des huit énoncés.** Si tu le trouves en train de
+> grossir, arrête-toi et dis-le : c'est le signe que tu as glissé dans le chantier voisin
+> (voir la fin).
 
 ---
 
 ## Le mandat — décision de Grégoire, 3 septembre au matin
 
-**Supprimer une échelle dont des évaluations dépendent n'est pas une suppression : c'est un
-remplacement.** L'application demande par quoi remplacer, migre les évaluations, puis retire
-l'ancienne. **Elle ne propose jamais de la retirer sans successeur.**
+**Deux choses, et elles vont ensemble.**
 
-▣ **Son motif, dans ses mots** : *« On supprime une échelle pour la remplacer par une autre.
-Une évaluation ne tient pas s'il n'y a pas d'échelle. Le geste est incomplet, il doit être
-suivi d'un remplacement ou d'une correction. »*
+### 1. Le geste s'appelle « Décloner »
 
-⮕ **Ce que ça écarte** : les trois issues envisagées jusqu'ici — refuser, cascader, laisser
-aller — posaient toutes la mauvaise question. Elles traitaient la suppression comme un geste
-qui se suffit. **Il ne se suffit pas.**
+▣ **Ses mots** : *« L'idée est de rendre réversible le clonage d'un item. Il serait plus
+approprié de parler de déclonage, plutôt que de prolonger la métaphore génétique ou
+généalogique et parler de famille. »*
 
-### Les trois cas, tous tranchés
+⮕ **« Détacher de sa famille de clones » devient « Décloner ».** Le mot « famille » quitte
+les textes que l'utilisateur lit *pour ce geste*.
+⚠ **Témoin du besoin** : `grep -rni "déclon" js/ index.html` rend **0** aujourd'hui.
+Grégoire a cherché « décloner » dans sa propre application et n'a rien trouvé — **c'est
+l'incident qui a ouvert ce chantier.**
 
-| cas | comportement arrêté |
+⛔ **LE RISQUE DU MOT, ET IL EST À TRAITER DANS LE TEXTE.** « Décloner » peut se lire
+« supprimer le clone ». **Le geste ne détruit rien** : il rend le bloc indépendant, contenu
+intact. ⮕ **Ce qui accompagne le bouton doit dire ce qui NE se passe pas.** Le texte actuel
+le dit déjà bien (« Son contenu est inchangé ») : **garde cette qualité, ne la perds pas en
+raccourcissant.**
+
+### 2. Le geste s'ajoute à l'Inspecteur, sans quitter le menu Actions
+
+▣ **Le manque, mesuré le 2 septembre** : l'Inspecteur **annonce** la famille de clones
+(`planif-panneau-clone-info`, `js/planification-carte.js:3002` — « 🧬 N instances · Voir les
+autres ») et **n'offre pas d'en sortir**. Celui qui voit la famille là cherche la sortie là.
+
+⮕ **Ajoute le bouton dans l'Inspecteur**, dans ce bloc, visible **seulement** quand le nœud
+porte un `cloneSourceId` ou qu'il a des clones (la condition existe :
+`doitAfficherIndicateurClone`).
+
+⛔ **NE RETIRE PAS celui du menu Actions.** ▣ **Motif mesuré** : `detacherDeLaFamille`
+(`js/planification-carte.js:3628`) prend **une liste de nœuds**, et le bouton du menu sert la
+**multisélection**, que l'Inspecteur ne couvre pas. Le retirer supprimerait le déclonage en
+lot. **Grégoire avait demandé le retrait, puis l'a annulé quand la mesure a été faite.**
+
+⛔ **NE DUPLIQUE PAS LA LOGIQUE.** Même `detacherDeLaFamille`, même message après le geste,
+même point d'annulation. **Deux appels d'une fonction, pas deux fonctions.**
+
+---
+
+## Les endroits visibles — mesurés, à rejouer
+
+| où | ce qu'il dit aujourd'hui |
 |---|---|
-| des évaluations dépendent de l'échelle | **remplacement obligatoire** : par quoi, puis migration, puis retrait |
-| trimestre **terminé ou archivé** | **refus**, en disant que ça toucherait des notes déjà remises |
-| **aucune** évaluation ne l'emploie | **rien de spécial** : elle se supprime sans un mot de plus |
+| `index.html:4184` | le bouton du menu Actions : **« Détacher de sa famille de clones »** |
+| `js/accompagnement-contenu-hover.js:645` | son infobulle (`planif-detacher-clone`) : « Libère le bloc sélectionné de **sa famille de clones**… » |
+| `js/planification-carte.js:8725` | le refus : « **Rien à détacher** : aucun des blocs sélectionnés n'appartient à une **famille de clones**. » |
+| `js/planification-carte.js:8729-8730` | le succès : « Bloc **détaché** — il ne suivra plus son original… » / « N blocs **détachés** — … » |
+| `js/accompagnement-contenu-popup.js:888` | l'aide copie/clone : « Pour libérer un clone déjà créé : *Actions ▸ Détacher de sa famille de clones* » |
+| `index.html:11684` | l'aide longue : « **Détacher un clone** : sélectionne le bloc, puis **Actions ▸ Détacher de sa famille de clones**… » |
 
-⚠ **Le troisième est le témoin négatif, et il compte autant que les deux autres.** Pas
-d'avertissement, pas de proposition de ménage, aucun signalement « inutilisée ». **Ses mots** :
-*« C'est peut-être tout simplement un projet qui n'est pas terminé. »*
+⚠ **Les deux dernières nomment le CHEMIN vers le bouton.** Si l'Inspecteur l'offre aussi,
+**elles doivent le dire** — sinon on reproduit le défaut d'origine : une aide qui envoie à un
+seul endroit alors qu'il y en a deux.
 
----
+⛔ **`js/changelog-data.js:390` NE SE RÉÉCRIT PAS.** C'est une annonce déjà lue (16 août). ⮕
+**L'annonce NEUVE, elle, dira le renommage** et devra donc nommer l'ancien mot une fois.
 
-## L'état mesuré — à rejouer avant de coder
-
-`verifierDependancesEchelle` → **`js/donnees-v2.js:1188`**
-
-▣ Elle ne compte que les **pratiques de notation** (`cle('pratiquesConfigurables')`), sur le
-**trimestre actif seul**. Elle ne regarde **jamais** les évaluations.
-▣ Le compte tombe dans `dependances`, pas dans `avertissements` ⮕ **le bouton est désactivé,
-sans issue proposée.** L'enseignant est bloqué sans savoir quoi faire.
-▣ **Témoin que le périmètre étroit n'est pas une contrainte d'architecture** : la fonction
-sœur `verifierDependancesCartouche`, dans le même fichier, énumère TOUS les trimestres
-(`enumererTrimestres()`).
-
-▣ **L'archivage existe déjà, et son champ est mesuré** : `js/trimestre-v2-liste.js:88` teste
-`t.archive === true`, et la l. 100 affiche le badge « Archivé ». ⚠ **« Terminé » n'est pas
-mesuré** : cherche s'il existe un autre marqueur, et **si tu n'en trouves pas, dis-le et
-n'invente pas de critère** — le refus portera alors sur l'archivage seul.
-
-⚠⚠ **Et cherche la DUALITÉ avant de coder.** `supprimerEchelleDefinitivement` existe en
-**deux corps** — `js/echelles.js` et `js/donnees-v2.js` — mesuré le 2 septembre : deux
-chemins de suppression indépendants, l'un depuis l'onglet Données, l'autre depuis Conception
-› Échelles. **Remesure-le, et traite les deux.** Un remplacement offert d'un côté et une
-suppression nue de l'autre serait pire que l'état actuel.
-
----
-
-## Le cas voisin — CORRIGER une échelle sans la supprimer
-
-**Le recalcul doit être possible, et il est PROPOSÉ, jamais automatique.**
-
-▣ **Ses mots** : *« La correction d'une échelle doit permettre un recalcul, c'est souvent ce à
-quoi sert la correction. »* et *« Il permet d'informer l'utilisateur des conséquences de son
-geste. »*
-
-⮕ **La proposition n'est pas une politesse : c'est le seul moment où l'enseignant apprend
-combien d'évaluations sa correction touche.** Elle nomme le compte AVANT le geste.
-⛔ **Un recalcul silencieux est exclu**, même s'il donne le bon résultat.
-⚠ **La règle du trimestre archivé vaut ici aussi.**
-
-⮕ **Si ce volet double la taille du lot, ARRÊTE-TOI APRÈS LE REMPLACEMENT et dis-le.**
-Deux lots valent mieux qu'un lot à moitié fait sur des chemins qui écrivent dans ses données.
+⚠ **« famille » rend 360 occurrences dans tout le dépôt** : la plupart n'ont rien à voir avec
+les clones. **Ne fais pas un remplacement global.** Le périmètre est le tableau ci-dessus,
+remesuré.
 
 ---
 
 ## Fini quand
 
-**Un enseignant qui s'est trompé dans une échelle peut la remplacer, et ses notes suivent.**
+**Grégoire cherche « décloner » là où il a vu la famille, et il le trouve.**
 
-▣ **Le témoin** : l'écran ne propose plus « Supprimer » nu sur une échelle employée par des
-évaluations — il propose de remplacer, et dit combien d'évaluations suivront.
-▣ **Le témoin négatif** : une échelle qu'aucune évaluation n'emploie se supprime **sans un mot
-de plus** qu'avant ce lot.
-▣ **Le témoin du refus** : dans un trimestre archivé, il refuse, et nomme les notes déjà
-remises.
-▣ **Le témoin des données** : aucune évaluation réelle n'a été écrite pendant ton travail.
-Cite la commande qui le montre.
+▣ **Le témoin** : `grep -rni "déclon" js/ index.html` rend un compte non nul, et
+`grep -rni "famille de clones" js/ index.html` ne rend plus que l'annonce de changelog du
+16 août.
+▣ **Le témoin négatif, qui compte autant** : le bouton du menu Actions **fonctionne toujours
+sur une multisélection**, et le déclonage en lot n'a pas régressé. Cite l'essai qui le montre.
+▣ **Le témoin de non-duplication** : `grep -n "detacherDeLaFamille" js/` montre **une seule
+définition** et deux appels.
 
 ---
 
 ## L'ordre
 
-1. **Rapporte le verdict de GitHub sur `763f5e46`** (rituel d'ouverture, §2.1).
-2. **Lis la décision** (`plans de travail/DECISION-2026-09-03-echelle-remplacement.md`).
-3. **Remesure** : les deux chemins de suppression, le champ d'archivage, le périmètre du
-   compte. **Rends-moi ça avant de coder.**
-4. Ce lot touche `js/` ⮕ **bump du bloc de jetons d'`index.html`**.
-5. `cd tests && npm run test:unit` pour travailler ; **`npm test` complet avant de dire que
-   c'est prêt** — ce lot touche des chemins qui écrivent dans les évaluations.
-   ⚠ Vitest se lance **depuis `tests/`**.
-6. ⛔ **Tu commites, puis tu t'arrêtes.** Pas de release, pas de push, pas de verdict au
-   jeton : relecture croisée de Cowork, puis coup d'œil de Grégoire, puis seulement le reste.
-7. **Ce fichier se commite avec ton lot.** Nomme tes fichiers ; pas de `git add -A`.
+1. **Rapporte le verdict de GitHub sur la release `1.112.0`** (rituel d'ouverture, §2.1).
+2. **Remesure les six endroits** du tableau avant de toucher au premier.
+3. Ce lot touche `js/` ⮕ **bump du bloc de jetons d'`index.html`**.
+4. `cd tests && npm run test:unit` pour travailler ; **`npm test` complet avant de dire que
+   c'est prêt.** ⚠ Vitest se lance **depuis `tests/`**.
+5. ⛔ **Tu commites, puis tu t'arrêtes.** Pas de release, pas de push, pas de verdict au
+   jeton : Grégoire regarde l'écran d'abord.
+6. **Ce fichier se commite avec ton lot.** Nomme tes fichiers ; pas de `git add -A`.
 
-⮕ **CE QUE GRÉGOIRE DOIT ALLER VOIR** : ouvrir **Conception › Échelles**, tenter de supprimer
-une échelle qu'il emploie, et lire ce que l'écran propose. Il doit lui demander par quoi la
-remplacer, et dire combien d'évaluations suivront. ⚠ **Qu'il ne confirme pas.** Lire suffit.
+⮕ **CE QUE GRÉGOIRE DOIT ALLER VOIR** : ouvrir sa carte d'alignement, sélectionner un bloc
+marqué 🧬, ouvrir l'**Inspecteur**, et y trouver « Décloner » à côté de l'annonce des
+instances. ⚠ **Qu'il ne clique pas.** Le voir suffit.
+
+---
+
+## ⛔ CE QUI N'EST PAS DANS CE LOT — et c'est ce qui le ferait grossir
+
+**L'Inspecteur qui décrit une SÉLECTION plutôt qu'un bloc.** Idée de Grégoire du 3 septembre,
+cadrée dans `plans de travail/CADRAGE-2026-09-03-inspecteur-selection-multiple.md`.
+
+⛔ **Ne l'entame pas.** Elle refond l'Inspecteur, et elle porte un piège nommé dans le cadrage :
+un champ qui écrit une valeur commune sur toute la sélection détruit en silence ce qui
+différait. **Ce lot-ci ajoute un bouton ; il ne change pas ce que l'Inspecteur est.**

@@ -7,6 +7,77 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 17 — 3 SEPTEMBRE 2026, MATIN : « DÉCLONER » — UN SEUL MOT, ET LE GESTE
+     LÀ OÙ ON LE CHERCHE (#693).
+
+     ▣ Session Claude Code sur consigne FICHIER (`plans de travail/CONSIGNE-DU-JOUR.md`,
+       Cowork 6 h 45, Grégoire éveillé). Décision de Grégoire : le geste s'appelle
+       « Décloner » (« plutôt que de prolonger la métaphore génétique ou généalogique »).
+       Témoin du besoin : `grep -rni "déclon" js/ index.html` rendait 0.
+
+     ▣ VERDICT GITHUB SUR 1.112.0 (rituel §2.1, rapporté en premier) : AUCUN — à la
+       mesure (6 h 50), `16833e74` et `e028695b` n'étaient pas poussés
+       (`origin/main..HEAD` = 2), jeton Playwright local absent. Dernier run jugé :
+       33741362801 sur `763f5e46` (1.111.2), vert sur les deux jobs. Pendant la session,
+       Grégoire : « une autre instance est en train de faire le release » ⮕ ce lot a été
+       écrit dans un WORKTREE (`.claude/worktrees/decloner`, branche
+       `claude/decloner-inspecteur`, partie de `e028695b`) pour ne pas modifier les
+       fichiers que le verdict Playwright de l'autre instance lisait.
+
+     ▣ MESURÉ AVANT DE TOUCHER : les six endroits du tableau de la consigne, conformes ;
+       un SEPTIÈME trouvé et inclus — `accompagnement-contenu-hover.js` l.608, l'infobulle
+       du menu Actions qui énumérait « détacher un clone » (même geste, même mot).
+       `detacherDeLaFamille` : une définition, UN appel (menu), un export. Le bloc
+       `planif-panneau-clone-info` (dans `ouvrirPanneau`) annonçait « 🧬 N instances ·
+       Voir les autres » sans sortie.
+
+     ▣ LIVRÉ (8 fichiers de code et d'essais, un commit, fichiers nommés) :
+       · planification-carte.js — bouton « Décloner » dans le bloc des instances de
+         l'Inspecteur (même condition que l'annonce : `doitAfficherIndicateurClone`),
+         qui appelle `detacherDeLaFamille([id])` sur LE bloc affiché, même si d'autres
+         sont allumés ; `annoncerDeclonage(n)` = le message d'après-geste en UN endroit
+         (0 / 1 / N, « Son contenu est inchangé »), partagé par les deux boutons ; le
+         menu Actions GARDE son bouton et sa multisélection ; `ouvrirPanneau` exporté
+         (prise de test). Une définition, DEUX appels, un export.
+       · index.html — menu : « Décloner la sélection » (supposition nommée : le menu
+         agit sur la sélection, l'Inspecteur sur un bloc, le libellé le dit) ; aide
+         longue « Décloner un bloc » qui nomme les DEUX chemins ; jetons bumpés
+         (planification-carte, hover, popup, styles).
+       · hover.js l.608 et l.645, popup.js l.888 — « famille » sorti, les deux chemins
+         nommés, « Rien n'est supprimé » dit (le risque du mot, traité dans le texte).
+       · styles.css — `#planif-panneau-clone-info` en flex, bouton `planif-btn-carte`
+         poussé à droite ; aucune couleur ni taille neuve.
+       · changelog-data.js l.402 NON touché (annonce du 16 août, déjà lue).
+       ▣ Témoins : `grep -rni "déclon" js/ index.html` = 19 ; `grep -rni "famille de
+         clones" js/ index.html` = le changelog seul ; `grep -n "detacherDeLaFamille("
+         js/` = 1 définition + 2 appels.
+       ▣ Sentinelle `sentinelle-detachement-clone.test.js` : +6 essais sur un DOM
+         factice qui INITIALISE le module et ouvre l'Inspecteur (bouton rendu ; clic
+         qui déclone CE bloc et pas l'autre ; message exact ; coin effacé ; rien sur un
+         bloc sans clone) ; TÉMOIN NÉGATIF : le menu Actions déclone une multisélection
+         de 2 en un geste (« 2 blocs déclonés ») ; refus sans « famille » ;
+         non-duplication (1 déf., 2 appels, 1 message) ; textes des deux chemins.
+         `sentinelle-accompagnement-carte` : deux attentes passées de « détacher » à
+         « décloner ». 5 mutations, 5 rouges, fichiers restaurés à l'identique.
+         Vitest 446 / 4821. Playwright complet dans le worktree (file://, aucun
+         serveur partagé) : 238 passés, 3 instables rattrapés à la reprise
+         (délais de 30 s sur cartouches-import-trimestre, horaire-format-preserve-seances,
+         ponderation-requise-540 — hors de ce lot ; le jeton de 1.112.0 sur `main` les
+         donnait francs), 0 échec, code 0, 9,6 min.
+     ⛔ Aucune donnée réelle touchée ; l'application n'a pas été ouverte d'ici.
+     ⏳ NON FAIT, hors lot par consigne : l'Inspecteur de SÉLECTION
+       (`plans de travail/CADRAGE-2026-09-03-inspecteur-selection-multiple.md`).
+       Changelog : l'annonce neuve, à la release, dira le renommage et nommera
+       l'ancien mot une fois.
+     ⮕ Commit sur la branche du worktree, puis ARRÊT : pas de release, pas de push,
+       pas de verdict au jeton. Fusion vers `main` quand la release de l'autre instance
+       est terminée (fast-forward attendu ; sinon s'arrêter et le dire).
+     ⮕ CE QUE GRÉGOIRE DOIT ALLER VOIR : sa carte d'alignement, un bloc marqué 🧬,
+       l'Inspecteur — « Décloner » à droite de « N instances · Voir les autres ».
+       Ne pas cliquer : le voir suffit.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 16 — 2 SEPTEMBRE 2026, SOIR : LES SUPPRESSIONS DE CARTOUCHES DISENT
      VRAI (#647), LE GARDE MORT DES PRODUCTIONS EST PARTI (#649), ET LA COPIE
      D'UN ÉLÈVE ATTEND SES MOTS (#560, volet A).
