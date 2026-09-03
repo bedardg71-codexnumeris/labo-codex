@@ -3088,9 +3088,10 @@ input[type="number"].controle-form {
 }
 
 /* === REPÈRES POSABLES — le texte troué, étape 1 (3 septembre 2026) ===
-   Sous chaque zone d'énoncé d'un critère algorithmique (gabarit des grilles),
-   les repères qu'un clic pose au curseur : {critere}, {erreurs}, {mots},
-   {points}. Deux familles, deux couleurs (cadrage du 2 septembre) : bleu =
+   Au-dessus de chaque zone d'énoncé d'un critère algorithmique (gabarit des
+   grilles), les repères qu'un clic pose au curseur : {critere}, {erreurs},
+   {mots}, {points}. La rangée précède la zone — Grégoire l'a cherchée là au
+   premier coup d'œil. Deux familles, deux couleurs (cadrage du 2 septembre) : bleu =
    écrit dans la grille par l'enseignant·e ; vert = se remplit à la correction.
    Texte en --texte-principal dans les deux modes : les teintes de famille ne
    portent que le cadre et le fond, et le contraste ne dépend pas d'elles. */
@@ -3099,7 +3100,7 @@ input[type="number"].controle-form {
     flex-wrap: wrap;
     align-items: center;
     gap: 6px 8px;
-    margin-top: 6px;
+    margin: 0 0 6px 0;
 }
 
 .reperes-enonce-mot {

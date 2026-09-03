@@ -117,6 +117,34 @@
        matière pour l'étape 2, aucun symptôme vécu. (2) `.badge-jeton-*` de styles.css
        dit « jeton » pour les jetons de reprise/délai, sans rapport ⮕ laissé, d'où
        le mot « repère » ici.
+
+     ▣ COUP D'ŒIL DE GRÉGOIRE (3 sept., après-midi, navigateur de bureau) : l'insertion au
+       curseur FONCTIONNE, vérifiée en replaçant le curseur puis en cliquant ; le focus
+       n'est pas perdu. ⚠ L'iPad reste à voir, par lui. UN CHANGEMENT DEMANDÉ, et il l'a
+       anticipé sans qu'on le lui dise — même signal que « Décloner » cherché dans
+       l'Inspecteur : la rangée « Poser : » passe AU-DESSUS de la zone (une palette
+       d'outils se place avant l'établi). ⮕ LIVRÉ (second commit) : ordre = label ·
+       rangée · zone · aide ; l'aide reste SOUS le champ, c'est lui qu'elle décrit ;
+       marge de la rangée retournée (0 0 6px) ; jetons grilles 0903e, styles 0903d.
+       Spec WebKit : passe SANS qu'aucun sélecteur bouge (les repères sont visés par
+       `.groupe-form:has(textarea[data-enonce-cle])`, pas par leur position) ; deux
+       assertions AJOUTÉES qui verrouillent l'ordre (rangée avant zone, aide après zone),
+       break-testées (rangée remise sous la zone ⮕ rouge).
+       ⚠⚠ ERREUR DE SESSION, RATTRAPÉE AVANT LE VERDICT : le script de remise du
+       break-test a TRONQUÉ `js/grilles.js` (en Python, `open(p,'w').write(lire())`
+       vide le fichier AVANT de le relire), et le commit `f786e172` a été créé avec
+       un `grilles.js` de 0 octet — le script l'avait dit (« revenu à l'identique :
+       False ») et j'ai commité sans lire la ligne. Vu au contrôle suivant, fichier
+       reconstruit depuis le commit précédent + réapplication des 14 lignes, commit
+       AMENDÉ (local, jamais poussé). Le hook anti-cache a refusé l'amend (jeton déjà
+       à 0903d dans le HEAD cassé) ⮕ jeton grilles poussé à 0903e, pour qu'aucun
+       navigateur ayant chargé le fichier vide sous 0903d ne le garde. Leçon : lire
+       la ligne de contrôle qu'on a soi-même écrite ; un « False » n'est pas un détail.
+     ▣ VERDICT AU JETON : lancé APRÈS ce second commit, dans l'ordre du §4.5
+       (`cd tests && node ../scripts/verifier-playwright.mjs`) ; lire
+       `scripts/.verdict-playwright.json` (SHA, échecs, instables). Aucun commit après le
+       verdict pour ne pas le périmer : son résultat est dans le rapport de session, pas
+       ici. Pas de push : Grégoire décide de la release.
      ===================================================================== -->
 
 <!-- =====================================================================
