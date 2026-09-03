@@ -32,11 +32,11 @@ const SEMER = `() => {
     ];
     const critere = (drapeau) => ({ id: 'CR', nom: 'Rigueur', type: 'algorithmique', ponderation: 20,
         codesDepuisSousCriteres: drapeau, sousCriteres: JSON.parse(JSON.stringify(sousCriteres)) });
-    db.setSync(cle('grillesTemplates'), [
+    db.setSync(cle('grillesTemplates'), [ // security-ok: fixture littérale du spec, aucune source externe.
         { id: 'G_ACT',   nom: 'Philo activée', criteres: [critere(true)] },
         { id: 'G_REPLI', nom: 'Philo sans geste', criteres: [critere(false)] }
     ]);
-    db.setSync(cle('productions'), [
+    db.setSync(cle('productions'), [ // security-ok: fixture littérale du spec, aucune source externe.
         { id: 'P_ACT',   nom: 'Dissertation', grilleId: 'G_ACT' },
         { id: 'P_REPLI', nom: 'Résumé',       grilleId: 'G_REPLI' },
         { id: 'P_SANS',  nom: 'Sans grille',  grilleId: '' }

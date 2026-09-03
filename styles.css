@@ -8445,9 +8445,57 @@ body.mode-clair .bloc-rlo-separateur {
 
 .sous-critere-champs-grid {
     display: grid;
-    grid-template-columns: 80px 1fr 100px auto;
+    /* Codes par grille (3 sept. 2026) : une colonne Couleur avant le retrait. */
+    grid-template-columns: 80px 1fr 100px 64px auto;
     gap: 10px;
     align-items: center;
+}
+
+/* Codes par grille (3 sept. 2026) — le geste d'activation en tête de la liste
+   des sous-critères, et la couleur de chaque code. */
+.sous-criteres-codes {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: var(--radius-moyen);
+    background: var(--surface-input);
+}
+
+.sous-criteres-codes--actif {
+    border-color: var(--accent-primaire);
+    background: var(--bleu-pale);
+}
+
+.sous-criteres-codes-choix {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: var(--texte-principal);
+    cursor: pointer;
+}
+
+.sous-criteres-codes-choix input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--accent-primaire);
+}
+
+.sous-criteres-codes-note {
+    font-size: 0.78rem;
+    color: var(--gris-clair);
+    line-height: 1.35;
+}
+
+.sous-critere-input-couleur {
+    width: 56px;
+    height: 34px;
+    padding: 2px;
+    cursor: pointer;
 }
 
 .sous-critere-label-petit {

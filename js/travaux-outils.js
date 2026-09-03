@@ -3366,8 +3366,11 @@
         overlay.className = 'modal-overlay actif';
 
         let html = '<div class="modal-contenu travaux-retro-modal">';
-        html += '<h2 style="margin-top:0">R\u00e9troactions \u2014 Erreurs de fran\u00e7ais</h2>';
-        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes appara\u00eetront dans la r\u00e9troaction g\u00e9n\u00e9r\u00e9e pour l\'\u00e9l\u00e8ve lorsque le code d\'erreur correspondant est utilis\u00e9. Clique sur la pastille pour changer sa couleur. Glissez \u2630 pour r\u00e9ordonner.</p>';
+        // Codes par grille (3 sept. 2026) — mots approuvés par Grégoire : le titre ne
+        // dit plus la discipline ; la phrase dit à quoi servent ces dix codes (le
+        // repli) depuis qu'une grille peut porter les siens.
+        html += '<h2 style="margin-top:0">Rétroactions — Codes d\'annotation</h2>';
+        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces dix codes servent à toute copie dont la grille ne porte pas ses propres codes (une grille active les siens dans Conception, sous son critère algorithmique). Ces textes apparaîtront dans la rétroaction générée pour l\'élève lorsque le code correspondant est posé. Clique sur la pastille pour changer sa couleur. Glissez \u2630 pour réordonner.</p>';
 
         const modeSynthese = obtenirModeSyntheseErrFr();
         html += '<div class="travaux-errfr-reglage">';

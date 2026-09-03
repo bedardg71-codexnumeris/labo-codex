@@ -622,6 +622,8 @@ const SCHEMAS_IMPORT = {
                 niveauSOLO: { type: 'string', maxLen: 50 },
                 verrouille: { type: 'boolean' },
                 obligatoire: { type: 'boolean' },
+                // Codes par grille (3 sept. 2026) — le geste d'activation voyage avec la grille.
+                codesDepuisSousCriteres: { type: 'boolean' },
                 facteurNormalisation: { type: 'number' },
 
                 // #667 — le modèle de formule choisi par l'utilisateur et ses
@@ -706,7 +708,9 @@ const SCHEMAS_IMPORT = {
                         code: { type: 'stringOrNumber', maxLen: 20 },
                         nom: { type: 'string', maxLen: 200 },
                         ponderation: { type: 'number' },
-                        retroaction: { type: 'string', maxLen: 5000 }
+                        retroaction: { type: 'string', maxLen: 5000 },
+                        // Codes par grille (3 sept. 2026) — la couleur du code sur la copie.
+                        couleur: { type: 'string', maxLen: 20 }
                     }
                 },
                 // Structure antérieure aux sous-critères, encore lue par la

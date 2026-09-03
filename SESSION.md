@@ -126,8 +126,42 @@
          Break-tests WebKit (2 mutations, remise par empreinte) : outils non régénérés ⮕
          rouge ; fermeture sans repli ⮕ rouge. Existant rejoué : 240, export-pdf, 581, 572,
          563 ; WebKit 672, 645, erreurs-saisie.
-     ▣ RESTE : lots 3 (gabarit : bouton d'activation, `sc.couleur`, les DEUX schémas, titre
-       de l'écran de réglage) et 4 (aide, doc, changelog).
+     ▣ LOT 3 LIVRÉ — LE GABARIT :
+       · grilles.js (mode grille ; le mode « nouvelle grille » ne rend pas de sous-critères,
+         donc rien à activer avant l'enregistrement) : `rendreActivationCodes` en tête de la
+         liste des sous-critères — case « Utiliser ces sous-critères comme codes
+         d'annotation » (mots de Grégoire) avec sa note (décochée : « les dix codes de
+         l'écran Annoter › palette, comme avant » ; cochée : « ces N sous-critères : le numéro
+         est le code, avec le nom, la couleur et la rétroaction d'ici » ; et le rappel qu'une
+         pondération 0 n'est pas un code posable) ; colonne Couleur (`<input type="color">`,
+         même handler `modifierSousCritereHandler`, champ `couleur`) ; `couleurDeSousCritere`
+         (la sienne, sinon les dix par position, gris si non posable) ;
+         `modifierCodesDepuisSousCriteresHandler` : coché ⮕ `true`, décoché ⮕ le champ est
+         RETIRÉ (jamais `false` : absent = repli).
+       · codes-annotation.js : `apercuCodes(critere)` (ce que les sous-critères donneraient,
+         geste ou non — pour le gabarit).
+       · partage-schemas.js et import-export.js : `codesDepuisSousCriteres` (booléen) sur le
+         critère, `couleur` (chaîne ≤ 20) sur le sous-critère — les DEUX schémas, fermés
+         (S.a.3 : l'ancien nom `tamponsDepuisSousCriteres` est refusé).
+       · travaux-outils.js : titre « Rétroactions — Codes d'annotation », phrase « Ces dix
+         codes servent à toute copie dont la grille ne porte pas ses propres codes (une grille
+         active les siens dans Conception, sous son critère algorithmique)… ».
+       · styles.css : `.sous-criteres-codes` (+ `--actif`), `.sous-criteres-codes-choix`,
+         `.sous-criteres-codes-note`, `.sous-critere-input-couleur` ; grille des champs à
+         cinq colonnes. index.html : grilles 0903f, travaux-outils 0903c, codes-annotation
+         0903b, partage-schemas 0903a, import-export 0903c, styles 0903e.
+       ▣ TÉMOINS lot 3 : `sentinelle-codes-par-grille-lot3.test.js` (10) — S.a les deux schémas
+         transportent geste et couleur et restent fermés, S.b aperçu, S.c sources ; spec WebKit
+         `codes-par-grille-gabarit.spec.js` (1, quatre temps) : case décochée + note, couleurs
+         rendues ['#888888','#c62828','#c62828','#e65100'], cocher ⮕ true + palette d'une
+         copie = 3 codes, couleur '#112233' écrite et lue, décocher ⮕ champ absent, couleur
+         gardée, retour aux dix. Break-tests (remise par empreinte) : handler écrivant `false`
+         ⮕ spec rouge ; partage sans `couleur` ⮕ S.a rouge. ⚠ Deux faux départs de la spec,
+         corrigés : l'éditeur s'ouvre par `chargerGrillePourModif` (pas
+         `chargerGrilleTemplate`, qui rend une liste en lecture seule) ; `.sous-critere-item`
+         sert aussi aux paliers de projection (compter les champs Code).
+     ▣ RESTE : lot 4 (aide longue du gabarit et de l'écran Annoter, doc
+       `pipeline-annotation-evaluation.md`, changelog proposé pour la release).
      ===================================================================== -->
 
 <!-- =====================================================================

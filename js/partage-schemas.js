@@ -305,7 +305,10 @@
                                 code: { type: 'chaine', max: 20 },
                                 nom: { type: 'chaine', max: 200 },
                                 ponderation: { type: 'nombre', minValeur: 0, maxValeur: 100 },
-                                retroaction: { type: 'chaine', max: 5000 }
+                                retroaction: { type: 'chaine', max: 5000 },
+                                // Codes par grille (3 sept. 2026) — la couleur du code
+                                // sur la copie. Facultative ; absente, les dix par position.
+                                couleur: { type: 'chaine', max: 20 }
                             }
                         },
                         // Structure antérieure aux sous-critères, encore lue par
@@ -326,7 +329,11 @@
                             }
                         },
                         niveauSOLO: { type: 'chaine', max: 50 },
-                        verrouille: { type: 'booleen' }
+                        verrouille: { type: 'booleen' },
+                        // Codes par grille (3 sept. 2026) — le geste d'activation : les
+                        // sous-critères sont les codes d'annotation. Sans lui, une grille
+                        // partagée arriverait avec ses codes mais muette dans la palette.
+                        codesDepuisSousCriteres: { type: 'booleen' }
                     }
                 },
                 dateCreation: { type: 'chaine', max: 40 },
