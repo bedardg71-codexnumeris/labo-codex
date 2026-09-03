@@ -70,7 +70,40 @@
        liste → « de sa grille « G5 FR-HOLIS A26 » » + irréversible ; section 1 ×2 →
        question d'avant, rien ne survit dans ses données). Décision : « Livrer
        maintenant » ⮕ release 1.111.1 (patch, item 8 de l'entrée 1.111 du
-       changelog), verdict au jeton par scripts/pousser.sh, push.
+       changelog), verdict au jeton par scripts/pousser.sh, push. `ec111072` poussé
+       (Playwright local 241 verts, jeton sur ce SHA ; GitHub : Vitest vert, Playwright
+       en cours au moment du relais suivant).
+     ↻ 3 SEPTEMBRE, 5 h 15 – 6 h : NOUVELLE CONSIGNE (Cowork, avec Grégoire éveillé),
+       deux lots, deux commits, pas de release ni de push :
+       · #560 volet A — les mots de Grégoire (arrêtés le 2 sept. à 21 h 45, inscrits
+         dans la consigne APRÈS ma lecture de la nuit — d'où « je n'ai pas composé ») :
+         « Le fichier, ses annotations et toutes les évaluations de cet élève pour
+         cette production seront effacés. » Mon patch appliqué, comptes inutiles
+         retirés (noms, reprises, autres fichiers : sa phrase ne les emploie pas),
+         sentinelle 560 (8 essais), 3 mutations 3 rouges. Commit `a69fb166`.
+       · « bibliothèque partagée » quitte le vocabulaire → « la Bibliothèque » :
+         89 lignes / 23 fichiers, chacune relue (39 chaînes, 51 commentaires par
+         ligne modifiée). Règle appliquée fichier par fichier, pas de sed global ;
+         cas à part : la Voûte (modal-soutien : l'apposition tombe, la Voûte reste),
+         l'annonce ancienne des huit échelles (laissée), l'annonce du renommage
+         (item 8 de 1.111, consolidé à 8 items). Témoins : `bibliothequeCartouches`
+         5 → 5, `CLE_BIBLIOTHEQUE_*` 61 → 61 ; sentinelle vocabulaire (2 essais,
+         motif prouvé sur les deux exceptions).
+       · Correction Cowork acceptée : en section 1 de la bibliothèque modale, la
+         grille se nomme dans TOUS les cas (« Supprimer définitivement la cartouche
+         «X» de sa grille « G » ? »), « Elle part aussi de la Bibliothèque. » reste
+         conditionnelle. Étend la forme arrêtée pour 1810, ne la change pas.
+       · #696 inscrit : dire que les documents reçus sont des copies, au geste de
+         partage/réception, à froid — et la casse voisine (« la bibliothèque » en
+         minuscule à côté de « la Bibliothèque ») avec.
+       · ⚠ Verrou `.git/index.lock` orphelin (05 h 18, vide, aucun processus git)
+         retiré ; `objects/maintenance.lock` du 31 août laissé. Défaut récurrent
+         (signet). ⚠ Ordre de release : Vitest APRÈS le commit du bump, sinon la
+         sentinelle anti-cache rougit à tort (repère = avant-dernier commit sur
+         version.json).
+       ⮕ CE QUE GRÉGOIRE DOIT ALLER VOIR : Conception › cartouches, section 2 de la
+         bibliothèque, lire ; puis une échelle et une grille — trois familles, un
+         mot. Ne rien confirmer.
      ===================================================================== -->
 
 <!-- =====================================================================

@@ -393,7 +393,7 @@ const AIDE_CONTEXTUELLE = {
                 titre: "Comprendre les badges de source",
                 items: [
                     "<strong class='badge-source-locale'>Locale</strong> : élément que tu as créé ou modifié toi-même",
-                    "<strong class='badge-source-bibliotheque'>Bibliothèque</strong> : élément provenant de la bibliothèque partagée (gabarits)",
+                    "<strong class='badge-source-bibliotheque'>Bibliothèque</strong> : élément provenant de la Bibliothèque (gabarits)",
                     "<strong class='badge-source-retiree'>Retirée</strong> : élément retiré de la barre latérale mais conservé dans tes données"
                 ]
             },

@@ -1,176 +1,125 @@
-# Consigne du jour — les suppressions disent vrai *(énoncé 8, volets A · C · D)*
+# Consigne du jour — la phrase qui attend, puis « bibliothèque partagée » sort du vocabulaire
 
-> **Écrite le 2 septembre 2026 à 21 h 30 (heure de Grégoire), par Cowork, POUR LA NUIT.**
-> **Application au moment de l'écriture : `1.111.0`, build `0902-1959`.**
-> Elle **remplace** la consigne écrite plus tôt ce soir, mise de côté dans
-> `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-02-soir.md`.
-> ⛔ **Ne la lis pas comme un complément : elle la contredit sur le volet C.**
+> **Écrite le 3 septembre 2026 à 5 h 15 (heure de Grégoire), par Cowork, avec lui.**
+> ▣ **Grégoire est ÉVEILLÉ et disponible** : il a arbitré le mandat lui-même à 5 h, et il
+> regardera l'écran dès que tu diras que c'est prêt. Le cycle est court, pas différé.
+> **Application au moment de l'écriture : `1.111.1`, build `0903-0459`, POUSSÉE.**
+> Elle remplace la consigne de la nuit, exécutée et livrée (`393e1e54`, `ec111072`).
 >
-> ▣ **État à l'écriture, mesuré** : `HEAD` = `1402a17c` (2026-09-02 20:00:57 -0400), **CI verte**.
+> ▣ **État à l'écriture, mesuré** : `HEAD` = `ec111072`,
 > `git rev-list --count origin/main..HEAD` rend **0** — témoin, `HEAD..origin/main` rend **0**
-> lui aussi, et `git rev-list --count HEAD` rend **4457** : les deux branches sont au même
-> point, et la commande sait compter.
+> lui aussi. Arbre propre, sauf `OU-EN-EST-ON.md` et `PROTOCOLE.md`, qui sont à Cowork :
+> **ne les commite pas.**
 >
-> ▣ **Six notes non suivies dans `plans de travail/` sont à Grégoire et à Cowork.
-> Ne les commite pas.** Ce fichier-ci, oui : il est la spécification du lot (règle 6).
+> ⚠ **REMESURE TOUT** (règle 1). Les comptes ci-dessous ont été pris par Cowork en lecture
+> seule ; ils ne sont pas les tiens.
 
 ---
 
-## ⚠ LIS CECI AVANT TOUT : C'EST UNE SÉANCE DE NUIT
+## Le mandat — décision de Grégoire, 3 septembre
 
-**Grégoire dort. Il ne regardera aucun écran avant le matin.**
+**L'expression « bibliothèque partagée » disparaît de tout ce que l'utilisateur lit.
+Elle est remplacée par « la Bibliothèque ».**
 
-⮕ **Conséquence, et elle n'est pas négociable** : `PROTOCOLE.md` règle 6, forme 4 —
-*une seule livraison par séance, et il regarde avant.* La nuit, « il regarde avant » ne
-peut pas avoir lieu. Donc :
+▣ **Le motif, dans ses mots** : *« Les documents partagés sont des copies indépendantes.
+Ce ne sont pas des originaux. Si un collègue m'envoie une cartouche, que je l'utilise et que
+je la supprime, ça n'a aucun effet sur l'original de mon collègue. »*
 
-- ⛔ **Aucune release. Aucun push. Aucun bump de version.**
-- ⛔ **Aucun verdict Playwright au jeton** : il se prend APRÈS son coup d'œil, jamais avant.
-- ⮕ **Tu commites, et tu t'arrêtes.** Ton rapport l'attend au réveil.
-- ⮕ **Et tu écris, à la fin, CE QU'IL DOIT ALLER VOIR À L'ÉCRAN** : quel onglet, quel geste,
-  ce qui devrait être différent. C'est sa façon de vérifier, et rien ne la remplace.
+⮕ **Le mot ment donc deux fois.** Il suggère un dépôt commun à plusieurs personnes — il n'y
+en a pas. Et il fait craindre à un enseignant de détruire l'exemplaire d'un collègue en
+supprimant sa propre copie. **C'est l'inverse de ce que fait le code.**
 
-⚠ **Le motif, mesuré le 2 septembre** : quatre versions sont parties avant midi et aucune
-n'avait été regardée par lui. À 8 h, il ne savait plus où il en était dans son propre projet.
+▣ **Témoin que le mot est étranger à l'écran** : `grep -n "Bibliothèque" index.html` rend
+« Bibliothèque » et « Bibliothèque groupe-cours ». **« Partagée » n'y est jamais un libellé.**
 
-⛔ **Et la règle qui commande tout le reste** : *jamais un numéro de fiche sans sa phrase en
-français.* « #647 » ne lui dit rien. « L'avertissement qui annonce une perte qui n'a pas
-lieu » lui dit tout.
-
----
-
-## Le mandat — le dernier énoncé encore ouvert
-
-*« Ce qu'un utilisateur détruit, il l'a voulu ; ce qu'il garde, il le retrouve. Les messages
-de suppression disent vrai, et la portée d'une suppression est celle qu'on annonce. »*
-
-▣ **C'est le seul des huit qui reste.** Cinq sont finis, deux sont éprouvés par Grégoire.
+↻ **Note d'avenir, à ne PAS anticiper** : quand la Voûte existera, l'expression pourra
+revenir — elle décrira alors quelque chose de réel. **Aujourd'hui, non.** Ne prépare rien
+pour ce futur, ne laisse pas d'alias « au cas où » (zéro-dette).
 
 ---
 
-## ⚠⚠ CE QUE LA REMESURE DE COWORK A TROUVÉ CE SOIR — ET QUI CHANGE LE LOT
+## Le périmètre — et les trois choses à ne PAS toucher
 
-*Règle 1(b) de `PROTOCOLE.md` : une connaissance transportée se remesure avant usage.
-La consigne écrite plus tôt ce soir transportait une mesure du 31 août au MATIN. Elle
-était périmée depuis le 31 août à 14 h 13.*
+`grep -rni "bibliothèque partagée" js/ index.html` rend **89** occurrences dans **23**
+fichiers (46 dans des chaînes, 50 dans des commentaires — les deux comptes se recouvrent,
+refais-les). Les plus fournis : `productions-bibliotheque-ui.js` (11), `cartouches.js` (10),
+`echelles.js` (8), `planification-bibliotheque.js` (7), `grilles.js` (6),
+`echelles-bibliotheque.js` (6), `donnees-v2.js` (6).
 
-### ▣ La moitié du volet C est DÉJÀ FAITE — ne la refais pas
+### ⛔ 1. LES CLÉS DE STOCKAGE NE CHANGENT PAS. C'EST LA RÈGLE QUI PRIME.
 
-`git log -1 -L 1170,1180:js/donnees-v2.js` rend **`183b515b`, 31 août 14:13:38 -0400,
-« fix(#647): la modal annonçait une perte qui n'a pas lieu, et taisait une survivance qui
-a lieu »**.
+`bibliothequeCartouches`, `bibliothequeGrilles`, `bibliothequeEchelles`,
+`bibliothequePratiques`, `bibliothequeProductions`, `bibliothequeTampons`,
+`bibliothequeAlignements`, et toute constante `CLE_BIBLIOTHEQUE_*`.
 
-⮕ **`verifierDependancesCartouche` (`js/donnees-v2.js:1137`) dit déjà vrai aujourd'hui.**
-Elle mesure la survivance dans l'ancrage au lieu de la supposer, et elle annonce, mot pour
-mot : *« Retrait de la bibliothèque partagée seulement : la cartouche reste attachée à la
-grille « X ». »* et *« N évaluation(s) l'emploient — leurs rétroactions restent intactes. »*
+⚠⚠ **Ce sont les adresses des données réelles de Grégoire.** Une seule renommée et son
+contenu devient introuvable — sans erreur, sans message, silencieusement. **C'est un chantier
+de PROSE, pas de structure.** Si une modification touche autre chose qu'une chaîne affichée
+ou un commentaire, **arrête-toi et dis-le.**
 
-⛔ **N'y touche pas.** Si tu « corriges » ce chemin, tu défais un correctif livré.
+### ⛔ 2. LE CHANGELOG DÉJÀ LU NE SE RÉÉCRIT PAS.
 
-### ▣ Mais il y a un SECOND chemin, et le problème y est PIRE que ce qu'on croyait
+`js/changelog-data.js:364` (les huit échelles d'exemple) est une annonce **ancienne**, lue par
+des utilisateurs. **Laisse-la.** Réécrire ce qui a été annoncé, c'est falsifier l'historique.
 
-`grep -rn "supprimerCartoucheDefinitivement" js/ index.html` rend **deux corps de fonction**,
-pas deux appels d'une seule :
+⮕ **L'exception, et une seule** : `js/changelog-data.js:35` — l'annonce de **1.111.1**, publiée
+il y a quelques heures, qui emploie l'expression trois fois. C'est l'annonce du lot qu'on
+corrige ; **récris-la** avec le nouveau mot.
 
-| chemin | fichier | ce qu'il écrit | ce qu'il annonce |
-|---|---|---|---|
-| onglet **Données** | `js/donnees-v2.js:1667` | la bibliothèque **seulement** | ✅ la vérité, depuis `183b515b` |
-| **Conception › cartouches** | `js/cartouches.js:4753` | **l'ancrage `cle('cartouches_<grilleId>')` ET la bibliothèque** | ❌ « Cette action est irréversible. » — rien d'autre |
+### ⛔ 3. PAS DE `sed` GLOBAL.
 
-▣ **Témoin du périmètre** : le bouton qui l'appelle est à `js/cartouches.js:4097`
-(`action: 'supprimerCartoucheDefinitivement'`), et un troisième chemin existe à côté,
-`supprimerCartoucheDeBibliothequePartagee` (`js/cartouches.js:4794`).
+L'expression apparaît dans au moins quatre positions grammaticales différentes :
 
-⚠⚠ **Ce ne sont donc pas deux messages différents pour un même geste : ce sont deux gestes
-de portées RÉELLEMENT différentes, dont un seul le dit.** Le chemin de Conception détruit
-la cartouche partout, et ne l'annonce pas. Le texte exact qu'il affiche aujourd'hui, à citer
-dans ton rapport avant de le remplacer :
+| aujourd'hui | demain |
+|---|---|
+| `Bibliothèque partagée (12)` *(titre de section)* | `Bibliothèque (12)` |
+| `ajouter tes N échelle(s) à la bibliothèque partagée` | `…à la Bibliothèque` |
+| `Supprimer définitivement «X» de la bibliothèque partagée ?` | `…de la Bibliothèque ?` |
+| `Aucun tampon dans la bibliothèque partagée.` | `Aucun tampon dans la Bibliothèque.` |
 
-```
-Supprimer définitivement la cartouche «NOM» ?
+⚠ **La casse suit la position** : « la Bibliothèque » en cours de phrase, « Bibliothèque » seul
+en titre. **Relis chaque occurrence.** Un remplacement automatique produira « à la la
+Bibliothèque » et des majuscules au mauvais endroit.
 
-Cette action est irréversible.
-```
-
-⮕ **C'est un `confirm()` natif** (`js/cartouches.js:4761`), pas une modale de l'application.
-
-⚠ **REMESURE-LE TOI-MÊME.** Ces lignes ont bougé une fois entre le 31 août et ce soir.
-**Chaque `grep` de cette consigne est à rejouer, pas à croire.**
+⮕ **Les commentaires de code** : change-les aussi, ils décrivent l'architecture et un nom
+périmé s'y réinstalle tout seul. **Mais compte-les à part** dans ton rapport : visible d'un
+côté, commentaire de l'autre. Les deux comptes n'ont pas la même valeur.
 
 ---
 
-## Volet C — le second chemin cesse de se taire *(#647, moitié restante)*
+## ↻ ET UNE CORRECTION DANS LA MÊME PASSE — décidée par Cowork, à contredire s'il le faut
 
-⮕ **Le travail** : `supprimerCartoucheDefinitivement` de `js/cartouches.js` annonce la
-portée qu'elle a réellement — la cartouche part **de la grille et de la bibliothèque
-partagée**, partout — avant le geste.
+`js/cartouches.js:4786-4791`, `supprimerCartoucheDefinitivement`.
 
-⚠ **Décide seul de la forme** (`confirm()` conservé ou modale de l'application) : c'est
-technique, ça se tranche par une mesure de ce que fait le reste de l'écran. **Dis ce que tu
-as choisi et pourquoi.**
+▣ **Mesuré ce matin sur la capture de Grégoire** : la fenêtre annonce « 89 évaluation(s)
+l'emploient » et « Cette action est irréversible » — **mais elle ne dit pas de quelle grille
+la cartouche part.** Le nom de la grille n'est écrit que si la cartouche est AUSSI dans la
+bibliothèque ; quand elle n'y est pas, la ligne saute entièrement.
 
-⛔ **N'ÉLARGIS NI NE RESTREINS AUCUNE PORTÉE.** Tu ne changes pas ce qui est supprimé.
-Tu changes ce qui en est dit.
+▣ **Témoin que ce n'est pas la règle partout** : `supprimerCartoucheConfirm` (l. 1810) met la
+grille dans la question elle-même, **toujours** — « Supprimer la cartouche «X» de sa grille
+« G » ? ».
 
-⚠ **Et vérifie le troisième chemin** (`supprimerCartoucheDeBibliothequePartagee`) : s'il ne
-retire que de la bibliothèque, son texte doit le dire aussi. **Corriger un chemin sur trois
-laisserait les deux tiers du silence en place.**
-
----
-
-## Volet D — un garde mort *(#649)*
-
-`js/donnees-v2.js:1718` teste `typeof retirerProductionDeLaBibliotheque === 'function'`.
-
-▣ **Remesuré ce soir** : `grep -rn "retirerProductionDeLaBibliotheque" js/` rend **2**
-occurrences — le garde (1718) et son propre appel (1719). **Aucune déclaration.**
-▣ **Témoin, le motif trouve bien ce qui existe** : `retirerPratiqueDeLaBibliotheque` rend
-**5**. Le 2 mesure donc une absence réelle, pas un motif cassé.
-
-⮕ **Rassurant** : le repli écrit `'bibliothequeProductions'`, la clé canonique. Aucun
-décalage aujourd'hui.
-⚠ **Latent** : le jour où quelqu'un déclare une fonction de ce nom, le chemin bascule **en
-silence**. Un garde mort est une bascule armée.
-⮕ **Remède** : retirer le branchement mort, appeler directement le chemin réel.
-⚠ **Zéro symptôme ⮕ c'est le DERNIER des trois**, et il ne justifie rien à lui seul.
+⮕ **Deux chemins vident le même ancrage, un seul dit lequel.** C'est mot pour mot l'énoncé 8.
+⮕ **Remède** : la grille se nomme dans TOUS les cas où l'ancrage est vidé. Le fragment sur la
+Bibliothèque reste conditionnel, lui.
+⚠ **Ce n'est pas un texte neuf** : c'est une phrase déjà arrêtée par Grégoire, appliquée au cas
+où elle manquait. **Si tu juges que ça change ses mots plutôt que de les étendre, arrête-toi et
+demande.**
 
 ---
 
-## Volet A — la copie d'un élève : dire la portée réelle *(#560 résiduel)*
+## ⚠⚠ ET D'ABORD — LE VOLET A ATTEND UNE PHRASE QUI EXISTE DÉJÀ
 
-↻ **TRANCHÉ PAR GRÉGOIRE le 2 septembre.** Quand on supprime définitivement la copie d'un
-élève, **TOUT ce qui touche le couple (cet élève, cette production) part** — l'originale,
-les reprises, l'évaluation d'un fichier réimporté.
+`plans de travail/PATCH-560-portee-suppression-fichier-EN-ATTENTE-DES-MOTS.diff`
 
-▣ **Donc le comportement actuel du code est le BON.** Le constat **B5** de l'audit du
-25 août décrivait cette portée comme « trop large » : **elle ne l'est pas.**
-⛔ **N'ÉLARGIS NI NE RESTREINS RIEN.** Ce volet ne touche pas au modèle de données.
+▣ **Ton rapport de cette nuit dit** : *« la règle est tranchée, les mots ne sont pas arrêtés,
+je n'ai pas composé. »* ⮕ **C'était vrai quand tu as lu la consigne. Ça ne l'est plus.**
+**Grégoire a tranché la phrase le 2 septembre à 21 h 45**, parmi trois formulations proposées.
+Elle a été inscrite dans la consigne quelques minutes après ta lecture — d'où le décalage.
 
-### ▣ Ce que la modale dit aujourd'hui — mesuré, à citer dans ton rapport
-
-`js/liste-evaluations.js:2851`, `supprimerFichierDefinitivement()` :
-
-```
-Supprimer définitivement ?
-
-Le fichier sera supprimé de façon permanente.
-Cette action est irréversible.
-```
-
-### ▣ Ce qui part réellement — mesuré dans le même corps de fonction
-
-1. le blob, la miniature (`travaux-stockage.js:1011`) ;
-2. **les annotations du fichier** (`supprimerAnnotationsFichiers([id])`, #572) ;
-3. l'entrée de corbeille ;
-4. **toutes les évaluations du couple `etudiantDA` + `productionId`**
-   (`js/liste-evaluations.js:2888-2895`).
-
-⮕ **La modale dit « le fichier ». Elle emporte les annotations et les évaluations.**
-C'est un mensonge par omission, et c'est exactement ce que l'énoncé 8 interdit.
-
-### ↻ LA PHRASE, ARRÊTÉE PAR GRÉGOIRE LE 2 SEPTEMBRE À 21 h 45
-
-**Trois formulations lui ont été proposées. Il a retenu celle-ci, mot pour mot :**
+⛔ **Ne pas avoir composé était le bon geste.** Voici les mots, arrêtés par lui, à écrire tels
+quels :
 
 ```
 Supprimer définitivement ?
@@ -181,49 +130,52 @@ production seront effacés.
 Cette action est irréversible.
 ```
 
-⛔ **ÉCRIS-LA TELLE QUELLE.** Pas de reformulation, pas de synonyme, pas d'ajout « utile ».
-Les mots qu'il lit au moment de détruire quelque chose lui appartiennent (`CLAUDE.md`, ce qui
-remonte jusqu'à lui, point 3), et il vient de les trancher.
+⮕ **Applique ton propre patch** (`git apply --3way`), remplace la phrase marquée « Mots
+PROVISOIRES » par celle-ci, bumpe le jeton de `js/liste-evaluations.js`, et écris la sentinelle
+que ton préambule décrit.
+⚠ **Le témoin négatif que tu as toi-même prévu tient** : sans évaluation liée, la fenêtre
+reprend la phrase d'avant, mot pour mot.
 
-⚠ **Ce que tu peux décider seul** : le découpage en paragraphes et le style des éléments
-(`<p>`, couleur d'alerte sur la dernière ligne comme aujourd'hui). **Le texte, non.**
+▣ **Fais ce volet EN PREMIER** : il est prêt, il ferme le dernier tiers d'un énoncé, et il ne
+touche pas les mêmes fichiers que le chantier du vocabulaire. **Deux lots, deux commits.**
+
+---
+
+## ⏳ CE QUI N'EST PAS DANS CE LOT
+
+**Dire que les documents partagés sont des copies indépendantes.** Grégoire veut que ce soit
+précisé quelque part — mais **pas dans une fenêtre de suppression**, qui n'est pas le moment
+de l'expliquer. ⮕ **Inscris-le** : le bon endroit est le geste de partage ou de réception,
+et ça se décide à froid.
 
 ---
 
 ## Fini quand
 
-**Une fenêtre de suppression annonce ce qui va réellement disparaître, et ce qui va survivre.**
+**Un enseignant qui lit un message de l'application ne peut plus croire qu'il touche au
+document d'un collègue.**
 
-▣ **Le témoin** : pour chaque volet traité, cite **la phrase AVANT et la phrase APRÈS**, et
-le chemin de code qui la produit.
-⚠ **Et le témoin négatif, qui compte autant** : une suppression **complète et sans surprise**
-doit continuer de se faire **sans un mot de plus**. Une fenêtre qui avertit partout n'avertit
-nulle part.
+▣ **Le témoin** : `grep -rni "bibliothèque partagée" js/ index.html` ne rend plus que
+`js/changelog-data.js:364` — l'annonce ancienne, laissée exprès.
+▣ **Le témoin inverse, qui compte autant** : `grep -rn "bibliothequeCartouches" js/` rend le
+MÊME compte qu'avant ton lot. Cite les deux nombres. **Si celui-là a bougé, tu as touché aux
+données.**
 
 ---
 
 ## L'ordre
 
-1. ▣ **Le verdict de GitHub sur `1402a17c` est DÉJÀ RENDU, et il est VERT.** Cowork l'a lu
-   dans le navigateur à 22 h (`gh` n'est pas installé sur le poste) : **passage n°785 du
-   workflow « Tests », `completed successfully`, 32 min 10 s**,
-   `https://github.com/bedardg71-codexnumeris/Monitorage_v6/actions/runs/33698317119`.
-   ▣ **Témoin que l'étiquette distingue** : dans la même liste, les passages **783, 782, 780
-   et 779 sont `failed`** et le **781 `cancelled`**. Le vert du 785 mesure donc quelque chose.
-   ⮕ **Reconfirme-le au démarrage** (le rituel §2.1 l'exige de toi, pas de Cowork), et signale
-   tout écart avec cette ligne.
-2. **Rejoue les mesures de cette consigne avant de coder.** Elles ont été prises par
-   Cowork en lecture seule, à 21 h 30 ; elles ne sont pas les tiennes.
-3. **Volet C d'abord** (le seul qui a un symptôme visible), **puis A** (sa phrase est arrêtée),
-   **puis D** — zéro symptôme, il ne justifie rien à lui seul.
+1. **Rapporte le verdict de GitHub sur `ec111072`** (rituel d'ouverture, §2.1).
+2. **Le volet A d'abord** — le patch est prêt, la phrase est arrêtée. Commit séparé.
+3. **Recompte les 89 occurrences toi-même**, et sépare visible / commentaire.
+3. **Vérifie d'abord la liste des clés intouchables**, avant la première modification.
 4. Ce lot touche `js/` ⮕ **bump du bloc de jetons d'`index.html`**.
 5. `cd tests && npm run test:unit` pour travailler ; **`npm test` complet avant de dire que
-   c'est prêt** — ce lot touche des chemins de destruction.
-   ⚠ Vitest se lance **depuis `tests/`**.
-6. ⛔ **Tu commites, puis tu t'arrêtes.** Pas de release, pas de push, pas de verdict au jeton.
+   c'est prêt.** ⚠ Vitest se lance **depuis `tests/`**.
+6. ⛔ **Tu commites, puis tu t'arrêtes.** Pas de release, pas de push, pas de verdict au jeton :
+   Grégoire regarde l'écran d'abord.
 7. **Ce fichier se commite avec ton lot.** Nomme tes fichiers au commit ; pas de `git add -A`.
 
-⮕ **CE QUE GRÉGOIRE DOIT ALLER VOIR AU RÉVEIL, et c'est un vrai geste** : ouvrir
-**Conception › cartouches**, cliquer « Supprimer » sur une cartouche, et **lire ce que la
-fenêtre annonce**. Elle doit dire que la cartouche part de la grille ET de la bibliothèque.
-⚠ **Qu'il ne confirme pas.** Lire suffit.
+⮕ **CE QUE GRÉGOIRE DOIT ALLER VOIR** : ouvrir **Conception › cartouches**, section 2 de la
+bibliothèque, et lire la question. Puis la même chose sur une **échelle** et sur une **grille**
+— trois familles, trois écrans, un seul mot. ⚠ **Qu'il ne confirme rien.** Lire suffit.

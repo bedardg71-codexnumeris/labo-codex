@@ -425,7 +425,7 @@ window.confirmerImportProductions = async function(donnees) {
         // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequeProductions
         // L'utilisateur consulte puis choisit lesquelles ajouter à sa barre latérale
         const CLE_BIBLIOTHEQUE = window.CLE_BIBLIOTHEQUE_PRODUCTIONS || 'bibliothequeProductions';
-        // #599 — la fusion passe par la file : la bibliothèque partagée est
+        // #599 — la fusion passe par la file : la Bibliothèque est
         // relue à l'instant de l'écriture. Hors file, un import et un ajout
         // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;
@@ -436,7 +436,7 @@ window.confirmerImportProductions = async function(donnees) {
             nbAjoutees = 0;
             nbMisesAJour = 0;
 
-            // Fusionner dans la bibliothèque partagée uniquement
+            // Fusionner dans la Bibliothèque uniquement
             productionsImportees.forEach(prod => {
                 const indexBiblio = bibliotheque.findIndex(p => p.id === prod.id);
                 if (indexBiblio >= 0) {

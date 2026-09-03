@@ -2,7 +2,7 @@
    BIBLIOTHÈQUE D'ÉCHELLES DE PERFORMANCE
    ✅ REFACTORING (2 janvier 2026)
 
-   Bibliothèque partagée d'échelles de performance.
+   Bibliothèque d'échelles de performance.
    - Indépendante du trimestre (clé non-namespacée)
    - Stockage dans IndexedDB/localStorage
    - Import/export avec collègues
@@ -57,7 +57,7 @@ function obtenirEchellesParDiscipline(discipline) {
 // classement par dossiers.
 
 /**
- * Ajouter une échelle à la bibliothèque partagée
+ * Ajouter une échelle à la Bibliothèque
  * @param {Object} echelle - L'échelle à ajouter
  * @returns {Promise<boolean>} true si ajoutée, false si déjà existante
  */
@@ -158,7 +158,7 @@ async function ajouterEchelleALaBibliotheque(echelle) {
  *
  * ⚠ Complète `_sonder574()` (echelles.js) plutôt qu'elle ne la répète : celle-là
  * ne connaît que `ECHELLE_GENERIQUE` et les `GABARIT_ECHELLE_*`, et ne regarde
- * pas la bibliothèque partagée. Les huit-ci lui sont invisibles.
+ * pas la Bibliothèque. Les huit-ci lui sont invisibles.
  *
  * À lancer en console : await _sonderEchellesDisciplinaires()
  *
@@ -169,7 +169,7 @@ async function _sonderEchellesDisciplinaires() {
     // Elle listait huit identifiants ecrits en dur, dont chacun portait le prenom
     // du collegue dont l'echelle venait ; ce fichier est servi au navigateur de
     // tout le monde. Le critere est desormais mesure, pas recopie : est visee
-    // toute echelle PRESENTE DANS LA BIBLIOTHEQUE PARTAGEE qui n'est pas un
+    // toute echelle PRESENTE DANS LA Bibliothèque qui n'est pas un
     // gabarit vivant. C'est exactement le meme ensemble — la bibliotheque ne
     // contient rien d'autre — et il attrape en plus ce qu'une liste figee ignore.
     const IDS_VIVANTS = ['ECHELLE_GENERIQUE', 'ECHELLE_IDME_DEPART'];
@@ -245,7 +245,7 @@ async function _sonderEchellesDisciplinaires() {
         + usages.evaluations + ' · productions : ' + usages.productions);
     if (!bibliotheque.length && !copies.length) {
         console.log('[Sonde échelles disciplinaires] ZÉRO — et ce zéro porte son témoin : '
-            + trimestres.length + ' trimestre(s) et la bibliothèque partagée ont été RÉELLEMENT lus.');
+            + trimestres.length + ' trimestre(s) et la Bibliothèque ont été RÉELLEMENT lus.');
     }
     return { bibliotheque: bibliotheque, copies: copies, usages: usages };
 }
@@ -258,7 +258,7 @@ window._sonderEchellesDisciplinaires = _sonderEchellesDisciplinaires;
  */
 async function retirerEchelleDeLaBibliotheque(echelleId) {
     // #599 — le retrait passe par la file. Hors file, un retrait et un ajout
-    // concurrents sur la MÊME bibliothèque partagée s'écrasaient l'un l'autre :
+    // concurrents sur la MÊME Bibliothèque s'écrasaient l'un l'autre :
     // les cinq familles écrivent dans un seul magasin, pas un par famille.
     let retiree = false;
     await db.modifier(CLE_BIBLIOTHEQUE_ECHELLES, (lues) => {
@@ -325,7 +325,7 @@ async function exporterBibliothequeEchelles() {
 }
 
 /**
- * Migrer les échelles d'un trimestre vers la bibliothèque partagée
+ * Migrer les échelles d'un trimestre vers la Bibliothèque
  * @param {string} cleSource - Clé source (ex: 'a2025_echelles')
  * @returns {Promise<{ajoutees: number, existantes: number}>}
  */

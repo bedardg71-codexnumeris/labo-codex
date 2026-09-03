@@ -167,6 +167,20 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ### Retour d'usage — 2 septembre 2026 (Grégoire, en travaillant sa carte d'alignement)
 
+- [ ] **#696 — Dire que les documents partagés sont des copies indépendantes — au geste de partage ou de réception, PAS dans une fenêtre de suppression**.
+  Inscrit le 3 septembre 2026 par Claude Code, sur décision de Grégoire (consigne du 3 septembre, 5 h 15). Ses mots :
+  « Les documents partagés sont des copies indépendantes. Ce ne sont pas des originaux. Si un collègue m'envoie une
+  cartouche, que je l'utilise et que je la supprime, ça n'a aucun effet sur l'original de mon collègue. »
+  ⮕ **Fait le 3 septembre** : l'expression « bibliothèque partagée » a quitté tout ce que l'utilisateur lit (« la
+  Bibliothèque »), 39 chaînes et 51 commentaires dans 23 fichiers, clés de stockage intouchées (témoin :
+  `bibliothequeCartouches` 5 → 5, `CLE_BIBLIOTHEQUE_*` 61 → 61) ; sentinelle `sentinelle-vocabulaire-bibliotheque`.
+  ⮕ **Reste à DIRE, quelque part, que ce qu'on reçoit est une copie.** ⛔ Pas dans une fenêtre de suppression (ce n'est
+  pas le moment de l'expliquer) : le bon endroit est le geste de partage (export `.lcz`, #329) ou de réception (import),
+  et ça se décide à froid.
+  ⚠ **Casse voisine, à trancher au même moment** : des libellés disent encore « la bibliothèque » en minuscule à côté du
+  nouveau « la Bibliothèque » (bouton « Retirer de la bibliothèque » et phrase « Le retrait de la bibliothèque est
+  irréversible » de la modal Données ; titre « Bibliothèque de cartouches de rétroaction »). Hors du lot du 3 septembre,
+  qui ne visait que l'expression « partagée ».
 - [ ] **#695 — L'Inspecteur d'une leçon affiche « SEMAINE 3 », pas la date où elle aura lieu**.
   Inscrit le 2 septembre 2026 depuis Cowork, **sur un usage réel** : Grégoire préparait son cours
   et a demandé « que la date réelle de la leçon soit affichée dans l'Inspecteur ».

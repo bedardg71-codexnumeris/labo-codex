@@ -790,7 +790,7 @@
         const alignements = typeof obtenirTousLesAlignementsBibliothequeSync === 'function' ? obtenirTousLesAlignementsBibliothequeSync() : [];
 
         if (alignements.length === 0) {
-            container.innerHTML = `<div class="alerte alerte-information"><p>Aucun alignement dans la bibliothèque partagée.</p></div>`;
+            container.innerHTML = `<div class="alerte alerte-information"><p>Aucun alignement dans la Bibliothèque.</p></div>`;
             return;
         }
 
@@ -1122,7 +1122,7 @@
      * une survivance qui a lieu. Deux mesures le fondent :
      *
      * 1. `supprimerCartoucheDefinitivement` (plus bas) n'appelle que
-     *    `retirerCartoucheDeLaBibliotheque`, qui n'écrit que la bibliothèque partagée
+     *    `retirerCartoucheDeLaBibliotheque`, qui n'écrit que la Bibliothèque
      *    (cartouches-bibliotheque.js:122-141). L'ancrage de la grille n'est JAMAIS
      *    touché — la cartouche y reste attachée.
      * 2. Les évaluations lisent leur cartouche DEPUIS L'ANCRAGE, jamais depuis la
@@ -1157,9 +1157,9 @@
         }
 
         if (resteDansGrille) {
-            avertissements.push(`Retrait de la bibliothèque partagée seulement : la cartouche reste attachée à la grille « ${nomGrille} ».`);
+            avertissements.push(`Retrait de la Bibliothèque seulement : la cartouche reste attachée à la grille « ${nomGrille} ».`);
         } else {
-            avertissements.push('Retrait de la bibliothèque partagée. Aucune copie n\'a été trouvée dans une grille du trimestre actif.');
+            avertissements.push('Retrait de la Bibliothèque. Aucune copie n\'a été trouvée dans une grille du trimestre actif.');
         }
 
         // Les évaluations : on donne le compte, et ce qui leur arrive RÉELLEMENT.
@@ -1453,11 +1453,11 @@
                          type === 'echelle' ? 'échelle de niveaux' :
                          type === 'production' ? 'production' : 'cartouche de rétroaction';
         // #647 — pour une cartouche qui reste ancrée à sa grille, l'acte n'est PAS une
-        // suppression définitive : c'est un retrait de la bibliothèque partagée. Les
+        // suppression définitive : c'est un retrait de la Bibliothèque. Les
         // deux phrases changent ensemble ; n'en corriger qu'une déplacerait le mensonge
         // d'un paragraphe.
         const phraseActe = cartoucheResteDansGrille
-            ? `Tu es sur le point de retirer de la bibliothèque partagée la ${typeLabel} :`
+            ? `Tu es sur le point de retirer de la Bibliothèque la ${typeLabel} :`
             : `Tu es sur le point de supprimer définitivement la ${typeLabel} :`;
         const phrasePortee = cartoucheResteDansGrille
             ? 'Le retrait de la bibliothèque est irréversible ; la cartouche reste dans sa grille.'

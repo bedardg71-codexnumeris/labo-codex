@@ -38,7 +38,7 @@
                     <ul class="soutien-liste">
                         <li>
                             <a class="soutien-lien" href="https://www.aqpc.qc.ca/fr/cop-labocodex" target="_blank" rel="noopener noreferrer">Rejoindre la Communauté de pratique (CoP) de l'AQPC.</a>
-                            Développer tes connaissances et soutenir les autres, participer au développement, expérimenter les nouvelles fonctions, signaler des bugs, proposer des idées pour le bien commun des utilisateur·rices (et bientôt, contribuer à la Voûte, la bibliothèque partagée, prévue cet automne).
+                            Développer tes connaissances et soutenir les autres, participer au développement, expérimenter les nouvelles fonctions, signaler des bugs, proposer des idées pour le bien commun des utilisateur·rices (et bientôt, contribuer à la Voûte, prévue cet automne).
                         </li>
                         <li>
                             <strong>Expérimenter l'application et en parler à tes collègues.</strong>

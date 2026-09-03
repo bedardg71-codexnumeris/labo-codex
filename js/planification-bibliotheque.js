@@ -16,7 +16,7 @@ var ID_DEMO = 'ALI_DEMO_ecriture_litterature';
 var MODAL_ID = 'modalBibliothequeAlignements';
 
 // ============================================
-// CRUD — Bibliothèque partagée
+// CRUD — Bibliothèque
 // ============================================
 
 function obtenirTousLesAlignementsBibliothequeSync() {
@@ -186,7 +186,7 @@ async function afficherBibliothequeAlignements() {
                 id: carte.id,
                 badgeSource: '<span class="badge-source badge-source--locale">Trimestre actif</span>',
                 metadonnees: nbNoeuds + ' noeud(s) \u00b7 ' + nbLiens + ' lien(s)',
-                boutonPrincipal: { label: 'Partager', action: 'partagerAlignement', param: carte.id, classe: 'btn-confirmer', title: 'Ajouter à la bibliothèque partagée' },
+                boutonPrincipal: { label: 'Partager', action: 'partagerAlignement', param: carte.id, classe: 'btn-confirmer', title: 'Ajouter à la Bibliothèque' },
                 actionsMenu: [
                     { label: 'Exporter', action: 'exporterAlignementJSON', param: carte.id, classe: 'btn-secondaire', title: 'Télécharger en JSON' },
                     { label: 'Supprimer', action: 'supprimerAlignementDuTrimestre', param: carte.id, classe: 'btn-supprimer', title: 'Supprimer cette carte du trimestre actif', showAlways: true }
@@ -195,7 +195,7 @@ async function afficherBibliothequeAlignements() {
         });
     }
 
-    // Section 2 : Bibliothèque partagée
+    // Section 2 : Bibliothèque
     var contenuSection2 = '';
     if (biblioItems.length === 0) {
         contenuSection2 = '<p class="text-muted" style="padding: 10px;">La bibliothèque est vide. Partage une carte d\'alignement depuis la section ci-dessus.</p>';
@@ -259,7 +259,7 @@ async function afficherBibliothequeAlignements() {
         contenuSection1: contenuSection1,
         boutonsApresSection1: boutonsApresSection1,
         sectionImportTrimestre: sectionImportTrimestre,
-        titreSection2: 'Bibliothèque partagée (' + biblioItems.length + ')',
+        titreSection2: 'Bibliothèque (' + biblioItems.length + ')',
         filtresSection2: '',
         contenuIdListe2: 'listeAlignementsBibliotheque',
         contenuSection2: contenuSection2
@@ -275,7 +275,7 @@ function fermerModalBibliothequeAlignements() {
 // ============================================
 
 /**
- * Partage un alignement du trimestre actif → bibliothèque partagée
+ * Partage un alignement du trimestre actif → Bibliothèque
  */
 async function partagerAlignement(carteId) {
     var exportData = window.planificationDonnees.exporterCartePourBibliotheque(carteId);
@@ -437,12 +437,12 @@ async function supprimerAlignementDuTrimestre(carteId) {
 }
 
 /**
- * Supprime un alignement de la bibliothèque partagée
+ * Supprime un alignement de la Bibliothèque
  */
 async function supprimerAlignementDeBibliotheque(id) {
     const messageSuppr = (id === ID_DEMO)
         ? 'Supprimer la carte démo de la bibliothèque ? Elle sera recréée au prochain chargement.'
-        : 'Supprimer cette carte d\'alignement de la bibliothèque partagée ? Cette action est irréversible.';
+        : 'Supprimer cette carte d\'alignement de la Bibliothèque ? Cette action est irréversible.';
     const okSuppr = await uiDialogues.confirmerAction({
         titre: 'Supprimer de la bibliothèque',
         message: messageSuppr,

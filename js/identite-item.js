@@ -215,7 +215,7 @@ function classerGroupe(exemplaires) {
  * DÉDUPLICATION NE PRODUIT PAS UN DÉLUGE DE FAUSSES ALERTES.
  *
  * Les cinq modales lisent DEUX magasins : la sélection locale de l'utilisateur
- * (`<trimestre>_grillesTemplates`…) et la bibliothèque partagée
+ * (`<trimestre>_grillesTemplates`…) et la Bibliothèque
  * (`bibliothequeGrilles`…). Or « Ajouter mes grilles à la bibliothèque »
  * (`ajouterGrilleALaBibliotheque`, grilles-bibliotheque.js) verse la grille
  * dans le magasin partagé EN CONSERVANT SON `id`. Le même identifiant vit donc
