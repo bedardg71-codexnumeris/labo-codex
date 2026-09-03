@@ -175,6 +175,11 @@
      ▣ RESTE À GRÉGOIRE : l'iPad sur 1.114.1 — le sélecteur natif derrière « Personnalisé… »
        (étiquette), la pastille repeinte, le milieu de mot au doigt ; et le texte des deux
        aides, proposé dans le rapport, NON commité.
+     ▣ AIDES RELUES PAR GRÉGOIRE (19 h 10) : « C'est très bien », un mot changé — dans le
+       paragraphe du critère algorithmique, « chaque sous-critère porte un code, un nom, une
+       pondération et une DESCRIPTION, et sert ainsi de code descriptif » (ses mots :
+       « … et une description... comme code descriptif ») ⮕ COMMITÉES telles quelles, sans
+       discipline en exemple : le code posé EST le sous-critère de la grille.
      ===================================================================== -->
 
 <!-- =====================================================================
