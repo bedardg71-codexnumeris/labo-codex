@@ -75,6 +75,12 @@
      ⮕ CE QUE GRÉGOIRE DOIT ALLER VOIR : sa carte d'alignement, un bloc marqué 🧬,
        l'Inspecteur — « Décloner » à droite de « N instances · Voir les autres ».
        Ne pas cliquer : le voir suffit.
+     ↻ 9 h 05 : Grégoire a lu l'écran (capture, mode clair : « Décloner » à droite de
+       « 2 instances · Voir les autres », sous « Rétroaction formative ») — « J'ai lu,
+       c'est bien. » ⮕ Fusion ff sur `main` (`e250b6c4`), annonce 1.113 dans le
+       changelog (nomme l'ancien mot une fois), release 1.113.0 (minor : geste nouveau
+       + renommage), Vitest après le commit du bump, puis verdict au jeton et push par
+       `scripts/pousser.sh`.
      ===================================================================== -->
 
 <!-- =====================================================================
