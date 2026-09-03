@@ -167,8 +167,14 @@
        rouge. « Retire les accolades » (Grégoire, pendant l'essai) ⮕ les badges des repères
        montrent le mot nu (critere, erreurs, mots, points) ; ce qui se pose dans la zone
        garde ses accolades (le format que le moteur lit) — témoins E.a + spec.
-     ▣ RESTE À GRÉGOIRE : l'iPad — le sélecteur natif derrière « Personnalisé… » (étiquette),
-       la pastille repeinte, le milieu de mot au doigt ; et le texte des aides.
+     ▣ RELEASE 1.114.1, build 0903-1858 (patch ; entrée 1.114 du changelog retouchée d'une
+       ligne) : commit correctif `40772a0a`, commit release `6add38e6`, Vitest 4898/4898 après
+       le bump, `scripts/pousser.sh` : verdict Playwright vert sur `6add38e6`, POUSSÉ
+       `55fb1c16..6add38e6` à 19 h 05 ; run GitHub 33816224577 lancé (celui de 1.114.0,
+       33810757170, fini VERT en 31 min). 0 devant, 0 derrière.
+     ▣ RESTE À GRÉGOIRE : l'iPad sur 1.114.1 — le sélecteur natif derrière « Personnalisé… »
+       (étiquette), la pastille repeinte, le milieu de mot au doigt ; et le texte des deux
+       aides, proposé dans le rapport, NON commité.
      ===================================================================== -->
 
 <!-- =====================================================================
