@@ -1691,7 +1691,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   échelles » est **faux** — il est posé dans `supprimerEchelleDefinitivement` (`:2610`), le plus destructeur des cinq
   chemins (local **et** bibliothèque partagée), et les évaluations en dépendent bien (cf. #648). Un piège écrit en
   commentaire n'arrête pas la main suivante ; un commentaire **faux** l'arme.
-- [ ] **#648 — CONSTAT · La garde de suppression d'échelle de l'onglet Données compte le mauvais référent, et le compte sur un seul trimestre**.
+- [x] **#648 — LIVRÉ 3 septembre 2026 (lot 1, le remplacement) · La garde de suppression d'échelle de l'onglet Données compte le mauvais référent, et le compte sur un seul trimestre**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**. Mesures convergentes de `kuekatsheu-67` (lecture)
   et `kuekatsheu-94` (écriture). Lot de #624, **non corrigé le 31 août** : arbitrage de référent, écarté en fin de session.
   `verifierDependancesEchelle` (`js/donnees-v2.js:1146`) compte **les pratiques seulement** puis **désactive le bouton**
@@ -1705,6 +1705,29 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   quatre autres énumèrent `enumererTrimestres()`. Une pratique d'un autre trimestre ne bloque rien.
   ⚠ Cible de tout remède : **`js/donnees-v2.js:1624`**, l'ombre locale — **pas** `js/echelles.js:2610`. Deux corps
   distincts, même nom, deux fichiers. N'en inscrire qu'un refermerait une porte en laissant l'autre.
+  ↻ **DÉCISION DE GRÉGOIRE, 3 septembre 2026** (`plans de travail/DECISION-2026-09-03-echelle-remplacement.md`) :
+  **supprimer une échelle que quelque chose nomme n'est pas une suppression, c'est un REMPLACEMENT** — par quoi, puis tout
+  ce qui la nomme suit, puis retrait ; refus dans un trimestre archivé (des notes déjà remises) ; sans porteur, rien de
+  spécial (« c'est peut-être un projet qui n'est pas terminé »). Deux compléments tranchés le matin même : le successeur
+  doit porter les **mêmes codes de niveaux** (une évaluation stocke son niveau par CODE, `evaluation-sauvegarde.js`, et la
+  note le relit dans l'échelle désignée, `evaluation-calcul.js:1264` — un pointeur seul ne fait pas suivre les notes),
+  sinon refus qui nomme les codes ; et **tout ce qui la nomme suit** (évaluations, productions, pratiques sous
+  `configuration.echelleId`, grilles, cartouches du trimestre actif), pas les évaluations seules.
+  ↻ **LIVRÉ (lot 1)** : `grep -rn "function supprimerEchelle" js/` rend SIX déclarations ; quatre vident l'ancrage, une
+  seule avait une porte de migration. Un cœur dans `echelles.js` — `supprimerOuRemplacerEchelle` (compte de tout ce qui
+  la nomme, refus si `estTrimestreArchive()`, successeurs aux mêmes codes, `remplacerEchellePartout` par la file magasin
+  par magasin, retrait) — sur les trois gestes de Conception (liste, zone d'édition, section 1) ; la modal de Données
+  reçoit un sélecteur de successeur et fait la même mesure (fin du « Suppression impossible » sans issue, fin du
+  `p.echelleId`). Section 2 (Bibliothèque seule) : rien à remplacer, rien à dire. `verifierUtilisationEchelle` (plus
+  d'appelant) retirée. **Périmètre = trimestre actif**, mesuré : évaluations ET échelles sont préfixées (#358), un
+  trimestre archivé garde sa copie — le « seul garde monotrimestre » ci-dessus n'était pas le défaut, le référent l'était.
+  **Aucun marqueur « terminé »** n'existe : le refus porte sur l'archivage seul. **Sentinelle**
+  `sentinelle-648-supprimer-une-echelle-est-la-remplacer` (18 essais, vraie fonction en bac à sable, magasins forgés en
+  mémoire — aucune donnée réelle) ; sentinelle 522 lot 2b ajustée (25 → 22 écritures par la file) ; **break-test**
+  5 mutations, 5 rouges.
+  ⏳ **LOT 2, À FAIRE, tranché le même jour** : **corriger** une échelle sans la supprimer ⮕ le recalcul des évaluations
+  qui l'emploient est **PROPOSÉ, jamais automatique** (« il permet d'informer l'utilisateur des conséquences de son
+  geste »), et refusé dans un trimestre archivé. Même règle, autre chemin d'écriture : session dédiée.
 - [x] **#649 — LIVRÉ 2 septembre 2026 (soir) · `retirerProductionDeLaBibliotheque` n'existe pas : le garde est mort et le « fallback » est l'unique chemin depuis toujours**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur mesure de `kuekatsheu-94`, **rejouée avec
   témoin** par la coordinatrice. Lot de #624, **non corrigé le 31 août** : aucun symptôme actuel.

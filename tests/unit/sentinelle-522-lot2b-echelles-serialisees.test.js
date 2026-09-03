@@ -279,14 +279,21 @@ describe('#522 lot 2b · C — la course ne peut pas se rouvrir en silence', () 
         // règle a cédé : C.a et C.b ci-dessus continuent d'exiger qu'AUCUNE
         // écriture directe ne subsiste.
         const parLaFile = (echelles.match(/db\.modifier\(cle\('echellesTemplates'\)/g) || []).length;
-        expect(parLaFile, 'lot 2b, lot 4, les conversions antérieures et le semis IDME').toBe(25);
+        // #648 (3 sept. 2026) : 25 → 22. Les trois suppressions de Conception (liste,
+        // zone d'édition, section 1) écrivaient chacune leur retrait ; elles passent
+        // par UN cœur (`supprimerOuRemplacerEchelle`), qui écrit une fois. Moins de
+        // sites, même garde : chaque retrait reste par la file.
+        expect(parLaFile, 'lot 2b, lot 4, les conversions antérieures, le semis IDME, et le cœur #648').toBe(22);
     });
 
     it('C.d les trois fenêtres d\'attente humaine lisent hors file et écrivent DANS la file', () => {
         // Le défaut le plus coûteux du lot : une collection lue avant une
         // question, réécrite après. Chacune de ces fonctions doit contenir un
         // `db.modifier` — sa lecture d'affichage, elle, peut rester dehors.
-        for (const nom of ['dupliquerEchelle', 'supprimerEchelleDefinitivement', 'supprimerEchelleDepuisSidebar']) {
+        // #648 : `supprimerEchelleDefinitivement` et `supprimerEchelleDepuisSidebar`
+        // délèguent au cœur `supprimerOuRemplacerEchelle`, qui porte désormais les
+        // questions (confirm, prompt) ET l'écriture par la file. C'est lui qu'on tient.
+        for (const nom of ['dupliquerEchelle', 'supprimerOuRemplacerEchelle']) {
             const debut = echelles.indexOf('function ' + nom + '(');
             expect(debut, `${nom} : introuvable`).toBeGreaterThan(-1);
             const corps = echelles.slice(debut, debut + 4000);

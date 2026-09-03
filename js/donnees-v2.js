@@ -1188,19 +1188,40 @@
     function verifierDependancesEchelle(echelleId) {
         const dependances = [];
         const avertissements = [];
-
-        // Vérifier les pratiques qui utilisent cette échelle
+        // #648 (3 septembre 2026) — supprimer une échelle que quelque chose nomme,
+        // c'est la REMPLACER (décision Grégoire). On compte TOUT ce qui la nomme
+        // dans le trimestre actif — plus seulement les pratiques, et sous leur
+        // vrai champ (`configuration.echelleId`, pas `p.echelleId`) —, on propose
+        // les successeurs qui portent ses codes de niveaux, et on refuse dans un
+        // trimestre archivé. Sans porteur : rien de spécial, rien d'écrit ici.
+        // Le cœur (compte, comparaison, réécriture) vit dans echelles.js et n'est
+        // pas gardé par un `typeof` : un symbole absent doit se voir (#649).
+        const remplacement = { requis: false, nb: null, candidats: [], ecartes: 0 };
         try {
-            const pratiques = db.getSync(cle('pratiquesConfigurables')) || [];
-            const pratiquesUtilisant = pratiques.filter(p => p.echelleId === echelleId);
-            if (pratiquesUtilisant.length > 0) {
-                dependances.push(`Utilisée par ${pratiquesUtilisant.length} pratique(s) de notation`);
+            const nb = window.compterPorteursEchelleDans(echelleId, window.lireMagasinsEchelleSync());
+            remplacement.nb = nb;
+            if (nb.total === 0) return { dependances, avertissements, remplacement };
+            remplacement.requis = true;
+            if (window.estTrimestreArchive && window.estTrimestreArchive()) {
+                dependances.push(`Ce trimestre est archivé : remplacer cette échelle toucherait ${window.decrirePorteursEchelle(nb)}, dont des notes déjà remises.`);
+                return { dependances, avertissements, remplacement };
             }
+            const echelles = db.getSync(cle('echellesTemplates'), []) || [];
+            const echelle = echelles.find(e => e && e.id === echelleId);
+            const autres = echelles.filter(e => e && e.id !== echelleId);
+            remplacement.candidats = autres.filter(e => window.comparerCodesEchelles(echelle, e).compatibles);
+            remplacement.ecartes = autres.length - remplacement.candidats.length;
+            if (remplacement.candidats.length === 0) {
+                const codes = ((echelle && echelle.niveaux) || []).map(n => n && n.code).filter(c => c != null && String(c).trim() !== '').join(', ');
+                dependances.push(`${window.decrirePorteursEchelle(nb)} l'emploient : la supprimer, c'est la remplacer — et aucune autre échelle de ce trimestre ne porte ses niveaux (${codes || 'aucun code'}). Crée d'abord une échelle aux mêmes niveaux, ou corrige celle-ci.`);
+                return { dependances, avertissements, remplacement };
+            }
+            avertissements.push(`${window.decrirePorteursEchelle(nb)} suivront vers l'échelle choisie ci-dessous.`);
         } catch (e) {
             console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
-        return { dependances, avertissements };
+        return { dependances, avertissements, remplacement };
     }
 
     /**
@@ -1389,6 +1410,7 @@
         let dependances = [];
         let avertissements = [];
         let cartoucheResteDansGrille = false; // #647 — cartouches seulement
+        let remplacementEchelle = null;       // #648 — échelles seulement
 
         if (type === 'pratique') {
             const pratiques = obtenirToutesPratiquesUtilisateur();
@@ -1424,6 +1446,7 @@
             const deps = verifierDependancesEchelle(id);
             dependances = deps.dependances;
             avertissements = deps.avertissements;
+            remplacementEchelle = deps.remplacement;   // #648 — pilote le sélecteur et l'acte
         } else if (type === 'production') {
             const productions = obtenirToutesLesProductionsBibliothequeSync();
             ressource = productions.find(p => p.id === id);
@@ -1443,7 +1466,8 @@
             id,
             nom: ressource.nom,
             dependances,
-            avertissements
+            avertissements,
+            remplacement: remplacementEchelle   // #648
         };
 
         // Remplir la modal
@@ -1456,12 +1480,19 @@
         // suppression définitive : c'est un retrait de la Bibliothèque. Les
         // deux phrases changent ensemble ; n'en corriger qu'une déplacerait le mensonge
         // d'un paragraphe.
+        // #648 — pour une échelle que quelque chose nomme, l'acte est un REMPLACEMENT :
+        // les trois libellés changent ensemble, comme pour la cartouche.
+        const echelleARemplacer = !!(remplacementEchelle && remplacementEchelle.requis && dependances.length === 0);
         const phraseActe = cartoucheResteDansGrille
             ? `Tu es sur le point de retirer de la Bibliothèque la ${typeLabel} :`
-            : `Tu es sur le point de supprimer définitivement la ${typeLabel} :`;
+            : echelleARemplacer
+                ? `Tu es sur le point de remplacer l'${typeLabel} :`
+                : `Tu es sur le point de supprimer définitivement la ${typeLabel} :`;
         const phrasePortee = cartoucheResteDansGrille
             ? 'Le retrait de la bibliothèque est irréversible ; la cartouche reste dans sa grille.'
-            : 'Cette action est irréversible.';
+            : echelleARemplacer
+                ? 'Tout ce qui la nomme passera à l\'échelle choisie, puis l\'ancienne sera supprimée. Cette action est irréversible.'
+                : 'Cette action est irréversible.';
         infoDiv.innerHTML = `
             <p>${phraseActe}</p>
             <p style="font-size: 1.2rem; font-weight: bold; color: var(--accent-primaire); margin: 15px 0;">
@@ -1490,6 +1521,26 @@
             divAvertissements.classList.add('u-hide');
         }
 
+        // #648 — le sélecteur de successeur, pour une échelle que quelque chose nomme.
+        // Vidé à chaque ouverture : la modal est partagée par cinq familles (#653).
+        const divRemplacement = document.getElementById('suppression-remplacement');
+        const selectRemplacement = document.getElementById('select-echelle-remplacement');
+        const noteRemplacement = document.getElementById('suppression-remplacement-note');
+        if (divRemplacement && selectRemplacement) {
+            if (echelleARemplacer) {
+                selectRemplacement.innerHTML = remplacementEchelle.candidats
+                    .map(e => `<option value="${escapeHtml(e.id)}">${escapeHtml(e.nom || 'Sans titre')}</option>`).join('');
+                if (noteRemplacement) noteRemplacement.textContent = remplacementEchelle.ecartes > 0
+                    ? `${remplacementEchelle.ecartes} autre(s) échelle(s) du trimestre n'ont pas les mêmes niveaux et ne sont pas proposées.`
+                    : '';
+                divRemplacement.classList.remove('u-hide');
+            } else {
+                selectRemplacement.innerHTML = '';
+                if (noteRemplacement) noteRemplacement.textContent = '';
+                divRemplacement.classList.add('u-hide');
+            }
+        }
+
         // Zone de confirmation
         const divConfirmation = document.getElementById('suppression-confirmation');
         const inputConfirmation = document.getElementById('input-confirmation-nom');
@@ -1511,7 +1562,9 @@
             // quand la cartouche reste ancrée à sa grille.
             btnConfirmer.textContent = cartoucheResteDansGrille
                 ? 'Retirer de la bibliothèque'
-                : 'Supprimer définitivement';
+                : echelleARemplacer
+                    ? 'Remplacer et supprimer'
+                    : 'Supprimer définitivement';
         }
 
         // Afficher la modal
@@ -1563,7 +1616,25 @@
             } else if (type === 'cartouche') {
                 succes = await supprimerCartoucheDefinitivement(id);
             } else if (type === 'echelle') {
-                succes = await supprimerEchelleDefinitivement(id);
+                // #648 — si quelque chose la nomme, le successeur choisi passe d'abord,
+                // par la file ; l'écran annonce ensuite ce qui a RÉELLEMENT suivi.
+                const rempl = ressourceASupprimer.remplacement;
+                if (rempl && rempl.requis) {
+                    const select = document.getElementById('select-echelle-remplacement');
+                    const successeurId = select ? select.value : '';
+                    const successeur = rempl.candidats.find(e => e.id === successeurId);
+                    if (!successeur) {
+                        alert('Choisis l\'échelle de remplacement avant de confirmer.');
+                        return;
+                    }
+                    const ecrits = await window.remplacerEchellePartout(id, successeurId);
+                    succes = await supprimerEchelleDefinitivement(id);
+                    if (succes) {
+                        notifications.succes('Échelle remplacée', `«${successeur.nom || 'Sans titre'}» prend la place : ${window.decrirePorteursEchelle(ecrits)} suivent.`);
+                    }
+                } else {
+                    succes = await supprimerEchelleDefinitivement(id);
+                }
             } else if (type === 'production') {
                 succes = await supprimerProductionDefinitivement(id);
             }
