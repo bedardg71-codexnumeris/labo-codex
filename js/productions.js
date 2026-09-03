@@ -1563,11 +1563,6 @@ async function prerenseignerFormulaireProduction(prod) {
         poserReferenceSelect(selectGrilleInline, prod.grilleId, 'grille');
     }
 
-    // Afficher les checkboxes de pratiques compatibles
-    const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
-    if (checkboxesContainer && typeof GabaritsUtils !== 'undefined') {
-        checkboxesContainer.innerHTML = GabaritsUtils.genererCheckboxesPratiques('production', prod.pratiquesCompatibles || []);
-    }
 }
 
 // Réinitialise le formulaire en mode ajout (refactor étape 4, 16 mai 2026)
@@ -1600,12 +1595,6 @@ function reinitialiserFormulaireProduction() {
     // 🆕 Beta 98.3 : Échéances par groupe-cours (multi-groupe)
     peuplerChampsPersonnalises(null);                                        // #499 — une fiche neuve n'hérite pas des champs de la précédente
     peuplerEcheancesParGroupe(null);
-
-    // Réinitialiser les checkboxes de pratiques compatibles
-    const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
-    if (checkboxesContainer && typeof GabaritsUtils !== 'undefined') {
-        checkboxesContainer.innerHTML = GabaritsUtils.genererCheckboxesPratiques('production', []);
-    }
 
     // Réinitialiser les champs portfolio
     const portfolioNombreRetenir = document.getElementById('portfolioNombreRetenir');
@@ -1915,10 +1904,6 @@ function construireProductionData(d, evaluations, idEnEdition) {
         console.warn('[Productions] ⚠️ Aucun cours actif - production créée sans coursId');
     }
 
-    const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
-        ? GabaritsUtils.lirePratiquesSelectionnees('production')
-        : [];
-
     // 🆕 Beta 95.4 : Préserver la catégorie existante si modification, sinon null
     const existingProd = evaluations.find(p => p.id === idEnEdition);
     const categorieExistante = existingProd?.categorie || null;
@@ -1939,7 +1924,11 @@ function construireProductionData(d, evaluations, idEnEdition) {
         echelleId: d.echelleId,        // 🆕 Persistance échelle dans le gabarit
         cartoucheId: d.cartoucheId,    // 🆕 Persistance cartouche dans le gabarit
         dateEcheance: d.dateEcheance,  // ✨ NOUVEAU (Beta 94 - 10 déc 2025)
-        pratiquesCompatibles,
+        // Volet C (3 sept. 2026) — `pratiquesCompatibles` ne se SAISIT plus, mais
+        // ne se SUPPRIME d'aucune donnée : une production déjà enregistrée garde
+        // la valeur qu'elle portait (tarir n'est pas réparer).
+        ...(existingProd && existingProd.pratiquesCompatibles !== undefined
+            ? { pratiquesCompatibles: existingProd.pratiquesCompatibles } : {}),
         categorie: categorieExistante  // 🆕 Beta 95.4
     };
 

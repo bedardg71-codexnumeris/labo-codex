@@ -64,8 +64,53 @@
        sans grille — l'engrenage, l'écran avec ses noms courts intacts. Ne rien modifier.
        ⚠ iPad : le sélecteur natif derrière « Personnalisé… » et le bandeau — non éprouvés
        hors WebKit de bureau.
-     ▣ PAS FAIT, VOULU : pas de release, pas de push. Le verdict au jeton est rendu après ce
-       commit (§4.5) pour que la pile, si Grégoire la pousse, soit jugée.
+     ▣ A et B COMMITÉS (`61982b1f`) avant C, qui suit à part — la consigne (réécrite à 16 h 34
+       avec un volet C « détachable ») dit « mieux vaut trois lots vérifiables ».
+
+     ▣ C · LIVRÉ — LES CASES « PRATIQUES COMPATIBLES » PARTENT, LE BADGE DIT LA COMPOSITION.
+       REMESURÉ : 29 lectures de `pratiquesCompatibles` hors grilles.js, 0 filtre, 0 garde ;
+       `lirePratiquesSelectionnees` 6 appelants (grille, cartouche, échelle ×2, objectifs,
+       production) ; `genererBadgesPratiques` 9 sites ; `filtrerParPratique` appelée par la
+       seule `genererSectionGabarits`, elle-même SANS appelant, comme `genererFiltrePratique`,
+       `compterParPratique`, `separerGabaritsEtElements` : une chaîne morte, qui lisait le
+       champ retiré ⮕ partie avec les cases (elle appartient à ce que le lot remplace ; dit,
+       pas caché). `lirePratiquesSelectionnees` reste DÉFINIE, sans appelant : le témoin de la
+       consigne.
+       · La SAISIE part des cinq objets : cases retirées (7 rendus), lectures retirées
+         (6 sauvegardes), quatre conteneurs d'index.html retirés, infobulle
+         `cn-pratiques-compat` retirée. Le CHAMP reste : aucune ligne des deux schémas ne
+         bouge (import-export.js : 3 mentions, avant comme après — témoin inverse). ⚠ Les
+         sauvegardes qui MUTENT un objet existant (grille, cartouche, échelle, objectifs) ne
+         touchent plus au champ ; celle des productions CONSTRUIT un objet neuf ⮕ la valeur
+         de la production existante est recopiée (`existingProd.pratiquesCompatibles`),
+         sinon une modification l'aurait effacée. Une grille / échelle / ensemble NEUFS ne
+         portent plus le champ.
+       · Le BADGE : `GabaritsUtils.compositionGrille(grille)` → ALGO / HOLIS / ANALY / MIXTE /
+         '' (types des critères ; inconnu + connu = MIXTE ; sans type = ignoré) et
+         `genererBadgeComposition` (classes `badge-composition--<code>`, titre en clair) sur
+         les 3 sites de grilles.js ; les 4 autres objets perdent leur badge, sans remplaçant.
+         Libellés = ceux du tableau de la consigne (ALGO / HOLIS / ANALY / MIXTE), non
+         retouchés — à Grégoire s'il en veut d'autres.
+       · index.html : jetons grilles 0903h, echelles 0903e, cartouches 0903e, objectifs 0903a,
+         productions 0903a, productions-liste 0903a, gabarits-utils 0903a, hover 0903c.
+       ▣ TESTS EXISTANTS MIS AU PAS (ils mesuraient ce que C retire) : #625 (quatre cas) —
+         la variable `pratiquesCompatibles` survivait dans la branche de CRÉATION d'une grille
+         et dans l'ensemble d'objectifs neuf ⮕ code corrigé, pas le test ; transport des
+         échelles AA.a — une échelle neuve n'écrit plus la clé (son transport reste éprouvé
+         sur l'échelle STOCKÉE de AB) ; #343 — la description DEN n'est plus dans
+         gabarits-utils.js (liste partie), le cas dit maintenant qu'elle n'y revient pas ;
+         #524 — sa borne était le conteneur des cases de cartouche ⮕ `listeCartouchesExistants`.
+       ▣ TÉMOINS C : `sentinelle-pratiques-compatibles-retirees.test.js` (9 : composition,
+         zéro appelant, transport intact, aucune case, recopie) ; spec WebKit
+         `pratiques-compatibles-retirees.spec.js` (2 : ALGO/HOLIS/MIXTE/rien dans la liste, le
+         champ déclaré ne commande plus rien ; formulaire sans case, grille renommée garde
+         `['SOM']`). Break-tests (remise par empreinte) : type unique rendu MIXTE ⮕ spec rouge ;
+         recopie retirée ⮕ sentinelle rouge.
+       ▣ CE QUE GRÉGOIRE DOIT ALLER VOIR (C) : Conception › grilles — sa liste porte ALGO,
+         HOLIS, MIXTE selon ses critères, plus de cases sous le nom ; échelles, cartouches,
+         objectifs, productions : plus de cases, plus de badge de pratique. Ne rien modifier.
+     ▣ PAS FAIT, VOULU : pas de release, pas de push. Le verdict au jeton est rendu après le
+       commit de C (§4.5) pour que la pile, si Grégoire la pousse, soit jugée.
      ===================================================================== -->
 
 <!-- =====================================================================

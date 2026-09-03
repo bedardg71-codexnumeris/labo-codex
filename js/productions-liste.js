@@ -126,11 +126,6 @@ async function afficherListeProductions(filtreType = '') {
         const activite = prod.activiteApprentissage || prod.description || '';
 
         // 🆕 Beta 95.4 : Badges uniformisés avec grilles/échelles
-        // Générer badges pratiques compatibles (utilise gabarits-utils.js)
-        const badgesPratiques = typeof GabaritsUtils !== 'undefined'
-            ? GabaritsUtils.genererBadgesPratiques(prod)
-            : '';
-
         // Badge de pondération (sauf pour portfolio conteneur et artefacts)
         const ponderationBadge = (prod.type !== 'portfolio' && prod.type !== 'artefact-portfolio' && prod.ponderation)
             ? `<span class="badge-caracteristique">${prod.ponderation}%</span>`
@@ -156,7 +151,6 @@ async function afficherListeProductions(filtreType = '') {
                 <div class="sidebar-item-titre">${echapperHtml(titre)}</div>
                 ${activite ? `<div class="sidebar-item-activite">${echapperHtml(activite)}</div>` : ''}
                 <div class="sidebar-item-badges">
-                    ${badgesPratiques}
                     ${ponderationBadge}
                     ${aPlanifierBadge}
                 </div>
@@ -297,12 +291,6 @@ function creerNouvelleProduction() {
     // Appeler gererChangementTypeProduction pour réinitialiser tous les états
     // (cartes contextuelles, notes, champs grisés, etc.)
     gererChangementTypeProduction();
-
-    // Réinitialiser les checkboxes de pratiques compatibles
-    const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
-    if (checkboxesContainer && typeof GabaritsUtils !== 'undefined') {
-        checkboxesContainer.innerHTML = GabaritsUtils.genererCheckboxesPratiques('production', []);
-    }
 
     // Changer le titre et le bouton
     document.getElementById('btnTexteEvaluation').textContent = 'Enregistrer';

@@ -204,7 +204,9 @@ describe('#524 · D — un astérisque sans légende est une énigme', () => {
         const html = lire('index.html');
         const i = html.indexOf('Nom + Grille + Échelle sur une seule ligne');
         expect(i, 'le bloc réordonné existe').toBeGreaterThan(-1);
-        const bloc = html.slice(i, html.indexOf('checkboxesPratiquesCartouche', i));
+        // Borne : la liste (désactivée) des cartouches, qui suit l'en-tête — le
+        // conteneur des cases « Pratiques compatibles » est parti (3 sept. 2026, volet C).
+        const bloc = html.slice(i, html.indexOf('listeCartouchesExistants', i));
         expect(bloc, 'pas de légende sur cet écran').not.toContain('legende-marques');
         const ordre = ['nomCartouche', 'selectGrilleCartouche', 'selectEchelleCartouche']
             .map(id => bloc.indexOf(id));

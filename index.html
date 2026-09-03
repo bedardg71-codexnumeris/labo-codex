@@ -4604,7 +4604,7 @@
 
                                 <!-- ═══════════════════════════════════════════════════════════
                                      SECTION 1 : EN-TÊTE
-                                     Nom de la production + Pratiques compatibles
+                                     Nom de la production
                                      ═══════════════════════════════════════════════════════════ -->
 
                                 <p class="legende-marques">
@@ -4618,7 +4618,6 @@
                                         <input type="text" id="productionTitre" class="controle-form"
                                             placeholder="Ex: Analyse #1">
                                     </div>
-                                    <div id="checkboxesPratiquesProduction" style="flex-shrink: 0;"></div>
                                 </div>
 
                                 <!-- ═══════════════════════════════════════════════════════════
@@ -4946,14 +4945,13 @@
                                 <p class="legende-marques">
                                     <span class="champ-requis">*</span> Champ obligatoire — l'enregistrement est refusé sans lui.
                                 </p>
-                                <!-- Nom + Pratiques compatibles sur même ligne -->
+                                <!-- Nom (les cases « Pratiques compatibles » sont parties le 3 sept. 2026, volet C) -->
                                 <div class="u-flex-gap-20 u-mb-20 u-flex-wrap" style="align-items: flex-start">
                                     <div class="groupe-form u-flex-1" style="min-width: 300px; margin: 0">
                                         <label>Nom de la grille <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :</label>
                                         <input type="text" id="nomGrilleTemplate" class="controle-form"
                                             placeholder="Ex: Grille analyse littéraire" data-on-change="sauvegarderNomGrille">
                                     </div>
-                                    <div id="checkboxesPratiquesGrille" style="flex-shrink: 0;"></div>
                                 </div>
 
                                 <div class="groupe-form u-mb-20">
@@ -5088,14 +5086,13 @@
                                 <p class="legende-marques">
                                     <span class="champ-requis">*</span> Champ obligatoire — l'enregistrement est refusé sans lui.
                                 </p>
-                                <!-- Nom + Pratiques compatibles sur même ligne -->
+                                <!-- Nom (les cases « Pratiques compatibles » sont parties le 3 sept. 2026, volet C) -->
                                 <div class="u-flex-gap-20 u-mb-20 u-flex-wrap" style="align-items: flex-start">
                                     <div class="groupe-form u-flex-1" style="min-width: 300px; margin: 0">
                                         <label>Nom de l'échelle <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :</label>
                                         <input type="text" id="nomEchelleTemplate" class="controle-form"
                                             placeholder="Ex: Échelle standard A-F" data-on-change="sauvegarderNomEchelle">
                                     </div>
-                                    <div id="checkboxesPratiquesEchelle" style="flex-shrink: 0;"></div>
                                 </div>
 
                                 <div class="groupe-form u-mb-20">
@@ -5455,7 +5452,6 @@
                                         <!-- Options générées par JS -->
                                     </select>
                                 </div>
-                                <div id="checkboxesPratiquesCartouche" style="flex-shrink: 0; align-self: flex-end;"></div>
                             </div>
 
                             <!-- Liste des cartouches existantes (DÉSACTIVÉ - remplacé par sidebar) -->
@@ -14486,7 +14482,7 @@
     <script src="js/entites/reconciliation-evaluations.js?v=2026062801"></script> <!-- #360 : prévention des doublons d'évals note-égale -->
 
     <script src="js/pratique-notation-v2.js?v=20260903b"></script> <!-- Beta 95 : dropdown productions + terminologie "production" -->
-    <script src="js/gabarits-utils.js?v=20260829b"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
+    <script src="js/gabarits-utils.js?v=20260903a"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
     <script src="js/identite-item.js?v=20260903b"></script> <!-- #291/#476 : source unique de l'identite d'un item de bibliotheque (analyserDoublons) — remplace les 5 detecteurs copies-colles -->
     <script src="js/bibliotheque-ui.js?v=20260903b"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 (menu ⋮ kebab + refactor renderCarte) · #522 lot 4 : le contrat du helper passe de lireListe/ecrireListe à modifierListe(mutateur), sérialisé par db.modifier -->
     <script src="js/repertoires-bibliotheque.js"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
@@ -14500,20 +14496,20 @@
          Chargé AVANT eux — ils l'appellent au rendu, pas au chargement, mais
          l'ordre reste la garantie la plus simple à relire. -->
     <script src="js/ui-blocs.js?v=20260825b"></script>
-    <script src="js/productions.js?v=20260901a"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
+    <script src="js/productions.js?v=20260903a"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
     <script src="js/productions-import-export.js?v=20260903b"></script> <!-- Refactor étape 3 (16 mai 2026) : extrait de productions.js (lignes 2630-3276) -->
-    <script src="js/productions-liste.js?v=20260830d"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js · #522 lot 4 : le descripteur de production écrit par db.modifier -->
+    <script src="js/productions-liste.js?v=20260903a"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js · #522 lot 4 : le descripteur de production écrit par db.modifier -->
     <script src="js/productions-bibliotheque-ui.js?v=20260903b"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide · #522 lot 4 : le descripteur de production écrit par db.modifier -->
     <script src="js/evaluation-formules.js?v=20260901a"></script> <!-- #667 : registre des modèles de formule algorithmique — CHARGÉ AVANT grilles.js et evaluation-calcul.js, qui l'appellent tous les deux -->
     <script src="js/evaluation-projection.js?v=20260902f"></script>
     <script src="js/evaluation-enonces.js?v=20260903a"></script>
     <script src="js/codes-annotation.js?v=20260903d"></script> <!-- 3 sept. 2026 : la liste des CODES d'annotation d'une copie (les codes identifient des éléments du travail, rattachés aux critères ; les tampons, eux, commentent — autre palette) — sous-critères de la grille activée, sinon les dix codes d'hier (repli). CHARGÉ AVANT travaux-outils.js, synthese-retroaction-data.js et evaluation-retroaction.js, qui le lisent ; APRÈS evaluation-enonces.js, dont il prend critereAlgorithmique --> <!-- texte troué étape 1 (3 sept.) : repères posables, contrat zone → repères, insertion au curseur · #581 : registre des modeles d'enonce algorithmique - MEME CONTRAINTE D'ORDRE que les deux registres ci-dessus : grilles.js, evaluation-calcul.js, evaluation-retroaction.js et synthese-retroaction-data.js l'appellent tous --> <!-- #668 : registre des modèles de projection (norme externe / EUF) — MÊME CONTRAINTE D'ORDRE que le registre de formules : grilles.js et evaluation-calcul.js l'appellent tous les deux -->
     <script src="js/grilles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/grilles.js?v=20260903g"></script> <!-- texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
+    <script src="js/grilles.js?v=20260903h"></script> <!-- texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
     <script src="js/echelles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/echelles.js?v=20260903d"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
+    <script src="js/echelles.js?v=20260903e"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
     <script src="js/cartouches-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/cartouches.js?v=20260903d"></script> <!-- #647 : les quatre chemins de suppression d'une cartouche disent leur portée réelle et ce qui survit ; supprimerCartouche() (morte) retirée -->
+    <script src="js/cartouches.js?v=20260903e"></script> <!-- #647 : les quatre chemins de suppression d'une cartouche disent leur portée réelle et ce qui survit ; supprimerCartouche() (morte) retirée -->
     <script src="js/export-pdf.js?v=20260901a"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
     <script src="js/cours.js?v=20260823a"></script> <!-- Beta 99.74 b0529-1016 : chantier 0 refonte — _diagnostiquerModeleCours (read-only) -->
     <script src="js/contexte.js?v=2026062701"></script> <!-- Beta 95.2 : Support groupe-cours -->
@@ -14558,7 +14554,7 @@
     <!-- Interface de gestion des pratiques configurables -->
     <script src="js/pratiques.js?v=20260902f"></script> <!-- #326 (28 juin) : T3 copie en forme canonique + T4 dérivation = arbre sans wizard ; Beta 99.38 b0508-1425 : nettoyage wizard V1 fantôme (-1772 l.) -->
     <script src="js/wizard-pratique-v2.js?v=20260902b"></script> <!-- #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté · #577 : l'étape « Échelle de performance » pose les deux repères de maîtrise de l'échelle choisie -->
-    <script src="js/objectifs.js?v=20260809b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
+    <script src="js/objectifs.js?v=20260903a"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20260828a"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
     <script src="js/saisie-presences.js?v=20260902f"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
@@ -14692,7 +14688,7 @@
     <script src="js/accompagnement.js?v=20260901a"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20260903b"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-hover.js?v=20260903c"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
     <script src="js/accompagnement-contenu-popup.js?v=20260903d"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20260809a"></script>
     <script src="js/guides-pedagogiques.js?v=20260629a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->

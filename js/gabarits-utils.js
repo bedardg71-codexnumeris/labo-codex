@@ -20,12 +20,6 @@
     /**
      * Tags de pratiques disponibles
      */
-    const PRATIQUES_DISPONIBLES = [
-        { code: 'SOM', nom: 'Sommative', description: 'Pratique traditionnelle avec moyenne pondérée' },
-        { code: 'STD', nom: 'PAN-Standards', description: 'Standards-Based Grading (objectifs à maîtriser)' },
-        { code: 'SPE', nom: 'PAN-Spécifications', description: 'Specifications Grading (forfaits/bundles)' },
-        { code: 'DEN', nom: 'PAN-Dénotation', description: 'Ungrading (cibles et critères explicites, note certificative à la fin)' }
-    ];
 
     // Session B (#303) : COULEURS_PRATIQUES retiré (zéro-dette). C'était une table
     // de couleurs en dur (jamais consommée) qui DIVERGEAIT du design system. La
@@ -54,213 +48,54 @@
         return element && element.systeme === true;
     }
 
-    /**
-     * Obtient les pratiques d'un élément
-     * @param {Object} element - Élément
-     * @returns {string[]} - Liste des pratiques (ou ['all'] si non spécifié)
-     */
-    function obtenirPratiques(element) {
-        if (!element) return ['all'];
-
-        // Chercher dans pratiquesCompatibles (nouveau) ou pratiques (ancien)
-        const pratiques = element.pratiquesCompatibles || element.pratiques;
-
-        if (!pratiques || pratiques.length === 0) {
-            // Rétrocompatibilité: déduire de gabaritType si présent
-            if (element.gabaritType) {
-                return [element.gabaritType];
-            }
-            return ['all'];
-        }
-        return pratiques;
-    }
-
     // =========================================================================
-    // FONCTIONS DE FILTRAGE
+    // COMPOSITION D'UNE GRILLE — le badge qui dit ce qui EST
     // =========================================================================
+    // Consigne du 3 sept. 2026 (volet C). Les cases « Pratiques compatibles » ne
+    // faisaient rien : 29 lectures d'affichage et de transport hors grilles.js,
+    // 0 filtre, 0 garde — « elles ne font que nommer l'intention de l'auteur »
+    // (Grégoire). La SAISIE est retirée des cinq objets (grille, cartouche,
+    // échelle, objectifs, production) ; le CHAMP `pratiquesCompatibles` reste
+    // dans les données et voyage toujours (import-export.js, partage-schemas.js) :
+    // tarir n'est pas réparer. La chaîne qui lisait ce champ ici (obtenir /
+    // filtrer / séparer / compter par pratique, badges de pratique, filtre et
+    // section de gabarits, cases à cocher, liste des pratiques disponibles)
+    // n'avait AUCUN appelant vivant hors des badges et des cases — mesuré le
+    // 3 sept. — et part avec elles. `lirePratiquesSelectionnees` reste définie,
+    // sans appelant : c'est le témoin que la consigne nomme.
+    //
+    // À la place, les GRILLES reçoivent un badge DÉDUIT des types de leurs
+    // critères — décision de Grégoire : « le type quand il est unique, "Mixte"
+    // sinon » — qu'il encodait déjà à la main dans ses noms (« G5 FR-HOLIS A26 »).
+    // Il dit vrai même quand un type change après coup. Les quatre autres objets
+    // n'ont pas de critères : pas de badge, sans remplaçant (accepté par lui).
+    const LIBELLES_COMPOSITION = { algorithmique: 'ALGO', holistique: 'HOLIS', analytique: 'ANALY' };
+    const LIBELLES_COMPOSITION_LONGS = {
+        ALGO: 'tous les critères sont algorithmiques',
+        HOLIS: 'tous les critères sont holistiques',
+        ANALY: 'tous les critères sont analytiques',
+        MIXTE: 'plusieurs types de critères'
+    };
 
     /**
-     * Filtre les éléments par pratique
-     * @param {Array} elements - Liste d'éléments
-     * @param {string|null} pratique - Code pratique ('SOM', 'STD', 'SPE', 'DEN') ou null pour tous
-     * @returns {Array} - Éléments filtrés
+     * La composition d'une grille, déduite des types de ses critères.
+     * @returns {string} 'ALGO' | 'HOLIS' | 'ANALY' | 'MIXTE' | '' (aucun critère,
+     *          ou un seul type que personne ne connaît)
      */
-    function filtrerParPratique(elements, pratique) {
-        if (!pratique) return elements;
-
-        return elements.filter(e => {
-            const pratiques = obtenirPratiques(e);
-            if (pratiques.includes('all')) return true;
-            return pratiques.includes(pratique);
-        });
+    function compositionGrille(grille) {
+        const criteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres : [];
+        const types = new Set();
+        criteres.forEach(c => { if (c && typeof c.type === 'string' && c.type) types.add(c.type); });
+        if (types.size === 0) return '';
+        if (types.size > 1) return 'MIXTE';
+        return LIBELLES_COMPOSITION[[...types][0]] || '';
     }
 
-    /**
-     * Sépare les éléments en gabarits et éléments utilisateur
-     * @param {Array} elements - Liste d'éléments
-     * @returns {Object} - { gabarits: [], elements: [] }
-     */
-    function separerGabaritsEtElements(elements) {
-        const gabarits = elements.filter(e => estUnGabarit(e));
-        const elementsUtilisateur = elements.filter(e => !estUnGabarit(e));
-        return { gabarits, elements: elementsUtilisateur };
-    }
-
-    /**
-     * Compte les éléments par pratique
-     * @param {Array} elements - Liste d'éléments
-     * @returns {Object} - { SOM: 0, STD: 0, SPE: 0, DEN: 0, all: 0 }
-     */
-    function compterParPratique(elements) {
-        const compteur = { SOM: 0, STD: 0, SPE: 0, DEN: 0, all: 0 };
-
-        elements.forEach(e => {
-            const pratiques = obtenirPratiques(e);
-            pratiques.forEach(p => {
-                if (compteur[p] !== undefined) {
-                    compteur[p]++;
-                }
-            });
-        });
-
-        return compteur;
-    }
-
-    // =========================================================================
-    // INTERFACE UTILISATEUR
-    // =========================================================================
-
-    /**
-     * Génère le HTML pour le badge de pratique (style solide avec texte blanc)
-     * Utilise les classes CSS : .badge-type-pratique + .badge-type-som, etc.
-     * @param {string} pratique - Code pratique ('SOM', 'STD', 'SPE', 'DEN', 'MULTI')
-     * @returns {string} - HTML du badge
-     */
-    function genererBadgePratique(pratique) {
-        const code = pratique.toUpperCase();
-        const classeModificateur = `badge-type-${code.toLowerCase()}`;
-        return `<span class="badge-type-pratique ${classeModificateur}">${code}</span>`;
-    }
-
-    /**
-     * Génère les badges pour toutes les pratiques d'un élément
-     * Règle MULTI : Si 3+ pratiques, affiche un seul badge MULTI (dégradé)
-     * Sinon affiche les badges individuels
-     * @param {Object} element - Élément avec propriété .pratiques ou .pratiquesCompatibles
-     * @returns {string} - HTML des badges
-     */
-    function genererBadgesPratiques(element) {
-        const pratiques = obtenirPratiques(element);
-
-        // Si 3+ pratiques → afficher MULTI
-        if (pratiques.length >= 3 || pratiques.includes('all')) {
-            return genererBadgePratique('MULTI');
-        }
-
-        // Sinon afficher les badges individuels
-        return pratiques.map(p => genererBadgePratique(p)).join(' ');
-    }
-
-    /**
-     * Génère le HTML pour le filtre par pratique
-     * @param {string} idFiltre - ID du select
-     * @param {string} onchangeHandler - Nom de la fonction onchange
-     * @param {Object} compteurs - Optionnel, compteur par pratique pour afficher les totaux
-     * @returns {string} - HTML du filtre
-     */
-    function genererFiltrePratique(idFiltre, onchangeHandler, compteurs = null) {
-        let options = '<option value="">Toutes les pratiques</option>';
-
-        PRATIQUES_DISPONIBLES.forEach(p => {
-            const count = compteurs ? ` (${compteurs[p.code] || 0})` : '';
-            options += `<option value="${echapperHtml(p.code)}">${echapperHtml(p.nom)}${count}</option>`;
-        });
-
-        if (compteurs && compteurs.all > 0) {
-            options += `<option value="all">Multi-pratiques (${compteurs.all})</option>`;
-        }
-
-        return `
-            <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
-                Filtrer par pratique de notation :
-            </label>
-            <select id="${idFiltre}"
-                    class="controle-form"
-                    data-on-change="${onchangeHandler}"
-                    style="max-width: 300px;">
-                ${options}
-            </select>
-        `;
-    }
-
-    /**
-     * Génère le HTML pour la section gabarits
-     * @param {Array} gabarits - Liste des gabarits
-     * @param {string} pratiqueFiltree - Pratique sélectionnée pour filtrage
-     * @param {string} typeMateriel - 'echelle', 'grille', 'production', 'cartouche'
-     * @param {string} actionClick - Fonction à appeler au clic
-     * @returns {string} - HTML de la section
-     */
-    function genererSectionGabarits(gabarits, pratiqueFiltree, typeMateriel, actionClick) {
-        const gabaritsFiltres = filtrerParPratique(gabarits, pratiqueFiltree);
-
-        if (gabaritsFiltres.length === 0) {
-            return `
-                <div class="gabarits-section">
-                    <h4 style="margin-top: 15px; margin-bottom: 10px; color: #6f42c1; display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 1.1rem;">Gabarits</span>
-                        <span style="font-size: 0.8rem; color: var(--gris-clair); font-weight: normal;">(formulaires pré-configurés)</span>
-                    </h4>
-                    <p style="color: var(--gris-clair); font-style: italic; font-size: 0.9rem;">
-                        Aucun gabarit disponible pour cette pratique
-                    </p>
-                </div>
-            `;
-        }
-
-        let html = `
-            <div class="gabarits-section">
-                <h4 style="margin-top: 15px; margin-bottom: 10px; color: #6f42c1; display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 1.1rem;">Gabarits</span>
-                    <span style="font-size: 0.8rem; color: var(--gris-clair); font-weight: normal;">(formulaires pré-configurés)</span>
-                </h4>
-        `;
-
-        gabaritsFiltres.forEach(gabarit => {
-            const nom = gabarit.nom || gabarit.titre || 'Sans titre';
-            const description = gabarit.description || '';
-            const badges = genererBadgesPratiques(gabarit);
-
-            html += `
-                <div class="gabarit-item" style="
-                    padding: 12px;
-                    background: linear-gradient(135deg, rgba(139,92,246,0.08) 0%, #162c36 100%);
-                    border: 1px solid rgba(139,92,246,0.2);
-                    border-left: 4px solid #8b5cf6;
-                    border-radius: 6px;
-                    margin-bottom: 10px;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                " class="hover-translate-x"
-                   data-action="${actionClick}" data-param="${gabarit.id}">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div style="flex: 1;">
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                ${badges}
-                                <span style="font-weight: 600; color: var(--accent-primaire);">${nom}</span>
-                            </div>
-                            ${description ? `<div style="font-size: 0.85rem; color: var(--gris-moyen);">${description}</div>` : ''}
-                        </div>
-                        <div style="color: #8b5cf6; font-size: 1.2rem; margin-left: 10px;">
-                            →
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-
-        html += '</div>';
-        return html;
+    /** Le badge de composition d'une grille — '' quand il n'y a rien à dire. */
+    function genererBadgeComposition(grille) {
+        const code = compositionGrille(grille);
+        if (!code) return '';
+        return `<span class="badge-type-pratique badge-composition badge-composition--${code.toLowerCase()}" title="${echapperHtml(LIBELLES_COMPOSITION_LONGS[code])}">${code}</span>`;
     }
 
     /**
@@ -404,43 +239,11 @@
     }
 
     /**
-     * Génère le HTML pour les checkboxes de sélection des pratiques compatibles
-     * À intégrer dans les formulaires d'édition de matériel pédagogique
-     * @param {string} idPrefix - Préfixe pour les IDs des checkboxes (ex: 'grille', 'echelle')
-     * @param {string[]} pratiquesSelectionnees - Liste des pratiques actuellement sélectionnées
-     * @returns {string} - HTML des checkboxes
-     */
-    function genererCheckboxesPratiques(idPrefix, pratiquesSelectionnees = []) {
-        const checkboxes = PRATIQUES_DISPONIBLES.map(p => {
-            const checked = pratiquesSelectionnees.includes(p.code) ? 'checked' : '';
-            const couleurClasse = `badge-type-${p.code.toLowerCase()}`;
-            return `
-                <label class="checkbox-pratique" style="display: inline-flex; align-items: center; gap: 4px; margin-right: 15px; cursor: pointer;">
-                    <input type="checkbox"
-                           id="${idPrefix}_pratique_${p.code}"
-                           name="${idPrefix}_pratiques"
-                           value="${echapperHtml(p.code)}"
-                           ${checked}
-                           style="width: 14px; height: 14px; cursor: pointer;">
-                    <span class="badge-type-pratique ${couleurClasse}">${p.code}</span>
-                </label>
-            `;
-        }).join('');
-
-        return `
-            <div class="champ-pratiques-compatibles" data-tooltip="cn-pratiques-compat">
-                <div style="font-weight: 500; font-size: 0.9rem; margin-bottom: 8px;">
-                    Pratiques compatibles :
-                </div>
-                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 5px;">
-                    ${checkboxes}
-                </div>
-            </div>
-        `;
-    }
-
-    /**
-     * Récupère les pratiques sélectionnées depuis les checkboxes
+     * Récupère les pratiques sélectionnées depuis les checkboxes.
+     * ⚠ PLUS AUCUN APPELANT depuis le 3 sept. 2026 (volet C) : les cases sont
+     * parties des cinq objets. La définition reste — c'est le témoin que la
+     * consigne nomme (« ne rend plus que sa définition ») — et rend toujours
+     * un tableau, contrat que des bancs stubbent encore.
      * @param {string} idPrefix - Préfixe utilisé lors de la génération
      * @returns {string[]} - Liste des codes pratiques sélectionnés
      */
@@ -466,7 +269,6 @@
 
     window.GabaritsUtils = {
         // Constantes
-        PRATIQUES_DISPONIBLES,
 
         // Gabarits par défaut (échelles : retirés par #574)
         GABARITS_GRILLES_DEFAUT,
@@ -475,20 +277,13 @@
         // Fonctions de détection
         estUnGabarit,
         estElementSysteme,
-        obtenirPratiques,
 
-        // Fonctions de filtrage
-        filtrerParPratique,
-        separerGabaritsEtElements,
-        compterParPratique,
+        // Composition d'une grille (3 sept. 2026, volet C)
+        compositionGrille,
+        genererBadgeComposition,
 
         // Interface utilisateur
-        genererBadgePratique,
-        genererBadgesPratiques,
-        genererFiltrePratique,
-        genererSectionGabarits,
         genererSeparateur,
-        genererCheckboxesPratiques,
         lirePratiquesSelectionnees,
 
         // Initialisation

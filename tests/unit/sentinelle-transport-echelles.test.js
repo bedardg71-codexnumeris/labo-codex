@@ -145,8 +145,13 @@ describe('transport des échelles · AA — aucune clé d\'échelle ne se perd e
             .forEach(c => expect(cles, `« ${c} » doit être vue par le banc`).toContain(c));
 
         const clesCreation = clesEcritesParLaCreationComplete();
-        expect(clesCreation.size).toBeGreaterThan(6);
-        ['pratiquesCompatibles', 'discipline', 'metadata_cc']
+        expect(clesCreation.size).toBeGreaterThan(5);
+        // ⚠ 3 sept. 2026 (volet C, cases « Pratiques compatibles » retirées) : une
+        // échelle NEUVE ne porte plus `pratiquesCompatibles` — la clé ne se saisit
+        // plus, elle ne se supprime d'aucune donnée. Son transport reste éprouvé
+        // plus bas, sur une échelle STOCKÉE qui la porte (AB, ['STD', 'SPE']).
+        expect(clesCreation, 'une échelle neuve n\'écrit plus la clé').not.toContain('pratiquesCompatibles');
+        ['discipline', 'metadata_cc']
             .forEach(c => expect(clesCreation, `« ${c} » doit être vue par le banc`).toContain(c));
         // `metadata_cc` est un objet : ses clés internes ne sont PAS des clés
         // d'échelle, et le ratchet ne doit pas réclamer leur transport.

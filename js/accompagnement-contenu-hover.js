@@ -300,8 +300,6 @@ const TOOLTIPS = {
         'Discipline académique associée. Filtre les ressources de la bibliothèque par pertinence.',
     'cn-pratique-appliquer':
         'Définit cette pratique comme configuration active du cours. Conditionne tous les calculs de notes et d\'indices.',
-    'cn-pratiques-compat':
-        'Pratiques compatibles avec cette ressource : SOM (sommative), STD (PAN-standards), SPE (spécification), DEN (dénotation).',
 
     // =================================================================
     // T5 — ÉVALUATIONS
