@@ -86,6 +86,24 @@
        run 33760167678 lancé sur `324421db` (à lire à l'ouverture de la prochaine session,
        §2.1) ; le run 33746552531 sur `e028695b` (1.112.0) est passé au VERT entre-temps.
        `origin/main..main` = 0.
+     ↻ 11 h 20 – 11 h 45 : CONSIGNE « fermer l'audit du 25 août pour de bon » (Cowork, temps 1
+       du plan `PLAN-2026-09-02-evaluation-avant-la-chronique.md`). ⚠⚠ PRÉMISSE FAUSSE, mesurée
+       avant de toucher : `Rapports/AUDIT-evaluation-onglet-2026-08-25.md` portait DÉJÀ ses
+       dispositions (commit `672e3c5f`, 2 sept. 12 h 26, sur 1.110.0), et le quatrième site de
+       la note (#572) était DÉJÀ corrigé (`3d3a57be`, 2 sept. 13 h 16, parti en 1.111.0 ;
+       `grep parseFloat(.*noteProduction1` rend 0). La consigne, écrite à 13 h sur une mesure de
+       11 h 40 et « remesurée » à la promotion, décrivait l'état de la veille. Temps 1 ET temps 2
+       étaient faits. ▣ Ce qui restait vraiment (fait, fichier d'audit seul, aucun `js/`) :
+       B5 → REFUSÉ pour la portée (motif de Grégoire, 2 sept.) + l'écran livré en 1.111.2 ;
+       B8 → inscrit #560 livré 29 août (site mort retiré — la consigne disait « livré en 1.111.2 »,
+       ce qui mêlait les deux dates) ; C5 → motif du refus dans ses mots (CoP à l'automne) ;
+       section D → livré 28/29 août + quatrième site corrigé + refus motivé des `console.log`
+       + restes nommés (#596, couleurs dans `style` laissées sans fiche, h2/h3 porte terrain) ;
+       en-tête → base de remesure du 3 sept. (1.113.0, `76cb53c3`). Les 17 blocs portent une
+       disposition (script de contrôle) ; Vitest témoin 446 / 4821.
+       ⚠ ÉCARTS RAPPORTÉS, NON CORRIGÉS (rien d'autre ne bouge) : la fiche #572 au BACKLOG dit
+       encore « trois sites » et « clos » ; l'intervalle `awk 4145-4620` de la consigne a glissé
+       (ancre à 4365). ⮕ Rien à voir à l'écran. Commit, puis ARRÊT : pas de push.
      ===================================================================== -->
 
 <!-- =====================================================================
