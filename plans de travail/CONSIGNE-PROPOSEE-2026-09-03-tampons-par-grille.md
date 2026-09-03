@@ -10,6 +10,9 @@
 > bloc SESSION 19 de `SESSION.md`). Deux suppositions nommées à l'exécution : un sous-critère de
 > pondération 0 n'est pas un tampon ; « (repli) » sort du titre de l'écran pour aller dans sa
 > phrase d'explication.
+> ✅ **LES QUATRE LOTS SONT LIVRÉS le 3 septembre en soirée** (commits lot 1 `2a71ee0d`, lot 2
+> `2084c20f`, lot 3 `74e22bd0`, lot 4 = le suivant), non poussés, pas de release : Grégoire
+> regarde l'écran d'abord. Ce qu'il doit aller voir est au bloc SESSION 19 de `SESSION.md`.
 >
 > ▣ **État mesuré à l'écriture** : `HEAD` = `43f7a57b` (texte troué, étape 1 : deux commits
 > devant `origin/main`, verdict Playwright au jeton VERT sur ce SHA, non poussés — Grégoire

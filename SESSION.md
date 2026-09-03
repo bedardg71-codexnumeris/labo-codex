@@ -54,8 +54,8 @@
        effacé) ; `estActive(grille)` = drapeau `codesDepuisSousCriteres === true` strict
        ET ≥ 1 sous-critère de pondération > 0 (⚠ SUPPOSITION NOMMÉE : pondération 0 =
        « aucune erreur », pas un tampon) ; `grilleDeCopie(fichier)` (E ci-dessus, mode
-       démo respecté). REPLI = les dix d'hier au caractère près (ids, noms, noms courts,
-       couleurs, apostrophe typographique de « d’usage »), avec les quatre clés : numéro =
+       démo respecté). REPLI = les dix d'hier au caractère près (ids, noms, couleurs,
+       apostrophe typographique de « d’usage »), avec les quatre clés : numéro =
        position dans l'ordre FILTRÉ (règle d'hier : ordre ≠ 10 entrées ignoré, inconnu
        filtré), objet de textes qui remplace tout clé par clé. Sous-critères activés :
        id `errfr_<code>`, numéro = code (tel quel, « 12 » compris), nom ou « Code N »,
@@ -160,8 +160,59 @@
          corrigés : l'éditeur s'ouvre par `chargerGrillePourModif` (pas
          `chargerGrilleTemplate`, qui rend une liste en lecture seule) ; `.sous-critere-item`
          sert aussi aux paliers de projection (compter les champs Code).
-     ▣ RESTE : lot 4 (aide longue du gabarit et de l'écran Annoter, doc
-       `pipeline-annotation-evaluation.md`, changelog proposé pour la release).
+     ▣ LOT 4 LIVRÉ — L'AIDE ET LA TRACE : aide « Annoter et évaluer » (une entrée « Codes »
+       dans la liste des outils, qui nomme les deux chemins), aide du critère algorithmique
+       (un paragraphe « Les sous-critères comme codes d'annotation », avant « Mode simple ») ;
+       `docs/modules/pipeline-annotation-evaluation.md` (ligne « Codes » de la table Mode
+       Annoter, `codes-annotation.js` dans les fichiers source) ; consigne close. ⚠ Ces deux
+       aides sont des MOTS QUE DES ENSEIGNANTS LIRONT, écrits dans l'esprit des mots approuvés
+       (case, titre) sans avoir été relus par Grégoire : à relire en dix secondes.
+     ▣ CHANGELOG PROPOSÉ pour la release (vert, minor) — « Les codes d'annotation suivent ta
+       grille » : « <strong>Une grille peut fournir ses propres codes d'annotation.</strong>
+       Sous le critère algorithmique, coche « Utiliser ces sous-critères comme codes
+       d'annotation » : dans Annoter, la palette Codes montre tes sous-critères — numéro,
+       nom, couleur et rétroaction — pour toute copie évaluée avec cette grille. Un enseignant
+       de philosophie tamponne « Thèse non dégagée » ; il n'avait aucun chemin. ·
+       <strong>Rien ne change tant que tu ne coches pas.</strong> Les dix codes de départ
+       restent la palette de toute grille sans ce geste, avec tes noms, couleurs, ordre et
+       textes. · <strong>Chaque sous-critère porte sa couleur</strong> dans le gabarit ; sans
+       choix, il reprend celle des dix. · Le geste et les couleurs voyagent avec la grille au
+       partage et à l'import. · L'écran de réglage des dix codes s'intitule « Rétroactions —
+       Codes d'annotation » et dit à quoi ils servent. · Les codes et les tampons sont deux
+       palettes : le code identifie un élément du travail, le tampon le commente. »
+     ▣ CE QUE GRÉGOIRE DOIT ALLER VOIR (recharger avec vidage de cache ; jetons bumpés) :
+       1. Annoter, sa copie habituelle : la palette Codes est INCHANGÉE — dix codes, ses
+          noms, son ordre, ses couleurs ; poser un code, le compteur suit ; le PDF montre les
+          mêmes numéros qu'avant. C'est le témoin négatif, et il compte le plus.
+       2. Conception › sa grille de français › critère algorithmique : la case sous les
+          sous-critères est DÉCOCHÉE, la colonne Couleur montre les couleurs des dix par
+          position (code 0 en gris). Ne rien cocher sur sa grille réelle sans le vouloir :
+          cocher change les noms que la palette montre (« Syntaxe » pour « Construction
+          syntaxique ») et les textes que ses élèves lisent (ceux de la grille).
+       3. Une grille d'essai : cocher, ouvrir une copie d'une production évaluée avec elle
+          ⮕ la palette montre ses sous-critères, numérotés par leur code ; décocher ⮕ retour
+          aux dix. Le titre de l'écran « Personnaliser » : « Rétroactions — Codes d'annotation ».
+       4. iPad : la case et le sélecteur de couleur natif (`<input type="color">`) — non
+          éprouvés hors WebKit de bureau.
+     ▣ RELECTURE CROISÉE DE COWORK (règle 2, le lot 3 touche un format qui voyage) : PASSÉE.
+       Cartographié : le module n'écrit nulle part (0 `db.set/modifier/setSync`, 8 lectures) ;
+       `code()` jamais null ; l'aiguillage tient en deux lignes ; le repli respecte l'ordre et
+       filtre les inconnus comme hier. UNE TROUVAILLE, mineure : dans `_repli()`, `nom` prend
+       la personnalisation mais `nomCourt` toujours le défaut. ⮕ MESURÉ : `nomCourt` n'a qu'UN
+       consommateur, `_regenererOutilsCodes` → `OUTILS[errfr_N].nom`, et ce champ n'est affiché
+       NULLE PART (lecteurs de `outil.nom` : symboles, outils de dessin, raccourcis — listes
+       d'identifiants fixes ; les écouteurs de `travaux-outil-change` ne lisent que `.id`).
+       Hier non plus la personnalisation ne le touchait pas (43f7a57b:1216-1220). Champ mort,
+       et je viens de l'écrire ⮕ ce n'est pas une trouvaille, c'est le lot qui n'était pas fini :
+       `nomCourt` RETIRÉ du module, `OUTILS[errfr_N].nom` = le nom de la liste (long,
+       personnalisé) — rien de visible ne change, et il n'y a plus deux noms pour un code.
+     ▣ TROUVAILLES du chantier (trois issues) : (1) `.sous-critere-item` sert aussi aux paliers
+       de projection — COMMENTÉ dans la spec, oublié. (2) La sélection visuelle d'un code dans
+       la palette flottante cherchait un `onclick` que plus personne ne posait — CORRIGÉ dans
+       le lot (`data-param`), c'était le chemin du lot. (3) Le mode « catégories » de
+       l'évaluation tape encore les codes à la main (`1;3;3`) alors que les tampons posés les
+       connaissent — INSCRIRE ET CONTINUER : c'est le vrai gain de la fusion, il attend son
+       cadrage (aucun item ouvert : symptôme non vécu, hors lot).
      ===================================================================== -->
 
 <!-- =====================================================================

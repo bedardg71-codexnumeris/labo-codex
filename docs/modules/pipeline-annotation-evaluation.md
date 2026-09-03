@@ -115,7 +115,7 @@ Cliquer sur un badge ouvre le fichier dans la visionneuse.
 | **Dessin** | Stylo (sensible a la pression, epaisseur 1-8px), Surligneur (10-40px, multiply), Gomme (efface le trait entier) |
 | **Texte** | Texte multiligne (modale, taille 10-32px) |
 | **Formes** | Rectangle, Cercle, Ligne, Fleche, Crochet (vert), Croix (rouge), Interrogation (orange) |
-| **Erreurs de francais** | 10 symboles numerotes (construction syntaxique, subordonnee, ponctuation, accord, etc.) |
+| **Codes** | Codes d'erreur numerotes, comptes pour le critere algorithmique. Liste rendue par `js/codes-annotation.js` (3 sept. 2026) : les dix codes de depart (REPLI, regles par Annoter > palette Codes > Personnaliser : noms, couleurs, ordre, textes — quatre cles globales) ou, si la grille de la production porte `codesDepuisSousCriteres: true` sur son critere algorithmique, ses SOUS-CRITERES (id `errfr_<code>`, numero = code, nom, `couleur`, retroaction ; ponderation 0 exclue). Resolution copie -> production -> grille a `travaux-fichier-ouvert` (`grilleDeCopie`). Un code pose que la liste ne connait plus garde son numero, jamais efface. Les TAMPONS (ci-dessous) sont une autre palette : ils commentent, le code identifie. |
 | **Couleurs** | 12 couleurs predefinies (bleu par defaut) |
 | **Epaisseur** | Reglable |
 | **Annuler/Retablir** | Pile de 50 etats max |
@@ -319,7 +319,8 @@ semantique reelle d'un `<div>`).
 | `travaux-stockage.js` | ~300+ | Abstraction IndexedDB/FSAPI, gestion quota |
 | `travaux-visionneuse.js` | ~400+ | Rendu PDF.js + images, zoom, navigation pages |
 | `travaux-annotation.js` | ~450+ | Moteur de dessin canvas, evenements, modele de donnees |
-| `travaux-outils.js` | ~200+ | Definitions outils, couleurs, autocollants, palette flottante |
+| `codes-annotation.js` | ~290 | La liste des codes d'annotation d'une copie : repli (dix codes + quatre cles globales) ou sous-critères de la grille activee ; `listeCodes`, `code` (jamais null), `estActive`, `apercuCodes`, `grilleDeCopie` |
+| `travaux-outils.js` | ~3700 | Definitions outils, couleurs, autocollants, palettes ; la grille courante d'une copie (`_poserGrilleCourante`) et l'ecran de reglage des dix codes du repli |
 | `travaux-ui.js` | ~2500+ | Coordinateur UI : import, fichiers, visionneuse, modes, archivage |
 | `travaux-export-pdf.js` | ~300+ | Generation PDF avec annotations superposees |
 | `travaux-archivage.js` | ~150+ | Export ZIP, organisation par dossiers, allegement |
