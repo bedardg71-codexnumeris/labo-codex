@@ -121,4 +121,14 @@ Et, quand d'autres fichiers du même travail restent (ils perdent leur évaluati
 | Contre-épreuve | 7 mutations du code de production, 7 rouges, restauration vérifiée par empreinte |
 | Audit sécurité du diff | 0 `innerHTML`, 0 handler inline, 0 `eval`, 0 `console.log` |
 | Playwright local complet | **241 essais verts, 0 échec, 8 min** (macOS, WebKit) — résultat local, sans jeton |
-| Verdict au jeton | **non pris**, exprès (règle de nuit) |
+| Verdict au jeton | **non pris** pendant la nuit, exprès ; pris le 3 septembre au matin, après le coup d'œil de Grégoire |
+
+---
+
+## ↻ 3 septembre, 4 h 50 — vu à l'écran, livré
+
+Grégoire a ouvert les trois fenêtres (captures) : la liste dit « Supprimer la cartouche
+«Description d'un personnage» de sa grille « G5 FR-HOLIS A26 » ? » puis « Cette action est
+irréversible. » ; les deux de la section 1 posent la question d'avant, parce que rien ne survit
+dans ses données (aucune copie en bibliothèque partagée, aucune évaluation d'automne 2026 ne les
+emploie encore). Décision : livrer maintenant ⮕ **release 1.111.1**, verdict au jeton, push.
