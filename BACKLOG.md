@@ -1728,6 +1728,13 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⏳ **LOT 2, À FAIRE, tranché le même jour** : **corriger** une échelle sans la supprimer ⮕ le recalcul des évaluations
   qui l'emploient est **PROPOSÉ, jamais automatique** (« il permet d'informer l'utilisateur des conséquences de son
   geste »), et refusé dans un trimestre archivé. Même règle, autre chemin d'écriture : session dédiée.
+  ⚠ **Trouvaille de la relecture croisée (Cowork, 3 septembre 2026), issue 2 — inscrite, NON corrigée** : « le
+  remplacement n'est pas atomique ; en cas d'échec partiel l'ancienne échelle survit et relancer le geste termine la
+  migration — mais l'écran ne le dit pas ». `remplacerEchellePartout` enchaîne six écritures indépendantes (évaluations,
+  productions, pratiques, grilles, cartouches par grille) ; si l'une échoue en cours (quota IndexedDB, magasin absent),
+  les précédentes sont écrites, les suivantes non, et l'exception remonte AVANT le retrait de l'ancienne : les deux
+  échelles coexistent, les porteurs sont répartis, et relancer le geste migre le reste — **idempotent par répétition**.
+  Ce qui manque : le dire à l'utilisateur, qui verrait une erreur brute sans savoir que relancer suffit.
 - [x] **#649 — LIVRÉ 2 septembre 2026 (soir) · `retirerProductionDeLaBibliotheque` n'existe pas : le garde est mort et le « fallback » est l'unique chemin depuis toujours**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur mesure de `kuekatsheu-94`, **rejouée avec
   témoin** par la coordinatrice. Lot de #624, **non corrigé le 31 août** : aucun symptôme actuel.

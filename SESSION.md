@@ -148,6 +148,13 @@
        ⮕ CE QUE GRÉGOIRE DOIT ALLER VOIR : Conception › Échelles, tenter de supprimer
          une échelle employée, lire — la fenêtre demande par quoi la remplacer et
          dit combien suivront. Ne pas confirmer.
+       ↻ 6 h 45 : RELECTURE CROISÉE DE COWORK PASSÉE (l'ordre du cœur cartographié :
+         compte → refus archivé → refus sans successeur → question → choix →
+         écriture, retrait après remplacement). Une trouvaille, issue 2, inscrite
+         sous #648 : le remplacement n'est pas atomique, l'ancienne survit à un
+         échec partiel et relancer termine — l'écran ne le dit pas. Grégoire a lu
+         l'écran (porteurs nommés, refus « aucun successeur » correct sur 0-IDME).
+         ⮕ Release 1.112.0 (minor : geste nouveau), verdict au jeton, push.
      ===================================================================== -->
 
 <!-- =====================================================================

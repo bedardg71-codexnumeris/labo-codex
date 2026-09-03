@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.112',
+            couleur: 'vert',
+            titre: 'Supprimer une échelle, c\'est la remplacer',
+            items: [
+                '<strong>Supprimer une échelle que des évaluations emploient n\'est plus un saut dans le vide : l\'application te demande par quelle échelle la remplacer, et tout ce qui la nommait suit</strong> — évaluations, productions, pratiques de notation, grilles et cartouches du trimestre. L\'ancienne n\'est retirée qu\'après. Avant, selon l\'écran, elle partait sans un mot, ou le bouton se bloquait sans dire quoi faire.',
+                '<strong>Seules les échelles aux mêmes niveaux sont proposées.</strong> Une évaluation retient le niveau de chaque critère par son code (I, D, M, E…) : un remplacement vers une échelle aux codes différents laisserait les notes sans correspondance. S\'il n\'existe aucune échelle compatible, l\'écran le dit, nomme les codes, et ne touche à rien.',
+                '<strong>Dans un trimestre archivé, l\'application refuse</strong>, et dit que le remplacement toucherait des notes déjà remises.',
+                '<strong>Une échelle que rien n\'emploie se supprime comme avant, sans un mot de plus.</strong> Ce n\'est pas un déchet : c\'est peut-être un projet qui n\'est pas terminé.',
+                'La même question, avec le choix du remplacement, depuis l\'onglet Données — où le bouton restait bloqué sur « Suppression impossible » sans issue.'
+            ]
+        },
+        {
             version: '1.111',
             couleur: 'orange',
             titre: 'La note dit sur quoi elle porte',
