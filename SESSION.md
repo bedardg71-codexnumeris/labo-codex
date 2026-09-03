@@ -66,6 +66,11 @@
        disque à 21 h 21, non commités) : laissés tels quels, à Cowork. La date du
        poste : 2 septembre 21 h — la consigne « pour la nuit » disait le 3.
      ⮕ Rapport complet : `plans de travail/RAPPORT-2026-09-02-nuit-suppressions-disent-vrai.md`.
+     ↻ 3 SEPTEMBRE, 4 h 50 : Grégoire a lu les trois fenêtres à l'écran (captures :
+       liste → « de sa grille « G5 FR-HOLIS A26 » » + irréversible ; section 1 ×2 →
+       question d'avant, rien ne survit dans ses données). Décision : « Livrer
+       maintenant » ⮕ release 1.111.1 (patch, item 8 de l'entrée 1.111 du
+       changelog), verdict au jeton par scripts/pousser.sh, push.
      ===================================================================== -->
 
 <!-- =====================================================================
