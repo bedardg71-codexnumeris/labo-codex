@@ -107,7 +107,47 @@
        ↻ 3 SEPTEMBRE, vers 6 h : Grégoire a lu les trois écrans (« c'est fait, on
          continue ») ⮕ release 1.111.2 (patch), verdict au jeton par
          scripts/pousser.sh, push. GitHub sur ec111072 (1.111.1) : vert, Vitest et
-         Playwright WebKit (run 33737365376).
+         Playwright WebKit (run 33737365376). 1.111.2 poussée (`763f5e46`), GitHub
+         vert sur les deux jobs (run 33741362801).
+     ↻ 3 SEPTEMBRE, 6 h 10 – 7 h : #648 — SUPPRIMER UNE ÉCHELLE EST UN REMPLACEMENT
+       (décision Grégoire, `plans de travail/DECISION-2026-09-03-echelle-remplacement.md`).
+       Consigne Cowork de 6 h 10. Mesure rendue AVANT de coder, deux questions
+       fermées tranchées par Grégoire : (1) successeur aux MÊMES codes de niveaux,
+       sinon refus nommé — parce qu'une évaluation stocke son niveau par CODE
+       (evaluation-sauvegarde.js) et que la note le relit dans l'échelle désignée
+       (evaluation-calcul.js:1264) : un pointeur seul ne fait pas suivre les
+       notes ; (2) TOUT ce qui nomme l'échelle suit (évaluations, productions,
+       pratiques sous `configuration.echelleId`, grilles, cartouches), pas les
+       évaluations seules.
+       ▣ Mesuré : SIX `supprimerEchelle*` (dualité, comme les cartouches) ; quatre
+         vident l'ancrage, UNE seule avait une porte de migration (zone d'édition,
+         confirm + prompt) ; la garde de Données comptait les pratiques sur le
+         mauvais champ (`p.echelleId`) et bloquait sans issue. Archivage =
+         `t.archive === true` / `estTrimestreArchive()` ; AUCUN marqueur « terminé »
+         → refus sur l'archivage seul. Périmètre = trimestre actif (évaluations ET
+         échelles préfixées #358) : énumérer tous les trimestres compterait ce que
+         la migration ne touche pas — contredit la consigne, dit et tenu.
+       ▣ LIVRÉ : un cœur dans echelles.js (`supprimerOuRemplacerEchelle` : compte
+         de tout ce qui la nomme, refus si archivé, successeurs aux mêmes codes,
+         `remplacerEchellePartout` par la file magasin par magasin, retrait) sur
+         les trois gestes de Conception ; la modal de Données reçoit un sélecteur
+         de successeur (index.html) et fait la même mesure ; `verifierUtilisationEchelle`
+         (plus d'appelant) retirée. Témoin négatif : sans porteur, la question
+         d'avant, sans un mot de plus. Sentinelle 648 (18 essais, vraie fonction en
+         bac à sable, magasins forgés en mémoire) ; sentinelle 522 lot 2b ajustée
+         (25 → 22 écritures par la file : trois retraits locaux → un cœur) ;
+         5 mutations, 5 rouges. Vitest 446 / 4815.
+       ⏳ LOT 2, NON FAIT (la consigne l'autorise) : CORRIGER une échelle → recalcul
+         PROPOSÉ, jamais automatique, refus si archivé. Même règle, autre chemin
+         d'écriture.
+       ⛔ Aucune donnée réelle touchée : l'application n'est jamais ouverte d'ici ;
+         les écritures des tests vont dans un objet `store` en mémoire
+         (sentinelle-648, `charger(store)`), témoin : `grep -n "store\[" tests/unit/sentinelle-648-*.test.js`.
+       ⮕ Commit, puis ARRÊT : relecture croisée de Cowork (règle 2, ça écrit dans
+         les évaluations), coup d'œil de Grégoire, puis seulement verdict/release/push.
+       ⮕ CE QUE GRÉGOIRE DOIT ALLER VOIR : Conception › Échelles, tenter de supprimer
+         une échelle employée, lire — la fenêtre demande par quoi la remplacer et
+         dit combien suivront. Ne pas confirmer.
      ===================================================================== -->
 
 <!-- =====================================================================

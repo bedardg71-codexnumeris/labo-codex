@@ -1071,17 +1071,10 @@ async function enregistrerCommeEchelle() {
  * - Confirmation obligatoire avant suppression
  */
 async function supprimerEchelle(echelleId) {
-    if (!confirm('Supprimer cette échelle ?')) return;
-
-    // Marquer comme supprimée si c'est un gabarit hardcodé
-    if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(echelleId)) {
-        window.marquerRessourceSupprimee(echelleId);
-    }
-
-    await db.modifier(cle('echellesTemplates'), (lues) => {
-        const echelles = lues || [];
-        return echelles.filter(e => e.id !== echelleId);
-    }, []);
+    // #648 — un seul chemin : remplacement si quelque chose la nomme, sinon la
+    // question d'avant, sans un mot de plus (voir supprimerOuRemplacerEchelle).
+    const resultat = await supprimerOuRemplacerEchelle(echelleId, { questionSimple: 'Supprimer cette échelle ?' });
+    if (!resultat.supprimee) return;
 
     await chargerEchellesTemplates();
     await afficherToutesLesEchellesNiveaux();
@@ -1093,7 +1086,7 @@ async function supprimerEchelle(echelleId) {
     // RETIRÉ — la fonction n'a jamais existé dans le dépôt. Il levait un
     // ReferenceError juste AVANT la notification : l'échelle partait vraiment,
     // sans que l'utilisateur en soit averti. Retrait, pas réanimation.
-    notifications.succes('Échelle supprimée');
+    notifierEchelleSupprimee(resultat);
 }
 
 /* ===============================
@@ -2728,47 +2721,21 @@ async function retirerEchelleDeBibliotheque(id) {
  * @param {string} id - ID de l'échelle à supprimer
  */
 async function supprimerEchelleDefinitivement(id) {
-    // ⚠ Lecture hors file, pour NOMMER l'échelle dans la question. La
-    // confirmation ne doit pas tenir la file ouverte : c'est le temps de
-    // réflexion de l'utilisateur, et tout ce qui s'enregistre pendant serait
-    // écrasé par une collection lue avant la question.
+    // #648 (3 septembre 2026) — ce chemin vide l'ancrage ET la Bibliothèque. Le
+    // remplacement passe d'abord, par le chemin partagé des trois gestes de
+    // Conception (supprimerOuRemplacerEchelle) ; sans porteur, la question
+    // d'avant, mot pour mot. Le commentaire #650 qui disait « ce chemin ne
+    // vérifie aucune dépendance » n'a plus lieu d'être : il en vérifie autant
+    // que les autres, parce que c'est le même code.
+    // ⚠ Lecture hors file, pour NOMMER l'échelle dans la question.
     const echelles = await db.get(cle('echellesTemplates')) || [];
     const echelle = echelles.find(e => e.id === id);
-
     if (!echelle) return;
 
-    // ⚠ #650 (31 août 2026) — CE CHEMIN NE VÉRIFIE AUCUNE DÉPENDANCE, ET CE
-    // N'EST PAS PARCE QU'IL N'Y EN A PAS. La ligne qui tenait cette place
-    // affirmait « Pas de dépendances directes pour les échelles ». C'était
-    // faux, et un commentaire faux ne se contente pas de ne pas aider : il
-    // arme la main suivante, qui le lit comme un fait vérifié.
-    //
-    // Une échelle EST référencée : les évaluations portent `ev.echelleId`
-    // (#624), et #648 recense les autres porteurs. Supprimer ici laisse ces
-    // références pointer dans le vide — sans compte, sans avertissement, sans
-    // trace : un gel silencieux, pas une perte visible.
-    //
-    // La garde et sa porte de sortie existent, mais dans UN seul chemin :
-    // `supprimerEchelleDepuisSidebar` (`verifierUtilisationEchelle` puis
-    // `migrerEvaluationsVersNouvelleEchelle`). Les porter ici est le lot #624,
-    // pas #650 — d'ici là, cette ligne dit ce qui manque au lieu de le nier.
-
-    // Confirmation
-    if (!confirm(`Supprimer définitivement l'échelle «${echelle.nom}» ?\n\nCette action est irréversible.`)) {
-        return;
-    }
-
-    // Marquer comme supprimée si c'est un gabarit hardcodé
-    if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(id)) {
-        window.marquerRessourceSupprimee(id);
-    }
-
-    // Suppression définitive du store local, DANS la file : la collection
-    // filtrée est celle qui existe au moment de l'écriture, pas celle lue
-    // avant la question.
-    await db.modifier(cle('echellesTemplates'), (lues) => {
-        return (lues || []).filter(e => e.id !== id);
-    }, []);
+    const resultat = await supprimerOuRemplacerEchelle(id, {
+        questionSimple: `Supprimer définitivement l'échelle «${echelle.nom}» ?\n\nCette action est irréversible.`
+    });
+    if (!resultat.supprimee) return;
 
     // Suppression du store partagé
     if (typeof retirerEchelleDeLaBibliotheque === 'function') {
@@ -2779,7 +2746,7 @@ async function supprimerEchelleDefinitivement(id) {
     fermerModalBibliothequeEchelles();
     await afficherListeEchelles();
     await afficherBibliothequeEchelles();
-
+    notifierEchelleSupprimee(resultat);
 }
 
 /**
@@ -4396,30 +4363,6 @@ async function dupliquerEchelleDepuisSidebar(id) {
 }
 
 /**
- * Vérifie si une échelle est utilisée par des évaluations existantes
- * @param {string} echelleId - ID de l'échelle à vérifier
- * @returns {Object} {utilisee: boolean, nbEvaluations: number, evaluations: Array}
- */
-async function verifierUtilisationEchelle(echelleId) {
-    // Récupérer les évaluations du trimestre actif
-    let evaluations = await db.get(cle('evaluationsSauvegardees'));
-
-    // S'assurer que c'est un tableau
-    if (!Array.isArray(evaluations)) {
-        evaluations = [];
-    }
-
-    // Filtrer les évaluations qui utilisent cette échelle
-    const evaluationsUtilisant = evaluations.filter(e => e.echelleId === echelleId);
-
-    return {
-        utilisee: evaluationsUtilisant.length > 0,
-        nbEvaluations: evaluationsUtilisant.length,
-        evaluations: evaluationsUtilisant
-    };
-}
-
-/**
  * Migre les évaluations d'une échelle vers une autre
  * @param {string} ancienneEchelleId - ID de l'échelle à remplacer
  * @param {string} nouvelleEchelleId - ID de la nouvelle échelle
@@ -4463,107 +4406,241 @@ async function migrerEvaluationsVersNouvelleEchelle(ancienneEchelleId, nouvelleE
     return nbMigrees;
 }
 
-async function supprimerEchelleDepuisSidebar(id) {
-    // Marquer comme supprimée si c'est un gabarit hardcodé
-    // (placé avant la logique pour couvrir tous les chemins de suppression)
-    const _marquerSiGabarit = () => {
-        if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(id)) {
-            window.marquerRessourceSupprimee(id);
-        }
+// =============================================================================
+// #648 (3 septembre 2026) — SUPPRIMER UNE ÉCHELLE EST UN REMPLACEMENT.
+//
+// Décision de Grégoire : « On supprime une échelle pour la remplacer par une
+// autre. Une évaluation ne tient pas s'il n'y a pas d'échelle. Le geste est
+// incomplet, il doit être suivi d'un remplacement ou d'une correction. »
+//
+// Trois cas, tous tranchés :
+//   · quelque chose la nomme  → remplacement obligatoire : par quoi, puis TOUT ce
+//     qui la nomme suit (évaluations, productions, pratiques, grilles, cartouches
+//     du trimestre actif), puis retrait ;
+//   · trimestre archivé       → refus, en nommant les notes déjà remises ;
+//   · rien ne la nomme        → rien de spécial : la question d'avant, sans un
+//     mot de plus (« c'est peut-être un projet qui n'est pas terminé »).
+//
+// Ce que « ses notes suivent » exige, MESURÉ : une évaluation stocke le niveau de
+// chaque critère par son CODE (evaluation-sauvegarde.js, `niveauSelectionne`), et
+// la note le relit dans l'échelle désignée par `ev.echelleId`
+// (evaluation-calcul.js:1264). Un successeur n'est donc proposé que s'il porte
+// tous les codes de l'ancienne ; sinon la note tomberait à « -- » sans que
+// personne le voie. Décision Grégoire : refuser et dire pourquoi, plutôt que
+// d'inventer une correspondance.
+//
+// Le périmètre est le TRIMESTRE ACTIF : évaluations et échelles sont préfixées
+// par trimestre (#358) ; un trimestre archivé garde sa copie et ses évaluations.
+//
+// Trois gestes de Conception passent ici (la liste, la zone d'édition, la
+// section 1 de la bibliothèque modale) ; l'onglet Données fait la même mesure et
+// le même remplacement avec sa propre modal (donnees-v2.js). La section 2 ne
+// touche que la Bibliothèque : rien à remplacer, rien à dire.
+// =============================================================================
+
+/**
+ * Les codes de niveaux de `nouvelle` couvrent-ils ceux d'`ancienne` ? Pure.
+ * Les codes vides ne comptent pas : une évaluation ne stocke jamais un code vide.
+ * @returns {{compatibles: boolean, manquants: string[]}}
+ */
+function comparerCodesEchelles(ancienne, nouvelle) {
+    const codesDe = (e) => new Set(((e && e.niveaux) || [])
+        .map(n => (n && n.code != null) ? String(n.code).trim() : '')
+        .filter(c => c !== ''));
+    const nouveaux = codesDe(nouvelle);
+    const manquants = [...codesDe(ancienne)].filter(c => !nouveaux.has(c));
+    return { compatibles: manquants.length === 0, manquants };
+}
+
+/**
+ * Tout ce qui nomme une échelle, dans des magasins déjà lus. Pure.
+ * @param {string} echelleId
+ * @param {{evaluations: Array, productions: Array, pratiques: Array, grilles: Array, cartouchesParGrille: Object}} magasins
+ * @returns {{evaluations: number, productions: number, pratiques: number, grilles: number, cartouches: number, total: number}}
+ */
+function compterPorteursEchelleDans(echelleId, magasins) {
+    const liste = (x) => Array.isArray(x) ? x : (x ? [x] : []);
+    const m = magasins || {};
+    const nommeLEchelle = (x) => !!x && x.echelleId === echelleId;
+    const nb = {
+        evaluations: liste(m.evaluations).filter(nommeLEchelle).length,
+        productions: liste(m.productions).filter(nommeLEchelle).length,
+        // Une pratique range son échelle sous `configuration.echelleId`
+        // (pratiques-gestion.js). L'ancienne garde de l'onglet Données lisait
+        // `p.echelleId` : le mauvais référent, d'où le compte faux de #648.
+        pratiques: liste(m.pratiques).filter(p => !!p && ((p.configuration && p.configuration.echelleId === echelleId) || p.echelleId === echelleId)).length,
+        grilles: liste(m.grilles).filter(nommeLEchelle).length,
+        cartouches: Object.values(m.cartouchesParGrille || {}).reduce((somme, ancrage) => somme + liste(ancrage).filter(nommeLEchelle).length, 0)
     };
+    nb.total = nb.evaluations + nb.productions + nb.pratiques + nb.grilles + nb.cartouches;
+    return nb;
+}
 
-    // Vérifier si l'échelle est utilisée
-    const utilisation = await verifierUtilisationEchelle(id);
-
-    if (utilisation.utilisee) {
-        // L'échelle est utilisée, offrir des choix à l'utilisateur
-        const echelles = await db.get(cle('echellesTemplates')) ||  [];
-        const echelle = echelles.find(e => e.id === id);
-        const nomEchelle = echelle?.nom || 'cette échelle';
-
-        // Créer une liste des autres échelles disponibles pour la migration
-        const autresEchelles = echelles.filter(e => e.id !== id);
-
-        let message = `⚠️ ATTENTION : L'échelle "${nomEchelle}" est utilisée par ${utilisation.nbEvaluations} évaluation(s) existante(s).\n\n`;
-
-        if (autresEchelles.length > 0) {
-            message += 'Options:\n';
-            message += '1. Migrer ces évaluations vers une autre échelle\n';
-            message += '2. Annuler la suppression\n\n';
-            message += `Veux-tu migrer les évaluations vers une autre échelle ?`;
-
-            const choixMigration = confirm(message);
-
-            if (choixMigration) {
-                // Afficher un sélecteur d'échelle de remplacement
-                let listeEchelles = 'Sélectionne l\'échelle de remplacement :\n\n';
-                autresEchelles.forEach((e, idx) => {
-                    listeEchelles += `${idx + 1}. ${e.nom} (${e.niveaux?.length || 0} niveaux)\n`;
-                });
-
-                const choixNumero = prompt(listeEchelles + '\nEntre le numéro de l\'échelle :');
-                const numeroChoisi = parseInt(choixNumero);
-
-                if (numeroChoisi && numeroChoisi >= 1 && numeroChoisi <= autresEchelles.length) {
-                    const nouvelleEchelle = autresEchelles[numeroChoisi - 1];
-                    const nbMigrees = await migrerEvaluationsVersNouvelleEchelle(id, nouvelleEchelle.id);
-
-                    // Maintenant supprimer l'échelle. ⚠ L'index est recalculé
-                    // DANS la file : celui d'avant les questions posées à
-                    // l'utilisateur ne vaut plus rien.
-                    let supprimee = false;
-                    await db.modifier(cle('echellesTemplates'), (lues) => {
-                        const liste = lues || [];
-                        const i = liste.findIndex(e => e.id === id);
-                        if (i === -1) return undefined;
-                        _marquerSiGabarit();
-                        liste.splice(i, 1);
-                        supprimee = true;
-                        return liste;
-                    }, []);
-
-                    if (supprimee) {
-                        await afficherListeEchelles();
-                        document.getElementById('conteneurEditionEchelle').classList.add('u-hide');
-                        // Note: Section optionsImportExportEchelles supprimée (Beta 92)
-                        document.getElementById('accueilEchelles').classList.remove('u-hide');
-                        notifications.succes('Échelle supprimée', `${nbMigrees} évaluation(s) migrée(s) vers "${nouvelleEchelle.nom}".`);
-                    }
-                } else {
-                    alert('Migration annulée. L\'échelle n\'a pas été supprimée.');
-                }
-            } else {
-                alert('Suppression annulée. Les évaluations existantes sont préservées.');
-            }
-        } else {
-            // Pas d'autres échelles disponibles
-            message += '⚠️ Impossible de supprimer : il n\'y a aucune autre échelle vers laquelle migrer les évaluations.\n\n';
-            message += 'Tu dois d\'abord créer une nouvelle échelle ou supprimer les évaluations existantes.';
-            alert(message);
-        }
-    } else {
-        // L'échelle n'est pas utilisée, suppression directe
-        if (!confirm('Supprimer cette échelle ?')) return;
-
-        let supprimee = false;
-        await db.modifier(cle('echellesTemplates'), (lues) => {
-            const liste = lues || [];
-            const i = liste.findIndex(e => e.id === id);
-            if (i === -1) return undefined;
-            _marquerSiGabarit();
-            liste.splice(i, 1);
-            supprimee = true;
-            return liste;
-        }, []);
-
-        if (supprimee) {
-            await afficherListeEchelles();
-            document.getElementById('conteneurEditionEchelle').classList.add('u-hide');
-            // Note: Section optionsImportExportEchelles supprimée (Beta 92)
-            document.getElementById('accueilEchelles').classList.remove('u-hide');
-            notifications.succes('Échelle supprimée');
-        }
+/** Les magasins du trimestre actif, lus hors file — pour compter, jamais pour écrire. */
+async function lireMagasinsEchelle() {
+    const grilles = await db.get(cle('grillesTemplates')) || [];
+    const cartouchesParGrille = {};
+    for (const g of (Array.isArray(grilles) ? grilles : [])) {
+        if (g && g.id) cartouchesParGrille[g.id] = await db.get(cle(`cartouches_${g.id}`)) || [];
     }
+    return {
+        evaluations: await db.get(cle('evaluationsSauvegardees')) || [],
+        productions: await db.get(cle('productions')) || [],
+        pratiques: await db.get(cle('pratiquesConfigurables')) || [],
+        grilles,
+        cartouchesParGrille
+    };
+}
+
+/** Même lecture, synchrone — pour la modal de l'onglet Données, qui n'attend pas. */
+function lireMagasinsEchelleSync() {
+    const grilles = db.getSync(cle('grillesTemplates'), []) || [];
+    const cartouchesParGrille = {};
+    (Array.isArray(grilles) ? grilles : []).forEach(g => {
+        if (g && g.id) cartouchesParGrille[g.id] = db.getSync(cle(`cartouches_${g.id}`), []) || [];
+    });
+    return {
+        evaluations: db.getSync(cle('evaluationsSauvegardees'), []) || [],
+        productions: db.getSync(cle('productions'), []) || [],
+        pratiques: db.getSync(cle('pratiquesConfigurables'), []) || [],
+        grilles,
+        cartouchesParGrille
+    };
+}
+
+/** « 12 évaluations, 2 productions et 1 pratique de notation » — pour l'enseignant. */
+function decrirePorteursEchelle(nb) {
+    const n = nb || {};
+    const p = (k, s, pl) => `${k} ${k >= 2 ? pl : s}`;
+    const parts = [];
+    if (n.evaluations) parts.push(p(n.evaluations, 'évaluation', 'évaluations'));
+    if (n.productions) parts.push(p(n.productions, 'production', 'productions'));
+    if (n.pratiques) parts.push(p(n.pratiques, 'pratique de notation', 'pratiques de notation'));
+    if (n.grilles) parts.push(p(n.grilles, 'grille', 'grilles'));
+    if (n.cartouches) parts.push(p(n.cartouches, 'cartouche', 'cartouches'));
+    if (parts.length === 0) return 'rien';
+    if (parts.length === 1) return parts[0];
+    return parts.slice(0, -1).join(', ') + ' et ' + parts[parts.length - 1];
+}
+
+/** Réécrit un magasin par la file ; rend le nombre d'objets touchés (0 = rien écrit). */
+async function _repointerEchelle(cleMagasin, estCible, appliquer) {
+    let n = 0;
+    await db.modifier(cleMagasin, (lues) => {
+        const liste = Array.isArray(lues) ? lues : (lues ? [lues] : []);
+        n = 0;
+        liste.forEach(x => { if (x && estCible(x)) { appliquer(x); n++; } });
+        return n === 0 ? undefined : liste;
+    }, []);
+    return n;
+}
+
+/**
+ * Tout ce qui nomme `ancienneId` dans le trimestre actif nomme désormais
+ * `nouvelleId`. Chaque magasin par la file (#522) ; rend les comptes RÉELLEMENT
+ * écrits — c'est eux que l'écran annonce après coup, pas ceux d'avant.
+ */
+async function remplacerEchellePartout(ancienneId, nouvelleId) {
+    const nb = { evaluations: 0, productions: 0, pratiques: 0, grilles: 0, cartouches: 0 };
+    nb.evaluations = await migrerEvaluationsVersNouvelleEchelle(ancienneId, nouvelleId);
+    const nommeAncienne = (x) => x.echelleId === ancienneId;
+    const versNouvelle = (x) => { x.echelleId = nouvelleId; };
+    nb.productions = await _repointerEchelle(cle('productions'), nommeAncienne, versNouvelle);
+    nb.pratiques = await _repointerEchelle(cle('pratiquesConfigurables'),
+        p => (p.configuration && p.configuration.echelleId === ancienneId) || p.echelleId === ancienneId,
+        p => {
+            if (p.configuration && p.configuration.echelleId === ancienneId) p.configuration.echelleId = nouvelleId;
+            if (p.echelleId === ancienneId) p.echelleId = nouvelleId;
+        });
+    const grilles = await db.get(cle('grillesTemplates')) || [];
+    nb.grilles = await _repointerEchelle(cle('grillesTemplates'), nommeAncienne, versNouvelle);
+    for (const g of (Array.isArray(grilles) ? grilles : [])) {
+        if (g && g.id) nb.cartouches += await _repointerEchelle(cle(`cartouches_${g.id}`), nommeAncienne, versNouvelle);
+    }
+    nb.total = nb.evaluations + nb.productions + nb.pratiques + nb.grilles + nb.cartouches;
+    return nb;
+}
+
+/**
+ * Le chemin partagé par lequel une échelle quitte l'ancrage depuis Conception.
+ * Rend { supprimee, nb, successeur } ; ne supprime JAMAIS sans successeur quand
+ * quelque chose la nomme ; refuse dans un trimestre archivé ; sans porteur, pose
+ * `options.questionSimple` et rien de plus.
+ * ⚠ Lit hors file pour poser ses questions, écrit DANS la file (#522) : l'index
+ * est recalculé au moment d'écrire, celui d'avant les questions ne vaut rien.
+ */
+async function supprimerOuRemplacerEchelle(id, options = {}) {
+    const echelles = await db.get(cle('echellesTemplates')) || [];
+    const echelle = echelles.find(e => e && e.id === id);
+    if (!echelle) return { supprimee: false };
+    const nomEchelle = echelle.nom || 'cette échelle';
+
+    const nb = compterPorteursEchelleDans(id, await lireMagasinsEchelle());
+    let successeur = null;
+    let ecrits = null;
+
+    if (nb.total === 0) {
+        // Témoin négatif : rien ne la nomme — la question d'avant, sans un mot de plus.
+        if (!confirm(options.questionSimple || 'Supprimer cette échelle ?')) return { supprimee: false, annulee: true };
+    } else {
+        if (window.estTrimestreArchive && window.estTrimestreArchive()) {
+            alert(`Ce trimestre est archivé : remplacer l'échelle «${nomEchelle}» toucherait ${decrirePorteursEchelle(nb)}, dont des notes déjà remises.\n\nRien n'a été modifié.`);
+            return { supprimee: false, refusee: 'archive', nb };
+        }
+        const autres = echelles.filter(e => e && e.id !== id);
+        const candidats = autres.filter(e => comparerCodesEchelles(echelle, e).compatibles);
+        const ecartes = autres.length - candidats.length;
+        if (candidats.length === 0) {
+            const codes = (echelle.niveaux || []).map(n => n && n.code).filter(c => c != null && String(c).trim() !== '').join(', ');
+            alert(`L'échelle «${nomEchelle}» est employée par ${decrirePorteursEchelle(nb)} : la supprimer, c'est la remplacer.\n\nAucune autre échelle de ce trimestre ne porte ses niveaux (${codes || 'aucun code'}). Crée d'abord une échelle aux mêmes niveaux, ou corrige celle-ci.\n\nRien n'a été modifié.`);
+            return { supprimee: false, refusee: 'aucun-successeur', nb };
+        }
+        let question = `Supprimer l'échelle «${nomEchelle}», c'est la remplacer : ${decrirePorteursEchelle(nb)} suivront.\n\nPar quelle échelle la remplacer ?\n\n`;
+        candidats.forEach((e, i) => { question += `${i + 1}. ${e.nom || 'Sans titre'}\n`; });
+        if (ecartes > 0) {
+            question += `\n(${ecartes} autre(s) échelle(s) du trimestre n'ont pas les mêmes niveaux et ne sont pas proposées.)\n`;
+        }
+        const choix = prompt(question + '\nEntre le numéro, ou Annuler pour ne rien changer :');
+        const numero = parseInt(choix, 10);
+        if (!numero || numero < 1 || numero > candidats.length) return { supprimee: false, annulee: true, nb };
+        successeur = candidats[numero - 1];
+        ecrits = await remplacerEchellePartout(id, successeur.id);
+    }
+
+    if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(id)) {
+        window.marquerRessourceSupprimee(id);
+    }
+    let supprimee = false;
+    await db.modifier(cle('echellesTemplates'), (lues) => {
+        const liste = lues || [];
+        const restants = liste.filter(e => !(e && e.id === id));
+        if (restants.length === liste.length) return undefined;
+        supprimee = true;
+        return restants;
+    }, []);
+    return { supprimee, nb: ecrits, successeur };
+}
+
+/** Le message d'après dit ce qui est parti — et, s'il y a eu remplacement, ce qui a suivi. */
+function notifierEchelleSupprimee(resultat) {
+    if (resultat && resultat.successeur) {
+        notifications.succes('Échelle remplacée et supprimée', `«${resultat.successeur.nom || 'Sans titre'}» prend la place : ${decrirePorteursEchelle(resultat.nb)} suivent.`);
+    } else {
+        notifications.succes('Échelle supprimée');
+    }
+}
+
+async function supprimerEchelleDepuisSidebar(id) {
+    // #648 — le remplacement vit dans supprimerOuRemplacerEchelle, partagé par les
+    // trois gestes de Conception ; ce qui reste ici est l'écran.
+    const resultat = await supprimerOuRemplacerEchelle(id, { questionSimple: 'Supprimer cette échelle ?' });
+    if (!resultat.supprimee) return;
+
+    await afficherListeEchelles();
+    document.getElementById('conteneurEditionEchelle')?.classList.add('u-hide');
+    // Note: Section optionsImportExportEchelles supprimée (Beta 92)
+    document.getElementById('accueilEchelles')?.classList.remove('u-hide');
+    notifierEchelleSupprimee(resultat);
 }
 
 /**
@@ -4853,8 +4930,17 @@ window.REFUS_MAX_NIVEAU = REFUS_MAX_NIVEAU;
 window.marquerChampRefuseEchelle = marquerChampRefuseEchelle;               // #524
 window.REFUS_CODE_NIVEAU = REFUS_CODE_NIVEAU;
 window.REFUS_NOM_NIVEAU = REFUS_NOM_NIVEAU;
-window.verifierUtilisationEchelle = verifierUtilisationEchelle;
 window.migrerEvaluationsVersNouvelleEchelle = migrerEvaluationsVersNouvelleEchelle;
+// #648 — supprimer une échelle est un remplacement : le cœur partagé, exposé pour
+// l'onglet Données (donnees-v2.js) et pour les sentinelles.
+window.comparerCodesEchelles = comparerCodesEchelles;
+window.compterPorteursEchelleDans = compterPorteursEchelleDans;
+window.lireMagasinsEchelle = lireMagasinsEchelle;
+window.lireMagasinsEchelleSync = lireMagasinsEchelleSync;
+window.decrirePorteursEchelle = decrirePorteursEchelle;
+window.remplacerEchellePartout = remplacerEchellePartout;
+window.supprimerOuRemplacerEchelle = supprimerOuRemplacerEchelle;
+window.notifierEchelleSupprimee = notifierEchelleSupprimee;
 
 // ✅ AJOUT (8 décembre 2025) : Exports fonctions bibliothèque
 window.afficherBibliothequeEchelles = afficherBibliothequeEchelles;

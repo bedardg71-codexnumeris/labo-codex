@@ -1,181 +1,143 @@
-# Consigne du jour — la phrase qui attend, puis « bibliothèque partagée » sort du vocabulaire
+# Consigne du jour — supprimer une échelle devient la remplacer *(#648)*
 
-> **Écrite le 3 septembre 2026 à 5 h 15 (heure de Grégoire), par Cowork, avec lui.**
-> ▣ **Grégoire est ÉVEILLÉ et disponible** : il a arbitré le mandat lui-même à 5 h, et il
-> regardera l'écran dès que tu diras que c'est prêt. Le cycle est court, pas différé.
-> **Application au moment de l'écriture : `1.111.1`, build `0903-0459`, POUSSÉE.**
-> Elle remplace la consigne de la nuit, exécutée et livrée (`393e1e54`, `ec111072`).
+> **Écrite le 3 septembre 2026 à 6 h 10 (heure de Grégoire), par Cowork, avec lui.**
+> **Application au moment de l'écriture : `1.111.2`, build `0903-0544`, POUSSÉE.**
+> Elle remplace la consigne du vocabulaire, exécutée et livrée (`a69fb166`, `225f55e2`,
+> `763f5e46`).
 >
-> ▣ **État à l'écriture, mesuré** : `HEAD` = `ec111072`,
+> ▣ **État à l'écriture, mesuré** : `HEAD` = `763f5e46`,
 > `git rev-list --count origin/main..HEAD` rend **0** — témoin, `HEAD..origin/main` rend **0**
-> lui aussi. Arbre propre, sauf `OU-EN-EST-ON.md` et `PROTOCOLE.md`, qui sont à Cowork :
+> lui aussi. Arbre propre sauf `OU-EN-EST-ON.md` et `PROTOCOLE.md`, qui sont à Cowork :
 > **ne les commite pas.**
 >
-> ⚠ **REMESURE TOUT** (règle 1). Les comptes ci-dessous ont été pris par Cowork en lecture
-> seule ; ils ne sont pas les tiens.
+> ▣ **Grégoire est éveillé** et regardera l'écran dès que tu diras que c'est prêt.
+>
+> ⚠ **REMESURE TOUT** (règle 1). Les lignes citées ici ont été prises par Cowork en lecture
+> seule ; elles ne sont pas les tiennes.
+>
+> ⮕ **La décision complète, avec ses motifs, est dans
+> `plans de travail/DECISION-2026-09-03-echelle-remplacement.md`. LIS-LA D'ABORD.**
+> Cette consigne en est l'exécution, pas le résumé.
 
 ---
 
-## Le mandat — décision de Grégoire, 3 septembre
+## ⛔ LE POINT QUI COMMANDE TOUT LE RESTE — TU VAS ÉCRIRE DANS SES DONNÉES
 
-**L'expression « bibliothèque partagée » disparaît de tout ce que l'utilisateur lit.
-Elle est remplacée par « la Bibliothèque ».**
+**Migrer des évaluations vers une autre échelle, c'est réécrire des évaluations réelles de
+Grégoire.** C'est le point 2 de ce qui remonte jusqu'à lui (`CLAUDE.md`), et c'est le
+périmètre exact de la **règle 2** de `PROTOCOLE.md` : relecture croisée obligatoire, parce
+que ça ne se reprend pas.
 
-▣ **Le motif, dans ses mots** : *« Les documents partagés sont des copies indépendantes.
-Ce ne sont pas des originaux. Si un collègue m'envoie une cartouche, que je l'utilise et que
-je la supprime, ça n'a aucun effet sur l'original de mon collègue. »*
-
-⮕ **Le mot ment donc deux fois.** Il suggère un dépôt commun à plusieurs personnes — il n'y
-en a pas. Et il fait craindre à un enseignant de détruire l'exemplaire d'un collègue en
-supprimant sa propre copie. **C'est l'inverse de ce que fait le code.**
-
-▣ **Témoin que le mot est étranger à l'écran** : `grep -n "Bibliothèque" index.html` rend
-« Bibliothèque » et « Bibliothèque groupe-cours ». **« Partagée » n'y est jamais un libellé.**
-
-↻ **Note d'avenir, à ne PAS anticiper** : quand la Voûte existera, l'expression pourra
-revenir — elle décrira alors quelque chose de réel. **Aujourd'hui, non.** Ne prépare rien
-pour ce futur, ne laisse pas d'alias « au cas où » (zéro-dette).
+⮕ **Ce que ça t'impose, et ce n'est pas négociable :**
+1. **La migration ne s'exécute jamais sans que l'utilisateur ait vu le compte AVANT.**
+2. **Aucun essai sur ses trimestres réels.** Bancs et données forgées seulement.
+3. ⛔ **Tu ne répares aucun stock existant d'office.** « Tarir n'est pas réparer » : ce
+   correctif change ce qui se passera, pas ce qui est déjà écrit chez les gens.
+4. **Le lot passe par la relecture croisée de Cowork avant tout verdict.** Dis-le quand tu es
+   prêt ; ne prends pas le verdict au jeton avant.
 
 ---
 
-## Le périmètre — et les trois choses à ne PAS toucher
+## Le mandat — décision de Grégoire, 3 septembre au matin
 
-`grep -rni "bibliothèque partagée" js/ index.html` rend **89** occurrences dans **23**
-fichiers (46 dans des chaînes, 50 dans des commentaires — les deux comptes se recouvrent,
-refais-les). Les plus fournis : `productions-bibliotheque-ui.js` (11), `cartouches.js` (10),
-`echelles.js` (8), `planification-bibliotheque.js` (7), `grilles.js` (6),
-`echelles-bibliotheque.js` (6), `donnees-v2.js` (6).
+**Supprimer une échelle dont des évaluations dépendent n'est pas une suppression : c'est un
+remplacement.** L'application demande par quoi remplacer, migre les évaluations, puis retire
+l'ancienne. **Elle ne propose jamais de la retirer sans successeur.**
 
-### ⛔ 1. LES CLÉS DE STOCKAGE NE CHANGENT PAS. C'EST LA RÈGLE QUI PRIME.
+▣ **Son motif, dans ses mots** : *« On supprime une échelle pour la remplacer par une autre.
+Une évaluation ne tient pas s'il n'y a pas d'échelle. Le geste est incomplet, il doit être
+suivi d'un remplacement ou d'une correction. »*
 
-`bibliothequeCartouches`, `bibliothequeGrilles`, `bibliothequeEchelles`,
-`bibliothequePratiques`, `bibliothequeProductions`, `bibliothequeTampons`,
-`bibliothequeAlignements`, et toute constante `CLE_BIBLIOTHEQUE_*`.
+⮕ **Ce que ça écarte** : les trois issues envisagées jusqu'ici — refuser, cascader, laisser
+aller — posaient toutes la mauvaise question. Elles traitaient la suppression comme un geste
+qui se suffit. **Il ne se suffit pas.**
 
-⚠⚠ **Ce sont les adresses des données réelles de Grégoire.** Une seule renommée et son
-contenu devient introuvable — sans erreur, sans message, silencieusement. **C'est un chantier
-de PROSE, pas de structure.** Si une modification touche autre chose qu'une chaîne affichée
-ou un commentaire, **arrête-toi et dis-le.**
+### Les trois cas, tous tranchés
 
-### ⛔ 2. LE CHANGELOG DÉJÀ LU NE SE RÉÉCRIT PAS.
-
-`js/changelog-data.js:364` (les huit échelles d'exemple) est une annonce **ancienne**, lue par
-des utilisateurs. **Laisse-la.** Réécrire ce qui a été annoncé, c'est falsifier l'historique.
-
-⮕ **L'exception, et une seule** : `js/changelog-data.js:35` — l'annonce de **1.111.1**, publiée
-il y a quelques heures, qui emploie l'expression trois fois. C'est l'annonce du lot qu'on
-corrige ; **récris-la** avec le nouveau mot.
-
-### ⛔ 3. PAS DE `sed` GLOBAL.
-
-L'expression apparaît dans au moins quatre positions grammaticales différentes :
-
-| aujourd'hui | demain |
+| cas | comportement arrêté |
 |---|---|
-| `Bibliothèque partagée (12)` *(titre de section)* | `Bibliothèque (12)` |
-| `ajouter tes N échelle(s) à la bibliothèque partagée` | `…à la Bibliothèque` |
-| `Supprimer définitivement «X» de la bibliothèque partagée ?` | `…de la Bibliothèque ?` |
-| `Aucun tampon dans la bibliothèque partagée.` | `Aucun tampon dans la Bibliothèque.` |
+| des évaluations dépendent de l'échelle | **remplacement obligatoire** : par quoi, puis migration, puis retrait |
+| trimestre **terminé ou archivé** | **refus**, en disant que ça toucherait des notes déjà remises |
+| **aucune** évaluation ne l'emploie | **rien de spécial** : elle se supprime sans un mot de plus |
 
-⚠ **La casse suit la position** : « la Bibliothèque » en cours de phrase, « Bibliothèque » seul
-en titre. **Relis chaque occurrence.** Un remplacement automatique produira « à la la
-Bibliothèque » et des majuscules au mauvais endroit.
-
-⮕ **Les commentaires de code** : change-les aussi, ils décrivent l'architecture et un nom
-périmé s'y réinstalle tout seul. **Mais compte-les à part** dans ton rapport : visible d'un
-côté, commentaire de l'autre. Les deux comptes n'ont pas la même valeur.
+⚠ **Le troisième est le témoin négatif, et il compte autant que les deux autres.** Pas
+d'avertissement, pas de proposition de ménage, aucun signalement « inutilisée ». **Ses mots** :
+*« C'est peut-être tout simplement un projet qui n'est pas terminé. »*
 
 ---
 
-## ↻ ET UNE CORRECTION DANS LA MÊME PASSE — décidée par Cowork, à contredire s'il le faut
+## L'état mesuré — à rejouer avant de coder
 
-`js/cartouches.js:4786-4791`, `supprimerCartoucheDefinitivement`.
+`verifierDependancesEchelle` → **`js/donnees-v2.js:1188`**
 
-▣ **Mesuré ce matin sur la capture de Grégoire** : la fenêtre annonce « 89 évaluation(s)
-l'emploient » et « Cette action est irréversible » — **mais elle ne dit pas de quelle grille
-la cartouche part.** Le nom de la grille n'est écrit que si la cartouche est AUSSI dans la
-bibliothèque ; quand elle n'y est pas, la ligne saute entièrement.
+▣ Elle ne compte que les **pratiques de notation** (`cle('pratiquesConfigurables')`), sur le
+**trimestre actif seul**. Elle ne regarde **jamais** les évaluations.
+▣ Le compte tombe dans `dependances`, pas dans `avertissements` ⮕ **le bouton est désactivé,
+sans issue proposée.** L'enseignant est bloqué sans savoir quoi faire.
+▣ **Témoin que le périmètre étroit n'est pas une contrainte d'architecture** : la fonction
+sœur `verifierDependancesCartouche`, dans le même fichier, énumère TOUS les trimestres
+(`enumererTrimestres()`).
 
-▣ **Témoin que ce n'est pas la règle partout** : `supprimerCartoucheConfirm` (l. 1810) met la
-grille dans la question elle-même, **toujours** — « Supprimer la cartouche «X» de sa grille
-« G » ? ».
+▣ **L'archivage existe déjà, et son champ est mesuré** : `js/trimestre-v2-liste.js:88` teste
+`t.archive === true`, et la l. 100 affiche le badge « Archivé ». ⚠ **« Terminé » n'est pas
+mesuré** : cherche s'il existe un autre marqueur, et **si tu n'en trouves pas, dis-le et
+n'invente pas de critère** — le refus portera alors sur l'archivage seul.
 
-⮕ **Deux chemins vident le même ancrage, un seul dit lequel.** C'est mot pour mot l'énoncé 8.
-⮕ **Remède** : la grille se nomme dans TOUS les cas où l'ancrage est vidé. Le fragment sur la
-Bibliothèque reste conditionnel, lui.
-⚠ **Ce n'est pas un texte neuf** : c'est une phrase déjà arrêtée par Grégoire, appliquée au cas
-où elle manquait. **Si tu juges que ça change ses mots plutôt que de les étendre, arrête-toi et
-demande.**
-
----
-
-## ⚠⚠ ET D'ABORD — LE VOLET A ATTEND UNE PHRASE QUI EXISTE DÉJÀ
-
-`plans de travail/PATCH-560-portee-suppression-fichier-EN-ATTENTE-DES-MOTS.diff`
-
-▣ **Ton rapport de cette nuit dit** : *« la règle est tranchée, les mots ne sont pas arrêtés,
-je n'ai pas composé. »* ⮕ **C'était vrai quand tu as lu la consigne. Ça ne l'est plus.**
-**Grégoire a tranché la phrase le 2 septembre à 21 h 45**, parmi trois formulations proposées.
-Elle a été inscrite dans la consigne quelques minutes après ta lecture — d'où le décalage.
-
-⛔ **Ne pas avoir composé était le bon geste.** Voici les mots, arrêtés par lui, à écrire tels
-quels :
-
-```
-Supprimer définitivement ?
-
-Le fichier, ses annotations et toutes les évaluations de cet élève pour cette
-production seront effacés.
-
-Cette action est irréversible.
-```
-
-⮕ **Applique ton propre patch** (`git apply --3way`), remplace la phrase marquée « Mots
-PROVISOIRES » par celle-ci, bumpe le jeton de `js/liste-evaluations.js`, et écris la sentinelle
-que ton préambule décrit.
-⚠ **Le témoin négatif que tu as toi-même prévu tient** : sans évaluation liée, la fenêtre
-reprend la phrase d'avant, mot pour mot.
-
-▣ **Fais ce volet EN PREMIER** : il est prêt, il ferme le dernier tiers d'un énoncé, et il ne
-touche pas les mêmes fichiers que le chantier du vocabulaire. **Deux lots, deux commits.**
+⚠⚠ **Et cherche la DUALITÉ avant de coder.** `supprimerEchelleDefinitivement` existe en
+**deux corps** — `js/echelles.js` et `js/donnees-v2.js` — mesuré le 2 septembre : deux
+chemins de suppression indépendants, l'un depuis l'onglet Données, l'autre depuis Conception
+› Échelles. **Remesure-le, et traite les deux.** Un remplacement offert d'un côté et une
+suppression nue de l'autre serait pire que l'état actuel.
 
 ---
 
-## ⏳ CE QUI N'EST PAS DANS CE LOT
+## Le cas voisin — CORRIGER une échelle sans la supprimer
 
-**Dire que les documents partagés sont des copies indépendantes.** Grégoire veut que ce soit
-précisé quelque part — mais **pas dans une fenêtre de suppression**, qui n'est pas le moment
-de l'expliquer. ⮕ **Inscris-le** : le bon endroit est le geste de partage ou de réception,
-et ça se décide à froid.
+**Le recalcul doit être possible, et il est PROPOSÉ, jamais automatique.**
+
+▣ **Ses mots** : *« La correction d'une échelle doit permettre un recalcul, c'est souvent ce à
+quoi sert la correction. »* et *« Il permet d'informer l'utilisateur des conséquences de son
+geste. »*
+
+⮕ **La proposition n'est pas une politesse : c'est le seul moment où l'enseignant apprend
+combien d'évaluations sa correction touche.** Elle nomme le compte AVANT le geste.
+⛔ **Un recalcul silencieux est exclu**, même s'il donne le bon résultat.
+⚠ **La règle du trimestre archivé vaut ici aussi.**
+
+⮕ **Si ce volet double la taille du lot, ARRÊTE-TOI APRÈS LE REMPLACEMENT et dis-le.**
+Deux lots valent mieux qu'un lot à moitié fait sur des chemins qui écrivent dans ses données.
 
 ---
 
 ## Fini quand
 
-**Un enseignant qui lit un message de l'application ne peut plus croire qu'il touche au
-document d'un collègue.**
+**Un enseignant qui s'est trompé dans une échelle peut la remplacer, et ses notes suivent.**
 
-▣ **Le témoin** : `grep -rni "bibliothèque partagée" js/ index.html` ne rend plus que
-`js/changelog-data.js:364` — l'annonce ancienne, laissée exprès.
-▣ **Le témoin inverse, qui compte autant** : `grep -rn "bibliothequeCartouches" js/` rend le
-MÊME compte qu'avant ton lot. Cite les deux nombres. **Si celui-là a bougé, tu as touché aux
-données.**
+▣ **Le témoin** : l'écran ne propose plus « Supprimer » nu sur une échelle employée par des
+évaluations — il propose de remplacer, et dit combien d'évaluations suivront.
+▣ **Le témoin négatif** : une échelle qu'aucune évaluation n'emploie se supprime **sans un mot
+de plus** qu'avant ce lot.
+▣ **Le témoin du refus** : dans un trimestre archivé, il refuse, et nomme les notes déjà
+remises.
+▣ **Le témoin des données** : aucune évaluation réelle n'a été écrite pendant ton travail.
+Cite la commande qui le montre.
 
 ---
 
 ## L'ordre
 
-1. **Rapporte le verdict de GitHub sur `ec111072`** (rituel d'ouverture, §2.1).
-2. **Le volet A d'abord** — le patch est prêt, la phrase est arrêtée. Commit séparé.
-3. **Recompte les 89 occurrences toi-même**, et sépare visible / commentaire.
-3. **Vérifie d'abord la liste des clés intouchables**, avant la première modification.
+1. **Rapporte le verdict de GitHub sur `763f5e46`** (rituel d'ouverture, §2.1).
+2. **Lis la décision** (`plans de travail/DECISION-2026-09-03-echelle-remplacement.md`).
+3. **Remesure** : les deux chemins de suppression, le champ d'archivage, le périmètre du
+   compte. **Rends-moi ça avant de coder.**
 4. Ce lot touche `js/` ⮕ **bump du bloc de jetons d'`index.html`**.
 5. `cd tests && npm run test:unit` pour travailler ; **`npm test` complet avant de dire que
-   c'est prêt.** ⚠ Vitest se lance **depuis `tests/`**.
-6. ⛔ **Tu commites, puis tu t'arrêtes.** Pas de release, pas de push, pas de verdict au jeton :
-   Grégoire regarde l'écran d'abord.
-7. **Ce fichier se commite avec ton lot.** Nomme tes fichiers au commit ; pas de `git add -A`.
+   c'est prêt** — ce lot touche des chemins qui écrivent dans les évaluations.
+   ⚠ Vitest se lance **depuis `tests/`**.
+6. ⛔ **Tu commites, puis tu t'arrêtes.** Pas de release, pas de push, pas de verdict au
+   jeton : relecture croisée de Cowork, puis coup d'œil de Grégoire, puis seulement le reste.
+7. **Ce fichier se commite avec ton lot.** Nomme tes fichiers ; pas de `git add -A`.
 
-⮕ **CE QUE GRÉGOIRE DOIT ALLER VOIR** : ouvrir **Conception › cartouches**, section 2 de la
-bibliothèque, et lire la question. Puis la même chose sur une **échelle** et sur une **grille**
-— trois familles, trois écrans, un seul mot. ⚠ **Qu'il ne confirme rien.** Lire suffit.
+⮕ **CE QUE GRÉGOIRE DOIT ALLER VOIR** : ouvrir **Conception › Échelles**, tenter de supprimer
+une échelle qu'il emploie, et lire ce que l'écran propose. Il doit lui demander par quoi la
+remplacer, et dire combien d'évaluations suivront. ⚠ **Qu'il ne confirme pas.** Lire suffit.
