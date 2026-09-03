@@ -7,6 +7,68 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 16 — 2 SEPTEMBRE 2026, SOIR : LES SUPPRESSIONS DE CARTOUCHES DISENT
+     VRAI (#647), LE GARDE MORT DES PRODUCTIONS EST PARTI (#649), ET LA COPIE
+     D'UN ÉLÈVE ATTEND SES MOTS (#560, volet A).
+
+     ▣ Session Claude Code sur consigne FICHIER (`plans de travail/CONSIGNE-DU-JOUR.md`),
+       réécrite par Cowork à 21 h 30 PENDANT la session : la première version, lue au
+       départ, croyait le volet C entier à faire ; il était à moitié livré le 31 août
+       (`183b515b`). Grégoire présent au début (un STOP, deux décisions), parti dormir
+       ensuite. UN commit, fichiers nommés. Pas de release, pas de push, pas de verdict
+       au jeton (règle de nuit de la consigne).
+
+     ▣ VERDICT GITHUB SUR `1402a17c` (rituel §2.1, rapporté en premier) : run
+       33698317119 « Tests », success — Vitest success, Playwright (WebKit) success,
+       233 essais jugés, 6 non jugés (planificateur, WebKit Linux ≠ Safari).
+
+     ⚠⚠ CE QUE LA CONSIGNE NE SAVAIT PAS, ET QUE L'ÉCRAN A MONTRÉ. Grégoire a ouvert la
+       fenêtre de suppression d'une cartouche : « Es-tu sûr de vouloir supprimer la
+       cartouche «Description d'un personnage» ? ». Elle n'est produite par AUCUNE des
+       fonctions nommées dans la fiche ni dans la consigne : c'est
+       `supprimerCartoucheConfirm` (liste + zone d'édition), qui EFFACE L'ANCRAGE sans
+       dire ni la portée ni l'irréversibilité. `grep -rn "function supprimerCartouche"
+       js/` rend SIX déclarations (témoin : `^async function supprimerGrille` en rend 6,
+       le motif compte). Cinq vivantes, de TROIS portées différentes (ancrage seul /
+       bibliothèque seule / les deux) ; une morte (`supprimerCartouche()`, zéro
+       appelant, zéro export) — retirée, pas corrigée, sur décision de Grégoire.
+       ⮕ La leçon du 2 septembre matin, encore : le regard à l'écran trouve ce que le
+       grep « de la fiche » ne cherche pas. COMPTER LES DÉCLARATIONS D'UNE FAMILLE
+       avant de corriger « le chemin ».
+
+     ▣ LIVRÉ :
+       · #647 — quatre chemins vivants disent vrai : portée MESURÉE au moment où on
+         parle (jamais supposée), survivance dite seulement si elle a lieu (copie en
+         bibliothèque ; rétroactions déjà rédigées, stockées dans l'évaluation et
+         restituées telles quelles — evaluation.js:1639), témoin négatif tenu (quand
+         rien ne survit, la question d'avant mot pour mot). Mots du chemin 1810
+         arrêtés par Grégoire. Forme : `confirm()` conservé — cartouches.js en compte
+         8, zéro `uiDialogues`. Sentinelle 21 essais (vraies fonctions extraites du
+         fichier, invariant couplé mots ↔ ce que chaque chemin ÉCRIT) ; 6 mutations,
+         6 rouges, restauration vérifiée par empreinte.
+       · #649 — garde mort retiré, chemin réel `retirerDeLaBibliotheque` appelé (file
+         #599 + sortie des dossiers de classement #327), résultat rendu (faux si
+         introuvable ; le repli rendait toujours vrai). Sentinelle 6 essais ; 1
+         mutation, 5 rouges.
+       · Jetons `index.html` : cartouches.js et donnees-v2.js → 20260903a.
+     ▣ NON LIVRÉ, PRÊT : #560 volet A. Grégoire a tranché la règle (tout le couple
+       part) ; les mots ne sont pas arrêtés (crochets vides) ⮕ on ne compose pas.
+       Patch complet : `plans de travail/PATCH-560-portee-suppression-fichier-EN-
+       ATTENTE-DES-MOTS.diff` (git apply --check OK), trois formulations dans le
+       RAPPORT. Volet B (#648, l'échelle) hors lot : arbitrage pédagogique dû.
+     ▣ Vitest 443 fichiers / 4787 verts (+2 fichiers, +27 essais avec les invariants
+       ajoutés au rituel). Playwright local complet : 241 essais verts, 0 échec,
+       8 min — PAS de verdict au jeton, il se prend après le coup d'œil de Grégoire.
+     ⮕ CE QUE GRÉGOIRE DOIT ALLER VOIR : Conception › cartouches, « Supprimer » sur
+       une cartouche de la liste, LIRE, ne pas confirmer. Puis la même chose depuis
+       la bibliothèque modale, section 1 et section 2.
+     ⚠ Cowork écrivait EN PARALLÈLE (OU-EN-EST-ON.md, PROTOCOLE.md modifiés sur le
+       disque à 21 h 21, non commités) : laissés tels quels, à Cowork. La date du
+       poste : 2 septembre 21 h — la consigne « pour la nuit » disait le 3.
+     ⮕ Rapport complet : `plans de travail/RAPPORT-2026-09-02-nuit-suppressions-disent-vrai.md`.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 15 — 1er SEPTEMBRE 2026 : #668, LA PROJECTION EUF DEVIENT UN
      RÉGLAGE DU GABARIT — ET DEUX DÉFAUTS TROUVÉS EN CHEMIN.
 

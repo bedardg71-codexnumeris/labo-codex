@@ -1816,7 +1816,30 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
         return;
     }
 
-    if (confirm(`Es-tu sûr de vouloir supprimer la cartouche «${cartouche?.nom}» ?`)) {
+    // #647 (2 septembre 2026, soir — mots arrêtés par Grégoire) : la question dit
+    // la portée réelle. Ce chemin n'écrit QUE l'ancrage de la grille (trimestre
+    // actif) ; il ne touche pas la bibliothèque partagée. Ce qui survit est dit,
+    // seulement quand c'est mesuré : la copie qui reste dans la bibliothèque (on
+    // peut la rajouter à la grille depuis la section 2), et les rétroactions déjà
+    // rédigées des évaluations qui l'emploient (stockées dans l'évaluation,
+    // restituées telles quelles au chargement — evaluation.js:1639).
+    const grilles = await db.get(cle('grillesTemplates')) || [];
+    const grille = grilles.find(g => g.id === grilleId);
+    const biblio = typeof obtenirToutesLesCartouchesBibliotheque === 'function'
+        ? (await obtenirToutesLesCartouchesBibliotheque() || [])
+        : [];
+    const evaluations = await db.get(cle('evaluationsSauvegardees')) || [];
+    const nbEvaluations = evaluations.filter(ev => ev && ev.cartoucheId === cartoucheId).length;
+
+    let survivance = '';
+    if (biblio.some(c => c.id === cartoucheId)) {
+        survivance += 'Elle reste dans la bibliothèque partagée.\n';
+    }
+    if (nbEvaluations > 0) {
+        survivance += `${nbEvaluations} évaluation(s) l'emploient : leur rétroaction déjà rédigée est conservée.\n`;
+    }
+
+    if (confirm(`Supprimer la cartouche «${cartouche?.nom}» de sa grille « ${grille ? grille.nom : grilleId} » ?\n\n${survivance ? survivance + '\n' : ''}Cette action est irréversible.`)) {
         if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(cartoucheId)) {
             window.marquerRessourceSupprimee(cartoucheId);
         }
@@ -1842,20 +1865,6 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
         }
 
     }
-}
-
-/**
- * Supprime la cartouche actuellement en édition
- * Appelée depuis le bouton de suppression principal
- * 
- * UTILISÉ PAR:
- * - Bouton «Supprimer» dans la zone d'édition
- */
-async function supprimerCartouche() {
-    if (!cartoucheActuel) return;
-
-    const grilleId = cartoucheActuel.grilleId;
-    await supprimerCartoucheConfirm(cartoucheActuel.id, grilleId);
 }
 
 /* ===============================
@@ -4758,8 +4767,34 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
 
     if (!cartouche) return;
 
+    // #647 (2 septembre 2026, soir) — ce chemin est le plus destructeur des trois :
+    // la cartouche part de sa grille (ancrage du trimestre actif) ET, si elle s'y
+    // trouve, de la bibliothèque partagée. La question le dit AVANT le geste, et ne
+    // nomme la bibliothèque que si la cartouche y est vraiment — mesuré, pas supposé.
+    // Ce qui SURVIT est dit aussi, seulement s'il y a quelque chose à dire : les
+    // évaluations qui l'emploient gardent leur rétroaction déjà rédigée (elle est
+    // stockée dans l'évaluation, `retroactionFinale`, pas relue depuis la cartouche).
+    // Témoin négatif : une cartouche qui n'est que dans sa grille et que rien
+    // n'emploie se supprime avec la question d'avant, sans un mot de plus.
+    const biblio = typeof obtenirToutesLesCartouchesBibliotheque === 'function'
+        ? (await obtenirToutesLesCartouchesBibliotheque() || [])
+        : [];
+    const aussiDansBibliotheque = biblio.some(c => c.id === id);
+    const evaluations = await db.get(cle('evaluationsSauvegardees')) || [];
+    const nbEvaluations = evaluations.filter(ev => ev && ev.cartoucheId === id).length;
+
+    let portee = '';
+    if (aussiDansBibliotheque) {
+        const grilles = await db.get(cle('grillesTemplates')) || [];
+        const grille = grilles.find(g => g.id === grilleId);
+        portee += `Elle part de sa grille « ${grille ? grille.nom : grilleId} » et de la bibliothèque partagée.\n`;
+    }
+    if (nbEvaluations > 0) {
+        portee += `${nbEvaluations} évaluation(s) l'emploient : leur rétroaction déjà rédigée est conservée.\n`;
+    }
+
     // Confirmation
-    if (!confirm(`Supprimer définitivement la cartouche «${cartouche.nom}» ?\n\nCette action est irréversible.`)) {
+    if (!confirm(`Supprimer définitivement la cartouche «${cartouche.nom}» ?\n\n${portee ? portee + '\n' : ''}Cette action est irréversible.`)) {
         return;
     }
 
@@ -4796,7 +4831,22 @@ async function supprimerCartoucheDeBibliothequePartagee(id) {
     const cartouche = biblio.find(c => c.id === id);
     if (!cartouche) return;
 
-    if (!confirm(`Supprimer définitivement «${cartouche.nom || 'Sans titre'}» de la bibliothèque partagée ?\n\nCette action est irréversible.`)) return;
+    // #647 (3 septembre 2026) — la même vérité que l'onglet Données, sur l'autre
+    // chemin. Ce retrait n'écrit que la bibliothèque partagée : si la cartouche est
+    // aussi ancrée à sa grille (`cartouches_<grilleId>`, clé EXACTE, lue au moment
+    // où on parle), elle y RESTE et la question le dit. Sinon la suppression est
+    // entière, et elle se fait sans un mot de plus.
+    const nomCartouche = cartouche.nom || 'Sans titre';
+    let question = `Supprimer définitivement «${nomCartouche}» de la bibliothèque partagée ?\n\nCette action est irréversible.`;
+    if (cartouche.grilleId) {
+        const ancrage = await db.get(cle(`cartouches_${cartouche.grilleId}`)) || [];
+        if (ancrage.some(c => c.id === id)) {
+            const grilles = await db.get(cle('grillesTemplates')) || [];
+            const grille = grilles.find(g => g.id === cartouche.grilleId);
+            question = `Retirer «${nomCartouche}» de la bibliothèque partagée ?\n\nLe retrait est irréversible ; la cartouche reste dans sa grille « ${grille ? grille.nom : cartouche.grilleId} ».`;
+        }
+    }
+    if (!confirm(question)) return;
 
     // #468/CO-25 (21 août 2026) : poser le tombstone AVANT le retrait. Sans lui,
     // un gabarit fourni par défaut revenait au prochain chargement — la

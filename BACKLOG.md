@@ -1614,7 +1614,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⮕ Deux hypothèses, aucune vérifiée : l'attente guette le **mauvais sélecteur**, ou elle guette **trop tôt**.
   ⮕ Ressemble à la famille de #645 (deux chemins de rendu qui divergent, l'un émettant les éléments attendus et l'autre
   non), mais **le rapprochement n'est pas mesuré non plus**. À traiter comme une piste, pas comme une cause.
-- [ ] **#647 — S6 · L'avertissement de suppression d'une cartouche annonce une perte qui n'a pas lieu, et tait une survivance qui a lieu**.
+- [x] **#647 — LIVRÉ 2 septembre 2026 (soir) · L'avertissement de suppression d'une cartouche annonce une perte qui n'a pas lieu, et tait une survivance qui a lieu**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur mesure de `kuekatsheu-94`. Lot de #624.
   `supprimerCartoucheDefinitivement` (`js/donnees-v2.js:1608`) n'appelle que `retirerCartoucheDeLaBibliotheque`, qui
   écrit **uniquement** `bibliothequeCartouches` (clé nue, `cartouches-bibliotheque.js:20`). Elle ne touche **jamais**
@@ -1641,6 +1641,27 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   sans eux **déplace** le mensonge au lieu de le retirer.
   ⚠ **Portée de la preuve** : établi par lecture de code, pas par exécution. La structure dit que la cartouche survit ;
   seules les DONNÉES diraient combien sont dans les deux magasins à la fois. Ne pas citer ceci comme un comptage.
+  ↻ **LIVRÉ EN DEUX TEMPS.** (1) 31 août, `183b515b` : le chemin de l'onglet Données dit vrai (survivance mesurée, trois
+  libellés changés ensemble, `index.html` compris — le « reste dû » ci-dessus était livré le même jour). (2) 2 septembre au
+  soir, Grégoire à l'écran : `grep -rn "function supprimerCartouche" js/` rend **SIX** déclarations, pas une — cinq vivantes,
+  une morte. La fenêtre qu'il avait sous les yeux (« Es-tu sûr de vouloir supprimer la cartouche «X» ? »,
+  `supprimerCartoucheConfirm`, la liste et la zone d'édition) n'était produite par **aucune** fonction nommée dans cette fiche ;
+  elle efface l'ANCRAGE et ne disait ni la portée ni l'irréversibilité. **Mots arrêtés par Grégoire** : « Supprimer la
+  cartouche «X» de sa grille « G » ? » + survivances MESURÉES, dites seulement si elles ont lieu (« Elle reste dans la
+  bibliothèque partagée. » ; « N évaluation(s) l'emploient : leur rétroaction déjà rédigée est conservée. ») + « Cette action
+  est irréversible. ». Section 1 de la bibliothèque modale (`supprimerCartoucheDefinitivement`, ancrage ET bibliothèque) dit
+  d'où elle part ; section 2 (`supprimerCartoucheDeBibliothequePartagee`, bibliothèque seule) dit qu'elle reste dans sa
+  grille. Témoin négatif tenu : quand rien ne survit, la question d'avant, mot pour mot. `supprimerCartouche()` (zéro
+  appelant, zéro export) **RETIRÉE**, pas corrigée. **Sentinelle** `sentinelle-647-suppression-cartouche-dit-vrai` (21 essais :
+  vraies fonctions extraites du fichier, invariant couplé mots ↔ ce que chaque chemin écrit) ; **break-test** 5 mutations,
+  5 rouges.
+  ⏳ **Toujours en suspens, pour Grégoire, à froid** (inchangé) : retirer une cartouche de la bibliothèque doit-il la
+  détacher de sa grille ?
+  ⚠ **Mesuré en chemin, NON corrigé — inscrit ici, pas de fiche (aucun symptôme vécu)** : (a) en section 2 de la
+  bibliothèque modale, « Supprimer » s'affiche aussi sur les cartouches locales absentes de la bibliothèque (`showAlways`),
+  et `supprimerCartoucheDeBibliothequePartagee` **ne fait rien, en silence**, pour elles (`if (!cartouche) return`) ;
+  (b) après une suppression d'ancrage, `obtenirNomCartouche` (`evaluation.js`) affiche l'identifiant brut à la place du nom
+  pour les évaluations qui l'employaient.
 - [x] **#650 — S6 · La porte de sortie des échelles écrit HORS FILE, entre deux dialogues — généraliser le patron généraliserait la course**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur mesure de `kuekatsheu-67`, **rejouée par la
   coordinatrice**. Lot de #624.
@@ -1670,7 +1691,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   quatre autres énumèrent `enumererTrimestres()`. Une pratique d'un autre trimestre ne bloque rien.
   ⚠ Cible de tout remède : **`js/donnees-v2.js:1624`**, l'ombre locale — **pas** `js/echelles.js:2610`. Deux corps
   distincts, même nom, deux fichiers. N'en inscrire qu'un refermerait une porte en laissant l'autre.
-- [ ] **#649 — CONSTAT · `retirerProductionDeLaBibliotheque` n'existe pas : le garde est mort et le « fallback » est l'unique chemin depuis toujours**.
+- [x] **#649 — LIVRÉ 2 septembre 2026 (soir) · `retirerProductionDeLaBibliotheque` n'existe pas : le garde est mort et le « fallback » est l'unique chemin depuis toujours**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur mesure de `kuekatsheu-94`, **rejouée avec
   témoin** par la coordinatrice. Lot de #624, **non corrigé le 31 août** : aucun symptôme actuel.
   `js/donnees-v2.js:1659` teste `typeof retirerProductionDeLaBibliotheque === 'function'`. Le symbole ne rend que
@@ -1683,6 +1704,12 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ⚠ **Latent** : le jour où quelqu'un déclare une fonction de ce nom, le chemin bascule **en silence** vers une
   sémantique que personne n'a comparée. **Un garde mort est une bascule armée** — c'est la version « branchement » de
   la garde née morte de S5.
+  ↻ **LIVRÉ** : le garde et son repli sont retirés ; `supprimerProductionDefinitivement` (Données) appelle le chemin réel,
+  `retirerDeLaBibliotheque` (`productions-bibliotheque.js` — par la file #599, et la production sort des dossiers de
+  classement #327, ce que le repli ne faisait pas), et rend SON résultat (faux si introuvable, faux sans jeter sur erreur ;
+  le repli rendait toujours vrai). **Sentinelle** `sentinelle-649-garde-mort-productions` (6 essais : symbole fantôme absent
+  du code de `js/`, un seul chemin sans `typeof`, témoin que le chemin réel est déclaré ET exporté, résultat rendu) ;
+  **break-test** 1 mutation (le garde revient), 5 rouges.
 - [x] **#645 — Après un changement de grille, le nombre d'erreurs est perdu et le calcul algorithmique ne rend plus de résultat** (grille « français seul »).
   Inscrit le 31 août 2026 par `kuekatsheu-9f` (coordinatrice), **avant tout usage**, à la demande de `kuekatsheu-5d`
   qui porte le correctif sous le pilotage direct de Grégoire. Retour terrain de Grégoire.
@@ -4398,6 +4425,17 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   `supprimerFichierDefinitivement` et le nettoyage de « Vider la corbeille » (`liste-evaluations.js`),
   ainsi que le jeton personnalisé (`evaluation.js`), écrivent par `db.setSync(cle(...))` direct —
   esquivant le blocage du mode anonymisation que `supprimerEvaluation` respecte.
+  ↻ **2 septembre 2026** : Grégoire a TRANCHÉ la règle métier — **tout ce qui touche le couple (élève, production) part avec
+  le fichier** : originale, reprises, évaluation d'un fichier réimporté. Le constat B5 « trop large » tombe : **le code le
+  fait déjà ; il reste à ce que la modale le DISE** (« Le fichier sera supprimé de façon permanente. » tait les annotations
+  et les évaluations). **Les mots sont à lui et ne sont pas arrêtés** (crochets vides dans la consigne du 2 septembre au
+  soir) ⮕ NON livré. Mécanique prête et mise de côté :
+  `plans de travail/PATCH-560-portee-suppression-fichier-EN-ATTENTE-DES-MOTS.diff` — prédicat UNIQUE
+  `estDuCoupleDuFichier` lu par la modale pour annoncer et par le filtre pour détruire ; comptes mesurés à l'ouverture
+  (évaluations qui partent, reprises parmi elles, autres fichiers du couple qui RESTENT sans évaluation) ; témoin négatif
+  (sans évaluation, la phrase d'avant mot pour mot) ; message d'après qui compte ce qui est réellement parti, y compris
+  sur refus d'écriture. Trois formulations proposées dans
+  `plans de travail/RAPPORT-2026-09-02-nuit-suppressions-disent-vrai.md`.
   ⚠ **LE PIRE CAS PORTE SUR DU CODE MORT — mesuré le 28 août 2026.** Le site du jeton personnalisé,
   `appliquerJetonPersonnalise` (`evaluation.js`), est **inatteignable, et l'était déjà le 25 août** :
   aucun appelant dans le dépôt, aucun `data-action` à ce nom (le dispatcher de `main.js` résout un
