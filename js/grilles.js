@@ -3559,11 +3559,37 @@ function rendreActivationCodes(critere, ctx) {
                             <label class="sous-criteres-codes-choix">
                                 <input type="checkbox"
                                        data-on-change="modifierCodesDepuisSousCriteresHandler" data-grille-id="${esc(ctx.grilleId)}" data-critere-index="${ctx.index}"
-                                       ${actif ? 'checked' : ''}${n === 0 ? ' disabled' : ''}>
+                                       ${actif ? 'checked' : ''}${(n === 0 && !actif) ? ' disabled' : ''}>
                                 Utiliser ces sous-critères comme codes d'annotation
                             </label>
                             <small class="sous-criteres-codes-note">${esc(note)}${esc(precision)}</small>
                         </div>`;
+}
+
+/**
+ * Consigne du 3 sept. 2026 (16 h) — UNE SEULE FAÇON DE CHOISIR UNE COULEUR. Le
+ * champ Couleur d'un sous-critère prend le sélecteur de la palette d'annotation
+ * (`travauxOutils.renderPickerCouleur`, #287) : les douze pastilles prédéfinies,
+ * plus « Personnalisé… » qui ouvre le sélecteur du système. Une définition, des
+ * appels — celui-ci rejoint ceux d'`echelles.js`. Le sélecteur pose l'input caché
+ * qui porte `data-on-change` : choisir une pastille passe par le même handler que
+ * les autres champs du sous-critère. Une couleur déjà enregistrée hors des douze
+ * s'affiche telle quelle : on change le CHOIX, pas ce qui est enregistré.
+ */
+function rendreCouleurSousCritere(critere, sc, ctx) {
+    const couleur = couleurDeSousCritere(critere, sc);
+    if (typeof window.travauxOutils === 'undefined' || typeof window.travauxOutils.renderPickerCouleur !== 'function') {
+        return `<span class="travaux-retro-couleur" style="background:${echapperHtml(couleur)}" title="Palette d'annotation absente : couleur non modifiable ici"></span>`;
+    }
+    return window.travauxOutils.renderPickerCouleur(couleur, {
+        dataAttrs: {
+            'on-change': 'modifierSousCritereHandler',
+            'grille-id': ctx.grilleId,
+            'critere-index': ctx.index,
+            'sc-index': ctx.scIndex,
+            'champ': 'couleur'
+        }
+    });
 }
 
 /** La couleur qu'un sous-critère aurait comme code — la sienne, sinon celle des dix par position ; gris s'il ne se pose pas. */
@@ -4078,13 +4104,9 @@ function afficherCriteresGrille(grille) {
                                            data-on-change="modifierSousCritereHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-sc-index="${scIndex}" data-champ="ponderation" data-parse-float
                                            title="Ex: 1.0 pour erreur complète, 0.5 pour demi-point">
                                 </div>
-                                <div class="groupe-form">
+                                <div class="groupe-form sous-critere-couleur-groupe">
                                     <label class="sous-critere-label-petit">Couleur</label>
-                                    <input type="color"
-                                           class="controle-form sous-critere-input-couleur"
-                                           value="${echapperHtml(couleurDeSousCritere(critere, sc))}"
-                                           data-on-change="modifierSousCritereHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-sc-index="${scIndex}" data-champ="couleur"
-                                           title="La couleur de ce code sur la copie, quand ces sous-critères servent de codes d'annotation">
+                                    ${rendreCouleurSousCritere(critere, sc, { grilleId: grille.id, index: index, scIndex: scIndex })}
                                 </div>
                                 <button class="btn btn-supprimer btn-tres-compact"
                                         data-action="supprimerSousCritere" data-param="${grille.id}" data-param2="${index}" data-param3="${scIndex}"

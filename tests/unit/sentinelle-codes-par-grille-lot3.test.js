@@ -13,7 +13,7 @@
  */
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -120,12 +120,19 @@ describe('codes par grille · S.c — les sources du gabarit et de l\'écran de 
         expect(h).not.toMatch(/codesDepuisSousCriteres = false/);
     });
 
-    it('S.c.3 chaque sous-critère a sa couleur, par le même handler que ses autres champs', () => {
+    it('S.c.3 chaque sous-critère a sa couleur, par le sélecteur de la palette et le même handler que ses autres champs', () => {
+        // Consigne du 3 sept. (16 h) : UNE seule façon de choisir une couleur — les
+        // douze pastilles de la palette d'annotation (`renderPickerCouleur`), jamais
+        // un `<input type="color">` nu dans le gabarit.
         const s = grilles();
-        expect(s).toMatch(/class="controle-form sous-critere-input-couleur"/);
-        expect(s).toMatch(/data-champ="couleur"/);
-        expect(s).toMatch(/type="color"/);
+        expect(s).toMatch(/travauxOutils\.renderPickerCouleur\(couleur, \{/);
+        expect(s).toMatch(/'on-change': 'modifierSousCritereHandler'/);
+        expect(s).toMatch(/'champ': 'couleur'/);
+        expect((s.match(/type="color"/g) || []).length).toBe(0);
         expect(source('styles.css')).toMatch(/grid-template-columns: 80px 1fr 100px 64px auto;/);
+        // Et les douze n'existent qu'une fois dans le dépôt.
+        const fichiers = readdirSync(path.join(racine, 'js')).filter(f => f.endsWith('.js'));
+        expect(fichiers.filter(f => source('js/' + f).includes("hex: '#ff0000'"))).toEqual(['travaux-outils.js']);
     });
 
     it('S.c.4 l\'écran de réglage ne dit plus la discipline, et dit à quoi servent ses dix codes', () => {

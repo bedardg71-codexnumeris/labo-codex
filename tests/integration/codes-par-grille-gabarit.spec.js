@@ -67,7 +67,9 @@ test('codes par grille · gabarit — cocher active, décocher retire, la couleu
     await expect(bloc.locator('.sous-criteres-codes-note')).toContainText('pondération 0');
 
     // Les couleurs rendues : la sienne ou celle des dix par position ; gris pour le code 0.
-    const couleursRendues = await page.locator('#listeCriteres .sous-critere-input-couleur').evaluateAll(els => els.map(e => e.value));
+    // Consigne du 3 sept. (16 h) : le champ est le sélecteur de la palette ; sa valeur vit
+    // dans l'input caché qu'il pose (`.travaux-retro-couleur-input`).
+    const couleursRendues = await page.locator('#listeCriteres .sous-critere-couleur-groupe .travaux-retro-couleur-input').evaluateAll(els => els.map(e => e.value));
     console.log('COULEURS RENDUES →', JSON.stringify(couleursRendues));
     expect(couleursRendues).toEqual(['#888888', '#c62828', '#c62828', '#e65100']);
 
@@ -85,9 +87,10 @@ test('codes par grille · gabarit — cocher active, décocher retire, la couleu
     });
     expect(palette).toEqual(['errfr_1', 'errfr_2', 'errfr_3']);
 
-    // Changer la couleur du code 2 : écrite sur le sous-critère, lue par la liste.
+    // Changer la couleur du code 2 (« Personnalisé… » du sélecteur : l'input caché reçoit la
+    // couleur et émet `change`) : écrite sur le sous-critère, lue par la liste.
     await page.evaluate(() => {
-        const inp = document.querySelectorAll('#listeCriteres .sous-critere-input-couleur')[2];
+        const inp = document.querySelectorAll('#listeCriteres .sous-critere-couleur-groupe .travaux-retro-couleur-input')[2];
         inp.value = '#112233';
         inp.dispatchEvent(new Event('change', { bubbles: true }));
     });
