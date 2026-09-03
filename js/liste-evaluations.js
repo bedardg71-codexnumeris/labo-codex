@@ -2846,10 +2846,53 @@ function restaurerFichierCorbeille(id) {
 }
 
 /**
+ * #560 (3 septembre 2026) — « du couple » = même élève, même production que le
+ * fichier. C'est EXACTEMENT ce que la suppression définitive emporte : originale,
+ * reprises, évaluation d'un fichier réimporté (tranché par Grégoire le 2 septembre ;
+ * le code le faisait déjà, l'écran ne le disait pas). Le prédicat est UNIQUE : la
+ * modale le lit pour annoncer, le filtre le lit pour détruire. Deux prédicats
+ * auraient pu diverger sans qu'aucun test ne le voie.
+ * @param {Object} objet - une évaluation, ou un autre fichier (mêmes champs)
+ * @param {Object} fichier - le fichier qu'on supprime
+ * @returns {boolean}
+ */
+function estDuCoupleDuFichier(objet, fichier) {
+    return !!(fichier && fichier.etudiantDA && fichier.productionId && objet &&
+        objet.etudiantDA === fichier.etudiantDA && objet.productionId === fichier.productionId);
+}
+
+/**
+ * #560 — combien d'évaluations partent avec ce fichier. Fonction PURE : on lui
+ * donne la liste, elle ne lit aucun magasin. C'est le compte que la modale lit
+ * pour choisir entre « rien de plus » et la phrase arrêtée par Grégoire.
+ * @param {Object} fichier - le fichier à supprimer
+ * @param {Array} evaluations - les évaluations du trimestre (la source que la destruction filtre)
+ * @returns {number}
+ */
+function compterEvaluationsDuCouple(fichier, evaluations) {
+    return (evaluations || []).filter(function(ev) { return estDuCoupleDuFichier(ev, fichier); }).length;
+}
+
+/**
  * Supprime définitivement un fichier de la corbeille avec confirmation
  */
 function supprimerFichierDefinitivement(id) {
     if (typeof travauxStockage === 'undefined') return;
+
+    // #560 (3 septembre 2026) — la portée est MESURÉE à l'ouverture, sur les
+    // mêmes sources que la destruction : la corbeille pour le fichier,
+    // `cle('evaluationsSauvegardees')` pour ce qui part avec lui.
+    const fichierCible = travauxStockage.obtenirCorbeille().find(function(f) { return f.id === id; }) || { id: id };
+    const nbEvaluations = compterEvaluationsDuCouple(fichierCible, db.getSync(cle('evaluationsSauvegardees'), []));
+
+    // Témoin négatif : sans évaluation qui parte avec lui, le fichier se supprime
+    // sans un mot de plus — la phrase d'avant, telle quelle. Sinon, les mots
+    // arrêtés par Grégoire le 2 septembre 2026 au soir, tels quels (tranché :
+    // TOUT ce qui touche le couple élève × production part — originale, reprises,
+    // évaluation d'un fichier réimporté).
+    const phrasePortee = nbEvaluations > 0
+        ? 'Le fichier, ses annotations et toutes les évaluations de cet élève pour cette production seront effacés.'
+        : 'Le fichier sera supprimé de façon permanente.';
 
     const existante = document.getElementById('supprimer-definitif-modal-overlay');
     if (existante) existante.remove();
@@ -2862,7 +2905,7 @@ function supprimerFichierDefinitivement(id) {
             <button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
             <h3 class="modal-titre">Supprimer définitivement ?</h3>
             <p style="margin: 8px 0 16px 0; font-size: 0.9em;">
-                Le fichier sera supprimé de façon permanente.
+                ${phrasePortee}
             </p>
             <p style="margin: 0 0 16px 0; font-size: 0.85em; color: var(--alerte-texte-attention);">
                 Cette action est irréversible.
@@ -2884,14 +2927,16 @@ function supprimerFichierDefinitivement(id) {
 
         await travauxStockage.supprimerDefinitivement(id);
 
-        // Nettoyer les évaluations liées (par etudiantDA + productionId)
+        // Nettoyer les évaluations liées — par le MÊME prédicat que la modale a lu
+        // pour annoncer la portée (#560) : ce qu'on détruit est ce qu'on a dit.
         // Lecture directe (read-modify-write : lire TOUTES les évaluations pour réécrire sans perte) ;
         // l'ÉCRITURE, elle, passe par le garde des modes (#560).
+        var nbEvalsRetirees = 0;
         if (fichier && fichier.etudiantDA && fichier.productionId) {
             var evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
             var avant = evaluations.length;
             evaluations = evaluations.filter(function(ev) {
-                return !(ev.etudiantDA === fichier.etudiantDA && ev.productionId === fichier.productionId);
+                return !estDuCoupleDuFichier(ev, fichier);
             });
             if (evaluations.length < avant) {
                 // #560 — par le GARDE DES MODES, comme `supprimerEvaluation` : en mode
@@ -2900,6 +2945,7 @@ function supprimerFichierDefinitivement(id) {
                 if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
                     notifications.erreur('Évaluations conservées', 'Le fichier est supprimé, mais ses évaluations n\'ont pas été retirées : écriture refusée en mode anonymisation.');
                 } else {
+                    nbEvalsRetirees = avant - evaluations.length;
                     // Tier 6.3 : Invalider les caches de moyennes
                     window._moyennesQualifies = null;
                     window._moyennesToutes = null;
@@ -2911,7 +2957,12 @@ function supprimerFichierDefinitivement(id) {
         }
 
         overlay.remove();
-        notifications.succes('Fichier et évaluation supprimés définitivement.');
+        // #560 — le message d'après dit ce qui est parti, pas ce qu'on croyait partir :
+        // « et évaluation » s'affichait même quand aucune n'existait, ou quand
+        // l'écriture venait d'être refusée quelques lignes plus haut.
+        notifications.succes(nbEvalsRetirees > 0
+            ? `Fichier et ${nbEvalsRetirees} ${pluriel(nbEvalsRetirees, 'évaluation', 'évaluations')} supprimés définitivement.`
+            : 'Fichier supprimé définitivement.');
         mettreAJourBoutonCorbeille();
         if (vueCorbeilleActive) {
             afficherVueCorbeille();
@@ -2930,6 +2981,15 @@ function viderTouteCorbeille() {
     const corbeille = travauxStockage.obtenirCorbeille();
     if (corbeille.length === 0) return;
 
+    // #560 — ce qui part avec les fichiers, compté sur la même source et par le
+    // même prédicat que la destruction ; rien de plus n'est dit s'il n'y a rien.
+    const nbEvalsLiees = db.getSync(cle('evaluationsSauvegardees'), [])
+        .filter(function(ev) { return corbeille.some(function(f) { return estDuCoupleDuFichier(ev, f); }); }).length;
+    const phraseEvalsLiees = nbEvalsLiees > 0 ? `
+            <p style="margin: 0 0 16px 0; font-size: 0.9em;">
+                ${nbEvalsLiees} ${pluriel(nbEvalsLiees, 'évaluation liée à ces fichiers partira', 'évaluations liées à ces fichiers partiront')} avec eux.
+            </p>` : '';
+
     const existante = document.getElementById('vider-corbeille-modal-overlay');
     if (existante) existante.remove();
 
@@ -2942,7 +3002,7 @@ function viderTouteCorbeille() {
             <h3 class="modal-titre">Vider la corbeille ?</h3>
             <p style="margin: 8px 0 16px 0; font-size: 0.9em;">
                 Supprimer définitivement les <strong>${corbeille.length}</strong> fichier(s) de la corbeille ?
-            </p>
+            </p>${phraseEvalsLiees}
             <p style="margin: 0 0 16px 0; font-size: 0.85em; color: var(--alerte-texte-attention);">
                 Cette action est irréversible.
             </p>
@@ -2975,8 +3035,7 @@ function viderTouteCorbeille() {
             var avant = evaluations.length;
             evaluations = evaluations.filter(function(ev) {
                 return !fichiersCorbeille.some(function(f) {
-                    return f.etudiantDA && f.productionId &&
-                           ev.etudiantDA === f.etudiantDA && ev.productionId === f.productionId;
+                    return estDuCoupleDuFichier(ev, f);
                 });
             });
             if (evaluations.length < avant) {
