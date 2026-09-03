@@ -576,9 +576,9 @@
      * indépendants de la grille ; mais quand une grille algorithmique a coché
      * « Utiliser ces sous-critères comme codes d'annotation », ils sont en
      * LECTURE SEULE, et la source est la grille. La copie ouverte est alors
-     * GOUVERNÉE : la palette porte la phrase ci-dessous, le bouton
-     * « Personnaliser » n'est pas rendu, et l'écran de réglage, s'il est atteint
-     * par un autre chemin, n'offre que la phrase. ⛔ L'édition du REPLI n'est pas
+     * GOUVERNÉE : l'engrenage de la palette porte la phrase ci-dessous et
+     * l'écran de réglage qu'il ouvre n'offre qu'elle (coup d'œil de Grégoire :
+     * pas de bandeau dans l'espace de travail). ⛔ L'édition du REPLI n'est pas
      * retirée : les dix codes portent les noms courts, couleurs et ordre de
      * Grégoire, et c'est ici la seule façon de les régler.
      */
@@ -1283,12 +1283,11 @@
      * @returns {string} HTML de la .travaux-errfr-liste
      */
     function genererContenuErreursFr() {
-        let html = '';
-        // Copie gouvernée par sa grille : la palette DIT d'où viennent les codes.
-        if (_copieGouvernee()) {
-            html += '<div class="travaux-errfr-source">' + echapperHtml(_phraseSourceCodes()) + '</div>';
-        }
-        html += '<div class="travaux-errfr-liste">';
+        // Copie gouvernée par sa grille : la phrase qui le dit vit derrière
+        // l'engrenage (voir la barre de titre et `ouvrirEditionRetroErreursFr`),
+        // pas ici — coup d'œil de Grégoire : un bandeau prenait trop de place dans
+        // l'espace de travail, et le message parle des paramètres que l'engrenage ouvre.
+        let html = '<div class="travaux-errfr-liste">';
         _codesCourants().forEach((c) => {
             const actif = outilActif === c.id ? ' actif' : '';
             const raccourci = obtenirRaccourciPourItem(c.id);
@@ -1416,10 +1415,10 @@
 
         // Barre de titre
         let html = '<div class="palette-flottante-barre">';
-        // Copie gouvernée par sa grille : rien à personnaliser ici, le bouton n'est pas rendu.
-        if (!_copieGouvernee()) {
-            html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
-        }
+        // Copie gouvernée par sa grille : l'engrenage reste (coup d'œil de Grégoire),
+        // il porte la phrase et l'écran qu'il ouvre ne montre qu'elle.
+        var titreEngrenage = _copieGouvernee() ? _phraseSourceCodes() : 'Personnaliser';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="' + echapperHtml(titreEngrenage) + '"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
         html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Codes <span id="travaux-errfr-total-header" style="font-weight:400; font-size:0.75rem; color:var(--texte-secondaire);"></span></span>';
         html += '<div style="display:flex; gap:2px;">';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-erreurs-fr" title="Disposition horizontale">\u2194</button>';
@@ -3751,6 +3750,19 @@
         if (!e.target.open) return;
         document.querySelectorAll('details.travaux-retro-couleur-picker[open]').forEach(function(d) {
             if (d !== e.target) d.open = false;
+        });
+    }, true);
+    // Coup d'œil de Grégoire (3 sept. 2026) : « il n'est pas possible de fermer la
+    // palette de couleurs quand je clique à côté ». Un <details> natif ne se
+    // referme que par son résumé. ⮕ Tout pointeur posé HORS d'un sélecteur ouvert
+    // le referme — souris et doigt, avant tout clic — pour tous les sélecteurs
+    // (palette, échelles, sous-critères) : une définition, pas une par écran.
+    document.addEventListener('pointerdown', function(e) {
+        var ouverts = document.querySelectorAll('details.travaux-retro-couleur-picker[open]');
+        if (!ouverts.length) return;
+        var cible = e.target;
+        ouverts.forEach(function(d) {
+            if (!(cible instanceof Node) || !d.contains(cible)) d.open = false;
         });
     }, true);
 
