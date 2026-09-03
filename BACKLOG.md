@@ -4426,16 +4426,16 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
   ainsi que le jeton personnalisé (`evaluation.js`), écrivent par `db.setSync(cle(...))` direct —
   esquivant le blocage du mode anonymisation que `supprimerEvaluation` respecte.
   ↻ **2 septembre 2026** : Grégoire a TRANCHÉ la règle métier — **tout ce qui touche le couple (élève, production) part avec
-  le fichier** : originale, reprises, évaluation d'un fichier réimporté. Le constat B5 « trop large » tombe : **le code le
-  fait déjà ; il reste à ce que la modale le DISE** (« Le fichier sera supprimé de façon permanente. » tait les annotations
-  et les évaluations). **Les mots sont à lui et ne sont pas arrêtés** (crochets vides dans la consigne du 2 septembre au
-  soir) ⮕ NON livré. Mécanique prête et mise de côté :
-  `plans de travail/PATCH-560-portee-suppression-fichier-EN-ATTENTE-DES-MOTS.diff` — prédicat UNIQUE
-  `estDuCoupleDuFichier` lu par la modale pour annoncer et par le filtre pour détruire ; comptes mesurés à l'ouverture
-  (évaluations qui partent, reprises parmi elles, autres fichiers du couple qui RESTENT sans évaluation) ; témoin négatif
-  (sans évaluation, la phrase d'avant mot pour mot) ; message d'après qui compte ce qui est réellement parti, y compris
-  sur refus d'écriture. Trois formulations proposées dans
-  `plans de travail/RAPPORT-2026-09-02-nuit-suppressions-disent-vrai.md`.
+  le fichier** : originale, reprises, évaluation d'un fichier réimporté. Le constat B5 « trop large » tombe : le code le
+  faisait déjà, l'écran ne le disait pas. **Mots arrêtés par lui le 2 septembre à 21 h 45, LIVRÉS le 3 septembre au
+  matin** : « Le fichier, ses annotations et toutes les évaluations de cet élève pour cette production seront effacés. » —
+  affichée seulement quand une évaluation du couple existe ; sinon la phrase d'avant, mot pour mot (témoin négatif).
+  Prédicat UNIQUE `estDuCoupleDuFichier` lu par la modale pour annoncer et par les deux filtres (un fichier, la corbeille
+  entière) pour détruire ; « Vider la corbeille » dit combien d'évaluations partent ; le message d'après compte ce qui est
+  réellement parti (zéro sur refus d'écriture en mode anonymisation). **Sentinelle** `sentinelle-560-portee-suppression-fichier`
+  (8 essais, fonctions extraites du fichier) ; **break-test** 3 mutations, 3 rouges.
+  ⚠ **Non annoncé, décision à froid s'il le faut** : quand d'autres fichiers du même couple restent (une reprise encore en
+  liste active), ils restent SANS évaluation — la phrase arrêtée ne le dit pas, et l'ajouter serait composer.
   ⚠ **LE PIRE CAS PORTE SUR DU CODE MORT — mesuré le 28 août 2026.** Le site du jeton personnalisé,
   `appliquerJetonPersonnalise` (`evaluation.js`), est **inatteignable, et l'était déjà le 25 août** :
   aucun appelant dans le dépôt, aucun `data-action` à ce nom (le dispatcher de `main.js` résout un
