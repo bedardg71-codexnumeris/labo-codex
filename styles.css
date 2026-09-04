@@ -3243,6 +3243,13 @@ input[type="number"].controle-form {
     box-shadow: var(--focus-ring);
 }
 
+/* Le texte troué, étape 2 (4 sept. 2026) — la palette d'un palier de projection :
+   une par palier, entre sa rangée « Palier · Jusqu'à » et ses deux zones. Même
+   composant que la palette des énoncés (ci-dessus) ; seul l'espacement diffère. */
+#listeCriteres .palier-projection .reperes-palier {
+    margin: 8px 0 4px;
+}
+
 /* iPad : la cible tactile des repères monte à 44 px dans le bloc `@media
    (pointer: coarse)` de #568, plus bas — un seul bloc tactile, que la
    sentinelle #568 lit en premier. */

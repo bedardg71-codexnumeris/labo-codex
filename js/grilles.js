@@ -3564,6 +3564,26 @@ function rendreBlocFormuleAlgo(critere, ctx) {
  * Zéro handler inline, `esc()` sur tout : les textes sont saisis par
  * l'enseignant·e et relus par l'élève.
  */
+/**
+ * Les boutons d'une palette de repères — le texte troué, étapes 1 (les quatre
+ * énoncés) et 2 (les deux zones de chaque palier de projection). Un bouton par
+ * repère ; le badge montre le mot SANS accolades (« retire les accolades » —
+ * Grégoire, essai iPad du 3 sept.), ce qu'il pose les garde (`data-jeton`,
+ * le format que les deux registres lisent). Même `data-action` pour les deux
+ * usages : c'est `insererRepereEnonce` qui reconnaît sa zone.
+ *
+ * @param {Array} reperes - `enoncesAlgo.reperesDeCle(cle)` ou `projectionAlgo.listerReperes()`
+ * @param {string} cible - la fin de l'étiquette lue par un lecteur d'écran (« dans le palier 2 »)
+ */
+function rendreBoutonsReperes(reperes, cible) {
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
+    return (reperes || []).map(r => `
+                            <button type="button" class="repere-enonce repere-enonce--${esc(r.famille)}"
+                                    data-action="insererRepereEnonce" data-jeton="${esc(r.jeton)}"
+                                    title="${esc(r.libelle)} — ${esc(r.aide)}"
+                                    aria-label="Poser ${esc(r.libelle)}, ${esc(r.jeton)}, ${esc(cible)}">${esc(r.jeton.slice(1, -1))}</button>`).join('');
+}
+
 function rendreBlocEnoncesAlgo(critere, ctx) {
     if (!critere || critere.type !== 'algorithmique') return '';
     if (typeof window.enoncesAlgo === 'undefined') return '';
@@ -3599,11 +3619,7 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
     // coup d'œil (3 sept., après-midi) : il l'a cherchée là sans qu'on le lui
     // dise — une palette d'outils se place avant l'établi, pas après. L'aide,
     // elle, reste SOUS le champ : c'est la zone qu'elle décrit, pas les repères.
-    const reperesDe = (c) => window.enoncesAlgo.reperesDeCle(c.cle).map(r => `
-                            <button type="button" class="repere-enonce repere-enonce--${esc(r.famille)}"
-                                    data-action="insererRepereEnonce" data-jeton="${esc(r.jeton)}"
-                                    title="${esc(r.libelle)} — ${esc(r.aide)}"
-                                    aria-label="Poser ${esc(r.libelle)}, ${esc(r.jeton)}, dans « ${esc(c.libelle)} »">${esc(r.jeton.slice(1, -1))}</button>`).join('');
+    const reperesDe = (c) => rendreBoutonsReperes(window.enoncesAlgo.reperesDeCle(c.cle), 'dans « ' + c.libelle + ' »');
 
     const champs = cles.map(c => `
                     <div class="groupe-form">
@@ -3802,6 +3818,30 @@ function rendreBlocProjectionAlgo(critere, ctx) {
     // (`_paliersDeRatio`, le terminal en dernier), l'ordre EST le seuil, un déplacement à
     // la main pourrait le contredire. ▣ Mesuré : ni le registre ni les handlers ne rangent
     // les paliers par seuil à la saisie — inscrit, rien n'est réécrit dans les grilles.
+    // Le texte troué, étape 2 (4 sept. 2026) — UNE palette par palier, au-dessus de
+    // ses deux zones. ▣ Décidé seul, dit : mesuré sur les six paliers de migration,
+    // deux palettes par palier feraient 96 boutons dans la carte, une par palier en
+    // fait 48 ; et la rangée de huit tient sur une ligne en pleine largeur, là où
+    // elle se plierait sur deux dans chaque demi-colonne (question 4 du cadrage).
+    // Le badge se pose dans la zone du palier où est le curseur — sans curseur,
+    // dans « Ce que l'élève lit » (`insererRepereEnonce`). Même composant, mêmes
+    // classes, même `data-action` que les énoncés.
+    const reperesPalier = (typeof window.projectionAlgo.listerReperes === 'function')
+        ? window.projectionAlgo.listerReperes() : [];
+    // Un jeton INCONNU de cette version reste dans le texte au rendu — l'élève le
+    // lirait tel quel. Le gabarit le DIT sous le palier, comme `herite` le dit pour
+    // un modèle inconnu (carte du 4 sept., §d : le risque nommé de ce lot).
+    const ligneInconnus = (pal) => {
+        const inconnus = (typeof window.projectionAlgo.jetonsInconnus === 'function')
+            ? window.projectionAlgo.jetonsInconnus((pal.texte || '') + ' ' + (pal.texteAide || '')) : [];
+        if (!inconnus.length) return '';
+        const un = inconnus.length === 1;
+        return `
+                            <small class="palier-jetons-inconnus" style="font-size: 0.78rem; color: var(--orange-accent); display: block; margin-top: 4px;">
+                                ${un ? 'Le badge' : 'Les badges'} ${inconnus.map(j => '« ' + esc(j) + ' »').join(', ')} ${un ? 'est inconnu' : 'sont inconnus'} de cette version de l'application : l'élève ${un ? 'le lirait tel quel' : 'les lirait tels quels'}.
+                            </small>`;
+    };
+
     const paliers = p.paliers.map((pal, i) => {
         const mpe = window.projectionAlgo.motsParErreurDuRatio(critere, pal.ratioMax);
         const seuilCol = pal.sansErreur
@@ -3830,6 +3870,9 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                                     ${seuilCol}
                                 </div>
                             </div>
+                            <div class="reperes-enonce reperes-palier" role="group" aria-label="Badges à poser dans le palier ${i + 1}">
+                                <span class="reperes-enonce-mot">Poser :</span>${rendreBoutonsReperes(reperesPalier, 'dans le palier ' + (i + 1))}
+                            </div>
                             <div class="grille-form-2col palier-rangee">
                                 <div class="groupe-form">
                                     <label class="sous-critere-label-petit">Ce que l'élève lit</label>
@@ -3843,6 +3886,7 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                                               data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="texteAide">${esc(pal.texteAide || '')}</textarea>
                                 </div>
                             </div>
+                            ${ligneInconnus(pal)}
                             ${retirer}
                         </div>`;
     }).join('');
@@ -3860,8 +3904,11 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                 <div class="sous-criteres-liste-conteneur" style="margin-top: 10px;">
                     ${paliers}
                 </div>
-                <small class="palier-note-service" style="font-size: 0.72rem; color: var(--gris-clair); display: block; margin-top: 4px;">
-                    Dans une phrase de recommandation, écris ${esc(window.projectionAlgo.JETON_SERVICE)} là où le nom du service doit apparaître. S'il est vide, ${esc(window.projectionAlgo.JETON_SERVICE)} disparaît proprement.
+                <small class="palier-note-composer" style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">
+                    Un clic sur un badge le pose dans la zone du palier où est le curseur — sans curseur, dans « Ce que l'élève lit ».
+                    Les badges bleus sont écrits dans la grille ; les verts se remplissent à la correction, copie par copie.
+                    Un badge sans valeur disparaît proprement.
+                    Une phrase sans badge est précédée de “Tu fais en moyenne 1 erreur à chaque N mots.” Dès qu'elle porte un badge, elle est entière : c'est toi qui l'écris.
                 </small>
                 <button class="btn btn-secondaire btn-tres-compact" style="margin-top: 8px;"
                         data-action="${actionAjout}" ${paramsAction}>+ Ajouter un palier</button>`;
@@ -5448,14 +5495,29 @@ async function modifierTexteEnonceGrilleHandler(el) {
  */
 function insererRepereEnonce(el) {
     if (typeof window.enoncesAlgo === 'undefined') return;
-    var groupe = (el && typeof el.closest === 'function') ? el.closest('.groupe-form') : null;
-    var zone = groupe ? groupe.querySelector('textarea[data-enonce-cle]') : null;
+    // Étape 2 (4 sept. 2026) : la palette d'un PALIER sert ses deux zones. La
+    // cible est la zone où est le curseur (le focus y reste : `pointerdown`
+    // annulé plus bas), sinon la dernière visitée depuis le rendu, sinon « Ce
+    // que l'élève lit » (`_zoneCibleDuPalier`). Les badges sont ceux du
+    // registre de projection ; la pose, elle, est commune (`insererRepere`,
+    // ouvert d'une palette).
+    var palier = (el && typeof el.closest === 'function') ? el.closest('.palier-projection') : null;
+    var zone = null;
+    var palette = null;
+    if (palier) {
+        if (typeof window.projectionAlgo === 'undefined' || typeof window.projectionAlgo.listerReperes !== 'function') return;
+        palette = window.projectionAlgo.listerReperes();
+        zone = _zoneCibleDuPalier(palier);
+    } else {
+        var groupe = (el && typeof el.closest === 'function') ? el.closest('.groupe-form') : null;
+        zone = groupe ? groupe.querySelector('textarea[data-enonce-cle]') : null;
+    }
     if (!zone) return;
 
     var visitee = zone.dataset.curseurVu === '1';
     var debut = visitee ? zone.selectionStart : zone.value.length;
     var fin = visitee ? zone.selectionEnd : zone.value.length;
-    var r = window.enoncesAlgo.insererRepere(zone.value, debut, fin, el.dataset.jeton);
+    var r = window.enoncesAlgo.insererRepere(zone.value, debut, fin, el.dataset.jeton, palette);
     if (!r) return;
 
     zone.value = r.texte;
@@ -5469,6 +5531,23 @@ function insererRepereEnonce(el) {
     }
 
     var index = parseInt(zone.dataset.critereIndex);
+    if (palier) {
+        // Même chemin d'écriture que la frappe dans la zone (`_muterPalier`,
+        // qui matérialise les paliers d'un critère migré au premier geste),
+        // sans le rendu — le curseur doit survivre au clic, comme pour les énoncés.
+        var palierIndex = parseInt(zone.dataset.palierIndex);
+        var champ = zone.dataset.champ;
+        if (zone.dataset.grilleId) {
+            modifierProjectionCritereGrille(zone.dataset.grilleId, index, function(critere) {
+                return _muterPalier(critere, palierIndex, champ, r.texte);
+            }).catch(function(err) {
+                console.warn('[paliers] le badge est à l\'écran mais pas enregistré :', err);
+            });
+        } else if (window.tempCriteres && window.tempCriteres[index]) {
+            _muterPalier(window.tempCriteres[index], palierIndex, champ, r.texte);
+        }
+        return;
+    }
     var cleEnonce = zone.dataset.enonceCle;
     if (zone.dataset.grilleId) {
         _ecrireTexteEnonceGrille(zone.dataset.grilleId, index, cleEnonce, r.texte)
@@ -5480,13 +5559,34 @@ function insererRepereEnonce(el) {
     }
 }
 
+/** La zone d'un palier qui reçoit le badge — voir `insererRepereEnonce`. */
+function _zoneCibleDuPalier(palier) {
+    var actif = (typeof document !== 'undefined') ? document.activeElement : null;
+    if (actif && actif.tagName === 'TEXTAREA' && actif.dataset && actif.dataset.palierIndex !== undefined
+        && typeof palier.contains === 'function' && palier.contains(actif)) {
+        return actif;
+    }
+    var champ = (palier.dataset && palier.dataset.zoneActive) || 'texte';
+    return palier.querySelector('textarea[data-palier-index][data-champ="' + champ + '"]')
+        || palier.querySelector('textarea[data-palier-index]');
+}
+
 if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
     // Le drapeau « zone visitée » — voir `insererRepereEnonce`. Il tombe avec
     // l'élément à chaque rendu du gabarit, et c'est voulu.
     document.addEventListener('focusin', function(e) {
         var zone = e.target;
-        if (zone && zone.tagName === 'TEXTAREA' && zone.dataset && zone.dataset.enonceCle !== undefined) {
+        if (!zone || zone.tagName !== 'TEXTAREA' || !zone.dataset) return;
+        if (zone.dataset.enonceCle !== undefined) {
             zone.dataset.curseurVu = '1';
+            return;
+        }
+        // Étape 2 : une zone de palier visitée devient la cible de la palette
+        // de son palier, jusqu'au prochain rendu (`_zoneCibleDuPalier`).
+        if (zone.dataset.palierIndex !== undefined) {
+            zone.dataset.curseurVu = '1';
+            var palier = (typeof zone.closest === 'function') ? zone.closest('.palier-projection') : null;
+            if (palier && palier.dataset) palier.dataset.zoneActive = zone.dataset.champ || 'texte';
         }
     });
     // ⚠ LE CLIC SUR UN REPÈRE NE DOIT PAS PRENDRE LE FOCUS. Sinon la zone le

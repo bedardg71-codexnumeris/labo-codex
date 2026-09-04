@@ -490,7 +490,7 @@ describe('lot 4 · C.G — coup d\'œil de Grégoire : corbeille partout, chevro
         expect(c.liste().innerHTML).toMatch(/bloc-coin-outils[\s\S]*?data-action="deplacerCritereTempHaut" data-param="0" disabled/);
     });
 
-    it('G.c un palier tient sur deux rangées côte à côte (la grille du formulaire groupe-cours), le nom a sa colonne, la note {service} une seule fois', () => {
+    it('G.c un palier tient sur deux rangées côte à côte (la grille du formulaire groupe-cours), le nom a sa colonne, la note du composeur une seule fois', () => {
         const { win, liste } = monter([GRILLE_PALIERS]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE_PALIERS)));
         const projection = contenuCarte(liste().innerHTML, 'projection');
@@ -503,10 +503,14 @@ describe('lot 4 · C.G — coup d\'œil de Grégoire : corbeille partout, chevro
             expect(bloc).not.toContain('sous-critere-champs-grid');
             expect(bloc).not.toContain('sous-critere-description-groupe');
         }
-        // « Écris {service}… » : UNE fois par critère, sous les paliers, plus dans chaque palier.
-        expect((projection.match(/palier-note-service/g) || []).length).toBe(1);
-        expect((projection.match(/là où le nom du service doit apparaître/g) || []).length).toBe(1);
-        expect(projection.indexOf('palier-note-service')).toBeGreaterThan(projection.lastIndexOf('palier-projection'));
+        // La note sous les paliers : UNE fois par critère, plus dans chaque palier. ↻ Texte troué,
+        // étape 2 (4 sept.) : la note « Écris {service}… » enseignait une syntaxe que le bouton rend
+        // inutile ; elle est remplacée par la note du composeur, qui porte la décision de Grégoire sur
+        // le préfixe engendré — au mot.
+        expect((projection.match(/palier-note-service/g) || []).length).toBe(0);
+        expect((projection.match(/palier-note-composer/g) || []).length).toBe(1);
+        expect((projection.match(/Dès qu'elle porte un badge, elle est entière : c'est toi qui l'écris\./g) || []).length).toBe(1);
+        expect(projection.indexOf('palier-note-composer')).toBeGreaterThan(projection.lastIndexOf('palier-projection'));
         expect(projection).toContain('value="Sans erreur"');
         // Les champs et leurs clés n'ont pas bougé (ce qui est enregistré non plus).
         for (const champ of ['libelle', 'ratioMax', 'texte', 'texteAide']) expect(projection).toContain('data-champ="' + champ + '"');
