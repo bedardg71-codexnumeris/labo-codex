@@ -243,6 +243,10 @@ var MODELES = [
     }
 ];
 
+// ⚠ C'est le défaut de LECTURE — ce que voit un critère d'avant #668, qui ne porte
+// aucun champ. Il ne change pas (lot 4, C.3) : les critères existants gardent leur
+// modèle. Le critère NEUF, lui, écrit « aucune » à sa naissance (`gabaritNeuf`,
+// `poserDefautNeuf`) : c'est la seule façon de les distinguer.
 var MODELE_PAR_DEFAUT = 'norme_externe';
 
 function listerModeles() {
@@ -583,38 +587,40 @@ function paliersGabaritNeuf() {
 }
 
 /**
- * Le fragment de critère à écrire dans le gabarit « critères EUF » livré aux
- * NOUVEAUX utilisateurs.
+ * Le fragment qu'un critère algorithmique NEUF écrit à sa naissance.
+ *
+ * ↻ LOT 4, C.3 — DÉCISION DE GRÉGOIRE (4 sept. 2026, 15 h 40) : « Par défaut, c'est
+ * réglé à “sans projection” ». Un collègue de philosophie ne reçoit plus l'EUF
+ * (900 mots / 30 erreurs) comme point de départ ; la norme externe se CHOISIT au
+ * menu, et arrive alors avec ses défauts déclarés (`appliquerAuCritere`).
  *
  * ⚠ Pourquoi ce n'est PAS le défaut du modèle. `normaliser` ne peut pas
  * distinguer un critère d'avant #668 d'un critère tout neuf : les deux n'ont
- * aucun champ de projection. Le défaut déclaré du modèle est donc ce que lit
- * TOUT critère migré ; le gabarit neuf, lui, ÉCRIT ses valeurs (`nomServiceAide`
- * vide) : c'est un artefact livré, pas une lecture.
+ * aucun champ de projection. Le défaut déclaré (`MODELE_PAR_DEFAUT`) est donc ce
+ * que lit TOUT critère existant — il ne change pas, les critères existants
+ * gardent leur modèle — ; le critère neuf, lui, ÉCRIT son choix. TARIR N'EST PAS
+ * RÉPARER : la source seulement, jamais le stock.
  *
- * ↻ CORRIGÉ LE 2 SEPT. 2026 (#690). Ce paragraphe disait que le défaut « doit
- * rester celui de la MIGRATION (Centre d'aide en français (CAF)), sans quoi la
- * reproduction au mot près tombe ». Ce n'est plus vrai, et ça ne l'était qu'à
- * moitié : le golden de la sentinelle #668 HÉRITAIT tacitement de ce défaut au
- * lieu de déclarer le nom d'alors. Il le déclare maintenant, et ses vingt
- * chaînes n'ont pas bougé d'un caractère. Le défaut, lui, est devenu « Centre
- * d'aide du collège » — décision de Grégoire : le service nommé n'existe plus,
- * et un enseignant dont l'établissement n'a ni CAF ni services adaptés lisait
- * ces mots quand même. ⚠ TARIR N'EST PAS RÉPARER : ce changement tarit la
- * SOURCE. Un enseignant qui a déjà réglé son `nomServiceAide` porte sa valeur
- * en base, elle n'est pas touchée, et c'est voulu.
+ * ▣ MESURÉ le 4 sept. : jusqu'à ce lot, cette fonction n'avait AUCUN appelant
+ * dans l'application — le « gabarit livré » (EUF, 900 / 30, paliers en apposition
+ * `PALIERS_GABARIT_NEUF`) n'a jamais été écrit sur le critère de personne ; un
+ * critère neuf lisait le repli de migration comme les anciens. Les paliers en
+ * apposition restent définis (`paliersGabaritNeuf`) sans être servis : inscrit,
+ * à décider avec « ce qu'un collègue reçoit quand il choisit la norme externe ».
  */
 function gabaritNeuf() {
-    return {
-        modeleProjection: 'norme_externe',
-        paramsProjection: {
-            motsReference: 900,
-            erreursTolerees: 30,
-            nomServiceAide: '',
-            lienServiceAide: ''
-        },
-        paliersProjection: paliersGabaritNeuf()
-    };
+    return { modeleProjection: 'aucune', paramsProjection: {} };
+}
+
+/**
+ * Pose le fragment neuf sur un critère qui DEVIENT algorithmique (naissance,
+ * changement de type) et n'a pas encore choisi de modèle. Jamais à la lecture,
+ * jamais sur un critère qui porte déjà un choix. Rend le critère, muté.
+ */
+function poserDefautNeuf(critere) {
+    if (!critere || critere.type !== 'algorithmique') return critere;
+    if (typeof critere.modeleProjection === 'string' && critere.modeleProjection.trim()) return critere;
+    return Object.assign(critere, gabaritNeuf());
 }
 
 /** Les paliers de migration — reproduction au mot près de l'existant. */
@@ -637,6 +643,7 @@ var api = {
     appliquerAuCritere: appliquerAuCritere,
     paliersGabaritNeuf: paliersGabaritNeuf,
     gabaritNeuf: gabaritNeuf,
+    poserDefautNeuf: poserDefautNeuf,
     paliersMigration: paliersMigration
 };
 

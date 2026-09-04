@@ -17,7 +17,10 @@
  *       couleur · rétroaction · activation dans la carte des codes ; tout ce qui vient de la
  *       grille est échappé ;
  *   E — le composant accordéon n'est pas touché : la bascule exige toujours une vraie carte,
- *       et le plafond de hauteur est relevé dans une règle SCOPÉE.
+ *       et le plafond de hauteur est relevé dans une règle SCOPÉE ;
+ *   F — C.3 (décision du 4 sept., 15 h 40) : un critère algorithmique NEUF naît « sans
+ *       projection » ; les critères existants gardent leur modèle, à la lecture comme après
+ *       rechargement ; la norme externe se choisit.
  *
  * ⚠ Ce banc EXÉCUTE les fonctions réelles de grilles.js (patron des sentinelles #516 / #522 /
  * lot 1) avec les registres réels (formules, énoncés, projection, codes) ; seules les
@@ -364,5 +367,61 @@ describe('lot 4 · C.E — le composant accordéon est employé, pas refait', ()
         const code = source('js/grilles.js');
         expect((code.match(/\$\{rendreCartesGabaritAlgo\(critere,/g) || []).length).toBe(2);
         expect(code).not.toContain('sansCadre');
+    });
+});
+
+/* --------------------------------- F — C.3 : un critère neuf naît sans projection */
+
+describe('lot 4 · C.F — C.3 : un critère algorithmique NEUF naît sans projection, les existants gardent leur modèle', () => {
+    const P = require(path.join(racine, 'js/evaluation-projection.js'));
+
+    it('F.a le fragment neuf est « aucune » ; la LECTURE d\'un critère d\'avant #668 reste la norme externe', () => {
+        expect(P.gabaritNeuf()).toEqual({ modeleProjection: 'aucune', paramsProjection: {} });
+        expect(P.MODELE_PAR_DEFAUT).toBe('norme_externe');
+        expect(P.normaliser({}).modeleId).toBe('norme_externe');                                   // existant sans champ : son modèle d'hier
+        expect(P.normaliser({ modeleProjection: 'norme_externe' }).modeleId).toBe('norme_externe');   // existant explicite : inchangé
+        expect(P.normaliser({ modeleProjection: 'aucune' }).modele.projette).toBe(false);
+        // `poserDefautNeuf` ne touche que l'algorithmique qui n'a rien choisi.
+        expect(P.poserDefautNeuf({ type: 'algorithmique' }).modeleProjection).toBe('aucune');
+        expect(P.poserDefautNeuf({ type: 'holistique' }).modeleProjection).toBeUndefined();
+        expect(P.poserDefautNeuf({ type: 'algorithmique', modeleProjection: 'norme_externe' }).modeleProjection).toBe('norme_externe');
+        expect(P.poserDefautNeuf(null)).toBeNull();
+    });
+
+    it('F.b les trois naissances et les trois changements de type ÉCRIVENT « aucune » — un rendu, lui, n\'écrit rien', async () => {
+        // Édition : naissance sur une grille algorithmique, puis un critère qui change de type.
+        const G = { id: 'G7', nom: 'Algo', type: 'algorithmique', criteres: [{ id: 'H', nom: 'Contenu', type: 'holistique', ponderation: 50 }] };
+        const a = monter([G]);
+        await a.win.ajouterCritereGrille('G7');
+        expect(a.store[CLE][0].criteres[1].type).toBe('algorithmique');
+        expect(a.store[CLE][0].criteres[1].modeleProjection).toBe('aucune');
+        await a.win.modifierCritereGrille('G7', 0, 'type', 'algorithmique');
+        expect(a.store[CLE][0].criteres[0].modeleProjection).toBe('aucune');
+        // Un critère existant SANS champ : un rendu ne l'écrit pas, et l'écran lui montre la norme externe.
+        const AVANT = { id: 'G8', criteres: [{ id: 'V', nom: 'Vieux', type: 'algorithmique', ponderation: 100 }] };
+        const b = monter([AVANT]);
+        b.win.afficherCriteresGrille(JSON.parse(JSON.stringify(AVANT)));
+        expect(b.store[CLE][0].criteres[0].modeleProjection).toBeUndefined();
+        expect(b.liste().innerHTML).toContain('<option value="norme_externe" selected>');
+        // Création : naissance, changement de type au menu du critère, retypage par le menu de la grille.
+        const c = monter([]);
+        c.win.tempTypeGrille = 'algorithmique'; c.win.tempCriteres = [];
+        c.win.ajouterCritereTemp();
+        expect(c.win.tempCriteres[0].modeleProjection).toBe('aucune');
+        c.win.tempTypeGrille = ''; c.win.tempCriteres = [{ id: 'T', nom: 'x', type: 'holistique', ponderation: 0 }];
+        c.win.modifierCritereTemp(0, 'type', 'algorithmique');
+        expect(c.win.tempCriteres[0].modeleProjection).toBe('aucune');
+        c.win.tempTypeGrille = ''; c.win.tempCriteres = [{ id: 'T2', nom: 'y', type: 'holistique', ponderation: 0 }];
+        const menu = c.document.getElementById('typeGrille'); menu.value = 'algorithmique';
+        await c.win.modifierTypeGrilleHandler(menu);
+        expect(c.win.tempCriteres[0].modeleProjection).toBe('aucune');
+        // Et l'écran d'un critère neuf dit « Aucune projection ».
+        c.win.afficherCriteresTemp();
+        expect(c.liste().innerHTML).toContain('<option value="aucune" selected>Aucune projection</option>');
+        expect(c.liste().innerHTML).toContain('Aucune projection ne sera proposée');
+        // Un critère qui reste holistique n'écrit rien.
+        c.win.tempCriteres = [{ id: 'T3', nom: 'z', type: 'holistique', ponderation: 0 }];
+        c.win.modifierCritereTemp(0, 'nom', 'z2');
+        expect(c.win.tempCriteres[0].modeleProjection).toBeUndefined();
     });
 });
