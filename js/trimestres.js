@@ -2378,6 +2378,12 @@
         // Même défaut que `calculerIPB` et que l'éditeur de grilles : un critère
         // sans étiquette est multistructurel, donc « fondation ».
         const solo = (critere && critere.niveauSOLO) || 'multistructurel';
+        // Lot 4, volet B (4 sept. 2026) : « Aucun » n'est ni fondamental, ni
+        // transitionnel, ni complexe — l'export le dit tel quel (`niveau_solo` porte
+        // déjà `'aucun'`), plutôt qu'un type deviné. ⚠ Le format d'export gagne une
+        // valeur dans ces deux colonnes ; un lecteur qui n'attend que trois valeurs
+        // doit apprendre la quatrième.
+        if (solo === 'aucun') return 'aucun';
         if (solo === 'relationnel') return 'transitionnel';
         if (solo === 'abstrait_etendu') return 'complexe';
         return 'fondamental';

@@ -2058,6 +2058,24 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
 }
 
 /**
+ * Le sous-titre de la barre des patterns : les critères multistructurels que le
+ * dépistage surveille. Lot 4, volet B (4 sept. 2026) : quand la grille a des critères
+ * mais qu'aucun n'est multistructurel (tous « Aucun », ou tous relationnels ou
+ * abstraits), l'écran le DIT au lieu de se taire — le suivi des fondations n'a rien à
+ * lire, et ce silence se prenait pour un chargement raté. Sans grille, rien.
+ * @param {Object|null} grille - la grille de référence du dépistage
+ * @returns {string} HTML échappé
+ */
+function libelleCriteresMultiSurveilles(grille) {
+    if (!grille || !Array.isArray(grille.criteres) || grille.criteres.length === 0) return '';
+    var nomsMulti = grille.criteres
+        .filter(function(c) { return (c.niveauSOLO || 'multistructurel') === 'multistructurel'; })
+        .map(function(c) { return c.nom; });
+    if (nomsMulti.length > 0) return 'Critères multistructurels surveillés : ' + echapperHtml(nomsMulti.join(', '));
+    return 'Aucun critère multistructurel dans la grille de dépistage : le suivi des fondations ne surveille rien.';
+}
+
+/**
  * Génère une barre de distribution pour les patterns d'apprentissage
  * 4 zones : Stable (vert) | Défi (bleu) | Émergent (jaune) | Critique (orange)
  *
@@ -2069,18 +2087,8 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
  */
 function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonnees = 0, nbTotal = 0, infoFiabilite = null) {
     // Lire les critères multistructurels pour le sous-titre contextuel
-    var nomsMulti = [];
-    if (typeof obtenirGrilleReferenceDepistage === 'function') {
-        var grille = obtenirGrilleReferenceDepistage();
-        if (grille && grille.criteres) {
-            nomsMulti = grille.criteres
-                .filter(function(c) { return (c.niveauSOLO || 'multistructurel') === 'multistructurel'; })
-                .map(function(c) { return c.nom; });
-        }
-    }
-    var libelleMulti = nomsMulti.length > 0
-        ? 'Critères multistructurels surveillés : ' + echapperHtml(nomsMulti.join(', '))
-        : '';
+    var libelleMulti = libelleCriteresMultiSurveilles(
+        typeof obtenirGrilleReferenceDepistage === 'function' ? obtenirGrilleReferenceDepistage() : null);
     // Sous-titre + 2 micro-actions (édition critères, choix grille dépistage).
     // Toujours rendu : si pas de critères, le libellé est vide mais les boutons restent accessibles.
     var barreActionsSolo = `
@@ -3191,6 +3199,7 @@ window.togglerCritereTrajectoires = togglerCritereTrajectoires;
 window.changerMesureTrajectoires = changerMesureTrajectoires;
 window._majSousTitreTrajectoires = _majSousTitreTrajectoires;
 window.determinerModeAffichageTableauBord = determinerModeAffichageTableauBord;
+window.libelleCriteresMultiSurveilles = libelleCriteresMultiSurveilles;   // lot 4, volet B
 
 /* ===============================
    📌 NOTES D'UTILISATION

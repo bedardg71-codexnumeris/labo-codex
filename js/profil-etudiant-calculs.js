@@ -2011,9 +2011,24 @@ function determinerAlerteContextuelle(da) {
 function libelleNiveauSOLO(niveauSOLO) {
     // Même défaut que `calculerIPB`, `typeCritereSelonSOLO` et l'éditeur de
     // grilles : un critère sans étiquette est une fondation.
+    // Lot 4, volet B (4 sept. 2026) : « Aucun » n'a PAS de libellé — ce critère ne
+    // nourrit pas la lecture SOLO, et un badge « multistructurel » mentirait. Les
+    // lecteurs sautent un libellé vide (badge, parenthèse du défi).
+    if (niveauSOLO === 'aucun') return '';
     if (niveauSOLO === 'relationnel') return 'relationnel';
     if (niveauSOLO === 'abstrait_etendu') return 'abstrait étendu';
     return 'multistructurel';
+}
+
+/**
+ * Le nom d'un défi, suivi de son étiquette SOLO entre parenthèses — sauf quand le
+ * critère n'en a pas (« Aucun », lot 4) : alors le nom seul, pas « Langue () ».
+ * @param {{nom: string, niveauSOLO: string}} defi
+ * @returns {string}
+ */
+function nommerDefiAvecSOLO(defi) {
+    const libelle = libelleNiveauSOLO(defi && defi.niveauSOLO);
+    return libelle ? defi.nom + ' (' + libelle + ')' : String((defi && defi.nom) || '');
 }
 
 /**
@@ -2124,7 +2139,7 @@ function determinerCibleIntervention(da) {
     // `determinerAlerteContextuelle` a sa propre carte.
     const defi = diagnostic.principalDefi;
     const cible = defi
-        ? suivi.diagnostic + ' — ' + defi.nom + ' (' + libelleNiveauSOLO(defi.niveauSOLO) + ')'
+        ? suivi.diagnostic + ' — ' + nommerDefiAvecSOLO(defi)
         : suivi.diagnostic;
 
     return { cible: cible, pattern: M, niveau: suivi.niveauRaI, couleur: suivi.couleur };
@@ -2164,6 +2179,7 @@ window.identifierPatternActuel = identifierPatternActuel;
 window.determinerNiveauRaiPedagogique = determinerNiveauRaiPedagogique;
 window.determinerAlerteContextuelle = determinerAlerteContextuelle;
 window.libelleNiveauSOLO = libelleNiveauSOLO;
+window.nommerDefiAvecSOLO = nommerDefiAvecSOLO;   // lot 4, volet B
 window.determinerCibleIntervention = determinerCibleIntervention;
 
 })();

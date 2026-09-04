@@ -132,7 +132,10 @@ describe('#505 · les rendus de blocs produisent du HTML', () => {
     });
 
     it('d. afficherCriteresGrille rend ses critères', () => {
-        const els = { tableauCriteresGrille: conteneur(), listeCriteresGrille: conteneur(),
+        // ↻ 4 sept. 2026 (lot 4) : `afficherCriteresGrille` est désormais exposée sur window —
+        // ce cas, dormant (il sortait à `return`), s'est réveillé. Le conteneur réel est
+        // `#listeCriteres` (grilles.js) ; sans lui, le rendu sort avant d'écrire.
+        const els = { listeCriteres: conteneur(), tableauCriteresGrille: conteneur(), listeCriteresGrille: conteneur(),
                       criteresContainer: conteneur(), apercuGrilleCriteres: conteneur() };
         const win = charger('js/grilles.js', els);
         if (typeof win.afficherCriteresGrille !== 'function') return;   // nom différent : rien à tenir

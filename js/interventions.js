@@ -714,10 +714,15 @@ function ouvrirIntervention(interventionId, options) {
             var niveauLabel = typeof libelleNiveauSOLO === 'function'
                 ? libelleNiveauSOLO(c.niveauSOLO)
                 : 'multistructurel';
+            // Lot 4, volet B (4 sept. 2026) : un critère « Aucun » n'a pas de badge SOLO —
+            // il reste ciblable par l'intervention, il n'est simplement pas étiqueté.
+            var badgeSolo = niveauLabel
+                ? '<span class="badge-sys" style="font-size: 0.75rem; padding: 2px 6px; opacity: 0.7;">' + echapperHtml(niveauLabel) + '</span>'
+                : '';
             return '<label style="display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer;">' +
                 '<input type="checkbox" class="critere-cible-cb" value="' + echapperHtml(c.nom) + '" ' + checked + ' style="width: auto; margin: 0;">' +
                 '<span>' + echapperHtml(c.nom) + '</span>' +
-                '<span class="badge-sys" style="font-size: 0.75rem; padding: 2px 6px; opacity: 0.7;">' + echapperHtml(niveauLabel) + '</span>' +
+                badgeSolo +
                 '<span class="critere-defi-count" style="font-size: 0.8rem; color: var(--gris-moyen);"></span>' +
                 '</label>';
         }).join('');
