@@ -46,6 +46,14 @@ async function ouvrir(page, enoncesExistants) {
     await page.waitForTimeout(900);
     const n = await page.evaluate(eval(OUVRIR), enoncesExistants || null);
     expect(n, 'les quatre zones sont rendues').toBe(4);
+    // Lot 4 (4 sept. 2026) : les quatre zones vivent dans la carte « Commentaire », repliée à
+    // l'ouverture — un pointeur ne les atteint pas plus qu'une main. On la déplie par
+    // l'événement DOM (le dispatcher de main.js) ; les redessins qui suivent chaque frappe la
+    // gardent dépliée (spec lot4-gabarit-algo-cartes).
+    const carte = page.locator('#listeCriteres .gabarit-algo-carte[data-pli$=":commentaire"]');
+    await expect(carte).toHaveClass(/ferme/);
+    await page.evaluate(() => document.querySelector('#listeCriteres .gabarit-algo-carte[data-pli$=":commentaire"] .accordeon-header').click());
+    await expect(carte).not.toHaveClass(/ferme/);
 }
 
 test('texte troué · chaque zone offre ses repères, et « Aucune annotation » n\'offre pas {erreurs}', async ({ page }) => {
