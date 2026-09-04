@@ -60,6 +60,16 @@ test('codes par grille · gabarit — cocher active, décocher retire, la couleu
     console.log('SEMIS →', JSON.stringify(semis));
     expect(semis.n, 'les quatre sous-critères sont rendus').toBe(4);
 
+    // Lot 4 (4 sept. 2026) : la case et les couleurs vivent dans la carte « Codes d'annotation »,
+    // repliée à l'ouverture. On la déplie comme à la souris (le dispatcher de main.js) ; les
+    // redessins qui suivent la GARDENT dépliée — c'est l'objet du spec lot4-gabarit-algo-cartes.
+    // Le geste passe par l'événement DOM, comme les autres gestes de ce spec : le clic à la
+    // souris sur une bande est éprouvé par le spec du lot 4, ici on veut la case.
+    const carteCodes = page.locator('#listeCriteres .gabarit-algo-carte[data-pli$=":codes"]');
+    await expect(carteCodes).toHaveClass(/ferme/);
+    await page.evaluate(() => document.querySelector('#listeCriteres .gabarit-algo-carte[data-pli$=":codes"] .accordeon-header').click());
+    await expect(carteCodes).not.toHaveClass(/ferme/);
+
     const bloc = page.locator('#listeCriteres .sous-criteres-codes');
     const caseCodes = bloc.locator('input[type="checkbox"]');
     await expect(caseCodes).not.toBeChecked();

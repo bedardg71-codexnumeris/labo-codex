@@ -3336,6 +3336,7 @@ function afficherCriteresTemp() {
     rendrePrecisionTypeGrille({ type: window.tempTypeGrille, criteres: window.tempCriteres });
     const container = document.getElementById('listeCriteres');
     if (!container) return;
+    capturerPlisGabaritAlgo(container);
 
     if (!window.tempCriteres || window.tempCriteres.length === 0) {
         container.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucun critère défini</p>';
@@ -3410,9 +3411,7 @@ function afficherCriteresTemp() {
                            data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="description">
                 </div>
             </div>
-            ${rendreBlocFormuleAlgo(critere, { mode: "temp", index: index })}
-            ${rendreBlocProjectionAlgo(critere, { mode: "temp", index: index })}
-            ${rendreBlocEnoncesAlgo(critere, { mode: "temp", index: index })}
+            ${rendreCartesGabaritAlgo(critere, { mode: "temp", index: index })}
         </div>
     `).join('');
 
@@ -3472,12 +3471,10 @@ function rendreBlocFormuleAlgo(critere, ctx) {
     // ⚠ Le texte de la formule N'EST PAS écrit ici : il sort du registre, de la
     // même source que le calcul. C'est tout l'objet de #667.
     //
-    // `sansCadre` : l'écran des grilles enregistrées pose déjà un conteneur
-    // encadré autour de la formule ET des sous-critères. Sans cette option, le
-    // bloc s'y dessinerait dans un second cadre imbriqué.
-    const ouvre = ctx.sansCadre ? '<div>' : '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">';
+    // Lot 4 (4 sept. 2026) : le bloc se dessine SANS cadre — c'est la carte
+    // « Formule » de `rendreCartesGabaritAlgo` qui le porte, sur les deux écrans.
     return `
-            ${ouvre}
+            <div>
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Modèle de formule</label>
                     <select class="controle-form"
@@ -3587,11 +3584,14 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
                         <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 2px;">${esc(c.aide)}</small>
                     </div>`).join('');
 
-    const ouvre = ctx.sansCadre ? '<div>' : '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">';
+    // Lot 4 (4 sept. 2026) : « Modèle de COMMENTAIRE », décision de Grégoire — la
+    // rétroaction, c'est la cartouche, sur le travail ; ici, des commentaires que
+    // le critère engendre. La clé sous le menu ne porte pas le mot : rien qui
+    // voyage ne change. Sans cadre : la carte « Commentaire » le porte.
     return `
-            ${ouvre}
+            <div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Modèle de rétroaction</label>
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Modèle de commentaire</label>
                     <select class="controle-form"
                             data-on-change="${handlerModele}" ${datasCommunes}>
                         ${options}
@@ -3813,6 +3813,228 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                 </div>
                 <button class="btn btn-secondaire btn-tres-compact" style="margin-top: 8px;"
                         data-action="${actionAjout}" ${paramsAction}>+ Ajouter un palier</button>`;
+}
+
+/* ===============================
+   LOT 4 (4 septembre 2026) — LE GABARIT ALGORITHMIQUE SE RANGE
+   =============================== */
+
+/**
+ * Les PLIS du gabarit vivent ici — pas dans le DOM, pas dans la grille.
+ *
+ * Chaque handler de champ redessine le bloc entier (`afficherCriteresTemp`,
+ * `afficherCriteresGrille`) : un pli qui ne vivrait que dans le DOM se refermerait
+ * sous les doigts à la première frappe (cadrage « accordéons » du 3 sept., obstacle 2).
+ * Avant chaque redessin, `capturerPlisGabaritAlgo` relève l'état des cartes en
+ * place ; le rendu le relit par `pliGabaritAlgoFerme`.
+ *
+ * ⛔ Rien de ceci n'entre dans les données de la grille : un pli d'écran n'est pas
+ * une propriété de la grille, il ne voyage ni à l'export ni au partage — il meurt
+ * avec la page, et c'est voulu. Les cartes ne portent pas d'`id` non plus :
+ * `toggleAccordeonV2` persisterait alors leur état dans `etatsAccordeonsV2`.
+ *
+ * Clé : `<id du critère>:<section>` ; valeur : `true` = repliée.
+ */
+const plisGabaritAlgo = {};
+
+function capturerPlisGabaritAlgo(container) {
+    if (!container || typeof container.querySelectorAll !== 'function') return;
+    const cartes = container.querySelectorAll('.carte.accordeon[data-pli]') || [];
+    Array.prototype.forEach.call(cartes, (carte) => {
+        const clePli = (carte.dataset && carte.dataset.pli)
+            || (typeof carte.getAttribute === 'function' ? carte.getAttribute('data-pli') : '');
+        if (!clePli || !carte.classList) return;
+        plisGabaritAlgo[clePli] = carte.classList.contains('ferme');
+    });
+}
+
+function pliGabaritAlgoFerme(clePli, fermeParDefaut) {
+    return Object.prototype.hasOwnProperty.call(plisGabaritAlgo, clePli)
+        ? plisGabaritAlgo[clePli]
+        : fermeParDefaut;
+}
+
+/**
+ * Une section repliable du gabarit — le composant `.carte.accordeon` de l'application
+ * (bascule `toggleAccordeonV2`, délégation des clics dans main.js), employé tel quel :
+ * la bascule exige une VRAIE carte, et son sélecteur ne s'assouplit pas pour un écran.
+ * Règle de Grégoire (3 sept.) : ouvert ce qui porte la note, fermé ce qui porte les mots.
+ * Le chevron suit ce que la bascule écrit (▼ ouvert, ▶ replié).
+ */
+function carteGabaritAlgo(critere, ctx, section, titre, contenu, fermeParDefaut) {
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
+    const clePli = `${critere.id || ('critere-' + ctx.index)}:${section}`;
+    const ferme = pliGabaritAlgoFerme(clePli, fermeParDefaut);
+    return `
+                <div class="carte accordeon gabarit-algo-carte${ferme ? ' ferme' : ''}" data-pli="${esc(clePli)}">
+                    <div class="accordeon-header">
+                        <h3 class="carte-titre-bleu" style="margin: 0;">
+                            <span class="accordeon-chevron">${ferme ? '▶' : '▼'}</span> ${esc(titre)}
+                        </h3>
+                    </div>
+                    <div class="accordeon-contenu">${contenu}</div>
+                </div>`;
+}
+
+/** Le code qu'un sous-critère affiche : le sien, sinon sa position (comme avant ce lot). */
+function codeAfficheSousCritere(sc, scIndex) {
+    return (sc.code === undefined || sc.code === null || sc.code === '') ? String(scIndex) : String(sc.code);
+}
+
+/**
+ * Les SOUS-CRITÈRES — en tête du gabarit, tout de suite sous la rangée du critère
+ * (décision de Grégoire, 4 sept.) : ils portent la note, on les relit souvent. À
+ * plat, pas repliables : la ligne code · nom · pondération est ce que l'enseignant
+ * vérifie quand il fait son total. Leur couleur et leur rétroaction — des mots —
+ * vivent dans la carte « Codes d'annotation » (`rendreBlocCodesAlgo`).
+ * En création (mode temp), la grille n'est pas encore enregistrée : on le dit.
+ * `esc()` sur tout ce qui vient de la grille — le nom d'un sous-critère est saisi.
+ */
+function rendreSousCriteresAlgo(critere, ctx) {
+    if (ctx.mode !== 'grille') {
+        return `
+                <p class="sous-criteres-info">Les sous-critères se définissent une fois la grille enregistrée.</p>`;
+    }
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
+    const grilleId = ctx.grilleId;
+    const index = ctx.index;
+    const scs = Array.isArray(critere.sousCriteres) ? critere.sousCriteres : [];
+    const datas = (scIndex) => `data-on-change="modifierSousCritereHandler" data-grille-id="${esc(grilleId)}" data-critere-index="${index}" data-sc-index="${scIndex}"`;
+
+    const lignes = scs.map((sc, scIndex) => `
+                        <div class="sous-critere-item">
+                            <div class="sous-critere-champs-grid sous-critere-champs-grid--note">
+                                <div class="groupe-form">
+                                    <label class="sous-critere-label-petit">Code</label>
+                                    <input type="text"
+                                           class="controle-form sous-critere-input-code"
+                                           value="${esc(codeAfficheSousCritere(sc, scIndex))}"
+                                           ${datas(scIndex)} data-champ="code">
+                                </div>
+                                <div class="groupe-form">
+                                    <label class="sous-critere-label-petit">Nom</label>
+                                    <input type="text"
+                                           class="controle-form sous-critere-input-standard"
+                                           value="${esc(sc.nom || '')}"
+                                           placeholder="Ex: Syntaxe, Ponctuation..."
+                                           ${datas(scIndex)} data-champ="nom">
+                                </div>
+                                <div class="groupe-form">
+                                    <label class="sous-critere-label-petit">Pondération</label>
+                                    <input type="number"
+                                           class="controle-form sous-critere-input-standard"
+                                           value="${esc(sc.ponderation !== undefined ? sc.ponderation : 1.0)}"
+                                           min="0"
+                                           step="0.1"
+                                           placeholder="1.0"
+                                           ${datas(scIndex)} data-champ="ponderation" data-parse-float
+                                           title="Ex: 1.0 pour erreur complète, 0.5 pour demi-point">
+                                </div>
+                                <button class="btn btn-supprimer btn-tres-compact"
+                                        data-action="supprimerSousCritere" data-param="${esc(grilleId)}" data-param2="${index}" data-param3="${scIndex}"
+                                        title="Supprimer ce sous-critère">
+                                    ✕
+                                </button>
+                            </div>
+                        </div>`).join('');
+
+    const boutonAjouter = (classe) => `
+                    <button class="btn btn-ajouter btn-tres-compact ${classe}"
+                            data-action="ajouterSousCritere" data-param="${esc(grilleId)}" data-param2="${index}">
+                        + Ajouter un sous-critère
+                    </button>`;
+
+    return `
+                <div class="sous-criteres-conteneur sous-criteres-conteneur--en-tete">
+                    <div class="sous-criteres-header">
+                        <h4 class="sous-criteres-titre">
+                            Sous-critères
+                            ${scs.length > 0 ? `<span class="sous-criteres-compteur">(${scs.length})</span>` : ''}
+                        </h4>
+                        ${scs.length === 0 ? `
+                        <button class="btn btn-secondaire btn-tres-compact sous-criteres-btn-defaut"
+                                data-action="initialiserSousCriteresParDefaut" data-param="${esc(grilleId)}" data-param2="${index}">
+                            📋 Utiliser sous-critères par défaut (0-10)
+                        </button>` : ''}
+                    </div>
+                    ${scs.length > 0 ? `
+                    <div class="sous-criteres-liste-conteneur">
+                        ${lignes}
+                        ${boutonAjouter('sous-criteres-btn-ajouter-liste')}
+                    </div>` : `
+                    <p class="sous-criteres-vide-message">
+                        Aucun sous-critère défini. Utilise les sous-critères par défaut ou crée les tiens.
+                    </p>
+                    ${boutonAjouter('sous-criteres-btn-ajouter-vide')}`}
+                    <p class="sous-criteres-info">
+                        💡 Les sous-critères permettent de catégoriser les erreurs avec des pondérations différentes (ex: ponctuation = 0.5 point).
+                    </p>
+                </div>`;
+}
+
+/**
+ * La carte « Codes d'annotation » — les MOTS des sous-critères : le geste
+ * d'activation (codes par grille, lot 3 du 3 sept.), puis, par sous-critère, sa
+ * couleur et sa rétroaction. Le code et le nom se LISENT ici et se modifient dans
+ * le bloc « Sous-critères » : un champ, un seul endroit où l'écrire.
+ */
+function rendreBlocCodesAlgo(critere, ctx) {
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
+    const grilleId = ctx.grilleId;
+    const index = ctx.index;
+    const scs = Array.isArray(critere.sousCriteres) ? critere.sousCriteres : [];
+    if (scs.length === 0) {
+        return `
+                <p class="sous-criteres-vide-message">Aucun sous-critère : ajoute-en dans le bloc « Sous-critères » ci-dessus, puis règle ici leur couleur et leur rétroaction.</p>`;
+    }
+    const lignes = scs.map((sc, scIndex) => `
+                        <div class="sous-critere-item">
+                            <div class="sous-critere-champs-grid sous-critere-champs-grid--code">
+                                <div class="groupe-form">
+                                    <label class="sous-critere-label-petit">Sous-critère</label>
+                                    <div class="sous-critere-code-lecture">${esc(codeAfficheSousCritere(sc, scIndex))} · ${esc(sc.nom || '')}</div>
+                                </div>
+                                <div class="groupe-form sous-critere-couleur-groupe">
+                                    <label class="sous-critere-label-petit">Couleur</label>
+                                    ${rendreCouleurSousCritere(critere, sc, { grilleId: grilleId, index: index, scIndex: scIndex })}
+                                </div>
+                            </div>
+                            <div class="groupe-form sous-critere-description-groupe">
+                                <label class="sous-critere-label-petit">Description / Rétroaction</label>
+                                <textarea class="controle-form sous-critere-textarea"
+                                          rows="2"
+                                          placeholder="Ex: La plupart des erreurs concernent la construction syntaxique..."
+                                          data-on-change="modifierSousCritereHandler" data-grille-id="${esc(grilleId)}" data-critere-index="${index}" data-sc-index="${scIndex}" data-champ="retroaction">${esc(sc.retroaction || '')}</textarea>
+                            </div>
+                        </div>`).join('');
+    return `
+                    <div class="sous-criteres-liste-conteneur">
+                        ${rendreActivationCodes(critere, { grilleId: grilleId, index: index })}
+                        ${lignes}
+                    </div>`;
+}
+
+/**
+ * LE GABARIT D'UN CRITÈRE ALGORITHMIQUE, pour les deux écrans de grille — un seul
+ * rendu, deux contextes (`ctx.mode` : 'temp' en création, 'grille' en édition).
+ * Ordre décidé par Grégoire le 4 sept. : les sous-critères d'abord, sous la rangée
+ * du critère ; puis la formule (ouverte : elle porte la note), le commentaire, la
+ * projection et les codes (repliés : ils portent les mots). Chaque carte a son
+ * titre et sa bande — c'est ce qui sépare la formule de la projection, sans marge
+ * ajoutée à part. Rien ici n'écrit dans la grille : l'ordre change le rendu, pas
+ * les données, et les `data-critere-index` des handlers restent ceux du critère.
+ */
+function rendreCartesGabaritAlgo(critere, ctx) {
+    if (!critere || critere.type !== 'algorithmique') return '';
+    const estGrille = ctx.mode === 'grille';
+    return `
+            <div class="gabarit-algo" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">
+                ${rendreSousCriteresAlgo(critere, ctx)}
+                ${carteGabaritAlgo(critere, ctx, 'formule', 'Formule', rendreBlocFormuleAlgo(critere, ctx), false)}
+                ${carteGabaritAlgo(critere, ctx, 'commentaire', 'Commentaire', rendreBlocEnoncesAlgo(critere, ctx), true)}
+                ${carteGabaritAlgo(critere, ctx, 'projection', 'Projection', rendreBlocProjectionAlgo(critere, ctx), true)}
+                ${estGrille ? carteGabaritAlgo(critere, ctx, 'codes', 'Codes d\'annotation', rendreBlocCodesAlgo(critere, ctx), true) : ''}
+            </div>`;
 }
 
 /**
@@ -4057,6 +4279,7 @@ function afficherCriteresGrille(grille) {
     rendrePrecisionTypeGrille(grille);
     const container = document.getElementById('listeCriteres');
     if (!container) return;
+    capturerPlisGabaritAlgo(container);
 
     if (!grille.criteres || grille.criteres.length === 0) {
         container.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucun critère défini</p>';
@@ -4131,105 +4354,7 @@ function afficherCriteresGrille(grille) {
                            data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="description">
                 </div>
             </div>
-            ${critere.type === 'algorithmique' ? `
-            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">
-                ${rendreBlocFormuleAlgo(critere, { mode: "grille", index: index, grilleId: grille.id, sansCadre: true })}
-                ${rendreBlocProjectionAlgo(critere, { mode: "grille", index: index, grilleId: grille.id, sansCadre: true })}
-                ${rendreBlocEnoncesAlgo(critere, { mode: "grille", index: index, grilleId: grille.id, sansCadre: true })}
-
-                <!-- Gestion des sous-critères -->
-                <div class="sous-criteres-conteneur">
-                    <div class="sous-criteres-header">
-                        <h4 class="sous-criteres-titre">
-                            Sous-critères
-                            ${critere.sousCriteres && critere.sousCriteres.length > 0 ?
-                                `<span class="sous-criteres-compteur">(${critere.sousCriteres.length})</span>` :
-                                ''}
-                        </h4>
-                        ${!critere.sousCriteres || critere.sousCriteres.length === 0 ? `
-                        <button class="btn btn-secondaire btn-tres-compact sous-criteres-btn-defaut"
-                                data-action="initialiserSousCriteresParDefaut" data-param="${grille.id}" data-param2="${index}">
-                            📋 Utiliser sous-critères par défaut (0-10)
-                        </button>
-                        ` : ''}
-                    </div>
-
-                    ${critere.sousCriteres && critere.sousCriteres.length > 0 ? `
-                    <div class="sous-criteres-liste-conteneur">
-                        ${rendreActivationCodes(critere, { grilleId: grille.id, index: index })}
-                        ${critere.sousCriteres.map((sc, scIndex) => `
-                        <div class="sous-critere-item">
-                            <div class="sous-critere-champs-grid">
-                                <div class="groupe-form">
-                                    <label class="sous-critere-label-petit">Code</label>
-                                    <input type="text"
-                                           class="controle-form sous-critere-input-code"
-                                           value="${sc.code || scIndex}"
-                                           data-on-change="modifierSousCritereHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-sc-index="${scIndex}" data-champ="code">
-                                </div>
-                                <div class="groupe-form">
-                                    <label class="sous-critere-label-petit">Nom</label>
-                                    <input type="text"
-                                           class="controle-form sous-critere-input-standard"
-                                           value="${sc.nom || ''}"
-                                           placeholder="Ex: Syntaxe, Ponctuation..."
-                                           data-on-change="modifierSousCritereHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-sc-index="${scIndex}" data-champ="nom">
-                                </div>
-                                <div class="groupe-form">
-                                    <label class="sous-critere-label-petit">Pondération</label>
-                                    <input type="number"
-                                           class="controle-form sous-critere-input-standard"
-                                           value="${sc.ponderation !== undefined ? sc.ponderation : 1.0}"
-                                           min="0"
-                                           step="0.1"
-                                           placeholder="1.0"
-                                           data-on-change="modifierSousCritereHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-sc-index="${scIndex}" data-champ="ponderation" data-parse-float
-                                           title="Ex: 1.0 pour erreur complète, 0.5 pour demi-point">
-                                </div>
-                                <div class="groupe-form sous-critere-couleur-groupe">
-                                    <label class="sous-critere-label-petit">Couleur</label>
-                                    ${rendreCouleurSousCritere(critere, sc, { grilleId: grille.id, index: index, scIndex: scIndex })}
-                                </div>
-                                <button class="btn btn-supprimer btn-tres-compact"
-                                        data-action="supprimerSousCritere" data-param="${grille.id}" data-param2="${index}" data-param3="${scIndex}"
-                                        title="Supprimer ce sous-critère">
-                                    ✕
-                                </button>
-                            </div>
-                            <div class="groupe-form sous-critere-description-groupe">
-                                <label class="sous-critere-label-petit">Description / Rétroaction</label>
-                                <textarea class="controle-form sous-critere-textarea"
-                                          rows="2"
-                                          placeholder="Ex: La plupart des erreurs concernent la construction syntaxique..."
-                                          data-on-change="modifierSousCritereHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-sc-index="${scIndex}" data-champ="retroaction">${sc.retroaction || ''}</textarea>
-                            </div>
-                        </div>
-                        `).join('')}
-
-                        <!-- Bouton ajouter après la liste -->
-                        <button class="btn btn-ajouter btn-tres-compact sous-criteres-btn-ajouter-liste"
-                                data-action="ajouterSousCritere" data-param="${grille.id}" data-param2="${index}">
-                            + Ajouter un sous-critère
-                        </button>
-                    </div>
-                    ` : `
-                    <p class="sous-criteres-vide-message">
-                        Aucun sous-critère défini. Utilise les sous-critères par défaut ou crée les tiens.
-                    </p>
-
-                    <!-- Bouton ajouter quand liste vide -->
-                    <button class="btn btn-ajouter btn-tres-compact sous-criteres-btn-ajouter-vide"
-                            data-action="ajouterSousCritere" data-param="${grille.id}" data-param2="${index}">
-                        + Ajouter un sous-critère
-                    </button>
-                    `}
-
-                    <p class="sous-criteres-info">
-                        💡 Les sous-critères permettent de catégoriser les erreurs avec des pondérations différentes (ex: ponctuation = 0.5 point).
-                    </p>
-                </div>
-            </div>
-            ` : ''}
+            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id })}
         </div>
     `).join('');
 
@@ -5542,6 +5667,9 @@ window.modifierTypeCritereGrilleHandler = modifierTypeCritereGrilleHandler;
 window.modifierTypeGrilleHandler = modifierTypeGrilleHandler;
 window.typeCritereParDefaut = typeCritereParDefaut;
 window.typeGrilleAffiche = typeGrilleAffiche;
+window.rendreCartesGabaritAlgo = rendreCartesGabaritAlgo;   // lot 4 — le gabarit algorithmique, pour les sentinelles
+window.afficherCriteresGrille = afficherCriteresGrille;       // lot 4 — l'écran d'édition, exécuté par les sentinelles (afficherCriteresTemp l'est déjà plus haut)
+window.capturerPlisGabaritAlgo = capturerPlisGabaritAlgo;
 window.phrasePrecisionTypeGrille = phrasePrecisionTypeGrille;
 window.TYPES_GRILLE = TYPES_GRILLE;
 window.modifierSousCritereHandler = modifierSousCritereHandler;
