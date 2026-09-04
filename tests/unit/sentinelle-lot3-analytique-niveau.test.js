@@ -370,6 +370,9 @@ function monterPdf() {
         echapperHtml: (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])),
         obtenirEchelleResolue: () => ECHELLE,
         obtenirDonneesSelonMode: () => [],
+        // Les lecteurs d'échelle du bilan du PDF (mêmes stubs que le bilan de l'app) — retouche §6.
+        niveauDuCodeDansEchelle: (code) => { const i = ['I', 'D', 'M', 'E'].indexOf(code); return i === -1 ? null : { code, nom: ECHELLE.niveaux[i].nom, rang: i + 1 }; },
+        zoneDuNiveau: (code) => ({ I: 'priorite', D: 'signale', M: 'acquis', E: 'acquis' })[code] || null,
         obtenirTrimestreActif: () => ({ id: 'T1', nom: 'A2026' }),
         obtenirEtudiantsCoursActif: () => [],
         obtenirGroupesCours: () => [],
@@ -510,6 +513,96 @@ describe('lot 3 · E — rien ne bouge pour un critère holistique, algorithmiqu
     });
 });
 
+/* ------------------------- H — le PDF de l'élève : son bilan et sa légende (seconde retouche, §6) */
+
+// Une grille ENTIÈREMENT analytique, sur le modèle de l'« Analyse littéraire » de Grégoire.
+const GRILLE_ANALYTIQUE = {
+    id: 'G3', nom: 'Analyse littéraire', type: 'analytique',
+    criteres: [
+        { id: 'a1', nom: 'Sujet amené', ponderation: 50, type: 'analytique' },
+        { id: 'a2', nom: 'Sujet posé', ponderation: 30, type: 'analytique' },
+        { id: 'a3', nom: 'Sujet divisé', ponderation: 20, type: 'analytique', description: 'Pertinent et clair' }
+    ]
+};
+// 50 / 50 → E (acquis : la force) ; 20 / 30 → D (signalé) ; 8 / 20 → I (priorité).
+const EVAL_ANALYTIQUE = {
+    id: 'EV4', etudiantDA: '111', grilleId: 'G3', echelleId: 'E3',
+    noteFinale: 78, niveauFinal: 'M', ponderationCouverte: 100,
+    pointsAnalytiques: { a1: 50, a2: 20, a3: 8 },
+    criteres: [
+        { critereId: 'a1', critereNom: 'Sujet amené', niveauSelectionne: 'E', points: 50, ponderation: 50, retroaction: '' },
+        { critereId: 'a2', critereNom: 'Sujet posé', niveauSelectionne: 'D', points: 20, ponderation: 30, retroaction: '' },
+        { critereId: 'a3', critereNom: 'Sujet divisé', niveauSelectionne: 'I', points: 8, ponderation: 20, retroaction: '' }
+    ]
+};
+
+describe('lot 3 · H — le PDF de l\'élève : son bilan nomme un critère analytique par son chiffre, et sa légende disparaît quand aucun critère ne lit l\'échelle (seconde retouche, décision de Grégoire)', () => {
+    function pageAnalytique() {
+        const calcul = chargerScript('js/evaluation-calcul.js', { valeurNumeriqueDuNiveau }, { addEventListener() {}, removeEventListener() {} });
+        const base = { test_grillesTemplates: [GRILLE_ANALYTIQUE] };
+        const communs = {
+            db: { getSync: (k, d) => (k in base ? JSON.parse(JSON.stringify(base[k])) : (d !== undefined ? d : null)), get: async () => null, set: async () => {}, setSync() {} },
+            cle: (k) => 'test_' + k,
+            echapperHtml: (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])),
+            obtenirEchelleResolue: () => ECHELLE,
+            obtenirDonneesSelonMode: () => [],
+            niveauDuCodeDansEchelle: (code) => { const i = ['I', 'D', 'M', 'E'].indexOf(code); return i === -1 ? null : { code, nom: ECHELLE.niveaux[i].nom, rang: i + 1 }; },
+            zoneDuNiveau: (code) => ({ I: 'priorite', D: 'signale', M: 'acquis', E: 'acquis' })[code] || null,
+            obtenirTrimestreActif: () => ({ id: 'T1', nom: 'A2026' }),
+            obtenirEtudiantsCoursActif: () => [], obtenirGroupesCours: () => [],
+            travauxStockage: { obtenirAnnotationFichier: () => null }, travauxOutils: { AUTOCOLLANTS: [] },
+            obtenirPreference: () => null,
+            porteeDepuisEvaluation: calcul.porteeDepuisEvaluation, texteCriteresHorsNote: calcul.texteCriteresHorsNote
+        };
+        const data = chargerScript('js/synthese-retroaction-data.js', communs);
+        const rendu = chargerScript('js/synthese-retroaction-rendu.js', communs);
+        const fb = data.syntheseRetroactionData.construireFeedback(EVAL_ANALYTIQUE, { id: 'F4' }, null);
+        return { fb, page: rendu.syntheseRetroactionRendu.rendreSyntheseHTML(fb) };
+    }
+
+    it('H.a « Présentement, il faut se concentrer sur » : « pertinent et clair (Sujet divisé 8 / 20) », pas « Insuffisant »', () => {
+        const { fb, page } = pageAnalytique();
+        expect(fb.bilan.concentration.priorites).toEqual(['pertinent et clair (Sujet divisé 8 / 20)']);
+        expect(page).toContain('pertinent et clair (Sujet divisé 8 / 20)');
+        expect(page).not.toContain('(Sujet divisé Insuffisant)');
+    });
+
+    it('H.b « Acquis en développement, à consolider » : « Sujet posé (20 / 30) »', () => {
+        const { fb, page } = pageAnalytique();
+        expect(fb.bilan.concentration.signales).toEqual(['Sujet posé (20 / 30)']);
+        expect(page).toContain('Sujet posé (20 / 30)');
+        expect(page).not.toContain('Sujet posé (En développement)');
+    });
+
+    it('H.c « Ta force : Sujet amené (50 / 50) »', () => {
+        const { fb, page } = pageAnalytique();
+        expect(fb.bilan.recurrents.force).toBe('Ta force : Sujet amené (50 / 50)');
+        expect(page).toContain('Ta force : Sujet amené (50 / 50)');
+        expect(page).not.toContain('Sujet amené (Étendu)');
+    });
+
+    it('H.d la légende « I · D · M · E » disparaît de « Rétroaction par critère » quand aucun critère ne lit l\'échelle — et reste sur une grille mixte', () => {
+        const { page } = pageAnalytique();
+        // La légende : une pastille de couleur, le code en gras, puis le libellé.
+        expect(page).not.toMatch(/<\/b> Insuffisant/);
+        expect(page).not.toMatch(/<\/b> Étendu/);
+        expect(page).toContain('Rétroaction par critère');
+        // Témoin : la grille mixte du lot 3 (Contenu holistique) garde sa légende.
+        const mixte = monterPdf().html(monterPdf().feedback(EVAL_LOT3));
+        expect(mixte).toMatch(/<\/b> Insuffisant/);
+        expect(mixte).toMatch(/<\/b> Étendu/);
+    });
+
+    it('H.e sans points (critère holistique), le bilan du PDF garde le libellé du niveau, comme avant', () => {
+        const pdf = monterPdf();
+        const avecDefi = JSON.parse(JSON.stringify(EVAL_LOT3));
+        avecDefi.criteres[0].niveauSelectionne = 'I';   // Contenu (holistique) en priorité
+        const fb = pdf.feedback(avecDefi);
+        expect(fb.bilan.concentration.priorites).toEqual(['le fond. (Contenu Insuffisant)']);
+        expect(fb.bilan.recurrents.force).toBe('Ta force : Langue (24 / 30)');
+    });
+});
+
 /* ------------------------------------------------- G — le bilan dit le chiffre (retouche) */
 
 /** Le bilan tel que l'élève le reçoit : `basculerVueRetroaction('bilan')` rend dans `#contenuRetroBilan`. */
@@ -606,6 +699,11 @@ describe('lot 3 · F — témoins de source', () => {
         expect(source('js/synthese-retroaction-rendu.js')).toContain('${esc(critere.points)} / ${esc(critere.weight)}');
         expect(source('js/evaluation-retroaction.js')).toContain('? `${ptsAnalytiques} / ${critere.ponderation}` : niveau;');
         expect(source('js/travaux-export-pdf.js')).toContain('? `${c.points} / ${c.ponderation}` : (c.niveauSelectionne || \'—\');');
+        // Seconde retouche (§6) : le bilan du PDF, trois sites, une lecture ; et la légende conditionnée.
+        const data = source('js/synthese-retroaction-data.js');
+        expect((data.match(/lectureNiveauCritere\(echelle, (d|meilleur)\)/g) || []).length, 'priorités, signalés, force').toBe(3);
+        expect(data).not.toMatch(/libelleNiveau\(echelle, [a-z]+\.niveauSelectionne\)/);
+        expect(source('js/synthese-retroaction-rendu.js')).toContain("criteres.some(c => typeof c.points !== 'number') ? renderLegende(ctx) : ''");
         // Retouche du 4 sept. : les trois rendus du bilan passent par la même lecture, et plus aucun n'appelle `_nomBilan` sur un critère.
         const retro = source('js/evaluation-retroaction.js');
         expect((retro.match(/= _lectureNiveauBilan\(niveauDe, (d|c|meilleur)\)/g) || []).length, "trois rendus, une lecture").toBe(3);

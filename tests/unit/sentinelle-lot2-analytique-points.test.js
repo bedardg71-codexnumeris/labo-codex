@@ -362,6 +362,17 @@ describe('lot 2 · E — les points vivent sous leur nom, partout où `donneesAl
         expect((chargement.match(/min="0" max="\$\{ponderation\}"/g) || []).length).toBe(2);
     });
 
+    it('E.e le champ de points VIDE ne ressemble pas à un zéro : « – » en placeholder, jamais « 0 » (retouche du 4 sept., vécu par Grégoire — un vrai zéro se tape)', () => {
+        const chargement = source('js/evaluation-chargement.js');
+        // Les deux gabarits du champ de points (les deux renderers) : `max="${ponderation}"` les identifie.
+        const champs = chargement.match(/max="\$\{ponderation\}" step="any" placeholder="[^"]*"/g) || [];
+        expect(champs.length).toBe(2);
+        champs.forEach((champ) => {
+            expect(champ, 'le vide se lit comme un vide').toContain('placeholder="–"');
+            expect(champ, '« 0 » redevient une valeur qu\'on tape').not.toContain('placeholder="0"');
+        });
+    });
+
     it('E.d la boucle de `calculerNote` n\'a pas bougé : elle somme `valeur × pondération / 100` et divise par la pondération totale', () => {
         const calcul = source('js/evaluation-calcul.js');
         expect(calcul).toContain("portee.criteresComptes.forEach(({ critere, niveau, valeur }) => {\n        const ponderation = (critere.ponderation || 0) / 100;\n        noteTotal += valeur * ponderation;\n        ponderationTotal += ponderation;");
