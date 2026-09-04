@@ -260,8 +260,23 @@ C'est un artefact publié, sa vue d'`OU-EN-EST-ON.md`. **Il n'y en a qu'une.** N
 jamais en fabriquer une seconde : deux pages qui divergent seraient pires que rien.
 Si son adresse manque, la demander plutôt que de la deviner.
 
-Elle porte : où on en est (les huit), **ce qu'on fait en ce moment et pourquoi**,
-ce qui attend une décision de lui, et ce qu'il doit aller voir à l'écran.
+↻ **Son titre à l'écran est « Ce qu'il reste à faire » depuis le 2 septembre 2026 ;
+son nom d'artefact reste « Les huit gestes ».** Même page, ne pas en chercher une autre.
+
+Elle porte : le ruban des huit, **ce qui reste ouvert**, ce qui attend une décision
+de lui, et ce qu'il doit aller voir à l'écran.
+
+⛔ **RÈGLE ARRÊTÉE PAR GRÉGOIRE LE 2 SEPTEMBRE 2026 — ON FAIT COURT, ET CE QUI EST
+FINI DISPARAÎT.** Ses mots : *« Quand un point est fini, on le retire. On le compte
+comme du travail fait, mais on ne l'affiche plus. On passe au point suivant. »*
+
+⮕ **Un geste fini est RETIRÉ de la page et COMPTÉ dans le ruban.** Les preuves et le
+détail restent dans `OU-EN-EST-ON.md`, au dépôt — la page n'est pas l'archive, elle
+est la vue de ce qui reste.
+⚠ **Le motif, et il est plus grave qu'une préférence de forme** : le 2 septembre au
+matin, il a dit être en **surcharge cognitive** — trop d'information, impossible de
+retenir, donc impossible de décider. **Une page qui accumule redevient illisible en
+une semaine.** La page était passée de 730 lignes à 200 le jour où cette règle est née.
 
 ⮕ **Cowork la met à jour à la fin de chaque lot**, et annonce en une ligne ce qui
 y a changé. C'est le travail de Cowork, pas le sien.
