@@ -7,6 +7,108 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 21 — 3 SEPTEMBRE 2026, SOIR : LE TYPE MONTE À LA GRILLE (lot 1 des trois
+     types de grille). ⏸ COMMITÉ, NON POUSSÉ — Grégoire regarde l'écran d'abord.
+
+     ▣ Session Claude Code sur consigne FICHIER
+       (`plans de travail/CONSIGNES-2026-09-03-lots-des-trois-types-de-grille.md`, Cowork
+       20 h 30, avec Grégoire ; plan et séance à froid du même soir, lus ensemble). LOT 1
+       SEUL, comme la consigne l'exige ; les lots 2 et 3 attendent son coup d'œil.
+     ▣ Une autre session (monitorage-v6-19) tenait l'arbre principal pour le verdict de
+       1.114.1 : ce lot a été écrit dans un worktree (`claude/lot1-type-grille`, parti de
+       `d3f0a289` = origin/main), puis fusionné en avance rapide une fois son verdict
+       rendu (jeton vert sur `d3f0a289`, 0 échec, 0 instable — mesuré par elle).
+
+     ▣ REMESURÉ (règle 1), rituel isolé + relecture : `grep -rn "grille\.type" js/ tests/
+       | wc -l` = 0 ; témoin `critere\.type` js/ = 17. Les huit ancres de la consigne sont
+       exactes, avec DEUX écarts :
+       · SOUS-COMPTE — la consigne nomme quatre sites posant `'holistique'` en dur ;
+         `grep -n "type: 'holistique'" js/grilles.js` en rendait SIX, dont deux chemins
+         vivants de « critère neuf » non nommés : `ajouterCritereTemp()` (3803) et
+         `ajouterCritereGrille()` (4496). Les trois sites du formulaire modal `#critereType`
+         (278/328/382) sont du code sans appelant vivant (#516) et sont traités quand même.
+       · DÉJÀ DÉCLARÉ — `SCHEMAS_IMPORT.grille` (import-export.js:737) portait DÉJÀ `type`
+         au niveau de la grille ; seul `partage-schemas.js` l'ignorait. Un seul schéma à
+         ouvrir, pas deux ; le témoin d'aller-retour couvre les deux canaux.
+
+     ▣ LIVRÉ — 4 fichiers de code, 2 témoins, 0 écriture dans les données existantes :
+       · index.html : menu `#typeGrille` (« Non précisé · Holistique · Analytique ·
+         Algorithmique », PAS de « Mixte ») dans la rangée du nom, `data-on-change=
+         "modifierTypeGrilleHandler"`. Jetons bumpés : grilles.js 0903l, partage-schemas
+         0903c, import-export 0903e (le hook anti-cache #547 l'exige même pour un commentaire).
+       · grilles.js : `TYPES_GRILLE`, `typeCritereParDefaut(grille)` (déclaré, sinon
+         holistique), `typeCritereParDefautEnCours()`, `typeGrilleAffiche(grille)` (déclaré,
+         sinon déduit des critères s'il est unique, sinon '' — lecture seule),
+         `rendreMenuTypeGrille`, `modifierTypeGrilleHandler`. Les trois créateurs vivants de
+         critère + les trois sites modaux lisent le défaut. `chargerGrillePourModif` remplit
+         le menu sans écrire ; `sauvegarderGrilleTemplate` (création) n'écrit `type` que
+         s'il a été choisi ; `dupliquerGrille` (modale) garde le type déclaré ;
+         `modifierTypeCritereGrilleHandler` attend l'écriture puis re-rend la barre
+         latérale (le badge MIXTE suit sans rechargement — il ne suivait pas avant).
+       · partage-schemas.js : `type: { type: 'chaine', max: 50 }` au niveau grille.
+       · import-export.js : commentaire sur la ligne déjà là.
+     ▣ TÉMOINS : `tests/unit/sentinelle-type-grille-lot1.test.js` (26 cas : défaut/menu,
+       création sans rien cocher, dérogation gardée, édition sans écriture puis choix
+       écrit et vide qui RETIRE, les deux duplications qui gardent le type, transport des deux côtés sans type fabriqué, badge qui
+       ignore `grille.type`, témoins de source) ; `tests/integration/type-grille-lot1.spec.js`
+       (le « fini quand » complet sous WebKit : trois analytiques sans cocher, badge
+       ANALY → MIXTE à l'écran, grille d'avant sans champ écrit, mixte non présélectionné,
+       transport par les fonctions réelles de la page).
+       Break-tests (10 mutations, remise par empreinte md5, sentinelle verte avant/après) :
+       défaut en dur remis (3 rouges) · schéma de partage amputé (2) · badge lisant le
+       déclaré (3) · création écrivant sans choix (2) · vide écrivant '' (1) · option
+       « Mixte » (1) · barre latérale non re-rendue (1 + WebKit code 1) · critère neuf
+       ignorant la grille en base (2) · copie modale sans type (1) · copie depuis la
+       barre latérale sans type (1).
+       `cd tests && npm run test:unit` : 453 fichiers / 4924 tests, code 0 (452 + 1 ;
+       4898 + 26). WebKit ciblé (8 fichiers de grilles + celui-ci) : 17/17. ⚠ La suite
+       WebKit COMPLÈTE n'a pas tourné ici : le verdict au jeton se prend APRÈS le coup
+       d'œil de Grégoire (règle 2, ordre fixe).
+     ▣ Audit sécurité statique des 124 lignes ajoutées (js/ + index.html) : aucun
+       innerHTML, aucun handler inline, aucun eval, aucun console.log, aucune écriture
+       db.set directe (tout passe par `sauvegarderGrilleTemplate` / `db.modifier`).
+
+     ▣ CE QUE J'AI DÉCIDÉ SEUL — à corriger en dix secondes si c'est faux :
+       1. Une grille SANS type déclaré : le menu MONTRE le type déduit (Cowork), mais un
+          critère neuf y reste HOLISTIQUE, comme avant (« exactement comme aujourd'hui »).
+          ⚠ Sur une grille toute algorithmique, le menu dit « Algorithmique » et le
+          critère neuf naît holistique : c'est visible, c'est la lecture littérale de la
+          consigne, et JE VOIS MIEUX — que le critère neuf suive ce que le menu montre,
+          sans rien écrire. Non fait sans le dire (test C.c le verrouille tel quel).
+       2. En CRÉATION, changer le type de la grille re-type les critères temporaires qui
+          SUIVAIENT l'ancien défaut ; ceux qui dérogeaient (type ≠ ancien défaut) sont
+          gardés. En ÉDITION, les critères existants ne bougent jamais.
+       3. Revenir à « Non précisé » RETIRE le champ (jamais `type: ''`), comme
+          `codesDepuisSousCriteres`.
+       4. Libellé du vide : « Non précisé ». Pas d'aide contextuelle (la consigne : ces
+          lots n'écrivent pas l'aide).
+       5. Une seule chose à regarder à l'écran, pas de porte terrain séparée : la machine
+          a répondu au « fini quand » (WebKit) ; reste la disposition sur Safari/iPad.
+
+     ▣ TROUVAILLES EN CHEMIN — issue 2 (inscrire et continuer), aucune corrigée :
+       · `partage-schemas.js` grille : `description` et `discipline` NE SONT PAS déclarés
+         au niveau grille — ils se perdent au partage (même classe que #667/#668). ⚠ La
+         copie d'un gabarit du catalogue « [Multi] Grille analytique » (gabarits-utils.js
+         :133) porte déjà `type: 'analytique'` au niveau grille : après ce lot, ce champ
+         inerte devient le défaut de ses critères neufs (sans changer aucune note).
+       · `dupliquerGrille` (modale, grilles.js:981) reconstruit la copie champ par champ
+         et perd `description` (préexistant ; `type` y est maintenant gardé).
+
+     ▣ CE QUE GRÉGOIRE DOIT ALLER VOIR (recharger avec vidage de cache) : Conception ›
+       Grilles de critères › « Nouvelle grille ». La rangée du nom porte maintenant « Type
+       de la grille ». Choisir « Analytique », ajouter deux critères : les trois menus de
+       critère disent « Analytique » sans rien cocher. Enregistrer ; passer un critère en
+       « Algorithmique » : le badge de la grille dans la barre latérale devient MIXTE.
+       ⮕ La question à trente secondes : le menu tient-il dans la rangée du nom, sur
+       Mac ET sur iPad, sans casser la ligne ni cacher le champ ?
+     ▣ DÛ ENSUITE, dans l'ordre : relecture croisée de Cowork (règle 2 : le lot touche un
+       schéma de données qui voyagent) → corrections → verdict au jeton (`node
+       ../scripts/verifier-playwright.mjs`) → release minor → push. Changelog proposé :
+       « Une grille déclare son type — holistique, analytique ou algorithmique — et ses
+       nouveaux critères le reçoivent sans qu'on le redise à chacun. »
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 20 — 3 SEPTEMBRE 2026, FIN D'APRÈS-MIDI : UNE SEULE SOURCE POUR LES CODES,
      ET UNE SEULE FAÇON DE CHOISIR UNE COULEUR.
 

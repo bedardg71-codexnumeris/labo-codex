@@ -275,7 +275,7 @@ function afficherFormCritere(id = null) {
         document.getElementById('critereNom').value = '';
         document.getElementById('criterePonderation').value = '';
         document.getElementById('critereDescription').value = '';
-        document.getElementById('critereType').value = 'holistique';
+        document.getElementById('critereType').value = typeCritereParDefautEnCours();
         document.getElementById('critereFormule').value = '';
         afficherChampFormule();
     }
@@ -325,7 +325,7 @@ async function sauvegarderCritere() {
         nom: nom,
         description: document.getElementById('critereDescription')?.value?.trim() || '',
         ponderation: parseInt(document.getElementById('criterePonderation')?.value) || 0,
-        type: document.getElementById('critereType')?.value || 'holistique',
+        type: document.getElementById('critereType')?.value || typeCritereParDefautEnCours(),
         formule: document.getElementById('critereFormule')?.value?.trim() || '',
         niveauSOLO: 'multistructurel',
         verrouille: false
@@ -379,7 +379,7 @@ async function sauvegarderCritere() {
     document.getElementById('critereNom').value = '';
     document.getElementById('critereDescription').value = '';
     document.getElementById('criterePonderation').value = '';
-    document.getElementById('critereType').value = 'holistique';
+    document.getElementById('critereType').value = typeCritereParDefautEnCours();
     document.getElementById('critereFormule').value = '';
     afficherChampFormule();
 
@@ -715,6 +715,8 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
             id: genererIdUnique('GRILLE_'),
             nom: nomGrille,
             criteres: window.tempCriteres || [],
+            // Lot 1 (3 sept. 2026) : le type choisi au menu — seulement s'il l'a été.
+            ...(TYPES_GRILLE.includes(window.tempTypeGrille) ? { type: window.tempTypeGrille } : {}),
             discipline: discipline, // 🆕 Beta 95.3
             description: document.getElementById('descriptionGrille')?.value?.trim() || '',
             dateCreation: new Date().toISOString(),
@@ -731,6 +733,7 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
 
         // Nettoyer les critères temporaires
         window.tempCriteres = [];
+        window.tempTypeGrille = '';
     }
 
     return grillesEnFile;
@@ -1011,6 +1014,8 @@ async function dupliquerGrille(grilleId) {
     const nouvelleGrille = {
         id: genererIdUnique('GRILLE_'),
         nom: nouveauNom.trim(),
+        // Lot 1 (3 sept. 2026) : le type déclaré suit la copie, comme ceux de ses critères.
+        ...(TYPES_GRILLE.includes(grilleOriginale.type) ? { type: grilleOriginale.type } : {}),
         criteres: grilleOriginale.criteres.map(c => ({
             ...c,
             id: genererIdUnique('CR_')
@@ -1614,6 +1619,11 @@ async function initialiserModuleGrilles() {
  *   formule: string (pour algorithmique),
  *   verrouille: boolean
  * }
+ *
+ * STRUCTURE D'UNE GRILLE — lot 1 (3 septembre 2026) :
+ *   type: 'holistique' | 'analytique' | 'algorithmique' — facultatif, DÉFAUT de ses
+ *   critères ; absent sur toute grille d'avant ce lot (rien n'y est écrit). Le badge
+ *   de composition ne le lit jamais : il dit ce qui EST, pas ce qui est déclaré.
  * 
  * AMÉLIORATIONS FUTURES:
  * - Moderniser les événements (remplacer onclick par addEventListener)
@@ -3193,6 +3203,52 @@ function fermerModalBibliothequeGrilles() {
     BibliothequeUI.fermerModal('modalBibliothequeGrilles');
 }
 
+/* ===============================
+   LE TYPE DE LA GRILLE — lot 1 (3 septembre 2026)
+   =============================== */
+
+/**
+ * Le type monte à la grille (consigne du 3 septembre 2026, lot 1). `grille.type`
+ * est le DÉFAUT de ses critères ; un critère peut déroger par son propre menu —
+ * la politique départementale impose 20 % pour le français, alors que la pratique
+ * de Grégoire est ailleurs. « Mixte » n'est pas une valeur : c'est le badge de
+ * composition qui le constate, depuis les critères, jamais depuis ce champ.
+ *
+ * ⚠ Aucune grille d'avant ce lot ne porte `grille.type`, et on n'écrit rien dans
+ * ses données : sans type déclaré, un critère neuf est holistique — le
+ * comportement d'avant, à l'identique. Tarir n'est pas réparer.
+ */
+const TYPES_GRILLE = ['holistique', 'analytique', 'algorithmique'];
+
+/** Le type qu'un critère neuf reçoit : celui que la grille déclare, sinon holistique. */
+function typeCritereParDefaut(grille) {
+    return (grille && TYPES_GRILLE.includes(grille.type)) ? grille.type : 'holistique';
+}
+
+/** Le défaut de l'écran courant : la grille en édition, ou le choix fait pour la grille en création. */
+function typeCritereParDefautEnCours() {
+    return typeCritereParDefaut(grilleTemplateActuelle || { type: window.tempTypeGrille });
+}
+
+/**
+ * Ce que le menu de la grille MONTRE : le type déclaré ; sinon celui de ses
+ * critères quand ils n'en ont qu'un ; sinon rien (composition mixte, aucun
+ * critère, type inconnu). Lecture seule — ce qui est déduit n'est jamais écrit.
+ */
+function typeGrilleAffiche(grille) {
+    if (!grille) return '';
+    if (TYPES_GRILLE.includes(grille.type)) return grille.type;
+    const types = new Set((grille.criteres || []).map(c => c && c.type).filter(Boolean));
+    if (types.size !== 1) return '';
+    const seul = [...types][0];
+    return TYPES_GRILLE.includes(seul) ? seul : '';
+}
+
+function rendreMenuTypeGrille(valeur) {
+    const menu = document.getElementById('typeGrille');
+    if (menu) menu.value = TYPES_GRILLE.includes(valeur) ? valeur : '';
+}
+
 function creerNouvelleGrille() {
     document.getElementById('accueilGrilles').classList.add('u-hide');
     document.getElementById('conteneurEditionGrille').classList.remove('u-hide');
@@ -3212,6 +3268,10 @@ function creerNouvelleGrille() {
     // Réinitialiser le formulaire
     document.getElementById('nomGrilleTemplate').value = '';
     document.getElementById('descriptionGrille').value = '';
+    // Lot 1 (3 sept. 2026) : le type de la grille en création attend son choix ;
+    // sans lui, un critère neuf est holistique, comme avant.
+    window.tempTypeGrille = '';
+    rendreMenuTypeGrille('');
 
     // ✅ AJOUT (6 jan 2026) : Vider le panneau métadonnées (mode création)
     const panneauMeta = document.getElementById('panneauMetadonneesGrille');
@@ -3221,7 +3281,7 @@ function creerNouvelleGrille() {
     window.tempCriteres = [{
         id: genererIdUnique('TEMP_CR_'),
         nom: '',
-        type: 'holistique',
+        type: typeCritereParDefautEnCours(),
         ponderation: 0,
         description: ''
     }];
@@ -3800,7 +3860,7 @@ function ajouterCritereTemp() {
     window.tempCriteres.push({
         id: genererIdUnique('TEMP_CR_'),
         nom: '',
-        type: 'holistique',
+        type: typeCritereParDefautEnCours(),
         ponderation: 0,
         description: ''
     });
@@ -3926,6 +3986,8 @@ async function chargerGrillePourModif(id) {
     // Remplir le formulaire
     document.getElementById('nomGrilleTemplate').value = grille.nom || '';
     document.getElementById('descriptionGrille').value = grille.description || '';
+    // Lot 1 (3 sept. 2026) : déclaré, sinon déduit des critères, sinon rien — sans écrire.
+    rendreMenuTypeGrille(typeGrilleAffiche(grille));
 
     // ✅ AJOUT (6 jan 2026) : Afficher le panneau métadonnées
     const panneauMeta = document.getElementById('panneauMetadonneesGrille');
@@ -4493,7 +4555,7 @@ async function ajouterCritereGrille(grilleId) {
             // critères sans identifiant — voir `scripts/diagnostic-674-criteres-sans-id.js`.
             id: genererIdUnique('CR_'),
             nom: 'Nouveau critère',
-            type: 'holistique',
+            type: typeCritereParDefaut(g),
             ponderation: 0,
             description: ''
         });
@@ -5307,6 +5369,31 @@ async function modifierParamFormuleGrilleHandler(el) {
     afficherCriteresGrille(await obtenirGrilleParId(grilleId));
 }
 
+/**
+ * Le menu « Type de la grille » — lot 1 (3 septembre 2026).
+ *
+ * Grille en ÉDITION : le choix s'écrit sur la grille par le même chemin que le
+ * nom et la description (le vide RETIRE le champ, il n'écrit jamais `''`). Ses
+ * critères existants ne bougent pas : ce sont des données, et le badge dit ce
+ * qui est. Grille en CRÉATION : le choix attend l'enregistrement, et les
+ * critères temporaires qui SUIVAIENT l'ancien défaut suivent le nouveau — ceux
+ * qui dérogeaient (un type choisi à la main, différent du défaut) sont gardés.
+ */
+async function modifierTypeGrilleHandler(el) {
+    const valeur = TYPES_GRILLE.includes(el.value) ? el.value : '';
+    if (grilleTemplateActuelle) {
+        if (valeur) grilleTemplateActuelle.type = valeur;
+        else delete grilleTemplateActuelle.type;
+        await sauvegarderGrilleTemplate(true);
+        return;
+    }
+    const ancien = typeCritereParDefautEnCours();
+    window.tempTypeGrille = valeur;
+    const nouveau = typeCritereParDefautEnCours();
+    (window.tempCriteres || []).forEach(c => { if (c && c.type === ancien) c.type = nouveau; });
+    afficherCriteresTemp();
+}
+
 /** Handler délégué pour modifierCritereTemp + afficherCriteresTemp (type change) */
 function modifierTypeCritereTempHandler(el) {
     var index = parseInt(el.dataset.critereIndex);
@@ -5345,11 +5432,14 @@ function modifierCritereGrilleHandler(el) {
 async function modifierTypeCritereGrilleHandler(el) {
     var grilleId = el.dataset.grilleId;
     var index = parseInt(el.dataset.critereIndex);
-    modifierCritereGrille(grilleId, index, 'type', el.value);
+    await modifierCritereGrille(grilleId, index, 'type', el.value);
     // 🔧 #466/CO-21 (21 août 2026) : obtenirGrilleParId est ASYNC — le renderer
     // recevait une Promise et affichait « Aucun critère défini » (les données
     // étaient sauves, l'écran mentait ; retour au rechargement seulement).
     afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+    // Lot 1 (3 sept. 2026) : le badge de composition de la barre latérale dit ce
+    // qui EST — il suit le changement de type sans attendre un rechargement.
+    await afficherListeGrilles();
 }
 
 /** Handler délégué pour modifierSousCritere(grilleId, critereIndex, scIndex, champ, valeur) */
@@ -5418,6 +5508,11 @@ window.modifierParamFormuleGrilleHandler = modifierParamFormuleGrilleHandler;
 window.modifierTypeCritereTempHandler = modifierTypeCritereTempHandler;
 window.modifierCritereGrilleHandler = modifierCritereGrilleHandler;
 window.modifierTypeCritereGrilleHandler = modifierTypeCritereGrilleHandler;
+// Lot 1 (3 sept. 2026) — le menu « Type de la grille » et ses deux lectures.
+window.modifierTypeGrilleHandler = modifierTypeGrilleHandler;
+window.typeCritereParDefaut = typeCritereParDefaut;
+window.typeGrilleAffiche = typeGrilleAffiche;
+window.TYPES_GRILLE = TYPES_GRILLE;
 window.modifierSousCritereHandler = modifierSousCritereHandler;
 window.modifierPonderationCritereTempHandler = modifierPonderationCritereTempHandler;
 window.fermerModalImportGrilles = fermerModalImportGrilles;
