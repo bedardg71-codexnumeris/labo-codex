@@ -7,6 +7,153 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 24 — 4 SEPTEMBRE 2026, MIDI : LA CI REDEVIENT VERTE, PUIS LE LOT 4 — le gabarit
+     algorithmique se range (C) · « Aucun » au menu SOLO (B) · les paliers d'une grille
+     analytique (A). ⏸ FUSIONNÉ SUR `main` (ff), NON POUSSÉ, PAS DE RELEASE — l'ordre de la
+     consigne (§4) : relecture croisée de Cowork (A obligatoire ; C et B au jugement) →
+     corrections → coup d'œil de Grégoire (le gabarit rangé · « Aucun » · la cartouche d'une
+     grille analytique) → verdict au jeton → release MINEURE 1.117, UNE entrée de changelog
+     dont les mots sont à lui → push. ⛔ DEUX POINTS [EN ATTENTE] : C.3 et les mots de A.
+
+     ▣ Mandat : d'abord « applique le CADRAGE lot 4 » (Grégoire, avec une session parallèle
+       qui finissait le lot 3 — elle a tout poussé à `3d7b8dc0` avant que j'écrive), puis en
+       cours de session « Lis `plans de travail/CONSIGNE-DU-JOUR.md` et exécute-la » (Cowork,
+       10 h 20). La consigne fait foi : §2 CI d'abord, puis C → B → A, D sans code.
+     ▣ Rituel isolé à l'ouverture : HEAD `3d7b8dc0` = origin/main, arbre propre hors les
+       fichiers de Cowork du matin ; Vitest 455 / 4989 ; aucune consigne du jour pour le
+       lot 4 à ce moment (elle est arrivée à 10 h 20) ; aucun n° BACKLOG pour le lot 4.
+
+     §2 — LA CI (run 33869215489 rouge sur `type-grille-lot1.spec.js`, 254 / 255)
+     ▣ Trace téléchargée (`gh run download -n playwright-traces`) et RELUE action par action
+       (`0-trace.trace`, JSONL) : l'hypothèse « course de rendu » de SESSION 23 est INFIRMÉE
+       — le bouton résolu au clic de la ligne 131 portait `data-param="G0"`, la liste était
+       bien celle de G0. Cause mesurée : un BUDGET DE TEMPS — sur le runner, chaque
+       `page.click` passait de 1,8 à 8 s dans « waiting for element to be visible, enabled and
+       stable » (les deux essais : 2,9 / 1,9 / 7-8 s), et le quatrième clic démarrait à 25,9 s
+       d'un budget de 30 s. Le vert local (10 s) ne pouvait rien en dire (règle 7).
+     ▣ Correction — le SPEC, pas le code : les quatre clics passent par `el.click()` dans
+       `page.evaluate` (le dispatcher de main.js les reçoit comme à la souris, c'est lui qu'on
+       éprouve), et chaque ajout sur une grille enregistrée attend `toHaveCount(n+1)` sur les
+       menus de type rendus — plus aucun `waitForTimeout` autour de ces clics. Break-test :
+       `typeCritereParDefaut` forcé à « holistique » → rouge à la ligne 87 ; restauré, `cmp`
+       identique à HEAD. Local WebKit : 1 passé, 10,1 s.
+     ▣ Commit `e5d9c71f` (test seul + les sept fichiers de Cowork du matin, par la consigne :
+       consigne du jour, archive de l'ancienne, consigne de démarrage Cowork, OU-EN-EST-ON,
+       trois cadrages) ; `scripts/pousser.sh origin main` : Playwright local vert (0 connu,
+       0 instable, jeton `e5d9c71f`), hook Vitest vert, `3d7b8dc0..e5d9c71f main -> main`.
+     ▣ **RUN GITHUB `33884692393` sur `e5d9c71f` : VERT — Vitest success, Playwright (WebKit) success (14 h 38 → 15 h 12 Z, 6 essais
+       non jugés = la baseline connue). La CI de `main` est verte.**
+     ⚠ DÉCIDÉ SEUL, dit : la consigne disait « attends le run avant d'ouvrir le lot 4 » ; le
+       run dure ~35 min. J'ai ouvert le lot 4 dans un WORKTREE (`.claude/worktrees/lot-4`,
+       branche `claude/lot-4-gabarit-algo-paliers` partie de `e5d9c71f`) pendant le run — rien
+       n'a atteint `main` avant son verdict.
+
+     §3 — LE LOT 4 : trois commits sur la branche, un par volet (+ un 4e, les specs), puis
+     fusion FAST-FORWARD sur `main` = `63ea2503` (worktree et branche retirés ; ce bloc et le
+     RELAIS forment le commit suivant). `main` = 5 commits devant `origin/main` (`e5d9c71f`),
+     NON POUSSÉS par la consigne.
+     ▣ VOLET C `c18318b7` — `js/grilles.js` : `rendreCartesGabaritAlgo` (UN rendu pour les
+       deux écrans ; les sentinelles #667/#668 comptent maintenant l'appel unique du bloc dans
+       sa carte). Ordre : rangée du critère → sous-critères (à plat, en tête, `--en-tete`) →
+       cartes `.carte.accordeon` « Formule » (ouverte) · « Commentaire » · « Projection » ·
+       « Codes d'annotation » (repliées). Composant EMPLOYÉ tel quel (bascule
+       `toggleAccordeonV2`, délégation main.js) ; les plis vivent dans `plisGabaritAlgo`,
+       relevés sur le DOM par `capturerPlisGabaritAlgo` AVANT chaque redessin (le gabarit se
+       redessine à chaque frappe), jamais dans la grille, pas d'`id` sur les cartes (sinon
+       `etatsAccordeonsV2` les persisterait). Ligne de partage des sous-critères : code · nom
+       · pondération à plat ; couleur, rétroaction, activation dans la carte des codes —
+       `esc()` sur tout ce qui vient de la grille (les lignes réécrites en manquaient).
+       Libellés : « Modèle de commentaire » (grilles.js) ; « Projection à l'EUF »
+       (`evaluation-projection.js`, `nom` seul). CSS SCOPÉ `#listeCriteres` (plafond 6000 px
+       des cartes — le contenu dépasse les 2000 px du composant —, colonnes des deux rangées,
+       bloc en tête sans bordure doublée). `sansCadre` retiré (dette). ⛔ C.3 NON TOUCHÉ
+       (`gabaritNeuf` reste `norme_externe`) : [EN ATTENTE] de Grégoire.
+       Témoins : `sentinelle-lot4-C-gabarit-algo-range` (17 cas) ;
+       `lot4-gabarit-algo-cartes.spec.js` (WebKit : ordre, états, déplier à la SOURIS, taper →
+       toujours dépliée ; replier, taper → toujours repliée ; changer de grille et revenir ;
+       rien dans la grille) ; `codes-par-grille-gabarit.spec.js` ouvre la carte des codes (par
+       l'événement DOM) avant d'y cocher. ⚠ MESURÉ : juste après un rendu, la liste bouge
+       quelques dizaines de ms (« element is not stable », un clic parti sur la carte voisine,
+       1 échec sur 4 runs) → `cliquerBande` attend l'immobilité de la boîte avant de cliquer ;
+       3 × 2 specs verts ensuite.
+     ▣ VOLET B `df07fa51` — carte des NEUF lecteurs de `niveauSOLO` rendue à Cowork
+       (`plans de travail/CARTE-2026-09-04-lot4-B-lecteurs-niveauSOLO.md`). Cinq fichiers
+       modifiés : les deux menus offrent « Aucun » (`'aucun'`, en dernier ; défaut inchangé) ;
+       `libelleNiveauSOLO('aucun')` → `''` et `nommerDefiAvecSOLO` (pure) évite « Langue () » ;
+       pas de badge SOLO sans libellé (interventions.js) ; `typeCritereSelonSOLO` → `'aucun'`
+       (⚠ format d'export : quatrième valeur dans `niveau_solo` et `type`, dit dans le code) ;
+       `libelleCriteresMultiSurveilles` (pure) : la barre des patterns DIT « Aucun critère
+       multistructurel dans la grille de dépistage : le suivi des fondations ne surveille
+       rien. » au lieu de se taire. Aide sous le menu enrichie. Quatre sans changement :
+       import/export et partage laissent passer (mesuré par `assainirObjet` et
+       `projeterEntite`), échelles et helpers lisent un niveau d'ÉCHELLE. Dépistage d'une grille
+       toute « Aucun » : `calculerIPB` null → le profil dit déjà « Intensité non calculable —
+       aucun suivi des fondations disponible ».
+       Témoins : `sentinelle-lot4-B-solo-aucun` (11 cas, break-testée : deux rouges).
+       ▣ RÉVEIL : le cas d. de `sentinelle-505-rendus-blocs-executent` dormait depuis sa
+       naissance (mauvais id de conteneur + fonction non exposée → `return`) ; l'export
+       d'`afficherCriteresGrille` (C) l'a réveillé rouge ; il reçoit `#listeCriteres` et tient.
+     ▣ VOLET A `0385eadb` — carte rendue à Cowork pour la relecture croisée OBLIGATOIRE
+       (`plans de travail/CARTE-2026-09-04-lot4-A-paliers-analytiques.md`). Mesuré : le
+       formulaire ne lisait le type d'AUCUNE grille (`.type` une fois, sur une production) ; la
+       cartouche copie (code, nom) à `:471`/`:3698` ; l'éditeur relit l'échelle SOURCE pour ses
+       couleurs (`:620`). Tranché : `grilleEstAnalytique` → `window.typeGrilleAffiche` (une
+       source ; déclaré sinon déduit ; MIXTE = niveaux) ; les BORNES se relisent sur la source
+       par le chemin des couleurs — la copie, la clé `critereId_niveau`, l'`echelleId` ne
+       changent pas : RIEN DE CE QUI VOYAGE NE BOUGE. Préremplissage `ECHELLE_IDME_DEPART` si
+       dans la base ET dans la sélection, sur les deux chemins (formulaire, barre latérale) ;
+       sinon rien. `index.html` : `<span id="motEchelleCartouche">` dans le label (la marque
+       « obligatoire » reste, #506 vert). ⚠ Piège attrapé : les `window.X = const` doivent
+       suivre la déclaration (TDZ) — placés avec les exports du haut, ils cassaient le
+       chargement de cartouches.js ; la sentinelle l'a vu avant tout navigateur.
+       ⛔ [EN ATTENTE] les MOTS (`LIBELLES_PALIERS`, `libellePalier`) : « Paliers (bornes en
+       %) », « Critère / Palier », « 0–64,99 % » (bornes EXACTES, décidé seul et dit — le
+       cadrage écrivait « 0–64 % » ; `formaterBornePalier`, une ligne), « pas encore de
+       paliers ». Proposés, pas arrêtés : pas de release avant son mot.
+       Témoins : `sentinelle-lot4-A-paliers-analytiques` (16 cas, grilles.js + cartouches.js
+       dans le même bac à sable, break-testée : huit rouges) ; `lot4-paliers-analytiques.spec.js`
+       (WebKit : le formulaire réel, analytique puis holistique, la forme de ce qui est
+       enregistré). ⚠ Le message du commit A dit « Vitest 458 / 5037 » : le compte mesuré est
+       458 / 5033 — erreur de transcription, corrigée ici.
+     ▣ VOLET D — rien à coder (consigne) : quand Grégoire aura une cartouche sur sa grille
+       analytique, produire le PDF d'une copie et regarder l'espace à droite du chiffre.
+     ▣ Jetons anti-cache bumpés au jour du build : grilles.js `20260904b`, cartouches.js /
+       evaluation-projection.js / profil-etudiant-calculs.js / interventions.js /
+       trimestres.js / tableau-bord-apercu.js / accompagnement-contenu-popup.js `20260904a`,
+       styles.css `20260904b`.
+
+     §4 — RITUEL DE FIN (lecture seule, sur `e5d9c71f..0385eadb`)
+     ▣ Audit statique : 1 `innerHTML` avec interpolation, passée par `echapperHtml` (message
+       « pas encore de paliers ») ; 0 handler inline ; 0 eval ; 0 console.log ; aucune zone
+       sensible ni protégée touchée ; CSP intacte.
+     ▣ Vitest (worktree, depuis `tests/`) : 458 fichiers / 5033 tests, code 0. Aucun `only`,
+       aucun `skip` dans les fichiers du lot.
+     ▣ Break-tests : C (plis) `capturerPlisGabaritAlgo` retirée des deux redessins → 2 rouges (C.a, C.b) ; B : `libelleNiveauSOLO('aucun')` → « multistructurel » rougit
+       2 cas ; A : `grilleEstAnalytique` → false rougit 8 cas. Tous restaurés (0 « BREAK-TEST »).
+     ▣ Playwright WebKit, suite complète sur la branche (worktree, file://) : 258 verts, 5 ROUGES — tous
+       causés par les cartes repliées (4 cas de `texte-troue-reperes-enonces.spec.js` : les zones
+       d'énoncés sont dans la carte « Commentaire » ; 1 de `source-unique-codes.spec.js` : le champ
+       Couleur est dans la carte des codes) → les specs déplient la carte par l'événement DOM
+       (`63ea2503`, 4e commit), 11 specs verts ensuite. ⚠ La suite COMPLÈTE est à REJOUER au jeton
+       sur le commit final, avant le push (`node scripts/verifier-playwright.mjs`).
+     ▣ Version : 1.116.0 / 0904-0729 inchangée (pas de bump — la release attend).
+
+     §5 — CE QUI REMONTE À GRÉGOIRE (et rien d'autre)
+     1. C.3 — le défaut de projection d'un critère algorithmique neuf : garder « Projection à
+        l'EUF » (900 / 30) ou passer à « Aucune projection » (recommandation de Cowork) ? Non
+        touché.
+     2. A — les mots : « Paliers (bornes en %) », « Critère / Palier », « 0–64,99 % » (ou
+        « 0–64 % »), « Cette cartouche n'a pas encore de paliers… » — proposés.
+     3. B — les mots : « Aucun » (option), la phrase d'aide, et la phrase du tableau de bord
+        « Aucun critère multistructurel dans la grille de dépistage : le suivi des fondations
+        ne surveille rien. » — proposés.
+     4. A — MIXTE : tranché « niveaux » (types divergents sans type déclaré) ; « déclarée
+        analytique avec un critère qui déroge » = paliers. Un `if` si autre lecture.
+     ⏳ Relecture croisée de Cowork (A obligatoire) sur les deux cartes ; puis coup d'œil ;
+       puis `node scripts/verifier-playwright.mjs` sur le commit final → release 1.117 → push.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 23 — 4 SEPTEMBRE 2026, MATIN : LE CHIFFRE TROUVE SON NIVEAU, ET LE NIVEAU
      OUVRE LA CARTOUCHE (lot 3 des trois types de grille). ⏸ COMMITÉ, NON POUSSÉ —
      relecture croisée de Cowork (le lot touche le calcul et ce que l'élève lit), puis

@@ -7,6 +7,54 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 4 SEPTEMBRE 2026, MIDI (lot 4 SUR `main`, NON POUSSÉ)
+
+> Session Claude Code de la fin de matinée, pilotée par la consigne du jour de Cowork
+> (10 h 20) : la CI d'abord, puis le lot 4 (C → B → A). Ce bloc **s'ajoute** aux suivants.
+
+**Branche `main`. Version `1.116.0`, build `0904-0729` — PAS DE BUMP : la release 1.117 attend.**
+**`origin/main` = `e5d9c71f`** (le spec du lot 1 rendu robuste + les fichiers de Cowork du
+matin, poussé, run GitHub `33884692393` : VERT, Vitest et Playwright WebKit, 15 h 12 Z).
+**`main` local = `le commit de ce relais, au-dessus de `63ea2503``, 5 commits NON POUSSÉS** : les trois volets du lot 4 — C `c18318b7`
+(le gabarit algorithmique se range), B `df07fa51` (« Aucun » au menu SOLO), A `0385eadb` (les
+paliers d'une grille analytique) et `63ea2503` (les specs déplient la carte) — fusionnés en
+fast-forward depuis `claude/lot-4-gabarit-algo-paliers`, plus ce relais.
+**Vitest : 458 fichiers / 5033 tests, code 0** (depuis `tests/`). **Playwright WebKit, suite
+complète sur le lot : 258 verts + 5 rouges, tous causés par les cartes repliées, specs adaptés en
+`63ea2503` (11 specs verts ensuite)** — ⚠ jeton `scripts/.verdict-playwright.json` à REFAIRE sur
+le commit final avant le push (`node scripts/verifier-playwright.mjs`).
+**Jetons anti-cache : `20260904a` / `20260904b`** (grilles.js et styles.css en `b`).
+
+### ⛔ L'ORDRE, ET IL NE SE NÉGOCIE PAS (consigne du 4 sept., §4)
+
+```
+relecture croisée de Cowork (A OBLIGATOIRE — format qui voyage ; C et B au jugement)
+  → corrections → coup d'œil de Grégoire (le gabarit rangé · « Aucun » · la cartouche
+  d'une grille analytique) → verdict au jeton → release MINEURE 1.117, UNE entrée de
+  changelog dont les mots sont à lui → push
+```
+
+**Ne pas pousser `main` avant.** Les deux cartes pour la relecture :
+`plans de travail/CARTE-2026-09-04-lot4-B-lecteurs-niveauSOLO.md` et
+`plans de travail/CARTE-2026-09-04-lot4-A-paliers-analytiques.md`.
+
+### ⛔ DEUX POINTS [EN ATTENTE] DE GRÉGOIRE — écrits nulle part à l'écran sans son mot
+
+1. **C.3** — le défaut de projection d'un critère algorithmique NEUF : `gabaritNeuf()` dans
+   `js/evaluation-projection.js` rend encore `norme_externe` (900 / 30, l'EUF). Recommandation
+   de Cowork : `'aucune'`. NON TOUCHÉ. Si « aucune » : source seulement + un cas de sentinelle.
+2. **Les mots de A** — `LIBELLES_PALIERS` et `libellePalier` (`js/cartouches.js`, bloc « LOT 4,
+   VOLET A ») : « Paliers (bornes en %) », « Critère / Palier », « 0–64,99 % » (bornes exactes ;
+   le cadrage écrivait « 0–64 % » — `formaterBornePalier`, une ligne), « Cette cartouche n'a
+   pas encore de paliers… ». PROPOSÉS ; livrés sur `main` pour son coup d'œil, pas en release.
+   Idem pour B : « Aucun », la phrase d'aide, la phrase du tableau de bord.
+
+### Le détail
+
+`SESSION.md`, bloc SESSION 24 (en tête). Worktree `.claude/worktrees/lot-4` : retiré, branche supprimée (fusion ff faite).
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 1er SEPTEMBRE 2026, FIN D'APRÈS-MIDI
 
 > Session solo, pilotée par Grégoire, de la fin de matinée au milieu de l'après-midi.
