@@ -15,7 +15,7 @@
 
 ---
 
-## ▣ CE QUI EST OUVERT AUJOURD'HUI — six chantiers, un seul entamé
+## ▣ CE QUI EST OUVERT AUJOURD'HUI — sept cadrages ; le 3 est exécuté (1.116), le 7 est le prochain
 
 *Aucun n'empêche un des huit énoncés de la cohorte 1 : ils sont tous parcourus depuis le
 3 septembre au matin. Ces quatre-là traitent l'**adoption** et la **justesse**, pas la ligne
@@ -46,6 +46,9 @@ observables par critère**, là où l'holistique n'a qu'une échelle globale.
 ▣ **Spécification** : la grille papier de Grégoire, « Évaluation de l'analyse 3 » (2013).
 ⏳ **Six points ouverts**, dont le mariage avec les pratiques de notation — **laissé ouvert
 volontairement** : il se tranchera par un essai sur ses données.
+↻ **4 septembre 2026 : les trois lots sont livrés** (lot 1 en 1.115, lots 2 et 3 en **1.116**,
+avec trois retouches issues du coup d'œil de Grégoire). Ce cadrage devient une consigne exécutée ;
+**ce qu'il a ouvert en retour vit au cadrage 7 (lot 4)**.
 
 ### 4 · L'Inspecteur de sélection — `CADRAGE-2026-09-03-inspecteur-selection-multiple.md`
 **Sélectionner plusieurs blocs, et l'Inspecteur n'offre que ce qu'ils ont en commun.**
@@ -75,6 +78,20 @@ sous-critères) · **fermé ce qui porte les mots** (énoncés, paliers de proje
 ⚠ **Le piège est nommé, et il ne se voit qu'en tapant** : le gabarit se redessine en entier à
 chaque frappe (`grilles.js:5025`, `5039`, `5051`). Un pli qui vit dans le DOM se refermerait sous
 les doigts. ⮕ **L'état vit en mémoire, jamais dans les données de la grille.**
+↻ **4 septembre 2026** : Grégoire a ajouté **l'ordre** (les sous-critères en premier), l'espace
+manquant entre formule et projection (réglé par les cartes), et deux libellés. **Absorbé par le
+cadrage 7 (lot 4)**, dont ce fichier reste la source pour les cartes.
+
+### 7 · Le lot 4 — `CADRAGE-2026-09-04-lot-4-gabarit-algorithmique-et-paliers-analytiques.md`
+**Ce que le coup d'œil de Grégoire sur les lots 2 et 3 a ouvert, rangé pour la prochaine séance** :
+(A) une grille analytique attache sa cartouche à des **paliers en %**, sans qu'on lui parle de
+« niveaux » — l'échelle reste le mécanisme, préremplie, renommée (voie (a), **tranchée**) ;
+(B) « **Aucun** » au menu « Niveau SOLO » ; (C) le gabarit algorithmique se range — sous-critères
+en tête, cartes repliables, « Modèle de commentaire », « Projection à l'EUF », et le **défaut de
+projection à trancher** (recommandation : « Aucune projection ») ; (D) l'espace à droite du chiffre
+sur le PDF, à rejuger avec une vraie cartouche.
+⛔ **Pas une consigne** : à cartographier d'abord (règle 2), et la relecture croisée est due sur (A),
+qui touche un format qui voyage.
 
 ---
 

@@ -15,8 +15,8 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 3 septembre 2026, 9 h 30 (dix-septième passe) — release **1.113.0**
-(build `0903-0906`). ▣ **LES HUIT ÉNONCÉS TIENNENT.** Le huitième — les suppressions disent
+**Dernière mise à jour : 4 septembre 2026, 10 h (dix-huitième passe, Cowork) — release **1.116.0**
+(build `0904-0729`) commitée, push en cours. Avant : 1.113.0 (build `0903-0906`), 3 septembre 9 h 30. ▣ **LES HUIT ÉNONCÉS TIENNENT.** Le huitième — les suppressions disent
 vrai — a fermé ce matin, en quatre volets et trois versions livrées en douze heures.**
 
 ⚠ **Ce que « tiennent » veut dire, et ce que ça ne veut pas dire.** Chaque volet a sa
@@ -574,15 +574,38 @@ et un passé en algorithmique fait basculer le badge à MIXTE. Relecture croisé
 Cowork sur `fa5d34d2` : rien à corriger. Verdict au jeton vert sur `1228837a`.
 *(commits `a6187760`, `fa5d34d2`, `1228837a`)*
 
-↻ **Lot 2 livré le 4 septembre au soir, COMMITÉ ET NON PUBLIÉ** (`37660b76`, sur `main`,
-un commit devant `origin/main`) : l'analytique se saisit en points — un champ « sur 30 » au
-lieu du menu de niveaux, et 24 sur 30 fait 80 %. Relecture croisée de Cowork : rien à corriger.
-**Décision de Grégoire** : *publier les lots 2 et 3 ensemble à la prochaine séance*, parce que
-dans ce lot un critère analytique n'entre pas encore dans la liste des critères d'une
-évaluation enregistrée — le PDF de l'élève ne le listerait pas alors que la note le compte.
-Le lot 3 (le chiffre trouve son niveau et ouvre la cartouche) le règle. Pas encore vu à
-l'écran par Grégoire : il regardera les deux d'un coup.
-Consignes et relecture : `plans de travail/CONSIGNES-2026-09-03-lots-des-trois-types-de-grille.md`.
+↻ **Lots 2 et 3 livrés le 4 septembre 2026 au matin — release 1.116.0 commitée (`6309111e`,
+build `0904-0729`) ; ⏳ le push et le verdict au jeton étaient en cours à 10 h : la prochaine
+session confirme que `origin/main` = `main` et que le bandeau dit 1.116.0.**
+· ✅ **L'analytique se saisit en points** : un champ « sur 30 » au lieu du menu, 24 sur 30 fait
+  80 % ; le champ vide dit « – », un vrai zéro se tape (lot 2 + retouche).
+· ✅ **Le chiffre trouve son niveau par les bornes de l'échelle, et ce niveau ouvre la cartouche** ;
+  le critère analytique entre dans l'évaluation enregistrée avec ses points ET son niveau déduit,
+  sous le même nom que les niveaux du menu — dix-huit lecteurs (dépistage, profil, archives,
+  bilan, PDF) le voient sans changer (lot 3).
+· ✅ **L'élève ne lit que le chiffre** : « 24 / 30 » sur le PDF, dans le texte copié vers LÉA, et
+  dans les DEUX bilans (celui de l'app et celui du PDF — deux implémentations, retouches 1 et 2) ;
+  la légende I·D·M·E disparaît du PDF d'une grille entièrement analytique. Le bandeau « Niveau
+  général » de la copie reste : c'est le niveau de la copie, pas d'un critère.
+· ✅ **Rouvrir une copie dont le premier critère est analytique charge l'évaluation et montre le
+  cadenas** — régression du lot 3 trouvée par Grégoire à l'écran, corrigée avant publication
+  (retouche 3).
+**Vérifié comment** : relecture croisée de Cowork sur chacun des cinq commits (`b4039828`,
+`5b8bc6b0`, `44559804`, `f485ea34`, et le lot 2 `37660b76`), cartographie faite à `37660b76`
+avant de lire le patch ; Claude Code : Vitest **455 fichiers / 4989 tests, code 0**, sentinelle
+lot 3 **43 cas** dont les cas rouges avant chaque retouche, break-tests par mutation à chaque
+lot (14 + 4 + 5 + 3), WebKit complet **260 / 260** au lot 3 puis 15 / 15 sur les specs
+d'évaluation à chaque retouche ; le verdict au jeton se prend par `scripts/pousser.sh` sur le
+commit poussé. ▣ **ÉPROUVÉ PAR GRÉGOIRE, à l'écran, le 4 septembre** : sa grille « Analyse
+littéraire » (12 critères analytiques), une copie évaluée, le PDF produit — **et c'est son
+regard qui a trouvé les trois retouches** (les niveaux encore nommés dans le PDF, le « 0 » qui se
+lisait comme une valeur, la copie qui ne se rechargeait pas). Aucun test ne les avait vues.
+⏳ **Inscrit, pas corrigé** : points sans niveau déductible (échelle à trous ou muette) — le
+critère n'entre pas dans `criteres[]` alors que la note compte ses points ; assumé par un test,
+à décider avec les paliers du lot 4.
+⮕ **Ce que le coup d'œil a ouvert — huit retours, tous tranchés ou mesurés — est le lot 4** :
+`plans de travail/CADRAGE-2026-09-04-lot-4-gabarit-algorithmique-et-paliers-analytiques.md`.
+Consignes et relectures : `plans de travail/CONSIGNES-2026-09-03-lots-des-trois-types-de-grille.md`.
 
 ---
 
