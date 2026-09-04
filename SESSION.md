@@ -9,7 +9,9 @@
 <!-- =====================================================================
      SESSION 24 — 4 SEPTEMBRE 2026, MIDI : LA CI REDEVIENT VERTE, PUIS LE LOT 4 — le gabarit
      algorithmique se range (C) · « Aucun » au menu SOLO (B) · les paliers d'une grille
-     analytique (A). ▣ **LIVRÉ : release 1.117.0 (`4e7a1b03`, build 0904-1336) POUSSÉE à 17 h 46 Z**,
+     analytique (A). ▣ **LIVRÉ : release 1.117.0 (`4e7a1b03`) POUSSÉE à 17 h 46 Z, puis 1.117.1
+     (`e990e710`, « Modèle d'observation », consigne h) à 19 h 17 Z** ; entre les deux, le run de 1.117.0
+     a rougi sur trois specs (clics souris sur le runner, corrigés en `807bdba2`, run vert),
      après l'ordre de la consigne (§4) tenu bout en bout : relecture croisée de Cowork (§6, rien à
      corriger) → trois coups d'œil de Grégoire (§7, §8, §9 « ça va ») → verdict au jeton → release
      MINEURE → push. Les deux points [EN ATTENTE] du départ (C.3, les mots de A) ont été tranchés
@@ -221,6 +223,41 @@
        pratique-notation-v2.js, echelles.js ; empilement iPad de `grille-form-2col` ; les trois
        réserves de Cowork du §6 ; `PALIERS_GABARIT_NEUF` jamais servi ; le tri des paliers à la saisie ;
        deux aides qui disent encore « Description »).
+
+     ↻ 18 h 25 — LE RUN GITHUB DE 1.117.0 A ROUGI, ET C'ÉTAIT LE RUNNER, PAS LE GABARIT
+     ▣ Run `33902352824` sur `4e7a1b03` : Vitest vert ; **Playwright WebKit ROUGE** (17 h 48 → 18 h 24 Z) —
+       2 rouges après deux essais (`lot4-gabarit-algo-cartes.spec.js`, `source-unique-codes.spec.js`),
+       1 instable (`codes-par-grille-gabarit.spec.js`, vert au second essai). Traces téléchargées et
+       relues action par action : chaque clic À LA SOURIS y prend de 2,3 à 8,9 s (« waiting for element
+       to be visible, enabled and stable ») et les trois specs dépassent le budget de 30 s — la cause
+       mesurée le matin (run 33869215489), pas une régression : les trois sont verts deux fois de suite
+       en local (13 s). Le jeton local, lui, était vert — règle 7 : le vert local ne prouve rien du runner.
+     ▣ Correctif — les SPECS, pas le code (même arbitrage que le §2 du matin) : un seul clic souris reste
+       (la bande de la projection, le pointeur qu'on éprouve) ; les autres gestes passent par `el.click()`
+       (même dispatcher) ; le « cliquer ailleurs » du sélecteur de couleur est livré tel que
+       travaux-outils.js l'écoute (`pointerdown` sur le document). Commit `807bdba2` (test seul),
+       `scripts/pousser.sh origin main` : Playwright local vert (jeton 807bdba2, 0 instable, 18 h 39 Z),
+       hook Vitest vert, `3825333d..807bdba2 main -> main`. **RUN GITHUB `33907151093` : VERT — Vitest et Playwright WebKit (18 h 42 → 19 h 06 Z). La CI de `main` ne ment plus.**
+     ▣ LEÇON, la seconde fois aujourd'hui : un spec qui empile des clics souris ne survit pas au runner
+       (2 à 9 s par clic) — mémoire `playwright-runner-budget-page-click`. Les nouveaux specs de
+       l'éditeur ne gardent qu'UN clic souris, celui qui prouve le pointeur.
+
+     ↻ 18 h 30 — h) « MODÈLE D'OBSERVATION » (consigne, décision de Grégoire 17 h 50 ; l'exception au
+       « plus rien » : le libellé est né dans 1.117.0 et se renomme avant d'être lu deux fois)
+     ▣ `24ac3c70` (worktree `h-observation`, pendant le verdict du push) : « Modèle de commentaire » →
+       « Modèle d'observation » (menu), carte « Commentaire » → « Observation » ; la clé sous le menu ne
+       porte pas le mot. L'entrée 1.117 du changelog dit « Modèle d'observation », au mot près de la
+       consigne. Sentinelle C (B.a, B.c) et spec C suivent le mot. Vitest 458 / 5042 ; 7 specs WebKit verts dans le worktree (le spec C et celui des énoncés).
+     ▣ Fusion ff sur `main` après le run du correctif, puis **release PATCH 1.117.1** (jugement courant :
+       un libellé, aucune rupture ; le changelog garde son entrée 1.117, corrigée) : `e990e710`
+       (1.117.1, build 0904-1507 ; `release.mjs patch`, quatre jetons bumpés), Vitest 458 / 5042, jeton
+       WebKit local vert (0 instable, 19 h 17 Z), `807bdba2..e990e710 main -> main`. Emporte la consigne
+       (h, §9) et le cadrage des codes par grille (point 7 de Cowork, non touché).
+     ▣ « VÉRIFIÉ COMMENT », pour `OU-EN-EST-ON.md` (Cowork) : `git rev-parse origin/main` =
+       `e990e710` (1.117.1, build 0904-1507) ; jeton WebKit local sur ce commit : code 0, 0 instable, 19 h 17 Z ;
+       Vitest 458 / 5042 ; runs GitHub : 33907151093 (vert) sur le correctif de specs,
+       `33910422885` (en cours à l'écriture, lancé 19 h 17 Z — verdict par le
+       commit de docs suivant) sur 1.117.1.
      ===================================================================== -->
 
 <!-- =====================================================================
