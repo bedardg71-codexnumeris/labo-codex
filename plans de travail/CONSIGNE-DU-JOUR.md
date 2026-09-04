@@ -141,6 +141,41 @@ contrainte** « corrige avec l'application à jour » (carte §d : un onglet 1.1
 « Projection », chaque palier a ses boutons de badges au-dessus de ses deux zones ; en dessous, la carte
 « Ce que l'élève lira » montre une phrase par palier, remplie, et une copie non corrigée sans projection.
 
+## 5 · Retouche du coup d'œil de Grégoire — l'aperçu vient sous chaque palier (4 septembre, 18 h 38)
+
+> **Relecture croisée de Cowork sur `dccaf3d2` : rien à corriger** (format qui voyage intact — `git diff
+> origin/main..HEAD -- js/import-export.js js/partage-schemas.js js/partage-validation.js js/evaluation-calcul.js`
+> rend zéro ; texte sans jeton rendu à l'identique par l'ancien et le nouveau module ; les deux décisions
+> appliquées au mot ; `echapperHtml` aux deux sites de rendu). Les quatre choix pris seuls sont retenus.
+>
+> **Coup d'œil de Grégoire** : les phrases sont « très naturelles ». Ce qui cloche, c'est LA PLACE de
+> l'aperçu : on compose dans le palier, on lit le résultat dans une autre carte, plus bas, repliée.
+> **Décision de Grégoire (« ça va, bonne recommandation »)** : l'aperçu vient sous chaque palier.
+> C'est une correction du lot, pas une envie : l'aperçu est la moitié de ce lot (arrêtés 4 et 5).
+
+**Ce que Grégoire verra** : dans la carte « Projection », directement sous les deux zones de chaque palier,
+une ligne grise « L'élève lira : » suivie de la phrase remplie pour la copie fictive de ce palier (décompte
+du bloc 3 puis projection, comme aujourd'hui), mise à jour à chaque frappe. En bas de la carte
+« Projection », une seule ligne : « Copie non corrigée : aucune phrase avant la correction. » La carte
+« Ce que l'élève lira » n'existe plus.
+
+**Ce qui est arrêté** :
+- un seul fichier de code : `js/grilles.js` (plus `styles.css` si la ligne a besoin d'une classe, et
+  `index.html` pour le bump des jetons) ; `evaluation-projection.js` ne bouge pas — `copiesExemple` sert
+  tel quel, la copie de chaque palier se retrouve par sa `cle` ;
+- rendu pur, aucun état ; le gabarit se redessine à chaque frappe, l'aperçu suit ;
+- la ligne du badge inconnu (orange) reste sous le palier, AU-DESSUS de la ligne « L'élève lira : » ;
+- la note « aucune donnée d'élève ; l'aperçu ne montre pas la rétroaction du sous-critère dominant » reste,
+  une fois, en bas de la carte « Projection », avec la ligne de la copie non corrigée ;
+- `echapperHtml` sur tout texte rendu ;
+- les sentinelles de l'aperçu (`sentinelle-texte-troue-etape-2-apercu.test.js`) se déplacent avec lui : même
+  cas, nouveau site — dis lesquels ont dû changer et pourquoi, break-test sur au moins un ;
+- le spec WebKit du volet 4 lit l'aperçu à sa nouvelle place ; ⛔ toujours pas de `page.click` à l'aveugle
+  ni `waitForTimeout`.
+
+**Un commit**, puis rends-le : Cowork relit en une passe courte, Grégoire regarde, verdict au jeton,
+release mineure 1.118 (les mots du changelog sont à lui, Cowork les lui proposera), push.
+
 ## 4 · L'ordre de la séance
 
 ```

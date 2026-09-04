@@ -3250,35 +3250,30 @@ input[type="number"].controle-form {
     margin: 8px 0 4px;
 }
 
-/* Le texte troué, étape 2 — la carte « Ce que l'élève lira » : une copie fictive
-   par palier, plus une non corrigée. Rendu pur, aucun contrôle dedans. */
-#listeCriteres .apercu-copie {
-    padding: 8px 12px;
-    margin-bottom: 8px;
+/* Le texte troué, étape 2 (§5, 4 sept.) — l'aperçu SOUS CHAQUE PALIER : « L'élève lira : »
+   suivi de la phrase remplie pour la copie fictive de ce palier. Rendu pur, aucun contrôle. */
+#listeCriteres .palier-apercu {
+    margin-top: 6px;
+    padding: 6px 10px;
     border-left: 3px solid var(--accent-primaire);
     background: var(--surface-input);
     border-radius: 4px;
-}
-
-#listeCriteres .apercu-copie--non-corrigee {
-    border-left-color: var(--bordure-moyenne);
-}
-
-#listeCriteres .apercu-copie-titre {
-    font-size: 0.78rem;
-    color: var(--gris-moyen);
-    margin-bottom: 4px;
-}
-
-#listeCriteres .apercu-copie-texte {
-    margin: 0;
-    font-size: 0.92rem;
-    line-height: 1.5;
+    font-size: 0.88rem;
+    line-height: 1.45;
     color: var(--texte-principal);
 }
 
-#listeCriteres .apercu-copie--non-corrigee .apercu-copie-texte {
+#listeCriteres .palier-apercu-mot {
+    font-size: 0.78rem;
     color: var(--gris-moyen);
+    margin-right: 4px;
+}
+
+#listeCriteres .palier-apercu-copie {
+    font-size: 0.78rem;
+    color: var(--gris-clair);
+    margin-left: 4px;
+    white-space: nowrap;
 }
 
 /* iPad : la cible tactile des repères monte à 44 px dans le bloc `@media
