@@ -129,6 +129,13 @@ test('source unique · gabarit : le champ Couleur est le sélecteur de la palett
         window.afficherSousSection('conception-grille-criteres');
         await window.chargerGrillePourModif('G1');
     });
+    // Lot 4 (4 sept. 2026) : le champ Couleur vit dans la carte « Codes d'annotation », repliée
+    // à l'ouverture ; on la déplie par l'événement DOM avant d'y cliquer (les redessins la
+    // gardent dépliée — spec lot4-gabarit-algo-cartes).
+    const carteCodes = page.locator('#listeCriteres .gabarit-algo-carte[data-pli$=":codes"]');
+    await expect(carteCodes).toHaveClass(/ferme/);
+    await page.evaluate(() => document.querySelector('#listeCriteres .gabarit-algo-carte[data-pli$=":codes"] .accordeon-header').click());
+    await expect(carteCodes).not.toHaveClass(/ferme/);
 
     const pickers = page.locator('#listeCriteres .sous-critere-couleur-groupe .travaux-retro-couleur-picker');
     await expect(pickers).toHaveCount(2);
