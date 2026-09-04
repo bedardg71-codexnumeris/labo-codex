@@ -167,7 +167,7 @@ ne le lit.*
 
 ## Ce qui reste à trancher — avec lui, PAS seul
 
-↻ **6. Où l'utilisateur s'attend à trouver ce réglage** — ajouté le 4 septembre 2026 (17 h 15), à la demande de
+↻ **6. Où l'utilisateur s'attend à trouver ce réglage** — ajouté le 4 septembre 2026 (vers 13 h 50), à la demande de
 Grégoire. Devant la carte « Codes d'annotation » du gabarit (celle qui porte la case « Utiliser ces sous-critères
 comme codes d'annotation »), il a demandé : *« Il faudrait pouvoir configurer les codes d'annotation qui
 correspondent à la palette, non ? Par défaut, c'est celle du français écrit, mais un utilisateur pourrait
@@ -195,7 +195,7 @@ vit la palette globale et ce que la case fait par rapport à elle — ou y mettr
 
 ---
 
-↻ **7. Une seule liste : les sous-critères ET les codes** — proposé par Grégoire le 4 septembre 2026 (17 h 45),
+↻ **7. Une seule liste : les sous-critères ET les codes** — proposé par Grégoire le 4 septembre 2026 (vers 14 h),
 capture à l'appui, recommandation de Cowork retenue. Aujourd'hui le gabarit rend le même objet deux fois :
 « Sous-critères » (code · nom · pondération · chevrons · corbeille) puis « Codes d'annotation » (les mêmes,
 avec couleur et « Description / Rétroaction »), le nom recopié. **Forme retenue** : une seule liste, une rangée par
@@ -212,7 +212,7 @@ tarit) ou écrit par Grégoire.
 écrit ; ce qui reste « français » est nommé aux points 2, 4 et 5 (palette globale des dix, titre, identifiants).
 
 ↻ **8. Le mot : « observation », jamais « rétroaction », dans le gabarit algorithmique** — décision de Grégoire,
-4 septembre 2026 (17 h 50) : *« Afin qu'on ne confonde pas la grille algorithmique et la cartouche de rétroaction,
+4 septembre 2026 (vers 14 h 15) : *« Afin qu'on ne confonde pas la grille algorithmique et la cartouche de rétroaction,
 au lieu de parler de rétroaction dans cette grille, je préférerais qu'on parle de commentaires ou d'observations. »*
 Cowork recommandait « commentaire » (déjà choisi par le lot 4) ; **il a tranché « observation »**. Donc :
 **« Rétroaction » est réservé à la cartouche** (ce que l'élève lit par niveau) ; dans le gabarit algorithmique, ce

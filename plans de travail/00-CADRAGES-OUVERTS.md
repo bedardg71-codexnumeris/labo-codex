@@ -22,7 +22,7 @@
 d'arrivée qui vient d'être franchie.*
 
 ### 1 · Le texte troué — `CADRAGE-2026-09-02-badges-texte-troue.md`
-↻ **4 septembre 2026, 16 h 30 — PROCHAINE SÉANCE après 1.117, décidé par Grégoire** (« oui » à la
+↻ **4 septembre 2026, vers 13 h 45 — PROCHAINE SÉANCE après 1.117, décidé par Grégoire** (« oui » à la
 recommandation de Cowork) : **l'étape 2, les paliers de projection** — la phrase « Ce que l'élève lit » d'un
 palier se compose avec les badges (l'artefact « Le texte troué », sections 2 et 3, est la maquette qu'il a
 remontrée). Motif : chantier entamé, six arrêtés déjà pris, même écran que le volet C du lot 4, et c'est le
@@ -119,6 +119,16 @@ qui touche un format qui voyage.
 - **Un remplacement d'échelle interrompu** : l'ancienne survit et relancer termine le travail,
   **mais l'écran ne le dit pas**. Inscrit sous #648.
 - **Les essais à la main sur iPad.** Le dernier point de « ce qui n'appartient qu'à Grégoire ».
+
+- **Repasser le dépôt en public** — possibilité notée par Grégoire le 4 septembre 2026 (fin d'après-midi),
+  **laissée de côté pour l'instant**. Ce que ça rendrait (docs GitHub, mesuré le 4) : minutes Actions
+  illimitées sur les runners standards (au lieu de 2 000/mois, quota déjà épuisé en août), runner Linux
+  4 vCPU / 16 Go au lieu de 2 / 8, shards sans facture, protection de branche et CodeQL de retour
+  (`DEPLOY.md` §8.3). ⛔ **Le préalable** : le dépôt est privé depuis le 23 juin parce que l'historique git
+  porte encore des noms et des DA d'élèves réels (`SESSION.md:9211`, « purgeable plus tard si le statut
+  change ») — purge de l'historique (`git filter-repo`), audit adverse après purge, demande à GitHub
+  d'effacer les commits en cache. Ses données réelles et son engagement public : la décision est à lui.
+  Pas avant le 14 septembre.
 
 ---
 

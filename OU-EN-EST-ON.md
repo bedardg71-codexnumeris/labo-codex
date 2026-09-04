@@ -15,9 +15,10 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 4 septembre 2026, 10 h 20 (dix-huitième passe, Cowork) — release **1.116.0**
-(build `0904-0729`) en ligne, CI rouge sur le spec du lot 1 (à régler). Avant : 1.113.0 (build `0903-0906`), 3 septembre 9 h 30. ▣ **LES HUIT ÉNONCÉS TIENNENT.** Le huitième — les suppressions disent
-vrai — a fermé ce matin, en quatre volets et trois versions livrées en douze heures.**
+**Dernière mise à jour : 4 septembre 2026, 16 h 30 (dix-neuvième passe, Cowork) — release **1.117.1**
+(build `0904-1507`, `e990e710`) en ligne : le lot 4 (gabarit algorithmique rangé, paliers d'une grille
+analytique, « Aucun » au menu SOLO) et le mot « observation ». La CI rouge du matin (spec du lot 1) est
+réglée ; celle de 1.117.0 (trois specs, clics lents sur le serveur) aussi ; le run de 1.117.1 est vert. Avant : 1.116.0 (build `0904-0729`), 4 septembre 10 h 20. ▣ **LES HUIT ÉNONCÉS TIENNENT.**
 
 ⚠ **Ce que « tiennent » veut dire, et ce que ça ne veut pas dire.** Chaque volet a sa
 commande et son témoin ci-dessous. **Les quatre écrans ont été lus par Grégoire
@@ -608,9 +609,34 @@ lisait comme une valeur, la copie qui ne se rechargeait pas). Aucun test ne les 
 ⏳ **Inscrit, pas corrigé** : points sans niveau déductible (échelle à trous ou muette) — le
 critère n'entre pas dans `criteres[]` alors que la note compte ses points ; assumé par un test,
 à décider avec les paliers du lot 4.
-⮕ **Ce que le coup d'œil a ouvert — huit retours, tous tranchés ou mesurés — est le lot 4** :
-`plans de travail/CADRAGE-2026-09-04-lot-4-gabarit-algorithmique-et-paliers-analytiques.md`.
-Consignes et relectures : `plans de travail/CONSIGNES-2026-09-03-lots-des-trois-types-de-grille.md`.
+↻ **Lot 4 livré le 4 septembre 2026 en après-midi — release 1.117.0 (`4e7a1b03`, 13 h 36) puis 1.117.1
+(`e990e710`, build `0904-1507`, 15 h 07), EN LIGNE.** Ce que tu vois dans Conception › Grilles :
+· ✅ **Le critère algorithmique s'ouvre sur ses sous-critères**, puis quatre cartes repliables (formule ouverte ;
+  observation, projection, codes repliés) qui restent comme tu les as laissées pendant que tu tapes. « Modèle de
+  rétroaction » s'appelle **« Modèle d'observation »** (ton mot, 1.117.1 ; « rétroaction » reste à la cartouche),
+  « Norme externe (épreuve uniforme) » s'appelle « Projection à l'EUF ». Un critère algorithmique neuf naît
+  **sans projection**.
+· ✅ **Les paliers de projection tiennent sur deux rangées**, numérotés, le nom lisible en entier ; la note
+  « Écris {service}… » une seule fois.
+· ✅ **Une grille analytique attache sa cartouche à des paliers en %** : le champ dit « Paliers (bornes en %) »,
+  l'échelle de départ est déjà choisie, les colonnes portent les bornes de TON échelle (« 65–74,99 % »). Rien de
+  ce qui voyage ne change (relecture croisée de Cowork sur `0385eadb`).
+· ✅ **« Aucun » en tête du menu « Niveau SOLO »** : le critère compte dans la note, le dépistage des fondations
+  ne le surveille pas ; le tableau de bord le dit quand plus rien n'est surveillé.
+· ✅ **Un seul geste pour supprimer (la corbeille) et un seul pour déplacer (les chevrons)** dans l'éditeur de
+  grille, sous-critères compris ; « Description » s'appelle « Descripteur ».
+**Vérifié comment** : trois coups d'œil de Grégoire à l'écran le 4 septembre (c'est son regard qui a demandé
+les huit retouches, toutes livrées sauf les chevrons sur les paliers, auxquels il a renoncé après la mesure :
+l'ordre d'un palier EST son seuil) ; relecture croisée de Cowork sur A, B, C (rien à corriger, trois réserves
+inscrites) ; Claude Code : Vitest **458 fichiers / 5042 tests**, sentinelles A, B, C break-testées, jeton WebKit
+local vert sur `e990e710` ; runs GitHub **33884692393** (CI du matin, vert), **33907151093** (correctif des
+trois specs de 1.117.0, vert), **33910422885** (1.117.1, vert : Vitest et Playwright WebKit, 19 h 20 → 19 h 46 Z). `origin/main` = `fd2b4ce6`.
+⏳ **Inscrit, pas corrigé** : les deux colonnes des paliers ne s'empilent pas sur iPad en portrait (le formulaire
+de groupe-cours dont elles héritent non plus) ; le ✕ rouge et la pile « Ordre » survivent hors de l'éditeur de
+grille ; « Description / Rétroaction » des codes attend la fusion des deux listes (cadrage codes par grille,
+points 7-8). ⚠ **Ce qui a retenu la publication aujourd'hui** : l'attente des runs GitHub (35 min, annulés par
+tout push) — décision du soir, FAITE (`fd2b4ce6`) : on n'attend plus un run pour pousser (`PROTOCOLE.md` règle 7), et la règle des clics de spec vit dans `docs/securite/TESTS-AUTOMATISES.md` §4 avec son témoin au rituel de fin. Mesuré : les pushs de docs ne déclenchent aucun run ; un run complet reste entre 26 et 36 min.
+⮕ **Prochaine séance** : le texte troué, étape 2 — les paliers de projection se composent avec des badges.
 
 ---
 
