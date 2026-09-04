@@ -7,6 +7,68 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 25 — 4 SEPTEMBRE 2026, 17 H : LE TEXTE TROUÉ, ÉTAPE 2 — LA CARTE, PAS LE CODE.
+     ⏸ EN ATTENTE de la relecture de Cowork et de deux décisions de Grégoire (noms des
+     badges ; sort du préfixe engendré). AUCUNE ligne de code écrite, aucun commit, aucun push.
+
+     ▣ Mandat : « Lis plans de travail/CONSIGNE-DU-JOUR.md et exécute-la » (Grégoire, 16 h 56, puis
+       renvoyé tel quel à 17 h 05 — la consigne n'avait pas changé : mtime 16 h 51, avant l'ouverture).
+       La consigne (Cowork, fin d'après-midi) : §2 CARTE d'abord, a-e, rendue à Cowork, puis attendre ;
+       §3 l'ordre des volets sera fixé par Cowork après relecture ; release MINEURE 1.118 à la fin.
+     ▣ Rituel isolé à l'ouverture : HEAD `fd2b4ce6` = origin/main (0 / 0) ; version 1.117.1, build
+       0904-1507 ; Vitest 458 / 5042, code 0 ; jeton WebKit local régénéré par le rituel sur
+       `fd2b4ce6` = HEAD (code 0, 0 connu, 0 instable, 21 h 04 Z) ; run GitHub 33913180261 sur `fd2b4ce6` : Vitest vert, Playwright non jugé (docs seulement,
+       paths-ignore) ; 33910422885 sur `e990e710` : jugé vert. Aucun écart de fond avec la prémisse.
+       ⚠ Cowork écrit en parallèle : 2 fichiers modifiés à l'ouverture, 5 dix minutes plus tard
+       (CONSIGNE-DEMARRAGE-COWORK, OU-EN-EST-ON, 00-CADRAGES-OUVERTS, cadrage codes par grille, la
+       consigne) + l'archive de l'ancienne consigne, non suivie. Aucun n'est à moi ; ils partent avec le
+       premier commit de CODE, par la consigne.
+       Écart documentaire vu par le rituel, non corrigé : le bloc « État courant » de BACKLOG.md (l. 6)
+       date du 31 août (1.106.13, dernier ID #643) alors que les IDs montent à #696.
+
+     §2 — LA CARTE : `plans de travail/CARTE-2026-09-04-texte-troue-etape-2.md` (a-e + les deux
+     questions). Ce qu'elle mesure, en cinq lignes :
+     a) le composeur de l'étape 1 = un BOUTON par repère qui insère le jeton au curseur (pas un badge
+        glissé) ; la palette, le CSS (`styles.css:3206-3241`), `insererRepere` (pure) et le geste sans
+        re-rendu se réemploient ; `insererRepere` REFUSE tout jeton hors de SA palette (cas C.g) → s'ouvre
+        d'un paramètre ; `insererRepereEnonce` est lié aux énoncés par son sélecteur et son chemin
+        d'écriture → s'ouvre d'un chemin (`_muterPalier`, `grilles.js:5282`, existe déjà). `reperesDeCle`
+        et `rendre` (5 jetons figés) ne se réemploient pas : la projection déclare et remplit les siens.
+        16 palettes sur un gabarit à six paliers (12 + 4). Recommandation = celle de Cowork : le même.
+     b) 8 jetons remplissables SANS toucher le calcul, valeurs mesurées avec le module réel en Node
+        (15 err / 584 mots → service « Passerelle + », seuil 30, longueur 900, erreurs 15, mots 584,
+        moyenne 39, projection 23, palier « Risqué ») ; `{projection}` = le nombre seul (recommandé).
+        NON remplissables sans changer le site d'appel : `{niveau}` IDME et `{note}` (calculés dans
+        evaluation-calcul.js, jamais passés à `calculer`) — hors lot. `{lien}` contredit #668 F.497 ;
+        `{facteur}` appartient à la formule — pas offerts. La maquette dit « niveau » pour ce qui est le
+        PALIER (« Bien » / « Risqué ») : nom proposé `palier`.
+     c) le préfixe « Tu fais en moyenne 1 erreur à chaque N mots. » (`_resultat`, :508) : recommandation
+        = devient `{moyenne}`, engendré seulement pour un texte sans jeton connu ; les grilles existantes
+        ne perdent rien (0 accolade dans les `texte` livrés ; golden #668 intact). Décision à Grégoire.
+     d) LE RISQUE DU LOT, mesuré : `_texteDuPalier` rend `texte` TEL QUEL et ne connaît que `{service}`
+        dans `texteAide` → une version antérieure (onglet ouvert avant le déploiement, copie locale)
+        rend `{erreurs}` littéral à l'élève, et `{service}` tapé dans « Ce que l'élève lit » l'est DÉJÀ
+        aujourd'hui. Les accolades voyagent intactes (import `assainirChaine` ne retire que `<…>`,
+        partage : type + longueur). Le texte rendu est PERSISTÉ à la correction (`donneesAlgorithmiques
+        [].retroaction`, evaluation-calcul.js:729) : c'est la version qui corrige qui fixe ce que l'élève
+        lit. Borné : une seule version en ligne, `netlify.toml` max-age=0 sur html/js/css, 0 service
+        worker. Proposé : jeton inconnu laissé en place ET signalé dans le gabarit (comme `herite`) ;
+        changelog qui nomme « corrige avec l'application à jour » ; rien dans le stock.
+     e) copies d'exemple : le pack démo a 0 copie corrigée sur 106 (`donneesAlgorithmiques` tous vides)
+        et 0 projection réglée → copies FICTIVES dérivées des paliers du gabarit (une par palier + une
+        non corrigée), aperçu au niveau du gabarit = décompte du bloc 3 puis projection du bloc 2, dans
+        l'ordre exact d'evaluation-calcul.js:514-526 ; la copie non corrigée n'a aucune projection
+        (`applicable: false`, mesuré).
+
+     §5 — CE QUI REMONTE À GRÉGOIRE (par Cowork) : 1. les noms des badges (service · seuil · longueur ;
+     erreurs · mots · moyenne · projection · palier) ; 2. le préfixe engendré (badge `moyenne` + phrase
+     sans badge inchangée, ou « le préfixe reste toujours »).
+     ⛔ Rien d'autre n'a bougé. Prochain geste : à la relecture de Cowork, l'ordre des volets arrive
+     dans CONSIGNE-DU-JOUR.md §3 ; puis code, un commit par volet, la consigne et les fichiers de
+     Cowork avec le premier.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 24 — 4 SEPTEMBRE 2026, MIDI : LA CI REDEVIENT VERTE, PUIS LE LOT 4 — le gabarit
      algorithmique se range (C) · « Aucun » au menu SOLO (B) · les paliers d'une grille
      analytique (A). ▣ **LIVRÉ : release 1.117.0 (`4e7a1b03`) POUSSÉE à 17 h 46 Z, puis 1.117.1

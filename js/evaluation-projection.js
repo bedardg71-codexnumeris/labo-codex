@@ -54,6 +54,19 @@
    ⚠ Ne pas confondre avec `PALIERS_GABARIT_NEUF`, plus bas : le gabarit livré
    aux NOUVEAUX utilisateurs ne charrie aucune particularité d'établissement.
 
+   LE TEXTE TROUÉ, ÉTAPE 2 (4 septembre 2026) — LES DEUX TEXTES D'UN PALIER SE
+   COMPOSENT AVEC DES BADGES. Le registre déclare ses huit jetons (`REPERES`),
+   les remplit par copie (`remplir`, `_valeursJetons`) et DIT ceux qu'il ne
+   connaît pas (`jetonsInconnus`). Le format qui voyage ne change pas : `texte`
+   et `texteAide` restent du texte libre avec accolades ; un texte sans jeton
+   connu se rend à l'octet près comme avant ce lot — c'est le golden #668 qui
+   le tient. Décisions de Grégoire (4 sept., 17 h 15) : les noms des badges, et
+   le préfixe engendré qui devient `{moyenne}` — voir `_resultat`.
+   ⚠ Le risque nommé de ce lot (carte du 4 sept., §d) : une version ANTÉRIEURE
+   rend un jeton tel quel à l'élève, et le texte rendu est persisté à la
+   correction. Le changelog nomme la contrainte « corrige avec l'application
+   à jour ».
+
    Aucune dépendance : ni DOM, ni db, ni evaluationEnCours. Testable en Node.
    =============================== */
 
@@ -69,6 +82,148 @@
 // s'inscrire à un service disparu — l'exemple type de ce que ce chantier
 // corrige. Le texte du palier porte le jeton, le registre y met le nom réglé.
 var JETON_SERVICE = '{service}';
+
+// ---------------------------------------------------------------------
+// LES JETONS D'UN PALIER — le texte troué, étape 2 (4 septembre 2026)
+// ---------------------------------------------------------------------
+// Décision de Grégoire (4 sept., 17 h 15) : huit badges, dans les mots que
+// les collègues lisent. Deux familles, tenues distinctes à l'écran (cadrage
+// du 2 sept.) :
+//   posee    la valeur est ÉCRITE dans le gabarit, une fois, pour tous les
+//            élèves — le nom du service, les erreurs tolérées, la longueur
+//            de référence ;
+//   remplie  la valeur vient de la CORRECTION, copie par copie — elle
+//            n'existe pas avant, personne n'a à la saisir dans la grille.
+// ⚠ `palier` remplace le « niveau » de la maquette : « niveau » désigne déjà
+// l'IDME partout dans l'application, et ce badge rend « Risqué », pas « D ».
+// Le niveau IDME et la note sont calculés au site d'appel (evaluation-calcul.js)
+// et jamais passés ici : pas offerts, ce serait toucher le calcul. Le lien du
+// service voyage À PART (sentinelle #668 F) ; le facteur appartient à la
+// FORMULE (voir l'en-tête) — pas offerts non plus.
+// `{s}` est l'accord du pluriel qui suit `{erreurs}` : le rendu le connaît,
+// la palette ne l'offre pas — même règle que les énoncés (#581).
+var JETON_SEUIL      = '{seuil}';
+var JETON_LONGUEUR   = '{longueur}';
+var JETON_ERREURS    = '{erreurs}';
+var JETON_MOTS       = '{mots}';
+var JETON_MOYENNE    = '{moyenne}';
+var JETON_PROJECTION = '{projection}';
+var JETON_PALIER     = '{palier}';
+var JETON_PLURIEL    = '{s}';
+
+var REPERES = [
+    { jeton: JETON_SERVICE,    famille: 'posee',   libelle: 'nom du service',
+      aide: 'Le nom du service d\'aide réglé plus haut. Vide : le badge disparaît.' },
+    { jeton: JETON_SEUIL,      famille: 'posee',   libelle: 'erreurs tolérées',
+      aide: 'Le nombre d\'erreurs tolérées sur la longueur de référence (30 pour l\'EUF).' },
+    { jeton: JETON_LONGUEUR,   famille: 'posee',   libelle: 'longueur de référence',
+      aide: 'La longueur de référence de l\'épreuve, en mots (900 pour l\'EUF).' },
+    { jeton: JETON_ERREURS,    famille: 'remplie', libelle: 'nombre d\'erreurs',
+      aide: 'Le nombre d\'erreurs comptées sur la copie, à la correction.' },
+    { jeton: JETON_MOTS,       famille: 'remplie', libelle: 'nombre de mots',
+      aide: 'Le nombre de mots de la production, saisi à la correction.' },
+    { jeton: JETON_MOYENNE,    famille: 'remplie', libelle: 'mots par erreur',
+      aide: 'En moyenne, 1 erreur à chaque N mots : c\'est ce N. Vide sur une copie sans erreur.' },
+    { jeton: JETON_PROJECTION, famille: 'remplie', libelle: 'erreurs projetées',
+      aide: 'Le nombre d\'erreurs que la copie ferait sur la longueur de référence, au même rythme.' },
+    { jeton: JETON_PALIER,     famille: 'remplie', libelle: 'palier atteint',
+      aide: 'Le nom du palier que la copie atteint, tel qu\'il est écrit dans la colonne « Palier ».' }
+];
+
+// Ce que le rendu CONNAÎT : les huit repères, plus l'accord du pluriel.
+var JETONS = REPERES.map(function(r) { return r.jeton; }).concat([JETON_PLURIEL]);
+
+/** La palette des badges posables dans les deux zones d'un palier — jamais {s}. */
+function listerReperes() {
+    return REPERES.map(function(r) {
+        return { jeton: r.jeton, famille: r.famille, libelle: r.libelle, aide: r.aide, espaceDeTete: false };
+    });
+}
+
+/** Le texte porte-t-il au moins un jeton que ce registre sait remplir ? */
+function porteJetonConnu(texte) {
+    if (typeof texte !== 'string' || !texte) return false;
+    for (var i = 0; i < JETONS.length; i++) if (texte.indexOf(JETONS[i]) !== -1) return true;
+    return false;
+}
+
+/**
+ * Les jetons d'un texte que ce registre NE connaît PAS — « {truc} », ou un
+ * badge d'une version plus récente de l'application. Le rendu les laisse en
+ * place (un élève les lirait tels quels) ; le gabarit les DIT, sous le palier.
+ * Même esprit que `herite` pour un modèle inconnu : rien ne se fait en douce.
+ */
+function jetonsInconnus(texte) {
+    if (typeof texte !== 'string' || !texte) return [];
+    var vus = texte.match(/\{[^{}\s]+\}/g) || [];
+    var inconnus = [];
+    vus.forEach(function(j) {
+        if (JETONS.indexOf(j) === -1 && inconnus.indexOf(j) === -1) inconnus.push(j);
+    });
+    return inconnus;
+}
+
+/** Échappe une chaîne pour un usage dans une RegExp littérale. */
+function _echapperRegExp(texte) {
+    return texte.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Remplit les jetons d'un texte de palier.
+ *
+ * ⚠ UN TEXTE SANS JETON CONNU EST RENDU À L'OCTET PRÈS — pas même un `trim`.
+ * C'est ce qui garantit que les grilles d'avant ce lot rendent exactement ce
+ * qu'elles rendent aujourd'hui (golden #668, vingt cas et une empreinte).
+ * Un jeton connu SANS valeur part avec l'espace qui le précède, et rien
+ * d'autre — la règle de `rendre` (evaluation-enonces.js) : on ne réécrit
+ * jamais la typographie de l'enseignant·e. Un jeton INCONNU reste en place
+ * (`jetonsInconnus`).
+ */
+function remplir(texte, valeurs) {
+    if (!porteJetonConnu(texte)) return (typeof texte === 'string') ? texte : '';
+    var v = (valeurs && typeof valeurs === 'object') ? valeurs : {};
+    var sortie = texte;
+    JETONS.forEach(function(jeton) {
+        var cle = jeton.slice(1, -1);
+        var brut = v[cle];
+        var vide = (brut === undefined || brut === null || brut === '');
+        var motif = vide
+            ? new RegExp('[ \\t]?' + _echapperRegExp(jeton), 'g')
+            : new RegExp(_echapperRegExp(jeton), 'g');
+        sortie = sortie.replace(motif, vide ? '' : String(brut));
+    });
+    return sortie.trim();
+}
+
+/**
+ * Les valeurs des jetons pour UNE copie — ce que la projection sait par élève
+ * (carte du 4 sept., §b), sans rien lire d'autre. Toutes des chaînes ; les
+ * nombres passent par `_nb`, comme le seuil affiché dans le gabarit.
+ */
+function _valeursJetons(x) {
+    var params = x.params || {};
+    var nom = (typeof params.nomServiceAide === 'string') ? params.nomServiceAide.trim() : '';
+    var erreurs = Number(x.erreurs);
+    var mots = Number(x.mots);
+    var projection = (isFinite(erreurs) && isFinite(mots) && mots > 0 && isFinite(Number(params.motsReference)))
+        ? String(Math.round(Number(params.motsReference) * erreurs / mots))
+        : '';
+    return {
+        service: nom,
+        seuil: (params.erreursTolerees === undefined) ? '' : _nb(params.erreursTolerees),
+        longueur: (params.motsReference === undefined) ? '' : _nb(params.motsReference),
+        erreurs: isFinite(erreurs) ? _nb(erreurs) : '',
+        mots: isFinite(mots) ? _nb(mots) : '',
+        // Le nombre du préfixe engendré d'hier. Vide sur le palier « zéro
+        // erreur », comme le préfixe l'était.
+        moyenne: (x.motsParErreur === null || x.motsParErreur === undefined) ? '' : String(Math.round(x.motsParErreur)),
+        // Le NOMBRE seul (« 23 »), pas « 23 erreurs pour 900 mots » : {longueur}
+        // existe à côté, et la phrase est celle de l'enseignant·e (arrêté 3).
+        projection: projection,
+        palier: (x.palier && (x.palier.libelle || x.palier.cle)) || '',
+        s: (isFinite(erreurs) && Math.abs(erreurs) > 1) ? 's' : ''
+    };
+}
 
 /** Formate un nombre pour un libellé (pas de décimale inutile). */
 function _nb(valeur) {
@@ -358,9 +513,20 @@ function _paliersDeRatio(paliers) {
     return paliers.filter(function(p) { return !p.sansErreur; });
 }
 
-/** Compose le texte d'un palier : verdict, puis recommandation si un service est nommé. */
-function _texteDuPalier(palier, params) {
-    var texte = palier.texte || '';
+/**
+ * Compose le texte d'un palier : verdict, puis recommandation.
+ *
+ * Étape 2 du texte troué (4 sept. 2026) : les DEUX champs se remplissent. Dans
+ * « Ce que l'élève lit » (`texte`), tous les jetons suivent la règle de
+ * `remplir` — {service} compris : un nom vide l'efface avec son espace, comme
+ * tout jeton sans valeur (décidé seul, dit : la règle de place ci-dessous
+ * ferait tomber le VERDICT entier, ce qui est pire qu'une phrase à retoucher).
+ * Dans la phrase de recommandation (`texteAide`), {service} RESTE CE QU'IL
+ * EST (consigne du 4 sept.) : sa règle de place — apposition ou complément —
+ * s'applique d'abord, puis les autres jetons se remplissent.
+ */
+function _texteDuPalier(palier, params, valeurs) {
+    var texte = remplir(palier.texte || '', valeurs);
     var nom = (typeof params.nomServiceAide === 'string') ? params.nomServiceAide.trim() : '';
     var aide = palier.texteAide || '';
     if (!aide) return texte;
@@ -390,6 +556,7 @@ function _texteDuPalier(palier, params) {
             }
         }
     }
+    aide = remplir(aide, valeurs);
     return texte ? (texte + ' ' + aide) : aide;
 }
 
@@ -457,7 +624,7 @@ function calculer(critere, donnees) {
         if (!sansErreur) return _nonApplicable(base, 'palier-zero-erreur-absent');
         return _resultat(base, {
             applicable: true, ratio: 0, motsParErreur: null,
-            palier: sansErreur, indice: 0, params: p.params, mots: mots
+            palier: sansErreur, indice: 0, params: p.params, erreurs: erreurs, mots: mots
         });
     }
 
@@ -487,7 +654,7 @@ function calculer(critere, donnees) {
 
     return _resultat(base, {
         applicable: true, ratio: ratio, motsParErreur: motsParErreur,
-        palier: choisi, indice: indice, params: p.params, mots: mots,
+        palier: choisi, indice: indice, params: p.params, erreurs: erreurs, mots: mots,
         seuilMotsParErreur: seuilMotsParErreur
     });
 }
@@ -496,19 +663,29 @@ function _nonApplicable(base, raison) {
     return {
         applicable: false, raison: raison,
         ratio: null, motsParErreur: null, palier: null, indicePalier: -1,
-        texte: '', prefixe: '',
+        texte: '', prefixe: '', compose: false, jetons: null,
         modeleId: base.modeleId, params: base.params, paliers: base.paliers,
         herite: base.herite, lienServiceAide: base.lienServiceAide
     };
 }
 
 function _resultat(base, x) {
+    var valeurs = _valeursJetons(x);
     // Le préfixe est ENGENDRÉ : il porte la mesure, jamais un verdict. Il est
     // absent du palier « zéro erreur », comme aujourd'hui.
-    var prefixe = (x.motsParErreur === null)
+    //
+    // ↻ DÉCISION DE GRÉGOIRE (4 sept. 2026, 17 h 15) : une phrase SANS AUCUN
+    // jeton connu garde le préfixe tel quel — les grilles existantes ne
+    // changent pas ; dès qu'elle en porte un, elle est ENTIÈRE, et {moyenne}
+    // remet la mesure où l'enseignant·e la veut. Le discriminant est « aucun
+    // jeton CONNU », pas « aucune accolade » : un {truc} inconnu ne fait pas
+    // tomber le préfixe. Il ne lit que « Ce que l'élève lit » (`texte`) : une
+    // recommandation composée sous un verdict d'hier garde le préfixe d'hier.
+    var compose = porteJetonConnu(x.palier.texte || '');
+    var prefixe = (x.motsParErreur === null || compose)
         ? ''
         : 'Tu fais en moyenne 1 erreur à chaque ' + Math.round(x.motsParErreur) + ' mots.';
-    var verdict = _texteDuPalier(x.palier, x.params);
+    var verdict = _texteDuPalier(x.palier, x.params, valeurs);
     var texte = prefixe ? (verdict ? prefixe + ' ' + verdict : prefixe) : verdict;
 
     return {
@@ -520,6 +697,8 @@ function _resultat(base, x) {
         indicePalier: x.indice,
         prefixe: prefixe,
         texte: texte,
+        compose: compose,
+        jetons: valeurs,
         modeleId: base.modeleId, params: base.params, paliers: base.paliers,
         herite: base.herite, lienServiceAide: base.lienServiceAide
     };
@@ -634,6 +813,11 @@ function paliersMigration() {
 var api = {
     MODELE_PAR_DEFAUT: MODELE_PAR_DEFAUT,
     JETON_SERVICE: JETON_SERVICE,
+    JETONS: JETONS.slice(),
+    listerReperes: listerReperes,
+    porteJetonConnu: porteJetonConnu,
+    jetonsInconnus: jetonsInconnus,
+    remplir: remplir,
     listerModeles: listerModeles,
     obtenirModele: obtenirModele,
     normaliser: normaliser,
