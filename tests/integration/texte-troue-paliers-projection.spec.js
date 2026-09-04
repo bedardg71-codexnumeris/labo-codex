@@ -1,0 +1,184 @@
+import { test, expect } from '@playwright/test';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
+
+// Le texte troué, ÉTAPE 2 — les paliers de projection se composent avec des badges
+// (4 septembre 2026), éprouvé dans un vrai WebKit, contre le vrai index.html.
+//
+// Ce que les trois sentinelles Vitest ne peuvent pas voir, et que ce spec mesure :
+//   · le CLIC : un vrai pointeur sur un badge, et le jeton qui arrive dans la zone du
+//     palier où est le curseur — après une FRAPPE, sans que la zone perde le focus ;
+//   · ENREGISTRER, ROUVRIR : les deux jetons posés sont écrits dans la grille (mode
+//     édition, `db.modifier`), et se relisent après un changement de grille ;
+//   · L'APERÇU d'une copie d'exemple : la phrase du palier composé, remplie, sans le
+//     préfixe engendré ; celle d'un palier d'hier, avec ; la copie non corrigée, muette ;
+//   · un jeton INCONNU tapé à la main se dit sous son palier, et l'élève le lirait tel quel ;
+//   · le témoin négatif : un palier non touché lit et écrit ce qu'il portait.
+//
+// ⚠ Règle du 4 septembre (docs/securite/TESTS-AUTOMATISES.md §4) : UN seul clic à la
+// souris (le badge, c'est le pointeur qu'on éprouve) ; tout autre geste passe par
+// l'événement DOM ; on attend le rendu, jamais un délai.
+
+const SEMER = `async () => {
+    db.setSync('trimestres', [{ id: 'a2026', nom: 'Automne 2026', annee: 2026, session: 'A', actif: true }]);
+    db.setSync('trimestreActif', 'a2026');
+    // security-ok: fixtures littérales écrites par le spec, aucune source externe.
+    await db.set(cle('grillesTemplates'), [
+        { id: 'G1', nom: 'Philo', dansBibliotheque: true, criteres: [
+            { id: 'CR', nom: 'Rigueur', type: 'algorithmique', ponderation: 20, modeleProjection: 'norme_externe',
+              paramsProjection: { nomServiceAide: 'Passerelle +' } } ] },
+        { id: 'G2', nom: 'Autre', dansBibliotheque: true, criteres: [ { id: 'H', nom: 'Contenu', type: 'holistique', ponderation: 100 } ] }
+    ]);
+    window.afficherSection('conception');
+    window.afficherSousSection('conception-grille-criteres');
+    await window.chargerGrillePourModif('G1');
+}`;
+
+const carte = (page, section) => page.locator(`#listeCriteres .gabarit-algo-carte[data-pli="CR:${section}"]`);
+const cliquerDom = (locator) => locator.evaluate((el) => el.click());
+const palier = (page, i) => page.locator('#listeCriteres .palier-projection').nth(i);
+const zone = (page, i, champ) => palier(page, i).locator(`textarea[data-palier-index="${i}"][data-champ="${champ}"]`);
+const badge = (page, i, jeton) => palier(page, i).locator(`[data-action="insererRepereEnonce"][data-jeton="${jeton}"]`);
+const paliersEnBase = (page) => page.evaluate(async () =>
+    ((await db.get(cle('grillesTemplates'))) || []).find((g) => g.id === 'G1').criteres[0].paliersProjection);
+/** La frappe telle que le navigateur la livre : la valeur, puis `change`. */
+const frapper = (locator, valeur) => locator.evaluate((el, v) => {
+    el.value = v;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+}, valeur);
+/**
+ * Le focus dans une zone, le curseur À LA FIN — comme un doigt qui touche après le dernier
+ * mot. ⚠ Mesuré dans WebKit : `keyboard.press('End')` après `focus()` laissait le curseur en
+ * tête de zone (le texte était inséré à la position 0) ; on pose le curseur explicitement.
+ */
+const focusEnFin = (locator) => locator.evaluate((el) => {
+    el.focus();
+    el.setSelectionRange(el.value.length, el.value.length);
+});
+/**
+ * LE clic à la souris du spec. Juste après un rendu, la liste bouge encore quelques
+ * dizaines de millisecondes (mesuré le 4 sept. sur les bandes d'accordéon) : on attend
+ * que la boîte du badge soit immobile d'une image à l'autre, puis on clique.
+ */
+async function cliquerSouris(locator) {
+    await locator.scrollIntoViewIfNeeded();
+    let precedent = null;
+    for (let i = 0; i < 40; i++) {
+        const boite = await locator.boundingBox();
+        const cle = boite ? [boite.x, boite.y, boite.width, boite.height].map(Math.round).join(',') : '';
+        if (cle && cle === precedent) break;
+        precedent = cle;
+        await locator.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    }
+    await locator.click();
+}
+
+test('texte troué 2 · deux badges posés dans un palier au clic, enregistrés, relus après réouverture, et lus dans l\'aperçu', async ({ page }) => {
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
+    await page.evaluate(eval(SEMER));
+
+    // 1 — la carte « Projection » est repliée ; on la déplie par l'événement DOM.
+    await expect(carte(page, 'projection')).toHaveClass(/ferme/);
+    await cliquerDom(carte(page, 'projection').locator('.accordeon-header'));
+    await expect(carte(page, 'projection')).not.toHaveClass(/ferme/);
+
+    // 2 — six paliers, une palette par palier, les huit badges dans l'ordre arrêté, sans accolades.
+    await expect(page.locator('#listeCriteres .palier-projection')).toHaveCount(6);
+    await expect(page.locator('#listeCriteres .reperes-palier')).toHaveCount(6);
+    const offerts = await palier(page, 4).locator('[data-action="insererRepereEnonce"]').evaluateAll((els) => ({
+        jetons: els.map((b) => b.dataset.jeton),
+        textes: els.map((b) => b.textContent.trim()),
+        familles: els.map((b) => (b.classList.contains('repere-enonce--posee') ? 'posee' : (b.classList.contains('repere-enonce--remplie') ? 'remplie' : '?'))),
+        visibles: els.every((b) => b.offsetParent !== null)
+    }));
+    console.log('PALETTE DU PALIER 5 →', JSON.stringify(offerts));
+    expect(offerts.jetons).toEqual(['{service}', '{seuil}', '{longueur}', '{erreurs}', '{mots}', '{moyenne}', '{projection}', '{palier}']);
+    expect(offerts.textes).toEqual(['service', 'seuil', 'longueur', 'erreurs', 'mots', 'moyenne', 'projection', 'palier']);
+    expect(offerts.familles).toEqual(['posee', 'posee', 'posee', 'remplie', 'remplie', 'remplie', 'remplie', 'remplie']);
+    expect(offerts.visibles, 'les badges sont à l\'écran').toBe(true);
+    await expect(page.locator('#listeCriteres .palier-note-service')).toHaveCount(0);
+    await expect(page.locator('#listeCriteres .palier-note-composer')).toHaveCount(1);
+
+    // 3 — palier 5 (« Risqué ») : FRAPPE dans « Ce que l'élève lit », puis LE clic à la souris sur
+    //     le badge {projection}. La zone est focalisée ET modifiée : si le bouton prenait le focus,
+    //     `change` partirait, le gabarit se redessinerait et le clic tomberait dans le vide.
+    const texte = zone(page, 4, 'texte');
+    const verdictDHier = 'En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec.';
+    await expect(texte).toHaveValue(verdictDHier);
+    await focusEnFin(texte);
+    await page.keyboard.type(' Bilan :');
+    await cliquerSouris(badge(page, 4, '{projection}'));
+    await expect(texte).toHaveValue(verdictDHier + ' Bilan : {projection}');
+    const apresClic = await page.evaluate(() => {
+        const t = document.querySelector('#listeCriteres textarea[data-palier-index="4"][data-champ="texte"]');
+        return { focalisee: document.activeElement === t, curseur: t.selectionStart, longueur: t.value.length };
+    });
+    console.log('APRÈS FRAPPE + CLIC →', JSON.stringify(apresClic));
+    expect(apresClic.focalisee, 'la zone garde le focus : on continue d\'écrire').toBe(true);
+    expect(apresClic.curseur, 'le curseur est après le badge').toBe(apresClic.longueur);
+    // Écrit sur la grille sans attendre la sortie de la zone (mode édition : `db.modifier`).
+    await expect.poll(async () => (await paliersEnBase(page))[4].texte).toBe(verdictDHier + ' Bilan : {projection}');
+
+    // 4 — second badge, par l'événement DOM : la zone est toujours celle où est le curseur.
+    await cliquerDom(badge(page, 4, '{longueur}'));
+    await expect(texte).toHaveValue(verdictDHier + ' Bilan : {projection} {longueur}');
+
+    // 5 — la palette sert aussi la recommandation : focus sur l'autre zone du même palier, badge {seuil}.
+    const aide = zone(page, 4, 'texteAide');
+    await expect(aide).toHaveValue('Il est recommandé de t\'inscrire au {service}.');
+    await focusEnFin(aide);
+    await cliquerDom(badge(page, 4, '{seuil}'));
+    await expect(aide).toHaveValue('Il est recommandé de t\'inscrire au {service}. {seuil}');
+    await expect(texte, 'l\'autre zone n\'a pas bougé').toHaveValue(verdictDHier + ' Bilan : {projection} {longueur}');
+    await expect.poll(async () => (await paliersEnBase(page))[4].texteAide).toBe('Il est recommandé de t\'inscrire au {service}. {seuil}');
+
+    // 6 — ROUVRIR : changer de grille et revenir. Les jetons se relisent tels quels.
+    await page.evaluate(async () => { await window.chargerGrillePourModif('G2'); await window.chargerGrillePourModif('G1'); });
+    await expect(zone(page, 4, 'texte')).toHaveValue(verdictDHier + ' Bilan : {projection} {longueur}');
+    await expect(zone(page, 4, 'texteAide')).toHaveValue('Il est recommandé de t\'inscrire au {service}. {seuil}');
+    const enBase = await paliersEnBase(page);
+    console.log('EN BASE →', JSON.stringify(enBase.map((p) => [p.cle, p.texte, p.texteAide])));
+    expect(enBase.length).toBe(6);
+    expect(enBase[4].texte).toBe(verdictDHier + ' Bilan : {projection} {longueur}');
+    expect(enBase[4].texteAide).toBe('Il est recommandé de t\'inscrire au {service}. {seuil}');
+    // Témoin négatif : le palier « Excellent » lit et porte ce qu'il portait.
+    await expect(zone(page, 1, 'texte')).toHaveValue('En prévision de l\'EUF, ce ratio est excellent.');
+    expect(enBase[1].texte).toBe('En prévision de l\'EUF, ce ratio est excellent.');
+    expect(enBase[1].texteAide).toBe('');
+
+    // 7 — L'APERÇU : la carte « Ce que l'élève lira », dépliée par l'événement DOM.
+    await expect(carte(page, 'apercu')).toHaveClass(/ferme/);
+    await cliquerDom(carte(page, 'apercu').locator('.accordeon-header'));
+    await expect(carte(page, 'apercu')).not.toHaveClass(/ferme/);
+    const copies = carte(page, 'apercu').locator('.apercu-copie');
+    await expect(copies).toHaveCount(7);   // six paliers + la copie non corrigée
+    const lues = await copies.evaluateAll((els) => els.map((e) => ({
+        titre: e.querySelector('.apercu-copie-titre').textContent.trim(),
+        texte: e.querySelector('.apercu-copie-texte').textContent.trim()
+    })));
+    console.log('APERÇU →', JSON.stringify(lues));
+    // Le palier composé : décompte du bloc 3, PUIS la phrase entière — jetons remplis, sans préfixe.
+    expect(lues[4].titre).toBe('Copie 5 — 23 erreurs pour 900 mots · palier « Risqué »');
+    expect(lues[4].texte).toBe('Ta production contient 23 erreurs pour 900 mots. ' + verdictDHier + ' Bilan : 23 900 Il est recommandé de t\'inscrire au Passerelle +. 30');
+    expect(lues[4].texte).not.toContain('Tu fais en moyenne');
+    // Un palier d'hier garde le préfixe engendré.
+    expect(lues[1].texte).toBe('Ta production contient 5 erreurs pour 900 mots. Tu fais en moyenne 1 erreur à chaque 180 mots. En prévision de l\'EUF, ce ratio est excellent.');
+    // La copie non corrigée : aucune phrase.
+    expect(lues[6].titre).toBe('Copie non corrigée — ni erreurs ni mots saisis');
+    expect(lues[6].texte).toBe('Aucune phrase : le décompte et la projection attendent la correction.');
+
+    // 8 — un jeton INCONNU tapé à la main (palier 1, « Sans erreur ») : la ligne orange le dit, l'aperçu le montre tel quel.
+    await expect(page.locator('#listeCriteres .palier-jetons-inconnus')).toHaveCount(0);
+    await frapper(zone(page, 0, 'texte'), 'Bravo {truc}.');
+    await expect(page.locator('#listeCriteres .palier-jetons-inconnus')).toHaveCount(1);
+    await expect(page.locator('#listeCriteres .palier-jetons-inconnus')).toContainText('Le badge « {truc} » est inconnu de cette version');
+    await expect(carte(page, 'apercu').locator('.apercu-copie').first().locator('.apercu-copie-texte')).toHaveText('Ta production contient 0 erreur pour 900 mots. Bravo {truc}.');
+    // Le redessin a gardé les deux cartes dépliées, et n'a rien écrit d'autre.
+    await expect(carte(page, 'projection')).not.toHaveClass(/ferme/);
+    await expect(carte(page, 'apercu')).not.toHaveClass(/ferme/);
+    expect((await paliersEnBase(page))[4].texte).toBe(verdictDHier + ' Bilan : {projection} {longueur}');
+});
