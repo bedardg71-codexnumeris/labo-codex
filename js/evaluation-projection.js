@@ -802,6 +802,55 @@ function poserDefautNeuf(critere) {
     return Object.assign(critere, gabaritNeuf());
 }
 
+/**
+ * Des copies FICTIVES pour prévisualiser le gabarit (le texte troué, étape 2,
+ * arrêtés 4 et 5) — une par palier, plus une non corrigée.
+ *
+ * ▣ Pourquoi dérivées des PALIERS plutôt que trois copies fixes (carte du
+ * 4 sept., §e) : avec 7 / 460 et 24 / 380, deux paliers sur six ne seraient
+ * jamais vus, et un seuil déplacé par l'enseignant·e pourrait faire tomber les
+ * copies fixes sur le même palier. Ici, mots = la longueur de référence et
+ * erreurs = le milieu du palier en ratio, ramené à un entier ; le terminal se
+ * place au-delà du dernier seuil. Chaque phrase de chaque palier est vue,
+ * quelle que soit la grille.
+ * ⛔ Aucune donnée de personne : les nombres sortent du gabarit lui-même.
+ * ⚠ Un arrondi peut faire tomber une copie sur le palier voisin quand deux
+ * seuils sont très proches : le rendu nomme le palier ATTEINT (par `calculer`),
+ * jamais le palier visé.
+ *
+ * @returns {Array<{cle: string, libelle: string, erreurs: number|null, mots: number|null, corrigee: boolean}>}
+ */
+function copiesExemple(critere) {
+    var p = normaliser(critere);
+    var copies = [];
+    if (p.modele.projette) {
+        var mots = p.params.motsReference;
+        var tolerees = p.params.erreursTolerees;
+        var precedent = 0;
+        p.paliers.forEach(function(pal) {
+            if (pal.sansErreur) {
+                copies.push({ cle: pal.cle, libelle: pal.libelle, erreurs: 0, mots: mots, corrigee: true });
+                return;
+            }
+            var ratio;
+            if (pal.ratioMax === null) {
+                ratio = precedent > 0 ? precedent * 1.5 : 1.5;
+            } else {
+                ratio = (precedent + pal.ratioMax) / 2;
+                precedent = pal.ratioMax;
+            }
+            copies.push({ cle: pal.cle, libelle: pal.libelle, erreurs: Math.max(1, Math.round(ratio * tolerees)), mots: mots, corrigee: true });
+        });
+    }
+    if (!copies.length) {
+        // « Aucune projection », ou aucun palier lisible : une copie ordinaire,
+        // pour voir au moins le décompte du bloc 3.
+        copies.push({ cle: 'exemple', libelle: '', erreurs: 3, mots: 300, corrigee: true });
+    }
+    copies.push({ cle: 'non_corrigee', libelle: '', erreurs: null, mots: null, corrigee: false });
+    return copies;
+}
+
 /** Les paliers de migration — reproduction au mot près de l'existant. */
 function paliersMigration() {
     return JSON.parse(JSON.stringify(PALIERS_MIGRATION));
@@ -826,6 +875,7 @@ var api = {
     motsParErreurDuRatio: motsParErreurDuRatio,
     appliquerAuCritere: appliquerAuCritere,
     paliersGabaritNeuf: paliersGabaritNeuf,
+    copiesExemple: copiesExemple,
     gabaritNeuf: gabaritNeuf,
     poserDefautNeuf: poserDefautNeuf,
     paliersMigration: paliersMigration
