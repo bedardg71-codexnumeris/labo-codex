@@ -284,7 +284,7 @@ critère par son niveau, « Langue (Maîtrisé) ». Pour un analytique, garder c
 que le chiffre — et parce que le même texte dit déjà « Critère 2 (Langue) — 24 / 30 » trois
 lignes plus haut. Hors du périmètre nommé du lot 3 : si oui, c'est une retouche avant 1.116.
 
-### ↻ Relecture croisée des deux retouches (`5b8bc6b0`, `44559804`), 4 septembre 2026 vers 8 h — rien à corriger
+### ↻ Relecture croisée des deux retouches (`5b8bc6b0`, `44559804`), 4 septembre 2026 vers 7 h 10 — rien à corriger
 
 - **Retouche 1 (bilan du texte copié)** : une lecture neuve remplace les trois appels qui nommaient
   le niveau (défis, acquis en développement, force) ; le chiffre est échappé avant l'`innerHTML`
@@ -298,7 +298,7 @@ lignes plus haut. Hors du périmètre nommé du lot 3 : si oui, c'est une retouc
   « Niveau général · Maîtrisé » du PDF reste sur une grille entièrement analytique (c'est le niveau
   de la COPIE, tiré de la note globale par les bornes, pas celui d'un critère).
 
-### ↻ Ce que le coup d'œil de Grégoire a ouvert — 4 septembre 2026, 7 h, sur `5b8bc6b0`
+### ↻ Ce que le coup d'œil de Grégoire a ouvert — 4 septembre 2026, 6 h 55, sur `5b8bc6b0`
 
 Il a parcouru les deux lots sur sa grille « Analyse littéraire » (12 critères analytiques, sans
 cartouche) et produit le PDF. Quatre retours, triés :
@@ -331,7 +331,7 @@ Deux voies :
   mécanisme de cartouche à maintenir, et le dépistage perd sa lecture commune.
 ⮕ **Recommandation de Cowork : (a).** Elle garde une seule mécanique de cartouche et une seule
 lecture pour le dépistage ; ce qui manquait était le nom et le préremplissage, pas le mécanisme.
-↻ **TRANCHÉ PAR GRÉGOIRE le 4 septembre 2026 vers 7 h 30 : la voie (a).** Ses mots : *« je suis
+↻ **TRANCHÉ PAR GRÉGOIRE le 4 septembre 2026 vers 7 h 05 : la voie (a).** Ses mots : *« je suis
 ta recommandation »*. L'échelle reste le mécanisme des paliers ; pour une grille analytique elle
 se présente comme des paliers en %, préremplie avec l'échelle de départ, et l'éditeur de cartouche
 titre ses colonnes par les bornes. **C'est le lot 4, à cadrer après 1.116** — avec le retour 4
@@ -347,7 +347,7 @@ savoir sauter. C'est une décision de dépistage (didactique) qu'il a déjà én
 ⮕ **Va avec le lot 4.**
 
 **6. « Distinguer la pénalité de la projection EUF : qu'on puisse activer la première sans la
-seconde »** (retour du 4 septembre vers 8 h 30, l'exemple d'un enseignant de philosophie).
+seconde »** (retour du 4 septembre vers 7 h 15, l'exemple d'un enseignant de philosophie).
 ▣ **Mesure : ça existe déjà.** Le menu « Modèle de projection » du gabarit algorithmique offre
 **« Aucune projection »** (`js/evaluation-projection.js:232-239`, `projette: false`) : le critère
 est noté par la formule, et rien de la section projection (bornes, service d'aide, paliers) ne
@@ -363,7 +363,7 @@ même question que « 20/20/30/30 → 25 % chacun » du 2 septembre. **Recommand
 existants gardent leur modèle) — tarir n'est pas réparer. Pas dans 1.116 : après, avec le lot 4.
 
 **7. Le libellé « Modèle de rétroaction » du gabarit algorithmique devient « Modèle de
-commentaire »** — décision de Grégoire, 4 septembre vers 8 h 40. Sa nuance : *la rétroaction, c'est
+commentaire »** — décision de Grégoire, 4 septembre vers 7 h 20. Sa nuance : *la rétroaction, c'est
 ce qui est lié à la cartouche, une rétroaction sur le travail ; ici, ce sont des commentaires sur
 une projection.* ▣ Mesure : un seul libellé à l'écran (`js/grilles.js:3594`), et la clé de données
 sous le menu ne porte pas le mot — rien qui voyage ne change, rien dans les données. Les

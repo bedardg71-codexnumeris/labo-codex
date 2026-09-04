@@ -1,6 +1,6 @@
 # Cadrage du lot 4 — le gabarit algorithmique se range, et une grille analytique a ses paliers
 
-> **Écrit le 4 septembre 2026 vers 9 h 45, par Cowork, à la demande de Grégoire**, pendant que
+> **Écrit le 4 septembre 2026 vers 7 h 30, par Cowork, à la demande de Grégoire**, pendant que
 > Claude Code publiait 1.116 (les lots 2 et 3 des trois types de grille). Application au moment de
 > l'écriture : `version.json` dit déjà **1.116.0**, build `0904-0729`, **pas encore poussée**.
 >
@@ -36,7 +36,7 @@ de l'échelle**, et ce niveau ouvre la cartouche (clé `critereId_niveau`). Une 
 un commentaire à un **palier** ; sans paliers, pas de cartouche. La question n'était donc pas
 « échelle ou pas », mais « où vivent les paliers et comment s'appellent-ils ».
 
-↻ **DÉCISION DE GRÉGOIRE, 4 septembre vers 7 h 30 : la voie (a)** — *« je suis ta
+↻ **DÉCISION DE GRÉGOIRE, 4 septembre vers 7 h 05 : la voie (a)** — *« je suis ta
 recommandation »*. L'échelle **reste** le mécanisme des paliers ; elle cesse de se présenter comme
 des « niveaux » quand la grille est analytique :
 - dans le formulaire de la cartouche, pour une grille analytique, le champ « Échelle (niveaux) * »
