@@ -7,9 +7,9 @@
      ===================================================================== -->
 
 <!-- =====================================================================
-     SESSION 25 — 4 SEPTEMBRE 2026, 17 H : LE TEXTE TROUÉ, ÉTAPE 2 — LA CARTE, PAS LE CODE.
-     ⏸ EN ATTENTE de la relecture de Cowork et de deux décisions de Grégoire (noms des
-     badges ; sort du préfixe engendré). AUCUNE ligne de code écrite, aucun commit, aucun push.
+     SESSION 25 — 4 SEPTEMBRE 2026, 17 H → 18 H : LE TEXTE TROUÉ, ÉTAPE 2 — LA CARTE, PUIS LES
+     QUATRE VOLETS (registre · gabarit · aperçu · spec), un commit chacun. ⏸ LOT RENDU POUR LA
+     RELECTURE CROISÉE de Cowork, AVANT tout verdict ; NON POUSSÉ ; pas de release.
 
      ▣ Mandat : « Lis plans de travail/CONSIGNE-DU-JOUR.md et exécute-la » (Grégoire, 16 h 56, puis
        renvoyé tel quel à 17 h 05 — la consigne n'avait pas changé : mtime 16 h 51, avant l'ouverture).
@@ -60,12 +60,66 @@
         l'ordre exact d'evaluation-calcul.js:514-526 ; la copie non corrigée n'a aucune projection
         (`applicable: false`, mesuré).
 
-     §5 — CE QUI REMONTE À GRÉGOIRE (par Cowork) : 1. les noms des badges (service · seuil · longueur ;
-     erreurs · mots · moyenne · projection · palier) ; 2. le préfixe engendré (badge `moyenne` + phrase
-     sans badge inchangée, ou « le préfixe reste toujours »).
-     ⛔ Rien d'autre n'a bougé. Prochain geste : à la relecture de Cowork, l'ordre des volets arrive
-     dans CONSIGNE-DU-JOUR.md §3 ; puis code, un commit par volet, la consigne et les fichiers de
-     Cowork avec le premier.
+     §5 — CE QUI REMONTAIT À GRÉGOIRE (par Cowork) : 1. les noms des badges ; 2. le préfixe engendré.
+     ↻ 17 h 20 — LES DEUX SONT TRANCHÉS (consigne §3, Cowork après relecture de la carte : « cinq
+       mesures rejouées, rien à lui opposer ») : noms arrêtés « ça va ! » (posés service · seuil ·
+       longueur ; remplis erreurs · mots · moyenne · projection · palier) ; le préfixe devient le badge
+       `moyenne` (« oui ») — une phrase SANS jeton connu garde le préfixe tel quel, une phrase qui en
+       porte un est entière ; discriminant « aucun jeton connu », pas « aucune accolade ».
+
+     §6 — LES QUATRE VOLETS, UN COMMIT CHACUN (17 h 20 → 18 h), sur `main`, NON POUSSÉS : le lot
+     attend la RELECTURE CROISÉE de Cowork (format qui voyage : obligatoire) AVANT tout verdict.
+     ▣ Volet 1 `2d9baafc` — le registre (`evaluation-projection.js`) : `REPERES` (8), `JETONS` (+{s}),
+       `listerReperes`, `porteJetonConnu`, `jetonsInconnus`, `remplir`, `_valeursJetons` ;
+       `_texteDuPalier` remplit `texte` ET `texteAide` ; `_resultat` expose `compose` et `jetons`.
+       {projection} = le nombre seul. DÉCIDÉ SEUL, DIT : dans « Ce que l'élève lit », {service}
+       sans nom suit la règle générique (part avec son espace) — la règle de place ferait tomber le
+       VERDICT entier ; dans la recommandation, {service} reste ce qu'il est. Sentinelle
+       `sentinelle-texte-troue-etape-2-paliers` (30 cas), six mutations rouges (6·3·14·1·2·9),
+       cmp identique ; golden #668 (69) intact ; `projectionAlgo.calculer` un seul site. Jeton
+       evaluation-projection.js bumpé (d) : le hook pre-commit l'exige même pour un volet « seul ».
+       Emporte la consigne, l'archive, OU-EN-EST-ON, CONSIGNE-DEMARRAGE-COWORK, 00-CADRAGES-OUVERTS,
+       le cadrage codes par grille, la carte, ce bloc. Vitest 459 / 5072.
+     ▣ Volet 2 `b6b3bc42` — le gabarit : `rendreBoutonsReperes` (un helper, énoncés + paliers) ;
+       UNE palette par palier entre la rangée « Palier · Jusqu'à » et ses deux zones — DÉCIDÉ SEUL,
+       DIT (question 4 du cadrage) : deux palettes par palier = 96 boutons sur six paliers, une =
+       48, et la rangée de huit tient sur une ligne en pleine largeur ; la ligne orange d'un jeton
+       INCONNU sous son palier ; la note « Écris {service}… » tombe, la note du composeur porte la
+       décision 2 au mot. `insererRepereEnonce` reconnaît un palier : cible = zone focalisée, sinon
+       `data-zone-active` (focusin), sinon « Ce que l'élève lit » ; écriture par `_muterPalier`
+       (temp + grille) sans rendu. `insererRepere(…, palette)` 5e paramètre (les neuf cas de
+       l'étape 1 intacts). styles.css (règle scopée) ; jetons grilles (i), enonces (20260904a),
+       styles (f). Sentinelle `…-etape-2-gabarit` (20 cas, le geste sur des zones factices en temp et
+       en grille), six mutations rouges (1·1·2·1·4·7). La sentinelle lot 4 C (G.c) et le spec lot 4
+       verrouillaient la note retirée : ils suivent. Vitest 460 / 5092.
+     ▣ Volet 3 `c016a148` — l'aperçu : `copiesExemple(critere)` dans le REGISTRE (décidé seul, dit :
+       pure, testable en Node, aucune donnée de personne) — une copie par palier (mots = longueur de
+       référence, erreurs = milieu du palier en ratio ; 0·5·11·14·23·45 pour 900, chacune atteint
+       SON palier), plus une non corrigée ; carte « Ce que l'élève lira » sous « Projection », avant
+       les codes, REPLIÉE par défaut (règle du 3 sept. : fermé ce qui porte les mots) ; par copie,
+       décompte du bloc 3 PUIS projection du bloc 2 (ordre d'`_construireRetroactionAlgoCategories`) ;
+       la non corrigée n'a AUCUNE phrase, comme l'application ; la ligne dit ce qui n'est pas montré.
+       Jetons grilles (j), projection (e), styles (g). Sentinelle `…-etape-2-apercu` (15 cas), cinq
+       mutations rouges (5·5·3·1·1). Le spec lot 4 (ordre + plis) suit la cinquième carte.
+       Vitest 461 / 5107.
+     ▣ Volet 4 `8305e502` — le spec WebKit `texte-troue-paliers-projection.spec.js` : un seul
+       clic souris (immobilité par requestAnimationFrame), tout le reste par l'événement DOM, prêt par
+       `window.dbReady`, `grep "page.click\|waitForTimeout"` = 0 ; 2,9 s ; les huit specs de
+       l'écran 15 / 15 (38,6 s). Break-test : `_zoneCibleDuPalier` → null, rouge à la pose.
+       ⚠ MESURÉ : dans WebKit, `keyboard.press('End')` après `focus()` laisse le curseur en tête
+       d'un textarea → `setSelectionRange`.
+     ▣ TROUVAILLES EN CHEMIN, hors du lot (issue 3 — commentées, pas inscrites) : (1) le cas
+       « jeton anti-cache de grilles.js = celui d'evaluation-projection.js » (#668 I.714) compare
+       deux `undefined` : son motif double l'échappement du point et ne matche jamais — un test qui
+       ne garde rien ; (2) au CHARGEMENT de grilles.js, `migrerCategoriesVersSousCriteres` fait un
+       `db.modifier` sur la clé des grilles (rien au rendu). Aucun symptôme vécu : non inscrits.
+     ▣ CE QUI RESTE, dans l'ordre de la consigne §4 : relecture croisée de Cowork (le format qui
+       voyage : `texte`/`texteAide` gardent les accolades ; import et partage inchangés — mesuré à la
+       carte) → coup d'œil de Grégoire (Conception › Grilles › critère algorithmique › carte
+       « Projection » : les badges ; carte « Ce que l'élève lira » : sept copies) → verdict au jeton
+       (`scripts/pousser.sh`) → release MINEURE 1.118, UNE entrée de changelog dont les mots sont à
+       lui, et qui nomme « corrige avec l'application à jour » → push.
+     ▣ ARBRE au moment d'écrire : propre ; `main` = origin/main + 5 commits (4 volets + ce bloc).
      ===================================================================== -->
 
 <!-- =====================================================================
