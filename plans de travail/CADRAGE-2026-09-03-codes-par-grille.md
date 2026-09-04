@@ -195,6 +195,32 @@ vit la palette globale et ce que la case fait par rapport à elle — ou y mettr
 
 ---
 
+↻ **7. Une seule liste : les sous-critères ET les codes** — proposé par Grégoire le 4 septembre 2026 (17 h 45),
+capture à l'appui, recommandation de Cowork retenue. Aujourd'hui le gabarit rend le même objet deux fois :
+« Sous-critères » (code · nom · pondération · chevrons · corbeille) puis « Codes d'annotation » (les mêmes,
+avec couleur et « Description / Rétroaction »), le nom recopié. **Forme retenue** : une seule liste, une rangée par
+sous-critère (code · nom · pondération · pastille de couleur · chevrons · corbeille), le texte du code sous un
+pli par rangée, fermé par défaut (règle des cartes : ouvert ce qui porte la note, fermé ce qui porte les mots) ;
+la case « Utiliser ces sous-critères comme codes d'annotation » en tête de la liste ; **couleur et texte
+n'apparaissent que si elle est cochée** ; la carte « Codes d'annotation » disparaît.
+⚠ Le texte d'un code est ce que l'élève lit sur sa copie annotée : **format qui voyage** avec la grille →
+relecture croisée obligatoire. À mesurer avant : « Description / Rétroaction » est-il UN champ ou deux
+(la description du sous-critère pour l'enseignant, le mot pour l'élève) ; et le sous-critère 0 « Nombre
+d'erreurs de français trop petit pour diagnostiquer » est-il semé par le code (alors il entre dans ce qui se
+tarit) ou écrit par Grégoire.
+▣ **Personnalisable pour d'autres disciplines** : oui, davantage — un sous-critère est un nom que l'enseignant
+écrit ; ce qui reste « français » est nommé aux points 2, 4 et 5 (palette globale des dix, titre, identifiants).
+
+↻ **8. Le mot : « observation », jamais « rétroaction », dans le gabarit algorithmique** — décision de Grégoire,
+4 septembre 2026 (17 h 50) : *« Afin qu'on ne confonde pas la grille algorithmique et la cartouche de rétroaction,
+au lieu de parler de rétroaction dans cette grille, je préférerais qu'on parle de commentaires ou d'observations. »*
+Cowork recommandait « commentaire » (déjà choisi par le lot 4) ; **il a tranché « observation »**. Donc :
+**« Rétroaction » est réservé à la cartouche** (ce que l'élève lit par niveau) ; dans le gabarit algorithmique, ce
+sont des **observations**. Un seul mot : « commentaire » n'entre pas non plus. Conséquences : « Modèle de
+commentaire » (né dans 1.117, pas encore public) devient **« Modèle d'observation »** avant la release
+(consigne du jour, §8 h) ; « Description / Rétroaction » du code → « Observation » (ou deux champs selon la mesure
+du point 7) au moment de la fusion ; toute phrase du gabarit qui dit encore « rétroaction » de ses propres textes.
+
 ## Ce que ce cadrage ne dit pas
 
 ⛔ **Aucune décision de faire ce chantier n'est prise**, et aucun effort n'a été mesuré.
