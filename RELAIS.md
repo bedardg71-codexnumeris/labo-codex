@@ -9,6 +9,12 @@
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 4 SEPTEMBRE 2026, FIN D'APRÈS-MIDI (1.117.0 EN LIGNE)
 
+> ↻ **19 h 17 — 1.117.1 EN LIGNE** (`e990e710`, build `0904-1507`, « Modèle d'observation », consigne h) : jeton
+> vert, `807bdba2..e990e710 main -> main`, **`main` = `origin/main` = `e990e710`, AUCUN travail en avance.** Run
+> GitHub `33910422885` en cours à l'écriture. Avant : le run de 1.117.0 (`33902352824`) a ROUGI sur trois specs —
+> clics souris de 2 à 9 s sur le runner, pas le gabarit — corrigés en `807bdba2` (specs seuls), run `33907151093`
+> VERT. Détail : `SESSION.md`, bloc 24.
+>
 > ↻ **17 h 46 — LIVRÉ ET POUSSÉ.** Release **1.117.0** (`4e7a1b03`, build `0904-1336`), verdict au jeton
 > vert (0 connu, 0 instable), `e5d9c71f..4e7a1b03 main -> main`. **`main` = `origin/main` = `4e7a1b03` :
 > AUCUN travail en avance.** Run GitHub `33902352824` en cours à l'écriture (verdict dans `SESSION.md`,
@@ -20,7 +26,7 @@
 > Session Claude Code de la fin de matinée, pilotée par la consigne du jour de Cowork
 > (10 h 20) : la CI d'abord, puis le lot 4 (C → B → A). Ce bloc **s'ajoute** aux suivants.
 
-**Branche `main`. Version `1.117.0`, build `0904-1336` — release mineure livrée (`4e7a1b03`).**
+**Branche `main`. Version `1.117.1`, build `0904-1507` — mineure `4e7a1b03`, puis patch `e990e710`.**
 **`origin/main` = `e5d9c71f`** (le spec du lot 1 rendu robuste + les fichiers de Cowork du
 matin, poussé, run GitHub `33884692393` : VERT, Vitest et Playwright WebKit, 15 h 12 Z).
 **`main` local = `4e7a1b03` = `origin/main` (les 12 commits ci-dessous sont POUSSÉS avec la release)** : les trois volets du lot 4 — C `c18318b7`
