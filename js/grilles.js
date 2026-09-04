@@ -3914,6 +3914,60 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                         data-action="${actionAjout}" ${paramsAction}>+ Ajouter un palier</button>`;
 }
 
+/**
+ * Le texte troué, étape 2 (4 sept. 2026) — « CE QUE L'ÉLÈVE LIRA », l'aperçu au
+ * niveau du GABARIT (arrêtés 4 et 5 du cadrage du 2 sept.) : ce que l'élève lit
+ * vient de deux blocs à la fois — le décompte du bloc 3 (Observation), puis le
+ * verdict et la recommandation du bloc 2 (Projection) — dans l'ordre exact où
+ * `_construireRetroactionAlgoCategories` (evaluation-calcul.js) les concatène.
+ * Un aperçu par champ montrerait des morceaux.
+ *
+ * Les copies sont FICTIVES, dérivées des paliers (`projectionAlgo.copiesExemple`) :
+ * une par palier, plus une non corrigée — qui n'a AUCUNE phrase, parce que c'est
+ * ce que fait l'application (le calcul s'arrête sans erreurs ni mots saisis).
+ * ⚠ Ce que l'aperçu ne montre pas, et le dit : la rétroaction du sous-critère
+ * dominant, qui dépend des codes posés sur une vraie copie.
+ * ⛔ Rendu PUR : rien n'est écrit dans la grille, aucun handler, aucun état —
+ * il suit chaque frappe comme le reste du gabarit.
+ */
+function rendreBlocApercuAlgo(critere, ctx) {
+    if (!critere || critere.type !== 'algorithmique') return '';
+    if (typeof window.projectionAlgo === 'undefined' || typeof window.enoncesAlgo === 'undefined') return '';
+    if (typeof window.projectionAlgo.copiesExemple !== 'function') return '';
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
+
+    const copies = window.projectionAlgo.copiesExemple(critere);
+    let numero = 0;
+    const blocs = copies.map((c) => {
+        if (!c.corrigee) {
+            return `
+                <div class="apercu-copie apercu-copie--non-corrigee">
+                    <div class="apercu-copie-titre">Copie non corrigée — ni erreurs ni mots saisis</div>
+                    <p class="apercu-copie-texte">Aucune phrase : le décompte et la projection attendent la correction.</p>
+                </div>`;
+        }
+        numero += 1;
+        const decompte = window.enoncesAlgo.enonce(critere, 'decompte', { erreurs: c.erreurs, mots: c.mots });
+        const projection = window.projectionAlgo.calculer(critere, { erreurs: c.erreurs, mots: c.mots });
+        const phrase = [decompte, projection.applicable ? projection.texte : ''].filter(Boolean).join(' ');
+        const palier = (projection.applicable && projection.palier)
+            ? ` · palier « ${esc(projection.palier.libelle || projection.palier.cle)} »` : '';
+        return `
+                <div class="apercu-copie">
+                    <div class="apercu-copie-titre">Copie ${numero} — ${esc(c.erreurs)} erreur${c.erreurs > 1 ? 's' : ''} pour ${esc(c.mots)} mots${palier}</div>
+                    <p class="apercu-copie-texte">${phrase ? esc(phrase) : '<em>Aucune phrase : le décompte est vide et ce palier ne dit rien.</em>'}</p>
+                </div>`;
+    }).join('');
+
+    return `
+            <div class="apercu-algo">
+                ${blocs}
+                <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 6px;">
+                    Copies fictives, calculées depuis tes paliers — aucune donnée d'élève. L'aperçu ne montre pas la rétroaction du sous-critère dominant : elle dépend des codes posés sur une vraie copie.
+                </small>
+            </div>`;
+}
+
 /* ===============================
    LOT 4 (4 septembre 2026) — LE GABARIT ALGORITHMIQUE SE RANGE
    =============================== */
@@ -4135,6 +4189,7 @@ function rendreCartesGabaritAlgo(critere, ctx) {
                 ${carteGabaritAlgo(critere, ctx, 'formule', 'Formule', rendreBlocFormuleAlgo(critere, ctx), false)}
                 ${carteGabaritAlgo(critere, ctx, 'commentaire', 'Observation', rendreBlocEnoncesAlgo(critere, ctx), true)}
                 ${carteGabaritAlgo(critere, ctx, 'projection', 'Projection', rendreBlocProjectionAlgo(critere, ctx), true)}
+                ${carteGabaritAlgo(critere, ctx, 'apercu', 'Ce que l\'élève lira', rendreBlocApercuAlgo(critere, ctx), true)}
                 ${estGrille ? carteGabaritAlgo(critere, ctx, 'codes', 'Codes d\'annotation', rendreBlocCodesAlgo(critere, ctx), true) : ''}
             </div>`;
 }

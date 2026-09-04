@@ -3250,6 +3250,37 @@ input[type="number"].controle-form {
     margin: 8px 0 4px;
 }
 
+/* Le texte troué, étape 2 — la carte « Ce que l'élève lira » : une copie fictive
+   par palier, plus une non corrigée. Rendu pur, aucun contrôle dedans. */
+#listeCriteres .apercu-copie {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-left: 3px solid var(--accent-primaire);
+    background: var(--surface-input);
+    border-radius: 4px;
+}
+
+#listeCriteres .apercu-copie--non-corrigee {
+    border-left-color: var(--bordure-moyenne);
+}
+
+#listeCriteres .apercu-copie-titre {
+    font-size: 0.78rem;
+    color: var(--gris-moyen);
+    margin-bottom: 4px;
+}
+
+#listeCriteres .apercu-copie-texte {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--texte-principal);
+}
+
+#listeCriteres .apercu-copie--non-corrigee .apercu-copie-texte {
+    color: var(--gris-moyen);
+}
+
 /* iPad : la cible tactile des repères monte à 44 px dans le bloc `@media
    (pointer: coarse)` de #568, plus bas — un seul bloc tactile, que la
    sentinelle #568 lit en premier. */
