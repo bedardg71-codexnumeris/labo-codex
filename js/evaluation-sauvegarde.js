@@ -255,6 +255,7 @@ function _construireObjetEvaluationSauv(ctx) {
         criteres: criteres,
         optionsAffichage: _lireOptionsAffichageSauv(),
         donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {},
+        pointsAnalytiques: evaluationEnCours.pointsAnalytiques || {},   // lot 2 — les points, sous leur nom
         verrouillee: true
     }, _lireChampsDOMSauv());
 }

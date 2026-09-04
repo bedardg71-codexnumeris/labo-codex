@@ -881,10 +881,15 @@ function porteeDepuisEvaluation(evaluation, grille, niveauxEchelle) {
     const portee = calculerPortee(
         (grille && Array.isArray(grille.criteres)) ? grille.criteres : [],
         critere => {
+            // Lot 2 — même règle qu'à l'écran : les points l'emportent quand ils existent.
+            const pts = _pointsAnalytiquesDe(evaluation, critere);
+            if (pts !== undefined) return String(pts);
             const c = parId[critere.id] || parNom[critere.nom];
             return c ? (c.niveauSelectionne || '') : '';
         },
         (critere, niveau) => {
+            const pts = _pointsAnalytiquesDe(evaluation, critere);
+            if (pts !== undefined) return _pourcentageDesPoints(critere, pts);
             const a = algo[critere.id];
             if (a && a.pourcentage !== undefined) return a.pourcentage;
             return valeurs[niveau];
@@ -987,7 +992,9 @@ function _instantanePourBrouillon() {
         echelleId: val('selectEchelle1') || nu.echelleId || w.echelleId || '',
         cartoucheId: val('selectCartoucheEval') || nu.cartoucheId || w.cartoucheId || '',
         criteres: Object.assign({}, w.criteres || {}, nu.criteres || {}),
-        donneesAlgorithmiques: JSON.parse(JSON.stringify(algoNu || w.donneesAlgorithmiques || {}))
+        donneesAlgorithmiques: JSON.parse(JSON.stringify(algoNu || w.donneesAlgorithmiques || {})),
+        // Lot 2 — les points, là où ils sont (le nu l'emporte), comme les critères.
+        pointsAnalytiques: JSON.parse(JSON.stringify((nu.pointsAnalytiques && Object.keys(nu.pointsAnalytiques).length ? nu.pointsAnalytiques : w.pointsAnalytiques) || {}))
     };
 }
 
@@ -1032,6 +1039,41 @@ function verifierPorteeAvantSauvegarde() {
 }
 
 /**
+ * Lot 2 (4 sept. 2026) — LES POINTS D'UN CRITÈRE ANALYTIQUE, pour les DEUX lecteurs.
+ * Les points vivent dans `pointsAnalytiques[critereId]` — sur l'évaluation en cours à
+ * l'écran comme sur l'évaluation enregistrée en base — sous leur nom, jamais dans
+ * `donneesAlgorithmiques` : c'est la donnée vraie, telle que saisie. Le pourcentage se
+ * dérive, `points / pondération × 100`, et entre dans la boucle de `calculerNote`
+ * comme n'importe quelle valeur en pourcentage (24 sur 30 → 80 %). Le maximum EST le
+ * poids (décision de Grégoire) ; un critère de pondération nulle ne rend rien.
+ * ⚠ Les points l'emportent quand ils existent ; sans eux, un critère analytique se lit
+ * exactement comme avant (le niveau qu'il porterait encore d'une évaluation faite
+ * quand il était holistique). Même règle à l'écran et en base : c'est ce qui empêche
+ * un bilan de rendre « -- » sur une copie que l'écran note à 80 %.
+ */
+function _pointsAnalytiquesDe(source, critere) {
+    if (!critere || critere.type !== 'analytique' || !source || !source.pointsAnalytiques) return undefined;
+    const pts = source.pointsAnalytiques[critere.id];
+    return (typeof pts === 'number' && !isNaN(pts)) ? pts : undefined;
+}
+
+function _pourcentageDesPoints(critere, points) {
+    const ponderation = Number(critere && critere.ponderation) || 0;
+    if (ponderation <= 0) return undefined;
+    return points / ponderation * 100;
+}
+
+/**
+ * Ce que `calculerPortee` reçoit comme « niveau » pour un critère de l'écran : pour un
+ * critère analytique à points, les points eux-mêmes — c'est aussi ce que la ligne à
+ * copier-coller des critères montre pour lui, en attendant son niveau (lot 3).
+ */
+function _niveauCritereEnCours(critere) {
+    const pts = _pointsAnalytiquesDe(evaluationEnCours, critere);
+    return (pts !== undefined) ? String(pts) : evaluationEnCours.criteres[critere.id];
+}
+
+/**
  * La valeur qui entre dans la note pour un critère de l'écran — extraite telle quelle
  * du corps historique de `calculerNote` (#674), pour que la même résolution serve au
  * calcul ET à la portée. Pour un critère algorithmique, le pourcentage exact calculé
@@ -1039,6 +1081,9 @@ function verifierPorteeAvantSauvegarde() {
  * (jeton de reprise ciblée) ; sinon la valeur ponctuelle du niveau, ou `undefined`.
  */
 function _valeurCritereEnCours(critere, niveau, valeurs) {
+    // Lot 2 — un critère analytique à points vaut son pourcentage de points.
+    const pts = _pointsAnalytiquesDe(evaluationEnCours, critere);
+    if (pts !== undefined) return _pourcentageDesPoints(critere, pts);
     // Vérifier si le select du critère est en mode manuel (valeur non vide)
     const selectCritere = document.getElementById(`eval_${critere.id}`);
     const niveauManuel = selectCritere?.value; // vide si "-- Utiliser le niveau calculé --"
@@ -1133,7 +1178,7 @@ function calculerNote() {
     // silence, quels critères entraient dans le total ; elle ne fait plus que sommer.
     const portee = calculerPortee(
         grille.criteres,
-        critere => evaluationEnCours.criteres[critere.id],
+        critere => _niveauCritereEnCours(critere),
         (critere, niveau) => _valeurCritereEnCours(critere, niveau, valeurs)
     );
 
@@ -1326,6 +1371,9 @@ window.calculerNoteAlgorithmiqueSimple = calculerNoteAlgorithmiqueSimple;
 
 // Promotions §5.6 nouvelles (session B) :
 window.calculerNote = calculerNote;
+// Lot 2 — exposés pour les bancs : la même règle sert l'écran et la base.
+window._pointsAnalytiquesDe = _pointsAnalytiquesDe;
+window._pourcentageDesPoints = _pourcentageDesPoints;
 window.obtenirCouleurNiveau = obtenirCouleurNiveau;
 
 // Restauration fix #110 v3 (24 mai 2026) — appelé par sauvegarderEvaluation

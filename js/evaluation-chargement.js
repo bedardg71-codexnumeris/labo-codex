@@ -439,6 +439,7 @@ function chargerEvaluationsEtudiant() {
         cartoucheId: cartoucheActuelle,
         criteres: {},  // ✅ Réinitialiser SEULEMENT les critères évalués
         donneesAlgorithmiques: {},  // ✅ Réinitialiser les données algorithmiques (codes erreurs, nb mots)
+        pointsAnalytiques: {},      // Lot 2 — les points des critères analytiques, à part
         statutRemise: remiseActuelle
     };
 
@@ -514,6 +515,7 @@ function demarrerEvaluationDepuisFichier(fichier, opts) {
              window.evaluationEnCours.productionId !== (productionIdEffective || ''))) {
             window.evaluationEnCours.criteres = {};
             window.evaluationEnCours.donneesAlgorithmiques = {};
+            window.evaluationEnCours.pointsAnalytiques = {};   // lot 2
             window.evaluationEnCours.etudiantDA = fichier.etudiantDA || '';
             window.evaluationEnCours.productionId = productionIdEffective || '';
             delete window.evaluationEnCours.idModification;
@@ -538,6 +540,7 @@ function demarrerEvaluationDepuisFichier(fichier, opts) {
             cartoucheId: '',
             criteres: {},
             donneesAlgorithmiques: {},
+            pointsAnalytiques: {},   // lot 2
             statutRemise: 'evalue'
         };
     }
@@ -866,6 +869,25 @@ function chargerGrilleSelectionnee() {
                     if (donnees) mapNomAlgo[c.nom.toLowerCase().trim()] = donnees;
                 });
             }
+            // Lot 2 (4 sept. 2026) — LES POINTS D'UN CRITÈRE ANALYTIQUE suivent aussi le
+            // changement de grille, par identifiant puis par nom (même règle que #645).
+            const mapNomPts = {};
+            if (ancienneGrille && evaluationEnCours.pointsAnalytiques) {
+                ancienneGrille.criteres.forEach(c => {
+                    const pts = evaluationEnCours.pointsAnalytiques[c.id];
+                    if (typeof pts === 'number') mapNomPts[c.nom.toLowerCase().trim()] = pts;
+                });
+            }
+            grille.criteres.forEach(critere => {
+                if (critere.type !== 'analytique') return;
+                const ptsEx = (evaluationEnCours.pointsAnalytiques || {})[critere.id];
+                const pts = (typeof ptsEx === 'number') ? ptsEx : mapNomPts[critere.nom.toLowerCase().trim()];
+                if (typeof pts !== 'number') return;
+                if (!evaluationEnCours.pointsAnalytiques) evaluationEnCours.pointsAnalytiques = {};
+                evaluationEnCours.pointsAnalytiques[critere.id] = pts;
+                const inputPts = document.getElementById(`eval_pts_${critere.id}`);
+                if (inputPts) inputPts.value = pts;
+            });
             grille.criteres.forEach(critere => {
                 if (critere.type !== 'algorithmique') return;
                 const existantes = (evaluationEnCours.donneesAlgorithmiques || {})[critere.id]
@@ -982,6 +1004,7 @@ function cartoucheSelectionnee() {
         const critereGrille = grille.criteres.find(c => c.id === critere.id);
         const ponderation = critereGrille ? critereGrille.ponderation : '?';
         const estAlgorithmique = critereGrille?.type === 'algorithmique';
+        const estAnalytique = critereGrille?.type === 'analytique';   // lot 2
         const facteur = critereGrille?.facteurNormalisation || 500;
 
         // Vérifier si la catégorisation des erreurs est activée
@@ -1077,8 +1100,17 @@ function cartoucheSelectionnee() {
             </select>
             <small class="eval-aide">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
         </div>
-    `) : `
-        <!-- Interface standard (holistique/analytique) -->
+    `) : estAnalytique ? `
+        <!-- Interface analytique (lot 2, 4 sept. 2026) : des points, sur le poids du critère.
+             Le maximum EST le poids ; la note en bas de la palette se fait depuis les points. -->
+        <div class="eval-saisie-points">
+            <input type="number" id="eval_pts_${critere.id}" class="controle-form eval-input-points"
+                   min="0" max="${ponderation}" step="any" placeholder="0" inputmode="decimal"
+                   data-on-input="pointsSaisis" data-param="${critere.id}">
+            <small class="eval-label">sur ${ponderation}</small>
+        </div>
+    ` : `
+        <!-- Interface standard (holistique) -->
         <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
                 data-on-change="niveauSelectionne" data-param="${critere.id}">
             <option value="">--</option>
@@ -1087,7 +1119,7 @@ function cartoucheSelectionnee() {
     `}
 </div>
             <div id="comm_${critere.id}" style="display:none;">
-                ${estAlgorithmique ? 'Saisissez les erreurs et le nombre de mots' : 'Sélectionne un niveau'}
+                ${estAlgorithmique ? 'Saisissez les erreurs et le nombre de mots' : (estAnalytique ? 'Saisis les points' : 'Sélectionne un niveau')}
             </div>
         </div>
     </div>
@@ -1100,6 +1132,13 @@ function cartoucheSelectionnee() {
     // puis recalculer la note et regénérer la rétroaction en temps réel
     if (evaluationEnCours && evaluationEnCours.criteres) {
         let niveauxRestaures = 0;
+        // Lot 2 — les points des critères analytiques reviennent dans leur champ, AVANT les
+        // niveaux : le recalcul que ceux-ci déclenchent les voit ; sans niveau, le recalcul
+        // final ci-dessous les voit aussi.
+        Object.entries(evaluationEnCours.pointsAnalytiques || {}).forEach(([critereId, pts]) => {
+            const champ = document.getElementById(`eval_pts_${critereId}`);
+            if (champ && typeof pts === 'number') champ.value = pts;
+        });
         for (const [critereId, niveau] of Object.entries(evaluationEnCours.criteres)) {
             if (!niveau) continue;
             const selectEl = document.getElementById(`eval_${critereId}`);
@@ -1186,6 +1225,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
     const html = grille.criteres.map(critere => {
         const ponderation = critere.ponderation || '?';
         const estAlgorithmique = critere.type === 'algorithmique';
+        const estAnalytique = critere.type === 'analytique';   // lot 2
         const facteur = critere.facteurNormalisation || 500;
 
         return `
@@ -1243,6 +1283,14 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                         <option value="">--</option>
                         ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
                     </select>
+                ` : estAnalytique ? `
+                    <!-- Interface analytique (lot 2, 4 sept. 2026) : des points, sur le poids. -->
+                    <div class="eval-saisie-points">
+                        <input type="number" id="eval_pts_${critere.id}" class="controle-form eval-input-points"
+                               min="0" max="${ponderation}" step="any" placeholder="0" inputmode="decimal"
+                               data-on-input="pointsSaisis" data-param="${critere.id}">
+                        <small class="eval-label">sur ${ponderation}</small>
+                    </div>
                 ` : `
                     <!-- Interface standard -->
                     <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
@@ -1253,7 +1301,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                 `}
             </div>
             <div id="comm_${critere.id}" class="u-hide">
-                ${estAlgorithmique ? 'Saisissez les erreurs et le nombre de mots' : 'Sélectionne un niveau'}
+                ${estAlgorithmique ? 'Saisissez les erreurs et le nombre de mots' : (estAnalytique ? 'Saisis les points' : 'Sélectionne un niveau')}
             </div>
         </div>
     </div>
@@ -1348,6 +1396,41 @@ function niveauSelectionne(critereId) {
     // Auto-sauvegarder apres un delai
     _debouncerAutoSave();
 }
+
+/**
+ * Lot 2 (4 sept. 2026) — LES POINTS D'UN CRITÈRE ANALYTIQUE, jumeau de `niveauSelectionne`.
+ * Le champ va de 0 au poids du critère (le maximum EST le poids, décision de Grégoire) ;
+ * la valeur est gardée telle que saisie dans `evaluationEnCours.pointsAnalytiques[critereId]`,
+ * le pourcentage n'est jamais stocké, il se dérive dans `evaluation-calcul.js`. Un champ
+ * vidé RETIRE l'entrée : le critère redevient « sans niveau » pour la portée (#674) et la
+ * note se retient. Hors bornes, la valeur est ramenée dans [0, poids] et le champ le montre.
+ * Écrit dans le nom nu, comme `niveauSelectionne` (#646 : deux emplacements).
+ */
+function pointsSaisis(critereId, el) {
+    if (!evaluationEnCours) return;
+    if (!evaluationEnCours.pointsAnalytiques) evaluationEnCours.pointsAnalytiques = {};
+    const champ = (el && typeof el === 'object') ? el : document.getElementById(`eval_pts_${critereId}`);
+    const brut = champ ? String(champ.value == null ? '' : champ.value).trim() : '';
+    if (brut === '' || isNaN(Number(brut))) {
+        delete evaluationEnCours.pointsAnalytiques[critereId];
+    } else {
+        const max = Number(champ && champ.max);
+        let pts = Number(brut);
+        if (pts < 0) pts = 0;
+        if (!isNaN(max) && max > 0 && pts > max) pts = max;
+        if (champ && Number(champ.value) !== pts) champ.value = pts;
+        evaluationEnCours.pointsAnalytiques[critereId] = pts;
+    }
+
+    // Calculer la note et générer la rétroaction en temps réel — comme un niveau choisi.
+    calculerNote();
+    evaluationEnCours._dernierCritereModifie = critereId;
+    genererRetroaction(1);
+    evaluationEnCours._dernierCritereModifie = null;
+
+    // Auto-sauvegarder apres un delai
+    _debouncerAutoSave();
+}
 /* ===============================
    AUTO-SAUVEGARDE DEBOUNCE (1.5s)
    Persiste les criteres en IDB apres chaque modification
@@ -1385,7 +1468,9 @@ function _debouncerAutoSave() {
         cartoucheId: window.evaluationEnCours?.cartoucheId,
         criteres: Object.assign({}, window.evaluationEnCours?.criteres),
         donneesAlgorithmiques: window.evaluationEnCours?.donneesAlgorithmiques
-            ? JSON.parse(JSON.stringify(window.evaluationEnCours.donneesAlgorithmiques)) : {}
+            ? JSON.parse(JSON.stringify(window.evaluationEnCours.donneesAlgorithmiques)) : {},
+        pointsAnalytiques: window.evaluationEnCours?.pointsAnalytiques
+            ? JSON.parse(JSON.stringify(window.evaluationEnCours.pointsAnalytiques)) : {}   // lot 2
     };
     window._timerAutoSave = setTimeout(function() { _autoSauvegarderCriteres(window._pendingAutoSaveSnapshot); }, 1500);
 }
@@ -1465,6 +1550,12 @@ function _majEvaluationExistanteAutoSave(evalExistante, ec, criteres) {
     if (ec.donneesAlgorithmiques && Object.keys(ec.donneesAlgorithmiques).length > 0) {
         evalExistante.donneesAlgorithmiques = ec.donneesAlgorithmiques;
     }
+    // Lot 2 — les points suivent, MÊME VIDÉS : un champ effacé retire son entrée, et la
+    // base ne doit pas garder des points que l'écran n'a plus (la suspension de l'auto-save
+    // au chargement couvre la fenêtre de course que la garde ci-dessus visait).
+    if (ec.pointsAnalytiques && typeof ec.pointsAnalytiques === 'object') {
+        evalExistante.pointsAnalytiques = ec.pointsAnalytiques;
+    }
 }
 
 function _lireChampsDOMAutoSave() {
@@ -1520,6 +1611,7 @@ function _construireNouvelleEvaluationAutoSave(ec, grille, criteres) {
         criteres: criteres,
         optionsAffichage: _lireOptionsAffichageAutoSave(),
         donneesAlgorithmiques: ec.donneesAlgorithmiques || {},
+        pointsAnalytiques: ec.pointsAnalytiques || {},   // lot 2
         verrouillee: false
     }, champsDOM);
 }
@@ -1530,7 +1622,8 @@ function _autoSauvegarderCriteres(snapshot) {
     if (!ec || !ec.etudiantDA || !ec.productionId || !ec.grilleId) return;
 
     // Au moins un critere doit etre renseigne
-    if (!Object.values(ec.criteres || {}).some(function(v) { return v; })) return;
+    if (!Object.values(ec.criteres || {}).some(function(v) { return v; })
+        && !Object.keys(ec.pointsAnalytiques || {}).length) return;   // lot 2 — des points seuls comptent
 
     // Collecter les criteres
     const grilles = db.getSync(cle('grillesTemplates'), []);
@@ -1603,6 +1696,7 @@ window.ecrireAttenteCriteres = ecrireAttenteCriteres;
 window.messageEchelleManquante = messageEchelleManquante;
 window.cartoucheSelectionnee = cartoucheSelectionnee;
 window.niveauSelectionne = niveauSelectionne;
+window.pointsSaisis = pointsSaisis;   // lot 2
 
 // Export dispersé d'origine (L7026 résidu — mise à jour après dup/modif productions) :
 window.chargerProductionsDansSelect = chargerProductionsDansSelect;

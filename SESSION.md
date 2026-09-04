@@ -7,6 +7,104 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 22 — 4 SEPTEMBRE 2026 : L'ANALYTIQUE SE SAISIT EN POINTS (lot 2 des trois
+     types de grille). ⏸ COMMITÉ, NON POUSSÉ — relecture croisée de Cowork OBLIGATOIRE
+     (le lot touche `calculerNote`, qui produit les notes des élèves), puis Grégoire.
+
+     ▣ Consigne : `plans de travail/CONSIGNES-2026-09-03-lots-des-trois-types-de-grille.md`,
+       LOT 2, avec la cartographie ajoutée par Cowork le 4 sept. au soir (deux lecteurs à
+       servir, boucle intouchable, emplacement des points à trancher par moi). La consigne
+       ainsi modifiée est commitée avec le lot. Mesuré à l'ouverture : main = origin/main =
+       `16dfc5eb`, 0 devant, arbre propre hors fichiers de Cowork.
+     ▣ REMESURÉ : le branchement de la palette = deux renderers (`cartoucheSelectionnee`
+       ~l. 1035 avec cartouche, `afficherCriteresDepuisGrille` ~l. 1240 sans) ; `calculerNote`
+       ne décide plus quels critères comptent (règle unique `calculerPortee`, #674) : elle
+       somme `valeur × pondération / 100` et divise par la pondération totale — la branche
+       analytique n'y passe pas, elle passe dans les LECTEURS ; le bas de la palette
+       (`#noteProduction1`, `#niveauProduction1`, `#porteeNote1`) se remplit depuis la même
+       boucle, sans nouvel écran. Aucun schéma de transport ne déclare `donneesAlgorithmiques`
+       (les évaluations voyagent entières) → rien à déclarer pour la clé neuve.
+
+     ▣ LIVRÉ — 6 fichiers de code, 2 témoins, ZÉRO ligne de la boucle touchée :
+       · DONNÉE (tranché par moi, dit ici) : `pointsAnalytiques: { [critereId]: nombre }`,
+         sur l'évaluation en cours (nu ET window, #646) et sur l'évaluation en base, à côté
+         de `donneesAlgorithmiques` et JAMAIS dedans (mensonge de nomenclature). Les points
+         sont gardés TELS QUE SAISIS ; le pourcentage se dérive (`points / pondération × 100`).
+       · evaluation-calcul.js : `_pointsAnalytiquesDe`, `_pourcentageDesPoints`,
+         `_niveauCritereEnCours` ; `_valeurCritereEnCours` (écran) et `porteeDepuisEvaluation`
+         (base) lisent les points d'abord — LES DEUX LECTEURS, même règle. `_instantanePourBrouillon`
+         emporte les points.
+       · evaluation-chargement.js : branche analytique dans les DEUX renderers (`<input
+         type="number" id="eval_pts_…" min="0" max="${poids}" step="any">` + « sur N ») ;
+         `pointsSaisis(critereId, el)`, jumeau de `niveauSelectionne` (data-on-input) ;
+         restauration des points au rendu ; report au changement de grille (id puis nom,
+         comme #645) ; snapshot + auto-save (nouvelle éval, éval existante, garde « des
+         points seuls comptent »).
+       · evaluation-sauvegarde.js et evaluation.js : les quatre écrivains emportent
+         `pointsAnalytiques` ; restauration à la réouverture par l'événement `input` (le même
+         chemin que la frappe), jumeau `_restaurerPointsAnalytiquesModif`.
+       · styles.css : `.eval-saisie-points`, `.eval-input-points`. Jetons : chargement,
+         calcul, sauvegarde, evaluation.js → 0903a ; styles 0903j.
+     ▣ CE QUE J'AI DÉCIDÉ SEUL — à corriger en dix secondes si c'est faux :
+       1. Les points L'EMPORTENT quand ils existent ; SANS points, un critère analytique se
+          lit exactement comme avant (le niveau qu'il porterait d'une évaluation faite quand
+          il était holistique) — même règle écran et base.
+       2. La ligne à copier-coller des critères montre LES POINTS pour un critère analytique
+          (« M ⇥ 24 »), en attendant son niveau (lot 3).
+       3. Hors bornes, la saisie est RAMENÉE dans [0, poids] et le champ le montre ; un champ
+          vidé RETIRE l'entrée (le critère redevient « sans niveau » pour la portée — le
+          message #674 dit « sans niveau » pour un critère sans points : mot imparfait, laissé,
+          le lot 3 lui donne un niveau).
+       4. L'auto-save écrit les points MÊME VIDÉS (une entrée retirée ne doit pas survivre en
+          base) — différent de la garde de `donneesAlgorithmiques`, dont la fenêtre de course
+          est couverte par la suspension de l'auto-save au chargement.
+       5. Un critère analytique N'ENTRE PAS dans `criteres[]` en base (il n'a pas de niveau) :
+          la synthèse / le PDF ne le listent donc pas encore. C'est le lot 3 (le niveau déduit
+          l'y fait entrer) ; la note finale, elle, est juste.
+     ▣ TÉMOINS : `tests/unit/sentinelle-lot2-analytique-points.test.js` (18 cas : A le fini
+       quand 24/30 → 80 % et le mixte 80,0 / 90,5 / 81,5 ; B portée — sans points hors note
+       nommé, ZÉRO compte, décimales, non-nombre = absence, pondération nulle ; C la base
+       relit l'écran — le témoin de Cowork ; D holistique/algorithmique inchangés, points sur
+       un non-analytique ignorés, 50/30/20 de #674 identique ; E témoins de source déduits
+       de js/). `tests/integration/lot2-analytique-points.spec.js` (2 cas WebKit, vrai flux
+       Travaux : SANS puis AVEC cartouche — les deux renderers) : champ rendu et pas de menu,
+       24 seul → « -- » nommant Contenu (70 %), M → 80,0 %, E → 90,5 %, vidé → « -- »
+       nommant Langue (30 %), 40 → 30 et 96,5 %, Enregistrer → base `pointsAnalytiques
+       {c2: 24}`, `criteres [c1:E]`, `donneesAlgorithmiques {}`, `porteeDepuisEvaluation`
+       → couverte 100, Langue 80 ; rouvrir → E et 24 reviennent, 90,5 %.
+       Break-tests (9 mutations, remise md5, verte avant/après) : écran sans lecteur (5) ·
+       niveau sans points (4) · base sans lecteur (1 + WebKit) · enregistrement sans points
+       (1 + WebKit) · saisie sans borne (WebKit) · renderer cartouche → menu (WebKit) ·
+       renderer grille → menu (1 + WebKit) · réouverture sans points (WebKit) · points non
+       rapportés au poids (5).
+       ⚠ TÉMOIN EXIGÉ PAR LA CONSIGNE : `cd tests && npm run test:unit` AVANT d'ajouter mon
+       banc, code touché : 453 fichiers / 4926 tests, code 0 — AUCUNE sentinelle existante
+       modifiée. Après : 454 / 4944. WebKit ciblé (8 fichiers d'évaluation + le mien) : 18/18.
+     ▣ Audit sécurité statique des 194 lignes ajoutées (js/ + index.html + styles.css) :
+       aucun innerHTML, handler inline, eval, console.log, écriture db directe.
+
+     ▣ TROUVAILLES EN CHEMIN — issue 2 (inscrire et continuer), aucune corrigée :
+       · `#criteresCopier` (la ligne à copier des niveaux) n'existe pas dans la visionneuse
+         Travaux : `calculerNote` l'écrit dans le vide sur ce flux.
+       · À la réouverture d'une copie, `verifierEtChargerEvaluationExistante` se garde d'agir
+         tant que l'évaluation en cours porte l'`idModification` de l'enregistrement — le
+         banc lui rend le point de départ d'une réouverture ; le vrai flux passe par
+         `modifierEvaluationParId`, qui a besoin de la visionneuse déployée (hors banc).
+       · L'auto-save débouncé du flux Travaux lit `window` et n'écrit rien (#646, constat du
+         31 août) : les points y sont à parité avec les niveaux — pas mieux, pas moins.
+
+     ▣ CE QUE GRÉGOIRE DOIT ALLER VOIR (après la relecture croisée ; recharger avec vidage
+       de cache) : une grille avec un critère analytique (lot 1) et un holistique ; Annoter
+       et évaluer une copie : le critère analytique montre un champ « sur 30 » au lieu du
+       menu ; taper 24 → la note se retient et nomme l'autre critère ; choisir un niveau au
+       menu de l'autre → la note en bas tient compte des deux.
+       ⮕ La question à trente secondes : le champ « sur 30 » est-il lisible et à sa place
+       dans la palette flottante, sur Mac ET sur iPad ?
+     ▣ DÛ ENSUITE : relecture croisée de Cowork (règle 2) → corrections → coup d'œil de
+       Grégoire → verdict au jeton → release minor → push. Lot 3 après son coup d'œil.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 21 — 3 SEPTEMBRE 2026, SOIR : LE TYPE MONTE À LA GRILLE (lot 1 des trois
      types de grille). ⏸ COMMITÉ, NON POUSSÉ — Grégoire regarde l'écran d'abord.
 
