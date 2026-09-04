@@ -184,6 +184,31 @@ total tient compte des deux.
 
 ---
 
+### ↻ Relecture croisée de Cowork sur le lot 2 (`37660b76`), 4 septembre 2026 au soir — rien à corriger, trois choses inscrites
+Mesuré en lecture seule sur le diff et sur ce qu'il touche. **Aucune correction demandée.** Les deux
+lecteurs lisent la même règle (`_pointsAnalytiquesDe`) ; la boucle de `calculerNote` n'a pas bougé ;
+un point à zéro compte (« 0 » est une chaîne non vide pour `calculerPortee`, et `0 !== undefined`) ;
+`data-on-input` est bien délégué (`main.js:1330`, l'attribut est construit, un `grep` littéral ne le
+trouve pas) ; `ponderation` est coercée en nombre au schéma d'import (`import-export.js`), donc
+`max="${ponderation}"` ne porte pas de donnée libre.
+
+**Inscrit, pas corrigé** (issue 2 des trois de `CLAUDE.md`) :
+1. **Un critère analytique est absent de `evaluation.criteres[]` en base.** Conséquence mesurée :
+   le PDF de l'élève (`travaux-export-pdf.js:949`) liste les critères depuis ce tableau — le critère
+   analytique n'y figure pas, alors que la note finale le compte. Même absence dans la matrice de
+   dépistage (`consolidation.js:118`, `conversion(c.niveauSelectionne)`) et dans tout lecteur de
+   `criteres[]` (16 fichiers hors calcul). ⮕ **C'est le lot 3 qui le règle** (le chiffre trouve son
+   niveau, donc entre dans `criteres[]`). ⚠ **Tant que le lot 3 n'est pas livré, une copie évaluée
+   avec un critère analytique rend un PDF dont la liste des critères est incomplète.** Décision de
+   publication : à Grégoire (voir la conversation du 4 septembre).
+2. **Les points sont bornés à la saisie, pas en base.** Si la pondération d'un critère est réduite
+   après qu'une copie a été notée (30 → 20 avec 24 points enregistrés), `_pourcentageDesPoints` rend
+   120 pour ce critère. Même famille que « corriger une échelle, avec recalcul proposé » : ne pas
+   rogner en silence ; dire. Pas dans ce chantier.
+3. **`_instantanePourBrouillon` préfère le nu quand il est non vide, sinon `window`** : des points tous
+   effacés côté nu retombent sur ceux de `window` s'il en porte. Parité exacte avec
+   `donneesAlgorithmiques`, flux #646 seulement. Sans conséquence observable connue.
+
 # LOT 3 · Le chiffre trouve son niveau, et le niveau ouvre la cartouche
 
 ⛔ **N'ouvre pas ce lot avant que Grégoire ait vu le lot 2 à l'écran.**

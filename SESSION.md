@@ -7,6 +7,133 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 23 — 4 SEPTEMBRE 2026, MATIN : LE CHIFFRE TROUVE SON NIVEAU, ET LE NIVEAU
+     OUVRE LA CARTOUCHE (lot 3 des trois types de grille). ⏸ COMMITÉ, NON POUSSÉ —
+     relecture croisée de Cowork (le lot touche le calcul et ce que l'élève lit), puis
+     coup d'œil de Grégoire sur les DEUX lots, puis verdict → release 1.116 → push.
+
+     ▣ Consigne : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 4 sept. au soir) — le lot 3
+       tel qu'écrit dans `CONSIGNES-2026-09-03-lots-des-trois-types-de-grille.md`, PLUS
+       l'exigence de la relecture du lot 2 : un critère analytique ENTRE dans
+       `evaluation.criteres[]` en base, et l'élève ne lit que le chiffre.
+     ▣ Rituel isolé à l'ouverture : HEAD `37660b76`, 1 devant `origin/main` (`16dfc5eb`),
+       0 derrière ; Vitest 454 / 4944, code 0 ; jeton WebKit rendu FRAIS sur HEAD par le
+       rituel lui-même (code 0, 0 instable) ; aucun écart de fond avec la prémisse.
+       ⚠ Trouvé par lui : le run GitHub de la release 1.115.0 (`1228837a`) a été ANNULÉ par
+       le push suivant (`concurrency: cancel-in-progress`) — le lot 1 n'a de verdict
+       Playwright que local. Le push des lots 2+3 le rejugera ; rien à faire d'ici là.
+
+     ▣ REMESURÉ (règle 1), les deux points « à mesurer avant d'écrire » + la prémisse :
+       · bornes pourcentage → niveau dans evaluation-calcul.js : `grep -n "\.min && .*<= *n\.max"`
+         rend QUATRE sites exécutables (137, 465, 680, 1270) — la consigne en comptait cinq le
+         3 sept. ; cinq APRÈS ce lot, le mien (`niveauDeduitDesPoints`) inclus.
+       · la clé de cartouche `critereId_niveau` se forme à 3 sites côté évaluation
+         (retroaction :171, chargement — extrait par ce lot —, synthese-data :447 `cleCart`) ;
+         la porte « sans niveau, commentaire vide EN SILENCE » est VÉRIFIÉE et REFERMÉE par
+         un témoin (D.e : amorce en `retroaction` + niveau déduit → le commentaire vient de
+         la clé ; sans niveau → '').
+       · lecteurs de `criteres[]` : `grep -rn "niveauSelectionne" js/ | grep -v <handler>`
+         rend 18 fichiers (la consigne disait 16) ; carte complète, avec la disposition de
+         chacun : `plans de travail/CARTE-2026-09-04-criteres-lot3.md` (le livrable §4).
+       · ⚠ PRÉMISSE CORRIGÉE : `travaux-export-pdf.js:949` n'est PAS le PDF de l'élève, c'est
+         l'APERÇU ENSEIGNANT (`afficherRevisionExport`, son propre commentaire #672 le dit).
+         Le PDF remis = la synthèse (synthese-retroaction-data → -rendu). Les deux changés.
+
+     ▣ LIVRÉ — 8 fichiers de code (+ index.html jetons), 176 lignes ajoutées, la boucle de
+       `calculerNote` intouchée (`git diff` n'y montre aucune ligne ; témoin E.d du lot 2 vert) :
+       · evaluation-calcul.js : `niveauDeduitDesPoints(critere, points, niveaux)` — pure,
+         bornes inclusives de l'échelle de l'ÉVALUATION (celle de la palette : les grilles
+         n'ont pas d'échelle propre — c'est ma lecture de « échelle de la grille »), niveau
+         « 0 » jamais déduit (règle de l'algorithmique) ; `_deduireNiveauxAnalytiques` écrit le
+         niveau dans `evaluationEnCours.criteres[critereId]` — SOUS LE MÊME NOM que les niveaux
+         du menu — appelée par `calculerNote` AVANT la portée (le seul point où l'échelle
+         résolue et les points se rencontrent dans TOUS les flux). Sans points : rien écrit ni
+         retiré. Points sans niveau déductible (échelle à trous) : entrée RETIRÉE, points comptés.
+       · evaluation-chargement.js : `_afficherCommentaireCritere` EXTRAIT de `niveauSelectionne`
+         et appelé aussi par `pointsSaisis` (une seule façon d'ouvrir la cartouche) ; vidé →
+         `delete criteres[id]` ; restauration dans `cartoucheSelectionnee` et report au
+         changement de grille passent par le CHEMIN DE LA FRAPPE (`pointsSaisis` / événement
+         `input`) ; collecteur de l'auto-save : `entree.points`.
+       · evaluation-sauvegarde.js, evaluation.js : les deux autres collecteurs, `entree.points`
+         si `type === 'analytique'` et points saisis. Entrée en base :
+         `{critereId, critereNom, niveauSelectionne: 'M', points: 24, ponderation: 30, retroaction}`.
+         La SOURCE reste `pointsAnalytiques` ; `criteres[].points` en est une lecture.
+       · CE QUE L'ÉLÈVE LIT = le chiffre : synthese-retroaction-rendu `renderCritere` imprime
+         « 24 / 30 » à la place de la rangée d'échelle (et pas « 30% » sous le nom) ;
+         evaluation-retroaction `_rendreCommentairesCriteres` : « Critère 2 (Langue) — 24 / 30 »
+         (texte copié vers LÉA) ; travaux-export-pdf :949 (aperçu) « Langue — 24 / 30 ».
+         synthese-retroaction-data passe `points` au rendu et DÉCLARE l'amorce « Saisis les
+         points » (lot 2) à la garde #672 — la garde avait ROUGI d'elle-même avant (4 ≠ 3).
+       · Jetons : calcul/chargement/sauvegarde/evaluation 0903b ; retroaction 0903d ;
+         synthese-data 0903e ; synthese-rendu 0903a ; export-pdf 0903c.
+     ▣ CE QUE J'AI DÉCIDÉ SEUL — à corriger en dix secondes si c'est faux :
+       1. La ligne à copier-coller des critères GARDE LES POINTS (« M ⇥ 24 »), pas le niveau
+          déduit : c'est la donnée saisie, celle qu'un tableur reçoit. Le lot 2 disait « en
+          attendant son niveau » ; j'ai tranché autrement, et le témoin A.d le verrouille.
+       2. Le niveau déduit est écrit sous `niveauSelectionne` (le nom que 18 lecteurs lisent),
+          sans drapeau « déduit » : `points` présent = analytique, c'est le discriminant.
+       3. Vider le champ retire AUSSI un niveau que le critère aurait porté d'une évaluation
+          faite quand il était holistique (« redevient sans niveau », décision 3 du lot 2).
+       4. « 0 » non recevable exclu de la déduction, comme pour l'algorithmique : 0 point → I.
+       5. Le div `comm_` garde son texte quand le champ est vidé (parité `niveauSelectionne`) ;
+          sans conséquence : un critère sans niveau n'est pas collecté.
+     ▣ TÉMOINS : `tests/unit/sentinelle-lot3-analytique-niveau.test.js` (28 cas — A fini
+       quand : M entre, cartouche dans le div ET le texte, I/D/E, copie = points, fonction
+       pure ; B vidé, bornes inclusives 75 → M / 74 → D, 0 pt → I jamais 0, échelle à trous,
+       redéduction ; C les TROIS collecteurs par la chaîne réelle + la base relit 83,3 pas 80 ;
+       D PDF données + rendu « 24 / 30 » sans rangée ni « 30% », évaluation d'avant intacte,
+       porte de la clé D.e, en-tête de la rétroaction ; E holistique / algorithmique / sans
+       points inchangés, 50/30/20 de #674 identique ; F source). Chaîne réelle en bac à sable :
+       calcul + chargement + retroaction + sauvegarde + evaluation dans le même contexte.
+       `tests/integration/lot3-analytique-niveau.spec.js` (WebKit, vrai flux Travaux avec
+       cartouche) : 24 → « Critère 2 (Langue) — 24 / 30 » + « Ta langue est maîtrisée. » sans
+       menu ; 20 → D ; vidé → plus rien ; Enregistrer → base `c2 {M, points 24, ponderation 30,
+       retroaction}` + `pointsAnalytiques {c2: 24}` ; PDF = points 24, commentaire, « 24 / 30 »,
+       4 cases d'échelle (Contenu seul), pas de « 30% » ; rouvrir → M et la cartouche reviennent.
+       ↻ MODIFIÉS (dit, pas caché) : spec du lot 2 — `criteres: ['c1:E']` → `['c1:E','c2:M']`
+       (c'était l'état provisoire « en attendant le lot 3 ») ; sentinelle #672 — 4 amorces
+       (la garde a fait son travail). AUCUNE sentinelle du CALCUL modifiée : la suite existante
+       AVANT mon banc rendait 4943 / 4944, le seul rouge = #672 « expected 4 to be 3 ».
+       Break-tests (14 mutations, remise par empreinte md5, 8/8 identiques) : déduction jamais
+       appelée (13) · « 0 » déduit (2) · vidé garde le niveau (1) · chacun des 3 collecteurs sans
+       points (2+2+2) · PDF imprime l'échelle (1) · en-tête dit le niveau (2) · amorce retirée
+       de la garde (2, dont #672) · cartouche fermée sur les points (7) · échelle à trous (1) ·
+       points absents du rendu (3) · aperçu dit le niveau (1, source) · restauration hors
+       frappe (1, source).
+       `cd tests && npm run test:unit` : 455 fichiers / 4973 tests, code 0. WebKit COMPLET
+       (`npx playwright test`, signal précoce, PAS le verdict au jeton) : 260 / 260, 0 rouge, 9 min.
+     ▣ Audit sécurité statique des 176 lignes ajoutées : aucun innerHTML, handler inline, eval,
+       console.log, écriture db directe (grep du diff, `aucun`). Les valeurs rendues passent par
+       `esc()` (synthèse) et `echapperHtml()` (aperçu).
+
+     ▣ TROUVAILLES EN CHEMIN — issue 2 (inscrire et continuer), aucune corrigée :
+       · `_afficherCommentaireCritere` écrit « [Non défini] » dans `comm_` quand la cartouche
+         n'a pas de commentaire pour ce niveau ; les collecteurs le stockent en `retroaction`,
+         et la garde #672 ne le connaît pas → il peut s'imprimer sur le PDF remis. PRÉEXISTANT
+         (niveauSelectionne faisait pareil) ; parité gardée. À vérifier sur une copie réelle.
+       · Les trois collecteurs de `criteres[]` sont trois copies identiques (sauvegarde,
+         modification, auto-save) ; les unifier obligeait à toucher la sentinelle #572 (bac à
+         sable d'evaluation.js seul). Laissé, dit.
+       · Le run GitHub de 1.115.0 annulé par `cancel-in-progress` (voir rituel).
+     ▣ QUESTION POUR GRÉGOIRE (les mots que ses élèves lisent) : le BILAN nomme un critère par
+       le NOM de son niveau — « - Langue (Maîtrisé) » — et il est copié dans ce que l'élève
+       reçoit. Pour un critère analytique : garder « Langue (Maîtrisé) », ou « Langue (24 / 30) » ?
+       Laissé tel quel (hors du périmètre nommé : le PDF et le chiffre).
+
+     ▣ CE QUE GRÉGOIRE DOIT ALLER VOIR (après la relecture croisée ; recharger avec vidage de
+       cache) — les DEUX lots, une seule fois : une grille avec Contenu (holistique) et Langue
+       (analytique, 30), une cartouche avec une rétroaction sur Langue › M ; Annoter et évaluer
+       une copie : (1) le champ « sur 30 » est-il lisible et à sa place, Mac ET iPad ? (2) taper
+       24 → la rétroaction de M apparaît dans la palette sans choisir de niveau ; (3) Exporter
+       la synthèse : le PDF dit « 24 / 30 » pour Langue, sans rangée I·D·M·E.
+     ▣ DÛ ENSUITE, dans l'ordre : relecture croisée de Cowork (carte + commit) → corrections →
+       coup d'œil de Grégoire → `scripts/pousser.sh` (verdict au jeton sur le commit de release)
+       → release MINEURE 1.116, UNE entrée de changelog pour les deux lots, mots à Grégoire → push.
+     ▣ MESURÉ au commit : voir le commit du lot 3 (les fichiers de Cowork partent avec lui, dont
+       `_ancienne-CONSIGNE-DU-JOUR-2026-09-03-16h15.md`, comme la précédente dans `16dfc5eb`).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 22 — 4 SEPTEMBRE 2026 : L'ANALYTIQUE SE SAISIT EN POINTS (lot 2 des trois
      types de grille). ⏸ COMMITÉ, NON POUSSÉ — relecture croisée de Cowork OBLIGATOIRE
      (le lot touche `calculerNote`, qui produit les notes des élèves), puis Grégoire.
@@ -102,6 +229,27 @@
        dans la palette flottante, sur Mac ET sur iPad ?
      ▣ DÛ ENSUITE : relecture croisée de Cowork (règle 2) → corrections → coup d'œil de
        Grégoire → verdict au jeton → release minor → push. Lot 3 après son coup d'œil.
+
+     ↻ CLÔTURE — 4 SEPTEMBRE 2026 AU SOIR (état mesuré, règle 4 ; écrit SANS commit, par
+       consigne : « aucun autre geste sur le dépôt »).
+       ▣ Relecture croisée de Cowork sur `37660b76` : FAITE, rien à corriger. Trois choses
+         inscrites par elle sous le lot 2 de la consigne (fichier modifié sur le disque, non
+         commité) : (1) le critère analytique est absent de `evaluation.criteres[]`, donc du
+         PDF de l'élève (`travaux-export-pdf.js:949`) et de tout lecteur de ce tableau —
+         DEVIENT UNE EXIGENCE DU LOT 3 ; (2) les points sont bornés à la saisie, pas en base
+         (pondération réduite après notation → pourcentage > 100) ; (3) voir la consigne.
+       ▣ DÉCISION DE GRÉGOIRE : les lots 2 et 3 se publient ENSEMBLE à la prochaine séance.
+         Ce soir : NI verdict au jeton, NI release, NI push. Le lot 3 n'ouvre pas ce soir.
+       ▣ MESURÉ à la clôture (`git fetch` puis `git rev-list --count origin/main..HEAD`) :
+         HEAD `37660b76` = le lot 2, UN commit devant `origin/main` (`16dfc5eb`), 0 derrière.
+         En ligne : 1.115.0 / build 0903-2103 (lot 1 + retouche). Jeton Playwright : sha
+         `1228837a`, code 0 — PÉRIMÉ pour HEAD, à rendre à la prochaine séance par
+         `scripts/pousser.sh`. `git status --short` : trois fichiers de Cowork modifiés, non
+         commités (`CONSIGNE-DEMARRAGE-COWORK.md`, `OU-EN-EST-ON.md`, la consigne des lots) —
+         et ce bloc-ci.
+       ▣ PROCHAINE SÉANCE, dans l'ordre : lot 3 (le chiffre trouve son niveau, le niveau ouvre
+         la cartouche, ET le critère analytique entre dans `criteres[]`) → relecture croisée →
+         coup d'œil de Grégoire sur les lots 2 + 3 → verdict au jeton → release minor → push.
      ===================================================================== -->
 
 <!-- =====================================================================

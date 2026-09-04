@@ -155,8 +155,15 @@ function _rendreCommentairesCriteres(grille, cartouche, critereActifId, texteAva
             positionCritereActif = texteAvant.length + texte.length;
         }
 
+        // Lot 3 (4 sept. 2026) — CE QUE L'ÉLÈVE LIT D'UN CRITÈRE ANALYTIQUE : LE CHIFFRE,
+        // rien d'autre (décision de Grégoire). Ce texte part chez l'élève (LÉA) : l'en-tête
+        // dit « 24 / 30 », pas le niveau déduit — qui, lui, a choisi le commentaire.
+        const ptsAnalytiques = (critere.type === 'analytique' && evaluationEnCours.pointsAnalytiques)
+            ? evaluationEnCours.pointsAnalytiques[critere.id] : undefined;
+        const lectureNiveau = (typeof ptsAnalytiques === 'number' && !isNaN(ptsAnalytiques))
+            ? `${ptsAnalytiques} / ${critere.ponderation}` : niveau;
         // Vérifier si c'est un critère algorithmique
-        const enteteCritere = `Critère ${index + 1} (${critere.nom}) — ${niveau}`;
+        const enteteCritere = `Critère ${index + 1} (${critere.nom}) — ${lectureNiveau}`;
         if (critere.type === 'algorithmique' && evaluationEnCours.donneesAlgorithmiques?.[critere.id]?.retroaction) {
             const retroAlgo = evaluationEnCours.donneesAlgorithmiques[critere.id].retroaction;
             texte += `${enteteCritere}\n${retroAlgo}\n\n`;

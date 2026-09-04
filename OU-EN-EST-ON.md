@@ -574,10 +574,15 @@ et un passé en algorithmique fait basculer le badge à MIXTE. Relecture croisé
 Cowork sur `fa5d34d2` : rien à corriger. Verdict au jeton vert sur `1228837a`.
 *(commits `a6187760`, `fa5d34d2`, `1228837a`)*
 
-⏳ **Suivent, un par séance** : le lot 2 (l'analytique se saisit en points, un chiffre
-par critère et un total en bas — touche le calcul des notes, relecture croisée
-obligatoire) et le lot 3 (le chiffre trouve son niveau et ouvre la cartouche).
-Consignes : `plans de travail/CONSIGNES-2026-09-03-lots-des-trois-types-de-grille.md`.
+↻ **Lot 2 livré le 4 septembre au soir, COMMITÉ ET NON PUBLIÉ** (`37660b76`, sur `main`,
+un commit devant `origin/main`) : l'analytique se saisit en points — un champ « sur 30 » au
+lieu du menu de niveaux, et 24 sur 30 fait 80 %. Relecture croisée de Cowork : rien à corriger.
+**Décision de Grégoire** : *publier les lots 2 et 3 ensemble à la prochaine séance*, parce que
+dans ce lot un critère analytique n'entre pas encore dans la liste des critères d'une
+évaluation enregistrée — le PDF de l'élève ne le listerait pas alors que la note le compte.
+Le lot 3 (le chiffre trouve son niveau et ouvre la cartouche) le règle. Pas encore vu à
+l'écran par Grégoire : il regardera les deux d'un coup.
+Consignes et relecture : `plans de travail/CONSIGNES-2026-09-03-lots-des-trois-types-de-grille.md`.
 
 ---
 

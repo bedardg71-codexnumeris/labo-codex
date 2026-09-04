@@ -1,6 +1,6 @@
 # Consigne de démarrage — la session Cowork qui prend le relais
 
-> **Écrite le 4 septembre 2026, par la session Cowork du 2-3 septembre, avant sa fermeture.**
+> **Réécrite le 4 septembre 2026 au soir, par la session Cowork du 4 septembre, à la clôture du lot 2.**
 > **Elle REMPLACE toute version précédente.**
 >
 > ⚠ **Ce fichier porte un nom sans date, exprès.** La date d'écriture est en tête ; c'est elle
@@ -36,65 +36,57 @@ qui te sont confiés, et dans sa console. Le code appartient à Claude Code.
 
 ## 2 · À LIRE D'ABORD, DANS CET ORDRE
 
-1. **`PROTOCOLE.md`** — comment vous travaillez tous les trois. **Les six règles.**
+1. **`PROTOCOLE.md`** — comment vous travaillez tous les trois. **Les sept règles.**
 2. **`OU-EN-EST-ON.md`** — où on en est, en gestes d'utilisateur.
-3. **`plans de travail/00-CADRAGES-OUVERTS.md`** — les **six** chantiers pensés, un seul entamé.
-4. **`OBJECTIF-COHORTE-1.md`** — les huit énoncés. **Ils sont tous parcourus depuis le
-   3 septembre au matin, et Grégoire les a tous vus à l'écran.**
+3. **`plans de travail/CONSIGNE-DU-JOUR.md`** — le mandat de Claude Code pour la séance (le lot 3),
+   écrit par la session du 4 septembre. **C'est ce que tu relis en premier quand il livre.**
+4. **`plans de travail/CONSIGNES-2026-09-03-lots-des-trois-types-de-grille.md`** — les arrêtés, le
+   hors-périmètre, les trois lots, et **ta cartographie + ta relecture du lot 2**, sous le lot 2.
+5. `plans de travail/00-CADRAGES-OUVERTS.md` — les cinq autres chantiers, aucun entamé.
 
-⛔ **Ne lis PAS les 130 autres fichiers de `plans de travail/`.** L'écrasante majorité est
-exécutée depuis des semaines. L'index du point 3 est la porte d'entrée ; c'est pour ça qu'il
-existe.
+⛔ **Ne lis PAS les 130 autres fichiers de `plans de travail/`.** L'index du point 5 est la porte
+d'entrée ; c'est pour ça qu'il existe.
 
 ---
 
-## 3 · L'ÉTAT MESURÉ — le 4 septembre 2026, en lecture seule
+## 3 · L'ÉTAT MESURÉ — le 4 septembre 2026 au soir, en lecture seule
 
 ⚠ **REMESURE-LE. Il aura vieilli avant que tu le lises.**
 
-- **En ligne** : **1.114.1**, build `0903-1858` (`version.json`).
-- **`main` est à `a6187760`**, **un commit devant `origin/main`, non poussé** — c'est le **lot 1**
-  du chantier des grilles. Il attend que Grégoire le voie à l'écran (règle 6).
-- **Les trois défauts iPad sont fermés à son doigt** sur 1.114.1 : les couleurs de la palette se
-  choisissent, « Personnalisé… » ouvre le sélecteur natif, un repère ne coupe plus un mot.
+- **En ligne** : **1.115.0**, build `0903-2103` (`version.json`) — le lot 1 des grilles, avec sa
+  retouche (le menu dit ce qui est enregistré, la déduction se dit à côté).
+- **`main` est à `37660b76`**, **un commit devant `origin/main`, non poussé** — c'est le **lot 2**
+  (l'analytique se saisit en points). Relu par Cowork : rien à corriger. **Il ne se publie PAS
+  seul** (voir §4).
+- **Les fichiers de cadrage sont au dépôt** depuis `16dfc5eb`. **Six fichiers modifiés non
+  commités** à la clôture (les deux consignes de démarrage, `OU-EN-EST-ON.md`, `SESSION.md`, la
+  consigne du jour, la consigne des lots) : **ils partent avec le commit du lot 3.** Non suivis,
+  décision de Grégoire en attente : `Retours des testeurs/jean-françois/`, `ignorés/`,
+  `docs/projet de développement/`, un `.txt` de modèle, `.claude/settings.local.json`.
 - **Sa console** — l'artefact « Les huit gestes » — porte ce qui est ouvert. **Demande-lui le
-  lien ; ne le devine pas, et n'en fabrique pas une seconde version.** Deux consoles qui divergent
-  seraient pires que rien.
+  lien ; ne le devine pas, et n'en fabrique pas une seconde version.**
 
 ---
 
 ## 4 · CE QUI EST DÛ — dans l'ordre
 
-### a) Le premier geste : relayer une décision déjà prise
-⚠ **Le bloc de relais a été remis à Grégoire le 4 septembre, avant la fermeture de la session précédente. DEMANDE-LUI s'il l'a transmis** — s'il l'a fait, ce point est clos ; sinon, réécris-le à partir de ce qui suit, en remesurant.
+### a) Le lot 3, puis UNE publication pour les lots 2 et 3
+**Décision de Grégoire, 4 septembre au soir** : *« publier les lots 2 et 3 ensemble à la prochaine
+séance »*. ▣ **Motif mesuré** : dans le lot 2, un critère analytique n'entre pas dans
+`evaluation.criteres[]` ; le PDF de l'élève (`travaux-export-pdf.js:949`) liste les critères depuis
+ce tableau, donc il omettrait le critère analytique alors que la note le compte. Le lot 3 le règle.
+⮕ **Le mandat est écrit** : `plans de travail/CONSIGNE-DU-JOUR.md` (4 septembre au soir). Il lève
+la ligne « n'ouvre pas le lot 3 avant que Grégoire ait vu le lot 2 », ajoute l'exigence du
+`criteres[]`, et fait imprimer **« 24 / 30 »** au PDF de l'élève, jamais le niveau. **Grégoire ne
+colle qu'une ligne** : *« Lis « plans de travail/CONSIGNE-DU-JOUR.md » et exécute-la. »*
+⚠ Le lot 3 ne porte pas de mesures, exprès. Cartographie-le avant qu'une ligne s'écrive (règle 2).
 
-Grégoire a tranché le 4 septembre au matin, sur le menu « Type de la grille » livré au lot 1 :
-**le menu affiche ce qui est ENREGISTRÉ** (« Non précisé » sur ses grilles actuelles), et **la
-déduction se dit en clair, en petit texte, à CÔTÉ du menu** — « Tes critères sont tous
-holistiques. »
-▣ **Motif** : le menu ne distinguait pas un type *déclaré* d'un type *déduit*, et il aurait pu
-croire une grille déclarée alors qu'elle ne porte rien.
-⛔ **Il avait d'abord proposé une couleur** (vert = déclaré, orange = déduit). **Écarté, et le
-motif est mesuré** : dans son système, l'orange veut déjà dire « avertissement »
-(`docs/aide-contextuelle-contenu-revue.md:15`) — or « déduit » est l'état NORMAL de toutes ses
-grilles et de celles de ses collègues. Et une couleur seule ne porte jamais une information :
-vert/orange est la paire que les daltonismes fréquents ne distinguent pas.
+### b) Puis, dans l'ordre : coup d'œil de Grégoire sur les DEUX lots, relecture croisée du lot 3, verdict au jeton, release MINEURE (1.116), push
+Le changelog 1.116 porte les deux lots ; ses mots sont à Grégoire. Le coup d'œil du lot 2 n'a pas
+encore eu lieu : le champ « sur 30 » est-il lisible et à sa place, sur Mac et sur iPad ?
 
-### b) Le lot 1 attend son passage à l'écran
-Le « fini quand » est dans `plans de travail/CONSIGNES-2026-09-03-lots-des-trois-types-de-grille.md` :
-trois critères analytiques sans rien cocher, un passé en algorithmique qui fait basculer le badge
-à **MIXTE**, puis un aller-retour export/import qui conserve le type.
-
-### c) Puis les lots 2 et 3 — dans ce fichier de consignes
-⚠ **Le lot 2 touche `calculerNote()`, qui produit les notes de ses élèves.** **Relecture croisée
-de Cowork OBLIGATOIRE** (règle 2) : *ça ne se reprend pas.*
-⚠ **Les lots 2 et 3 ne portent PAS de mesures**, exprès — seulement les questions à mesurer. Un
-chiffre relevé le 3 septembre et lu plus tard serait un souvenir présenté comme une mesure.
-
-### d) Ce qui reste ouvert par ailleurs
-`plans de travail/00-CADRAGES-OUVERTS.md` en tient la liste à jour — le texte troué, les codes par
-grille, la grille analytique, l'Inspecteur de sélection, les collections de paramètres, les
-accordéons du gabarit.
+### c) Ce qui reste ouvert par ailleurs
+`plans de travail/00-CADRAGES-OUVERTS.md` en tient la liste.
 
 ---
 
@@ -142,6 +134,23 @@ c'est lui qui a changé ce défaut, le 1er septembre.
    mesurer, pas de te croire.**
 5. **La nomenclature confondue.** Un **code** identifie et compte (rattaché aux sous-critères) ;
    un **tampon** commente et se restitue. Un cadrage entier et un module portaient le mauvais nom.
+
+### Et le 4 septembre — quatre choses qui n'ont PAS coûté, parce qu'elles ont été mesurées à temps
+
+6. **Un bloc relayé n'est pas un bloc appliqué.** Grégoire avait transmis la décision du menu ;
+   Claude Code avait lancé la suite et n'avait rien changé. Mesuré avant de le croire :
+   `grep "critères sont tous" js/` rendait 0 avec son témoin. ⮕ **Après un relais, remesure
+   ce qui devait changer, pas ce que le rapport dit.**
+7. **En relayant une décision, Cowork l'avait ÉTENDUE** (la ligne parlerait aussi quand les types
+   divergent). C'était son ajout, pas la décision. Retiré quand la note de la session précédente
+   a montré l'écart. ⮕ **Relaie la décision au mot ; ce que tu ajoutes, tu le nommes comme tien.**
+8. **Un `grep` littéral qui rend zéro sur un nom CONSTRUIT.** `data-on-input` n'apparaît nulle part
+   dans `main.js`, parce que l'attribut y est assemblé (`'data-on-' + eventType`, `main.js:1330`).
+   Un zéro qui ressemblait à un défaut bloquant. ⮕ **Devant un zéro, cherche la construction
+   avant d'annoncer l'absence.**
+9. **Le badge MIXTE que Grégoire croyait fautif** : Cowork a dit « je ne retrouve pas ce
+   comportement dans le code » et a demandé un regard de trente secondes, au lieu d'inventer une
+   cause. C'était une erreur de manipulation. ⮕ **Ne pas retrouver, c'est une réponse.**
 
 ### ▣ Et un motif qui est revenu QUATRE fois en deux jours
 **« Ce que Grégoire demande existe déjà, ailleurs, sous un autre nom. »** L'écran de

@@ -414,7 +414,10 @@
     // Ce sont les textes que le gabarit pose dans le div `comm_<critereId>` avant toute
     // saisie. Ils viennent de trois endroits, et cette liste doit les suivre :
     //   · js/evaluation-chargement.js:1029 et :1195 (les deux chemins de rendu) ;
-    //   · js/evaluation-calcul.js:518 (mode catégories, remise à l'état initial).
+    //   · js/evaluation-calcul.js:518 (mode catégories, remise à l'état initial) ;
+    //   · « Saisis les points » : l'amorce du critère analytique (lot 2, 4 sept. 2026),
+    //     posée par les deux mêmes chemins de rendu — déclarée ici au lot 3, quand le
+    //     critère analytique s'est mis à entrer dans `criteres[]` avec sa `retroaction`.
     // ⚠ Une liste de reconnaissance périme en silence : si quelqu'un réécrit une de ces
     // phrases sans toucher ici, la garde cesse d'agir sans rien dire.
     // ⮕ `tests/unit/sentinelle-672-retroaction-mode-simple.test.js` va relire ces trois
@@ -422,7 +425,8 @@
     const AMORCES_DE_SAISIE = [
         'Saisissez les erreurs et le nombre de mots',
         'Saisissez les codes des sous-critères (ex: 1;4;6;1;4)',
-        'Sélectionne un niveau'
+        'Sélectionne un niveau',
+        'Saisis les points'
     ];
 
     function estAmorceDeSaisie(texte) {
@@ -490,12 +494,18 @@
                 ponderation:  ponderationCrit
             } : null;
 
+            // Lot 3 (4 sept. 2026) — un critère analytique porte ses POINTS dans
+            // `criteres[]` (`points`, à côté du niveau déduit). Le rendu les imprime
+            // « 24 / 30 » à la place de l'échelle : l'élève ne lit que le chiffre
+            // (décision de Grégoire). Le niveau, lui, a servi à choisir le commentaire.
+            const points = (typeof c.points === 'number' && !isNaN(c.points)) ? c.points : null;
             return {
                 key:     c.critereId || c.critereNom || '',
                 name:    c.critereNom || def.nom || '',
                 weight:  ponderationCrit,
                 sub:     def.description || '',
                 code:    niveau,
+                points:  points,
                 comment: commentaire,
                 algo:    algo
             };
