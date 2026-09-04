@@ -327,6 +327,10 @@ async function sauvegarderCritere() {
         ponderation: parseInt(document.getElementById('criterePonderation')?.value) || 0,
         type: document.getElementById('critereType')?.value || typeCritereParDefautEnCours(),
         formule: document.getElementById('critereFormule')?.value?.trim() || '',
+        // Lot 4, volet B (4 sept. 2026) : le menu offre aussi « Aucun » (`'aucun'`) — ce
+        // critère ne nourrit pas la lecture SOLO ; il compte dans la note, le dépistage le
+        // saute. Le DÉFAUT reste « multistructurel » : un critère sans étiquette est une
+        // fondation, comme le lisent `calculerIPB` et l'export (#542).
         niveauSOLO: 'multistructurel',
         verrouille: false
     };
@@ -3400,6 +3404,7 @@ function afficherCriteresTemp() {
                         <option value="multistructurel" ${(critere.niveauSOLO || 'multistructurel') === 'multistructurel' ? 'selected' : ''}>Multistructurel</option>
                         <option value="relationnel" ${critere.niveauSOLO === 'relationnel' ? 'selected' : ''}>Relationnel</option>
                         <option value="abstrait_etendu" ${critere.niveauSOLO === 'abstrait_etendu' ? 'selected' : ''}>Abstrait étendu</option>
+                        <option value="aucun" ${critere.niveauSOLO === 'aucun' ? 'selected' : ''}>Aucun</option>
                     </select>
                 </div>
                 <div class="groupe-form">
@@ -4344,6 +4349,7 @@ function afficherCriteresGrille(grille) {
                         <option value="multistructurel" ${(critere.niveauSOLO || 'multistructurel') === 'multistructurel' ? 'selected' : ''}>Multistructurel</option>
                         <option value="relationnel" ${critere.niveauSOLO === 'relationnel' ? 'selected' : ''}>Relationnel</option>
                         <option value="abstrait_etendu" ${critere.niveauSOLO === 'abstrait_etendu' ? 'selected' : ''}>Abstrait étendu</option>
+                        <option value="aucun" ${critere.niveauSOLO === 'aucun' ? 'selected' : ''}>Aucun</option>
                     </select>
                 </div>
                 <div class="groupe-form">

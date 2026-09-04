@@ -1134,6 +1134,10 @@ const AIDE_CONTEXTUELLE = {
                 contenu: 'Les critères <strong>multistructurels</strong> (fondations) sont surveillés par le dépistage pour détecter les difficultés persistantes. Identifie-les pour alimenter le suivi des fondamentaux.'
             },
             {
+                type: 'texte',
+                contenu: '<strong>« Aucun »</strong> retire le critère de la lecture SOLO : il compte dans la note comme les autres, mais le dépistage des fondations ne le surveille pas et aucune étiquette ne l’accompagne dans les exports. C’est le choix d’une méthode traditionnelle, sans taxonomie.'
+            },
+            {
                 type: 'action', action: 'ouvrirGuidePedagogique', param: 'solo', libelle: 'Ouvrir le guide SOLO'
             }
         ],
