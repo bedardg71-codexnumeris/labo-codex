@@ -8,8 +8,9 @@
 
 <!-- =====================================================================
      SESSION 25 — 4 SEPTEMBRE 2026, 17 H → 18 H : LE TEXTE TROUÉ, ÉTAPE 2 — LA CARTE, PUIS LES
-     QUATRE VOLETS (registre · gabarit · aperçu · spec), un commit chacun. ⏸ LOT RENDU POUR LA
-     RELECTURE CROISÉE de Cowork, AVANT tout verdict ; NON POUSSÉ ; pas de release.
+     QUATRE VOLETS (registre · gabarit · aperçu · spec), un commit chacun, PUIS LA RETOUCHE DU COUP
+     D'ŒIL (§5 : l'aperçu sous chaque palier), un commit. ⏸ RENDU POUR LA RELECTURE COURTE de Cowork,
+     AVANT tout verdict ; NON POUSSÉ ; pas de release.
 
      ▣ Mandat : « Lis plans de travail/CONSIGNE-DU-JOUR.md et exécute-la » (Grégoire, 16 h 56, puis
        renvoyé tel quel à 17 h 05 — la consigne n'avait pas changé : mtime 16 h 51, avant l'ouverture).
@@ -119,7 +120,41 @@
        « Projection » : les badges ; carte « Ce que l'élève lira » : sept copies) → verdict au jeton
        (`scripts/pousser.sh`) → release MINEURE 1.118, UNE entrée de changelog dont les mots sont à
        lui, et qui nomme « corrige avec l'application à jour » → push.
-     ▣ ARBRE au moment d'écrire : propre ; `main` = origin/main + 5 commits (4 volets + ce bloc).
+     ↻ 18 h 38 — §5 DE LA CONSIGNE : RELECTURE CROISÉE DE COWORK SUR `dccaf3d2`, RIEN À CORRIGER
+       (format qui voyage intact : `git diff origin/main..HEAD -- js/import-export.js
+       js/partage-schemas.js js/partage-validation.js js/evaluation-calcul.js` rend zéro ; les quatre
+       choix pris seuls retenus). COUP D'ŒIL DE GRÉGOIRE : les phrases sont « très naturelles » ; ce
+       qui cloche est LA PLACE de l'aperçu (composé dans le palier, lu dans une autre carte, plus bas,
+       repliée). DÉCISION (« ça va, bonne recommandation ») : l'aperçu vient sous chaque palier —
+       correction du lot, pas une envie (arrêtés 4 et 5).
+     ▣ UN COMMIT (le suivant) — `grilles.js` seul en code (+ styles.css, index.html) :
+       `rendreBlocApercuAlgo` et la carte « Ce que l'élève lira » RETIRÉS (zéro dette) ; dans
+       `rendreBlocProjectionAlgo`, sous les deux zones de chaque palier, APRÈS la ligne orange, une
+       ligne `.palier-apercu` : « L'élève lira : » + la phrase remplie pour la copie fictive de CE
+       palier (`copiesExemple`, retrouvée par sa `cle` ; décompte du bloc 3 puis projection du bloc 2)
+       + « — copie fictive, N erreurs pour M mots » ; en bas de la carte, une fois : « Copie non
+       corrigée : aucune phrase avant la correction. » et la note (aucune donnée d'élève ; le
+       sous-critère dominant n'est pas montré), avant le bouton d'ajout. `evaluation-projection.js`
+       ne bouge pas. Sous « Aucune projection » : pas de palier, donc rien à prévisualiser dans cette
+       carte (l'ancienne carte montrait une copie ordinaire pour le décompte — dit). CSS : les cinq
+       règles de la carte remplacées par trois règles de la ligne. Jetons grilles (k), styles (h).
+     ▣ SENTINELLE `…-etape-2-apercu` déplacée avec l'aperçu (15 cas, même fond) — ce qui a dû
+       changer et pourquoi : B.a (la carte → une ligne par palier, après la 2e rangée ET après la
+       ligne orange ; plus de `CR:apercu` ni de `rendreBlocApercuAlgo`), B.b/C.a/C.b (même phrase,
+       lue dans `.palier-apercu-texte` du palier), B.c (la copie non corrigée n'a plus d'entrée :
+       une ligne en bas), B.d (la note en bas, avant « + Ajouter un palier »), B.e (« Aucune
+       projection » : rien), D.a (la ligne elle-même sans contrôle, le rendu n'écrit rien), E
+       (jetons k / h). A inchangé. Break-tests : six mutations (5·2·3·6·1·6 rouges), restaurées,
+       cmp identique ×2. Le spec lot 4 (ordre + plis) revient à quatre cartes ; le spec du volet 4
+       lit l'aperçu à sa nouvelle place (étapes 7-8 : six lignes, la 5e composée sans préfixe, la 2e
+       avec, la ligne non corrigée une fois, la ligne orange AVANT la ligne d'aperçu) — toujours 0
+       `page.click` / `waitForTimeout`. WebKit local : 12 tests des cinq specs de l'écran en 31,5 s.
+       Vitest 461 / 5107.
+     ▣ CE QUI RESTE (consigne §5) : relecture courte de Cowork → coup d'œil de Grégoire → verdict au
+       jeton (`scripts/pousser.sh`) → release MINEURE 1.118 (les mots du changelog sont à lui, Cowork
+       les lui propose ; nommer « corrige avec l'application à jour ») → push.
+     ▣ ARBRE au moment d'écrire : propre ; `main` = origin/main + 6 commits (4 volets, le bloc, la
+       retouche §5).
      ===================================================================== -->
 
 <!-- =====================================================================

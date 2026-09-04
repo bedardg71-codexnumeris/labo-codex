@@ -88,9 +88,9 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     // 1 — l'ordre et l'état à l'ouverture.
     let etat = await page.evaluate(eval(LIRE));
     console.log('OUVERTURE →', JSON.stringify(etat));
-    expect(etat.ordre).toEqual(['sous-criteres', 'CR:formule', 'CR:commentaire', 'CR:projection', 'CR:apercu', 'CR:codes']);
+    expect(etat.ordre).toEqual(['sous-criteres', 'CR:formule', 'CR:commentaire', 'CR:projection', 'CR:codes']);
     expect(etat.rangeeAvantSousCriteres, 'les sous-critères viennent tout de suite sous la rangée du critère').toBe(true);
-    expect(etat.plis).toEqual({ 'CR:formule': 'ouvert', 'CR:commentaire': 'replie', 'CR:projection': 'replie', 'CR:apercu': 'replie', 'CR:codes': 'replie' });
+    expect(etat.plis).toEqual({ 'CR:formule': 'ouvert', 'CR:commentaire': 'replie', 'CR:projection': 'replie', 'CR:codes': 'replie' });
     expect(etat.commentaire, '« Modèle d\'observation », ni « rétroaction » ni « commentaire »').toBe(true);
     expect(etat.euf, '« Projection à l\'EUF » au menu de projection').toBe(true);
     expect(etat.cartesAvecId, 'aucune carte ne porte d\'id : le composant ne persiste rien').toBe(0);
@@ -121,7 +121,7 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     await page.waitForTimeout(300);
     etat = await page.evaluate(eval(LIRE));
     console.log('APRÈS RETOUR →', JSON.stringify(etat.plis));
-    expect(etat.plis).toEqual({ 'CR:formule': 'replie', 'CR:commentaire': 'replie', 'CR:projection': 'ouvert', 'CR:apercu': 'replie', 'CR:codes': 'replie' });
+    expect(etat.plis).toEqual({ 'CR:formule': 'replie', 'CR:commentaire': 'replie', 'CR:projection': 'ouvert', 'CR:codes': 'replie' });
 
     // 5 — rien de tout cela n'est dans la grille : les plis meurent avec la page.
     const grille = await page.evaluate(async () => ((await db.get(cle('grillesTemplates'))) || []).find(g => g.id === 'G1'));

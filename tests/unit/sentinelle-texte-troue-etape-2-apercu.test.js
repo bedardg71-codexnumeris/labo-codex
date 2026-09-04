@@ -1,25 +1,38 @@
-// SENTINELLE — LE TEXTE TROUÉ, ÉTAPE 2 · VOLET 3 : « CE QUE L'ÉLÈVE LIRA », L'APERÇU
-// AU NIVEAU DU GABARIT (4 septembre 2026, arrêtés 4 et 5 du cadrage du 2 sept.).
+// SENTINELLE — LE TEXTE TROUÉ, ÉTAPE 2 · VOLET 3 : L'APERÇU AU NIVEAU DU GABARIT
+// (4 septembre 2026, arrêtés 4 et 5 du cadrage du 2 sept.).
+//
+// ↻ §5 (4 sept., 18 h 38 — coup d'œil de Grégoire, « ça va, bonne recommandation ») :
+// L'APERÇU VIENT SOUS CHAQUE PALIER, dans la carte « Projection » ; la carte « Ce que
+// l'élève lira » n'existe plus. Les cas B et D changent de SITE, pas de fond : mêmes
+// phrases, même ordre décompte → projection, même copie fictive par palier.
 //
 //   A. les copies FICTIVES viennent des paliers (`copiesExemple`, registre réel en
 //      Node) : une par palier, chacune ATTEINT son palier, plus une non corrigée ;
 //      « Aucune projection » en a une quand même ; aucune donnée de personne ;
-//   B. la CARTE « Ce que l'élève lira » : sous « Projection », avant les codes,
-//      repliée par défaut (règle du 3 sept. : fermé ce qui porte les mots) ; une
-//      entrée par copie ; la phrase = décompte du bloc 3 PUIS projection du bloc 2,
-//      dans l'ordre d'evaluation-calcul.js ; la copie non corrigée n'a aucune phrase ;
-//      la ligne dit ce qui n'est pas montré ;
+//   B. la LIGNE « L'élève lira : » sous chaque palier, dans la carte « Projection » :
+//      une par palier, APRÈS les deux zones et APRÈS la ligne orange d'un jeton inconnu ;
+//      la phrase = décompte du bloc 3 PUIS projection du bloc 2, dans l'ordre
+//      d'evaluation-calcul.js ; en bas de la carte, une fois, la copie non corrigée et
+//      la note ; plus aucune carte « apercu » ; « Aucune projection » : rien ;
 //   C. une phrase COMPOSÉE (badges) se voit remplie pour la copie de son palier ;
-//   D. rendu PUR : aucun handler, rien d'écrit dans la grille ni le stockage ;
+//   D. rendu PUR : aucun contrôle dans la ligne, rien d'écrit dans la grille ni le stockage ;
 //   E. les jetons anti-cache du volet ont bougé.
 //
+// CE QUI A CHANGÉ AU §5, et pourquoi : B.a (la carte → la ligne par palier, et sa place
+// après la ligne orange), B.b / C.a / C.b (même phrase, lue dans `.palier-apercu-texte` du
+// palier), B.c (la copie non corrigée n'a plus d'entrée : une ligne en bas de la carte),
+// B.d (la note en bas de « Projection », avant le bouton d'ajout), B.e (« Aucune
+// projection » : plus rien à prévisualiser — le bloc n'a pas de palier), D.a (les lignes
+// vivent dans un bloc qui porte des contrôles : on vérifie la ligne elle-même), E (jetons
+// k / h). A ne change pas.
+//
 // BREAK-TESTS (faits le 4 septembre 2026, chacun restauré, `cmp` identique) :
-//   · A — `precedent` jamais avancé (chaque copie au milieu de [0, seuil]) → A.a et A.c rougissent
-//     (« très bien » tombe sur « excellent ») ;
+//   · A — `precedent` jamais avancé → A.a et A.c rougissent ;
 //   · A — la copie non corrigée retirée → A.b rougit ;
-//   · B — la projection concaténée AVANT le décompte → B.b rougit ;
-//   · B — la carte ouverte par défaut → B.a rougit ;
-//   · D — un `data-action` glissé dans l'aperçu → D.a rougit.
+//   · B — la projection concaténée AVANT le décompte → B.b, C.a, C.b rougissent ;
+//   · B — `ligneApercu` rend '' → B.a, B.b, C, D rougissent ;
+//   · B — la ligne orange rendue APRÈS la ligne d'aperçu → B.a rougit ;
+//   · D — un `data-action` glissé dans la ligne → D.a rougit.
 
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
@@ -114,9 +127,17 @@ const carte = (html, section) => {
     const suivant = html.indexOf('class="carte accordeon gabarit-algo-carte', i + 10);
     return html.slice(i, suivant < 0 ? undefined : suivant);
 };
-const copiesDe = (apercu) => apercu.split(/<div class="apercu-copie(?=[" ])/).slice(1);
-const texteDe = (copie) => (copie.match(/<p class="apercu-copie-texte">([\s\S]*?)<\/p>/) || [])[1];
+/** Les blocs de palier de la carte « Projection », chacun jusqu'au suivant. */
+const paliersDe = (projection) => projection.split('class="sous-critere-item palier-projection"').slice(1);
+const ligneDe = (pal) => (pal.match(/<div class="palier-apercu">[\s\S]*?<\/div>/) || [])[0] || '';
+const texteDe = (pal) => (ligneDe(pal).match(/<span class="palier-apercu-texte">([\s\S]*?)<\/span>/) || [])[1];
 const desechapper = (t) => String(t).replace(/&#x27;|&#39;/g, '\'').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+/** Le rendu de la carte « Projection » d'une grille, en édition. */
+function projectionRendue(grille) {
+    const m = monter([grille || GRILLE]);
+    m.win.afficherCriteresGrille(JSON.parse(JSON.stringify(grille || GRILLE)));
+    return Object.assign(m, { html: m.liste().innerHTML, projection: carte(m.liste().innerHTML, 'projection') });
+}
 
 /* ============================================================ A — LES COPIES */
 
@@ -173,70 +194,72 @@ describe('texte troué 2 · A — les copies fictives viennent des paliers, et c
     });
 });
 
-/* ============================================================ B — LA CARTE */
+/* ====================================================== B — LA LIGNE SOUS CHAQUE PALIER */
 
-describe('texte troué 2 · B — la carte « Ce que l\'élève lira »', () => {
-    const rendu = (grille) => {
-        const m = monter([grille || GRILLE]);
-        m.win.afficherCriteresGrille(JSON.parse(JSON.stringify(grille || GRILLE)));
-        return Object.assign(m, { html: m.liste().innerHTML });
-    };
-
-    it('B.a sous « Projection », avant « Codes d\'annotation », repliée par défaut, avec son titre', () => {
-        const { html } = rendu();
-        const projection = html.indexOf('data-pli="CR:projection"');
-        const apercu = html.indexOf('data-pli="CR:apercu"');
-        const codes = html.indexOf('data-pli="CR:codes"');
-        expect(apercu).toBeGreaterThan(projection);
-        expect(apercu).toBeLessThan(codes);
-        expect(html).toMatch(/<div class="carte accordeon gabarit-algo-carte ferme" data-pli="CR:apercu">/);
-        expect(html).toMatch(/<span class="accordeon-chevron">▶<\/span> Ce que l(?:'|&#x27;|&#39;)élève lira/);
-        // En création aussi (mode temp), sans la carte des codes.
+describe('texte troué 2 · B — « L\'élève lira : » sous chaque palier, dans la carte « Projection »', () => {
+    it('B.a une ligne par palier, APRÈS ses deux zones et APRÈS la ligne orange ; plus aucune carte « apercu », ni en édition ni en création', () => {
+        const { html, projection } = projectionRendue({ ...GRILLE, criteres: [{ ...ALGO,
+            paliersProjection: P.paliersMigration().map((p) => (p.cle === 'bien' ? { ...p, texte: 'Bien {truc}.' } : p)) }] });
+        expect(html).not.toContain('data-pli="CR:apercu"');
+        expect(source('js/grilles.js')).not.toContain('rendreBlocApercuAlgo');
+        const paliers = paliersDe(projection);
+        expect(paliers.length).toBe(6);
+        expect((projection.match(/class="palier-apercu"/g) || []).length).toBe(6);
+        paliers.forEach((pal, i) => {
+            const rangees = [...pal.matchAll(/class="grille-form-2col palier-rangee"/g)].map((m) => m.index);
+            const ligne = pal.indexOf('class="palier-apercu"');
+            expect(rangees.length, 'palier ' + i).toBe(2);
+            expect(ligne, 'palier ' + i).toBeGreaterThan(rangees[1]);
+            expect(ligneDe(pal)).toContain('<span class="palier-apercu-mot">L\'élève lira :</span>');
+        });
+        // Le palier « Bien » porte un jeton inconnu : la ligne orange PRÉCÈDE la ligne d'aperçu.
+        const bien = paliers[3];
+        expect(bien).toContain('palier-jetons-inconnus');
+        expect(bien.indexOf('palier-jetons-inconnus')).toBeLessThan(bien.indexOf('class="palier-apercu"'));
+        // En création aussi (mode temp).
         const { win, liste } = monter([]);
         win.tempCriteres = [{ ...ALGO, id: 'T' }];
         win.afficherCriteresTemp();
-        expect(liste().innerHTML).toContain('data-pli="T:apercu"');
-        expect(liste().innerHTML).not.toContain('data-pli="T:codes"');
+        expect(liste().innerHTML).not.toContain('data-pli="T:apercu"');
+        expect((liste().innerHTML.match(/class="palier-apercu"/g) || []).length).toBe(6);
     });
 
-    it('B.b une entrée par copie ; la phrase = décompte du bloc 3 PUIS projection du bloc 2, exactement', () => {
-        const { html } = rendu();
-        const apercu = carte(html, 'apercu');
-        const copies = copiesDe(apercu);
-        expect(copies.length).toBe(7);   // six paliers + la non corrigée
+    it('B.b la phrase de chaque palier = décompte du bloc 3 PUIS projection du bloc 2, pour SA copie fictive, exactement', () => {
+        const { projection } = projectionRendue();
+        const paliers = paliersDe(projection);
         const attendues = P.copiesExemple(ALGO).filter((x) => x.corrigee);
         attendues.forEach((x, i) => {
             const decompte = E.enonce(ALGO, 'decompte', { erreurs: x.erreurs, mots: x.mots });
-            const projection = P.calculer(ALGO, { erreurs: x.erreurs, mots: x.mots });
-            const phrase = [decompte, projection.texte].filter(Boolean).join(' ');
-            expect(desechapper(texteDe(copies[i])), x.cle).toBe(phrase);
-            expect(copies[i]).toContain(`Copie ${i + 1} — ${x.erreurs} erreur${x.erreurs > 1 ? 's' : ''} pour ${x.mots} mots · palier « ${echapper(x.libelle)} »`);
+            const proj = P.calculer(ALGO, { erreurs: x.erreurs, mots: x.mots });
+            const phrase = [decompte, proj.texte].filter(Boolean).join(' ');
+            expect(desechapper(texteDe(paliers[i])), x.cle).toBe(phrase);
+            expect(ligneDe(paliers[i])).toContain(`— copie fictive, ${x.erreurs} erreur${x.erreurs > 1 ? 's' : ''} pour ${x.mots} mots`);
         });
-        // Le témoin du contenu : la copie « Risqué » lit bien le service réglé, après le décompte.
-        expect(desechapper(texteDe(copies[4]))).toBe('Ta production contient 23 erreurs pour 900 mots. Tu fais en moyenne 1 erreur à chaque 39 mots. En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec. Il est recommandé de t\'inscrire au Passerelle +.');
+        // Le témoin du contenu : le palier « Risqué » lit bien le service réglé, après le décompte.
+        expect(desechapper(texteDe(paliers[4]))).toBe('Ta production contient 23 erreurs pour 900 mots. Tu fais en moyenne 1 erreur à chaque 39 mots. En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec. Il est recommandé de t\'inscrire au Passerelle +.');
     });
 
-    it('B.c la copie non corrigée n\'a AUCUNE phrase — comme l\'application, qui s\'arrête sans erreurs ni mots', () => {
-        const { html } = rendu();
-        const copies = copiesDe(carte(html, 'apercu'));
-        expect(copies[6]).toContain('apercu-copie--non-corrigee');
-        expect(copies[6]).toContain('Copie non corrigée — ni erreurs ni mots saisis');
-        expect(desechapper(texteDe(copies[6]))).toBe('Aucune phrase : le décompte et la projection attendent la correction.');
+    it('B.c la copie non corrigée n\'a plus d\'entrée : UNE ligne en bas de la carte le dit — comme l\'application, muette sans erreurs ni mots', () => {
+        const { projection } = projectionRendue();
+        expect((projection.match(/palier-apercu-non-corrigee/g) || []).length).toBe(1);
+        expect(projection).toContain('Copie non corrigée : aucune phrase avant la correction.');
+        expect(projection.indexOf('palier-apercu-non-corrigee')).toBeGreaterThan(projection.lastIndexOf('class="palier-apercu"'));
+        expect(projection.indexOf('palier-apercu-non-corrigee')).toBeGreaterThan(projection.indexOf('palier-note-composer'));
     });
 
-    it('B.d la ligne dit ce que l\'aperçu ne montre pas, et d\'où viennent les copies', () => {
-        const { html } = rendu();
-        const apercu = carte(html, 'apercu');
-        expect(apercu).toContain('Copies fictives, calculées depuis tes paliers — aucune donnée d');
-        expect(apercu).toContain('ne montre pas la rétroaction du sous-critère dominant');
+    it('B.d la note dit ce que l\'aperçu ne montre pas, et d\'où viennent les copies — une fois, en bas, avant le bouton d\'ajout', () => {
+        const { projection } = projectionRendue();
+        expect((projection.match(/palier-apercu-note/g) || []).length).toBe(1);
+        expect(projection).toContain('Copies fictives, calculées depuis tes paliers — aucune donnée d');
+        expect(projection).toContain('ne montre pas la rétroaction du sous-critère dominant');
+        expect(projection.indexOf('palier-apercu-note')).toBeGreaterThan(projection.lastIndexOf('class="palier-apercu"'));
+        expect(projection.lastIndexOf('+ Ajouter un palier')).toBeGreaterThan(projection.indexOf('palier-apercu-note'));
     });
 
-    it('B.e « Aucune projection » : le décompte seul, sur une copie, et la non corrigée', () => {
-        const { html } = rendu({ ...GRILLE, criteres: [{ ...ALGO, modeleProjection: 'aucune', paramsProjection: {} }] });
-        const copies = copiesDe(carte(html, 'apercu'));
-        expect(copies.length).toBe(2);
-        expect(desechapper(texteDe(copies[0]))).toBe('Ta production contient 3 erreurs pour 300 mots.');
-        expect(copies[0]).not.toContain('palier «');
+    it('B.e « Aucune projection » : pas de palier, donc rien à prévisualiser dans cette carte — ni ligne, ni note', () => {
+        const { projection } = projectionRendue({ ...GRILLE, criteres: [{ ...ALGO, modeleProjection: 'aucune', paramsProjection: {} }] });
+        expect(projection).toContain('Aucune projection ne sera proposée');
+        expect(projection).not.toContain('palier-apercu');
     });
 });
 
@@ -247,29 +270,25 @@ describe('texte troué 2 · C — une phrase composée se voit remplie pour la c
         const paliers = P.paliersMigration().map((p) => (p.cle === 'risque'
             ? { ...p, texte: 'Palier {palier} : {projection} erreurs pour {longueur} mots, 1 erreur tous les {moyenne} mots.', texteAide: 'Va voir {service} — seuil {seuil}.' }
             : p));
-        const critere = { ...ALGO, paliersProjection: paliers };
-        const { win, liste } = monter([{ ...GRILLE, criteres: [critere] }]);
-        win.afficherCriteresGrille({ ...GRILLE, criteres: [critere] });
-        const copies = copiesDe(carte(liste().innerHTML, 'apercu'));
-        expect(desechapper(texteDe(copies[4]))).toBe('Ta production contient 23 erreurs pour 900 mots. Palier Risqué : 23 erreurs pour 900 mots, 1 erreur tous les 39 mots. Va voir Passerelle + — seuil 30.');
+        const { projection } = projectionRendue({ ...GRILLE, criteres: [{ ...ALGO, paliersProjection: paliers }] });
+        const blocs = paliersDe(projection);
+        expect(desechapper(texteDe(blocs[4]))).toBe('Ta production contient 23 erreurs pour 900 mots. Palier Risqué : 23 erreurs pour 900 mots, 1 erreur tous les 39 mots. Va voir Passerelle + — seuil 30.');
         // Les autres paliers, non composés, gardent le préfixe d'hier.
-        expect(desechapper(texteDe(copies[1]))).toContain('Tu fais en moyenne 1 erreur à chaque 180 mots. En prévision de l\'EUF, ce ratio est excellent.');
+        expect(desechapper(texteDe(blocs[1]))).toContain('Tu fais en moyenne 1 erreur à chaque 180 mots. En prévision de l\'EUF, ce ratio est excellent.');
     });
 
     it('C.b l\'aperçu suit le gabarit : changer la longueur de référence change les copies ET les phrases', () => {
-        const critere = { ...ALGO, paramsProjection: { motsReference: 600, erreursTolerees: 30, nomServiceAide: '' } };
-        const { win, liste } = monter([{ ...GRILLE, criteres: [critere] }]);
-        win.afficherCriteresGrille({ ...GRILLE, criteres: [critere] });
-        const copies = copiesDe(carte(liste().innerHTML, 'apercu'));
-        expect(copies[4]).toContain('Copie 5 — 23 erreurs pour 600 mots · palier « Risqué »');
-        expect(desechapper(texteDe(copies[4]))).toBe('Ta production contient 23 erreurs pour 600 mots. Tu fais en moyenne 1 erreur à chaque 26 mots. En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec.');
+        const { projection } = projectionRendue({ ...GRILLE, criteres: [{ ...ALGO, paramsProjection: { motsReference: 600, erreursTolerees: 30, nomServiceAide: '' } }] });
+        const blocs = paliersDe(projection);
+        expect(ligneDe(blocs[4])).toContain('— copie fictive, 23 erreurs pour 600 mots');
+        expect(desechapper(texteDe(blocs[4]))).toBe('Ta production contient 23 erreurs pour 600 mots. Tu fais en moyenne 1 erreur à chaque 26 mots. En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec.');
     });
 });
 
 /* ============================================================ D — RENDU PUR */
 
-describe('texte troué 2 · D — rendu pur : aucun contrôle, rien d\'écrit', () => {
-    it('D.a l\'aperçu ne porte ni handler ni action, et le rendu n\'écrit ni dans la grille ni dans le stockage', () => {
+describe('texte troué 2 · D — rendu pur : aucun contrôle dans la ligne, rien d\'écrit', () => {
+    it('D.a la ligne ne porte ni handler ni action, et le rendu n\'écrit ni dans la grille ni dans le stockage', () => {
         // ⚠ Mesuré : au CHARGEMENT de grilles.js (pas au rendu), `migrerCategoriesVersSousCriteres`
         // fait un `db.modifier` sur la clé des grilles — hors de ce lot. On remet le compteur à
         // zéro après le montage : ce qui compte ici, c'est ce que le RENDU écrit.
@@ -278,9 +297,10 @@ describe('texte troué 2 · D — rendu pur : aucun contrôle, rien d\'écrit', 
         const avant = JSON.stringify(m.store[CLE]);
         const copie = JSON.parse(JSON.stringify(GRILLE));
         m.win.afficherCriteresGrille(copie);
-        const apercu = carte(m.liste().innerHTML, 'apercu');
-        expect(apercu.length).toBeGreaterThan(500);
-        expect(apercu).not.toMatch(/data-action=|data-on-change=|<textarea|<input|<select|<button/);
+        const projection = carte(m.liste().innerHTML, 'projection');
+        const lignes = projection.match(/<div class="palier-apercu">[\s\S]*?<\/div>/g) || [];
+        expect(lignes.length).toBe(6);
+        for (const l of lignes) expect(l).not.toMatch(/data-action=|data-on-change=|<textarea|<input|<select|<button/);
         expect(JSON.stringify(m.store[CLE])).toBe(avant);
         expect(copie).toEqual(GRILLE);
         expect(m.ecrits, 'écritures pendant le rendu en édition').toEqual([]);
@@ -289,30 +309,27 @@ describe('texte troué 2 · D — rendu pur : aucun contrôle, rien d\'écrit', 
         t.ecrits.length = 0;
         t.win.tempCriteres = [{ ...ALGO, id: 'T' }];
         t.win.afficherCriteresTemp();
-        expect(t.liste().innerHTML).toContain('data-pli="T:apercu"');
+        expect((t.liste().innerHTML.match(/class="palier-apercu"/g) || []).length).toBe(6);
         expect(t.ecrits).toEqual([]);
         expect(t.win.tempCriteres[0].paliersProjection).toBeUndefined();
     });
 
-    it('D.b tout ce qui vient de la grille est échappé dans l\'aperçu', () => {
-        const critere = { ...ALGO, paliersProjection: [{ cle: 'x', libelle: 'A <b>gras</b>', ratioMax: null, texte: 'Texte <i>libre</i> "cité".', texteAide: '' }] };
-        const { win, liste } = monter([{ ...GRILLE, criteres: [critere] }]);
-        win.afficherCriteresGrille({ ...GRILLE, criteres: [critere] });
-        const apercu = carte(liste().innerHTML, 'apercu');
-        expect(apercu).not.toContain('<b>gras</b>');
-        expect(apercu).not.toContain('<i>libre</i>');
-        expect(apercu).toContain('&lt;b&gt;gras&lt;/b&gt;');
-        expect(apercu).toContain('&lt;i&gt;libre&lt;/i&gt; &quot;cité&quot;.');
+    it('D.b tout ce qui vient de la grille est échappé dans la ligne', () => {
+        const { projection } = projectionRendue({ ...GRILLE, criteres: [{ ...ALGO,
+            paliersProjection: [{ cle: 'x', libelle: 'A <b>gras</b>', ratioMax: null, texte: 'Texte <i>libre</i> "cité".', texteAide: '' }] }] });
+        const ligne = ligneDe(paliersDe(projection)[0]);
+        expect(ligne).not.toContain('<i>libre</i>');
+        expect(ligne).toContain('&lt;i&gt;libre&lt;/i&gt; &quot;cité&quot;.');
     });
 });
 
 /* ============================================================ E — ANTI-CACHE */
 
-describe('texte troué 2 · E — les jetons anti-cache du volet 3 ont bougé', () => {
+describe('texte troué 2 · E — les jetons anti-cache du volet ont bougé', () => {
     it('E.a grilles.js, evaluation-projection.js et styles.css', () => {
         const html = source('index.html');
-        expect(html).toMatch(/js\/grilles\.js\?v=20260904[j-z]|js\/grilles\.js\?v=2026090[5-9]|js\/grilles\.js\?v=20261/);
+        expect(html).toMatch(/js\/grilles\.js\?v=20260904[k-z]|js\/grilles\.js\?v=2026090[5-9]|js\/grilles\.js\?v=20261/);
         expect(html).toMatch(/js\/evaluation-projection\.js\?v=20260904[e-z]|js\/evaluation-projection\.js\?v=2026090[5-9]|js\/evaluation-projection\.js\?v=20261/);
-        expect(html).toMatch(/styles\.css\?v=20260904[g-z]|styles\.css\?v=2026090[5-9]|styles\.css\?v=20261/);
+        expect(html).toMatch(/styles\.css\?v=20260904[h-z]|styles\.css\?v=2026090[5-9]|styles\.css\?v=20261/);
     });
 });

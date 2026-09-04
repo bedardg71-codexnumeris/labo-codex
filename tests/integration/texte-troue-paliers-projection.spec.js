@@ -12,8 +12,8 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //     palier où est le curseur — après une FRAPPE, sans que la zone perde le focus ;
 //   · ENREGISTRER, ROUVRIR : les deux jetons posés sont écrits dans la grille (mode
 //     édition, `db.modifier`), et se relisent après un changement de grille ;
-//   · L'APERÇU d'une copie d'exemple : la phrase du palier composé, remplie, sans le
-//     préfixe engendré ; celle d'un palier d'hier, avec ; la copie non corrigée, muette ;
+//   · L'APERÇU sous chaque palier (§5) : la phrase du palier composé, remplie, sans le
+//     préfixe engendré ; celle d'un palier d'hier, avec ; la copie non corrigée, dite en bas ;
 //   · un jeton INCONNU tapé à la main se dit sous son palier, et l'élève le lirait tel quel ;
 //   · le témoin négatif : un palier non touché lit et écrit ce qu'il portait.
 //
@@ -150,35 +150,44 @@ test('texte troué 2 · deux badges posés dans un palier au clic, enregistrés,
     expect(enBase[1].texte).toBe('En prévision de l\'EUF, ce ratio est excellent.');
     expect(enBase[1].texteAide).toBe('');
 
-    // 7 — L'APERÇU : la carte « Ce que l'élève lira », dépliée par l'événement DOM.
-    await expect(carte(page, 'apercu')).toHaveClass(/ferme/);
-    await cliquerDom(carte(page, 'apercu').locator('.accordeon-header'));
-    await expect(carte(page, 'apercu')).not.toHaveClass(/ferme/);
-    const copies = carte(page, 'apercu').locator('.apercu-copie');
-    await expect(copies).toHaveCount(7);   // six paliers + la copie non corrigée
-    const lues = await copies.evaluateAll((els) => els.map((e) => ({
-        titre: e.querySelector('.apercu-copie-titre').textContent.trim(),
-        texte: e.querySelector('.apercu-copie-texte').textContent.trim()
+    // 7 — L'APERÇU, SOUS CHAQUE PALIER (§5, coup d'œil de Grégoire : on compose dans le palier, on lit
+    //     le résultat au même endroit). Plus de carte « Ce que l'élève lira ».
+    await expect(carte(page, 'apercu')).toHaveCount(0);
+    await expect(page.locator('#listeCriteres .palier-projection .palier-apercu')).toHaveCount(6);
+    const lues = await page.locator('#listeCriteres .palier-projection .palier-apercu').evaluateAll((els) => els.map((e) => ({
+        mot: e.querySelector('.palier-apercu-mot').textContent.trim(),
+        texte: e.querySelector('.palier-apercu-texte').textContent.trim(),
+        copie: e.querySelector('.palier-apercu-copie').textContent.trim()
     })));
     console.log('APERÇU →', JSON.stringify(lues));
+    expect(lues.every((l) => l.mot === 'L\'élève lira :')).toBe(true);
     // Le palier composé : décompte du bloc 3, PUIS la phrase entière — jetons remplis, sans préfixe.
-    expect(lues[4].titre).toBe('Copie 5 — 23 erreurs pour 900 mots · palier « Risqué »');
+    expect(lues[4].copie).toBe('— copie fictive, 23 erreurs pour 900 mots');
     expect(lues[4].texte).toBe('Ta production contient 23 erreurs pour 900 mots. ' + verdictDHier + ' Bilan : 23 900 Il est recommandé de t\'inscrire au Passerelle +. 30');
     expect(lues[4].texte).not.toContain('Tu fais en moyenne');
     // Un palier d'hier garde le préfixe engendré.
     expect(lues[1].texte).toBe('Ta production contient 5 erreurs pour 900 mots. Tu fais en moyenne 1 erreur à chaque 180 mots. En prévision de l\'EUF, ce ratio est excellent.');
-    // La copie non corrigée : aucune phrase.
-    expect(lues[6].titre).toBe('Copie non corrigée — ni erreurs ni mots saisis');
-    expect(lues[6].texte).toBe('Aucune phrase : le décompte et la projection attendent la correction.');
+    // En bas de la carte « Projection » : la copie non corrigée, une fois, et la note, une fois.
+    const nonCorrigee = carte(page, 'projection').locator('.palier-apercu-non-corrigee');
+    await expect(nonCorrigee).toHaveCount(1);
+    await expect(nonCorrigee).toHaveText('Copie non corrigée : aucune phrase avant la correction.');
+    await expect(carte(page, 'projection').locator('.palier-apercu-note')).toHaveCount(1);
+    await expect(carte(page, 'projection').locator('.palier-apercu-note')).toContainText('ne montre pas la rétroaction du sous-critère dominant');
 
-    // 8 — un jeton INCONNU tapé à la main (palier 1, « Sans erreur ») : la ligne orange le dit, l'aperçu le montre tel quel.
+    // 8 — un jeton INCONNU tapé à la main (palier 1, « Sans erreur ») : la ligne orange le dit, AU-DESSUS de
+    //     la ligne « L'élève lira : », qui le montre tel quel.
     await expect(page.locator('#listeCriteres .palier-jetons-inconnus')).toHaveCount(0);
     await frapper(zone(page, 0, 'texte'), 'Bravo {truc}.');
     await expect(page.locator('#listeCriteres .palier-jetons-inconnus')).toHaveCount(1);
     await expect(page.locator('#listeCriteres .palier-jetons-inconnus')).toContainText('Le badge « {truc} » est inconnu de cette version');
-    await expect(carte(page, 'apercu').locator('.apercu-copie').first().locator('.apercu-copie-texte')).toHaveText('Ta production contient 0 erreur pour 900 mots. Bravo {truc}.');
-    // Le redessin a gardé les deux cartes dépliées, et n'a rien écrit d'autre.
+    await expect(palier(page, 0).locator('.palier-apercu-texte')).toHaveText('Ta production contient 0 erreur pour 900 mots. Bravo {truc}.');
+    const ordre = await palier(page, 0).evaluate((el) => {
+        const orange = el.querySelector('.palier-jetons-inconnus');
+        const apercu = el.querySelector('.palier-apercu');
+        return !!(orange.compareDocumentPosition(apercu) & Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+    expect(ordre, 'la ligne orange précède la ligne « L\'élève lira : »').toBe(true);
+    // Le redessin a gardé la carte dépliée, et n'a rien écrit d'autre.
     await expect(carte(page, 'projection')).not.toHaveClass(/ferme/);
-    await expect(carte(page, 'apercu')).not.toHaveClass(/ferme/);
     expect((await paliersEnBase(page))[4].texte).toBe(verdictDHier + ' Bilan : {projection} {longueur}');
 });

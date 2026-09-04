@@ -3842,6 +3842,37 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                             </small>`;
     };
 
+    // ↻ §5 (4 sept. 2026, 18 h 38 — coup d'œil de Grégoire : « on compose dans le palier,
+    // on lit le résultat dans une autre carte, plus bas, repliée ») : L'APERÇU VIENT SOUS
+    // CHAQUE PALIER. C'est l'aperçu au niveau du gabarit des arrêtés 4 et 5 (ce que l'élève
+    // lit vient de deux blocs à la fois) : la copie FICTIVE de ce palier
+    // (`projectionAlgo.copiesExemple`, retrouvée par sa `cle`), et la phrase = décompte du
+    // bloc 3 PUIS projection du bloc 2, dans l'ordre exact où
+    // `_construireRetroactionAlgoCategories` (evaluation-calcul.js) les concatène. Rendu
+    // pur, aucun état : le gabarit se redessine à chaque frappe, l'aperçu suit. La copie
+    // non corrigée n'a AUCUNE phrase (l'application s'arrête sans erreurs ni mots) : une
+    // ligne en bas de la carte le dit, une fois. ⚠ Ce que l'aperçu ne montre pas, et dit :
+    // la rétroaction du sous-critère dominant, qui dépend des codes posés sur une vraie copie.
+    const apercuPossible = typeof window.enoncesAlgo !== 'undefined'
+        && typeof window.projectionAlgo.copiesExemple === 'function';
+    const copies = apercuPossible ? window.projectionAlgo.copiesExemple(critere) : [];
+    const phraseDe = (copie) => {
+        const decompte = window.enoncesAlgo.enonce(critere, 'decompte', { erreurs: copie.erreurs, mots: copie.mots });
+        const projection = window.projectionAlgo.calculer(critere, { erreurs: copie.erreurs, mots: copie.mots });
+        return [decompte, projection.applicable ? projection.texte : ''].filter(Boolean).join(' ');
+    };
+    const ligneApercu = (pal) => {
+        const copie = copies.find((c) => c.corrigee && c.cle === pal.cle);
+        if (!copie) return '';
+        const phrase = phraseDe(copie);
+        return `
+                            <div class="palier-apercu">
+                                <span class="palier-apercu-mot">L'élève lira :</span>
+                                <span class="palier-apercu-texte">${phrase ? esc(phrase) : '<em>aucune phrase — le décompte est vide et ce palier ne dit rien</em>'}</span>
+                                <span class="palier-apercu-copie">— copie fictive, ${esc(copie.erreurs)} erreur${copie.erreurs > 1 ? 's' : ''} pour ${esc(copie.mots)} mots</span>
+                            </div>`;
+    };
+
     const paliers = p.paliers.map((pal, i) => {
         const mpe = window.projectionAlgo.motsParErreurDuRatio(critere, pal.ratioMax);
         const seuilCol = pal.sansErreur
@@ -3887,9 +3918,18 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                                 </div>
                             </div>
                             ${ligneInconnus(pal)}
+                            ${ligneApercu(pal)}
                             ${retirer}
                         </div>`;
     }).join('');
+
+    const basApercu = apercuPossible ? `
+                <small class="palier-apercu-non-corrigee" style="font-size: 0.78rem; color: var(--gris-moyen); display: block; margin-top: 8px;">
+                    Copie non corrigée : aucune phrase avant la correction.
+                </small>
+                <small class="palier-apercu-note" style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">
+                    Copies fictives, calculées depuis tes paliers — aucune donnée d'élève. L'aperçu ne montre pas la rétroaction du sous-critère dominant : elle dépend des codes posés sur une vraie copie.
+                </small>` : '';
 
     return `${enTete}
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
@@ -3909,63 +3949,9 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                     Les badges bleus sont écrits dans la grille ; les verts se remplissent à la correction, copie par copie.
                     Un badge sans valeur disparaît proprement.
                     Une phrase sans badge est précédée de “Tu fais en moyenne 1 erreur à chaque N mots.” Dès qu'elle porte un badge, elle est entière : c'est toi qui l'écris.
-                </small>
+                </small>${basApercu}
                 <button class="btn btn-secondaire btn-tres-compact" style="margin-top: 8px;"
                         data-action="${actionAjout}" ${paramsAction}>+ Ajouter un palier</button>`;
-}
-
-/**
- * Le texte troué, étape 2 (4 sept. 2026) — « CE QUE L'ÉLÈVE LIRA », l'aperçu au
- * niveau du GABARIT (arrêtés 4 et 5 du cadrage du 2 sept.) : ce que l'élève lit
- * vient de deux blocs à la fois — le décompte du bloc 3 (Observation), puis le
- * verdict et la recommandation du bloc 2 (Projection) — dans l'ordre exact où
- * `_construireRetroactionAlgoCategories` (evaluation-calcul.js) les concatène.
- * Un aperçu par champ montrerait des morceaux.
- *
- * Les copies sont FICTIVES, dérivées des paliers (`projectionAlgo.copiesExemple`) :
- * une par palier, plus une non corrigée — qui n'a AUCUNE phrase, parce que c'est
- * ce que fait l'application (le calcul s'arrête sans erreurs ni mots saisis).
- * ⚠ Ce que l'aperçu ne montre pas, et le dit : la rétroaction du sous-critère
- * dominant, qui dépend des codes posés sur une vraie copie.
- * ⛔ Rendu PUR : rien n'est écrit dans la grille, aucun handler, aucun état —
- * il suit chaque frappe comme le reste du gabarit.
- */
-function rendreBlocApercuAlgo(critere, ctx) {
-    if (!critere || critere.type !== 'algorithmique') return '';
-    if (typeof window.projectionAlgo === 'undefined' || typeof window.enoncesAlgo === 'undefined') return '';
-    if (typeof window.projectionAlgo.copiesExemple !== 'function') return '';
-    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
-
-    const copies = window.projectionAlgo.copiesExemple(critere);
-    let numero = 0;
-    const blocs = copies.map((c) => {
-        if (!c.corrigee) {
-            return `
-                <div class="apercu-copie apercu-copie--non-corrigee">
-                    <div class="apercu-copie-titre">Copie non corrigée — ni erreurs ni mots saisis</div>
-                    <p class="apercu-copie-texte">Aucune phrase : le décompte et la projection attendent la correction.</p>
-                </div>`;
-        }
-        numero += 1;
-        const decompte = window.enoncesAlgo.enonce(critere, 'decompte', { erreurs: c.erreurs, mots: c.mots });
-        const projection = window.projectionAlgo.calculer(critere, { erreurs: c.erreurs, mots: c.mots });
-        const phrase = [decompte, projection.applicable ? projection.texte : ''].filter(Boolean).join(' ');
-        const palier = (projection.applicable && projection.palier)
-            ? ` · palier « ${esc(projection.palier.libelle || projection.palier.cle)} »` : '';
-        return `
-                <div class="apercu-copie">
-                    <div class="apercu-copie-titre">Copie ${numero} — ${esc(c.erreurs)} erreur${c.erreurs > 1 ? 's' : ''} pour ${esc(c.mots)} mots${palier}</div>
-                    <p class="apercu-copie-texte">${phrase ? esc(phrase) : '<em>Aucune phrase : le décompte est vide et ce palier ne dit rien.</em>'}</p>
-                </div>`;
-    }).join('');
-
-    return `
-            <div class="apercu-algo">
-                ${blocs}
-                <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 6px;">
-                    Copies fictives, calculées depuis tes paliers — aucune donnée d'élève. L'aperçu ne montre pas la rétroaction du sous-critère dominant : elle dépend des codes posés sur une vraie copie.
-                </small>
-            </div>`;
 }
 
 /* ===============================
@@ -4189,7 +4175,6 @@ function rendreCartesGabaritAlgo(critere, ctx) {
                 ${carteGabaritAlgo(critere, ctx, 'formule', 'Formule', rendreBlocFormuleAlgo(critere, ctx), false)}
                 ${carteGabaritAlgo(critere, ctx, 'commentaire', 'Observation', rendreBlocEnoncesAlgo(critere, ctx), true)}
                 ${carteGabaritAlgo(critere, ctx, 'projection', 'Projection', rendreBlocProjectionAlgo(critere, ctx), true)}
-                ${carteGabaritAlgo(critere, ctx, 'apercu', 'Ce que l\'élève lira', rendreBlocApercuAlgo(critere, ctx), true)}
                 ${estGrille ? carteGabaritAlgo(critere, ctx, 'codes', 'Codes d\'annotation', rendreBlocCodesAlgo(critere, ctx), true) : ''}
             </div>`;
 }
