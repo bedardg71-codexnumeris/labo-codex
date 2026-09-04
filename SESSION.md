@@ -141,6 +141,14 @@
          « Tes critères sont tous holistiques. » ; choisir « Analytique » → la ligne disparaît,
          le menu porte le choix ; revenir à « Non précisé » → le champ est retiré, la ligne
          revient. Le « fini quand » du lot 1 reste vrai (spec inchangée sur ces points).
+
+     ↻ 4 SEPTEMBRE — VU PAR GRÉGOIRE, RELU PAR COWORK, EN ROUTE. Les trois passages vus à
+       l'écran, conformes (le MIXTE qu'il croyait fautif était une erreur de manipulation) ;
+       relecture croisée de Cowork sur `fa5d34d2` : rien à corriger. Release MINEURE
+       `1.115.0` (build `0903-2103`) : entrée 1.115 du changelog (vert, mots approuvés par
+       Grégoire, tels quels). Ordre tranché et dit : release D'ABORD, puis `scripts/pousser.sh`
+       — c'est lui qui rend le verdict au jeton, et il le rend sur le commit de release, celui
+       qui part réellement (un verdict sur `fa5d34d2` aurait été périmé par le bump).
      ===================================================================== -->
 
 <!-- =====================================================================

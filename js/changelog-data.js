@@ -21,6 +21,15 @@
 
     var CHANGELOG = [
         {
+            version: '1.115',
+            couleur: 'vert',
+            titre: 'Ta grille déclare sa manière d\'évaluer, et ses critères en héritent',
+            items: [
+                '<strong>Un menu « Type de la grille », à côté du nom.</strong> Choisis holistique, analytique ou algorithmique en créant ta grille : chaque critère neuf reçoit ce type sans que tu aies rien à cocher. Le menu de chaque critère reste là pour déroger. Le type voyage avec la grille au partage et à l\'import.',
+                '<strong>Tes grilles existantes ne changent pas.</strong> Leur menu dit « Non précisé », et une ligne dessous dit ce que leurs critères sont — « Tes critères sont tous holistiques. » Le badge de composition continue de dire ce qui est vraiment dans la grille : une grille déclarée analytique dont un critère passe en algorithmique affiche MIXTE.'
+            ]
+        },
+        {
             version: '1.114',
             couleur: 'vert',
             titre: 'Les codes d\'annotation suivent ta grille, et les phrases de rétroaction se composent sans rien taper',
