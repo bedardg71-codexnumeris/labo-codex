@@ -4952,6 +4952,18 @@
                                         <input type="text" id="nomGrilleTemplate" class="controle-form"
                                             placeholder="Ex: Grille analyse littéraire" data-on-change="sauvegarderNomGrille">
                                     </div>
+                                    <!-- Lot 1 (3 sept. 2026) : le type monte à la grille — le défaut de ses critères,
+                                         qui gardent leur propre menu pour déroger. Pas de « mixte » ici : c'est le
+                                         badge de composition qui le constate, depuis les critères. -->
+                                    <div class="groupe-form" style="min-width: 220px; margin: 0">
+                                        <label for="typeGrille">Type de la grille :</label>
+                                        <select id="typeGrille" class="controle-form" data-on-change="modifierTypeGrilleHandler">
+                                            <option value="">Non précisé</option>
+                                            <option value="holistique">Holistique</option>
+                                            <option value="analytique">Analytique</option>
+                                            <option value="algorithmique">Algorithmique</option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div class="groupe-form u-mb-20">
@@ -14505,7 +14517,7 @@
     <script src="js/evaluation-enonces.js?v=20260903d"></script>
     <script src="js/codes-annotation.js?v=20260903e"></script> <!-- 3 sept. 2026 : la liste des CODES d'annotation d'une copie (les codes identifient des éléments du travail, rattachés aux critères ; les tampons, eux, commentent — autre palette) — sous-critères de la grille activée, sinon les dix codes d'hier (repli). CHARGÉ AVANT travaux-outils.js, synthese-retroaction-data.js et evaluation-retroaction.js, qui le lisent ; APRÈS evaluation-enonces.js, dont il prend critereAlgorithmique --> <!-- texte troué étape 1 (3 sept.) : repères posables, contrat zone → repères, insertion au curseur · #581 : registre des modeles d'enonce algorithmique - MEME CONTRAINTE D'ORDRE que les deux registres ci-dessus : grilles.js, evaluation-calcul.js, evaluation-retroaction.js et synthese-retroaction-data.js l'appellent tous --> <!-- #668 : registre des modèles de projection (norme externe / EUF) — MÊME CONTRAINTE D'ORDRE que le registre de formules : grilles.js et evaluation-calcul.js l'appellent tous les deux -->
     <script src="js/grilles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/grilles.js?v=20260903k"></script> <!-- texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
+    <script src="js/grilles.js?v=20260903l"></script> <!-- texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
     <script src="js/echelles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/echelles.js?v=20260903f"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
     <script src="js/cartouches-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
@@ -14635,7 +14647,7 @@
          labo-codex-partage-v1 + signature ECDSA (Défense F, D2) + confiance TOFU (D3).
          Ordre requis : après cc-license.js et bibliotheque-ui.js, avant import-export.js ;
          signature.js avant partage-format.js (construirePackageSigne). -->
-    <script src="js/partage-schemas.js?v=20260903b"></script>
+    <script src="js/partage-schemas.js?v=20260903c"></script>
     <script src="js/partage-validation.js?v=20260901a"></script>
     <script src="js/signature.js?v=2026061002"></script>
     <script src="js/trust-tofu.js?v=20260902f"></script>
@@ -14643,7 +14655,7 @@
     <script src="js/partage-export.js?v=20260901a"></script>
     <script src="js/partage-import.js?v=20260824b"></script>
     <script src="js/partage-section.js?v=20260901a"></script>
-    <script src="js/import-export.js?v=20260903d"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
+    <script src="js/import-export.js?v=20260903e"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
     <script src="js/codex.js?v=20260903b"></script> <!-- #614 : la fusion valide les magic bytes ; la purge #336 ne recense plus la corbeille ni la modélisation -->
     <script src="js/liste-evaluations.js?v=20260903b"></script> <!-- #560 : supprimer une copie pour de bon dit ce qui part avec elle (annotations, évaluations du couple) -->
     <script src="js/journal.js?v=2026041706"></script>

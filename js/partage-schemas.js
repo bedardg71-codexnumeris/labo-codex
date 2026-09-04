@@ -198,6 +198,12 @@
             champs: {
                 id: { type: 'chaine', requis: true, max: 200 },
                 nom: { type: 'chaine', requis: true, max: 200 },
+                // Lot 1 (3 sept. 2026) — LE TYPE DE LA GRILLE VOYAGE. Même classe
+                // que #667/#668/#581 : la projection ne copie que les champs
+                // déclarés ici. Sans cette ligne, une grille déclarée
+                // « analytique » arriverait sans type, et ses critères neufs
+                // naîtraient holistiques chez le destinataire — sans un mot.
+                type: { type: 'chaine', max: 50 },
                 criteres: {
                     type: 'tableau', requis: true, max: 50,
                     schema: {

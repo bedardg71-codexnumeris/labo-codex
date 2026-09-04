@@ -734,6 +734,8 @@ const SCHEMAS_IMPORT = {
         dateModification: { type: 'string', maxLen: 50 },
         estDemo: { type: 'boolean' },
         isDemo: { type: 'boolean' },
+        // Lot 1 (3 sept. 2026) — `grille.type`, le DÉFAUT des critères, passe par
+        // cette ligne, qui existait avant lui. Témoin : sentinelle-type-grille-lot1.
         type: { type: 'string', maxLen: 50 },
         typeSPE: { type: 'boolean' },
         typeProductionId: { type: 'string', maxLen: 100 },
