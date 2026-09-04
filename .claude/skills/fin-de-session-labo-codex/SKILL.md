@@ -199,6 +199,18 @@ comme **réserve** — le comportement n'est PAS prouvé, le correctif n'est pas
 Proportionnalité (barème parent §5) : un break-test échantillon par chantier suffit
 souvent ; les correctifs données/sécurité/SSOT l'exigent, l'UI/microcopy non.
 
+### 4.1 bis Les specs Playwright touchés par la session (ajouté le 4 septembre 2026, consigne §10)
+
+```bash
+git diff --name-only <base>..HEAD -- tests/integration/ | xargs grep -n "page.click\|waitForTimeout"
+```
+
+→ **attendu : zéro**. Un geste de spec passe par l'événement DOM et attend le rendu (un élément qui
+n'existe qu'après), jamais par `page.click` à l'aveugle ni `waitForTimeout` : sur le runner, un
+clic souris coûte de 2 à 9 s et le budget de 30 s s'épuise — deux runs rouges le 4 septembre.
+La règle et son motif : `docs/securite/TESTS-AUTOMATISES.md` §4. Un `page.click` qui reste se
+justifie en une ligne (le clic qu'on éprouve).
+
 ### 4.2 Confrontation des affirmations au diff
 
 Avant de rédiger le bilan de session (SESSION.md, message de commit) : pour chaque

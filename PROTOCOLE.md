@@ -414,3 +414,9 @@ seulement une machine assez généreuse.
 ▣ **Le témoin de la règle** : le 2 septembre, la correction retenue chaque fois a été la même —
 **déplacer le calcul dans `node`**, ou **déclarer le global manquant**. Jamais « ajuster pour que
 ça passe ici ».
+
+⮕ **Ajouté le 4 septembre 2026 (décision de Grégoire, consigne du jour §10)** : on ne retient plus
+un push pour laisser finir un run GitHub — le run annulé par `cancel-in-progress` n'est pas perdu,
+le suivant juge le sommet de la branche, qui contient tout ce qui précède ; le verdict au jeton
+local (`scripts/pousser.sh`) reste le dernier geste avant chaque push, et le rituel d'ouverture lit
+les JOBS du dernier run (jugé vert, jugé rouge, non jugé).

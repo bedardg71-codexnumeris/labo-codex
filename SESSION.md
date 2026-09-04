@@ -45,7 +45,8 @@
        0 instable, jeton `e5d9c71f`), hook Vitest vert, `3d7b8dc0..e5d9c71f main -> main`.
      ▣ **RUN GITHUB `33884692393` sur `e5d9c71f` : VERT — Vitest success, Playwright (WebKit) success (14 h 38 → 15 h 12 Z, 6 essais
        non jugés = la baseline connue). La CI de `main` est verte.**
-     ⚠ DÉCIDÉ SEUL, dit : la consigne disait « attends le run avant d'ouvrir le lot 4 » ; le
+     ⚠ DÉCIDÉ SEUL, dit : la consigne disait « attends le run avant d'ouvrir le lot 4 » (règle
+       RETIRÉE le soir même par Grégoire, consigne §10 : on ne retient plus un push pour un run) ; le
        run dure ~35 min. J'ai ouvert le lot 4 dans un WORKTREE (`.claude/worktrees/lot-4`,
        branche `claude/lot-4-gabarit-algo-paliers` partie de `e5d9c71f`) pendant le run — rien
        n'a atteint `main` avant son verdict.
@@ -253,6 +254,17 @@
        (1.117.1, build 0904-1507 ; `release.mjs patch`, quatre jetons bumpés), Vitest 458 / 5042, jeton
        WebKit local vert (0 instable, 19 h 17 Z), `807bdba2..e990e710 main -> main`. Emporte la consigne
        (h, §9) et le cadrage des codes par grille (point 7 de Cowork, non touché).
+     ↻ 19 h 50 — §10 DE LA CONSIGNE (décision de Grégoire : « on est toujours en train d'attendre »)
+     ▣ a) la phrase est dans `PROTOCOLE.md` règle 7 (on ne retient plus un push pour un run ; le jeton
+       local reste le dernier geste) ; la consigne d'attendre de ce bloc est marquée retirée.
+     ▣ b) la règle des specs (événement DOM, attendre le rendu, un clic souris au plus) vit dans
+       `docs/securite/TESTS-AUTOMATISES.md` §4 — MESURÉ : il n'y a pas de « skill des tests » ; c'est
+       le document que CLAUDE.md et le rituel de fin (§3) pointent pour la suite — et le rituel de fin
+       porte le témoin `grep -n "page.click\|waitForTimeout"` = zéro sur les specs touchés (§4.1 bis).
+     ▣ c) MESURÉ : les trois pushs de docs du jour (`3825333d`, `d738f691`, `ac0fa92c`) n'ont déclenché
+       AUCUN run (`paths-ignore`, `tests.yml:101`) — zéro minute ; et le run de `3d7b8dc0` (docs +
+       cadrages) avait le job Playwright SAUTÉ par la liste `OBSERVABLE`. Les deux leviers sans facture
+       fonctionnent ; le run complet reste ~26 à 36 min (Playwright 19 h 20 → 19 h 46 sur 1.117.1).
      ▣ « VÉRIFIÉ COMMENT », pour `OU-EN-EST-ON.md` (Cowork) : `git rev-parse origin/main` =
        `e990e710` (1.117.1, build 0904-1507) ; jeton WebKit local sur ce commit : code 0, 0 instable, 19 h 17 Z ;
        Vitest 458 / 5042 ; runs GitHub : 33907151093 (vert) sur le correctif de specs,

@@ -92,6 +92,29 @@ Tout chantier sécurité Phase 1+ ajoute au minimum **1 test** qui couvre la dé
 
 Le test prévient la régression — il est **la trace exécutable du chantier**. Sans test, le chantier n'est pas terminé.
 
+### Un geste de spec Playwright passe par l'événement DOM, et attend le rendu
+
+*Règle inscrite le 4 septembre 2026 (consigne du jour §10), après deux runs GitHub rouges le même
+jour pour la même cause : `type-grille-lot1.spec.js` le matin (run 33869215489), trois specs de
+l'éditeur de grille l'après-midi (run 33902352824).*
+
+Sur le runner (WebKit Linux), un `page.click` ou `locator.click()` coûte de **2 à 9 secondes** —
+« waiting for element to be visible, enabled and stable » — et un spec qui en empile quatre ou
+cinq dépasse le budget de 30 s, alors qu'il passe en 10 s sur le Mac. La trace le montre ; le vert
+local ne le montre jamais (règle 7 de `PROTOCOLE.md`).
+
+- **Un geste passe par l'événement DOM** : `locator.evaluate((el) => el.click())`, ou `page.evaluate`
+  avec `el.click()` / `dispatchEvent(...)` — il traverse le même dispatcher que la souris
+  (`main.js`, `data-action` / `data-on-change`). Ce qui ferme un sélecteur « en cliquant ailleurs »
+  se livre tel que le code l'écoute (`pointerdown` sur le document, par exemple).
+- **Un seul clic à la souris par spec, au plus** : celui qui prouve le pointeur (une bande
+  d'accordéon, un bouton), et il attend l'immobilité de la boîte de l'élément juste après un rendu
+  (`cliquerBande` dans `lot4-gabarit-algo-cartes.spec.js`).
+- **On attend le rendu, jamais un délai** : `expect(locator).toHaveCount(n + 1)`, `toHaveValue`,
+  un élément qui n'existe qu'après — pas de `waitForTimeout` autour d'un geste.
+- **Témoin au rituel de fin de session** : `grep -n "page.click\|waitForTimeout"` sur les specs
+  touchés par la session rend zéro, sinon on dit pourquoi.
+
 ### Si la fonction n'est pas exposée sur `window`
 
 Pattern projet : `window.maFonction = maFonction;` à la fin de l'IIFE, juste avant `})();`. Une ligne, non intrusive, déjà utilisé pour `validerMagicBytes` (cf. `js/travaux-import.js:1554`).
