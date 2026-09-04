@@ -256,8 +256,8 @@
      ▣ « VÉRIFIÉ COMMENT », pour `OU-EN-EST-ON.md` (Cowork) : `git rev-parse origin/main` =
        `e990e710` (1.117.1, build 0904-1507) ; jeton WebKit local sur ce commit : code 0, 0 instable, 19 h 17 Z ;
        Vitest 458 / 5042 ; runs GitHub : 33907151093 (vert) sur le correctif de specs,
-       `33910422885` (en cours à l'écriture, lancé 19 h 17 Z — verdict par le
-       commit de docs suivant) sur 1.117.1.
+       `33910422885` VERT — Vitest et Playwright WebKit (19 h 20 → 19 h 46 Z).
+       La CI de `main` est verte sur 1.117.1. sur 1.117.1.
      ===================================================================== -->
 
 <!-- =====================================================================

@@ -11,7 +11,7 @@
 
 > ↻ **19 h 17 — 1.117.1 EN LIGNE** (`e990e710`, build `0904-1507`, « Modèle d'observation », consigne h) : jeton
 > vert, `807bdba2..e990e710 main -> main`, **`main` = `origin/main` = `e990e710`, AUCUN travail en avance.** Run
-> GitHub `33910422885` en cours à l'écriture. Avant : le run de 1.117.0 (`33902352824`) a ROUGI sur trois specs —
+> GitHub `33910422885` VERT (Vitest, Playwright WebKit, 19 h 46 Z). Avant : le run de 1.117.0 (`33902352824`) a ROUGI sur trois specs —
 > clics souris de 2 à 9 s sur le runner, pas le gabarit — corrigés en `807bdba2` (specs seuls), run `33907151093`
 > VERT. Détail : `SESSION.md`, bloc 24.
 >
