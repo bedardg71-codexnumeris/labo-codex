@@ -144,10 +144,16 @@ describe('codes par grille · S.c — les sources du gabarit et de l\'écran de 
 
     it('S.c.5 les jetons du lot ont bougé', () => {
         const html = source('index.html');
-        expect(html).toMatch(/js\/grilles\.js\?v=20260903[f-z]/);
-        expect(html).toMatch(/js\/partage-schemas\.js\?v=20260903/);
-        expect(html).toMatch(/js\/import-export\.js\?v=20260903[c-z]/);
-        expect(html).toMatch(/js\/codes-annotation\.js\?v=20260903[b-z]/);
-        expect(html).toMatch(/styles\.css\?v=20260903[e-z]/);
+        // Le jeton a bougé AU MOINS jusqu'à celui du lot (3 sept.) : une release ultérieure le
+        // porte plus loin — autre jour, autre lettre — et ne doit pas rougir ici. Le format
+        // AAAAMMJJ + lettre se compare comme une chaîne. (Corrigé le 4 sept. 2026 : la release
+        // 1.116.0 a porté styles.css à 20260904a, et le motif daté « 20260903[e-z] » rougissait ;
+        // même forme robuste que `sentinelle-texte-troue-etape-1-reperes`.)
+        const jeton = (fichier) => (html.match(new RegExp(fichier.replace(/[./]/g, '\\$&') + '\\?v=([0-9a-z]+)')) || [])[1] || '';
+        expect(jeton('js/grilles.js') >= '20260903f', 'grilles.js : ' + jeton('js/grilles.js')).toBe(true);
+        expect(jeton('js/partage-schemas.js') >= '20260903', 'partage-schemas.js : ' + jeton('js/partage-schemas.js')).toBe(true);
+        expect(jeton('js/import-export.js') >= '20260903c', 'import-export.js : ' + jeton('js/import-export.js')).toBe(true);
+        expect(jeton('js/codes-annotation.js') >= '20260903b', 'codes-annotation.js : ' + jeton('js/codes-annotation.js')).toBe(true);
+        expect(jeton('styles.css') >= '20260903e', 'styles.css : ' + jeton('styles.css')).toBe(true);
     });
 });
