@@ -10,8 +10,10 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //   · Grégoire crée une grille, choisit « Analytique », ajoute trois critères — les trois
 //     sont analytiques sans qu'il ait rien coché ;
 //   · il en passe un en algorithmique : le badge de la barre latérale devient MIXTE ;
-//   · une grille d'avant ce lot (sans `type`) : le menu montre le déduit, rien n'est écrit,
-//     un critère neuf y reste holistique ; une composition mixte ne présélectionne rien ;
+//   · une grille d'avant ce lot (sans `type`) : le menu dit « Non précisé », la ligne sous le
+//     menu dit « Tes critères sont tous holistiques. » (retouche du 4 sept.), rien n'est écrit ;
+//     choisir un type tait la ligne et l'écrit ; revenir à « Non précisé » retire le champ et
+//     la ligne revient ; un critère neuf y reste holistique ; une composition mixte : rien ;
 //   · export/import et partage : le type traverse (les fonctions réelles de la page).
 
 const SEMER = `async () => {
@@ -43,7 +45,8 @@ const LIRE = `async () => {
         aType: Object.prototype.hasOwnProperty.call(g, 'type'),
         criteres: (g.criteres || []).map(c => c.type)
     });
-    return { grilles: grilles.map(brut), menu: document.getElementById('typeGrille').value };
+    return { grilles: grilles.map(brut), menu: document.getElementById('typeGrille').value,
+             ligne: document.getElementById('precisionTypeGrille').textContent };
 }`;
 
 const TYPES_TEMP = '#listeCriteres select[data-on-change="modifierTypeCritereTempHandler"]';
@@ -88,6 +91,7 @@ test('lot 1 · le type monte à la grille — le « fini quand », à l\'écran'
     await page.evaluate((id) => window.chargerGrillePourModif(id), neuve.id);
     await page.waitForTimeout(300);
     await expect(page.locator('#typeGrille')).toHaveValue('analytique');
+    await expect(page.locator('#precisionTypeGrille'), 'déclaré : la ligne se tait').toHaveText('');
     await expect(page.locator(TYPES_GRILLE)).toHaveCount(3);
     await page.locator(TYPES_GRILLE).nth(2).selectOption('algorithmique');
     await expect(item.locator('.badge-composition--mixte')).toHaveCount(1);
@@ -106,11 +110,24 @@ test('lot 1 · le type monte à la grille — le « fini quand », à l\'écran'
     g = etat.grilles.find(x => x.id === neuve.id);
     expect(g.criteres).toEqual(['analytique', 'analytique', 'algorithmique', 'analytique']);
 
-    // 4 — une grille d'avant ce lot : le menu MONTRE holistique, rien n'est ÉCRIT,
-    //     et un critère neuf y reste holistique — exactement comme avant.
+    // 4 — une grille d'avant ce lot : le menu dit « Non précisé », la LIGNE dit la
+    //     déduction, rien n'est ÉCRIT. Choisir tait la ligne et écrit ; revenir retire et
+    //     la ligne revient. Un critère neuf y reste holistique — exactement comme avant.
     await page.evaluate(() => window.chargerGrillePourModif('G0'));
     await page.waitForTimeout(300);
-    await expect(page.locator('#typeGrille')).toHaveValue('holistique');
+    await expect(page.locator('#typeGrille')).toHaveValue('');
+    await expect(page.locator('#precisionTypeGrille')).toHaveText('Tes critères sont tous holistiques.');
+    await page.selectOption('#typeGrille', 'analytique');
+    await expect(page.locator('#precisionTypeGrille')).toHaveText('');
+    await page.waitForTimeout(300);
+    etat = await page.evaluate(eval(LIRE));
+    console.log('G0 DÉCLARÉE →', JSON.stringify(etat.grilles.find(x => x.id === 'G0')));
+    expect(etat.grilles.find(x => x.id === 'G0').type).toBe('analytique');
+    await page.selectOption('#typeGrille', '');
+    await expect(page.locator('#precisionTypeGrille')).toHaveText('Tes critères sont tous holistiques.');
+    await page.waitForTimeout(300);
+    etat = await page.evaluate(eval(LIRE));
+    expect(etat.grilles.find(x => x.id === 'G0').aType, 'revenir à « Non précisé » RETIRE le champ').toBe(false);
     await page.click('#listeCriteres [data-action="ajouterCritereGrille"]');
     await page.waitForTimeout(300);
     etat = await page.evaluate(eval(LIRE));
@@ -118,11 +135,13 @@ test('lot 1 · le type monte à la grille — le « fini quand », à l\'écran'
     const g0 = etat.grilles.find(x => x.id === 'G0');
     expect(g0.aType, 'aucun champ `type` écrit sur une grille d\'avant').toBe(false);
     expect(g0.criteres).toEqual(['holistique', 'holistique', 'holistique']);
+    expect(etat.ligne, 'toujours tous holistiques : la ligne reste').toBe('Tes critères sont tous holistiques.');
 
     // 5 — une composition mixte de fait : rien de présélectionné.
     await page.evaluate(() => window.chargerGrillePourModif('GM'));
     await page.waitForTimeout(300);
     await expect(page.locator('#typeGrille')).toHaveValue('');
+    await expect(page.locator('#precisionTypeGrille'), 'mixte : le badge le dit déjà').toHaveText('');
     etat = await page.evaluate(eval(LIRE));
     expect(etat.grilles.find(x => x.id === 'GM').aType).toBe(false);
 

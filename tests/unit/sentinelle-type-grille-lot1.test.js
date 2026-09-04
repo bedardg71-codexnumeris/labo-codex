@@ -18,6 +18,13 @@
  *   E — le badge dit ce qui EST : il ne lit jamais `grille.type` ;
  *   F — les témoins de source : les trois créateurs de critère lisent le défaut.
  *
+ * ↻ RETOUCHE DU 4 SEPTEMBRE (décision de Grégoire, avant son coup d'œil) : le MENU
+ *   montre ce que les données portent — « Non précisé » quand `grille.type` est
+ *   absent — et la déduction se dit en clair SOUS le menu (« Tes critères sont tous
+ *   holistiques. »), jamais par une couleur. Rien quand un type est déclaré, quand
+ *   les types divergent, ou sans critère. Les cas B/C changent de sens, pas de
+ *   périmètre : chacun affirme maintenant le menu ET la ligne.
+ *
  * ⚠ Ce banc EXÉCUTE les fonctions réelles de grilles.js sur un stockage en
  * mémoire (patron des sentinelles #516 / #522) ; les assertions statiques (F)
  * ne font que nommer les sites, elles ne tiennent pas lieu de preuve.
@@ -97,6 +104,9 @@ function monter(grilles) {
 
 const crit = (id, type, extra = {}) => ({ id, nom: 'Critère ' + id, ponderation: 50, ...(type ? { type } : {}), ...extra });
 const menu = (document) => document.getElementById('typeGrille').value;
+const ligne = (document) => document.getElementById('precisionTypeGrille').textContent;
+/** Choisir au menu comme le dispatcher le fait : l'élément porte déjà la valeur quand le handler part. */
+const choisir = (win, document, valeur) => { const m = document.getElementById('typeGrille'); m.value = valeur; return win.modifierTypeGrilleHandler(m); };
 
 /* -------------------------------------------- A — le défaut, et ce que le menu montre */
 
@@ -130,6 +140,18 @@ describe('lot 1 · A — le défaut d\'un critère neuf, et ce que le menu montr
         // Le menu ne connaît pas « mixte » : un `type: 'mixte'` écrit à la main n'est pas montré.
         expect(win.typeGrilleAffiche({ type: 'mixte', criteres: [crit('1', 'holistique')] })).toBe('holistique');
     });
+
+    it('A.c la phrase sous le menu : le texte de Grégoire, tel quel — et rien si déclaré, mixte ou vide', () => {
+        expect(win.phrasePrecisionTypeGrille({ criteres: [crit('1', 'holistique'), crit('2', 'holistique')] })).toBe('Tes critères sont tous holistiques.');
+        expect(win.phrasePrecisionTypeGrille({ criteres: [crit('1', 'analytique')] })).toBe('Tes critères sont tous analytiques.');
+        expect(win.phrasePrecisionTypeGrille({ criteres: [crit('1', 'algorithmique')] })).toBe('Tes critères sont tous algorithmiques.');
+        // Déclaré : rien, même si les critères sont d'un seul type.
+        expect(win.phrasePrecisionTypeGrille({ type: 'analytique', criteres: [crit('1', 'holistique')] })).toBe('');
+        // Mixte : rien (le badge MIXTE le dit déjà). Sans critère : rien.
+        expect(win.phrasePrecisionTypeGrille({ criteres: [crit('1', 'holistique'), crit('2', 'algorithmique')] })).toBe('');
+        expect(win.phrasePrecisionTypeGrille({ criteres: [] })).toBe('');
+        expect(win.phrasePrecisionTypeGrille(null)).toBe('');
+    });
 });
 
 /* ----------------------------------------------------- B — en création, sans rien cocher */
@@ -139,14 +161,17 @@ describe('lot 1 · B — en création : choisir « Analytique », puis ajouter �
         const { win, document } = monter([]);
         win.creerNouvelleGrille();
         expect(menu(document)).toBe('');
+        expect(ligne(document), 'le premier critère, vide, est holistique — la ligne le dit').toBe('Tes critères sont tous holistiques.');
         expect(win.tempCriteres).toHaveLength(1);
         expect(win.tempCriteres[0].type).toBe('holistique');
     });
 
     it('B.b LE « FINI QUAND » : choisir Analytique, ajouter deux critères — les trois sont analytiques', async () => {
-        const { win } = monter([]);
+        const { win, document } = monter([]);
         win.creerNouvelleGrille();
-        await win.modifierTypeGrilleHandler({ value: 'analytique' });
+        await choisir(win, document, 'analytique');
+        expect(menu(document)).toBe('analytique');
+        expect(ligne(document), 'déclaré : la ligne se tait').toBe('');
         // Le premier critère, vide, suivait le défaut : il suit le nouveau.
         expect(win.tempCriteres[0].type).toBe('analytique');
         win.ajouterCritereTemp();
@@ -155,14 +180,14 @@ describe('lot 1 · B — en création : choisir « Analytique », puis ajouter �
     });
 
     it('B.c une dérogation faite à la main tient quand le type de la grille change', async () => {
-        const { win } = monter([]);
+        const { win, document } = monter([]);
         win.creerNouvelleGrille();
-        await win.modifierTypeGrilleHandler({ value: 'analytique' });
+        await choisir(win, document, 'analytique');
         win.ajouterCritereTemp();
         win.ajouterCritereTemp();
         // Le français, imposé à 20 % par la politique départementale : algorithmique.
         win.modifierCritereTemp(1, 'type', 'algorithmique');
-        await win.modifierTypeGrilleHandler({ value: 'holistique' });
+        await choisir(win, document, 'holistique');
         expect(win.tempCriteres.map(c => c.type)).toEqual(['holistique', 'algorithmique', 'holistique']);
     });
 
@@ -170,7 +195,7 @@ describe('lot 1 · B — en création : choisir « Analytique », puis ajouter �
         const { win, document, grilles } = monter([]);
         win.creerNouvelleGrille();
         document.getElementById('nomGrilleTemplate').value = 'Dissertation';
-        await win.modifierTypeGrilleHandler({ value: 'analytique' });
+        await choisir(win, document, 'analytique');
         win.ajouterCritereTemp();
         win.ajouterCritereTemp();
         await win.sauvegarderGrilleTemplate();
@@ -198,7 +223,7 @@ describe('lot 1 · B — en création : choisir « Analytique », puis ajouter �
         const { win, document, grilles } = monter([]);
         win.creerNouvelleGrille();
         document.getElementById('nomGrilleTemplate').value = 'Forcée';
-        await win.modifierTypeGrilleHandler({ value: 'mixte' });
+        await choisir(win, document, 'mixte');
         win.ajouterCritereTemp();
         expect(win.tempCriteres.map(c => c.type)).toEqual(['holistique', 'holistique']);
         await win.sauvegarderGrilleTemplate();
@@ -217,10 +242,11 @@ const GRILLES_AVANT = () => ([
 const sansType = (g) => !Object.prototype.hasOwnProperty.call(g, 'type');
 
 describe('lot 1 · C — en édition : une grille d\'avant ce lot fonctionne comme avant', () => {
-    it('C.a ouvrir une grille toute holistique : le menu MONTRE holistique, rien n\'est ÉCRIT', async () => {
+    it('C.a ouvrir une grille toute holistique : le menu dit « Non précisé », la LIGNE dit la déduction, rien n\'est ÉCRIT', async () => {
         const { win, document, grilles } = monter(GRILLES_AVANT());
         await win.chargerGrillePourModif('G0');
-        expect(menu(document)).toBe('holistique');
+        expect(menu(document), 'le menu montre ce que les données portent : rien').toBe('');
+        expect(ligne(document)).toBe('Tes critères sont tous holistiques.');
         expect(sansType(grilles().find(g => g.id === 'G0'))).toBe(true);
     });
 
@@ -237,26 +263,31 @@ describe('lot 1 · C — en édition : une grille d\'avant ce lot fonctionne com
     it('C.c une grille toute algorithmique sans type déclaré : le menu le montre, mais un critère neuf reste holistique (la consigne : « exactement comme aujourd\'hui »)', async () => {
         const { win, document, grilles } = monter(GRILLES_AVANT());
         await win.chargerGrillePourModif('GA');
-        expect(menu(document)).toBe('algorithmique');
+        expect(menu(document)).toBe('');
+        expect(ligne(document)).toBe('Tes critères sont tous algorithmiques.');
         await win.ajouterCritereGrille('GA');
         const g = grilles().find(x => x.id === 'GA');
         expect(g.criteres[2].type).toBe('holistique');
         expect(sansType(g)).toBe(true);
+        expect(ligne(document), 'les types divergent maintenant : la ligne se tait, le badge dit MIXTE').toBe('');
     });
 
     it('C.d une composition mixte : le menu ne présélectionne rien', async () => {
         const { win, document } = monter(GRILLES_AVANT());
         await win.chargerGrillePourModif('GM');
         expect(menu(document)).toBe('');
+        expect(ligne(document), 'mixte : le badge le dit déjà').toBe('');
     });
 
     it('C.e choisir un type sur une grille existante : il s\'ÉCRIT, ses critères existants ne bougent pas, un critère neuf le reçoit', async () => {
         const { win, document, grilles } = monter(GRILLES_AVANT());
         await win.chargerGrillePourModif('G0');
         document.getElementById('nomGrilleTemplate').value = 'Toute holistique';
-        await win.modifierTypeGrilleHandler({ value: 'analytique' });
+        await choisir(win, document, 'analytique');
         let g = grilles().find(x => x.id === 'G0');
         expect(g.type).toBe('analytique');
+        expect(menu(document)).toBe('analytique');
+        expect(ligne(document), 'déclaré : la ligne se tait').toBe('');
         expect(g.criteres.map(c => c.type), 'les critères existants sont des données').toEqual(['holistique', 'holistique']);
         await win.ajouterCritereGrille('G0');
         g = grilles().find(x => x.id === 'G0');
@@ -269,20 +300,24 @@ describe('lot 1 · C — en édition : une grille d\'avant ce lot fonctionne com
         const { win, document, grilles } = monter(GRILLES_AVANT());
         await win.chargerGrillePourModif('G0');
         document.getElementById('nomGrilleTemplate').value = 'Toute holistique';
-        await win.modifierTypeGrilleHandler({ value: 'analytique' });
+        await choisir(win, document, 'analytique');
         expect(grilles().find(x => x.id === 'G0').type).toBe('analytique');
-        await win.modifierTypeGrilleHandler({ value: '' });
+        await choisir(win, document, '');
         expect(sansType(grilles().find(x => x.id === 'G0'))).toBe(true);
+        expect(menu(document)).toBe('');
+        expect(ligne(document), 'le champ retiré, la déduction revient').toBe('Tes critères sont tous holistiques.');
     });
 
     it('C.g le badge de la barre latérale est rafraîchi quand un critère change de type', async () => {
         const { win, document, grilles } = monter(GRILLES_AVANT());
         await win.chargerGrillePourModif('G0');
+        expect(ligne(document)).toBe('Tes critères sont tous holistiques.');
         const barre = document.getElementById('sidebarListeGrilles');
         barre.innerHTML = '';
         await win.modifierTypeCritereGrilleHandler({ dataset: { grilleId: 'G0', critereIndex: '1' }, value: 'algorithmique' });
         expect(grilles().find(x => x.id === 'G0').criteres[1].type).toBe('algorithmique');
         expect(barre.innerHTML, 'la barre latérale a été re-rendue').not.toBe('');
+        expect(ligne(document), 'mixte désormais : la ligne suit sans rechargement').toBe('');
     });
 
     it('C.h dupliquer depuis la barre latérale : la copie garde le type déclaré — et n\'en reçoit pas si la source n\'en a pas', async () => {
@@ -424,5 +459,16 @@ describe('lot 1 · F — les témoins de source', () => {
         expect(bloc).not.toMatch(/mixte/i);
         // Une seule déclaration du menu.
         expect((html.match(/id="typeGrille"/g) || []).length).toBe(1);
+    });
+
+    it('F.c retouche du 4 sept. : le menu ne lit plus la déduction ; la ligne existe, une fois, sans couleur', () => {
+        const { win } = monter([]);
+        expect(win.chargerGrillePourModif.toString()).not.toMatch(/rendreMenuTypeGrille\(typeGrilleAffiche/);
+        expect(win.chargerGrillePourModif.toString()).toMatch(/rendreMenuTypeGrille\(grille\.type\)/);
+        const html = source('index.html');
+        expect((html.match(/id="precisionTypeGrille"/g) || []).length).toBe(1);
+        const debut = html.indexOf('id="precisionTypeGrille"');
+        const balise = html.slice(html.lastIndexOf('<', debut), html.indexOf('>', debut) + 1);
+        expect(balise).not.toMatch(/orange|vert|color|couleur/i);
     });
 });

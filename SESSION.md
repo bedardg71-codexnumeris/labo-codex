@@ -106,6 +106,41 @@
        ../scripts/verifier-playwright.mjs`) → release minor → push. Changelog proposé :
        « Une grille déclare son type — holistique, analytique ou algorithmique — et ses
        nouveaux critères le reçoivent sans qu'on le redise à chacun. »
+
+     ↻ RETOUCHE D'ÉCRAN — 4 SEPTEMBRE AU MATIN, décision de Grégoire AVANT son coup d'œil
+       (relayée par Cowork). Commit SÉPARÉ, pas d'amend : la décision est postérieure au lot
+       et mérite sa propre trace. Non poussé.
+       ▣ Mesuré avant d'agir : main à `a6187760`, 1 devant origin/main, arbre propre hors
+         fichiers de Cowork ; `typeGrilleAffiche` : deux appelants seulement (:3990 et
+         l'exposition window) ; idiome d'une précision sous un champ = `<small class=
+         "text-muted u-texte-petit">` (index.html:6031, `.text-muted` styles.css:5822).
+       ▣ CE QUI CHANGE : le menu montre ce que les DONNÉES portent — « Non précisé » quand
+         `grille.type` est absent (`rendreMenuTypeGrille(grille.type)`). La déduction se dit
+         en clair sous le menu, `#precisionTypeGrille` (`small.text-muted.u-texte-petit
+         .u-block.u-mt-5`, aucune couleur) : « Tes critères sont tous holistiques. » (texte de
+         Grégoire, tel quel ; même forme pour analytiques / algorithmiques). RIEN si déclaré,
+         si les types divergent (le badge MIXTE le dit) ou sans critère. La ligne est rendue
+         par `afficherCriteresGrille` / `afficherCriteresTemp` (donc à chaque ajout, retrait
+         ou changement de type, sans rechargement) et après le choix au menu.
+         `typeGrilleAffiche` garde son rôle pour la phrase (`phrasePrecisionTypeGrille`).
+         ⮕ DÉCIDÉ SEUL : en création aussi, la ligne dit ce que les critères temporaires
+         sont — une grille neuve affiche « Tes critères sont tous holistiques. » jusqu'au
+         choix d'un type (c'est la règle appliquée littéralement ; à dire si c'est du bruit).
+       ▣ RIEN NE CHANGE : aucune écriture dans les grilles existantes (« Non précisé » =
+         absence du champ ; le choisir RETIRE) ; badge déduit des critères ;
+         `typeCritereParDefaut` inchangé ; aucun calcul de note. Jeton grilles.js 0903m (les
+         sentinelles anti-cache exigent le jour du BUILD, 0903, pas celui du calendrier).
+       ▣ TÉMOINS : sentinelle 28 cas (A.c phrase, F.c menu sans déduction + ligne sans
+         couleur ; B/C changent de sens — menu ET ligne — pas de périmètre) ; spec WebKit
+         : G0 → menu vide + ligne, choisir Analytique → ligne tue + `type` écrit, revenir →
+         champ RETIRÉ + ligne revenue, GM → rien. Break-tests (5 mutations, remise md5) : menu
+         relisant la déduction (3 + WebKit code 1) · ligne jamais rendue (5) · ligne malgré
+         un type déclaré (3) · ligne sur mixte (5) · ligne absente d'index.html (1).
+         `cd tests && npm run test:unit` : 453 fichiers / 4926 tests, code 0 (4924 + 2).
+       ▣ FINI QUAND, à l'écran : ouvrir une grille actuelle → menu « Non précisé », ligne
+         « Tes critères sont tous holistiques. » ; choisir « Analytique » → la ligne disparaît,
+         le menu porte le choix ; revenir à « Non précisé » → le champ est retiré, la ligne
+         revient. Le « fini quand » du lot 1 reste vrai (spec inchangée sur ces points).
      ===================================================================== -->
 
 <!-- =====================================================================

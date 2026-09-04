@@ -1624,6 +1624,8 @@ async function initialiserModuleGrilles() {
  *   type: 'holistique' | 'analytique' | 'algorithmique' — facultatif, DÉFAUT de ses
  *   critères ; absent sur toute grille d'avant ce lot (rien n'y est écrit). Le badge
  *   de composition ne le lit jamais : il dit ce qui EST, pas ce qui est déclaré.
+ *   Retouche du 4 sept. : le MENU montre ce que les données portent (« Non précisé »
+ *   = champ absent) ; la déduction se dit en clair sous le menu, jamais par une couleur.
  * 
  * AMÉLIORATIONS FUTURES:
  * - Moderniser les événements (remplacer onclick par addEventListener)
@@ -3231,9 +3233,12 @@ function typeCritereParDefautEnCours() {
 }
 
 /**
- * Ce que le menu de la grille MONTRE : le type déclaré ; sinon celui de ses
- * critères quand ils n'en ont qu'un ; sinon rien (composition mixte, aucun
- * critère, type inconnu). Lecture seule — ce qui est déduit n'est jamais écrit.
+ * Le type déclaré ; sinon celui de ses critères quand ils n'en ont qu'un ; sinon
+ * rien (composition mixte, aucun critère, type inconnu). Lecture seule — ce qui
+ * est déduit n'est jamais écrit.
+ * ↻ Retouche du 4 sept. 2026 (décision de Grégoire) : ne remplit PLUS le menu —
+ * un type déduit y passait pour un type déclaré. Elle nourrit la phrase sous le
+ * menu (`phrasePrecisionTypeGrille`), et rien d'autre.
  */
 function typeGrilleAffiche(grille) {
     if (!grille) return '';
@@ -3247,6 +3252,26 @@ function typeGrilleAffiche(grille) {
 function rendreMenuTypeGrille(valeur) {
     const menu = document.getElementById('typeGrille');
     if (menu) menu.value = TYPES_GRILLE.includes(valeur) ? valeur : '';
+}
+
+/**
+ * La phrase sous le menu — ce que ses critères disent quand la grille ne déclare
+ * rien (retouche du 4 sept. 2026). Texte arrêté par Grégoire, à ne pas reformuler.
+ * RIEN quand un type est déclaré, quand les types divergent (le badge MIXTE le dit
+ * déjà) ou sans critère. ⛔ Pas de couleur pour porter cette information : l'orange
+ * veut déjà dire « avertissement », et « déduit » est l'état normal de toute grille
+ * d'avant le lot 1.
+ */
+const ADJECTIFS_TYPE_GRILLE = { holistique: 'holistiques', analytique: 'analytiques', algorithmique: 'algorithmiques' };
+function phrasePrecisionTypeGrille(grille) {
+    if (!grille || TYPES_GRILLE.includes(grille.type)) return '';
+    const deduit = typeGrilleAffiche(grille);
+    return deduit ? 'Tes critères sont tous ' + ADJECTIFS_TYPE_GRILLE[deduit] + '.' : '';
+}
+
+function rendrePrecisionTypeGrille(grille) {
+    const ligne = document.getElementById('precisionTypeGrille');
+    if (ligne) ligne.textContent = phrasePrecisionTypeGrille(grille);
 }
 
 function creerNouvelleGrille() {
@@ -3308,6 +3333,7 @@ function creerNouvelleGrille() {
  * Avec formulaire éditable inline et placeholders orientés rédaction
  */
 function afficherCriteresTemp() {
+    rendrePrecisionTypeGrille({ type: window.tempTypeGrille, criteres: window.tempCriteres });
     const container = document.getElementById('listeCriteres');
     if (!container) return;
 
@@ -3986,8 +4012,10 @@ async function chargerGrillePourModif(id) {
     // Remplir le formulaire
     document.getElementById('nomGrilleTemplate').value = grille.nom || '';
     document.getElementById('descriptionGrille').value = grille.description || '';
-    // Lot 1 (3 sept. 2026) : déclaré, sinon déduit des critères, sinon rien — sans écrire.
-    rendreMenuTypeGrille(typeGrilleAffiche(grille));
+    // Lot 1 (3 sept. 2026), retouché le 4 : le menu montre ce que les DONNÉES portent —
+    // « Non précisé » quand `grille.type` est absent. La déduction se dit sous le menu
+    // (rendue par afficherCriteresGrille, qui suit chaque changement de critère).
+    rendreMenuTypeGrille(grille.type);
 
     // ✅ AJOUT (6 jan 2026) : Afficher le panneau métadonnées
     const panneauMeta = document.getElementById('panneauMetadonneesGrille');
@@ -4026,6 +4054,7 @@ async function dupliquerEtEditerGrille(id) {
 }
 
 function afficherCriteresGrille(grille) {
+    rendrePrecisionTypeGrille(grille);
     const container = document.getElementById('listeCriteres');
     if (!container) return;
 
@@ -5385,6 +5414,7 @@ async function modifierTypeGrilleHandler(el) {
         if (valeur) grilleTemplateActuelle.type = valeur;
         else delete grilleTemplateActuelle.type;
         await sauvegarderGrilleTemplate(true);
+        rendrePrecisionTypeGrille(grilleTemplateActuelle);
         return;
     }
     const ancien = typeCritereParDefautEnCours();
@@ -5512,6 +5542,7 @@ window.modifierTypeCritereGrilleHandler = modifierTypeCritereGrilleHandler;
 window.modifierTypeGrilleHandler = modifierTypeGrilleHandler;
 window.typeCritereParDefaut = typeCritereParDefaut;
 window.typeGrilleAffiche = typeGrilleAffiche;
+window.phrasePrecisionTypeGrille = phrasePrecisionTypeGrille;
 window.TYPES_GRILLE = TYPES_GRILLE;
 window.modifierSousCritereHandler = modifierSousCritereHandler;
 window.modifierPonderationCritereTempHandler = modifierPonderationCritereTempHandler;
