@@ -149,6 +149,13 @@
        Grégoire, tels quels). Ordre tranché et dit : release D'ABORD, puis `scripts/pousser.sh`
        — c'est lui qui rend le verdict au jeton, et il le rend sur le commit de release, celui
        qui part réellement (un verdict sur `fa5d34d2` aurait été périmé par le bump).
+     ▣ POUSSÉE — `scripts/pousser.sh origin main` : sentinelle WebKit « aucune rougeur
+       nouvelle (0 échec connu, inchangé) », hook Vitest vert, jeton `scripts/.verdict-
+       playwright.json` = sha `1228837a`, code 0, 0 instable, rendu 2026-09-04T01:12:54Z.
+       `d3f0a289..1228837a main -> main`. Après `git fetch` : HEAD = origin/main = `1228837a`,
+       0 devant, 0 derrière. **1.115.0 / build 0903-2103 EN LIGNE.** Run GitHub `33824921638`
+       (workflow Tests) lancé sur `1228837a` à 01:13:23Z — pas encore conclu à l'écriture ;
+       dernier vert complet : `33819177467` sur `d3f0a289`.
      ===================================================================== -->
 
 <!-- =====================================================================
