@@ -219,6 +219,62 @@
          `CADRAGE-2026-09-03-collections-de-parametres.md` (toujours modifiés dans l'arbre).
        ▣ DÛ ENSUITE : relecture croisée de Cowork de cette retouche → `scripts/pousser.sh`
          (verdict au jeton) → release 1.116 → push.
+       ▣ MESURÉ au commit : `44559804`, 10 fichiers, 4 devant `origin/main`.
+
+     ↻ TROISIÈME RETOUCHE — RÉGRESSION DU LOT 3, §7 de la consigne du jour, trouvée par Grégoire
+       à l'écran vers 7 h (`44559804`) : sa grille « Analyse littéraire » (12 critères, tous
+       analytiques), retour dans « Annoter et évaluer », bandeau rouge « Impossible de charger
+       l'évaluation : Timeout génération selects critères » et cadenas absent. Commit SÉPARÉ.
+       ▣ CAUSE, confirmée par la mesure (une seule pour les deux symptômes) : la fermeture
+         `attendreSelectsCriteres` de `modifierEvaluation` n'attendait que `#eval_<premierId>`, le
+         MENU de niveaux, 30 × 100 ms, puis rejetait. Un critère analytique n'a pas de menu
+         (`#eval_pts_<id>`). Avant le lot 3 il n'entrait jamais dans `criteres[]`, le premier
+         était donc toujours holistique/algorithmique. Depuis, premier critère analytique → 3 s →
+         rejet → `catch` (bandeau) → les étapes 13-14 (indicateur, verrouillage) jamais atteintes.
+         Le spec du lot 3 rouvrait une copie sur une grille MIXTE (premier critère holistique) par
+         `verifierEtChargerEvaluationExistante` — pas par ce chemin.
+       ▣ (a) `_attendreSaisiePremierCritereModif(evaluation)` — fonction de MODULE (plus une
+         fermeture ; exposée sur `window` pour les bancs) : résout dès que le premier critère a
+         son élément de saisie, `#eval_<id>` OU `#eval_pts_<id>` (option 1 de Cowork, tranchée :
+         les deux formes de saisie qui existent, nommées) ; message du timeout : « les critères
+         de la grille ne sont pas rendus » (plus « selects »).
+       ▣ (b) MESURÉ sur tout le chemin de réouverture, et corrigé ce qui y était :
+         · `_chargerValeursEtAlgoModif` étape 10 : cherchait un menu pour CHAQUE entrée et
+           écrivait « Select non trouvé » pour un critère à points → saute silencieusement les
+           entrées à `points` (elles reviennent à l'étape 10.5, `_restaurerPointsAnalytiquesModif`).
+         · `_initEvaluationEnCoursPourModif` : l'objet `window.evaluationEnCours` qu'il construit
+           n'avait PAS `pointsAnalytiques` → le bilan (qui lit `window`, §5) aurait dit le NOM du
+           niveau sur ce chemin. Corrigé : copie profonde des points sur l'objet, comme l'autre
+           chemin (`verifierEtChargerEvaluationExistante`, l. 746) le fait déjà.
+         · `desactiverFormulaireEvaluation` : désactive `#listeCriteresGrille1 input[type="number"]`
+           → le champ de points est bien verrouillé, rien à faire (mesuré, WebKit le prouve).
+         · `_afficherCriteresDepuisEvaluation` (repli « grille disparue ») rend un <select> avec le
+           NIVEAU pour toute entrée, donc « I » pour un critère analytique, à l'enseignant·e, en
+           consultation seule (sans grille, `calculerNote` ne tourne pas). L'attente s'y résout
+           (le select existe). INSCRIT, pas corrigé : hors du symptôme, PDF déjà juste.
+       ▣ (c) TÉMOINS : sentinelle lot 3 → 43 cas (I.a premier critère analytique → l'attente se
+         résout sur le champ de points, ROUGE avant la retouche (break-test v) ; I.b menu d'un
+         premier holistique, inchangé ; I.c rien de rendu → rejet à 3 s, message sans « selects » ;
+         I.d sans critère → false ; I.e source : étape 10 sans menu pour un critère à points, points
+         sur `window`, fermeture disparue). Horloge simulée (`vi.useFakeTimers`), `evaluation.js`
+         seul, patron #572. Spec lot 3, second test → étape 4 : `modifierEvaluationParId` sur la
+         copie enregistrée, formulaire vidé avant — AUCUN refus, notification « lecture seule
+         (verrouillée) » (étapes 13-14 atteintes), points 50 / 20 / 8 revenus, 78,0 %, les trois
+         champs `disabled`, `window.evaluationEnCours.pointsAnalytiques` = {50, 20, 8}, bilan « Ta
+         force : Sujet amené (50 / 50) » sans « Étendu ». (L'indicateur orange de l'étape 13
+         s'insère dans `#evaluations-saisie .contenu`, absent de ce banc : la notification tient
+         lieu de témoin.)
+         Break-tests (3 mutations, remise md5) : attente au menu seul (1, I.a) · étape 10 avec menu
+         pour les points (1) · points absents de window (1).
+         `cd tests && npm run test:unit` : 455 / 4989, code 0. WebKit ciblé, 8 specs d'évaluation :
+         15 / 15. 60 lignes ajoutées ; audit statique : aucun innerHTML écrit (la seule occurrence
+         est une LECTURE de diagnostic préexistante, déplacée), aucun handler/eval/console.log/db.set.
+         Jeton evaluation.js 0903c.
+       ▣ PAS TOUCHÉ, par consigne : collecteurs, calcul, données.
+       ▣ NON EMPORTÉS, à Cowork : `CONSIGNE-DEMARRAGE-COWORK.md`, `00-CADRAGES-OUVERTS.md`,
+         `CADRAGE-…-accordeons-gabarit-algorithmique.md`, `CADRAGE-…-collections-de-parametres.md`.
+       ▣ DÛ ENSUITE : relecture croisée de Cowork → `scripts/pousser.sh` (verdict au jeton) →
+         release 1.116 → push.
      ===================================================================== -->
 
 <!-- =====================================================================

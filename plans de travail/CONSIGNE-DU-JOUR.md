@@ -178,3 +178,50 @@ sans « Aucun ». Les deux derniers attendent une décision de Grégoire.
 
 **Puis l'ordre reprend** : relecture croisée de Cowork de cette retouche, verdict au jeton,
 release 1.116, push. Commite cette retouche AVEC ce fichier.
+
+---
+
+## 7 · Troisième retouche — RÉGRESSION du lot 3, trouvée par Grégoire à l'écran le 4 septembre vers 7 h (`44559804`)
+
+> Écrite par Cowork vers 8 h 15. **Symptôme vécu** : il a modifié sa grille « Analyse littéraire »
+> (12 critères, tous analytiques), est revenu dans « Annoter et évaluer », et **son évaluation
+> enregistrée ne s'est pas chargée** — bandeau rouge *« Impossible de charger l'évaluation : Timeout
+> génération selects critères »* — **et le cadenas n'est pas apparu** dans la palette de gauche.
+>
+> ▣ **Cause mesurée depuis Cowork, une seule pour les deux symptômes** :
+> `attendreSelectsCriteres` (`js/evaluation.js:1269-1296`) attend `#eval_<critereId>` du **premier**
+> critère de `evaluation.criteres[]`, 30 fois 100 ms, puis rejette. Un critère analytique n'a pas
+> ce select : son élément est `#eval_pts_<critereId>` (`evaluation-chargement.js:1113`, `:1300`).
+> **Avant le lot 3, un critère analytique n'entrait jamais dans `criteres[]`** : le premier était
+> toujours holistique ou algorithmique, et le select existait. Depuis le lot 3, sur une grille
+> entièrement analytique, le premier critère est analytique → 3 s → rejet → le `catch` de
+> `modifierEvaluation` (l. 1352) affiche le bandeau, et **les étapes 13-14 (indicateur et
+> verrouillage, l. 1343) ne s'exécutent jamais** : c'est le cadenas absent. Deux symptômes, une
+> cause. Le témoin : le spec du lot 3 rouvrait une copie sur une grille MIXTE dont le premier
+> critère est holistique — il ne pouvait pas voir ça.
+
+**Ce que ça produit à l'écran** : rouvrir une copie évaluée avec une grille entièrement
+analytique charge l'évaluation, ses points, sa note, et montre le cadenas — comme pour toute
+autre grille.
+
+**À faire**
+- **a)** `attendreSelectsCriteres` attend l'élément de saisie du premier critère **quel que soit
+  son type** : `#eval_<id>` OU `#eval_pts_<id>`. Tranche toi-même la forme (un `querySelector`
+  sur les deux identifiants, ou attendre que `#listeCriteresGrille1` porte un élément par
+  critère de la grille — cette seconde forme couvre aussi un premier critère dont le type
+  changerait demain). Le message du timeout cesse de dire « selects » s'il ne les attend plus seuls.
+- **b)** Mesure si autre chose, sur le chemin de réouverture, suppose un `select` pour chaque
+  entrée de `criteres[]` (`_chargerValeursEtAlgoModif`, l. 1625 et ce qu'elle appelle) — le même
+  angle mort peut s'y répéter. Dis ce que tu as trouvé, corrige ce qui est dans ce chemin.
+- **c)** Témoins : le spec WebKit du lot 3 sur la grille ENTIÈREMENT analytique **rouvre la copie
+  enregistrée** et vérifie que les points sont revenus dans leurs champs, que la note est
+  identique, et que l'indicateur de verrouillage est affiché ; un cas Vitest sur
+  `attendreSelectsCriteres` avec un premier critère analytique (rouge avant, vert après) ;
+  break-test.
+- ⚠ Ce que tu ne fais PAS : toucher aux collecteurs ni au calcul. Rien dans les données.
+
+**Décidé par Cowork** : c'est « corriger maintenant » — ça casse le parcours qu'on est en train
+de livrer (rouvrir une copie), et ça part dans 1.116. Ce que Grégoire a changé dans sa grille
+n'est pas la cause : la mesure suffit sans le savoir. Commite AVEC ce fichier.
+
+**Puis** : relecture croisée de Cowork, verdict au jeton, release 1.116, push.
