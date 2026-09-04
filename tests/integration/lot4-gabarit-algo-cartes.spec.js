@@ -39,7 +39,7 @@ const LIRE = `() => {
         ordre: blocs.map(e => e.dataset.pli || 'sous-criteres'),
         plis: Object.fromEntries([...l.querySelectorAll('.gabarit-algo-carte')].map(e => [e.dataset.pli, e.classList.contains('ferme') ? 'replie' : 'ouvert'])),
         rangeeAvantSousCriteres: l.innerHTML.indexOf('data-champ="nom"') < l.innerHTML.indexOf('sous-criteres-conteneur--en-tete'),
-        commentaire: l.innerHTML.includes('Modèle d\'observation') && !l.innerHTML.includes('Modèle de rétroaction') && !l.innerHTML.includes('Modèle de commentaire'),
+        commentaire: l.innerHTML.includes("Modèle d'observation") && !l.innerHTML.includes('Modèle de rétroaction') && !l.innerHTML.includes('Modèle de commentaire'),
         euf: [...l.querySelectorAll('option')].some(o => o.textContent === "Projection à l'EUF"),
         motsReference: (l.querySelector('input[data-param-cle="motsReference"]') || {}).value,
         cartesAvecId: [...l.querySelectorAll('.gabarit-algo-carte[id]')].length
