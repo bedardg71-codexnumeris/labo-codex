@@ -109,7 +109,10 @@ function ecranEvaluation() {
         // La palette : le champ de points de Langue, le menu de Contenu, les divs de commentaire.
         eval_pts_c2: elementDom({ max: '30' }), eval_c1: elementDom(),
         comm_c1: elementDom({ textContent: 'Sélectionne un niveau' }),
-        comm_c2: elementDom({ textContent: 'Saisis les points' })
+        comm_c2: elementDom({ textContent: 'Saisis les points' }),
+        // Le bilan (retouche du 4 sept.) : ses trois vues et son conteneur.
+        vueRetroGenerale: elementDom(), vueRetroSpecifique: elementDom(), vueRetroBilan: elementDom(),
+        contenuRetroBilan: elementDom({ innerHTML: '' })
     };
 }
 
@@ -117,7 +120,7 @@ function ecranEvaluation() {
  * Le bac à sable : calcul, palette (chargement), rétroaction, enregistrement et modification
  * dans le MÊME contexte — la chaîne réelle de « je tape 24 » à « c'est en base ».
  */
-function monter({ niveaux = {}, points = {}, echelle = ECHELLE, modification = false, cartouche = true } = {}) {
+function monter({ niveaux = {}, points = {}, echelle = ECHELLE, modification = false, cartouche = true, enBase = null, sansGrille = false } = {}) {
     const ecran = ecranEvaluation();
     const document = {
         getElementById: (id) => ecran[id] || null,
@@ -133,7 +136,7 @@ function monter({ niveaux = {}, points = {}, echelle = ECHELLE, modification = f
         idModification: modification ? 'EV1' : undefined
     };
     const base = {
-        test_grillesTemplates: [GRILLE],
+        test_grillesTemplates: sansGrille ? [] : [GRILLE],
         test_echellesTemplates: [echelle],
         test_cartouches_G3: [CARTOUCHE],
         test_pratiquesConfigurables: [],
@@ -153,9 +156,14 @@ function monter({ niveaux = {}, points = {}, echelle = ECHELLE, modification = f
         echapperHtml: (s) => String(s == null ? '' : s),
         genererIdUnique: (p) => p + 'NEUF',
         obtenirDonneesSelonMode: (k) => k === 'groupeEtudiants' ? [{ da: '1234567', prenom: 'A', nom: 'B', groupe: '01' }]
-            : k === 'productions' ? [{ id: 'P3', titre: 'Prod' }] : [],
+            : k === 'productions' ? [{ id: 'P3', titre: 'Prod' }]
+            : k === 'evaluationsSauvegardees' ? JSON.parse(JSON.stringify(enBase || [])) : [],
         sauvegarderDonneesSelonMode: (k, v) => { ecritures.push({ k, v: JSON.parse(JSON.stringify(v)) }); return true; },
         notifications: { succes() {}, erreur(t, m) { refus.push({ titre: t, details: m }); }, info() {}, warning() {} },
+        // Les lecteurs d'échelle du bilan (`profil-etudiant-calculs.js`, #555/#575) : nom et rang
+        // d'un code, et sa zone. Miroir de l'échelle témoin, I sous la suffisance, D entre les deux.
+        niveauDuCodeDansEchelle: (code) => { const i = ['I', 'D', 'M', 'E'].indexOf(code); return i === -1 ? null : { code, nom: ECHELLE.niveaux[i].nom, rang: i + 1 }; },
+        zoneDuNiveau: (code) => ({ I: 'priorite', D: 'signale', M: 'acquis', E: 'acquis' })[code] || null,
         obtenirPreference: () => null, obtenirCoursActifId: () => null,
         afficherNotificationSucces() {}, afficherNotificationErreur() {}, afficherNotificationCopiee() {},
         afficherSection() {}, afficherSousSection() {}, estModeeLectureSeule: () => false,
@@ -502,6 +510,61 @@ describe('lot 3 · E — rien ne bouge pour un critère holistique, algorithmiqu
     });
 });
 
+/* ------------------------------------------------- G — le bilan dit le chiffre (retouche) */
+
+/** Le bilan tel que l'élève le reçoit : `basculerVueRetroaction('bilan')` rend dans `#contenuRetroBilan`. */
+function bilan(win, ecran) {
+    win.basculerVueRetroaction('bilan');
+    return String(ecran.contenuRetroBilan.innerHTML || '');
+}
+
+describe('lot 3 · G — le bilan nomme un critère analytique par son chiffre, jamais par le nom du niveau déduit (décision de Grégoire, 4 sept.)', () => {
+    it('G.a un défi analytique : « (Langue 12 / 30) », et le holistique garde le nom de son niveau', () => {
+        // 12 sur 30 = 40 % → I (priorité) ; Contenu à M (acquis) devient la force.
+        const { win, ecran } = monter({ niveaux: { c1: 'M', c2: 'I' }, points: { c2: 12 } });
+        const html = bilan(win, ecran);
+        expect(html).toContain('(Langue 12 / 30)');
+        expect(html).not.toContain('Insuffisant');
+        expect(html).toContain('Ta force : Contenu (Maîtrisé)');
+    });
+
+    it('G.b un acquis en développement analytique : « - Langue (20 / 30) »', () => {
+        const { win, ecran } = monter({ niveaux: { c1: 'M', c2: 'D' }, points: { c2: 20 } });
+        const html = bilan(win, ecran);
+        expect(html).toContain('Acquis en développement');
+        expect(html).toContain('- Langue (20 / 30)');
+        expect(html).not.toContain('En développement');
+    });
+
+    it('G.c la force analytique : « Ta force : Langue (27 / 30) »', () => {
+        const { win, ecran } = monter({ niveaux: { c1: 'D', c2: 'E' }, points: { c2: 27 } });
+        const html = bilan(win, ecran);
+        expect(html).toContain('Ta force : Langue (27 / 30)');
+        expect(html).not.toContain('Étendu');
+        expect(html).toContain('- Contenu (En développement)');
+    });
+
+    it('G.d copie rouverte SANS sa grille : le bilan relit `criteres[]` en base — points et poids ENREGISTRÉS, chiffre identique', () => {
+        const enBase = [{ id: 'EV1', etudiantDA: '1234567', productionId: 'P3', grilleId: 'G3', echelleId: 'E3', noteFinale: 68, niveauFinal: 'D',
+            criteres: [
+                { critereId: 'c1', critereNom: 'Contenu', niveauSelectionne: 'M', ponderation: 70 },
+                { critereId: 'c2', critereNom: 'Langue', niveauSelectionne: 'I', points: 12, ponderation: 30 }
+            ] }];
+        const { win, ecran } = monter({ niveaux: { c1: 'M', c2: 'I' }, points: {}, enBase, sansGrille: true, modification: true });
+        const html = bilan(win, ecran);
+        expect(html).toContain('- Langue (12 / 30)');
+        expect(html).not.toContain('Insuffisant');
+        expect(html).toContain('Ta force : Contenu (Maîtrisé)');
+    });
+
+    it('G.e sans points, un critère analytique se nomme par son niveau, comme avant', () => {
+        const { win, ecran } = monter({ niveaux: { c1: 'M', c2: 'I' }, points: {} });
+        const html = bilan(win, ecran);
+        expect(html).toContain('(Langue Insuffisant)');
+        expect(html).not.toContain(' / ');
+    });
+});
+
 /* ------------------------------------------------------------- F — témoins de source */
 
 describe('lot 3 · F — témoins de source', () => {
@@ -543,5 +606,9 @@ describe('lot 3 · F — témoins de source', () => {
         expect(source('js/synthese-retroaction-rendu.js')).toContain('${esc(critere.points)} / ${esc(critere.weight)}');
         expect(source('js/evaluation-retroaction.js')).toContain('? `${ptsAnalytiques} / ${critere.ponderation}` : niveau;');
         expect(source('js/travaux-export-pdf.js')).toContain('? `${c.points} / ${c.ponderation}` : (c.niveauSelectionne || \'—\');');
+        // Retouche du 4 sept. : les trois rendus du bilan passent par la même lecture, et plus aucun n'appelle `_nomBilan` sur un critère.
+        const retro = source('js/evaluation-retroaction.js');
+        expect((retro.match(/= _lectureNiveauBilan\(niveauDe, (d|c|meilleur)\)/g) || []).length, "trois rendus, une lecture").toBe(3);
+        expect(retro).not.toMatch(/_nomBilan\(niveauDe, [a-z]+\.niveauSelectionne\)/);
     });
 });

@@ -98,6 +98,11 @@ node_modules
 *.timestamp-*.mjs
 .fuse_hidden*
 
+# Réglages locaux de Claude Code, propres au poste (4 sept. 2026, décision Cowork).
+# Sur le Mac, `~/.config/git/ignore` l'ignore déjà ; ici, pour que le montage
+# Linux de Cowork ne le voie plus comme le seul « non suivi » du dépôt.
+.claude/settings.local.json
+
 # Rapports d'outillage d'audit (lourds, régénérables — 21 Mo)
 audit/reports/
 
