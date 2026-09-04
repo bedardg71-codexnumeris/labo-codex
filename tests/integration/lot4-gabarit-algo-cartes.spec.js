@@ -22,7 +22,7 @@ const SEMER = `async () => {
     // security-ok: fixtures littérales écrites par le spec, aucune source externe.
     await db.set(cle('grillesTemplates'), [
         { id: 'G1', nom: 'Philo', dansBibliotheque: true, criteres: [
-            { id: 'CR', nom: 'Rigueur', type: 'algorithmique', ponderation: 20, sousCriteres: [
+            { id: 'CR', nom: 'Rigueur', type: 'algorithmique', ponderation: 20, modeleProjection: 'norme_externe', sousCriteres: [
                 { id: 'sc_1', code: '1', nom: 'Thèse non dégagée', ponderation: 1, retroaction: 'La thèse doit être explicite.' }
             ] } ] },
         { id: 'G2', nom: 'Autre', dansBibliotheque: true, criteres: [ { id: 'H', nom: 'Contenu', type: 'holistique', ponderation: 100 } ] }
@@ -73,7 +73,7 @@ const frapper = (page, sel, valeur) => page.evaluate(({ s, v }) => {
 }, { s: sel, v: valeur });
 
 test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste où on l\'a laissée quand on tape', async ({ page }) => {
-    page.on('dialog', (d) => d.dismiss().catch(() => {}));
+    page.on('dialog', (d) => d.accept().catch(() => {}));   // « Supprimer ce sous-critère ? » : oui (retouche c)
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(900);
@@ -122,4 +122,37 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     const texte = JSON.stringify(grille);
     expect(texte).not.toMatch(/"pli|plis|ferme|ouvert/);
     expect(grille.criteres[0].paramsProjection.motsReference, 'la frappe, elle, est bien écrite').toBe(1000);
+
+    // 6 — coup d'œil de Grégoire (4 sept., §7 b) : le nom d'un palier se lit EN ENTIER — « Sans erreur »,
+    //     pas « Sans erre » — dans la carte « Projection » dépliée.
+    const nomPalier = page.locator('#listeCriteres .gabarit-algo-carte[data-pli="CR:projection"] input.palier-nom').first();
+    await expect(nomPalier).toHaveValue('Sans erreur');
+    const mesure = await nomPalier.evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth, largeur: el.getBoundingClientRect().width }));
+    console.log('PALIER « Sans erreur » →', JSON.stringify(mesure));
+    expect(mesure.scroll, 'le texte tient dans le champ').toBeLessThanOrEqual(mesure.client);
+    expect(mesure.largeur).toBeGreaterThan(120);
+    // La note « Écris {service}… » : une seule, sous les paliers.
+    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli="CR:projection"] .palier-note-service')).toHaveCount(1);
+
+    // 7 — §7 c) : la corbeille supprime un palier et un sous-critère (à la souris, dans une carte dépliée
+    //     ou à plat) ; aucun « ✕ » ne reste dans l'éditeur.
+    await expect(page.locator('#listeCriteres .btn-supprimer')).toHaveCount(0);
+    const nbPaliersAvant = await page.locator('#listeCriteres .palier-projection').count();
+    await page.locator('#listeCriteres .palier-projection').last().locator('.bloc-retirer-coin').click();
+    await expect(page.locator('#listeCriteres .palier-projection')).toHaveCount(nbPaliersAvant - 1);
+    await expect(page.locator('#listeCriteres .sous-critere-input-code')).toHaveCount(1);
+    await page.locator('#listeCriteres .sous-criteres-conteneur--en-tete .sous-critere-item .bloc-retirer-coin').first().click();
+    await expect(page.locator('#listeCriteres .sous-critere-input-code')).toHaveCount(0);
+    let g = await page.evaluate(async () => ((await db.get(cle('grillesTemplates'))) || []).find(x => x.id === 'G1'));
+    expect(g.criteres[0].sousCriteres).toEqual([]);
+    expect(g.criteres[0].paliersProjection.length).toBe(nbPaliersAvant - 1);
+
+    // 8 — §7 d) : le chevron déplace un critère — le même geste que la liste des productions.
+    await page.evaluate(async () => { await window.ajouterCritereGrille('G1'); });
+    await expect(page.locator('#listeCriteres .bloc-coin-outils')).toHaveCount(2);
+    await expect(page.locator('#listeCriteres .bloc-reordonner')).toHaveCount(0);
+    await page.locator('#listeCriteres .bloc-coin-outils').first().locator('[data-action="deplacerCritereGrilleBas"]').click();
+    g = await page.evaluate(async () => ((await db.get(cle('grillesTemplates'))) || []).find(x => x.id === 'G1'));
+    expect(g.criteres.map(c => c.id)[1]).toBe('CR');
+    expect(g.criteres[0].nom).toBe('Nouveau critère');
 });

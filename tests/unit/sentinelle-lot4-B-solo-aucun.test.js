@@ -98,8 +98,10 @@ describe('lot 4 · B.A — les deux menus offrent « Aucun », le défaut reste 
         expect(menus[1]).toContain('<option value="multistructurel" >Multistructurel</option>');
         expect(menus[2]).toContain('<option value="multistructurel" selected>Multistructurel</option>');
         expect(menus[2]).toContain('<option value="aucun" >Aucun</option>');
-        // L'ordre du menu : les trois niveaux SOLO, puis le retrait — « Aucun » ferme la liste.
-        expect(menus[1].indexOf('value="abstrait_etendu"')).toBeLessThan(menus[1].indexOf('value="aucun"'));
+        // ↻ Coup d'œil de Grégoire (4 sept., retouche a) : « Aucun » EN TÊTE du menu, avant
+        // « Multistructurel » — l'ordre des options change, pas la valeur choisie par défaut.
+        expect(menus[1].indexOf('value="aucun"')).toBeLessThan(menus[1].indexOf('value="multistructurel"'));
+        expect(menus[2].indexOf('value="aucun"')).toBeLessThan(menus[2].indexOf('value="multistructurel"'));
     });
 
     it('A.b en CRÉATION : même menu, même défaut', () => {
@@ -111,6 +113,7 @@ describe('lot 4 · B.A — les deux menus offrent « Aucun », le défaut reste 
         expect((html.match(/<option value="aucun"/g) || []).length).toBe(2);
         expect(html).toContain('<option value="aucun" selected>Aucun</option>');
         expect(html).toContain('<option value="multistructurel" selected>Multistructurel</option>');
+        expect(html.indexOf('value="aucun"')).toBeLessThan(html.indexOf('value="multistructurel"'));
     });
 
     it('A.c le défaut d\'un critère neuf est toujours multistructurel — « Aucun » se choisit, il ne s\'impose pas', () => {

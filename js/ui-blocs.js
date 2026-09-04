@@ -61,9 +61,13 @@ window.boutonRetirerBloc = function(o) {
     const titre = o.titre || 'Retirer ce bloc';
     const p2 = (o.param2 === undefined || o.param2 === null) ? ''
         : ` data-param2="${window.echapperHtml ? window.echapperHtml(String(o.param2)) : String(o.param2)}"`;
+    // Lot 4 (4 sept. 2026, retouche c) : un sous-critère et un palier d'une grille enregistrée
+    // s'identifient par un TRIPLET (grille, critère, index) — la corbeille les sert aussi.
+    const p3 = (o.param3 === undefined || o.param3 === null) ? ''
+        : ` data-param3="${window.echapperHtml ? window.echapperHtml(String(o.param3)) : String(o.param3)}"`;
     const coin = o.coin ? ' bloc-retirer-coin' : '';
     return `<button type="button" class="btn-mini btn-icone-nu${coin}" title="${titre}" aria-label="${titre}"
-                data-action="${o.action}" data-param="${p}"${p2}
+                data-action="${o.action}" data-param="${p}"${p2}${p3}
                 ><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>`;
 };
 
