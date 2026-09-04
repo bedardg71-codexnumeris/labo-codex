@@ -149,8 +149,25 @@
         ne surveille rien. » — proposés.
      4. A — MIXTE : tranché « niveaux » (types divergents sans type déclaré) ; « déclarée
         analytique avec un critère qui déroge » = paliers. Un `if` si autre lecture.
-     ⏳ Relecture croisée de Cowork (A obligatoire) sur les deux cartes ; puis coup d'œil ;
-       puis `node scripts/verifier-playwright.mjs` sur le commit final → release 1.117 → push.
+     ↻ 16 h — LES DEUX POINTS SONT TRANCHÉS ET FAITS (consigne §3 et §6 ; relecture croisée de
+       Cowork sur `eaad7ce1` : RIEN À CORRIGER, trois réserves inscrites — le menu d'échelle qui se
+       reprérempli (A), le modèle texte qui nomme les niveaux (A), la clé de pli des critères sans id (C)).
+     ▣ C.3 — `9671a8c8` : « Par défaut, c'est réglé à “sans projection” » (15 h 40). MESURÉ : `gabaritNeuf`
+       n'avait AUCUN appelant — le « défaut du neuf » passait par le repli de lecture `MODELE_PAR_DEFAUT`,
+       le même que les critères d'avant #668 ; `PALIERS_GABARIT_NEUF` (apposition) n'a jamais été servi à
+       personne (inscrit dans le code). Source : `gabaritNeuf()` = `{ modeleProjection: 'aucune',
+       paramsProjection: {} }`, posé par `poserDefautNeuf` aux SIX sites où un critère devient
+       algorithmique (trois naissances, trois changements de type — `avecProjectionNeuve`, grilles.js),
+       jamais à la lecture ; `MODELE_PAR_DEFAUT` reste `norme_externe`. Sentinelle C, cas F (break-testé :
+       2 rouges) ; #668 lit la norme externe CHOISIE ; #674 accepte le motif. Vitest 458 / 5035 ;
+       14 specs WebKit verts. Jetons : grilles.js `c`, evaluation-projection.js et l'aide `b`.
+     ▣ B — l'aide sous le menu SOLO perd sa dernière phrase (« C'est le choix d'une méthode
+       traditionnelle, sans taxonomie. ») : l'aide ne qualifie pas le choix du collègue (15 h 50). Les
+       autres mots de A et B sont ARRÊTÉS tels quels (« Je suis d'accord avec l'ensemble »).
+     ⏸ SUITE, dans l'ordre : coup d'œil de Grégoire (le gabarit rangé · « Aucun » · la cartouche
+       d'une grille analytique · un critère algorithmique neuf sans projection) → verdict au jeton
+       (`node scripts/verifier-playwright.mjs`, suite COMPLÈTE) → release MINEURE 1.117 (mots du
+       changelog à lui) → push. `main` = 7 commits devant `origin/main`, non poussés.
      ===================================================================== -->
 
 <!-- =====================================================================
