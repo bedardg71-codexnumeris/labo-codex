@@ -52,6 +52,20 @@ const LIRE = `async () => {
 const TYPES_TEMP = '#listeCriteres select[data-on-change="modifierTypeCritereTempHandler"]';
 const TYPES_GRILLE = '#listeCriteres select[data-on-change="modifierTypeCritereGrilleHandler"]';
 
+// ↻ 4 SEPTEMBRE 2026 — LES QUATRE CLICS PASSENT PAR L'ÉVÉNEMENT DOM (`el.click()`), comme les
+// gestes des specs des lots 2 et 3 : le dispatcher de main.js les reçoit exactement comme à la
+// souris, et c'est lui qu'on éprouve. ⚠ Mesuré sur le runner GitHub (run 33869215489, la trace
+// relue action par action) : `page.click` y passait de 1,8 à 8 s PAR CLIC dans « waiting for
+// element to be visible, enabled and stable », et le quatrième clic démarrait à 25,9 s d'un
+// budget de 30 s — le rouge était un BUDGET DE TEMPS, pas une course de rendu (le bouton résolu
+// portait bien `data-param="G0"`). Et après chaque clic sur une grille enregistrée, on attend le
+// RENDU (un menu de type de plus), jamais un délai.
+const cliquer = (page, sel) => page.evaluate((s) => {
+    const el = document.querySelector(s);
+    if (!el) throw new Error('bouton absent : ' + s);
+    el.click();
+}, sel);
+
 test('lot 1 · le type monte à la grille — le « fini quand », à l\'écran', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
@@ -65,8 +79,8 @@ test('lot 1 · le type monte à la grille — le « fini quand », à l\'écran'
     await page.fill('#nomGrilleTemplate', 'Dissertation');
     await page.selectOption('#typeGrille', 'analytique');
     await page.waitForTimeout(200);
-    await page.click('#listeCriteres [data-action="ajouterCritereTemp"]');
-    await page.click('#listeCriteres [data-action="ajouterCritereTemp"]');
+    await cliquer(page, '#listeCriteres [data-action="ajouterCritereTemp"]');
+    await cliquer(page, '#listeCriteres [data-action="ajouterCritereTemp"]');
     await expect(page.locator(TYPES_TEMP)).toHaveCount(3);
     const typesTemp = await page.locator(TYPES_TEMP).evaluateAll(els => els.map(e => e.value));
     console.log('TYPES EN CRÉATION →', JSON.stringify(typesTemp));
@@ -104,8 +118,8 @@ test('lot 1 · le type monte à la grille — le « fini quand », à l\'écran'
     await expect(page.locator('#typeGrille')).toHaveValue('analytique');
 
     // 3 — un critère neuf sur cette grille naît analytique.
-    await page.click('#listeCriteres [data-action="ajouterCritereGrille"]');
-    await page.waitForTimeout(300);
+    await cliquer(page, '#listeCriteres [data-action="ajouterCritereGrille"]');
+    await expect(page.locator(TYPES_GRILLE), 'le quatrième critère est rendu').toHaveCount(4);
     etat = await page.evaluate(eval(LIRE));
     g = etat.grilles.find(x => x.id === neuve.id);
     expect(g.criteres).toEqual(['analytique', 'analytique', 'algorithmique', 'analytique']);
@@ -128,8 +142,8 @@ test('lot 1 · le type monte à la grille — le « fini quand », à l\'écran'
     await page.waitForTimeout(300);
     etat = await page.evaluate(eval(LIRE));
     expect(etat.grilles.find(x => x.id === 'G0').aType, 'revenir à « Non précisé » RETIRE le champ').toBe(false);
-    await page.click('#listeCriteres [data-action="ajouterCritereGrille"]');
-    await page.waitForTimeout(300);
+    await cliquer(page, '#listeCriteres [data-action="ajouterCritereGrille"]');
+    await expect(page.locator(TYPES_GRILLE), 'le troisième critère de G0 est rendu').toHaveCount(3);
     etat = await page.evaluate(eval(LIRE));
     console.log('GRILLE D\'AVANT →', JSON.stringify(etat.grilles.find(x => x.id === 'G0')));
     const g0 = etat.grilles.find(x => x.id === 'G0');

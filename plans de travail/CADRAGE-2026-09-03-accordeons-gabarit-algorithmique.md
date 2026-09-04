@@ -143,7 +143,7 @@ chantier d'écran, donc **reportable sans dette**.
 
 ---
 
-## ↻ Ajouté le 4 septembre 2026 vers 8 h 50 — l'ORDRE des sections, décidé par Grégoire
+## ↻ Ajouté le 4 septembre 2026 vers 7 h 20 — l'ORDRE des sections, décidé par Grégoire
 
 À l'écran, le gabarit d'un critère algorithmique enchaîne : la rangée du critère → **Modèle de
 formule** (`grilles.js:3482`) → Modèle de rétroaction (`:3594`, à renommer « Modèle de
@@ -159,7 +159,7 @@ de ce cadrage : les sous-critères portent la note (ouverts, en tête), le reste
 des sous-critères ne se replie pas au premier lot) tient toujours — un bloc en tête qui ne se
 replie pas est exactement ce qu'il demande. **Avec le lot 4.**
 
-## ↻ Ajouté le 4 septembre 2026 vers 9 h — deux retours de plus sur le même gabarit
+## ↻ Ajouté le 4 septembre 2026 vers 7 h 25 — deux retours de plus sur le même gabarit
 
 **a) « Il manque d'espace entre le modèle de formule et le modèle de projection : on dirait un
 seul formulaire, alors que ce sont deux choses différentes. »** ⮕ C'est exactement ce que les
@@ -175,7 +175,7 @@ l'EUF ; et le 2 septembre, il a retiré des noms de discipline et d'épreuve de 
 (#687, #690). Un collègue qui règle 500 mots / 20 erreurs pour une autre épreuve lirait
 « Projection à l'EUF » sur un modèle qui ne l'est plus. **Recommandation : garder le nom
 générique et rendre l'EUF visible comme réglage de départ** — « Norme externe (par défaut :
-l'EUF, 900 mots / 30 erreurs) », ou la description sous le menu qui le dit. ↻ **TRANCHÉ PAR GRÉGOIRE le 4 septembre vers 9 h, contre la recommandation** : *« Pour l'instant,
+l'EUF, 900 mots / 30 erreurs) », ou la description sous le menu qui le dit. ↻ **TRANCHÉ PAR GRÉGOIRE le 4 septembre vers 7 h 25, contre la recommandation** : *« Pour l'instant,
 indiquons "Projection à l'EUF". »* L'option s'appelle **« Projection à l'EUF »**. La réserve de
 Cowork reste écrite ci-dessus pour le jour où un collègue règle une autre norme sous ce nom — ce
 sera alors une mesure, pas une supposition. Le libellé seul change (`evaluation-projection.js:186`,

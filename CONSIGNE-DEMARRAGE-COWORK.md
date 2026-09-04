@@ -1,7 +1,7 @@
 # Consigne de démarrage — la session Cowork qui prend le relais
 
-> **Réécrite le 4 septembre 2026 vers 10 h, par la session Cowork du 4 septembre au matin, pendant
-> que Claude Code publiait 1.116.** **Elle REMPLACE toute version précédente.**
+> **Réécrite le 4 septembre 2026 à 10 h 20 (Toronto), par la session Cowork du 4 septembre au matin,
+> après la publication de 1.116.** **Elle REMPLACE toute version précédente.**
 >
 > ⚠ **Ce fichier porte un nom sans date, exprès.** La date d'écriture est en tête ; c'est elle
 > qui fait foi.
@@ -54,63 +54,62 @@ qui te sont confiés, et dans sa console. Le code appartient à Claude Code.
 ⛔ **Ne lis PAS les 130 autres fichiers de `plans de travail/`.** L'index du point 6 est la porte
 d'entrée ; c'est pour ça qu'il existe.
 
-## 3 · L'ÉTAT MESURÉ — le 4 septembre 2026 vers 10 h, en lecture seule, PENDANT la release
+## 3 · L'ÉTAT MESURÉ — le 4 septembre 2026 à 10 h 15 (Toronto), en lecture seule
 
-⚠ **REMESURE-LE. Ce paragraphe a été écrit pendant que Claude Code publiait ; il est périmé par
-construction.** Commandes : `git --no-optional-locks log --oneline -3`,
-`git --no-optional-locks rev-list --left-right --count origin/main...HEAD`, `cat version.json`.
+⚠ **REMESURE-LE. Il aura vieilli avant que tu le lises.** Commandes :
+`git --no-optional-locks log --oneline -3` · `git --no-optional-locks rev-list --left-right --count origin/main...HEAD`
+· `cat version.json` · **`TZ=America/Toronto date`** pour toute heure que tu écris.
 
-- **Au moment de l'écriture** : `HEAD` = `f485ea34`, **cinq commits devant `origin/main`** (lot 3,
-  deux retouches du PDF et du champ, la régression de la réouverture), tous relus par Cowork ;
-  `version.json` disait déjà **1.116.0**, build `0904-0729`, et `js/changelog-data.js` était
-  modifié non commité — **le §8 de la consigne du jour était en cours d'exécution**.
-- **Ce que tu dois trouver si tout s'est bien passé** : `origin/main` = `main`, un commit de
-  release `release(1.116.0)` en tête, `rev-list` rend `0 0`, et le bloc de clôture de Claude Code
-  dans `SESSION.md` (lis-le par `grep -n "1.116" SESSION.md`, jamais en entier) dit le run GitHub.
-  ⛔ **Si `rev-list` ne rend pas `0 0`, la publication n'est pas finie** : demande à Grégoire où
-  Claude Code en est avant d'écrire quoi que ce soit.
-- **Quatre fichiers de cadrage de Cowork** étaient modifiés dans l'arbre à l'écriture
-  (`CONSIGNE-DEMARRAGE-COWORK.md`, `00-CADRAGES-OUVERTS.md`, les cadrages « collections »,
-  « accordéons ») plus **deux fichiers neufs** (le cadrage du lot 4 ; ce fichier-ci réécrit). Le §8
-  demandait à Claude Code de les emporter avec le commit de release. **Vérifie qu'ils y sont**
-  (`git --no-optional-locks status --short` doit ne rendre que des `??` ; s'il rend des ` M`,
-  ce sont des décisions de Grégoire non commitées — le dire, et les faire commiter avec le lot 4).
+- **En ligne** : **1.116.0**, build `0904-0729` — les lots 2 et 3 des trois types de grille et
+  leurs trois retouches. Poussée à 7 h 32 (`7a197996`), jeton WebKit local vert sur ce commit.
+- **`main` = `origin/main` = `3d7b8dc0`** (`rev-list` rend `0 0`) : la release, le bloc de clôture
+  de Claude Code (`553b4951`), et le commit de documentation qui porte les décisions de Grégoire
+  du 4 septembre et le cadrage du lot 4.
+- ⚠ **LA CI EST ROUGE SUR `main`** : run GitHub 33869215489 — Vitest vert, **Playwright 254 / 255**,
+  le rouge est le spec du lot 1 (`tests/integration/type-grille-lot1.spec.js`), **jamais jugé sur
+  Linux** parce que le run de 1.115 avait été annulé. Claude Code l'a mesuré (hypothèse : course
+  de rendu sur le runner) et inscrit ; **rien corrigé**, par le §8 de la consigne d'alors. ⮕ C'est
+  le **§2 de la consigne du jour** : d'abord la CI, avant le lot 4. Règle 7 : le vert local ne
+  prouve rien.
+- **Fichiers de Cowork non commités à l'écriture** : la consigne du jour (le lot 4), l'archive de
+  l'ancienne, ce fichier, et quatre cadrages retouchés pour leurs heures. **Ils partent avec le
+  premier commit de Claude Code.** Vérifie : `git --no-optional-locks status --short` ne doit
+  rendre que des `??` NFD (voir l'erreur 10) — s'il rend des ` M`, dis-le et fais-les emporter.
 - ⚠ **Le montage Linux de Cowork rend les noms de fichiers en NFD** : des fichiers suivis
   (`Retours des testeurs/jean-françois/`, `docs/projet de développement/`, le `.txt` de modèle)
   apparaissent `??`, et `ignorés/` n'est pas vu comme ignoré. **Ce ne sont pas des non-suivis.**
-  Détail à l'erreur 10, §6.
 - **Sa console** — l'artefact « Les huit gestes » (titre à l'écran : « Ce qu'il reste à faire »).
-  **Demande-lui le lien ; ne le devine pas, et n'en fabrique pas une seconde version.** Elle
-  portait à 10 h l'item des grilles « ton coup d'œil » : il est fait ; **mets-la à jour à
-  l'ouverture** (règle 6) — 1.116 en ligne, l'item des grilles disparaît, le lot 4 entre.
+  **Demande-lui le lien ; ne le devine pas, et n'en fabrique pas une seconde version.** À 10 h 15
+  elle dit « 1.116 commitée, publication en cours » : **mets-la à jour à l'ouverture** — en
+  ligne, CI rouge à régler, lot 4 en cours, et les deux décisions qui attendent Grégoire.
 
 ## 4 · CE QUI EST DÛ — dans l'ordre
 
-### a) Clore 1.116 dans les fichiers de Grégoire
-Si la publication est finie (§3) : **`OU-EN-EST-ON.md`** — la ligne des trois types de grille
-passe à « en ligne dans 1.116 » avec sa phrase « vérifié comment » (les mesures sont dans le
-bloc de clôture de Claude Code, `SESSION.md`, et dans les relectures de Cowork) ; **sa console**
-idem. ⚠ Ce que Grégoire a vu à l'écran le 4 septembre est écrit dans la consigne des lots
-(retours 1 à 8) — c'est la preuve « éprouvé par Grégoire ».
+### a) La consigne du jour est ÉCRITE : `plans de travail/CONSIGNE-DU-JOUR.md` (4 septembre, 10 h 20)
+§2 la CI verte (le spec du lot 1, pas le code) → le lot 4 en quatre volets (C gabarit → B SOLO
+« Aucun » → A paliers → D PDF) → relecture croisée (A obligatoire : la cartouche est un format
+qui voyage) → coup d'œil de Grégoire → verdict → **1.117** → push. Grégoire ne colle qu'une ligne.
+⚠ **Deux points y sont `[EN ATTENTE]`, et c'est TOI qui les débloques** en écrivant la décision
+de Grégoire dans le fichier :
+1. **C.3, le défaut de projection** d'un critère algorithmique neuf — recommandation « Aucune
+   projection » ; **il n'a pas tranché** (il a tranché le NOM « Projection à l'EUF », contre
+   la recommandation, pas le défaut). Repose-la, avec la recommandation, au moment où C s'ouvre.
+2. **Les libellés du volet A** que ses collègues liront (« Paliers (bornes en %) », « 0–64 % »…) —
+   **propose-lui le texte**, n'attends pas qu'il le compose. Après la carte de Claude Code.
 
-### b) Le lot 4 — cartographier, puis écrire la consigne
-Le cadrage (§2, point 3) porte les décisions ; **aucune mesure n'y dépasse les lignes citées**.
-Avant d'écrire `CONSIGNE-DU-JOUR.md` :
-- cartographie les quatre volets (A paliers, B SOLO « Aucun », C gabarit, D PDF) — où chaque
-  chose se lit et s'écrit, et ce qui voyage (A touche la cartouche : format qui voyage → relecture
-  croisée due, règle 2) ;
-- **remonte à Grégoire ce que le cadrage nomme comme lui appartenant**, en lui **proposant un
-  texte** : le défaut de projection (« Aucune projection » recommandé, **pas tranché**), la grille
-  MIXTE dans le formulaire de cartouche, et les libellés neufs que ses collègues liront ;
-- puis écris la consigne dans l'ordre que le cadrage propose (C → B → A → D), **une seule
-  livraison à la fin, après son coup d'œil**, en 1.117.
-⚠ Le lot 4 ne porte pas de mesures, exprès. **Cartographie-le avant qu'une ligne s'écrive.**
+### b) Quand Claude Code rend ses cartes (B, puis A), relis-les AVANT qu'il code
+La consigne le lui demande. La carte de A dit si le format de la cartouche change (les bornes
+dans la copie, ou relues sur l'échelle) : **c'est ce qui voyage, c'est la règle 2.**
 
-### c) Ce qui reste ouvert par ailleurs
-`plans de travail/00-CADRAGES-OUVERTS.md` en tient la liste — sept cadrages, le 3 exécuté.
-⏳ Et le bandeau « Niveau général » du PDF sur une grille entièrement analytique : **gardé** sur
-recommandation de Cowork (c'est le niveau de la copie, pas d'un critère) ; Grégoire n'a pas
-contredit. Si un collègue s'en étonne, c'est une décision, pas un défaut.
+### c) Fin de lot : `OU-EN-EST-ON.md`, sa console, ce fichier
+La ligne des trois types de grille est à « livré » (dix-huitième passe, 4 septembre 7 h 40) ;
+la CI rouge n'y est pas encore écrite — **ajoute-la** à l'ouverture, en une ligne, avec le
+numéro du run.
+
+### d) Ce qui reste ouvert par ailleurs
+`plans de travail/00-CADRAGES-OUVERTS.md` — sept cadrages ; le 3 est exécuté (1.116), le 7 est
+le lot 4. ⏳ Le bandeau « Niveau général » du PDF sur une grille entièrement analytique est
+**gardé** (c'est le niveau de la copie, pas d'un critère) ; Grégoire n'a pas contredit.
 
 ## 5 · COMMENT GRÉGOIRE VEUT QU'ON LUI PARLE
 
@@ -198,6 +197,12 @@ c'est lui qui a changé ce défaut, le 1er septembre.
     « Aucune projection » existait (`evaluation-projection.js:232`). **Six fois en trois jours**,
     ce qu'il demande existe déjà sous un autre nom. ⮕ **Avant de remonter une question, `grep`
     la demande dans `js/` ; la réponse y est une fois sur deux.**
+
+14. **Des heures écrites de mémoire au lieu d'être lues.** Cowork a daté ses fichiers « 9 h 30 »,
+    « 9 h 45 », « 10 h » alors que l'horloge de Toronto disait 7 h 25 à 7 h 40 (témoin : le
+    build `0904-0729` et le push `7a197996` à 7 h 32). Corrigé après coup, dans sept fichiers.
+    ⮕ **Toute heure qu'on écrit se lit d'abord : `TZ=America/Toronto date`.** L'horloge du montage
+    est en UTC ; la date en tête d'un fichier « fait foi » — elle doit donc être mesurée.
 
 ### ▣ Et un motif qui est revenu SIX fois en trois jours
 **« Ce que Grégoire demande existe déjà, ailleurs, sous un autre nom. »** L'écran de

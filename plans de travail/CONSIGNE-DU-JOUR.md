@@ -1,274 +1,171 @@
-# Consigne du jour — le lot 3 des trois types de grille, puis UNE publication pour les lots 2 et 3
+# Consigne du jour — la CI redevient verte, puis le lot 4 (le gabarit algorithmique se range, et une grille analytique a ses paliers)
 
-> **Écrite le 4 septembre 2026 au soir, par Cowork, à la clôture de la séance, pour la séance suivante.**
-> **Application au moment de l'écriture : `1.115.0`, build `0903-2103`.**
-> ▣ **État mesuré à l'écriture** : `HEAD` = `37660b76` (le lot 2), **un commit devant
-> `origin/main`** (`16dfc5eb`), 0 derrière — témoin : `git rev-list --left-right --count
-> origin/main...HEAD` rend `0 1`. Arbre : quatre fichiers modifiés non commités, tous à Cowork
-> (`CONSIGNE-DEMARRAGE-COWORK.md`, `OU-EN-EST-ON.md`, `SESSION.md` pour ton bloc de clôture, la
-> consigne des lots). **Ils partent AVEC le commit du lot 3.**
+> **Écrite le 4 septembre 2026 à 10 h 20 (heure de Toronto, lue par `TZ=America/Toronto date`), par
+> Cowork, après la publication de 1.116.**
+> **Application au moment de l'écriture : `1.116.0`, build `0904-0729`, EN LIGNE.**
+> ▣ **État mesuré à l'écriture** : `HEAD` = `3d7b8dc0` = `origin/main` (témoin :
+> `git rev-list --left-right --count origin/main...HEAD` rend `0 0`) ; arbre propre hors les
+> fichiers de Cowork de ce matin (ce fichier, l'archive de l'ancien, la consigne de démarrage
+> Cowork et quatre cadrages retouchés pour leurs heures). **Ils partent avec ton premier commit.**
+> ⚠ **La CI est ROUGE sur `main`** : run GitHub 33869215489, Vitest vert, Playwright 254 / 255 —
+> le rouge est `tests/integration/type-grille-lot1.spec.js`, jamais jugé sur Linux (le run de
+> 1.115 avait été annulé). Tu l'as mesuré et inscrit dans `SESSION.md` (l. ~318-332). **C'est le §1.**
 >
 > ⚠ **Si tu lis ceci plus de quelques heures après son écriture, remesure avant d'exécuter.**
-> ⚠ **Tu as un état mesuré plus frais que celui-ci : ton propre bloc de clôture du 4 septembre
-> dans `SESSION.md`. Il fait foi sur le mien.**
+> ⚠ **Ton propre bloc de clôture dans `SESSION.md` fait foi sur l'état mesuré ci-dessus.**
 
 ---
 
 ## Ce que cette consigne produit à l'écran, pour Grégoire
 
-Il saisit **24 sur 30** sur un critère analytique, et **la rétroaction de cartouche attachée au
-niveau où tombe 80 % apparaît**, sans qu'il ait choisi de niveau nulle part. Et le PDF de l'élève
-liste ce critère avec son chiffre — **24 / 30** — et rien d'autre.
+**Rien avant son coup d'œil** : une seule livraison, 1.117, à la fin. Ce qu'il verra alors :
+- le gabarit d'un critère algorithmique s'ouvre sur **ses sous-critères**, tout de suite sous la
+  rangée du critère ; la formule, le commentaire et la projection sont **trois cartes nommées**,
+  repliées ou dépliées selon qu'elles portent la note ou les mots ;
+- « Modèle de rétroaction » se lit **« Modèle de commentaire »** ; « Norme externe (épreuve
+  uniforme) » se lit **« Projection à l'EUF »** ;
+- le menu « Niveau SOLO » d'un critère offre **« Aucun »** ;
+- pour une grille analytique, le formulaire de cartouche ne parle plus de « niveaux » mais de
+  **paliers en %**, préremplis ; l'éditeur de cartouche titre ses colonnes par les bornes.
 
 ---
 
 ## 1 · Lis d'abord
 
-1. `PROTOCOLE.md`, puis `OU-EN-EST-ON.md` (la ligne des trois types de grille est à jour).
-2. **`plans de travail/CONSIGNES-2026-09-03-lots-des-trois-types-de-grille.md`** — les arrêtés,
-   le hors-périmètre, **le lot 3**, et sous le lot 2 la **relecture croisée de Cowork** avec ses
-   trois trouvailles. ⛔ **Sa ligne « N'ouvre pas ce lot avant que Grégoire ait vu le lot 2 à
-   l'écran » est LEVÉE par la décision du 4 septembre** : il regarde les deux lots ensemble.
-3. Ton bloc de clôture du 4 septembre dans `SESSION.md`.
+1. `PROTOCOLE.md` (règles 1, 2 et 7), puis `OU-EN-EST-ON.md`.
+2. **`plans de travail/CADRAGE-2026-09-04-lot-4-gabarit-algorithmique-et-paliers-analytiques.md`**
+   — les décisions de Grégoire, volet par volet, et ce qui lui remonte encore. **Il fait foi sur
+   ce fichier-ci en cas d'écart.**
+3. `plans de travail/CADRAGE-2026-09-03-accordeons-gabarit-algorithmique.md` — les cartes
+   repliables : le composant, le piège (le gabarit se redessine à chaque frappe), l'état en
+   mémoire, la ligne de partage, et les ajouts du 4 septembre.
+4. Ton bloc de clôture de 1.116 dans `SESSION.md` (par `grep -n "1.116" SESSION.md`, jamais en
+   entier), pour la CI.
 
 ---
 
-## 2 · Le mandat : le lot 3, avec une exigence que le texte du 3 septembre ne portait pas
+## 2 · D'ABORD : la CI redevient verte — le spec du lot 1, pas le code
 
-**Le lot 3 tel qu'écrit** : le pourcentage d'un critère analytique trouve son niveau par les
-bornes de l'échelle **de la grille** ; ce niveau ouvre la cartouche (clé `critereId_niveau`).
-Mesure d'abord les deux points de sa section « À mesurer avant d'écrire ».
+**Décidé par Cowork (technique)** : une CI rouge sur `main` n'est pas une trouvaille à inscrire,
+c'est l'état de vérité du dépôt qui ment (le 2 septembre, « la CI rouge que personne ne lisait »
+a été la première des quatre occurrences du vert qui ne prouve rien). **Ça se règle avant le lot 4,
+dans un commit à part.**
 
-**L'exigence ajoutée** (trouvaille 1 de la relecture du lot 2, mesurée le 4 septembre) :
-**un critère analytique DOIT entrer dans `evaluation.criteres[]` en base**, comme les autres,
-parce que seize fichiers lisent ce tableau et qu'aucun ne voit les points aujourd'hui — dont le
-PDF de l'élève (`travaux-export-pdf.js:949`, qui rend `critereNom — niveauSelectionne`) et la
-matrice de dépistage (`consolidation.js:118`).
-
-⚠ **Et ici les deux règles se croisent — tranche-les ensemble, pas l'une contre l'autre :**
-- Le niveau déduit **entre** dans `criteres[]` (c'est ce qui le rend visible au dépistage, à la
-  synthèse, à la cartouche) ;
-- mais **l'élève ne voit que le chiffre** (arrêté 4, et « ce qui ne doit pas bouger » du lot 3).
-  ⮕ Le rendu du PDF **doit donc distinguer** un critère analytique : il imprime **« 24 / 30 »**,
-  pas le niveau. C'est **dans** le périmètre (le chiffre) ; tout ce qui irait au-delà du chiffre
-  dans le PDF est nommé hors périmètre. Mesure où `criteres[]` se construit à l'enregistrement
-  (les quatre écrivains du lot 2 : `evaluation-sauvegarde.js`, `evaluation.js`, l'auto-save) et
-  fais entrer le critère analytique **avec ses points ET son niveau déduit**, sous des noms qui
-  disent ce qu'ils sont.
-- **Les points restent dans `pointsAnalytiques`** (lot 2) : la source ne change pas de place, le
-  tableau `criteres[]` en porte une **lecture**. Si tu vois mieux, dis-le avant d'écrire.
-
-**Ce qui ne bouge pas** : un critère holistique ou algorithmique se calcule et s'enregistre
-exactement comme avant ; les sentinelles du calcul passent **sans modification** ; la boucle de
-`calculerNote` reste intouchée (le lot 2 y a mis un témoin de source).
-
-**Trouvaille 2 du lot 2** (points bornés à la saisie, pas en base) : **pas dans ce lot.** Inscrite.
+- Ton hypothèse (SESSION.md) : course de rendu entre `chargerGrillePourModif('G0')` et le rendu
+  précédent, sur un runner plus lent ; le clic tombe sur la liste de la grille précédente.
+  Rejoue la trace (`npx playwright show-trace`) et **confirme-la ou infirme-la avant de toucher**.
+- Si c'est le spec : rends-le robuste **comme les autres gestes du spec** — attendre le rendu de
+  G0 (un élément qui n'existe que pour G0) avant de cliquer, pas un `waitForTimeout`. Break-test :
+  le spec doit encore rougir si le comportement du lot 1 se casse (retire la propagation du type
+  aux critères neufs → rouge).
+- Si c'est le code (un vrai défaut de course qu'un utilisateur lent peut rencontrer) : **arrête-toi
+  et dis-le** ; ça remonte, et ça passe avant le lot 4.
+- ⚠ Règle 7 : le vert local ne prouve rien — c'est **le run GitHub** qui juge. Pousse ce commit seul
+  (c'est un `test:` sans bump, `scripts/release.mjs --build-only` s'il touche `index.html`, sinon
+  rien) et **attends le run** avant d'ouvrir le lot 4. Dis son numéro et son verdict.
 
 ---
 
-## 3 · L'ordre de la séance, et il ne se négocie pas
+## 3 · Le lot 4, dans l'ordre C → B → A → D — un commit par volet, une livraison à la fin
+
+### Volet C — le gabarit algorithmique se range (`js/grilles.js`, deux gabarits : `:3355-3806` et le second à `:4121`)
+
+Cinq points, tous tranchés par Grégoire sauf le 3 :
+
+1. **Libellés** : « Modèle de rétroaction » → **« Modèle de commentaire »** (`grilles.js:3594`, le
+   seul libellé ; la clé sous le menu ne porte pas le mot — vérifie que rien qui voyage ne
+   change). Relis les descriptions de cette section pour dire « commentaire » partout où elles
+   disent « rétroaction » de CES phrases-là (pas de la cartouche).
+   « Norme externe (épreuve uniforme) » → **« Projection à l'EUF »** (`evaluation-projection.js:186`,
+   `nom` seulement ; **l'`id` `norme_externe` ne bouge pas**, il voyage avec les grilles partagées).
+2. **Ordre** : les **sous-critères** viennent en premier, sous la rangée du critère ; puis la
+   formule, le commentaire, la projection. Mesure d'abord ce qui dépend de l'ordre du DOM (les
+   `data-critere-index`, les handlers délégués, `afficherCriteresTemp()` à `:5025`) — l'ordre
+   change le rendu, pas les données.
+3. **Défaut de projection d'un critère neuf** (`evaluation-projection.js:605`, `'norme_externe'`) :
+   ⛔ **NE PAS FAIRE tant que la ligne suivante n'est pas remplacée par la décision de Grégoire.**
+   `[EN ATTENTE — recommandation de Cowork : 'aucune' ; Grégoire n'a pas tranché]`
+   Si tranché « aucune » : source seulement, les critères existants gardent leur modèle ; un cas
+   dans une sentinelle (un critère neuf naît sans projection ; un critère existant `norme_externe`
+   reste `norme_externe` après rechargement).
+4. **Les cartes repliables** — c'est le cadrage « accordéons » qui les spécifie : ouvert ce qui
+   porte la note (sous-critères, formule), fermé ce qui porte les mots (commentaire, projection,
+   codes) ; **l'état du pli vit en mémoire, par critère et par section, jamais dans la grille** ;
+   le composant est celui de Cadre et de l'aide (bascule `pratiques.js:2113`). ⚠ **Le piège** :
+   le gabarit se redessine en entier à chaque frappe (`grilles.js:5025, 5039, 5051`) — un pli
+   dans le DOM se refermerait sous les doigts ; relis l'état à chaque redessin. Cette étape règle
+   aussi l'espace manquant entre formule et projection : **pas de marge ajoutée à part**.
+5. Rien dans les données de personne ; aucune sentinelle du calcul ne change.
+
+**Témoins** : une sentinelle Vitest sur les libellés et l'ordre (rendu du gabarit : l'élément des
+sous-critères précède celui de la formule ; « Modèle de commentaire » présent ; « Modèle de
+rétroaction » absent — témoin : il reste présent là où c'est la cartouche) ; un spec WebKit qui
+plie une carte, tape dans un champ, et vérifie que la carte est toujours pliée.
+
+### Volet B — « Aucun » au menu « Niveau SOLO » (`grilles.js:3399` et `:4121`, défaut `:330`)
+
+**Mesure avant d'écrire, et rends la carte à Cowork** : les neuf fichiers qui lisent `niveauSOLO`
+(`echelles.js` 11, `profil-etudiant-calculs.js` 9, `grilles.js` 9, `trimestres.js` 6,
+`profil-etudiant-helpers.js` 2, `import-export.js` 2, `tableau-bord-apercu.js` 1,
+`partage-schemas.js` 1, `interventions.js` 1 — `grep -rn -c "niveauSOLO" js/`) : pour chacun, *que
+fait-il d'une valeur « aucun » ?* « Aucun » veut dire **ce critère ne nourrit pas la lecture
+SOLO** ; chaque lecteur doit savoir le sauter **sans que le critère disparaisse de la note**.
+`partage-schemas.js` et `import-export.js` : la valeur doit passer à l'import et au partage
+(format qui voyage → mesure, et dis-le).
+⚠ **Question qui remonte à Grégoire, avec ta mesure** : que dit l'écran de dépistage d'une copie
+dont TOUS les critères sont « Aucun » ? Propose-lui la phrase.
+
+### Volet A — les paliers d'une grille analytique (`js/cartouches.js`, `index.html:5452`)
+
+**Décision de Grégoire : la voie (a)** — l'échelle reste le mécanisme des paliers ; pour une
+grille analytique elle se présente comme des paliers en %, préremplie, et l'éditeur de cartouche
+titre ses colonnes par les bornes.
+
+**Mesure avant d'écrire, et rends la carte à Cowork** (ce volet touche la cartouche, **format qui
+voyage** → relecture croisée obligatoire, règle 2) :
+- comment le formulaire de cartouche connaît le type de la grille choisie (`grille.type` depuis
+  le lot 1, ou déduit des critères quand « Non précisé ») ; `cartouches.js` ne lit `.type` qu'une
+  fois — dis où ;
+- la cartouche **copie** les niveaux de l'échelle à la création (`cartouches.js:471`,
+  `niveaux.map(n => ({code, nom}))`) et l'éditeur les lit depuis cette copie (`:620`, `:630`,
+  `:1281`, `:1291`) : **les bornes n'y sont pas**. Pour titrer les colonnes par les bornes, soit
+  la copie les emporte (le format de la cartouche change → dis-le, c'est ce qui voyage), soit
+  l'éditeur les relit sur l'échelle source. **Tranche, et dis ce que tu as supposé** ; la clé
+  `critereId_niveau` ne change pas ;
+- ce qu'affiche une grille **MIXTE** (des critères à niveaux ET à points) : ⚠ si ce n'est pas
+  évident après mesure, ça remonte à Grégoire ;
+- le préremplissage : l'échelle de départ (`ECHELLE_IDME_DEPART`, `echelles.js:584`) si elle est
+  dans la base, sinon rien de prérempli — dis-le.
+
+**Les mots que les collègues liront** — Cowork les propose à Grégoire, tu ne les inventes pas :
+le libellé du champ pour une grille analytique (« Paliers (bornes en %) » proposé), et la forme
+des titres de colonnes (« 0–64 % », « 65–79 % »… proposée). **Attends qu'ils soient dans ce
+fichier avant de les écrire à l'écran.** `[EN ATTENTE — libellés à confirmer par Grégoire]`
+
+### Volet D — après A seulement
+
+Produire le PDF d'une copie **avec** cartouche sur une grille analytique et regarder la rangée du
+critère : si l'espace à droite du chiffre reste vide avec un commentaire, c'est du design (skill
+`design-interface`) et ça se cadre ; sinon c'était le symptôme de A. **Rien à coder d'office.**
+
+---
+
+## 4 · L'ordre de la séance, et il ne se négocie pas
 
 ```
-lot 3 commité (avec les fichiers de Cowork)
-  → relecture croisée de Cowork (le lot touche le calcul et ce que l'élève lit)
+§2 : la CI verte (commit à part, poussé, run jugé)
+  → volet C commité → volet B (carte à Cowork, puis code) commité
+  → volet A (carte à Cowork → décisions de Grégoire → code) commité
+  → relecture croisée de Cowork (A obligatoire ; C et B au jugement)
   → corrections
-  → coup d'œil de Grégoire sur les DEUX lots, une seule fois
-      (le champ « sur 30 » est-il lisible et à sa place, Mac ET iPad ? · 24 → la cartouche s'ouvre · le PDF dit 24 / 30)
-  → verdict au jeton (scripts/pousser.sh le rend sur le commit poussé)
-  → release MINEURE : 1.116 — UNE entrée de changelog pour les deux lots, dont les mots sont à Grégoire
-  → push
+  → coup d'œil de Grégoire (le gabarit rangé · « Aucun » · la cartouche d'une grille analytique)
+  → verdict au jeton → release MINEURE 1.117, UNE entrée de changelog dont les mots sont à lui → push
 ```
 
-⛔ **Rien ne part avant son coup d'œil.** Le lot 2 est resté sur sa machine exprès : publier le
-lot 2 seul mettait en ligne un PDF qui omet un critère que la note compte.
+⛔ **Deux points sont `[EN ATTENTE]` dans ce fichier** (C.3 et les libellés de A). Ils se
+débloquent par Cowork, qui les écrit ici avec la décision de Grégoire. **Tu ne les devines pas.**
 
----
+## 5 · Ce que tu rends à Cowork
 
-## 4 · Ce que tu rends à Cowork, pour la relecture
-
-Le commit du lot 3, et **la liste des fichiers où `criteres[]` se construit et se lit** que tu as
-mesurée, avec pour chacun : *le critère analytique y entre / y est lu / n'a pas à y être*. C'est la
-carte dont la relecture a besoin ; sans elle, elle lit le patch seul, et le protocole dit pourquoi
-ça ne suffit pas.
-
----
-
-## 5 · Retouche décidée le 4 septembre 2026 au matin, après la relecture croisée du lot 3 (`b4039828`)
-
-> Écrite par Cowork vers 6 h 45, sur l'arbre commité `b4039828` (deux commits devant `origin/main`).
-> La relecture du lot 3 est dans la consigne des lots, sous le lot 3 : rien à corriger, une réserve
-> inscrite (points sans niveau déductible), et la question ci-dessous, que Grégoire a tranchée.
-
-**Ce que ça produit à l'écran** : dans le texte copié vers LÉA, la section « === BILAN === » nomme
-un critère analytique par son chiffre — « Langue (24 / 30) » — et non plus par le nom du niveau
-déduit (« Langue (Maîtrisé) »). Les critères holistiques et algorithmiques y restent nommés par
-leur niveau, comme avant.
-
-**a) Le bilan dit le chiffre — décision de Grégoire, 4 septembre au matin** : *« pas de niveau avec
-la grille analytique : on passe au chiffre »*. C'est l'arrêté 4 appliqué au dernier endroit où le
-niveau déduit atteignait encore l'élève. Sites : `_rendreDefisBilan` / `_rendreSignalesBilan`
-(`js/evaluation-retroaction.js`), que ta carte a nommés. Même prédicat que les trois rendus du
-lot 3 (`typeof points === 'number'`, ou les points de `evaluationEnCours.pointsAnalytiques` selon
-ce que ces fonctions lisent — mesure-le, c'est toi qui as le fichier). ⚠ Mesure aussi si le bilan
-est relu depuis `criteres[]` en base pour une copie rouverte : le chiffre doit y être identique.
-Un cas dans la sentinelle lot 3 ; break-test.
-
-**b) `.claude/settings.local.json` entre au `.gitignore`** — décidé par Cowork (technique) : c'est le
-seul fichier VRAIMENT non suivi du dépôt, et il est propre au poste. Témoin de la mesure : les autres
-« non suivis » que voyait Cowork (`Retours des testeurs/jean-françois/`, `docs/projet de
-développement/SPEC-…`, le `.txt` de modèle) sont **suivis** sous leur nom NFC, et `ignorés/` est
-couvert par `*ignorés*/` ; c'est le montage Linux qui rend les noms en NFD. Rien d'autre à faire
-pour eux.
-
-**Puis l'ordre de la séance reprend au §3** : coup d'œil de Grégoire sur les deux lots, verdict au
-jeton, release 1.116, push. Commite cette retouche AVEC ce fichier.
-
----
-
-## 6 · Seconde retouche, décidée le 4 septembre 2026 au matin, après le coup d'œil de Grégoire (`5b8bc6b0`)
-
-> Écrite par Cowork vers 7 h 15. Grégoire a parcouru les deux lots à l'écran et a produit le PDF
-> d'une copie évaluée avec sa grille « Analyse littéraire » (12 critères, tous analytiques).
-> ▣ **Mesuré depuis Cowork avant d'écrire** : le PDF remis porte un SECOND bilan, distinct de celui
-> du texte copié — `construireConcentration` (`js/synthese-retroaction-data.js:762`) et
-> `construireForce` (l. 881, `libelleNiveau(echelle, …)`), rendus par
-> `js/synthese-retroaction-rendu.js:643-648`. La retouche du §5 n'a touché que
-> `evaluation-retroaction.js` ; celui-ci n'a pas bougé. Et la légende de l'échelle
-> (`renderLegende`, `synthese-retroaction-rendu.js:328`) s'imprime depuis `ctx.feedback.scale`
-> quel que soit le type des critères.
-
-**Ce que ça produit à l'écran** : dans l'écran d'évaluation, un champ de points vide affiche « – »
-et non plus « 0 » — un vrai zéro se tape. Et sur le PDF de l'élève, pour une grille dont les critères sont
-analytiques, **plus aucun nom de niveau nulle part** — ni dans « Présentement, il faut se
-concentrer sur » (« pertinent et clair (Sujet divisé Incomplet ou insuffisant) » devient
-« pertinent et clair (Sujet divisé 1 / 2) »), ni dans « Acquis en développement, à consolider »
-(« Sujet posé (2 / 3) »), ni dans « Ta force : Sujet amené (3 / 3) ») — et **la légende
-« 0 Aucun · I · D · M · E » disparaît de l'en-tête « Rétroaction par critère » quand aucun critère
-imprimé ne lit l'échelle**. Les critères holistiques et algorithmiques gardent leur niveau et
-leur légende.
-
-**C'est le lot 3 qui n'est pas fini, pas une trouvaille** (le test de `CLAUDE.md` : « est-ce que
-je viens de l'écrire ? » — l'arrêté 4 s'appliquait à TOUT ce que l'élève lit, et deux sites ont
-été manqués par ma consigne et par la carte). Corriger maintenant.
-
-- **a)** Le bilan du PDF nomme un critère analytique par son chiffre, aux trois endroits (défis,
-  acquis en développement, force). Même règle que `_lectureNiveauBilan` (§5) : `points` présent
-  dans l'entrée de `criteres[]` → « 1 / 2 » ; sinon le libellé du niveau comme avant. Le poids
-  vient de l'entrée enregistrée (`c.ponderation`), comme au repli du §5.
-- **b)** La légende de l'échelle ne s'imprime que si au moins un critère rendu passe par la
-  rangée de niveaux (`typeof critere.points !== 'number'`). Grille mixte : elle reste.
-- **c)** Un cas par site dans la sentinelle lot 3 ; break-test. Le spec WebKit du lot 3 lit le PDF
-  produit : ajoute-lui les deux assertions négatives (aucun libellé de niveau, aucune légende)
-  sur une grille entièrement analytique — c'est le témoin que le §5 n'avait pas.
-
-- **d) Le champ de points vide ne doit pas ressembler à un zéro** — trouvé par Grégoire à
-  l'écran : *« je ne savais pas que le zéro prérempli était une absence de valeur »*. Sur un critère
-  qui valait vraiment 0, il n'a rien tapé, le critère est resté sans points et la note n'a pas pu
-  se calculer. ▣ Mesuré : `placeholder="0"` sur les deux gabarits du champ
-  (`js/evaluation-chargement.js:1114` et `:1301`). Remplace le `placeholder` par « – » (tiret
-  demi-cadratin) aux deux sites : le vide se lit comme un vide, et « 0 » redevient une valeur
-  qu'on tape. Rien d'autre ne change (`min`, `max`, `step`, le handler). Un cas dans la sentinelle
-  du lot 2 (le gabarit ne porte plus `placeholder="0"`), break-test. C'est le lot 2 qui n'était
-  pas fini : symptôme vécu, note bloquée.
-
-⚠ **Ce qui n'entre PAS dans cette retouche, et qui est cadré ailleurs** (consigne des lots, sous
-le lot 3, « Ce que le coup d'œil a ouvert ») : l'espace vide à droite du chiffre dans la liste
-des critères ; la cartouche qui exige une échelle pour une grille analytique ; le menu SOLO
-sans « Aucun ». Les deux derniers attendent une décision de Grégoire.
-
-**Puis l'ordre reprend** : relecture croisée de Cowork de cette retouche, verdict au jeton,
-release 1.116, push. Commite cette retouche AVEC ce fichier.
-
----
-
-## 7 · Troisième retouche — RÉGRESSION du lot 3, trouvée par Grégoire à l'écran le 4 septembre vers 7 h (`44559804`)
-
-> Écrite par Cowork vers 8 h 15. **Symptôme vécu** : il a modifié sa grille « Analyse littéraire »
-> (12 critères, tous analytiques), est revenu dans « Annoter et évaluer », et **son évaluation
-> enregistrée ne s'est pas chargée** — bandeau rouge *« Impossible de charger l'évaluation : Timeout
-> génération selects critères »* — **et le cadenas n'est pas apparu** dans la palette de gauche.
->
-> ▣ **Cause mesurée depuis Cowork, une seule pour les deux symptômes** :
-> `attendreSelectsCriteres` (`js/evaluation.js:1269-1296`) attend `#eval_<critereId>` du **premier**
-> critère de `evaluation.criteres[]`, 30 fois 100 ms, puis rejette. Un critère analytique n'a pas
-> ce select : son élément est `#eval_pts_<critereId>` (`evaluation-chargement.js:1113`, `:1300`).
-> **Avant le lot 3, un critère analytique n'entrait jamais dans `criteres[]`** : le premier était
-> toujours holistique ou algorithmique, et le select existait. Depuis le lot 3, sur une grille
-> entièrement analytique, le premier critère est analytique → 3 s → rejet → le `catch` de
-> `modifierEvaluation` (l. 1352) affiche le bandeau, et **les étapes 13-14 (indicateur et
-> verrouillage, l. 1343) ne s'exécutent jamais** : c'est le cadenas absent. Deux symptômes, une
-> cause. Le témoin : le spec du lot 3 rouvrait une copie sur une grille MIXTE dont le premier
-> critère est holistique — il ne pouvait pas voir ça.
-
-**Ce que ça produit à l'écran** : rouvrir une copie évaluée avec une grille entièrement
-analytique charge l'évaluation, ses points, sa note, et montre le cadenas — comme pour toute
-autre grille.
-
-**À faire**
-- **a)** `attendreSelectsCriteres` attend l'élément de saisie du premier critère **quel que soit
-  son type** : `#eval_<id>` OU `#eval_pts_<id>`. Tranche toi-même la forme (un `querySelector`
-  sur les deux identifiants, ou attendre que `#listeCriteresGrille1` porte un élément par
-  critère de la grille — cette seconde forme couvre aussi un premier critère dont le type
-  changerait demain). Le message du timeout cesse de dire « selects » s'il ne les attend plus seuls.
-- **b)** Mesure si autre chose, sur le chemin de réouverture, suppose un `select` pour chaque
-  entrée de `criteres[]` (`_chargerValeursEtAlgoModif`, l. 1625 et ce qu'elle appelle) — le même
-  angle mort peut s'y répéter. Dis ce que tu as trouvé, corrige ce qui est dans ce chemin.
-- **c)** Témoins : le spec WebKit du lot 3 sur la grille ENTIÈREMENT analytique **rouvre la copie
-  enregistrée** et vérifie que les points sont revenus dans leurs champs, que la note est
-  identique, et que l'indicateur de verrouillage est affiché ; un cas Vitest sur
-  `attendreSelectsCriteres` avec un premier critère analytique (rouge avant, vert après) ;
-  break-test.
-- ⚠ Ce que tu ne fais PAS : toucher aux collecteurs ni au calcul. Rien dans les données.
-
-**Décidé par Cowork** : c'est « corriger maintenant » — ça casse le parcours qu'on est en train
-de livrer (rouvrir une copie), et ça part dans 1.116. Ce que Grégoire a changé dans sa grille
-n'est pas la cause : la mesure suffit sans le savoir. Commite AVEC ce fichier.
-
-**Puis** : relecture croisée de Cowork, verdict au jeton, release 1.116, push.
-
----
-
-## 8 · La version 1.116 — relecture faite, mots arrêtés, ordre du §3 à reprendre au verdict
-
-> Écrite par Cowork le 4 septembre 2026 vers 9 h 30, sur `f485ea34` (cinq commits devant
-> `origin/main`, tous relus par Cowork : lot 3, deux retouches du PDF et du champ, régression de la
-> réouverture). Grégoire a vu les deux lots à l'écran et a arrêté les mots du changelog (« ça va »).
-> ⚠ **Quatre fichiers de cadrage de Cowork sont modifiés dans l'arbre** (`CONSIGNE-DEMARRAGE-COWORK.md`,
-> `00-CADRAGES-OUVERTS.md`, les cadrages « collections » et « accordéons ») : **ils partent avec le
-> commit de release**, comme la consigne. Ce sont des décisions de Grégoire prises ce matin ; les
-> perdre serait perdre les décisions.
-
-**Ce que ça produit à l'écran** : le bandeau de l'application passe à **1.116.0**, et la section
-« Nouvelles » de l'accueil porte une seule entrée pour les lots 2 et 3.
-
-**Ordre, celui du §3 :**
-1. **Changelog** — une entrée en tête de `CHANGELOG` dans `js/changelog-data.js`, couleur `vert`,
-   **au mot près** (les mots sont à Grégoire) :
-
-```javascript
-        {
-            version: '1.116',
-            couleur: 'vert',
-            titre: 'Une grille analytique se note en points, et l\'élève ne lit que le chiffre',
-            items: [
-                '<strong>Un champ « sur 30 » à la place du menu de niveaux.</strong> Sur un critère analytique, tu tapes des points sur le poids du critère : 24 sur 30 fait 80 %. Le champ vide affiche « – » ; un vrai zéro se tape.',
-                '<strong>Le chiffre trouve son niveau, et ta cartouche s\'ouvre.</strong> 24 sur 30 tombe dans un niveau de ton échelle, et la rétroaction que tu as attachée à ce niveau apparaît, sans que tu choisisses de niveau nulle part.',
-                '<strong>L\'élève ne voit que le chiffre.</strong> Sur son PDF, dans le texte copié vers LÉA et dans le bilan, un critère analytique dit « 24 / 30 », jamais le niveau qui a servi à choisir le commentaire. Sur une grille entièrement analytique, la légende des niveaux disparaît du PDF.',
-                '<strong>Le critère analytique compte partout.</strong> Il entre dans l\'évaluation enregistrée avec ses points, donc le dépistage, le profil de l\'élève et les archives le voient comme les autres.',
-                '<strong>Rien ne change pour tes critères holistiques et algorithmiques</strong>, ni pour tes évaluations déjà enregistrées.'
-            ]
-        },
-```
-
-2. **Verdict au jeton** : `scripts/pousser.sh`, tel que le skill `release-et-changelog` et
-   `fin-de-session` l'ordonnent — le verdict est le dernier geste avant le push, et il se prend
-   sur le commit qui part. Si le verdict rougit, on s'arrête là et Cowork relit ; pas de
-   correction « pour que ça passe ».
-3. **Release MINEURE** : `node scripts/release.mjs minor` → 1.116.0, les quatre points de vérité
-   et les jetons anti-cache par le script, jamais à la main. Témoin après coup :
-   `grep -rl '1\.115\.0' --include=*.js --include=*.json --include=*.html .` rend 0.
-4. **Push**, puis l'état mesuré dans `SESSION.md` (règle 4) : le commit poussé, le run GitHub, et
-   la phrase « vérifié comment » pour `OU-EN-EST-ON.md` que Cowork reprendra.
-
-⛔ Rien d'autre n'entre : le lot 4 (gabarit algorithmique, paliers d'une grille analytique, menu
-SOLO) est cadré et attend une consigne à froid.
+La carte de B (neuf lecteurs, disposition de chacun), la carte de A (où le type se lit, où les
+bornes vivent, ce qui voyage), et le numéro du run GitHub du §2 avec son verdict.

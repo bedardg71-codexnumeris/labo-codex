@@ -15,8 +15,8 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 4 septembre 2026, 10 h (dix-huitième passe, Cowork) — release **1.116.0**
-(build `0904-0729`) commitée, push en cours. Avant : 1.113.0 (build `0903-0906`), 3 septembre 9 h 30. ▣ **LES HUIT ÉNONCÉS TIENNENT.** Le huitième — les suppressions disent
+**Dernière mise à jour : 4 septembre 2026, 10 h 20 (dix-huitième passe, Cowork) — release **1.116.0**
+(build `0904-0729`) en ligne, CI rouge sur le spec du lot 1 (à régler). Avant : 1.113.0 (build `0903-0906`), 3 septembre 9 h 30. ▣ **LES HUIT ÉNONCÉS TIENNENT.** Le huitième — les suppressions disent
 vrai — a fermé ce matin, en quatre volets et trois versions livrées en douze heures.**
 
 ⚠ **Ce que « tiennent » veut dire, et ce que ça ne veut pas dire.** Chaque volet a sa
@@ -574,9 +574,14 @@ et un passé en algorithmique fait basculer le badge à MIXTE. Relecture croisé
 Cowork sur `fa5d34d2` : rien à corriger. Verdict au jeton vert sur `1228837a`.
 *(commits `a6187760`, `fa5d34d2`, `1228837a`)*
 
-↻ **Lots 2 et 3 livrés le 4 septembre 2026 au matin — release 1.116.0 commitée (`6309111e`,
-build `0904-0729`) ; ⏳ le push et le verdict au jeton étaient en cours à 10 h : la prochaine
-session confirme que `origin/main` = `main` et que le bandeau dit 1.116.0.**
+↻ **Lots 2 et 3 livrés le 4 septembre 2026 au matin — release 1.116.0 EN LIGNE (`6309111e`,
+build `0904-0729`, poussée à 7 h 32 : `git rev-parse origin/main` = `7a197996`), jeton WebKit
+local vert sur ce commit.**
+⚠ **MAIS LA CI EST ROUGE** : run GitHub 33869215489, Vitest vert, Playwright 254 / 255 — le rouge
+est le spec du **lot 1** (`type-grille-lot1.spec.js`), jamais jugé sur Linux (le run de 1.115 avait
+été annulé). Hypothèse mesurée par Claude Code : course de rendu sur le runner ; rien corrigé, par
+consigne. **C'est le premier geste de la prochaine séance** (consigne du jour, §2). Règle 7 : le
+vert local n'a rien prouvé ici.
 · ✅ **L'analytique se saisit en points** : un champ « sur 30 » au lieu du menu, 24 sur 30 fait
   80 % ; le champ vide dit « – », un vrai zéro se tape (lot 2 + retouche).
 · ✅ **Le chiffre trouve son niveau par les bornes de l'échelle, et ce niveau ouvre la cartouche** ;
