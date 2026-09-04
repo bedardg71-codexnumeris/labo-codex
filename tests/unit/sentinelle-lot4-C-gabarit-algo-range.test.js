@@ -5,7 +5,7 @@
  * premier, sous la rangée du critère ; la formule, le commentaire et la projection suivent,
  * en CARTES nommées et repliables — ouvert ce qui porte la note (sous-critères, formule),
  * fermé ce qui porte les mots (commentaire, projection, codes) ; « Modèle de rétroaction »
- * se lit « Modèle de commentaire » ; « Norme externe (épreuve uniforme) » se lit
+ * se lit « Modèle d'observation » (h, 17 h 50 — d'abord « commentaire ») ; « Norme externe (épreuve uniforme) » se lit
  * « Projection à l'EUF » (le nom seul : l'`id` voyage avec les grilles partagées).
  *
  *   A — l'ORDRE et l'état des cartes, sur les deux écrans (édition et création) ;
@@ -198,13 +198,15 @@ describe('lot 4 · C.A — l\'ordre du gabarit, et ce qui est ouvert ou replié'
 /* ------------------------------------------------------------------ B — les libellés */
 
 describe('lot 4 · C.B — les libellés', () => {
-    it('B.a « Modèle de commentaire » dans le gabarit ; plus « Modèle de rétroaction » ; la cartouche garde son mot', () => {
+    it('B.a « Modèle d\'observation » dans le gabarit ; ni « rétroaction » ni « commentaire » ; la cartouche garde son mot', () => {
         const { win, liste } = monter([GRILLE]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const html = liste().innerHTML;
-        expect(html).toContain('Modèle de commentaire');
+        expect(html).toContain('Modèle d\'observation');
         expect(html).not.toContain('Modèle de rétroaction');
+        expect(html).not.toContain('Modèle de commentaire');
         expect(source('js/grilles.js')).not.toContain('Modèle de rétroaction');
+        expect(source('js/grilles.js')).not.toContain('Modèle de commentaire');
         // Témoin : « rétroaction » reste le mot de la CARTOUCHE, sur le travail (nuance de Grégoire).
         expect(source('index.html')).toContain('Cartouches de rétroaction');
         expect(source('js/cartouches.js')).toContain('Cartouches de rétroaction');
@@ -229,7 +231,7 @@ describe('lot 4 · C.B — les libellés', () => {
         const { win, liste } = monter([GRILLE]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const html = liste().innerHTML;
-        for (const titre of ['Formule', 'Commentaire', 'Projection', 'Codes d\'annotation']) {
+        for (const titre of ['Formule', 'Observation', 'Projection', 'Codes d\'annotation']) {
             expect(html).toMatch(new RegExp('<span class="accordeon-chevron">[▶▼]</span> ' + titre.replace(/'/g, "(?:'|&#x27;|&#39;)")));
         }
     });

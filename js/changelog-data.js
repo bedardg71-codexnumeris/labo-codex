@@ -26,7 +26,7 @@
             titre: 'Le gabarit du critère algorithmique se range, et une grille analytique a ses paliers',
             items: [
                 '<strong>Le critère algorithmique s\'ouvre sur ses sous-critères.</strong> Ils viennent en tête, puis quatre cartes repliables : la formule ouverte, le commentaire, la projection et les codes repliés. Une carte reste comme tu l\'as laissée pendant que tu tapes.',
-                '<strong>Les paliers de projection tiennent sur deux rangées</strong>, numérotés, le nom du palier lisible en entier. « Modèle de rétroaction » s\'appelle maintenant « Modèle de commentaire », et « Norme externe (épreuve uniforme) », « Projection à l\'EUF ».',
+                '<strong>Les paliers de projection tiennent sur deux rangées</strong>, numérotés, le nom du palier lisible en entier. « Modèle de rétroaction » s\'appelle maintenant « Modèle d\'observation », et « Norme externe (épreuve uniforme) », « Projection à l\'EUF ».',
                 '<strong>Un critère algorithmique neuf naît sans projection.</strong> Tu choisis la projection à l\'EUF si tu la veux ; tes critères existants gardent la leur.',
                 '<strong>Une grille analytique attache sa cartouche à des paliers en %.</strong> Le champ dit « Paliers (bornes en %) », l\'échelle de départ est déjà choisie, et les colonnes de la cartouche portent les bornes de ton échelle (« 65–74,99 % ») au lieu des noms de niveaux.',
                 '<strong>« Aucun » au menu « Niveau SOLO ».</strong> Le critère compte dans la note comme les autres, mais le dépistage des fondations ne le surveille pas.',
