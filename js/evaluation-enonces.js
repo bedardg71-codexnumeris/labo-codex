@@ -309,8 +309,21 @@ function _copieRepere(r) {
              espaceDeTete: !!r.espaceDeTete };
 }
 
-function _repere(jeton) {
-    for (var i = 0; i < REPERES.length; i++) if (REPERES[i].jeton === jeton) return REPERES[i];
+/**
+ * Le repère d'un jeton, dans SA palette. Sans palette : celle des énoncés.
+ * Étape 2 (4 sept. 2026) : la pose est commune aux énoncés et aux paliers de
+ * projection ; chaque registre déclare ses repères, celui-ci déclare le geste.
+ */
+function _repere(jeton, palette) {
+    var liste = (Array.isArray(palette) && palette.length) ? palette : REPERES;
+    for (var i = 0; i < liste.length; i++) if (liste[i] && liste[i].jeton === jeton) return liste[i];
+    return null;
+}
+
+/** Le repère qui OUVRE un texte (le texte commence par son jeton), s'il y en a un. */
+function _repereEnTete(texte, palette) {
+    var liste = (Array.isArray(palette) && palette.length) ? palette : REPERES;
+    for (var i = 0; i < liste.length; i++) if (liste[i] && texte.indexOf(liste[i].jeton) === 0) return liste[i];
     return null;
 }
 
@@ -362,6 +375,9 @@ function reperesDeCle(cle) {
  * @param {number} debut - début de la sélection (le curseur, si égal à `fin`)
  * @param {number} fin - fin de la sélection
  * @param {string} jeton - un repère de `listerReperes()`, avec ses accolades
+ * @param {Array} [palette] - étape 2 : les repères d'un AUTRE registre (ceux de
+ *          `projectionAlgo.listerReperes()`) ; sans elle, ceux des énoncés.
+ *          Le jeton doit appartenir à la palette donnée, sinon `null`.
  * @returns {{texte: string, curseur: number}|null} le nouveau texte et la
  *          position du curseur après le repère ; `null` si `jeton` n'est pas
  *          posable — le texte n'est alors pas touché.
@@ -390,8 +406,8 @@ function _horsDuMot(t, a) {
     return (a - debutMot < finMot - a) ? debutMot : finMot;
 }
 
-function insererRepere(texte, debut, fin, jeton) {
-    var r = _repere(jeton);
+function insererRepere(texte, debut, fin, jeton, palette) {
+    var r = _repere(jeton, palette);
     if (!r) return null;
     var t = (typeof texte === 'string') ? texte : '';
     var n = t.length;
@@ -406,7 +422,9 @@ function insererRepere(texte, debut, fin, jeton) {
     var avant = t.slice(0, a), apres = t.slice(b);
     var espaceAvant = (!r.espaceDeTete && /[\p{L}\p{N}}.,;:!?)»…%]$/u.test(avant)) ? ' ' : '';
     var suitUnMot = /^[\p{L}\p{N}]/u.test(apres);
-    var suitUnRepere = apres.charAt(0) === '{' && apres.indexOf(JETON_POINTS) !== 0;
+    // Un repère qui porte déjà son espace de tête ({points}) n'en reçoit pas une seconde.
+    var enTete = _repereEnTete(apres, palette);
+    var suitUnRepere = apres.charAt(0) === '{' && !(enTete && enTete.espaceDeTete);
     var espaceApres = (suitUnMot || suitUnRepere) ? ' ' : '';
     var insere = espaceAvant + r.jeton + espaceApres;
     return { texte: avant + insere + apres, curseur: avant.length + insere.length };
