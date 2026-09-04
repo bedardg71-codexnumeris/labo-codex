@@ -164,10 +164,24 @@
      ▣ B — l'aide sous le menu SOLO perd sa dernière phrase (« C'est le choix d'une méthode
        traditionnelle, sans taxonomie. ») : l'aide ne qualifie pas le choix du collègue (15 h 50). Les
        autres mots de A et B sont ARRÊTÉS tels quels (« Je suis d'accord avec l'ensemble »).
-     ⏸ SUITE, dans l'ordre : coup d'œil de Grégoire (le gabarit rangé · « Aucun » · la cartouche
-       d'une grille analytique · un critère algorithmique neuf sans projection) → verdict au jeton
-       (`node scripts/verifier-playwright.mjs`, suite COMPLÈTE) → release MINEURE 1.117 (mots du
-       changelog à lui) → push. `main` = 7 commits devant `origin/main`, non poussés.
+     ↻ 16 h 30 — PREMIER COUP D'ŒIL DE GRÉGOIRE (« C'est très bien, beaucoup plus clair. »), QUATRE
+       RETOUCHES (consigne §7), commit `3419d4db` avec le fichier :
+       a) « Aucun » en tête des deux menus SOLO (défaut inchangé) ; b) un palier de projection sur
+       deux rangées côte à côte (`grille-form-2col` du formulaire groupe-cours — MESURÉ : cette classe
+       n'a aucune règle @media, ce formulaire ne s'empile pas non plus sur iPad en portrait ; emprunté
+       tel quel, dit) ; le nom du palier a toute sa colonne (« Sans erreur » entier : 331 px mesurés
+       en WebKit) ; la note « Écris {service}… » une fois, sous les paliers ; c) la corbeille en coin
+       partout dans l'éditeur (critères, sous-critères, paliers — `boutonRetirerBloc` accepte un
+       `param3`), plus aucun ✕ rouge ; d) les chevrons des productions en coin, même ligne que la
+       corbeille, plus de colonne « Ordre » ; cibles tactiles 44 px scopées à `#listeCriteres`.
+       PÉRIMÈTRE mesuré pour Cowork, non touché : ✕ rouge encore dans `bibliotheque-ui.js` (1) et
+       `pratique-notation-v2.js` (3) ; pile « Ordre » dans `echelles.js` (3 sites).
+       Témoins : sentinelle B (ordre), sentinelle C cas G (banc avec ui-blocs.js réel), spec C
+       étapes 6-8 (nom lisible, corbeille palier + sous-critère à la souris, chevron). Break-tests :
+       5 cas rouges + le spec rouge sur un champ de 60 px. Vitest 458 / 5039 ; 12 specs verts.
+     ⏸ SUITE, dans l'ordre : SECOND coup d'œil de Grégoire (le gabarit entier, Mac et iPad) →
+       verdict au jeton (`node scripts/verifier-playwright.mjs`, suite COMPLÈTE) → release MINEURE
+       1.117 (mots du changelog à lui) → push. `main` = 10 commits devant `origin/main`, non poussés.
      ===================================================================== -->
 
 <!-- =====================================================================
