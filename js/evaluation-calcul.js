@@ -1064,9 +1064,62 @@ function _pourcentageDesPoints(critere, points) {
 }
 
 /**
+ * Lot 3 (4 sept. 2026) — LE CHIFFRE TROUVE SON NIVEAU. Le pourcentage des points d'un
+ * critère analytique tombe dans un niveau par les BORNES de l'échelle de l'évaluation —
+ * la règle du système, énoncée dans `echelles.js` (« note chiffrée → CODE :
+ * `pourcentage >= n.min && pourcentage <= n.max` »), celle du niveau général et du
+ * critère algorithmique (`_determinerNiveauIDMEAlgo`, et ses deux jumeaux en ligne).
+ * Comme pour l'algorithmique, le niveau « 0 » (non recevable, réservé à l'intégrité
+ * académique) ne se déduit jamais d'un chiffre.
+ * Ce niveau ouvre la cartouche (clé `critereId_niveau`) et fait entrer le critère dans
+ * `evaluation.criteres[]` ; il n'entre PAS dans la note, que les points font seuls
+ * (`_valeurCritereEnCours`, `porteeDepuisEvaluation`).
+ * Rend `undefined` sans points, sans pondération, ou quand aucune plage ne contient le
+ * pourcentage (échelle à trous) : la note compte alors les points, sans niveau.
+ */
+function niveauDeduitDesPoints(critere, points, niveaux) {
+    const pct = (typeof points === 'number' && !isNaN(points)) ? _pourcentageDesPoints(critere, points) : undefined;
+    if (pct === undefined || !Array.isArray(niveaux)) return undefined;
+    const niveau = niveaux.find(n => {
+        if (n.code === '0' || n.code === 0) return false;
+        return pct >= Number(n.min) && pct <= Number(n.max);
+    });
+    return niveau ? niveau.code : undefined;
+}
+
+/**
+ * Lot 3 — LE NIVEAU DÉDUIT ENTRE DANS L'ÉVALUATION EN COURS sous le même nom que les
+ * niveaux choisis au menu, `evaluationEnCours.criteres[critereId]` : c'est ce qui le
+ * rend visible à tout ce qui lit ce tableau SANS qu'aucun lecteur change — la
+ * cartouche (`genererRetroaction`), les trois collecteurs de `criteres[]`
+ * (enregistrement, modification, auto-save), le bilan.
+ * Appelée par `calculerNote`, le seul endroit où l'échelle résolue et les points se
+ * rencontrent dans TOUS les flux (frappe, réouverture, changement d'échelle, de grille
+ * ou de cartouche) : une règle, pas un flux oublié.
+ * ⚠ Sans points, rien n'est écrit ni retiré : un critère analytique sans points se lit
+ * comme avant (lot 2). Avec des points mais sans niveau déductible, l'entrée est
+ * RETIRÉE : un niveau périmé n'ouvre pas une cartouche qui ne lui correspond plus.
+ */
+function _deduireNiveauxAnalytiques(grille, niveaux) {
+    if (!grille || !Array.isArray(grille.criteres) || !evaluationEnCours) return;
+    if (!evaluationEnCours.criteres) evaluationEnCours.criteres = {};
+    grille.criteres.forEach(critere => {
+        const pts = _pointsAnalytiquesDe(evaluationEnCours, critere);
+        if (pts === undefined) return;
+        const code = niveauDeduitDesPoints(critere, pts, niveaux);
+        if (code) evaluationEnCours.criteres[critere.id] = code;
+        else delete evaluationEnCours.criteres[critere.id];
+    });
+}
+
+/**
  * Ce que `calculerPortee` reçoit comme « niveau » pour un critère de l'écran : pour un
  * critère analytique à points, les points eux-mêmes — c'est aussi ce que la ligne à
- * copier-coller des critères montre pour lui, en attendant son niveau (lot 3).
+ * copier-coller des critères montre pour lui.
+ * ⮕ Lot 3, décidé : la ligne à copier GARDE LES POINTS (la donnée saisie, celle qu'un
+ * tableur reçoit) ; le niveau déduit, lui, vit dans `evaluationEnCours.criteres` et en
+ * base (`_deduireNiveauxAnalytiques`). Les points restent ce qui fait compter le critère
+ * dans la portée, avec ou sans niveau déductible.
  */
 function _niveauCritereEnCours(critere) {
     const pts = _pointsAnalytiquesDe(evaluationEnCours, critere);
@@ -1176,6 +1229,9 @@ function calculerNote() {
     // #674 — QUELS CRITÈRES COMPTENT : une seule règle (`calculerPortee`), la même
     // qui relit les évaluations déjà en base. La boucle historique décidait ici, en
     // silence, quels critères entraient dans le total ; elle ne fait plus que sommer.
+    // Lot 3 — le chiffre trouve son niveau AVANT que la portée ne lise l'évaluation.
+    _deduireNiveauxAnalytiques(grille, niveaux);
+
     const portee = calculerPortee(
         grille.criteres,
         critere => _niveauCritereEnCours(critere),
@@ -1374,6 +1430,7 @@ window.calculerNote = calculerNote;
 // Lot 2 — exposés pour les bancs : la même règle sert l'écran et la base.
 window._pointsAnalytiquesDe = _pointsAnalytiquesDe;
 window._pourcentageDesPoints = _pourcentageDesPoints;
+window.niveauDeduitDesPoints = niveauDeduitDesPoints;   // lot 3 — le chiffre trouve son niveau
 window.obtenirCouleurNiveau = obtenirCouleurNiveau;
 
 // Restauration fix #110 v3 (24 mai 2026) — appelé par sauvegarderEvaluation

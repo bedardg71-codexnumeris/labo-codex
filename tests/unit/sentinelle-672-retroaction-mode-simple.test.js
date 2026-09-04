@@ -165,7 +165,11 @@ describe('#672 · la garde d’amorces reste reliée aux gabarits qui les produi
     const amorcesAttendues = [
         { texte: 'Saisissez les erreurs et le nombre de mots',           source: 'js/evaluation-chargement.js' },
         { texte: 'Saisissez les codes des sous-critères (ex: 1;4;6;1;4)', source: 'js/evaluation-calcul.js' },
-        { texte: 'Sélectionne un niveau',                                source: 'js/evaluation-chargement.js' }
+        { texte: 'Sélectionne un niveau',                                source: 'js/evaluation-chargement.js' },
+        // Lot 3 (4 sept. 2026) — l'amorce du critère analytique, posée par le lot 2 dans les
+        // deux chemins de rendu ; déclarée à la garde quand le critère analytique s'est mis à
+        // entrer dans `criteres[]` avec sa `retroaction`. Attrapée par ce compte, comme prévu.
+        { texte: 'Saisis les points',                                    source: 'js/evaluation-chargement.js' }
     ];
 
     it('TÉMOIN : le filtre de commentaires mord — une phrase qui n’existe QUE dans un commentaire n’est pas comptée', () => {
@@ -181,14 +185,14 @@ describe('#672 · la garde d’amorces reste reliée aux gabarits qui les produi
         });
     }
 
-    it('la garde du PDF connaît exactement ces trois amorces, ni plus ni moins', () => {
+    it('la garde du PDF connaît exactement ces quatre amorces, ni plus ni moins', () => {
         const src = lireSource('js/synthese-retroaction-data.js');
         for (const { texte } of amorcesAttendues) {
             expect(src, 'amorce absente de la garde').toContain(texte);
         }
-        // Le compte ferme la porte à une quatrième entrée ajoutée sans témoin.
+        // Le compte ferme la porte à une cinquième entrée ajoutée sans témoin.
         const bloc = src.slice(src.indexOf('AMORCES_DE_SAISIE'), src.indexOf('function estAmorceDeSaisie'));
         const entrees = (bloc.match(/'[^']+'/g) || []).length;
-        expect(entrees, 'trois amorces déclarées').toBe(3);
+        expect(entrees, 'quatre amorces déclarées').toBe(4);
     });
 });

@@ -338,7 +338,12 @@
         const scale = ctx.feedback.scale || [];
         const idx = scale.findIndex(s => s.code === critere.code);
 
-        const segments = scale.map((s, i) => {
+        // Lot 3 (4 sept. 2026) — CE QUE L'ÉLÈVE LIT D'UN CRITÈRE ANALYTIQUE : LE CHIFFRE,
+        // rien d'autre (décision de Grégoire). Le niveau déduit a choisi le commentaire ;
+        // il ne s'imprime pas. « 24 / 30 » prend la place de la rangée de l'échelle.
+        const segments = (typeof critere.points === 'number')
+            ? `<div style="font-family: ${FONT_MONO}; font-size: 11px; font-weight: 800; color: ${INK};">${esc(critere.points)} / ${esc(critere.weight)}</div>`
+            : scale.map((s, i) => {
             const atteint = i <= idx;
             const courant = i === idx;
             const bg = atteint ? (ctx.codeColor[critere.code] || MUTED) : CARD;
@@ -348,7 +353,9 @@
             return `<div style="flex: 1; height: 18px; border-radius: 2px; background: ${bg}; color: ${color}; border: ${border}; display: flex; align-items: center; justify-content: center; font-family: ${FONT_MONO}; font-size: 9px; font-weight: ${weight};">${esc(s.code)}</div>`;
         }).join('');
 
-        const sub = [
+        // Lot 3 — sous le nom d'un critère analytique, le poids se dit en points, pas en % :
+        // le maximum EST le poids (arrêté 3), et « 30% » à côté de « 24 / 30 » se lirait deux fois.
+        const sub = (typeof critere.points === 'number') ? [critere.sub].filter(Boolean).join(' · ') : [
             critere.weight ? `${critere.weight}%` : '',
             critere.sub
         ].filter(Boolean).join(' · ');

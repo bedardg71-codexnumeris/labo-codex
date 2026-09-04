@@ -886,7 +886,13 @@ function chargerGrilleSelectionnee() {
                 if (!evaluationEnCours.pointsAnalytiques) evaluationEnCours.pointsAnalytiques = {};
                 evaluationEnCours.pointsAnalytiques[critere.id] = pts;
                 const inputPts = document.getElementById(`eval_pts_${critere.id}`);
-                if (inputPts) inputPts.value = pts;
+                if (inputPts) {
+                    inputPts.value = pts;
+                    // Lot 3 — relancer par l'événement de la frappe (même chemin que le bloc
+                    // algorithmique ci-dessous) : le niveau se déduit sous le NOUVEL identifiant
+                    // et la cartouche s'ouvre — remplir le champ ne suffit pas.
+                    inputPts.dispatchEvent(new Event('input', { bubbles: true }));
+                }
             });
             grille.criteres.forEach(critere => {
                 if (critere.type !== 'algorithmique') return;
@@ -1133,11 +1139,16 @@ function cartoucheSelectionnee() {
     if (evaluationEnCours && evaluationEnCours.criteres) {
         let niveauxRestaures = 0;
         // Lot 2 — les points des critères analytiques reviennent dans leur champ, AVANT les
-        // niveaux : le recalcul que ceux-ci déclenchent les voit ; sans niveau, le recalcul
-        // final ci-dessous les voit aussi.
+        // niveaux : le recalcul que ceux-ci déclenchent les voit.
+        // Lot 3 — et par le MÊME CHEMIN que la frappe (`pointsSaisis`, comme les niveaux
+        // repassent par `niveauSelectionne` ci-dessous) : le niveau se déduit, la cartouche
+        // s'ouvre, le div `comm_` reçoit son commentaire au lieu de garder l'amorce.
         Object.entries(evaluationEnCours.pointsAnalytiques || {}).forEach(([critereId, pts]) => {
             const champ = document.getElementById(`eval_pts_${critereId}`);
-            if (champ && typeof pts === 'number') champ.value = pts;
+            if (!champ || typeof pts !== 'number') return;
+            champ.value = pts;
+            pointsSaisis(critereId, champ);
+            niveauxRestaures++;
         });
         for (const [critereId, niveau] of Object.entries(evaluationEnCours.criteres)) {
             if (!niveau) continue;
@@ -1327,6 +1338,32 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
  * UTILISÉ PAR:
  * - onchange sur les selects de critères
  */
+/**
+ * Le commentaire de cartouche attaché à un niveau d'un critère, écrit dans le div
+ * `comm_<critereId>` (caché ; c'est lui que les collecteurs de `criteres[]` lisent
+ * comme `retroaction` à l'enregistrement). Clé de la cartouche : `critereId_niveau`.
+ * Extrait de `niveauSelectionne` au lot 3 (4 sept. 2026) pour servir aussi au niveau
+ * DÉDUIT d'un critère analytique (`pointsSaisis`) : une seule façon d'ouvrir la
+ * cartouche, qu'on ait choisi le niveau au menu ou tapé un chiffre.
+ */
+function _afficherCommentaireCritere(critereId, niveau) {
+    if (!niveau || !evaluationEnCours || !evaluationEnCours.cartoucheId) return;
+    const grilleId = evaluationEnCours.grilleId;
+    const cartouches = db.getSync(cle(`cartouches_${grilleId}`), []);
+    const cartouche = cartouches.find(c => c.id === evaluationEnCours.cartoucheId);
+    if (!cartouche) return;
+
+    const cleCommentaire = `${critereId}_${niveau}`;
+    const commentaire = (cartouche.commentaires || {})[cleCommentaire] || '[Non défini]';
+
+    const commDiv = document.getElementById(`comm_${critereId}`);
+    if (commDiv) {
+        commDiv.textContent = commentaire;
+        commDiv.style.fontStyle = commentaire === '[Non défini]' ? 'italic' : 'normal';
+        commDiv.style.color = commentaire === '[Non défini]' ? 'var(--gris-clair)' : 'var(--gris-moyen)';
+    }
+}
+
 function niveauSelectionne(critereId) {
     const selectElement = document.getElementById(`eval_${critereId}`);
     const niveau = selectElement.value;
@@ -1355,23 +1392,7 @@ function niveauSelectionne(critereId) {
     }
 
     // Afficher le commentaire correspondant
-    if (niveau && evaluationEnCours.cartoucheId) {
-        const grilleId = evaluationEnCours.grilleId;
-        const cartouches = db.getSync(cle(`cartouches_${grilleId}`), []);
-        const cartouche = cartouches.find(c => c.id === evaluationEnCours.cartoucheId);
-
-        if (cartouche) {
-            const cle = `${critereId}_${niveau}`;
-            const commentaire = cartouche.commentaires[cle] || '[Non défini]';
-
-            const commDiv = document.getElementById(`comm_${critereId}`);
-            if (commDiv) {
-                commDiv.textContent = commentaire;
-                commDiv.style.fontStyle = commentaire === '[Non défini]' ? 'italic' : 'normal';
-                commDiv.style.color = commentaire === '[Non défini]' ? 'var(--gris-clair)' : 'var(--gris-moyen)';
-            }
-        }
-    }
+    _afficherCommentaireCritere(critereId, niveau);
 
     // Calculer la note et générer la rétroaction en temps réel
     calculerNote();
@@ -1413,6 +1434,9 @@ function pointsSaisis(critereId, el) {
     const brut = champ ? String(champ.value == null ? '' : champ.value).trim() : '';
     if (brut === '' || isNaN(Number(brut))) {
         delete evaluationEnCours.pointsAnalytiques[critereId];
+        // Lot 3 — le niveau déduit part avec les points : le critère redevient « sans
+        // niveau », et une cartouche ne s'ouvre plus sur un chiffre qui n'y est plus.
+        if (evaluationEnCours.criteres) delete evaluationEnCours.criteres[critereId];
     } else {
         const max = Number(champ && champ.max);
         let pts = Number(brut);
@@ -1423,7 +1447,11 @@ function pointsSaisis(critereId, el) {
     }
 
     // Calculer la note et générer la rétroaction en temps réel — comme un niveau choisi.
+    // Lot 3 — `calculerNote` déduit le niveau des points par les bornes de l'échelle et
+    // l'écrit dans `evaluationEnCours.criteres[critereId]` ; c'est ce niveau qui ouvre la
+    // cartouche, exactement comme un niveau choisi au menu.
     calculerNote();
+    _afficherCommentaireCritere(critereId, (evaluationEnCours.criteres || {})[critereId]);
     evaluationEnCours._dernierCritereModifie = critereId;
     genererRetroaction(1);
     evaluationEnCours._dernierCritereModifie = null;
@@ -1520,13 +1548,20 @@ function _collecterCriteresAutoSave(grille, ec) {
         const niveau = ec.criteres[c.id];
         if (niveau) {
             const commDiv = document.getElementById('comm_' + c.id);
-            criteres.push({
+            const entree = {
                 critereId: c.id,
                 critereNom: c.nom,
                 niveauSelectionne: niveau,
                 retroaction: commDiv ? commDiv.textContent : '',
                 ponderation: c.ponderation || 0
-            });
+            };
+            // Lot 3 (4 sept. 2026) — un critère analytique entre avec ses POINTS et son
+            // niveau DÉDUIT (`niveauSelectionne`, posé par `calculerNote`) : les seize
+            // lecteurs de `criteres[]` voient le niveau, et le PDF de l'élève imprime
+            // « points / pondération ». La source des points reste `pointsAnalytiques`.
+            const pts = (ec.pointsAnalytiques || {})[c.id];
+            if (c.type === 'analytique' && typeof pts === 'number' && !isNaN(pts)) entree.points = pts;
+            criteres.push(entree);
         }
     });
     return criteres;

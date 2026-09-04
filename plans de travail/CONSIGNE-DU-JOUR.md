@@ -1,198 +1,92 @@
-# Consigne du jour — une seule source, une seule façon de choisir, et un badge qui dit vrai
+# Consigne du jour — le lot 3 des trois types de grille, puis UNE publication pour les lots 2 et 3
 
-> **Écrite le 3 septembre 2026 à 16 h 15 (heure de Grégoire), par Cowork, avec lui.**
-> **Application au moment de l'écriture : `1.113.0`, build `0903-0906`.**
-> ▣ **État mesuré** : `HEAD` = `74e22bd0`, **5 commits devant `origin/main`**, non poussés —
-> témoin, `HEAD..origin/main` rend **0**. Arbre : `OU-EN-EST-ON.md` et `PROTOCOLE.md` sont à
-> Cowork, **ne les commite pas**.
+> **Écrite le 4 septembre 2026 au soir, par Cowork, à la clôture de la séance, pour la séance suivante.**
+> **Application au moment de l'écriture : `1.115.0`, build `0903-2103`.**
+> ▣ **État mesuré à l'écriture** : `HEAD` = `37660b76` (le lot 2), **un commit devant
+> `origin/main`** (`16dfc5eb`), 0 derrière — témoin : `git rev-list --left-right --count
+> origin/main...HEAD` rend `0 1`. Arbre : quatre fichiers modifiés non commités, tous à Cowork
+> (`CONSIGNE-DEMARRAGE-COWORK.md`, `OU-EN-EST-ON.md`, `SESSION.md` pour ton bloc de clôture, la
+> consigne des lots). **Ils partent AVEC le commit du lot 3.**
 >
-> ⚠ **CETTE CONSIGNE VIENT DU COUP D'ŒIL DE GRÉGOIRE**, pas d'une mesure de Cowork. Il a
-> regardé l'écran des lots 1 et 2, et il a vu deux choses que les essais ne pouvaient pas voir.
->
-> ⛔ **Cinq commits attendent déjà d'être poussés.** ⮕ **Ce lot les rejoint, il ne les
-> précède pas.** Si tu juges que la pile devient trop haute, dis-le.
->
-> ⚠ **REMESURE** (règle 1). Les lignes citées ont été relevées en lecture seule à 16 h.
+> ⚠ **Si tu lis ceci plus de quelques heures après son écriture, remesure avant d'exécuter.**
+> ⚠ **Tu as un état mesuré plus frais que celui-ci : ton propre bloc de clôture du 4 septembre
+> dans `SESSION.md`. Il fait foi sur le mien.**
 
 ---
 
-## A · Une seule façon de choisir une couleur
+## Ce que cette consigne produit à l'écran, pour Grégoire
 
-▣ **Ce que Grégoire a vu** : deux sélecteurs de couleur coexistent, et ils ne suivent pas la
-même convention.
-
-| où | ce que c'est |
-|---|---|
-| **palette des codes** (Annoter) | **12 pastilles prédéfinies + « Personnalisé… »** qui ouvre le sélecteur du système (`js/travaux-outils.js`, `choisirCouleurPalette` / `ouvrirCouleurPerso`) |
-| **sous-critères** (Conception, écran neuf du lot 2) | `<input type="color">` **nu** — `js/grilles.js:4083`. Spectre complet, RGB, pipette. **Aucune convention.** |
-
-▣ **Le module de la palette énonce lui-même le principe** (`js/travaux-outils.js:118`) :
-*« permettre une couleur hors-palette tout en gardant la convention 12 couleurs prédéfinies »*.
-⮕ **L'écran neuf a pris la porte de sortie sans la maison.**
-
-↻ **DEMANDE DE GRÉGOIRE** : *« Simplifier le choix des couleurs, et conserver le système
-prédéfini dans la palette pour monter des collections. »*
-
-⮕ **À faire** : le champ **Couleur** des sous-critères adopte le sélecteur de la palette — les
-douze pastilles, plus « Personnalisé… ».
-
-⛔ **NE DUPLIQUE PAS LE SÉLECTEUR.** Il existe. **Mesure s'il est appelable depuis Conception ;
-s'il ne l'est pas, extrais-le en UNE fonction appelée des deux côtés.** *Une définition, deux
-appels* — comme `detacherDeLaFamille`.
-⚠ **La liste des douze est UNE constante partagée, pas une copie.** ▣ **Si tu en trouves déjà
-deux copies dans le dépôt, dis-le : c'est le doublon d'origine, et il explique le reste.**
-⚠ **Les couleurs déjà choisies hors des douze restent affichées telles quelles.** ⛔ **On change
-le CHOIX, pas ce qui est enregistré.** *Tarir n'est pas réparer.*
+Il saisit **24 sur 30** sur un critère analytique, et **la rétroaction de cartouche attachée au
+niveau où tombe 80 % apparaît**, sans qu'il ait choisi de niveau nulle part. Et le PDF de l'élève
+liste ce critère avec son chiffre — **24 / 30** — et rien d'autre.
 
 ---
 
-## B · Une seule source de vérité pour les codes — et l'écran le DIT
+## 1 · Lis d'abord
 
-### La règle, arrêtée par Grégoire
+1. `PROTOCOLE.md`, puis `OU-EN-EST-ON.md` (la ligne des trois types de grille est à jour).
+2. **`plans de travail/CONSIGNES-2026-09-03-lots-des-trois-types-de-grille.md`** — les arrêtés,
+   le hors-périmètre, **le lot 3**, et sous le lot 2 la **relecture croisée de Cowork** avec ses
+   trois trouvailles. ⛔ **Sa ligne « N'ouvre pas ce lot avant que Grégoire ait vu le lot 2 à
+   l'écran » est LEVÉE par la décision du 4 septembre** : il regarde les deux lots ensemble.
+3. Ton bloc de clôture du 4 septembre dans `SESSION.md`.
 
-> **« Il faut une SSOT. C'est maintenant la grille. »**
-> ⮕ Précisé par lui, et c'est la formulation qui fait foi :
-> **« Une grille analytique pourrait utiliser les mêmes codes. Donc les paramètres de la
-> palette sont INDÉPENDANTS de la grille. Mais dans une grille algorithmique, si l'on coche
-> "Utiliser ces sous-critères comme codes d'annotation", les paramètres de la palette sont en
-> LECTURE SEULE, dont la source est la grille. »**
+---
 
-▣ **La SSOT n'est pas « un seul écran ». C'est UNE SEULE SOURCE PAR COPIE.**
+## 2 · Le mandat : le lot 3, avec une exigence que le texte du 3 septembre ne portait pas
 
-| la copie | qui commande | ce que la palette fait |
-|---|---|---|
-| gouvernée par une grille (case cochée, `codesDepuisSousCriteres`) | **la grille, seule** | **lecture seule** — elle dit d'où viennent les codes |
-| sans grille | **le repli** (les dix, avec la personnalisation globale) | **éditable, comme aujourd'hui** |
+**Le lot 3 tel qu'écrit** : le pourcentage d'un critère analytique trouve son niveau par les
+bornes de l'échelle **de la grille** ; ce niveau ouvre la cartouche (clé `critereId_niveau`).
+Mesure d'abord les deux points de sa section « À mesurer avant d'écrire ».
 
-⛔ **NE RETIRE PAS L'ÉDITION DU REPLI.** ▣ **Motif** : les dix portent les noms courts de
-Grégoire — « Accord GV », « Accord PP » — ses couleurs et son ordre, dans
-`personnalisationErreursFr` et `ordreErreursFr`. **Appliquer « SSOT = la grille » à la lettre
-lui retirerait la seule façon de les régler.** Le module le dit déjà
-(`js/codes-annotation.js:43`) : ce sont *« les clés globales que l'écran Annoter › palette
-continue de régler »*.
+**L'exigence ajoutée** (trouvaille 1 de la relecture du lot 2, mesurée le 4 septembre) :
+**un critère analytique DOIT entrer dans `evaluation.criteres[]` en base**, comme les autres,
+parce que seize fichiers lisent ce tableau et qu'aucun ne voit les points aujourd'hui — dont le
+PDF de l'élève (`travaux-export-pdf.js:949`, qui rend `critereNom — niveauSelectionne`) et la
+matrice de dépistage (`consolidation.js:118`).
 
-### Ce qui manque, et c'est le travail
+⚠ **Et ici les deux règles se croisent — tranche-les ensemble, pas l'une contre l'autre :**
+- Le niveau déduit **entre** dans `criteres[]` (c'est ce qui le rend visible au dépistage, à la
+  synthèse, à la cartouche) ;
+- mais **l'élève ne voit que le chiffre** (arrêté 4, et « ce qui ne doit pas bouger » du lot 3).
+  ⮕ Le rendu du PDF **doit donc distinguer** un critère analytique : il imprime **« 24 / 30 »**,
+  pas le niveau. C'est **dans** le périmètre (le chiffre) ; tout ce qui irait au-delà du chiffre
+  dans le PDF est nommé hors périmètre. Mesure où `criteres[]` se construit à l'enregistrement
+  (les quatre écrivains du lot 2 : `evaluation-sauvegarde.js`, `evaluation.js`, l'auto-save) et
+  fais entrer le critère analytique **avec ses points ET son niveau déduit**, sous des noms qui
+  disent ce qu'ils sont.
+- **Les points restent dans `pointsAnalytiques`** (lot 2) : la source ne change pas de place, le
+  tableau `criteres[]` en porte une **lecture**. Si tu vois mieux, dis-le avant d'écrire.
 
-**Aujourd'hui la palette n'annonce rien.** Quand une copie est gouvernée par sa grille, elle
-affiche encore ses champs de nom et de couleur **comme s'ils comptaient**.
-⮕ **C'est exactement le silence que les huit énoncés ont passé deux jours à supprimer** : un
-écran qui laisse croire qu'un geste aura un effet.
+**Ce qui ne bouge pas** : un critère holistique ou algorithmique se calcule et s'enregistre
+exactement comme avant ; les sentinelles du calcul passent **sans modification** ; la boucle de
+`calculerNote` reste intouchée (le lot 2 y a mis un témoin de source).
 
-↻ **LA PHRASE, ARRÊTÉE PAR GRÉGOIRE — écris-la telle quelle :**
+**Trouvaille 2 du lot 2** (points bornés à la saisie, pas en base) : **pas dans ce lot.** Inscrite.
+
+---
+
+## 3 · L'ordre de la séance, et il ne se négocie pas
 
 ```
-Les codes de cette copie viennent de sa grille « X ». Pour les modifier, ouvre la grille.
+lot 3 commité (avec les fichiers de Cowork)
+  → relecture croisée de Cowork (le lot touche le calcul et ce que l'élève lit)
+  → corrections
+  → coup d'œil de Grégoire sur les DEUX lots, une seule fois
+      (le champ « sur 30 » est-il lisible et à sa place, Mac ET iPad ? · 24 → la cartouche s'ouvre · le PDF dit 24 / 30)
+  → verdict au jeton (scripts/pousser.sh le rend sur le commit poussé)
+  → release MINEURE : 1.116 — UNE entrée de changelog pour les deux lots, dont les mots sont à Grégoire
+  → push
 ```
 
-▣ **Motif de son choix, en une ligne** : *quelqu'un qui lit ça veut agir, pas comprendre
-l'architecture.* Une seconde formulation, qui expliquait ce que l'écran sert encore, a été
-écartée pour cette raison.
-⚠ **« X » est le nom réel de la grille.** ⛔ **Ne mets pas d'identifiant.**
-⮕ **Ce que tu décides seul** : la forme (bandeau, encart), et si les champs sont grisés ou
-masqués. ⚠ **Dis ce que tu as choisi.**
+⛔ **Rien ne part avant son coup d'œil.** Le lot 2 est resté sur sa machine exprès : publier le
+lot 2 seul mettait en ligne un PDF qui omet un critère que la note compte.
 
 ---
 
-## C · Les cases « Pratiques compatibles » partent, et le badge dit enfin quelque chose de vrai
+## 4 · Ce que tu rends à Cowork, pour la relecture
 
-⛔ **VOLET DÉTACHABLE. Si le lot devient trop gros, fais A et B, commite, et dis que C attend.**
-
-### Ce qui est mesuré
-
-▣ **Les cases ne font RIEN.** `pratiquesCompatibles` rend **29 lectures hors `grilles.js`**, et
-le motif qui cherche un filtre, une garde ou un refus autour d'elles rend **0**. Ce sont des
-lectures d'affichage et de transport (import/export).
-▣ **Confirmé par Grégoire** : *« Les cases ici sont sans conséquence. Elles ne font que nommer
-l'intention de l'auteur. Elles pourraient disparaître et ça n'aurait aucun effet. »*
-⚠ **Une fonction `filtrerParPratique` existe** (`js/gabarits-utils.js:88`) — **personne ne
-l'appelle pour bloquer**. Quelqu'un avait prévu ce filtrage. **Mesure ses appelants avant de
-décider de son sort**, et applique les trois issues de `CLAUDE.md`.
-
-▣ **CINQ OBJETS PORTENT CES CASES, pas seulement les grilles** :
-`lirePratiquesSelectionnees` est appelé pour **`grille`, `cartouche`, `echelle`, `objectifs`,
-`production`**. Le badge est rendu sur les mêmes, plus la liste des productions.
-
-### ↻ CE QUE GRÉGOIRE A TRANCHÉ
-
-> **« Il serait mieux de les retirer. »** puis, sur le périmètre : **« Tout d'un coup. Les
-> grilles sont indépendantes des pratiques de toute façon. »**
-
-1. **La SAISIE part des cinq objets.** L'écran n'offre plus de cocher une pratique.
-2. **Les grilles gagnent un badge déduit** — voir ci-dessous.
-3. **Les quatre autres objets perdent leur badge**, sans remplaçant. ▣ **Accepté par lui** :
-   rien ne permet de déduire une pratique d'une échelle ou d'une cartouche.
-
-### ⛔ CE QUI NE DOIT PAS BOUGER — le champ reste dans les données
-
-**On retire la SAISIE, pas le CHAMP.** `pratiquesCompatibles` vit dans ses grilles enregistrées,
-et il **voyage dans les imports-exports** (`js/import-export.js`, validé en `arrayStrings`).
-⛔ **Ne le supprime d'aucune donnée. Ne l'écris plus, c'est tout.** ⚠ **Le schéma d'import et de
-partage continue de l'accepter** — une grille reçue d'un collègue en version antérieure le
-portera. *Tarir n'est pas réparer.*
-
-### Le badge neuf — sur les grilles seulement
-
-**Il ne nomme plus une pratique. Il nomme la COMPOSITION de la grille**, déduite des types de
-ses critères. ▣ **Décision de Grégoire** : *« Le type quand il est unique, "Mixte" sinon. »*
-
-| la grille | le badge |
-|---|---|
-| tous ses critères sont algorithmiques | **ALGO** |
-| tous holistiques | **HOLIS** |
-| tous analytiques | **ANALY** |
-| plusieurs types | **MIXTE** |
-| aucun critère | *(rien)* |
-
-⚠ **Les libellés exacts sont à Grégoire** — ceux du tableau sont une proposition. **Montre-lui
-ce que tu écris avant de commiter si tu t'en écartes.**
-
-▣ **Motif, et il est mesuré à l'écran** : **Grégoire encode déjà cette information à la main
-dans ses noms de grilles** — « G5 FR-**HOLIS** A26 », « G5 FR-**ALGO** A26 », « G1 FR-**ALGO
-seul** A26 ». ⮕ **Le badge le dispense de le faire, et il dit vrai même quand un type de critère
-change après coup.**
-⮕ **C'est l'esprit de tout ce qui a été livré aujourd'hui : l'écran annonce ce qui EST, pas ce
-qu'on a déclaré.**
-
-⚠ **`genererBadgesPratiques` est appelé sur six sites** (3 dans `grilles.js`, et un dans
-`cartouches.js`, `echelles.js`, `objectifs.js`, `productions-liste.js`). ⮕ **Ne le détourne
-pas** : les cinq autres objets n'ont pas de critères. **Une fonction neuve pour les grilles, et
-les appels des autres objets rendent une chaîne vide.**
-
----
-
-## Fini quand
-
-**Un enseignant sait toujours d'où viennent les codes qu'il voit, et n'a jamais deux endroits
-pour régler la même chose.**
-
-▣ **Le témoin** : sur une copie dont la grille a la case cochée, la palette affiche la phrase et
-n'édite plus. Sur une copie sans grille, elle édite exactement comme avant.
-▣ **Le témoin négatif, qui compte autant** : les dix codes de repli restent **modifiables**, et
-la personnalisation de Grégoire (noms courts, couleurs, ordre) est intacte au caractère près.
-▣ **Le témoin du sélecteur** : `grep -c "type=\"color\"" js/grilles.js` rend **0**, et le
-compte des appels au sélecteur de la palette a augmenté d'autant.
-▣ **Le témoin du volet C** : `grep -rn "lirePratiquesSelectionnees" js/` ne rend plus que sa
-définition — **zéro appelant**. ⚠ **Et le témoin INVERSE, qui compte autant** :
-`grep -rn "pratiquesCompatibles" js/import-export.js` rend **le même compte qu'avant**. **Si
-celui-là a bougé, tu as touché au transport des données.**
-
----
-
-## L'ordre
-
-1. **Rapporte le verdict de GitHub sur `1.113.0`**, et **dis où en est la pile des 5 commits**.
-2. **A d'abord** (le sélecteur) — c'est le plus petit, et il ne touche pas la logique.
-3. **Puis B.**
-4. **C en dernier, et seulement si le lot reste tenable.** ⛔ **Il touche cinq écrans : c'est
-   celui qui peut faire déborder.** Mieux vaut trois lots vérifiables qu'un lot que Grégoire ne
-   peut pas parcourir.
-5. Ce lot touche `js/` ⮕ **bump du bloc de jetons d'`index.html`**.
-6. `cd tests && npm run test:unit` pour travailler ; **`npm test` complet avant de dire que
-   c'est prêt.** ⚠ Vitest se lance **depuis `tests/`**.
-7. ⛔ **Tu commites, puis tu t'arrêtes.**
-8. **Ce fichier se commite avec ton lot.** Nomme tes fichiers ; pas de `git add -A`.
-
-⮕ **CE QUE GRÉGOIRE DOIT ALLER VOIR** : ouvrir la palette des codes sur une copie **dont la
-grille a la case cochée** — elle doit afficher la phrase et ne plus éditer. Puis sur une copie
-**sans grille** — elle doit éditer comme avant, avec ses noms courts intacts. ⚠ **Ne rien
-modifier**, lire suffit.
+Le commit du lot 3, et **la liste des fichiers où `criteres[]` se construit et se lit** que tu as
+mesurée, avec pour chacun : *le critère analytique y entre / y est lu / n'a pas à y être*. C'est la
+carte dont la relecture a besoin ; sans elle, elle lit le patch seul, et le protocole dit pourquoi
+ça ne suffit pas.

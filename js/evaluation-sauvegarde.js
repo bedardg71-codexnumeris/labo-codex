@@ -200,13 +200,20 @@ function _collecterCriteresSauv(grille) {
         const niveau = evaluationEnCours.criteres[critere.id];
         if (niveau) {
             const commDiv = document.getElementById(`comm_${critere.id}`);
-            criteres.push({
+            const entree = {
                 critereId: critere.id,
                 critereNom: critere.nom,
                 niveauSelectionne: niveau,
                 retroaction: commDiv ? commDiv.textContent : '',
                 ponderation: critere.ponderation || 0
-            });
+            };
+            // Lot 3 (4 sept. 2026) — un critère analytique entre avec ses POINTS et son
+            // niveau DÉDUIT (`niveauSelectionne`, posé par `calculerNote`) : les seize
+            // lecteurs de `criteres[]` voient le niveau, et le PDF de l'élève imprime
+            // « points / pondération ». La source des points reste `pointsAnalytiques`.
+            const pts = (evaluationEnCours.pointsAnalytiques || {})[critere.id];
+            if (critere.type === 'analytique' && typeof pts === 'number' && !isNaN(pts)) entree.points = pts;
+            criteres.push(entree);
         }
     });
     return criteres;

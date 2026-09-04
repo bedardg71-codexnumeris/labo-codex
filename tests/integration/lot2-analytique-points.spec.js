@@ -250,8 +250,10 @@ test(`lot 2 · ${avecCartouche ? 'AVEC cartouche (renderer cartouche)' : 'sans c
     console.log('BASE →', JSON.stringify(apres));
     expect(apres.notifs, 'aucun refus : la portée est complète').toEqual([]);
     expect(apres.nb).toBe(1);
+    // Lot 3 (4 sept. 2026) — Langue ENTRE maintenant dans criteres[] avec son niveau déduit
+    // (24 sur 30 = 80 % → M) : le lot 2 l'en laissait dehors « en attendant son niveau ».
     expect(apres.eval).toMatchObject({ noteFinale: 90.5, ponderationCouverte: 100, verrouillee: true,
-                                       criteres: ['c1:E'], pointsAnalytiques: { c2: 24 } });
+                                       criteres: ['c1:E', 'c2:M'], pointsAnalytiques: { c2: 24 } });
     expect(apres.eval.algo, 'les points ne sont PAS logés dans donneesAlgorithmiques').toEqual({});
     expect(apres.portee).toEqual({ couverte: 100, incomplete: false, langue: 80 });
 

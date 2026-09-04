@@ -946,7 +946,11 @@
                         ? anonymiserTexteRetroaction(c.retroaction || '', evaluation.etudiantDA)
                         : (c.retroaction || '');
                     const extrait = retroTexte ? retroTexte.substring(0, 80) + (retroTexte.length > 80 ? '…' : '') : '—';
-                    html += `<li><strong>${echapperHtml(c.critereNom)}</strong> — ${echapperHtml(c.niveauSelectionne || '—')}<br><span class="texte-muted">${echapperHtml(extrait)}</span></li>`;
+                    // Lot 3 (4 sept. 2026) — un critère analytique se lit par son chiffre, ici
+                    // comme sur le PDF remis : « 24 / 30 », pas le niveau déduit.
+                    const lecture = (typeof c.points === 'number' && !isNaN(c.points))
+                        ? `${c.points} / ${c.ponderation}` : (c.niveauSelectionne || '—');
+                    html += `<li><strong>${echapperHtml(c.critereNom)}</strong> — ${echapperHtml(lecture)}<br><span class="texte-muted">${echapperHtml(extrait)}</span></li>`;
                 }
                 html += '</ul>';
             }
