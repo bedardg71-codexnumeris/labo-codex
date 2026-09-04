@@ -2297,7 +2297,53 @@ span.header-icon {
 }
 
 #listeCriteres .sous-critere-champs-grid--note {
-    grid-template-columns: 80px 1fr 100px auto;
+    grid-template-columns: 80px 1fr 100px;
+}
+
+/* Coup d'œil de Grégoire, 4 sept. 2026 (retouches b, c, d) — dans l'éditeur de grille :
+   les chevrons et la corbeille en coin, sur la même ligne (le modèle de la liste des
+   productions) ; la rangée du critère leur laisse la place ; chaque sous-critère et
+   chaque palier porte sa corbeille en coin ; les cibles tactiles font 44 px (iPad),
+   l'icône garde sa taille ; un palier tient sur deux rangées (`grille-form-2col`). */
+#listeCriteres .bloc-coin-outils {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+#listeCriteres .critere-rangee {
+    padding-right: 140px;
+}
+
+#listeCriteres .sous-critere-item {
+    position: relative;
+    padding-right: 52px;
+}
+
+#listeCriteres .btn-icone-nu,
+#listeCriteres .pipeline-btn-reorder {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#listeCriteres .sous-critere-item .bloc-retirer-coin {
+    top: 2px;
+    right: 2px;
+}
+
+#listeCriteres .palier-rangee {
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+#listeCriteres .palier-rangee:last-of-type {
+    margin-bottom: 0;
 }
 
 #listeCriteres .sous-critere-champs-grid--code {

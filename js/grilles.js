@@ -327,10 +327,11 @@ async function sauvegarderCritere() {
         ponderation: parseInt(document.getElementById('criterePonderation')?.value) || 0,
         type: document.getElementById('critereType')?.value || typeCritereParDefautEnCours(),
         formule: document.getElementById('critereFormule')?.value?.trim() || '',
-        // Lot 4, volet B (4 sept. 2026) : le menu offre aussi « Aucun » (`'aucun'`) — ce
-        // critère ne nourrit pas la lecture SOLO ; il compte dans la note, le dépistage le
-        // saute. Le DÉFAUT reste « multistructurel » : un critère sans étiquette est une
-        // fondation, comme le lisent `calculerIPB` et l'export (#542).
+        // Lot 4, volet B (4 sept. 2026) : le menu offre aussi « Aucun » (`'aucun'`), EN TÊTE
+        // (coup d'œil de Grégoire, retouche a) — ce critère ne nourrit pas la lecture SOLO ;
+        // il compte dans la note, le dépistage le saute. Le DÉFAUT reste « multistructurel » :
+        // un critère sans étiquette est une fondation, comme le lisent `calculerIPB` et
+        // l'export (#542) — l'ordre des options change, pas la valeur choisie.
         niveauSOLO: 'multistructurel',
         verrouille: false
     };
@@ -3246,6 +3247,17 @@ function avecProjectionNeuve(critere) {
     return critere;
 }
 
+/**
+ * Coup d'œil de Grégoire, 4 sept. 2026 (retouche c) : UN SEUL bouton de suppression dans
+ * l'éditeur de grille — la corbeille en coin (`boutonRetirerBloc`, ui-blocs.js), pour les
+ * critères, les sous-critères et les paliers. Le geste ne change pas (ce que chaque
+ * suppression fait et dit reste #647 et sœurs) ; seul le rendu change. Sans ui-blocs
+ * (bancs qui ne le chargent pas), rien n'est rendu.
+ */
+function retirerBloc(o) {
+    return (typeof window.boutonRetirerBloc === 'function') ? window.boutonRetirerBloc(o) : '';
+}
+
 /** Le défaut de l'écran courant : la grille en édition, ou le choix fait pour la grille en création. */
 function typeCritereParDefautEnCours() {
     return typeCritereParDefaut(grilleTemplateActuelle || { type: window.tempTypeGrille });
@@ -3364,23 +3376,19 @@ function afficherCriteresTemp() {
 
     const html = window.tempCriteres.map((critere, index) => `
         <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); border: 1px solid var(--bordure-claire); border-radius: 6px; margin-bottom: 10px;">
-                            ${window.boutonRetirerBloc({
-                                action: 'supprimerCritereTemp',
-                                param: index,
-                                coin: true,
-                                titre: 'Supprimer ce critère'
-                            })}
-            <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 150px 3fr; gap: 12px; align-items: end;">
-                <div class="groupe-form echelle-text-center">
-                    <label class="echelle-texte-detail">Ordre</label>
-                    <div class="bloc-reordonner">
-                        ${window.boutonsReordonnerBloc({
-                            actionHaut: 'deplacerCritereTempHaut', actionBas: 'deplacerCritereTempBas',
-                            param: index, premier: index === 0, dernier: index === window.tempCriteres.length - 1,
-                            quoi: 'ce critère'
-                        })}
-                    </div>
-                </div>
+            <div class="bloc-coin-outils">
+                ${window.boutonsReordonnerBloc({
+                    actionHaut: 'deplacerCritereTempHaut', actionBas: 'deplacerCritereTempBas',
+                    param: index, premier: index === 0, dernier: index === window.tempCriteres.length - 1,
+                    quoi: 'ce critère'
+                })}
+                ${window.boutonRetirerBloc({
+                    action: 'supprimerCritereTemp',
+                    param: index,
+                    titre: 'Supprimer ce critère'
+                })}
+            </div>
+            <div class="critere-rangee" style="display: grid; grid-template-columns: 2fr 140px 90px 150px 3fr; gap: 12px; align-items: end;">
                 <div class="groupe-form">
                     <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span></label>
                     <input type="text"
@@ -3416,10 +3424,10 @@ function afficherCriteresTemp() {
                     </label>
                     <select class="controle-form"
                             data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="niveauSOLO">
+                        <option value="aucun" ${critere.niveauSOLO === 'aucun' ? 'selected' : ''}>Aucun</option>
                         <option value="multistructurel" ${(critere.niveauSOLO || 'multistructurel') === 'multistructurel' ? 'selected' : ''}>Multistructurel</option>
                         <option value="relationnel" ${critere.niveauSOLO === 'relationnel' ? 'selected' : ''}>Relationnel</option>
                         <option value="abstrait_etendu" ${critere.niveauSOLO === 'abstrait_etendu' ? 'selected' : ''}>Abstrait étendu</option>
-                        <option value="aucun" ${critere.niveauSOLO === 'aucun' ? 'selected' : ''}>Aucun</option>
                     </select>
                 </div>
                 <div class="groupe-form">
@@ -3773,6 +3781,15 @@ function rendreBlocProjectionAlgo(critere, ctx) {
     // Le seuil dans les DEUX unités — comme libelleSymbolique dit la formule.
     // Le ratio normalisé, lui, ne s'affiche jamais à l'élève ; ici il sert à
     // l'enseignant·e, toujours accompagné de son équivalent en mots.
+    //
+    // ↻ 4 SEPT. 2026 (coup d'œil de Grégoire, retouche b) — UN PALIER SUR DEUX RANGÉES,
+    // pas quatre : « Palier · Jusqu'à », puis « Ce que l'élève lit · Phrase de
+    // recommandation », côte à côte dans la grille du formulaire groupe-cours
+    // (`grille-form-2col`, empruntée telle quelle — mesuré : elle ne s'empile pas sur
+    // iPad en portrait, ce formulaire-là non plus). Le nom du palier a toute sa colonne
+    // (« Sans erreur » s'affichait « Sans erre » dans les 80 px du code d'un
+    // sous-critère). La corbeille en coin (retouche c). La note « Écris {service}… »
+    // UNE fois, sous les paliers, pas sous chacun.
     const paliers = p.paliers.map((pal, i) => {
         const mpe = window.projectionAlgo.motsParErreurDuRatio(critere, pal.ratioMax);
         const seuilCol = pal.sansErreur
@@ -3784,12 +3801,15 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                           data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="ratioMax"
                           title="Seuil en ratio normalisé. 1 = exactement au seuil de l'épreuve.">
                    <small style="font-size: 0.72rem; color: var(--gris-clair);">soit 1 erreur / ${mpe === null ? '?' : esc(Math.round(mpe * 10) / 10)} mots</small>`);
+        const retirer = retirerBloc(estTemp
+            ? { action: actionRetrait, param: ctx.index, param2: i, coin: true, titre: 'Supprimer ce palier' }
+            : { action: actionRetrait, param: ctx.grilleId, param2: ctx.index, param3: i, coin: true, titre: 'Supprimer ce palier' });
         return `
-                        <div class="sous-critere-item">
-                            <div class="sous-critere-champs-grid">
+                        <div class="sous-critere-item palier-projection">
+                            <div class="grille-form-2col palier-rangee">
                                 <div class="groupe-form">
                                     <label class="sous-critere-label-petit">Palier</label>
-                                    <input type="text" class="controle-form sous-critere-input-standard"
+                                    <input type="text" class="controle-form sous-critere-input-standard palier-nom"
                                            value="${esc(pal.libelle || pal.cle)}"
                                            data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="libelle">
                                 </div>
@@ -3797,24 +3817,21 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                                     <label class="sous-critere-label-petit">Jusqu'à</label>
                                     ${seuilCol}
                                 </div>
-                                <button class="btn btn-supprimer btn-tres-compact"
-                                        data-action="${actionRetrait}" ${paramsAction} ${paramPalier}="${i}"
-                                        title="Supprimer ce palier">✕</button>
                             </div>
-                            <div class="groupe-form sous-critere-description-groupe">
-                                <label class="sous-critere-label-petit">Ce que l'élève lit</label>
-                                <textarea class="controle-form sous-critere-textarea" rows="2"
-                                          data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="texte">${esc(pal.texte || '')}</textarea>
+                            <div class="grille-form-2col palier-rangee">
+                                <div class="groupe-form">
+                                    <label class="sous-critere-label-petit">Ce que l'élève lit</label>
+                                    <textarea class="controle-form sous-critere-textarea" rows="2"
+                                              data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="texte">${esc(pal.texte || '')}</textarea>
+                                </div>
+                                <div class="groupe-form">
+                                    <label class="sous-critere-label-petit">Phrase de recommandation (facultative)</label>
+                                    <textarea class="controle-form sous-critere-textarea" rows="2"
+                                              placeholder="Laisser vide pour ne rien recommander à ce palier"
+                                              data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="texteAide">${esc(pal.texteAide || '')}</textarea>
+                                </div>
                             </div>
-                            <div class="groupe-form sous-critere-description-groupe">
-                                <label class="sous-critere-label-petit">Phrase de recommandation (facultative)</label>
-                                <textarea class="controle-form sous-critere-textarea" rows="2"
-                                          placeholder="Laisser vide pour ne rien recommander à ce palier"
-                                          data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="texteAide">${esc(pal.texteAide || '')}</textarea>
-                                <small style="font-size: 0.72rem; color: var(--gris-clair);">
-                                    Écris ${esc(window.projectionAlgo.JETON_SERVICE)} là où le nom du service doit apparaître. S'il est vide, ${esc(window.projectionAlgo.JETON_SERVICE)} disparaît proprement.
-                                </small>
-                            </div>
+                            ${retirer}
                         </div>`;
     }).join('');
 
@@ -3831,6 +3848,9 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                 <div class="sous-criteres-liste-conteneur" style="margin-top: 10px;">
                     ${paliers}
                 </div>
+                <small class="palier-note-service" style="font-size: 0.72rem; color: var(--gris-clair); display: block; margin-top: 4px;">
+                    Dans une phrase de recommandation, écris ${esc(window.projectionAlgo.JETON_SERVICE)} là où le nom du service doit apparaître. S'il est vide, ${esc(window.projectionAlgo.JETON_SERVICE)} disparaît proprement.
+                </small>
                 <button class="btn btn-secondaire btn-tres-compact" style="margin-top: 8px;"
                         data-action="${actionAjout}" ${paramsAction}>+ Ajouter un palier</button>`;
 }
@@ -3950,12 +3970,8 @@ function rendreSousCriteresAlgo(critere, ctx) {
                                            ${datas(scIndex)} data-champ="ponderation" data-parse-float
                                            title="Ex: 1.0 pour erreur complète, 0.5 pour demi-point">
                                 </div>
-                                <button class="btn btn-supprimer btn-tres-compact"
-                                        data-action="supprimerSousCritere" data-param="${esc(grilleId)}" data-param2="${index}" data-param3="${scIndex}"
-                                        title="Supprimer ce sous-critère">
-                                    ✕
-                                </button>
                             </div>
+                            ${retirerBloc({ action: 'supprimerSousCritere', param: grilleId, param2: index, param3: scIndex, coin: true, titre: 'Supprimer ce sous-critère' })}
                         </div>`).join('');
 
     const boutonAjouter = (classe) => `
@@ -4309,25 +4325,21 @@ function afficherCriteresGrille(grille) {
 
     const html = grille.criteres.map((critere, index) => `
         <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); border: 1px solid var(--bordure-claire); border-radius: 6px; margin-bottom: 10px;">
-                            ${window.boutonRetirerBloc({
-                                action: 'supprimerCritereGrille',
-                                param: grille.id,
-                                param2: index,
-                                coin: true,
-                                titre: 'Supprimer ce critère'
-                            })}
-            <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 150px 3fr; gap: 12px; align-items: end;">
-                <div class="groupe-form echelle-text-center">
-                    <label class="echelle-texte-detail">Ordre</label>
-                    <div class="bloc-reordonner">
-                        ${window.boutonsReordonnerBloc({
-                            actionHaut: 'deplacerCritereGrilleHaut', actionBas: 'deplacerCritereGrilleBas',
-                            param: grille.id,
-                            param2: index,
-                            premier: index === 0, dernier: index === grille.criteres.length - 1, quoi: 'ce critère'
-                        })}
-                    </div>
-                </div>
+            <div class="bloc-coin-outils">
+                ${window.boutonsReordonnerBloc({
+                    actionHaut: 'deplacerCritereGrilleHaut', actionBas: 'deplacerCritereGrilleBas',
+                    param: grille.id,
+                    param2: index,
+                    premier: index === 0, dernier: index === grille.criteres.length - 1, quoi: 'ce critère'
+                })}
+                ${window.boutonRetirerBloc({
+                    action: 'supprimerCritereGrille',
+                    param: grille.id,
+                    param2: index,
+                    titre: 'Supprimer ce critère'
+                })}
+            </div>
+            <div class="critere-rangee" style="display: grid; grid-template-columns: 2fr 140px 90px 150px 3fr; gap: 12px; align-items: end;">
                 <div class="groupe-form">
                     <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span></label>
                     <input type="text"
@@ -4362,10 +4374,10 @@ function afficherCriteresGrille(grille) {
                     </label>
                     <select class="controle-form"
                             data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="niveauSOLO">
+                        <option value="aucun" ${critere.niveauSOLO === 'aucun' ? 'selected' : ''}>Aucun</option>
                         <option value="multistructurel" ${(critere.niveauSOLO || 'multistructurel') === 'multistructurel' ? 'selected' : ''}>Multistructurel</option>
                         <option value="relationnel" ${critere.niveauSOLO === 'relationnel' ? 'selected' : ''}>Relationnel</option>
                         <option value="abstrait_etendu" ${critere.niveauSOLO === 'abstrait_etendu' ? 'selected' : ''}>Abstrait étendu</option>
-                        <option value="aucun" ${critere.niveauSOLO === 'aucun' ? 'selected' : ''}>Aucun</option>
                     </select>
                 </div>
                 <div class="groupe-form">

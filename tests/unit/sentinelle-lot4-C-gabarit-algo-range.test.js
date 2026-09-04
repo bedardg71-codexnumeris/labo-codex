@@ -81,7 +81,9 @@ function monter(grilles) {
         }
     };
     const document = fauxDocument();
-    const win = chargerScript('js/grilles.js', {
+    // ui-blocs.js d'abord : depuis les retouches du 4 sept. (c, d), la corbeille et les
+    // chevrons de l'éditeur sont ses rendus réels — on les éprouve, on ne les stubbe plus.
+    const globaux = {
         db, document,
         cle: (k) => 'a2026_' + k,
         echapperHtml: echapper,
@@ -92,7 +94,9 @@ function monter(grilles) {
                           filtrerParModeDemo: (l) => l, repertoires: { rendre() {} } },
         obtenirIdentiteCCUtilisateur: () => 'banc',
         grilleTemplateActuelle: null
-    });
+    };
+    const win = chargerScript('js/ui-blocs.js', globaux);
+    chargerScript('js/grilles.js', globaux, win);
     // Les registres réels — le gabarit rend '' pour un registre absent.
     win.formulesAlgo = require(path.join(racine, 'js/evaluation-formules.js'));
     win.enoncesAlgo = require(path.join(racine, 'js/evaluation-enonces.js'));
@@ -100,8 +104,6 @@ function monter(grilles) {
     win.codesAnnotation = require(path.join(racine, 'js/codes-annotation.js'));
     win.estRessourceSupprimee = () => false;
     win.IDS_GABARITS_HARDCODES = [];
-    win.boutonRetirerBloc = () => '';
-    win.boutonsReordonnerBloc = () => '';
     return { win, store, document, liste: () => document.getElementById('listeCriteres') };
 }
 
@@ -300,7 +302,9 @@ describe('lot 4 · C.D — les sous-critères : la note à plat, les mots dans l
         expect(plat).toContain('data-champ="code"');
         expect(plat).toContain('data-champ="nom"');
         expect(plat).toContain('data-champ="ponderation"');
-        expect(plat).toContain('data-action="supprimerSousCritere"');
+        // Retouche c (4 sept.) : la suppression est la corbeille en coin, avec le triplet.
+        expect(plat).toMatch(/data-action="supprimerSousCritere" data-param="G1" data-param2="0" data-param3="1"[^>]*><img src="icons\/icons8-trash\.svg"/);
+        expect(plat).not.toContain('btn-supprimer');
         expect(plat).toContain('data-action="ajouterSousCritere"');
         expect(plat).toContain('sous-criteres-compteur">(2)');
         expect(plat).not.toContain('data-champ="retroaction"');
@@ -423,5 +427,92 @@ describe('lot 4 · C.F — C.3 : un critère algorithmique NEUF naît sans proje
         c.win.tempCriteres = [{ id: 'T3', nom: 'z', type: 'holistique', ponderation: 0 }];
         c.win.modifierCritereTemp(0, 'nom', 'z2');
         expect(c.win.tempCriteres[0].modeleProjection).toBeUndefined();
+    });
+});
+
+/* ------------------------ G — les retouches du coup d'œil (4 sept., §7 : b, c, d) */
+
+describe('lot 4 · C.G — coup d\'œil de Grégoire : corbeille partout, chevrons en coin, paliers sur deux rangées', () => {
+    const GRILLE_PALIERS = { id: 'G9', nom: 'EUF', criteres: [{ ...ALGO, modeleProjection: 'norme_externe' }] };
+
+    it('G.a plus aucun bouton « ✕ » de suppression dans les deux gabarits — la corbeille, en coin, avec le bon identifiant', () => {
+        const a = monter([GRILLE_PALIERS]);
+        a.win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE_PALIERS)));
+        const edition = a.liste().innerHTML;
+        expect(edition).not.toContain('btn-supprimer');
+        expect(edition).not.toContain('✕');
+        // Critère, deux sous-critères, et chaque palier de la norme externe : une corbeille chacun.
+        const corbeilles = (edition.match(/icons8-trash\.svg/g) || []).length;
+        const paliers = (edition.match(/class="sous-critere-item palier-projection"/g) || []).length;
+        expect(paliers).toBeGreaterThan(1);
+        expect(corbeilles).toBe(1 + 2 + paliers);
+        expect(edition).toMatch(/data-action="supprimerPalierProjectionGrille" data-param="G9" data-param2="0" data-param3="0"/);
+        expect(edition).toMatch(/data-action="supprimerCritereGrille" data-param="G9" data-param2="0"/);
+        // En création, même chose : le palier s'identifie par (critère, index).
+        const c = monter([]);
+        c.win.tempTypeGrille = 'algorithmique';
+        c.win.tempCriteres = [{ ...ALGO, id: 'TEMP_9', modeleProjection: 'norme_externe' }];
+        c.win.afficherCriteresTemp();
+        const creation = c.liste().innerHTML;
+        expect(creation).not.toContain('btn-supprimer');
+        expect(creation).not.toContain('✕');
+        expect(creation).toMatch(/data-action="supprimerPalierProjectionTemp" data-param="0" data-param2="0"[^>]*><img src="icons\/icons8-trash\.svg"/);
+        expect(creation).toMatch(/data-action="supprimerCritereTemp" data-param="0"[^>]*><img src="icons\/icons8-trash\.svg"/);
+    });
+
+    it('G.b les chevrons remplacent la pile « Ordre » : en coin, sur la même ligne que la corbeille, mêmes actions', () => {
+        const G = { id: 'G10', criteres: [{ id: 'A', nom: 'Un', type: 'holistique', ponderation: 50 }, { id: 'B', nom: 'Deux', type: 'holistique', ponderation: 50 }] };
+        const { win, liste } = monter([G]);
+        win.afficherCriteresGrille(JSON.parse(JSON.stringify(G)));
+        const html = liste().innerHTML;
+        expect(html).not.toContain('bloc-reordonner');
+        expect(html).not.toContain('>Ordre<');
+        expect(html).not.toContain('grid-template-columns: 60px');
+        const coins = html.split('class="bloc-coin-outils"').slice(1);
+        expect(coins).toHaveLength(2);
+        // Dans le coin : monter, descendre, puis la corbeille — et le premier ne monte pas, le dernier ne descend pas.
+        expect(coins[0]).toMatch(/data-action="deplacerCritereGrilleHaut" data-param="G10" data-param2="0" disabled/);
+        expect(coins[0]).toMatch(/data-action="deplacerCritereGrilleBas" data-param="G10" data-param2="0"\s*>/);
+        expect(coins[1]).toMatch(/data-action="deplacerCritereGrilleBas" data-param="G10" data-param2="1" disabled/);
+        expect(coins[0].indexOf('pipeline-btn-reorder')).toBeLessThan(coins[0].indexOf('icons8-trash.svg'));
+        // La rangée laisse la place au coin.
+        expect(html).toContain('class="critere-rangee"');
+        // En création aussi.
+        const c = monter([]);
+        c.win.tempCriteres = [{ id: 'T1', nom: 'a', type: 'holistique', ponderation: 0 }, { id: 'T2', nom: 'b', type: 'holistique', ponderation: 0 }];
+        c.win.afficherCriteresTemp();
+        expect(c.liste().innerHTML).not.toContain('bloc-reordonner');
+        expect(c.liste().innerHTML).toMatch(/bloc-coin-outils[\s\S]*?data-action="deplacerCritereTempHaut" data-param="0" disabled/);
+    });
+
+    it('G.c un palier tient sur deux rangées côte à côte (la grille du formulaire groupe-cours), le nom a sa colonne, la note {service} une seule fois', () => {
+        const { win, liste } = monter([GRILLE_PALIERS]);
+        win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE_PALIERS)));
+        const projection = contenuCarte(liste().innerHTML, 'projection');
+        const paliers = projection.split('class="sous-critere-item palier-projection"').slice(1);
+        expect(paliers.length).toBeGreaterThan(1);
+        for (const pal of paliers) {
+            const bloc = pal.split('class="sous-critere-item palier-projection"')[0];
+            expect((bloc.match(/class="grille-form-2col palier-rangee"/g) || []).length, 'deux rangées').toBe(2);
+            expect(bloc).toContain('class="controle-form sous-critere-input-standard palier-nom"');
+            expect(bloc).not.toContain('sous-critere-champs-grid');
+            expect(bloc).not.toContain('sous-critere-description-groupe');
+        }
+        // « Écris {service}… » : UNE fois par critère, sous les paliers, plus dans chaque palier.
+        expect((projection.match(/palier-note-service/g) || []).length).toBe(1);
+        expect((projection.match(/là où le nom du service doit apparaître/g) || []).length).toBe(1);
+        expect(projection.indexOf('palier-note-service')).toBeGreaterThan(projection.lastIndexOf('palier-projection'));
+        expect(projection).toContain('value="Sans erreur"');
+        // Les champs et leurs clés n'ont pas bougé (ce qui est enregistré non plus).
+        for (const champ of ['libelle', 'ratioMax', 'texte', 'texteAide']) expect(projection).toContain('data-champ="' + champ + '"');
+    });
+
+    it('G.d les règles sont SCOPÉES à l\'éditeur, et la grille à deux colonnes est celle du formulaire groupe-cours', () => {
+        const css = source('styles.css');
+        expect(css).toContain('#listeCriteres .bloc-coin-outils {');
+        expect(css).toContain('#listeCriteres .critere-rangee {');
+        expect(css).toMatch(/#listeCriteres \.btn-icone-nu,\n#listeCriteres \.pipeline-btn-reorder \{\n    min-width: 44px;\n    min-height: 44px;/);
+        expect(css).toContain('.grille-form-2col {\n    display: grid;\n    grid-template-columns: 1fr 1fr;');
+        expect(source('index.html')).toContain('<div class="grille-form-2col u-mb-15">');
     });
 });

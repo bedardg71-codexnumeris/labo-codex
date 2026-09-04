@@ -213,3 +213,65 @@ bornes vivent, ce qui voyage), et le numéro du run GitHub du §2 avec son verdi
 
 **Ordre qui reprend** : réponses de Grégoire aux deux points (C.3 ci-dessous, les mots de A et B), coup
 d'œil, verdict au jeton, release MINEURE 1.117, push.
+
+---
+
+## 7 · Deux retouches du coup d'œil de Grégoire (4 septembre 2026, vers 16 h 15, sur `d022372b`)
+
+> Grégoire a parcouru les quatre écrans : *« C'est très bien, beaucoup plus clair. »* Deux retouches,
+> toutes deux dans le gabarit (volets B et C) ; rien dans les données, rien dans le calcul. Commite AVEC ce
+> fichier, puis il regarde une seconde fois, courte ; ensuite verdict au jeton, release 1.117, push.
+
+**a) « Aucun » en TÊTE du menu « Niveau SOLO »**, avant « Multistructurel » — aux deux menus (`grilles.js`,
+création et édition). Le défaut d'un critère neuf ne bouge pas (toujours multistructurel : l'ordre des
+options change, pas la valeur sélectionnée). Adapter le cas de la sentinelle du volet B qui vérifie la
+position de l'option.
+
+**b) Les paliers de projection (carte « Projection ») prennent trop de hauteur** — ce qu'il voit, capture à
+l'appui : chaque palier empile sur quatre rangées « Palier » + « Jusqu'à », « Ce que l'élève lit »,
+« Phrase de recommandation », puis la note « Écris {service}… » ; et le champ du nom est trop étroit —
+« Sans erreur » s'affiche « Sans erre ». Ce qu'il demande : **condenser en mettant les champs côte à côte,
+sur le modèle du formulaire « Modifier le groupe-cours »** (deux colonnes, étiquette au-dessus de chaque
+champ, une rangée par paire) ; **et agrandir un peu le champ du nom du palier**.
+
+Ce que je retiens comme forme, à ajuster par toi (skill `design-interface`, mesure d'abord le gabarit) :
+- rangée 1 : **Palier** (nom, assez large pour « Sans erreur » entier) · **Jusqu'à** (avec sa ligne
+  « soit 1 erreur / 100 mots » dessous) · le bouton ✕ à droite ;
+- rangée 2, deux colonnes : **Ce que l'élève lit** · **Phrase de recommandation (facultative)** — zones de
+  texte plus basses (deux lignes) ;
+- la note « Écris {service}… » **une seule fois**, sous la carte « Projection », pas sous chaque palier
+  (elle est identique à chaque palier).
+- Sur iPad en portrait, les deux colonnes s'empilent, comme le fait le formulaire du groupe-cours (mesure
+  comment il le fait et emprunte le même mécanisme, pas une nouvelle règle CSS).
+- Rien d'autre ne change : les champs, leurs noms, ce qui est enregistré, le redessin à chaque frappe (les
+  plis se relisent, §3 C.4).
+
+Témoins : le spec WebKit du volet C plie, tape et vérifie déjà ; ajoute-lui que le nom « Sans erreur » est
+lisible en entier (largeur du champ ≥ largeur du texte) ; un cas de sentinelle sur l'ordre des options SOLO.
+Break-test sur les deux.
+
+**c) Un seul bouton de suppression dans l'éditeur de grille : la corbeille.** Captures de Grégoire : les
+critères et les productions ont la corbeille grise en coin (icône seule) ; les sous-critères et les paliers
+de projection ont un gros bouton rouge « ✕ ». Il veut la corbeille partout **dans l'éditeur de grille**
+(critères, sous-critères, paliers, codes) — même icône, même place (en coin, à droite), même comportement
+qu'aujourd'hui (ce que chaque suppression fait et dit ne change pas : #647 et sœurs restent). Cible
+tactile iPad ≥ 44 px autour de l'icône (skill `design-interface`), pas d'icône minuscule.
+
+**d) Un seul geste pour changer l'ordre : les chevrons de la liste des productions.** Capture : dans les
+productions, « ∧ ∨ » à droite du nom, sur la même ligne que la corbeille ; dans les critères, une pile
+« Ordre » verticale à gauche avec deux flèches empilées. Il veut le modèle des productions **dans l'éditeur
+de grille**, partout où un élément se réordonne (critères, sous-critères, paliers si ordonnables, codes).
+Même fonctions de déplacement qu'aujourd'hui : c'est le rendu qui change, pas la donnée ni l'ordre
+enregistré.
+
+⚠ **Périmètre** : l'éditeur de grille seulement (écran Conception › Grilles, les deux gabarits). Un
+alignement de TOUTE l'application sur corbeille + chevrons serait un cadrage design à part ; mesure et dis,
+en une ligne, combien d'autres écrans portent encore le « ✕ » rouge ou la pile « Ordre », pour que Cowork
+le cadre. Ne les touche pas.
+
+Témoins pour c) et d) : le spec WebKit du volet C supprime un sous-critère et un palier par la corbeille et
+déplace un critère par le chevron ; la sentinelle du volet C vérifie qu'aucun bouton « ✕ » de suppression ne
+reste dans les deux gabarits rendus. Break-test.
+
+**Ordre** : a) b) c) d) dans un ou deux commits, avec ce fichier ; second coup d'œil de Grégoire (le gabarit
+entier, Mac et iPad) ; verdict au jeton ; release 1.117 ; push.
