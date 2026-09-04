@@ -135,6 +135,33 @@ un total en bas.
 - **Le total et le pourcentage en bas de la palette existent déjà** (« Note chiffrée · 45 % ·
   Niveau »). ⮕ **Vérifie qu'ils se remplissent depuis les points, sans nouvel écran.**
 
+### ↻ Ajouté par Cowork le 4 septembre 2026 au soir, après la clôture du lot 1 (1.115.0) — cartographie pour la relecture croisée
+⚠ **Ce sont des lignes à retrouver, pas des mesures à croire. Remesure.**
+
+- **La valeur d'un critère a DEUX lecteurs, et le lot doit servir les deux.** Le cas
+  algorithmique est le modèle : à l'écran, `_valeurCritereEnCours` (`js/evaluation-calcul.js`)
+  rend `donneesAlgorithmiques[critere.id].pourcentage` ; en base, `porteeDepuisEvaluation`
+  (même fichier) relit exactement la même chose pour `synthese-retroaction-data.js`. Les deux
+  passent par `calculerPortee`, la règle unique. **Une branche analytique ajoutée au premier
+  lecteur et pas au second donne un bilan qui rend « -- » sur une copie que l'écran note à 80 %.**
+  ⮕ **Témoin exigé** : une évaluation sauvegardée avec des points, relue par
+  `porteeDepuisEvaluation`, rend le même pourcentage que l'écran.
+- **`calculerNote()` n'a PAS à changer sa boucle.** Elle fait déjà une moyenne pondérée de
+  valeurs en pourcentage (`valeur × pondération / 100`, divisé par la pondération totale) : un
+  critère analytique y entre comme les autres si son lecteur rend `points / pondération × 100`.
+  24 sur 30 → 80 %, c'est la boucle actuelle. **Si tu touches la boucle, tu as changé un
+  comportement — arrête et dis-le.**
+- **Où les points vivent sur l'évaluation : à trancher par toi, et à dire.** Le raccourci qui
+  tente — loger le pourcentage analytique dans `donneesAlgorithmiques` pour que les deux lecteurs
+  marchent sans une ligne — est un **mensonge de nomenclature** (l'erreur 5 de la session
+  précédente). Recommandation de Cowork : une clé à son nom, qui garde **les points tels que
+  saisis** (c'est la donnée vraie, celle que l'enseignant a tapée), le pourcentage étant dérivé ;
+  et cette clé **déclarée dans les schémas de transport** si l'évaluation voyage (vérifie si
+  `donneesAlgorithmiques` y est ; si oui, la clé neuve y va aussi — c'est le piège du lot 1).
+- **`notesCriteres` collecte un CODE de niveau par critère** pour le copier-coller et l'export.
+  Un critère analytique n'a pas de niveau avant le lot 3. **Décide ce qu'il y met d'ici là**
+  (les points, une chaîne vide ?) et dis-le : c'est un texte que quelqu'un peut lire.
+
 ### À faire
 - Un critère analytique rend **un champ numérique** (0 → sa pondération) au lieu du menu de
   niveaux.

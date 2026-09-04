@@ -609,7 +609,10 @@ function verifierEtChargerEvaluationExistante() {
         // Réinitialiser les données algorithmiques (codes d'erreurs, nombre de mots)
         if (window.evaluationEnCours) {
             window.evaluationEnCours.donneesAlgorithmiques = {};
+            window.evaluationEnCours.pointsAnalytiques = {};   // lot 2
         }
+        // Lot 2 — vider aussi les champs de points des critères analytiques
+        document.querySelectorAll('input[id^="eval_pts_"]').forEach(champ => { champ.value = ''; });
 
         // Vider les champs algorithmiques dans le DOM
         // IDs: eval_categories_*, eval_erreurs_*, eval_mots_*, resultat_algo_*
@@ -681,6 +684,17 @@ function verifierEtChargerEvaluationExistante() {
     setTimeout(() => {
         let criteresCharges = 0;
 
+        // Lot 2 (4 sept. 2026) — LES POINTS D'UN CRITÈRE ANALYTIQUE reviennent dans leur
+        // champ, et le même événement que la frappe les remet en mémoire (`pointsSaisis`,
+        // comme `change` remet les niveaux par `niveauSelectionne`).
+        Object.entries(evaluationExistante.pointsAnalytiques || {}).forEach(([critereId, pts]) => {
+            const champ = document.getElementById(`eval_pts_${critereId}`);
+            if (!champ || typeof pts !== 'number') return;
+            champ.value = pts;
+            champ.dispatchEvent(new Event('input', { bubbles: true }));
+            criteresCharges++;
+        });
+
         evaluationExistante.criteres.forEach(critere => {
             const selectId = `eval_${critere.critereId}`;
             const selectCritere = document.getElementById(selectId);
@@ -729,6 +743,7 @@ function verifierEtChargerEvaluationExistante() {
             evaluationExistante.criteres.forEach(c => {
                 window.evaluationEnCours.criteres[c.critereId] = c.niveauSelectionne;
             });
+            window.evaluationEnCours.pointsAnalytiques = evaluationExistante.pointsAnalytiques || {};   // lot 2
 
             // Restaurer les données algorithmiques (français écrit)
             if (evaluationExistante.donneesAlgorithmiques && Object.keys(evaluationExistante.donneesAlgorithmiques).length > 0) {
@@ -1562,6 +1577,16 @@ function _chargerStatutsEtBadgesModif(evaluation) {
     window.afficherBadgesJetons();
 }
 
+// Lot 2 — jumeau de `_restaurerDonneesAlgorithmiquesModif` pour les points analytiques.
+function _restaurerPointsAnalytiquesModif(evaluation) {
+    Object.entries((evaluation && evaluation.pointsAnalytiques) || {}).forEach(([critereId, pts]) => {
+        const champ = document.getElementById(`eval_pts_${critereId}`);
+        if (!champ || typeof pts !== 'number') return;
+        champ.value = pts;
+        champ.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+}
+
 function _restaurerDonneesAlgorithmiquesModif(evaluation) {
     if (!evaluation.donneesAlgorithmiques || Object.keys(evaluation.donneesAlgorithmiques).length === 0) return;
 
@@ -1617,6 +1642,7 @@ async function _chargerValeursEtAlgoModif(evaluation, attendreSelectsCriteres) {
 
     // ÉTAPE 10.5 : Restaurer les données algorithmiques (français écrit)
     _restaurerDonneesAlgorithmiquesModif(evaluation);
+    _restaurerPointsAnalytiquesModif(evaluation);   // lot 2
 
     // Forcer le recalcul de la note après restauration données algorithmiques
     setTimeout(() => {
@@ -1973,6 +1999,7 @@ function sauvegarderEvaluationModifiee() {
             criteres: criteres,
             optionsAffichage: _lireOptionsAffichageMod(),
             donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {},
+            pointsAnalytiques: evaluationEnCours.pointsAnalytiques || {},   // lot 2
             verrouillee: true
         },
         _lireChampsDOMMod(maintenant),

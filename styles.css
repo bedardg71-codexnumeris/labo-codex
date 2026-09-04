@@ -15665,6 +15665,22 @@ tr.etudiant-inactif td {
     font-weight: normal;
 }
 
+/* Lot 2 (4 sept. 2026) — saisie en points d'un critère analytique : un champ, son maximum. */
+.eval-saisie-points {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.eval-input-points {
+    max-width: 110px;
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+}
+.eval-saisie-points .eval-label {
+    margin-bottom: 0;
+    display: inline;
+}
+
 /* Badge ALGORITHMIQUE */
 .eval-badge-algo {
     font-size: 0.7rem;
