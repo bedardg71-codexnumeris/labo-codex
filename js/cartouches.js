@@ -450,8 +450,18 @@ async function initialiserNouveauCartouche(grilleId) {
     // une colonne inventée). Avec choix : ses niveaux, et l'`echelleId` est ÉCRIT
     // sur la cartouche pour que la question ne se repose plus à la réouverture.
     // Résolution par `id` puis `idOriginal`, comme `afficherMatriceRetroaction`.
-    const echelleChoisieId = ((document.getElementById('selectEchelleCartouche') || {}).value || '').trim();
+    let echelleChoisieId = ((document.getElementById('selectEchelleCartouche') || {}).value || '').trim();
     const echelles = await db.get(cle('echellesTemplates'), []) || [];
+    // Lot 4, volet A — grille analytique sans échelle choisie : l'échelle de départ, si elle
+    // est offerte (même règle que `onChangeSelectionCartouche`) ; sinon rien, comme avant.
+    if (!echelleChoisieId && grilleEstAnalytique(grille)) {
+        const depart = echelles.find(e => e && e.id === ID_ECHELLE_DE_DEPART && estDansSelection(e));
+        if (depart) {
+            echelleChoisieId = depart.id;
+            const selectEchelleDepart = document.getElementById('selectEchelleCartouche');
+            if (selectEchelleDepart) selectEchelleDepart.value = depart.id;
+        }
+    }
     const echelleChoisie = echelleChoisieId
         ? (echelles.find(e => e && e.id === echelleChoisieId)
             || echelles.find(e => e && e.idOriginal === echelleChoisieId)
@@ -606,6 +616,12 @@ async function afficherMatriceRetroaction() {
 
     const container = document.getElementById('matriceContainer');
 
+    // Lot 4, volet A — une grille analytique attache ses commentaires à des PALIERS (bornes
+    // en %). Les bornes se lisent sur l'échelle SOURCE, comme ses couleurs ci-dessous ; la
+    // copie que porte la cartouche (code, nom) ne change pas, ni la clé `critereId_niveau` :
+    // rien de ce qui voyage ne bouge. Sans bornes (copie seule), le nom du niveau.
+    const enPaliers = grilleEstAnalytique(await grilleDeCartouche(cartoucheActuel.grilleId));
+
     // Utiliser les niveaux de l'échelle sélectionnée (stockés dans cartoucheActuel)
     // L'ordre est conservé tel que défini par l'utilisateur dans l'échelle
     let niveauxAffichage = [];
@@ -620,6 +636,8 @@ async function afficherMatriceRetroaction() {
             niveauxAffichage = echelleSource.niveaux.map(n => ({
                 code: n.code,
                 nom: n.nom,
+                min: n.min,
+                max: n.max,
                 couleur: n.couleur || '#cccccc'
             }));
         }
@@ -637,8 +655,8 @@ async function afficherMatriceRetroaction() {
     // #578 — sans échelle, pas de colonnes : on le dit, on n'invente rien.
     // (Un tableau à une seule colonne « Critère / Niveau » se lisait comme un bug.)
     if (niveauxAffichage.length === 0) {
-        container.innerHTML = '<div class="message-vide"><p>Cette cartouche n\'a pas encore d\'échelle. '
-            + 'Choisis une échelle de performance ci-dessus : ses niveaux deviendront les colonnes de la matrice.</p></div>';
+        container.innerHTML = '<div class="message-vide"><p>'
+            + echapperHtml(enPaliers ? LIBELLES_PALIERS.sansEchellePaliers : LIBELLES_PALIERS.sansEchelleNiveaux) + '</p></div>';
         mettreAJourMetriques();
         return;
     }
@@ -653,15 +671,19 @@ async function afficherMatriceRetroaction() {
         <table class="matrice-tableau">
             <thead>
                 <tr>
-                    <th class="cartouche-gradient-bleu">Critère / Niveau</th>
+                    <th class="cartouche-gradient-bleu">${echapperHtml(enPaliers ? LIBELLES_PALIERS.coinPaliers : LIBELLES_PALIERS.coinNiveaux)}</th>
     `;
 
-    // En-têtes des niveaux avec code et label + couleur de l'échelle
+    // En-têtes des niveaux avec code et label + couleur de l'échelle — ou, pour une grille
+    // analytique, le palier par ses bornes (lot 4, volet A).
     niveauxAffichage.forEach(niveau => {
         const codeEchappe = echapperHtml(niveau.code);
         const nomEchappe = echapperHtml(niveau.nom);
         const couleurNiveau = couleursParCode[niveau.code] || 'var(--bleu-moyen)';
-        html += `
+        html += enPaliers ? `
+                    <th style="background: ${couleurNiveau};">
+                        <span class="niveau-code niveau-palier">${echapperHtml(libellePalier(niveau))}</span>
+                    </th>` : `
                     <th style="background: ${couleurNiveau};">
                         <span class="niveau-code">${codeEchappe}</span>
                         <span class="niveau-label">${nomEchappe}</span>
@@ -687,7 +709,7 @@ async function afficherMatriceRetroaction() {
             const key = `${critere.id}_${niveau.code}`;
             const commentaire = cartoucheActuel.commentaires[key] || '';
             const commentaireEchappe = echapperHtml(commentaire);
-            const nomNiveauEchappe = echapperHtml(niveau.nom);
+            const nomNiveauEchappe = echapperHtml(enPaliers ? libellePalier(niveau) : niveau.nom);
 
             html += `
                     <td>
@@ -3537,6 +3559,81 @@ function estDansSelection(item) {
     return !!item && item.dansBibliotheque !== false;
 }
 
+/* ===============================
+   LOT 4, VOLET A (4 septembre 2026) — LES PALIERS D'UNE GRILLE ANALYTIQUE
+   =============================== */
+
+/**
+ * Retour de Grégoire : « quand on a une grille analytique et qu'on veut produire une
+ * cartouche, nous n'avons pas le choix de créer une échelle, alors que la grille
+ * analytique fonctionne uniquement avec des points. » Sa décision, la voie (a) : l'échelle
+ * RESTE le mécanisme des paliers (le lot 3 déduit le niveau d'un chiffre par ses bornes,
+ * et ce niveau ouvre la cartouche, clé `critereId_niveau`) ; elle cesse seulement de se
+ * présenter comme des « niveaux » quand la grille est analytique — champ « Paliers »,
+ * colonnes titrées par les bornes, échelle de départ préremplie.
+ *
+ * ⚠ [EN ATTENTE — mots PROPOSÉS à Grégoire (consigne du 4 sept.), pas arrêtés] : les
+ * libellés que ses collègues liront vivent ICI, en un seul endroit. La forme des bornes
+ * est exacte (« 0–64,99 % »), celle que l'éditeur d'échelles montre — le cadrage écrivait
+ * « 0–64 % » ; un arrondi cacherait où tombe 64,5.
+ */
+const LIBELLES_PALIERS = {
+    champNiveaux: 'Échelle (niveaux)',
+    champPaliers: 'Paliers (bornes en %)',
+    coinNiveaux: 'Critère / Niveau',
+    coinPaliers: 'Critère / Palier',
+    sansEchelleNiveaux: 'Cette cartouche n\'a pas encore d\'échelle. Choisis une échelle de performance ci-dessus : ses niveaux deviendront les colonnes de la matrice.',
+    sansEchellePaliers: 'Cette cartouche n\'a pas encore de paliers. Choisis-les ci-dessus : leurs bornes deviendront les colonnes de la matrice.'
+};
+/** L'échelle semée par `assurerEchelleIdmeDeDepart` (echelles.js) — préremplie si elle est dans la base. */
+const ID_ECHELLE_DE_DEPART = 'ECHELLE_IDME_DEPART';
+
+/**
+ * Une grille est analytique quand son type l'est — déclaré (lot 1), sinon déduit de ses
+ * critères quand ils le sont tous. Une seule source : `typeGrilleAffiche` (grilles.js).
+ * Une grille MIXTE (des critères à niveaux ET à points, sans type déclaré) n'est PAS
+ * analytique : elle garde les mots des niveaux. Une grille déclarée analytique dont un
+ * critère déroge l'est : le déclaré l'emporte, comme au menu.
+ */
+function grilleEstAnalytique(grille) {
+    if (!grille || typeof window.typeGrilleAffiche !== 'function') return false;
+    return window.typeGrilleAffiche(grille) === 'analytique';
+}
+
+/** Une borne, telle quelle, en français : 64.99 → « 64,99 », 85 → « 85 ». Vide si ce n'est pas un nombre. */
+function formaterBornePalier(v) {
+    const n = Number(v);
+    if (v === '' || v === null || v === undefined || !Number.isFinite(n)) return '';
+    return String(Math.round(n * 100) / 100).replace('.', ',');
+}
+
+/** Le titre d'un palier : « 65–74,99 % » ; sans bornes (copie d'échelle sans elles), le nom du niveau. */
+function libellePalier(niveau) {
+    if (!niveau) return '';
+    const min = formaterBornePalier(niveau.min);
+    const max = formaterBornePalier(niveau.max);
+    if (min === '' || max === '') return String(niveau.nom || niveau.code || '');
+    return min + '\u2013' + max + '\u00a0%';
+}
+
+/** La grille d'une cartouche, par son id ou l'id d'origine d'une copie — `null` sans grille. */
+async function grilleDeCartouche(grilleId) {
+    if (!grilleId) return null;
+    const grilles = await db.get(cle('grillesTemplates')) || [];
+    return grilles.find(g => g && (g.id === grilleId || g.idOriginal === grilleId)) || null;
+}
+
+/** Le mot du champ : « Paliers (bornes en %) » pour une grille analytique, « Échelle (niveaux) » sinon. */
+function adapterFormulaireCartoucheAuTypeGrille(grille) {
+    const mot = document.getElementById('motEchelleCartouche');
+    if (mot) mot.textContent = grilleEstAnalytique(grille) ? LIBELLES_PALIERS.champPaliers : LIBELLES_PALIERS.champNiveaux;
+}
+// Exposés ICI, après les déclarations : `const` n'est pas hoisté, et un export placé plus haut
+// dans le fichier (avec ceux des fonctions) casserait le chargement du module (TDZ).
+window.grilleEstAnalytique = grilleEstAnalytique;
+window.libellePalier = libellePalier;
+window.LIBELLES_PALIERS = LIBELLES_PALIERS;
+
 async function populerDropdownsCartouche(grilleId = '', echelleId = '', disabled = false) {
     const selectGrille = document.getElementById('selectGrilleCartouche');
     const selectEchelle = document.getElementById('selectEchelleCartouche');
@@ -3611,6 +3708,9 @@ async function populerDropdownsCartouche(grilleId = '', echelleId = '', disabled
             });
         selectProduction.innerHTML = htmlProd;
     }
+
+    // Lot 4, volet A — le mot du champ suit la grille liée (création : aucune → « niveaux »).
+    adapterFormulaireCartoucheAuTypeGrille(await grilleDeCartouche(grilleId));
 }
 
 // Alias pour compatibilité
@@ -3628,7 +3728,22 @@ async function onChangeSelectionCartouche() {
     const matriceRetroaction = document.getElementById('matriceRetroaction');
 
     const grilleId = selectGrille?.value;
-    const echelleId = selectEchelle?.value;
+    let echelleId = selectEchelle?.value;
+
+    // Lot 4, volet A — la grille choisie dit si l'on parle de niveaux ou de paliers. Pour
+    // une grille analytique sans échelle choisie, l'échelle de départ est PRÉREMPLIE si elle
+    // est dans la base (et dans la sélection) ; sinon rien n'est prérempli — on ne devine
+    // pas une échelle (#578), on offre celle qui existe.
+    const grilleChoisie = await grilleDeCartouche(grilleId);
+    adapterFormulaireCartoucheAuTypeGrille(grilleChoisie);
+    if (grilleId && !echelleId && selectEchelle && grilleEstAnalytique(grilleChoisie)) {
+        const echelles = await db.get(cle('echellesTemplates')) || [];
+        const depart = echelles.find(e => e && e.id === ID_ECHELLE_DE_DEPART && estDansSelection(e));
+        if (depart) {
+            selectEchelle.value = depart.id;
+            echelleId = depart.id;
+        }
+    }
 
     // Si les deux ne sont pas sélectionnés, masquer la matrice
     if (!grilleId || !echelleId) {
