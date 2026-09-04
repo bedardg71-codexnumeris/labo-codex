@@ -284,6 +284,54 @@ critère par son niveau, « Langue (Maîtrisé) ». Pour un analytique, garder c
 que le chiffre — et parce que le même texte dit déjà « Critère 2 (Langue) — 24 / 30 » trois
 lignes plus haut. Hors du périmètre nommé du lot 3 : si oui, c'est une retouche avant 1.116.
 
+### ↻ Ce que le coup d'œil de Grégoire a ouvert — 4 septembre 2026, 7 h, sur `5b8bc6b0`
+
+Il a parcouru les deux lots sur sa grille « Analyse littéraire » (12 critères analytiques, sans
+cartouche) et produit le PDF. Quatre retours, triés :
+
+**1. Le PDF nomme encore les niveaux (bilan + légende) → retouche du lot 3, §6 de la consigne du
+jour.** C'est l'arrêté 4 manqué à deux sites. Part dans 1.116.
+
+**2. « Beaucoup d'espace perdu à droite des scores » dans la liste des critères du PDF.**
+▣ Mesure : la place à droite est celle du commentaire de cartouche (`renderCritere`), et cette
+copie n'en avait pas — il n'a pas pu créer de cartouche (retour 3). ⮕ **Disposition : à revoir
+APRÈS le retour 3, avec un vrai commentaire dans la rangée.** Si l'espace reste vide avec un
+commentaire, c'est du design (skill `design-interface`) ; sinon c'était le symptôme du retour 3.
+Inscrit, pas dans 1.116.
+
+**3. Créer une cartouche pour une grille analytique exige une échelle** (champ « Échelle
+(niveaux) * »), *« alors que la grille analytique fonctionne uniquement avec des points »*.
+⚠ **C'est une contradiction avec le lot 3 tel que construit, et elle est didactique, donc à
+Grégoire.** Le lot 3 fait précisément ceci : le chiffre trouve son niveau **par les bornes de
+l'échelle**, et ce niveau ouvre la cartouche (clé `critereId_niveau`). Une cartouche attache un
+commentaire à un PALIER ; sans paliers, pas de cartouche. La question n'est donc pas « échelle ou
+pas », c'est **« où vivent les paliers d'une grille analytique, et comment s'appellent-ils ? »**
+Deux voies :
+- (a) **L'échelle reste le mécanisme des paliers, mais elle ne se présente plus comme des
+  « niveaux » quand la grille est analytique** : le champ de la cartouche se lit « Paliers (bornes
+  en %) », prérempli avec l'échelle de départ, et l'éditeur de cartouche titre ses colonnes par
+  les bornes (« 0–64 % », « 65–79 % »…) plutôt que I·D·M·E. Aucun mécanisme neuf : c'est le motif
+  « ce que Grégoire demande existe déjà sous un autre nom », cinquième occurrence.
+- (b) **Des paliers en points, propres à chaque critère** (« 0–1 · 2 · 3 » pour un critère sur 3).
+  Plus proche du réflexe « traditionnel », mais douze critères × N paliers à écrire, un second
+  mécanisme de cartouche à maintenir, et le dépistage perd sa lecture commune.
+⮕ **Recommandation de Cowork : (a).** Elle garde une seule mécanique de cartouche et une seule
+lecture pour le dépistage ; ce qui manquait était le nom et le préremplissage, pas le mécanisme.
+↻ **TRANCHÉ PAR GRÉGOIRE le 4 septembre 2026 vers 7 h 30 : la voie (a).** Ses mots : *« je suis
+ta recommandation »*. L'échelle reste le mécanisme des paliers ; pour une grille analytique elle
+se présente comme des paliers en %, préremplie avec l'échelle de départ, et l'éditeur de cartouche
+titre ses colonnes par les bornes. **C'est le lot 4, à cadrer après 1.116** — avec le retour 4
+(« Aucun » au menu SOLO) et le retour 2 (l'espace à droite du chiffre, à rejuger avec une vraie
+cartouche).
+
+**4. Le menu « Niveau SOLO » de l'éditeur de grille devrait offrir « Aucun »** pour une méthode
+traditionnelle. ▣ Mesure : le menu existe à deux endroits (`js/grilles.js:3399` et `:4121`) et le
+défaut est `multistructurel` (`:330`). Ce qui LIT `niveauSOLO` (dépistage, profil) reste à
+mesurer : « Aucun » veut dire *ce critère ne nourrit pas la lecture SOLO*, et chaque lecteur doit
+savoir sauter. C'est une décision de dépistage (didactique) qu'il a déjà énoncée ; ce qui reste
+à trancher est ce que le dépistage fait d'une copie dont TOUS les critères sont « Aucun ».
+⮕ **Va avec le lot 4.**
+
 ---
 
 ## Ce que ce fichier ne dit pas

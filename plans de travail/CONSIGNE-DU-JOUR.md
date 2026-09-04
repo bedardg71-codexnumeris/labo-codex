@@ -122,3 +122,59 @@ pour eux.
 
 **Puis l'ordre de la séance reprend au §3** : coup d'œil de Grégoire sur les deux lots, verdict au
 jeton, release 1.116, push. Commite cette retouche AVEC ce fichier.
+
+---
+
+## 6 · Seconde retouche, décidée le 4 septembre 2026 au matin, après le coup d'œil de Grégoire (`5b8bc6b0`)
+
+> Écrite par Cowork vers 7 h 15. Grégoire a parcouru les deux lots à l'écran et a produit le PDF
+> d'une copie évaluée avec sa grille « Analyse littéraire » (12 critères, tous analytiques).
+> ▣ **Mesuré depuis Cowork avant d'écrire** : le PDF remis porte un SECOND bilan, distinct de celui
+> du texte copié — `construireConcentration` (`js/synthese-retroaction-data.js:762`) et
+> `construireForce` (l. 881, `libelleNiveau(echelle, …)`), rendus par
+> `js/synthese-retroaction-rendu.js:643-648`. La retouche du §5 n'a touché que
+> `evaluation-retroaction.js` ; celui-ci n'a pas bougé. Et la légende de l'échelle
+> (`renderLegende`, `synthese-retroaction-rendu.js:328`) s'imprime depuis `ctx.feedback.scale`
+> quel que soit le type des critères.
+
+**Ce que ça produit à l'écran** : dans l'écran d'évaluation, un champ de points vide affiche « – »
+et non plus « 0 » — un vrai zéro se tape. Et sur le PDF de l'élève, pour une grille dont les critères sont
+analytiques, **plus aucun nom de niveau nulle part** — ni dans « Présentement, il faut se
+concentrer sur » (« pertinent et clair (Sujet divisé Incomplet ou insuffisant) » devient
+« pertinent et clair (Sujet divisé 1 / 2) »), ni dans « Acquis en développement, à consolider »
+(« Sujet posé (2 / 3) »), ni dans « Ta force : Sujet amené (3 / 3) ») — et **la légende
+« 0 Aucun · I · D · M · E » disparaît de l'en-tête « Rétroaction par critère » quand aucun critère
+imprimé ne lit l'échelle**. Les critères holistiques et algorithmiques gardent leur niveau et
+leur légende.
+
+**C'est le lot 3 qui n'est pas fini, pas une trouvaille** (le test de `CLAUDE.md` : « est-ce que
+je viens de l'écrire ? » — l'arrêté 4 s'appliquait à TOUT ce que l'élève lit, et deux sites ont
+été manqués par ma consigne et par la carte). Corriger maintenant.
+
+- **a)** Le bilan du PDF nomme un critère analytique par son chiffre, aux trois endroits (défis,
+  acquis en développement, force). Même règle que `_lectureNiveauBilan` (§5) : `points` présent
+  dans l'entrée de `criteres[]` → « 1 / 2 » ; sinon le libellé du niveau comme avant. Le poids
+  vient de l'entrée enregistrée (`c.ponderation`), comme au repli du §5.
+- **b)** La légende de l'échelle ne s'imprime que si au moins un critère rendu passe par la
+  rangée de niveaux (`typeof critere.points !== 'number'`). Grille mixte : elle reste.
+- **c)** Un cas par site dans la sentinelle lot 3 ; break-test. Le spec WebKit du lot 3 lit le PDF
+  produit : ajoute-lui les deux assertions négatives (aucun libellé de niveau, aucune légende)
+  sur une grille entièrement analytique — c'est le témoin que le §5 n'avait pas.
+
+- **d) Le champ de points vide ne doit pas ressembler à un zéro** — trouvé par Grégoire à
+  l'écran : *« je ne savais pas que le zéro prérempli était une absence de valeur »*. Sur un critère
+  qui valait vraiment 0, il n'a rien tapé, le critère est resté sans points et la note n'a pas pu
+  se calculer. ▣ Mesuré : `placeholder="0"` sur les deux gabarits du champ
+  (`js/evaluation-chargement.js:1114` et `:1301`). Remplace le `placeholder` par « – » (tiret
+  demi-cadratin) aux deux sites : le vide se lit comme un vide, et « 0 » redevient une valeur
+  qu'on tape. Rien d'autre ne change (`min`, `max`, `step`, le handler). Un cas dans la sentinelle
+  du lot 2 (le gabarit ne porte plus `placeholder="0"`), break-test. C'est le lot 2 qui n'était
+  pas fini : symptôme vécu, note bloquée.
+
+⚠ **Ce qui n'entre PAS dans cette retouche, et qui est cadré ailleurs** (consigne des lots, sous
+le lot 3, « Ce que le coup d'œil a ouvert ») : l'espace vide à droite du chiffre dans la liste
+des critères ; la cartouche qui exige une échelle pour une grille analytique ; le menu SOLO
+sans « Aucun ». Les deux derniers attendent une décision de Grégoire.
+
+**Puis l'ordre reprend** : relecture croisée de Cowork de cette retouche, verdict au jeton,
+release 1.116, push. Commite cette retouche AVEC ce fichier.

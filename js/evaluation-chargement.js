@@ -1108,10 +1108,12 @@ function cartoucheSelectionnee() {
         </div>
     `) : estAnalytique ? `
         <!-- Interface analytique (lot 2, 4 sept. 2026) : des points, sur le poids du critère.
-             Le maximum EST le poids ; la note en bas de la palette se fait depuis les points. -->
+             Le maximum EST le poids ; la note en bas de la palette se fait depuis les points.
+             Le champ vide montre « – », pas « 0 » : un vrai zéro se tape (retouche du 4 sept.,
+             vécu par Grégoire — « je ne savais pas que le zéro prérempli était une absence »). -->
         <div class="eval-saisie-points">
             <input type="number" id="eval_pts_${critere.id}" class="controle-form eval-input-points"
-                   min="0" max="${ponderation}" step="any" placeholder="0" inputmode="decimal"
+                   min="0" max="${ponderation}" step="any" placeholder="–" inputmode="decimal"
                    data-on-input="pointsSaisis" data-param="${critere.id}">
             <small class="eval-label">sur ${ponderation}</small>
         </div>
@@ -1295,10 +1297,11 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                         ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
                     </select>
                 ` : estAnalytique ? `
-                    <!-- Interface analytique (lot 2, 4 sept. 2026) : des points, sur le poids. -->
+                    <!-- Interface analytique (lot 2, 4 sept. 2026) : des points, sur le poids.
+                         Le champ vide montre « – », pas « 0 » : un vrai zéro se tape (retouche du 4 sept.). -->
                     <div class="eval-saisie-points">
                         <input type="number" id="eval_pts_${critere.id}" class="controle-form eval-input-points"
-                               min="0" max="${ponderation}" step="any" placeholder="0" inputmode="decimal"
+                               min="0" max="${ponderation}" step="any" placeholder="–" inputmode="decimal"
                                data-on-input="pointsSaisis" data-param="${critere.id}">
                         <small class="eval-label">sur ${ponderation}</small>
                     </div>

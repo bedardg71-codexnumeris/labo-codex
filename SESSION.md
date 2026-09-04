@@ -169,6 +169,56 @@
          sur le disque pendant la séance, hors du mandat §5).
        ▣ DÛ ENSUITE (§3 de la consigne, inchangé) : coup d'œil de Grégoire sur les deux lots →
          `scripts/pousser.sh` (verdict au jeton) → release 1.116 → push.
+       ▣ MESURÉ au commit : `5b8bc6b0`, 8 fichiers, 3 devant `origin/main`.
+
+     ↻ SECONDE RETOUCHE — 4 SEPTEMBRE AU MATIN, §6 de la consigne du jour, APRÈS le coup d'œil
+       de Grégoire sur les deux lots (`5b8bc6b0`) : il a produit le PDF d'une copie évaluée avec
+       sa grille « Analyse littéraire » (12 critères analytiques). C'est le lot 3 qui n'était pas
+       fini (deux sites manqués par la consigne et par ma carte), et le lot 2 aussi (le zéro
+       prérempli). Commit SÉPARÉ.
+       ▣ MESURÉ avant d'écrire : le PDF porte un SECOND bilan, distinct de celui du texte copié
+         — `construireConcentration` (priorités + signalés) et `construireForce` dans
+         `synthese-retroaction-data.js`, rendus par `renderRangeeConcentration` /
+         `renderRangeeRecurrents` ; tous trois par `libelleNiveau(echelle, niveauSelectionne)`.
+         La légende « I · D · M · E » : `renderLegende(ctx)` depuis `ctx.feedback.scale`, appelée
+         sans condition par `renderCriteres`. Le placeholder : `placeholder="0"` à QUATRE sites de
+         `evaluation-chargement.js` — deux sont les champs algorithmiques (erreurs, mots ; :1083,
+         :1262), intouchés ; deux sont les champs de points (:1114, :1301). Ordre des sections
+         du PDF : critères → niveau général → tampons → bilan.
+       ▣ (a) `lectureNiveauCritere(echelle, c)` — « 8 / 20 » si `points` est un nombre (points
+         et poids ENREGISTRÉS dans l'entrée), sinon `libelleNiveau` comme avant ; les trois sites
+         du bilan du PDF passent par elle. Même règle que `_lectureNiveauBilan` de l'app : les
+         deux textes vont au même élève.
+       ▣ (b) `renderCriteres` : la légende ne s'imprime que si `criteres.some(c => typeof
+         c.points !== 'number')`. Grille mixte : elle reste (témoin H.d, EVAL_LOT3).
+       ▣ (d) `placeholder="–"` (demi-cadratin) aux deux gabarits du champ de points ; `min`,
+         `max`, `step`, `inputmode`, le handler : inchangés.
+       ▣ DÉCIDÉ SEUL, dit : le bandeau « Niveau général · Maîtrisé » du PDF RESTE sur une grille
+         entièrement analytique — c'est le niveau de la COPIE (note globale → bornes), pas d'un
+         critère ; l'arrêté 4 porte sur le critère. Le spec l'exclut explicitement de son
+         assertion « aucun libellé de niveau » (ordre des sections mesuré : il suit les critères).
+       ▣ TÉMOINS : sentinelle lot 3 → 38 cas (H.a priorités « pertinent et clair (Sujet divisé
+         8 / 20) », H.b signalés « Sujet posé (20 / 30) », H.c « Ta force : Sujet amené (50 / 50) »,
+         H.d légende absente sur l'entièrement analytique / présente sur la mixte, H.e holistique
+         garde son libellé ; F.e : trois sites, une lecture, légende conditionnée). Sentinelle
+         lot 2 → 19 cas (E.e : les deux gabarits portent `placeholder="–"`, jamais `"0"`). Spec
+         lot 3 → second test, grille « Analyse littéraire » 50·30·20 sans cartouche, vrai flux :
+         placeholders « – » et champs vides, 50/20/8 → 78,0 %, Enregistrer → base `a1:E:50,
+         a2:D:20, a3:I:8`, PDF : les trois chiffres, priorités/signalés/force au chiffre, AUCUNE
+         légende, AUCUN libellé de niveau dans les critères et le bilan (bandeau exclu).
+         Break-tests (5 mutations, remise md5, 3/3 identiques) : lecture du PDF sans points (4) ·
+         signalés au libellé (2) · force au libellé (3) · légende toujours (2) · placeholder « 0 »
+         aux deux gabarits (1).
+         `cd tests && npm run test:unit` : 455 / 4984, code 0. WebKit ciblé, 8 specs d'évaluation :
+         15 / 15. 34 lignes ajoutées (js + index.html), audit statique : aucun innerHTML/handler/
+         eval/console.log/db.set. Jetons : synthese-data 0903f, synthese-rendu 0903b, chargement 0903c.
+       ▣ HORS DE CETTE RETOUCHE (cadré par Cowork sous le lot 3, « Ce que le coup d'œil a
+         ouvert ») : l'espace vide à droite du chiffre ; la cartouche qui exige une échelle pour
+         une grille analytique ; le menu SOLO sans « Aucun ». Rien touché.
+       ▣ NON EMPORTÉS, à Cowork : `CONSIGNE-DEMARRAGE-COWORK.md`, `00-CADRAGES-OUVERTS.md`,
+         `CADRAGE-2026-09-03-collections-de-parametres.md` (toujours modifiés dans l'arbre).
+       ▣ DÛ ENSUITE : relecture croisée de Cowork de cette retouche → `scripts/pousser.sh`
+         (verdict au jeton) → release 1.116 → push.
      ===================================================================== -->
 
 <!-- =====================================================================

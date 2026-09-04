@@ -271,3 +271,141 @@ test('lot 3 · 24 sur 30 ouvre la cartouche de M sans choisir de niveau ; le cri
 
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
+
+// ---------------------------------------------------------------------------------------------
+// SECONDE RETOUCHE (§6 de la consigne du jour, 4 sept. 2026, après le coup d'œil de Grégoire) :
+// sur une grille ENTIÈREMENT analytique, le PDF de l'élève ne porte plus aucun nom de niveau dans
+// son bilan (défis, acquis en développement, force), ni la légende « I · D · M · E » de la section
+// « Rétroaction par critère ». Et le champ de points vide montre « – », pas « 0 ».
+// C'est le témoin que la première retouche n'avait pas : Grégoire l'a vu sur sa grille « Analyse
+// littéraire » (12 critères analytiques).
+
+const saisir = (page, critereId, valeur) => page.evaluate(([id, v]) => {
+    const champ = document.getElementById('eval_pts_' + id);
+    champ.value = v;
+    champ.dispatchEvent(new Event('input', { bubbles: true }));
+}, [critereId, valeur]);
+
+test('lot 3 · grille entièrement analytique : le PDF ne nomme aucun niveau (bilan et légende), et le champ vide dit « – »', async ({ page }) => {
+    const erreurs = [];
+    attacherCaptureErreurs(page, erreurs);
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(700);
+
+    // 1. Le semis : trois critères analytiques (50 · 30 · 20), une échelle avec ses repères, pas de cartouche.
+    const prep = await page.evaluate(() => {
+        const k = (b) => (typeof cle === 'function' ? cle(b) : b);
+        // security-ok: fixtures littérales du banc, aucune source externe.
+        window.db.setSync('trimestres', [{ id: 'a2026', nom: 'Automne 2026', annee: 2026, session: 'A', actif: true }]);
+        window.db.setSync('trimestreActif', 'a2026');
+        window.db.setSync('groupeCoursActif', { id: 'GC1', trimestreId: 'a2026', nom: 'Groupe 00007' });
+        // security-ok: fixture littérale du banc, aucune source externe.
+        window.db.setSync(k('groupeEtudiants'), [{ da: '1234567', prenom: 'Daniel', nom: 'Témoin', groupe: '00007', groupeCoursId: 'GC1' }]);
+        // security-ok: fixture littérale du banc, aucune source externe.
+        window.db.setSync(k('grillesTemplates'), [{ id: 'G4', nom: 'Analyse littéraire', type: 'analytique', criteres: [
+            { id: 'a1', nom: 'Sujet amené', ponderation: 50, type: 'analytique' },
+            { id: 'a2', nom: 'Sujet posé', ponderation: 30, type: 'analytique' },
+            { id: 'a3', nom: 'Sujet divisé', ponderation: 20, type: 'analytique', description: 'Pertinent et clair' }
+        ] }]);
+        // security-ok: fixture littérale du banc, aucune source externe.
+        window.db.setSync(k('echellesTemplates'), [{ id: 'E4', nom: 'IDME témoin', niveaux: [
+            { code: 'I', nom: 'Insuffisant', min: 0, max: 54, valeurCalcul: 40, couleur: '#aa0000' },
+            { code: 'D', nom: 'En développement', min: 55, max: 74, valeurCalcul: 65, couleur: '#aa8800' },
+            { code: 'M', nom: 'Maîtrisé', min: 75, max: 89, valeurCalcul: 80, couleur: '#00aa00' },
+            { code: 'E', nom: 'Étendu', min: 90, max: 100, valeurCalcul: 95, couleur: '#0000aa' }
+        ], seuilSuffisance: 'D', seuilMaitrise: 'M' }]);
+        window.db.setSync(k('cartouches_G4'), []);
+        // security-ok: fixture littérale du banc, aucune source externe.
+        window.db.setSync(k('productions'), [{ id: 'P4', titre: 'Analyse témoin', grilleId: 'G4', echelleId: 'E4', groupeCoursId: 'GC1', cartoucheId: '' }]);
+        window.db.setSync(k('evaluationsSauvegardees'), []);
+        window.chargerListeEtudiantsEval();
+        window.chargerGroupesEval();
+        window.chargerProductionsDansSelect();
+        window.chargerGrillesDansSelect();
+        window.chargerEchellePerformance();
+        return window.demarrerEvaluationDepuisFichier({ id: 'F4', etudiantDA: '1234567', productionId: 'P4', nomFichier: 'analyse.pdf' });
+    });
+    expect(prep).toBe('P4');
+    await page.waitForTimeout(200);
+
+    // 2. Ouvrir la copie (même séquence que le premier test, sur P4 / G4 / E4).
+    const ouverture = await page.evaluate(async () => {
+        const dormir = (ms) => new Promise(r => setTimeout(r, ms));
+        const selE = document.getElementById('selectEtudiantEval');
+        selE.value = '1234567';
+        window.chargerEvaluationsEtudiant();
+        const selP = document.getElementById('selectProduction1');
+        selP.value = 'P4';
+        selP.dispatchEvent(new Event('change', { bubbles: true }));
+        await dormir(900);
+        const selG = document.getElementById('selectGrille1');
+        if (!selG.value) { selG.value = 'G4'; selG.dispatchEvent(new Event('change', { bubbles: true })); }
+        const selEch = document.getElementById('selectEchelle1');
+        if (!selEch.value) { selEch.value = 'E4'; selEch.dispatchEvent(new Event('change', { bubbles: true })); }
+        const selR = document.getElementById('remiseProduction1');
+        if (selR) { selR.value = 'importe'; if (typeof window.changerStatutRemise === 'function') window.changerStatutRemise(1); }
+        await dormir(400);
+        return {
+            champs: ['a1', 'a2', 'a3'].map(id => !!document.getElementById('eval_pts_' + id)),
+            placeholders: ['a1', 'a2', 'a3'].map(id => (document.getElementById('eval_pts_' + id) || {}).placeholder),
+            valeurs: ['a1', 'a2', 'a3'].map(id => (document.getElementById('eval_pts_' + id) || {}).value)
+        };
+    });
+    console.log('OUVERTURE →', JSON.stringify(ouverture));
+    expect(ouverture.champs).toEqual([true, true, true]);
+    // (d) Le champ vide ne ressemble pas à un zéro : « – », et aucune valeur.
+    expect(ouverture.placeholders).toEqual(['–', '–', '–']);
+    expect(ouverture.valeurs).toEqual(['', '', '']);
+
+    // 3. 50 / 50 (E), 20 / 30 (D), 8 / 20 (I) → 78,0 % ; Enregistrer.
+    await saisir(page, 'a1', '50');
+    await saisir(page, 'a2', '20');
+    await saisir(page, 'a3', '8');
+    await page.waitForTimeout(150);
+    const note = await page.evaluate(() => document.getElementById('noteProduction1').textContent);
+    expect(note).toBe('78.0 %');
+
+    const apres = await page.evaluate(async () => {
+        const notifs = [];
+        const orig = window.notifications.erreur;
+        window.notifications.erreur = (t, m) => { notifs.push({ t, m }); return orig.call(window.notifications, t, m); };
+        window.sauvegarderEvaluation();
+        await new Promise(r => setTimeout(r, 400));
+        window.notifications.erreur = orig;
+        const evals = window.db.getSync(cle('evaluationsSauvegardees'), []) || [];
+        const e = evals[0];
+        if (!e) return { notifs, nb: evals.length };
+        const fb = window.syntheseRetroactionData.construireFeedback(e, { id: 'F4', etudiantDA: '1234567', productionId: 'P4' }, null);
+        const html = window.syntheseRetroactionRendu.rendreSyntheseHTML(fb);
+        // La section des critères et le bilan, SANS le bandeau du niveau GÉNÉRAL (celui de la copie,
+        // « M · Maîtrisé », qui reste : l'arrêté 4 porte sur le critère analytique, pas sur la note).
+        const debut = html.indexOf('Rétroaction par critère');
+        const corps = (debut === -1 ? '' : html.slice(debut))
+            .replace(/<section[^>]*>(?:(?!<\/section>)[\s\S])*Niveau général(?:(?!<\/section>)[\s\S])*<\/section>/, '');
+        return {
+            notifs, nb: evals.length,
+            criteres: (e.criteres || []).map(c => c.critereId + ':' + c.niveauSelectionne + ':' + c.points),
+            priorites: fb.bilan.concentration.priorites,
+            signales: fb.bilan.concentration.signales,
+            force: fb.bilan.recurrents.force,
+            legende: /<\/b> Insuffisant/.test(html),
+            chiffres: ['50 / 50', '20 / 30', '8 / 20'].map(t => html.includes(t)),
+            libellesDansLeCorps: ['Insuffisant', 'En développement', 'Maîtrisé', 'Étendu'].filter(l => corps.includes(l))
+        };
+    });
+    console.log('PDF →', JSON.stringify(apres));
+    expect(apres.notifs).toEqual([]);
+    expect(apres.nb).toBe(1);
+    expect(apres.criteres).toEqual(['a1:E:50', 'a2:D:20', 'a3:I:8']);
+    // (a) Le bilan du PDF, aux trois endroits : le chiffre, jamais le nom du niveau déduit.
+    expect(apres.priorites).toEqual(['pertinent et clair (Sujet divisé 8 / 20)']);
+    expect(apres.signales).toEqual(['Sujet posé (20 / 30)']);
+    expect(apres.force).toBe('Ta force : Sujet amené (50 / 50)');
+    expect(apres.chiffres).toEqual([true, true, true]);
+    // (b) Aucune légende d'échelle, et aucun libellé de niveau de la section des critères à la fin.
+    expect(apres.legende).toBe(false);
+    expect(apres.libellesDansLeCorps).toEqual([]);
+
+    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
+});

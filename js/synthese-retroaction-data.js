@@ -743,6 +743,22 @@
         return (niveau && niveau.label) || code || '';
     }
 
+    /**
+     * Ce que le bilan du PDF dit du niveau d'un critère : le libellé du niveau dans
+     * l'échelle — ou, pour un critère analytique, SON CHIFFRE, « 1 / 2 » (points et poids
+     * ENREGISTRÉS dans l'entrée de `criteres[]`, comme au rendu du critère).
+     * ⮕ Retouche du lot 3, 4 septembre 2026, décision de Grégoire (arrêté 4 : l'élève ne lit
+     * que la note chiffrée). Même règle que `_lectureNiveauBilan` du bilan de l'app
+     * (`evaluation-retroaction.js`) — les deux textes vont au même élève et doivent dire la
+     * même chose du même critère.
+     */
+    function lectureNiveauCritere(echelle, c) {
+        if (c && typeof c.points === 'number' && !isNaN(c.points)) {
+            return `${c.points} / ${c.ponderation == null ? '' : c.ponderation}`;
+        }
+        return libelleNiveau(echelle, c ? c.niveauSelectionne : '');
+    }
+
     function construireBilan(evaluation, grille, echelle, stats) {
         const historique = lireHistorique(evaluation);
         const evalPrecedente = historique[0] || null;
@@ -825,7 +841,7 @@
             const def = grilleCriteres.find(gc => gc.nom === d.critereNom || gc.id === d.critereId);
             const desc = def && def.description ? def.description.toLowerCase() : '';
             const prefix = desc || d.critereNom;
-            const niveauTxt = libelleNiveau(echelle, d.niveauSelectionne);
+            const niveauTxt = lectureNiveauCritere(echelle, d);   // le chiffre pour un analytique
             const recurrent = patrons.indexOf(d.critereNom) !== -1
                 ? '. Cet objectif est prioritaire depuis 3 productions'
                 : '';
@@ -836,7 +852,7 @@
             tousMaitrises:  tousMaitrises,
             messageGlobal:  messageGlobal,
             priorites:      priorites,
-            signales:       signales.map(d => `${d.critereNom} (${libelleNiveau(echelle, d.niveauSelectionne)})`)
+            signales:       signales.map(d => `${d.critereNom} (${lectureNiveauCritere(echelle, d)})`)   // le chiffre pour un analytique
         };
     }
 
@@ -878,7 +894,7 @@
         // moins faible. Un critère en zone « signalé » est réel mais non durable :
         // l'annoncer comme une force dirait à l'élève qu'il peut s'en détourner.
         if (lecteurZone(evaluation.echelleId)(meilleur.niveauSelectionne) !== 'acquis') return '';
-        return `Ta force : ${meilleur.critereNom} (${libelleNiveau(echelle, meilleur.niveauSelectionne)})`;
+        return `Ta force : ${meilleur.critereNom} (${lectureNiveauCritere(echelle, meilleur)})`;   // le chiffre pour un analytique
     }
 
     function construireTamponsRecurrents(stats) {
