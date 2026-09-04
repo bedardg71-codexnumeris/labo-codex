@@ -39,7 +39,7 @@ const LIRE = `() => {
         ordre: blocs.map(e => e.dataset.pli || 'sous-criteres'),
         plis: Object.fromEntries([...l.querySelectorAll('.gabarit-algo-carte')].map(e => [e.dataset.pli, e.classList.contains('ferme') ? 'replie' : 'ouvert'])),
         rangeeAvantSousCriteres: l.innerHTML.indexOf('data-champ="nom"') < l.innerHTML.indexOf('sous-criteres-conteneur--en-tete'),
-        commentaire: l.innerHTML.includes('Modèle de commentaire') && !l.innerHTML.includes('Modèle de rétroaction'),
+        commentaire: l.innerHTML.includes('Modèle d\'observation') && !l.innerHTML.includes('Modèle de rétroaction') && !l.innerHTML.includes('Modèle de commentaire'),
         euf: [...l.querySelectorAll('option')].some(o => o.textContent === "Projection à l'EUF"),
         motsReference: (l.querySelector('input[data-param-cle="motsReference"]') || {}).value,
         cartesAvecId: [...l.querySelectorAll('.gabarit-algo-carte[id]')].length
@@ -91,7 +91,7 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     expect(etat.ordre).toEqual(['sous-criteres', 'CR:formule', 'CR:commentaire', 'CR:projection', 'CR:codes']);
     expect(etat.rangeeAvantSousCriteres, 'les sous-critères viennent tout de suite sous la rangée du critère').toBe(true);
     expect(etat.plis).toEqual({ 'CR:formule': 'ouvert', 'CR:commentaire': 'replie', 'CR:projection': 'replie', 'CR:codes': 'replie' });
-    expect(etat.commentaire, '« Modèle de commentaire », plus « Modèle de rétroaction »').toBe(true);
+    expect(etat.commentaire, '« Modèle d\'observation », ni « rétroaction » ni « commentaire »').toBe(true);
     expect(etat.euf, '« Projection à l\'EUF » au menu de projection').toBe(true);
     expect(etat.cartesAvecId, 'aucune carte ne porte d\'id : le composant ne persiste rien').toBe(0);
 

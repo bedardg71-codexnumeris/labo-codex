@@ -3617,14 +3617,15 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
                         <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 2px;">${esc(c.aide)}</small>
                     </div>`).join('');
 
-    // Lot 4 (4 sept. 2026) : « Modèle de COMMENTAIRE », décision de Grégoire — la
-    // rétroaction, c'est la cartouche, sur le travail ; ici, des commentaires que
-    // le critère engendre. La clé sous le menu ne porte pas le mot : rien qui
-    // voyage ne change. Sans cadre : la carte « Commentaire » le porte.
+    // Lot 4 (4 sept. 2026) : « Modèle d'OBSERVATION », décision de Grégoire (17 h 50,
+    // consigne h) — la rétroaction, c'est la cartouche, sur le travail ; « commentaire »
+    // n'entre pas ; ici, des observations que le critère engendre. La clé sous le menu
+    // ne porte pas le mot : rien qui voyage ne change. Sans cadre : la carte
+    // « Observation » le porte.
     return `
             <div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Modèle de commentaire</label>
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Modèle d'observation</label>
                     <select class="controle-form"
                             data-on-change="${handlerModele}" ${datasCommunes}>
                         ${options}
@@ -4072,7 +4073,7 @@ function rendreBlocCodesAlgo(critere, ctx) {
  * LE GABARIT D'UN CRITÈRE ALGORITHMIQUE, pour les deux écrans de grille — un seul
  * rendu, deux contextes (`ctx.mode` : 'temp' en création, 'grille' en édition).
  * Ordre décidé par Grégoire le 4 sept. : les sous-critères d'abord, sous la rangée
- * du critère ; puis la formule (ouverte : elle porte la note), le commentaire, la
+ * du critère ; puis la formule (ouverte : elle porte la note), l'observation, la
  * projection et les codes (repliés : ils portent les mots). Chaque carte a son
  * titre et sa bande — c'est ce qui sépare la formule de la projection, sans marge
  * ajoutée à part. Rien ici n'écrit dans la grille : l'ordre change le rendu, pas
@@ -4085,7 +4086,7 @@ function rendreCartesGabaritAlgo(critere, ctx) {
             <div class="gabarit-algo" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">
                 ${rendreSousCriteresAlgo(critere, ctx)}
                 ${carteGabaritAlgo(critere, ctx, 'formule', 'Formule', rendreBlocFormuleAlgo(critere, ctx), false)}
-                ${carteGabaritAlgo(critere, ctx, 'commentaire', 'Commentaire', rendreBlocEnoncesAlgo(critere, ctx), true)}
+                ${carteGabaritAlgo(critere, ctx, 'commentaire', 'Observation', rendreBlocEnoncesAlgo(critere, ctx), true)}
                 ${carteGabaritAlgo(critere, ctx, 'projection', 'Projection', rendreBlocProjectionAlgo(critere, ctx), true)}
                 ${estGrille ? carteGabaritAlgo(critere, ctx, 'codes', 'Codes d\'annotation', rendreBlocCodesAlgo(critere, ctx), true) : ''}
             </div>`;
