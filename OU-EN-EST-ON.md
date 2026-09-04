@@ -15,9 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**Dernière mise à jour : 2 septembre 2026, tard (quatorzième passe) — release 1.110.0 EN LIGNE.
-Le CINQUIÈME ÉNONCÉ est CLOS par Grégoire : corrigé, vérifié par lui à l'écran, commité sur
-`main` — mais NON POUSSÉ. Il ne sera vrai pour les utilisateurs qu'au push.**
+**Dernière mise à jour : 3 septembre 2026, 9 h 30 (dix-septième passe) — release **1.113.0**
+(build `0903-0906`). ▣ **LES HUIT ÉNONCÉS TIENNENT.** Le huitième — les suppressions disent
+vrai — a fermé ce matin, en quatre volets et trois versions livrées en douze heures.**
+
+⚠ **Ce que « tiennent » veut dire, et ce que ça ne veut pas dire.** Chaque volet a sa
+commande et son témoin ci-dessous. **Les quatre écrans ont été lus par Grégoire
+lui-même**, à l'écran. Le dernier — la suppression définitive d'une copie d'élève — le
+3 septembre au matin, dans la corbeille.
 
 ---
 
@@ -39,7 +44,7 @@ mentaient dans les deux sens :
 
 ---
 
-## Le compte du jour : 6 faits (dont 1 commité, PAS ENCORE POUSSÉ), 2 éprouvés par Grégoire, 1 pas fait, 0 jamais vérifié
+## Le compte du jour : 5 faits, 3 éprouvés par Grégoire, 0 pas fait, 0 jamais vérifié
 
 ---
 
@@ -314,13 +319,12 @@ Cliquer Enregistrer : refus nommé. Donner le niveau : la note revient, plus un 
 ↻ **CLOS PAR GRÉGOIRE le 2 septembre 2026, tard.** Ses mots : *« L'item "Aucune note remise
 ne repose sur une pondération incomplète sans le dire" est clos. »*
 
-⚠⚠ **CLOS N'EST PAS ENCORE EN LIGNE, ET LA DISTINCTION COMPTE.** Le correctif est **commité sur
-`main` et non poussé** — huit commits. ⮕ **Tant qu'il n'est pas parti, les utilisateurs déjà en
-place ont l'ancien comportement** : une note qui monte en silence. **L'énoncé n'est vrai pour eux
-qu'au push.**
-⮕ **Ce qui reste, dans l'ordre** : relecture croisée par Cowork (règle 2 — le lot ajoute un champ
-aux évaluations, qui partira dans les exports : c'est bien « ce qui ne se reprend pas »), puis le
-verdict au jeton (`cd tests && node ../scripts/verifier-playwright.mjs`), puis le push.
+↻ **POUSSÉ le 2 septembre au soir — `9fe13749..1402a17c`, release 1.111.0.** Le hook a relancé
+Vitest (vert) et lu le jeton (« verdict vert à jour pour ce commit »). ▣ **L'énoncé est donc vrai
+pour les utilisateurs**, et non plus seulement dans le dépôt.
+⏳ **Reste à confirmer, et ce n'est pas cet énoncé-ci** : que la version affichée dans
+l'application passe bien à **1.111.0** après le déploiement Netlify. C'est l'énoncé 7, et il se
+vérifie d'un coup d'œil au bandeau.
 
 **Vérifié comment :**
 · **Reproduit en ROUGE avant de toucher au code**, sur le vrai `calculerNote()` : le cas 50/30/20
@@ -351,6 +355,18 @@ verdict au jeton (`cd tests && node ../scripts/verifier-playwright.mjs`), puis l
   leur échelle. ▣ **C'est la propriété qui avait écarté l'état « brouillon / conclue »** : elle
   seule répare l'existant.
 
+⚠⚠ **LE TROU QUE CE LOT A NOMMÉ, ET C'EST LA LEÇON DE LA JOURNÉE.** La suite était **verte —
+441 fichiers, 4760 tests — avec DEUX vrais défauts dedans** : le brouillon perdu au refus, et des
+critères créés sans identifiant. ▣ **Aucun test ne les a vus. C'est le regard de Grégoire à
+l'écran qui les a trouvés.**
+⮕ **Quatrième occurrence du même motif le 2 septembre** : un vert qui ne prouve pas ce qu'on croit
+(la CI rouge que personne ne lisait · la sentinelle #572 qui regardait deux fichiers sur trois ·
+trois outils de poste plus permissifs que le serveur · et maintenant 4760 tests verts sur deux
+défauts réels).
+⮕ **C'est l'argument le plus fort en faveur de la règle 6** — *chaque lot se termine par un geste
+à vérifier à l'écran, pas par un rapport.* Elle n'est pas une politesse : elle a attrapé
+aujourd'hui ce que toute la machinerie a manqué.
+
 ⏳ **Trois trouvailles inscrites, PAS corrigées** : le portfolio et la liste des évaluations ne
 lisent pas encore la portée ; l'export unitaire ignorait déjà la raison de #565 ; un repli mort
 dans `calculerNote` contredit #527, sans effet en production.
@@ -358,6 +374,68 @@ dans `calculerNote` contredit #527, sans effet en production.
 ⏳ **Et une décision qui reste à Grégoire** : la réparation automatique des grilles des AUTRES
 enseignants — l'éditeur créait des critères sans identifiant depuis octobre 2025. **C'est une
 écriture dans les données de quelqu'un.**
+
+### Ce qu'un utilisateur détruit, il l'a voulu ; ce qu'il garde, il le retrouve
+↻ **CLOS le 3 septembre 2026 au matin.** Quatre volets, trois versions : **1.111.1**
+(cartouches), **1.111.2** (copie d'élève + vocabulaire), **1.112.0** (échelle).
+
+▣ **La règle, tranchée par Grégoire le 2 septembre** : supprimer définitivement la copie d'un
+élève emporte **tout ce qui touche le couple** (cet élève, cette production) — originale,
+reprises, évaluation d'un fichier réimporté. **Le code le faisait déjà ; l'écran ne le disait
+pas.** Le constat B5 de l'audit du 25 août, qui décrivait cette portée comme « trop large », est
+donc **REFUSÉ** : elle ne l'est pas.
+
+**Ce que chaque écran dit maintenant, et comment on le sait :**
+
+· **La copie d'un élève** — « Le fichier, ses annotations et toutes les évaluations de cet élève
+pour cette production seront effacés. » ↻ **Les mots sont ceux de Grégoire**, choisis le
+2 septembre à 21 h 45 parmi trois propositions. Un seul prédicat décide de ce qui est annoncé
+et de ce qui est détruit — deux prédicats auraient pu diverger sans qu'aucun test ne le voie.
+**Vérifié comment** : sentinelle #560, 8 essais. ▣ **ÉPROUVÉ PAR GRÉGOIRE le 3 septembre au
+matin**, à l'écran, dans la corbeille — sa phrase s'affiche mot pour mot. ⮕ **Et le témoin
+négatif tient** : le déplacement à la corbeille, qui ne détruit rien, continue de dire « le
+fichier pourra être restauré pendant 30 jours » et rien de plus.
+
+· **La cartouche** — les quatre chemins vivants disent leur portée, mesurée au moment où ils
+parlent. Celui de la liste, que Grégoire avait sous les yeux, disait « Es-tu sûr ? » et rien
+d'autre ; il nomme maintenant la grille, ce qui survit, et l'irréversibilité.
+**Vérifié comment** : sentinelle #647, 21 essais ; et **Grégoire a lu l'écran** — c'est même sa
+capture qui a montré qu'un des chemins ne nommait pas sa grille, ce que ni les essais ni la
+relecture du code n'avaient vu.
+
+· **L'échelle** — « Supprimer l'échelle «X», c'est la remplacer : N évaluations, N productions…
+suivront. Par quelle échelle la remplacer ? » ↻ **Décision de Grégoire, 3 septembre** :
+*« On supprime une échelle pour la remplacer par une autre. Une évaluation ne tient pas s'il n'y
+a pas d'échelle. »* Un seul cœur pour les cinq chemins ; refus nommé si le trimestre est
+archivé ; ne propose que les successeurs aux mêmes codes de niveaux.
+**Vérifié comment** : sentinelle #648, 18 essais, vraie fonction chargée en bac à sable ;
+`grep "^async function supprimerEchelle" js/` rend 6 chemins, dont 5 passent par
+`supprimerOuRemplacerEchelle` et le 6e ne touche que la Bibliothèque. **Grégoire a lu l'écran**
+sur son échelle « 0-IDME » (28 évaluations, 10 productions, 1 pratique, 6 cartouches).
+▣ **Relecture croisée de Cowork (règle 2)** : l'ordre est sûr — compte, refus, question,
+**puis** écriture. Rien n'est touché avant que l'utilisateur ait vu le chiffre.
+
+· **Un aiguillage mort** dans la suppression d'une production — `typeof
+retirerProductionDeLaBibliotheque === 'function'` gardait une fonction jamais déclarée.
+**Vérifié comment** : `grep -rn` rendait **2** occurrences (le garde et son appel), contre **5**
+pour la fonction sœur `retirerPratiqueDeLaBibliotheque` — témoin que le motif trouve ce qui
+existe. Retiré ; sentinelle #649, 105 lignes.
+
+⏳ **Inscrit, PAS corrigé** *(issue 2)* :
+· Le compte « N évaluation(s) l'emploient » d'une cartouche ne regarde que **le trimestre
+courant**, alors que la Bibliothèque est commune à tous. La phrase omet, elle n'invente pas.
+· Le remplacement d'une échelle **n'est pas atomique** : six écritures indépendantes. En cas
+d'échec partiel, l'ancienne échelle survit et relancer le geste termine la migration — **mais
+l'écran ne le dit pas.**
+· `verifierDependancesEchelle` ne connaissait pas de marqueur « terminé » : **le refus porte sur
+l'archivage seul**, faute d'un critère mesurable.
+
+⚠ **Ce que le lot n'a PAS fait, et c'est un chantier ouvert** : **corriger** une échelle sans la
+supprimer, avec **recalcul proposé, jamais automatique**. Décision de Grégoire le 3 septembre :
+*« Il permet d'informer l'utilisateur des conséquences de son geste. »* Cadré dans
+`plans de travail/DECISION-2026-09-03-echelle-remplacement.md`. *(#647, #648, #649, #560)*
+
+---
 
 ### Le numéro de version affiché correspond au code qui tourne
 Sans ça, aucun rapport de bug n'est interprétable, ni le sien ni celui d'un
@@ -378,38 +456,12 @@ qu'il liste). Le danger reste le bump fait à la main, et lui seul. *(#665)*
 
 ## PAS FAIT
 
-### Ce qu'un utilisateur détruit, il l'a voulu ; ce qu'il garde, il le retrouve
+▣ **Rien.** Pour la première fois depuis que ce fichier existe, aucun des huit énoncés n'est
+ouvert. Le dernier est monté dans FAIT le 3 septembre 2026 au matin.
 
-↻ **TRANCHÉ PAR GRÉGOIRE le 2 septembre 2026 en fin de journée — et ça change la NATURE du
-lot, pas seulement son contenu.**
-
-**La question posée** : tu supprimes définitivement la copie d'un élève, qu'est-ce qui part
-avec ? Trois issues lui ont été rendues : le fichier seul ; le fichier et son évaluation ; tout
-ce qui touche le couple (cet élève, cette production).
-
-⮕ **Sa réponse : TOUT CE QUI TOUCHE LE COUPLE.** Originale, reprises, évaluation d'un fichier
-réimporté.
-
-▣ **Donc le comportement actuel du code est le BON.** Le constat B5 de l'audit du 25 août
-décrivait cette portée comme un défaut (« suppressions par couple trop larges ») ; **elle ne
-l'est pas.** Ce qui est fautif, c'est que **l'écran ne l'annonce pas**.
-
-⮕ **Ce qui reste à faire n'est plus une règle métier, c'est la vérité des messages** — les
-trois défauts déjà ouverts : ils annoncent des pertes qui n'ont pas lieu, et taisent des
-survivances qui ont lieu. *(#647, #648, #649)*
-⮕ **Le lot devient beaucoup plus petit**, et il ne touche plus au modèle de données.
-⚠ **Le détail exact des trois fiches n'a pas été relu au moment de cette décision** (la machine
-de Grégoire s'était déconnectée). **À rejouer avant d'écrire la consigne** :
-`grep -n -A8 "\*\*#647 \|\*\*#648 \|\*\*#649 " BACKLOG.md`.
-
-⚠ **Ce que la décision ne couvre pas, et qu'il faudra lui reposer** : la portée de la
-suppression du matériel de DÉPART (supprimer la grille de départ dans un trimestre l'interdit
-dans TOUS). C'est #683, une autre question — et elle tombe d'elle-même si le semis disparaît.
-
-Trois défauts ouverts sur les messages de suppression : ils annoncent des pertes
-qui n'ont pas lieu, et taisent des survivances qui ont lieu.
-**Attend une décision de Grégoire** : que doit emporter la suppression d'un
-fichier ? *(#647, #648, #649)*
+⚠ **Ça ne veut pas dire que l'application est finie.** Ça veut dire que **la liste fermée de
+huit gestes que Grégoire s'était donnée pour la cohorte 1 est parcourue**. Ce qui reste vit
+dans `BACKLOG.md` et dans `plans de travail/`, et ne se compte pas ici.
 
 ---
 
@@ -502,6 +554,33 @@ complet de l'énoncé 2.
 
 ---
 
+↻ **Livré et éprouvé le 4 septembre 2026 — la grille déclare sa manière d'évaluer
+(lot 1 des trois types de grille), en ligne dans 1.115.0, build `0903-2103`.**
+· ✅ **Un menu « Type de la grille »** à côté du nom : holistique, analytique ou
+  algorithmique. **Chaque critère neuf en hérite** sans rien cocher ; le menu de
+  chaque critère reste là pour déroger. Le type voyage au partage et à l'import.
+· ✅ **Le menu dit ce qui est ENREGISTRÉ, pas ce qui est déduit** (retouche décidée
+  par Grégoire le 4 septembre) : « Non précisé » sur toute grille d'avant, et une
+  ligne dessous dit ce que ses critères sont — « Tes critères sont tous
+  holistiques. » Pas de couleur pour porter l'information : l'orange veut déjà dire
+  « avertissement », et « déduit » est l'état normal de toutes les grilles d'avant.
+· ✅ **Le badge de composition continue de dire ce qui EST**, depuis les critères,
+  jamais depuis la déclaration.
+· ⛔ **Rien n'est écrit dans les grilles existantes.** Rien du calcul des notes.
+**Vérifié comment** : Grégoire, à l'écran, trois passages — une grille d'avant ouvre
+sur « Non précisé » avec sa ligne, choisir un type tait la ligne et revenir la ramène ;
+une grille neuve en « Analytique » reçoit trois critères analytiques sans rien cocher,
+et un passé en algorithmique fait basculer le badge à MIXTE. Relecture croisée de
+Cowork sur `fa5d34d2` : rien à corriger. Verdict au jeton vert sur `1228837a`.
+*(commits `a6187760`, `fa5d34d2`, `1228837a`)*
+
+⏳ **Suivent, un par séance** : le lot 2 (l'analytique se saisit en points, un chiffre
+par critère et un total en bas — touche le calcul des notes, relecture croisée
+obligatoire) et le lot 3 (le chiffre trouve son niveau et ouvre la cartouche).
+Consignes : `plans de travail/CONSIGNES-2026-09-03-lots-des-trois-types-de-grille.md`.
+
+---
+
 ## L'ÉVALUATION — ce que l'audit du 25 août a déjà réglé
 
 C'est le morceau qui inquiète, et il est moins ouvert qu'il n'en a l'air.
@@ -558,9 +637,13 @@ propre ne dit rien de ce qu'il n'a pas regardé.
 
 Aucune session ne peut trancher ces points à sa place.
 
-- **La règle de suppression d'un fichier** : que doit-elle emporter ?
-- **Le facteur de normalisation 500 → 600** sur sa grille de première session.
-  ⚠ Entre deux évaluations, jamais au milieu d'une correction.
+↻ **QUATRE POINTS RETIRÉS DE CETTE LISTE LE 3 SEPTEMBRE 2026, tranchés par lui.** La règle
+de suppression d'un fichier (tout ce qui touche le couple élève-production), les mots des
+messages de suppression, le facteur de normalisation 500 → 600, et le message à la communauté.
+⮕ **Les décisions sur l'échelle sont écrites en entier dans
+`plans de travail/DECISION-2026-09-03-echelle-remplacement.md`** — remplacement, correction,
+recalcul proposé, refus dans un trimestre archivé, et le cas de l'échelle que personne
+n'emploie. ⚠ **Ce fichier fait foi ; ne les redemande pas.**
 ↻ **Tranché le 2 septembre à 11 h 30, et retiré de cette liste : le nom du service
 d'aide.** Trois décisions, dans ses mots :
   · Ce que lit un enseignant qui n'a rien réglé : un libellé générique —
@@ -575,12 +658,23 @@ d'aide.** Trois décisions, dans ses mots :
 - **Les essais à la main** que les tests ne remplacent pas : l'écran réel sur Mac
   et sur iPad.
 - **Deux attributions d'idée** inscrites dans le code (« l'algorithme propose, le
-  jugement tranche — Voisard ») : si la formule vient d'une source publiée, elle se
-  cite en règle plutôt que de disparaître ; sinon elle part. Question d'honnêteté
-  intellectuelle, pas de code.
-- **Le message à la communauté de pratique** sur l'adresse unique. C'est le seul
-  canal qui atteint quelqu'un ayant un vieux signet : le changelog s'affiche dans
-  l'application, donc *derrière* la porte. *(rédigé, attend sa correction)*
+  jugement tranche — Voisard »).
+  ↻ **TRANCHÉ le 3 septembre 2026** : **la source EST publiée.** Ses mots : *« Le travail de
+  Voisard est publié. Il tient un blogue sur Substack, et cette idée d'algorithme et de
+  jugement personnel est dans l'une de ses chroniques. »*
+  ⮕ **Donc elle se cite en règle — elle ne part pas.**
+  ⏳ **Ce qui reste, et ce n'est pas urgent** : retrouver LAQUELLE des chroniques. *« Il faudra
+  faire une recherche pour la retrouver, mais ce n'est pas le bon moment. »*
+  ⚠ **Ne pas retirer les attributions en attendant** : une mention imprécise vaut mieux qu'une
+  idée empruntée sans nom. Question d'honnêteté intellectuelle, pas de code.
+↻ **Le message à la communauté de pratique** sur l'adresse unique : **fait**, le
+3 septembre.
+
+⮕ **Il ne reste donc qu'UN point sur cette liste : les essais à la main.** ▣ **Et c'est
+celui qui a le plus payé** : le 2 et le 3 septembre, son coup d'œil à l'écran a trouvé
+**trois** défauts que 4760 essais verts, deux relectures croisées et une suite de navigateur
+complète avaient tous manqués — un brouillon perdu au refus, des critères créés sans
+identifiant, et une fenêtre de suppression qui ne nommait pas sa grille.
 
 ↻ **Retiré de cette liste le 2 septembre** : les identifiants du code qui portent un
 prénom de collègue. **Il a tranché — ils partent tous** — et la mesure a montré que
