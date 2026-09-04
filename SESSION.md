@@ -129,8 +129,46 @@
      ▣ DÛ ENSUITE, dans l'ordre : relecture croisée de Cowork (carte + commit) → corrections →
        coup d'œil de Grégoire → `scripts/pousser.sh` (verdict au jeton sur le commit de release)
        → release MINEURE 1.116, UNE entrée de changelog pour les deux lots, mots à Grégoire → push.
-     ▣ MESURÉ au commit : voir le commit du lot 3 (les fichiers de Cowork partent avec lui, dont
-       `_ancienne-CONSIGNE-DU-JOUR-2026-09-03-16h15.md`, comme la précédente dans `16dfc5eb`).
+     ▣ MESURÉ au commit : `b4039828`, 21 fichiers, 2 devant `origin/main` (les fichiers de Cowork
+       partent avec lui, dont `_ancienne-CONSIGNE-DU-JOUR-2026-09-03-16h15.md`, comme la
+       précédente dans `16dfc5eb`).
+
+     ↻ RETOUCHE — 4 SEPTEMBRE AU MATIN, §5 de la consigne du jour, après la relecture croisée du
+       lot 3 (`b4039828`, Cowork : rien à corriger, une réserve inscrite « points sans niveau
+       déductible », une question tranchée par Grégoire). Commit SÉPARÉ, pas d'amend.
+       ▣ (a) LE BILAN DIT LE CHIFFRE — décision de Grégoire : « pas de niveau avec la grille
+         analytique : on passe au chiffre ». MESURÉ avant d'écrire : `genererRetroactionBilan`
+         lit `window.evaluationEnCours` (`var ec = window.evaluationEnCours`), donc les points
+         viennent de `ec.pointsAnalytiques` — l'emplacement window (#646), le même que les
+         niveaux ; à la réouverture, `evaluation.js:743-746` y remet niveaux ET points depuis la
+         base, et le repli « grille disparue » relit `criteres[].points` + `ponderation`
+         ENREGISTRÉS. Trois rendus nommaient le niveau (`_rendreDefisBilan`,
+         `_rendreSignalesBilan`, `_rendreForceBilan`) : une seule lecture neuve,
+         `_lectureNiveauBilan(niveauDe, c)` — « 24 / 30 » si `points` est un nombre, sinon
+         `_nomBilan` comme avant ; échappée. `_collecterCriteresBilan` porte `points` +
+         `ponderation` dans ses deux branches (grille : `ec.pointsAnalytiques` + poids de la
+         grille ; repli : l'entrée en base). Jeton evaluation-retroaction 0903e.
+       ▣ (b) `.claude/settings.local.json` au `.gitignore` (Cowork). MESURÉ : sur ce Mac il
+         était déjà ignoré par `~/.config/git/ignore` (témoin `git check-ignore -v`) — d'où
+         l'écart avec le montage Linux de Cowork ; la ligne du dépôt rend l'ignorance portable.
+       ▣ TÉMOINS : sentinelle lot 3 → 33 cas (+ G.a défi « (Langue 12 / 30) » et la force
+         holistique garde son nom, G.b signalé « - Langue (20 / 30) », G.c force « Ta force :
+         Langue (27 / 30) », G.d copie rouverte SANS grille relue depuis la base, G.e sans points
+         = nom du niveau comme avant ; F.e : trois rendus, une lecture, plus d'appel direct).
+         Spec lot 3 : échelle avec repères (`seuilSuffisance` D, `seuilMaitrise` M), Contenu à D
+         (69,5 %), cartouche `c1_D` ; étape 9 après réouverture : `basculerVueRetroaction('bilan')`
+         rend « Acquis en développement, à consolider : - Contenu (En développement) Ta force :
+         Langue (24 / 30) » — mesuré dans le vrai flux, depuis la base.
+         Break-tests (4 mutations, remise md5) : lecture sans points (4) · branche grille sans
+         points (3) · repli sans points (1) · force au nom du niveau (2).
+         `cd tests && npm run test:unit` : 455 / 4978, code 0. WebKit ciblé, 8 specs d'évaluation
+         (dont `evaluation-rendu` : bilan défis + forces, #576) : 14 / 14. 36 lignes ajoutées,
+         audit statique : aucun innerHTML/handler/eval/console.log/db.set.
+       ▣ NON EMPORTÉS, à Cowork : `CONSIGNE-DEMARRAGE-COWORK.md`, `plans de travail/00-CADRAGES-
+         OUVERTS.md`, `plans de travail/CADRAGE-2026-09-03-collections-de-parametres.md` (modifiés
+         sur le disque pendant la séance, hors du mandat §5).
+       ▣ DÛ ENSUITE (§3 de la consigne, inchangé) : coup d'œil de Grégoire sur les deux lots →
+         `scripts/pousser.sh` (verdict au jeton) → release 1.116 → push.
      ===================================================================== -->
 
 <!-- =====================================================================

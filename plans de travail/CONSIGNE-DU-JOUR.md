@@ -90,3 +90,35 @@ Le commit du lot 3, et **la liste des fichiers où `criteres[]` se construit et 
 mesurée, avec pour chacun : *le critère analytique y entre / y est lu / n'a pas à y être*. C'est la
 carte dont la relecture a besoin ; sans elle, elle lit le patch seul, et le protocole dit pourquoi
 ça ne suffit pas.
+
+---
+
+## 5 · Retouche décidée le 4 septembre 2026 au matin, après la relecture croisée du lot 3 (`b4039828`)
+
+> Écrite par Cowork vers 6 h 45, sur l'arbre commité `b4039828` (deux commits devant `origin/main`).
+> La relecture du lot 3 est dans la consigne des lots, sous le lot 3 : rien à corriger, une réserve
+> inscrite (points sans niveau déductible), et la question ci-dessous, que Grégoire a tranchée.
+
+**Ce que ça produit à l'écran** : dans le texte copié vers LÉA, la section « === BILAN === » nomme
+un critère analytique par son chiffre — « Langue (24 / 30) » — et non plus par le nom du niveau
+déduit (« Langue (Maîtrisé) »). Les critères holistiques et algorithmiques y restent nommés par
+leur niveau, comme avant.
+
+**a) Le bilan dit le chiffre — décision de Grégoire, 4 septembre au matin** : *« pas de niveau avec
+la grille analytique : on passe au chiffre »*. C'est l'arrêté 4 appliqué au dernier endroit où le
+niveau déduit atteignait encore l'élève. Sites : `_rendreDefisBilan` / `_rendreSignalesBilan`
+(`js/evaluation-retroaction.js`), que ta carte a nommés. Même prédicat que les trois rendus du
+lot 3 (`typeof points === 'number'`, ou les points de `evaluationEnCours.pointsAnalytiques` selon
+ce que ces fonctions lisent — mesure-le, c'est toi qui as le fichier). ⚠ Mesure aussi si le bilan
+est relu depuis `criteres[]` en base pour une copie rouverte : le chiffre doit y être identique.
+Un cas dans la sentinelle lot 3 ; break-test.
+
+**b) `.claude/settings.local.json` entre au `.gitignore`** — décidé par Cowork (technique) : c'est le
+seul fichier VRAIMENT non suivi du dépôt, et il est propre au poste. Témoin de la mesure : les autres
+« non suivis » que voyait Cowork (`Retours des testeurs/jean-françois/`, `docs/projet de
+développement/SPEC-…`, le `.txt` de modèle) sont **suivis** sous leur nom NFC, et `ignorés/` est
+couvert par `*ignorés*/` ; c'est le montage Linux qui rend les noms en NFD. Rien d'autre à faire
+pour eux.
+
+**Puis l'ordre de la séance reprend au §3** : coup d'œil de Grégoire sur les deux lots, verdict au
+jeton, release 1.116, push. Commite cette retouche AVEC ce fichier.

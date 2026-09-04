@@ -129,13 +129,13 @@ test('lot 3 · 24 sur 30 ouvre la cartouche de M sans choisir de niveau ; le cri
             { code: 'D', nom: 'En développement', min: 55, max: 74, valeurCalcul: 65, couleur: '#aa8800' },
             { code: 'M', nom: 'Maîtrisé', min: 75, max: 89, valeurCalcul: 80, couleur: '#00aa00' },
             { code: 'E', nom: 'Étendu', min: 90, max: 100, valeurCalcul: 95, couleur: '#0000aa' }
-        ] }]);
+        ], seuilSuffisance: 'D', seuilMaitrise: 'M' }]);   // les repères : le bilan range D en « signalé », M en « acquis »
         // security-ok: fixture littérale du banc, aucune source externe.
         window.db.setSync(k('cartouches_G3'), [{ id: 'CT3', nom: 'Cartouche témoin', grilleId: 'G3',
             criteres: [{ id: 'c1', nom: 'Contenu' }, { id: 'c2', nom: 'Langue' }],
             niveaux: [{ code: 'I', nom: 'Insuffisant' }, { code: 'D', nom: 'En développement' }, { code: 'M', nom: 'Maîtrisé' }, { code: 'E', nom: 'Étendu' }],
             commentaires: {
-                c1_M: 'Ton propos est solide.', c1_E: 'Ton propos est remarquable.',
+                c1_D: 'Ton propos se construit.', c1_M: 'Ton propos est solide.', c1_E: 'Ton propos est remarquable.',
                 c2_I: 'La langue nuit à la lecture.', c2_D: 'La langue se travaille encore.',
                 c2_M: 'Ta langue est maîtrisée.', c2_E: 'Ta langue est irréprochable.'
             } }]);
@@ -191,14 +191,16 @@ test('lot 3 · 24 sur 30 ouvre la cartouche de M sans choisir de niveau ; le cri
     expect(ecran.retro).not.toContain('La langue se travaille encore.');
     expect(ecran.retro).not.toContain('(Langue)');
 
-    // 6. Retour à 24, Contenu à M : 80,0 %, les deux rétroactions.
+    // 6. Retour à 24, Contenu à D (65) : 45,5 + 24 = 69,5 %, les deux rétroactions.
+    //    (D plutôt que M pour que le bilan de l'étape 9 ait quelque chose à dire : Contenu en
+    //    « acquis en développement », Langue en force.)
     await saisirPoints(page, '24');
-    await choisirContenu(page, 'M');
+    await choisirContenu(page, 'D');
     await page.waitForTimeout(150);
     ecran = await page.evaluate(eval(LIRE_ECRAN));
-    expect(ecran.note).toBe('80.0 %');
-    expect(ecran.niveau).toBe('M');
-    expect(ecran.retro).toContain('Ton propos est solide.');
+    expect(ecran.note).toBe('69.5 %');
+    expect(ecran.niveau).toBe('D');
+    expect(ecran.retro).toContain('Ton propos se construit.');
     expect(ecran.retro).toContain('Ta langue est maîtrisée.');
 
     // 7. Enregistrer : Langue ENTRE dans criteres[] avec son niveau déduit ET ses points ; la
@@ -235,9 +237,9 @@ test('lot 3 · 24 sur 30 ouvre la cartouche de M sans choisir de niveau ; le cri
     console.log('BASE →', JSON.stringify(apres));
     expect(apres.notifs).toEqual([]);
     expect(apres.nb).toBe(1);
-    expect(apres.eval).toMatchObject({ noteFinale: 80, ponderationCouverte: 100, verrouillee: true, pointsAnalytiques: { c2: 24 } });
+    expect(apres.eval).toMatchObject({ noteFinale: 69.5, ponderationCouverte: 100, verrouillee: true, pointsAnalytiques: { c2: 24 } });
     expect(apres.eval.criteres).toEqual([
-        { id: 'c1', niveau: 'M', points: undefined, ponderation: 70, retro: 'Ton propos est solide.' },
+        { id: 'c1', niveau: 'D', points: undefined, ponderation: 70, retro: 'Ton propos se construit.' },
         { id: 'c2', niveau: 'M', points: 24, ponderation: 30, retro: 'Ta langue est maîtrisée.' }
     ]);
     expect(apres.pdf, 'les modules de synthèse sont chargés dans la page').not.toBeNull();
@@ -250,7 +252,22 @@ test('lot 3 · 24 sur 30 ouvre la cartouche de M sans choisir de niveau ; le cri
     expect(rouverte.niveauLangue).toBe('M');
     expect(rouverte.commLangue).toBe('Ta langue est maîtrisée.');
     expect(rouverte.retro).toContain('Ta langue est maîtrisée.');
-    expect(rouverte.note).toBe('80.0 %');
+    expect(rouverte.note).toBe('69.5 %');
+
+    // 9. LE BILAN (retouche du 4 sept., décision de Grégoire) : copié sous « === BILAN === » dans ce
+    //    que l'élève reçoit, il nomme le critère analytique par son chiffre — « Langue (24 / 30) » —
+    //    et le holistique par le nom de son niveau. Il lit `window.evaluationEnCours`, que la
+    //    réouverture vient de remplir depuis la base (niveaux ET points).
+    const leBilan = await page.evaluate(() => {
+        window.basculerVueRetroaction('bilan');
+        const c = document.getElementById('contenuRetroBilan');
+        return c ? c.textContent : null;
+    });
+    console.log('BILAN →', JSON.stringify(leBilan));
+    expect(leBilan).not.toBeNull();
+    expect(leBilan).toContain('Ta force : Langue (24 / 30)');
+    expect(leBilan).toContain('Contenu (En développement)');
+    expect(leBilan).not.toContain('Langue (Maîtrisé)');
 
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

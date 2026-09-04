@@ -692,7 +692,14 @@ function _collecterCriteresBilan(grilleDef, ec, enregistree) {
         grilleDef.criteres.forEach(function(gc) {
             var niv = ec.criteres[gc.id];
             if (niv) {
-                criteres.push({ critereNom: gc.nom, critereId: gc.id, niveauSelectionne: niv, description: gc.description || '' });
+                var entree = { critereNom: gc.nom, critereId: gc.id, niveauSelectionne: niv, description: gc.description || '' };
+                // Lot 3, retouche du 4 sept. 2026 — un critère analytique porte ses POINTS
+                // (source : `pointsAnalytiques`, lot 2) et le poids de la grille : le bilan
+                // le nomme par son chiffre, jamais par le nom du niveau déduit (arrêté 4).
+                // ⚠ Lus sur `ec` = `window.evaluationEnCours`, comme les niveaux (#646).
+                var pts = (gc.type === 'analytique' && ec.pointsAnalytiques) ? ec.pointsAnalytiques[gc.id] : undefined;
+                if (typeof pts === 'number' && !isNaN(pts)) { entree.points = pts; entree.ponderation = gc.ponderation || 0; }
+                criteres.push(entree);
             }
         });
     }
@@ -707,14 +714,36 @@ function _collecterCriteresBilan(grilleDef, ec, enregistree) {
         if (!c || !c.critereId) return;
         var niv = ec.criteres[c.critereId];
         if (!niv) return;
-        criteres.push({
+        var entree = {
             critereNom: c.critereNom || c.critereId,
             critereId: c.critereId,
             niveauSelectionne: niv,
             description: ''
-        });
+        };
+        // Lot 3, retouche — relu depuis `criteres[]` en base : les points et le poids
+        // ENREGISTRÉS avec l'entrée (le chiffre reste vrai si la grille a changé depuis).
+        if (typeof c.points === 'number' && !isNaN(c.points)) { entree.points = c.points; entree.ponderation = c.ponderation || 0; }
+        criteres.push(entree);
     });
     return criteres;
+}
+
+/**
+ * Ce que le bilan dit du niveau d'un critère : le NOM du niveau dans l'échelle —
+ * ou, pour un critère analytique, SON CHIFFRE, « 24 / 30 ».
+ * ⮕ Décision de Grégoire, 4 septembre 2026 au matin, après la relecture croisée du
+ * lot 3 : « pas de niveau avec la grille analytique : on passe au chiffre ». C'est
+ * l'arrêté 4 (l'élève ne lit que la note chiffrée) appliqué au dernier endroit où le
+ * niveau déduit l'atteignait encore — ce bilan est copié sous « === BILAN === » dans
+ * ce qu'il reçoit. Même prédicat que les trois rendus du lot 3 : `points` présent.
+ * ⚠ Ce texte part chez l'élève et traverse un `innerHTML` : échappé ici, comme `_nomBilan`.
+ */
+function _lectureNiveauBilan(niveauDe, c) {
+    if (c && typeof c.points === 'number') {
+        var ech = (typeof echapperHtml === 'function') ? echapperHtml : function () { return ''; };
+        return ech(String(c.points) + ' / ' + String(c.ponderation == null ? '' : c.ponderation));
+    }
+    return _nomBilan(niveauDe, c ? c.niveauSelectionne : '');
 }
 
 /**
@@ -830,7 +859,7 @@ function _rendreDefisBilan(defis, algoA0, nomsPatrons, niveauDe) {
         var patron = nomsPatrons.indexOf(d.critereNom) !== -1 ? '. Cet objectif est prioritaire depuis 3 productions' : '';
         // #575 — le nom du niveau vient de l'échelle. Quand elle ne le nomme
         // pas, il est simplement absent : jamais un repère inventé.
-        var nomNiveau = _nomBilan(niveauDe, d.niveauSelectionne);
+        var nomNiveau = _lectureNiveauBilan(niveauDe, d);   // le chiffre pour un analytique (retouche du lot 3)
         // ⚠ LES DEUX SONT DES DONNÉES UTILISATEUR — description ET nom du
         // critère traversent un innerHTML. La règle n° 1 s'applique aux deux.
         var ech = function (t) { return (typeof echapperHtml === 'function') ? echapperHtml(t) : ''; };
@@ -869,7 +898,7 @@ function _rendreSignalesBilan(signales, niveauDe) {
     if (!signales || signales.length === 0) return '';
     var ech = function (t) { return (typeof echapperHtml === 'function') ? echapperHtml(t) : ''; };
     var lignes = signales.map(function (c) {
-        var nomNiveau = _nomBilan(niveauDe, c.niveauSelectionne);
+        var nomNiveau = _lectureNiveauBilan(niveauDe, c);   // le chiffre pour un analytique (retouche du lot 3)
         return '<p>- ' + ech(c.critereNom) + (nomNiveau ? ' (' + nomNiveau + ')' : '') + '</p>';
     }).join('');
     return '<h5>Acquis en développement, à consolider :</h5>' + lignes;
@@ -924,7 +953,7 @@ function _rendreForceBilan(criteres, defis, niveauDe, zoneDe, signales) {
     // du bilan — trouvé par une spec WebKit, Vitest restant vert.
     var resteATravailler = defis.length > 0 || (signales && signales.length > 0);
     if (meilleur && zoneDe(meilleur.niveauSelectionne) === 'acquis' && resteATravailler) {
-        var nomNiveau = _nomBilan(niveauDe, meilleur.niveauSelectionne);
+        var nomNiveau = _lectureNiveauBilan(niveauDe, meilleur);   // le chiffre pour un analytique (retouche du lot 3)
         var nomCritere = (typeof echapperHtml === 'function') ? echapperHtml(meilleur.critereNom) : '';
         return '<p class="retro-force">Ta force : ' + nomCritere
             + (nomNiveau ? ' (' + nomNiveau + ')' : '') + '</p>';

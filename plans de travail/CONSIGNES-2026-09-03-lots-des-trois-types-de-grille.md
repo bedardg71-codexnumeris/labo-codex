@@ -234,6 +234,56 @@ et à la cartouche ; il ne s'ajoute pas au PDF de l'élève sans qu'il le demand
 Grégoire attache une rétroaction de cartouche à un niveau, saisit une note chiffrée qui tombe dans
 ce niveau, et **la rétroaction apparaît** — sans qu'il ait choisi de niveau nulle part.
 
+### ↻ Relecture croisée de Cowork sur le lot 3 (`b4039828`), 4 septembre 2026 au matin — rien à corriger avant le coup d'œil, une réserve inscrite, une question à Grégoire
+
+**Comment** : cartographie faite à `37660b76` AVANT de lire le patch (règle 2 du protocole), puis
+lecture du diff des huit fichiers de `js/` et de `index.html`, et mesures de contrôle sur l'arbre
+commité. Aucune suite relancée — une seule session lance une suite, et c'est Claude Code (règle 5).
+Les comptes de tests sont donc les siens, pas les miens.
+
+**Ce que la cartographie prédisait, et que le patch fait** :
+- Le niveau déduit entre dans `evaluationEnCours.criteres[id]` **sous le nom `niveauSelectionne`**
+  (`_deduireNiveauxAnalytiques`, appelée par `calculerNote` avant la portée). C'était la question
+  pivot : les dix lecteurs que le lot ne touche pas (dépistage, profil, progression, journal, liste,
+  trimestres, PAN…) le voient sans changer. ▣ Témoin : les trois collecteurs gardent leur
+  `if (niveau)` intact et n'ajoutent que `points`.
+- Les trois collecteurs (`_collecterCriteresSauv`, `_collecterCriteresMod`,
+  `_collecterCriteresAutoSave`) sont modifiés à l'identique, `points` n'entre que si
+  `critere.type === 'analytique'` et que les points sont un nombre. Un holistique ou un
+  algorithmique entre au caractère près comme avant.
+- Le seul endroit qui imprime le niveau au lecteur de `criteres[]` que j'avais mesuré
+  (`travaux-export-pdf.js:949`) est changé ; `export-pdf.js` n'imprime pas le niveau. ↻ **Prémisse
+  de ma consigne corrigée par Claude Code, et il a raison** : ce site est l'aperçu de l'enseignant,
+  le PDF remis passe par la synthèse — changée aussi, elle imprime « 24 / 30 » à la place de la
+  rangée I·D·M·E, avec le poids **enregistré dans l'entrée** (`c.ponderation`), pas celui de la
+  grille du jour : « 24 / 30 » reste vrai si la grille change après coup.
+- La boucle de `calculerNote` n'a pas bougé (diff : trois lignes ajoutées avant `calculerPortee`).
+- Le « 0 » non recevable ne se déduit jamais — même règle que `_determinerNiveauIDMEAlgo`.
+- Trois lignes de rendu élève, trois fois le même prédicat (`typeof points === 'number'`).
+
+**⚠ La réserve — inscrite, PAS à corriger dans ce lot** : *points sans niveau déductible*.
+`_deduireNiveauxAnalytiques` RETIRE alors l'entrée, et les collecteurs, gardés par `if (niveau)`,
+**ne font pas entrer le critère** — la note compte ses points, `criteres[]` l'omet, le PDF se tait.
+C'est le trou de la trouvaille 1, réduit à un cas : une échelle à trous ou muette. Le lot le
+**mesure et l'assume** (sentinelle lot 3, cas B.d : « les points comptent quand même »), il ne
+l'ignore pas. ⮕ Pourquoi pas maintenant : lever le garde ferait entrer une entrée sans
+`niveauSelectionne` chez dix-huit lecteurs dont aucun n'a été mesuré pour ça (`consolidation.js:118`
+tolère `null`, les autres restent à voir). L'échelle de départ est contiguë (0–64,99 · 65–…) ;
+le trou n'existe que si l'utilisateur le crée dans l'éditeur (bornes libres, pas 0,1) ou porte
+encore une copie d'échelle sans bornes. Disposition : **inscrit**, à traiter avec « corriger une
+échelle » (00-CADRAGES-OUVERTS), où les bornes sont déjà le sujet.
+
+**Mineur, inscrit** : quand les points sortent d'une plage ou sont effacés, le div `comm_` garde le
+commentaire du niveau précédent à l'écran (`_afficherCommentaireCritere` sort sans écrire quand le
+niveau manque). Rien n'atteint la base — le collecteur saute le critère — mais l'écran montre une
+phrase périmée. Même comportement qu'un menu remis à vide : préexistant.
+
+**À Grégoire, les mots que l'élève lit** : le bilan (« === BILAN === » du texte copié) nomme un
+critère par son niveau, « Langue (Maîtrisé) ». Pour un analytique, garder ce mot ou dire
+« Langue (24 / 30) » ? Recommandation de Cowork : « 24 / 30 », par l'arrêté 4 — l'élève ne voit
+que le chiffre — et parce que le même texte dit déjà « Critère 2 (Langue) — 24 / 30 » trois
+lignes plus haut. Hors du périmètre nommé du lot 3 : si oui, c'est une retouche avant 1.116.
+
 ---
 
 ## Ce que ce fichier ne dit pas
