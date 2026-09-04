@@ -90,6 +90,11 @@ Corriger le nom du service en octobre ne doit pas changer ce qu'un élève a lu 
 
 ⛔ **Cowork ne tranche pas ceci** : ce sont les mots que ses élèves lisent.
 
+↻ **TRANCHÉ PAR GRÉGOIRE le 4 septembre 2026 au matin — LA COPIE.** Ses mots : *« la copie — un
+niveau se recalcule et le recalcul se voit »*. Une collection corrigée ne change pas ce qu'un élève
+a déjà lu ; le critère reste la source unique du calcul et du texte. **Ce point est fermé ; ne le
+redemande pas.**
+
 ---
 
 ## ⛔ HORS PÉRIMÈTRE — nommé pour que ça n'y entre pas

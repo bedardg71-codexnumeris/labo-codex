@@ -63,9 +63,8 @@ c'est une **projection** (où il se situe) — et ce choix existe déjà, sous l
 L'enseignant règle, mais **n'enregistre pas sous un nom**.
 ↻ **Le mécanisme d'accueil existe** : la bibliothèque range déjà quatre familles d'objets nommés
 (grilles, échelles, pratiques, productions). Une échelle **est** déjà une collection de paramètres.
-⚠ **Un point ouvert, pour Grégoire** : copie ou lien. Une collection corrigée doit-elle changer ce
-qu'un élève a déjà lu ? **Recommandation : la copie** — une phrase, contrairement à un niveau, se
-réécrit en silence.
+↻ **Tranché par Grégoire le 4 septembre 2026 : la COPIE.** Une collection corrigée ne change pas
+ce qu'un élève a déjà lu. Plus rien n'attend sa décision sur ce cadrage.
 
 ### 6 · Replier le gabarit algorithmique — `CADRAGE-2026-09-03-accordeons-gabarit-algorithmique.md`
 **Le gabarit du critère algorithmique est trop long** ; ses sections se replient en bandes bleues,

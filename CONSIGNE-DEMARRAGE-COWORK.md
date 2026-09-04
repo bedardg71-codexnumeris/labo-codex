@@ -152,6 +152,13 @@ c'est lui qui a changé ce défaut, le 1er septembre.
    comportement dans le code » et a demandé un regard de trente secondes, au lieu d'inventer une
    cause. C'était une erreur de manipulation. ⮕ **Ne pas retrouver, c'est une réponse.**
 
+10. **Trois dossiers annoncés « non suivis » qui l'étaient** (4 septembre au soir, corrigé le 4 au
+    matin). Le montage Linux de Cowork rend les noms de fichiers en **NFD** (`franc\u0327ois`) ;
+    le dépôt les suit en **NFC** (`français`, `core.precomposeunicode=true`). `git status` depuis
+    Cowork montre donc comme non suivis des fichiers suivis, et comme non ignorés des dossiers
+    ignorés — et une question est montée jusqu'à Grégoire pour rien. ⮕ **Devant un « non suivi »
+    qui porte un accent, normalise en NFC et cherche dans `git ls-files` avant de l'annoncer.**
+
 ### ▣ Et un motif qui est revenu QUATRE fois en deux jours
 **« Ce que Grégoire demande existe déjà, ailleurs, sous un autre nom. »** L'écran de
 personnalisation des codes, les bornes d'échelle, le seuil de réussite, les collections de

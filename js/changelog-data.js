@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.116',
+            couleur: 'vert',
+            titre: 'Une grille analytique se note en points, et l\'élève ne lit que le chiffre',
+            items: [
+                '<strong>Un champ « sur 30 » à la place du menu de niveaux.</strong> Sur un critère analytique, tu tapes des points sur le poids du critère : 24 sur 30 fait 80 %. Le champ vide affiche « – » ; un vrai zéro se tape.',
+                '<strong>Le chiffre trouve son niveau, et ta cartouche s\'ouvre.</strong> 24 sur 30 tombe dans un niveau de ton échelle, et la rétroaction que tu as attachée à ce niveau apparaît, sans que tu choisisses de niveau nulle part.',
+                '<strong>L\'élève ne voit que le chiffre.</strong> Sur son PDF, dans le texte copié vers LÉA et dans le bilan, un critère analytique dit « 24 / 30 », jamais le niveau qui a servi à choisir le commentaire. Sur une grille entièrement analytique, la légende des niveaux disparaît du PDF.',
+                '<strong>Le critère analytique compte partout.</strong> Il entre dans l\'évaluation enregistrée avec ses points, donc le dépistage, le profil de l\'élève et les archives le voient comme les autres.',
+                '<strong>Rien ne change pour tes critères holistiques et algorithmiques</strong>, ni pour tes évaluations déjà enregistrées.'
+            ]
+        },
+        {
             version: '1.115',
             couleur: 'vert',
             titre: 'Ta grille déclare sa manière d\'évaluer, et ses critères en héritent',

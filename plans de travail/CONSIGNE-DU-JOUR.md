@@ -225,3 +225,50 @@ de livrer (rouvrir une copie), et ça part dans 1.116. Ce que Grégoire a chang�
 n'est pas la cause : la mesure suffit sans le savoir. Commite AVEC ce fichier.
 
 **Puis** : relecture croisée de Cowork, verdict au jeton, release 1.116, push.
+
+---
+
+## 8 · La version 1.116 — relecture faite, mots arrêtés, ordre du §3 à reprendre au verdict
+
+> Écrite par Cowork le 4 septembre 2026 vers 9 h 30, sur `f485ea34` (cinq commits devant
+> `origin/main`, tous relus par Cowork : lot 3, deux retouches du PDF et du champ, régression de la
+> réouverture). Grégoire a vu les deux lots à l'écran et a arrêté les mots du changelog (« ça va »).
+> ⚠ **Quatre fichiers de cadrage de Cowork sont modifiés dans l'arbre** (`CONSIGNE-DEMARRAGE-COWORK.md`,
+> `00-CADRAGES-OUVERTS.md`, les cadrages « collections » et « accordéons ») : **ils partent avec le
+> commit de release**, comme la consigne. Ce sont des décisions de Grégoire prises ce matin ; les
+> perdre serait perdre les décisions.
+
+**Ce que ça produit à l'écran** : le bandeau de l'application passe à **1.116.0**, et la section
+« Nouvelles » de l'accueil porte une seule entrée pour les lots 2 et 3.
+
+**Ordre, celui du §3 :**
+1. **Changelog** — une entrée en tête de `CHANGELOG` dans `js/changelog-data.js`, couleur `vert`,
+   **au mot près** (les mots sont à Grégoire) :
+
+```javascript
+        {
+            version: '1.116',
+            couleur: 'vert',
+            titre: 'Une grille analytique se note en points, et l\'élève ne lit que le chiffre',
+            items: [
+                '<strong>Un champ « sur 30 » à la place du menu de niveaux.</strong> Sur un critère analytique, tu tapes des points sur le poids du critère : 24 sur 30 fait 80 %. Le champ vide affiche « – » ; un vrai zéro se tape.',
+                '<strong>Le chiffre trouve son niveau, et ta cartouche s\'ouvre.</strong> 24 sur 30 tombe dans un niveau de ton échelle, et la rétroaction que tu as attachée à ce niveau apparaît, sans que tu choisisses de niveau nulle part.',
+                '<strong>L\'élève ne voit que le chiffre.</strong> Sur son PDF, dans le texte copié vers LÉA et dans le bilan, un critère analytique dit « 24 / 30 », jamais le niveau qui a servi à choisir le commentaire. Sur une grille entièrement analytique, la légende des niveaux disparaît du PDF.',
+                '<strong>Le critère analytique compte partout.</strong> Il entre dans l\'évaluation enregistrée avec ses points, donc le dépistage, le profil de l\'élève et les archives le voient comme les autres.',
+                '<strong>Rien ne change pour tes critères holistiques et algorithmiques</strong>, ni pour tes évaluations déjà enregistrées.'
+            ]
+        },
+```
+
+2. **Verdict au jeton** : `scripts/pousser.sh`, tel que le skill `release-et-changelog` et
+   `fin-de-session` l'ordonnent — le verdict est le dernier geste avant le push, et il se prend
+   sur le commit qui part. Si le verdict rougit, on s'arrête là et Cowork relit ; pas de
+   correction « pour que ça passe ».
+3. **Release MINEURE** : `node scripts/release.mjs minor` → 1.116.0, les quatre points de vérité
+   et les jetons anti-cache par le script, jamais à la main. Témoin après coup :
+   `grep -rl '1\.115\.0' --include=*.js --include=*.json --include=*.html .` rend 0.
+4. **Push**, puis l'état mesuré dans `SESSION.md` (règle 4) : le commit poussé, le run GitHub, et
+   la phrase « vérifié comment » pour `OU-EN-EST-ON.md` que Cowork reprendra.
+
+⛔ Rien d'autre n'entre : le lot 4 (gabarit algorithmique, paliers d'une grille analytique, menu
+SOLO) est cadré et attend une consigne à froid.
