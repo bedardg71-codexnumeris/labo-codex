@@ -47,6 +47,12 @@ const LIRE = `() => {
 }`;
 
 const carte = (page, section) => page.locator(`#listeCriteres .gabarit-algo-carte[data-pli="CR:${section}"]`);
+// ↻ 4 sept. 2026, 18 h 30 — RUN GITHUB 33902352824 (1.117.0) ROUGE sur ce spec : sur le runner, chaque
+// clic à la souris coûte de 2 à 9 s (« waiting for element to be visible, enabled and stable ») et le
+// budget de 30 s s'épuise — la même cause que le matin (run 33869215489), pas une régression du gabarit.
+// UN SEUL clic souris reste : la bande de la projection, c'est le pointeur qu'on éprouve ; les autres
+// gestes passent par l'événement DOM (`el.click()`), qui traverse le même dispatcher.
+const cliquerDom = (locator) => locator.evaluate((el) => el.click());
 /**
  * Un clic À LA SOURIS sur la bande d'une carte. ⚠ Juste après un rendu, la liste bouge encore
  * quelques dizaines de millisecondes (mesuré le 4 sept. : « element is not stable », puis un
@@ -101,7 +107,7 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     expect(etat.plis['CR:commentaire']).toBe('replie');
 
     // 3 — replier la formule, taper dans un de ses champs : elle reste repliée.
-    await cliquerBande(page, 'formule');
+    await cliquerDom(carte(page, 'formule').locator('.accordeon-header'));
     await expect(carte(page, 'formule')).toHaveClass(/ferme/);
     await frapper(page, '#listeCriteres .gabarit-algo-carte[data-pli="CR:formule"] input[data-param-cle]', '7');
     await page.waitForTimeout(400);
@@ -146,11 +152,11 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     //     ou à plat) ; aucun « ✕ » ne reste dans l'éditeur.
     await expect(page.locator('#listeCriteres .btn-supprimer')).toHaveCount(0);
     const nbPaliersAvant = await page.locator('#listeCriteres .palier-projection').count();
-    await page.locator('#listeCriteres .palier-projection').last().locator('.bloc-retirer-coin').click();
+    await cliquerDom(page.locator('#listeCriteres .palier-projection').last().locator('.bloc-retirer-coin'));
     await expect(page.locator('#listeCriteres .palier-projection')).toHaveCount(nbPaliersAvant - 1);
     await expect(page.locator('#listeCriteres .sous-critere-input-code')).toHaveCount(1);
     // §8 f : le sous-critère porte chevrons + corbeille en coin — la corbeille est le bouton d'icône du coin.
-    await page.locator('#listeCriteres .sous-criteres-conteneur--en-tete .sous-critere-item .bloc-coin-outils .btn-icone-nu').first().click();
+    await cliquerDom(page.locator('#listeCriteres .sous-criteres-conteneur--en-tete .sous-critere-item .bloc-coin-outils .btn-icone-nu').first());
     await expect(page.locator('#listeCriteres .sous-critere-input-code')).toHaveCount(0);
     let g = await page.evaluate(async () => ((await db.get(cle('grillesTemplates'))) || []).find(x => x.id === 'G1'));
     expect(g.criteres[0].sousCriteres).toEqual([]);
@@ -160,7 +166,7 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     await page.evaluate(async () => { await window.ajouterCritereGrille('G1'); });
     await expect(page.locator('#listeCriteres .item-liste > .bloc-coin-outils')).toHaveCount(2);
     await expect(page.locator('#listeCriteres .bloc-reordonner')).toHaveCount(0);
-    await page.locator('#listeCriteres .item-liste > .bloc-coin-outils').first().locator('[data-action="deplacerCritereGrilleBas"]').click();
+    await cliquerDom(page.locator('#listeCriteres .item-liste > .bloc-coin-outils').first().locator('[data-action="deplacerCritereGrilleBas"]'));
     g = await page.evaluate(async () => ((await db.get(cle('grillesTemplates'))) || []).find(x => x.id === 'G1'));
     expect(g.criteres.map(c => c.id)[1]).toBe('CR');
     expect(g.criteres[0].nom).toBe('Nouveau critère');

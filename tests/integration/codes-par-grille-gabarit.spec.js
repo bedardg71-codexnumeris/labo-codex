@@ -84,7 +84,9 @@ test('codes par grille · gabarit — cocher active, décocher retire, la couleu
     expect(couleursRendues).toEqual(['#888888', '#c62828', '#c62828', '#e65100']);
 
     // Cocher : le geste s'écrit, la note change, la palette d'une copie suit.
-    await caseCodes.click();
+    // ↻ 4 sept. 2026, 18 h 30 (run 33902352824 instable ici) : le clic passe par le DOM — sur le runner,
+    // un clic souris coûte de 2 à 9 s, et le budget de 30 s s'épuise. Même dispatcher, même geste.
+    await caseCodes.evaluate((el) => el.click());
     await expect(page.locator('#listeCriteres .sous-criteres-codes--actif')).toHaveCount(1);
     await expect(page.locator('#listeCriteres .sous-criteres-codes-note')).toContainText('ces 3 sous-critères');
     let etat = await page.evaluate(eval(LIRE));
@@ -111,7 +113,7 @@ test('codes par grille · gabarit — cocher active, décocher retire, la couleu
     expect(etat.codes[1]).toBe('errfr_2:#112233');
 
     // Décocher : le champ est RETIRÉ, pas mis à false ; retour aux dix.
-    await page.locator('#listeCriteres .sous-criteres-codes input[type="checkbox"]').click();
+    await page.locator('#listeCriteres .sous-criteres-codes input[type="checkbox"]').evaluate((el) => el.click());
     await expect(page.locator('#listeCriteres .sous-criteres-codes--actif')).toHaveCount(0);
     etat = await page.evaluate(eval(LIRE));
     console.log('APRÈS DÉCOCHE →', JSON.stringify(etat));

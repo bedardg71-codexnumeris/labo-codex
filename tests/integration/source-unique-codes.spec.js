@@ -159,14 +159,18 @@ test('source unique · gabarit : le champ Couleur est le sélecteur de la palett
     expect(rendu[0].inputsColorNus).toBe(0);
 
     // Ouvert, puis un clic ailleurs : il se referme (coup d'œil de Grégoire).
-    await pickers.nth(1).locator('summary').click();
+    // ↻ 4 sept. 2026, 18 h 30 — run GitHub 33902352824 ROUGE ici : sur le runner, chaque clic souris coûte
+    // de 3 à 9 s (attente « visible, enabled and stable ») et le budget de 30 s s'épuise. Les gestes passent
+    // par l'événement DOM, comme ailleurs dans ce spec ; c'est le sélecteur qu'on éprouve, pas le pointeur.
+    await pickers.nth(1).locator('summary').evaluate((el) => el.click());
     await expect(pickers.nth(1)).toHaveAttribute('open', '');
-    await page.locator('#nomGrilleTemplate').click();
+    // « Cliquer ailleurs » : le sélecteur se ferme sur le `pointerdown` du document (travaux-outils.js) — on le livre tel quel.
+    await page.locator('#nomGrilleTemplate').evaluate((el) => el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'mouse' })));
     await expect(pickers.nth(1)).not.toHaveAttribute('open', '');
 
     // Choisir une pastille sur le premier sous-critère : la couleur s'écrit.
-    await pickers.nth(0).locator('summary').click();
-    await pickers.nth(0).locator('.travaux-btn-couleur[data-couleur="#22c55e"]').click();
+    await pickers.nth(0).locator('summary').evaluate((el) => el.click());
+    await pickers.nth(0).locator('.travaux-btn-couleur[data-couleur="#22c55e"]').evaluate((el) => el.click());
     await page.waitForTimeout(400);
     const apres = await page.evaluate(async () => {
         const g = (await db.get(cle('grillesTemplates')))[0];
