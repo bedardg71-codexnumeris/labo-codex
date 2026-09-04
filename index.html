@@ -5449,7 +5449,7 @@
                                     </select>
                                 </div>
                                 <div class="groupe-form" style="flex: 0 0 200px; margin: 0;">
-                                    <label>Échelle (niveaux) <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :</label>
+                                    <label><span id="motEchelleCartouche">Échelle (niveaux)</span> <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :</label>
                                     <select id="selectEchelleCartouche" class="controle-form" data-on-change="onChangeSelectionCartouche">
                                         <option value="">— Échelle —</option>
                                         <!-- Options générées par JS -->
@@ -14523,7 +14523,7 @@
     <script src="js/echelles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/echelles.js?v=20260903f"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
     <script src="js/cartouches-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/cartouches.js?v=20260903f"></script> <!-- #647 : les quatre chemins de suppression d'une cartouche disent leur portée réelle et ce qui survit ; supprimerCartouche() (morte) retirée -->
+    <script src="js/cartouches.js?v=20260904a"></script> <!-- #647 : les quatre chemins de suppression d'une cartouche disent leur portée réelle et ce qui survit ; supprimerCartouche() (morte) retirée -->
     <script src="js/export-pdf.js?v=20260901a"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
     <script src="js/cours.js?v=20260823a"></script> <!-- Beta 99.74 b0529-1016 : chantier 0 refonte — _diagnostiquerModeleCours (read-only) -->
     <script src="js/contexte.js?v=2026062701"></script> <!-- Beta 95.2 : Support groupe-cours -->
