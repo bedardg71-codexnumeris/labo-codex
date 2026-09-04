@@ -275,3 +275,31 @@ reste dans les deux gabarits rendus. Break-test.
 
 **Ordre** : a) b) c) d) dans un ou deux commits, avec ce fichier ; second coup d'œil de Grégoire (le gabarit
 entier, Mac et iPad) ; verdict au jeton ; release 1.117 ; push.
+
+---
+
+## 8 · Troisième et DERNIÈRE passe avant la release — second coup d'œil de Grégoire (4 septembre 2026, vers 17 h, sur `193e7ff4`)
+
+> Les quatre retouches du §7 sont vues. Trois demandes de plus, toutes dans l'éditeur de grille ; après
+> celles-ci, **plus rien n'entre dans 1.117** : ce qui viendrait encore va au cadrage design inscrit dans
+> `00-CADRAGES-OUVERTS.md`. Commite AVEC ce fichier ; troisième coup d'œil court ; verdict ; release ; push.
+
+**e) Les paliers de projection sont numérotés** (« Palier 1 », « Palier 2 »… par rang, « Sans erreur » compris),
+pour se distinguer d'un coup d'œil. **Pas de chevrons sur les paliers** — Grégoire y a renoncé après la
+mesure : le calcul lit les paliers dans leur ordre (`_paliersDeRatio`, `evaluation-projection.js:357`, « le
+terminal en dernier »), donc l'ordre EST le seuil, et un déplacement à la main pourrait le contredire.
+Mesure si le gabarit range déjà les paliers par seuil à la saisie ; s'il ne le fait pas, dis-le en une ligne
+(inscrit, pas corrigé dans ce lot) — rien n'est réécrit dans les grilles existantes.
+
+**f) Les sous-critères se déplacent aux chevrons**, comme les critères (§7 d). ⚠ **Mesure AVANT** : les
+codes d'annotation SONT les sous-critères (cadrage « codes par grille ») et les tampons posés sur les
+copies s'écrivent `errfr_<code>` (`codes-annotation.js:32`). Si le numéro de code d'un sous-critère dérive
+de son RANG, changer le rang change le sens des tampons déjà posés : dans ce cas, **arrête-toi et dis-le**,
+ça remonte. Si le code est porté par le sous-critère (identifiant stable), déplace librement.
+
+**g) « Description » devient « Descripteur »** sur la rangée du critère (les deux gabarits). Libellé seulement ;
+la clé du champ, ce qui voyage et ce que l'élève lit ne changent pas. Vérifie qu'aucun autre écran ne nomme
+ce même champ « Description » à côté (sinon dis-le, n'harmonise pas).
+
+Témoins : un cas de sentinelle par point (numéro rendu ; chevrons présents sur un sous-critère et
+déplacement ; « Descripteur » présent, « Description » absent de la rangée du critère) ; break-test.

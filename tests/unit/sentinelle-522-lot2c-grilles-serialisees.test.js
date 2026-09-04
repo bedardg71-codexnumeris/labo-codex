@@ -305,7 +305,10 @@ const PAR_LA_FILE = {
     // écrit deux. Six handlers du gabarit s'y adossent sans ajouter d'écriture :
     // c'est la direction que cette sentinelle récompense, moins de portes pour
     // plus de gestes. Le +1 est donc un ajout de CAPACITÉ, pas de dispersion.
-    'js/grilles.js': 27,
+    // 27 → 28 le 4 septembre 2026 (lot 4, §8 f) : `_deplacerSousCritere` — un sous-critère
+    // se déplace aux chevrons, comme un critère. Par la file, comme les autres : c'est
+    // ce que cette sentinelle exige, et le compte monte parce qu'un geste est né.
+    'js/grilles.js': 28,
     'js/cartouches.js': 1,
     // ⚰ Retiré le 1er septembre 2026 avec `js/spe-specifications.js` (#681) :
     // code mort, zéro consommateur vivant. Son unique site écrivait bien par la
