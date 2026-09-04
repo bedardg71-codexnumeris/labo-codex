@@ -1263,37 +1263,8 @@ function modifierEvaluation(evaluationId) {
         return null;
     };
 
-    /**
-     * Attend que les selects de critères soient générés dans le DOM
-     */
-    const attendreSelectsCriteres = (evaluation) => {
-        return new Promise((resolve, reject) => {
-            if (!evaluation.criteres || evaluation.criteres.length === 0) {
-                console.warn('⚠️ Aucun critère à charger');
-                resolve(false); // Pas de critères, mais pas une erreur
-                return;
-            }
-
-            let tentatives = 0;
-            const maxTentatives = 30; // 3 secondes max
-            const premierCritereId = `eval_${evaluation.criteres[0].critereId}`;
-
-            const intervalle = setInterval(() => {
-                tentatives++;
-                const premierSelect = document.getElementById(premierCritereId);
-
-                if (premierSelect) {
-                    clearInterval(intervalle);
-                    resolve(true);
-                } else if (tentatives >= maxTentatives) {
-                    clearInterval(intervalle);
-                    console.error('❌ Timeout: selects de critères non générés');
-                    console.error('Contenu listeCriteresGrille1:', document.getElementById('listeCriteresGrille1')?.innerHTML.substring(0, 200));
-                    reject(new Error('Timeout génération selects critères'));
-                }
-            }, 100);
-        });
-    };
+    // L'attente des critères rendus vit au niveau du module : `_attendreSaisiePremierCritereModif`
+    // (retouche du 4 sept. 2026 — elle attendait un <select> que le critère analytique n'a pas).
 
     // ========== CHARGEMENT SÉQUENTIEL ==========
 
@@ -1334,7 +1305,7 @@ function modifierEvaluation(evaluationId) {
             _chargerStatutsEtBadgesModif(evaluation);
 
             // ÉTAPES 9-10 : Attendre selects critères + charger valeurs + données algorithmiques
-            await _chargerValeursEtAlgoModif(evaluation, attendreSelectsCriteres);
+            await _chargerValeursEtAlgoModif(evaluation, _attendreSaisiePremierCritereModif);
 
             // ÉTAPES 11-12 : Options d'affichage + rétroaction finale (avec anonymisation)
             _chargerOptionsEtRetroactionModif(evaluation);
@@ -1464,6 +1435,11 @@ function _initEvaluationEnCoursPourModif(evaluation, evaluationId) {
         plafondNoteCiblee: evaluation.plafondNoteCiblee,
         dateApplicationJetonRepriseCiblee: evaluation.dateApplicationJetonRepriseCiblee,
         criteres: {},
+        // Retouche du 4 sept. 2026 — les points d'un critère analytique, sur l'objet `window`
+        // aussi (#646) : le bilan les y lit (`_collecterCriteresBilan`), comme l'autre chemin de
+        // réouverture (`verifierEtChargerEvaluationExistante`) les y remet déjà.
+        pointsAnalytiques: (evaluation.pointsAnalytiques && typeof evaluation.pointsAnalytiques === 'object')
+            ? JSON.parse(JSON.stringify(evaluation.pointsAnalytiques)) : {},
         idModification: evaluationId
     };
 
@@ -1622,14 +1598,61 @@ function _restaurerDonneesAlgorithmiquesModif(evaluation) {
     });
 }
 
-async function _chargerValeursEtAlgoModif(evaluation, attendreSelectsCriteres) {
-    // ÉTAPE 9 : Attendre que les selects de critères soient générés
-    const criteresGeneres = await attendreSelectsCriteres(evaluation);
+/**
+ * Attend que le PREMIER critère de l'évaluation soit rendu dans la palette — son élément de
+ * saisie, QUEL QUE SOIT SON TYPE : le menu de niveaux (`#eval_<id>`, holistique ou
+ * algorithmique) ou le champ de points (`#eval_pts_<id>`, analytique).
+ *
+ * ⚠ RÉGRESSION DU LOT 3, trouvée par Grégoire à l'écran le 4 septembre 2026 : cette attente
+ * (alors une fermeture de `modifierEvaluation`, `attendreSelectsCriteres`) n'attendait que le
+ * <select>. Avant le lot 3, un critère analytique n'entrait jamais dans `criteres[]`, le premier
+ * était toujours holistique ou algorithmique, et le select existait. Depuis, sur une grille
+ * entièrement analytique, le premier critère est analytique → 3 s → rejet → le `catch` de
+ * `modifierEvaluation` affichait « Impossible de charger l'évaluation : Timeout génération
+ * selects critères », et les étapes 13-14 (indicateur, verrouillage) ne s'exécutaient jamais :
+ * c'est le cadenas absent. Deux symptômes, une cause.
+ * Rend `true` quand l'élément est là, `false` sans critère, rejette après 3 secondes.
+ */
+function _attendreSaisiePremierCritereModif(evaluation) {
+    return new Promise((resolve, reject) => {
+        if (!evaluation.criteres || evaluation.criteres.length === 0) {
+            console.warn('⚠️ Aucun critère à charger');
+            resolve(false); // Pas de critères, mais pas une erreur
+            return;
+        }
+
+        let tentatives = 0;
+        const maxTentatives = 30; // 3 secondes max
+        const premierId = evaluation.criteres[0].critereId;
+
+        const intervalle = setInterval(() => {
+            tentatives++;
+            const saisie = document.getElementById(`eval_${premierId}`) || document.getElementById(`eval_pts_${premierId}`);
+
+            if (saisie) {
+                clearInterval(intervalle);
+                resolve(true);
+            } else if (tentatives >= maxTentatives) {
+                clearInterval(intervalle);
+                console.error('❌ Timeout : le premier critère n\'est pas rendu (ni menu de niveaux, ni champ de points)');
+                console.error('Contenu listeCriteresGrille1:', document.getElementById('listeCriteresGrille1')?.innerHTML.substring(0, 200));
+                reject(new Error('Timeout : les critères de la grille ne sont pas rendus'));
+            }
+        }, 100);
+    });
+}
+
+async function _chargerValeursEtAlgoModif(evaluation, attendreSaisiePremierCritere) {
+    // ÉTAPE 9 : Attendre que le premier critère soit rendu (menu OU champ de points)
+    const criteresGeneres = await attendreSaisiePremierCritere(evaluation);
 
     if (!criteresGeneres || !evaluation.criteres || !Array.isArray(evaluation.criteres)) return;
 
     // ÉTAPE 10 : Charger les valeurs des critères
     evaluation.criteres.forEach(critere => {
+        // Un critère analytique n'a pas de menu : ses points reviennent à l'étape 10.5
+        // (`_restaurerPointsAnalytiquesModif`), et son niveau se redéduit au calcul.
+        if (typeof critere.points === 'number') return;
         const selectId = `eval_${critere.critereId}`;
         const selectCritere = document.getElementById(selectId);
         if (selectCritere) {
@@ -3027,6 +3050,7 @@ function mettreAJourBoutonVoirTravail() {
 window.filtrerBanqueEvaluations = filtrerBanqueEvaluations;
 window.ouvrirBanqueAvecRecherche = ouvrirBanqueAvecRecherche;
 window.modifierEvaluationParId = modifierEvaluation; // Export sous un nom différent pour éviter conflit avec liste-evaluations.js
+window._attendreSaisiePremierCritereModif = _attendreSaisiePremierCritereModif;   // retouche du 4 sept. 2026 — exposée pour les bancs
 window.ouvrirProfilDepuisEvaluation = ouvrirProfilDepuisEvaluation;
 window.ouvrirTravailDepuisEvaluation = ouvrirTravailDepuisEvaluation;
 window.mettreAJourBoutonVoirTravail = mettreAJourBoutonVoirTravail;

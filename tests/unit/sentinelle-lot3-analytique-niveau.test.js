@@ -27,7 +27,7 @@
  * ⚠ Sur le patron des sentinelles du lot 2 et #674 : modules réels chargés dans le bac à
  * sable, fonctions publiques appelées telles quelles. Aucune donnée réelle lue ni écrite.
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -655,6 +655,93 @@ describe('lot 3 · G — le bilan nomme un critère analytique par son chiffre, 
         const html = bilan(win, ecran);
         expect(html).toContain('(Langue Insuffisant)');
         expect(html).not.toContain(' / ');
+    });
+});
+
+/* ------------------------ I — la réouverture d'une copie (troisième retouche, §7) */
+
+/**
+ * `evaluation.js` seul, comme la sentinelle #572 : la palette y est un `document` où l'on pose
+ * les éléments rendus (ou non). L'horloge est simulée : l'attente sonde toutes les 100 ms.
+ */
+function monterReouverture(elementsRendus) {
+    const ecran = {};
+    elementsRendus.forEach((id) => { ecran[id] = elementDom(); });
+    const document = {
+        getElementById: (id) => ecran[id] || null,
+        querySelector: () => null, querySelectorAll: () => [],
+        createElement: () => elementDom(), addEventListener() {}, removeEventListener() {},
+        body: elementDom(), documentElement: elementDom()
+    };
+    const win = { addEventListener() {}, removeEventListener() {}, evaluationEnCours: null };
+    chargerScript('js/evaluation.js', {
+        document, evaluationEnCours: null,
+        db: { getSync: (k, d) => d, setSync() {}, get: async () => null, set: async () => {} },
+        cle: (k) => 'test_' + k, echapperHtml: (s) => String(s == null ? '' : s),
+        obtenirDonneesSelonMode: () => [], sauvegarderDonneesSelonMode: () => true,
+        notifications: { succes() {}, erreur() {}, info() {}, warning() {} },
+        obtenirPreference: () => null, obtenirCoursActifId: () => null,
+        afficherSection() {}, afficherSousSection() {}, estModeeLectureSeule: () => false,
+        obtenirConfigJetons: () => ({}), verifierDisponibiliteJeton: () => true, compterJetonsUtilises: () => 0
+    }, win);
+    return win;
+}
+
+const EVAL_PREMIER_ANALYTIQUE = { criteres: [
+    { critereId: 'a1', critereNom: 'Sujet amené', niveauSelectionne: 'E', points: 50, ponderation: 50 },
+    { critereId: 'a2', critereNom: 'Sujet posé', niveauSelectionne: 'D', points: 20, ponderation: 30 }
+] };
+const EVAL_PREMIER_HOLISTIQUE = { criteres: [
+    { critereId: 'c1', critereNom: 'Contenu', niveauSelectionne: 'M', ponderation: 70 },
+    { critereId: 'c2', critereNom: 'Langue', niveauSelectionne: 'M', points: 24, ponderation: 30 }
+] };
+
+describe('lot 3 · I — rouvrir une copie dont le PREMIER critère est analytique (régression trouvée par Grégoire à l\'écran, 4 sept.)', () => {
+    it('I.a l\'attente se résout sur le CHAMP DE POINTS du premier critère — rouge avant la retouche (elle n\'attendait qu\'un menu, 3 s, rejet)', async () => {
+        vi.useFakeTimers();
+        try {
+            const win = monterReouverture(['eval_pts_a1', 'eval_pts_a2']);
+            const attente = win._attendreSaisiePremierCritereModif(EVAL_PREMIER_ANALYTIQUE);
+            await vi.advanceTimersByTimeAsync(100);
+            await expect(attente).resolves.toBe(true);
+        } finally { vi.useRealTimers(); }
+    });
+
+    it('I.b …et toujours sur le MENU d\'un premier critère holistique, comme avant', async () => {
+        vi.useFakeTimers();
+        try {
+            const win = monterReouverture(['eval_c1', 'eval_pts_c2']);
+            const attente = win._attendreSaisiePremierCritereModif(EVAL_PREMIER_HOLISTIQUE);
+            await vi.advanceTimersByTimeAsync(100);
+            await expect(attente).resolves.toBe(true);
+        } finally { vi.useRealTimers(); }
+    });
+
+    it('I.c rien de rendu → rejet après 3 secondes, et le message ne parle plus de « selects »', async () => {
+        vi.useFakeTimers();
+        const silence = vi.spyOn(console, 'error').mockImplementation(() => {});
+        try {
+            const win = monterReouverture([]);
+            const attente = win._attendreSaisiePremierCritereModif(EVAL_PREMIER_ANALYTIQUE);
+            const verdict = attente.then(() => 'résolue', (e) => e.message);
+            await vi.advanceTimersByTimeAsync(3000);
+            const message = await verdict;
+            expect(message).toContain('ne sont pas rendus');
+            expect(message).not.toContain('selects');
+        } finally { silence.mockRestore(); vi.useRealTimers(); }
+    });
+
+    it('I.d sans critère : `false`, pas une erreur (inchangé)', async () => {
+        const win = monterReouverture([]);
+        await expect(win._attendreSaisiePremierCritereModif({ criteres: [] })).resolves.toBe(false);
+    });
+
+    it('I.e témoins de source : l\'étape 10 ne cherche pas de menu pour un critère à points ; les points passent sur `window` à la réouverture', () => {
+        const src = source('js/evaluation.js');
+        expect(src).toContain("if (typeof critere.points === 'number') return;\n        const selectId = `eval_${critere.critereId}`;");
+        expect(src).toMatch(/criteres: \{\},\n(?:\s*\/\/.*\n)*\s*pointsAnalytiques: \(evaluation\.pointsAnalytiques && typeof evaluation\.pointsAnalytiques === 'object'\)/);
+        expect(src).not.toContain('attendreSelectsCriteres = (evaluation) =>');
+        expect(src).toContain('await _chargerValeursEtAlgoModif(evaluation, _attendreSaisiePremierCritereModif);');
     });
 });
 

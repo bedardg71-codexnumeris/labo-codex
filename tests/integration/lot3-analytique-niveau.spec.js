@@ -407,5 +407,45 @@ test('lot 3 · grille entièrement analytique : le PDF ne nomme aucun niveau (bi
     expect(apres.legende).toBe(false);
     expect(apres.libellesDansLeCorps).toEqual([]);
 
+    // 4. ROUVRIR LA COPIE ENREGISTRÉE par le chemin que Grégoire a pris (`modifierEvaluationParId`,
+    //    troisième retouche, §7) : avant, l'attente du premier critère cherchait un menu de niveaux
+    //    que le critère analytique n'a pas → « Impossible de charger l'évaluation : Timeout
+    //    génération selects critères », et le cadenas n'apparaissait jamais.
+    const rouverte = await page.evaluate(async () => {
+        const dormir = (ms) => new Promise(r => setTimeout(r, ms));
+        const refus = []; const succes = [];
+        const origErreur = window.notifications.erreur; const origSucces = window.notifications.succes;
+        window.notifications.erreur = (t, m) => { refus.push(t + ' — ' + m); return origErreur.call(window.notifications, t, m); };
+        window.notifications.succes = (m) => { succes.push(String(m)); return origSucces.call(window.notifications, m); };
+        // Repartir d'un formulaire vierge, comme au retour dans « Annoter et évaluer ».
+        document.getElementById('listeCriteresGrille1').innerHTML = '';
+        const e = (window.db.getSync(cle('evaluationsSauvegardees'), []) || [])[0];
+        window.modifierEvaluationParId(e.id);
+        await dormir(3800);   // 200 ms de mise en place + les attentes de la séquence + 200 ms de recalcul
+        window.notifications.erreur = origErreur; window.notifications.succes = origSucces;
+        window.basculerVueRetroaction('bilan');
+        return {
+            refus, succes,
+            valeurs: ['a1', 'a2', 'a3'].map(id => (document.getElementById('eval_pts_' + id) || {}).value),
+            verrouilles: ['a1', 'a2', 'a3'].map(id => (document.getElementById('eval_pts_' + id) || {}).disabled),
+            indicateur: !!document.getElementById('indicateurModeModification'),
+            note: document.getElementById('noteProduction1').textContent,
+            pointsWindow: window.evaluationEnCours && window.evaluationEnCours.pointsAnalytiques,
+            bilan: (document.getElementById('contenuRetroBilan') || {}).textContent
+        };
+    });
+    console.log('ROUVERTE →', JSON.stringify({ ...rouverte, bilan: (rouverte.bilan || '').slice(0, 160) }));
+    expect(rouverte.refus, 'aucun bandeau « Impossible de charger l\'évaluation »').toEqual([]);
+    expect(rouverte.succes.some(m => m.includes('lecture seule'))).toBe(true);
+    expect(rouverte.valeurs, 'les points sont revenus dans leurs champs').toEqual(['50', '20', '8']);
+    expect(rouverte.note).toBe('78.0 %');
+    expect(rouverte.verrouilles, 'le verrouillage a bien été appliqué (étape 14) : les champs de points sont désactivés').toEqual([true, true, true]);
+    // (L'indicateur orange de l'étape 13 s'insère dans un conteneur que ce banc sans visionneuse
+    // n'a pas : la notification « lecture seule (verrouillée) », émise juste après, prouve que les
+    // étapes 13-14 ont tourné — c'est ce que le timeout empêchait.)
+    expect(rouverte.pointsWindow).toEqual({ a1: 50, a2: 20, a3: 8 });
+    expect(rouverte.bilan).toContain('Ta force : Sujet amené (50 / 50)');
+    expect(rouverte.bilan).not.toContain('Étendu');
+
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

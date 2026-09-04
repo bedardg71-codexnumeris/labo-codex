@@ -284,6 +284,20 @@ critère par son niveau, « Langue (Maîtrisé) ». Pour un analytique, garder c
 que le chiffre — et parce que le même texte dit déjà « Critère 2 (Langue) — 24 / 30 » trois
 lignes plus haut. Hors du périmètre nommé du lot 3 : si oui, c'est une retouche avant 1.116.
 
+### ↻ Relecture croisée des deux retouches (`5b8bc6b0`, `44559804`), 4 septembre 2026 vers 8 h — rien à corriger
+
+- **Retouche 1 (bilan du texte copié)** : une lecture neuve remplace les trois appels qui nommaient
+  le niveau (défis, acquis en développement, force) ; le chiffre est échappé avant l'`innerHTML`
+  comme l'était le nom du niveau ; le repli « grille disparue » lit points et poids enregistrés.
+- **Retouche 2 (bilan du PDF, légende, champ vide)** : même règle, un seul prédicat
+  (`typeof c.points === 'number'`) aux trois sites de `synthese-retroaction-data.js` ; les trois
+  chaînes passent par `esc()` au rendu (`synthese-retroaction-rendu.js:628, 646, 659` — mesuré) ;
+  la légende ne s'imprime que si un critère rendu lit l'échelle ; `placeholder="–"` aux deux
+  gabarits du champ, `min`/`max`/`step`/handler intacts. Rien hors périmètre dans `js/`.
+- ⚠ **Décidé seul par Claude Code, et remonté à Grégoire parce que l'élève le lit** : le bandeau
+  « Niveau général · Maîtrisé » du PDF reste sur une grille entièrement analytique (c'est le niveau
+  de la COPIE, tiré de la note globale par les bornes, pas celui d'un critère).
+
 ### ↻ Ce que le coup d'œil de Grégoire a ouvert — 4 septembre 2026, 7 h, sur `5b8bc6b0`
 
 Il a parcouru les deux lots sur sa grille « Analyse littéraire » (12 critères analytiques, sans
@@ -331,6 +345,32 @@ mesurer : « Aucun » veut dire *ce critère ne nourrit pas la lecture SOLO*, et
 savoir sauter. C'est une décision de dépistage (didactique) qu'il a déjà énoncée ; ce qui reste
 à trancher est ce que le dépistage fait d'une copie dont TOUS les critères sont « Aucun ».
 ⮕ **Va avec le lot 4.**
+
+**6. « Distinguer la pénalité de la projection EUF : qu'on puisse activer la première sans la
+seconde »** (retour du 4 septembre vers 8 h 30, l'exemple d'un enseignant de philosophie).
+▣ **Mesure : ça existe déjà.** Le menu « Modèle de projection » du gabarit algorithmique offre
+**« Aucune projection »** (`js/evaluation-projection.js:232-239`, `projette: false`) : le critère
+est noté par la formule, et rien de la section projection (bornes, service d'aide, paliers) ne
+sert. Le commentaire du code le dit en toutes lettres : *« AUCUN réglage "afficher ou non" n'est
+ajouté ailleurs : le critère algorithmique est à lui seul le bon déclencheur. »* Sixième
+occurrence du motif « ce que Grégoire demande existe déjà sous un autre nom » — ce qui manque est
+le chemin pour le trouver, pas le mécanisme.
+⚠ **Ce qui reste à trancher, et c'est à lui** : le DÉFAUT d'un critère algorithmique neuf est
+`norme_externe` (`evaluation-projection.js:605`) avec 900 mots / 30 erreurs — l'EUF, donc sa
+pratique de littérature servie comme point de départ à un enseignant de philosophie. C'est la
+même question que « 20/20/30/30 → 25 % chacun » du 2 septembre. **Recommandation de Cowork :
+« Aucune projection » par défaut** ; la norme externe se choisit. Source seulement (les critères
+existants gardent leur modèle) — tarir n'est pas réparer. Pas dans 1.116 : après, avec le lot 4.
+
+**7. Le libellé « Modèle de rétroaction » du gabarit algorithmique devient « Modèle de
+commentaire »** — décision de Grégoire, 4 septembre vers 8 h 40. Sa nuance : *la rétroaction, c'est
+ce qui est lié à la cartouche, une rétroaction sur le travail ; ici, ce sont des commentaires sur
+une projection.* ▣ Mesure : un seul libellé à l'écran (`js/grilles.js:3594`), et la clé de données
+sous le menu ne porte pas le mot — rien qui voyage ne change, rien dans les données. Les
+descriptions sous les champs (« La phrase engendrée sous le critère… ») ne parlent pas de
+rétroaction ; à relire au même moment pour la cohérence du vocabulaire (« commentaire » partout
+dans cette section). ⮕ **Avec le lot 4** (le gabarit algorithmique est son terrain : paliers,
+défaut de projection, accordéons, ce libellé) — pas dans 1.116, dont le thème est fermé.
 
 ---
 
