@@ -20,7 +20,10 @@
  *       et le plafond de hauteur est relevé dans une règle SCOPÉE ;
  *   F — C.3 (décision du 4 sept., 15 h 40) : un critère algorithmique NEUF naît « sans
  *       projection » ; les critères existants gardent leur modèle, à la lecture comme après
- *       rechargement ; la norme externe se choisit.
+ *       rechargement ; la norme externe se choisit ;
+ *   G — coup d'œil de Grégoire (§7) : corbeille partout, chevrons en coin, paliers sur deux rangées ;
+ *   H — second coup d'œil (§8) : paliers numérotés sans chevrons, sous-critères déplaçables aux
+ *       chevrons (le code voyage avec le sous-critère), « Descripteur ».
  *
  * ⚠ Ce banc EXÉCUTE les fonctions réelles de grilles.js (patron des sentinelles #516 / #522 /
  * lot 1) avec les registres réels (formules, énoncés, projection, codes) ; seules les
@@ -514,5 +517,73 @@ describe('lot 4 · C.G — coup d\'œil de Grégoire : corbeille partout, chevro
         expect(css).toMatch(/#listeCriteres \.btn-icone-nu,\n#listeCriteres \.pipeline-btn-reorder \{\n    min-width: 44px;\n    min-height: 44px;/);
         expect(css).toContain('.grille-form-2col {\n    display: grid;\n    grid-template-columns: 1fr 1fr;');
         expect(source('index.html')).toContain('<div class="grille-form-2col u-mb-15">');
+    });
+});
+
+/* ------------------------ H — le second coup d'œil (4 sept., §8 : e, f, g) */
+
+describe('lot 4 · C.H — second coup d\'œil : paliers numérotés, sous-critères déplaçables, « Descripteur »', () => {
+    const GRILLE_PALIERS = { id: 'G9', nom: 'EUF', criteres: [{ ...ALGO, modeleProjection: 'norme_externe' }] };
+
+    it('H.e les paliers sont numérotés par rang, « Sans erreur » compris, et n\'ont PAS de chevrons — l\'ordre est le seuil', () => {
+        const { win, liste } = monter([GRILLE_PALIERS]);
+        win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE_PALIERS)));
+        const projection = contenuCarte(liste().innerHTML, 'projection');
+        const paliers = projection.split('class="sous-critere-item palier-projection"').slice(1);
+        expect(paliers.length).toBeGreaterThan(1);
+        paliers.forEach((pal, i) => {
+            expect(pal, 'palier ' + (i + 1)).toContain('<label class="sous-critere-label-petit">Palier ' + (i + 1) + '</label>');
+            expect(pal).not.toContain('pipeline-btn-reorder');
+        });
+        expect(paliers[0]).toContain('value="Sans erreur"');
+        expect(projection).not.toContain('<label class="sous-critere-label-petit">Palier</label>');
+        // Le calcul lit les paliers dans leur ordre : aucun tri à la saisie (mesuré, inscrit).
+        const P = source('js/evaluation-projection.js');
+        expect(P).toContain('function _paliersDeRatio(paliers) {\n    return paliers.filter(function(p) { return !p.sansErreur; });');
+    });
+
+    it('H.f un sous-critère se déplace aux chevrons, son CODE voyage avec lui, la carte des codes suit', async () => {
+        const { win, liste, store } = monter([GRILLE]);
+        win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
+        let html = liste().innerHTML;
+        const plat = html.slice(pos(html, 'sous-criteres-conteneur--en-tete'), pos(html, 'data-pli="CR:formule"'));
+        expect(plat).toMatch(/data-action="deplacerSousCritereHaut" data-param="G1" data-param2="0" data-param3="0" disabled/);
+        expect(plat).toMatch(/data-action="deplacerSousCritereBas" data-param="G1" data-param2="0" data-param3="0"\s*>/);
+        expect(plat).toMatch(/data-action="deplacerSousCritereBas" data-param="G1" data-param2="0" data-param3="1" disabled/);
+        expect((plat.match(/class="bloc-coin-outils"/g) || []).length).toBe(2);
+        // Le geste : le second passe premier ; le code « 1 » reste sur « Thèse », le « 0 » sur « Aucune erreur ».
+        await win.deplacerSousCritereBas('G1', 0, 0);
+        const scs = store[CLE][0].criteres[0].sousCriteres;
+        expect(scs.map(sc => sc.code)).toEqual(['1', '0']);
+        expect(scs.map(sc => sc.id)).toEqual(['sc_1', 'sc_0']);
+        expect(scs[0].nom).toContain('Thèse');
+        // Le rendu suit, et la carte des codes aussi.
+        html = liste().innerHTML;
+        expect(html.indexOf('value="1"')).toBeLessThan(html.indexOf('value="0"'));
+        const codes = contenuCarte(html, 'codes');
+        expect(codes.indexOf('sous-critere-code-lecture">1 ·')).toBeLessThan(codes.indexOf('sous-critere-code-lecture">0 ·'));
+        // Aux bornes : rien ne bouge.
+        await win.deplacerSousCritereHaut('G1', 0, 0);
+        expect(store[CLE][0].criteres[0].sousCriteres.map(sc => sc.code)).toEqual(['1', '0']);
+        await win.deplacerSousCritereBas('G1', 0, 1);
+        expect(store[CLE][0].criteres[0].sousCriteres.map(sc => sc.code)).toEqual(['1', '0']);
+        // Ce qui rend le déplacement sûr : la palette et le calcul lisent le CODE, jamais le rang.
+        expect(source('js/codes-annotation.js')).toContain("var numero = (sc.code === undefined || sc.code === null) ? '' : String(sc.code).trim();");
+        expect(source('js/evaluation-calcul.js')).toContain('sousCriteres.find(s => s.code === code)');
+    });
+
+    it('H.g la rangée du critère dit « Descripteur », plus « Description » — la clé du champ ne bouge pas', () => {
+        const a = monter([GRILLE]);
+        a.win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
+        const edition = a.liste().innerHTML;
+        expect(edition).toContain('>Descripteur</label>');
+        expect(edition).not.toContain('>Description</label>');
+        expect(edition).toContain('data-champ="description"');
+        const c = monter([]);
+        c.win.tempCriteres = [{ id: 'T', nom: 'x', type: 'holistique', ponderation: 0 }];
+        c.win.afficherCriteresTemp();
+        expect(c.liste().innerHTML).toContain('>Descripteur</label>');
+        expect(c.liste().innerHTML).not.toContain('>Description</label>');
+        expect(c.liste().innerHTML).toContain('data-champ="description"');
     });
 });

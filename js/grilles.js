@@ -3258,6 +3258,11 @@ function retirerBloc(o) {
     return (typeof window.boutonRetirerBloc === 'function') ? window.boutonRetirerBloc(o) : '';
 }
 
+/** Les chevrons d'un bloc (`boutonsReordonnerBloc`, ui-blocs.js) — §8 f : les sous-critères aussi. */
+function reordonnerBloc(o) {
+    return (typeof window.boutonsReordonnerBloc === 'function') ? window.boutonsReordonnerBloc(o) : '';
+}
+
 /** Le défaut de l'écran courant : la grille en édition, ou le choix fait pour la grille en création. */
 function typeCritereParDefautEnCours() {
     return typeCritereParDefaut(grilleTemplateActuelle || { type: window.tempTypeGrille });
@@ -3431,7 +3436,7 @@ function afficherCriteresTemp() {
                     </select>
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Description</label>
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Descripteur</label>
                     <input type="text"
                            class="controle-form"
                            value="${critere.description || ''}"
@@ -3790,6 +3795,12 @@ function rendreBlocProjectionAlgo(critere, ctx) {
     // (« Sans erreur » s'affichait « Sans erre » dans les 80 px du code d'un
     // sous-critère). La corbeille en coin (retouche c). La note « Écris {service}… »
     // UNE fois, sous les paliers, pas sous chacun.
+    //
+    // ↻ §8 e) — LES PALIERS SONT NUMÉROTÉS par rang (« Palier 1 »…, « Sans erreur »
+    // compris) et N'ONT PAS de chevrons : le calcul lit les paliers dans leur ordre
+    // (`_paliersDeRatio`, le terminal en dernier), l'ordre EST le seuil, un déplacement à
+    // la main pourrait le contredire. ▣ Mesuré : ni le registre ni les handlers ne rangent
+    // les paliers par seuil à la saisie — inscrit, rien n'est réécrit dans les grilles.
     const paliers = p.paliers.map((pal, i) => {
         const mpe = window.projectionAlgo.motsParErreurDuRatio(critere, pal.ratioMax);
         const seuilCol = pal.sansErreur
@@ -3808,7 +3819,7 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                         <div class="sous-critere-item palier-projection">
                             <div class="grille-form-2col palier-rangee">
                                 <div class="groupe-form">
-                                    <label class="sous-critere-label-petit">Palier</label>
+                                    <label class="sous-critere-label-petit">Palier ${i + 1}</label>
                                     <input type="text" class="controle-form sous-critere-input-standard palier-nom"
                                            value="${esc(pal.libelle || pal.cle)}"
                                            data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="libelle">
@@ -3942,7 +3953,7 @@ function rendreSousCriteresAlgo(critere, ctx) {
     const datas = (scIndex) => `data-on-change="modifierSousCritereHandler" data-grille-id="${esc(grilleId)}" data-critere-index="${index}" data-sc-index="${scIndex}"`;
 
     const lignes = scs.map((sc, scIndex) => `
-                        <div class="sous-critere-item">
+                        <div class="sous-critere-item avec-outils">
                             <div class="sous-critere-champs-grid sous-critere-champs-grid--note">
                                 <div class="groupe-form">
                                     <label class="sous-critere-label-petit">Code</label>
@@ -3971,7 +3982,14 @@ function rendreSousCriteresAlgo(critere, ctx) {
                                            title="Ex: 1.0 pour erreur complète, 0.5 pour demi-point">
                                 </div>
                             </div>
-                            ${retirerBloc({ action: 'supprimerSousCritere', param: grilleId, param2: index, param3: scIndex, coin: true, titre: 'Supprimer ce sous-critère' })}
+                            <div class="bloc-coin-outils">
+                                ${reordonnerBloc({
+                                    actionHaut: 'deplacerSousCritereHaut', actionBas: 'deplacerSousCritereBas',
+                                    param: grilleId, param2: index, param3: scIndex,
+                                    premier: scIndex === 0, dernier: scIndex === scs.length - 1, quoi: 'ce sous-critère'
+                                })}
+                                ${retirerBloc({ action: 'supprimerSousCritere', param: grilleId, param2: index, param3: scIndex, titre: 'Supprimer ce sous-critère' })}
+                            </div>
                         </div>`).join('');
 
     const boutonAjouter = (classe) => `
@@ -4221,6 +4239,34 @@ async function deplacerCritereGrilleHaut(grilleId, index) {
 }
 
 /**
+ * §8 f (4 sept. 2026) — DÉPLACER UN SOUS-CRITÈRE, comme un critère. ▣ Mesuré avant
+ * d'écrire : le code d'annotation d'un sous-critère est PORTÉ par lui (`sc.code`, écrit à
+ * sa naissance ; la palette et le calcul le lisent par `s.code === code`, jamais par le
+ * rang) — déplacer ne change pas le sens des tampons déjà posés (`errfr_<code>`). Seul
+ * l'ordre d'affichage change, dans la grille ; la carte des codes le suit.
+ */
+async function _deplacerSousCritere(grilleId, critereIndex, scIndex, vers) {
+    let grille = null;
+    await db.modifier(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const g = grilles.find(x => x.id === grilleId);
+        const scs = g && g.criteres && g.criteres[critereIndex] && g.criteres[critereIndex].sousCriteres;
+        if (!Array.isArray(scs) || !scs[scIndex] || !scs[scIndex + vers]) return undefined;
+        [scs[scIndex], scs[scIndex + vers]] = [scs[scIndex + vers], scs[scIndex]];
+        g.dateModification = new Date().toISOString();
+        grille = g;
+        return grilles;
+    }, []);
+    if (!grille) return;
+    if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
+        grilleTemplateActuelle = grille;
+    }
+    afficherCriteresGrille(grille);
+}
+async function deplacerSousCritereHaut(grilleId, critereIndex, scIndex) { await _deplacerSousCritere(grilleId, critereIndex, scIndex, -1); }
+async function deplacerSousCritereBas(grilleId, critereIndex, scIndex) { await _deplacerSousCritere(grilleId, critereIndex, scIndex, 1); }
+
+/**
  * Déplace un critère de grille vers le bas
  */
 async function deplacerCritereGrilleBas(grilleId, index) {
@@ -4381,7 +4427,7 @@ function afficherCriteresGrille(grille) {
                     </select>
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Description</label>
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Descripteur</label>
                     <input type="text"
                            class="controle-form"
                            value="${echapperHtml(critere.description || '')}"
@@ -5161,6 +5207,8 @@ window.initialiserSousCriteresParDefaut = initialiserSousCriteresParDefaut;
 window.ajouterSousCritere = ajouterSousCritere;
 window.modifierSousCritere = modifierSousCritere;
 window.supprimerSousCritere = supprimerSousCritere;
+window.deplacerSousCritereHaut = deplacerSousCritereHaut;   // §8 f (4 sept. 2026)
+window.deplacerSousCritereBas = deplacerSousCritereBas;
 
 /* ===============================
    WRAPPERS DELEGATION (Phase 5)

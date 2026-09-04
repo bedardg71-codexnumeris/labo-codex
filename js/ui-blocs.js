@@ -41,11 +41,15 @@ window.boutonsReordonnerBloc = function(o) {
     // par un couple (grille + index), les trois autres par un seul index.
     const p2 = (o.param2 === undefined || o.param2 === null) ? ''
         : ` data-param2="${window.echapperHtml ? window.echapperHtml(String(o.param2)) : String(o.param2)}"`;
+    // Lot 4 (4 sept. 2026, §8 f) : un sous-critère d'une grille enregistrée s'identifie par un
+    // TRIPLET (grille, critère, index) — les chevrons le servent aussi.
+    const p3 = (o.param3 === undefined || o.param3 === null) ? ''
+        : ` data-param3="${window.echapperHtml ? window.echapperHtml(String(o.param3)) : String(o.param3)}"`;
     return `<button type="button" class="pipeline-btn-reorder" title="Monter" aria-label="Monter ${quoi}"
-                data-action="${o.actionHaut}" data-param="${p}"${p2}${o.premier ? ' disabled' : ''}
+                data-action="${o.actionHaut}" data-param="${p}"${p2}${p3}${o.premier ? ' disabled' : ''}
                 ><img src="icons/icon-chevron-up.svg" alt=""></button>
             <button type="button" class="pipeline-btn-reorder" title="Descendre" aria-label="Descendre ${quoi}"
-                data-action="${o.actionBas}" data-param="${p}"${p2}${o.dernier ? ' disabled' : ''}
+                data-action="${o.actionBas}" data-param="${p}"${p2}${p3}${o.dernier ? ' disabled' : ''}
                 ><img src="icons/icon-chevron-down.svg" alt=""></button>`;
 };
 

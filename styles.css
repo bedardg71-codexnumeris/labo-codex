@@ -2323,6 +2323,17 @@ span.header-icon {
     padding-right: 52px;
 }
 
+/* §8 f (4 sept. 2026) — un sous-critère porte ses chevrons ET sa corbeille en coin,
+   sur la même ligne, comme le critère ; sa rangée leur laisse la place. */
+#listeCriteres .sous-critere-item.avec-outils {
+    padding-right: 140px;
+}
+
+#listeCriteres .sous-critere-item .bloc-coin-outils {
+    top: 0;
+    right: 0;
+}
+
 #listeCriteres .btn-icone-nu,
 #listeCriteres .pipeline-btn-reorder {
     min-width: 44px;

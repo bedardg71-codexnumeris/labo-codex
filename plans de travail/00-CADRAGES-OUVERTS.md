@@ -15,13 +15,20 @@
 
 ---
 
-## ▣ CE QUI EST OUVERT AUJOURD'HUI — sept cadrages ; le 3 est exécuté (1.116), le 7 est le prochain
+## ▣ CE QUI EST OUVERT AUJOURD'HUI — sept cadrages ; le 3 est exécuté (1.116), le 7 est en cours (1.117), le 1 (étape 2) est le prochain
 
 *Aucun n'empêche un des huit énoncés de la cohorte 1 : ils sont tous parcourus depuis le
 3 septembre au matin. Ces quatre-là traitent l'**adoption** et la **justesse**, pas la ligne
 d'arrivée qui vient d'être franchie.*
 
 ### 1 · Le texte troué — `CADRAGE-2026-09-02-badges-texte-troue.md`
+↻ **4 septembre 2026, 16 h 30 — PROCHAINE SÉANCE après 1.117, décidé par Grégoire** (« oui » à la
+recommandation de Cowork) : **l'étape 2, les paliers de projection** — la phrase « Ce que l'élève lit » d'un
+palier se compose avec les badges (l'artefact « Le texte troué », sections 2 et 3, est la maquette qu'il a
+remontrée). Motif : chantier entamé, six arrêtés déjà pris, même écran que le volet C du lot 4, et c'est le
+piège `[service]`/`{service}` qu'il a rencontré lui-même. ⛔ Pas dans 1.117 (une livraison par séance).
+Cowork cadre à froid : mesurer d'abord quels repères le bloc de projection connaît réellement (la maquette
+en montre sept, le bloc des énoncés n'en a que quatre).
 **Composer la phrase que l'élève lira en posant ses variables d'un clic**, au lieu de taper des
 accolades. Modèle de Grégoire : la cellule de formule dans Numbers.
 ▣ **SEUL CHANTIER ENTAMÉ** : l'étape 1 (les quatre énoncés de rétroaction) est livrée et vue à
@@ -96,6 +103,13 @@ qui touche un format qui voyage.
 ---
 
 ## ⏳ INSCRIT AILLEURS, ET QUI N'A PAS DE CADRAGE
+
+- **Corbeille et chevrons partout, et les deux colonnes qui s'empilent sur iPad** — mesuré par Claude Code le
+  4 septembre (lot 4, §7 c-d) : hors de l'éditeur de grille, le ✕ rouge vit encore dans la bibliothèque (1)
+  et la pratique de notation v2 (3), la pile « Ordre » dans l'éditeur d'échelles (3 sites) ; et la grille à
+  deux colonnes du formulaire groupe-cours (empruntée par les paliers) **n'a aucune règle d'empilement en
+  portrait iPad**. Un cadrage design à froid (skill `design-interface`), trois gestes : un seul bouton de
+  suppression, un seul geste d'ordre, une règle d'empilement pour les deux écrans.
 
 - **Corriger une échelle, avec recalcul proposé** — décidé le 3 septembre, dans
   `plans de travail/DECISION-2026-09-03-echelle-remplacement.md`. **Jamais automatique** :
