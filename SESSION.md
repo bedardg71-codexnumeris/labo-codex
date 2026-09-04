@@ -275,6 +275,70 @@
          `CADRAGE-…-accordeons-gabarit-algorithmique.md`, `CADRAGE-…-collections-de-parametres.md`.
        ▣ DÛ ENSUITE : relecture croisée de Cowork → `scripts/pousser.sh` (verdict au jeton) →
          release 1.116 → push.
+       ▣ MESURÉ au commit : `f485ea34`, 7 fichiers, 5 devant `origin/main`.
+
+     ↻ RELEASE 1.116.0 — §8 de la consigne du jour (Cowork, 9 h 30, relecture des cinq commits
+       faite, mots du changelog arrêtés par Grégoire : « ça va »). ▣ **1.116.0 / build
+       `0904-0729` EN LIGNE.**
+       ▣ ORDRE APPLIQUÉ, dit : changelog → `node scripts/release.mjs minor` → commit → Vitest →
+         `scripts/pousser.sh` (qui rend le verdict SUR le commit qui part, puis pousse). Le §8
+         numérotait « verdict, puis release » ; la leçon du 4 sept. au matin (1.115.0) et la
+         phrase du §8 « il se prend sur le commit qui part » commandent l'inverse.
+       ▣ Changelog : entrée 1.116, vert, cinq items, AU MOT PRÈS (témoin : normalisation des
+         blancs, le bloc de la consigne est inclus dans `js/changelog-data.js`).
+       ▣ `release.mjs minor` : 1.115.0 → 1.116.0, build 0903-2103 → 0904-0729 ; quatre points
+         de vérité (version.json, version.js, init-inline.js ×2, main.js) + 12 jetons anti-cache
+         (changelog, les 8 fichiers des lots, init-inline, main, styles.css) par le script. Témoins :
+         `grep -rl '1\.115\.0' --include='*.js' --include='*.json' --include='*.html'` (hors
+         node_modules/test-results) rend 0 ; `'1\.116\.0'` rend 3 (version.json, version.js,
+         init-inline.js) ; `'0903-2103'` rend 0. ⚠ Le premier grep, sans quotes, avait rendu un
+         faux 0 des deux côtés (zsh : « no matches found ») — le témoin non-zéro l'a attrapé.
+       ▣ Commit de release `6309111e` (11 fichiers) : les quatre points, index.html, le changelog,
+         ET, par consigne, les cinq fichiers de Cowork (consigne du jour §8, consigne de démarrage
+         Cowork, cadrages ouverts, collections de paramètres, accordéons du gabarit algorithmique).
+       ▣ ⚠ VITEST ROUGE APRÈS LE COMMIT DU BUMP, 1 / 4989 : `sentinelle-codes-par-grille-lot3`
+         S.c.5 exigeait `styles.css?v=20260903[e-z]` — un motif DATÉ (3 sept.), que la release a
+         porté à `20260904a`. Il ne pouvait survivre à aucune release d'un autre jour ; il bloquait
+         le push (hook Vitest). Corrigé en gardant l'intention (jetons ≥ ceux du lot, comparaison
+         de chaîne AAAAMMJJ+lettre, même forme que `sentinelle-texte-troue-etape-1-reperes`),
+         break-testé (`styles.css?v=20260903d` rougit), commit séparé `7a197996` (test seul).
+         Vitest 455 / 4989, code 0. DÉCIDÉ SEUL, dit : c'est la brittleness d'un témoin, pas un
+         comportement ; si Cowork y voit autre chose, il se rejoue en une ligne.
+       ▣ `scripts/pousser.sh origin main` : 7 commits ; sentinelle WebKit « aucune rougeur
+         nouvelle (0 échec connu) » ; hook Vitest vert ; jeton `scripts/.verdict-playwright.json`
+         = sha `7a197996`, code 0, 0 instable, rendu 2026-09-04T11:42:02Z ; `16dfc5eb..7a197996
+         main -> main`. Après fetch : HEAD = origin/main = `7a197996`, 0 / 0.
+       ▣ ⚠⚠ RUN GITHUB `33869215489` sur `7a197996` : Vitest VERT (11:42→11:44) ; **Playwright
+         (WebKit) ROUGE** (11:44→12:18, 33 min) : **254 passés, 1 rouge = `type-grille-lot1.spec.js`
+         (LE LOT 1, 3 sept.), deux fois de suite (retry)** — `page.click('#listeCriteres
+         [data-action="ajouterCritereGrille"]')` à la ligne 131 : « Test timeout of 30000ms »,
+         journal arrêté à « waiting for element to be visible, enabled and stable », AUCUNE ligne
+         de plus (ni « not stable », ni « scrolling »). Le même clic passait à la ligne 108 sur la
+         grille neuve ; celui-ci est sur `G0` (grille d'avant) après deux bascules du menu. Trace
+         téléchargée (`gh run download -n playwright-traces`) : le snapshot a11y montre le bouton
+         présent (« + Ajouter un critère », ref e194, cursor=pointer) ; la DERNIÈRE image du
+         screencast (3 s après le clic) montre la page défilée sur le panneau de sous-critères d'un
+         critère ALGORITHMIQUE et une rangée « Nouveau critère · Analytique · 0 » — la liste de la
+         grille PRÉCÉDENTE (la neuve), pas les trois holistiques de G0 → hypothèse : course de
+         rendu entre `chargerGrillePourModif('G0')` et le rendu précédent sur le runner, plus lent.
+         ▣ CE QUE ÇA DIT ET NE DIT PAS : les specs des lots 2 et 3 (3 tests) sont VERTS sur le
+         runner ; le rouge est sur le lot 1, dont le run de 1.115.0 avait été ANNULÉ ce matin
+         (`cancel-in-progress`) — **il n'avait jamais été jugé sur Linux** ; le vert local (Mac,
+         260 / 260, deux fois aujourd'hui) est exactement ce que la règle 7 du protocole dit ne
+         rien prouver sur la CI. Par le §8 (« si le verdict rougit, on s'arrête là et Cowork
+         relit ; pas de correction pour que ça passe ») : RIEN CORRIGÉ. **INSCRIT, à Cowork :
+         rejouer la trace (`npx playwright show-trace`) ; forme robuste probable = piloter ce clic
+         comme les autres gestes du spec (événement DOM), ou attendre le rendu de G0 avant de
+         cliquer — à trancher après lecture, pas ici.**
+       ▣ « VÉRIFIÉ COMMENT », pour la ligne d'`OU-EN-EST-ON.md` (Cowork) : `git rev-parse
+         origin/main` = `7a197996` (1.116.0, build 0904-0729) ; jeton WebKit local vert sur ce
+         commit (`scripts/.verdict-playwright.json` : sha 7a197996, code 0, 0 instable) ;
+         `cd tests && npm run test:unit` 455 / 4989 ; run GitHub 33869215489 : Vitest vert,
+         Playwright 254 / 255, le rouge = spec du lot 1 (jamais jugé sur Linux), inscrit.
+       ▣ ARBRE au moment d'écrire : `OU-EN-EST-ON.md`, `CONSIGNE-DEMARRAGE-COWORK.md`,
+         `00-CADRAGES-OUVERTS.md` modifiés par Cowork après la release, et un cadrage neuf non
+         suivi (`CADRAGE-2026-09-04-lot-4-…`) — à Cowork, non emportés.
+       ▣ ⛔ RIEN D'AUTRE N'ENTRE (§8) : le lot 4 attend une consigne à froid.
      ===================================================================== -->
 
 <!-- =====================================================================
