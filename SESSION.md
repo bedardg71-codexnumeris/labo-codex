@@ -9,11 +9,11 @@
 <!-- =====================================================================
      SESSION 24 — 4 SEPTEMBRE 2026, MIDI : LA CI REDEVIENT VERTE, PUIS LE LOT 4 — le gabarit
      algorithmique se range (C) · « Aucun » au menu SOLO (B) · les paliers d'une grille
-     analytique (A). ⏸ FUSIONNÉ SUR `main` (ff), NON POUSSÉ, PAS DE RELEASE — l'ordre de la
-     consigne (§4) : relecture croisée de Cowork (A obligatoire ; C et B au jugement) →
-     corrections → coup d'œil de Grégoire (le gabarit rangé · « Aucun » · la cartouche d'une
-     grille analytique) → verdict au jeton → release MINEURE 1.117, UNE entrée de changelog
-     dont les mots sont à lui → push. ⛔ DEUX POINTS [EN ATTENTE] : C.3 et les mots de A.
+     analytique (A). ▣ **LIVRÉ : release 1.117.0 (`4e7a1b03`, build 0904-1336) POUSSÉE à 17 h 46 Z**,
+     après l'ordre de la consigne (§4) tenu bout en bout : relecture croisée de Cowork (§6, rien à
+     corriger) → trois coups d'œil de Grégoire (§7, §8, §9 « ça va ») → verdict au jeton → release
+     MINEURE → push. Les deux points [EN ATTENTE] du départ (C.3, les mots de A) ont été tranchés
+     en cours de session et livrés.
 
      ▣ Mandat : d'abord « applique le CADRAGE lot 4 » (Grégoire, avec une session parallèle
        qui finissait le lot 3 — elle a tout poussé à `3d7b8dc0` avant que j'écrive), puis en
@@ -190,10 +190,37 @@
        MESURÉ, non harmonisé : deux textes d'aide d'index.html (l. 10978, 11089) disent encore
        « Description ». Témoins : sentinelle C cas H (break-testés : 3 rouges), spec C. Vitest
        458 / 5042 ; 12 specs verts.
-     ⏸ SUITE, dans l'ordre : TROISIÈME coup d'œil de Grégoire (court, le dernier — après lui,
-       plus rien n'entre dans 1.117 : le reste va au cadrage design de `00-CADRAGES-OUVERTS.md`)
-       → verdict au jeton (`node scripts/verifier-playwright.mjs`, suite COMPLÈTE) → release
-       MINEURE 1.117 (mots du changelog à lui) → push. `main` = 12 commits devant `origin/main`.
+     ↻ 17 h 45 — RELEASE 1.117.0 (consigne §9, mots du changelog arrêtés par Grégoire : « ça va »)
+     ▣ Entrée 1.117 du changelog AU MOT PRÈS en tête de `js/changelog-data.js` (sept items, vert) ;
+       chaque item confronté au diff livré : les trois coups d'œil (§7, §8) sont livrés tels quels,
+       aucune phrase retirée.
+     ▣ `node scripts/release.mjs minor` : 1.116.0 → **1.117.0**, build 0904-0729 → **0904-1336**
+       (⚠ le message du commit de release dit « 0904-1335 » — l'heure du dry-run, une minute avant
+       l'écriture ; le build ÉCRIT est 1336, sur les quatre points : `version.json`, `version.js`,
+       `js/init-inline.js` ×2, `js/main.js` ; jeton `version.js?v=09041336`). Douze jetons anti-cache
+       bumpés par le script. Commit `4e7a1b03` (emporte la consigne §9 et le cadrage des codes par
+       grille, de Cowork). Vitest 458 / 5042, code 0.
+     ▣ Témoin « `grep -rl '1\.116\.0'` rend 0 » : 0 sur les quatre points et sur tout `js/` ;
+       la seule occurrence du dépôt est un COMMENTAIRE daté de
+       `tests/unit/sentinelle-codes-par-grille-lot3.test.js:150` (l'historique du jeton), pas une
+       version — dit plutôt que retouché.
+     ▣ `scripts/pousser.sh origin main` : 13 commits ; sentinelle Playwright locale VERTE (0 connu, 0 instable, jeton
+       `4e7a1b03`, 17 h 46 Z) ; hook Vitest vert ; `e5d9c71f..4e7a1b03 main -> main`. Après fetch :
+       HEAD = origin/main = `4e7a1b03`, 0 / 0.
+     ▣ RUN GITHUB `33902352824` sur `4e7a1b03`, lancé 17 h 46 Z, EN COURS au moment d'écrire (Vitest
+       ~2 min, Playwright WebKit ~33 min) — son verdict s'inscrit ici par le commit de docs suivant.
+     ▣ « VÉRIFIÉ COMMENT », pour la ligne d'`OU-EN-EST-ON.md` (Cowork) : `git rev-parse origin/main`
+       = `4e7a1b03` (1.117.0, build 0904-1336) ; jeton WebKit local
+       (`scripts/.verdict-playwright.json`) : sha `4e7a1b03`, code 0, 0 instable, 17 h 46 Z ; `cd tests && npm run
+       test:unit` 458 / 5042 ; run GitHub 33902352824 (en cours à l'écriture). Les trois coups d'œil de Grégoire (§7, §8,
+       §9 « ça va ») sur `d022372b`, `193e7ff4`, `83cac427`.
+     ▣ ARBRE au moment d'écrire : propre hors ce bloc ; `main` = `origin/main` après le push
+       (+ ce commit de docs, poussé à son tour).
+     ⛔ Plus rien n'entre dans 1.117. Ce qui viendrait va au cadrage design de
+       `plans de travail/00-CADRAGES-OUVERTS.md` (corbeille + chevrons ailleurs : bibliotheque-ui.js,
+       pratique-notation-v2.js, echelles.js ; empilement iPad de `grille-form-2col` ; les trois
+       réserves de Cowork du §6 ; `PALIERS_GABARIT_NEUF` jamais servi ; le tri des paliers à la saisie ;
+       deux aides qui disent encore « Description »).
      ===================================================================== -->
 
 <!-- =====================================================================
