@@ -304,6 +304,14 @@ ce même champ « Description » à côté (sinon dis-le, n'harmonise pas).
 Témoins : un cas de sentinelle par point (numéro rendu ; chevrons présents sur un sous-critère et
 déplacement ; « Descripteur » présent, « Description » absent de la rangée du critère) ; break-test.
 
+**h) « Modèle de commentaire » devient « Modèle d'observation »** — décision de Grégoire, 17 h 50 : dans le gabarit
+algorithmique, le mot est **« observation »** ; « rétroaction » reste à la cartouche, « commentaire » n'entre pas.
+C'est l'exception au « plus rien » : ce libellé est né dans 1.117 et n'est pas encore public — le renommer
+maintenant évite de le renommer deux fois devant les collègues. Même site que C.1 (`grilles.js`, le seul
+libellé) ; relis les descriptions de cette section pour dire « observation » où elles disaient « commentaire »
+depuis le lot 4. Adapte le cas de la sentinelle C qui vérifie « Modèle de commentaire ». Rien d'autre (le
+« Description / Rétroaction » des codes attend le cadrage « codes par grille », point 7-8).
+
 ---
 
 ## 9 · La version 1.117 — mots arrêtés par Grégoire (4 septembre 2026, vers 17 h 30 : « ça va »)
@@ -322,7 +330,7 @@ Entrée en tête de `CHANGELOG` dans `js/changelog-data.js`, **au mot près** :
             titre: 'Le gabarit du critère algorithmique se range, et une grille analytique a ses paliers',
             items: [
                 '<strong>Le critère algorithmique s\'ouvre sur ses sous-critères.</strong> Ils viennent en tête, puis quatre cartes repliables : la formule ouverte, le commentaire, la projection et les codes repliés. Une carte reste comme tu l\'as laissée pendant que tu tapes.',
-                '<strong>Les paliers de projection tiennent sur deux rangées</strong>, numérotés, le nom du palier lisible en entier. « Modèle de rétroaction » s\'appelle maintenant « Modèle de commentaire », et « Norme externe (épreuve uniforme) », « Projection à l\'EUF ».',
+                '<strong>Les paliers de projection tiennent sur deux rangées</strong>, numérotés, le nom du palier lisible en entier. « Modèle de rétroaction » s\'appelle maintenant « Modèle d\'observation », et « Norme externe (épreuve uniforme) », « Projection à l\'EUF ».',
                 '<strong>Un critère algorithmique neuf naît sans projection.</strong> Tu choisis la projection à l\'EUF si tu la veux ; tes critères existants gardent la leur.',
                 '<strong>Une grille analytique attache sa cartouche à des paliers en %.</strong> Le champ dit « Paliers (bornes en %) », l\'échelle de départ est déjà choisie, et les colonnes de la cartouche portent les bornes de ton échelle (« 65–74,99 % ») au lieu des noms de niveaux.',
                 '<strong>« Aucun » au menu « Niveau SOLO ».</strong> Le critère compte dans la note comme les autres, mais le dépistage des fondations ne le surveille pas.',
