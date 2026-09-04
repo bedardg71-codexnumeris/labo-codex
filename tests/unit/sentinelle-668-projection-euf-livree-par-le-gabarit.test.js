@@ -435,7 +435,9 @@ describe('#668 · F — le service d\'aide est un réglage, et son absence se re
         // Décision 6bis : le gabarit LIVRÉ emploie l'apposition, parce que le
         // nom peut rester vide longtemps et qu'une phrase qui dégrade vers une
         // phrase encore utile vaut mieux qu'une phrase qui disparaît.
-        const neuf = P.gabaritNeuf();
+        // ↻ Lot 4, C.3 (4 sept. 2026) : un critère NEUF naît sans projection ; ce cas lit
+        // donc la norme externe CHOISIE, avec les paliers en apposition du gabarit.
+        const neuf = P.appliquerAuCritere({}, 'norme_externe', { nomServiceAide: '' }, P.paliersGabaritNeuf());
         const t = P.calculer(neuf, donnees).texte;
         expect(t).toContain('service d\'aide de ton collège.');
         expect(t).not.toContain(P.JETON_SERVICE);
@@ -443,7 +445,7 @@ describe('#668 · F — le service d\'aide est un réglage, et son absence se re
     });
 
     it('et dans le gabarit livré, inscrire un nom AGIT — sinon le réglage serait décoratif', () => {
-        const neuf = P.gabaritNeuf();
+        const neuf = P.appliquerAuCritere({}, 'norme_externe', { nomServiceAide: '' }, P.paliersGabaritNeuf());
         neuf.paramsProjection.nomServiceAide = 'Passerelle +';
         const t = P.calculer(neuf, donnees).texte;
         expect(t).toContain('de ton collège : Passerelle +.');
@@ -452,8 +454,10 @@ describe('#668 · F — le service d\'aide est un réglage, et son absence se re
     it('le gabarit livré ne charrie AUCUN nom d\'établissement', () => {
         // Deux voies, à ne pas confondre (§6) : la migration reproduit « CAF »
         // au mot près ; le gabarit neuf ne le porte nulle part.
-        const brut = JSON.stringify(P.gabaritNeuf());
+        const brut = JSON.stringify(P.gabaritNeuf()) + JSON.stringify(P.paliersGabaritNeuf());
         expect(brut).not.toMatch(/CAF|Centre d'aide|Passerelle/);
+        // Lot 4, C.3 : le fragment neuf, c'est « aucune » — et rien d'autre.
+        expect(P.gabaritNeuf()).toEqual({ modeleProjection: 'aucune', paramsProjection: {} });
 
         // …tandis que la MIGRATION le porte — c'est voulu, et il n'est écrit
         // qu'à UN endroit : le défaut déclaré du paramètre. Les paliers, eux,

@@ -38,8 +38,10 @@ de personne n'est touchée : l'option n'existe que pour qui la choisit.
 - Ce qui manquait : la barre des patterns se taisait. Elle dit maintenant la phrase ci-dessus.
 - ⚠ **À Grégoire (mots que ses collègues liront)** : la phrase du tableau de bord, la phrase d'aide sous
   le menu (« “Aucun” retire le critère de la lecture SOLO : il compte dans la note comme les autres, mais
-  le dépistage des fondations ne le surveille pas et aucune étiquette ne l’accompagne dans les exports.
-  C’est le choix d’une méthode traditionnelle, sans taxonomie. »), et le mot du menu (« Aucun »).
+  le dépistage des fondations ne le surveille pas et aucune étiquette ne l’accompagne dans les exports. »
+  — ↻ arrêtée par Grégoire le 4 sept. à 15 h 50 SANS sa dernière phrase, « C’est le choix d’une méthode
+  traditionnelle, sans taxonomie. », retirée : l'aide ne qualifie pas le choix du collègue), et le mot du
+  menu (« Aucun »).
 
 ## Témoins
 

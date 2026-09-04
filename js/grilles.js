@@ -3231,6 +3231,21 @@ function typeCritereParDefaut(grille) {
     return (grille && TYPES_GRILLE.includes(grille.type)) ? grille.type : 'holistique';
 }
 
+/**
+ * Lot 4, C.3 (décision de Grégoire, 4 sept. 2026) — UN CRITÈRE ALGORITHMIQUE NEUF NAÎT
+ * « SANS PROJECTION ». Le registre ne distingue pas, à la LECTURE, un critère d'avant
+ * #668 d'un critère tout neuf (aucun des deux ne porte de champ) : le neuf ÉCRIT donc
+ * son choix, à la naissance et au changement de type — la source, jamais le stock. Les
+ * critères existants gardent leur modèle. Sans le registre (bancs sans projection),
+ * rien n'est écrit.
+ */
+function avecProjectionNeuve(critere) {
+    if (typeof window.projectionAlgo !== 'undefined' && typeof window.projectionAlgo.poserDefautNeuf === 'function') {
+        window.projectionAlgo.poserDefautNeuf(critere);
+    }
+    return critere;
+}
+
 /** Le défaut de l'écran courant : la grille en édition, ou le choix fait pour la grille en création. */
 function typeCritereParDefautEnCours() {
     return typeCritereParDefaut(grilleTemplateActuelle || { type: window.tempTypeGrille });
@@ -3307,13 +3322,13 @@ function creerNouvelleGrille() {
     if (panneauMeta) panneauMeta.innerHTML = '';
 
     // Initialiser tempCriteres avec un premier critère vide
-    window.tempCriteres = [{
+    window.tempCriteres = [avecProjectionNeuve({
         id: genererIdUnique('TEMP_CR_'),
         nom: '',
         type: typeCritereParDefautEnCours(),
         ponderation: 0,
         description: ''
-    }];
+    })];
 
     // Afficher le premier critère avec placeholders
     afficherCriteresTemp();
@@ -4103,6 +4118,7 @@ async function modifierParamFormuleCritereGrille(grilleId, critereIndex, clePara
 function modifierCritereTemp(index, champ, valeur) {
     if (!window.tempCriteres || !window.tempCriteres[index]) return;
     window.tempCriteres[index][champ] = valeur;
+    if (champ === 'type') avecProjectionNeuve(window.tempCriteres[index]);   // lot 4, C.3
 }
 
 /**
@@ -4110,13 +4126,13 @@ function modifierCritereTemp(index, champ, valeur) {
  */
 function ajouterCritereTemp() {
     if (!window.tempCriteres) window.tempCriteres = [];
-    window.tempCriteres.push({
+    window.tempCriteres.push(avecProjectionNeuve({
         id: genererIdUnique('TEMP_CR_'),
         nom: '',
         type: typeCritereParDefautEnCours(),
         ponderation: 0,
         description: ''
-    });
+    }));
     afficherCriteresTemp();
     mettreAJourTotalTemp();
 }
@@ -4461,6 +4477,7 @@ async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
 
         // Mettre à jour le champ
         grille.criteres[critereIndex][champ] = valeur;
+        if (champ === 'type') avecProjectionNeuve(grille.criteres[critereIndex]);   // lot 4, C.3
         grille.dateModification = new Date().toISOString();
         grilleModifiee = grille;
         return grilles;
@@ -4701,7 +4718,7 @@ async function ajouterCritereGrille(grilleId) {
         }
 
         // Créer un nouveau critère avec des valeurs par défaut
-        g.criteres.push({
+        g.criteres.push(avecProjectionNeuve({
             // ⚠⚠ UN CRITÈRE NAÎT AVEC SON IDENTIFIANT (2 septembre 2026, sonde sur les
             // données de Grégoire). Cet éditeur travaille par INDEX et ne s'en apercevait
             // pas ; l'écran d'évaluation, le PDF et la réouverture d'une copie travaillent
@@ -4718,7 +4735,7 @@ async function ajouterCritereGrille(grilleId) {
             type: typeCritereParDefaut(g),
             ponderation: 0,
             description: ''
-        });
+        }));
 
         grille = g;
         return grilles;
@@ -5551,7 +5568,7 @@ async function modifierTypeGrilleHandler(el) {
     const ancien = typeCritereParDefautEnCours();
     window.tempTypeGrille = valeur;
     const nouveau = typeCritereParDefautEnCours();
-    (window.tempCriteres || []).forEach(c => { if (c && c.type === ancien) c.type = nouveau; });
+    (window.tempCriteres || []).forEach(c => { if (c && c.type === ancien) { c.type = nouveau; avecProjectionNeuve(c); } });   // lot 4, C.3
     afficherCriteresTemp();
 }
 

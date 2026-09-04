@@ -84,7 +84,9 @@ Cinq points, tous tranchés par Grégoire sauf le 3 :
    change le rendu, pas les données.
 3. **Défaut de projection d'un critère neuf** (`evaluation-projection.js:605`, `'norme_externe'`) :
    ⛔ **NE PAS FAIRE tant que la ligne suivante n'est pas remplacée par la décision de Grégoire.**
-   `[EN ATTENTE — recommandation de Cowork : 'aucune' ; Grégoire n'a pas tranché]`
+   ↻ **TRANCHÉ par Grégoire le 4 septembre 2026 vers 15 h 40 : « Par défaut, c'est réglé à
+   “sans projection” ».** Donc `'aucune'` pour un critère neuf ; les critères existants gardent leur
+   modèle. C.3 est ouvert : à faire, avec son cas de sentinelle.
    Si tranché « aucune » : source seulement, les critères existants gardent leur modèle ; un cas
    dans une sentinelle (un critère neuf naît sans projection ; un critère existant `norme_externe`
    reste `norme_externe` après rechargement).
@@ -140,7 +142,17 @@ voyage** → relecture croisée obligatoire, règle 2) :
 **Les mots que les collègues liront** — Cowork les propose à Grégoire, tu ne les inventes pas :
 le libellé du champ pour une grille analytique (« Paliers (bornes en %) » proposé), et la forme
 des titres de colonnes (« 0–64 % », « 65–79 % »… proposée). **Attends qu'ils soient dans ce
-fichier avant de les écrire à l'écran.** `[EN ATTENTE — libellés à confirmer par Grégoire]`
+fichier avant de les écrire à l'écran.**
+↻ **ARRÊTÉS par Grégoire le 4 septembre 2026 vers 15 h 50** (« Je suis d'accord avec l'ensemble ») :
+- le champ : « Paliers (bornes en %) » ; le coin de la matrice : « Critère / Palier » ;
+- les titres de colonnes : les bornes de l'échelle, **forme exacte** (« 0–64,99 % »), confirmée après
+  précision que les chiffres sont ceux de l'échelle de l'utilisateur, jamais du code ;
+- le menu SOLO : « Aucun » ; sa phrase d'aide **SANS la dernière phrase** (« C'est le choix d'une méthode
+  traditionnelle, sans taxonomie. » est retirée — l'aide ne qualifie pas le choix du collègue) ;
+- le tableau de bord : « Aucun critère multistructurel dans la grille de dépistage : le suivi des
+  fondations ne surveille rien. »
+⮕ Une seule retouche de code : couper la dernière phrase de l'aide sous le menu SOLO (volet B). Le reste est
+déjà à l'écran tel quel.
 
 ### Volet D — après A seulement
 
@@ -162,10 +174,42 @@ critère : si l'espace à droite du chiffre reste vide avec un commentaire, c'es
   → verdict au jeton → release MINEURE 1.117, UNE entrée de changelog dont les mots sont à lui → push
 ```
 
-⛔ **Deux points sont `[EN ATTENTE]` dans ce fichier** (C.3 et les libellés de A). Ils se
+▣ **Plus rien n'est `[EN ATTENTE]` dans ce fichier** : C.3 et les libellés sont tranchés (§3, §6). Ils se
 débloquent par Cowork, qui les écrit ici avec la décision de Grégoire. **Tu ne les devines pas.**
 
 ## 5 · Ce que tu rends à Cowork
 
 La carte de B (neuf lecteurs, disposition de chacun), la carte de A (où le type se lit, où les
 bornes vivent, ce qui voyage), et le numéro du run GitHub du §2 avec son verdict.
+
+---
+
+## 6 · Relecture croisée de Cowork sur le lot 4 (`eaad7ce1`, cinq commits devant `origin/main`)
+
+> Écrite par Cowork le 4 septembre 2026 vers 15 h 30, cartes A et B lues AVANT les patchs, puis les
+> diffs de `0385eadb` (A, obligatoire), `df07fa51` (B) et `c18318b7` (C).
+
+**Verdict : rien à corriger.** Ce que j'ai vérifié, et le témoin :
+- **A** — les bornes que l'éditeur affiche sont `n.min` / `n.max` de l'échelle source, les mêmes champs
+  que le lot 3 lit pour déduire le niveau (`git show b4039828 -- js/` : `pct >= Number(n.min) && pct <=
+  Number(n.max)`) : ce que la colonne titre est bien ce qui ouvre la cartouche. La copie (code, nom), la
+  clé `critereId_niveau` et `echelleId` ne bougent pas dans le diff. `typeGrilleAffiche` (`grilles.js:3247`)
+  rend `''` sur une grille mixte sans type : les niveaux restent, comme la carte le dit.
+- **B** — les deux seuls appelants de `libelleNiveauSOLO` (`profil-etudiant-calculs.js:2030`,
+  `interventions.js:715`) tolèrent le libellé vide ; la 4e valeur de l'export du trimestre (`type`,
+  `niveau_solo`) n'a **aucun lecteur dans l'application** (`grep -rn "niveau_solo\|'fondamental'" js/`
+  hors `trimestres.js` : objectifs.js et le pack de démo seulement, sans rapport).
+- **C** — `id: 'norme_externe'` intact (`evaluation-projection.js:185`) ; les plis sont relevés avant chaque
+  redessin et vivent en mémoire, clé `<id du critère>:<section>`, jamais dans la grille.
+
+**Trois réserves inscrites, pas corrigées** (issue 2) :
+1. (A) Sur une grille analytique dont l'échelle de départ est dans la base, remettre le menu sur
+   « — Échelle — » la resélectionne aussitôt (`onChangeSelectionCartouche`) : le champ ne peut pas rester
+   vide. Il est obligatoire de toute façon ; à regarder si quelqu'un s'en plaint.
+2. (A) Le modèle texte et l'export texte d'une cartouche (`lignesMatriceCartouche`, `cartouches.js:2769`)
+   nomment encore les niveaux par leur nom sur une grille analytique. Lu par l'enseignant, pas l'élève.
+3. (C) Un critère sans identifiant (grilles d'avant le 2 septembre, non réparées chez les autres
+   enseignants) partage sa clé de pli avec ses semblables.
+
+**Ordre qui reprend** : réponses de Grégoire aux deux points (C.3 ci-dessous, les mots de A et B), coup
+d'œil, verdict au jeton, release MINEURE 1.117, push.

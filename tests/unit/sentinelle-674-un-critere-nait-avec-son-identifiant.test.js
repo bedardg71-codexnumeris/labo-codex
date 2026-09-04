@@ -108,15 +108,18 @@ describe('#674 · un critère naît avec son identifiant (éditeur de grille en 
     });
 
     it('statique — aucun `criteres.push({ … })` de grilles.js ne pousse un objet sans `id:`', () => {
-        const motif = /criteres\.push\(\{/g;
+        // ↻ Lot 4, C.3 (4 sept. 2026) : une naissance peut passer par `avecProjectionNeuve({ … })`,
+        // qui pose « aucune projection » sur un critère algorithmique neuf — le motif l'accepte,
+        // ce qu'il tient ne change pas.
+        const motif = /criteres\.push\((?:avecProjectionNeuve\()?\{/g;
         const fautifs = [];
         let m;
         let compte = 0;
         while ((m = motif.exec(src)) !== null) {
             compte++;
-            // L'objet poussé : de `{` à la première `});` qui le ferme.
+            // L'objet poussé : de `{` à la première `})` qui le ferme.
             const debut = m.index + m[0].length - 1;
-            const fin = src.indexOf('});', debut);
+            const fin = src.indexOf('})', debut);
             const objet = src.slice(debut, fin);
             if (!/(^|[\s{,])id\s*:/.test(objet)) {
                 fautifs.push(src.slice(0, m.index).split('\n').length);
