@@ -167,6 +167,16 @@ ne le lit.*
 
 ## Ce qui reste à trancher — avec lui, PAS seul
 
+↻ **6. Où l'utilisateur s'attend à trouver ce réglage** — ajouté le 4 septembre 2026 (17 h 15), à la demande de
+Grégoire. Devant la carte « Codes d'annotation » du gabarit (celle qui porte la case « Utiliser ces sous-critères
+comme codes d'annotation »), il a demandé : *« Il faudrait pouvoir configurer les codes d'annotation qui
+correspondent à la palette, non ? Par défaut, c'est celle du français écrit, mais un utilisateur pourrait
+préférer autre chose. »* — alors que la personnalisation existe (Annoter › palette) et que la case sous ses
+yeux est le rattachement par grille. **Quatrième occurrence du motif « ça existe, personne ne le trouve là
+où il le cherche »** (après « Décloner », la palette elle-même, et les sous-critères comme codes). ⮕ Question
+d'écran à traiter dans ce cadrage : depuis la carte « Codes d'annotation » du gabarit, dire en une ligne où
+vit la palette globale et ce que la case fait par rapport à elle — ou y mettre le lien. Les mots seront à lui.
+
 1. **Par grille, ou par pratique ?** La demande dit « la grille ». Mais les tampons se posent
    dans **Annoter**, sur une copie, et une copie est liée à une **production**. ⚠ **Le chemin
    copie → production → grille est-il toujours vrai et unique ?** À mesurer avant de choisir.
