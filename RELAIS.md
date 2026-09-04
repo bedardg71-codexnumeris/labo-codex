@@ -15,11 +15,11 @@
 **Branche `main`. Version `1.116.0`, build `0904-0729` — PAS DE BUMP : la release 1.117 attend.**
 **`origin/main` = `e5d9c71f`** (le spec du lot 1 rendu robuste + les fichiers de Cowork du
 matin, poussé, run GitHub `33884692393` : VERT, Vitest et Playwright WebKit, 15 h 12 Z).
-**`main` local = `le commit de ce relais, au-dessus de `63ea2503``, 5 commits NON POUSSÉS** : les trois volets du lot 4 — C `c18318b7`
+**`main` local = le commit de ce relais, 8 commits NON POUSSÉS** : les trois volets du lot 4 — C `c18318b7`
 (le gabarit algorithmique se range), B `df07fa51` (« Aucun » au menu SOLO), A `0385eadb` (les
 paliers d'une grille analytique) et `63ea2503` (les specs déplient la carte) — fusionnés en
 fast-forward depuis `claude/lot-4-gabarit-algo-paliers`, plus ce relais.
-**Vitest : 458 fichiers / 5033 tests, code 0** (depuis `tests/`). **Playwright WebKit, suite
+**Vitest : 458 fichiers / 5035 tests, code 0** (depuis `tests/`). **Playwright WebKit, suite
 complète sur le lot : 258 verts + 5 rouges, tous causés par les cartes repliées, specs adaptés en
 `63ea2503` (11 specs verts ensuite)** — ⚠ jeton `scripts/.verdict-playwright.json` à REFAIRE sur
 le commit final avant le push (`node scripts/verifier-playwright.mjs`).
@@ -38,16 +38,20 @@ relecture croisée de Cowork (A OBLIGATOIRE — format qui voyage ; C et B au ju
 `plans de travail/CARTE-2026-09-04-lot4-B-lecteurs-niveauSOLO.md` et
 `plans de travail/CARTE-2026-09-04-lot4-A-paliers-analytiques.md`.
 
-### ⛔ DEUX POINTS [EN ATTENTE] DE GRÉGOIRE — écrits nulle part à l'écran sans son mot
+### ↻ 16 h — LES DEUX POINTS SONT TRANCHÉS ET FAITS (`9671a8c8`) ; relecture croisée de Cowork : rien à corriger
 
-1. **C.3** — le défaut de projection d'un critère algorithmique NEUF : `gabaritNeuf()` dans
-   `js/evaluation-projection.js` rend encore `norme_externe` (900 / 30, l'EUF). Recommandation
-   de Cowork : `'aucune'`. NON TOUCHÉ. Si « aucune » : source seulement + un cas de sentinelle.
-2. **Les mots de A** — `LIBELLES_PALIERS` et `libellePalier` (`js/cartouches.js`, bloc « LOT 4,
-   VOLET A ») : « Paliers (bornes en %) », « Critère / Palier », « 0–64,99 % » (bornes exactes ;
-   le cadrage écrivait « 0–64 % » — `formaterBornePalier`, une ligne), « Cette cartouche n'a
-   pas encore de paliers… ». PROPOSÉS ; livrés sur `main` pour son coup d'œil, pas en release.
-   Idem pour B : « Aucun », la phrase d'aide, la phrase du tableau de bord.
+1. **C.3** — « Par défaut, c'est réglé à “sans projection” » : `gabaritNeuf()` rend `{ modeleProjection:
+   'aucune', paramsProjection: {} }`, posé par `poserDefautNeuf` aux six sites où un critère DEVIENT
+   algorithmique (`avecProjectionNeuve`, grilles.js) ; `MODELE_PAR_DEFAUT` reste `norme_externe` (la
+   lecture des existants). ⚠ Mesuré : `gabaritNeuf` n'avait aucun appelant ; `PALIERS_GABARIT_NEUF`
+   n'a jamais été servi (inscrit dans le code).
+2. **Les mots de A et B** — ARRÊTÉS tels quels (« Je suis d'accord avec l'ensemble »), sauf la dernière
+   phrase de l'aide SOLO, retirée.
+
+**Trois réserves de Cowork, inscrites, pas corrigées** (consigne du jour, §6) : le menu d'échelle d'une
+grille analytique se reprérempli dès qu'on le vide (A) ; le modèle texte et l'export texte d'une
+cartouche nomment encore les niveaux sur une grille analytique (A) ; un critère sans identifiant
+partage sa clé de pli avec ses semblables (C).
 
 ### Le détail
 
