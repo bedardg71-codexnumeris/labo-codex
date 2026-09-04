@@ -193,7 +193,10 @@ describe('#667 · D — plus aucun site ne réécrit la formule à la main', () 
     it('les deux écrans de grille passent par le MÊME rendu', () => {
         const code = lire('js/grilles.js');
         // `${...}` : on compte les APPELS dans les gabarits, pas la déclaration.
-        expect((code.match(/\$\{rendreBlocFormuleAlgo\(critere,/g) || []).length).toBe(2);
+        // Lot 4 (4 sept. 2026) : les deux écrans appellent `rendreCartesGabaritAlgo`, qui
+        // seul rend le bloc (dans sa carte « Formule ») — un rendu, deux contextes, toujours.
+        expect((code.match(/\$\{rendreCartesGabaritAlgo\(critere,/g) || []).length).toBe(2);
+        expect((code.match(/(?<!function )rendreBlocFormuleAlgo\(critere, ctx\)/g) || []).length).toBe(1);   // l'appel, pas la déclaration
     });
 
     it('les trois blocs résultat du module Évaluer portent la ligne de formule', () => {

@@ -2271,6 +2271,44 @@ span.header-icon {
     opacity: 1;
 }
 
+/* ===============================
+   LOT 4 (4 sept. 2026) — LE GABARIT ALGORITHMIQUE SE RANGE
+   Les sections du gabarit d'un critère algorithmique sont des `.carte.accordeon`
+   (le composant de Cadre et de l'aide, employé tel quel — rien ci-dessous ne le
+   modifie). Seuls ajouts, scopés à la liste des critères : le bloc des
+   sous-critères en tête ne redouble pas la bordure du gabarit ; la rangée à plat
+   (code · nom · pondération) et la rangée de la carte des codes (lecture · couleur)
+   ont leurs colonnes ; et le contenu d'une carte (paliers, énoncés, dix codes)
+   dépasse les 2000 px du composant — plafond relevé ICI, pas dans le composant.
+   =============================== */
+#listeCriteres .sous-criteres-conteneur--en-tete {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
+#listeCriteres .gabarit-algo-carte {
+    margin-top: 12px;
+    margin-bottom: 0;
+}
+
+#listeCriteres .gabarit-algo-carte:not(.ferme) .accordeon-contenu {
+    max-height: 6000px;
+}
+
+#listeCriteres .sous-critere-champs-grid--note {
+    grid-template-columns: 80px 1fr 100px auto;
+}
+
+#listeCriteres .sous-critere-champs-grid--code {
+    grid-template-columns: 1fr 64px;
+}
+
+#listeCriteres .sous-critere-code-lecture {
+    padding: 6px 0;
+    font-weight: 500;
+}
+
 /* ============================================
    BOUTON « GUIDE » DES EN-TÊTES DE CARTE
    Réglages > Observation et dépistage (SOLO, ACP, RàI) et

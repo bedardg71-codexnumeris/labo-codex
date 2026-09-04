@@ -641,7 +641,10 @@ describe('#668 · I — le bloc projection du gabarit', () => {
         // Comme pour la formule (#667) : un seul rendu, deux contextes. Deux
         // rendus divergeraient le jour où l'un des deux serait modifié seul.
         // `${...}` : on compte les APPELS dans les gabarits, pas la déclaration.
-        expect((code.match(/\$\{rendreBlocProjectionAlgo\(critere,/g) || []).length).toBe(2);
+        // Lot 4 (4 sept. 2026) : les deux écrans appellent `rendreCartesGabaritAlgo`, qui
+        // seul rend le bloc (dans sa carte « Projection ») — un rendu, deux contextes.
+        expect((code.match(/\$\{rendreCartesGabaritAlgo\(critere,/g) || []).length).toBe(2);
+        expect((code.match(/(?<!function )rendreBlocProjectionAlgo\(critere, ctx\)/g) || []).length).toBe(1);   // l'appel, pas la déclaration
         expect(code).toContain('mode: "temp"');
         expect(code).toContain('mode: "grille"');
     });

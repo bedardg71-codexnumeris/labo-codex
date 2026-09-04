@@ -183,7 +183,11 @@ var PALIERS_GABARIT_NEUF = PALIERS_MIGRATION.map(function(p) {
 var MODELES = [
     {
         id: 'norme_externe',
-        nom: 'Norme externe (épreuve uniforme)',
+        // Lot 4 (4 sept. 2026) — « Projection à l'EUF », décision de Grégoire (contre la
+        // recommandation de Cowork, réserve inscrite au cadrage « accordéons » : le modèle
+        // est paramétrable et sert toute norme externe). Le NOM seul change ; l'`id`
+        // `norme_externe` voyage avec les grilles partagées et ne bouge pas.
+        nom: 'Projection à l\'EUF',
         description: 'Situe l\'élève face à une norme indépendante du cours, exprimée en erreurs tolérées pour une longueur de référence.',
         projette: true,
         parametres: [
