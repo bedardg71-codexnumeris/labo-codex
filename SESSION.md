@@ -179,9 +179,21 @@
        Témoins : sentinelle B (ordre), sentinelle C cas G (banc avec ui-blocs.js réel), spec C
        étapes 6-8 (nom lisible, corbeille palier + sous-critère à la souris, chevron). Break-tests :
        5 cas rouges + le spec rouge sur un champ de 60 px. Vitest 458 / 5039 ; 12 specs verts.
-     ⏸ SUITE, dans l'ordre : SECOND coup d'œil de Grégoire (le gabarit entier, Mac et iPad) →
-       verdict au jeton (`node scripts/verifier-playwright.mjs`, suite COMPLÈTE) → release MINEURE
-       1.117 (mots du changelog à lui) → push. `main` = 10 commits devant `origin/main`, non poussés.
+     ↻ 17 h — SECOND COUP D'ŒIL, TROIS POINTS (consigne §8), commit `331a8b93` avec la consigne et le
+       cadrage design ouvert de Cowork :
+       e) paliers numérotés par rang, sans chevrons (l'ordre est le seuil ; MESURÉ : aucun tri par
+       seuil à la saisie, ni registre ni handlers — inscrit) ; f) sous-critères déplaçables aux
+       chevrons — MESURÉ AVANT : le code est porté par le sous-critère (`sc.code`), palette et
+       calcul lisent `s.code === code`, jamais le rang ; un sous-critère sans code n'est pas
+       posable → déplacer librement ; `_deplacerSousCritere` par la file (28e écriture, #522
+       ajusté avec son motif) ; g) « Descripteur » sur la rangée du critère (libellé seul) —
+       MESURÉ, non harmonisé : deux textes d'aide d'index.html (l. 10978, 11089) disent encore
+       « Description ». Témoins : sentinelle C cas H (break-testés : 3 rouges), spec C. Vitest
+       458 / 5042 ; 12 specs verts.
+     ⏸ SUITE, dans l'ordre : TROISIÈME coup d'œil de Grégoire (court, le dernier — après lui,
+       plus rien n'entre dans 1.117 : le reste va au cadrage design de `00-CADRAGES-OUVERTS.md`)
+       → verdict au jeton (`node scripts/verifier-playwright.mjs`, suite COMPLÈTE) → release
+       MINEURE 1.117 (mots du changelog à lui) → push. `main` = 12 commits devant `origin/main`.
      ===================================================================== -->
 
 <!-- =====================================================================
