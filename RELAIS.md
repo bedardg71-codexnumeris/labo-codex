@@ -15,11 +15,11 @@
 **Branche `main`. Version `1.116.0`, build `0904-0729` — PAS DE BUMP : la release 1.117 attend.**
 **`origin/main` = `e5d9c71f`** (le spec du lot 1 rendu robuste + les fichiers de Cowork du
 matin, poussé, run GitHub `33884692393` : VERT, Vitest et Playwright WebKit, 15 h 12 Z).
-**`main` local = le commit de ce relais, 8 commits NON POUSSÉS** : les trois volets du lot 4 — C `c18318b7`
+**`main` local = le commit de ce relais, 10 commits NON POUSSÉS** : les trois volets du lot 4 — C `c18318b7`
 (le gabarit algorithmique se range), B `df07fa51` (« Aucun » au menu SOLO), A `0385eadb` (les
 paliers d'une grille analytique) et `63ea2503` (les specs déplient la carte) — fusionnés en
 fast-forward depuis `claude/lot-4-gabarit-algo-paliers`, plus ce relais.
-**Vitest : 458 fichiers / 5035 tests, code 0** (depuis `tests/`). **Playwright WebKit, suite
+**Vitest : 458 fichiers / 5039 tests, code 0** (depuis `tests/`). **Playwright WebKit, suite
 complète sur le lot : 258 verts + 5 rouges, tous causés par les cartes repliées, specs adaptés en
 `63ea2503` (11 specs verts ensuite)** — ⚠ jeton `scripts/.verdict-playwright.json` à REFAIRE sur
 le commit final avant le push (`node scripts/verifier-playwright.mjs`).
@@ -52,6 +52,15 @@ relecture croisée de Cowork (A OBLIGATOIRE — format qui voyage ; C et B au ju
 grille analytique se reprérempli dès qu'on le vide (A) ; le modèle texte et l'export texte d'une
 cartouche nomment encore les niveaux sur une grille analytique (A) ; un critère sans identifiant
 partage sa clé de pli avec ses semblables (C).
+
+### ↻ 16 h 30 — QUATRE RETOUCHES DU PREMIER COUP D'ŒIL (`3419d4db`, consigne §7)
+
+« Aucun » en tête du menu SOLO ; paliers de projection sur deux rangées (`grille-form-2col` — cette
+classe n'a aucune règle @media : pas d'empilement sur iPad en portrait, pas plus que le formulaire
+groupe-cours) ; la corbeille partout dans l'éditeur de grille, plus de ✕ rouge ; les chevrons en coin.
+⏳ Second coup d'œil de Grégoire (gabarit entier, Mac et iPad) AVANT le verdict au jeton.
+⚠ Pour Cowork (cadrage design à part, non touché) : ✕ rouge encore dans `bibliotheque-ui.js` (1) et
+`pratique-notation-v2.js` (3) ; pile « Ordre » dans `echelles.js` (3 sites).
 
 ### Le détail
 
