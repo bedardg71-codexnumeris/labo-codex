@@ -6,9 +6,10 @@ executant_des_correctifs : Claude Code, un lot à la fois, après arbitrage de G
 type : audit de vérité de la chaîne de dépistage et de protection de ce qu'elle sait
 livrable_attendu : rapport de constats, chaque constat portant sa disposition proposée ; AUCUN correctif appliqué
 rapport_a_produire : Rapports/AUDIT-onglet-suivi-2026-09-XX.md (date du jour de l'exécution)
-prerequis : Rapports/AUDIT-moteur-evaluation-2026-09-05.md (déposé) et Rapports/AUDIT-pratique-de-notation-2026-09-XX.md (à déposer avant) — l'onglet Suivi lit ce que ces deux moteurs produisent
+rapport_produit : Rapports/AUDIT-onglet-suivi-2026-09-05.md (42 mesures au banc tests/unit/audit-onglet-suivi-2026-09-05.test.js, quatre élèves de banc ; dispositions écrites dans ultrareview-lot-6-travaux-saisie.md et AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md)
+prerequis : Rapports/AUDIT-moteur-evaluation-2026-09-05.md (déposé, lot #697-#699 livré en 1.121.0) et Rapports/AUDIT-pratique-de-notation-2026-09-05.md (déposé, lot #706/#708/#709 livré en 1.122.0) — l'onglet Suivi lit ce que ces deux moteurs produisent
 cadre_par : Cowork, 5 septembre 2026, avec Grégoire
-statut : à exécuter, en troisième, après l'audit de la pratique de notation
+statut : exécuté le 5 septembre 2026 en soirée (Claude Code, branche audit/onglet-suivi-2026-09-05, fusionnée vers main — documents et banc seulement ; aucun correctif, Grégoire arbitre)
 ---
 
 # Audit — l'onglet Suivi (Labo Codex)

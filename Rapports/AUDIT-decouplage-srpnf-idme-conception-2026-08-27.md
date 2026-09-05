@@ -404,3 +404,49 @@ heure de devis = une période » (§3 n° 14) ; la marque de maîtrise (#555).
 *Artefacts bruts : les huit rapports de chantier (C1 à C8) sont dans la transcription de la session du
 27 août ; chaque ligne de ce document cite le fichier:ligne ou la commande qui la fonde. Aucun commit, aucun
 bump, aucune écriture hors ce fichier.*
+
+---
+
+## Dispositions des §5.3, §8 et §9 — remesurées le 5 septembre 2026 (audit de l'onglet Suivi)
+
+> Écrites par l'audit `Rapports/AUDIT-onglet-suivi-2026-09-05.md`, sur `7d335a16` (1.122.1), en lecture seule
+> sur `js/` et par `grep` sur `BACKLOG.md`. Ce fichier ne portait aucune disposition ; `CLAUDE.md` (§« Ce qu'un
+> audit doit produire ») en exige une par constat : *inscrit* (n°), *refusé* (motif), *périmé*. Les items du §9
+> qui touchent Conception ou les données réelles sont HORS du périmètre de l'audit du Suivi : leur disposition
+> est celle que le `BACKLOG.md` porte, ou « sans fiche » quand il n'en porte pas.
+
+### §5.3 — la pratique configurable n'est jamais interrogée par le profil
+
+| Constat | Disposition | Preuve, 5 septembre 2026 |
+|---|---|---|
+| `obtenirPratiqueActuelle()` passe le TYPE au registre → la classe, jamais l'instance configurable | **tenu, recoupé #714 / #716** (le profil lit l'instance registre : c'est le B-4 et le B-6 de l'audit du 5 septembre midi) | `[grep]` `profil-etudiant-helpers.js:637-652` : `obtenirTypePratiqueActive()` → `obtenirPratiqueParId(pratiqueId)` — inchangé. |
+| `obtenirEchelleNoteGlobale` de la configurable **pas atteinte** depuis le profil | **périmé en partie — le chemin a changé, la source non** | `[grep]` `sections-affichage.js:994` n'existe plus : les deux blocs passent par `lireNiveauNoteGlobale` (`helpers.js:604`, #575), qui appelle **encore** `obtenirPratiqueActuelle()` (le type) puis `pratique.obtenirEchelleNoteGlobale(da)` — l'instance configurable n'est toujours pas celle qu'on interroge. Une seule règle désormais (#575), donc un seul endroit à réorienter quand #714/#716 se traitent. |
+| SPE et `pratique-test` n'implémentent pas la méthode → `raison: 'pratique-sans-methode'`, infobulle vide | **tenu, recoupé** (E-4 du second audit : « SOM et SPE, sans niveau — fonctionne comme tranché » ; le survol vide vient de `message: ''` dans `lireNiveauNoteGlobale:609`) | `[grep]` `grep -c obtenirEchelleNoteGlobale js/pratiques/pratique-pan-specifications.js` → **0** ; `pratique-configurable.js:115` l'a. Le message vide est un choix (« une pratique sans échelle n'est pas en panne », commentaire `sections-affichage.js:4284`). |
+
+### §8 — ce qui n'avait pas été vérifié
+
+| Zone | Disposition | Preuve |
+|---|---|---|
+| Playwright non relancée | **périmé** | la suite WebKit tourne sur le serveur depuis le 2 septembre (règle 7 de `PROTOCOLE.md`) ; run `33994473211` (1.122.0) : Vitest et Playwright `success`. |
+| Rendu réel au navigateur des sites du §3 | **tenu, hors périmètre** de l'audit du Suivi (pas de WebKit) | « Ce que je n'ai pas regardé » du rapport du 5 septembre soir. |
+| Données réelles (ratios, échelle restaurée) | **hors périmètre** (interdit par les prompts d'audit) | — |
+| L'événement du 5-10 août (#545) | **inscrit #545, ouvert** — Grégoire | `BACKLOG.md:3211`. |
+| `js/pratiques/*` : mentions SRPNF | **tenu, trois fichiers** | `[grep]` `grep -c SRPNF js/pratiques/*.js` → `pratique-interface.js` 5, `pratique-pan-standards.js` 3, `pratiques-predefines.js` 4 (#690 a retiré les noms de personnes et de disciplines, pas les sigles de critères). |
+| `export-pdf.js` : `echelle.config.seuilReussite` | **tenu, lecture seule** | `[grep]` `:503-504`, `:853` : lu et affiché (« Seuil de reussite : N % ») ; aucune écriture trouvée dans `js/` (`grep -rn "seuilReussite\s*=" js/` → 0) — un champ affiché que rien n'écrit, à inscrire si un lot touche le PDF. |
+| `pack-demo-20.js` | **non remesuré** (le pack est un jeu de données ; l'échelle qu'il embarque est celle de la démo). | — |
+| Convergence réelle du §5.3 | **mesurée** — voir §5.3 ci-dessus : le chemin a convergé sur `lireNiveauNoteGlobale`, la source reste le type. | `[grep]` |
+| B1 (`convertirNiveauEnPourcentage`) | **périmé** | supprimée le 27 août 2026 (#575 B1+B2, `BACKLOG.md:3782-3786`). |
+
+### §9 — ce qui attendait Grégoire
+
+| # | Proposition du 27 août | Disposition | Preuve |
+|---|---|---|---|
+| 1 | Ouvrir l'item du lot 4 du plan SOLO (§3 n° 1-2-3-4-5-8-9-10-11) | **inscrit #575** ; B1-B4 livrés le 27 août ; le reste ouvert. L'audit du 5 septembre y **ajoute** : les lettres du bilan d'intervention (`interventions.js:918-919`, E-5), les tables IDME des courbes (`graphiques-progression.js:2447-2460`, `:3782-3800`, H-1) et les zones de « la première échelle » (H-2). | `BACKLOG.md:3778` |
+| 2 | Conception : cartouche remplacée après « Enregistrer » ; `valeurCalcul` des seeds et gabarits d'échelle | **inscrit #574** (gabarits non calculables) ; la cartouche : **#619 / #623 livrés le 30 août** (régime des cartouches). | `BACKLOG.md:4457`, `:655`, `:677` |
+| 3 | Renforcer quatre sentinelles (§4) | **sans fiche — non fait** : `grep -n "IPB ≠ performance\|quatre sentinelles" BACKLOG.md` → 0. L'audit du 5 septembre soir mesure la conséquence : aucune sentinelle ne verrouille le périmètre des évaluations comptées par le dépistage ni le cas « aucune donnée » (H-5, quatre mutations vertes partout sauf au banc). **À inscrire** avec le lot de correction de B-3 / D-2. | rapport du 5 sept. soir, H-5 |
+| 4 | Volet C : commande de vérification, garde référentielle sur `supprimerEchelleDefinitivement` | **inscrit #545, ouvert** (la garde y est le candidat n° 2). | `BACKLOG.md:3211` |
+| 5 | Seuils d'alerte A-C vers `interpretation.*` (§3 n° 7, 15) et le `\|\| 2` des interventions (n° 13) | **sans fiche — tenu, remesuré** : `determinerAlerteContextuelle` compare à 0,85 / 0,75 / 0,65 en clair, `interpreterMobilisation` à 0,7 / 0,8 / 0,9, `interpreterCompletion` / `Assiduite` à 0,60, les filtres du tableau de bord à 65 (C-8 du rapport du 5 sept.). Le `\|\| 2` de la durée : **retiré** dans le transfert (#540 lot C, `interventions.js:1373-1381` refuse et le dit) ; **reste** à la création (`:120` `duree: data.duree \|\| 2`) et pour `niveauRai` (`:121`). **À inscrire.** | `[grep]` |
+| 6 | Rétroaction EUF/CAF hors du type algorithmique (n° 12) | **livré en partie #539 → #690 (1.110.0)** : le service d'aide est un réglage (`nomServiceAide`, « Centre d'aide du collège »), les mots « en français » retirés des chaînes ; **#539 ouvert** pour les identifiants du volet confidentiel (G-5 du 5 sept. : tenus) ; les seuils 100/75/60/30 mots par erreur sont devenus le facteur réglable de #667/#668. | `OU-EN-EST-ON.md` §« Une rétroaction ne parle que de la discipline… » ; `BACKLOG.md:2855`, `:1348` |
+| 7 | Invariant `valeurCalcul ∈ [min, max]` à la saisie | **sans fiche** : #526 (livré 26 août) refuse une `valeurCalcul` vide ou non numérique, pas une valeur hors plage. Règle sur ses échelles — **à Grégoire**, à inscrire s'il la veut. | `BACKLOG.md:2659` |
+| 8 | Aide périmée (n° 16), régime des cartouches (D3), contexte mort de `pan-standards.js` | cartouches : **#619/#623 livrés** ; aide « Seuil de défi 75 % / Fenêtre 4 » : **non remesurée** (accompagnement, hors périmètre) ; `pan-standards.js` : **non remesuré** (#575 famille). | — |
+| — | Ce qui relève de sa décision : niveau « 0 » et #546 ; défaut `multistructurel` ; « une heure de devis = une période » (n° 14) ; marque de maîtrise (#555) | #546 **ouvert** (`BACKLOG.md:3170`) ; #555 **clos le 30 août** ; le défaut `multistructurel` **tenu** (`profil-etudiant-calculs.js:1186`, `:1366` — mesuré C-6 du 5 sept. : un critère « Aucun » sort de l'IPB mais reste un défi) ; n° 14 **à Grégoire**, sans fiche. | `[grep]` |
