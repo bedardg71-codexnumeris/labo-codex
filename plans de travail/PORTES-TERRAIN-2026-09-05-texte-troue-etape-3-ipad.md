@@ -81,3 +81,16 @@
   (« erreur{s} »), volontairement — il n'est pas posable, le moteur le remplit quand même.
 - **Erreur de session, rattrapée** : l'heure de la carte avait été TAPÉE (« 9 h 35 ») au lieu d'être lue
   (9 h 27) — corrigée à la relecture de Cowork.
+
+## §5 · Retour du terrain — relevé de Grégoire, 5 septembre, 10 h 27 (Toronto), consigné par Cowork à 10 h 28
+
+Aperçu ouvert : `https://deploy-preview-82--codexnumeris-051225.netlify.app/` (PR 82, branche d'aperçu, option B).
+**4 passées / 0 échec / 0 non traitées.** 2.1 poser au doigt ✓ · 2.2 taper autour et Retour ✓ · 2.3 effacer (la croix) ✓
+· 2.4 quitter, recharger ✓.
+- Mesure 2.3 (⌫ retire la pastille ?) : **oui, d'un coup** (Grégoire, 10 h 29) — l'angle mort du clavier virtuel est levé.
+- Décision · la croix : **garder**.
+- Décision · le glissé : « Ça ne marche pas. Je n'y tiens pas, le clic est efficace. » ⮕ **clos, pas de glissé** (il n'était
+  pas implémenté : l'aperçu ne pouvait pas le rendre ; la décision vaut quand même).
+- §4, vu en chemin : **« Quand je veux ajouter du texte après une pastille, le curseur apparaît hors du bloc. »** Capture :
+  zone « Aucune annotation », texte puis pastille `critere` en fin de contenu, caret dessiné à droite, hors du cadre du champ.
+  ⮕ Retouche du lot D (c'est le lot lui-même, pas une trouvaille) : relayée à Claude Code à 10 h 28.

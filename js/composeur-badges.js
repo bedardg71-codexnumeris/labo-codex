@@ -37,6 +37,16 @@
 
 var BLOCS = { DIV: true, P: true, LI: true, SECTION: true, BLOCKQUOTE: true, UL: true, OL: true, PRE: true };
 
+// ↻ Porte iPad du 5 sept. (Grégoire, 10 h 27) : « quand je veux ajouter du texte après une
+// pastille, le curseur apparaît hors du bloc ». CAUSE MESURÉE : une chip est
+// `contenteditable="false"` ; quand elle est le DERNIER nœud de la vue — ou le dernier avant un
+// `<br>` de fin de ligne —, le moteur n'a aucune position de caret éditable après elle, et le
+// dessine hors du cadre. L'ANCRE : un espace de largeur nulle (U+200B) rendu comme nœud texte
+// après toute chip terminale ; c'est là que le caret se pose et que la frappe entre. `lire` la
+// retire de la valeur : elle ne fuit jamais dans le `<textarea>`, ni dans la grille.
+var ANCRE = '\u200B';
+var RE_ANCRE = /\u200B/g;
+
 function _echapperRegExp(t) { return String(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
 function _echapperDefaut(t) {
@@ -108,8 +118,12 @@ function _htmlChip(s, esc) {
 function rendreHtml(texte, palette, esc) {
     var e = _echappeur(esc);
     var t = (typeof texte === 'string') ? texte : '';
-    var html = segmenter(t, palette).map(function(s) {
-        return (s.type === 'jeton') ? _htmlChip(s, e) : e(s.valeur).replace(/\n/g, '<br>');
+    var segments = segmenter(t, palette);
+    var html = segments.map(function(s, i) {
+        if (s.type !== 'jeton') return e(s.valeur).replace(/\n/g, '<br>');
+        var suivant = segments[i + 1];
+        var terminale = !suivant || (suivant.type === 'texte' && suivant.valeur.charAt(0) === '\n');
+        return _htmlChip(s, e) + (terminale ? ANCRE : '');
     }).join('');
     if (t.length && t.charAt(t.length - 1) === '\n') html += '<br>';
     return html;
@@ -146,8 +160,14 @@ function entreesDe(racine) {
     var dejaDuContenu = false;
     function visiter(n, dernierDeSonParent) {
         if (_estTexte(n)) {
-            var v = (typeof n.nodeValue === 'string') ? n.nodeValue : String(n.textContent || '');
-            if (v.length) { entrees.push({ type: 'texte', texte: v, noeud: n }); dejaDuContenu = true; }
+            var brut = (typeof n.nodeValue === 'string') ? n.nodeValue : String(n.textContent || '');
+            // L'ancre (U+200B) ne vaut rien dans le texte ; son nœud reste une entrée de
+            // longueur 0, pour que le caret qui s'y trouve se traduise en position de texte.
+            var v = brut.replace(RE_ANCRE, '');
+            if (brut.length) {
+                entrees.push({ type: 'texte', texte: v, brut: brut, noeud: n });
+                if (v.length) dejaDuContenu = true;
+            }
             return;
         }
         if (!n || n.nodeType !== 1) return;
@@ -249,11 +269,29 @@ function curseur(vue) {
              fin: _positionDe(vue, entrees, range.endContainer, range.endOffset) };
 }
 
+/** Dans un nœud texte, l'offset DOM → le nombre de caractères de TEXTE avant lui (les ancres ne comptent pas). */
+function _positionTexte(brut, offsetDom) {
+    return String(brut || '').slice(0, Math.max(0, offsetDom)).replace(RE_ANCRE, '').length;
+}
+
+/** Dans un nœud texte, une position de TEXTE → l'offset DOM, posé APRÈS les ancres qui la touchent. */
+function _offsetDom(brut, positionTexte) {
+    var b = String(brut || '');
+    var i = 0, n = 0;
+    while (i < b.length && (n < positionTexte || b.charAt(i) === ANCRE)) {
+        if (b.charAt(i) !== ANCRE) n++;
+        i++;
+    }
+    return i;
+}
+
 /** Un point (nœud, offset) du DOM → une position dans le texte de la vue. */
 function _positionDe(vue, entrees, noeud, offset) {
     var total = entrees.length ? (entrees[entrees.length - 1].debut + entrees[entrees.length - 1].texte.length) : 0;
     if (_estTexte(noeud)) {
-        for (var i = 0; i < entrees.length; i++) if (entrees[i].noeud === noeud) return entrees[i].debut + Math.min(offset, entrees[i].texte.length);
+        for (var i = 0; i < entrees.length; i++) {
+            if (entrees[i].noeud === noeud) return entrees[i].debut + Math.min(_positionTexte(entrees[i].brut, offset), entrees[i].texte.length);
+        }
         return total;
     }
     // Dans une chip (non éditable) : après elle.
@@ -297,9 +335,13 @@ function placerCaret(vue, position) {
         var e = entrees[i];
         var fin = e.debut + e.texte.length;
         if (pos < e.debut || pos > fin) continue;
-        if (e.type === 'texte') { range.setStart(e.noeud, pos - e.debut); pose = true; }
+        if (e.type === 'texte') { range.setStart(e.noeud, _offsetDom(e.brut, pos - e.debut)); pose = true; }
         else if (pos === e.debut && e.type !== 'frontiere') { range.setStartBefore(e.noeud); pose = true; }
         else if (e.type === 'frontiere') { if (pos === fin) { range.setStart(e.noeud, 0); pose = true; } }
+        else if (e.type === 'jeton' && entrees[i + 1] && entrees[i + 1].type === 'texte' && entrees[i + 1].brut && entrees[i + 1].brut.charAt(0) === ANCRE) {
+            // Après une chip terminale : DANS l'ancre, la seule position que le moteur dessine.
+            range.setStart(entrees[i + 1].noeud, _offsetDom(entrees[i + 1].brut, 0)); pose = true;
+        }
         else { range.setStartAfter(e.noeud); pose = true; }
     }
     if (!pose) {
