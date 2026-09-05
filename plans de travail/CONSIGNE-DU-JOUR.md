@@ -119,6 +119,60 @@ régler un palier, enregistrer sous « EUF », créer une grille, choisir « EUF
 
 **Fin du lot B** : rapport à Cowork ; **coup d'œil de Grégoire** (le « Fini quand » du cadrage, tel quel).
 
+
+---
+
+## Lot D — le texte troué, étape 3 : le badge s'affiche dans la phrase (ajouté le 5 septembre à 8 h 59, par Cowork)
+
+> **Décision de Grégoire (5 septembre, entre 8 h 53 et 8 h 58)** : l'étape 3 se fait **aujourd'hui**, pas après le 14. **Ordre de la
+> journée corrigé : A → B → D → C.** L'étape 4 (les badges qu'on invente) reste hors de ce jour : elle rouvre un arrêté
+> du 2 septembre (« palette fixe d'abord ») et la question qui la commande — avec quoi un badge inventé se remplit-il
+> à la correction ? — est didactique, à trancher à froid avec Grégoire ; Cowork la cadre ce soir ou demain.
+> ⚠ Relecture croisée par Cowork sur la carte de B en cours à l'heure où ceci s'écrit ; D ne commence qu'après le
+> coup d'œil de Grégoire sur B.
+
+**Ce que Grégoire verra** : dans toute zone qui offre des badges (les deux zones de chaque palier, le décompte, les
+trois énoncés de « Observation »), un badge posé s'affiche **comme un badge** — la pastille bleue ou verte, sans
+accolades, dans le fil de la phrase — au lieu du texte `{erreurs}`. Il se retire comme un caractère (effacement
+arrière) ou d'un clic sur sa croix ; le texte autour se tape comme aujourd'hui. **Rien ne change dans ce qui est
+enregistré** : la grille porte toujours `{erreurs}` en texte brut, c'est le format que lit le moteur et qui voyage.
+Sur iPad, le doigt fait ce que la souris fait.
+
+**Source** : `plans de travail/CADRAGE-2026-09-02-badges-texte-troue.md`, section « ▣ Le mécanisme de glissé existe
+déjà » (lis-la d'abord) : le patron est celui de `planification-carte.js` (suivre le POINTEUR, `pointerdown` /
+`pointermove` / `setPointerCapture`), ⛔ jamais `dragstart` / `drop` (capricieux sur iPadOS) ; **le clic pour insérer
+au curseur reste le chemin principal**. ⚠ Ce que le cadrage dit neuf, et qui est la moitié du travail : viser une
+position dans du texte, calée au bord d'un mot.
+
+**D'abord une carte courte (`plans de travail/CARTE-2026-09-05-texte-troue-etape-3.md`), rendue à Cowork avant le
+code** — c'est un composeur neuf, pas une finition :
+- **le composant** : mesure ce que le dépôt a déjà de plus proche (`grep -rn "contenteditable" js/`, les chips de la
+  palette d'annotation, `rendreBoutonsReperes`) ; propose UNE zone éditable où les jetons sont rendus en chips et le
+  reste en texte ; dis comment on **sérialise** (chips → `{jeton}`) et **désérialise** (texte → chips), et prouve
+  l'aller-retour par une sentinelle : pour tout texte de la palette, `serialiser(deserialiser(t)) === t` ;
+- **l'écriture** : la zone écrit par les MÊMES handlers (`modifierPalierProjection*`, `modifierTexteEnonce*`), la même
+  valeur texte, au même moment (en quittant la zone) ; mesure ce que `data-on-change` fait d'un élément
+  `contenteditable` (`main.js`, le dispatcher `'data-on-' + eventType`) : si `change` ne se déclenche pas, dis quel
+  événement le remplace et où il se branche, ⛔ sans handler inline ;
+- **la sécurité** : tout texte tapé passe par `echapperHtml` avant de revenir dans le rendu ; un `{jeton}` inconnu
+  reste du texte (ligne orange inchangée) ; coller du HTML dans la zone ne rend que du texte ;
+- **le repli** : si une plateforme casse (Safari iPad), la zone redevient le `textarea` d'aujourd'hui — dis comment on
+  bascule (un drapeau mesuré à l'ouverture, pas une option) ;
+- **le glissé** : hors de cette carte si le clic au curseur tient ; s'il entre, c'est le patron de la carte mentale,
+  et il vient en dernier volet, séparable.
+
+**Après la relecture de Cowork** : le code, un commit par volet (composant + sentinelle d'aller-retour · branchement
+dans les zones · spec WebKit qui pose un badge au clic, tape autour, recharge, relit `{erreurs}` dans la grille ET
+la chip à l'écran). Sentinelles : aller-retour ; un badge inconnu rendu texte ; `echapperHtml` ; **aucun changement
+de `critere.paliersProjection[].texte`, `.texteAide`, `critere.enonces.*` pour une grille existante rechargée sans
+modification** (break-test : une sérialisation qui ajoute une espace rougit). `git diff -- js/evaluation-projection.js
+js/evaluation-enonces.js js/import-export.js js/partage-schemas.js` : **zéro**.
+
+**Fin du lot D** : rapport à Cowork, **relecture croisée** (composeur neuf : règle 2), puis **porte terrain iPad**
+(skill `portes-terrain` : Claude Code écrit le markdown dans `plans de travail/`, Cowork publie l'artefact) —
+poser un badge au doigt, taper autour, effacer un badge, quitter la zone, recharger. **1.119 ne part avec D que si
+la porte iPad est passée** ; sinon D attend, et 1.119 part avec A, B (et C s'il est fini).
+
 ---
 
 ## Lot C — les mêmes gestes partout (cadrage design, écrit à froid par Cowork le 4 au soir)
@@ -166,7 +220,7 @@ d'échelles ; iPad en portrait : le formulaire de groupe-cours).
 ## La fin de journée — 1.119
 
 ```
-lot A → coup d'œil → lot B (carte, relecture, code) → coup d'œil → lot C → coup d'œil
+lot A → coup d'œil → lot B (carte, relecture, code) → coup d'œil → lot D (carte, relecture, code, relecture croisée, porte iPad) → lot C → coup d'œil
   → relecture croisée de Cowork sur le lot B seulement (l'objet neuf dans ses données) — A et C au jugement
   → ce qui est cassé se corrige, ce qui est une envie s'inscrit
   → verdict au jeton (scripts/pousser.sh) → release MINEURE 1.119, TROIS entrées de changelog dont les mots

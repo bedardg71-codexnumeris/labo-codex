@@ -88,6 +88,10 @@
         // dictionnaire en `<carteId>::<leconId>` : namespacer sans composer
         // n'aurait réglé que la moitié du rouge D1.
         'planification_seances',
+        // 🆕 Lot B (5 sept. 2026) : les collections de paramètres de projection — un jeu
+        // NOMMÉ de réglages (modèle, paramètres, paliers), COPIÉ dans un critère au choix.
+        // Propriétaire : js/collections-projection.js. Par trimestre, comme les modèles.
+        'collectionsProjection',
         // 🆕 Corbeille fichiers travaux (4 mars 2026)
         'corbeilleFichiers',
         // 🆕 (24 mai 2026) Pratique de notation active : namespacée par trimestre
