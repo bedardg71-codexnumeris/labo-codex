@@ -23,6 +23,12 @@
 //   · le décompte retiré de la carte de projection → A.a, A.b, B.a, B.b, C.b, D.a, D.b, D.c
 //     rougissent, et le B.d de la sentinelle du gabarit avec (9) ;
 //   · le titre « Projection » remis → C.a rougit, et le B.c de la sentinelle lot 4 C avec (2).
+//
+// ↻ LA CARTE « BILAN » (5 septembre 2026, 1.120 — cadrage `CADRAGE-2026-09-05-carte-bilan.md`) :
+// « Observation » s'appelle « Bilan » et ne porte plus que `priorite` et `concentre` ; « Aucune
+// annotation » vit sous la case des codes, dans la liste des sous-critères (grille enregistrée
+// seulement). Les attentes ci-dessous sont adaptées ; `sentinelle-carte-bilan.test.js` porte le
+// reste (le pli, le menu, le modèle « Français écrit »).
 
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
@@ -122,7 +128,7 @@ const compter = (h, motif) => (h.split(motif).length - 1);
 const clesDe = (h) => [...h.matchAll(/data-enonce-cle="([a-z]+)"/g)].map((m) => m[1]);
 const boutons = (bloc) => [...bloc.matchAll(/<button type="button" class="repere-enonce repere-enonce--(posee|remplie)"\s+data-action="insererRepereEnonce" data-jeton="([^"]+)"[^>]*>([^<]*)<\/button>/g)]
     .map((m) => ({ famille: m[1], jeton: m[2], texte: m[3] }));
-/** Le rendu du gabarit d'une grille en ÉDITION : tout, la carte de projection, la carte « Observation ». */
+/** Le rendu du gabarit d'une grille en ÉDITION : tout, la carte de projection, la carte « Bilan » (clé de pli `commentaire`). */
 function rendu(grille) {
     const m = monter([grille || GRILLE]);
     m.win.afficherCriteresGrille(JSON.parse(JSON.stringify(grille || GRILLE)));
@@ -152,7 +158,7 @@ const blocDecompte = (projection) => {
 /* ====================================================== A — UNE FOIS, AU BON ENDROIT */
 
 describe('une seule carte · A — le décompte est rendu UNE fois, dans « Ce que l\'élève lit », absent d\'« Observation »', () => {
-    it('A.a en ÉDITION : une zone `decompte` dans tout le gabarit, dans la carte de projection ; « Observation » rend les trois autres, dans l\'ordre', () => {
+    it('A.a en ÉDITION : une zone `decompte` dans tout le gabarit, dans la carte de projection ; « Bilan » rend les deux du bilan, dans l\'ordre ; « Aucune annotation » sous la case des codes', () => {
         const { html, projection, commentaire } = rendu();
         expect(projection.length).toBeGreaterThan(0);
         expect(commentaire.length).toBeGreaterThan(0);
@@ -160,9 +166,11 @@ describe('une seule carte · A — le décompte est rendu UNE fois, dans « Ce q
         expect(compter(projection, 'data-enonce-cle="decompte"')).toBe(1);
         expect(commentaire).not.toContain('data-enonce-cle="decompte"');
         expect(commentaire).not.toContain('Décompte des erreurs');
-        expect(clesDe(commentaire)).toEqual(['priorite', 'concentre', 'aucune']);
+        expect(clesDe(commentaire)).toEqual(['priorite', 'concentre']);
         expect(clesDe(projection)).toEqual(['decompte']);
-        expect(clesDe(html)).toEqual(['priorite', 'concentre', 'aucune', 'decompte']);
+        // ↻ La carte « Bilan » (1.120) : « Aucune annotation » vit sous la case des codes, dans la liste
+        // des sous-critères — rendue AVANT les cartes (sentinelle `carte-bilan`, B).
+        expect(clesDe(html)).toEqual(['aucune', 'priorite', 'concentre', 'decompte']);
         // Témoin : le décompte est bien celui du registre — étiquette et aide au mot.
         const c = E.listerCles().find((x) => x.cle === 'decompte');
         expect(projection).toContain('>' + c.libelle + '</label>');
@@ -173,7 +181,8 @@ describe('une seule carte · A — le décompte est rendu UNE fois, dans « Ce q
         const { html, projection, commentaire } = renduTemp();
         expect(compter(html, 'data-enonce-cle="decompte"')).toBe(1);
         expect(clesDe(projection)).toEqual(['decompte']);
-        expect(clesDe(commentaire)).toEqual(['priorite', 'concentre', 'aucune']);
+        expect(clesDe(commentaire)).toEqual(['priorite', 'concentre']);
+        expect(clesDe(html), 'en création, « Aucune annotation » n\'est nulle part : sa maison est la liste des sous-critères d\'une grille enregistrée').toEqual(['priorite', 'concentre', 'decompte']);
         expect(blocDecompte(projection)).toMatch(/<textarea[^>]*data-on-change="modifierTexteEnonceTempHandler" data-critere-index="0" data-enonce-cle="decompte"/);
     });
 });
@@ -208,7 +217,7 @@ describe('une seule carte · B — la carte se lit de haut en bas dans l\'ordre 
         const { html, projection, commentaire } = rendu({ ...GRILLE, criteres: [{ ...ALGO, modeleProjection: 'aucune', paramsProjection: {} }] });
         expect(compter(html, 'data-enonce-cle="decompte"')).toBe(1);
         expect(compter(projection, 'data-enonce-cle="decompte"')).toBe(1);
-        expect(clesDe(commentaire)).toEqual(['priorite', 'concentre', 'aucune']);
+        expect(clesDe(commentaire)).toEqual(['priorite', 'concentre']);
         expect(boutons(blocDecompte(projection)).map((b) => b.jeton)).toEqual(['{critere}', '{erreurs}', '{mots}', '{points}']);
         expect(projection).toContain('Aucune projection ne sera proposée');
         expect(projection.indexOf('data-enonce-cle="decompte"')).toBeLessThan(projection.indexOf('Aucune projection ne sera proposée'));
@@ -224,25 +233,26 @@ describe('une seule carte · B — la carte se lit de haut en bas dans l\'ordre 
 describe('une seule carte · C — les titres que Grégoire lira, la clé de pli inchangée, la ligne « Texte de départ », l\'aide reprise', () => {
     const titre = (t) => new RegExp('<span class="accordeon-chevron">[▶▼]</span> ' + t.replace(/'/g, "(?:'|&#x27;|&#39;)") + '\\s*<');
 
-    it('C.a « Ce que l\'élève lit » et « Observation » ; plus de carte titrée « Projection » ; la clé de pli `projection` reste (mémoire des plis)', () => {
+    it('C.a « Ce que l\'élève lit » et « Bilan » (↻ 1.120, d\'abord « Observation ») ; plus de carte titrée « Projection » ; la clé de pli `projection` reste (mémoire des plis)', () => {
         const { html } = rendu();
         expect(html).toMatch(titre('Ce que l\'élève lit'));
-        expect(html).toMatch(titre('Observation'));
+        expect(html).toMatch(titre('Bilan'));
+        expect(source('js/grilles.js')).not.toMatch(/carteGabaritAlgo\(critere, ctx, 'commentaire', 'Observation'/);
         expect(html).not.toMatch(titre('Projection'));
         expect(html).toContain('data-pli="CR:projection"');
         expect(html).toContain('data-pli="CR:commentaire"');
         expect(source('js/grilles.js')).toMatch(/carteGabaritAlgo\(critere, ctx, 'projection', 'Ce que l\\'élève lit'/);
     });
 
-    it('C.b sous le décompte, une fois : « Texte de départ : le modèle d\'observation, carte « Observation ». » ; le menu du modèle reste dans « Observation »', () => {
+    it('C.b sous le décompte, une fois : « Texte de départ : le modèle des phrases, carte « Bilan ». » ; le menu du modèle reste dans « Bilan »', () => {
         const { projection, commentaire } = rendu();
         expect(compter(projection, 'decompte-texte-depart')).toBe(1);
-        expect(projection).toContain('Texte de départ : le modèle d\'observation, carte « Observation ».');
+        expect(projection).toContain('Texte de départ : le modèle des phrases, carte « Bilan ».');
         const ligne = projection.indexOf('decompte-texte-depart');
         expect(ligne).toBeGreaterThan(projection.indexOf('data-enonce-cle="decompte"'));
         expect(ligne).toBeLessThan(projection.indexOf('class="sous-critere-item palier-projection"'));
-        expect(commentaire).toContain('Modèle d\'observation');
-        expect(projection).not.toContain('Modèle d\'observation</label>');
+        expect(commentaire).toContain('Modèle des phrases (bilan et décompte)');
+        expect(projection).not.toContain('Modèle des phrases (bilan et décompte)</label>');
         // Ses classes vivent dans styles.css, scopées à l'éditeur.
         const css = source('styles.css');
         expect(css).toMatch(/#listeCriteres \.decompte-eleve \{/);
@@ -301,11 +311,11 @@ describe('une seule carte · D — même zone, mêmes attributs, même palette ;
 /* ============================================================ E — LA FACTORISATION, LES JETONS */
 
 describe('une seule carte · E — un helper, deux appels ; les jetons anti-cache ont bougé', () => {
-    it('E.a `rendreChampEnonceAlgo` est déclaré une fois et appelé deux fois ; « Observation » filtre le décompte ; la zone n\'est écrite qu\'à un endroit', () => {
+    it('E.a `rendreChampEnonceAlgo` est déclaré une fois et appelé trois fois (↻ 1.120) ; « Bilan » filtre le décompte et « aucune » ; la zone n\'est écrite qu\'à un endroit', () => {
         const src = source('js/grilles.js');
         expect((src.match(/function rendreChampEnonceAlgo\(/g) || []).length).toBe(1);
-        expect((src.match(/rendreChampEnonceAlgo\(/g) || []).length).toBe(3);   // la déclaration + deux appels
-        expect((src.match(/listerCles\(\)\.filter\(\(c\) => c\.cle !== 'decompte'\)/g) || []).length).toBe(1);
+        expect((src.match(/rendreChampEnonceAlgo\(/g) || []).length).toBe(4);   // la déclaration + trois appels (« Bilan », le décompte, « Aucune annotation » sous la case des codes)
+        expect((src.match(/listerCles\(\)\.filter\(\(c\) => c\.cle !== 'decompte' && c\.cle !== 'aucune'\)/g) || []).length).toBe(1);
         expect((src.match(/data-enonce-cle="\$\{esc\(c\.cle\)\}"/g) || []).length).toBe(1);
         expect(src).not.toMatch(/rendreBlocApercuAlgo/);
     });

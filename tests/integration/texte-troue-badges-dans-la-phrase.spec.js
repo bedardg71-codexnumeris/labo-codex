@@ -54,7 +54,8 @@ test('texte troué 3 · le badge posé s\'affiche en pastille, on tape autour, o
     await expect(carte(page)).not.toHaveClass(/ferme/);
     await expect(page.locator('#listeCriteres .palier-projection')).toHaveCount(6);
     await expect(page.locator('#listeCriteres .palier-projection .composeur-badges')).toHaveCount(12);
-    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli="CR:commentaire"] .composeur-badges')).toHaveCount(3);
+    // ↻ La carte « Bilan » (1.120) : deux énoncés — « Aucune annotation » vit sous la case des codes.
+    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli="CR:commentaire"] .composeur-badges')).toHaveCount(2);
     const verdictDHier = 'En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec.';
     await expect(zone(page, 4, 'texte')).toBeHidden();
     await expect(zone(page, 4, 'texte')).toHaveValue(verdictDHier);

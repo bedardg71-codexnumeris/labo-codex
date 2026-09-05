@@ -39,7 +39,7 @@ const LIRE = `() => {
         ordre: blocs.map(e => e.dataset.pli || 'sous-criteres'),
         plis: Object.fromEntries([...l.querySelectorAll('.gabarit-algo-carte')].map(e => [e.dataset.pli, e.classList.contains('ferme') ? 'replie' : 'ouvert'])),
         rangeeAvantSousCriteres: l.innerHTML.indexOf('data-champ="nom"') < l.innerHTML.indexOf('sous-criteres-conteneur--en-tete'),
-        commentaire: l.innerHTML.includes("Modèle d'observation") && !l.innerHTML.includes('Modèle de rétroaction') && !l.innerHTML.includes('Modèle de commentaire'),
+        commentaire: l.innerHTML.includes("Modèle des phrases (bilan et décompte)") && !l.innerHTML.includes("Modèle d'observation") && !l.innerHTML.includes('Modèle de rétroaction') && !l.innerHTML.includes('Modèle de commentaire'),
         euf: [...l.querySelectorAll('option')].some(o => o.textContent === "Projection à l'EUF"),
         motsReference: (l.querySelector('input[data-param-cle="motsReference"]') || {}).value,
         cartesAvecId: [...l.querySelectorAll('.gabarit-algo-carte[id]')].length
@@ -93,7 +93,7 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     expect(etat.ordre).toEqual(['sous-criteres', 'CR:formule', 'CR:commentaire', 'CR:projection']);
     expect(etat.rangeeAvantSousCriteres, 'les sous-critères viennent tout de suite sous la rangée du critère').toBe(true);
     expect(etat.plis).toEqual({ 'CR:formule': 'ouvert', 'CR:commentaire': 'replie', 'CR:projection': 'replie' });
-    expect(etat.commentaire, '« Modèle d\'observation », ni « rétroaction » ni « commentaire »').toBe(true);
+    expect(etat.commentaire, '« Modèle des phrases (bilan et décompte) » (carte « Bilan », 1.120), ni « observation », ni « rétroaction » ni « commentaire »').toBe(true);
     expect(etat.euf, '« Projection à l\'EUF » au menu de projection').toBe(true);
     expect(etat.cartesAvecId, 'aucune carte ne porte d\'id : le composant ne persiste rien').toBe(0);
 
@@ -157,10 +157,24 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     const caseCodes = page.locator('#listeCriteres .sous-criteres-conteneur--en-tete .sous-criteres-codes input[type="checkbox"]');
     await expect(caseCodes).toHaveCount(1);
     await expect(caseCodes).not.toBeChecked();
-    await expect(page.locator('#listeCriteres .sous-critere-pli')).toHaveCount(0);
+    // ↻ La carte « Bilan » (5 sept. 2026, 1.120) : sous la case, cochée ou non, le pli « Quand la copie ne porte
+    //     aucun code » (fermé, le même composant) porte « Aucune annotation », partie de la carte « Bilan » ;
+    //     ce qui n'existe pas décoché, c'est le pli DE RANGÉE. On le déplie par l'événement DOM ; le redessin
+    //     qui suit la case cochée le garde déplié (les plis vivent en mémoire).
+    const pliAucune = () => page.locator('#listeCriteres .sous-critere-pli--aucune[data-pli="CR:aucune"]');
+    await expect(pliAucune()).toHaveCount(1);
+    await expect(pliAucune()).toHaveClass(/ferme/);
+    await expect(pliAucune().locator('.accordeon-header h3')).toHaveText(/Quand la copie ne porte aucun code/);
+    await expect(page.locator('#listeCriteres textarea[data-enonce-cle="aucune"]')).toHaveCount(1);
+    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli="CR:commentaire"] textarea[data-enonce-cle="aucune"]')).toHaveCount(0);
+    await expect(page.locator('#listeCriteres .sous-critere-pli[data-pli*=":sc:"]')).toHaveCount(0);
     await expect(page.locator('#listeCriteres textarea[data-champ="retroaction"]')).toHaveCount(0);
+    await cliquerDom(pliAucune().locator('.accordeon-header'));
+    await expect(pliAucune()).not.toHaveClass(/ferme/);
     await caseCodes.evaluate((el) => el.click());
     await expect(page.locator('#listeCriteres .sous-criteres-codes--actif')).toHaveCount(1);
+    await expect(pliAucune(), 'le redessin de la case cochée garde le pli déplié').not.toHaveClass(/ferme/);
+    await expect(page.locator('#listeCriteres textarea[data-enonce-cle="aucune"]')).toHaveCount(1);
     await expect(page.locator('#listeCriteres .sous-critere-couleur-groupe .travaux-retro-couleur-picker')).toHaveCount(1);
     const pli = () => page.locator('#listeCriteres .sous-critere-pli[data-pli="CR:sc:sc_1"]');
     await expect(pli()).toHaveClass(/ferme/);
@@ -179,7 +193,8 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     expect(gA.criteres[0].sousCriteres[0].retroaction).toBe(observation);
     // Décocher : couleur et pli disparaissent de l'écran ; l'observation reste en base.
     await page.locator('#listeCriteres .sous-criteres-codes input[type="checkbox"]').evaluate((el) => el.click());
-    await expect(page.locator('#listeCriteres .sous-critere-pli')).toHaveCount(0);
+    await expect(page.locator('#listeCriteres .sous-critere-pli[data-pli*=":sc:"]')).toHaveCount(0);
+    await expect(pliAucune(), 'décochée, la phrase « Aucune annotation » reste sous la case').toHaveCount(1);
     await expect(page.locator('#listeCriteres .sous-critere-couleur-groupe')).toHaveCount(0);
     gA = await page.evaluate(async () => ((await db.get(cle('grillesTemplates'))) || []).find(x => x.id === 'G1'));
     expect(gA.criteres[0].sousCriteres[0].retroaction).toBe(observation);

@@ -244,8 +244,8 @@ var MODELES = [
     },
     {
         id: 'discipline_francais',
-        nom: 'Français écrit (formulations d\'origine)',
-        description: 'Les phrases d\'avant #581, mot pour mot. À conserver pour un critère de français écrit dont les élèves ont déjà reçu ces textes.',
+        nom: 'Français écrit',
+        description: 'Les phrases parlent du français écrit (« erreurs de français », « la qualité du français »). Pour un critère d\'une autre discipline, choisis « Générique », qui nomme le critère tel qu\'il est écrit dans la grille.',
         enoncesParDefaut: ENONCES_FRANCAIS
     }
 ];
