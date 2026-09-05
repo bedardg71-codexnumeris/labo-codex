@@ -7,6 +7,55 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 29 — 5 SEPTEMBRE 2026, 18 H 40 → 19 H 45 : UN MOT SOUS LA NOTE DU COURS (release 1.122.1), puis
+     L'AUDIT DE L'ONGLET SUIVI (troisième audit cadré). ▣ **LIVRÉ : 1.122.1 (build 0905-1852, `7d335a16`) — la phrase
+     « N évaluation(s) sans critère évalué, non comptée(s) » sans « aucun » (mot arrêté par Grégoire), poussée après
+     verdict Playwright local vert (0 échec, 0 instable) ; run GitHub `33997649062` LU JUSQU'AU BOUT : Vitest `success`,
+     Playwright (WebKit) `success` (23 h 36 Z).** ▣ **DÉPOSÉ, rien d'appliqué : `Rapports/AUDIT-onglet-suivi-2026-09-05.md`**
+     (`4f1b4eb7`, branche `audit/onglet-suivi-2026-09-05` fusionnée fast-forward). Vitest 478 / 5 374.
+
+     ▣ Rituel isolé (18 h 45) : aucun écart avec la prémisse de Cowork (HEAD 12df341a = origin/main, 1.122.0, Vitest
+       477 / 5 332, run 33994473211 vert). Trouvaille hors mandat : `OU-EN-EST-ON.md` absent de `paths-ignore`
+       (tests.yml l. 106-125) — inscrite dans le rapport, mineure. Un `index.lock` périmé (18 h 42, 0 octet, aucun
+       processus git) retiré avant le premier `git mv`.
+     ▣ Temps 1 (18 h 50 → 19 h 03) : consigne promue (`CONSIGNE-PROCHAINE-SEANCE.md` → `CONSIGNE-DU-JOUR.md`, l'ancienne
+       archivée `_ancienne-CONSIGNE-DU-JOUR-2026-09-05-carte-bilan-1.120.md`), fichiers de Cowork commis tels quels.
+       Le mot retiré sur TROIS sites qui portent la même formule (profil `_phraseEvaluationsEcartees`, détail du calcul
+       `pratique-sommative.js:216`, export `profil-etudiant-actions.js:594`) — SUPPOSITION NOMMÉE : le retrait vaut
+       partout où la formule vit, pas seulement sous la note. Sentinelle #706 mise à jour AVANT le code : ROUGE
+       (`1 failed | 11 passed`), puis verte ; `not.toContain('aucun')` ajouté. `release.mjs patch` (5 jetons), commit
+       `7d335a16`, Vitest après le bump, `scripts/pousser.sh` (verdict au jeton, push). Rituel fin-de-session : diff
+       9 lignes, 0 innerHTML / handler / console.log, 0 spec Playwright touchée.
+     ▣ Temps 2 (19 h 05 → 19 h 45) : banc `tests/unit/audit-onglet-suivi-2026-09-05.test.js`, 42 mesures, modules
+       réels (registre, quatre familles, portfolio, indices, saisie-presences, les sept profil-etudiant-*,
+       interventions, consolidation, snapshots, tableau-bord-apercu, graphiques-progression, interpretation-config,
+       ET modes.js réel à part pour le filtre par cours). Quatre élèves de banc ; chaque palier et indice à la main
+       avant le code. La chaîne est JUSTE pour l'assidu et l'absent sur tous les écrans. Quatre majeurs, « corriger
+       maintenant » PROPOSÉS : B-3 la reprise comptée deux fois par le dépistage (7 fonctions sans filtre
+       `remplaceeParId` : l'élève qui a repris et réussi reste niveau 3) ; D-2/D-3 « Non-participation niveau 3 » pour
+       toute la classe avant le premier travail, et à zéro donnée (A = 100 sans séance) ; B-5 le rapport du profil ne se
+       génère pas (`obtenirDetailsAssiduite` jamais exporté ; rapport.js l'appelle par son nom nu depuis une autre IIFE,
+       depuis le 18 mai) et recalcule P et C par une autre règle ; E-6 observations d'intervention brutes dans un
+       <textarea> (règle 1). Un cinquième majeur recoupe #716 : G-2 le P historique des snapshots pour une sommative
+       = moyenne DU GROUPE (le repli filtre sans DA) — 67 pour tous les élèves du banc. Une vingtaine de moyens à
+       inscrire après le 14 (brouillon remis pour C et pour la performance du dépistage ; non-remis à 0 remis pour le
+       C sommatif ; élève arrivé en semaine 6 ; critère SOLO « Aucun » toujours un défi ; deux paliers sur le même
+       profil ; interventions sans groupe-cours ; `etudiantsSuivis` clé NUE vidée au changement de groupe ; deux
+       « moyenne A » ; mode anonymisation muet sur le confidentiel ; seuils A-C et lettres du bilan en clair). Le volet
+       confidentiel ne sort dans AUCUN flux du Suivi (rapport, snapshots, consolidation, CSV, PDF, graphiques, console).
+       Break-tests : quatre mutations d'un point dans js/ (filtre remplacées IPB, filtre DA snapshots, export
+       obtenirDetailsAssiduite, branche Non-participation), suite complète relancée à chaque fois — chacune ne
+       rougit QUE ce banc ; restauration par copie, SHA-256 identique, `git status -- js/` propre.
+       Transcriptions : `ultrareview-lot-6-travaux-saisie.md` (N1-N6 périmés-corrigés, parseInt tenu) ;
+       `AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md` (§5.3, §8, §9). Prompt à « exécuté ». OU-EN-EST-ON :
+       section « LE SUIVI » OUVERTE (jugement dit dans le rapport : l'onglet a son lecteur propre, l'orthopédagogue).
+     ▣ DÛ À GRÉGOIRE : arbitrer les quatre « corriger maintenant » (avant le 14 : le rapport du profil et la reprise
+       comptée deux fois touchent ce que l'orthopédagogue lira) ; le reste après le 14 avec #700-#705 et #710-#721 ;
+       les deux gestes à l'écran sur 1.122.x (profil avec brouillon ; SPE « Modèle simple ») ; le renommage de la page
+       « Les huit gestes ».
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 28 — 5 SEPTEMBRE 2026, 15 H 56 → 17 H 30 : AUDIT DE LA PRATIQUE DE NOTATION (second audit cadré),
      puis le lot arbitré le soir même. ▣ **LIVRÉ : release 1.122.0 (build 0905-1722) — lot #706 / #708 / #709,
      rapport `48c77c2d` (branche `audit/pratique-de-notation-2026-09-05`, fusionnée fast-forward), docs Cowork

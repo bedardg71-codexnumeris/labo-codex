@@ -7,6 +7,24 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, 19 H 45 (1.122.1 EN LIGNE, RUN GITHUB VERT ; AUDIT DU SUIVI DÉPOSÉ)
+
+> ↻ **19 h 03 — 1.122.1 (build `0905-1852`, `7d335a16`)** : le mot « aucun » retiré de « N évaluation(s) sans critère
+> évalué, non comptée(s) » (mot arrêté par Grégoire), sur les trois sites qui portent la formule ; sentinelle #706
+> break-testée ; verdict Playwright local au jeton (0 échec, 0 instable), `12df341a..7d335a16 main -> main`.
+> ▣ **RUN GITHUB `33997649062` ATTENDU ET LU : Vitest `success`, Playwright (WebKit) `success` (23 h 36 Z), conclusion
+> `success`.** La consigne du jour est `plans de travail/CONSIGNE-DU-JOUR.md` (celle du 5 au soir) ; l'ancienne est
+> archivée ; les fichiers de Cowork sont commis tels quels dans `7d335a16`.
+> ↻ **19 h 45 — le troisième audit cadré est DÉPOSÉ, rien d'appliqué** : `Rapports/AUDIT-onglet-suivi-2026-09-05.md`
+> (`4f1b4eb7`, branche `audit/onglet-suivi-2026-09-05` fusionnée fast-forward, documents et banc seulement). **`main` =
+> `origin/main` après ce push, AUCUN travail en avance.** Vitest 478 / 5 374.
+> **Ce qui attend Grégoire** : l'arbitrage des dispositions du rapport — quatre « corriger maintenant » proposés
+> (la reprise comptée deux fois par le dépistage · « Non-participation niveau 3 » avant le premier travail · le rapport
+> du profil qui ne se génère pas · le `<textarea>` des observations non échappé), une vingtaine de « inscrire » après le
+> 14 ; la section « LE SUIVI » d'`OU-EN-EST-ON.md` le résume en gestes d'utilisateur. **Aucun correctif ne part sans lui.**
+> **Ce que Cowork peut lire** : le rapport, la section « LE SUIVI », le prompt passé à « exécuté » (`rapport_produit`),
+> les dispositions écrites dans `ultrareview-lot-6-travaux-saisie.md` et `AUDIT-decouplage-…-2026-08-27.md`.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, SOIRÉE (1.122.0 EN LIGNE, RUN GITHUB VERT)
 
 > ↻ **17 h 30 — 1.122.0 (build `0905-1722`, « La note du cours ne compte plus les brouillons, et les spécifications
