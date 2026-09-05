@@ -156,17 +156,29 @@ test('texte troué 2 · deux badges posés dans un palier au clic, enregistrés,
     await expect(page.locator('#listeCriteres .palier-projection .palier-apercu')).toHaveCount(6);
     const lues = await page.locator('#listeCriteres .palier-projection .palier-apercu').evaluateAll((els) => els.map((e) => ({
         mot: e.querySelector('.palier-apercu-mot').textContent.trim(),
-        texte: e.querySelector('.palier-apercu-texte').textContent.trim(),
+        engendre: e.querySelector('.palier-apercu-engendre').textContent.trim(),
+        ecrit: e.querySelector('.palier-apercu-ecrit').textContent.trim(),
         copie: e.querySelector('.palier-apercu-copie').textContent.trim()
     })));
     console.log('APERÇU →', JSON.stringify(lues));
-    expect(lues.every((l) => l.mot === 'L\'élève lira :')).toBe(true);
-    // Le palier composé : décompte du bloc 3, PUIS la phrase entière — jetons remplis, sans préfixe.
+    // ↻ §7 : l'étiquette dit d'où vient la ligne, et DEUX segments — en gris ce qui est engendré, dans l'encre ce qu'il a écrit.
+    expect(lues.every((l) => l.mot === 'L\'élève lira (décompte, puis tes deux phrases) :')).toBe(true);
+    // Le palier composé : en gris le décompte seul (la phrase porte un badge : plus de préfixe) ; dans l'encre, la phrase entière, jetons remplis.
     expect(lues[4].copie).toBe('— copie fictive, 23 erreurs pour 900 mots');
-    expect(lues[4].texte).toBe('Ta production contient 23 erreurs pour 900 mots. ' + verdictDHier + ' Bilan : 23 900 Il est recommandé de t\'inscrire au Passerelle +. 30');
-    expect(lues[4].texte).not.toContain('Tu fais en moyenne');
-    // Un palier d'hier garde le préfixe engendré.
-    expect(lues[1].texte).toBe('Ta production contient 5 erreurs pour 900 mots. Tu fais en moyenne 1 erreur à chaque 180 mots. En prévision de l\'EUF, ce ratio est excellent.');
+    expect(lues[4].engendre).toBe('Ta production contient 23 erreurs pour 900 mots.');
+    expect(lues[4].ecrit).toBe(verdictDHier + ' Bilan : 23 900 Il est recommandé de t\'inscrire au Passerelle +. 30');
+    expect(lues[4].engendre + ' ' + lues[4].ecrit).not.toContain('Tu fais en moyenne');
+    // Un palier d'hier : le préfixe engendré en gris, avec le décompte ; son verdict dans l'encre.
+    expect(lues[1].engendre).toBe('Ta production contient 5 erreurs pour 900 mots. Tu fais en moyenne 1 erreur à chaque 180 mots.');
+    expect(lues[1].ecrit).toBe('En prévision de l\'EUF, ce ratio est excellent.');
+    // Les deux zones s'appellent « Verdict » et « Recommandation (facultative) » ; l'aide sur les badges précède le premier palier.
+    expect(await palier(page, 4).locator('label').allTextContents()).toEqual(['Palier 5', 'Jusqu\'à', 'Verdict', 'Recommandation (facultative)']);
+    const aideEnTete = await carte(page, 'projection').evaluate((el) => {
+        const note = el.querySelector('.palier-note-composer');
+        const premier = el.querySelector('.palier-projection');
+        return !!(note && premier && (note.compareDocumentPosition(premier) & Node.DOCUMENT_POSITION_FOLLOWING));
+    });
+    expect(aideEnTete, 'l\'aide sur les badges vient avant le premier palier').toBe(true);
     // En bas de la carte « Projection » : la copie non corrigée, une fois, et la note, une fois.
     const nonCorrigee = carte(page, 'projection').locator('.palier-apercu-non-corrigee');
     await expect(nonCorrigee).toHaveCount(1);
@@ -180,7 +192,8 @@ test('texte troué 2 · deux badges posés dans un palier au clic, enregistrés,
     await frapper(zone(page, 0, 'texte'), 'Bravo {truc}.');
     await expect(page.locator('#listeCriteres .palier-jetons-inconnus')).toHaveCount(1);
     await expect(page.locator('#listeCriteres .palier-jetons-inconnus')).toContainText('Le badge « {truc} » est inconnu de cette version');
-    await expect(palier(page, 0).locator('.palier-apercu-texte')).toHaveText('Ta production contient 0 erreur pour 900 mots. Bravo {truc}.');
+    await expect(palier(page, 0).locator('.palier-apercu-engendre')).toHaveText('Ta production contient 0 erreur pour 900 mots.');
+    await expect(palier(page, 0).locator('.palier-apercu-ecrit')).toHaveText('Bravo {truc}.');
     const ordre = await palier(page, 0).evaluate((el) => {
         const orange = el.querySelector('.palier-jetons-inconnus');
         const apercu = el.querySelector('.palier-apercu');

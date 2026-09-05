@@ -188,3 +188,77 @@ carte (§2) → relecture de Cowork → décisions de Grégoire (noms des jetons
 ⛔ Hors périmètre, cadré ailleurs : la fusion des listes sous-critères + codes (cadrage codes par grille,
 points 7-8) ; le cadrage design (corbeille, chevrons, empilement iPad) ; les badges que l'enseignant invente
 (étape 3+).
+
+## 6 · Le lendemain matin, 5 septembre — finir 1.118, puis passer à la journée (écrit le 4 à 19 h 12, par Cowork)
+
+> Grégoire a arrêté sa journée le 4 à 19 h, la retouche du §5 rendue ou en cours. **Rien n'est poussé** : `main`
+> a cinq (ou six) commits d'avance, 1.117.1 reste en ligne. Cet ordre est celui du matin, dans l'ordre.
+
+1. **Remesure** (`git --no-optional-locks log --oneline -7`, `cat version.json`, `git status --short`) et dis en
+   une ligne où en est la retouche du §5 : rendue (quel commit) ou pas.
+2. Si elle n'est pas rendue : fais-la (§5), un commit, rapport à Cowork.
+3. **Cowork relit la retouche** (une passe courte : l'aperçu sous chaque palier, `echapperHtml`, les sentinelles
+   déplacées), puis **coup d'œil de Grégoire** (Conception › Grilles › un critère algorithmique › carte
+   « Projection » : la ligne « L'élève lira : » sous chaque palier, qui change quand il tape).
+4. **Les mots du changelog** : Cowork propose à Grégoire l'entrée de 1.118 (elle DOIT nommer la contrainte
+   « corrige avec l'application à jour ») ; il corrige ; tu l'écris telle quelle.
+5. Verdict au jeton (`scripts/pousser.sh`), **release MINEURE 1.118**, push. On n'attend pas le run (règle 7).
+6. **Puis, sans autre consigne** : archive ce fichier sous
+   `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-04-texte-troue-etape-2.md`, renomme
+   `plans de travail/CONSIGNE-2026-09-05.md` en `plans de travail/CONSIGNE-DU-JOUR.md`, et commence son lot A.
+   Les deux fichiers partent avec le premier commit du lot A.
+
+## 7 · Retouches du coup d'œil de Grégoire — 5 septembre, 6 h 50 (Toronto), par Cowork — AVANT la livraison de 1.118
+
+> **Décision de Grégoire (6 h 50)** : la livraison n'est pas urgente, on corrige d'abord, **une seule livraison à la fin**.
+> Coup d'œil fait sur `7ff78ced` : l'aperçu sous chaque palier fonctionne, la recommandation aussi. ⚠ Elle suit au
+> `change` (en quittant le champ), pas à chaque frappe : c'est le bon mécanisme (un redessin à chaque frappe perdrait le
+> curseur) ; le « mise à jour à chaque frappe » du §5 était une erreur de mots de Cowork. **Ne change pas ça.**
+> ⚠ Cowork n'a PAS relu `grilles.js` au-delà de `rendreBlocProjectionAlgo` : les numéros de lignes ci-dessous sont
+> des repères mesurés à 6 h 30, **remesure avant de toucher**.
+
+**Ce que Grégoire verra** (carte « Projection » d'un critère algorithmique) : l'aide sur les badges **en haut de la
+carte**, avant le premier palier, en trois phrases courtes ; dans chaque palier, les deux zones s'appellent
+**« Verdict »** et **« Recommandation (facultative) »** ; sous chaque palier, la ligne grise s'intitule **« L'élève lira
+(décompte, puis tes deux phrases) : »** et montre **en gris ce qui est engendré** (le décompte et, s'il y a lieu, le
+préfixe « Tu fais en moyenne 1 erreur à chaque N mots. ») et **dans l'encre normale ce qu'il a écrit** (verdict et
+recommandation, remplis). Les deux notes du bas (copie non corrigée, copies fictives) restent en bas.
+
+**Ce qui l'a motivé** : deux endroits disaient « ce que l'élève lit / lira » et rien ne montrait que la ligne grise est
+fabriquée à partir des deux zones ; l'aide sur les badges était à six paliers de la rangée « Poser : ».
+
+**Trois retouches, UN commit. Périmètre : `js/grilles.js`, `styles.css`, `index.html` (bump). ⛔ `evaluation-projection.js`
+ne bouge pas ; aucune donnée ne change.**
+
+1. **Les étiquettes** (`grilles.js:~3908` et `:~3917`, les deux `<label>` du palier) : « Ce que l'élève lit » →
+   **« Verdict »** ; « Phrase de recommandation (facultative) » → **« Recommandation (facultative) »** (mots de Grégoire,
+   6 h 35). Mesure d'abord `grep -n "Ce que l'élève lit\|Phrase de recommandation" js/ tests/` : l'aide de la carte cite
+   « dans « Ce que l'élève lit » » (à corriger en « dans « Verdict » ») ; les commentaires de code restent tels quels ;
+   dis si une sentinelle ou un spec porte l'ancien libellé.
+
+2. **La composition visible** (`ligneApercu`, `grilles.js:~3865`) : la ligne rend **deux segments**, chacun passé par
+   `echapperHtml`. **Gris** (`palier-apercu-engendre`, `--gris-moyen`) = le décompte du bloc 3, puis `projection.prefixe`
+   s'il est non vide. **Encre normale** (`palier-apercu-ecrit`, `--texte-principal`) = `projection.texte` privé de son
+   préfixe. Mesure : `_resultat` (`evaluation-projection.js:~672`) rend `prefixe` ET `texte` où `texte` = préfixe + ' ' +
+   verdict(+recommandation) ; retire le préfixe par sa longueur (`texte.slice(prefixe.length).trim()`), pas par regex.
+   Verdict et recommandation restent **un seul segment** : les séparer exigerait de changer le module de projection —
+   hors périmètre, dis-le si tu y vois un défaut. Étiquette de la ligne : **« L'élève lira (décompte, puis tes deux
+   phrases) : »**. Classes dans `styles.css`, rien en `style=` inline neuf.
+
+3. **L'aide en haut** (`grilles.js:~3945`, le `<small>` qui précède le bouton « + Ajouter un palier ») : déplacée
+   **en tête de carte, avant le premier palier**, resserrée à trois phrases (texte de départ, Grégoire le reprend au coup
+   d'œil) : « Un clic sur un badge le pose dans la zone du palier où est le curseur — sans curseur, dans « Verdict ». Les
+   badges bleus sont écrits dans la grille ; les verts se remplissent à la correction, copie par copie, et un badge sans
+   valeur disparaît. Sans badge, la phrase est précédée de « Tu fais en moyenne 1 erreur à chaque N mots » ; avec un
+   badge, elle est entière : c'est toi qui l'écris. » Les deux `<small>` du bas (`basApercu`) restent en bas.
+
+**Témoins** : la sentinelle `sentinelle-texte-troue-etape-2-apercu.test.js` (B.a lit l'étiquette « L'élève lira : »,
+B.d la place de la note, D.b l'échappement) et le spec WebKit `texte-troue-paliers-projection.spec.js` (lit « L'élève
+lira : ») **suivent** ; dis lesquels ont dû changer et pourquoi ; **break-test** sur au moins un cas — le verdict rendu
+dans le segment gris doit rougir. Si `sentinelle-lot4-C-gabarit-algo-range.test.js` porte les anciens libellés, adapte-la.
+⛔ Toujours pas de `page.click` à l'aveugle ni `waitForTimeout`. Format qui voyage : `git diff -- js/evaluation-projection.js
+js/import-export.js js/partage-schemas.js` rend zéro ; golden #668 sans modification.
+
+**Puis** : rapport à Cowork (une passe courte), coup d'œil de Grégoire, **les mots du changelog** (Cowork les lui propose ;
+ton brouillon de 6 h 09 est la base, avec les nouveaux libellés), verdict au jeton, release MINEURE 1.118, push — puis le
+§6 s'applique tel quel à partir de son point 6.

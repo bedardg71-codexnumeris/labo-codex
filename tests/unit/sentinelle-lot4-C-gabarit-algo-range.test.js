@@ -509,8 +509,10 @@ describe('lot 4 · C.G — coup d\'œil de Grégoire : corbeille partout, chevro
         // le préfixe engendré — au mot.
         expect((projection.match(/palier-note-service/g) || []).length).toBe(0);
         expect((projection.match(/palier-note-composer/g) || []).length).toBe(1);
-        expect((projection.match(/Dès qu'elle porte un badge, elle est entière : c'est toi qui l'écris\./g) || []).length).toBe(1);
-        expect(projection.indexOf('palier-note-composer')).toBeGreaterThan(projection.lastIndexOf('palier-projection'));
+        expect((projection.match(/avec un badge, elle est entière : c'est toi qui l'écris\./g) || []).length).toBe(1);
+        // ↻ §7 (5 sept.) : la note vient EN TÊTE de la carte, avant le premier palier — à six paliers
+        // de la rangée « Poser : », elle n'aidait personne.
+        expect(projection.indexOf('palier-note-composer')).toBeLessThan(projection.indexOf('palier-projection'));
         expect(projection).toContain('value="Sans erreur"');
         // Les champs et leurs clés n'ont pas bougé (ce qui est enregistré non plus).
         for (const champ of ['libelle', 'ratioMax', 'texte', 'texteAide']) expect(projection).toContain('data-champ="' + champ + '"');

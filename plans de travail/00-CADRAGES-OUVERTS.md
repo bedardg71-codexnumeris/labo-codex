@@ -38,6 +38,10 @@ badges que l'enseignant invente.
 (`{critere}`, `{erreurs}`, `{mots}`, `{points}`), pas dix. Mesuré le 3 septembre.
 
 ### 2 · Les codes par grille — `CADRAGE-2026-09-03-codes-par-grille.md`
+↻ **4 septembre 2026, 19 h (mesuré par Cowork) : LE MÉCANISME EST LIVRÉ DEPUIS LE 3** (`js/codes-annotation.js`,
+commits `2084c20f` → `61982b1f` ; `CODES_ERREURS_FR` n'est plus lu qu'en repli). **Ce qui reste = le lot A du
+5 septembre** (`CONSIGNE-2026-09-05.md`) : fusion des deux listes du gabarit (point 7), la ligne « où vit la
+palette » (point 6), le mot « Observation » (point 8).
 **Les dix codes d'erreurs de français cessent d'être écrits dans le code.** La grille porte sa
 liste ; sans liste, on retombe sur les dix — donc **rien à réparer dans les données**.
 ⛔ **LIRE SA SECTION « NOMENCLATURE » EN PREMIER** : un **code** identifie et compte, un

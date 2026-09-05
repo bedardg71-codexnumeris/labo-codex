@@ -188,14 +188,22 @@ describe('texte troué 2 · B — une palette par palier, les huit badges, la no
         });
     });
 
-    it('B.c la note « Écris {service}… » est partie ; la note du composeur dit la décision sur le préfixe, au mot, une fois, sous les paliers', () => {
+    it('B.c la note « Écris {service}… » est partie ; la note du composeur dit la décision sur le préfixe, au mot, une fois — ↻ §7 : EN TÊTE, avant le premier palier, et les zones s\'appellent « Verdict » et « Recommandation »', () => {
         const projection = rendu();
         expect(projection).not.toContain('palier-note-service');
         expect(projection).not.toContain('là où le nom du service doit apparaître');
         expect((projection.match(/palier-note-composer/g) || []).length).toBe(1);
-        expect(projection).toContain('Une phrase sans badge est précédée de “Tu fais en moyenne 1 erreur à chaque N mots.” Dès qu\'elle porte un badge, elle est entière : c\'est toi qui l\'écris.');
-        expect(projection).toContain('sans curseur, dans « Ce que l\'élève lit »');
-        expect(projection.indexOf('palier-note-composer')).toBeGreaterThan(projection.lastIndexOf('palier-projection'));
+        expect(projection).toContain('Sans badge, la phrase est précédée de « Tu fais en moyenne 1 erreur à chaque N mots » ; avec un badge, elle est entière : c\'est toi qui l\'écris.');
+        expect(projection).toContain('sans curseur, dans « Verdict »');
+        // §7 (5 sept.) : l'aide était à six paliers de la rangée « Poser : » ; elle précède le premier palier.
+        const note = projection.indexOf('palier-note-composer');
+        expect(note).toBeGreaterThan(-1);
+        expect(note).toBeLessThan(projection.indexOf('palier-projection'));
+        // Les étiquettes des deux zones (mots de Grégoire, 5 sept., 6 h 35) — et plus aucune trace des anciennes.
+        expect((projection.match(/>Verdict<\/label>/g) || []).length).toBe(6);
+        expect((projection.match(/>Recommandation \(facultative\)<\/label>/g) || []).length).toBe(6);
+        expect(projection).not.toContain('Ce que l\'élève lit');
+        expect(projection).not.toContain('Phrase de recommandation');
     });
 
     it('B.d les énoncés gardent leur palette, par le même helper : « Décompte des erreurs » offre ses quatre repères', () => {
