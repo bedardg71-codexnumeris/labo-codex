@@ -195,3 +195,28 @@ Confirmé en phase Vérifier (14 confirmés / 13 réfutés visible sur la web UI
 | 4 — Défense en profondeur | nit1, nit2, nit3 + finding manquant | 1h30 | Symétrisation des paths zoom/cleanup, try/catch ouvrirPDF, parseInt → parseFloat dans `obtenirClasseSaisiePeriodes`. |
 
 **Effort total estimé** : ~5 heures.
+
+---
+
+## Dispositions — remesurées le 5 septembre 2026 (audit de l'onglet Suivi)
+
+> Écrites par l'audit `Rapports/AUDIT-onglet-suivi-2026-09-05.md` (flux A), sur `7d335a16` (1.122.1), au banc
+> `tests/unit/audit-onglet-suivi-2026-09-05.test.js` (mesure A5) et par `grep` sur le source. Une disposition est
+> *périmé — corrigé* (le défaut n'est plus là, preuve à côté), *tenu → à inscrire* (encore là), *refusé* (motif),
+> ou *hors périmètre* (fichier que cet audit ne couvre pas : la visionneuse est l'onglet Travaux).
+> Les corrections ne portent pas de numéro de fiche : elles ont été livrées avec #538 et #540 (26 août 2026)
+> et le Tier 6.4 (avril 2026), avant qu'on tienne ce registre.
+
+| # | Constat du 1er mai | Disposition | Preuve, 5 septembre 2026 |
+|---|---|---|---|
+| N1 | `obtenirHeuresSeance` : `=` qui écrasait l'accumulateur | **périmé — corrigé** (#538) | `[grep]` le corps de la fonction, commentaires retirés : **0** affectation `totalHeures =`, **2** `+=` ; la branche « format inconnu » n'ajoute plus rien (le commentaire l. 435+ dit pourquoi). |
+| N2 | `obtenirNombrePeriodesSeance` sous-compte les jours multi-séances | **périmé — corrigé** (#538, #540 E2) | `[exécuté]` un jour à deux séances de 2 périodes rend **4** (`reduce` sur `nombrePeriodes`, `saisie-presences.js:591-595`). |
+| N3 | `appliquerCodeCouleurPeriodes` perd `saisie-absence-motivee` | **périmé — corrigé** | `[exécuté]` `dataset.facultatif === 'true'` lu (`:1326`), posé au rendu (`:1208`) ; sur `0` la classe rendue est `saisie-absence-motivee`. |
+| N4 | `etudiants` nul → crash `.sort/.filter` | **périmé — corrigé** (99.30) | `[grep]` `etudiants = etudiants \|\| [];` → **2** (`:1111`, `:1462`) ; le troisième site garde son `if (!etudiants …) return` (`:795`). |
+| N5 | `modifierNotesPresence` ignore `coursId` | **périmé — corrigé** (Tier 6.4) | `[exécuté]` deux fiches, même DA, même date, GC2 puis GC1 : seule celle du cours actif est modifiée (`:2121-2147`). ⚠ Une fiche legacy SANS `coursId` reste appariée par n'importe quel cours (`!p.coursId` dans `matchCoursId`) — voulu pour la migration progressive, dit ici. |
+| N6 | XSS via motif de congé | **périmé — corrigé** | `[grep]` `compteur.innerHTML` interpole `${echapperHtml(message)}` (`:1997-2001`), le commentaire nomme la raison. |
+| N7 | boutons prev/next de la vue côte-à-côte | **hors périmètre** (visionneuse, onglet Travaux) | non remesuré ici. |
+| nit1-3 | zoom, `ouvrirPDF`, `cleanup()` | **hors périmètre** (visionneuse) | non remesurés ici. |
+| finding hors JSON | `obtenirClasseSaisiePeriodes` : `parseInt` avec `step=0.5` | **tenu, mineur → commenter et oublier** (ou une ligne si un lot touche le fichier) | `[exécuté]` `obtenirClasseSaisiePeriodes(0.5, 2)` → `saisie-absence` au rendu initial ; `appliquerCodeCouleurPeriodes` sur `0.5` → `saisie-retard` à l'édition. La même demi-période, deux couleurs selon le moment. |
+
+**Ce que la remesure ajoute au-delà du rapport de mai** (constats A-2, A-5 de l'audit du 5 septembre, proposés à l'inscription) : un élève ajouté en cours de trimestre compte les séances d'avant son arrivée comme des absences (aucune date d'entrée n'existe) ; trois des quatre portes d'écriture des présences (`sauvegarderPresencesSansValidation`, `modifierNotesPresence`, `ajouterPresencesIntervention`) écrivent `db.setSync` directement et ignorent le mode anonymisation, `enregistrerPresences` seule passe par `sauvegarderDonneesSelonMode`.
