@@ -375,6 +375,42 @@
        quand ») → lot D (carte d'abord).
      ▣ ARBRE : `main` = origin/main + 2 commits (lot A, volet 1 de B). Ce commit emporte la carte et la
        consigne du jour (lot D de Cowork, 8 h 59).
+     ↻ 9 h 10 → 9 h 40 — LOT B, VOLET 2 (le gabarit, `grilles.js` + `styles.css` + jetons c / c) :
+       dans `rendreBlocProjectionAlgo`, après les modèles livrés, `<optgroup label="Mes collections">` avec
+       une option `collection:<id>` par jeu (par nom, `esc()`) — absent sans collection ; sous le menu,
+       la liste des collections (`.collection-ligne`, la corbeille `retirerBloc` avec le triplet id /
+       cible / index, titre échappé) et la ligne d'aide qui dit la copie ; sous les paliers, le bouton
+       « Enregistrer ces paliers sous un nom… » (`rendreSaisieCollectionProjection`, seulement sous un
+       modèle qui projette, en édition ET en création) qui ouvre une section INLINE (nom, Enregistrer,
+       Annuler, message) dont l'état vit en mémoire (`_etatSaisieCollection`, par critère, comme les
+       plis) et survit au redessin ; les deux handlers du menu reconnaissent `collection:` et COPIENT par
+       `collectionsProjection.appliquer` (grille : le mutateur rend false si l'id a disparu → rien
+       d'écrit, avertissement) ; `enregistrerCollectionProjection` lit le champ (vide → `marquerChampRefuse`
+       ; pris → message « Une collection porte déjà ce nom. », nom conservé ; ok → notification, section
+       fermée, le menu liste) ; `supprimerCollectionProjection` confirme (`confirm`, comme les autres
+       suppressions du gabarit) puis retire. ⛔ pas de `prompt()`, zéro handler inline. DÉCIDÉ SEUL, DIT :
+       la ligne d'aide et la liste ne se rendent que s'il existe une collection ; sous « Aucune
+       projection », le menu offre les collections mais pas le bouton (rien à nommer) ; la corbeille
+       passe par `confirm()` dans le handler, comme les sous-critères et les paliers (`boutonRetirerBloc`
+       n'émet pas de `data-confirm`). Sentinelle `sentinelle-collections-gabarit` (12 cas : A menu, B
+       choix, C geste, D suppression, E jetons / CSS) sur le gabarit réel + le module réel + une base
+       factice ; BREAK-TESTS (restaurés, `cmp` identique) : le handler grille traite `collection:` comme
+       un modèle → B.a, B.b, E.a rouges ; l'optgroup rendu sans collection → A.a, D.a rouges ; enregistrer
+       ne ferme pas la section → C.b rouge.
+     ↻ 9 h 40 → 9 h 50 — LOT B, VOLET 3 : spec WebKit `tests/integration/collections-projection.spec.js`
+       (le « Fini quand » du cadrage) : G1 réglée (service « Passerelle + », palier 5 écrit) → bouton →
+       `fill('EUF')` → Enregistrer → la collection en base, l'optgroup et la liste la portent, G1 intacte
+       → G2 (« Aucune projection », pas de bouton) → choisir « EUF » (valeur + `change`) → six paliers,
+       le service et le palier 5 arrivent réglés, le menu montre le modèle copié → « euf » refusé
+       (message, rien d'écrit) → Annuler → la corbeille (dialogue accepté) → la collection part, G2 ne
+       bouge pas, et `calculer` rend « Bilan : 23 erreurs sur 900 mots. Il est recommandé de t'inscrire
+       au Passerelle +. ». 0 `page.click`, 0 `waitForTimeout` ; 3,7 s. Les six specs de l'écran :
+       13 / 13 (26,6 s). Vitest 464 / 5149. Format qui voyage : `git diff HEAD -- js/evaluation-projection.js
+       js/evaluation-enonces.js js/import-export.js js/partage-schemas.js js/partage-validation.js` = ZÉRO.
+     ▣ CE QUI RESTE (lot B) : rapport à Cowork → COUP D'ŒIL DE GRÉGOIRE (le « Fini quand » tel quel ; les
+       mots du bouton, du sous-titre, de la ligne d'aide et de la confirmation sont à lui) → lot D (carte
+       d'abord) ; la relecture croisée de Cowork sur B avant 1.119.
+     ▣ ARBRE : `main` = origin/main + 4 commits (lot A, B volets 1-2-3).
      ===================================================================== -->
 
 <!-- =====================================================================
