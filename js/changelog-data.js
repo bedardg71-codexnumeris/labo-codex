@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.121',
+            couleur: 'orange',
+            titre: 'Trois chemins où une note pouvait se tromper sont fermés',
+            items: [
+                '<strong>Une échelle introuvable ne fait plus enregistrer un zéro.</strong> Si l\'échelle de performance d\'une copie n\'existe plus dans le trimestre (supprimée, ou grille importée sans son échelle), Enregistrer refuse et nomme l\'échelle à choisir. Avant, un 0 s\'écrivait en silence, la liste l\'affichait « - » et la note du cours le comptait.',
+                '<strong>Effacer les codes ou le nombre de mots d\'un critère algorithmique efface aussi son résultat.</strong> La note se recalcule tout de suite et le critère redevient « sans niveau ». Avant, l\'ancien pourcentage restait en mémoire, s\'enregistrait, et le PDF pouvait imprimer « 0 erreur → 87,5 % ».',
+                '<strong>Rouvrir une copie et changer un niveau : l\'enregistrement automatique et le bilan suivent.</strong> Ils écrivaient la nouvelle note avec les anciens niveaux par critère, et le bilan gardait l\'ancien défi ; les deux lisent maintenant ce que le calcul a lu.'
+            ]
+        },
+        {
             version: '1.120',
             couleur: 'bleu',
             titre: 'La carte « Bilan » ne dit que ce que l\'élève lit',
