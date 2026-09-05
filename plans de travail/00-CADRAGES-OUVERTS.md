@@ -15,7 +15,7 @@
 
 ---
 
-## ▣ CE QUI EST OUVERT AUJOURD'HUI — sept cadrages ; le 3 est exécuté (1.116), le 7 est en cours (1.117), le 1 (étape 2) est le prochain
+## ▣ CE QUI EST OUVERT AUJOURD'HUI — huit cadrages ; le 3 est exécuté (1.116), le 7 (1.117) et le 1 étape 2 (1.118) sont livrés, le 2 (lot A) est en cours, le 8 est inscrit
 
 *Aucun n'empêche un des huit énoncés de la cohorte 1 : ils sont tous parcourus depuis le
 3 septembre au matin. Ces quatre-là traitent l'**adoption** et la **justesse**, pas la ligne
@@ -105,6 +105,11 @@ sur le PDF, à rejuger avec une vraie cartouche.
 qui touche un format qui voyage.
 
 ---
+
+### 8 · La carte « Bilan » — `CADRAGE-2026-09-05-carte-bilan.md`
+↻ **5 septembre 2026, 8 h 01 (Cowork), décision de Grégoire** : « Observation » devient « Bilan » et ne garde que les deux
+phrases du bilan ; « Aucune annotation » va dans « Codes d'annotation » ; le menu du modèle se renomme ; la
+description « #581 » lue par les collègues disparaît. **Pas dans 1.119 sauf décision contraire.** Rendu seul.
 
 ## ⏳ INSCRIT AILLEURS, ET QUI N'A PAS DE CADRAGE
 

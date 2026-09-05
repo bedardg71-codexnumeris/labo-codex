@@ -7,6 +7,19 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, MATIN (1.118.0 EN LIGNE)
+
+> ↻ **7 h 55 — 1.118.0 EN LIGNE** (`d6c4b3fc`, build `0905-0744`, « Ce que l'élève lit se compose en une seule
+> carte, avec des badges ») : verdict Playwright local vert (0 connu, 0 instable), Vitest vert, `fd2b4ce6..d6c4b3fc
+> main -> main`. À cet instant, **`main` = `origin/main` = `d6c4b3fc`.** Les mots du changelog sont ceux de Grégoire.
+>
+> ↻ **8 h 30 — LA JOURNÉE DU 5 A COMMENCÉ SUR `main`, EN LOCAL, NON POUSSÉE** : `plans de travail/CONSIGNE-DU-JOUR.md`
+> (trois lots — A : une seule liste sous-critères + codes ; B : collections de paramètres ; C : les mêmes gestes
+> partout — **une seule livraison, 1.119, en fin de journée**, décision de Grégoire). Le lot A est codé et commité
+> localement (voir `git --no-optional-locks log --oneline -3` et `SESSION.md`, bloc 25, « LOT A »). **Aucun push
+> entre les lots** : ce fichier est poussé SEUL (règle du 8 août) pour que toute session sache que du travail
+> vit en avance sur `main` local, sur le poste de Grégoire. Détail : `SESSION.md`, bloc 25.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 4 SEPTEMBRE 2026, FIN D'APRÈS-MIDI (1.117.0 EN LIGNE)
 
 > ↻ **19 h 17 — 1.117.1 EN LIGNE** (`e990e710`, build `0904-1507`, « Modèle d'observation », consigne h) : jeton
