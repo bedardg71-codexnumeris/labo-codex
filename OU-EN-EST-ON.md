@@ -15,6 +15,22 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **5 septembre 2026, 11 h 16 (vingt-deuxième passe, Cowork) — 1.119.0 EN LIGNE** (build `0905-1053`, `f2fa5a2e`, poussée à
+11 h 04, verdict Playwright local vert ; `main` = `origin/main`, arbre propre). **La journée du 5, livrée d'un coup, quatre
+lots** : (A) une seule liste pour les sous-critères et les codes — la carte « Codes d'annotation » disparaît ; (B) les
+collections de paramètres de projection — « Enregistrer ces paliers sous un nom… », « Mes collections » au menu, la COPIE
+(décision de Grégoire), clé `collectionsProjection` namespacée, module `collections-projection.js` ; (D) le texte troué,
+étape 3 — le badge s'affiche comme une pastille dans la phrase (`composeur-badges.js`, le `<textarea>` reste la valeur),
+voulu par Grégoire aujourd'hui plutôt qu'après le 14 ; (C) les mêmes gestes partout — corbeille, chevrons, empilement iPad
+sous 768 px. **Vérifié comment** : relecture croisée de Cowork sur B et D (rien à corriger), A et C au jugement de Claude
+Code ; coups d'œil de Grégoire sur A, B, C ; **porte terrain iPad sur D passée 4/4** sur un aperçu de PR (`deploy-preview-82`,
+option B, `netlify.toml` l. 29-31) — ⌫ retire la pastille d'un coup, la croix reste, pas de glissé ; une retouche née de la
+porte (le curseur hors du cadre après une pastille terminale, `74e52ef8`) vue réglée par lui. Vitest 5 185 verts.
+▣ **Ouvert après ce jour** : ~~l'étape 4 du texte troué~~ **abandonnée par Grégoire à 11 h 35** après un inventaire mesuré
+(`INVENTAIRE-2026-09-05-badges-inventes.md`) — le prochain accent, non daté, est la synthèse des rétroactions dans le PDF ; la carte « Bilan » (cadrage du matin, avec le
+« #581 » toujours en ligne dans la description du modèle « Français écrit », `evaluation-enonces.js:248`) ; rien ne prévoit
+encore comment on recueille ce qui sortira du 14.
+
 ↻ **5 septembre 2026, 8 h 01 (vingt-et-unième passe, Cowork) — 1.118.0 EN LIGNE** (build `0905-0744`, `d6c4b3fc`,
 poussée, verdict Playwright vert ; `origin/main` = `main`). Le texte troué, étape 2 : les paliers de projection se
 composent avec des badges, et **une seule carte « Ce que l'élève lit »** (décompte, verdict, recommandation, lue de

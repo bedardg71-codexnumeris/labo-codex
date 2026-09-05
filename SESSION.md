@@ -570,8 +570,16 @@
        Playwright local VERT (0 connu, 0 instable, dix minutes), hook Vitest vert, `56d20a63..f2fa5a2e
        main -> main`. **1.119.0 EN LIGNE, `main` = `origin/main`.** PR #82 : GitHub l'a marquée fusionnée au push de `main`
        (fast-forward, aucun commit de fusion — `gh pr close` l'a dit), branche d'aperçu supprimée. RELAIS.md mis à jour (ce commit de docs, poussé seul).
-     ▣ CE QUI RESTE : rien du jour. Cowork : OU-EN-EST-ON, sa console, la consigne de demain (l'étape 4 des
-       badges inventés reste à cadrer à froid, décision de Grégoire).
+     ↻ 11 h 45 — CLÔTURE (Grégoire, par Cowork) : journée close côté code, rien à coder. Deux décisions,
+       écrites dans les fichiers de Cowork : l'ÉTAPE 4 du texte troué (les badges qu'on invente) est
+       ABANDONNÉE — « palette fixe » tient, cadrage clos (`INVENTAIRE-2026-09-05-badges-inventes.md`) ;
+       le modèle « Français écrit (formulations d'origine) » devient « Français écrit », nom et
+       description arrêtés au caractère (`CADRAGE-2026-09-05-carte-bilan.md`, point 5), À LIVRER AVEC LE
+       LOT « BILAN », non daté. ⚠ J'avais déjà appliqué ces mots dans `evaluation-enonces.js` (message
+       de 11 h 15, vert) : DÉFAIT (`git checkout`), le registre est celui de 1.119.0. Les fichiers de
+       Cowork partent seuls, en un commit de docs (règle du 8 août) ; `CONSIGNE-DU-JOUR.md` n'est pas
+       archivée — elle le sera quand une consigne neuve la remplacera.
+     ▣ CE QUI RESTE : rien du jour.
      ===================================================================== -->
 
 <!-- =====================================================================

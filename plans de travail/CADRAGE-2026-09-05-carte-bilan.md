@@ -29,9 +29,15 @@ corrigé** (1.118 est partie avec).
    texte de départ à reprendre par Grégoire : « Modèle des phrases (bilan et décompte) » — il fournit aussi le texte
    de départ du décompte, qui vit dans « Ce que l'élève lit » depuis 1.118 (`enoncesAlgo.normaliser`). Le découpler
    est hors de ce cadrage.
-5. **La description du modèle « Français écrit »** perd son numéro de fiche. Texte proposé, à corriger par Grégoire :
-   « Les formulations d'origine du critère de français écrit, mot pour mot. À garder si tes élèves ont déjà reçu ces
-   textes. »
+5. **Le modèle « Français écrit (formulations d'origine) » devient « Français écrit »** — nom ET description, mots arrêtés
+   par Grégoire le 5 à 11 h 41 (à écrire au caractère, `evaluation-enonces.js:247-248`) :
+   - nom : `Français écrit`
+   - description : `Les phrases parlent du français écrit (« erreurs de français », « la qualité du français »). Pour un
+     critère d'une autre discipline, choisis « Générique », qui nomme le critère tel qu'il est écrit dans la grille.`
+   Motif, dans ses mots : « On ne conserve pas les formulations pour les élèves qui ont déjà reçu leur rétroaction. Elle est
+   imprimée de toute façon dans leur PDF, de façon permanente. » ⮕ La raison d'être « formulations d'origine » tombe ; le modèle
+   reste comme LE modèle du français écrit. L'identifiant enregistré dans les grilles (`discipline_francais`) ne change pas ;
+   `_nomDitFrancais` (le choix par défaut) non plus. Rendu seul.
 
 ## Ce qui ne change pas
 
@@ -42,5 +48,5 @@ la clé de pli `commentaire` (mémoire seulement — peut rester).
 ## Fini quand
 
 Grégoire ouvre un critère algorithmique : une carte « Bilan » à deux phrases, « Aucune annotation » dans « Codes
-d'annotation », le menu renommé, la description sans numéro ; la sentinelle « une seule carte » (étape 2) adaptée,
+d'annotation », le menu renommé, le modèle « Français écrit » sans parenthèse et sa description neuve ; la sentinelle « une seule carte » (étape 2) adaptée,
 une sentinelle qui rougit si « aucune » revient dans « Bilan ».

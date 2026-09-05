@@ -1,8 +1,7 @@
 # Consigne de démarrage — la session Cowork qui prend le relais
 
-> **Réécrite le 4 septembre 2026 à 19 h 13 (Toronto, lue par `TZ=America/Toronto date`), par la session
-> Cowork du 4 septembre au soir, après la préparation de la journée du 5.** **Elle REMPLACE toute version
-> précédente.**
+> **Réécrite le 5 septembre 2026 à 11 h 17 (Toronto, lue par `TZ=America/Toronto date`), par la session
+> Cowork du 5 septembre, après la livraison de 1.119.** **Elle REMPLACE toute version précédente.**
 >
 > ⚠ **Ce fichier porte un nom sans date, exprès.** La date d'écriture est en tête ; c'est elle
 > qui fait foi.
@@ -39,71 +38,59 @@ qui te sont confiés, et dans sa console. Le code appartient à Claude Code.
 
 1. **`PROTOCOLE.md`** — les sept règles. La règle 7 est amendée depuis le 4 : on ne retient plus un push pour un run.
 2. **`OU-EN-EST-ON.md`** — en gestes d'utilisateur (dernière passe : 4 septembre, 19 h).
-3. **`plans de travail/CONSIGNE-DU-JOUR.md`** — celle du 4 : le texte troué, étape 2. **Son §6 dit le matin du 5** :
-   finir 1.118 (retouche relue, coup d'œil, mots du changelog, release, push), puis Claude Code promeut seul
-   `CONSIGNE-2026-09-05.md` en consigne du jour.
-4. **`plans de travail/CONSIGNE-2026-09-05.md`** — **la journée du 5, écrite** : trois lots (fusion des listes ·
-   collections de paramètres · les mêmes gestes partout), **une seule livraison, 1.119**, en fin de journée.
-5. `plans de travail/CARTE-2026-09-04-texte-troue-etape-2.md` — la carte du lot 1.118 (relue, rien à lui opposer).
-6. `plans de travail/00-CADRAGES-OUVERTS.md` — la porte d'entrée ; ⚠ son point 2 (codes par grille) dit encore
-   « cadré » alors que le mécanisme est livré depuis le 3 : **corrige-le** quand tu y passes.
+3. **`plans de travail/CONSIGNE-DU-JOUR.md`** — celle du 5, **entièrement exécutée** (quatre lots, 1.119). Elle n'a pas
+   encore été archivée : Claude Code le fera au premier commit de la prochaine journée, quand une consigne neuve la remplace.
+   ⛔ **Il n'y a PAS de consigne pour la prochaine journée** : elle s'écrit à froid, avec Grégoire, à partir du §4 ci-dessous.
+4. `plans de travail/00-CADRAGES-OUVERTS.md` — la porte d'entrée, à jour du 5 au soir (points 1, 2, 5, 7 livrés ; 8 inscrit).
+5. `plans de travail/CADRAGE-2026-09-05-carte-bilan.md` — le seul cadrage neuf du 5, décidé, pas commencé.
+6. `plans de travail/CADRAGE-2026-09-02-badges-texte-troue.md`, section « Décision de Grégoire » — pour cadrer l'étape 4.
 
 ⛔ **Ne lis PAS les 130 autres fichiers de `plans de travail/`.**
 
-## 3 · L'ÉTAT MESURÉ — le 4 septembre 2026 à 18 h 49 (Toronto), en lecture seule
+## 3 · L'ÉTAT MESURÉ — le 5 septembre 2026 à 11 h 15 (Toronto), en lecture seule
 
-> ↻ **5 septembre, 8 h 01 (Cowork)** : **1.118.0 en ligne** (`0905-0744`, `d6c4b3fc`), poussée, `main` = `origin/main`.
-> Le §4a est fait (quatre commits, trois coups d'œil, changelog écrit au mot). `CONSIGNE-DU-JOUR.md` = la journée du 5,
-> **lot A en cours** par Claude Code. Neuf inscrit : `CADRAGE-2026-09-05-carte-bilan.md` (point 8 des cadrages ouverts).
-> Ce qui suit est l'état de la veille, gardé pour la trace.
+⚠ **REMESURE-LE.** `git --no-optional-locks log --oneline -7` · `git --no-optional-locks rev-list --left-right --count
+origin/main...HEAD` · `cat version.json` · **`TZ=America/Toronto date`** pour toute heure que tu écris.
+
+- **En ligne : 1.119.0**, build `0905-1053` (`f2fa5a2e`, poussée à 11 h 04). `main` = `origin/main` = `78aacd49`, **arbre
+  propre**, rien en avance. Quatorze commits le 5, deux livraisons (1.118 à 7 h 55, 1.119 à 11 h 04).
+- **Ce que 1.119 a livré** : une seule liste sous-critères + codes · les collections de paramètres de projection (clé neuve
+  `collectionsProjection`, module `collections-projection.js`) · le badge affiché dans la phrase (`composeur-badges.js`, porte
+  iPad 4/4) · corbeille et chevrons partout, empilement iPad. **1.118** : les paliers composés avec badges, une seule carte
+  « Ce que l'élève lit » (le décompte y est venu d'« Observation »), « Verdict » / « Recommandation (facultative) ».
+- **Aucun fichier de Cowork non commité** à l'heure d'écriture, sauf ceux de cette passe (ce fichier, `OU-EN-EST-ON.md`,
+  `00-CADRAGES-OUVERTS.md`, `PORTES-TERRAIN-…-ipad.md` §5) : ils partent avec le prochain commit de Claude Code.
+- **Sa console** — l'artefact « Les huit gestes » (titre à l'écran « Ce qu'il reste à faire »), mise à jour à 11 h 17 ; demande le
+  lien, n'en fabrique pas une seconde. Une seconde page existe depuis le 5 : la **porte iPad** (« Porte iPad — le badge dans la
+  phrase »), passée, close ; et une maquette (« Une seule carte »), périmée par 1.118 — ni l'une ni l'autre n'est la console.
+- ⚠ NFD : `git status` depuis Cowork montre `??` des fichiers suivis (`Modèle de consigne…`, `jean-françois/`, `projet de
+  développement/`) et `ignorés/` non ignoré. **Tous suivis** (`git -c core.quotepath=off ls-files`). Ce n'est pas un défaut.
 
 ⚠ **REMESURE-LE. Il aura vieilli avant que tu le lises.** Commandes :
 `git --no-optional-locks log --oneline -7` · `git --no-optional-locks rev-list --left-right --count origin/main...HEAD`
 · `cat version.json` · **`TZ=America/Toronto date`** pour toute heure que tu écris.
 
-- **En ligne** : **1.117.1**, build `0904-1507` (`e990e710`). `origin/main` = `fd2b4ce6`.
-- **`main` local = `dccaf3d2`, CINQ commits d'avance, non poussés** : le texte troué, étape 2 (quatre volets,
-  `2d9baafc` → `8305e502`) et le bloc 25 de `SESSION.md`. **Aucun verdict pris, pas de release.** La retouche du
-  §5 (l'aperçu sous chaque palier) était relayée à Claude Code à 18 h 40 ; **rendue ou non à l'écriture : je ne
-  sais pas** — c'est la première chose à mesurer le matin (un sixième commit, ou pas).
-- **Fichiers de Cowork non commités** : `OU-EN-EST-ON.md`, ce fichier, `CONSIGNE-DU-JOUR.md` (§5, §6),
-  `CONSIGNE-2026-09-05.md`, `00-CADRAGES-OUVERTS.md`, le cadrage « codes par grille ». Ils partent avec le
-  prochain commit de Claude Code.
-- ⚠ **Le montage Linux de Cowork rend les noms en NFD** : `git status` montre `??` des fichiers suivis
-  (`Modèle de consigne…`, `jean-françois/`, `projet de développement/`) et `ignorés/` non ignoré. Mesuré le 4 au soir
-  avec `git -c core.quotepath=off ls-files` : **tous suivis.** Ce ne sont pas des non-suivis.
-- **`_to_delete/` (racine) est ignoré par git** et contient un fichier temporaire de Cowork (`_ep_avant_tmp.js`,
-  erreur 18). Rien à faire.
-- **Sa console** — l'artefact « Les huit gestes » (titre à l'écran : « Ce qu'il reste à faire »), mise à jour à
-  18 h 50 : 1.118 « en retouche », la possibilité de repasser public inscrite. ⚠ Son point « codes par grille »
-  dit encore « cadré » : **à corriger à la prochaine passe** (le mécanisme est livré, il reste la fusion des
-  listes = lot A du 5). Demande-lui le lien ; n'en fabrique pas une seconde.
 
 ## 4 · CE QUI EST DÛ — dans l'ordre
 
-### a) Le matin du 5 : finir 1.118
-`CONSIGNE-DU-JOUR.md` §6. Claude Code mesure et rend la retouche ; **tu la relis en une passe courte** (l'aperçu
-sous chaque palier, `echapperHtml`, sentinelles déplacées) ; coup d'œil de Grégoire ; **tu lui proposes l'entrée
-de changelog de 1.118 à corriger** — elle doit nommer la contrainte « corrige avec l'application à jour »
-(carte §d : un onglet ouvert d'avant la mise en ligne écrit `{erreurs}` dans une copie) ; release mineure ; push.
+### a) Écrire la prochaine consigne du jour, à froid, avec Grégoire
+Rien n'est écrit pour la journée suivante. Deux candidats décidés par lui, un abandonné, aucun daté :
+1. ~~Le texte troué, étape 4~~ — **ABANDONNÉE par Grégoire le 5 à 11 h 35** après l'inventaire (`INVENTAIRE-2026-09-05-badges-inventes.md`) :
+   pas de badge inventé pour les critères algorithmiques ; « palette fixe » tient. **Ne pas le reproposer.** Ce qu'il a nommé à
+   la place, non daté : **la synthèse des rétroactions dans le PDF**, et ce que les utilisateurs demanderont à l'usage.
+2. **La carte « Bilan »** (`CADRAGE-2026-09-05-carte-bilan.md`) : rendu seul, une demi-journée ; emporte le modèle « Français écrit (formulations d'origine) » → « Français écrit », nom et description **arrêtés par
+   Grégoire le 5** (dans le cadrage, point 5) — le « #581 » lu par les collègues est **toujours en ligne dans 1.119**.
+3. **Le 14 septembre** : comment on recueille ce qui sortira de la première rencontre (un gabarit de retour et un canal) —
+   personne ne l'a pris ; le canal est sa décision.
 
-### b) La journée du 5 : `CONSIGNE-2026-09-05.md`
-Trois lots, une livraison (1.119). Ce qui te revient : la relecture de la **carte courte du lot B** (les
-collections : où la clé s'enregistre — namespacée par trimestre —, ce que la collection porte, le menu) ; puis
-la relecture croisée du lot B seul ; à chaque lot, **le coup d'œil de Grégoire** (quel écran, quoi de différent,
-une question) ; en fin de journée, **trois entrées de changelog à lui proposer**. Les mots qui lui reviennent :
-la ligne « palette » du lot A, le bouton et le sous-titre du lot B.
-
-### c) Fin de chaque lot : `OU-EN-EST-ON.md`, sa console, ce fichier (règle 6)
+### b) Fin de chaque lot : `OU-EN-EST-ON.md`, sa console, ce fichier (règle 6)
 Sans qu'il le demande, et une ligne pour dire ce qui a changé.
 
-### d) Ce qui reste ouvert par ailleurs
-`00-CADRAGES-OUVERTS.md`. **Après le 14** (décision du 4 au soir) : le recalcul quand une échelle change
-(personne n'aura d'évaluations le 14), l'Inspecteur de sélection (la planification est faite), l'étape 3 du texte
-troué (les badges dans la phrase : un composeur neuf, à éprouver sur iPad — **ce n'est pas une finition**, carte
-à part), l'étape 4. **Repasser le dépôt en public** : noté, laissé de côté, préalable = purge de l'historique.
-**Ce que personne n'a pris** : comment on recueille ce qui sortira du 14 (un gabarit de retour et un canal ; à
-écrire à froid, une demi-heure ; le canal est sa décision).
+### c) Ce qui reste ouvert par ailleurs
+`00-CADRAGES-OUVERTS.md` (points 4, 6, 8). Après le 14 : le recalcul quand une échelle change, l'Inspecteur de sélection,
+repasser le dépôt en public (préalable : purge de l'historique). Hors périmètre du lot B, inscrit dans sa carte : la modale
+de bibliothèque des collections et « importer depuis un autre trimestre », qui viennent avec le partage.
+
 
 ## 5 · COMMENT GRÉGOIRE VEUT QU'ON LUI PARLE
 
@@ -239,6 +226,21 @@ c'est lui qui a changé ce défaut, le 1er septembre.
     la phrase », un composeur neuf. Corrigé au tour suivant. ⮕ **Un chantier ne se qualifie qu'après lecture
     de sa carte.**
 
+### Et le 5 septembre — quatre choses, deux payées, deux rattrapées
+
+23. **La console a oublié un lot que Grégoire venait de décider** (l'étape 3, 8 h 59 → 9 h 01) : il a dû demander « as-tu
+    ajouté l'étape 3 au menu du jour ? ». ⮕ **Une décision de Grégoire va dans la console au tour même où elle est prise**, pas
+    au prochain lot.
+24. **Une phrase lue par les collègues, proposée et jamais relayée** (« #581 », 7 h 50) : 1.118 puis 1.119 sont parties avec.
+    Rangée dans le cadrage « Bilan », mais c'est un mot d'utilisateur qui attend depuis deux livraisons. ⮕ **Une correction de
+    mots proposée à Grégoire a besoin de SA réponse avant la release ; sinon, la redemander au moment des mots du changelog.**
+25. **Deux heures TAPÉES et rattrapées avant publication** (Cowork : « 8 h 05 » à 8 h 03 ; « 8 h 50 » pour une décision prise
+    entre 8 h 53 et 8 h 58) ; et **une tapée par Claude Code** dans une carte (« 9 h 35 » à 9 h 27), vue à la relecture.
+    ⮕ L'erreur 14 en est à sa **septième occurrence** en deux jours : **lire l'heure dans la même commande que l'écriture**.
+26. **Le mécanisme d'aperçu de PR existait pour exactement le besoin du jour** (éprouver sur iPad avant la fusion,
+    `netlify.toml` l. 29-31) et il a été retrouvé en lisant le fichier, pas de mémoire. ⮕ **Dixième occurrence de « ça existe
+    déjà »**, cette fois payante : lire la configuration avant de proposer une voie.
+
 ### ▣ Et un motif qui est revenu HUIT fois en trois jours
 **« Ce que Grégoire demande existe déjà, ailleurs, sous un autre nom. »** L'écran de
 personnalisation des codes, les bornes d'échelle, le seuil de réussite, les collections de
@@ -262,5 +264,5 @@ date du **26 août**. Le canal des retours est à sec, et ça ne se voit pas par
 plan tout seul. **Rien ne prévoit encore comment on récolte ce qui sortira du 14.**
 ↻ **4 septembre** : le canal a fonctionné, mais **avec Grégoire seul** — seize retours en une journée,
 trois retouches, un lot 4, huit retouches de plus, et trois points de cadrage en sont sortis. Le 14, ce
-sera vingt personnes, **dans dix jours**. **Toujours rien pour les recueillir** — et c'est le seul point
+sera vingt personnes, **dans neuf jours**. **Toujours rien pour les recueillir** — et c'est le seul point
 de cette page que personne n'a encore pris.
