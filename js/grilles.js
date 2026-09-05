@@ -3638,7 +3638,13 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
     const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
     const e = window.enoncesAlgo.normaliser(critere);
     const modeles = window.enoncesAlgo.listerModeles();
-    const cles = window.enoncesAlgo.listerCles();
+    // ↻ §8 (5 sept. 2026, 7 h 15 — décision de Grégoire : « non pas doublonner, mais
+    // fondre les deux en un seul endroit d'écriture ») : le DÉCOMPTE se compose dans la
+    // carte « Ce que l'élève lit » (`rendreBlocProjectionAlgo`), avant les paliers — la
+    // phrase de l'élève se lit de haut en bas. Ici restent le modèle d'observation et les
+    // trois énoncés qui ne parlent pas sur la copie. Même clé, mêmes handlers : rien ne
+    // change dans les données, et le modèle fournit toujours le texte de départ du décompte.
+    const cles = window.enoncesAlgo.listerCles().filter((c) => c.cle !== 'decompte');
 
     const estTemp = ctx.mode === 'temp';
     const handlerModele = estTemp ? 'modifierModeleEnoncesTempHandler' : 'modifierModeleEnoncesGrilleHandler';
@@ -3802,10 +3808,26 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                     <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">${esc(p.modele.description)}</small>
                 </div>`;
 
+    // ↻ §8 (5 sept. 2026, 7 h 15) — LE DÉCOMPTE VIENT ICI, avant les paliers : la carte
+    // « Ce que l'élève lit » se lit de haut en bas dans l'ordre exact de la phrase de
+    // l'élève (décompte du bloc 3, puis projection du bloc 2). Le décompte gris de la ligne
+    // « L'élève lira : » ne tombe plus du ciel : son composeur est juste au-dessus. Même
+    // clé (`enonces.decompte`), mêmes handlers, même helper que les trois énoncés restés
+    // dans « Observation » ; le texte de départ vient toujours du modèle d'observation
+    // (`enoncesAlgo.normaliser`), et une ligne le dit. Rendu AVANT le `if` qui suit : sous
+    // « Aucune projection », l'élève lit quand même le décompte, il reste composable.
+    const cleDecompte = (typeof window.enoncesAlgo !== 'undefined')
+        ? window.enoncesAlgo.listerCles().find((c) => c.cle === 'decompte') : null;
+    const blocDecompte = cleDecompte ? `
+                <div class="decompte-eleve">
+                    ${rendreChampEnonceAlgo(cleDecompte, window.enoncesAlgo.normaliser(critere), ctx)}
+                    <small class="decompte-texte-depart">Texte de départ : le modèle d'observation, carte « Observation ».</small>
+                </div>` : '';
+
     // « Aucune projection » : rien d'autre à régler. Le dire, plutôt que de
     // laisser un bloc vide qui ressemble à un chargement raté.
     if (!p.modele.projette) {
-        return `${enTete}
+        return `${enTete}${blocDecompte}
                 <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 6px;">
                     Aucune projection ne sera proposée à l'élève pour ce critère.
                 </small>`;
@@ -3903,7 +3925,7 @@ function rendreBlocProjectionAlgo(critere, ctx) {
         const vide = !s.engendre && !s.ecrit;
         return `
                             <div class="palier-apercu">
-                                <span class="palier-apercu-mot">L'élève lira (décompte, puis tes deux phrases) :</span>
+                                <span class="palier-apercu-mot">L'élève lira :</span>
                                 <span class="palier-apercu-engendre">${esc(s.engendre)}</span>
                                 <span class="palier-apercu-ecrit">${esc(s.ecrit)}</span>${vide ? '<em class="palier-apercu-vide">aucune phrase — le décompte est vide et ce palier ne dit rien</em>' : ''}
                                 <span class="palier-apercu-copie">— copie fictive, ${esc(copie.erreurs)} erreur${copie.erreurs > 1 ? 's' : ''} pour ${esc(copie.mots)} mots</span>
@@ -3979,10 +4001,10 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                     Ce seuil est indépendant du facteur de normalisation de la formule : l'élève est noté selon la norme du cours, et situé selon celle de l'épreuve.
                 </small>
                 <small class="palier-note-composer" style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 8px;">
-                    Un clic sur un badge le pose dans la zone du palier où est le curseur — sans curseur, dans « Verdict ».
+                    Un clic sur un badge le pose dans la zone où est le curseur — sans curseur, dans « Verdict ».
                     Les badges bleus sont écrits dans la grille ; les verts se remplissent à la correction, copie par copie, et un badge sans valeur disparaît.
                     Sans badge, la phrase est précédée de « Tu fais en moyenne 1 erreur à chaque N mots » ; avec un badge, elle est entière : c'est toi qui l'écris.
-                </small>
+                </small>${blocDecompte}
                 <div class="sous-criteres-liste-conteneur" style="margin-top: 10px;">
                     ${paliers}
                 </div>
@@ -4211,7 +4233,7 @@ function rendreCartesGabaritAlgo(critere, ctx) {
                 ${rendreSousCriteresAlgo(critere, ctx)}
                 ${carteGabaritAlgo(critere, ctx, 'formule', 'Formule', rendreBlocFormuleAlgo(critere, ctx), false)}
                 ${carteGabaritAlgo(critere, ctx, 'commentaire', 'Observation', rendreBlocEnoncesAlgo(critere, ctx), true)}
-                ${carteGabaritAlgo(critere, ctx, 'projection', 'Projection', rendreBlocProjectionAlgo(critere, ctx), true)}
+                ${carteGabaritAlgo(critere, ctx, 'projection', 'Ce que l\'élève lit', rendreBlocProjectionAlgo(critere, ctx), true)}
                 ${estGrille ? carteGabaritAlgo(critere, ctx, 'codes', 'Codes d\'annotation', rendreBlocCodesAlgo(critere, ctx), true) : ''}
             </div>`;
 }

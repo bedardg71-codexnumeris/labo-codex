@@ -161,8 +161,9 @@ test('texte troué 2 · deux badges posés dans un palier au clic, enregistrés,
         copie: e.querySelector('.palier-apercu-copie').textContent.trim()
     })));
     console.log('APERÇU →', JSON.stringify(lues));
-    // ↻ §7 : l'étiquette dit d'où vient la ligne, et DEUX segments — en gris ce qui est engendré, dans l'encre ce qu'il a écrit.
-    expect(lues.every((l) => l.mot === 'L\'élève lira (décompte, puis tes deux phrases) :')).toBe(true);
+    // ↻ §7 : DEUX segments — en gris ce qui est engendré, dans l'encre ce qu'il a écrit. ↻ §8 : le décompte se
+    //    compose dans la même carte, juste au-dessus ; l'étiquette redevient « L'élève lira : ».
+    expect(lues.every((l) => l.mot === 'L\'élève lira :')).toBe(true);
     // Le palier composé : en gris le décompte seul (la phrase porte un badge : plus de préfixe) ; dans l'encre, la phrase entière, jetons remplis.
     expect(lues[4].copie).toBe('— copie fictive, 23 erreurs pour 900 mots');
     expect(lues[4].engendre).toBe('Ta production contient 23 erreurs pour 900 mots.');

@@ -34,6 +34,9 @@
 // phrase se lit dans les deux segments, `texteDe` les recolle), D.b (l'échappement, dans le
 // segment écrit) ; B.f est NEUF : la composition visible, segment par segment, et ses classes
 // dans styles.css.
+// ↻ §8 (5 sept., 7 h 15) : le décompte se compose dans la MÊME carte, juste au-dessus des
+// paliers (sentinelle `…-etape-2-une-seule-carte`) ; l'étiquette de la ligne redevient
+// « L'élève lira : » — la composition est visible au-dessus, elle n'a plus à l'expliquer (B.a).
 //
 // BREAK-TESTS (faits le 4 septembre 2026, chacun restauré, `cmp` identique) :
 //   · A — `precedent` jamais avancé → A.a et A.c rougissent ;
@@ -226,7 +229,7 @@ describe('texte troué 2 · B — « L\'élève lira : » sous chaque palier, da
             const ligne = pal.indexOf('class="palier-apercu"');
             expect(rangees.length, 'palier ' + i).toBe(2);
             expect(ligne, 'palier ' + i).toBeGreaterThan(rangees[1]);
-            expect(ligneDe(pal)).toContain('<span class="palier-apercu-mot">L\'élève lira (décompte, puis tes deux phrases) :</span>');
+            expect(ligneDe(pal)).toContain('<span class="palier-apercu-mot">L\'élève lira :</span>');
         });
         // Le palier « Bien » porte un jeton inconnu : la ligne orange PRÉCÈDE la ligne d'aperçu.
         const bien = paliers[3];

@@ -262,3 +262,53 @@ js/import-export.js js/partage-schemas.js` rend zéro ; golden #668 sans modific
 **Puis** : rapport à Cowork (une passe courte), coup d'œil de Grégoire, **les mots du changelog** (Cowork les lui propose ;
 ton brouillon de 6 h 09 est la base, avec les nouveaux libellés), verdict au jeton, release MINEURE 1.118, push — puis le
 §6 s'applique tel quel à partir de son point 6.
+
+## 8 · Une seule carte pour ce que l'élève lit — 5 septembre, 7 h 15 (Toronto), par Cowork — DANS 1.118
+
+> **Décision de Grégoire (7 h 15)** : « non pas doublonner, mais fondre les deux en un seul endroit d'écriture », et
+> **dans 1.118**, avant la livraison. Maquette montrée à Grégoire (artefact « Une seule carte », 5 sept.) ; les
+> noms de cartes ci-dessous sont **confirmés par Grégoire à 7 h 24** : « Ce que l'élève lit » (la carte fondue) et « Observation » (ce qui reste).
+> ⚠ Repères de lignes mesurés entre 7 h 04 et 7 h 15 sur `91195f33` : **remesure avant de toucher.**
+
+**Ce que Grégoire verra** (Conception › Grilles › un critère algorithmique) : la carte « Projection » devient
+**« Ce que l'élève lit »** et se lit de haut en bas dans l'ordre exact de la phrase de l'élève : le modèle de projection
+et ses réglages (service, seuil, longueur) ; puis **« Décompte des erreurs »** avec sa rangée de badges (`critère`,
+`erreurs`, `mots`, `points`), venu de la carte « Observation » ; puis les paliers (verdict, recommandation) ; sous
+chaque palier la ligne grise, qui redevient simplement **« L'élève lira : »** (la composition est maintenant visible
+juste au-dessus, l'étiquette longue du §7 n'a plus à l'expliquer). La carte **« Observation »** garde le modèle
+d'observation et les trois énoncés qui ne parlent pas sur la copie (« Défi prioritaire », « Quand tout est maîtrisé »,
+« Aucune annotation »). Plus rien n'est écrit à deux endroits.
+
+**Ce qui l'a motivé** : le décompte gris de la ligne d'aperçu « tombait du ciel » ; son composeur était une carte plus
+haut. Motif « ça existe déjà ailleurs », neuvième occurrence : ce qui manquait, c'était le chemin.
+
+**Ce qui est arrêté — un rendu qui bouge, aucune donnée** :
+- `critere.enonces.decompte` reste où il est, lu et écrit par les mêmes handlers (`modifierTexteEnonce*Handler`,
+  `data-enonce-cle="decompte"`) ; `modeleEnonces` reste dans « Observation » et fournit toujours le texte de départ du
+  décompte quand rien n'est écrit (`normaliser`, `evaluation-enonces.js:~456`) — une ligne d'aide le dit sous le
+  décompte : « Texte de départ : le modèle d'observation, carte « Observation ». » ;
+- **factorise** le rendu d'un énoncé (`grilles.js:~3623-3635`, le `champs = cles.map(...)`) en une fonction
+  `rendreChampEnonceAlgo(c, e, ctx)` appelée par les deux cartes ; « Observation » rend `listerCles()` **sans**
+  `decompte`, « Ce que l'élève lit » rend `decompte` seul, **avant** le `if (!p.modele.projette)` (`:~3783`) : avec
+  « Aucune projection », l'élève lit quand même le décompte, il reste composable ;
+- ordre dans la carte fondue : modèle + réglages → aide (trois phrases du §7, où « la zone du palier où est le
+  curseur » devient « la zone où est le curseur ») → décompte → paliers → notes du bas → bouton ;
+- la clé de pli `projection` ne change pas (`plisGabaritAlgo`, mémoire seulement) ; seul le **titre** de la carte
+  change (`rendreCartesGabaritAlgo`, `:~4191`) ;
+- ligne d'aperçu : étiquette « L'élève lira : », deux segments gris / encre inchangés (§7) ;
+- `echapperHtml` partout, zéro handler inline, classes dans `styles.css`.
+
+**Témoins** : `git diff -- js/evaluation-enonces.js js/evaluation-projection.js js/import-export.js js/partage-schemas.js`
+rend **zéro**. Sept fichiers de tests touchent le décompte ou la carte « Observation » (mesuré : `grep -rln
+"decompte\|Décompte des erreurs\|CR:commentaire" tests/`) : `sentinelle-581-enonces-sans-discipline`,
+`sentinelle-texte-troue-etape-1-reperes`, `…-etape-2-apercu`, `…-etape-2-gabarit`, `sentinelle-lot4-C-gabarit-algo-range`,
+et les specs `lot4-gabarit-algo-cartes`, `texte-troue-reperes-enonces` (qui ouvre « Observation » pour taper le
+décompte — il l'ouvrira dans « Ce que l'élève lit »). Dis lesquels ont dû changer et pourquoi ; **une sentinelle neuve
+ou étendue** : le décompte rendu UNE fois dans le gabarit, dans la carte de projection, absent de « Observation », et
+présent même sous « Aucune projection » ; **break-test** (rends-le deux fois → rouge). ⛔ Pas de `page.click`
+à l'aveugle, pas de `waitForTimeout`.
+
+**Un ou deux commits** (la factorisation peut être le premier). Puis : rapport à Cowork, **relecture croisée** (le
+gabarit est dans le périmètre de la règle 2 depuis qu'il porte des mots d'élève), coup d'œil de Grégoire (une carte,
+lue de haut en bas ; les deux titres), mots du changelog (une puce de plus : « une seule carte »), verdict au jeton,
+release MINEURE 1.118, push, puis §6 à partir de son point 6.

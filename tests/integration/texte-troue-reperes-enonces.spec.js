@@ -43,17 +43,25 @@ const repere = (page, cle, jeton) =>
 async function ouvrir(page, enoncesExistants) {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    // ↻ §8 (5 sept.) : prêt quand la base l'est (comme le spec des paliers), plus un délai fixe.
+    await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
     const n = await page.evaluate(eval(OUVRIR), enoncesExistants || null);
     expect(n, 'les quatre zones sont rendues').toBe(4);
-    // Lot 4 (4 sept. 2026) : les quatre zones vivent dans la carte « Commentaire », repliée à
-    // l'ouverture — un pointeur ne les atteint pas plus qu'une main. On la déplie par
-    // l'événement DOM (le dispatcher de main.js) ; les redessins qui suivent chaque frappe la
-    // gardent dépliée (spec lot4-gabarit-algo-cartes).
-    const carte = page.locator('#listeCriteres .gabarit-algo-carte[data-pli$=":commentaire"]');
-    await expect(carte).toHaveClass(/ferme/);
-    await page.evaluate(() => document.querySelector('#listeCriteres .gabarit-algo-carte[data-pli$=":commentaire"] .accordeon-header').click());
-    await expect(carte).not.toHaveClass(/ferme/);
+    // Lot 4 (4 sept. 2026) : les zones vivent dans des cartes repliées à l'ouverture — un pointeur
+    // ne les atteint pas plus qu'une main. ↻ §8 (5 sept., décision de Grégoire) : le DÉCOMPTE se
+    // compose dans « Ce que l'élève lit » (la carte de projection), avant les paliers ; les trois
+    // autres restent dans « Observation ». On déplie les deux par l'événement DOM (le dispatcher de
+    // main.js) ; les redessins qui suivent chaque frappe les gardent dépliées (spec lot4-gabarit-algo-cartes).
+    for (const section of ['commentaire', 'projection']) {
+        const carte = page.locator(`#listeCriteres .gabarit-algo-carte[data-pli$=":${section}"]`);
+        await expect(carte).toHaveClass(/ferme/);
+        await page.evaluate((s) => document.querySelector(`#listeCriteres .gabarit-algo-carte[data-pli$=":${s}"] .accordeon-header`).click(), section);
+        await expect(carte).not.toHaveClass(/ferme/);
+    }
+    // §8 : le décompte est dans la carte de projection, une fois, et nulle part ailleurs.
+    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli$=":projection"] textarea[data-enonce-cle="decompte"]')).toHaveCount(1);
+    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli$=":commentaire"] textarea[data-enonce-cle]')).toHaveCount(3);
+    await expect(page.locator('#listeCriteres textarea[data-enonce-cle="decompte"]')).toHaveCount(1);
 }
 
 test('texte troué · chaque zone offre ses repères, et « Aucune annotation » n\'offre pas {erreurs}', async ({ page }) => {

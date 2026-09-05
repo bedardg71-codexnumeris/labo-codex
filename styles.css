@@ -3292,6 +3292,19 @@ input[type="number"].controle-form {
     white-space: nowrap;
 }
 
+/* §8 (5 sept.) — une seule carte pour ce que l'élève lit : le décompte se compose ici,
+   avant les paliers ; sous lui, la ligne qui dit d'où vient son texte de départ. */
+#listeCriteres .decompte-eleve {
+    margin-top: 10px;
+}
+
+#listeCriteres .decompte-texte-depart {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.78rem;
+    color: var(--gris-clair);
+}
+
 /* iPad : la cible tactile des repères monte à 44 px dans le bloc `@media
    (pointer: coarse)` de #568, plus bas — un seul bloc tactile, que la
    sentinelle #568 lit en premier. */

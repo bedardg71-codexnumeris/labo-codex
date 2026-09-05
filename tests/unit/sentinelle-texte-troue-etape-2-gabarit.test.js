@@ -202,17 +202,17 @@ describe('texte troué 2 · B — une palette par palier, les huit badges, la no
         // Les étiquettes des deux zones (mots de Grégoire, 5 sept., 6 h 35) — et plus aucune trace des anciennes.
         expect((projection.match(/>Verdict<\/label>/g) || []).length).toBe(6);
         expect((projection.match(/>Recommandation \(facultative\)<\/label>/g) || []).length).toBe(6);
-        expect(projection).not.toContain('Ce que l\'élève lit');
+        // ↻ §8 : « Ce que l'élève lit » est désormais le TITRE de la carte — c'est l'ancienne étiquette de zone qui ne doit plus exister.
+        expect(projection).not.toContain('>Ce que l\'élève lit</label>');
         expect(projection).not.toContain('Phrase de recommandation');
     });
 
-    it('B.d les énoncés gardent leur palette, par le même helper : « Décompte des erreurs » offre ses quatre repères', () => {
+    it('B.d les énoncés gardent leur palette, par le même helper : « Décompte des erreurs » offre ses quatre repères — ↻ §8 : dans « Ce que l\'élève lit »', () => {
         const { win, liste } = monter([GRILLE]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const html = liste().innerHTML;
-        const i = html.indexOf('data-pli="CR:commentaire"');
-        const commentaire = html.slice(i, html.indexOf('data-pli="CR:projection"'));
-        const decompte = commentaire.slice(commentaire.indexOf('Décompte des erreurs'), commentaire.indexOf('Défi prioritaire'));
+        const projection = carteProjection(html);
+        const decompte = projection.slice(projection.indexOf('Décompte des erreurs'), projection.indexOf('class="sous-criteres-liste-conteneur"'));
         expect(boutons(decompte).map((b) => b.jeton)).toEqual(['{critere}', '{erreurs}', '{mots}', '{points}']);
         expect(decompte).toContain('aria-label="Poser nom du critère, {critere}, dans « Décompte des erreurs »"');
         expect((source('js/grilles.js').match(/rendreBoutonsReperes\(/g) || []).length).toBe(3);   // la déclaration + deux appels
