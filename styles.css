@@ -9390,6 +9390,14 @@ body.mode-clair .bloc-rlo-separateur {
 
 /* Responsive : empiler sur mobile */
 @media (max-width: 768px) {
+    /* Lot C (5 sept. 2026) — iPad en portrait : la grille à deux colonnes du formulaire
+       de groupe-cours (empruntée par les paliers) et la rangée d'un sous-critère
+       s'empilent, l'étiquette au-dessus de chaque champ, dans l'ordre de lecture. */
+    .grille-form-2col,
+    #listeCriteres .sous-critere-champs-grid {
+        grid-template-columns: 1fr;
+    }
+
     .disposition-bibliotheque-formulaire {
         grid-template-columns: 1fr;
     }
@@ -17320,6 +17328,33 @@ tr.etudiant-inactif td {
     right: 8px;
 }
 
+/* Lot C (5 sept. 2026) — LE COIN D'OUTILS, partout : les chevrons puis la corbeille,
+   sur la même ligne, en haut à droite d'un bloc (`position: relative` sur le bloc,
+   qui laisse la place à droite). La rangée d'outils d'une ligne de tableau
+   (`.outils-rangee`) est le même assemblage, en ligne. Cibles tactiles ≥ 44 px
+   dans ces deux contextes — les pipelines gardent leurs chevrons de 20 px. */
+.bloc-coin-outils {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.bloc-coin-outils .btn-icone-nu,
+.bloc-coin-outils .pipeline-btn-reorder,
+.outils-rangee .btn-icone-nu,
+.outils-rangee .pipeline-btn-reorder,
+.tableau td > .btn-icone-nu,
+.btn-icone-nu[data-action="BibliothequeUI.repertoires.supprimer"] {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* #504 (25 août 2026) — LE BOUTON D'ICÔNE NU.
    La suppression d'un bloc utilisait `.btn btn-annuler` : un bouton PLEIN
    orange pour un geste secondaire. Le design system réserve `.btn-annuler` à
@@ -19224,9 +19259,12 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
    lignes et sa liste déroulante, en `width: 100%`, était coupée à 60 px. Le
    défaut se voyait à l'écran depuis que ce champ existe. Signalé par Grégoire
    sur capture. */
+/* Lot C (5 sept. 2026) — la cellule « Ordre » (56 px, la première) n'existe plus :
+   les chevrons vivent en coin avec la corbeille. Sept colonnes ; la carte laisse
+   la place au coin par son propre style (padding droit). */
 .echelle-niveau-grille {
     display: grid;
-    grid-template-columns: 56px 64px minmax(150px, 2fr) 76px 76px 104px 64px minmax(150px, 1fr);
+    grid-template-columns: 64px minmax(150px, 2fr) 76px 76px 104px 64px minmax(150px, 1fr);
     gap: 12px;
     align-items: end;
 }
@@ -19238,9 +19276,9 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
    facultatif. */
 @media (max-width: 1280px) {
     .echelle-niveau-grille {
-        grid-template-columns: 56px 64px minmax(140px, 1fr) 76px 76px 104px 64px;
+        grid-template-columns: 64px minmax(140px, 1fr) 76px 76px 104px 64px;
     }
-    .echelle-niveau-grille > .groupe-form:nth-child(8) {
+    .echelle-niveau-grille > .groupe-form:nth-child(7) {
         grid-column: 1 / -1;
     }
 }
@@ -19248,10 +19286,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     .echelle-niveau-grille {
         grid-template-columns: 1fr 1fr;
     }
-    .echelle-niveau-grille > .groupe-form:nth-child(1) {
-        grid-column: 1 / -1;
-    }
-    .echelle-niveau-grille > .groupe-form:nth-child(3) {
+    .echelle-niveau-grille > .groupe-form:nth-child(2) {
         grid-column: 1 / -1;
     }
 }

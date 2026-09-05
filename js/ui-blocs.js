@@ -58,11 +58,20 @@ window.boutonsReordonnerBloc = function(o) {
  * l'icône qui porte le sens, et sa couleur de survol vient de
  * `.btn-delete-icon`. Voir ci-dessus pourquoi ce n'est pas un `.btn-supprimer`.
  *
- * @param {Object} o - { action, param, titre }
+ * Lot C (5 sept. 2026) — UN SEUL bouton de suppression dans toute l'application :
+ * la corbeille sert aussi hors de l'éditeur de grille (dossiers de la bibliothèque,
+ * pratique de notation v2, niveaux d'échelle). Deux options pour ces sites :
+ * `confirm` (le texte du `data-confirm` lu par le dispatcher — la confirmation
+ * ne change pas d'un mot) et `disabled` (un niveau verrouillé ne se supprime pas).
+ *
+ * @param {Object} o - { action, param, param2, param3, titre, coin, confirm, disabled }
  */
 window.boutonRetirerBloc = function(o) {
-    const p = window.echapperHtml ? window.echapperHtml(String(o.param)) : String(o.param);
+    const esc = (t) => (window.echapperHtml ? window.echapperHtml(String(t)) : String(t));
+    const p = esc(o.param);
     const titre = o.titre || 'Retirer ce bloc';
+    const confirme = o.confirm ? ` data-confirm="${esc(o.confirm)}"` : '';
+    const inactif = o.disabled ? ' disabled' : '';
     const p2 = (o.param2 === undefined || o.param2 === null) ? ''
         : ` data-param2="${window.echapperHtml ? window.echapperHtml(String(o.param2)) : String(o.param2)}"`;
     // Lot 4 (4 sept. 2026, retouche c) : un sous-critère et un palier d'une grille enregistrée
@@ -71,7 +80,7 @@ window.boutonRetirerBloc = function(o) {
         : ` data-param3="${window.echapperHtml ? window.echapperHtml(String(o.param3)) : String(o.param3)}"`;
     const coin = o.coin ? ' bloc-retirer-coin' : '';
     return `<button type="button" class="btn-mini btn-icone-nu${coin}" title="${titre}" aria-label="${titre}"
-                data-action="${o.action}" data-param="${p}"${p2}${p3}
+                data-action="${o.action}" data-param="${p}"${p2}${p3}${confirme}${inactif}
                 ><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>`;
 };
 

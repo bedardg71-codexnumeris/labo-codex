@@ -1236,7 +1236,6 @@ function afficherTableauNiveaux(niveaux) {
         <table class="tableau">
 <thead>
     <tr>
-        <th class="echelle-w-80">Ordre</th>
         <th class="echelle-w-80">Code</th>
         <th class="echelle-w-180">Nom</th>
         <th>Description</th>
@@ -1244,25 +1243,12 @@ function afficherTableauNiveaux(niveaux) {
         <th class="echelle-w-80">Max (%)</th>
         <th class="echelle-w-100">Valeur ponctuelle</th>
         <th class="echelle-w-150">Couleur</th>
-        <th class="echelle-w-120">Actions</th>
+        <th class="echelle-w-180">Actions</th>
     </tr>
 </thead>
             <tbody>
                 ${niveaux.map((niveau, index) => `
                     <tr style="opacity: ${niveau.verrouille ? '0.7' : '1'};">
-                        <td class="echelle-text-center">
-                            <div class="bloc-reordonner bloc-reordonner-ligne">
-                                ${/* ⚠ #504 : ces deux boutons portaient DEUX attributs `class`
-                                      chacun — `btn btn-compact` puis `echelle-padding-compact`.
-                                      Le navigateur ignore le second : le padding compact n'a
-                                      jamais été appliqué. Le helper n'a qu'une classe. */''}
-                                ${window.boutonsReordonnerBloc({
-                                    actionHaut: 'deplacerNiveauHaut', actionBas: 'deplacerNiveauBas',
-                                    param: index, premier: index === 0,
-                                    dernier: index === niveaux.length - 1, quoi: 'ce niveau'
-                                })}
-                            </div>
-                        </td>
                         <td>
                             <input type="text"
                                    value="${echapperHtml(niveau.code)}"
@@ -1326,20 +1312,26 @@ function afficherTableauNiveaux(niveaux) {
          border-radius: 4px; margin-top: 5px; border: 1px solid var(--bordure-moyenne);"></div>
 </td>
                         <td class="echelle-text-center">
-                            ${niveaux.length > 1 ?
-            `<button data-action="supprimerNiveau" data-param="${index}"
-                                         class="btn btn-supprimer btn-compact"
-                                         ${niveau.verrouille ? 'disabled' : ''}
-                                         title="${niveau.verrouille ? 'Déverrouillez d\'abord pour supprimer' : 'Supprimer ce niveau'}">
-                                    Supprimer
-                                </button>`
-            : ''}
+                            ${/* Lot C (5 sept. 2026) — la colonne « Ordre » n'existe plus : ses flèches sont
+                                  les chevrons de la rangée, à côté de la corbeille (le seul bouton de
+                                  suppression), puis le cadenas. Mêmes fonctions, même ordre enregistré. */''}
+                            <div class="bloc-reordonner bloc-reordonner-ligne outils-rangee">
+                            ${window.boutonsReordonnerBloc({
+                                actionHaut: 'deplacerNiveauHaut', actionBas: 'deplacerNiveauBas',
+                                param: index, premier: index === 0,
+                                dernier: index === niveaux.length - 1, quoi: 'ce niveau'
+                            })}
+                            ${niveaux.length > 1 ? window.boutonRetirerBloc({
+                                action: 'supprimerNiveau', param: index, disabled: !!niveau.verrouille,
+                                titre: niveau.verrouille ? 'Déverrouillez d\'abord pour supprimer' : 'Supprimer ce niveau'
+                            }) : ''}
                             <span id="cadenas-niveau-${index}"
                                   data-action="basculerVerrouillageNiveau" data-param="${index}"
                                   style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 8px;"
                                   title="${niveau.verrouille ? 'Verrouillé - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
                                 ${niveau.verrouille ? '<img src="icons/icon-lock.svg" alt="Verrouillé" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="Modifiable" class="btn-inline-icon">'}
                             </span>
+                            </div>
                         </td>
                     </tr>
                 `).join('')}
@@ -3224,26 +3216,22 @@ function afficherNiveauxNouvelleEchelle() {
     const html = niveaux.map((niveau, index) => {
         const ph = placeholders[index] || { code: 'X', nom: 'Niveau' };
         return `
-        <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); margin-bottom: 10px;">
-            ${niveaux.length > 1 ? `
-                            ${window.boutonRetirerBloc({
-                                action: 'supprimerNiveauTemp',
-                                param: index,
-                                coin: true,
-                                titre: 'Supprimer ce niveau'
-                            })}
-            ` : ''}
+        <div class="item-liste" style="position: relative; padding: 15px 150px 15px 15px; background: var(--surface-conteneur, #162c36); margin-bottom: 10px;">
+            ${/* Lot C (5 sept. 2026) — les chevrons et la corbeille en coin, sur la même ligne (le
+                  modèle des productions) ; la cellule « Ordre » de la grille n'existe plus. */''}
+            <div class="bloc-coin-outils">
+                ${window.boutonsReordonnerBloc({
+                    actionHaut: 'deplacerNiveauTempHaut', actionBas: 'deplacerNiveauTempBas',
+                    param: index, premier: index === 0, dernier: index === niveaux.length - 1,
+                    quoi: 'ce niveau'
+                })}
+                ${niveaux.length > 1 ? window.boutonRetirerBloc({
+                    action: 'supprimerNiveauTemp',
+                    param: index,
+                    titre: 'Supprimer ce niveau'
+                }) : ''}
+            </div>
             <div class="echelle-niveau-grille">
-                <div class="groupe-form echelle-text-center">
-                    <label class="echelle-texte-detail">Ordre</label>
-                    <div class="bloc-reordonner">
-                        ${window.boutonsReordonnerBloc({
-                            actionHaut: 'deplacerNiveauTempHaut', actionBas: 'deplacerNiveauTempBas',
-                            param: index, premier: index === 0, dernier: index === niveaux.length - 1,
-                            quoi: 'ce niveau'
-                        })}
-                    </div>
-                </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail">Code <span class="champ-requis" title="Champ obligatoire">*</span></label>
                     <input type="text"
@@ -3561,29 +3549,25 @@ function afficherNiveauxEchelle(echelle) {
 
     // Afficher le tableau des niveaux en mode édition
     const html = echelle.niveaux.map((niveau, index) => `
-        <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); margin-bottom: 10px;">
-            ${echelle.niveaux.length > 1 ? `
-                            ${window.boutonRetirerBloc({
-                                action: 'supprimerNiveauEchelle',
-                                param: echelle.id,
-                                param2: index,
-                                coin: true,
-                                titre: 'Supprimer ce niveau'
-                            })}
-            ` : ''}
+        <div class="item-liste" style="position: relative; padding: 15px 150px 15px 15px; background: var(--surface-conteneur, #162c36); margin-bottom: 10px;">
+            ${/* Lot C (5 sept. 2026) — les chevrons et la corbeille en coin, sur la même ligne (le
+                  modèle des productions) ; la cellule « Ordre » de la grille n'existe plus. */''}
+            <div class="bloc-coin-outils">
+                ${window.boutonsReordonnerBloc({
+                    actionHaut: 'deplacerNiveauEchelleHaut', actionBas: 'deplacerNiveauEchelleBas',
+                    param: echelle.id,
+                    param2: index,
+                    premier: index === 0, dernier: index === echelle.niveaux.length - 1,
+                    quoi: 'ce niveau'
+                })}
+                ${echelle.niveaux.length > 1 ? window.boutonRetirerBloc({
+                    action: 'supprimerNiveauEchelle',
+                    param: echelle.id,
+                    param2: index,
+                    titre: 'Supprimer ce niveau'
+                }) : ''}
+            </div>
             <div class="echelle-niveau-grille">
-                <div class="groupe-form echelle-text-center">
-                    <label class="echelle-texte-detail">Ordre</label>
-                    <div class="bloc-reordonner">
-                        ${window.boutonsReordonnerBloc({
-                            actionHaut: 'deplacerNiveauEchelleHaut', actionBas: 'deplacerNiveauEchelleBas',
-                            param: echelle.id,
-                            param2: index,
-                            premier: index === 0, dernier: index === echelle.niveaux.length - 1,
-                            quoi: 'ce niveau'
-                        })}
-                    </div>
-                </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail">Code <span class="champ-requis" title="Champ obligatoire">*</span></label>
                     <input type="text"

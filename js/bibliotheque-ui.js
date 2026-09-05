@@ -1469,7 +1469,9 @@
                 return '<div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">' +
                     '<input type="text" data-rep-biblio="' + b + '" data-rep-id="' + id + '" value="' + echapperHtml(r.nom || '') + '" class="controle-form" style="flex:1;" aria-label="Nom du dossier" />' +
                     '<button data-action="BibliothequeUI.repertoires.renommer" data-param="' + b + '" data-param2="' + id + '" class="btn btn-secondaire btn-mini">Renommer</button>' +
-                    '<button data-action="BibliothequeUI.repertoires.supprimer" data-param="' + b + '" data-param2="' + id + '" data-confirm="Supprimer ce dossier ? Son contenu n\'est pas supprimé : les ' + pluriel + ' repassent en « non classées »." class="btn btn-supprimer btn-mini" title="Supprimer le dossier" aria-label="Supprimer le dossier">✕</button>' +
+                    // Lot C (5 sept. 2026) : la corbeille, comme partout — le geste et sa confirmation ne changent pas.
+                    window.boutonRetirerBloc({ action: 'BibliothequeUI.repertoires.supprimer', param: biblio, param2: r.id, titre: 'Supprimer le dossier',
+                                               confirm: 'Supprimer ce dossier ? Son contenu n\'est pas supprimé : les ' + pluriel + ' repassent en « non classées ».' }) +
                     '</div>';
             }).join('');
 
