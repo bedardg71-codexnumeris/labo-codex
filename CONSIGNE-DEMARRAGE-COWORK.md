@@ -40,7 +40,8 @@ qui te sont confiés, et dans sa console. Le code appartient à Claude Code.
 2. **`OU-EN-EST-ON.md`** — en gestes d'utilisateur (dernière passe : 4 septembre, 19 h).
 3. **`plans de travail/CONSIGNE-DU-JOUR.md`** — celle du 5, **entièrement exécutée** (quatre lots, 1.119). Elle n'a pas
    encore été archivée : Claude Code le fera au premier commit de la prochaine journée, quand une consigne neuve la remplace.
-   ⛔ **Il n'y a PAS de consigne pour la prochaine journée** : elle s'écrit à froid, avec Grégoire, à partir du §4 ci-dessous.
+   ↻ **11 h 53 : la consigne de la prochaine séance EST écrite** — `plans de travail/CONSIGNE-PROCHAINE-SEANCE.md` (la carte
+   « Bilan », un lot, 1.120). Claude Code la promeut au démarrage ; toi, tu la relis d'abord contre l'état remesuré.
 4. `plans de travail/00-CADRAGES-OUVERTS.md` — la porte d'entrée, à jour du 5 au soir (points 1, 2, 5, 7 livrés ; 8 inscrit).
 5. `plans de travail/CADRAGE-2026-09-05-carte-bilan.md` — le seul cadrage neuf du 5, décidé, pas commencé.
 6. `plans de travail/CADRAGE-2026-09-02-badges-texte-troue.md`, section « Décision de Grégoire » — pour cadrer l'étape 4.
@@ -73,13 +74,15 @@ origin/main...HEAD` · `cat version.json` · **`TZ=America/Toronto date`** pour 
 
 ## 4 · CE QUI EST DÛ — dans l'ordre
 
-### a) Écrire la prochaine consigne du jour, à froid, avec Grégoire
-Rien n'est écrit pour la journée suivante. Deux candidats décidés par lui, un abandonné, aucun daté :
+### a) La prochaine séance : la carte « Bilan » — consigne ÉCRITE (11 h 53), non datée
+`plans de travail/CONSIGNE-PROCHAINE-SEANCE.md`. Ce qui te revient : la remesurer au démarrage (repères de lignes, version en
+ligne), relire le lot en une passe courte quand Claude Code le rend, proposer l'entrée de changelog de 1.120, mettre à jour la
+console. Ce qui reste décidé mais non écrit en consigne :
 1. ~~Le texte troué, étape 4~~ — **ABANDONNÉE par Grégoire le 5 à 11 h 35** après l'inventaire (`INVENTAIRE-2026-09-05-badges-inventes.md`) :
    pas de badge inventé pour les critères algorithmiques ; « palette fixe » tient. **Ne pas le reproposer.** Ce qu'il a nommé à
    la place, non daté : **la synthèse des rétroactions dans le PDF**, et ce que les utilisateurs demanderont à l'usage.
-2. **La carte « Bilan »** (`CADRAGE-2026-09-05-carte-bilan.md`) : rendu seul, une demi-journée ; emporte le modèle « Français écrit (formulations d'origine) » → « Français écrit », nom et description **arrêtés par
-   Grégoire le 5** (dans le cadrage, point 5) — le « #581 » lu par les collègues est **toujours en ligne dans 1.119**.
+2. **La carte « Bilan »** : c'est la consigne ci-dessus ; son cadrage (`CADRAGE-2026-09-05-carte-bilan.md`) porte les cinq points
+   et les mots au caractère. Le « #581 » lu par les collègues est **toujours en ligne dans 1.119** ; il part avec ce lot.
 3. **Le 14 septembre** : comment on recueille ce qui sortira de la première rencontre (un gabarit de retour et un canal) —
    personne ne l'a pris ; le canal est sa décision.
 
