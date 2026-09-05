@@ -445,6 +445,43 @@
        `insererRepereEnonce` et le `focusin` qui reconnaissent la vue ; sentinelle : une grille rechargée
        sans frappe ne change pas) → volet 3 (spec WebKit) → rapport → relecture croisée → PORTE iPad.
      ▣ ARBRE : `main` = origin/main + 5 commits.
+     ↻ 9 h 50 → 10 h 00 — LOT D, VOLET 2 (le branchement, `grilles.js` + jeton d) : `monterVuesBadges(container)`
+       après les deux rendus du gabarit (édition, création) ; `insererRepereEnonce` : quand la zone porte une
+       vue, le caret vient de `composeurBadges.curseur(vue)` (visitée) ou de la fin, le texte reste
+       `zone.value`, la vue se redessine (`ecrire`) après le badge, `composeurEcrit` posé pour que le
+       `focusout` n'écrive pas deux fois ; sans vue, le chemin d'avant ; `_zoneDeFocus` : la vue focalisée
+       vaut son textarea, pour le `focusin` (`curseurVu`, `zoneActive`) et `_zoneCibleDuPalier`. Sentinelle
+       `sentinelle-composeur-branchement` (9 cas, composeur ESPION : A montage, B pose avec / sans vue et
+       énoncé, C focus, D sources) ; BREAK-TESTS (restaurés, `cmp` identique) : `monterVuesBadges` retiré du
+       rendu en édition → A.a + D.a rouges ; la pose ignore le caret de la vue → B.a, B.b, C.b rouges ; le
+       `focusin` ne reconnaît plus la vue → C.a + D.a rouges. ⚠ Le harnais : `insererRepere` pose
+       « ' {projection}' » après un point sans espace de fin → caret 19, pas 20 (mesuré, attentes corrigées) ;
+       un énoncé égal au défaut du modèle ne s'écrit pas dans `critere.enonces` (le registre le retire) —
+       le cas B.d utilise un texte hors défaut.
+     ↻ 10 h 00 → 10 h 15 — LOT D, VOLET 3 : spec WebKit `texte-troue-badges-dans-la-phrase.spec.js` (la vue sur
+       les 12 zones de palier et les 3 énoncés, le textarea caché ; le caret à la fin par `placerCaret`, un
+       badge par le dispatcher → la chip, `{projection}` dans le textarea, le focus reste ; `keyboard.type`,
+       Entrée, une seconde ligne → la valeur suit, `lire(vue)` = le texte ; le badge cliqué est ÉCRIT tout de
+       suite (chemin sans rendu de l'étape 2), le tapé ne l'est qu'en quittant ; blur → `change` → la grille
+       porte le texte brut avec `\n`, le gabarit se redessine avec la chip et un `<br>`, l'aperçu lit la
+       phrase remplie ; rechargement sans frappe : la donnée au caractère, entrer / sortir d'une zone sans
+       frappe n'écrit rien ; la croix (pointerdown) retire ; ⌫ SUR UNE CHIP LA RETIRE D'UN BLOC dans WebKit
+       de bureau (mesuré : chips 0) ; un `{truc}` tapé reste du texte, la ligne orange le dit). ⚠ Mesuré et
+       DIT : quitter une zone redessine le gabarit entier (comme avant ce lot) — un focus pris AVANT ce
+       redessin est perdu avec l'élément remplacé ; le spec quitte une zone avant d'entrer dans la suivante.
+       Les specs des étapes 1 et 2 (`texte-troue-reperes-enonces`, `texte-troue-paliers-projection`) PORTÉS
+       SUR LA VUE (le focus et le caret dans la vue par `placerCaret`, la valeur lue au textarea caché) —
+       leurs `z.click()` sur un textarea caché expiraient. 0 `page.click` neuf, 0 `waitForTimeout`. Les sept
+       specs de l'écran : 14 / 14 (28,7 s). Vitest 466 / 5173. Format qui voyage vs origin/main : ZÉRO sur
+       projection / énoncés / import-export / partage-*.
+       PORTE TERRAIN iPad écrite (`plans de travail/PORTES-TERRAIN-2026-09-05-texte-troue-etape-3-ipad.md`,
+       quatre rangées au doigt + deux décisions + §4) ; l'artefact est à Cowork. ⚠ DIT : l'iPad charge le
+       SITE, pas le clone — le lot D n'y est pas tant que 1.119 n'est pas poussée ; recommandation : 1.119
+       part avec D, la porte se passe en place (rien d'irréversible, un repli existe) ; sinon une
+       prévisualisation par Cowork.
+     ▣ CE QUI RESTE (lot D) : rapport à Cowork → RELECTURE CROISÉE (composeur neuf, règle 2) → porte iPad
+       (après le push, ou sur une prévisualisation) → lot C.
+     ▣ ARBRE : `main` = origin/main + 7 commits (A ; B 1-2-3 ; D 1-2-3).
      ===================================================================== -->
 
 <!-- =====================================================================
