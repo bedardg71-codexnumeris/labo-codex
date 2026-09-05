@@ -1,7 +1,7 @@
 # Consigne de démarrage — la session Cowork qui prend le relais
 
-> **Réécrite le 5 septembre 2026 à 13 h 52 (Toronto, lue par `TZ=America/Toronto date`), par la session
-> Cowork du 5 septembre, après la livraison de 1.120 (troisième du jour).** **Elle REMPLACE toute version précédente.**
+> **Réécrite le 5 septembre 2026 en soirée (Toronto), par la session Cowork du 5 septembre, après la livraison de 1.122.0
+> (cinquième du jour) et la clôture de la journée d'audits.** **Elle REMPLACE toute version précédente.**
 >
 > ⚠ **Ce fichier porte un nom sans date, exprès.** La date d'écriture est en tête ; c'est elle
 > qui fait foi.
@@ -36,67 +36,83 @@ qui te sont confiés, et dans sa console. Le code appartient à Claude Code.
 
 ## 2 · À LIRE D'ABORD, DANS CET ORDRE
 
-1. **`PROTOCOLE.md`** — les sept règles. La règle 7 est amendée depuis le 4 : on ne retient plus un push pour un run.
-2. **`OU-EN-EST-ON.md`** — en gestes d'utilisateur (dernière passe : 4 septembre, 19 h).
-3. **`plans de travail/CONSIGNE-DU-JOUR.md`** — c'est celle de la carte « Bilan », promue et **entièrement exécutée**
-   (un lot, 1.120, `1b06b1ba`). Celle des quatre lots du matin est archivée
-   (`_ancienne-CONSIGNE-DU-JOUR-2026-09-05-quatre-lots-1.119.md`). **Il n'y a PAS de consigne écrite pour la prochaine
-   séance** : rien n'est daté, et le prochain accent (la synthèse des rétroactions dans le PDF) n'est pas cadré. Ne l'écris pas
-   seul : elle s'écrit à froid, avec Grégoire.
-4. `plans de travail/00-CADRAGES-OUVERTS.md` — la porte d'entrée, à jour de 1.120 (point 8, la carte « Bilan », livré ; ouverts : 4 et 6).
-5. `plans de travail/CADRAGE-2026-09-05-carte-bilan.md` — livré tel qu'écrit, cinq points sur cinq ; à lire seulement pour la trace.
+1. **`PROTOCOLE.md`** — les sept règles.
+2. **`OU-EN-EST-ON.md`** — en gestes d'utilisateur. Sa section « L'ÉVALUATION » porte la journée du 5 : deux audits, deux lots,
+   tout vu par Grégoire ; et un renvoi à la série d'audits.
+3. **`plans de travail/00-CADRAGES-OUVERTS.md`**, section **« La série d'audits cadrés »** — trois audits, un ordre, une règle de
+   fermeture. C'est le fil de ta séance.
+4. **`CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`** et **`plans de travail/CONSIGNE-PROCHAINE-SEANCE.md`** — ce que Claude Code fait
+   dans la séance qui te précède ou qui tourne pendant la tienne : un mot sous la note du cours, puis **l'audit de l'onglet Suivi**.
+5. Les deux rapports fermés, pour le format et la méthode que le troisième doit tenir :
+   `Rapports/AUDIT-moteur-evaluation-2026-09-05.md` (en-tête, vue d'ensemble, § « Rien d'appliqué ») et
+   `Rapports/AUDIT-pratique-de-notation-2026-09-05.md` (vue d'ensemble). Et le prompt du troisième :
+   `Rapports/prompts-audit/PROMPT-AUDIT-onglet-suivi-2026-09-05.md` — c'est le contrat que tu vérifieras.
 
 ⛔ **Ne lis PAS les 130 autres fichiers de `plans de travail/`.**
 
-## 3 · L'ÉTAT MESURÉ — le 5 septembre 2026 à 13 h 51 (Toronto), en lecture seule
+## 3 · L'ÉTAT MESURÉ — le 5 septembre 2026 en soirée (Toronto), en lecture seule
 
 ⚠ **REMESURE-LE.** `git --no-optional-locks log --oneline -7` · `git --no-optional-locks rev-list --left-right --count
 origin/main...HEAD` · `cat version.json` · **`TZ=America/Toronto date`** pour toute heure que tu écris.
 
-- **En ligne : 1.120.0**, build `0905-1315` (`c4c7b04a`, poussée à 13 h 26). `main` = `origin/main` = `7a40949b`, **arbre
-  propre**, rien en avance. Dix-huit commits le 5, **trois livraisons** (1.118 à 7 h 55, 1.119 à 11 h 04, 1.120 à 13 h 26).
-- **Ce que 1.120 a livré** (un lot, `1b06b1ba`) : la carte « Observation » → « Bilan », deux phrases + menu « Modèle des phrases
-  (bilan et décompte) » avec ligne d'aide ; « Aucune annotation » sous la case des codes, pli « Quand la copie ne porte aucun
-  code » ; modèle « Français écrit », description sans « #581 ». Aucune donnée ne change (diff nul sur ce qui voyage).
-  Sentinelle `sentinelle-carte-bilan.test.js`. Deux tests de plus que le grep de la consigne adaptés par Claude Code.
-- **Ce que 1.119 a livré** : une seule liste sous-critères + codes · les collections de paramètres de projection (clé neuve
-  `collectionsProjection`, module `collections-projection.js`) · le badge affiché dans la phrase (`composeur-badges.js`, porte
-  iPad 4/4) · corbeille et chevrons partout, empilement iPad. **1.118** : les paliers composés avec badges, une seule carte
-  « Ce que l'élève lit » (le décompte y est venu d'« Observation »), « Verdict » / « Recommandation (facultative) ».
-- **Aucun fichier de Cowork non commité** à l'heure d'écriture, sauf ceux de cette passe (ce fichier, `OU-EN-EST-ON.md`, `00-CADRAGES-OUVERTS.md`) :
-  ils partent avec le prochain commit de Claude Code.
-- **Sa console** — l'artefact « Les huit gestes » (titre à l'écran « Ce qu'il reste à faire »), mise à jour à 13 h 52 ; demande le
-  lien, n'en fabrique pas une seconde. Une seconde page existe depuis le 5 : la **porte iPad** (« Porte iPad — le badge dans la
-  phrase »), passée, close ; et une maquette (« Une seule carte »), périmée par 1.118 — ni l'une ni l'autre n'est la console.
+- **En ligne : 1.122.0**, build `0905-1722`. `main` = `origin/main` = `12df341a`. **Run GitHub 33994473211 vert** (Vitest et
+  Playwright WebKit), premier run complet vert depuis 1.120.0 ; il juge aussi 1.121.0. Vitest 477 fichiers / 5 332 cas.
+- **Cinq livraisons le 5** : 1.118, 1.119, 1.120 (matin, les grilles) ; **1.121** (15 h 30, trois trous du moteur d'évaluation :
+  échelle introuvable, effacement des codes, auto-save et bilan — #697-#699) ; **1.122** (17 h 22, la note du cours ne compte plus
+  les brouillons #706, les spécifications calculent #708, cache d'indices vide → `null` #709).
+- **La série d'audits** : 1 (moteur d'évaluation) et 2 (pratique de notation) exécutés, fermés, corrigés, le 1 vu à l'écran par
+  Grégoire, le 2 pas encore. **Le 3 (onglet Suivi) est le mandat de la prochaine séance Claude Code.** En attente d'arbitrage
+  après le 14 : #700-#705 (audit 1), #710-#721 (audit 2), le cadrage « non remis par famille ».
+- **Fichiers de Cowork dans l'arbre, non commités** (contenu de leur auteur, Claude Code les commet tels quels) :
+  `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`, ce fichier, `plans de travail/00-CADRAGES-OUVERTS.md`,
+  `plans de travail/CADRAGE-2026-09-05-non-remis-par-famille.md`, `plans de travail/CONSIGNE-PROCHAINE-SEANCE.md`.
+- **Sa console** — l'artefact « Les huit gestes » (titre à l'écran « Ce qu'il reste à faire »), mise à jour à 16 h 40 avec la série
+  d'audits ; **demande le lien, n'en fabrique pas une seconde.** Un renommage du nom de galerie en « Ce qu'il reste à faire » est
+  proposé à Grégoire, pas tranché : ne le fais pas sans son oui.
 - ⚠ NFD : `git status` depuis Cowork montre `??` des fichiers suivis (`Modèle de consigne…`, `jean-françois/`, `projet de
-  développement/`) et `ignorés/` non ignoré. **Tous suivis** (`git -c core.quotepath=off ls-files`). Ce n'est pas un défaut.
-
-⚠ **REMESURE-LE. Il aura vieilli avant que tu le lises.** Commandes :
-`git --no-optional-locks log --oneline -7` · `git --no-optional-locks rev-list --left-right --count origin/main...HEAD`
-· `cat version.json` · **`TZ=America/Toronto date`** pour toute heure que tu écris.
-
+  développement/`, `ignorés/`). Tous suivis (`git -c core.quotepath=off ls-files`). Ce n'est pas un défaut.
 
 ## 4 · CE QUI EST DÛ — dans l'ordre
 
-### a) La prochaine séance : RIEN N'EST DATÉ NI ÉCRIT — elle se cadre à froid, avec Grégoire
-La carte « Bilan » est livrée (1.120, `1b06b1ba`) ; sa consigne est exécutée et deviendra `_ancienne-…` au prochain lot.
-Ce qui reste, dans l'ordre où Grégoire l'a nommé, sans date :
-1. **La synthèse des rétroactions dans le PDF** — nommé à 11 h 35 le 5, en abandonnant l'étape 4 du texte troué (**abandonnée,
-   ne pas la reproposer** ; inventaire `INVENTAIRE-2026-09-05-badges-inventes.md`). Pas cadré. Avant de cadrer : mesurer ce que
-   le PDF rend déjà (erreur 11 : « ce que l'élève lit » est un périmètre, quatre sites) et chercher si le mécanisme existe
-   (motif « ça existe déjà », dix fois). Écouter d'abord ce que les collègues diront à l'usage.
-2. **Le 14 septembre** : comment on recueille ce qui sortira de la première rencontre (un gabarit de retour et un canal) —
-   personne ne l'a pris ; **le canal est sa décision**. Une demi-heure, à froid.
-⮕ Ce qui te revient au démarrage : remesurer, puis **demander à Grégoire
-lequel des deux il ouvre** — c'est une question d'adoption, la sienne (erreur 21), pas une variable de charge.
+### a) Ton mandat : recevoir le rapport d'audit de l'onglet Suivi, et faire ce que Cowork a fait deux fois le 5
+
+Grégoire te collera le compte rendu de Claude Code. **La procédure, telle qu'elle a tenu deux fois** :
+
+1. **Remesure avant de lire le compte rendu** : branche d'audit présente ? (`git branch --list 'audit/*'`), rapport déposé
+   (`Rapports/AUDIT-onglet-suivi-<date>.md`, dans l'arbre ou par `git show <branche>:<chemin>`), `js/` intact
+   (`git diff --stat origin/main..<branche> -- js/` doit rendre **rien**), arbre revenu sur `main`.
+2. **Relecture croisée, pas relecture du résumé** : lis l'en-tête, la vue d'ensemble, les constats **critiques et majeurs**, la
+   frontière (flux B et C : ce que le Suivi lit des deux moteurs), et **« ce que je n'ai pas regardé »**. Recoupe au `grep` au
+   moins le mécanisme de chaque « corriger maintenant » proposé — le 5, un grep a confirmé `tableBundles`/`forfaits` en trente
+   secondes ; c'est ce qui a permis de recommander sans deviner. **Vérifie que le prompt a été tenu** : quatre élèves de banc
+   dont un **sans aucune évaluation**, la sortie du volet confidentiel cherchée dans chaque flux de G (même quand le résultat est
+   « rien »), les dispositions écrites dans `ultrareview-lot-6` et dans l'audit du 27 août. Un flux sauté est un constat.
+3. **L'arbitrage, à Grégoire, en UN tour** : les « corriger maintenant » proposés, avec **ta recommandation motivée** pour chacun
+   (règle : un élève ou un enseignant peut lire un chiffre faux, ou une donnée sensible sort → corriger ; sinon inscrire). Ce qui
+   est une **règle** (un seuil, ce que vaut un palier sans données) n'est pas un défaut : inscrire, après le 14. **Un seul objet par
+   tour** — s'il y a trois décisions, présente-les ensemble avec une recommandation chacune et UNE question ; ne reviens pas
+   dessus trois tours plus tard.
+4. **Le relais**, une fois qu'il a tranché : un lot, l'ordre, la preuve exigée (sentinelle break-testée ; spec WebKit AVANT le
+   correctif quand l'état de départ est déduit), les dispositions à écrire DANS le rapport, la fusion de la branche (documents et
+   banc), release, **verdict du run GitHub lu avant tout autre push**, et le geste que Grégoire ira voir à l'écran.
+5. **Relecture croisée du lot livré** sur le diff réel (pas le compte rendu), puis `OU-EN-EST-ON.md` (une ligne, « vérifié
+   comment », et « éprouvé par Grégoire » quand il l'a vu), la série d'audits dans `00-CADRAGES-OUVERTS.md`, sa console.
+
+⚠ **Ce qui est propre à cet audit-là** : la seconde moitié de sa question est la **confidentialité** (services adaptés,
+sous-catégories médicales, notes de présences). Un constat de sortie d'une donnée sensible est **corriger maintenant** sans
+attendre le 14, quelle que soit sa rareté. Et un **palier 3 attribué faute de données** l'est aussi : il enverrait quelqu'un en
+intervention intensive parce qu'on ne sait rien de lui.
 
 ### b) Fin de chaque lot : `OU-EN-EST-ON.md`, sa console, ce fichier (règle 6)
 Sans qu'il le demande, et une ligne pour dire ce qui a changé.
 
 ### c) Ce qui reste ouvert par ailleurs
-`00-CADRAGES-OUVERTS.md` (points 4 et 6 ; le 8, la carte « Bilan », est livré). Après le 14 : le recalcul quand une échelle change, l'Inspecteur de sélection,
-repasser le dépôt en public (préalable : purge de l'historique). Hors périmètre du lot B, inscrit dans sa carte : la modale
-de bibliothèque des collections et « importer depuis un autre trimestre », qui viennent avec le partage.
+**Après le 14** : l'arbitrage des dispositions #700-#705 et #710-#721 (deux rapports d'audit, dispositions écrites dedans), le
+cadrage « non remis par famille » (règle de Grégoire : zéro en sommative, ignoré en « meilleures notes » si le minimum est
+atteint — « propre à l'utilisateur »), le recalcul quand une échelle change, l'Inspecteur de sélection, repasser le dépôt en
+public. **Non daté** : la synthèse des rétroactions dans le PDF (mesurer d'abord ce que le PDF rend). **Personne ne l'a pris** :
+recueillir ce qui sortira du 14 (un gabarit et un canal ; le canal est sa décision). **Dû par Grégoire** : deux gestes à l'écran sur
+1.122.0 (le profil d'un élève avec un brouillon ; « Modèle simple » qui donne 90 et 70 au lieu de 0).
 
 
 ## 5 · COMMENT GRÉGOIRE VEUT QU'ON LUI PARLE

@@ -1,57 +1,42 @@
-# Consigne de la prochaine séance — un mot sous la note du cours, puis l'audit de l'onglet Suivi
+# Consigne du jour — le Suivi ne compte plus une reprise deux fois, ne déclare personne « non-participant » avant le premier travail, et son rapport dit ce que le profil dit
 
-> **Écrite le 5 septembre 2026 en soirée, par Cowork, à froid, avec Grégoire.**
-> **Application au moment de l'écriture : 1.122.0 en ligne (build `0905-1722`) ; `main` = `origin/main` = `12df341a`,
-> run GitHub 33994473211 vert (Vitest et Playwright WebKit), premier run complet vert depuis 1.120.0.**
-> ⚠ **Nom sans date, exprès.** Au démarrage, Claude Code le promeut : archive `CONSIGNE-DU-JOUR.md` (celle du 5, la carte
-> « Bilan ») sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-05-carte-bilan-1.120.md`, renomme celui-ci en `CONSIGNE-DU-JOUR.md`,
-> et **remesure avant d'exécuter** (`git --no-optional-locks log --oneline -5`, `cat version.json`, `TZ=America/Toronto date`) :
-> si 1.122.0 n'est plus la version en ligne, dis-le en tête de ton rapport. Les deux fichiers partent avec le premier commit.
+> **Écrite le 5 septembre 2026, 19 h 45 (Toronto), par Cowork, après l'arbitrage de Grégoire sur le rapport `Rapports/AUDIT-onglet-suivi-2026-09-05.md`.**
+> **Application au moment de l'écriture : 1.122.1 en ligne (build `0905-1852`) ; `main` = `origin/main` = `2a05b188`, run GitHub 33997649062 vert (Vitest et Playwright WebKit).**
+> ⚠ **Remesure avant d'exécuter** (`git --no-optional-locks log --oneline -5`, `cat version.json`, `TZ=America/Toronto date`) : si 1.122.1 n'est plus la version en ligne ou si `main` a bougé, dis-le en tête de ton rapport. L'ancienne consigne (l'audit) est archivée par Cowork sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-05-audit-suivi-1.122.1.md` ; les deux fichiers partent avec le premier commit du lot.
+> ⚠ **Cette consigne peut se tromper : mesure, n'obéis pas.** Chaque site cité ci-dessous vient du rapport et d'un `grep` de Cowork à 19 h 40 ; si un site filtre déjà, n'existe plus ou porte un autre nom, dis-le et fais ce que la mesure commande.
+
+## La décision de Grégoire, au mot
+
+Les quatre « corriger maintenant » du rapport se font **ce soir**, en un seul lot, une seule livraison à la fin. Et la règle didactique qu'il a tranchée : **un élève qui n'a rien remis n'est « Non-participation » que lorsqu'un travail est dû ET qu'au moins une copie du groupe est évaluée ; avant, tout le monde reste « En attente ».** Ce qui est proposé « à inscrire » dans le rapport reste inscrit : ce sont des règles à trancher, pas ce lot.
 
 ## Ce que cette séance produit à l'écran, pour Grégoire
 
-Deux choses, dans cet ordre, et la première est courte.
+Dans l'onglet Suivi : un élève qui a repris un travail et réussi n'est plus lu au palier de sa première copie ; au début d'un trimestre, la classe entière n'est plus en « Non-participation, niveau 3 » ; le bouton « Rapport » d'un profil produit un rapport (au lieu d'un message d'erreur) dont les nombres sont ceux du profil ; et les courbes P des archives sont celles de l'élève, plus la même pour tout le monde.
 
-**1. Un mot sous la note du cours** (patch, une livraison). Grégoire a arrêté les deux phrases qu'un enseignant lit
-sous « Performance globale (P) » et « Note finale de session » quand des évaluations sont écartées par #706 :
-« N évaluations en brouillon, non comptées » (inchangée) et **« N évaluation(s) sans critère évalué, non comptée(s) »** —
-retirer « aucun » de la formulation livrée en 1.122.0, le reste tient. Accord en nombre, sentinelle mise à jour,
-release `patch` par `scripts/release.mjs`, rituel de fin de session, **verdict du run GitHub lu avant tout autre push**
-(règle 7 : le vert local n'a rien prouvé tant que le serveur n'a pas jugé).
+## Le lot, dans cet ordre — un fichier à la fois, un commit par geste
 
-**2. Le troisième audit cadré : l'onglet Suivi.** Prompt : `Rapports/prompts-audit/PROMPT-AUDIT-onglet-suivi-2026-09-05.md`.
-Le lire en entier, puis les flux H des deux premiers rapports (`Rapports/AUDIT-moteur-evaluation-2026-09-05.md`,
-`Rapports/AUDIT-pratique-de-notation-2026-09-05.md`), dont il repart sans les remesurer. Lecture seule sur `js/`,
-exécution en bac à sable Vitest, branche `audit/onglet-suivi-<date>` partie de `origin/main`, jamais sur `main`.
-Quatre élèves de banc dont **un sans aucune évaluation** ; palier et indices attendus calculés à la main avant le code.
-Dépose `Rapports/AUDIT-onglet-suivi-<date>.md` au format des deux premiers (en-tête mesuré, flux A à H, verdict
-`[exécuté]` ou `[lecture]`, disposition PROPOSÉE par constat, ce qui fonctionne avec sa preuve, « ce que je n'ai pas
-regardé »), et **la seconde moitié de la question ne se saute pas** : la sortie du volet confidentiel a été cherchée
-dans chaque flux de G et le résultat est écrit, même quand il est « rien ». Transcription : dispositions dans
-`Rapports/ultrareview-lot-6-travaux-saisie.md` (N1-N6) et dans les §5.3, §8, §9 de
-`Rapports/AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md`. N'applique aucun correctif : Grégoire arbitre.
-Une fois déposé : statut du prompt à « exécuté » avec `rapport_produit`, une ligne dans `OU-EN-EST-ON.md` sous
-« L'ÉVALUATION » (ou une section « LE SUIVI » si tu juges que l'audit la mérite — dis-le), sans numéro de fiche en
-tête de ligne. La branche d'audit se fusionne (documents et banc seulement) ; **le lot de correction attend l'arbitrage.**
+**1. La reprise remplacée sort du dépistage.** Une évaluation qui porte `remplaceeParId` ne compte plus dans les fonctions du dépistage qui l'ignorent encore. Le rapport en nomme sept : `js/profil-etudiant-calculs.js` — `calculerMoyennesCriteres` (l. 814), `calculerMoyennesCriteresRecents` (940), `_filtrerEtTrierEvaluationsIPB` (1084), `calculerIndicesNDerniersArtefacts` (1413), `identifierDefiSpecifique` (1623) ; `js/profil-etudiant-sections-affichage.js` — `calculerDirectionRisque` (2015), `calculerDirectionsCriteres` (2089). Le patron est celui des deux sœurs du même fichier qui filtrent déjà (`!e.remplaceeParId`, l. 678 et 753). Mesure d'abord : `grep -rn "remplaceeParId" js/profil-etudiant-*.js` — si un lecteur de plus existe hors de cette liste et qu'il calcule un palier ou un indice, il entre dans le geste ; dis-le. Ce que ça ne fait pas : réécrire une évaluation ; la réconciliation #360 en bénéficie du même filtre sans autre geste. **Preuve** : le banc d'audit B-3 passe aux valeurs d'après (performance 0,65 ; IPB sur quatre artefacts ; niveau 2 « Difficulté émergente ») — l'avant en commentaire, comme pour les deux audits précédents ; sentinelle neuve, break-testée en retirant le filtre d'UN site à la fois (chaque retrait doit rougir).
 
-## À inscrire au passage, avec les fiches #710 à #721
+**2. « Non-participation » seulement quand un travail est dû et qu'une copie du groupe est évaluée.** La règle de Grégoire, ci-dessus. Sites : `determinerNiveauRaiPedagogique` (`calculs.js:1772`, branche `nbArtefacts === 0` puis assiduité > 0 à la l. 1795), `determinerCibleIntervention` (`:2089`, retour l. 2105), et l'alerte nommée du tableau de bord (`tableau-bord-apercu.js`, filtre `nombreSeances > 0 && !(completion > 0 || performance > 0)`). La garde existe déjà à côté : `determinerAlerteContextuelle` (`calculs.js:1902`) sait dire « En attente » quand C n'est pas calculable — mesure exactement ce qu'elle teste, et pose LA MÊME garde dans les trois sites, en une fonction partagée plutôt que trois copies : aucune production due à ce jour, OU aucune évaluation enregistrée dans le groupe → « En attente », niveau 0, comme la branche « aucune présence » de la l. 1815. Le cas fondé reste fondé : l'élève sans remise quand quatre travaux sont évalués pour les autres (D-1) reste niveau 3. **Ce qui n'entre PAS dans ce geste** : le défaut « assiduité 100 % sans séance » (`indices.js:145`, `:191`) — inscrit, pas corrigé ; la garde couvre D-3 sans lui. Mots : « En attente » existe déjà, aucun mot neuf ; si tu dois en écrire un, propose-le dans ton rapport, ne le livre pas. **Preuve** : le banc D-1 reste niveau 3, D-2 et D-3 passent à « En attente » (F-1 suit) ; sentinelle break-testée en retirant la garde d'un site à la fois.
 
-`plans de travail/CADRAGE-2026-09-05-non-remis-par-famille.md` (dans l'arbre, non commis, contenu de Cowork) : ce que
-vaut un travail non remis dans la note du cours, **famille par famille**, règle de Grégoire du 5 septembre (zéro en
-sommative ; ignoré en « meilleures notes » si le minimum est atteint ; « propre à l'utilisateur »). Première mesure due :
-ce que chaque famille fait aujourd'hui de `statutRemise: 'non-remis'`. **Après le 14.** Sa ligne d'index est déjà dans
-`00-CADRAGES-OUVERTS.md` (modifié, non commis). Commets les fichiers de Cowork tels quels.
+**3. Le rapport du profil se génère, et dit ce que le profil dit.** Deux moitiés, dans le même geste. (a) `obtenirDetailsAssiduite` (`sections-affichage.js:1620`) est appelée par son nom nu depuis l'IIFE de `profil-etudiant-rapport.js:56` et n'est exportée nulle part (`grep -rn "window.obtenirDetailsAssiduite" js/` → 0) : exporte-la comme les seize autres du fichier, ou déplace l'appel — à toi. (b) `genererRapportAPI` recalcule un P à sa manière (« 75 % (4 meilleurs artefacts actuels) », `modalites.nbArtefactsPortfolio || 4`) et un C sur des `artefact-portfolio` que le cours n'a pas (« 0 remises / 0 productions ») : ses trois nombres A, C, P viennent de `calculerTousLesIndices`, la même source que le profil et la Liste — c'est la règle « même source » de #699, appliquée ici. Garde les phrases du rapport telles quelles autant que les nombres le permettent ; si une phrase doit changer (« 4 meilleurs artefacts » ne sera plus vrai), propose la nouvelle dans ton rapport et laisse Grégoire la valider au coup d'œil — c'est un texte que l'orthopédagogue lit. **Preuve — spec WebKit AVANT le correctif**, parce que l'état de départ est déduit du source, pas vu : un essai qui ouvre un profil, clique le bouton du rapport et lit la zone de texte ; il doit être ROUGE avant (le message « Erreur lors de la génération du rapport … is not defined ») et VERT après (un rapport dont le P est celui affiché sur le profil). Puis sentinelle Vitest sur `genererRapportAPI` (aucun test ne l'appelle aujourd'hui : `grep -rln "genererRapportAPI" tests/` → 0) : P et C du rapport = ceux de `calculerTousLesIndices` sur le banc d'audit (77 et 100 pour l'assidu) ; break-testée.
+
+**4. Règle 1 de `CLAUDE.md`, trois lignes.** `js/interventions.js:885` : les observations de l'intervention entrent dans le `<textarea>` par `echapperHtml(intervention.observations || '')` (le bilan six lignes plus bas le fait déjà) ; `js/profil-etudiant-confidentiel.js:173-174` : `data-date` et `data-da` échappés. **Preuve** : sentinelle par mutation évidente (une valeur qui contient `</textarea>` ou une guillemet ne sort pas brute).
+
+**5. Les courbes P des archives sont celles de l'élève.** Ajout de Cowork, pas du rapport (qui proposait « inscrire avec #716 ») : un enseignant lit un chiffre faux, donc la partie d'une ligne se fait ce soir. Le repli de `js/snapshots.js:226-243` filtre les évaluations par production, statut, note et échéance, jamais par `etudiantDA` : ajoute le filtre par élève. **Le reste de #716 reste inscrit** (le repli entier, la sommative qui lit `e.da` / `e.note`). Ce que ça ne fait pas : les snapshots déjà écrits gardent leur 67 — tarir n'est pas réparer, écris-le dans ton rapport. **Preuve** : le banc G-2 rend trois P différents pour les trois élèves ; break-testée.
+
+## Après le code, avant la livraison
+
+- Les dispositions, DANS `Rapports/AUDIT-onglet-suivi-2026-09-05.md`, constat par constat : B-3, B-5, D-2, E-6 → *corrigé (numéro, version)* ; G-2 → *filtre par élève corrigé ; le repli reste #716* ; G-4 → *attributs corrigés ; le mode anonymisation et le bouton « Confidentiel » inscrits* ; D-3 → *couvert par la garde de D-2 ; le défaut 100 % inscrit* ; tout le reste → *inscrit (n°)* avec les numéros que tu alloues à partir du premier libre après #729 (mesure-le dans `BACKLOG.md`), ou *tenu* / *commenter* comme le récapitulatif du rapport le dit. La trouvaille `paths-ignore` : inscrite, mineure, pas dans ce lot.
+- Le prompt de l'audit garde `statut : exécuté` ; ajoute la ligne du lot correctif.
+- **Commits, puis STOP avant la release** : rapport à Grégoire avec les commits nommés, pour la relecture croisée de Cowork sur le diff réel (règle 2 : commit → relecture → corrections → verdict → push) et son coup d'œil. **Une seule livraison, à la fin, et il regarde avant.**
+- Sur son feu vert : release `minor` par `scripts/release.mjs` — titre proposé pour le changelog, à faire valider par Grégoire avec les mots : « Le Suivi ne compte plus une reprise deux fois, et ne déclare personne "non-participant" avant le premier travail » ; rituel de fin de session ; verdict Playwright local ; push ; **verdict du run GitHub lu jusqu'au bout avant tout autre push** (règle 7). Puis `OU-EN-EST-ON.md`, section « LE SUIVI » : une ligne, « vérifié comment », sans numéro en tête.
 
 ## Ce qui ne se fait PAS dans cette séance
 
-- Aucun correctif né de l'audit du Suivi : arbitrage de Grégoire d'abord.
-- Aucun des constats moyens #710-#721 ni #700-#705 : après le 14.
-- Ne pas rouvrir la règle #706 ni la traduction #708 : livrées, jugées par la CI, à éprouver par Grégoire à l'écran.
+- Aucun des constats « à inscrire » du rapport (brouillon remis pour C, « non remis » à 0, critère SOLO « Aucun », deux paliers sur un profil, interventions sans groupe, clé nue des suivis, deux « moyenne A », seuils en dur, mode anonymisation du volet) ni #700-#705, #710-#729 : après le 14, arbitrage de Grégoire.
+- Pas de changement au défaut « assiduité 100 % sans séance », ni au repli entier des snapshots (#716), ni à la CI.
 
-## Ce qui est dû par Grégoire, et que cette séance ne code pas à sa place
+## Ce que Grégoire ira voir à l'écran, sur ses données de l'automne 2026
 
-- **Deux gestes à l'écran sur 1.122.0** : le profil d'un élève avec une copie en brouillon (la note du cours sans elle,
-  la ligne dessous) ; une pratique créée depuis « Partir d'un modèle » › « Modèle simple » (deux projets et un examen
-  au-dessus de 75 % → 90 ; un projet et un examen → 70 ; avant 1.122.0, toute la classe à 0).
-- **L'arbitrage des fiches #700-#705 et #710-#721**, après le 14.
-- **Le renommage de la page « Les huit gestes »** en « Ce qu'il reste à faire » : proposé par Cowork, pas encore tranché.
+Suivi du groupe : la barre RàI et la carte Contexte — plus personne en « Non-participation » tant qu'aucune copie n'est évaluée ; « En attente » à la place. Puis le profil d'un élève › bouton « Rapport » : un rapport s'écrit, et son P est celui du haut du profil.

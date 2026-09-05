@@ -482,7 +482,7 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         expect(p.rai).toMatchObject({ niveau: 2, pattern: 'Stable' });
     });
 
-    it('B3 · une REPRISE : la note du cours remplace ; le dépistage compte l\'originale ET la reprise', () => {
+    it('B3 · une REPRISE : la note du cours remplace, et le dépistage aussi (#730 ; avant, il comptait l\'originale ET la reprise)', () => {
         // À la main : Absent reprend P3 (55 → 75, le 20 avril). Note du cours = (1700 + 1400 + 75·30 + 1500) / 100 = 68,5 → 69,
         // donc niveau 2 (< 0,75). Les trois évaluations les plus récentes, si la remplacée est écartée : P4 50, P3' 75, P2 70
         // → 0,65 ; si elle ne l'est pas : P4 50, P3' 75, P3 55 → 0,60. Même question pour l'IPB (fenêtre de 3 sur les
@@ -496,11 +496,12 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         const ipb = b.win.calculerIPB(DA.ABSENT);
         const moy = b.win.calculerMoyennesCriteres(DA.ABSENT);
         noter('B3', { P: p.P, performance3: p.performance3, nbHistorique: ipb.historiqueComplet.length, scoresParArtefact: ipb.scoresParArtefact.map(r3), ipb: ipb.ipb, moyStructure: r3(moy.structure), rai: p.rai, suivi: p.suivi });
-        expect(p.P).toBe(69);                                        // la note du cours REMPLACE
-        expect(p.performance3).toBe(0.6);                            // le dépistage lit 50, 75, 55 : l'originale remplacée est dedans
-        expect(ipb.historiqueComplet.length).toBe(5);                // cinq artefacts pour quatre productions
-        expect(r3(moy.structure)).toBe(r3((0.75 + 0.65 + 0.40 + 0.75 + 0.40) / 5)); // l'originale pèse dans la moyenne
-        expect(p.rai.niveau).toBe(3);                                // « Difficulté persistante » (0,60 < 0,64) — à la main : 0,65 → niveau 2
+        // ↻ Valeurs D'APRÈS #730 (5 sept. 2026, soir) ; l'avant en commentaire.
+        expect(p.P).toBe(69);                                        // la note du cours REMPLACE (inchangé)
+        expect(p.performance3).toBe(0.65);                           // 50, 75, 70 — avant 0,60 (50, 75, 55 : l'originale remplacée était dedans)
+        expect(ipb.historiqueComplet.length).toBe(4);                // quatre artefacts pour quatre productions — avant 5
+        expect(r3(moy.structure)).toBe(r3((0.75 + 0.65 + 0.75 + 0.40) / 4)); // 0,6375 — avant 0,59 (l'originale pesait)
+        expect(p.rai).toMatchObject({ niveau: 2, pattern: 'Difficulté émergente' });   // avant : niveau 3 « Difficulté persistante » (0,60 < 0,64)
     });
 
     it('B4 · un « non remis » enregistré avec 0 : remis pour le C sommatif, écarté par le C des snapshots', () => {
