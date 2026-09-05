@@ -3800,13 +3800,31 @@ function rendreBlocProjectionAlgo(critere, ctx) {
         `<option value="${esc(m.id)}"${m.id === p.modeleId ? ' selected' : ''}>${esc(m.nom)}</option>`
     ).join('');
 
+    // Lot B (5 sept. 2026) — LES COLLECTIONS DE PARAMÈTRES : les jeux nommés du trimestre
+    // (`collectionsProjection`), sous un sous-titre, APRÈS les modèles livrés (liste fermée,
+    // intouchée). La valeur porte le préfixe `collection:` que les deux handlers du menu
+    // reconnaissent. Choisir COPIE (décision de Grégoire, 4 sept.) : le menu montre ensuite le
+    // modèle copié, pas la collection — le critère ne garde aucun lien. Sous le menu, la
+    // liste des collections avec la corbeille, et la ligne qui dit la copie.
+    const collections = (typeof window.collectionsProjection !== 'undefined') ? window.collectionsProjection.lister() : [];
+    const optionsCollections = collections.length ? `
+                        <optgroup label="Mes collections">${collections.map((c) => `
+                            <option value="collection:${esc(c.id)}">${esc(c.nom)}</option>`).join('')}
+                        </optgroup>` : '';
+    const cibleCollection = estTemp ? 'temp' : ctx.grilleId;
+    const listeCollections = collections.length ? `
+                    <div class="collections-liste">${collections.map((c) => `
+                        <div class="collection-ligne"><span class="collection-nom">${esc(c.nom)}</span>${retirerBloc({ action: 'supprimerCollectionProjection', param: c.id, param2: cibleCollection, param3: ctx.index, titre: 'Supprimer la collection « ' + esc(c.nom) + ' »' })}</div>`).join('')}
+                    </div>
+                    <small class="collections-aide">Choisir une collection copie ses paliers et ses réglages dans ce critère. Corriger ou supprimer la collection ensuite ne change pas cette grille, ni ce qu'un élève a déjà lu.</small>` : '';
+
     const enTete = `
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Modèle de projection</label>
                     <select class="controle-form" data-on-change="${hModele}" ${datas}>
-                        ${options}
+                        ${options}${optionsCollections}
                     </select>
-                    <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">${esc(p.modele.description)}</small>
+                    <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">${esc(p.modele.description)}</small>${listeCollections}
                 </div>`;
 
     // ↻ §8 (5 sept. 2026, 7 h 15) — LE DÉCOMPTE VIENT ICI, avant les paliers : la carte
@@ -4011,7 +4029,113 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                 </div>
 ${basApercu}
                 <button class="btn btn-secondaire btn-tres-compact" style="margin-top: 8px;"
-                        data-action="${actionAjout}" ${paramsAction}>+ Ajouter un palier</button>`;
+                        data-action="${actionAjout}" ${paramsAction}>+ Ajouter un palier</button>${rendreSaisieCollectionProjection(critere, ctx)}`;
+}
+
+/**
+ * Lot B (5 sept. 2026) — le geste qui ENREGISTRE les réglages d'un critère sous un nom :
+ * un bouton, qui ouvre une section INLINE dans la carte (⛔ pas de `prompt()`, pas de
+ * modale) — le nom, « Enregistrer », « Annuler », et le message d'un nom déjà pris. L'état
+ * ouvert / fermé et le nom tapé vivent en mémoire (`_etatSaisieCollection`, comme les plis),
+ * jamais dans la grille, et survivent aux redessins. Rendu seulement sous un modèle qui
+ * projette : « Aucune projection » n'a rien à nommer. En édition comme en création.
+ */
+const _etatSaisieCollection = {};
+
+function rendreSaisieCollectionProjection(critere, ctx) {
+    if (typeof window.collectionsProjection === 'undefined') return '';
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
+    const cleCritere = critere.id || ('critere-' + ctx.index);
+    const cible = ctx.mode === 'temp' ? 'temp' : ctx.grilleId;
+    const params = `data-param="${esc(cible)}" data-param2="${ctx.index}"`;
+    const etat = _etatSaisieCollection[cleCritere];
+    if (!etat) {
+        return `
+                <button type="button" class="btn btn-secondaire btn-tres-compact collection-bouton-enregistrer"
+                        data-action="ouvrirSaisieCollectionProjection" ${params}>Enregistrer ces paliers sous un nom…</button>`;
+    }
+    return `
+                <div class="collection-saisie">
+                    <label class="sous-critere-label-petit" for="collection-nom-${esc(cleCritere)}">Nom de la collection</label>
+                    <div class="collection-saisie-rangee">
+                        <input type="text" id="collection-nom-${esc(cleCritere)}" class="controle-form" maxlength="80"
+                               value="${esc(etat.nom || '')}" placeholder="Ex. : EUF" data-collection-nom="${esc(cleCritere)}">
+                        <button type="button" class="btn btn-principal btn-tres-compact" data-action="enregistrerCollectionProjection" ${params}>Enregistrer</button>
+                        <button type="button" class="btn btn-secondaire btn-tres-compact" data-action="annulerSaisieCollectionProjection" ${params}>Annuler</button>
+                    </div>${etat.message ? `
+                    <small class="collection-saisie-message">${esc(etat.message)}</small>` : ''}
+                </div>`;
+}
+
+/** Le critère visé par un geste de collection : en création (`temp`), ou dans une grille enregistrée. */
+async function _critereCibleCollection(cible, index) {
+    if (cible === 'temp') return (window.tempCriteres || [])[index] || null;
+    const grille = await obtenirGrilleParId(cible);
+    return (grille && grille.criteres && grille.criteres[index]) || null;
+}
+
+async function _redessinerCibleCollection(cible) {
+    if (cible === 'temp') { afficherCriteresTemp(); return; }
+    afficherCriteresGrille(await obtenirGrilleParId(cible));
+}
+
+async function ouvrirSaisieCollectionProjection(cible, index) {
+    const critere = await _critereCibleCollection(cible, index);
+    if (!critere) return;
+    _etatSaisieCollection[critere.id || ('critere-' + index)] = { nom: '', message: '' };
+    await _redessinerCibleCollection(cible);
+}
+
+async function annulerSaisieCollectionProjection(cible, index) {
+    const critere = await _critereCibleCollection(cible, index);
+    if (!critere) return;
+    delete _etatSaisieCollection[critere.id || ('critere-' + index)];
+    await _redessinerCibleCollection(cible);
+}
+
+async function enregistrerCollectionProjection(cible, index) {
+    const critere = await _critereCibleCollection(cible, index);
+    if (!critere) return;
+    const cleCritere = critere.id || ('critere-' + index);
+    const input = document.querySelector('input[data-collection-nom="' + cleCritere + '"]');
+    const nom = input ? String(input.value || '') : '';
+    if (!nom.trim()) {
+        marquerChampRefuse(input, 'Donne un nom à la collection.');
+        return;
+    }
+    const r = await window.collectionsProjection.enregistrer(nom, critere);
+    if (!r.ok) {
+        _etatSaisieCollection[cleCritere] = {
+            nom: nom,
+            message: r.raison === 'nom_pris' ? 'Une collection porte déjà ce nom.' : 'Ce modèle n\'a pas de paliers à enregistrer.'
+        };
+        await _redessinerCibleCollection(cible);
+        return;
+    }
+    delete _etatSaisieCollection[cleCritere];
+    if (typeof notifications !== 'undefined' && notifications.succes) {
+        notifications.succes(`Collection « ${r.collection.nom} » enregistrée.`, 'Tu la retrouveras dans le menu de projection de tes grilles.');
+    }
+    await _redessinerCibleCollection(cible);
+}
+
+async function supprimerCollectionProjection(id, cible, index) {
+    const c = window.collectionsProjection.obtenir(id);
+    if (!c) { await _redessinerCibleCollection(cible); return; }
+    if (!confirm(`Supprimer la collection « ${c.nom} » ? Les grilles qui l'ont copiée ne changent pas.`)) return;
+    await window.collectionsProjection.supprimer(id);
+    await _redessinerCibleCollection(cible);
+}
+
+/** Un choix du menu de projection est-il une collection ? Rend son id, ou null. */
+function _idCollectionChoisie(valeur) {
+    return (typeof valeur === 'string' && valeur.indexOf('collection:') === 0) ? valeur.slice('collection:'.length) : null;
+}
+
+function _direCollectionDisparue() {
+    if (typeof notifications !== 'undefined' && notifications.avertissement) {
+        notifications.avertissement('Cette collection n\'existe plus.', 'Rien n\'a été changé sur le critère.');
+    }
 }
 
 /* ===============================
@@ -5450,6 +5574,13 @@ function _muterPalier(critere, index, champ, valeur) {
 function modifierModeleProjectionTempHandler(el) {
     var index = parseInt(el.dataset.critereIndex);
     if (!window.tempCriteres || !window.tempCriteres[index]) return;
+    // Lot B : une collection choisie se COPIE dans le critère (paliers compris).
+    var idCollection = _idCollectionChoisie(el.value);
+    if (idCollection !== null) {
+        if (!window.collectionsProjection.appliquer(window.tempCriteres[index], idCollection)) _direCollectionDisparue();
+        afficherCriteresTemp();
+        return;
+    }
     // params null ET paliers null : le nouveau modèle repart de SES défauts.
     window.projectionAlgo.appliquerAuCritere(window.tempCriteres[index], el.value, null, null);
     delete window.tempCriteres[index].paliersProjection;
@@ -5481,6 +5612,19 @@ async function modifierModeleProjectionGrilleHandler(el) {
     var grilleId = el.dataset.grilleId;
     var index = parseInt(el.dataset.critereIndex);
     var valeur = el.value;
+    // Lot B : une collection choisie se COPIE dans le critère (paliers compris) ; un id
+    // disparu entre le rendu et le clic n'écrit rien (le mutateur rend false).
+    var idCollection = _idCollectionChoisie(valeur);
+    if (idCollection !== null) {
+        var appliquee = false;
+        await modifierProjectionCritereGrille(grilleId, index, function(critere) {
+            appliquee = window.collectionsProjection.appliquer(critere, idCollection);
+            return appliquee ? undefined : false;
+        });
+        if (!appliquee) _direCollectionDisparue();
+        afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+        return;
+    }
     await modifierProjectionCritereGrille(grilleId, index, function(critere) {
         window.projectionAlgo.appliquerAuCritere(critere, valeur, null, null);
         delete critere.paliersProjection;
@@ -5930,6 +6074,10 @@ window.modifierCritereTempHandler = modifierCritereTempHandler;
 // Sans ces quatre lignes, le bloc « formule » du gabarit s'affiche et ne réagit
 // à rien, en silence.
 window.modifierModeleProjectionTempHandler = modifierModeleProjectionTempHandler;
+window.ouvrirSaisieCollectionProjection = ouvrirSaisieCollectionProjection;         // Lot B (5 sept. 2026)
+window.annulerSaisieCollectionProjection = annulerSaisieCollectionProjection;
+window.enregistrerCollectionProjection = enregistrerCollectionProjection;
+window.supprimerCollectionProjection = supprimerCollectionProjection;
 window.modifierParamProjectionTempHandler = modifierParamProjectionTempHandler;
 window.modifierPalierProjectionTempHandler = modifierPalierProjectionTempHandler;
 window.modifierModeleProjectionGrilleHandler = modifierModeleProjectionGrilleHandler;
