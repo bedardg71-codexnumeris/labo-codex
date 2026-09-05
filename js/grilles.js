@@ -3584,6 +3584,53 @@ function rendreBoutonsReperes(reperes, cible) {
                                     aria-label="Poser ${esc(r.libelle)}, ${esc(r.jeton)}, ${esc(cible)}">${esc(r.jeton.slice(1, -1))}</button>`).join('');
 }
 
+/**
+ * UN énoncé du gabarit : son étiquette, sa palette de repères, sa zone, son aide.
+ * ↻ §8 (5 sept. 2026) — factorisé pour servir DEUX cartes : « Observation » rend
+ * les trois énoncés qui ne parlent pas sur la copie, « Ce que l'élève lit » rend
+ * le décompte, avant les paliers. Même zone, mêmes attributs, mêmes handlers
+ * (`modifierTexteEnonce*Handler`, `data-enonce-cle`) : un énoncé s'écrit et se
+ * lit exactement comme avant, seul l'endroit où on le compose peut bouger.
+ *
+ * Le texte troué, étape 1 (3 septembre 2026) — AU-DESSUS de chaque zone, les
+ * repères qu'elle OFFRE. Un clic pose le repère au curseur (`insererRepereEnonce`) :
+ * rien à taper, donc plus de `[service]` tapé pour `{service}`. La zone reste
+ * éditable à la main — on ajoute un chemin, on n'en ferme aucun. ⚠ Chaque zone
+ * n'offre que ce qu'un appel remplit (`reperesDeCle`) : « Aucune annotation »
+ * n'offre pas {erreurs}, qui y vaudrait toujours vide. Deux familles, deux
+ * couleurs (cadrage du 2 sept.). ⚠ LE BADGE S'AFFICHE SANS ACCOLADES (« retire
+ * les accolades » — Grégoire, essai iPad du 3 sept.) ; ce qui se pose dans la
+ * zone les garde, c'est le format que le moteur lit (`data-jeton`,
+ * `insererRepere`). ⚠ LA RANGÉE PRÉCÈDE LA ZONE, ET C'EST GRÉGOIRE QUI L'A
+ * DEMANDÉ au premier coup d'œil (3 sept., après-midi) : il l'a cherchée là sans
+ * qu'on le lui dise — une palette d'outils se place avant l'établi, pas après.
+ * L'aide, elle, reste SOUS le champ : c'est la zone qu'elle décrit, pas les repères.
+ *
+ * @param {Object} c - une clé de `enoncesAlgo.listerCles()`
+ * @param {Object} e - `enoncesAlgo.normaliser(critere)`, les textes en vigueur
+ * @param {Object} ctx - { mode: 'temp' | 'grille', index, grilleId }
+ */
+function rendreChampEnonceAlgo(c, e, ctx) {
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
+    const estTemp = ctx.mode === 'temp';
+    const handlerTexte = estTemp ? 'modifierTexteEnonceTempHandler' : 'modifierTexteEnonceGrilleHandler';
+    const datasCommunes = estTemp
+        ? `data-critere-index="${ctx.index}"`
+        : `data-grille-id="${esc(ctx.grilleId)}" data-critere-index="${ctx.index}"`;
+    const reperes = rendreBoutonsReperes(window.enoncesAlgo.reperesDeCle(c.cle), 'dans « ' + c.libelle + ' »');
+    return `
+                    <div class="groupe-form">
+                        <label style="font-size: 0.85rem; color: var(--gris-moyen);">${esc(c.libelle)}</label>
+                        <div class="reperes-enonce" role="group" aria-label="Repères à poser dans « ${esc(c.libelle)} »">
+                            <span class="reperes-enonce-mot">Poser :</span>${reperes}
+                        </div>
+                        <textarea class="controle-form" rows="2"
+                                  data-on-change="${handlerTexte}" ${datasCommunes} data-enonce-cle="${esc(c.cle)}"
+                                  title="${esc(c.aide)}">${esc(e.enonces[c.cle])}</textarea>
+                        <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 2px;">${esc(c.aide)}</small>
+                    </div>`;
+}
+
 function rendreBlocEnoncesAlgo(critere, ctx) {
     if (!critere || critere.type !== 'algorithmique') return '';
     if (typeof window.enoncesAlgo === 'undefined') return '';
@@ -3595,7 +3642,6 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
 
     const estTemp = ctx.mode === 'temp';
     const handlerModele = estTemp ? 'modifierModeleEnoncesTempHandler' : 'modifierModeleEnoncesGrilleHandler';
-    const handlerTexte  = estTemp ? 'modifierTexteEnonceTempHandler'  : 'modifierTexteEnonceGrilleHandler';
     const datasCommunes = estTemp
         ? `data-critere-index="${ctx.index}"`
         : `data-grille-id="${esc(ctx.grilleId)}" data-critere-index="${ctx.index}"`;
@@ -3605,33 +3651,10 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
     ).join('');
     const modeleCourant = modeles.find(m => m.id === e.modeleId);
 
-    // Le texte troué, étape 1 (3 septembre 2026) — AU-DESSUS de chaque zone,
-    // les repères qu'elle OFFRE. Un clic pose le repère au curseur
-    // (`insererRepereEnonce`) : rien à taper, donc plus de `[service]` tapé
-    // pour `{service}`. La zone reste éditable à la main — on ajoute un chemin,
-    // on n'en ferme aucun. ⚠ Chaque zone n'offre que ce qu'un appel remplit
-    // (`reperesDeCle`) : « Aucune annotation » n'offre pas {erreurs}, qui y
-    // vaudrait toujours vide. Deux familles, deux couleurs (cadrage du 2 sept.).
-    // ⚠ LE BADGE S'AFFICHE SANS ACCOLADES (« retire les accolades » — Grégoire,
-    // essai iPad du 3 sept.) ; ce qui se pose dans la zone les garde, c'est le
-    // format que le moteur lit (`data-jeton`, `insererRepere`).
-    // ⚠ LA RANGÉE PRÉCÈDE LA ZONE, ET C'EST GRÉGOIRE QUI L'A DEMANDÉ au premier
-    // coup d'œil (3 sept., après-midi) : il l'a cherchée là sans qu'on le lui
-    // dise — une palette d'outils se place avant l'établi, pas après. L'aide,
-    // elle, reste SOUS le champ : c'est la zone qu'elle décrit, pas les repères.
-    const reperesDe = (c) => rendreBoutonsReperes(window.enoncesAlgo.reperesDeCle(c.cle), 'dans « ' + c.libelle + ' »');
-
-    const champs = cles.map(c => `
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem; color: var(--gris-moyen);">${esc(c.libelle)}</label>
-                        <div class="reperes-enonce" role="group" aria-label="Repères à poser dans « ${esc(c.libelle)} »">
-                            <span class="reperes-enonce-mot">Poser :</span>${reperesDe(c)}
-                        </div>
-                        <textarea class="controle-form" rows="2"
-                                  data-on-change="${handlerTexte}" ${datasCommunes} data-enonce-cle="${esc(c.cle)}"
-                                  title="${esc(c.aide)}">${esc(e.enonces[c.cle])}</textarea>
-                        <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 2px;">${esc(c.aide)}</small>
-                    </div>`).join('');
+    // Chaque énoncé : étiquette, palette, zone, aide — `rendreChampEnonceAlgo`
+    // (le texte troué, étape 1 ; factorisé au §8 du 5 sept. pour la carte
+    // « Ce que l'élève lit », qui rend le décompte par le même helper).
+    const champs = cles.map((c) => rendreChampEnonceAlgo(c, e, ctx)).join('');
 
     // Lot 4 (4 sept. 2026) : « Modèle d'OBSERVATION », décision de Grégoire (17 h 50,
     // consigne h) — la rétroaction, c'est la cartouche, sur le travail ; « commentaire »
