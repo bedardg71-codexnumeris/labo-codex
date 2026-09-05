@@ -3454,6 +3454,19 @@ function afficherCriteresTemp() {
             + Ajouter un critère
         </button>
     `;
+    monterVuesBadges(container);
+}
+
+/**
+ * Le texte troué, étape 3 (5 sept. 2026) — après chaque rendu du gabarit, la VUE qui
+ * montre les badges dans la phrase se pose par-dessus chaque zone à badges (les deux
+ * zones de chaque palier, les énoncés). Le `<textarea>` reste la valeur et le porteur
+ * des handlers ; sans composeur disponible, rien ne se passe et l'écran est celui
+ * d'avant. Voir `js/composeur-badges.js`.
+ */
+function monterVuesBadges(container) {
+    if (typeof window.composeurBadges === 'undefined' || typeof window.composeurBadges.monterTout !== 'function') return 0;
+    return window.composeurBadges.monterTout(container);
 }
 
 /**
@@ -4723,6 +4736,7 @@ function afficherCriteresGrille(grille) {
     `;
 
     container.innerHTML = html + btnAjouterCritere;
+    monterVuesBadges(container);
 
     // Calculer et afficher le total de pondération
     calculerEtAfficherTotalPonderation(grille);
@@ -5763,20 +5777,36 @@ function insererRepereEnonce(el) {
     }
     if (!zone) return;
 
+    // Étape 3 (5 sept. 2026) : quand la zone porte une VUE (composeur-badges), le
+    // caret vient de la vue, en positions de texte ; le texte reste `zone.value`.
+    var vue = _vueBadgesDe(zone);
     var visitee = zone.dataset.curseurVu === '1';
     var debut = visitee ? zone.selectionStart : zone.value.length;
     var fin = visitee ? zone.selectionEnd : zone.value.length;
+    if (vue) {
+        var c = visitee ? window.composeurBadges.curseur(vue) : null;
+        debut = c ? c.debut : zone.value.length;
+        fin = c ? c.fin : zone.value.length;
+    }
     var r = window.enoncesAlgo.insererRepere(zone.value, debut, fin, el.dataset.jeton, palette);
     if (!r) return;
 
     zone.value = r.texte;
     zone.dataset.curseurVu = '1';
-    try {
-        zone.focus({ preventScroll: true });
-        zone.setSelectionRange(r.curseur, r.curseur);
-    } catch (err) {
-        // Un moteur sans setSelectionRange sur un textarea : le repère est
-        // posé quand même, seul le curseur n'est pas replacé.
+    if (vue) {
+        // La vue se redessine depuis le texte et replace le caret après le badge ; ce
+        // qu'elle écrira au `focusout` est déjà ce que la donnée porte.
+        zone.dataset.composeurEcrit = r.texte;
+        try { vue.focus({ preventScroll: true }); } catch (err) { /* rien : le badge est posé */ }
+        window.composeurBadges.ecrire(vue, r.texte, r.curseur);
+    } else {
+        try {
+            zone.focus({ preventScroll: true });
+            zone.setSelectionRange(r.curseur, r.curseur);
+        } catch (err) {
+            // Un moteur sans setSelectionRange sur un textarea : le repère est
+            // posé quand même, seul le curseur n'est pas replacé.
+        }
     }
 
     var index = parseInt(zone.dataset.critereIndex);
@@ -5809,8 +5839,25 @@ function insererRepereEnonce(el) {
 }
 
 /** La zone d'un palier qui reçoit le badge — voir `insererRepereEnonce`. */
+/** La vue (composeur-badges) posée sur une zone, s'il y en a une. */
+function _vueBadgesDe(zone) {
+    return (typeof window.composeurBadges !== 'undefined' && typeof window.composeurBadges.vueDe === 'function')
+        ? window.composeurBadges.vueDe(zone) : null;
+}
+
+/** Le `<textarea>` qu'un élément focalisé représente : lui-même, ou celui de sa vue (étape 3). */
+function _zoneDeFocus(el) {
+    if (!el) return null;
+    if (el.tagName === 'TEXTAREA') return el;
+    if (typeof window.composeurBadges !== 'undefined' && typeof window.composeurBadges.textareaDe === 'function') {
+        var vue = (typeof el.closest === 'function') ? el.closest('.composeur-badges') : null;
+        if (vue) return window.composeurBadges.textareaDe(vue);
+    }
+    return null;
+}
+
 function _zoneCibleDuPalier(palier) {
-    var actif = (typeof document !== 'undefined') ? document.activeElement : null;
+    var actif = _zoneDeFocus((typeof document !== 'undefined') ? document.activeElement : null);
     if (actif && actif.tagName === 'TEXTAREA' && actif.dataset && actif.dataset.palierIndex !== undefined
         && typeof palier.contains === 'function' && palier.contains(actif)) {
         return actif;
@@ -5824,7 +5871,7 @@ if (typeof document !== 'undefined' && typeof document.addEventListener === 'fun
     // Le drapeau « zone visitée » — voir `insererRepereEnonce`. Il tombe avec
     // l'élément à chaque rendu du gabarit, et c'est voulu.
     document.addEventListener('focusin', function(e) {
-        var zone = e.target;
+        var zone = _zoneDeFocus(e.target);
         if (!zone || zone.tagName !== 'TEXTAREA' || !zone.dataset) return;
         if (zone.dataset.enonceCle !== undefined) {
             zone.dataset.curseurVu = '1';

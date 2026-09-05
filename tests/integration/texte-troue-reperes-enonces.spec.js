@@ -37,6 +37,17 @@ const OUVRIR = `(enoncesExistants) => {
 }`;
 
 const zone = (page, cle) => page.locator(`#listeCriteres textarea[data-enonce-cle="${cle}"]`);
+// ↻ Étape 3 (5 sept. 2026) : la zone que l'œil voit est la VUE du composeur, posée après le textarea
+// (caché, il reste la valeur). Le focus et le caret se posent dans la vue ; la valeur se lit au textarea.
+const vueDe = (page, cle) => zone(page, cle).locator('xpath=following-sibling::*[1]');
+const caretA = (locator, position) => locator.evaluate((el, p) => { el.focus(); window.composeurBadges.placerCaret(el, p); }, position);
+/** Ce que la zone rend de son état : la valeur, le focus (dans sa vue), le caret en positions de texte. */
+const etatZone = (page, cle) => page.evaluate((c) => {
+    const t = document.querySelector(`#listeCriteres textarea[data-enonce-cle="${c}"]`);
+    const vue = window.composeurBadges.vueDe(t);
+    const curseur = vue ? window.composeurBadges.curseur(vue) : null;
+    return { valeur: t.value, focalisee: !!vue && document.activeElement === vue, curseur: curseur ? curseur.debut : t.selectionStart };
+}, cle);
 const repere = (page, cle, jeton) =>
     page.locator(`#listeCriteres .groupe-form:has(textarea[data-enonce-cle="${cle}"]) [data-action="insererRepereEnonce"][data-jeton="${jeton}"]`);
 
@@ -96,23 +107,14 @@ test('texte troué · après une FRAPPE, un clic pose le repère au curseur — 
     const z = zone(page, 'priorite');
     await expect(z).toHaveValue('{critere} est à travailler en priorité');
 
-    await z.click();
-    await page.keyboard.press('End');
+    await caretA(vueDe(page, 'priorite'), '{critere} est à travailler en priorité'.length);
     await page.keyboard.type(' (dès maintenant)');
     // ⚠ Le clic qui compte : la zone est focalisée ET modifiée. Si le bouton
     // prend le focus, `change` part, le gabarit se re-rend, et le clic tombe
     // dans le vide — le repère n'arrive jamais.
     await repere(page, 'priorite', '{critere}').click();
 
-    const apres = await page.evaluate(() => {
-        const t = document.querySelector('#listeCriteres textarea[data-enonce-cle="priorite"]');
-        return {
-            valeur: t.value,
-            focalisee: document.activeElement === t,
-            curseur: t.selectionStart,
-            enregistre: (window.tempCriteres[0].enonces || {}).priorite
-        };
-    });
+    const apres = Object.assign(await etatZone(page, 'priorite'), await page.evaluate(() => ({ enregistre: (window.tempCriteres[0].enonces || {}).priorite })));
     console.log('APRÈS FRAPPE + CLIC →', JSON.stringify(apres));
     expect(apres.valeur).toBe('{critere} est à travailler en priorité (dès maintenant) {critere}');
     expect(apres.enregistre, 'la valeur est écrite sur le critère sans attendre la sortie de la zone').toBe(apres.valeur);
@@ -126,11 +128,7 @@ test('texte troué · au milieu d\'une phrase, le repère prend ses espaces, et 
     const defaut = 'Ta production contient {erreurs} erreur{s}{points} pour {mots} mots.';
     await expect(z).toHaveValue(defaut);
 
-    await z.click();
-    await page.evaluate((pos) => {
-        const t = document.querySelector('#listeCriteres textarea[data-enonce-cle="decompte"]');
-        t.setSelectionRange(pos, pos);
-    }, 'Ta production contient'.length);
+    await caretA(vueDe(page, 'decompte'), 'Ta production contient'.length);
     await repere(page, 'decompte', '{mots}').click();
 
     const r = await page.evaluate(() => {
@@ -149,12 +147,8 @@ test('texte troué · un curseur au milieu d\'un mot : le repère se pose à la 
     await ouvrir(page);
     const z = zone(page, 'concentre');
     await expect(z).toHaveValue('Concentre-toi sur {critere}');
-    await z.click();
     // « Concentre-toi sur {critere} » : curseur dans « Concen|tre-toi » (6 lettres avant, 7 après le tiret compris).
-    await page.evaluate(() => {
-        const t = document.querySelector('#listeCriteres textarea[data-enonce-cle="concentre"]');
-        t.setSelectionRange(6, 6);
-    });
+    await caretA(vueDe(page, 'concentre'), 6);
     await repere(page, 'concentre', '{critere}').click();
     const v = await z.inputValue();
     console.log('MILIEU DE MOT →', JSON.stringify(v));
