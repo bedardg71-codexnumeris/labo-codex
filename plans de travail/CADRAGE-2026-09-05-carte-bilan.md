@@ -1,0 +1,46 @@
+# Cadrage — la carte « Observation » devient « Bilan », et ne porte que le bilan
+
+> **Écrit le 5 septembre 2026 à 8 h 01 (Toronto), par Cowork, sur décision de Grégoire (7 h 55).**
+> Application au moment de l'écriture : **1.118.0** en ligne (build `0905-0744`, `d6c4b3fc`).
+> **Pas dans 1.119 sauf décision contraire** : inscrit « pour la prochaine fois », après la journée du 5.
+
+## Le constat (mesuré le 5 au matin)
+
+Depuis 1.118, la carte « Observation » du gabarit algorithmique porte le menu « Modèle d'observation » et trois
+énoncés. Deux vont dans le **bilan** de l'élève (application et PDF de synthèse) : « Défi prioritaire »
+(`evaluation-retroaction.js:842`, quand le critère est effondré) et « Quand tout est maîtrisé » (`:920` et
+`synthese-retroaction-data.js:820`). Le troisième, « Aucune annotation », ne s'affiche **qu'à l'enseignant·e**, dans
+le panneau de correction, quand la copie ne porte ni tampon ni erreur (`:507`). Le titre « Observation » ne désigne
+rien que l'élève ou l'enseignant·e voit à l'écran ; la carte mélange deux publics.
+
+Et la description du modèle « Français écrit (formulations d'origine) » porte un numéro de fiche lu par les
+collègues (`evaluation-enonces.js:248`, « Les phrases d'avant #581 ») — proposé le 5 à 7 h 50, **pas encore
+corrigé** (1.118 est partie avec).
+
+## Ce qui est arrêté (Grégoire, 5 septembre, 7 h 55)
+
+1. **La carte s'appelle « Bilan »** — le mot que l'élève et l'enseignant·e voient déjà dans l'application et le PDF.
+2. **Elle ne contient que ce qui va dans le bilan** : « Défi prioritaire » et « Quand tout est maîtrisé ».
+3. **« Aucune annotation » déménage dans la carte « Codes d'annotation »** : c'est la phrase lue quand aucun code ni
+   tampon n'est posé, même geste. ⚠ Réserve nommée : cette carte n'existe qu'en édition d'une grille enregistrée
+   (`grilles.js`, `estGrille`), pas à la création ; la phrase suivra — acceptable pour un texte qu'on ne touche pas
+   avant d'avoir corrigé.
+4. **Le menu « Modèle d'observation » reste dans « Bilan »** et se renomme pour dire les deux choses qu'il fait,
+   texte de départ à reprendre par Grégoire : « Modèle des phrases (bilan et décompte) » — il fournit aussi le texte
+   de départ du décompte, qui vit dans « Ce que l'élève lit » depuis 1.118 (`enoncesAlgo.normaliser`). Le découpler
+   est hors de ce cadrage.
+5. **La description du modèle « Français écrit »** perd son numéro de fiche. Texte proposé, à corriger par Grégoire :
+   « Les formulations d'origine du critère de français écrit, mot pour mot. À garder si tes élèves ont déjà reçu ces
+   textes. »
+
+## Ce qui ne change pas
+
+Aucune clé de données (`enonces.priorite`, `enonces.concentre`, `enonces.aucune`, `modeleEnonces`), aucun handler,
+aucun format qui voyage. Rendu seul : `rendreBlocEnoncesAlgo`, `rendreBlocCodesAlgo`, `rendreCartesGabaritAlgo`,
+la clé de pli `commentaire` (mémoire seulement — peut rester).
+
+## Fini quand
+
+Grégoire ouvre un critère algorithmique : une carte « Bilan » à deux phrases, « Aucune annotation » dans « Codes
+d'annotation », le menu renommé, la description sans numéro ; la sentinelle « une seule carte » (étape 2) adaptée,
+une sentinelle qui rougit si « aucune » revient dans « Bilan ».

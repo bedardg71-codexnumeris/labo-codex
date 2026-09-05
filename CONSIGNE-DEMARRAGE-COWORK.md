@@ -52,6 +52,11 @@ qui te sont confiés, et dans sa console. Le code appartient à Claude Code.
 
 ## 3 · L'ÉTAT MESURÉ — le 4 septembre 2026 à 18 h 49 (Toronto), en lecture seule
 
+> ↻ **5 septembre, 8 h 01 (Cowork)** : **1.118.0 en ligne** (`0905-0744`, `d6c4b3fc`), poussée, `main` = `origin/main`.
+> Le §4a est fait (quatre commits, trois coups d'œil, changelog écrit au mot). `CONSIGNE-DU-JOUR.md` = la journée du 5,
+> **lot A en cours** par Claude Code. Neuf inscrit : `CADRAGE-2026-09-05-carte-bilan.md` (point 8 des cadrages ouverts).
+> Ce qui suit est l'état de la veille, gardé pour la trace.
+
 ⚠ **REMESURE-LE. Il aura vieilli avant que tu le lises.** Commandes :
 `git --no-optional-locks log --oneline -7` · `git --no-optional-locks rev-list --left-right --count origin/main...HEAD`
 · `cat version.json` · **`TZ=America/Toronto date`** pour toute heure que tu écris.

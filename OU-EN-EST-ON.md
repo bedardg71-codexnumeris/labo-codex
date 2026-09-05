@@ -15,6 +15,17 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **5 septembre 2026, 8 h 01 (vingt-et-unième passe, Cowork) — 1.118.0 EN LIGNE** (build `0905-0744`, `d6c4b3fc`,
+poussée, verdict Playwright vert ; `origin/main` = `main`). Le texte troué, étape 2 : les paliers de projection se
+composent avec des badges, et **une seule carte « Ce que l'élève lit »** (décompte, verdict, recommandation, lue de
+haut en bas ; ligne « L'élève lira : » en gris ce qui est engendré, dans l'encre ce qu'on a écrit). Vérifié comment :
+relecture croisée de Cowork sur les quatre commits du matin (`7ff78ced`, `91195f33`, `65ae6884`, `23bf5350`), trois
+coups d'œil de Grégoire (l'aperçu, la composition, la carte fondue : « c'est bien »). Décisions de Grégoire du matin :
+« Verdict » et « Recommandation (facultative) » ; fondre le décompte et les paliers en un seul endroit d'écriture ;
+« Observation » → « Bilan » (inscrit, `CADRAGE-2026-09-05-carte-bilan.md`, pas dans 1.119). ⚠ Parti avec 1.118 : la
+description du modèle « Français écrit » dit encore « #581 » aux collègues (dans le cadrage Bilan). **En cours** :
+le lot A du 5 (une seule liste sous-critères + codes), `CONSIGNE-DU-JOUR.md` promue par Claude Code.
+
 ↻ **4 septembre 2026, 19 h 14 (vingtième passe, Cowork) — 1.118 codée, pas livrée.** Le texte troué, étape 2
 (les paliers de projection se composent avec des badges) est sur `main` en local, cinq commits d'avance non
 poussés (`2d9baafc` → `dccaf3d2`), carte relue, relecture croisée sans réserve, coup d'œil de Grégoire fait :
