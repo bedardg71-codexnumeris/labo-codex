@@ -493,7 +493,7 @@
        (clos : « le clic est efficace »). UNE RETOUCHE DU LOT D, vue à la porte : « quand je veux
        ajouter du texte après une pastille, le curseur apparaît hors du bloc » (zone « Aucune
        annotation », texte puis chip `critere` en fin).
-     ↻ 10 h 30 → 10 h 50 — LA RETOUCHE (ce commit, `composeur-badges.js` + jeton b) : CAUSE MESURÉE —
+     ↻ 10 h 28 → 10 h 35 — LA RETOUCHE (commit `74e52ef8`, 10 h 35 lu au git ; `composeur-badges.js` + jeton b) : CAUSE MESURÉE —
        une chip est `contenteditable="false"` ; dernier nœud de la vue (ou dernier avant un `<br>` de
        fin de ligne), elle ne laisse au moteur aucune position de caret éditable après elle. L'ANCRE :
        un espace de largeur nulle (U+200B) rendu comme nœud texte après toute chip terminale ou
@@ -511,9 +511,9 @@
        d'aperçu (main → apercu, fast-forward) : la PR #82 se rebâtit seule.
      ▣ CE QUI RESTE : coup d'œil de Grégoire de dix secondes sur la même zone dans l'aperçu à jour →
        lot C (remisé, à reprendre : `git stash pop`).
-     ↻ 10 h 50 — l'aperçu PR #82 sert `composeur-badges.js?v=20260905b` (veille curl, mesuré) : adresse
+     ↻ 10 h 36 — l'aperçu PR #82 sert `composeur-badges.js?v=20260905b` (veille curl, heure LUE) : adresse
        inchangée, notification à Grégoire pour le coup d'œil de dix secondes sur la même zone.
-     ↻ 10 h 15 → 11 h 00 — LOT C : LES MÊMES GESTES PARTOUT (cadrage design de Cowork, trois règles).
+     ↻ 10 h 10 → 10 h 37 — LOT C (commit `ce789a24`, 10 h 37 lu au git) : LES MÊMES GESTES PARTOUT (cadrage design de Cowork, trois règles).
        REMESURÉ AVANT DE TOUCHER : `grep -n "✕" js/*.js` = 1 site bibliothèque (`bibliotheque-ui.js:1472`,
        le dossier, `btn-supprimer` + `data-confirm`) + 3 sites pratique v2 (`pratique-notation-v2.js`
        429 / 689 / 935, `btn-danger`) + 2 commentaires ; `grep -n ">Ordre<" js/*.js` = 3 sites échelles
@@ -562,6 +562,7 @@
        sur le lot B → ce qui est cassé se corrige → verdict au jeton → release MINEURE 1.119, TROIS
        entrées de changelog (ses mots, Cowork les propose) → push → PR #82 fermée sans fusion.
      ▣ ARBRE : `main` = origin/main + 10 commits ; `apercu/…` = main moins ce commit.
+     ⚠ Erreur 14, rattrapée : trois heures de ce bloc avaient été TAPÉES ; corrigées d'après git et la veille.
      ===================================================================== -->
 
 <!-- =====================================================================
