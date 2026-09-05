@@ -57,11 +57,15 @@ async function ouvrir(page, enoncesExistants) {
     // ↻ §8 (5 sept.) : prêt quand la base l'est (comme le spec des paliers), plus un délai fixe.
     await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
     const n = await page.evaluate(eval(OUVRIR), enoncesExistants || null);
-    expect(n, 'les quatre zones sont rendues').toBe(4);
+    // ↻ La carte « Bilan » (5 sept. 2026, 1.120) : en CRÉATION, trois zones — « Aucune annotation » vit
+    // sous la case des codes, dans la liste des sous-critères d'une grille ENREGISTRÉE (réserve nommée
+    // au cadrage). Son rendu et sa palette ({critere} seul, jamais {erreurs}) sont éprouvés par la
+    // sentinelle Vitest `sentinelle-carte-bilan` (B) et, au registre, par `…-etape-1-reperes` (B.b).
+    expect(n, 'trois zones en création : « Aucune annotation » n\'y est pas').toBe(3);
     // Lot 4 (4 sept. 2026) : les zones vivent dans des cartes repliées à l'ouverture — un pointeur
     // ne les atteint pas plus qu'une main. ↻ §8 (5 sept., décision de Grégoire) : le DÉCOMPTE se
-    // compose dans « Ce que l'élève lit » (la carte de projection), avant les paliers ; les trois
-    // autres restent dans « Observation ». On déplie les deux par l'événement DOM (le dispatcher de
+    // compose dans « Ce que l'élève lit » (la carte de projection), avant les paliers ; les deux du
+    // bilan sont dans « Bilan » (↻ 1.120). On déplie les deux par l'événement DOM (le dispatcher de
     // main.js) ; les redessins qui suivent chaque frappe les gardent dépliées (spec lot4-gabarit-algo-cartes).
     for (const section of ['commentaire', 'projection']) {
         const carte = page.locator(`#listeCriteres .gabarit-algo-carte[data-pli$=":${section}"]`);
@@ -71,11 +75,11 @@ async function ouvrir(page, enoncesExistants) {
     }
     // §8 : le décompte est dans la carte de projection, une fois, et nulle part ailleurs.
     await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli$=":projection"] textarea[data-enonce-cle="decompte"]')).toHaveCount(1);
-    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli$=":commentaire"] textarea[data-enonce-cle]')).toHaveCount(3);
+    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli$=":commentaire"] textarea[data-enonce-cle]')).toHaveCount(2);
     await expect(page.locator('#listeCriteres textarea[data-enonce-cle="decompte"]')).toHaveCount(1);
 }
 
-test('texte troué · chaque zone offre ses repères, et « Aucune annotation » n\'offre pas {erreurs}', async ({ page }) => {
+test('texte troué · chaque zone offre ses repères ; en création, « Aucune annotation » n\'est pas rendue', async ({ page }) => {
     await ouvrir(page);
     const offerts = await page.evaluate(() =>
         [...document.querySelectorAll('#listeCriteres .groupe-form:has(textarea[data-enonce-cle])')].map(g => ({
@@ -95,7 +99,7 @@ test('texte troué · chaque zone offre ses repères, et « Aucune annotation »
     expect(offerts.find(o => o.cle === 'decompte').textes).toEqual(['critere', 'erreurs', 'mots', 'points']);
     expect(parCle.priorite).toEqual(['{critere}']);
     expect(parCle.concentre).toEqual(['{critere}']);
-    expect(parCle.aucune).toEqual(['{critere}']);
+    expect(parCle.aucune, '« Aucune annotation » n\'est pas dans la création (carte « Bilan », 1.120)').toBeUndefined();
     expect(offerts.every(o => o.visibles), 'les repères sont à l\'écran').toBe(true);
     expect(offerts.every(o => o.rangeeAvantZone), 'la rangée « Poser » précède la zone').toBe(true);
     expect(offerts.every(o => o.aideApresZone), 'l\'aide reste attachée au champ, sous lui').toBe(true);
@@ -174,7 +178,8 @@ test('texte troué · TÉMOIN NÉGATIF — une grille existante affiche ses text
     const lus = await page.evaluate(() => {
         const v = (cle) => document.querySelector(`#listeCriteres textarea[data-enonce-cle="${cle}"]`).value;
         return {
-            decompte: v('decompte'), priorite: v('priorite'), concentre: v('concentre'), aucune: v('aucune'),
+            decompte: v('decompte'), priorite: v('priorite'), concentre: v('concentre'),
+            aucuneRendue: !!document.querySelector('#listeCriteres textarea[data-enonce-cle="aucune"]'),
             rendu: window.enoncesAlgo.enonce(window.tempCriteres[0], 'decompte', { erreurs: 2, mots: 300 }),
             tu: window.enoncesAlgo.enonce(window.tempCriteres[0], 'aucune', {}),
             enonces: window.tempCriteres[0].enonces
@@ -183,7 +188,7 @@ test('texte troué · TÉMOIN NÉGATIF — une grille existante affiche ses text
     console.log('EXISTANTS →', JSON.stringify(lus));
     expect(lus.decompte).toBe(existants.decompte);
     expect(lus.priorite).toBe(existants.priorite);
-    expect(lus.aucune).toBe('');
+    expect(lus.aucuneRendue, 'en création, la zone « Aucune annotation » n\'est pas rendue ; sa valeur vide reste dans les données').toBe(false);
     // La zone restée au défaut montre le défaut du modèle générique (le nom ne dit pas « français »).
     expect(lus.concentre).toBe('Concentre-toi sur {critere}');
     expect(lus.rendu).toBe('Mon décompte à moi : 2 sur 300.');

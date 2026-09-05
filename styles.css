@@ -2344,6 +2344,23 @@ span.header-icon {
     padding: 0;
 }
 
+/* La carte « Bilan » (5 sept. 2026, 1.120) — « Aucune annotation » vit sous la case des
+   codes, dans le même pli que les observations des rangées ; seule la marge diffère :
+   la case porte déjà la sienne au-dessus, la liste des rangées suit. */
+#listeCriteres .sous-critere-pli--aucune {
+    margin: 0 0 12px;
+}
+
+/* Sous le menu « Modèle des phrases (bilan et décompte) » : ce que le menu fait, avant
+   ce que le modèle choisi dit de lui-même. */
+#listeCriteres .modele-phrases-aide {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.78rem;
+    color: var(--gris-clair);
+    line-height: 1.35;
+}
+
 #listeCriteres .sous-criteres-codes-palette {
     font-size: 0.78rem;
     color: var(--gris-clair);

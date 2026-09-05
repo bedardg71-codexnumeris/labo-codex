@@ -5,7 +5,8 @@
  * premier, sous la rangée du critère ; la formule, le commentaire et la projection suivent,
  * en CARTES nommées et repliables — ouvert ce qui porte la note (sous-critères, formule),
  * fermé ce qui porte les mots (commentaire, projection, codes) ; « Modèle de rétroaction »
- * se lit « Modèle d'observation » (h, 17 h 50 — d'abord « commentaire ») ; « Norme externe (épreuve uniforme) » se lit
+ * se lit « Modèle d'observation » (h, 17 h 50 — d'abord « commentaire » ; ↻ 1.120 : « Modèle des phrases
+ * (bilan et décompte) », et la carte « Observation » s'appelle « Bilan ») ; « Norme externe (épreuve uniforme) » se lit
  * « Projection à l'EUF » (le nom seul : l'`id` voyage avec les grilles partagées).
  *
  *   A — l'ORDRE et l'état des cartes, sur les deux écrans (édition et création) ;
@@ -198,11 +199,12 @@ describe('lot 4 · C.A — l\'ordre du gabarit, et ce qui est ouvert ou replié'
 /* ------------------------------------------------------------------ B — les libellés */
 
 describe('lot 4 · C.B — les libellés', () => {
-    it('B.a « Modèle d\'observation » dans le gabarit ; ni « rétroaction » ni « commentaire » ; la cartouche garde son mot', () => {
+    it('B.a « Modèle des phrases (bilan et décompte) » dans le gabarit (↻ 1.120, d\'abord « Modèle d\'observation ») ; ni « rétroaction » ni « commentaire » ; la cartouche garde son mot', () => {
         const { win, liste } = monter([GRILLE]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const html = liste().innerHTML;
-        expect(html).toContain('Modèle d\'observation');
+        expect(html).toContain('Modèle des phrases (bilan et décompte)');
+        expect(html).not.toContain('Modèle d\'observation');
         expect(html).not.toContain('Modèle de rétroaction');
         expect(html).not.toContain('Modèle de commentaire');
         expect(source('js/grilles.js')).not.toContain('Modèle de rétroaction');
@@ -232,8 +234,9 @@ describe('lot 4 · C.B — les libellés', () => {
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const html = liste().innerHTML;
         // ↻ §8 (5 sept. 2026, titres confirmés par Grégoire à 7 h 24) : « Projection » devient
-        // « Ce que l'élève lit » — le décompte s'y compose, avant les paliers ; « Observation » reste.
-        for (const titre of ['Formule', 'Observation', 'Ce que l\'élève lit']) {
+        // « Ce que l'élève lit » — le décompte s'y compose, avant les paliers. ↻ La carte « Bilan »
+        // (1.120) : « Observation » s'appelle « Bilan » et ne porte que ce que l'élève lit dans son bilan.
+        for (const titre of ['Formule', 'Bilan', 'Ce que l\'élève lit']) {
             expect(html).toMatch(new RegExp('<span class="accordeon-chevron">[▶▼]</span> ' + titre.replace(/'/g, "(?:'|&#x27;|&#39;)")));
         }
         expect(html).not.toMatch(/<\/span> Codes d(?:'|&#x27;|&#39;)annotation/);
@@ -327,7 +330,10 @@ describe('lot 4 · C.D — les sous-critères : UNE seule liste (lot A du 5 sept
         // Décochée : ni couleur ni observation, et le mot « rétroaction » n'apparaît pas dans le bloc.
         expect(bloc).not.toContain('data-champ="retroaction"');
         expect(bloc).not.toContain('sous-critere-couleur-groupe');
-        expect(bloc).not.toContain('sous-critere-pli');
+        // ↻ La carte « Bilan » (1.120) : le pli « Quand la copie ne porte aucun code » vit sous la case, coché
+        // ou non, avec le même composant (`sous-critere-pli`) ; ce qui n'existe pas décoché, c'est le pli DE RANGÉE.
+        expect(bloc).not.toContain('data-pli="CR:sc:');
+        expect(bloc).not.toContain('> Observation</h3>');
         expect(bloc).not.toContain('sous-critere-champs-grid--note-codes');
         expect(bloc.toLowerCase()).not.toContain('rétroaction');
         expect(html).not.toContain('data-pli="CR:codes"');

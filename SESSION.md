@@ -7,6 +7,92 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 26 — 5 SEPTEMBRE 2026, 12 H → 12 H 25 : LA CARTE « BILAN » — un seul lot, rendu seul,
+     aucune donnée ; release MINEURE 1.120 après le coup d'œil de Grégoire. ⏸ RENDU POUR LA PASSE
+     COURTE de Cowork et le coup d'œil (la ligne d'aide sous le menu, point 4) ; NON POUSSÉ ; pas de
+     release encore.
+
+     ▣ Mandat : « Nouvelle séance : la carte « Bilan », un seul lot, release mineure 1.120 » (Grégoire,
+       par Cowork, 12 h). Consigne promue au démarrage : `CONSIGNE-DU-JOUR.md` (celle du 5, quatre lots,
+       1.119) archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-05-quatre-lots-1.119.md`,
+       `CONSIGNE-PROCHAINE-SEANCE.md` → `CONSIGNE-DU-JOUR.md` (deux `git mv`, dans ce commit). Source :
+       `CADRAGE-2026-09-05-carte-bilan.md` (cinq points), lu en entier ; aucun autre fichier de plans de travail.
+     ▣ Rituel isolé à l'ouverture (12 h 05) : HEAD `3bd6c5f6` = origin/main (0 / 0), arbre propre, aucun
+       worktree ; version 1.119.0, build 0905-1053 ; Vitest 467 / 5185, code 0 ; jeton WebKit local sur
+       `f2fa5a2e` (dernier commit de code), code 0 ; run GitHub 33973665411 sur `f2fa5a2e` jugé vert
+       (6 essais non jugés, WebKit Linux), 33976333184 sur `3bd6c5f6` Playwright non jugé (docs). Aucun
+       écart avec la prémisse de Cowork (11 h 58) ; remesuré par moi à 12 h 06 : identique. Écart
+       documentaire déjà connu, non corrigé : BACKLOG.md l. 6 (« État courant » du 31 août, IDs à #777).
+     ▣ MESURÉ AVANT D'ÉCRIRE, en une ligne chacun : `rendreBlocEnoncesAlgo` (3647) rendait le menu
+       « Modèle d'observation » + TROIS énoncés (`priorite`, `concentre`, `aucune` — filtre `!== 'decompte'`) ;
+       `rendreCartesGabaritAlgo` (4373) titrait la carte `commentaire` « Observation » ;
+       `rendreActivationCodes` (3720) appelé UNE fois, dans `rendreSousCriteresAlgo` (4314), avec
+       `{ grilleId, index }`, mode grille seulement (création : « Les sous-critères se définissent une fois la
+       grille enregistrée. ») ; `evaluation-enonces.js:247-248` = les deux chaînes. Les deux repères glissés
+       de Cowork (3647, 4373) confirmés. Tests qui nomment la carte : les quatre du grep de la consigne — et
+       DEUX de plus que ce grep ne voyait pas, trouvés en lisant : `texte-troue-reperes-enonces.spec.js`
+       (comptait QUATRE zones en création, dont `aucune`) et la spec lot 4 l. 160/182 (comptait zéro
+       `.sous-critere-pli` décoché). Après le lot, `js/` et `docs/modules/` ne portent plus aucun
+       « Modèle d'observation » ni « carte « Observation » » (grep).
+
+     ▣ LIVRÉ (ce commit) — rendu seul, ZÉRO donnée :
+       1. `grilles.js` — la carte `commentaire` se titre « Bilan » ; `rendreBlocEnoncesAlgo` filtre
+          `decompte` ET `aucune` : le menu + DEUX énoncés ; le menu se lit « Modèle des phrases (bilan et
+          décompte) » avec, sous lui, la ligne d'aide du point 4 (texte de départ, classe
+          `.modele-phrases-aide`), AVANT la description du modèle choisi ; `rendrePliAucuneAnnotation`
+          (neuf) rend « Aucune annotation » dans `rendreSousCriteresAlgo`, juste après
+          `rendreActivationCodes`, sous un pli FERMÉ « Quand la copie ne porte aucun code » — le composant
+          `.carte.accordeon` des rangées (`sous-critere-pli` + modificateur `sous-critere-pli--aucune`),
+          `data-pli="<critère>:aucune"`, relevé par `capturerPlisGabaritAlgo`, sans `id` — par le MÊME
+          helper `rendreChampEnonceAlgo(cle 'aucune', normaliser(critere), ctx)` : même handler
+          (`modifierTexteEnonceGrilleHandler`), mêmes `data-grille-id` / `data-critere-index` /
+          `data-enonce-cle`, même palette ({critere} seul). Grille enregistrée seulement, comme la case
+          (réserve nommée au cadrage) ; rendu coché OU non. La ligne « Texte de départ » de la carte
+          « Ce que l'élève lit » dit « le modèle des phrases, carte « Bilan » ». Commentaires mis à jour.
+       2. `evaluation-enonces.js` — 2 lignes, au caractère du cadrage : `nom: 'Français écrit'`, la
+          description neuve (sans « #581 », sans « formulations »). `discipline_francais`, `_nomDitFrancais`,
+          `ENONCES_FRANCAIS` intacts.
+       3. `styles.css` — `#listeCriteres .sous-critere-pli--aucune { margin: 0 0 12px }` et
+          `#listeCriteres .modele-phrases-aide` ; rien en `style=` inline neuf (l'enveloppe du pli est
+          vérifiée sans `style=`).
+       4. `index.html` — jetons : grilles.js 20260905f, evaluation-enonces.js 20260905b, styles.css 20260905g.
+       ▣ SUPPOSÉ, DIT : (a) le pli « Aucune annotation » est rendu que la case soit cochée ou non — le
+          texte s'affiche à l'enseignant·e quelle que soit la source des codes, et la consigne dit « sous la
+          case », pas « quand la case est cochée » ; (b) la ligne d'aide est placée ENTRE le menu et la
+          description du modèle (ce que le menu fait, puis ce que le modèle dit) ; (c) la ligne « Texte de
+          départ » de « Ce que l'élève lit » citait « carte « Observation » » : mise au nom neuf, sinon elle
+          pointait une carte qui n'existe plus ; (d) le pli réutilise la classe `sous-critere-pli` des rangées
+          (zéro règle CSS dupliquée) avec un modificateur pour la marge, plutôt qu'une classe neuve.
+     ▣ TÉMOINS de la consigne : `git diff -- js/import-export.js js/partage-schemas.js js/evaluation-projection.js`
+       rend 0 octet (témoin : `git diff --stat` = 9 fichiers, 136 / 54) ; `git diff --stat -- js/evaluation-enonces.js`
+       = 2 insertions, 2 suppressions.
+     ▣ TESTS : sentinelle NEUVE `tests/unit/sentinelle-carte-bilan.test.js` (17 tests, A-E : la carte, le pli,
+       le menu, le modèle, rien d'écrit + jetons) ; « une seule carte » (étape 2) ADAPTÉE (deux énoncés,
+       `aucune` avant les cartes en édition, absent en création, titre, ligne « Texte de départ », 4 appels
+       du helper, filtre) ; lot 4 C ADAPTÉE (B.a étiquette, B.c titre, D.a « aucun pli DE RANGÉE » décoché —
+       `data-pli="CR:sc:` — plutôt que « aucun `.sous-critere-pli` ») ; specs WebKit : `texte-troue-badges-
+       dans-la-phrase` (2 composeurs dans « Bilan »), `lot4-gabarit-algo-cartes` (étiquette du menu ; l. 160/182
+       → plis de rangée ; + le pli « Quand la copie ne porte aucun code » : présent, fermé, déplié par le
+       dispatcher, gardé déplié au redessin de la case, présent décoché), `texte-troue-reperes-enonces`
+       (TROIS zones en création, `aucune` non rendue, sa valeur vide reste dans les données — le titre du
+       premier test dit maintenant cela ; la palette de `aucune` reste éprouvée par la sentinelle neuve, B.a).
+       Vitest depuis `tests/` : **468 fichiers / 5202 tests verts** (+1 fichier, +17 tests), code 0.
+       Playwright local, les trois specs modifiées : 7 / 8 au premier passage (lot 4 l. 160, cause ci-dessus),
+       puis lot 4 seule 1 / 1 après la précision — **8 / 8** ; la suite complète = verdict au jeton avant le
+       push, pas encore lancé.
+       BREAK-TESTS (12 h 20 ; source mutée, Vitest sur 3 sentinelles = 57 tests, remise, sha256 identique) :
+       `aucune` remis dans « Bilan » → 13 rouges ; pli retiré → 7 ; nom du modèle remis avec sa parenthèse
+       → 2 ; titre « Observation » remis → 5 ; étiquette « Modèle d'observation » remise → 3. Le détail
+       (quels tests) est dans l'en-tête de la sentinelle.
+     ▣ CE QUI RESTE (ordre de la consigne) : rapport à Cowork (passe courte, pas de relecture croisée : rendu
+       seul) → COUP D'ŒIL de Grégoire (Conception › Grilles › un critère algorithmique : une carte « Bilan » à
+       deux phrases, le menu renommé, « Français écrit », puis dans « Sous-critères », sous la case, le pli
+       « Quand la copie ne porte aucun code ») — ce qui lui revient : la LIGNE D'AIDE sous le menu (point 4)
+       et les MOTS du changelog (Cowork les propose) → entrée de changelog → verdict au jeton
+       (`scripts/pousser.sh`) → `release.mjs minor` 1.120 → push, sans attendre le run (règle 7).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 25 — 4 SEPTEMBRE 2026, 17 H → 18 H : LE TEXTE TROUÉ, ÉTAPE 2 — LA CARTE, PUIS LES
      QUATRE VOLETS (registre · gabarit · aperçu · spec), un commit chacun, PUIS LA RETOUCHE DU COUP
      D'ŒIL (§5 : l'aperçu sous chaque palier), un commit. ⏸ RENDU POUR LA RELECTURE COURTE de Cowork,
