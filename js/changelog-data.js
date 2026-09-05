@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            version: '1.118',
+            couleur: 'vert',
+            titre: 'Ce que l\'élève lit se compose en une seule carte, avec des badges',
+            items: [
+                '<strong>Une seule carte pour ce que l\'élève lit.</strong> « Projection » s\'appelle maintenant « Ce que l\'élève lit » et se lit de haut en bas comme la phrase de l\'élève : le décompte des erreurs (venu de la carte « Observation »), puis les paliers, chacun avec son verdict et sa recommandation. « Observation » garde le modèle et les énoncés du bilan.',
+                '<strong>Huit badges dans chaque palier.</strong> Tu poses service, seuil, longueur, erreurs, mots, moyenne, projection ou palier au curseur, dans le verdict ou la recommandation, comme dans le décompte.',
+                '<strong>La phrase se remplit pour chaque élève.</strong> Le badge « moyenne » remplace la phrase « Tu fais en moyenne 1 erreur à chaque N mots » : un palier sans badge la garde telle quelle ; un palier qui en porte un dit exactement ce que tu as écrit.',
+                '<strong>« L\'élève lira » sous chaque palier.</strong> En gris ce que l\'application engendre, le décompte et la moyenne ; dans l\'encre, ton verdict et ta recommandation, remplis pour une copie fictive du palier. La ligne se met à jour quand tu quittes le champ ; un badge inconnu se signale en orange.',
+                '<strong>Corrige avec l\'application à jour.</strong> Un onglet ouvert d\'avant cette version ne connaît pas les badges : il écrirait « {erreurs} » tel quel dans la rétroaction de l\'élève, et cette rétroaction s\'enregistre à la correction. Recharge avant de corriger avec une grille qui porte des badges.',
+                '<strong>Tes grilles existantes ne changent pas.</strong> Un palier écrit sans badge se lit comme avant ; les grilles partagées et importées gardent leur texte.'
+            ]
+        },
+        {
             version: '1.117',
             couleur: 'vert',
             titre: 'Le gabarit du critère algorithmique se range, et une grille analytique a ses paliers',
