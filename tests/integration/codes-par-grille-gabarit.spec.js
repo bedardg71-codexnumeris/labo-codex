@@ -60,21 +60,23 @@ test('codes par grille · gabarit — cocher active, décocher retire, la couleu
     console.log('SEMIS →', JSON.stringify(semis));
     expect(semis.n, 'les quatre sous-critères sont rendus').toBe(4);
 
-    // Lot 4 (4 sept. 2026) : la case et les couleurs vivent dans la carte « Codes d'annotation »,
-    // repliée à l'ouverture. On la déplie comme à la souris (le dispatcher de main.js) ; les
-    // redessins qui suivent la GARDENT dépliée — c'est l'objet du spec lot4-gabarit-algo-cartes.
-    // Le geste passe par l'événement DOM, comme les autres gestes de ce spec : le clic à la
-    // souris sur une bande est éprouvé par le spec du lot 4, ici on veut la case.
-    const carteCodes = page.locator('#listeCriteres .gabarit-algo-carte[data-pli$=":codes"]');
-    await expect(carteCodes).toHaveClass(/ferme/);
-    await page.evaluate(() => document.querySelector('#listeCriteres .gabarit-algo-carte[data-pli$=":codes"] .accordeon-header').click());
-    await expect(carteCodes).not.toHaveClass(/ferme/);
-
-    const bloc = page.locator('#listeCriteres .sous-criteres-codes');
+    // ↻ Lot A (5 sept. 2026) : UNE seule liste — la case vit en tête des sous-critères, à plat (plus de carte
+    // « Codes d'annotation ») ; la couleur et l'observation de chaque rangée n'apparaissent que si elle est cochée.
+    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli$=":codes"]')).toHaveCount(0);
+    const bloc = page.locator('#listeCriteres .sous-criteres-conteneur--en-tete .sous-criteres-codes');
     const caseCodes = bloc.locator('input[type="checkbox"]');
     await expect(caseCodes).not.toBeChecked();
     await expect(bloc.locator('.sous-criteres-codes-note')).toContainText('Décochée');
     await expect(bloc.locator('.sous-criteres-codes-note')).toContainText('pondération 0');
+    await expect(bloc.locator('.sous-criteres-codes-palette')).toContainText('palette générale');
+    await expect(page.locator('#listeCriteres .sous-critere-couleur-groupe')).toHaveCount(0);
+
+    // Cocher : le geste s'écrit, la note change, la palette d'une copie suit — et les couleurs se rendent.
+    // ↻ 4 sept. 2026, 18 h 30 (run 33902352824 instable ici) : le clic passe par le DOM — sur le runner,
+    // un clic souris coûte de 2 à 9 s, et le budget de 30 s s'épuise. Même dispatcher, même geste.
+    await caseCodes.evaluate((el) => el.click());
+    await expect(page.locator('#listeCriteres .sous-criteres-codes--actif')).toHaveCount(1);
+    await expect(page.locator('#listeCriteres .sous-criteres-codes-note')).toContainText('ces 3 sous-critères');
 
     // Les couleurs rendues : la sienne ou celle des dix par position ; gris pour le code 0.
     // Consigne du 3 sept. (16 h) : le champ est le sélecteur de la palette ; sa valeur vit
@@ -82,13 +84,6 @@ test('codes par grille · gabarit — cocher active, décocher retire, la couleu
     const couleursRendues = await page.locator('#listeCriteres .sous-critere-couleur-groupe .travaux-retro-couleur-input').evaluateAll(els => els.map(e => e.value));
     console.log('COULEURS RENDUES →', JSON.stringify(couleursRendues));
     expect(couleursRendues).toEqual(['#888888', '#c62828', '#c62828', '#e65100']);
-
-    // Cocher : le geste s'écrit, la note change, la palette d'une copie suit.
-    // ↻ 4 sept. 2026, 18 h 30 (run 33902352824 instable ici) : le clic passe par le DOM — sur le runner,
-    // un clic souris coûte de 2 à 9 s, et le budget de 30 s s'épuise. Même dispatcher, même geste.
-    await caseCodes.evaluate((el) => el.click());
-    await expect(page.locator('#listeCriteres .sous-criteres-codes--actif')).toHaveCount(1);
-    await expect(page.locator('#listeCriteres .sous-criteres-codes-note')).toContainText('ces 3 sous-critères');
     let etat = await page.evaluate(eval(LIRE));
     console.log('APRÈS COCHE →', JSON.stringify(etat));
     expect(etat.drapeau).toBe(true);
@@ -115,6 +110,7 @@ test('codes par grille · gabarit — cocher active, décocher retire, la couleu
     // Décocher : le champ est RETIRÉ, pas mis à false ; retour aux dix.
     await page.locator('#listeCriteres .sous-criteres-codes input[type="checkbox"]').evaluate((el) => el.click());
     await expect(page.locator('#listeCriteres .sous-criteres-codes--actif')).toHaveCount(0);
+    await expect(page.locator('#listeCriteres .sous-critere-couleur-groupe')).toHaveCount(0);
     etat = await page.evaluate(eval(LIRE));
     console.log('APRÈS DÉCOCHE →', JSON.stringify(etat));
     expect(etat.drapeauPresent).toBe(false);

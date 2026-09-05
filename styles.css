@@ -2300,6 +2300,56 @@ span.header-icon {
     grid-template-columns: 80px 1fr 100px;
 }
 
+/* Lot A (5 sept. 2026) — une seule liste : la case cochée, la rangée gagne sa pastille
+   de couleur ; le texte du code (« Observation ») vit sous un pli par rangée — le
+   composant accordéon, sans l'habit de carte. La bande garde 44 px (iPad). */
+#listeCriteres .sous-critere-champs-grid--note-codes {
+    grid-template-columns: 80px 1fr 100px 64px;
+}
+
+#listeCriteres .sous-critere-pli {
+    margin: 8px 0 0;
+    padding: 0;
+    border: none;
+    border-left: 2px solid var(--bordure-moyenne);
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+}
+
+#listeCriteres .sous-critere-pli:hover {
+    box-shadow: none;
+    transform: none;
+}
+
+#listeCriteres .sous-critere-pli .accordeon-header {
+    margin: 0;
+    padding: 4px 10px;
+    min-height: 44px;
+    background: transparent;
+    border-radius: 0;
+}
+
+#listeCriteres .sous-critere-pli .accordeon-header h3 {
+    color: var(--texte-secondaire);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+#listeCriteres .sous-critere-pli .accordeon-contenu {
+    padding: 0 10px 8px;
+}
+
+#listeCriteres .sous-critere-pli.ferme .accordeon-contenu {
+    padding: 0;
+}
+
+#listeCriteres .sous-criteres-codes-palette {
+    font-size: 0.78rem;
+    color: var(--gris-clair);
+    line-height: 1.35;
+}
+
 /* Coup d'œil de Grégoire, 4 sept. 2026 (retouches b, c, d) — dans l'éditeur de grille :
    les chevrons et la corbeille en coin, sur la même ligne (le modèle de la liste des
    productions) ; la rangée du critère leur laisse la place ; chaque sous-critère et
@@ -2355,15 +2405,6 @@ span.header-icon {
 
 #listeCriteres .palier-rangee:last-of-type {
     margin-bottom: 0;
-}
-
-#listeCriteres .sous-critere-champs-grid--code {
-    grid-template-columns: 1fr 64px;
-}
-
-#listeCriteres .sous-critere-code-lecture {
-    padding: 6px 0;
-    font-weight: 500;
 }
 
 /* ============================================
@@ -8686,10 +8727,6 @@ body.mode-clair .bloc-rlo-separateur {
 .sous-critere-textarea {
     font-size: 0.8rem;
     resize: vertical;
-}
-
-.sous-critere-description-groupe {
-    margin-top: 8px;
 }
 
 .sous-criteres-vide-message {

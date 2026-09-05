@@ -263,6 +263,89 @@
        MINEURE 1.118 → push → §6 à partir de son point 6.
      ▣ ARBRE au moment d'écrire : `main` = origin/main + 9 commits. Ce commit emporte la consigne du
        jour (§8 de Cowork, 7 h 24).
+     ↻ 7 h 40 — LES MOTS DU CHANGELOG, par Grégoire (six puces, titre « Ce que l'élève lit se compose en
+       une seule carte, avec des badges », la contrainte « corrige avec l'application à jour » nommée) :
+       écrits tels quels dans `changelog-data.js` (la première phrase de chaque puce en <strong>, la
+       convention du fichier). SUPPOSÉ, DIT : ses mots arrivant après la relecture et le coup d'œil dans
+       l'ordre de la consigne, la relecture croisée de Cowork sur le §8 était faite — confirmé ensuite
+       par OU-EN-EST-ON (21e passe, 8 h 01 : « relecture croisée sur les quatre commits du matin »).
+     ↻ 7 h 44 → 7 h 55 — RELEASE 1.118.0 (`release.mjs minor` : build 0905-0744, quatre points de vérité,
+       sept jetons à 20260905a) → commit `d6c4b3fc` → Vitest 462 / 5120 (après le commit du bump) →
+       `scripts/pousser.sh` : verdict Playwright local VERT (0 connu, 0 instable), hook Vitest vert,
+       `fd2b4ce6..d6c4b3fc main -> main`. **`main` = `origin/main`. 1.118.0 EN LIGNE.** On n'attend
+       pas le run (règle 7).
+     ↻ 7 h 56 — §6 POINT 6 : la consigne du 4 archivée (`_ancienne-CONSIGNE-DU-JOUR-2026-09-04-texte-
+       troue-etape-2.md`), `CONSIGNE-2026-09-05.md` promue en `CONSIGNE-DU-JOUR.md` (deux `git mv`, qui
+       partent avec le premier commit du lot A, comme demandé).
+
+     ═══ LA JOURNÉE DU 5 — TROIS LOTS, UNE LIVRAISON (1.119) ═══
+     ↻ 8 h 00 → 8 h 45 — LOT A : UNE SEULE LISTE, SOUS-CRITÈRES ET CODES (cadrage codes par grille,
+       points 6-8 ; décision de Grégoire du 4 sept.). MESURÉ D'ABORD, en une ligne chacun :
+       `rendreSousCriteresAlgo` (4091) rendait code · nom · pondération + chevrons + corbeille ;
+       `rendreBlocCodesAlgo` (4182) rendait, par sous-critère, « code · nom » EN LECTURE (recopié), la
+       couleur (`rendreCouleurSousCritere`, le sélecteur de la palette) et « Description / Rétroaction »
+       = UN champ `sc.retroaction` ; `rendreActivationCodes` (3707) = la case + sa note dynamique ; le
+       « second gabarit » est l'écran de CRÉATION (mode temp, `rendreCartesGabaritAlgo` appelé à 3447 et
+       4584) : il ne rend ni sous-critères ni codes — le lot ne touche que le mode grille. Le sous-critère
+       0 « trop petit pour diagnostiquer » vit dans les données (pack démo), pas dans le code.
+       ▣ LIVRÉ (un commit, ce commit) : `grilles.js` — `rendreBlocCodesAlgo` et la carte « Codes
+       d'annotation » RETIRÉS (zéro dette) ; `rendreSousCriteresAlgo` porte tout : la case
+       (`rendreActivationCodes`) en tête de la liste, sous le titre ; une rangée par sous-critère —
+       code · nom · pondération · (case cochée :) pastille de couleur — puis les chevrons et la corbeille
+       en coin ; (case cochée :) sous chaque rangée, le pli « Observation » (`rendrePliObservationSousCritere`,
+       le composant `.carte.accordeon` employé tel quel, `data-pli="<critère>:sc:<sc.id>"`, relevé par
+       `capturerPlisGabaritAlgo` et relu par `pliGabaritAlgoFerme`, FERMÉ par défaut, sans `id`), avec le
+       textarea `data-champ="retroaction"`, MÊME handler et MÊMES index qu'avant. Sous la case : la note
+       dynamique (« la couleur et l'observation d'ici » — plus « rétroaction ») et la ligne « Sans cette
+       case, la copie utilise la palette générale (Annoter › palette). Cochée, ce sont ces sous-critères
+       qui deviennent les codes de la copie. » (texte de départ, à lui). Le mot est « Observation »
+       (étiquette du pli, aria-label du champ). `styles.css` : `--note-codes` (quatre colonnes), le pli
+       sans l'habit de carte (bande ≥ 44 px), la ligne palette ; les règles de la carte disparue
+       (`--code`, `code-lecture`, `description-groupe`) RETIRÉES. Jetons grilles (b), styles (b).
+       ▣ RIEN DANS LES DONNÉES : mêmes clés `sousCriteres[].{code,nom,ponderation,couleur,retroaction}`,
+       même drapeau `codesDepuisSousCriteres` (absent = repli) ; `git diff HEAD -- js/codes-annotation.js
+       js/import-export.js js/partage-schemas.js js/partage-validation.js` rend ZÉRO ; les deux goldens
+       #668 et les sentinelles `codes-par-grille-lot1` / `lot3` passent SANS modification.
+       ▣ DÉCIDÉ SEUL, DIT : (1) la note dynamique de la case (trace du 3 sept.) reste ET la ligne palette
+       s'ajoute — deux lignes sous la case, dont la première redit en partie la seconde quand elle est
+       décochée : Grégoire tranche les mots au coup d'œil ; (2) le pli est le composant accordéon
+       (bascule par le dispatcher de main.js, aucun handler neuf) plutôt qu'un pli maison ; (3) sans
+       sous-critère, la case reste rendue, désactivée, à sa place ; (4) le pli vit DANS la rangée, donc
+       sous son `padding-right` de 140 px (le coin des outils) : le champ est un peu plus étroit que la
+       rangée — à voir au coup d'œil ; (5) dans le spec lot 4 que je touchais, trois `waitForTimeout`
+       (900 / 400 / 300 ms) remplacés par l'attente de `dbReady` et deux `toHaveValue` sur le redessin —
+       reste la boucle d'immobilité de `cliquerBande` (50 ms mesurés, pas un délai à l'aveugle) ; vert en
+       3,7 s.
+       ▣ TÉMOINS qui ont dû changer, et pourquoi : sentinelle lot 4 C — A.a / A.b / B.c / C.a (plus de
+       carte « codes », plus de titre, plus de clé de pli), E.b (`--note-codes` remplace `--code`), H.f
+       (« la liste suit », plus de lecture recopiée), et le BLOC D RÉÉCRIT (D.a décochée : rien de plus,
+       la case en tête, la ligne palette, zéro « rétroaction » ; D.b cochée : pastille + pli fermé par
+       rangée, même handler, un sous-critère rendu UNE fois — nom et code comptés dans le bloc ; D.c
+       échappement de l'observation ; D.d sans sous-critère ; D.e les plis par rangée relus au redessin,
+       rien dans la grille ; D.f la carte absente du code et du CSS, règles scopées) ; specs WebKit :
+       lot4-gabarit-algo-cartes (ordre / plis sans `CR:codes` + étape 6 bis : coche la case, déplie le
+       pli, écrit une observation, la frappe le laisse ouvert, recharge, relit, décoche — l'observation
+       reste en base), codes-par-grille-gabarit (la case à plat ; les couleurs se lisent APRÈS la coche),
+       source-unique-codes (plus de carte à déplier ; la grille semée est cochée). ⛔ 0 `page.click`
+       neuf, 0 `waitForTimeout` neuf.
+       BREAK-TESTS (trois mutations de grilles.js, restaurées, `cmp` identique) : le sous-critère rendu
+       DEUX fois → 2 rouges (bloc D) ; la couleur rendue décochée → 1 rouge (D.a) ; le pli ouvert par
+       défaut → 2 rouges (D.b, D.e). Vitest 462 / 5122 ; WebKit local : lot4 + codes-par-grille 2 / 2
+       (8,6 s), source-unique 3 / 3 (6,6 s), paliers + énoncés 7 / 7 (12,4 s), lot4 seul après le retrait
+       des délais 1 / 1 (3,7 s).
+       ⚠ Cowork a écrit en parallèle (8 h 01) : OU-EN-EST-ON (21e passe), CONSIGNE-DEMARRAGE-COWORK,
+       00-CADRAGES-OUVERTS, et un cadrage neuf « la carte Observation devient Bilan » (pas dans 1.119).
+       Partis dans un commit de DOCS `56d20a63` avec `RELAIS.md` (1.118.0 en ligne ; la journée entamée
+       sur `main` local, non poussée), POUSSÉ SEUL (règle du 8 août ; aucun code observable → pas de
+       Playwright ; `d6c4b3fc..56d20a63`). `main` = `origin/main` avant ce commit-ci.
+     ▣ CE QUI RESTE (consigne du 5) : rapport à Cowork → COUP D'ŒIL DE GRÉGOIRE (Conception › Grilles ›
+       un critère algorithmique : une seule liste, la case en tête, la couleur et le pli « Observation »
+       qui apparaissent quand il coche ; les mots de la ligne « palette » sont à lui) → lot B (carte
+       courte `CARTE-2026-09-05-collections.md` rendue à Cowork AVANT le code) → coup d'œil → lot C →
+       coup d'œil → relecture croisée du lot B seul → verdict au jeton → release MINEURE 1.119, trois
+       entrées de changelog (ses mots) → push.
+     ▣ ARBRE au moment d'écrire : `main` = origin/main + 1 commit (celui-ci : lot A + les deux
+       renommages de consigne + ce bloc).
      ===================================================================== -->
 
 <!-- =====================================================================

@@ -3712,7 +3712,7 @@ function rendreActivationCodes(critere, ctx) {
     const n = apercu.length;
     const sansPoids = (critere.sousCriteres || []).length - n;
     const note = actif
-        ? `Sur toute copie évaluée avec cette grille, la palette des codes montre ${n === 1 ? 'ce sous-critère' : 'ces ' + n + ' sous-critères'} : le numéro est le code, avec le nom, la couleur et la rétroaction d'ici.`
+        ? `Sur toute copie évaluée avec cette grille, la palette des codes montre ${n === 1 ? 'ce sous-critère' : 'ces ' + n + ' sous-critères'} : le numéro est le code, avec le nom, la couleur et l'observation d'ici.`
         : `Décochée : la palette montre les dix codes de l'écran Annoter › palette, comme avant.`;
     const precision = sansPoids > 0
         ? ` Un sous-critère de pondération 0 n'est pas un code posable (${sansPoids === 1 ? 'un ici' : sansPoids + ' ici'}).`
@@ -3726,6 +3726,7 @@ function rendreActivationCodes(critere, ctx) {
                                 Utiliser ces sous-critères comme codes d'annotation
                             </label>
                             <small class="sous-criteres-codes-note">${esc(note)}${esc(precision)}</small>
+                            <small class="sous-criteres-codes-palette">Sans cette case, la copie utilise la palette générale (Annoter › palette). Cochée, ce sont ces sous-critères qui deviennent les codes de la copie.</small>
                         </div>`;
 }
 
@@ -4083,8 +4084,17 @@ function codeAfficheSousCritere(sc, scIndex) {
  * Les SOUS-CRITÈRES — en tête du gabarit, tout de suite sous la rangée du critère
  * (décision de Grégoire, 4 sept.) : ils portent la note, on les relit souvent. À
  * plat, pas repliables : la ligne code · nom · pondération est ce que l'enseignant
- * vérifie quand il fait son total. Leur couleur et leur rétroaction — des mots —
- * vivent dans la carte « Codes d'annotation » (`rendreBlocCodesAlgo`).
+ * vérifie quand il fait son total.
+ * ↻ LOT A (5 sept. 2026, décision de Grégoire du 4, cadrage codes par grille, points 7-8) :
+ * UNE SEULE LISTE — le gabarit rendait le même objet deux fois (« Sous-critères »,
+ * puis la carte « Codes d'annotation » avec la couleur et le texte, le nom recopié).
+ * Une rangée par sous-critère : code · nom · pondération · pastille de couleur ·
+ * chevrons · corbeille ; le texte du code — « Observation », UN champ, `sc.retroaction`
+ * — sous un pli par rangée, fermé par défaut (règle des cartes : fermé ce qui porte
+ * les mots). La case « Utiliser ces sous-critères comme codes d'annotation » en tête
+ * de la liste ; couleur et observation n'apparaissent que si elle est cochée. Rien ne
+ * change dans les données : mêmes clés, mêmes handlers, même drapeau. Les plis vivent
+ * en mémoire (`plisGabaritAlgo`, par `data-pli`), jamais dans la grille.
  * En création (mode temp), la grille n'est pas encore enregistrée : on le dit.
  * `esc()` sur tout ce qui vient de la grille — le nom d'un sous-critère est saisi.
  */
@@ -4098,10 +4108,12 @@ function rendreSousCriteresAlgo(critere, ctx) {
     const index = ctx.index;
     const scs = Array.isArray(critere.sousCriteres) ? critere.sousCriteres : [];
     const datas = (scIndex) => `data-on-change="modifierSousCritereHandler" data-grille-id="${esc(grilleId)}" data-critere-index="${index}" data-sc-index="${scIndex}"`;
+    const codesActifs = critere.codesDepuisSousCriteres === true;
+    const cleCritere = critere.id || ('critere-' + index);
 
     const lignes = scs.map((sc, scIndex) => `
                         <div class="sous-critere-item avec-outils">
-                            <div class="sous-critere-champs-grid sous-critere-champs-grid--note">
+                            <div class="sous-critere-champs-grid ${codesActifs ? 'sous-critere-champs-grid--note-codes' : 'sous-critere-champs-grid--note'}">
                                 <div class="groupe-form">
                                     <label class="sous-critere-label-petit">Code</label>
                                     <input type="text"
@@ -4127,7 +4139,11 @@ function rendreSousCriteresAlgo(critere, ctx) {
                                            placeholder="1.0"
                                            ${datas(scIndex)} data-champ="ponderation" data-parse-float
                                            title="Ex: 1.0 pour erreur complète, 0.5 pour demi-point">
-                                </div>
+                                </div>${codesActifs ? `
+                                <div class="groupe-form sous-critere-couleur-groupe">
+                                    <label class="sous-critere-label-petit">Couleur</label>
+                                    ${rendreCouleurSousCritere(critere, sc, { grilleId: grilleId, index: index, scIndex: scIndex })}
+                                </div>` : ''}
                             </div>
                             <div class="bloc-coin-outils">
                                 ${reordonnerBloc({
@@ -4136,7 +4152,7 @@ function rendreSousCriteresAlgo(critere, ctx) {
                                     premier: scIndex === 0, dernier: scIndex === scs.length - 1, quoi: 'ce sous-critère'
                                 })}
                                 ${retirerBloc({ action: 'supprimerSousCritere', param: grilleId, param2: index, param3: scIndex, titre: 'Supprimer ce sous-critère' })}
-                            </div>
+                            </div>${codesActifs ? rendrePliObservationSousCritere(sc, scIndex, { grilleId: grilleId, index: index, cleCritere: cleCritere }) : ''}
                         </div>`).join('');
 
     const boutonAjouter = (classe) => `
@@ -4158,6 +4174,7 @@ function rendreSousCriteresAlgo(critere, ctx) {
                             📋 Utiliser sous-critères par défaut (0-10)
                         </button>` : ''}
                     </div>
+                    ${rendreActivationCodes(critere, { grilleId: grilleId, index: index })}
                     ${scs.length > 0 ? `
                     <div class="sous-criteres-liste-conteneur">
                         ${lignes}
@@ -4174,67 +4191,56 @@ function rendreSousCriteresAlgo(critere, ctx) {
 }
 
 /**
- * La carte « Codes d'annotation » — les MOTS des sous-critères : le geste
- * d'activation (codes par grille, lot 3 du 3 sept.), puis, par sous-critère, sa
- * couleur et sa rétroaction. Le code et le nom se LISENT ici et se modifient dans
- * le bloc « Sous-critères » : un champ, un seul endroit où l'écrire.
+ * Lot A (5 sept. 2026) — le texte d'un code, « Observation », sous un PLI par rangée :
+ * le composant `.carte.accordeon` de l'application, employé tel quel (bascule
+ * `toggleAccordeonV2` par le dispatcher de main.js, état relevé par
+ * `capturerPlisGabaritAlgo` avant chaque redessin, relu par `pliGabaritAlgoFerme`),
+ * fermé par défaut — ce qui porte les mots. Sans l'habit de carte : `styles.css`,
+ * règle scopée `.sous-critere-pli`. UN champ, `sc.retroaction`, le même handler et
+ * les mêmes index que le code, le nom et la pondération de sa rangée.
+ * ⛔ Le pli ne porte pas d'`id` : rien ne se persiste, il meurt avec la page.
  */
-function rendreBlocCodesAlgo(critere, ctx) {
+function rendrePliObservationSousCritere(sc, scIndex, ctx) {
     const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
-    const grilleId = ctx.grilleId;
-    const index = ctx.index;
-    const scs = Array.isArray(critere.sousCriteres) ? critere.sousCriteres : [];
-    if (scs.length === 0) {
-        return `
-                <p class="sous-criteres-vide-message">Aucun sous-critère : ajoute-en dans le bloc « Sous-critères » ci-dessus, puis règle ici leur couleur et leur rétroaction.</p>`;
-    }
-    const lignes = scs.map((sc, scIndex) => `
-                        <div class="sous-critere-item">
-                            <div class="sous-critere-champs-grid sous-critere-champs-grid--code">
-                                <div class="groupe-form">
-                                    <label class="sous-critere-label-petit">Sous-critère</label>
-                                    <div class="sous-critere-code-lecture">${esc(codeAfficheSousCritere(sc, scIndex))} · ${esc(sc.nom || '')}</div>
-                                </div>
-                                <div class="groupe-form sous-critere-couleur-groupe">
-                                    <label class="sous-critere-label-petit">Couleur</label>
-                                    ${rendreCouleurSousCritere(critere, sc, { grilleId: grilleId, index: index, scIndex: scIndex })}
-                                </div>
-                            </div>
-                            <div class="groupe-form sous-critere-description-groupe">
-                                <label class="sous-critere-label-petit">Description / Rétroaction</label>
-                                <textarea class="controle-form sous-critere-textarea"
-                                          rows="2"
-                                          placeholder="Ex: La plupart des erreurs concernent la construction syntaxique..."
-                                          data-on-change="modifierSousCritereHandler" data-grille-id="${esc(grilleId)}" data-critere-index="${index}" data-sc-index="${scIndex}" data-champ="retroaction">${esc(sc.retroaction || '')}</textarea>
-                            </div>
-                        </div>`).join('');
+    const clePli = `${ctx.cleCritere}:sc:${sc.id || ('rang-' + scIndex)}`;
+    const ferme = pliGabaritAlgoFerme(clePli, true);
     return `
-                    <div class="sous-criteres-liste-conteneur">
-                        ${rendreActivationCodes(critere, { grilleId: grilleId, index: index })}
-                        ${lignes}
-                    </div>`;
+                            <div class="carte accordeon sous-critere-pli${ferme ? ' ferme' : ''}" data-pli="${esc(clePli)}">
+                                <div class="accordeon-header">
+                                    <h3 class="sous-critere-pli-titre"><span class="accordeon-chevron">${ferme ? '▶' : '▼'}</span> Observation</h3>
+                                </div>
+                                <div class="accordeon-contenu">
+                                    <div class="groupe-form sous-critere-observation-groupe">
+                                        <textarea class="controle-form sous-critere-textarea"
+                                                  rows="2"
+                                                  placeholder="Ex: La plupart des erreurs concernent la construction syntaxique..."
+                                                  aria-label="Observation du code ${esc(codeAfficheSousCritere(sc, scIndex))}"
+                                                  data-on-change="modifierSousCritereHandler" data-grille-id="${esc(ctx.grilleId)}" data-critere-index="${ctx.index}" data-sc-index="${scIndex}" data-champ="retroaction">${esc(sc.retroaction || '')}</textarea>
+                                    </div>
+                                </div>
+                            </div>`;
 }
 
 /**
  * LE GABARIT D'UN CRITÈRE ALGORITHMIQUE, pour les deux écrans de grille — un seul
  * rendu, deux contextes (`ctx.mode` : 'temp' en création, 'grille' en édition).
  * Ordre décidé par Grégoire le 4 sept. : les sous-critères d'abord, sous la rangée
- * du critère ; puis la formule (ouverte : elle porte la note), l'observation, la
- * projection et les codes (repliés : ils portent les mots). Chaque carte a son
+ * du critère ; puis la formule (ouverte : elle porte la note), l'observation et
+ * « Ce que l'élève lit » (repliées : elles portent les mots). ↻ Lot A du 5 sept. :
+ * la carte « Codes d'annotation » n'existe plus — la liste des sous-critères porte
+ * tout (`rendreSousCriteresAlgo`). Chaque carte a son
  * titre et sa bande — c'est ce qui sépare la formule de la projection, sans marge
  * ajoutée à part. Rien ici n'écrit dans la grille : l'ordre change le rendu, pas
  * les données, et les `data-critere-index` des handlers restent ceux du critère.
  */
 function rendreCartesGabaritAlgo(critere, ctx) {
     if (!critere || critere.type !== 'algorithmique') return '';
-    const estGrille = ctx.mode === 'grille';
     return `
             <div class="gabarit-algo" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">
                 ${rendreSousCriteresAlgo(critere, ctx)}
                 ${carteGabaritAlgo(critere, ctx, 'formule', 'Formule', rendreBlocFormuleAlgo(critere, ctx), false)}
                 ${carteGabaritAlgo(critere, ctx, 'commentaire', 'Observation', rendreBlocEnoncesAlgo(critere, ctx), true)}
                 ${carteGabaritAlgo(critere, ctx, 'projection', 'Ce que l\'élève lit', rendreBlocProjectionAlgo(critere, ctx), true)}
-                ${estGrille ? carteGabaritAlgo(critere, ctx, 'codes', 'Codes d\'annotation', rendreBlocCodesAlgo(critere, ctx), true) : ''}
             </div>`;
 }
 
