@@ -15,11 +15,15 @@
 
 ## §0 · Préalable
 
-- **Où l'application se charge.** L'iPad ne lit pas ton clone : il charge le SITE. Le lot D n'y est pas tant
-  que 1.119 n'est pas poussée. ⮕ Soit 1.119 part avec D et cette porte se passe en place (c'est ce que je
-  recommande : rien d'irréversible, un repli existe) ; soit Cowork te donne une adresse de prévisualisation.
-  **La rangée juste, dans les deux cas : lis le numéro en bas de page** — il doit dire **1.119.0** (ou la
-  prévisualisation qui porte `composeur-badges.js`). Si tu lis 1.118.0, la porte ne juge rien.
+- ↻ **OPTION RETENUE PAR GRÉGOIRE (10 h 05) : L'APERÇU.** Les sept commits du jour sont poussés sur la
+  branche `apercu/2026-09-05-journee-A-B-D` (PR #82 vers `main`, à NE PAS fusionner par le bouton — `main`
+  recevra les mêmes commits en fast-forward avec 1.119). Netlify publie l'aperçu de PR, non redirigé exprès :
+  **https://deploy-preview-82--codexnumeris-051225.netlify.app/**
+  ⮕ Ouvre CETTE adresse sur l'iPad. Le numéro en bas de page dit encore **1.118.0** (l'aperçu porte le code
+  du jour SANS bump de version) : le geste qui prouve que tu es sur le bon code, c'est **2.1** — la pastille
+  dans la phrase. Si un badge posé s'écrit `{projection}` en clair, tu n'es pas sur l'aperçu.
+- **Où l'application se charge, sinon.** L'iPad ne lit pas ton clone : il charge le SITE, où le lot D n'est
+  pas tant que 1.119 n'est pas poussée.
 - Sur l'iPad, **recharge en vidant le cache** si l'application était déjà ouverte (le jeton `?v=` de
   `grilles.js`, `styles.css` et `composeur-badges.js` est bumpé au jour de la release).
 - Conception › Grilles › ouvre une grille qui a un **critère algorithmique** (« Rigueur », par exemple), puis
