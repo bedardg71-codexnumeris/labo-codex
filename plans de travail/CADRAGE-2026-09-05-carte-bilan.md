@@ -21,10 +21,13 @@ corrigé** (1.118 est partie avec).
 
 1. **La carte s'appelle « Bilan »** — le mot que l'élève et l'enseignant·e voient déjà dans l'application et le PDF.
 2. **Elle ne contient que ce qui va dans le bilan** : « Défi prioritaire » et « Quand tout est maîtrisé ».
-3. **« Aucune annotation » déménage dans la carte « Codes d'annotation »** : c'est la phrase lue quand aucun code ni
-   tampon n'est posé, même geste. ⚠ Réserve nommée : cette carte n'existe qu'en édition d'une grille enregistrée
-   (`grilles.js`, `estGrille`), pas à la création ; la phrase suivra — acceptable pour un texte qu'on ne touche pas
-   avant d'avoir corrigé.
+3. **« Aucune annotation » déménage sous la case « Utiliser ces sous-critères comme codes d'annotation »**, dans la liste
+   « Sous-critères » — ↻ corrigé à 11 h 53 : la carte « Codes d'annotation » **n'existe plus depuis le lot A** (1.119, `a3deac63`) ;
+   la case est maintenant l'endroit où vivent les codes (`rendreActivationCodes`, appelé dans `rendreSousCriteresAlgo`,
+   `grilles.js:~4314`). La phrase s'y rend par le même helper (`rendreChampEnonceAlgo`, clé `aucune`), sous un pli fermé
+   « Quand la copie ne porte aucun code ». ⚠ Réserve nommée : la case n'est rendue qu'en édition d'une grille enregistrée
+   (`grilleId`), pas à la création ; la phrase suivra — acceptable pour un texte qu'on ne touche pas avant d'avoir corrigé.
+   Une seule maison : elle n'apparaît plus dans « Bilan », ni en édition ni en création.
 4. **Le menu « Modèle d'observation » reste dans « Bilan »** et se renomme pour dire les deux choses qu'il fait,
    texte de départ à reprendre par Grégoire : « Modèle des phrases (bilan et décompte) » — il fournit aussi le texte
    de départ du décompte, qui vit dans « Ce que l'élève lit » depuis 1.118 (`enoncesAlgo.normaliser`). Le découpler
@@ -47,6 +50,6 @@ la clé de pli `commentaire` (mémoire seulement — peut rester).
 
 ## Fini quand
 
-Grégoire ouvre un critère algorithmique : une carte « Bilan » à deux phrases, « Aucune annotation » dans « Codes
-d'annotation », le menu renommé, le modèle « Français écrit » sans parenthèse et sa description neuve ; la sentinelle « une seule carte » (étape 2) adaptée,
+Grégoire ouvre un critère algorithmique : une carte « Bilan » à deux phrases, « Aucune annotation » sous la case des codes,
+dans la liste « Sous-critères », le menu renommé, le modèle « Français écrit » sans parenthèse et sa description neuve ; la sentinelle « une seule carte » (étape 2) adaptée,
 une sentinelle qui rougit si « aucune » revient dans « Bilan ».
