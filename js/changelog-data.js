@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            version: '1.119',
+            couleur: 'vert',
+            titre: 'Les badges s\'affichent dans la phrase, tes réglages de projection s\'enregistrent sous un nom',
+            items: [
+                '<strong>Le badge s\'affiche dans la phrase.</strong> Dans toute zone qui offre des badges (verdict, recommandation, décompte, énoncés), un badge posé se montre comme une pastille dans le fil du texte, plus comme « {erreurs} ». Il s\'efface d\'un coup, par la touche d\'effacement ou par sa croix. Ce qui est enregistré ne change pas : tes grilles gardent le même texte.',
+                '<strong>Tes réglages de projection sous un nom.</strong> Dans la carte « Ce que l\'élève lit », « Enregistrer ces paliers sous un nom… » garde le modèle, ses réglages et ses paliers ; tu les retrouves sous « Mes collections » dans le menu de projection de toutes tes grilles. Choisir une collection copie ses valeurs dans le critère : la corriger ou la supprimer ensuite ne change aucune grille, ni ce qu\'un élève a déjà lu.',
+                '<strong>Une seule liste pour les sous-critères et les codes.</strong> La carte « Codes d\'annotation » disparaît : la case « Utiliser ces sous-critères comme codes d\'annotation » est en tête de la liste ; cochée, chaque rangée montre sa couleur et un pli « Observation » qui porte le texte du code. Une ligne dit où vit la palette générale.',
+                '<strong>Les mêmes gestes partout.</strong> La corbeille remplace le « ✕ » rouge dans la bibliothèque, la pratique de notation et l\'éditeur d\'échelles ; les chevrons à côté du nom remplacent la colonne « Ordre ». Ce que chaque suppression fait et dit ne change pas.',
+                '<strong>Sur iPad en portrait, les formulaires à deux colonnes s\'empilent</strong> (le groupe-cours, les paliers), l\'étiquette au-dessus de chaque champ.',
+                '<strong>Rien ne change dans tes grilles ni tes évaluations enregistrées</strong> ; les grilles partagées et importées gardent leur texte.'
+            ]
+        },
+        {
             version: '1.118',
             couleur: 'vert',
             titre: 'Ce que l\'élève lit se compose en une seule carte, avec des badges',
