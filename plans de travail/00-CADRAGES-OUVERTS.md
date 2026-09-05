@@ -124,6 +124,32 @@ avec la correction du point 3 (« Aucune annotation » sous la case des codes, p
 « Codes d'annotation » n'existant plus) et le point 5 (« Français écrit », mots de Grégoire à 11 h 41). Vérifié : relecture de Cowork
 sur le commit, coup d'œil de Grégoire, changelog validé par lui. Plus rien d'ouvert ici.
 
+## 🔎 LA SÉRIE D'AUDITS CADRÉS — trois audits, un ordre, une règle de fermeture
+
+*Ouverte le 5 septembre 2026 par Cowork, à la demande de Grégoire : « le moteur d'évaluation, et ce
+qui a été couvert comme inspection ». Les prompts vivent dans `Rapports/prompts-audit/`, les
+rapports dans `Rapports/`. **Un audit n'est fermé que quand chaque constat porte sa disposition dans
+son fichier** (`CLAUDE.md`, « Ce qu'un audit doit produire ») — et les dispositions sont
+PROPOSÉES par l'auditeur, ARBITRÉES par Grégoire, avant tout lot de correction.*
+
+| n° | objet | prompt | état au 5 septembre, 16 h 30 |
+|---|---|---|---|
+| 1 | **Le moteur d'évaluation** — la note d'une copie (calcul, formules, projection, énoncés, rétroaction ; frontière avec `pratiques/`) | `PROMPT-AUDIT-moteur-evaluation-2026-09-05.md` | ▣ **EXÉCUTÉ et FERMÉ le jour même** : `Rapports/AUDIT-moteur-evaluation-2026-09-05.md`, 8 flux, banc de 30 mesures. Trois « corriger maintenant » arbitrés par Grégoire et **livrés en 1.121.0** (#697 échelle introuvable, #698 effacement des codes, #699 auto-save et bilan), **éprouvés par lui à l'écran**. Inscrits pour après le 14 : #700 à #705 ; H-1 (frontière) → audit 2 (#706). Une réserve de Cowork sur G-2 (source unique prouvée sur une grille holistique seulement), à inscrire. |
+| 2 | **La pratique de notation** — la note du cours (quatre familles SOM/STD/SPE/DEN, les deux systèmes de calcul, l'échelle globale, les jetons) | `PROMPT-AUDIT-pratique-de-notation-2026-09-05.md` | ⏳ **À EXÉCUTER** — prêt, relais donné à Grégoire le 5 septembre. Part du flux H de l'audit 1. Ferme au passage `ultrareview-lot-3-indices.md` et `ultrareview-lot-4a-evaluation.md` (mai, sans disposition). |
+| 3 | **L'onglet Suivi** — présences → assiduité, complétion, niveau, IPB, palier RàI, interventions, agrégats du groupe, graphiques ; **et la protection du volet confidentiel** dans tout ce qui sort | `PROMPT-AUDIT-onglet-suivi-2026-09-05.md` | ⏳ **À EXÉCUTER EN TROISIÈME**, après le 2 (il lit ce que les deux moteurs produisent). Jamais audité comme onglet (mesuré le 5 septembre). Ferme au passage `ultrareview-lot-6-travaux-saisie.md` (N1-N6, présences) et les §5.3/§8/§9 de `AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md`. |
+
+⮕ **Pourquoi trois audits courts plutôt qu'un grand** : le 1er septembre, sur 51 rapports, 22 étaient
+sans suite. Un audit qui pose deux questions sur 13 000 lignes produit un rapport que personne ne
+ferme. Chaque audit a **une** question directrice, un périmètre compté au `wc -l`, des élèves ou
+des copies de banc avec le nombre attendu calculé à la main, et une section « ce que je n'ai pas
+regardé » obligatoire — celle qui manquait le 25 août.
+⮕ **Après le 3** : ce qui reste sans inspection cadrée, à ce jour, c'est l'onglet Conception
+(audité le 25 août, `AUDIT-conception-gabarits-2026-08-25.md`, dispositions à vérifier), le
+Calendrier, le Labo, l'Aide et les Réglages. Rien n'est cadré pour eux ; ce n'est pas un oubli,
+c'est un choix : les trois audits couvrent ce qui écrit un chiffre sur le document d'un élève.
+
+---
+
 ## ⏳ INSCRIT AILLEURS, ET QUI N'A PAS DE CADRAGE
 
 - **Corbeille et chevrons partout, et les deux colonnes qui s'empilent sur iPad** — mesuré par Claude Code le

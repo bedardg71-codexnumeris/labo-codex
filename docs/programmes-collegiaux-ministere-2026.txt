@@ -1,0 +1,198 @@
+# PROGRAMMES D'ÉTUDES COLLÉGIALES (DEC) — LISTE MINISTÉRIELLE
+# Compilée le 5 septembre 2026 pour Labo Codex.
+#
+# SOURCES (Ministère de l'Enseignement supérieur, quebec.ca)
+#   Préuniversitaires : quebec.ca/education/cegeps-colleges-prives/services/programmes/programmes-etudes-preuniversitaires (mise à jour 17 oct. 2025)
+#   Techniques : quebec.ca/education/cegeps-colleges-prives/services/programmes/programmes-etudes-techniques + ses 20 pages « Secteur » (mise à jour 3 avr. 2025)
+#   Les titres sont reproduits tels quels (apostrophes droites), sans les mentions « Addenda » ni « nouvelle version ».
+#
+# FORMAT : une ligne par programme, « CODE | Titre ». Les lignes « ## » sont des en-têtes de groupe.
+# COMPTE : 24 préuniversitaires + 112 techniques = 136 programmes ministériels, plus 13 codes hors nomenclature (bloc final).
+#
+# ÉCARTS AVEC LA DATALIST ACTUELLE (index.html, #liste-programmes-etudes, 125 entrées)
+#   À ajouter (14) : 141.B0, 180.A1, 414.C0, 200.D1, 200.Z0, 200.Z1, 300.B1, 300.C1, 300.D1, 300.Z0, 500.B1, 500.C1, 500.Z0, 700.Z0
+#   À déplacer vers le bloc final (3, versions antérieures encore portées par des cohortes) : 141.A0, 180.A0, 414.A0
+#   À renommer (1) : 570.C0 « Techniques de design industriel » devient « Techniques de design de produits »
+#   La table obtenirNomProgramme() de js/etudiants.js (33 entrées, offre d'un seul cégep) est à remplacer par la même source unique.
+#
+# NOTE SUR 300.M0 / 300.M1 (inférence, non confirmée auprès du SRAM) : le Ministère ne publie que 300.A0 et 300.A1 ;
+#   300.M0 / 300.M1 (Sciences humaines sans / avec mathématiques) sont des codes d'admission utilisés par plusieurs cégeps.
+#   Ils sont conservés dans le bloc final pour ne rien casser.
+
+## PRÉUNIVERSITAIRES — Principaux programmes
+500.A1 | Arts, lettres et communication
+510.A0 | Arts visuels
+506.A0 | Danse
+700.B0 | Histoire et civilisation
+501.A0 | Musique
+200.B0 | Sciences de la nature
+200.B1 | Sciences de la nature
+300.A0 | Sciences humaines
+300.A1 | Sciences humaines
+200.C0 | Sciences informatiques et mathématiques
+200.C1 | Sciences, informatique et mathématique
+700.A0 | Sciences, lettres et arts
+700.A1 | Sciences, lettres et arts
+## PRÉUNIVERSITAIRES — Cheminements du Baccalauréat International (BI)
+500.Z0 | Arts, lettres et communication (BI)
+700.Z0 | Cheminement multidisciplinaire du Baccalauréat International
+200.Z0 | Sciences de la nature (BI)
+200.Z1 | Sciences de la nature (BI)
+300.Z0 | Sciences humaines (BI)
+## PRÉUNIVERSITAIRES — Programmes adaptés aux langues et aux cultures autochtones
+300.B1 | Sciences humaines – Premières Nations
+300.D1 | Sciences humaines – Inuits
+500.B1 | Arts, lettres et communication – Premières Nations
+500.C1 | Arts, lettres et communication – Inuits
+## PRÉUNIVERSITAIRES — Programmes avec langue seconde enrichie
+200.D1 | Sciences de la nature – Langue seconde enrichie
+300.C1 | Sciences humaines – Langue seconde enrichie
+## TECHNIQUES — Secteur 1 : Administration, commerce et informatique
+384.A0 | Techniques de recherche et de gestion de données
+410.B0 | Techniques de comptabilité et de gestion
+410.D0 | Gestion de commerces
+410.F0 | Techniques de services financiers et d'assurances
+410.G0 | Techniques d'administration et de gestion
+412.A0 | Techniques de bureautique
+420.B0 | Techniques de l'informatique
+## TECHNIQUES — Secteur 2 : Agriculture et pêches
+145.D0 | Techniques de santé animale
+152.B0 | Gestion et technologies d'entreprise agricole
+153.A0 | Technologie des productions animales
+153.C0 | Paysage et commercialisation en horticulture ornementale
+153.D0 | Technologie du génie agromécanique
+153.F0 | Technologie de la production horticole agroenvironnementale
+155.A0 | Techniques équines
+231.A0 | Techniques d'aquaculture
+231.B0 | Technologies bioalimentaires aquatiques
+## TECHNIQUES — Secteur 3 : Alimentation et tourisme
+154.A0 | Technologie des procédés et de la qualité des aliments
+414.C0 | Techniques de tourisme
+414.B0 | Techniques du tourisme d'aventure
+430.A0 | Techniques de gestion hôtelière
+430.B0 | Gestion d'un établissement de restauration
+## TECHNIQUES — Secteur 4 : Arts
+551.A0 | Techniques professionnelles de musique et chanson
+551.B0 | Technologies sonores
+561.B0 | Danse - Interprétation
+561.C0 | Interprétation théâtrale
+561.D0 | Arts du cirque
+561.F0 | Production scénique
+570.C0 | Techniques de design de produits
+570.D0 | Techniques de design de présentation
+570.E0 | Techniques de design d'intérieur
+570.F0 | Photographie
+573.A0 | Techniques de métiers d'art
+## TECHNIQUES — Secteur 5 : Bois et matériaux connexes
+233.B0 | Techniques du meuble et d'ébénisterie
+## TECHNIQUES — Secteur 6 : Chimie, biologie
+210.A0 | Techniques de laboratoire
+210.D0 | Techniques de procédés industriels
+260.A0 | Technologie de l'eau
+260.B0 | Environnement, hygiène et sécurité au travail
+## TECHNIQUES — Secteur 7 : Bâtiment et travaux publics
+221.A0 | Technologie de l'architecture
+221.B0 | Technologie du génie civil
+221.C0 | Technologie de la mécanique du bâtiment
+221.D0 | Technologie de l'estimation et de l'évaluation en bâtiment
+230.B0 | Technologie de la géomatique
+311.A0 | Techniques de sécurité incendie
+## TECHNIQUES — Secteur 8 : Environnement et aménagement du territoire
+145.B0 | Techniques d'aménagement cynégétique et halieutique
+145.C0 | Techniques de bioécologie
+147.A0 | Techniques du milieu naturel
+222.A0 | Techniques d'aménagement et d'urbanisme
+## TECHNIQUES — Secteur 9 : Électrotechnique
+243.D0 | Technologie du génie électrique - Automatisation et contrôle
+243.F0 | Technologie du génie électrique - Réseaux et télécommunications
+243.G0 | Technologie du génie électrique - Électronique programmable
+243.H0 | Technologie de l'électronique - Audiovisuel
+244.A0 | Technologie du génie physique
+280.D0 | Techniques d'avionique
+## TECHNIQUES — Secteur 10 : Entretien d'équipement motorisé
+248.D0 | Techniques de génie mécanique de marine
+280.C0 | Techniques de maintenance d'aéronefs
+## TECHNIQUES — Secteur 11 : Fabrication mécanique
+235.B0 | Technologie du génie industriel
+235.C0 | Technologie de la production pharmaceutique
+241.A0 | Techniques de génie mécanique
+241.B0 | Techniques de génie du plastique
+241.C0 | Technologie du génie des matériaux composites
+248.A0 | Technologie de l'architecture navale
+280.B0 | Techniques de génie aérospatial
+## TECHNIQUES — Secteur 12 : Foresterie et papier
+190.A0 | Technologie de la transformation des produits forestiers
+190.B0 | Technologie forestière
+## TECHNIQUES — Secteur 13 : Communications et documentation
+393.B0 | Techniques de la documentation
+570.B0 | Techniques de muséologie
+570.G0 | Graphisme
+574.A0 | Illustration et dessin animé
+574.C0 | Production 3D et de synthèse d'images
+581.C0 | Gestion de projet en communications graphiques
+581.D0 | Infographie en prémédia
+582.A1 | Techniques d'intégration multimédia
+589.B0 | Techniques de communication dans les médias
+589.C0 | Techniques cinématographiques et télévisuelles
+## TECHNIQUES — Secteur 14 : Mécanique d'entretien
+241.D0 | Technologie de maintenance industrielle
+## TECHNIQUES — Secteur 15 : Mines et travaux de chantier
+271.A0 | Technologie minérale
+## TECHNIQUES — Secteur 16 : Métallurgie
+270.A0 | Technologie du génie métallurgique
+## TECHNIQUES — Secteur 17 : Transport
+248.B0 | Navigation
+280.F0 | Techniques de pilotage d'aéronefs
+410.A1 | Gestion des opérations et de la chaîne logistique
+## TECHNIQUES — Secteur 18 : Cuir, textile et habillement
+571.A0 | Design de mode
+571.B0 | Gestion de la production du vêtement
+571.C0 | Commercialisation de la mode
+## TECHNIQUES — Secteur 19 : Santé
+110.A0 | Techniques de prothèses dentaires
+110.B0 | Techniques de denturologie
+111.B0 | Techniques d'hygiène dentaire
+112.A0 | Acupuncture
+120.A0 | Techniques de diététique
+140.A0 | Techniques d'électrophysiologie médicale
+140.C0 | Technologie d'analyses biomédicales
+141.B0 | Inhalothérapie
+142.D0 | Technologie de radio-oncologie
+142.F0 | Technologie de médecine nucléaire
+142.G0 | Technologie de l'échographie médicale
+142.H0 | Technologie de radiodiagnostic
+144.A1 | Techniques de physiothérapie
+144.F0 | Orthèses, prothèses et soins orthopédiques
+160.A0 | Optique et lunetterie
+160.B0 | Audioprothèse
+165.A0 | Techniques de pharmacie
+171.A0 | Techniques de thanatologie
+180.A1 | Soins infirmiers
+180.B0 | Soins infirmiers
+181.A1 | Soins préhospitaliers d'urgence
+411.A0 | Archives médicales
+## TECHNIQUES — Secteur 20 : Services sociaux, éducatifs et juridiques
+310.A0 | Techniques policières
+310.B1 | Techniques d'intervention en criminologie
+310.C0 | Techniques juridiques
+322.A1 | Techniques d'éducation à l'enfance
+351.A1 | Techniques d'éducation spécialisée
+388.A1 | Techniques de travail social
+391.A0 | Techniques de gestion et d'intervention en loisir
+
+## HORS NOMENCLATURE MINISTÉRIELLE — Versions antérieures encore portées par des cohortes
+141.A0 | Techniques d'inhalothérapie
+180.A0 | Soins infirmiers
+410.A0 | Techniques de la logistique du transport
+414.A0 | Techniques de tourisme
+## HORS NOMENCLATURE MINISTÉRIELLE — Codes d'admission (SRAM) présents dans les données actuelles
+300.M0 | Sciences humaines
+300.M1 | Sciences humaines avec mathématiques
+500.AE | Arts, lettres et communication – Multidisciplinaire
+500.AL | Arts, lettres et communication – Langues
+## HORS NOMENCLATURE MINISTÉRIELLE — Doubles DEC et cheminements locaux
+081.06 | Tremplin DEC
+200.12 | Double DEC Sciences de la nature / Sciences humaines
+300.13 | Double DEC Sciences humaines / Arts visuels
+300.15 | Double DEC Sciences humaines / Danse
+300.16 | Double DEC Sciences humaines / Arts, lettres et communication
