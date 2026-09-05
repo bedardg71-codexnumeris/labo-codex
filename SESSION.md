@@ -7,6 +7,70 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 27 — 5 SEPTEMBRE 2026, 14 H 20 → 16 H 30 : AUDIT DU MOTEUR D'ÉVALUATION, puis le lot arbitré
+     le jour même. ▣ **LIVRÉ : release 1.121.0 (`1aadacb1`, build 0905-1530) — lot `d3111feb` (#697, #698,
+     #699), rapport `23f5ce67`** sur la branche `audit/moteur-evaluation-2026-09-05`, fusionnée fast-forward sur
+     `main`, verdict Playwright au jeton puis push (`scripts/pousser.sh`) — voir RELAIS. Vitest 473 / 5 263.
+
+     ▣ Mandat 1 (Cowork, 14 h 10) : exécuter `Rapports/prompts-audit/PROMPT-AUDIT-moteur-evaluation-2026-09-05.md`,
+       lecture seule, bac à sable Vitest, branche d'audit partie d'origin/main, jamais main. Rituel isolé
+       (14 h 20) : HEAD 7a40949b = origin/main, Vitest 468 / 5 202, jeton WebKit valide sur c4c7b04a ; un second
+       prompt (`PROMPT-AUDIT-pratique-de-notation-2026-09-05.md`) apparu à 14 h 16 — c'est l'audit SUIVANT, non
+       exécuté. Travail en worktree `.claude/worktrees/audit-moteur-2026-09-05` (retiré ensuite, la branche garde tout).
+     ▣ AUDIT (14 h 25 → 15 h 10) : les huit flux A–H tracés en exécutant le vrai code — banc
+       `tests/unit/audit-moteur-evaluation-2026-09-05.test.js` (30 mesures, modules réels dans le bac à sable,
+       journal AUDIT-MESURES) ; rapport `Rapports/AUDIT-moteur-evaluation-2026-09-05.md` (309 l.). Quatre chemins
+       font atteindre au stockage / à l'écran / au PDF une valeur non saisie : A-1 échelle non résolue → la porte
+       #674 passe (portée NULLE) et `0` s'écrit verrouillé sans portée, 84 → 0 en modification ; D-2 codes ou mots
+       effacés → pourcentage/niveau d'avant en mémoire, note inchangée, « 0 erreur → 17,50/20 (87,5 %) » persisté
+       et imprimé ; G-2 #646 MESURÉ : après réouverture, l'auto-save écrit la note neuve avec les critères anciens
+       (instantané sur window) et le bilan lit window ; B-1 trou entre bornes entières → niveau global « le plus
+       proche » (74,5 → M). Plus B-2 (« -- » en base), C-1 (type déclaré non lu), D-1 (zéro code ≠ zéro erreur),
+       E-2 (grille rééditée → « incomplète »), H-1 (`pratiques/` : ponderationCouverte 0 lecture, verrouillee 0 ;
+       brouillon 95/80 compte 95, zéro de portée 0 compte 0). B-3 bruit flottant ; D-3 facteur 500 (code) — le 600 est
+       sur SA grille, vérifié par lui à l'écran (ligne ajoutée par Cowork dans la copie, portée dans la branche).
+     ▣ Mandat 2 (Grégoire par Cowork, 15 h 20) : les trois « corriger maintenant » en UN lot, ordre A-1 → D-2 → G-2,
+       G-2 CONDITIONNÉ à une spec WebKit qui rougit dans le flux réel ; sentinelles break-testées ; dispositions
+       arrêtées dans le rapport ; release ; rituel ; geste à voir. Pas de mesure des données réelles (sonde en
+       lecture seule pour le stock).
+     ▣ ORDRE TENU : spec `tests/integration/evaluation-699-auto-save-lit-la-source-du-calcul.spec.js` écrite et lancée
+       AVANT tout correctif → ROUGE (base c3 = I sous noteFinale 95 ; restauration et idModification vérifiés) →
+       correctifs dans `evaluation-calcul.js` (résolveur `resoudreEchelleEvaluation` extrait de calculerNote ; porte
+       refuse `noteCalculeeCourante === null` en nommant l'échelle, sans brouillon ; `_memoireAlgoSansResultat` +
+       `_retirerNiveauCalculeAlgo` + calculerNote() dans les deux réinitialisations ; `etatVivantEvaluationEnCours`,
+       le nu l'emporte EN BLOC, `_instantanePourBrouillon` délègue), `evaluation-chargement.js` (garde de création
+       de l'auto-save ; instantané de `_debouncerAutoSave` = état vivant), `evaluation-retroaction.js` (le bilan lit
+       l'état vivant) → banc rougit sur 8 mesures = exactement celles corrigées (+ B5, artefact du banc qui rendait
+       les deux jeux de champs algo ; grille simple posée) → banc aux valeurs d'après, l'avant en commentaire →
+       sentinelles 697 (11 cas) / 697-sonde (3) / 698 (10) / 699 (7) → specs 699 + 674 + 672 + 673 vertes (17,8 s).
+     ▣ BREAK-TESTS, LUS (la première passe était MUETTE — extracteur `\s` refusé par BSD grep ; rejoués avec sortie
+       en fichier, piège 8.4 du skill) : témoin 28/28 vert ; `evaluation-calcul.js` remis à HEAD → **20 rouges / 8
+       témoins verts** (697 A–E H K, 698 A–E G–I, 699 A–D F) ; `evaluation-chargement.js` → **3 rouges** (697 H,
+       699 A B) ; `evaluation-retroaction.js` → **1 rouge** (699 F) ; chaque fichier restauré à empreinte SHA-256
+       identique, `git diff --stat` inchangé.
+     ▣ Rituel : §2 audit statique du diff — 0 innerHTML/handler inline/eval dans js/ ; la sonde porte 3 console.log
+       (outil console, patron diag-674) ; les tests posent innerHTML sur des faux éléments seulement. §3 Vitest
+       473 / 5 263 (avant et après le bump). §5 `release.mjs minor` (dry-run puis réel) : 6 jetons bumpés dont les
+       trois du lot déjà passés à 20260905i au commit du lot (pratique de 1b06b1ba) ; changelog 1.121 ORANGE, trois
+       items, MES mots — à relire par Grégoire.
+     ▣ Décisions prises seul, dites : `minor` plutôt que `patch` (trois corrections visibles méritent leur entrée) ;
+       « le nu l'emporte EN BLOC » (une fusion clé par clé ferait resurgir un niveau retiré par #698 ou par des points
+       effacés) ; les données algorithmiques gardent le repli sur window (la réouverture les y pose en premier,
+       `_majEvaluationExistanteAutoSave` refuse l'objet vide) ; le refus #697 n'écrit AUCUN brouillon ; la sonde du
+       stock est un script console lecture seule (`scripts/diagnostic-697-zeros-sans-echelle.js`, `await diag697()`),
+       pas un écran ; IDs #697–#706 (les « #777 » du BACKLOG sont la couleur `#777788`).
+     ▣ Inscrit, non fait : #700 annotations retirées → `eval_erreurs_` ; #701–#705 à trancher après le 14 ; #706 →
+       second audit ; #646 réunification. Non regardé : le navigateur pour A/D (Node seulement), les données réelles
+       (interdit), échelles de pratique en flux réel, jetons, plafond de reprise, `modifierEvaluation` depuis la liste.
+     ▣ CE QUE GRÉGOIRE DOIT ALLER VOIR (Annoter et évaluer) : (1) une copie dont la grille n'a pas d'échelle →
+       Enregistrer → refus « Échelle introuvable » qui nomme l'échelle, rien d'écrit dans la liste ; (2) une copie
+       avec des codes saisis sur le critère algorithmique → effacer les codes → la note bouge tout de suite (« -- »,
+       critère nommé sous la note), et le PDF ne dit plus « 0 erreur → 87,5 % » ; (3) rouvrir une copie déjà
+       évaluée, changer un niveau, attendre deux secondes → la liste porte la nouvelle note ET le nouveau niveau du
+       critère ; l'onglet Bilan suit.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 26 — 5 SEPTEMBRE 2026, 12 H → 13 H 27 : LA CARTE « BILAN » — un seul lot, rendu seul,
      aucune donnée. ▣ **LIVRÉ : release 1.120.0 (`c4c7b04a`, build 0905-1315) POUSSÉE à 13 h 26,
      verdict Playwright local vert, `main` = `origin/main`.** Ordre de la consigne tenu : lot (`1b06b1ba`)

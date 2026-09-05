@@ -15,7 +15,7 @@
 
 ---
 
-## ▣ CE QUI EST OUVERT AUJOURD'HUI — huit cadrages ; livrés : le 3 (1.116), le 7 (1.117), le 1 étapes 2 et 3 (1.118, 1.119), le 2 (1.119), le 5 (1.119) ; le 1 est CLOS (étape 4 abandonnée) ; ouverts : le 4, le 6 (à trier), le 8 (inscrit)
+## ▣ CE QUI EST OUVERT AUJOURD'HUI — huit cadrages ; livrés : le 3 (1.116), le 7 (1.117), le 1 étapes 2 et 3 (1.118, 1.119), le 2 (1.119), le 5 (1.119), le 8 (1.120) ; le 1 est CLOS (étape 4 abandonnée) ; ouverts : le 4, le 6 (à trier)
 
 *Aucun n'empêche un des huit énoncés de la cohorte 1 : ils sont tous parcourus depuis le
 3 septembre au matin. Ces quatre-là traitent l'**adoption** et la **justesse**, pas la ligne
@@ -119,6 +119,10 @@ qui touche un format qui voyage.
 ↻ **5 septembre 2026, 8 h 01 (Cowork), décision de Grégoire** : « Observation » devient « Bilan » et ne garde que les deux
 phrases du bilan ; « Aucune annotation » va dans « Codes d'annotation » ; le menu du modèle se renomme ; la
 description « #581 » lue par les collègues disparaît. **Pas dans 1.119 sauf décision contraire.** Rendu seul.
+↻ **5 septembre 2026, 13 h 53 (Cowork) — LIVRÉ dans 1.120.0** (`1b06b1ba`, release `c4c7b04a`, build `0905-1315`), cinq points sur cinq,
+avec la correction du point 3 (« Aucune annotation » sous la case des codes, pli « Quand la copie ne porte aucun code », la carte
+« Codes d'annotation » n'existant plus) et le point 5 (« Français écrit », mots de Grégoire à 11 h 41). Vérifié : relecture de Cowork
+sur le commit, coup d'œil de Grégoire, changelog validé par lui. Plus rien d'ouvert ici.
 
 ## ⏳ INSCRIT AILLEURS, ET QUI N'A PAS DE CADRAGE
 

@@ -15,6 +15,24 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **5 septembre 2026, 13 h 51 (vingt-troisième passe, Cowork) — 1.120.0 EN LIGNE** (build `0905-1315`, `c4c7b04a`, poussée à
+13 h 26 ; docs `7a40949b` à 13 h 28 ; `main` = `origin/main`, arbre propre, remesuré à 13 h 51). **Un seul lot, la carte
+« Bilan »** (`1b06b1ba`) : dans un critère algorithmique, la carte « Observation » se titre « Bilan » et ne porte plus que les deux
+phrases du bilan de l'élève et le menu du modèle, renommé « Modèle des phrases (bilan et décompte) » avec une ligne d'aide ;
+« Aucune annotation », lue par l'enseignant seul, vit sous la case des codes dans un pli fermé « Quand la copie ne porte aucun
+code » ; le modèle « Français écrit (formulations d'origine) » devient « Français écrit », description neuve — **le « #581 » que
+les collègues lisaient depuis deux livraisons est parti** (`evaluation-enonces.js:247-248`, mots arrêtés par Grégoire à 11 h 41).
+Aucune donnée ne change. **Vérifié comment** : relecture de Cowork sur le commit du lot (plus aucun « Observation » dans
+`grilles.js`, `aucune` rendu une fois sous la case, diff nul sur `import-export.js`, `partage-schemas.js`,
+`evaluation-projection.js`, deux lignes sur `evaluation-enonces.js`) ; sentinelle neuve `sentinelle-carte-bilan.test.js` (17 tests,
+cinq break-tests rouges puis remis) ; Vitest 5 202 verts ; verdict Playwright local vert sur le commit de release ; coup d'œil de
+Grégoire sur la carte, le menu et le pli — la ligne d'aide gardée telle quelle, les mots du changelog validés (« ça va »).
+Deux tests de plus que le grep de la consigne ne voyait nommaient la carte sans ses mots (`texte-troue-reperes-enonces.spec.js`,
+`lot4-gabarit-algo-cartes.spec.js` l. 160 et 182) : adaptés par Claude Code, dit dans son rapport.
+▣ **Ouvert après ce jour, rien de daté** : la synthèse des rétroactions dans le PDF (nommée à 11 h 35, pas cadrée) ; recueillir ce
+qui sortira du 14 (un gabarit et un canal — le canal est la décision de Grégoire ; personne ne l'a pris). Après le 14 : le recalcul
+quand une échelle change, l'Inspecteur de sélection, le dépôt public.
+
 ↻ **5 septembre 2026, 11 h 16 (vingt-deuxième passe, Cowork) — 1.119.0 EN LIGNE** (build `0905-1053`, `f2fa5a2e`, poussée à
 11 h 04, verdict Playwright local vert ; `main` = `origin/main`, arbre propre). **La journée du 5, livrée d'un coup, quatre
 lots** : (A) une seule liste pour les sous-critères et les codes — la carte « Codes d'annotation » disparaît ; (B) les
@@ -727,6 +745,8 @@ session non préfixées. *(#587, #595, #596)*
 enregistrements, le PDF et le design. Le défaut mesuré le 1er septembre au soir (une
 pondération incomplète qui affiche 0,0 %) n'est dans aucun des 20 constats. Un audit
 propre ne dit rien de ce qu'il n'a pas regardé.
+
+↻ **5 septembre 2026, 15 h 30 — le calcul de la note a été audité, et les trois trous qui pouvaient te faire écrire un chiffre faux sont fermés le jour même (1.121.0).** Rapport `Rapports/AUDIT-moteur-evaluation-2026-09-05.md` (huit flux, banc de 30 mesures exécutées), arbitré par toi : une échelle disparue ne fait plus enregistrer un zéro (l'enregistrement refuse et nomme l'échelle ; ton stock se MESURE avec `scripts/diagnostic-697-zeros-sans-echelle.js`, rien n'y est réparé) ; effacer les codes ou les mots d'un critère algorithmique efface aussi son résultat, la note bouge et le PDF ne dit plus « 0 erreur → 87,5 % » ; rouvrir une copie et changer un niveau : l'enregistrement automatique et le bilan lisent la même source que le calcul. Six constats inscrits (#700 à #706 : le trou entre deux bornes entières, « -- » en base, le type déclaré à la grille, zéro code, la grille rééditée, la pratique de notation qui compte les brouillons), à trancher après le 14 ou renvoyés au second audit. **Vérifié comment** : spec WebKit `evaluation-699-…` ROUGE avant le correctif dans le flux réel (base `c3 = I` sous 95) et verte après ; trois sentinelles (28 cas) break-testées, chaque fichier corrigé remis à HEAD → rouge, restauré à empreinte identique ; Vitest 473 fichiers verts depuis `tests/`. ⮕ **Ce que tu dois aller voir** : ouvre une copie dont la grille n'a pas d'échelle et clique Enregistrer → refus « Échelle introuvable » qui nomme l'échelle, rien d'écrit ; sur une copie avec des codes saisis, efface-les → la note bouge tout de suite et le PDF ne dit plus « 0 erreur ».
 
 ---
 
