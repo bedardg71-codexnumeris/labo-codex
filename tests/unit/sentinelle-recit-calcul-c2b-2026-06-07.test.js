@@ -35,10 +35,14 @@ const GOLDEN = 8450 / 101;
 let win, som, recit;
 
 beforeAll(() => {
-    win = chargerScript('js/pratiques/pratique-sommative.js', {
+    // #706 (5 sept. 2026) : la règle « ce qui entre dans la note » vit dans pratique-registre.js —
+    // le charger d'abord sur le même window. Changement de HARNAIS seulement : assertions inchangées.
+    const dbStub = { getSync: (k, d) => (d !== undefined ? d : null), setSync: () => {}, get: async () => null, set: async () => {} };
+    win = chargerScript('js/pratiques/pratique-registre.js', { db: dbStub, cle: (k) => k });
+    chargerScript('js/pratiques/pratique-sommative.js', {
         obtenirDonneesSelonMode: (k) =>
             k === 'evaluationsSauvegardees' ? EVALS : (k === 'productions' ? PRODUCTIONS : [])
-    });
+    }, win);
     // obtenirCode() délègue au registre (window.obtenirCodePratique) — stub neutre.
     win.obtenirCodePratique = () => 'SOM';
     som = new win.PratiqueSommative();
@@ -91,9 +95,10 @@ describe('C2-b · récit de calcul SOM (traçabilité additive)', () => {
 
     it('cas non calculable → null (DA invalide ou aucune évaluation)', () => {
         expect(som.decrireCalcul('123')).toBeNull();
-        const winVide = chargerScript('js/pratiques/pratique-sommative.js', {
+        const winVide = chargerScript('js/pratiques/pratique-registre.js', { db: { getSync: (k, d) => (d !== undefined ? d : null), setSync: () => {}, get: async () => null, set: async () => {} }, cle: (k) => k });
+        chargerScript('js/pratiques/pratique-sommative.js', {
             obtenirDonneesSelonMode: () => []
-        });
+        }, winVide);
         winVide.obtenirCodePratique = () => 'SOM';
         const somVide = new winVide.PratiqueSommative();
         expect(somVide.decrireCalcul(DA)).toBeNull();

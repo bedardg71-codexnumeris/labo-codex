@@ -1035,7 +1035,10 @@ function genererSectionAccompagnement(da) {
                         }
 
                         const termeArtefact = nbTotalArtefacts > 1 ? obtenirTermeProduction('pluriel') : obtenirTermeProduction('singulier');
-                        return `${prefixeNiveau}<span${survolPourcentage}>${pct.toFixed(0)}%</span> <span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal;">(sur ${nbTotalArtefacts} ${termeArtefact})</span>${noteExplicative}`;
+                        // #706 — ce que la note n'a pas compté, dit à côté du chiffre.
+                        const phraseEcartees = _phraseEvaluationsEcartees(
+                            (typeof compterEvaluationsEcarteesDeLaNote === 'function') ? compterEvaluationsEcarteesDeLaNote(da) : null);
+                        return `${prefixeNiveau}<span${survolPourcentage}>${pct.toFixed(0)}%</span> <span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal;">(sur ${nbTotalArtefacts} ${termeArtefact})</span>${noteExplicative}${phraseEcartees}`;
                     })()}
                 </p>
 
@@ -2964,6 +2967,7 @@ function genererSectionProductions(da) {
                     <div class="note-finale-total ${detailsNoteFinale.noteFinale === null ? 'note-finale-tiret' : ''}">
                         ${detailsNoteFinale.noteFinale !== null ? detailsNoteFinale.noteFinale.toFixed(1) + '%' : '—'}
                     </div>
+                    ${_phraseEvaluationsEcartees(detailsNoteFinale.ecartees, 'note-finale-message-provisoire')}
                 </div>
             </div>
             `;
@@ -3033,6 +3037,7 @@ function genererSectionProductions(da) {
                     <div class="note-finale-total ${detailsNoteFinale.noteFinale === null ? 'note-finale-tiret' : ''}">
                         ${detailsNoteFinale.noteFinale !== null ? detailsNoteFinale.noteFinale.toFixed(1) + '%' : '—'}
                     </div>
+                    ${_phraseEvaluationsEcartees(detailsNoteFinale.ecartees, 'note-finale-message-provisoire')}
                     ${detailsNoteFinale.estProvisoire && terminal.present ? '<div class="note-finale-message-provisoire">Basée uniquement sur le portfolio (évaluation terminale non complétée)</div>' : ''}
                 </div>
             </div>
@@ -4060,6 +4065,35 @@ function _appliquerSelectionAutoArtefacts(da, portfolio, artefacts, selectionEle
 function _calculerIndicesPerformance(da) {
     // Session C (#303) : mode comparatif retiré — indices de la pratique active.
     return { indices: calculerTousLesIndices(da) };
+}
+
+/**
+ * #706 — la phrase qui dit combien d'évaluations ont été écartées de la note du cours
+ * (règle arrêtée par Grégoire le 5 septembre 2026 : un brouillon non verrouillé, ou une
+ * portée nulle, n'entre pas dans la note). Vide quand rien n'est écarté : une note qui
+ * compte tout n'a pas d'avertissement à porter.
+ *
+ * Les MOTS sont ceux d'un enseignant qui les lit : « 2 évaluations en brouillon, non
+ * comptées » · « 1 évaluation sans aucun critère évalué, non comptée ».
+ *
+ * @param {{brouillons:number, sansPortee:number, total:number}|null} ecartees
+ * @param {string} [classeBloc] - rendu en <div class="…"> ; sans elle, en <span> discret
+ * @returns {string} HTML sûr (aucune donnée utilisateur)
+ */
+function _phraseEvaluationsEcartees(ecartees, classeBloc) {
+    if (!ecartees || !ecartees.total) return '';
+    const morceaux = [];
+    if (ecartees.brouillons) {
+        const n = ecartees.brouillons;
+        morceaux.push(n + ' évaluation' + (n > 1 ? 's' : '') + ' en brouillon, non comptée' + (n > 1 ? 's' : ''));
+    }
+    if (ecartees.sansPortee) {
+        const m = ecartees.sansPortee;
+        morceaux.push(m + ' évaluation' + (m > 1 ? 's' : '') + ' sans aucun critère évalué, non comptée' + (m > 1 ? 's' : ''));
+    }
+    const texte = morceaux.join(' · ');
+    if (classeBloc) return '<div class="' + classeBloc + '">' + texte + '</div>';
+    return '<span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal; display: block; margin-top: 2px;">' + texte + '</span>';
 }
 
 function _lireDetailsRapportPerformance(da, nombreARetenir, artefacts) {

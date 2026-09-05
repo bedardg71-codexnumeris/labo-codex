@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.122',
+            couleur: 'orange',
+            titre: 'La note du cours ne compte plus les brouillons, et les spécifications calculent',
+            items: [
+                '<strong>Une évaluation en brouillon n\'entre plus dans la note du cours.</strong> Une copie non enregistrée (enregistrement automatique en cours, reprise pas encore réévaluée, copie déverrouillée pour modification) ou enregistrée sans aucun critère ne compte plus, dans les quatre pratiques de notation. Le profil et l\'export des résultats disent combien ont été écartées : « 2 évaluations en brouillon, non comptées ».',
+                '<strong>Une pratique par spécifications configurée dans l\'application calcule.</strong> Le « Modèle simple », l\'éditeur de gabarit et leurs forfaits (« Excellence », « Réussite ») rendaient 0 % à toute la classe : le moteur ne lisait pas leur forme. Il la lit maintenant, et un type de travail nommé « Examen » ou « Projet » s\'apparie aux productions du même type. Rien n\'est réécrit dans tes pratiques.',
+                '<strong>Plus de « 0 » qui a l\'air d\'une note.</strong> Au premier calcul d\'un trimestre, pour un élève qu\'on vient d\'ajouter, ou dans l\'export lancé avant un recalcul, une pratique sommative ou par spécifications affichait 0 % comme un résultat. Elle calcule sa note tout de suite, et dit « non constructible » quand il n\'y a rien à calculer.'
+            ]
+        },
+        {
             version: '1.121',
             couleur: 'orange',
             titre: 'Trois chemins où une note pouvait se tromper sont fermés',

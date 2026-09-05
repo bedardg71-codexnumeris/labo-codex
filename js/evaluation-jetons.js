@@ -538,7 +538,10 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options
         evaluations[indexOriginal].archivee = true;
         evaluations[indexOriginal].dateArchivage = new Date().toISOString();
     } else {
-        // Option 2: Supprimer l'originale
+        // Option 2: Supprimer l'originale.
+        // Audit du 5 sept. 2026 (G-4) : `repriseDeId` désigne alors un id disparu. L'aval
+        // est cohérent — retirer le jeton nettoie sans restaurer (`:692-699`), l'impact des
+        // jetons rend `noteOriginale: null` — et la note du cours ne le lit pas. Commenté, pas de fiche.
         evaluations.splice(indexOriginal, 1);
         // #607 — sans quoi le fichier de l'originale garde un evaluationId mort.
         _detacherFichiersDeEvaluation(evaluationOriginaleId, 'delier');

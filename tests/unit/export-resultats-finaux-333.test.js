@@ -64,7 +64,8 @@ describe('#333 — construction des lignes de synthèse', () => {
 
     it('note réelle → valeur + statut « final »', () => {
         const lignes = X.construireLignesSynthese(etudiants, contexte, simuler);
-        expect(lignes[0]).toEqual(['2570113', 'Tremblay', 'Léa', '00001', 'Littérature', 'H2026', 'STD', 'PAN-Standards', 82, 'final']);
+        // #706 (5 sept. 2026) : 11e colonne « Non comptées » — vide quand la simulation ne porte pas `ecartees`.
+        expect(lignes[0]).toEqual(['2570113', 'Tremblay', 'Léa', '00001', 'Littérature', 'H2026', 'STD', 'PAN-Standards', 82, 'final', '']);
     });
 
     it('non constructible → note vide + statut « non constructible » (pas un 0)', () => {

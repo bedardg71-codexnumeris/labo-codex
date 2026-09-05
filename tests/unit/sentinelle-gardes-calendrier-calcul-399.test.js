@@ -148,11 +148,13 @@ describe('#399 · L7 — la note 0 compte dans le repli calculerPerformancePAN',
             { etudiantDA: '1234567', productionId: 'P2', noteFinale: 80 },
             { etudiantDA: '1234567', productionId: 'P3', noteFinale: 60 }
         ];
-        const win = chargerScript('js/indices.js', {
+        // #706 (5 sept. 2026) : la règle « ce qui entre dans la note » vit dans pratique-registre.js — chargé d'abord (harnais seulement).
+        const win = chargerScript('js/pratiques/pratique-registre.js', { db: { getSync: (_k, d) => (d !== undefined ? d : null), setSync: () => {}, get: async () => null, set: async () => {} }, cle: (k) => k });
+        chargerScript('js/indices.js', {
             db: { getSync: (_k, d) => (d !== undefined ? d : null), setSync: () => {}, get: async () => null, set: async () => {} },
             cle: (k) => k,
             obtenirDonneesSelonMode: (k) => (k === 'evaluationsSauvegardees' ? evals : (k === 'portfoliosEleves' ? {} : []))
-        });
+        }, win);
         expect(win.calculerPerformancePAN('1234567')).toBeCloseTo(0.4667, 3);
     });
 
@@ -162,11 +164,13 @@ describe('#399 · L7 — la note 0 compte dans le repli calculerPerformancePAN',
             { etudiantDA: '1234567', productionId: 'P2', noteFinale: undefined },
             { etudiantDA: '1234567', productionId: 'P3', noteFinale: 60 }
         ];
-        const win = chargerScript('js/indices.js', {
+        // #706 (5 sept. 2026) : la règle « ce qui entre dans la note » vit dans pratique-registre.js — chargé d'abord (harnais seulement).
+        const win = chargerScript('js/pratiques/pratique-registre.js', { db: { getSync: (_k, d) => (d !== undefined ? d : null), setSync: () => {}, get: async () => null, set: async () => {} }, cle: (k) => k });
+        chargerScript('js/indices.js', {
             db: { getSync: (_k, d) => (d !== undefined ? d : null), setSync: () => {}, get: async () => null, set: async () => {} },
             cle: (k) => k,
             obtenirDonneesSelonMode: (k) => (k === 'evaluationsSauvegardees' ? evals : (k === 'portfoliosEleves' ? {} : []))
-        });
+        }, win);
         expect(win.calculerPerformancePAN('1234567')).toBeCloseTo(0.60, 5);
     });
 });

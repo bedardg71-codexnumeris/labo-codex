@@ -237,8 +237,9 @@ function _filtrerEvaluationsArtefactsValides(evaluations, da, artefactsIds, term
         if (e.etudiantDA !== da) return false;
         if (!artefactsIds.includes(e.productionId)) return false;
         if (e.productionId === terminalId) return false;
-        if (e.remplaceeParId) return false;
-        if (e.noteFinale === null || e.noteFinale === undefined) return false;
+        // #706 — la règle unique du registre : remplacées, sans note, brouillons (non
+        // verrouillées) et portée nulle n'entrent pas dans la note du cours.
+        if (!window.evaluationEntreDansLaNote(e)) return false;
         // Exclure les évaluations non-recevables (plagiat, IA)
         const statutIntegrite = e.statutIntegrite || 'recevable';
         if (statutIntegrite === 'plagiat' || statutIntegrite === 'ia') return false;
@@ -298,6 +299,9 @@ function _selectionnerArtefactsLegacy(evalsArtefacts, productions, methodeSelect
     const parRecence = window.creerComparateurRecenceStd(productions);
 
     let artefactsRetenus = [...evalsArtefacts];
+    // Égalité à la coupure (audit du 5 sept. 2026, D-2b) : le tri est stable, l'ordre de
+    // stockage départage deux notes égales ; la note ne change pas, seul le récit nomme
+    // « écartée » l'une plutôt que l'autre. Commenté, pas de fiche.
     if (methodeSelection === 'meilleurs' || methodeSelection === 'hybride') {
         artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
     } else if (methodeSelection === 'recents') {
@@ -360,12 +364,11 @@ function _appliquerPlafonnementConformite(moyennePortfolio, reglesConformite, de
 
 function _obtenirNoteTerminaleEtudiant(evaluations, da, productionTerminale) {
     if (!productionTerminale) return { noteTerminale: null, evaluationTerminale: null };
+    // #706 : un brouillon de terminale n'est pas une terminale — la note reste provisoire.
     const evaluationTerminale = evaluations.find(e =>
         e.etudiantDA === da &&
         e.productionId === productionTerminale.id &&
-        !e.remplaceeParId &&
-        e.noteFinale !== null &&
-        e.noteFinale !== undefined
+        window.evaluationEntreDansLaNote(e)
     ) || null;
     const noteTerminale = evaluationTerminale ? evaluationTerminale.noteFinale : null;
     return { noteTerminale, evaluationTerminale };
@@ -423,6 +426,10 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     // Lecture config portfolio (source canonique : pratiquesConfigurables, via
     // obtenirConfigPratiqueActive). Plus de fallback sur configPAN.portfolio
     // (Phase G2-a, 24 mai 2026).
+    // #706 — combien d'évaluations de l'élève sont écartées de la note (brouillons, portée
+    // nulle) : dit au profil et à l'export, sur le modèle « 2 évaluations en brouillon, non comptées ».
+    const ecartees = window.compterEvaluationsEcarteesDeLaNote(da);
+
     const cfg = _obtenirConfigPortfolioCalcul(modalites, pratiqueIdDemande);
     if (cfg.erreur) {
         return {
@@ -434,6 +441,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
             terminal: null,
             noteFinale: null,
             estProvisoire: false,
+            ecartees: ecartees,
             recit: null
         };
     }
@@ -575,6 +583,16 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     _remplacees.forEach(e => {
         _resultatsRecit.push(_resArtefact(e, 'remplace', 'remplacée par une reprise'));
     });
+    // #706 — brouillons et portée nulle (pool et terminale) : nommés, non comptés.
+    evaluations
+        .filter(e => e.etudiantDA === da &&
+            (artefactsIds.includes(e.productionId) || e.productionId === terminalId) &&
+            !e.remplaceeParId && e.noteFinale !== null && e.noteFinale !== undefined &&
+            !window.evaluationEntreDansLaNote(e))
+        .forEach(e => {
+            _resultatsRecit.push(_resArtefact(e, 'ecarte',
+                e.verrouillee === false ? 'brouillon · non comptée' : 'sans aucun critère évalué · non comptée'));
+        });
     if (productionTerminale && noteTerminale !== null) {
         _resultatsRecit.push({
             label: productionTerminale.titre || productionTerminale.activiteApprentissage || 'Évaluation terminale',
@@ -630,6 +648,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
         noteFinale: noteFinale,
         estProvisoire: noteTerminale === null,
         ponderationParComplement: ponderationParComplement,
+        ecartees: ecartees,   // #706 : { brouillons, sansPortee, total }
         recit: recit
     };
 }

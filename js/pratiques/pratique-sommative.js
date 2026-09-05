@@ -100,12 +100,10 @@ class PratiqueSommative {
         const evaluations = this._lireEvaluations();
         const productions = this._lireProductions();
 
-        // Filtrer évaluations de cet étudiant (évaluations actives seulement)
+        // Filtrer évaluations de cet étudiant — #706 : la règle unique du registre
+        // (remplacées, sans note, brouillons non verrouillés et portée nulle : hors note).
         const evaluationsEleve = evaluations.filter(e =>
-            e.etudiantDA === da &&
-            !e.remplaceeParId && // Exclure remplacées
-            e.noteFinale !== null &&
-            e.noteFinale !== undefined
+            e.etudiantDA === da && window.evaluationEntreDansLaNote(e)
         );
 
         if (evaluationsEleve.length === 0) {
@@ -171,12 +169,9 @@ class PratiqueSommative {
             return p?.ponderation || 1;
         };
 
-        // MÊMES critères de validité que calculerPerformance (garantit la parité).
+        // MÊMES critères de validité que calculerPerformance (garantit la parité) — #706.
         const valides = evaluations.filter(e =>
-            e.etudiantDA === da &&
-            !e.remplaceeParId &&
-            e.noteFinale !== null &&
-            e.noteFinale !== undefined
+            e.etudiantDA === da && window.evaluationEntreDansLaNote(e)
         );
 
         if (valides.length === 0) {
@@ -204,6 +199,23 @@ class PratiqueSommative {
                 detail: 'comptée une fois · poids ' + poidsPct(e.productionId).toFixed(0) + ' %'
             });
         });
+
+        // #706 — brouillons (non verrouillées) et portée nulle : nommés, non comptés.
+        evaluations
+            .filter(e => e.etudiantDA === da && !e.remplaceeParId
+                && e.noteFinale !== null && e.noteFinale !== undefined
+                && !window.evaluationEntreDansLaNote(e))
+            .slice().sort(parDate)
+            .forEach(e => {
+                resultats.push({
+                    label: titreProd(e.productionId),
+                    date: e.dateEvaluation || null,
+                    niveau: e.niveauFinal || null,
+                    note: (e.noteFinale ?? null),
+                    sort: 'ecarte',
+                    detail: e.verrouillee === false ? 'brouillon · non comptée' : 'sans aucun critère évalué · non comptée'
+                });
+            });
 
         // Remplacées par reprise : exclues de la moyenne (parité), nommées pour l'honnêteté.
         // #360 — exclure les doublons réconciliés : ils portent remplaceeParId SANS
