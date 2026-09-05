@@ -3345,6 +3345,53 @@ input[type="number"].controle-form {
     box-shadow: var(--focus-ring);
 }
 
+/* Le texte troué, étape 3 (5 sept. 2026) — LA VUE qui montre les badges dans la
+   phrase, par-dessus le `<textarea>` (caché, il reste la valeur). Elle a l'aspect
+   du champ ; la chip réemploie la pastille de la palette (couleurs, bordure) mais
+   pas sa taille de bouton : elle vit dans le fil du texte, au doigt comme à la
+   souris ; sa croix la retire. Un texte vide montre le placeholder du champ. */
+.composeur-badges {
+    min-height: 3.4em;
+    padding: 8px 10px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.6;
+    cursor: text;
+}
+
+.composeur-badges:empty::before {
+    content: attr(data-placeholder);
+    color: var(--gris-clair);
+    pointer-events: none;
+}
+
+.composeur-badges .composeur-chip {
+    min-height: 0;
+    margin: 0 2px;
+    padding: 1px 8px;
+    vertical-align: baseline;
+    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: none;
+}
+
+.composeur-badges .composeur-chip:hover {
+    transform: none;
+}
+
+.composeur-badges .composeur-chip-croix {
+    margin-left: 6px;
+    padding: 0 2px;
+    font-weight: 400;
+    opacity: 0.6;
+    cursor: pointer;
+}
+
+.composeur-badges .composeur-chip-croix:hover {
+    opacity: 1;
+}
+
 /* Le texte troué, étape 2 (4 sept. 2026) — la palette d'un palier de projection :
    une par palier, entre sa rangée « Palier · Jusqu'à » et ses deux zones. Même
    composant que la palette des énoncés (ci-dessus) ; seul l'espacement diffère. */
@@ -18258,6 +18305,10 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     /* Le texte troué, étape 1 (3 sept. 2026) — les repères posables des énoncés
        algorithmiques (30 px au pointeur fin). */
     .repere-enonce { min-height: 44px; padding: 8px 14px; }
+    /* Le texte troué, étape 3 (5 sept. 2026) — la chip dans la phrase n'est pas un
+       bouton : elle garde sa taille de texte ; sa croix, elle, s'élargit au doigt. */
+    .composeur-badges .composeur-chip { min-height: 0; padding: 3px 10px; }
+    .composeur-badges .composeur-chip-croix { padding: 4px 8px; }
 }
 
 .travaux-fond-swatch:hover {
