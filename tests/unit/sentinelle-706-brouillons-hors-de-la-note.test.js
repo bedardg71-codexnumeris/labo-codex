@@ -223,11 +223,13 @@ describe('#706 · le profil et l\'export DISENT combien ont été écartées', (
         const sans = X.construireLignesSynthese([{ da: DA.STD, nom: 'N', prenom: 'P' }], { pratiqueId: 'x' }, () => ({ P: 80, noteConstructible: true }))[0];
         expect(sans[10]).toBe('');
     });
-    it('les mots du profil : « 2 évaluations en brouillon, non comptées » · « 1 évaluation sans aucun critère évalué, non comptée » ; rien quand rien n\'est écarté', () => {
+    it('les mots du profil : « 2 évaluations en brouillon, non comptées » · « 1 évaluation sans critère évalué, non comptée » (mot arrêté par Grégoire le 5 sept. 2026 : sans « aucun ») ; rien quand rien n\'est écarté', () => {
         const phrase = phraseDuProfil();
         expect(phrase({ brouillons: 2, sansPortee: 0, total: 2 })).toContain('2 évaluations en brouillon, non comptées');
         expect(phrase({ brouillons: 1, sansPortee: 0, total: 1 })).toContain('1 évaluation en brouillon, non comptée');
-        expect(phrase({ brouillons: 0, sansPortee: 1, total: 1 })).toContain('1 évaluation sans aucun critère évalué, non comptée');
+        expect(phrase({ brouillons: 0, sansPortee: 1, total: 1 })).toContain('1 évaluation sans critère évalué, non comptée');
+        expect(phrase({ brouillons: 0, sansPortee: 2, total: 2 })).toContain('2 évaluations sans critère évalué, non comptées');
+        expect(phrase({ brouillons: 1, sansPortee: 1, total: 2 })).not.toContain('aucun');
         expect(phrase({ brouillons: 1, sansPortee: 1, total: 2 })).toContain(' · ');
         expect(phrase({ brouillons: 0, sansPortee: 0, total: 0 })).toBe('');
         expect(phrase(null)).toBe('');
