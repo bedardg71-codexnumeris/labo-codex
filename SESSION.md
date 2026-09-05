@@ -346,6 +346,35 @@
        entrées de changelog (ses mots) → push.
      ▣ ARBRE au moment d'écrire : `main` = origin/main + 1 commit (celui-ci : lot A + les deux
        renommages de consigne + ce bloc).
+     ↻ 8 h 45 → 9 h 05 — LOT B, LA CARTE : `plans de travail/CARTE-2026-09-05-collections.md` (a-e, mesurée :
+       la clé et `cle()` / CLES_NAMESPACEES ; ce que porte une collection = modèle + QUATRE params + paliers
+       de `normaliser` ; le menu = un `<select>` dont seuls deux handlers lisent `el.value` → un `<optgroup>` ;
+       le geste inline ; la suppression sous le menu ; export brut = toutes les clés, configuration complète
+       = un ensemble fixe SANS la clé neuve → pas dans ce lot, dit). RELECTURE DE COWORK (9 h) : rien à
+       corriger, ancres remesurées ; TRANCHÉ : la clé, le module, le menu et la gestion inline ; la modale
+       de bibliothèque, `repertoires.enregistrer` et « importer depuis un autre trimestre » viennent avec
+       le partage (inscrit dans la carte, §c). Cowork a ajouté le LOT D à 8 h 59 (le texte troué, étape 3 :
+       le badge s'affiche dans la phrase) : ordre du jour A → B → D → C ; D ne commence qu'après le coup
+       d'œil de Grégoire sur B, et par une carte.
+     ↻ 9 h 05 → 9 h 25 — LOT B, VOLET 1 (ce commit) : `js/collections-projection.js`, module neuf,
+       propriétaire de `collectionsProjection` — pur : `nomPris`, `depuisCritere`, `appliquerCollection` ;
+       stockage : `lister` (copies, par nom), `obtenir`, `enregistrer` (unicité du nom DANS le mutateur,
+       trim + sans casse ; refus nom_vide / sans_paliers / nom_pris, rien d'écrit), `supprimer`,
+       `appliquer` ; `db.modifier` seulement, sous `cle()`, et REFUS si `cle()` manque — jamais une clé
+       nue (#464). `trimestres.js` : la clé dans CLES_NAMESPACEES (pas dans les archives). `index.html` :
+       le script après evaluation-projection.js, avant grilles.js (20260905a) ; trimestres (0905a).
+       `docs/DATA-OWNERSHIP.md` : la ligne. `evaluation-projection.js` INTOUCHÉ. Sentinelle
+       `sentinelle-collections-projection` (14 cas : A pur, B stockage, C registres) sur le module réel et
+       une base factice qui rend le stock TEL QUEL — un faux `db` qui clonait rendait B.a tautologique,
+       vu au break-test, corrigé. BREAK-TESTS (restaurés, `cmp` identique) : partager les paliers de la
+       collection avec le critère → A.d rouge ; `nomPris` sensible à la casse → A.c + B.b rouges ;
+       `lister` sans copie → B.a rouge. Vitest 463 / 5137.
+     ▣ CE QUI RESTE (lot B) : volet 2 (gabarit : l'optgroup « Mes collections », les deux handlers, le
+       bouton « Enregistrer ces paliers sous un nom… » + la section inline, la ligne des collections avec
+       corbeille, la ligne d'aide) → volet 3 (spec WebKit) → rapport → coup d'œil de Grégoire (« Fini
+       quand ») → lot D (carte d'abord).
+     ▣ ARBRE : `main` = origin/main + 2 commits (lot A, volet 1 de B). Ce commit emporte la carte et la
+       consigne du jour (lot D de Cowork, 8 h 59).
      ===================================================================== -->
 
 <!-- =====================================================================
