@@ -2350,6 +2350,67 @@ span.header-icon {
     line-height: 1.35;
 }
 
+/* Lot B (5 sept. 2026) — les collections de paramètres de projection : sous le menu, la
+   liste des jeux nommés avec leur corbeille (≥ 44 px) et la ligne qui dit la copie ; sous
+   les paliers, le bouton et la section inline qui enregistre sous un nom. */
+#listeCriteres .collections-liste {
+    margin-top: 6px;
+}
+
+#listeCriteres .collection-ligne {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--texte-principal);
+}
+
+#listeCriteres .collection-nom {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+#listeCriteres .collections-aide {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.78rem;
+    color: var(--gris-clair);
+    line-height: 1.35;
+}
+
+#listeCriteres .collection-bouton-enregistrer {
+    margin-top: 8px;
+    margin-left: 8px;
+}
+
+#listeCriteres .collection-saisie {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: var(--radius-moyen);
+    background: var(--surface-input);
+}
+
+#listeCriteres .collection-saisie-rangee {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+#listeCriteres .collection-saisie-rangee input {
+    flex: 1 1 160px;
+    min-width: 160px;
+}
+
+#listeCriteres .collection-saisie-message {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.78rem;
+    color: var(--orange-accent);
+}
+
 /* Coup d'œil de Grégoire, 4 sept. 2026 (retouches b, c, d) — dans l'éditeur de grille :
    les chevrons et la corbeille en coin, sur la même ligne (le modèle de la liste des
    productions) ; la rangée du critère leur laisse la place ; chaque sous-critère et
