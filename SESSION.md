@@ -482,6 +482,35 @@
      ▣ CE QUI RESTE (lot D) : rapport à Cowork → RELECTURE CROISÉE (composeur neuf, règle 2) → porte iPad
        (après le push, ou sur une prévisualisation) → lot C.
      ▣ ARBRE : `main` = origin/main + 7 commits (A ; B 1-2-3 ; D 1-2-3).
+     ↻ 10 h 05 — DÉCISION DE GRÉGOIRE : l'APERÇU (option B). Branche `apercu/2026-09-05-journee-A-B-D`
+       poussée (les sept commits), PR #82 vers main (à ne pas fusionner par le bouton), Netlify :
+       https://deploy-preview-82--codexnumeris-051225.netlify.app/ — en ligne dès la première mesure
+       (HTTP 200, `composeur-badges.js` servi). Adresse rendue à Grégoire (notification), inscrite
+       dans la porte (§0, commit `4602f4db`, local). Le run de CI de la PR n'est pas attendu.
+     ↻ 10 h 27 — PORTE iPAD PASSÉE 4 / 4 (relevé de Grégoire consigné par Cowork dans la porte, §5) :
+       poser au doigt, taper autour + Retour, effacer (la croix ET ⌫ d'un coup — l'angle mort du
+       clavier virtuel est levé), quitter et recharger. DÉCISIONS : la croix reste ; pas de glissé
+       (clos : « le clic est efficace »). UNE RETOUCHE DU LOT D, vue à la porte : « quand je veux
+       ajouter du texte après une pastille, le curseur apparaît hors du bloc » (zone « Aucune
+       annotation », texte puis chip `critere` en fin).
+     ↻ 10 h 30 → 10 h 50 — LA RETOUCHE (ce commit, `composeur-badges.js` + jeton b) : CAUSE MESURÉE —
+       une chip est `contenteditable="false"` ; dernier nœud de la vue (ou dernier avant un `<br>` de
+       fin de ligne), elle ne laisse au moteur aucune position de caret éditable après elle. L'ANCRE :
+       un espace de largeur nulle (U+200B) rendu comme nœud texte après toute chip terminale ou
+       suivie d'un saut de ligne (`rendreHtml`) ; `entreesDe` en fait une entrée de longueur 0 (le
+       nœud reste connu pour la table des positions) et `lire` la RETIRE de la valeur ; `_positionTexte`
+       / `_offsetDom` traduisent les offsets DOM ↔ texte à travers les ancres, et `placerCaret`
+       pose le caret DANS l'ancre après une chip terminale. Le lot C, en cours dans l'arbre, a été
+       REMISÉ par chemins (`git stash`, « lot C en cours ») le temps de la retouche. Sentinelle
+       étendue (C.d : huit textes finissant par un jeton ou jeton + `\n` passent par ecrire() puis
+       lire() au caractère près ; l'ancre après la chip terminale et avant un `<br>`, nulle part
+       ailleurs ; ce qui est tapé dans l'ancre entre, l'ancre non ; les positions) ; B.b et C.b
+       relus avec l'ancre. BREAK-TESTS (restaurés, `cmp` identique) : `lire` ne retire plus l'ancre →
+       C.a + C.d rouges (elle fuit) ; `rendreHtml` ne la pose plus → B.b, C.b, C.d rouges. Vitest
+       466 / 5174 ; WebKit : badges + paliers + énoncés 8 / 8 (14,8 s). Poussée sur la branche
+       d'aperçu (main → apercu, fast-forward) : la PR #82 se rebâtit seule.
+     ▣ CE QUI RESTE : coup d'œil de Grégoire de dix secondes sur la même zone dans l'aperçu à jour →
+       lot C (remisé, à reprendre : `git stash pop`).
      ===================================================================== -->
 
 <!-- =====================================================================

@@ -19,6 +19,9 @@
 //   · `assembler` joint les segments par une espace → A rougit ;
 //   · `rendreHtml` n'échappe pas le texte → B.a et F.c rougissent ;
 //   · `entreesDe` ignore la frontière des blocs → C.c rougit.
+// BREAK-TESTS DE LA RETOUCHE iPad (5 sept., 10 h 30 — l'ancre après une chip terminale) :
+//   · `lire` ne retire plus l'ancre → C.d rougit (elle fuit dans la valeur) ;
+//   · `rendreHtml` ne pose plus l'ancre → C.d rougit (plus de nœud texte après la chip).
 
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
@@ -140,7 +143,8 @@ describe('composeur · B — rendreHtml : échappé, la chip est la pastille, le
         expect(C.rendreHtml('\n', PAL_PROJ)).toBe('<br><br>');
         expect(C.rendreHtml('', PAL_PROJ)).toBe('');
         expect(C.rendreHtml('a', PAL_PROJ)).toBe('a');
-        expect(C.rendreHtml('{erreurs}\n{mots}', PAL_PROJ)).toMatch(/^<span[^>]*data-jeton="\{erreurs\}"[\s\S]*<\/span><br><span[^>]*data-jeton="\{mots\}"/);
+        // (retouche iPad : l'ancre U+200B suit une chip avant un saut de ligne — voir C.d)
+        expect(C.rendreHtml('{erreurs}\n{mots}', PAL_PROJ)).toMatch(/^<span[^>]*data-jeton="\{erreurs\}"[\s\S]*<\/span>\u200B<br><span[^>]*data-jeton="\{mots\}"/);
     });
 });
 
@@ -155,9 +159,40 @@ describe('composeur · C — ecrire() puis lire() : le texte revient au caractè
         expect(allerRetourVue('\n', PAL_PROJ)).toBe('\n');
     });
 
+    it('C.d (retouche iPad) un texte qui FINIT par un jeton : un nœud texte (l\'ancre U+200B) suit la chip terminale — ou la chip avant un saut de ligne — et l\'ancre ne fuit jamais dans la valeur', () => {
+        const ANCRE = '\u200B';
+        const finissent = ['Va voir {service}', '{erreurs}', 'Concentre-toi sur {critere}', 'x {erreurs}\n', '{erreurs}\n{mots}', '{erreurs}\n', '{erreurs}{mots}', 'a {erreurs} {mots}'];
+        finissent.forEach((t) => {
+            const html = C.rendreHtml(t, PAL_PROJ);
+            expect(allerRetourVue(t, PAL_PROJ), JSON.stringify(t)).toBe(t);
+            expect(C.lireNoeuds(domDe(html)), JSON.stringify(t)).not.toContain(ANCRE);
+        });
+        // L'ancre : après la chip terminale, après une chip suivie d'un saut de ligne — nulle part ailleurs.
+        expect(C.rendreHtml('Va voir {service}', PAL_PROJ)).toMatch(/<\/span>\u200B$/);
+        expect(C.rendreHtml('{erreurs}\n{mots}', PAL_PROJ)).toMatch(/<\/span>\u200B<br><span[\s\S]*<\/span>\u200B$/);
+        expect(C.rendreHtml('{erreurs}\n', PAL_PROJ)).toMatch(/<\/span>\u200B<br><br>$/);
+        expect(C.rendreHtml('{erreurs}{mots}', PAL_PROJ).split(ANCRE).length - 1).toBe(1);
+        expect(C.rendreHtml('Tu as {erreurs} sur {mots}.', PAL_PROJ)).not.toContain(ANCRE);
+        expect(C.rendreHtml('sans jeton', PAL_PROJ)).not.toContain(ANCRE);
+        // Le dernier nœud d'une vue rendue depuis un texte à jeton final est un nœud TEXTE, jamais la chip.
+        const vue = domDe(C.rendreHtml('Va voir {service}', PAL_PROJ));
+        expect(vue.childNodes[vue.childNodes.length - 1].nodeName).toBe('#text');
+        expect(vue.childNodes[vue.childNodes.length - 1].nodeValue).toBe(ANCRE);
+        // Ce que le doigt tape dans l'ancre entre dans le texte, l'ancre non ; une ancre seule ne vaut rien.
+        expect(C.lireNoeuds(el('div', [texteNoeud('a '), el('span', [texteNoeud('erreurs')], { chip: true, jeton: '{erreurs}' }), texteNoeud(ANCRE + ' erreurs')]))).toBe('a {erreurs} erreurs');
+        expect(C.lireNoeuds(el('div', [texteNoeud(ANCRE)]))).toBe('');
+        expect(C.lireNoeuds(el('div', [texteNoeud(ANCRE), el('div', [texteNoeud('b')])]))).toBe('b');
+        // Les positions : l'ancre est une entrée de longueur 0, à la fin de la chip.
+        const e = C.entreesDe(vue);
+        expect(e.map((x) => [x.type, x.debut, x.texte.length])).toEqual([['texte', 0, 8], ['jeton', 8, 9], ['texte', 17, 0]]);
+        expect(e[2].brut).toBe(ANCRE);
+    });
+
     it('C.b la vue simulée porte bien des chips et des <br>, pas du texte `{erreurs}` (le témoin du parseur)', () => {
         const vue = domDe(C.rendreHtml('Tu as {erreurs}\nsur {mots}.', PAL_PROJ));
-        expect(vue.childNodes.map((n) => n.nodeName)).toEqual(['#text', 'SPAN', 'BR', '#text', 'SPAN', '#text']);
+        // (retouche iPad : un nœud texte — l'ancre — entre la chip et le <br>)
+        expect(vue.childNodes.map((n) => n.nodeName)).toEqual(['#text', 'SPAN', '#text', 'BR', '#text', 'SPAN', '#text']);
+        expect(vue.childNodes[2].nodeValue).toBe('\u200B');
         expect(vue.childNodes[1].dataset.jeton).toBe('{erreurs}');
     });
 
