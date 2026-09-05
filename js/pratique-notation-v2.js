@@ -423,11 +423,7 @@
 
             html += `
                     <td style="text-align: center;">
-                        <button type="button" class="btn btn-danger btn-tres-compact"
-                                data-action="supprimerObjectif" data-param="${index}"
-                                title="Supprimer cet objectif">
-                            ✕
-                        </button>
+                        ${window.boutonRetirerBloc({ action: 'supprimerObjectif', param: index, titre: 'Supprimer cet objectif' })}
                     </td>
                 </tr>
             `;
@@ -683,11 +679,7 @@
                                style="width: 100%; padding: 4px 8px;">
                     </td>
                     <td style="text-align: center;">
-                        <button type="button" class="btn btn-danger btn-tres-compact"
-                                data-action="supprimerTypeTravailSpecV2" data-param="${type.id}"
-                                title="Supprimer ce type">
-                            ✕
-                        </button>
+                        ${window.boutonRetirerBloc({ action: 'supprimerTypeTravailSpecV2', param: type.id, titre: 'Supprimer ce type' })}
                     </td>
                 </tr>
             `;
@@ -929,11 +921,7 @@
 
             html += `
                     <td style="text-align: center;">
-                        <button type="button" class="btn btn-danger btn-tres-compact"
-                                data-action="supprimerForfaitSpec" data-param="${forfait.id}"
-                                title="Supprimer ce forfait">
-                            ✕
-                        </button>
+                        ${window.boutonRetirerBloc({ action: 'supprimerForfaitSpec', param: forfait.id, titre: 'Supprimer ce forfait' })}
                     </td>
                 </tr>
             `;

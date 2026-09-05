@@ -272,7 +272,9 @@ test('#555 (e) · l\'éditeur d\'échelle NEUVE rend les deux repères, et un ch
 // huitième champ — ne vit qu'au-dessus de 1280 px, c'est-à-dire sur l'écran de
 // Grégoire, celui de la capture. Sans ce cas, elle ne serait verrouillée par
 // rien.
-test('#555 · en fenêtre large, les huit champs d\'un niveau tiennent sur UNE rangée', async ({ page }) => {
+// ↻ Lot C (5 sept. 2026) : la cellule « Ordre » a quitté la grille (les chevrons vivent en coin avec la
+// corbeille) — un niveau a SEPT champs, plus huit.
+test('#555 · en fenêtre large, les sept champs d\'un niveau tiennent sur UNE rangée', async ({ page }) => {
     await page.setViewportSize({ width: 1600, height: 900 });
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
@@ -318,7 +320,7 @@ test('#555 · en fenêtre large, les huit champs d\'un niveau tiennent sur UNE r
         };
     });
 
-    expect(resultat.nbChamps).toBe(8);
+    expect(resultat.nbChamps).toBe(7);
     expect(resultat.rangees).toBe(1);
     expect(resultat.largeurSOLO).toBeGreaterThan(128);
     expect(resultat.grilleDeborde).toBe(false);

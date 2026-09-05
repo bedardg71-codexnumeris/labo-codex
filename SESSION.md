@@ -511,6 +511,57 @@
        d'aperçu (main → apercu, fast-forward) : la PR #82 se rebâtit seule.
      ▣ CE QUI RESTE : coup d'œil de Grégoire de dix secondes sur la même zone dans l'aperçu à jour →
        lot C (remisé, à reprendre : `git stash pop`).
+     ↻ 10 h 50 — l'aperçu PR #82 sert `composeur-badges.js?v=20260905b` (veille curl, mesuré) : adresse
+       inchangée, notification à Grégoire pour le coup d'œil de dix secondes sur la même zone.
+     ↻ 10 h 15 → 11 h 00 — LOT C : LES MÊMES GESTES PARTOUT (cadrage design de Cowork, trois règles).
+       REMESURÉ AVANT DE TOUCHER : `grep -n "✕" js/*.js` = 1 site bibliothèque (`bibliotheque-ui.js:1472`,
+       le dossier, `btn-supprimer` + `data-confirm`) + 3 sites pratique v2 (`pratique-notation-v2.js`
+       429 / 689 / 935, `btn-danger`) + 2 commentaires ; `grep -n ">Ordre<" js/*.js` = 3 sites échelles
+       (`echelles.js:1239` la table, 3238 et 3576 les deux cartes) ; `@media (max-width: 768px)` : dix
+       blocs, AUCUN ne touche `.grille-form-2col` ni `.sous-critere-champs-grid` ; et `.grille-form-2col`
+       est défini DEUX fois — styles.css:9339 et un `<style>` d'index.html:1757 (plus tard dans la
+       cascade : il aurait battu toute règle d'empilement de styles.css). Vu en chemin : la table des
+       niveaux portait AUSSI un bouton plein « Supprimer » (`btn-supprimer`, pas un ✕) — traité, c'est
+       la fonction que je réécrivais (règle 1 : un seul bouton).
+       ▣ LIVRÉ (ce commit) : `ui-blocs.js` — `boutonRetirerBloc` gagne `confirm` (→ `data-confirm`, la
+       confirmation ne change pas d'un mot) et `disabled` ; `bibliotheque-ui.js` — la corbeille du
+       dossier (même action, mêmes paramètres, même confirmation, même étiquette) ; `pratique-notation-v2.js`
+       — trois corbeilles (objectifs, types de production, forfaits) ; `echelles.js` — la table : plus de
+       colonne « Ordre », dans la rangée les chevrons puis la corbeille (désactivée si verrouillé, titre
+       d'avant) puis le cadenas (`.bloc-reordonner.bloc-reordonner-ligne.outils-rangee`, Actions en
+       `echelle-w-180`) ; les deux cartes : plus de cellule « Ordre », un `.bloc-coin-outils` (chevrons
+       puis corbeille, comme les critères) et la carte laisse 150 px à droite par son style ;
+       `styles.css` — `.echelle-niveau-grille` à SEPT colonnes (le 56 px de l'ordre part ; nth-child
+       8 → 7, 1 → retiré, 3 → 2 dans les blocs 1280 / 640), `.bloc-coin-outils` GÉNÉRIQUE (le modèle
+       des productions, servi partout ; #listeCriteres garde ses réglages), cibles 44 px dans le coin,
+       la rangée d'outils, les cellules de tableau et le dossier (les pipelines gardent 20 px), et UNE
+       règle dans le bloc 768 de la ligne 9392 : `.grille-form-2col, #listeCriteres .sous-critere-champs-grid
+       { grid-template-columns: 1fr }` — placée APRÈS les grilles qu'elle plie (la cascade tranche à
+       spécificité égale) ; `index.html` — le doublon `.grille-form-2col` du `<style>` RETIRÉ, jetons
+       ui-blocs / bibliotheque-ui / pratique-notation-v2 / echelles (0905a), styles (e). ⛔ Rien dans
+       les données, aucune confirmation modifiée, aucun libellé de suppression réécrit ; #696 et
+       « la bibliothèque » non touchés.
+       DÉCIDÉ SEUL, DIT : (1) la place du coin se règle par le style inline de la carte (déjà là), pas
+       par un `!important` ; (2) la corbeille du dossier et des tables prend 44 px par des sélecteurs de
+       contexte, pas en changeant `.btn-icone-nu` partout ; (3) l'empilement iPad se MESURE (règle 1 des
+       portes : une machine répond) — spec à 700 px vs 1200 px sur le formulaire de groupe-cours, un
+       palier et un sous-critère → PAS de porte terrain pour le lot C ; reste le coup d'œil de Grégoire
+       sur Mac (bibliothèque, éditeur d'échelles).
+       TÉMOINS : sentinelle NEUVE `sentinelle-lot-C-memes-gestes` (11 cas : A dossier, B pratique v2 —
+       les trois tables rendues par le code réel —, C échelles — table + deux cartes —, D sources, E CSS
+       + doublon parti + jetons) ; spec WebKit NEUF `lot-C-echelles-chevrons-corbeille` (chevron →
+       l'ordre en base suit, bornes ; corbeille + dialogue → deux niveaux restent ; cibles 44 × 44
+       mesurées ; l'empilement à 700 px) ; spec `echelle-reperes-maitrise-rendu` #555 adapté (SEPT champs
+       par rangée, plus huit). ⚠ Harnais : `<thead>` commence par `<th` ; l'apostrophe n'est pas
+       échappée par le faux `echapperHtml` ; « éléments » quand aucune famille n'est enregistrée.
+       BREAK-TESTS (restaurés, `cmp` identiques) : un « ✕ » réintroduit dans la pratique v2 → B.a + D.a
+       rouges ; la colonne « Ordre » remise dans la table → C.a + D.b rouges ; la règle d'empilement
+       retirée → E.c rouge. Vitest 467 / 5185 ; WebKit : lot C 2 / 2, les dix specs des écrans touchés
+       (bibliothèques, échelles, pratiques) 18 / 18 après l'adaptation de #555.
+     ▣ CE QUI RESTE (journée) : coup d'œil de Grégoire sur le lot C (Mac) → relecture croisée de Cowork
+       sur le lot B → ce qui est cassé se corrige → verdict au jeton → release MINEURE 1.119, TROIS
+       entrées de changelog (ses mots, Cowork les propose) → push → PR #82 fermée sans fusion.
+     ▣ ARBRE : `main` = origin/main + 10 commits ; `apercu/…` = main moins ce commit.
      ===================================================================== -->
 
 <!-- =====================================================================
