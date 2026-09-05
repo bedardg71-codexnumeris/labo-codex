@@ -696,7 +696,7 @@ function _collecterCriteresBilan(grilleDef, ec, enregistree) {
                 // Lot 3, retouche du 4 sept. 2026 — un critère analytique porte ses POINTS
                 // (source : `pointsAnalytiques`, lot 2) et le poids de la grille : le bilan
                 // le nomme par son chiffre, jamais par le nom du niveau déduit (arrêté 4).
-                // ⚠ Lus sur `ec` = `window.evaluationEnCours`, comme les niveaux (#646).
+                // ⚠ Lus sur `ec`, l'état vivant (#699 : le nu l'emporte), comme les niveaux.
                 var pts = (gc.type === 'analytique' && ec.pointsAnalytiques) ? ec.pointsAnalytiques[gc.id] : undefined;
                 if (typeof pts === 'number' && !isNaN(pts)) { entree.points = pts; entree.ponderation = gc.ponderation || 0; }
                 criteres.push(entree);
@@ -1077,7 +1077,11 @@ function genererRetroactionBilan() {
     var conteneur = document.getElementById('contenuRetroBilan');
     if (!conteneur) return;
 
-    var ec = window.evaluationEnCours;
+    // #699 (G-2, audit du 5 sept. 2026) — LA MÊME SOURCE QUE LE CALCUL : le nom nu quand il
+    // existe (`etatVivantEvaluationEnCours`, evaluation-calcul.js), `window` sinon, comme avant.
+    // Le bilan lisait `window` seul et nommait encore l'ancien défi après un niveau changé (spec
+    // WebKit #699, mesure G3 du banc).
+    var ec = (typeof window.etatVivantEvaluationEnCours === 'function') ? window.etatVivantEvaluationEnCours() : window.evaluationEnCours;
     if (!ec || !ec.etudiantDA || !ec.grilleId) {
         conteneur.innerHTML = '<p class="eval-vide">Sélectionne un étudiant et une grille pour voir le bilan.</p>';
         return;

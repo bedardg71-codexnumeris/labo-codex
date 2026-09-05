@@ -15,6 +15,32 @@ cd tests && npx vitest run unit/audit-moteur-evaluation-2026-09-05.test.js
 
 **Verdicts** : `[exécuté]` = la fonction réelle a été appelée dans le banc et la valeur citée est celle qu'elle a rendue ; `[lecture]` = chemin de code lu, non exécuté ; `[grep]` = un compte reproductible par la commande citée. Ce que le banc n'est pas : un navigateur. Aucun WebKit n'a tourné ; l'ordre réel des événements (rejeu des `change`, minuteries de `preRemplirEvaluation`, garde #671) n'est pas éprouvé ici.
 
+> ## ↻ Dispositions arrêtées par Grégoire — 5 septembre 2026, 15 h 30, sur la même base, livrées en 1.121.0
+>
+> Chaque constat porte ci-dessous l'une des dispositions exigées par `CLAUDE.md` (§« Ce qu'un audit doit
+> produire ») : ***inscrit*** (n° de fiche au `BACKLOG.md`), ***refusé*** (motif), ***périmé*** — et ***livré***
+> quand la fiche est fermée dans le même lot. Les propositions d'origine restent lisibles plus bas, pour
+> que la relecture croisée voie ce qui a été suivi et ce qui a été écarté.
+>
+> | Constat | Disposition arrêtée | Fiche | Preuve |
+> |---|---|---|---|
+> | A-1 · échelle non résolue → `0` | **inscrit, livré** (porte + auto-save ; le stock se MESURE, ne se répare pas) | #697 | `tests/unit/sentinelle-697-echelle-introuvable-refus-nomme.test.js` (11 cas, break-testée) ; sonde `scripts/diagnostic-697-zeros-sans-echelle.js` |
+> | D-2 · effacement non tari | **inscrit, livré** (les deux réinitialisations) ; la 3ᵉ entrée (annotations) **inscrite** | #698 · #700 | `tests/unit/sentinelle-698-effacer-tarit-la-memoire-algorithmique.test.js` (10 cas, break-testée) |
+> | G-2 · #646, auto-save et bilan | **inscrit, livré**, périmètre borné, APRÈS preuve dans le flux réel ; la réunification reste **#646** | #699 | `tests/integration/evaluation-699-auto-save-lit-la-source-du-calcul.spec.js` (ROUGE avant, verte après) + `sentinelle-699-…test.js` (7 cas, break-testée) |
+> | B-1 · le trou entre bornes | **inscrit**, à trancher après le 14 | #701 | banc B1-B4 |
+> | B-2 · « -- » en base | **inscrit**, à trancher après le 14 avec #701 | #702 | banc B2, B5 |
+> | C-1 · type déclaré non lu | **inscrit**, à trancher après le 14 | #703 | banc C1-C3 |
+> | D-1 · zéro code ≠ zéro erreur | **inscrit**, à trancher après le 14 (règle pédagogique) | #704 | banc D1 |
+> | E-2 · grille rééditée | **inscrit**, à trancher après le 14 | #705 | banc E2 |
+> | H-1 · `pratiques/` sans portée ni verrou | **inscrit**, renvoyé au second audit | #706 | banc H1-H4 |
+> | B-3 · bruit flottant | **commenté** (aucune fiche) | – | banc B5, F1 |
+> | D-3 · facteur 500 → 600 | **aucune** — vérifié par Grégoire à l'écran (voir D-3) | – | – |
+>
+> ⚠ Le banc `tests/unit/audit-moteur-evaluation-2026-09-05.test.js` a été mis aux valeurs D'APRÈS pour A1/A2/A5,
+> D2/D3/D4, G2/G3 (l'ancienne valeur reste en commentaire) ; les autres mesures sont inchangées.
+> Break-tests du lot : `js/evaluation-calcul.js`, `js/evaluation-chargement.js`, `js/evaluation-retroaction.js`
+> remis à HEAD un à un → les sentinelles rougissent (sortie dans `SESSION.md`, bloc 27) ; restaurés, empreintes identiques.
+
 ---
 
 ## Vue d'ensemble : la réponse à la question directrice
@@ -61,6 +87,7 @@ Les dispositions sont **proposées** ; Grégoire arbitre. Trois « corriger main
 
 **Quand ça arrive** `[lecture]` : une échelle supprimée avant que #648 (1.113, « Supprimer une échelle, c'est la remplacer ») n'existe ; une grille partagée ou importée sans son échelle (l'import de pratiques ne remappe pas `echelleId`, décision d'option A du 26 juin) ; une échelle `pratique-<id>` dont la pratique a disparu ; un trimestre archivé consulté sans copie d'échelle (le commentaire « #348-résiduel » de `calculerNote` nomme ce cas). #648 tarit la source pour la suppression par l'éditeur ; le stock et les autres entrées restent.
 
+↻ **Arrêté : inscrit #697, LIVRÉ (1.121.0).** Le stock se mesure par `scripts/diagnostic-697-zeros-sans-echelle.js`, il ne se répare pas.
 **Disposition proposée : corriger maintenant.** C'est le cinquième chemin de « un `0` par-dessus une vraie note », le défaut même que #572 (quatre sites) et #674 ont fermé partout ailleurs ; un élève peut lire un chiffre faux par la note provisoire et par la note du cours. Le correctif tient dans la porte (refuser quand `noteCalculeeCourante === null`, en nommant l'échelle introuvable) et dans l'auto-save de création (ne rien créer sans échelle résolue). **Stock** : un `0` déjà écrit par ce chemin se reconnaît (`noteFinale === 0 && ponderationCouverte === null && niveauFinal === '--'`) ; il se mesure, il ne se répare pas d'office (ses données remontent à lui).
 
 ### A-2 · Les autres écritures – fonctionne – `[lecture]`
@@ -88,17 +115,18 @@ Le même 74,5 % sur un **critère algorithmique** rend « -- » (`_determinerNiv
 
 **Ce que l'élève lit** : le niveau global du PDF (`construireOverall`, `evaluation.niveauFinal`), le « Niveau : » de la rétroaction copiée, et ce que PAN-Standards lit de `niveauFinal`. Le chiffre est juste (74,5 %) ; la lettre à côté est celle du niveau qui commence à 75.
 
+↻ **Arrêté : inscrit #701, à trancher après le 14.**
 **Disposition proposée : inscrire et continuer.** La règle du trou est une décision : arrondir le pourcentage avant la recherche (au dixième ? à l'entier ?) ou imposer des bornes contiguës dans l'éditeur d'échelle (le cadrage du lot 4, §A, posait déjà cette alternative). L'unification des trois règles est technique ; le choix de la règle est pédagogique. Antérieur au chantier des trois types ; A2025 et H2026 ne se rouvrent pas.
 
 ### B-2 · « -- » entre en base comme niveau d'un critère – moyen – `[exécuté]`
 
 `_appliquerResultatsAlgoCategories` et le mode simple écrivent `evaluationEnCours.criteres[critereId] = niveauIDME` même quand `niveauIDME === '--'` ; les trois collecteurs poussent `if (niveau)`, et « -- » est vrai. **Mesuré B5** (51 erreurs / 5 000 mots, facteur 500 → 74,5 %) : l'enregistrement passe sans refus, `criteres[]` porte `{ critereId: 'a1', niveauSelectionne: '--', ponderation: 20 }`, `donneesAlgorithmiques.a1.niveau = '--'`, la note compte le critère par son pourcentage exact (82,1 %, niveau global M), la ligne à copier dit `M\t--`. Sur le PDF, `libelleNiveau(echelle, '--')` ne trouve rien et rend le code tel quel (`synthese-retroaction-data.js:740-744`) ; la ligne algorithmique, elle, est juste (« 14.90/20 (74.5 %) »). La clé de cartouche `a1_--` n'existe pas : commentaire vide, en silence.
-**Disposition : inscrire**, avec B-1 : même racine, même lot.
+↻ **Arrêté : inscrit #702, à trancher après le 14 avec #701.** (Proposé : inscrire, avec B-1 : même racine, même lot.)
 
 ### B-3 · Bruit flottant – mineur – `[exécuté]`
 
 `donneesAlgorithmiques.pourcentage` porte `74.49999999999999` pour 20 − 51/5000×500 (B5). Sur cinq combinaisons holistiques de la grille 50/30/20 (F1 : 84,6 · 85,1 · 68,5 · 84 · 82,5), la valeur stockée est propre. L'écran (`toFixed(1)`), la liste (`Math.round(x*10)/10`) et le PDF (`toFixed`) arrondissent ; **l'aperçu enseignant** de l'export (`travaux-export-pdf.js:979`, `${evaluation.noteFinale}%`, marqué « APERÇU ENSEIGNANT, pas le PDF remis » l. 937) imprime la valeur brute (ex. « 79.625% », E1).
-**Disposition : commenter et oublier.**
+↻ **Arrêté : commenté, aucune fiche.** (Proposé : commenter et oublier.)
 
 ### B-4 · L'échelle remplacée (#648) et l'échelle muette – fonctionne – `[lecture]` et sentinelles
 
@@ -122,6 +150,7 @@ Le remplacement ne propose que des échelles aux mêmes codes (changelog 1.113, 
 
 **Quand ça arrive** `[lecture]` : une grille d'avant le chantier dont on déclare le type après coup. `modifierTypeGrilleHandler` (`grilles.js:6060-6064`) écrit `grille.type` et **ne touche pas aux critères existants** (« ce sont des données »). Pour ce critère, la palette montre un menu de niveaux (cohérent avec le calcul) ; les points ne peuvent pas y être saisis, donc C1 suppose une évaluation faite quand le critère était analytique puis dé-typé, ou une grille importée dont les critères n'ont pas de type. Le badge de la grille dit ce qui EST (HOLIS ou MIXTE), pas ce qui est déclaré ; rien à l'écran de la palette ne dit que la déclaration est ignorée.
 
+↻ **Arrêté : inscrit #703, à trancher après le 14.**
 **Disposition proposée : inscrire et continuer.** Deux voies techniques : le calcul et la palette lisent `typeParDefautCritere(grille)` (`grilles.js:3232`, existe) comme repli d'un critère sans type ; ou l'éditeur dit, sous le menu, que les critères existants ne suivent pas la déclaration. Le plan du lot 1 a tranché « on n'écrit rien dans ses données » : le choix entre repli à la lecture et avertissement lui revient.
 
 ### C-2 · Grille d'avant le chantier, sans aucun type – fonctionne
@@ -141,7 +170,8 @@ Le critère compte ses points (portée complète) mais n'entre pas dans `critere
 Mode catégories : `if (mots === 0 || totalErreurs === 0)` (`evaluation-calcul.js:546`) réinitialise et sort **avant** la formule. Mode simple : `if (motsRequisSimple && mots === 0)` (`:648`) ; zéro erreur passe par la formule.
 **Mesuré D1** : catégories, 500 mots, aucun code → critère « sans-niveau », note « -- » ; simple, 0 erreur / 500 mots → E, 100,0 %, note 87,2 %.
 **Ce que l'enseignant vit** : une copie sans faute en mode catégories ne peut recevoir sa note qu'en choisissant le niveau au menu « modifiable manuellement » ; la formule ne s'applique jamais à une copie parfaite. Le registre `ratio_cible` sait pourtant le dire (« aucune erreur : la note est complète »).
-**Disposition : inscrire et continuer.** « Zéro code = pondération entière » est une règle pédagogique (Grégoire) ; la mécanique est une garde à séparer en deux (`mots === 0` reste, `totalErreurs === 0` calcule).
+↻ **Arrêté : inscrit #704, à trancher après le 14 (règle pédagogique).**
+**Disposition proposée : inscrire et continuer.** « Zéro code = pondération entière » est une règle pédagogique (Grégoire) ; la mécanique est une garde à séparer en deux (`mots === 0` reste, `totalErreurs === 0` calcule).
 
 ### D-2 · L'effacement ne tarit pas la mémoire – majeur – `[exécuté]`
 
@@ -161,12 +191,13 @@ Mode catégories : `if (mots === 0 || totalErreurs === 0)` (`evaluation-calcul.j
 **Ce que l'élève lit** : la ligne algorithmique du PDF vient de `donneesAlgorithmiques` (`synthese-retroaction-rendu.js:374-378`) : « **0 erreurs sur 500 mots → 17.50/20 (87.5 %)** », et le critère au niveau M. Deux nombres qui se contredisent sur son document.
 **Troisième entrée, non mesurée** `[lecture]` : `travaux-outils.js`, `mettreAJourCompteursErreurs`, ne propage le total des codes d'annotation vers `eval_erreurs_` que `if (total > 0)` (garde délibérée, pour ne pas écraser une saisie manuelle) : retirer toutes les annotations d'une copie laisse l'ancien compte dans le champ.
 
+↻ **Arrêté : inscrit #698, LIVRÉ (1.121.0) pour les deux réinitialisations ; la troisième entrée (annotations retirées) est inscrite, #700.**
 **Disposition proposée : corriger maintenant** pour les deux réinitialisations : retirer `pourcentage`, `noteCalculee`, `niveau` de l'objet (comme #673 retire déjà `retroaction`), retirer `criteres[critereId]` quand aucun niveau manuel n'est choisi, puis `calculerNote()` ; une sentinelle sur le patron de D2/D3. Motif : un élève peut lire un chiffre faux, et le correctif est local. La troisième entrée (annotations retirées → propager 0 ou non) est une décision : **inscrire**.
 
 ### D-3 · Le facteur 500 → 600 – information – `[exécuté]` `[lecture]`
 
 Le défaut est **500** dans les trois sources du code : le registre (`evaluation-formules.js`, `defaut: 500`, mesuré D5 par `normaliser({})`), la palette (`evaluation-chargement.js:1014`, `|| 500`) et le recalcul avant sauvegarde (`|| 500`). La décision du 3 septembre porte sur **sa grille** (*Grille-1 FR-ALGO seul A26*, `plans de travail/CADRAGE-2026-09-01-front-evaluations-et-code-en-dur.md:189`), donc sur une donnée réelle : non mesurée ici. Le gabarit affiche le facteur ; c'est une ligne à lire à l'écran.
-**Disposition : aucune.**
+**Disposition : aucune.** ↻ **Vérifié par Grégoire à l'écran, 5 septembre 2026** (capture du gabarit, carte « Formule » de *Grille-1 FR-ALGO seul A26*) : « Facteur de normalisation (nombre de mots) » = **600**, et la formule affichée le reflète (Note = Pondération − (Erreurs ÷ Mots × 600)). Le défaut du code reste 500 pour les grilles neuves : c'est voulu, le 600 est sa position, pas un point de départ.
 
 ### D-4 · La chaîne codes → formule → niveau – fonctionne – `[exécuté]` `[lecture]`
 
@@ -191,7 +222,8 @@ Grille 50/30, E + I : note 79,625 (« 79.6 % », M) ramenée à 100 par `noteTot
 | avec `ponderationCouverte: 100`, grille gonflée à 110 | **true** | 100 / 110 | – |
 
 **Ce que l'élève lit** : pour une évaluation d'avant 1.111 dont la grille a gagné un critère, le PDF refuse de conclure (pas de bandeau) et nomme un critère qui n'existait pas quand il a été noté. Pas un chiffre faux ; une conclusion retirée sur une note déjà remise. Qui : les utilisateurs en place avec des évaluations d'avant #674 ; pas Grégoire (A2025 et H2026 ne se rouvrent pas, A26 commence).
-**Disposition : inscrire et continuer.** Décision : la portée d'une évaluation se relit contre **sa** grille (prendre `criteres[]` comme référence quand `ponderationCouverte` manque) ou contre la grille courante.
+↻ **Arrêté : inscrit #705, à trancher après le 14.**
+**Disposition proposée : inscrire et continuer.** Décision : la portée d'une évaluation se relit contre **sa** grille (prendre `criteres[]` comme référence quand `ponderationCouverte` manque) ou contre la grille courante.
 
 ### E-3 · L'évaluation vide écrit `0` verrouillé – fonctionne comme tranché – `[exécuté]`
 
@@ -248,6 +280,7 @@ F1 : cinq combinaisons holistiques, valeur stockée = écran = liste, sans bruit
 **Ce que l'élève lit** si l'enseignant se fie à l'auto-save : un PDF avec le bandeau **E** et, dans la liste des critères, « Langue : Insuffisant » ; et le bilan copié sous « === BILAN === » nomme un défi qu'il a levé. L'enregistrement manuel (qui collecte le nu) rétablit la cohérence.
 **Réserve de méthode** : le banc Node reproduit la conséquence d'un état construit d'après la lecture du chemin de réouverture et la mesure Playwright du 2 septembre ; une spec WebKit sur le flux réel scellerait le constat.
 
+↻ **Arrêté : inscrit #699, LIVRÉ (1.121.0), périmètre borné — APRÈS que la spec WebKit `tests/integration/evaluation-699-auto-save-lit-la-source-du-calcul.spec.js` a ROUGI dans le flux réel (base `c3 = I` sous `noteFinale 95`) ; la réunification reste #646.**
 **Disposition proposée : corriger maintenant, périmètre borné** : l'instantané de `_debouncerAutoSave` prend les critères et les points **là où ils sont, le nu l'emportant**, exactement comme `_instantanePourBrouillon` le fait déjà pour la porte (`evaluation-calcul.js:994`) ; et le bilan lit la même source. La réunification des deux emplacements, qui est le vrai #646, est un lot à part, avec Playwright : **inscrire**.
 
 ### G-3 · Retirer un niveau, changer la grille – couverts
@@ -273,6 +306,7 @@ Retirer un niveau après réouverture : refus nommé, l'existante devient brouil
 
 **Les champs neufs, un par un** : `ponderationCouverte` est ignorée, **avec dommage** : « 95 sur 80 % » entre à 95, c'est le défaut de #674 qui survit en aval de l'écran ; `verrouillee` est ignorée : un brouillon d'auto-save compte comme une note remise ; `pointsAnalytiques`, `points`, le niveau déduit : sans effet, les pratiques ne lisent que `noteFinale` et `niveauFinal` ; le critère SOLO « Aucun » : sans effet, il n'entre pas dans `noteFinale`. DEN lit ses propres jugements (`saisie.noteFinale`, `denotation-jugements.js:121`) : hors de cette chaîne.
 
+↻ **Arrêté : inscrit #706, renvoyé au second audit.**
 **Disposition proposée : inscrire et continuer**, comme première question du second audit (`Rapports/prompts-audit/PROMPT-AUDIT-pratique-de-notation-2026-09-05.md`, déposé à 14 h 16). La règle « un brouillon, ou une note de portée incomplète, compte-t-il dans la note du cours ? » est pédagogique ; la mécanique (filtrer sur `verrouillee` ou sur `ponderationCouverte < ponderationGrille`) attend cette règle.
 
 ---
@@ -304,6 +338,9 @@ Retirer un niveau après réouverture : refus nommé, l'existante devient brouil
 - **PAN-Standards, PAN-Spécifications, DEN** au-delà de leur chargement et de leurs filtres (H4) : c'est le second audit.
 - **`_traiterPostRepriseMod` et la reprise** (jeton de reprise, `remplaceeParId`) : lecture seule.
 
-## Rien d'appliqué
+## Rien d'appliqué — au moment de l'audit
+
+↻ **Le même jour, après arbitrage, le lot 1.121.0 a modifié `js/evaluation-calcul.js`, `js/evaluation-chargement.js` et
+`js/evaluation-retroaction.js`** (#697, #698, #699) ; le paragraphe qui suit décrit l'état au dépôt du rapport, 15 h 10.
 
 Aucun fichier de `js/` n'est modifié. La branche `audit/moteur-evaluation-2026-09-05` porte ce rapport et le banc `tests/unit/audit-moteur-evaluation-2026-09-05.test.js` ; `main` n'a pas été touché. Le prompt passe à `statut : exécuté` et `OU-EN-EST-ON.md` reçoit une ligne sous « L'ÉVALUATION », dans l'arbre principal, avec les fichiers de Cowork. Les dispositions ci-dessus sont des propositions : Grégoire arbitre avant tout lot, et chaque constat recevra alors, dans ce fichier, *inscrit* (n°), *refusé* (motif) ou *périmé*.

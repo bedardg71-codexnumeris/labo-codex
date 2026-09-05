@@ -1490,8 +1490,14 @@ function _debouncerAutoSave() {
     // `_suspendreAutoSaveTemporairement`).
     if (window._autoSaveSuspendu) return;
     if (window._timerAutoSave) clearTimeout(window._timerAutoSave);
-    // Snapshot de l'état ACTUEL pour pouvoir flusher si l'utilisateur change d'élève
-    window._pendingAutoSaveSnapshot = {
+    // Snapshot de l'état ACTUEL pour pouvoir flusher si l'utilisateur change d'élève.
+    // #699 (G-2, audit du 5 sept. 2026) — pris LÀ OÙ LE CALCUL LIT : le nom nu l'emporte
+    // (`etatVivantEvaluationEnCours`, evaluation-calcul.js). L'instantané pris sur `window`
+    // seul écrivait la note neuve avec les critères anciens après une réouverture (spec WebKit
+    // #699). Le littéral ci-dessous ne sert plus que si le module de calcul n'est pas chargé.
+    window._pendingAutoSaveSnapshot = (typeof window.etatVivantEvaluationEnCours === 'function')
+        ? window.etatVivantEvaluationEnCours()
+        : {
         etudiantDA: window.evaluationEnCours?.etudiantDA,
         productionId: window.evaluationEnCours?.productionId,
         grilleId: window.evaluationEnCours?.grilleId,
@@ -1702,6 +1708,13 @@ function _autoSauvegarderCriteres(snapshot) {
         if (evaluations[idx].verrouillee === true) return;
         _majEvaluationExistanteAutoSave(evaluations[idx], ec, criteres);
     } else {
+        // #697 (A-1, audit du 5 sept. 2026) — ne rien CRÉER sans échelle résolue : `calculerNote`
+        // n'a pas pu calculer, et la nouvelle évaluation porterait `0` sans portée (mesuré au
+        // banc : A5). Une existante garde sa note (`_majEvaluationExistanteAutoSave`, `#572`).
+        if (typeof window.resoudreEchelleEvaluation === 'function') {
+            const echelleId = ec.echelleId || (document.getElementById('selectEchelle1') || {}).value || '';
+            if (!window.resoudreEchelleEvaluation(echelleId)) return;
+        }
         // Creer une nouvelle evaluation (brouillon non verrouille)
         const nouvelle = _construireNouvelleEvaluationAutoSave(ec, grille, criteres);
         if (!nouvelle) return;

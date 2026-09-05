@@ -11,6 +11,11 @@
  * valeurs souhaitées — si l'un rougit, c'est que le comportement mesuré a changé, et le
  * constat correspondant du rapport est à remesurer.
  *
+ * ↻ LE MÊME JOUR, 15 h 30 — Grégoire a arbitré : A-1 (#697), D-2 (#698) et G-2 (#699) sont
+ * corrigés dans ce lot. Les mesures A1/A2/A5, D2/D3/D4 et G2/G3 portent désormais les valeurs
+ * D'APRÈS, et la valeur d'avant en commentaire ; les sentinelles #697, #698, #699 tiennent le
+ * comportement corrigé. Les autres mesures (B, C, D1, D5, E, F, H) sont inchangées : inscrites.
+ *
  * Aucune donnée réelle lue ni écrite. Rien dans js/.
  */
 import { describe, it, expect, afterAll } from 'vitest';
@@ -71,6 +76,11 @@ const GRILLE_ALGO = { id: 'GA', nom: 'Contenu 80 · Français 20', criteres: [
     { id: 'a1', nom: 'Français écrit', ponderation: 20, type: 'algorithmique', sousCriteres: [
         { id: 'SC1', code: '1', nom: 'Syntaxe', ponderation: 1, retroaction: '' },
         { id: 'SC4', code: '4', nom: 'Accord GN', ponderation: 1.5, retroaction: '' } ] } ] };
+// Le même critère algorithmique, en mode SIMPLE (sans sous-critère) : `_forcerRecalculAlgorithmiqueAvantSauvegarde`
+// choisit le mode par la présence de sous-critères, et le banc rend les deux jeux de champs.
+const GRILLE_ALGO_SIMPLE = { id: 'GS', nom: 'Contenu 80 · Français 20 (simple)', criteres: [
+    { id: 'c1', nom: 'Contenu', ponderation: 80 },
+    { id: 'a1', nom: 'Français écrit', ponderation: 20, type: 'algorithmique' } ] };
 // Lot 1 : le type déclaré à la grille, un critère SANS type écrit (d'avant le chantier).
 const GRILLE_DECLAREE_ANALYTIQUE = { id: 'GD', nom: 'Déclarée analytique', type: 'analytique', criteres: [
     { id: 'k', nom: 'Rédaction', ponderation: 30 },
@@ -188,7 +198,7 @@ const EV1 = (grille, extra) => Object.assign({ id: 'EV1', etudiantDA: '1234567',
    A · LES SITES D'ÉCRITURE — une échelle non résolue
    ====================================================================================== */
 describe('A · sites d\'écriture — l\'échelle de l\'évaluation n\'est pas dans echellesTemplates', () => {
-    it('A1 · CRÉATION : la porte #674 laisse passer (portée nulle) et « 0 » est écrit, verrouillé, sans portée', () => {
+    it('A1 · CRÉATION sur une échelle absente — ↻ corrigé #697 : refus nommé, rien d\'écrit (avant : « 0 » verrouillé, sans portée, aucun refus)', () => {
         const nu = ecDe(GRILLE_50_30_20, { criteres: { c1: 'E', c2: 'E', c3: 'I' } });
         const { win, ecran, ecritures, refus } = monterChaine({ grille: GRILLE_50_30_20, echelles: [], nu });
         win.sauvegarderEvaluation();
@@ -196,19 +206,19 @@ describe('A · sites d\'écriture — l\'échelle de l\'évaluation n\'est pas d
         noter('A1', { refus: refus.map((r) => r.titre), ecranNote: ecran.noteProduction1.textContent,
             noteCalculee: win.noteCalculeeCourante, portee: win.porteeCalculeeCourante,
             ecrit: ecrit && { noteFinale: ecrit.noteFinale, ponderationCouverte: ecrit.ponderationCouverte, niveauFinal: ecrit.niveauFinal, verrouillee: ecrit.verrouillee, echelleId: ecrit.echelleId } });
-        expect(refus).toHaveLength(0);
         expect(win.noteCalculeeCourante).toBeNull();
         expect(win.porteeCalculeeCourante).toBeNull();
-        expect(ecrit).toMatchObject({ noteFinale: 0, ponderationCouverte: null, niveauFinal: '--', verrouillee: true });
+        expect(refus.map((r) => r.titre)).toEqual(['Échelle introuvable']);   // avant #697 : []
+        expect(ecrit).toBeNull();                                              // avant #697 : { noteFinale: 0, ponderationCouverte: null, niveauFinal: '--', verrouillee: true }
     });
-    it('A2 · MODIFICATION : une évaluation à 84 rouverte sur une échelle disparue est réécrite à 0, verrouillée', () => {
+    it('A2 · MODIFICATION d\'une évaluation à 84 sur une échelle disparue — ↻ corrigé #697 : refus nommé, l\'existante n\'est pas touchée (avant : réécrite à 0, verrouillée)', () => {
         const nu = ecDe(GRILLE_50_30_20, { criteres: { c1: 'E', c2: 'E', c3: 'I' }, idModification: 'EV1' });
         const { win, ecritures, refus } = monterChaine({ grille: GRILLE_50_30_20, echelles: [], nu, evaluations: [EV1(GRILLE_50_30_20)] });
         win.sauvegarderEvaluationModifiee();
         const ecrit = derniereEcriture(ecritures, 'EV1');
         noter('A2', { refus: refus.map((r) => r.titre), ecrit: ecrit && { noteFinale: ecrit.noteFinale, ponderationCouverte: ecrit.ponderationCouverte, niveauFinal: ecrit.niveauFinal, verrouillee: ecrit.verrouillee } });
-        expect(refus).toHaveLength(0);
-        expect(ecrit).toMatchObject({ noteFinale: 0, ponderationCouverte: null, verrouillee: true });
+        expect(refus.map((r) => r.titre)).toEqual(['Échelle introuvable']);   // avant #697 : []
+        expect(ecritures).toHaveLength(0);                                     // avant #697 : EV1 réécrite { noteFinale: 0, ponderationCouverte: null, verrouillee: true }
     });
     it('A3 · témoin — la même évaluation avec son échelle : 84 écrit, portée 100, aucun refus', () => {
         const nu = ecDe(GRILLE_50_30_20, { criteres: { c1: 'E', c2: 'E', c3: 'I' } });
@@ -218,7 +228,7 @@ describe('A · sites d\'écriture — l\'échelle de l\'évaluation n\'est pas d
         expect(refus).toHaveLength(0);
         expect(ecrit).toMatchObject({ noteFinale: 84, ponderationCouverte: 100, niveauFinal: 'M', verrouillee: true });
     });
-    it('A5 · AUTO-SAVE (création) : un niveau choisi sur une échelle absente écrit « 0 », portée nulle, NON verrouillé — et SOM le lira (H2)', () => {
+    it('A5 · AUTO-SAVE (création) sur une échelle absente — ↻ corrigé #697 : rien n\'est créé (avant : « 0 », portée nulle, non verrouillé, que SOM lisait — H2)', () => {
         const nu = ecDe(GRILLE_50_30_20, { criteres: { c1: 'E', c2: 'E' } });
         const { win, ecran, ecritures, minuteries } = monterChaine({ grille: GRILLE_50_30_20, echelles: [], nu });
         ecran.eval_c3.value = 'I';
@@ -226,8 +236,7 @@ describe('A · sites d\'écriture — l\'échelle de l\'évaluation n\'est pas d
         minuteries[0]();
         const ecrit = derniereEcriture(ecritures, 'EVAL_NEUF');
         noter('A5', { ecrit: ecrit && { noteFinale: ecrit.noteFinale, ponderationCouverte: ecrit.ponderationCouverte, niveauFinal: ecrit.niveauFinal, verrouillee: ecrit.verrouillee, nbCriteres: ecrit.criteres.length } });
-        expect(ecrit).toMatchObject({ noteFinale: 0, ponderationCouverte: null, niveauFinal: '--', verrouillee: false });
-        expect(ecrit.criteres).toHaveLength(3);
+        expect(ecrit).toBeNull();   // avant #697 : { noteFinale: 0, ponderationCouverte: null, niveauFinal: '--', verrouillee: false }, 3 critères
     });
     it('A4 · le contexte : la liste des évaluations affiche « - » pour une note à 0 (liste-evaluations.js:946)', () => {
         // Reproduction littérale de l'expression de la liste, pour dire ce que l'enseignant·e VERRAIT.
@@ -272,8 +281,8 @@ describe('B · l\'échelle — un pourcentage qui tombe entre deux bornes entiè
         expect(r.deduit).toBeUndefined();
     });
     it('B5 · l\'ENREGISTREMENT écrit « -- » comme niveauSelectionne du critère algorithmique dans le trou (74,5 %), et la note compte 82,1', () => {
-        const nu = ecDe(GRILLE_ALGO, { criteres: { c1: 'M' } });
-        const { win, ecran, ecritures, refus } = monterChaine({ grille: GRILLE_ALGO, nu });
+        const nu = ecDe(GRILLE_ALGO_SIMPLE, { criteres: { c1: 'M' } });
+        const { win, ecran, ecritures, refus } = monterChaine({ grille: GRILLE_ALGO_SIMPLE, nu });
         ecran.eval_erreurs_a1.value = '51'; ecran.eval_mots_a1.value = '5000';
         win.calculerNoteAlgorithmiqueSimple('a1', 20, 500);
         win.sauvegarderEvaluation();
@@ -350,7 +359,7 @@ describe('D · le critère algorithmique — copie sans code, codes effacés, mo
         expect(r.categories.hors).toEqual(['a1:sans-niveau']);
         expect(r.simple).toEqual({ niveauAlgo: 'E', pct: '100.0', note: '87.2 %' });   // 0,8×84 + 0,2×100
     });
-    it('D2 · mode CATÉGORIES : les codes « 1;4 » donnent 87,5 % ; EFFACÉS, le pourcentage et le niveau restent et la note ne bouge pas', () => {
+    it('D2 · mode CATÉGORIES : les codes « 1;4 » donnent 87,5 % ; EFFACÉS — ↻ corrigé #698 : le résultat part, le critère redevient sans niveau, la note se retient (avant : 87,5 et M restaient, 84,7 % inchangé)', () => {
         const { win, ecran, ec } = monterAlgo();
         ecran.eval_categories_a1.value = '1;4'; ecran.eval_mots_a1.value = '500';
         win.calculerNoteAlgorithmiqueAvecCategories('a1', 20, 500, 'a1');
@@ -361,11 +370,11 @@ describe('D · le critère algorithmique — copie sans code, codes effacés, mo
         win.calculerNote();   // n'importe quel geste qui recalcule ensuite (un autre critère, l'enregistrement…)
         const r = noter('D2', { avant, apresReset, noteApres: ecran.noteProduction1.textContent, porteeApres: win.porteeCalculeeCourante.ponderationCouverte });
         expect(avant).toMatchObject({ pct: 87.5, critere: 'M', note: '84.7 %' });   // 0,8×84 + 0,2×87,5
-        expect(apresReset).toMatchObject({ pct: 87.5, critere: 'M', niveauAlgo: '--', codes: [] });   // l'écran du critère dit « -- », la mémoire garde 87,5 et M
-        expect(r.noteApres).toBe('84.7 %');
-        expect(r.porteeApres).toBe(100);
+        expect(apresReset).toEqual({ pct: undefined, critere: undefined, niveauAlgo: '--', codes: [] });   // avant #698 : pct 87.5, critere 'M'
+        expect(r.noteApres).toBe('--');       // avant #698 : '84.7 %'
+        expect(r.porteeApres).toBe(80);       // avant #698 : 100
     });
-    it('D3 · mode SIMPLE : 4 erreurs / 500 mots = 80 % ; le nombre de mots EFFACÉ, le pourcentage et le niveau restent', () => {
+    it('D3 · mode SIMPLE : 4 erreurs / 500 mots = 80 % ; le nombre de mots EFFACÉ — ↻ corrigé #698 : le résultat part et la note se retient (avant : 80 et M restaient, 83,2 % inchangé)', () => {
         const { win, ecran, ec } = monterAlgo();
         ecran.eval_erreurs_a1.value = '4'; ecran.eval_mots_a1.value = '500';
         win.calculerNoteAlgorithmiqueSimple('a1', 20, 500);
@@ -376,10 +385,10 @@ describe('D · le critère algorithmique — copie sans code, codes effacés, mo
         win.calculerNote();
         const r = noter('D3', { avant, apres, noteApres: ecran.noteProduction1.textContent });
         expect(avant).toEqual({ pct: 80, note: '83.2 %' });
-        expect(apres).toMatchObject({ pct: 80, mots: 0, critere: 'M', niveauAlgo: '--' });
-        expect(r.noteApres).toBe('83.2 %');
+        expect(apres).toEqual({ pct: undefined, mots: 0, critere: undefined, niveauAlgo: '--' });   // avant #698 : pct 80, critere 'M'
+        expect(r.noteApres).toBe('--');   // avant #698 : '83.2 %'
     });
-    it('D4 · l\'ENREGISTREMENT après effacement des codes persiste le pourcentage périmé (la porte recalcule, le recalcul sort tôt)', () => {
+    it('D4 · l\'ENREGISTREMENT après effacement des codes — ↻ corrigé #698 : refus « incomplète », brouillon sans résultat périmé (avant : 84,7 persisté avec 87,5 en mémoire)', () => {
         const nu = ecDe(GRILLE_ALGO, { criteres: { c1: 'M' } });
         const { win, ecran, ecritures, refus } = monterChaine({ grille: GRILLE_ALGO, nu });
         ecran.eval_categories_a1.value = '1;4'; ecran.eval_mots_a1.value = '500';
@@ -390,10 +399,10 @@ describe('D · le critère algorithmique — copie sans code, codes effacés, mo
         const ecrit = derniereEcriture(ecritures, 'EVAL_NEUF');
         const r = noter('D4', { refus: refus.map((x) => x.titre), noteFinale: ecrit && ecrit.noteFinale, ponderationCouverte: ecrit && ecrit.ponderationCouverte,
             a1: ecrit && ecrit.criteres.find((c) => c.critereId === 'a1'), algo: ecrit && ecrit.donneesAlgorithmiques.a1 });
-        expect(refus).toHaveLength(0);
-        expect(ecrit.noteFinale).toBeCloseTo(84.7, 10);
-        expect(r.a1).toMatchObject({ niveauSelectionne: 'M' });
-        expect(r.algo).toMatchObject({ codes: [], totalErreurs: 0, pourcentage: 87.5 });
+        expect(refus.map((x) => x.titre)).toEqual(['Évaluation incomplète']);   // avant #698 : []
+        expect(ecrit).toMatchObject({ noteFinale: 84, ponderationCouverte: 80, verrouillee: false });   // le brouillon de #674 ; avant : noteFinale 84.7, portée 100, verrouillé
+        expect(r.a1).toBeUndefined();                                            // avant #698 : niveauSelectionne 'M'
+        expect(r.algo).toEqual({ codes: [], mots: 500, totalErreurs: 0 });        // avant #698 : + pourcentage 87.5, noteCalculee 17.5, niveau 'M'
     });
     it('D5 · le facteur de normalisation par DÉFAUT est 500 dans les trois sources du code (registre, palette, recalcul avant sauvegarde)', () => {
         const { win } = monterMoteur({ grille: GRILLE_ALGO, ec: ecDe(GRILLE_ALGO) });
@@ -477,7 +486,7 @@ describe('G · rouvrir / modifier / réenregistrer', () => {
         expect(ecrit.noteFinale).toBe(68.5);
         expect(ecrit.verrouillee).toBe(true);
     });
-    it('G2 · #646 — un niveau changé après réouverture : l\'AUTO-SAVE écrit la note NEUVE (95) avec les critères ANCIENS (c3 = I)', () => {
+    it('G2 · #646 — un niveau changé après réouverture — ↻ corrigé #699 : l\'auto-save écrit la note ET le critère neufs (avant : 95 avec c3 = I)', () => {
         // Le flux réel après `verifierEtChargerEvaluationExistante` : `window.evaluationEnCours.criteres`
         // porte les niveaux ENREGISTRÉS ; les selects rejoués par `change` ont écrit les mêmes dans le
         // nom nu. L'enseignant·e change ensuite c3 (I → E) : `niveauSelectionne` écrit le nu.
@@ -492,10 +501,10 @@ describe('G · rouvrir / modifier / réenregistrer', () => {
         const r = noter('G2', { nu: nu.criteres, fenetre: fenetre.criteres, noteCalculee: win.noteCalculeeCourante, ecranNote: ecran.noteProduction1.textContent,
             ecrit: ecrit && { noteFinale: ecrit.noteFinale, ponderationCouverte: ecrit.ponderationCouverte, niveauFinal: ecrit.niveauFinal, c3: (ecrit.criteres.find((c) => c.critereId === 'c3') || {}).niveauSelectionne, verrouillee: ecrit.verrouillee } });
         expect(nu.criteres.c3).toBe('E');
-        expect(fenetre.criteres.c3).toBe('I');
-        expect(r.ecrit).toMatchObject({ noteFinale: 95, niveauFinal: 'E', c3: 'I', ponderationCouverte: 100 });
+        expect(fenetre.criteres.c3).toBe('I');   // les deux emplacements divergent toujours (#646, inscrit) …
+        expect(r.ecrit).toMatchObject({ noteFinale: 95, niveauFinal: 'E', c3: 'E', ponderationCouverte: 100 });   // … mais l'écriture lit le nu. Avant #699 : c3 'I'
     });
-    it('G3 · #646 — le BILAN lit `window.evaluationEnCours` : après le même changement, il nomme encore Langue comme défi', () => {
+    it('G3 · #646 — le BILAN après le même changement — ↻ corrigé #699 : il lit la même source que le calcul (avant : « Langue (Insuffisant) » restait le défi)', () => {
         const fenetre = ecDe(GRILLE_50_30_20, { criteres: { c1: 'E', c2: 'E', c3: 'I' }, idModification: 'EV1' });
         const nu = ecDe(GRILLE_50_30_20, { criteres: { c1: 'E', c2: 'E', c3: 'I' } });
         const { win, ecran } = monterChaine({ grille: GRILLE_50_30_20, echelles: [ECHELLE_674], nu, fenetre, evaluations: [EV1(GRILLE_50_30_20)], retro: true });
@@ -504,10 +513,10 @@ describe('G · rouvrir / modifier / réenregistrer', () => {
         let erreur = null;
         try { win.basculerVueRetroaction('bilan'); } catch (e) { erreur = e.message; }
         const html = ecran.contenuRetroBilan.innerHTML;
-        const r = noter('G3', { erreur, nommeLangueEnDefi: /Langue/.test(html) && /concentrer/.test(html), extrait: html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 400) });
+        const r = noter('G3', { erreur, nommeLangueEnDefi: /Langue \(Insuffisant\)/.test(html), extrait: html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 400) });
         expect(erreur).toBeNull();
         expect(ecran.niveauProduction1.textContent).toBe('E');   // l'écran du calcul (nu) dit E…
-        expect(r.nommeLangueEnDefi).toBe(true);                  // …le bilan (window) travaille encore avec c3 = I
+        expect(r.nommeLangueEnDefi).toBe(false);                 // …et le bilan aussi. Avant #699 : true (il lisait window, c3 = I)
     });
     it('G4 · #646 témoin — quand les deux noms désignent le MÊME objet, l\'auto-save écrit note et critères cohérents', () => {
         const nu = ecDe(GRILLE_50_30_20, { criteres: { c1: 'E', c2: 'E', c3: 'I' }, idModification: 'EV1' });
