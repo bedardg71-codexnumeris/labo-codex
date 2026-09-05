@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.120',
+            couleur: 'bleu',
+            titre: 'La carte « Bilan » ne dit que ce que l\'élève lit',
+            items: [
+                '<strong>La carte « Observation » s\'appelle « Bilan ».</strong> Dans un critère algorithmique, elle ne porte plus que les deux phrases qui vont dans le bilan de l\'élève (« Défi prioritaire », « Quand tout est maîtrisé ») et le menu du modèle, renommé « Modèle des phrases (bilan et décompte) ». Rien n\'est écrit à deux endroits.',
+                '<strong>« Aucune annotation » a déménagé.</strong> Cette phrase, que toi seul lis, vit maintenant dans la liste « Sous-critères », sous la case des codes d\'annotation, dans un pli « Quand la copie ne porte aucun code ».',
+                '<strong>Le modèle « Français écrit » porte son vrai nom.</strong> Plus de « formulations d\'origine » ni de numéro de fiche dans le menu ; sa description dit quand le choisir et quand préférer « Générique ». Tes grilles et ce que tes élèves ont déjà reçu ne changent pas.'
+            ]
+        },
+        {
             version: '1.119',
             couleur: 'vert',
             titre: 'Les badges s\'affichent dans la phrase, tes réglages de projection s\'enregistrent sous un nom',
