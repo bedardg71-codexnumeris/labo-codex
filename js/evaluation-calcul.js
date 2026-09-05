@@ -366,10 +366,50 @@ function _viderResultatAlgoSimple(critereId, erreurs, mots) {
     _masquerFormuleAlgo(critereId);
     _appliquerStyleResultatAlgo(critereId, null);
     if (!evaluationEnCours.donneesAlgorithmiques) evaluationEnCours.donneesAlgorithmiques = {};
-    evaluationEnCours.donneesAlgorithmiques[critereId] = Object.assign(
-        evaluationEnCours.donneesAlgorithmiques[critereId] || {},
+    // #698 — la saisie reste, le RÉSULTAT part (voir `_memoireAlgoSansResultat`), et la note
+    // se recalcule tout de suite : un critère sans résultat est un critère sans niveau.
+    evaluationEnCours.donneesAlgorithmiques[critereId] = _memoireAlgoSansResultat(
+        evaluationEnCours.donneesAlgorithmiques[critereId],
         { erreurs: erreurs, mots: mots }
     );
+    _retirerNiveauCalculeAlgo(critereId);
+    calculerNote();
+    if (typeof window.genererRetroaction === 'function') window.genererRetroaction(1);
+}
+
+/**
+ * #698 (D-2 de l'audit du moteur, 5 septembre 2026) — L'EFFACEMENT TARIT LA MÉMOIRE DU CRITÈRE.
+ *
+ * Les deux réinitialisations (mode simple ci-dessus, mode catégories dans
+ * `calculerNoteAlgorithmiqueAvecCategories`) fusionnaient la saisie neuve SUR l'ancien objet :
+ * `pourcentage`, `noteCalculee`, `niveau` et `sommePonderee` survivaient à des codes ou à des
+ * mots effacés, `evaluationEnCours.criteres[critereId]` gardait le niveau, et `calculerNote`
+ * n'était pas rappelée. La note ne bougeait pas ; l'enregistrement rejouait la même garde
+ * (`_forcerRecalculAlgorithmiqueAvantSauvegarde`) et persistait « 0 erreur → 17,50/20
+ * (87,5 %) », que le PDF de l'élève imprime tel quel. Mesuré au banc de l'audit (D2, D3, D4).
+ * Le fix #110 v3 voulait garder erreurs, mots et codes pour que la sauvegarde ne repersiste pas
+ * l'ancienne SAISIE ; il gardait aussi le RÉSULTAT. On garde la saisie, on retire le résultat.
+ * La rétroaction engendrée, elle, part déjà par `_effacerRetroactionMachine` (#673).
+ */
+function _memoireAlgoSansResultat(ancienne, saisie) {
+    const memo = Object.assign({}, ancienne || {}, saisie);
+    delete memo.pourcentage;
+    delete memo.noteCalculee;
+    delete memo.niveau;
+    delete memo.sommePonderee;
+    return memo;
+}
+
+/**
+ * #698 — Le niveau qu'un calcul avait posé part avec lui. Un niveau choisi À LA MAIN dans le
+ * menu du critère (jeton de reprise ciblée : `_valeurCritereEnCours` lit le select) n'est pas
+ * un résultat de calcul — il reste.
+ */
+function _retirerNiveauCalculeAlgo(critereId) {
+    if (!evaluationEnCours || !evaluationEnCours.criteres) return;
+    const select = document.getElementById(`eval_${critereId}`);
+    if (select && select.value) return;
+    delete evaluationEnCours.criteres[critereId];
 }
 
 /**
@@ -549,10 +589,14 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
         // préserver mots+codes+totalErreurs même quand le calcul ne tourne pas,
         // sinon la sauvegarde persiste l'ancienne valeur de donneesAlgorithmiques.
         if (!evaluationEnCours.donneesAlgorithmiques) evaluationEnCours.donneesAlgorithmiques = {};
-        evaluationEnCours.donneesAlgorithmiques[critereId] = Object.assign(
-            evaluationEnCours.donneesAlgorithmiques[critereId] || {},
+        // #698 — la saisie reste, le RÉSULTAT part (voir `_memoireAlgoSansResultat`).
+        evaluationEnCours.donneesAlgorithmiques[critereId] = _memoireAlgoSansResultat(
+            evaluationEnCours.donneesAlgorithmiques[critereId],
             { codes: codesSousCriteres, mots: mots, totalErreurs: totalErreurs }
         );
+        _retirerNiveauCalculeAlgo(critereId);
+        calculerNote();
+        if (typeof window.genererRetroaction === 'function') window.genererRetroaction(1);
         return;
     }
 
@@ -981,20 +1025,48 @@ function _ecrirePorteeEcran(portee) {
  * n'écrit rien (mesuré, même banc) ; c'est #646.
  */
 function _instantanePourBrouillon() {
-    const nu = (typeof evaluationEnCours !== 'undefined' && evaluationEnCours) ? evaluationEnCours : {};
+    return etatVivantEvaluationEnCours();
+}
+
+/**
+ * #699 (G-2 de l'audit du moteur, 5 septembre 2026) — L'ÉTAT VIVANT DE L'ÉVALUATION EN COURS,
+ * UNE SEULE RÈGLE pour la porte (`_instantanePourBrouillon`), l'auto-save débouncé
+ * (`_debouncerAutoSave`, evaluation-chargement.js) et le bilan (`genererRetroactionBilan`,
+ * evaluation-retroaction.js).
+ *
+ * ⚠ LE NOM NU L'EMPORTE EN BLOC, pas clé par clé. À la réouverture d'une évaluation,
+ * `verifierEtChargerEvaluationExistante` remplit `window.evaluationEnCours.criteres` depuis la
+ * base ET rejoue les selects vers le nu : les deux portent les mêmes niveaux, puis seul le nu
+ * bouge (c'est lui que `niveauSelectionne`, `pointsSaisis` et les calculs algorithmiques
+ * écrivent, et lui que `calculerNote` lit). Mesuré sous WebKit le 5 septembre
+ * (`tests/integration/evaluation-699-auto-save-lit-la-source-du-calcul.spec.js`) : l'auto-save,
+ * qui lisait `window`, écrivait la note NEUVE (95) avec les critères ANCIENS (c3 = I), et le
+ * bilan nommait encore l'ancien défi. Une fusion clé par clé (l'ancienne règle de la porte)
+ * ne suffirait pas : un niveau RETIRÉ du nu (points effacés, #698) resurgirait depuis `window`.
+ * Les données algorithmiques gardent le repli sur `window` quand le nu n'en a aucune : la
+ * réouverture les y pose en premier, et `_majEvaluationExistanteAutoSave` refuse de toute façon
+ * d'écraser la base par un objet vide.
+ *
+ * Ce n'est pas la réunification des deux emplacements (#646, inscrite) : c'est le chemin qui
+ * fait lire à l'écriture ce que le calcul a lu, en attendant.
+ */
+function etatVivantEvaluationEnCours() {
+    const nu = (typeof evaluationEnCours !== 'undefined' && evaluationEnCours && typeof evaluationEnCours === 'object') ? evaluationEnCours : null;
     const w = window.evaluationEnCours || {};
+    const source = nu || w;
     const val = (id) => { const el = document.getElementById(id); return (el && el.value) ? el.value : ''; };
-    const algoNu = nu.donneesAlgorithmiques && Object.keys(nu.donneesAlgorithmiques).length ? nu.donneesAlgorithmiques : null;
+    const copie = (v) => JSON.parse(JSON.stringify(v || {}));
+    const algoNu = nu && nu.donneesAlgorithmiques && Object.keys(nu.donneesAlgorithmiques).length ? nu.donneesAlgorithmiques : null;
     return {
-        etudiantDA: val('selectEtudiantEval') || w.etudiantDA || nu.etudiantDA || '',
-        productionId: val('selectProduction1') || w.productionId || nu.productionId || '',
-        grilleId: val('selectGrille1') || nu.grilleId || w.grilleId || '',
-        echelleId: val('selectEchelle1') || nu.echelleId || w.echelleId || '',
-        cartoucheId: val('selectCartoucheEval') || nu.cartoucheId || w.cartoucheId || '',
-        criteres: Object.assign({}, w.criteres || {}, nu.criteres || {}),
-        donneesAlgorithmiques: JSON.parse(JSON.stringify(algoNu || w.donneesAlgorithmiques || {})),
-        // Lot 2 — les points, là où ils sont (le nu l'emporte), comme les critères.
-        pointsAnalytiques: JSON.parse(JSON.stringify((nu.pointsAnalytiques && Object.keys(nu.pointsAnalytiques).length ? nu.pointsAnalytiques : w.pointsAnalytiques) || {}))
+        etudiantDA: val('selectEtudiantEval') || w.etudiantDA || (nu && nu.etudiantDA) || '',
+        productionId: val('selectProduction1') || w.productionId || (nu && nu.productionId) || '',
+        grilleId: val('selectGrille1') || (nu && nu.grilleId) || w.grilleId || '',
+        echelleId: val('selectEchelle1') || (nu && nu.echelleId) || w.echelleId || '',
+        cartoucheId: val('selectCartoucheEval') || (nu && nu.cartoucheId) || w.cartoucheId || '',
+        idModification: w.idModification || (nu && nu.idModification) || undefined,
+        criteres: Object.assign({}, source.criteres || {}),
+        donneesAlgorithmiques: copie(algoNu || w.donneesAlgorithmiques),
+        pointsAnalytiques: copie(source.pointsAnalytiques)
     };
 }
 
@@ -1009,6 +1081,24 @@ function _instantanePourBrouillon() {
  */
 function verifierPorteeAvantSauvegarde() {
     calculerNote();
+    // #697 (A-1 de l'audit du moteur, 5 septembre 2026) — UNE ÉCHELLE QUI NE SE RÉSOUT PAS N'EST
+    // PAS UNE PORTÉE COMPLÈTE. `calculerNote` sort tôt et publie `noteCalculeeCourante = null` ;
+    // cette porte ne testait que `portee.incomplete` : une portée NULLE passait, et les trois
+    // sites d'écriture posaient leur repli `: 0` — un zéro verrouillé, sans portée, par-dessus
+    // une vraie note en modification (mesuré au banc de l'audit : A1, A2 ; 84 → 0). Refus nommé,
+    // et RIEN n'est écrit : un brouillon porterait le même zéro. L'échelle est nommée par son
+    // identifiant, c'est tout ce qu'on a d'elle quand elle manque.
+    if (window.noteCalculeeCourante === null) {
+        const echelleId = (evaluationEnCours && evaluationEnCours.echelleId) || document.getElementById('selectEchelle1')?.value || '';
+        const details = echelleId
+            ? 'L\'échelle « ' + echelleId + ' » de cette évaluation n\'existe plus dans ce trimestre : aucune note ne peut être calculée. Choisis une échelle de performance, puis enregistre.'
+            : 'Aucune échelle de performance n\'est choisie : aucune note ne peut être calculée. Choisis une échelle, puis enregistre.';
+        if (typeof notifications !== 'undefined' && notifications && typeof notifications.erreur === 'function') {
+            notifications.erreur('Échelle introuvable', details);
+        }
+        console.warn('[Évaluation] #697 enregistrement refusé — échelle non résolue : ' + (echelleId || '(aucune)'));
+        return false;
+    }
     const portee = window.porteeCalculeeCourante;
     if (!portee || !portee.incomplete) return true;
     // ⚠⚠ LE REFUS NE JETTE RIEN. `sauvegarderEvaluation` ANNULE l'auto-save en attente
@@ -1156,6 +1246,33 @@ function _valeurCritereEnCours(critere, niveau, valeurs) {
  * 3. Détermine le niveau global
  * 4. Met à jour l'affichage
  */
+/**
+ * #697 — L'ÉCHELLE DE L'ÉVALUATION, RÉSOLUE PAR UNE SEULE FONCTION. La résolution vivait dans le
+ * corps de `calculerNote` (échelle d'une pratique configurable `pratique-<id>`, ou échelle du
+ * trimestre). Extraite telle quelle pour que la porte de l'enregistrement et l'auto-save de
+ * création (`_autoSauvegarderCriteres`) posent la MÊME question que le calcul : « cette échelle
+ * existe-t-elle ici ? ». Rend l'échelle, ou `null` — jamais un objet qui aurait l'air d'une échelle.
+ */
+function resoudreEchelleEvaluation(echelleId) {
+    if (!echelleId) return null;
+    const id = String(echelleId);
+    if (id.startsWith('pratique-')) {
+        const pratiqueId = id.replace('pratique-', '');
+        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || [];
+        const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
+        if (pratiqueData && pratiqueData.config && pratiqueData.config.echelle) {
+            return {
+                id: id,
+                niveaux: pratiqueData.config.echelle.niveaux || [],
+                type: pratiqueData.config.echelle.type || 'niveaux'
+            };
+        }
+        return null;
+    }
+    const echelles = db.getSync(cle('echellesTemplates'), []);
+    return echelles.find(e => e.id === id) || null;
+}
+
 function calculerNote() {
     if (!evaluationEnCours) return;
     window.porteeCalculeeCourante = null;   // #674 — inconnue tant qu'elle n'est pas calculée
@@ -1167,28 +1284,9 @@ function calculerNote() {
     if (!grille) return;
 
     // LECTURE DE L'ÉCHELLE SÉLECTIONNÉE (pas l'ancienne niveauxEchelle)
-    // NOUVEAU (Beta 92): Support échelles de pratiques configurables
+    // NOUVEAU (Beta 92): Support échelles de pratiques configurables — #697 : par `resoudreEchelleEvaluation`.
     const echelleId = evaluationEnCours.echelleId || document.getElementById('selectEchelle1')?.value;
-    let echelleSelectionnee = null;
-
-    // Vérifier si c'est une échelle de pratique configurable
-    if (echelleId && echelleId.startsWith('pratique-')) {
-        const pratiqueId = echelleId.replace('pratique-', '');
-        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || [];
-        const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
-
-        if (pratiqueData && pratiqueData.config && pratiqueData.config.echelle) {
-            echelleSelectionnee = {
-                id: echelleId,
-                niveaux: pratiqueData.config.echelle.niveaux || [],
-                type: pratiqueData.config.echelle.type || 'niveaux'
-            };
-        }
-    } else {
-        // Échelle personnalisée classique
-        const echelles = db.getSync(cle('echellesTemplates'), []);
-        echelleSelectionnee = echelles.find(e => e.id === echelleId);
-    }
+    const echelleSelectionnee = resoudreEchelleEvaluation(echelleId);
 
     // SÉCURITÉ: Vérifier que l'échelle existe. Si non résolue (consultation d'un
     // trimestre archivé sans copie d'échelle = pilote A25 pas posé, ou échelle pas
@@ -1446,5 +1544,9 @@ window.calculerPortee = calculerPortee;
 window.porteeDepuisEvaluation = porteeDepuisEvaluation;
 window.verifierPorteeAvantSauvegarde = verifierPorteeAvantSauvegarde;
 window.texteCriteresHorsNote = texteCriteresHorsNote;
+// #697 — la même résolution d'échelle pour le calcul, la porte et l'auto-save de création.
+window.resoudreEchelleEvaluation = resoudreEchelleEvaluation;
+// #699 — l'état vivant (le nu l'emporte) pour l'auto-save débouncé et le bilan.
+window.etatVivantEvaluationEnCours = etatVivantEvaluationEnCours;
 
 })();
