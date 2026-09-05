@@ -563,6 +563,15 @@
        entrées de changelog (ses mots, Cowork les propose) → push → PR #82 fermée sans fusion.
      ▣ ARBRE : `main` = origin/main + 10 commits ; `apercu/…` = main moins ce commit.
      ⚠ Erreur 14, rattrapée : trois heures de ce bloc avaient été TAPÉES ; corrigées d'après git et la veille.
+     ↻ 10 h 53 → 11 h 04 — RELEASE 1.119.0 : les mots du changelog par Grégoire (six puces, écrites telles
+       quelles, la première phrase en <strong>) — SUPPOSÉ, DIT : ses mots venant après le coup d'œil et la
+       relecture de B dans l'ordre de la consigne, les deux étaient faits ; `release.mjs minor` (build
+       0905-1053, douze jetons) → commit `f2fa5a2e` → Vitest 467 / 5185 → `scripts/pousser.sh` : verdict
+       Playwright local VERT (0 connu, 0 instable, dix minutes), hook Vitest vert, `56d20a63..f2fa5a2e
+       main -> main`. **1.119.0 EN LIGNE, `main` = `origin/main`.** PR #82 fermée sans fusion, branche
+       d'aperçu supprimée. RELAIS.md mis à jour (ce commit de docs, poussé seul).
+     ▣ CE QUI RESTE : rien du jour. Cowork : OU-EN-EST-ON, sa console, la consigne de demain (l'étape 4 des
+       badges inventés reste à cadrer à froid, décision de Grégoire).
      ===================================================================== -->
 
 <!-- =====================================================================
