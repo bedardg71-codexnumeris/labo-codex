@@ -7,6 +7,22 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, 16 H 30 (1.121.0 EN LIGNE)
+
+> ↻ **16 h 30 — 1.121.0 EN LIGNE** (`1aadacb1`, build `0905-1530`, « Trois chemins où une note pouvait se tromper sont
+> fermés ») : verdict Playwright local au jeton, hook Vitest vert (473 / 5 263), `7a40949b..1aadacb1 main -> main`.
+> **`main` = `origin/main` = `1aadacb1` (puis le commit docs de clôture), AUCUN travail en avance.** La branche
+> `audit/moteur-evaluation-2026-09-05` (3 commits : rapport `23f5ce67`, lot `d3111feb`, release) est fusionnée
+> fast-forward ; son worktree est retiré. **Ce qui est livré** : #697 (une échelle introuvable ne fait plus écrire un
+> `0` ; refus nommé, l'auto-save ne crée rien ; le STOCK se mesure par `scripts/diagnostic-697-zeros-sans-echelle.js`,
+> console Safari, `await diag697()` — rien n'y est réparé), #698 (effacer codes ou mots tarit la mémoire du critère
+> algorithmique), #699 (l'auto-save et le bilan lisent la source du calcul ; prouvé rouge → vert par la spec WebKit
+> `evaluation-699-…`). **Ce qui attend Grégoire** : le geste à voir (SESSION.md bloc 27, dernier point), les mots du
+> changelog 1.121 (les miens, à relire), et les fiches #701–#705 à trancher après le 14 ; #706 est renvoyé au second
+> audit (`Rapports/prompts-audit/PROMPT-AUDIT-pratique-de-notation-2026-09-05.md`, écrit par Cowork, NON exécuté).
+> Rapport : `Rapports/AUDIT-moteur-evaluation-2026-09-05.md`, dispositions arrêtées en tête. Détail : `SESSION.md`,
+> bloc 27. Côté Cowork : OU-EN-EST-ON (ligne « L'ÉVALUATION » écrite), la console, CONSIGNE-DEMARRAGE-COWORK.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, 13 H 30 (1.120.0 EN LIGNE)
 
 > ↻ **13 h 26 — 1.120.0 EN LIGNE** (`c4c7b04a`, build `0905-1315`, « La carte « Bilan » ne dit que ce que l'élève

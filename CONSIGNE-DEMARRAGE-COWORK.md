@@ -1,7 +1,7 @@
 # Consigne de démarrage — la session Cowork qui prend le relais
 
-> **Réécrite le 5 septembre 2026 à 11 h 17 (Toronto, lue par `TZ=America/Toronto date`), par la session
-> Cowork du 5 septembre, après la livraison de 1.119.** **Elle REMPLACE toute version précédente.**
+> **Réécrite le 5 septembre 2026 à 13 h 52 (Toronto, lue par `TZ=America/Toronto date`), par la session
+> Cowork du 5 septembre, après la livraison de 1.120 (troisième du jour).** **Elle REMPLACE toute version précédente.**
 >
 > ⚠ **Ce fichier porte un nom sans date, exprès.** La date d'écriture est en tête ; c'est elle
 > qui fait foi.
@@ -38,30 +38,34 @@ qui te sont confiés, et dans sa console. Le code appartient à Claude Code.
 
 1. **`PROTOCOLE.md`** — les sept règles. La règle 7 est amendée depuis le 4 : on ne retient plus un push pour un run.
 2. **`OU-EN-EST-ON.md`** — en gestes d'utilisateur (dernière passe : 4 septembre, 19 h).
-3. **`plans de travail/CONSIGNE-DU-JOUR.md`** — celle du 5, **entièrement exécutée** (quatre lots, 1.119). Elle n'a pas
-   encore été archivée : Claude Code le fera au premier commit de la prochaine journée, quand une consigne neuve la remplace.
-   ↻ **11 h 53 : la consigne de la prochaine séance EST écrite** — `plans de travail/CONSIGNE-PROCHAINE-SEANCE.md` (la carte
-   « Bilan », un lot, 1.120). Claude Code la promeut au démarrage ; toi, tu la relis d'abord contre l'état remesuré.
-4. `plans de travail/00-CADRAGES-OUVERTS.md` — la porte d'entrée, à jour du 5 au soir (points 1, 2, 5, 7 livrés ; 8 inscrit).
-5. `plans de travail/CADRAGE-2026-09-05-carte-bilan.md` — le seul cadrage neuf du 5, décidé, pas commencé.
-6. `plans de travail/CADRAGE-2026-09-02-badges-texte-troue.md`, section « Décision de Grégoire » — pour cadrer l'étape 4.
+3. **`plans de travail/CONSIGNE-DU-JOUR.md`** — c'est celle de la carte « Bilan », promue et **entièrement exécutée**
+   (un lot, 1.120, `1b06b1ba`). Celle des quatre lots du matin est archivée
+   (`_ancienne-CONSIGNE-DU-JOUR-2026-09-05-quatre-lots-1.119.md`). **Il n'y a PAS de consigne écrite pour la prochaine
+   séance** : rien n'est daté, et le prochain accent (la synthèse des rétroactions dans le PDF) n'est pas cadré. Ne l'écris pas
+   seul : elle s'écrit à froid, avec Grégoire.
+4. `plans de travail/00-CADRAGES-OUVERTS.md` — la porte d'entrée, à jour de 1.120 (point 8, la carte « Bilan », livré ; ouverts : 4 et 6).
+5. `plans de travail/CADRAGE-2026-09-05-carte-bilan.md` — livré tel qu'écrit, cinq points sur cinq ; à lire seulement pour la trace.
 
 ⛔ **Ne lis PAS les 130 autres fichiers de `plans de travail/`.**
 
-## 3 · L'ÉTAT MESURÉ — le 5 septembre 2026 à 11 h 15 (Toronto), en lecture seule
+## 3 · L'ÉTAT MESURÉ — le 5 septembre 2026 à 13 h 51 (Toronto), en lecture seule
 
 ⚠ **REMESURE-LE.** `git --no-optional-locks log --oneline -7` · `git --no-optional-locks rev-list --left-right --count
 origin/main...HEAD` · `cat version.json` · **`TZ=America/Toronto date`** pour toute heure que tu écris.
 
-- **En ligne : 1.119.0**, build `0905-1053` (`f2fa5a2e`, poussée à 11 h 04). `main` = `origin/main` = `78aacd49`, **arbre
-  propre**, rien en avance. Quatorze commits le 5, deux livraisons (1.118 à 7 h 55, 1.119 à 11 h 04).
+- **En ligne : 1.120.0**, build `0905-1315` (`c4c7b04a`, poussée à 13 h 26). `main` = `origin/main` = `7a40949b`, **arbre
+  propre**, rien en avance. Dix-huit commits le 5, **trois livraisons** (1.118 à 7 h 55, 1.119 à 11 h 04, 1.120 à 13 h 26).
+- **Ce que 1.120 a livré** (un lot, `1b06b1ba`) : la carte « Observation » → « Bilan », deux phrases + menu « Modèle des phrases
+  (bilan et décompte) » avec ligne d'aide ; « Aucune annotation » sous la case des codes, pli « Quand la copie ne porte aucun
+  code » ; modèle « Français écrit », description sans « #581 ». Aucune donnée ne change (diff nul sur ce qui voyage).
+  Sentinelle `sentinelle-carte-bilan.test.js`. Deux tests de plus que le grep de la consigne adaptés par Claude Code.
 - **Ce que 1.119 a livré** : une seule liste sous-critères + codes · les collections de paramètres de projection (clé neuve
   `collectionsProjection`, module `collections-projection.js`) · le badge affiché dans la phrase (`composeur-badges.js`, porte
   iPad 4/4) · corbeille et chevrons partout, empilement iPad. **1.118** : les paliers composés avec badges, une seule carte
   « Ce que l'élève lit » (le décompte y est venu d'« Observation »), « Verdict » / « Recommandation (facultative) ».
-- **Aucun fichier de Cowork non commité** à l'heure d'écriture, sauf ceux de cette passe (ce fichier, `OU-EN-EST-ON.md`,
-  `00-CADRAGES-OUVERTS.md`, `PORTES-TERRAIN-…-ipad.md` §5) : ils partent avec le prochain commit de Claude Code.
-- **Sa console** — l'artefact « Les huit gestes » (titre à l'écran « Ce qu'il reste à faire »), mise à jour à 11 h 17 ; demande le
+- **Aucun fichier de Cowork non commité** à l'heure d'écriture, sauf ceux de cette passe (ce fichier, `OU-EN-EST-ON.md`, `00-CADRAGES-OUVERTS.md`) :
+  ils partent avec le prochain commit de Claude Code.
+- **Sa console** — l'artefact « Les huit gestes » (titre à l'écran « Ce qu'il reste à faire »), mise à jour à 13 h 52 ; demande le
   lien, n'en fabrique pas une seconde. Une seconde page existe depuis le 5 : la **porte iPad** (« Porte iPad — le badge dans la
   phrase »), passée, close ; et une maquette (« Une seule carte »), périmée par 1.118 — ni l'une ni l'autre n'est la console.
 - ⚠ NFD : `git status` depuis Cowork montre `??` des fichiers suivis (`Modèle de consigne…`, `jean-françois/`, `projet de
@@ -74,23 +78,23 @@ origin/main...HEAD` · `cat version.json` · **`TZ=America/Toronto date`** pour 
 
 ## 4 · CE QUI EST DÛ — dans l'ordre
 
-### a) La prochaine séance : la carte « Bilan » — consigne ÉCRITE (11 h 53), non datée
-`plans de travail/CONSIGNE-PROCHAINE-SEANCE.md`. Ce qui te revient : la remesurer au démarrage (repères de lignes, version en
-ligne), relire le lot en une passe courte quand Claude Code le rend, proposer l'entrée de changelog de 1.120, mettre à jour la
-console. Ce qui reste décidé mais non écrit en consigne :
-1. ~~Le texte troué, étape 4~~ — **ABANDONNÉE par Grégoire le 5 à 11 h 35** après l'inventaire (`INVENTAIRE-2026-09-05-badges-inventes.md`) :
-   pas de badge inventé pour les critères algorithmiques ; « palette fixe » tient. **Ne pas le reproposer.** Ce qu'il a nommé à
-   la place, non daté : **la synthèse des rétroactions dans le PDF**, et ce que les utilisateurs demanderont à l'usage.
-2. **La carte « Bilan »** : c'est la consigne ci-dessus ; son cadrage (`CADRAGE-2026-09-05-carte-bilan.md`) porte les cinq points
-   et les mots au caractère. Le « #581 » lu par les collègues est **toujours en ligne dans 1.119** ; il part avec ce lot.
-3. **Le 14 septembre** : comment on recueille ce qui sortira de la première rencontre (un gabarit de retour et un canal) —
-   personne ne l'a pris ; le canal est sa décision.
+### a) La prochaine séance : RIEN N'EST DATÉ NI ÉCRIT — elle se cadre à froid, avec Grégoire
+La carte « Bilan » est livrée (1.120, `1b06b1ba`) ; sa consigne est exécutée et deviendra `_ancienne-…` au prochain lot.
+Ce qui reste, dans l'ordre où Grégoire l'a nommé, sans date :
+1. **La synthèse des rétroactions dans le PDF** — nommé à 11 h 35 le 5, en abandonnant l'étape 4 du texte troué (**abandonnée,
+   ne pas la reproposer** ; inventaire `INVENTAIRE-2026-09-05-badges-inventes.md`). Pas cadré. Avant de cadrer : mesurer ce que
+   le PDF rend déjà (erreur 11 : « ce que l'élève lit » est un périmètre, quatre sites) et chercher si le mécanisme existe
+   (motif « ça existe déjà », dix fois). Écouter d'abord ce que les collègues diront à l'usage.
+2. **Le 14 septembre** : comment on recueille ce qui sortira de la première rencontre (un gabarit de retour et un canal) —
+   personne ne l'a pris ; **le canal est sa décision**. Une demi-heure, à froid.
+⮕ Ce qui te revient au démarrage : remesurer, puis **demander à Grégoire
+lequel des deux il ouvre** — c'est une question d'adoption, la sienne (erreur 21), pas une variable de charge.
 
 ### b) Fin de chaque lot : `OU-EN-EST-ON.md`, sa console, ce fichier (règle 6)
 Sans qu'il le demande, et une ligne pour dire ce qui a changé.
 
 ### c) Ce qui reste ouvert par ailleurs
-`00-CADRAGES-OUVERTS.md` (points 4, 6, 8). Après le 14 : le recalcul quand une échelle change, l'Inspecteur de sélection,
+`00-CADRAGES-OUVERTS.md` (points 4 et 6 ; le 8, la carte « Bilan », est livré). Après le 14 : le recalcul quand une échelle change, l'Inspecteur de sélection,
 repasser le dépôt en public (préalable : purge de l'historique). Hors périmètre du lot B, inscrit dans sa carte : la modale
 de bibliothèque des collections et « importer depuis un autre trimestre », qui viennent avec le partage.
 
