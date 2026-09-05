@@ -54,6 +54,10 @@ const frapper = (locator, valeur) => locator.evaluate((el, v) => {
  * tête de zone (le texte était inséré à la position 0) ; on pose le curseur explicitement.
  */
 const focusEnFin = (locator) => locator.evaluate((el) => {
+    // ↻ Étape 3 (5 sept. 2026) : la zone que l'œil voit est la VUE du composeur ; le textarea, caché,
+    // reste la valeur. Le focus et le caret se posent dans la vue, en positions de texte.
+    const vue = window.composeurBadges && window.composeurBadges.vueDe(el);
+    if (vue) { vue.focus(); window.composeurBadges.placerCaret(vue, el.value.length); return; }
     el.focus();
     el.setSelectionRange(el.value.length, el.value.length);
 });
@@ -115,7 +119,9 @@ test('texte troué 2 · deux badges posés dans un palier au clic, enregistrés,
     await expect(texte).toHaveValue(verdictDHier + ' Bilan : {projection}');
     const apresClic = await page.evaluate(() => {
         const t = document.querySelector('#listeCriteres textarea[data-palier-index="4"][data-champ="texte"]');
-        return { focalisee: document.activeElement === t, curseur: t.selectionStart, longueur: t.value.length };
+        const vue = window.composeurBadges.vueDe(t);
+        const c = vue ? window.composeurBadges.curseur(vue) : null;
+        return { focalisee: !!vue && document.activeElement === vue, curseur: c ? c.debut : t.selectionStart, longueur: t.value.length };
     });
     console.log('APRÈS FRAPPE + CLIC →', JSON.stringify(apresClic));
     expect(apresClic.focalisee, 'la zone garde le focus : on continue d\'écrire').toBe(true);
