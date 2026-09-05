@@ -411,6 +411,40 @@
        mots du bouton, du sous-titre, de la ligne d'aide et de la confirmation sont à lui) → lot D (carte
        d'abord) ; la relecture croisée de Cowork sur B avant 1.119.
      ▣ ARBRE : `main` = origin/main + 4 commits (lot A, B volets 1-2-3).
+     ↻ 9 h 20 — COUP D'ŒIL DE GRÉGOIRE SUR B : les quatre textes rendus (bouton, sous-titre, ligne d'aide,
+       confirmation) — identiques à ceux en place, au caractère (grep). Lot B clos de son côté.
+     ↻ 9 h 20 → 9 h 27 — LOT D, LA CARTE : `plans de travail/CARTE-2026-09-05-texte-troue-etape-3.md`
+       (mesuré : 10 `contenteditable`, tous dans planification-carte.js ; zéro composant de chips ; la
+       pastille = le bouton de la palette ; `insererRepere` pur se réemploie ; le dispatcher délègue
+       change / input / keyup / mousedown / focusin — un contenteditable n'émet JAMAIS `change`, d'où
+       `focusout` écouté par le module qui dispatche `change` sur le `<textarea>` resté porteur de la
+       valeur ; collage = le patron de `collerEnTexteBrut`). RELECTURE DE COWORK (9 h 29-9 h 40) : le fond
+       tient, deux réserves — (1) le saut de ligne : Entrée intercepté + `execCommand('insertText',
+       '\n')`, `\n` → `<br>`, tout bloc = frontière `\n` dans `lire`, l'aller-retour par ecrire() puis
+       lire() ; (2) l'heure de l'en-tête TAPÉE (« 9 h 35 ») alors que l'horloge lue disait 9 h 27 :
+       erreur 14, corrigée — l'heure se lit (`TZ=America/Toronto date`) et se recopie.
+     ↻ 9 h 45 → 10 h 05 — LOT D, VOLET 1 (ce commit) : `js/composeur-badges.js` — couche PURE
+       (`segmenter` : jetons de la palette seulement, le plus long d'abord ; `assembler` : concaténation
+       stricte ; `rendreHtml` : texte échappé, chip = la pastille sans data-action, contenteditable=false,
+       croix, `\n` → `<br>` + un `<br>` placeholder en fin ; `entreesDe` / `lireNoeuds` : un `<br>` dernier
+       de son parent = placeholder, tout bloc = frontière `\n` quand quelque chose le précède, tout
+       autre élément = ses enfants) et couche DOM (`disponible` mesuré une fois, `paletteDe`, `monter` /
+       `monterTout` avec try/catch — le `<textarea>` caché garde tout, `lire`, `ecrire`, `curseur`,
+       `placerCaret`, délégués `input` / `keydown` Entrée / `paste` text-plain / `focusout` → `change`
+       sur le `<textarea>` si la valeur a changé / `pointerdown` sur la croix). `index.html` : le script
+       après les deux registres, avant grilles.js. `styles.css` : la vue = l'aspect du champ, la chip
+       sans la taille de bouton — ⚠ d'abord un `@media (pointer: coarse)` À PART : la sentinelle #568 lit
+       le PREMIER bloc tactile et a rougi ; la règle est LOGÉE dans le bloc de #568 (un seul bloc), vert.
+       Sentinelle `sentinelle-composeur-badges` (14 cas : A aller-retour pur sur 38 textes — énoncés des
+       deux modèles, paliers, limites ; B rendreHtml ; C aller-retour PAR LA VUE, lire(ecrire(t)), avec
+       un parseur du seul HTML rendu + les formes de bloc WebKit / Blink ; D positions ; E disponible /
+       paletteDe ; F sources). BREAK-TESTS (restaurés, `cmp` identique) : `assembler` joint par une espace
+       → A.a rouge ; `rendreHtml` n'échappe pas → B.a + F.c rouges ; la frontière des blocs ignorée → C.c
+       rouge. Vitest 465 / 5164. `evaluation-projection.js`, `evaluation-enonces.js` intouchés.
+     ▣ CE QUI RESTE (lot D) : volet 2 (branchement : `monterTout` après chaque rendu du gabarit,
+       `insererRepereEnonce` et le `focusin` qui reconnaissent la vue ; sentinelle : une grille rechargée
+       sans frappe ne change pas) → volet 3 (spec WebKit) → rapport → relecture croisée → PORTE iPad.
+     ▣ ARBRE : `main` = origin/main + 5 commits.
      ===================================================================== -->
 
 <!-- =====================================================================
