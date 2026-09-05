@@ -136,7 +136,7 @@ const contenuCarte = (html, section) => {
 /* ----------------------------------------------- A — l'ordre et l'état des cartes */
 
 describe('lot 4 · C.A — l\'ordre du gabarit, et ce qui est ouvert ou replié', () => {
-    it('A.a en ÉDITION : la rangée du critère, puis les sous-critères, puis formule · commentaire · projection · codes', () => {
+    it('A.a en ÉDITION : la rangée du critère, puis les sous-critères, puis formule · commentaire · projection (lot A : plus de carte des codes)', () => {
         const { win, liste } = monter([GRILLE]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const html = liste().innerHTML;
@@ -145,13 +145,13 @@ describe('lot 4 · C.A — l\'ordre du gabarit, et ce qui est ouvert ou replié'
         const formule = pos(html, 'data-pli="CR:formule"');
         const commentaire = pos(html, 'data-pli="CR:commentaire"');
         const projection = pos(html, 'data-pli="CR:projection"');
-        const codes = pos(html, 'data-pli="CR:codes"');
-        for (const p of [rangee, sousCriteres, formule, commentaire, projection, codes]) expect(p).toBeGreaterThan(-1);
+        for (const p of [rangee, sousCriteres, formule, commentaire, projection]) expect(p).toBeGreaterThan(-1);
         expect(rangee).toBeLessThan(sousCriteres);
         expect(sousCriteres).toBeLessThan(formule);
         expect(formule).toBeLessThan(commentaire);
         expect(commentaire).toBeLessThan(projection);
-        expect(projection).toBeLessThan(codes);
+        // ↻ Lot A (5 sept. 2026) : plus de carte « Codes d'annotation » — la liste des sous-critères porte tout.
+        expect(html).not.toContain('data-pli="CR:codes"');
     });
 
     it('A.b ouvert ce qui porte la note, replié ce qui porte les mots', () => {
@@ -161,11 +161,11 @@ describe('lot 4 · C.A — l\'ordre du gabarit, et ce qui est ouvert ou replié'
         expect(carte(html, 'formule')).toEqual({ presente: true, ferme: false });
         expect(carte(html, 'commentaire')).toEqual({ presente: true, ferme: true });
         expect(carte(html, 'projection')).toEqual({ presente: true, ferme: true });
-        expect(carte(html, 'codes')).toEqual({ presente: true, ferme: true });
+        expect(carte(html, 'codes')).toEqual({ presente: false });
         // Le bloc des sous-critères n'est PAS une carte : il ne se replie pas (cadrage, friction nommée).
         expect(html).not.toMatch(/data-pli="CR:sous-criteres"/);
         // Chaque carte est une VRAIE carte du composant, avec son en-tête cliquable et son contenu.
-        for (const s of ['formule', 'commentaire', 'projection', 'codes']) {
+        for (const s of ['formule', 'commentaire', 'projection']) {
             const c = contenuCarte(html, s);
             expect(c, s).toContain('class="accordeon-header"');
             expect(c, s).toContain('class="accordeon-chevron"');
@@ -233,9 +233,10 @@ describe('lot 4 · C.B — les libellés', () => {
         const html = liste().innerHTML;
         // ↻ §8 (5 sept. 2026, titres confirmés par Grégoire à 7 h 24) : « Projection » devient
         // « Ce que l'élève lit » — le décompte s'y compose, avant les paliers ; « Observation » reste.
-        for (const titre of ['Formule', 'Observation', 'Ce que l\'élève lit', 'Codes d\'annotation']) {
+        for (const titre of ['Formule', 'Observation', 'Ce que l\'élève lit']) {
             expect(html).toMatch(new RegExp('<span class="accordeon-chevron">[▶▼]</span> ' + titre.replace(/'/g, "(?:'|&#x27;|&#39;)")));
         }
+        expect(html).not.toMatch(/<\/span> Codes d(?:'|&#x27;|&#39;)annotation/);
     });
 });
 
@@ -254,7 +255,7 @@ describe('lot 4 · C.C — les plis vivent en mémoire, jamais dans la grille', 
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         // L'enseignant a déplié la projection et replié la formule, puis tape dans un champ :
         // le handler redessine tout. L'état est celui du DOM au moment du redessin.
-        domAvecPlis(liste(), { 'CR:formule': true, 'CR:commentaire': true, 'CR:projection': false, 'CR:codes': true });
+        domAvecPlis(liste(), { 'CR:formule': true, 'CR:commentaire': true, 'CR:projection': false });
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         let html = liste().innerHTML;
         expect(carte(html, 'projection').ferme).toBe(false);
@@ -300,42 +301,81 @@ describe('lot 4 · C.C — les plis vivent en mémoire, jamais dans la grille', 
 
 /* ---------------------------------------- D — la ligne de partage des sous-critères */
 
-describe('lot 4 · C.D — les sous-critères : la note à plat, les mots dans la carte des codes', () => {
-    it('D.a à plat : code · nom · pondération et le retrait ; ni couleur, ni rétroaction', () => {
+describe('lot 4 · C.D — les sous-critères : UNE seule liste (lot A du 5 sept.) — la note à plat, la case en tête, les mots sous un pli par rangée', () => {
+    const plat = (html) => html.slice(pos(html, 'sous-criteres-conteneur--en-tete'), pos(html, 'data-pli="CR:formule"'));
+    const COCHEE = { ...GRILLE, criteres: [{ ...ALGO, codesDepuisSousCriteres: true }] };
+
+    it('D.a case décochée : code · nom · pondération, chevrons et corbeille ; ni couleur, ni observation ; plus de carte des codes', () => {
         const { win, liste } = monter([GRILLE]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const html = liste().innerHTML;
-        const plat = html.slice(pos(html, 'sous-criteres-conteneur--en-tete'), pos(html, 'data-pli="CR:formule"'));
-        expect(plat).toContain('data-champ="code"');
-        expect(plat).toContain('data-champ="nom"');
-        expect(plat).toContain('data-champ="ponderation"');
+        const bloc = plat(html);
+        expect(bloc).toContain('data-champ="code"');
+        expect(bloc).toContain('data-champ="nom"');
+        expect(bloc).toContain('data-champ="ponderation"');
         // Retouche c (4 sept.) : la suppression est la corbeille en coin, avec le triplet.
-        expect(plat).toMatch(/data-action="supprimerSousCritere" data-param="G1" data-param2="0" data-param3="1"[^>]*><img src="icons\/icons8-trash\.svg"/);
-        expect(plat).not.toContain('btn-supprimer');
-        expect(plat).toContain('data-action="ajouterSousCritere"');
-        expect(plat).toContain('sous-criteres-compteur">(2)');
-        expect(plat).not.toContain('data-champ="retroaction"');
-        expect(plat).not.toContain('sous-critere-couleur-groupe');
-        expect(plat).not.toContain('modifierCodesDepuisSousCriteresHandler');
+        expect(bloc).toMatch(/data-action="supprimerSousCritere" data-param="G1" data-param2="0" data-param3="1"[^>]*><img src="icons\/icons8-trash\.svg"/);
+        expect(bloc).not.toContain('btn-supprimer');
+        expect(bloc).toContain('data-action="ajouterSousCritere"');
+        expect(bloc).toContain('sous-criteres-compteur">(2)');
+        // La case, en tête de la liste, AVANT la première rangée ; sous elle, la ligne qui dit où vit la palette.
+        expect(bloc).toContain('data-on-change="modifierCodesDepuisSousCriteresHandler"');
+        expect(bloc).toContain('Utiliser ces sous-critères comme codes d\'annotation');
+        expect(pos(bloc, 'class="sous-criteres-codes')).toBeGreaterThan(pos(bloc, 'sous-criteres-header'));
+        expect(pos(bloc, 'class="sous-criteres-codes')).toBeLessThan(pos(bloc, 'class="sous-critere-item avec-outils"'));
+        expect(bloc).toContain('sous-criteres-codes-palette">Sans cette case, la copie utilise la palette générale (Annoter › palette). Cochée, ce sont ces sous-critères qui deviennent les codes de la copie.</small>');
+        // Décochée : ni couleur ni observation, et le mot « rétroaction » n'apparaît pas dans le bloc.
+        expect(bloc).not.toContain('data-champ="retroaction"');
+        expect(bloc).not.toContain('sous-critere-couleur-groupe');
+        expect(bloc).not.toContain('sous-critere-pli');
+        expect(bloc).not.toContain('sous-critere-champs-grid--note-codes');
+        expect(bloc.toLowerCase()).not.toContain('rétroaction');
+        expect(html).not.toContain('data-pli="CR:codes"');
+        expect(html).not.toContain('sous-critere-code-lecture');
         // Les handlers sont ceux d'avant, avec les mêmes index : l'ordre change le rendu, pas les données.
-        expect(plat).toMatch(/data-on-change="modifierSousCritereHandler" data-grille-id="G1" data-critere-index="0" data-sc-index="1" data-champ="nom"/);
+        expect(bloc).toMatch(/data-on-change="modifierSousCritereHandler" data-grille-id="G1" data-critere-index="0" data-sc-index="1" data-champ="nom"/);
     });
 
-    it('D.b dans la carte des codes : l\'activation, puis par sous-critère la couleur et la rétroaction ; le nom s\'y LIT', () => {
-        const { win, liste } = monter([GRILLE]);
-        win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
-        const codes = contenuCarte(liste().innerHTML, 'codes');
-        expect(codes).toContain('data-on-change="modifierCodesDepuisSousCriteresHandler"');
-        expect(codes).toContain('Utiliser ces sous-critères comme codes d\'annotation');
-        expect((codes.match(/sous-critere-couleur-groupe/g) || []).length).toBe(2);
-        expect((codes.match(/data-champ="retroaction"/g) || []).length).toBe(2);
-        expect(codes).toMatch(/data-sc-index="1" data-champ="retroaction">La thèse &quot;doit&quot; être explicite\.<\/textarea>/);
-        expect(codes).toContain('sous-critere-code-lecture">1 · Thèse &lt;b&gt;non&lt;/b&gt; dégagée');
-        expect(codes).not.toContain('data-champ="nom"');
+    it('D.b case cochée : chaque rangée a sa pastille (le sélecteur de la palette) et son pli « Observation », fermé par défaut, même handler et mêmes index', () => {
+        const { win, liste } = monter([COCHEE]);
+        win.afficherCriteresGrille(JSON.parse(JSON.stringify(COCHEE)));
+        const html = liste().innerHTML;
+        const bloc = plat(html);
+        expect(bloc).toContain('sous-criteres-codes--actif');
+        expect((bloc.match(/sous-critere-couleur-groupe/g) || []).length).toBe(2);
+        // Sans `travauxOutils` (le harnais), la pastille est le repli ; le sélecteur à douze pastilles est éprouvé
+        // dans WebKit par le spec source-unique-codes.
+        expect((bloc.match(/class="travaux-retro-couleur"/g) || []).length).toBe(2);
+        expect(source('js/grilles.js')).toMatch(/rendreCouleurSousCritere\(critere, sc, \{ grilleId: grilleId, index: index, scIndex: scIndex \}\)/);
+        expect((bloc.match(/sous-critere-champs-grid--note-codes/g) || []).length).toBe(2);
+        expect((bloc.match(/data-champ="retroaction"/g) || []).length).toBe(2);
+        // Le pli : une vraie carte du composant, fermée, sans id, dans SA rangée, après le coin des outils.
+        expect(bloc).toContain('class="carte accordeon sous-critere-pli ferme" data-pli="CR:sc:sc_0"');
+        expect(bloc).toContain('class="carte accordeon sous-critere-pli ferme" data-pli="CR:sc:sc_1"');
+        expect(bloc).not.toMatch(/sous-critere-pli[^>]*\sid=/);
+        const rangees = bloc.split('class="sous-critere-item avec-outils"').slice(1);
+        expect(rangees.length).toBe(2);
+        rangees.forEach((r, i) => {
+            expect(r, 'rangée ' + i).toContain('data-pli="CR:sc:sc_' + i + '"');
+            expect(r, 'rangée ' + i).toContain('<span class="accordeon-chevron">▶</span> Observation</h3>');
+            expect(r, 'rangée ' + i).toMatch(new RegExp('data-on-change="modifierSousCritereHandler" data-grille-id="G1" data-critere-index="0" data-sc-index="' + i + '" data-champ="retroaction"'));
+            expect(pos(r, 'sous-critere-champs-grid')).toBeLessThan(pos(r, 'bloc-coin-outils'));
+            expect(pos(r, 'bloc-coin-outils')).toBeLessThan(pos(r, 'sous-critere-pli'));
+            expect((r.match(/data-champ="code"/g) || []).length, 'un seul champ Code par rangée').toBe(1);
+        });
+        expect(bloc).toMatch(/data-sc-index="1" data-champ="retroaction">La thèse &quot;doit&quot; être explicite\.<\/textarea>/);
+        expect(bloc.toLowerCase()).not.toContain('rétroaction');
+        expect(bloc).toContain('la couleur et l\'observation d\'ici');
+        // Un sous-critère n'est rendu qu'UNE fois : le nom ne s'écrit qu'une fois, plus de lecture recopiée.
+        // (dans le BLOC des sous-critères : la rangée du critère a son propre champ « nom »)
+        expect((bloc.match(/data-champ="nom"/g) || []).length).toBe(2);
+        expect((bloc.match(/data-champ="code"/g) || []).length).toBe(2);
+        expect(html).not.toContain('sous-critere-code-lecture');
+        expect(html).not.toContain('data-pli="CR:codes"');
     });
 
-    it('D.c tout ce qui vient de la grille est échappé (règle 1) — le nom, la rétroaction, le code', () => {
-        const G = { id: 'G4', criteres: [{ ...ALGO, sousCriteres: [{ id: 's', code: '<i>', nom: '<img src=x onerror=alert(1)>', ponderation: 1, retroaction: '</textarea><script>' }] }] };
+    it('D.c tout ce qui vient de la grille est échappé (règle 1) — le nom, l\'observation, le code', () => {
+        const G = { id: 'G4', criteres: [{ ...ALGO, codesDepuisSousCriteres: true, sousCriteres: [{ id: 's', code: '<i>', nom: '<img src=x onerror=alert(1)>', ponderation: 1, retroaction: '</textarea><script>' }] }] };
         const { win, liste } = monter([G]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(G)));
         const html = liste().innerHTML;
@@ -343,16 +383,53 @@ describe('lot 4 · C.D — les sous-critères : la note à plat, les mots dans l
         expect(html).not.toContain('</textarea><script>');
         expect(html).not.toContain('value="<i>"');
         expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
+        expect(html).toContain('&lt;/textarea&gt;&lt;script&gt;');
     });
 
-    it('D.d sans sous-critère : le bouton des défauts à plat, et la carte des codes dit où les ajouter', () => {
+    it('D.d sans sous-critère : le bouton des défauts à plat, la case présente mais inactive, et plus de carte des codes', () => {
         const G = { id: 'G5', criteres: [{ id: 'CR', nom: 'Rigueur', type: 'algorithmique', ponderation: 20 }] };
         const { win, liste } = monter([G]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(G)));
         const html = liste().innerHTML;
         expect(html).toContain('data-action="initialiserSousCriteresParDefaut"');
         expect(html).toContain('Aucun sous-critère défini.');
-        expect(contenuCarte(html, 'codes')).toContain('Aucun sous-critère : ajoute-en dans le bloc « Sous-critères » ci-dessus');
+        expect(html).toMatch(/data-on-change="modifierCodesDepuisSousCriteresHandler"[^>]*\sdisabled/);
+        expect(html).not.toContain('data-pli="CR:codes"');
+        expect(html).not.toContain('Aucun sous-critère : ajoute-en dans le bloc');
+    });
+
+    it('D.e les plis des observations vivent en mémoire, par rangée, et se relisent au redessin ; rien n\'entre dans la grille', () => {
+        const { win, liste, store } = monter([COCHEE]);
+        win.afficherCriteresGrille(JSON.parse(JSON.stringify(COCHEE)));
+        const avant = JSON.stringify(store[CLE]);
+        // L'enseignant a déplié l'observation du second, puis tape : le redessin relit l'état du DOM.
+        liste().querySelectorAll = (sel) => sel === '.carte.accordeon[data-pli]'
+            ? [{ dataset: { pli: 'CR:sc:sc_1' }, classList: { contains: () => false } }]
+            : [];
+        win.afficherCriteresGrille(JSON.parse(JSON.stringify(COCHEE)));
+        const html = liste().innerHTML;
+        expect(html).toContain('class="carte accordeon sous-critere-pli" data-pli="CR:sc:sc_1"');
+        expect(html).toContain('class="carte accordeon sous-critere-pli ferme" data-pli="CR:sc:sc_0"');
+        const seconde = html.split('class="sous-critere-item avec-outils"')[2];
+        expect(seconde).toContain('<span class="accordeon-chevron">▼</span> Observation</h3>');
+        expect(JSON.stringify(store[CLE])).toBe(avant);
+        expect(avant).not.toMatch(/"pli|plisGabarit|data-pli/);
+        expect(Object.keys(store)).toEqual([CLE]);
+    });
+
+    it('D.f la carte des codes n\'existe plus dans le code ni dans le CSS ; la rangée cochée a sa grille à quatre colonnes, le pli sa bande de 44 px — scopés', () => {
+        const code = source('js/grilles.js');
+        expect(code).not.toContain('rendreBlocCodesAlgo');
+        expect(code).not.toContain("'codes', 'Codes d\\'annotation'");
+        expect((code.match(/function rendrePliObservationSousCritere\(/g) || []).length).toBe(1);
+        expect((code.match(/rendreActivationCodes\(critere, \{ grilleId: grilleId, index: index \}\)/g) || []).length).toBe(1);
+        const css = source('styles.css');
+        expect(css).toContain('#listeCriteres .sous-critere-champs-grid--note-codes {\n    grid-template-columns: 80px 1fr 100px 64px;');
+        expect(css).toContain('#listeCriteres .sous-critere-pli {');
+        expect(css).toMatch(/#listeCriteres \.sous-critere-pli \.accordeon-header \{[^}]*min-height: 44px/);
+        expect(css).not.toContain('.sous-critere-champs-grid--code');
+        expect(css).not.toContain('.sous-critere-code-lecture');
+        expect(css).not.toContain('.sous-critere-description-groupe');
     });
 });
 
@@ -369,7 +446,7 @@ describe('lot 4 · C.E — le composant accordéon est employé, pas refait', ()
         const css = source('styles.css');
         expect(css).toContain('#listeCriteres .gabarit-algo-carte:not(.ferme) .accordeon-contenu {\n    max-height: 6000px;');
         expect(css).toContain('#listeCriteres .sous-critere-champs-grid--note {');
-        expect(css).toContain('#listeCriteres .sous-critere-champs-grid--code {');
+        expect(css).toContain('#listeCriteres .sous-critere-champs-grid--note-codes {');
         // La grille des cinq colonnes du lot des codes (3 sept.) reste la règle de base.
         expect(css).toContain('grid-template-columns: 80px 1fr 100px 64px auto;');
     });
@@ -552,7 +629,7 @@ describe('lot 4 · C.H — second coup d\'œil : paliers numérotés, sous-crit�
         expect(P).toContain('function _paliersDeRatio(paliers) {\n    return paliers.filter(function(p) { return !p.sansErreur; });');
     });
 
-    it('H.f un sous-critère se déplace aux chevrons, son CODE voyage avec lui, la carte des codes suit', async () => {
+    it('H.f un sous-critère se déplace aux chevrons, son CODE voyage avec lui, la liste suit', async () => {
         const { win, liste, store } = monter([GRILLE]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         let html = liste().innerHTML;
@@ -567,11 +644,10 @@ describe('lot 4 · C.H — second coup d\'œil : paliers numérotés, sous-crit�
         expect(scs.map(sc => sc.code)).toEqual(['1', '0']);
         expect(scs.map(sc => sc.id)).toEqual(['sc_1', 'sc_0']);
         expect(scs[0].nom).toContain('Thèse');
-        // Le rendu suit, et la carte des codes aussi.
+        // Le rendu suit — une seule liste (lot A) : le code « 1 » passe premier, rien n'est recopié ailleurs.
         html = liste().innerHTML;
         expect(html.indexOf('value="1"')).toBeLessThan(html.indexOf('value="0"'));
-        const codes = contenuCarte(html, 'codes');
-        expect(codes.indexOf('sous-critere-code-lecture">1 ·')).toBeLessThan(codes.indexOf('sous-critere-code-lecture">0 ·'));
+        expect(html).not.toContain('sous-critere-code-lecture');
         // Aux bornes : rien ne bouge.
         await win.deplacerSousCritereHaut('G1', 0, 0);
         expect(store[CLE][0].criteres[0].sousCriteres.map(sc => sc.code)).toEqual(['1', '0']);

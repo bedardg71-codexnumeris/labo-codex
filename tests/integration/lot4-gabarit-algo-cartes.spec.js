@@ -82,15 +82,17 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     page.on('dialog', (d) => d.accept().catch(() => {}));   // « Supprimer ce sous-critère ? » : oui (retouche c)
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    // ↻ Lot A (5 sept.) : prêt quand la base l'est (comme les specs du texte troué), plus un délai fixe.
+    await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
     await page.evaluate(eval(SEMER));
 
     // 1 — l'ordre et l'état à l'ouverture.
     let etat = await page.evaluate(eval(LIRE));
     console.log('OUVERTURE →', JSON.stringify(etat));
-    expect(etat.ordre).toEqual(['sous-criteres', 'CR:formule', 'CR:commentaire', 'CR:projection', 'CR:codes']);
+    // ↻ Lot A (5 sept. 2026) : plus de carte « Codes d'annotation » — la liste des sous-critères porte tout.
+    expect(etat.ordre).toEqual(['sous-criteres', 'CR:formule', 'CR:commentaire', 'CR:projection']);
     expect(etat.rangeeAvantSousCriteres, 'les sous-critères viennent tout de suite sous la rangée du critère').toBe(true);
-    expect(etat.plis).toEqual({ 'CR:formule': 'ouvert', 'CR:commentaire': 'replie', 'CR:projection': 'replie', 'CR:codes': 'replie' });
+    expect(etat.plis).toEqual({ 'CR:formule': 'ouvert', 'CR:commentaire': 'replie', 'CR:projection': 'replie' });
     expect(etat.commentaire, '« Modèle d\'observation », ni « rétroaction » ni « commentaire »').toBe(true);
     expect(etat.euf, '« Projection à l\'EUF » au menu de projection').toBe(true);
     expect(etat.cartesAvecId, 'aucune carte ne porte d\'id : le composant ne persiste rien').toBe(0);
@@ -110,7 +112,7 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     await cliquerDom(carte(page, 'formule').locator('.accordeon-header'));
     await expect(carte(page, 'formule')).toHaveClass(/ferme/);
     await frapper(page, '#listeCriteres .gabarit-algo-carte[data-pli="CR:formule"] input[data-param-cle]', '7');
-    await page.waitForTimeout(400);
+    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli="CR:formule"] input[data-param-cle]').first(), 'le gabarit s\'est redessiné avec la valeur').toHaveValue('7');
     etat = await page.evaluate(eval(LIRE));
     console.log('APRÈS FRAPPE (formule repliée) →', JSON.stringify(etat.plis));
     expect(etat.plis['CR:formule']).toBe('replie');
@@ -118,10 +120,10 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
 
     // 4 — changer de grille et revenir : les plis sont ceux qu'il a laissés.
     await page.evaluate(async () => { await window.chargerGrillePourModif('G2'); await window.chargerGrillePourModif('G1'); });
-    await page.waitForTimeout(300);
+    await expect(page.locator('#listeCriteres input[data-param-cle="motsReference"]'), 'G1 est de retour, avec la valeur écrite à l\'étape 2').toHaveValue('1000');
     etat = await page.evaluate(eval(LIRE));
     console.log('APRÈS RETOUR →', JSON.stringify(etat.plis));
-    expect(etat.plis).toEqual({ 'CR:formule': 'replie', 'CR:commentaire': 'replie', 'CR:projection': 'ouvert', 'CR:codes': 'replie' });
+    expect(etat.plis).toEqual({ 'CR:formule': 'replie', 'CR:commentaire': 'replie', 'CR:projection': 'ouvert' });
 
     // 5 — rien de tout cela n'est dans la grille : les plis meurent avec la page.
     const grille = await page.evaluate(async () => ((await db.get(cle('grillesTemplates'))) || []).find(g => g.id === 'G1'));
@@ -147,6 +149,40 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     await expect(page.locator('#listeCriteres .palier-projection .pipeline-btn-reorder')).toHaveCount(0);
     await expect(page.locator('#listeCriteres label', { hasText: /^Descripteur$/ })).toHaveCount(1);
     await expect(page.locator('#listeCriteres label', { hasText: /^Description$/ })).toHaveCount(0);
+
+    // 6 bis — LOT A (5 sept. 2026) : UNE seule liste. La case en tête des sous-critères, à plat ; cochée, la
+    //     rangée gagne sa pastille et son pli « Observation » (fermé par défaut) ; on déplie, on écrit une
+    //     observation, la frappe laisse le pli ouvert ; on recharge la grille : la case et l'observation se relisent.
+    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli="CR:codes"]')).toHaveCount(0);
+    const caseCodes = page.locator('#listeCriteres .sous-criteres-conteneur--en-tete .sous-criteres-codes input[type="checkbox"]');
+    await expect(caseCodes).toHaveCount(1);
+    await expect(caseCodes).not.toBeChecked();
+    await expect(page.locator('#listeCriteres .sous-critere-pli')).toHaveCount(0);
+    await expect(page.locator('#listeCriteres textarea[data-champ="retroaction"]')).toHaveCount(0);
+    await caseCodes.evaluate((el) => el.click());
+    await expect(page.locator('#listeCriteres .sous-criteres-codes--actif')).toHaveCount(1);
+    await expect(page.locator('#listeCriteres .sous-critere-couleur-groupe .travaux-retro-couleur-picker')).toHaveCount(1);
+    const pli = () => page.locator('#listeCriteres .sous-critere-pli[data-pli="CR:sc:sc_1"]');
+    await expect(pli()).toHaveClass(/ferme/);
+    await expect(pli().locator('.accordeon-header h3')).toHaveText(/Observation/);
+    await cliquerDom(pli().locator('.accordeon-header'));
+    await expect(pli()).not.toHaveClass(/ferme/);
+    const observation = 'La thèse est à dégager dès l\'introduction.';
+    await frapper(page, '#listeCriteres textarea[data-sc-index="0"][data-champ="retroaction"]', observation);
+    await expect(page.locator('#listeCriteres textarea[data-sc-index="0"][data-champ="retroaction"]')).toHaveValue(observation);
+    await expect(pli(), 'la frappe redessine, le pli reste déplié').not.toHaveClass(/ferme/);
+    await page.evaluate(async () => { await window.chargerGrillePourModif('G2'); await window.chargerGrillePourModif('G1'); });
+    await expect(page.locator('#listeCriteres .sous-criteres-codes input[type="checkbox"]')).toBeChecked();
+    await expect(page.locator('#listeCriteres textarea[data-sc-index="0"][data-champ="retroaction"]')).toHaveValue(observation);
+    let gA = await page.evaluate(async () => ((await db.get(cle('grillesTemplates'))) || []).find(x => x.id === 'G1'));
+    expect(gA.criteres[0].codesDepuisSousCriteres).toBe(true);
+    expect(gA.criteres[0].sousCriteres[0].retroaction).toBe(observation);
+    // Décocher : couleur et pli disparaissent de l'écran ; l'observation reste en base.
+    await page.locator('#listeCriteres .sous-criteres-codes input[type="checkbox"]').evaluate((el) => el.click());
+    await expect(page.locator('#listeCriteres .sous-critere-pli')).toHaveCount(0);
+    await expect(page.locator('#listeCriteres .sous-critere-couleur-groupe')).toHaveCount(0);
+    gA = await page.evaluate(async () => ((await db.get(cle('grillesTemplates'))) || []).find(x => x.id === 'G1'));
+    expect(gA.criteres[0].sousCriteres[0].retroaction).toBe(observation);
 
     // 7 — §7 c) : la corbeille supprime un palier et un sous-critère (à la souris, dans une carte dépliée
     //     ou à plat) ; aucun « ✕ » ne reste dans l'éditeur.

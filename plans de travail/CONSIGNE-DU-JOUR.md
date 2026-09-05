@@ -1,314 +1,178 @@
-# Consigne du jour — le texte troué, étape 2 : les paliers de projection se composent avec des badges
+# Consigne du 5 septembre 2026 — trois lots, une livraison : 1.119
 
-> **Écrite le 4 septembre 2026 en fin d'après-midi, par Cowork, après la clôture du lot 4.**
-> **Application au moment de l'écriture : `1.117.1`, build `0904-1507`, EN LIGNE** (run GitHub 33910422885 vert).
-> ▣ **État mesuré à l'écriture** : `origin/main` = `main` = `fd2b4ce6` ; arbre propre hors les fichiers de Cowork
-> (`OU-EN-EST-ON.md`, ce fichier, l'archive de l'ancien, `00-CADRAGES-OUVERTS.md`, le cadrage « codes par
-> grille »). **Ils partent avec ton premier commit.**
-> ⚠ **Si tu lis ceci plus de quelques heures après son écriture, remesure avant d'exécuter.**
-> ⚠ **Ton propre bloc de clôture dans `SESSION.md` (bloc 24) fait foi sur l'état mesuré ci-dessus.**
-> ⚠ **Nouvelle règle 7 (`PROTOCOLE.md`, hier soir)** : on ne retient plus un push pour laisser finir un run
-> GitHub ; le jeton local reste le dernier geste avant chaque push.
+> **Écrite le 4 septembre 2026 à 19 h 12 (Toronto), par Cowork, à froid, avec Grégoire.**
+> **Application au moment de l'écriture : `1.117.1` en ligne (build `0904-1507`) ; 1.118 (le texte troué,
+> étape 2) codée sur `main` en local, cinq commits d'avance, en retouche, NON livrée.**
+> ⚠ **Ce fichier ne devient `CONSIGNE-DU-JOUR.md` qu'APRÈS le push de 1.118** (§6 de la consigne du 4). Si tu
+> lis ceci sous son nom du 5 septembre, c'est que 1.118 est en ligne : remesure (`git --no-optional-locks log
+> --oneline -3`, `cat version.json`) et dis-le en tête de ton premier rapport.
+> ⚠ **Si tu lis ceci plus de quelques heures après le début de la journée, remesure avant d'exécuter.**
 
 ---
 
-## Ce que cette consigne produit à l'écran, pour Grégoire
+## Ce que cette journée produit à l'écran, pour Grégoire
 
-Dans le gabarit d'un critère algorithmique, carte « Projection », la phrase **« Ce que l'élève lit »** d'un
-palier ne se tape plus avec des accolades : il pose des badges (`erreurs`, `mots`, `projection`, `seuil`,
-`service`…) dans sa phrase, comme il le fait déjà pour les quatre énoncés d'observation depuis l'étape 1.
-Une prévisualisation lui montre la phrase remplie pour une copie d'exemple. **Rien avant son coup d'œil** :
-une seule livraison, 1.118, à la fin.
+Trois lots, **une seule livraison, 1.119, en fin de journée** (décision de Grégoire, 4 septembre au soir :
+« les 3 étapes, mais avec une seule release à la fin »). Chaque lot se termine par son coup d'œil AVANT que le
+suivant commence ; aucun push entre les lots.
 
-La maquette est l'artefact « Le texte troué » (favicon 🏷️), sections 2 et 3, que Grégoire a remontré le
-4 septembre. ⚠ **Elle montre le geste, pas le comportement** (cadrage, « Les maquettes »).
+- **Lot A (matin) — le gabarit algorithmique ne montre plus deux fois ses sous-critères.** La carte « Codes
+  d'annotation » disparaît ; la liste « Sous-critères » porte tout : code, nom, pondération, pastille de
+  couleur, chevrons, corbeille, et le texte du code sous un pli par rangée. La case « Utiliser ces
+  sous-critères comme codes d'annotation » est en tête de la liste ; couleur et texte n'apparaissent que si
+  elle est cochée. Une ligne dit où vit la palette globale.
+- **Lot B (midi) — les collections de paramètres.** Dans la carte « Projection », il enregistre ses paliers
+  sous un nom (« EUF »), et les retrouve dans le menu de projection d'une grille neuve. Choisir une
+  collection COPIE ses paliers dans le critère.
+- **Lot C (après-midi) — les mêmes gestes partout.** Hors de l'éditeur de grille, plus de « ✕ » rouge : la
+  corbeille ; plus de pile « Ordre » : les chevrons ; et la grille à deux colonnes du formulaire de
+  groupe-cours (empruntée par les paliers) s'empile sur iPad en portrait.
 
----
-
-## 1 · Lis d'abord
-
-1. `PROTOCOLE.md` (règles 1, 2 et 7), puis `OU-EN-EST-ON.md`.
-2. **`plans de travail/CADRAGE-2026-09-02-badges-texte-troue.md`** — d'abord « ⚠ LA DISTINCTION QUI COMMANDE
-   TOUT LE RESTE », puis « ↻ DÉCISION DE GRÉGOIRE — 2 septembre » (les six arrêtés) et « ▣ LE MÉCANISME DE
-   GLISSÉ EXISTE DÉJÀ » (⛔ pas de `dragstart`/`drop` : iPadOS).
-3. Ton bloc 24 dans `SESSION.md`, par `grep -n "1.117" SESSION.md`, jamais en entier.
-
----
-
-## 2 · D'ABORD la carte, PAS le code (règle 2 : ce qui voyage)
-
-Le texte d'un palier est enregistré **dans la grille** et voyage avec elle (partage, import, archives). Le
-composer avec des jetons change ce format. **Cartographie, rends la carte à Cowork, attends sa relecture
-avant d'écrire une ligne de code.** Mesure et écris, avec commande et témoin :
-
-- **a) Ce que l'étape 1 a livré, et ce qui se réemploie tel quel** : `rendreBlocEnoncesAlgo`
-  (`grilles.js:3567`), `insererRepereEnonce` (`:5449`), `window.enoncesAlgo.insererRepere`, l'attribut
-  `data-jeton`, les repères de `reperesDeCle`. ▣ Mesuré depuis Cowork : c'est un **bouton par repère qui insère
-  le jeton au curseur** dans une zone de texte — pas un badge glissé dans une phrase comme la maquette. Dis
-  si l'étape 2 reprend ce composeur (recommandation de Cowork : **oui, le même**, un composeur pour tout le
-  gabarit ; la maquette « badges dans la phrase » est l'étape 3, les accolades qui disparaissent).
-- **b) Ce que la projection SAIT par élève, donc ce qu'un jeton peut remplir** : `_resultat`
-  (`evaluation-projection.js:~505`) porte `ratio`, `motsParErreur`, `seuilMotsParErreur`, `palier`, et les
-  `params` (`nomServiceAide`) ; le nombre d'erreurs et de mots de la copie sont en amont. ▣ Aujourd'hui le
-  texte d'un palier ne connaît qu'**UN** jeton, `{service}` (`JETON_SERVICE`, `:71`), et seulement dans
-  `texteAide`. ⚠ La maquette en montre sept (`service`, `seuil`, `longueur`, `erreurs`, `mots`,
-  `projection`, `niveau`) ; **liste ceux que le moteur peut réellement remplir**, avec la valeur exacte de
-  chacun (ex. `projection` = « 14 erreurs pour 900 mots » ou « 14 » ?). Les **noms** des jetons remontent à
-  Grégoire (mots que les collègues lisent) : propose-les dans la carte, Cowork les lui porte.
-- **c) Le préfixe ENGENDRÉ** : « Tu fais en moyenne 1 erreur à chaque N mots. » (`_resultat`, `prefixe`) est
-  ajouté par le code devant le verdict, jamais écrit par l'enseignant. Avec des jetons, l'arrêté 3 dit que
-  **l'enseignant écrit la phrase entière**. Deux voies : le préfixe devient un jeton (`{moyenne}` ?) que le
-  gabarit neuf place dans son texte de départ, et un texte SANS jeton garde le préfixe engendré (les grilles
-  existantes ne changent pas) ; ou le préfixe reste toujours. **Mesure ce que les grilles existantes
-  perdraient dans chaque voie, et recommande ; la décision est à Grégoire** (ce que l'élève lit).
-- **d) Où les deux textes du palier s'enregistrent et se lisent** (`texte`, `texteAide` ; `_paliersRetenus`,
-  `:296`, et ce que le partage/l'import projettent) : un jeton inconnu d'une version antérieure de
-  l'application chez un collègue — que rend-il ? (il lit `{erreurs}` tel quel ?). Dis-le : c'est le risque de
-  ce lot.
-- **e) La prévisualisation** (arrêtés 4 et 5) : au niveau du gabarit, sur des copies d'exemple, dont une
-  non corrigée. Mesure d'où les copies d'exemple peuvent venir sans toucher aux données de personne (le pack
-  de démonstration ? trois copies fictives codées dans le gabarit ?) et propose.
-
-**Ce que tu rends à Cowork** : `plans de travail/CARTE-2026-09-0X-texte-troue-etape-2.md` avec a-e, et les
-deux questions à Grégoire (les noms des jetons ; le préfixe engendré). **Puis tu attends.**
+▣ **Cowork a mesuré le 4 au soir, à ne pas redécouvrir** : les codes par grille SONT LIVRÉS depuis le
+3 septembre (`js/codes-annotation.js`, commits `2084c20f`…`61982b1f` ; `grep -rl CODES_ERREURS_FR js/` rend
+**1** fichier, le repli). Le lot A n'est que la fusion des deux rendus du gabarit. « Description / Rétroaction »
+est **un seul champ** dans les données (`sc.retroaction`, `codes-annotation.js:222`) ; le sous-critère 0 « trop
+petit pour diagnostiquer » vit dans les données (pack démo `:14097`), pas dans le code. **Aucun format ne
+change au lot A.**
 
 ---
 
-## 3 · Après la carte et les décisions — l'écriture, un commit par volet
+## 0 · Lis d'abord
 
-> ↻ **Écrit le 4 septembre 2026 à 17 h 20 (Toronto), par Cowork, après relecture de la carte
-> `CARTE-2026-09-04-texte-troue-etape-2.md`** (cinq mesures rejouées, rien à lui opposer) **et les deux
-> réponses de Grégoire** (17 h 15). L'état mesuré n'a pas bougé : `fd2b4ce6`, 1.117.1, jeton local vert sur
-> ce commit.
+1. `PROTOCOLE.md` (règles 1, 2, 7) ; `OU-EN-EST-ON.md` en tête.
+2. Ton bloc de clôture de 1.118 dans `SESSION.md` (`grep -n "1.118" SESSION.md`, jamais en entier).
+3. Par lot, le cadrage nommé dans sa section. ⛔ Pas les 130 autres fichiers de `plans de travail/`.
 
-### Les deux décisions de Grégoire — au mot
+---
 
-1. **Les noms des badges, arrêtés (« ça va ! »)** : posés (bleu) `service` · `seuil` · `longueur` ;
-   remplis (vert) `erreurs` · `mots` · `moyenne` · `projection` · `palier`. `palier` remplace le
-   `niveau` de la maquette. Le niveau IDME, la note, le lien du service et le facteur ne sont pas offerts.
-2. **Le préfixe engendré devient le badge `moyenne` (« oui »)** : une phrase de palier **sans aucun jeton
-   connu du registre** garde le préfixe engendré tel quel (les grilles existantes ne changent pas) ; **dès
-   qu'elle porte un jeton, elle est entière**. Discriminant : « aucun jeton connu », pas « aucune
-   accolade ». Sous les paliers, une ligne : « Une phrase sans badge est précédée de “Tu fais en moyenne
-   1 erreur à chaque N mots.” Dès qu'elle porte un badge, elle est entière : c'est toi qui l'écris. »
+## Lot A — une seule liste : sous-critères et codes (`js/grilles.js`, `styles.css`, `index.html` pour le bump)
 
-### Ce qui reste arrêté (inchangé)
-- le composeur de l'étape 1 sert aux deux champs de chaque palier (« Ce que l'élève lit », « Phrase de
-  recommandation ») — un composeur à deux registres, la pose commune ; `{service}` reste ce qu'il est ;
-- **le mot est « observation »** dans le gabarit (jamais « rétroaction ») ;
-- un texte enregistré sans jeton se rend exactement comme avant (témoins : le golden #668 et le spec des
-  énoncés passent sans modification) ;
-- `{projection}` rend le nombre seul (décision de Claude Code, carte §b) ; `{s}` accorde le pluriel après
-  `{erreurs}` comme dans les énoncés ;
-- un jeton **inconnu** reste en place au rendu et **se dit dans le gabarit** (ligne orange sous le palier,
-  carte §d) ; un jeton connu non fourni disparaît avec son espace de tête ;
-- ⛔ pas de `dragstart`/`drop` ; ⛔ rien dans les données de personne ; ⛔ aucune sentinelle du calcul ne change.
+Source : `plans de travail/CADRAGE-2026-09-03-codes-par-grille.md`, points **6, 7 et 8** (lis-les d'abord).
 
-### L'ordre des volets — un commit par volet, dans cet ordre
+**Mesure d'abord, en une ligne chacune** : `rendreBlocCodesAlgo` (`grilles.js:~4123`) et le bloc
+« Sous-critères » du même gabarit — quels champs chacun rend ; `rendreActivationCodes` (la case) ; et si le
+second gabarit (`:~4176`, l'écran d'évaluation) rend aussi les deux blocs.
 
-**Volet 1 — le registre** (`js/evaluation-projection.js` seul). Les huit jetons déclarés dans le module de
-la projection (nom, famille posé/rempli, valeur exacte de la carte §b) ; `_texteDuPalier` remplit `texte` ET
-`texteAide` ; le préfixe engendré n'apparaît que si `texte` ne porte aucun jeton connu ; `{s}`. Sentinelle
-Vitest en Node sur le module réel : chaque jeton sur les quatre couples de la carte (0/460, 4/460, 15/584,
-59/460), le cas « Sans erreur » (`moyenne` vide → le jeton part avec son espace), le texte sans jeton qui
-rend l'octet près ce qu'il rend aujourd'hui, le jeton inconnu laissé en place — **break-testée** (fais
-échouer chaque cas une fois, dis comment). Témoin : le golden #668 et `grep -c "projectionAlgo.calculer"
-js/evaluation-calcul.js` toujours 1.
+**Ce qui est arrêté (Grégoire, 4 septembre, points 7 et 8 du cadrage)** :
+- une seule liste, une rangée par sous-critère : code · nom · pondération · pastille de couleur · chevrons ·
+  corbeille ; le texte du code (« Observation », un seul champ, `sc.retroaction`) sous un pli par rangée, fermé
+  par défaut (règle des cartes : fermé ce qui porte les mots) ;
+- la case « Utiliser ces sous-critères comme codes d'annotation » en tête de la liste ; **couleur et texte
+  n'apparaissent que si elle est cochée** ;
+- la carte « Codes d'annotation » disparaît ; ce qu'elle disait d'utile (l'aide, la trace du 3 septembre) va
+  sous la case, en une ligne ;
+- **le mot est « Observation »** pour le champ du code (jamais « Description / Rétroaction », jamais
+  « rétroaction ») ;
+- **la ligne qui dit où vit la palette globale** (point 6 du cadrage), sous la case, texte de départ à
+  reprendre par Grégoire au coup d'œil : « Sans cette case, la copie utilise la palette générale (Annoter ›
+  palette). Cochée, ce sont ces sous-critères qui deviennent les codes de la copie. » ;
+- les plis vivent en mémoire (`plisGabaritAlgo`), jamais dans la grille ; le gabarit se redessine à chaque
+  frappe, les plis se relisent ;
+- **rien ne change dans les données** : mêmes clés `sousCriteres[].{code,nom,ponderation,couleur,retroaction}`,
+  même drapeau d'activation. Témoin : le golden #668 et les sentinelles de `codes-annotation` passent sans
+  modification ; `git diff -- js/codes-annotation.js js/import-export.js js/partage-schemas.js` rend zéro.
+- `echapperHtml` sur tout texte rendu ; cibles ≥ 44 px (iPad) autour de la corbeille et des chevrons.
 
-**Volet 2 — le gabarit** (`js/grilles.js`, `js/evaluation-enonces.js`, `styles.css`, `index.html` pour le
-bump des jetons). `insererRepere` ouvert d'un 5e paramètre `palette` (les neuf cas de l'étape 1 ne bougent
-pas) ; `insererRepereEnonce` ouvert d'un chemin d'écriture par `dataset` (`palierIndex` + `champ` →
-`_muterPalier`) ; la palette rendue sur les deux zones de chaque palier, mêmes classes, même `data-action`,
-mêmes gardes iPad ; la note « Écris {service}… » tombe ; la ligne sous les paliers (décision 2) ; la ligne
-orange du jeton inconnu. Mesure et dis ce que font 16 palettes sur un gabarit à six paliers (question 4 du
-cadrage) : si c'est illisible, une seule palette par palier au-dessus des deux zones, et dis-le comme ton choix.
+**Témoins** : la sentinelle du gabarit (`sentinelle-lot4-C-gabarit-algo-range.test.js`, adapte-la) vérifie
+qu'un sous-critère n'est rendu qu'UNE fois, que couleur et texte sont absents du rendu quand la case est
+décochée et présents quand elle est cochée ; break-test. Le spec WebKit du lot 4 (`lot4-gabarit-algo-cartes`)
+coche la case, écrit une observation, recharge, la relit.
 
-**Volet 3 — l'aperçu** (`js/grilles.js`). Une carte « Ce que l'élève lira » sous « Projection » : copies
-fictives dérivées des paliers (une par palier, plus une non corrigée), décompte du bloc 3 puis texte de
-projection, dans l'ordre de `_construireRetroactionAlgoCategories` ; une ligne dit ce que l'aperçu ne montre
-pas (la rétroaction du sous-critère dominant). Rendu pur, aucun état dans la grille.
+**Fin du lot A** : un ou deux commits, ce fichier avec ; rapport à Cowork ; **coup d'œil de Grégoire** (Conception
+› Grilles › un critère algorithmique : une seule liste, la case en tête, la couleur qui apparaît quand il
+coche) ; les mots de la ligne « palette » sont à lui.
 
-**Volet 4 — le spec WebKit** (`tests/integration/`). Poser deux jetons dans un palier par le bouton,
-enregistrer, rouvrir, lire l'aperçu d'une copie d'exemple. ⛔ Aucun `page.click` à l'aveugle ni
-`waitForTimeout` (règle du 4 septembre) : `grep -n "page.click\|waitForTimeout"` sur le spec rend zéro.
+---
 
-**Puis** : relecture croisée de Cowork (format qui voyage : obligatoire), coup d'œil de Grégoire, verdict au
-jeton, release MINEURE 1.118 avec UNE entrée de changelog dont les mots sont à lui — et qui **nomme la
-contrainte** « corrige avec l'application à jour » (carte §d : un onglet 1.117 qui corrige une grille 1.118
-écrit `{erreurs}` dans l'évaluation).
+## Lot B — les collections de paramètres (`js/evaluation-projection.js`, `js/grilles.js`, la bibliothèque)
 
-▣ **Ce que Grégoire verra à l'écran quand c'est livré** : dans le gabarit d'un critère algorithmique, carte
-« Projection », chaque palier a ses boutons de badges au-dessus de ses deux zones ; en dessous, la carte
-« Ce que l'élève lira » montre une phrase par palier, remplie, et une copie non corrigée sans projection.
+Source : `plans de travail/CADRAGE-2026-09-03-collections-de-parametres.md` — **tranché par Grégoire : la
+COPIE** (choisir une collection verse ses paliers dans le critère ; corriger la collection ne touche aucune
+grille, aucune évaluation). Hors périmètre, nommé là : le menu des formules, une collection formule +
+projection, toute migration, le partage entre enseignants.
 
-## 5 · Retouche du coup d'œil de Grégoire — l'aperçu vient sous chaque palier (4 septembre, 18 h 38)
+**D'abord une carte courte (30 min, `plans de travail/CARTE-2026-09-05-collections.md`), rendue à Cowork
+avant le code** — ce lot crée un objet neuf dans les données de Grégoire (règle 2) :
+- **où la collection s'enregistre** : la cinquième famille de la bibliothèque
+  (`BibliothequeUI.repertoires.enregistrer`, quatre appels existants : grilles, échelles, pratiques,
+  productions) ; **clé namespacée par trimestre via `cle()`**, comme `echellesTemplates` (skill
+  `integrite-globaux` : lis-le avant d'écrire une clé) ; ce que la collection porte exactement (les paliers
+  retenus `_paliersRetenus` + `nomServiceAide` + `motsReference` + `erreursTolerees` ? — mesure ce que
+  « les quatre paliers et le nom du service arrivent réglés » exige, cadrage « Fini quand ») ;
+- **où elle se choisit** : le menu de projection du critère (`listerModeles`, `evaluation-projection.js:~242`)
+  reste une liste fermée de modèles livrés ; les collections de l'utilisateur s'y ajoutent sous un
+  sous-titre (« Mes collections ») — mesure comment le menu est rendu et si un `optgroup` passe par le
+  rendu existant ;
+- **le geste d'enregistrement** : un bouton dans la carte « Projection », « Enregistrer ces paliers sous un
+  nom… » — nom demandé inline (⛔ pas de `prompt()`, skill `design-interface` : pas de modale quand une
+  section inline suffit) ; un nom déjà pris se dit ;
+- **ce que voit une grille qui a copié une collection ensuite supprimée** : rien ne change (c'est la copie) ;
+  dis-le en une ligne dans l'aide ;
+- **ce qu'export et import font de la clé neuve** (`import-export.js` : schéma des clés) — si la clé n'est
+  pas exportée, dis-le et propose ; ⛔ rien dans le partage entre enseignants pour ce lot.
 
-> **Relecture croisée de Cowork sur `dccaf3d2` : rien à corriger** (format qui voyage intact — `git diff
-> origin/main..HEAD -- js/import-export.js js/partage-schemas.js js/partage-validation.js js/evaluation-calcul.js`
-> rend zéro ; texte sans jeton rendu à l'identique par l'ancien et le nouveau module ; les deux décisions
-> appliquées au mot ; `echapperHtml` aux deux sites de rendu). Les quatre choix pris seuls sont retenus.
->
-> **Coup d'œil de Grégoire** : les phrases sont « très naturelles ». Ce qui cloche, c'est LA PLACE de
-> l'aperçu : on compose dans le palier, on lit le résultat dans une autre carte, plus bas, repliée.
-> **Décision de Grégoire (« ça va, bonne recommandation »)** : l'aperçu vient sous chaque palier.
-> C'est une correction du lot, pas une envie : l'aperçu est la moitié de ce lot (arrêtés 4 et 5).
+**Après la relecture de la carte par Cowork** (une passe courte, pas de décision de Grégoire attendue sauf
+les mots du bouton et du sous-titre) : le code, un commit par volet (registre + bibliothèque · gabarit ·
+spec). Sentinelle Vitest sur le module réel : enregistrer, lister, appliquer (les paliers copiés sont égaux
+mais pas identiques : `!==`), supprimer la collection ne change pas le critère ; break-test. Spec WebKit :
+régler un palier, enregistrer sous « EUF », créer une grille, choisir « EUF », relire les paliers.
 
-**Ce que Grégoire verra** : dans la carte « Projection », directement sous les deux zones de chaque palier,
-une ligne grise « L'élève lira : » suivie de la phrase remplie pour la copie fictive de ce palier (décompte
-du bloc 3 puis projection, comme aujourd'hui), mise à jour à chaque frappe. En bas de la carte
-« Projection », une seule ligne : « Copie non corrigée : aucune phrase avant la correction. » La carte
-« Ce que l'élève lira » n'existe plus.
+**Fin du lot B** : rapport à Cowork ; **coup d'œil de Grégoire** (le « Fini quand » du cadrage, tel quel).
 
-**Ce qui est arrêté** :
-- un seul fichier de code : `js/grilles.js` (plus `styles.css` si la ligne a besoin d'une classe, et
-  `index.html` pour le bump des jetons) ; `evaluation-projection.js` ne bouge pas — `copiesExemple` sert
-  tel quel, la copie de chaque palier se retrouve par sa `cle` ;
-- rendu pur, aucun état ; le gabarit se redessine à chaque frappe, l'aperçu suit ;
-- la ligne du badge inconnu (orange) reste sous le palier, AU-DESSUS de la ligne « L'élève lira : » ;
-- la note « aucune donnée d'élève ; l'aperçu ne montre pas la rétroaction du sous-critère dominant » reste,
-  une fois, en bas de la carte « Projection », avec la ligne de la copie non corrigée ;
-- `echapperHtml` sur tout texte rendu ;
-- les sentinelles de l'aperçu (`sentinelle-texte-troue-etape-2-apercu.test.js`) se déplacent avec lui : même
-  cas, nouveau site — dis lesquels ont dû changer et pourquoi, break-test sur au moins un ;
-- le spec WebKit du volet 4 lit l'aperçu à sa nouvelle place ; ⛔ toujours pas de `page.click` à l'aveugle
-  ni `waitForTimeout`.
+---
 
-**Un commit**, puis rends-le : Cowork relit en une passe courte, Grégoire regarde, verdict au jeton,
-release mineure 1.118 (les mots du changelog sont à lui, Cowork les lui proposera), push.
+## Lot C — les mêmes gestes partout (cadrage design, écrit à froid par Cowork le 4 au soir)
 
-## 4 · L'ordre de la séance
+Source de la mesure : consigne du 4 (archivée, `_ancienne-CONSIGNE-DU-JOUR-2026-09-04-lot-4-et-release-1.117.md`,
+§7 c-d) et ton rapport du lot 4 : hors de l'éditeur de grille, le « ✕ » rouge vit dans la bibliothèque (1 site)
+et la pratique de notation v2 (3 sites) ; la pile « Ordre » dans l'éditeur d'échelles (3 sites,
+`echelles.js:1239`, `:3238`, `:3576`) ; la grille à deux colonnes du formulaire de groupe-cours (empruntée par
+les paliers) n'a **aucune règle d'empilement** en portrait iPad. **Remesure ces comptes avant de toucher
+(`grep -n "✕" js/*.js`, `grep -n ">Ordre<" js/*.js`) et dis-les.**
+
+**Les trois règles, arrêtées (skill `design-interface` : `design-system.html` reste la source ; variables CSS
+de `styles.css`, aucune couleur en dur ; deux modes ; cibles ≥ 44 px)** :
+
+1. **Un seul bouton de suppression dans toute l'application : la corbeille** grise en coin, à droite, icône
+   seule, cible tactile ≥ 44 px — celle des critères et des productions, celle que l'éditeur de grille a
+   adoptée en 1.117. Ce que chaque suppression FAIT et DIT ne change pas d'un mot (les confirmations #647 et
+   sœurs restent). C'est le rendu qui change, pas le geste.
+2. **Un seul geste pour changer l'ordre : les chevrons « ∧ ∨ »** à droite du nom, sur la ligne de la corbeille
+   — le modèle des productions. Mêmes fonctions de déplacement qu'aujourd'hui ; l'ordre enregistré ne
+   change pas. La colonne « Ordre » de l'éditeur d'échelles disparaît, ses flèches deviennent les chevrons de
+   la rangée.
+3. **Une règle d'empilement pour la grille à deux colonnes** (`sous-critere-champs-grid`, le formulaire de
+   groupe-cours, les paliers) : sous 768 px de large — iPad en portrait — une seule colonne, l'étiquette
+   au-dessus de chaque champ, dans l'ordre de lecture. **Une règle CSS, une classe, appliquée aux deux écrans** ;
+   mesure d'abord ce que `@media (max-width: 768px)` (`styles.css:1508`, `:5351`) fait déjà de ces grilles,
+   et emprunte plutôt que d'ajouter.
+
+**Périmètre** : `styles.css`, les fichiers qui rendent les sites mesurés (`bibliotheque-ui.js`, la pratique
+de notation v2, `echelles.js`, le formulaire de groupe-cours), `index.html` pour le bump. ⛔ Aucun changement
+de données, aucune confirmation modifiée, aucun libellé de suppression réécrit.
+⛔ **Ne touche pas** : « dire qu'un document reçu est une copie » (#696) et les libellés « la bibliothèque » —
+c'est un lot de mots, pas de gestes ; il reste inscrit.
+
+**Témoins** : une sentinelle qui rend chaque site mesuré et vérifie qu'aucun bouton « ✕ » de suppression ni
+colonne « Ordre » ne subsiste (break-test : réintroduis un « ✕ », elle rougit) ; le spec WebKit de l'éditeur
+d'échelles déplace un niveau par le chevron et supprime par la corbeille ; **l'empilement iPad ne se juge
+pas ici** : c'est une porte terrain de Grégoire (iPad, portrait, le formulaire de groupe-cours et un palier).
+
+**Fin du lot C** : rapport à Cowork ; **coup d'œil de Grégoire** (Mac : la bibliothèque et l'éditeur
+d'échelles ; iPad en portrait : le formulaire de groupe-cours).
+
+---
+
+## La fin de journée — 1.119
 
 ```
-carte (§2) → relecture de Cowork → décisions de Grégoire (noms des jetons, préfixe)
-  → code, un commit par volet → relecture croisée (format qui voyage : obligatoire)
-  → coup d'œil de Grégoire : ce qui est cassé se corrige, ce qui est une envie va au lot suivant
-  → verdict au jeton → release MINEURE 1.118, UNE entrée de changelog dont les mots sont à lui → push
+lot A → coup d'œil → lot B (carte, relecture, code) → coup d'œil → lot C → coup d'œil
+  → relecture croisée de Cowork sur le lot B seulement (l'objet neuf dans ses données) — A et C au jugement
+  → ce qui est cassé se corrige, ce qui est une envie s'inscrit
+  → verdict au jeton (scripts/pousser.sh) → release MINEURE 1.119, TROIS entrées de changelog dont les mots
+    sont à Grégoire (Cowork les lui propose) → push → on n'attend pas le run (règle 7)
 ```
 
-⛔ Hors périmètre, cadré ailleurs : la fusion des listes sous-critères + codes (cadrage codes par grille,
-points 7-8) ; le cadrage design (corbeille, chevrons, empilement iPad) ; les badges que l'enseignant invente
-(étape 3+).
-
-## 6 · Le lendemain matin, 5 septembre — finir 1.118, puis passer à la journée (écrit le 4 à 19 h 12, par Cowork)
-
-> Grégoire a arrêté sa journée le 4 à 19 h, la retouche du §5 rendue ou en cours. **Rien n'est poussé** : `main`
-> a cinq (ou six) commits d'avance, 1.117.1 reste en ligne. Cet ordre est celui du matin, dans l'ordre.
-
-1. **Remesure** (`git --no-optional-locks log --oneline -7`, `cat version.json`, `git status --short`) et dis en
-   une ligne où en est la retouche du §5 : rendue (quel commit) ou pas.
-2. Si elle n'est pas rendue : fais-la (§5), un commit, rapport à Cowork.
-3. **Cowork relit la retouche** (une passe courte : l'aperçu sous chaque palier, `echapperHtml`, les sentinelles
-   déplacées), puis **coup d'œil de Grégoire** (Conception › Grilles › un critère algorithmique › carte
-   « Projection » : la ligne « L'élève lira : » sous chaque palier, qui change quand il tape).
-4. **Les mots du changelog** : Cowork propose à Grégoire l'entrée de 1.118 (elle DOIT nommer la contrainte
-   « corrige avec l'application à jour ») ; il corrige ; tu l'écris telle quelle.
-5. Verdict au jeton (`scripts/pousser.sh`), **release MINEURE 1.118**, push. On n'attend pas le run (règle 7).
-6. **Puis, sans autre consigne** : archive ce fichier sous
-   `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-04-texte-troue-etape-2.md`, renomme
-   `plans de travail/CONSIGNE-2026-09-05.md` en `plans de travail/CONSIGNE-DU-JOUR.md`, et commence son lot A.
-   Les deux fichiers partent avec le premier commit du lot A.
-
-## 7 · Retouches du coup d'œil de Grégoire — 5 septembre, 6 h 50 (Toronto), par Cowork — AVANT la livraison de 1.118
-
-> **Décision de Grégoire (6 h 50)** : la livraison n'est pas urgente, on corrige d'abord, **une seule livraison à la fin**.
-> Coup d'œil fait sur `7ff78ced` : l'aperçu sous chaque palier fonctionne, la recommandation aussi. ⚠ Elle suit au
-> `change` (en quittant le champ), pas à chaque frappe : c'est le bon mécanisme (un redessin à chaque frappe perdrait le
-> curseur) ; le « mise à jour à chaque frappe » du §5 était une erreur de mots de Cowork. **Ne change pas ça.**
-> ⚠ Cowork n'a PAS relu `grilles.js` au-delà de `rendreBlocProjectionAlgo` : les numéros de lignes ci-dessous sont
-> des repères mesurés à 6 h 30, **remesure avant de toucher**.
-
-**Ce que Grégoire verra** (carte « Projection » d'un critère algorithmique) : l'aide sur les badges **en haut de la
-carte**, avant le premier palier, en trois phrases courtes ; dans chaque palier, les deux zones s'appellent
-**« Verdict »** et **« Recommandation (facultative) »** ; sous chaque palier, la ligne grise s'intitule **« L'élève lira
-(décompte, puis tes deux phrases) : »** et montre **en gris ce qui est engendré** (le décompte et, s'il y a lieu, le
-préfixe « Tu fais en moyenne 1 erreur à chaque N mots. ») et **dans l'encre normale ce qu'il a écrit** (verdict et
-recommandation, remplis). Les deux notes du bas (copie non corrigée, copies fictives) restent en bas.
-
-**Ce qui l'a motivé** : deux endroits disaient « ce que l'élève lit / lira » et rien ne montrait que la ligne grise est
-fabriquée à partir des deux zones ; l'aide sur les badges était à six paliers de la rangée « Poser : ».
-
-**Trois retouches, UN commit. Périmètre : `js/grilles.js`, `styles.css`, `index.html` (bump). ⛔ `evaluation-projection.js`
-ne bouge pas ; aucune donnée ne change.**
-
-1. **Les étiquettes** (`grilles.js:~3908` et `:~3917`, les deux `<label>` du palier) : « Ce que l'élève lit » →
-   **« Verdict »** ; « Phrase de recommandation (facultative) » → **« Recommandation (facultative) »** (mots de Grégoire,
-   6 h 35). Mesure d'abord `grep -n "Ce que l'élève lit\|Phrase de recommandation" js/ tests/` : l'aide de la carte cite
-   « dans « Ce que l'élève lit » » (à corriger en « dans « Verdict » ») ; les commentaires de code restent tels quels ;
-   dis si une sentinelle ou un spec porte l'ancien libellé.
-
-2. **La composition visible** (`ligneApercu`, `grilles.js:~3865`) : la ligne rend **deux segments**, chacun passé par
-   `echapperHtml`. **Gris** (`palier-apercu-engendre`, `--gris-moyen`) = le décompte du bloc 3, puis `projection.prefixe`
-   s'il est non vide. **Encre normale** (`palier-apercu-ecrit`, `--texte-principal`) = `projection.texte` privé de son
-   préfixe. Mesure : `_resultat` (`evaluation-projection.js:~672`) rend `prefixe` ET `texte` où `texte` = préfixe + ' ' +
-   verdict(+recommandation) ; retire le préfixe par sa longueur (`texte.slice(prefixe.length).trim()`), pas par regex.
-   Verdict et recommandation restent **un seul segment** : les séparer exigerait de changer le module de projection —
-   hors périmètre, dis-le si tu y vois un défaut. Étiquette de la ligne : **« L'élève lira (décompte, puis tes deux
-   phrases) : »**. Classes dans `styles.css`, rien en `style=` inline neuf.
-
-3. **L'aide en haut** (`grilles.js:~3945`, le `<small>` qui précède le bouton « + Ajouter un palier ») : déplacée
-   **en tête de carte, avant le premier palier**, resserrée à trois phrases (texte de départ, Grégoire le reprend au coup
-   d'œil) : « Un clic sur un badge le pose dans la zone du palier où est le curseur — sans curseur, dans « Verdict ». Les
-   badges bleus sont écrits dans la grille ; les verts se remplissent à la correction, copie par copie, et un badge sans
-   valeur disparaît. Sans badge, la phrase est précédée de « Tu fais en moyenne 1 erreur à chaque N mots » ; avec un
-   badge, elle est entière : c'est toi qui l'écris. » Les deux `<small>` du bas (`basApercu`) restent en bas.
-
-**Témoins** : la sentinelle `sentinelle-texte-troue-etape-2-apercu.test.js` (B.a lit l'étiquette « L'élève lira : »,
-B.d la place de la note, D.b l'échappement) et le spec WebKit `texte-troue-paliers-projection.spec.js` (lit « L'élève
-lira : ») **suivent** ; dis lesquels ont dû changer et pourquoi ; **break-test** sur au moins un cas — le verdict rendu
-dans le segment gris doit rougir. Si `sentinelle-lot4-C-gabarit-algo-range.test.js` porte les anciens libellés, adapte-la.
-⛔ Toujours pas de `page.click` à l'aveugle ni `waitForTimeout`. Format qui voyage : `git diff -- js/evaluation-projection.js
-js/import-export.js js/partage-schemas.js` rend zéro ; golden #668 sans modification.
-
-**Puis** : rapport à Cowork (une passe courte), coup d'œil de Grégoire, **les mots du changelog** (Cowork les lui propose ;
-ton brouillon de 6 h 09 est la base, avec les nouveaux libellés), verdict au jeton, release MINEURE 1.118, push — puis le
-§6 s'applique tel quel à partir de son point 6.
-
-## 8 · Une seule carte pour ce que l'élève lit — 5 septembre, 7 h 15 (Toronto), par Cowork — DANS 1.118
-
-> **Décision de Grégoire (7 h 15)** : « non pas doublonner, mais fondre les deux en un seul endroit d'écriture », et
-> **dans 1.118**, avant la livraison. Maquette montrée à Grégoire (artefact « Une seule carte », 5 sept.) ; les
-> noms de cartes ci-dessous sont **confirmés par Grégoire à 7 h 24** : « Ce que l'élève lit » (la carte fondue) et « Observation » (ce qui reste).
-> ⚠ Repères de lignes mesurés entre 7 h 04 et 7 h 15 sur `91195f33` : **remesure avant de toucher.**
-
-**Ce que Grégoire verra** (Conception › Grilles › un critère algorithmique) : la carte « Projection » devient
-**« Ce que l'élève lit »** et se lit de haut en bas dans l'ordre exact de la phrase de l'élève : le modèle de projection
-et ses réglages (service, seuil, longueur) ; puis **« Décompte des erreurs »** avec sa rangée de badges (`critère`,
-`erreurs`, `mots`, `points`), venu de la carte « Observation » ; puis les paliers (verdict, recommandation) ; sous
-chaque palier la ligne grise, qui redevient simplement **« L'élève lira : »** (la composition est maintenant visible
-juste au-dessus, l'étiquette longue du §7 n'a plus à l'expliquer). La carte **« Observation »** garde le modèle
-d'observation et les trois énoncés qui ne parlent pas sur la copie (« Défi prioritaire », « Quand tout est maîtrisé »,
-« Aucune annotation »). Plus rien n'est écrit à deux endroits.
-
-**Ce qui l'a motivé** : le décompte gris de la ligne d'aperçu « tombait du ciel » ; son composeur était une carte plus
-haut. Motif « ça existe déjà ailleurs », neuvième occurrence : ce qui manquait, c'était le chemin.
-
-**Ce qui est arrêté — un rendu qui bouge, aucune donnée** :
-- `critere.enonces.decompte` reste où il est, lu et écrit par les mêmes handlers (`modifierTexteEnonce*Handler`,
-  `data-enonce-cle="decompte"`) ; `modeleEnonces` reste dans « Observation » et fournit toujours le texte de départ du
-  décompte quand rien n'est écrit (`normaliser`, `evaluation-enonces.js:~456`) — une ligne d'aide le dit sous le
-  décompte : « Texte de départ : le modèle d'observation, carte « Observation ». » ;
-- **factorise** le rendu d'un énoncé (`grilles.js:~3623-3635`, le `champs = cles.map(...)`) en une fonction
-  `rendreChampEnonceAlgo(c, e, ctx)` appelée par les deux cartes ; « Observation » rend `listerCles()` **sans**
-  `decompte`, « Ce que l'élève lit » rend `decompte` seul, **avant** le `if (!p.modele.projette)` (`:~3783`) : avec
-  « Aucune projection », l'élève lit quand même le décompte, il reste composable ;
-- ordre dans la carte fondue : modèle + réglages → aide (trois phrases du §7, où « la zone du palier où est le
-  curseur » devient « la zone où est le curseur ») → décompte → paliers → notes du bas → bouton ;
-- la clé de pli `projection` ne change pas (`plisGabaritAlgo`, mémoire seulement) ; seul le **titre** de la carte
-  change (`rendreCartesGabaritAlgo`, `:~4191`) ;
-- ligne d'aperçu : étiquette « L'élève lira : », deux segments gris / encre inchangés (§7) ;
-- `echapperHtml` partout, zéro handler inline, classes dans `styles.css`.
-
-**Témoins** : `git diff -- js/evaluation-enonces.js js/evaluation-projection.js js/import-export.js js/partage-schemas.js`
-rend **zéro**. Sept fichiers de tests touchent le décompte ou la carte « Observation » (mesuré : `grep -rln
-"decompte\|Décompte des erreurs\|CR:commentaire" tests/`) : `sentinelle-581-enonces-sans-discipline`,
-`sentinelle-texte-troue-etape-1-reperes`, `…-etape-2-apercu`, `…-etape-2-gabarit`, `sentinelle-lot4-C-gabarit-algo-range`,
-et les specs `lot4-gabarit-algo-cartes`, `texte-troue-reperes-enonces` (qui ouvre « Observation » pour taper le
-décompte — il l'ouvrira dans « Ce que l'élève lit »). Dis lesquels ont dû changer et pourquoi ; **une sentinelle neuve
-ou étendue** : le décompte rendu UNE fois dans le gabarit, dans la carte de projection, absent de « Observation », et
-présent même sous « Aucune projection » ; **break-test** (rends-le deux fois → rouge). ⛔ Pas de `page.click`
-à l'aveugle, pas de `waitForTimeout`.
-
-**Un ou deux commits** (la factorisation peut être le premier). Puis : rapport à Cowork, **relecture croisée** (le
-gabarit est dans le périmètre de la règle 2 depuis qu'il porte des mots d'élève), coup d'œil de Grégoire (une carte,
-lue de haut en bas ; les deux titres), mots du changelog (une puce de plus : « une seule carte »), verdict au jeton,
-release MINEURE 1.118, push, puis §6 à partir de son point 6.
+⚠ **Règle de Grégoire pour cette journée** : les trois lots, une seule livraison. Si le lot C n'est pas fini à
+l'heure où il s'arrête, 1.119 part avec A et B, et C attend — jamais l'inverse.
+⚠ **Chaque rapport à Grégoire : un objet, court.** Le détail va dans `SESSION.md`.
