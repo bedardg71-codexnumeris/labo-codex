@@ -210,6 +210,59 @@
        les retouches §7). Ce commit emporte les fichiers de Cowork (CONSIGNE-DEMARRAGE-COWORK,
        OU-EN-EST-ON, 00-CADRAGES-OUVERTS, la consigne du jour §6-§7, CONSIGNE-2026-09-05 sous son nom
        daté — le renommage viendra avec le premier commit du lot A).
+     ↻ 7 h 15 — §8 DE LA CONSIGNE (Cowork, après un second coup d'œil de Grégoire : « non pas
+       doublonner, mais fondre les deux en un seul endroit d'écriture », DANS 1.118 ; titres confirmés
+       à 7 h 24 : « Ce que l'élève lit » pour la carte fondue, « Observation » pour ce qui reste).
+       Motif : le décompte gris de la ligne d'aperçu « tombait du ciel », son composeur était une
+       carte plus haut. Repères remesurés sur `91195f33` avant de toucher (`champs = cles.map`
+       3624-3634, `if (!p.modele.projette)` 3784, titres 4190-4191, `insererRepereEnonce` : la cible
+       hors palier = `closest('.groupe-form')` → `textarea[data-enonce-cle]`, le délégué `focusin` lit
+       l'attribut, pas la carte — le décompte déplacé garde ses gestes sans rien changer).
+       DEUX COMMITS :
+       1. `65ae6884` — la factorisation seule : `rendreChampEnonceAlgo(c, e, ctx)` (étiquette, palette,
+          zone, aide) sort de `rendreBlocEnoncesAlgo`, appelé par la même carte avec les mêmes clés ;
+          rendu IDENTIQUE, prouvé par les sentinelles qui lisent le gabarit au caractère (étape 1,
+          étape 2 gabarit / apercu, lot 4 C) sans modification — Vitest 461 / 5108. Jeton grilles (m).
+       2. (ce commit) — la fusion : « Observation » rend `listerCles()` SANS `decompte` ; « Ce que
+          l'élève lit » rend le décompte par le même helper, AVANT le `if (!p.modele.projette)` —
+          sous « Aucune projection », l'élève lit quand même le décompte, il reste composable (ses
+          quatre badges), avant la note « Aucune projection… », sans palier ni aide des paliers (DÉCIDÉ
+          SEUL, DIT : l'aide en trois phrases parle des zones des paliers ; sans palier elle n'aurait
+          rien à décrire, et la sentinelle du gabarit B.e verrouille « ni palette ni note »). Ordre de
+          la carte fondue : modèle + réglages (seuil compris) → aide (« la zone où est le curseur ») →
+          décompte + ligne « Texte de départ : le modèle d'observation, carte « Observation ». » →
+          paliers → notes du bas → bouton. Titre 'Ce que l\'élève lit', clé de pli `projection`
+          inchangée. La ligne d'aperçu redevient « L'élève lira : ». `evaluation-enonces.js` et
+          `evaluation-projection.js` intouchés ; `enonces.decompte` lu et écrit par les mêmes handlers.
+          styles.css : `.decompte-eleve`, `.decompte-texte-depart` (scopées). Jetons grilles (n),
+          styles (j) — au jour du build.
+       TÉMOINS qui ont dû changer, et pourquoi : lot 4 C B.c (le titre « Projection » →
+       « Ce que l'élève lit ») ; gabarit B.d (le décompte se lit dans la carte de projection, plus
+       dans « Observation ») et B.c (« Ce que l'élève lit » est devenu un TITRE : c'est l'ancienne
+       étiquette `>…</label>` qui est proscrite) ; apercu B.a (l'étiquette courte) ; spec paliers
+       (idem) ; spec `texte-troue-reperes-enonces` : `ouvrir()` déplie les DEUX cartes (le décompte
+       vit dans celle de projection, repliée aussi) et compte 1 décompte dans la projection, 3 zones
+       dans « Observation » — et son `waitForTimeout(900)` d'ouverture (étape 1) devient l'attente de
+       `window.dbReady`, comme le spec des paliers (dans la fonction que je réécrivais ; 0
+       `page.click` / `waitForTimeout` dans les trois specs touchés). SENTINELLE NEUVE
+       `sentinelle-texte-troue-etape-2-une-seule-carte.test.js` (14 cas, A-E) : une zone `decompte`
+       dans tout le gabarit, dans la carte de projection, absente d'« Observation » (édition et
+       création) ; l'ordre de lecture ; « Aucune projection » ; les titres + la clé de pli + la ligne
+       « Texte de départ » + l'aide ; mêmes attributs / palette / valeur, rendu sans écriture, texte
+       échappé ; un helper déclaré une fois et appelé deux fois. BREAK-TESTS (trois mutations,
+       restaurées, `cmp` identique) : décompte rendu DEUX fois → 6 rouges (A.a, A.b, B.b, D.b, D.c,
+       E.a) ; décompte retiré de la projection → 9 rouges (A, B, C.b, D + gabarit B.d) ; titre
+       « Projection » remis → 2 rouges (C.a + lot 4 B.c). Vitest 462 / 5120 ; WebKit local, les trois
+       specs de l'écran : 8 / 8 (17,3 s). Format qui voyage : `git diff HEAD -- js/evaluation-enonces.js
+       js/evaluation-projection.js js/import-export.js js/partage-schemas.js` rend zéro (ce lot) ;
+       vs origin/main, seuls `evaluation-enonces.js` et `evaluation-projection.js` diffèrent — le
+       registre des volets 1-3 d'hier, déjà relu par Cowork sur `dccaf3d2`. Goldens #668 intacts.
+     ▣ CE QUI RESTE (consigne §8) : rapport à Cowork → RELECTURE CROISÉE (le gabarit porte des mots
+       d'élève : règle 2) → coup d'œil de Grégoire (une carte, lue de haut en bas ; les deux titres)
+       → mots du changelog (une puce de plus : « une seule carte ») → verdict au jeton → release
+       MINEURE 1.118 → push → §6 à partir de son point 6.
+     ▣ ARBRE au moment d'écrire : `main` = origin/main + 9 commits. Ce commit emporte la consigne du
+       jour (§8 de Cowork, 7 h 24).
      ===================================================================== -->
 
 <!-- =====================================================================

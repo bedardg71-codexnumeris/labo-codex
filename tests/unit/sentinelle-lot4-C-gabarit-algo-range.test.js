@@ -231,7 +231,9 @@ describe('lot 4 · C.B — les libellés', () => {
         const { win, liste } = monter([GRILLE]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const html = liste().innerHTML;
-        for (const titre of ['Formule', 'Observation', 'Projection', 'Codes d\'annotation']) {
+        // ↻ §8 (5 sept. 2026, titres confirmés par Grégoire à 7 h 24) : « Projection » devient
+        // « Ce que l'élève lit » — le décompte s'y compose, avant les paliers ; « Observation » reste.
+        for (const titre of ['Formule', 'Observation', 'Ce que l\'élève lit', 'Codes d\'annotation']) {
             expect(html).toMatch(new RegExp('<span class="accordeon-chevron">[▶▼]</span> ' + titre.replace(/'/g, "(?:'|&#x27;|&#39;)")));
         }
     });
