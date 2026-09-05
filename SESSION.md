@@ -568,8 +568,8 @@
        relecture de B dans l'ordre de la consigne, les deux étaient faits ; `release.mjs minor` (build
        0905-1053, douze jetons) → commit `f2fa5a2e` → Vitest 467 / 5185 → `scripts/pousser.sh` : verdict
        Playwright local VERT (0 connu, 0 instable, dix minutes), hook Vitest vert, `56d20a63..f2fa5a2e
-       main -> main`. **1.119.0 EN LIGNE, `main` = `origin/main`.** PR #82 fermée sans fusion, branche
-       d'aperçu supprimée. RELAIS.md mis à jour (ce commit de docs, poussé seul).
+       main -> main`. **1.119.0 EN LIGNE, `main` = `origin/main`.** PR #82 : GitHub l'a marquée fusionnée au push de `main`
+       (fast-forward, aucun commit de fusion — `gh pr close` l'a dit), branche d'aperçu supprimée. RELAIS.md mis à jour (ce commit de docs, poussé seul).
      ▣ CE QUI RESTE : rien du jour. Cowork : OU-EN-EST-ON, sa console, la consigne de demain (l'étape 4 des
        badges inventés reste à cadrer à froid, décision de Grégoire).
      ===================================================================== -->
