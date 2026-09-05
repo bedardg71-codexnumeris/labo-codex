@@ -100,3 +100,41 @@ Décision prise le 29 avril 2026 : **stop sur les 3 lots restants** suite au tau
 | #9 | Travaux + saisie | 19 467 | Non audité — à reprendre plus tard |
 
 À reprendre quand l'infrastructure `/ultrareview` sera stabilisée (à surveiller dans les release notes Claude Code).
+
+---
+
+## Dispositions — remesurées le 5 septembre 2026 (audit de la pratique de notation)
+
+> Écrites par Claude Code sur mandat du second audit cadré
+> (`Rapports/prompts-audit/PROMPT-AUDIT-pratique-de-notation-2026-09-05.md`), d'après la remesure
+> sur `93b744b4` (1.121.0). Une disposition est *périmé* (le code cité n'existe plus ou le défaut est
+> corrigé, preuve à côté), *refusé* (motif), ou *tenu → à inscrire* (le défaut est toujours là ;
+> **le numéro de fiche est à attribuer par Grégoire à l'arbitrage** — `BACKLOG.md` n'est pas touché
+> par cet audit). Verdicts : `[exécuté]` = mesuré dans
+> `tests/unit/audit-pratique-de-notation-2026-09-05.test.js` ; `[lecture]` = chemin de code lu ;
+> `[grep]` = compte reproductible.
+
+| # | Candidat (ligne du 29 avril) | Disposition | Preuve, 5 septembre 2026 |
+|---|---|---|---|
+| 1 | `snapshots.js:600` cGlobal > 100 % (numérateur inclut les exclus) | **tenu → à inscrire** (indice C, hors périmètre de l'audit du 5 sept. ; non couvert par le rapport du 31 août) | `[lecture]` `snapshots.js:553` : `evaluationsCache = await db.get(cle('evaluationsSauvegardees'))` — TOUTES les évaluations du trimestre ; `:508-509` : `etudiants` = `obtenirEtudiantsCoursActif()` filtré par groupe et par `estEtudiantExclu` ; `:632-641` : `nbRemis` compte les évaluations du dernier travail sans les restreindre à `etudiants`. Un élève exclu, ou de l'autre groupe du même cours, compte au numérateur seulement. |
+| 2 | `snapshots.js:845` même mécanique | **tenu → à inscrire, fusionné avec 1** | même code (`:632-641` est l'unique calcul de `cGlobal` ; `:859` relit les évaluations de la même façon). |
+| 3 | `portfolio.js:148` note 0 perdue par `\|\| null` | **périmé — code mort** | `[grep]` `grep -rn "chargerPortfolioEleveDetail(" js/` → sa définition (`portfolio.js:111`) et son propre repli (`:390`) ; `grep -c portfolioEleveDetail index.html` → **0** ; `grep -c toggleArtefactPortfolioFromEl index.html` → **0** ; `window.chargerPortfolioEleveDetail` n'existe pas (`[exécuté]` B3). La ligne (`:157` aujourd'hui) vit dans une fonction que rien n'appelle. Retrait proposé avec le mort (constat B-3 du rapport du 5 sept.). |
+| 4 | `snapshots.js:515` `evaluationsCache` null → TypeError | **périmé — corrigé** | `[lecture]` `snapshots.js:547-556` : `evaluationsCache = evaluationsCacheParam`, sinon `await db.get(...)`, sinon `[]` dans le `catch`. |
+| 5 | `indices.js:562` `sommatif` et `alternatif` = même référence | **refusé — inerte** (commenté, aucune fiche) | `[grep]` `grep -rn '\.alternatif\.\w* *=[^=]\|\.sommatif\.\w* *=[^=]' js/` → **0** écrivain : aucun consommateur ne mute l'objet ; la référence partagée (`indices.js:599`) est une rétrocompat de lecture. |
+| 6 | `portfolio.js:196` `parseInt` sans radix | **refusé** | code mort (voir 3) ; et depuis ES5, `parseInt('08')` rend 8 — l'interprétation octale des chaînes préfixées `0` n'existe plus dans les moteurs cibles (Safari, WebKit). |
+| 7 | `indices.js:305` `obtenirHistoriqueIndicesCP` ignore la pratique | **périmé** | `[grep]` `grep -rn obtenirHistoriqueIndicesCP js/` → **0** : l'historique `indicesCP` a été purgé (#397, décision D3 du 5 août 2026, `portfolio.js:663-669`). |
+| 8 | `portfolio.js:858` `calculerNoteFinaleMultiObjectifs` sous-pondère | **périmé** | retirée (#402, `portfolio.js:902-904` : « zéro appelant … ablation zéro-dette »). |
+| 9 | `portfolio.js:218` `recents-meilleurs` cassé (dateRemise identiques) | **périmé — code mort** | `selectionnerArtefactsSelonModalite` n'a qu'un appelant, `chargerPortfolioEleveDetail` (voir 3). Le mode « récents parmi les meilleurs » vivant est celui de `profil-etudiant-actions.js` (`_selectionnerArtefactsLegacy`, récence par numéro de production, #394). |
+| 10 | `portfolio.js:250` `dateRemise` toujours NOW | **périmé — code mort** | idem (la ligne est `:195` aujourd'hui, dans la même fonction morte). |
+| 11 | `indices.js:422` filtre exclut les 0 valides | **périmé — corrigé** | `indices.js:422-426` (#399 L7) : `e.noteFinale !== null && e.noteFinale !== undefined` ; le commentaire cite la sonde (0,70 → 0,467). |
+| 12 | `snapshots.js:245` `productionsDues` n'exclut pas `*-formatif` | **tenu → à inscrire** (indice C, hors périmètre ; non couvert par le rapport du 31 août) | `[lecture]` `snapshots.js:255-263` : seuls `facultatif` et `type === 'portfolio'` sont écartés ; les types formatifs existent encore (`productions.js:2679-2683`, `:2817` `examen-formatif`). Le C historique compte donc un formatif dû comme un travail dû. |
+| 13 | `snapshots.js:307` repli IDME codé en dur (40/65/75/100) | **tenu → à inscrire** (constat B-8 du rapport du 5 sept. — c'est l'indice P) | `[lecture]` `snapshots.js:315-322` inchangé, et ATTEINT : `calculerIndicesHistoriques` passe par `obtenirPratiqueActuelle()` (`:292`), qui rend l'instance REGISTRE de la famille ; `[grep]` `calculerPerformanceHistorique` : sommative 1, pan-standards 1, **pan-specifications 0, configurable 0**. Une pratique SPE tombe donc sur ce repli ; une DEN tombe sur l'instance STD (`profil-etudiant-helpers.js`, repli `new PratiquePANStandards()`). Contredit #529 (« rien codé en dur »). |
+| 14 | `correlations-longitudinales.js:50` dates non normalisées | **périmé — corrigé** | `[lecture]` `:168` `(interventions[ii].date \|\| '').substring(0, 10)` et `:52-56` tri par `dateSeance`. |
+| 15 | `correlations-longitudinales.js:70` composante horaire | **périmé — corrigé** | idem 14 (`substring(0, 10)` sur toutes les comparaisons de dates). |
+| 16 | `indices.js:108` signature `obtenirDonneesSelonMode('groupeEtudiants')` | **refusé — faux positif** | `indices.js:263` : c'est l'appel canonique de tout le dépôt (`modes.js:622`). |
+| 17 | `indices.js:162` `heures` traitées différemment (régulier / facultatif) | **tenu → à inscrire** (indice A, hors périmètre ; non couvert par le rapport du 31 août) | `[lecture]` `indices.js:203` : régulier `heures × 60 / dureePeriode` ; `:214` : facultatif `pPeriodes = pf.heures` (brut). Deux unités pour le même champ. |
+| 18 | `correlations-longitudinales.js:152` interventions perdues si n < 5 | **refusé — voulu** | `[lecture]` `:156-160` : `SEUIL_MIN_ETUDIANTS` est un seuil statistique explicite ; sous le seuil, les corrélations sont `null`, pas les interventions (les événements sont poussés à `:164-180` quel que soit `n`). |
+| 19 | `correlations-longitudinales.js:195` courbe d'une intervention future depuis l'index 0 | **tenu, mineur → à inscrire avec 1, 2, 12** (lot « snapshots et corrélations ») | `[lecture]` `:199-203` : `idxDebut = 0` puis `break` au premier snapshot `>= dateInterv` — une intervention postérieure à la dernière séance ne trouve rien et garde 0 : sa courbe part du début. |
+| 20 | idem, doublon de 19 | **fusionné avec 19** | même ligne, même mécanique. |
+
+**Bilan** : 9 périmés, 4 refusés, 7 tenus (dont 5 hors du périmètre de l'audit du 5 septembre — indices A et C —, à inscrire sans redémontrer). Le rapport n'est plus « sans suite ».

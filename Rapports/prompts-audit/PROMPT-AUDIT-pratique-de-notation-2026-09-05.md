@@ -6,9 +6,10 @@ executant_des_correctifs : Claude Code, un lot à la fois, après arbitrage de G
 type : audit de vérité du calcul et de concordance
 livrable_attendu : rapport de constats, chaque constat portant sa disposition ; AUCUN correctif appliqué
 rapport_a_produire : Rapports/AUDIT-pratique-de-notation-2026-09-XX.md (date du jour de l'exécution)
-prerequis : Rapports/AUDIT-moteur-evaluation-2026-09-XX.md déposé — ce second audit part de son flux H
+rapport_produit : Rapports/AUDIT-pratique-de-notation-2026-09-05.md (46 mesures au banc tests/unit/audit-pratique-de-notation-2026-09-05.test.js ; dispositions écrites dans ultrareview-lot-3-indices.md et ultrareview-lot-4a-evaluation.md)
+prerequis : Rapports/AUDIT-moteur-evaluation-2026-09-05.md (déposé, lot #697-#699 livré en 1.121.0) — ce second audit part de son flux H
 cadre_par : Cowork, 5 septembre 2026, avec Grégoire
-statut : à exécuter, APRÈS l'audit du moteur d'évaluation
+statut : exécuté le 5 septembre 2026 (Claude Code, branche audit/pratique-de-notation-2026-09-05, non poussée — Grégoire arbitre)
 ---
 
 # Audit — le moteur de la pratique de notation (Labo Codex)
@@ -70,7 +71,7 @@ Les écrans qui lisent la note du cours, pour la concordance seulement : profil 
 
 Lis d'abord, et rien d'autre en entier :
   .claude/skills/pratiques-notation/SKILL.md (§3, §4, §6, §7 bis, §9, §10 — les pièges y sont déjà nommés ; ton travail est de mesurer s'ils sont toujours vrais)
-  Rapports/AUDIT-moteur-evaluation-2026-09-XX.md, flux H
+  Rapports/AUDIT-moteur-evaluation-2026-09-05.md, flux H
   Rapports/AUDIT-SSOT-MODALITES-EVALUATION-2026-06-10.md
   Rapports/ultrareview-lot-3-indices.md et ultrareview-lot-4a-evaluation.md (à fermer, voir Livrable)
   docs/DATA-OWNERSHIP.md
