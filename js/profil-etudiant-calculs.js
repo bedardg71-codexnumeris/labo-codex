@@ -815,7 +815,9 @@ function calculerMoyennesCriteres(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
 
     // Filtrer toutes les évaluations de l'étudiant avec rétroaction finale
-    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && e.retroactionFinale);
+    // #730 — une évaluation remplacée par une reprise porte l'état d'AVANT : le dépistage ne la compte plus
+    // (audit du 5 septembre 2026, B-3 : l'originale ET la reprise pesaient dans chaque moyenne).
+    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && e.retroactionFinale && !e.remplaceeParId);
 
 
     if (evaluationsEleve.length === 0) {
@@ -955,6 +957,7 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
 
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
+        !e.remplaceeParId &&   // #730 — la remplacée porte l'état d'avant la reprise
         productionsIds.includes(e.productionId) &&
         e.retroactionFinale
     );
@@ -1084,6 +1087,7 @@ function _normaliserNomCritereIPB(nom) {
 function _filtrerEtTrierEvaluationsIPB(evaluations, da, productionsIds) {
     var filtrees = evaluations.filter(function (e) {
         return e.etudiantDA === da &&
+            !e.remplaceeParId &&   // #730 — l'IPB comptait l'originale ET la reprise (cinq artefacts pour quatre travaux)
             productionsIds.indexOf(e.productionId) >= 0 &&
             e.retroactionFinale &&
             e.criteres && Array.isArray(e.criteres);
@@ -1436,6 +1440,7 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
 
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
+        !e.remplaceeParId &&   // #730 — la performance du RàI lisait 50, 75, 55 là où la note du cours lit 50, 75, 70
         productionsIds.includes(e.productionId) &&
         e.noteFinale !== null &&
         e.noteFinale !== undefined
@@ -1632,6 +1637,7 @@ function identifierDefiSpecifique(da) {
 
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
+        !e.remplaceeParId &&   // #730
         productionsIds.includes(e.productionId) &&
         e.retroactionFinale
     );

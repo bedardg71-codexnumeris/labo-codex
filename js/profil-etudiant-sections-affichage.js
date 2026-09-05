@@ -2024,6 +2024,7 @@ function calculerDirectionRisque(da) {
 
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
+        !e.remplaceeParId &&   // #730 — une évaluation remplacée par une reprise porte l'état d'avant : hors du dépistage
         productionsIds.includes(e.productionId) &&
         e.noteFinale !== null &&
         e.noteFinale !== undefined
@@ -2093,8 +2094,10 @@ function calculerDirectionsCriteres(da) {
     const N = obtenirNombreProductionsPourPatterns() || 3;
 
     // Toutes les évaluations de l'étudiant avec critères structurés
+    // #730 — sans les remplacées : l'originale d'une reprise porte l'état d'avant.
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
+        !e.remplaceeParId &&
         e.criteres && Array.isArray(e.criteres) && e.criteres.length > 0
     );
 
