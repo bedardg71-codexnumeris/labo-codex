@@ -13,7 +13,7 @@
 > réglages de projection s'enregistrent sous un nom ») : verdict Playwright local vert (0 connu, 0 instable), hook
 > Vitest vert, `56d20a63..f2fa5a2e main -> main`. **`main` = `origin/main` = `f2fa5a2e`, AUCUN travail en avance.**
 > La journée du 5 (lots A, B, D avec sa retouche iPad, C) est livrée d'un coup ; les mots du changelog sont ceux de
-> Grégoire. La PR #82 (aperçu iPad du lot D) est fermée sans fusion, sa branche supprimée. Le run de CI n'est pas
+> Grégoire. La PR #82 (aperçu iPad du lot D) : GitHub l'a MARQUÉE fusionnée au push de `main` (ses commits en sont devenus des ancêtres, fast-forward, AUCUN commit de fusion) ; sa branche est supprimée. Le run de CI n'est pas
 > attendu (règle 7). Détail : `SESSION.md`, bloc 25.
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, MATIN (1.118.0 EN LIGNE)
