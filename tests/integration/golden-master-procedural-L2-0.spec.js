@@ -40,11 +40,14 @@ const GOLDEN = {
     stdActive: { noteFinale: 81.5 },   // sans pratiqueId → pratique active (parité)
     som: { C: 100, P: 78, noteFinale: null },  // (60+75+90)×10 + 80×40 / 70 = 77,86
     spe: { C: 100, P: 80, noteFinale: null },  // seuil 70 : 2 artefacts + terminale → palier 80
-    // Caractéristique du code actuel (garde de PratiqueConfigurable.calculerPerformance) :
-    // sans entrée indicesCP[da].actuel, une pratique CONFIGURABLE rend P=0 — la
-    // délégation aux paliers SPE n'est même pas tentée. Figé sciemment : si un
-    // refactoring change cette garde, ce test doit le rendre VISIBLE, pas le masquer.
-    speSansIndicesCP: { C: 100, P: 0, noteFinale: null }
+    // ↻ #709 (5 septembre 2026, arbitré par Grégoire après l'audit de la pratique de
+    // notation, constat F-1) : la garde qui rendait P=0 sans entrée indicesCP[da].actuel est
+    // RETIRÉE — une SPE configurable délègue aux paliers sans lire le cache, et un cache vide
+    // rend null (« non constructible »), plus jamais un 0 « constructible ». Ce golden avait
+    // figé l'ancien 0 sciemment, « pour rendre VISIBLE un refactoring qui change cette
+    // garde » : il l'a rendu visible le 5 septembre (rouge sur P 0 → 80), et il fige
+    // maintenant la valeur d'après. Avant #709 : { C: 100, P: 0, noteFinale: null }.
+    speSansIndicesCP: { C: 100, P: 80, noteFinale: null }
 };
 
 // Erreurs attendues en contexte file:// (mêmes patterns que les autres specs)
