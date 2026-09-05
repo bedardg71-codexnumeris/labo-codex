@@ -71,7 +71,13 @@
      ▣ VERDICT PLAYWRIGHT 1 (21 h 34 Z, sur `b5c758b5`) : ROUGE — 1 spec nouvelle, `golden-master-procedural-L2-0.spec.js`,
        sur `speSansIndicesCP` : P 0 attendu, 80 reçu. C'est #709 qui a bougé la garde que ce golden avait figée
        « sciemment, pour rendre visible un refactoring » (STD 81,5 · SOM 78 · SPE 80 inchangés). Golden mis à la
-       valeur d'après (l'avant en commentaire), commit séparé, second verdict pris AVANT le push.
+       valeur d'après (l'avant en commentaire), commit séparé `12b88c6e`, second verdict pris AVANT le push.
+     ▣ VERDICT PLAYWRIGHT 2 (21 h 55 Z, sur `12b88c6e`) : VERT, 0 échec, 4 instables hors du lot (cartouches-import-
+       trimestre, grilles-suppression-orphelinage, planif-toolbar, source-unique-codes — vertes au second essai ; la
+       machine venait de tuer un premier verdict par manque de mémoire ; à surveiller, #685). Push `93b744b4..12b88c6e`.
+     ▣ RUN GITHUB `33994473211` (créé 21 h 56 Z) SUIVI JUSQU'AU BOUT : Vitest success, Playwright (WebKit) success,
+       conclusion SUCCESS — premier run complet vert depuis 1.120.0 ; le lot #697-#699 (1.121, run annulé) est jugé
+       par celui-ci. Commit docs de clôture poussé APRÈS la lecture du verdict, jamais avant.
      ▣ CE QUE GRÉGOIRE DOIT ALLER VOIR : (1) le profil d'un élève dont une copie est en brouillon — la note du cours
        est celle SANS le brouillon, et « 1 évaluation en brouillon, non comptée » sous « Performance globale (P) »
        et sous la note finale de session ; (2) une pratique par spécifications « Modèle simple » (Partir d'un modèle),

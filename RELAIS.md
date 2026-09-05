@@ -7,16 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, SOIRÉE (1.122.0)
+## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, SOIRÉE (1.122.0 EN LIGNE, RUN GITHUB VERT)
 
 > ↻ **17 h 30 — 1.122.0 (build `0905-1722`, « La note du cours ne compte plus les brouillons, et les spécifications
 > calculent »)** : lot #706 / #708 / #709 arbitré par Grégoire après le second audit cadré
 > (`Rapports/AUDIT-pratique-de-notation-2026-09-05.md`), commis sur `main` par-dessus la fusion fast-forward de la
 > branche `audit/pratique-de-notation-2026-09-05` (`48c77c2d`) et les fichiers de Cowork (`a32af277`). Verdict
-> Playwright au jeton puis push par `scripts/pousser.sh`. **⏳ Le run GitHub de ce push est ATTENDU JUSQU'AU BOUT et
-> son verdict est écrit ici, dans un commit docs qui suit** (consigne de Grégoire : le lot 1.121 n'avait jamais été
-> jugé par la CI — son run `33987962162` a été annulé par le push docs suivant). Vitest 477 / 5 332.
-> **`main` = `origin/main` après ce push, AUCUN travail en avance.**
+> Playwright au jeton (deux verdicts : le premier ROUGE sur `golden-master-procedural-L2-0.spec.js` — le golden
+> figeait sciemment l'ancien « cache vide → P 0 » que #709 retire, mis à la valeur d'après en `12b88c6e` ; le second
+> VERT sur `12b88c6e`, 0 échec, 4 specs instables hors du lot : cartouches-import-trimestre, grilles-suppression-
+> orphelinage, planif-toolbar, source-unique-codes — vertes au second essai, machine chargée, à surveiller #685), puis
+> `git push origin main` (`93b744b4..12b88c6e`). ▣ **RUN GITHUB `33994473211` ATTENDU JUSQU'AU BOUT ET LU : Vitest
+> `success`, Playwright (WebKit) `success`, conclusion `success`** — le premier run complet vert depuis 1.120.0 (celui
+> de 1.121, `33987962162`, avait été annulé par le push docs qui le suivait : le lot #697-#699 est donc jugé par ce
+> run-ci, qui l'emporte). Vitest local 477 / 5 332. **`main` = `origin/main` = `12b88c6e` (+ le commit docs de cette
+> clôture), AUCUN travail en avance.**
 > **Ce qui est livré** : #706 (un brouillon non verrouillé, ou une portée nulle, n'entre pas dans la note du cours —
 > quatre familles, deux systèmes ; le profil et l'export disent combien sont écartées), #708 (une SPE écrite en
 > `forfaits` calcule ; le stock se MESURE par `scripts/diagnostic-708-spe-forfaits.js`, `await diag708()`), #709 (un
