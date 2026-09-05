@@ -3250,8 +3250,11 @@ input[type="number"].controle-form {
     margin: 8px 0 4px;
 }
 
-/* Le texte troué, étape 2 (§5, 4 sept.) — l'aperçu SOUS CHAQUE PALIER : « L'élève lira : »
-   suivi de la phrase remplie pour la copie fictive de ce palier. Rendu pur, aucun contrôle. */
+/* Le texte troué, étape 2 (§5, 4 sept.) — l'aperçu SOUS CHAQUE PALIER : « L'élève lira… »
+   suivi de la phrase remplie pour la copie fictive de ce palier. Rendu pur, aucun contrôle.
+   ↻ §7 (5 sept.) — deux segments : en gris ce qui est ENGENDRÉ (décompte, préfixe), dans
+   l'encre normale ce que l'enseignant·e a ÉCRIT (verdict, recommandation). Un segment vide
+   ne prend pas de place. */
 #listeCriteres .palier-apercu {
     margin-top: 6px;
     padding: 6px 10px;
@@ -3267,6 +3270,19 @@ input[type="number"].controle-form {
     font-size: 0.78rem;
     color: var(--gris-moyen);
     margin-right: 4px;
+}
+
+#listeCriteres .palier-apercu-engendre {
+    color: var(--gris-moyen);
+}
+
+#listeCriteres .palier-apercu-ecrit {
+    color: var(--texte-principal);
+}
+
+#listeCriteres .palier-apercu-engendre:empty,
+#listeCriteres .palier-apercu-ecrit:empty {
+    display: none;
 }
 
 #listeCriteres .palier-apercu-copie {

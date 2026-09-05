@@ -3856,19 +3856,33 @@ function rendreBlocProjectionAlgo(critere, ctx) {
     const apercuPossible = typeof window.enoncesAlgo !== 'undefined'
         && typeof window.projectionAlgo.copiesExemple === 'function';
     const copies = apercuPossible ? window.projectionAlgo.copiesExemple(critere) : [];
-    const phraseDe = (copie) => {
+    // ↻ §7 (5 sept. 2026, 6 h 50 — coup d'œil de Grégoire : rien ne montrait que la ligne
+    // grise est FABRIQUÉE à partir des deux zones) : la ligne rend DEUX segments. En gris,
+    // ce qui est engendré — le décompte du bloc 3, puis le préfixe « Tu fais en moyenne… »
+    // s'il y en a un ; dans l'encre normale, ce qu'il a écrit — verdict et recommandation,
+    // remplis. `_resultat` rend `prefixe` ET `texte` = préfixe + ' ' + verdict : le préfixe
+    // se retire par sa LONGUEUR, pas par regex. Verdict et recommandation restent UN seul
+    // segment : les séparer exigerait de changer le module de projection (hors périmètre).
+    const segmentsDe = (copie) => {
         const decompte = window.enoncesAlgo.enonce(critere, 'decompte', { erreurs: copie.erreurs, mots: copie.mots });
         const projection = window.projectionAlgo.calculer(critere, { erreurs: copie.erreurs, mots: copie.mots });
-        return [decompte, projection.applicable ? projection.texte : ''].filter(Boolean).join(' ');
+        const prefixe = projection.applicable ? (projection.prefixe || '') : '';
+        const texte = projection.applicable ? (projection.texte || '') : '';
+        return {
+            engendre: [decompte, prefixe].filter(Boolean).join(' '),
+            ecrit: (prefixe && texte.startsWith(prefixe)) ? texte.slice(prefixe.length).trim() : texte
+        };
     };
     const ligneApercu = (pal) => {
         const copie = copies.find((c) => c.corrigee && c.cle === pal.cle);
         if (!copie) return '';
-        const phrase = phraseDe(copie);
+        const s = segmentsDe(copie);
+        const vide = !s.engendre && !s.ecrit;
         return `
                             <div class="palier-apercu">
-                                <span class="palier-apercu-mot">L'élève lira :</span>
-                                <span class="palier-apercu-texte">${phrase ? esc(phrase) : '<em>aucune phrase — le décompte est vide et ce palier ne dit rien</em>'}</span>
+                                <span class="palier-apercu-mot">L'élève lira (décompte, puis tes deux phrases) :</span>
+                                <span class="palier-apercu-engendre">${esc(s.engendre)}</span>
+                                <span class="palier-apercu-ecrit">${esc(s.ecrit)}</span>${vide ? '<em class="palier-apercu-vide">aucune phrase — le décompte est vide et ce palier ne dit rien</em>' : ''}
                                 <span class="palier-apercu-copie">— copie fictive, ${esc(copie.erreurs)} erreur${copie.erreurs > 1 ? 's' : ''} pour ${esc(copie.mots)} mots</span>
                             </div>`;
     };
@@ -3906,12 +3920,12 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                             </div>
                             <div class="grille-form-2col palier-rangee">
                                 <div class="groupe-form">
-                                    <label class="sous-critere-label-petit">Ce que l'élève lit</label>
+                                    <label class="sous-critere-label-petit">Verdict</label>
                                     <textarea class="controle-form sous-critere-textarea" rows="2"
                                               data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="texte">${esc(pal.texte || '')}</textarea>
                                 </div>
                                 <div class="groupe-form">
-                                    <label class="sous-critere-label-petit">Phrase de recommandation (facultative)</label>
+                                    <label class="sous-critere-label-petit">Recommandation (facultative)</label>
                                     <textarea class="controle-form sous-critere-textarea" rows="2"
                                               placeholder="Laisser vide pour ne rien recommander à ce palier"
                                               data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="texteAide">${esc(pal.texteAide || '')}</textarea>
@@ -3941,15 +3955,15 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                 <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">
                     Ce seuil est indépendant du facteur de normalisation de la formule : l'élève est noté selon la norme du cours, et situé selon celle de l'épreuve.
                 </small>
+                <small class="palier-note-composer" style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 8px;">
+                    Un clic sur un badge le pose dans la zone du palier où est le curseur — sans curseur, dans « Verdict ».
+                    Les badges bleus sont écrits dans la grille ; les verts se remplissent à la correction, copie par copie, et un badge sans valeur disparaît.
+                    Sans badge, la phrase est précédée de « Tu fais en moyenne 1 erreur à chaque N mots » ; avec un badge, elle est entière : c'est toi qui l'écris.
+                </small>
                 <div class="sous-criteres-liste-conteneur" style="margin-top: 10px;">
                     ${paliers}
                 </div>
-                <small class="palier-note-composer" style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">
-                    Un clic sur un badge le pose dans la zone du palier où est le curseur — sans curseur, dans « Ce que l'élève lit ».
-                    Les badges bleus sont écrits dans la grille ; les verts se remplissent à la correction, copie par copie.
-                    Un badge sans valeur disparaît proprement.
-                    Une phrase sans badge est précédée de “Tu fais en moyenne 1 erreur à chaque N mots.” Dès qu'elle porte un badge, elle est entière : c'est toi qui l'écris.
-                </small>${basApercu}
+${basApercu}
                 <button class="btn btn-secondaire btn-tres-compact" style="margin-top: 8px;"
                         data-action="${actionAjout}" ${paramsAction}>+ Ajouter un palier</button>`;
 }

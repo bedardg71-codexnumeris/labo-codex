@@ -15,6 +15,17 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **4 septembre 2026, 19 h 14 (vingtième passe, Cowork) — 1.118 codée, pas livrée.** Le texte troué, étape 2
+(les paliers de projection se composent avec des badges) est sur `main` en local, cinq commits d'avance non
+poussés (`2d9baafc` → `dccaf3d2`), carte relue, relecture croisée sans réserve, coup d'œil de Grégoire fait :
+les phrases sont naturelles, l'aperçu change de place (sous chaque palier, retouche relayée à 18 h 40). Décisions
+de Grégoire (17 h 15) : les huit badges (`service` `seuil` `longueur` · `erreurs` `mots` `moyenne` `projection`
+`palier`) ; le préfixe engendré devient le badge `moyenne`. **Le matin du 5** : retouche relue, coup d'œil,
+changelog, release 1.118, push ; puis la journée du 5 (`plans de travail/CONSIGNE-2026-09-05.md`) : fusion des
+listes du gabarit · collections de paramètres · les mêmes gestes partout, **une seule livraison, 1.119**.
+▣ Mesuré ce soir : **les codes par grille sont livrés depuis le 3** (`js/codes-annotation.js`) ; ce qui reste est
+la fusion des deux rendus. En ligne, toujours **1.117.1**.
+
 **Dernière mise à jour : 4 septembre 2026, 16 h 30 (dix-neuvième passe, Cowork) — release **1.117.1**
 (build `0904-1507`, `e990e710`) en ligne : le lot 4 (gabarit algorithmique rangé, paliers d'une grille
 analytique, « Aucun » au menu SOLO) et le mot « observation ». La CI rouge du matin (spec du lot 1) est

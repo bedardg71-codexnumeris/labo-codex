@@ -26,6 +26,15 @@
 // vivent dans un bloc qui porte des contrôles : on vérifie la ligne elle-même), E (jetons
 // k / h). A ne change pas.
 //
+// ↻ §7 (5 sept., 6 h 50 — coup d'œil de Grégoire : rien ne montrait que la ligne grise est
+// FABRIQUÉE à partir des deux zones) : la ligne s'intitule « L'élève lira (décompte, puis tes
+// deux phrases) : » et rend DEUX segments — en gris ce qui est ENGENDRÉ (le décompte, puis le
+// préfixe « Tu fais en moyenne… » s'il y en a un), dans l'encre normale ce qu'il a ÉCRIT
+// (verdict et recommandation, remplis). Ce qui a changé : B.a (l'étiquette), B.b / C (la
+// phrase se lit dans les deux segments, `texteDe` les recolle), D.b (l'échappement, dans le
+// segment écrit) ; B.f est NEUF : la composition visible, segment par segment, et ses classes
+// dans styles.css.
+//
 // BREAK-TESTS (faits le 4 septembre 2026, chacun restauré, `cmp` identique) :
 //   · A — `precedent` jamais avancé → A.a et A.c rougissent ;
 //   · A — la copie non corrigée retirée → A.b rougit ;
@@ -33,6 +42,11 @@
 //   · B — `ligneApercu` rend '' → B.a, B.b, C, D rougissent ;
 //   · B — la ligne orange rendue APRÈS la ligne d'aperçu → B.a rougit ;
 //   · D — un `data-action` glissé dans la ligne → D.a rougit.
+// BREAK-TESTS DU §7 (faits le 5 septembre 2026, chacun restauré, `cmp` identique) :
+//   · le verdict rendu dans le segment GRIS (l'écrit vide) → B.f et D.b rougissent, et le spec
+//     WebKit `texte-troue-paliers-projection` aussi ;
+//   · l'aide remise EN BAS de la carte → gabarit B.c et lot 4 G.c rougissent ;
+//   · l'ancienne étiquette « Ce que l'élève lit » → gabarit B.c rougit.
 
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
@@ -130,7 +144,9 @@ const carte = (html, section) => {
 /** Les blocs de palier de la carte « Projection », chacun jusqu'au suivant. */
 const paliersDe = (projection) => projection.split('class="sous-critere-item palier-projection"').slice(1);
 const ligneDe = (pal) => (pal.match(/<div class="palier-apercu">[\s\S]*?<\/div>/) || [])[0] || '';
-const texteDe = (pal) => (ligneDe(pal).match(/<span class="palier-apercu-texte">([\s\S]*?)<\/span>/) || [])[1];
+/** Un segment de la ligne (§7 : `engendre` ou `ecrit`), échappé tel que rendu ; et la phrase recollée. */
+const segmentDe = (pal, quel) => (ligneDe(pal).match(new RegExp('<span class="palier-apercu-' + quel + '">([\\s\\S]*?)<\\/span>')) || [])[1] || '';
+const texteDe = (pal) => [segmentDe(pal, 'engendre'), segmentDe(pal, 'ecrit')].filter(Boolean).join(' ');
 const desechapper = (t) => String(t).replace(/&#x27;|&#39;/g, '\'').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
 /** Le rendu de la carte « Projection » d'une grille, en édition. */
 function projectionRendue(grille) {
@@ -210,7 +226,7 @@ describe('texte troué 2 · B — « L\'élève lira : » sous chaque palier, da
             const ligne = pal.indexOf('class="palier-apercu"');
             expect(rangees.length, 'palier ' + i).toBe(2);
             expect(ligne, 'palier ' + i).toBeGreaterThan(rangees[1]);
-            expect(ligneDe(pal)).toContain('<span class="palier-apercu-mot">L\'élève lira :</span>');
+            expect(ligneDe(pal)).toContain('<span class="palier-apercu-mot">L\'élève lira (décompte, puis tes deux phrases) :</span>');
         });
         // Le palier « Bien » porte un jeton inconnu : la ligne orange PRÉCÈDE la ligne d'aperçu.
         const bien = paliers[3];
@@ -260,6 +276,43 @@ describe('texte troué 2 · B — « L\'élève lira : » sous chaque palier, da
         const { projection } = projectionRendue({ ...GRILLE, criteres: [{ ...ALGO, modeleProjection: 'aucune', paramsProjection: {} }] });
         expect(projection).toContain('Aucune projection ne sera proposée');
         expect(projection).not.toContain('palier-apercu');
+    });
+
+    it('B.f (§7) la composition visible : en GRIS le décompte puis le préfixe engendré, dans l\'ENCRE ce qu\'il a écrit — jamais l\'inverse', () => {
+        const composes = P.paliersMigration().map((p) => (p.cle === 'risque'
+            ? { ...p, texte: 'Palier {palier} : {projection} erreurs.', texteAide: 'Va voir {service}.' }
+            : p));
+        const critere = { ...ALGO, paliersProjection: composes };
+        const { projection } = projectionRendue({ ...GRILLE, criteres: [critere] });
+        const blocs = paliersDe(projection);
+        const copies = P.copiesExemple(critere).filter((x) => x.corrigee);
+        expect(copies.length).toBe(6);
+        copies.forEach((x, i) => {
+            const decompte = E.enonce(critere, 'decompte', { erreurs: x.erreurs, mots: x.mots });
+            const proj = P.calculer(critere, { erreurs: x.erreurs, mots: x.mots });
+            const engendre = desechapper(segmentDe(blocs[i], 'engendre'));
+            const ecrit = desechapper(segmentDe(blocs[i], 'ecrit'));
+            expect(engendre, x.cle).toBe([decompte, proj.prefixe].filter(Boolean).join(' '));
+            expect(ecrit, x.cle).toBe(proj.texte.slice(proj.prefixe.length).trim());
+            expect(ecrit, x.cle).not.toBe('');
+            expect(engendre, 'le verdict ne va pas dans le gris — ' + x.cle).not.toContain(ecrit);
+            expect(ecrit, 'le décompte ne va pas dans l\'encre — ' + x.cle).not.toContain('Ta production contient');
+        });
+        // Au mot : « Sans erreur » n'a pas de préfixe (aucune moyenne) ; « Excellent » en a un ; le composé n'en a plus.
+        expect(desechapper(segmentDe(blocs[0], 'engendre'))).toBe('Ta production contient 0 erreur pour 900 mots.');
+        expect(desechapper(segmentDe(blocs[0], 'ecrit'))).toBe('En prévision de l\'EUF, l\'absence d\'erreur est exceptionnelle.');
+        expect(desechapper(segmentDe(blocs[1], 'engendre'))).toBe('Ta production contient 5 erreurs pour 900 mots. Tu fais en moyenne 1 erreur à chaque 180 mots.');
+        expect(desechapper(segmentDe(blocs[1], 'ecrit'))).toBe('En prévision de l\'EUF, ce ratio est excellent.');
+        expect(desechapper(segmentDe(blocs[4], 'engendre'))).toBe('Ta production contient 23 erreurs pour 900 mots.');
+        expect(desechapper(segmentDe(blocs[4], 'ecrit'))).toBe('Palier Risqué : 23 erreurs. Va voir Passerelle +.');
+        // Le préfixe se retire par sa longueur, pas par regex ; les classes vivent dans styles.css, scopées à l'éditeur :
+        // gris moyen pour l'engendré, encre normale pour l'écrit, et un segment vide ne prend pas de place.
+        expect(source('js/grilles.js')).toMatch(/texte\.slice\(prefixe\.length\)\.trim\(\)/);
+        const css = source('styles.css');
+        expect(css).toMatch(/#listeCriteres \.palier-apercu-engendre \{[^}]*color: var\(--gris-moyen\)/);
+        expect(css).toMatch(/#listeCriteres \.palier-apercu-ecrit \{[^}]*color: var\(--texte-principal\)/);
+        expect(css).toMatch(/#listeCriteres \.palier-apercu-engendre:empty,\s*#listeCriteres \.palier-apercu-ecrit:empty \{[^}]*display: none/);
+        expect(ligneDe(blocs[4])).not.toMatch(/palier-apercu-(engendre|ecrit)"[^>]*style=/);
     });
 });
 
@@ -320,6 +373,7 @@ describe('texte troué 2 · D — rendu pur : aucun contrôle dans la ligne, rie
         const ligne = ligneDe(paliersDe(projection)[0]);
         expect(ligne).not.toContain('<i>libre</i>');
         expect(ligne).toContain('&lt;i&gt;libre&lt;/i&gt; &quot;cité&quot;.');
+        expect(segmentDe(paliersDe(projection)[0], 'ecrit')).toContain('&lt;i&gt;libre&lt;/i&gt; &quot;cité&quot;.');
     });
 });
 

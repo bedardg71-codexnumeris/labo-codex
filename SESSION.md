@@ -153,8 +153,63 @@
      ▣ CE QUI RESTE (consigne §5) : relecture courte de Cowork → coup d'œil de Grégoire → verdict au
        jeton (`scripts/pousser.sh`) → release MINEURE 1.118 (les mots du changelog sont à lui, Cowork
        les lui propose ; nommer « corrige avec l'application à jour ») → push.
-     ▣ ARBRE au moment d'écrire : propre ; `main` = origin/main + 6 commits (4 volets, le bloc, la
-       retouche §5).
+     ↻ 5 SEPTEMBRE, 6 h 09 — RITUEL ISOLÉ : HEAD `7ff78ced` = origin/main + 6 (0 de retard) ; 1.117.1 en
+       ligne ; Vitest 461 / 5107 ; jeton Playwright local PÉRIMÉ (rendu sur `fd2b4ce6`, pas sur HEAD) ;
+       WebKit local, les deux specs de la retouche §5 : 2 / 2 (7,8 s). Rapport rendu, brouillon de
+       changelog proposé. Écart documentaire vu, non corrigé : `RELAIS.md` dit encore « main =
+       origin/main = e990e710, rien en avance » (périmé depuis le 4 au soir).
+     ↻ 6 h 50 — §7 DE LA CONSIGNE (Cowork, après le coup d'œil de Grégoire sur `7ff78ced` : l'aperçu
+       fonctionne ; il suit au `change`, pas à chaque frappe — le bon mécanisme, NE PAS le changer) :
+       TROIS RETOUCHES, UN COMMIT, AVANT la livraison (« la livraison n'est pas urgente, on corrige
+       d'abord »). Repères remesurés avant de toucher : les deux `<label>` 3909 / 3914, `ligneApercu`
+       3864, le `<small>` 3947 ; `grep "Ce que l'élève lit\|Phrase de recommandation" js/ tests/` :
+       trois sites RENDUS dans grilles.js, le reste = commentaires (laissés tels quels) ; AUCUNE
+       sentinelle ni spec ne lisait l'ancien libellé.
+       1. Étiquettes : « Verdict » · « Recommandation (facultative) » (mots de Grégoire, 6 h 35) ;
+          l'aide cite « dans « Verdict » ».
+       2. Composition visible : `segmentsDe` remplace `phraseDe` — GRIS (`.palier-apercu-engendre`,
+          `--gris-moyen`) = décompte du bloc 3 puis `projection.prefixe` s'il est non vide ; ENCRE
+          (`.palier-apercu-ecrit`, `--texte-principal`) = `projection.texte` privé du préfixe par sa
+          LONGUEUR (`startsWith` + `slice(prefixe.length).trim()`), jamais par regex. Verdict et
+          recommandation restent UN segment : les séparer exigerait de changer le module de projection
+          (hors périmètre) — aucun défaut vu, les deux sont « ce qu'il a écrit ». Étiquette « L'élève
+          lira (décompte, puis tes deux phrases) : ». Un segment vide ne prend pas de place
+          (`:empty { display: none }`) ; classes dans styles.css, aucun `style=` neuf ; `esc()` sur les
+          deux segments.
+       3. L'aide en tête : le `<small class="palier-note-composer">` passe AVANT le premier palier
+          (juste avant `sous-criteres-liste-conteneur`, sous la note du seuil — au plus près de la
+          première rangée « Poser : »), trois phrases, texte de départ de Cowork au mot (Grégoire le
+          reprend au coup d'œil). Les deux `<small>` du bas (`basApercu`) restent en bas.
+       Jetons : grilles.js (l), styles.css (i) — AU JOUR DU BUILD (0904) : `20260905a` rougit
+       `sentinelle-anticache-fichiers-modifies` tant que la release n'a pas bumpé le build (mesuré) ;
+       release.mjs les portera à `20260905a`. `evaluation-projection.js` intouché.
+       TÉMOINS qui ont dû changer, et pourquoi : sentinelle `…-etape-2-apercu` — B.a (l'étiquette),
+       B.b / C (la phrase se lit dans les DEUX segments : `segmentDe`, et `texteDe` qui les recolle),
+       D.b (l'échappement vérifié dans le segment écrit), B.f NEUF (composition segment par segment sur
+       les six copies : gris = décompte + préfixe, encre = texte − préfixe, jamais l'inverse ; les
+       classes CSS ; le `slice(prefixe.length)`) → 16 cas ; sentinelle `…-etape-2-gabarit` B.c (le
+       texte de la note au mot, sa place AVANT le premier palier, 6 × « Verdict » / « Recommandation
+       (facultative) », zéro ancien libellé rendu) ; sentinelle lot 4 C G.c (la phrase de la note, sa
+       place) ; spec WebKit `texte-troue-paliers-projection` (étapes 7-8 : lit `engendre` / `ecrit`
+       par palier, les quatre étiquettes du palier 5, l'aide avant le premier palier — toujours 0
+       `page.click` / `waitForTimeout`).
+       BREAK-TESTS (trois mutations de grilles.js, restaurées, `cmp` identique) : le verdict rendu
+       dans le segment GRIS → B.f + D.b rouges ET le spec WebKit rouge ; l'aide remise EN BAS →
+       gabarit B.c + lot 4 G.c rouges ; l'ancienne étiquette → gabarit B.c rouge. Vitest 461 / 5108 ;
+       WebKit local 2 / 2 (8,1 s). Format qui voyage : `git diff -- js/evaluation-projection.js
+       js/import-export.js js/partage-schemas.js js/partage-validation.js js/evaluation-calcul.js`
+       rend zéro (arbre vs HEAD et vs origin/main) ; les deux goldens #668 intacts (non modifiés).
+       Trouvaille hors lot, issue 3 (commentée ici, pas inscrite) : le spec lot 4 porte quatre
+       `waitForTimeout` qui datent de 1.117 (`c18318b7`), vert en 8 s ; à retirer au lot A du 5, qui
+       touche ce spec.
+     ▣ CE QUI RESTE (consigne §7) : rapport à Cowork (une passe courte) → coup d'œil de Grégoire →
+       les mots du changelog (brouillon de 6 h 09, avec les nouveaux libellés) → verdict au jeton
+       (`scripts/pousser.sh`) → release MINEURE 1.118 → push → §6 à partir de son point 6 (archiver
+       la consigne du 4, promouvoir celle du 5, lot A).
+     ▣ ARBRE au moment d'écrire : `main` = origin/main + 7 commits (4 volets, le bloc, la retouche §5,
+       les retouches §7). Ce commit emporte les fichiers de Cowork (CONSIGNE-DEMARRAGE-COWORK,
+       OU-EN-EST-ON, 00-CADRAGES-OUVERTS, la consigne du jour §6-§7, CONSIGNE-2026-09-05 sous son nom
+       daté — le renommage viendra avec le premier commit du lot A).
      ===================================================================== -->
 
 <!-- =====================================================================
