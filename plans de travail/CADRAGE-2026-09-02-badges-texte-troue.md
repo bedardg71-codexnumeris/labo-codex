@@ -193,6 +193,13 @@ plaint, le premier ne sait pas.*
 voyant sa communauté de pratique le 14 septembre, que l'écran algorithmique est un obstacle à
 l'entrée pour la cohorte. Il a vu ces gens ; aucune session ne peut mesurer ça à sa place.
 
+↻ **DÉCISION DE GRÉGOIRE — 5 septembre 2026, 11 h 35** : **l'étape 4 (les badges qu'on invente) est ABANDONNÉE pour les
+critères algorithmiques.** Ses mots : « nous allons laisser tomber cette partie pour les critères algorithmiques et nous
+allons nous concentrer plus tard sur la synthèse des rétroactions dans le PDF. Nous verrons également si, à l'usage, les
+utilisateurs font des remarques ou expriment des besoins. » ⮕ L'arrêté 2 du 2 septembre (« palette fixe ») **tient**.
+L'inventaire qui a fondé la décision : `INVENTAIRE-2026-09-05-badges-inventes.md`. Ce qui rouvrirait le sujet : un besoin
+nommé par un utilisateur, pas une idée de session.
+
 ### Ce qui est ARRÊTÉ, et qu'une session future ne réouvre pas
 
 1. **Deux familles de badges**, visuellement distinctes : ceux que l'enseignant pose, ceux qui

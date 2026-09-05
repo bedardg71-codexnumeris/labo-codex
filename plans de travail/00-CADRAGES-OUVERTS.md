@@ -15,13 +15,17 @@
 
 ---
 
-## ▣ CE QUI EST OUVERT AUJOURD'HUI — huit cadrages ; le 3 est exécuté (1.116), le 7 (1.117) et le 1 étape 2 (1.118) sont livrés, le 2 (lot A) est en cours, le 8 est inscrit
+## ▣ CE QUI EST OUVERT AUJOURD'HUI — huit cadrages ; livrés : le 3 (1.116), le 7 (1.117), le 1 étapes 2 et 3 (1.118, 1.119), le 2 (1.119), le 5 (1.119) ; le 1 est CLOS (étape 4 abandonnée) ; ouverts : le 4, le 6 (à trier), le 8 (inscrit)
 
 *Aucun n'empêche un des huit énoncés de la cohorte 1 : ils sont tous parcourus depuis le
 3 septembre au matin. Ces quatre-là traitent l'**adoption** et la **justesse**, pas la ligne
 d'arrivée qui vient d'être franchie.*
 
 ### 1 · Le texte troué — `CADRAGE-2026-09-02-badges-texte-troue.md`
+↻ **5 septembre 2026, 11 h 16 (Cowork)** : **étapes 1, 2 et 3 LIVRÉES** (1.115 → 1.119 ; l'étape 3 = `composeur-badges.js`,
+porte iPad 4/4). **Étape 4 ABANDONNÉE (11 h 35, décision de Grégoire, après `INVENTAIRE-2026-09-05-badges-inventes.md`)** : pas de badge inventé pour
+les critères algorithmiques ; « palette fixe » tient. **Le cadrage est CLOS.** Prochain accent, non daté : la synthèse des
+rétroactions dans le PDF ; et ce que les utilisateurs demanderont à l'usage.
 ↻ **4 septembre 2026, vers 13 h 45 — PROCHAINE SÉANCE après 1.117, décidé par Grégoire** (« oui » à la
 recommandation de Cowork) : **l'étape 2, les paliers de projection** — la phrase « Ce que l'élève lit » d'un
 palier se compose avec les badges (l'artefact « Le texte troué », sections 2 et 3, est la maquette qu'il a
@@ -38,6 +42,8 @@ badges que l'enseignant invente.
 (`{critere}`, `{erreurs}`, `{mots}`, `{points}`), pas dix. Mesuré le 3 septembre.
 
 ### 2 · Les codes par grille — `CADRAGE-2026-09-03-codes-par-grille.md`
+↻ **5 septembre 2026, 11 h 16 (Cowork) : EXÉCUTÉ** — lot A livré dans 1.119 (`a3deac63`) : une seule liste, la case en tête,
+couleur et pli « Observation » quand elle est cochée, la carte « Codes d'annotation » disparue.
 ↻ **4 septembre 2026, 19 h (mesuré par Cowork) : LE MÉCANISME EST LIVRÉ DEPUIS LE 3** (`js/codes-annotation.js`,
 commits `2084c20f` → `61982b1f` ; `CODES_ERREURS_FR` n'est plus lu qu'en repli). **Ce qui reste = le lot A du
 5 septembre** (`CONSIGNE-2026-09-05.md`) : fusion des deux listes du gabarit (point 7), la ligne « où vit la
@@ -68,6 +74,9 @@ détruit en silence ce qui différait. ⮕ Une voie moins coûteuse y est propos
 sélection multiple qu'aux **gestes**, pas aux **propriétés**.
 
 ### 5 · Les collections de paramètres — `CADRAGE-2026-09-03-collections-de-parametres.md`
+↻ **5 septembre 2026, 11 h 16 (Cowork) : EXÉCUTÉ** — lot B livré dans 1.119 (`b6bf80b9` → `9ec87e70`, carte
+`CARTE-2026-09-05-collections.md`). Reste hors périmètre, inscrit là : la modale de bibliothèque et « importer depuis un autre
+trimestre », qui viennent avec le partage.
 **Enregistrer un jeu de paliers sous un nom (« EUF ») et le retrouver dans une grille neuve**, au
 lieu de repartir des défauts à chaque critère algorithmique.
 ⛔ **LA DEMANDE VISAIT LE MAUVAIS MENU** : l'EUF n'est pas une **formule** (combien l'élève perd),
