@@ -1764,11 +1764,49 @@ function identifierPatternActuel(performancePAN3, aUnDefi) {
 }
 
 /**
- * Détermine la cible d'intervention selon la formule pédagogique complète
+ * #731 — Le groupe permet-il de juger la « non-participation » d'un élève qui n'a rien remis ?
  *
- * @param {string} da - Numéro de DA
- * @returns {Object} - { cible, pattern, niveau, couleur, emoji }
+ * RÈGLE ARRÊTÉE PAR GRÉGOIRE (5 septembre 2026, au mot) : un élève qui n'a rien remis n'est
+ * « Non-participation » que lorsqu'un travail est dû ET qu'au moins une copie du groupe est
+ * évaluée ; avant, tout le monde reste « En attente ».
+ *
+ * CE QUE ÇA CORRIGE (audit de l'onglet Suivi, constats D-2 et D-3). La règle « aucun artefact ET
+ * assiduité > 0 → Non-participation, niveau 3 » ne regardait ni si un travail était dû, ni si une
+ * copie était évaluée : au retour de la première séance, TOUTE la classe était en palier intensif —
+ * carte RàI, cible d'intervention, barre RàI et barre des patterns du groupe, alerte nommée. Et un
+ * élève à zéro donnée l'était aussi dès qu'un écran du Suivi avait calculé les indices, parce
+ * qu'une assiduité sans séance vaut 100 % (`indices.js`, non touché ici : la garde le couvre).
+ *
+ * UNE FONCTION, TROIS LECTEURS — `determinerNiveauRaiPedagogique`, `determinerCibleIntervention`,
+ * `afficherAlerteNonParticipation` (tableau-bord-apercu.js) — plutôt que trois copies qui divergeraient.
+ *
+ * « Un travail dû » : une production non facultative, hors conteneur portfolio, assignée au groupe-cours,
+ * dont l'échéance effective est passée (`obtenirEcheanceEffective`, productions.js). « Une copie
+ * évaluée » : une évaluation du groupe non remplacée qui porte une note.
+ *
+ * @returns {{possible: boolean, raison: (string|null)}} `raison` : 'aucun-travail-du' | 'aucune-copie-evaluee'
  */
+function depistagePeutJugerLaNonParticipation() {
+    const productions = obtenirDonneesSelonMode('productions') || [];
+    const aujourdhui = (typeof window.dateLocaleYMD === 'function') ? window.dateLocaleYMD() : new Date().toISOString().slice(0, 10);
+    const infoCours = db.getSync('infoCours', null);
+    const groupeCoursId = infoCours ? (infoCours._groupeCoursId || infoCours.id || null) : null;
+    const travailDu = productions.some(p => {
+        if (!p || p.facultatif || p.type === 'portfolio') return false;
+        const echeance = (typeof obtenirEcheanceEffective === 'function')
+            ? obtenirEcheanceEffective(p, groupeCoursId)
+            : { date: p.dateEcheance || null, assignee: true };
+        return echeance.assignee && !!echeance.date && echeance.date <= aujourdhui;
+    });
+    if (!travailDu) return { possible: false, raison: 'aucun-travail-du' };
+
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const copieEvaluee = evaluations.some(e => e && !e.remplaceeParId && e.noteFinale !== null && e.noteFinale !== undefined);
+    if (!copieEvaluee) return { possible: false, raison: 'aucune-copie-evaluee' };
+
+    return { possible: true, raison: null };
+}
+
 /**
  * Détermine le Modèle de la Réponse à l'intervention (RàI) basé UNIQUEMENT sur P et SRPNF
  * (sans tenir compte de la mobilisation A-C)
@@ -1799,7 +1837,9 @@ function determinerNiveauRaiPedagogique(da) {
     // 🆕 BETA 98.9: Vérifier si données suffisantes avant interprétation
     if (indices3Derniers.nbArtefacts === 0) {
         // Élève présent mais aucune production → Non-participation (signal prioritaire)
-        if (indices.A > 0) {
+        // #731 — seulement si le groupe permet de le juger : un travail dû ET une copie évaluée
+        // (règle de Grégoire, 5 sept. 2026). Sinon la branche « En attente » ci-dessous vaut pour tous.
+        if (indices.A > 0 && depistagePeutJugerLaNonParticipation().possible) {
             return {
                 niveau: 3,
                 label: 'Non-participation',
@@ -2107,8 +2147,15 @@ function determinerCibleIntervention(da) {
 
     // Élève présent, aucune production remise : il n'y a rien à mesurer, et
     // c'est en soi le signal le plus fort. Conséquence logique, pas seuil.
-    if (indices3Derniers.nbArtefacts === 0 && indices.A > 0) {
-        return { cible: 'Non-participation', pattern: 'Non-participation', niveau: 3, couleur: '#dc3545' };
+    if (indices3Derniers.nbArtefacts === 0) {
+        // #731 — même garde que la carte RàI : sans travail dû ou sans copie évaluée dans le groupe,
+        // « En attente » (niveau 0), pas un palier inventé.
+        if (!depistagePeutJugerLaNonParticipation().possible) {
+            return { cible: 'En attente', pattern: 'Données insuffisantes', niveau: 0, couleur: '#8aa4b0' };
+        }
+        if (indices.A > 0) {
+            return { cible: 'Non-participation', pattern: 'Non-participation', niveau: 3, couleur: '#dc3545' };
+        }
     }
 
     const M = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null);
@@ -2187,5 +2234,6 @@ window.determinerAlerteContextuelle = determinerAlerteContextuelle;
 window.libelleNiveauSOLO = libelleNiveauSOLO;
 window.nommerDefiAvecSOLO = nommerDefiAvecSOLO;   // lot 4, volet B
 window.determinerCibleIntervention = determinerCibleIntervention;
+window.depistagePeutJugerLaNonParticipation = depistagePeutJugerLaNonParticipation;   // #731 — la garde partagée des trois lecteurs
 
 })();
