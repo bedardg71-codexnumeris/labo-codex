@@ -7,10 +7,11 @@
      ===================================================================== -->
 
 <!-- =====================================================================
-     SESSION 26 — 5 SEPTEMBRE 2026, 12 H → 12 H 25 : LA CARTE « BILAN » — un seul lot, rendu seul,
-     aucune donnée ; release MINEURE 1.120 après le coup d'œil de Grégoire. ⏸ RENDU POUR LA PASSE
-     COURTE de Cowork et le coup d'œil (la ligne d'aide sous le menu, point 4) ; NON POUSSÉ ; pas de
-     release encore.
+     SESSION 26 — 5 SEPTEMBRE 2026, 12 H → 13 H 27 : LA CARTE « BILAN » — un seul lot, rendu seul,
+     aucune donnée. ▣ **LIVRÉ : release 1.120.0 (`c4c7b04a`, build 0905-1315) POUSSÉE à 13 h 26,
+     verdict Playwright local vert, `main` = `origin/main`.** Ordre de la consigne tenu : lot (`1b06b1ba`)
+     → passe courte de Cowork (rien à reprendre) → coup d'œil de Grégoire (la ligne d'aide gardée telle
+     quelle) → changelog (ses mots) → `release.mjs minor` → commit → Vitest → verdict au jeton → push.
 
      ▣ Mandat : « Nouvelle séance : la carte « Bilan », un seul lot, release mineure 1.120 » (Grégoire,
        par Cowork, 12 h). Consigne promue au démarrage : `CONSIGNE-DU-JOUR.md` (celle du 5, quatre lots,
@@ -84,12 +85,25 @@
        `aucune` remis dans « Bilan » → 13 rouges ; pli retiré → 7 ; nom du modèle remis avec sa parenthèse
        → 2 ; titre « Observation » remis → 5 ; étiquette « Modèle d'observation » remise → 3. Le détail
        (quels tests) est dans l'en-tête de la sentinelle.
-     ▣ CE QUI RESTE (ordre de la consigne) : rapport à Cowork (passe courte, pas de relecture croisée : rendu
+     ▣ CE QUI RESTAIT à 12 h 25 (ordre de la consigne) : rapport à Cowork (passe courte, pas de relecture croisée : rendu
        seul) → COUP D'ŒIL de Grégoire (Conception › Grilles › un critère algorithmique : une carte « Bilan » à
        deux phrases, le menu renommé, « Français écrit », puis dans « Sous-critères », sous la case, le pli
        « Quand la copie ne porte aucun code ») — ce qui lui revient : la LIGNE D'AIDE sous le menu (point 4)
        et les MOTS du changelog (Cowork les propose) → entrée de changelog → verdict au jeton
        (`scripts/pousser.sh`) → `release.mjs minor` 1.120 → push, sans attendre le run (règle 7).
+     ↻ 13 h 10 → 13 h 27 — CLÔTURE : Cowork a relu `1b06b1ba` (rien à reprendre) ; Grégoire a validé les mots
+       du changelog (trois items, bleu) et n'a rien redemandé sur la ligne d'aide (gardée telle quelle).
+       Entrée 1.120 en tête de `js/changelog-data.js` (relue par l'application via `vm` : 1.120, 3 items,
+       1.119 en 2e) → `release.mjs minor` (dry-run puis réel : 1.119.0 → 1.120.0, build 0905-1315, quatre
+       points de vérité, six jetons ; ancien build `0905-1053` à 0 dans les cinq fichiers de vérité, témoin
+       2 dans SESSION.md) → commit `c4c7b04a` → Vitest 468 / 5202 (après le commit du bump) →
+       `scripts/pousser.sh` : verdict Playwright local VERT (0 connu, 0 instable, jeton sur `c4c7b04a`,
+       17 h 26 Z), hook Vitest vert, `3bd6c5f6..c4c7b04a main -> main`. **1.120.0 EN LIGNE, `main` =
+       `origin/main`, arbre propre.** On n'attend pas le run (règle 7). SUPPOSÉ, DIT : le verdict est pris
+       sur le commit de release, pas avant lui — un jeton sur `1b06b1ba` n'aurait pas couvert index.html,
+       version.js, init-inline.js, main.js —, comme pour 1.118 et 1.119 ce matin.
+     ▣ CE QUI RESTE : rien du lot. Côté Cowork (règle 6) : OU-EN-EST-ON, la console, CONSIGNE-DEMARRAGE-COWORK.
+       Hors séance, non daté : la synthèse des rétroactions dans le PDF ; recueillir ce qui sortira du 14.
      ===================================================================== -->
 
 <!-- =====================================================================

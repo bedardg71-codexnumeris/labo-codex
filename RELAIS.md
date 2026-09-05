@@ -7,6 +7,19 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, 13 H 30 (1.120.0 EN LIGNE)
+
+> ↻ **13 h 26 — 1.120.0 EN LIGNE** (`c4c7b04a`, build `0905-1315`, « La carte « Bilan » ne dit que ce que l'élève
+> lit ») : verdict Playwright local vert (0 connu, 0 instable, jeton sur `c4c7b04a`), hook Vitest vert (468 / 5202),
+> `3bd6c5f6..c4c7b04a main -> main`. **`main` = `origin/main` = `c4c7b04a`, AUCUN travail en avance.** Un seul lot
+> (`1b06b1ba`, relu par Cowork, rien à reprendre) : la carte « Observation » se titre « Bilan » et ne porte que les
+> deux phrases du bilan ; « Aucune annotation » sous la case des codes, dans un pli « Quand la copie ne porte aucun
+> code » ; menu « Modèle des phrases (bilan et décompte) » + ligne d'aide ; modèle « Français écrit » (nom et
+> description neufs, sans « #581 »). Rendu seul, aucune donnée. La consigne du 5 (quatre lots, 1.119) est archivée
+> et `CONSIGNE-DU-JOUR.md` est celle de la carte « Bilan », exécutée. Les mots du changelog sont ceux de Grégoire.
+> Le run de CI n'est pas attendu (règle 7). Détail : `SESSION.md`, bloc 26. Rien en suspens du lot ; côté Cowork :
+> OU-EN-EST-ON, la console, CONSIGNE-DEMARRAGE-COWORK (règle 6).
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, MIDI (1.119.0 EN LIGNE)
 
 > ↻ **11 h 04 — 1.119.0 EN LIGNE** (`f2fa5a2e`, build `0905-1053`, « Les badges s'affichent dans la phrase, tes
