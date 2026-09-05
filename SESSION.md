@@ -68,6 +68,10 @@
        (indices A/C du lot 3), #482 périmé, dernier ID #729 ; rapport — dispositions arrêtées + « le même jour » ;
        ultrareviews numérotées et fermées ; OU-EN-EST-ON — ligne « livré » sous L'ÉVALUATION ; changelog 1.122
        (mes mots, à relire par Grégoire). Rituel §2 : aucun motif sur les lignes ajoutées ; §4.1bis : 0 spec touchée.
+     ▣ VERDICT PLAYWRIGHT 1 (21 h 34 Z, sur `b5c758b5`) : ROUGE — 1 spec nouvelle, `golden-master-procedural-L2-0.spec.js`,
+       sur `speSansIndicesCP` : P 0 attendu, 80 reçu. C'est #709 qui a bougé la garde que ce golden avait figée
+       « sciemment, pour rendre visible un refactoring » (STD 81,5 · SOM 78 · SPE 80 inchangés). Golden mis à la
+       valeur d'après (l'avant en commentaire), commit séparé, second verdict pris AVANT le push.
      ▣ CE QUE GRÉGOIRE DOIT ALLER VOIR : (1) le profil d'un élève dont une copie est en brouillon — la note du cours
        est celle SANS le brouillon, et « 1 évaluation en brouillon, non comptée » sous « Performance globale (P) »
        et sous la note finale de session ; (2) une pratique par spécifications « Modèle simple » (Partir d'un modèle),
