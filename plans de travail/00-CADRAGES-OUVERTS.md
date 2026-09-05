@@ -138,6 +138,11 @@ PROPOSÉES par l'auditeur, ARBITRÉES par Grégoire, avant tout lot de correctio
 | 2 | **La pratique de notation** — la note du cours (quatre familles SOM/STD/SPE/DEN, les deux systèmes de calcul, l'échelle globale, les jetons) | `PROMPT-AUDIT-pratique-de-notation-2026-09-05.md` | ⏳ **À EXÉCUTER** — prêt, relais donné à Grégoire le 5 septembre. Part du flux H de l'audit 1. Ferme au passage `ultrareview-lot-3-indices.md` et `ultrareview-lot-4a-evaluation.md` (mai, sans disposition). |
 | 3 | **L'onglet Suivi** — présences → assiduité, complétion, niveau, IPB, palier RàI, interventions, agrégats du groupe, graphiques ; **et la protection du volet confidentiel** dans tout ce qui sort | `PROMPT-AUDIT-onglet-suivi-2026-09-05.md` | ⏳ **À EXÉCUTER EN TROISIÈME**, après le 2 (il lit ce que les deux moteurs produisent). Jamais audité comme onglet (mesuré le 5 septembre). Ferme au passage `ultrareview-lot-6-travaux-saisie.md` (N1-N6, présences) et les §5.3/§8/§9 de `AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md`. |
 
+### Né du second audit · Ce que vaut un non-remis, famille par famille — `CADRAGE-2026-09-05-non-remis-par-famille.md`
+**Une règle par famille, pas une règle de moteur** (Grégoire, 5 septembre) : zéro en sommative, ignoré en
+« meilleures notes » si le minimum est atteint. Première mesure due : ce que chaque famille fait aujourd'hui de
+`statutRemise: 'non-remis'`. **Après le 14**, avec les constats moyens du second audit.
+
 ⮕ **Pourquoi trois audits courts plutôt qu'un grand** : le 1er septembre, sur 51 rapports, 22 étaient
 sans suite. Un audit qui pose deux questions sur 13 000 lignes produit un rapport que personne ne
 ferme. Chaque audit a **une** question directrice, un périmètre compté au `wc -l`, des élèves ou

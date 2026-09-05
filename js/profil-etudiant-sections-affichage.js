@@ -4074,7 +4074,8 @@ function _calculerIndicesPerformance(da) {
  * compte tout n'a pas d'avertissement à porter.
  *
  * Les MOTS sont ceux d'un enseignant qui les lit : « 2 évaluations en brouillon, non
- * comptées » · « 1 évaluation sans aucun critère évalué, non comptée ».
+ * comptées » · « 1 évaluation sans critère évalué, non comptée » (mot arrêté par Grégoire le
+ * 5 septembre 2026 : sans « aucun », qui doublait la négation).
  *
  * @param {{brouillons:number, sansPortee:number, total:number}|null} ecartees
  * @param {string} [classeBloc] - rendu en <div class="…"> ; sans elle, en <span> discret
@@ -4089,7 +4090,7 @@ function _phraseEvaluationsEcartees(ecartees, classeBloc) {
     }
     if (ecartees.sansPortee) {
         const m = ecartees.sansPortee;
-        morceaux.push(m + ' évaluation' + (m > 1 ? 's' : '') + ' sans aucun critère évalué, non comptée' + (m > 1 ? 's' : ''));
+        morceaux.push(m + ' évaluation' + (m > 1 ? 's' : '') + ' sans critère évalué, non comptée' + (m > 1 ? 's' : ''));
     }
     const texte = morceaux.join(' · ');
     if (classeBloc) return '<div class="' + classeBloc + '">' + texte + '</div>';
