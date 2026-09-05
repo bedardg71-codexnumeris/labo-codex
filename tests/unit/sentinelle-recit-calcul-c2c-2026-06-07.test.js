@@ -51,10 +51,13 @@ const EVALS = [
 const SORTS_VALIDES = ['compte', 'ecarte', 'remplace', 'obligatoire', 'non-exige', 'satisfait', 'manquant'];
 
 function instancierSPE(evals, productions) {
-    const win = chargerScript('js/pratiques/pratique-pan-specifications.js', {
+    // #706 (5 sept. 2026) : la règle « ce qui entre dans la note » vit dans pratique-registre.js —
+    // le charger d'abord sur le même window. Changement de HARNAIS seulement : assertions inchangées.
+    const win = chargerScript('js/pratiques/pratique-registre.js', { db: { getSync: (k, d) => (d !== undefined ? d : null), setSync: () => {}, get: async () => null, set: async () => {} }, cle: (k) => k });
+    chargerScript('js/pratiques/pratique-pan-specifications.js', {
         obtenirDonneesSelonMode: (k) =>
             k === 'evaluationsSauvegardees' ? evals : (k === 'productions' ? productions : [])
-    });
+    }, win);
     win.obtenirCodePratique = () => 'SPE'; // obtenirCode() délègue au registre — stub neutre
     return new win.PratiquePanSpecifications();
 }

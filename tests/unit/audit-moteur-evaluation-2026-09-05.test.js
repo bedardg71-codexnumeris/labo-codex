@@ -542,21 +542,21 @@ describe('H · pratiques/ — SOM lit noteFinale sans lire ponderationCouverte n
         return win.obtenirPratiqueParId('sommative');
     }
     const DA = '1234567';
-    it('H1 · un BROUILLON retenu par #674 (95 sur 80 %, non verrouillé) entre dans la note du cours à 95', () => {
+    it('H1 · un BROUILLON retenu par #674 (95 sur 80 %, non verrouillé) — ↻ corrigé #706 : n\'entre PLUS dans la note du cours (avant : comptait 95 → 0,906)', () => {
         const p = sommative([
             { etudiantDA: DA, productionId: 'P1', noteFinale: 84, ponderationCouverte: 100, verrouillee: true, remplaceeParId: null },
             { etudiantDA: DA, productionId: 'P2', noteFinale: 95, ponderationCouverte: 80, verrouillee: false, remplaceeParId: null }
         ]);
         const r = noter('H1', { indiceP: p.calculerPerformance(DA) });
-        expect(r.indiceP).toBeCloseTo((84 * 40 + 95 * 60) / 100 / 100, 10);   // 0,906
+        expect(r.indiceP).toBeCloseTo(0.84, 10);   // avant #706 : (84×40 + 95×60)/100/100 = 0,906
     });
-    it('H2 · un « 0 » écrit avec portée 0 (évaluation vide, ou échelle disparue → A1) entre comme un ZÉRO : 84 devient 33,6', () => {
+    it('H2 · un « 0 » écrit avec portée 0 (évaluation vide, ou échelle disparue → A1) — ↻ corrigé #706 : écarté (avant : entrait comme un ZÉRO, 84 devenait 33,6)', () => {
         const p = sommative([
             { etudiantDA: DA, productionId: 'P1', noteFinale: 84, ponderationCouverte: 100, verrouillee: true, remplaceeParId: null },
             { etudiantDA: DA, productionId: 'P2', noteFinale: 0, ponderationCouverte: 0, verrouillee: true, remplaceeParId: null }
         ]);
         const r = noter('H2', { indiceP: p.calculerPerformance(DA) });
-        expect(r.indiceP).toBeCloseTo(0.336, 10);
+        expect(r.indiceP).toBeCloseTo(0.84, 10);   // avant #706 : 0,336
     });
     it('H4 · PAN-Standards et PAN-Spécifications : chargement et lecture sur le même jeu (mesure de faisabilité, résultat consigné)', () => {
         const store = { productions: [{ id: 'P1', ponderation: 40, typeTravail: 'artefact' }, { id: 'P2', ponderation: 60, typeTravail: 'artefact' }], modalitesEvaluation: {}, groupesCours: [],

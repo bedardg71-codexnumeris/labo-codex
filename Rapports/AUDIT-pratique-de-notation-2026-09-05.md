@@ -17,6 +17,50 @@ cd tests && npx vitest run unit/audit-pratique-de-notation-2026-09-05.test.js
 
 **Verdicts** : `[exécuté]` = la fonction réelle a été appelée dans le banc et la valeur citée est celle qu'elle a rendue ; `[lecture]` = chemin de code lu, non exécuté ; `[grep]` = un compte reproductible par la commande citée. Ce que le banc n'est pas : un navigateur (aucun WebKit n'a tourné) ; et les données réelles de Grégoire n'ont pas été lues.
 
+
+> ## ↻ Dispositions arrêtées par Grégoire — 5 septembre 2026, en soirée, sur la même base, livrées en 1.122.0
+>
+> Chaque constat porte ci-dessous l'une des dispositions exigées par `CLAUDE.md` (§« Ce qu'un audit doit
+> produire ») : ***inscrit*** (n° de fiche au `BACKLOG.md`), ***refusé*** (motif), ***périmé*** — et ***livré***
+> quand la fiche est fermée dans le même lot. Les propositions d'origine restent lisibles plus bas.
+>
+> | Constat | Disposition arrêtée | Fiche | Preuve |
+> |---|---|---|---|
+> | D-3 · SPE en `forfaits` → 0 pour tous | **inscrit, livré** (traduction `forfaits → tableBundles` à la lecture ; appariement d'un type par id OU par nom) ; le stock se MESURE (`scripts/diagnostic-708-spe-forfaits.js`), ne se réécrit pas | #708 | `tests/unit/sentinelle-708-spe-forfaits-calculent.test.js` (6 cas ; break-testée : traduction retirée → 5 rouges, appariement par nom retiré → 3 rouges) |
+> | F-1 · cache `indicesCP` vide → 0 constructible | **inscrit, livré** (le cache ne se lit que pour `conversion_niveaux` ; vide → `null` ; SPE sans évaluation → `null`) | #709 | `tests/unit/sentinelle-709-cache-vide-rend-null.test.js` (5 cas ; break-testée : cache vide → 0 → 1 rouge, délégation → 0 → 2 rouges) |
+> | C-1 · le brouillon compte 95 partout | **inscrit, livré — RÈGLE ARRÊTÉE** : une évaluation non verrouillée, ou dont la portée est incomplète, n'entre pas dans la note du cours, dans les quatre familles et les deux systèmes ; le profil et l'export disent combien ont été écartées | #706 | `tests/unit/sentinelle-706-brouillons-hors-de-la-note.test.js` (12 cas : SOM 87,43 · STD 79,45 · SPE 80 · DEN 78, mots du profil, colonne de l'export ; break-testée : règle retirée → 18 rouges, portée nulle → 2 rouges) |
+> | A-1 · deux replis pour un groupe sans pratique | **inscrit**, après le 14 | #710 | banc A1 |
+> | A-2 · id legacy → défauts du registre | **inscrit**, après le 14 | #711 | banc A2 |
+> | A-3 · forme `.config` non lue | **inscrit**, après le 14 (recoupe #465, #663) | #712 | banc A3 |
+> | A-4 · registre SPE = 50 % | **inscrit**, après le 14 | #713 | banc A4 |
+> | B-4 · panneau du profil (3 vs 4, « Calcul impossible », écrit au rendu) | **inscrit**, après le 14 | #714 | banc B3b |
+> | B-5 · mode « tous » divergent | **inscrit**, après le 14 | #715 | banc C3 |
+> | B-6 · P historique (SPE → IDME en dur, DEN → STD ; historique SOM mort par sa forme) | **inscrit**, après le 14 — ferme l'item 13 du lot 3 | #716 | `[lecture]` `[grep]` |
+> | D-6 · ids de cibles DEN changés → 59 muet | **inscrit**, après le 14 (recoupe #465) | #717 | banc D11 |
+> | E-2 · niveau global exige un texte de rétroaction | **inscrit**, après le 14 | #718 | banc E2 |
+> | E-5 · DEN lue « M » par la règle STD | **inscrit**, après le 14 | #719 | banc E5 |
+> | G-2 · héritage du jeton de délai | **inscrit**, après le 14 (N2 du lot 4a) | #720 | banc G2 |
+> | G-7 · `jetonsEtudiants` clé nue | **inscrit**, après le 14 (N6, N7, H3 du lot 4a) | #721 | banc G7 |
+> | B-3 · `chargerPortfolioEleveDetail` mort | **inscrit** (mineur ; ferme 3, 6, 9, 10 du lot 3) | #722 | `[grep]` |
+> | F-3 · export à l'entier | **inscrit** (mineur) | #723 | banc F3 |
+> | G-3 · reprise sur doublon réconcilié | **inscrit** (mineur, N5 du lot 4a) | #724 | banc G3 |
+> | G-5 · succès avant l'écriture | **inscrit** (mineur, H2 du lot 4a) | #725 | banc G5 |
+> | G-4 · `repriseDeId` vers un id supprimé | **commenté** dans `evaluation-jetons.js`, aucune fiche | – | banc G4 |
+> | D-2b · égalité à la coupure | **commenté** dans `profil-etudiant-actions.js`, aucune fiche | – | banc D6 |
+> | A-5 · trimestre archivé (#482) | **périmé** — motif au constat A-5 (`cle()`, #622-B3, #358) | #482 | `[lecture]` |
+> | D-1 (#483), E-1 (#701), E-6 (#590), G-6 (#617) | **recoupés, tenus** — fiches existantes, rien de neuf | – | bancs D1-D3, E1, E6, G6 |
+> | Ultrareview lot 3, items 1-2 · 12 · 17 · 19-20 (indices A et C) | **inscrits** | #726 · #727 · #728 · #729 | `[lecture]`, dans le fichier de l'ultrareview |
+>
+> ⚠ Le banc `tests/unit/audit-pratique-de-notation-2026-09-05.test.js` a été mis aux valeurs D'APRÈS pour B1, B2b, B6,
+> C1 à C5, D2, D4, D9, F1, F2, G1, G8 (l'ancienne valeur reste en commentaire) ; celui du premier audit pour H1 et H2.
+> **Sous la règle #706, le nombre principal de la sommative devient 87,43** (8830/101 : le brouillon « 0 sur 50 % » du jeu
+> n'est plus au poids 1) ; STD 79,45 et SPE 70 ne bougent pas, DEN 78 non plus.
+> Break-tests du lot : chaque fichier de `js/` muté puis restauré par copie, empreinte SHA-256 identique (sortie dans `SESSION.md`).
+> ⚠ **Supposition nommée, à confirmer par Grégoire** : « portée incomplète » est jugée SANS relire la grille — portée 0
+> (rien couvert) écartée, portée déclarée positive comptée, parce que la porte #674 refuse une portée partielle à
+> l'enregistrement ; comparer à la grille COURANTE est #705. Conséquence : une copie enregistrée sans aucun critère ne pèse
+> plus 0 dans une moyenne sommative. Et les mots « 1 évaluation sans aucun critère évalué, non comptée » sont les miens.
+
 ---
 
 ## Vue d'ensemble : la réponse à la question directrice
@@ -335,6 +379,8 @@ Sept mutations d'un point, suite complète relancée à chaque fois (`cd tests &
 - **Les indices A et C** : hors périmètre ; les cinq constats du lot 3 qui les touchent (1, 2, 12, 17, 19) sont **tenus par lecture** et inscrits dans l'ultrareview, non remesurés au banc.
 - **Le mode hybride (catégories)** : couvert par son golden master (H5), pas par un élève de banc.
 
-## Rien d'appliqué
+## Rien d'appliqué — au moment de l'audit
+
+↻ **Le même jour, en soirée, après arbitrage, le lot 1.122.0 a modifié onze fichiers de `js/`** (#706 : `pratique-registre.js`, `pratique-sommative.js`, `pratique-pan-standards.js`, `pratique-pan-specifications.js`, `profil-etudiant-actions.js`, `portfolio.js`, `indices.js`, `export-resultats-finaux.js`, `profil-etudiant-sections-affichage.js` ; #708 : `pratique-pan-specifications.js`, `pratique-configurable.js` ; #709 : `pratique-configurable.js` ; deux commentaires : `evaluation-jetons.js`, `profil-etudiant-actions.js`) ; le paragraphe qui suit décrit l'état au dépôt du rapport, 16 h 50.
 
 Aucun fichier de `js/` n'est modifié (`git status` : seuls des `.md` et le banc). La branche `audit/pratique-de-notation-2026-09-05` porte ce rapport, le banc `tests/unit/audit-pratique-de-notation-2026-09-05.test.js`, les deux ultrareviews complétées, le prompt passé à `statut : exécuté`, la ligne de `OU-EN-EST-ON.md`, et les trois fichiers de Cowork qui attendaient dans l'arbre ; `main` n'a pas été touché et **la branche n'est pas poussée** : Grégoire arbitre. Les dispositions ci-dessus sont des propositions ; chaque constat recevra alors, dans ce fichier, *inscrit* (n°), *refusé* (motif) ou *périmé*.

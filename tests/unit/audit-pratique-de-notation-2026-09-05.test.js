@@ -23,6 +23,11 @@
  * Tout le reste est le code de js/. Aucune donnée réelle lue ni écrite. Rien dans js/.
  *
  *   cd tests && npx vitest run unit/audit-pratique-de-notation-2026-09-05.test.js
+ *
+ * ↻ LE MÊME JOUR, en soirée — Grégoire a arbitré : D-3 (#708), F-1 (#709) et C-1 (#706, règle
+ * arrêtée : un brouillon n'entre pas dans la note) sont livrés. Les mesures touchées portent
+ * désormais les valeurs D'APRÈS, et la valeur d'avant en commentaire ; les sentinelles #706, #708,
+ * #709 tiennent le comportement corrigé. Les autres mesures sont inchangées : inscrites.
  */
 import { describe, it, expect, afterAll } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -457,7 +462,7 @@ describe('A · quelle pratique calcule pour cet élève', () => {
    B · LES DEUX SYSTÈMES DE CALCUL, PAR FAMILLE — le nœud
    ============================================================================================= */
 describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, le profil', () => {
-    it('B1 · SOM — attendu 86,57 : (84×40 + 90×60 + 70×1 + 0×1) / (40+60+1+1) = 8830/102 ; P 0,8657 ; profil et export « 87 »', () => {
+    it('B1 · SOM — attendu 87,43 : (84×40 + 90×60 + 70×1) / (40+60+1) = 8830/101 (↻ #706 : le brouillon 0 est écarté ; avant 8830/102 = 86,57) ; P 0,87 ; profil et export « 87 »', () => {
         const b = monter(jeuSOM());
         const m = noter('B1', mesurerEleve(b, DA.SOM, 'som-banc'));
         expect(m.famille).toBe('SOM');
@@ -465,7 +470,7 @@ describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, 
         expect(m.registreP).toBe(0.87);                   // 0,8657 arrondi au centième
         expect(m.configurableP).toBe(0.87);
         expect(m.simule).toEqual({ P: 87, noteFinale: null, noteConstructible: true });
-        expect(m.indicesPasse1).toEqual({ P: 0, noteConstructible: true });   // ⚠ première passe : 0 « constructible » (voir F1)
+        expect(m.indicesPasse1).toEqual({ P: 87, noteConstructible: true });  // ↻ #709 : juste dès la 1re passe (avant : { P: 0, noteConstructible: true }, voir F1)
         expect(m.indicesPasse2).toEqual({ P: 87, noteConstructible: true });
         expect(m.export).toEqual({ note: 87, statut: 'final' });
         expect(m.profilNiveau).toBeNull(); expect(m.profilRaison).toBe('note-chiffree');
@@ -484,11 +489,11 @@ describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, 
         expect(m.profilNiveau).toBe('M');
     });
 
-    it('B2b · STD — la configurable lue AVANT toute passe d\'indices rend 0, un nombre (cache vide)', () => {
+    it('B2b · STD — la configurable lue AVANT toute passe d\'indices rend null (↻ #709 ; avant : 0, un nombre)', () => {
         const b = monter(jeuSTD());
         const p = b.win.obtenirPratiqueParId('std-banc').calculerPerformance(DA.STD);
         noter('B2b', { configurableP_sansCache: p });
-        expect(p).toBe(0);
+        expect(p).toBeNull();   // avant #709 : 0
     });
 
     it('B3 · STD — l\'« écran Portfolio » de portfolio.js (chargerPortfolioEleveDetail) n\'a AUCUN appelant ni conteneur : code mort ; sa règle propre (originale 90 retenue, terminale ignorée → 82,75) ne s\'affiche nulle part', () => {
@@ -572,8 +577,8 @@ describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, 
         expect(res.STD.export).toEqual(['', 'non constructible']);
         expect(res.DEN.export).toEqual(['', 'non constructible']);
         expect(res.SPE.registreP).toBeNull();
-        expect(res.SPE.configurableP).toBe(0);                 // ⚠ 0 là où l'instance rend null
-        expect(res.SPE.export).toEqual([0, 'final']);           // ⚠ un zéro qui a l'air d'un résultat
+        expect(res.SPE.configurableP).toBeNull();              // ↻ #709 (avant : 0 là où l'instance rend null)
+        expect(res.SPE.export).toEqual(['', 'non constructible']);   // ↻ #709 (avant : [0, 'final'], un zéro qui a l'air d'un résultat)
     });
 });
 
@@ -581,20 +586,20 @@ describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, 
    C · CE QUE LA PRATIQUE FAIT DES CHAMPS NEUFS DE L'ÉVALUATION
    ============================================================================================= */
 describe('C · brouillon « 0 » à portée incomplète, brouillon « 95 sur 50 % », points analytiques, verrou', () => {
-    it('C1 · SOM — le brouillon 0/50 % compte 0 au poids 1 : 86,57 avec, 87,43 sans (8830/101)', () => {
+    it('C1 · SOM — le brouillon 0/50 % est écarté (↻ #706) : 87,43 avec comme sans (avant : 86,57 avec, il comptait 0 au poids 1)', () => {
         const avec = monter(jeuSOM());
         const jeu = jeuSOM(); jeu.evaluations = jeu.evaluations.filter(e => e.id !== 'EV_S4');
         const sans = monter(jeu);
         const m = noter('C1', { avec: r2(avec.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100), sans: r2(sans.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100) });
-        expect(m.avec).toBe(86.57);
+        expect(m.avec).toBe(87.43);   // avant #706 : 86.57
         expect(m.sans).toBe(87.43);
     });
 
-    it('C2 · SOM — le brouillon « 95 sur 50 % » compte 95 : (8830 + 95) / 102 = 87,5 (H-1 du premier audit, suivi ici)', () => {
+    it('C2 · SOM — le brouillon « 95 sur 50 % » est écarté (↻ #706) : 87,43 (avant : il comptait 95, (8830 + 95) / 102 = 87,5 — H-1 du premier audit)', () => {
         const jeu = jeuSOM(); Object.assign(jeu.evaluations.find(e => e.id === 'EV_S4'), BROUILLON95);
         const b = monter(jeu);
         const p = noter('C2', r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100));
-        expect(p).toBe(87.5);
+        expect(p).toBe(87.43);   // avant #706 : 87.5
     });
 
     it('C3 · STD — le brouillon 0 entre dans le pool (écarté sous « meilleurs » N = 4) ; sous « tous », les DEUX systèmes divergent : le riche tronque à N (76,75), l\'instance prend tout (69,9)', () => {
@@ -615,27 +620,27 @@ describe('C · brouillon « 0 » à portée incomplète, brouillon « 95 sur 50 
             tousSansBrouillonInstance: r2(tousSans.win.obtenirPratiqueParId('standards').calculerPerformance(DA.STD) * 100) });
         expect(m.meilleurs).toBe(79.45);
         expect(m.sortBrouillonSousMeilleurs).toBe('ecarte');
-        expect(m.nombreEvalues).toBe(6);
+        expect(m.nombreEvalues).toBe(5);   // ↻ #706 : le brouillon n'est plus dans le pool (avant : 6)
         expect(m.tousRiche).toBe(76.75);
         expect(m.tousRicheRetenus).toEqual(['A1', 'A2', 'A3', 'A4']);
-        expect(m.tousInstance).toBe(69.9);
+        expect(m.tousInstance).toBe(77.32);   // ↻ #706 (avant : 69,9, le brouillon 0 comptait) — la divergence riche/instance (B-5) demeure
         expect(m.tousSansBrouillonInstance).toBe(77.32);
     });
 
-    it('C4 · STD — le brouillon « 95 sur 50 % » entre en tête de sélection : (95+85+78+78)/4 = 84 → 84×0,6 + 32,8 = 83,2 (contre 79,45)', () => {
+    it('C4 · STD — le brouillon « 95 sur 50 % » n\'entre plus en tête de sélection (↻ #706) : 79,45 (avant : (95+85+78+78)/4 = 84 → 83,2)', () => {
         const b = monter(jeuSTD({ brouillon95: true }));
         const d = b.win.calculerDetailsNoteFinale(DA.STD);
         noter('C4', { noteFinale: r2(d.noteFinale), retenus: d.portfolio.artefactsRetenus.map(a => a.productionId) });
-        expect(r2(d.noteFinale)).toBe(83.2);
-        expect(d.portfolio.artefactsRetenus.map(a => a.productionId)).toContain('A6');
+        expect(r2(d.noteFinale)).toBe(79.45);   // avant #706 : 83.2
+        expect(d.portfolio.artefactsRetenus.map(a => a.productionId)).not.toContain('A6');
     });
 
-    it('C5 · SPE — le brouillon 0 n\'est pas acceptable (sans effet) ; le brouillon « 95 sur 50 % » est acceptable et fait monter le palier : avec D2 reprise à 75, B (80) → A (100)', () => {
+    it('C5 · SPE — ni le brouillon 0 ni le brouillon « 95 sur 50 % » ne sont des travaux acceptables (↻ #706) : B (80) dans les deux cas (avant : le 95 faisait monter à A = 100)', () => {
         const b0 = monter(jeuSPE({ repriseD2: 75 }));
         const b95 = monter(jeuSPE({ repriseD2: 75, brouillon95: true }));
         const m = noter('C5', { brouillon0: pSPE(b0), brouillon95: pSPE(b95) });
         expect(m.brouillon0).toBe(80);
-        expect(m.brouillon95).toBe(100);
+        expect(m.brouillon95).toBe(80);   // avant #706 : 100
     });
 
     it('C6 · DEN — brouillons, reprises, points : aucun effet (78 dans tous les cas) ; SOLO « Aucun » et `verrouillee` : lus nulle part dans pratiques/ [grep]', () => {
@@ -660,12 +665,12 @@ describe('D · SOM', () => {
         const p = noter('D1', r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100));
         expect(p).toBe(87.33);
     });
-    it('D2 · production évaluée deux fois (P1 : 84 puis 60, aucune remplacée) : les deux comptent, chacune au poids 40 → 11230/142 = 79,08', () => {
+    it('D2 · production évaluée deux fois (P1 : 84 puis 60, aucune remplacée) : les deux comptent, chacune au poids 40 → 11230/141 = 79,65 (↻ #706 : sans le brouillon ; avant 11230/142 = 79,08)', () => {
         const jeu = jeuSOM(); jeu.evaluations.push(ev('EV_S1B', DA.SOM, 'P1', 60, 'D'));
         const b = monter(jeu);
         const recit = b.win.obtenirPratiqueParId('sommative').decrireCalcul(DA.SOM);
         noter('D2', { P: r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100), comptees: recit.resultats.filter(x => x.sort === 'compte').length });
-        expect(r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100)).toBe(79.08);
+        expect(r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100)).toBe(79.65);   // avant #706 : 79.08
     });
     it('D3 · production à pondération 0 ou sans pondération : poids 1, comptée (le « poids 1 » de #483) — récit « poids 1 % »', () => {
         const b = monter(jeuSOM());
@@ -678,12 +683,12 @@ describe('D · SOM', () => {
 });
 
 describe('D · STD', () => {
-    it('D4 · nombreARetenir 10 > 6 évaluations : moyenne de toutes, brouillon 0 compris → 69,9 (contre 79,45)', () => {
+    it('D4 · nombreARetenir 10 > 5 évaluations : moyenne de toutes → 77,32 (↻ #706 : brouillon écarté ; avant : brouillon compris, 69,9)', () => {
         const b = monter(jeuSTD({ nombreARetenir: 10 }));
         const d = b.win.calculerDetailsNoteFinale(DA.STD);
         noter('D4', { noteFinale: r2(d.noteFinale), retenus: d.portfolio.nombreRetenus, aRetenir: d.portfolio.nombreARetenir });
-        expect(r2(d.noteFinale)).toBe(69.9);
-        expect(d.portfolio.nombreRetenus).toBe(6);
+        expect(r2(d.noteFinale)).toBe(77.32);   // avant #706 : 69.9
+        expect(d.portfolio.nombreRetenus).toBe(5);   // avant : 6
     });
     it('D5 · terminale absente des productions : note = pool seul 77,75, provisoire ; terminale présente non évaluée : 77,75, provisoire ; l\'export dit « provisoire »', () => {
         const sans = monter(jeuSTD({ sansTerminale: true }));
@@ -722,17 +727,18 @@ describe('D · SPE', () => {
         const m = noter('D8', { sansDossier: pSPE(sansDossier), avantReprise: pSPE(avant), apresReprise: pSPE(apres) });
         expect(m.sansDossier).toBe(60); expect(m.avantReprise).toBe(80); expect(m.apresReprise).toBe(70);
     });
-    it('D9 · une SPE dans la forme que l\'assistant, le gabarit et l\'éditeur écrivent (`forfaits`, ids numériques) : 0 pour tout le monde, « constructible », exporté « 0 final »', () => {
-        // À la main : le moteur lit `tableBundles` ; `forfaits` n'est converti nulle part (grep) → config
-        // incomplète → repli `indicesCP.P || 0` → 0. Attendu pédagogique : A (100) ou C (60) selon les travaux.
+    it('D9 · une SPE dans la forme du gabarit et de l\'éditeur (`forfaits`, ids numériques) CALCULE (↻ #708) : C = 60 (avant : 0 pour tout le monde, « constructible », exporté « 0 final »)', () => {
+        // À la main, APRÈS #708 (seuil 70 à la racine) : « Dissertation » s'apparie par NOM aux productions
+        // de type `dissertation` → D1 80 ✓, D2 reprise 65 ✗ → 1 ; « Examen » → X1 90 ✓ (X2 brouillon écarté) → 1 ;
+        // A {1:2, 2:1} ✗, C {1:1, 2:1} ✓ → 60. AVANT : `forfaits` n'était lu nulle part → repli `indicesCP.P || 0` → 0.
         const jeu = jeuSPE(); jeu.pratiques = [pratiqueSPEGabarit()]; jeu.pratiqueId = 'spe-gabarit';
         const b = monter(jeu);
         b.win.calculerEtStockerIndicesCP(); const p = b.win.calculerEtStockerIndicesCP()[DA.SPE].actuel;
         const s = b.win.simulerIndices(DA.SPE, 'spe-gabarit');
         const l = b.win._exportResultats.construireLignesSynthese([ETUDIANTS[2]], { pratiqueId: 'spe-gabarit' }, b.win.simulerIndices)[0];
         noter('D9', { configurableP: b.win.obtenirPratiqueParId('spe-gabarit').calculerPerformance(DA.SPE), indicesP: p.P, noteConstructible: p.noteConstructible, simule: { P: s.P, noteConstructible: s.noteConstructible }, export: [l[8], l[9]], recit: b.win.obtenirPratiqueParId('spe-gabarit').decrireCalcul(DA.SPE) });
-        expect(p.P).toBe(0); expect(p.noteConstructible).toBe(true);
-        expect(l[8]).toBe(0); expect(l[9]).toBe('final');
+        expect(p.P).toBe(60); expect(p.noteConstructible).toBe(true);   // avant #708 : P 0
+        expect(l[8]).toBe(60); expect(l[9]).toBe('final');               // avant #708 : [0, 'final']
     });
 });
 
@@ -818,23 +824,23 @@ describe('E · dans quoi la note du cours se lit', () => {
    F · NON CALCULABLE — le premier calcul d'un trimestre
    ============================================================================================= */
 describe('F · le zéro qui a l\'air d\'un résultat', () => {
-    it('F1 · SOM et SPE configurables, PREMIÈRE passe d\'indices (cache indicesCP vide) : P = 0 « constructible » pour l\'élève ; la seconde passe rend le bon nombre', () => {
+    it('F1 · SOM et SPE configurables, PREMIÈRE passe d\'indices (cache indicesCP vide) : le bon nombre dès la première passe (↻ #709 ; avant : 0 « constructible », puis le bon nombre à la seconde)', () => {
         const som = monter(jeuSOM()), spe = monter(jeuSPE());
         const s1 = som.win.calculerEtStockerIndicesCP()[DA.SOM].actuel, s2 = som.win.calculerEtStockerIndicesCP()[DA.SOM].actuel;
         const p1 = spe.win.calculerEtStockerIndicesCP()[DA.SPE].actuel, p2 = spe.win.calculerEtStockerIndicesCP()[DA.SPE].actuel;
         noter('F1', { SOM: [{ P: s1.P, c: s1.noteConstructible }, { P: s2.P, c: s2.noteConstructible }], SPE: [{ P: p1.P, c: p1.noteConstructible }, { P: p2.P, c: p2.noteConstructible }] });
-        expect([s1.P, s1.noteConstructible]).toEqual([0, true]);
+        expect([s1.P, s1.noteConstructible]).toEqual([87, true]);   // avant #709 : [0, true]
         expect([s2.P, s2.noteConstructible]).toEqual([87, true]);
-        expect([p1.P, p1.noteConstructible]).toEqual([0, true]);
+        expect([p1.P, p1.noteConstructible]).toEqual([70, true]);   // avant #709 : [0, true]
         expect([p2.P, p2.noteConstructible]).toEqual([70, true]);
     });
-    it('F2 · l\'export appelé AVANT toute passe d\'indices (élève ajouté, données importées) : SOM « 0, final » ; après une passe : « 87, final »', () => {
+    it('F2 · l\'export appelé AVANT toute passe d\'indices (élève ajouté, données importées) : « 87, final » d\'emblée (↻ #709 ; avant : « 0, final », puis « 87, final » après une passe)', () => {
         const b = monter(jeuSOM());
         const avant = b.win._exportResultats.construireLignesSynthese([ETUDIANTS[0]], { pratiqueId: 'som-banc' }, b.win.simulerIndices)[0];
         b.win.calculerEtStockerIndicesCP();
         const apres = b.win._exportResultats.construireLignesSynthese([ETUDIANTS[0]], { pratiqueId: 'som-banc' }, b.win.simulerIndices)[0];
         noter('F2', { avant: [avant[8], avant[9]], apres: [apres[8], apres[9]] });
-        expect([avant[8], avant[9]]).toEqual([0, 'final']);
+        expect([avant[8], avant[9]]).toEqual([87, 'final']);   // avant #709 : [0, 'final']
         expect([apres[8], apres[9]]).toEqual([87, 'final']);
     });
     it('F3 · l\'export arrondit à l\'ENTIER (P) : 86,57 → 87 ; 79,45 → 79, alors que la section « Note finale de session » du profil affiche « 79.4 » (79,45 flottant → toFixed(1))', () => {
@@ -851,7 +857,7 @@ describe('F · le zéro qui a l\'air d\'un résultat', () => {
    G · LES JETONS DÉCIDENT QUELLE ÉVALUATION COMPTE
    ============================================================================================= */
 describe('G · reprise, retrait, héritage', () => {
-    it('G1 · retirer le jeton de la reprise (90) restaure l\'originale (50) : la note SOM passe de 86,57 à 63,04 (6430/102) — l\'originale n\'est plus « remplacée »', () => {
+    it('G1 · retirer le jeton de la reprise (90) restaure l\'originale (50) : la note SOM passe de 87,43 à 63,66 (6430/101 ; ↻ #706 sans le brouillon — avant 86,57 → 63,04) — l\'originale n\'est plus « remplacée »', () => {
         const b = monter(jeuSOM(), { avecJetons: true });
         const avant = r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100);
         const ok = b.win.retirerJetonReprise('EV_S2_NEW');
@@ -859,7 +865,7 @@ describe('G · reprise, retrait, héritage', () => {
         const orig = evals.find(e => e.id === 'EV_S2_OLD');
         const apres = r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100);
         noter('G1', { ok, avant, apres, origRemplacee: orig.remplaceeParId, origArchivee: orig.archivee, repriseSubsiste: !!evals.find(e => e.id === 'EV_S2_NEW'), notifs: b.notifs.map(n => n.type + ':' + n.t) });
-        expect(ok).toBe(true); expect(avant).toBe(86.57); expect(apres).toBe(63.04);
+        expect(ok).toBe(true); expect(avant).toBe(87.43); expect(apres).toBe(63.66);   // avant #706 : 86.57 → 63.04
         expect(orig.remplaceeParId).toBeUndefined(); expect(orig.archivee).toBeUndefined();
     });
     it('G2 · (N2) la reprise HÉRITE de `jetonDelaiApplique` : après un jeton de délai puis une reprise, l\'élève a « 2 » délais utilisés pour un seul accordé', () => {
@@ -924,8 +930,9 @@ describe('G · reprise, retrait, héritage', () => {
     it('G8 · `archivee` n\'est lu par aucun calcul ; la seule décision est `remplaceeParId` — une originale « archivée » sans `remplaceeParId` compte', () => {
         const jeu = jeuSOM(); delete jeu.evaluations.find(e => e.id === 'EV_S2_OLD').remplaceeParId;
         const b = monter(jeu);
-        // À la main : les deux P2 comptent (50×60 + 90×60) → (3360 + 3000 + 5400 + 70 + 0) / (40+60+60+1+1) = 11830/162 = 73,02.
+        // À la main : les deux P2 comptent (50×60 + 90×60) → (3360 + 3000 + 5400 + 70) / (40+60+60+1) = 11830/161 = 73,48
+        // (↻ #706 : sans le brouillon ; avant 11830/162 = 73,02).
         const p = noter('G8', r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100));
-        expect(p).toBe(73.02);
+        expect(p).toBe(73.48);   // avant #706 : 73.02
     });
 });

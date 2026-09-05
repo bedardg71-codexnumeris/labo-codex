@@ -7,6 +7,74 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 28 — 5 SEPTEMBRE 2026, 15 H 56 → 17 H 30 : AUDIT DE LA PRATIQUE DE NOTATION (second audit cadré),
+     puis le lot arbitré le soir même. ▣ **LIVRÉ : release 1.122.0 (build 0905-1722) — lot #706 / #708 / #709,
+     rapport `48c77c2d` (branche `audit/pratique-de-notation-2026-09-05`, fusionnée fast-forward), docs Cowork
+     `a32af277`** ; verdict Playwright au jeton puis push (`scripts/pousser.sh`) ; **le run GitHub est lu jusqu'au
+     bout cette fois — verdict dans RELAIS**. Vitest 477 / 5 332.
+
+     ▣ Mandat 1 (Cowork, 15 h 50) : exécuter `Rapports/prompts-audit/PROMPT-AUDIT-pratique-de-notation-2026-09-05.md`,
+       lecture seule, bac à sable, branche d'audit partie d'origin/main, quatre élèves de banc (nombre à la main avant
+       le code), transcription des dispositions dans les deux ultrareviews de mai, clôture des trois fichiers de Cowork.
+       Rituel isolé (15 h 56) : HEAD 93b744b4 = origin/main, Vitest 473 / 5 263, jeton WebKit sur 1aadacb1 ; trois
+       fichiers Cowork modifiés dans l'arbre. ⚠ Deux trouvailles hors mandat, non exécutées : le run GitHub de
+       `1aadacb1` (lot 1.121, #697-#699) ANNULÉ par le push docs qui a suivi — jamais jugé par la CI ;
+       `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` date du 4 sept. au soir. Un `index.lock` périmé (15 h 46, 0 octet,
+       aucun processus git) retiré avant de créer la branche.
+     ▣ AUDIT (16 h 00 → 16 h 50) : banc `tests/unit/audit-pratique-de-notation-2026-09-05.test.js`, 46 mesures,
+       modules réels (registre, SOM/STD/SPE/configurable, DEN, portfolio, indices, actions, calculs, helpers,
+       sections-affichage avec export d'une interne, export CSV, jetons, modes.js réel à part) ; rapport
+       `Rapports/AUDIT-pratique-de-notation-2026-09-05.md`. Trois majeurs : D-3 (SPE écrite en `forfaits` par le
+       gabarit/éditeur → 0 pour tous, « constructible », exporté « 0, final » ; `tableBundles` n'a AUCUN écrivain hors
+       pack démo), F-1 (configurable lit `indicesCP` AVANT de déléguer → 0 tant que l'élève n'y est pas : première
+       passe, élève ajouté, export avant recalcul), C-1 (#706 : brouillon 95/50 % compte 95 en SOM/STD/SPE — STD 79,45
+       → 83,2, SPE B → A). Douze moyens (A-1 deux replis · A-2 id legacy → défauts · A-3 `.config` non lu · A-4
+       registre SPE = 50 % · B-4 panneau du profil « 3 meilleurs » vs 4, « Calcul impossible », ÉCRIT au rendu ·
+       B-5 « tous » divergent 76,75/69,9 · B-6 P historique IDME en dur pour SPE, STD pour DEN · D-6 ids de cibles
+       DEN → 59 muet · E-2 niveau global exige retroactionFinale · E-5 DEN lue « M » par repli STD · G-2 héritage
+       jetonDelaiApplique · G-7 `jetonsEtudiants` clé nue), quatre mineurs, deux commentés. H : sept break-tests sur
+       les golden masters (tous rouges au bon endroit). Ultrareviews lot 3 (20) et 4a (11) : disposition par constat.
+       ⚠ LEÇON : une sauvegarde de mesures lancée PENDANT le break-test en arrière-plan a lu le code muté (SOM à +1) —
+       remesurée après ; mémoire écrite (`break-test-en-arriere-plan-pas-de-vitest-parallele`).
+     ▣ Mandat 2 (Grégoire par Cowork, 17 h 00) : fusionner (fait : `48c77c2d` + `a32af277`, fichiers Cowork commis
+       tels quels), UN lot de trois, dispositions arrêtées et numéros, release, rituel, CI jusqu'au bout, geste à voir.
+     ▣ LOT (17 h 05 → 17 h 25) :
+       · #706 — UNE règle, `evaluationEntreDansLaNote` (`pratique-registre.js`, SSOT avec les rôles STD de #394) :
+         remplacée, sans note, `verrouillee === false`, `ponderationCouverte === 0` → hors note. Appelée par
+         sommative (calcul, récit), pan-standards (calcul, historique, récent, terminale ×2), pan-specifications
+         (`_estTravailAcceptable`, filtres), actions (pool, terminale, récit, `ecartees`), portfolio (hybride,
+         `simulerIndices.ecartees`), indices (repli). `compterEvaluationsEcarteesDeLaNote` → profil (« Performance
+         globale » et « Note finale de session », `_phraseEvaluationsEcartees`), export CSV (11e colonne
+         « Non comptées »), récits (`ecarte · brouillon · non comptée`).
+       · #708 — `normaliserConfigurationSpecifications` (forfaits → tableBundles, seuil racine → types) dans
+         `configurerPratique` ; `_productionEstDuType` (id OU nom, via `TYPES_PRODUCTION`) ; configurable :
+         `_instanceSpecifications`, récit délégué. Sonde lecture seule `scripts/diagnostic-708-spe-forfaits.js`.
+       · #709 — `PratiqueConfigurable.calculerPerformance` : cache lu seulement pour `conversion_niveaux`
+         (`_lireIndiceStocke`, null si vide) ; délégations sans cache ; SPE « aucune évaluation » → null.
+       · Sentinelles : `sentinelle-706-brouillons-hors-de-la-note` (12), `sentinelle-708-spe-forfaits-calculent` (6),
+         `sentinelle-709-cache-vide-rend-null` (5). BREAK-TESTS (restauration par copie, empreintes identiques) :
+         règle #706 retirée → 18 rouges (706 : 8, banc 2 : 9, banc 1 : 1) ; portée nulle → 2 ; traduction forfaits
+         retirée → 5 (708 : 4, banc D9) ; appariement par nom retiré → 3 ; cache vide → 0 → 1 ; délégation → 0 → 2.
+       · Bancs mis aux valeurs d'après (l'avant en commentaire) : second banc B1, B2b, B6, C1-C5, D2, D4, D9, F1, F2,
+         G1, G8 (SOM principal 86,57 → 87,43) ; premier banc H1, H2. Harnais réhaussés (registre chargé d'abord,
+         assertions inchangées) : c2b, c2c, golden hybride-339, gardes-399 ; export test : 11e colonne.
+       · Deux commentaires « et oublier » : `evaluation-jetons.js` (G-4), `profil-etudiant-actions.js` (D-2b).
+     ▣ SUPPOSITIONS NOMMÉES : « portée incomplète » = portée 0, sans relire la grille (la porte #674 refuse une
+       portée partielle ; comparer à la grille courante est #705) ; les mots « N évaluation(s) sans aucun critère
+       évalué, non comptée(s) » sont les miens (les autres sont ceux de Grégoire) ; conséquences : une copie
+       enregistrée sans aucun critère ne pèse plus 0 en sommative ; une reprise pas encore réévaluée ne compte pas ;
+       les évaluations d'avant le 2 sept. comptent comme avant (stock incomplet-verrouillé non mesuré).
+     ▣ DOCS : BACKLOG — #706 livré, #708-#709 livrés, #710-#721 (après le 14), #722-#725 (mineurs), #726-#729
+       (indices A/C du lot 3), #482 périmé, dernier ID #729 ; rapport — dispositions arrêtées + « le même jour » ;
+       ultrareviews numérotées et fermées ; OU-EN-EST-ON — ligne « livré » sous L'ÉVALUATION ; changelog 1.122
+       (mes mots, à relire par Grégoire). Rituel §2 : aucun motif sur les lignes ajoutées ; §4.1bis : 0 spec touchée.
+     ▣ CE QUE GRÉGOIRE DOIT ALLER VOIR : (1) le profil d'un élève dont une copie est en brouillon — la note du cours
+       est celle SANS le brouillon, et « 1 évaluation en brouillon, non comptée » sous « Performance globale (P) »
+       et sous la note finale de session ; (2) une pratique par spécifications « Modèle simple » (Partir d'un modèle),
+       groupe avec des productions Projet et Examen — une note qui n'est pas 0 (90 / 70 / 50). Et les mots.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 27 — 5 SEPTEMBRE 2026, 14 H 20 → 16 H 30 : AUDIT DU MOTEUR D'ÉVALUATION, puis le lot arbitré
      le jour même. ▣ **LIVRÉ : release 1.121.0 (`1aadacb1`, build 0905-1530) — lot `d3111feb` (#697, #698,
      #699), rapport `23f5ce67`** sur la branche `audit/moteur-evaluation-2026-09-05`, fusionnée fast-forward sur

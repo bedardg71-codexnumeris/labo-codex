@@ -85,7 +85,11 @@ beforeAll(() => {
             return [];
         }
     };
-    win = chargerScript('js/portfolio.js', globaux);
+    // #706 (5 sept. 2026) : la règle « ce qui entre dans la note » vit dans pratique-registre.js —
+    // le charger d'abord sur le même window. Changement de HARNAIS seulement : les chiffres
+    // GOLDEN sont inchangés (aucune évaluation de la fixture n'est un brouillon).
+    win = chargerScript('js/pratiques/pratique-registre.js', globaux);
+    chargerScript('js/portfolio.js', globaux, win);
 });
 
 describe('#339 L0 · golden master moteur hybride indice P (calculerNoteAvecCategories)', () => {

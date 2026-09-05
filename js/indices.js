@@ -420,10 +420,10 @@ function obtenirIndicesCP(da) {
 function calculerPerformancePAN(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     // #399 (L7) : filtre aligné sur le motif standard du moteur — un 0 est une
-    // note VALIDE (le filtre truthy l'excluait du corpus : repli « 3 meilleures »
-    // rendait 0,70 au lieu de 0,467 sur [0, 80, 60]).
+    // note VALIDE. #706 : la règle unique du registre (remplacées, sans note,
+    // brouillons non verrouillés, portée nulle : hors note).
     const evaluationsEleve = evaluations.filter(e =>
-        e.etudiantDA === da && e.noteFinale !== null && e.noteFinale !== undefined);
+        e.etudiantDA === da && window.evaluationEntreDansLaNote(e));
 
     if (evaluationsEleve.length === 0) {
         return 0;

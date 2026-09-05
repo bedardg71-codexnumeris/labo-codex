@@ -7,6 +7,23 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, SOIRÉE (1.122.0)
+
+> ↻ **17 h 30 — 1.122.0 (build `0905-1722`, « La note du cours ne compte plus les brouillons, et les spécifications
+> calculent »)** : lot #706 / #708 / #709 arbitré par Grégoire après le second audit cadré
+> (`Rapports/AUDIT-pratique-de-notation-2026-09-05.md`), commis sur `main` par-dessus la fusion fast-forward de la
+> branche `audit/pratique-de-notation-2026-09-05` (`48c77c2d`) et les fichiers de Cowork (`a32af277`). Verdict
+> Playwright au jeton puis push par `scripts/pousser.sh`. **⏳ Le run GitHub de ce push est ATTENDU JUSQU'AU BOUT et
+> son verdict est écrit ici, dans un commit docs qui suit** (consigne de Grégoire : le lot 1.121 n'avait jamais été
+> jugé par la CI — son run `33987962162` a été annulé par le push docs suivant). Vitest 477 / 5 332.
+> **`main` = `origin/main` après ce push, AUCUN travail en avance.**
+> **Ce qui est livré** : #706 (un brouillon non verrouillé, ou une portée nulle, n'entre pas dans la note du cours —
+> quatre familles, deux systèmes ; le profil et l'export disent combien sont écartées), #708 (une SPE écrite en
+> `forfaits` calcule ; le stock se MESURE par `scripts/diagnostic-708-spe-forfaits.js`, `await diag708()`), #709 (un
+> cache d'indices vide rend null, plus jamais 0). **Ce qui attend Grégoire** : le geste à voir (SESSION 28, dernier
+> point), les mots du changelog 1.122 et de la phrase « sans aucun critère évalué, non comptée » (les miens), la
+> conséquence sommative (une copie enregistrée sans aucun critère ne pèse plus 0), #710-#721 à trancher après le 14.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, 16 H 30 (1.121.0 EN LIGNE)
 
 > ↻ **16 h 30 — 1.121.0 EN LIGNE** (`1aadacb1`, build `0905-1530`, « Trois chemins où une note pouvait se tromper sont

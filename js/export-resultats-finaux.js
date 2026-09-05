@@ -64,9 +64,12 @@ function construireCSV(entetes, lignes) {
 // CONSTRUCTION DES LIGNES (PUR — données et simulation injectées)
 // =========================================================================
 
+// #706 — la dernière colonne dit combien d'évaluations de l'élève ont été écartées de la note
+// (brouillons non verrouillés, portée nulle), sur le modèle « 2 évaluations en brouillon,
+// non comptées » du profil ; vide quand la simulation ne le sait pas.
 var ENTETES_SYNTHESE = [
     'DA', 'Nom', 'Prénom', 'Groupe', 'Cours', 'Trimestre',
-    'Pratique (code)', 'Pratique (nom)', 'Note finale', 'Statut'
+    'Pratique (code)', 'Pratique (nom)', 'Note finale', 'Statut', 'Non comptées'
 ];
 
 /**
@@ -76,7 +79,7 @@ var ENTETES_SYNTHESE = [
  *
  * @param {Array<{da, nom, prenom}>} etudiants
  * @param {{groupe, cours, trimestre, pratiqueId, pratiqueCode, pratiqueNom}} contexte
- * @param {function(da, pratiqueId): ({P, noteFinale, noteConstructible, details}|null)} simuler
+ * @param {function(da, pratiqueId): ({P, noteFinale, noteConstructible, details, ecartees}|null)} simuler
  * @returns {Array<Array<*>>}
  */
 function construireLignesSynthese(etudiants, contexte, simuler) {
@@ -93,11 +96,13 @@ function construireLignesSynthese(etudiants, contexte, simuler) {
             note = r.P;
             statut = (r.details && r.details.estProvisoire) ? 'provisoire' : 'final';
         }
+        // #706 : le compte des écartées (brouillons + portée nulle), ou vide si inconnu.
+        var nonComptees = (r && r.ecartees && typeof r.ecartees.total === 'number') ? r.ecartees.total : '';
         return [
             e.da, e.nom, e.prenom,
             ctx.groupe || '', ctx.cours || '', ctx.trimestre || '',
             ctx.pratiqueCode || '', ctx.pratiqueNom || '',
-            note, statut
+            note, statut, nonComptees
         ];
     });
 }

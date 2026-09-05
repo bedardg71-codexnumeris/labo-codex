@@ -748,8 +748,67 @@ function creerComparateurRecenceStd(productions) {
     return (a, b) => numero(b) - numero(a);
 }
 
+/* ===============================
+   #706 — CE QUI ENTRE DANS LA NOTE DU COURS (SSOT des quatre familles et des deux systèmes)
+   Règle arrêtée par Grégoire le 5 septembre 2026, après l'audit de la pratique de notation
+   (Rapports/AUDIT-pratique-de-notation-2026-09-05.md, C-1) : une évaluation NON VERROUILLÉE
+   — brouillon de l'enregistrement automatique (#674), reprise pas encore réévaluée
+   (evaluation-jetons.js, `verrouillee: false`), copie déverrouillée pour modification —, ou
+   dont la portée `ponderationCouverte` est INCOMPLÈTE, N'ENTRE PAS dans la note du cours.
+   Les DEUX systèmes (calculerDetailsNoteFinale et chaque calculerPerformance) passent ici,
+   et le profil comme l'export disent combien ont été écartées (compterEvaluationsEcarteesDeLaNote).
+
+   ⚠ « Incomplète » se juge SANS relire la grille : la porte #674 refuse d'enregistrer une
+   portée partielle, donc une évaluation verrouillée est complète à l'enregistrement — sauf
+   le zéro « rien couvert » (portée 0 : évaluation enregistrée sans aucun critère, ou fossile
+   #697), écarté lui aussi. Comparer la portée à la grille COURANTE (grille rééditée après
+   coup) est #705, à trancher après le 14 : pas ici. Les évaluations d'avant le 2 septembre
+   n'ont pas de portée déclarée (undefined) : elles comptent comme avant.
+   ⚠ Conséquence nommée : une copie enregistrée sans aucun critère (0 sur portée 0) ne pèse
+   plus 0 dans une moyenne sommative — un « non remis » qui doit compter 0 se note.
+   =============================== */
+
+/**
+ * Vrai si l'évaluation compte dans la note du cours ; faux pour une remplacée, une sans note,
+ * un brouillon (non verrouillée) ou une portée nulle.
+ * @param {Object} evaluation
+ * @returns {boolean}
+ */
+function evaluationEntreDansLaNote(evaluation) {
+    if (!evaluation) return false;
+    if (evaluation.remplaceeParId) return false;
+    if (evaluation.noteFinale === null || evaluation.noteFinale === undefined) return false;
+    if (evaluation.verrouillee === false) return false;
+    if (evaluation.ponderationCouverte === 0) return false;
+    return true;
+}
+
+/**
+ * Combien d'évaluations de cet élève portent une note mais sont écartées par #706.
+ * @param {string} da
+ * @param {Array} [evaluations] - liste déjà lue (sinon lue via obtenirDonneesSelonMode)
+ * @returns {{brouillons:number, sansPortee:number, total:number}}
+ */
+function compterEvaluationsEcarteesDeLaNote(da, evaluations) {
+    const liste = Array.isArray(evaluations) ? evaluations
+        : ((typeof obtenirDonneesSelonMode === 'function')
+            ? (obtenirDonneesSelonMode('evaluationsSauvegardees') || [])
+            : (db.getSync(cle('evaluationsSauvegardees'), []) || []));
+    let brouillons = 0, sansPortee = 0;
+    liste.forEach(e => {
+        if (!e || e.etudiantDA !== da || e.remplaceeParId) return;
+        if (e.noteFinale === null || e.noteFinale === undefined) return;
+        if (evaluationEntreDansLaNote(e)) return;
+        if (e.verrouillee === false) brouillons++; else sansPortee++;
+    });
+    return { brouillons: brouillons, sansPortee: sansPortee, total: brouillons + sansPortee };
+}
+
 // Fonctions principales
 window.enregistrerPratique = enregistrerPratique;
+// #706 — la règle unique de ce qui entre dans la note du cours, et son compte
+window.evaluationEntreDansLaNote = evaluationEntreDansLaNote;
+window.compterEvaluationsEcarteesDeLaNote = compterEvaluationsEcarteesDeLaNote;
 // #394 — rôles des productions STD (SSOT des deux systèmes de calcul)
 window.identifierProductionTerminale = identifierProductionTerminale;
 window.obtenirArtefactsIdsPoolStd = obtenirArtefactsIdsPoolStd;

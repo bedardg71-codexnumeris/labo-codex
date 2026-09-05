@@ -781,7 +781,13 @@ function _simulerIndicesInterne(da, pratiqueId) {
         recit = pratique.decrireCalcul(da);
     }
 
-    return { pratique: pratiqueId, C, P, noteFinale, details, recit, noteConstructible };
+    // #706 — combien d'évaluations de l'élève sont écartées de la note (brouillons, portée
+    // nulle) : l'export des résultats le dit, sur le modèle « 2 évaluations en brouillon, non
+    // comptées ». Additif ; null si le registre n'est pas chargé.
+    const ecartees = (typeof compterEvaluationsEcarteesDeLaNote === 'function')
+        ? compterEvaluationsEcarteesDeLaNote(da) : null;
+
+    return { pratique: pratiqueId, C, P, noteFinale, details, recit, noteConstructible, ecartees };
 }
 
 /**
@@ -948,12 +954,10 @@ function calculerNoteAvecCategories(da, configCategories) {
     const productions = obtenirDonneesSelonMode('productions') || [];
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
 
-    // 2. Filtrer les évaluations de cet étudiant (non remplacées)
+    // 2. Filtrer les évaluations de cet étudiant — #706 : la règle unique du registre
+    // (remplacées, sans note, brouillons non verrouillés, portée nulle : hors note).
     const evaluationsEleve = evaluations.filter(e =>
-        e.etudiantDA === da &&
-        e.noteFinale !== null &&
-        e.noteFinale !== undefined &&
-        !e.remplaceeParId
+        e.etudiantDA === da && window.evaluationEntreDansLaNote(e)
     );
 
     // 3. Séparer les productions par catégorie

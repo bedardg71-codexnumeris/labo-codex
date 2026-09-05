@@ -178,13 +178,12 @@ class PratiquePANStandards {
         const artefactsIds = window.obtenirArtefactsIdsPoolStd(productions, terminalId);
         const parRecence = window.creerComparateurRecenceStd(productions);
 
-        // Filtrer les évaluations de cet étudiant sur les artefacts du pool
+        // Filtrer les évaluations de cet étudiant sur les artefacts du pool — #706 : la règle
+        // unique du registre (remplacées, sans note, brouillons, portée nulle : hors note).
         const evaluationsEleve = evaluations.filter(e =>
             e.etudiantDA === da &&
             artefactsIds.includes(e.productionId) &&
-            !e.remplaceeParId && // Exclure les évaluations remplacées
-            e.noteFinale !== null &&
-            e.noteFinale !== undefined
+            window.evaluationEntreDansLaNote(e)
         );
 
         if (evaluationsEleve.length === 0) {
@@ -238,13 +237,12 @@ class PratiquePANStandards {
             return moyennePortfolio / 100;
         }
 
-        // Trouver l'évaluation de l'étudiant sur l'évaluation terminale
+        // Trouver l'évaluation de l'étudiant sur l'évaluation terminale (#706 : un brouillon
+        // de terminale n'est pas une terminale — la note reste provisoire)
         const evalTerminale = evaluations.find(e =>
             e.etudiantDA === da &&
             e.productionId === productionTerminale.id &&
-            !e.remplaceeParId &&
-            e.noteFinale !== null &&
-            e.noteFinale !== undefined
+            window.evaluationEntreDansLaNote(e)
         );
 
         // Si l'évaluation terminale n'est pas encore faite, note provisoire = pool seul
@@ -350,8 +348,7 @@ class PratiquePANStandards {
             if (e.etudiantDA !== da) return false;
             if (!artefactsIds.includes(e.productionId)) return false;
             if (e.statutRemise === 'non-remis') return false;
-            if (e.remplaceeParId) return false;
-            if (e.noteFinale === null || e.noteFinale === undefined) return false;
+            if (!window.evaluationEntreDansLaNote(e)) return false;   // #706 : même règle que la note du cours
 
             // ✅ NOUVEAU (Beta 94): Filtrer par dateEcheance de la production
             const dateEcheance = obtenirDateEcheance(e);
@@ -436,13 +433,11 @@ class PratiquePANStandards {
             return moyennePortfolio / 100;
         }
 
-        // Trouver l'évaluation de l'étudiant sur l'évaluation terminale
+        // Trouver l'évaluation de l'étudiant sur l'évaluation terminale (#706)
         const evalTerminale = evaluationsCache.find(e =>
             e.etudiantDA === da &&
             e.productionId === productionTerminale.id &&
-            !e.remplaceeParId &&
-            e.noteFinale !== null &&
-            e.noteFinale !== undefined
+            window.evaluationEntreDansLaNote(e)
         );
 
         // Si l'évaluation terminale n'est pas encore faite, retourner seulement le pool
@@ -506,13 +501,11 @@ class PratiquePANStandards {
         const evaluations = this._lireEvaluations();
         const artefactsIds = this._lireArtefactsPortfolio();
 
-        // Filtrer les évaluations de cet étudiant sur les artefacts portfolio
+        // Filtrer les évaluations de cet étudiant sur les artefacts portfolio (#706)
         const evaluationsEleve = evaluations.filter(e =>
             e.etudiantDA === da &&
             artefactsIds.includes(e.productionId) &&
-            !e.remplaceeParId &&
-            e.noteFinale !== null &&
-            e.noteFinale !== undefined
+            window.evaluationEntreDansLaNote(e)
         );
 
         if (evaluationsEleve.length === 0) {

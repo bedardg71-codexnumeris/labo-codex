@@ -175,46 +175,40 @@ class PratiqueConfigurable {
             return pDen === null ? null : pDen / 100;
         }
 
-        const indicesCP = db.getSync(cle('indicesCP'), {});
-        const donneesEtudiant = indicesCP[da];
-
-        if (!donneesEtudiant || !donneesEtudiant.actuel) {
-            return 0;
-        }
-
-        // Session C : retrait de code mort — `modalites`/`pratique` étaient lus depuis
-        // le SSOT global puis JAMAIS utilisés (le switch ci-dessous branche sur
-        // this.config.calcul_note.methode, la config propre à l'instance). Le calcul
-        // par famille s'appuie sur this.config, pas sur l'état global actif.
-        let P_pct = 0;
+        // #709 (audit du 5 septembre 2026, constat F-1) — LE CACHE `indicesCP` NE SE LIT QUE
+        // POUR LA MÉTHODE QUI EN DÉPEND. Avant, il se lisait ici pour TOUTES les méthodes,
+        // AVANT de déléguer, et rendait 0 — un nombre, « constructible » — tant que l'élève n'y
+        // avait pas d'entrée : première passe d'indices d'un trimestre, élève ajouté, export
+        // lancé avant un recalcul (mesuré au banc F1/F2 : « 0, final » dans le CSV). Une
+        // sommative ou une spécification configurable calcule depuis les évaluations, sans
+        // cache ; et un cache vide n'est pas une note : null (« non constructible »).
+        //
+        // Session C : `modalites`/`pratique` (SSOT global) ne sont plus lus — le calcul par
+        // famille s'appuie sur this.config, pas sur l'état global actif.
+        let P_pct;
 
         // Pour les pratiques configurables, utiliser la méthode définie dans la config
         switch (this.config.calcul_note.methode) {
             case 'conversion_niveaux':
                 // #395 : le store indicesCP est PLAT depuis Beta 95.5 ({date, pratique,
-                // C, P, details}) — l'ancienne lecture duale actuel.PAN?.P rendait
-                // toujours 0. NB : pour une configurable de famille STD, la note
+                // C, P, details}). NB : pour une configurable de famille STD, la note
                 // autoritative vient du chemin riche (calculerDetailsNoteFinale) en
                 // amont ; cette valeur stockée n'est qu'un dernier repli.
-                P_pct = donneesEtudiant.actuel.P || 0;
+                P_pct = this._lireIndiceStocke(da);
                 break;
 
             case 'moyenne_ponderee':
                 // #395 : délègue à la vraie moyenne pondérée de PratiqueSommative
                 // (patron exact de la délégation SPE du 6 juin, cf. 'specifications'
-                // ci-dessous). L'ancienne lecture duale actuel.SOM?.P — format retiré
-                // en Beta 95.5 — rendait P = 0 pour TOUT LE MONDE, affiché comme un
-                // vrai zéro. Instance jetable, lecture seule.
-                P_pct = this._calculerPerformanceSommative(da, donneesEtudiant);
+                // ci-dessous). Instance jetable, lecture seule.
+                P_pct = this._calculerPerformanceSommative(da);
                 break;
 
             case 'specifications':
                 // Délègue à la vraie logique tout-ou-rien (bundles) de
                 // PratiquePanSpecifications, configurée avec la config de CETTE
-                // instance. Sans cette délégation, une SPE configurable retombait
-                // sur la valeur PAN stockée dans indicesCP (faux : ce n'était pas
-                // un calcul par paliers). Lecture seule, instance jetable.
-                P_pct = this._calculerPerformanceSpecifications(da, donneesEtudiant);
+                // instance (#708 : dans l'une ou l'autre forme). Lecture seule.
+                P_pct = this._calculerPerformanceSpecifications(da);
                 break;
 
             // 'jugement_global' (DEN) est traité par court-circuit en tête de
@@ -223,8 +217,7 @@ class PratiqueConfigurable {
 
             default:
                 console.warn(`Méthode de calcul inconnue : ${this.config.calcul_note.methode}`);
-                // #395 : lecture du store PLAT (le dual PAN?.P rendait toujours 0)
-                P_pct = donneesEtudiant.actuel.P || 0;
+                P_pct = this._lireIndiceStocke(da);
         }
 
         // #395 : une délégation qui ne peut pas produire de valeur (aucune évaluation)
@@ -238,6 +231,19 @@ class PratiqueConfigurable {
     }
 
     /**
+     * #709 — la valeur PLATE stockée dans `indicesCP` pour cet élève (0-100), ou null si le
+     * cache n'a pas d'entrée : un cache vide n'est pas un zéro.
+     * @param {string} da
+     * @returns {number|null}
+     */
+    _lireIndiceStocke(da) {
+        const indicesCP = db.getSync(cle('indicesCP'), {}) || {};
+        const entree = indicesCP[da];
+        if (!entree || !entree.actuel || typeof entree.actuel.P !== 'number') return null;
+        return entree.actuel.P;
+    }
+
+    /**
      * #395 — Performance « moyenne_ponderee » (Sommative configurable) : délègue à
      * la vraie logique de PratiqueSommative (moyenne pondérée des évaluations
      * actives, production.ponderation || 1), au lieu de relire le format dual
@@ -246,13 +252,12 @@ class PratiqueConfigurable {
      * jetable.
      *
      * @param {string} da - DA de l'étudiant
-     * @param {Object} donneesEtudiant - entrée indicesCP[da] (repli si classe absente)
      * @returns {number|null} P en pourcentage (0-100), null si non calculable
      */
-    _calculerPerformanceSommative(da, donneesEtudiant) {
+    _calculerPerformanceSommative(da) {
         if (typeof window.PratiqueSommative !== 'function') {
-            // Classe absente → repli sur la valeur PLATE connue du store.
-            return donneesEtudiant?.actuel?.P || 0;
+            // Classe absente → repli sur la valeur PLATE connue du store (#709 : null si vide).
+            return this._lireIndiceStocke(da);
         }
         const inst = new window.PratiqueSommative();
         const p = inst.calculerPerformance(da); // décimal 0-1, ou null
@@ -331,8 +336,15 @@ class PratiqueConfigurable {
      */
     decrireCalcul(da) {
         if (!da) return null;
+        if (this.config.calcul_note && this.config.calcul_note.methode === 'specifications') {
+            // #708 — le récit d'une SPE configurable vient du même délégué que sa note
+            // (parité C2-c), sous le nom de CETTE pratique.
+            const inst = this._instanceSpecifications();
+            const recit = inst ? inst.decrireCalcul(da) : null;
+            return recit ? Object.assign(recit, { pratiqueNom: this.obtenirNom() }) : null;
+        }
         if (!(this.config.calcul_note && this.config.calcul_note.methode === 'jugement_global')) {
-            return null; // pas une DEN : aucun récit de jugement à produire
+            return null; // ni DEN ni SPE : aucun récit à produire ici
         }
         if (!window.denotationJugements) return null;
 
@@ -384,6 +396,35 @@ class PratiqueConfigurable {
     }
 
     /**
+     * L'instance PanSpecifications jetable configurée avec la config de CETTE pratique,
+     * ou null si la classe est absente ou la config incomplète.
+     *
+     * #708 — la config peut être dans la forme du moteur (`tableBundles`) OU dans celle que
+     * l'application écrit (`forfaits`, seuil à la racine) : `configurerPratique` traduit.
+     * @returns {Object|null}
+     */
+    _instanceSpecifications() {
+        const cfg = this.config.configuration || this.config;
+        if (typeof window.PratiquePanSpecifications !== 'function' ||
+            !cfg || !Array.isArray(cfg.typesTravaux) ||
+            !(Array.isArray(cfg.tableBundles) || Array.isArray(cfg.forfaits))) {
+            return null;
+        }
+        const inst = new window.PratiquePanSpecifications();
+        inst.configurerPratique({
+            typesTravaux: cfg.typesTravaux,
+            tableBundles: cfg.tableBundles,
+            forfaits: cfg.forfaits,
+            seuilAcceptable: cfg.seuilAcceptable,
+            seuilAcceptabilite: cfg.seuilAcceptabilite,
+            jetons: cfg.jetons,
+            seuilReussite: cfg.seuilReussite,
+            seuilExcellence: cfg.seuilExcellence
+        });
+        return inst;
+    }
+
+    /**
      * Délègue le calcul de performance SPE à PratiquePanSpecifications.
      *
      * La logique des paliers (bundles, tout-ou-rien) vit UNIQUEMENT dans la classe
@@ -391,27 +432,18 @@ class PratiqueConfigurable {
      * en configurant une instance jetable avec sa propre config. Aucune écriture.
      *
      * @param {string} da - DA de l'étudiant
-     * @param {object} donneesEtudiant - entrée indicesCP[da] (pour le repli)
-     * @returns {number} P en pourcentage (0-100)
+     * @returns {number|null} P en pourcentage (0-100), null si non calculable
      */
-    _calculerPerformanceSpecifications(da, donneesEtudiant) {
-        const cfg = this.config.configuration || this.config;
-        if (typeof window.PratiquePanSpecifications !== 'function' ||
-            !cfg || !Array.isArray(cfg.typesTravaux) || !Array.isArray(cfg.tableBundles)) {
+    _calculerPerformanceSpecifications(da) {
+        const inst = this._instanceSpecifications();
+        if (!inst) {
             // Classe absente ou config incomplète → repli sur la valeur PLATE connue
-            // (#395 : le format dual actuel.PAN a été retiré en Beta 95.5).
-            return donneesEtudiant?.actuel?.P || 0;
+            // (#395 : le format dual actuel.PAN a été retiré en Beta 95.5 ; #709 : null si vide).
+            return this._lireIndiceStocke(da);
         }
-        const inst = new window.PratiquePanSpecifications();
-        inst.configurerPratique({
-            typesTravaux: cfg.typesTravaux,
-            tableBundles: cfg.tableBundles,
-            jetons: cfg.jetons,
-            seuilReussite: cfg.seuilReussite,
-            seuilExcellence: cfg.seuilExcellence
-        });
         const perf = inst.calculerPerformance(da); // 0-1, ou null si pas de données
-        return (perf === null || perf === undefined) ? 0 : perf * 100;
+        // #709 : « pas de données » n'est pas un zéro.
+        return (perf === null || perf === undefined) ? null : perf * 100;
     }
 
     // ========================================================================

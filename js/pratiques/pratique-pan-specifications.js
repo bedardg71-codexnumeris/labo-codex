@@ -27,6 +27,83 @@
 (function() {
 'use strict';
 
+/**
+ * #708 (audit du 5 septembre 2026, constat D-3) — DEUX FORMES POUR UNE SEULE RÈGLE.
+ *
+ * Le moteur lit `typesTravaux[] { id, nom, seuilAcceptable }` et
+ * `tableBundles[] { noteFixe, label, requis: { typeId: n } }`. Or ce que l'application ÉCRIT
+ * — le gabarit « Modèle simple » (pratiques-bibliotheque.js), l'éditeur de gabarit
+ * (pratiques-gestion.js) et l'ancien éditeur (pratique-notation-v2.js) — est
+ * `typesTravaux[] { id, nom }` avec un `seuilAcceptable` à la racine, et
+ * `forfaits[] { lettre, note, travaux: { typeId: n } }`. Rien ne traduisait l'un en l'autre :
+ * une pratique par spécifications configurée dans l'application rendait 0 pour toute la
+ * classe, « constructible », exporté « 0, final ». Mesuré au banc D9.
+ *
+ * ⮕ La traduction se fait ICI, à la lecture, une seule fois. Rien n'est réécrit dans les
+ * données de personne (tarir n'est pas réparer) : une SPE déjà rangée en `forfaits` calcule
+ * dès ce lot, telle quelle. Quand les deux formes coexistent, `tableBundles` (la forme du
+ * moteur) prime.
+ *
+ * @param {Object} configuration - `configuration` d'une pratique, dans l'une ou l'autre forme
+ * @returns {{typesTravaux: ?Array, tableBundles: ?Array}} la forme du moteur (null = absent)
+ */
+function normaliserConfigurationSpecifications(configuration) {
+    const cfg = configuration || {};
+    const seuilRacine = (typeof cfg.seuilAcceptable === 'number') ? cfg.seuilAcceptable
+        : (typeof cfg.seuilAcceptabilite === 'number' ? cfg.seuilAcceptabilite : null);
+
+    let typesTravaux = null;
+    if (Array.isArray(cfg.typesTravaux)) {
+        typesTravaux = cfg.typesTravaux.map(t => {
+            if (!t) return t;
+            const seuil = (typeof t.seuilAcceptable === 'number') ? t.seuilAcceptable : seuilRacine;
+            return (seuil === null || seuil === t.seuilAcceptable) ? t : Object.assign({}, t, { seuilAcceptable: seuil });
+        });
+    }
+
+    let tableBundles = null;
+    if (Array.isArray(cfg.tableBundles)) {
+        tableBundles = cfg.tableBundles;
+    } else if (Array.isArray(cfg.forfaits)) {
+        tableBundles = cfg.forfaits.map(f => ({
+            noteFixe: Number(f && f.note),
+            label: (f && (f.lettre || f.label)) || undefined,
+            description: (f && f.description) || undefined,
+            // Un forfait sans travaux requis est le palier plancher (comme `requis: null`).
+            requis: (f && f.travaux && Object.keys(f.travaux).length > 0) ? Object.assign({}, f.travaux) : null
+        })).filter(b => !isNaN(b.noteFixe));
+    }
+
+    return { typesTravaux: typesTravaux, tableBundles: tableBundles };
+}
+
+/** Sans casse ni accents ni espaces : « Présentation » ↔ `presentation`. */
+function _cleNom(valeur) {
+    return String(valeur == null ? '' : valeur).toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[\s_-]+/g, '');
+}
+
+/**
+ * #708 — un type de travail s'apparie à une production par son `id` (la forme du moteur :
+ * `production.type === typeTravail.id`, ou `production.identifiant`), OU par son NOM contre le
+ * type de la production et le libellé de ce type (« Projet » ↔ `projet`, « Examen » ↔ `examen`) :
+ * c'est le seul lien qu'un type nommé dans un gabarit peut avoir avec une production.
+ */
+function _productionEstDuType(production, typeTravail) {
+    if (!production || !typeTravail) return false;
+    const id = typeTravail.id;
+    if (id !== undefined && id !== null && String(id) !== '') {
+        if (production.type === id || production.identifiant === id) return true;
+        if (String(production.type) === String(id)) return true;
+    }
+    const nom = _cleNom(typeTravail.nom);
+    if (!nom) return false;
+    if (_cleNom(production.type) === nom) return true;
+    const table = (typeof window !== 'undefined' && Array.isArray(window.TYPES_PRODUCTION)) ? window.TYPES_PRODUCTION : [];
+    const entree = table.find(t => t && t.id === production.type);
+    return !!(entree && (_cleNom(entree.libelle) === nom || _cleNom(entree.libelleLong) === nom));
+}
+
 class PratiquePanSpecifications {
 
     constructor() {
@@ -113,12 +190,17 @@ class PratiquePanSpecifications {
      * @param {Object} configuration.jetons - Configuration des jetons
      */
     configurerPratique(configuration) {
-        if (configuration.typesTravaux) {
-            this.config.typesTravaux = configuration.typesTravaux;
+        // #708 — la forme que l'application ÉCRIT (gabarit « Modèle simple », éditeur de
+        // gabarit, ancien éditeur : `forfaits` + `typesTravaux` sans seuil par type) est
+        // traduite ICI, une fois, vers la forme que le moteur lit (`tableBundles`).
+        const normalisee = normaliserConfigurationSpecifications(configuration);
+
+        if (normalisee.typesTravaux) {
+            this.config.typesTravaux = normalisee.typesTravaux;
         }
 
-        if (configuration.tableBundles) {
-            this.config.tableBundles = configuration.tableBundles;
+        if (normalisee.tableBundles) {
+            this.config.tableBundles = normalisee.tableBundles;
         }
 
         if (configuration.jetons) {
@@ -161,13 +243,11 @@ class PratiquePanSpecifications {
             return null;
         }
 
-        // Lire les évaluations
+        // Lire les évaluations — #706 : la règle unique du registre (un élève qui n'a que
+        // des brouillons n'a pas de note, pas un palier d'échec)
         const evaluations = this._lireEvaluations();
         const evaluationsEleve = evaluations.filter(e =>
-            e.etudiantDA === da &&
-            !e.remplaceeParId &&
-            e.noteFinale !== null &&
-            e.noteFinale !== undefined
+            e.etudiantDA === da && window.evaluationEntreDansLaNote(e)
         );
 
         if (evaluationsEleve.length === 0) {
@@ -218,12 +298,9 @@ class PratiquePanSpecifications {
         }
 
         const evaluations = this._lireEvaluations();
-        // MÊMES critères de validité que calculerPerformance (garantit la parité).
+        // MÊMES critères de validité que calculerPerformance (garantit la parité) — #706.
         const valides = (evaluations || []).filter(e =>
-            e.etudiantDA === da &&
-            !e.remplaceeParId &&
-            e.noteFinale !== null &&
-            e.noteFinale !== undefined
+            e.etudiantDA === da && window.evaluationEntreDansLaNote(e)
         );
 
         if (valides.length === 0) {
@@ -639,10 +716,10 @@ class PratiquePanSpecifications {
         this.config.typesTravaux.forEach(typeTravail => {
             comptes[typeTravail.id] = 0;
 
-            // Filtrer les évaluations de ce type
+            // Filtrer les évaluations de ce type (#708 : par id OU par nom)
             const evaluationsCeType = evaluations.filter(e => {
                 const prod = productions.find(p => p.id === e.productionId);
-                return prod && (prod.type === typeTravail.id || prod.identifiant === typeTravail.id);
+                return _productionEstDuType(prod, typeTravail);
             });
 
             // Compter celles qui sont acceptables
@@ -670,6 +747,11 @@ class PratiquePanSpecifications {
      */
     _estTravailAcceptable(evaluation, typeTravail) {
         if (!evaluation || !typeTravail) {
+            return false;
+        }
+
+        // #706 — un brouillon ou une portée nulle n'est pas un travail acceptable
+        if (!window.evaluationEntreDansLaNote(evaluation)) {
             return false;
         }
 
@@ -788,6 +870,8 @@ class PratiquePanSpecifications {
 
 // Export de la classe pour utilisation directe
 window.PratiquePanSpecifications = PratiquePanSpecifications;
+// #708 — la traduction forfaits → tableBundles, réutilisable (sonde de stock, attributs)
+window.normaliserConfigurationSpecifications = normaliserConfigurationSpecifications;
 
 
 
