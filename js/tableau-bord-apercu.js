@@ -2609,6 +2609,10 @@ function afficherAlerteNonParticipation(etudiants) {
     const alerteExistante = carteIndicateurs.querySelector('.alerte-non-participation');
     if (alerteExistante) alerteExistante.remove();
 
+    // #731 — l'alerte nommée suit la même garde que la carte RàI et la cible : sans travail dû ou sans
+    // copie évaluée dans le groupe, personne n'est « sans aucun travail remis » — il n'y a rien à remettre.
+    if (typeof depistagePeutJugerLaNonParticipation === 'function' && !depistagePeutJugerLaNonParticipation().possible) return;
+
     if (nonParticipants.length === 0) return;
 
     // Construire la liste nommée
@@ -2680,6 +2684,9 @@ function afficherPatternsApprentissage(etudiants) {
         try {
             if (typeof determinerCibleIntervention === 'function') {
                 const cibleInfo = determinerCibleIntervention(e.da);
+                // #731 — « En attente » (niveau 0) n'est pas un pattern : l'élève n'entre pas dans la barre,
+                // comme la barre RàI l'écarte déjà (`if (niveau)`).
+                if (cibleInfo && cibleInfo.niveau === 0) return;
                 const pattern = cibleInfo ? cibleInfo.pattern : null;
 
                 // Normaliser le pattern

@@ -304,7 +304,7 @@ function monter(jeu, opts = {}) {
     chargerAvecInterne('js/interventions.js', globaux, win, ['genererAffichageNotesIndividuelles']);
     chargerAvecInterne('js/consolidation.js', globaux, win, ['calculerMatriceConsolidation']);
     chargerScript('js/snapshots.js', globaux, win);
-    chargerAvecInterne('js/tableau-bord-apercu.js', globaux, win, ['_tousEtudiantsEnrichis', '_etudiantsPrioritaires', '_filtresActifs', 'appliquerFiltres', 'nettoyerEtudiantsSuivis']);
+    chargerAvecInterne('js/tableau-bord-apercu.js', globaux, win, ['_tousEtudiantsEnrichis', '_etudiantsPrioritaires', '_filtresActifs', 'appliquerFiltres', 'nettoyerEtudiantsSuivis', 'afficherAlerteNonParticipation']);
     chargerAvecInterne('js/graphiques-progression.js', globaux, win, ['obtenirDonneesCriteres', 'niveauHabiletesVersDecimal', 'genererZonesDepuisEchelle']);
 
     /** La chaîne complète de calcul, comme l'ouverture du Suivi du groupe la déclenche. */
@@ -669,25 +669,28 @@ describe('D · quel palier pour celui dont on ne sait rien', () => {
         expect(p.suivi).toBeNull();
     });
 
-    it('D2 · DÉBUT DE TRIMESTRE : présences prises, AUCUNE évaluation pour personne → les trois élèves sont « Non-participation » niveau 3', () => {
-        // À la main : la règle ne regarde pas si un travail est dû ou évalué ; A > 0 et nbArtefacts 0 suffisent. Au retour de la
-        // première séance, avant le premier travail, la carte RàI, la barre RàI du groupe et la barre des patterns disent
-        // « Niveau 3 – Non-participation » pour tout le groupe ; l'alerte nommée du tableau de bord le dit aussi (nombreSeances > 0, rien remis).
+    it('D2 · DÉBUT DE TRIMESTRE : présences prises, AUCUNE évaluation pour personne → « En attente » partout (#731 ; avant : « Non-participation » niveau 3 pour les trois)', () => {
+        // À la main : la règle de Grégoire (5 sept.) — « Non-participation » seulement si un travail est dû ET qu'une copie du groupe est
+        // évaluée. Ici les quatre travaux sont dus, aucune copie n'est évaluée → la garde rend { possible: false, raison: 'aucune-copie-evaluee' } :
+        // carte RàI niveau 0, cible niveau 0, aucune alerte nommée. Avant #731, la règle ne regardait que « A > 0 et nbArtefacts 0 ».
         const jeu = jeuBase(); jeu.evaluations = [];
-        const b = monter(jeu); b.calculerTout();
+        const inserts = [];
+        const b = monter(jeu, { elements: { 'carte-indicateurs-acpe': elementDom({ insertAdjacentHTML: (ou, h) => inserts.push(h) }) } }); b.calculerTout();
+        const garde = b.win.depistagePeutJugerLaNonParticipation();
         const niveaux = [DA.ASSIDU, DA.ABSENT, DA.SILENCE].map(da => b.win.determinerNiveauRaiPedagogique(da).label);
         const cibles = [DA.ASSIDU, DA.ABSENT, DA.SILENCE].map(da => b.win.determinerCibleIntervention(da).cible);
-        // Le filtre de l'alerte « présents sans aucun travail remis » (tableau-bord-apercu.js, afficherAlerteNonParticipation), rejoué :
-        const alerte = [DA.ASSIDU, DA.ABSENT, DA.SILENCE].filter(da => { const i = b.win.calculerIndicesEtudiant(da).sommatif; return i.nombreSeances > 0 && !(i.completion > 0 || i.performance > 0); });
-        noter('D2', { niveaux, cibles, alerteNommee: alerte.length });
-        expect(niveaux).toEqual(['Non-participation', 'Non-participation', 'Non-participation']);
-        expect(cibles).toEqual(['Non-participation', 'Non-participation', 'Non-participation']);
-        expect(alerte.length).toBe(3);
+        // L'alerte nommée RÉELLE du tableau de bord, avec ce qu'il lui passe (calculerIndicesEtudiant par élève).
+        b.interne['tableau-bord-apercu.js'].afficherAlerteNonParticipation([DA.ASSIDU, DA.ABSENT, DA.SILENCE].map(da => Object.assign({ da }, b.win.calculerIndicesEtudiant(da))));
+        noter('D2', { garde, niveaux, cibles, alerteNommee: inserts.length });
+        expect(garde).toEqual({ possible: false, raison: 'aucune-copie-evaluee' });
+        expect(niveaux).toEqual(['En attente', 'En attente', 'En attente']);        // avant : trois « Non-participation »
+        expect(cibles).toEqual(['En attente', 'En attente', 'En attente']);         // avant : trois « Non-participation »
+        expect(inserts.length).toBe(0);                                              // avant : « 3 étudiants présents sans aucun travail remis »
     });
 
-    it('D3 · ZÉRO DONNÉE (ni présence ni évaluation) : A vaut 100 par défaut → « Non-participation » niveau 3 dès que les indices ont été calculés une fois', () => {
-        // À la main : calculerAssiduite sans aucune séance saisie rend { indice: 1 } — 100 %. Le RàI lit A > 0 → « Non-participation ».
-        // Tant que le stock indicesAssiduite n'existe pas (aucun écran du Suivi ouvert), A = 0 → « En attente », niveau 0.
+    it('D3 · ZÉRO DONNÉE (ni présence ni évaluation) : A vaut toujours 100 par défaut (indices.js, inscrit), mais la garde #731 rend « En attente » — avant : « Non-participation » dès le premier calcul', () => {
+        // À la main : calculerAssiduite sans aucune séance saisie rend { indice: 1 } — 100 % — et c'est inchangé (défaut inscrit, pas corrigé).
+        // Avant #731, le RàI lisait A > 0 → « Non-participation » dès que le stock indicesAssiduite existait. La garde le couvre : aucune copie évaluée.
         const jeu = jeuBase(); jeu.evaluations = []; jeu.presences = [];
         const avant = monter(jeu);
         const raiAvant = avant.win.determinerNiveauRaiPedagogique(DA.ASSIDU);
@@ -696,8 +699,8 @@ describe('D · quel palier pour celui dont on ne sait rien', () => {
         const A = apres.win.calculerTousLesIndices(DA.ASSIDU).A;
         noter('D3', { avantCalcul: { niveau: raiAvant.niveau, label: raiAvant.label }, apresCalcul: { niveau: raiApres.niveau, label: raiApres.label, A } });
         expect(raiAvant).toMatchObject({ niveau: 0, label: 'En attente' });
-        expect(A).toBe(100);
-        expect(raiApres).toMatchObject({ niveau: 3, label: 'Non-participation' });
+        expect(A).toBe(100);                                                         // le défaut d'indices.js, tel quel
+        expect(raiApres).toMatchObject({ niveau: 0, label: 'En attente' });          // avant #731 : niveau 3 « Non-participation »
     });
 
     it('D4 · UNE SEULE évaluation faible : le suivi des fondations dit « Difficulté émergente » niveau 1, la carte RàI dit niveau 3', () => {
