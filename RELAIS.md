@@ -7,6 +7,41 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, 11 H 00 → 11 H 45 : LES SIX « CORRIGER MAINTENANT » DE L'AUDIT LIVRÉS EN UN LOT (1.123.7, #767 À #772)
+
+> ↻ **Même session que l'audit (SESSION 32), arbre principal cette fois** : Cowork a réécrit la consigne à 10 h 57 sur l'arbitrage de
+> Grégoire (« corrige les six, en un lot, une sentinelle par correctif, livre une fois ») ; l'autre session Claude Code
+> (`monitorage-v6-75`) a confirmé par message qu'elle ne touchait pas `js/` et que je prenais le lot. Branche
+> `fix/six-corriger-maintenant-audit-suivi` depuis `e2631728` ; consigne d'audit archivée (`b42bf39e`) ; release
+> `patch` **1.123.7** (build `0906-1108`, commit `a3909b23`) ; fusion fast-forward vers `main`.
+> ▣ **Les six, dans l'ordre** : **#767** `modes.js:279` — `let doitRegenerer = false;` (affecté sans déclaration sous 'use strict' :
+> l'anonymisation levait ReferenceError sur tout trimestre sans mapping ; SOURCE seulement, le plantage précédait toute écriture,
+> aucun mapping partiel possible en stock). **#768** `saisie-presences.js:2007` — la barre reconstruite porte « Rapport », et
+> « Annuler » vise `suivi-liste` (la cible de la barre statique d'`index.html:8005` : un mot, une destination). **#769**
+> `interventions.js:363/780/793/824` — titre, heure, description, séance échappés ; sentinelle #733 étendue. **#770**
+> `boite-outils.js:387/829/891/962` — nom/prénom, texte de question, nom de catégorie échappés. **#771**
+> `trimestre-v2-etudiants.js:801` — « N étudiant(s) importé(s) — M au total dans le groupe » (`nbImportes` + `verification`) ; plus
+> de ReferenceError après l'écriture. **#772** `interventions.js:1221` — garde-fou « ce que le formulaire montre s'écrit tel quel,
+> ce qu'il ne montre pas reste » (notes fusionnées, participants d'un autre groupe-cours conservés, dédoublonnés).
+> ⚠ **La règle de Grégoire « une intervention appartient à un groupe-cours » N'EST PAS implémentée** : mesuré, aucune intervention
+> ne porte de `coursId` (`creerIntervention:117-138`), la liste n'est filtrée par rien (`afficherListeInterventions:299-348`) —
+> c'est #746, lot à part, à inscrire tel quel. ⚠ **Stock #772** : les notes déjà effacées chez Grégoire ne reviennent pas ; porte
+> terrain EN LECTURE SEULE `plans de travail/PORTE-TERRAIN-2026-09-06-interventions-rognees.md` (un extrait console, zéro écriture ;
+> Cowork publie l'artefact jumeau). Rien d'écrit dans ses données.
+> ▣ **Preuves** : cinq sentinelles neuves (767, 768, 770, 771, 772 — 9 cas) + #733 étendue (1 cas), bac partagé
+> `tests/unit/_helpers/bac-suivi.js` (modes.js réel, db de banc avec `modifier`, faux document) ; **sept break-tests rouges** (un par
+> correctif, deux pour #772) puis restauration à empreinte MD5 identique ; le banc d'audit passe six mesures (I-2, I-3, I-4, L-7, S-5,
+> A-3) aux valeurs d'après. Audit statique du diff : 0 motif ; zones protégées intactes. Vitest depuis `tests/` sur le commit :
+> **497 fichiers / 5 471 verts**. **Verdict Playwright WebKit local VERT au jeton sur `a3909b23` (code 0, 0 échec connu, 0 instable, rendu 15 h 23 Z / 11 h 23 Toronto, 601 s)** ; push après le verdict, dans l'ordre du §4.5.
+> ▣ Trouvailles en chemin, arbitrées : `doitRegenerer` n'est lu nulle part (commenté dans le code, pas inscrit) ; le changelog 1.123
+> a reçu cinq items de plus (consolidation des patches, comme la règle le dit) ; un premier amend a été refusé par le hook anti-cache
+> (jeton du changelog déjà à HEAD) → lettre incrémentée `g → h`.
+> ⏳ **Ce qui attend Grégoire** : la porte terrain #772 (deux minutes, console, lecture seule) ; sur 1.123.7, basculer une fois en
+> anonymisation sur A2026 (le premier mapping se crée) ; les « inscrire » du rapport d'audit, section par section, dont #746 avec sa
+> règle désormais arrêtée.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, 10 H 12 → 11 H 10 : QUATRIÈME AUDIT CADRÉ DÉPOSÉ (LES SIX SOUS-ONGLETS DE SUIVI), SANS CODER — GRÉGOIRE ARBITRE
 
 > ↻ **Séance sur le Mac, dans un WORKTREE** (`Monitorage_v6-wt-audit-suivi`, branche `audit/sous-onglets-suivi-2026-09-06` partie de
