@@ -172,9 +172,21 @@ function supprimerEvaluationDepuisProfil(evaluationId) {
 // ne sait pas encore calculer cette famille (ses données étant cohérentes). Brique de la
 // future fonction « simuler / comparer des pratiques sur les mêmes données ».
 function _diagnostiquerNoteNonCalculable() {
-    const pratiqueId = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
+    // #762 (6 sept. 2026) — LA SOURCE DE VÉRITÉ D'ABORD. `obtenirPratiqueActiveGroupeCours`
+    // (modes.js) ne rend jamais null : sans `pratiqueId`, elle rend le repli « sommative », que
+    // ce diagnostic cherchait ensuite dans la bibliothèque — d'où « introuvable dans la
+    // bibliothèque (supprimée, ou assignation vers un identifiant obsolète) » pour un
+    // groupe-cours simplement SANS pratique, et une consigne qui ne pouvait pas le résoudre.
+    // Mesuré sur les données de Grégoire (BUG_grégoire_2026-09-06_07-48-42 : `pratiqueId: null`)
+    // et par l'audit du 5 septembre (constat A-1, #710). Le groupe-cours actif est lu tel quel ;
+    // sans groupe-cours résolu, rien ne peut porter l'assignation : même réponse.
+    const gcActif = db.getSync('groupeCoursActif', null);
+    const groupesCours = db.getSync(cle('groupesCours'), []) || [];
+    const gc = (gcActif && gcActif.id && Array.isArray(groupesCours))
+        ? groupesCours.find(g => g && g.id === gcActif.id) : null;
+    const pratiqueId = (gc && gc.pratiqueId) ? gc.pratiqueId : null;
     if (!pratiqueId) {
-        return 'Aucune pratique de notation n\'est assignée à ce groupe-cours. Choisis-en une dans Conception → Pratiques de notation.';
+        return 'Aucune pratique de notation n\'est assignée à ce groupe-cours. Ouvre Conception → Pratiques de notation, choisis ta pratique et clique « Appliquer au cours actif ».';
     }
     const pratiquesCfg = db.getSync(cle('pratiquesConfigurables'), null) || [];
     const pratiqueData = pratiquesCfg.find(p => p.id === pratiqueId) || null;

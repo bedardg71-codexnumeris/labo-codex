@@ -63,8 +63,22 @@ const PratiqueManager = {
             return null;
         }
 
-        this.pratiqueActive = new PratiqueConfigurable(pratiqueData.config);
-        return this.pratiqueActive;
+        // #762 (6 sept. 2026) — LA LECTURE UNIQUE DU REGISTRE, pas `pratiqueData.config` seul.
+        // Une pratique écrite par l'assistant range tout sous `configuration` (pas `config`) :
+        // `new PratiqueConfigurable(undefined)` levait ici, juste APRÈS que `changerPratiqueActive`
+        // eut écrit la source de vérité — « Appliquer au cours actif » assignait, puis sortait sur
+        // une erreur sans rendre la barre (porte WebKit `pratiques-762-…`). `obtenirPratiqueParId`
+        // (pratique-registre.js) construit la configuration complète (racine, `config`,
+        // `configuration`, échelle par référence) et rend null, sans lever, si elle est illisible.
+        const instance = (typeof window.obtenirPratiqueParId === 'function')
+            ? window.obtenirPratiqueParId(pratiqueId)
+            : null;
+        if (!instance) {
+            console.error(`[PratiqueManager] Pratique illisible : ${pratiqueId}`);
+            return null;
+        }
+        this.pratiqueActive = instance;
+        return instance;
     },
 
     /**
