@@ -7,6 +7,47 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, 10 H 12 → 11 H 10 : QUATRIÈME AUDIT CADRÉ DÉPOSÉ (LES SIX SOUS-ONGLETS DE SUIVI), SANS CODER — GRÉGOIRE ARBITRE
+
+> ↻ **Séance sur le Mac, dans un WORKTREE** (`Monitorage_v6-wt-audit-suivi`, branche `audit/sous-onglets-suivi-2026-09-06` partie de
+> `2fb1facf`), parce qu'une autre session Claude Code travaillait dans l'arbre principal (#765 → 1.123.6 `126b41ce`, puis son commit de
+> relais `f5df6177`). Les deux sessions se sont coordonnées par message : aucun fichier de Cowork commis de son côté, fusion fast-forward du
+> mien après le sien. **Rien dans `js/`** (audit en lecture seule ; empreintes MD5 identiques après trois break-tests).
+> ▣ **Déposé : `Rapports/AUDIT-sous-onglets-suivi-2026-09-06.md`** — six sections dans l'ordre de la navigation, chacune ouverte par son
+> tableau des gestes (`data-action` → fonction → effet mesuré → écriture), puis logique / affichage / sauvegardes. Banc
+> `tests/unit/audit-sous-onglets-suivi-2026-09-06.test.js` (34 mesures, modules réels, `db` de banc avec journal et `db.modifier`
+> reproduit, minuteries virtuelles ; un `describe` par sous-onglet). Captures WebKit LOCALES (30 + 6, deux viewports, démo et vide)
+> hors dépôt : `_to_delete/captures-audit-suivi-2026-09-06/` (git-ignoré) — rien de poussé qui déclenche Playwright pour l'axe
+> affichage ; le push de `tests/unit/` déclenche la CI (liste `OBSERVABLE`, #756), assumé par la consigne.
+> ⚠ **Six « corriger maintenant » proposés (§0 du rapport, une page), à arbitrer une ligne à la fois** — deux sont HORS des six
+> modules mais sous chacun d'eux : **CM-1 `modes.js:310/338`** — `doitRegenerer` affecté sans déclaration sous `'use strict'` :
+> **le mode anonymisation lève `ReferenceError` à chaque lecture de `groupeEtudiants` sur tout trimestre sans mapping** (démo, A2026),
+> mesuré au vrai geste `basculerModeAnonymisation()` ; H2026 a un mapping ancien, d'où le silence depuis le 22 février (`8b739ae3`).
+> **CM-2 `saisie-presences.js:2023`** — « Annuler » de la barre reconstruite vise `suivi-apercu-legacy` (inexistant) → aucune sous-section
+> active, Suivi vide ; la même reconstruction fait disparaître le bouton « Rapport » PDF dès qu'une date est choisie. **CM-3
+> `interventions.js:363/793`** — titre et description bruts (règle 1 ; le titre `Sonde <b>3</b>` s'affiche en gras). **CM-4
+> `boite-outils.js:387`** — nom/prénom bruts dans la modale projetée du tirage. **CM-5 `trimestre-v2-etudiants.js:801`** — confirmer un
+> import CSV écrit les élèves puis lève `ReferenceError` (variable du mutateur hors portée) : pas de confirmation. **CM-6 (à arbitrer)
+> `interventions.js:1277-1283`** — enregistrer efface les notes des décochés et retire les participants d'un autre groupe-cours.
+> ▣ Autres constats, tous « inscrire » ou « commenter », **rien au BACKLOG** (les fiches se créent à l'arbitrage) : 12 clés NUES du
+> Suivi (`etudiantsSuivis` purgée en base à la consultation d'un autre groupe-cours — produit de #749 —, `datesVerrouillees`,
+> `presences_*`, `etatTirage`, `questionsFlash_<coursId>`, `preferencesRapport` sans DA, `profilOngletDeveloppementActif`, …) ;
+> tri « # » sans effet et DA lexicographique ; abandons absents du tableau contre la note de l'écran ; recherche sensible aux
+> accents ; option « En progression » morte ; « ≥ Min. » perdu au re-rendu ; DA en double accepté ; groupe non padé ; 3 écritures
+> par caractère tapé dans la recherche ; bandeau « Configuration incomplète » à tort après activation de la démo (jusqu'au
+> rechargement) ; brouillon d'intervention écrit puis purgé en silence ; bilan « I 65 % » contre « seuil D (64 %) » ; graphiques
+> `B` → trou, `3` → 75 %, points → % ; tirage équitable mais jamais réinitialisé seul (l'infobulle promet le contraire) ; 58 cibles
+> tactiles sous 44 px ; pack démo sans grille de référence (520 avertissements), sans intervention, sans question flash.
+> ▣ **Vérifié comment** : 34 mesures exécutées sur le code réel ; trois break-tests rouges puis restaurés (I-4, G-2 refait après une
+> première mutation non appliquée — piège 8.4 —, S-5) ; cinq sondes navigateur (la sonde 2, qui vidait `localStorage` à chaque
+> chargement, faisait ré-amorcer le pack démo et montrait un faux « retour à 2 h » : refaite proprement en sonde 3, l'écriture
+> survit au rechargement). Vitest depuis `tests/` : 491 fichiers / 5 459 verts. Pas de release (rien dans `js/`), pas de verdict
+> Playwright local (aucun spec touché ; le push est jugé par la CI).
+> ⏳ **Ce qui attend Grégoire** : le §0 du rapport (six lignes) ; puis, s'il le veut, les « inscrire » section par section. #759
+> (option 2) n'a pas été relayé : non fait, comme la consigne le prévoyait.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, MATIN (MESURE DU PDF DE L'ÉLÈVE DÉPOSÉE, PUIS SES DEUX CONSTATS CORRIGÉS : 1.123.1 ; PUIS CINQ RETOURS TESTEUR CORRIGÉS : 1.123.2 À 1.123.6)
 
 > ↻ **6 h 28 → 7 h 15, sur le Mac.** Temps 0 de la consigne (rapatrier la clôture) **déjà fait** par `886d9828` avant la séance
