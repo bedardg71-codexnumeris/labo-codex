@@ -83,9 +83,16 @@ test('Porte #732 · le bouton « Rapport » du profil produit un rapport dont le
     expect(montage.erreur, `Erreur de montage : ${montage.erreur}`).toBeUndefined();
 
     // Le rapport s'écrit au rendu de la section (post-rendu T+100 ms → restaurerPreferencesRapport → genererEtAfficherRapport).
-    // On attend la zone de texte REMPLIE, pas une durée.
-    await page.waitForFunction(() => { const t = document.getElementById('textarea-rapport-TEST732'); return !!(t && t.value && t.value.length > 0); }, null, { timeout: 10000 });
-    const rapport = await page.evaluate(() => document.getElementById('textarea-rapport-TEST732').value);
+    // On attend la zone de texte REMPLIE, pas une durée — et on la LIT DANS LA MÊME ÉVALUATION. Ouvrir un profil le rend
+    // trois fois (#754) : afficherProfilComplet → afficherSousSection('suivi-profil') → auto-chargement de navigation.js à
+    // T+100 ms, puis le MutationObserver de profil-etudiant-sections-affichage.js à T+100 ms ; chaque rendu remplace la zone
+    // de texte par une vide, que son propre T+100 remplit à nouveau. Mesuré : vide 7 ms → remplie 108 ms → vide 212 ms →
+    // remplie 317 ms. Sur le runner GitHub (run 34001941420, 1.123.0), une lecture séparée de l'attente tombait dans la
+    // fenêtre vide — « Received string: "" » aux deux essais — alors que l'instantané de la trace portait le rapport complet.
+    const rapport = await (await page.waitForFunction(() => {
+        const t = document.getElementById('textarea-rapport-TEST732');
+        return (t && t.value && t.value.length > 0) ? t.value : null;
+    }, null, { timeout: 10000 })).jsonValue();
 
     // AVANT le correctif : « Erreur lors de la génération du rapport :\n\nobtenirDetailsAssiduite is not defined ».
     expect(rapport, rapport).not.toMatch(/Erreur lors de la génération du rapport/);
