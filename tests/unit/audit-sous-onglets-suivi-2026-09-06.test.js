@@ -33,7 +33,7 @@ const echapperHtml = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').re
 function chargerAvecInterne(chemin, globaux, win, noms) {
     let code = readFileSync(path.join(RACINE, chemin), 'utf8');
     const expo = '\n;window.__audit = window.__audit || {}; window.__audit[' + JSON.stringify(path.basename(chemin)) + '] = {'
-        + noms.map(n => 'get ' + n + '() { return ' + n + '; }' + (/^(_|etat)/.test(n) ? ', set ' + n + '(v) { ' + n + ' = v; }' : '')).join(', ') + '};\n';
+        + noms.map(n => 'get ' + n + '() { return ' + n + '; }' + (/^(_|etat|donnees)/.test(n) ? ', set ' + n + '(v) { ' + n + ' = v; }' : '')).join(', ') + '};\n';
     const fin = code.lastIndexOf('})();');
     code = fin >= 0 ? code.slice(0, fin) + expo + code.slice(fin) : code + expo;
     const { document: doc, localStorage: ls, ...autres } = globaux;
@@ -404,7 +404,7 @@ describe('2 · Liste des étudiant·es — tris, filtres, écritures par rendu, 
             obtenirConfigPratiqueActive: () => ({ portfolio: { minimumCompletion: 3 } }), obtenirInterventionsEtudiant: () => [], obtenirTypePratiqueActive: () => 'standards',
             obtenirTermeProduction: () => 'artefact', obtenirCodePratique: () => 'STD'
         }, opts.globaux || {});
-        const b = monter(store, Object.assign({}, opts, { modules: ['js/interpretation-config.js', 'js/etudiants.js', 'js/trimestre-v2-etudiants.js'], globaux }));
+        const b = monter(store, Object.assign({}, opts, { modules: ['js/interpretation-config.js', 'js/etudiants.js', { chemin: 'js/trimestre-v2-etudiants.js', internes: ['donneesImportEnAttenteV2'] }], globaux }));
         b.compteurs = compteurs;
         return b;
     }
@@ -492,6 +492,17 @@ describe('2 · Liste des étudiant·es — tris, filtres, écritures par rendu, 
         noter('L6', { erreur, nbFichesMemeDA: fiches.length, groupeEcrit: fiches[1] && fiches[1].groupe, notifs: b.notifs.map(n => n.type + ':' + n.t) });
         expect(fiches.length).toBe(2);
         expect(fiches[1].groupe).toBe('1');   // non padé : « 1 » ≠ « 00001 » dans le filtre Groupe de la Liste
+    });
+    it('L-7 · Confirmer un import (Cadre › Trimestre) : les élèves sont ÉCRITS, puis la fonction lève ReferenceError (« etudiants » hors de portée, :801) — aucune confirmation ne s\'affiche', async () => {
+        const store = storeBase();
+        const b = monterL(store);
+        b.interne['trimestre-v2-etudiants.js'].donneesImportEnAttenteV2 = [{ da: '3000001', nom: 'Importé', prenom: 'Ivan', groupe: '01', programme: '' }, { da: '3000002', nom: 'Importée', prenom: 'Ida', groupe: '01', programme: '' }];
+        let erreur = null;
+        try { await b.win.confirmerImportV2(); } catch (e) { erreur = e.constructor.name + ': ' + e.message; }
+        noter('L7', { erreur, nbApres: store.test_groupeEtudiants.length, notifsSucces: b.notifs.filter(n => n.type === 'succes').length });
+        expect(store.test_groupeEtudiants.length).toBe(6);                       // écrits
+        expect(erreur).toMatch(/ReferenceError/);                                  // puis la chute
+        expect(b.notifs.filter(n => n.type === 'succes').length).toBe(0);         // et pas de « N étudiant(s) importé(s) »
     });
 });
 
