@@ -43,6 +43,7 @@
                 '<strong>Enregistrer une intervention ne détruit plus ce que le formulaire n\'a pas montré.</strong> Décocher un élève absent effaçait sa note individuelle ; rouvrir une intervention planifiée sous un autre groupe-cours et l\'enregistrer retirait tous ses participants et leurs notes. Ce que le formulaire affiche s\'écrit tel quel ; le reste est conservé (1.123.7).',
                 'Le titre et la description d\'une intervention, et les noms de la modale du tirage au sort, sont échappés avant d\'entrer dans la page (1.123.7).',
                 '<strong>Sur iPad, les palettes se redimensionnent au doigt.</strong> Le coin inférieur droit de la palette des codes (et des palettes Annotation, Tampons et Évaluer) ne se laissait pas saisir sur l\'iPad : la poignée était celle du navigateur, que Safari ne montre pas au toucher. Le coin porte maintenant une vraie poignée, au doigt, au Pencil ou à la souris, et la taille choisie est retrouvée à la prochaine ouverture (1.123.8).',
+                '<strong>La palette mise en bandeau (↔) ne couvre plus la copie.</strong> Elle prenait les trois cinquièmes de la hauteur de l\'écran même quand ses codes tenaient en deux lignes : le reste était vide, et posé sur le travail de l\'élève. Le bandeau prend maintenant la hauteur de ce qu\'il contient (1.123.9).',
             ]
         },
         {
