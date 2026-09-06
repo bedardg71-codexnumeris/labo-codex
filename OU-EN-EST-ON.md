@@ -15,8 +15,9 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-↻ **6 septembre 2026, 15 h 25 (Claude Code) — 1.123.9 POUSSÉE SUR `main`** (build `0906-1458`, `c09ca731` ; `main` = `origin/main`,
-arbre propre ; le déploiement Netlify part du push). **Ce qui change pour quelqu'un qui annote sur iPad** : le coin inférieur droit
+↻ **6 septembre 2026, 16 h 15 (Claude Code) — 1.123.9 EN LIGNE** (build `0906-1458`, `c09ca731` ; `main` = `origin/main`, arbre
+propre ; poussée à 16 h 11, déploiement Netlify `ready` sur ce commit, vérifié par l'API — la page servie, elle, n'a pas pu être lue
+d'ici, le proxy du conteneur refuse le domaine : le numéro en bas de page reste le geste qui tranche). **Ce qui change pour quelqu'un qui annote sur iPad** : le coin inférieur droit
 d'une palette (Codes, Annotation, Tampons, Évaluer) se saisit enfin au doigt pour la redimensionner — il ne portait qu'un dessin, et
 la vraie poignée était celle du navigateur, que Safari ne montre pas au toucher ; la taille choisie est retrouvée à la prochaine
 ouverture, ce qui n'était jamais le cas. Et la palette mise en bandeau (↔) prend la hauteur de ce qu'elle contient au lieu des trois
