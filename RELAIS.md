@@ -9,10 +9,10 @@
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, NUIT (1.123.0 EN LIGNE ; LE RUN DE LA RELEASE ROUGE SUR SA SPEC NEUVE, PAS SUR LE CODE ; LE RUN DU CORRECTIF DE SPEC ROUGE PAR PERTE DU RUNNER, RELANCE DUE À GRÉGOIRE ; CLÔTURE REPRISE APRÈS UN REDÉMARRAGE DU MAC)
 
-> ↻ **19 h 45 → 20 h 25 — LE LOT DU SUIVI, ARBITRÉ ET LIVRÉ : 1.123.0 (build `0905-2025`, `507b7229`, « Le Suivi ne compte plus
+> ↻ **19 h 45 → 20 h 25, poussé vers 20 h 40 — LE LOT DU SUIVI, ARBITRÉ ET LIVRÉ : 1.123.0 (build `0905-2025`, `507b7229`, « Le Suivi ne compte plus
 > une reprise deux fois, et ne déclare personne « non-participant » avant le premier travail »)**. Cinq correctifs, un commit
 > chacun, sentinelle break-testée chacun : #730 `1e8a1d72` (une évaluation remplacée par une reprise sort du dépistage, sept
-> fonctions filtrent `remplaceeParId`) ; #731 `aad47f68` (« Non-participation » seulement quand un travail est dû ET qu'une
+> fonctions filtrent `remplaceeParId`) ; #731 `aad47f66` (« Non-participation » seulement quand un travail est dû ET qu'une
 > copie du groupe est évaluée, règle de Grégoire au mot, une garde partagée `depistagePeutJugerLaNonParticipation`, trois
 > lecteurs, sinon « En attente ») ; #732 `1ebe8a2` (le rapport du profil se génère, `obtenirDetailsAssiduite` exportée ; A, C, P
 > viennent de `calculerTousLesIndices` ; spec WebKit `profil-rapport-732-se-genere.spec.js` rouge avant, verte après) ; #733
@@ -20,9 +20,15 @@
 > (le P historique d'un snapshot est celui de l'élève, ajout de Cowork au lot ; ⚠ tarir n'est pas réparer : les snapshots déjà
 > écrits gardent leur 67). Dispositions constat par constat dans `Rapports/AUDIT-onglet-suivi-2026-09-05.md` (`dd528bf`) :
 > #730-#734 corrigés, #735-#753 inscrits ; suite après le lot 483 fichiers / 5 395 tests (`7926555d`). Feu vert de la relecture
-> croisée de Cowork à 20 h 15 (rien à corriger sur `2a05b188..7926555d` ; UNE réserve, sous #737 : la garde « copie évaluée »
-> s'ouvre sur un brouillon non verrouillé). Phrase du rapport (« Performance : 77% (note du cours) ») et titre du changelog
-> validés tels quels par Grégoire. `release.mjs minor`, dix jetons anti-cache, push `2a05b188..507b7229 main -> main`.
+> croisée de Cowork à 20 h 15 (rien à corriger sur `2a05b188..7926555d` ; UNE réserve, inscrite sous #731 et à trancher avec #737 : la garde « copie évaluée »
+> s'ouvre sur un brouillon non verrouillé). Phrases du rapport (« Performance : 77% (note du cours) » et « non constructible (…) »,
+> « les deux formes ») et titre du changelog validés tels quels par Grégoire, après son coup d'œil à l'écran avant la release (Suivi
+> du groupe : barre RàI et carte Contexte en « En attente » ; bouton « Rapport » : un rapport, au P du profil). `release.mjs minor`
+> à 20 h 25 (dix jetons anti-cache ; un helper de session les bumpait déjà à chaque commit, même règle), verdict Playwright local
+> au jeton (0 échec, 4 instables : les mêmes qu'à 1.122.0, #685), push `2a05b188..507b7229 main -> main` vers 20 h 40.
+> ⚠ Incident de session : un `scripts/pousser.sh` en arrière-plan a été TUÉ par le système (mémoire basse) pendant la suite
+> WebKit — rien n'était poussé (8 commits en avance, jeton encore sur `7d335a16`) ; les 20 processus WebKit résiduels vus à ce
+> moment étaient des services système vieux de plusieurs jours, pas la suite ; relancé, verdict rendu, poussé.
 > ▣ **RUN GITHUB `34001941420` (`507b7229`) LU JUSQU'AU BOUT : Vitest `success` (00 h 43 Z), Playwright (WebKit) `failure`
 > (01 h 15 Z), conclusion `failure`.** ROUGE SUR LA SPEC NEUVE DE #732, PAS SUR LE CORRECTIF : `profil-rapport-732-se-genere`
 > rendait « Received string: "" » aux deux essais, alors que l'instantané de la trace, pris juste après l'attente, portait le
@@ -41,11 +47,17 @@
 > `claude/closure-sept-5-restart-52fv88`, vers minuit) les réécrit à partir des messages de commit et des runs GitHub, puis
 > fusionne vers `main`. ⮕ **Sur le Mac, au prochain `git status` : si ces trois fichiers apparaissent modifiés, ce sont les
 > brouillons interrompus. Les comparer (`git diff`) avant de les jeter ; ne pas les fusionner à l'aveugle.** Aucun `js/` en
-> attente nulle part.
+> attente nulle part. ✅ **FAIT le 6 septembre au matin, sur le Mac** : les trois brouillons (patch de 105 lignes sauvé par Cowork
+> sous `_to_delete/`) comparés aux blocs de cette clôture ; ce qu'ils avaient de plus est reporté ici (heures, verdict local,
+> incident `pousser.sh`, réserve sous #731, coup d'œil de Grégoire à l'écran) ; brouillons jetés ; rien sur les deux runs n'a changé.
+> ⚠ Le push docs `0896e535` a lui-même déclenché le run `34011409214` (Vitest `success`, Playwright `skipped` : « aucun fichier
+> observable au navigateur dans ce push ») parce que `OU-EN-EST-ON.md` manque à `paths-ignore` (#753) ; le push de ce report fait
+> pareil. **La spec corrigée reste sans verdict serveur : rien de plus, rien de moins.**
 > **`main` = `origin/main` après le push de cette clôture, AUCUN travail en avance.** Version 1.123.0, build `0905-2025`.
 > **Ce qui attend Grégoire** : **relancer le run `34009795798`** (ou laisser le prochain push juger `c4ac5ae3`) — la spec corrigée n'a pas de verdict serveur ; le coup d'œil sur 1.123.0 (les gestes sont dans `OU-EN-EST-ON.md`, section « LE SUIVI ») ;
 > #737 (la réserve de Cowork : un seul brouillon commencé rend la classe jugeable) avec #706 étendu ; #754 et #735-#753 après
-> le 14, avec #700-#705 et #710-#721.
+> le 14, avec #700-#705 et #710-#721 ; le cadrage « non remis par famille » (#738 en est la première mesure) ; le renommage de la
+> page « Les huit gestes ».
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, 19 H 45 (1.122.1 EN LIGNE, RUN GITHUB VERT ; AUDIT DU SUIVI DÉPOSÉ)
 

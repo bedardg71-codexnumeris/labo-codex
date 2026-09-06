@@ -14,6 +14,7 @@
      `profil-rapport-732-se-genere.spec.js`, PAS sur le code ; `c4ac5ae3` corrige la spec (rien dans js/) ; run GitHub
      `34009795798` LU JUSQU'AU BOUT : Vitest `success` (03 h 48 Z), Playwright (WebKit) `failure` par PERTE DU RUNNER (220 verts / 264, 0 rouge, 0 second essai, silence de 9 min après le test 220 à 04 h 09 Z, « shutdown signal » à 04 h 18 min 59 s Z, étape `cancelled`) ; le 221e, jamais imprimé, était la spec corrigée : NI prouvée NI infirmée. Aucune relance, aucun correctif : la relance est à Grégoire.** Vitest 483 / 5 395.
 
+     ▣ Remesure d'ouverture (19 h 46) : 1.122.1 en ligne, main = origin/main = 2a05b188, consigne de 19 h 45 (fraîche).
      ▣ Arbitrage (Cowork avec Grégoire, 19 h 45, `plans de travail/CONSIGNE-DU-JOUR.md`) : les quatre « corriger maintenant »
        du rapport retenus, plus G-2 ajouté au lot par Cowork (un enseignant lit un chiffre faux). Règle de Grégoire, au mot :
        un élève qui n'a rien remis n'est « Non-participation » que lorsqu'un travail est dû ET qu'au moins une copie du
@@ -23,25 +24,42 @@
        #730 `1e8a1d72` — sept fonctions du dépistage filtrent `remplaceeParId` (calculerMoyennesCriteres,
          calculerMoyennesCriteresRecents, _filtrerEtTrierEvaluationsIPB, calculerIndicesNDerniersArtefacts,
          identifierDefiSpecifique ; calculerDirectionRisque, calculerDirectionsCriteres) ; 7 cas, 7 retraits → 7 rouges.
-       #731 `aad47f68` — `depistagePeutJugerLaNonParticipation()` (profil-etudiant-calculs.js, exportée), trois lecteurs
+         Mesure préalable : aucun autre lecteur du dépistage ; le `find` du panneau Développement des habiletés (l. 4207)
+         est #714. Banc B-3 aux valeurs d'après.
+       #731 `aad47f66` — `depistagePeutJugerLaNonParticipation()` (profil-etudiant-calculs.js, exportée), trois lecteurs
          (determinerNiveauRaiPedagogique, determinerCibleIntervention, afficherAlerteNonParticipation) ; la barre des
          patterns écarte le niveau 0 ; le cas fondé (D-1) reste niveau 3 ; « A = 100 sans séance » NON touché → #743.
+         SUPPOSITION NOMMÉE : la cible rend « En attente » quel que soit A quand la garde est fermée ; le cas « A = 0, garde
+         ouverte » est inchangé. Break-test 3 sites.
        #732 `1ebe8a2` — export d'`obtenirDetailsAssiduite` ; `genererRapportAPI` lit A, C, P dans `calculerTousLesIndices`
-         (règle « même source », #699) ; « N remises / M productions » sur les productions que la pratique compte ; la liste
+         (règle « même source », #699) ; « N remises / M productions » sur les productions que la pratique compte (évaluées pour
+         ≥ 1 élève) ; la liste
          sous P = les évaluations qui ENTRENT dans la note (#706), la reprise et non l'originale ; spec WebKit neuve,
-         ROUGE avant (message d'erreur), VERTE après (P 70 = celui du profil). Phrase « Performance : 77% (note du cours) »
-         validée par Grégoire.
+         ROUGE avant (« Can't find variable: obtenirDetailsAssiduite »), VERTE après (P 70 = celui du profil). Phrases
+         « Performance : 77% (note du cours) » et « non constructible (…) » validées par Grégoire. Sentinelle 4 cas, break-test 3.
+         Trouvaille laissée : `opts.date` du rapport n'est lue nulle part (commenté dans #732).
        #733 `5915cc28` — règle 1 : observations d'intervention (`<textarea>`), `data-date` / `data-da` du confidentiel ;
-         2 cas rendus EXÉCUTÉS dans un faux DOM ; 3 retraits, 3 rouges.
+         2 cas rendus EXÉCUTÉS dans un faux DOM (`ouvrirIntervention` avec « </textarea><img … » ;
+         `chargerNotesPresencesConfidentiel` avec une guillemet) ; 3 retraits, 3 rouges.
        #734 `00f82b28` — `if (e.etudiantDA !== da) return false;` dans le repli de `calculerIndicesHistoriques`
-         (snapshots.js) ; le repli entier reste #716. ⚠ Tarir n'est pas réparer : les snapshots écrits gardent leur 67, la
+         (snapshots.js) ; banc G-2 : 53 / 83 / null (avant 67 pour tous) ; sentinelle 3 cas, break-testée ; le repli entier
+         reste #716. ⚠ Tarir n'est pas réparer : les snapshots écrits gardent leur 67, la
          prochaine capture écrit la bonne valeur, rien n'est réécrit.
      ▣ Dispositions (20 h 10, `dd528bf`) : le rapport porte, constat par constat, corrigé / inscrit / recoupé / commenté ;
-       #735-#753 inscrits (#753 : `OU-EN-EST-ON.md` absent de `paths-ignore`). Compte de la suite après le lot : 483 / 5 395
-       (`7926555d`). Relecture croisée de Cowork (20 h 15) : rien à corriger sur `2a05b188..7926555d` ; une réserve inscrite
-       sous #737 (la garde « copie évaluée » lit `noteFinale`, pas le verrou : un brouillon commencé rend la classe jugeable).
-     ▣ Release (20 h 25) : `release.mjs minor` → 1.123.0, dix jetons ; titre du changelog validé tel quel ; push
-       `2a05b188..507b7229`. Rituel fin-de-session sur le lot : 0 innerHTML sans échappement, 0 handler inline, 0 console.log.
+       #735-#753 inscrits (#753 : `OU-EN-EST-ON.md` absent de `paths-ignore`) ; #716 élargi ; le prompt porte la ligne du lot.
+       Compte de la suite après le lot : 483 / 5 395 (`7926555d`). Relecture croisée de Cowork (20 h 15) : rien à corriger sur
+       `2a05b188..7926555d` ; une réserve inscrite sous #731, à trancher avec #737 (la garde « copie évaluée » lit `noteFinale`, pas le verrou : un brouillon commencé rend la classe jugeable).
+     ▣ Coup d'œil de Grégoire à l'écran AVANT la release (Suivi du groupe : barre RàI et carte Contexte en « En attente »,
+       plus personne en « Non-participation » ; profil › bouton « Rapport » : un rapport s'écrit, au P du haut du profil) ; ses
+       mots : la phrase du rapport « validée telle quelle (les deux formes) », le titre du changelog aussi.
+     ▣ Release (20 h 25) : `release.mjs minor` → 1.123.0, dix jetons rebumpés (un helper de session les bumpait déjà à chaque
+       commit, même règle que release.mjs) ; titre du changelog validé tel quel. Rituel fin-de-session sur le lot : 0 innerHTML
+       sans échappement, 0 handler inline, 0 console.log ; aucune spec avec clic souris simulé ; Vitest 483 / 5 395 avant et
+       après le bump ; break-tests des cinq sentinelles ; verdict Playwright local au jeton (0 échec, 4 instables : les mêmes
+       qu'à 1.122.0, #685) ; push `2a05b188..507b7229` vers 20 h 40. ⚠ Incident : `scripts/pousser.sh` en arrière-plan TUÉ par
+       le système (mémoire basse) pendant la suite WebKit — rien n'avait été poussé (8 commits en avance, jeton encore sur
+       `7d335a16`) ; les 20 processus WebKit résiduels étaient des services système vieux de plusieurs jours, pas la suite ;
+       relancé, verdict rendu, poussé.
      ▣ Run `34001941420` (`507b7229`) attendu et LU : Vitest `success` (00 h 43 Z) ; Playwright (WebKit) `failure` (01 h 15 Z).
        Un seul rouge : la spec neuve de #732, « Received string: "" » aux deux essais — mais l'instantané de la trace, pris
        juste après l'attente, portait le rapport complet (Camille Roy, Complétion 100 % 2/2, Performance 70 % note du cours,
@@ -61,10 +79,17 @@
        0905-2025 : prémisse exacte sauf les trois fichiers « modifiés », absents ici), lecture du run 34009795798 jusqu'au
        bout, les trois documents réécrits à partir des messages de commit et des runs, commis ensemble, fusionnés vers main.
        Sur le Mac, les brouillons interrompus peuvent réapparaître comme modifications locales : à comparer, pas à fusionner.
+       ✅ FAIT le 6 septembre au matin, sur le Mac : patch de 105 lignes (sauvé par Cowork sous `_to_delete/`) identique au
+       diff local, comparé aux blocs de cette clôture ; ses précisions reportées dans ce bloc (heures, remesure d'ouverture,
+       verdict local, incident pousser.sh, réserve sous #731 et non #737, hash `aad47f66`, coup d'œil à l'écran, mesures par
+       geste) ; brouillons jetés ; rien sur les deux runs n'a changé. Le push docs 0896e535 avait déclenché le run 34011409214
+       (Vitest success, Playwright skipped : aucun fichier observable dans ce push ; OU-EN-EST-ON.md manque à paths-ignore, #753) ;
+       le push de ce report fait pareil — la spec corrigée reste sans verdict serveur.
      ▣ DÛ À GRÉGOIRE : relancer le run `34009795798` (ou laisser le prochain push juger `c4ac5ae3`) — la spec corrigée n'a pas de
        verdict serveur ; le coup d'œil sur 1.123.0 (OU-EN-EST-ON, section « LE SUIVI », « ce que tu dois aller voir ») ; #737
        avec #706 étendu ; #754 et #735-#753 après le 14, avec #700-#705 et #710-#721 ; les deux gestes à l'écran sur 1.122.x
-       (profil avec brouillon ; SPE « Modèle simple ») restent dus.
+       (profil avec brouillon ; SPE « Modèle simple ») restent dus ; le cadrage « non remis par famille » (#738 en est la
+       première mesure) et le renommage de la page « Les huit gestes » aussi.
      ===================================================================== -->
 
 <!-- =====================================================================
