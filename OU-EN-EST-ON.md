@@ -31,8 +31,13 @@ Deux tests de plus que le grep de la consigne ne voyait nommaient la carte sans 
 `lot4-gabarit-algo-cartes.spec.js` l. 160 et 182) : adaptés par Claude Code, dit dans son rapport.
 ▣ **Ouvert après ce jour, rien de daté** : la synthèse des rétroactions dans le PDF (nommée à 11 h 35, pas cadrée —
 **mesurée le 6 septembre au matin**, rapport `Rapports/MESURE-ce-que-l-eleve-lit-dans-le-pdf-2026-09-06.md` : trois documents,
-sept blocs, même squelette pour les trois types de grille, et deux textes faux que l'élève lit dans le collage Léa, à arbitrer
-par Grégoire — « 63.5 %% », et un bilan qui prend la copie pour sa propre précédente) ; recueillir ce
+sept blocs, même squelette pour les trois types de grille, et deux textes faux que l'élève lisait dans le collage Léa — « 63.5 %% »,
+et un bilan qui prenait la copie pour sa propre précédente — **corrigés le matin même sur arbitrage de Grégoire, 1.123.1** :
+la ligne « Note finale » porte l'unité une fois, et le bilan copié lit l'historique comme le PDF le fait déjà (le progrès revient,
+« depuis 3 productions » ne se dit plus après deux). **Vérifié comment** : deux sentinelles rouges avant / vertes après, break-testées
+avec témoin ; le banc de mesure repassé aux valeurs d'après ; Vitest 486 fichiers / 5 411 ; verdict Playwright local au jeton avant le
+push. Deux défauts de forme restent inscrits, pas corrigés : le collage Léa sans sauts de ligne, et le bloc « Observations » qui ne
+s'écrit jamais (#759, #760)) ; recueillir ce
 qui sortira du 14 (un gabarit et un canal — le canal est la décision de Grégoire ; personne ne l'a pris). Après le 14 : le recalcul
 quand une échelle change, l'Inspecteur de sélection, le dépôt public.
 

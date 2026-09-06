@@ -29,6 +29,11 @@
  * Le `textContent` du faux DOM imite celui d'un navigateur : le texte des nœuds, SANS
  * séparateur entre deux éléments — c'est ce que `copierToutRetroaction` copie.
  *
+ * ↻ 6 sept. 2026, plus tard dans la matinée : les deux constats mesurés ici (C1 « %% », C2 le bilan
+ * de l'écran pris pour sa propre précédente) ont été CORRIGÉS le jour même (#757, #758) ; les
+ * `expect` des deux premiers `it` portent les valeurs d'après, les sentinelles dédiées portent le
+ * rouge-avant / vert-après.
+ *
  *   cd tests && npx vitest run unit/mesure-ce-que-l-eleve-lit-2026-09-06.test.js
  */
 import { describe, it, expect, afterAll } from 'vitest';
@@ -455,33 +460,33 @@ describe('mesure · ce que l\'élève lit dans son PDF et dans le texte copié v
     const G = mesurer('ALGORITHMIQUE');
     const HF = mesurerEcranFrais('HOLISTIQUE');
 
-    // ── CONSTATS À PART : des textes que l'élève lit et qui sont FAUX (en tête du rapport) ──
+    // ── CONSTATS À PART : des textes que l'élève lisait et qui étaient FAUX (en tête du rapport) ──
+    // ⮕ Corrigés le jour même, décision de Grégoire (6 sept. 2026, matin) : C1 = #757, C2 = #758,
+    // sentinelles `sentinelle-757-…` et `sentinelle-758-…` (rouges avant, vertes après, break-testées).
+    // Les `expect` ci-dessous portent les valeurs d'APRÈS ; l'état d'avant est décrit dans le rapport.
 
-    it('CONSTAT 1 · le texte Léa dit « Note finale : 63.5 %% » — le signe % est doublé, pour les trois types', () => {
-        // `noteProduction1` porte déjà « 63.5 % » (evaluation-calcul.js l. 1404) et
-        // `_rendreNoteFinale` (evaluation-retroaction.js) lui ajoute un second « % ».
+    it('CONSTAT 1 (corrigé, #757) · le texte Léa dit « Note finale : 63.5 % » — l\'unité une seule fois, pour les trois types', () => {
+        // `noteProduction1` porte « 63.5 % » (evaluation-calcul.js l. 1404) ; `_rendreNoteFinale`
+        // (evaluation-retroaction.js) le recopie sans y ajouter un second « % » (avant : « 63.5 %% »).
         expect(H.m.ecran.noteAffichee).toBe('63.5 %');
-        expect(H.m.lea.generale).toContain('Note finale : 63.5 %%');
-        expect(A.m.lea.generale).toContain('Note finale : 71.0 %%');
-        expect(G.m.lea.generale).toContain('Note finale : 76.0 %%');
+        expect(H.m.lea.generale).toContain('Note finale : 63.5 %  |  Niveau : D');
+        expect(A.m.lea.generale).toContain('Note finale : 71.0 %  |  Niveau : D');
+        expect(G.m.lea.generale).toContain('Note finale : 76.0 %  |  Niveau : M');
+        [H, A, G].forEach(x => expect(x.m.lea.generale).not.toContain('%%'));
     });
 
-    it('CONSTAT 2 · une fois la copie enregistrée, le bilan de l\'écran la prend pour SA PROPRE précédente : « depuis 3 productions » avec un seul artefact antérieur, et plus aucune ligne de progrès', () => {
-        // `_chargerHistoriqueBilan` (evaluation-retroaction.js) n'exclut pas l'évaluation en cours ;
-        // `lireHistorique` (synthese-retroaction-data.js) l'exclut par `e.id !== evaluation.id`.
-        // Après enregistrement (l'état normal dès l'auto-save) :
-        expect(H.m.lea.bilan).toContain('Cet objectif est prioritaire depuis 3 productions');
-        expect(H.m.lea.bilan).not.toContain('Progrès :');
-        expect(H.m.lea.bilan).not.toContain('Tu as progressé');
-        // Avant enregistrement, le même écran dit le vrai :
-        expect(HF.m.lea.bilan).not.toContain('depuis 3 productions');
-        expect(HF.m.lea.bilan).toContain('Progrès : I → D depuis Analyse 1');
-        expect(HF.m.lea.bilan).toContain('Tu as progressé en Nuance.');
-        // Et le PDF, lui, dit le vrai dans les deux cas :
-        const bilanPdf = H.m.pdf.rangeesBilan.join(' ');
-        expect(bilanPdf).not.toContain('depuis 3 productions');
-        expect(bilanPdf).toContain('Progrès : I → D depuis Analyse 1');
-        expect(bilanPdf).toContain('Tu as progressé en Nuance.');
+    it('CONSTAT 2 (corrigé, #758) · copie enregistrée ou non, le bilan de l\'écran lit l\'historique comme le PDF : la copie n\'est pas sa propre précédente', () => {
+        // Avant : `_chargerHistoriqueBilan` n'excluait pas l'évaluation en cours → « depuis 3 productions »
+        // avec un seul artefact antérieur, et aucune ligne de progrès dès l'auto-save. Après : la copie
+        // que le résolveur #576 retrouve en base est exclue, même prédicat que `lireHistorique` du PDF.
+        const attendu = (bilan) => {
+            expect(bilan).not.toContain('depuis 3 productions');
+            expect(bilan).toContain('Progrès : I → D depuis Analyse 1');
+            expect(bilan).toContain('Tu as progressé en Nuance.');
+        };
+        attendu(H.m.lea.bilan);                   // après enregistrement (l'état normal dès l'auto-save)
+        attendu(HF.m.lea.bilan);                  // avant enregistrement
+        attendu(H.m.pdf.rangeesBilan.join(' '));  // le PDF, inchangé
     });
 
     // ── LA CARTE ──────────────────────────────────────────────────────────────
