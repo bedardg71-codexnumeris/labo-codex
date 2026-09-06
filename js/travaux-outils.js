@@ -2083,6 +2083,75 @@
         } catch(e) { /* JSON parse error */ }
     }
 
+    /**
+     * Pose une poignée de redimensionnement (coin inférieur droit) sur une palette
+     * flottante et la fait fonctionner en Pointer Events — #773 (6 sept. 2026).
+     *
+     * ⚠ POURQUOI UNE POIGNÉE EN JS ET PAS `resize: both` : WebKit sur iPadOS ne
+     * rend AUCUNE poignée native de `resize` au toucher — la propriété est lue,
+     * rien n'est saisissable. Mesuré par Grégoire sur son iPad le 6 sept. 2026
+     * (Safari 26.6, palette Codes : « je ne suis pas capable de saisir le coin
+     * inférieur droit »). La limite était déjà nommée au #144 (11 juin) : le
+     * glisser avait été porté en Pointer Events, pas le redimensionnement.
+     *
+     * Même mécanique que le glisser de la barre (ci-dessous) : `pointerdown`,
+     * `setPointerCapture`, `touch-action: none` sur la poignée (styles.css,
+     * `.palette-poignee-redim`) pour que Safari ne cède pas le geste au défilement.
+     * La taille est persistée avec la position (`sauvegarderPositionPalette`), ce
+     * que le `resize` natif ne faisait jamais : une palette redimensionnée à la
+     * souris reprenait sa taille par défaut au rechargement.
+     *
+     * Une palette positionnée par `right` grandirait vers la gauche : le bord
+     * gauche est figé avant le geste, comme le fait le glisser.
+     */
+    function configurerPoigneeRedimension(palette, conteneur) {
+        if (!palette || palette.querySelector(':scope > .palette-poignee-redim')) return;
+        const poignee = document.createElement('div');
+        poignee.className = 'palette-poignee-redim';
+        poignee.setAttribute('role', 'separator');
+        poignee.setAttribute('aria-label', 'Redimensionner la palette');
+        poignee.title = 'Glisser pour redimensionner';
+        palette.appendChild(poignee);
+
+        // La palette est son propre conteneur de défilement : une poignée absolue
+        // part avec le contenu défilé. La ramener au coin VISIBLE à chaque scroll.
+        palette.addEventListener('scroll', function() {
+            poignee.style.transform = palette.scrollTop ? 'translateY(' + palette.scrollTop + 'px)' : '';
+        }, { passive: true });
+
+        poignee.addEventListener('pointerdown', function(e) {
+            if (!e.isPrimary) return;
+            if (palette.classList.contains('replie')) return;
+            e.preventDefault();
+            const pointerId = e.pointerId;
+            const startX = e.clientX, startY = e.clientY;
+            const rect = palette.getBoundingClientRect();
+            const startW = rect.width, startH = rect.height;
+            const cont = conteneur || palette.offsetParent || document.getElementById('travaux-conteneur-document');
+            if (cont) {
+                palette.style.left = (rect.left - cont.getBoundingClientRect().left) + 'px';
+                palette.style.right = 'auto';
+            }
+            function onMove(e2) {
+                if (e2.pointerId !== pointerId) return;
+                // Les planchers CSS (min-width, hauteur de la barre) gardent le dernier mot.
+                palette.style.width = Math.max(80, startW + e2.clientX - startX) + 'px';
+                palette.style.height = Math.max(48, startH + e2.clientY - startY) + 'px';
+            }
+            function onUp(e2) {
+                if (e2.pointerId !== pointerId) return;
+                poignee.removeEventListener('pointermove', onMove);
+                poignee.removeEventListener('pointerup', onUp);
+                poignee.removeEventListener('pointercancel', onUp);
+                sauvegarderPositionPalette(palette);
+            }
+            poignee.setPointerCapture(pointerId);
+            poignee.addEventListener('pointermove', onMove);
+            poignee.addEventListener('pointerup', onUp);
+            poignee.addEventListener('pointercancel', onUp);
+        });
+    }
+
     function configurerDragPalette(palette, conteneur) {
         if (!palette) {
             palette = document.getElementById('travaux-palette-flottante');
@@ -2157,6 +2226,9 @@
             barre.addEventListener('pointerup', onUp);
             barre.addEventListener('pointercancel', onUp);
         });
+
+        // Coin inférieur droit : redimensionnement au doigt, au stylet ou à la souris (#773).
+        configurerPoigneeRedimension(palette, conteneur);
 
         // Double-clic sur la barre : reset taille et position sauvegardée
         // Même exemption qu'au `pointerdown` ci-dessus, et pour la même raison : un
