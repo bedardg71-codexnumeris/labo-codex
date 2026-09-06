@@ -7,10 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, 14 H 35 → 15 H 25 : LE RETOUR IPAD SUR LA PALETTE DES CODES, DEUX LOTS (1.123.8 ET 1.123.9, #773 ET #774) — TOUT EST SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, 14 H 35 → 16 H 15 : LE RETOUR IPAD SUR LA PALETTE DES CODES, DEUX LOTS (1.123.8 ET 1.123.9, #773 ET #774) — TOUT EST SUR `main`
 
 > ↻ **Session Claude Code sur `claude/ipad-palette-resize-t1kjo3`, FUSIONNÉE EN FAST-FORWARD VERS `main` (`c09ca731`) et poussée à
-> 15 h 12** : rien n'attend sur une branche, le déploiement Netlify part du push sur `main`.
+> 16 h 11** : rien n'attend sur une branche. **Déploiement Netlify VÉRIFIÉ par l'API** : `6a9dc8db4d5aaa000991f946`, contexte
+> production, `ready`, publié 20 h 11 Z sur le commit `c09ca731`, alias `app.codexnumeris.org` ; puis celui du commit de docs.
+> ⚠ **La PAGE SERVIE n'a pas été lue** : le proxy sortant de ce conteneur refuse `app.codexnumeris.org` et les URL `netlify.app`.
+> « En ligne » repose donc sur l'état Netlify, pas sur une lecture de la page — le geste qui tranche reste le numéro en bas de page.
 > ▣ **#773 (1.123.8, build `0906-1445`, `9d0b016c`)** — rapport `BUG_grégoire_2026-09-06_14-31-01.txt`, iPad Air, Safari 26.6,
 > SUIVI-BUGS #538 : « je ne suis pas capable de saisir le coin inférieur droit de la palette des codes ». Cause mesurée au code :
 > les quatre palettes flottantes (`.palette-flottante` — Annotation, Codes, Tampons, Évaluer) comptaient sur `resize: both`, la
