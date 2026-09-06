@@ -36,6 +36,24 @@
      ▣ SUPPOSITIONS NOMMÉES : les captures sont WebKit sur Mac, pas Safari iPad ; le mode anonymisation n'a pas pu être mesuré
        dans les six sous-onglets (CM-1 lève à chaque lecture) ; `consolidation.js` n'appartient pas au sous-onglet Interventions
        (Labo › Études), constaté et laissé là.
+     ▣ SUITE, 11 h 00 → 11 h 45 — LE LOT DES SIX « CORRIGER MAINTENANT » (consigne réécrite par Cowork à 10 h 57 sur l'arbitrage de
+       Grégoire ; l'autre session confirme par message qu'elle ne touche pas js/). Branche `fix/six-corriger-maintenant-audit-suivi`
+       depuis `e2631728` (son BACKLOG #766). Un fichier à la fois : modes.js (#767, `let doitRegenerer = false;` — jamais lu, les deux
+       affectations documentent la branche), saisie-presences.js (#768, Rapport + Annuler → suivi-liste), interventions.js (#769
+       quatre `echapperHtml` ; #772 `dasAffiches` = toutes les cases du formulaire, participants non affichés conservés et dédoublonnés,
+       notes fusionnées champ par champ), boite-outils.js (#770 quatre `echapperHtml`), trimestre-v2-etudiants.js (#771 `nbImportes`
+       + `verification` dans la notification). Sentinelles 767/768/770/771/772 + #733 étendue, sur un bac partagé
+       `_helpers/bac-suivi.js` extrait du banc d'audit ; ⚠ le bac ne fournit PAS `doitRegenerer` (il aurait masqué #767).
+       Sept break-tests rouges (BT-6b : la reconstruction des notes depuis les cases AFFICHÉES est équivalente pour elles — seul le
+       cas « non affiché » le distingue, et il rougit), empreintes identiques. Banc d'audit : six mesures aux valeurs d'après, dit dans
+       leurs titres. Release patch 1.123.7 par release.mjs (8 jetons) ; ⚠ le changelog inséré sans virgule finale → `changelog-data.js`
+       ne se compilait plus (sentinelle-scripts-parsables rouge) → virgule, amend refusé par le hook anti-cache (jeton déjà à HEAD) →
+       `g → h`, amend `a3909b23`. Vitest 497 / 5 471 verts sur le commit. **Verdict Playwright WebKit local VERT au jeton sur `a3909b23` (code 0, 0 échec connu, 0 instable, rendu 15 h 23 Z / 11 h 23 Toronto, 601 s)** ; push après le verdict, dans l'ordre du §4.5.
+     ▣ MESURÉ, PAS IMPLÉMENTÉ : « une intervention appartient à un groupe-cours » (règle de Grégoire) — aucun `coursId` sur une
+       intervention, liste non filtrée : #746, lot à part. STOCK #772 : porte terrain lecture seule
+       `PORTE-TERRAIN-2026-09-06-interventions-rognees.md` (Cowork publie l'artefact). Rien d'écrit dans les données de Grégoire.
+     ▣ SUPPOSITIONS NOMMÉES : cible d'« Annuler » = `suivi-liste` (celle de la barre statique) ; le libellé de la notification
+       d'import est lu par des enseignants, tranché seul ; un champ de note AFFICHÉ et vidé efface la note (le formulaire l'a montré).
      ▣ Clôture : Vitest 491 / 5 459 verts ; pas de release ; fusion fast-forward vers `main` après le relais de l'autre session ;
        worktree retiré.
      ===================================================================== -->
