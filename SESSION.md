@@ -7,6 +7,40 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 32 — 6 SEPTEMBRE 2026, 10 H 12 → 11 H 10 (Mac, worktree) : QUATRIÈME AUDIT CADRÉ — LES SIX SOUS-ONGLETS DE SUIVI
+     (logique propre, affichage, sauvegardes), SANS CODER. Consigne du 6 à 10 h 07 ; prompt
+     `Rapports/prompts-audit/PROMPT-AUDIT-sous-onglets-suivi-2026-09-06.md` (statut : exécuté).
+     ▣ Ouverture (subagent d'audit) : arbre NON propre — `styles.css` + sentinelle #765 non commis (une autre session Claude Code,
+       `monitorage-v6-75`, dans l'arbre principal) et les fichiers de Cowork (consigne réécrite 10 h 07, prompt, ancienne consigne).
+       Décision : worktree `Monitorage_v6-wt-audit-suivi` sur `2fb1facf`, branche `audit/sous-onglets-suivi-2026-09-06` ;
+       coordination par message avec l'autre session (elle pousse 1.123.6 `126b41ce` puis son relais `f5df6177` ; aucun fichier de
+       Cowork de son côté ; je fusionne après). Les trois fichiers de Cowork commis sur ma branche (`e934aff3`) ;
+       `CONSIGNE-DEMARRAGE-COWORK.md` laissé à Cowork. Vitest 490 / 5 425 verts sur la base. #759 non relayé → non fait.
+     ▣ Méthode : six recensements en parallèle (agents Explore, un par sous-onglet : gestes `data-*` ET câblés par
+       `addEventListener`, écritures directes ET indirectes — `db.modifier`, chaînes d'indices —, exports pour le banc) ; puis banc
+       Vitest (34 mesures, modules réels + `modes.js` + `interpretation-config.js` réels ; faux `document` qui capture l'innerHTML et
+       sert les champs ; `db` de banc avec journal ; « recharger » = window neuf sur le même store ; minuteries virtuelles pour la
+       roulette) ; puis cinq sondes WebKit locales (captures ×36 hors dépôt, `mesures.json`, texte et géométrie, jamais l'œil).
+     ▣ Rapport : `Rapports/AUDIT-sous-onglets-suivi-2026-09-06.md` — §0 : six « corriger maintenant » (CM-1 `modes.js`
+       `doitRegenerer` non déclaré sous `'use strict'` → anonymisation plante sans mapping, mesuré au vrai geste ; CM-2 « Annuler »
+       de la saisie → Suivi vide + « Rapport » disparu ; CM-3 titre/description d'intervention bruts ; CM-4 nom brut dans la modale
+       du tirage ; CM-5 import CSV → `ReferenceError` après écriture ; CM-6 notes d'intervention effacées à l'enregistrement),
+       puis six sections. 37 sites d'écriture recensés, 12 sous clé nue. Rien au BACKLOG.
+     ▣ Break-tests : I-4 (echapperHtml sur le titre) ROUGE ; G-2 (réécriture de `nettoyerEtudiantsSuivis`) — ⚠ première mutation
+       NON APPLIQUÉE (motif inexact, test vert menteur), refaite sur les lignes exactes → ROUGE ; S-5 (`suivi-apercu-legacy` →
+       `suivi-liste`) ROUGE. Restaurations par copie, MD5 identiques, `git status -- js/` propre.
+     ▣ PIÈGE VÉCU : la sonde 2 posait `localStorage.clear()` en `addInitScript` — rejoué au `reload`, il effaçait
+       `demo-version-installee` et le pack démo se ré-amorçait : « la présence enregistrée revient à 2 h » était un artefact de
+       la sonde. Sonde 3 (vidage une fois, puis rechargements propres) : l'écriture survit. Écrit dans le rapport pour qu'on ne
+       le redécouvre pas.
+     ▣ SUPPOSITIONS NOMMÉES : les captures sont WebKit sur Mac, pas Safari iPad ; le mode anonymisation n'a pas pu être mesuré
+       dans les six sous-onglets (CM-1 lève à chaque lecture) ; `consolidation.js` n'appartient pas au sous-onglet Interventions
+       (Labo › Études), constaté et laissé là.
+     ▣ Clôture : Vitest 491 / 5 459 verts ; pas de release ; fusion fast-forward vers `main` après le relais de l'autre session ;
+       worktree retiré.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 31 — 6 SEPTEMBRE 2026, 6 H 28 → 10 H 45 (Mac) : MESURER CE QUE L'ÉLÈVE LIT DANS SON PDF, SANS CODER (consigne du 6 au matin, Temps 1),
      PUIS, SUR ARBITRAGE (a) DE GRÉGOIRE, CORRIGER LES DEUX CONSTATS (#757, #758) — release 1.123.1 (`89bcf4a9`, build 0906-0715) —,
      PUIS UN RETOUR TESTEUR (7 h 32, page vide depuis la vignette d'un travail du profil) — release 1.123.2 (`ddc94fcf`, build 0906-0745, #761),
