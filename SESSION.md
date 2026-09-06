@@ -149,7 +149,11 @@
        + js/ : classes jumelées à `controle-form` dont styles.css règle padding/police/hauteur et que le bloc inline ne redéclare
        pas) : 13 classes perdent → #766 inscrit, pas corrigé (retirer le doublon change bordure `--bordure-claire`→`--bleu-leger`
        et padding 8→12 px de tous les contrôles : à voir à l'écran). Vitest 5 427 / 491 fichiers. SUIVI-BUGS #537, BACKLOG
-       #765/#766, changelog 1.123. Release `patch` 1.123.6 (`126b41ce`, build 0906-1016) ; `pousser.sh` détaché.
+       #765/#766, changelog 1.123. Release `patch` 1.123.6 (`126b41ce`, build 0906-1016) ; `pousser.sh` détaché : verdict local VERT
+       (0 échec, inchangé), push `2fb1facf..126b41ce` à 10 h 27 ; run `34039237638` VERT de bout en bout (Vitest 10 h 30, Playwright
+       WebKit 10 h 30 → 10 h 52). Le run du commit de relais `2fb1facf` (`34037433494`) était vert aussi. ⚠ Le premier commit de
+       relais (`b7eb8e64`) est parti sans ces lignes : mon script s'est arrêté sur un build mal recopié (1013 pour 1016) et la chaîne
+       a commis quand même — second commit de relais pour les porter.
      ▣ Autre session en parallèle (message reçu 10 h 30) : audit des six sous-onglets de Suivi (consigne de 10 h 07), worktree
        `Monitorage_v6-wt-audit-suivi`, branche `audit/sous-onglets-suivi-2026-09-06` depuis `2fb1facf` ; elle commet les fichiers
        de Cowork sur sa branche ; je lui envoie le SHA de chaque push ; elle fusionne en fast-forward après moi.

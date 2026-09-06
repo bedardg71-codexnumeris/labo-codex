@@ -784,8 +784,8 @@ arbitrées par Grégoire.
 
 ↻ **6 septembre 2026, matin (Claude Code) — CINQ RETOURS DE GRÉGOIRE, CORRIGÉS LE MATIN MÊME : 1.123.2 À 1.123.6 EN LIGNE**
 (builds `0906-0745`, `0906-0821`, `0906-0842`, `0906-0902` et `0906-1016`, commits `ddc94fcf`, `43c6cc6d`, `4f0e836a`, `aea9d144` et `126b41ce`, chacun poussé
-après un verdict Playwright local vert au jeton ; run serveur `34035446544` de 1.123.5 VERT de bout en bout à 9 h 51, les trois runs
-précédents annulés par le push suivant).
+après un verdict Playwright local vert au jeton ; runs serveur `34035446544` (1.123.5, 9 h 51), `34037433494` (relais) et `34039237638` (1.123.6, 10 h 52) VERTS de bout en bout,
+les trois runs précédents annulés par le push suivant).
 · ✅ **Dans le profil d'un élève, la vignette d'un travail (« Travaux soumis ») ouvre la copie** — elle menait à une page vide :
   l'onglet Annoter et évaluer s'activait sans que la section Évaluations s'affiche (le geste ne basculait que la sous-section,
   depuis la refonte du 18 février), et l'ouverture entrait en course avec l'initialisation du module. Le geste arrive d'abord,
