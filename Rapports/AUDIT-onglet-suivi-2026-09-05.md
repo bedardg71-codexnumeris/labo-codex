@@ -18,6 +18,53 @@ cd tests && npx vitest run unit/audit-onglet-suivi-2026-09-05.test.js
 
 **Verdicts** : `[exécuté]` = la fonction réelle a été appelée dans le banc et la valeur citée est celle qu'elle a rendue ; `[lecture]` = chemin de code lu, non exécuté ; `[grep]` = un compte reproductible par la commande citée (plusieurs sont exécutés DANS le banc, sur le source). Ce que le banc n'est pas : un navigateur (aucun WebKit n'a tourné ; les écrans sont des chaînes ou des structures, jamais un DOM rendu) ; et les données réelles de Grégoire n'ont pas été lues.
 
+
+> ## ↻ Dispositions arrêtées par Grégoire — 5 septembre 2026, 19 h 45, sur la même base ; le lot est commis, la release `minor` attend son coup d'œil
+>
+> Chaque constat porte ci-dessous l'une des dispositions exigées par `CLAUDE.md` (§« Ce qu'un audit doit
+> produire ») : ***corrigé*** (n° de fiche, commit ; la version est celle de la release qui suit), ***inscrit***
+> (n° au `BACKLOG.md`), ***recoupé, tenu*** (fiche existante), ***commenté*** (aucune fiche). Les propositions
+> d'origine restent lisibles plus bas. Consigne : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 19 h 45).
+>
+> | Constat | Disposition arrêtée | Fiche | Preuve |
+> |---|---|---|---|
+> | B-3 · la remplacée comptée par le dépistage (sept fonctions) | **corrigé** — filtre `!e.remplaceeParId` sur les sept sites, patron des deux sœurs | #730, `1e8a1d72` | `sentinelle-730-reprise-hors-du-depistage` (7 cas ; rouge 7/7 sur l'avant ; break-testée site par site, 7 retraits → 7 rouges) ; banc B-3 aux valeurs d'après (0,65 ; 4 artefacts ; niveau 2) |
+> | D-2 · « Non-participation » pour toute la classe avant le premier travail | **corrigé — RÈGLE ARRÊTÉE** : Non-participation seulement si un travail est dû ET qu'une copie du groupe est évaluée ; sinon « En attente ». Une garde partagée, trois lecteurs (RàI, cible, alerte nommée) | #731, `aad47f66` | `sentinelle-731-non-participation-quand-un-travail-est-du` (5 cas ; break-testée : RàI 3 rouges, cible 3, alerte 2) ; banc D-1 inchangé (niveau 3), D-2 et D-3 → « En attente » |
+> | D-3 · zéro donnée, A = 100 par défaut | **couvert par la garde de D-2** (#731) ; le défaut « 100 % sans séance » **inscrit** | #743 | banc D-3 : « En attente » après le premier calcul ; A reste 100 |
+> | B-5 · le rapport du profil (export manquant ; P et C recalculés) | **corrigé** — export de `obtenirDetailsAssiduite` ; A, C, P depuis `calculerTousLesIndices` ; la liste = les évaluations qui entrent dans la note (#706). ⚠ **Phrase changée, à valider au coup d'œil** : « Performance : 77% (note du cours) » | #732, `1ebe8a2a` | spec WebKit `profil-rapport-732-se-genere` ROUGE avant (« Can't find variable: obtenirDetailsAssiduite »), VERTE après (P 70 = profil) ; `sentinelle-732-…` (4 cas, break-testée 3 fois) ; banc B-5 d'après |
+> | E-6 · observations d'intervention brutes dans un `<textarea>` · G-4 (attributs `data-date` / `data-da`) | **corrigé** — `echapperHtml`, trois lignes | #733, `5915cc28` | `sentinelle-733-regle-1-observations-et-attributs` (2 cas, rendus exécutés ; break-testée : 3 retraits, 3 rouges) |
+> | G-2 · le P historique des snapshots = moyenne du groupe | **corrigé en partie** — filtre par `etudiantDA` (ajout de Cowork au lot) ; **le repli entier reste #716** (élargi). ⚠ Tarir n'est pas réparer : les snapshots écrits gardent leur 67 | #734, `00f82b28` ; #716 | `sentinelle-734-snapshots-p-de-l-eleve` (3 cas ; break-testée : filtre retiré → 67 pour les deux) ; banc G-2 : 53 / 83 / null |
+> | G-4 · le mode anonymisation n'anonymise pas le volet ; bouton sans garde | **inscrit** (les attributs : corrigés #733) | #751 | `[grep]` `modes.js:865` |
+> | A-2 · élève ajouté en cours de trimestre | **inscrit** — décision pédagogique | #735 | banc A-3 |
+> | A-5 + E-4 · portes d'écriture hors du mode | **inscrit** | #736 | `[grep]` |
+> | A-4 résiduel · `parseInt` d'une demi-période | **commenté** (aucune fiche) | – | banc A-5 |
+> | B-2 · le brouillon remis pour C et artefact pour le dépistage | **inscrit** — même règle que #706 ? à lui de le dire | #737 | banc B-2 |
+> | B-4 · « non remis » à 0 remis pour le C sommatif | **inscrit, DANS le cadrage « non remis par famille »** | #738 | banc B-4 |
+> | C-3, C-4 · deux définitions de la maîtrise | **recoupé, tenu** — mesures ajoutées à #551 (cas de sa sentinelle future) | #551 | banc C-3, C-4 |
+> | C-5 · points analytiques ignorés par le dépistage | **inscrit** | #739 | banc C-5 |
+> | C-6 · critère SOLO « Aucun » reste un défi | **inscrit** | #740 | banc C-6 |
+> | C-7 · évaluation sans texte de rétroaction hors du dépistage | **inscrit** (recoupe #718) | #741 | banc C-7 |
+> | C-8 + E-5 · seuils d'alerte et lettres du bilan en clair | **inscrit** (item 5 du §9 du 27 août ; famille #575 pour E-5) | #742 | `[grep]` |
+> | D-4 · deux paliers sur le même profil | **inscrit** — didactique | #744 | banc D-4 |
+> | D-5 + F-2 · calcul « à la volée » (hors groupe, exclu) | **inscrit** | #745 | banc D-5, F-2 |
+> | D-6 · #554 (décrochage jamais passé) | **recoupé, tenu** | #554 | banc D-6 |
+> | E-1 · interventions sans groupe-cours | **inscrit** | #746 | banc E-1 |
+> | E-2 · absence motivée retire la séance ; doublon aveugle à `facultatif` | **inscrit** (la première à confirmer par lui) ; `heures` = #728 | #747, #728 | banc E-2 |
+> | E-3 · note individuelle d'un élève retiré | **inscrit**, mineur | #748 | banc E-3 |
+> | F-3 · `etudiantsSuivis` clé nue vidée au changement de groupe | **inscrit** (classe #464) | #749 | banc F-3 |
+> | F-4 · deux « moyenne A » | **inscrit** | #750 | banc F-4 |
+> | G-5 · #539 | **recoupé, tenu** | #539 | `[grep]` |
+> | H-1 + H-2 · tables IDME en dur des courbes ; zones de la première échelle | **inscrit** (famille #575) | #752 | banc H-1, H-2 |
+> | Trouvaille du rituel · `OU-EN-EST-ON.md` hors `paths-ignore` | **inscrit**, mineur | #753 | `tests.yml:106-125` |
+>
+> **Ce que le lot n'a PAS touché, et qui était dans son périmètre de lecture** : la ligne `opts.date` du rapport
+> (une case « Date » que `genererRapportAPI` ne lit nulle part — commenté dans la fiche #732, aucune fiche) ;
+> le `find` du panneau « Développement des habiletés » qui affiche la première évaluation d'un artefact
+> (#714). Les cinq bancs de mesure touchés (B-3, B-5, D-2, D-3, E-6, G-2, G-4) portent les valeurs D'APRÈS,
+> l'avant en commentaire (patron des deux audits précédents). Suite complète après le lot : **482 fichiers /
+> 5 395 tests** verts depuis `tests/` ; la spec WebKit neuve verte seule ; verdict Playwright complet au moment
+> de la release, après le coup d'œil de Grégoire (règle 2 : commit → relecture → verdict → push).
+
 ---
 
 ## Vue d'ensemble : la réponse à la question directrice

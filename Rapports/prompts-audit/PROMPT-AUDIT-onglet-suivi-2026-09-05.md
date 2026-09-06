@@ -10,6 +10,7 @@ rapport_produit : Rapports/AUDIT-onglet-suivi-2026-09-05.md (42 mesures au banc 
 prerequis : Rapports/AUDIT-moteur-evaluation-2026-09-05.md (déposé, lot #697-#699 livré en 1.121.0) et Rapports/AUDIT-pratique-de-notation-2026-09-05.md (déposé, lot #706/#708/#709 livré en 1.122.0) — l'onglet Suivi lit ce que ces deux moteurs produisent
 cadre_par : Cowork, 5 septembre 2026, avec Grégoire
 statut : exécuté le 5 septembre 2026 en soirée (Claude Code, branche audit/onglet-suivi-2026-09-05, fusionnée vers main — documents et banc seulement ; aucun correctif, Grégoire arbitre)
+lot_correctif : arbitré le 5 septembre 2026 à 19 h 45 (plans de travail/CONSIGNE-DU-JOUR.md) ; #730, #731, #732, #733, #734 LIVRÉS le soir même en cinq commits (1e8a1d72 → 00f82b28), release minor après le coup d'œil de Grégoire ; #735 à #753 inscrits, après le 14 ; dispositions arrêtées écrites en tête du rapport
 ---
 
 # Audit — l'onglet Suivi (Labo Codex)
