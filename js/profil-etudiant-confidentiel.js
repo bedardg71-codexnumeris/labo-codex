@@ -170,8 +170,8 @@ function chargerNotesPresencesConfidentiel(da) {
                 <span style="min-width: 55px; font-weight: 600; color: var(--accent-primaire); padding-top: 4px;">${dateFormatee}</span>
                 <textarea
                     class="controle-form note-presence-editable"
-                    data-date="${p.date}"
-                    data-da="${da}"
+                    data-date="${echapperHtml(p.date)}"
+                    data-da="${echapperHtml(da)}"
                     rows="1"
                     style="flex: 1; resize: vertical; font-size: 0.8rem; padding: 4px 8px;"
                 >${escapeHtml(p.notes)}</textarea>

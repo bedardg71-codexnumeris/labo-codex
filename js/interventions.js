@@ -882,7 +882,8 @@ function ouvrirIntervention(interventionId, options) {
                 <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 10px;">
                     Note tes observations durant l'intervention (stratégies à nouveau enseignées, réception du groupe...)
                 </p>
-                <textarea id="observationsIntervention" class="controle-form" rows="6" placeholder="Ex. Stratégie de lecture n°3…">${intervention.observations || ''}</textarea>
+                <!-- #733 — règle 1 : texte libre de l'enseignant (ou importé) dans du HTML → echapperHtml, comme le bilan plus bas -->
+                <textarea id="observationsIntervention" class="controle-form" rows="6" placeholder="Ex. Stratégie de lecture n°3…">${echapperHtml(intervention.observations || '')}</textarea>
             </div>
 
             ${(() => {
