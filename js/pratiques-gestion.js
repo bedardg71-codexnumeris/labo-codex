@@ -128,15 +128,24 @@ async function afficherListePratiquesMateriel() {
         return;
     }
 
+    // #762 (6 sept. 2026) — LA PRATIQUE ASSIGNÉE AU GROUPE-COURS ACTIF SE VOIT ICI. Cette barre
+    // ne le disait pas : un enseignant pouvait croire sa pratique « activée » sans qu'aucune le
+    // soit (le repli « sommative » ne correspond à aucune pratique de la liste : pas de badge).
+    // Même badge et même règle que `afficherListePratiquesSidebar` (pratiques.js) : la SSOT.
+    const pratiqueActiveId = (typeof obtenirPratiqueActiveGroupeCours === 'function')
+        ? obtenirPratiqueActiveGroupeCours()
+        : null;
+
     // Générer les items de la sidebar
     const html = pratiquesDansBibliotheque.map(pratique => {
         const nomPratique = pratique.nom || 'Sans titre';
         const badgeType = genererBadgeTypePratique(pratique);
         const badgesCaracteristiques = genererBadgeCaracteristiques(pratique);
+        const badgeActive = (pratique.id === pratiqueActiveId) ? ' <span class="sidebar-item-badge">Active</span>' : '';
         return `
             <div class="sidebar-item" data-id="${pratique.id}" data-action="chargerPratiquePourModif" data-param="${pratique.id}">
                 <div class="sidebar-item-titre">${nomPratique}</div>
-                <div class="sidebar-item-badges">${badgeType} ${badgesCaracteristiques}</div>
+                <div class="sidebar-item-badges">${badgeType} ${badgesCaracteristiques}${badgeActive}</div>
             </div>
         `;
     }).join('');
@@ -2176,11 +2185,30 @@ async function appliquerPratiqueAuCours(pratiqueId) {
     }
 
     const succes = await appliquerConfigurationPratique(pratiqueId);
-    if (succes) {
-        notifications.succes('Configuration appliquée au cours actif');
-    } else {
+    if (!succes) {
         alert('Impossible d\'appliquer cette pratique : sa configuration est introuvable dans la bibliothèque. Enregistre-la d\'abord dans la bibliothèque, puis réessaie.');
+        return;
     }
+
+    // #762 (6 sept. 2026) — « AU COURS ACTIF », ET C'EST ÉCRIT DANS LA SOURCE DE VÉRITÉ.
+    // `appliquerConfigurationPratique` n'écrit que les modalités (portfolio, variante) et le
+    // dit depuis #328 (e3179c41, 11 juin) : « seule l'activation par la SSOT change la
+    // pratique active ». Or cette activation n'avait plus de bouton — les cartes « Activer »
+    // vivaient dans `#listePratiques`, retiré de la page le 9 décembre 2025. L'enseignant
+    // cliquait ce bouton (infobulle : « Définit cette pratique comme configuration active du
+    // cours »), lisait un succès, et `groupesCours[].pratiqueId` restait null : l'application
+    // calculait en « sommative » et le profil disait « introuvable » (rapport de Grégoire,
+    // BUG_grégoire_2026-09-06_07-48-42 ; ses données : `pratiqueId: null`, champ 6 du
+    // groupe-cours vide, aucun badge). Le bouton fait maintenant ce qu'il dit.
+    try {
+        await PratiqueManager.changerPratiqueActive(pratiqueId);
+    } catch (e) {
+        alert('La configuration est appliquée, mais la pratique n\'a pas pu être assignée au groupe-cours actif : ' + (e && e.message ? e.message : e));
+        return;
+    }
+    // La barre latérale suit : le badge « Active » se pose sur la pratique assignée.
+    await afficherListePratiquesMateriel();
+    notifications.succes('Pratique appliquée au cours actif', 'C\'est elle qui calcule maintenant les notes et les indices de ce groupe-cours.');
 }
 
 /**

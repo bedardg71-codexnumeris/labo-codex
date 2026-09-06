@@ -394,6 +394,9 @@ describe('A · quelle pratique calcule pour cet élève', () => {
         // À la main : deux replis différents. L'indice P suit la sommative (8830/102 = 86,57 → 87) ;
         // le profil (calculerDetailsNoteFinale) prend le défaut PRATIQUE_DEFAUT = standards et cherche
         // une config de portfolio pour l'id « sommative » → « introuvable dans la bibliothèque ».
+        // ↻ #762 (6 sept. 2026, retour testeur) : le diagnostic lit maintenant la source de vérité
+        // (`groupesCours[].pratiqueId`) et dit « aucune pratique de notation n'est assignée » —
+        // la moitié « diagnostic » de #710 ; les deux replis de calcul (87 ici) restent à trancher.
         const b = monter(jeuSOM(), { retirerPratiqueId: true });
         const actif = b.win.obtenirPratiqueActiveGroupeCours();
         const type = b.win.obtenirTypePratiqueActive();
@@ -403,7 +406,7 @@ describe('A · quelle pratique calcule pour cet élève', () => {
         expect(actif).toBe('sommative');
         expect(type).toBeNull();
         expect(p.P).toBe(87);
-        expect(details.erreur).toMatch(/introuvable dans la bibliothèque/);
+        expect(details.erreur).toMatch(/[Aa]ucune pratique de notation n'est assignée/);   // avant #762 : « introuvable dans la bibliothèque »
     });
 
     it('A2 · identifiant legacy « pan-standards » dans le groupe-cours — le registre calcule avec ses défauts (3 / meilleurs), le profil dit « non calculable »', () => {

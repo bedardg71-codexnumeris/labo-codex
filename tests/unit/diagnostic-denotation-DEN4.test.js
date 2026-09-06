@@ -8,8 +8,16 @@ import { chargerScript } from './_helpers/charger-script.js';
 
 let pratiqueActiveId = null;
 let store = [];
+// #762 (6 sept. 2026) — le diagnostic lit d'abord la SOURCE DE VÉRITÉ (`groupesCours[].pratiqueId`
+// du groupe-cours actif), pas seulement le repli de `obtenirPratiqueActiveGroupeCours` : le banc
+// sème donc un groupe-cours qui porte la pratique active. Les assertions ne changent pas.
 const db = {
-    getSync: (k, def) => (k === 'pratiquesConfigurables' ? store : (def !== undefined ? def : null)),
+    getSync: (k, def) => {
+        if (k === 'pratiquesConfigurables') return store;
+        if (k === 'groupeCoursActif') return { id: 'GC_DEN4' };
+        if (k === 'groupesCours') return [{ id: 'GC_DEN4', pratiqueId: pratiqueActiveId }];
+        return def !== undefined ? def : null;
+    },
     setSync: () => {}
 };
 const globaux = {

@@ -277,7 +277,22 @@ function construireConfigComplete(pratiqueData) {
     // fonctionnel — décision D2). Une config stockée qui la porte encore est
     // NORMALISÉE ici, à la LECTURE, vers le mode STD correspondant — aucune
     // écriture de données, avertissement visible.
-    let calcul_note = config.calcul_note || pratiqueData.calcul_note || { methode: 'conversion_niveaux' };
+    // #762 (6 sept. 2026) — SANS `calcul_note`, LA MÉTHODE SE DÉDUIT DE LA FAMILLE, pas d'un
+    // défaut PAN-Standards. Le « Modèle sommatif » adopté par Grégoire le 2 septembre (clone
+    // fidèle du gabarit `SOM-simple` : `type: 'sommative'`, pas de `calcul_note`, pas d'échelle)
+    // tombait sur `conversion_niveaux`, qui exige une échelle : « Champ obligatoire manquant :
+    // echelle », et la pratique était introuvable partout où le registre résout (comparateur,
+    // activation, calculs). Une sommative n'a pas d'échelle à fournir. Lecture seule : le stock
+    // déjà adopté est lu juste sans être réécrit. Une PAN-Standards sans échelle reste refusée.
+    const familleCanon = normaliserIdPratique(config.type || pratiqueData.type || pratiqueData.configuration?.type);
+    const METHODE_PAR_FAMILLE = {
+        sommative: 'moyenne_ponderee',
+        specifications: 'specifications',
+        denotation: 'jugement_global',
+        standards: 'conversion_niveaux'
+    };
+    let calcul_note = config.calcul_note || pratiqueData.calcul_note
+        || { methode: METHODE_PAR_FAMILLE[familleCanon] || 'conversion_niveaux' };
     if (calcul_note && calcul_note.methode === 'pan_par_objectif') {
         console.warn(`[construireConfigComplete] Méthode retirée « pan_par_objectif » (pratique « ${config.id || pratiqueData.id || '?'} ») — normalisée vers conversion_niveaux (#396). Ré-enregistrer la pratique au wizard pour faire disparaître cet avertissement.`);
         calcul_note = Object.assign({}, calcul_note, { methode: 'conversion_niveaux' });
