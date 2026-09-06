@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.123',
+            couleur: 'orange',
+            titre: 'Le Suivi ne compte plus une reprise deux fois, et ne déclare personne « non-participant » avant le premier travail',
+            items: [
+                '<strong>Une reprise remplace aussi dans le dépistage.</strong> La note du cours remplaçait déjà l\'originale ; le suivi des fondations, la performance du RàI, les moyennes par critère et le défi principal la comptaient encore. Un élève qui a repris et réussi n\'est plus lu au palier de sa première copie.',
+                '<strong>« Non-participation » seulement quand un travail est dû et qu\'une copie du groupe est évaluée.</strong> Au début d\'un trimestre, la classe entière n\'est plus en « Non-participation, niveau 3 » : la carte RàI, la cible d\'intervention, la barre RàI du groupe et l\'alerte disent « En attente » tant qu\'il n\'y a rien à remettre.',
+                '<strong>Le bouton « Rapport » d\'un profil produit un rapport.</strong> Il écrivait un message d\'erreur depuis mai. Ses nombres — assiduité, complétion, performance — sont désormais ceux du profil : « Performance : 77% (note du cours) », et la liste des évaluations qui comptent dans la note.',
+                '<strong>Les courbes de performance des archives sont celles de l\'élève.</strong> Dans un cours sommatif, tous les élèves portaient la même courbe (la moyenne du groupe). Les captures déjà faites gardent leur valeur ; la prochaine écrit la bonne.',
+                'Les observations d\'une intervention et deux champs du volet confidentiel sont échappés avant d\'entrer dans la page.'
+            ]
+        },
+        {
             version: '1.122',
             couleur: 'orange',
             titre: 'La note du cours ne compte plus les brouillons, et les spécifications calculent',
