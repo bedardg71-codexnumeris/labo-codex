@@ -31,7 +31,8 @@
                 '<strong>Les courbes de performance des archives sont celles de l\'élève.</strong> Dans un cours sommatif, tous les élèves portaient la même courbe (la moyenne du groupe). Les captures déjà faites gardent leur valeur ; la prochaine écrit la bonne.',
                 'Les observations d\'une intervention et deux champs du volet confidentiel sont échappés avant d\'entrer dans la page.',
                 '<strong>Le texte copié vers Léa dit « Note finale : 63.5 % », plus « 63.5 %% ».</strong> La dernière ligne de la rétroaction générale doublait le signe de pourcentage (1.123.1).',
-                '<strong>Le bilan copié vers Léa ne prend plus la copie pour son propre artefact précédent.</strong> Dès l\'enregistrement automatique, il annonçait « prioritaire depuis 3 productions » après un seul travail antérieur, et taisait « Progrès : I → D » et « Tu as progressé en… ». Il lit l\'historique comme la page de synthèse du PDF le fait déjà (1.123.1).'
+                '<strong>Le bilan copié vers Léa ne prend plus la copie pour son propre artefact précédent.</strong> Dès l\'enregistrement automatique, il annonçait « prioritaire depuis 3 productions » après un seul travail antérieur, et taisait « Progrès : I → D » et « Tu as progressé en… ». Il lit l\'historique comme la page de synthèse du PDF le fait déjà (1.123.1).',
+                '<strong>Dans le profil d\'un élève, la vignette d\'un travail ouvre la copie.</strong> Sous « Travaux soumis », cliquer un travail menait à une page vide : l\'onglet Annoter et évaluer s\'activait sans que la section Évaluations s\'affiche. Le geste arrive d\'abord dans Évaluations, puis ouvre la copie (1.123.2).'
             ]
         },
         {
