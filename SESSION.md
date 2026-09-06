@@ -7,6 +7,36 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 31 — 6 SEPTEMBRE 2026, 6 H 28 → 7 H 15 (Mac) : MESURER CE QUE L'ÉLÈVE LIT DANS SON PDF, SANS CODER (consigne du 6 au matin, Temps 1).
+     ▣ Ouverture (subagent d'audit) : Temps 0 (rapatrier la clôture) DÉJÀ FAIT par `886d9828` à 6 h 22 ; la prémisse de la consigne
+       (Mac à `c4ac5ae3`, trois brouillons) était périmée d'un commit ; Vitest 483 / 5 395 verts. Consigne promue (`dc1e606d`).
+     ▣ Temps 1 : banc `tests/unit/mesure-ce-que-l-eleve-lit-2026-09-06.test.js` — modules RÉELS dans le bac à sable
+       (synthese-retroaction-data/-rendu, evaluation-calcul, evaluation-retroaction, travaux-export-pdf, profil-etudiant-calculs,
+       evaluation-enonces, evaluation-formules, codes-annotation) ; doublures nommées (trois tampons du catalogue, moteur de
+       notation, jetons). Trois copies (holistique, analytique, algorithmique = holistique + algorithmique avec codes), une
+       évaluation antérieure, quatre tampons, cinq erreurs ; marqueurs VIVANT (cartouche d'aujourd'hui) / GELÉ (enregistré).
+       Rapport : `Rapports/MESURE-ce-que-l-eleve-lit-dans-le-pdf-2026-09-06.md` (carte, pas d'audit : aucune disposition).
+     ▣ Mesuré : trois documents (copie évaluée + page de synthèse — l'export Léa est le même PDF —, texte copié vers Léa, document
+       de consignes), sept blocs, même squelette pour les trois types ; le PDF lit `criteres[].retroaction` (gelé), le texte Léa
+       la cartouche vivante ; `retroactionFinale` (texte libre) n'est nulle part dans le PDF ; le PDF ignore les cases d'options ;
+       tampons et erreurs deux fois dans le PDF (bloc 5 + bilan) ; le bilan Léa est une seconde implémentation du bilan du PDF.
+     ▣ CONSTATS À PART (Grégoire arbitre ; rien corrigé, rien inscrit) : C1 « Note finale : 63.5 %% » (`evaluation-calcul.js:1404`
+       écrit « 63.5 % », `_rendreNoteFinale` ajoute « % », depuis au moins `9ffff2cf`) ; C2 `_chargerHistoriqueBilan`
+       (`evaluation-retroaction.js:603`) n'exclut pas la copie en cours — `lireHistorique` du PDF l'exclut (l. 1311) — donc,
+       dès l'auto-save, « prioritaire depuis 3 productions » avec un artefact antérieur et plus aucune ligne de progrès (mesuré
+       avant / après enregistrement). Défauts de forme : collage `textContent` sans séparateurs ; « --- Observations --- » mort
+       (`DIAG_IDS`, l. 184, neuf identifiants `legacy`).
+     ▣ Break-tests (js/ muté puis restauré, `git diff --quiet -- js/` vert à chaque fois) : second « % » retiré → CONSTAT 1 rouge ;
+       exclusion retirée dans `lireHistorique` → CONSTAT 2 rouge ; légende imprimée en analytique → « jamais le nom du niveau » rouge.
+     ▣ Trouvaille hors périmètre : #755 (`travaux-archivage.js` lu comme binaire, l. 39 — grep aveugle, dix minutes perdues).
+     ▣ Rituel de fin : §1 quatre fichiers (BACKLOG, OU-EN-EST-ON, rapport, banc), zéro `js/` ; §2 le banc porte un `console.log`
+       (patron des trois bancs d'audit, hors production) ; §3 484 / 5 404 verts en 24 s ; §5 pas de release. Push = premier run
+       Playwright depuis `c4ac5ae3` (juge la spec #732).
+     ▣ SUPPOSITIONS NOMMÉES : les textes par défaut des tampons et l'échelle IDME du banc sont ceux du dépôt, pas ceux du
+       trimestre réel de Grégoire ; le collage Léa est mesuré par un `textContent` imité (un navigateur ne fait pas autrement).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 30 — 5 SEPTEMBRE 2026, 19 H 45 → 23 H 45, puis LA CLÔTURE REPRISE VERS MINUIT APRÈS UN REDÉMARRAGE DU MAC :
      LE LOT DU SUIVI ARBITRÉ ET LIVRÉ (release 1.123.0), le run de la release rouge sur sa spec neuve, le correctif de spec.
      ▣ **LIVRÉ : 1.123.0 (build 0905-2025, `507b7229`) — #730 à #734, cinq commits, cinq sentinelles break-testées ;

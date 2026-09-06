@@ -29,7 +29,10 @@ cinq break-tests rouges puis remis) ; Vitest 5 202 verts ; verdict Playwright lo
 Grégoire sur la carte, le menu et le pli — la ligne d'aide gardée telle quelle, les mots du changelog validés (« ça va »).
 Deux tests de plus que le grep de la consigne ne voyait nommaient la carte sans ses mots (`texte-troue-reperes-enonces.spec.js`,
 `lot4-gabarit-algo-cartes.spec.js` l. 160 et 182) : adaptés par Claude Code, dit dans son rapport.
-▣ **Ouvert après ce jour, rien de daté** : la synthèse des rétroactions dans le PDF (nommée à 11 h 35, pas cadrée) ; recueillir ce
+▣ **Ouvert après ce jour, rien de daté** : la synthèse des rétroactions dans le PDF (nommée à 11 h 35, pas cadrée —
+**mesurée le 6 septembre au matin**, rapport `Rapports/MESURE-ce-que-l-eleve-lit-dans-le-pdf-2026-09-06.md` : trois documents,
+sept blocs, même squelette pour les trois types de grille, et deux textes faux que l'élève lit dans le collage Léa, à arbitrer
+par Grégoire — « 63.5 %% », et un bilan qui prend la copie pour sa propre précédente) ; recueillir ce
 qui sortira du 14 (un gabarit et un canal — le canal est la décision de Grégoire ; personne ne l'a pris). Après le 14 : le recalcul
 quand une échelle change, l'Inspecteur de sélection, le dépôt public.
 

@@ -7,6 +7,32 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, MATIN (MESURE DU PDF DE L'ÉLÈVE DÉPOSÉE ; RIEN DANS `js/`, PAS DE RELEASE)
+
+> ↻ **6 h 28 → 7 h 15, sur le Mac.** Temps 0 de la consigne (rapatrier la clôture) **déjà fait** par `886d9828` avant la séance
+> (rituel d'ouverture : arbre propre sur les trois fichiers, patch de 105 lignes reporté). Consigne promue en `dc1e606d`
+> (`CONSIGNE-PROCHAINE-SEANCE.md` → `CONSIGNE-DU-JOUR.md`, l'ancienne archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-05-lot-suivi-1.123.md`,
+> `CONSIGNE-DEMARRAGE-COWORK.md` de Cowork commise telle quelle — ⚠ sa prémisse « Mac à `c4ac5ae3`, trois brouillons » est
+> périmée d'un commit, à corriger par Cowork).
+> ▣ **Temps 1 déposé : `Rapports/MESURE-ce-que-l-eleve-lit-dans-le-pdf-2026-09-06.md`** — banc
+> `tests/unit/mesure-ce-que-l-eleve-lit-2026-09-06.test.js` (modules réels, 9 mesures, trois copies : holistique, analytique,
+> algorithmique ; trois break-tests rouges puis restaurés). Trois documents (la copie évaluée et sa page de synthèse — l'export
+> Léa est le MÊME PDF, `travaux-archivage.js:443` —, le texte copié vers Léa, le document de consignes), sept blocs, même
+> squelette pour les trois types ; le PDF imprime le commentaire GELÉ à l'enregistrement, le texte Léa la cartouche VIVANTE ; le
+> texte libre de l'enseignant n'est nulle part dans le PDF ; tampons et erreurs y figurent deux fois (bloc 5 + bilan).
+> ⚠ **Deux textes FAUX lus par l'élève dans le collage Léa, NON inscrits, Grégoire arbitre** (en tête du rapport) : C1 « Note
+> finale : 63.5 %% » (`evaluation-calcul.js:1404` + `evaluation-retroaction.js:232-249`) ; C2 le bilan de l'écran prend la copie
+> enregistrée pour sa propre précédente (`_chargerHistoriqueBilan` n'exclut pas la copie ; le PDF l'exclut) → « prioritaire
+> depuis 3 productions » avec un seul artefact antérieur, et plus jamais « Progrès » ni « Tu as progressé » dès l'auto-save.
+> Deux défauts de forme : collage `textContent` sans séparateurs ; bloc « --- Observations --- » jamais écrit (identifiants
+> hérités). **#755 inscrit** (`travaux-archivage.js` lu comme binaire, l. 39). Une ligne dans `OU-EN-EST-ON.md`.
+> ⚠ **Ce push touche `tests/unit/` : il déclenche Vitest ET Playwright sur le runner** — c'est « le prochain push » qui juge
+> enfin la spec #732 corrigée en `c4ac5ae3`. Lire le run avant de conclure ; aucune relance faite.
+> **`main` = `origin/main` après ce push, AUCUN travail en avance.** Version 1.123.0, build `0905-2025` (pas de release : rien
+> dans `js/`). Suite Vitest après le dépôt : 484 fichiers / 5 404 tests.
+> **Ce qui attend Grégoire** : arbitrer C1 et C2 (et les deux défauts de forme) avant que Cowork cadre la « synthèse des
+> rétroactions dans le PDF » ; le reste est inchangé (le run à lire, les cinq coups d'œil sur 1.122 / 1.123, le canal du 14, #737).
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, NUIT (1.123.0 EN LIGNE ; LE RUN DE LA RELEASE ROUGE SUR SA SPEC NEUVE, PAS SUR LE CODE ; LE RUN DU CORRECTIF DE SPEC ROUGE PAR PERTE DU RUNNER, RELANCE DUE À GRÉGOIRE ; CLÔTURE REPRISE APRÈS UN REDÉMARRAGE DU MAC)
 
 > ↻ **19 h 45 → 20 h 25, poussé vers 20 h 40 — LE LOT DU SUIVI, ARBITRÉ ET LIVRÉ : 1.123.0 (build `0905-2025`, `507b7229`, « Le Suivi ne compte plus
