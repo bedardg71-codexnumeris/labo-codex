@@ -6,9 +6,10 @@ executant_des_correctifs : Claude Code, un lot à la fois, après arbitrage de G
 type : audit de ce que chaque sous-onglet FAIT à l'écran et ÉCRIT en base — le complément du troisième audit cadré, qui a jugé la chaîne des indices
 livrable_attendu : rapport de constats, chaque constat portant sa disposition proposée ; AUCUN correctif appliqué
 rapport_a_produire : Rapports/AUDIT-sous-onglets-suivi-2026-09-XX.md (date du jour de l'exécution)
+rapport_produit : Rapports/AUDIT-sous-onglets-suivi-2026-09-06.md (banc : tests/unit/audit-sous-onglets-suivi-2026-09-06.test.js, 34 mesures ; captures WebKit locales hors dépôt)
 prerequis : Rapports/AUDIT-onglet-suivi-2026-09-05.md (déposé, lot #730-#734 livré en 1.123.0, #735-#754 inscrits) — la chaîne présences → indices → palier → écrans est JUGÉE ; ne la remesure pas
 cadre_par : Cowork, 6 septembre 2026, 10 h 06, à la demande de Grégoire
-statut : à exécuter
+statut : exécuté le 6 septembre 2026 (10 h 12 – 11 h 05, Claude Code sur le Mac, worktree sur 2fb1facf / 1.123.5) — six sous-onglets, trois axes chacun ; six « corriger maintenant » proposés (§0 du rapport), aucun correctif appliqué, rien au BACKLOG
 ---
 
 # Audit — les six sous-onglets de Suivi : logique propre, affichage, qualité des sauvegardes
