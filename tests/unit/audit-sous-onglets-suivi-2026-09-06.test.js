@@ -12,6 +12,9 @@
  * chaque écriture (clé, valeur) ; « recharger » = remonter un window neuf sur le MÊME store, puis relire.
  * Les `expect` sont les valeurs OBTENUES au 6 septembre 2026 (HEAD 2fb1facf, 1.123.5) ; quand elles
  * divergent de ce que le libellé du geste promet, le commentaire le dit et le rapport en fait un constat.
+ * ⚠ Six mesures sont passées aux VALEURS D'APRÈS le lot #767-#772 (1.123.7, le même jour) : I-2, I-3, I-4,
+ * L-7, S-5, A-3 — chacune le dit dans son titre ; le constat d'origine reste dans le rapport, la preuve du
+ * correctif dans sa sentinelle (sentinelle-767…772, sentinelle-733 étendue).
  * Un `describe` par sous-onglet, dans l'ordre de la navigation. Aucune donnée réelle. Rien dans js/.
  *
  *   cd tests && npx vitest run unit/audit-sous-onglets-suivi-2026-09-06.test.js
@@ -192,25 +195,26 @@ describe('5 · Interventions — gestes et écritures', () => {
         expect(b2.notifs.length).toBe(0);
     });
 
-    it('I-2 · Enregistrer : la note individuelle d\'un élève DÉCOCHÉ est effacée de la base (le formulaire reconstruit notesIndividuelles à partir des cochés)', () => {
+    it('I-2 · Enregistrer : la note individuelle d\'un élève DÉCOCHÉ était effacée — depuis #772, un champ affiché rempli est conservé (valeur d\'après)', () => {
         const store = storeBase();
         store.test_interventions = [{ id: 'I1', titre: 'Rattrapage', date: '2026-09-01', heure: '10:00', duree: 2, type: 'groupe', niveauRai: 2, contexte: 'rattrapage', description: '',
             etudiants: ['2000001', '2000002'], analyse: null, observations: '', notesIndividuelles: { 2000001: 'Alice progresse.', 2000002: 'Bruno absent, à revoir.' }, criteresCibles: [], objectifVise: '', bilan: null, statut: 'en-cours', jamaisSauvegardee: false }];
         // Le formulaire, tel que l'enseignant le laisse : Alice cochée, Bruno décoché (il n'est pas venu), ses champs de note intacts.
-        const cbAlice = elementDom({ value: '2000001', checked: true });
+        const cbAlice = elementDom({ value: '2000001', checked: true }), cbBruno = elementDom({ value: '2000002', checked: false });
         const b = monterI(store, {
             elements: { interventionNiveau: elementDom({ value: '2' }), interventionContexte: elementDom({ value: 'rattrapage' }), interventionTitre: elementDom({ value: 'Rattrapage' }), interventionDate: elementDom({ value: '2026-09-01' }), interventionHeure: elementDom({ value: '10:00' }), interventionDuree: elementDom({ value: '2' }), interventionDescription: elementDom({ value: '' }), interventionSeance: elementDom({ value: '' }), observationsIntervention: elementDom({ value: 'obs' }), objectifVise: elementDom({ value: '' }), 'note-2000001': elementDom({ value: 'Alice progresse.' }), 'note-2000002': elementDom({ value: 'Bruno absent, à revoir.' }) },
-            selecteurs: { '#listeEtudiantsIntervention input[type="checkbox"]:checked': [cbAlice], 'input[name="interventionStatut"]:checked': elementDom({ value: 'en-cours' }), '#criteresCiblesContainer .critere-cible-cb:checked': [] }
+            selecteurs: { '#listeEtudiantsIntervention input[type="checkbox"]': [cbAlice, cbBruno], '#listeEtudiantsIntervention input[type="checkbox"]:checked': [cbAlice], 'input[name="interventionStatut"]:checked': elementDom({ value: 'en-cours' }), '#criteresCiblesContainer .critere-cible-cb:checked': [] }
         });
         b.win.sauvegarderPresencesIntervention('I1');
         const i = store.test_interventions[0];
         noter('I2', { etudiants: i.etudiants, notes: i.notesIndividuelles, ecritures: b.journal.filter(j => j.k === 'test_interventions').length, notif: b.notifs.map(n => n.t) });
         expect(i.etudiants).toEqual(['2000001']);
-        expect(i.notesIndividuelles).toEqual({ 2000001: 'Alice progresse.' });   // la note de Bruno n'existe plus
+        // Avant #772 : { 2000001 } seulement — la note de Bruno n'existait plus. Après : son champ, affiché et rempli, est conservé.
+        expect(i.notesIndividuelles).toEqual({ 2000001: 'Alice progresse.', 2000002: 'Bruno absent, à revoir.' });
         expect(b.journal.filter(j => j.k === 'test_interventions').length).toBe(2);   // deux écritures complètes pour un clic
     });
 
-    it('I-3 · Ouvrir une intervention d\'un AUTRE groupe-cours, puis l\'enregistrer sans rien toucher : ses participants sont retirés avec leurs notes', () => {
+    it('I-3 · Ouvrir une intervention d\'un AUTRE groupe-cours, puis l\'enregistrer sans rien toucher : ses participants étaient retirés — depuis #772, ce que le formulaire ne montre pas reste (valeur d\'après)', () => {
         const store = storeBase();
         // L'intervention a été planifiée quand GC2 était actif : Dario (GC2) en est le seul participant.
         store.test_interventions = [{ id: 'I2', titre: 'Suivi Dario', date: '2026-09-01', heure: '', duree: 2, type: 'individuel', niveauRai: 3, contexte: 'hors-classe', description: '',
@@ -218,7 +222,7 @@ describe('5 · Interventions — gestes et écritures', () => {
         // GC1 est actif : le formulaire ne construit des cases que pour ses élèves (obtenirEtudiantsCoursActif) — Dario n'a pas de case.
         const conteneur = elementDom();
         const b = monterI(store, { elements: { conteneurPrincipal: conteneur, interventionNiveau: elementDom({ value: '3' }), interventionContexte: elementDom({ value: 'hors-classe' }), interventionTitre: elementDom({ value: 'Suivi Dario' }), interventionDate: elementDom({ value: '2026-09-01' }), interventionHeure: elementDom({ value: '' }), interventionDuree: elementDom({ value: '2' }), interventionDescription: elementDom({ value: '' }), interventionSeance: elementDom({ value: '' }), observationsIntervention: elementDom({ value: '' }), objectifVise: elementDom({ value: '' }) },
-            selecteurs: { '#listeEtudiantsIntervention input[type="checkbox"]:checked': [], 'input[name="interventionStatut"]:checked': elementDom({ value: 'en-cours' }), '#criteresCiblesContainer .critere-cible-cb:checked': [] } });
+            selecteurs: { '#listeEtudiantsIntervention input[type="checkbox"]': ['2000001', '2000002', '2000003'].map(da => elementDom({ value: da })), '#listeEtudiantsIntervention input[type="checkbox"]:checked': [], 'input[name="interventionStatut"]:checked': elementDom({ value: 'en-cours' }), '#criteresCiblesContainer .critere-cible-cb:checked': [] } });
         b.win.ouvrirIntervention('I2', {});
         const html = conteneur.innerHTML;
         const casesRendues = (html.match(/id="etud-\d+"/g) || []);
@@ -227,11 +231,12 @@ describe('5 · Interventions — gestes et écritures', () => {
         const i = store.test_interventions[0];
         noter('I3', { casesRendues, listeVisible: html.includes('2000004'), etudiantsApres: i.etudiants, notesApres: i.notesIndividuelles, liste: html.includes('Dautre') });
         expect(casesRendues.sort()).toEqual(['id="etud-2000001"', 'id="etud-2000002"', 'id="etud-2000003"']);   // les trois de GC1, triés par nom à l'écran ; pas Dario
-        expect(i.etudiants).toEqual([]);
-        expect(i.notesIndividuelles).toEqual({});
+        // Avant #772 : [] et {} — Dario et sa note disparaissaient. Après : conservés, faute de case pour eux.
+        expect(i.etudiants).toEqual(['2000004']);
+        expect(i.notesIndividuelles).toEqual({ 2000004: 'Plan de travail convenu.' });
     });
 
-    it('I-4 · La liste : le TITRE d\'une intervention entre dans l\'innerHTML sans echapperHtml (règle 1) ; le formulaire, lui, l\'échappe', () => {
+    it('I-4 · La liste : le TITRE et la description entraient bruts (règle 1) — depuis #769, échappés partout (valeur d\'après)', () => {
         const store = storeBase();
         store.test_interventions = [{ id: 'I3', titre: 'Rattrapage <b>x</b> "y"', date: '2026-09-01', heure: '', duree: 2, type: 'groupe', niveauRai: 2, contexte: 'rattrapage', description: 'desc <i>z</i>',
             etudiants: ['2000001'], analyse: { nbEtudiants: 1, patternsCommuns: {}, progressions: {}, niveauxRai: { 1: 0, 2: 1, 3: 0 } }, observations: '', notesIndividuelles: {}, criteresCibles: [], objectifVise: '', bilan: null, statut: 'en-cours', jamaisSauvegardee: false }];
@@ -240,10 +245,11 @@ describe('5 · Interventions — gestes et écritures', () => {
         b.win.afficherListeInterventions();
         b.win.ouvrirIntervention('I3', {});
         noter('I4', { listeBrut: liste.innerHTML.includes('Rattrapage <b>x</b>'), formulaireEchappe: conteneur.innerHTML.includes('Rattrapage &lt;b&gt;x&lt;/b&gt;'), descriptionBrute: conteneur.innerHTML.includes('desc <i>z</i>') });
-        expect(liste.innerHTML).toContain('Rattrapage <b>x</b> "y"');                 // brut dans la liste
+        expect(liste.innerHTML).not.toContain('Rattrapage <b>x</b> "y"');             // avant #769 : brut dans la liste
+        expect(liste.innerHTML).toContain('Rattrapage &lt;b&gt;x&lt;/b&gt;');
         expect(conteneur.innerHTML).toContain('Rattrapage &lt;b&gt;x&lt;/b&gt;');      // échappé dans le champ titre du formulaire
         expect(conteneur.innerHTML).toContain('<textarea id="interventionDescription"');
-        expect(conteneur.innerHTML).toContain('desc <i>z</i></textarea>');             // la description, brute dans son textarea
+        expect(conteneur.innerHTML).toContain('desc &lt;i&gt;z&lt;/i&gt;</textarea>'); // avant #769 : brute dans son textarea
     });
 
     it('I-5 · Le bilan : ses lettres viennent de 0,65/0,75/0,85 en clair ; la suggestion d\'objectif du même écran lit idme.insuffisant = 0,64', () => {
@@ -493,7 +499,7 @@ describe('2 · Liste des étudiant·es — tris, filtres, écritures par rendu, 
         expect(fiches.length).toBe(2);
         expect(fiches[1].groupe).toBe('1');   // non padé : « 1 » ≠ « 00001 » dans le filtre Groupe de la Liste
     });
-    it('L-7 · Confirmer un import (Cadre › Trimestre) : les élèves sont ÉCRITS, puis la fonction lève ReferenceError (« etudiants » hors de portée, :801) — aucune confirmation ne s\'affiche', async () => {
+    it('L-7 · Confirmer un import (Cadre › Trimestre) : les élèves étaient ÉCRITS puis la fonction levait ReferenceError sans confirmation — depuis #771, elle notifie (valeur d\'après)', async () => {
         const store = storeBase();
         const b = monterL(store);
         b.interne['trimestre-v2-etudiants.js'].donneesImportEnAttenteV2 = [{ da: '3000001', nom: 'Importé', prenom: 'Ivan', groupe: '01', programme: '' }, { da: '3000002', nom: 'Importée', prenom: 'Ida', groupe: '01', programme: '' }];
@@ -501,8 +507,8 @@ describe('2 · Liste des étudiant·es — tris, filtres, écritures par rendu, 
         try { await b.win.confirmerImportV2(); } catch (e) { erreur = e.constructor.name + ': ' + e.message; }
         noter('L7', { erreur, nbApres: store.test_groupeEtudiants.length, notifsSucces: b.notifs.filter(n => n.type === 'succes').length });
         expect(store.test_groupeEtudiants.length).toBe(6);                       // écrits
-        expect(erreur).toMatch(/ReferenceError/);                                  // puis la chute
-        expect(b.notifs.filter(n => n.type === 'succes').length).toBe(0);         // et pas de « N étudiant(s) importé(s) »
+        expect(erreur).toBe(null);                                                 // avant #771 : ReferenceError après l'écriture
+        expect(b.notifs.filter(n => n.type === 'succes').length).toBe(1);         // et « 2 étudiant(s) importé(s) — 6 au total dans le groupe »
     });
 });
 
@@ -590,7 +596,7 @@ describe('3 · Saisie des présences — écritures, répétition, verrouillage,
         expect(store.datesVerrouillees).toEqual([]);
     });
 
-    it('S-5 · La barre du compteur reconstruite au premier rendu : plus de bouton « Rapport », et « Annuler » vise une sous-section qui n\'existe pas (suivi-apercu-legacy)', () => {
+    it('S-5 · La barre du compteur reconstruite au premier rendu : « Rapport » avait disparu et « Annuler » visait suivi-apercu-legacy — depuis #768, Rapport présent et Annuler → suivi-liste (valeur d\'après)', () => {
         const store = storeBase();
         const b = monterS(store);
         b.interne['saisie-presences.js'].restaurerCompteurPresences();
@@ -600,9 +606,9 @@ describe('3 · Saisie des présences — écritures, répétition, verrouillage,
         const indexHtml = readFileSync(path.join(RACINE, 'index.html'), 'utf8').split('\n').slice(7911, 8118).join('\n');
         noter('S5', { rapportDansBarre: html.includes('ouvrirModaleRapportPresences'), rapportDansIndex: indexHtml.includes('ouvrirModaleRapportPresences'), annulerVise: (html.match(/data-param="([^"]+)"/) || [])[1], sousSectionsSuivi: sousSectionsSuivi.map(x => x.replace(/id:\s*'/, '').replace(/'$/, '')) });
         expect(indexHtml).toContain('ouvrirModaleRapportPresences');
-        expect(html).not.toContain('ouvrirModaleRapportPresences');
-        expect(html).toContain('data-param="suivi-apercu-legacy"');
-        expect(sousSectionsSuivi.join(',')).not.toContain('apercu-legacy');
+        expect(html).toContain('ouvrirModaleRapportPresences');                   // avant #768 : absent de la barre reconstruite
+        expect(html).toContain('data-param="suivi-liste"');                        // avant #768 : suivi-apercu-legacy
+        expect(html).not.toContain('apercu-legacy');
     });
 
     it('S-6 · Le bandeau « Configuration incomplète » ne regarde que l\'horaire, jamais les séances ; et initialiser la saisie écrit trois préférences sous clés NUES', () => {
@@ -679,7 +685,7 @@ describe('6 · Animation — tirage au sort, questions flash, clés', () => {
         expect(ecritApresDepart).toEqual(apresDepart);
         expect(apresRetour).not.toContain(parti);
     });
-    it('A-3 · La modale des paramètres : le DA réel dans le DOM (data-da) et le nom injecté SANS echapperHtml', () => {
+    it('A-3 · La modale des paramètres : le DA réel dans le DOM (data-da) ; le nom entrait brut — depuis #770, échappé (valeur d\'après)', () => {
         const store = storeBase();
         store.test_groupeEtudiants[0].nom = 'Assidu <b>gras</b>';
         const b = monterA(store);
@@ -688,7 +694,8 @@ describe('6 · Animation — tirage au sort, questions flash, clés', () => {
         const html = b.document.body.innerHTML;
         noter('A3', { daDansDom: /data-da="2000001"/.test(html), nomBrut: html.includes('Assidu <b>gras</b>, Alice'), nomEchappe: html.includes('Assidu &lt;b&gt;gras&lt;/b&gt;') });
         expect(html).toMatch(/data-da="2000001"/);
-        expect(html).toContain('Assidu <b>gras</b>, Alice');
+        expect(html).not.toContain('Assidu <b>gras</b>, Alice');                   // avant #770 : brut
+        expect(html).toContain('Assidu &lt;b&gt;gras&lt;/b&gt;, Alice');
     });
 
     it('A-4 · Les questions flash : clé assemblée « questionsFlash_<coursId> », NON namespacée ; « questionsFlash_global » si aucun cours actif', () => {

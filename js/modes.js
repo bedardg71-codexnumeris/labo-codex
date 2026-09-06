@@ -277,6 +277,11 @@ function choisirCategorieCulturelle() {
  * @returns {Object} - Mapping DA réel → pseudonyme
  */
 function genererMappingAnonyme() {
+    // #767 (6 sept. 2026) — `doitRegenerer` était affecté (:310, :338) sans jamais être déclaré : sous le
+    // 'use strict' du module, chaque lecture de groupeEtudiants en mode anonymisation levait
+    // ReferenceError sur un trimestre sans mapping (démo, A2026). Déclaré ici, dans la portée où il est
+    // affecté. Il n'est lu nulle part : les deux affectations documentent la branche, sans effet.
+    let doitRegenerer = false;
     // Utiliser un mapping namespacé par trimestre pour éviter le mélange entre sessions
     const trId = typeof window.obtenirTrimestreId === 'function' ? window.obtenirTrimestreId() : '';
     const cleMapping = trId ? `${trId}_mapping_anonymisation` : 'mapping_anonymisation';

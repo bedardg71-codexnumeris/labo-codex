@@ -2019,8 +2019,9 @@ function restaurerCompteurPresences() {
             <span>Total : <span id="nb-total">0</span></span>
             <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
             <span id="actions-presences-bar" style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+                <button class="btn btn-principal btn-compact" data-action="ouvrirModaleRapportPresences">Rapport</button>
                 <button class="btn btn-confirmer btn-compact" data-action="enregistrerPresences">Enregistrer</button>
-                <button class="btn btn-annuler btn-compact" data-action="afficherSousSection" data-param="suivi-apercu-legacy">Annuler</button>
+                <button class="btn btn-annuler btn-compact" data-action="afficherSousSection" data-param="suivi-liste">Annuler</button>
                 <span id="controle-verrouillage-presences" class="u-hide" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
                     <input type="checkbox" id="checkbox-verrouillage-presences"
                            style="width: 16px; height: 16px; accent-color: var(--bleu-principal, #1a73e8); cursor: pointer;"

@@ -384,7 +384,7 @@ function ouvrirModalParamsTirage() {
                                                data-da="${e.da}"
                                                ${!estExclu ? 'checked' : ''}
                                                data-on-change="toggleExclusionEtudiant" data-param="${e.da}">
-                                        <span class="tirage-etudiant-nom">${e.nom}, ${e.prenom}</span>
+                                        <span class="tirage-etudiant-nom">${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}</span>
                                         ${estTire && !etatTirage.avecRemise ? '<span class="tirage-badge-tire">tiré</span>' : ''}
                                     </label>
                                 `;
@@ -826,7 +826,7 @@ function ouvrirModalParamsQuestions() {
 
                             ${etatQuestions.categories.map(cat => `
                                 <div class="questions-groupe-categorie">
-                                    <h4 class="questions-categorie-titre">${cat.nom} (${questionsParCategorie[cat.id]?.length || 0})</h4>
+                                    <h4 class="questions-categorie-titre">${echapperHtml(cat.nom)} (${questionsParCategorie[cat.id]?.length || 0})</h4>
                                     <div class="questions-liste">
                                         ${(questionsParCategorie[cat.id] || []).map(q => genererHTMLQuestionFlash(q)).join('')}
                                     </div>
@@ -888,7 +888,7 @@ function genererHTMLQuestionFlash(question) {
 
     return `
         <div class="question-item ${estPosee && !etatQuestions.avecRemise ? 'question-posee' : ''}">
-            <span class="question-item-texte" data-action="modifierQuestion" data-param="${question.id}" title="Clique pour modifier">${question.texte}</span>
+            <span class="question-item-texte" data-action="modifierQuestion" data-param="${question.id}" title="Clique pour modifier">${echapperHtml(question.texte)}</span>
             <div class="question-item-actions">
                 <select class="question-categorie-select" data-on-change="changerCategorieQuestionHandler" data-question-id="${question.id}" title="Changer de catégorie">
                     ${optionsCategorie}
@@ -959,7 +959,7 @@ function rafraichirListeQuestionsModal() {
             if (questionsCategorie.length > 0 || etatQuestions.categories.length > 0) {
                 html += `
                     <div class="questions-groupe-categorie">
-                        <h4 class="questions-categorie-titre">${cat.nom} (${questionsCategorie.length})</h4>
+                        <h4 class="questions-categorie-titre">${echapperHtml(cat.nom)} (${questionsCategorie.length})</h4>
                         <div class="questions-liste">
                             ${questionsCategorie.map(q => genererHTMLQuestionFlash(q)).join('')}
                         </div>
