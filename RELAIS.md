@@ -7,7 +7,7 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, MATIN (MESURE DU PDF DE L'ÉLÈVE DÉPOSÉE ; RIEN DANS `js/`, PAS DE RELEASE)
+## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, MATIN (MESURE DU PDF DE L'ÉLÈVE DÉPOSÉE, PUIS SES DEUX CONSTATS CORRIGÉS : 1.123.1)
 
 > ↻ **6 h 28 → 7 h 15, sur le Mac.** Temps 0 de la consigne (rapatrier la clôture) **déjà fait** par `886d9828` avant la séance
 > (rituel d'ouverture : arbre propre sur les trois fichiers, patch de 105 lignes reporté). Consigne promue en `dc1e606d`
@@ -26,15 +26,28 @@
 > depuis 3 productions » avec un seul artefact antérieur, et plus jamais « Progrès » ni « Tu as progressé » dès l'auto-save.
 > Deux défauts de forme : collage `textContent` sans séparateurs ; bloc « --- Observations --- » jamais écrit (identifiants
 > hérités). **#755 inscrit** (`travaux-archivage.js` lu comme binaire, l. 39). Une ligne dans `OU-EN-EST-ON.md`.
-> ▣ **Ce push (`d5f911b0`) touche `tests/unit/` : run GitHub `34028716398`, Vitest `success`, puis Playwright (WebKit) LANCÉ**
-> (`tests/` est dans la liste `OBSERVABLE` de la CI) — c'est « le prochain push » qui juge enfin la spec #732 corrigée en
-> `c4ac5ae3` ; **lire ce run avant de conclure** (Claude Code le lit à sa fin si la session tient). ⚠ Le hook pre-push, lui, a
-> dit « sans objet (aucun fichier observable) » : sa liste (`scripts/lot-observable.sh`) ne compte pas `tests/`, celle de la CI
-> si — deux règles pour la même question (#756). Aucune relance faite.
-> **`main` = `origin/main` après ce push, AUCUN travail en avance.** Version 1.123.0, build `0905-2025` (pas de release : rien
-> dans `js/`). Suite Vitest après le dépôt : 484 fichiers / 5 404 tests.
-> **Ce qui attend Grégoire** : arbitrer C1 et C2 (et les deux défauts de forme) avant que Cowork cadre la « synthèse des
-> rétroactions dans le PDF » ; le reste est inchangé (le run à lire, les cinq coups d'œil sur 1.122 / 1.123, le canal du 14, #737).
+> ▣ **Ce push (`d5f911b0`) touche `tests/unit/` : run GitHub `34028716398`, Vitest `success`, Playwright (WebKit) LANCÉ**
+> (`tests/` est dans la liste `OBSERVABLE` de la CI) **puis ANNULÉ par le push suivant** (`89bcf4a9`, la release : le workflow
+> annule le run en cours sur la même branche). ⚠ Le hook pre-push, lui, avait dit « sans objet (aucun fichier observable) » :
+> sa liste (`scripts/lot-observable.sh`) ne compte pas `tests/`, celle de la CI si — deux règles pour la même question (#756).
+> ⮕ **Le verdict serveur sur la spec #732 (corrigée en `c4ac5ae3`) se prend sur le run `34030274015` de `89bcf4a9`**, où
+> Playwright tourne (`js/` touché) ; lu par Claude Code à sa fin, sinon à lire. Aucune relance faite.
+> ↻ **7 h 00 → 7 h 15 — ARBITRAGE (a) DE GRÉGOIRE : C1 ET C2 CORRIGÉS LE MATIN MÊME, release `patch` 1.123.1** (build `0906-0715`,
+> `89bcf4a9`, « Le texte copié vers Léa dit la note une fois, et son bilan retrouve le progrès »). **#757** : `_rendreNoteFinale`
+> recopie l'écran tel quel (il porte déjà l'unité). **#758** : mesure préalable demandée par Grégoire — la garde du PDF
+> (`lireHistorique`, `e.id !== evaluation.id`) est privée à son module, l'exporter aurait forcé dix bancs à le charger ; l'écran
+> possède déjà le résolveur de « la copie en base » (#576, `_chargerEvaluationEnregistreeBilan`) : `_chargerHistoriqueBilan`
+> la reçoit et applique le MÊME prédicat — une règle, pas une seconde lecture. Deux sentinelles rouges avant / vertes après,
+> break-testées (⚠ la première mutation de #758 n'avait pas été appliquée — témoin à 1 pendant « la casse », vert menteur ;
+> refaite avec témoin à 0 : 4 rouges / 5). Le banc de mesure repassé aux valeurs d'après ; **#759** (collage Léa sans
+> séparateurs) et **#760** (bloc « Observations » jamais écrit) inscrits, pas corrigés ; changelog consolidé dans l'entrée 1.123.
+> Vitest **486 fichiers / 5 411** sur le commit ; **verdict Playwright local VERT au jeton sur `89bcf4a9`** (0 échec, 0 instable,
+> rendu 11 h 26 Z) par `scripts/pousser.sh`, puis push `5da06435..89bcf4a9 main -> main` vers 7 h 27.
+> **`main` = `origin/main` après ce push, AUCUN travail en avance.** Version 1.123.1, build `0906-0715`.
+> **Ce qui attend Grégoire** : lire le run GitHub de 1.123.1 (Playwright y tourne : `js/` touché) et celui de `d5f911b0`
+> (`34028716398`) ; un coup d'œil à l'écran : copier la rétroaction d'une copie évaluée → « Note finale : 63.5 % », et le bilan
+> d'une copie qui a un artefact antérieur → « Progrès : … » ; le reste est inchangé (les cinq coups d'œil sur 1.122 / 1.123, le canal
+> du 14, #737 ; Cowork cadre la « synthèse des rétroactions dans le PDF » à partir du rapport, avec #759 et #760).
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, NUIT (1.123.0 EN LIGNE ; LE RUN DE LA RELEASE ROUGE SUR SA SPEC NEUVE, PAS SUR LE CODE ; LE RUN DU CORRECTIF DE SPEC ROUGE PAR PERTE DU RUNNER, RELANCE DUE À GRÉGOIRE ; CLÔTURE REPRISE APRÈS UN REDÉMARRAGE DU MAC)
 
