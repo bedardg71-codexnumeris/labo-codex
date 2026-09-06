@@ -7,7 +7,7 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, MATIN (MESURE DU PDF DE L'ÉLÈVE DÉPOSÉE, PUIS SES DEUX CONSTATS CORRIGÉS : 1.123.1)
+## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, MATIN (MESURE DU PDF DE L'ÉLÈVE DÉPOSÉE, PUIS SES DEUX CONSTATS CORRIGÉS : 1.123.1 ; PUIS UN RETOUR TESTEUR CORRIGÉ : 1.123.2)
 
 > ↻ **6 h 28 → 7 h 15, sur le Mac.** Temps 0 de la consigne (rapatrier la clôture) **déjà fait** par `886d9828` avant la séance
 > (rituel d'ouverture : arbre propre sur les trois fichiers, patch de 105 lignes reporté). Consigne promue en `dc1e606d`
@@ -43,11 +43,27 @@
 > séparateurs) et **#760** (bloc « Observations » jamais écrit) inscrits, pas corrigés ; changelog consolidé dans l'entrée 1.123.
 > Vitest **486 fichiers / 5 411** sur le commit ; **verdict Playwright local VERT au jeton sur `89bcf4a9`** (0 échec, 0 instable,
 > rendu 11 h 26 Z) par `scripts/pousser.sh`, puis push `5da06435..89bcf4a9 main -> main` vers 7 h 27.
-> **`main` = `origin/main` après ce push, AUCUN travail en avance.** Version 1.123.1, build `0906-0715`.
-> **Ce qui attend Grégoire** : lire le run GitHub de 1.123.1 (Playwright y tourne : `js/` touché) et celui de `d5f911b0`
-> (`34028716398`) ; un coup d'œil à l'écran : copier la rétroaction d'une copie évaluée → « Note finale : 63.5 % », et le bilan
-> d'une copie qui a un artefact antérieur → « Progrès : … » ; le reste est inchangé (les cinq coups d'œil sur 1.122 / 1.123, le canal
-> du 14, #737 ; Cowork cadre la « synthèse des rétroactions dans le PDF » à partir du rapport, avec #759 et #760).
+> ↻ **7 h 32 → 7 h 55 — RETOUR TESTEUR (priorité absolue) : `BUG_grégoire_2026-09-06_07-32-11`, « j'ai cliqué sur le travail d'un
+> élève pour le consulter et on me mène à une page vide » (Suivi › Profil › Travaux soumis, vignette). CORRIGÉ : 1.123.2** (build
+> `0906-0745`, `ddc94fcf`, #761, SUIVI-BUGS #533). Cause lue puis reproduite au WebKit : `travauxUI.ouvrirFichier` ne faisait que
+> `afficherSousSection('evaluations-annoter')` depuis la refonte de la sous-navigation (`e24f0960`, 18 février) ; or
+> `afficherSousSection` (navigation.js) ne bascule jamais la section parente — Suivi restait affichée sans sous-section active. Les
+> trois autres entrées hors section (liste ×2, « Annoter et évaluer » du profil) faisaient `afficherSection` elles-mêmes, puis
+> attendaient l'initialisation du module (200 à 500 ms) ; la vignette, non. Correctif dans le geste (`ouvrirFichier`, seul fichier
+> de `js/` touché ; navigation.js intact) : arriver d'abord (section, drapeau `_apresOuvertureFichier`, sous-section), puis second
+> passage à +500 ms. Spec `profil-travaux-761-vignette-mene-a-la-visionneuse.spec.js` : départ Suivi › Profil comme le rapport,
+> rouge avant (Évaluations jamais active), verte après ; deux break-tests rouges (sans la bascule : expiration à l'arrivée ; sans le
+> second passage : `badgeEnCours: false` — la course avec l'initialisation à +100 ms est réelle). Vitest 5 411 ; verdict Playwright
+> local par `scripts/pousser.sh` avant le push. USAGE-FORMATS non touché (journal des formats, pas le registre de ce bug).
+> ⏳ Noté sous #761, pas corrigé : le protocole d'arrivée à minuteries vit maintenant en quatre endroits — un signal d'initialisation
+> (promesse) le remplacerait ; à prendre avec les neuf doublons `window` du 28 août.
+> ⚠ Ce push annule le run `34030274015` de 1.123.1 (même règle de concurrence) : **le run de 1.123.2 juge l'ensemble**, dont la
+> spec #732 corrigée en `c4ac5ae3` — à lire.
+> **`main` = `origin/main` après ce push, AUCUN travail en avance.** Version 1.123.2, build `0906-0745`.
+> **Ce qui attend Grégoire** : lire le run GitHub de 1.123.2 ; à l'écran, sur 1.123.2 rechargée : Suivi › Profil › Travaux soumis,
+> cliquer un travail → la copie s'ouvre dans Annoter et évaluer ; copier la rétroaction d'une copie évaluée → « Note finale :
+> 63.5 % » ; le bilan d'une copie qui a un artefact antérieur → « Progrès : … » ; le reste est inchangé (les cinq coups d'œil sur
+> 1.122 / 1.123, le canal du 14, #737 ; Cowork cadre la « synthèse des rétroactions dans le PDF » à partir du rapport, avec #759 et #760).
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, NUIT (1.123.0 EN LIGNE ; LE RUN DE LA RELEASE ROUGE SUR SA SPEC NEUVE, PAS SUR LE CODE ; LE RUN DU CORRECTIF DE SPEC ROUGE PAR PERTE DU RUNNER, RELANCE DUE À GRÉGOIRE ; CLÔTURE REPRISE APRÈS UN REDÉMARRAGE DU MAC)
 

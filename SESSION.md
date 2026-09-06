@@ -7,8 +7,9 @@
      ===================================================================== -->
 
 <!-- =====================================================================
-     SESSION 31 — 6 SEPTEMBRE 2026, 6 H 28 → 7 H 45 (Mac) : MESURER CE QUE L'ÉLÈVE LIT DANS SON PDF, SANS CODER (consigne du 6 au matin, Temps 1),
-     PUIS, SUR ARBITRAGE (a) DE GRÉGOIRE, CORRIGER LES DEUX CONSTATS (#757, #758) — release 1.123.1 (`89bcf4a9`, build 0906-0715).
+     SESSION 31 — 6 SEPTEMBRE 2026, 6 H 28 → 8 H 00 (Mac) : MESURER CE QUE L'ÉLÈVE LIT DANS SON PDF, SANS CODER (consigne du 6 au matin, Temps 1),
+     PUIS, SUR ARBITRAGE (a) DE GRÉGOIRE, CORRIGER LES DEUX CONSTATS (#757, #758) — release 1.123.1 (`89bcf4a9`, build 0906-0715) —,
+     PUIS UN RETOUR TESTEUR (7 h 32, page vide depuis la vignette d'un travail du profil) — release 1.123.2 (`ddc94fcf`, build 0906-0745, #761).
      ▣ Ouverture (subagent d'audit) : Temps 0 (rapatrier la clôture) DÉJÀ FAIT par `886d9828` à 6 h 22 ; la prémisse de la consigne
        (Mac à `c4ac5ae3`, trois brouillons) était périmée d'un commit ; Vitest 483 / 5 395 verts. Consigne promue (`dc1e606d`).
      ▣ Temps 1 : banc `tests/unit/mesure-ce-que-l-eleve-lit-2026-09-06.test.js` — modules RÉELS dans le bac à sable
@@ -61,6 +62,26 @@
        changelog-data, evaluation-retroaction, init-inline, main) ; commit `89bcf4a9` ; Vitest 486 / 5 411 sur le commit ;
        `scripts/pousser.sh origin main` détaché : verdict Playwright local VERT au jeton (`89bcf4a9`, 0 échec, 0 instable,
        11 h 26 Z), push `5da06435..89bcf4a9 main -> main` vers 7 h 27. Le run GitHub de 1.123.1 est à lire (Playwright y tourne).
+     ▣ RETOUR TESTEUR (7 h 32, `BUG_grégoire_2026-09-06_07-32-11`, 1.123.0) : « page vide » après le clic sur la vignette d'un travail,
+       Suivi › Profil › Travaux soumis. Skill debug : reproduit d'abord par lecture — la vignette porte `travauxUI.ouvrirFichier`, qui ne
+       fait que `afficherSousSection('evaluations-annoter')` (refonte `e24f0960`, 18 févr.) ; `afficherSousSection` (navigation.js,
+       l. 458-620, aucun `afficherSection`) ne bascule pas la section parente → Suivi affichée sans sous-section active. Second temps
+       lu dans `initialiserModuleTravaux` : arrivé, ouvrir tout de suite entre en course avec l'initialisation à +100 ms (première
+       initialisation → `rafraichirUI` reconstruit ; sinon restauration d'un « dernier fichier »). Les trois autres entrées hors
+       section (liste-evaluations ×2, profil-etudiant-actions) font `afficherSection` + drapeau + 200/500 ms ; la vignette, non.
+       Catégories 2.5 (navigation à demi) + 2.6 (course). `window.afficherSection` de planification.js / bilan-reflexif.js : des
+       enveloppes qui rappellent l'original (vérifié), rien ne se perd.
+     ▣ Correctif : `ouvrirFichier(fichierId, _deuxiemePassage)` — si la sous-section n'est pas visible : section (si inactive),
+       drapeau `_apresOuvertureFichier` (no-op), sous-section, `setTimeout(ouvrirFichier(id, true), 500)`, return ; au second
+       passage, le chemin d'hier. Seul fichier de js/ touché ; navigation.js (zone protégée) intact.
+     ▣ Preuve : spec WebKit `profil-travaux-761-vignette-mene-a-la-visionneuse.spec.js` (fixture #732, un `fichiersTravaux`
+       namespacé, `afficherSection('suivi')` AVANT `afficherProfilComplet` — ouvrir un profil n'active que la sous-section ; rendus
+       comptés ≥ 3 avant le clic, #754 ; clic par `el.click()`, dispatcher réel). Rouge avant à l'arrivée (10 s), verte après
+       (3,3 s). Break-tests : sans la bascule → rouge à l'arrivée ; sans le second passage → rouge `badgeEnCours: false`
+       (la course est réelle). Restauration `cmp` identique ; Vitest 5 411.
+     ▣ Traces : SUIVI-BUGS #533 (section « Corrigés (6 septembre 2026 …) ») ; BACKLOG #761 [x] + note « protocole d'arrivée en
+       quatre endroits » ; changelog dans 1.123 ; USAGE-FORMATS non touché (journal des formats). Release `patch` 1.123.2
+       (`ddc94fcf`, build 0906-0745, jetons `20260906b` + travaux-ui `20260906a`) ; `pousser.sh` détaché (verdict puis push).
      ===================================================================== -->
 
 <!-- =====================================================================
