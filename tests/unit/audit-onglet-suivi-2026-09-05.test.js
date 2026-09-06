@@ -275,10 +275,8 @@ function monter(jeu, opts = {}) {
         demarrerCacheLecture: winModes.demarrerCacheLecture, terminerCacheLecture: winModes.terminerCacheLecture, invaliderCacheLecture: winModes.invaliderCacheLecture,
         filtrerEtudiantsParMode: winModes.filtrerEtudiantsParMode, estModeeLectureSeule: winModes.estModeeLectureSeule,
         // Aiguillages vers les exports réels, résolus à l'appel.
-        obtenirPratiqueActiveGroupeCours: fwd('obtenirPratiqueActiveGroupeCours'),
-        // ⚠ PONT DU BANC, que l'application N'A PAS : `obtenirDetailsAssiduite` vit dans l'IIFE de sections-affichage.js
-        // sans export window, et rapport.js l'appelle par son nom nu (mesure B5). Sans ce pont, genererRapportAPI lève.
-        obtenirDetailsAssiduite: (...a) => win.__audit['profil-etudiant-sections-affichage.js'].obtenirDetailsAssiduite(...a)
+        obtenirPratiqueActiveGroupeCours: fwd('obtenirPratiqueActiveGroupeCours')
+        // (Le pont `obtenirDetailsAssiduite` que le banc prêtait à rapport.js n'a plus lieu d'être : #732 l'exporte — mesure B5.)
     });
     const OBJETS_EXPORTES = ['PratiqueManager', 'denotationJugements', 'modalitesEvaluation', 'profilActuelDA', 'etudiantsListeCache', 'PRATIQUE_DEFAUT', 'SEUILS_PAR_DEFAUT', '__audit'];
     for (const nom of EXPORTS_WINDOW) if (!(nom in globaux) && !/^[A-Z]/.test(nom) && !OBJETS_EXPORTES.includes(nom)) globaux[nom] = fwd(nom);
@@ -520,26 +518,25 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         expect(/statutRemise/.test(corpsC)).toBe(false);   // l'historique SOM (l. 311) le lit ; le C courant, non
     });
 
-    it('B5 · le même P partout ? tableau de bord, liste et profil lisent le même stock ; le RAPPORT du profil recalcule le sien', () => {
-        // À la main : le stock indicesCP dit 77 pour Assidu. Le rapport (genererRapportAPI) refait « les 4 meilleurs » :
-        // (90 + 80 + 70 + 60) / 4 = 75 ; et sa complétion compte des « artefact-portfolio » — il n'y en a aucun : « 0 remises / 0 productions ».
+    it('B5 · le même P partout : tableau de bord, liste, profil ET rapport lisent le même stock (#732 ; avant, le rapport levait, puis recalculait le sien)', () => {
+        // À la main : le stock indicesCP dit 77 pour Assidu. Avant #732 : « Performance : 75% (4 meilleurs artefacts actuels) » et
+        // « Complétion : 100% (0 remises / 0 productions) » — et dans l'application, une ReferenceError. Après : 77 (note du cours), 4 remises / 4.
         const b = monter(jeuBase()); b.calculerTout();
         const stock = b.win.calculerIndicesEtudiant(DA.ASSIDU).sommatif.performance * 100;   // ce que lit le tableau de bord
         const profil = b.win.calculerTousLesIndices(DA.ASSIDU).P;                              // ce que lit le profil et la liste
-        // ⚠ Dans l'application, ce rapport LÈVE : `obtenirDetailsAssiduite` n'est exporté sur window par aucun fichier de js/,
-        // et rapport.js l'appelle par son nom nu depuis une autre IIFE. Le banc lui prête un pont pour lire ses nombres.
+        // #732 — `obtenirDetailsAssiduite` est désormais exportée (avant : 0 export, et rapport.js l'appelait par son nom nu).
         const exportsDetailsA = readFileSync(path.join(RACINE, 'js/profil-etudiant-sections-affichage.js'), 'utf8').match(/window\.obtenirDetailsAssiduite\s*=/g) || [];
         const appelNu = /const detailsA = obtenirDetailsAssiduite\(da\);/.test(readFileSync(path.join(RACINE, 'js/profil-etudiant-rapport.js'), 'utf8'));
         const rapport = b.win.genererRapportAPI(DA.ASSIDU);
         const ligneP = (rapport.match(/Performance : [^\n]*/) || [''])[0];
         const ligneC = (rapport.match(/Complétion : [^\n]*/) || [''])[0];
         noter('B5', { stock, profil, ligneP, ligneC, exportsDetailsA: exportsDetailsA.length, appelNu });
-        expect(exportsDetailsA.length).toBe(0);
+        expect(exportsDetailsA.length).toBe(1);                               // avant : 0
         expect(appelNu).toBe(true);
         expect(stock).toBe(77);
         expect(profil).toBe(77);
-        expect(ligneP).toBe('Performance : 75% (4 meilleurs artefacts actuels)');
-        expect(ligneC).toBe('Complétion : 100% (0 remises / 0 productions)');
+        expect(ligneP).toBe('Performance : 77% (note du cours)');             // avant : « 75% (4 meilleurs artefacts actuels) »
+        expect(ligneC).toBe('Complétion : 100% (4 remises / 4 productions)');  // avant : « 0 remises / 0 productions »
     });
 });
 
