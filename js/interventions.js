@@ -360,7 +360,7 @@ function afficherListeInterventions() {
             <div class="carte intervention-item u-mb-15">
                 <div class="intervention-header">
                     <div>
-                        <h4 class="intervention-titre" data-tooltip="interv-carte">${intervention.titre}</h4>
+                        <h4 class="intervention-titre" data-tooltip="interv-carte">${echapperHtml(intervention.titre)}</h4>
                         <div class="intervention-badges">
                             <span>${badgeStatut}</span>
                             <span class="badge-type-intervention">${badgeType}</span>
@@ -777,7 +777,7 @@ function ouvrirIntervention(interventionId, options) {
 
                         <div class="champ-formulaire u-m-0">
                             <label for="interventionHeure" class="label-formulaire">Heure :</label>
-                            <input type="time" id="interventionHeure" class="controle-form" value="${intervention.heure || ''}">
+                            <input type="time" id="interventionHeure" class="controle-form" value="${echapperHtml(intervention.heure || '')}">
                         </div>
 
                         <div class="champ-formulaire u-m-0">
@@ -790,7 +790,7 @@ function ouvrirIntervention(interventionId, options) {
                     <div class="champ-formulaire u-m-0">
                         <label for="interventionDescription" class="label-formulaire">Description (optionnel) :</label>
                         <textarea id="interventionDescription" class="controle-form" rows="3"
-                                  placeholder="Objectifs de l'intervention, sujets abord\u00e9s\u2026">${intervention.description || ''}</textarea>
+                                  placeholder="Objectifs de l'intervention, sujets abord\u00e9s\u2026">${echapperHtml(intervention.description || '')}</textarea>
                     </div>
                 </div>
 
@@ -821,7 +821,7 @@ function ouvrirIntervention(interventionId, options) {
 
                         <div class="champ-formulaire u-m-0">
                             <label for="interventionSeance" class="label-formulaire">S\u00e9ance concern\u00e9e :</label>
-                            <input type="date" id="interventionSeance" class="controle-form" value="${intervention.seanceConcernee || ''}">
+                            <input type="date" id="interventionSeance" class="controle-form" value="${echapperHtml(intervention.seanceConcernee || '')}">
                         </div>
                     </div>
                 </div>
@@ -1222,6 +1222,11 @@ function sauvegarderPresencesIntervention(interventionId) {
 
     const checkboxes = document.querySelectorAll('#listeEtudiantsIntervention input[type="checkbox"]:checked');
     const dasSelectionnes = Array.from(checkboxes).map(cb => cb.value);
+    // #772 (6 sept. 2026) — ce que le formulaire n'a pas MONTRÉ n'est pas touché. Le formulaire ne construit
+    // des cases que pour les élèves du groupe-cours actif : les participants d'un autre groupe-cours (une
+    // intervention planifiée sous GC2, rouverte sous GC1) restaient invisibles et étaient retirés, avec leurs
+    // notes, par un simple « Enregistrer ». On distingue donc les DA affichés (cochés ou non) des autres.
+    const dasAffiches = Array.from(document.querySelectorAll('#listeEtudiantsIntervention input[type="checkbox"]')).map(cb => cb.value);
     const observationsField = document.getElementById('observationsIntervention');
     const observations = observationsField ? observationsField.value : '';
 
@@ -1229,8 +1234,11 @@ function sauvegarderPresencesIntervention(interventionId) {
     const statutRadio = document.querySelector('input[name="interventionStatut"]:checked');
     const nouveauStatut = statutRadio ? statutRadio.value : 'en-cours';
 
-    // Marquer les présences (met à jour etudiants et analyse)
-    marquerPresences(interventionId, dasSelectionnes);
+    // Marquer les présences (met à jour etudiants et analyse) : les cochés du formulaire, plus les
+    // participants que le formulaire n'a pas montrés (#772).
+    const existante = obtenirInterventions().find(i => i.id === interventionId);
+    const participantsNonAffiches = ((existante && existante.etudiants) || []).filter(da => !dasAffiches.includes(da));
+    marquerPresences(interventionId, [...new Set(participantsNonAffiches.concat(dasSelectionnes))]);
 
     // Sauvegarder TOUTES les informations de l'intervention
     const interventions = obtenirInterventions();
@@ -1272,13 +1280,16 @@ function sauvegarderPresencesIntervention(interventionId) {
         // Mettre à jour observations
         interventions[index].observations = observations;
 
-        // Récupérer les notes individuelles pour chaque étudiant présent
-        const notesIndividuelles = {};
-        dasSelectionnes.forEach(da => {
+        // Notes individuelles (#772) : on part de celles en base et on n'écrit que ce que le formulaire a
+        // montré — un champ affiché vide efface la note, un champ affiché rempli la pose (coché ou non) ;
+        // les DA sans champ (autre groupe-cours, élève parti) gardent la leur.
+        const notesIndividuelles = Object.assign({}, interventions[index].notesIndividuelles || {});
+        dasAffiches.forEach(da => {
             const noteField = document.getElementById(`note-${da}`);
-            if (noteField && noteField.value.trim()) {
-                notesIndividuelles[da] = noteField.value.trim();
-            }
+            if (!noteField) return;
+            const texte = noteField.value.trim();
+            if (texte) notesIndividuelles[da] = texte;
+            else delete notesIndividuelles[da];
         });
         interventions[index].notesIndividuelles = notesIndividuelles;
 

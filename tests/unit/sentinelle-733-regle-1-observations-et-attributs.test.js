@@ -65,4 +65,33 @@ describe('#733 · règle 1 — observations et attributs', () => {
         expect(html).toContain('data-da="2000001&quot; data-x=&quot;"');
         expect(html).toContain('note &lt;b&gt;x&lt;/b&gt;');   // le contenu était déjà échappé (escapeHtml local)
     });
+    it('#769 · le TITRE dans la liste, la DESCRIPTION, l\'HEURE et la SÉANCE dans le formulaire : bruts le 6 septembre, ils sortent échappés', () => {
+        const intervention = { id: 'I2', titre: 'Rattrapage <b>x</b> "y"', date: '2026-09-01', heure: '10:00" onfocus="alert(1)', duree: 2, type: 'groupe', niveauRai: 2, contexte: 'rattrapage',
+            description: 'desc </textarea><img src=x onerror="alert(2)">', seanceConcernee: '2026-09-01" data-x="', etudiants: ['2000001'],
+            analyse: { nbEtudiants: 1, patternsCommuns: {}, progressions: {}, niveauxRai: { 1: 0, 2: 1, 3: 0 } }, observations: '', notesIndividuelles: {}, criteresCibles: [], objectifVise: '', bilan: null, statut: 'en-cours' };
+        const store = { test_interventions: [intervention], test_groupeEtudiants: [{ da: '2000001', nom: 'Assidu', prenom: 'Alice' }], test_grillesTemplates: [] };
+        const liste = element(), conteneur = element();
+        const elements = { conteneurPrincipal: conteneur, listeInterventions: liste };
+        const document = { getElementById: (id) => (elements[id] || (elements[id] = element())), querySelector: () => null, querySelectorAll: () => [],
+            createElement: () => element(), addEventListener() {}, body: element(), documentElement: element(), readyState: 'complete' };
+        const db = { getSync: (k, d) => (k in store ? JSON.parse(JSON.stringify(store[k])) : (d !== undefined ? d : null)), setSync: (k, v) => { store[k] = v; }, get: async () => null, set: async () => {} };
+        const win = { addEventListener() {}, removeEventListener() {}, dateLocaleYMD: () => '2026-05-15' };
+        chargerScript('js/interventions.js', { document, db, cle: (k) => 'test_' + k, echapperHtml,
+            obtenirDonneesSelonMode: (k) => JSON.parse(JSON.stringify(store['test_' + String(k).replace(/^test_/, '')] || [])),
+            obtenirEtudiantsCoursActif: () => JSON.parse(JSON.stringify(store.test_groupeEtudiants)),
+            determinerNiveauRaiPedagogique: () => ({ niveau: 1, pattern: 'Stable' }), calculerTousLesIndices: () => ({ A: 100, C: 100, P: 80 }),
+            calculerMoyennesCriteres: () => null, obtenirGrilleReferenceDepistage: () => null, libelleNiveauSOLO: () => '', obtenirSeuil: () => 0.7,
+            notifications: { succes() {}, erreur() {}, info() {} }, alert() {}, genererIdUnique: (p) => p + '1', obtenirCoursActifId: () => 'GC1',
+            formaterDateComplete: (d) => String(d), formaterNbEtudiants: (n) => n + ' étudiant', obtenirSeancesCompletes: () => ({}), obtenirCalendrierComplet: () => ({}) }, win);
+        win.afficherListeInterventions();
+        win.ouvrirIntervention('I2', {});
+        const htmlListe = liste.innerHTML, htmlForm = conteneur.innerHTML;
+        expect(htmlListe).not.toContain('Rattrapage <b>x</b>');
+        expect(htmlListe).toContain('Rattrapage &lt;b&gt;x&lt;/b&gt; &quot;y&quot;');
+        expect(htmlForm).not.toContain('desc </textarea><img');
+        expect(htmlForm).toContain('desc &lt;/textarea&gt;&lt;img src=x onerror=&quot;alert(2)&quot;&gt;</textarea>');
+        expect(htmlForm).not.toContain('value="10:00" onfocus=');
+        expect(htmlForm).toContain('value="10:00&quot; onfocus=&quot;alert(1)"');
+        expect(htmlForm).toContain('value="2026-09-01&quot; data-x=&quot;"');
+    });
 });

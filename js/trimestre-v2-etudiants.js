@@ -784,8 +784,11 @@ async function confirmerImportV2() {
         return etudiants;
     }, []);
 
-    // Vérification immédiate
+    // Vérification immédiate : le compte relu en base (tout le groupe), et le compte du lot importé.
+    // #771 (6 sept. 2026) — la notification lisait `etudiants`, le paramètre du mutateur ci-dessus,
+    // hors de portée ici : ReferenceError après l'écriture, aucune confirmation à l'écran.
     const verification = db.getSync(cleEtud, []).length;
+    const nbImportes = donneesImportEnAttenteV2.length;
 
     // Nettoyer
     donneesImportEnAttenteV2 = [];
@@ -799,7 +802,7 @@ async function confirmerImportV2() {
 
     chargerListeEtudiantsV2();
 
-    notifications.succes(`${etudiants.length} étudiant(s) importé(s)`);
+    notifications.succes(`${nbImportes} étudiant(s) importé(s) — ${verification} au total dans le groupe`);
 
     // Mettre à jour le guide groupe-cours
 }
