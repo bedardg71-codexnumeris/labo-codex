@@ -7,6 +7,67 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 30 — 5 SEPTEMBRE 2026, 19 H 45 → 23 H 45, puis LA CLÔTURE REPRISE VERS MINUIT APRÈS UN REDÉMARRAGE DU MAC :
+     LE LOT DU SUIVI ARBITRÉ ET LIVRÉ (release 1.123.0), le run de la release rouge sur sa spec neuve, le correctif de spec.
+     ▣ **LIVRÉ : 1.123.0 (build 0905-2025, `507b7229`) — #730 à #734, cinq commits, cinq sentinelles break-testées ;
+     run GitHub `34001941420` LU JUSQU'AU BOUT : Vitest `success`, Playwright (WebKit) `failure` (01 h 15 Z) — rouge sur
+     `profil-rapport-732-se-genere.spec.js`, PAS sur le code ; `c4ac5ae3` corrige la spec (rien dans js/) ; run GitHub
+     `34009795798` LU JUSQU'AU BOUT : Vitest `success` (03 h 48 Z), Playwright (WebKit) `failure` par PERTE DU RUNNER (220 verts / 264, 0 rouge, 0 second essai, silence de 9 min après le test 220 à 04 h 09 Z, « shutdown signal » à 04 h 18 min 59 s Z, étape `cancelled`) ; le 221e, jamais imprimé, était la spec corrigée : NI prouvée NI infirmée. Aucune relance, aucun correctif : la relance est à Grégoire.** Vitest 483 / 5 395.
+
+     ▣ Arbitrage (Cowork avec Grégoire, 19 h 45, `plans de travail/CONSIGNE-DU-JOUR.md`) : les quatre « corriger maintenant »
+       du rapport retenus, plus G-2 ajouté au lot par Cowork (un enseignant lit un chiffre faux). Règle de Grégoire, au mot :
+       un élève qui n'a rien remis n'est « Non-participation » que lorsqu'un travail est dû ET qu'au moins une copie du
+       groupe est évaluée ; avant, tout le monde reste « En attente ».
+     ▣ Lot (19 h 54 → 20 h 07), un commit par fiche, sentinelle écrite AVANT le code (rouge sur l'avant, verte après),
+       break-testée site par site, fichiers restaurés à empreinte identique, banc d'audit passé aux valeurs d'après :
+       #730 `1e8a1d72` — sept fonctions du dépistage filtrent `remplaceeParId` (calculerMoyennesCriteres,
+         calculerMoyennesCriteresRecents, _filtrerEtTrierEvaluationsIPB, calculerIndicesNDerniersArtefacts,
+         identifierDefiSpecifique ; calculerDirectionRisque, calculerDirectionsCriteres) ; 7 cas, 7 retraits → 7 rouges.
+       #731 `aad47f68` — `depistagePeutJugerLaNonParticipation()` (profil-etudiant-calculs.js, exportée), trois lecteurs
+         (determinerNiveauRaiPedagogique, determinerCibleIntervention, afficherAlerteNonParticipation) ; la barre des
+         patterns écarte le niveau 0 ; le cas fondé (D-1) reste niveau 3 ; « A = 100 sans séance » NON touché → #743.
+       #732 `1ebe8a2` — export d'`obtenirDetailsAssiduite` ; `genererRapportAPI` lit A, C, P dans `calculerTousLesIndices`
+         (règle « même source », #699) ; « N remises / M productions » sur les productions que la pratique compte ; la liste
+         sous P = les évaluations qui ENTRENT dans la note (#706), la reprise et non l'originale ; spec WebKit neuve,
+         ROUGE avant (message d'erreur), VERTE après (P 70 = celui du profil). Phrase « Performance : 77% (note du cours) »
+         validée par Grégoire.
+       #733 `5915cc28` — règle 1 : observations d'intervention (`<textarea>`), `data-date` / `data-da` du confidentiel ;
+         2 cas rendus EXÉCUTÉS dans un faux DOM ; 3 retraits, 3 rouges.
+       #734 `00f82b28` — `if (e.etudiantDA !== da) return false;` dans le repli de `calculerIndicesHistoriques`
+         (snapshots.js) ; le repli entier reste #716. ⚠ Tarir n'est pas réparer : les snapshots écrits gardent leur 67, la
+         prochaine capture écrit la bonne valeur, rien n'est réécrit.
+     ▣ Dispositions (20 h 10, `dd528bf`) : le rapport porte, constat par constat, corrigé / inscrit / recoupé / commenté ;
+       #735-#753 inscrits (#753 : `OU-EN-EST-ON.md` absent de `paths-ignore`). Compte de la suite après le lot : 483 / 5 395
+       (`7926555d`). Relecture croisée de Cowork (20 h 15) : rien à corriger sur `2a05b188..7926555d` ; une réserve inscrite
+       sous #737 (la garde « copie évaluée » lit `noteFinale`, pas le verrou : un brouillon commencé rend la classe jugeable).
+     ▣ Release (20 h 25) : `release.mjs minor` → 1.123.0, dix jetons ; titre du changelog validé tel quel ; push
+       `2a05b188..507b7229`. Rituel fin-de-session sur le lot : 0 innerHTML sans échappement, 0 handler inline, 0 console.log.
+     ▣ Run `34001941420` (`507b7229`) attendu et LU : Vitest `success` (00 h 43 Z) ; Playwright (WebKit) `failure` (01 h 15 Z).
+       Un seul rouge : la spec neuve de #732, « Received string: "" » aux deux essais — mais l'instantané de la trace, pris
+       juste après l'attente, portait le rapport complet (Camille Roy, Complétion 100 % 2/2, Performance 70 % note du cours,
+       les deux copies). Le correctif est donc PROUVÉ sur le runner ; c'est la lecture qui tombait dans un trou. Mesuré en
+       local : ouvrir un profil le rend TROIS fois (afficherProfilComplet → afficherSousSection('suivi-profil') →
+       auto-chargement de navigation.js à T+100 ms, puis le MutationObserver de profil-etudiant-sections-affichage.js à
+       T+100 ms), chaque rendu remplaçant la zone de texte par une vide que son propre T+100 remplit : vide 7 ms →
+       remplie 108 ms → vide 212 ms → remplie 317 ms. ⮕ #754 inscrit (navigation.js est zone protégée ; lequel des deux
+       relanceurs sert encore un chemin réel est à trancher après le 14). Sous #685 : `planif-objectifs-espacement-157`
+       verte au second essai (793,98 px contre 800,17).
+     ▣ `c4ac5ae3` (21 h 29) : la spec attend ET lit dans la même évaluation (`waitForFunction` qui rend la chaîne). Rien dans
+       js/, pas de release. Poussé à 23 h 45 (`507b7229..c4ac5ae3`). Run `34009795798` LU : Vitest `success` (03 h 48 Z),
+       Playwright (WebKit) `failure` par perte du runner après 220 verts / 264, la spec corrigée jamais imprimée (détail ci-dessus).
+     ⚠ LE MAC A REDÉMARRÉ pendant l'écriture des trois documents de clôture (OU-EN-EST-ON, RELAIS, SESSION : modifiés, non
+       commités, restés sur le Mac). Reprise vers minuit en session à distance (branche `claude/closure-sept-5-restart-52fv88`,
+       arbre propre au clone, les trois fichiers à `2a05b188`) : remesure (HEAD c4ac5ae3 = origin/main, 1.123.0, build
+       0905-2025 : prémisse exacte sauf les trois fichiers « modifiés », absents ici), lecture du run 34009795798 jusqu'au
+       bout, les trois documents réécrits à partir des messages de commit et des runs, commis ensemble, fusionnés vers main.
+       Sur le Mac, les brouillons interrompus peuvent réapparaître comme modifications locales : à comparer, pas à fusionner.
+     ▣ DÛ À GRÉGOIRE : relancer le run `34009795798` (ou laisser le prochain push juger `c4ac5ae3`) — la spec corrigée n'a pas de
+       verdict serveur ; le coup d'œil sur 1.123.0 (OU-EN-EST-ON, section « LE SUIVI », « ce que tu dois aller voir ») ; #737
+       avec #706 étendu ; #754 et #735-#753 après le 14, avec #700-#705 et #710-#721 ; les deux gestes à l'écran sur 1.122.x
+       (profil avec brouillon ; SPE « Modèle simple ») restent dus.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 29 — 5 SEPTEMBRE 2026, 18 H 40 → 19 H 45 : UN MOT SOUS LA NOTE DU COURS (release 1.122.1), puis
      L'AUDIT DE L'ONGLET SUIVI (troisième audit cadré). ▣ **LIVRÉ : 1.122.1 (build 0905-1852, `7d335a16`) — la phrase
      « N évaluation(s) sans critère évalué, non comptée(s) » sans « aucun » (mot arrêté par Grégoire), poussée après
