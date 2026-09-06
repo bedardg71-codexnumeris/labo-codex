@@ -61,7 +61,7 @@ cd tests && npx vitest run unit/audit-onglet-suivi-2026-09-05.test.js
 > (une case « Date » que `genererRapportAPI` ne lit nulle part — commenté dans la fiche #732, aucune fiche) ;
 > le `find` du panneau « Développement des habiletés » qui affiche la première évaluation d'un artefact
 > (#714). Les cinq bancs de mesure touchés (B-3, B-5, D-2, D-3, E-6, G-2, G-4) portent les valeurs D'APRÈS,
-> l'avant en commentaire (patron des deux audits précédents). Suite complète après le lot : **482 fichiers /
+> l'avant en commentaire (patron des deux audits précédents). Suite complète après le lot : **483 fichiers /
 > 5 395 tests** verts depuis `tests/` ; la spec WebKit neuve verte seule ; verdict Playwright complet au moment
 > de la release, après le coup d'œil de Grégoire (règle 2 : commit → relecture → verdict → push).
 
