@@ -7,6 +7,46 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, NUIT (1.123.0 EN LIGNE ; LE RUN DE LA RELEASE ROUGE SUR SA SPEC NEUVE, PAS SUR LE CODE ; LE RUN DU CORRECTIF DE SPEC ROUGE PAR PERTE DU RUNNER, RELANCE DUE À GRÉGOIRE ; CLÔTURE REPRISE APRÈS UN REDÉMARRAGE DU MAC)
+
+> ↻ **19 h 45 → 20 h 25 — LE LOT DU SUIVI, ARBITRÉ ET LIVRÉ : 1.123.0 (build `0905-2025`, `507b7229`, « Le Suivi ne compte plus
+> une reprise deux fois, et ne déclare personne « non-participant » avant le premier travail »)**. Cinq correctifs, un commit
+> chacun, sentinelle break-testée chacun : #730 `1e8a1d72` (une évaluation remplacée par une reprise sort du dépistage, sept
+> fonctions filtrent `remplaceeParId`) ; #731 `aad47f68` (« Non-participation » seulement quand un travail est dû ET qu'une
+> copie du groupe est évaluée, règle de Grégoire au mot, une garde partagée `depistagePeutJugerLaNonParticipation`, trois
+> lecteurs, sinon « En attente ») ; #732 `1ebe8a2` (le rapport du profil se génère, `obtenirDetailsAssiduite` exportée ; A, C, P
+> viennent de `calculerTousLesIndices` ; spec WebKit `profil-rapport-732-se-genere.spec.js` rouge avant, verte après) ; #733
+> `5915cc28` (règle 1 : observations d'intervention et `data-date`/`data-da` du confidentiel par `echapperHtml`) ; #734 `00f82b28`
+> (le P historique d'un snapshot est celui de l'élève, ajout de Cowork au lot ; ⚠ tarir n'est pas réparer : les snapshots déjà
+> écrits gardent leur 67). Dispositions constat par constat dans `Rapports/AUDIT-onglet-suivi-2026-09-05.md` (`dd528bf`) :
+> #730-#734 corrigés, #735-#753 inscrits ; suite après le lot 483 fichiers / 5 395 tests (`7926555d`). Feu vert de la relecture
+> croisée de Cowork à 20 h 15 (rien à corriger sur `2a05b188..7926555d` ; UNE réserve, sous #737 : la garde « copie évaluée »
+> s'ouvre sur un brouillon non verrouillé). Phrase du rapport (« Performance : 77% (note du cours) ») et titre du changelog
+> validés tels quels par Grégoire. `release.mjs minor`, dix jetons anti-cache, push `2a05b188..507b7229 main -> main`.
+> ▣ **RUN GITHUB `34001941420` (`507b7229`) LU JUSQU'AU BOUT : Vitest `success` (00 h 43 Z), Playwright (WebKit) `failure`
+> (01 h 15 Z), conclusion `failure`.** ROUGE SUR LA SPEC NEUVE DE #732, PAS SUR LE CORRECTIF : `profil-rapport-732-se-genere`
+> rendait « Received string: "" » aux deux essais, alors que l'instantané de la trace, pris juste après l'attente, portait le
+> rapport complet (Camille Roy, Complétion 100 % 2/2, Performance 70 % note du cours, les deux copies). Cause mesurée en local :
+> ouvrir un profil le rend TROIS fois (`afficherProfilComplet` → `afficherSousSection('suivi-profil')` → auto-chargement de
+> `navigation.js` à T+100 ms, puis le `MutationObserver` de `profil-etudiant-sections-affichage.js` à T+100 ms), zone de texte
+> vide 7 ms → remplie 108 ms → vide 212 ms → remplie 317 ms ; la spec lisait la zone dans une évaluation séparée de l'attente
+> et tombait dans la fenêtre vide. ⮕ **#754 inscrit** (le triple rendu ; `navigation.js` est zone protégée, à trancher après
+> le 14). Sous #685 : `planif-objectifs-espacement-157` verte au second essai sur ce run (793,98 px contre 800,17).
+> ↻ **21 h 29 — `c4ac5ae3`, la spec lit la valeur dans la même évaluation (`waitForFunction` qui rend la chaîne). Rien dans
+> `js/`, pas de release.** Poussé à 23 h 45 (`507b7229..c4ac5ae3 main -> main`). ▣ **RUN GITHUB `34009795798` (`c4ac5ae3`)
+> LU JUSQU'AU BOUT : Vitest `success` (03 h 48 Z), Playwright (WebKit) `failure` PAR PERTE DU RUNNER, PAS PAR UNE SPEC : 220 tests verts sur 264, 0 rouge, 0 second essai (03 h 49 → 04 h 09 Z), puis neuf minutes de silence et « The runner has received a shutdown signal » à 04 h 18 min 59 s Z (étape `cancelled`, job `failure`, conclusion du run `failure`, 30 min après le départ du job, sous le plafond de 40). Le test 221, jamais imprimé, était par ordre de fichiers `profil-rapport-732-se-genere.spec.js` (la spec corrigée) : elle porte un `waitForFunction` à 10 s et Playwright coupe un test à 30 s par défaut (aucun `timeout` dans `playwright.config.js`), avec un second essai — un blocage de la spec aurait été coupé et imprimé en moins de deux minutes ; le silence de neuf minutes est celui de la machine (inférence, pas mesuré). La spec corrigée n'est donc NI prouvée NI infirmée par ce run. ⛔ Pas de relance, pas de correctif (consigne de Grégoire : rouge → s'arrêter et rapporter). ⮕ **Relancer le run est SA décision.**.**
+> ⚠ **LE MAC A REDÉMARRÉ PENDANT L'ÉCRITURE DES TROIS DOCUMENTS DE CLÔTURE** (`OU-EN-EST-ON.md`, `RELAIS.md`, `SESSION.md`,
+> modifiés, non commités). Ces brouillons sont restés sur le Mac : sur `origin/main`, la dernière version des trois fichiers
+> était `2a05b188` (19 h 45, aucune mention de 1.123.0). Cette clôture-ci (session à distance, branche
+> `claude/closure-sept-5-restart-52fv88`, vers minuit) les réécrit à partir des messages de commit et des runs GitHub, puis
+> fusionne vers `main`. ⮕ **Sur le Mac, au prochain `git status` : si ces trois fichiers apparaissent modifiés, ce sont les
+> brouillons interrompus. Les comparer (`git diff`) avant de les jeter ; ne pas les fusionner à l'aveugle.** Aucun `js/` en
+> attente nulle part.
+> **`main` = `origin/main` après le push de cette clôture, AUCUN travail en avance.** Version 1.123.0, build `0905-2025`.
+> **Ce qui attend Grégoire** : **relancer le run `34009795798`** (ou laisser le prochain push juger `c4ac5ae3`) — la spec corrigée n'a pas de verdict serveur ; le coup d'œil sur 1.123.0 (les gestes sont dans `OU-EN-EST-ON.md`, section « LE SUIVI ») ;
+> #737 (la réserve de Cowork : un seul brouillon commencé rend la classe jugeable) avec #706 étendu ; #754 et #735-#753 après
+> le 14, avec #700-#705 et #710-#721.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, 19 H 45 (1.122.1 EN LIGNE, RUN GITHUB VERT ; AUDIT DU SUIVI DÉPOSÉ)
 
 > ↻ **19 h 03 — 1.122.1 (build `0905-1852`, `7d335a16`)** : le mot « aucun » retiré de « N évaluation(s) sans critère
