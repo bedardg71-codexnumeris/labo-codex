@@ -29,7 +29,9 @@
                 '<strong>« Non-participation » seulement quand un travail est dû et qu\'une copie du groupe est évaluée.</strong> Au début d\'un trimestre, la classe entière n\'est plus en « Non-participation, niveau 3 » : la carte RàI, la cible d\'intervention, la barre RàI du groupe et l\'alerte disent « En attente » tant qu\'il n\'y a rien à remettre.',
                 '<strong>Le bouton « Rapport » d\'un profil produit un rapport.</strong> Il écrivait un message d\'erreur depuis mai. Ses nombres — assiduité, complétion, performance — sont désormais ceux du profil : « Performance : 77% (note du cours) », et la liste des évaluations qui comptent dans la note.',
                 '<strong>Les courbes de performance des archives sont celles de l\'élève.</strong> Dans un cours sommatif, tous les élèves portaient la même courbe (la moyenne du groupe). Les captures déjà faites gardent leur valeur ; la prochaine écrit la bonne.',
-                'Les observations d\'une intervention et deux champs du volet confidentiel sont échappés avant d\'entrer dans la page.'
+                'Les observations d\'une intervention et deux champs du volet confidentiel sont échappés avant d\'entrer dans la page.',
+                '<strong>Le texte copié vers Léa dit « Note finale : 63.5 % », plus « 63.5 %% ».</strong> La dernière ligne de la rétroaction générale doublait le signe de pourcentage (1.123.1).',
+                '<strong>Le bilan copié vers Léa ne prend plus la copie pour son propre artefact précédent.</strong> Dès l\'enregistrement automatique, il annonçait « prioritaire depuis 3 productions » après un seul travail antérieur, et taisait « Progrès : I → D » et « Tu as progressé en… ». Il lit l\'historique comme la page de synthèse du PDF le fait déjà (1.123.1).'
             ]
         },
         {

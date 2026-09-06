@@ -238,9 +238,16 @@ function _rendreNoteFinale() {
         return '';
     }
     let texte = '';
-    const noteAffichee = document.getElementById('noteProduction1')?.textContent;
+    // #757 (6 sept. 2026) — L'ÉCRAN PORTE DÉJÀ L'UNITÉ : `calculerNote` écrit « 63.5 % »
+    // (evaluation-calcul.js l. 1404). Cette ligne lui ajoutait un second « % », et l'élève
+    // lisait « Note finale : 63.5 %% » dans ce qui lui était collé (mesuré le 6 sept. au
+    // matin, Rapports/MESURE-ce-que-l-eleve-lit-dans-le-pdf-2026-09-06.md, C1). Ce que
+    // l'écran affiche part tel quel ; le « -- » d'une portée incomplète n'écrit rien, comme
+    // avant. (Une copie sans aucun niveau affiche « 0.0 % » à l'écran, donc ici aussi :
+    // c'est le choix de l'écran, pas celui de cette ligne.)
+    const noteAffichee = (document.getElementById('noteProduction1')?.textContent || '').trim();
     if (noteAffichee && noteAffichee !== '--') {
-        texte += `---\nNote finale : ${noteAffichee}%`;
+        texte += `---\nNote finale : ${noteAffichee}`;
     }
     if (evaluationEnCours.niveauFinal && evaluationEnCours.niveauFinal !== '--') {
         texte += `  |  Niveau : ${evaluationEnCours.niveauFinal}`;
@@ -600,11 +607,29 @@ function _nomBilan(niveauDe, code) {
     return (typeof echapperHtml === 'function') ? echapperHtml(niveau.nom) : '';
 }
 
-function _chargerHistoriqueBilan(da) {
+/**
+ * L'historique de l'élève — ses AUTRES copies, la plus récente d'abord, cinq au plus.
+ *
+ * ⮕ #758 (6 sept. 2026) — LA COPIE EN COURS N'EN FAIT PAS PARTIE. Dès que l'auto-save
+ * l'a écrite (1,5 s après le premier geste), elle était ici la plus récente des
+ * évaluations de l'élève, donc sa propre « précédente » : « prioritaire depuis
+ * 3 productions » avec un seul artefact antérieur, et plus jamais « Progrès » ni « Tu as
+ * progressé ». Le PDF de synthèse l'excluait déjà (`lireHistorique`,
+ * synthese-retroaction-data.js : `e.id !== evaluation.id`) et disait le vrai. Même
+ * prédicat ici, appliqué à la copie que le résolveur #576 retrouve en base (par
+ * `idModification`, sinon par élève + production) — une seule règle, pas une seconde
+ * lecture de l'historique. Mesuré avant / après enregistrement
+ * (Rapports/MESURE-ce-que-l-eleve-lit-dans-le-pdf-2026-09-06.md, C2).
+ *
+ * @param {string} da
+ * @param {Object|null} copieEnBase - l'évaluation enregistrée de la copie en cours, ou null
+ */
+function _chargerHistoriqueBilan(da, copieEnBase) {
+    var idCopie = copieEnBase ? copieEnBase.id : null;
     try {
         var toutesEvals = obtenirDonneesSelonMode('evaluationsSauvegardees');
         return toutesEvals
-            .filter(function(e) { return e.etudiantDA === da && !e.remplaceeParId; })
+            .filter(function(e) { return e.etudiantDA === da && !e.remplaceeParId && !(idCopie && e.id === idCopie); })
             .sort(function(a, b) { return new Date(b.dateEvaluation) - new Date(a.dateEvaluation); })
             .slice(0, 5);
     } catch(e) {
@@ -1088,11 +1113,13 @@ function genererRetroactionBilan() {
     }
 
     var da = ec.etudiantDA;
-    var historiqueEleve = _chargerHistoriqueBilan(da);
+    // #576 — la source de secours des NOMS de critères quand la grille a disparu ; et,
+    // depuis #758, LA COPIE À EXCLURE DE L'HISTORIQUE : c'est elle que l'auto-save a mise
+    // en base, et elle n'est la « précédente » de personne.
+    var evalEnregistree = _chargerEvaluationEnregistreeBilan(ec);
+    var historiqueEleve = _chargerHistoriqueBilan(da, evalEnregistree);
     var evalPrecedente = historiqueEleve.length > 0 ? historiqueEleve[0] : null;
     var grilleDef = _chargerGrilleDefBilan(ec.grilleId);
-    // #576 — la source de secours des NOMS de critères quand la grille a disparu.
-    var evalEnregistree = _chargerEvaluationEnregistreeBilan(ec);
     var criteres = _collecterCriteresBilan(grilleDef, ec, evalEnregistree);
     // ⚠ `echelleId` est résolu plus bas ; on le calcule ici pour que les patrons
     // le reçoivent. Même lecture : l'évaluation d'abord, le sélecteur en repli.

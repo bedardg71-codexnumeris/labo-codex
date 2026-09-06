@@ -13,15 +13,15 @@
 
 | # | Ce que l'élève lit | Où | Cause mesurée | Disposition proposée (CLAUDE.md) |
 |---|---|---|---|---|
-| C1 | **« Note finale : 63.5 %% »** (signe doublé), pour les trois types de grille | texte copié vers Léa, rétroaction générale, dernière ligne | `noteProduction1` porte déjà « 63.5 % » (`evaluation-calcul.js:1404`) et `_rendreNoteFinale` (`evaluation-retroaction.js:232-249`) lui ajoute un second « % ». Présent au moins depuis l'extraction du 18 mai (`9ffff2cf`). | **Inscrire** (une ligne à retirer ; rien en main d'élèves avant le 14). Grégoire arbitre. |
-| C2 | **« Cet objectif est prioritaire depuis 3 productions »** avec UN seul artefact antérieur ; et **plus jamais** « Progrès : I → D depuis Analyse 1 » ni « Tu as progressé en Nuance. » | texte copié vers Léa, bilan (`=== BILAN ===`), dès que la copie est enregistrée — c'est-à-dire 1,5 s après le premier geste (auto-save) | `_chargerHistoriqueBilan` (`evaluation-retroaction.js:603-614`) lit toutes les évaluations de l'élève **sans exclure celle en cours** : la copie devient sa propre « précédente ». Le PDF, lui, l'exclut (`synthese-retroaction-data.js:1306`, `e.id !== evaluation.id`) et dit le vrai. Mesuré : bilan AVANT enregistrement = progrès nommés, pas de « 3 productions » ; APRÈS = l'inverse. | **Inscrire** (règle à trancher : le bilan de l'écran lit-il l'historique comme le PDF ?). Grégoire arbitre. |
+| C1 | **« Note finale : 63.5 %% »** (signe doublé), pour les trois types de grille | texte copié vers Léa, rétroaction générale, dernière ligne | `noteProduction1` porte déjà « 63.5 % » (`evaluation-calcul.js:1404`) et `_rendreNoteFinale` (`evaluation-retroaction.js:232-249`) lui ajoute un second « % ». Présent au moins depuis l'extraction du 18 mai (`9ffff2cf`). | **CORRIGÉ le jour même (#757, 1.123.1)**, arbitrage (a) de Grégoire : l'écran est recopié tel quel. Sentinelle rouge avant, verte après, break-testée. |
+| C2 | **« Cet objectif est prioritaire depuis 3 productions »** avec UN seul artefact antérieur ; et **plus jamais** « Progrès : I → D depuis Analyse 1 » ni « Tu as progressé en Nuance. » | texte copié vers Léa, bilan (`=== BILAN ===`), dès que la copie est enregistrée — c'est-à-dire 1,5 s après le premier geste (auto-save) | `_chargerHistoriqueBilan` (`evaluation-retroaction.js:603-614`) lit toutes les évaluations de l'élève **sans exclure celle en cours** : la copie devient sa propre « précédente ». Le PDF, lui, l'exclut (`synthese-retroaction-data.js:1311`, `e.id !== evaluation.id`) et dit le vrai. Mesuré : bilan AVANT enregistrement = progrès nommés, pas de « 3 productions » ; APRÈS = l'inverse. | **CORRIGÉ le jour même (#758, 1.123.1)** : même prédicat que le PDF, appliqué à la copie que le résolveur #576 retrouve en base (la garde du PDF est privée à son module ; mesuré : l'exporter aurait forcé dix bancs à le charger). Sentinelle cinq cas, rouge avant, verte après, break-testée. |
 
 Deux défauts de forme, pas des faussetés, que l'élève lit aussi dans le texte copié : (F1) « spécifique » et « bilan »
 sont copiés par `textContent` d'un HTML sans blanc entre balises — les phrases se collent (« …viens me
 voir.Selon toi… », « …Insuffisant)Acquis en développement… ») ; (F2) le bloc « --- Observations --- » de la
 rétroaction générale ne s'écrit **jamais** avec les tampons du catalogue courant (`DIAG_IDS`,
-`evaluation-retroaction.js:184`, ne connaît que neuf identifiants hérités, `legacy: true`). Disposition proposée
-pour les deux : inscrire, avec le cadrage.
+`evaluation-retroaction.js:184`, ne connaît que neuf identifiants hérités, `legacy: true`). Disposition (décision de
+Grégoire) : **inscrits, #759 et #760**, à cadrer avec la synthèse des rétroactions ; pas corrigés.
 
 ## Le périmètre, mesuré : cinq fichiers, trois documents
 
