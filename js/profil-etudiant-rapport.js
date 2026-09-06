@@ -55,19 +55,29 @@ function genererRapportAPI(da, options = {}) {
     const indices = calculerTousLesIndices(da);
     const detailsA = obtenirDetailsAssiduite(da);
 
+    // #732 — LES TROIS NOMBRES VIENNENT DE `calculerTousLesIndices`, la source du profil et de la Liste
+    // (règle « même source » de #699). Avant : le rapport comptait des `artefact-portfolio` que le cours
+    // n'a pas forcément (« 0 remises / 0 productions ») et recalculait P à sa manière (« 75 % (4 meilleurs
+    // artefacts actuels) » là où la note du cours dit 77). Audit de l'onglet Suivi, 5 sept. 2026, B-5.
     const productions = obtenirDonneesSelonMode('productions') || [];
-    const artefacts = productions.filter(p => p.type === 'artefact-portfolio' && !p.facultatif);
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
 
-    // Compter les productions remises (avec évaluations)
-    const nbRemis = artefacts.filter(art => {
-        return evaluations.some(e =>
-            e.etudiantDA === da &&
-            e.productionId === art.id &&
-            !e.remplaceeParId &&
-            e.statutRemise !== 'non-remis'
-        );
-    }).length;
+    // Les productions que la pratique compte (artefacts de portfolio en standards, tout sauf le
+    // conteneur en sommative — `obtenirIdsProductionsEvaluables`), non facultatives, et déjà évaluées
+    // pour au moins un élève : c'est le dénominateur de la complétion sommative et la liste que la
+    // section « Complétion » du profil appelle « données ».
+    const idsEvaluables = (typeof obtenirIdsProductionsEvaluables === 'function')
+        ? obtenirIdsProductionsEvaluables(productions)
+        : productions.filter(p => p.type !== 'portfolio').map(p => p.id);
+    const compteDansLaNote = (e) => (typeof evaluationEntreDansLaNote === 'function')
+        ? evaluationEntreDansLaNote(e)
+        : (!e.remplaceeParId && e.noteFinale !== null && e.noteFinale !== undefined);
+    const productionsComptees = productions.filter(p =>
+        idsEvaluables.includes(p.id) && !p.facultatif &&
+        evaluations.some(e => e.productionId === p.id && !e.remplaceeParId && e.noteFinale !== null && e.noteFinale !== undefined));
+    const nbRemis = productionsComptees.filter(p => evaluations.some(e =>
+        e.etudiantDA === da && e.productionId === p.id && !e.remplaceeParId &&
+        e.statutRemise !== 'non-remis' && e.noteFinale !== null && e.noteFinale !== undefined)).length;
 
     let rapport = '';
 
@@ -88,51 +98,35 @@ function genererRapportAPI(da, options = {}) {
 
     // 3. COMPLÉTION
     if (opts.completion) {
-        rapport += `Complétion : ${indices.C}% (${nbRemis} remises / ${artefacts.length} productions)\n\n`;
+        rapport += `Complétion : ${indices.C}% (${nbRemis} remises / ${productionsComptees.length} productions)\n\n`;
     }
 
-    // 4. PERFORMANCE avec détails des meilleurs artefacts
+    // 4. PERFORMANCE — la note du cours, telle que le profil l'affiche, et les évaluations qui y entrent (#706).
     if (opts.performance) {
-        // Obtenir la pratique active et le nombre d'artefacts
-        const modalites = obtenirDonneesSelonMode('modalitesEvaluation') || {};
-        const nbArtefacts = modalites.nbArtefactsPortfolio || 4;
+        if (indices.noteConstructible === false) {
+            rapport += `Performance : non constructible (aucune évaluation ne compte encore dans la note du cours)\n\n`;
+        } else {
+            rapport += `Performance : ${indices.P}% (note du cours)\n\n`;
+        }
 
-        // ✨ CORRECTION (8 déc 2025) : Utiliser noteFinale (pourcentage réel) au lieu de recalculer
-        // Obtenir les évaluations de l'étudiant avec notes
-        const evaluationsEleve = evaluations.filter(e => {
-            if (e.etudiantDA !== da || !e.productionId || e.remplaceeParId) return false;
-            if (e.statutRemise === 'non-remis') return false;
+        const evaluationsComptees = evaluations
+            .filter(e => e.etudiantDA === da && e.productionId && compteDansLaNote(e))
+            .map(e => {
+                const production = productions.find(p => p.id === e.productionId);
+                return {
+                    productionNom: production?.activiteApprentissage || production?.description || production?.titre || production?.nom || `Production ${e.productionId}`,
+                    niveauFinal: e.niveauFinal,
+                    notePct: parseFloat(e.noteFinale),
+                    date: e.dateEvaluation || e.dateCreation || ''
+                };
+            })
+            .sort((a, b) => String(a.date).localeCompare(String(b.date)));
 
-            // Vérifier que noteFinale existe et est valide
-            return e.noteFinale !== null &&
-                   e.noteFinale !== undefined &&
-                   !isNaN(parseFloat(e.noteFinale));
+        evaluationsComptees.forEach((art, idx) => {
+            const niveau = (art.niveauFinal !== null && art.niveauFinal !== undefined && art.niveauFinal !== '') ? `${art.niveauFinal} ` : '';
+            rapport += `${idx + 1}- ${art.productionNom} : ${niveau}(${isNaN(art.notePct) ? '—' : art.notePct.toFixed(1)})\n`;
         });
-
-        // Utiliser directement noteFinale (pourcentage réel) et trier
-        const evaluationsAvecNotes = evaluationsEleve.map(e => {
-            const production = productions.find(p => p.id === e.productionId);
-
-            return {
-                productionNom: production?.activiteApprentissage || production?.description || production?.nom || `Artefact ${e.productionId}`,
-                niveauFinal: e.niveauFinal, // La lettre (I, D, M, E)
-                notePct: parseFloat(e.noteFinale) // Le pourcentage réel (60.5, 73.5, 79.7, etc.)
-            };
-        }).sort((a, b) => b.notePct - a.notePct);
-
-        // Prendre les N meilleurs
-        const meilleursArtefacts = evaluationsAvecNotes.slice(0, nbArtefacts);
-        const moyenneP = meilleursArtefacts.length > 0
-            ? Math.round(meilleursArtefacts.reduce((sum, a) => sum + a.notePct, 0) / meilleursArtefacts.length)
-            : 0;
-
-        rapport += `Performance : ${moyenneP}% (${meilleursArtefacts.length} meilleurs artefacts actuels)\n\n`;
-
-        // Liste des meilleurs artefacts
-        meilleursArtefacts.forEach((art, idx) => {
-            rapport += `${idx + 1}- ${art.productionNom} : ${art.niveauFinal} (${art.notePct.toFixed(1)})\n`;
-        });
-        rapport += `\n`;
+        if (evaluationsComptees.length > 0) rapport += `\n`;
     }
 
     // 5. GESTION DES JETONS

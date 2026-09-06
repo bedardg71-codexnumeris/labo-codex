@@ -4771,6 +4771,10 @@ window.afficherProfilComplet = afficherProfilComplet;
 // window.obtenirPratiqueActuelle → profil-etudiant-helpers.js (Utilisé par snapshots.js pour calcul historique P, Beta 93.5)
 // window.calculerDetailsNoteFinale → profil-etudiant-actions.js (session C refactor 18 mai 2026, FIX #37 préservé)
 window.calculerDirectionsCriteres = calculerDirectionsCriteres; // session C refactor : reste dans le résidu (zone Sections affichage L2003), export migré depuis zone actions
+// #732 — `profil-etudiant-rapport.js` (une autre IIFE) l'appelle par son nom nu : sans cet export, le bouton
+// « Rapport » écrivait « Erreur lors de la génération du rapport : obtenirDetailsAssiduite is not defined »
+// depuis le refactor du 18 mai 2026 (audit de l'onglet Suivi, 5 sept. 2026, B-5 ; vu dans WebKit par la spec 732).
+window.obtenirDetailsAssiduite = obtenirDetailsAssiduite;
 
 // ✅ CORRECTIF (17 déc 2025): Exporter les fonctions utilisées dans les data-action du profil
 window.changerSectionProfil = changerSectionProfil;
