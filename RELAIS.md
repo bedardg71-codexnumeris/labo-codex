@@ -59,11 +59,38 @@
 > (promesse) le remplacerait ; à prendre avec les neuf doublons `window` du 28 août.
 > ⚠ Ce push annule le run `34030274015` de 1.123.1 (même règle de concurrence) : **le run de 1.123.2 juge l'ensemble**, dont la
 > spec #732 corrigée en `c4ac5ae3` — à lire.
-> **`main` = `origin/main` après ce push, AUCUN travail en avance.** Version 1.123.2, build `0906-0745`.
-> **Ce qui attend Grégoire** : lire le run GitHub de 1.123.2 ; à l'écran, sur 1.123.2 rechargée : Suivi › Profil › Travaux soumis,
-> cliquer un travail → la copie s'ouvre dans Annoter et évaluer ; copier la rétroaction d'une copie évaluée → « Note finale :
-> 63.5 % » ; le bilan d'une copie qui a un artefact antérieur → « Progrès : … » ; le reste est inchangé (les cinq coups d'œil sur
-> 1.122 / 1.123, le canal du 14, #737 ; Cowork cadre la « synthèse des rétroactions dans le PDF » à partir du rapport, avec #759 et #760).
+> ↻ **7 h 48 → 8 h 30 — SECOND RETOUR TESTEUR : `BUG_grégoire_2026-09-06_07-48-42`, « Note finale non calculable… pratique assignée
+> introuvable dans la bibliothèque » alors que la PAN-STD est configurée et appliquée. CORRIGÉ : 1.123.3** (build `0906-0821`,
+> `43c6cc6d`, #762, SUIVI-BUGS #534). Diagnostic sur SES données (deux captures + un dump console demandé, sans donnée d'élève) :
+> `groupesCours[0].pratiqueId = null`, champ 6 du groupe-cours vide, aucun badge « Active ». **Trois défauts en chaîne** : (1) le bouton
+> « Appliquer au cours actif » n'écrivait que les modalités depuis #328 (`e3179c41`, 11 juin) et renvoyait à « l'activation par la
+> SSOT », dont le seul bouton (cartes `#listePratiques`) avait été retiré de la page le 9 déc. 2025 — succès affiché, rien d'assigné,
+> l'application calculait en « sommative » ; (2) le diagnostic du profil cherchait le repli « sommative » dans la bibliothèque →
+> « introuvable » (A-1 de l'audit du 5, #710) ; (3) en console, le « Modèle sommatif » adopté le 2 sept. (sans `calcul_note`) était
+> lu comme une PAN-STD et refusé faute d'échelle. Correctifs : le bouton écrit la SSOT et la barre latérale marque « Active »
+> (`pratiques-gestion.js`) ; `chargerPratiqueActive` lit par le registre (`pratique-manager.js` — `new PratiqueConfigurable(pratiqueData.config)`
+> levait sur une pratique de l'assistant, trouvé par la porte WebKit, le sandbox à doublure restant vert) ; le diagnostic lit le
+> groupe-cours actif et nomme le geste (`profil-etudiant-actions.js`, la moitié « diagnostic » de #710) ; la méthode se déduit de la
+> famille (`pratique-registre.js`). Sentinelles `sentinelle-762-*` (11 cas, rouges avant, 5 break-tests rouges avec témoin), spec
+> `pratiques-762-appliquer-au-cours-actif.spec.js` (le bouton réel). Deux bancs amendés à la valeur d'après (audit A1 ↻ #762 ; DEN-4 sème
+> la SSOT). Vitest 5 422 ; verdict Playwright local par `pousser.sh` avant le push.
+> ⏳ **Dû à Grégoire sur 1.123.3** : Conception › Pratiques › sa PAN-STD › « Appliquer au cours actif » UNE fois (son assignation est
+> vide ; le correctif tarit la source, il ne réécrit pas son groupe-cours) ; puis le profil d'un élève calcule. Noté sous #762 : le champ 6 de
+> l'assemblage dit encore « (facultatif) » alors que sans pratique tout calcule en sommative par repli — à revoir avec #710.
+> ↻ **8 h 30 → 8 h 55 — DEUX DEMANDES DE GRÉGOIRE SUR 1.123.3 (deux captures) : « que le dropdown dans Cadre se mette à jour
+> et affiche l'activation », et « que le badge soit un peu différent des caractéristiques ». LIVRÉ : 1.123.4** (#763, SUIVI-BUGS
+> #535). Le Cadre n'était rempli qu'au chargement : navigation.js appelle `initialiserModuleTrimestre()` à chaque affichage de
+> `calendrier-trimestre`, nom retiré comme « code mort » le 22 mai (`5ccb3063`) et tu par le `typeof`. `trimestre-v2-init.js`
+> l'expose → `initialiserTrimestreV2()` derrière `auDbPret` (navigation.js intact). Spec `cadre-763-pratique-appliquee-visible.spec.js`
+> (rouge avant dès le premier affichage après semis, verte après, break-test rouge). Badge : `.sidebar-item-badge.badge-pratique-active`
+> (fond `--vert-pale`, bordure `--vert-leger`, texte principal — blanc sur `--vert-succes` faisait ~2:1) ; la sentinelle #762 exige la
+> classe ET la règle (8.1). Vitest 5 422 (489 fichiers) ; verdict Playwright local avant le push.
+> **`main` = `origin/main` après ce push, AUCUN travail en avance.** Version 1.123.4.
+> **Ce qui attend Grégoire** : lire le run GitHub de 1.123.3 (il annule celui de 1.123.2) ; à l'écran, sur 1.123.3 rechargée :
+> « Appliquer au cours actif » sur la PAN-STD → badge « Active », profil qui calcule ; Suivi › Profil › Travaux soumis, cliquer un
+> travail → la copie s'ouvre ; copier la rétroaction d'une copie évaluée → « Note finale : 63.5 % » ; le bilan d'une copie qui a un
+> artefact antérieur → « Progrès : … » ; le reste est inchangé (les cinq coups d'œil sur 1.122 / 1.123, le canal du 14, #737 ; Cowork
+> cadre la « synthèse des rétroactions dans le PDF » à partir du rapport, avec #759 et #760).
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 5 SEPTEMBRE 2026, NUIT (1.123.0 EN LIGNE ; LE RUN DE LA RELEASE ROUGE SUR SA SPEC NEUVE, PAS SUR LE CODE ; LE RUN DU CORRECTIF DE SPEC ROUGE PAR PERTE DU RUNNER, RELANCE DUE À GRÉGOIRE ; CLÔTURE REPRISE APRÈS UN REDÉMARRAGE DU MAC)
 

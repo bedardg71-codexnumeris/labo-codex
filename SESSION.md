@@ -9,7 +9,8 @@
 <!-- =====================================================================
      SESSION 31 — 6 SEPTEMBRE 2026, 6 H 28 → 8 H 00 (Mac) : MESURER CE QUE L'ÉLÈVE LIT DANS SON PDF, SANS CODER (consigne du 6 au matin, Temps 1),
      PUIS, SUR ARBITRAGE (a) DE GRÉGOIRE, CORRIGER LES DEUX CONSTATS (#757, #758) — release 1.123.1 (`89bcf4a9`, build 0906-0715) —,
-     PUIS UN RETOUR TESTEUR (7 h 32, page vide depuis la vignette d'un travail du profil) — release 1.123.2 (`ddc94fcf`, build 0906-0745, #761).
+     PUIS UN RETOUR TESTEUR (7 h 32, page vide depuis la vignette d'un travail du profil) — release 1.123.2 (`ddc94fcf`, build 0906-0745, #761),
+     PUIS UN SECOND (7 h 48, « pratique assignée introuvable » : « Appliquer au cours actif » n'assignait pas) — release 1.123.3 (`43c6cc6d`, build 0906-0821, #762).
      ▣ Ouverture (subagent d'audit) : Temps 0 (rapatrier la clôture) DÉJÀ FAIT par `886d9828` à 6 h 22 ; la prémisse de la consigne
        (Mac à `c4ac5ae3`, trois brouillons) était périmée d'un commit ; Vitest 483 / 5 395 verts. Consigne promue (`dc1e606d`).
      ▣ Temps 1 : banc `tests/unit/mesure-ce-que-l-eleve-lit-2026-09-06.test.js` — modules RÉELS dans le bac à sable
@@ -81,7 +82,42 @@
        (la course est réelle). Restauration `cmp` identique ; Vitest 5 411.
      ▣ Traces : SUIVI-BUGS #533 (section « Corrigés (6 septembre 2026 …) ») ; BACKLOG #761 [x] + note « protocole d'arrivée en
        quatre endroits » ; changelog dans 1.123 ; USAGE-FORMATS non touché (journal des formats). Release `patch` 1.123.2
-       (`ddc94fcf`, build 0906-0745, jetons `20260906b` + travaux-ui `20260906a`) ; `pousser.sh` détaché (verdict puis push).
+       (`ddc94fcf`, build 0906-0745, jetons `20260906b` + travaux-ui `20260906a`) ; `pousser.sh` détaché (verdict puis push) : verdict
+       local VERT au jeton, push `9c940e69..ddc94fcf` vers 7 h 56 ; le run de 1.123.1 annulé par ce push (concurrence), run `34031658908`.
+     ▣ SECOND RETOUR TESTEUR (7 h 48, `BUG_grégoire_2026-09-06_07-48-42`) : Profil › Productions, « pratique assignée introuvable dans la
+       bibliothèque » alors que la PAN-STD est « configurée et activée ». Deux hypothèses au code (assignation absente / pratique refusée
+       faute d'échelle) ; DÉPARTAGÉES PAR SES DONNÉES (question fermée + dump console sans donnée d'élève, deux captures) :
+       `groupesCours[0].pratiqueId = null`, champ 6 du groupe-cours vide, aucun badge « Active », PAN-STD saine avec échelle, et le
+       « Modèle sommatif » adopté le 2 sept. sans `calcul_note` (l'erreur console). Puis la lecture du bouton « Appliquer au cours actif » :
+       `appliquerConfigurationPratique` n'écrit que les modalités et le dit depuis #328 (`e3179c41`) ; l'activation par la SSOT n'avait
+       plus de bouton (`#listePratiques` retiré le 9 déc. 2025) ; `_diagnostiquerNoteNonCalculable` cherchait le repli « sommative » dans la
+       bibliothèque (A-1 / #710) ; `construireConfigComplete` défautait à `conversion_niveaux`.
+     ▣ Correctifs #762 (quatre fichiers) : `appliquerPratiqueAuCours` écrit la SSOT + badge « Active » dans `afficherListePratiquesMateriel`
+       (pratiques-gestion.js) ; `chargerPratiqueActive` lit par `obtenirPratiqueParId` (pratique-manager.js) ; le diagnostic lit
+       `groupesCours[].pratiqueId` du groupe-cours actif et nomme le geste (profil-etudiant-actions.js) ; méthode par famille sans
+       `calcul_note` (pratique-registre.js), une PAN-STD sans échelle reste refusée.
+     ▣ Preuves : trois sentinelles `sentinelle-762-*` (11 cas ; rouges avant sur 7) ; spec WebKit `pratiques-762-appliquer-au-cours-actif.spec.js`
+       (le bouton réel, dispatcher `data-action`). ⚠ La spec a d'abord rougi APRÈS le correctif du bouton : la SSOT était écrite mais pas
+       de badge — `changerPratiqueActive` rappelle `chargerPratiqueActive`, qui instanciait `pratiqueData.config` (absent : l'assistant
+       range tout sous `configuration`) et levait ; mon `try/catch` alertait et sortait avant de rendre la barre. Le sandbox restait vert
+       pour la MAUVAISE raison (le manager lit `window.obtenirPratiqueActiveGroupeCours`, absent du faux window → sortie précoce) :
+       miroir posé sur `window`, sentinelle rouge, correctif du manager, vert. Cinq break-tests avec témoin (A écriture SSOT, B badge,
+       C manager, D diagnostic, E méthode par famille), tous rouges, restauration par copie et `cmp`. Deux bancs amendés à la valeur
+       d'après (audit A1 ↻ #762 ; DEN-4 sème la SSOT). Vitest 5 422 (486 fichiers).
+     ▣ Traces : SUIVI-BUGS #534 ; BACKLOG #762 [x] (+ note : le champ 6 de l'assemblage dit « facultatif » alors que sans pratique tout
+       calcule en sommative — à revoir avec #710) ; changelog dans 1.123 (avec le geste dû : « Appliquer au cours actif » une fois).
+       Release `patch` 1.123.3 (`43c6cc6d`, build 0906-0821, 4 jetons `20260906a` + init-inline/main `20260906c`) ; `pousser.sh` détaché :
+       verdict local VERT, push `e5cf059c..43c6cc6d` vers 8 h 27 ; run `34033384362`.
+     ▣ DEUX DEMANDES DE GRÉGOIRE sur 1.123.3 (8 h 30, deux captures) : le Cadre doit montrer la pratique appliquée ; le badge doit se
+       distinguer des caractéristiques. Mesuré : le formulaire du groupe-cours est rempli par `initialiserTrimestreV2` au chargement
+       (`auDbPret`, trimestre-v2.js:625) et JAMAIS après — l'initialiseur que navigation.js appelle (`initialiserModuleTrimestre`,
+       l. 248) n'existe plus depuis `5ccb3063` (22 mai, « retrait code mort cascade trimestre.js »), `typeof` le tait. #763 :
+       `window.initialiserModuleTrimestre` exposé dans trimestre-v2-init.js → `initialiserTrimestreV2()` derrière `auDbPret`.
+       Spec WebKit `cadre-763-…` : rouge AVANT dès l'étape 1 (le Cadre affiché après le semis ne repeuple même pas ses options),
+       verte après (1,7 s) ; break-test (exposition renommée) rouge, restauré. Badge : classe `badge-pratique-active` posée + règle
+       `.sidebar-item-badge.badge-pratique-active` (fond --vert-pale, bordure --vert-leger, texte principal ; blanc sur
+       --vert-succes ≈ 2:1, refusé) ; S1 exige la classe et la règle ; break-test (classe retirée) rouge. Vitest 5 422 / 489 fichiers.
+       Release `patch` 1.123.4 ; `pousser.sh` détaché.
      ===================================================================== -->
 
 <!-- =====================================================================
