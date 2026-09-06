@@ -24610,6 +24610,10 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     max-width: 220px;
     font-size: 12px;
     height: 28px;
+    /* #765 — padding vertical porté ici : le bloc <style> d'index.html, chargé après cette feuille,
+       redéclare .controle-form avec un padding de 8 px et battait .travaux-filtre-production (même
+       spécificité) ; à 28 px de haut, 8 px en haut et en bas coupaient le texte à mi-hauteur. */
+    padding: 0 8px;
 }
 
 .annot-toolbar-fichiers {
