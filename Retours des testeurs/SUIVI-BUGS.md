@@ -104,6 +104,14 @@
 > correctif : si le terrain re-bute dessus, envisager un indice visuel plus
 > fort ou la poignée aux DEUX coins.
 
+## Corrigés (6 septembre 2026 — la vignette d'un travail dans le profil, 1.123.2)
+
+| # | Testeur | Date | Corrigé | Build | Problème | Résolution |
+|---|---------|------|---------|-------|----------|------------|
+| 533 | Grégoire (`BUG_grégoire_2026-09-06_07-32-11.txt`, 1.123.0, Chrome 152, Mac) | 6 sept. 2026 | 6 sept. 2026 | 1.123.2 | **Suivi › Profil › « Travaux soumis » : cliquer la vignette d'un travail mène à une page vide.** La vignette appelle `travauxUI.ouvrirFichier`, qui ne faisait que `afficherSousSection('evaluations-annoter')` depuis la refonte de la sous-navigation (`e24f0960`, 18 février 2026) ; or `afficherSousSection` (navigation.js) ne bascule jamais la section parente : `#suivi-profil` perdait « active », `#evaluations-annoter` la prenait dans une section cachée, et la section Suivi restait affichée sans sous-section. Les trois autres entrées hors section (liste des évaluations ×2, « Annoter et évaluer » du profil) faisaient `afficherSection('evaluations')` elles-mêmes, puis attendaient l'initialisation du module (200 à 500 ms) avant d'ouvrir ; la vignette, non. ⮕ REPRODUIT AU WEBKIT avant correction (spec rouge : Évaluations jamais active). | 2.5 navigation à demi + 2.6 course : `ouvrirFichier` (`travaux-ui.js`) arrive d'abord (section si elle n'est pas active, drapeau `_apresOuvertureFichier` pour que l'initialisation ne restaure ni ne reconstruise rien, sous-section) puis se rappelle 500 ms plus tard (second passage) — le protocole des trois autres entrées, porté par le geste lui-même, pour tout appelant. Spec `profil-travaux-761-vignette-mene-a-la-visionneuse.spec.js` (rouge avant, verte après ; break-test sur la bascule de section : rouge). BACKLOG #761. |
+
+---
+
 ## Corrigés et VALIDÉS AU TERRAIN (27 août 2026 — #532 chez Jean-François, #158 et #121 sur le Mac de Grégoire)
 
 | # | Testeur | Date | Corrigé | Build | Problème | Résolution |

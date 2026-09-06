@@ -3165,7 +3165,7 @@
      * Ouvre un fichier dans la visionneuse
      * @param {string} fichierId - ID du fichier
      */
-    async function ouvrirFichier(fichierId) {
+    async function ouvrirFichier(fichierId, _deuxiemePassage) {
         // Reset du chrono au changement de fichier
         resetChrono();
 
@@ -3186,6 +3186,35 @@
             const sousSectionActive = document.querySelector('#evaluations-annoter.sous-section.active') ||
                                        document.querySelector('#evaluations-annoter.sous-section[style*="display: block"]');
             if (!sousSectionActive || sousSectionActive.offsetParent === null) {
+                // #761 (6 sept. 2026) — ARRIVER D'ABORD, OUVRIR ENSUITE. `afficherSousSection` ne
+                // bascule jamais la section parente (navigation.js) : appelé depuis le profil
+                // (Suivi › Travaux soumis, la vignette d'un travail), ce geste activait
+                // `#evaluations-annoter` dans une section cachée et laissait la section Suivi
+                // affichée sans aucune sous-section active — une page vide (rapport de Grégoire,
+                // BUG_grégoire_2026-09-06_07-32-11 ; spec `profil-travaux-761-…`). Et même arrivé,
+                // ouvrir tout de suite entrait en course avec `initialiserModuleTravaux`, lancé à
+                // +100 ms par l'arrivée sur la sous-section (première initialisation :
+                // `rafraichirUI` reconstruit la grille ; sinon restauration d'un « dernier fichier »
+                // de session). Les trois autres entrées hors section (liste des évaluations,
+                // « Annoter et évaluer » du profil) font ce protocole elles-mêmes — la section, le
+                // drapeau, la sous-section, puis 200 à 500 ms. Ici, c'est le geste qui le fait, pour
+                // tout appelant, et il se rappelle une fois arrivé (second passage : la sous-section
+                // est alors active et cette branche ne rejoue pas ; si l'arrivée a échoué, le second
+                // passage reprend le chemin d'hier plutôt que de boucler).
+                if (!_deuxiemePassage) {
+                    if (typeof afficherSection === 'function') {
+                        const sectionEvaluations = document.getElementById('section-evaluations');
+                        if (sectionEvaluations && !sectionEvaluations.classList.contains('active')) {
+                            afficherSection('evaluations');
+                        }
+                    }
+                    // Le drapeau que `initialiserModuleTravaux` respecte : ne pas restaurer une autre
+                    // copie ni reconstruire le DOM sous l'ouverture qui vient. Consommé en fin d'ouverture.
+                    if (!window._apresOuvertureFichier) window._apresOuvertureFichier = function() {};
+                    afficherSousSection('evaluations-annoter');
+                    setTimeout(function() { ouvrirFichier(fichierId, true); }, 500);
+                    return;
+                }
                 afficherSousSection('evaluations-annoter');
             }
         }
