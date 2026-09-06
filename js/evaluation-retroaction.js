@@ -167,12 +167,16 @@ function _rendreCommentairesCriteres(grille, cartouche, critereActifId, texteAva
         if (critere.type === 'algorithmique' && evaluationEnCours.donneesAlgorithmiques?.[critere.id]?.retroaction) {
             const retroAlgo = evaluationEnCours.donneesAlgorithmiques[critere.id].retroaction;
             texte += `${enteteCritere}\n${retroAlgo}\n\n`;
-        } else if (cartouche.commentaires) {
+        } else if (cartouche && cartouche.commentaires) {
             const cle = `${critere.id}_${niveau}`;
             const commentaire = cartouche.commentaires[cle];
             texte += commentaire
                 ? `${enteteCritere}\n${commentaire}\n\n`
                 : `${enteteCritere}\n[Non défini]\n\n`;
+        } else {
+            // #764 — sans cartouche, le critère se dit par son en-tête (nom, niveau ou points) :
+            // rien à inventer à la place d'un commentaire qui n'existe pas.
+            texte += `${enteteCritere}\n\n`;
         }
     });
 
@@ -256,16 +260,24 @@ function _rendreNoteFinale() {
 }
 
 function genererRetroaction(num) {
-    if (!evaluationEnCours?.cartoucheId) {
-        document.getElementById('retroactionFinale1').value = '';
+    // #764 (6 sept. 2026) — LA GÉNÉRALE S'ÉCRIT AVEC OU SANS CARTOUCHE. Elle sortait dès que
+    // `cartoucheId` était vide : née cartouche, elle ignorait que la rétroaction d'un critère
+    // algorithmique (le paragraphe engendré au calcul), le décompte des codes « --- Langue --- »
+    // et la ligne « Note finale » n'en ont pas besoin. Sur la grille de Grégoire (un seul critère,
+    // « Français écrit », algorithmique, sans cartouche), « Copier tout » ne livrait donc que la
+    // spécifique et le bilan — « le texte est incomplet » (BUG_grégoire_2026-09-06_08-54-01, la
+    // zone « Générale » encore sur son texte d'attente). La cartouche n'apporte que son contexte
+    // et ses commentaires : sans elle, ils manquent, le reste s'écrit.
+    const zoneRetroaction = document.getElementById('retroactionFinale1');
+    if (!zoneRetroaction) return;
+    if (!evaluationEnCours || !evaluationEnCours.grilleId) {
+        zoneRetroaction.value = '';
         return;
     }
 
     const grilleId = evaluationEnCours.grilleId;
-    const cartouches = db.getSync(cle(`cartouches_${grilleId}`), []);
-    const cartouche = cartouches.find(c => c.id === evaluationEnCours.cartoucheId);
-
-    if (!cartouche) return;
+    const cartouches = evaluationEnCours.cartoucheId ? (db.getSync(cle(`cartouches_${grilleId}`), []) || []) : [];
+    const cartouche = cartouches.find(c => c.id === evaluationEnCours.cartoucheId) || null;
 
     const productions = obtenirDonneesSelonMode('productions');
     const production = productions.find(p => p.id === evaluationEnCours.productionId);
@@ -275,7 +287,7 @@ function genererRetroaction(num) {
     texte += _rendreAdresseEtudiant();
 
     // Contexte de la cartouche
-    if (document.getElementById('afficherContexte1')?.checked && cartouche.contexte) {
+    if (document.getElementById('afficherContexte1')?.checked && cartouche && cartouche.contexte) {
         texte += `${cartouche.contexte}\n\n`;
     }
 
@@ -503,7 +515,10 @@ function genererRetroactionSpecifique() {
             // repli) : `codesAnnotation`. Le nom est une donnée utilisateur posée
             // dans innerHTML : échappé (règle 1), il ne l'était pas.
             var t = window.codesAnnotation.code(grilleDef581, type);
-            html += '<p><strong>' + ech581(t.nom) + '</strong> (' + erreurs[type] + ') — ' + ech581((t.retroaction || '').substring(0, 120)) + '</p>';
+            // #764 (6 sept. 2026) — LE TEXTE ENTIER. Il était coupé à 120 caractères (« … minuscule,
+            // sou ») : un aperçu d'écran, copié tel quel dans ce qui est remis à l'élève par « Copier
+            // tout » — et visible coupé à l'écran aussi (capture de Grégoire). Le panneau défile.
+            html += '<p><strong>' + ech581(t.nom) + '</strong> (' + erreurs[type] + ') — ' + ech581(t.retroaction || '') + '</p>';
         });
     }
 
