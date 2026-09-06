@@ -7,7 +7,7 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, MATIN (MESURE DU PDF DE L'ÉLÈVE DÉPOSÉE, PUIS SES DEUX CONSTATS CORRIGÉS : 1.123.1 ; PUIS UN RETOUR TESTEUR CORRIGÉ : 1.123.2)
+## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, MATIN (MESURE DU PDF DE L'ÉLÈVE DÉPOSÉE, PUIS SES DEUX CONSTATS CORRIGÉS : 1.123.1 ; PUIS QUATRE RETOURS TESTEUR CORRIGÉS : 1.123.2 À 1.123.5)
 
 > ↻ **6 h 28 → 7 h 15, sur le Mac.** Temps 0 de la consigne (rapatrier la clôture) **déjà fait** par `886d9828` avant la séance
 > (rituel d'ouverture : arbre propre sur les trois fichiers, patch de 105 lignes reporté). Consigne promue en `dc1e606d`
@@ -85,10 +85,25 @@
 > (rouge avant dès le premier affichage après semis, verte après, break-test rouge). Badge : `.sidebar-item-badge.badge-pratique-active`
 > (fond `--vert-pale`, bordure `--vert-leger`, texte principal — blanc sur `--vert-succes` faisait ~2:1) ; la sentinelle #762 exige la
 > classe ET la règle (8.1). Vitest 5 422 (489 fichiers) ; verdict Playwright local avant le push.
-> **`main` = `origin/main` après ce push, AUCUN travail en avance.** Version 1.123.4.
-> **Ce qui attend Grégoire** : lire le run GitHub de 1.123.3 (il annule celui de 1.123.2) ; à l'écran, sur 1.123.3 rechargée :
+> ↻ **8 h 54 → 9 h 05 — RETOUR TESTEUR sur 1.123.4 (`BUG_grégoire_2026-09-06_08-54-01`, deux captures) : « Quand je copie la
+> rétroaction créée automatiquement lors de l'évaluation, le texte est incomplet. » LIVRÉ : 1.123.5** (#764, SUIVI-BUGS #536,
+> `aea9d144`, build 0906-0902). Sa grille n'a qu'un critère « Français écrit » (algorithmique, 59 erreurs / 460 mots → 23,0 %, I) et
+> pas de cartouche : `genererRetroaction` (evaluation-retroaction.js) sortait dès que `cartoucheId` était vide, la générale restait
+> sur son texte d'attente et le collage ne portait que SPÉCIFIQUE et BILAN ; et `genererRetroactionSpecifique` coupait chaque texte
+> de code à 120 caractères (« … minuscule, sou »), à l'écran comme dans le collage. La générale s'écrit avec ou sans cartouche (elle
+> n'apporte que son contexte et ses commentaires ; sans elle, un critère se dit par son en-tête) ; la spécifique porte les textes
+> entiers. Sentinelle `sentinelle-764-…` (3 cas, rouge avant sur 2, deux break-tests rouges avec témoin, restauration `cmp`).
+> Vitest 5 425 (490 fichiers) sur le commit ; verdict Playwright local vert (0 échec, inchangé) par `pousser.sh`, push 9 h 13.
+> **Run `34035446544` VERT de bout en bout** (Vitest 9 h 14 → 9 h 16, Playwright WebKit 9 h 16 → 9 h 51) — le premier run serveur
+> vert de la matinée : ceux de 1.123.2, 1.123.3 et 1.123.4 ont chacun été annulés par le push suivant (`cancel-in-progress`), Vitest
+> vert à chaque fois avant l'annulation. ⏳ Le troisième défaut du même
+> exemple, le collage sans sauts de ligne (#759), n'est pas corrigé : décision de Grégoire du matin (« inscris-les, ne les corrige
+> pas ») — posé en question fermée dans le rapport.
+> **`main` = `origin/main` après ce push, AUCUN travail en avance.** Version 1.123.5.
+> **Ce qui attend Grégoire** : rien à lire côté serveur (le run de 1.123.5 est vert et lu) ; à l'écran, sur 1.123.5 rechargée :
 > « Appliquer au cours actif » sur la PAN-STD → badge « Active », profil qui calcule ; Suivi › Profil › Travaux soumis, cliquer un
-> travail → la copie s'ouvre ; copier la rétroaction d'une copie évaluée → « Note finale : 63.5 % » ; le bilan d'une copie qui a un
+> travail → la copie s'ouvre ; copier la rétroaction d'une copie évaluée → « Note finale : 63.5 % » ; « Copier tout » sur sa copie
+> évaluée sans cartouche → GÉNÉRALE, SPÉCIFIQUE et BILAN, phrases entières (1.123.5) ; le bilan d'une copie qui a un
 > artefact antérieur → « Progrès : … » ; le reste est inchangé (les cinq coups d'œil sur 1.122 / 1.123, le canal du 14, #737 ; Cowork
 > cadre la « synthèse des rétroactions dans le PDF » à partir du rapport, avec #759 et #760).
 

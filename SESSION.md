@@ -7,7 +7,7 @@
      ===================================================================== -->
 
 <!-- =====================================================================
-     SESSION 31 — 6 SEPTEMBRE 2026, 6 H 28 → 8 H 00 (Mac) : MESURER CE QUE L'ÉLÈVE LIT DANS SON PDF, SANS CODER (consigne du 6 au matin, Temps 1),
+     SESSION 31 — 6 SEPTEMBRE 2026, 6 H 28 → 9 H 10 (Mac) : MESURER CE QUE L'ÉLÈVE LIT DANS SON PDF, SANS CODER (consigne du 6 au matin, Temps 1),
      PUIS, SUR ARBITRAGE (a) DE GRÉGOIRE, CORRIGER LES DEUX CONSTATS (#757, #758) — release 1.123.1 (`89bcf4a9`, build 0906-0715) —,
      PUIS UN RETOUR TESTEUR (7 h 32, page vide depuis la vignette d'un travail du profil) — release 1.123.2 (`ddc94fcf`, build 0906-0745, #761),
      PUIS UN SECOND (7 h 48, « pratique assignée introuvable » : « Appliquer au cours actif » n'assignait pas) — release 1.123.3 (`43c6cc6d`, build 0906-0821, #762).
@@ -117,7 +117,23 @@
        verte après (1,7 s) ; break-test (exposition renommée) rouge, restauré. Badge : classe `badge-pratique-active` posée + règle
        `.sidebar-item-badge.badge-pratique-active` (fond --vert-pale, bordure --vert-leger, texte principal ; blanc sur
        --vert-succes ≈ 2:1, refusé) ; S1 exige la classe et la règle ; break-test (classe retirée) rouge. Vitest 5 422 / 489 fichiers.
-       Release `patch` 1.123.4 ; `pousser.sh` détaché.
+       Release `patch` 1.123.4 (`4f0e836a`, build 0906-0842) ; `pousser.sh` détaché : verdict local VERT, push ; run `34034423474`
+       (annulé par le push suivant, `cancel-in-progress`).
+     ▣ RETOUR TESTEUR sur 1.123.4 (8 h 54, `BUG_grégoire_2026-09-06_08-54-01`, deux captures) : « Copier tout » livre un texte
+       incomplet. Mesuré au code : sa grille (un critère « Français écrit », algorithmique, sans cartouche) tombe sur la sortie précoce
+       `if (!evaluationEnCours?.cartoucheId) return` de `genererRetroaction` → générale jamais écrite (texte d'attente à l'écran,
+       absente du collage) ; `genererRetroactionSpecifique` coupait chaque texte de code par `substring(0, 120)` — la capture le
+       montrait à l'écran (« minuscule, sou », « Il devient plu »). #764 : la garde ne porte plus que `grilleId` ; la cartouche est
+       cherchée seulement si `cartoucheId` ; contexte et commentaires gardés par `cartouche &&` ; sans commentaire, un critère se dit
+       par son en-tête ; la coupe retirée. Sentinelle `sentinelle-764-copier-tout-complet-sans-cartouche.test.js` (3 cas : sa
+       grille → `Critère 1 (Français écrit) — I`, `--- Langue ---`, `Code 10 – … (×23) :`, `Note finale : 23.0 %  |  Niveau : I`,
+       sans CONTEXTE ni [Non défini] ; spécifique entière ; non-régression avec cartouche) : rouge AVANT sur 2, verte après ;
+       break-tests (sortie précoce remise → cas 1 rouge ; coupe remise → cas 2 rouge), témoins 1, restauration `cmp` identique.
+       Vitest 5 425 / 490 fichiers, avant et sur le commit. SUIVI-BUGS #536, BACKLOG #764, changelog 1.123.
+       Release `patch` 1.123.5 (`aea9d144`, build 0906-0902) ; `pousser.sh` détaché : verdict local VERT (0 échec, inchangé), push
+       `f1e5d33a..aea9d144` à 9 h 13 ; run `34035446544` VERT de bout en bout (Vitest 9 h 16, Playwright WebKit 9 h 16 → 9 h 51),
+       le premier de la matinée (les trois précédents annulés par le push suivant). Non corrigé : #759 (collage sans sauts de
+       ligne, dans le même exemple) — décision du matin, posé en question fermée.
      ===================================================================== -->
 
 <!-- =====================================================================
