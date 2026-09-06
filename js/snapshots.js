@@ -227,7 +227,12 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
     };
 
     // Filtrer les évaluations complétées avant la date limite
+    // #734 — CELLES DE L'ÉLÈVE. Ce filtre ne portait pas sur `etudiantDA` : quand la pratique ne rend pas de P
+    // historique (la sommative lit `e.da` / `e.note`, champs absents — #716 ; SPE et DEN n'ont pas la méthode),
+    // le repli moyennait les niveaux de TOUT LE GROUPE dus à cette date — 67 pour chaque élève du banc d'audit
+    // (constat G-2, 5 sept. 2026). Le repli entier reste #716 ; les snapshots déjà écrits gardent leur valeur.
     const evaluationsFiltrees = evaluations.filter(e => {
+        if (e.etudiantDA !== da) return false;
         if (!e.productionId || e.remplaceeParId) return false;
 
         // ✅ NOUVEAU : Vérifier que l'évaluation a bien une note ET n'est pas "non remis"

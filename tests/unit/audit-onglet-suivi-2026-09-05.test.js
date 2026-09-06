@@ -819,12 +819,14 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
         expect(ligne).toMatch(/avant >= 0\.85 \? 'E' : avant >= 0\.75 \? 'M' : avant >= 0\.65 \? 'D' : 'I'/);
     });
 
-    it('E6 · les observations de l\'intervention sont injectées dans un <textarea> SANS echapperHtml (règle 1) ; le bilan, lui, est échappé', () => {
+    it('E6 · les observations de l\'intervention passent par echapperHtml dans le <textarea> (#733 ; avant : brutes, le bilan seul était échappé)', () => {
         const src = readFileSync(path.join(RACINE, 'js/interventions.js'), 'utf8');
         const brut = /<textarea id="observationsIntervention"[^>]*>\$\{intervention\.observations \|\| ''\}<\/textarea>/.test(src);
+        const echappe = /<textarea id="observationsIntervention"[^>]*>\$\{echapperHtml\(intervention\.observations \|\| ''\)\}<\/textarea>/.test(src);
         const bilanEchappe = /<textarea id="observationsBilan"[^>]*>' \+ echapperHtml\(bilan\.observationsBilan \|\| ''\)/.test(src);
-        noter('E6', { observationsBrutes: brut, bilanEchappe });
-        expect(brut).toBe(true);
+        noter('E6', { observationsBrutes: brut, observationsEchappees: echappe, bilanEchappe });
+        expect(brut).toBe(false);      // avant #733 : true
+        expect(echappe).toBe(true);
         expect(bilanEchappe).toBe(true);
     });
 });
@@ -913,11 +915,11 @@ describe('G · les sorties du Suivi et le volet confidentiel', () => {
         expect(/SENSIBLE|Dyslexie|fragile|PRESENCE-BANC/.test(rapport)).toBe(false);
     });
 
-    it('G2 · le snapshot d\'archivage : par élève { da, nom, A, C, P } — rien du volet confidentiel ; son P historique n\'est pas la note du cours (#716)', async () => {
+    it('G2 · le snapshot d\'archivage : par élève { da, nom, A, C, P } — rien du volet confidentiel ; son P historique est celui de l\'ÉLÈVE (#734), mais pas la note du cours (#716)', async () => {
         // À la main : au 16 mars, deux travaux dus (P1, P2). Assidu : C 2/2 = 100 ; sa note du cours sur ces deux travaux est
         // (60 + 70) / 2 = 65. Le P historique sommatif (#716) : `calculerPerformanceHistorique` lit `e.da` / `e.note` (jamais
-        // remplis) → null → repli IDME en dur (I 40, D 65)… sur des évaluations FILTRÉES SANS le DA : toutes celles du groupe
-        // dues au 16 mars — Assidu I, D ; Absent E, D ; Incohérent D → (40 + 65 + 100 + 65 + 65) / 5 = 67. Le même 67 pour tous.
+        // remplis) → null → repli IDME en dur (I 40, D 65) sur SES évaluations dues au 16 mars : (40 + 65) / 2 = 52,5 → 53 ;
+        // Absent (E 100, D 65) → 82,5 → 83. AVANT #734, le repli ne filtrait pas par élève : (40 + 65 + 100 + 65 + 65) / 5 = 67 pour tous.
         const b = monter(jeuBase(), { store: { test_confidentielEtudiants: { [DA.ASSIDU]: { notes: 'NOTE-SENSIBLE-BANC' } } } }); b.calculerTout();
         const snap = await b.win.capturerSnapshotSeance('2026-03-16', null, { numeroSemaine: 10 });
         const assidu = snap.etudiants.find(e => e.da === DA.ASSIDU);
@@ -928,9 +930,9 @@ describe('G · les sorties du Suivi et le volet confidentiel', () => {
         const blocFiltre = srcSnap.slice(srcSnap.indexOf('const evaluationsFiltrees = evaluations.filter'), srcSnap.indexOf('const productionsDues = productions.filter'));
         noter('G2', { champs: Object.keys(assidu), assidu, absentP: absent.P, cleEcrite, filtreParDA: /etudiantDA/.test(blocFiltre), sensible: /SENSIBLE/.test(JSON.stringify(snap)) });
         expect(Object.keys(assidu).sort()).toEqual(['A', 'A_cumulatif', 'C', 'P', 'da', 'nom', 'pattern', 'rai'].sort());
-        expect(assidu).toMatchObject({ A: 100, C: 100, P: 67, nom: 'Alice Assidu' });
-        expect(absent.P).toBe(67);                       // le même P pour l'absent qui régresse
-        expect(/etudiantDA/.test(blocFiltre)).toBe(false);
+        expect(assidu).toMatchObject({ A: 100, C: 100, P: 53, nom: 'Alice Assidu' });   // avant #734 : 67 (la moyenne du groupe)
+        expect(absent.P).toBe(83);                       // avant : 67, le même que l'assidu
+        expect(/etudiantDA/.test(blocFiltre)).toBe(true);   // avant : false
         expect(cleEcrite).toEqual(['test_snapshots_GC1']);
         expect(/SENSIBLE/.test(JSON.stringify(snap))).toBe(false);
     });
@@ -958,14 +960,14 @@ describe('G · les sorties du Suivi et le volet confidentiel', () => {
         const confidentiel = lire('js/profil-etudiant-confidentiel.js');
         const consoleSensible = /console\.\w+\([^)]*(infos|donnees|notes)/.test(confidentiel);
         const litBrut = /db\.getSync\(cleConfidentiel|db\.getSync\(clePresences/.test(confidentiel);
-        const nonEchappes = (confidentiel.match(/data-(date|da)="\$\{[^}]+\}"/g) || []);
+        const nonEchappes = (confidentiel.match(/data-(date|da)="\$\{(?!echapperHtml\()[^}]+\}"/g) || []);   // #733 : les deux attributs passent par echapperHtml
         const boutonSansGarde = !/estModeeLectureSeule|anonymisation/.test(lire('js/profil-etudiant-sections-affichage.js').split('\n').filter(l => /ouvrirModalConfidentiel/.test(l)).join('\n'));
         noter('G4', { autresLecteurs: lecteurs, casAnonymises, consoleSensible, litLeStoreBrut: litBrut, attributsNonEchappes: nonEchappes, boutonSansGarde });
         expect(lecteurs).toEqual([]);
         expect(casAnonymises).toEqual(['groupeEtudiants', 'evaluationsSauvegardees', 'presences']);   // pas confidentielEtudiants, pas interventions
         expect(consoleSensible).toBe(false);
         expect(litBrut).toBe(true);
-        expect(nonEchappes).toEqual(['data-date="${p.date}"', 'data-da="${da}"']);
+        expect(nonEchappes).toEqual([]);   // avant #733 : ['data-date="${p.date}"', 'data-da="${da}"']
         expect(boutonSansGarde).toBe(true);
     });
 
