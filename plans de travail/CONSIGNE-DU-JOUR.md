@@ -1,33 +1,65 @@
-# Consigne du jour — auditer les six sous-onglets de Suivi (logique propre, affichage, sauvegardes), sans coder
+# Consigne du jour — le lot correctif des six « corriger maintenant » de l'audit des sous-onglets de Suivi
 
-> **Écrite le 6 septembre 2026, 10 h 07 (Toronto), par Cowork, à la demande de Grégoire.**
-> **Application au moment de l'écriture : 1.123.5 en ligne (build `0906-0902`), `main` = `origin/main` = `2fb1facf`, arbre propre, run serveur de 1.123.5 vert.** Si #759 (collage sans sauts de ligne) a été livré entre-temps en 1.123.6, l'état a bougé d'un patch : dis-le en tête du rapport et audite la base que tu mesures.
-> **Cette séance tourne SUR LE MAC**, dans le dépôt monté. **Remesure avant d'exécuter** (`git --no-optional-locks log --oneline -5`, `git rev-parse --short origin/main`, `cat version.json`, `TZ=America/Toronto date`).
-> L'ancienne consigne (mesurer ce que l'élève lit dans son PDF, exécutée le 6 au matin) est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-06-mesure-pdf.md` ; commets l'archivage avec ton premier commit.
+> **Écrite le 6 septembre 2026, 10 h 57 (Toronto), par Cowork, sur l'arbitrage de Grégoire.** Elle remplace la consigne d'audit du matin, archivée à côté sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-06-audit-sous-onglets.md` — commets l'archivage avec ton premier commit.
+> **Cette séance tourne SUR LE MAC**, dans le dépôt monté. **Remesure avant d'exécuter** : `git --no-optional-locks log --oneline -5`, `git --no-optional-locks rev-parse --short origin/main`, `cat version.json`, `TZ=America/Toronto date`.
+> **Source de vérité des constats** : `Rapports/AUDIT-sous-onglets-suivi-2026-09-06.md`, §0 et les sections citées. Cowork a revérifié les six au code sur le Mac le 6 en fin de matinée ; les six tiennent. **Une consigne peut se tromper : mesure, n'obéis pas.**
 
 ## Le mandat, en une phrase
 
-Exécute `Rapports/prompts-audit/PROMPT-AUDIT-sous-onglets-suivi-2026-09-06.md` : le quatrième audit cadré, **complément** du troisième (5 sept., la chaîne des indices, jugée) — pour chacun des six sous-onglets de Suivi, dans l'ordre de la navigation, ce que l'écran montre, ce que chaque geste fait, et ce que chaque écriture laisse en base après rechargement. **Aucun correctif appliqué** : `js/` reste intact, le banc et le rapport seulement. Grégoire arbitre ensuite, une règle à la fois.
+Corriger les six « corriger maintenant » du §0, en UN lot, avec une sentinelle par correctif, et livrer une seule fois à la fin.
 
-## Ce qui ne se discute pas
+## L'arbitrage de Grégoire, au mot
 
-- **Lecture seule sur `js/`.** Les break-tests du banc mutent un point et restaurent par copie à empreinte identique ; `git status -- js/` propre à la fin.
-- **Aucune donnée réelle.** Élèves de banc et mode démonstration. Ni A2025, ni H2026, ni l'automne en cours.
-- **La partie navigateur reste locale** (Playwright WebKit sur le Mac, captures hors du dépôt suivi) : **rien de poussé qui déclenche Playwright sur la CI** pour cet audit. Le banc Vitest et le rapport, eux, se poussent.
-- **Ne remesure pas** ce que le rapport du 5 a jugé ni ce que 1.123.2 à 1.123.5 ont corrigé ce matin ; le prompt en porte la liste.
-- **Un sous-onglet complet (trois axes) avant de passer au suivant.** Si le temps manque, le rapport dit lesquels sont faits et lesquels ne le sont pas — un sous-onglet à moitié audité se dit comme tel.
+> « Une intervention appartient à un groupe-cours. »
 
-## Temps 0 — #759, seulement si Grégoire te l'a relayé
+C'est sa réponse à la règle laissée ouverte en CM-6 (#746). Rien d'autre n'a été tranché : ce qui n'est pas dans cette consigne reste « inscrire ».
 
-Si Grégoire t'a transmis la réponse « option 2 » pour le collage sans sauts de ligne (#759) et que ce n'est pas encore livré : **il passe avant l'audit**, tel que relayé — mesurer d'abord si le texte mis dans le presse-papiers par « Copier tout » porte des retours ; si oui, le défaut est au collage dans Léa, inscris-le tel quel sans correctif ; si non, corrige le format (une ligne vide entre les blocs, un retour par phrase du bilan), sentinelle rouge avant / verte après, break-test, patch 1.123.6, verdict local, push, puis l'audit repart de cette base. **S'il ne te l'a pas relayé, ne le fais pas** : #759 reste inscrit, l'option 1 tient, et l'audit commence tout de suite.
+## Les six, dans l'ordre
 
-## Déroulé
+### 1 · CM-1 — Le mode anonymisation plante sur tout trimestre sans mapping
 
-1. Remesure ; archive et promeus la consigne ; branche `audit/sous-onglets-suivi-2026-09-06` depuis `main` (après le temps 0, s'il a lieu).
-2. Le prompt, section par section. Le rapport s'écrit **au fil des onglets**, pas à la fin : après chaque sous-onglet, sa section est complète dans le fichier.
-3. Rituel de fin de session (skill `fin-de-session-labo-codex`) : Vitest depuis `tests/`, `git status -- js/` propre, empreintes vérifiées ; fusion vers `main`, push. Pas de release (rien dans `js/`).
-4. `RELAIS.md`, `SESSION.md`, `OU-EN-EST-ON.md` à jour ; BACKLOG : **n'inscris rien** — les fiches se créent à l'arbitrage de Grégoire, comme pour les trois premiers audits. Le prompt reçoit son `statut` et son `rapport_produit`.
+- **Ce que l'utilisateur voit** : il bascule en mode anonymisation sur un trimestre neuf (A2026, ou la démo) et les six sous-onglets de Suivi deviennent vides ou muets.
+- **Site** : `js/modes.js:310` et `:338` — `doitRegenerer = true` sans déclaration, sous le `'use strict'` de la ligne 9. `ReferenceError: Can't find variable: doitRegenerer` à chaque lecture de `groupeEtudiants`. Introduit le 22 février (`8b739ae3`).
+- **Correctif attendu** : déclarer `doitRegenerer` en tête de `genererMappingAnonyme` (`:279`). Vérifie la portée réelle avant d'écrire — le rapport propose `let doitRegenerer = false;`, pas plus.
+- **Source ou stock ?** Réponds-y dans le commit : le plantage empêche-t-il seulement la lecture, ou a-t-il pu laisser un mapping partiel écrit chez quelqu'un ? Si du stock reste, **ne le répare pas** — mesure-le, écris-le, et remonte-le.
 
-## Ce que Grégoire verra
+### 2 · CM-2 — « Annuler » vide l'onglet Suivi, et le bouton « Rapport » disparaît
 
-Rien de nouveau à l'écran : c'est une lecture. Ce qu'il recevra, c'est un rapport en six sections, une par sous-onglet, avec en tête le tableau des « corriger maintenant » en phrases qu'il peut arbitrer en un tour. Cowork le relit avant qu'il tranche.
+- **Ce que l'utilisateur voit** : dans la saisie des présences, « Annuler » laisse une zone blanche jusqu'au prochain clic d'onglet ; et dès qu'une date est choisie, le bouton « Rapport » n'est plus là — la modale du PDF des présences devient inatteignable.
+- **Site** : `js/saisie-presences.js:2023` (`data-param="suivi-apercu-legacy"`, sous-section qui n'existe pas — `config.js:62-69` en liste six : groupe, liste, saisie, profil, interventions, animation) et `restaurerCompteurPresences` (`:2007`), qui reconstruit la barre sans le bouton « Rapport » de `index.html:8003`.
+- **Correctif attendu** : viser une sous-section qui existe, et rendre « Rapport » dans la barre reconstruite. **Le choix de la cible d'« Annuler » est à toi** (le rapport suggère `suivi-liste` ou `suivi-groupe`) — dis en une ligne laquelle tu as prise et pourquoi.
+- La mesure S-5 du banc d'audit rougit sur la mutation : garde-la comme sentinelle.
+
+### 3 · CM-3 — Le titre et la description d'une intervention entrent bruts dans la page
+
+- **Règle 1 de `CLAUDE.md`, non négociable.** `js/interventions.js:363` (titre, dans l'innerHTML de la liste), `:793` (description, dans le `<textarea>`), `:780` et `:824` (attributs). Le formulaire, lui, échappe déjà (`:735`) — c'est le motif corrigé pour `observations` en #733, six lignes plus bas.
+- **Correctif attendu** : `echapperHtml` sur les quatre sites, et étendre la sentinelle de #733 plutôt que d'en écrire une neuve.
+
+### 4 · CM-4 — Le nom et le prénom entrent bruts dans la modale du tirage au sort
+
+- **Règle 1.** `js/boite-outils.js:387` (`${e.nom}, ${e.prenom}`), `:891` (texte de question), `:829` et `:962` (nom de catégorie). Les treize autres injections du module sont échappées : c'est la seule nominative qui ne l'est pas, **et cette modale est projetée en classe**.
+- **Correctif attendu** : `echapperHtml` sur les quatre sites, une sentinelle.
+
+### 5 · CM-5 — Confirmer un import CSV écrit les élèves puis lève, sans confirmation
+
+- **Ce que l'utilisateur voit** : il confirme l'import, rien ne dit « N étudiant(s) importé(s) », et il ne sait pas si ses élèves sont entrés. **C'est le premier geste des collègues le 14.**
+- **Site** : `js/trimestre-v2-etudiants.js:801` — `etudiants` est le paramètre du `reduce` refermé à `:785` ; sous `'use strict'`, `ReferenceError: etudiants is not defined` **après** l'écriture.
+- **Correctif attendu** : utiliser `verification` (`:789`), déjà calculé et inutilisé. Vérifie qu'il compte bien ce que la notification annonce (il lit `cleEtud` en entier, pas le lot importé) — si les deux nombres diffèrent, c'est le libellé qu'il faut ajuster, pas la mesure.
+
+### 6 · CM-6 — Enregistrer une intervention efface ce qui n'était pas affiché
+
+- **Ce que l'utilisateur perd** : décocher un élève **détruit sa note d'intervention** ; et ouvrir une intervention rattachée à un autre groupe-cours puis l'enregistrer sans rien toucher **retire tous ses participants et leurs notes**. Sans avertissement, par un geste ordinaire.
+- **Site** : `js/interventions.js:1277-1283` (`notesIndividuelles` reconstruit à partir des seuls cochés) et `:1224` (`etudiants` réécrit avec les seuls cochés du groupe courant).
+- **Correctif attendu, en deux temps** :
+  1. **Le garde-fou, qui vaut quelle que soit la règle** : fusionner `notesIndividuelles` au lieu de le remplacer (conserver les DA que le formulaire n'a pas affichés), et ne pas réécrire `etudiants` avec les seuls cochés du groupe courant. **Ne jamais détruire ce que le formulaire n'a pas montré.**
+  2. **La règle de Grégoire** : une intervention appartient à un groupe-cours. Mesure d'abord ce que le code en fait aujourd'hui (une intervention porte-t-elle un `coursId` ? la liste filtre-t-elle par groupe-cours actif ?) et **rapporte-le sans l'implémenter dans ce lot** si ça dépasse le garde-fou — c'est alors une ligne à inscrire, pas un élargissement.
+- **Source et stock, celui-ci en a les deux.** Le correctif tarit la source ; **les notes déjà effacées chez Grégoire ne reviennent pas**. Mesure si son trimestre actif porte des interventions dont les participants ont été rognés, écris ce que tu trouves, **et n'écris rien dans ses données** : ça remonte à lui.
+
+## Les règles de la séance
+
+- **Une seule livraison à la fin**, pas six. Rituel `/fin-de-session` puis `release-et-changelog` ; `patch`, pas `minor` — ce sont des correctifs.
+- **Chaque correctif porte au moins une sentinelle** qui rougit sur la mutation (break-test, puis restauration à empreinte identique). C'est la preuve exigée, pas les tests verts.
+- **Ne dépasse pas les six.** Toute trouvaille en chemin prend une des trois issues de `CLAUDE.md` et tu la NOMMES dans ton rapport ; le défaut est « inscrire et continuer ». Ce que tu viens d'écrire toi-même, tu le finis : ce n'est pas une trouvaille.
+- **Ce qui remonte à Grégoire** : sa didactique, ses données réelles, les mots que ses élèves et ses collègues liront, ce qui l'engage publiquement. **Le reste, tranche-le seul et dis en une ligne ce que tu as supposé.**
+- `js/config.js`, `js/navigation.js` et `noms_stables.json` restent des zones protégées.
+- Vitest se lance **depuis `tests/`**. Le hook pre-push ne juge pas Playwright : commit, relecture, **puis** verdict, **puis** push.
