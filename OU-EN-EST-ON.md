@@ -782,6 +782,34 @@ arbitrées par Grégoire.
 
 ---
 
+↻ **6 septembre 2026, matin (Claude Code) — QUATRE RETOURS DE GRÉGOIRE, CORRIGÉS LE MATIN MÊME : 1.123.2 À 1.123.5 EN LIGNE**
+(builds `0906-0745`, `0906-0821`, `0906-0842` et `0906-0902`, commits `ddc94fcf`, `43c6cc6d`, `4f0e836a` et `aea9d144`, chacun poussé
+après un verdict Playwright local vert au jeton ; run serveur `34035446544` de 1.123.5 VERT de bout en bout à 9 h 51, les trois runs
+précédents annulés par le push suivant).
+· ✅ **Dans le profil d'un élève, la vignette d'un travail (« Travaux soumis ») ouvre la copie** — elle menait à une page vide :
+  l'onglet Annoter et évaluer s'activait sans que la section Évaluations s'affiche (le geste ne basculait que la sous-section,
+  depuis la refonte du 18 février), et l'ouverture entrait en course avec l'initialisation du module. Le geste arrive d'abord,
+  puis ouvre (1.123.2, #761).
+· ✅ **« Appliquer au cours actif » assigne vraiment la pratique au groupe-cours** — depuis le 11 juin, le bouton n'appliquait
+  que les réglages et disait « appliquée » ; le groupe-cours restait sans pratique (`pratiqueId` vide chez Grégoire, champ 6 vide,
+  pas de badge), tout calculait en sommative par repli, et le profil parlait d'une pratique « introuvable ». Le bouton assigne, la
+  barre latérale marque « Active », le profil dit « aucune pratique assignée » quand c'est le cas, et une pratique adoptée depuis
+  un modèle sommatif n'est plus refusée pour une échelle qu'elle n'a pas (1.123.3, #762).
+· ✅ **Le Cadre montre la pratique que tu viens d'appliquer, et le badge « Active » se lit comme un état** — le formulaire du
+  groupe-cours ne se remplissait qu'au chargement de la page (l'initialiseur que la navigation appelle à chaque affichage avait été
+  retiré comme « code mort » le 22 mai) ; il relit tes données chaque fois qu'il s'affiche (1.123.4, #763).
+· ✅ **« Copier tout » livre la rétroaction entière, même sans cartouche** — sur sa grille à un seul critère algorithmique et sans
+  cartouche, la générale restait sur son texte d'attente et le collage ne portait que la spécifique et le bilan ; chaque phrase de la
+  spécifique était coupée à 120 caractères, à l'écran comme dans le collage. La générale s'écrit avec ou sans cartouche, la
+  spécifique porte les textes entiers (1.123.5, #764). Le collage sans sauts de ligne, visible dans le même exemple, reste #759
+  (inscrit, non corrigé sur sa décision du matin).
+**Vérifié comment** : chaque retour reproduit AU CODE puis AU NAVIGATEUR avant correction (specs WebKit
+`profil-travaux-761-…`, `pratiques-762-…` et `cadre-763-…`, rouges avant, vertes après — la deuxième a attrapé un troisième défaut que
+le banc Vitest ne voyait pas), sentinelles rouges avant / vertes après (dont `sentinelle-764-…`, 3 cas), onze break-tests rouges avec témoin, Vitest 5 425 verts ; le
+second diagnostic a été tranché par les données de Grégoire (deux captures, un dump console sans donnée d'élève), pas par supposition.
+⏳ **Dû à Grégoire sur 1.123.3** : Conception › Pratiques › sa PAN-STD › « Appliquer au cours actif », une fois — son assignation est
+vide et le correctif ne réécrit pas son groupe-cours ; puis le profil d'un élève calcule.
+
 ## CE QUI N'APPARTIENT QU'À GRÉGOIRE
 
 Aucune session ne peut trancher ces points à sa place.
