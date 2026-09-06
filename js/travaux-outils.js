@@ -2008,7 +2008,21 @@
         palette.style.left = '12px';
         palette.style.right = 'auto';
         palette.style.width = (cRect.width - 24) + 'px';
-        palette.style.height = Math.min(cRect.height - 24, cRect.height * 0.6) + 'px';
+        // HAUTEUR AU CONTENU, PAS 60 % DE LA ZONE — #774 (6 sept. 2026).
+        // La formule d'origine (`cRect.height * 0.6`) donnait la même bande à une
+        // palette de dix codes qu'à une palette de cent : sur la capture d'iPad de
+        // Grégoire, ses dix codes tenaient en deux lignes et les quatre cinquièmes
+        // du bandeau, vides, couvraient la copie de l'élève. En bandeau, la largeur
+        // est déjà maximale : c'est elle qui décide du nombre de lignes, donc la
+        // hauteur utile se MESURE, elle ne se postule pas.
+        // `height: auto` avant la mesure, et non `''` : la règle
+        // `.palette-flottante[style*="height"] .palette-flottante-contenu` lève le
+        // plafond du contenu sur la présence du mot dans le style en ligne — sans
+        // lui, le contenu serait replafonné le temps de la mesure. La lecture
+        // d'`offsetHeight` force le reflow. La zone reste le plafond dur : une
+        // palette plus haute qu'elle deviendrait insaisissable.
+        palette.style.height = 'auto';
+        palette.style.height = Math.min(palette.offsetHeight, cRect.height - 24) + 'px';
         sauvegarderPositionPalette(palette);
     }
 
