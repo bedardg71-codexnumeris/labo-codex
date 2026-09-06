@@ -7,7 +7,7 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, MATIN (MESURE DU PDF DE L'ÉLÈVE DÉPOSÉE, PUIS SES DEUX CONSTATS CORRIGÉS : 1.123.1 ; PUIS QUATRE RETOURS TESTEUR CORRIGÉS : 1.123.2 À 1.123.5)
+## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, MATIN (MESURE DU PDF DE L'ÉLÈVE DÉPOSÉE, PUIS SES DEUX CONSTATS CORRIGÉS : 1.123.1 ; PUIS CINQ RETOURS TESTEUR CORRIGÉS : 1.123.2 À 1.123.6)
 
 > ↻ **6 h 28 → 7 h 15, sur le Mac.** Temps 0 de la consigne (rapatrier la clôture) **déjà fait** par `886d9828` avant la séance
 > (rituel d'ouverture : arbre propre sur les trois fichiers, patch de 105 lignes reporté). Consigne promue en `dc1e606d`
@@ -99,11 +99,30 @@
 > vert à chaque fois avant l'annulation. ⏳ Le troisième défaut du même
 > exemple, le collage sans sauts de ligne (#759), n'est pas corrigé : décision de Grégoire du matin (« inscris-les, ne les corrige
 > pas ») — posé en question fermée dans le rapport.
-> **`main` = `origin/main` après ce push, AUCUN travail en avance.** Version 1.123.5.
+> ↻ **10 h 01 → 10 h 45 — RETOUR TESTEUR sur 1.123.5 (`BUG_grégoire_2026-09-06_10-01-29`, une capture) : « Le texte du bouton est
+> à moitié visible. » LIVRÉ : 1.123.6** (#765, SUIVI-BUGS #537, `126b41ce`, build 0906-1016). Dans la barre d'annotation, le sélecteur
+> « Portrait de lecteur/lectrice (28) » était coupé au milieu des lettres. MESURÉ DANS SON CHROME (page nue avec le vrai styles.css :
+> pas de défaut, 18 px de contenu ; application entière servie en local, fixture du spec #761 : défaut reproduit à l'identique,
+> 10 px de contenu) — cascade relevée par `document.styleSheets` : le bloc `<style>` d'index.html (596 règles), chargé APRÈS
+> styles.css, redéclare `.controle-form { padding: 8px }` et bat `.travaux-filtre-production { padding: 4px 8px }` à spécificité
+> égale ; à 28 px de haut, 16 px de padding et 2 de bordure laissent 10 px pour 12 px de police. Correctif ciblé : la règle
+> `.annot-toolbar-production select` (plus spécifique) porte `padding: 0 8px` ; remesuré dans son Chrome après rechargement hors
+> cache : 26 px, texte entier (capture). Sentinelle `sentinelle-765-…` (parse la cascade réelle, bloc inline compris ; rouge avant
+> sur 2, deux break-tests rouges). ⚠ Spec WebKit écrite puis RETIRÉE : WebKit force à 0 le padding d'un sélecteur natif et ne voit pas
+> le défaut (verte avec ou sans correctif). **#766 INSCRIT, pas corrigé** : le même doublon inline bat 13 classes modificatrices de
+> styles.css (liste au BACKLOG) ; seule celle de #765 coupait du texte (hauteur fixe) ; retirer le doublon change bordure et padding
+> de TOUS les contrôles — lot à voir à l'écran avec Grégoire. Même mécanisme que les notifications retirées du bloc inline le 24 août.
+> Vitest 5 427 (491 fichiers) sur le commit ; verdict Playwright local vert (0 échec, inchangé) par `pousser.sh`, push 10 h 27.
+> **Run `34039237638` VERT de bout en bout** (Vitest 10 h 28 → 10 h 30, Playwright WebKit 10 h 30 → 10 h 52). Le run du commit de
+> relais précédent (`34037433494`, 2fb1facf) était vert aussi : trois runs serveur verts d'affilée ce matin (1.123.5, relais, 1.123.6).
+> **`main` = `origin/main` après ce push, AUCUN travail en avance.** Version 1.123.6. ⚠ Une autre session (audit des six sous-onglets
+> de Suivi, consigne de 10 h 07) travaille dans le worktree `Monitorage_v6-wt-audit-suivi`, branche `audit/sous-onglets-suivi-2026-09-06`
+> depuis `2fb1facf` ; elle commet les fichiers de Cowork sur SA branche et fusionnera en fast-forward après ce push.
 > **Ce qui attend Grégoire** : rien à lire côté serveur (le run de 1.123.5 est vert et lu) ; à l'écran, sur 1.123.5 rechargée :
 > « Appliquer au cours actif » sur la PAN-STD → badge « Active », profil qui calcule ; Suivi › Profil › Travaux soumis, cliquer un
 > travail → la copie s'ouvre ; copier la rétroaction d'une copie évaluée → « Note finale : 63.5 % » ; « Copier tout » sur sa copie
-> évaluée sans cartouche → GÉNÉRALE, SPÉCIFIQUE et BILAN, phrases entières (1.123.5) ; le bilan d'une copie qui a un
+> évaluée sans cartouche → GÉNÉRALE, SPÉCIFIQUE et BILAN, phrases entières (1.123.5) ; Annoter et évaluer, le sélecteur de production
+> se lit en entier (1.123.6) ; le bilan d'une copie qui a un
 > artefact antérieur → « Progrès : … » ; le reste est inchangé (les cinq coups d'œil sur 1.122 / 1.123, le canal du 14, #737 ; Cowork
 > cadre la « synthèse des rétroactions dans le PDF » à partir du rapport, avec #759 et #760).
 
