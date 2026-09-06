@@ -7,7 +7,8 @@
      ===================================================================== -->
 
 <!-- =====================================================================
-     SESSION 31 — 6 SEPTEMBRE 2026, 6 H 28 → 7 H 15 (Mac) : MESURER CE QUE L'ÉLÈVE LIT DANS SON PDF, SANS CODER (consigne du 6 au matin, Temps 1).
+     SESSION 31 — 6 SEPTEMBRE 2026, 6 H 28 → 7 H 45 (Mac) : MESURER CE QUE L'ÉLÈVE LIT DANS SON PDF, SANS CODER (consigne du 6 au matin, Temps 1),
+     PUIS, SUR ARBITRAGE (a) DE GRÉGOIRE, CORRIGER LES DEUX CONSTATS (#757, #758) — release 1.123.1 (`89bcf4a9`, build 0906-0715).
      ▣ Ouverture (subagent d'audit) : Temps 0 (rapatrier la clôture) DÉJÀ FAIT par `886d9828` à 6 h 22 ; la prémisse de la consigne
        (Mac à `c4ac5ae3`, trois brouillons) était périmée d'un commit ; Vitest 483 / 5 395 verts. Consigne promue (`dc1e606d`).
      ▣ Temps 1 : banc `tests/unit/mesure-ce-que-l-eleve-lit-2026-09-06.test.js` — modules RÉELS dans le bac à sable
@@ -31,12 +32,35 @@
      ▣ Trouvaille hors périmètre : #755 (`travaux-archivage.js` lu comme binaire, l. 39 — grep aveugle, dix minutes perdues).
      ▣ Rituel de fin : §1 quatre fichiers (BACKLOG, OU-EN-EST-ON, rapport, banc), zéro `js/` ; §2 le banc porte un `console.log`
        (patron des trois bancs d'audit, hors production) ; §3 484 / 5 404 verts en 24 s ; §5 pas de release. Push `d5f911b0` →
-       run `34028716398` : Vitest `success`, Playwright (WebKit) LANCÉ (`tests/` est observable pour la CI) — le premier
-       verdict serveur possible sur la spec #732 depuis `c4ac5ae3`, à lire. ⚠ Le hook pre-push avait dit « sans objet » : sa
-       liste (`scripts/lot-observable.sh`) n'a pas `tests/`, celle de la CI si → #756. (J'ai d'abord cru le hook et écrit
-       « Playwright sauté » ; le run l'a démenti ; corrigé avant de conclure — règle 1 : l'attestation n'est pas la preuve.)
+       run `34028716398` : Vitest `success`, Playwright (WebKit) LANCÉ (`tests/` est observable pour la CI) puis ANNULÉ par
+       le push de la release (`89bcf4a9`, run en cours sur la même branche) — le verdict serveur sur la spec #732 se prend sur
+       le run `34030274015`. ⚠ Le hook pre-push avait dit « sans objet » : sa liste (`scripts/lot-observable.sh`) n'a pas
+       `tests/`, celle de la CI si → #756. (J'ai d'abord cru le hook et écrit « Playwright sauté » ; le run l'a démenti ;
+       corrigé avant de conclure — règle 1 : l'attestation n'est pas la preuve.)
      ▣ SUPPOSITIONS NOMMÉES : les textes par défaut des tampons et l'échelle IDME du banc sont ceux du dépôt, pas ceux du
        trimestre réel de Grégoire ; le collage Léa est mesuré par un `textContent` imité (un navigateur ne fait pas autrement).
+     ▣ ARBITRAGE (a), 7 h 00 : « corrige C1 et C2 aujourd'hui, sans toucher au reste ; pour C2, aligne le bilan de l'écran sur la
+       lecture que le PDF fait déjà de l'historique — mesure d'abord si la même garde est réutilisable ; sentinelle rouge avant,
+       verte après, break-test ; inscris les deux défauts de forme ; release patch ».
+     ▣ Mesures préalables : C1 — quatre écrivains de `noteProduction1` (`'--'`, `'0.0'` à la remise à zéro, `x.x %` au calcul) ; la
+       source #572 (`noteCalculeeCourante`) n'est pas remise à zéro par les trois chemins de reset → l'écran reste la source, recopié
+       tel quel. C2 — la garde du PDF est privée à `synthese-retroaction-data.js` ; dix bancs chargent `evaluation-retroaction.js`
+       sans ce module ; l'écran a déjà le résolveur #576 de « la copie en base » → il est passé à `_chargerHistoriqueBilan`, même
+       prédicat que le PDF (`e.id !== copie.id`), aucune seconde lecture.
+     ▣ Sentinelles : `sentinelle-757-note-finale-un-seul-pourcent.test.js` (2 cas ; rouge avant sur le « %% ») ;
+       `sentinelle-758-bilan-ecran-exclut-la-copie.test.js` (5 cas : enregistrée, auto-enregistrée sans identifiant, fraîche, deux
+       antérieures vraies → « depuis 3 productions » se dit encore, reprise remplacée ; rouge avant sur 4). Vertes après.
+       Break-tests : #757 rouge ; #758 — ⚠ PREMIÈRE MUTATION NON APPLIQUÉE (le `sed` visait `; })` alors que le `filter` est
+       chaîné à `.sort`) : témoin à 1 pendant « la casse », 5 verts MENTEURS — refaite avec témoin à 0 : 4 rouges / 5 ; restauré,
+       diff 34 / 7 identique (piège 8.4 du skill, vécu ici).
+     ▣ Trouvé en écrivant #757, hors lot : une copie sans AUCUN niveau affiche « 0.0 % » à l'écran (portée « pas commencée »
+       ≠ « incomplète ») et le texte copié le suit — commenté dans le code, pas inscrit.
+     ▣ Le banc de mesure passe aux valeurs d'après ; le rapport porte les dispositions (C1/C2 corrigés, F1/F2 inscrits #759/#760) ;
+       BACKLOG #757/#758 [x], #759/#760 [ ], dernier ID #760 ; changelog : deux items consolidés dans 1.123.
+     ▣ Release : `release.mjs patch` (dry-run lu, puis écrit : 4 points 1.123.1 / 0906-0715, jetons `?v=20260906a` sur
+       changelog-data, evaluation-retroaction, init-inline, main) ; commit `89bcf4a9` ; Vitest 486 / 5 411 sur le commit ;
+       `scripts/pousser.sh origin main` détaché : verdict Playwright local VERT au jeton (`89bcf4a9`, 0 échec, 0 instable,
+       11 h 26 Z), push `5da06435..89bcf4a9 main -> main` vers 7 h 27. Le run GitHub de 1.123.1 est à lire (Playwright y tourne).
      ===================================================================== -->
 
 <!-- =====================================================================
