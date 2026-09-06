@@ -782,8 +782,8 @@ arbitrées par Grégoire.
 
 ---
 
-↻ **6 septembre 2026, matin (Claude Code) — QUATRE RETOURS DE GRÉGOIRE, CORRIGÉS LE MATIN MÊME : 1.123.2 À 1.123.5 EN LIGNE**
-(builds `0906-0745`, `0906-0821`, `0906-0842` et `0906-0902`, commits `ddc94fcf`, `43c6cc6d`, `4f0e836a` et `aea9d144`, chacun poussé
+↻ **6 septembre 2026, matin (Claude Code) — CINQ RETOURS DE GRÉGOIRE, CORRIGÉS LE MATIN MÊME : 1.123.2 À 1.123.6 EN LIGNE**
+(builds `0906-0745`, `0906-0821`, `0906-0842`, `0906-0902` et `0906-1016`, commits `ddc94fcf`, `43c6cc6d`, `4f0e836a`, `aea9d144` et `126b41ce`, chacun poussé
 après un verdict Playwright local vert au jeton ; run serveur `34035446544` de 1.123.5 VERT de bout en bout à 9 h 51, les trois runs
 précédents annulés par le push suivant).
 · ✅ **Dans le profil d'un élève, la vignette d'un travail (« Travaux soumis ») ouvre la copie** — elle menait à une page vide :
@@ -803,9 +803,15 @@ précédents annulés par le push suivant).
   spécifique était coupée à 120 caractères, à l'écran comme dans le collage. La générale s'écrit avec ou sans cartouche, la
   spécifique porte les textes entiers (1.123.5, #764). Le collage sans sauts de ligne, visible dans le même exemple, reste #759
   (inscrit, non corrigé sur sa décision du matin).
+· ✅ **Dans la barre d'annotation, le sélecteur de production se lit en entier** — « Portrait de lecteur/lectrice (28) » était
+  coupé au milieu des lettres : le bloc de styles d'index.html, chargé après la feuille principale, imposait à cette boîte de 28 px
+  un padding de champ de formulaire. La règle du sélecteur porte le sien (1.123.6, #765). Le même doublon rabaisse 13 autres classes
+  sans couper de texte : inscrit #766, à voir à l'écran (le retirer change bordure et padding de tous les contrôles).
 **Vérifié comment** : chaque retour reproduit AU CODE puis AU NAVIGATEUR avant correction (specs WebKit
 `profil-travaux-761-…`, `pratiques-762-…` et `cadre-763-…`, rouges avant, vertes après — la deuxième a attrapé un troisième défaut que
-le banc Vitest ne voyait pas), sentinelles rouges avant / vertes après (dont `sentinelle-764-…`, 3 cas), onze break-tests rouges avec témoin, Vitest 5 425 verts ; le
+le banc Vitest ne voyait pas), sentinelles rouges avant / vertes après (dont `sentinelle-764-…`, 3 cas, et `sentinelle-765-…` qui parse la cascade réelle), treize
+break-tests rouges avec témoin, Vitest 5 427 verts ; #765 reproduit puis remesuré DANS SON CHROME (application entière servie en local,
+10 px de contenu avant, 26 après, capture) ; le
 second diagnostic a été tranché par les données de Grégoire (deux captures, un dump console sans donnée d'élève), pas par supposition.
 ⏳ **Dû à Grégoire sur 1.123.3** : Conception › Pratiques › sa PAN-STD › « Appliquer au cours actif », une fois — son assignation est
 vide et le correctif ne réécrit pas son groupe-cours ; puis le profil d'un élève calcule.

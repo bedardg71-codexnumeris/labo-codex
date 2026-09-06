@@ -7,7 +7,7 @@
      ===================================================================== -->
 
 <!-- =====================================================================
-     SESSION 31 — 6 SEPTEMBRE 2026, 6 H 28 → 9 H 10 (Mac) : MESURER CE QUE L'ÉLÈVE LIT DANS SON PDF, SANS CODER (consigne du 6 au matin, Temps 1),
+     SESSION 31 — 6 SEPTEMBRE 2026, 6 H 28 → 10 H 45 (Mac) : MESURER CE QUE L'ÉLÈVE LIT DANS SON PDF, SANS CODER (consigne du 6 au matin, Temps 1),
      PUIS, SUR ARBITRAGE (a) DE GRÉGOIRE, CORRIGER LES DEUX CONSTATS (#757, #758) — release 1.123.1 (`89bcf4a9`, build 0906-0715) —,
      PUIS UN RETOUR TESTEUR (7 h 32, page vide depuis la vignette d'un travail du profil) — release 1.123.2 (`ddc94fcf`, build 0906-0745, #761),
      PUIS UN SECOND (7 h 48, « pratique assignée introuvable » : « Appliquer au cours actif » n'assignait pas) — release 1.123.3 (`43c6cc6d`, build 0906-0821, #762).
@@ -134,6 +134,25 @@
        `f1e5d33a..aea9d144` à 9 h 13 ; run `34035446544` VERT de bout en bout (Vitest 9 h 16, Playwright WebKit 9 h 16 → 9 h 51),
        le premier de la matinée (les trois précédents annulés par le push suivant). Non corrigé : #759 (collage sans sauts de
        ligne, dans le même exemple) — décision du matin, posé en question fermée.
+     ▣ RETOUR TESTEUR sur 1.123.5 (10 h 01, `BUG_grégoire_2026-09-06_10-01-29`, une capture) : « Le texte du bouton est à moitié
+       visible » — le sélecteur de production de la barre d'annotation, coupé au milieu des lettres. MESURE dans son Chrome 152 (outils
+       navigateur) : page nue + styles.css → 18 px de contenu, pas de défaut ; application entière servie sur 127.0.0.1:8766 avec la
+       fixture #761 → défaut reproduit (padT/padB 8 px, 10 px de contenu). Cascade par `document.styleSheets` : le bloc `<style>`
+       d'index.html (596 règles, chargé après styles.css) redéclare `.controle-form { padding: 8px }` (l.1437, f8f5fec4, 6 février)
+       et bat `.travaux-filtre-production` (styles.css:24570) à spécificité égale. Inférence, pas mesurée : Chrome 152 honore
+       désormais le padding vertical d'un `<select>` natif, ce qui rend visible un défaut de cascade présent depuis le 2 avril
+       (184b1953, `height: 28px`). #765 : `.annot-toolbar-production select { padding: 0 8px }` ; remesuré après rechargement hors
+       cache : 26 px, texte entier (capture). Sentinelle `sentinelle-765-…` (parse styles.css ET le bloc inline, commentaires
+       retirés — ma première version s'arrêtait sur une accolade dans le commentaire de la règle) : rouge avant sur 2, verte après,
+       break-tests (padding retiré → rouge ; padding 8px → rouge). Spec WebKit `visionneuse-765-…` écrite, verte AVANT correctif
+       (WebKit : padT/padB 0 px sur un select natif, mesuré par script) → RETIRÉE, décorative. Étendue mesurée (script sur index.html
+       + js/ : classes jumelées à `controle-form` dont styles.css règle padding/police/hauteur et que le bloc inline ne redéclare
+       pas) : 13 classes perdent → #766 inscrit, pas corrigé (retirer le doublon change bordure `--bordure-claire`→`--bleu-leger`
+       et padding 8→12 px de tous les contrôles : à voir à l'écran). Vitest 5 427 / 491 fichiers. SUIVI-BUGS #537, BACKLOG
+       #765/#766, changelog 1.123. Release `patch` 1.123.6 (`126b41ce`, build 0906-1016) ; `pousser.sh` détaché.
+     ▣ Autre session en parallèle (message reçu 10 h 30) : audit des six sous-onglets de Suivi (consigne de 10 h 07), worktree
+       `Monitorage_v6-wt-audit-suivi`, branche `audit/sous-onglets-suivi-2026-09-06` depuis `2fb1facf` ; elle commet les fichiers
+       de Cowork sur sa branche ; je lui envoie le SHA de chaque push ; elle fusionne en fast-forward après moi.
      ===================================================================== -->
 
 <!-- =====================================================================
