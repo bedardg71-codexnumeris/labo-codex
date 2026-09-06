@@ -7,6 +7,49 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, 14 H 35 → 15 H 25 : LE RETOUR IPAD SUR LA PALETTE DES CODES, DEUX LOTS (1.123.8 ET 1.123.9, #773 ET #774) — TOUT EST SUR `main`
+
+> ↻ **Session Claude Code sur `claude/ipad-palette-resize-t1kjo3`, FUSIONNÉE EN FAST-FORWARD VERS `main` (`c09ca731`) et poussée à
+> 15 h 12** : rien n'attend sur une branche, le déploiement Netlify part du push sur `main`.
+> ▣ **#773 (1.123.8, build `0906-1445`, `9d0b016c`)** — rapport `BUG_grégoire_2026-09-06_14-31-01.txt`, iPad Air, Safari 26.6,
+> SUIVI-BUGS #538 : « je ne suis pas capable de saisir le coin inférieur droit de la palette des codes ». Cause mesurée au code :
+> les quatre palettes flottantes (`.palette-flottante` — Annotation, Codes, Tampons, Évaluer) comptaient sur `resize: both`, la
+> poignée NATIVE du navigateur, que WebKit iPadOS ne rend pas au toucher ; l'indicateur `::after` du coin n'était qu'un dessin
+> (`pointer-events: none`). **Ce n'est pas une régression** : le comportement attendu de ce CSS sur iPad, et la limite était déjà
+> nommée au #144 (11 juin) — le glisser avait été porté en Pointer Events, pas le redimensionnement.
+> ⮕ `configurerPoigneeRedimension` (`travaux-outils.js`), appelée par `configurerDragPalette` : poignée `.palette-poignee-redim`
+> en Pointer Events capturés, `touch-action: none`, cible 44 px à zone sensible triangulaire (`clip-path`, pour ne pas couvrir la
+> fin de la dernière ligne de codes) ; `resize: both` RETIRÉ des palettes (zéro-dette) ; taille persistée avec la position (le natif
+> ne la gardait jamais) ; poignée ramenée au coin visible au défilement (`translateY(scrollTop)`).
+> ⚠ **Une version `sticky` a été écrite d'abord, puis ÉCARTÉE AU BANC** : elle reste au bout du CONTENU, pas au coin, dès que la
+> palette est plus haute que ce qu'elle contient (disposition ↕ sur une courte liste). Écrit dans le commentaire du CSS pour que
+> personne ne la « rétablisse » comme une simplification.
+> ▣ **#774 (1.123.9, build `0906-1458`, `c09ca731`)** — sur SA CAPTURE du même retour, pas sur un rapport : la palette en
+> disposition ↔ prenait `min(zone - 24, zone × 0,6)` quel que soit son contenu ; ses dix codes tenaient en deux lignes et les
+> quatre cinquièmes du bandeau, vides, couvraient la copie de l'élève. **C'est ce vide qui l'a poussé à vouloir redimensionner,
+> donc à découvrir #773.** `layoutPaletteH` MESURE maintenant la hauteur (`height: 'auto'`, lecture d'`offsetHeight`, pose),
+> plafonnée par la zone. Mesuré au banc dans 900 × 700 : **147 px au lieu de 420**, sans défilement. `layoutPaletteV` intacte :
+> en colonne étroite, la hauteur pleine est la disposition voulue.
+> ⚠ `height: 'auto'` et NON `''` : la règle `.palette-flottante[style*="height"] .palette-flottante-contenu` lève le plafond du
+> contenu sur la présence du mot dans le style en ligne — sans lui, la mesure serait faussée.
+> ▣ **Preuves** : sentinelle statique `sentinelle-773-palette-poignee-redim.test.js` (8 cas) ; specs
+> `palette-redim-poignee-773.spec.js` (3 cas) et `palette-layout-h-hauteur-774.spec.js` (2 cas), toutes deux sur le CHEMIN RÉEL
+> (`creerLayoutAnnotation`, et pour #774 le VRAI bouton ↔, pas un appel direct) ; **quatre break-tests rouges**, dont deux CROISÉS
+> pour #774 (l'ancienne formule ne rougit que le premier cas, le retrait du plafond que le second). Vitest depuis `tests/` :
+> **498 fichiers / 5 479 verts**. Audit statique du diff `js/` : 0 motif ; zones protégées intactes.
+> ⚠⚠ **VERDICT PLAYWRIGHT : CHROMIUM, PAS WEBKIT — le conteneur n'a pas WebKit.** Suite complète jouée sous Chromium
+> (`/opt/pw-browsers/chromium`) : **277 passés, 1 échec**, et cet échec est `bandeau-non-modal-508.spec.js › #508`, un des six
+> titres de `EXCLUS_WEBKIT_LINUX` (playwright.config.js). **Établi, pas supposé** : rejoué sur un worktree du commit de base
+> `ce81883e`, SANS une ligne du diff de session → rouge à l'identique. Ce n'est pas le rouge de ce lot.
+> ⏳ **Ce qui attend Grégoire** : le DOIGT sur l'iPad, en usage normal — aucune porte terrain écrite (règle 2 du skill
+> `portes-terrain` : comportement et apparence, aucune donnée en jeu, un raté se dit et se corrige). Recharger l'app et lire
+> **1.123.9** en bas de page avant de juger quoi que ce soit.
+> ⏳ **Trouvaille inscrite, non traitée** (niveau 3) : la classe `.travaux-palette-flottante` (styles.css, « legacy, sera migrée »,
+> avec son propre `resize: both` et son `::after`) n'est portée par AUCUN élément — seul l'identifiant
+> `#travaux-palette-flottante` survit. Dans #774 au BACKLOG.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, 11 H 00 → 11 H 45 : LES SIX « CORRIGER MAINTENANT » DE L'AUDIT LIVRÉS EN UN LOT (1.123.7, #767 À #772)
 
 > ↻ **Même session que l'audit (SESSION 32), arbre principal cette fois** : Cowork a réécrit la consigne à 10 h 57 sur l'arbitrage de

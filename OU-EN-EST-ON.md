@@ -15,6 +15,18 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **6 septembre 2026, 15 h 25 (Claude Code) — 1.123.9 POUSSÉE SUR `main`** (build `0906-1458`, `c09ca731` ; `main` = `origin/main`,
+arbre propre ; le déploiement Netlify part du push). **Ce qui change pour quelqu'un qui annote sur iPad** : le coin inférieur droit
+d'une palette (Codes, Annotation, Tampons, Évaluer) se saisit enfin au doigt pour la redimensionner — il ne portait qu'un dessin, et
+la vraie poignée était celle du navigateur, que Safari ne montre pas au toucher ; la taille choisie est retrouvée à la prochaine
+ouverture, ce qui n'était jamais le cas. Et la palette mise en bandeau (↔) prend la hauteur de ce qu'elle contient au lieu des trois
+cinquièmes de l'écran : sur la capture de Grégoire, dix codes tenaient en deux lignes et le vide couvrait la copie de l'élève.
+**Vérifié comment** : deux specs sur le chemin réel de l'écran d'annotation (la vraie palette, le vrai bouton ↔), quatre break-tests
+rouges dont deux croisés, une sentinelle statique de 8 cas, Vitest 498 fichiers / 5 479 verts. **Ce qui n'est PAS vérifié, et il faut
+le lire** : tout cela est mesuré sous Chromium — le conteneur n'a pas WebKit, et Playwright n'a pas de doigt. **Le geste réel sur
+l'iPad Air reste dû**, en usage normal, sans liste à cocher. Le seul rouge de la suite complète (277 passés, 1 échec) est un essai
+déjà déclaré non-jugeant hors macOS : rejoué sur le commit d'avant, il rougit pareil.
+
 ↻ **5 septembre 2026, 13 h 51 (vingt-troisième passe, Cowork) — 1.120.0 EN LIGNE** (build `0905-1315`, `c4c7b04a`, poussée à
 13 h 26 ; docs `7a40949b` à 13 h 28 ; `main` = `origin/main`, arbre propre, remesuré à 13 h 51). **Un seul lot, la carte
 « Bilan »** (`1b06b1ba`) : dans un critère algorithmique, la carte « Observation » se titre « Bilan » et ne porte plus que les deux
