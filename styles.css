@@ -9047,6 +9047,19 @@ body.mode-clair .bloc-rlo-separateur {
     text-transform: lowercase;
 }
 
+/* #762 / #763 (6 sept. 2026) — la pratique ASSIGNÉE au groupe-cours actif, dans la
+   barre latérale des pratiques : la même pilule que les caractéristiques, mais la
+   couleur d'un ÉTAT (fond pâle, bordure verte, texte principal — lisible dans les deux
+   modes, là où du blanc sur --vert-succes ne l'était pas), pour qu'elle ne se lise pas
+   comme une caractéristique de plus (demande de Grégoire). Deux classes, pour gagner
+   sur le fond bleu de .sidebar-item-badge sans !important. */
+.sidebar-item-badge.badge-pratique-active {
+    background: var(--vert-pale);
+    color: var(--texte-principal);
+    border: 1px solid var(--vert-leger);
+    font-weight: 600;
+}
+
 /* Conteneur pour tous les badges sur la ligne 2 */
 .sidebar-item-badges {
     display: flex;

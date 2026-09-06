@@ -77,6 +77,24 @@ function initialiserTrimestreV2() {
 
 }
 
+// #763 (6 sept. 2026) — LE CADRE RELIT LE STOCKAGE À CHAQUE AFFICHAGE.
+// navigation.js appelle `initialiserModuleTrimestre()` quand la sous-section
+// `calendrier-trimestre` s'affiche ; ce nom n'existait plus depuis le retrait du
+// code mort de trimestre.js (5ccb3063, 22 mai 2026), et `typeof … === 'function'`
+// le taisait : le formulaire du groupe-cours ne reflétait que l'état du stockage
+// AU CHARGEMENT de la page. Une pratique appliquée dans Conception › Pratiques
+// (#762) n'y apparaissait pas avant un rechargement — demande de Grégoire,
+// 6 sept., deux captures : champ 6 encore « À compléter » après l'application.
+// Les modules ne se parlent pas directement : c'est le Cadre qui relit le stockage
+// quand il s'affiche, derrière le même portillon qu'au chargement (base prête).
+window.initialiserModuleTrimestre = function () {
+    if (typeof window.auDbPret === 'function') {
+        window.auDbPret(function () { initialiserTrimestreV2(); });
+    } else {
+        initialiserTrimestreV2();
+    }
+};
+
 /* ===============================
    IDENTIFICATION DU TRIMESTRE
    =============================== */

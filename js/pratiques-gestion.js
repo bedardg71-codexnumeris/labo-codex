@@ -141,7 +141,9 @@ async function afficherListePratiquesMateriel() {
         const nomPratique = pratique.nom || 'Sans titre';
         const badgeType = genererBadgeTypePratique(pratique);
         const badgesCaracteristiques = genererBadgeCaracteristiques(pratique);
-        const badgeActive = (pratique.id === pratiqueActiveId) ? ' <span class="sidebar-item-badge">Active</span>' : '';
+        // La couleur de l'ÉTAT, pas celle des caractéristiques (demande de Grégoire, 6 sept.) :
+        // `.sidebar-item-badge.badge-pratique-active` dans styles.css.
+        const badgeActive = (pratique.id === pratiqueActiveId) ? ' <span class="sidebar-item-badge badge-pratique-active">Active</span>' : '';
         return `
             <div class="sidebar-item" data-id="${pratique.id}" data-action="chargerPratiquePourModif" data-param="${pratique.id}">
                 <div class="sidebar-item-titre">${nomPratique}</div>

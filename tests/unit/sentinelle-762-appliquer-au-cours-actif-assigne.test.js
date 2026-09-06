@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+
+const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 // SENTINELLE #762 (volet bouton) — « APPLIQUER AU COURS ACTIF » ASSIGNE LA PRATIQUE AU GROUPE-COURS.
 //
@@ -104,6 +109,12 @@ describe('#762 · « Appliquer au cours actif » assigne la pratique au groupe-c
         const actives = items.filter(i => i.includes('>Active<'));
         expect(actives).toHaveLength(1);
         expect(actives[0]).toContain(PAN_STD.id);
+        // La couleur d'un ÉTAT, pas d'une caractéristique (demande de Grégoire, 6 sept.) : la
+        // classe est posée, ET la feuille de style la définit (règle 8.1 : un banc vert peut
+        // couvrir un écran cassé — une classe jamais définie ne se voit qu'au grep).
+        expect(actives[0]).toMatch(/class="sidebar-item-badge badge-pratique-active"/);
+        const css = readFileSync(path.join(RACINE, 'styles.css'), 'utf8');
+        expect(css).toMatch(/\.sidebar-item-badge\.badge-pratique-active\s*\{/);
     });
 
     it('sans groupe-cours actif : rien n\'est assigné et l\'enseignant l\'apprend (pas un succès)', async () => {
