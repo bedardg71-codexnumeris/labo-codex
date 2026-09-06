@@ -26,8 +26,11 @@
 > depuis 3 productions » avec un seul artefact antérieur, et plus jamais « Progrès » ni « Tu as progressé » dès l'auto-save.
 > Deux défauts de forme : collage `textContent` sans séparateurs ; bloc « --- Observations --- » jamais écrit (identifiants
 > hérités). **#755 inscrit** (`travaux-archivage.js` lu comme binaire, l. 39). Une ligne dans `OU-EN-EST-ON.md`.
-> ⚠ **Ce push touche `tests/unit/` : il déclenche Vitest ET Playwright sur le runner** — c'est « le prochain push » qui juge
-> enfin la spec #732 corrigée en `c4ac5ae3`. Lire le run avant de conclure ; aucune relance faite.
+> ▣ **Ce push (`d5f911b0`) touche `tests/unit/` : run GitHub `34028716398`, Vitest `success`, puis Playwright (WebKit) LANCÉ**
+> (`tests/` est dans la liste `OBSERVABLE` de la CI) — c'est « le prochain push » qui juge enfin la spec #732 corrigée en
+> `c4ac5ae3` ; **lire ce run avant de conclure** (Claude Code le lit à sa fin si la session tient). ⚠ Le hook pre-push, lui, a
+> dit « sans objet (aucun fichier observable) » : sa liste (`scripts/lot-observable.sh`) ne compte pas `tests/`, celle de la CI
+> si — deux règles pour la même question (#756). Aucune relance faite.
 > **`main` = `origin/main` après ce push, AUCUN travail en avance.** Version 1.123.0, build `0905-2025` (pas de release : rien
 > dans `js/`). Suite Vitest après le dépôt : 484 fichiers / 5 404 tests.
 > **Ce qui attend Grégoire** : arbitrer C1 et C2 (et les deux défauts de forme) avant que Cowork cadre la « synthèse des

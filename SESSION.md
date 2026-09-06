@@ -30,8 +30,11 @@
        exclusion retirée dans `lireHistorique` → CONSTAT 2 rouge ; légende imprimée en analytique → « jamais le nom du niveau » rouge.
      ▣ Trouvaille hors périmètre : #755 (`travaux-archivage.js` lu comme binaire, l. 39 — grep aveugle, dix minutes perdues).
      ▣ Rituel de fin : §1 quatre fichiers (BACKLOG, OU-EN-EST-ON, rapport, banc), zéro `js/` ; §2 le banc porte un `console.log`
-       (patron des trois bancs d'audit, hors production) ; §3 484 / 5 404 verts en 24 s ; §5 pas de release. Push = premier run
-       Playwright depuis `c4ac5ae3` (juge la spec #732).
+       (patron des trois bancs d'audit, hors production) ; §3 484 / 5 404 verts en 24 s ; §5 pas de release. Push `d5f911b0` →
+       run `34028716398` : Vitest `success`, Playwright (WebKit) LANCÉ (`tests/` est observable pour la CI) — le premier
+       verdict serveur possible sur la spec #732 depuis `c4ac5ae3`, à lire. ⚠ Le hook pre-push avait dit « sans objet » : sa
+       liste (`scripts/lot-observable.sh`) n'a pas `tests/`, celle de la CI si → #756. (J'ai d'abord cru le hook et écrit
+       « Playwright sauté » ; le run l'a démenti ; corrigé avant de conclure — règle 1 : l'attestation n'est pas la preuve.)
      ▣ SUPPOSITIONS NOMMÉES : les textes par défaut des tampons et l'échelle IDME du banc sont ceux du dépôt, pas ceux du
        trimestre réel de Grégoire ; le collage Léa est mesuré par un `textContent` imité (un navigateur ne fait pas autrement).
      ===================================================================== -->
