@@ -7,6 +7,34 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 34 bis — 7 SEPTEMBRE 2026, CLÔTURE : FUSION ET MISE EN LIGNE DES DEUX LOTS (1.123.10 ET 1.123.11).
+     ▣ Demande de Grégoire, en clair : « il faut faire le déploiement pour pouvoir faire les tests ». Juste — les
+       deux correctifs ne se jugent que sur son iPad, et son iPad lit la production.
+     ▣ ⚠ UNE MESURE AVANT DE FUSIONNER, qui valait la peine : `main` LOCAL pointait sur `c4ac5ae3`, soit 31 commits
+       en retard sur `origin/main`. Ce n'était pas une divergence — la ref locale datait du clonage et ne portait
+       AUCUN commit propre (`git rev-list --left-right --count` : 0 à gauche, 31 à droite ; `c4ac5ae3` est bien
+       ancêtre d'`origin/main`). Fusionner sans regarder aurait pu embarquer autre chose que le lot.
+     ▣ FUSION EN FAST-FORWARD : `main` remis sur `origin/main`, puis `--ff-only` sur la branche du jour.
+       `634f5143` → `d50ed45d`, aucun commit de fusion, l'historique reste linéaire. Vitest 500 / 5 529 verts
+       APRÈS fusion, avant le push, puis à nouveau par le hook pré-push.
+     ▣ DÉPLOIEMENT : automatique, par le webhook du push vers `main` (`DEPLOY.md` §1) — il n'y a pas de commande à
+       lancer. VÉRIFIÉ PAR L'API : deploy `6a9e0c6912ce270008829994`, contexte production, `ready`, publié à
+       00 h 59 UTC sur le commit `d50ed45d` exact, en 8 s, `error_message` nul, alias `app.codexnumeris.org` ;
+       17 fichiers, 2 redirections, 9 règles d'en-tête, aucune faute.
+     ▣ ⚠ CE QUI RESTE NON VÉRIFIÉ, et il faut le lire : LA PAGE SERVIE. Le proxy sortant du conteneur refuse
+       `app.codexnumeris.org` comme les URL `netlify.app` — `connect_rejected` horodaté à 00 h 59 50 sur la
+       tentative, donc c'est bien le proxy et non le site. « En ligne » repose sur l'état Netlify, pas sur une
+       lecture. Même limite que la session du 6 septembre après-midi ; le geste qui tranche reste le numéro en bas
+       de page, sur l'appareil de Grégoire.
+     ▣ REPÈRE DE DATES, noté une fois pour toutes : le script de release horodate en heure de TORONTO (d'où les
+       builds `0906-2017` et `0906-2039`, soit le 6 septembre au soir), la session compte en UTC (d'où
+       « 7 septembre » partout dans ces blocs). Les deux nomment le même moment ; ce n'est pas un écart.
+     ▣ CE QUI RESTE DÛ, et c'est tout : les deux gestes sur l'iPad. Pincer la carte dans Conception ; toucher une
+       bulle d'une barre de dégradé dans Suivi › Groupe. Aucune porte terrain formelle (aucune donnée en jeu, rien
+       d'irréversible — règle 2 du skill `portes-terrain`).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 34 — 7 SEPTEMBRE 2026 (même conteneur, même branche `claude/alignment-map-zoom-fluidity-9itj9c`) :
      SECOND RETOUR TESTEUR #540 — SAISIR LES BULLES D'ÉLÈVE AU DOIGT. Release 1.123.11.
      ▣ LE RAPPORT (iPad Air, Safari 26.6, sur 1.123.9, gravité mineure) : « j'ai du mal à saisir les bulles
