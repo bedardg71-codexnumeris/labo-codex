@@ -11,8 +11,15 @@
 
 > ⛔ **RIEN N'EST EXÉCUTÉ. Tout est préparé, et la préparation est le livrable.**
 >
-> **Les deux consignes existent, et elles ont deux publics :**
-> · **Pour toi, session** : `plans de travail/CHANTIER-historique-git-donnees-personnelles.md`,
+> ⏳ **EXÉCUTION PRÉVUE LE JEUDI 10 SEPTEMBRE, au terminal, sur le Mac de Grégoire.**
+> Le point d'entrée de ce jour-là : `plans de travail/PLAN-TERMINAL-2026-09-07-purge-historique.md`
+> — six phases, deux arrêts obligatoires, la consigne de départ à coller telle quelle, et ce
+> qui change sur son Mac (`--unshallow` disparaît, la sauvegarde survit, GitHub Desktop à
+> fermer, et **`claude` se lance depuis `~`, PAS depuis le dépôt** — il renomme ce dossier à
+> la fin).
+>
+> **Les trois documents, et leurs publics :**
+> · **Pour la session qui exécute** : `plans de travail/CHANTIER-historique-git-donnees-personnelles.md`,
 >   **§0 CONSIGNE D'EXÉCUTION** — cinq arrêts durs, l'ordre en douze gestes, et ce qu'il faut
 >   REDEMANDER à Grégoire même s'il a déjà répondu. Lis-le en entier avant la première commande.
 > · **Pour Grégoire** : `plans de travail/PORTES-TERRAIN-2026-09-07-purge-historique.md` et son
