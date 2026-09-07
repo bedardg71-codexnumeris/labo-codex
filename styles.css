@@ -9504,6 +9504,28 @@ body.mode-clair .bloc-rlo-separateur {
     font-weight: 600;
 }
 
+/* Marqueur « RàI » du panneau de report vers le SIS (7 sept. 2026).
+   Même geste que .badge-sa : une puce discrète posée à côté du nom d'un élève.
+   Classe distincte, parce que le sens de .badge-sa (Services adaptés) est autre.
+
+   Deux mesures au navigateur ont dicté cette forme :
+   - `u-texte-warning` rendait #D97706 sur blanc, soit ~3,1:1 — sous le seuil
+     AA de 4,5:1 pour du texte.
+   - .badge-sa, dont c'était le calque, s'appuie sur --orange-clair et
+     --orange-fonce, qui N'EXISTENT PAS dans ce fichier : ses deux couleurs
+     sont ignorées par le navigateur. À signaler, pas à corriger ici.
+   D'où : la couleur du texte reste héritée (10:1 en sombre, 17:1 en clair,
+   mesurés), et seuls le fond et la bordure distinguent la puce. */
+.badge-rai {
+    display: inline-block;
+    background: var(--surface-element);
+    border: 1px solid var(--bordure-moyenne);
+    padding: 1px 6px;
+    border-radius: var(--radius-moyen);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
 /* Section Import à droite (Beta 95.3) */
 .section-import-droite {
     background: var(--bleu-pale);

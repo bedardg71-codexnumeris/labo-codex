@@ -15,6 +15,31 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+⏳ **1.124.0 PRÊTE, PAS ENCORE EN LIGNE** (build `0907-0834`). Elle attend une autorisation de fusion : le travail
+vit sur une branche, et tant qu'elle n'est pas fusionnée, l'application de Grégoire reste en 1.123.12.
+**Ce qui change pour quelqu'un qui reporte ses absences dans le portail du cégep** : après avoir saisi une séance,
+un bouton « Reporter dans Léa » ouvre un panneau qui dit qui reporter, et combien. Jusqu'ici, il fallait relire les
+vingt-huit lignes de Codex, faire la soustraction de tête pour chacune, puis retrouver les bonnes lignes dans une
+seconde liste de vingt-huit noms, dans une autre fenêtre. Le panneau ne montre que les trois ou quatre élèves
+concernés, avec leur numéro d'étudiant en premier — c'est ce numéro qui sert de repère dans le portail, et un
+nombre à sept chiffres ne se confond pas dans une colonne de noms. Il montre aussi son calcul : les périodes de la
+séance, celles de présence saisies, et l'absence qui en découle. On peut donc le contredire d'un coup d'œil.
+**Deux choses qu'il refuse de faire, et c'est délibéré.** Il n'écrit jamais dans le portail : la saisie et la
+sauvegarde restent le geste de l'enseignant. Et il ne propose jamais comme absent un élève qui n'a aucune saisie ce
+jour-là — celui-là part dans une liste à part, parce que l'application ne peut pas distinguer « il était absent » de
+« la séance n'a pas été saisie jusqu'au bout », et qu'une absence inventée finirait dans un dossier officiel.
+Un élève venu à un rattrapage porte une mention à côté de son nom, et son absence au cours reste entière : savoir si
+un rattrapage l'annule est une règle de cégep, pas une décision de l'application.
+**Vérifié comment** : seize essais neufs sur le calcul, dont ceux qui protègent les deux refus ci-dessus ; cinq
+mutations du code les font rougir, et le témoin repasse au vert. Un nom d'élève hostile, chargé de code, ressort en
+texte inerte dans un vrai navigateur. Les couleurs mesurées à l'écran dans les deux modes, clair et sombre. Vitest
+502 fichiers / 5 551 verts. **Ce qui n'est PAS vérifié** : Safari, l'iPad, et l'ordre réel du portail sur son vrai
+groupe — le conteneur n'a pas WebKit, et la liste de vérifications terrain est déposée.
+▣ **Ce que le travail a appris** : ce que Grégoire demandait au départ — coller une colonne entière dans le portail —
+était impossible, et c'est LUI qui l'a mesuré en trente secondes, pas la session. Trois questions posées avant
+d'écrire une ligne de code ont écarté deux fausses pistes et fait tomber la vraie contrainte : le coût n'était pas
+de taper les chiffres, il était de retrouver les bonnes lignes.
+
 ↻ **1.123.12 EN LIGNE** (build `0907-0733`, commit `3b309ab9`). **Déploiement VÉRIFIÉ par l'API Netlify** :
 `6a9ea3804c71af0008bf7f6c`, contexte production, état `ready`, publié à 11 h 44 UTC sur ce commit exact, en 11 s,
 sans erreur, alias `app.codexnumeris.org`. ⚠ **La page servie n'a pas été lue** (le proxy du conteneur refuse le
