@@ -15,8 +15,9 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-⏳ **1.124.0 PRÊTE, PAS ENCORE EN LIGNE** (build `0907-0834`). Elle attend une autorisation de fusion : le travail
-vit sur une branche, et tant qu'elle n'est pas fusionnée, l'application de Grégoire reste en 1.123.12.
+↻ **1.124.0 FUSIONNÉE DANS `main` ET POUSSÉE** (build `0907-0834`, commit `736928bb`), sur l'autorisation de
+Grégoire. ⚠ **Le déploiement n'a pas été lu** : le proxy de ce conteneur refuse le domaine de l'application. « En
+ligne » n'est donc pas vérifié ici — **le geste qui tranche reste le numéro en bas de page**.
 **Ce qui change pour quelqu'un qui reporte ses absences dans le portail du cégep** : après avoir saisi une séance,
 un bouton « Reporter dans Léa » ouvre un panneau qui dit qui reporter, et combien. Jusqu'ici, il fallait relire les
 vingt-huit lignes de Codex, faire la soustraction de tête pour chacune, puis retrouver les bonnes lignes dans une
