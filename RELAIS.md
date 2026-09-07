@@ -14,9 +14,13 @@
 > pushes à la branche désignée ; la question lui a été posée, il a répondu « fusionne et déploie »). La branche et
 > `main` sont au même commit.
 > ⮕ Le déploiement Netlify part du webhook du push, sans commande (`DEPLOY.md` §1).
-> ⚠ **L'état du déploiement n'a PAS été lu au moment d'écrire ces lignes** — elles sont écrites avant le push, dans
-> le commit qu'il emporte. Le geste qui tranche reste le numéro en bas de page sur l'iPad : **1.123.12, build
-> `0907-0733`**.
+> ▣ **DÉPLOIEMENT VÉRIFIÉ PAR L'API NETLIFY** (après le push, d'où ce second commit) : deploy
+> `6a9ea3804c71af0008bf7f6c`, contexte production, état `ready`, publié à 11 h 44 13 UTC sur le commit `3b309ab9`
+> exact, en 11 s, `error_message` nul, alias `app.codexnumeris.org` ; 14 fichiers, 2 redirections, 9 règles
+> d'en-tête, aucune faute.
+> ⚠ **La PAGE SERVIE n'a pas été lue** : le proxy sortant de ce conteneur refuse `app.codexnumeris.org` (même limite
+> que les deux sessions précédentes). « En ligne » repose sur l'état Netlify, pas sur une lecture. Le geste qui
+> tranche reste le numéro en bas de page sur l'iPad : **1.123.12, build `0907-0733`**.
 > ⚠ **Comme la veille, `main` LOCAL était en retard sur `origin/main`** (34 commits, ancêtre pur, zéro commit propre :
 > la ref date du clonage du conteneur). D'où le `git branch -f main origin/main` ci-dessus, AVANT toute fusion — un
 > `git merge main` naïf serait faux. C'est la deuxième session de suite qui le mesure : ce n'est pas un accident,
