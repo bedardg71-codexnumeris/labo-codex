@@ -15,8 +15,15 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-↻ **7 septembre 2026 (Claude Code) — 1.123.11 PRÊTE, PAS ENCORE EN LIGNE** (build `0906-2039` ; même branche
-`claude/alignment-map-zoom-fluidity-9itj9c`, poussée, non fusionnée : la fusion et le déploiement restent à faire).
+↻ **1.123.11 EN LIGNE** (build `0906-2039`, commit `d50ed45d`). **Déploiement VÉRIFIÉ par l'API Netlify** :
+`6a9e0c6912ce270008829994`, contexte production, état `ready`, publié à 00 h 59 UTC sur ce commit exact, en 8 s, sans
+erreur, alias `app.codexnumeris.org` ; 17 fichiers, 2 redirections et 9 règles d'en-tête déployés sans faute.
+⚠ **La PAGE SERVIE n'a pas été lue** : le proxy sortant de ce conteneur refuse `app.codexnumeris.org` comme les URL
+`netlify.app` (`connect_rejected`, horodaté sur la tentative). « En ligne » repose donc sur l'état Netlify, pas sur une
+lecture — **le geste qui tranche reste le numéro en bas de page**.
+⚠ **Repère de dates, pour lever une ambiguïté qui traîne** : le script de release horodate en heure de Toronto (d'où le
+build `0906`, soit le 6 septembre à 20 h 39), la session compte en UTC (d'où « 7 septembre »). Les deux nomment le même
+moment.
 **Ce qui change pour quelqu'un qui lit le Suivi sur iPad** : les bulles blanches des barres de dégradés se saisissent au
 doigt. Une bulle fait dix pixels et elle bouge sans arrêt : la toucher tenait de la chance, et le journal du rapport le
 montre — cinq touchers de suite sur le fond de la barre, pas un seul sur une bulle. Deux choses l'empêchaient. La cible
@@ -30,8 +37,8 @@ Grégoire ; le conteneur n'a pas WebKit. **Le geste réel sur l'iPad Air reste d
 ▣ **Ce que le travail a appris, et qui vaut d'être dit** : un des six essais était MENTEUR — il passait même quand on
 cassait ce qu'il prétendait garder. C'est en essayant de le faire rougir qu'on l'a vu.
 
-↻ **7 septembre 2026 (Claude Code) — 1.123.10 PRÊTE, PAS ENCORE EN LIGNE** (build `0906-2017` ; branche
-`claude/alignment-map-zoom-fluidity-9itj9c`, poussée, non fusionnée dans `main` : la fusion et le déploiement restent à faire).
+↻ **1.123.10 EN LIGNE** (build `0906-2017`, commit `cf73a83d`), emportée par le déploiement de 1.123.11 ci-dessus —
+les deux lots de la soirée sont partis ensemble.
 **Ce qui change pour quelqu'un qui planifie sur iPad** : pincer pour agrandir ou réduire la carte d'alignement (Conception) ne
 devrait plus accrocher. Trois choses se battaient dans ce geste. Deux mécanismes de zoom tournaient en même temps sur le même
 pincement — l'un recentrait sur le milieu de l'écran, l'autre sur l'endroit pincé — et se contredisaient à chaque image. Chacun

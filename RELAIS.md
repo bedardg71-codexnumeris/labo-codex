@@ -7,10 +7,20 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026 : DEUX RETOURS IPAD SUR LA MÊME BRANCHE (1.123.10 ET 1.123.11, #539 ET #540) — ⚠ RIEN N'EST SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026 : DEUX RETOURS IPAD (1.123.10 ET 1.123.11, #539 ET #540) — TOUT EST SUR `main` ET EN LIGNE
 
-> ⚠ **LES DEUX LOTS VIVENT SUR `claude/alignment-map-zoom-fluidity-9itj9c`, poussée.** `main` reste à `634f5143`
-> / 1.123.9 : une session qui en part NE VERRA NI L'UN NI L'AUTRE. **La fusion et le déploiement restent à faire.**
+> ✅ **RIEN N'ATTEND SUR UNE BRANCHE.** `claude/alignment-map-zoom-fluidity-9itj9c` a été fusionnée dans `main` en
+> FAST-FORWARD (`634f5143` → `d50ed45d`) et poussée. La branche et `main` sont au même commit.
+> ▣ **DÉPLOIEMENT VÉRIFIÉ PAR L'API NETLIFY** : `6a9e0c6912ce270008829994`, contexte production, état `ready`,
+> publié à 00 h 59 UTC sur le commit `d50ed45d` exact, en 8 s, sans erreur, alias `app.codexnumeris.org` ;
+> 17 fichiers, 2 redirections, 9 règles d'en-tête, aucune faute. Déclenché par le webhook du push, comme le
+> décrit `DEPLOY.md` §1.
+> ⚠ **La PAGE SERVIE n'a pas été lue** : le proxy sortant de ce conteneur refuse `app.codexnumeris.org` et les URL
+> `netlify.app` (`connect_rejected`, horodaté sur la tentative). « En ligne » repose sur l'état Netlify, pas sur une
+> lecture de la page — le geste qui tranche reste le numéro en bas de page.
+> ⚠ **Repère de dates** : le script de release horodate en heure de Toronto (build `0906` = 6 septembre, 20 h 39),
+> la session compte en UTC (« 7 septembre »). Même moment, deux comptes.
+>
 > Le détail du premier lot (#539, le pincement de la carte d'alignement) est dans la section suivante ; celle-ci
 > porte le second.
 >
@@ -47,7 +57,8 @@
 >
 > ▣ **VERDICT** : Vitest 500 / 5 529 verts ; la spec des bulles 6/6 sous **Chromium** (config jetable, hors dépôt).
 > **WebKit reste injouable ici** (#456). ⚠ **La saisie au doigt ne se juge pas au banc** : Chromium n'a pas les
-> doigts de Grégoire. **Les DEUX lots attendent son iPad**, et c'est le seul reste dû sur cette branche.
+> doigts de Grégoire. **Les DEUX lots attendent son iPad, et c'est le SEUL reste dû** — le code est en ligne, il
+> peut les éprouver.
 >
 > ▣ **DEUX GESTES À LUI DEMANDER**, en une phrase chacun : dans Conception, pincer la carte et dire si ça suit les
 > doigts ; dans Suivi › Groupe, toucher une bulle d'une barre de dégradé et dire si elle se laisse prendre.
