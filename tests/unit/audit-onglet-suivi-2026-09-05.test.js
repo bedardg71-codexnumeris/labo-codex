@@ -416,7 +416,14 @@ describe('A · les présences saisies deviennent l\'indice A', () => {
         const modifie = b.win.modifierNotesPresence(DA.ASSIDU, '2026-01-19', 'note du cours actif');
         const fiches = b.store.test_presences.filter(p => p.da === DA.ASSIDU && p.date === '2026-01-19').map(p => [p.coursId, p.notes]);
         // N6 : le motif de congé passe par echapperHtml.
-        const n6 = /compteur\.innerHTML = `[^`]*\$\{echapperHtml\(message\)\}/.test(src);
+        // #782 (7 sept. 2026) — MESURE MISE À JOUR, la valeur a changé pour une
+        // bonne raison. Le 5 sept., N6 vérifiait que le message du compteur passait
+        // par `echapperHtml()` avant d'entrer dans `innerHTML`. Ce chemin n'existe
+        // plus : le message est posé en `textContent`, où l'injection de HTML est
+        // impossible par construction plutôt que traitée. On mesure donc l'invariant
+        // (le message n'est jamais du HTML), pas l'ancienne forme de sa défense.
+        const n6 = /zoneMessage\.textContent = message/.test(src)
+                   && !/compteur\.innerHTML\s*=/.test(src);
         // Le constat resté hors du JSON de mai : parseInt au rendu initial, parseFloat à l'édition.
         const initial = b.interne['saisie-presences.js'].obtenirClasseSaisiePeriodes(0.5, 2, false);
         const live = elementDom({ value: '0.5', dataset: {} }); b.win.appliquerCodeCouleurPeriodes(live, 2);

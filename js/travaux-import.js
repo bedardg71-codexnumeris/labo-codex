@@ -151,7 +151,7 @@
             // fabriquent deux documents la ou il n'y en a qu'un : pas
             // d'assemblage multi-pages, et un faux doublon a la confirmation
             // d'import. Le suffixe n'est retire que s'il RESTE un nom de
-            // production apres coup — « 9000200_p2 » sans titre garde le sien.
+            // production apres coup — « 9000058_p2 » sans titre garde le sien.
             const matchPage = resultat.nomProduction.match(SUFFIXE_PAGE);
             if (matchPage) {
                 const resteProduction = resultat.nomProduction.slice(0, matchPage.index).replace(/[\s\-_]+$/, '').trim();

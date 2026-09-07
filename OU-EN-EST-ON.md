@@ -15,6 +15,39 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.124.2 — LE REPORT VERS LÉA EST RETIRÉ** (build `0907-1011`). Grégoire l'a abandonné le jour même de
+sa livraison : « Ce que tu as créé ne fait que trier l'information en la préparant pour Léa. Il s'agit d'un
+transfert manuel des informations. Si on ne peut pas faire un copier/coller, il n'y a pas vraiment d'intérêt,
+car aucun gain de temps. » L'application revient à son comportement d'avant : le panneau, son bouton et tout
+son code sont partis, sans rien laisser en sommeil.
+▣ **Ce que le travail a appris, et c'est la vraie leçon de la journée.** Le module faisait exactement ce qui
+avait été demandé, et il ne servait à rien. Trois questions avaient été posées avant d'écrire une ligne de
+code, et elles avaient écarté deux fausses pistes. Aucune n'a demandé : une fois le tri fait, combien de temps
+reste-t-il vraiment à gagner ? L'outil agissait sur la lecture et le calcul ; le coût était dans la saisie.
+**Ce n'est pas une erreur d'exécution, c'est une question qui manquait au cadrage.**
+**Ce qui reste de la journée** : la barre de boutons de la saisie n'a plus qu'une seule définition, et ne peut
+plus effacer ce qu'on lui ajoute. Et une question de Grégoire est tranchée : c'est l'enseignant qui juge si un
+rattrapage reprend une absence — rien à automatiser là.
+⚠ **Ce qui devient prioritaire** : il signale que l'enregistrement des présences est instable, qu'il a dû
+saisir et enregistrer plusieurs fois. Ce n'est pas reproduit, et trois mesures pointent vers une écriture qui
+n'attend pas d'être confirmée avant un rechargement. Trois questions lui sont posées avant de toucher au code.
+
+↻ **1.124.1 EN LIGNE** (build `0907-0938`, commit `a64164cc`). **Déploiement VÉRIFIÉ par l'API Netlify** :
+`6a9ebeee3b7291000831720a`, production, `ready`, publié à 13 h 41 UTC sur ce commit exact, en 8 s, sans erreur.
+**Ce qui change** : le bouton « Reporter dans Léa », livré le matin même, **n'apparaissait nulle part**. Grégoire
+l'a constaté sur son Mac et sur son iPad. La barre de boutons de la saisie des présences existait en deux
+exemplaires — un dans la page, un second reconstruit par le programme — et le second effaçait le premier dès
+qu'une séance s'affichait. Le bouton neuf, ajouté au premier seulement, disparaissait avant d'avoir pu servir.
+Il n'y a plus qu'une seule barre. **Vérifié comment** : quatre mutations du code font rougir l'essai qui la
+garde, et le bouton a été retrouvé dans un vrai navigateur en passant cette fois par l'affichage réel d'une
+séance. Vitest 502 fichiers / 5 553 verts. **Ce qui n'est PAS vérifié** : Safari et l'iPad — la liste de
+vérifications reprend à sa rangée 2.1a.
+▣ **Ce que le travail a appris, et qui vaut d'être dit deux fois.** L'essai censé garder cette barre nommait
+trois boutons : il est resté vert pendant que le quatrième disparaissait. Il gardait des exemples, pas la règle.
+Et l'essai qui l'a remplacé était, au premier jet, **incapable d'échouer** — il sautait sa propre vérification en
+silence. C'est en essayant de le casser qu'on l'a vu. Deux essais menteurs dans la même journée, tous deux
+attrapés par le même geste : essayer de les faire rougir.
+
 ↻ **1.124.0 FUSIONNÉE DANS `main` ET POUSSÉE** (build `0907-0834`, commit `736928bb`), sur l'autorisation de
 Grégoire. **Déploiement VÉRIFIÉ par l'API Netlify** : `6a9eb302a9b96b0008b2c867`, contexte production, état `ready`,
 publié à 12 h 50 UTC sur ce commit exact, en 12 s, sans erreur, alias `app.codexnumeris.org`.
