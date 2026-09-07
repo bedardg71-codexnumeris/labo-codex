@@ -9,14 +9,14 @@
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026, MATIN : LA PERFORMANCE AFFICHÉE À ZÉRO (1.123.12, #775 / SUIVI-BUGS #541)
 
-> ⏳ **LE TRAVAIL ATTEND SUR `claude/performances-zero-display-bug-uxd741`, POUSSÉE MAIS NON FUSIONNÉE.** La session
-> était bornée par son harnais à sa seule branche désignée (« ne jamais pousser sur une autre branche sans permission
-> explicite ») : la fusion vers `main` et donc le déploiement **restent à autoriser par Grégoire**. Le commit est
-> `7d0e2d9c`, exactement UN commit devant `origin/main` (`6c94c163`) — la fusion sera un fast-forward pur, sans
-> conflit possible.
-> ⮕ **Le geste, quand il est autorisé** : `git fetch origin main && git branch -f main origin/main &&
-> git checkout main && git merge --ff-only claude/performances-zero-display-bug-uxd741 && git push origin main`.
-> Le déploiement Netlify part ensuite du webhook, sans commande (`DEPLOY.md` §1).
+> ✅ **RIEN N'ATTEND SUR UNE BRANCHE.** `claude/performances-zero-display-bug-uxd741` a été fusionnée dans `main`
+> en FAST-FORWARD et poussée, **sur l'autorisation explicite de Grégoire** (le harnais de cette session bornait les
+> pushes à la branche désignée ; la question lui a été posée, il a répondu « fusionne et déploie »). La branche et
+> `main` sont au même commit.
+> ⮕ Le déploiement Netlify part du webhook du push, sans commande (`DEPLOY.md` §1).
+> ⚠ **L'état du déploiement n'a PAS été lu au moment d'écrire ces lignes** — elles sont écrites avant le push, dans
+> le commit qu'il emporte. Le geste qui tranche reste le numéro en bas de page sur l'iPad : **1.123.12, build
+> `0907-0733`**.
 > ⚠ **Comme la veille, `main` LOCAL était en retard sur `origin/main`** (34 commits, ancêtre pur, zéro commit propre :
 > la ref date du clonage du conteneur). D'où le `git branch -f main origin/main` ci-dessus, AVANT toute fusion — un
 > `git merge main` naïf serait faux. C'est la deuxième session de suite qui le mesure : ce n'est pas un accident,
