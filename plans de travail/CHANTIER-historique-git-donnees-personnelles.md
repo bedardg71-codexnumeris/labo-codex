@@ -11,7 +11,58 @@ d'une session web et **n'existe plus** : tout est à refaire, et tout est ici.
 
 ---
 
-## 0. CE QUI EST DÉJÀ FAIT — ne pas le refaire
+## 0. CONSIGNE D'EXÉCUTION — à lire EN ENTIER avant la première commande
+
+> **Écrite le 7 septembre 2026 au soir, à la demande de Grégoire, pour une reprise À FROID.**
+> La session qui exécute n'a pas la conversation d'origine et n'en a pas besoin.
+> Le pendant côté Grégoire est `plans de travail/PORTES-TERRAIN-2026-09-07-purge-historique.md`,
+> et son artefact : https://claude.ai/code/artifact/75c9b6eb-667a-4c26-96e5-43c99656dd8d
+
+### Les cinq arrêts durs — aucun ne se contourne
+
+1. ⛔ **Le `git push --force` n'a lieu que sur un signal EXPLICITE de Grégoire, donné DANS la
+   session qui exécute.** Un accord d'une session précédente ne vaut pas : il a tranché la
+   portée en septembre, pas la date. Si le signal n'est pas là, on prépare tout et on s'arrête.
+2. ⛔ **Le fichier de listes ne devient JAMAIS un fichier suivi.** Ni `git add`, ni copié dans un
+   document versionné, ni recopié dans un message. Il vit hors du dépôt et meurt avec la session.
+   Le 7 sept., ce chantier a dû retirer de son propre plan les 19 DA qu'il transportait : ne pas
+   refaire ça.
+3. ⛔ **Aucune vérification sans TÉMOIN.** Une vérification qui ne sait pas rendre « différent »
+   ne prouve rien. La plus importante du chantier avait d'abord été écrite comme une tautologie
+   (§5). Chaque contrôle du §5 porte son témoin : l'exécuter aussi, et le dire.
+4. ⛔ **La sauvegarde doit SORTIR du conteneur.** Le premier travail préparé est mort avec lui
+   (bundle et copie réécrite). Tant que Grégoire n'a pas le bundle sur son Mac, on ne déclenche
+   rien.
+5. ⛔ **Si un contrôle du §5 échoue, on s'arrête et on rapporte.** On ne pousse pas « pour voir ».
+
+### L'ordre, et rien d'autre
+
+| # | Geste | Où c'est écrit |
+|---|---|---|
+| 1 | Lire ce document en entier, puis la porte terrain jumelle | — |
+| 2 | **Recevoir le fichier de listes** de Grégoire, hors du dépôt | §1, format ci-dessous |
+| 3 | `git fetch --unshallow` — **le clone du conteneur ne voit que ~60 commits sur 4625** | §4.1 |
+| 4 | Mesure d'ENTRÉE : le balayage des DA sur le dépôt d'origine (c'est le témoin du §5 C) | §5 C |
+| 5 | Bundle de sauvegarde → **le faire descendre chez Grégoire** | §4.2 |
+| 6 | Travailler sur une COPIE, jamais sur le clone de session | §4.3 |
+| 7 | Générer les deux fichiers de règles depuis sa liste | §4.4 |
+| 8 | Réécrire (`git filter-repo`) | §4.5 |
+| 9 | Les quatre vérifications A, B, C, D — **avec leurs témoins** | §5 |
+| 10 | **Demander son signal.** S'il ne vient pas : rapporter et s'arrêter | §6 |
+| 11 | Force-push, puis suppression des 128 branches distantes sauf `main` | §6 |
+| 12 | Lui dire ce qui reste dû : recloner, et la question du support GitHub | §6, §7 |
+
+### Ce qu'il faut lui redemander avant de déclencher — même s'il a déjà répondu
+
+- **A-t-il du travail non commité dans son clone ?** La manœuvre le rend irréconciliable.
+- **Confirme-t-il encore la perte des 65 branches non fusionnées ?** Il l'a acceptée le
+  7 septembre ; du temps a pu passer, et c'est une perte sèche.
+- **Veut-il que le chantier tourne depuis son Mac plutôt que depuis un conteneur ?** C'est là
+  que vit sa liste, et c'est là qu'il devra recloner de toute façon.
+
+---
+
+## 0 bis. CE QUI EST DÉJÀ FAIT — ne pas le refaire
 
 **Commit `41fe67a8` (7 sept. 2026) : l'ARBRE COURANT est propre.** Les identités réelles qui
 traînaient dans des fixtures de test et dans l'aide de l'application en ont été retirées.
@@ -203,9 +254,25 @@ Archives/Bugs/
 Une ligne par DA réel, chacun vers un substitut synthétique de même forme — c'est ce qui
 préserve la lisibilité des diffs anciens au lieu de les trouer :
 
+**Le format attendu du fichier de Grégoire** — une ligne par élève, trois colonnes séparées
+par une tabulation, sans en-tête. Les colonnes vides sont tolérées (une ligne peut n'avoir
+qu'un DA, ou qu'un nom) :
+
+```
+2570101	Tremblay	Ariane
+2570107	Roy-Gagnon	Félix
+	Bouchard	Maude          ← un élève dont le DA est inconnu : le nom seul suffit
+```
+
+⚠ **Fichier hors dépôt, jamais `git add`é.** Emplacement suggéré : `~/purge-identites.txt`.
+Il doit couvrir **toutes les cohortes présentes dans l'historique** — A2024 (56 élèves d'après
+le §1), et les trimestres exportés d'octobre à décembre 2025. Un élève absent de la liste
+survivra à la purge sans que rien ne le signale : **c'est la seule pièce que la machine ne peut
+pas deviner.**
+
 ```bash
-# depuis le fichier hors dépôt fourni par Grégoire (un DA à 7 chiffres par ligne)
-awk 'NF {printf "%s==>90000%02d\n", $1, NR}' ~/purge-identites.txt > /chemin/hors-du-depot/regles-texte.txt
+# depuis le fichier hors dépôt fourni par Grégoire (colonne 1 : le DA)
+awk -F'\t' '$1 ~ /^[0-9]{7}$/ {printf "%s==>90000%02d\n", $1, NR}' ~/purge-identites.txt > /chemin/hors-du-depot/regles-texte.txt
 wc -l /chemin/hors-du-depot/regles-texte.txt   # doit rendre 19 pour les DA connus au 7 sept.
 ```
 
