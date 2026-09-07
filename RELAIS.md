@@ -7,6 +7,53 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026 : DEUX RETOURS IPAD SUR LA MÊME BRANCHE (1.123.10 ET 1.123.11, #539 ET #540) — ⚠ RIEN N'EST SUR `main`
+
+> ⚠ **LES DEUX LOTS VIVENT SUR `claude/alignment-map-zoom-fluidity-9itj9c`, poussée.** `main` reste à `634f5143`
+> / 1.123.9 : une session qui en part NE VERRA NI L'UN NI L'AUTRE. **La fusion et le déploiement restent à faire.**
+> Le détail du premier lot (#539, le pincement de la carte d'alignement) est dans la section suivante ; celle-ci
+> porte le second.
+>
+> ▣ **#540 (1.123.11, build `0906-2039`) — SAISIR LES BULLES D'ÉLÈVE AU DOIGT.** Rapport
+> `BUG_grégoire_2026-09-07_20-06-02.txt`, iPad Air, Safari 26.6, Suivi › Groupe : « j'ai du mal à saisir les
+> bulles blanches dans les barres de dégradés ». Son journal d'actions vaut mesure : CINQ touchers de suite
+> atterrissent sur `.barre-indicateur`, le fond de la barre, pas un seul sur une bulle.
+>
+> ▣ **DEUX CAUSES** : (a) `.barre-etudiant` fait 10 px quand la règle du projet demande 44 px de cible tactile
+> (skill `design-interface` §5), et `float-vertical` la fait OSCILLER sans arrêt ; (b) elle portait un `:hover`
+> sans garde — sur iPad, un élément qui porte un style `:hover` fait du PREMIER toucher un survol simulé, la
+> bulle grossit et le clic ne part qu'au toucher suivant.
+>
+> ⮕ **CE QUI A ÉTÉ ÉCARTÉ, et c'est ce qu'il faut retenir avant de « simplifier » ce code** : donner 44 px de
+> zone sensible à chaque bulle, le réflexe habituel. Vingt-huit élèves sur une barre d'environ 700 px se tiennent
+> à 25 px les uns des autres EN MOYENNE, et bien moins là où la distribution se resserre : des zones de 44 px s'y
+> recouvriraient de part en part, et le toucher irait à la bulle du DESSUS — celle que l'empilement désigne, pas
+> celle qu'on vise. La cible de 44 px est obtenue par DISTANCE au doigt (`bulleLaPlusProche`, rayon 22 px), bornée
+> à la barre touchée, sur la position ANIMÉE du moment, sous pointeur grossier seulement.
+>
+> ▣ **TROIS règles de survol passent sous `@media (hover: hover)`** : sombre, « sans évaluation », **et mode
+> clair**. ⚠ La troisième a été trouvée par le test, 12 000 lignes plus bas dans la feuille.
+>
+> ▣ **PREUVE, à deux étages** : `tests/unit/sentinelle-bulles-au-doigt.test.js` (19 tests, l'arbitrage) et
+> `tests/integration/bulles-au-doigt-540.spec.js` (6 essais, le CHEMIN RÉEL — contexte tactile, vrai gestionnaire,
+> `touchscreen.tap`), dont l'envers : « sans doigt, rien ne change pour la souris ». **Aucune spec n'existait sur
+> le Suivi de groupe ni sur les bulles : celle-ci est la première.** Elle n'a jamais tourné sous WebKit — à jouer
+> sur le Mac.
+>
+> ⚠⚠ **UN ESSAI MENTEUR A ÉTÉ PRIS PAR LE BREAK-TEST, et ça vaut la leçon** : « une barre voisine ne vole pas le
+> toucher » plaçait la barre voisine 80 px plus bas, donc sa bulle restait hors du rayon de tolérance quoi qu'il
+> arrive — il restait VERT même en étendant la recherche à tout le document. Corrigé, il rougit. 10 mutations au
+> total sur ce lot, toutes rouges.
+>
+> ▣ **VERDICT** : Vitest 500 / 5 529 verts ; la spec des bulles 6/6 sous **Chromium** (config jetable, hors dépôt).
+> **WebKit reste injouable ici** (#456). ⚠ **La saisie au doigt ne se juge pas au banc** : Chromium n'a pas les
+> doigts de Grégoire. **Les DEUX lots attendent son iPad**, et c'est le seul reste dû sur cette branche.
+>
+> ▣ **DEUX GESTES À LUI DEMANDER**, en une phrase chacun : dans Conception, pincer la carte et dire si ça suit les
+> doigts ; dans Suivi › Groupe, toucher une bulle d'une barre de dégradé et dire si elle se laisse prendre.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026 : LE PINCEMENT DE LA CARTE D'ALIGNEMENT SUR IPAD (1.123.10, #539) — ⚠ SUR UNE BRANCHE, PAS SUR `main`
 
 > ⚠ **LE TRAVAIL N'EST PAS SUR `main`.** Il vit sur `claude/alignment-map-zoom-fluidity-9itj9c`, poussée. **La fusion vers `main`

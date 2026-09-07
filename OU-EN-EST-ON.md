@@ -15,6 +15,21 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **7 septembre 2026 (Claude Code) — 1.123.11 PRÊTE, PAS ENCORE EN LIGNE** (build `0906-2039` ; même branche
+`claude/alignment-map-zoom-fluidity-9itj9c`, poussée, non fusionnée : la fusion et le déploiement restent à faire).
+**Ce qui change pour quelqu'un qui lit le Suivi sur iPad** : les bulles blanches des barres de dégradés se saisissent au
+doigt. Une bulle fait dix pixels et elle bouge sans arrêt : la toucher tenait de la chance, et le journal du rapport le
+montre — cinq touchers de suite sur le fond de la barre, pas un seul sur une bulle. Deux choses l'empêchaient. La cible
+était douze fois trop petite pour un doigt. Et comme elle réagissait au survol, le premier toucher servait de survol pour
+rien : il fallait toucher deux fois. Maintenant, un toucher à côté saisit la bulle la plus proche, et c'est bien la plus
+proche du doigt qui est prise, pas celle qui se trouve au-dessus des autres. **À la souris, rien ne change.**
+**Vérifié comment** : dix-neuf essais sur l'arbitrage, et six essais sur le vrai écran avec un vrai doigt simulé, dont
+celui qui vérifie l'envers — sans doigt, la souris garde son geste. Dix mutations du code les font rougir. Vitest 500
+fichiers / 5 529 verts. **Ce qui n'est PAS vérifié** : tout cela est mesuré sous Chromium, qui n'a pas les doigts de
+Grégoire ; le conteneur n'a pas WebKit. **Le geste réel sur l'iPad Air reste dû.**
+▣ **Ce que le travail a appris, et qui vaut d'être dit** : un des six essais était MENTEUR — il passait même quand on
+cassait ce qu'il prétendait garder. C'est en essayant de le faire rougir qu'on l'a vu.
+
 ↻ **7 septembre 2026 (Claude Code) — 1.123.10 PRÊTE, PAS ENCORE EN LIGNE** (build `0906-2017` ; branche
 `claude/alignment-map-zoom-fluidity-9itj9c`, poussée, non fusionnée dans `main` : la fusion et le déploiement restent à faire).
 **Ce qui change pour quelqu'un qui planifie sur iPad** : pincer pour agrandir ou réduire la carte d'alignement (Conception) ne
