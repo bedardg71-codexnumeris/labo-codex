@@ -7,6 +7,53 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026, MIDI : REPORTER LES ABSENCES DANS LÉA (1.124.0)
+
+> ⏳ **UN LOT ATTEND SUR UNE BRANCHE.** `claude/bokadex-lea-presence-transfer-e6ynxi`, **1 commit devant
+> `origin/main`** (`1796ead6`), release `minor` **1.124.0**, build `0907-0834`.
+> ⛔ **La fusion n'a PAS été faite, et ce n'est pas un oubli** : le harnais de cette session borne ses pushes à sa
+> branche désignée, et l'autorisation de fusionner n'a pas été demandée pour ce lot-ci. **Elle reste à demander à
+> Grégoire.** Tant qu'elle n'a pas lieu, son clone est en 1.123.12 et le panneau ne lui est pas jugeable.
+> ⮕ Geste, une fois l'autorisation obtenue : `git fetch origin && git merge --ff-only origin/claude/bokadex-lea-presence-transfer-e6ynxi`
+> depuis `main`, puis push. **Vérifier le hash au moment de le faire plutôt que de recopier celui-ci** — c'est ce
+> défaut de trace qui a fait pointer le relais précédent sur un commit inexistant.
+>
+> **CE QUE LE LOT CONTIENT** — un panneau « Reporter dans Léa » dans la saisie des présences (`js/presences-transfert.js`,
+> module neuf, **lecture seule, aucune écriture nulle part**). Labo Codex compte les PRÉSENCES, Léa réclame les
+> ABSENCES : le panneau inverse pour la séance affichée et ne montre que les élèves à reporter (trois ou quatre sur
+> vingt-huit), DA en tête. Il réutilise `construireModeleRapportPresences` (#485) plutôt que de refaire son calcul.
+>
+> **TROIS CAS ARBITRÉS AVEC GRÉGOIRE, ET C'EST LE CŒUR DU LOT** : (1) un élève sans aucune saisie n'est JAMAIS
+> proposé comme absent — il part dans une liste séparée, parce que Codex ne peut pas distinguer « absent » de
+> « séance saisie à moitié », et qu'un faux positif atterrirait dans un dossier officiel ; (2) une présence
+> facultative (rattrapage RàI, **#747**) est SIGNALÉE, jamais déduite — la règle est institutionnelle, pas
+> technique ; (3) un retard est la simple différence, Léa mettant absence et retard dans le même champ.
+>
+> **CE QUI A ÉTÉ MESURÉ, PAS AFFIRMÉ** : Vitest **502 fichiers / 5551 tests verts** (16 neufs) ·
+> **5 break-tests, 5 ROUGES** sur l'arbre final, témoin vert avant/après, arbre restauré à l'identique ·
+> contrôle XSS au navigateur avec nom et DA hostiles (0 script, 0 img, HTML échappé, témoin `&lt;img src=x`) ·
+> contrastes mesurés dans les deux modes (badge 15,9:1 clair / 7,2:1 sombre ; chiffres 17,1:1 / 10,0:1) ·
+> rendu capturé dans Chromium, deux modes. ⛔ **Playwright non lançable** (WebKit introuvable, #456) : verdict CI.
+>
+> **CE QUI A ÉTÉ ÉCARTÉ, ET POURQUOI** — l'idée de départ de Grégoire était de coller une colonne dans Léa. Mesuré
+> sur sa page réelle : les champs sont des `<input>` indépendants, **aucun collage groupé n'est possible** (il a
+> testé, tout atterrit dans une seule case, même séparé par des points-virgules), et le menu « Données - Importer /
+> Partager » de Léa ne couvre pas les absences. Un bookmarklet remplissant les cases était faisable — le test de
+> faisabilité est PASSÉ sur sa page (`javascript:` non bloqué, 28 champs trouvés, DA présent dans chaque ligne) —
+> et il l'a écarté lui-même : « ça risque d'être trop compliqué » pour ses testeurs, qui devraient l'installer à la
+> main. ⮕ Si un groupe tourne à douze absents par séance, la question se rouvre (porte terrain §3.3).
+>
+> **DÛ À GRÉGOIRE** : `plans de travail/PORTES-TERRAIN-2026-09-07-report-lea.md` — courte (règle 1 du skill : tout
+> ce qu'une machine pouvait juger l'a été), **rien d'irréversible**, et **l'artefact jumeau reste à publier par
+> Cowork**, qui ne lit pas `.claude/`. Trois décisions y attendent son verdict, dont #747.
+>
+> **INSCRITS, PAS CORRIGÉS** : **#778** (`.badge-sa` s'appuie sur `--orange-clair` / `--orange-fonce`, qui
+> n'existent nulle part dans `styles.css` : le badge des Services adaptés est sans couleur depuis toujours —
+> trouvé en calquant une classe dessus) · **#779** (double attribut `class` sur `#date-cours`) · **#780**
+> (l'inversion présences→absences existe à deux endroits, ce panneau et le PDF #485). **Dernier ID : #780.**
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026, MATIN : LA PERFORMANCE AFFICHÉE À ZÉRO (1.123.12, #775 / SUIVI-BUGS #541)
 
 > ✅ **RIEN N'ATTEND SUR UNE BRANCHE.** `claude/performances-zero-display-bug-uxd741` a été fusionnée dans `main`
