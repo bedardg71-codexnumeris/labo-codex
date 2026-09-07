@@ -15,8 +15,10 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-↻ **1.123.12 POUSSÉE SUR `main`** (build `0907-0733`), donc en cours de déploiement — le numéro en bas de page
-tranche. **Ce qui change pour quelqu'un qui ouvre le Suivi d'un groupe en début
+↻ **1.123.12 EN LIGNE** (build `0907-0733`, commit `3b309ab9`). **Déploiement VÉRIFIÉ par l'API Netlify** :
+`6a9ea3804c71af0008bf7f6c`, contexte production, état `ready`, publié à 11 h 44 UTC sur ce commit exact, en 11 s,
+sans erreur, alias `app.codexnumeris.org`. ⚠ **La page servie n'a pas été lue** (le proxy du conteneur refuse le
+domaine) — le geste qui tranche reste le numéro en bas de page. **Ce qui change pour quelqu'un qui ouvre le Suivi d'un groupe en début
 de trimestre** : la carte des performances ne dit plus que tout le monde est en difficulté quand la note du cours
 n'existe pas encore. Une pratique par standards construit sa note à partir de plusieurs résultats : tant qu'elle n'en
 a pas assez, il n'y a pas de note — et ce n'est pas la même chose qu'une note de zéro. L'application le savait
