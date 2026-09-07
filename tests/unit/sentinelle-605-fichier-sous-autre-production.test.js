@@ -40,8 +40,8 @@ const PROD_ARTEFACTS = Array.from({ length: 10 }, (_, i) => ({
 }));
 const PROD_PORTFOLIO = { id: 'p_folio', titre: 'Portfolio de fin de session', type: 'portfolio' };
 
-const YACINE = { da: '9000200', nom: 'Breton', prenom: 'Yacine', groupe: '00007' };
-const LUDOVIC = { da: '9000193', nom: 'Moreau', prenom: 'Ludovic', groupe: '00007' };
+const YANN = { da: '9000058', nom: 'Bourdages', prenom: 'Yann', groupe: '00007' };
+const LOU = { da: '9000200', nom: 'Mailhot', prenom: 'Lou', groupe: '00007' };
 
 function charger(fichiers, productions) {
     return chargerScript('js/liste-evaluations.js', {
@@ -81,24 +81,24 @@ const avertissements = (lignes) => lignes.filter(l => l.fichierAutreProduction);
 
 describe('#605 · le cas de Grégoire, reproduit', () => {
     const PRODUCTIONS = [PROD_PORTRAIT, ...PROD_ARTEFACTS];
-    const FICHIER_PORTRAIT = { id: 'ft1', etudiantDA: YACINE.da, productionId: PROD_PORTRAIT.id };
+    const FICHIER_PORTRAIT = { id: 'ft1', etudiantDA: YANN.da, productionId: PROD_PORTRAIT.id };
 
     it('un travail remis sur onze ne fabrique AUCUN avertissement', () => {
-        const { lignes } = lignesAvecStatut([FICHIER_PORTRAIT], PRODUCTIONS, [YACINE]);
+        const { lignes } = lignesAvecStatut([FICHIER_PORTRAIT], PRODUCTIONS, [YANN]);
         expect(lignes).toHaveLength(11);
         expect(avertissements(lignes)).toEqual([]);
     });
 
     it('le travail remis reste visible à sa place, avec son statut', () => {
         // Le point qui rend l'avertissement superflu : le fichier a sa ligne.
-        const { lignes } = lignesAvecStatut([FICHIER_PORTRAIT], PRODUCTIONS, [YACINE]);
+        const { lignes } = lignesAvecStatut([FICHIER_PORTRAIT], PRODUCTIONS, [YANN]);
         const sienne = lignes.find(l => l.productionId === PROD_PORTRAIT.id);
         expect(sienne.statutWorkflow).toBe('importe');
     });
 
     it('un élève sans aucun fichier n\'a rien non plus', () => {
-        const { lignes } = lignesAvecStatut([FICHIER_PORTRAIT], PRODUCTIONS, [YACINE, LUDOVIC]);
-        const deLudovic = lignes.filter(l => l.da === LUDOVIC.da);
+        const { lignes } = lignesAvecStatut([FICHIER_PORTRAIT], PRODUCTIONS, [YANN, LOU]);
+        const deLudovic = lignes.filter(l => l.da === LOU.da);
         expect(deLudovic).toHaveLength(11);
         expect(avertissements(deLudovic)).toEqual([]);
     });
@@ -108,8 +108,8 @@ describe('#605 · le message subsiste là où il est la seule trace du fichier',
     const PRODUCTIONS = [PROD_PORTRAIT, ...PROD_ARTEFACTS, PROD_PORTFOLIO];
 
     it('un fichier posé sur un portfolio est signalé — le portfolio n\'a pas de ligne', () => {
-        const fichiers = [{ id: 'ft2', etudiantDA: YACINE.da, productionId: PROD_PORTFOLIO.id }];
-        const { lignes } = lignesAvecStatut(fichiers, PRODUCTIONS, [YACINE]);
+        const fichiers = [{ id: 'ft2', etudiantDA: YANN.da, productionId: PROD_PORTFOLIO.id }];
+        const { lignes } = lignesAvecStatut(fichiers, PRODUCTIONS, [YANN]);
 
         // Aucune ligne pour le portfolio lui-même : sans le message, ce fichier
         // n'apparaîtrait nulle part dans ce tableau.
@@ -120,15 +120,15 @@ describe('#605 · le message subsiste là où il est la seule trace du fichier',
     });
 
     it('le message nomme la production, il ne retombe pas sur un libellé générique', () => {
-        const fichiers = [{ id: 'ft2', etudiantDA: YACINE.da, productionId: PROD_PORTFOLIO.id }];
-        const { lignes } = lignesAvecStatut(fichiers, PRODUCTIONS, [YACINE]);
+        const fichiers = [{ id: 'ft2', etudiantDA: YANN.da, productionId: PROD_PORTFOLIO.id }];
+        const { lignes } = lignesAvecStatut(fichiers, PRODUCTIONS, [YANN]);
         expect(avertissements(lignes).every(l => l.fichierAutreProductionNom === 'Portfolio de fin de session')).toBe(true);
     });
 
     it('un fichier sur une production INCONNUE ne déclenche pas ce message', () => {
         // #346-cleanup : il est traité par la branche « non associé », pas ici.
-        const fichiers = [{ id: 'ft3', etudiantDA: YACINE.da, productionId: 'p_disparue' }];
-        const { lignes } = lignesAvecStatut(fichiers, PRODUCTIONS, [YACINE]);
+        const fichiers = [{ id: 'ft3', etudiantDA: YANN.da, productionId: 'p_disparue' }];
+        const { lignes } = lignesAvecStatut(fichiers, PRODUCTIONS, [YANN]);
         expect(avertissements(lignes)).toEqual([]);
     });
 });
@@ -141,10 +141,10 @@ describe('#605 · les deux lecteurs de la règle restent d\'accord', () => {
 
     it('aucune production qui a sa ligne ne peut être citée par le message', () => {
         const fichiers = [
-            { id: 'a', etudiantDA: YACINE.da, productionId: PROD_PORTRAIT.id },
-            { id: 'b', etudiantDA: LUDOVIC.da, productionId: PROD_ARTEFACTS[3].id }
+            { id: 'a', etudiantDA: YANN.da, productionId: PROD_PORTRAIT.id },
+            { id: 'b', etudiantDA: LOU.da, productionId: PROD_ARTEFACTS[3].id }
         ];
-        const { lignes } = lignesAvecStatut(fichiers, PRODUCTIONS, [YACINE, LUDOVIC]);
+        const { lignes } = lignesAvecStatut(fichiers, PRODUCTIONS, [YANN, LOU]);
 
         const titresAvecLigne = new Set(lignes.map(l => l.productionNom));
         for (const l of avertissements(lignes)) {
@@ -153,7 +153,7 @@ describe('#605 · les deux lecteurs de la règle restent d\'accord', () => {
     });
 
     it('la règle de génération des lignes est bien celle que le message consulte', () => {
-        const { win, lignes } = lignesAvecStatut([], PRODUCTIONS, [YACINE]);
+        const { win, lignes } = lignesAvecStatut([], PRODUCTIONS, [YANN]);
         const idsAvecLigne = new Set(lignes.map(l => l.productionId));
         for (const p of PRODUCTIONS) {
             expect(win._productionGenereUneLigne(p), p.titre).toBe(idsAvecLigne.has(p.id));

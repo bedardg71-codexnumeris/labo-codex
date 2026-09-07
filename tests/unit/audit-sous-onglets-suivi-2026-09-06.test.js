@@ -599,8 +599,15 @@ describe('3 · Saisie des présences — écritures, répétition, verrouillage,
     it('S-5 · La barre du compteur reconstruite au premier rendu : « Rapport » avait disparu et « Annuler » visait suivi-apercu-legacy — depuis #768, Rapport présent et Annuler → suivi-liste (valeur d\'après)', () => {
         const store = storeBase();
         const b = monterS(store);
+        // #782 (7 sept. 2026) — MESURE MISE À JOUR. Le 6 sept., cette rangée lisait
+        // la barre RECONSTRUITE par `restaurerCompteurPresences`. Cette reconstruction
+        // était elle-même le défaut : elle écrasait la barre d'index.html à partir
+        // d'un second gabarit, et a fait disparaître le bouton « Reporter dans Léa »
+        // de la 1.124.0 sur les deux appareils. La fonction ne reconstruit plus rien ;
+        // la barre n'existe qu'en statique. On mesure donc index.html, seule source.
         b.interne['saisie-presences.js'].restaurerCompteurPresences();
-        const html = b.elements['compteur-presences'].innerHTML;
+        const html = readFileSync(path.join(RACINE, 'index.html'), 'utf8')
+            .split('id="actions-presences-bar"')[1].split('</div>')[0];
         const config = readFileSync(path.join(RACINE, 'js/config.js'), 'utf8');
         const sousSectionsSuivi = (config.match(/suivi:\s*\[([\s\S]*?)\]/) || ['', ''])[1].match(/id:\s*'([^']+)'/g) || [];
         const indexHtml = readFileSync(path.join(RACINE, 'index.html'), 'utf8').split('\n').slice(7911, 8118).join('\n');

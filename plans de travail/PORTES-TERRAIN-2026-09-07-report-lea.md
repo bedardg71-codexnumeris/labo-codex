@@ -1,24 +1,34 @@
 # PORTES TERRAIN — Reporter les absences dans Léa (1.124.0)
 
-> ## ⛔ CLOSE — LE MODULE EST ABANDONNÉ (décision de Grégoire, 7 sept. 2026, en fin de matinée)
+> # ⛔ CETTE LISTE EST CADUQUE — LE MODULE EST ABANDONNÉ
 >
-> **Ne pas exécuter cette liste.** Elle a été passée en entier le 7 sept. à 09 h 52
-> (10 passées, 2 échecs), puis Grégoire a tranché : le panneau ne fait que trier
-> l'information à recopier, la saisie dans Léa reste manuelle, et **rien ne prouve
-> que Léa accepte une entrée en masse**. Sans copier-coller possible, le gain se
-> compte en dizaines de secondes pour trois ou quatre absents. Retour à l'état
-> d'avant 1.124.0 demandé.
+> **Décision de Grégoire, 7 septembre 2026 :** « Ce que tu as créé ne fait que trier l'information
+> en la préparant pour Léa. Il s'agit d'un transfert manuel des informations. Si on ne peut pas
+> faire un copier/coller, il n'y a pas vraiment d'intérêt, car aucun gain de temps. »
 >
-> **Ce qui SURVIT au retrait et reste dû** (signalé par Grégoire au même moment,
-> hors du panneau) : *« l'enregistrement semble instable, j'ai dû saisir et
-> enregistrer les présences à plusieurs reprises »*. C'est la saisie des présences
-> elle-même, pas le module de report. À reproduire et à inscrire.
+> Le module a été **retiré en entier** (1.124.2). Ce document reste comme trace, et pour la leçon :
+> **le cadrage n'a pas mesuré le gain réel avant de coder.** Trois questions avaient été posées
+> avant d'écrire une ligne — le collage groupé, la voie d'import, l'unité — et elles ont écarté
+> deux fausses pistes. Aucune n'a demandé : *une fois le tri fait, combien de temps reste-t-il
+> à gagner ?* Le panneau agit sur la lecture et le calcul, jamais sur la saisie ; c'est la saisie
+> qui coûte.
 >
-> Le relevé complet de la passation est conservé plus bas, section AU RETOUR.
+> **Ce qui SURVIT au retrait**, et qui n'est pas caduc :
+> · la barre d'actions de la saisie n'a plus qu'une définition (1.124.1) ;
+> · **§3.1 est répondu** : « C'est l'enseignant qui juge si un rattrapage reprend une absence. »
+>   BACKLOG #747 fermé sans code, le 7 sept. ;
+> · le retour testeur sur l'enregistrement instable (SUIVI-BUGS #542, BACKLOG #785).
 
-**7 septembre 2026** · release `minor` **1.124.0**, build **0907-0834**
-Branche `claude/bokadex-lea-presence-transfer-e6ynxi` · **fusionnée dans `main` et déployée** (commits `95195d6e` → `e05355f3`, 7 sept.)
-Artefact jumeau publié par Cowork le 7 sept. : https://claude.ai/code/artifact/ffd40fff-45ac-430f-9fd9-27b72e13a44d
+**7 septembre 2026** · release **1.124.1**, build **0907-0938**
+> ⚠⚠ **RELEVÉ DU JOUR MÊME : 2.1a A ÉCHOUÉ, ET C'EST CORRIGÉ.** Le bouton « Reporter dans Léa »
+> n'apparaissait nulle part, sur Mac comme sur iPad. La barre d'actions de la saisie existait en
+> DEUX exemplaires — un dans `index.html`, un second en gabarit `innerHTML` dans
+> `saisie-presences.js` — et le second écrasait le premier au premier rendu d'une séance. Le
+> bouton, ajouté au seul `index.html`, était détruit avant d'avoir pu être cliqué.
+> ⮕ **Corrigé en 1.124.1** : le JS ne reconstruit plus rien, il bascule la visibilité de deux
+> blocs. La barre n'a plus qu'une définition. **Reprendre cette liste à partir de 2.1a**, sur un
+> build qui affiche **1.124.1**.
+Branche `claude/bokadex-lea-presence-transfer-e6ynxi` · **non fusionnée dans `main`** (voir `RELAIS.md`)
 
 > **Cette liste est courte, et c'est voulu.** Règle 1 du skill `portes-terrain` :
 > une porte n'existe que si aucune machine ne peut répondre. Le calcul est couvert
@@ -39,10 +49,9 @@ Artefact jumeau publié par Cowork le 7 sept. : https://claude.ai/code/artifact/
 |---|---|---|
 | 0.1 | Recharge l'application (vidage de cache si un onglet était déjà ouvert) et lis le numéro en bas de page. | **1.124.0**. Si tu lis 1.123.x, le reste de cette liste juge du code que tu n'as pas. |
 
-⚠ ~~Un `git pull` t'est nécessaire cette fois~~ — **fait le 7 sept. en début
-d'après-midi.** Le clone de Grégoire porte bien 1.124.0 / `0907-0834` (mesuré par
-Cowork dans `version.json`). Il n'y a plus rien à tirer : seul le rechargement
-de l'application reste dû.
+⚠ **Un `git pull` t'est nécessaire cette fois** : cette session a travaillé sur une
+branche, pas dans ton clone. Les fichiers de ton disque sont encore en 1.123.12
+tant que la branche n'est pas fusionnée.
 
 ---
 
@@ -149,39 +158,3 @@ ta place. Écris ta réponse, ne coche rien.
 1. Trier les échecs : défaut réel, ou build en retard (relire §0.1) ?
 2. Verser chaque échec réel au BACKLOG, avec son numéro de porte.
 3. Mettre à jour ce fichier : état, date, ce qui reste dû.
-
----
-
-## RELEVÉ DE LA PASSATION — 7 septembre 2026, 09 h 52
-
-BILAN : 10 passées · 2 échecs · 0 non traitée.
-
-**Passées** : 0.1 · 2.1a · 2.1b · 2.1c · 2.1d · 2.2a · 2.2b · 2.3a · 2.3b · 2.3c.
-Le tri n'a jamais fait remonter dans la liste de Léa (2.2b) : **l'ordre du panneau
-s'accorde au sien**. C'est le seul acquis technique du lot qui mérite d'être retenu.
-
-**Échec 2.4a** — « le panneau ne se met pas à jour quand je change de date ». C'est
-le défaut grave annoncé par la porte : le panneau garde l'ancienne séance. Sans
-conséquence désormais, le module étant retiré.
-
-**Échec 2.4b** — sans objet : *« je n'ai pas de sous-groupe et je ne connais pas ce
-concept »*. ⮕ Une porte a été posée sur une notion qui n'existe pas dans son usage.
-
-**Retard sur 2.1a** — le bouton n'apparaissait ni sur Mac ni sur iPad :
-`restaurerCompteurPresences()` (`js/saisie-presences.js:2007`) régénère
-`#actions-presences-bar` en `innerHTML` et écrasait le bouton ajouté à
-`index.html`. Deux définitions de la même barre. **Ce défaut de structure survit au
-retrait du module** et retombera sur le prochain lot qui ajoutera un bouton là.
-
-**Défaut de confidentialité mesuré à la passation** : le panneau affichait le vrai
-nom et le vrai DA d'un élève **alors que le mode anonymisation était actif**, la
-case du bandeau du bas non cochée. Disparaît avec le module ; à vérifier qu'il
-n'existe nulle part ailleurs.
-
-### Réponses de Grégoire aux trois décisions (§3)
-
-| | Question | Réponse |
-|---|---|---|
-| 3.1 | Un rattrapage annule-t-il l'absence au cours régulier ? | **C'est l'enseignant qui juge** si un rattrapage reprend une absence. Ce n'est donc pas une règle institutionnelle automatisable. ⮕ Ferme #747. |
-| 3.2 | Le panneau devrait-il montrer les présents ? | Non. |
-| 3.3 | D'autres groupes à beaucoup plus d'absents ? | Pas lui ; peut-être d'autres utilisateurs. ⮕ La question du remplissage automatique ne se rouvre pas pour la cohorte 1. |

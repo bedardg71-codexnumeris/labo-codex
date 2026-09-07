@@ -1985,20 +1985,23 @@ function mettreAJourCompteurPresences() {
  */
 function afficherMessageCompteurPresences(message) {
     const compteur = document.getElementById('compteur-presences');
-    if (!compteur) return;
+    const zoneMessage = document.getElementById('message-etat-presences');
+    const blocNormal = document.getElementById('bloc-normal-presences');
+    if (!compteur || !zoneMessage || !blocNormal) return;
 
     // Changer le style pour indiquer un état spécial
     compteur.style.borderLeftColor = 'var(--jaune-principal, #f0ad4e)';
     compteur.style.background = 'var(--jaune-tres-pale, #fff8e1)';
 
-    // Le message peut contenir validation.motif (texte libre saisi par
-    // l'utilisateur en config calendrier). echapperHtml() obligatoire avant
-    // injection dans innerHTML pour eviter XSS via motif crafte.
-    compteur.innerHTML = `
-        <span style="color: var(--texte-secondaire); font-style: italic;">
-            ${echapperHtml(message)}
-        </span>
-    `;
+    // #782 (7 sept. 2026) : `textContent`, plus `innerHTML` + echapperHtml().
+    // Le message peut porter `validation.motif`, texte libre saisi en config
+    // calendrier ; `textContent` retire la question de l'échappement au lieu de
+    // la traiter. Et surtout : cette fonction n'écrase plus TOUT le conteneur —
+    // elle montre l'un de ses deux blocs et masque l'autre. C'est ce qui permet
+    // à la barre d'actions de n'exister qu'une fois, dans index.html.
+    zoneMessage.textContent = message;
+    zoneMessage.classList.remove('u-hide');
+    blocNormal.classList.add('u-hide');
 }
 
 /**
@@ -2006,34 +2009,26 @@ function afficherMessageCompteurPresences(message) {
  */
 function restaurerCompteurPresences() {
     const compteur = document.getElementById('compteur-presences');
-    if (!compteur) return;
+    const zoneMessage = document.getElementById('message-etat-presences');
+    const blocNormal = document.getElementById('bloc-normal-presences');
+    if (!compteur || !zoneMessage || !blocNormal) return;
 
     compteur.style.borderLeftColor = 'var(--accent-primaire)';
     compteur.style.background = 'var(--bleu-tres-pale)';
 
-    compteur.innerHTML = `
-        <div id="info-seance" class="u-hide" style="font-size: 0.85rem; opacity: 0.8;"></div>
-        <div style="display: flex; align-items: center; gap: 30px; flex-wrap: wrap;">
-            <span>Présents : <span id="nb-presents">0</span></span>
-            <span>Absents : <span id="nb-absents">0</span></span>
-            <span>Total : <span id="nb-total">0</span></span>
-            <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
-            <span id="actions-presences-bar" style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
-                <button class="btn btn-principal btn-compact" data-action="ouvrirModaleRapportPresences">Rapport</button>
-                <button class="btn btn-confirmer btn-compact" data-action="enregistrerPresences">Enregistrer</button>
-                <button class="btn btn-annuler btn-compact" data-action="afficherSousSection" data-param="suivi-liste">Annuler</button>
-                <span id="controle-verrouillage-presences" class="u-hide" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
-                    <input type="checkbox" id="checkbox-verrouillage-presences"
-                           style="width: 16px; height: 16px; accent-color: var(--bleu-principal, #1a73e8); cursor: pointer;"
-                           data-on-change="basculerVerrouillageDateActive">
-                    <label for="checkbox-verrouillage-presences" style="cursor: pointer; user-select: none; white-space: nowrap;">
-                        <span id="icone-verrouillage-presences"><img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon"></span>
-                        <span id="texte-verrouillage-presences">Verrouiller</span>
-                    </label>
-                </span>
-            </span>
-        </div>
-    `;
+    // ⚠ #782 (7 sept. 2026) : CETTE FONCTION NE RECONSTRUIT PLUS RIEN.
+    // Elle portait une SECONDE copie de la barre d'actions, en `innerHTML`, et
+    // l'écrasait sur celle d'index.html à chaque rendu d'une séance valide. Le
+    // bouton « Reporter dans Léa » de la 1.124.0, ajouté au seul index.html, était
+    // donc détruit avant d'avoir pu être cliqué — invisible sur Mac ET sur iPad,
+    // relevé en porte terrain le jour même. Les deux copies avaient d'ailleurs
+    // déjà divergé : le contrôle de verrouillage n'existait que dans celle-ci.
+    // Un gabarit partagé aurait laissé deux chemins de rendu à synchroniser ;
+    // basculer la visibilité n'en laisse aucun. Gardé par sentinelle-768, qui
+    // compare désormais TOUS les boutons de la barre, pas trois nommés.
+    zoneMessage.classList.add('u-hide');
+    zoneMessage.textContent = '';
+    blocNormal.classList.remove('u-hide');
 }
 
 window.tousPresents = tousPresents;
@@ -2050,6 +2045,11 @@ window.filtrerTableauPresences = filtrerTableauPresences;
 window.mettreAJourLignePeriodes = mettreAJourLignePeriodes;
 window.appliquerCodeCouleurPeriodes = appliquerCodeCouleurPeriodes;
 window.obtenirNombrePeriodesSeance = obtenirNombrePeriodesSeance;
+// #782 — exportées pour que la sentinelle puisse les APPELER. Sans cela, son
+// cas « la barre reste intacte » sautait son bloc en silence et passait toujours :
+// un test tautologique, trouvé en lui faisant subir un break-test.
+window.afficherMessageCompteurPresences = afficherMessageCompteurPresences;
+window.restaurerCompteurPresences = restaurerCompteurPresences;
 
 // #540 lot C (26 août 2026) — SOURCE UNIQUE de la mesure d'une séance.
 // `trimestre-v2-horaires.js` réinventait la sienne, en trois endroits et avec un

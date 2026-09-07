@@ -7,6 +7,92 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026, FIN D'APRÈS-MIDI : LE MODULE LÉA EST RETIRÉ (1.124.2)
+
+> ✅ **`main` à jour, 1.124.2, build `0907-1011`. Vitest 501 fichiers / 5536 tests.**
+>
+> **DÉCISION DE GRÉGOIRE : le report vers Léa est ABANDONNÉ, retiré en entier le jour de sa livraison.**
+> Ses mots : « Ce que tu as créé ne fait que trier l'information en la préparant pour Léa. Il s'agit d'un
+> transfert manuel des informations. Si on ne peut pas faire un copier/coller, il n'y a pas vraiment
+> d'intérêt, car aucun gain de temps. »
+> ⮕ **Ce n'est pas un défaut d'exécution : c'est un défaut de CADRAGE.** Trois questions avaient été posées
+> avant d'écrire une ligne, et elles ont écarté deux fausses pistes. Aucune n'a demandé *combien de temps
+> il resterait à gagner une fois le tri fait*. Le panneau agissait sur la lecture et le calcul, jamais sur
+> la saisie — et c'est la saisie qui coûte. **Retenir cette question pour le prochain lot d'outillage.**
+> Zéro-dette : module, bouton, panneau, balise, 16 tests, classe CSS, entrée de changelog — tout est parti,
+> rien n'est mis en sommeil derrière un drapeau. Le module n'écrivait nulle part : aucune donnée en jeu.
+>
+> **CE QUI SURVIT, et qu'il ne faut pas défaire :**
+> · **La barre d'actions de la saisie n'a plus qu'une définition** (1.124.1, livrée juste avant l'abandon).
+>   `restaurerCompteurPresences` ne reconstruit plus rien : `#compteur-presences` porte deux enfants qui
+>   s'excluent, et le JS bascule leur visibilité. Sentinelle #768/#782 élargie à TOUTE la barre, quatre
+>   break-tests rouges. C'est ce défaut qui avait rendu le bouton invisible sur les deux appareils.
+> · **#747 EST FERMÉ, sans code**, sur la réponse de Grégoire : « C'est l'enseignant qui juge si un
+>   rattrapage reprend une absence. » Ce n'est pas une règle institutionnelle : rien à automatiser.
+>
+> ⚠⚠ **CE QUI EST PRIORITAIRE MAINTENANT — SUIVI-BUGS #542 / BACKLOG #785.** Retour testeur du jour, sur
+> son corpus réel : « l'enregistrement semble instable. J'ai dû saisir et enregistrer les présences à
+> plusieurs reprises. » **NON REPRODUIT** — ce qui suit est une inférence, pas une cause établie.
+> Trois faits mesurés : `enregistrerPresences` n'appelle JAMAIS `db.flush()` (dix autres gestes durables
+> du projet le font) ; au démarrage `syncToLocalStorageCache()` fait d'IndexedDB la source de vérité en
+> écrasant localStorage ; `db.js` documente que le commit IDB est différé sous WebKit et `file://`.
+> ⮕ Une écriture non commitée avant fermeture serait écrasée par l'ancienne valeur au rechargement.
+> **C'est le mécanisme exact de #140** (juin 2026), corrigé alors par `await db.flush()`.
+> ⛔ **Poser les trois questions du SUIVI-BUGS à Grégoire AVANT de coder** : la perte suit-elle un
+> rechargement ? sur quel appareil ? la notification de succès s'affiche-t-elle quand même ?
+>
+> **AUTRES INSCRITS** : **#786** (`sauvegarderDonneesSelonMode` signale ses échecs par les chaînes
+> `'quota'`/`'error'`, *truthy*, qu'une vingtaine d'appelants lisent comme un succès — défaut de contrat
+> réel, mais qui n'explique probablement PAS #785, `setSync` basculant sans lever). **#780 PÉRIMÉ**
+> (la duplication est partie avec le module). **Dernier ID : #786.**
+>
+> **MESURE DEMANDÉE PAR COWORK, FAITE, ET NON CONCLUANTE** : le panneau affichait un vrai nom en mode
+> anonymisation. La porte de lecture `obtenirEtudiantsCoursActif` (modes.js:1154) passe pourtant bien par
+> `obtenirDonneesSelonMode` : elle RESPECTE le mode. Le contournement venait donc d'ailleurs, et la
+> question reste ouverte — à reprendre sur un autre écran, sans le module pour la reproduire.
+
+---
+
+## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026, APRÈS-MIDI : LE BOUTON QUI N'EXISTAIT PAS (1.124.1)
+
+> ✅ **`main` = `a64164cc`, 1.124.1, build `0907-0938`. Déploiement VÉRIFIÉ par l'API Netlify** :
+> `6a9ebeee3b7291000831720a`, production, `ready`, publié à 13 h 41 12 UTC sur ce commit exact, en 8 s,
+> sans erreur. ⚠ La page servie n'est toujours pas lue (proxy).
+>
+> **CE QUI S'EST PASSÉ, et c'est la leçon du jour.** La 1.124.0 a livré un bouton « Reporter dans Léa »
+> **qui n'apparaissait nulle part**, sur Mac comme sur iPad. Relevé par Grégoire en porte terrain, diagnostiqué
+> par Cowork, vérifié puis corrigé ici. `restaurerCompteurPresences` réécrivait tout `#compteur-presences` par
+> `innerHTML`, depuis une **seconde copie de la barre d'actions** vivant dans `saisie-presences.js`. Le bouton,
+> ajouté au seul `index.html`, était détruit au premier rendu d'une séance. Les deux copies avaient déjà divergé.
+>
+> **Correction retenue** : ni gabarit partagé, ni bouton ajouté au gabarit JS. `#compteur-presences` porte
+> désormais **deux enfants qui s'excluent** (message d'état / bloc normal) et le JS ne fait que basculer leur
+> visibilité. Aucun gabarit à synchroniser, donc plus rien à oublier. Le message passe en `textContent` :
+> l'échappement du motif devient une non-question.
+>
+> ⚠⚠ **DEUX TESTS MENTEURS TROUVÉS DANS LA MÊME JOURNÉE, tous deux par break-test.** (1) La sentinelle #768
+> gardait TROIS BOUTONS NOMMÉS : elle est restée verte pendant que le bouton neuf disparaissait. Elle garde
+> maintenant l'invariant — le JS ne fabrique aucun bouton de la barre, et le cycle message → restauration la
+> laisse intacte quels que soient ses boutons, **lus dans index.html** plutôt qu'énumérés. (2) Son propre cas 3,
+> au premier jet, enveloppait tout dans un `if (typeof … === 'function')` sur des fonctions non exportées :
+> il sautait son bloc en silence et passait toujours. **C'est le break-test resté vert qui l'a révélé.**
+> ⮕ Quatre break-tests, quatre rouges sur l'arbre final. Vitest **502 fichiers / 5553 tests**.
+>
+> **POURQUOI LA MESURE DU MATIN NE L'AVAIT PAS VU** (inscrit #784) : elle posait `date-cours.value` à la main
+> sans déclencher `chargerTableauPresences`, puis cliquait le bouton du HTML **statique, encore intact**. Elle
+> éprouvait le rendu du panneau, jamais le chemin qui régénère son conteneur. La vérification de cette
+> correction, elle, passe par le rendu réel.
+>
+> **DÛ À GRÉGOIRE** : reprendre `plans de travail/PORTES-TERRAIN-2026-09-07-report-lea.md` **à partir de 2.1a**,
+> sur un build qui affiche **1.124.1**. Le §3 (trois décisions) reste valide et indépendant.
+> ⏳ **L'artefact jumeau de cette porte n'est TOUJOURS PAS publié** (rôle de Cowork).
+>
+> **INSCRITS** : **#783** (l'en-tête de la colonne « Présence » a lui aussi deux gabarits — mais avec une raison :
+> son libellé dépend du nombre de périodes), **#784** (la classe de défaut, et l'angle mort de mesure qui l'a
+> laissée passer). **Dernier ID : #784.**
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026, MIDI : REPORTER LES ABSENCES DANS LÉA (1.124.0)
 
 > ✅ **RIEN N'ATTEND SUR UNE BRANCHE.** `claude/bokadex-lea-presence-transfer-e6ynxi` a été fusionnée dans `main`
@@ -53,6 +139,15 @@
 > **DÛ À GRÉGOIRE** : `plans de travail/PORTES-TERRAIN-2026-09-07-report-lea.md` — courte (règle 1 du skill : tout
 > ce qu'une machine pouvait juger l'a été), **rien d'irréversible**, et **l'artefact jumeau reste à publier par
 > Cowork**, qui ne lit pas `.claude/`. Trois décisions y attendent son verdict, dont #747.
+>
+> ⏳ **CHANTIER OUVERT, NON EXÉCUTÉ — #781, purge de l'historique git.** Grégoire a demandé d'effacer de
+> l'historique les données personnelles, « idéalement tout l'historique depuis le début ». L'audit a trouvé
+> 19 exports complets de son application (30 élèves réels chacun), 56 élèves d'A2024, une analyse RàI et
+> `IMG_3171.jpg`. **L'ARBRE COURANT a été nettoyé** (commit `41fe67a8`) ; **l'HISTORIQUE ne l'est pas.**
+> La réécriture a été préparée et vérifiée sur une copie, puis **laissée en attente à sa demande** : il veut la
+> reprendre dans une session à froid. **Ne pas la déclencher sans son signal explicite.**
+> ⮕ Tout est dans `plans de travail/CHANTIER-historique-git-donnees-personnelles.md`, écrit pour être repris
+> SANS la conversation d'origine.
 >
 > **INSCRITS, PAS CORRIGÉS** : **#778** (`.badge-sa` s'appuie sur `--orange-clair` / `--orange-fonce`, qui
 > n'existent nulle part dans `styles.css` : le badge des Services adaptés est sans couleur depuis toujours —
@@ -2077,7 +2172,7 @@ dans le mode où Grégoire ouvre l'application. Ce n'était pas une régression 
 mode d'usage jamais couvert, et une mesure vraie mais incomplète.
 
 **Ce qui a été mesuré à neuf** (Chrome de Grégoire, banc isolé hors dépôt, le vrai
-`IMG_2179.HEIC` de Breton, 2 909 950 octets) :
+`IMG_2179.HEIC` de Bourdages, 2 909 950 octets) :
 
 | Chemin | Contexte | Résultat |
 |---|---|---|
