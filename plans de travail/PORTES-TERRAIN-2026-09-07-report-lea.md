@@ -1,7 +1,24 @@
 # PORTES TERRAIN — Reporter les absences dans Léa (1.124.0)
 
+> ## ⛔ CLOSE — LE MODULE EST ABANDONNÉ (décision de Grégoire, 7 sept. 2026, en fin de matinée)
+>
+> **Ne pas exécuter cette liste.** Elle a été passée en entier le 7 sept. à 09 h 52
+> (10 passées, 2 échecs), puis Grégoire a tranché : le panneau ne fait que trier
+> l'information à recopier, la saisie dans Léa reste manuelle, et **rien ne prouve
+> que Léa accepte une entrée en masse**. Sans copier-coller possible, le gain se
+> compte en dizaines de secondes pour trois ou quatre absents. Retour à l'état
+> d'avant 1.124.0 demandé.
+>
+> **Ce qui SURVIT au retrait et reste dû** (signalé par Grégoire au même moment,
+> hors du panneau) : *« l'enregistrement semble instable, j'ai dû saisir et
+> enregistrer les présences à plusieurs reprises »*. C'est la saisie des présences
+> elle-même, pas le module de report. À reproduire et à inscrire.
+>
+> Le relevé complet de la passation est conservé plus bas, section AU RETOUR.
+
 **7 septembre 2026** · release `minor` **1.124.0**, build **0907-0834**
-Branche `claude/bokadex-lea-presence-transfer-e6ynxi` · **non fusionnée dans `main`** (voir `RELAIS.md`)
+Branche `claude/bokadex-lea-presence-transfer-e6ynxi` · **fusionnée dans `main` et déployée** (commits `95195d6e` → `e05355f3`, 7 sept.)
+Artefact jumeau publié par Cowork le 7 sept. : https://claude.ai/code/artifact/ffd40fff-45ac-430f-9fd9-27b72e13a44d
 
 > **Cette liste est courte, et c'est voulu.** Règle 1 du skill `portes-terrain` :
 > une porte n'existe que si aucune machine ne peut répondre. Le calcul est couvert
@@ -22,9 +39,10 @@ Branche `claude/bokadex-lea-presence-transfer-e6ynxi` · **non fusionnée dans `
 |---|---|---|
 | 0.1 | Recharge l'application (vidage de cache si un onglet était déjà ouvert) et lis le numéro en bas de page. | **1.124.0**. Si tu lis 1.123.x, le reste de cette liste juge du code que tu n'as pas. |
 
-⚠ **Un `git pull` t'est nécessaire cette fois** : cette session a travaillé sur une
-branche, pas dans ton clone. Les fichiers de ton disque sont encore en 1.123.12
-tant que la branche n'est pas fusionnée.
+⚠ ~~Un `git pull` t'est nécessaire cette fois~~ — **fait le 7 sept. en début
+d'après-midi.** Le clone de Grégoire porte bien 1.124.0 / `0907-0834` (mesuré par
+Cowork dans `version.json`). Il n'y a plus rien à tirer : seul le rechargement
+de l'application reste dû.
 
 ---
 
@@ -131,3 +149,39 @@ ta place. Écris ta réponse, ne coche rien.
 1. Trier les échecs : défaut réel, ou build en retard (relire §0.1) ?
 2. Verser chaque échec réel au BACKLOG, avec son numéro de porte.
 3. Mettre à jour ce fichier : état, date, ce qui reste dû.
+
+---
+
+## RELEVÉ DE LA PASSATION — 7 septembre 2026, 09 h 52
+
+BILAN : 10 passées · 2 échecs · 0 non traitée.
+
+**Passées** : 0.1 · 2.1a · 2.1b · 2.1c · 2.1d · 2.2a · 2.2b · 2.3a · 2.3b · 2.3c.
+Le tri n'a jamais fait remonter dans la liste de Léa (2.2b) : **l'ordre du panneau
+s'accorde au sien**. C'est le seul acquis technique du lot qui mérite d'être retenu.
+
+**Échec 2.4a** — « le panneau ne se met pas à jour quand je change de date ». C'est
+le défaut grave annoncé par la porte : le panneau garde l'ancienne séance. Sans
+conséquence désormais, le module étant retiré.
+
+**Échec 2.4b** — sans objet : *« je n'ai pas de sous-groupe et je ne connais pas ce
+concept »*. ⮕ Une porte a été posée sur une notion qui n'existe pas dans son usage.
+
+**Retard sur 2.1a** — le bouton n'apparaissait ni sur Mac ni sur iPad :
+`restaurerCompteurPresences()` (`js/saisie-presences.js:2007`) régénère
+`#actions-presences-bar` en `innerHTML` et écrasait le bouton ajouté à
+`index.html`. Deux définitions de la même barre. **Ce défaut de structure survit au
+retrait du module** et retombera sur le prochain lot qui ajoutera un bouton là.
+
+**Défaut de confidentialité mesuré à la passation** : le panneau affichait le vrai
+nom et le vrai DA d'un élève **alors que le mode anonymisation était actif**, la
+case du bandeau du bas non cochée. Disparaît avec le module ; à vérifier qu'il
+n'existe nulle part ailleurs.
+
+### Réponses de Grégoire aux trois décisions (§3)
+
+| | Question | Réponse |
+|---|---|---|
+| 3.1 | Un rattrapage annule-t-il l'absence au cours régulier ? | **C'est l'enseignant qui juge** si un rattrapage reprend une absence. Ce n'est donc pas une règle institutionnelle automatisable. ⮕ Ferme #747. |
+| 3.2 | Le panneau devrait-il montrer les présents ? | Non. |
+| 3.3 | D'autres groupes à beaucoup plus d'absents ? | Pas lui ; peut-être d'autres utilisateurs. ⮕ La question du remplissage automatique ne se rouvre pas pour la cohorte 1. |
