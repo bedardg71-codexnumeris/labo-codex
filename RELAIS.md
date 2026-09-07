@@ -7,6 +7,43 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPT. 2026, NUIT : LA PURGE #781 EST PRÊTE À FROID
+
+> ⛔ **RIEN N'EST EXÉCUTÉ. Tout est préparé, et la préparation est le livrable.**
+>
+> **Les deux consignes existent, et elles ont deux publics :**
+> · **Pour toi, session** : `plans de travail/CHANTIER-historique-git-donnees-personnelles.md`,
+>   **§0 CONSIGNE D'EXÉCUTION** — cinq arrêts durs, l'ordre en douze gestes, et ce qu'il faut
+>   REDEMANDER à Grégoire même s'il a déjà répondu. Lis-le en entier avant la première commande.
+> · **Pour Grégoire** : `plans de travail/PORTES-TERRAIN-2026-09-07-purge-historique.md` et son
+>   artefact https://claude.ai/code/artifact/75c9b6eb-667a-4c26-96e5-43c99656dd8d — 13 rangées,
+>   dont **4 décisions en attente de son verdict** (où ça s'exécute, les 65 branches, le support
+>   GitHub, le passage en public).
+>
+> ⚠ **L'ARRÊT DUR QUI COMPTE LE PLUS** : le `push --force` n'a lieu que sur un signal explicite
+> donné DANS la session qui exécute. Son accord de septembre portait sur la PORTÉE, pas sur la
+> date. Préparer et s'arrêter est le comportement attendu, pas un échec.
+>
+> ⚠ **LA PIÈCE MANQUANTE EST CHEZ LUI** : ses listes de cohortes (`DA` ⇥ `Nom` ⇥ `Prénom`),
+> dans un fichier HORS du dépôt, jamais `git add`é. **Un élève absent de sa liste survit à la
+> purge sans aucun signal** — c'est la seule chose que la machine ne peut pas deviner. Format
+> exact au §4.4 du chantier.
+>
+> ▣ **CE QUE LA MESURE A CHANGÉ AU PLAN, et qu'il ne faut pas re-supposer :**
+> · Les 19 DA identifiés **ne sont PAS ceux des exports** : balayage de 36 066 objets, 197 blobs
+>   porteurs sur 10 chemins, dont **182 dans le seul `BACKLOG.md`**. `backups-donnees/`
+>   n'apparaît pas une fois. Les exports portent d'AUTRES élèves, dont on ignore les DA.
+> · **La règle de purge des noms était inopérante** : quatre regex ancrées qui n'attrapaient pas
+>   le nom écrit en prose — là où il dormait. Remplacée par un remplacement littéral.
+> · **Le plan transportait ce qu'il purgeait** : les 19 DA (§1 ET §4.4) et un nom d'élève en
+>   clair. Retirés le 7 sept. au soir. Ne pas les y remettre « pour la commodité ».
+>
+> ⛔ **Playwright n'a toujours pas conclu sur 1.124.3** (#788, plafond de 40 min) et **4 specs
+> iPad sont rouges sur `main` depuis avant ce lot** (#789). Ni l'un ni l'autre n'appartient à
+> la purge, mais une session qui pousse doit le savoir.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026, SOIR : SIX MINEURS ENCHAÎNÉS (1.124.3)
 
 > ✅ **`main` à jour, 1.124.3, build `0907-1325`, commit `efe1baa9`. Vitest 506 fichiers / 5561 tests.**
