@@ -7,6 +7,54 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026, SOIR : SIX MINEURS ENCHAÎNÉS (1.124.3)
+
+> ✅ **`main` à jour, 1.124.3, build `0907-1325`, commit `efe1baa9`. Vitest 506 fichiers / 5561 tests.**
+> Branche `claude/simple-backlog-tasks-gyyt04` fusionnée en fast-forward, poussée sur `main` le soir même.
+>
+> ⚠ **LE PIÈGE DE LA REF LOCALE S'EST REPRÉSENTÉ** : `main` locale était à `6c94c163`, **17 commits
+> derrière** `origin/main`. Recalée par `git branch -f main origin/main` AVANT la fusion. Le refaire.
+>
+> **CE QUI A ÉTÉ FAIT, et pourquoi c'était le bon moment** : #785 (l'enregistrement des présences qui se
+> perd) attend la réponse de Grégoire aux trois questions du SUIVI-BUGS ; deux hypothèses ont déjà été
+> réfutées à la mesure. La fenêtre a servi à six items qui ne demandaient aucun arbitrage.
+> · **#776** la note de la Liste des évaluations à une décimale (symptôme qu'il avait sous les yeux)
+> · **#778** `.badge-sa` appelait deux variables CSS **jamais définies**
+> · **#779** double `class` sur `#date-cours`
+> · **#755** les octets de contrôle en clair rendaient `travaux-archivage.js` binaire pour git ET grep
+> · **#756** le hook pré-push LIT désormais la liste `OBSERVABLE` de la CI
+> · **#753** `OU-EN-EST-ON.md` ajouté à `paths-ignore`
+>
+> **TROIS CHOSES À NE PAS DÉFAIRE :**
+> · **`scripts/lot-observable.sh` n'a plus de motif à lui** : il dérive celui de la CI. Liste illisible
+>   ⮕ il répond OUI (sauter le verdict en silence est le défaut que #756 corrige). `sentinelle-533` D.b
+>   a changé de sens en conséquence : l'invariant « une seule copie » tient, il a changé de fichier.
+>   ⚠ **Conséquence assumée** : le verdict Playwright est maintenant exigé pour un banc Vitest seul, un
+>   script ou une icône. C'est voulu.
+> · **La liste des 22 doubles `class` (#787) est FIGÉE** dans `sentinelle-779` (bord B). Elle ne peut ni
+>   grossir ni changer de forme sans rougir. **Retirer un cas réparé de la liste fait partie du geste.**
+> · **`.badge-sa` n'est plus orange**, et c'est une décision prise seule, faute de teinte orange lisible
+>   dans les deux modes (`--orange-accent` tombe à 2,2:1 sur fond clair). **Question ouverte à Grégoire.**
+>
+> **DEUX FICHES RETOURNÉES PAR LA MESURE, et c'est la leçon du lot :**
+> · **#694 point C** (« cinq `.DS_Store` suivis, le seul cas franc, ça ne se discute pas ») : **PÉRIMÉ**.
+>   `git ls-files -- '*DS_Store*'` rend zéro. Un constat déposé et jamais redaté se lit comme une tâche due.
+> · **#779 a révélé 22 autres cas** ⮕ **#787 inscrit, NON corrigé** (22 rendus changés d'un coup se jugent
+>   à l'écran, avec lui).
+>
+> **UNE TROUVAILLE DE LA PASSE « CONNEXIONS »** : `scripts/reparation-448-doublons-import.js:410` portait
+> le même défaut que #755 (un NUL brut dans un littéral). Corrigé dans le même lot ; l'échappement est
+> identique à l'exécution. La garde couvre **`js/` ET `scripts/`** ; `libs/` en est exclu (tierces minifiées).
+>
+> **UNE ERREUR DE RÉCIT ATTRAPÉE PAR LE RITUEL** : le BACKLOG et `OU-EN-EST-ON.md` annonçaient
+> « 13 break-tests ». Le compte réel est **10 break-tests, 20 rougeurs**. Corrigé avant le commit.
+> ⮕ Un chiffre écrit en cours de route n'est pas une mesure tant qu'on ne l'a pas recompté à la fin.
+>
+> ⛔ **CE QUI N'EST PAS VÉRIFIÉ** : Safari, iPad, Playwright (WebKit absent du conteneur, #456).
+> Verdict CI à relire sur le run de `efe1baa9`. **Dernier ID : #787.**
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026, FIN D'APRÈS-MIDI : LE MODULE LÉA EST RETIRÉ (1.124.2)
 
 > ✅ **`main` à jour, 1.124.2, build `0907-1011`. Vitest 501 fichiers / 5536 tests.**
