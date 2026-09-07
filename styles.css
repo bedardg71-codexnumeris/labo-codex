@@ -11386,18 +11386,26 @@ label:has(+ textarea:disabled) {
 }
 
 /* Animation et grossissement au hover - point devient noir avec effet 3D */
-.barre-etudiant:hover {
-    z-index: 20;
-    transform: translate(-50%, -50%) scale(1.4); /* 🆕 BETA 96.2: Grossissement au hover */
-    background: linear-gradient(135deg, rgba(40, 40, 40, 0.95) 0%, rgba(10, 10, 10, 0.9) 100%);
-    /* 🆕 BETA 96.2: Ombres pour effet verre bombé noir */
-    box-shadow:
-        0 6px 16px rgba(0, 0, 0, 0.35),
-        0 0 20px rgba(255, 255, 255, 0.3),
-        0 0 0 2px rgba(255, 255, 255, 0.85),
-        inset 0 -3px 6px rgba(0, 0, 0, 0.3);
-    /* BETA 97.5: Stopper l'animation au hover pour stabiliser le tooltip */
-    animation: none;
+/* ⚠ SOUS `hover: hover` DEPUIS LE 7 SEPTEMBRE 2026 (#540). Sur iPad, un élément
+   qui porte un style `:hover` fait du PREMIER toucher un survol simulé : il
+   grossit, et le clic ne part qu'au toucher suivant. Sur une bulle de 10 px qui
+   oscille, ce premier toucher pour rien est indiscernable d'un raté — et le
+   journal de Grégoire montre exactement ça, cinq touchers de suite sur le fond
+   de la barre. La souris garde son survol, le doigt n'en simule plus. */
+@media (hover: hover) {
+    .barre-etudiant:hover {
+        z-index: 20;
+        transform: translate(-50%, -50%) scale(1.4); /* 🆕 BETA 96.2: Grossissement au hover */
+        background: linear-gradient(135deg, rgba(40, 40, 40, 0.95) 0%, rgba(10, 10, 10, 0.9) 100%);
+        /* 🆕 BETA 96.2: Ombres pour effet verre bombé noir */
+        box-shadow:
+            0 6px 16px rgba(0, 0, 0, 0.35),
+            0 0 20px rgba(255, 255, 255, 0.3),
+            0 0 0 2px rgba(255, 255, 255, 0.85),
+            inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+        /* BETA 97.5: Stopper l'animation au hover pour stabiliser le tooltip */
+        animation: none;
+    }
 }
 
 /* Point sélectionné au clic - couleur bleue distincte */
@@ -11436,14 +11444,16 @@ label:has(+ textarea:disabled) {
     50% { opacity: 0.6; }
 }
 
-.barre-etudiant-sans-eval:hover {
-    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-    box-shadow:
-        0 6px 16px rgba(232, 64, 87, 0.4),
-        0 0 20px rgba(232, 64, 87, 0.3),
-        0 0 0 2px rgba(255, 255, 255, 0.85),
-        inset 0 -3px 6px rgba(0, 0, 0, 0.3);
-    animation: none;
+@media (hover: hover) {
+    .barre-etudiant-sans-eval:hover {
+        background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+        box-shadow:
+            0 6px 16px rgba(232, 64, 87, 0.4),
+            0 0 20px rgba(232, 64, 87, 0.3),
+            0 0 0 2px rgba(255, 255, 255, 0.85),
+            inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+        animation: none;
+    }
 }
 
 /* Infobulle persistante pour point sélectionné */
@@ -24202,12 +24212,16 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
         2px 3px 8px rgba(3, 46, 92, 0.35),
         inset 0 -1px 2px rgba(0, 0, 0, 0.15);
 }
-.mode-clair .barre-etudiant:hover {
-    box-shadow:
-        0 6px 16px rgba(3, 46, 92, 0.3),
-        0 0 20px rgba(3, 46, 92, 0.15),
-        0 0 0 2px rgba(3, 46, 92, 0.6),
-        inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+/* Même garde que le mode sombre (#540) : le mode clair a sa propre règle de
+   survol, et sans elle l'iPad y garderait le premier toucher inerte. */
+@media (hover: hover) {
+    .mode-clair .barre-etudiant:hover {
+        box-shadow:
+            0 6px 16px rgba(3, 46, 92, 0.3),
+            0 0 20px rgba(3, 46, 92, 0.15),
+            0 0 0 2px rgba(3, 46, 92, 0.6),
+            inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+    }
 }
 
 /* 4. Tooltip points étudiants — fond blanc en mode clair */
@@ -26875,6 +26889,18 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     .btn-icon-header .header-icon {
         width: 20px;
         height: 20px;
+    }
+
+    /* #540 (7 septembre 2026) — les bulles d'élève des barres de dégradé.
+       Elles font 10 px et ne peuvent pas grossir : à vingt-huit sur 700 px,
+       elles se toucheraient. Leur cible de 44 px est donc obtenue en JS, par
+       distance au doigt (`bulleLaPlusProche`, tableau-bord-apercu.js) plutôt
+       que par une zone sensible qui recouvrirait les voisines.
+       Ce qui reste au CSS : retirer le délai que Safari s'accorde pour voir
+       venir un double-toucher — ici il ne sert à rien, la barre ne zoome pas,
+       et il fait paraître le toucher mou. */
+    .barre-indicateur {
+        touch-action: manipulation;
     }
 }
 

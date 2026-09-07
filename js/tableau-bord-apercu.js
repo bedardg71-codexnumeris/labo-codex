@@ -880,6 +880,86 @@ function mettreAJourNoteIndicateurs() {
     el.innerHTML = genererExplicationCalculIndices(complementGauss);
 }
 
+// === SAISIR UNE BULLE AU DOIGT (7 septembre 2026, #540) ===
+//
+// Retour de Grégoire depuis l'iPad : « j'ai du mal à saisir les bulles blanches
+// dans les barres de dégradés ». Mesuré au code : une bulle fait 10 px
+// (`.barre-etudiant`), là où la règle du projet demande 44 px de cible tactile
+// — et elle BOUGE, `float-vertical` la fait osciller sans arrêt. Son journal le
+// montre : cinq touchers de suite atterrissent sur `.barre-indicateur`, le fond
+// de la barre, et pas une seule fois sur une bulle.
+//
+// ⚠ POURQUOI PAS UNE ZONE SENSIBLE DE 44 px PAR BULLE, le réflexe habituel :
+// vingt-huit élèves sur une barre d'environ 700 px se tiennent à 25 px les uns
+// des autres en moyenne, et bien moins là où la distribution se resserre. Des
+// zones de 44 px s'y recouvriraient de part en part, et le toucher irait à la
+// bulle du dessus — celle que l'empilement désigne, pas celle qu'on vise. On
+// résout donc par DISTANCE : la bulle dont le centre est le plus proche du
+// doigt, dans un rayon de tolérance. Déterministe, et jamais arbitraire.
+//
+// Uniquement sous pointeur grossier : à la souris, viser 10 px est un geste
+// ordinaire, et un clic à côté doit continuer de désélectionner.
+const RAYON_TOUCHER_BULLE = 22;   // 22 px de rayon = 44 px de cible, la règle du projet.
+
+/**
+ * La bulle la plus proche d'un point, dans un rayon donné.
+ * Pure : elle ne lit pas le DOM, on lui passe les centres déjà mesurés.
+ * @param {Array<{x:number,y:number,element:*}>} centres
+ * @param {number} x - abscisse du doigt
+ * @param {number} y - ordonnée du doigt
+ * @param {number} rayon - au-delà, on considère que rien n'était visé
+ * @returns {*|null} l'`element` du plus proche, ou null si aucun n'est assez près
+ */
+function bulleLaPlusProche(centres, x, y, rayon) {
+    let gagnante = null;
+    let meilleure = rayon * rayon;   // comparaison au carré : pas de racine à tirer
+    for (const c of centres) {
+        const dx = c.x - x;
+        const dy = c.y - y;
+        const d2 = dx * dx + dy * dy;
+        // `<` et non `<=` : à égalité stricte la première rencontrée gagne, donc
+        // l'ordre du DOM tranche — un résultat stable d'un toucher à l'autre.
+        if (d2 < meilleure) {
+            meilleure = d2;
+            gagnante = c.element;
+        }
+    }
+    return gagnante;
+}
+
+/**
+ * Le doigt a touché la barre sans toucher de bulle : laquelle visait-il ?
+ * Rend null hors pointeur grossier, hors d'une barre, ou si rien n'est assez près.
+ */
+// Le gestionnaire de clic est délégué au DOCUMENT : il voit passer TOUS les
+// clics de l'application. La requête média se garde donc d'un clic à l'autre —
+// et un `MediaQueryList` reste vivant, son `.matches` suit l'appareil (une
+// souris branchée sur l'iPad le fait basculer).
+let _pointeurGrossier = null;
+function pointeurEstGrossier() {
+    if (!window.matchMedia) return false;
+    if (!_pointeurGrossier) _pointeurGrossier = window.matchMedia('(pointer: coarse)');
+    return _pointeurGrossier.matches;
+}
+
+function pointLePlusProcheDuToucher(e) {
+    if (!pointeurEstGrossier()) return null;
+    if (!e.target || !e.target.closest) return null;
+    const barre = e.target.closest('.barre-indicateur');
+    if (!barre) return null;
+
+    // Les bulles de CETTE barre seulement : deux distributions voisines ne
+    // doivent pas se voler un toucher.
+    const centres = [];
+    barre.querySelectorAll('.barre-etudiant').forEach(function(el) {
+        // `getBoundingClientRect` donne la position ANIMÉE du moment, pas celle
+        // du style au repos : c'est bien là que la bulle était sous le doigt.
+        const r = el.getBoundingClientRect();
+        centres.push({ x: r.left + r.width / 2, y: r.top + r.height / 2, element: el });
+    });
+    return bulleLaPlusProche(centres, e.clientX, e.clientY, RAYON_TOUCHER_BULLE);
+}
+
 function initialiserModuleTableauBordApercu() {
 
     // Charger les statistiques si la sous-section aperçu est active
@@ -992,7 +1072,8 @@ function initialiserModuleTableauBordApercu() {
 
     // 🆕 BETA 96.1: Gestionnaire de clic sur les points (délégation d'événement)
     document.addEventListener('click', function(e) {
-        const point = e.target.closest('.barre-etudiant');
+        const point = e.target.closest('.barre-etudiant')
+            || pointLePlusProcheDuToucher(e);
 
         // Supprimer l'ancienne infobulle
         const ancienneInfo = document.querySelector('.barre-etudiant-info');
@@ -3207,6 +3288,9 @@ window.changerMesureTrajectoires = changerMesureTrajectoires;
 window._majSousTitreTrajectoires = _majSousTitreTrajectoires;
 window.determinerModeAffichageTableauBord = determinerModeAffichageTableauBord;
 window.libelleCriteresMultiSurveilles = libelleCriteresMultiSurveilles;   // lot 4, volet B
+// 7 sept. 2026 — exposée pour la sentinelle des bulles au doigt : le toucher
+// ne se joue pas au banc (WebKit absent des conteneurs), son arbitrage si.
+window._bulleLaPlusProche = bulleLaPlusProche;
 
 /* ===============================
    📌 NOTES D'UTILISATION

@@ -7,6 +7,48 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 34 — 7 SEPTEMBRE 2026 (même conteneur, même branche `claude/alignment-map-zoom-fluidity-9itj9c`) :
+     SECOND RETOUR TESTEUR #540 — SAISIR LES BULLES D'ÉLÈVE AU DOIGT. Release 1.123.11.
+     ▣ LE RAPPORT (iPad Air, Safari 26.6, sur 1.123.9, gravité mineure) : « j'ai du mal à saisir les bulles
+       blanches dans les barres de dégradés ». Son journal d'actions vaut mesure : CINQ touchers de suite sur
+       `.barre-indicateur`, le fond de la barre, et pas une seule fois sur une bulle.
+     ▣ DEUX CAUSES :
+       (a) LA CIBLE FAIT 10 px ET ELLE BOUGE. `.barre-etudiant` mesure 10 px quand la règle du projet demande
+           44 px (skill `design-interface` §5), et `float-vertical` la fait osciller sans arrêt.
+       (b) UN `:hover` SANS GARDE. Sur iPad, un élément qui porte un style `:hover` fait du PREMIER toucher un
+           survol simulé : la bulle grossit, et le clic ne part qu'au toucher suivant. Sur une cible de 10 px
+           qui oscille, ce toucher pour rien est indiscernable d'un raté.
+     ▣ CE QUI A ÉTÉ ÉCARTÉ, ET C'EST LE CŒUR : donner 44 px de zone sensible à chaque bulle, le réflexe habituel.
+       Vingt-huit élèves sur une barre d'environ 700 px se tiennent à 25 px les uns des autres en moyenne, et bien
+       moins là où la distribution se resserre : des zones de 44 px s'y recouvriraient de part en part, et le
+       toucher irait à la bulle du DESSUS — celle que l'empilement désigne, pas celle qu'on vise. La cible de
+       44 px est donc obtenue par DISTANCE au doigt (`bulleLaPlusProche`, rayon 22 px), bornée à la barre touchée,
+       sur la position ANIMÉE du moment, et sous pointeur grossier seulement.
+     ▣ TROIS RÈGLES DE SURVOL passent sous `@media (hover: hover)` : sombre, « sans évaluation », ET MODE CLAIR.
+       ⚠ La troisième a été TROUVÉE PAR LE TEST, 12 000 lignes plus bas dans la feuille — elle avait été manquée au
+       premier jet, et sans elle le mode clair gardait le défaut que le mode sombre venait de perdre. C'est
+       exactement ce que le skill `design-interface` demande en disant « tester les deux modes ».
+     ▣ PREUVE, à deux étages : sentinelle Vitest (19 tests) sur l'arbitrage par distance, ET une spec Playwright
+       (6 essais) sur le CHEMIN RÉEL — contexte tactile, vrai gestionnaire délégué, vrai doigt (`touchscreen.tap`).
+       La spec porte son envers : « sans doigt, rien ne change pour la souris ».
+     ▣ BREAK-TESTS : 10 mutations, toutes rouges. ⚠⚠ ET L'UNE D'ELLES A RÉVÉLÉ UN ESSAI MENTEUR : « une barre
+       voisine ne vole pas le toucher » plaçait la barre voisine 80 px plus bas, donc sa bulle restait hors du
+       rayon de tolérance quoi qu'il arrive — le test restait VERT même en étendant la recherche à tout le
+       document. Corrigé (barre voisine collée, bulle au bord haut, distance vérifiée DANS le test), il rougit.
+       C'est le §4 de `verification-adverse` qui a payé : un test vert n'est pas une preuve tant qu'on ne l'a pas
+       vu rougir.
+     ▣ RELECTURE ADVERSE, deux prises sur mon propre code : (1) premier jet, la fonction pure était définie DANS
+       `initialiserModuleTableauBordApercu` et exportée depuis le niveau module — `node --check` ne voit pas une
+       erreur de portée, elle aurait planté au chargement ; reprise à zéro. (2) `matchMedia` était appelé à chaque
+       clic de TOUTE l'application (le gestionnaire est délégué au document) ; la requête média est mise en cache.
+     ▣ VERDICT : Vitest 500 / 5 529 verts. Spec des bulles 6/6 sous CHROMIUM (config jetable hors dépôt).
+       **Playwright WebKit INJOUABLE ici** (#456). ⚠ La saisie au doigt ne se juge pas au banc : Chromium n'a pas
+       les doigts de Grégoire. Le verdict lui appartient.
+     ▣ AUCUNE SPEC N'EXISTAIT sur le Suivi de groupe ni sur les bulles : `bulles-au-doigt-540.spec.js` est la
+       première. Elle tournera sur le Mac et en CI, où WebKit existe.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 33 — 7 SEPTEMBRE 2026 (conteneur cloud, branche `claude/alignment-map-zoom-fluidity-9itj9c`) :
      RETOUR TESTEUR #539 — LE PINCEMENT DE LA CARTE D'ALIGNEMENT SUR IPAD. Release 1.123.10.
      ▣ Ouverture (subagent d'audit) : arbre propre, HEAD = origin/main `634f5143`, 0 ahead / 0 behind,
