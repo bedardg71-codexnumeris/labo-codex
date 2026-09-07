@@ -15,6 +15,22 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.124.1 EN LIGNE** (build `0907-0938`, commit `a64164cc`). **Déploiement VÉRIFIÉ par l'API Netlify** :
+`6a9ebeee3b7291000831720a`, production, `ready`, publié à 13 h 41 UTC sur ce commit exact, en 8 s, sans erreur.
+**Ce qui change** : le bouton « Reporter dans Léa », livré le matin même, **n'apparaissait nulle part**. Grégoire
+l'a constaté sur son Mac et sur son iPad. La barre de boutons de la saisie des présences existait en deux
+exemplaires — un dans la page, un second reconstruit par le programme — et le second effaçait le premier dès
+qu'une séance s'affichait. Le bouton neuf, ajouté au premier seulement, disparaissait avant d'avoir pu servir.
+Il n'y a plus qu'une seule barre. **Vérifié comment** : quatre mutations du code font rougir l'essai qui la
+garde, et le bouton a été retrouvé dans un vrai navigateur en passant cette fois par l'affichage réel d'une
+séance. Vitest 502 fichiers / 5 553 verts. **Ce qui n'est PAS vérifié** : Safari et l'iPad — la liste de
+vérifications reprend à sa rangée 2.1a.
+▣ **Ce que le travail a appris, et qui vaut d'être dit deux fois.** L'essai censé garder cette barre nommait
+trois boutons : il est resté vert pendant que le quatrième disparaissait. Il gardait des exemples, pas la règle.
+Et l'essai qui l'a remplacé était, au premier jet, **incapable d'échouer** — il sautait sa propre vérification en
+silence. C'est en essayant de le casser qu'on l'a vu. Deux essais menteurs dans la même journée, tous deux
+attrapés par le même geste : essayer de les faire rougir.
+
 ↻ **1.124.0 FUSIONNÉE DANS `main` ET POUSSÉE** (build `0907-0834`, commit `736928bb`), sur l'autorisation de
 Grégoire. **Déploiement VÉRIFIÉ par l'API Netlify** : `6a9eb302a9b96b0008b2c867`, contexte production, état `ready`,
 publié à 12 h 50 UTC sur ce commit exact, en 12 s, sans erreur, alias `app.codexnumeris.org`.

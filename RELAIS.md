@@ -7,6 +7,46 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026, APRÈS-MIDI : LE BOUTON QUI N'EXISTAIT PAS (1.124.1)
+
+> ✅ **`main` = `a64164cc`, 1.124.1, build `0907-0938`. Déploiement VÉRIFIÉ par l'API Netlify** :
+> `6a9ebeee3b7291000831720a`, production, `ready`, publié à 13 h 41 12 UTC sur ce commit exact, en 8 s,
+> sans erreur. ⚠ La page servie n'est toujours pas lue (proxy).
+>
+> **CE QUI S'EST PASSÉ, et c'est la leçon du jour.** La 1.124.0 a livré un bouton « Reporter dans Léa »
+> **qui n'apparaissait nulle part**, sur Mac comme sur iPad. Relevé par Grégoire en porte terrain, diagnostiqué
+> par Cowork, vérifié puis corrigé ici. `restaurerCompteurPresences` réécrivait tout `#compteur-presences` par
+> `innerHTML`, depuis une **seconde copie de la barre d'actions** vivant dans `saisie-presences.js`. Le bouton,
+> ajouté au seul `index.html`, était détruit au premier rendu d'une séance. Les deux copies avaient déjà divergé.
+>
+> **Correction retenue** : ni gabarit partagé, ni bouton ajouté au gabarit JS. `#compteur-presences` porte
+> désormais **deux enfants qui s'excluent** (message d'état / bloc normal) et le JS ne fait que basculer leur
+> visibilité. Aucun gabarit à synchroniser, donc plus rien à oublier. Le message passe en `textContent` :
+> l'échappement du motif devient une non-question.
+>
+> ⚠⚠ **DEUX TESTS MENTEURS TROUVÉS DANS LA MÊME JOURNÉE, tous deux par break-test.** (1) La sentinelle #768
+> gardait TROIS BOUTONS NOMMÉS : elle est restée verte pendant que le bouton neuf disparaissait. Elle garde
+> maintenant l'invariant — le JS ne fabrique aucun bouton de la barre, et le cycle message → restauration la
+> laisse intacte quels que soient ses boutons, **lus dans index.html** plutôt qu'énumérés. (2) Son propre cas 3,
+> au premier jet, enveloppait tout dans un `if (typeof … === 'function')` sur des fonctions non exportées :
+> il sautait son bloc en silence et passait toujours. **C'est le break-test resté vert qui l'a révélé.**
+> ⮕ Quatre break-tests, quatre rouges sur l'arbre final. Vitest **502 fichiers / 5553 tests**.
+>
+> **POURQUOI LA MESURE DU MATIN NE L'AVAIT PAS VU** (inscrit #784) : elle posait `date-cours.value` à la main
+> sans déclencher `chargerTableauPresences`, puis cliquait le bouton du HTML **statique, encore intact**. Elle
+> éprouvait le rendu du panneau, jamais le chemin qui régénère son conteneur. La vérification de cette
+> correction, elle, passe par le rendu réel.
+>
+> **DÛ À GRÉGOIRE** : reprendre `plans de travail/PORTES-TERRAIN-2026-09-07-report-lea.md` **à partir de 2.1a**,
+> sur un build qui affiche **1.124.1**. Le §3 (trois décisions) reste valide et indépendant.
+> ⏳ **L'artefact jumeau de cette porte n'est TOUJOURS PAS publié** (rôle de Cowork).
+>
+> **INSCRITS** : **#783** (l'en-tête de la colonne « Présence » a lui aussi deux gabarits — mais avec une raison :
+> son libellé dépend du nombre de périodes), **#784** (la classe de défaut, et l'angle mort de mesure qui l'a
+> laissée passer). **Dernier ID : #784.**
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026, MIDI : REPORTER LES ABSENCES DANS LÉA (1.124.0)
 
 > ✅ **RIEN N'ATTEND SUR UNE BRANCHE.** `claude/bokadex-lea-presence-transfer-e6ynxi` a été fusionnée dans `main`
