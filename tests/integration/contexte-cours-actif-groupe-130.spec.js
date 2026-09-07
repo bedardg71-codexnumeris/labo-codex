@@ -45,8 +45,8 @@ test('Bug #130 · groupe résolu depuis le groupe-cours actif, pas le infoCours 
 
         // Étudiants : 2 dans 00002 (le groupe actif réel), 1 dans 00001 (périmé).
         window.db.setSync(window.cle('groupeEtudiants'), [
-            { da: '2570101', groupe: '00002', nom: 'Bélanger', prenom: 'Charlotte' },
-            { da: '2570107', groupe: '00002', nom: 'Benali', prenom: 'Yasmine' },
+            { da: '9000101', groupe: '00002', nom: 'Bélisle', prenom: 'Camille' },
+            { da: '9000107', groupe: '00002', nom: 'Bertrand', prenom: 'Yolande' },
             { da: '9990001', groupe: '00001', nom: 'Ancien', prenom: 'Groupe' }
         ]);
 
@@ -60,6 +60,6 @@ test('Bug #130 · groupe résolu depuis le groupe-cours actif, pas le infoCours 
     // Comportement observable : seuls les 2 étudiants du groupe RÉELLEMENT actif
     // (00002, via le groupe-cours actif) sont retournés — pas celui du groupe
     // périmé (00001) qu'aurait sélectionné le cache infoCours non corrigé.
-    expect(r.das).toEqual(['2570101', '2570107']);
+    expect(r.das).toEqual(['9000101', '9000107']);
     expect(r.nb).toBe(2);
 });
