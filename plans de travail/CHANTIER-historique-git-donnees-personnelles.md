@@ -52,8 +52,29 @@ vaut ici comme ailleurs.
 
 **Ce que sont ces 19** : les DA à 7 chiffres qui avaient fui **dans le code et dans la prose**
 (fixtures de test, aide de l'application, BACKLOG, RELAIS). Ce n'est **pas** le registre des
-élèves : les exports de `backups-donnees/` en portent bien davantage, et c'est le §1 qui les
-dénombre.
+élèves : les exports de `backups-donnees/` portent un tout autre ensemble, plus large.
+
+▣ **BALAYAGE COMPLET DE LA BASE D'OBJETS — 7 sept. au soir, 36 066 objets en 37 s.**
+**197 blobs** portent au moins un des 19 DA, sur **10 chemins** seulement :
+
+| blobs | chemin |
+|---|---|
+| **182** | `BACKLOG.md` |
+| 5 | `js/travaux-import.js` |
+| 2 + 2 + 1 + 1 + 1 + 1 | six fichiers de `tests/` |
+| 1 | `BACKLOG-ARCHIVE.md` |
+| 1 | ce fichier-ci |
+
+⚠⚠ **`backups-donnees/` n'apparaît PAS dans cette liste — pas un seul blob.** Les 19 DA ne sont
+donc **pas** ceux des exports : ce sont ceux qui ont fui dans les documents. **92 % du travail
+de réécriture, pour ces 19, porte sur l'historique du seul `BACKLOG.md`.**
+⮕ **Ce que ça change** : le tableau du §1 laisse croire que le gros du risque est dans les
+exports. Pour les DA identifiés, c'est faux. Les exports restent à retirer (§4.4,
+`chemins-a-retirer.txt`) et ils portent bien davantage d'élèves — **mais on ne connaît pas leurs
+DA**, et aucune règle de remplacement ne les couvre. C'est exactement ce que les listes de
+Grégoire viendront combler.
+⚠ Compté sur l'inventaire d'objets pris **avant** les retraits du 7 sept. au soir : c'est la
+photo d'origine, celle qui sert de témoin (§5 C).
 
 **Où retrouver la liste au moment d'exécuter le chantier**, dans cet ordre :
 
@@ -93,12 +114,32 @@ de repli à l'audit d'attribution Creative Commons (`REPLIS_HISTORIQUES_CONNUS`,
 `scripts/audit-attribution-cc.mjs`). Le remplacer casse la démo et l'audit. **Ne pas y toucher.**
 Un premier jet l'avait fait, annulé.
 
-**⚠ 2. `libs/jspdf.umd.min.js` contient `br:"‹NOM›"`** — la langue bretonne dans une table de
-langues, pas une personne. Un remplacement littéral de « ‹NOM› » **corrompt une bibliothèque
-tierce**. Toute règle sur ce nom doit être ancrée sur un contexte (`‹NOM›_<da>_`, `nom: '‹NOM›'`).
-↻ **Le nom est masqué en « ‹NOM› » depuis le 7 sept. au soir** : c'est À LA FOIS le patronyme
-d'un élève réel ET la langue bretonne. C'est exactement ce qui le rend indétectable — et
-c'est pourquoi il ne pouvait pas rester écrit ici. Il se relit dans le fichier hors dépôt (§1).
+**⚠ 2. Le patronyme ‹NOM› est AUSSI un mot qui existe ailleurs — mais le cadrage d'origine
+était faux, et il rendait la règle inopérante.** ↻ **Repris le 7 sept. au soir, sur correction
+de Grégoire : « il n'y a aucune référence à la langue bretonne, c'est un vrai nom de famille ».**
+
+▣ **CE QUI A ÉTÉ MESURÉ, fichier par fichier.** Le mot n'apparaît qu'**UNE fois** dans tout
+l'arbre : `libs/jspdf.umd.min.js`, sous la forme `br:"…"`, entre `bs:"Bosnian"` et
+`bg:"Bulgarian"` — la table ISO-639 de jsPDF, code tiers *vendorisé* (en-tête `@license`), que
+personne ici n'a écrit. ⮕ **Grégoire a raison sur ce qui compte** : le projet ne parle nulle
+part de cette langue. **Tout ce que nos sessions ont écrit avec ce mot désignait l'élève.**
+
+⛔⛔ **ET LA CONSÉQUENCE EST GRAVE POUR LA RÈGLE.** Le plan prescrivait quatre regex ancrées
+(`‹NOM›_<da>_`, `nom: '‹NOM›'`, `nom: "‹NOM›"`, `"nom":"‹NOM›"`) pour ne pas toucher jsPDF.
+**Aucune des quatre n'attrape le nom écrit en PROSE** — et c'est précisément là qu'il dormait :
+mesuré dans `BACKLOG.md`, à l'intérieur d'une phrase. La règle ancrée aurait laissé le nom dans
+l'historique du BACKLOG en croyant l'avoir purgé. **Une ancre qui protège une bibliothèque
+protège aussi ce qu'on cherche à effacer.**
+
+⮕ **RÈGLE À RETENIR, plus simple et plus sûre** : remplacement **littéral** du nom, sans ancre.
+Son seul effet de bord est de renommer une étiquette de langue dans jsPDF — inerte
+fonctionnellement (une valeur d'affichage dans une table), mais le fichier diffère alors de
+l'amont. Deux issues, au choix, à décider au moment d'exécuter :
+  a) restaurer `libs/jspdf.umd.min.js` depuis son blob d'origine après la réécriture ;
+  b) assumer l'écart d'un mot, en le notant pour la prochaine remise à jour de la bibliothèque.
+
+↻ Le nom lui-même est masqué en « ‹NOM› » ici depuis le 7 sept. — il se relit dans le fichier
+hors dépôt (§1).
 
 **⚠ 3. Un remplacement de noms est plus dangereux qu'il n'en a l'air.** « Léa » est le nom du
 portail Omnivox, présent partout dans le dépôt. « Roy », « Tremblay », « Jo », « Sam » sont des
@@ -286,6 +327,8 @@ est de **recloner**.
 - [x] **Nom d'élève réel retiré des règles (§4.4) et du piège 2 (§3)** — trouvé en vérifiant
       le retrait des DA : le témoin trouvait encore le fichier. Un seul balayage n'a pas suffi.
 - [ ] **Ses listes de cohortes reçues, dans un fichier HORS du dépôt** (noms + DA)
+- [x] **Balayage complet de la base d'objets** — 7 sept. : 197 blobs, 10 chemins, 182 dans BACKLOG.md (§1)
+- [x] **Piège 2 recadré** sur correction de Grégoire : la règle ancrée était inopérante (§3)
 - [ ] **Sauvegarde conservée hors du conteneur, chez Grégoire**
 - [ ] **Réécriture rejouée** (§4)
 - [ ] **Vérifications avec leurs témoins** (§5)
