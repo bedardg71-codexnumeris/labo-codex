@@ -2077,7 +2077,7 @@ dans le mode où Grégoire ouvre l'application. Ce n'était pas une régression 
 mode d'usage jamais couvert, et une mesure vraie mais incomplète.
 
 **Ce qui a été mesuré à neuf** (Chrome de Grégoire, banc isolé hors dépôt, le vrai
-`IMG_2179.HEIC` de Breton, 2 909 950 octets) :
+`IMG_2179.HEIC` de Bourdages, 2 909 950 octets) :
 
 | Chemin | Contexte | Résultat |
 |---|---|---|

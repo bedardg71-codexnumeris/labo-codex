@@ -5120,7 +5120,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
 
 - [x] **#597 — Les remises HEIC ne s'affichent nulle part : aucun décodeur dans le dépôt.**
   Créé le 30 août 2026, pendant l'import réel du Portrait de lecteur (601-101, 49 fichiers).
-  **Mesuré** : deux remises `.HEIC` (Breton, 4032 x 3024, brand `ftypheic`, magic bytes valides)
+  **Mesuré** : deux remises `.HEIC` (Bourdages, 4032 x 3024, brand `ftypheic`, magic bytes valides)
   entrent dans la file, passent `validerMagicBytes`, et ressortent sans miniature — `thumb: false`,
   dimensions `0 x 0`. Les 5 PDF et les 42 JPEG de la même file sont intacts (`thumb: true`).
   **Cause** : `heic` n'apparaît dans le dépôt QUE dans les listes de formats acceptés
@@ -5142,7 +5142,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   `genererThumbnailQueue`, filet dans `importerFichier`), libellé corrigé dans `travaux-ui.js`.
   **Sentinelle** `sentinelle-597-heic-decode-avant-pipeline` (10 cas) ; **break-test** 4 mutations,
   4 rouges obtenus, restauration vérifiée. Vitest **4105/4105** (394 fichiers).
-  **Mesuré au navigateur** (Chrome 151, modules du dépôt, CSP réelle) : les deux remises de Breton
+  **Mesuré au navigateur** (Chrome 151, modules du dépôt, CSP réelle) : les deux remises de Bourdages
   converties en 3024x4032, 2,3 s et 3,0 s, affichées dans un `<img>`.
   ⚠ **Choix de bibliothèque — ce qui est mesuré, et ce qui ne l'est pas.** heic2any (essayé
   d'abord) réclame `document` puis `window` **tel qu'il se charge par `importScripts`** : deux
@@ -5179,7 +5179,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
 
   ✅ **SECONDE PASSE — 30 août 2026, sur signalement de Grégoire (capture de l'étape 2).**
   La passe précédente se croyait complète : elle avait mesuré, documenté la limite `file://`, et
-  annoncé un « échec EXPLICITE ». Sur le terrain, les deux Breton s'affichaient « **Dimensions
+  annoncé un « échec EXPLICITE ». Sur le terrain, les deux Bourdages s'affichaient « **Dimensions
   inconnues** » — pas « HEIC non décodé » — et **les quatre textes d'interface annonçaient toujours
   le format**. L'application continuait donc de promettre ce qu'elle refusait.
   **Mesuré à neuf** (Chrome de Grégoire, banc isolé hors dépôt, `IMG_2179.HEIC` réel, 2 909 950 o) :
@@ -6006,8 +6006,8 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   Trouvé le 30 août 2026, même import que [[#604]] — dont il est la cause amont.
   `parserNomFichierLea` (`travaux-import.js:98`) coupe le nom sur `_Remis_le_`, prend tout ce qui suit
   le DA et l'appelle `nomProduction`. Sur les deux pages d'une même remise :
-  · `Breton_9000200_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.jpg` → « Portrait de lecteur-p1 »
-  · `Breton_9000200_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.jpg` → « Portrait de lecteur-p2 »
+  · `Bourdages_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.jpg` → « Portrait de lecteur-p1 »
+  · `Bourdages_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.jpg` → « Portrait de lecteur-p2 »
   Le `groupeDocumentId` en dérive (`da + '_' + nomProduction`) : **deux clés différentes pour un seul
   document.** Trois conséquences en cascade, toutes observées :
   1. `assemblerGroupesPipeline` ne voit que des groupes d'UNE image → aucun assemblage.
