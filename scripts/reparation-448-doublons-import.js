@@ -407,7 +407,7 @@
 
                 const avecCitations = groupe.map((g) => ({
                     ...g,
-                    citations: compterCitations(g.item && g.item.id ? String(g.item.id) : ' ', corpus, cleMag)
+                    citations: compterCitations(g.item && g.item.id ? String(g.item.id) : '\x00', corpus, cleMag)
                 }));
                 const vivants = avecCitations.filter((g) => g.citations > 0);
                 const muets = avecCitations.filter((g) => g.citations === 0);

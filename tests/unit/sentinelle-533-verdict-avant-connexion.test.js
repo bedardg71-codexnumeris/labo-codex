@@ -176,11 +176,19 @@ describe('#533 · D — le motif « code observable » n\'existe qu\'à un endro
         expect(POUSSER).toContain('scripts/lot-observable.sh');
     });
 
-    it('D.b ni l\'un ni l\'autre ne garde une copie du motif', () => {
+    it('D.b personne n\'en garde une copie — le fragment lui-même LIT celle de la CI', () => {
+        // ↻ #756 (7 sept. 2026) : l'endroit unique n'est plus le fragment, c'est
+        // la liste `OBSERVABLE` du workflow. Le fragment gardait un motif à lui,
+        // plus étroit que celui de la CI — le hook disait « sans objet » là où le
+        // runner lançait Playwright. La preuve de COMPORTEMENT (même verdict,
+        // chemin par chemin) vit dans sentinelle-756 ; ici, on garde l'invariant
+        // « une seule copie », qui a simplement changé de côté.
         const enDur = /\^\(js\/\|index\\?\.html/;
+        const fragment = lire('scripts', 'lot-observable.sh');
         expect(enDur.test(HOOK), 'copie du motif dans le hook').toBe(false);
         expect(enDur.test(POUSSER), 'copie du motif dans pousser.sh').toBe(false);
-        expect(enDur.test(lire('scripts', 'lot-observable.sh'))).toBe(true);
+        expect(enDur.test(fragment), 'copie du motif dans le fragment : #756 est revenu').toBe(false);
+        expect(fragment).toContain('.github/workflows/tests.yml');
     });
 });
 

@@ -1067,6 +1067,17 @@ function rechercherEvaluations() {
 /**
  * Génère le HTML d'une ligne du tableau
  */
+/**
+ * #776 — La note affichée dans la Liste des évaluations n'était pas arrondie :
+ * « 92.52136752136752% » dans la colonne Note %, alors que la note originale
+ * d'une reprise l'est depuis toujours (`genererLigneHTML`, badge « Reprise »).
+ * Source d'affichage seulement : la valeur stockée n'est pas touchée.
+ */
+function arrondirNoteAffichee(valeur) {
+    const nombre = Number(valeur);
+    return Number.isFinite(nombre) ? Math.round(nombre * 10) / 10 : valeur;
+}
+
 function genererLigneHTML(ligne) {
     // #562 (29 août 2026) — TOUT ce qui vient des données passe par `echapperHtml`,
     // attributs compris (`data-*`, `title`) : la règle 1 du projet est « sans
@@ -1141,7 +1152,12 @@ function genererLigneHTML(ligne) {
         // distincte, reste visible). N'altère pas la valeur stockée.
         affichageNoteChiffree = (typeof noteDiffereeActive === 'function' && noteDiffereeActive())
             ? badgeNoteDifferee()
-            : `<strong>${echapperHtml(ligne.noteChiffree)}%</strong>`;
+            // #776 : une décimale, comme la note originale d'une reprise (badge
+            // « Reprise », plus haut dans cette même fonction).
+            // Une valeur non numérique reste rendue telle quelle (échappée) :
+            // le banc d'échappement #562 en fournit une, et « NaN % » serait pire
+            // que la valeur brute.
+            : `<strong>${echapperHtml(arrondirNoteAffichee(ligne.noteChiffree))}%</strong>`;
     } else {
         affichageNoteChiffree = '-';
     }

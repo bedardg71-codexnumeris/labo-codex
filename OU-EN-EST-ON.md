@@ -15,6 +15,33 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.124.3 — SIX PETITES CHOSES RÉPARÉES PENDANT L'ATTENTE** (build `0907-1325`). Pendant que la question
+des présences instables attend ta réponse, six items sans arbitrage ont été pris d'affilée.
+**Ce que tu verras** : dans Évaluations › Liste, la colonne « Note % » n'affiche plus « 92.52136752136752% »
+mais « 92.5% » — la même règle que la note d'origine d'une reprise, juste à côté ; ton calcul et tes notes
+enregistrées ne changent pas, c'est l'affichage qui montrait le nombre entier de la machine. Et le badge
+« SA » du résumé de groupe a de nouveau un fond : il appelait deux couleurs qui n'avaient **jamais** été
+définies, donc le navigateur les ignorait. ⚠ **Une décision à revoir si elle te déplaît** : ce badge était
+censé être orange, et aucune teinte orange du projet ne se lit correctement dans les deux modes. Il est
+maintenant gris-surface avec une bordure. Si tu veux qu'il se distingue par la couleur, dis-le.
+**Ce que tu ne verras pas, et qui compte quand même** : un fichier du code était illisible pour les outils de
+recherche — dix minutes perdues hier à croire qu'un bout d'export n'existait pas ; il est redevenu du texte,
+et la vérification posée pour l'empêcher de revenir en a trouvé **un second, du même genre**, dans un script de
+réparation : corrigé aussi, sans rien changer à ce qu'il fait. Le garde-fou qui tourne avant chaque
+envoi ne posait pas la même question que celui du serveur : il pouvait dire « rien à vérifier » là où le
+serveur, lui, vérifiait. Il lit maintenant la liste du serveur. ⚠ **Conséquence assumée** : il te demandera
+le verdict du navigateur un peu plus souvent qu'avant — exactement dans les cas où le serveur le rend déjà.
+▣ **Deux mesures ont retourné leur fiche.** Une tâche notée « le seul cas franc, à faire tout de suite » était
+**déjà faite** — trois lignes de vérification l'ont levée. Et en réparant un champ de date dont une classe
+d'affichage se perdait, on a trouvé **vingt-deux autres cas identiques** dans la page. Ils ne sont **pas**
+corrigés : ça changerait vingt-deux affichages d'un coup, et ça se juge à l'écran, avec toi. La liste est
+gelée : elle ne peut plus grossir sans faire échouer les essais. (#753, #755, #756, #776, #778, #779, #787)
+**Vérifié comment** : 506 fichiers d'essais, 5 561 verts (25 de plus qu'au départ) ; dix mutations du code
+faites exprès pour faire rougir les essais neufs, vingt rougeurs obtenues, et le vert retrouvé après. Le contraste du
+badge est **calculé** dans l'essai depuis la feuille de style, pas recopié à la main. Le garde-fou d'envoi est
+**exécuté** dans l'essai et confronté à la règle du serveur sur vingt chemins. **Ce qui n'est PAS vérifié** :
+rien n'a été vu dans Safari ni sur l'iPad — le navigateur reste hors de portée ici.
+
 ↻ **1.124.2 — LE REPORT VERS LÉA EST RETIRÉ** (build `0907-1011`). Grégoire l'a abandonné le jour même de
 sa livraison : « Ce que tu as créé ne fait que trier l'information en la préparant pour Léa. Il s'agit d'un
 transfert manuel des informations. Si on ne peut pas faire un copier/coller, il n'y a pas vraiment d'intérêt,

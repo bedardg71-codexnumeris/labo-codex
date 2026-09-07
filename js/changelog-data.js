@@ -21,6 +21,14 @@
 
     var CHANGELOG = [
         {
+            version: '1.124',
+            couleur: 'orange',
+            titre: 'La note de la Liste des évaluations s\'affiche à une décimale',
+            items: [
+                '<strong>Fini les notes à quinze décimales.</strong> Dans Évaluations \u203a Liste, la colonne « Note % » affichait « 92.52136752136752% ». Elle affiche « 92.5% », comme la note originale d\'une reprise le fait depuis toujours, juste à côté. Le calcul et la note enregistrée ne changent pas : c\'est l\'affichage qui montrait le nombre entier de la machine.',
+            ]
+        },
+        {
             version: '1.123',
             couleur: 'orange',
             titre: 'Le Suivi ne compte plus une reprise deux fois, et ne déclare personne « non-participant » avant le premier travail',
