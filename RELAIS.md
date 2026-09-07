@@ -54,6 +54,15 @@
 > ce qu'une machine pouvait juger l'a été), **rien d'irréversible**, et **l'artefact jumeau reste à publier par
 > Cowork**, qui ne lit pas `.claude/`. Trois décisions y attendent son verdict, dont #747.
 >
+> ⏳ **CHANTIER OUVERT, NON EXÉCUTÉ — #781, purge de l'historique git.** Grégoire a demandé d'effacer de
+> l'historique les données personnelles, « idéalement tout l'historique depuis le début ». L'audit a trouvé
+> 19 exports complets de son application (30 élèves réels chacun), 56 élèves d'A2024, une analyse RàI et
+> `IMG_3171.jpg`. **L'ARBRE COURANT a été nettoyé** (commit `41fe67a8`) ; **l'HISTORIQUE ne l'est pas.**
+> La réécriture a été préparée et vérifiée sur une copie, puis **laissée en attente à sa demande** : il veut la
+> reprendre dans une session à froid. **Ne pas la déclencher sans son signal explicite.**
+> ⮕ Tout est dans `plans de travail/CHANTIER-historique-git-donnees-personnelles.md`, écrit pour être repris
+> SANS la conversation d'origine.
+>
 > **INSCRITS, PAS CORRIGÉS** : **#778** (`.badge-sa` s'appuie sur `--orange-clair` / `--orange-fonce`, qui
 > n'existent nulle part dans `styles.css` : le badge des Services adaptés est sans couleur depuis toujours —
 > trouvé en calquant une classe dessus) · **#779** (double attribut `class` sur `#date-cours`) · **#780**
