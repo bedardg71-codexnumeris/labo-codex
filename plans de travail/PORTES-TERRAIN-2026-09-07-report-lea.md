@@ -1,6 +1,14 @@
 # PORTES TERRAIN — Reporter les absences dans Léa (1.124.0)
 
-**7 septembre 2026** · release `minor` **1.124.0**, build **0907-0834**
+**7 septembre 2026** · release **1.124.1**, build **0907-0938**
+> ⚠⚠ **RELEVÉ DU JOUR MÊME : 2.1a A ÉCHOUÉ, ET C'EST CORRIGÉ.** Le bouton « Reporter dans Léa »
+> n'apparaissait nulle part, sur Mac comme sur iPad. La barre d'actions de la saisie existait en
+> DEUX exemplaires — un dans `index.html`, un second en gabarit `innerHTML` dans
+> `saisie-presences.js` — et le second écrasait le premier au premier rendu d'une séance. Le
+> bouton, ajouté au seul `index.html`, était détruit avant d'avoir pu être cliqué.
+> ⮕ **Corrigé en 1.124.1** : le JS ne reconstruit plus rien, il bascule la visibilité de deux
+> blocs. La barre n'a plus qu'une définition. **Reprendre cette liste à partir de 2.1a**, sur un
+> build qui affiche **1.124.1**.
 Branche `claude/bokadex-lea-presence-transfer-e6ynxi` · **non fusionnée dans `main`** (voir `RELAIS.md`)
 
 > **Cette liste est courte, et c'est voulu.** Règle 1 du skill `portes-terrain` :

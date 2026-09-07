@@ -7991,23 +7991,45 @@
                             </div>
                         </div>
 
-                        <!-- Compteur présents/absents + info séance -->
+                        <!-- Compteur présents/absents + info séance.
+                             ⚠ DEUX ENFANTS QUI S'EXCLUENT, ET AUCUN GABARIT EN JS (7 sept. 2026).
+                             Jusqu'à la 1.124.0, `restaurerCompteurPresences` réécrivait tout ce
+                             conteneur par innerHTML, à partir d'une SECONDE copie de la barre
+                             d'actions vivant dans saisie-presences.js. Le bouton « Reporter dans
+                             Léa », ajouté ici seulement, était donc détruit au premier rendu d'une
+                             séance : invisible sur Mac ET sur iPad. Les deux copies avaient déjà
+                             divergé (le contrôle de verrouillage n'existait que côté JS).
+                             Désormais le JS ne fait que BASCULER la visibilité de ces deux blocs :
+                             tout bouton ajouté à `#actions-presences-bar` survit sans qu'aucun
+                             gabarit soit à synchroniser. Gardé par sentinelle-768. -->
                         <div id="compteur-presences" class="u-mb-15 u-texte-moyen u-texte-medium u-texte-gris u-flex-col" style="background: var(--bleu-tres-pale); padding: 12px 16px; display: flex; gap: 4px; border-left: 4px solid var(--accent-primaire)">
-                            <div id="info-seance" class="u-hide u-texte-petit" style="opacity: 0.8"></div>
-                            <div class="u-flex-wrap u-align-center" style="display: flex; gap: 30px">
-                                <span>Présents : <span id="nb-presents">0</span></span>
-                                <span>Absents : <span id="nb-absents">0</span></span>
-                                <span>Total : <span id="nb-total">0</span></span>
-                                <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
-                                <span id="actions-presences-bar" class="u-flex-gap-8 u-align-center" style="margin-left: auto">
-                                    <button class="btn btn-principal btn-compact" data-action="ouvrirModaleRapportPresences">Rapport</button>
-                                    <button class="btn btn-principal btn-compact" id="btn-report-sis"
-                                            data-action="basculerPanneauReportPresences"
-                                            aria-expanded="false" aria-controls="panneau-report-sis"
-                                            title="Qui reporter dans le portail du cégep, et combien de périodes">Reporter dans Léa</button>
-                                    <button class="btn btn-confirmer btn-compact" data-action="enregistrerPresences">Enregistrer</button>
-                                    <button class="btn btn-annuler btn-compact" data-action="afficherSousSection" data-param="suivi-liste">Annuler</button>
-                                </span>
+                            <div id="message-etat-presences" class="u-hide u-texte-italic" style="color: var(--texte-secondaire)"></div>
+                            <div id="bloc-normal-presences" class="u-flex-col" style="display: flex; gap: 4px">
+                                <div id="info-seance" class="u-hide u-texte-petit" style="opacity: 0.8"></div>
+                                <div class="u-flex-wrap u-align-center" style="display: flex; gap: 30px">
+                                    <span>Présents : <span id="nb-presents">0</span></span>
+                                    <span>Absents : <span id="nb-absents">0</span></span>
+                                    <span>Total : <span id="nb-total">0</span></span>
+                                    <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
+                                    <span id="actions-presences-bar" class="u-flex-gap-8 u-align-center" style="margin-left: auto">
+                                        <button class="btn btn-principal btn-compact" data-action="ouvrirModaleRapportPresences">Rapport</button>
+                                        <button class="btn btn-principal btn-compact" id="btn-report-sis"
+                                                data-action="basculerPanneauReportPresences"
+                                                aria-expanded="false" aria-controls="panneau-report-sis"
+                                                title="Qui reporter dans le portail du cégep, et combien de périodes">Reporter dans Léa</button>
+                                        <button class="btn btn-confirmer btn-compact" data-action="enregistrerPresences">Enregistrer</button>
+                                        <button class="btn btn-annuler btn-compact" data-action="afficherSousSection" data-param="suivi-liste">Annuler</button>
+                                        <span id="controle-verrouillage-presences" class="u-hide u-flex-gap-6 u-align-center u-texte-petit" style="display: flex">
+                                            <input type="checkbox" id="checkbox-verrouillage-presences"
+                                                   style="width: 16px; height: 16px; accent-color: var(--bleu-principal, #1a73e8); cursor: pointer"
+                                                   data-on-change="basculerVerrouillageDateActive">
+                                            <label for="checkbox-verrouillage-presences" style="cursor: pointer; user-select: none; white-space: nowrap">
+                                                <span id="icone-verrouillage-presences"><img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon"></span>
+                                                <span id="texte-verrouillage-presences">Verrouiller</span>
+                                            </label>
+                                        </span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -14446,7 +14468,7 @@
          donc jamais lu sur Safari ni sur iPad. Un script, lui, se charge. Généré
          par scripts/release.mjs en même temps que version.json — les deux ne
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
-    <script src="version.js?v=09070834"></script>
+    <script src="version.js?v=09070938"></script>
     <script src="js/db.js?v=20260826b"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
     <script src="js/pratiques/modalites-evaluation.js?v=20260810a"></script> <!-- SSOT #328 Lot 1 : module propriétaire de modalitesEvaluation (seul point d'écriture), chargé avec la couche stockage -->
@@ -14587,7 +14609,7 @@
     <script src="js/objectifs.js?v=20260903b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20260905a"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
-    <script src="js/saisie-presences.js?v=20260906a"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
+    <script src="js/saisie-presences.js?v=20260907a"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
     <script src="js/indices.js?v=20260905a"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
@@ -14639,7 +14661,7 @@
     <script src="js/labo-codex-data.js?v=2026050603"></script> <!-- #252 : loader codex data dans le Labo -->
     <script src="js/travaux-preparation.js?v=20260829a"></script> <!-- #559 : les options d'import ne visent plus un fichier étranger -->
     <script src="js/heic-decodeur.js?v=20260830d"></script> <!-- #597 : conversion HEIC vers JPEG a l'entree de la file ; le bundle libheif (1,2 Mo) est charge par le worker, seulement quand un HEIC se presente -->
-    <script src="js/travaux-import.js?v=20260907a"></script> <!-- #612 (T6.3) : un DA sans eleve dans ce groupe est recense ; #611 : appariement par nom par MOTS ENTIERS normalisés, ambiguïté ⇒ aucune association ; #558 la file survit au rechargement -->
+    <script src="js/travaux-import.js?v=20260907b"></script> <!-- #612 (T6.3) : un DA sans eleve dans ce groupe est recense ; #611 : appariement par nom par MOTS ENTIERS normalisés, ambiguïté ⇒ aucune association ; #558 la file survit au rechargement -->
     <script src="js/travaux-visionneuse.js?v=20260903b"></script> <!-- Beta 1.106.14 b0831 : zoom molette/trackpad proportionnel a deltaY + apercu CSS pendant le geste -->
     <script src="js/travaux-outils.js?v=20260906b"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 menu ⋮ dans modales Personnaliser tampons + codes erreurs -->
     <script src="js/tampons-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.41 : #264 progression sur exporterBibliotheque (sealing) -->
@@ -14706,7 +14728,7 @@
     <script src="js/guidage-demo.js?v=20260831b"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260907b"></script> <!-- Entrée 1.124 : reporter les absences dans Léa (panneau de la saisie des présences) -->
+    <script src="js/changelog-data.js?v=20260907c"></script> <!-- Entrée 1.124 : reporter les absences dans Léa (panneau de la saisie des présences) -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260808a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14720,18 +14742,18 @@
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
     <script src="js/accompagnement-contenu-hover.js?v=20260903d"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
-    <script src="js/accompagnement-contenu-popup.js?v=20260907a"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
+    <script src="js/accompagnement-contenu-popup.js?v=20260907b"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20260809a"></script>
     <script src="js/guides-pedagogiques.js?v=20260629a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
     <script src="js/comparateur-pratiques.js?v=20260821a"></script> <!-- Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->
     <script src="js/export-resultats-finaux.js?v=20260905a"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260907c"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260907d"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260907c"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260907d"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
