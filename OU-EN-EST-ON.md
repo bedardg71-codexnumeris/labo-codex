@@ -16,8 +16,10 @@
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
 ↻ **1.124.0 FUSIONNÉE DANS `main` ET POUSSÉE** (build `0907-0834`, commit `736928bb`), sur l'autorisation de
-Grégoire. ⚠ **Le déploiement n'a pas été lu** : le proxy de ce conteneur refuse le domaine de l'application. « En
-ligne » n'est donc pas vérifié ici — **le geste qui tranche reste le numéro en bas de page**.
+Grégoire. **Déploiement VÉRIFIÉ par l'API Netlify** : `6a9eb302a9b96b0008b2c867`, contexte production, état `ready`,
+publié à 12 h 50 UTC sur ce commit exact, en 12 s, sans erreur, alias `app.codexnumeris.org`.
+⚠ **La page servie n'a pas été lue** : le proxy de ce conteneur refuse le domaine de l'application, et refuse aussi le
+CDN des captures de déploiement — les deux voies sont fermées. **Le geste qui tranche reste le numéro en bas de page.**
 **Ce qui change pour quelqu'un qui reporte ses absences dans le portail du cégep** : après avoir saisi une séance,
 un bouton « Reporter dans Léa » ouvre un panneau qui dit qui reporter, et combien. Jusqu'ici, il fallait relire les
 vingt-huit lignes de Codex, faire la soustraction de tête pour chacune, puis retrouver les bonnes lignes dans une

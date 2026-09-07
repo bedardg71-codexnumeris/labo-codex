@@ -13,7 +13,14 @@
 > en FAST-FORWARD PUR et poussée, **sur l'autorisation explicite de Grégoire** (le harnais de cette session bornait
 > ses pushes à sa branche désignée ; la question lui a été posée, il a répondu « oui, fusionne »). Branche et `main`
 > au même commit, **`736928bb`**, vérifié après le push (`git rev-list --left-right --count` = `0 0`).
-> ⮕ Le déploiement Netlify part du webhook du push, sans commande (`DEPLOY.md` §1).
+> ▣ **DÉPLOIEMENT VÉRIFIÉ PAR L'API NETLIFY** : deploy `6a9eb302a9b96b0008b2c867`, contexte production, état
+> `ready`, publié à 12 h 50 23 UTC **sur le commit `736928bb` exact**, en 12 s, `error_message` nul, alias
+> `app.codexnumeris.org` ; 13 fichiers, 2 redirections, 9 règles d'en-tête, aucune faute. Le commit `a4631189`
+> (ce relais) ne porte que de la documentation : il déclenchera son propre déploiement, sans effet sur l'application.
+> ⚠ **La PAGE SERVIE n'a pas été lue.** Le proxy sortant de ce conteneur refuse `app.codexnumeris.org`, et — mesuré
+> cette fois, ce qui est neuf — **il refuse aussi le CDN des captures de déploiement** (`cloudfront.net`,
+> `CONNECT tunnel failed, 403`). Cette voie de contournement est donc fermée elle aussi : inutile de la retenter.
+> « En ligne » repose sur l'état Netlify, pas sur une lecture. **Le geste qui tranche reste le numéro en bas de page.**
 > ⚠ **Comme les jours précédents, `main` LOCAL était en retard sur `origin/main`** (ref datant du clonage du
 > conteneur) : `git branch -f main origin/main` AVANT la fusion, sans quoi le fast-forward aurait replanté une vieille
 > base.
