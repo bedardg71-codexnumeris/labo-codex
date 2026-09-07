@@ -103,13 +103,23 @@ describe('Tout voir · les invariants de source', () => {
         expect(sourceCarte).toMatch(/Math\.max\(ZOOM_MIN, Math\.min\(1,/);
     });
 
-    it('les trois bornes de zoom passent par les MÊMES constantes', () => {
-        // Molette, geste Safari, pincement tactile. Le plancher a dû baisser
-        // pour que « Tout voir » puisse tenir sa promesse : s'il repasse en
-        // dur quelque part, les trois divergent à nouveau.
-        expect(sourceCarte).not.toMatch(/Math\.max\(0\.25, Math\.min\(3,/);
+    it('toutes les bornes de zoom passent par les MÊMES constantes', () => {
+        // Le plancher a dû baisser pour que « Tout voir » puisse tenir sa
+        // promesse : s'il repasse en dur quelque part, les sites divergent à
+        // nouveau. C'est ça que cette sentinelle tient — aucune borne écrite
+        // en chiffres, où que ce soit.
+        expect(sourceCarte).not.toMatch(/Math\.max\(\s*[\d.]+\s*, Math\.min\(\s*[\d.]+\s*,/);
+
+        // Le compte est passé de TROIS à DEUX le 7 septembre 2026, et c'est un
+        // site en moins, pas une borne en moins : le geste Safari et le
+        // pincement tactile bornaient chacun de leur côté, ils bornent
+        // désormais au même endroit — la boucle d'aperçu commune, qu'ils
+        // alimentent tous les deux (sentinelle du pincement, S2). Restent
+        // `zoomer()` (molette et raccourcis clavier) et `majApercuZoom()`.
+        // Si un troisième reparaît, c'est qu'un chemin de zoom s'est remis à
+        // vivre à part : c'est exactement ce qu'on veut voir rougir.
         const bornes = sourceCarte.match(/Math\.max\(ZOOM_MIN, Math\.min\(ZOOM_MAX,/g) || [];
-        expect(bornes).toHaveLength(3);
+        expect(bornes).toHaveLength(2);
     });
 });
 
