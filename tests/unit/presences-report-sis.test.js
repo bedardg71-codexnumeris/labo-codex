@@ -33,10 +33,15 @@ const SEANCES = {
     '2026-09-04': [{ numeroSemaine: 1, nombrePeriodes: 2 }]
 };
 
+// ⚠ Élèves de banc, entièrement fictifs. Les DA sont en 90000xx, hors de toute
+// plage réelle. Aucune donnée d'un élève de Grégoire n'entre dans ce dépôt :
+// mon premier jet y avait recopié trois noms et trois DA lus sur une capture,
+// corrigé le jour même. « Laguë » et « Lafond » restent : ce sont des noms
+// choisis pour le tri des accents, pas ceux de quiconque.
 const ETUDIANTS = [
-    { da: '9000195', nom: 'A.', prenom: 'Yacine', coursId: 'C1' },
-    { da: '9000183', nom: 'B.', prenom: 'Ludovic', coursId: 'C1' },
-    { da: '9000196', nom: 'B.', prenom: 'Maélia', coursId: 'C1' }
+    { da: '9000001', nom: 'Abelard', prenom: 'Yann', coursId: 'C1' },
+    { da: '9000002', nom: 'Bonsecours', prenom: 'Lou', coursId: 'C1' },
+    { da: '9000003', nom: 'Bourdages', prenom: 'Mia', coursId: 'C1' }
 ];
 
 beforeAll(() => {
@@ -55,9 +60,9 @@ function reporter(presences, options) {
 describe('Inversion présences → absences', () => {
     it('une présence complète ne produit AUCUNE ligne à reporter', () => {
         const r = reporter([
-            { date: '2026-09-04', da: '9000195', periodesPresentes: 2, coursId: 'C1' },
-            { date: '2026-09-04', da: '9000183', periodesPresentes: 2, coursId: 'C1' },
-            { date: '2026-09-04', da: '9000196', periodesPresentes: 2, coursId: 'C1' }
+            { date: '2026-09-04', da: '9000001', periodesPresentes: 2, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000002', periodesPresentes: 2, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000003', periodesPresentes: 2, coursId: 'C1' }
         ]);
         expect(r.aReporter).toEqual([]);
         expect(r.nbPresents).toBe(3);
@@ -66,21 +71,21 @@ describe('Inversion présences → absences', () => {
 
     it('une absence totale reporte les périodes de la séance, pas les périodes présentes', () => {
         const r = reporter([
-            { date: '2026-09-04', da: '9000195', periodesPresentes: 0, coursId: 'C1' },
-            { date: '2026-09-04', da: '9000183', periodesPresentes: 2, coursId: 'C1' },
-            { date: '2026-09-04', da: '9000196', periodesPresentes: 2, coursId: 'C1' }
+            { date: '2026-09-04', da: '9000001', periodesPresentes: 0, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000002', periodesPresentes: 2, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000003', periodesPresentes: 2, coursId: 'C1' }
         ]);
         expect(r.aReporter).toHaveLength(1);
-        expect(r.aReporter[0].da).toBe('9000195');
+        expect(r.aReporter[0].da).toBe('9000001');
         expect(r.aReporter[0].periodesAbsence).toBe(2);
         expect(r.aReporter[0].periodesPresentes).toBe(0);
     });
 
     it('un retard (1 période sur 2) reporte 1, la différence', () => {
         const r = reporter([
-            { date: '2026-09-04', da: '9000195', periodesPresentes: 1, coursId: 'C1' },
-            { date: '2026-09-04', da: '9000183', periodesPresentes: 2, coursId: 'C1' },
-            { date: '2026-09-04', da: '9000196', periodesPresentes: 2, coursId: 'C1' }
+            { date: '2026-09-04', da: '9000001', periodesPresentes: 1, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000002', periodesPresentes: 2, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000003', periodesPresentes: 2, coursId: 'C1' }
         ]);
         expect(r.aReporter).toHaveLength(1);
         expect(r.aReporter[0].periodesAbsence).toBe(1);
@@ -88,18 +93,18 @@ describe('Inversion présences → absences', () => {
 
     it('une demi-période se conserve (Léa accepte les décimales)', () => {
         const r = reporter([
-            { date: '2026-09-04', da: '9000195', periodesPresentes: 1.5, coursId: 'C1' },
-            { date: '2026-09-04', da: '9000183', periodesPresentes: 2, coursId: 'C1' },
-            { date: '2026-09-04', da: '9000196', periodesPresentes: 2, coursId: 'C1' }
+            { date: '2026-09-04', da: '9000001', periodesPresentes: 1.5, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000002', periodesPresentes: 2, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000003', periodesPresentes: 2, coursId: 'C1' }
         ]);
         expect(r.aReporter[0].periodesAbsence).toBe(0.5);
     });
 
     it('borne haute : une saisie négative ne reporte jamais plus que la séance', () => {
         const r = reporter([
-            { date: '2026-09-04', da: '9000195', periodesPresentes: -3, coursId: 'C1' },
-            { date: '2026-09-04', da: '9000183', periodesPresentes: 2, coursId: 'C1' },
-            { date: '2026-09-04', da: '9000196', periodesPresentes: 2, coursId: 'C1' }
+            { date: '2026-09-04', da: '9000001', periodesPresentes: -3, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000002', periodesPresentes: 2, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000003', periodesPresentes: 2, coursId: 'C1' }
         ]);
         expect(r.aReporter[0].periodesAbsence).toBe(2);
     });
@@ -109,13 +114,13 @@ describe('Cas 1 — aucune saisie : Codex n’affirme rien', () => {
     it('un élève sans présence enregistrée va dans sansSaisie, JAMAIS dans aReporter', () => {
         // Seuls deux des trois élèves ont été saisis.
         const r = reporter([
-            { date: '2026-09-04', da: '9000195', periodesPresentes: 2, coursId: 'C1' },
-            { date: '2026-09-04', da: '9000183', periodesPresentes: 0, coursId: 'C1' }
+            { date: '2026-09-04', da: '9000001', periodesPresentes: 2, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000002', periodesPresentes: 0, coursId: 'C1' }
         ]);
 
-        expect(r.sansSaisie.map(e => e.da)).toEqual(['9000196']);
+        expect(r.sansSaisie.map(e => e.da)).toEqual(['9000003']);
         // Le seul à reporter est celui dont l'absence a été SAISIE.
-        expect(r.aReporter.map(e => e.da)).toEqual(['9000183']);
+        expect(r.aReporter.map(e => e.da)).toEqual(['9000002']);
     });
 
     it('une séance entièrement non saisie ne propose aucune absence', () => {
@@ -129,12 +134,12 @@ describe('Cas 1 — aucune saisie : Codex n’affirme rien', () => {
 describe('Cas 2 — présence facultative (rattrapage RàI, #747)', () => {
     it('un rattrapage ne réduit pas l’absence au cours régulier', () => {
         const r = reporter([
-            { date: '2026-09-04', da: '9000195', periodesPresentes: 0, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000001', periodesPresentes: 0, coursId: 'C1' },
             // Rattrapage le même jour : 2 périodes, facultatives.
-            { date: '2026-09-04', da: '9000195', periodesPresentes: 2, coursId: 'C1', facultatif: true },
-            { date: '2026-09-04', da: '9000183', periodesPresentes: 2, coursId: 'C1' },
-            { date: '2026-09-04', da: '9000196', periodesPresentes: 2, coursId: 'C1' }
-        ], { dasFacultatifs: ['9000195'] });
+            { date: '2026-09-04', da: '9000001', periodesPresentes: 2, coursId: 'C1', facultatif: true },
+            { date: '2026-09-04', da: '9000002', periodesPresentes: 2, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000003', periodesPresentes: 2, coursId: 'C1' }
+        ], { dasFacultatifs: ['9000001'] });
 
         expect(r.aReporter).toHaveLength(1);
         expect(r.aReporter[0].periodesAbsence).toBe(2);
@@ -144,9 +149,9 @@ describe('Cas 2 — présence facultative (rattrapage RàI, #747)', () => {
 
     it('sans rattrapage, aucun élève n’est marqué RàI', () => {
         const r = reporter([
-            { date: '2026-09-04', da: '9000195', periodesPresentes: 0, coursId: 'C1' },
-            { date: '2026-09-04', da: '9000183', periodesPresentes: 2, coursId: 'C1' },
-            { date: '2026-09-04', da: '9000196', periodesPresentes: 2, coursId: 'C1' }
+            { date: '2026-09-04', da: '9000001', periodesPresentes: 0, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000002', periodesPresentes: 2, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000003', periodesPresentes: 2, coursId: 'C1' }
         ]);
         expect(r.aReporter[0].rai).toBe(false);
     });
@@ -166,7 +171,7 @@ describe('Séances sans périodes et dates hors modèle', () => {
         // manquer une séance qui n'existe pas.
         const seancesVides = { '2026-09-04': [{ numeroSemaine: 1, nombrePeriodes: 0 }] };
         const modele = construireModele(ETUDIANTS, seancesVides, [
-            { date: '2026-09-04', da: '9000195', periodesPresentes: 0, coursId: 'C1' }
+            { date: '2026-09-04', da: '9000001', periodesPresentes: 0, coursId: 'C1' }
         ], OPTS_MODELE);
         const r = construireReport(modele, '2026-09-04', {});
         expect(r.periodesAttendues).toBe(0);
@@ -177,9 +182,9 @@ describe('Séances sans périodes et dates hors modèle', () => {
 describe('Ordre des lignes — celui de Léa, accents compris', () => {
     it('trie par nom puis prénom, en plaçant les accents à leur rang français', () => {
         const etudiantsAccentues = [
-            { da: '3000003', nom: 'L.', prenom: 'Cédrick', coursId: 'C1' },
-            { da: '3000002', nom: 'L.', prenom: 'Laurent', coursId: 'C1' },
-            { da: '3000001', nom: 'Lafond', prenom: 'Amélie', coursId: 'C1' }
+            { da: '3000003', nom: 'Lebeau', prenom: 'Cyprien', coursId: 'C1' },
+            { da: '3000002', nom: 'Laguë', prenom: 'Lubin', coursId: 'C1' },
+            { da: '3000001', nom: 'Lafond', prenom: 'Alma', coursId: 'C1' }
         ];
         const modele = construireModele(etudiantsAccentues, SEANCES, [
             { date: '2026-09-04', da: '3000001', periodesPresentes: 0, coursId: 'C1' },
@@ -189,15 +194,15 @@ describe('Ordre des lignes — celui de Léa, accents compris', () => {
         const r = construireReport(modele, '2026-09-04', {});
 
         // « Laguë » se classe entre « Lafond » et « Lebel », pas après le Z.
-        expect(r.aReporter.map(e => e.nom)).toEqual(['Lafond', 'Laguë', 'Lebel']);
+        expect(r.aReporter.map(e => e.nom)).toEqual(['Lafond', 'Laguë', 'Lebeau']);
     });
 });
 
 describe('Comptes affichés', () => {
     it('nbTotal couvre tout le groupe, présents et sans-saisie compris', () => {
         const r = reporter([
-            { date: '2026-09-04', da: '9000195', periodesPresentes: 0, coursId: 'C1' },
-            { date: '2026-09-04', da: '9000183', periodesPresentes: 2, coursId: 'C1' }
+            { date: '2026-09-04', da: '9000001', periodesPresentes: 0, coursId: 'C1' },
+            { date: '2026-09-04', da: '9000002', periodesPresentes: 2, coursId: 'C1' }
         ]);
         expect(r.nbTotal).toBe(3);
         expect(r.nbPresents).toBe(1);
