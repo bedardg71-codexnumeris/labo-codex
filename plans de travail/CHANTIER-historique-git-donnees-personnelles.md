@@ -269,6 +269,15 @@ No de DA;Groupe;Nom de l'étudiant;Prénom de l'étudiant;Prog.;Services adapté
 ~/purge-identites/          ← un DOSSIER, pas un fichier
 ```
 
+⛔⛔ **PAS dans `Documents`, PAS sur le Bureau, PAS dans le dépôt.** macOS sait synchroniser
+`Documents` et `Bureau` vers iCloud, et cette option est souvent active sans qu'on y pense :
+la liste partirait alors chez Apple — **une copie de plus, exactement ce que ce chantier
+cherche à supprimer.** Le dossier personnel lui-même (`/Users/<nom>/`) n'est pas synchronisé.
+⮕ Dans le Finder : **Aller ▸ Départ** (`⌘⇧H`), puis créer le dossier là.
+⚠ **Le nom s'écrit sans accent et sans espace** — `purge-identites` — sinon les commandes
+deviennent fragiles.
+⮕ **Et il se supprime une fois le chantier fini** (rangée 2.5 de la porte terrain).
+
 **Pourquoi un dossier et non un document unique** : concaténer dix exports à la main, c'est dix
 occasions d'abîmer une ligne, et la provenance se perd. Le script lit le dossier, détecte le
 séparateur, saute les lignes d'en-tête, et **déduplique par DA** (un élève inscrit deux

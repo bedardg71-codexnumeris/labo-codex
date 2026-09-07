@@ -58,7 +58,14 @@ Jumelle technique : `plans de travail/CHANTIER-historique-git-donnees-personnell
         │ survivra à la purge SANS QUE RIEN NE LE SIGNALE.              │
         └───────────────────────────────────────────────────────────────┘
 
-        [✓][✗]  Crée un DOSSIER `~/purge-identites/` et dépose tes dix listes dedans,
+        [✓][✗]  Dans le Finder : **Aller ▸ Départ** (`⌘⇧H`) — c'est ton dossier personnel,
+                celui qui porte ton nom, au même niveau que `Documents` et `Bureau`. Crée
+                un dossier `purge-identites` **là** (sans accent, sans espace).
+                ⛔ **PAS dans `Documents`, PAS sur le Bureau** : macOS synchronise souvent ces
+                  deux-là vers iCloud, et ta liste d'élèves partirait chez Apple — une copie de
+                  plus, exactement ce qu'on cherche à supprimer.
+                ⛔ **PAS dans `Monitorage_v6`** : elle finirait dans le dépôt.
+                Dépose tes dix listes dedans,
                 **telles quelles**. Ne reformate rien, ne concatène rien, ne retire pas les
                 en-têtes : le format d'export du collège
                 (`No de DA;Groupe;Nom;Prénom;Prog.;Services adaptés;`) est lu tel quel.
@@ -162,7 +169,8 @@ Jumelle technique : `plans de travail/CHANTIER-historique-git-donnees-personnell
 
   2.5   **Une fois rassuré — et seulement là — efface l'ancien dossier.**        `⚠⚠ Données`
 
-        [✓][✗]  Mets `Monitorage_v6_ancien` à la corbeille, et vide la corbeille.
+        [✓][✗]  Mets `Monitorage_v6_ancien` **et le dossier `purge-identites`** à la corbeille,
+                et vide la corbeille.
                 ⮕ Attendu : il ne reste qu'un dossier `Monitorage_v6`.
                 ⛔ Tant qu'il existe, il contient l'historique complet avec les identités :
                   c'est la dernière copie chez toi.
