@@ -37,13 +37,40 @@ et seul l'historique les garde.
 | `IMG_3171.jpg` | Photo de la feuille de présences réelle. Déjà signalée au BACKLOG en août. |
 | `Archives/Captures modèles/` (53 png), `Audit UX/` (35), `Archives/Bugs/` (2) | Captures d'écran. **Échantillonnées** : celles vues montrent du mode démonstration et des agrégats, pas de noms. Retirées quand même — elles sont déjà hors de l'arbre, leur suppression ne coûte rien. |
 
-### Les 19 DA réels identifiés
+### Les DA réels identifiés — **19**, et la liste ne vit plus ici
 
+⛔ **La liste elle-même a été RETIRÉE de ce document le 7 septembre 2026 au soir, sur décision
+de Grégoire.** Motif, mesuré le jour même : après le nettoyage `41fe67a8`, ces 19 DA
+n'apparaissaient plus **nulle part dans l'arbre courant — sauf ici**. Un document de purge qui
+transporte ce qu'il purge est le dernier endroit qui le publie, et le premier que quiconque
+ouvrirait. La question s'est posée en pesant un passage du dépôt en **public** : le gain
+serait des minutes d'Actions, le coût serait ce bloc.
+
+⚠ **Ce retrait ne touche que l'ARBRE.** Les révisions antérieures de ce fichier gardent la
+liste : c'est la réécriture (§4) qui l'emporte, pas ce commit. « Tarir n'est pas réparer »
+vaut ici comme ailleurs.
+
+**Ce que sont ces 19** : les DA à 7 chiffres qui avaient fui **dans le code et dans la prose**
+(fixtures de test, aide de l'application, BACKLOG, RELAIS). Ce n'est **pas** le registre des
+élèves : les exports de `backups-donnees/` en portent bien davantage, et c'est le §1 qui les
+dénombre.
+
+**Où retrouver la liste au moment d'exécuter le chantier**, dans cet ordre :
+
+1. **Chez Grégoire.** Il a proposé le 7 sept. de fournir les listes complètes de ses cohortes —
+   c'est la meilleure source : elle porte les NOMS autant que les DA, et le §7 dit pourquoi les
+   noms sont l'angle mort qui reste. ⛔ **Le fichier qu'il fournit vit HORS du dépôt** (par
+   exemple `~/purge-identites.txt`), n'est jamais `git add`é, et n'est jamais recopié dans un
+   document versionné — ce serait refaire exactement ce que ce retrait vient de défaire.
+2. **À défaut, en les reconstruisant depuis l'historique**, avant la réécriture :
+
+```bash
+# les DA que le nettoyage de l'arbre a retirés (sous-ensemble)
+git show 41fe67a8 | grep '^-' | grep -oE '\b[0-9]{7}\b' | sort -u
+# et, pour le compte complet, un balayage de tous les blobs (cf. §5 C)
 ```
-2570101 2570107 2570113 2570114 2570115 9000200 9000264 9000193
-9000195 9000183 9000196 9000185 9000190 9000194 9000198 9000201
-9000204 9000192 9000191
-```
+   ⚠ La première commande ne rend qu'une PARTIE des 19 : elle ne voit que ce que ce commit-là
+   a touché. Le balayage du §5 C est la source qui fait foi.
 
 ---
 
@@ -66,9 +93,12 @@ de repli à l'audit d'attribution Creative Commons (`REPLIS_HISTORIQUES_CONNUS`,
 `scripts/audit-attribution-cc.mjs`). Le remplacer casse la démo et l'audit. **Ne pas y toucher.**
 Un premier jet l'avait fait, annulé.
 
-**⚠ 2. `libs/jspdf.umd.min.js` contient `br:"Breton"`** — la langue bretonne dans une table de
-langues, pas une personne. Un remplacement littéral de « Breton » **corrompt une bibliothèque
-tierce**. Toute règle sur ce nom doit être ancrée sur un contexte (`Breton_<da>_`, `nom: 'Breton'`).
+**⚠ 2. `libs/jspdf.umd.min.js` contient `br:"‹NOM›"`** — la langue bretonne dans une table de
+langues, pas une personne. Un remplacement littéral de « ‹NOM› » **corrompt une bibliothèque
+tierce**. Toute règle sur ce nom doit être ancrée sur un contexte (`‹NOM›_<da>_`, `nom: '‹NOM›'`).
+↻ **Le nom est masqué en « ‹NOM› » depuis le 7 sept. au soir** : c'est À LA FOIS le patronyme
+d'un élève réel ET la langue bretonne. C'est exactement ce qui le rend indétectable — et
+c'est pourquoi il ne pouvait pas rester écrit ici. Il se relit dans le fichier hors dépôt (§1).
 
 **⚠ 3. Un remplacement de noms est plus dangereux qu'il n'en a l'air.** « Léa » est le nom du
 portail Omnivox, présent partout dans le dépôt. « Roy », « Tremblay », « Jo », « Sam » sont des
@@ -127,33 +157,39 @@ Audit UX/
 Archives/Bugs/
 ```
 
-`regles-texte.txt` — les DA en littéral, les noms seulement par regex ancrée :
+`regles-texte.txt` — **à GÉNÉRER hors du dépôt, jamais à versionner** (cf. §1 : la table littérale a été retirée d'ici le 7 sept. au soir).
+
+Une ligne par DA réel, chacun vers un substitut synthétique de même forme — c'est ce qui
+préserve la lisibilité des diffs anciens au lieu de les trouer :
+
+```bash
+# depuis le fichier hors dépôt fourni par Grégoire (un DA à 7 chiffres par ligne)
+awk 'NF {printf "%s==>90000%02d\n", $1, NR}' ~/purge-identites.txt > /chemin/hors-du-depot/regles-texte.txt
+wc -l /chemin/hors-du-depot/regles-texte.txt   # doit rendre 19 pour les DA connus au 7 sept.
+```
+
+⚠ **Le bloc d'origine portait aussi quatre règles pour UN nom de famille réel — retirées ici
+le 7 sept. au soir, pour le même motif que les DA : elles le nommaient en clair, quatre fois.**
+En voici la FORME, à reconstruire depuis le fichier hors dépôt. `‹NOM›` est le nom réel,
+`‹SUBSTITUT›` un patronyme inventé de longueur voisine :
 
 ```
-2570101==>9000101
-2570107==>9000107
-2570113==>9000113
-2570114==>9000114
-2570115==>9000115
-9000200==>9000058
-9000264==>9000582
-9000193==>9000200
-9000195==>9000001
-9000183==>9000002
-9000196==>9000003
-9000185==>9000004
-9000190==>9000005
-9000194==>9000006
-9000198==>9000008
-9000201==>9000009
-9000204==>9000005
-9000192==>9000006
-9000191==>9000007
-regex:Breton_(\d{7})_==>Bourdages_\1_
-regex:nom: 'Breton'==>nom: 'Bourdages'
-regex:nom: "Breton"==>nom: "Bourdages"
-regex:"nom":"Breton"==>"nom":"Bourdages"
+regex:‹NOM›_(\d{7})_==>‹SUBSTITUT›_\1_
+regex:nom: '‹NOM›'==>nom: '‹SUBSTITUT›'
+regex:nom: "‹NOM›"==>nom: "‹SUBSTITUT›"
+regex:"nom":"‹NOM›"==>"nom":"‹SUBSTITUT›"
 ```
+
+▣ **Pourquoi quatre règles et pas une**, et c'est le cœur du piège 2 : ce nom est AUSSI une
+langue dans `libs/jspdf.umd.min.js` (`br:"…"`). Les quatre motifs sont donc **ancrés** — suivis
+d'un DA, ou précédés de la clé `nom:` sous ses trois graphies. Un `‹NOM›==>‹SUBSTITUT›` nu
+corromprait la bibliothèque tierce. Toute règle ajoutée pour un autre nom doit être ancrée de
+la même façon, et **éprouvée sur une copie avant d'être lancée**.
+
+⛔ **Les noms ne passent PAS par un remplacement littéral** — pièges 2 et 3 : « ‹NOM› »
+est une langue dans `jspdf`, « Primo Primavera » est l'enseignant fictif de la démo. Les noms
+que Grégoire fournira demandent une regex ancrée, écrite et éprouvée cas par cas.
+
 
 ### 4.5 Réécrire
 
@@ -189,9 +225,11 @@ comparé par `diff`).
 `git rev-list --objects --all` puis chercher chaque chemin de la liste. Attendu : zéro.
 
 **C. Les DA réels ont-ils disparu ?** Parcourir tous les blobs texte
-(`git cat-file --batch`) et chercher les 19 DA. Attendu : zéro.
+(`git cat-file --batch`) et chercher les 19 DA — **liste prise dans le fichier hors dépôt du
+§1, jamais recopiée ici**. Attendu : zéro.
 **TÉMOIN obligatoire** : le même scan sur le dépôt **original** doit les trouver. Mesuré le
-7 sept. : le DA `9000200` était présent dans **97 blobs** de l'original, **0** dans la copie.
+7 sept. : **l'un des 19** était présent dans **97 blobs** de l'original, **0** dans la copie.
+(Le DA témoin n'est plus nommé ici — il se relit dans le fichier hors dépôt du §1.)
 
 **D. Intégrité** : `git fsck` sans erreur.
 
@@ -244,6 +282,10 @@ est de **recloner**.
 - [x] Nettoyage de l'arbre courant — commit `41fe67a8`
 - [x] Réécriture préparée et vérifiée sur une copie (perdue avec le conteneur)
 - [x] Décisions de Grégoire prises (§2)
+- [x] **Liste des 19 DA retirée de ce document** — 7 sept. au soir, sur sa décision (§1)
+- [x] **Nom d'élève réel retiré des règles (§4.4) et du piège 2 (§3)** — trouvé en vérifiant
+      le retrait des DA : le témoin trouvait encore le fichier. Un seul balayage n'a pas suffi.
+- [ ] **Ses listes de cohortes reçues, dans un fichier HORS du dépôt** (noms + DA)
 - [ ] **Sauvegarde conservée hors du conteneur, chez Grégoire**
 - [ ] **Réécriture rejouée** (§4)
 - [ ] **Vérifications avec leurs témoins** (§5)
