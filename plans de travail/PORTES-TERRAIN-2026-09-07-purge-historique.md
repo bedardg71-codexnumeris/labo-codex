@@ -58,14 +58,25 @@ Jumelle technique : `plans de travail/CHANTIER-historique-git-donnees-personnell
         │ survivra à la purge SANS QUE RIEN NE LE SIGNALE.              │
         └───────────────────────────────────────────────────────────────┘
 
-        [✓][✗]  Crée `~/purge-identites.txt` : une ligne par élève,
-                `DA` ⇥ `Nom` ⇥ `Prénom`, séparés par une TABULATION, sans titre de colonnes.
-                Une colonne peut rester vide (un nom sans DA, ça compte quand même).
-                ⮕ Attendu : toutes tes cohortes présentes dans l'historique — l'automne 2024
-                  (56 élèves) et les trimestres exportés d'octobre à décembre 2025.
-                ⛔ **Ne colle jamais cette liste dans une conversation.** Un fichier, rien d'autre.
+        [✓][✗]  Crée un DOSSIER `~/purge-identites/` et dépose tes dix listes dedans,
+                **telles quelles**. Ne reformate rien, ne concatène rien, ne retire pas les
+                en-têtes : le format d'export du collège
+                (`No de DA;Groupe;Nom;Prénom;Prog.;Services adaptés;`) est lu tel quel.
+                ⮕ Attendu : dix fichiers dans le dossier, aucun ouvert ni réenregistré dans Excel.
+                ⛔ **Ne colle jamais ces listes dans une conversation.** Un dossier, rien d'autre.
 
-        Combien de lignes as-tu mises ?   → __________ lignes
+        Combien de listes as-tu déposées ?   → __________ fichiers
+
+  1.1b  **Ne te bats pas avec les accents.**                                    `note`
+
+        ┌ POURQUOI ────────────────────────────────────────────────────┐
+        │ Un export ouvert puis réenregistré dans Excel peut abîmer les │
+        │ accents. Si tu essaies de les réparer à la main, tu risques   │
+        │ d'en perdre un — et un nom mal orthographié n'est pas purgé.  │
+        └───────────────────────────────────────────────────────────────┘
+
+        [✓][✗]  Si les accents ont l'air abîmés, laisse-les. Signale-le, c'est tout.
+                ⮕ Attendu : le script détecte l'encodage et convertit.
 
   1.2   **As-tu du travail non enregistré dans ton dossier ?**                   `⚠⚠ Données`
 
@@ -199,7 +210,21 @@ Jumelle technique : `plans de travail/CHANTIER-historique-git-donnees-personnell
 
         Ta réponse → ______________________________________________
 
-  3.4   **Le dépôt passe-t-il en public, et quand ?**
+  3.4   **Les prénoms qui se confondent avec des mots du projet.**
+
+        ⚠ Avant de purger, la session te présentera un rapport : pour chaque nom et prénom de
+        tes listes, combien de fois le mot apparaît dans le dépôt. Mesuré au hasard sur des
+        prénoms courants : **« Léa » apparaît 214 fois — c'est la plateforme du collège.**
+        « Alice » 66 fois (l'élève fictive des tests), « Rose » 57 (une couleur), « Camille »
+        24 (la démo), « Olivier » 23 (un collègue testeur). Si une de tes élèves porte un de
+        ces prénoms, un remplacement aveugle casserait tout.
+        ⮕ **Ce rapport, c'est toi qui le tranches, cas par cas.** Le plus souvent, ne rien
+        faire suffit : une fois le nom de famille et le DA partis, un prénom seul n'identifie
+        personne.
+
+        Ta réponse → ______________________________________________
+
+  3.5   **Le dépôt passe-t-il en public, et quand ?**
 
         C'est la seule option qui supprime la facture des minutes d'Actions au lieu de la
         rationner. ⚠ Le code de l'application est **déjà** téléchargeable par tout visiteur du

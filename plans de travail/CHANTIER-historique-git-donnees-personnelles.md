@@ -254,21 +254,37 @@ Archives/Bugs/
 Une ligne par DA réel, chacun vers un substitut synthétique de même forme — c'est ce qui
 préserve la lisibilité des diffs anciens au lieu de les trouer :
 
-**Le format attendu du fichier de Grégoire** — une ligne par élève, trois colonnes séparées
-par une tabulation, sans en-tête. Les colonnes vides sont tolérées (une ligne peut n'avoir
-qu'un DA, ou qu'un nom) :
+**Le format des listes de Grégoire — ↻ REVU LE 7 SEPT. AU SOIR, SUR SES LISTES RÉELLES.**
+Il en a **dix** (cohortes de l'hiver 2025 à l'automne 2026, y compris un H25 où il n'a enseigné
+que deux ou trois semaines — les élèves y sont quand même). Le format est celui de l'export du
+collège, **séparé par des points-virgules** :
 
 ```
-2570101	Tremblay	Ariane
-2570107	Roy-Gagnon	Félix
-	Bouchard	Maude          ← un élève dont le DA est inconnu : le nom seul suffit
+No de DA;Groupe;Nom de l'étudiant;Prénom de l'étudiant;Prog.;Services adaptés;
 ```
 
-⚠ **Fichier hors dépôt, jamais `git add`é.** Emplacement suggéré : `~/purge-identites.txt`.
-Il doit couvrir **toutes les cohortes présentes dans l'historique** — A2024 (56 élèves d'après
-le §1), et les trimestres exportés d'octobre à décembre 2025. Un élève absent de la liste
-survivra à la purge sans que rien ne le signale : **c'est la seule pièce que la machine ne peut
-pas deviner.**
+⮕ **NE RIEN LUI FAIRE REFORMATER.** Un dossier, les dix fichiers déposés tels quels :
+
+```
+~/purge-identites/          ← un DOSSIER, pas un fichier
+```
+
+**Pourquoi un dossier et non un document unique** : concaténer dix exports à la main, c'est dix
+occasions d'abîmer une ligne, et la provenance se perd. Le script lit le dossier, détecte le
+séparateur, saute les lignes d'en-tête, et **déduplique par DA** (un élève inscrit deux
+trimestres apparaît deux fois).
+
+⚠ **L'encodage peut être du Latin-1** (un export ouvert dans Excel puis réenregistré) : les
+accents arrivent alors abîmés. **Qu'il ne se batte pas avec** — le script détecte et convertit.
+Se battre avec un encodage à la main, c'est perdre un « é » et rater un nom.
+
+▣ **Les colonnes `Prog.` et `Services adaptés` ne sont PAS à purger** : un code de programme
+n'identifie personne, et le drapeau des services adaptés devient anonyme dès que le nom et le
+DA sont partis. La colonne `Groupe`, elle, sert à départager les cohortes et à repérer les
+doublons.
+
+⚠ **Fichier hors dépôt, jamais `git add`é.** Un élève absent des listes survivra à la purge sans
+que rien ne le signale : **c'est la seule pièce que la machine ne peut pas deviner.**
 
 ```bash
 # depuis le fichier hors dépôt fourni par Grégoire (colonne 1 : le DA)
@@ -294,9 +310,46 @@ d'un DA, ou précédés de la clé `nom:` sous ses trois graphies. Un `‹NOM›
 corromprait la bibliothèque tierce. Toute règle ajoutée pour un autre nom doit être ancrée de
 la même façon, et **éprouvée sur une copie avant d'être lancée**.
 
-⛔ **Les noms ne passent PAS par un remplacement littéral** — pièges 2 et 3 : « ‹NOM› »
-est une langue dans `jspdf`, « Primo Primavera » est l'enseignant fictif de la démo. Les noms
-que Grégoire fournira demandent une regex ancrée, écrite et éprouvée cas par cas.
+### ⛔⛔ LES PRÉNOMS NE SE REMPLACENT PAS COMME LES NOMS — mesuré le 7 sept. au soir
+
+**C'est le piège le plus coûteux du chantier, et il n'avait pas été vu.** Un remplacement
+littéral convient à un nom de famille ; appliqué à un prénom, **il détruit le dépôt**. Mesuré
+sur l'arbre courant, en cherchant des prénoms courants au hasard :
+
+| jeton | occurrences | ce que c'est en réalité |
+|---|---|---|
+| **Léa** | **214** | **la plateforme du collège** — « Reporter dans Léa », l'export, la porte terrain du 7 sept. |
+| Alice | 66 | l'élève FICTIVE des bancs (« Assidu, Alice ») |
+| Rose | 57 | une **couleur** de `styles.css` (`#ff6f91`) |
+| Camille | 24 | le pack de démonstration |
+| Olivier | 23 | un **collègue testeur** (`Retours des testeurs/olivier/`) |
+
+⮕ **Si une seule élève de Grégoire s'appelle Léa, un remplacement littéral casse 214 mentions
+de la plateforme.** Aucun test ne l'attraperait : ce sont des documents.
+
+**La règle, en trois temps :**
+1. **Les DA** — remplacement littéral, sans réserve. Sept chiffres, aucune ambiguïté possible.
+2. **Les noms de famille** — remplacement littéral, **mais après comptage** (voir ci-dessous).
+3. **Les prénoms — JAMAIS littéralement.** Seulement ancrés à un contexte qui prouve qu'il
+   s'agit d'une personne : `prenom: '‹PRÉNOM›'`, `‹NOM›_‹PRÉNOM›_<da>`, `"prenom":"‹PRÉNOM›"`.
+   ▣ **Et le plus souvent, ne rien faire suffit** : une fois le nom de famille et le DA partis,
+   un prénom seul n'identifie personne dans un cégep de plusieurs milliers d'élèves.
+
+**⚠ ÉTAPE OBLIGATOIRE AVANT DE GÉNÉRER LES RÈGLES — le comptage des collisions.** Pour chaque
+nom et chaque prénom de ses listes, compter les occurrences dans le dépôt, et **présenter à
+Grégoire tout jeton qui dépasse une poignée d'occurrences** avant d'écrire la moindre règle :
+
+```bash
+# hors dépôt : un rapport de collisions, à lire AVANT de purger
+while IFS=';' read -r da grp nom prenom reste; do
+  n=$(git grep -o -w -F "$nom" 2>/dev/null | wc -l)
+  p=$(git grep -o -w -F "$prenom" 2>/dev/null | wc -l)
+  [ "$n" -gt 3 ] && echo "NOM      $nom : $n occurrences — À VÉRIFIER"
+  [ "$p" -gt 3 ] && echo "PRÉNOM   $prenom : $p occurrences — À VÉRIFIER"
+done < <(cat ~/purge-identites/*)
+```
+⮕ Ce rapport ne se lit pas en diagonale : c'est lui qui distingue un patronyme rare d'un mot
+que le projet emploie tous les jours.
 
 
 ### 4.5 Réécrire
