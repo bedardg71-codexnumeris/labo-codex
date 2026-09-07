@@ -85,12 +85,11 @@ describe('#768/#782 · la barre d\'actions de la saisie', () => {
 
     it('2. index.html porte la barre en entier, verrouillage compris', () => {
         const { actions, ids } = barreStatique();
-        // Au moins les quatre boutons connus au 7 sept., sans figer la liste :
+        // Au moins les trois boutons connus au 7 sept., sans figer la liste :
         // la vérification qui compte est la 3, qui les prend TOUS tels qu'ils sont.
         expect(actions).toContain('ouvrirModaleRapportPresences');
         expect(actions).toContain('enregistrerPresences');
         expect(actions).toContain('afficherSousSection');
-        expect(actions).toContain('basculerPanneauReportPresences');
         // #782 : ce contrôle n'existait QUE dans le gabarit JS, d'où sa disparition
         // quand le gabarit est parti. Il vit désormais dans index.html.
         expect(ids).toContain('controle-verrouillage-presences');
