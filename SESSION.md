@@ -7,6 +7,59 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 35 — 7 SEPTEMBRE 2026, MATIN : « LES PERFORMANCES SONT AFFICHÉES À ZÉRO » (1.123.12, #775 / SUIVI-BUGS #541).
+     ▣ RETOUR DE GRÉGOIRE, 7 h 01, avec deux captures : « les performances sont affichées à zéro alors qu'elles ne
+       le sont pas. La progression est affichée stable, mais tout le monde est au niveau 3. Le suivi est donc
+       incohérent. » Suivi › Groupe, A2026-601-101-MQ-00007, 28 élèves, pratique PAN-SDT-Litt A26.
+     ▣ CE QUI A TRANCHÉ AVANT TOUTE LECTURE DE CODE — l'arithmétique de ses captures. La carte annonçait « parmi les
+       28 étudiant·es en difficulté, 25 montrent des signes de progrès » ; la barre du dessous, « difficulté
+       persistante : 3 ». 28 − 3 = 25. Les deux chiffres portent donc sur la MÊME population, lue par DEUX chemins.
+       Il n'y avait plus à chercher un calcul faux : il fallait trouver l'écart entre les deux chemins.
+     ▣ LA SOURCE AVAIT RAISON, ET C'EST LE POINT. Une PAN-Standards ne construit sa note qu'à partir de plusieurs
+       résultats ; il en a un. `portfolio.js:646` stocke alors `P = 0` AVEC `noteConstructible: false` — exactement
+       ce que #394 (règle 4) demande. Le drapeau était déjà honoré par cinq lecteurs (bulles, panneau prioritaire,
+       rapport de profil, comparateur #326-T1, export des résultats) et ignoré par quatre autres. Chercher la cause
+       dans le moteur de note aurait coûté la journée.
+     ▣ LES QUATRE LECTEURS : `calculerDistributionPerformance`, `genererInterpretationPerformance`,
+       `genererDiagnosticNotePassage` (tableau-bord-apercu.js) et `determinerNiveauRaiPedagogique`
+       (profil-etudiant-calculs.js). Les trois premiers reçoivent le tableau que `genererBarreDistribution` leur
+       passe, drapeaux compris : le filtre est donc UN filtre, `!sansEvaluation && !nonConstructible` — la MÊME
+       règle que la moyenne affichée au-dessus de la même barre, qui l'appliquait déjà. Le quatrième lit
+       `calculerTousLesIndices`, qui rend `noteConstructible` depuis #394 sans que personne ici ne le regarde.
+     ▣ `genererDiagnosticNotePassage` N'ÉTAIT PAS UNE TROUVAILLE : c'est la branche voisine du même `if/else` (elle
+       sert quand la préférence « descriptions SOLO » est décochée). La laisser aurait fait survivre le bug derrière
+       un réglage. Le lot n'était pas fini sans elle.
+     ▣ DÉCISION DE GRÉGOIRE (question posée avec trois options, tranchée en un geste) : tant que la note n'est pas
+       constructible, le palier RàI se décide SUR LE DÉPISTAGE SEUL. Écartées : « aucun palier tant qu'il n'y a pas
+       de note » (le dépistage précoce se tairait trois semaines, au moment où il sert le plus) et « palier marqué
+       provisoire » (une représentation de plus à concevoir et à faire tenir sur iPad).
+     ▣ ⚠ MA PREMIÈRE MESURE ÉTAIT MAL POSÉE, et il faut le dire : je lui ai demandé de toucher une bulle pour lire
+       « note non constructible ». Ce texte vit dans un attribut `title` — l'infobulle NATIVE, que Safari tactile
+       n'affiche jamais. Ce qu'il a vu (une bulle nommée « R., Jacob », SANS pourcentage) était pourtant la
+       preuve cherchée : `data-valeur` est vidé précisément quand la note n'est pas constructible. La leçon vaut
+       au-delà du cas : une mesure demandée à l'iPad ne doit jamais reposer sur un `title`.
+     ▣ ⚠ UN BREAK-TEST RATÉ, ET SA CAUSE. Les trois premiers break-tests de la carte sont restés VERTS : mon script
+       de mutation INSÉRAIT un filtre neutre au lieu de REMPLACER le vrai (`list.insert` là où il fallait
+       reconstruire). Le correctif n'avait donc jamais été retiré. Refaits correctement : 3 rouges sur 3, et
+       `genererInterpretationPerformance` n'en fait rougir qu'un seul — normal, deux des trois cas ne l'appellent
+       pas. ⮕ Un break-test vert se soupçonne D'ABORD comme un défaut du break-test.
+     ▣ ⚠ ET UN GESTE À NE PAS REFAIRE : `git checkout <fichier>` pour restaurer après une mutation a effacé le
+       correctif non indexé de `profil-etudiant-calculs.js`. Réappliqué et remesuré. Restaurer se fait par copie
+       d'une sauvegarde, jamais par `git checkout` sur un arbre qui porte du travail non commité.
+     ▣ CE QUE LE LOT NE FAIT PAS, assumé et inscrit : il tarit la SOURCE d'affichage, pas le STOCK. `snapshots.js`
+       a déjà gravé des `P: 0` sans drapeau (#777). Rien n'est réparé d'office dans ses données.
+     ▣ TROUVAILLES, avec leur disposition NOMMÉE : #776 inscrire et continuer (la note non arrondie de la Liste des
+       évaluations — « 92.52136752136752% » sur sa capture, `liste-evaluations.js:1144`) ; #777 inscrire et
+       continuer (le stock des snapshots) ; niveau 3, commenté nulle part et sans conséquence observable : les
+       corrélations r(A↔P) et r(C↔P) de la liste des étudiants (`etudiants.js:878`) se calculent sur des P non
+       constructibles — à variance nulle, Pearson ne rend rien d'affichable.
+     ▣ SÉCURITÉ : le seul texte utilisateur qui entre dans le HTML neuf est le terme de production configurable —
+       `echapperHtml` posé. Zéro handler inline, zéro `console.log`, zéro `eval`, aucune zone protégée touchée.
+     ▣ VITEST 501 fichiers / 5 534 tests verts (500 / 5 529 au départ). ⛔ AUCUN VERDICT PLAYWRIGHT sur ce commit :
+       WebKit absent du conteneur (#456), jeton inexistant. Le hook pre-push ne juge que Vitest — dit, pas caché.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 34 bis — 7 SEPTEMBRE 2026, CLÔTURE : FUSION ET MISE EN LIGNE DES DEUX LOTS (1.123.10 ET 1.123.11).
      ▣ Demande de Grégoire, en clair : « il faut faire le déploiement pour pouvoir faire les tests ». Juste — les
        deux correctifs ne se jugent que sur son iPad, et son iPad lit la production.

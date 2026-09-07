@@ -1817,6 +1817,19 @@ function determinerNiveauRaiPedagogique(da) {
     // Récupérer les indices de performance
     const indices = calculerTousLesIndices(da);
     const P = indices.P / 100; // Convertir en décimal 0-1
+    // #775 — UNE NOTE QUI N'EXISTE PAS ENCORE N'EST PAS UNE NOTE DE ZÉRO.
+    // `portfolio.js` stocke `P = 0` quand la note du cours n'est pas constructible
+    // (PAN-Standards qui attend ses N résultats, config portfolio en erreur…) et le
+    // dit par `noteConstructible: false` (#394, règle 4). Ce palier lisait le 0 comme
+    // une performance nulle : au premier artefact d'un trimestre, TOUT le groupe
+    // passait « Niveau 3 — Intensif » pendant que la barre des patterns, elle, lisait
+    // les copies et disait « Stable » (retour terrain du 7 septembre 2026, capture à
+    // l'appui : 24 stables, 27 en palier intensif).
+    // RÈGLE ARRÊTÉE PAR GRÉGOIRE (7 septembre 2026) : tant que la note n'est pas
+    // constructible, le palier se décide SUR LE DÉPISTAGE SEUL — le pattern des N
+    // derniers artefacts, la même donnée que la barre SOLO. La note n'entre dans le
+    // calcul qu'une fois qu'elle existe.
+    const noteConstructible = indices.noteConstructible !== false;
 
     // Déterminer quelle fonction utiliser selon la pratique
     // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
@@ -1880,7 +1893,7 @@ function determinerNiveauRaiPedagogique(da) {
     // LOGIQUE PÉDAGOGIQUE (basée uniquement sur P et SRPNF)
 
     // Niveau 3 - Intensif : Difficulté persistante (P < insuffisant OU plusieurs critères < développement)
-    if (pattern === 'Difficulté persistante' || P < seuilIdmeInsuffisant) {
+    if (pattern === 'Difficulté persistante' || (noteConstructible && P < seuilIdmeInsuffisant)) {
         return {
             niveau: 3,
             label: 'Niveau 3 - Intensif',
@@ -1897,10 +1910,10 @@ function determinerNiveauRaiPedagogique(da) {
     // Niveau 2 - Préventif : Performance en développement (<75%) OU Difficulté émergente OU Défi spécifique
     // Un élève avec P en zone "Développement" (65-74%) nécessite un accompagnement préventif,
     // même si son pattern est "Stable" (pas de défi identifié).
-    if (P < seuilIdmeDeveloppement || pattern === 'Difficulté émergente' || pattern === 'Défi spécifique') {
+    if ((noteConstructible && P < seuilIdmeDeveloppement) || pattern === 'Difficulté émergente' || pattern === 'Défi spécifique') {
         // Déterminer la description selon le contexte
         let description;
-        if (P < seuilIdmeDeveloppement && pattern === 'Stable') {
+        if (noteConstructible && P < seuilIdmeDeveloppement && pattern === 'Stable') {
             description = 'Performance en développement nécessitant un accompagnement préventif.';
         } else if (pattern === 'Difficulté émergente') {
             description = 'Difficultés émergentes nécessitant une intervention préventive ciblée.';

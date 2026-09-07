@@ -587,6 +587,14 @@ function genererDiagnosticNotePassage(etudiants) {
         return '';
     }
 
+    // #775 — même règle que la répartition IDME de la branche voisine : une note qui
+    // ne se construit pas encore n'est pas une note « inférieure à 60 % ». Sans ce
+    // filtre, le même défaut survivait derrière la préférence « descriptions SOLO ».
+    etudiants = etudiants.filter(e => !e.sansEvaluation && !e.nonConstructible);
+    if (etudiants.length === 0) {
+        return '';
+    }
+
     const notePassage = 0.60; // 60%
     const total = etudiants.length;
 
@@ -618,6 +626,14 @@ function genererDiagnosticNotePassage(etudiants) {
  */
 function genererInterpretationPerformance(etudiants, echelle) {
     if (!etudiants || etudiants.length === 0 || !echelle) {
+        return '';
+    }
+
+    // #775 — même population que la répartition : une note non constructible n'est
+    // pas une note en difficulté (« Parmi les 28 étudiant·es en difficulté… » alors
+    // que la barre des patterns en donnait 24 stables).
+    etudiants = etudiants.filter(e => !e.sansEvaluation && !e.nonConstructible);
+    if (etudiants.length === 0) {
         return '';
     }
 
@@ -703,6 +719,19 @@ function genererInterpretationPerformance(etudiants, echelle) {
 function calculerDistributionPerformance(etudiants) {
     if (!etudiants || etudiants.length === 0) {
         console.warn('📊 Distribution P : Aucun étudiant');
+        return null;
+    }
+
+    // #775 — UN P STOCKÉ À 0 « NON CONSTRUCTIBLE » N'EST PAS UNE PERFORMANCE NULLE.
+    // `portfolio.js` écrit `P = 0` + `noteConstructible: false` tant que la note du
+    // cours ne se construit pas (PAN-Standards qui attend ses N résultats, config
+    // portfolio en erreur…). Les compter ici les rangeait tous dans le premier niveau
+    // de l'échelle : « Incomplet ou insuffisant : 28 » au premier artefact d'un
+    // trimestre (retour terrain du 7 septembre 2026). MÊME RÈGLE que la moyenne
+    // affichée au-dessus de la même barre (`genererBarreDistribution`), pour que le
+    // chiffre et la répartition portent sur la même population.
+    etudiants = etudiants.filter(e => !e.sansEvaluation && !e.nonConstructible);
+    if (etudiants.length === 0) {
         return null;
     }
 
@@ -1836,6 +1865,9 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             // 🆕 BETA 91: Distribution IDME + interprétation (si RàI activé)
 
             const distribution = calculerDistributionPerformance(etudiants);
+            // #775 — combien restent hors de la répartition, et pourquoi : rien ne
+            // disparaît en silence de la carte.
+            const nbSansNote = etudiants.filter(e => e.sansEvaluation || e.nonConstructible).length;
 
             let interpretation = '';
 
@@ -1852,13 +1884,25 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             }
 
             if (distribution) {
+                const mentionSansNote = nbSansNote > 0
+                    ? `<div class="u-mt-6">${nbSansNote} ${window.pluriel(nbSansNote, 'élève', 'élèves')} sans note constructible ${window.pluriel(nbSansNote, 'n\'est pas réparti·e', 'ne sont pas réparti·es')}.</div>`
+                    : '';
                 interpretationHTML = `
                     <div class="tb-texte-description">
                         <div><span class="u-texte-gras">Distribution : </span>${distribution}</div>
                         ${interpretation ? `<div class="u-mt-6">${interpretation}</div>` : ''}
+                        ${mentionSansNote}
                     </div>
                 `;
-            } else {
+            } else if (nbSansNote > 0) {
+                // #775 — personne n'a encore de note constructible : le dire, plutôt que
+                // de laisser la barre muette ou, pire, de ranger tout le groupe dans le
+                // premier niveau de l'échelle.
+                interpretationHTML = `
+                    <div class="tb-texte-description">
+                        La note du cours ne se construit pas encore : il n'y a rien à répartir. Le dépistage, lui, s'appuie sur les ${echapperHtml(obtenirTermeProduction('pluriel'))} déjà ${accordTermeProduction('evalue', 2)}.
+                    </div>
+                `;
             }
         } else {
             // 🆕 BETA 91: Diagnostic basique note de passage (SOLO désactivé)

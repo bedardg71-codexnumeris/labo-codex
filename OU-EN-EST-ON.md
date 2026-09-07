@@ -15,6 +15,25 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.123.12 LIVRÉE** (build `0907-0733`). **Ce qui change pour quelqu'un qui ouvre le Suivi d'un groupe en début
+de trimestre** : la carte des performances ne dit plus que tout le monde est en difficulté quand la note du cours
+n'existe pas encore. Une pratique par standards construit sa note à partir de plusieurs résultats : tant qu'elle n'en
+a pas assez, il n'y a pas de note — et ce n'est pas la même chose qu'une note de zéro. L'application le savait
+déjà, elle le disait même aux bulles de la barre, mais quatre écrans du Suivi lisaient ce « pas de note » comme un
+zéro : la répartition rangeait les vingt-huit élèves dans « Incomplet ou insuffisant », la phrase en dessous
+annonçait « vingt-huit étudiant·es en difficulté », et le modèle d'intervention les plaçait tous au palier le plus
+intensif — pendant que la barre juste au-dessous, elle, lisait les copies et disait « progression stable » pour
+vingt-quatre d'entre eux. Maintenant la carte ne répartit que les élèves dont la note existe, dit combien restent en
+attente, et **le palier d'intervention se décide sur le dépistage seul** — les derniers artefacts, la même donnée que
+la barre des patterns — tant que la note ne se construit pas. C'est la règle que Grégoire a arrêtée ce matin-là,
+entre trois possibles.
+**Vérifié comment** : cinq essais neufs, dont celui qui protège l'envers — une note qui vaut VRAIMENT zéro garde son
+palier intensif. Quatre mutations du code, une par écran corrigé, les font rougir. Vitest 501 fichiers / 5 534 verts.
+**Ce qui n'est PAS vérifié** : l'écran réel sur l'iPad de Grégoire — le conteneur n'a pas WebKit.
+▣ **Ce que le travail a appris** : la première mesure demandée à Grégoire était mal posée. On lui a fait toucher une
+bulle pour lire une infobulle que Safari tactile n'affiche jamais. Ce qu'il a vu — une bulle sans pourcentage — était
+pourtant la preuve cherchée.
+
 ↻ **1.123.11 EN LIGNE** (build `0906-2039`, commit `d50ed45d`). **Déploiement VÉRIFIÉ par l'API Netlify** :
 `6a9e0c6912ce270008829994`, contexte production, état `ready`, publié à 00 h 59 UTC sur ce commit exact, en 8 s, sans
 erreur, alias `app.codexnumeris.org` ; 17 fichiers, 2 redirections et 9 règles d'en-tête déployés sans faute.
