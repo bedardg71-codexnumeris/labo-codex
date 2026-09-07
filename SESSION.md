@@ -7,6 +7,64 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 33 — 7 SEPTEMBRE 2026 (conteneur cloud, branche `claude/alignment-map-zoom-fluidity-9itj9c`) :
+     RETOUR TESTEUR #539 — LE PINCEMENT DE LA CARTE D'ALIGNEMENT SUR IPAD. Release 1.123.10.
+     ▣ Ouverture (subagent d'audit) : arbre propre, HEAD = origin/main `634f5143`, 0 ahead / 0 behind,
+       Vitest 498 / 5 479 verts, quatre points de vérité cohérents à 1.123.9 / 0906-1458. Aucun écart de fond
+       avec la prémisse. Deux écarts documentaires signalés, non corrigés : SESSION.md n'avait aucun bloc pour
+       les cycles 1.123.8 / 1.123.9 (ce bloc-ci ne les rattrape pas — la trace en est dans RELAIS.md et
+       OU-EN-EST-ON.md), et l'étiquette temporelle de l'état courant du BACKLOG est en retard d'une demi-journée.
+     ▣ LE RAPPORT : « les zoom in et out dans le canevas de la carte d'alignement ne sont pas fluides comme ceux
+       des pages Annoter et Évaluer » (iPad Air, Safari 26.6, 1.123.9, gravité mineure, aucune erreur console).
+     ▣ TROIS CAUSES, toutes lues au code, aucune présente dans `travaux-visionneuse.js` que Grégoire donne pour
+       référence — c'est ce qui rend la comparaison exploitable plutôt qu'impressionniste :
+       (a) LES DEUX CHEMINS DE PINCEMENT ÉTAIENT BRANCHÉS EN MÊME TEMPS. `gesturestart`/`gesturechange` (Safari)
+           et `touchstart`/`touchmove` (générique) étaient enregistrés l'un après l'autre sur la même zone, sans
+           `else`. Safari émet les deux familles pendant UN seul pincement : chacun réécrivait `etat.zoom` depuis
+           sa propre base et recentrait sur son propre point — le centre de la zone pour l'un, le milieu des
+           doigts pour l'autre. Deux zooms qui se contredisent par image.
+       (b) UN CYCLE DE MISE EN PAGE COMPLET PAR ÉVÉNEMENT : redimensionner l'enveloppe de 10 000 × 6 000 px,
+           lire `getBoundingClientRect()`, réécrire `scrollLeft`/`scrollTop`, parcourir les boutons de préréglage.
+           Écriture, lecture qui la force, écriture encore — et Safari émet plus d'événements qu'il n'y a d'images.
+       (c) LA MOLETTE AVANÇAIT D'UN PAS FIXE DE ±5 %, donc à la cadence des événements et non à l'ampleur du
+           geste. C'est le défaut corrigé sur la visionneuse en #660, resté ici. (Trouvé par le subagent d'audit ;
+           hors du chemin iPad, corrigé au passage parce que c'est le même geste au trackpad.)
+     ▣ LE CORRECTIF : le geste passe par un aperçu en `transform` seul (`translate` + `scale`, composé sans remise
+       en page), coalescé par `requestAnimationFrame` ; l'enveloppe, le défilement et les boutons attendent
+       `gestureend`. La géométrie de la zone se lit UNE fois, au départ. Le point focal se fige au départ lui aussi
+       — le réécrire à chaque événement fait dériver la carte de ce que les doigts ont parcouru, c'est la
+       correction du 31 août sur la visionneuse, même piège ici. Le défilement, lui, se RELIT à chaque image :
+       à deux doigts Safari peut faire glisser la zone pendant le pincement.
+     ▣ ZÉRO-DETTE : quatre copies du même affichage de pourcentage cohabitaient (`zoomer`, les préréglages, Cmd+0,
+       et `majAffichageZoom` qui doublait `mettreAJourBoutonsZoomPreset`). Une seule subsiste. C'est mon lot qui
+       les rendait mortes, pas une trouvaille en chemin.
+     ▣ PREUVE : sentinelle `sentinelle-pincement-carte-alignement` (31 tests) — S1 l'arithmétique (le point sous
+       les doigts ne bouge pas, à l'aperçu comme après, et les deux coïncident), S2 l'exclusion des deux chemins,
+       S3 la boucle qui ne remet rien en page, S4 la molette proportionnelle. ⚠ Le test écrit SON PROPRE modèle de
+       rendu à partir du CSS (`transform-origin: 0 0` dans une zone qui défile) plutôt que d'emprunter les
+       formules du module : sans ça il vérifierait une formule par elle-même.
+     ▣ BREAK-TESTS (6 mutations, restaurations par copie, arbre repropre à chaque fois) : décalage d'aperçu privé
+       du défilement → 11 rouges ; chemin tactile sorti du `else` → 1 rouge ; boucle d'aperçu qui repose
+       l'enveloppe et le défilement → 2 rouges ; molette au pas fixe → 2 rouges ; borne de zoom remise en dur →
+       1 rouge ; troisième site de bornage ajouté → 1 rouge.
+     ▣ SENTINELLE EXISTANTE MISE À JOUR : `sentinelle-tout-voir-et-loupe` comptait TROIS sites bornés par
+       ZOOM_MIN/ZOOM_MAX (molette, geste Safari, pincement tactile). Il en reste DEUX — un site en moins, pas une
+       borne en moins : les deux chemins de pincement bornent désormais au même endroit. Le compte est passé à 2
+       et la règle a été RENFORCÉE au passage : plus aucune borne numérique en dur, quelles que soient ses valeurs
+       (l'ancienne ne refusait que `0.25`/`3` littéralement).
+     ▣ EFFET DE BORD ASSUMÉ, à dire à Grégoire : le pincement se recentre maintenant sur le point pincé, plus sur
+       le centre de l'écran. C'est le comportement d'Annoter et Évaluer, et c'est un changement visible.
+     ▣ SUPPOSITION NOMMÉE : « fluide » a été lu comme le PINCEMENT, pas comme les boutons + / −. Le rapport vient
+       d'un iPad et « in et out » y désigne le geste à deux doigts ; les trois causes trouvées sont réelles quelle
+       que soit l'intention. Si Grégoire visait les boutons, le lot est à reprendre.
+     ▣ VERDICT : Vitest 499 / 5 510 verts. **Playwright INJOUABLE ici** — WebKit absent des conteneurs (#456),
+       aucun jeton `.verdict-playwright.json` sur le disque. ⚠ **La fluidité ne se juge pas au banc** : rien ici
+       ne mesure une image par seconde. Le verdict appartient au doigt de Grégoire sur l'iPad.
+     ▣ PAS DE PORTE TERRAIN FORMELLE : aucune donnée en jeu, rien d'irréversible — règle 2 du skill
+       `portes-terrain` (« préalable dû seulement si un raté est irréversible »). Même arbitrage que #773/#774.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 32 — 6 SEPTEMBRE 2026, 10 H 12 → 11 H 10 (Mac, worktree) : QUATRIÈME AUDIT CADRÉ — LES SIX SOUS-ONGLETS DE SUIVI
      (logique propre, affichage, sauvegardes), SANS CODER. Consigne du 6 à 10 h 07 ; prompt
      `Rapports/prompts-audit/PROMPT-AUDIT-sous-onglets-suivi-2026-09-06.md` (statut : exécuté).

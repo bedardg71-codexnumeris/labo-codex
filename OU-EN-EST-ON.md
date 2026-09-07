@@ -15,6 +15,23 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **7 septembre 2026 (Claude Code) — 1.123.10 PRÊTE, PAS ENCORE EN LIGNE** (build `0906-2017` ; branche
+`claude/alignment-map-zoom-fluidity-9itj9c`, poussée, non fusionnée dans `main` : la fusion et le déploiement restent à faire).
+**Ce qui change pour quelqu'un qui planifie sur iPad** : pincer pour agrandir ou réduire la carte d'alignement (Conception) ne
+devrait plus accrocher. Trois choses se battaient dans ce geste. Deux mécanismes de zoom tournaient en même temps sur le même
+pincement — l'un recentrait sur le milieu de l'écran, l'autre sur l'endroit pincé — et se contredisaient à chaque image. Chacun
+refaisait la mise en page de toute la carte, dix mille pixels sur six mille, à chaque instant du geste. Et au trackpad, le zoom
+avançait par bonds de 5 % au rythme des signaux reçus plutôt qu'à l'ampleur du geste. Le pincement se comporte maintenant comme
+celui d'Annoter et d'Évaluer, qui n'avait aucun de ces trois défauts. **Un changement visible à annoncer** : le zoom se recentre
+désormais sur le point pincé, plus sur le centre de l'écran.
+**Vérifié comment** : une sentinelle neuve de 31 essais qui tient l'arithmétique du geste — le point de carte sous les doigts ne
+bouge pas, pendant le pincement comme après —, l'exclusion des deux mécanismes, et l'absence de remise en page dans la boucle ;
+quatre mutations du code la font rougir, deux de plus pour la sentinelle voisine qui garde les bornes de zoom ; Vitest 499 fichiers
+/ 5 510 verts. **Ce qui n'est PAS vérifié, et c'est l'essentiel ici** : rien de tout cela ne dit que c'est FLUIDE. Le conteneur n'a
+pas WebKit, Playwright n'a pas de doigt, et aucun banc ici ne mesure une image par seconde. **Le geste réel sur l'iPad Air est le
+seul juge**, et il reste dû. **Une supposition, à démentir si elle est fausse** : « les zoom in et out » a été lu comme le
+pincement à deux doigts, pas comme les boutons + et −. Si c'était les boutons, le lot est à reprendre.
+
 ↻ **6 septembre 2026, 16 h 15 (Claude Code) — 1.123.9 EN LIGNE** (build `0906-1458`, `c09ca731` ; `main` = `origin/main`, arbre
 propre ; poussée à 16 h 11, déploiement Netlify `ready` sur ce commit, vérifié par l'API — la page servie, elle, n'a pas pu être lue
 d'ici, le proxy du conteneur refuse le domaine : le numéro en bas de page reste le geste qui tranche). **Ce qui change pour quelqu'un qui annote sur iPad** : le coin inférieur droit

@@ -2515,6 +2515,11 @@ const ESPACE_H = 6000;
 const ZOOM_MIN = 0.10;
 const ZOOM_MAX = 3;
 
+// Sensibilité de la molette et du pincement trackpad. Reprise telle quelle de
+// `travaux-visionneuse.js` (#660) : c'est un CALIBRAGE, pas une mesure — il se
+// juge au doigt, pas au banc.
+const ZOOM_SENSIBILITE_MOLETTE = 0.025;
+
 // Grossissement de la loupe, et zoom d'atterrissage quand on clique dedans :
 // on arrive exactement à l'échelle qu'on venait de lire.
 const LOUPE_ZOOM = 1;
@@ -2578,22 +2583,131 @@ function zoomer(clientX, clientY, facteur) {
     zoneTravail.scrollLeft = espaceX * etat.zoom - cursorLocalX;
     zoneTravail.scrollTop = espaceY * etat.zoom - cursorLocalY;
 
-    const zoomInfo = document.getElementById('planif-zoom-info');
-    if (zoomInfo) zoomInfo.textContent = Math.round(etat.zoom * 100) + '%';
     mettreAJourBoutonsZoomPreset();
 }
 
-function mettreAJourBoutonsZoomPreset() {
-    var zoomArrondi = Math.round(etat.zoom * 100);
-    var texte = zoomArrondi + '%';
-    document.querySelectorAll('.planif-btn-zoom-preset').forEach(function(btn) {
-        var presetVal = Math.round(parseFloat(btn.dataset.zoom) * 100);
-        btn.classList.toggle('actif', presetVal === zoomArrondi);
-    });
+// Le seul affichage qui doive suivre un pincement image par image : les deux
+// badges de pourcentage. Détaché de `mettreAJourBoutonsZoomPreset()`, qui
+// parcourt en plus les boutons de préréglage — inutile à chaque frame.
+function afficherPourcentageZoom(zoom) {
+    var texte = Math.round(zoom * 100) + '%';
     var infoHeader = document.getElementById('planif-zoom-info-header');
     if (infoHeader) infoHeader.textContent = texte;
     var infoFooter = document.getElementById('planif-zoom-info');
     if (infoFooter) infoFooter.textContent = texte;
+}
+
+function mettreAJourBoutonsZoomPreset() {
+    var zoomArrondi = Math.round(etat.zoom * 100);
+    document.querySelectorAll('.planif-btn-zoom-preset').forEach(function(btn) {
+        var presetVal = Math.round(parseFloat(btn.dataset.zoom) * 100);
+        btn.classList.toggle('actif', presetVal === zoomArrondi);
+    });
+    afficherPourcentageZoom(etat.zoom);
+}
+
+// === ARITHMÉTIQUE DU ZOOM AUTOUR D'UN POINT ===
+// Pures, et isolées pour cette raison : le pincement lui-même ne se joue pas au
+// banc (WebKit absent des conteneurs, #456), son calcul si. Les deux tiennent la
+// MÊME promesse — le point de carte sous les doigts ne bouge pas — mais à deux
+// moments : pendant le geste c'est le transform qui porte le décalage, après le
+// geste c'est le défilement.
+
+/** Décalage du transform d'aperçu qui fige `pointEspace` sous `focal`. */
+function decalageApercuZoom(focal, defilement, pointEspace, zoom) {
+    return focal + defilement - pointEspace * zoom;
+}
+
+/** Défilement à poser après le geste pour figer `pointEspace` sous `focal`. */
+function defilementApresZoom(pointEspace, zoom, focal) {
+    return pointEspace * zoom - focal;
+}
+
+// === APERÇU DE ZOOM PENDANT UN GESTE ===
+// Ce qui rendait le pincement saccadé sur iPad (retour de Grégoire, 6 sept.
+// 2026) : chaque événement tactile refaisait le cycle de zoom AU COMPLET —
+// redimensionner l'enveloppe de 10 000 × 6 000 px (reflow de toute la carte),
+// lire `getBoundingClientRect()`, réécrire `scrollLeft`/`scrollTop`, puis
+// parcourir les boutons de préréglage. Un aller-retour écriture-lecture-écriture
+// de mise en page par événement, sur l'espace qui porte tous les nœuds ; et
+// Safari en émet plus qu'il n'y a d'images à l'écran.
+//
+// Le modèle est celui d'Annoter et Évaluer : pendant le geste on ne touche
+// QU'À `transform`, que le compositeur applique sans remettre la page en page ;
+// l'enveloppe, le défilement et les boutons attendent la fin du geste.
+var apercuZoom = {
+    actif: false,
+    zoomDepart: 1,
+    zoomCible: 1,
+    focalX: 0,
+    focalY: 0,
+    espaceX: 0,
+    espaceY: 0,
+    frame: 0
+};
+
+function demarrerApercuZoom(clientX, clientY) {
+    // UNE lecture de géométrie, au départ du geste — pas une par événement.
+    var rect = zoneTravail.getBoundingClientRect();
+    apercuZoom.actif = true;
+    apercuZoom.zoomDepart = etat.zoom;
+    apercuZoom.zoomCible = etat.zoom;
+    // Le point focal se fige ici pour tout le geste. Le réécrire à chaque
+    // événement fait dériver la carte de ce que les doigts ont parcouru — c'est
+    // la correction du 31 août sur la visionneuse, même piège ici.
+    apercuZoom.focalX = clientX - rect.left;
+    apercuZoom.focalY = clientY - rect.top;
+    apercuZoom.espaceX = (apercuZoom.focalX + zoneTravail.scrollLeft) / etat.zoom;
+    apercuZoom.espaceY = (apercuZoom.focalY + zoneTravail.scrollTop) / etat.zoom;
+}
+
+function majApercuZoom(zoomVise) {
+    if (!apercuZoom.actif) return;
+    apercuZoom.zoomCible = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, zoomVise));
+    // Une seule image par rafraîchissement, quel que soit le nombre
+    // d'événements reçus entre-temps : Safari en émet davantage.
+    if (apercuZoom.frame) return;
+    apercuZoom.frame = requestAnimationFrame(function() {
+        apercuZoom.frame = 0;
+        if (!apercuZoom.actif) return;
+        var z = apercuZoom.zoomCible;
+        // Le défilement se relit ici plutôt que de se figer au départ : à deux
+        // doigts, Safari peut faire glisser la zone pendant le pincement, et
+        // l'aperçu doit suivre. Lecture puis écriture, une fois par image —
+        // pas l'alternance des deux qu'on vient de retirer.
+        var tx = decalageApercuZoom(apercuZoom.focalX, zoneTravail.scrollLeft, apercuZoom.espaceX, z);
+        var ty = decalageApercuZoom(apercuZoom.focalY, zoneTravail.scrollTop, apercuZoom.espaceY, z);
+        // `#planif-espace` a `transform-origin: 0 0` : un point d'espace E se
+        // pose donc en E × z + t.
+        espace.style.transform = 'translate(' + tx + 'px, ' + ty + 'px) scale(' + z + ')';
+        afficherPourcentageZoom(z);
+    });
+}
+
+function finirApercuZoom() {
+    if (!apercuZoom.actif) return;
+    apercuZoom.actif = false;
+    if (apercuZoom.frame) {
+        cancelAnimationFrame(apercuZoom.frame);
+        apercuZoom.frame = 0;
+    }
+    var z = apercuZoom.zoomCible;
+    etat.zoom = z;
+    // `appliquerZoom()` réécrit `transform` sans décalage : c'est le défilement
+    // qui le reprend à son compte, exactement à la position où l'aperçu laissait
+    // le point focal. Rien ne saute entre la dernière image et ici.
+    appliquerZoom();
+    zoneTravail.scrollLeft = defilementApresZoom(apercuZoom.espaceX, z, apercuZoom.focalX);
+    zoneTravail.scrollTop = defilementApresZoom(apercuZoom.espaceY, z, apercuZoom.focalY);
+    mettreAJourBoutonsZoomPreset();
+}
+
+/** Point d'écran d'un geste Safari — `clientX`, avec repli sur `pageX`. */
+function pointClientDuGeste(e) {
+    return {
+        x: typeof e.clientX === 'number' ? e.clientX : e.pageX - window.scrollX,
+        y: typeof e.clientY === 'number' ? e.clientY : e.pageY - window.scrollY
+    };
 }
 
 // === CRÉER UN NŒUD ===
@@ -8091,82 +8205,76 @@ function initialiser() {
     zoneTravail.addEventListener('scroll', function () { majBarreAlignement(); }, { passive: true });
     window.addEventListener('resize', function () { majBarreAlignement(); }, { passive: true });
 
+    // Le facteur suit l'AMPLITUDE du geste, pas la cadence des événements.
+    // Un pas fixe de ±5 % fait courir le zoom plus vite que les doigts dès que
+    // le trackpad émet dru — c'est le défaut corrigé sur la visionneuse en
+    // #660, resté ici. `ZOOM_SENSIBILITE_MOLETTE` reprend sa valeur.
     zoneTravail.addEventListener('wheel', function(e) {
         if (e.ctrlKey && !gestureEnCours) {
             e.preventDefault();
-            var facteur = e.deltaY < 0 ? 1.05 : 0.95;
-            zoomer(e.clientX, e.clientY, facteur);
+            // Un deltaY nul est un événement neutre : le trackpad en émet, et
+            // le versant « zoom avant » les avalait tous.
+            if (!e.deltaY) return;
+            zoomer(e.clientX, e.clientY, Math.exp(-e.deltaY * ZOOM_SENSIBILITE_MOLETTE));
         }
     }, { passive: false });
 
-    // Zoom gestuel Safari
+    // Pincement. ⚠ Les deux chemins — geste Safari et tactile générique —
+    // étaient branchés EN MÊME TEMPS sur la même zone. Sur iPad, Safari émet
+    // les deux familles pendant un seul pincement : chacun réécrivait
+    // `etat.zoom` depuis sa propre base et recentrait sur son propre point (le
+    // centre de la zone pour l'un, le milieu des doigts pour l'autre), soit
+    // deux cycles de zoom contradictoires par image. D'où le `else` — la
+    // visionneuse le fait depuis toujours.
     if ('GestureEvent' in window) {
-        var gestureBaseZoom = 1;
         zoneTravail.addEventListener('gesturestart', function(e) {
             e.preventDefault();
             gestureEnCours = true;
-            gestureBaseZoom = etat.zoom;
-        });
+            var p = pointClientDuGeste(e);
+            demarrerApercuZoom(p.x, p.y);
+        }, { passive: false });
         zoneTravail.addEventListener('gesturechange', function(e) {
             e.preventDefault();
-            var oldZoom = etat.zoom;
-            etat.zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, gestureBaseZoom * e.scale));
-            appliquerZoom();
-            var rect = zoneTravail.getBoundingClientRect();
-            var cx = rect.width / 2;
-            var cy = rect.height / 2;
-            var espaceX = (cx + zoneTravail.scrollLeft) / oldZoom;
-            var espaceY = (cy + zoneTravail.scrollTop) / oldZoom;
-            zoneTravail.scrollLeft = espaceX * etat.zoom - cx;
-            zoneTravail.scrollTop = espaceY * etat.zoom - cy;
-            var zoomInfo = document.getElementById('planif-zoom-info');
-            if (zoomInfo) zoomInfo.textContent = Math.round(etat.zoom * 100) + '%';
-            mettreAJourBoutonsZoomPreset();
-        });
+            // `e.scale` est cumulatif depuis `gesturestart`.
+            majApercuZoom(apercuZoom.zoomDepart * e.scale);
+        }, { passive: false });
         zoneTravail.addEventListener('gestureend', function(e) {
             e.preventDefault();
             gestureEnCours = false;
+            finirApercuZoom();
+        }, { passive: false });
+    } else {
+        var touchStartDist = null;
+        zoneTravail.addEventListener('touchstart', function(e) {
+            if (e.touches.length !== 2) return;
+            touchStartDist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            demarrerApercuZoom(
+                (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                (e.touches[0].clientY + e.touches[1].clientY) / 2
+            );
+        }, { passive: true });
+        zoneTravail.addEventListener('touchmove', function(e) {
+            if (e.touches.length !== 2 || !touchStartDist) return;
+            var dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            majApercuZoom(apercuZoom.zoomDepart * (dist / touchStartDist));
+        }, { passive: true });
+        zoneTravail.addEventListener('touchend', function() {
+            if (!touchStartDist) return;
+            touchStartDist = null;
+            finirApercuZoom();
+        });
+        zoneTravail.addEventListener('touchcancel', function() {
+            if (!touchStartDist) return;
+            touchStartDist = null;
+            finirApercuZoom();
         });
     }
-
-    // Zoom tactile
-    var touchStartDist = null;
-    var touchStartZoom = null;
-    zoneTravail.addEventListener('touchstart', function(e) {
-        if (e.touches.length === 2) {
-            var dx = e.touches[0].clientX - e.touches[1].clientX;
-            var dy = e.touches[0].clientY - e.touches[1].clientY;
-            touchStartDist = Math.hypot(dx, dy);
-            touchStartZoom = etat.zoom;
-        }
-    }, { passive: true });
-    zoneTravail.addEventListener('touchmove', function(e) {
-        if (e.touches.length === 2 && touchStartDist) {
-            var dx = e.touches[0].clientX - e.touches[1].clientX;
-            var dy = e.touches[0].clientY - e.touches[1].clientY;
-            var dist = Math.hypot(dx, dy);
-            var scale = dist / touchStartDist;
-            var oldZoom = etat.zoom;
-            etat.zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, touchStartZoom * scale));
-            appliquerZoom();
-            var rect = zoneTravail.getBoundingClientRect();
-            var midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-            var midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-            var localX = midX - rect.left;
-            var localY = midY - rect.top;
-            var espaceX = (localX + zoneTravail.scrollLeft) / oldZoom;
-            var espaceY = (localY + zoneTravail.scrollTop) / oldZoom;
-            zoneTravail.scrollLeft = espaceX * etat.zoom - localX;
-            zoneTravail.scrollTop = espaceY * etat.zoom - localY;
-            var zoomInfo = document.getElementById('planif-zoom-info');
-            if (zoomInfo) zoomInfo.textContent = Math.round(etat.zoom * 100) + '%';
-            mettreAJourBoutonsZoomPreset();
-        }
-    }, { passive: true });
-    zoneTravail.addEventListener('touchend', function() {
-        touchStartDist = null;
-        touchStartZoom = null;
-    });
 
     // Palette drag & drop
     var paletteDragType = null;
@@ -8900,8 +9008,6 @@ function initialiser() {
             var niveauZoom = parseFloat(btn.dataset.zoom);
             etat.zoom = niveauZoom;
             appliquerZoom();
-            var zoomInfo = document.getElementById('planif-zoom-info');
-            if (zoomInfo) zoomInfo.textContent = Math.round(niveauZoom * 100) + '%';
             mettreAJourBoutonsZoomPreset();
             centrerVueSurContenu();
         });
@@ -8950,8 +9056,6 @@ function gererKeydown(e) {
         e.preventDefault();
         etat.zoom = 1;
         appliquerZoom();
-        var zoomInfo = document.getElementById('planif-zoom-info');
-        if (zoomInfo) zoomInfo.textContent = '100%';
         mettreAJourBoutonsZoomPreset();
         centrerVueSurContenu();
         return;
@@ -11148,14 +11252,11 @@ function majBoutonLoupe() {
     btn.title = etat.loupeActive ? 'Quitter la loupe (L ou Échap)' : 'Loupe — lire sans changer le zoom (L)';
 }
 
-/** Les deux afficheurs de zoom + les boutons de préréglage, en un seul appel. */
+/** Les deux afficheurs de zoom + les boutons de préréglage, en un seul appel.
+    Le pourcentage était réécrit ici ET dans `mettreAJourBoutonsZoomPreset()` :
+    une seule des deux copies le fait désormais. */
 function majAffichageZoom() {
-    var pourcent = Math.round(etat.zoom * 100) + '%';
-    var info = document.getElementById('planif-zoom-info');
-    if (info) info.textContent = pourcent;
-    var infoEntete = document.getElementById('planif-zoom-info-header');
-    if (infoEntete) infoEntete.textContent = pourcent;
-    if (typeof mettreAJourBoutonsZoomPreset === 'function') mettreAJourBoutonsZoomPreset();
+    mettreAJourBoutonsZoomPreset();
 }
 
 function centrerVueSurSequence(seqId) {
@@ -11629,6 +11730,10 @@ window.planificationCarte = {
     activer: function() { planificationActive = true; },
     desactiver: function() { planificationActive = false; },
     centrerVueSurContenu: centrerVueSurContenu,
+    // 7 sept. 2026 — exposées pour la sentinelle du pincement : le geste ne se
+    // joue pas au banc (WebKit absent des conteneurs), son arithmétique si.
+    decalageApercuZoom: decalageApercuZoom,
+    defilementApresZoom: defilementApresZoom,
     mettreAJourListeCartes: mettreAJourListeCartes,
     chargerCarte: chargerCarte,
     changerCarte: changerCarte,

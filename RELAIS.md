@@ -7,6 +7,63 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026 : LE PINCEMENT DE LA CARTE D'ALIGNEMENT SUR IPAD (1.123.10, #539) — ⚠ SUR UNE BRANCHE, PAS SUR `main`
+
+> ⚠ **LE TRAVAIL N'EST PAS SUR `main`.** Il vit sur `claude/alignment-map-zoom-fluidity-9itj9c`, poussée. **La fusion vers `main`
+> et le déploiement restent à faire** — cette session n'avait pas mandat de fusionner. Une session qui part de `main` NE VERRA PAS
+> ce lot : `main` reste à `634f5143` / 1.123.9.
+>
+> ▣ **LE RAPPORT** (`BUG_grégoire_2026-09-07_20-00-37.txt`, iPad Air, Safari 26.6, sur 1.123.9, gravité mineure, aucune erreur
+> console, SUIVI-BUGS #539) : « les zoom in et out dans le canevas de la carte d'alignement ne sont pas fluides comme ceux des
+> pages Annoter et Évaluer ».
+>
+> ▣ **TROIS CAUSES, toutes lues au code de `js/planification-carte.js`, aucune présente dans `js/travaux-visionneuse.js`** — c'est
+> la comparaison que Grégoire propose lui-même, et elle est exploitable :
+> **(a)** les DEUX chemins de pincement, `gesturestart`/`gesturechange` (Safari) et `touchstart`/`touchmove` (générique), étaient
+> branchés l'un après l'autre sur la même zone, sans `else`. Safari émet les deux familles pendant UN seul pincement : chacun
+> réécrivait `etat.zoom` depuis sa propre base et recentrait sur son propre point (le centre de la zone pour l'un, le milieu des
+> doigts pour l'autre). Deux zooms contradictoires par image.
+> **(b)** chaque événement refaisait le cycle complet : redimensionner l'enveloppe de 10 000 × 6 000 px (`appliquerZoom`), lire
+> `getBoundingClientRect()`, réécrire `scrollLeft`/`scrollTop`, parcourir les boutons de préréglage. Écriture, lecture qui la
+> force, écriture encore — et Safari émet plus d'événements qu'il n'y a d'images.
+> **(c)** la molette avançait d'un pas fixe de ±5 %, donc à la cadence des événements et non à l'ampleur du geste : le défaut
+> corrigé sur la visionneuse en #660, resté ici. Hors du chemin iPad, corrigé au passage — c'est le même geste au trackpad.
+>
+> ⮕ **LE CORRECTIF** : aperçu en `transform` seul pendant le geste (`translate` + `scale`, composé sans remise en page), coalescé
+> par `requestAnimationFrame` ; l'enveloppe, le défilement et les boutons attendent `gestureend`. La géométrie de la zone se lit UNE
+> fois, au départ ; le point focal s'y fige aussi (le réécrire à chaque événement fait dériver la carte de ce que les doigts ont
+> parcouru — correction du 31 août sur la visionneuse, même piège) ; le défilement, lui, se RELIT à chaque image, parce qu'à deux
+> doigts Safari peut faire glisser la zone pendant le pincement.
+>
+> ▣ **CE QUI EST VÉRIFIÉ** : sentinelle neuve `tests/unit/sentinelle-pincement-carte-alignement.test.js` (31 tests) — S1
+> l'arithmétique du recalage, S2 l'exclusion des deux chemins, S3 la boucle qui ne remet rien en page, S4 la molette
+> proportionnelle. Break-tests : 6 mutations, toutes rouges, restaurations vérifiées. Vitest 499 fichiers / 5 510 verts.
+> ⚠ **CE QUI NE L'EST PAS, et c'est le cœur du sujet** : rien de tout cela ne dit que c'est FLUIDE. WebKit est absent des
+> conteneurs (#456), aucun jeton `.verdict-playwright.json` sur le disque, et rien ici ne mesure une image par seconde. **Le doigt
+> de Grégoire sur l'iPad est le seul juge, et il est dû.**
+>
+> ▣ **DEUX CHOSES À DIRE À GRÉGOIRE, pas à découvrir dans trois jours** :
+> **1.** effet de bord assumé — le pincement se recentre maintenant sur le POINT PINCÉ, plus sur le centre de l'écran. C'est le
+> comportement d'Annoter et Évaluer, et c'est visible.
+> **2.** supposition nommée — « les zoom in et out » a été lu comme le PINCEMENT à deux doigts, pas comme les boutons + et −. Le
+> rapport vient d'un iPad et les trois causes trouvées sont réelles quelle que soit l'intention, mais si Grégoire visait les
+> boutons, le lot est à reprendre.
+>
+> ▣ **UNE SENTINELLE EXISTANTE A CHANGÉ DE COMPTE** : `sentinelle-tout-voir-et-loupe` exigeait TROIS sites bornés par
+> ZOOM_MIN/ZOOM_MAX. Il en reste DEUX — un site en moins, pas une borne en moins : les deux chemins de pincement bornent désormais
+> au même endroit. Le test a été renforcé au passage (plus AUCUNE borne numérique en dur, alors qu'il ne refusait que `0.25`/`3`
+> littéralement), et les deux mutations le font rougir.
+>
+> ▣ **PAS DE PORTE TERRAIN FORMELLE** : aucune donnée en jeu, rien d'irréversible — règle 2 du skill `portes-terrain`. Même
+> arbitrage que pour #773/#774. Le geste à demander tient en une phrase : ouvrir Conception › la carte sur l'iPad, pincer, et dire
+> si ça suit les doigts.
+>
+> ▣ **DEUX ÉCARTS DOCUMENTAIRES SIGNALÉS PAR L'AUDIT D'OUVERTURE, NON CORRIGÉS** : `SESSION.md` n'a aucun bloc pour les cycles
+> 1.123.8 / 1.123.9 (leur trace est ici et dans `OU-EN-EST-ON.md`) ; l'étiquette temporelle de l'état courant du `BACKLOG.md`
+> (« 6 septembre, matin ») est en retard d'une demi-journée, le compte d'items est bon.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 6 SEPTEMBRE 2026, 14 H 35 → 16 H 15 : LE RETOUR IPAD SUR LA PALETTE DES CODES, DEUX LOTS (1.123.8 ET 1.123.9, #773 ET #774) — TOUT EST SUR `main`
 
 > ↻ **Session Claude Code sur `claude/ipad-palette-resize-t1kjo3`, FUSIONNÉE EN FAST-FORWARD VERS `main` (`c09ca731`) et poussée à

@@ -44,6 +44,7 @@
                 'Le titre et la description d\'une intervention, et les noms de la modale du tirage au sort, sont échappés avant d\'entrer dans la page (1.123.7).',
                 '<strong>Sur iPad, les palettes se redimensionnent au doigt.</strong> Le coin inférieur droit de la palette des codes (et des palettes Annotation, Tampons et Évaluer) ne se laissait pas saisir sur l\'iPad : la poignée était celle du navigateur, que Safari ne montre pas au toucher. Le coin porte maintenant une vraie poignée, au doigt, au Pencil ou à la souris, et la taille choisie est retrouvée à la prochaine ouverture (1.123.8).',
                 '<strong>La palette mise en bandeau (↔) ne couvre plus la copie.</strong> Elle prenait les trois cinquièmes de la hauteur de l\'écran même quand ses codes tenaient en deux lignes : le reste était vide, et posé sur le travail de l\'élève. Le bandeau prend maintenant la hauteur de ce qu\'il contient (1.123.9).',
+                '<strong>Sur iPad, le zoom de la carte d\'alignement suit les doigts.</strong> Pincer pour agrandir ou réduire la carte accrochait, et le zoom se recentrait sur le milieu de l\'écran plutôt que sur l\'endroit pincé : deux mécanismes de zoom tournaient en même temps sur le même geste, et chacun refaisait la mise en page de toute la carte à chaque instant. Le pincement se comporte maintenant comme dans Annoter et Évaluer. Au trackpad, le zoom suit l\'ampleur du geste plutôt que sa cadence (1.123.10).',
             ]
         },
         {
