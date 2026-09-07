@@ -28,7 +28,7 @@
 > ⮕ **Corrigé en 1.124.1** : le JS ne reconstruit plus rien, il bascule la visibilité de deux
 > blocs. La barre n'a plus qu'une définition. **Reprendre cette liste à partir de 2.1a**, sur un
 > build qui affiche **1.124.1**.
-Branche `claude/bokadex-lea-presence-transfer-e6ynxi` · **non fusionnée dans `main`** (voir `RELAIS.md`)
+Fusionnée dans `main` le 7 sept., puis **retirée en 1.124.2**.
 
 > **Cette liste est courte, et c'est voulu.** Règle 1 du skill `portes-terrain` :
 > une porte n'existe que si aucune machine ne peut répondre. Le calcul est couvert
@@ -47,11 +47,10 @@ Branche `claude/bokadex-lea-presence-transfer-e6ynxi` · **non fusionnée dans `
 
 | | Geste | Attendu |
 |---|---|---|
-| 0.1 | Recharge l'application (vidage de cache si un onglet était déjà ouvert) et lis le numéro en bas de page. | **1.124.0**. Si tu lis 1.123.x, le reste de cette liste juge du code que tu n'as pas. |
+| 0.1 | ~~Recharge et lis le numéro en bas de page.~~ **Sans objet** : le module a été retiré en 1.124.2, il n'y a plus rien à vérifier ici. |
 
-⚠ **Un `git pull` t'est nécessaire cette fois** : cette session a travaillé sur une
-branche, pas dans ton clone. Les fichiers de ton disque sont encore en 1.123.12
-tant que la branche n'est pas fusionnée.
+⚠ Le `git pull` évoqué ici a été fait le 7 sept. au soir, au prix d'un conflit sur ce
+fichier même — résolu en gardant la version du dépôt.
 
 ---
 
