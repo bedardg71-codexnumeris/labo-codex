@@ -9,14 +9,14 @@
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026, MIDI : REPORTER LES ABSENCES DANS LÉA (1.124.0)
 
-> ⏳ **UN LOT ATTEND SUR UNE BRANCHE.** `claude/bokadex-lea-presence-transfer-e6ynxi`, **1 commit devant
-> `origin/main`** (`1796ead6`), release `minor` **1.124.0**, build `0907-0834`.
-> ⛔ **La fusion n'a PAS été faite, et ce n'est pas un oubli** : le harnais de cette session borne ses pushes à sa
-> branche désignée, et l'autorisation de fusionner n'a pas été demandée pour ce lot-ci. **Elle reste à demander à
-> Grégoire.** Tant qu'elle n'a pas lieu, son clone est en 1.123.12 et le panneau ne lui est pas jugeable.
-> ⮕ Geste, une fois l'autorisation obtenue : `git fetch origin && git merge --ff-only origin/claude/bokadex-lea-presence-transfer-e6ynxi`
-> depuis `main`, puis push. **Vérifier le hash au moment de le faire plutôt que de recopier celui-ci** — c'est ce
-> défaut de trace qui a fait pointer le relais précédent sur un commit inexistant.
+> ✅ **RIEN N'ATTEND SUR UNE BRANCHE.** `claude/bokadex-lea-presence-transfer-e6ynxi` a été fusionnée dans `main`
+> en FAST-FORWARD PUR et poussée, **sur l'autorisation explicite de Grégoire** (le harnais de cette session bornait
+> ses pushes à sa branche désignée ; la question lui a été posée, il a répondu « oui, fusionne »). Branche et `main`
+> au même commit, **`736928bb`**, vérifié après le push (`git rev-list --left-right --count` = `0 0`).
+> ⮕ Le déploiement Netlify part du webhook du push, sans commande (`DEPLOY.md` §1).
+> ⚠ **Comme les jours précédents, `main` LOCAL était en retard sur `origin/main`** (ref datant du clonage du
+> conteneur) : `git branch -f main origin/main` AVANT la fusion, sans quoi le fast-forward aurait replanté une vieille
+> base.
 >
 > **CE QUE LE LOT CONTIENT** — un panneau « Reporter dans Léa » dans la saisie des présences (`js/presences-transfert.js`,
 > module neuf, **lecture seule, aucune écriture nulle part**). Labo Codex compte les PRÉSENCES, Léa réclame les
