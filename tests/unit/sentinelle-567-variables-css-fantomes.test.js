@@ -76,8 +76,6 @@ const TOLEREES = {
     "--lien": 1,
     "--ombre-elevation-3": 1,
     "--orange-attention": 15,
-    "--orange-clair": 1,
-    "--orange-fonce": 1,
     "--orange-fond": 1,
     "--orange-principal": 8,
     "--primaire": 2,

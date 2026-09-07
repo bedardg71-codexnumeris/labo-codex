@@ -9495,9 +9495,15 @@ body.mode-clair .bloc-rlo-separateur {
     font-size: 0.85rem;
 }
 
+/* #778 (7 sept. 2026) — `--orange-clair` et `--orange-fonce` n'ont JAMAIS été définies :
+   les deux déclarations étaient ignorées par le navigateur et le badge « SA » rendait
+   sans fond, en couleur héritée. Repris sur le patron d'un marqueur d'ÉTAT (fond de
+   surface, bordure, texte principal), le seul qui tienne dans les deux modes : contraste
+   mesuré 15,9:1 en clair (#1a1a2e sur #f0f8ff) et 7,2:1 en sombre (#d0e0e4 sur #244858). */
 .badge-sa {
-    background: var(--orange-clair);
-    color: var(--orange-fonce);
+    background: var(--surface-element);
+    color: var(--texte-principal);
+    border: 1px solid var(--bordure-moyenne);
     padding: 2px 6px;
     border-radius: var(--radius-moyen);
     font-size: 0.75rem;
