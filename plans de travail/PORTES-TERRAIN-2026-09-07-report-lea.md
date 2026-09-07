@@ -1,5 +1,24 @@
 # PORTES TERRAIN — Reporter les absences dans Léa (1.124.0)
 
+> # ⛔ CETTE LISTE EST CADUQUE — LE MODULE EST ABANDONNÉ
+>
+> **Décision de Grégoire, 7 septembre 2026 :** « Ce que tu as créé ne fait que trier l'information
+> en la préparant pour Léa. Il s'agit d'un transfert manuel des informations. Si on ne peut pas
+> faire un copier/coller, il n'y a pas vraiment d'intérêt, car aucun gain de temps. »
+>
+> Le module a été **retiré en entier** (1.124.2). Ce document reste comme trace, et pour la leçon :
+> **le cadrage n'a pas mesuré le gain réel avant de coder.** Trois questions avaient été posées
+> avant d'écrire une ligne — le collage groupé, la voie d'import, l'unité — et elles ont écarté
+> deux fausses pistes. Aucune n'a demandé : *une fois le tri fait, combien de temps reste-t-il
+> à gagner ?* Le panneau agit sur la lecture et le calcul, jamais sur la saisie ; c'est la saisie
+> qui coûte.
+>
+> **Ce qui SURVIT au retrait**, et qui n'est pas caduc :
+> · la barre d'actions de la saisie n'a plus qu'une définition (1.124.1) ;
+> · **§3.1 est répondu** : « C'est l'enseignant qui juge si un rattrapage reprend une absence. »
+>   BACKLOG #747 fermé sans code, le 7 sept. ;
+> · le retour testeur sur l'enregistrement instable (SUIVI-BUGS #542, BACKLOG #785).
+
 **7 septembre 2026** · release **1.124.1**, build **0907-0938**
 > ⚠⚠ **RELEVÉ DU JOUR MÊME : 2.1a A ÉCHOUÉ, ET C'EST CORRIGÉ.** Le bouton « Reporter dans Léa »
 > n'apparaissait nulle part, sur Mac comme sur iPad. La barre d'actions de la saisie existait en

@@ -7,6 +7,52 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026, FIN D'APRÈS-MIDI : LE MODULE LÉA EST RETIRÉ (1.124.2)
+
+> ✅ **`main` à jour, 1.124.2, build `0907-1011`. Vitest 501 fichiers / 5536 tests.**
+>
+> **DÉCISION DE GRÉGOIRE : le report vers Léa est ABANDONNÉ, retiré en entier le jour de sa livraison.**
+> Ses mots : « Ce que tu as créé ne fait que trier l'information en la préparant pour Léa. Il s'agit d'un
+> transfert manuel des informations. Si on ne peut pas faire un copier/coller, il n'y a pas vraiment
+> d'intérêt, car aucun gain de temps. »
+> ⮕ **Ce n'est pas un défaut d'exécution : c'est un défaut de CADRAGE.** Trois questions avaient été posées
+> avant d'écrire une ligne, et elles ont écarté deux fausses pistes. Aucune n'a demandé *combien de temps
+> il resterait à gagner une fois le tri fait*. Le panneau agissait sur la lecture et le calcul, jamais sur
+> la saisie — et c'est la saisie qui coûte. **Retenir cette question pour le prochain lot d'outillage.**
+> Zéro-dette : module, bouton, panneau, balise, 16 tests, classe CSS, entrée de changelog — tout est parti,
+> rien n'est mis en sommeil derrière un drapeau. Le module n'écrivait nulle part : aucune donnée en jeu.
+>
+> **CE QUI SURVIT, et qu'il ne faut pas défaire :**
+> · **La barre d'actions de la saisie n'a plus qu'une définition** (1.124.1, livrée juste avant l'abandon).
+>   `restaurerCompteurPresences` ne reconstruit plus rien : `#compteur-presences` porte deux enfants qui
+>   s'excluent, et le JS bascule leur visibilité. Sentinelle #768/#782 élargie à TOUTE la barre, quatre
+>   break-tests rouges. C'est ce défaut qui avait rendu le bouton invisible sur les deux appareils.
+> · **#747 EST FERMÉ, sans code**, sur la réponse de Grégoire : « C'est l'enseignant qui juge si un
+>   rattrapage reprend une absence. » Ce n'est pas une règle institutionnelle : rien à automatiser.
+>
+> ⚠⚠ **CE QUI EST PRIORITAIRE MAINTENANT — SUIVI-BUGS #542 / BACKLOG #785.** Retour testeur du jour, sur
+> son corpus réel : « l'enregistrement semble instable. J'ai dû saisir et enregistrer les présences à
+> plusieurs reprises. » **NON REPRODUIT** — ce qui suit est une inférence, pas une cause établie.
+> Trois faits mesurés : `enregistrerPresences` n'appelle JAMAIS `db.flush()` (dix autres gestes durables
+> du projet le font) ; au démarrage `syncToLocalStorageCache()` fait d'IndexedDB la source de vérité en
+> écrasant localStorage ; `db.js` documente que le commit IDB est différé sous WebKit et `file://`.
+> ⮕ Une écriture non commitée avant fermeture serait écrasée par l'ancienne valeur au rechargement.
+> **C'est le mécanisme exact de #140** (juin 2026), corrigé alors par `await db.flush()`.
+> ⛔ **Poser les trois questions du SUIVI-BUGS à Grégoire AVANT de coder** : la perte suit-elle un
+> rechargement ? sur quel appareil ? la notification de succès s'affiche-t-elle quand même ?
+>
+> **AUTRES INSCRITS** : **#786** (`sauvegarderDonneesSelonMode` signale ses échecs par les chaînes
+> `'quota'`/`'error'`, *truthy*, qu'une vingtaine d'appelants lisent comme un succès — défaut de contrat
+> réel, mais qui n'explique probablement PAS #785, `setSync` basculant sans lever). **#780 PÉRIMÉ**
+> (la duplication est partie avec le module). **Dernier ID : #786.**
+>
+> **MESURE DEMANDÉE PAR COWORK, FAITE, ET NON CONCLUANTE** : le panneau affichait un vrai nom en mode
+> anonymisation. La porte de lecture `obtenirEtudiantsCoursActif` (modes.js:1154) passe pourtant bien par
+> `obtenirDonneesSelonMode` : elle RESPECTE le mode. Le contournement venait donc d'ailleurs, et la
+> question reste ouverte — à reprendre sur un autre écran, sans le module pour la reproduire.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026, APRÈS-MIDI : LE BOUTON QUI N'EXISTAIT PAS (1.124.1)
 
 > ✅ **`main` = `a64164cc`, 1.124.1, build `0907-0938`. Déploiement VÉRIFIÉ par l'API Netlify** :

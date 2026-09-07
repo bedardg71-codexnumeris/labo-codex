@@ -21,19 +21,6 @@
 
     var CHANGELOG = [
         {
-            version: '1.124',
-            couleur: 'vert',
-            titre: 'Reporter tes absences dans Léa sans relire la liste entière',
-            items: [
-                '<strong>Un panneau « Reporter dans Léa » dans la saisie des présences.</strong> Labo Codex compte les présences, Léa réclame les absences : le panneau fait l\'inversion pour la séance affichée et ne montre que les élèves concernés — trois ou quatre lignes au lieu de vingt-huit. Le DA vient en premier, parce que c\'est lui qui sert de repère dans Léa.',
-                '<strong>Il montre son calcul.</strong> Pour chaque élève : les périodes de la séance, les périodes de présence saisies, et l\'absence qui en découle. Tu peux le contredire d\'un coup d\'œil.',
-                '<strong>Un élève sans aucune saisie n\'est jamais proposé comme absent.</strong> Il apparaît à part, avec la raison : Codex ne peut pas savoir s\'il était absent ou si la séance n\'a pas été saisie jusqu\'au bout. À toi de trancher.',
-                '<strong>Un rattrapage est signalé, jamais déduit.</strong> Quand une présence facultative existe à cette date, l\'élève porte la mention « RàI » et l\'absence au cours régulier reste entière. Savoir si un rattrapage l\'annule est une règle de ton cégep, pas une décision de l\'application.',
-                '<strong>Labo Codex n\'écrit jamais dans Léa.</strong> Tu saisis, tu cliques « Sauvegarder les modifications ». Le panneau change de nom si tu changes de portail dans tes préférences.',
-                '<strong>Correctif du jour même : le bouton « Reporter dans Léa » était invisible.</strong> Il disparaissait dès qu\'une séance s\'affichait, sur Mac comme sur iPad. La barre d\'actions de la saisie existait en double, et la seconde copie écrasait la première à chaque rendu. Il n\'y en a plus qu\'une (1.124.1).'
-            ]
-        },
-        {
             version: '1.123',
             couleur: 'orange',
             titre: 'Le Suivi ne compte plus une reprise deux fois, et ne déclare personne « non-participant » avant le premier travail',
