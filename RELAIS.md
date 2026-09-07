@@ -50,8 +50,30 @@
 > « 13 break-tests ». Le compte réel est **10 break-tests, 20 rougeurs**. Corrigé avant le commit.
 > ⮕ Un chiffre écrit en cours de route n'est pas une mesure tant qu'on ne l'a pas recompté à la fin.
 >
-> ⛔ **CE QUI N'EST PAS VÉRIFIÉ** : Safari, iPad, Playwright (WebKit absent du conteneur, #456).
-> Verdict CI à relire sur le run de `efe1baa9`. **Dernier ID : #787.**
+> ⛔ **VERDICT CI, RELU LE SOIR MÊME** : **Vitest VERT** (2 min 07). **Playwright : AUCUN VERDICT** — le job
+> a été COUPÉ au plafond `timeout-minutes: 40` à l'essai 280 (`The operation was canceled`), ni vert ni rouge.
+>
+> ▣ **DEUX TROUVAILLES EN LE MESURANT, et aucune n'est causée par ce lot :**
+> · **#788 — le plafond de 40 min est à 8 % de la durée réelle.** Run 848 : 36 min 22, verdict rendu.
+>   Run 850 : runner plus lent, coupé à l'essai 280. Même suite, 105 fichiers. **Le verdict Playwright
+>   est devenu probabiliste, et c'est la marge qui décide, pas la suite.** ⚠ Ça pèse sur #756, livré le
+>   même jour : le hook exige ce verdict plus souvent au moment où la CI cesse de pouvoir le rendre.
+>   ⛔ **Aucune relance faite, délibérément** : un plafond n'est pas un raté passager, et les minutes
+>   d'Actions sont facturées (dépôt privé, quota épuisé en août). **Arbitrage à Grégoire.**
+> · **#789 — quatre specs iPad rouges sur `main` DEPUIS AVANT ce lot** (run 848, `3fffd73b`) :
+>   `bulles-au-doigt-540` (3 cas) et `palette-redim-poignee-773` (1 cas), soit #540 et #773, livrés les
+>   6 et 7 sept. **Hors baseline** : `playwright-baseline.json` déclare zéro échec connu depuis le 26 août.
+>   Deux lectures non départagées (WebKit Linux ≠ Safari iOS, ou les correctifs ne tiennent pas).
+>   **Seul Grégoire peut trancher, au doigt sur son iPad.**
+>
+> ▣ **POURQUOI CE LOT N'EST EN CAUSE NI DANS L'UN NI DANS L'AUTRE, mesuré et non supposé** : aucune spec
+> d'intégration ne touche ce que le diff change. `#date-cours` n'apparaît que dans
+> `parcours-neuf-saisie-presences.spec.js`, qui lui pose une VALEUR et ne lit ni classe ni largeur ;
+> ni `.badge-sa`, ni la colonne Note %, ni `travaux-archivage`, ni `lot-observable` n'apparaissent
+> nulle part dans `tests/integration/`.
+>
+> ⛔ **CE QUI N'EST TOUJOURS PAS VÉRIFIÉ** : Safari, iPad (WebKit absent du conteneur, #456), et la
+> suite Playwright de bout en bout — personne ne l'a vue conclure sur ce commit. **Dernier ID : #789.**
 
 ---
 
