@@ -15,7 +15,8 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-↻ **1.123.12 LIVRÉE** (build `0907-0733`). **Ce qui change pour quelqu'un qui ouvre le Suivi d'un groupe en début
+↻ **1.123.12 POUSSÉE SUR `main`** (build `0907-0733`), donc en cours de déploiement — le numéro en bas de page
+tranche. **Ce qui change pour quelqu'un qui ouvre le Suivi d'un groupe en début
 de trimestre** : la carte des performances ne dit plus que tout le monde est en difficulté quand la note du cours
 n'existe pas encore. Une pratique par standards construit sa note à partir de plusieurs résultats : tant qu'elle n'en
 a pas assez, il n'y a pas de note — et ce n'est pas la même chose qu'une note de zéro. L'application le savait
