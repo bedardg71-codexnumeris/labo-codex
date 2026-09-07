@@ -7,6 +7,57 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026, MATIN : LA PERFORMANCE AFFICHÉE À ZÉRO (1.123.12, #775 / SUIVI-BUGS #541)
+
+> ⏳ **LE TRAVAIL ATTEND SUR `claude/performances-zero-display-bug-uxd741`, POUSSÉE MAIS NON FUSIONNÉE.** La session
+> était bornée par son harnais à sa seule branche désignée (« ne jamais pousser sur une autre branche sans permission
+> explicite ») : la fusion vers `main` et donc le déploiement **restent à autoriser par Grégoire**. Le commit est
+> `7d0e2d9c`, exactement UN commit devant `origin/main` (`6c94c163`) — la fusion sera un fast-forward pur, sans
+> conflit possible.
+> ⮕ **Le geste, quand il est autorisé** : `git fetch origin main && git branch -f main origin/main &&
+> git checkout main && git merge --ff-only claude/performances-zero-display-bug-uxd741 && git push origin main`.
+> Le déploiement Netlify part ensuite du webhook, sans commande (`DEPLOY.md` §1).
+> ⚠ **Comme la veille, `main` LOCAL était en retard sur `origin/main`** (34 commits, ancêtre pur, zéro commit propre :
+> la ref date du clonage du conteneur). D'où le `git branch -f main origin/main` ci-dessus, AVANT toute fusion — un
+> `git merge main` naïf serait faux. C'est la deuxième session de suite qui le mesure : ce n'est pas un accident,
+> c'est la forme du conteneur.
+> ⚠ **Tant que la fusion n'est pas faite, l'iPad de Grégoire lit encore 1.123.11** : le correctif n'est pas jugeable
+> par lui.
+>
+> ▣ **CE QUE PORTE LE LOT.** Retour de Grégoire à 7 h 01 : « les performances sont affichées à zéro alors qu'elles
+> ne le sont pas ; la progression est affichée stable, mais tout le monde est au niveau 3 ». Ses captures donnent la
+> mesure : A = 96 %, C = 96 %, des notes réelles dans la Liste des évaluations — et « Incomplet ou insuffisant : 28 »,
+> « Niveau 3 Intensif : 27 (100 %) » contre « Progression stable : 24 (89 %) ».
+>
+> ▣ **CE QU'IL FAUT RETENIR AVANT DE TOUCHER À CE CODE : LA SOURCE AVAIT RAISON.** Sa pratique est une
+> PAN-Standards ; la note du cours ne se construit pas encore. `portfolio.js:646` stocke donc `P = 0` accompagné de
+> `noteConstructible: false` — le comportement voulu par #394 (règle 4), et déjà honoré par les bulles, le panneau
+> prioritaire, le rapport de profil, le comparateur (#326-T1) et l'export des résultats. **Le défaut était entier
+> du côté des LECTEURS** : quatre d'entre eux lisaient le 0 sans regarder le drapeau. Chercher la cause dans le
+> moteur de note aurait été une journée perdue.
+>
+> ▣ **L'ARITHMÉTIQUE QUI A TRANCHÉ, avant toute lecture de code** : la carte disait « parmi les 28 en difficulté,
+> 25 montrent des signes de progrès », et la barre voisine « 3 en difficulté persistante ». 28 − 3 = 25. Les deux
+> chiffres viennent donc de la MÊME population lue par DEUX chemins : l'un par l'indice P stocké, l'autre par les
+> copies (`calculerIndicesNDerniersArtefacts`, qui n'applique pas la règle #706). C'est cet écart qui nomme le bug.
+>
+> ▣ **DÉCISION DE GRÉGOIRE, 7 septembre** (question posée, trois options) : tant que la note n'est pas
+> constructible, **le palier RàI se décide sur le DÉPISTAGE SEUL** — pas d'« En attente » qui viderait le dépistage
+> précoce pendant trois semaines, pas de marqueur « provisoire » à concevoir. Le geste est minimal : la clause
+> « P < seuil » ne s'applique que si P existe.
+>
+> ▣ **CE QUE LE LOT NE FAIT PAS, et c'est assumé** : il tarit la source d'affichage, il ne touche pas le STOCK.
+> `snapshots.js` a déjà gravé des `P: 0` sans drapeau dans les snapshots d'intervention et hebdomadaires (#777
+> inscrit). Rien n'est réparé d'office dans les données de Grégoire.
+>
+> ⏳ **DÛ À GRÉGOIRE, une phrase** : ouvrir Suivi › Groupe sur l'iPad et dire ce que la carte Performance annonce
+> maintenant, et quels paliers RàI il voit. WebKit est absent du conteneur (#456) : rien de cela n'est jugeable ici.
+>
+> ⚠ **Aucun verdict Playwright ne porte sur ce commit** : WebKit absent, `scripts/.verdict-playwright.json` inexistant.
+> Le hook pre-push ne lance que Vitest et laisse passer. Vitest : **501 fichiers / 5 534 tests verts**.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPTEMBRE 2026 : DEUX RETOURS IPAD (1.123.10 ET 1.123.11, #539 ET #540) — TOUT EST SUR `main` ET EN LIGNE
 
 > ✅ **RIEN N'ATTEND SUR UNE BRANCHE.** `claude/alignment-map-zoom-fluidity-9itj9c` a été fusionnée dans `main` en
