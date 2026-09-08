@@ -10761,7 +10761,7 @@
                                     <li><strong>Gestion des trimestres</strong> : Dates début/fin, congés, aperçu statistiques</li>
                                     <li><strong>Gestion des cours</strong> : Code, titre, discipline, compétence</li>
                                     <li><strong>Enseignant·e</strong> : Multi-profils avec dropdown</li>
-                                    <li><strong>Groupe d'étudiants</strong> : Import CSV/TXT, gestion SA/CAF</li>
+                                    <li><strong>Groupe d'étudiants</strong> : Import CSV/TXT, gestion SA / mesure d'aide</li>
                                     <li><strong>Horaire hebdomadaire</strong> : Séances avec jour, heures, local</li>
                                     <li><strong>Assemblage groupe-cours</strong> : Combine les 5 éléments ci-dessus</li>
                                 </ol>
@@ -10862,7 +10862,7 @@
                                 <li><strong>Nom</strong> : Nom de famille</li>
                                 <li><strong>Prénom</strong> : Prénom</li>
                                 <li><strong>Services adaptés (SA)</strong> : Si applicable</li>
-                                <li><strong>CAF</strong> : Centre d'Aide en Français (si inscrit)</li>
+                                <li><strong>Mesure d'aide</strong> : l'élève est inscrit à une mesure d'aide de ton collège (si applicable). La colonne s'appelait « CAF » ; les fichiers qui portent l'ancien en-tête restent lisibles.</li>
                             </ul>
 
                             <p><strong>Options d'import :</strong></p>
@@ -14544,7 +14544,7 @@
     <script src="js/productions-liste.js?v=20260903b"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js · #522 lot 4 : le descripteur de production écrit par db.modifier -->
     <script src="js/productions-bibliotheque-ui.js?v=20260903b"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide · #522 lot 4 : le descripteur de production écrit par db.modifier -->
     <script src="js/evaluation-formules.js?v=20260901a"></script> <!-- #667 : registre des modèles de formule algorithmique — CHARGÉ AVANT grilles.js et evaluation-calcul.js, qui l'appellent tous les deux -->
-    <script src="js/evaluation-projection.js?v=20260905a"></script>
+    <script src="js/evaluation-projection.js?v=20260908a"></script>
     <script src="js/collections-projection.js?v=20260905b"></script> <!-- Lot B (5 sept. 2026) : les collections de paramètres de projection — un jeu nommé de réglages, copié dans un critère au choix -->
     <script src="js/evaluation-enonces.js?v=20260905c"></script>
     <script src="js/composeur-badges.js?v=20260905c"></script> <!-- Le texte troué, étape 3 (5 sept. 2026) : le badge s'affiche dans la phrase — une vue éditable par-dessus chaque zone, le textarea reste la valeur -->
@@ -14613,7 +14613,7 @@
     <script src="js/profil-etudiant-diagnostics.js?v=20260829a"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260905b"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
     <script src="js/profil-etudiant-actions.js?v=20260906a"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
-    <script src="js/profil-etudiant-sections-affichage.js?v=20260905e"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
+    <script src="js/profil-etudiant-sections-affichage.js?v=20260908a"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=2025121017"></script>
     <script src="js/presences-rapport.js?v=20260827a"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
     <script src="js/boite-outils.js?v=20260906a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
@@ -14671,7 +14671,7 @@
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js?v=20260805b"></script> <!-- #366+#374 relais : stats fonction pure + clé unique (5 août) -->
     <script src="js/horaire.js?v=20260827a"></script> <!-- #416 lot C : lecture stricte des séances d'un groupe DÉSIGNÉ (jamais de génération) -->
-    <script src="js/groupe.js?v=2026032600"></script>
+    <script src="js/groupe.js?v=20260908a"></script>
     <script src="js/interventions.js?v=20260906a"></script>
 
     <!-- PRIORITÉ 6: Modules avancés (Beta 91.5 - Import/Export) -->

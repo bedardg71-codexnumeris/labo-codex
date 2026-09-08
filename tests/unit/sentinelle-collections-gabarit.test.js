@@ -190,7 +190,12 @@ describe('collections · B — choisir une collection COPIE ses valeurs dans le 
         await m.win.modifierModeleProjectionGrilleHandler({ value: 'collection:coll_euf', dataset: { grilleId: 'G2', critereIndex: '0' } });
         const c = m.store[CLE_G][0].criteres[0];
         expect(c.modeleProjection).toBe('norme_externe');
-        expect(c.paramsProjection).toEqual(EUF.params);
+        // #790 (8 sept. 2026) — LA RÉTRO-COMPAT SE LIT ICI, et c'est pour ça que l'oracle
+        // n'est plus `EUF.params` tel quel : `EUF` est une collection enregistrée AVANT
+        // que `libelleSignalement` existe. Elle s'applique quand même, et le paramètre
+        // neuf arrive à son défaut (vide = aucun signalement levé). Une collection
+        // partagée par un collègue en juin se pose donc toujours, sans rien lever.
+        expect(c.paramsProjection).toEqual({ ...EUF.params, libelleSignalement: '' });
         // L'oracle : ce que le registre écrit pour la même entrée (les paliers sont normalisés à l'écriture).
         expect(c.paliersProjection).toEqual(P.appliquerAuCritere({}, 'norme_externe', EUF.params, EUF.paliers).paliersProjection);
         expect(c.paliersProjection.length).toBe(6);

@@ -210,7 +210,10 @@ function parseAndPreview(content) {
             prenom: ['prenom', 'prénom', 'prenom de l\'etudiant', 'prénom de l\'étudiant', 'prenom de l\'élève', 'prénom de l\'élève', 'firstname', 'first name', 'given name'],
             programme: ['programme', 'program', 'prog', 'prog.', 'code programme', 'code_programme'],
             sa: ['sa', 's.a.', 's.a', 'services adaptés', 'services adaptes', 'services_adaptes', 'service adapté', 'service adapte', 'adaptation', 'accommodations', 'accomodations', 'mesures', 'mesures adaptees', 'mesures adaptées'],
-            caf: ['caf', 'centre d\'aide', 'centre aide', 'aide francais', 'aide français', 'cote', 'côte', 'cote r', 'score']
+            // #790 — « mesure d'aide » est le libellé affiché depuis le 8 sept. 2026 ; les
+            // anciens en-têtes restent reconnus, sinon les fichiers d'élèves déjà
+            // constitués cesseraient de se relire.
+            caf: ['caf', 'mesure d\'aide', 'mesure aide', 'centre d\'aide', 'centre aide', 'aide francais', 'aide français', 'cote', 'côte', 'cote r', 'score']
         };
 
         // Fonction pour normaliser un texte (pour comparaison)
@@ -821,7 +824,10 @@ function exportStudentsData() {
         }
 
         // Générer CSV
-        let csv = 'DA,Groupe,Nom,Prénom,Programme,SA,CAF\n';
+        // #790 — l'en-tête porte le nom neuf ; la CLÉ `caf` ne bouge pas, et
+        // `mappingColonnes` reconnaît « mesure d'aide » à la relecture. Un fichier
+        // exporté aujourd'hui se réimporte donc, et ceux d'hier aussi.
+        let csv = 'DA,Groupe,Nom,Prénom,Programme,SA,Mesure d\'aide\n';
         students.forEach(s => {
             csv += `${s.da},${s.groupe},${s.nom},${s.prenom},${s.programme || ''},${s.sa || ''},${s.caf || ''}\n`;
         });
