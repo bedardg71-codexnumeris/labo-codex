@@ -1,6 +1,6 @@
 # PORTES TERRAIN — 8 septembre 2026 · #790, le travail diagnostique
 
-> **Artefact jumeau** : *(lien ajouté à la publication)*
+> **Artefact jumeau** : https://claude.ai/code/artifact/fe31db5b-62d8-470f-99d2-a751b76d7840
 > **Base** : `main`, **1.125.0**, build **`0908-1502`**. Le lot est **poussé et déployé** —
 > c'est l'adresse en ligne que tu ouvres, pas ton dossier.
 > **État** : ⏳ **DUE.**
