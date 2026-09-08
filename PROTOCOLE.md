@@ -254,6 +254,46 @@ conditions pour qu'il décide en connaissance de cause.*
    y a changé depuis la dernière fois.
 3. Rendre l'état **en gestes d'utilisateur**, jamais en compte d'items de backlog.
 
+### L'application : UNE SEULE ADRESSE porte ses données réelles
+
+*Arrêté le 8 septembre 2026, après que #785 eut occupé deux sessions comme un bug
+d'enregistrement. Il n'y en avait pas. Grégoire ouvrait Labo Codex à deux adresses
+depuis l'automne, saisissait ses présences dans l'une et les cherchait dans l'autre.*
+
+**La règle, dans ses mots :**
+
+> **`https://app.codexnumeris.org` est ma source unique. Le fichier local
+> (`file://`) ne porte plus de trimestre réel.**
+
+**Elle nomme l'ADRESSE, jamais le navigateur.** Il avait d'abord écrit « Chrome
+comme source unique » : ça ne protège de rien, puisqu'il ouvre les deux adresses
+dans Chrome. Le cloisonnement du stockage suit l'**origine** (`file://` contre
+`https://…`), pas le logiciel. localStorage et IndexedDB y sont étanches : rien
+ne passe de l'une à l'autre, même navigateur, même machine, même écran.
+
+**Deux discriminants sont invisibles à l'écran, pas un** : les données sont
+séparées, ET les versions peuvent différer — le local sert son clone du dépôt, le
+web la version déployée.
+
+⚠ **Le local n'est pas un banc représentatif.** Trois chemins divergent, mesurés :
+`version.json` n'est jamais lu en `file://` (#495, le numéro affiché vient d'un
+repli), la détection de mise à jour ne tourne pas (`init-inline.js:446`), le
+décodage HEIC est désactivé (`heic-decodeur.js:81`). Éprouver en local ce que ses
+collègues vivront en ligne trompe sur ces trois-là.
+
+⛔ **C'est la DEUXIÈME fois en un mois.** Le 9 août, #154 disait déjà « chaque
+navigateur est une île » : la réparation #346 avait soigné sa copie Safari, sa
+copie Chrome ne l'avait jamais reçue. **Devant un symptôme de données qui
+manquent ou qui reviennent, la première question n'est pas « quel bug ? » mais
+« quelle instance ? ».** Poser la question coûte dix secondes ; ne pas la poser a
+coûté deux sessions d'enquête et deux hypothèses réfutées.
+
+▣ **Pour mesurer sans rien écrire** : `scripts/diagnostic-785-presences-deux-instances.js`,
+à coller dans la console de CHAQUE instance. Il rend une signature comparable
+(trimestre · date · groupe-cours · nombre d'élèves · périodes) et **aucune donnée
+personnelle** — ni DA, ni nom, ni note. Il ne sait pas écrire, et ça ne doit pas
+changer.
+
 ### La console : « Les huit gestes »
 
 C'est un artefact publié, sa vue d'`OU-EN-EST-ON.md`. **Il n'y en a qu'une.** Ne
