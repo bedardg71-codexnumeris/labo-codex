@@ -820,11 +820,21 @@ function sauvegarderPresencesSansValidation(dateStr) {
         }
     });
 
+    // 🛡️ #785 (8 sept. 2026) : NE RETIRER QUE CE QUI SERA RÉÉCRIT.
+    // La liste des élèves vient de la BASE, la réécriture vient du DOM. Quand le
+    // tableau de la séance n'est pas rendu, le retrait emportait la séance ENTIÈRE
+    // sans qu'aucune écriture ne la remplace — une séance détruite en silence.
+    const daReecrits = new Set(
+        etudiantsATraiter
+            .filter(e => document.getElementById(`periodes_${e.da}`))
+            .map(e => e.da)
+    );
+
     // Supprimer les anciennes présences pour cette date et ce cours
     presences = presences.filter(p => {
         if (p.date !== dateStr) return true;
         if (coursId && p.coursId && p.coursId !== coursId) return true;
-        return !etudiantsATraiter.some(e => e.da === p.da);
+        return !daReecrits.has(p.da);
     });
 
     // Ajouter les nouvelles présences depuis le formulaire
@@ -1485,13 +1495,23 @@ function enregistrerPresences() {
         }
     });
 
+    // 🛡️ #785 (8 sept. 2026) : NE RETIRER QUE CE QUI SERA RÉÉCRIT.
+    // La liste des élèves vient de la BASE, la réécriture vient du DOM. Quand le
+    // tableau de la séance n'est pas rendu, le retrait emportait la séance ENTIÈRE
+    // sans qu'aucune écriture ne la remplace — une séance détruite en silence.
+    const daReecrits = new Set(
+        etudiantsATraiter
+            .filter(e => document.getElementById(`periodes_${e.da}`))
+            .map(e => e.da)
+    );
+
     // Supprimer les anciennes présences pour cette date et ces étudiants
     // ✅ CORRIGÉ (8 janvier 2026) : Protéger les présences des autres cours
     presences = presences.filter(p => {
         if (p.date !== dateStr) return true;
         // Préserver les présences d'autres cours (coursId différent)
         if (coursId && p.coursId && p.coursId !== coursId) return true;
-        return !etudiantsATraiter.some(e => e.da === p.da);
+        return !daReecrits.has(p.da);
     });
 
     // Ajouter les nouvelles présences
