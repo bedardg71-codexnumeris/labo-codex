@@ -7,6 +7,102 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 36 — 7 SEPTEMBRE (MIDI) AU 8 SEPTEMBRE 2026 : 1.124.0 → 1.124.3, ET #542 QUI N'ÉTAIT PAS UN BUG.
+     Périmètre couvert : `6eed06a9..bebcbc76`, trente et un commits, plusieurs sessions et deux instances
+     d'agent travaillant en parallèle sur le même dépôt. Ce bloc rend l'état mesuré, pas la liste des commits ;
+     `RELAIS.md` et `OU-EN-EST-ON.md` portent le détail et restent la source.
+
+     ▣ LE MODULE DE REPORT VERS LÉA : LIVRÉ LE MATIN, RETIRÉ LE SOIR (1.124.0 → 1.124.2). Décision de Grégoire,
+       le jour même de la livraison, dans ses mots : « il s'agit d'un transfert manuel des informations. Si on ne
+       peut pas faire un copier/coller, il n'y a pas vraiment d'intérêt, car aucun gain de temps. »
+     ⮕ CE N'EST PAS UN DÉFAUT D'EXÉCUTION, C'EST UN DÉFAUT DE CADRAGE, et c'est la leçon à garder. Trois questions
+       avaient été posées avant d'écrire une ligne, et elles avaient écarté deux fausses pistes. Aucune n'a demandé
+       COMBIEN DE TEMPS IL RESTERAIT À GAGNER UNE FOIS LE TRI FAIT. Le panneau agissait sur la lecture et le calcul,
+       jamais sur la saisie — et c'est la saisie qui coûte. À poser au prochain lot d'outillage.
+     ⮕ Zéro-dette tenu : module, bouton, panneau, balise, seize tests, classe CSS, entrée de changelog — tout est
+       parti, rien en sommeil derrière un drapeau. Le module n'écrivait nulle part : aucune donnée en jeu.
+
+     ▣ CE QUI SURVIT AU RETRAIT, ET QU'IL NE FAUT PAS DÉFAIRE. La barre d'actions de la saisie n'a plus qu'UNE
+       définition (1.124.1). `restaurerCompteurPresences` ne reconstruit plus rien par `innerHTML` depuis une
+       seconde copie vivant dans `saisie-presences.js` : `#compteur-presences` porte deux enfants qui s'excluent et
+       le JS ne fait que basculer leur visibilité. C'est ce défaut-là — deux gabarits divergents — qui avait rendu
+       invisible, sur Mac COMME sur iPad, un bouton pourtant ajouté à `index.html`. Plus rien à synchroniser, donc
+       plus rien à oublier. Sentinelle #768/#782 élargie à toute la barre, quatre break-tests rouges.
+     ⮕ #747 est FERMÉ SANS CODE, sur sa réponse : « c'est l'enseignant qui juge si un rattrapage reprend une
+       absence. » Ce n'est pas une règle institutionnelle : il n'y avait rien à automatiser.
+
+     ▣ DEUX TESTS MENTEURS TROUVÉS LE MÊME JOUR, TOUS DEUX PAR BREAK-TEST. (1) La sentinelle #768 gardait TROIS
+       BOUTONS NOMMÉS : elle est restée verte pendant que le bouton neuf disparaissait ; elle garde maintenant
+       l'invariant — le JS ne fabrique aucun bouton de la barre — en les LISANT dans `index.html` au lieu de les
+       énumérer. (2) Son propre cas 3, au premier jet, enveloppait tout dans un `if (typeof … === 'function')` sur
+       des fonctions non exportées : il sautait son bloc en silence et passait toujours. C'est le break-test resté
+       VERT qui l'a révélé. ⮕ Une sentinelle qui nomme des instances au lieu de l'invariant ne garde rien.
+
+     ▣ #542 / #785 — « L'ENREGISTREMENT SEMBLE INSTABLE » : DEUX HYPOTHÈSES RÉFUTÉES, ET LA LEÇON QU'ELLES COÛTENT.
+       Chronologie de la mesure, qui est tout l'intérêt de ce point :
+       · 7 sept. — première inférence : `enregistrerPresences` n'appelle jamais `db.flush()`, `syncToLocalStorageCache`
+         fait d'IndexedDB la source au boot, le commit IDB est différé sous WebKit. Mécanisme exact de #140. Plausible.
+       · 7 sept. soir — REPRODUIT au banc : deux onglets, une clé de plus de 200 Ko, la perte survient.
+       · 8 sept. — RÉFUTÉ SUR SES DONNÉES : sa clé fait 15,12 Ko. La cause reproduite n'était pas la sienne.
+     ⛔ LA LEÇON DE MÉTHODE, ET ELLE VAUT AU-DELÀ DE CE CAS : une cause REPRODUITE AU BANC n'est pas la cause du cas
+       de Grégoire tant qu'on n'a pas mesuré SES données. Reproduire prouve qu'un chemin existe, jamais qu'il a été
+       emprunté. Deux sessions d'enquête sont passées là.
+     ▣ LA VRAIE EXPLICATION EST VENUE DE LUI, PAS DU CODE : il ouvrait Labo Codex à DEUX ADRESSES cet automne — son
+       fichier local (`file://`) et `https://app.codexnumeris.org`. Deux ORIGINES au sens du navigateur : localStorage
+       et IndexedDB y sont étanches, même navigateur, même Mac, même écran. Il saisissait d'un côté et cherchait de
+       l'autre. Deux séances (21 août, 1er sept.) ne vivaient que dans le local, et ont été ressaisies depuis.
+     ⚠ DEUXIÈME FOIS EN UN MOIS : #154, le 9 août, disait déjà « chaque navigateur est une île ». ⮕ Devant un symptôme
+       de données qui manquent ou qui reviennent, la première question n'est pas « quel bug ? » mais « quelle instance ? ».
+     ▣ CE QUE LA REQUALIFICATION N'ÉTABLIT PAS, et pourquoi #542 N'A PAS ÉTÉ BASCULÉ AUX CORRIGÉS : rien n'a été
+       réparé dans le code, et un chemin résiduel a été vérifié au code — `enregistrerPresences` (`:1490-1503`) retire
+       les présences de la date pour tous les élèves de la liste EN BASE, puis n'en réécrit que pour ceux dont le champ
+       existe DANS LE DOM. La fiche est donc RESTÉE OUVERTE, priorité abaissée de HAUTE à Basse, sans le vocabulaire
+       de la correction. ⮕ « Requalifié » n'est pas « corrigé » ; l'écrire ainsi est le geste.
+
+     ▣ DÉCISION DE GRÉGOIRE, 8 SEPT. : `https://app.codexnumeris.org` EST SA SOURCE UNIQUE DE VÉRITÉ. Le fichier local
+       ne porte plus de trimestre réel. La règle nomme l'ADRESSE, jamais le navigateur — il ouvre les deux dans Chrome,
+       et le cloisonnement suit l'origine. ⛔ Les présences saisies en local cet automne EXISTENT TOUJOURS, dans un
+       coffre séparé : rien n'y a été touché, leur sort lui revient.
+     ⮕ Écrit là où une session le lira AVANT de lui demander d'aller vérifier quelque chose à l'écran : `PROTOCOLE.md`
+       (« L'application : UNE SEULE ADRESSE porte ses données réelles », avec la sonde
+       `scripts/diagnostic-785-presences-deux-instances.js`, lecture seule, aucune donnée personnelle) ; `ETAT-PROJET.md`
+       §10 ; et le skill `portes-terrain`, dont le §0 disait encore le contraire.
+     ⚠⚠ LA CONSÉQUENCE OPÉRATOIRE, QUI CHANGE LE RITUEL DES PORTES TERRAIN : un lot seulement COMMITÉ n'est plus chez
+       lui. Il doit être POUSSÉ sur `main` et déployé (30-60 s) avant qu'une porte puisse le juger. Une porte écrite sur
+       un lot non poussé est un faux rouge garanti. Le `git pull` du §0, lui, n'a plus d'objet du tout.
+
+     ▣ #781 — LA PURGE DE L'HISTORIQUE EST PRÊTE À FROID, RIEN N'EST EXÉCUTÉ, et la préparation EST le livrable.
+       Exécution prévue le jeudi 10 septembre au terminal. Le `push --force` n'a lieu que sur un signal explicite donné
+       DANS la session qui exécute : son accord portait sur la PORTÉE, pas sur la date. Trois choses que la mesure a
+       changées et qu'il ne faut pas re-supposer : les 19 DA ne sont PAS ceux des exports (182 des 197 blobs porteurs
+       sont dans le seul `BACKLOG.md`) ; la règle de purge des noms était INOPÉRANTE (quatre regex ancrées qui
+       n'attrapaient pas le nom écrit en prose) ; et le plan TRANSPORTAIT ce qu'il purgeait — 19 DA et un nom en clair,
+       retirés le 7 au soir, à ne pas y remettre « pour la commodité ». La pièce manquante est chez lui : ses listes de
+       cohortes, hors dépôt — un élève absent de la liste survit à la purge sans aucun signal.
+
+     ▣ SIX MINEURS ENCHAÎNÉS (1.124.3) PENDANT L'ATTENTE DE SA RÉPONSE — #776, #778, #779, #755, #756, #753. Trois choses
+       à ne pas défaire : `scripts/lot-observable.sh` n'a plus de motif à lui, il DÉRIVE celui de la CI (liste illisible
+       ⮕ il répond OUI, car sauter le verdict en silence est le défaut que #756 corrige — le verdict Playwright est donc
+       maintenant exigé pour un banc Vitest seul, et c'est voulu) ; la liste des 22 doubles `class` (#787) est FIGÉE dans
+       `sentinelle-779`, et retirer un cas réparé de la liste fait partie du geste ; `.badge-sa` n'est plus orange, décidé
+       seul faute de teinte lisible dans les deux modes (`--orange-accent` à 2,2:1 sur fond clair) — QUESTION OUVERTE.
+     ⮕ Et deux fiches retournées par la mesure : #694 point C PÉRIMÉ (`git ls-files -- '*DS_Store*'` rend zéro) — un
+       constat déposé et jamais redaté se lit comme une tâche due.
+
+     ▣ CE QUI RESTE OUVERT EN SORTANT DE CE BLOC :
+       · **La branche `claude/consigne-du-jour-wybfs0`, poussée le 8 sept. et NON fusionnée** — elle porte un défaut
+         RÉEL et DISTINCT, reproduit au banc : cocher « Verrouillée » alors que le tableau n'est pas rendu DÉTRUIT la
+         séance en silence, puis pose le cadenas sur une séance vide. Banc de cinq cas avec témoin, break-test à
+         l'envers, correctif d'une ligne PROPOSÉ ET NON APPLIQUÉ. Elle relève #542 de Basse à HAUTE et #785 au niveau 1.
+         ⛔ NE PAS SUPPRIMER CETTE BRANCHE : `RELAIS.md` ne la mentionne pas, et elle est en avance sur `main`.
+       · **Playwright rouge sur `main` depuis AVANT la 1.124.3** (#788, #789) : `bulles-au-doigt-540` ×3 et
+         `palette-redim-poignee-773`. Aucun n'est causé par un lot de ce bloc ; la 1.124.3 n'a jamais été jugée (run
+         annulé). Inscrit, pas corrigé.
+       · `.badge-sa` sans orange (à voir à l'écran avec lui) ; #787 les 22 rendus à juger d'un coup ; #783, #784, #786.
+       · L'artefact jumeau de `PORTES-TERRAIN-2026-09-07-report-lea.md` est devenu sans objet avec le retrait du module.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 35 — 7 SEPTEMBRE 2026, MATIN : « LES PERFORMANCES SONT AFFICHÉES À ZÉRO » (1.123.12, #775 / SUIVI-BUGS #541).
      ▣ RETOUR DE GRÉGOIRE, 7 h 01, avec deux captures : « les performances sont affichées à zéro alors qu'elles ne
        le sont pas. La progression est affichée stable, mais tout le monde est au niveau 3. Le suivi est donc

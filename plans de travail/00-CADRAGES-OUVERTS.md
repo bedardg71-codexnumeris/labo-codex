@@ -15,7 +15,7 @@
 
 ---
 
-## ▣ CE QUI EST OUVERT AUJOURD'HUI — huit cadrages ; livrés : le 3 (1.116), le 7 (1.117), le 1 étapes 2 et 3 (1.118, 1.119), le 2 (1.119), le 5 (1.119), le 8 (1.120) ; le 1 est CLOS (étape 4 abandonnée) ; ouverts : le 4, le 6 (à trier)
+## ▣ CE QUI EST OUVERT AUJOURD'HUI — neuf cadrages (le 9 ajouté le 7 septembre) ; livrés : le 3 (1.116), le 7 (1.117), le 1 étapes 2 et 3 (1.118, 1.119), le 2 (1.119), le 5 (1.119), le 8 (1.120) ; le 1 est CLOS (étape 4 abandonnée) ; ouverts : le 4, le 6 (à trier)
 
 *Aucun n'empêche un des huit énoncés de la cohorte 1 : ils sont tous parcourus depuis le
 3 septembre au matin. Ces quatre-là traitent l'**adoption** et la **justesse**, pas la ligne
@@ -123,6 +123,17 @@ description « #581 » lue par les collègues disparaît. **Pas dans 1.119 sauf 
 avec la correction du point 3 (« Aucune annotation » sous la case des codes, pli « Quand la copie ne porte aucun code », la carte
 « Codes d'annotation » n'existant plus) et le point 5 (« Français écrit », mots de Grégoire à 11 h 41). Vérifié : relecture de Cowork
 sur le commit, coup d'œil de Grégoire, changelog validé par lui. Plus rien d'ouvert ici.
+
+### 9 · Le dépistage du français en première semaine — `CADRAGE-2026-09-07-depistage-du-francais-semaine-1.md`
+↻ **7 septembre 2026, 21 h 15 : DEVENU LA CONSIGNE DU JOUR.** Les six arbitrages de Grégoire sont pris ; le cadrage quitte cette liste dès que le lot est livré.
+**Écrit le 7 septembre 2026 en soirée, avec Grégoire, sur un besoin qu'il vient de vivre sur ses vraies copies.**
+Un texte écrit en semaine 1, corrigé sur le seul critère du français, doit repérer qui référer au centre d'aide —
+sans compter dans la note, ni dans P, ni dans le palier RàI. **Ce qui est tranché** : un marqueur « production
+diagnostique » sur la production, et un **signalement à côté du palier, pas dedans**, levé automatiquement au seuil
+de la projection EUF, distinct du champ administratif « Services adaptés ». **Ce qui est mesuré** : les deux chaînes
+(note/P et dépistage) ne partagent pas le même filtre, donc c'est séparable ; et c'est `determinerNiveauRaiPedagogique`,
+pas l'IPB, qui alimente l'écran — un seul artefact y suffit à produire un palier 2 ou 3. **Restent à lui** : le libellé
+du signalement, le palier qui le lève, et le nom du champ « CAF », qui désigne un service qui n'existe plus.
 
 ## 🔎 LA SÉRIE D'AUDITS CADRÉS — trois audits, un ordre, une règle de fermeture
 
