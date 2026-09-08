@@ -829,6 +829,16 @@ function genererSectionAccompagnement(da) {
     const conversionAveugle = (typeof diagnostiquerConversionNiveaux === 'function')
         ? diagnostiquerConversionNiveaux(da) : null;
     const alerteContexte = determinerAlerteContextuelle(da);
+    // #790 — LE SIGNALEMENT, RECALCULÉ ICI ET JAMAIS LU D'UN STOCKAGE. Il ne touche
+    // pas au palier RàI : celui-ci se construit sur les artefacts complets du
+    // trimestre, le signalement dit une autre chose, à côté. Décocher un palier du
+    // gabarit le fait disparaître au rechargement suivant, sans migration.
+    const signalements = (typeof window.SignalementDepistage !== 'undefined')
+        ? window.SignalementDepistage.pourEleve(da, {
+            evaluations: obtenirDonneesSelonMode('evaluationsSauvegardees') || [],
+            grilles: db.getSync(cle('grillesTemplates'), []) || []
+        })
+        : [];
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true); // true = dépistage (3 artefacts)
     const progression = calculerProgressionEleve(da);
     const defiSpecifique = identifierDefiSpecifique(da);
@@ -973,6 +983,19 @@ function genererSectionAccompagnement(da) {
                 <div style="margin: 12px 0; padding: 10px 12px; background: var(--alerte-fond-attention, rgba(232,168,56,0.10)); border-left: 3px solid var(--orange-attention, #e8a838); border-radius: 0 4px 4px 0; font-size: 0.85rem; color: var(--gris-fonce);">
                     <strong style="color: var(--orange-attention, #e8a838);">Dépistage incomplet</strong><br>
                     ${echapperHtml(conversionAveugle.message)}
+                </div>` : ''}
+
+                <!-- #790 — LE SIGNALEMENT : sous le badge, donc À CÔTÉ du palier et
+                     jamais dedans. Sa phrase vient du gabarit de la grille, pas du
+                     code : un enseignant de chimie y lit la sienne. -->
+                ${signalements.length ? `
+                <div class="profil-signalement">
+                    ${signalements.map((sig) => `
+                    <div class="profil-signalement-ligne">
+                        <span class="profil-signalement-libelle">${echapperHtml(sig.libelle)}</span>
+                        <span class="profil-signalement-source">Palier « ${echapperHtml(sig.palier)} »${sig.critereNom ? ' — ' + echapperHtml(sig.critereNom) : ''}</span>
+                    </div>`).join('')}
+                    <button class="btn btn-secondaire profil-signalement-btn" data-action="naviguerVersNouvelleIntervention" data-param="${echapperHtml(da)}">Ouvrir une intervention</button>
                 </div>` : ''}
 
                 <p class="profil-texte-paragraphe">

@@ -26971,3 +26971,83 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     color: var(--gris-moyen);
     font-size: 0.8rem;
 }
+
+/* #790 — la case « ce palier lève un signalement », dans l'éditeur de paliers de
+   projection. Discrète : elle est un réglage du palier, pas son sujet. Le label
+   enveloppe la case et son texte, donc la cible tactile de 44 px porte sur toute
+   la rangée (règle iPad du projet). */
+.palier-leve-signalement {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    min-height: 44px;
+    padding: 8px 4px 4px;
+    margin: 0;
+    cursor: pointer;
+    font-weight: normal;
+    font-size: 0.82rem;
+    color: var(--gris-fonce);
+    line-height: 1.45;
+}
+
+.palier-leve-signalement input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 1px 0 0 0;
+    flex: 0 0 auto;
+    cursor: pointer;
+}
+
+.palier-leve-signalement small {
+    color: var(--gris-moyen);
+    font-size: 0.76rem;
+}
+
+/* ============================================================================
+   #790 — LE SIGNALEMENT DE DÉPISTAGE, au profil de l'élève.
+   Placé SOUS le badge RàI : à côté du palier, jamais dedans. Il dit une autre
+   chose que lui, et doit se lire comme telle — d'où un filet sarcelle plutôt que
+   les couleurs d'alerte des paliers RàI, qui ont leur propre code (règle du skill
+   `design-interface` §3 : ne jamais confondre une alerte RàI avec autre chose).
+   ============================================================================ */
+
+.profil-signalement {
+    margin: 12px 0;
+    padding: 10px 12px;
+    background: var(--bleu-tres-pale);
+    border-left: 3px solid var(--bleu-principal);
+    border-radius: 0 4px 4px 0;
+}
+
+.profil-signalement-ligne + .profil-signalement-ligne {
+    margin-top: 8px;
+    padding-top: 8px;
+    /* `--bordure-claire` est DÉFINIE dans les deux modes. `--bordure-legere`, elle,
+       ne l'est nulle part : le cliquet des variables fantômes (#567/#595) refuse d'en
+       ajouter un treizième usage, et il a raison — un fallback qui marche masque une
+       variable qui n'existe pas. */
+    border-top: 1px solid var(--bordure-claire);
+}
+
+.profil-signalement-libelle {
+    display: block;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--gris-fonce);
+    line-height: 1.4;
+}
+
+.profil-signalement-source {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.76rem;
+    color: var(--gris-moyen);
+}
+
+.profil-signalement-btn {
+    margin-top: 10px;
+    /* Cible tactile iPad : la règle du projet est 44 px, et un bouton de carte
+       ne fait pas exception. */
+    min-height: 44px;
+    font-size: 0.82rem;
+}

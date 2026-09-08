@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.125',
+            couleur: 'vert',
+            titre: 'Un travail qui repère sans compter',
+            items: [
+                '<strong>Une case « Travail diagnostique — ne compte dans aucun calcul », sur la fiche du travail.</strong> Pour ce qu\'on fait produire en début de trimestre afin de situer les élèves : le travail reste entier dans le dossier de chacun — copie, annotation, rétroaction, résultat — mais il ne pèse ni sur la note, ni sur la performance, ni sur la complétion, ni sur le palier RàI. Tu peux la cocher sur un travail déjà corrigé.',
+                '<strong>Un élève arrivé en retard ne bascule plus en « Niveau 3 » à cause de ce travail-là.</strong> C\'était le piège de la première semaine : un seul travail dû et une seule copie corrigée suffisaient à déclarer « non-participation » ceux qui n\'avaient pas encore leur horaire. Le travail diagnostique ne déclenche plus ce verdict.',
+                '<strong>Et il peut lever un signalement, dans tes mots.</strong> Sur chaque palier de ta grille de projection, une case « ce palier lève un signalement », et un champ où tu écris la phrase que TU veux lire — « Aide en français recommandée », « Reprise du module 2 à prévoir ». Elle apparaît à côté du palier RàI de l\'élève et dans la vue du groupe, avec le nombre d\'élèves concernés, pour voir l\'ampleur avant de contacter qui que ce soit. Rien n\'est écrit sur la copie de l\'élève, et rien n\'est écrit dans tes données : le signalement se recalcule, donc décocher un palier le fait disparaître.',
+                '<strong>Le champ « CAF » de la fiche de l\'élève s\'appelle maintenant « Mesure d\'aide ».</strong> Il dit un fait administratif — l\'élève EST inscrit à une mesure — et rien dans l\'application ne suppose plus une discipline en particulier. Tes fichiers d\'élèves déjà constitués restent lisibles : l\'ancienne colonne est toujours reconnue à l\'import.'
+            ]
+        },
+        {
             version: '1.124',
             couleur: 'orange',
             titre: 'Verrouiller une séance n\'efface plus ses présences',
