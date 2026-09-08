@@ -179,7 +179,16 @@ test('texte troué 2 · deux badges posés dans un palier au clic, enregistrés,
     expect(lues[1].engendre).toBe('Ta production contient 5 erreurs pour 900 mots. Tu fais en moyenne 1 erreur à chaque 180 mots.');
     expect(lues[1].ecrit).toBe('En prévision de l\'EUF, ce ratio est excellent.');
     // Les deux zones s'appellent « Verdict » et « Recommandation (facultative) » ; l'aide sur les badges précède le premier palier.
-    expect(await palier(page, 4).locator('label').allTextContents()).toEqual(['Palier 5', 'Jusqu\'à', 'Verdict', 'Recommandation (facultative)']);
+    // ↻ #790 (8 sept. 2026) — UNE CINQUIÈME ÉTIQUETTE, et l'égalité stricte est GARDÉE exprès :
+    // un palier ne doit pas gagner un champ sans que quelqu'un le décide. C'est cette attente qui
+    // a signalé l'ajout, et c'est ce qu'on attend d'elle. Les textes sont normalisés (espaces et
+    // retours d'indentation écrasés) : sans ça, l'oracle dépendrait de la mise en forme du gabarit.
+    const etiquettes = (await palier(page, 4).locator('label').allTextContents())
+        .map((t) => t.replace(/\s+/g, ' ').trim());
+    expect(etiquettes).toEqual([
+        'Palier 5', 'Jusqu\'à', 'Verdict', 'Recommandation (facultative)',
+        'Ce palier lève un signalement — pour toi, à côté du palier RàI de l\'élève. Rien n\'est écrit sur sa copie.'
+    ]);
     const aideEnTete = await carte(page, 'projection').evaluate((el) => {
         const note = el.querySelector('.palier-note-composer');
         const premier = el.querySelector('.palier-projection');
