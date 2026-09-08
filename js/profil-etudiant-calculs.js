@@ -1791,7 +1791,18 @@ function depistagePeutJugerLaNonParticipation() {
     const aujourdhui = (typeof window.dateLocaleYMD === 'function') ? window.dateLocaleYMD() : new Date().toISOString().slice(0, 10);
     const infoCours = db.getSync('infoCours', null);
     const groupeCoursId = infoCours ? (infoCours._groupeCoursId || infoCours.id || null) : null;
-    const travailDu = productions.some(p => {
+    // #790, PORTE 4 — LA PLUS FACILE À OUBLIER, ET CELLE QUI ANNULE LES TROIS AUTRES.
+    // En première semaine, la production diagnostique remplit à elle seule les DEUX
+    // conditions ci-dessous dès que l'enseignant a corrigé une première copie : elle
+    // est un travail dû, et elle fournit une copie évaluée. Un élève arrivé en retard
+    // pour une raison d'horaire basculerait donc en « Non-participation → niveau 3 »
+    // par CETTE porte, sans que son exclusion de C ni de la note n'y change rien.
+    // ⚠ IL FAUT L'ÉCARTER DES DEUX CÔTÉS, pas d'un seul : si un AUTRE travail est dû
+    // mais que la seule copie corrigée est celle du diagnostique, le verdict passerait
+    // encore. Les deux conditions se valident indépendamment.
+    const dsp = window.ProductionDiagnostique;
+    const productionsJugeables = dsp ? dsp.filtrerProductions(productions) : productions;
+    const travailDu = productionsJugeables.some(p => {
         if (!p || p.facultatif || p.type === 'portfolio') return false;
         const echeance = (typeof obtenirEcheanceEffective === 'function')
             ? obtenirEcheanceEffective(p, groupeCoursId)
@@ -1800,7 +1811,8 @@ function depistagePeutJugerLaNonParticipation() {
     });
     if (!travailDu) return { possible: false, raison: 'aucun-travail-du' };
 
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const evaluationsBrutes = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const evaluations = dsp ? dsp.filtrerEvaluations(evaluationsBrutes, productions) : evaluationsBrutes;
     const copieEvaluee = evaluations.some(e => e && !e.remplaceeParId && e.noteFinale !== null && e.noteFinale !== undefined);
     if (!copieEvaluee) return { possible: false, raison: 'aucune-copie-evaluee' };
 

@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260907c"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260908a"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4682,6 +4682,18 @@
                                             </div>
                                             <p id="notePonderation" class="u-hide u-texte-petit" style="color: var(--gris-moyen); margin: 0; padding-top: 28px; line-height: 1.5"></p>
                                         </div>
+                                        <!-- #790 (8 sept. 2026) — LE MARQUEUR DIAGNOSTIQUE, juste sous la
+                                             pondération : c'est là que le poids d'un travail se décide, donc
+                                             c'est là qu'on dit qu'il n'en a aucun. Rien de disciplinaire ici —
+                                             le cas fondateur est un texte corrigé sur le seul critère du
+                                             français, mais un enseignant de chimie coche la même case. -->
+                                        <label class="prod-marqueur-diagnostique" for="productionDiagnostique">
+                                            <input type="checkbox" id="productionDiagnostique">
+                                            <span>
+                                                <strong>Travail diagnostique — ne compte dans aucun calcul</strong>
+                                                <span class="prod-marqueur-diagnostique-aide">Un travail de repérage, en début de trimestre. Il reste entier dans le dossier de l'élève — copie, annotation, rétroaction, résultat — mais il ne pèse ni sur la note, ni sur la performance, ni sur la complétion, ni sur le palier RàI. Sa pondération est alors sans effet.</span>
+                                            </span>
+                                        </label>
                                         <!-- #496 (25 août 2026) : « Préparer le PDF » a quitté l'en-tête de
                                              section pour venir ICI, au-dessus des trois choix dont il dépend.
                                              Depuis qu'il lit la production ouverte plutôt qu'un formulaire, sa
@@ -14510,6 +14522,7 @@
     <script src="js/entites/horaires.js?v=2026010601"></script>
     <script src="js/entites/groupe-cours.js?v=20260821a"></script>
     <script src="js/entites/reconciliation-evaluations.js?v=2026062801"></script> <!-- #360 : prévention des doublons d'évals note-égale -->
+    <script src="js/entites/production-diagnostique.js?v=20260908a"></script> <!-- #790 : la production de repérage, hors des quatre calculs — chargée AVANT productions.js, les pratiques et le profil, qui la consultent tous -->
 
     <script src="js/pratique-notation-v2.js?v=20260905b"></script> <!-- Beta 95 : dropdown productions + terminologie "production" -->
     <script src="js/gabarits-utils.js?v=20260903b"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
@@ -14526,7 +14539,7 @@
          Chargé AVANT eux — ils l'appellent au rendu, pas au chargement, mais
          l'ordre reste la garantie la plus simple à relire. -->
     <script src="js/ui-blocs.js?v=20260905b"></script>
-    <script src="js/productions.js?v=20260903b"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
+    <script src="js/productions.js?v=20260908a"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
     <script src="js/productions-import-export.js?v=20260903b"></script> <!-- Refactor étape 3 (16 mai 2026) : extrait de productions.js (lignes 2630-3276) -->
     <script src="js/productions-liste.js?v=20260903b"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js · #522 lot 4 : le descripteur de production écrit par db.modifier -->
     <script src="js/productions-bibliotheque-ui.js?v=20260903b"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide · #522 lot 4 : le descripteur de production écrit par db.modifier -->
@@ -14553,15 +14566,15 @@
     <!-- DEN couche 2 (#318, DEN-0) : SSOT de jugementsDenotation, lu par le moteur (DEN-1) -->
     <script src="js/pratiques/denotation-jugements.js?v=20260821a"></script>
     <!-- IMPORTANT: pratique-configurable.js doit être chargé EN PREMIER car pratique-registre.js l'utilise -->
-    <script src="js/pratiques/pratique-configurable.js?v=20260905a"></script>
+    <script src="js/pratiques/pratique-configurable.js?v=20260908a"></script>
     <script src="js/pratiques/pratique-registre.js?v=20260906a"></script>
     <!-- migration-pratiques.js retiré (Lot 3 #328, 11 juin 2026) : migration des ids
          legacy sur la clé nue pré-namespacing, morte sur tout appareil courant ;
          normaliserIdPratique résout de toute façon les ids legacy à la volée -->
     <script src="js/pratiques/pratique-test.js?v=2025120705"></script>
-    <script src="js/pratiques/pratique-pan-standards.js?v=20260905a"></script>
-    <script src="js/pratiques/pratique-sommative.js?v=20260905b"></script>
-    <script src="js/pratiques/pratique-pan-specifications.js?v=20260905a"></script>
+    <script src="js/pratiques/pratique-pan-standards.js?v=20260908a"></script>
+    <script src="js/pratiques/pratique-sommative.js?v=20260908a"></script>
+    <script src="js/pratiques/pratique-pan-specifications.js?v=20260908a"></script>
 
     <!-- Pratiques prédéfinies (Beta 92 - Jour 1) -->
     <script src="js/pratiques/pratiques-predefines.js?v=20260902f"></script>
@@ -14594,8 +14607,8 @@
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=20260907b"></script> <!-- Refonte nav SP5 : faux ami CSS class préservée -->
-    <script src="js/profil-etudiant-helpers.js?v=20260829a"></script> <!-- Refactor session A : zone helpers extraite. Compte de fonctions et de lignes retire le 27 aout 2026 : il disait 16 alors que le module en exportait 19, et il se re-perimerait au prochain ajout. · #555 (d) : la préférence IDME se nomme seuilIdme* -->
-    <script src="js/profil-etudiant-calculs.js?v=20260907b"></script> <!-- Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
+    <script src="js/profil-etudiant-helpers.js?v=20260908a"></script> <!-- Refactor session A : zone helpers extraite. Compte de fonctions et de lignes retire le 27 aout 2026 : il disait 16 alors que le module en exportait 19, et il se re-perimerait au prochain ajout. · #555 (d) : la préférence IDME se nomme seuilIdme* -->
+    <script src="js/profil-etudiant-calculs.js?v=20260908a"></script> <!-- Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
     <script src="js/profil-etudiant-rapport.js?v=20260905b"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
     <script src="js/profil-etudiant-diagnostics.js?v=20260829a"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260905b"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
@@ -14675,7 +14688,7 @@
     <script src="js/partage-export.js?v=20260901a"></script>
     <script src="js/partage-import.js?v=20260824b"></script>
     <script src="js/partage-section.js?v=20260901a"></script>
-    <script src="js/import-export.js?v=20260903f"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
+    <script src="js/import-export.js?v=20260908a"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
     <script src="js/codex.js?v=20260903b"></script> <!-- #614 : la fusion valide les magic bytes ; la purge #336 ne recense plus la corbeille ni la modélisation -->
     <script src="js/liste-evaluations.js?v=20260907a"></script> <!-- #560 : supprimer une copie pour de bon dit ce qui part avec elle (annotations, évaluations du couple) -->
     <script src="js/journal.js?v=2026041706"></script>
