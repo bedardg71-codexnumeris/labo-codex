@@ -648,6 +648,15 @@ Synthèse :
 
 ## 10. Points de vigilance
 
+- **⚠ UNE SEULE ADRESSE porte ses données réelles : `https://app.codexnumeris.org`** (arrêté par
+  Grégoire le 8 septembre 2026 ; règle complète dans `PROTOCOLE.md`, « L'application : UNE SEULE
+  ADRESSE porte ses données réelles »). Son clone `~/Documents/GitHub/Monitorage_v6` reste l'arbre de
+  travail des sessions ; il n'alimente plus son écran. **Deux conséquences pour toute session** :
+  (a) devant un symptôme de données qui manquent ou qui reviennent, la première question est
+  « quelle instance ? », pas « quel bug ? » — l'avoir omise a coûté deux sessions à #785/#542 ;
+  (b) **un lot seulement commité n'est pas encore chez lui** : rien ne se vérifie à l'écran avant le
+  push sur `main` et le déploiement (30-60 s, `DEPLOY.md` §2). Sonde de mesure, sans écriture :
+  `scripts/diagnostic-785-presences-deux-instances.js`.
 - **Reprise d'août sur Plan Pro, après un congé de juillet.** Mémoire personnelle dégradée + budget réduit
   (Pro ≪ Max 20x, usage partagé Cowork + Claude Code). Mitigations : s'appuyer sur le rituel
   `.claude/skills/debut-de-session-labo-codex/SKILL.md` et sur `PLAN-mi-aout-2026.md` plutôt que sur la mémoire ; défaut **Sonnet**

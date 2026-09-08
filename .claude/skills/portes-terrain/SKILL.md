@@ -165,35 +165,43 @@ ne portait sur la vraie variable.
 - **vérifier le numéro de version en bas de page** — c'est le geste qui vaut dans
   TOUS les cas, et le seul qui prouve quelque chose ;
 
-  ⚠⚠ **NE PAS ÉCRIRE « fais un `git pull` » SANS AVOIR VÉRIFIÉ D'OÙ TU AS TRAVAILLÉ.**
-  (27 août 2026.) Le dépôt de Grégoire, `~/Documents/GitHub/Monitorage_v6`, sert
-  À LA FOIS d'arbre de travail aux sessions et de source `file://` à son
-  application. **Quand la session commite là — le cas courant — ses commits sont
-  DÉJÀ chez lui : il n'y a rien à tirer.** GitHub Desktop affiche alors « No local
-  changes » et un bouton « Fetch origin » qui ne propose aucun pull, et la porte
-  se bloque sur sa toute première rangée.
+  ⚠⚠ **NE LUI DEMANDE NI `git pull` NI RIEN QUI TOUCHE SON CLONE : SON APPLICATION
+  N'EN VIENT PLUS.** (Réécrit le 8 septembre 2026 ; avant cette date, ce bloc disait
+  le contraire — voir la note de fin.) Grégoire ouvre `https://app.codexnumeris.org`,
+  la version **déployée**. Son clone `~/Documents/GitHub/Monitorage_v6` reste l'arbre
+  de travail des sessions, mais il ne sert plus rien à l'écran chez lui. Règle et
+  fondement : `PROTOCOLE.md`, « L'application : UNE SEULE ADRESSE porte ses données
+  réelles ».
 
-  ⮕ **C'est arrivé ce jour-là**, et le `RELAIS.md` l'annonçait pourtant noir sur
-  blanc (« le `git pull` des portes terrain lui est inutile »). La consigne a été
-  recopiée du gabarit sans être confrontée à la situation — exactement le défaut
-  que les deux règles de tête de ce skill visent, appliqué au §0.
+  ⮕ **La conséquence qui change tout : UN LOT COMMITÉ N'EST PAS ENCORE VISIBLE.**
+  Il doit être **poussé sur `main`** ; Netlify reconstruit et met en ligne en 30 à
+  60 secondes (`DEPLOY.md` §2). **Une porte terrain écrite sur un lot non poussé est
+  un faux rouge garanti** — il jugerait la version d'avant. Avant d'écrire la liste :
+  `git --no-optional-locks rev-parse HEAD origin/main` (après un `fetch`), et si les
+  deux diffèrent, la porte attend le push.
 
-  ⮕ **La rangée juste** : « recharge l'application, et lis le numéro en bas de
-  page ». Le `git pull` ne s'ajoute que si la session a travaillé AILLEURS que
-  dans son clone (worktree, autre machine, branche non fusionnée) — et il faut
-  alors le dire, avec la raison.
+  ⮕ **La rangée juste** : « ouvre `https://app.codexnumeris.org`, recharge, et lis
+  le numéro en bas de page ». Rien d'autre au §0 — ni pull, ni chemin de fichier.
+
+  ⮕ *Ce que ce bloc disait avant le 8 septembre, et pourquoi il tient encore comme
+  leçon.* Son application venait alors de son clone en `file://` : les commits d'une
+  session étaient déjà chez lui, et le §0 du 27 août s'était bloqué sur un `git pull`
+  recopié du gabarit qui n'avait rien à tirer, alors que `RELAIS.md` l'annonçait noir
+  sur blanc. Le piège a changé de forme, pas de nature : **recopier le §0 du gabarit
+  sans le confronter à la situation reste le défaut** — c'est ce que visent les deux
+  règles de tête de ce skill.
 - backup Codex si une porte touche les données ;
 - `allow pasting` si une porte demande la console ;
 - les deux appareils, les deux modes.
 
-⚠ **Rappeler que son build n'est pas forcément celui de `main`.** Il lance l'app
-en `file://` depuis son clone : elle est à la version des fichiers SUR SON DISQUE.
-Quand la session a commité dans ce même clone, ils sont à jour dès le commit ;
-quand elle a travaillé ailleurs, ils sont à la version de son dernier `git pull`.
-Deux des quatre échecs des 81 portes étaient des faux rouges venus de là — et **ce
-type de faux rouge est indétectable au récit**, parce qu'il décrit exactement
-l'état d'avant le correctif, qui est précisément ce que la porte teste.
-⮕ D'où le geste qui tranche dans les deux cas : **lire le numéro en bas de page**.
+⚠ **Rappeler que son build n'est pas forcément celui de ton HEAD.** Il lit la
+version **en ligne** : celle du dernier push sur `main` déployé par Netlify, pas
+celle de ton dernier commit. Deux des quatre échecs des 81 portes étaient des faux
+rouges venus de cet écart (à l'époque : la version des fichiers sur son disque) —
+et **ce type de faux rouge est indétectable au récit**, parce qu'il décrit
+exactement l'état d'avant le correctif, qui est précisément ce que la porte teste.
+⮕ D'où le geste qui tranche dans tous les cas : **lire le numéro en bas de page**,
+et le comparer au jeton que la porte annonce.
 
 ### §1 · ⚠⚠ Données — ce qu'il exécute sur son corpus
 En tête dès qu'il y en a. Ce sont les gestes **irréversibles**.
@@ -374,11 +382,13 @@ celui du disque.
 verdict ne vaut rien, ni le vert ni le rouge.
 
 **Avant d'envoyer une porte terrain** :
+0. **Vérifier que le lot est POUSSÉ et déployé** — c'est l'adresse en ligne qu'il
+   ouvre. Un lot seulement commité n'est pas chez lui (8 septembre 2026).
 1. Vérifier que le bloc de jetons `?v=` d'`index.html` a été bumpé pour les
    fichiers du lot.
 2. Le dire dans la porte : version, build, et le jeton attendu.
-3. Demander un rechargement **avec vidage de cache** si une session `file://`
-   était déjà ouverte.
+3. Demander un rechargement **avec vidage de cache** si un onglet de l'application
+   était déjà ouvert.
 
 ⚠ Et une porte terrain ne se rend pas sur ce qui n'est pas arrivé : le
 1er septembre, une porte a dû être SUSPENDUE parce qu'elle jugeait des libellés
@@ -391,6 +401,7 @@ n'existe pas.
 
 | Date | Changement |
 |---|---|
+| 2026-09-08 | **Une porte terrain vise le SITE WEB, plus le fichier local.** Grégoire a arrêté que `https://app.codexnumeris.org` porte ses données réelles (`PROTOCOLE.md`, règle des deux instances) : son clone n'alimente plus son écran. Conséquence sur le §0 — plus de `git pull`, et **un lot seulement commité n'est pas encore chez lui : il doit être poussé et déployé** (30-60 s). Le bloc du 27 août sur le `git pull` inutile est conservé comme leçon de méthode, marqué périmé. |
 | 2026-08-24 | **Les deux règles de tête** (§0) : une porte n'existe que si aucune machine ne peut répondre ; la vérification préalable n'est due que si un raté est irréversible. Adoptées après que Grégoire eut dit son découragement devant 24 portes d'une session et 35 d'une autre — dont 19 étaient déjà mesurées par les tests. Le gabarit avait été appliqué mécaniquement, y compris 3 portes iPad sur un chantier sans une ligne de CSS. |
 | 2026-08-11 | Bouton « Copier mes résultats » rendu obligatoire, éprouvé au navigateur avant publication. Et la leçon de son premier usage : une case à cocher ne porte ni un nombre ni un verdict — les rangées du §3 et les rangées de mesure prennent un champ de saisie, pas une bascule. |
 | 2026-08-10 | Création, à la demande de Grégoire (« je veux qu'on utilise dorénavant ce modèle »). Codifie l'artefact du cycle 1.67.1 → 1.71.1, lui-même repris du modèle de captures qu'il avait versé au dépôt le 9 août. La règle 1 (symptôme, pas mécanisme) vient de son rappel « je ne suis pas développeur », dans la même réponse. |
