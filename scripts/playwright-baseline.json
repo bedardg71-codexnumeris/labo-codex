@@ -1,6 +1,10 @@
 {
     "_lisezMoi": "Cliché des specs Playwright rouges CONNUES (#456). Une rougeur absente de cette liste bloque le push. Cette liste doit RÉTRÉCIR : chaque spec réparée s'en retire. Régénérer : node scripts/verifier-playwright.mjs --ecrire",
-    "genereLe": "2026-08-26",
-    "totalEchecsConnus": 0,
-    "echecsConnus": []
+    "genereLe": "2026-09-08",
+    "totalEchecsConnus": 3,
+    "echecsConnus": [
+        "bulles-au-doigt-540.spec.js › LE POINT DÉCISIF — c'est la bulle la PLUS PROCHE qui est saisie, pas celle du dessus",
+        "bulles-au-doigt-540.spec.js › le toucher pose l'infobulle du bon élève, dès le PREMIER contact",
+        "bulles-au-doigt-540.spec.js › un doigt posé À CÔTÉ d'une bulle la saisit quand même"
+    ]
 }

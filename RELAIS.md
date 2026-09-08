@@ -7,7 +7,50 @@
 
 ---
 
-## ⛔ 8 SEPT. 2026 — UNE BRANCHE EN AVANCE SUR `main` : NE PAS LA SUPPRIMER
+## POUR LA SESSION QUI PREND LE RELAIS — 8 SEPT. 2026, APRÈS-MIDI : LE MÉNAGE, PUIS LE CORRECTIF DES PRÉSENCES (1.124.4)
+
+> ✅ **`main` à jour, 1.124.4, build `0908-1324`. Vitest 508 fichiers / 5573 tests.**
+> Verdict Playwright rendu en local sur le SHA poussé.
+>
+> **CE QUI A ÉTÉ FAIT, DANS L'ORDRE :**
+> · **Le ménage documentaire** — bloc « SESSION 36 » en tête de `SESSION.md` (il s'arrêtait à 1.123.12,
+>   trente et un commits sans trace) ; les trois textes vivants qui décrivaient encore le clone comme la
+>   source `file://` de l'application (skill `portes-terrain`, `ETAT-PROJET.md` §10, la porte du 28 août).
+> · **#785 / #542 CORRIGÉ** — le défaut destructif que la branche avait reproduit sans le corriger.
+>
+> ⚠⚠ **LA CONSIGNE DU MÉNAGE ÉTAIT PÉRIMÉE SUR TROIS DE SES CINQ POINTS, et c'est la leçon de la séance.**
+> Elle avait été écrite sur `b8ccd67b` ; `origin/main` était à `d21e40fd`, **huit commits plus loin**,
+> poussés par une autre instance dans l'intervalle. Trois de ses gestes étaient déjà faits — l'un d'eux
+> **autrement et mieux** (#542 gardé OUVERT à Basse plutôt que basculé aux corrigés, parce qu'un chemin
+> résiduel avait été vérifié au code). ⮕ **Remesurer l'état d'une consigne avant de l'exécuter n'est pas
+> une politesse : ici, deux de ses gestes auraient DÉFAIT du travail plus récent.**
+>
+> **TROIS CHOSES À NE PAS DÉFAIRE :**
+> · **`daReecrits` — on ne retire QUE ce qu'on va réécrire.** Aux DEUX sites de `saisie-presences.js`. Le
+>   filtre ne consulte plus `etudiantsATraiter`, mais l'ensemble bâti depuis le DOM AVANT le retrait.
+>   Rétablir `etudiantsATraiter.some(...)` fait rougir la sentinelle : c'est voulu, c'est le break-test.
+> · **Le sixième cas de la sentinelle est la contre-épreuve DU REMÈDE**, pas du défaut : un tableau rendu
+>   doit toujours ÉCRASER l'ancienne valeur. Sans lui, « ne retirer que ce qu'on va réécrire » pourrait
+>   dégénérer en « ne rien retirer » — sauvegarde sans effet — et les cinq autres cas resteraient verts.
+> · **`scripts/playwright-baseline.json` déclare désormais 3 échecs connus**, régénéré le 8 sept. Il en
+>   déclarait ZÉRO depuis le 26 août et bloquait donc tout push. Les trois sont ceux de `bulles-au-doigt-540`,
+>   **mesurés rouges dans un worktree sur `3913b4cb`, avant le correctif** — antériorité prouvée, pas inférée.
+>   ⚠ **Ce n'est pas un classement sans suite** : chaque spec réparée s'en retire, et la question de fond
+>   (#789) reste celle de Grégoire — les bulles répondent-elles au doigt sur son iPad ?
+>
+> **UNE MESURE QUI DÉPARTAGE #789** : la suite locale rend **3 rouges, pas 4**. `palette-redim-poignee-773`
+> passe sur le Mac et échoue sur le runner — rougeur DU RUNNER, pas du code. Les trois autres se
+> reproduisent hors CI.
+>
+> ⛔ **TARIR N'EST PAS RÉPARER, et c'est écrit dans le changelog** : une séance déjà détruite chez
+> quelqu'un ne revient pas. Rien n'a été écrit dans les données de personne.
+>
+> ⏳ **RESTE OUVERT** : la consigne du jour (`plans de travail/CONSIGNE-DU-JOUR.md`, le dépistage du
+> français en première semaine) n'est PAS entamée. Et la purge #781 attend toujours le jeudi 10.
+
+---
+
+## 8 SEPT. 2026 — LA BRANCHE `claude/consigne-du-jour-wybfs0` EST ABSORBÉE (mais toujours vivante)
 
 > **`origin/claude/consigne-du-jour-wybfs0` = `main` + 1 commit** (`4201bf62`, poussé le 8 sept.).
 > Elle porte un banc qui REPRODUIT un défaut destructif : cocher « Verrouillée » alors que le
@@ -21,9 +64,14 @@
 > branche = `main` + `4201bf62`. Rien n'a été supprimé. ⮕ **Remesurer avant de supprimer une
 > branche, toujours** : `git fetch --prune` puis `git rev-parse origin/main origin/<branche>`.
 >
-> **Ce qui reste à trancher avec Grégoire** : fusionner la branche et appliquer le correctif d'une
-> ligne, ou la laisser en l'état. Le même motif vit dans `enregistrerPresences` (`:1490-1503`) — à
-> traiter dans le même lot.
+> ✅ **TRANCHÉ PAR GRÉGOIRE LE 8 SEPT. : on corrige.** Son commit `4201bf62` a été **cherry-piqué sur
+> `main`** (auteur préservé), puis le correctif appliqué AUX DEUX SITES en 1.124.4, et le banc retourné
+> en sentinelle. Son contenu vit donc entièrement sur `main`.
+>
+> ⚠ **LA BRANCHE N'A PAS ÉTÉ SUPPRIMÉE POUR AUTANT**, et c'est délibéré : elle a été poussée le jour même
+> par une autre instance, possiblement encore au travail dessus. Supprimer le point d'appui d'une session
+> vivante n'est pas un ménage, c'est une collision. **Sa suppression revient à cette session-là, ou à
+> Grégoire.** Elle n'apporte plus rien à `main` : c'est la seule chose que cette note établit.
 
 ---
 
