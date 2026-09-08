@@ -4016,6 +4016,11 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                                               data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="texteAide">${esc(pal.texteAide || '')}</textarea>
                                 </div>
                             </div>
+                            <label class="palier-leve-signalement">
+                                <input type="checkbox" ${pal.leveSignalement ? 'checked' : ''}
+                                       data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="leveSignalement">
+                                <span>Ce palier lève un signalement <small>— pour toi, à côté du palier RàI de l'élève. Rien n'est écrit sur sa copie.</small></span>
+                            </label>
                             ${ligneInconnus(pal)}
                             ${ligneApercu(pal)}
                             ${retirer}
@@ -5612,6 +5617,17 @@ function _appliquerPaliers(critere, paliers) {
     window.projectionAlgo.appliquerAuCritere(critere, p.modeleId, p.params, paliers);
 }
 
+/**
+ * Ce qu'un champ de palier vaut, selon sa nature.
+ *
+ * #790 — les deux handlers lisaient `el.value` sans exception. Une case à cocher
+ * y répond « on » quoi qu'il arrive : décocher n'aurait rien décoché. Un seul
+ * lecteur pour les deux, plutôt que la même condition écrite deux fois.
+ */
+function _valeurChampPalier(el) {
+    return (el && el.type === 'checkbox') ? !!el.checked : (el ? el.value : '');
+}
+
 function _muterPalier(critere, index, champ, valeur) {
     const paliers = _paliersEditablesDuCritere(critere);
     if (!paliers[index]) return false;
@@ -5621,6 +5637,11 @@ function _muterPalier(critere, index, champ, valeur) {
         // de déplacer un palier vers une valeur que personne n'a voulue.
         if (isNaN(n) || n <= 0) return false;
         paliers[index].ratioMax = n;
+    } else if (champ === 'leveSignalement') {
+        // #790 — le seul champ BOOLÉEN d'un palier. Les deux handlers passent
+        // `el.checked` pour lui et `el.value` pour les autres ; le `String(valeur)`
+        // de la branche générale en aurait fait la chaîne « false », qui est vraie.
+        paliers[index].leveSignalement = (valeur === true || valeur === 'true');
     } else {
         paliers[index][champ] = String(valeur);
     }
@@ -5658,7 +5679,7 @@ function modifierParamProjectionTempHandler(el) {
 function modifierPalierProjectionTempHandler(el) {
     var index = parseInt(el.dataset.critereIndex);
     if (!window.tempCriteres || !window.tempCriteres[index]) return;
-    if (_muterPalier(window.tempCriteres[index], parseInt(el.dataset.palierIndex), el.dataset.champ, el.value) === false) {
+    if (_muterPalier(window.tempCriteres[index], parseInt(el.dataset.palierIndex), el.dataset.champ, _valeurChampPalier(el)) === false) {
         if (typeof marquerChampRefuse === 'function') marquerChampRefuse(el, 'Le seuil doit être un nombre supérieur à zéro.');
         return;
     }
@@ -5948,7 +5969,7 @@ async function modifierPalierProjectionGrilleHandler(el) {
     var index = parseInt(el.dataset.critereIndex);
     var palierIndex = parseInt(el.dataset.palierIndex);
     var champ = el.dataset.champ;
-    var valeur = el.value;
+    var valeur = _valeurChampPalier(el);
     var res = await modifierProjectionCritereGrille(grilleId, index, function(critere) {
         return _muterPalier(critere, palierIndex, champ, valeur);
     });

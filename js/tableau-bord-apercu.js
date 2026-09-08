@@ -1253,6 +1253,7 @@ function chargerTableauBordApercu() {
 
         // 🆕 BETA 98.9: Alerte nommée pour élèves en non-participation
         afficherAlerteNonParticipation(etudiantsAvecIndices);
+        afficherSignalementsDepistage(etudiantsAvecIndices);   // #790
 
         // 🆕 BETA 96: Afficher le graphique spaghetti ACP (évolution temporelle par étudiant)
         // ✅ CORRECTIF (2 mars 2026): Lire la valeur actuelle du dropdown au lieu de hardcoder 'A'
@@ -2768,6 +2769,67 @@ function afficherAlerteNonParticipation(etudiants) {
     `;
 
     // Insérer après les barres ACPE (avant le conteneur indicateurs apprentissage ou avant le fold)
+    const conteneurIndicateurs = carteIndicateurs.querySelector('#conteneur-indicateurs-apprentissage');
+    if (conteneurIndicateurs) {
+        conteneurIndicateurs.insertAdjacentHTML('beforebegin', html);
+    } else {
+        carteIndicateurs.insertAdjacentHTML('beforeend', html);
+    }
+}
+
+/**
+ * #790 — COMBIEN D'ÉLÈVES SONT SIGNALÉS, ET LESQUELS.
+ *
+ * Ses mots (7 sept. 2026) : « À ce moment du trimestre je les connais très peu, mais
+ * je veux avoir une incidence sur leur parcours. » Il contacte les élèves lui-même,
+ * par message, et ne veut pas valider une liste élève par élève — mais il doit voir
+ * L'AMPLEUR avant d'écrire, parce que la capacité d'accueil d'un service d'aide est
+ * limitée. Trois élèves et dix-sept ne se traitent pas de la même façon.
+ *
+ * ⚠ Recalculé à chaque rendu, jamais lu d'un stockage : décocher un palier du
+ * gabarit vide cette liste au rafraîchissement suivant.
+ * ⚠ Rien de disciplinaire : la phrase affichée vient du gabarit de la grille.
+ */
+function afficherSignalementsDepistage(etudiants) {
+    const carteIndicateurs = document.getElementById('carte-indicateurs-acpe');
+    if (!carteIndicateurs) return;
+
+    const existante = carteIndicateurs.querySelector('.alerte-signalement-depistage');
+    if (existante) existante.remove();
+
+    if (typeof window.SignalementDepistage === 'undefined') return;
+
+    const bilan = window.SignalementDepistage.pourGroupe(etudiants, {
+        evaluations: obtenirDonneesSelonMode('evaluationsSauvegardees') || [],
+        grilles: db.getSync(cle('grillesTemplates'), []) || []
+    });
+    if (bilan.total === 0) return;
+
+    const modeActif = db.getSync('modeApplication', 'normal');
+    const lignes = etudiants.filter(e => bilan.parEleve[e.da]).map(e => {
+        let nomAffiche;
+        if (modeActif === 'anonymisation') {
+            nomAffiche = (e.prenom && e.prenom.startsWith('Élève')) ? e.prenom :
+                (typeof anonymiserNom === 'function' && anonymiserNom(e.da)) || 'Étudiant Anonyme';
+        } else {
+            nomAffiche = `${e.nom}, ${e.prenom}`;
+        }
+        // Un élève peut porter plusieurs phrases (deux critères, deux copies) :
+        // elles sont déjà dédoublonnées par libellé en amont.
+        const phrases = bilan.parEleve[e.da].map(s => echapperHtml(s.libelle)).join(' · ');
+        return `<li>${echapperHtml(nomAffiche)} — ${phrases}</li>`;
+    }).join('');
+
+    const n = bilan.total;
+    const html = `
+        <div class="alerte-signalement-depistage info-box" style="margin: 16px 20px 0;">
+            <strong>${n} étudiant·e${n > 1 ? '·s' : ''} signalé·e${n > 1 ? '·s' : ''} par le dépistage</strong>
+            <ul style="margin: 6px 0 0 16px; padding: 0; list-style: none;">
+                ${lignes}
+            </ul>
+        </div>
+    `;
+
     const conteneurIndicateurs = carteIndicateurs.querySelector('#conteneur-indicateurs-apprentissage');
     if (conteneurIndicateurs) {
         conteneurIndicateurs.insertAdjacentHTML('beforebegin', html);
