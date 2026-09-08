@@ -15,6 +15,37 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.125.0 — UN TRAVAIL QUI REPÈRE SANS COMPTER** (build `0908-1502`). Ce que tu voulais depuis le
+7 septembre : ton portrait de lecteur cesse de peser, sans cesser d'exister.
+**Ce que tu verras** : sur la fiche d'un travail, sous la pondération, une case **« Travail
+diagnostique — ne compte dans aucun calcul »**. Coche-la, et ce travail ne pèse plus ni sur la note,
+ni sur la performance, ni sur la complétion, ni sur le palier RàI — mais il reste **entier** dans le
+dossier de chaque élève : sa copie, ton annotation, ta rétroaction, son résultat. Tu peux la cocher
+sur un travail que tu as déjà corrigé, c'est même le cas prévu.
+▣ **Et le piège de la première semaine est fermé.** Un seul travail dû et une seule copie corrigée
+suffisaient à déclarer « non-participation » — donc niveau intensif — les élèves qui n'avaient pas
+encore leur horaire. Un travail diagnostique ne déclenche plus ce verdict.
+▣ **Il peut lever un signalement, dans TES mots.** Sur chaque palier de ta grille de projection, une
+case « ce palier lève un signalement » ; et dans les paramètres du critère, un champ où tu écris la
+phrase que tu veux lire. Elle apparaît **à côté** du palier RàI de l'élève — jamais dedans — et dans
+la vue de ton groupe, avec le nombre d'élèves concernés, pour voir l'ampleur avant de contacter qui
+que ce soit. Rien n'est écrit sur la copie de l'élève.
+⚠ **Rien n'est coché dans tes grilles, et c'est voulu** : aucune ne s'est mise à signaler toute
+seule. Tant que tu n'as pas coché un palier ET écrit une phrase, il ne se passe rien.
+▣ **Le champ « CAF » de la fiche s'appelle maintenant « Mesure d'aide »** — ta décision du jour : ce
+pourrait être une autre matière qui est diagnostiquée, et rien dans l'application ne suppose plus une
+discipline. Tes fichiers d'élèves restent lisibles, l'ancienne colonne est toujours reconnue.
+**Vérifié comment** : 511 fichiers d'essais, 5 620 verts. Trois gardiens neufs, 45 cas, dont un
+témoin à l'envers pour chaque exclusion — décoché, le même travail compte partout, sinon un filtre
+trop large laisserait tout au vert. Puis **treize mutations du code faites exprès** pour les faire
+échouer : treize rouges, et le fichier restauré à l'octet près chaque fois.
+⚠ **Deux gardiens ont été REFAITS parce qu'ils ne pouvaient pas échouer** — un garde-fou en double
+dont aucun des deux n'était mesurable, et un cas de comptage qui restait vert quoi qu'on casse. Sans
+les mutations, les deux auraient été livrés comme du travail fini.
+**Ce qui n'est PAS vérifié** : rien n'a été vu dans Safari ni sur l'iPad — trois éléments visuels
+sont neufs. Porte terrain : `plans de travail/PORTES-TERRAIN-2026-09-08-travail-diagnostique.md`.
+(#790)
+
 ↻ **1.124.4 — VERROUILLER UNE SÉANCE NE PEUT PLUS EFFACER SES PRÉSENCES** (build `0908-1324`).
 **Ce que tu verras** : cocher « Verrouillée » sur une date dont la séance n'est pas affichée à l'écran
 n'efface plus les présences que tu avais saisies pour cette date. Avant, le verrouillage enregistrait au

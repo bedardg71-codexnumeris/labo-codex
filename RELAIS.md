@@ -7,6 +7,52 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 8 SEPT. 2026, FIN D'APRÈS-MIDI : LE TRAVAIL DIAGNOSTIQUE (1.125.0)
+
+> ✅ **`main` à jour, 1.125.0, build `0908-1502`. Vitest 511 fichiers / 5620 tests.**
+> Le lot de la consigne du jour (#790) est LIVRÉ EN ENTIER : volets A, B et C.
+>
+> ⏳ **CE QUI RESTE DÛ, ET C'EST TOUT CE QUI RESTE** : la porte terrain,
+> `plans de travail/PORTES-TERRAIN-2026-09-08-travail-diagnostique.md`. Rien du lot n'a été vu
+> dans Safari ni sur l'iPad. **Trois de ses rangées attendent un VERDICT de Grégoire**, pas une
+> case cochée : le libellé de la case, les paliers qui lèvent, et la phrase du signalement.
+>
+> **CINQ CHOSES À NE PAS DÉFAIRE :**
+> · **Le filtre des quatre portes est posé HAUT, dans les accesseurs privés des familles de
+>   pratiques** (`_lireProductions` / `_lireEvaluations`), pas dans les huit `calculer*` que le
+>   cadrage nommait. Mesuré : tous leurs appelants sont des CALCULS. Le redescendre rendrait huit
+>   sites à tenir alignés, et le neuvième écrit plus tard passerait au travers.
+> · **`_lireProductionsBrutes` n'est PAS un doublon oublié.** Sans elle, `_lireEvaluations` ne
+>   sait plus à quelle production rattacher une copie : les productions filtrées deviennent
+>   introuvables, et leurs copies passent.
+> · ⛔ **`signalement-depistage.js` NE DOIT PAS filtrer les productions diagnostiques.** Elles sont
+>   exclues des quatre calculs ; le signalement est leur SEULE sortie. « Uniformiser » ici viderait
+>   le lot de son sens sans rien casser ailleurs — une sentinelle statique le garde.
+> · **Le marqueur se pose EN MODIFICATION**, contrairement aux champs d'état de #346. Sa garde est
+>   « seulement si la case était à l'écran » (`null` ≠ `false`), pas « à la création seulement ».
+> · **Rien n'est coché dans les grilles existantes**, et le silence par défaut est mesuré : champ
+>   absent, ou libellé vide, ne lèvent rien. Ne pas « aider » en cochant quoi que ce soit d'office.
+>
+> ⚠⚠ **DEUX GARDE-FOUS SONT TOMBÉS AU BREAK-TEST, ET C'EST LA LEÇON DE LA SÉANCE.**
+> (1) `calculerCompletion` portait DEUX filtres ; chacun suffisant seul, aucun ne pouvait être rendu
+> rouge. Un retiré. (2) Le cas du bilan de groupe donnait deux copies au même élève avec la MÊME
+> phrase : le dédoublonnage les ramenait à une, et « compter les élèves » valait exactement
+> « compter les signalements ». Refait avec deux phrases distinctes.
+> ⮕ **Treize mutations, treize rouges** sur l'ensemble du lot, source restaurée à l'empreinte sha256.
+> **Sans elles, les deux auraient été livrés verts.**
+>
+> ▣ **CE QUE LA MESURE A DÉMENTI DANS LE CADRAGE, et qu'il ne faut pas re-supposer** : le champ de
+> formulaire `etudiantCAF` qu'il annonçait N'EXISTE PAS — toute la famille `etudiant*` (7 ids) a
+> disparu d'`index.html` au profit de `v2-etudiant*`. Inscrits, non corrigés : **#791** (ce chemin
+> mort) et **#792** (« Mesure d'aide » n'a aucune interface de saisie hors import CSV).
+>
+> ⛔ **SOURCE, PAS STOCK** : le champ est neuf, aucune migration ne le pose. C'est Grégoire qui
+> cochera sa production et ses paliers — et c'est ce qui lui fera voir le changement.
+>
+> ⏳ **La purge #781 attend toujours le jeudi 10.**
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 8 SEPT. 2026, APRÈS-MIDI : LE MÉNAGE, PUIS LE CORRECTIF DES PRÉSENCES (1.124.4)
 
 > ✅ **`main` à jour, 1.124.4, build `0908-1324`. Vitest 508 fichiers / 5573 tests.**
