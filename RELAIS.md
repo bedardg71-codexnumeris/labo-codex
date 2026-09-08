@@ -7,6 +7,26 @@
 
 ---
 
+## ⛔ 8 SEPT. 2026 — UNE BRANCHE EN AVANCE SUR `main` : NE PAS LA SUPPRIMER
+
+> **`origin/claude/consigne-du-jour-wybfs0` = `main` + 1 commit** (`4201bf62`, poussé le 8 sept.).
+> Elle porte un banc qui REPRODUIT un défaut destructif : cocher « Verrouillée » alors que le
+> tableau des présences n'est pas rendu **détruit la séance en silence**, puis pose le cadenas sur
+> une séance vide. Cinq cas avec témoin, break-test à l'envers, **correctif d'une ligne PROPOSÉ et
+> NON APPLIQUÉ** — Grégoire avait demandé la fiche et le banc, pas le remède.
+> Elle relève **SUIVI-BUGS #542 de Basse à HAUTE** et **BACKLOG #785 au niveau 1**.
+>
+> ⚠ **Une consigne du 8 septembre demandait de supprimer cette branche**, sur le constat (du 7)
+> qu'elle était identique à `main`. **Elle ne l'est plus.** Mesuré ce jour : `main` = `d21e40fd`,
+> branche = `main` + `4201bf62`. Rien n'a été supprimé. ⮕ **Remesurer avant de supprimer une
+> branche, toujours** : `git fetch --prune` puis `git rev-parse origin/main origin/<branche>`.
+>
+> **Ce qui reste à trancher avec Grégoire** : fusionner la branche et appliquer le correctif d'une
+> ligne, ou la laisser en l'état. Le même motif vit dans `enregistrerPresences` (`:1490-1503`) — à
+> traiter dans le même lot.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 7 SEPT. 2026, NUIT : LA PURGE #781 EST PRÊTE À FROID
 
 > ⛔ **RIEN N'EST EXÉCUTÉ. Tout est préparé, et la préparation est le livrable.**
