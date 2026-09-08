@@ -26,6 +26,13 @@ skill `portes-terrain`.
 
 ## §0 · Préalable
 
+> ⚠ **PÉRIMÉ DEPUIS LE 8 SEPTEMBRE 2026 — ne pas recopier ce §0.** Ce qui suit décrivait le clone de
+> Grégoire comme la source `file://` de son application : c'était vrai ce jour-là, ça ne l'est plus.
+> Il ouvre désormais `https://app.codexnumeris.org` (`PROTOCOLE.md`, « L'application : UNE SEULE
+> ADRESSE porte ses données réelles »), et un lot doit être **poussé et déployé** avant qu'une porte
+> puisse le juger. Le §0 courant vit dans le skill `portes-terrain`. Le texte ci-dessous est conservé
+> comme trace de la séance du 28 août.
+
 Sans ces deux gestes, tout le reste peut être un **faux rouge** : Grégoire testerait l'ancienne
 version. ⚠ **Pas de `git pull`** — la session a écrit directement dans son clone
 (`~/Documents/GitHub/Monitorage_v6`), qui est aussi la source `file://` de son application : les
