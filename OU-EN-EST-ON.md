@@ -15,6 +15,35 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.124.4 — VERROUILLER UNE SÉANCE NE PEUT PLUS EFFACER SES PRÉSENCES** (build `0908-1324`).
+**Ce que tu verras** : cocher « Verrouillée » sur une date dont la séance n'est pas affichée à l'écran
+n'efface plus les présences que tu avais saisies pour cette date. Avant, le verrouillage enregistrait au
+passage ce que l'écran montrait ; quand la séance n'était pas ouverte, l'écran ne montrait rien, et les
+présences de cette date disparaissaient **sans un message** — le cadenas se posant sur une séance vide.
+Seules les présences réellement affichées sont désormais remplacées.
+⛔ **Ce que ça ne fait PAS** : ramener une séance déjà perdue. La correction ferme la porte, elle ne
+répare rien de ce qui est déjà écrit chez toi — et rien n'a été touché dans tes données.
+▣ **Et ta question du 7 sur l'enregistrement instable a sa réponse, mais ce n'était pas ce défaut-ci.**
+Tu ouvrais l'application à deux adresses depuis l'automne : ton fichier local et le site web. Pour le
+navigateur, ce sont deux coffres étanches qui portent le même nom à l'écran — tu saisissais dans l'un et
+tu cherchais dans l'autre. Ta décision est prise : **le site web porte tes données réelles, le fichier
+local ne porte plus de trimestre.** Les présences saisies en local cet automne existent toujours dans
+leur coffre ; rien n'y a été touché, et ce que tu veux en faire t'appartient. (#542, #785)
+⚠ **Une conséquence pratique de ta décision, à connaître** : quand une session te demande de vérifier
+quelque chose à l'écran, il faut désormais que le travail soit **publié en ligne** — le déposer sur ton
+disque ne suffit plus. C'est trente à soixante secondes après l'envoi.
+**Vérifié comment** : 508 fichiers d'essais, 5 573 verts. L'essai qui affirmait la destruction a été
+**retourné** en gardien : ses deux constats disent maintenant que la séance survit, et les trois autres
+cas — dont le témoin, séance affichée — n'ont pas bougé, ce qui prouve que le remède n'a rien changé au
+cas normal. Un sixième cas a été ajouté exprès contre le remède lui-même : un tableau affiché doit
+toujours écraser l'ancienne valeur, sinon « ne rien effacer » deviendrait « ne rien enregistrer » sans
+qu'aucun essai ne rougisse. Puis le code a été remis dans son état fautif : les deux constats ont rougi,
+le témoin est resté vert, et le fichier a été restauré à l'octet près.
+**Ce qui n'est PAS vérifié** : rien n'a été vu dans Safari ni sur l'iPad. Et trois essais du toucher des
+bulles (Suivi › Groupe) sont rouges ici comme sur le serveur — **mesuré : ils l'étaient déjà avant ce
+lot**, ils ne viennent pas de lui. La question qu'ils posent reste la tienne : les bulles répondent-elles
+au doigt sur ton iPad ? (#789)
+
 ↻ **1.124.3 — SIX PETITES CHOSES RÉPARÉES PENDANT L'ATTENTE** (build `0907-1325`). Pendant que la question
 des présences instables attend ta réponse, six items sans arbitrage ont été pris d'affilée.
 **Ce que tu verras** : dans Évaluations › Liste, la colonne « Note % » n'affiche plus « 92.52136752136752% »
