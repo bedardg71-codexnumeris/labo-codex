@@ -373,6 +373,21 @@ var MODELES = [
                 max: 200
             },
             {
+                // #790 — LE LIBELLÉ DU SIGNALEMENT, à côté du nom du service parce qu'il
+                // se relit avec lui. Il ne s'adresse PAS à l'élève : c'est ce que
+                // l'enseignant voit à côté du palier RàI, pour savoir qui contacter.
+                // ⚠ VIDE PAR DÉFAUT, ET C'EST VOULU. Écrire « français » ici en dur
+                // rejouerait le code disciplinaire retiré du dépistage — le gabarit
+                // « critères EUF » livré en exemple porte la phrase du français parce
+                // que c'est SON gabarit, pas parce que le code la connaît.
+                cle: 'libelleSignalement',
+                type: 'texte',
+                libelle: 'Ce que le signalement affiche à l\'enseignant',
+                aide: 'Une phrase courte, dans tes mots : « Aide en français recommandée », « Reprise du module 2 à prévoir »… Elle apparaît à côté du palier RàI de l\'élève, jamais sur sa copie. Laisser vide pour ne lever aucun signalement.',
+                defaut: '',
+                max: 200
+            },
+            {
                 cle: 'lienServiceAide',
                 type: 'texte',
                 libelle: 'Lien d\'inscription au service (facultatif)',
@@ -449,7 +464,14 @@ function _paliersRetenus(brut) {
             sansErreur: p.sansErreur === true,
             ratioMax: max,
             texte: (typeof p.texte === 'string') ? p.texte : '',
-            texteAide: (typeof p.texteAide === 'string') ? p.texteAide : ''
+            texteAide: (typeof p.texteAide === 'string') ? p.texteAide : '',
+            // #790 — CE PALIER LÈVE-T-IL UN SIGNALEMENT POUR L'ENSEIGNANT ?
+            // C'est une CASE SUR LE PALIER, jamais un seuil écrit dans le code : un
+            // `ratio <= 0,5` en dur rejouerait exactement le code disciplinaire que
+            // #668 a retiré d'ici. L'enseignant de chimie coche les siens.
+            // ⚠ `=== true` : un gabarit d'avant le 8 sept. 2026 n'a pas le champ, et
+            // un champ absent ne lève rien. Aucune grille existante ne change.
+            leveSignalement: p.leveSignalement === true
         });
     });
     if (!propres.length) return null;

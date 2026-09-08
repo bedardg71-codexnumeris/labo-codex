@@ -947,7 +947,7 @@ function genererSectionAccompagnement(da) {
             <br><br>
             <strong>Objectif :</strong> Cette section centralise les indicateurs de suivi et l'historique complet des interventions RàI (Réponse à l'Intervention). Elle permet d'orienter les décisions d'accompagnement pédagogique et de documenter les observations spécifiques.
             <br><br>
-            <strong>Contenu :</strong> Niveau d'intervention RàI recommandé (1, 2 ou 3) • Indicateurs de risque, pattern d'apprentissage et progression • Services adaptés (SA, CAF) pour contextualiser l'accompagnement • Échelle visuelle de positionnement du risque • Liste chronologique des interventions documentées
+            <strong>Contenu :</strong> Niveau d'intervention RàI recommandé (1, 2 ou 3) • Indicateurs de risque, pattern d'apprentissage et progression • Services adaptés (SA, mesure d'aide) pour contextualiser l'accompagnement • Échelle visuelle de positionnement du risque • Liste chronologique des interventions documentées
             <br><br>
             <strong>Utilisation :</strong> Planifier intervention (base-toi sur le niveau RàI et les indicateurs affichés) • Nouvelle intervention (clique sur «Nouvelle intervention») • Consulter historique (clique sur «Consulter» pour voir les détails complets) • Notes individuelles (visibles directement sous chaque intervention)
         </div>
@@ -1166,7 +1166,7 @@ function genererSectionAccompagnement(da) {
                 <div class="profil-separateur-section"></div>
 
                 <p class="profil-texte-detail-compact">
-                    <strong>Services adaptés :</strong> ${etudiant.caf === 'Oui' ? 'CAF' : ''}${etudiant.caf === 'Oui' && etudiant.sa === 'Oui' ? ', ' : ''}${etudiant.sa === 'Oui' ? 'SA' : ''} ${etudiant.caf !== 'Oui' && etudiant.sa !== 'Oui' ? 'Aucun' : ''}
+                    <strong>Services adaptés :</strong> ${etudiant.caf === 'Oui' ? 'Mesure d\'aide' : ''}${etudiant.caf === 'Oui' && etudiant.sa === 'Oui' ? ', ' : ''}${etudiant.sa === 'Oui' ? 'SA' : ''} ${etudiant.caf !== 'Oui' && etudiant.sa !== 'Oui' ? 'Aucun' : ''}
                 </p>
 
                 <button data-action="ouvrirModalConfidentiel" data-param="${da}" class="btn btn-secondaire" style="margin-top: 12px; font-size: 0.85rem;" data-tooltip="profil-confidentiel">
@@ -2481,7 +2481,7 @@ function afficherProfilComplet(daOuEl) {
                         ${eleve.groupe ? `<div><strong>Groupe:</strong> ${echapperHtml(eleve.groupe)}</div>` : ''}
                         ${eleve.programme ? `<div><strong>Programme:</strong> ${typeof obtenirNomProgramme === 'function' ? echapperHtml(obtenirNomProgramme(eleve.programme)) : echapperHtml(eleve.programme)}</div>` : ''}
                         ${eleve.sa === 'Oui' ? '<div class="u-texte-bleu">Services adaptés</div>' : ''}
-                        ${eleve.caf === 'Oui' ? '<div class="u-texte-bleu">CAF</div>' : ''}
+                        ${eleve.caf === 'Oui' ? '<div class="u-texte-bleu">Mesure d\'aide</div>' : ''}
                     </div>
                 </div>
 

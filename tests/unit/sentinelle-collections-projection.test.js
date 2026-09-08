@@ -70,7 +70,7 @@ const ECRIT = { ...ALGO, paramsProjection: { nomServiceAide: 'Le CAF', motsRefer
 /* ============================================================ A — PUR */
 
 describe('collections · A — pur : ce qu\'une collection porte, et la copie dans un critère', () => {
-    it('A.a `depuisCritere` : un id `coll_…`, le nom épuré, le modèle, les QUATRE paramètres et les paliers de `normaliser`, copiés', () => {
+    it('A.a `depuisCritere` : un id `coll_…`, le nom épuré, le modèle, les CINQ paramètres et les paliers de `normaliser`, copiés', () => {
         const { C } = monter();
         const c = C.depuisCritere(ECRIT, '  EUF  ');
         expect(c.id).toMatch(/^coll_[a-z0-9]+_[a-z0-9]{6}$/);
@@ -79,7 +79,9 @@ describe('collections · A — pur : ce qu\'une collection porte, et la copie da
         expect(typeof c.dateCreation).toBe('string');
         const n = P.normaliser(ECRIT);
         expect(c.params).toEqual(n.params);
-        expect(Object.keys(c.params).sort()).toEqual(['erreursTolerees', 'lienServiceAide', 'motsReference', 'nomServiceAide']);
+        // #790 (8 sept. 2026) : `libelleSignalement` s'ajoute aux quatre — le libellé du signalement
+        // est un paramètre du gabarit, jamais une chaîne écrite dans le code.
+        expect(Object.keys(c.params).sort()).toEqual(['erreursTolerees', 'libelleSignalement', 'lienServiceAide', 'motsReference', 'nomServiceAide']);
         expect(c.params.nomServiceAide).toBe('Le CAF');
         expect(c.paliers).toEqual(n.paliers);
         expect(c.paliers).not.toBe(n.paliers);
