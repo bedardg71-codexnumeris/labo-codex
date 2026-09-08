@@ -13,7 +13,8 @@
 > Le lot de la consigne du jour (#790) est LIVRÉ EN ENTIER : volets A, B et C.
 >
 > ⏳ **CE QUI RESTE DÛ, ET C'EST TOUT CE QUI RESTE** : la porte terrain,
-> `plans de travail/PORTES-TERRAIN-2026-09-08-travail-diagnostique.md`. Rien du lot n'a été vu
+> `plans de travail/PORTES-TERRAIN-2026-09-08-travail-diagnostique.md` et son artefact
+> https://claude.ai/code/artifact/fe31db5b-62d8-470f-99d2-a751b76d7840. Rien du lot n'a été vu
 > dans Safari ni sur l'iPad. **Trois de ses rangées attendent un VERDICT de Grégoire**, pas une
 > case cochée : le libellé de la case, les paliers qui lèvent, et la phrase du signalement.
 >
