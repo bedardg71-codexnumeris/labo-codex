@@ -464,12 +464,30 @@ class PratiqueConfigurable {
         if (!da) return null;
 
         // Lire les productions et évaluations via le namespace du mode actif
-        const productions = typeof obtenirDonneesSelonMode === 'function'
+        const productionsBrutes = typeof obtenirDonneesSelonMode === 'function'
             ? obtenirDonneesSelonMode('productions') || []
             : db.getSync(cle('productions'), []);
-        const evaluations = typeof obtenirDonneesSelonMode === 'function'
+        const evaluationsBrutes = typeof obtenirDonneesSelonMode === 'function'
             ? obtenirDonneesSelonMode('evaluationsSauvegardees') || []
             : db.getSync(cle('evaluationsSauvegardees'), []);
+
+        // #790, PORTE 3 — L'INDICE C. Cette famille est la seule à lire le stockage
+        // en direct : sa PERFORMANCE, elle, délègue aux instances SOM/STD/SPE, déjà
+        // filtrées dans leurs accesseurs, et la famille DEN ne lit aucune évaluation
+        // (sa note est un jugement saisi). Il n'y a donc que la complétion à fermer ici.
+        // Motif de Grégoire : « Certains élèves ne sont pas au premier cours pour des
+        // raisons administratives (horaire, inscription, etc.) » — une non-remise en
+        // première semaine ne dit rien de la mobilisation de l'élève.
+        // ⚠ UN SEUL FILTRE, ET C'EST MESURÉ. Le premier jet en posait DEUX — sur les
+        // productions et sur les évaluations. Chacun suffisait à lui seul, donc aucun
+        // des deux ne pouvait être rendu ROUGE par un banc : le break-test du 8 sept.
+        // les a laissés verts tous les deux. Deux mécanismes pour un seul effet, dont
+        // aucun n'est éprouvable, c'est moins sûr qu'un seul qu'on peut faire échouer.
+        // Celui qui reste est le plus direct : la production n'entre pas dans le
+        // dénominateur, donc ses copies ne sont jamais consultées.
+        const dsp = window.ProductionDiagnostique;
+        const productions = dsp ? dsp.filtrerProductions(productionsBrutes) : productionsBrutes;
+        const evaluations = evaluationsBrutes;
 
         // Identifier les productions qui ont été évaluées (au moins 1 évaluation existe)
         const productionsEvaluees = productions.filter(production => {

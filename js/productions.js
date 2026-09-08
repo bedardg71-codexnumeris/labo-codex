@@ -1551,6 +1551,17 @@ async function prerenseignerFormulaireProduction(prod) {
     // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Charger date d'échéance
     document.getElementById('productionDateEcheance').value = prod.dateEcheance || '';
 
+    // #790 — l'état du marqueur diagnostique. Sans cette ligne, rouvrir une
+    // production cochée montrerait une case VIDE, et le simple fait d'enregistrer
+    // la décocherait : le formulaire dirait « false » avec l'assurance de quelqu'un
+    // qui a lu, alors qu'il n'a fait que ne pas être rempli.
+    const caseDiagnostique = document.getElementById('productionDiagnostique');
+    if (caseDiagnostique) {
+        caseDiagnostique.checked = window.ProductionDiagnostique
+            ? window.ProductionDiagnostique.estDiagnostique(prod)
+            : prod.diagnostique === true;
+    }
+
     // 🆕 Beta 98.3 : Échéances par groupe-cours (multi-groupe)
     peuplerEcheancesParGroupe(prod);
 
@@ -1591,6 +1602,10 @@ function reinitialiserFormulaireProduction() {
 
     // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Réinitialiser date d'échéance
     document.getElementById('productionDateEcheance').value = '';
+
+    // #790 — une fiche neuve n'hérite pas du marqueur de la précédente.
+    const caseDiagnostiqueNeuve = document.getElementById('productionDiagnostique');
+    if (caseDiagnostiqueNeuve) caseDiagnostiqueNeuve.checked = false;
 
     // 🆕 Beta 98.3 : Échéances par groupe-cours (multi-groupe)
     peuplerChampsPersonnalises(null);                                        // #499 — une fiche neuve n'hérite pas des champs de la précédente
@@ -1747,8 +1762,17 @@ function lireDonneesFormulaireProduction() {
     const titresBlocs = titresBlocsAEnregistrer();
     const ordreBlocs = ordreBlocsAEnregistrer();
 
+    // #790 — le marqueur diagnostique. `null` quand la case n'est PAS RENDUE, jamais
+    // `false` : c'est « je ne sais pas », et `construireProductionData` ne posera
+    // alors rien. Distinguer les deux n'est pas de la coquetterie — un `false` rendu
+    // par un formulaire partiel DÉCOCHERAIT la case sur la production existante, et
+    // ferait recompter un travail que l'enseignant avait sorti des calculs. C'est
+    // exactement le motif de #785, mesuré ce matin sur les présences.
+    const caseDiagnostique = document.getElementById('productionDiagnostique');
+    const diagnostique = caseDiagnostique ? !!caseDiagnostique.checked : null;
+
     return { titre, activiteApprentissage, type, ponderation, objectif, tache, detailTache,
-             champsPersonnalises, titresBlocs, ordreBlocs,
+             champsPersonnalises, titresBlocs, ordreBlocs, diagnostique,
              echeancesParGroupe, dateEcheance, grilleId, echelleId, cartoucheId };
 }
 
@@ -1941,6 +1965,20 @@ function construireProductionData(d, evaluations, idEnEdition) {
     // groupe sans le dire.
     if (d.echeancesParGroupe) {
         productionData.echeancesParGroupe = d.echeancesParGroupe;
+    }
+
+    // #790 — LE MARQUEUR DIAGNOSTIQUE N'EST PAS UN CHAMP D'ÉTAT COMME LES AUTRES.
+    // `verrouille`, `dansBibliotheque` et `coursId` ne se posent qu'à la CRÉATION
+    // (voir l'entête) : les reposer à chaque retouche a produit le bug #346. Celui-ci
+    // est l'inverse — il DOIT pouvoir se cocher sur une production déjà créée ET
+    // ÉVALUÉE, puisque c'est le cas d'usage même : l'enseignant a déjà fait produire
+    // et corrigé le travail quand il décide qu'il ne comptera pas.
+    // ⮕ La garde n'est donc pas « à la création seulement », mais « seulement si le
+    // formulaire avait quelque chose à dire ». `lireDonneesFormulaireProduction` rend
+    // `null` quand la case n'est pas rendue ; un `undefined` dans le spread ÉCRASE,
+    // et un `false` deviné décocherait la case sans que personne ne l'ait demandé.
+    if (d.diagnostique !== null && d.diagnostique !== undefined) {
+        productionData.diagnostique = !!d.diagnostique;
     }
 
     // #468/CO-17 : champs d'ÉTAT — à la création seulement (voir l'entête).

@@ -874,6 +874,7 @@ const SCHEMAS_IMPORT = {
         estDemo: { type: 'boolean' },
         isDemo: { type: 'boolean' },
         facultatif: { type: 'boolean' },
+        diagnostique: { type: 'boolean' },   // #790 — sinon le marqueur ne survit à aucun import/export
         grilleId: { type: 'string', maxLen: 100 },
         echelleId: { type: 'string', maxLen: 100 },
         pratiqueId: { type: 'string', maxLen: 100 },

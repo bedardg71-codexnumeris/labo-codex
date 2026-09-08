@@ -432,14 +432,26 @@ function obtenirNombreProductionsPourPatterns() {
  * @returns {Array<string>} - IDs des productions évaluables
  */
 function obtenirIdsProductionsEvaluables(productions) {
+    // #790, PORTE 2 — LA FENÊTRE DES PATTERNS. Cette fonction est le point unique
+    // que cinq appelants du dépistage partagent, et la fenêtre qu'elle alimente
+    // moyenne des NOTES FINALES : une production évaluée sur une seule dimension y
+    // entrerait comme si elle mesurait la compétence entière, et ferait basculer en
+    // palier 2 ou 3, dès la première semaine, un élève solide ailleurs — sans que
+    // l'écran dise nulle part que ce palier repose sur une dimension unique.
+    // ⚠ Le filtre est posé EN PREMIER, avant la bifurcation PAN/Sommative : il vaut
+    // pour les deux, et une exclusion recopiée dans chaque branche finirait par ne
+    // plus valoir que pour l'une.
+    var evaluables = (typeof window.ProductionDiagnostique !== 'undefined')
+        ? window.ProductionDiagnostique.filtrerProductions(productions)
+        : (Array.isArray(productions) ? productions : []);
     // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
     var estPAN = ((typeof obtenirTypePratiqueActive === 'function')
         ? obtenirTypePratiqueActive() : null) === 'standards';
     if (estPAN) {
-        return productions.filter(function(p) { return p.type === 'artefact-portfolio'; }).map(function(p) { return p.id; });
+        return evaluables.filter(function(p) { return p.type === 'artefact-portfolio'; }).map(function(p) { return p.id; });
     }
     // Sommative : toutes les productions sauf le conteneur portfolio
-    return productions.filter(function(p) { return p.type !== 'portfolio'; }).map(function(p) { return p.id; });
+    return evaluables.filter(function(p) { return p.type !== 'portfolio'; }).map(function(p) { return p.id; });
 }
 
 /**

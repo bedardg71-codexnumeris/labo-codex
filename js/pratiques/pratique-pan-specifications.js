@@ -828,9 +828,34 @@ class PratiquePanSpecifications {
      * @private
      */
     _lireEvaluations() {
-        return (typeof obtenirDonneesSelonMode === 'function')
+    // #790, PORTES 1 ET 3 — LA NOTE, L'INDICE P ET LA COMPLÉTION, EN UN SEUL POINT.
+    // ⮕ LE FILTRE EST POSÉ ICI, DANS L'ACCESSEUR, ET PAS DANS CHAQUE CALCUL. Motif
+    // mesuré : tous les appelants de ces deux accesseurs sont des CALCULS
+    // (performance, historique, complétion, défis, patterns, données du profil) —
+    // aucun n'affiche la liste des copies d'un élève. Poser l'exclusion dans chaque
+    // `calculer*` aurait fait huit sites à tenir alignés, et le neuvième écrit dans
+    // six mois serait passé au travers.
+    // ⚠ CE QUI RESTE VISIBLE, ET C'EST LA DÉCISION : la production diagnostique
+    // demeure ENTIÈRE dans le dossier de l'élève — copie, annotation, rétroaction,
+    // résultat. Le dossier ne passe pas par ces accesseurs. On lui retire son poids,
+    // pas son existence.
+        const brutes = ((typeof obtenirDonneesSelonMode === 'function')
             ? obtenirDonneesSelonMode('evaluationsSauvegardees')
-            : db.getSync(cle('evaluationsSauvegardees'), []);
+            : db.getSync(cle('evaluationsSauvegardees'), [])) || [];
+        return window.ProductionDiagnostique
+            ? window.ProductionDiagnostique.filtrerEvaluations(brutes, this._lireProductionsBrutes())
+            : brutes;
+    }
+
+    /**
+     * Les productions TELLES QU'ELLES SONT EN BASE, diagnostiques comprises — voir
+     * la note de `_lireEvaluations`.
+     * @private
+     */
+    _lireProductionsBrutes() {
+        return ((typeof obtenirDonneesSelonMode === 'function')
+            ? obtenirDonneesSelonMode('productions')
+            : db.getSync(cle('productions'), [])) || [];
     }
 
     /**
@@ -838,9 +863,10 @@ class PratiquePanSpecifications {
      * @private
      */
     _lireProductions() {
-        return (typeof obtenirDonneesSelonMode === 'function')
-            ? obtenirDonneesSelonMode('productions')
-            : db.getSync(cle('productions'), []);
+        const brutes = this._lireProductionsBrutes();
+        return window.ProductionDiagnostique
+            ? window.ProductionDiagnostique.filtrerProductions(brutes)
+            : brutes;
     }
 }
 
