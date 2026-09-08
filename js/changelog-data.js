@@ -23,8 +23,9 @@
         {
             version: '1.124',
             couleur: 'orange',
-            titre: 'La note de la Liste des évaluations s\'affiche à une décimale',
+            titre: 'Verrouiller une séance n\'efface plus ses présences',
             items: [
+                '<strong>Cocher « Verrouillée » sur une date dont la séance n\'est pas affichée n\'efface plus les présences déjà saisies.</strong> Le verrouillage enregistrait au passage ce que l\'écran montrait ; quand la séance n\'était pas ouverte, l\'écran ne montrait rien, et les présences de cette date disparaissaient sans un mot — le cadenas se posant sur une séance vide. Seules les présences réellement affichées sont désormais remplacées. Cette correction empêche que ça se reproduise ; elle ne ramène pas une séance déjà perdue.',
                 '<strong>Fini les notes à quinze décimales.</strong> Dans Évaluations \u203a Liste, la colonne « Note % » affichait « 92.52136752136752% ». Elle affiche « 92.5% », comme la note originale d\'une reprise le fait depuis toujours, juste à côté. Le calcul et la note enregistrée ne changent pas : c\'est l\'affichage qui montrait le nombre entier de la machine.',
             ]
         },

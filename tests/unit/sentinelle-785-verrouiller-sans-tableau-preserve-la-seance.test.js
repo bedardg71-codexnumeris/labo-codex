@@ -13,12 +13,23 @@
  * `sauvegarderPresencesSansValidation(dateStr)` AVANT de verrouiller, « pour ne pas perdre les données
  * saisies ». Cocher la case est donc censé sauvegarder. Ce banc mesure si ce filet tient.
  *
- * ── CE QU'IL MESURE ────────────────────────────────────────────────────────────────────────────────
- * `sauvegarderPresencesSansValidation` RETIRE les présences de la date pour tous les élèves du cours
- * actif (`:823-828`, liste venue de la BASE), puis n'en réécrit que pour ceux dont le champ
- * `#periodes_<da>` existe DANS LE DOM (`:831-833`). Quand le tableau de la séance n'est pas rendu —
- * une date qu'on n'a pas ouverte, un rendu pas encore arrivé — il ne reste RIEN à réécrire, et le
- * tableau amputé est écrit tel quel par `db.setSync` (`:862`).
+ * ── LE DÉFAUT MESURÉ, ET SA CORRECTION (8 septembre 2026) ──────────────────────────────────────────
+ * `sauvegarderPresencesSansValidation` RETIRAIT les présences de la date pour tous les élèves du cours
+ * actif — liste venue de la BASE — puis n'en réécrivait que pour ceux dont le champ `#periodes_<da>`
+ * existe DANS LE DOM. Quand le tableau de la séance n'est pas rendu — une date qu'on n'a pas ouverte,
+ * un rendu pas encore arrivé — il ne restait RIEN à réécrire, et le tableau amputé était écrit tel quel
+ * par `db.setSync`. Séance détruite en silence, et la date verrouillée par-dessus : un cadenas sur une
+ * séance vide. `enregistrerPresences` portait le même motif ; les deux sites sont corrigés.
+ *
+ * ⮕ LE CORRECTIF, ET DONC L'INVARIANT QUE CE FICHIER GARDE : **on ne retire QUE ce qu'on va réécrire.**
+ * `daReecrits` est bâti depuis le DOM avant le retrait, et le filtre ne consulte plus que lui. Un élève
+ * dont le champ n'est pas à l'écran n'est plus touché.
+ *
+ * ⚠ CE BANC A D'ABORD AFFIRMÉ LE DÉFAUT (commit `4201bf62`, « reproduit, non corrigé ») avant d'être
+ * retourné en sentinelle. Ses deux constats de destruction sont devenus des constats de survie ; le
+ * TÉMOIN et les deux cas de bord n'ont pas bougé — c'est ce qui prouve que le remède n'a pas changé le
+ * cas normal. Le break-test de la correction est le geste inverse : rétablir
+ * `etudiantsATraiter.some(...)` dans les deux filtres doit rougir ce fichier.
  *
  * ⚠ LE FAUX `document` DU BAC PARTAGÉ NE SUFFIT PAS ICI : son `getElementById` CRÉE l'élément absent
  * au lieu de rendre `null` (`_helpers/bac-suivi.js`). Sous ce document-là, `if (inputPeriodes)` est
@@ -53,14 +64,14 @@ function storeAvecUneSeance() {
  * Monte le module et rend `document.getElementById` fidèle au navigateur.
  * @param {boolean} tableauRendu - false : aucun champ `periodes_*` dans la page (séance non affichée).
  */
-function monterAvecDomFidele(store, tableauRendu) {
+function monterAvecDomFidele(store, tableauRendu, valeurAffichee = '2') {
     const b = monter(store, { modules: ['js/saisie-presences.js'] });
     const creeParLeBac = b.document.getElementById;
     b.document.getElementById = (id) => {
         if (/^(periodes|notes)_/.test(id)) {
             if (!tableauRendu) return null;                 // le navigateur rend null, pas un élément neuf
             const el = creeParLeBac(id);
-            if (id.startsWith('periodes_') && el.value === '') el.value = '2';
+            if (id.startsWith('periodes_') && el.value === '') el.value = valeurAffichee;
             return el;
         }
         return creeParLeBac(id);
@@ -71,27 +82,27 @@ function monterAvecDomFidele(store, tableauRendu) {
 const presencesDu = (store, date) => (store.test_presences || []).filter((p) => p.date === date);
 
 describe('#785 · verrouiller une date dont le tableau n’est pas rendu', () => {
-    it('⛔ EFFACE la séance : trois présences en base, zéro après le clic', () => {
+    it('✅ PRÉSERVE la séance : trois présences en base, trois après le clic', () => {
         const store = storeAvecUneSeance();
         const b = monterAvecDomFidele(store, false);
         expect(presencesDu(store, DATE)).toHaveLength(3);   // avant : la séance existe
 
         try { b.win.basculerVerrouillageDate(DATE); } catch { /* le re-rendu ne concerne pas la mesure */ }
 
-        // LE CONSTAT. Si un correctif rend ce cas inoffensif, cette attente tombe :
-        // c'est le signal que le défaut est réparé, pas que le banc est faux.
-        expect(presencesDu(store, DATE)).toHaveLength(0);
-        // Et la date est verrouillée quand même — l'utilisateur voit un cadenas sur une séance vidée.
+        // L'INVARIANT. Rétablir `etudiantsATraiter.some(...)` dans le filtre fait tomber cette attente.
+        expect(presencesDu(store, DATE)).toHaveLength(3);
+        // Et la date est bien verrouillée : le geste demandé a eu lieu, sans emporter la séance.
         expect(store.datesVerrouillees).toContain(DATE);
     });
 
-    it('la destruction est SILENCIEUSE : aucune alerte, aucune notification', () => {
+    it('la séance est INTACTE, pas seulement du même nombre : périodes et notes inchangées', () => {
         const store = storeAvecUneSeance();
+        const avant = JSON.stringify(presencesDu(store, DATE));
         const b = monterAvecDomFidele(store, false);
         try { b.win.basculerVerrouillageDate(DATE); } catch { /* idem */ }
-        expect(presencesDu(store, DATE)).toHaveLength(0);
+        // Garde contre une « survie » qui réécrirait tout à zéro : le compte tiendrait, pas les valeurs.
+        expect(JSON.stringify(presencesDu(store, DATE))).toBe(avant);
         expect(b.avertissements.filter((m) => /présence|perdu|effac/i.test(String(m)))).toHaveLength(0);
-        expect(b.notifs).toHaveLength(0);
     });
 
     it('n’emporte QUE la date visée : la séance du 25 août survit', () => {
@@ -108,6 +119,18 @@ describe('#785 · verrouiller une date dont le tableau n’est pas rendu', () =>
         // Trois élèves du groupe-cours actif, réécrits depuis les champs affichés.
         expect(presencesDu(store, DATE)).toHaveLength(3);
         expect(store.datesVerrouillees).toContain(DATE);
+    });
+
+    it('⚠ CONTRE-ÉPREUVE DU REMÈDE — un tableau rendu ÉCRASE BIEN l’ancienne valeur', () => {
+        // Sans ce cas, « ne retirer que ce qu’on va réécrire » pourrait dégénérer en « ne rien
+        // retirer » : la sauvegarde deviendrait un geste sans effet, et les quatre cas ci-dessus
+        // resteraient verts. Ici l’écran affiche 1 période là où la base en porte 2.
+        const store = storeAvecUneSeance();
+        const b = monterAvecDomFidele(store, true, '1');
+        try { b.win.basculerVerrouillageDate(DATE); } catch { /* idem */ }
+        const apres = presencesDu(store, DATE);
+        expect(apres).toHaveLength(3);
+        expect(apres.every((p) => p.periodesPresentes === 1)).toBe(true);
     });
 
     it('DÉVERROUILLER ne touche à rien — seul le verrouillage passe par la sauvegarde', () => {
