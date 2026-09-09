@@ -3448,7 +3448,7 @@ function afficherCriteresTemp() {
                            data-on-change="modifierPonderationCritereTempHandler" data-critere-index="${index}">
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Niveau SOLO
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Complexité SOLO du critère
                         <span class="primo-aide" data-target="grille-niveau-solo"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                     </label>
                     <select class="controle-form"
@@ -4777,7 +4777,7 @@ function afficherCriteresGrille(grille) {
                            data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="ponderation" data-parse-int>
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Niveau SOLO
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Complexité SOLO du critère
                         <span class="primo-aide" data-target="grille-niveau-solo"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
                     </label>
                     <select class="controle-form"
