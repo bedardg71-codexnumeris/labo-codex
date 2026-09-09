@@ -15,6 +15,38 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.126.0 — L'AIDE NE PRÉSENTE PLUS TA PRATIQUE COMME LA DÉFINITION** (build `0909-1452`).
+**Ce que tu verras** : dans l'Aide, la carte sur les pratiques alternatives de notation s'appelle
+désormais **« Les pratiques alternatives de notation (PAN) »**, au pluriel. Elle ne dit plus qu'une PAN
+« sélectionne les N meilleurs artefacts » — c'était **ta** façon de faire, pas la définition. Elle dit ce
+que les PAN ont en commun, présente les **quatre familles côte à côte** (dont la **dénotation**, qui
+n'est plus annoncée comme « à venir »), et ajoute **six questions** pour situer une pratique : objet,
+révisabilité, agentivité, communication, granularité, détermination.
+▣ **La carte « Choisir ta pratique de notation » ne te recommande plus de chiffres.** « 8-14 artefacts
+recommandés (standard : 12) » et « 3-4 jetons maximum » ont disparu : c'étaient les réglages d'une
+classe en particulier, pas des normes. Les quatre familles y ont maintenant **le même gabarit** — un
+principe, puis ce qu'il y a à régler — et un encadré dit ce que la recherche observe des reprises
+sans imposer de nombre.
+▣ **Les mots sont ceux de l'assistant.** « PAN – Standards », « PAN – Spécifications »,
+« PAN – Dénotation » : l'Aide et l'assistant de configuration disent maintenant la même chose.
+▣ **Réglages › À propos cite le rapport d'où viennent ces six questions** : « Laissons-les se
+tromper » (Cormier, Voisard, Turcotte et Arseneault-Hubert, Cégep André-Laurendeau, 2026), avec le lien
+vers le rapport complet. La phrase d'introduction ne parle plus de « deux blogues ».
+▣ **Rien d'autre n'a bougé** : aucun calcul, aucune valeur par défaut, aucun réglage. Trois blocs de
+texte, et c'est tout.
+**Vérifié comment** : les trois blocs ouverts **dans ton Chrome**, sur l'application servie en local —
+les deux cartes d'Aide s'ouvrent et se ferment au clic, et la recherche de l'Aide les retrouve sur
+« six paramètres », « révisabilité », « agentivité » et « dénotation » (zéro erreur console). Le
+tableau de l'À propos compte bien trois lignes, la troisième avec son lien. **Le risque de troncature
+a été mesuré, pas supposé** : les cartes d'accordéon sont coupées à 2 000 px, et le texte neuf en fait
+**1 087** au plus étroit (iPad portrait, 768 px) contre 497 avant — sous le plafond, sans débordement
+horizontal. Structure HTML comparée avant/après : identique. Suite complète : 5 644 essais verts.
+⛔ **Ce qui n'est PAS vérifié** : rien n'a été vu sur **Safari ni sur l'iPad réel** — la mesure iPad
+vient de WebKit en simulation, pas de ta tablette. Et le **glossaire de l'Aide** (Consultation ›
+Référence rapide) définit toujours « PAN » par « sélectionner automatiquement les N meilleurs
+artefacts » : c'est la même confusion, dans un quatrième bloc qui n'était pas au périmètre. Non
+corrigé, inscrit.
+
 ↻ **1.125.2 — CINQ CHOSES QUE TU AS SIGNALÉES CE MATIN** (build `0909-1356`).
 **Ce que tu verras** : le menu « Actions » de la liste des évaluations a la **même largeur** d'une
 ligne à l'autre ; dans la palette des codes, un libellé trop long **revient à la ligne** au lieu de
