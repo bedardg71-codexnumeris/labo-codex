@@ -15,6 +15,15 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+⏳ **CE QUI T'ATTEND — la porte terrain des sept livraisons du jour (#802).**
+`plans de travail/PORTES-TERRAIN-2026-09-09.md`. **14 rangées et 3 décisions pour sept versions** :
+une seule touche tes données (ta grille de dépistage, à re-choisir UNE fois — la source est tarie,
+pas le stock), deux ne peuvent être tranchées que sur ta tablette (saisir une bulle au doigt, le
+Comparateur en mode sombre), et trois attendent ton verdict écrit, pas une case cochée. Tout le
+reste — la prose de l'Aide, la fiche production, les cinq correctifs du matin — est livré sans porte :
+si ça cloche, tu le diras en travaillant. Consigne de publication de l'artefact pour Cowork :
+`plans de travail/CONSIGNE-COWORK-artefact-porte-802.md`.
+
 ↻ **1.127.1 — LE TABLEAU DU COMPARATEUR SE LIT D'UN COUP D'ŒIL** (build `0909-1745`).
 **Ce que tu verras** : dans Labo › Comparateur, les **titres de section**, les **six paramètres** et
 les **lignes** ont enfin trois traitements distincts. Ce midi, le tableau est passé de deux en-têtes à
