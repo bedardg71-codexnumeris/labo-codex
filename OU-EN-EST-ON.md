@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-↻ **1.127.0 — LE COMPARATEUR PARLE EN SIX PARAMÈTRES** (build `BUILD_ID`).
+↻ **1.127.0 — LE COMPARATEUR PARLE EN SIX PARAMÈTRES** (build `0909-1640`).
 **Ce que tu verras** : dans Labo › Comparateur, le tableau n'aligne plus une suite de lignes à plat.
 Il est **rangé sous les six paramètres** que l'Aide présente depuis ce midi — objet, révisabilité,
 agentivité, communication, granularité, détermination. Les lignes n'ont pas changé de sens, aucun
@@ -50,6 +50,42 @@ définies nulle part (défaut préexistant, mesuré). Le tableau portait deux en
 porte huit. Le regroupement se lit donc moins bien qu'il ne le devrait. **Hors du périmètre que tu as
 fixé** («&nbsp;rien d'autre&nbsp;») : non corrigé, inscrit (#808). Et rien n'a été vu sur Safari ni sur
 l'iPad.
+
+↻ **1.127.0 (même livraison) — TA GRILLE DE DÉPISTAGE RESTE CHOISIE, ET LA FICHE PRODUCTION S'ALIGNE**
+(#806 et #807, tes deux rapports de cet après-midi).
+**Ce que tu verras** : dans Labo › Outils d'observation, la **grille de critères pour le dépistage**
+ne se vide plus toute seule. Et la fiche d'une production n'a plus son grand trou blanc au milieu.
+▣ **Deux chemins l'effaçaient, et aucun n'était un geste de ta part.** Le premier : l'écran des forces
+et défis — du code d'AFFICHAGE — effaçait le réglage chaque fois qu'il ouvrait un profil avant que la
+base soit hydratée, sous le nom rassurant d'« auto-nettoyage silencieux ». Sa prémisse était fausse
+(« absente de la liste DONC supprimée ») : `db.getSync` rend une liste vide aussi quand IndexedDB
+n'est pas prête, et **ton localStorage est saturé** (5 119 Ko au rapport), donc tes grilles vivent en
+IDB. Le second : le panneau des réglages réécrit TOUT à chaque changement d'une case, et lisait le
+sélecteur avec un repli `|| ''` — un menu pas encore rempli rend une valeur vide, indiscernable d'un
+retrait volontaire.
+▣ **Le chemin affiché était faux, en trois exemplaires.** « Conception › Pratiques de notation », où
+le réglage n'est plus. C'est la duplication qui lui a permis de survivre à la migration : les trois
+sites lisent maintenant la même source, celle de #550, qui porte le bon chemin.
+▣ **La fiche production** : la description du type était alignée sur le BAS de la colonne voisine, ce
+qui suppose deux colonnes de hauteur comparable — pour un **artefact**, la pondération disparaît et la
+description tombait sous un grand vide. Elle prend toute la largeur ; la case « Travail diagnostique »
+reste avec la pondération (#790 : c'est là que le poids d'un travail se décide) ; le bouton PDF et les
+trois choix à droite, libellés alignés au lieu de démarrer à trois hauteurs. Et le bouton
+d'enregistrement des Outils d'observation remonte auprès du titre.
+⛔ **TARIR N'EST PAS RÉPARER — et il reste un geste pour toi.** La source est tarie, **le stock ne
+l'est pas** : la préférence déjà effacée dans tes données le reste. **Désigne ta grille une fois après
+cette mise à jour** ; c'est ce passage-là qui prouvera le correctif, pas les tests.
+**Vérifié comment** : **10 mutations volontaires, 10 rouges** sur les deux sentinelles neuves (#806
+neuf cas, #807 cinq), chaque fichier restauré et vérifié par empreinte sha256 — y compris les
+contreparties : rendre la garde de sauvegarde *totale* fait rougir le cas « retrait volontaire », et
+retirer la seule règle CSS fait rougir l'alignement des sélecteurs. Rendu **mesuré dans Chrome** sur
+serveur local : 0,0 px d'écart sur les libellés ET les sélecteurs, aux deux types de production
+(artefact pondération masquée, examen visible) et à quatre largeurs de panneau, sans chevauchement ;
+contraste du bouton 8,03:1 dans les deux modes. Suite complète mesurée en worktree isolé — une autre
+session travaillait dans le même arbre.
+⛔ **Ce qui n'est PAS vérifié** : Safari et l'iPad (le CSS garantit la cible de 44 px, personne ne l'a
+vue) ; et la persistance dans la durée, qui demande ton usage réel — c'est un défaut de course, il ne
+se produisait pas à chaque fois.
 
 ↻ **1.126.1 — LE GLOSSAIRE DIT LA MÊME CHOSE QUE LE RESTE DE L'AIDE** (build `0909-1512`).
 **Ce que tu verras** : dans Consultation › Référence rapide, l'entrée **« PAN »** ne définit plus une
