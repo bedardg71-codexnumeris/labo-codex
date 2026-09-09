@@ -118,6 +118,24 @@ test('#773 · la poignée reste au coin visible quand la palette défile, et dis
         return null;
     });
     void defilee;
+
+    // ⚠ MESURÉ LE 9 SEPTEMBRE 2026 — CET ESSAI SE COURAIT APRÈS LUI-MÊME.
+    // La poignée est ramenée au coin visible par un écouteur `scroll`
+    // (`travaux-outils.js`, configurerPoigneeRedimension), et un `scroll` est
+    // dispatché au FRAME SUIVANT, pas à l'affectation de `scrollTop`. En
+    // mesurant tout de suite, l'essai lisait une fois sur cinq la poignée
+    // encore partie avec le contenu : `ecartBas` à 360 au lieu de ≤ 2 —
+    // 4 vertes sur 5 en local (macOS), et le rouge permanent de la CI.
+    // Le code n'a jamais été en cause : un frame de retard est invisible au
+    // doigt. On attend donc la CONDITION, pas un délai — un `waitForTimeout`
+    // rendrait l'essai lent ET encore instable sur une machine chargée.
+    await page.waitForFunction(() => {
+        const p = document.getElementById('travaux-palette-erreurs-fr');
+        const poignee = p && p.querySelector(':scope > .palette-poignee-redim');
+        if (!p || !poignee) return false;
+        return Math.abs(poignee.getBoundingClientRect().bottom - p.getBoundingClientRect().bottom) <= 2;
+    }, null, { timeout: 5000 });
+
     const g = await page.evaluate(geometrie);
     console.log('DÉFILÉE →', JSON.stringify(g));
     expect(g.scrollMax, 'le banc a bien produit un débordement (sinon il ne mesure rien)').toBeGreaterThan(20);

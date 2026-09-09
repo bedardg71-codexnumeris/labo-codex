@@ -15,6 +15,30 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+▣ **LE VERT DE LA CI REDEVIENT UN SIGNAL** (9 sept., fin de journée — aucun changement pour toi).
+La CI GitHub était **rouge sur `main` depuis 24 h** (dernier vert : hier 17 h 20), sur 4 essais. Un rouge
+permanent ne signale plus rien : une vraie régression s'y noierait. Mesuré, et **ce n'était pas ton
+application** — c'étaient les essais eux-mêmes.
+▣ **Trois essais du toucher sur iPad accusaient un code sain.** `page.touchscreen.tap()` sous WebKit
+sans écran émet `pointerdown`, `touchstart`, `touchend` — **et aucun `click`**. Or c'est un `click` que
+l'application écoute. La sélection n'était donc jamais demandée : les essais mesuraient le harnais, pas
+la tolérance de 44 px, qui **fonctionne** (vérifiée en la cassant : l'essai rougit).
+▣ **Et deux essais de la même famille passaient QUOI QU'IL ARRIVE.** « Trop loin, le toucher ne saisit
+personne » et « une barre voisine ne vole pas le toucher » attendent que rien ne soit sélectionné — or
+rien ne l'était jamais. **Break-testés : la tolérance tactile entièrement retirée, ils restaient verts.**
+Ils n'attestaient rien depuis le début. C'est le genre de vert qui coûte plus cher qu'un rouge.
+▣ **Le quatrième courait après lui-même.** La poignée de la palette de codes est ramenée au coin visible
+par un écouteur `scroll`, qui s'exécute au frame suivant ; l'essai mesurait avant. **4 vertes sur 5 en
+local** avant correction, **6 sur 6** après — il attend maintenant la condition, pas un délai. Là non
+plus le code n'était en cause : un frame de retard est invisible au doigt.
+**Vérifié comment** : les 6 essais du toucher passent, et **4 mutations volontaires du code applicatif
+les font rougir** (tolérance retirée, garde « pointeur grossier » sautée, barre voisine autorisée à voler
+le toucher, poignée non repositionnée) — chaque fichier restauré et vérifié par empreinte sha256. La
+baseline des rougeurs connues **rétrécit de 3 à 0**, comme elle le doit.
+⛔ **Ce qui n'est PAS vérifié** : que le toucher marche sur TON iPad. Ces essais tournent sur un WebKit
+sans écran ; ils disent que le code fait ce qu'on lui demande, pas que le doigt trouve la bulle. C'est
+la porte terrain (#802) qui le dira.
+
 ↻ **1.127.0 — LE COMPARATEUR PARLE EN SIX PARAMÈTRES** (build `0909-1640`).
 **Ce que tu verras** : dans Labo › Comparateur, le tableau n'aligne plus une suite de lignes à plat.
 Il est **rangé sous les six paramètres** que l'Aide présente depuis ce midi — objet, révisabilité,
