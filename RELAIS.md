@@ -7,6 +7,46 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 9 SEPT. 2026, FIN DE SOIRÉE : LES MOTS JUSTES AVANT LE 14 (1.127.3)
+
+> ✅ **`main` à 1.127.3, build `0909-1955`. Vitest 520 fichiers / 5714 essais.**
+>
+> **CE QUI A ÉTÉ FAIT.** Trois corrections de langage, toutes destinées à ce que la cohorte lira le
+> 14, et une release qui emporte AUSSI un texte déjà commité mais jamais livré (`9a202b2b` : en
+> PAN – Standards, la note « **vise** » le niveau atteint pour des cibles au lieu d'y « reposer »,
+> suivi de ce que Labo Codex fait réellement aujourd'hui).
+>
+> **#810, préalable de vocabulaire** — « Niveau SOLO » désignait DEUX objets sous le même mot : la
+> complexité qu'un critère EXIGE et le palier qu'un élève ATTEINT. Grégoire s'y est trompé lui-même
+> sur son propre critère Structure, la fiche d'aide ouverte à trois centimètres. ⮕ « Complexité SOLO
+> du critère » (grille, deux sites) et « Palier SOLO du niveau » (échelle, deux sites). **Le champ de
+> donnée `niveauSOLO` ne change pas** — c'est l'affichage qu'on corrige, pas le modèle.
+> ⚠ **ÉCART VOLONTAIRE AVEC LA CONSIGNE** : elle nommait `index.html:10268` comme site d'échelle.
+> C'est le `<th>` du tableau de l'AIDE sur la taxonomie de Biggs et Collis, dont la colonne liste les
+> cinq niveaux. « Palier SOLO du niveau » y serait faux. Non touché — mesuré avant d'écrire.
+>
+> **#801, gestes 1 et 3** — le canal de retour EXISTAIT (`js/rapport-bug.js`, deux modes complets) ;
+> il ne se voyait pas. Le bouton, le menu, l'infobulle et le titre de la modale annoncent maintenant
+> « Signaler un bug ou donner ton avis », et la modale des **Nouveautés** porte un bouton « Donner
+> ton avis ». ⛔ **Pas dans le bandeau de version** : il disparaît, et il porterait alors trois
+> boutons. Un cas de sentinelle interdit de l'y remettre.
+>
+> **VÉRIFIÉ COMMENT** : 12 mutations volontaires, 12 rouges, restauration vérifiée par empreinte
+> sha256. ⚠ **Un cas passait QUOI QU'IL ARRIVE** — il visait `#bandeau-maj`, identifiant qui n'existe
+> nulle part ; le vrai est `#bandeau-mise-a-jour`. C'est le break-test qui l'a dit, pas la relecture.
+> Rendu mesuré au banc WebKit : pied de modale à deux boutons, la modale de rapport s'ouvre
+> par-dessus (z-index 10000), et le libellé de grille tient sur une ligne dès 240 px de colonne.
+> ⛔ **Ni Safari ni l'iPad**, et l'éditeur de grille n'a pas été atteint par la navigation réelle :
+> son libellé a été mesuré avec le CSS de la page, pas ouvert en situation.
+>
+> ⚠ **DEUXIÈME ENTORSE AU CHANGELOG, ET ELLE S'AGGRAVE** : l'entrée 1.127 porte **dix** items, deux
+> de plus que le plafond de huit. Motif structurel, pas de la négligence — **sept versions sont
+> sorties le 9**, et la règle « une entrée par version mineure » les fait toutes converger vers la
+> même entrée. Deux items ont déjà été fusionnés pour limiter la casse. ⮕ **À arbitrer par
+> Grégoire** : soit on élague, soit la règle admet qu'une journée à sept livraisons déborde.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 9 SEPT. 2026, SOIR : LE TEXTE D'ACCUEIL DE L'AIDE (1.127.2), ET LES TROIS RELAIS REMIS À JOUR
 
 > ✅ **`main` à 1.127.2, build `0909-1912`. Vitest 518 fichiers / 5703 essais. Tout est poussé —
@@ -63,13 +103,14 @@ reste à pousser au moment de l'écriture** ; la session qui lit doit de toute f
 
 ### CE QUI RESTE DÛ AU 9 AU SOIR
 
-- **#810** — le Comparateur dit « Artefacts (instruments d'évaluation) », l'Aide dit « cibles
-  d'apprentissage ». Tranché par Grégoire à la porte terrain : *« C'est l'intention qui doit primer
-  (la cible d'apprentissage). »* ⚠ Le moteur, lui, calcule toujours sur des artefacts : aligner le
-  seul libellé remplacerait une contradiction visible par une contradiction cachée. La question du
-  moteur se pose EN MÊME TEMPS que le libellé.
-- **La grille de dépistage de Grégoire** reste à re-désigner UNE fois : la source est tarie (#806),
-  le stock ne l'est pas, et personne n'écrit dans son codex à sa place.
+- **#810** — ⚠ **NE PAS RELIRE CETTE LIGNE COMME « aligner le libellé du Comparateur »** : c'était
+  le cadrage d'avant. Le chantier a été cadré avec Grégoire le 9 au soir et **il vit maintenant dans
+  `BACKLOG.md` #810**, avec ses quatre mesures, sa décision didactique et ses deux préalables non
+  techniques. À lire là, pas ici. Ce qui en a été LIVRÉ ce soir (1.127.3) est le seul préalable de
+  vocabulaire : deux mots distincts pour deux objets distincts. Le chantier de fond **n'ouvre pas
+  avant la rencontre de la communauté de pratique du 14**.
+- ✅ **La grille de dépistage de Grégoire EST re-désignée** — rangée 1.1 de la porte #802, passée le
+  9 à 18 h 49 : elle tient après rechargement. Cette ligne est close.
 - **Safari n'a pas été visité** de la journée, et **#795 n'a jamais été vu de bout en bout dans un
   vrai codex**. Sept versions sont sorties le 9.
 - **Quatre specs vertes au second essai** (`cartouche-enregistrer-reste-ouverte`,

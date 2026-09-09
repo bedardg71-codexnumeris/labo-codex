@@ -7,8 +7,8 @@
      ===================================================================== -->
 
 <!-- =====================================================================
-     SESSION 37 — 8 SEPTEMBRE (APRÈS-MIDI) AU 9 SEPTEMBRE 2026 AU SOIR : 1.124.3 → 1.127.2, SEPT VERSIONS EN UNE JOURNÉE.
-     Périmètre couvert : `3913b4cb..c8b7fc5d`, vingt-trois commits, plusieurs sessions — dont DEUX à égalité dans le
+     SESSION 37 — 8 SEPTEMBRE (APRÈS-MIDI) AU 9 SEPTEMBRE 2026 EN FIN DE SOIRÉE : 1.124.3 → 1.127.3, HUIT VERSIONS EN UNE JOURNÉE.
+     Périmètre couvert : `3913b4cb..1a7205ee`, vingt-huit commits, plusieurs sessions — dont DEUX à égalité dans le
      même arbre tout l'après-midi du 9. Ce bloc rend l'état mesuré, pas la liste des commits ; `RELAIS.md` et
      `OU-EN-EST-ON.md` portent le détail et restent la source.
 
@@ -94,10 +94,31 @@
        (#810), avec la réserve écrite que le moteur, lui, calcule toujours sur des artefacts. Aligner le seul libellé
        remplacerait une contradiction visible par une contradiction cachée.
 
-     ▣ CE QUI RESTE DÛ AU 9 AU SOIR : #810 (le libellé du Comparateur, avec la question du moteur posée en même
-       temps) ; #795 jamais vu de bout en bout dans un vrai codex ; Safari non visité ; la grille de dépistage de
-       Grégoire à re-désigner UNE fois (la source est tarie, le stock ne l'est pas — personne n'écrit dans son codex
-       à sa place) ; et les quatre specs vertes au second essai signalées sans être traitées (#534).
+     ▣ ET LA JOURNÉE SE TERMINE SUR TROIS CORRECTIONS DE LANGAGE, PAS SUR DU CODE (1.127.3). Toutes visent ce que la
+       cohorte lira le 14. (1) « Niveau SOLO » désignait DEUX objets sous le même mot — la complexité qu'un critère
+       EXIGE, le palier qu'un élève ATTEINT ; Grégoire s'y est trompé lui-même sur son propre critère Structure, la
+       fiche d'aide ouverte à trois centimètres. ⮕ « Complexité SOLO du critère » et « Palier SOLO du niveau », deux
+       sites chacun, LE CHAMP DE DONNÉE INCHANGÉ. (2) Le canal de retour EXISTAIT — deux modes complets dans
+       `rapport-bug.js` — mais la porte annonçait « Signaler un bug » : un collègue sans bug n'avait aucune raison de
+       l'ouvrir. (3) En PAN – Standards, la note « vise » les cibles au lieu d'y « reposer ».
+     ⮕ DEUX DÉCISIONS DE MÉTHODE VALENT PLUS QUE LE LOT LUI-MÊME. **Renommer, pas expliquer** : la fiche d'aide disait
+       DÉJÀ la bonne chose et n'a pas empêché l'erreur — un paragraphe de plus n'aurait fait que documenter la
+       question. Et **l'invitation vit dans les Nouveautés, pas dans le bandeau** : le bandeau disparaît, et une
+       invitation vue une seule fois se referme avant d'avoir servi. Une sentinelle interdit de l'y remettre.
+     ⚠ UN CAS DE MA PROPRE SENTINELLE PASSAIT QUOI QU'IL ARRIVE — il gardait un bandeau sous l'identifiant
+       `#bandeau-maj`, qui n'existe nulle part (le vrai est `#bandeau-mise-a-jour`). Découvert par le break-test, pas
+       par la relecture. C'est le troisième vert menteur de la journée, après les deux essais du toucher.
+     ⚠ ÉCART VOLONTAIRE AVEC LA CONSIGNE, mesuré avant d'écrire : elle nommait `index.html:10268` comme site
+       d'échelle à renommer. C'est le `<th>` du tableau de l'AIDE sur la taxonomie de Biggs et Collis, dont la colonne
+       liste les cinq niveaux — « Palier SOLO du niveau » y serait faux. Non touché.
+
+     ▣ CE QUI RESTE DÛ AU 9 AU SOIR : #810 — dont SEUL le préalable de vocabulaire est livré ; le chantier de fond
+       (une note qui agrège par critère, en parallèle du portfolio) est cadré dans `BACKLOG.md` et **n'ouvre pas avant
+       la rencontre du 14** ; #795 jamais vu de bout en bout dans un vrai codex ; Safari non visité de la journée ;
+       les quatre specs vertes au second essai signalées sans être traitées (#534) ; et les trois specs
+       `bulles-au-doigt-540` en baseline, dont la porte terrain vient de prouver qu'elles accusent un code SAIN — à
+       réparer ou à retirer, pas à laisser indéfiniment (#789).
+     ✅ CLOS DANS LA JOURNÉE : la grille de dépistage de Grégoire, re-désignée et vérifiée après rechargement.
      ===================================================================== -->
 
 <!-- =====================================================================
