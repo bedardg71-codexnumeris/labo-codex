@@ -140,11 +140,80 @@ aucune corrigée** — elles sont hors du périmètre « texte seulement » du l
 - [ ] 🟢 **#805** Le skill `pratiques-notation` §2 bis n'est pas ancré dans le rapport PAREA
   - Il ancre les familles dans Talbert, Clark, Blum et Girouard-Gagné. Le rapport « Laissons-les se tromper » (Cormier, Voisard, Turcotte, Arseneault-Hubert, Cégep André-Laurendeau, 2026, <https://eduq.info/xmlui/handle/11515/40677>) est désormais la source québécoise empirique de référence, et c'est de lui que vient la grille des six paramètres affichée dans l'Aide depuis 1.126.0.
 
-- [ ] ⚠️ **#810** Le Comparateur et l'Aide ne disent pas la même chose de PAN – Standards — **TRANCHÉ par Grégoire le 9 sept. 2026 (porte #802, décision 3.3)**
-  - Le Comparateur affiche « **Artefacts (instruments d'évaluation)** » ; l'Aide, écrite le même jour, dit que les standards portent sur « le niveau atteint pour des **cibles d'apprentissage** ».
-  - **Verdict de Grégoire, mot pour mot : « C'est l'intention qui doit primer (la cible d'apprentissage). »** L'Aide fait foi ; c'est le Comparateur qui s'aligne, pas l'inverse.
-  - ⚠ Le code, lui, construit bien la note sur des artefacts de portfolio. Aligner le libellé sans toucher au moteur laisse un écart entre ce qui est dit et ce qui est calculé : **à trancher en même temps que la formulation**, sinon on remplace une contradiction visible par une contradiction cachée.
-  - Sa réponse porte sur le mot à l'écran, pas sur le moteur — ne pas lire un mandat de refonte du calcul dans cette phrase.
+- [ ] ⚠️ **#810** Construire la note de PAN – Standards sur les cibles, et non sur le portfolio — **CADRÉ avec Grégoire le 9 sept. 2026 au soir**
+
+  **Le point de départ.** Le Comparateur affiche « Artefacts (instruments d'évaluation) » ; l'Aide dit
+  que les standards portent sur « le niveau atteint pour des cibles d'apprentissage ». Verdict de
+  Grégoire (porte #802, décision 3.3) : « **C'est l'intention qui doit primer (la cible
+  d'apprentissage).** »
+
+  ⛔ **NE PAS corriger le libellé du Comparateur.** Il décrit ce que le CODE fait, et il porte à côté
+  une seconde ligne — « Alignement sur des cibles d'apprentissage ⮕ Non couvert » — qui est la seule
+  phrase de l'application disant honnêtement aux collègues que Labo Codex ne sait pas encore rapporter
+  la note à des cibles. Écrire « Cibles d'apprentissage » là ferait mentir cette ligne et transformerait
+  une mesure en brochure.
+
+  **CE QUI EXISTE DÉJÀ — quatre mesures faites le 9 sept., qui rétrécissent beaucoup le chantier :**
+  1. **La cible est définie** (Grégoire) : le niveau de maîtrise atteint sur un critère, pour une
+     production liée à plusieurs critères. Le porteur de la cible est donc le CRITÈRE, pas une entité
+     « objectif » nouvelle.
+  2. **Le chaînon existe et il est stable.** Chaque évaluation stocke `critereId` / `critereNom` /
+     `niveauSelectionne` ; `profil-etudiant-calculs.js` accumule par `critereId`, « identifiant STABLE ».
+     La grille de référence du dépistage désigne un jeu de critères unique pour tout le trimestre.
+     ⮕ **Le dépistage parcourt DÉJÀ cet axe.** Ce qui manque, c'est que la NOTE ne l'emprunte pas :
+     elle passe par le portfolio (`nombreARetenir`, `methodeSelection`).
+  3. **Le seuil est déjà lisible par la machine.** Seuil de Grégoire : uniforme, niveau relationnel
+     = **M (Maîtrisé)**, 75–84,99 % dans l'échelle IDME (`js/echelles.js`, `niveauSOLO: 'relationnel'`).
+     Règle : cible atteinte si le critère est à M ou E. Rien à saisir de plus.
+  4. **La déclinaison en quatre paliers existe.** La cartouche de rétroaction EST une matrice
+     critères × niveaux (`cartouches_<grilleId>`), et une même grille en porte plusieurs, une par
+     nature de production. Les descripteurs de niveau ne sont donc pas à produire.
+
+  **DÉCISION DIDACTIQUE DE GRÉGOIRE (9 sept.), et elle débloque la conception :** un critère est
+  **un seul objet d'apprentissage, dont les manifestations changent avec le genre** — « Structure »
+  en analyse littéraire et « Structure » en dissertation sont le même apprentissage.
+  ⮕ L'agrégation par `critereId` est donc légitime telle quelle, malgré des cartouches différentes.
+  ⮕ **Exigence qui en découle, et elle n'est pas optionnelle** : la trace doit conserver LA CARTOUCHE
+  QUI A SERVI au jugement. Sans ça, une cible « atteinte » l'est contre une description que plus
+  personne ne peut retrouver, et le verdict cesse d'être explicable. C'est le prix de la barre mobile.
+
+  **CE QUI RESTE À BÂTIR** : un chemin de note qui agrège, par critère, le niveau atteint à travers
+  les productions, en parallèle du chemin portfolio — pas à sa place (les deux familles doivent
+  continuer de cohabiter).
+
+  ⚠ **Ne PAS relire #435 comme une fonctionnalité à restaurer.** Le mode « par objectifs » retiré le
+  9 août n'a jamais fonctionné : il appariait les productions par un `objectifId` qu'aucun code
+  n'écrit, et ses quatre gabarits ne portaient aucun objectif. C'est une construction, pas une
+  reconstruction — et elle passe par les CRITÈRES, pas par les objectifs.
+
+  **DEUX PRÉALABLES NON TECHNIQUES, avant d'ouvrir le chantier :**
+  - ⏳ **Vérifier la prémisse à la CoP du 14 sept.** Grégoire pense que d'autres enseignants
+    fonctionnent par objectifs. C'est plausible mais non mesuré, et coder d'abord reviendrait à
+    re-coder en dur sur sa seule pratique — ce qu'il dit vouloir assouplir. Le formulaire Forms
+    prévu avant la rencontre est le bon endroit pour la question.
+  - ⚠ **Un problème de vocabulaire, à régler avant d'en parler à vingt personnes.** DEUX champs
+    s'appellent « niveau SOLO » et ne désignent pas la même chose : `critere.niveauSOLO`
+    (l'exigence cognitive du critère — traduite en fondamental / transitionnel / complexe, lue par
+    `calculerIPB` et le dépistage) et le `niveauSOLO` d'un NIVEAU D'ÉCHELLE (le niveau atteint par
+    l'élève). Le seuil de Grégoire porte sur le second ; sa grille affiche le premier. Dire « mon
+    seuil est le relationnel » devant la CoP fera lire à une partie de la salle que trois de ses
+    cinq critères sont sous son propre seuil. `profil-etudiant-calculs.js:2078` avertit déjà de ne
+    pas confondre les deux — l'avertissement est dans le code, pas à l'écran.
+
+  **Deux corrections mineures rattachées, à ne pas perdre :**
+  - ⏳ **L'Aide affirme un fait faux du logiciel** : « la note repose sur le niveau atteint pour des
+    cibles d'apprentissage » (`index.html` l. 10317, l. 10967). Formulation proposée le 9 sept., non
+    écrite, en attente du verdict de Grégoire : « la note **vise** le niveau atteint pour des cibles
+    d'apprentissage […]. Dans Labo Codex, ce niveau se lit aujourd'hui à travers les artefacts retenus
+    au portfolio : les cibles guident le jugement, les artefacts en portent la trace. »
+  - ⏳ **Erreur de configuration reconnue par Grégoire lui-même** (9 sept.) : dans sa grille à cinq
+    critères, **Structure** est étiquetée `multistructurel` alors que son descripteur — « établir et
+    expliquer les relations logiques » — est relationnel. À corriger dans SA grille, pas dans le code.
+
+  **Écarté, et il faut que ça reste écarté** : rendre les descripteurs « observables » au sens
+  comptable (trois arguments, deux citations par paragraphe). Énumérer des éléments présents EST la
+  définition du multistructurel : ça ferait redescendre toute la grille d'un palier. Les verbes de
+  ses descripteurs sont ce qui les rend lisibles en SOLO, pas un défaut.
 
 ### Retour d'usage — 5 septembre 2026 (Grégoire, profil individuel ; diagnostic Cowork en lecture seule)
 
