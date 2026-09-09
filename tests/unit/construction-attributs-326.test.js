@@ -1,29 +1,69 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
 
+const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+const SOURCE = readFileSync(path.join(RACINE, 'js/pratiques/construction-attributs.js'), 'utf8');
+// Commentaires retirés avant toute recherche — même parade qu'à la sentinelle #690 :
+// le module DOCUMENTE ce qu'il ne fait pas (« il ne lit pas noteDiffereeActive() »),
+// et un grep naïf rougirait sur la documentation au lieu du code.
+const CODE = SOURCE.replace(/\/\*[\s\S]*?\*\//g, '')
+    .split('\n').map(l => l.replace(/\/\/.*$/, '')).join('\n');
+
 // #326 R3 — extracteur PUR « config résolue → attributs de construction par famille ».
-// Lignes du tableau du Comparateur (RELAIS §4.3.4) : ancres (pondération / reprises /
-// nb de productions) toujours présentes, puis attributs family-specific.
+// Lignes du tableau du Comparateur (RELAIS §4.3.4), rangées depuis le 9 sept. 2026
+// sous les SIX PARAMÈTRES du rapport PAREA (objet, révisabilité, agentivité,
+// communication, granularité, détermination) — les six toujours rendus, y compris
+// ceux que l'application ne couvre pas.
 // Constat R1 (RELAIS §4.5) : STD ne porte PAS de jetons côté pratique vivante.
 
 const win = chargerScript('js/pratiques/construction-attributs.js');
-const { extraire, AXES_ANCRES } = win.ConstructionAttributs;
+const { extraire, PARAMETRES } = win.ConstructionAttributs;
+const CLES = PARAMETRES.map(p => p.cle);
 
 const axes = (r) => r.attributs.map(a => a.axe);
 const val = (r, axe) => (r.attributs.find(a => a.axe === axe) || {}).valeur;
+const param = (r, axe) => (r.attributs.find(a => a.axe === axe) || {}).parametre;
+const axesDe = (r, cle) => r.attributs.filter(a => a.parametre === cle).map(a => a.axe);
 
-describe('#326 R3 · ancres toujours présentes (pondération / reprises / nb de productions)', () => {
-    it('les 3 ancres ouvrent la liste, dans l\'ordre, marquées ancre:true', () => {
-        const r = extraire({ type: 'standards' });
-        expect(axes(r).slice(0, 3)).toEqual(AXES_ANCRES);
-        expect(r.attributs.slice(0, 3).every(a => a.ancre === true)).toBe(true);
+// ─────────────────────────────────────────────────────────────────────────────
+// 9 sept. 2026 — LES SIX PARAMÈTRES (rapport PAREA « Laissons-les se tromper »).
+// Ce qui est TOUJOURS rendu n'est plus trois ancres mais les six paramètres,
+// y compris ceux que l'application ne couvre pas. Les cas ci-dessous
+// remplacent les deux cas « ancres » : AXES_ANCRES a été retiré du module.
+// ─────────────────────────────────────────────────────────────────────────────
+describe('six paramètres · toujours rendus, dans l\'ordre', () => {
+    it('les six paramètres du rapport, dans cet ordre exact', () => {
+        expect(CLES).toEqual(['objet', 'revisabilite', 'agentivite',
+            'communication', 'granularite', 'determination']);
     });
 
-    it('config vide → repli neutre (ancres avec valeurs par défaut, jamais d\'exception)', () => {
+    it.each(['standards', 'specifications', 'sommative', 'denotation'])(
+        'chacun des six porte au moins une ligne — famille %s', (type) => {
+            const r = extraire({ type });
+            const vus = new Set(r.attributs.map(a => a.parametre));
+            expect(CLES.filter(c => !vus.has(c))).toEqual([]);
+        });
+
+    it('les lignes sortent groupées, dans l\'ordre des paramètres (aucun retour en arrière)', () => {
+        const r = extraire({ type: 'standards' });
+        const rangs = r.attributs.map(a => CLES.indexOf(a.parametre));
+        expect(rangs).toEqual([...rangs].sort((x, y) => x - y));
+        expect(rangs.every(i => i >= 0)).toBe(true);   // aucun paramètre inconnu
+    });
+
+    it('config vide → repli neutre : six paramètres, aucune exception, aucune valeur vide', () => {
         const r = extraire({});
-        expect(axes(r).slice(0, 3)).toEqual(AXES_ANCRES);
-        // jamais de valeur null/undefined : toujours une chaîne lisible
+        const vus = new Set(r.attributs.map(a => a.parametre));
+        expect(CLES.filter(c => !vus.has(c))).toEqual([]);
         expect(r.attributs.every(a => typeof a.valeur === 'string' && a.valeur.length > 0)).toBe(true);
+    });
+
+    it('AXES_ANCRES est retiré, et rien ne porte plus le champ « ancre »', () => {
+        expect(win.ConstructionAttributs.AXES_ANCRES).toBeUndefined();
+        expect(extraire({ type: 'standards' }).attributs.some(a => 'ancre' in a)).toBe(false);
     });
 });
 
@@ -79,11 +119,10 @@ describe('#326 R3 · SPÉCIFICATIONS', () => {
 
 describe('#326 R3 · SOMMATIVE', () => {
     const cfg = { type: 'sommative', configuration: { reprisesPermises: 'limitees' }, reglesSpeciales: ['remplacement', 'plafonnement'] };
-    it('pondération par production, reprises (select), règles spéciales', () => {
+    it('pondération par production, reprises (select)', () => {
         const r = extraire(cfg);
         expect(val(r, 'ponderation')).toMatch(/production/i);
         expect(val(r, 'reprises')).toBe('Limitées');
-        expect(val(r, 'reglesSpeciales')).toBe('remplacement, plafonnement');
     });
     it('toutes les évaluations comptent ; pas d\'échelle (SOM par design)', () => {
         const r = extraire(cfg);
@@ -119,5 +158,191 @@ describe('#326 R3 · DÉNOTATION', () => {
         expect(val(r, 'grille')).toBe('Rattachée');
         // la note reste un jugement (l'échelle ne calcule pas)
         expect(val(r, 'noteFinale')).toMatch(/[Jj]ugement/);
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 9 sept. 2026 — CE QUE CHAQUE PARAMÈTRE PORTE
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('six paramètres · rangement des axes existants', () => {
+    const std = {
+        type: 'standards',
+        echelle: { echelle_nom: 'IDME H26', niveaux: [{}, {}, {}, {}] },
+        portfolio: { methodeSelection: 'meilleurs', nombreARetenir: 4, minimumCompletion: 8 },
+        notesFinales: true
+    };
+    const spe = { type: 'specifications', seuilAcceptabilite: 100, modeleBundle: 'litterature' };
+    const den = { type: 'denotation', objectifs: ['A'], suggestion: { methode: 'mediane' } };
+
+    it('OBJET porte le nombre de productions et les composantes', () => {
+        const r = extraire(std);
+        expect(param(r, 'nbProductions')).toBe('objet');
+        expect(param(r, 'composantes')).toBe('objet');
+    });
+
+    it('RÉVISABILITÉ porte reprises, méthode de sélection et forfaits', () => {
+        expect(param(extraire(std), 'reprises')).toBe('revisabilite');
+        expect(param(extraire(std), 'methodeSelection')).toBe('revisabilite');
+        // Les modèles de forfaits sont des mécaniques de reprise, pas des disciplines.
+        expect(param(extraire(spe), 'forfaits')).toBe('revisabilite');
+    });
+
+    it('COMMUNICATION porte l\'échelle (les symboles) et la grille de rétroaction', () => {
+        expect(param(extraire(std), 'echelle')).toBe('communication');
+        expect(param(extraire(den), 'grille')).toBe('communication');
+    });
+
+    it('DÉTERMINATION porte pondération, note finale, seuil et suggestion', () => {
+        expect(param(extraire(std), 'ponderation')).toBe('determination');
+        expect(param(extraire(std), 'notesFinales')).toBe('determination');
+        expect(param(extraire(spe), 'seuilAcceptabilite')).toBe('determination');
+        expect(param(extraire(den), 'noteFinale')).toBe('determination');
+        expect(param(extraire(den), 'suggestion')).toBe('determination');
+    });
+});
+
+describe('six paramètres · ce qui n\'est PAS couvert s\'affiche', () => {
+    it.each(['standards', 'specifications', 'sommative', 'denotation'])(
+        'AGENTIVITÉ : une ligne unique « non couvert », toujours — famille %s', (type) => {
+            const r = extraire({ type });
+            expect(axesDe(r, 'agentivite')).toEqual(['agentivite']);
+            expect(val(r, 'agentivite')).toMatch(/[Nn]on couvert/);
+        });
+
+    it('GRANULARITÉ : la note du cours est déclarée non couverte, pour toute famille', () => {
+        ['standards', 'specifications', 'sommative', 'denotation'].forEach(type => {
+            expect(val(extraire({ type }), 'granulariteCours')).toMatch(/[Nn]on couvert/);
+        });
+    });
+
+    it('OBJET : l\'alignement sur des cibles est non couvert quand la note porte sur des instruments', () => {
+        ['standards', 'specifications', 'sommative'].forEach(type => {
+            expect(val(extraire({ type }), 'alignementCibles')).toMatch(/[Nn]on couvert/);
+        });
+        // Seule la dénotation rapporte la note à des cibles.
+        expect(val(extraire({ type: 'denotation' }), 'alignementCibles')).not.toMatch(/[Nn]on couvert/);
+    });
+
+    it('un « non couvert » ne se masque jamais : la ligne existe et porte du texte', () => {
+        const r = extraire({ type: 'sommative' });
+        ['agentivite', 'granulariteCours', 'alignementCibles'].forEach(axe => {
+            const ligne = r.attributs.find(a => a.axe === axe);
+            expect(ligne).toBeDefined();
+            expect(ligne.valeur.length).toBeGreaterThan(0);
+        });
+    });
+});
+
+describe('six paramètres · GRANULARITÉ extraite de l\'échelle', () => {
+    it('le nombre de niveaux devient une ligne à part, sous granularité', () => {
+        const r = extraire({ type: 'standards', echelle: { echelle_nom: 'IDME', niveaux: [{}, {}, {}, {}] } });
+        expect(param(r, 'granulariteEvaluation')).toBe('granularite');
+        expect(val(r, 'granulariteEvaluation')).toBe('4 niveaux');
+        // l'échelle reste sous communication, avec son nom (les symboles)
+        expect(val(r, 'echelle')).toBe('IDME (4 niveaux)');
+        expect(param(r, 'echelle')).toBe('communication');
+    });
+
+    it('sans échelle : la sommative note en pourcentage, les spécifications sont binaires', () => {
+        expect(val(extraire({ type: 'sommative' }), 'granulariteEvaluation')).toMatch(/pourcentage/i);
+        expect(val(extraire({ type: 'specifications' }), 'granulariteEvaluation')).toMatch(/[Bb]inaire/);
+    });
+});
+
+describe('six paramètres · les deux dérivations', () => {
+    it('« ce à quoi la note se rapporte » : cibles en dénotation, instruments ailleurs', () => {
+        expect(val(extraire({ type: 'denotation' }), 'objetNote')).toMatch(/[Cc]ibles/);
+        ['standards', 'specifications', 'sommative'].forEach(type => {
+            expect(val(extraire({ type }), 'objetNote')).toMatch(/instruments/i);
+        });
+    });
+
+    it('la dérivation se range sous COMMUNICATION et ne demande aucun champ neuf', () => {
+        const r = extraire({ type: 'standards' });   // config minimale, sans champ ajouté
+        expect(param(r, 'objetNote')).toBe('communication');
+        expect(val(r, 'objetNote')).not.toBe('—');
+    });
+
+    it('« temporalité de la note » pointe vers le réglage global, pas vers la pratique', () => {
+        const r = extraire({ type: 'standards' });
+        expect(param(r, 'temporaliteNote')).toBe('communication');
+        expect(val(r, 'temporaliteNote')).toMatch(/Réglages/);
+        expect(val(r, 'temporaliteNote')).toMatch(/Préférences/);
+    });
+
+    it('la temporalité est identique pour toutes les familles (c\'est un réglage global)', () => {
+        const vus = ['standards', 'specifications', 'sommative', 'denotation']
+            .map(type => val(extraire({ type }), 'temporaliteNote'));
+        expect(new Set(vus).size).toBe(1);
+    });
+});
+
+describe('six paramètres · règles spéciales éclatées (le cas tranché)', () => {
+    it('chaque règle cochée se range sous SON paramètre', () => {
+        const r = extraire({ type: 'sommative',
+            reglesSpeciales: ['remplacement', 'double_verrou', 'plafonnement', 'portfolio'] });
+        expect(param(r, 'regleRemplacement')).toBe('revisabilite');
+        expect(param(r, 'regleVerrou')).toBe('determination');
+        expect(param(r, 'reglePlafonnement')).toBe('determination');
+        expect(param(r, 'reglePortfolio')).toBe('objet');
+    });
+
+    it('une règle absente ne produit aucune ligne', () => {
+        const r = extraire({ type: 'sommative', reglesSpeciales: ['remplacement'] });
+        expect(axes(r)).toContain('regleRemplacement');
+        expect(axes(r)).not.toContain('regleVerrou');
+        expect(axes(r)).not.toContain('reglePortfolio');
+    });
+
+    it('aucune règle → une seule ligne « Aucune », sous détermination', () => {
+        const r = extraire({ type: 'sommative' });
+        expect(val(r, 'reglesSpeciales')).toBe('Aucune');
+        expect(param(r, 'reglesSpeciales')).toBe('determination');
+    });
+
+    it('« aucune » explicite vaut pas de règle', () => {
+        expect(val(extraire({ type: 'sommative', reglesSpeciales: ['aucune'] }), 'reglesSpeciales')).toBe('Aucune');
+    });
+
+    it('règles portées par un objet plutôt qu\'un tableau : même rangement', () => {
+        const r = extraire({ type: 'sommative', reglesSpeciales: { remplacement: true, plafonnement: true } });
+        expect(param(r, 'regleRemplacement')).toBe('revisabilite');
+        expect(param(r, 'reglePlafonnement')).toBe('determination');
+    });
+
+    it('une règle inconnue est rendue telle quelle plutôt que perdue', () => {
+        const r = extraire({ type: 'sommative', reglesSpeciales: ['bidule_inconnu'] });
+        const ligne = r.attributs.find(a => a.valeur === 'bidule_inconnu');
+        expect(ligne).toBeDefined();
+        expect(ligne.parametre).toBe('determination');
+    });
+});
+
+describe('six paramètres · posture et pureté (inchangées)', () => {
+    const toutes = ['standards', 'specifications', 'sommative', 'denotation']
+        .map(type => extraire({ type, reglesSpeciales: ['remplacement', 'portfolio'],
+            echelle: { echelle_nom: 'IDME', niveaux: [{}, {}, {}, {}] } }));
+
+    it('aucune valeur ne hiérarchise les familles ni ne juge la pratique', () => {
+        const interdits = /sévèr|généreu|indulgen|meilleure? pratique|plus juste|moins juste|recommandé/i;
+        toutes.forEach(r => r.attributs.forEach(a => {
+            expect(a.valeur).not.toMatch(interdits);
+            expect(a.libelle).not.toMatch(interdits);
+        }));
+    });
+
+    it('le module reste PUR : ni DOM, ni stockage dans son code', () => {
+        expect(CODE).not.toMatch(/document\.|localStorage|sessionStorage|indexedDB/);
+        // il ne LIT pas la préférence de note différée : il POINTE vers son emplacement
+        expect(CODE).not.toMatch(/noteDiffereeActive\s*\(/);
+        // ... et le commentaire qui l'explique est bien là, lui (témoin : la
+        // garde ci-dessus mesure le code, pas la documentation)
+        expect(SOURCE).toMatch(/noteDiffereeActive/);
+    });
+
+    it('MODELES_FORFAITS et ses valeurs persistées ne bougent pas', () => {
+        expect(win.ConstructionAttributs.MODELES_FORFAITS.map(m => m.value))
+            .toEqual(['sciences', 'simple', 'litterature', 'personnalise']);
     });
 });

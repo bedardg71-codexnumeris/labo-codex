@@ -15,6 +15,42 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.127.0 — LE COMPARATEUR PARLE EN SIX PARAMÈTRES** (build `BUILD_ID`).
+**Ce que tu verras** : dans Labo › Comparateur, le tableau n'aligne plus une suite de lignes à plat.
+Il est **rangé sous les six paramètres** que l'Aide présente depuis ce midi — objet, révisabilité,
+agentivité, communication, granularité, détermination. Les lignes n'ont pas changé de sens, aucun
+chiffre ne bouge : elles sont **regroupées**, pour qu'on voie sur quelle dimension deux pratiques
+diffèrent vraiment.
+▣ **Ce que l'application ne couvre pas est écrit noir sur blanc.** L'**agentivité** — les choix et la
+flexibilité laissés à l'étudiant·e — n'a aucun réglage dans Labo Codex, et le tableau l'affiche au
+lieu de laisser un blanc. Idem pour les **niveaux de la note du cours**, et pour l'**alignement de la
+note sur des cibles d'apprentissage** là où elle porte sur des instruments. Motif : un silence se
+lirait comme une lacune de TA pratique, alors que c'est une limite de l'outil.
+▣ **Deux lignes neuves, et rien à configurer.** «&nbsp;Ce à quoi la note se rapporte&nbsp;» dit si elle
+porte sur des cibles ou sur des instruments — dérivé de la famille, aucun champ ajouté.
+«&nbsp;Temporalité de la note&nbsp;» rappelle que la note différée est un **réglage global**, dans
+Réglages › Préférences : elle n'est pas un attribut de la pratique comparée, et le tableau ne fait pas
+semblant du contraire. Le réglage n'a pas bougé de place.
+▣ **Les règles spéciales d'une pratique sommative ne sont plus entassées sur une ligne** : le
+remplacement automatique sous la révisabilité, le verrou et le plafonnement sous la détermination, le
+portfolio sous l'objet. C'était le seul cas qui ne se rangeait pas sous un seul paramètre — tranché en
+éclatant, parce que garder la ligne unique aurait rangé trois règles sur quatre au mauvais endroit.
+▣ **Rien d'autre n'a bougé** : ni le moteur de calcul, ni l'assistant de configuration, ni une seule
+valeur par défaut, ni tes données. Les six paramètres **décrivent** une pratique, ils ne la règlent pas.
+**Vérifié comment** : **14 mutations volontaires du code, 14 rouges**, chaque fichier restauré et
+vérifié par empreinte sha256 — dont deux qui ont d'abord viré au VERT et ont révélé de vrais trous
+dans mes propres tests (le repli « Autres » recréait les six groupes dans le bon ordre et masquait la
+perte de l'ossature ; une clé `undefined` passait pour un groupe valide). Les deux gardes ont été
+resserrées, puis rougissent. Le tableau a été **ouvert et lu à l'écran** sur un banc WebKit jetable
+(pack de démonstration, profil éphémère — aucune de tes données touchée) : six en-têtes, 14 lignes,
+zéro erreur console. Suite complète : 5 683 essais verts.
+⛔ **Ce qui n'est PAS vérifié, et un défaut que ce lot rend plus visible** : les en-têtes du tableau
+**ne se distinguent pas** de ses lignes — les trois classes CSS du tableau du Comparateur ne sont
+définies nulle part (défaut préexistant, mesuré). Le tableau portait deux en-têtes indistincts, il en
+porte huit. Le regroupement se lit donc moins bien qu'il ne le devrait. **Hors du périmètre que tu as
+fixé** («&nbsp;rien d'autre&nbsp;») : non corrigé, inscrit (#808). Et rien n'a été vu sur Safari ni sur
+l'iPad.
+
 ↻ **1.126.1 — LE GLOSSAIRE DIT LA MÊME CHOSE QUE LE RESTE DE L'AIDE** (build `0909-1512`).
 **Ce que tu verras** : dans Consultation › Référence rapide, l'entrée **« PAN »** ne définit plus une
 pratique alternative de notation par « sélectionner automatiquement les N meilleurs artefacts ». Elle
