@@ -7,6 +7,100 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 37 — 8 SEPTEMBRE (APRÈS-MIDI) AU 9 SEPTEMBRE 2026 AU SOIR : 1.124.3 → 1.127.2, SEPT VERSIONS EN UNE JOURNÉE.
+     Périmètre couvert : `3913b4cb..c8b7fc5d`, vingt-trois commits, plusieurs sessions — dont DEUX à égalité dans le
+     même arbre tout l'après-midi du 9. Ce bloc rend l'état mesuré, pas la liste des commits ; `RELAIS.md` et
+     `OU-EN-EST-ON.md` portent le détail et restent la source.
+
+     ▣ #785/#542 — VERROUILLER UNE SÉANCE NON AFFICHÉE DÉTRUISAIT SES PRÉSENCES (1.124.4, 8 sept.). Le filet de
+       février 2026 « pour ne pas perdre les données saisies » retirait les présences de la date pour tous les élèves
+       du cours — liste venue de la BASE — puis ne réécrivait que ceux dont le champ existe DANS LE DOM. Tableau non
+       rendu ⇒ séance détruite en silence, et le cadenas posé par-dessus. Invariant du correctif, en une phrase :
+       **on ne retire QUE ce qu'on va réécrire** (`daReecrits`, bâti depuis le DOM avant le retrait, aux deux sites).
+     ⮕ Le banc qui accusait est devenu la sentinelle qui garde, et un SIXIÈME cas y a été ajouté : la contre-épreuve
+       du remède (un tableau rendu doit toujours écraser l'ancienne valeur). Sans lui, « ne retirer que ce qu'on va
+       réécrire » pouvait dégénérer en « ne rien retirer » — sauvegarde sans effet, cinq cas restés verts.
+     ⚠ Deux choses distinctes ont voyagé sous le numéro #542 : le rapport du 7 (deux instances, requalifié, sans
+       défaut de code) et ce défaut-ci. Les fiches les séparent désormais. Tarir n'est pas réparer : une séance déjà
+       détruite ne revient pas, et rien n'a été écrit dans les données de personne.
+
+     ▣ #790 — LE TRAVAIL DIAGNOSTIQUE REPÈRE SANS PESER (1.125.0, 8 sept.). Une production marquée « diagnostique »
+       ne pèse sur aucun calcul et peut lever un signalement dès un palier choisi. Exigence posée par Grégoire en
+       ouvrant la séance : « ce pourrait être une autre matière qui est diagnostiquée » — aucun seuil, aucune phrase,
+       aucun nom de service n'est écrit dans le code. Le déclencheur est une CASE SUR UN PALIER du gabarit, le texte
+       affiché un PARAMÈTRE du même gabarit. « CAF » est devenu « Mesure d'aide ».
+     ⮕ À NE PAS DÉFAIRE : `signalement-depistage.js` ne doit PAS filtrer les productions diagnostiques — ça viderait
+       le lot de son sens sans rien casser ailleurs.
+     ⚠ La baseline Playwright (`scripts/playwright-baseline.json`) déclarait ZÉRO échec connu depuis le 26 août alors
+       que trois specs étaient rouges sur `main` : elle bloquait tout push observable. Régénérée le 8, antériorité
+       PROUVÉE (suite rejouée dans un worktree détaché sur `3913b4cb` : mêmes trois rouges).
+
+     ▣ LE 9 AU MATIN — #543 PUIS CINQ RAPPORTS D'AFFILÉE (1.125.1, 1.125.2). #543 « la bibliothèque n'est pas
+       rafraîchie à l'import d'une grille » : elle l'était. Le défaut est GÉOMÉTRIQUE — la grille importée part en fin
+       de bibliothèque, 61e carte sur 61, à 8 548 px sous la zone visible pendant que la modale remonte en haut. Rien
+       ne bouge à l'écran, ce qui ne se distingue pas d'une panne. Remède : pointer vers la carte, et DIRE quand rien
+       n'est visible. Puis #794 (largeur du menu Actions), #795 (le 404 de Netlify — le code n'en est pas la cause,
+       mesuré ; ce qui est corrigé est le rechargement juste après une écriture), #796, #797, #798 (SSOT du mode).
+     ⚠ #797 A ÉTÉ FAUX AVANT D'ÊTRE JUSTE, et c'est Playwright qui l'a dit : `flex-direction: column` empilait les
+       dix codes en disposition BANDEAU — le défaut même que #774 avait corrigé le 6. Aucun sélecteur ne distingue
+       les deux dispositions ; la règle doit valoir pour les deux.
+
+     ▣ L'AIDE RÉÉCRITE EN TROIS TEMPS (1.126.0, 1.126.1, 1.127.2). D'abord la carte PAN, qui présentait LA PRATIQUE
+       PERSONNELLE de Grégoire (« les N meilleurs artefacts ») comme la définition de la famille ; puis le glossaire,
+       qui portait encore la même phrase — l'Aide se contredisait d'un onglet à l'autre ; enfin, le soir, le texte
+       d'accueil, qui affirmait « son code est ouvert » (le dépôt est privé depuis le 23 juin) et « tes données
+       restent en sécurité chez toi » (aucun chiffrement au repos n'est implémenté). Un paragraphe neuf « Où vont tes
+       données ? » remplace la promesse par ce qui est vrai, et la passerelle IA est assumée plutôt que seulement
+       niée : l'application n'en contient aucune, mais elle fournit des gabarits vides à confier à une IA.
+     ⮕ RIEN N'ANNONCE UNE RÉOUVERTURE DU DÉPÔT, même si c'est l'intention : une promesse dans un texte d'aide devient
+       une dette. La phrase reviendra quand l'historique aura été purgé.
+     ⚠ Mesuré au passage et NON traité : `mt-10`, `mt-5`, `alerte-info` ne sont définies nulle part (96 occurrences
+       mortes de `mt-10` dans `index.html` ; le vivant est `u-mt-10`).
+
+     ▣ LE COMPARATEUR PARLE EN SIX PARAMÈTRES (1.127.0), PUIS SE LIT (1.127.1). Le tableau range ses lignes sous les
+       six paramètres du rapport PAREA au lieu de trois « ancres » — aucune ligne ne change de sens, aucun chiffre ne
+       bouge. Un paramètre non couvert S'AFFICHE (agentivité, niveaux de la note du cours) : le silence se lirait
+       comme une lacune de la pratique de l'utilisateur alors que c'est une limite de l'outil.
+     ⮕ ET LE LOT A RENDU SON PROPRE APPORT ILLISIBLE : passer de deux en-têtes à huit a révélé que
+       `.comparateur-section-tete`, `.comparateur-ligne-constr` et `.comparateur-cellule-constr` n'étaient déclarées
+       dans AUCUNE feuille — seul le rendu natif du `<th>` les séparait. Corrigé à l'écran, pas sur plan : la
+       première version donnait un fond aux deux niveaux et la hiérarchie s'INVERSAIT en mode sombre.
+     ⚠ #809 : les libellés de règles sommatives vivaient dans TROIS tables, et deux avaient déjà divergé sans que
+       rien ne le signale — l'écran faisait cocher « Verrou sur une évaluation », le récapitulatif rendait « Verrou
+       d'évaluation ». Ce n'était pas de la dette inerte. Source unique posée, libellé de la SAISIE retenu.
+
+     ▣ LA CI ÉTAIT ROUGE SUR `main` DEPUIS 24 H, ET AUCUN DES QUATRE ESSAIS N'ACCUSAIT UN VRAI DÉFAUT (#540, #773 ;
+       zéro ligne de `js/` modifiée). Sous WebKit sans écran, `touchscreen.tap()` n'émet AUCUN `click` : les essais
+       mesuraient le harnais, pas le code.
+     ⮕⮕ LE VRAI CONSTAT EST LE VERT, PAS LE ROUGE. Deux essais « négatifs » — trop loin, une barre voisine ne vole
+       pas le toucher — attendaient que RIEN ne soit sélectionné, or rien ne l'était jamais : tolérance tactile
+       ENTIÈREMENT retirée, ils restaient VERTS. Ils n'attestaient rien depuis leur écriture. Un vert de cette sorte
+       coûte plus cher qu'un rouge : il se lit comme une garantie. Baseline ramenée de 3 à 0.
+
+     ▣ DEUX SESSIONS À ÉGALITÉ DANS LE MÊME ARBRE, TOUT L'APRÈS-MIDI DU 9 — ce qui a tenu. Worktree jetable pour
+       MESURER (les break-tests de l'autre rendent tout rouge et inattribuable) ; bump MANUEL de ses seuls jetons
+       `?v=` pour commettre sans emporter le lot non commité du voisin (`release.mjs` avait bumpé les six siens : ils
+       ont été restaurés un par un) ; UN SEUL `release.mjs` à la fin, dont l'intention se juge sur le lot COMBINÉ —
+       correctif + nouveauté = `minor` ; une seule entrée de changelog pour la mineure.
+     ⚠ Le compteur d'identifiants ne voit pas la collision : #807/#808 ont été pris deux fois et renumérotés en
+       #808/#809. Se parler à chaque étape est ce qui l'attrape.
+
+     ▣ LA PORTE TERRAIN #802 A ÉTÉ RELEVÉE LE SOIR MÊME : 14 rangées pour SEPT versions, 14 passées, 0 échec. C'est
+       le résultat des deux règles de tête, pas un oubli — aucune porte si une machine peut répondre ; préalable dû
+       seulement si un raté est irréversible. Motif de la brièveté, dans ses mots du 24 août : « Je suis complètement
+       découragé par les portes terrain nombreuses. » Il avait eu 24 portes d'une session et 35 d'une autre.
+     ⮕ TROIS DÉCISIONS RENDUES PAR GRÉGOIRE : la prose de l'Aide est retenue telle quelle · « Verrou sur une
+       évaluation » confirmé · **l'intention prime, la cible d'apprentissage** — le Comparateur s'alignera sur l'Aide
+       (#810), avec la réserve écrite que le moteur, lui, calcule toujours sur des artefacts. Aligner le seul libellé
+       remplacerait une contradiction visible par une contradiction cachée.
+
+     ▣ CE QUI RESTE DÛ AU 9 AU SOIR : #810 (le libellé du Comparateur, avec la question du moteur posée en même
+       temps) ; #795 jamais vu de bout en bout dans un vrai codex ; Safari non visité ; la grille de dépistage de
+       Grégoire à re-désigner UNE fois (la source est tarie, le stock ne l'est pas — personne n'écrit dans son codex
+       à sa place) ; et les quatre specs vertes au second essai signalées sans être traitées (#534).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 36 — 7 SEPTEMBRE (MIDI) AU 8 SEPTEMBRE 2026 : 1.124.0 → 1.124.3, ET #542 QUI N'ÉTAIT PAS UN BUG.
      Périmètre couvert : `6eed06a9..bebcbc76`, trente et un commits, plusieurs sessions et deux instances
      d'agent travaillant en parallèle sur le même dépôt. Ce bloc rend l'état mesuré, pas la liste des commits ;

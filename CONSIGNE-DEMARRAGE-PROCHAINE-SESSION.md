@@ -9,6 +9,12 @@
 >
 > ⚠ **Nom sans date, exprès.** La date d'écriture est en tête ; c'est elle qui fait foi.
 > ⛔ **Ce fichier ne porte que ce qui PÉRIME** : l'état mesuré, le mandat, ce qui est dû.
+>
+> ↻ **État mesuré remplacé le 9 septembre 2026 au soir par Claude Code**, à la demande de Grégoire,
+> après un rituel de début de session qui a trouvé ce fichier périmé de trois versions. Seul l'ÉTAT
+> MESURÉ a changé de main : **le mandat et la séquence restent à Cowork** (`PROTOCOLE.md`, « Qui écrit
+> quoi dans la consigne de démarrage »). Ce qui a périmé dans la séquence est signalé où il l'est,
+> **sans être réécrit**.
 
 ---
 
@@ -25,28 +31,44 @@
 
 Puis le rituel : skill `debut-de-session-labo-codex`.
 
+⚠ **Mesuré le 9 septembre au soir — deux entrées de cette liste ont périmé.** Le point 2 annonce une
+tête d'`OU-EN-EST-ON.md` à `1.124.3` : elle est à **`1.127.2`**. Le point 3 (`CONSIGNE-SUIVANTE-menage-
+documentaire.md`) est **livré** — le bloc `SESSION.md` manquant a été écrit le 8 (`f5334e86`), et la
+branche `claude/consigne-du-jour-wybfs0` **existe toujours sur `origin`**, sa suppression revenant à
+l'instance qui l'a poussée. Le point 4 renvoie à la consigne du dépistage du français : elle a été
+**archivée le 9 au soir sans avoir été exécutée**, remplacée par la consigne du jour du 9 à 19 h 05
+(le texte d'accueil de l'Aide), elle-même **exécutée et livrée en 1.127.2**. Il n'y a donc, ce soir,
+**aucune consigne du jour en attente** : la suivante revient à Cowork.
+
 ---
 
-## ÉTAT MESURÉ — 8 SEPTEMBRE 2026, DÉBUT D'APRÈS-MIDI
+## ÉTAT MESURÉ — 9 SEPTEMBRE 2026, 19 H 30 (TORONTO)
 
-▣ **Ce qui suit est la mesure de COWORK, en lecture seule.** La règle 4 veut que l'état qui fait foi
-soit celui que Claude Code écrit lui-même dans `SESSION.md` — **et c'est justement ce qui manque** :
-son dernier bloc s'arrête à `1.123.12`, trois versions en arrière. Le combler est le temps 1 du
-ménage. **Jusque-là, traite ce qui suit comme une indication, pas comme la mesure de référence.**
+▣ **Mesure de CLAUDE CODE, dans l'arbre, chaque ligne avec la commande qui la produit.** Elle remplace
+celle du 8 septembre, périmée de trois versions mineures. ⚠ Un état mesuré vieillit en heures : sept
+versions sont sorties le 9. **Remesure, ne recopie pas.**
 
-- **`main` = `b8ccd67b`**, version `1.124.3`, build `0907-1325` (`git log --oneline -1`,
-  `cat version.json`).
-- **`origin` non mesurable depuis le poste de Cowork** : `git fetch` échoue sur « Host key
-  verification failed ». L'égalité `main` = `origin/main` **n'est pas vérifiée** ici.
-- **Arbre** : `plans de travail/CONSIGNE-DU-JOUR.md` et `plans de travail/00-CADRAGES-OUVERTS.md`
-  modifiés, non commités — **fichiers de Cowork, à commettre tels quels** avec le premier commit.
-  Non suivis, décision de Grégoire toujours en attente : `Retours des testeurs/jean-françois/`,
-  `ignorés/`, `docs/projet de développement/`, `Modèle de consigne de démarrage à froid.txt`,
-  `plans de travail/CADRAGE-2026-09-07-depistage-du-francais-semaine-1.md`,
-  `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-06-six-correctifs-sous-onglets.md`,
-  `scripts/diagnostic785presencesdeuxinstances.js`.
-- **`RELAIS.md`, `BACKLOG.md` et `OU-EN-EST-ON.md` sont à jour** (constat de Claude Code, 7 au soir).
-- **Suite de tests : non exécutée par Cowork.** Aucun verdict à reprendre d'ici.
+- **`main` = `c8b7fc5d`**, version `1.127.2`, build `0909-1912` (`git log --oneline -1`,
+  `cat version.json`). Sept livraisons le 9 : `1.125.1`, `1.125.2`, `1.126.0`, `1.126.1`, `1.127.0`,
+  `1.127.1`, `1.127.2`.
+- **`origin/main` = `main`** après le push du soir (`git fetch && git rev-list --count origin/main..HEAD`
+  rend `0` ; témoin : le même compte rendait `1` avant le push, un commit de porte terrain attendait
+  depuis 18 h 52).
+- **Arbre propre** : aucun fichier modifié, **aucun fichier non suivi** (`git status --short -uall` ne
+  rend rien). La liste des non-suivis de la version du 8 est donc entièrement épuisée. `_to_delete/`
+  existe toujours, **douze fichiers**, mais il est dans `.gitignore` (l. 134) : il ne remonte plus au
+  statut, il attend toujours le geste de Grégoire.
+- **Tests** : Vitest **518 fichiers / 5703 essais, 0 échec** (`cd tests && npm run test:unit`) ; verdict
+  Playwright local pris sur le SHA poussé, baseline des rougeurs connues **à 0** depuis le 9 en fin
+  d'après-midi (elle déclarait faussement zéro depuis le 26 août, corrigée le 8, puis vidée pour de
+  vrai quand les quatre essais menteurs ont été réparés).
+- **`RELAIS.md`, `SESSION.md` et `OU-EN-EST-ON.md` sont à jour au 9 au soir** — les trois ont été
+  remis à niveau ce soir-là ; `SESSION.md` portait **vingt-trois commits sans trace** (bloc SESSION 37).
+- **Une branche vivante sur `origin`** : `claude/consigne-du-jour-wybfs0`, absorbée dans `main` mais non
+  supprimée (sa suppression revient à l'instance qui l'a poussée).
+- ⚠ **`.git/` porte treize verrous résiduels renommés depuis le 27 août**, et un `HEAD.lock` vide daté
+  de 18 h 52 a bloqué un commit le 9 au soir. Défaut récurrent, jamais traité : si un commit échoue sur
+  « Unable to create … .lock », vérifier l'horodatage et l'absence de processus git avant de l'écarter.
 
 ### Le retour testeur du 7 septembre : ce n'était pas un bug
 
@@ -69,6 +91,12 @@ l'écran vise maintenant le site web, pas le fichier local.
 ⚠ Le diagnostic qui a établi tout ceci est `scripts/diagnostic785presencesdeuxinstances.js`, **non
 suivi par git au 8 septembre**. En lecture seule, sans donnée personnelle en sortie. À commettre.
 
+↻ **Mesuré le 9 septembre au soir : ce script n'existe plus.** Il n'est ni dans l'arbre, ni dans
+l'historique (`git log -- scripts/diagnostic785presencesdeuxinstances.js` rend vide ; témoin : la même
+commande sur un fichier voisin rend ses commits). Il a été supprimé sans être commis. **La conclusion,
+elle, tient** — elle est écrite ci-dessus et dans `SUIVI-BUGS.md` ; c'est la preuve rejouable qui est
+perdue. Si la question des deux origines revient, le diagnostic est à réécrire.
+
 ---
 
 ## LE MANDAT — deux fichiers, dans cet ordre
@@ -85,6 +113,17 @@ recommandée » dès le palier « Risqué ». **Quatre portes à fermer**, dont 
 **Si Grégoire veut autre chose** : un retour de testeur passe avant (`CLAUDE.md`, priorité absolue).
 Sinon, les cadrages ouverts sont dans `plans de travail/00-CADRAGES-OUVERTS.md` — aucun n'est une
 consigne ; **Cowork en écrit une avant qu'on y touche.**
+
+↻ **ÉTAT DE CE MANDAT AU 9 SEPTEMBRE AU SOIR — fait mesuré, le mandat suivant reste à Cowork.**
+Le **fichier 1 est livré** : le bloc `SESSION.md` manquant a été écrit le 8 (`f5334e86`), et la branche
+`claude/consigne-du-jour-wybfs0` n'a pas été supprimée — décision assumée, elle avait été poussée le
+jour même par une autre instance possiblement encore au travail dessus. Le **fichier 2 n'a jamais été
+exécuté** : la consigne du dépistage du français a été archivée le 9 au soir
+(`plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-07-depistage-francais-semaine-1.md`) sur une
+décision de Grégoire, au profit du texte d'accueil de l'Aide — livré en `1.127.2`.
+⮕ **Il n'y a aucune consigne du jour en attente ce soir.** Ce que le dépistage du français prévoyait
+n'est pas perdu : le cadrage vit dans `plans de travail/CADRAGE-2026-09-07-depistage-du-francais-semaine-1.md`,
+et le travail diagnostique lui-même est livré depuis `1.125.0`.
 
 ---
 

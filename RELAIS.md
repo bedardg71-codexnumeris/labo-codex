@@ -7,6 +7,81 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 9 SEPT. 2026, SOIR : LE TEXTE D'ACCUEIL DE L'AIDE (1.127.2), ET LES TROIS RELAIS REMIS À JOUR
+
+> ✅ **`main` à 1.127.2, build `0909-1912`. Vitest 518 fichiers / 5703 essais. Tout est poussé —
+> aucun travail en attente sur une branche.**
+>
+> **CE QUI A ÉTÉ FAIT (1.127.2)** : le texte « Qu'est-ce que Labo Codex ? » de l'Aide, sur consigne
+> de Cowork écrite le 9 à 19 h 05. Deux affirmations ne tenaient plus. **« Son code est ouvert »** —
+> le dépôt est privé depuis le 23 juin (`DEPLOY.md` §1.2) ; un utilisateur qui vérifie trouvait une
+> affirmation fausse. **« Tes données restent en sécurité chez toi »** — il n'y a aucun chiffrement
+> au repos (`docs/securite/PROTECTION-DONNEES-CHIFFREMENT-REPOS.md` décrit le plan, rien n'est
+> implémenté) ; les données restent *chez* l'enseignant, ce qui est vrai, mais *en sécurité*
+> promettait une protection que l'application n'assure pas.
+>
+> Trois paragraphes réécrits, texte seul, aucune structure ni script touché : la passerelle IA est
+> **assumée** plutôt que seulement niée (« Copier le prompt pour IA »,
+> `bilan-reflexif-import-export-texte.js:734`, et `telechargerModeleCartouche`,
+> `cartouches.js:2691` — un utilisateur qui trouve ces boutons ne doit pas croire que le texte lui a
+> menti) ; un paragraphe neuf **« Où vont tes données ? »** dit le local, le transport par fichier,
+> et le partage **signé + licence CC** (le refus d'un paquet non signé est bloquant et livré,
+> `partage-import.js:652-661`) ; « commun à construire » dit ce qui est vrai aujourd'hui — gratuit,
+> local, développement guidé par une communauté de pratique.
+>
+> ⛔ **NE PAS ÉCRIRE « LE CODE SERA ROUVERT »**, même si c'est l'intention de Grégoire. Une promesse
+> dans un texte d'aide devient une dette ; la phrase reviendra quand l'historique du dépôt aura été
+> purgé. Consigne explicite du 9 septembre.
+>
+> **VÉRIFIÉ COMMENT** : `grep -c "code est ouvert"` = 0 et `grep -c "en s&eacute;curit&eacute; chez
+> toi"` = 0, avec leur témoin (les mêmes motifs rendant non-zéro avant le lot) ; le bloc **lu à
+> l'écran**, carte dépliée, sur un banc WebKit jetable servi en local — aucune entité cassée, aucun
+> accent en clair, insécables tenus avant les « ? » et les « : », demi-cadratins conformes. C'est un
+> texte : la preuve est la lecture.
+>
+> ⚠ **UNE ENTORSE ASSUMÉE À LA RÈGLE DU CHANGELOG** : l'entrée 1.127 porte désormais NEUF items, un
+> de plus que le plafond de huit. Motif : une affirmation fausse sur la confidentialité corrigée
+> mérite d'être annoncée aux testeurs. Signalé à Grégoire, qui peut faire retirer l'item.
+
+### LES TROIS FICHIERS DE RELAIS ÉTAIENT PÉRIMÉS — CE QUI A ÉTÉ REMIS À JOUR
+
+Constat du rituel de début de session du 9 au soir, corrigé dans la foulée **à la demande de
+Grégoire**. Aucun code touché.
+
+| Fichier | Ce qu'il affirmait | Mesuré le 9 au soir |
+|---|---|---|
+| `RELAIS.md` | 1.125.2, Vitest 516/5644, « tout est poussé — aucun travail en attente » | 1.127.2, 518/5703, et **un commit local attendait depuis 18 h 52** |
+| `SESSION.md` | dernier bloc = SESSION 36, s'arrête à 1.124.3 | **vingt-trois commits sans trace**, de 1.124.4 à 1.127.2 — bloc SESSION 37 écrit |
+| `CONSIGNE-DEMARRAGE-…` | `main = b8ccd67b`, 1.124.3, mandat = la consigne du dépistage du français | la consigne a été **archivée le 9 au soir** ; état mesuré réécrit, mandat laissé à Cowork |
+
+⮕ **C'EST LA TROISIÈME FOIS QUE `RELAIS.md` DIT « TOUT EST POUSSÉ » ALORS QUE NON.** Le fichier
+n'est juste qu'au moment où on l'écrit, et il est écrit AVANT le push — c'est l'ordre imposé par le
+hook (le jeton du verdict Playwright porte sur le SHA exact poussé, donc un commit de relais posé
+après le verdict le périme). La phrase à écrire n'est donc pas « tout est poussé » mais **ce qui
+reste à pousser au moment de l'écriture** ; la session qui lit doit de toute façon remesurer par
+`git rev-list --count origin/main..HEAD`, jamais croire cette ligne.
+
+### CE QUI RESTE DÛ AU 9 AU SOIR
+
+- **#810** — le Comparateur dit « Artefacts (instruments d'évaluation) », l'Aide dit « cibles
+  d'apprentissage ». Tranché par Grégoire à la porte terrain : *« C'est l'intention qui doit primer
+  (la cible d'apprentissage). »* ⚠ Le moteur, lui, calcule toujours sur des artefacts : aligner le
+  seul libellé remplacerait une contradiction visible par une contradiction cachée. La question du
+  moteur se pose EN MÊME TEMPS que le libellé.
+- **La grille de dépistage de Grégoire** reste à re-désigner UNE fois : la source est tarie (#806),
+  le stock ne l'est pas, et personne n'écrit dans son codex à sa place.
+- **Safari n'a pas été visité** de la journée, et **#795 n'a jamais été vu de bout en bout dans un
+  vrai codex**. Sept versions sont sorties le 9.
+- **Quatre specs vertes au second essai** (`cartouche-enregistrer-reste-ouverte`,
+  `evaluation-grille-sans-echelle`, `palettes-drag-rendu`, `reparation-cartouches-orphelines`),
+  signalées sans être traitées (#534).
+- ⚠ **`.git/` accumule des verrous résiduels renommés depuis le 27 août** — treize au 9 septembre,
+  et un `HEAD.lock` vide daté de 18 h 52 a bloqué le commit de 1.127.2 ce soir-là. Le signet de
+  `SESSION.md` le dit depuis juin : *« c'est un défaut RÉCURRENT du dépôt, pas une malchance. À
+  traiter comme tel plutôt qu'à re-nettoyer chaque fois. »* Toujours pas traité.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 9 SEPT. 2026, APRÈS-MIDI : CINQ RAPPORTS TESTEURS (1.125.2)
 
 > ✅ **`main` à jour, 1.125.2, build `0909-1356`. Vitest 516 fichiers / 5644 essais. Tout est

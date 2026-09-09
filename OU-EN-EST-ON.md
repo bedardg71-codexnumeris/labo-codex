@@ -24,6 +24,31 @@ reste — la prose de l'Aide, la fiche production, les cinq correctifs du matin 
 si ça cloche, tu le diras en travaillant. Consigne de publication de l'artefact pour Cowork :
 `plans de travail/CONSIGNE-COWORK-artefact-porte-802.md`.
 
+↻ **1.127.2 — LE TEXTE D'ACCUEIL DE L'AIDE DIT VRAI SUR TES DONNÉES** (build `0909-1912`).
+**Ce que tu verras** : dans Aide › « Qu'est-ce que Labo Codex ? », la carte de présentation ne promet
+plus deux choses que l'application ne tient pas. Elle disait « **son code est ouvert** » — le dépôt est
+privé depuis le 23 juin — et « tes données restent **en sécurité** chez toi » — il n'y a aucun
+chiffrement au repos ; elles restent *chez toi*, ce qui est vrai, mais rien ne les *protège* sur
+l'appareil. Un collègue qui vérifiait tombait sur une affirmation fausse.
+▣ **Un paragraphe neuf répond à la question qu'on te posera** : « Où vont tes données ? Nulle part. »
+Le navigateur, ton appareil, aucun serveur ; le transport d'un appareil à l'autre par un fichier que tu
+déplaces toi-même, sans nuage. Et ce que tu partages avec un collègue — grille, échelle, cartouche,
+pratique — est **signé** et porte une **licence Creative Commons** : l'application refuse d'importer un
+fichier non signé ou modifié en chemin.
+▣ **La passerelle vers une IA est écrite, au lieu d'être seulement niée.** Il n'y a toujours aucune IA
+dans l'application, et aucune décision n'est prise à ta place. Mais les boutons « Copier le prompt pour
+IA » et le modèle de cartouche vide existent : le texte dit maintenant que ce qui sort d'ici est un
+**gabarit**, jamais les données de tes élèves. Quelqu'un qui trouve ces boutons ne croira pas que le
+texte lui a menti.
+▣ **Ce qui n'a pas bougé** : les trois blocs « À quoi sert ce labo ? », « Qu'est-ce que ça change ? » et
+« Qu'est-ce que ça demande ? », mot pour mot. Aucun calcul, aucune donnée, aucun réglage.
+⛔ **Rien n'annonce que le code sera rouvert**, même si c'est ton intention : une promesse dans un texte
+d'aide devient une dette. La phrase reviendra quand l'historique du dépôt aura été purgé.
+**Vérifié comment** : les deux formules fautives ne sont plus dans `index.html` (recherche à zéro, avec
+son témoin) ; le bloc **lu à l'écran**, carte dépliée, sur un banc jetable — accents, espaces
+insécables et tirets tiennent. C'est un texte : la preuve est la lecture, et elle a été faite.
+Suite complète : 5 703 essais verts (518 fichiers).
+
 ↻ **1.127.1 — LE TABLEAU DU COMPARATEUR SE LIT D'UN COUP D'ŒIL** (build `0909-1745`).
 **Ce que tu verras** : dans Labo › Comparateur, les **titres de section**, les **six paramètres** et
 les **lignes** ont enfin trois traitements distincts. Ce midi, le tableau est passé de deux en-têtes à
