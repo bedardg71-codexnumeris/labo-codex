@@ -15,6 +15,22 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.126.1 — LE GLOSSAIRE DIT LA MÊME CHOSE QUE LE RESTE DE L'AIDE** (build `0909-1512`).
+**Ce que tu verras** : dans Consultation › Référence rapide, l'entrée **« PAN »** ne définit plus une
+pratique alternative de notation par « sélectionner automatiquement les N meilleurs artefacts ». Elle
+reprend les mots de la carte d'Introduction — droit à l'erreur, traces récentes ou représentatives —
+et nomme les trois familles. **« Performance »** et **« Portfolio »** suivent&nbsp;: « les N meilleurs »
+y est présenté comme **une** méthode de sélection parmi celles que tu peux choisir, pas comme la règle.
+Et sur la carte de l'indice P, l'exemple ne dit plus « en PAN – Standards, P = moyenne des N meilleurs
+artefacts (IDME) » — ni la méthode ni l'échelle ne sont des attributs de la famille.
+▣ **Pourquoi maintenant** : c'était la contradiction laissée ouverte par 1.126.0 ce midi. L'Aide disait
+deux choses différentes selon l'onglet où tu étais.
+**Vérifié comment** : les quatre entrées relues à l'écran dans ton Chrome, app servie en local&nbsp;; la
+recherche de l'Aide retrouve « dénotation » dans quatre cartes et « méthode de sélection » dans trois.
+**Mesuré au passage** : le second glossaire (« 48 termes du parcours ») était déjà juste — il dit
+« regroupe les pratiques STD, SPE et DEN ». Rien à y changer. Structure HTML identique avant/après.
+⛔ **Ce qui n'est PAS vérifié** : ni Safari ni l'iPad. Toujours dû avec la porte terrain (#802).
+
 ↻ **1.126.0 — L'AIDE NE PRÉSENTE PLUS TA PRATIQUE COMME LA DÉFINITION** (build `0909-1452`).
 **Ce que tu verras** : dans l'Aide, la carte sur les pratiques alternatives de notation s'appelle
 désormais **« Les pratiques alternatives de notation (PAN) »**, au pluriel. Elle ne dit plus qu'une PAN
