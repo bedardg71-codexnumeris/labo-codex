@@ -22053,6 +22053,60 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
+/* #808 (9 sept. 2026) — LES TROIS NIVEAUX DU TABLEAU SE DISTINGUENT.
+   Le tableau porte SECTION > PARAMÈTRE > LIGNE. Les trois classes existaient
+   dans le HTML généré depuis longtemps mais n'étaient déclarées NULLE PART :
+   seul le rendu natif du <th> les séparait. Passer de deux en-têtes à huit (les
+   six paramètres du rapport PAREA) rendait le tableau illisible — le
+   regroupement est l'apport, il devait se voir.
+
+   ⚠ PREMIÈRE VERSION CORRIGÉE À L'ÉCRAN : les deux niveaux portaient un fond,
+   et en mode SOMBRE la hiérarchie s'inversait — `--surface-section` (20,36,40)
+   est plus proche du fond de page que `--surface-element` (36,72,88), donc les
+   six bandes de paramètres écrasaient l'en-tête de section. Mesuré, pas
+   supposé. Corrigé en retirant le fond du niveau 2 : six bandes pleines sur un
+   tableau déjà dense, c'était lourd de toute façon. La section porte le fond,
+   le paramètre est un intertitre — filet, couleur d'accent, respiration. */
+.comparateur-section-tete th {
+    background: var(--surface-element, rgba(106, 172, 184, 0.14));
+    color: var(--texte-principal, #d0e0e4);
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-top: 2px solid var(--accent-primaire, #6aacb8);
+    border-bottom: 1px solid var(--bordure-moyenne, rgba(106, 172, 184, 0.35));
+}
+.comparateur-parametre-tete th {
+    background: transparent;
+    color: var(--accent-primaire, #6aacb8);
+    font-weight: 600;
+    font-size: 0.88rem;
+    border-top: 1px solid var(--bordure-moyenne, rgba(106, 172, 184, 0.35));
+    border-bottom: none;
+    padding-top: 18px;
+    padding-bottom: 6px;
+}
+/* La ligne appartient au paramètre au-dessus d'elle : un retrait le dit sans
+   ajouter un mot. Le retrait vit sur la cellule de gauche seulement — la
+   valeur, elle, reste alignée d'une colonne à l'autre. */
+.comparateur-ligne-constr .comparateur-col-profil {
+    padding-left: 26px;
+    font-weight: 500;
+}
+
+/* Mode clair : mêmes rôles, contrastes tenus (le sarcelle pâle disparaîtrait
+   sur fond blanc). */
+.mode-clair .comparateur-section-tete th {
+    background: var(--bleu-pale, #e8f2fd);
+    color: var(--texte-principal, #1b3a4b);
+    border-top-color: var(--bleu-moyen, #9dc3e6);
+    border-bottom-color: var(--bleu-moyen, #9dc3e6);
+}
+.mode-clair .comparateur-parametre-tete th {
+    border-top-color: var(--bleu-moyen, #9dc3e6);
+}
+
 /* E1 — « ce que cette note mesure » (une ligne descriptive par famille). */
 .comparateur-col-e1 {
     display: block;

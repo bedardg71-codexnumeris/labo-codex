@@ -40,13 +40,42 @@ describe('#326 R4b · lignes de construction (R3) + résultats', () => {
         expect(src).toMatch(/ConstructionAttributs\.PARAMETRES/);
         expect(src).not.toMatch(/ConstructionAttributs\.AXES_ANCRES/);
     });
-    it('chaque paramètre ouvre son groupe de lignes, avec le gabarit d\'en-tête existant', () => {
+    it('chaque paramètre ouvre son groupe de lignes, à son propre niveau visuel', () => {
         const i = src.indexOf('groupes.forEach(');
         expect(i).toBeGreaterThan(-1);
-        const bloc = src.slice(i, i + 700);
-        expect(bloc).toMatch(/comparateur-section-tete/);   // aucune classe neuve
+        const bloc = src.slice(i, i + 800);
+        // #808 : TROIS niveaux — section > paramètre > ligne. Le paramètre porte
+        // sa propre classe, sinon il se confond avec l'en-tête de section.
+        expect(bloc).toMatch(/comparateur-parametre-tete/);
+        expect(bloc).not.toMatch(/comparateur-section-tete/);
         expect(bloc).toMatch(/groupe\.libelle/);
         expect(bloc).toMatch(/groupe\.axes\.forEach\(/);
+    });
+    it('#808 · les trois niveaux du tableau sont DÉCLARÉS, dans les deux modes', () => {
+        const css = readFileSync(path.resolve(__dirname, '..', '..', 'styles.css'), 'utf8');
+        // Le défaut d'origine : ces classes vivaient dans le HTML sans exister
+        // en CSS. Une déclaration, pas une simple mention.
+        // ⚠ Ancrés en DÉBUT DE LIGNE : sans le `^`, la surcharge
+        // `.mode-clair .comparateur-parametre-tete th` contient la même
+        // sous-chaîne et la garde restait verte alors que la règle de base
+        // avait disparu (mesuré au break-test).
+        expect(css).toMatch(/^\.comparateur-section-tete th\s*\{/m);
+        expect(css).toMatch(/^\.comparateur-parametre-tete th\s*\{/m);
+        // ⚠ Mesuré au break-test : exiger la RÈGLE ne suffit pas — retirer son
+        // `padding-left` laissait l'essai vert alors que le retrait, qui dit
+        // l'appartenance de la ligne à son paramètre, avait disparu.
+        expect(css).toMatch(/\.comparateur-ligne-constr \.comparateur-col-profil\s*\{[^}]*padding-left:\s*\d+px/);
+        expect(css).toMatch(/\.mode-clair \.comparateur-section-tete th\s*\{/);
+        // Et aucune couleur en dur : la palette seulement (skill design-interface §2).
+        // ⚠ Commentaires retirés d'abord — « #808 » ressemble à un hex court et
+        // faisait rougir la garde sur sa propre documentation (mesuré).
+        const i0 = css.indexOf('/* #808 (9 sept. 2026)');   // au DÉLIMITEUR, sinon le commentaire n'est pas retirable
+        const blocBrut = css.slice(i0, css.indexOf('/* E1 —', i0));
+        const decls = blocBrut.replace(/\/\*[\s\S]*?\*\//g, '');
+        const horsFallback = decls.split('\n').filter((l) => /#[0-9a-f]{3,6}\b/i.test(l) && !/var\(--/.test(l));
+        expect(horsFallback, 'couleur en dur hors fallback : ' + horsFallback.join(' | ')).toEqual([]);
+        // témoin : la garde regarde bien des déclarations qui portent des couleurs
+        expect(decls).toMatch(/var\(--[a-z-]+, ?#[0-9a-f]{3,6}\)/i);
     });
     it('axe absent d\'une famille → « s.o. » dans la cellule', () => {
         const i = src.indexOf('function _rendreMatrice(');

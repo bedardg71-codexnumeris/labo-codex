@@ -58,6 +58,19 @@ const TYPE_BADGES = {
  * mais n'est pas encore consommée par le moteur de calcul — écart tracé au backlog.
  * @param {string} defaut - 'illimite' | 'limite' | 'non'
  */
+/**
+ * Le libellé d'une règle sommative — #809 (9 sept. 2026). SOURCE UNIQUE dans
+ * `construction-attributs.js`, chargé avant ce fichier. Le repli rend la clé
+ * brute plutôt qu'un trou, et n'invente aucun mot : si le module manquait, on
+ * verrait « double_verrou », ce qui se remarque, plutôt qu'un libellé fantôme
+ * qui divergerait en silence — c'est exactement ce qui était arrivé.
+ */
+function _libelleRegle(cle) {
+    return (window.ConstructionAttributs && window.ConstructionAttributs.libelleRegleSommative)
+        ? window.ConstructionAttributs.libelleRegleSommative(cle)
+        : cle;
+}
+
 function champsReprises(defaut) {
     return [
         {
@@ -468,22 +481,22 @@ const ETAPES_WIZARD = {
                 options: [
                     {
                         value: 'remplacement',
-                        label: 'Remplacement automatique',
+                        label: _libelleRegle('remplacement'),
                         description: 'L\'évaluation finale remplace la mi-session si elle est meilleure — une forme de reprise sans pénalité, un pilier que tu pratiques peut-être déjà.'
                     },
                     {
                         value: 'double_verrou',
-                        label: 'Verrou sur une évaluation',
+                        label: _libelleRegle('double_verrou'),
                         description: 'Une évaluation spécifique (ex: la finale) doit être réussie pour passer le cours.'
                     },
                     {
                         value: 'portfolio',
-                        label: 'Portfolio de progression',
+                        label: _libelleRegle('portfolio'),
                         description: 'Un portfolio d\'artefacts contribue à la note, avec progression prise en compte.'
                     },
                     {
                         value: 'plafonnement',
-                        label: 'Plafonnement conditionnel',
+                        label: _libelleRegle('plafonnement'),
                         description: 'La note est plafonnée si certaines conditions ne sont pas remplies.'
                     },
                     {
@@ -2008,13 +2021,16 @@ function genererRecapitulatif() {
         html += `<p class="wizard-v2-recap-diagnostic-meta">Variante\u00a0: <strong>${varianteLabels[classification.variante] || classification.variante}</strong></p>`;
     }
     if (classification.regles && classification.regles.length > 0 && !classification.regles.includes('aucune')) {
-        const reglesLabels = {
-            'remplacement': 'Remplacement automatique',
-            'double_verrou': 'Verrou d\'évaluation',
-            'portfolio': 'Portfolio de progression',
-            'plafonnement': 'Plafonnement conditionnel'
-        };
-        const reglesTexte = classification.regles.map(rl => reglesLabels[rl] || rl).join(', ');
+        // #809 (9 sept. 2026) — SOURCE UNIQUE. Ces quatre libellés vivaient ici
+        // ET dans `construction-attributs.js` : deux tables identiques, deux
+        // occasions de diverger. Ils vivent désormais là-bas seulement, comme
+        // MODELES_FORFAITS et pour la même raison (module PUR, chargé avant
+        // celui-ci). Le repli rend la clé brute — jamais un trou.
+        const libelleRegle = (rl) => (window.ConstructionAttributs
+            && window.ConstructionAttributs.libelleRegleSommative)
+                ? window.ConstructionAttributs.libelleRegleSommative(rl)
+                : rl;
+        const reglesTexte = classification.regles.map(libelleRegle).join(', ');
         html += `<p class="wizard-v2-recap-diagnostic-meta">Règles\u00a0: ${reglesTexte}</p>`;
     }
     html += '</div>';

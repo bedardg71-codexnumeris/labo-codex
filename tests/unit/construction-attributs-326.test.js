@@ -346,3 +346,61 @@ describe('six paramètres · posture et pureté (inchangées)', () => {
             .toEqual(['sciences', 'simple', 'litterature', 'personnalise']);
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #809 (9 sept. 2026) — LES LIBELLÉS DES RÈGLES SOMMATIVES ONT UNE SOURCE UNIQUE
+// Ils vivaient dans trois tables : les options de l'assistant, son récapitulatif
+// et ce module. Et deux d'entre elles AVAIENT DÉJÀ DIVERGÉ.
+// ─────────────────────────────────────────────────────────────────────────────
+const SRC_WIZARD = readFileSync(path.join(RACINE, 'js/wizard-pratique-v2.js'), 'utf8');
+const CODE_WIZARD = SRC_WIZARD.replace(/\/\*[\s\S]*?\*\//g, '')
+    .split('\n').map((l) => l.replace(/\/\/.*$/, '')).join('\n');
+
+describe('#809 · une seule table de libellés de règles sommatives', () => {
+    const { libelleRegleSommative } = win.ConstructionAttributs;
+
+    it('le module expose le libellé, et rend la clé brute si elle est inconnue', () => {
+        expect(libelleRegleSommative('remplacement')).toBe('Remplacement automatique');
+        expect(libelleRegleSommative('portfolio')).toBe('Portfolio de progression');
+        expect(libelleRegleSommative('plafonnement')).toBe('Plafonnement conditionnel');
+        // mieux un mot brut qu'un trou
+        expect(libelleRegleSommative('bidule_inconnu')).toBe('bidule_inconnu');
+        expect(libelleRegleSommative(null)).toBe('');
+    });
+
+    it('LA DIVERGENCE MESURÉE : le libellé retenu est celui de l\'écran de saisie', () => {
+        // L'assistant faisait cocher « Verrou sur une évaluation » et son
+        // récapitulatif rendait « Verrou d'évaluation ». Une case, deux mots.
+        expect(libelleRegleSommative('double_verrou')).toBe('Verrou sur une évaluation');
+    });
+
+    it('le wizard ne réécrit AUCUN de ces quatre libellés en dur', () => {
+        [
+            'Remplacement automatique', 'Portfolio de progression',
+            'Plafonnement conditionnel', 'Verrou sur une évaluation', "Verrou d'évaluation"
+        ].forEach((libelle) => {
+            const enDur = CODE_WIZARD.split('\n')
+                .filter((l) => l.includes("label: '" + libelle) || l.includes("'" + libelle + "'"));
+            expect(enDur, 'libellé en dur dans le wizard : ' + libelle + ' → ' + enDur.join(' | '))
+                .toEqual([]);
+        });
+    });
+
+    it('et il passe bien par la source unique — l\'APPEL, pas la mention', () => {
+        // ⚠ Mesuré au break-test : vérifier que le nom APPARAÎT ne prouve rien.
+        // Vider le corps du helper (`? cle : cle`) laissait le nom dans la
+        // condition et l'essai restait vert. C'est l'appel qui compte.
+        expect(CODE_WIZARD).toMatch(/window\.ConstructionAttributs\.libelleRegleSommative\s*\(\s*cle\s*\)/);
+        expect(CODE_WIZARD).toMatch(/_libelleRegle\('remplacement'\)/);
+        expect(CODE_WIZARD).toMatch(/_libelleRegle\('double_verrou'\)/);
+    });
+
+    it('les quatre clés du wizard sont exactement celles que le module connaît', () => {
+        // Les `value` sont PERSISTÉES : elles ne doivent pas bouger, et aucune
+        // règle de l'écran ne doit manquer à la table.
+        ['remplacement', 'double_verrou', 'portfolio', 'plafonnement'].forEach((cle) => {
+            expect(CODE_WIZARD).toMatch(new RegExp("value: '" + cle + "'"));
+            expect(libelleRegleSommative(cle)).not.toBe(cle);   // le module la connaît
+        });
+    });
+});
