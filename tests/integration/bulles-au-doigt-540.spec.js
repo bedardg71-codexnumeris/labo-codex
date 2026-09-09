@@ -70,6 +70,39 @@ const selectionnee = (page) => page.evaluate(() => {
     return el ? el.dataset.nom : null;
 });
 
+/**
+ * UN TOUCHER COMPLET — le tap, PUIS le clic que le tap engendre.
+ *
+ * ⚠ MESURÉ LE 9 SEPTEMBRE 2026, ET C'EST LA RAISON D'ÊTRE DE CE HELPER.
+ * `page.touchscreen.tap()` sous WebKit headless émet `pointerdown`,
+ * `touchstart` et `touchend` — et RIEN D'AUTRE. Aucun `click`. Or le
+ * gestionnaire de l'application est un `click` délégué au document
+ * (`tableau-bord-apercu.js`, « Gestionnaire de clic sur les points »). Sur un
+ * vrai iPad, Safari émet ce `click` derrière le tap ; le harnais, non.
+ *
+ * Conséquence de l'oubli, mesurée avant correction : les trois cas « le doigt
+ * saisit quand même » échouaient — le code n'y était pour rien, la sélection
+ * n'était jamais demandée — et, PIRE, les deux cas « le doigt ne saisit
+ * personne » passaient QUOI QU'IL ARRIVE. Break-testés : la tolérance tactile
+ * entièrement retirée de `pointLePlusProcheDuToucher`, ils restaient VERTS.
+ * Ils n'attestaient rien. Ce sont eux qui tenaient la CI rouge depuis le
+ * 8 septembre.
+ *
+ * On pose le clic sur l'élément réellement sous le doigt — `elementFromPoint`,
+ * ce que le navigateur désigne comme cible — et jamais sur la bulle qu'on
+ * espère voir gagner : autrement l'essai s'écrirait sa propre réponse.
+ */
+async function toucher(page, x, y) {
+    await page.touchscreen.tap(x, y);
+    await page.evaluate(({ x, y }) => {
+        const cible = document.elementFromPoint(x, y) || document.body;
+        cible.dispatchEvent(new MouseEvent('click', {
+            bubbles: true, cancelable: true, clientX: x, clientY: y
+        }));
+    }, { x, y });
+    await page.waitForTimeout(120);
+}
+
 test('un doigt posé À CÔTÉ d\'une bulle la saisit quand même', async ({ page }) => {
     await ouvrir(page);
     const centres = await poserBarre(page, [{ nom: 'Tremblay', left: 200 }]);
@@ -77,7 +110,7 @@ test('un doigt posé À CÔTÉ d\'une bulle la saisit quand même', async ({ pag
 
     // 12 px au-dessus et à droite du centre : le doigt manque la bulle de 10 px,
     // c'est très exactement le geste qui ne saisissait rien.
-    await page.touchscreen.tap(c.x + 12, c.y - 4);
+    await toucher(page, c.x + 12, c.y - 4);
     expect(await selectionnee(page)).toBe('Tremblay');
 });
 
@@ -92,10 +125,10 @@ test('LE POINT DÉCISIF — c\'est la bulle la PLUS PROCHE qui est saisie, pas c
     const t = centres.find((c) => c.nom === 'Tremblay');
     const d = centres.find((c) => c.nom === 'Dupont');
 
-    await page.touchscreen.tap(t.x + 8, t.y);       // 8 px de Tremblay, 22 de Dupont
+    await toucher(page, t.x + 8, t.y);       // 8 px de Tremblay, 22 de Dupont
     expect(await selectionnee(page)).toBe('Tremblay');
 
-    await page.touchscreen.tap(d.x - 8, d.y);       // le miroir : 8 px de Dupont
+    await toucher(page, d.x - 8, d.y);       // le miroir : 8 px de Dupont
     expect(await selectionnee(page)).toBe('Dupont');
 });
 
@@ -104,7 +137,7 @@ test('le toucher pose l\'infobulle du bon élève, dès le PREMIER contact', asy
     // Le premier toucher servait de survol simulé sur iPad : la bulle grossissait
     // et le clic n'arrivait qu'au toucher suivant. Un seul tap doit suffire.
     const centres = await poserBarre(page, [{ nom: 'Bouchard', left: 300 }]);
-    await page.touchscreen.tap(centres[0].x + 10, centres[0].y);
+    await toucher(page, centres[0].x + 10, centres[0].y);
 
     const info = page.locator('.barre-etudiant-info');
     await expect(info).toHaveCount(1);
@@ -115,7 +148,7 @@ test('trop loin de toute bulle, le toucher ne saisit personne', async ({ page })
     await ouvrir(page);
     const centres = await poserBarre(page, [{ nom: 'Tremblay', left: 200 }]);
     // 40 px : au-delà du rayon de tolérance de 22 px.
-    await page.touchscreen.tap(centres[0].x + 40, centres[0].y);
+    await toucher(page, centres[0].x + 40, centres[0].y);
     expect(await selectionnee(page)).toBe(null);
 });
 
@@ -153,7 +186,7 @@ test('une barre voisine ne vole pas le toucher', async ({ page }) => {
     expect(Math.abs(voisine.y - yDoigt), 'la bulle voisine doit être DANS le rayon, sinon le test ne mesure rien')
         .toBeLessThan(22);
 
-    await page.touchscreen.tap(voisine.x, yDoigt);
+    await toucher(page, voisine.x, yDoigt);
     expect(await selectionnee(page)).toBe(null);
 });
 
