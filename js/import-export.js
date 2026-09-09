@@ -2737,7 +2737,7 @@ async function executerImportConfigComplete() {
         // iPad 10 juin 2026 — cf. codex.js actionOuvrir, même patron).
         await db.flush();
         if (confirm('Import terminé!\n\nRecharger la page pour appliquer les changements?')) {
-            location.reload();
+            await window.rechargerSiLeServeurRepond(); // #795
         }
 
     } catch (erreur) {
@@ -2805,7 +2805,7 @@ async function executerImportLocalStorageBrut(config) {
         // iPad 10 juin 2026 — cf. codex.js actionOuvrir, même patron).
         await db.flush();
         if (confirm('Recharger la page pour appliquer les changements ?')) {
-            location.reload();
+            await window.rechargerSiLeServeurRepond(); // #795
         }
 
     } catch (erreur) {
@@ -3300,7 +3300,7 @@ async function executerImportSelectif() {
             // iPad 10 juin 2026 — cf. codex.js actionOuvrir, même patron).
             await db.flush();
             if (confirm('Recharger la page pour voir les changements ?')) {
-                location.reload();
+                await window.rechargerSiLeServeurRepond(); // #795
             }
         }
 

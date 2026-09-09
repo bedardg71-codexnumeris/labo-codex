@@ -22,7 +22,7 @@
     let moduleInitialise = false;
     let vueCoteACote = false;
     let sidebarManuelReplie = false;
-    let modeCourant = 'annoter'; // 'annoter' | 'evaluer'
+    let modeCourant = 'annoter'; // 'annoter' | 'evaluer' — n'écrire que par _setModeCourant (#798)
     let fichierSelectionneIndex = -1; // -1 = aucune selection dans le pipeline
     let productionFiltreActive = sessionStorage.getItem('travaux-filtre-production') || '';
     // #558 B2 — le choix « Rés. max. » ne vivait QUE dans le DOM. Le select est
@@ -268,7 +268,7 @@
 
     function restaurerEtatSession() {
         // Toujours demarrer en mode "annoter" (l'utilisateur bascule manuellement vers Evaluer)
-        modeCourant = 'annoter';
+        _setModeCourant('annoter');
         return sessionStorage.getItem('travaux-dernier-fichier');
     }
 
@@ -564,16 +564,32 @@
             dropdown.classList.remove('ouvert');
         });
 
-        // Label initial selon le mode courant
-        _majLabelBtnActions(modeCourant === 'evaluer' ? 'Évaluer' : 'Annoter');
+        // Le bouton vient d'être (re)créé : il prend le mode courant.
+        _rafraichirLabelBtnActions();
     }
 
     /**
-     * Met à jour le texte du bouton Actions avec le mode actif
+     * #798 — LE MODE EST LA SOURCE, LE LIBELLÉ EN EST LA VUE.
+     *
+     * Rapport testeur du 9 sept. 2026 : « le bouton affiche Évaluer alors que
+     * nous sommes en mode Annotation ». Le libellé se posait à la main, et
+     * SEPT chemins de navigation remettaient `modeCourant` à « annoter » sans
+     * le dire au bouton — SIX, comptés au grep (retour sur l'onglet, ouverture
+     * d'un fichier depuis un badge, restauration de session, reprise du dernier
+     * fichier, réinitialisation après navigation, fermeture du mode
+     * évaluation). Passer par `_setModeCourant` est
+     * désormais le seul moyen de changer de mode : les deux ne peuvent plus
+     * diverger.
      */
-    function _majLabelBtnActions(label) {
+    function _setModeCourant(mode) {
+        modeCourant = (mode === 'evaluer') ? 'evaluer' : 'annoter';
+        _rafraichirLabelBtnActions();
+    }
+
+    /** Réécrit le libellé du bouton Actions d'après `modeCourant`. */
+    function _rafraichirLabelBtnActions() {
         var btn = document.getElementById('travaux-btn-actions');
-        if (btn) btn.textContent = label + ' \u25BE';
+        if (btn) btn.textContent = (modeCourant === 'evaluer' ? 'Évaluer' : 'Annoter') + ' \u25BE';
     }
 
     /* ===============================
@@ -656,7 +672,7 @@
             // ne pas détruire/reconstruire le DOM — le ouvrirFichier() imminent s'en charge.
             // Sinon rafraichirUI → afficherFichiers détruit la visionneuse et crée une course.
             if (window._apresOuvertureFichier) {
-                modeCourant = 'annoter';
+                _setModeCourant('annoter');
                 // S'assurer que le conteneur fichiers est visible (il peut être masqué
                 // si le formulaire standalone était affiché par un consulter sans fichier)
                 const conteneurFichiers = document.getElementById('evaluations-contenu-fichiers');
@@ -716,7 +732,7 @@
                 if (dernierFichier) {
                     const fichiers = travauxStockage.obtenirFichiersGroupeActif();
                     if (fichiers.some(function(f) { return f.id === dernierFichier; })) {
-                        modeCourant = 'annoter';
+                        _setModeCourant('annoter');
                         rafraichirUI();
                         setTimeout(function() { ouvrirFichier(dernierFichier); }, 200);
                         return;
@@ -740,7 +756,7 @@
             }
             // Toujours réinitialiser modeCourant à 'annoter' après navigation
             // (sinon basculerMode('evaluer') retourne immédiatement si modeCourant est resté à 'evaluer')
-            modeCourant = 'annoter';
+            _setModeCourant('annoter');
             rafraichirUI();
             // Restaurer le mode Évaluer si c'était le mode actif avant navigation
             // 🔧 FIX (29 mars 2026) : Ne restaurer QUE sur l'onglet Annoter.
@@ -3247,7 +3263,7 @@
             }
             fermerModeEvaluation();
             // Réinitialiser modeCourant pour que basculerMode('evaluer') fonctionne ensuite
-            modeCourant = 'annoter';
+            _setModeCourant('annoter');
             // Réafficher les palettes annotation (masquées lors du passage en eval)
             afficherPalettesAnnotation();
         }
@@ -4649,7 +4665,7 @@
         // Permettre la re-creation si le mode est 'evaluer' mais les palettes n'existent plus
         if (mode === modeCourant) {
             if (mode === 'evaluer' && !document.getElementById('travaux-palette-eval-gauche')) {
-                modeCourant = 'annoter';
+                _setModeCourant('annoter');
             } else {
                 return;
             }
@@ -4663,7 +4679,7 @@
                 alert('Ce fichier n\'est pas associé à un étudiant.');
                 return;
             }
-            modeCourant = 'evaluer';
+            _setModeCourant('evaluer');
             masquerPalettesAnnotation();
 
             // Si les palettes eval existent déjà (cachées), les réafficher et re-remplir
@@ -4693,7 +4709,6 @@
 
             if (btnAnnoter) btnAnnoter.classList.remove('actif');
             if (btnEvaluer) btnEvaluer.classList.add('actif');
-            _majLabelBtnActions('Évaluer');
 
             // Recentrer le document
             requestAnimationFrame(() => {
@@ -4707,7 +4722,7 @@
                 setTimeout(() => toggleCorrectionIdentite(), 100);
             }
         } else {
-            modeCourant = 'annoter';
+            _setModeCourant('annoter');
             // Remettre les panneaux eval dans le HTML statique (pas juste masquer)
             // pour qu'ils survivent si le DOM est recréé (rafraichirUI, navigation)
             fermerModeEvaluation();
@@ -4715,7 +4730,6 @@
 
             if (btnAnnoter) btnAnnoter.classList.add('actif');
             if (btnEvaluer) btnEvaluer.classList.remove('actif');
-            _majLabelBtnActions('Annoter');
 
             // Recentrer le document
             requestAnimationFrame(() => {

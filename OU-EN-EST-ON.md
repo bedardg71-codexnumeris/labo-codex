@@ -15,6 +15,28 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.125.2 — CINQ CHOSES QUE TU AS SIGNALÉES CE MATIN** (build `0909-1356`).
+**Ce que tu verras** : le menu « Actions » de la liste des évaluations a la **même largeur** d'une
+ligne à l'autre ; dans la palette des codes, un libellé trop long **revient à la ligne** au lieu de
+sortir du cadre ; le bandeau de nouvelle version t'envoie à la **carte « Nouveautés » de l'accueil**,
+là où les nouveautés sont vraiment ; et dans « Annoter et évaluer », le bouton du mode **dit le mode
+où tu es**, quel que soit le chemin par lequel tu es arrivé.
+▣ **Le 404 après le chargement d'un codex : ton application n'y était pour rien.** Mesuré — le
+déploiement en ligne était publié et sain depuis plus d'une heure quand c'est arrivé, et le site
+répondait normalement juste après. C'était une panne passagère du service qui sert la page. **Tes
+données étaient écrites avant le rechargement**, et elles l'étaient encore après.
+▣ **Ce qui change quand même** : recharger la page était le seul moment où l'application se remettait
+à la merci du réseau, juste après avoir écrit. Elle **vérifie maintenant que le serveur répond avant
+de recharger**. S'il ne répond pas, elle reste ouverte et te dit que tes données sont enregistrées,
+au lieu de disparaître derrière un message d'erreur en anglais.
+⛔ **Ce qui n'est PAS vérifié** : rien de tout ceci n'a été vu sur Safari ni sur l'iPad, et la
+vérification du serveur n'a pas été éprouvée sur un vrai codex — seulement au banc. La liste de
+vérifications est due (#802).
+▣ **Comment ça a été vérifié** : cinq sentinelles neuves (23 essais), **onze ablations rejouées, onze
+rouges** ; deux mesures faites dans ton Chrome, sur un banc servi en local — le menu « Actions » à
+150 px sur quatre listes d'options différentes, et la palette sans aucun débordement
+(`scrollWidth = clientWidth = 255`). Suite complète : 5644 essais verts.
+
 ↻ **1.125.1 — LA GRILLE QUE TU IMPORTES SE MONTRE** (build `0909-0832`).
 **Ce que tu verras** : après « Importer des grilles (JSON) », la grille importée est **amenée à
 l'écran** et mise en évidence deux secondes, pour que tu voies laquelle vient d'arriver.

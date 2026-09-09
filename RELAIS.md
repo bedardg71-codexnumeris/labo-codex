@@ -7,6 +7,51 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 9 SEPT. 2026, APRÈS-MIDI : CINQ RAPPORTS TESTEURS (1.125.2)
+
+> ✅ **`main` à jour, 1.125.2, build `0909-1356`. Vitest 516 fichiers / 5644 essais. Tout est
+> poussé — aucun travail en attente sur une branche.**
+>
+> **CE QUI A ÉTÉ FAIT** : les cinq rapports du matin, pris d'affilée. Détail complet dans
+> `Retours des testeurs/SUIVI-BUGS.md` (section « 9 septembre 2026 — cinq rapports du matin »).
+> **#794** largeur du menu « Actions » (un `<select>` natif prend la largeur de son option la plus
+> longue, et les options changent d'une ligne à l'autre) · **#795** l'app remplacée par le 404 de
+> Netlify juste après le chargement d'un codex · **#796** le bandeau qui envoyait les nouveautés vers
+> « Réglages › À propos » · **#797** les libellés de codes hors du cadre de la palette · **#798** le
+> libellé du bouton de mode.
+>
+> ⚠ **CE QU'IL FAUT SAVOIR SUR #795, pour ne pas repartir sur une fausse piste.** Le code n'a PAS
+> causé le 404, et c'est mesuré : déploiement courant publié à 12:46:43 UTC et `ready`, incident à
+> 13:54 UTC, origine Netlify en 200 (1,1 Mo, etag `3c37dc90…`), domaine bien attaché. L'inférence —
+> panne transitoire de routage côté livraison — n'est PAS prouvée : les journaux de trafic ne sont
+> pas accessibles depuis ici. Ce qui a été corrigé est autre chose : l'app rechargeait sans vérifier
+> que le serveur répondait, **juste après une écriture**. Module `js/rechargement-sur.js`, branché
+> sur les quatre chemins post-écriture (les seuls `location.reload()` qui suivent une écriture,
+> vérifié au grep ; les deux autres sont assumés, cf. #800).
+>
+> **#798 est une correction SSOT, pas un rustine d'affichage** : `_setModeCourant()` est désormais le
+> SEUL point d'écriture de `modeCourant`, et il dérive le libellé du bouton. La sentinelle verrouille
+> cette unicité — toute assignation directe la fait rougir. C'est volontaire : une liste de chemins
+> aurait été périmée au premier refactor.
+>
+> **VÉRIFICATION** : onze ablations rejouées séquentiellement (script du scratchpad), onze rouges,
+> arbre restauré et vérifié par empreinte sha256 à chaque fois. Un écart récit↔code a été trouvé et
+> corrigé au passage : le commentaire de `_setModeCourant` disait « sept chemins », le grep en compte
+> **six** (les deux autres écritures vivent dans `basculerMode`, qui posait déjà le libellé).
+>
+> ⏳ **CE QUI RESTE DÛ** : **#802, la porte terrain du lot** — rien n'a été vu sur Safari ni sur iPad,
+> et #795 n'a pas été éprouvé de bout en bout (il faudrait ouvrir un vrai codex, donc les données de
+> Grégoire ; la seule épreuve honnête de la sonde est de couper le réseau avant d'accepter le
+> rechargement). Inscrits en chemin, non traités : **#799** (page 404 en français — à ne PAS écrire
+> avant d'avoir mesuré si Netlify la sert dans ce cas), **#800**, **#801**.
+>
+> ⚠ **Relevé, hors lot** : le rapport de #798 porte trois erreurs console « Timeout : les critères de
+> la grille ne sont pas rendus » (`js/evaluation.js:1639`), en h2026. Ça ressemble aux **grilles
+> h2026 désappariées** (outil `scripts/reparer-grilles-h2026.mjs`, en attente d'un run à froid sur
+> backup). Chantier de données réelles — ne pas l'ouvrir en passant.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 9 SEPT. 2026, MATIN : RAPPORT TESTEUR #543 (1.125.1)
 
 > ✅ **`main` à jour, 1.125.1, build `0909-0832`. Vitest 511 fichiers / 5620 tests. Tout est

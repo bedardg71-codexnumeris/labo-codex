@@ -2910,7 +2910,9 @@ async function actionOuvrir() {
             texteConfirmer: 'Recharger',
             preformate: true
         })) {
-            window.location.reload();
+            // #795 : ne pas se saborder si le serveur ne répond plus — les
+            // données viennent d'être écrites, l'écran doit le dire.
+            await window.rechargerSiLeServeurRepond();
         }
     } catch (e) {
         // Une annulation volontaire (garde de modèle antérieur, #335 A) n'est
