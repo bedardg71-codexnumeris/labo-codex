@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.127',
+            couleur: 'bleu',
+            titre: 'Le Comparateur parle en six param\u00e8tres',
+            items: [
+                '<strong>Le tableau du Comparateur est rang\u00e9 sous les six param\u00e8tres de la recherche.</strong> Objet, r\u00e9visabilit\u00e9, agentivit\u00e9, communication, granularit\u00e9, d\u00e9termination\u00a0: les m\u00eames que ceux pr\u00e9sent\u00e9s dans l\'Aide. Les lignes n\'ont pas chang\u00e9 de sens et aucun chiffre ne bouge\u00a0\u2014 elles sont regroup\u00e9es, de sorte qu\'on voit sur quelle dimension deux pratiques diff\u00e8rent vraiment.',
+                '<strong>Ce que l\'application ne couvre pas est \u00e9crit, pas tu.</strong> L\'agentivit\u00e9 \u2014 les choix et la flexibilit\u00e9 laiss\u00e9s \u00e0 l\'\u00e9tudiant\u00b7e \u2014 n\'a aucun r\u00e9glage dans Labo Codex, et le tableau le dit au lieu de laisser un blanc. M\u00eame chose pour les niveaux de la note du cours, et pour l\'alignement de la note sur des cibles d\'apprentissage l\u00e0 o\u00f9 elle porte sur des instruments. Un silence se lirait comme une lacune de ta pratique alors que c\'est une limite de l\'outil.',
+                '<strong>Deux lignes neuves, sans rien \u00e0 configurer.</strong> «\u00a0Ce \u00e0 quoi la note se rapporte\u00a0» dit si elle porte sur des cibles d\'apprentissage ou sur des instruments d\'\u00e9valuation. «\u00a0Temporalit\u00e9 de la note\u00a0» rappelle que la note diff\u00e9r\u00e9e est un r\u00e9glage global, dans R\u00e9glages\u00a0\u203a\u00a0Pr\u00e9f\u00e9rences \u2014 pas un attribut de la pratique compar\u00e9e.',
+                '<strong>Les r\u00e8gles sp\u00e9ciales d\'une pratique sommative ne sont plus entass\u00e9es sur une ligne.</strong> Le remplacement automatique appara\u00eet sous la r\u00e9visabilit\u00e9, le verrou et le plafonnement sous la d\u00e9termination, le portfolio sous l\'objet\u00a0: chacune l\u00e0 o\u00f9 elle agit.',
+                '<strong>Le nombre de niveaux de ton \u00e9chelle a sa propre ligne.</strong> Il \u00e9tait gliss\u00e9 entre parenth\u00e8ses \u00e0 c\u00f4t\u00e9 du nom de l\'\u00e9chelle\u00a0; il se lit maintenant aussi sous la granularit\u00e9, o\u00f9 on le cherche.'
+            ]
+        },
+        {
             version: '1.126',
             couleur: 'bleu',
             titre: 'L\'Aide ne confond plus une pratique avec la d\u00e9finition',

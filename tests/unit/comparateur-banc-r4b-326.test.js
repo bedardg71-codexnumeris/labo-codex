@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { chargerScript } from './_helpers/charger-script.js';
 
 // #326 R4b — banc « colonnes paires » : 2-3 pratiques sans réf privilégiée, lignes
 // de CONSTRUCTION (R3) + RÉSULTAT, lien par colonne vers le formulaire #319, source
@@ -30,11 +31,22 @@ describe('#326 R4b · lignes de construction (R3) + résultats', () => {
         expect(src).toMatch(/Construction de la note/);
         expect(src).toMatch(/Résultat — profils-types/);
     });
-    it('les lignes de construction viennent de ConstructionAttributs (R3), alignées par axe', () => {
+    it('les lignes de construction viennent de ConstructionAttributs (R3), groupées par paramètre', () => {
         expect(src).toMatch(/function _extraitsColonnes\(/);
-        expect(src).toMatch(/function _axesConstruction\(/);
+        expect(src).toMatch(/function _groupesConstruction\(/);
         expect(src).toMatch(/ConstructionAttributs\.extraire\(_configPourExtraction/);
-        expect(src).toMatch(/ConstructionAttributs\.AXES_ANCRES/);
+        // 9 sept. 2026 : l'ossature du tableau n'est plus AXES_ANCRES (retiré du
+        // module) mais les six paramètres. L'ancien nom ne doit plus être appelé.
+        expect(src).toMatch(/ConstructionAttributs\.PARAMETRES/);
+        expect(src).not.toMatch(/ConstructionAttributs\.AXES_ANCRES/);
+    });
+    it('chaque paramètre ouvre son groupe de lignes, avec le gabarit d\'en-tête existant', () => {
+        const i = src.indexOf('groupes.forEach(');
+        expect(i).toBeGreaterThan(-1);
+        const bloc = src.slice(i, i + 700);
+        expect(bloc).toMatch(/comparateur-section-tete/);   // aucune classe neuve
+        expect(bloc).toMatch(/groupe\.libelle/);
+        expect(bloc).toMatch(/groupe\.axes\.forEach\(/);
     });
     it('axe absent d\'une famille → « s.o. » dans la cellule', () => {
         const i = src.indexOf('function _rendreMatrice(');
@@ -88,5 +100,73 @@ describe('#326 R5 · nettoyage zéro-dette du code démo/matrice mort', () => {
         expect(src).not.toMatch(/function construireInvitation\(/);
         expect(src).not.toMatch(/function activerDemoEtOuvrir\(/);
         expect(src).not.toMatch(/comparateur-activer-demo/);
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 9 sept. 2026 — LE GROUPEMENT SOUS LES SIX PARAMÈTRES, MESURÉ POUR DE VRAI.
+// Le reste de ce fichier est une sentinelle STATIQUE (rendu DOM non exerçable).
+// `_groupesConstruction` est pure — elle ne lit que ce qu'on lui passe — et
+// c'est elle qui décide de l'ossature du tableau : elle s'exécute, donc on
+// l'exécute plutôt que de la relire.
+// ─────────────────────────────────────────────────────────────────────────────
+describe('#326 R4b · groupement des lignes sous les six paramètres', () => {
+    const attributs = chargerScript('js/pratiques/construction-attributs.js').ConstructionAttributs;
+    const win = chargerScript('js/comparateur-pratiques.js', { ConstructionAttributs: attributs });
+    const grouper = win._comparateurGroupesConstruction;
+
+    // Deux colonnes, deux familles : ce que le Comparateur reçoit réellement.
+    const extraitsDe = (...types) => types.map(type => {
+        const parAxe = {};
+        attributs.extraire({ type }).attributs.forEach(a => { parAxe[a.axe] = a; });
+        return parAxe;
+    });
+
+    it('les six paramètres ouvrent six groupes, dans l\'ordre du module', () => {
+        const g = grouper(extraitsDe('standards', 'sommative'));
+        expect(g.map(x => x.cle)).toEqual(attributs.PARAMETRES.map(p => p.cle));
+        // ⚠ Les clés seules ne prouvent rien : si l'ossature venait à disparaître,
+        // le repli « Autres » les recréerait dans le même ordre (mesuré au
+        // break-test du 9 sept.). Ce sont les LIBELLÉS qui attestent que
+        // l'ordre vient bien de ConstructionAttributs.PARAMETRES.
+        expect(g.map(x => x.libelle)).toEqual(attributs.PARAMETRES.map(p => p.libelle));
+        expect(g.every(x => /—/.test(x.libelle))).toBe(true);
+    });
+
+    it('chaque groupe porte au moins une ligne, et chaque ligne son libellé', () => {
+        const g = grouper(extraitsDe('standards', 'denotation'));
+        g.forEach(groupe => {
+            expect(groupe.axes.length).toBeGreaterThan(0);
+            groupe.axes.forEach(a => expect(typeof a.libelle).toBe('string'));
+        });
+    });
+
+    it('un axe présent dans une seule colonne apparaît quand même (l\'autre aura « s.o. »)', () => {
+        const g = grouper(extraitsDe('standards', 'sommative'));
+        const tousAxes = g.flatMap(x => x.axes.map(a => a.axe));
+        expect(tousAxes).toContain('composantes');       // STD seulement
+        expect(tousAxes).toContain('reglesSpeciales');   // SOM seulement
+    });
+
+    it('aucun axe n\'est perdu ni dupliqué en chemin', () => {
+        const extraits = extraitsDe('standards', 'specifications', 'denotation');
+        const attendus = new Set(extraits.flatMap(e => Object.keys(e)));
+        const rendus = grouper(extraits).flatMap(x => x.axes.map(a => a.axe));
+        expect(new Set(rendus)).toEqual(attendus);
+        expect(rendus.length).toBe(attendus.size);
+    });
+
+    it('un groupe sans aucune ligne est écarté (un en-tête seul ne dit rien)', () => {
+        expect(grouper([{}])).toEqual([]);
+    });
+
+    it('un axe sans paramètre connu n\'est pas perdu : il tombe dans un groupe « Autres » nommé', () => {
+        const g = grouper([{ bidule: { axe: 'bidule', libelle: 'Bidule', valeur: 'x' } }]);
+        expect(g.length).toBe(1);
+        expect(g[0].axes.map(a => a.axe)).toEqual(['bidule']);
+        // La clé du repli est une VRAIE clé — pas `undefined` promu en clé
+        // d'objet, qui donnerait un groupe fantôme (mesuré au break-test).
+        expect(g[0].cle).toBe('autres');
+        expect(g[0].libelle).toBe('Autres');
     });
 });

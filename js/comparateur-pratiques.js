@@ -351,21 +351,40 @@
             return parAxe;
         });
     }
-    // Union ORDONNÉE des axes : ancres d'abord (R3 AXES_ANCRES), puis les autres dans
-    // l'ordre de première apparition. libellé pris de la 1ʳᵉ colonne qui le porte.
-    function _axesConstruction(extraits) {
-        var ordre = (typeof ConstructionAttributs !== 'undefined' && ConstructionAttributs.AXES_ANCRES)
-            ? ConstructionAttributs.AXES_ANCRES.slice() : [];
-        var seen = {}; ordre.forEach(function(a) { seen[a] = true; });
+    // Union ORDONNÉE des axes, GROUPÉE PAR PARAMÈTRE (9 sept. 2026).
+    //
+    // Avant : `AXES_ANCRES` donnait trois axes de tête, puis les autres dans
+    // l'ordre de première apparition. Maintenant l'ossature est celle des SIX
+    // PARAMÈTRES (`ConstructionAttributs.PARAMETRES`), et chaque axe se range
+    // sous le sien via son champ `parametre`.
+    //
+    // ⚠ L'ancien filtre `.filter(libelles[a])` supprimait un axe annoncé mais
+    // jamais produit. Il n'a plus lieu d'être ici : les six paramètres sont
+    // toujours produits par `extraire()`. Un paramètre qui ne porterait aucun
+    // axe est néanmoins ÉCARTÉ du rendu — un en-tête seul, sans ligne dessous,
+    // ne dirait rien à personne.
+    // Le libellé d'un axe est pris de la 1ʳᵉ colonne qui le porte.
+    function _groupesConstruction(extraits) {
+        var params = (typeof ConstructionAttributs !== 'undefined' && ConstructionAttributs.PARAMETRES)
+            ? ConstructionAttributs.PARAMETRES.slice() : [];
+        var parParam = {}, ordre = [];
+        params.forEach(function(p) { parParam[p.cle] = []; ordre.push(p); });
         var libelles = {};
         extraits.forEach(function(parAxe) {
             Object.keys(parAxe).forEach(function(axe) {
-                if (!seen[axe]) { seen[axe] = true; ordre.push(axe); }
-                if (!libelles[axe]) libelles[axe] = parAxe[axe].libelle;
+                var a = parAxe[axe];
+                var cle = a.parametre || 'autres';
+                if (!parParam[cle]) { parParam[cle] = []; ordre.push({ cle: cle, libelle: 'Autres' }); }
+                if (parParam[cle].indexOf(axe) === -1) parParam[cle].push(axe);
+                if (!libelles[axe]) libelles[axe] = a.libelle;
             });
         });
-        return ordre.filter(function(a) { return libelles[a]; })
-            .map(function(a) { return { axe: a, libelle: libelles[a] }; });
+        return ordre.map(function(p) {
+            return {
+                cle: p.cle, libelle: p.libelle,
+                axes: parParam[p.cle].map(function(a) { return { axe: a, libelle: libelles[a] }; })
+            };
+        }).filter(function(g) { return g.axes.length > 0; });
     }
 
     /* ── Rendu du banc : construction (R3) + résultats (R2/réel) ─────── */
@@ -374,7 +393,7 @@
         var cols = _colonnes();
         var dispo = _pratiquesComparables();
         var extraits = _extraitsColonnes(cols);
-        var axes = _axesConstruction(extraits);
+        var groupes = _groupesConstruction(extraits);
         var nbCol = cols.length;
 
         var h = '<table class="comparateur-matrice-table">';
@@ -387,14 +406,20 @@
 
         // SECTION 1 — Construction de la note (lignes R3, alignées par axe).
         h += '<tr class="comparateur-section-tete"><th colspan="' + (nbCol + 1) + '" scope="colgroup">Construction de la note</th></tr>';
-        axes.forEach(function(ax) {
-            h += '<tr class="comparateur-ligne-constr"><th scope="row" class="comparateur-col-profil">' + _esc(ax.libelle) + '</th>';
-            extraits.forEach(function(parAxe) {
-                var a = parAxe[ax.axe];
-                var v = a ? a.valeur : 's.o.';
-                h += '<td class="comparateur-cellule-constr' + (a ? '' : ' comparateur-vide') + '">' + _esc(v) + '</td>';
+        // Un en-tête par paramètre, puis ses axes. Même gabarit que les en-têtes
+        // de section (`comparateur-section-tete`) : aucune classe neuve.
+        groupes.forEach(function(groupe) {
+            h += '<tr class="comparateur-section-tete"><th colspan="' + (nbCol + 1) + '" scope="colgroup">'
+                + _esc(groupe.libelle) + '</th></tr>';
+            groupe.axes.forEach(function(ax) {
+                h += '<tr class="comparateur-ligne-constr"><th scope="row" class="comparateur-col-profil">' + _esc(ax.libelle) + '</th>';
+                extraits.forEach(function(parAxe) {
+                    var a = parAxe[ax.axe];
+                    var v = a ? a.valeur : 's.o.';
+                    h += '<td class="comparateur-cellule-constr' + (a ? '' : ' comparateur-vide') + '">' + _esc(v) + '</td>';
+                });
+                h += '</tr>';
             });
-            h += '</tr>';
         });
 
         // SECTION 2 — Résultat sur les profils-types (note par colonne). Le niveau
@@ -1124,5 +1149,11 @@
     window.initialiserComparateurPratiques = rendreComparateur;
     // Exposée pour les tests de régression (contenu CSV déterministe).
     window._comparateurGenererCSV = _genererCSV;
+    // Idem pour le groupement des lignes de construction sous les six paramètres
+    // (9 sept. 2026) : c'est une fonction PURE — elle ne lit que les extraits
+    // qu'on lui passe — et la seule du fichier qui décide de l'ossature du
+    // tableau. La sentinelle du banc est statique par conception (rendu DOM non
+    // exerçable en sandbox) ; cet export lui donne un point de mesure réel.
+    window._comparateurGroupesConstruction = _groupesConstruction;
 
 })();
