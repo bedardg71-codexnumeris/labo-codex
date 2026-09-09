@@ -1207,26 +1207,68 @@
      * @param {string} id - identifiant complet de l'exemplaire
      */
     BibliothequeUI.voirItemDoublon = function (id) {
-        if (!id || typeof document === 'undefined') return;
+        if (!id) return;
 
-        var cibles = document.querySelectorAll(
-            '[data-biblio-item-id="' + String(id).replace(/["\\]/g, '\\$&') + '"]');
+        var resultat = BibliothequeUI.pointerVersItems([id]);
 
-        if (!cibles.length) {
+        if (!resultat.trouves.length) {
             // Un filtre actif ou un dossier replié peut masquer la carte : le
             // dire, plutôt que de ne rien faire et laisser croire à une panne.
             if (typeof notifications !== 'undefined' && notifications.info) {
                 notifications.info('Cette carte n\'est pas affichée en ce moment.',
                     'Vide le champ de recherche ou les filtres, puis réessaie.');
             }
-            return;
         }
+    };
+
+    /**
+     * Conduit l'œil à un ou plusieurs items de la modale ouverte : défilement
+     * vers le premier, surbrillance de tous pendant 2,2 s.
+     *
+     * ⚠ MESURÉ LE 8 SEPTEMBRE 2026, rapport testeur « la bibliothèque n'est pas
+     * rafraîchie au moment de l'importation d'une grille ». Elle L'ÉTAIT : sur
+     * une bibliothèque de 60 grilles, la carte importée arrivait 61e sur 61, à
+     * 8 548 px sous le bas de la fenêtre, sur une modale que la reconstruction
+     * remet en haut (scrollTop 0, contenu de 9 326 px pour 646 px visibles).
+     * L'écriture était bonne, le rendu aussi ; c'est le RÉSULTAT qui n'était
+     * jamais sous les yeux. Un rafraîchissement qu'on ne voit pas ne se
+     * distingue pas d'une panne.
+     *
+     * Plusieurs cartes peuvent porter le même identifiant — c'est le cas
+     * « collision » de #291 — donc on les met TOUTES en évidence.
+     *
+     * @param {string[]} ids - identifiants complets des exemplaires visés
+     * @returns {{trouves: string[], absents: string[]}} `absents` = les ids
+     *   qu'aucune carte ne porte : filtre actif, dossier replié, ou item écrit
+     *   en base mais masqué au rendu. L'appelant peut alors le DIRE au lieu
+     *   d'annoncer un succès que l'écran ne montre pas.
+     */
+    BibliothequeUI.pointerVersItems = function (ids) {
+        var resultat = { trouves: [], absents: [] };
+        if (!Array.isArray(ids) || !ids.length || typeof document === 'undefined') return resultat;
+
+        var cibles = [];
+        ids.forEach(function (id) {
+            if (!id) return;
+            var trouvees = document.querySelectorAll(
+                '[data-biblio-item-id="' + String(id).replace(/["\\]/g, '\\$&') + '"]');
+            if (trouvees.length) {
+                resultat.trouves.push(id);
+                Array.prototype.push.apply(cibles, Array.prototype.slice.call(trouvees));
+            } else {
+                resultat.absents.push(id);
+            }
+        });
+
+        if (!cibles.length) return resultat;
 
         cibles[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
         cibles.forEach(function (el) { el.classList.add('biblio-carte--pointee'); });
         setTimeout(function () {
             cibles.forEach(function (el) { el.classList.remove('biblio-carte--pointee'); });
         }, 2200);
+
+        return resultat;
     };
 
     /**

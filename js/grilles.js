@@ -2020,11 +2020,13 @@ window.confirmerImportGrilles = async function(donnees) {
         // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;
         let nbMisesAJour = 0;
+        let idsImportes = [];
 
         await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
             const bibliotheque = lues || [];
             nbAjoutees = 0;
             nbMisesAJour = 0;
+            idsImportes = [];
             grillesImportees.forEach(grille => {
                 // Préserver les métadonnées CC dans la grille importée
                 if (metadata && metadata.licence) {
@@ -2035,6 +2037,8 @@ window.confirmerImportGrilles = async function(donnees) {
                         contributeurs: metadata.contributeurs || []
                     };
                 }
+
+                if (grille.id) idsImportes.push(grille.id);
 
                 const indexBiblio = bibliotheque.findIndex(g => g.id === grille.id);
                 if (indexBiblio >= 0) {
@@ -2049,15 +2053,35 @@ window.confirmerImportGrilles = async function(donnees) {
             return bibliotheque;
         }, []);
 
-        // Rafraîchir le modal de bibliothèque s'il est ouvert
+        // Rafraîchir le modal de bibliothèque s'il est ouvert, PUIS conduire l'œil
+        // au résultat. Rapport testeur du 8 septembre 2026 : « la bibliothèque
+        // n'est pas rafraîchie au moment de l'importation d'une grille ». Elle
+        // l'était — la carte arrivait en fin de liste, à 8 548 px sous le bas de
+        // la fenêtre, sur une modale que la reconstruction remet en haut.
+        // Un rafraîchissement qu'on ne voit pas ne se distingue pas d'une panne.
+        let pointage = null;
         if (document.getElementById('modalBibliothequeGrilles')) {
             await afficherBibliothequeGrilles();
+            pointage = BibliothequeUI.pointerVersItems(idsImportes);
         }
 
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) grille(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} grille(s) mise(s) à jour.`);
-        details.push('Consulte « Grilles disponibles » pour les ajouter à ta barre latérale.');
+        // L'écriture a réussi mais AUCUNE carte ne la porte : un filtre mange le
+        // résultat (« Masquer les éléments déjà dans la barre latérale », ou le
+        // masquage des items démo en mode normal). Mesuré le 8 septembre : dans
+        // ces deux cas l'app annonçait « 1 grille ajoutée » devant une liste
+        // inchangée. On le dit, plutôt que d'annoncer un succès invisible.
+        if (pointage && pointage.trouves.length === 0 && pointage.absents.length > 0) {
+            const masquageCoche = typeof BibliothequeUI.estMasquerDejaPresentActif === 'function'
+                && BibliothequeUI.estMasquerDejaPresentActif();
+            details.push(masquageCoche
+                ? 'Aucune n\'apparaît dans la liste : décoche « Masquer les éléments déjà dans la barre latérale » pour les voir.'
+                : 'Aucune n\'apparaît dans la liste : un filtre d\'affichage les masque ici.');
+        } else {
+            details.push('Consulte « Grilles disponibles » pour les ajouter à ta barre latérale.');
+        }
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {
