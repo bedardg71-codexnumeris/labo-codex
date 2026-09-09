@@ -39,6 +39,29 @@
 > corrigé au passage : le commentaire de `_setModeCourant` disait « sept chemins », le grep en compte
 > **six** (les deux autres écritures vivent dans `basculerMode`, qui posait déjà le libellé).
 >
+>
+> ⚠ **UN CORRECTIF DE CE LOT A ÉTÉ FAUX AVANT D'ÊTRE JUSTE, et c'est Playwright qui l'a dit.** La
+> première version de #797 posait `flex-direction: column` sur `.travaux-errfr-liste` : en
+> disposition BANDEAU (le bouton ↔), ça empile les dix codes au lieu des deux lignes du `flex-wrap`,
+> et la palette réoccupe la moitié de la copie — le défaut même que #774 avait corrigé le 6 sept.
+> Rien dans le DOM ne distingue les deux dispositions (seule la largeur en style en ligne change),
+> donc aucun sélecteur ne peut les séparer : la règle doit valoir pour les deux. Version retenue :
+> **borner sans empiler** (`max-width: 100%` sur l'item, repli du nom, liste inchangée). Mesuré dans
+> le Chrome de Grégoire : vertical 257 px → 0 débordement ; bandeau 876 px → 145 px de haut sur trois
+> lignes (la sentinelle exige < 315 px sans défilement). La sentinelle unitaire #797 interdit
+> désormais explicitement l'empilement, avec le motif écrit dans le CSS.
+> ⮕ **Leçon à garder** : un banc de mesure qui ne reproduit qu'UNE disposition ne prouve rien sur
+> l'autre. Le verdict Playwright n'est pas une formalité de fin de course — ici, il était le seul
+> juge de la seconde disposition.
+>
+> ⚠ **Le message du commit `3d997dcc` est INCOMPLET** : un `--amend --no-edit`, après un refus du
+> hook anti-cache, a conservé le message d'avant ce correctif. Il décrit #797 dans sa première
+> version. Le code, lui, porte la bonne — c'est ce bloc-ci qui fait foi.
+>
+> ⚠ **Une affirmation faite en séance était FAUSSE** : « la palette reste bridée à `max-width: 320px`,
+> tirer la poignée au-delà ne fait rien ». Non — `#travaux-palette-erreurs-fr` et
+> `#travaux-palette-tampons` portent `max-width: none` (`styles.css:19008-19013`). Le plafond de
+> 320 px ne vaut que pour `.palette-flottante` en général.
 > ⏳ **CE QUI RESTE DÛ** : **#802, la porte terrain du lot** — rien n'a été vu sur Safari ni sur iPad,
 > et #795 n'a pas été éprouvé de bout en bout (il faudrait ouvrir un vrai codex, donc les données de
 > Grégoire ; la seule épreuve honnête de la sonde est de couper le réseau avant d'accepter le
