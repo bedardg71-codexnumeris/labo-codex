@@ -3025,7 +3025,13 @@ span.header-icon {
 }
 
 /* Select natif d'actions dans le tableau des évaluations */
+/* #794 : largeur FIXE. Sans elle, un <select> natif se dimensionne sur son
+   option la plus longue ; comme les actions offertes changent d'une ligne à
+   l'autre (« Supprimer l'évaluation » vs « Transférer »), la colonne montrait
+   des boîtes en escalier. La liste déroulante de macOS s'ouvre à la largeur de
+   son contenu, pas à celle du select : rien n'est tronqué. */
 .eval-actions-select {
+    width: 150px;
     padding: 4px 6px;
     font-size: 0.8rem;
     border: 1px solid var(--bleu-leger);
@@ -25517,6 +25523,38 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     gap: 4px;
     cursor: pointer;
 }
+/* #797 (9 sept. 2026) — DANS LA PALETTE, UN LIBELLÉ LONG REVIENT À LA LIGNE.
+   Rapport testeur : la description des codes dépassait la largeur de la
+   palette, qui rendait une barre de défilement horizontale. Le
+   `text-overflow: ellipsis` de `.travaux-errfr-nom` ne s'appliquait JAMAIS :
+   les items d'un flex `wrap` prennent la largeur de leur contenu, rien ne les
+   bornait au cadre, et `.palette-flottante { overflow: auto }` faisait le
+   reste. Décision de Grégoire (9 sept.) : passer à la ligne plutôt que couper
+   — la liste ne cache rien, et la palette a la hauteur pour ça.
+   Scopé à `.palette-flottante` : la colonne droite ancrée garde sa ligne
+   unique, elle a la largeur qu'il faut. */
+/* ⚠ NE PAS empiler la liste en `flex-direction: column` : la disposition
+   BANDEAU (le bouton ↔, `layoutPaletteH`) compte sur le `flex-wrap: wrap` pour
+   poser les dix codes en deux lignes, et rien dans le DOM ne distingue les deux
+   dispositions — seule la largeur en style en ligne change. Une première
+   version de ce correctif l'a fait et a rougi `palette-layout-h-hauteur-774`
+   (dix lignes empilées au lieu de deux). Borner sans empiler suffit : en
+   colonne, aucun item ne peut plus dépasser le cadre ; en bandeau, chacun garde
+   sa largeur naturelle. */
+.palette-flottante .travaux-errfr-item {
+    max-width: 100%;
+    min-width: 0;
+    /* Le texte peut faire deux lignes : la pastille et le compteur se posent
+       en haut, sur la première. */
+    align-items: flex-start;
+}
+.palette-flottante .travaux-errfr-nom {
+    white-space: normal;
+    overflow-wrap: break-word;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
 .annot-col-droite .travaux-errfr-item {
     padding: 3px 6px;
     font-size: 0.72rem;

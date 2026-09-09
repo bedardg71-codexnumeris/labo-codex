@@ -100,8 +100,8 @@ function definirModeExpertFromEl(el) {
 // === CONFIGURATION ===
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
 // Les valeurs ici servent de fallback si version.json n'est pas disponible
-let VERSION_MAJEURE = '1.125.1';
-let BUILD_ID = '0909-0832';
+let VERSION_MAJEURE = '1.125.2';
+let BUILD_ID = '0909-1356';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
@@ -396,7 +396,7 @@ function afficherBandeauVersion(beta, build, distant) {
     elBuild.textContent = `BÊTA PUBLIQUE ${beta} (BUILD ${build})`;
     elTexte.textContent = distant
         ? `Une mise à jour a été déployée en arrière-plan pendant que tu travailles. Rafraîchis la page pour l\u2019activer. Tes données persistent.`
-        : `Nouvelle version chargée. Les nouveautés sont dans Réglages \u203a À propos. Tes données persistent.`;
+        : `Nouvelle version chargée. Les nouveautés sont dans la carte « Nouveautés », en bas de l\u2019accueil. Tes données persistent.`;
     elDate.textContent = `${dateStr} à ${heureStr}`;
 
     // Le bouton Recharger n'a de sens que pour une mise à jour DISTANTE.
