@@ -200,6 +200,30 @@ aucune corrigée** — elles sont hors du périmètre « texte seulement » du l
     cinq critères sont sous son propre seuil. `profil-etudiant-calculs.js:2078` avertit déjà de ne
     pas confondre les deux — l'avertissement est dans le code, pas à l'écran.
 
+    ⮕ **CORRECTIF ARRÊTÉ AVEC GRÉGOIRE (9 sept. 2026) — RENOMMER, PAS EXPLIQUER.**
+    - Dans l'éditeur de grilles, l'étiquette « Niveau SOLO » devient « **Complexité SOLO du
+      critère** » (`js/grilles.js`, DEUX sites : l. 3451 création et l. 4780 édition — le même
+      libellé y est écrit deux fois, ne pas n'en corriger qu'un).
+    - Dans l'éditeur d'échelles, l'étiquette équivalente devient « **Palier SOLO du niveau** »
+      (`index.html` l. 10268, `<th>Niveau SOLO</th>`, et tout site jumeau de `js/echelles.js`).
+    - ⛔ **NE PAS ajouter de texte d'explication.** La fiche d'aide `grille-niveau-solo`
+      (`js/accompagnement-contenu-popup.js:1125`) dit DÉJÀ la bonne chose — « niveau cognitif du
+      critère […] la complexité structurelle attendue dans la réponse ». Elle n'a pas empêché
+      l'erreur de Grégoire sur son propre critère Structure, à trois centimètres de l'icône.
+      Ce n'est pas un manque d'explication, c'est une erreur de nom : deux noms distincts font
+      disparaître la question, un paragraphe de plus ne fait que la documenter.
+    - ⛔ **NE PAS conditionner l'affichage du champ à l'activation du dépistage** — question posée
+      par Grégoire, tranchée NON sur mesure. `calculerIPB` (`profil-etudiant-calculs.js:1190`) lit
+      `c.niveauSOLO || 'multistructurel'` : un critère sans étiquette est traité comme
+      multistructurel EN SILENCE, et c'est exactement ce filtre qui définit les « fondations »
+      surveillées. Un champ caché ne signifie donc pas « pas de valeur » mais « valeur posée par le
+      code, à l'insu de l'enseignant » : à l'activation du dépistage, un collègue verrait des
+      fondations qu'il n'a jamais choisies et les croirait siennes.
+    - ✅ **Ce qui PEUT devenir conditionnel** : la phrase de conseil de la fiche d'aide, « les
+      critères multistructurels sont surveillés par le dépistage pour détecter les difficultés
+      persistantes ». Elle ne veut rien dire tant que le dépistage est inactif ; elle peut
+      s'effacer. Le champ et son nom, jamais.
+
   **Deux corrections mineures rattachées, à ne pas perdre :**
   - ⏳ **L'Aide affirme un fait faux du logiciel** : « la note repose sur le niveau atteint pour des
     cibles d'apprentissage » (`index.html` l. 10317, l. 10967). Formulation proposée le 9 sept., non
