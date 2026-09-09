@@ -151,9 +151,28 @@
         }
 
         // Grille de référence
+        //
+        // ⚠ #806 — L'ÉCRAN NE DOIT PAS MENTIR. `select.value = id` échoue en
+        // silence quand aucune option ne porte cet id : le sélecteur retombe sur
+        // « — Sélectionner une grille — », et Grégoire lit « je n'ai rien choisi »
+        // alors qu'il a bien choisi et que sa préférence est intacte. C'est ce qui
+        // le faisait re-sélectionner sa grille « régulièrement ».
+        //
+        // ⮕ On rend visible ce qui est réellement enregistré, en nommant la cause
+        // dans l'option elle-même. Effet de bord voulu : le sélecteur redevient
+        // synchronisé, donc `_sauvegarderGrilleReferenceSiFiable` réécrira cette
+        // même valeur au lieu de s'abstenir — jamais un `''`.
         const grilleReference = document.getElementById('v2-pref-grille-reference');
         const grilleRefId = obtenirPreference('grilleReferenceDepistage');
         if (grilleReference && grilleRefId) {
+            const offerte = Array.from(grilleReference.options || []).some(o => o.value === grilleRefId);
+            if (!offerte) {
+                const fantome = document.createElement('option');
+                fantome.value = grilleRefId;
+                fantome.textContent = 'Grille enregistrée, introuvable dans ce trimestre';
+                fantome.dataset.grilleIntrouvable = 'true';
+                grilleReference.appendChild(fantome);
+            }
             grilleReference.value = grilleRefId;
         }
 
@@ -213,6 +232,42 @@
     // =========================================================================
 
     /**
+     * Écrit `grilleReferenceDepistage` — mais SEULEMENT quand le sélecteur est en
+     * état de représenter le choix de l'utilisateur (#806).
+     *
+     * ⚠ LE PIÈGE QU'ELLE FERME : un `<select>` dont l'option n'existe pas rend
+     * `''`. Silencieusement. Il n'y a AUCUNE différence, à la lecture de `.value`,
+     * entre « l'utilisateur a choisi de ne plus rien désigner » et « le dropdown
+     * n'a pas encore été peuplé ». Le premier est un geste, le second un accident,
+     * et les traiter pareil coûtait son réglage à Grégoire à répétition.
+     *
+     * ⮕ Le départage se fait sur les OPTIONS, pas sur la valeur : si la grille
+     * actuellement désignée figure dans la liste offerte, alors le sélecteur est
+     * synchronisé et son `''` est un vrai retrait. Sinon, on s'abstient.
+     */
+    function _sauvegarderGrilleReferenceSiFiable() {
+        const select = document.getElementById('v2-pref-grille-reference');
+        if (!select) return;
+
+        const choisie = select.value || '';
+        if (choisie) {
+            definirPreference('grilleReferenceDepistage', choisie);
+            return;
+        }
+
+        const actuelle = obtenirPreference('grilleReferenceDepistage') || '';
+        if (!actuelle) return;  // rien à perdre
+
+        const offerte = Array.from(select.options || []).some(o => o.value === actuelle);
+        if (offerte) {
+            definirPreference('grilleReferenceDepistage', '');
+        } else {
+            console.warn('[preferences-v2] Sélecteur de grille désynchronisé — la préférence "'
+                + actuelle + '" est CONSERVÉE plutôt qu\'effacée (#806)');
+        }
+    }
+
+    /**
      * Sauvegarde les préférences via l'API.
      */
     function sauvegarderPreferencesV2() {
@@ -224,7 +279,16 @@
         definirPreference('activerRai', document.getElementById('v2-pref-rai')?.checked !== false);
         definirPreference('afficherDescriptionsSOLO', document.getElementById('v2-pref-solo')?.checked !== false);
         definirPreference('activerActionsRLO', document.getElementById('v2-pref-actions-rlo')?.checked === true);
-        definirPreference('grilleReferenceDepistage', document.getElementById('v2-pref-grille-reference')?.value || '');
+        // ⛔ #806 — LE DEUXIÈME CHEMIN QUI EFFAÇAIT LE CHOIX DE GRÉGOIRE.
+        // `sauvegarderPreferencesV2` écrit TOUT le panneau à chaque `change` de
+        // N'IMPORTE LEQUEL de ses contrôles. Le `|| ''` transformait donc un
+        // sélecteur mal synchronisé — dropdown pas encore peuplé, ou grille
+        // désignée absente de la liste du trimestre — en un effacement de la
+        // préférence, au premier clic sur une case voisine.
+        // ⮕ On n'écrit '' que si c'est un GESTE : le dropdown propose bien la
+        // grille actuellement désignée, et l'utilisateur a quand même choisi de
+        // la retirer. Sinon on ne touche pas à ce qu'il a réglé.
+        _sauvegarderGrilleReferenceSiFiable();
         definirPreference('decouplerPN', document.getElementById('v2-pref-decoupler-pn')?.checked === true);
         definirPreference('fenetrePatterns', parseInt(document.getElementById('v2-pref-fenetre-patterns')?.value) || 3);
 

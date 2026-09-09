@@ -164,35 +164,19 @@ function initialiserModulePratiques() {
     // 🎨 Mettre à jour l'interface de la pratique par défaut
     mettreAJourUIPratiqueDefaut();
 
-    // 🔄 Recharger les grilles après synchronisation IndexedDB.
+    // ⛔ #806 (9 sept. 2026) — PORTILLON `db-ready` RETIRÉ : IL NE GARDAIT RIEN.
     //
-    // #414 (8 août 2026) : cet écouteur est posé depuis `initialiserModulePratiques()`,
-    // que `main.js` appelle sous `DOMContentLoaded` — c'est-à-dire À L'INSTANT
-    // EXACT où l'écouteur de #413 se posait trop tard. La course n'est donc pas
-    // théorique ici : c'est la même, au même moment. Quand `db-ready` était déjà
-    // passé, la liste des grilles restait celle d'avant l'hydratation d'IDB et
-    // la préférence `grilleReferenceDepistage` n'était jamais réappliquée au
-    // sélecteur.
+    // Il rechargeait `#grilleReferenceDepistage` et `#activerCategorisationErreurs`
+    // au `db-ready`. Ces deux identifiants N'EXISTENT NULLE PART dans le HTML :
+    // le sélecteur de grille de dépistage s'appelle `#v2-pref-grille-reference`
+    // depuis sa migration vers « Labo → Outils d'observation », et il est servi
+    // par `preferences-v2.js`, qui a son propre portillon.
     //
-    // `once: false` : à réexécuter à chaque `db-ready`, l'événement étant réémis
-    // après un import — les grilles importées doivent apparaître dans la liste.
-    window.auDbPret(function() {
-        chargerGrillesDisponibles();
-
-        // Restaurer la grille de référence (préférence utilisateur)
-        const selectGrilleRef = document.getElementById('grilleReferenceDepistage');
-        const grilleRefId = obtenirPreference('grilleReferenceDepistage');
-        if (selectGrilleRef && grilleRefId) {
-            selectGrilleRef.value = grilleRefId;
-        }
-
-        // Restaurer la checkbox de catégorisation des erreurs (config de pratique)
-        const modalitesDB = window.modalitesEvaluation.lire();
-        const checkCategorisation = document.getElementById('activerCategorisationErreurs');
-        if (checkCategorisation) {
-            checkCategorisation.checked = modalitesDB.activerCategorisationErreurs === true;
-        }
-    }, { once: false });
+    // ⮕ CE N'EST PAS UN NETTOYAGE COSMÉTIQUE. Ce bloc portait le correctif #414
+    // — la course d'hydratation d'IndexedDB — et le portait sur une cible morte.
+    // Il donnait donc à lire que la course était fermée pour ce réglage, alors
+    // qu'elle ne l'était pour personne. Un garde-fou branché sur rien est pire
+    // qu'un garde-fou absent : on cesse de chercher.
 }
 
 /* ===============================
@@ -432,37 +416,12 @@ function obtenirConfigurationNotation() {
    GRILLE DE RÉFÉRENCE POUR DÉPISTAGE
    =============================== */
 
-/**
- * Charge les grilles disponibles dans le sélecteur de grille de référence
- * Appelée au chargement et après sauvegarde
- */
-function chargerGrillesDisponibles() {
-    const select = document.getElementById('grilleReferenceDepistage');
-    if (!select) return;
-
-    // Sauvegarder la valeur actuellement sélectionnée
-    const valeurActuelle = select.value;
-
-    // Lire les grilles depuis localStorage
-    const grilles = db.getSync(cle('grillesTemplates'), []);
-
-    // Vider le select
-    select.innerHTML = '<option value="">-- Sélectionner une grille --</option>';
-
-    // Ajouter chaque grille comme option
-    grilles.forEach(grille => {
-        const option = document.createElement('option');
-        option.value = grille.id;
-        option.textContent = grille.nom;
-        select.appendChild(option);
-    });
-
-    // Restaurer la valeur sélectionnée si elle existe toujours
-    if (valeurActuelle) {
-        select.value = valeurActuelle;
-    }
-
-}
+// ⛔ #806 — `chargerGrillesDisponibles()` RETIRÉE. Elle peuplait
+// `#grilleReferenceDepistage`, identifiant absent du HTML depuis que le réglage
+// a migré vers « Labo → Outils d'observation ». Son unique appelant était le
+// portillon `db-ready` retiré plus haut, et son `if (!select) return;` la rendait
+// inoffensive — donc invisible. Le sélecteur vivant est peuplé par
+// `chargerDropdownGrillesPreferencesV2()` dans `preferences-v2.js`.
 
 // ============================================================================
 // GESTION DES PRATIQUES CONFIGURABLES (Beta 92)

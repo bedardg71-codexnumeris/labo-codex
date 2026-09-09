@@ -27089,3 +27089,20 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     min-height: 44px;
     font-size: 0.82rem;
 }
+
+/* ============================================================
+   #807 (9 septembre 2026) — LES TROIS CHOIX D'UNE PRODUCTION
+   Grille de critères / Échelle de performance / Cartouche de
+   rétroaction, côte à côte sur une demi-largeur de fiche.
+   Leurs libellés n'ont pas le même nombre de lignes ; sans cette
+   règle, chaque colonne se cale sur son propre contenu et les
+   trois libellés démarrent à trois hauteurs (67 px d'écart mesuré
+   sur la fiche « Artefact »). Ici : le libellé en haut, le
+   sélecteur au pied de sa colonne, quel que soit le nombre de
+   lignes entre les deux.
+   ============================================================ */
+#champGrille .groupe-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}

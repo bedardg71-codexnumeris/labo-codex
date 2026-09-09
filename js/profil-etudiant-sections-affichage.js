@@ -3915,16 +3915,27 @@ function _genererBlocForcesDefisSRPNF(da) {
     `;
 
     if (!barresHTML || barresHTML.trim() === '') {
-        const grilleRef = obtenirGrilleReferenceDepistage();
-        if (!grilleRef) {
+        // ⚠ #806 — LE CHEMIN ÉTAIT FAUX, ET C'EST PIRE QU'UN MESSAGE ABSENT.
+        // « Conception → Pratiques de notation → Grille de référence pour le
+        // dépistage » était écrit ici en dur ; le réglage vit dans « Labo → Outils
+        // d'observation », section « Grille de critères pour le dépistage ».
+        // Rapporté par Grégoire le 9 septembre 2026 : il a cherché.
+        //
+        // ⫦ LA PHRASE N'EST PLUS ÉCRITE ICI. `diagnostiquerGrilleReferenceDepistage`
+        // (#550) la compose déjà, avec le bon chemin ET la cause exacte — trois
+        // causes distinctes qui ne demandent pas le même geste. Une phrase
+        // recopiée dans un deuxième fichier est une phrase qui divergera.
+        const lectureGrille = (typeof diagnostiquerGrilleReferenceDepistage === 'function')
+            ? diagnostiquerGrilleReferenceDepistage()
+            : { grille: null, raison: null, message: '' };
+        if (!lectureGrille.grille || lectureGrille.raison) {
             return `
                 <div class="info-box info-box--attention" style="margin: 15px 0;">
                     <div style="display: flex; gap: 10px; align-items: start;">
                         <div style="flex: 1;">
                             <strong style="color: var(--alerte-texte-attention); display: block; margin-bottom: 5px;">Configuration requise</strong>
                             <p style="margin: 0; color: var(--alerte-texte-attention); font-size: 0.9rem; line-height: 1.5;">
-                                Pour afficher les forces et défis par critère, tu dois configurer une grille de référence dans
-                                <strong>Conception → Pratiques de notation → Grille de référence pour le dépistage</strong>.
+                                ${echapperHtml(lectureGrille.message || '')}
                             </p>
                         </div>
                     </div>
