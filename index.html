@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260909b"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260909f"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4662,18 +4662,34 @@
                                      pondération puis grille/échelle/cartouche à droite,
                                      le tout aligné sur le bas (20 août 2026).
                                      ═══════════════════════════════════════════════════════════ -->
-                                <div class="u-mb-20" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
-                                    <!-- Colonne gauche : définition du type sélectionné -->
-                                    <div style="display: flex; flex-direction: column; justify-content: flex-end">
-                                        <div id="carteDefinitionType" class="u-p-15 u-hide" style="background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal)">
-                                            <p id="texteDefinitionType" class="u-texte-09" style="margin: 0; line-height: 1.6; color: var(--gris-fonce)">
-                                                <!-- Contenu généré dynamiquement par JS -->
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <!-- Colonne droite : pondération, puis grille + échelle + cartouche -->
-                                    <div style="display: flex; flex-direction: column; gap: 15px; justify-content: flex-end">
-                                        <!-- Pondération + Note explicative -->
+                                <!-- ⮕ #807 (9 sept. 2026) — LA DÉFINITION DU TYPE PREND TOUTE LA LARGEUR,
+                                     et elle vient ICI, juste sous les champs qui l'ont déterminée.
+                                     Elle vivait en colonne de gauche, alignée sur le BAS de la colonne
+                                     voisine (choix du 20 août : « le tout aligné sur le bas »). Cet
+                                     alignement supposait deux colonnes de hauteur comparable. Pour un
+                                     artefact, la pondération disparaît — les artefacts n'en ont pas — et
+                                     la colonne droite reste seule à porter la hauteur : la définition
+                                     tombait alors très bas, sous un grand trou blanc. Rapporté par
+                                     Grégoire le 9 sept. : « plusieurs champs désalignés ».
+                                     ⮕ Pleine largeur, elle n'a plus de voisine sur laquelle s'aligner :
+                                     le désalignement ne peut plus se reproduire, quel que soit le type. -->
+                                <div id="carteDefinitionType" class="u-p-15 u-hide u-mb-20" style="background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal)">
+                                    <p id="texteDefinitionType" class="u-texte-09" style="margin: 0; line-height: 1.6; color: var(--gris-fonce)">
+                                        <!-- Contenu généré dynamiquement par JS -->
+                                    </p>
+                                </div>
+
+                                <!-- Deux colonnes, alignées sur le HAUT (#807) : à gauche ce qui décide du
+                                     poids du travail, à droite ce qui s'y attache. `align-items: start`
+                                     plutôt que `flex-end` — c'est ce qui rendait la disposition dépendante
+                                     de la hauteur du voisin. -->
+                                <div class="u-mb-20" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start">
+                                    <!-- Colonne gauche : la pondération, puis le marqueur diagnostique.
+                                         ⚠ LES DEUX RESTENT ENSEMBLE, et c'est le motif de #790 (8 sept.) :
+                                         le marqueur se lit « juste sous la pondération — c'est là que le
+                                         poids d'un travail se décide, donc c'est là qu'on dit qu'il n'en a
+                                         aucun ». Les séparer casserait cette lecture. -->
+                                    <div style="display: flex; flex-direction: column; gap: 15px">
                                         <div id="champPonderation" style="display: grid; grid-template-columns: 150px 1fr; gap: 15px; align-items: start;">
                                             <div class="groupe-form" style="margin: 0;">
                                                 <label data-tooltip="cn-prod-ponderation">Pondération (%) <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span></label>
@@ -4682,11 +4698,6 @@
                                             </div>
                                             <p id="notePonderation" class="u-hide u-texte-petit" style="color: var(--gris-moyen); margin: 0; padding-top: 28px; line-height: 1.5"></p>
                                         </div>
-                                        <!-- #790 (8 sept. 2026) — LE MARQUEUR DIAGNOSTIQUE, juste sous la
-                                             pondération : c'est là que le poids d'un travail se décide, donc
-                                             c'est là qu'on dit qu'il n'en a aucun. Rien de disciplinaire ici —
-                                             le cas fondateur est un texte corrigé sur le seul critère du
-                                             français, mais un enseignant de chimie coche la même case. -->
                                         <label class="prod-marqueur-diagnostique" for="productionDiagnostique">
                                             <input type="checkbox" id="productionDiagnostique">
                                             <span>
@@ -4694,18 +4705,27 @@
                                                 <span class="prod-marqueur-diagnostique-aide">Un travail de repérage, en début de trimestre. Il reste entier dans le dossier de l'élève — copie, annotation, rétroaction, résultat — mais il ne pèse ni sur la note, ni sur la performance, ni sur la complétion, ni sur le palier RàI. Sa pondération est alors sans effet.</span>
                                             </span>
                                         </label>
-                                        <!-- #496 (25 août 2026) : « Préparer le PDF » a quitté l'en-tête de
-                                             section pour venir ICI, au-dessus des trois choix dont il dépend.
-                                             Depuis qu'il lit la production ouverte plutôt qu'un formulaire, sa
-                                             place est dans la fiche : le bouton et ce qu'il emporte se lisent
-                                             d'un seul regard. -->
+                                    </div>
+                                    <!-- Colonne droite : ce qui s'attache à la production — le PDF qu'on en
+                                         tire, et les trois choix dont il dépend.
+                                         #496 (25 août 2026) : « Préparer le PDF » a quitté l'en-tête de
+                                         section pour venir au-dessus de ces trois choix. Depuis qu'il lit la
+                                         production ouverte plutôt qu'un formulaire, sa place est dans la
+                                         fiche : le bouton et ce qu'il emporte se lisent d'un seul regard. -->
+                                    <div style="display: flex; flex-direction: column; gap: 15px">
                                         <div class="u-text-right" style="margin-bottom: -5px;">
                                             <button data-action="afficherFormulairePDFDepuisProduction" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
                                                 <img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Pr&eacute;parer le PDF
                                             </button>
                                         </div>
-                                        <!-- Grille de critères + Échelle + Cartouche -->
-                                        <div id="champGrille" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: end;">
+                                        <!-- #807 — `stretch` et non `end` : à trois sélecteurs sur une demi-largeur,
+                                             « Grille de critères d'évaluation » tient sur trois lignes quand
+                                             « Échelle de performance » en tient deux. Aligner les colonnes par le BAS
+                                             faisait alors démarrer les trois libellés à trois hauteurs différentes
+                                             (67 px d'écart, mesuré). Étirées, les colonnes alignent les libellés en
+                                             haut ET les sélecteurs en bas — voir `#champGrille .groupe-form` dans
+                                             styles.css, qui pousse le sélecteur au pied de sa colonne. -->
+                                        <div id="champGrille" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: stretch;">
                                             <div class="groupe-form" style="margin: 0;">
                                                 <label data-tooltip="cn-prod-grille">Grille de critères d'évaluation
                                                     <button class="btn-aide-contextuelle" data-aide="apc-grille-individuel" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
@@ -8704,7 +8724,17 @@
                 </div>
 
                 <div id="labo-accompagnement" class="sous-section">
-                    <h2>Outils d'observation</h2>
+                    <!-- #806 (9 sept. 2026) — le bouton d'enregistrement remonte auprès du
+                         titre. Il vivait en pleine largeur tout en bas de la page, après les
+                         trois sections dépliables : Grégoire ne le voyait pas, et le patron
+                         de toutes les autres pages (Cadre du trimestre, Présences) le place
+                         compact, à droite du titre. -->
+                    <div class="u-flex-between u-mb-12">
+                        <h2 class="u-mb-0">Outils d'observation</h2>
+                        <button class="btn btn-confirmer btn-compact" data-action="sauvegarderToutesPreferencesV2">
+                            Enregistrer
+                        </button>
+                    </div>
                     <p class="text-muted">
                         Configure les trois piliers de l'accompagnement : observation de la structure des apprentissages (SOLO), cueillette des micro-données (ACP), et planification des interventions (RàI). Plie ou déplie chaque section selon ton usage.
                     </p>
@@ -9036,12 +9066,8 @@
                         </div>
                     </div>
 
-                    <!-- Bouton sauvegarder -->
-                    <div class="u-mt-20">
-                        <button class="btn btn-confirmer u-w-100" data-action="sauvegarderToutesPreferencesV2">
-                            Enregistrer les paramètres d'accompagnement
-                        </button>
-                    </div>
+                    <!-- #806 — le bouton pleine largeur qui était ici est remonté auprès du
+                         titre « Outils d'observation ». Un seul bouton, pas deux. -->
                 </div>
 
 
@@ -9352,7 +9378,15 @@
 
                 <!-- Onglet 2: Préférences (Beta 95) -->
                 <div id="reglages-preferences" class="sous-section">
-                    <h2>Préférences</h2>
+                    <!-- #806 — même geste que pour « Outils d'observation » : les deux pages
+                         partagent le même bouton (`sauvegarderToutesPreferencesV2`), elles
+                         doivent le placer au même endroit. -->
+                    <div class="u-flex-between u-mb-12">
+                        <h2 class="u-mb-0">Préférences</h2>
+                        <button class="btn btn-confirmer btn-compact" data-action="sauvegarderToutesPreferencesV2">
+                            Enregistrer
+                        </button>
+                    </div>
                     <p class="text-muted">
                         Personnalise ton expérience : outils à exploiter, affichage et navigation.
                     </p>
@@ -9484,12 +9518,7 @@
                         </div>
                     </div>
 
-                    <!-- Bouton sauvegarder -->
-                    <div class="u-mt-20">
-                        <button class="btn btn-confirmer u-w-100" data-action="sauvegarderToutesPreferencesV2">
-                            Enregistrer toutes les préférences
-                        </button>
-                    </div>
+                    <!-- #806 — bouton remonté auprès du titre « Préférences ». -->
                 </div>
 
                 <!-- Onglet : Données -->
@@ -14560,7 +14589,7 @@
     <script src="js/repertoires-bibliotheque.js"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
     <script src="js/pratiques-bibliotheque.js?v=20260903b"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/pratiques-gestion.js?v=20260906b"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
-    <script src="js/preferences-v2.js?v=20260822a"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
+    <script src="js/preferences-v2.js?v=20260909f"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=20260903f"></script> <!-- #649 : un seul chemin de suppression des productions, le garde mort est parti -->
     <script src="js/etudiants.js?v=20260827a"></script>
     <script src="js/productions-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
@@ -14626,7 +14655,7 @@
     <script src="js/modal-doublon.js?v=2026010601"></script>
 
     <!-- Interface de gestion des pratiques configurables -->
-    <script src="js/pratiques.js?v=20260902f"></script> <!-- #326 (28 juin) : T3 copie en forme canonique + T4 dérivation = arbre sans wizard ; Beta 99.38 b0508-1425 : nettoyage wizard V1 fantôme (-1772 l.) -->
+    <script src="js/pratiques.js?v=20260909f"></script> <!-- #326 (28 juin) : T3 copie en forme canonique + T4 dérivation = arbre sans wizard ; Beta 99.38 b0508-1425 : nettoyage wizard V1 fantôme (-1772 l.) -->
     <script src="js/wizard-pratique-v2.js?v=20260902b"></script> <!-- #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté · #577 : l'étape « Échelle de performance » pose les deux repères de maîtrise de l'échelle choisie -->
     <script src="js/objectifs.js?v=20260903b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
@@ -14636,13 +14665,13 @@
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=20260908a"></script> <!-- Refonte nav SP5 : faux ami CSS class préservée -->
-    <script src="js/profil-etudiant-helpers.js?v=20260908b"></script> <!-- Refactor session A : zone helpers extraite. Compte de fonctions et de lignes retire le 27 aout 2026 : il disait 16 alors que le module en exportait 19, et il se re-perimerait au prochain ajout. · #555 (d) : la préférence IDME se nomme seuilIdme* -->
-    <script src="js/profil-etudiant-calculs.js?v=20260908b"></script> <!-- Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
+    <script src="js/profil-etudiant-helpers.js?v=20260909f"></script> <!-- Refactor session A : zone helpers extraite. Compte de fonctions et de lignes retire le 27 aout 2026 : il disait 16 alors que le module en exportait 19, et il se re-perimerait au prochain ajout. · #555 (d) : la préférence IDME se nomme seuilIdme* -->
+    <script src="js/profil-etudiant-calculs.js?v=20260909f"></script> <!-- Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
     <script src="js/profil-etudiant-rapport.js?v=20260905b"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
-    <script src="js/profil-etudiant-diagnostics.js?v=20260829a"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
+    <script src="js/profil-etudiant-diagnostics.js?v=20260909f"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260905b"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
     <script src="js/profil-etudiant-actions.js?v=20260906a"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
-    <script src="js/profil-etudiant-sections-affichage.js?v=20260908b"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
+    <script src="js/profil-etudiant-sections-affichage.js?v=20260909f"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=2025121017"></script>
     <script src="js/presences-rapport.js?v=20260827a"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
     <script src="js/boite-outils.js?v=20260906a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->

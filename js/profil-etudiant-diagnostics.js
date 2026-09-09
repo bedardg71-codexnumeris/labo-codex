@@ -471,12 +471,19 @@ function _genererBarresSRPNF(da) {
     // Contenu des barres ou message
     let contenuBarres = '';
     if (!barresHTML || barresHTML.trim() === '') {
-        const grilleRef = typeof obtenirGrilleReferenceDepistage === 'function' ? obtenirGrilleReferenceDepistage() : null;
-        if (!grilleRef) {
+        // ⚠ #806 — deuxième exemplaire du même chemin faux (l'autre était dans
+        // `profil-etudiant-sections-affichage.js`). Les deux citaient « Conception
+        // → Pratiques de notation » ; le réglage est dans « Labo → Outils
+        // d'observation ». Deux copies d'une phrase, deux occasions de se tromper :
+        // la phrase vient maintenant du diagnostic #550, qui en est la seule source.
+        const lectureGrille = (typeof diagnostiquerGrilleReferenceDepistage === 'function')
+            ? diagnostiquerGrilleReferenceDepistage()
+            : { grille: null, raison: null, message: '' };
+        if (!lectureGrille.grille || lectureGrille.raison) {
             contenuBarres = `<div class="info-box info-box--attention" style="margin: 15px 0;">
                 <strong style="color: var(--alerte-texte-attention);">Configuration requise</strong>
                 <p style="margin: 5px 0 0; color: var(--alerte-texte-attention); font-size: 0.9rem;">
-                    Configure une grille de référence dans Conception → Pratiques de notation → Grille de référence pour le dépistage.
+                    ${echapperHtml(lectureGrille.message || '')}
                 </p>
             </div>`;
         } else {

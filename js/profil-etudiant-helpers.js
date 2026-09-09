@@ -709,17 +709,21 @@ function obtenirPratiqueActuelle() {
  * ⚠ TROIS CAUSES DISTINCTES, et elles ne demandent pas le même geste :
  *   · `aucune-grille-designee` — la préférence est vide. Fraîche installation,
  *     ou grille jamais choisie. C'est le cas de Grégoire ce matin-là.
- *   · `grille-introuvable` — la grille désignée a été supprimée. La préférence
- *     est auto-nettoyée ici même (comportement d'origine, préservé).
+ *   · `grille-introuvable` — la grille désignée n'est pas parmi celles du
+ *     trimestre, ALORS QUE LA LISTE EN CONTIENT : elle a bien été supprimée.
+ *   · `grilles-indisponibles` (#806) — la liste entière est vide. Ce n'est pas
+ *     une suppression : c'est une base pas encore hydratée, ou un trimestre sans
+ *     grilles. La préférence est CONSERVÉE, et le message le dit.
  *   · `grille-sans-criteres` — la grille existe et est bien désignée, mais elle
  *     est vide. L'écran serait tout aussi muet, pour une raison encore
  *     différente : c'est la grille qu'il faut remplir, pas en choisir une autre.
  *
- * ⚠ L'AUTO-NETTOYAGE FAIT QUE `grille-introuvable` NE S'OBSERVE QU'UNE FOIS :
- * l'appel suivant, dans le même rendu ou le suivant, verra une préférence vide
- * et rendra `aucune-grille-designee`. C'est sans conséquence pratique — les deux
- * messages mènent au même geste, désigner une grille — mais il ne faut pas
- * écrire de test qui suppose l'ordre des appels.
+ * ⛔ #806 (9 sept. 2026) — CETTE FONCTION N'ÉCRIT PLUS RIEN. Elle effaçait la
+ * préférence quand la grille ne se résolvait pas (« auto-nettoyage »), ce qui
+ * faisait perdre son choix à Grégoire à chaque course d'hydratation d'IndexedDB.
+ * Un chemin d'affichage constate ; il ne détruit pas un réglage. Le corollaire
+ * pour les tests : `grille-introuvable` s'observe autant de fois qu'on l'appelle,
+ * et la préférence vaut toujours ce que l'utilisateur y a mis.
  *
  * Verrouillé par `tests/unit/sentinelle-550-grille-reference-cause-nommee.test.js`.
  *
@@ -748,14 +752,43 @@ function diagnostiquerGrilleReferenceDepistage() {
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille) {
-        // Auto-nettoyage silencieux : la grille référencée a été supprimée
-        // (cas d'une grille utilisateur effacée puis référence non nettoyée).
-        // On retire la préférence pour éviter que le message d'erreur ne se
-        // répète à chaque rendu de l'aperçu.
-        console.warn(`[Depistage] Grille de référence "${grilleId}" introuvable — préférence auto-nettoyée`);
-        if (typeof definirPreference === 'function') {
-            definirPreference('grilleReferenceDepistage', '');
+        // ⛔⛔ #806 — CETTE FONCTION N'ÉCRIT PLUS. Elle écrivait, et c'est ce qui
+        // faisait « disparaître » le réglage de Grégoire (rapporté le 9 sept. 2026 :
+        // « il faut régulièrement que je l'enregistre à nouveau »).
+        //
+        // Ce qui vivait ici :
+        //     definirPreference('grilleReferenceDepistage', '');
+        // sous le nom rassurant d'« auto-nettoyage silencieux ». Il partait d'une
+        // prémisse fausse : « la grille est absente de la liste DONC elle a été
+        // supprimée ». `db.getSync(cle('grillesTemplates'), [])` rend `[]` aussi
+        // quand IndexedDB n'est pas encore hydratée — et le localStorage de
+        // Grégoire est saturé (5 119 Ko au rapport), donc ses grilles vivent en
+        // IDB. UN SEUL RENDU DE PROFIL PARTI TROP TÔT SUFFISAIT À EFFACER SON
+        // CHOIX, définitivement, sans qu'il voie rien.
+        //
+        // ⮕ LA RÈGLE, ET ELLE NE VAUT PAS QUE POUR CE FICHIER : un chemin
+        // d'AFFICHAGE ne détruit pas un réglage de l'utilisateur. Il constate, il
+        // nomme, il laisse la donnée intacte. Réparer d'office est exclu (CLAUDE.md,
+        // « tarir n'est pas réparer ») : on tarit la source, le stock déjà effacé
+        // se re-désigne à la main, une fois.
+        //
+        // ⚠ DEUX CAUSES SOUS UN MÊME SILENCE, et elles ne se disent pas pareil.
+        // Affirmer « supprimée » quand la liste entière est vide, c'est mentir à
+        // l'utilisateur sur ce qui s'est passé — et l'envoyer réparer ce qui n'est
+        // pas cassé.
+        const listeVide = !Array.isArray(grilles) || grilles.length === 0;
+        if (listeVide) {
+            console.warn(`[Depistage] Aucune grille chargée pour le trimestre — la référence "${grilleId}" est CONSERVÉE`);
+            return {
+                grille: null,
+                raison: 'grilles-indisponibles',
+                message: 'Aucune grille n\'est chargée pour ce trimestre : le dépistage n\'a '
+                    + 'rien à quoi comparer les résultats pour l\'instant. Ton choix de grille est '
+                    + 'conservé. Si l\'écran reste vide après un rechargement, revérifie ' + OU + '.'
+            };
         }
+
+        console.warn(`[Depistage] Grille de référence "${grilleId}" absente des ${grilles.length} grilles du trimestre`);
         return {
             grille: null,
             raison: 'grille-introuvable',

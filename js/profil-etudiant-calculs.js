@@ -1336,9 +1336,12 @@ function diagnostiquerForcesChallenges(moyennes, seuil = null) {
     const grille = obtenirGrilleReferenceDepistage();
 
     if (!grille || !grille.criteres || grille.criteres.length === 0) {
+        // #806 — le chemin cité était faux ici aussi (console, mais c'est la
+        // console que Grégoire lit quand il cherche). Le réglage vit dans
+        // « Labo → Outils d'observation ».
         console.warn('⚠️ Pas de grille de référence - diagnostic forces/défis impossible');
         console.warn('   → Grille:', grille);
-        console.warn('   → Allez dans Conception → Pratiques de notation pour configurer une grille de référence');
+        console.warn('   → Choisis-en une dans Labo → Outils d\'observation → « Grille de critères pour le dépistage »');
         return { forces: [], defis: [], principaleForce: null, principalDefi: null };
     }
 
