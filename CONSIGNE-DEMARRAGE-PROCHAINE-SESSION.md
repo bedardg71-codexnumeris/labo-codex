@@ -42,18 +42,18 @@ l'instance qui l'a poussée. Le point 4 renvoie à la consigne du dépistage du 
 
 ---
 
-## ÉTAT MESURÉ — 9 SEPTEMBRE 2026, 19 H 30 (TORONTO)
+## ÉTAT MESURÉ — 9 SEPTEMBRE 2026, 20 H 05 (TORONTO)
 
 ▣ **Mesure de CLAUDE CODE, dans l'arbre, chaque ligne avec la commande qui la produit.** Elle remplace
 celle du 8 septembre, périmée de trois versions mineures. ⚠ Un état mesuré vieillit en heures : sept
 versions sont sorties le 9. **Remesure, ne recopie pas.**
 
-- **`main` = `12a41e29`**, version `1.127.2`, build `0909-1912` (`git log --oneline -1`,
-  `cat version.json`). Sept livraisons le 9 : `1.125.1`, `1.125.2`, `1.126.0`, `1.126.1`, `1.127.0`,
-  `1.127.1`, `1.127.2`. ⚠ Ce SHA a bougé **deux fois pendant que cette mesure s'écrivait** : la
-  livraison est `c8b7fc5d`, puis une AUTRE session du même arbre a commité `00c6237b` et `12a41e29`
-  (cadrage de #810, `BACKLOG.md` seul, aucun code). C'est la démonstration de la ligne du dessus :
-  **un SHA écrit dans un fichier d'état est périmé avant d'être lu.**
+- **Version `1.127.3`, build `0909-1955`** (`cat version.json`). **HUIT livraisons le 9** :
+  `1.125.1`, `1.125.2`, `1.126.0`, `1.126.1`, `1.127.0`, `1.127.1`, `1.127.2`, `1.127.3`.
+  ⚠ **Le SHA de `main` n'est PAS écrit ici, exprès.** Celui de la version précédente de cette
+  mesure a été périmé DEUX FOIS en une heure — d'abord par la livraison, puis par une autre session
+  du même arbre qui commitait en parallèle. Un SHA inscrit dans un fichier d'état est périmé avant
+  d'être lu : `git log --oneline -1` le rend en une seconde, et c'est la seule valeur à croire.
 - **`origin/main` = `main`** après le push du soir (`git fetch && git rev-list --count origin/main..HEAD`
   rend `0` ; témoin : le même compte rendait `1` avant le push, un commit de porte terrain attendait
   depuis 18 h 52).
@@ -65,13 +65,21 @@ versions sont sorties le 9. **Remesure, ne recopie pas.**
   Playwright local pris sur le SHA poussé, baseline des rougeurs connues **à 0** depuis le 9 en fin
   d'après-midi (elle déclarait faussement zéro depuis le 26 août, corrigée le 8, puis vidée pour de
   vrai quand les quatre essais menteurs ont été réparés).
-- **`RELAIS.md`, `SESSION.md` et `OU-EN-EST-ON.md` sont à jour au 9 au soir** — les trois ont été
-  remis à niveau ce soir-là ; `SESSION.md` portait **vingt-trois commits sans trace** (bloc SESSION 37).
+- **`RELAIS.md` et `OU-EN-EST-ON.md` sont à jour au 9 en fin de soirée** (1.127.3) ; `SESSION.md`
+  s'arrête au bloc SESSION 37, qui couvre jusqu'à `1.127.2` — **les deux dernières livraisons du 9 y
+  manquent**, et c'est la première chose à combler.
+- ✅ **La grille de dépistage de Grégoire est re-désignée et TIENT** (porte #802, rangée 1.1, relevée
+  à 18 h 49). La ligne « à re-choisir une fois » qui traînait dans les relais est close.
+- ⏳ **#810 n'est pas ouvert** : seul son préalable de vocabulaire est livré (1.127.3). Le chantier de
+  fond attend la rencontre de la communauté de pratique du 14 — cadrage complet dans `BACKLOG.md`.
 - **Une branche vivante sur `origin`** : `claude/consigne-du-jour-wybfs0`, absorbée dans `main` mais non
   supprimée (sa suppression revient à l'instance qui l'a poussée).
-- ⚠ **`.git/` porte treize verrous résiduels renommés depuis le 27 août**, et un `HEAD.lock` vide daté
-  de 18 h 52 a bloqué un commit le 9 au soir. Défaut récurrent, jamais traité : si un commit échoue sur
-  « Unable to create … .lock », vérifier l'horodatage et l'absence de processus git avant de l'écarter.
+- ⚠ **`.git/` porte une vingtaine de verrous résiduels renommés depuis le 27 août**, et deux verrous
+  vides sont réapparus le 9 à 19 h 21 **sans qu'aucun processus git ne tourne**. ⮕ **LA CAUSE EST
+  CONNUE ET STRUCTURELLE, un `rm` de plus ne règle rien** : le shell de Cowork ne peut pas SUPPRIMER
+  de fichier dans le dépôt, seulement renommer — chaque commit tenté depuis Cowork laisse donc son
+  verrou derrière lui. Conduite à tenir côté Claude Code : si un commit échoue sur « Unable to create
+  … .lock », vérifier que le fichier est VIDE et qu'aucun processus git ne tourne, puis l'écarter.
 
 ### Le retour testeur du 7 septembre : ce n'était pas un bug
 

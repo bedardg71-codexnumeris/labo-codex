@@ -15,14 +15,44 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-⏳ **CE QUI T'ATTEND — la porte terrain des sept livraisons du jour (#802).**
-`plans de travail/PORTES-TERRAIN-2026-09-09.md`. **14 rangées et 3 décisions pour sept versions** :
-une seule touche tes données (ta grille de dépistage, à re-choisir UNE fois — la source est tarie,
-pas le stock), deux ne peuvent être tranchées que sur ta tablette (saisir une bulle au doigt, le
-Comparateur en mode sombre), et trois attendent ton verdict écrit, pas une case cochée. Tout le
-reste — la prose de l'Aide, la fiche production, les cinq correctifs du matin — est livré sans porte :
-si ça cloche, tu le diras en travaillant. Consigne de publication de l'artefact pour Cowork :
+✅ **RELEVÉE — la porte terrain des sept livraisons du jour (#802) : 14 sur 14, zéro échec.**
+`plans de travail/PORTES-TERRAIN-2026-09-09.md`, relevée le 9 sept. à 18 h 49. **Ta grille de
+dépistage tient** : re-désignée, elle a survécu au rechargement (rangée 1.1) — plus rien à faire de
+ce côté. Sur ta tablette, la bulle répond au doigt sur les cinq essais, et le Comparateur se lit en
+mode sombre. Tes trois décisions sont écrites dans le markdown, pas dans une conversation : la prose
+de l'Aide retenue telle quelle, « Verrou sur une évaluation » confirmé, et **l'intention prime — la
+cible d'apprentissage**, ce dernier point ouvrant un chantier (#810) plutôt qu'un correctif.
+Consigne de publication de l'artefact pour Cowork :
 `plans de travail/CONSIGNE-COWORK-artefact-porte-802.md`.
+
+↻ **1.127.3 — DEUX MOTS POUR DEUX CHOSES, ET LE BOUTON COCCINELLE NE SERT PLUS QU'AUX BUGS**
+(build `0909-1955`).
+**Ce que tu verras** : dans ta grille, le champ « Niveau SOLO » s'appelle maintenant « **Complexité
+SOLO du critère** » ; dans ton échelle, l'équivalent devient « **Palier SOLO du niveau** ». C'est le
+même mot qui servait aux deux, et il désignait deux choses opposées : ce qu'un critère EXIGE d'un
+côté, ce qu'un élève ATTEINT de l'autre. Tu t'y es trompé toi-même aujourd'hui sur ton critère
+Structure, la fiche d'aide ouverte juste à côté. ⮕ **Rien n'a changé dans tes grilles ni dans tes
+échelles** : c'est l'étiquette à l'écran, pas ce qui est enregistré.
+▣ **Pourquoi maintenant, et pas après le 14** : dire « mon seuil est le relationnel » devant vingt
+collègues ferait lire à une partie de la salle que trois de tes cinq critères passent sous ton propre
+seuil. Le chantier de fond, lui, attend la rencontre — il est cadré dans la fiche #810.
+▣ **Le bouton coccinelle annonce enfin ce qu'il y a derrière.** Il disait « Signaler un bug » ; la
+fenêtre porte deux modes depuis toujours — un bug, ou un commentaire. Un collègue sans bug à
+déclarer n'avait aucune raison de l'ouvrir. Il dit maintenant « **Signaler un bug ou donner ton
+avis** », dans l'en-tête comme dans le menu.
+▣ **Et l'invitation reste visible.** La fenêtre des « Nouveautés » porte un bouton « Donner ton
+avis ». Elle est là parce que le bandeau de version, lui, **disparaît** : une invitation qu'on ne
+voit qu'une fois, au moment précis où tu veux lire autre chose, se referme avant d'avoir servi.
+▣ **Au passage, une phrase de l'Aide qui n'avait jamais été livrée** : en PAN – Standards, la note
+« **vise** » le niveau atteint pour des cibles d'apprentissage — elle n'y « repose » plus — et l'Aide
+dit désormais par quoi Labo Codex lit ce niveau aujourd'hui : les traces retenues au portfolio.
+**Vérifié comment** : 12 mutations volontaires, 12 rouges, arbre restauré par empreinte sha256 — dont
+une qui a révélé qu'un de mes propres essais passait QUOI QU'IL ARRIVE (il surveillait un bandeau
+sous un identifiant qui n'existe nulle part). La fenêtre des nouveautés et son nouveau bouton ouverts
+et cliqués au banc ; l'étiquette de grille tient sur une ligne. Suite complète : 5 714 essais verts
+(520 fichiers).
+⛔ **Ce qui n'est PAS vérifié** : ni Safari, ni l'iPad. Et l'éditeur de grille n'a pas été ouvert en
+situation — son étiquette a été mesurée avec la vraie feuille de style, pas dans le vrai écran.
 
 ↻ **1.127.2 — LE TEXTE D'ACCUEIL DE L'AIDE DIT VRAI SUR TES DONNÉES** (build `0909-1912`).
 **Ce que tu verras** : dans Aide › « Qu'est-ce que Labo Codex ? », la carte de présentation ne promet
