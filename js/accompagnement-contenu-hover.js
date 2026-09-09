@@ -22,7 +22,7 @@ const TOOLTIPS = {
     'entete-mode-affichage':
         'Masque les noms réels de tes étudiant·es (noms fictifs ou numéros). Utile quand tu présentes ton écran en réunion ou en formation.',
     'entete-signaler-bug':
-        'Signale un problème technique. Pense à inclure le numéro de build (dans le bandeau) pour faciliter le diagnostic.',
+        'Signale un problème technique OU envoie un commentaire sur l\'application — la fenêtre porte les deux modes. Le numéro de build part automatiquement avec ton message.',
 
     // --- Groupe-cours ---
 

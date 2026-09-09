@@ -145,7 +145,7 @@ test('#555 · l\'éditeur d\'échelle rend les deux repères, et l\'aperçu dit 
     resultat.largeursReperes.forEach((l) => expect(l).toBeGreaterThan(128));
 
     // Et les libellés ne s'empilent plus mot par mot : « Suffisant à partir de »
-    // tient sur une ligne, « Niveau SOLO atteint (facultatif) » sur deux au plus
+    // tient sur une ligne, « Palier SOLO du niveau (facultatif) » sur deux au plus
     // (il en occupait quatre).
     resultat.lignesLabelsReperes.forEach((n) => expect(n).toBeLessThanOrEqual(1));
     expect(resultat.lignesLabelSOLO).toBeLessThanOrEqual(2);

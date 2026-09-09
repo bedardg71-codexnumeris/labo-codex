@@ -848,7 +848,7 @@ function ouvrirModalRapportBug() {
         <div id="modalRapportBug" class="modal-overlay actif" style="z-index: 10000;">
             <div class="modal-contenu" style="max-width: 700px;">
                 <button class="modal-fermer" data-action="fermerModalRapportBug"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
-                <h3 class="modal-titre">Signaler un problème</h3>
+                <h3 class="modal-titre">Signaler un bug ou donner ton avis</h3>
 
                 <div class="modal-section">
                     <!-- Sélecteur de mode -->

@@ -3294,7 +3294,7 @@ function afficherNiveauxNouvelleEchelle() {
                     })}
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Niveau SOLO atteint
+                    <label class="echelle-texte-detail">Palier SOLO du niveau
                         <span class="echelle-texte-petit"> (facultatif)</span>
                     </label>
                     <select class="controle-form"
@@ -3629,7 +3629,7 @@ function afficherNiveauxEchelle(echelle) {
                     })}
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Niveau SOLO atteint
+                    <label class="echelle-texte-detail">Palier SOLO du niveau
                         <span class="echelle-texte-petit"> (facultatif)</span>
                     </label>
                     <select class="controle-form"
