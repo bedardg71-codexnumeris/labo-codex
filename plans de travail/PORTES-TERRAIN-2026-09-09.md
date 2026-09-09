@@ -5,6 +5,9 @@
 >
 > **Ce qui échoue ici devient un item de backlog, avec son numéro de porte.**
 > Jamais une note mentale.
+>
+> ✅ **RELEVÉE LE 9 SEPTEMBRE 2026, 18 h 49 — 14 passées / 0 échec / 0 non traitée.**
+> Les trois décisions du §3 sont tranchées et reportées ci-dessous. Seule la 3.3 appelle du code : **#810**.
 
 **Pourquoi cette liste est courte.** Sept versions sont sorties aujourd'hui, et
 la liste tient en **six rangées et trois décisions**. C'est voulu : une porte
@@ -107,7 +110,7 @@ cohorte.**
 Aide → Introduction, et écris ton verdict :** les mots conviennent-ils ? Qu'est-ce
 qui sonne faux, ou manque ?
 
-> _Ta réponse :_
+> **Réponse de Grégoire (9 sept. 2026, 18 h 49) :** « C'est très bien. » ⮕ La prose de la carte PAN est retenue telle quelle.
 
 ### 3.2 · « Verrou sur une évaluation » — le mot retenu
 
@@ -118,7 +121,7 @@ J'ai retenu celui de l'écran de saisie, sans te le demander.
 ⮕ **Est-ce le bon mot ?** Si tu en préfères un autre, il ne se change plus qu'à
 un seul endroit désormais.
 
-> _Ta réponse :_
+> **Réponse de Grégoire (9 sept. 2026, 18 h 49) :** « C'est le bon mot. » ⮕ « Verrou sur une évaluation » est confirmé comme libellé unique.
 
 ### 3.3 · Ce à quoi la note se rapporte, en PAN – Standards
 
@@ -132,7 +135,7 @@ question de pédagogie, pas de code : le Comparateur décrit la mécanique, l'Ai
 l'intention. **Laquelle doit primer ?** Faut-il aligner l'une sur l'autre, ou
 assumer la distinction en l'expliquant ?
 
-> _Ta réponse :_
+> **Réponse de Grégoire (9 sept. 2026, 18 h 49) :** « C'est l'intention qui doit primer (la cible d'apprentissage). » ⮕ L'Aide fait foi ; le Comparateur doit être aligné sur elle pour PAN – Standards. Inscrit au backlog sous **#810**.
 
 ---
 
