@@ -7,6 +7,46 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 9 SEPT. 2026, MATIN : RAPPORT TESTEUR #543 (1.125.1)
+
+> ✅ **`main` à jour, 1.125.1, build `0909-0832`. Vitest 511 fichiers / 5620 tests. Tout est
+> poussé — aucun travail en attente sur une branche.**
+>
+> **CE QUI A ÉTÉ FAIT** : le rapport testeur du 8 sept. (« la bibliothèque n'est pas rafraîchie au
+> moment de l'importation d'une grille »). ⚠ **Elle L'ÉTAIT.** Quatre reproductions en WebKit —
+> chemin nominal, grille marquée démo, réimport d'une grille déjà en sélection, et le régime réel de
+> Grégoire (60 grilles en bibliothèque + localStorage saturé à 5,2 M car.) — montrent que l'écriture,
+> la relecture et la reconstruction de la modale se font toutes. Le défaut est **géométrique** : la
+> carte importée arrive **61ᵉ sur 61, à 8 548 px sous le bas de la zone visible**, sur une modale que
+> la reconstruction remet en haut. Remède : helper générique `BibliothequeUI.pointerVersItems(ids)`
+> (extrait de `voirItemDoublon`, #291 §3.3) — défilement + surbrillance 2,2 s — et il **rend** les
+> ids qu'aucune carte ne porte, ce qui permet de le DIRE quand un filtre avale le résultat.
+>
+> **TROIS CHOSES À NE PAS DÉFAIRE :**
+> · **Le pointage vient APRÈS `await afficherBibliothequeGrilles()`**, jamais avant : la modale est
+>   entièrement reconstruite (`creerModal` retire l'ancienne), donc toute référence DOM prise avant
+>   est morte.
+> · **`voirItemDoublon` passe désormais par le helper** et n'a plus sa propre requête DOM. Son
+>   comportement d'origine (notification quand la carte est masquée) est conservé, et l'essai
+>   `doublons-bandeau-291.spec.js` « Voir mène à la bonne carte » le garde.
+> · **Le message de la notification est CONDITIONNEL** : il ne nomme la case « Masquer les éléments
+>   déjà dans la barre latérale » que si elle est réellement cochée. Sinon il dit « un filtre
+>   d'affichage les masque ici » — parce que dans le cas démo, ce n'est pas cette case-là.
+>
+> ⏳ **CE QUI RESTE DÛ** :
+> · **BACKLOG #793** — les **quatre autres bibliothèques** (cartouches, échelles, pratiques,
+>   productions) portent le MÊME patron `confirmerImportX` et le même défaut. Le helper est déjà
+>   générique : il ne reste qu'à poser l'appel et la phrase. Niveau 2 assumé (Grégoire n'avait
+>   signalé que les grilles).
+> · **La porte terrain #790** de la veille est toujours due — voir le bloc du 8 sept. ci-dessous.
+> · **Rien de ce lot n'a été vu dans le Chrome de Grégoire ni sur l'iPad** : la mesure vient de
+>   WebKit en ligne de commande.
+> · **La CI est rouge sur `main`** depuis avant ce lot : 4 essais WebKit/iPad préexistants
+>   (`bulles-au-doigt-540.spec.js` ×3, `palette-redim-poignee-773.spec.js:111`), que le verdict local
+>   compte comme échecs connus. Aucune disposition prise.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 8 SEPT. 2026, FIN D'APRÈS-MIDI : LE TRAVAIL DIAGNOSTIQUE (1.125.0)
 
 > ✅ **`main` à jour, 1.125.0, build `0908-1502`. Vitest 511 fichiers / 5620 tests.**

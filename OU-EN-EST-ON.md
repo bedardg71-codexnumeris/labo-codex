@@ -15,6 +15,29 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.125.1 — LA GRILLE QUE TU IMPORTES SE MONTRE** (build `0909-0832`).
+**Ce que tu verras** : après « Importer des grilles (JSON) », la grille importée est **amenée à
+l'écran** et mise en évidence deux secondes, pour que tu voies laquelle vient d'arriver.
+▣ **Ce qui se passait, et ce n'était pas ce que tu croyais.** Ton rapport du 8 septembre disait « la
+bibliothèque n'est pas rafraîchie ». Elle l'était — à chaque fois. La grille était bien écrite, la
+liste bien reconstruite. Mais la nouvelle venue s'ajoutait **tout en bas**, et la fenêtre repartait du
+haut : sur ta bibliothèque, ça la plaçait à plus de huit mille pixels sous le bas de l'écran. Rien ne
+bougeait sous tes yeux, ce qui ne se distingue pas d'une panne.
+▣ **Et quand un filtre la cache, l'application le dit.** Deux cas mesurés au passage : la case
+« Masquer les éléments déjà dans la barre latérale » cochée sur un réimport, et le matériel de
+démonstration en mode normal. Dans les deux, tu lisais « 1 grille ajoutée » devant une liste
+rigoureusement identique. Le message dit maintenant qu'un filtre les masque, et lequel décocher.
+⛔ **Ce que ça ne fait PAS** : les **quatre autres bibliothèques** — cartouches, échelles, pratiques,
+productions — ont exactement le même défaut, et il n'est pas corrigé. Tu n'avais signalé que les
+grilles, et le périmètre ne s'élargit plus tout seul. C'est inscrit (#793).
+**Vérifié comment** : 5 620 essais verts, plus deux gardiens neufs — l'un mesure que la carte est
+réellement dans le cadre visible sur une liste de 61 grilles, l'autre que le message apparaît quand un
+filtre avale le résultat. **Trois mutations du code faites exprès** pour les faire échouer : chacune
+rouge, et chaque fichier restauré à l'octet près (empreinte vérifiée). La deuxième mutation **rejoue
+le chiffre** : 8 548 pixels sous le bas de l'écran, deux fois de suite.
+**Ce qui n'est PAS vérifié** : rien n'a été vu dans ton Chrome ni sur l'iPad — la mesure vient de
+WebKit en ligne de commande. (#543, #793)
+
 ↻ **1.125.0 — UN TRAVAIL QUI REPÈRE SANS COMPTER** (build `0908-1502`). Ce que tu voulais depuis le
 7 septembre : ton portrait de lecteur cesse de peser, sans cesser d'exister.
 **Ce que tu verras** : sur la fiche d'un travail, sous la pondération, une case **« Travail
