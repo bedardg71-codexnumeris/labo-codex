@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.126',
+            couleur: 'bleu',
+            titre: 'L\'Aide ne confond plus une pratique avec la d\u00e9finition',
+            items: [
+                '<strong>La carte d\'aide sur les pratiques alternatives de notation ne d\u00e9crit plus une seule fa\u00e7on de faire.</strong> Elle d\u00e9finissait la PAN par la s\u00e9lection des N meilleurs artefacts \u2014 c\'est une mani\u00e8re de faire parmi d\'autres, pas la d\u00e9finition. Elle dit maintenant ce que les PAN ont en commun&nbsp;: le droit \u00e0 l\'erreur sans p\u00e9nalit\u00e9, et une note compos\u00e9e \u00e0 partir des traces les plus r\u00e9centes ou les plus repr\u00e9sentatives.',
+                '<strong>Les quatre familles sont pr\u00e9sent\u00e9es c\u00f4te \u00e0 c\u00f4te, sans hi\u00e9rarchie.</strong> Sommative, PAN\u00a0\u2013\u00a0Standards, PAN\u00a0\u2013\u00a0Sp\u00e9cifications et PAN\u00a0\u2013\u00a0D\u00e9notation, chacune en une phrase, avec les m\u00eames mots que l\'assistant de configuration. La d\u00e9notation n\'est plus annonc\u00e9e comme \u00ab\u00a0\u00e0 venir\u00a0\u00bb\u00a0: elle est l\u00e0, et l\'assistant la configure.',
+                '<strong>Six questions pour situer ta pratique.</strong> Objet, r\u00e9visabilit\u00e9, agentivit\u00e9, communication, granularit\u00e9, d\u00e9termination\u00a0: deux coll\u00e8gues qui se r\u00e9clament de la m\u00eame \u00e9tiquette peuvent r\u00e9pondre diff\u00e9remment \u00e0 chacune. C\'est une grille de lecture, pas un formulaire de plus \u00e0 remplir.',
+                '<strong>La carte \u00ab\u00a0Choisir ta pratique de notation\u00a0\u00bb ne recommande plus de chiffres.</strong> Elle annon\u00e7ait \u00ab\u00a08-14 artefacts recommand\u00e9s\u00a0\u00bb et \u00ab\u00a03-4 jetons maximum\u00a0\u00bb, qui \u00e9taient les r\u00e9glages d\'une classe en particulier. Chaque famille dit d\u00e9sormais son principe, puis ce qu\'il y a \u00e0 r\u00e9gler \u2014 et un mot sur ce que la recherche observe des reprises, sans imposer de nombre.',
+                '<strong>R\u00e9glages\u00a0\u203a\u00a0\u00c0 propos cite le rapport de recherche qu\u00e9b\u00e9cois sur les PAN.</strong> \u00ab\u00a0Laissons-les se tromper\u00a0\u00bb (rapport de recherche PAREA, C\u00e9gep Andr\u00e9-Laurendeau, 2026), d\'o\u00f9 vient la grille des six param\u00e8tres. Le lien vers le rapport complet et ses auteurs est dans la carte \u00ab\u00a0Sources et remerciements\u00a0\u00bb.'
+            ]
+        },
+        {
             version: '1.125',
             couleur: 'vert',
             titre: 'Un travail qui repère sans compter',
