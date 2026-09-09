@@ -109,13 +109,13 @@ seconde session travaillait en parallèle dans le même arbre et a commité `#80
 sessions, un compteur. Il a été vu parce que les deux sessions se parlaient ; le compteur, lui,
 n'a rien signalé.
 
-- [ ] ⚠️ **#808** Les en-têtes du tableau du Comparateur ne se distinguent pas de ses lignes
+- [x] ⚠️ **#808** Les en-têtes du tableau du Comparateur ne se distinguent pas de ses lignes — **FAIT (1.127.1)** : trois niveaux déclarés (section / paramètre / ligne), les deux modes, contrastes mesurés ≥ 4,5:1. La première version inversait la hiérarchie en mode sombre — corrigé à l'écran.
   - `.comparateur-section-tete`, `.comparateur-ligne-constr` et `.comparateur-cellule-constr` sont employées par `js/comparateur-pratiques.js` mais **ne sont définies dans aucune feuille de style** (mesuré le 9 sept. : 0 déclaration dans `styles.css`, `css/accompagnement.css`, `Design system - Modules/guide-common.css`). Seul le rendu natif du `<th>` les sépare.
   - **Le lot 1.127.0 rend le défaut plus visible** : le tableau portait deux en-têtes indistincts (« Construction de la note », « Résultat — profils-types »), il en porte maintenant huit — les six paramètres s'ajoutent. Le regroupement est l'apport du lot ; sans mise en valeur, il se lit mal. Constaté à l'écran sur un banc WebKit, capture à l'appui.
   - Correctif attendu : une règle pour `.comparateur-section-tete` (fond léger, ou filet supérieur) et, si utile, un retrait pour les lignes d'axes. **`design-system.html` est la source de vérité** — prendre le motif d'en-tête de groupe qui y existe plutôt que d'en inventer un.
   - ⚠ Décider aussi si l'en-tête de SECTION (« Construction de la note ») et l'en-tête de PARAMÈTRE doivent se distinguer l'un de l'autre : ils partagent aujourd'hui la même classe, faute d'en avoir une seconde.
 
-- [ ] 🟢 **#809** Les libellés des règles sommatives sont écrits à deux endroits
+- [x] 🟢 **#809** Les libellés des règles sommatives sont écrits à deux endroits — **FAIT (1.127.1)** : source unique `libelleRegleSommative()`. ⚠ Ils étaient en fait dans TROIS tables, et deux AVAIENT DÉJÀ DIVERGÉ (« Verrou sur une évaluation » à la saisie vs « Verrou d'évaluation » au récapitulatif). Le mot de la saisie l'emporte.
   - `wizard-pratique-v2.js:2011-2016` (`reglesLabels`) et, depuis 1.127.0, `construction-attributs.js` (`REGLES_SOMMATIVES`) portent chacun les quatre libellés — « Remplacement automatique », « Verrou d'évaluation », « Portfolio de progression », « Plafonnement conditionnel ». Le wizard ne les exporte pas.
   - Même situation que `MODELES_FORFAITS`, réglée en son temps en faisant vivre la table dans `construction-attributs.js` (module pur, chargé avant le wizard — `index.html` 14617 contre 14630) et en la faisant lire par le wizard. La même voie est ouverte ici.
   - Le wizard était hors périmètre du lot : rien n'a été touché. Aucun effet visible tant que les deux tables disent la même chose.

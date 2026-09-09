@@ -230,15 +230,24 @@
     // exactement ce que le lot corrige.
     // Aucune règle cochée ⇒ une seule ligne « Aucune », sous détermination.
     //
-    // ⚠ Les libellés sont DUPLIQUÉS depuis `wizard-pratique-v2.js:2011-2016`
-    // (`reglesLabels`), qui ne les exporte pas. Le wizard est hors du périmètre
-    // de ce lot : la duplication est inscrite, pas corrigée ici.
+    // ⮕ SOURCE UNIQUE DES QUATRE LIBELLÉS (#809, 9 sept. 2026). Ils vivaient
+    // dans TROIS tables : les options de l'assistant, son récapitulatif
+    // (`reglesLabels`) et ici. La table vit désormais ICI seulement, pour la
+    // même raison que MODELES_FORFAITS — ce module est PUR et chargé AVANT le
+    // wizard (`index.html` 14617 contre 14630) — et les deux écrans la lisent
+    // par `libelleRegleSommative()`.
+    //
+    // ⚠ ET ELLES AVAIENT DÉJÀ DIVERGÉ, sans que rien ne le signale : l'écran de
+    // saisie faisait cocher « Verrou sur une évaluation » et le récapitulatif
+    // rendait « Verrou d'évaluation ». Deux surfaces, deux mots, pour la même
+    // case. C'est le libellé de la SAISIE qui est retenu — c'est celui que
+    // l'utilisateur rencontre en premier, et le plus explicite des deux.
     // -------------------------------------------------------------------------
     var REGLES_SOMMATIVES = {
         remplacement:  { axe: 'regleRemplacement', libelle: 'Remplacement automatique',
                          valeur: 'Actif (la finale remplace la mi-session si meilleure)',
                          parametre: 'revisabilite' },
-        double_verrou: { axe: 'regleVerrou', libelle: 'Verrou d\'évaluation',
+        double_verrou: { axe: 'regleVerrou', libelle: 'Verrou sur une évaluation',
                          valeur: 'Actif (une évaluation doit être réussie)',
                          parametre: 'determination' },
         plafonnement:  { axe: 'reglePlafonnement', libelle: 'Plafonnement conditionnel',
@@ -246,6 +255,18 @@
         portfolio:     { axe: 'reglePortfolio', libelle: 'Portfolio de progression',
                          valeur: 'Actif', parametre: 'objet' }
     };
+
+    /**
+     * Le libellé d'une règle sommative, pour l'AFFICHAGE — dans le Comparateur
+     * comme dans le récapitulatif de l'assistant. Une valeur inconnue est rendue
+     * telle quelle : mieux vaut un mot brut qu'un trou (même règle que
+     * `libelleModeleForfaits`).
+     */
+    function libelleRegleSommative(cle) {
+        var r = REGLES_SOMMATIVES[cle];
+        if (r) return r.libelle;
+        return cle == null ? '' : String(cle);
+    }
 
     /** Les clés de `reglesSpeciales`, que la config la porte en tableau ou en objet. */
     function _clesRegles(config) {
@@ -453,6 +474,7 @@
     var api = {
         MODELES_FORFAITS: MODELES_FORFAITS,
         libelleModeleForfaits: libelleModeleForfaits,
+        libelleRegleSommative: libelleRegleSommative,
         extraire: extraire,
         PARAMETRES: PARAMETRES.map(function (p) { return { cle: p.cle, libelle: p.libelle }; })
     };

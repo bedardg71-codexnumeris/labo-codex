@@ -15,6 +15,33 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.127.1 — LE TABLEAU DU COMPARATEUR SE LIT D'UN COUP D'ŒIL** (build `0909-1745`).
+**Ce que tu verras** : dans Labo › Comparateur, les **titres de section**, les **six paramètres** et
+les **lignes** ont enfin trois traitements distincts. Ce midi, le tableau est passé de deux en-têtes à
+huit — et comme les trois classes du tableau n'étaient déclarées dans **aucune** feuille de style, rien
+ne les séparait des lignes qu'elles coiffent. Le regroupement était l'apport du lot, il se lisait mal.
+Corrigé : la section porte un fond et un filet, chaque paramètre est un intertitre sarcelle, et les
+lignes sont en retrait sous le leur.
+▣ **Corrigé à l'écran, pas sur plan.** La première version donnait un fond aux deux niveaux : en mode
+**sombre**, la hiérarchie s'inversait — les six bandes de paramètres écrasaient le titre de section.
+Mesuré, puis repris : six bandes pleine largeur alourdissaient de toute façon un tableau déjà dense.
+Les contrastes des deux modes sont mesurés et tiennent (6,9:1 au plus serré, le seuil est 4,5:1).
+▣ **Une case de règle sommative porte enfin le même nom partout.** L'assistant te faisait cocher
+« **Verrou sur une évaluation** » et son récapitulatif répondait « **Verrou d'évaluation** » : une
+seule case, deux mots. Les quatre libellés de règles étaient écrits dans **trois** tables ; ils
+viennent maintenant d'un seul endroit, et c'est le mot de l'écran de saisie qui l'emporte.
+▣ **Rien d'autre n'a bougé** : aucun calcul, aucune valeur par défaut, aucune donnée. Les `value`
+persistées dans tes pratiques déjà créées sont intactes — seul l'affichage passe par la source unique.
+**Vérifié comment** : le tableau ouvert et lu **dans les deux modes** sur un banc WebKit jetable (pack
+de démonstration, profil éphémère), contrastes calculés ; **8 mutations volontaires, 8 rouges**, arbre
+restauré par empreinte sha256 — dont **trois qui ont d'abord viré au VERT** et ont montré que mes
+propres gardes ne mesuraient rien : vérifier qu'un nom de fonction *apparaît* alors que son corps est
+vidé, exiger une règle CSS sans exiger le retrait qu'elle porte, et un sélecteur non ancré que sa
+propre surcharge « mode clair » suffisait à satisfaire. Les trois resserrées, puis rouges.
+Suite complète : 5 703 essais verts (518 fichiers).
+⛔ **Ce qui n'est PAS vérifié** : ni Safari, ni l'iPad. Le rendu vient de WebKit en simulation, et
+c'est précisément un lot d'affichage. La porte terrain (#802) couvre maintenant cinq livraisons.
+
 ▣ **LE VERT DE LA CI REDEVIENT UN SIGNAL** (9 sept., fin de journée — aucun changement pour toi).
 La CI GitHub était **rouge sur `main` depuis 24 h** (dernier vert : hier 17 h 20), sur 4 essais. Un rouge
 permanent ne signale plus rien : une vraie régression s'y noierait. Mesuré, et **ce n'était pas ton

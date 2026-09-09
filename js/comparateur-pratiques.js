@@ -406,10 +406,12 @@
 
         // SECTION 1 — Construction de la note (lignes R3, alignées par axe).
         h += '<tr class="comparateur-section-tete"><th colspan="' + (nbCol + 1) + '" scope="colgroup">Construction de la note</th></tr>';
-        // Un en-tête par paramètre, puis ses axes. Même gabarit que les en-têtes
-        // de section (`comparateur-section-tete`) : aucune classe neuve.
+        // Un en-tête par paramètre, puis ses axes. TROIS niveaux dans ce tableau —
+        // section (« Construction de la note ») > paramètre > ligne — donc trois
+        // traitements visuels : `.comparateur-parametre-tete` est le niveau du
+        // milieu (#808, 9 sept. 2026).
         groupes.forEach(function(groupe) {
-            h += '<tr class="comparateur-section-tete"><th colspan="' + (nbCol + 1) + '" scope="colgroup">'
+            h += '<tr class="comparateur-parametre-tete"><th colspan="' + (nbCol + 1) + '" scope="colgroup">'
                 + _esc(groupe.libelle) + '</th></tr>';
             groupe.axes.forEach(function(ax) {
                 h += '<tr class="comparateur-ligne-constr"><th scope="row" class="comparateur-col-profil">' + _esc(ax.libelle) + '</th>';
