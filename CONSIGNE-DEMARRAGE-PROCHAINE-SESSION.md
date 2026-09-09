@@ -48,9 +48,12 @@ l'instance qui l'a poussée. Le point 4 renvoie à la consigne du dépistage du 
 celle du 8 septembre, périmée de trois versions mineures. ⚠ Un état mesuré vieillit en heures : sept
 versions sont sorties le 9. **Remesure, ne recopie pas.**
 
-- **`main` = `c8b7fc5d`**, version `1.127.2`, build `0909-1912` (`git log --oneline -1`,
+- **`main` = `12a41e29`**, version `1.127.2`, build `0909-1912` (`git log --oneline -1`,
   `cat version.json`). Sept livraisons le 9 : `1.125.1`, `1.125.2`, `1.126.0`, `1.126.1`, `1.127.0`,
-  `1.127.1`, `1.127.2`.
+  `1.127.1`, `1.127.2`. ⚠ Ce SHA a bougé **deux fois pendant que cette mesure s'écrivait** : la
+  livraison est `c8b7fc5d`, puis une AUTRE session du même arbre a commité `00c6237b` et `12a41e29`
+  (cadrage de #810, `BACKLOG.md` seul, aucun code). C'est la démonstration de la ligne du dessus :
+  **un SHA écrit dans un fichier d'état est périmé avant d'être lu.**
 - **`origin/main` = `main`** après le push du soir (`git fetch && git rev-list --count origin/main..HEAD`
   rend `0` ; témoin : le même compte rendait `1` avant le push, un commit de porte terrain attendait
   depuis 18 h 52).
