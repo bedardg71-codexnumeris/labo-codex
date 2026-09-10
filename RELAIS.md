@@ -7,6 +7,89 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 10 SEPT. 2026 : L'AUDIT DE L'AIDE FUSIONNÉ DANS 1.128.0 (1.128.1)
+
+> ✅ **`main` à 1.128.1, build `0910-0649`, commit `0752bc17`, POUSSÉ.** Rien n'attend
+> sur une branche : `claude/audit-help-documentation-l4s0tz` est à l'identique de `main`.
+> Vérifié par `git rev-list --count origin/main..HEAD` = 0 **après** le push, pas avant.
+> Vitest **526 fichiers / 5740 essais**, 0 échec.
+
+**CE QUE CETTE FUSION APPORTE** : l'audit de conformité entre l'« Aide » et le code,
+demandé par Grégoire (« on a retiré beaucoup de code dur porté sur ma pratique, est-ce
+que l'Aide est encore conforme ? »). **Les six lots sont faits.**
+
+| Lot | Objet |
+|---|---|
+| #803 | la définition des PAN |
+| A | chemins, libellés de boutons, valeurs chiffrées, formats de fichiers |
+| B | cohérence des quatre surfaces (section Aide, popups, infobulles, glossaire) |
+| C | la visite guidée |
+| D | les trous de couverture |
+| E | l'encastrement résiduel |
+
+**Le fichier d'audit est `plans de travail/AUDIT-AIDE-CONFORMITE-2026-09-10.md`** :
+chaque constat y porte sa disposition (*corrigé*, *inscrit n°*, *refusé* + motif,
+*périmé*). **Six sentinelles neuves, 36 ablations toutes rouges.** Elles LISENT leurs
+valeurs à la source (pack de démo, `config.js`, `interpretation-config.js`,
+`preferences-v2.js`, le rendu de `tableau-bord-apercu.js`) plutôt que de figer des
+copies : plusieurs ablations modifient le CODE et non la doc.
+
+**LA PRISE LA PLUS LOURDE** : « Primo », un assistant conversationnel retiré du code le
+**21 avril 2026** (`cfee0157`), que l'Aide décrivait encore cinq mois plus tard sur une
+carte de 78 lignes détaillant « les 4 modules de Primo » et leurs durées.
+
+⚠ **TROIS ITEMS OUVERTS, AUCUN CORRIGÉ**, gardés pour le 11 sept. à la demande de
+Grégoire. Tous demandent un arbitrage pédagogique, aucun n'est technique :
+- **#816** (🔴) deux des quatre modes de sélection du portfolio ne calculent pas ce que
+  leur nom annonce (`derniers`/`hybride` tombent dans le `default` de `portfolio.js`).
+  **Le seul qui touche une note.** Inférence de lecture, à éprouver à l'écran.
+- **#817** (🟡) trois seuils pour « force » et « défi » (0,70 · 0,7125 · 0,75).
+- **#818** (🟡) trois choses portent le nom « Très favorable ».
+
+⚠ **DEUX TROUS NON COMBLÉS** (ils demandent d'écrire, pas de corriger) : les trois types
+de grille (holistique/analytique/algorithmique, livrés en 1.115-1.117) et la note
+différée (1.20) ne sont mentionnés nulle part dans l'Aide.
+
+⚠ **DEUX CONSTATS DU RITUEL DE FIN DE SESSION, non corrigés** :
+1. **Deux entrées disent encore « ce sont les N meilleures démonstrations qui
+   comptent »** — popup `conception-productions` et glossaire `portfolio`. C'est la
+   réduction que #803 visait, dans deux surfaces qu'aucune des six sentinelles ne lit.
+   Trouvé par la passe « connexions », pas par les lots.
+2. **Quatre messages de commit affirment « 523 fichiers »** alors que le compte réel
+   montait à 524, 525, 526, 527. Le nombre d'ESSAIS était juste (lu dans la sortie) ;
+   c'est le compte de FICHIERS qui a été recopié sans être remesuré.
+
+⚠⚠ **CINQ SENTINELLES SUR SIX PORTENT UN NUMÉRO TROMPEUR.** La collision d'IDs de la
+nuit (troisième en cinq semaines) a laissé des noms de fichiers qui ne pointent pas vers
+les bonnes fiches :
+
+| Fichier | Ce qu'il teste | Ce que le numéro désigne |
+|---|---|---|
+| `sentinelle-817-aide-chemins-et-libelles` | le lot A de l'audit | #817 = les trois seuils (non corrigé, sans banc) |
+| `sentinelle-818-aide-trois-surfaces-concordent` | le lot B | #818 = les zones homonymes (non corrigé, sans banc) |
+| `sentinelle-819-visite-guidee-coherente` | le lot C | **#819 = « Consolidation retirée »**, l'autre chantier |
+| `sentinelle-820-aide-exemples-restent-des-exemples` | le lot E | **#820 = sentinelles anti-cache**, l'autre chantier |
+| `sentinelle-821-aide-ne-promet-pas-ce-qui-nexiste-pas` | le lot D | #821 n'est attribué à rien |
+
+Seule `sentinelle-803-aide-pan-famille-pas-mecanique` porte le bon numéro. ⮕ **Le
+renommage est dû**, avec un nom qui dise le LOT plutôt qu'une fiche — un banc d'audit
+ne couvre pas une fiche, il couvre un balayage.
+
+⛔ **VERDICT PLAYWRIGHT : AUCUN sur toute la session** (environnement cloud, pas de banc
+navigateur). **Deux choses sont à éprouver à l'écran avant la CoP du 14** : la carte
+« Prendre en main l'application » (hauteur d'accordéon), et surtout **la visite guidée
+de bout en bout** — le lot C a changé son parcours (elle emmène maintenant dans le Labo
+à sa dernière étape, et reconnaît l'écran des pratiques).
+
+⚠ **Un piège rencontré, à ne pas répéter** : un `grep` qui ne trouve rien n'est PAS une
+preuve d'absence. J'ai rapporté à Grégoire qu'un bouton n'existait pas, sur la foi d'un
+`grep data-action="reconstruire` — l'action s'appelait `lancerReconstructionRetroactive`.
+Sa décision, prise sur cette base, aurait retiré une procédure juste. Chercher par le nom
+de la FONCTION appelée, et relire tout candidat en contexte (un autre grep a mordu sur
+une négation : « et NON une structure du logiciel »).
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 10 SEPT. 2026, 0 h 30 : TROIS RAPPORTS, UNE SUPPRESSION, ET SEPT BANCS QUI MESURAIENT LE CALENDRIER
 
 > ✅ **`main` à 1.128.0, build `0910-0046`, commit de fusion `2e6c8010`, POUSSÉ.** Vitest **524 fichiers /
