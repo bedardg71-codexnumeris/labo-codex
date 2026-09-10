@@ -71,6 +71,9 @@ beforeAll(() => {
     // de promotion systématique des helpers cross-zones). Chargé AVANT le résidu
     // dans index.html.
     win = chargerScript('js/profil-etudiant-helpers.js', stubs);
+    // #821 lot A (10 sept. 2026) : interpreterMobilisation / interpreterCompletion /
+    // interpreterAssiduite ont déménagé dans contexte-qualification.js — même sandbox.
+    chargerScript('js/contexte-qualification.js', stubs, win);
 
     // Refactor étape 3 session A (18 mai 2026) : profil-etudiant-calculs.js
     // extrait depuis profil-etudiant.js (zone L4185-5686 originale, 14 fonctions
@@ -159,6 +162,8 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
             'initialiserModuleProfilEtudiant',
             'genererBadgePratiqueProfil',
             'genererBadgePatternProfil',
+            // Zone Qualification d'un contexte — 3 exports déplacés le 10 sept. 2026 (#821 lot A)
+            // de la zone Helpers vers `js/contexte-qualification.js`, chargé dans le même sandbox.
             'interpreterMobilisation',
             'interpreterCompletion',
             'interpreterAssiduite',

@@ -410,7 +410,7 @@ describe('2 · Liste des étudiant·es — tris, filtres, écritures par rendu, 
             obtenirConfigPratiqueActive: () => ({ portfolio: { minimumCompletion: 3 } }), obtenirInterventionsEtudiant: () => [], obtenirTypePratiqueActive: () => 'standards',
             obtenirTermeProduction: () => 'artefact', obtenirCodePratique: () => 'STD'
         }, opts.globaux || {});
-        const b = monter(store, Object.assign({}, opts, { modules: ['js/interpretation-config.js', 'js/etudiants.js', { chemin: 'js/trimestre-v2-etudiants.js', internes: ['donneesImportEnAttenteV2'] }], globaux }));
+        const b = monter(store, Object.assign({}, opts, { modules: ['js/interpretation-config.js', 'js/contexte-qualification.js', 'js/etudiants.js', { chemin: 'js/trimestre-v2-etudiants.js', internes: ['donneesImportEnAttenteV2'] }], globaux }));
         b.compteurs = compteurs;
         return b;
     }

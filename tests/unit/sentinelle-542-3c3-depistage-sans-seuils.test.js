@@ -67,6 +67,10 @@ describe('#542 pas 3c-3 · le dépistage ne lit plus les seuils IDME', () => {
             estModeeLectureSeule: () => false, genererSeancesCompletes: () => {},
             calculerEtSauvegarderIndicesAssiduite: () => {}, calculerEtStockerIndicesCP: () => {}
         });
+        // #821 lot A (10 sept. 2026) : `interpreterCompletion` et `interpreterAssiduite`
+        // ont déménagé dans `contexte-qualification.js`. L'assertion tient toujours
+        // — elles doivent EXISTER — mais on les cherche là où elles vivent.
+        chargerScript('js/contexte-qualification.js', { obtenirSeuil: () => 0.70 }, win);
 
         expect(typeof win.interpreterPerformance,
             'la fonction est revenue, ou son export n\'a pas été retiré').toBe('undefined');

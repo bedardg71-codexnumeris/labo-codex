@@ -8,7 +8,10 @@
    - Accesseurs (pratique actuelle, grille de référence, critères avec valeurs)
    - Init module (initialiserModuleProfilEtudiant)
    - Badges (pratique, pattern)
-   - Interprétations des indices A-C-P-M (mobilisation, performance, complétion, assiduité)
+   - (Les interprétations des indices A, C et M — `interpreterAssiduite`,
+     `interpreterCompletion`, `interpreterMobilisation` — ont déménagé dans
+     `contexte-qualification.js` le 10 sept. 2026, #821 lot A ; celle de P a été
+     retirée par #542.)
 
    Tous les helpers sont promus `window.X` (Écart #4 MODULES-MAP §2.3 + décision
    étape 1 b — convention systématique cross-zones).
@@ -981,85 +984,10 @@ function genererBadgePatternProfil(pattern) {
 
 // calculerTousLesIndices → déplacé dans indices.js (#206)
 
-/**
- * Interprète l'indice M (Mobilisation) selon la logique pédagogique avancée
- * Implémente la formule Excel avec diagnostic précis des composantes A et C
- * @param {number} A - Assiduité en proportion 0-1
- * @param {number} C - Complétion en proportion 0-1
- * @param {boolean} statutDecrochage - Indicateur de décrochage (défaut: false)
- * @returns {Object} - { niveau, emoji, couleur }
- */
-function interpreterMobilisation(A, C, statutDecrochage = false) {
-    // 1. Décrochage (priorité absolue - interventions impossibles)
-    if (statutDecrochage) {
-        return {
-            niveau: 'Décrochage',
-            couleur: '#9e9e9e' // Gris
-        };
-    }
-
-    // 2. Assiduité ET complétion critiques (A<0.7 ET C<0.7)
-    if (A < 0.7 && C < 0.7) {
-        return {
-            niveau: 'Assiduité ET complétion critiques',
-            couleur: '#dc3545' // Rouge
-        };
-    }
-
-    // 3. Assiduité critique seule (A<0.7)
-    if (A < 0.7) {
-        return {
-            niveau: 'Assiduité critique',
-            couleur: '#ff9800' // Orange
-        };
-    }
-
-    // 4. Complétion critique seule (C<0.7)
-    if (C < 0.7) {
-        return {
-            niveau: 'Complétion critique',
-            couleur: '#ff9800' // Orange
-        };
-    }
-
-    // 5. Mobilisation fragile (A<0.8 ET C<0.8)
-    if (A < 0.8 && C < 0.8) {
-        return {
-            niveau: 'Mobilisation fragile',
-            couleur: '#ffc107' // Jaune
-        };
-    }
-
-    // 6. Assiduité fragile (A<0.8 ET C≥0.8)
-    if (A < 0.8 && C >= 0.8) {
-        return {
-            niveau: 'Assiduité fragile',
-            couleur: '#ffc107' // Jaune
-        };
-    }
-
-    // 7. Complétion fragile (A≥0.8 ET C<0.8)
-    if (A >= 0.8 && C < 0.8) {
-        return {
-            niveau: 'Complétion fragile',
-            couleur: '#ffc107' // Jaune
-        };
-    }
-
-    // 8. Favorable (A≥0.9 ET C≥0.9)
-    if (A >= 0.9 && C >= 0.9) {
-        return {
-            niveau: 'Favorable',
-            couleur: '#2196F3' // Bleu
-        };
-    }
-
-    // 9. Acceptable (sinon: A≥0.8 ET C≥0.8, mais pas tous deux ≥0.9)
-    return {
-        niveau: 'Acceptable',
-        couleur: '#28a745' // Vert
-    };
-}
+// #821 lot A (10 sept. 2026) — `interpreterMobilisation` (neuf branches par
+// conjonction sur A et C, bornes 70 / 80 / 90) vit dans
+// `contexte-qualification.js`, LE SEUL endroit où les règles qui qualifient un
+// contexte sont écrites côte à côte. Déplacée telle quelle, sans alias ici.
 
 // ⚠⚠ #542 lot 3, pas 3c-3 — `interpreterPerformance` A ÉTÉ SUPPRIMÉE, ET ELLE
 // N'A PAS ÉTÉ REMPLACÉE : SON RÉSULTAT N'ÉTAIT LU NULLE PART.
@@ -1092,97 +1020,9 @@ function interpreterMobilisation(A, C, statutDecrochage = false) {
 //
 // Verrouillé par `tests/unit/sentinelle-542-3c3-depistage-sans-seuils.test.js`.
 
-/**
- * Interprète l'indice C (Complétion)
- * @param {number} valeur - Valeur en pourcentage (0-100)
- * @returns {Object} - { niveau, emoji, couleur, description }
- */
-function interpreterCompletion(valeur) {
-    const c = valeur / 100; // Normaliser en 0-1
-    const seuilExcellent = obtenirSeuil('interpretation.excellent');
-    const seuilBon = obtenirSeuil('interpretation.bon');
-    const seuilAcceptable = obtenirSeuil('interpretation.acceptable');
-
-    if (c >= seuilExcellent) {
-        return {
-            niveau: 'Taux de complétion excellent',
-            couleur: '#2196F3', // Bleu
-            description: 'Remise régulière et complète des travaux'
-        };
-    }
-    if (c >= seuilBon) {
-        return {
-            niveau: 'Bon taux de complétion',
-            couleur: '#28a745', // Vert
-            description: 'Majorité des travaux remis'
-        };
-    }
-    if (c >= seuilAcceptable) {
-        return {
-            niveau: 'Complétion acceptable',
-            couleur: '#ffc107', // Jaune
-            description: 'Quelques travaux manquants, suivi recommandé'
-        };
-    }
-    if (c >= 0.60) {
-        return {
-            niveau: 'Complétion insuffisante',
-            couleur: '#ff9800', // Orange
-            description: 'Nombreux travaux manquants, intervention nécessaire'
-        };
-    }
-    return {
-        niveau: 'Complétion critique',
-        couleur: '#dc3545', // Rouge
-        description: 'Travaux non remis, situation critique'
-    };
-}
-
-/**
- * Interprète l'indice A (Assiduité)
- * @param {number} valeur - Valeur en pourcentage (0-100)
- * @returns {Object} - { niveau, emoji, couleur, description }
- */
-function interpreterAssiduite(valeur) {
-    const a = valeur / 100; // Normaliser en 0-1
-    const seuilExcellent = obtenirSeuil('interpretation.excellent');
-    const seuilBon = obtenirSeuil('interpretation.bon');
-    const seuilAcceptable = obtenirSeuil('interpretation.acceptable');
-
-    if (a >= seuilExcellent) {
-        return {
-            niveau: 'Assiduité exemplaire',
-            couleur: '#2196F3', // Bleu
-            description: 'Présence constante et engagement soutenu'
-        };
-    }
-    if (a >= seuilBon) {
-        return {
-            niveau: 'Bonne assiduité',
-            couleur: '#28a745', // Vert
-            description: 'Présence régulière avec absences rares et justifiées'
-        };
-    }
-    if (a >= seuilAcceptable) {
-        return {
-            niveau: 'Assiduité acceptable',
-            couleur: '#ffc107', // Jaune
-            description: 'Quelques absences, suivi recommandé'
-        };
-    }
-    if (a >= 0.60) {
-        return {
-            niveau: 'Assiduité insuffisante',
-            couleur: '#ff9800', // Orange
-            description: 'Absences fréquentes, intervention nécessaire'
-        };
-    }
-    return {
-        niveau: 'Assiduité critique',
-        couleur: '#dc3545', // Rouge
-        description: 'Absences excessives, situation d\'urgence'
-    };
-}
+// #821 lot A (10 sept. 2026) — `interpreterCompletion` et `interpreterAssiduite`
+// (un seuil sur un scalaire, réglable par `obtenirSeuil('interpretation.*')`,
+// plus une borne fixe à 60 %) vivent dans `contexte-qualification.js`.
 
 // Exporter les fonctions vers window (décision étape 1 b — convention systématique
 // cross-zones, Écart #4 MODULES-MAP §2.3).
@@ -1209,13 +1049,10 @@ window.obtenirCriteresAvecValeurs = obtenirCriteresAvecValeurs;
 window.initialiserModuleProfilEtudiant = initialiserModuleProfilEtudiant;
 window.genererBadgePratiqueProfil = genererBadgePratiqueProfil;
 window.genererBadgePatternProfil = genererBadgePatternProfil;
-window.interpreterMobilisation = interpreterMobilisation;
 // `window.interpreterPerformance` retiré au pas 3c-3 de #542 — la fonction n'existe plus.
 window.niveauxEtGradientDesEvaluations = niveauxEtGradientDesEvaluations;  // #575 — UN dégradé, pour les deux blocs
 window.couleurCssSure = couleurCssSure;                    // #575 — la couleur utilisateur, filtrée, pour TOUS les sites
 window.couleurDuNiveau = couleurDuNiveau;                  // #575 — la couleur d'un code, dans SON échelle
 window.lireNiveauNoteGlobale = lireNiveauNoteGlobale;      // #575 — LA règle, pour les deux blocs du profil
-window.interpreterCompletion = interpreterCompletion;
-window.interpreterAssiduite = interpreterAssiduite;
 
 })();

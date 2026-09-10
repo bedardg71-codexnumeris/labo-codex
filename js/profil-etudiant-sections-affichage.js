@@ -1506,6 +1506,14 @@ function genererSectionMobilisation(da) {
     // Interpréter selon A et C (pas la moyenne M)
     const interpM = interpreterMobilisation(A, C);
 
+    // #821 lot A (10 sept. 2026) — les bornes de l'interprétation A-C ont UNE
+    // source, `BORNES_MOBILISATION` (contexte-qualification.js). Les blocs de
+    // recommandation les lisent, et la prose écrit les mêmes chiffres qu'elles.
+    const B = BORNES_MOBILISATION;
+    const pctCritique = Math.round(B.critique * 100);
+    const pctFragile = Math.round(B.fragile * 100);
+    const pctFavorable = Math.round(B.favorable * 100);
+
     return `
         <!-- STATISTIQUES -->
         <div class="profil-grid-indicateurs">
@@ -1538,20 +1546,20 @@ function genererSectionMobilisation(da) {
                 ${interpM.niveau === 'Décrochage' ?
                     "L'étudiant ne se présente plus au cours. Les interventions pédagogiques ne sont plus possibles. Référer aux services d'aide et à l'API." :
                   interpM.niveau === 'Assiduité ET complétion critiques' ?
-                    "Situation critique : présence ET remise des travaux sous 70%. Intervention RàI niveau 3 immédiate requise." :
+                    `Situation critique : présence ET remise des travaux sous ${pctCritique}%. Intervention RàI niveau 3 immédiate requise.` :
                   interpM.niveau === 'Assiduité critique' ?
-                    "Assiduité critique (< 70%). La présence irrégulière compromet l'apprentissage. Intervention prioritaire sur l'engagement comportemental." :
+                    `Assiduité critique (< ${pctCritique}%). La présence irrégulière compromet l'apprentissage. Intervention prioritaire sur l'engagement comportemental.` :
                   interpM.niveau === 'Complétion critique' ?
-                    "Complétion critique (< 70%). Les travaux ne sont pas remis. Investigation des obstacles organisationnels ou motivationnels nécessaire." :
+                    `Complétion critique (< ${pctCritique}%). Les travaux ne sont pas remis. Investigation des obstacles organisationnels ou motivationnels nécessaire.` :
                   interpM.niveau === 'Mobilisation fragile' ?
-                    "Les deux composantes (A et C) sont entre 70-80%. Soutien proactif recommandé pour stabiliser l'engagement." :
+                    `Les deux composantes (A et C) sont entre ${pctCritique}-${pctFragile}%. Soutien proactif recommandé pour stabiliser l'engagement.` :
                   interpM.niveau === 'Assiduité fragile' ?
-                    "L'assiduité est entre 70-80% alors que la complétion est satisfaisante. Renforcer la présence en classe." :
+                    `L'assiduité est entre ${pctCritique}-${pctFragile}% alors que la complétion est satisfaisante. Renforcer la présence en classe.` :
                   interpM.niveau === 'Complétion fragile' ?
-                    "La complétion est entre 70-80% alors que l'assiduité est satisfaisante. Soutenir l'organisation et la planification." :
+                    `La complétion est entre ${pctCritique}-${pctFragile}% alors que l'assiduité est satisfaisante. Soutenir l'organisation et la planification.` :
                   interpM.niveau === 'Favorable' ?
-                    "Excellent engagement comportemental. Assiduité et complétion ≥ 90%. Maintenir cette dynamique positive." :
-                    "Engagement comportemental satisfaisant. Assiduité et complétion ≥ 80%. Continuer la surveillance de niveau 1."}
+                    `Excellent engagement comportemental. Assiduité et complétion ≥ ${pctFavorable}%. Maintenir cette dynamique positive.` :
+                    `Engagement comportemental satisfaisant. Assiduité et complétion ≥ ${pctFragile}%. Continuer la surveillance de niveau 1.`}
             </div>
         </div>
 
@@ -1576,32 +1584,32 @@ function genererSectionMobilisation(da) {
                     <li>Documentation du dossier étudiant</li>
                 </ul>
             </div>
-        ` : (A < 0.7 || C < 0.7) ? `
-            <div style="background: ${A < 0.7 && C < 0.7 ? 'rgba(232,64,87,0.12)' : 'rgba(200,160,96,0.12)'};
-                        border-left: 4px solid ${A < 0.7 && C < 0.7 ? '#e84057' : '#c8a060'};
+        ` : (A < B.critique || C < B.critique) ? `
+            <div style="background: ${A < B.critique && C < B.critique ? 'rgba(232,64,87,0.12)' : 'rgba(200,160,96,0.12)'};
+                        border-left: 4px solid ${A < B.critique && C < B.critique ? '#e84057' : '#c8a060'};
                         padding: 15px; border-radius: 6px;">
-                <h4 style="color: ${A < 0.7 && C < 0.7 ? '#f06878' : '#d4b878'}; margin-bottom: 10px;">
+                <h4 style="color: ${A < B.critique && C < B.critique ? '#f06878' : '#d4b878'}; margin-bottom: 10px;">
                     Recommandations d'intervention (niveau critique)
                 </h4>
-                <ul style="margin: 0; padding-left: 20px; color: ${A < 0.7 && C < 0.7 ? '#f06878' : '#d4b878'}; line-height: 1.6;">
-                    ${A < 0.7 && C < 0.7 ?
+                <ul style="margin: 0; padding-left: 20px; color: ${A < B.critique && C < B.critique ? '#f06878' : '#d4b878'}; line-height: 1.6;">
+                    ${A < B.critique && C < B.critique ?
                         '<li><strong>Intervention RàI niveau 3 immédiate</strong> - Les deux composantes sont critiques</li>' : ''}
-                    ${A < 0.7 ?
+                    ${A < B.critique ?
                         '<li><strong>Assiduité critique :</strong> Rencontre immédiate pour identifier les causes d\'absence</li>' : ''}
-                    ${C < 0.7 ?
+                    ${C < B.critique ?
                         '<li><strong>Complétion critique :</strong> Investigation des obstacles à la remise des travaux</li>' : ''}
                     <li>Établir un plan d'intervention personnalisé (PIP) avec objectifs mesurables</li>
                     <li>Suivi hebdomadaire jusqu'à amélioration significative</li>
                     <li>Mobiliser les ressources d'aide (tutorat, aide technologique, etc.)</li>
                 </ul>
             </div>
-        ` : (A < 0.8 || C < 0.8) ? `
+        ` : (A < B.fragile || C < B.fragile) ? `
             <div class="info-box info-box--attention">
                 <h4 style="color: var(--alerte-texte-attention); margin-bottom: 10px;">Recommandations préventives (niveau fragile)</h4>
                 <ul style="margin: 0; padding-left: 20px; color: var(--alerte-texte-attention); line-height: 1.6;">
-                    ${A < 0.8 && C < 0.8 ?
+                    ${A < B.fragile && C < B.fragile ?
                         '<li><strong>Mobilisation fragile :</strong> Soutien sur les deux composantes (présence ET remise)</li>' :
-                      A < 0.8 ?
+                      A < B.fragile ?
                         '<li><strong>Assiduité fragile :</strong> Renforcer la motivation à assister aux séances</li>' :
                         '<li><strong>Complétion fragile :</strong> Soutenir l\'organisation et la gestion du temps</li>'}
                     <li>Discussion informelle pour identifier les obstacles émergents</li>

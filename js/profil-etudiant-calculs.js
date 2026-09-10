@@ -1975,7 +1975,7 @@ function determinerNiveauRaiPedagogique(da) {
 
 /**
  * Détermine l'alerte contextuelle basée UNIQUEMENT sur A et C
- * (sans tenir compte de la performance P)
+ * (sans tenir compte de la performance P). La règle : `qualifierContexteApprentissage`.
  * @param {string} da - Numéro de DA
  * @returns {Object} - Alerte contextuelle avec niveau d'engagement
  */
@@ -1988,10 +1988,6 @@ function determinerAlerteContextuelle(da) {
     // 🆕 BETA 96.1: Vérifier si données suffisantes pour C
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true);
     const cEstCalculable = indices3Derniers.nbArtefacts > 0 || C > 0;
-
-    // Interpréter la mobilisation
-    const interpMobilisation = interpreterMobilisation(A, C);
-
 
     // 🆕 BETA 96.1: Si C n'est pas calculable, retourner un état "en attente"
     if (!cEstCalculable) {
@@ -2007,70 +2003,14 @@ function determinerAlerteContextuelle(da) {
         };
     }
 
-    // LOGIQUE CONTEXTUELLE (basée uniquement sur A et C)
-
-    // Contexte très favorable : A ≥ 85% ET C ≥ 85%
-    if (A >= 0.85 && C >= 0.85) {
-        return {
-            niveau: 'tres-favorable',
-            label: 'Très favorable',
-            description: 'Contexte très favorable. L\'étudiant·e est assidu·e et mobilisé·e.',
-            badgeClasse: 'badge-engagement-tres-favorable',
-            A: (A * 100).toFixed(0) + '%',
-            C: (C * 100).toFixed(0) + '%',
-            recommandation: 'Les interventions peuvent se concentrer sur le développement des habiletés et compétences.'
-        };
-    }
-
-    // Contexte favorable : A ≥ 75% ET C ≥ 75%
-    if (A >= 0.75 && C >= 0.75) {
-        return {
-            niveau: 'favorable',
-            label: 'Favorable',
-            description: 'Contexte favorable. L\'étudiant·e est présent·e et mobilisé·e.',
-            badgeClasse: 'badge-engagement-favorable',
-            A: (A * 100).toFixed(0) + '%',
-            C: (C * 100).toFixed(0) + '%',
-            recommandation: 'Les interventions peuvent se concentrer sur le développement des habiletés et compétences.'
-        };
-    }
-
-    // Contexte modéré : A ≥ 65% ET C ≥ 65%
-    if (A >= 0.65 && C >= 0.65) {
-        return {
-            niveau: 'modere',
-            label: 'Modéré',
-            description: 'Contexte modéré. Performance adéquate mais mobilisation pourrait être améliorée.',
-            badgeClasse: 'badge-engagement-modere',
-            A: (A * 100).toFixed(0) + '%',
-            C: (C * 100).toFixed(0) + '%',
-            recommandation: 'Suivi régulier recommandé pour maintenir l\'engagement et éviter une baisse de performance.'
-        };
-    }
-
-    // Contexte fragile : A < 65% OU C < 65%
-    if (A < 0.65 || C < 0.65) {
-        return {
-            niveau: 'fragile',
-            label: 'Fragile',
-            description: 'Contexte fragile. La tendance actuelle invite à un suivi rapproché.',
-            badgeClasse: 'badge-engagement-fragile',
-            A: (A * 100).toFixed(0) + '%',
-            C: (C * 100).toFixed(0) + '%',
-            recommandation: 'Interventions recommandées : Rencontrer l\'étudiant·e pour comprendre les absences/non-remises, encourager la mobilisation, vérifier s\'il y a des obstacles (emploi, santé, etc.).'
-        };
-    }
-
-    // Contexte insuffisant : A < 50% OU C < 50%
-    return {
-        niveau: 'insuffisant',
-        label: 'Insuffisant',
-        description: 'Contexte insuffisant. Une rencontre individuelle est recommandée.',
-        badgeClasse: 'badge-engagement-insuffisant',
-        A: (A * 100).toFixed(0) + '%',
-        C: (C * 100).toFixed(0) + '%',
-        recommandation: 'Intervention urgente requise : Rencontre individuelle, contact avec aide pédagogique, vérifier situation personnelle.'
-    };
+    // #821 lot A (10 sept. 2026) — LA RÈGLE N'EST PLUS ICI. Les quatre paliers
+    // par conjonction sur A et C (bornes 85 / 75 / 65) vivent dans
+    // `contexte-qualification.js`, à côté des trois autres mécanismes qui
+    // qualifient un contexte — pour qu'on puisse les comparer. Cette fonction
+    // lit les indices, décide si C est calculable, puis délègue.
+    // Retiré au passage : un appel à `interpreterMobilisation(A, C)` dont le
+    // résultat n'était lu nulle part.
+    return qualifierContexteApprentissage(A, C);
 }
 
 /**

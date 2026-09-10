@@ -161,6 +161,9 @@ beforeAll(() => {
         calculerEtStockerIndicesCP: () => {}
     };
     win = chargerScript('js/profil-etudiant-helpers.js', stubs);
+    // #821 lot A (10 sept. 2026) : `interpreterMobilisation`, que calculs.js appelle,
+    // vit dans contexte-qualification.js — chargé dans le même sandbox, avant calculs.
+    chargerScript('js/contexte-qualification.js', stubs, win);
     // ⚠ LES EXPORTS DE `helpers.js` REPASSÉS EN GLOBAUX. Le sandbox de
     // `chargerScript` évalue chaque module dans sa propre `new Function` : les
     // fonctions de helpers.js ne sont PAS dans le scope lexical de calculs.js,
