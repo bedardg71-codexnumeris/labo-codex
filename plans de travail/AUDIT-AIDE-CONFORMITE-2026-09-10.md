@@ -266,12 +266,54 @@ d'une assertion est une porte ouverte au faux vert.**
 
 ---
 
+## Lot D — les trous de couverture (10 sept. 2026)
+
+**Ce que le lot cherchait** : ce que le code a ouvert cet été et dont l'Aide se
+tait. `js/changelog-data.js` a servi d'index — c'est ce qui a été ANNONCÉ aux
+utilisateurs, donc ce que l'Aide devrait couvrir.
+
+**Le chantier d'assouplissement est lisible dans le changelog** : 1.103 « Le niveau
+vient de ta pratique », 1.104 « La structure se lit dans TES niveaux », 1.105 « Ton
+échelle dit où commence la maîtrise », 1.108-1.110 « Ton interface ne parle plus
+d'une matière ni d'un service qui ne sont pas les tiens ». Sur douze sujets
+sondés, dix sont couverts par l'Aide.
+
+### Ce que l'Aide annonce et que le code ne fait pas — corrigé
+
+| # | L'écart | Preuve | Disposition |
+|---|---|---|---|
+| D.1 | « **Filtres par niveau de risque** (prévu dans une version future) » | présent depuis le **6 déc. 2025** (`a9d016f1`), jamais implémenté | **corrigé** — retiré (décision de Grégoire : abandonné depuis longtemps) |
+| D.2 | « Modéliser en projection **(en développement)** » + un encadré « ⚠️ Module en cours de développement » | le module fait 521 lignes et réutilise `travaux-annotation`, `travaux-visionneuse`, `travaux-outils` | **corrigé** — décision de Grégoire : ce n'est pas un chantier, c'est **l'annotation réemployée pour modéliser un exercice projeté en classe**. La description le dit maintenant. |
+| D.3 | quatre **noms de fichiers d'export** figés (`grilles-criteres-YYYY-MM-DD.json` et trois autres) | les quatre exports passent par `genererNomFichierExport` (`cc-license.js`), qui compose `<type>-[nom]-[cours]-[discipline]-[CC-BY-SA]-<horodatage>` | **corrigé** — décision de Grégoire : **décrire** la composition plutôt que recopier des noms qui ne peuvent pas rester justes |
+
+### Ce que le code fait et dont l'Aide se tait — EN ATTENTE
+
+| # | Le trou | Preuve | Disposition |
+|---|---|---|---|
+| D.4 | les **trois types de grille** (holistique, analytique, algorithmique), livrés en 1.115-1.117 | `TYPES_GRILLE` (`grilles.js:3252`), sélecteur `#typeGrille` (`index.html:4993-4996`) | **en attente** — demande de la prose neuve |
+| D.5 | la **note différée** (« Masquer les notes par travail »), livrée en 1.20 | `noteDiffereeActive()` (`liste-evaluations.js:1153`), Réglages › Préférences (`index.html:9035`) | **en attente** — demande de la prose neuve |
+
+⚠ Ces deux-là **dépassent le mandat « corrections factuelles »** : combler un trou,
+c'est écrire, pas corriger. Soumis à Grégoire, non écrits.
+
+**Sentinelle** : `tests/unit/sentinelle-821-aide-ne-promet-pas-ce-qui-nexiste-pas.test.js`
+(3 essais). **Cinq ablations, cinq rouges**, arbre restauré par sha256.
+
+⚠ **Une ablation mal conçue, et ce qu'elle apprend.** L'ablation « la Modélisation
+cesse de réutiliser l'annotation » est d'abord restée VERTE : l'assertion est une
+ALTERNATIVE (`travaux-annotation|travauxUI`) et je n'avais retiré qu'une branche.
+Ce n'était pas le test qui était tautologique, c'était l'ablation qui était
+incomplète. ⮕ **Une assertion à alternatives exige une ablation par branche**,
+sinon le break-test atteste moins qu'il n'en a l'air.
+
+---
+
 ## Lots à venir
 
 - ~~**Lot A — balayage mécanique**~~ : **fait le 10 sept.**, valeurs chiffrées et formats compris.
 - ~~**Lot B — cohérence des surfaces**~~ : **fait le 10 sept.** (voir plus haut).
 - ~~**Lot C — visite guidée**~~ : **fait le 10 sept.** (voir plus haut).
-- **Lot D — trous de couverture** : les 1 554 commits de l'été contre l'Aide.
+- ~~**Lot D — trous de couverture**~~ : **fait le 10 sept.** (voir plus haut). Deux trous restent à combler (D.4, D.5) : ils demandent de la prose neuve.
 - ~~**Lot E — encastrement résiduel**~~ : **fait le 10 sept.** (voir plus haut). Le pilote avait vu juste : largement propre.
 
 ## Garde-fous à ne pas « corriger » par mégarde
