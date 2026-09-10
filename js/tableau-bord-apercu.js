@@ -480,8 +480,7 @@ function mettreAJourContextesSections(nbEtudiants) {
         'contexte-evolution-temporelle',
         'contexte-trajectoire-apprentissage',
         'contexte-correlations',
-        'contexte-impact-jetons',
-        'contexte-consolidation'
+        'contexte-impact-jetons'
     ];
 
     // Vérifier la préférence d'affichage
@@ -1278,11 +1277,6 @@ function chargerTableauBordApercu() {
         // 🆕 Graphique impact des jetons sur P
         if (typeof creerGraphiqueImpactJetons === 'function') {
             creerGraphiqueImpactJetons('graphique-impact-jetons');
-        }
-
-        // Matrice de consolidation des apprentissages
-        if (typeof afficherMatriceConsolidation === 'function') {
-            afficherMatriceConsolidation();
         }
 
         // 🆕 BETA 96: Distribution ACPE maintenant intégrée dans les barres de progression

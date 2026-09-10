@@ -764,7 +764,7 @@ const SCHEMAS_IMPORT = {
                 // `afficherNiveauxNouvelleEchelle` et `afficherNiveauxEchelle`),
                 // et que lisent `valeurNumeriqueDuNiveau` (echelles.js — LA règle
                 // depuis #525), `_tableDepuisNiveaux` (profil-etudiant-calculs.js)
-                // et `_construireConversion` (consolidation.js). Les données
+                // et `_construireConversion` (module Consolidation, retiré). Les données
                 // réelles portent l'un ou l'autre selon leur origine.
                 // ⚠ Cités par NOM et non par numéro de ligne : deux des trois
                 // renvois de ce commentaire avaient glissé (`echelles.js:1540` ne

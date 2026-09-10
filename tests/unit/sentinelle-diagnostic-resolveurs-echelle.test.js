@@ -139,7 +139,7 @@ describe('diagnostic résolveurs · B — il détecte ET nomme la cause', () => 
         const r = win._diagnostiquerResolutionEchelles();
         expect(r.divergents).toHaveLength(1);
         expect(r.divergents[0].resolueParRetroaction).toBe(true);
-        expect(r.divergents[0].resolueParConsolidation).toBe(false);
+        expect(r.divergents[0].resolueParRegistre).toBe(false);
         expect(r.divergents[0].cause).toBe('idOriginal');
         expect(r.parCause.idOriginal).toBe(1);
     });
@@ -166,7 +166,7 @@ describe('diagnostic résolveurs · B — il détecte ET nomme la cause', () => 
         const r = win._diagnostiquerResolutionEchelles();
         expect(r.divergents).toHaveLength(1);
         expect(r.divergents[0].resolueParRetroaction).toBe(false);
-        expect(r.divergents[0].resolueParConsolidation).toBe(true);
+        expect(r.divergents[0].resolueParRegistre).toBe(true);
         expect(r.divergents[0].cause).toBe('pool-inter-trimestre');
     });
 
@@ -199,7 +199,7 @@ describe('diagnostic résolveurs · B — il détecte ET nomme la cause', () => 
         const r = win._diagnostiquerResolutionEchelles();
         expect(r.divergents).toHaveLength(0);
         expect(r.lignes[0].resolueParRetroaction).toBe(false);
-        expect(r.lignes[0].resolueParConsolidation).toBe(false);
+        expect(r.lignes[0].resolueParRegistre).toBe(false);
     });
 });
 
@@ -240,6 +240,6 @@ describe('diagnostic résolveurs · C — il ne touche à rien', () => {
             calculerEtStockerIndicesCP: () => {}
         });
         const r = sansRegistre._diagnostiquerResolutionEchelles();
-        expect(r.lignes[0].resolueParConsolidation).toBeNull();
+        expect(r.lignes[0].resolueParRegistre).toBeNull();
     });
 });

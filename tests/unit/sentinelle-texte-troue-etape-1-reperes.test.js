@@ -37,6 +37,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { jetonAuMoins } from './_helpers/jeton-anticache.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
 
@@ -331,8 +332,8 @@ describe('texte troué · E — le gabarit offre les repères par le registre', 
         expect(html.indexOf('js/evaluation-enonces.js')).toBeLessThan(html.indexOf('js/grilles.js'));
         // Le garde anti-cache ne surveille que main.js : un fichier corrigé sans
         // bump arrive périmé dans Safari, sans signal. Les trois du lot :
-        expect(html).toMatch(/js\/evaluation-enonces\.js\?v=2026090[3-9]|js\/evaluation-enonces\.js\?v=20261/);
-        expect(html).toMatch(/js\/grilles\.js\?v=20260903[c-z]|js\/grilles\.js\?v=2026090[4-9]|js\/grilles\.js\?v=20261/);
-        expect(html).toMatch(/styles\.css\?v=20260903[c-z]|styles\.css\?v=2026090[4-9]|styles\.css\?v=20261/);
+        { const j = jetonAuMoins(html, 'js/evaluation-enonces.js', '20260903a'); expect(j.ok, j.message).toBe(true); }
+        { const j = jetonAuMoins(html, 'js/grilles.js', '20260903c'); expect(j.ok, j.message).toBe(true); }
+        { const j = jetonAuMoins(html, 'styles.css', '20260903c'); expect(j.ok, j.message).toBe(true); }
     });
 });

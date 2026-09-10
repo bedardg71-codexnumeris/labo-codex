@@ -339,10 +339,6 @@ const INITIALISATEURS_SOUS_SECTION = {
         if (typeof creerGraphiqueImpactJetons === 'function') {
             setTimeout(() => creerGraphiqueImpactJetons('graphique-impact-jetons'), 100);
         }
-        // Matrice de consolidation des apprentissages
-        if (typeof afficherMatriceConsolidation === 'function') {
-            setTimeout(() => afficherMatriceConsolidation(), 150);
-        }
     },
     'labo-bilan': function () {
         if (typeof initialiserBilanReflexif === 'function') {

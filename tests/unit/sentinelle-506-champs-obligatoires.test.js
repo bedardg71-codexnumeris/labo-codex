@@ -122,7 +122,7 @@ describe('#506 · aucun astérisque sur un champ facultatif', () => {
         // départ. Si un jour un site la lit SANS repli, elle devient bloquante
         // — et cette garde rougira pour le dire.
         const sources = ['js/evaluation-retroaction.js', 'js/synthese-retroaction-data.js',
-                         'js/profil-etudiant-calculs.js', 'js/consolidation.js'].map(lire).join('\n');
+                         'js/profil-etudiant-calculs.js'].map(lire).join('\n');
         const usages = sources.split('\n').filter(l => l.includes('activiteApprentissage')
             && !l.trim().startsWith('//') && !l.trim().startsWith('*'));
         expect(usages.length, 'des usages à vérifier').toBeGreaterThan(0);

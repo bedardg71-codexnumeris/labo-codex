@@ -7,6 +7,72 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 10 SEPT. 2026, 0 h 30 : TROIS RAPPORTS, UNE SUPPRESSION, ET SEPT BANCS QUI MESURAIENT LE CALENDRIER
+
+> ✅ **`main` à 1.128.0, build `0910-0046`, commit de fusion `2e6c8010`, POUSSÉ.** Vitest **524 fichiers /
+> 5733 essais**, vert sur l'état fusionné · Playwright : aucune rougeur nouvelle, verdict posé sur ce SHA.
+>
+> ⚠⚠ **LIRE CECI D'ABORD : DEUX SESSIONS ONT LIVRÉ CETTE NUIT, ET LE COMPTEUR A ENCORE COLLISIONNÉ.**
+> Pendant que ce lot se committait, une seconde instance a poussé **huit commits** (1.127.6 → 1.127.11,
+> audit de l'Aide) et pris **#816, #817 ET #818**. Découvert au `git fetch` qui a suivi un push tué faute
+> de mémoire — **par accident, pas par un contrôle**. Mes deux items ont été décalés à **#819** et **#820**
+> (les leurs étaient déjà publiés : ce sont les miens qui bougent, jamais l'inverse). ⮕ **TROISIÈME FOIS
+> EN CINQ SEMAINES** (8 août, 9 septembre, cette nuit) : `Dernier ID` ne vit que sur `main`, et deux
+> sessions qui le lisent au même moment y lisent la même valeur. Ce n'est pas de la malchance, c'est la
+> conception du compteur. ⚠ Le message du commit `f6f00c71` porte les nouveaux numéros ; l'historique du
+> merge, lui, garde trace des anciens.
+> ⮕ **Et la fusion elle-même demandait une preuve** : leur version des deux fichiers d'aide contenait
+> ENCORE les lignes que ce lot venait d'en retirer. Une fusion automatique « réussie » aurait pu les
+> ramener. Vérifié par grep des deux côtés (0 attendu / >0 attendu) avant de pousser.
+>
+> **#819 — LE MODULE « CONSOLIDATION DES APPRENTISSAGES » EST RETIRÉ, EN ENTIER.** Demande de Grégoire :
+> « cette fonctionnalité n'a jamais vraiment été concluante ». ⚠⚠ **LE FAIT À RETENIR : LA SUPPRESSION
+> DÉBORDAIT DE L'ÉCRAN CAPTURÉ.** Trois surfaces vivaient sur le même moteur — la carte du Labo, la ligne
+> « Consolidation » de l'onglet *Forces et défis*, et les mentions « ◆ Consolidé » de l'infobulle du
+> graphique. Les deux dernières appelaient `calculerConsolidationIndividuelle` : **retirer la carte seule
+> aurait laissé 769 lignes de moteur en place**. Le périmètre a été porté à sa décision AVANT la première
+> coupe, chiffres à l'appui — « ce qu'une suppression doit emporter » est l'un des quatre points qui
+> remontent. Il a tranché : tout part.
+> ⮕ **Vérifié avant de couper** : `echelle.seuilMaitrise` n'est PAS orpheline (cinq autres lecteurs). Le
+> repère « Maîtrisé à partir de » garde son effet. La spec d'origine est **archivée**, pas supprimée.
+> ⚠ **La couverture perd 21 essais, tous nommés dans #819.** Dont une sentinelle entière (12 cas) : elle
+> éprouvait `_detecterScoreMaitrise`, qui vivait dans le module. L'objet a disparu, pas la couverture
+> d'autre chose. ⮕ **Et en lisant `sentinelle-555-2`, une coupe trop large a été vue** : « Règle le
+> dépistage seulement » restait vrai. Remise, avec un cas neuf break-testé rouge.
+>
+> **#820 — SEPT SENTINELLES MESURAIENT LE CALENDRIER, ET C'EST LA RELEASE QUI L'A DÉCOUVERT.**
+> `release.mjs` pose le build `0910-…` ; sept bancs rougissent d'un coup sur un lot qui ne les touche pas.
+> Ils vérifiaient un jeton `?v=` par `20260905[c-z]|2026090[6-9]|20261` — la dernière branche visait
+> octobre-décembre. **TROU DU 10 AU 30 SEPTEMBRE.** N'importe quelle release d'aujourd'hui l'aurait
+> heurté. ⮕ Corrigé (niveau 1 : ça bloquait le parcours livré). Helper `tests/unit/_helpers/jeton-anticache.js`
+> — **deux dates se comparent, elles ne s'énumèrent pas**. 18 assertions réécrites, planchers conservés.
+> ⚠ **Réécrire 18 assertions peut neutraliser sept sentinelles sans qu'aucune ne le dise** : break-test
+> obligatoire, fait — jeton d'août → 6 rouges, jeton retiré → 6 rouges, arbre intact → vert (le témoin
+> porte le sens ici : le 10 du mois doit PASSER).
+>
+> **LE RAPPORT HEIC EST CLOS SANS CORRECTIF.** Chrome ne décode pas le HEIC nativement, mais l'app embarque
+> libheif depuis #597 : sur la bêta publique `decodagePossible()` rend `true` et le worker répond ; sur banc
+> local, `IMG_2179.HEIC` (2 909 950 o) → 3024 × 4032 en 2 535 ms. Un seul commit a jamais touché ce libellé
+> (`20e4feaf`) : il l'a rendu **conditionnel**, jamais retiré. ⮕ Ce qui manque est ailleurs : le bloc
+> `--- SYSTÈME ---` du rapport de bug ne dit pas le PROTOCOLE d'ouverture, alors que c'est ce qui départage
+> les deux affichages. Inscrit dans **#812**.
+>
+> **`SUIVI-BUGS.md` MENTAIT, ET C'EST LE FICHIER QU'ON LIT AVANT DE CORRIGER.** #806, #807 (livrés 1.127.0,
+> validés porte #802 14/14) et #811 (1.127.4) y traînaient comme chantiers ouverts. **Seul #114 reste ouvert.**
+>
+> ⚠ **#812 VÉCU DE L'INTÉRIEUR** : les premières écritures de la session portaient « 10 septembre » — l'heure
+> UTC lue au lieu de l'heure locale, à 23 h 53 le 9. Le même mécanisme que le nom des rapports de bug.
+> Et le jeton anti-cache a suivi le même chemin : la sentinelle exige le jour du **BUILD**, pas la date du jour.
+>
+> **MESURÉ, PAS AFFIRMÉ** : Vitest 520/5707 sur l'état exact de la release · **six ablations, six rougeurs**,
+> arbre restauré par sha256 · zéro référence orpheline au grep · les six sous-sections du Labo parcourues au
+> navigateur, zéro erreur console · fenêtre de soutien mesurée à trois formats.
+>
+> ⏳ **DÛ, ET PAS À UNE SESSION** : Safari sur l'iPad de Grégoire — la fenêtre de soutien y a changé deux fois
+> en vingt-quatre heures sans que personne l'y voie.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 10 SEPT. 2026 : L'AUDIT DE CONFORMITÉ DE L'AIDE (1.127.11)
 
 > ✅ **`main` à 1.127.11, build `0910-0024`, fusionné et poussé.** Rien n'attend sur

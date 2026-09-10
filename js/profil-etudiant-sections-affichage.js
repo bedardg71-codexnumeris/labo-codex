@@ -1414,8 +1414,6 @@ function genererSectionAccompagnement(da) {
             })()}
         </div>
 
-        <!-- Bloc Consolidation déplacé vers l'onglet « Forces et défis » de « Développement des habiletés » (17 avril 2026) -->
-
         <!-- Historique compact -->
         <div class="u-mt-15">
             <div class="u-flex-between-mb10">
@@ -4214,7 +4212,7 @@ function genererSectionPerformance(da) {
     if (!portfolio) {
         return genererOngletsDeveloppement(da, {
             criteres: graphiqueCriteres,
-            forcesDefis: barresSRPNF + genererBlocConsolidation(da),
+            forcesDefis: barresSRPNF,
             gestesCognitifs: genererConteneurGestesCognitifs(da)
         });
     }
@@ -4225,7 +4223,7 @@ function genererSectionPerformance(da) {
     if (tousLesArtefactsPortfolio.length === 0) {
         return genererOngletsDeveloppement(da, {
             criteres: graphiqueCriteres,
-            forcesDefis: barresSRPNF + genererBlocConsolidation(da),
+            forcesDefis: barresSRPNF,
             gestesCognitifs: genererConteneurGestesCognitifs(da)
         });
     }
@@ -4380,7 +4378,6 @@ function genererSectionPerformance(da) {
                 <div style="margin: 20px 0;">
                 ${_genererBlocForcesDefisSRPNF(da)}
                 </div>
-                ${genererBlocConsolidation(da)}
                 `,
                 gestesCognitifs: genererConteneurGestesCognitifs(da)
             })}

@@ -58,6 +58,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { jetonAuMoins } from './_helpers/jeton-anticache.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
 const source = (rel) => readFileSync(path.join(racine, rel), 'utf8');
@@ -385,8 +386,8 @@ describe('texte troué 2 · D — rendu pur : aucun contrôle dans la ligne, rie
 describe('texte troué 2 · E — les jetons anti-cache du volet ont bougé', () => {
     it('E.a grilles.js, evaluation-projection.js et styles.css', () => {
         const html = source('index.html');
-        expect(html).toMatch(/js\/grilles\.js\?v=20260904[k-z]|js\/grilles\.js\?v=2026090[5-9]|js\/grilles\.js\?v=20261/);
-        expect(html).toMatch(/js\/evaluation-projection\.js\?v=20260904[e-z]|js\/evaluation-projection\.js\?v=2026090[5-9]|js\/evaluation-projection\.js\?v=20261/);
-        expect(html).toMatch(/styles\.css\?v=20260904[h-z]|styles\.css\?v=2026090[5-9]|styles\.css\?v=20261/);
+        { const j = jetonAuMoins(html, 'js/grilles.js', '20260904k'); expect(j.ok, j.message).toBe(true); }
+        { const j = jetonAuMoins(html, 'js/evaluation-projection.js', '20260904e'); expect(j.ok, j.message).toBe(true); }
+        { const j = jetonAuMoins(html, 'styles.css', '20260904h'); expect(j.ok, j.message).toBe(true); }
     });
 });

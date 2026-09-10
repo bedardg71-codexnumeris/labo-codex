@@ -27,6 +27,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { jetonAuMoins } from './_helpers/jeton-anticache.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
 const source = (rel) => readFileSync(path.join(racine, rel), 'utf8');
@@ -253,8 +254,8 @@ describe('lot C · E — les règles : sept colonnes, le coin, 44 px, l\'empilem
     it('E.d les jetons des cinq fichiers du lot ont bougé', () => {
         const html = source('index.html');
         for (const f of ['js/ui-blocs.js', 'js/bibliotheque-ui.js', 'js/pratique-notation-v2.js', 'js/echelles.js']) {
-            expect(html, f).toMatch(new RegExp(f.replace(/[./]/g, '\\$&') + '\\?v=(2026090[5-9]|20261)'));
+            { const j = jetonAuMoins(html, f, '20260905a'); expect(j.ok, j.message).toBe(true); }
         }
-        expect(html).toMatch(/styles\.css\?v=20260905[e-z]|styles\.css\?v=2026090[6-9]|styles\.css\?v=20261/);
+        { const j = jetonAuMoins(html, 'styles.css', '20260905e'); expect(j.ok, j.message).toBe(true); }
     });
 });
