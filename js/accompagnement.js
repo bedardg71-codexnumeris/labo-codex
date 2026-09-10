@@ -1066,7 +1066,7 @@ const ETAPES_TOUR = [
     {
         id: 0,
         titre: 'Bienvenue',
-        texte: "Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0. Ce parcours te guide \u00e0 travers les \u00e9tapes essentielles. Tu peux le quitter \u00e0 tout moment et y revenir depuis les Pr\u00e9f\u00e9rences. Commence par configurer ton espace de travail dans l'onglet Cadre.",
+        texte: "Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0. Ce parcours te guide \u00e0 travers les \u00e9tapes essentielles. Tu peux le quitter \u00e0 tout moment et le relancer depuis le bouton de l'en-t\u00eate. Commence par configurer ton espace de travail dans l'onglet Cadre.",
         correspond: function(idSousSection) { return !idSousSection || idSousSection === 'accueil'; }
     },
     {
@@ -1081,13 +1081,13 @@ const ETAPES_TOUR = [
         titre: 'Conception',
         texte: "Tu construis ici tes outils d'\u00e9valuation \u2014 les m\u00eames que sur papier, mais r\u00e9utilisables. Les productions d\u00e9finissent les occasions d'apprentissage de tes \u00e9tudiant\u00b7es. Les grilles fixent tes crit\u00e8res. Les \u00e9chelles \u00e9tablissent les niveaux de performance. Les cartouches pr\u00e9parent la r\u00e9troaction. La pratique assemble le tout.\n\nL'ordre n'est pas impos\u00e9, mais les productions et les grilles sont un bon point de d\u00e9part.",        correspond: function(idSousSection) {
             if (typeof idSousSection !== 'string') return false;
-            const structureConception = ['conception-productions', 'conception-grille-criteres', 'conception-echelle-performance', 'conception-retroactions'];
+            const structureConception = ['conception-productions', 'conception-grille-criteres', 'conception-echelle-performance', 'conception-retroactions', 'conception-pratiques-notation'];
             return structureConception.indexOf(idSousSection) !== -1;
         }
     },
     {
         id: 3,
-        titre: '\u00c9valuations',
+        titre: '\u00c9valuation',
         texte: "C'est le geste quotidien\u00a0: tu s\u00e9lectionnes une production, tu attribues un niveau \u00e0 chaque crit\u00e8re et la r\u00e9troaction se construit au fur et \u00e0 mesure. Tu peux importer les copies de tes \u00e9tudiant\u00b7es (PDF ou images), les annoter avec des tampons / estampes ou des codes, puis les \u00e9valuer \u2014 tout sur le m\u00eame document.\n\nLes jetons (D\u00e9lai, Reprise, Reprise cibl\u00e9e) offrent \u00e0 l'\u00e9tudiant\u00b7e une nouvelle occasion de d\u00e9montrer sa comp\u00e9tence.",        correspond: function(idSousSection) {
             return typeof idSousSection === 'string' && idSousSection.indexOf('evaluations-') === 0;
         }
@@ -1127,11 +1127,12 @@ const TOUR_NAV = {
     2: { section: 'conception', sousSection: 'productions' },
     3: { section: 'evaluations' },
     4: { section: 'suivi' },
-    5: { section: 'conception', sousSection: 'carte' }
+    5: { section: 'conception', sousSection: 'carte' },
+    6: { section: 'labo' }
 };
 
 // Libellés courts pour le bouton « Suivant : <section> » (indexés par id d'étape).
-const TOUR_TITRE_COURT = ['Bienvenue', 'Cadre', 'Conception', 'Évaluations', 'Suivi', 'Carte d\'alignement'];
+const TOUR_TITRE_COURT = ['Bienvenue', 'Cadre', 'Conception', 'Évaluation', 'Suivi', 'Carte d\'alignement', 'Labo'];
 
 // Phase 4 : publier les 6 étapes dans le catalogue unifié sous mode `tour`.
 // La clé est `tour-etape-<id>`. L'orchestration continue d'utiliser le tableau

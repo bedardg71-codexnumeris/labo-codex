@@ -7,6 +7,64 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 10 SEPT. 2026 : L'AUDIT DE CONFORMITÉ DE L'AIDE (1.127.11)
+
+> ✅ **`main` à 1.127.11, build `0910-0024`, fusionné et poussé.** Rien n'attend sur
+> une branche. La branche `claude/audit-help-documentation-l4s0tz` est à l'identique
+> de `main` (elle porte le merge, `main` l'a repris en avance rapide).
+>
+> ⚠ **Cette ligne a été fausse quatre sessions de suite** (le fichier le documente
+> lui-même plus bas). Elle est écrite ici APRÈS la fusion et la vérification
+> `git rev-list --count origin/main..main` = 0, pas avant.
+
+**CE QUI A ÉTÉ FAIT — un audit de conformité entre l'« Aide » et le code**, demandé
+par Grégoire : « on a retiré beaucoup de code dur porté sur ma pratique, est-ce que
+l'Aide est encore conforme ? » Quatre lots sur six sont faits.
+
+| Lot | Objet | Releases |
+|---|---|---|
+| #803 | la définition des PAN | 1.127.6 |
+| A | chemins, libellés, valeurs chiffrées, formats | 1.127.7 → 1.127.9 |
+| B | cohérence des quatre surfaces de l'Aide | 1.127.10 |
+| C | la visite guidée | 1.127.11 |
+
+**Le fichier d'audit est `plans de travail/AUDIT-AIDE-CONFORMITE-2026-09-10.md`** :
+chaque constat y porte sa disposition (*corrigé*, *inscrit n°*, *refusé* + motif,
+*périmé*). Les deux lots restants (**D** — ce que le code a ouvert cet été et dont
+l'Aide se tait ; **E** — l'encastrement résiduel : 601-101, SRPNF, IDME, ELLAC) y
+sont cadrés.
+
+**QUATRE SENTINELLES NEUVES**, 26 essais, **26 ablations toutes rouges** :
+`sentinelle-803-aide-pan-famille-pas-mecanique`,
+`sentinelle-817-aide-chemins-et-libelles`,
+`sentinelle-818-aide-trois-surfaces-concordent`,
+`sentinelle-819-visite-guidee-coherente`.
+Elles **lisent leurs valeurs à la source** (le pack de démo, `config.js`,
+`interpretation-config.js`, `preferences-v2.js`, le rendu du tableau de bord)
+au lieu de figer des copies : plusieurs ablations modifient le CODE et non la doc.
+Vitest **523 fichiers / 5754 essais**.
+
+**TROIS ITEMS OUVERTS, AUCUN CORRIGÉ** — tous demandent un arbitrage de Grégoire :
+- **#816** (🔴) deux des quatre modes de sélection du portfolio ne calculent pas ce
+  que leur nom annonce. **Le seul qui touche une note.**
+- **#817** (🟡) trois seuils pour « force » et « défi » (0,70 · 0,7125 · 0,75),
+  l'Aide n'en décrit qu'un.
+- **#818** (🟡) trois choses portent le nom « Très favorable ».
+
+⛔ **VERDICT PLAYWRIGHT : AUCUN sur toute la session** (environnement cloud, pas de
+banc navigateur). **Deux choses sont à éprouver à l'écran avant la CoP du 14** :
+la carte « Prendre en main l'application » (hauteur d'accordéon), et surtout **la
+visite guidée de bout en bout** — le lot C a changé son parcours (elle emmène
+maintenant dans le Labo à sa dernière étape, et reconnaît l'écran des pratiques).
+
+⚠ **Un piège rencontré, à ne pas répéter** : un `grep` qui ne trouve rien n'est PAS
+une preuve d'absence. J'ai rapporté à Grégoire qu'un bouton n'existait pas, sur la
+foi d'un `grep data-action="reconstruire` — l'action s'appelait
+`lancerReconstructionRetroactive`. Sa décision, prise sur cette base, aurait retiré
+une procédure juste. Chercher par le nom de la FONCTION appelée.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 10 SEPT. 2026, NUIT : LE JOURNAL SANS FOND, PUIS LA FENÊTRE DE SOUTIEN (1.127.5)
 
 > ✅ **`main` à 1.127.5, build `0909-2314`, fusionné en avance rapide (aucun conflit possible : `main`

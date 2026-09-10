@@ -172,7 +172,7 @@ const TOOLTIPS = {
     'depist-seuils-interpretation':
         'Seuils de couleur pour les indices A-C-P. Fragile (rouge), Acceptable (jaune), Bon (vert). Détermine les alertes du tableau de bord.',
     'depist-seuils-restaurer':
-        'Réinitialise les seuils d\'interprétation à leurs valeurs par défaut (65 / 70 / 75 %).',
+        'Réinitialise les seuils d\'interprétation à leurs valeurs par défaut (70 / 80 / 85 %).',
     'depist-seuils-visuels':
         'Lignes pointillées et étiquettes des zones (ex. : Insuffisant, Développement, Maîtrise, Étendu) sur les graphiques de la section «Progression temporelle ACP» du profil individuel.',
 
@@ -233,7 +233,7 @@ const TOOLTIPS = {
     'cn-prod-tableau':
         'Tableau récapitulatif de toutes tes productions : titre, type, pondération et échéance.',
     'cn-prod-type':
-        'Portfolio (conteneur d\'artefacts pondéré — les N meilleurs résultats sont retenus), Artefact (production à l\'intérieur d\'un portfolio) ou Travail (évaluation indépendante).',
+        'Portfolio (conteneur d\'artefacts pondéré — ta pratique décide lesquels comptent), Artefact (production à l\'intérieur d\'un portfolio) ou Travail (évaluation indépendante).',
     'cn-prod-activite':
         'Nom de l\'activité pédagogique associée à cette production. Clique sur ✏\ufe0f pour modifier.',
     'cn-prod-grille':
@@ -438,7 +438,7 @@ const TOOLTIPS = {
     'tdb-sous-nav':
         'Quatre vues : aperçu du groupe, liste des individus, profil étudiant·e et interventions RàI.',
     'tdb-zones-couleur':
-        'Fragile (0-64 %), Modéré (65-74 %), Favorable (75-85 %), Très favorable (≥ 85 %). Seuils configurables dans Réglages.',
+        'Fragile (30-49 %), Modéré (50-64 %), Favorable (65-79 %), Très favorable (≥ 80 %).',
 
     // --- Observer (indices A-C-P) ---
 
