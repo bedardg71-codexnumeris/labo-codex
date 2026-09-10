@@ -1,140 +1,91 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
-> **Réécrite le 8 septembre 2026, en début d'après-midi, par Cowork.**
-> **Elle REMPLACE la version du 5 septembre au soir**, qui annonçait `1.122.0` et renvoyait vers
-> `plans de travail/CONSIGNE-PROCHAINE-SEANCE.md` — **un fichier qui n'existe plus** : son contenu a
-> été promu en `CONSIGNE-DU-JOUR.md`, comme son en-tête le prescrivait, et le renvoi est resté
-> pendant trois jours à pointer dans le vide. Le tableau du tri du 2 septembre est gardé en fin de
-> fichier.
+> ↻ **ÉTAT MESURÉ et MANDAT réécrits le 10 septembre 2026, en début d'après-midi, par Claude Code**,
+> à la demande explicite de Grégoire. Ils remplacent la version du 9 au soir, périmée de six versions
+> mineures, **et dont les deux fichiers du mandat étaient entièrement consommés**.
+>
+> ⚠ **Exception nommée à `PROTOCOLE.md` § « Qui écrit quoi »**, qui réserve le MANDAT à Cowork.
+> Motif de la règle : *une session qui rédige sa propre consigne se relit elle-même — elle transmet
+> ce qu'elle a vu, pas ce qu'elle a manqué.* Le risque est réel ici. ⮕ **Cowork peut et devrait
+> reprendre le mandat à froid** ; ce qui suit est une proposition, pas un mandat arrêté.
 >
 > ⚠ **Nom sans date, exprès.** La date d'écriture est en tête ; c'est elle qui fait foi.
 > ⛔ **Ce fichier ne porte que ce qui PÉRIME** : l'état mesuré, le mandat, ce qui est dû.
->
-> ↻ **État mesuré remplacé le 9 septembre 2026 au soir par Claude Code**, à la demande de Grégoire,
-> après un rituel de début de session qui a trouvé ce fichier périmé de trois versions. Seul l'ÉTAT
-> MESURÉ a changé de main : **le mandat et la séquence restent à Cowork** (`PROTOCOLE.md`, « Qui écrit
-> quoi dans la consigne de démarrage »). Ce qui a périmé dans la séquence est signalé où il l'est,
-> **sans être réécrit**.
 
 ---
 
 ## À LIRE D'ABORD, DANS CET ORDRE
 
 1. **`PROTOCOLE.md`** — comment nous trois travaillons ensemble. Sept règles.
-2. **`OU-EN-EST-ON.md`** — où on en est, en gestes d'utilisateur. Sa tête porte `1.124.3`.
-3. **`plans de travail/CONSIGNE-SUIVANTE-menage-documentaire.md`** — **court, et il passe en
-   premier** : deux traces manquantes dans `SESSION.md`, une branche à retirer. Aucun code touché.
-4. **`plans de travail/CONSIGNE-DU-JOUR.md`** — **le vrai chantier de la journée** : le dépistage du
-   français en première semaine. Écrite le 7 au soir, maintenue par Grégoire le 8. Une seule consigne
-   du jour à la fois ; c'est celle-là.
-5. `CLAUDE.md`, puis `OBJECTIF-COHORTE-1.md` (les huit énoncés).
+2. **`OU-EN-EST-ON.md`** — où on en est, en gestes d'utilisateur. Sa tête porte `1.128.3`.
+3. **`plans de travail/CONSIGNE-SUIVANTE-nomenclature-des-zones.md`** — la proposition d'analyse
+   du jour (voir LE MANDAT plus bas).
+4. `CLAUDE.md`, puis `OBJECTIF-COHORTE-1.md` (les huit énoncés).
 
-Puis le rituel : skill `debut-de-session-labo-codex`.
+Puis le rituel : skill `debut-de-session-labo-codex`, **délégué au subagent `audit-debut-session`**.
 
-⚠ **Mesuré le 9 septembre au soir — deux entrées de cette liste ont périmé.** Le point 2 annonce une
-tête d'`OU-EN-EST-ON.md` à `1.124.3` : elle est à **`1.127.2`**. Le point 3 (`CONSIGNE-SUIVANTE-menage-
-documentaire.md`) est **livré** — le bloc `SESSION.md` manquant a été écrit le 8 (`f5334e86`), et la
-branche `claude/consigne-du-jour-wybfs0` **existe toujours sur `origin`**, sa suppression revenant à
-l'instance qui l'a poussée. Le point 4 renvoie à la consigne du dépistage du français : elle a été
-**archivée le 9 au soir sans avoir été exécutée**, remplacée par la consigne du jour du 9 à 19 h 05
-(le texte d'accueil de l'Aide), elle-même **exécutée et livrée en 1.127.2**. Il n'y a donc, ce soir,
-**aucune consigne du jour en attente** : la suivante revient à Cowork.
+⚠ Les trois entrées périmées de la version précédente ont été retirées, pas corrigées : le ménage
+documentaire est livré, la consigne du dépistage du français est archivée sans avoir été exécutée
+(son cadrage vit dans `plans de travail/CADRAGE-2026-09-07-depistage-du-francais-semaine-1.md`), et
+il n'y avait **aucune consigne du jour en attente** au matin du 10.
 
 ---
 
-## ÉTAT MESURÉ — 9 SEPTEMBRE 2026, 20 H 05 (TORONTO)
+## ÉTAT MESURÉ — 10 SEPTEMBRE 2026, DÉBUT D'APRÈS-MIDI (TORONTO)
 
-▣ **Mesure de CLAUDE CODE, dans l'arbre, chaque ligne avec la commande qui la produit.** Elle remplace
-celle du 8 septembre, périmée de trois versions mineures. ⚠ Un état mesuré vieillit en heures : sept
-versions sont sorties le 9. **Remesure, ne recopie pas.**
+▣ **Mesure de Claude Code, dans l'arbre, chaque ligne avec la commande qui la produit.**
+⚠ **Un état mesuré vieillit en heures. Remesure, ne recopie pas.**
 
-- **Version `1.127.3`, build `0909-1955`** (`cat version.json`). **HUIT livraisons le 9** :
-  `1.125.1`, `1.125.2`, `1.126.0`, `1.126.1`, `1.127.0`, `1.127.1`, `1.127.2`, `1.127.3`.
-  ⚠ **Le SHA de `main` n'est PAS écrit ici, exprès.** Celui de la version précédente de cette
-  mesure a été périmé DEUX FOIS en une heure — d'abord par la livraison, puis par une autre session
-  du même arbre qui commitait en parallèle. Un SHA inscrit dans un fichier d'état est périmé avant
-  d'être lu : `git log --oneline -1` le rend en une seconde, et c'est la seule valeur à croire.
-- **`origin/main` = `main`** après le push du soir (`git fetch && git rev-list --count origin/main..HEAD`
-  rend `0` ; témoin : le même compte rendait `1` avant le push, un commit de porte terrain attendait
-  depuis 18 h 52).
-- **Arbre propre** : aucun fichier modifié, **aucun fichier non suivi** (`git status --short -uall` ne
-  rend rien). La liste des non-suivis de la version du 8 est donc entièrement épuisée. `_to_delete/`
-  existe toujours, **douze fichiers**, mais il est dans `.gitignore` (l. 134) : il ne remonte plus au
-  statut, il attend toujours le geste de Grégoire.
-- **Tests** : Vitest **518 fichiers / 5703 essais, 0 échec** (`cd tests && npm run test:unit`) ; verdict
-  Playwright local pris sur le SHA poussé, baseline des rougeurs connues **à 0** depuis le 9 en fin
-  d'après-midi (elle déclarait faussement zéro depuis le 26 août, corrigée le 8, puis vidée pour de
-  vrai quand les quatre essais menteurs ont été réparés).
-- **`RELAIS.md` et `OU-EN-EST-ON.md` sont à jour au 9 en fin de soirée** (1.127.3) ; `SESSION.md`
-  s'arrête au bloc SESSION 37, qui couvre jusqu'à `1.127.2` — **les deux dernières livraisons du 9 y
-  manquent**, et c'est la première chose à combler.
-- ✅ **La grille de dépistage de Grégoire est re-désignée et TIENT** (porte #802, rangée 1.1, relevée
-  à 18 h 49). La ligne « à re-choisir une fois » qui traînait dans les relais est close.
-- ⏳ **#810 n'est pas ouvert** : seul son préalable de vocabulaire est livré (1.127.3). Le chantier de
-  fond attend la rencontre de la communauté de pratique du 14 — cadrage complet dans `BACKLOG.md`.
-- **Une branche vivante sur `origin`** : `claude/consigne-du-jour-wybfs0`, absorbée dans `main` mais non
-  supprimée (sa suppression revient à l'instance qui l'a poussée).
-- ⚠ **`.git/` porte une vingtaine de verrous résiduels renommés depuis le 27 août**, et deux verrous
-  vides sont réapparus le 9 à 19 h 21 **sans qu'aucun processus git ne tourne**. ⮕ **LA CAUSE EST
-  CONNUE ET STRUCTURELLE, un `rm` de plus ne règle rien** : le shell de Cowork ne peut pas SUPPRIMER
-  de fichier dans le dépôt, seulement renommer — chaque commit tenté depuis Cowork laisse donc son
-  verrou derrière lui. Conduite à tenir côté Claude Code : si un commit échoue sur « Unable to create
-  … .lock », vérifier que le fichier est VIDE et qu'aucun processus git ne tourne, puis l'écarter.
+- **Version `1.128.3`, build `0910-1147`** (`cat version.json`). **Une seule release le 10**
+  (`git log --format=%s origin/main --since='2026-09-10 00:00' | grep -c '^release '` rend `1`),
+  après les quatre du 9 au soir et du 10 au matin livrées par d'autres instances.
+- **`origin/main` = `main`**, et **la branche de travail est fusionnée** :
+  `git rev-list --count main ^claude/continuation-travail-qpdgka` rend `0`.
+  ⚠ **Le SHA n'est pas écrit ici, exprès** — il périme avant d'être lu. `git log --oneline -1`.
+- **Arbre propre au moment de la mesure** (`git status --porcelain -uall`).
+- **Vitest : 529 fichiers / 5760 essais, 0 échec** (`cd tests && npm run test:unit`, ~65 s).
+  ⛔ **PAS `npm test`** : il enchaîne Playwright, plus de dix minutes, et la connexion se ferme.
+- **Playwright : AUCUN verdict local, et aucun n'est obtenable en session cloud.** Mesuré le 10 :
+  la config `playwright.chromium.config.js` dit elle-même que la suite entière rougit à moitié en
+  Chromium (motifs d'erreurs console rédigés pour WebKit), et **aucune spec ne touche le code livré
+  aujourd'hui** (`grep -rln "portfoliosEleves\|seuilsInterpretation\|distribution-legende" tests/integration/`
+  ne rend rien). Le verdict WebKit vient de la CI ; le verdict Safari/iPad reste sur le Mac.
 
-### Le retour testeur du 7 septembre : ce n'était pas un bug
+**Ce que le 10 septembre a livré, et ce qu'il a CORRIGÉ DES FICHES ELLES-MÊMES** — c'est le fait
+le plus utile au relais :
 
-**« L'enregistrement semble instable. J'ai dû saisir et enregistrer les présences à plusieurs
-reprises. »** ⮕ **REQUALIFIÉ le 8 septembre, et ce n'est pas un défaut du code.** Grégoire a ouvert
-l'application à DEUX adresses cet automne — son fichier local (`file://`) et
-`https://app.codexnumeris.org`. Ce sont deux **origines** au sens du navigateur : `localStorage` et
-IndexedDB y sont cloisonnés, rien ne passe de l'une à l'autre. Il saisissait d'un côté et cherchait
-de l'autre. Deux séances d'automne (21 août, 1er septembre) ne vivaient que dans le local ; elles
-ont été ressaisies depuis.
+| Fiche | Livré | ⚠ Ce que la mesure a corrigé de la fiche |
+|---|---|---|
+| `#816` | les quatre modes de sélection du portfolio parlent la langue de l'écran | « le seul des trois qui touche une note » était **faux** : `pratique-pan-standards.js` ne lit jamais `portfoliosEleves` (0 occurrence) |
+| `#817` | le seuil force/défi n'a plus qu'une source | six occurrences de `0.7125` dans **trois** fichiers, la fiche en citait deux ; et c'était la COULEUR qui contredisait le CLASSEMENT |
+| `#818` | la légende du tableau de bord calcule ses bornes | il n'y a **pas** « deux échelles » : le tableau de bord ne classe rien, c'est un dégradé continu |
+| *(trouvé en chemin)* | les trois seuils d'interprétation atteignent enfin les calculs | ils écrivaient des clés PLATES que personne ne lisait ; il a fallu réparer AVANT d'écrire la prose du glossaire |
 
-▣ **DÉCISION DE GRÉGOIRE, 8 septembre — `https://app.codexnumeris.org` est désormais sa SOURCE
-UNIQUE DE VÉRITÉ.** L'instance locale ne sert plus à ses vraies données.
-
-⚠ **Conséquence pour les sessions** : plusieurs documents décrivent encore le dépôt comme « la source
-`file://` de l'application ouverte de Grégoire » (`ETAT-PROJET.md`, `plans de travail/PORTES-TERRAIN-2026-08-28.md`,
-entre autres). **Ces mentions sont périmées.** Une porte terrain qui demande une vérification à
-l'écran vise maintenant le site web, pas le fichier local.
-
-⚠ Le diagnostic qui a établi tout ceci est `scripts/diagnostic785presencesdeuxinstances.js`, **non
-suivi par git au 8 septembre**. En lecture seule, sans donnée personnelle en sortie. À commettre.
-
-↻ **Mesuré le 9 septembre au soir : ce script n'existe plus.** Il n'est ni dans l'arbre, ni dans
-l'historique (`git log -- scripts/diagnostic785presencesdeuxinstances.js` rend vide ; témoin : la même
-commande sur un fichier voisin rend ses commits). Il a été supprimé sans être commis. **La conclusion,
-elle, tient** — elle est écrite ci-dessus et dans `SUIVI-BUGS.md` ; c'est la preuve rejouable qui est
-perdue. Si la question des deux origines revient, le diagnostic est à réécrire.
+⮕ **La leçon à retenir pour le relais** : sur trois fiches parquées, **deux se trompaient sur leur
+propre constat**, et la mesure l'a montré AVANT de coder. Une fiche est une piste, pas un fait.
 
 ---
 
-## LE MANDAT — deux fichiers, dans cet ordre
+## LE MANDAT — une proposition, à reprendre à froid
 
-**1. `plans de travail/CONSIGNE-SUIVANTE-menage-documentaire.md`** — le bloc manquant de `SESSION.md`
-pour `1.124.0` → `1.124.3` et `#781` ; la branche `claude/consigne-du-jour-wybfs0` à retirer si elle
-est bien identique à `main`. Un commit `docs`, pas de bump.
+**`plans de travail/CONSIGNE-SUIVANTE-nomenclature-des-zones.md`** — revoir la nomenclature des
+zones de couleur (« fragile / modéré / favorable / très favorable »), que Grégoire ne reconnaît plus :
+« je ne sais pas sur quoi ils s'appuient ». Inscrit au backlog en **`#821`**.
 
-**2. `plans de travail/CONSIGNE-DU-JOUR.md`** — le dépistage du français en première semaine : une
-production marquée « diagnostique », qui ne pèse sur rien, et qui lève « Aide en français
-recommandée » dès le palier « Risqué ». **Quatre portes à fermer**, dont la quatrième est le piège
-(`depistagePeutJugerLaNonParticipation`). Un seul lot, une seule livraison, à la fin.
+Le document porte : ce qui est **déjà mesuré et qu'il ne faut pas refaire** (notamment que ces mots
+**ne sortent pas vers les élèves** — dix fichiers, tous côté enseignant), l'analyse en quatre temps,
+le livrable attendu, et deux garde-fous. **Le quatrième temps est un arbitrage de Grégoire : rien ne
+se renomme avant.**
 
 **Si Grégoire veut autre chose** : un retour de testeur passe avant (`CLAUDE.md`, priorité absolue).
 Sinon, les cadrages ouverts sont dans `plans de travail/00-CADRAGES-OUVERTS.md` — aucun n'est une
 consigne ; **Cowork en écrit une avant qu'on y touche.**
 
-↻ **ÉTAT DE CE MANDAT AU 9 SEPTEMBRE AU SOIR — fait mesuré, le mandat suivant reste à Cowork.**
-Le **fichier 1 est livré** : le bloc `SESSION.md` manquant a été écrit le 8 (`f5334e86`), et la branche
-`claude/consigne-du-jour-wybfs0` n'a pas été supprimée — décision assumée, elle avait été poussée le
-jour même par une autre instance possiblement encore au travail dessus. Le **fichier 2 n'a jamais été
-exécuté** : la consigne du dépistage du français a été archivée le 9 au soir
-(`plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-07-depistage-francais-semaine-1.md`) sur une
-décision de Grégoire, au profit du texte d'accueil de l'Aide — livré en `1.127.2`.
-⮕ **Il n'y a aucune consigne du jour en attente ce soir.** Ce que le dépistage du français prévoyait
-n'est pas perdu : le cadrage vit dans `plans de travail/CADRAGE-2026-09-07-depistage-du-francais-semaine-1.md`,
-et le travail diagnostique lui-même est livré depuis `1.125.0`.
+⏸ **Deux points restent dus à l'écran avant la CoP du 14**, qu'aucune session ne peut faire : la
+carte « Prendre en main l'application » (hauteur d'accordéon) et **la visite guidée de bout en bout**,
+dont le lot C de l'audit de l'Aide a changé le parcours. S'y ajoute, depuis le 10 : **la légende du
+tableau de bord porte maintenant des décimales** (« 47,5 % ») dans quatre colonnes serrées — c'est le
+premier endroit à regarder sur iPad.
 
 ---
 
