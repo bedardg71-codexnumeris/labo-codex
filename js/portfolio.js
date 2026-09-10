@@ -50,57 +50,89 @@
    =============================== */
 
 /**
- * Sélectionne les artefacts selon la modalité configurée
+ * Sélectionne les artefacts selon la modalité configurée.
  *
- * @param {Array} artefactsRemisAvecNote - Artefacts remis avec notes (non triés)
- * @param {number} nombreARetenir - Nombre d'artefacts à retenir
- * @param {string} modalite - 'meilleurs' | 'recents' | 'recents-meilleurs' | 'tous'
+ * #816 (10 sept. 2026) — CETTE FONCTION NE PARLAIT PAS LA LANGUE DE L'ÉCRAN.
+ * Le `<select>` de la pratique écrit `meilleurs` / `derniers` / `tous` /
+ * `hybride` ; le `switch` ne connaissait que `meilleurs` / `recents` /
+ * `recents-meilleurs` / `tous`. Deux modalités sur quatre tombaient donc dans
+ * le `default` — « les N meilleures » — sous un nom qui annonce autre chose.
+ * Le tri par `dateRemise` était mort de son côté : l'appelant posait un
+ * `new Date()` identique sur chaque artefact à la lecture, si bien que la
+ * comparaison de dates ne départageait jamais rien.
+ *
+ * Ce que « Hybride » veut dire a été tranché par Grégoire : les N meilleures de
+ * la SÉLECTION, plus TOUTES les OBLIGATOIRES — la même règle que le moteur de la
+ * note (`calculerNoteAvecCategories`) et que `profil-etudiant-actions.js`.
+ * Le N de la Sélection est celui des catégories, pas celui du portfolio : sur
+ * sa pratique, 4 meilleures + 2 obligatoires = les 6 artefacts de la note.
+ *
+ * @param {Array} artefactsRemisAvecNote - {id, productionId, numero, note, categorie}, non triés
+ * @param {number} nombreARetenir - Nombre d'artefacts à retenir (hors hybride)
+ * @param {string} modalite - vocabulaire de l'écran (`meilleurs`|`derniers`|`tous`|
+ *   `hybride`) OU du moteur (`recents`|`recents-meilleurs`) : les deux sont acceptés,
+ *   des pratiques enregistrées avant #434 pouvant porter le second.
+ * @param {Object} [options] - { productions, configCategories }
  * @returns {Array} Artefacts sélectionnés
  */
-function selectionnerArtefactsSelonModalite(artefactsRemisAvecNote, nombreARetenir, modalite) {
+function selectionnerArtefactsSelonModalite(artefactsRemisAvecNote, nombreARetenir, modalite, options = {}) {
     if (artefactsRemisAvecNote.length === 0) {
         return [];
     }
 
-    switch (modalite) {
+    const { productions = [], configCategories = null } = options;
+
+    // LE comparateur de récence du moteur STD (SSOT, pratique-registre.js) —
+    // plus de tri local qui pourrait dériver de celui de la note.
+    const parRecence = typeof window.creerComparateurRecenceStd === 'function'
+        ? window.creerComparateurRecenceStd(productions)
+        : (a, b) => (b.numero || 0) - (a.numero || 0);
+    const parNote = (a, b) => b.note - a.note;
+
+    const mode = modalite === 'derniers' ? 'recents' : (modalite || 'meilleurs');
+
+    // HYBRIDE — piloté par la config des catégories, qui a priorité comme dans
+    // `profil-etudiant-actions.js` et `pratiques-gestion.js`.
+    if (mode === 'hybride' || (configCategories && configCategories.actif)) {
+        const nSelection = (configCategories && configCategories.selection
+            && configCategories.selection.nombreARetenir) || nombreARetenir;
+        const obligatoires = artefactsRemisAvecNote.filter(a => a.categorie === 'obligatoire');
+        const meilleuresSelection = artefactsRemisAvecNote
+            .filter(a => a.categorie !== 'obligatoire')
+            .slice()
+            .sort(parNote)
+            .slice(0, nSelection);
+        return [...meilleuresSelection, ...obligatoires];
+    }
+
+    switch (mode) {
         case 'meilleurs':
-            // MODALITÉ 1: N meilleurs artefacts (note décroissante)
-            // Principe de maîtrise - évalue le plus haut niveau atteint
-            return artefactsRemisAvecNote
-                .sort((a, b) => b.note - a.note)
-                .slice(0, nombreARetenir);
+            // N meilleurs artefacts (note décroissante).
+            // Principe de maîtrise — évalue le plus haut niveau atteint.
+            return artefactsRemisAvecNote.slice().sort(parNote).slice(0, nombreARetenir);
 
         case 'recents':
-            // MODALITÉ 2: N récents artefacts (numéro décroissant)
-            // Représentatif du niveau terminal/actuel
-            // CORRECTION (24 jan 2026): Trier par numéro de production, pas par date
-            return artefactsRemisAvecNote
-                .sort((a, b) => (b.numero || 0) - (a.numero || 0))
-                .slice(0, nombreARetenir);
+            // N plus récents — représentatif du niveau terminal/actuel.
+            return artefactsRemisAvecNote.slice().sort(parRecence).slice(0, nombreARetenir);
 
         case 'recents-meilleurs':
-            // MODALITÉ 3: N récents parmi les meilleurs (hybride)
-            // Équilibre entre maîtrise maximale et représentativité actuelle
-            // Algorithme: Filtrer top 50% par note, puis prendre les N plus récents
-            const nombreMeilleurs = Math.max(1, Math.ceil(artefactsRemisAvecNote.length * 0.5));
-            const topMeilleurs = artefactsRemisAvecNote
-                .sort((a, b) => b.note - a.note)
-                .slice(0, nombreMeilleurs);
-
-            return topMeilleurs
-                .sort((a, b) => new Date(b.dateRemise) - new Date(a.dateRemise))
+            // Legacy : top 50 % par note, puis les N plus récents. Aucune option de
+            // l'écran ne produit plus cette valeur depuis #434 ; conservée pour les
+            // pratiques enregistrées avant. Trie désormais par récence RÉELLE.
+            return artefactsRemisAvecNote
+                .slice()
+                .sort(parNote)
+                .slice(0, Math.max(1, Math.ceil(artefactsRemisAvecNote.length * 0.5)))
+                .sort(parRecence)
                 .slice(0, nombreARetenir);
 
         case 'tous':
-            // MODALITÉ 4: Tous les artefacts (moyenne complète)
-            // Calcul sommative - pour comparaison avec PAN
+            // Toutes les évaluations comptent, sans sélection.
             return artefactsRemisAvecNote;
 
         default:
             console.warn(`Modalité inconnue: ${modalite}, utilisation de 'meilleurs' par défaut`);
-            return artefactsRemisAvecNote
-                .sort((a, b) => b.note - a.note)
-                .slice(0, nombreARetenir);
+            return artefactsRemisAvecNote.slice().sort(parNote).slice(0, nombreARetenir);
     }
 }
 
@@ -134,13 +166,31 @@ function chargerPortfolioEleveDetail(da) {
         // #394 (L10) : configuration depuis pratiquesConfigurables (source canonique
         // G2-a, la même que le calcul) — plus de lecture du snapshot configPAN qui
         // driftait ; fallback conservé sur portfolio.regles (ancien format productions).
-        const configPortfolio = (typeof obtenirConfigPratiqueActive === 'function'
-            ? obtenirConfigPratiqueActive()?.portfolio : null) || {};
+        const configPratique = (typeof obtenirConfigPratiqueActive === 'function'
+            ? obtenirConfigPratiqueActive() : null) || {};
+        const configPortfolio = configPratique.portfolio || {};
+        // #816 — la config Sélection/Obligatoires, LA MÊME SOURCE que le moteur de
+        // la note (`profil-etudiant-actions.js`). Sans elle, le panneau cochait
+        // « les N meilleures » là où la note comptait « N meilleures + obligatoires ».
+        const configCategories = configPratique.categories
+            || (typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null);
 
         const nombreTotal = configPortfolio.nombreTotal || portfolio.regles?.nombreTotal || artefactsPortfolio.length;
         const minimumRequis = configPortfolio.minimumCompletion || portfolio.regles?.minimumCompletion || 7;
         const nombreARetenir = configPortfolio.nombreARetenir || portfolio.regles?.nombreARetenir || 3;
         const methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
+
+        // #816 — LE plafond de la sélection manuelle. En hybride, la note retient
+        // N meilleures de la Sélection PLUS toutes les Obligatoires : plafonner à
+        // `nombreARetenir` empêchait de reproduire à la main ce que le moteur
+        // compte, dès que les deux nombres divergent.
+        const estHybrideActif = !!(configCategories && configCategories.actif)
+            || methodeSelection === 'hybride';
+        const plafondSelection = estHybrideActif
+            ? ((configCategories && configCategories.selection
+                && configCategories.selection.nombreARetenir) || nombreARetenir)
+              + artefactsPortfolio.filter(p => p.categorie === 'obligatoire').length
+            : nombreARetenir;
 
         // Construire la liste des artefacts avec leur statut
         const artefacts = [];
@@ -150,6 +200,11 @@ function chargerPortfolioEleveDetail(da) {
             const evaluation = evaluationsEleve.find(e => e.productionId === art.id);
             artefacts.push({
                 id: art.id,
+                // #816 — le comparateur de récence de la SSOT lit `productionId`.
+                productionId: art.id,
+                // #816 — 'selection' | 'obligatoire' | null : c'est elle qui range
+                // un artefact dans son bloc en mode hybride.
+                categorie: art.categorie || null,
                 titre: art.titre,
                 description: art.description || '',
                 numero: art.numero || parseInt(art.id.match(/\d+/)?.[0]) || 0, // AJOUT (24 jan 2026)
@@ -188,18 +243,17 @@ function chargerPortfolioEleveDetail(da) {
         // ✨ SÉLECTION AUTOMATIQUE selon la modalité configurée
         if (selectionEleve.artefactsRetenus.length === 0) {
             // Récupérer les artefacts remis avec note (non triés - le tri se fait dans la fonction)
-            const artefactsRemisAvecNote = artefacts
-                .filter(a => a.remis && a.note !== null)
-                .map(a => ({
-                    ...a,
-                    dateRemise: new Date().toISOString() // TODO: Ajouter vraie date de remise dans évaluations
-                }));
+            // #816 — le `dateRemise: new Date()` posé ici valait le MÊME instant pour
+            // tous les artefacts : le tri par date ne départageait rien. La récence
+            // se lit sur le numéro de production, via le comparateur de la SSOT.
+            const artefactsRemisAvecNote = artefacts.filter(a => a.remis && a.note !== null);
 
             // Sélectionner selon la modalité configurée
             const artefactsSelectionnes = selectionnerArtefactsSelonModalite(
                 artefactsRemisAvecNote,
                 nombreARetenir,
-                methodeSelection
+                methodeSelection,
+                { productions: artefactsPortfolio, configCategories }
             );
 
             if (artefactsSelectionnes.length > 0) {
@@ -214,7 +268,11 @@ function chargerPortfolioEleveDetail(da) {
                     artefactsRetenus: selectionEleve.artefactsRetenus,
                     dateSelection: new Date().toISOString(),
                     auto: true, // Flag pour indiquer sélection automatique
-                    modalite: methodeSelection // Tracer quelle modalité a été utilisée
+                    modalite: methodeSelection, // Tracer quelle modalité a été utilisée
+                    // #816 — la modalité configurée ne suffit pas à relire ce qui a
+                    // été fait : les catégories ont priorité sur elle. Tracer les deux
+                    // permet de départager après coup une écriture d'une autre.
+                    categoriesActives: !!(configCategories && configCategories.actif)
                 };
                 db.setSync(cle('portfoliosEleves'), selectionsPortfolios);
 
@@ -278,7 +336,7 @@ function chargerPortfolioEleveDetail(da) {
                                    ${art.retenu ? 'checked' : ''}
                                    ${!art.remis ? 'disabled' : ''}
                                    data-on-change="toggleArtefactPortfolioFromEl"
-                                   data-da="${da}" data-portfolio-id="${portfolio.id}" data-nombre-a-retenir="${nombreARetenir}">
+                                   data-da="${da}" data-portfolio-id="${portfolio.id}" data-nombre-a-retenir="${plafondSelection}">
                             <div class="portfolio-artefact-contenu">
                                 <div class="portfolio-artefact-titre ${art.retenu ? 'portfolio-artefact-titre-retenu' : 'portfolio-artefact-titre-normal'}">
                                     ${echapperHtml(art.description || art.titre)}
@@ -1103,6 +1161,10 @@ window.toggleArtefactPortfolioFromEl = toggleArtefactPortfolioFromEl;
 window.calculerPerformanceParObjectif = calculerPerformanceParObjectif;
 
 // 🆕 Beta 95.4 : Exporter les fonctions de catégories
+// #816 — exposé pour être ÉPROUVÉ. Cette fonction décide ce qui s'écrit dans
+// `portfoliosEleves`, c'est-à-dire dans les données de l'utilisateur : elle ne
+// peut pas rester hors de portée des bancs.
+window.selectionnerArtefactsSelonModalite = selectionnerArtefactsSelonModalite;
 window.calculerNoteAvecCategories = calculerNoteAvecCategories;
 window.obtenirConfigCategories = obtenirConfigCategories;
 window.obtenirConfigPratiqueActive = obtenirConfigPratiqueActive;
