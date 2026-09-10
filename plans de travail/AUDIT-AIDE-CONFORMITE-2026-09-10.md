@@ -177,11 +177,51 @@ la doc** — c'est ce qui prouve que le banc suit la source et ne fige pas une c
 
 ---
 
+## Lot C — la visite guidée (10 sept. 2026)
+
+**Ce que le lot cherchait** : les étapes du tour pointent-elles vers des éléments
+qui existent ? Réponse : les cibles existent toutes, mais **le tour lui-même est
+désaccordé**, et le défaut n'est pas documentaire.
+
+**La cause, unique** : la visite s'orchestre par **trois tableaux parallèles**
+indexés par l'id d'étape — `ETAPES_TOUR` (le contenu), `TOUR_NAV` (où le
+« Suivant » emmène) et `TOUR_TITRE_COURT` (ce que le bouton annonce). Une
+**septième étape (Labo)** a été ajoutée au premier sans compléter les deux autres.
+
+| # | L'écart | Preuve | Disposition |
+|---|---|---|---|
+| C.1 | À l'étape 5, le bouton affichait **« Suivant : undefined › »** | `TOUR_TITRE_COURT` a 6 entrées, `accompagnement.js:1246` lit `[etape.id + 1]`, et `dernier = 6` (`:1223`). **Reproduit en Node** avant correction. | **corrigé** |
+| C.2 | L'étape 6 (Labo) n'avait **aucune cible** : le panneau changeait de texte sans emmener dans le Labo, seule étape sur sept dans ce cas | `TOUR_NAV` s'arrêtait à 5 ; `tourNaviguerVersEtape` fait `if (nav)` et ne navigue pas sans cible (`:1270-1277`) | **corrigé** |
+| C.3 | L'étape 0 disait « y revenir **depuis les Préférences** » | Réglages › Préférences ne mentionne ni tour ni visite (**0 occurrence, mesuré**). Les deux points de relance sont le bouton de l'en-tête (`index.html:3892`) et le menu (`:3940`). Le popup `tour-guide`, lui, dit correctement « depuis ce bouton ». | **corrigé** |
+| C.4 | L'étape 3 s'intitulait « **Évaluations** » | l'onglet s'appelle « Évaluation » (`nav-label`) — même écart qu'au lot A, dans une quatrième surface | **corrigé** |
+| C.5 | L'étape « Conception » ne reconnaissait pas l'écran des **pratiques de notation**, alors que son texte dit « la pratique assemble le tout » | `structureConception` listait 4 des 6 sous-sections | **corrigé** |
+
+**Ce que le lot enseigne, et qui n'était pas dans le mandat.** Les lots A et B
+cherchaient des textes faux. Le lot C a trouvé un **défaut d'exécution** :
+« undefined » s'affiche à l'avant-dernière étape de la visite que tout nouvel
+utilisateur lance en premier. ⮕ **Auditer la doc d'une fonctionnalité, c'est
+souvent auditer la fonctionnalité.**
+
+**Ce que la sentinelle vérifie** : la **cohérence entre les trois tableaux**, pas
+des libellés recopiés. Ajouter une huitième étape sans compléter `TOUR_NAV` et
+`TOUR_TITRE_COURT` rougit. Elle vérifie aussi que les sections et sous-sections
+visées existent, et que Réglages › Préférences ne relance toujours pas la visite.
+
+**Sentinelle** : `tests/unit/sentinelle-819-visite-guidee-coherente.test.js`
+(6 essais). **Six ablations, six rouges**, arbre restauré par sha256.
+
+⚠ **Changement de comportement assumé** : C.2 et C.5 ne sont pas de la prose. La
+visite emmène désormais dans le Labo à sa dernière étape, et reconnaît l'écran des
+pratiques. L'intention était lisible (les cinq autres étapes ont une cible ; le
+texte de l'étape parle des pratiques), mais c'est à éprouver à l'écran.
+
+---
+
 ## Lots à venir
 
 - ~~**Lot A — balayage mécanique**~~ : **fait le 10 sept.**, valeurs chiffrées et formats compris.
 - ~~**Lot B — cohérence des surfaces**~~ : **fait le 10 sept.** (voir plus haut).
-- **Lot C — visite guidée** : ses étapes pointent-elles vers des éléments qui existent ?
+- ~~**Lot C — visite guidée**~~ : **fait le 10 sept.** (voir plus haut).
 - **Lot D — trous de couverture** : les 1 554 commits de l'été contre l'Aide.
 - **Lot E — encastrement résiduel** : 601-101, Cégep Gérald-Godin, Bédard, SRPNF, IDME,
   ELLAC, français, littérature. Le pilote suggère que la plupart sont déjà cadrés comme
