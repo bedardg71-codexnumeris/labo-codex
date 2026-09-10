@@ -260,7 +260,7 @@ const GLOSSAIRE = {
         terme: 'Seuils de dépistage',
         categorie: 'Réglages',
         etape: 'observation',
-        definition: 'Les valeurs qui déterminent les couleurs et les alertes dans le tableau de bord. Valeurs par défaut : Progression 5 points (%), Direction du risque 5 points (%), Défi ≤70 %. Toute modification s\'applique immédiatement à tous les calculs — diagnostics RàI, patterns et recommandations.',
+        definition: 'Les valeurs qui déterminent les couleurs et les alertes dans le tableau de bord. Valeurs par défaut : Progression 5 points (%), Sensibilité des flèches par critère 5 points (%), Défi ≤70 %. Toute modification s\'applique immédiatement à tous les calculs — diagnostics RàI, patterns et recommandations.',
         voir: 'Labo > Outils d’observation'
     },
 

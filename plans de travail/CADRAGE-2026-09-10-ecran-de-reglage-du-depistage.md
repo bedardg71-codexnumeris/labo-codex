@@ -105,7 +105,7 @@ affiché » = un calcul le lit, mais son résultat n'atteint aucun rendu.
 | Progression des artefacts | `seuilsInterpretation.progressionArtefacts` | `calculerIPB` (la direction ↗ / ↘ du suivi) → `diagnostiquerSuiviApprentissage` → `determinerCibleIntervention` et `calculerEtudiantsPrioritaires` | Suivi › Suivi du groupe › Observation globale des besoins d'intervention (cible et pattern) et le panneau « prioritaires » de la carte Observation globale des indices d'engagement. **Pas le profil** : aucune section du profil n'appelle ce calcul | **oui — 1 écran** |
 | Direction du risque | `seuilsInterpretation.directionRisque` | ⚠ **CORRIGÉ AU § 4.4** — `calculerDirectionRisque` est bien morte (résultat rangé dans une variable que rien ne lit, l. 845), mais le SEUIL a un second lecteur, `calculerDirectionsCriteres` (l. 2202, « même seuil que pour le risque »), dont le résultat s'affiche | **Suivi › Profils individuels › Accompagnement › carte RàI : la flèche (→ / ← / —) après chaque critère ; Développement des habiletés › barres SRPNF : la même flèche ; et le texte « Apprentissage : présentement en amélioration / en baisse / en plateau » (`calculerProgressionEleve`)** | **OUI — 1 écran, 3 rendus** (la ligne disait NON) |
 | Seuil de défi spécifique | `seuilsInterpretation.defiSpecifique` | 9 lecteurs : `genererDiagnosticSRPNF`, `genererSectionPerformance` (profil) ; `calculerIPB`, `diagnostiquerForcesChallenges` (calculs RàI) ; `mettreAJourCriteresCibles` (interventions) ; et 4 morts — `identifierDefiSpecifique` (résultat non lu), `genererTableauObjectifs` (jamais appelée), moteur PAN `_diagnostiquerForcesChallenges` | Suivi › Profils individuels › Développement des habiletés › « Diagnostic par critère (seuil force : 70 %) » et le bloc forces / défis ; Accompagnement › carte RàI (le défi principal) · Suivi › Liste des étudiant·es › colonnes Pattern et RàI · Suivi › Suivi du groupe › besoins d'intervention, prioritaires · Suivi › Interventions › formulaire › les critères « en défi » proposés | **oui — 4 écrans, tous dans Suivi** |
-| Restaurer les valeurs par défaut *(bloc SOLO)* | remet la fenêtre à 3, progression 0,10, direction 0,05, défi 0,70 ; puis **ré-enregistre tout le panneau** (`sauvegarderSeuilsV2` + `sauvegarderPreferencesV2`) | — | ce que les quatre lignes ci-dessus voient — soit, en réalité, **le seuil de défi et la progression** ; la fenêtre et la direction ne changent rien. Ne touche **ni** Fragile / Acceptable / Bon **ni** `idme.*` | — |
+| Restaurer les valeurs par défaut *(bloc SOLO)* | remet la fenêtre à 3, progression 0,10, sensibilité des flèches 0,05, défi 0,70 ; puis ré-enregistre les seuils (`sauvegarderSeuilsV2` — depuis #823 la fenêtre y passe aussi, `sauvegarderPreferencesV2` n'est plus appelée) | — | ce que les quatre lignes ci-dessus voient — **les quatre agissent depuis #823** (avant : le seuil de défi et la progression seulement). Ne touche **ni** Fragile / Acceptable / Bon **ni** `idme.*` | — |
 
 **Bloc « Micro-données ACP »**
 
@@ -117,7 +117,7 @@ affiché » = un calcul le lit, mais son résultat n'atteint aucun rendu.
 | Fragile si inférieur à | `seuilsInterpretation.interpretation.acceptable` | mécanisme 2 de `contexte-qualification.js` (`interpreterAssiduite`, `interpreterCompletion`, `obtenirCouleurSelonSeuils`) | Suivi › Liste des étudiant·es › la couleur des colonnes A, C, P et M · Suivi › Profils individuels › Engagement ACP (interprétation de A et de C, et les détails dépliables Complétion / Performance) | **oui — 2 écrans** |
 | Acceptable si inférieur à | `…interpretation.bon` | idem | idem | **oui — 2 écrans** |
 | Bon si supérieur ou égal à | `…interpretation.excellent` | idem | idem | **oui — 2 écrans** |
-| Restaurer les valeurs par défaut *(bloc ACP)* | remet 70 / 80 / 85 ; puis ré-enregistre les trois curseurs de détection **tels qu'affichés** | — | ce que les trois lignes ci-dessus voient. Ne touche **ni** la fenêtre, **ni** la progression, **ni** la direction, **ni** le défi, **ni** `idme.*` | — |
+| Restaurer les valeurs par défaut *(bloc ACP)* | remet 70 / 80 / 85 ; puis ré-enregistre les trois curseurs de détection **tels qu'affichés** | — | ce que les trois lignes ci-dessus voient. Ne touche **ni** la fenêtre, **ni** la progression, **ni** la sensibilité des flèches, **ni** le défi, **ni** `idme.*` | — |
 | Graphiques d'évolution ACP | préférence `afficherGraphiques` | `genererSectionProgression`, `afficherProfilComplet` (profil) ; `genererBlocEvolutionRLO` (gestes cognitifs) | Suivi › Profils individuels › la section « Progression temporelle ACP » est retirée, et le bloc « Évolution » de l'onglet Gestes cognitifs | **oui — 1 écran** |
 | Masquer les notes par travail (note différée) | préférence `noteDifferee` | `noteDiffereeActive()` : profil (Engagement ACP, Productions et évaluations, Complétion, panneau Portfolio), `genererLigneHTML` (liste des évaluations) | Suivi › Profils individuels › partout où une note par travail s'affiche, un repère « note différée » la remplace · **Évaluation › Liste des évaluations › la colonne de la note**. ⚠ Le repère lui-même dit « Réglage dans Réglages › Préférences » — **faux**, il est ici | **oui — 2 écrans, dont 1 HORS Suivi** ; texte faux |
 
@@ -164,9 +164,14 @@ décidé du curseur.
 **Leçon de méthode** : remonter la CLÉ (`grep directionRisque`) jusqu'à chacun de ses lecteurs,
 pas la fonction qui porte son nom. Deux fonctions à un « s » près se prennent l'une pour l'autre.
 
-**Disposition** : le sort du curseur attend Grégoire (garder et renommer sans le mot « risque »,
-ADR 007 ; ou retirer en figeant 0,05). Les lignes 4.2-3 et 4.3 qui comptent « quatre » placebos
-en comptent trois.
+**Disposition — tranchée par Grégoire le 10 sept. au soir, option 1** : le curseur reste et se
+nomme « Sensibilité des flèches par critère », aide : « Variation minimale de la moyenne d'un
+critère, d'une fenêtre d'analyse à la précédente (la même, décalée d'une production), pour afficher
+une flèche (→ ou ←) après ce critère. » ⚠ La formulation « d'une production à l'autre » proposée
+d'abord a été **remplacée après mesure** : le code compare la moyenne des N dernières productions à
+celle de la même fenêtre décalée d'une production (`slice(0, N)` contre `slice(1, N + 1)`), pas une
+production à la suivante. La clé `directionRisque` garde son nom (clé de données, § 5).
+`calculerDirectionRisque` et sa variable morte sont retirées. Livré en 1.129.0.
 
 #### 4.2 Ce que la carte fait ressortir, sans le trancher
 
@@ -179,10 +184,11 @@ en comptent trois.
    habiletés* (profil + suivi du groupe), *Seuil de défi* (4 écrans de Suivi), *RàI* (4 écrans de
    Suivi), les trois seuils Fragile / Acceptable / Bon (liste + profil), *Indicateurs visuels* (profil +
    suivi du groupe).
-3. **Quatre réglages n'agissent NULLE PART** : *Découpler P et N* (jamais lu), *Fenêtre d'analyse des
-   patterns* (écrit une clé que personne ne lit ; le calcul lit une clé que personne n'écrit), *Unité
-   d'affichage de l'assiduité* (ses formateurs n'ont aucun appelant), *Direction du risque* (calculée
-   une fois, résultat jamais lu). **Un contrôle sur cinq est un placebo.** Et deux textes promettent
+3. **Trois réglages n'agissaient NULLE PART** (⚠ corrigé au § 4.4 : la carte en comptait quatre, mais
+   *Direction du risque* agit) : *Découpler P et N* (jamais lu), *Fenêtre d'analyse des
+   patterns* (écrivait une clé que personne ne lisait ; le calcul lit une clé que personne n'écrivait),
+   *Unité d'affichage de l'assiduité* (ses formateurs n'avaient aucun appelant). **Réglé au #823
+   (1.129.0) : deux retirés, la fenêtre rebranchée, le quatrième renommé.** Et deux textes promettent
    ce que le code ne fait pas (les étiquettes IDME des graphiques ; « Réglages › Préférences »).
 4. **Les deux boutons « Restaurer » couvrent des ensembles disjoints**, et aucun ne dit lequel : celui
    du bloc SOLO remet les quatre seuils de détection (dont deux placebos), celui du bloc ACP remet les
@@ -200,7 +206,7 @@ La forme (déplacer, scinder, ou garder dans Labo) reste **à Grégoire**.
 
 | Constat | Disposition |
 |---|---|
-| Quatre réglages sans aucun effet (Découpler P/N, Fenêtre d'analyse, Unité d'assiduité, Direction du risque) | **inscrit — `#823`**. Chacun demande de choisir entre rebrancher et retirer : le rebranchement est technique, le retrait touche l'écran de Grégoire |
+| Trois réglages sans aucun effet (Découpler P/N, Fenêtre d'analyse, Unité d'assiduité) — et Direction du risque, qui agit mais sous un faux nom (§ 4.4) | **livré — `#823`, 1.129.0** : deux retirés, la fenêtre rebranchée, le curseur renommé « Sensibilité des flèches par critère » (arbitrage de Grégoire, 10 sept. au soir) |
 | Deux textes qui promettent autre chose que le code (étiquettes IDME des graphiques ; « Réglage dans Réglages › Préférences ») et le mot « cueillette » | **inscrit — `#823`**, même item : ce sont les mots de l'écran à trier |
 | Quatre chemins morts lus par des seuils (`identifierDefiSpecifique` non lu, `genererTableauObjectifs`, `genererDiagnosticCriteres`, `creerGraphiqueGroupeMoyennes`) + un appel à une fonction inexistante (`genererContenuCibleIntervention`) | **inscrit — `#824`**. Sans conséquence observable aujourd'hui ; à retirer d'un bloc, avec le regard de `#551` (les cinq `identifierPattern` gardés « délibérément ») |
 | Les seuils IDME annoncés par le bloc mais réglables nulle part ici | **rattaché au cadrage** (§ « Deux nomenclatures dans le même encadré ») — c'est le tri des mots |

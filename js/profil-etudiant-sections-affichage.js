@@ -842,7 +842,6 @@ function genererSectionAccompagnement(da) {
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true); // true = dépistage (3 artefacts)
     const progression = calculerProgressionEleve(da);
     const defiSpecifique = identifierDefiSpecifique(da);
-    const directionRisque = calculerDirectionRisque(da);
     const directionsCriteres = calculerDirectionsCriteres(da);
 
     // Compter le nombre total d'artefacts évalués (pour afficher la fiabilité des données)
@@ -2035,81 +2034,6 @@ function changerSectionProfil(section) {
 }
 
 /**
- * Calcule la direction du risque (évolution temporelle)
- * Compare le risque sur les N artefacts récents vs les N suivants (fenêtre glissante configurable)
- *
- * @param {string} da - Numéro de DA
- * @returns {Object} - { symbole: '→'|'←'|'—', interpretation: string }
- */
-function calculerDirectionRisque(da) {
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = obtenirDonneesSelonMode('productions') || [];
-
-    // Obtenir le nombre de productions configuré pour l'analyse des patterns
-    const N = obtenirNombreProductionsPourPatterns() || 3;
-
-    // Filtrer les productions évaluables selon la pratique active
-    const productionsIds = obtenirIdsProductionsEvaluables(productions);
-
-    const evaluationsEleve = evaluations.filter(e =>
-        e.etudiantDA === da &&
-        !e.remplaceeParId &&   // #730 — une évaluation remplacée par une reprise porte l'état d'avant : hors du dépistage
-        productionsIds.includes(e.productionId) &&
-        e.noteFinale !== null &&
-        e.noteFinale !== undefined
-    );
-
-    // Pas assez de données pour calculer la direction du risque (besoin de N+1 minimum)
-    if (evaluationsEleve.length < N + 1) {
-        return {
-            symbole: '',
-            interpretation: 'Données insuffisantes'
-        };
-    }
-
-    // Trier par date (plus récent d'abord)
-    evaluationsEleve.sort((a, b) => {
-        const dateA = a.dateEvaluation || a.dateCreation || 0;
-        const dateB = b.dateEvaluation || b.dateCreation || 0;
-        return new Date(dateB) - new Date(dateA);
-    });
-
-    // Calculer risque récent (N plus récents)
-    const artefactsRecents = evaluationsEleve.slice(0, N);
-    const performanceRecente = artefactsRecents.reduce((sum, e) => sum + e.noteFinale, 0) / artefactsRecents.length / 100;
-    const risqueRecent = 1 - performanceRecente;
-
-    // Calculer risque précédent (N suivants avec chevauchement)
-    const artefactsSuivants = evaluationsEleve.slice(1, N + 1);
-    const performancePrecedente = artefactsSuivants.reduce((sum, e) => sum + e.noteFinale, 0) / artefactsSuivants.length / 100;
-    const risquePrecedent = 1 - performancePrecedente;
-
-    const difference = risqueRecent - risquePrecedent;
-
-    // Déterminer la direction selon le seuil configurable
-    const seuilDirection = obtenirSeuil('directionRisque');
-    let symbole, interpretation;
-    if (difference > seuilDirection) {
-        symbole = '→';
-        interpretation = 'Le risque augmente';
-    } else if (difference < -seuilDirection) {
-        symbole = '←';
-        interpretation = 'Le risque diminue';
-    } else {
-        symbole = '—';
-        interpretation = 'Risque plateau';
-    }
-
-    return {
-        symbole,
-        interpretation,
-        risqueRecent: (risqueRecent * 100).toFixed(1),
-        risquePrecedent: (risquePrecedent * 100).toFixed(1),
-        difference: (difference * 100).toFixed(1)
-    };
-}
-
-/**
  * Calcule la direction de chaque critère SRPNF (évolution temporelle)
  * Compare les scores sur les N artefacts récents vs les N suivants (fenêtre glissante configurable)
  *
@@ -2198,7 +2122,11 @@ function calculerDirectionsCriteres(da) {
     const artefactsSuivants = evaluationsEleve.slice(1, N + 1);
     const scoresSuivants = extraireScoresCriteres(artefactsSuivants);
 
-    // Déterminer le seuil de direction (même seuil que pour le risque)
+    // Le seuil du curseur « Sensibilité des flèches par critère » (Labo ›
+    // Outils d'observation). #823 : la clé garde son nom historique
+    // `directionRisque` — c'est une clé de données, pas un mot lu à l'écran ;
+    // `calculerDirectionRisque`, qui la lisait aussi sans que son résultat soit
+    // jamais lu, est retirée.
     const seuilDirection = obtenirSeuil('directionRisque');
 
     // Calculer la direction pour chaque critère RENCONTRÉ dans les évaluations,

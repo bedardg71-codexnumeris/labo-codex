@@ -45,7 +45,7 @@ L'enseignant definit sa grille dans les Reglages > Depistage :
 - **Fenetre d'analyse** : nombre de dernieres productions (defaut : 4)
 - **Seuils configurables** :
   - Progression des artefacts : difference minimale pour progression/regression (defaut : 5 pts)
-  - Direction du risque : variation minimale pour tendance (defaut : 5 pts)
+  - Sensibilite des fleches par critere (cle `directionRisque`, #823) : variation minimale de la moyenne d'un critere entre deux fenetres d'analyse decalees d'une production (defaut : 5 pts)
   - Seuil de defi specifique : score sous lequel un critere est en defi (defaut : 70%)
 - **Seuils d'interpretation** : Fragile (< 65%), Acceptable (< 70%), Bon (>= 75%)
 - **Option P/R decouples** : P pour la notation, R pour le depistage
@@ -234,7 +234,6 @@ genererSectionAccompagnement(da)  →  profil-etudiant.js (lignes 1611+)
 | `calculerIndicesNDerniersArtefacts(da, true)` | Niveaux IDME pour le depistage |
 | `calculerProgressionEleve(da)` | Direction globale et par critere |
 | `identifierDefiSpecifique(da)` | Defi principal avec score |
-| `calculerDirectionRisque(da)` | Direction du risque |
 | `obtenirCriteresAvecValeurs(da)` | Criteres avec pourcentages |
 
 ---

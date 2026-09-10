@@ -185,6 +185,22 @@ describe('#823 · les trois contrôles sans effet sont partis sans laisser de tr
         }
     });
 
+    it('9. « Direction du risque » est renommé, pas retiré : son seuil garde son lecteur vivant', () => {
+        // Relecture croisée du 10 sept. au soir : le seuil `directionRisque` est lu par
+        // `calculerDirectionsCriteres` (flèches par critère du profil). Option 1 de Grégoire :
+        // garder le curseur sous son vrai nom ; `calculerDirectionRisque` (résultat jamais lu) part.
+        const html = readFileSync(path.join(RACINE, 'index.html'), 'utf8');
+        expect(html.includes('Sensibilité des flèches par critère'), 'le nouveau libellé n\'est pas à l\'écran').toBe(true);
+        expect(html.includes('id="v2-seuil-risque"'), 'le curseur a disparu').toBe(true);
+        const sections = lireCodeSansCommentaires('js/profil-etudiant-sections-affichage.js');
+        expect(sections.includes('calculerDirectionRisque'), '`calculerDirectionRisque` est encore là').toBe(false);
+        expect(sections).toMatch(/function calculerDirectionsCriteres[\s\S]*?obtenirSeuil\(\s*'directionRisque'\s*\)/);
+        for (const f of ['index.html', 'js/accompagnement-contenu-hover.js', 'js/accompagnement-contenu-popup.js', 'js/accompagnement-contenu-terme.js']) {
+            const code = lireCodeSansCommentaires(f).replace(/<!--[\s\S]*?-->/g, '');
+            expect(code.includes('Direction du risque') || code.includes('tendance du risque'), `${f} porte encore le mot « risque » pour ce curseur`).toBe(false);
+        }
+    });
+
     it('8. les deux formateurs d\'assiduité n\'ont ni définition ni appelant nulle part', () => {
         const js = readFileSync(path.join(RACINE, 'js', 'preferences-v2.js'), 'utf8');
         expect(js).not.toMatch(/function formaterAssiduiteAvecUnite|function formaterTotalPresence/);
