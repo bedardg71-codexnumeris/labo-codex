@@ -5205,52 +5205,105 @@ body:not(.mode-clair) .badge-source--partage {
 }
 
 /* Modale « Soutenir Labo Codex » (bouton cœur de l'entête) */
+/* Modale « Soutenir Labo Codex » — refonte du 10 septembre 2026 (#815).
+   Trois blocs cadrés au lieu de quatre sections en liste : le regroupement se
+   lit d'un coup, et le bleu ne sert plus QU'AUX LIENS (les titres de groupe le
+   portaient aussi, si bien que rien ne dominait). Les filets entre items, les
+   puces et l'ancien `--gris-texte` de l'intro — variable jamais définie, donc
+   déclaration morte — partent avec. */
 .modal-contenu.modal-soutien {
-    max-width: 640px;
+    max-width: 720px;
 }
 .soutien-intro {
     line-height: 1.6;
-    margin: 0 0 18px 0;
-    color: var(--gris-texte);
+    margin: 0 0 22px 0;
+    color: var(--texte-secondaire);
 }
-.soutien-groupe-titre {
-    color: var(--accent-primaire);
+
+/* Deux colonnes : « Avec ton temps » à gauche, « Avec tes moyens » et
+   « Suivre le projet » empilés à droite. Ce n'est pas un choix d'esthétique —
+   les trois blocs pèsent 427 px et 271 + 180 px (mesuré) : les répartir 1 / 2
+   est ce qui les équilibre. `flex-start` et non `stretch` : à hauteurs
+   inégales, `stretch` creuse un vide sous la colonne courte (le défaut de
+   #807). */
+.soutien-colonnes {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+.soutien-colonne {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.soutien-bloc {
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: var(--radius-grand);
+    padding: 18px;
+}
+.soutien-bloc-titre {
+    margin: 0 0 14px 0;
     font-size: 1rem;
-    font-weight: 600;
-    margin: 18px 0 8px 0;
+    font-weight: 700;
+    color: var(--texte-principal);
 }
+
 .soutien-liste {
     list-style: none;
     margin: 0;
     padding: 0;
 }
 .soutien-liste li {
-    position: relative;
-    padding: 8px 0 8px 18px;
-    line-height: 1.55;
-    border-bottom: 1px solid var(--bordure-claire);
+    margin: 0 0 14px 0;
+    line-height: 1.5;
 }
 .soutien-liste li:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
 }
-.soutien-liste li::before {
-    content: '';
-    position: absolute;
-    left: 2px;
-    top: 16px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent-primaire);
+
+/* Le libellé d'action porte le lien quand il y en a un ; sinon il reste en
+   texte principal. Une seule grammaire pour les sept items. */
+.soutien-action {
+    display: block;
+    font-weight: 600;
+    color: var(--texte-principal);
+    margin-bottom: 2px;
 }
-.soutien-lien {
+a.soutien-action {
+    color: var(--accent-primaire);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+a.soutien-action:hover,
+a.soutien-action:focus {
+    text-decoration: none;
+}
+.soutien-detail {
+    display: block;
+    color: var(--texte-secondaire);
+    font-size: .92rem;
+}
+
+.soutien-pied {
+    margin: 22px 0 0 0;
+    padding-top: 14px;
+    border-top: 1px solid var(--bordure-claire);
+    color: var(--texte-secondaire);
+    font-size: .92rem;
+    line-height: 1.5;
+}
+.soutien-pied a {
     color: var(--accent-primaire);
     font-weight: 600;
-    text-decoration: underline;
 }
-.soutien-lien:hover,
-.soutien-lien:focus {
-    text-decoration: none;
+
+/* Sous 560 px, les colonnes s'empilent : trois blocs pleine largeur. */
+@media (max-width: 560px) {
+    .soutien-colonnes {
+        flex-direction: column;
+    }
 }
 
 .modal-liste {

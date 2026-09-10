@@ -55,12 +55,25 @@ test('bouton Soutenir : ouvre la modale avec le bon contenu + liens', async ({ p
     await expect(modal).toHaveClass(/\bactif\b/);
     await expect(page.locator('#modalSoutien-titre')).toHaveText('Soutenir Labo Codex');
 
-    // Sections attendues.
-    await expect(modal).toContainText('S\'impliquer dans la communauté');
+    // Les trois blocs (refonte #815, 10 sept. 2026 : « S'impliquer dans la
+    // communauté » et « Soutenir financièrement » sont devenus « Avec ton temps »
+    // et « Avec tes moyens » ; « Nous écrire » a perdu son titre pour un pied).
+    await expect(modal).toContainText('Avec ton temps');
+    await expect(modal).toContainText('Avec tes moyens');
     await expect(modal).toContainText('Suivre le projet');
-    await expect(modal).toContainText('Soutenir financièrement');
     await expect(modal).toContainText('Voici plusieurs façons de contribuer');
     await expect(modal).toContainText('Offrir un abonnement de soutien'); // item ajouté (révision)
+
+    // Le blogue dit sur QUOI il porte — demandé par Grégoire le 10 sept.
+    await expect(modal).toContainText('procédures, trucs et astuces de Labo Codex');
+    await expect(modal).toContainText('analyses critiques sur la technologie, la pédagogie et l\'éducation');
+
+    // Trois blocs cadrés, et deux colonnes qui les portent.
+    await expect(modal.locator('.soutien-bloc')).toHaveCount(3);
+    await expect(modal.locator('.soutien-colonne')).toHaveCount(2);
+
+    // Le bleu ne sert plus qu'aux liens : aucun titre de bloc n'est un lien.
+    await expect(modal.locator('.soutien-bloc-titre a')).toHaveCount(0);
 
     // CoP : lien externe AQPC (la CoP n'est pas une section interne) — sécurité rel/target.
     const lienCoP = modal.locator('a[href="https://www.aqpc.qc.ca/fr/cop-labocodex"]');
@@ -81,7 +94,7 @@ test('bouton Soutenir : ouvre la modale avec le bon contenu + liens', async ({ p
         await expect(lien).toHaveAttribute('target', '_blank');
     }
 
-    // Contact : section « Nous écrire » avec un lien mailto.
+    // Contact : le pied de la modale, avec un lien mailto.
     await expect(modal).toContainText('demande de présentation');
     const mailto = modal.locator('a[href="mailto:labo@codexnumeris.org"]');
     await expect(mailto).toHaveCount(1);
