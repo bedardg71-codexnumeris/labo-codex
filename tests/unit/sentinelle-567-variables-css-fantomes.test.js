@@ -16,6 +16,15 @@ import { fileURLToPath } from 'node:url';
 // C'est #595. Ce banc pose un CLIQUET : la liste fermée ci-dessous, avec le nombre
 // d'usages de chacune ; une variable neuve non définie, ou un usage de plus, rougit.
 // Le compte ne peut que baisser — retirer une entrée ici quand elle tombe à zéro.
+//
+// ⚠⚠ CE CLIQUET A LAISSÉ PASSER #811 (10 sept. 2026), ET VOICI POURQUOI.
+// Il COMPTAIT les usages sans les QUALIFIER. `--surface` y figurait pour 1 usage,
+// jugé anodin : c'était le `background` de la modale « Journal de bord », SANS valeur
+// de repli. Une variable inexistante sans repli rend la déclaration invalide — le
+// panneau n'avait plus de fond du tout, et le journal se lisait à même le voile de la
+// modale sur l'iPad de Grégoire. Avec repli, la même variable manquante est bénigne.
+// D'où le troisième cliquet, plus bas : les usages SANS REPLI comptés à part.
+// (#595 reste ouvert pour les 29 noms restants ; #813 porte leur mesure.)
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -25,15 +34,18 @@ function mesurer() {
     const files = ['index.html', 'styles.css',
         ...readdirSync(path.join(racine, 'js')).filter(f => f.endsWith('.js')).map(f => 'js/' + f),
         ...(existsSync(path.join(racine, 'css')) ? readdirSync(path.join(racine, 'css')).filter(f => f.endsWith('.css')).map(f => 'css/' + f) : [])];
-    const used = new Map(), defined = new Set();
+    const used = new Map(), nu = new Map(), defined = new Set();
     for (const f of files) {
         const s = strip(readFileSync(path.join(racine, f), 'utf8'));
         for (const m of s.matchAll(/var\(\s*(--[a-zA-Z0-9_-]+)\s*[,)]/g)) used.set(m[1], (used.get(m[1]) || 0) + 1);
+        // var(--x) fermé DIRECTEMENT par ')' : pas de valeur de repli.
+        for (const m of s.matchAll(/var\(\s*(--[a-zA-Z0-9_-]+)\s*\)/g)) nu.set(m[1], (nu.get(m[1]) || 0) + 1);
         for (const m of s.matchAll(/(^|[\s;{])(--[a-zA-Z0-9_-]+)\s*:/g)) defined.add(m[2]);
     }
-    const fantomes = {};
+    const fantomes = {}, fantomesSansRepli = {};
     for (const [k, n] of used) if (!defined.has(k)) fantomes[k] = n;
-    return { used, defined, fantomes };
+    for (const [k, n] of nu) if (!defined.has(k)) fantomesSansRepli[k] = n;
+    return { used, defined, fantomes, fantomesSansRepli };
 }
 
 // Liste fermée au 29 août 2026 (#595) : variable → usages tolérés.
@@ -42,10 +54,10 @@ const TOLEREES = {
     "--accent-primaire-hover": 1,
     "--accent-principal": 5,
     "--accent-survol": 1,
-    "--avertissement": 3,
-    "--avertissement-fond": 2,
+    "--avertissement": 2,
+    "--avertissement-fond": 1,
     "--blanc": 1,
-    "--bordure": 25,
+    "--bordure": 23,
     "--bordure-discrete": 4,
     "--bordure-douce": 6,
     "--bordure-legere": 12,
@@ -74,29 +86,25 @@ const TOLEREES = {
     "--jaune-principal": 1,
     "--jaune-tres-pale": 1,
     "--lien": 1,
-    "--ombre-elevation-3": 1,
     "--orange-attention": 15,
     "--orange-fond": 1,
     "--orange-principal": 8,
     "--primaire": 2,
     "--primary-500": 3,
-    "--radius-lg": 1,
     "--radius-md": 2,
-    "--radius-sm": 8,
+    "--radius-sm": 6,
     "--radius-standard": 10,
     "--rayon-moyen": 2,
     "--rouge": 7,
     "--rouge-principal": 1,
     "--shadow-elevee": 1,
-    "--surface": 1,
     "--surface-0": 1,
     "--surface-1": 2,
     "--surface-2": 3,
     "--surface-alt": 1,
     "--surface-elevee": 2,
     "--surface-fond": 1,
-    "--surface-hover": 1,
-    "--surface-secondaire": 5,
+    "--surface-secondaire": 4,
     "--surface-sureleve": 2,
     "--surface-survol": 2,
     "--surface-tertiaire": 1,
@@ -143,5 +151,61 @@ describe('#595 · cliquet — aucune variable fantôme nouvelle, aucun usage de 
         const { fantomes } = mesurer();
         const disparues = Object.keys(TOLEREES).filter(k => !(k in fantomes));
         expect(disparues, 'retirer ces entrées de TOLEREES').toEqual([]);
+    });
+});
+
+// Liste fermée au 10 septembre 2026 (#811 / #813) : variable jamais définie → usages
+// SANS valeur de repli. Ceux-là ne dégradent pas : ils ANNULENT la déclaration. Un fond
+// qui disparaît, une bordure qui n'existe plus, un texte qui hérite de son parent.
+// C'est la moitié dangereuse de #595, et elle ne doit plus grossir d'une seule ligne.
+const SANS_REPLI_TOLERES = {
+    "--accent-principal": 1,
+    "--avertissement": 2,
+    "--blanc": 1,
+    "--bordure": 5,
+    "--bordure-douce": 6,
+    "--bordure-legere": 11,
+    "--couleur-texte-secondaire": 1,
+    "--fond-secondaire": 1,
+    "--fond-surface": 1,
+    "--gris-bordure": 4,
+    "--gris-leger": 5,
+    "--gris-pale": 8,
+    "--gris-texte": 11,
+    "--gris-texte-pale": 7,
+    "--info": 3,
+    "--orange-principal": 4,
+    "--primaire": 2,
+    "--radius-standard": 10,
+    "--rouge": 4,
+    "--rouge-principal": 1,
+    "--surface-alt": 1,
+    "--texte-fonce": 1,
+    "--texte-primaire": 6,
+    "--vert-accent": 1,
+    "--vert-fonce": 1,
+    "--vert-moyen": 1,
+    "--vert-positif": 6,
+    "--vert-principal": 7,
+    "--vert-valide": 1
+};
+
+describe('#811 · cliquet — une variable fantôme SANS REPLI ne s\'ajoute plus', () => {
+    it('aucun nom neuf employé sans valeur de repli', () => {
+        const { fantomesSansRepli } = mesurer();
+        const neufs = Object.keys(fantomesSansRepli).filter(k => !(k in SANS_REPLI_TOLERES));
+        expect(neufs, 'var(--x) sans repli sur une variable qui n\'existe pas : la déclaration est ANNULÉE (c\'était #811). Employer la palette, ou donner un repli.').toEqual([]);
+    });
+    it('aucun usage de plus, pour les noms déjà tolérés', () => {
+        const { fantomesSansRepli } = mesurer();
+        const enHausse = Object.keys(fantomesSansRepli)
+            .filter(k => fantomesSansRepli[k] > SANS_REPLI_TOLERES[k])
+            .map(k => k + ' ' + SANS_REPLI_TOLERES[k] + ' → ' + fantomesSansRepli[k]);
+        expect(enHausse, 'usage(s) sans repli en hausse').toEqual([]);
+    });
+    it('la liste descend avec le code (retirer ce qui a disparu)', () => {
+        const { fantomesSansRepli } = mesurer();
+        const disparues = Object.keys(SANS_REPLI_TOLERES).filter(k => !(k in fantomesSansRepli));
+        expect(disparues, 'retirer ces entrées de SANS_REPLI_TOLERES').toEqual([]);
     });
 });
