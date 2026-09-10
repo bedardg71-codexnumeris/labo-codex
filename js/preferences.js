@@ -3,7 +3,9 @@
  *
  * Source de vérité unique pour les préférences globales de l'application.
  * Regroupe ce qui était dispersé dans deux emplacements :
- *   - 5 champs de modalitesEvaluation (RàI, SOLO, grille, découpler P/R, fenêtre patterns)
+ *   - 3 champs de modalitesEvaluation (RàI, SOLO, grille) — « découpler P/N » et
+ *     « fenêtre patterns » en faisaient partie jusqu'au #823 (10 sept. 2026) :
+ *     retirés, personne ne les lisait (la fenêtre vit dans seuilsInterpretation)
  *   - tout preferencesAffichage (patterns on/off, snapshots, graphiques, chrono, animations,
  *     visite guidée, aide contextuelle, mode clair, tooltips, mode expert, etc.)
  *
@@ -17,9 +19,10 @@
  *
  * 2. `seuilsInterpretation` contient une structure mixte : quelques seuils
  *    ajustables par l'utilisateur (fragile, acceptable, bon, progression,
- *    risque, défi), mais aussi une hiérarchie de constantes (idme.*, risque.*,
- *    interpretation.*, nombreProductionsAnalyse) lues en bloc par plusieurs
- *    modules via chargerSeuilsInterpretation(). Le refondre proprement demande
+ *    risque, défi, et la fenêtre d'analyse `nombreProductionsAnalyse` depuis
+ *    #823), mais aussi une hiérarchie de constantes (idme.*, risque.*,
+ *    interpretation.*) lues en bloc par plusieurs modules via
+ *    chargerSeuilsInterpretation(). Le refondre proprement demande
  *    un chantier dédié — laissé pour plus tard.
  *
  * API publique :
@@ -56,8 +59,6 @@
         // --- Dépistage (RàI) ---
         activerRai: true,
         grilleReferenceDepistage: '',
-        decouplerPN: false,
-        fenetrePatterns: 3,
 
         // --- Affichage ---
         depistageAcp: true,
@@ -65,7 +66,6 @@
         afficherSeuilsVisuels: true,
         afficherDeveloppementHabiletes: true,
         afficherContexteGraphiques: true,
-        uniteAffichageAssiduite: 'periodes',
         animationPoints: true,
         chronoEvaluation: false,
         // #321 — « note différée » (couche 1 PRÉN) : masque les notes PAR TRAVAIL
@@ -264,7 +264,7 @@
      * Chaque entrée décrit où lire la valeur dans l'ancien système.
      */
     const MIGRATION_MAP = [
-        // Depuis modalitesEvaluation — UNIQUEMENT les 5 champs qui sont des préférences
+        // Depuis modalitesEvaluation — UNIQUEMENT les 3 champs qui sont des préférences
         // utilisateur. Le reste (pratique, specifications, parObjectifs, categories)
         // reste dans modalitesEvaluation car ce sont des paramètres de la pratique
         // active, pas des préférences utilisateur. NB SSOT Lot 0 (10 juin 2026) :
@@ -273,15 +273,14 @@
         { source: 'modalitesEvaluation', champ: 'afficherDescriptionsSOLO', cible: 'afficherDescriptionsSOLO' },
         { source: 'modalitesEvaluation', champ: 'activerRai',               cible: 'activerRai' },
         { source: 'modalitesEvaluation', champ: 'grilleReferenceDepistage', cible: 'grilleReferenceDepistage' },
-        { source: 'modalitesEvaluation', champ: 'decouplerPN',              cible: 'decouplerPN' },
-        { source: 'modalitesEvaluation', champ: 'fenetrePatterns',          cible: 'fenetrePatterns' },
+        // `decouplerPN` et `fenetrePatterns` figuraient ici jusqu'au #823 :
+        // retirés avec les contrôles, ils ne sont plus ni migrés ni purgés.
 
         // Depuis preferencesAffichage
         { source: 'preferencesAffichage', champ: 'depistageAcp',                cible: 'depistageAcp' },
         { source: 'preferencesAffichage', champ: 'afficherGraphiques',          cible: 'afficherGraphiques' },
         { source: 'preferencesAffichage', champ: 'afficherSeuilsVisuels',       cible: 'afficherSeuilsVisuels' },
         { source: 'preferencesAffichage', champ: 'afficherContexteGraphiques',  cible: 'afficherContexteGraphiques' },
-        { source: 'preferencesAffichage', champ: 'uniteAffichageAssiduite',     cible: 'uniteAffichageAssiduite' },
         { source: 'preferencesAffichage', champ: 'animationPoints',             cible: 'animationPoints' },
         { source: 'preferencesAffichage', champ: 'chronoEvaluation',            cible: 'chronoEvaluation' },
         { source: 'preferencesAffichage', champ: 'sisDefaut',                   cible: 'sisDefaut' },
@@ -298,7 +297,7 @@
      * Migre les 3 anciens objets vers `preferencesUtilisateur`.
      * Idempotente : protégée par le flag `migrationPrefs_v3_done`.
      *
-     * Nettoie aussi les emplacements legacy (5 champs dans modalitesEvaluation,
+     * Nettoie aussi les emplacements legacy (3 champs dans modalitesEvaluation,
      * clé preferencesAffichage entière) une fois la migration confirmée. Le
      * nettoyage s'exécute à chaque démarrage — idempotent et robuste face aux
      * réintroductions par import ou sortie de démo.
@@ -322,7 +321,7 @@
                 // propriétaire, c'est-à-dire la clé namespacée du trimestre ACTIF.
                 //
                 // Une migration qui efface une clé qu'elle n'a jamais lue. Chez un
-                // utilisateur dont le trimestre actif porte ces cinq champs, ils
+                // utilisateur dont le trimestre actif porte ces champs, ils
                 // étaient supprimés sans jamais atteindre le magasin V3.
                 //
                 // Constat du 8 août : Grégoire n'a été épargné que par un hasard —
@@ -401,7 +400,8 @@
     // `modalitesEvaluation` (cas réel : A2026 chez Grégoire, créé après le
     // 16 avril), la migration ne trouve RIEN et pose les DÉFAUTS, pendant que
     // les vraies valeurs dorment dans a2024/a2025/h2026. Constaté au premier
-    // contrôle terrain : grille de dépistage vide, fenetrePatterns 4 → 3.
+    // contrôle terrain : grille de dépistage vide, et la fenêtre de patterns
+    // 4 → 3 (préférence retirée depuis, #823 : elle n'était lue par personne).
     //
     // Ce correctif balaie TOUS les trimestres (du plus récent au plus ancien,
     // par dateCreation) et adopte, pour chaque champ resté à sa valeur PAR
@@ -464,7 +464,7 @@
 
     /**
      * Supprime les emplacements legacy que la migration a absorbés :
-     *   - les 5 champs de modalitesEvaluation qui sont devenus des préférences ;
+     *   - les 3 champs de modalitesEvaluation qui sont devenus des préférences ;
      *   - la clé preferencesAffichage dans son ensemble.
      * Idempotent : aucune écriture si rien à nettoyer, pas d'effet si la clé
      * n'existe pas. Appelée à chaque démarrage (après garantie que la migration
@@ -497,7 +497,7 @@
             // `nettoyerLegacy()` tourne à CHAQUE démarrage, y compris longtemps
             // après que le drapeau de migration a été posé — et il purge le
             // trimestre ACTIF. Un utilisateur qui change de trimestre des mois
-            // plus tard voyait donc les cinq champs de ce trimestre-là
+            // plus tard voyait donc les champs de ce trimestre-là
             // supprimés alors que la migration, déjà marquée « faite », ne
             // repasserait jamais les recueillir. La purge devançait la mise à
             // l'abri au lieu de la suivre.
@@ -620,10 +620,10 @@
     // car la migration purge le legacy via `nettoyerLegacy()` :
     //   • `preferencesAffichage` — clé supprimée en entier : ZÉRO lecteur
     //     ailleurs dans le code, la purge est sans effet de bord ;
-    //   • les 5 champs retirés de `modalitesEvaluation` — aucune lecture
-    //     qualifiée (`modalites.decouplerPN` etc.) ; les occurrences trouvées
-    //     visent `modalites.portfolio.decouplerPN`, champ imbriqué distinct,
-    //     que `nettoyerLegacy` ne touche pas.
+    //   • les champs retirés de `modalitesEvaluation` — aucune lecture
+    //     qualifiée (`modalites.activerRai` etc.). ⚠ `portfolio.decouplerPN`
+    //     (config de pratique, champ imbriqué distinct de la préférence retirée
+    //     au #823) n'a jamais été dans la table : `nettoyerLegacy` n'y touche pas.
     // La migration n'écrase jamais une valeur déjà présente en V3
     // (`if (entree.cible in prefs) continue`) : elle ne fait que combler les
     // trous. Et si l'écriture V3 échoue, `nettoyerLegacy()` n'est pas atteint —

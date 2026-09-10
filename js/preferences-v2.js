@@ -138,12 +138,6 @@
             chronoEval.checked = obtenirPreference('chronoEvaluation') === true;
         }
 
-        // 🆕 BETA 95.1 : Unité d'affichage de l'assiduité (périodes/heures)
-        const uniteAffichage = document.getElementById('v2-pref-unite-affichage');
-        if (uniteAffichage) {
-            uniteAffichage.value = obtenirPreference('uniteAffichageAssiduite') || 'periodes';
-        }
-
         // SIS par défaut
         const sisSelect = document.getElementById('v2-pref-sis');
         if (sisSelect) {
@@ -176,16 +170,19 @@
             grilleReference.value = grilleRefId;
         }
 
-        // Découpler Performance et Risque
-        const decouplerPN = document.getElementById('v2-pref-decoupler-pn');
-        if (decouplerPN) {
-            decouplerPN.checked = obtenirPreference('decouplerPN') === true;
-        }
-
-        // Fenêtre d'analyse des patterns
-        const fenetrePatterns = document.getElementById('v2-pref-fenetre-patterns');
-        if (fenetrePatterns) {
-            fenetrePatterns.value = obtenirPreference('fenetrePatterns') || 3;
+        // Fenêtre d'analyse des patterns.
+        // #823 (10 sept. 2026) — LE CHAMP LISAIT UNE PRÉFÉRENCE QUE PERSONNE NE
+        // LISAIT. Il écrivait `fenetrePatterns` ; les douze calculs de patterns
+        // lisent `seuilsInterpretation.nombreProductionsAnalyse` par
+        // `obtenirNombreProductionsPourPatterns`, une clé que rien n'écrivait :
+        // la fenêtre valait 3 quoi qu'on tape. Même défaut de branchement que
+        // les trois curseurs de #818. Le champ lit et écrit désormais la clé
+        // des calculs ; la préférence est retirée, pas migrée — sa valeur n'a
+        // jamais eu d'effet, la récupérer changerait des profils sans que
+        // personne l'ait demandé (décision Cowork, confirmée par Grégoire).
+        const fenetreAnalyse = document.getElementById('v2-pref-fenetre-patterns');
+        if (fenetreAnalyse) {
+            fenetreAnalyse.value = obtenirSeuil('nombreProductionsAnalyse');
         }
 
         // Seuils d'interprétation — lus directement depuis seuilsInterpretation
@@ -297,8 +294,6 @@
         // grille actuellement désignée, et l'utilisateur a quand même choisi de
         // la retirer. Sinon on ne touche pas à ce qu'il a réglé.
         _sauvegarderGrilleReferenceSiFiable();
-        definirPreference('decouplerPN', document.getElementById('v2-pref-decoupler-pn')?.checked === true);
-        definirPreference('fenetrePatterns', parseInt(document.getElementById('v2-pref-fenetre-patterns')?.value) || 3);
 
         definirPreference('depistageAcp', document.getElementById('v2-pref-depistage-acp')?.checked !== false);
         definirPreference('afficherGraphiques', document.getElementById('v2-pref-graphiques')?.checked !== false);
@@ -306,7 +301,6 @@
         definirPreference('noteDifferee', document.getElementById('v2-pref-note-differee')?.checked === true);
         definirPreference('afficherSeuilsVisuels', document.getElementById('v2-pref-seuils-visuels')?.checked !== false);
         definirPreference('afficherDeveloppementHabiletes', document.getElementById('v2-pref-developpement-habiletes')?.checked !== false);
-        definirPreference('uniteAffichageAssiduite', document.getElementById('v2-pref-unite-affichage')?.value || 'periodes');
 
         const animationActive = document.getElementById('v2-pref-animation-points')?.checked !== false;
         definirPreference('animationPoints', animationActive);
@@ -326,7 +320,8 @@
     }
 
     /**
-     * Sauvegarde les seuils d'interprétation.
+     * Sauvegarde les seuils d'interprétation — et la fenêtre d'analyse des
+     * patterns, qui vit dans le même objet (#823).
      * Écrit directement dans seuilsInterpretation (non migré vers l'API)
      * pour préserver la structure mixte (champs plats + sous-objets idme/risque/interpretation).
      */
@@ -358,6 +353,13 @@
         delete seuils.fragile;
         delete seuils.acceptable;
         delete seuils.bon;
+
+        // Fenêtre d'analyse des patterns — #823 : dans la clé que
+        // `obtenirNombreProductionsPourPatterns` lit, et nulle part ailleurs.
+        const fenetreAnalyse = document.getElementById('v2-pref-fenetre-patterns');
+        if (fenetreAnalyse) {
+            seuils.nombreProductionsAnalyse = parseInt(fenetreAnalyse.value) || 3;
+        }
 
         // Seuils avancés de détection
         const seuilProgression = document.getElementById('v2-seuil-progression');
@@ -398,12 +400,12 @@
      * Restaure les seuils de détection avancés par défaut
      */
     function restaurerSeuilsDetectionDefautV2() {
-        const fenetrePatterns = document.getElementById('v2-pref-fenetre-patterns');
+        const fenetreAnalyse = document.getElementById('v2-pref-fenetre-patterns');
         const seuilProgression = document.getElementById('v2-seuil-progression');
         const seuilRisque = document.getElementById('v2-seuil-risque');
         const seuilDefi = document.getElementById('v2-seuil-defi');
 
-        if (fenetrePatterns) fenetrePatterns.value = 3;
+        if (fenetreAnalyse) fenetreAnalyse.value = 3;
 
         if (seuilProgression) {
             seuilProgression.value = 0.10;
@@ -418,8 +420,7 @@
             mettreAJourAffichageSeuilV2('defi', 0.70);
         }
 
-        sauvegarderSeuilsV2();
-        sauvegarderPreferencesV2(); // Pour sauvegarder fenetrePatterns
+        sauvegarderSeuilsV2(); // #823 : la fenêtre y passe aussi
         notifications.succes('Seuils de détection restaurés');
     }
 
@@ -458,69 +459,6 @@
     // =========================================================================
 
     // =========================================================================
-    // 🆕 BETA 95.1 : FORMATAGE DE L'ASSIDUITÉ SELON PRÉFÉRENCE
-    // =========================================================================
-
-    /**
-     * Obtient la préférence d'unité d'affichage
-     * @returns {string} - 'periodes' | 'heures' | 'les-deux'
-     */
-    function obtenirUniteAffichageAssiduite() {
-        return obtenirPreference('uniteAffichageAssiduite') || 'periodes';
-    }
-
-    /**
-     * Formate l'assiduité selon la préférence d'affichage
-     * @param {Object} assiduite - Objet avec heuresPresentes, heuresOffertes, periodesPresentes, periodesOffertes
-     * @param {string} modeForce - Mode forcé (optionnel) : 'periodes' | 'heures' | 'les-deux'
-     * @returns {string} - Texte formaté
-     */
-    function formaterAssiduiteAvecUnite(assiduite, modeForce = null) {
-        const mode = modeForce || obtenirUniteAffichageAssiduite();
-
-        const heuresP = assiduite.heuresPresentes || 0;
-        const heuresO = assiduite.heuresOffertes || 0;
-        const periodesP = assiduite.periodesPresentes || 0;
-        const periodesO = assiduite.periodesOffertes || 0;
-
-        switch (mode) {
-            case 'heures':
-                return `${heuresP.toFixed(1)}h / ${heuresO.toFixed(1)}h`;
-
-            case 'les-deux':
-                return `${periodesP} / ${periodesO} pér. (${heuresP.toFixed(1)}h / ${heuresO.toFixed(1)}h)`;
-
-            case 'periodes':
-            default:
-                return `${periodesP} / ${periodesO} périodes`;
-        }
-    }
-
-    /**
-     * Formate un total de présence selon la préférence d'affichage
-     * @param {number} heures - Heures totales
-     * @param {string} modeForce - Mode forcé (optionnel)
-     * @returns {string} - Texte formaté
-     */
-    function formaterTotalPresence(heures, modeForce = null) {
-        const mode = modeForce || obtenirUniteAffichageAssiduite();
-        const dureePeriode = typeof window.obtenirDureePeriode === 'function' ? window.obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
-        const periodes = Math.round((heures * 60) / dureePeriode);
-
-        switch (mode) {
-            case 'heures':
-                return `${heures.toFixed(1)}h`;
-
-            case 'les-deux':
-                return `${periodes} pér. (${heures.toFixed(1)}h)`;
-
-            case 'periodes':
-            default:
-                return `${periodes} période${periodes > 1 ? 's' : ''}`;
-        }
-    }
-
-    // =========================================================================
     // 🆕 BETA 96.1 : ANIMATION DES POINTS DU TABLEAU DE BORD
     // =========================================================================
 
@@ -547,10 +485,6 @@
     window.restaurerSeuilsDetectionDefautV2 = restaurerSeuilsDetectionDefautV2;
     window.sauvegarderToutesPreferencesV2 = sauvegarderToutesPreferencesV2;
     window.mettreAJourAffichageSeuilV2 = mettreAJourAffichageSeuilV2;
-    // 🆕 BETA 95.1 : Fonctions de formatage selon l'unité
-    window.obtenirUniteAffichageAssiduite = obtenirUniteAffichageAssiduite;
-    window.formaterAssiduiteAvecUnite = formaterAssiduiteAvecUnite;
-    window.formaterTotalPresence = formaterTotalPresence;
     // 🆕 BETA 96.1 : Animation des points
     window.appliquerAnimationPoints = appliquerAnimationPoints;
 

@@ -381,10 +381,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Migration vocabulaire descriptif (22 mai 2026, Phase 6.1 PLAN-AQPC) :
         // renomme la propriété `decouplerPR` → `decouplerPN` (Découpler
-        // Performance / Niveau d'attention) dans toutes les structures
-        // stockées. Cohérent avec le renommage des tokens CSS --risque-*
+        // Performance / Niveau d'attention) dans la config portfolio des
+        // pratiques. Cohérent avec le renommage des tokens CSS --risque-*
         // → --niveau-attention-* livré au chantier J du 21 mai 2026.
         // Idempotent.
+        // #823 (10 sept. 2026) — le volet 1 (`preferencesUtilisateur.decouplerPR`)
+        // est retiré avec la préférence « Découpler P et N », que personne ne
+        // lisait. Un `decouplerPR` ou `decouplerPN` encore présent dans les
+        // préférences d'un utilisateur y reste, orphelin : on ne réécrit pas
+        // les données des gens pour une clé sans lecteur.
         if (!db.getSync('migration_decoupler_pn_done', false)) {
             try {
                 const renommerDansObjet = (obj) => {
@@ -402,13 +407,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // le seul écrivain de la clé namespacée. La config portfolio
                 // canonique vit dans pratiquesConfigurables (Phase G2-a).
 
-                // 1. preferencesUtilisateur.decouplerPR (préférence v2)
-                const prefs = db.getSync('preferencesUtilisateur', {});
-                if (prefs && renommerDansObjet(prefs)) {
-                    db.setSync('preferencesUtilisateur', prefs);
-                }
-
-                // 2. bibliothequePratiques[*].config.portfolio.decouplerPR
+                // bibliothequePratiques[*].config.portfolio.decouplerPR
                 const biblioPratiques = db.getSync('bibliothequePratiques', []);
                 let biblioModifiee = false;
                 if (Array.isArray(biblioPratiques)) {

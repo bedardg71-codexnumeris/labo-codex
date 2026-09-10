@@ -103,12 +103,15 @@ describe('#419 · migration V3 — un espace réservé vide n’est pas un choix
     });
 
     it('V3 contient `0` : c’est un choix aussi', () => {
+        // #823 : `fenetrePatterns`, la seule préférence numérique de la table,
+        // est retirée. Le `0` porte sur une clé encore migrée — la valeur
+        // exerce la garde (`0` n'est pas un espace réservé), pas son sens.
         const { win, store } = laboratoire(
-            { fenetrePatterns: 0 },
-            { fenetrePatterns: 5 }
+            { activerRai: 0 },
+            { activerRai: true }
         );
         win.migrerPreferencesV3();
-        expect(store.preferencesUtilisateur.fenetrePatterns).toBe(0);
+        expect(store.preferencesUtilisateur.activerRai).toBe(0);
     });
 
     it('V3 ne contient pas la clé : la valeur legacy est adoptée (comportement d’origine)', () => {
@@ -215,7 +218,9 @@ describe('#419 · la migration lit par le MÊME chemin qu’elle purge', () => {
 // =======================================================================
 // Constaté au contrôle terrain du 8 août, sur le dump de Grégoire : V3 portait
 // `grilleReferenceDepistage: ''` et `fenetrePatterns: 3` (défauts), pendant que
-// a2024/a2025/h2026 portaient la grille réelle et `4`. Cause : le trimestre
+// a2024/a2025/h2026 portaient la grille réelle et `4`. (La fenêtre a quitté la
+// table au #823, 10 sept. 2026 : le banc exerce le même mécanisme sur la
+// grille et sur `afficherDescriptionsSOLO`.) Cause : le trimestre
 // ACTIF (A2026, créé après le 16 avril) n'a pas de `modalitesEvaluation` — la
 // migration lit par le module propriétaire, donc par LA clé du trimestre actif,
 // et n'a rien trouvé. L'enrichissement balaie TOUS les trimestres, du plus
@@ -243,17 +248,17 @@ describe('#429 · l’enrichissement V3 depuis les trimestres', () => {
         { id: 'h2026', dateCreation: '2026-01-10' }
     ];
 
-    it('récupère un champ resté au DÉFAUT — le cas réel du terrain (grille + fenêtre)', () => {
+    it('récupère un champ resté au DÉFAUT — le cas réel du terrain (grille + un second champ)', () => {
         const { win, store } = laboratoireEnrichissement(
-            { grilleReferenceDepistage: '', fenetrePatterns: 3 },
+            { grilleReferenceDepistage: '', afficherDescriptionsSOLO: true },
             TRIMS,
-            { h2026_modalitesEvaluation: { grilleReferenceDepistage: 'GRILLE_REELLE', fenetrePatterns: 4 } }
+            { h2026_modalitesEvaluation: { grilleReferenceDepistage: 'GRILLE_REELLE', afficherDescriptionsSOLO: false } }
         );
         const rapport = win.enrichirPrefsV3DepuisTrimestres();
 
         expect(rapport.champsRecuperes).toBe(2);
         expect(store.preferencesUtilisateur.grilleReferenceDepistage).toBe('GRILLE_REELLE');
-        expect(store.preferencesUtilisateur.fenetrePatterns).toBe(4);
+        expect(store.preferencesUtilisateur.afficherDescriptionsSOLO).toBe(false);
     });
 
     it('ne touche JAMAIS une valeur qui n’est plus au défaut', () => {
@@ -311,7 +316,7 @@ describe('#429 · l’enrichissement V3 depuis les trimestres', () => {
         // L'asymétrie lecture/purge a fait #419 — le correctif de son dégât ne
         // doit pas la recréer. Les vieilles clés restent intactes : c'est
         // nettoyerLegacy (bornée au trimestre actif) qui décide des purges.
-        const source = { grilleReferenceDepistage: 'GRILLE_REELLE', fenetrePatterns: 4, autreChamp: 'x' };
+        const source = { grilleReferenceDepistage: 'GRILLE_REELLE', activerRai: false, autreChamp: 'x' };
         const { win, store } = laboratoireEnrichissement(
             {},
             TRIMS,
@@ -321,7 +326,7 @@ describe('#429 · l’enrichissement V3 depuis les trimestres', () => {
 
         expect(store.h2026_modalitesEvaluation).toBe(source);
         expect(store.h2026_modalitesEvaluation).toEqual(
-            { grilleReferenceDepistage: 'GRILLE_REELLE', fenetrePatterns: 4, autreChamp: 'x' }
+            { grilleReferenceDepistage: 'GRILLE_REELLE', activerRai: false, autreChamp: 'x' }
         );
     });
 });
