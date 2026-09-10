@@ -15,7 +15,7 @@
 
 ---
 
-## ▣ CE QUI EST OUVERT AUJOURD'HUI — neuf cadrages (le 9 ajouté le 7 septembre) ; livrés : le 3 (1.116), le 7 (1.117), le 1 étapes 2 et 3 (1.118, 1.119), le 2 (1.119), le 5 (1.119), le 8 (1.120) ; le 1 est CLOS (étape 4 abandonnée) ; ouverts : le 4, le 6 (à trier)
+## ▣ CE QUI EST OUVERT AUJOURD'HUI — dix cadrages (le 10 ajouté le 10 septembre) ; livrés : le 3 (1.116), le 7 (1.117), le 1 étapes 2 et 3 (1.118, 1.119), le 2 (1.119), le 5 (1.119), le 8 (1.120) ; le 1 est CLOS (étape 4 abandonnée) ; ouverts : le 4, le 6 (à trier)
 
 *Aucun n'empêche un des huit énoncés de la cohorte 1 : ils sont tous parcourus depuis le
 3 septembre au matin. Ces quatre-là traitent l'**adoption** et la **justesse**, pas la ligne
@@ -134,6 +134,23 @@ de la projection EUF, distinct du champ administratif « Services adaptés ». *
 (note/P et dépistage) ne partagent pas le même filtre, donc c'est séparable ; et c'est `determinerNiveauRaiPedagogique`,
 pas l'IPB, qui alimente l'écran — un seul artefact y suffit à produire un palier 2 ou 3. **Restent à lui** : le libellé
 du signalement, le palier qui le lève, et le nom du champ « CAF », qui désigne un service qui n'existe plus.
+
+### 10 · L'écran de réglage du dépistage — `CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md`
+**Ajouté le 10 septembre par Cowork, à la demande de Grégoire**, en préparation du travail d'automne
+avec l'orthopédagogue. Son mot : l'écran `Labo › Outils d'observation` est « un peu cacophonique ».
+▣ **Ordre décidé par lui** : l'écran de RÉGLAGE d'abord, « puisque c'est lui qui entraîne le suivi » ;
+l'onglet **Suivi** ensuite.
+⮕ **Ce que la mesure a trouvé, et qui déplace le chantier** : la cacophonie n'est pas d'abord une
+affaire de mise en page. L'échelle IDME de Grégoire est écrite de **trois façons différentes** selon
+l'endroit, et le E — *Étendu* dans son cadre — devient **« Excellent »** sur l'écran de réglage. Deux
+lettres sur quatre ont glissé du descriptif vers l'évaluatif, contre l'`ADR-007`.
+⏸ **ATTEND la livraison de `CONSIGNE-DU-JOUR.md`** (source unique de qualification) : même terrain,
+mêmes seuils.
+▣ **Ordre TRANCHÉ le 10 septembre par Grégoire** (« ta recommandation est bonne, suivons-la ») :
+**trier le contenu d'abord, déplacer ensuite.** Le déplacement de `Labo` vers `Suivi` reste **sa
+proposition**, à confirmer par la carte des effets — mesurer où chaque réglage produit un effet
+visible, ce qu'aucune session n'a fait. Aucune mesure n'écarte non plus que l'écran soit **scindé**
+plutôt que déplacé en bloc.
 
 ## 🔎 LA SÉRIE D'AUDITS CADRÉS — trois audits, un ordre, une règle de fermeture
 
