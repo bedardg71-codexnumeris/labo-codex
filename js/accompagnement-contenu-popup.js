@@ -629,7 +629,6 @@ const AIDE_CONTEXTUELLE = {
                 titre: "Ce que tu peux faire depuis le profil",
                 items: [
                     "Voir le niveau RàI, le pattern d'apprentissage et la direction de chaque critère (↗ amélioration, ← détérioration, — plateau).",
-                    "Consulter la consolidation par critère : consolidé, fragile ou non consolidé.",
                     "Identifier les forces et défis selon la taxonomie SOLO.",
                     "Créer une intervention RàI directement (bouton Nouvelle intervention) — l'étudiant sera pré-coché avec les critères en défi.",
                     "Exporter un rapport PDF pour un suivi institutionnel ou une rencontre."

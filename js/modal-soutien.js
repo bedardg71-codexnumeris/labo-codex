@@ -25,6 +25,14 @@
         // donc l'item pointe directement vers l'inscription AQPC — destination réelle de
         // l'onglet CoP. Décision Grégoire (8 juin) : on garde ce lien tel quel ; pas de
         // bouton réciproque, faute de section CoP interne (§4 clos ainsi).
+        //
+        // ORDRE DE LA COLONNE DROITE ET MOT « BLOGUE » (10 sept. 2026, rapport de Grégoire).
+        // « Suivre le projet » passe AVANT « Avec tes moyens », et les trois libellés
+        // d'abonnement nomment le blogue. Motif, dans ses mots : « on dirait ici que c'est
+        // un abonnement à Labo Codex ». Les deux abonnements (gratuit et de soutien) sont
+        // en effet DEUX NIVEAUX DU MÊME abonnement au blogue Codex Numeris — les trois
+        // liens pointent vers son portail — et rien ne le disait. Présenter le blogue en
+        // premier donne au bloc suivant l'objet auquel se rattacher.
         return `
         <div id="modalSoutien" class="modal-overlay actif" style="z-index: 10000;" data-close-on-bg="fermerModalSoutien">
             <div class="modal-contenu modal-soutien" role="dialog" aria-modal="true" aria-labelledby="modalSoutien-titre">
@@ -56,28 +64,28 @@
 
                     <div class="soutien-colonne">
                         <section class="soutien-bloc">
-                            <h4 class="soutien-bloc-titre">Avec tes moyens</h4>
+                            <h4 class="soutien-bloc-titre">Suivre le projet</h4>
                             <ul class="soutien-liste">
                                 <li>
-                                    <a class="soutien-action" href="https://codexnumeris.org/#/portal/signup/68d7cf7691267900011c2b4c/yearly" target="_blank" rel="noopener noreferrer">Souscrire un abonnement de soutien</a>
-                                    <span class="soutien-detail">24 $ par année.</span>
-                                </li>
-                                <li>
-                                    <a class="soutien-action" href="https://codexnumeris.org/#/portal/gift" target="_blank" rel="noopener noreferrer">Offrir un abonnement de soutien</a>
-                                    <span class="soutien-detail">À un·e collègue.</span>
-                                </li>
-                                <li>
-                                    <a class="soutien-action" href="https://codexnumeris.org/#/portal/support" target="_blank" rel="noopener noreferrer">Faire un don</a>
+                                    <a class="soutien-action" href="https://codexnumeris.org/#/portal/signup/free" target="_blank" rel="noopener noreferrer">T'abonner gratuitement au blogue Codex Numeris</a>
+                                    <span class="soutien-detail">Le blogue du développeur&nbsp;: procédures, trucs et astuces de Labo Codex, et des analyses critiques sur la technologie, la pédagogie et l'éducation.</span>
                                 </li>
                             </ul>
                         </section>
 
                         <section class="soutien-bloc">
-                            <h4 class="soutien-bloc-titre">Suivre le projet</h4>
+                            <h4 class="soutien-bloc-titre">Avec tes moyens</h4>
                             <ul class="soutien-liste">
                                 <li>
-                                    <a class="soutien-action" href="https://codexnumeris.org/#/portal/signup/free" target="_blank" rel="noopener noreferrer">T'abonner gratuitement à Codex Numeris</a>
-                                    <span class="soutien-detail">Le blogue du développeur&nbsp;: procédures, trucs et astuces de Labo Codex, et des analyses critiques sur la technologie, la pédagogie et l'éducation.</span>
+                                    <a class="soutien-action" href="https://codexnumeris.org/#/portal/signup/68d7cf7691267900011c2b4c/yearly" target="_blank" rel="noopener noreferrer">Souscrire un abonnement de soutien au blogue</a>
+                                    <span class="soutien-detail">24 $ par année. C'est cet abonnement qui finance Labo Codex.</span>
+                                </li>
+                                <li>
+                                    <a class="soutien-action" href="https://codexnumeris.org/#/portal/gift" target="_blank" rel="noopener noreferrer">Offrir un abonnement de soutien au blogue</a>
+                                    <span class="soutien-detail">À un·e collègue.</span>
+                                </li>
+                                <li>
+                                    <a class="soutien-action" href="https://codexnumeris.org/#/portal/support" target="_blank" rel="noopener noreferrer">Faire un don</a>
                                 </li>
                             </ul>
                         </section>

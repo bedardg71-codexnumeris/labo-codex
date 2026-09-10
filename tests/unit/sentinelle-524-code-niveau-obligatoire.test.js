@@ -306,7 +306,7 @@ describe('#525 · F — les bornes sont obligatoires, et les deux lecteurs ont l
 
     it('F.d LA COUTURE : plus aucun module ne réécrit la règle dans son coin', () => {
         const lire = (f) => readFileSync(path.join(racineProjet, f), 'utf8');
-        for (const fichier of ['js/evaluation-calcul.js', 'js/consolidation.js']) {
+        for (const fichier of ['js/evaluation-calcul.js']) {
             const src = lire(fichier);
             expect(src, `${fichier} doit passer par valeurNumeriqueDuNiveau`)
                 .toContain('valeurNumeriqueDuNiveau');

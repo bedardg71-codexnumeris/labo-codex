@@ -23,6 +23,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { jetonAuMoins } from './_helpers/jeton-anticache.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
 const source = (rel) => readFileSync(path.join(racine, rel), 'utf8');
@@ -238,8 +239,8 @@ describe('collections · C — la clé inscrite, le script chargé, la clé docu
         expect(projection).toBeGreaterThan(-1);
         expect(collections).toBeGreaterThan(projection);
         expect(grilles).toBeGreaterThan(collections);
-        expect(html).toMatch(/js\/collections-projection\.js\?v=2026090[5-9]|js\/collections-projection\.js\?v=20261/);
-        expect(html).toMatch(/js\/trimestres\.js\?v=2026090[5-9]|js\/trimestres\.js\?v=20261/);
+        { const j = jetonAuMoins(html, 'js/collections-projection.js', '20260905a'); expect(j.ok, j.message).toBe(true); }
+        { const j = jetonAuMoins(html, 'js/trimestres.js', '20260905a'); expect(j.ok, j.message).toBe(true); }
     });
 
     it('C.c la clé est documentée avec son propriétaire (docs/DATA-OWNERSHIP.md)', () => {

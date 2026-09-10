@@ -3760,7 +3760,7 @@ function blocReperesEchelle(echelle, options) {
  *
  * ⚠⚠ DEUX MODULES APPLIQUAIENT DEUX RÈGLES À LA MÊME DONNÉE :
  *   `evaluation-calcul.js`  →  `niveau.valeurCalcul || (min + max) / 2`
- *   `consolidation.js`      →  `valeurCalcul != null ? valeurCalcul : (min + max) / 2`
+ *   (module Consolidation, retiré le 10 sept. 2026)  →  `valeurCalcul != null ? valeurCalcul : (min + max) / 2`
  *
  * Le premier trahit le ZÉRO. `0 || x` rend `x` : une valeur ponctuelle de 0 —
  * parfaitement légitime, et présente dans les échelles « IDME et niv 0 » de
@@ -3812,7 +3812,7 @@ function valeurNumeriqueDuNiveau(niveau) {
     // ⮕ `null` = « je ne sais pas calculer », et les deux lecteurs le savent :
     // `evaluation-calcul.js` EXCLUT le critère du total (`valeurCritere !==
     // undefined`, pondération comprise — pas de zéro silencieux) et
-    // `consolidation.js` saute le niveau. C'est la doctrine du projet : non
+    // le module Consolidation (retiré) sautait le niveau. C'est la doctrine du projet : non
     // calculable et DIT, jamais un chiffre inventé.
     return null;
 }

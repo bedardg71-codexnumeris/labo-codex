@@ -162,7 +162,7 @@ const TOOLTIPS = {
     'depist-seuil-bon':
         'Indice au-dessus duquel la situation est satisfaisante (vert).',
     'depist-seuil-defi':
-        'Score (%) sous lequel un critère est identifié comme un défi nécessitant attention. Seuil bas = plus exigeant, seuil élevé = moins exigeant. Règle le dépistage seulement : le seuil de maîtrise de la «Consolidation des apprentissages» vient des repères posés sur ton échelle.',
+        'Score (%) sous lequel un critère est identifié comme un défi nécessitant attention. Seuil bas = plus exigeant, seuil élevé = moins exigeant. Règle le dépistage seulement.',
     'depist-seuil-direction':
         'Variation minimale (%) pour afficher une tendance du niveau d\'attention. Contrôle la sensibilité de l\'indicateur directionnel.',
     'depist-seuil-fragile':

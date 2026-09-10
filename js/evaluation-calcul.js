@@ -1312,7 +1312,7 @@ function calculerNote() {
     // ponctuelle sur le milieu de plage par un OU-logique : celui-ci traitait une
     // valeur ponctuelle de ZÉRO comme absente et la remplaçait par le milieu. Sur un
     // niveau 0 dont la plage irait de 0 à 59, la note valait 29,5 au lieu de 0.
-    // `consolidation.js` appliquait déjà la bonne règle — deux lecteurs, deux
+    // le module Consolidation (retiré) appliquait déjà la bonne règle — deux lecteurs, deux
     // résultats pour la même échelle.
     niveaux.forEach(niveau => {
         const valeur = (typeof valeurNumeriqueDuNiveau === 'function')

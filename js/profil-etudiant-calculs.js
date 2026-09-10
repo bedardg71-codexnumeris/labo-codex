@@ -381,12 +381,12 @@ function zoneDuNiveau(code, echelleId = null) {
  *   | repli pool inter-trimestre    | NON                   | oui                 |
  *   | refus d'une échelle sans niveaux | oui                | non                 |
  *
- * `resoudreModeleParId` n'est appelé pour une ÉCHELLE qu'à deux endroits —
- * `consolidation.js` (`_detecterEchelle`) et `pratique-registre.js`
- * (`construireConfigComplete`) — et l'échec ne s'y voit pas de la même façon :
- * la matrice de consolidation ne calcule alors RIEN (map de conversion vide, un
- * niveau en lettres rend `null`), et la pratique retombe sur une échelle IDME
- * codée en dur qui contredit celle de l'utilisateur.
+ * `resoudreModeleParId` n'est appelé pour une ÉCHELLE que par
+ * `pratique-registre.js` (`construireConfigComplete`) depuis le retrait du
+ * module « Consolidation » (10 septembre 2026) — il en avait un second
+ * appelant, `consolidation.js`, parti avec lui. Quand la résolution échoue,
+ * la pratique retombe sur une échelle IDME codée en dur qui contredit celle
+ * de l'utilisateur.
  *
  * ⮕ CE QUE CE DIAGNOSTIC TRANCHE, ET QU'AUCUNE LECTURE DE CODE NE PEUT DIRE :
  * si la divergence touche des données RÉELLES, ou si elle reste théorique.
@@ -461,7 +461,7 @@ function _diagnostiquerResolutionEchelles() {
             productions: usages[id].productions,
             evaluations: usages[id].evaluations,
             resolueParRetroaction: parResolue,
-            resolueParConsolidation: parRegistre,
+            resolueParRegistre: parRegistre,
             divergent: parResolue !== parRegistre,
             cause: cause
         };
@@ -485,7 +485,7 @@ function _diagnostiquerResolutionEchelles() {
     divergents.forEach(function (l) {
         console.log('  · ' + l.echelleId + ' — ' + l.productions + ' production(s), ' + l.evaluations
             + ' évaluation(s) — rétroaction: ' + l.resolueParRetroaction
-            + ' · consolidation: ' + l.resolueParConsolidation + ' — cause : ' + l.cause);
+            + ' · registre: ' + l.resolueParRegistre + ' — cause : ' + l.cause);
     });
 
     return { total: lignes.length, divergents: divergents, parCause: parCause, lignes: lignes };

@@ -3,7 +3,6 @@
 **Fichiers principaux** :
 - `js/profil-etudiant.js` — profil individuel, IPB, patterns, diagnostic, accompagnement
 - `js/interventions.js` — planification et suivi des interventions RaI
-- `js/consolidation.js` — matrice de consolidation des apprentissages
 - `js/graphiques-progression.js` — graphiques d'evolution des criteres
 
 **Skill de reference** : `.claude/skills/depistage-rai/SKILL.md`
@@ -222,10 +221,6 @@ genererSectionAccompagnement(da)  →  profil-etudiant.js (lignes 1611+)
 - Defis critiques (niveau I) avec description SOLO
 - Forces (niveaux M et E)
 
-**Consolidation individuelle** (apres les cartes)
-- Par critere : consolide (a quel artefact) / fragile / non consolide
-- Source : `calculerConsolidationIndividuelle(da)` (consolidation.js)
-
 **Historique des interventions**
 - Liste des interventions passees avec type, titre, date, note individuelle
 - Bouton «+ Nouvelle intervention» → `naviguerVersNouvelleIntervention(da)`
@@ -241,7 +236,6 @@ genererSectionAccompagnement(da)  →  profil-etudiant.js (lignes 1611+)
 | `identifierDefiSpecifique(da)` | Defi principal avec score |
 | `calculerDirectionRisque(da)` | Direction du risque |
 | `obtenirCriteresAvecValeurs(da)` | Criteres avec pourcentages |
-| `calculerConsolidationIndividuelle(da)` | Points de consolidation par critere |
 
 ---
 
@@ -281,67 +275,10 @@ Utilise :
 
 ---
 
-## 8. Consolidation des apprentissages
-
-### Definition
-
-La consolidation mesure si les acquis tiennent dans le temps. Un critere est
-«consolide» quand un etudiant (ou un groupe) atteint la maitrise (>= M) a une
-production ET maintient ce niveau sur >= 75% des productions suivantes.
-
-### Calcul individuel
-
-```
-calculerConsolidationIndividuelle(da)  →  consolidation.js
-```
-
-Retour :
-```javascript
-{
-  pointsConsolidation: {
-    'Structure': { artefact: 2, maintenusSur: 5, totalSuivants: 6 },
-    'Rigueur': null  // jamais atteint M
-  },
-  resume: {
-    'Structure': { type: 'consolide', artefact: 2, artefactNom: '...', maintenusSur: 5, totalSuivants: 6 },
-    'Rigueur': { type: 'jamais-atteint-m' }
-  }
-}
-```
-
-Types de resume : `'consolide'`, `'non-consolide-avec-tentatives'`, `'jamais-atteint-m'`
-
-### Calcul groupe (Labo > Suivi)
-
-```
-calculerMatriceConsolidation()  →  consolidation.js
-```
-
-Matrice : Productions (lignes) x Criteres (colonnes). Chaque cellule :
-```javascript
-{
-  tauxRetention: 0.78,   // % du groupe qui maintient la maitrise
-  nMaitrise: 9,          // Etudiants ayant atteint M a cette production
-  nRetenu: 7,            // Etudiants ayant maintenu M ensuite
-  nTotal: 15             // Etudiants evalues
-}
-```
-
-### Seuils
-
-| Seuil | Valeur | Signification |
-|-------|--------|--------------|
-| Retention individuelle | >= 75% des productions suivantes | L'etudiant consolide |
-| Consolidation durable (groupe) | >= 75% | Vert fonce |
-| Consolidation fragile (groupe) | 65-74% | Vert pale |
-| Non consolide | < 65% | Rouge |
-
-### Point de consolidation
-
-Premier artefact ou >= 75% du groupe retient la maitrise sur ce critere.
-Affiche dans la ligne de synthese du tableau Labo > Suivi.
-
----
+> **Section 8 « Consolidation des apprentissages » retirée le 10 septembre 2026.**
+> Le module entier a été supprimé à la demande de Grégoire — la fonctionnalité
+> n'a jamais été concluante. La spécification d'origine est archivée dans
+> `docs/archive/SPEC-CONSOLIDATION-APPRENTISSAGES.md`.
 
 ## 9. Module interventions
 
@@ -440,7 +377,6 @@ sauvegarder, le flag `jamaisSauvegardee: true` reste. Un guard dans
    Carte RaI : niveau, P, moyennes par critere + directions, pattern, defi
    Carte Contexte : A, C, contexte favorable/fragile/defavorable
    Carte SOLO : defis classes par niveau taxonomique
-   Consolidation individuelle : acquis durables vs fragiles
    → L'enseignant voit tout au meme endroit et decide d'intervenir
 
 5. PLANIFICATION (formulaire unifie)
@@ -470,7 +406,6 @@ fonctionnement cross-modules :
 
 | Fonction | Module source | Consommateurs |
 |----------|--------------|---------------|
-| `calculerConsolidationIndividuelle` | consolidation.js | profil-etudiant.js (Accompagnement) |
 | `calculerDirectionsCriteres` | profil-etudiant.js | profil-etudiant.js (Accompagnement), snapshots.js |
 | `calculerMoyennesCriteres` | profil-etudiant.js | interventions.js (criteres cibles, snapshot) |
 | `obtenirGrilleReferenceDepistage` | profil-etudiant.js | interventions.js (criteres cibles) |
@@ -482,6 +417,5 @@ fonctionnement cross-modules :
 
 - **Skill pedagogique** : `.claude/skills/depistage-rai/SKILL.md`
 - **Plan de refonte** : `plans de travail/PLAN-REFONTE-MODULE-INTERVENTIONS.md`
-- **Spec consolidation** : `SPEC-CONSOLIDATION-APPRENTISSAGES.md`
 - **Desrochers (2021)** : L'approche de la reponse a l'intervention
 - **Fuchs, Fuchs & Malone (2017)** : Taxonomy of Intervention Intensity

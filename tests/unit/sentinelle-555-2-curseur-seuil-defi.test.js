@@ -22,11 +22,16 @@ const lire = (f) => readFileSync(path.join(racineProjet, f), 'utf8');
 // disparu, on devrait y revenir ») chaque fois que quelqu'un cherchera le
 // seuil de maîtrise à cet écran.
 //
-// ⚠ CE QUE CE BANC TIENT : que l'aide à l'écran et l'infobulle du survol
-// continuent de dire les DEUX faces — ce que le curseur règle, et ce qu'il ne
-// règle pas — et de pointer vers l'endroit où le seuil de maîtrise se règle
-// vraiment. Une aide réécrite « plus courte » qui perdrait la seconde face
-// referait exactement l'écran d'avant le 30 août.
+// ⚠⚠ RÉDUIT LE 10 SEPTEMBRE 2026 — LE MODULE « CONSOLIDATION » A ÉTÉ RETIRÉ.
+// La collision de noms que ce banc prévenait n'a plus de second terme : il n'y
+// a plus d'écran « Consolidation des apprentissages » où chercher un seuil de
+// maîtrise. Les trois cas qui exigeaient de le NOMMER (B, C, l'ancien D) sont
+// partis avec lui.
+//
+// ⚠ CE QUE CE BANC TIENT ENCORE : que l'aide à l'écran et l'infobulle du survol
+// disent ce que le curseur règle — le DÉPISTAGE, et lui seul — et qu'aucun
+// second réglage de maîtrise ne renaisse dans cet écran (cas E, la décision A
+// du 29 août).
 
 function blocCurseur() {
     const html = lire('index.html');
@@ -51,29 +56,15 @@ describe('#555·2 · le curseur « Seuil de défi » dit ce qu\'il ne règle pas
         expect(bloc).toMatch(/dépistage/i);
     });
 
-    it('B. LE POINT QUI PORTE LE SENS : l\'aide dit ce que le curseur NE règle PAS', () => {
-        // C'est la face qui manquait — celle qui lève la collision de noms.
-        const bloc = blocCurseur();
-        expect(bloc, 'le module qui ne lit pas ce curseur est nommé')
-            .toContain('Consolidation des apprentissages');
-        expect(bloc, 'la négation est dite, pas suggérée').toMatch(/ne lit pas ce curseur/);
-    });
 
-    it('C. l\'aide dit OÙ le seuil de maîtrise se règle : les repères de l\'échelle', () => {
-        const bloc = blocCurseur();
-        expect(bloc).toMatch(/repères/);
-        expect(bloc, 'le chemin vers l\'éditeur est donné').toMatch(/Conception → Échelles/);
-    });
 
-    it('D. l\'infobulle du survol porte la même relation que l\'aide à l\'écran', () => {
+
+    it('D. l\'infobulle du survol dit la même chose que l\'aide à l\'écran', () => {
         // Deux textes pour le même curseur : si l'un part sans l'autre, l'écran
         // se contredit selon que la souris survole ou non.
         const texte = infobulle();
         expect(texte, 'infobulle depist-seuil-defi trouvée').toBeTruthy();
         expect(texte).toMatch(/dépistage seulement/);
-        expect(texte).toMatch(/repères/);
-        expect(texte).toMatch(/échelle/);
-        expect(texte).toContain('Consolidation des apprentissages');
     });
 
     it('E. aucun second réglage de maîtrise n\'est né dans cet écran (option B écartée)', () => {

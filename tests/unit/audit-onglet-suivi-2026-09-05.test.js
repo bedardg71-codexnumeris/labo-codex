@@ -44,7 +44,7 @@ const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 
 /**
  * Même chargement que chargerScript, mais des noms INTERNES du module sont exposés sous
  * `window.__audit[<fichier>]` par des accesseurs (lus à l'appel, donc à jour pour une variable `let`).
- * Injection avant le `})();` final quand le module est une IIFE, en fin de fichier sinon (consolidation.js).
+ * Injection avant le `})();` final quand le module est une IIFE, en fin de fichier sinon.
  */
 function chargerAvecInterne(chemin, globaux, win, noms) {
     let code = readFileSync(path.join(RACINE, chemin), 'utf8');
@@ -184,7 +184,7 @@ const MODULES = ['js/interpretation-config.js', 'js/pratiques/pratique-configura
     'js/pratiques/pratique-pan-specifications.js', 'js/pratiques/denotation-jugements.js', 'js/portfolio.js', 'js/indices.js',
     'js/saisie-presences.js', 'js/profil-etudiant-actions.js', 'js/profil-etudiant-calculs.js', 'js/profil-etudiant-helpers.js',
     'js/profil-etudiant-rapport.js', 'js/profil-etudiant-diagnostics.js', 'js/profil-etudiant-confidentiel.js',
-    'js/profil-etudiant-sections-affichage.js', 'js/interventions.js', 'js/consolidation.js', 'js/snapshots.js',
+    'js/profil-etudiant-sections-affichage.js', 'js/interventions.js', 'js/snapshots.js',
     'js/tableau-bord-apercu.js', 'js/graphiques-progression.js'];
 const EXPORTS_WINDOW = (() => {
     const noms = new Set();
@@ -300,7 +300,6 @@ function monter(jeu, opts = {}) {
     chargerScript('js/profil-etudiant-confidentiel.js', globaux, win);
     chargerAvecInterne('js/profil-etudiant-sections-affichage.js', globaux, win, ['obtenirDetailsAssiduite']);
     chargerAvecInterne('js/interventions.js', globaux, win, ['genererAffichageNotesIndividuelles']);
-    chargerAvecInterne('js/consolidation.js', globaux, win, ['calculerMatriceConsolidation']);
     chargerScript('js/snapshots.js', globaux, win);
     chargerAvecInterne('js/tableau-bord-apercu.js', globaux, win, ['_tousEtudiantsEnrichis', '_etudiantsPrioritaires', '_filtresActifs', 'appliquerFiltres', 'nettoyerEtudiantsSuivis', 'afficherAlerteNonParticipation']);
     chargerAvecInterne('js/graphiques-progression.js', globaux, win, ['obtenirDonneesCriteres', 'niveauHabiletesVersDecimal', 'genererZonesDepuisEchelle']);
@@ -576,25 +575,6 @@ describe('C · le palier que chaque écran rend, et l\'échelle qu\'il lit', () 
         expect(p.contexte.niveau).toBe('fragile');
     });
 
-    it('C3 · une échelle à TROIS paliers (A/B/C, maîtrise dès B = 60) : la consolidation dit « consolidé », le RàI dit « niveau 2 »', () => {
-        // À la main : quatre travaux à 70, tous les critères « B » (valeur 75). Sur SON échelle, 70 est « B » = atteint, et le repère
-        // de maîtrise est B (min 60 → 0,60) : chaque critère est à 0,75 ≥ 0,60 dès P1 et le reste → consolidé. Le RàI compare
-        // P = 0,70 à idme.developpement 0,75 → niveau 2 « Performance en développement ». Deux verdicts pour le même élève.
-        const jeu = jeuBase();
-        jeu.echelles = [clone(E3N)]; jeu.grilles[0].echelleId = 'E3N'; jeu.productions.forEach(p => { p.echelleId = 'E3N'; });
-        jeu.evaluations = ['P1', 'P2', 'P3', 'P4'].map((pid, i) => ev('E1' + pid, DA.ASSIDU, pid, 70, 'B', ['B', 'B', 'B'], { echelleId: 'E3N' }));
-        const b = monter(jeu); b.calculerTout();
-        const p = portrait(b, DA.ASSIDU);
-        const conso = b.win.calculerConsolidationIndividuelle(DA.ASSIDU);
-        const situe = b.win.situerPourcentageDansEchelle(70, E3N);
-        noter('C3', { rai: p.rai, suivi: p.suivi, scoreMaitrise: conso.scoreMaitrise, deduit: conso.scoreMaitriseDeduit, structure: conso.resume.Structure.type, niveauEchelle: situe && situe.code });
-        expect(situe.code).toBe('B');
-        expect(conso.scoreMaitrise).toBe(0.6);
-        expect(conso.scoreMaitriseDeduit).toBe(false);
-        expect(conso.resume.Structure.type).toBe('consolide');
-        expect(p.rai.niveau).toBe(2);
-        expect(p.suivi.diagnostic).toBe('Maîtrise acquise');
-    });
 
     it('C4 · une échelle 60 / 75 / 90 : 62 est « D » sur l\'échelle, « Difficulté persistante » niveau 3 pour le RàI', () => {
         // À la main : trois travaux à 62, critères « D » (valeur 67, sous le seuil de défi 0,70 → défis). P 0,62 < idme.insuffisant 0,64
@@ -944,23 +924,10 @@ describe('G · les sorties du Suivi et le volet confidentiel', () => {
         expect(/SENSIBLE/.test(JSON.stringify(snap))).toBe(false);
     });
 
-    it('G3 · la consolidation lit le repère de maîtrise de l\'échelle (M = 75) : l\'assidu consolide Rigueur à P2, Structure et Nuance à P3 ; l\'absent ne consolide rien', () => {
-        const b = monter(jeuBase()); b.calculerTout();
-        const c1 = b.win.calculerConsolidationIndividuelle(DA.ASSIDU);
-        const c2 = b.win.calculerConsolidationIndividuelle(DA.ABSENT);
-        const c3 = b.win.calculerConsolidationIndividuelle(DA.SILENCE);
-        const resume = (c) => c && Object.fromEntries(Object.entries(c.resume).map(([k, v]) => [k, v.type + (v.artefactNom ? ' (' + v.artefactNom + ')' : '')]));
-        noter('G3', { seuil: c1.scoreMaitrise, deduit: c1.scoreMaitriseDeduit, assidu: resume(c1), absent: resume(c2), silence: c3 });
-        expect(c1.scoreMaitrise).toBe(0.75);
-        expect(c1.scoreMaitriseDeduit).toBe(false);
-        expect(resume(c1)).toEqual({ Structure: 'consolide (Dissertation)', Rigueur: 'consolide (Analyse 2)', Nuance: 'consolide (Dissertation)' });
-        expect(resume(c2)).toEqual({ Structure: 'non-consolide-avec-tentatives', Rigueur: 'non-consolide-avec-tentatives', Nuance: 'non-consolide-avec-tentatives' });
-        expect(c3).toBeNull();
-    });
 
     it('G4 · le volet confidentiel : un seul module le lit ; ni la synthèse PDF, ni l\'export CSV, ni les snapshots, ni un console.* ne le touchent ; le codex complet l\'emporte (sauvegarde personnelle) ; le mode anonymisation ne l\'anonymise pas', () => {
         const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
-        const lecteurs = ['js/profil-etudiant-rapport.js', 'js/snapshots.js', 'js/export-resultats-finaux.js', 'js/synthese-retroaction-data.js', 'js/export-pdf.js', 'js/consolidation.js', 'js/tableau-bord-apercu.js', 'js/etudiants.js', 'js/graphiques-progression.js']
+        const lecteurs = ['js/profil-etudiant-rapport.js', 'js/snapshots.js', 'js/export-resultats-finaux.js', 'js/synthese-retroaction-data.js', 'js/export-pdf.js', 'js/tableau-bord-apercu.js', 'js/etudiants.js', 'js/graphiques-progression.js']
             .filter(f => /confidentielEtudiants|servicesAdaptes|sousCategorie|portraitStructure/.test(lire(f)));
         const modes = lire('js/modes.js');
         const casAnonymises = (modes.slice(modes.indexOf('function anonymiserDonnees')).match(/case '(\w+)':/g) || []).map(s => s.replace(/case '|':/g, ''));

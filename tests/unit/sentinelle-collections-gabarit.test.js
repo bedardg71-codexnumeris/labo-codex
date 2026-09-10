@@ -25,6 +25,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { jetonAuMoins } from './_helpers/jeton-anticache.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
 const source = (rel) => readFileSync(path.join(racine, rel), 'utf8');
@@ -355,8 +356,8 @@ describe('collections · D — supprimer une collection, après confirmation, ne
 describe('collections · E — jetons et règles scopées', () => {
     it('E.a grilles.js et styles.css ont bougé ; les classes vivent sous #listeCriteres ; la corbeille garde ses 44 px', () => {
         const html = source('index.html');
-        expect(html).toMatch(/js\/grilles\.js\?v=20260905[c-z]|js\/grilles\.js\?v=2026090[6-9]|js\/grilles\.js\?v=20261/);
-        expect(html).toMatch(/styles\.css\?v=20260905[c-z]|styles\.css\?v=2026090[6-9]|styles\.css\?v=20261/);
+        { const j = jetonAuMoins(html, 'js/grilles.js', '20260905c'); expect(j.ok, j.message).toBe(true); }
+        { const j = jetonAuMoins(html, 'styles.css', '20260905c'); expect(j.ok, j.message).toBe(true); }
         const css = source('styles.css');
         for (const c of ['collections-liste', 'collection-ligne', 'collections-aide', 'collection-saisie', 'collection-saisie-rangee', 'collection-saisie-message', 'collection-bouton-enregistrer']) {
             expect(css, c).toContain('#listeCriteres .' + c + ' {');

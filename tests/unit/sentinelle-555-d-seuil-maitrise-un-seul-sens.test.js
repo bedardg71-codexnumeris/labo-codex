@@ -15,7 +15,6 @@ import { fileURLToPath } from 'node:url';
 //
 // ⮕ DÉCISION DE GRÉGOIRE (28 août 2026, arbitrage A1, option A) : le CODE de
 // niveau GARDE `seuilMaitrise` ; les autres sens deviennent explicites.
-//   · consolidation.js      → `scoreMaitrise` (+ `Deduit`, `Raison`), `_detecterScoreMaitrise`
 //   · profil-etudiant-*.js  → `seuilIdmeMaitrise` (avec ses deux voisins `seuilIdme*`)
 //
 // ⮕ CE BANC EST UN CLIQUET, PAS UNE PHOTO. Il compte, fichier par fichier et
@@ -52,8 +51,6 @@ function compter(source, motif) {
  * niveau lu ou écrit sur une ÉCHELLE — sauf le dernier, une exception nommée.
  */
 const EMPLOIS_CONNUS = {
-    // `echelle.seuilMaitrise` lu deux fois par `_detecterScoreMaitrise`.
-    'js/consolidation.js': 2,
     // Le libellé du repère, la copie dans `dupliquerEchelle`, le refus croisé,
     // et le `<select>` de l'éditeur : tous sur l'échelle.
     'js/echelles.js': 5,
@@ -107,27 +104,6 @@ describe('#555 (d) · « seuilMaitrise » ne désigne plus que le code de niveau
         ).toEqual(EMPLOIS_CONNUS);
     });
 
-    it('la matrice de consolidation nomme son score, et ne l\'appelle plus seuil', () => {
-        const src = lire('js/consolidation.js');
-        expect(src).toContain('function _detecterScoreMaitrise(');
-        expect(src).toContain('window._detecterScoreMaitrise = _detecterScoreMaitrise');
-        expect(compter(src, /\bctx\.scoreMaitrise\b/g)).toBeGreaterThanOrEqual(4);
-        expect(src).toContain('scoreMaitriseDeduit');
-        expect(src).toContain('scoreMaitriseRaison');
-        // Les anciens noms n'existent plus, ni en lecture ni en écriture.
-        expect(src).not.toMatch(/\bctx\.seuilMaitrise\b/);
-        expect(src).not.toMatch(/\bseuilMaitriseDeduit\b/);
-        expect(src).not.toMatch(/\bseuilMaitriseRaison\b/);
-        expect(src).not.toMatch(/\b_detecterSeuilMaitrise\b/);
-        expect(src).not.toMatch(/\b_seuilParConvention\b/);
-    });
-
-    it('le seul consommateur du score lit les nouveaux champs', () => {
-        const src = lire('js/profil-etudiant-diagnostics.js');
-        expect(src).toContain('consolidation.scoreMaitriseDeduit');
-        expect(src).toContain('consolidation.scoreMaitriseRaison');
-        expect(src).not.toMatch(/consolidation\.seuilMaitrise/);
-    });
 
     it('la préférence IDME porte son nom, dans les trois fonctions qui la lisent', () => {
         for (const rel of ['js/profil-etudiant-helpers.js', 'js/profil-etudiant-calculs.js']) {
