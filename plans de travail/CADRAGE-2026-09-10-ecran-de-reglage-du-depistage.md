@@ -3,9 +3,9 @@
 > **Écrit le 10 septembre 2026 par Cowork, à la demande de Grégoire.**
 > ⛔ **Ce n'est PAS une consigne.** Rien ne se code à partir de ce fichier : Cowork en écrit une
 > quand le chantier prend son tour (`00-CADRAGES-OUVERTS.md`, règle d'entrée).
-> ⚠ **Un chantier est en cours sur le même terrain** : `plans de travail/CONSIGNE-DU-JOUR.md`
-> (source unique pour qualifier un contexte, `js/contexte-qualification.js`). **Ce cadrage attend
-> qu'il soit livré** — les deux touchent aux mêmes seuils.
+> ↻ Le lot A (source unique de qualification, `js/contexte-qualification.js`) est **livré en
+> `1.128.4`** ; ce cadrage a pris son tour le 10 septembre au soir : **la carte des effets est au
+> § 4**, écrite par Claude Code sur la consigne du jour.
 
 ---
 
@@ -66,17 +66,119 @@ Acceptable · Bon**. Deux échelles pour un seul bloc.
 ⮕ **La « cacophonie » n'est donc pas d'abord une affaire de mise en page.** Réarranger sans régler ça
 reviendrait à mieux aligner des mots qui se contredisent.
 
-### 4. Les seuils de cet écran servent au diagnostic, pas au calcul de la note
+### 4. LA CARTE DES EFFETS — pour chaque réglage, l'écran où son effet se voit
 
-Mesuré : `defiSpecifique` et `idme.*` sont lus par `pratique-pan-standards.js`, mais dans
-`_diagnostiquerForcesChallenges()` (l. 1042) et `_identifierPatternActuel()` (l. 1190) — deux
-fonctions de **dépistage** logées dans le fichier du moteur PAN.
+> **Mesuré le 10 septembre 2026 au soir par Claude Code**, sur `1c771840` (1.128.4), zéro ligne de
+> `js/` touchée. Cette section remplace l'ancien § 4 (« mesure incomplète, à finir avant tout
+> déplacement »). **Méthode** : les 20 contrôles relevés dans `index.html` (l. 8731-9080), la clé
+> que chacun écrit lue dans `preferences-v2.js`, puis chaque lecteur remonté **jusqu'à un
+> `innerHTML`, un `textContent` ou un rendu Chart.js**. Quand la chaîne s'arrête avant, la ligne dit
+> « lu, jamais affiché » — c'est un résultat, pas un trou.
+>
+> ⮕ **La réponse à l'exception de la consigne, d'abord** : **aucun réglage de cet écran n'agit sur
+> une note.** Les quatre méthodes de note du moteur PAN (`calculerPerformance`,
+> `calculerPerformanceHistorique`, `calculerPerformanceRecente`, `calculerCompletion`,
+> `pratique-pan-standards.js` l. 126-600) ne lisent **aucune** des clés de l'écran. Les deux fonctions
+> de diagnostic que l'ancien § 4 nommait (`_diagnostiquerForcesChallenges`, `_identifierPatternActuel`)
+> lisent bien `defiSpecifique` et `idme.*` — mais elles ne sont atteintes que par des chemins **morts**
+> (`#551` : `identifierPattern` / `genererCibleIntervention` du moteur n'ont plus de consommateur ;
+> `genererDiagnosticCriteres`, seul appelant de `pratique.detecterDefis`, n'est appelée nulle part).
+> Le seul contrôle qui PROMET de toucher la note — « Découpler P et N », « P (notation) : utilise la
+> méthode de la pratique » — n'est lu par personne.
 
-⚠ **Mesure incomplète, à finir avant tout déplacement** : il reste à établir la liste des ÉCRANS où
-ces réglages produisent un effet visible. Ils sont lus au moins par `profil-etudiant-*` (Suivi),
-`interventions.js` (Suivi), `etudiants.js` (Suivi) et `pratique-pan-standards.js` (dont les sorties
-s'affichent où ?). **Tant que cette liste n'existe pas, l'emplacement de l'écran ne peut pas se
-décider sur des faits.**
+#### 4.1 Le tableau
+
+Lecture des colonnes : **Où l'effet se VOIT** est en gestes d'utilisateur ; **Visible ?** compte les
+écrans, et signale ce qui est hors de `Suivi`. « Nulle part » = écrit, jamais lu. « Lu, jamais
+affiché » = un calcul le lit, mais son résultat n'atteint aucun rendu.
+
+**Bloc « Taxonomie SOLO »**
+
+| Réglage (libellé à l'écran) | Ce qu'il écrit (clé) | Qui le lit | Où l'effet se VOIT | Visible ? |
+|---|---|---|---|---|
+| Activer l'observation de la structure des résultats d'apprentissage | préférence `afficherDescriptionsSOLO` | `genererSectionAccompagnement` (profil), `genererBarreDistribution` (suivi du groupe), `genererContenuTampons` (annotation) | Suivi › Profils individuels › Accompagnement › la 3e carte « Observation de la structure » apparaît, et la grille passe de 2 à 3 colonnes · Suivi › Suivi du groupe › Observation globale des indices d'engagement › barre P : la ligne « Distribution » (IDME) · **Évaluation › Annoter et évaluer › palette de tampons : la catégorie « compréhension »** | **oui — 3 écrans, dont 1 HORS Suivi** |
+| Développement des habiletés | préférence `afficherDeveloppementHabiletes` | `afficherProfilComplet` / `genererSectionPerformance` (profil), `initialiserCarteTrajectoiresProduction` (suivi du groupe) | Suivi › Profils individuels › la section « Développement des habiletés » est retirée du profil · Suivi › Suivi du groupe › la carte « Trajectoires par production » est masquée | **oui — 2 écrans** |
+| Observation des actions | préférence `activerActionsRLO` | `genererContenuTampons` (annotation) ; `_appliquerProfilACOSauv` / `_appliquerProfilACOMod` (enregistrement d'une évaluation) ; `genererOngletsDeveloppement` (profil) ; `exporterFormatRecherche` ; `actions-rlo.js` (agrégation) | **Évaluation › Annoter et évaluer › palette : la catégorie « action »** ; à l'enregistrement, l'évaluation reçoit un champ `actionsRLO` (une DONNÉE, pas un pixel) · Suivi › Profils individuels › Développement des habiletés › l'onglet « Gestes cognitifs » apparaît · **Réglages › Données › « Exporter au format recherche » : les colonnes d'actions** | **oui — 3 écrans + 1 export, 2 HORS Suivi** |
+| Grille de critères pour le dépistage | préférence `grilleReferenceDepistage` | `genererBadgeGrilleDepistage` (grilles) ; `obtenirGrilleReferenceDepistage` / `diagnostiquerGrilleReferenceDepistage` (profil : carte RàI, barres SRPNF, forces/défis) ; `exporterFormatRecherche` ; moteur PAN `_obtenirGrilleReference` | **Conception › Grilles de critères › le badge « dépistage » sur la grille désignée** · Suivi › Profils individuels › Accompagnement › carte RàI (et sa cause nommée quand la grille manque, `#550`) ; Développement des habiletés › barres SRPNF et bloc forces/défis · **Réglages › Données › export recherche** · le moteur PAN la lit dans `_obtenirInterventionConfiguree` et `_calculerMoyennesCriteresRecents` : **lu, jamais affiché** (chemins morts, `#551`) · les calculs RàI de la Liste et du Suivi du groupe passent par les mêmes helpers : **probable, chaîne non remontée jusqu'au pixel** | **oui — 2 écrans sûrs + 1 export, 2 HORS Suivi** |
+| Découpler Performance (P) et Niveau d'attention (N) | préférence `decouplerPN` | **personne** (`grep -rn decouplerPN js/` : le panneau qui l'écrit, et une table de migration) | **nulle part.** L'écran promet « P (notation) : utilise la méthode de la pratique pour calculer la note finale » — rien ne lit ce réglage, la note n'en dépend pas, le niveau d'attention non plus | **NON** |
+| Fenêtre d'analyse des patterns | préférence `fenetrePatterns` | **personne.** Les calculs lisent `seuilsInterpretation.nombreProductionsAnalyse` (`obtenirNombreProductionsPourPatterns`, 12 appelants) — une clé que **rien n'écrit** : elle vaut toujours son défaut, 3 | **nulle part.** Ce que l'enseignant croit régler (la fenêtre de l'IPB, des patterns, le « sur N » de fiabilité du Suivi du groupe) reste à 3 quoi qu'il tape — même défaut de branchement que les trois curseurs de `#818` | **NON** |
+| Progression des artefacts | `seuilsInterpretation.progressionArtefacts` | `calculerIPB` (la direction ↗ / ↘ du suivi) → `diagnostiquerSuiviApprentissage` → `determinerCibleIntervention` et `calculerEtudiantsPrioritaires` | Suivi › Suivi du groupe › Observation globale des besoins d'intervention (cible et pattern) et le panneau « prioritaires » de la carte Observation globale des indices d'engagement. **Pas le profil** : aucune section du profil n'appelle ce calcul | **oui — 1 écran** |
+| Direction du risque | `seuilsInterpretation.directionRisque` | `calculerDirectionRisque` (via `extraireScoresCriteres`) — appelée **une** fois, par `genererSectionAccompagnement`, qui range le résultat dans une variable que rien ne lit (l. 845) | **lu, jamais affiché.** Le curseur promet « une tendance du risque (→ ou ←) » ; aucun écran ne la dessine | **NON** |
+| Seuil de défi spécifique | `seuilsInterpretation.defiSpecifique` | 9 lecteurs : `genererDiagnosticSRPNF`, `genererSectionPerformance` (profil) ; `calculerIPB`, `diagnostiquerForcesChallenges` (calculs RàI) ; `mettreAJourCriteresCibles` (interventions) ; et 4 morts — `identifierDefiSpecifique` (résultat non lu), `genererTableauObjectifs` (jamais appelée), moteur PAN `_diagnostiquerForcesChallenges` | Suivi › Profils individuels › Développement des habiletés › « Diagnostic par critère (seuil force : 70 %) » et le bloc forces / défis ; Accompagnement › carte RàI (le défi principal) · Suivi › Liste des étudiant·es › colonnes Pattern et RàI · Suivi › Suivi du groupe › besoins d'intervention, prioritaires · Suivi › Interventions › formulaire › les critères « en défi » proposés | **oui — 4 écrans, tous dans Suivi** |
+| Restaurer les valeurs par défaut *(bloc SOLO)* | remet la fenêtre à 3, progression 0,10, direction 0,05, défi 0,70 ; puis **ré-enregistre tout le panneau** (`sauvegarderSeuilsV2` + `sauvegarderPreferencesV2`) | — | ce que les quatre lignes ci-dessus voient — soit, en réalité, **le seuil de défi et la progression** ; la fenêtre et la direction ne changent rien. Ne touche **ni** Fragile / Acceptable / Bon **ni** `idme.*` | — |
+
+**Bloc « Micro-données ACP »**
+
+| Réglage (libellé à l'écran) | Ce qu'il écrit (clé) | Qui le lit | Où l'effet se VOIT | Visible ? |
+|---|---|---|---|---|
+| Activer la cueillette des données sur le contexte d'apprentissage et la performance | préférence `depistageAcp` | `genererSectionMobilisationEngagement`, `afficherProfilComplet` (profil) | Suivi › Profils individuels › la section « Engagement ACP » est retirée. **Rien d'autre** : A, C et P continuent d'être calculés et affichés dans la Liste et le Suivi du groupe — le mot « cueillette » promet plus que ce que la case fait | **oui — 1 écran** |
+| Unité d'affichage de l'assiduité (A) | préférence `uniteAffichageAssiduite` | deux fonctions de formatage dans `preferences-v2.js` (`formaterAssiduiteAvecUnite`, `formaterTotalPresence`), **appelées par personne** | **nulle part.** Les assiduités s'affichent partout dans la même unité, quel que soit le choix | **NON** |
+| Indicateurs visuels des seuils | préférence `afficherSeuilsVisuels` | 5 graphiques Chart.js de `graphiques-progression.js` (plugin d'étiquettes de zones) | Suivi › Profils individuels › Progression temporelle ACP (graphique individuel) et Développement des habiletés (graphique des critères) · Suivi › Suivi du groupe › Développement du groupe semaine par semaine (indice P seulement) et Trajectoires par production · un 5e graphique (`creerGraphiqueGroupeMoyennes`) n'est appelé par personne. ⚠ **Les étiquettes dessinées sont les niveaux de l'ÉCHELLE de l'utilisateur** (`genererZonesDepuisEchelle`), pas « Insuffisant / Développement / Maîtrise / Excellent » comme le texte sous la case l'annonce | **oui — 2 écrans, 4 graphiques** ; texte faux |
+| Fragile si inférieur à | `seuilsInterpretation.interpretation.acceptable` | mécanisme 2 de `contexte-qualification.js` (`interpreterAssiduite`, `interpreterCompletion`, `obtenirCouleurSelonSeuils`) | Suivi › Liste des étudiant·es › la couleur des colonnes A, C, P et M · Suivi › Profils individuels › Engagement ACP (interprétation de A et de C, et les détails dépliables Complétion / Performance) | **oui — 2 écrans** |
+| Acceptable si inférieur à | `…interpretation.bon` | idem | idem | **oui — 2 écrans** |
+| Bon si supérieur ou égal à | `…interpretation.excellent` | idem | idem | **oui — 2 écrans** |
+| Restaurer les valeurs par défaut *(bloc ACP)* | remet 70 / 80 / 85 ; puis ré-enregistre les trois curseurs de détection **tels qu'affichés** | — | ce que les trois lignes ci-dessus voient. Ne touche **ni** la fenêtre, **ni** la progression, **ni** la direction, **ni** le défi, **ni** `idme.*` | — |
+| Graphiques d'évolution ACP | préférence `afficherGraphiques` | `genererSectionProgression`, `afficherProfilComplet` (profil) ; `genererBlocEvolutionRLO` (gestes cognitifs) | Suivi › Profils individuels › la section « Progression temporelle ACP » est retirée, et le bloc « Évolution » de l'onglet Gestes cognitifs | **oui — 1 écran** |
+| Masquer les notes par travail (note différée) | préférence `noteDifferee` | `noteDiffereeActive()` : profil (Engagement ACP, Productions et évaluations, Complétion, panneau Portfolio), `genererLigneHTML` (liste des évaluations) | Suivi › Profils individuels › partout où une note par travail s'affiche, un repère « note différée » la remplace · **Évaluation › Liste des évaluations › la colonne de la note**. ⚠ Le repère lui-même dit « Réglage dans Réglages › Préférences » — **faux**, il est ici | **oui — 2 écrans, dont 1 HORS Suivi** ; texte faux |
+
+**Bloc « Intervention (RàI) »**
+
+| Réglage (libellé à l'écran) | Ce qu'il écrit (clé) | Qui le lit | Où l'effet se VOIT | Visible ? |
+|---|---|---|---|---|
+| Appliquer une adaptation du modèle de la Réponse à l'intervention | préférence `activerRai` | `chargerTableauBordApercu`, `genererBarreDistribution` (suivi du groupe) ; `afficherListeEtudiantsConsultation`, `filtrerEtudiants` (liste) ; `afficherProfilComplet` (profil) ; `afficherListeInterventions` (interventions) | Suivi › Suivi du groupe › la carte « Observation globale des besoins d'intervention » (patterns + niveaux RàI), le calcul des patterns du groupe, et la ligne d'interprétation sous la barre P · Suivi › Liste des étudiant·es › les colonnes Pattern et RàI et leurs filtres · Suivi › Profils individuels › la section « Accompagnement » entière · Suivi › Interventions › le bouton « Guide RàI » | **oui — 4 écrans, tous dans Suivi** |
+
+**Hors tableau, mesuré en passant**
+
+- Le bouton **« Enregistrer »** de l'en-tête réécrit tout le panneau. Il est **redondant** : les 20
+  contrôles s'enregistrent déjà au changement (`data-on-change`, 18 occurrences, plus les trois
+  curseurs par `sauvegarderSeuilsV2`).
+- Les **seuils IDME** (`idme.insuffisant / developpement / maitrise`) que le texte du bloc « Seuils
+  d'interprétation » annonce ne sont **réglables nulle part** sur cet écran (aucun champ n'y écrit).
+  Ils sont pourtant lus : niveau RàI (`identifierPatternActuel`), objectif suggéré d'une intervention,
+  conversion pourcentage → niveau IDME.
+- La section « Suivi de l'apprentissage » du profil (`case 'cible'`) appelle
+  `genererContenuCibleIntervention`, **qui n'existe nulle part**. Inatteignable aujourd'hui (aucun
+  bouton n'y mène depuis `#551`) ; si un jour un bouton y mène, c'est une erreur d'exécution.
+
+#### 4.2 Ce que la carte fait ressortir, sans le trancher
+
+1. **Quatre réglages agissent HORS de `Suivi`** — c'est le fait qui pèse sur le déplacement :
+   *Observation de la structure* (Évaluation › Annoter, palette), *Observation des actions*
+   (Évaluation › Annoter, et Réglages › Données), *Grille de critères pour le dépistage* (Conception ›
+   Grilles, et Réglages › Données), *Note différée* (Évaluation › Liste des évaluations). Les ranger
+   dans `Suivi` affirmerait « ça agit ici » pour quatre réglages sur seize qui agissent quelque part.
+2. **Sept réglages agissent à plusieurs endroits** : les quatre ci-dessus, plus *Développement des
+   habiletés* (profil + suivi du groupe), *Seuil de défi* (4 écrans de Suivi), *RàI* (4 écrans de
+   Suivi), les trois seuils Fragile / Acceptable / Bon (liste + profil), *Indicateurs visuels* (profil +
+   suivi du groupe).
+3. **Quatre réglages n'agissent NULLE PART** : *Découpler P et N* (jamais lu), *Fenêtre d'analyse des
+   patterns* (écrit une clé que personne ne lit ; le calcul lit une clé que personne n'écrit), *Unité
+   d'affichage de l'assiduité* (ses formateurs n'ont aucun appelant), *Direction du risque* (calculée
+   une fois, résultat jamais lu). **Un contrôle sur cinq est un placebo.** Et deux textes promettent
+   ce que le code ne fait pas (les étiquettes IDME des graphiques ; « Réglages › Préférences »).
+4. **Les deux boutons « Restaurer » couvrent des ensembles disjoints**, et aucun ne dit lequel : celui
+   du bloc SOLO remet les quatre seuils de détection (dont deux placebos), celui du bloc ACP remet les
+   trois seuils d'interprétation. Ni l'un ni l'autre ne touche `idme.*`, ni les cases à cocher. Tous
+   deux ré-enregistrent au passage le reste du panneau tel qu'affiché — sans le changer.
+5. **Aucun réglage n'agit sur une note** (mesuré en tête de section). L'exception de la consigne ne
+   se déclenche pas.
+
+⮕ **Ce que ça change pour la question du § « déplacer l'écran dans Suivi ? »** : le tri d'abord n'est
+plus seulement la recommandation de Cowork, c'est une conséquence de la mesure — on ne déplace pas
+quatre placebos et deux textes faux, et quatre réglages sur seize ne sont pas des réglages de Suivi.
+La forme (déplacer, scinder, ou garder dans Labo) reste **à Grégoire**.
+
+#### 4.3 Dispositions
+
+| Constat | Disposition |
+|---|---|
+| Quatre réglages sans aucun effet (Découpler P/N, Fenêtre d'analyse, Unité d'assiduité, Direction du risque) | **inscrit — `#823`**. Chacun demande de choisir entre rebrancher et retirer : le rebranchement est technique, le retrait touche l'écran de Grégoire |
+| Deux textes qui promettent autre chose que le code (étiquettes IDME des graphiques ; « Réglage dans Réglages › Préférences ») et le mot « cueillette » | **inscrit — `#823`**, même item : ce sont les mots de l'écran à trier |
+| Quatre chemins morts lus par des seuils (`identifierDefiSpecifique` non lu, `genererTableauObjectifs`, `genererDiagnosticCriteres`, `creerGraphiqueGroupeMoyennes`) + un appel à une fonction inexistante (`genererContenuCibleIntervention`) | **inscrit — `#824`**. Sans conséquence observable aujourd'hui ; à retirer d'un bloc, avec le regard de `#551` (les cinq `identifierPattern` gardés « délibérément ») |
+| Les seuils IDME annoncés par le bloc mais réglables nulle part ici | **rattaché au cadrage** (§ « Deux nomenclatures dans le même encadré ») — c'est le tri des mots |
+| Le bouton « Enregistrer » redondant | **rattaché au cadrage** (grammaire visuelle) — pas un item |
+| L'ancien § 4 (« lus par `pratique-pan-standards.js` ») | **précisé** : vrai, mais par des chemins morts ; le moteur de la note ne lit rien |
+| Le déplacement vers Suivi | **attend Grégoire** — la carte donne les faits, pas la forme |
 
 ### 5. Les mots sont dans les clés de données
 

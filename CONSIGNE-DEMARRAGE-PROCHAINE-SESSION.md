@@ -1,6 +1,8 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
-> ↻ **ÉTAT MESURÉ et MANDAT réécrits le 10 septembre 2026, en début d'après-midi, par Claude Code**,
+> ↻ **ÉTAT MESURÉ remesuré le 10 septembre 2026 en fin de soirée par Claude Code** (le MANDAT, lui,
+> reste tel que Cowork l'a repris en fin d'après-midi — voir la note en tête de sa section).
+> Version précédente de cet en-tête : **ÉTAT MESURÉ et MANDAT réécrits le 10 septembre 2026, en début d'après-midi, par Claude Code**,
 > à la demande explicite de Grégoire. Ils remplacent la version du 9 au soir, périmée de six versions
 > mineures, **et dont les deux fichiers du mandat étaient entièrement consommés**.
 >
@@ -33,42 +35,49 @@ il n'y avait **aucune consigne du jour en attente** au matin du 10.
 
 ---
 
-## ÉTAT MESURÉ — 10 SEPTEMBRE 2026, DÉBUT D'APRÈS-MIDI (TORONTO)
+## ÉTAT MESURÉ — 10 SEPTEMBRE 2026, FIN DE SOIRÉE (TORONTO)
 
-▣ **Mesure de Claude Code, dans l'arbre, chaque ligne avec la commande qui la produit.**
-⚠ **Un état mesuré vieillit en heures. Remesure, ne recopie pas.**
+▣ **Remesuré par Claude Code au rituel de la session du soir, puis à sa clôture — chaque ligne
+avec la commande qui la produit.** La version précédente de ce bloc (début d'après-midi, 1.128.3)
+est remplacée, pas corrigée. ⚠ **Un état mesuré vieillit en heures. Remesure, ne recopie pas.**
 
-- **Version `1.128.3`, build `0910-1147`** (`cat version.json`). **Une seule release le 10**
-  (`git log --format=%s origin/main --since='2026-09-10 00:00' | grep -c '^release '` rend `1`),
-  après les quatre du 9 au soir et du 10 au matin livrées par d'autres instances.
-- **`origin/main` = `main`**, et **la branche de travail est fusionnée** :
-  `git rev-list --count main ^claude/continuation-travail-qpdgka` rend `0`.
-  ⚠ **Le SHA n'est pas écrit ici, exprès** — il périme avant d'être lu. `git log --oneline -1`.
-- **Arbre propre au moment de la mesure** (`git status --porcelain -uall`).
-- **Vitest : 529 fichiers / 5760 essais, 0 échec** (`cd tests && npm run test:unit`, ~65 s).
-  ⛔ **PAS `npm test`** : il enchaîne Playwright, plus de dix minutes, et la connexion se ferme.
-- **Playwright : AUCUN verdict local, et aucun n'est obtenable en session cloud.** Mesuré le 10 :
-  la config `playwright.chromium.config.js` dit elle-même que la suite entière rougit à moitié en
-  Chromium (motifs d'erreurs console rédigés pour WebKit), et **aucune spec ne touche le code livré
-  aujourd'hui** (`grep -rln "portfoliosEleves\|seuilsInterpretation\|distribution-legende" tests/integration/`
-  ne rend rien). Le verdict WebKit vient de la CI ; le verdict Safari/iPad reste sur le Mac.
+- **Version `1.128.4`, build `0910-1531`** (`cat version.json`). **Deux releases le 10**
+  (`git log --format=%s origin/main --since='2026-09-10 00:00' | grep -c '^release '` rend `2`) :
+  1.128.3 (quatre réglages qui n'atteignaient pas leur calcul) et 1.128.4 (#821 lot A, un seul
+  endroit pour les quatre règles qui qualifient un contexte, **rien de visible à l'écran**).
+- **`origin/main` = `main`** au rituel (`git fetch && git rev-list --count origin/main..HEAD` = 0),
+  puis **poussé** en fin de session avec les commits documentaires du soir. Aucune branche ne porte
+  de travail, sauf `claude/formation-session-setup-4181r0` (chantier Formation, à part).
+  ⚠ **Le SHA n'est pas écrit ici, exprès.** `git log --oneline -1`.
+- **Arbre : trois `Formation/*.html` non suivis** (chantier Formation, pas à commettre avec un lot
+  du dépistage). Rien d'autre (`git status --porcelain -uall`).
+- **Vitest : 530 fichiers / 5785 essais, 0 échec** (`cd tests && npm run test:unit`, ~26 s).
+  ⛔ **PAS `npm test`** : il enchaîne Playwright, plus de dix minutes.
+- **Playwright : verdict local VERT sur le SHA de 1.128.4** (`scripts/.verdict-playwright.json`,
+  `code: 0`, rendu par `scripts/pousser.sh` avant le push du soir). Les commits suivants sont
+  documentaires : le hook laisse passer sans relancer la suite. **Le verdict Safari/iPad reste sur
+  le Mac de Grégoire** ; le CI WebKit sur `main` est à relire (`gh run list --branch main -L 1`).
 
-**Ce que le 10 septembre a livré, et ce qu'il a CORRIGÉ DES FICHES ELLES-MÊMES** — c'est le fait
-le plus utile au relais :
+**Ce que le 10 septembre au soir a livré, et ce que la mesure a corrigé des fiches** :
 
-| Fiche | Livré | ⚠ Ce que la mesure a corrigé de la fiche |
+| Lot | Livré | ⚠ Ce que la mesure a corrigé |
 |---|---|---|
-| `#816` | les quatre modes de sélection du portfolio parlent la langue de l'écran | « le seul des trois qui touche une note » était **faux** : `pratique-pan-standards.js` ne lit jamais `portfoliosEleves` (0 occurrence) |
-| `#817` | le seuil force/défi n'a plus qu'une source | six occurrences de `0.7125` dans **trois** fichiers, la fiche en citait deux ; et c'était la COULEUR qui contredisait le CLASSEMENT |
-| `#818` | la légende du tableau de bord calcule ses bornes | il n'y a **pas** « deux échelles » : le tableau de bord ne classe rien, c'est un dégradé continu |
-| *(trouvé en chemin)* | les trois seuils d'interprétation atteignent enfin les calculs | ils écrivaient des clés PLATES que personne ne lisait ; il a fallu réparer AVANT d'écrire la prose du glossaire |
+| `#821` lot A (1.128.4) | `js/contexte-qualification.js` : les quatre règles, bornes nommées et datées ; harnais AVANT/APRÈS 1630 cas / 0 différence ; sentinelle 24 essais, 8 break-tests rouges | l'inventaire disait « indice composite » pour l'Aperçu : c'est **un indice par barre** ; le mécanisme 2 a une **4e borne fixe à 60 %** ; « Assiduité critique » vit sous deux bornes ; le palier « Insuffisant » est inatteignable (`#822`) |
+| `#821` lot B | le tableau des divergences, en points, § 8 de `Rapports/INVENTAIRE-2026-09-10-nomenclature-des-zones.md` | — |
+| cadrage 10, temps 1 (docs seulement) | **la carte des effets** de `Labo › Outils d'observation`, § 4 de `plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md` : 20 contrôles, l'écran où chacun agit, en gestes d'utilisateur | **aucun réglage n'agit sur une note** (l'exception de la consigne ne se déclenche pas) ; **quatre contrôles n'agissent nulle part** (`#823`) ; quatre agissent **hors de Suivi** ; cinq chemins morts (`#824`) ; l'ancien § 4 disait « lus par `pratique-pan-standards.js` » — vrai, mais par des chemins morts |
 
-⮕ **La leçon à retenir pour le relais** : sur trois fiches parquées, **deux se trompaient sur leur
-propre constat**, et la mesure l'a montré AVANT de coder. Une fiche est une piste, pas un fait.
+⮕ **La leçon qui se répète** : sur trois consignes de la journée, chacune portait au moins une
+affirmation fausse que la mesure a corrigée AVANT d'écrire. Une consigne est une piste, pas un fait.
 
 ---
 
 ## LE MANDAT — repris par Cowork le 10 septembre en fin d'après-midi
+
+⏸ **CE MANDAT EST CONSOMMÉ** (note d'état, Claude Code, 10 sept. fin de soirée) : le lot A qu'il
+annonce est livré en `1.128.4`, et la consigne suivante (la carte des effets de l'écran de réglage du
+dépistage) est livrée aussi, le même soir. **Cowork écrit le mandat suivant** ; les cadrages ouverts
+sont dans `plans de travail/00-CADRAGES-OUVERTS.md`, et le cadrage 10 attend l'arbitrage de Grégoire
+sur la forme (déplacer, scinder, ou garder dans Labo) — les faits sont au § 4 du cadrage.
 
 ↻ **La proposition de Claude Code a été reprise à froid, comme son en-tête y invitait.** Ses temps 1
 (inventaire) et 2 (archéologie) sont **faits** — résultats dans

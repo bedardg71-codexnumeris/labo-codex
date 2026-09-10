@@ -7,6 +7,17 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 10 SEPT. 2026, FIN DE SOIRÉE : LA CARTE DES EFFETS (docs, toujours 1.128.4)
+
+> ✅ **`main` à 1.128.4, build `0910-1531`, plus trois commits documentaires du soir, poussés.**
+> Aucune branche ne porte de travail. Vérifie : `git rev-list --count origin/main..main`.
+> **Livré** : la carte des effets de `Labo › Outils d'observation` (§ 4 de
+> `plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md`) — zéro ligne de `js/`.
+> **Ce qui attend Grégoire** : la forme de l'écran (déplacer dans Suivi, scinder, garder) — les faits
+> sont au § 4.2 ; et, pour `#823`, rebrancher ou retirer chacun des quatre réglages sans effet.
+> **Ce qui attend Cowork** : le mandat suivant (`CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` porte un
+> mandat consommé, état mesuré à jour). **Hors dépôt, pas à moi** : `Formation/*.html`.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 10 SEPT. 2026 AU SOIR : #821 LOT A LIVRÉ (1.128.4)
 
 > ✅ **`main` à 1.128.4, build `0910-1531`.** Tout est sur `main` ; aucune branche ne porte de
