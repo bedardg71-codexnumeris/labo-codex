@@ -1,138 +1,138 @@
-# Consigne du jour — la carte des effets de l'écran de réglage du dépistage
+# Consigne du jour — trois réglages qui ne font rien s'en vont, un se rebranche
 
-> **Écrite le 10 septembre 2026 au soir par Cowork, sur une décision de Grégoire du même jour.**
-> Elle remplace la consigne du lot A (source unique de qualification), **livrée en `1.128.4`** et
-> archivée à côté sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-10-source-unique-qualification.md` —
-> **commets l'archivage avec ton premier commit.**
+> **Écrite le 10 septembre 2026 au soir par Cowork, sur un arbitrage de Grégoire du même soir.**
+> Elle remplace la carte des effets, **livrée** et archivée à côté sous
+> `_ancienne-CONSIGNE-DU-JOUR-2026-09-10-carte-des-effets.md` — **commets l'archivage avec ton
+> premier commit.**
 >
 > **Remesure avant d'exécuter** : `git --no-optional-locks log --oneline -5`, `cat version.json`,
 > `TZ=America/Toronto date`.
 > ⚠ **Une consigne peut se tromper : mesure, n'obéis pas.**
 >
-> **Préalables de lecture** : `plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md`
-> (le chantier dont ceci est le premier temps) et le **§ 8** de
-> `Rapports/INVENTAIRE-2026-09-10-nomenclature-des-zones.md` (le tableau des divergences, livré au
-> lot B). **Ne refais ni l'un ni l'autre.**
+> **Préalable de lecture, et il fait autorité** : le **§ 4** de
+> `plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md` — la carte des effets.
+> **Ne la refais pas.** Elle nomme, pour chacun des vingt réglages, ce qu'il écrit et qui le lit.
 
 ---
 
 ## POURQUOI
 
-Grégoire veut refaire sur le **dépistage** ce qui a déjà été fait sur Cadre, Conception et
-Évaluation, en préparation du travail d'automne avec l'orthopédagogue. Il commence par l'écran de
-RÉGLAGE — `Labo › Outils d'observation` — « puisque c'est lui qui entraîne le suivi ».
+La carte a montré que **quatre des vingt contrôles de `Labo › Outils d'observation` n'agissent nulle
+part** (`#823`). Un cinquième de la page. L'écran ne se contente pas d'être encombré : par endroits,
+il promet ce que le code ne fait pas.
 
-Son mot sur cet écran : « un peu cacophonique ».
+▣ **Arbitrage de Grégoire, 10 septembre au soir** : « ok, retirer trois, brancher la fenêtre. »
 
-▣ **Il a aussi une proposition, et elle n'est PAS tranchée** : déplacer cet écran de `Labo` vers
-l'onglet `Suivi`, « le réglage des paramètres de recherche dans l'onglet où les paramètres ont une
-influence ».
-
-▣ **Ordre qu'il a arbitré le 10 septembre** (« ta recommandation est bonne, suivons-la ») :
-**trier le contenu d'abord, déplacer ensuite.**
-
-⮕ **Ce lot produit la mesure qui manque pour trancher.** On ne sait pas où ces réglages agissent.
-Les ranger dans `Suivi` affirmerait « ça agit ici » — sans l'avoir vérifié.
-
-⮕ **Et c'est la moitié manquante du dossier de l'orthopédagogue.** Le § 8 dit quels mots divergent.
-Cette carte dira **où l'enseignant les rencontre**. Un désaccord de quinze points sur « Favorable »
-ne veut rien dire tant qu'on ignore sur quel écran il se lit.
+Le partage suit une différence d'état mesurée, pas une préférence : **chez trois d'entre eux il n'y a
+rien derrière ; chez le quatrième, tout fonctionne sauf un nom.**
 
 ---
 
-## LE TRAVAIL — une carte, rien d'autre
+## LOT A — les trois qui s'en vont
 
-**Pour CHAQUE réglage de l'écran, l'écran où son effet se voit.**
+### 1. « Découpler Performance (P) et Niveau d'attention (N) »
 
-### Pars des réglages, pas des fichiers
+Écrit la préférence `decouplerPN`, que **personne ne lit** (le panneau qui l'écrit, et une table de
+migration). Son texte promet pourtant de séparer la note du dépistage.
 
-L'écran porte une vingtaine de contrôles, relevés sur les captures de Grégoire du 10 septembre.
-**Vérifie cette liste dans `index.html` avant de t'en servir** — elle est un point de départ, pas
-une source :
+**Retirer** : la case et ses trois lignes d'explication dans `index.html` · sa lecture et son écriture
+dans `preferences-v2.js` · son entrée dans la table de correspondance de `preferences.js` · son défaut.
 
-- **Taxonomie SOLO** : activer l'observation de la structure · Développement des habiletés ·
-  Observation des actions · Grille de critères pour le dépistage · Découpler P et N ·
-  Fenêtre d'analyse des patterns · Progression des artefacts · Direction du risque ·
-  Seuil de défi spécifique · Restaurer les valeurs par défaut
-- **Micro-données ACP** : activer la cueillette · Unité d'affichage de l'assiduité ·
-  Indicateurs visuels des seuils · Fragile si inférieur à · Acceptable si inférieur à ·
-  Bon si supérieur ou égal à · Restaurer les valeurs par défaut · Graphiques d'évolution ACP ·
-  Masquer les notes par travail
-- **Intervention (RàI)** : appliquer une adaptation du modèle de la Réponse à l'intervention
+### 2. « Unité d'affichage de l'assiduité (A) »
 
-### Le tableau attendu
+Écrit `uniteAffichageAssiduite`, lue par deux fonctions de formatage de `preferences-v2.js`
+(`formaterAssiduiteAvecUnite`, `formaterTotalPresence`) qui **n'ont aucun appelant**.
 
-| Réglage (son libellé à l'écran) | Ce qu'il écrit (clé) | Qui le lit | **Où l'effet se VOIT** | Visible ? |
-|---|---|---|---|---|
+**Retirer** : le menu et son étiquette · la préférence · **et les deux formateurs**. ⛔ Zéro-dette
+(`CLAUDE.md`) : un chantier retire ce qu'il remplace. Laisser les formateurs, c'est laisser la moitié
+du problème.
 
-⚠ **La colonne « Où l'effet se voit » se remplit en GESTES D'UTILISATEUR**, pas en noms de fichiers :
-« Suivi › Profils individuels › carte Mobilisation », « Tableau de bord › Aperçu › légende ».
-C'est cette colonne qui tranche la question de l'emplacement ; un nom de fichier ne tranche rien.
+### 3. « Direction du risque »
 
-### ⚠ LE PIÈGE — « lu par du code » n'est pas « visible à l'écran »
+Le curseur écrit `seuilsInterpretation.directionRisque`, lu par `calculerDirectionRisque`, appelée
+**une** fois par `genererSectionAccompagnement`, qui range le résultat dans une variable que rien ne
+lit.
 
-Précédent mesuré : `interpreterPerformance` a été **supprimée** (`#542` lot 3) parce que son résultat
-n'était lu nulle part, alors qu'elle avait l'air d'un consommateur. Et le lot A vient d'en retirer un
-autre du même genre.
+**Retirer** : le curseur et ses libellés · la clé du modèle de `interpretation-config.js` ·
+`calculerDirectionRisque` · la variable morte de `genererSectionAccompagnement` · et ce que la chaîne
+laisse derrière (`extraireScoresCriteres`, **seulement si elle n'a plus d'autre appelant** — mesure-le).
 
-⮕ **Pour chaque consommateur, remonte jusqu'à un `innerHTML`, un `textContent` ou un rendu Chart.js.**
-Si la chaîne s'arrête avant, la ligne est **« lu, jamais affiché »** — et c'est un résultat, pas un
-trou dans la carte. Inscris-le et continue (`CLAUDE.md`, issue n° 2).
+▣ **Deuxième motif, et il est de Grégoire** : « risque » est proscrit par `docs/adr/007-vocabulaire-descriptif.md`.
+Ce retrait retire aussi le mot.
 
-### Ce que la carte doit faire ressortir, sans le trancher
-
-1. **Les réglages dont l'effet se voit HORS de `Suivi`** — s'il y en a. C'est le fait qui décide.
-2. **Les réglages dont l'effet se voit à PLUSIEURS endroits**, et lesquels.
-3. **Les réglages dont l'effet ne se voit nulle part.**
-4. **Ce que restaure chacun des DEUX boutons « Restaurer les valeurs par défaut »** : deux boutons
-   identiques, dans deux sections, sans dire ce qu'ils touchent. Un utilisateur peut croire qu'il
-   remet tout à zéro.
+⚠ **La ligne « Variation minimale pour afficher une tendance du risque (→ ou ←) » disparaît avec le
+curseur.** Vérifie qu'aucun autre texte de l'écran n'y renvoie.
 
 ---
 
-## ⛔ CE QUE CETTE CONSIGNE NE FAIT PAS
+## LOT B — la fenêtre se rebranche
 
-1. **Elle ne renomme rien**, ni à l'écran ni dans les clés.
-2. **Elle ne déplace aucun réglage, aucun bloc, aucun écran.** ⚠ `js/navigation.js` et `js/config.js`
-   sont des **zones protégées** (`CLAUDE.md`) : on n'y touche pas, et surtout pas dans un lot de mesure.
-3. **Elle ne corrige aucun des trois défauts trouvés au lot B** — « Assiduité critique » sous deux
-   bornes, la borne à 60 % que les curseurs n'atteignent pas, le palier « Insuffisant » inatteignable
-   (`#822`). **Chacun demande de choisir laquelle des deux règles est la bonne : c'est de la
-   pédagogie, et ça attend l'automne.**
-4. **Elle n'écrit dans aucune donnée d'utilisateur.**
+**L'état mesuré** : le champ « dernières productions » écrit la préférence `fenetrePatterns`. Les
+**douze** calculs lisent `seuilsInterpretation.nombreProductionsAnalyse`
+(`obtenirNombreProductionsPourPatterns`, `profil-etudiant-helpers.js:426`), que **rien n'écrit** — sa
+seule occurrence dans le code est sa valeur par défaut. ⮕ **La fenêtre vaut 3 quoi qu'on tape.**
 
-⮕ **Livrable : un document. Zéro ligne de `js/` modifiée.** Si un fichier de `js/` change, c'est un
-défaut de périmètre.
+**Le mécanisme qui manque existe déjà et fonctionne** : `sauvegarderSeuilsV2()` (`preferences-v2.js:333`)
+écrit directement dans `seuilsInterpretation`, et c'est lui qui sauvegarde les trois champs
+Fragile / Acceptable / Bon du même écran. Il suffit d'y faire passer une valeur de plus.
+
+**À faire** :
+1. `sauvegarderSeuilsV2()` écrit aussi `nombreProductionsAnalyse` depuis le champ.
+2. L'initialisation du panneau lit la valeur depuis `seuilsInterpretation`, plus depuis la préférence.
+3. **Retirer `fenetrePatterns`** — préférence, défaut, entrée de la table de correspondance. Zéro-dette :
+   c'est l'ancien système, il ne reste pas « au cas où ».
+4. Le bouton « Restaurer les valeurs par défaut » du bloc SOLO remet 3 **dans la bonne clé**.
+
+### ⛔ CE QUI NE SE FAIT PAS — la valeur déjà stockée chez les gens
+
+Des utilisateurs ont `fenetrePatterns` à 4 ou 5 dans leurs préférences. **Ne la migre pas vers
+`nombreProductionsAnalyse`.**
+
+▣ **Décision de Cowork, motivée, et Grégoire peut la renverser** : cette valeur n'a **jamais** eu
+d'effet. La migrer donnerait rétroactivement un effet à un réglage qu'un enseignant croyait actif il y
+a des mois, et changerait ses profils sans qu'il ait rien demandé. Repartir du défaut 3 — l'état réel
+d'aujourd'hui — est le seul choix qui ne surprend personne. Qui veut 5 le retape, et cette fois ça
+marchera.
+
+⛔ Plus largement : **aucune écriture dans les données de personne.** Les clés `decouplerPN`,
+`uniteAffichageAssiduite`, `directionRisque` et `fenetrePatterns` resteront orphelines dans les
+préférences des utilisateurs. **C'est voulu** — « tarir n'est pas réparer », et nettoyer le stock de
+quelqu'un remonte à Grégoire (`CLAUDE.md`). Écris-le dans le rapport de session plutôt que de le faire.
 
 ---
 
-## OÙ ÉCRIRE, ET COMMENT FERMER
+## CE QUI CHANGE À L'ÉCRAN — et qui doit être dit
 
-Une section neuve dans `plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md`,
-qui remplace son § 4 (« mesure incomplète, à finir avant tout déplacement »).
+Contrairement aux deux lots précédents, **celui-ci se voit** : trois contrôles disparaissent de
+`Labo › Outils d'observation`, et un quatrième se met à fonctionner.
 
-⮕ **Un audit n'est pas terminé quand il est déposé** (`CLAUDE.md`) : chaque constat porte, DANS le
-fichier, l'une de trois dispositions — *inscrit* (n°), *refusé* (motif), *périmé*.
+⚠ **Conséquence à assumer, arbitrée par Grégoire** : aujourd'hui les analyses portent sur trois
+productions quelle que soit la valeur affichée. Après ce lot, la valeur du champ s'applique vraiment.
+**Un profil peut changer d'aspect** — aucune donnée n'est touchée, seulement la lecture qu'on en fait.
 
-**Commit `docs`, pas de bump, pas de porte terrain** (rien ne bouge à l'écran, et une machine peut
-répondre : règle 2 du skill `portes-terrain`).
+⮕ **Release `minor`, pas `patch`** : un réglage change de comportement et trois disparaissent.
+⮕ **Entrée de changelog obligatoire**, skill `release-et-changelog`. Elle dit deux choses en langue
+d'utilisateur : trois réglages qui ne faisaient rien ont été retirés ; la fenêtre d'analyse, elle,
+fonctionne maintenant — et si tu y avais mis une valeur, elle est repartie à trois.
 
-⚠ **Trois documents de Cowork attendent ton commit** : `plans de travail/00-CADRAGES-OUVERTS.md`
-(modifié — il porte l'arbitrage de Grégoire sur l'ordre), l'archivage de la consigne précédente, et
-celle-ci.
-
-⚠ **`CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` porte encore l'état mesuré de `1.128.3`.** Sa remise à
-jour te revient (`PROTOCOLE.md`, « qui écrit quoi ») ; le MANDAT reste à Cowork.
+⮕ **Porte terrain DUE** — l'écran change (skill `portes-terrain`, règle 1 : une machine ne peut pas
+répondre à « est-ce que ça a l'air bien »). Markdown à toi, artefact à Cowork. Quatre portes, pas plus :
+les trois blocs ont bien disparu sans laisser de trou ni de titre orphelin · le bloc « Paramètres
+avancés » se replie et se déplie encore · une valeur tapée dans la fenêtre survit à un rechargement ·
+et elle atteint vraiment un profil (change-la, rouvre un profil, l'analyse porte sur ce nombre).
+⚠ Sur `https://app.codexnumeris.org`, **pas** le fichier local.
 
 ---
 
 ## CE QUI REMONTE À GRÉGOIRE
 
-**Rien de ce lot.** Il est mesurable de bout en bout : tranche, puis dis-le en une ligne en nommant ce
-que tu as supposé.
+1. **Si un des trois « morts » se révèle vivant** à la mesure, arrête et dis-le. La carte est solide,
+   mais elle a été écrite par la session qui l'a mesurée ; c'est exactement le cas où une relecture
+   croisée existe (`PROTOCOLE.md`, règle 2).
+2. **Rien d'autre.** Le reste est technique : tranche, puis dis-le en une ligne en nommant ce que tu as
+   supposé.
 
-**Une seule exception** : si la carte montre qu'un réglage agit sur **une note** — et non sur un
-diagnostic — dis-le tout de suite et **n'y touche pas**. Le lot A a mesuré que `defiSpecifique` et
-`idme.*` n'entrent dans `pratique-pan-standards.js` que par deux fonctions de diagnostic
-(`_diagnostiquerForcesChallenges`, `_identifierPatternActuel`). **Si cette mesure est fausse, c'est le
-fait le plus important de la journée.**
+⛔ **Hors périmètre, et ce n'est pas un oubli** : la forme de l'écran (sa « cacophonie »), les deux
+nomenclatures du bloc « Seuils d'interprétation », les cinq chemins morts de `#824`, les trois défauts
+du lot B (« Assiduité critique » sous deux bornes, la borne à 60 %, le palier inatteignable), et le
+déplacement de l'écran vers `Suivi`. **Un lot, une livraison.**
