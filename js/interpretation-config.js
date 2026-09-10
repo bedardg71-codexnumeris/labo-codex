@@ -91,6 +91,54 @@ function fusionnerAvecDefauts(stocke, defauts) {
 }
 
 /**
+ * #818 suite (10 sept. 2026) — LE BRANCHEMENT MANQUANT DES TROIS CURSEURS.
+ *
+ * Les curseurs « Fragile / Acceptable / Bon » de Labo > Outils d'observation
+ * écrivaient `fragile`, `acceptable` et `bon` À PLAT, à la racine de
+ * `seuilsInterpretation`. Les consommateurs — `etudiants.js`,
+ * `profil-etudiant-helpers.js` — lisent la branche `interpretation`. Rien ne
+ * reliait les deux, et `fusionnerAvecDefauts` ne parcourt que les clés du
+ * modèle : le réglage était conservé en base, réaffiché à l'identique dans son
+ * propre panneau, et sans le moindre effet sur un calcul ou une couleur.
+ * Les défauts coïncidaient (70/80/85), ce qui masquait le défaut tant que
+ * personne ne bougeait un curseur.
+ *
+ * ⚠ Les deux vocabulaires nomment la MÊME frontière par des côtés opposés : le
+ * curseur « Fragile 70 » dit « sous 70, c'est fragile » ; la branche écrit
+ * `acceptable: 0.70`, « à partir de 70, c'est acceptable ». Ce n'est pas un
+ * décalage d'un cran, c'est la même borne nommée par en dessous ou par en
+ * dessus. D'où cette table, et pas une autre.
+ */
+const SEUILS_PLATS_VERS_INTERPRETATION = {
+    fragile: 'acceptable',
+    acceptable: 'bon',
+    bon: 'excellent'
+};
+
+/**
+ * Reporte dans la branche `interpretation` un réglage resté à plat, puis retire
+ * la clé plate. Muter la COPIE, jamais l'objet rendu par le cache.
+ * Sans repli arbitraire : une clé absente ou non numérique est ignorée.
+ * @param {Object} stocke - copie de l'objet stocké, mutée sur place
+ * @returns {boolean} - vrai si au moins un réglage a été repris
+ */
+function migrerSeuilsPlats(stocke) {
+    if (!stocke || typeof stocke !== 'object') return false;
+    let repris = false;
+    for (const plat in SEUILS_PLATS_VERS_INTERPRETATION) {
+        const valeur = stocke[plat];
+        if (typeof valeur !== 'number' || !isFinite(valeur)) continue;
+        if (!stocke.interpretation || typeof stocke.interpretation !== 'object') {
+            stocke.interpretation = {};
+        }
+        stocke.interpretation[SEUILS_PLATS_VERS_INTERPRETATION[plat]] = valeur;
+        delete stocke[plat];
+        repris = true;
+    }
+    return repris;
+}
+
+/**
  * Charge les seuils depuis db.getSync, fusionne avec les défauts pour combler
  * toute clé manquante, et persiste la version complète si une clé a été ajoutée.
  * Garantit que l'objet retourné expose TOUTES les branches de SEUILS_PAR_DEFAUT.
@@ -101,10 +149,15 @@ function chargerSeuilsInterpretation() {
     if (!stocke) {
         return JSON.parse(JSON.stringify(SEUILS_PAR_DEFAUT));
     }
-    const fusion = fusionnerAvecDefauts(stocke, SEUILS_PAR_DEFAUT);
-    if (!fusion.complete) {
-        // Auto-guérison : l'objet stocké manquait de clés ajoutées depuis.
-        // On persiste la fusion pour éviter de refaire le merge à chaque lecture.
+    // Copie : `db.getSync` peut rendre une référence vivante du cache.
+    const copie = JSON.parse(JSON.stringify(stocke));
+    // #818 suite — reprendre un réglage laissé à plat AVANT la fusion. Après
+    // elle, il serait perdu : les clés plates ne figurent pas dans le modèle.
+    const migre = migrerSeuilsPlats(copie);
+    const fusion = fusionnerAvecDefauts(copie, SEUILS_PAR_DEFAUT);
+    if (!fusion.complete || migre) {
+        // Auto-guérison : l'objet stocké manquait de clés ajoutées depuis, ou
+        // portait un réglage à plat qu'on vient de rebrancher.
         db.setSync('seuilsInterpretation', fusion.valeur);
     }
     return fusion.valeur;
