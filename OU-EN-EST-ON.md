@@ -15,6 +15,27 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.129.0 — DEUX RÉGLAGES QUI NE FAISAIENT RIEN S'EN VONT, LA FENÊTRE D'ANALYSE FONCTIONNE** (build `0910-1645`).
+**Ce que tu verras** : dans `Labo › Outils d'observation`, la case « Découpler P et N » et le menu
+« Unité d'affichage de l'assiduité » ont disparu — rien ne les lisait. La « Fenêtre d'analyse des
+patterns » s'applique enfin : le nombre que tu tapes atteint les calculs du profil et du Suivi du
+groupe, qui restaient à 3 quoi que tu tapes. ⚠ **Si tu y avais mis un autre nombre, il est reparti à
+3** : cette valeur n'avait jamais eu d'effet, la reprendre aurait changé tes profils sans que tu l'aies
+demandé (décision de Cowork, confirmée par toi). Retape-le, et cette fois ça compte. Et le curseur
+« Direction du risque » s'appelle **« Sensibilité des flèches par critère »** : il agit, mais pas sur
+ce que son nom disait — il règle la variation minimale pour qu'une flèche (→ / ←) apparaisse après un
+critère dans le profil. Sa valeur et son effet ne changent pas.
+**Rien n'est écrit dans tes données** : les préférences retirées restent chez toi, muettes.
+**Ce que la relecture croisée a attrapé** : la carte des effets d'hier disait que ce curseur ne
+faisait rien. Faux — elle avait suivi une fonction du même nom (morte) et pas le seuil, qui a un
+second lecteur vivant. Sans la mesure préalable, les flèches auraient été figées à 0,05 sans que
+personne le sache. C'est toi qui as tranché : garder et renommer.
+**Vérifié comment** : neuf essais qui EXÉCUTENT le panneau sur le vrai code des seuils et prouvent
+que la valeur tapée arrive à la fonction que les douze calculs appellent ; neuf ablations, neuf
+rouges, arbre restauré par empreinte ; Vitest 531 fichiers / 5793 essais. **Pas vérifié** : l'écran
+lui-même — quatre portes t'attendent (`plans de travail/PORTES-TERRAIN-2026-09-10-823.md`), l'artefact
+revient à Cowork. (`#823`)
+
 ↻ **1.128.4 — LES QUATRE RÈGLES QUI QUALIFIENT UN CONTEXTE SONT ÉCRITES AU MÊME ENDROIT** (build `0910-1531`).
 **Ce que tu verras : rien.** Pas un mot, pas une borne, pas une couleur n'a bougé — c'est le
 critère de réussite de ce lot, et il est mesuré : les quatre règles ont été rejouées AVANT et
