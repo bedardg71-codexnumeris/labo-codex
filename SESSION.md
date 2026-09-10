@@ -7,6 +7,64 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 38 — 10 SEPTEMBRE 2026, NUIT : DEUX ÉCRANS, ET LE GARDE-FOU QUI COMPTAIT SANS QUALIFIER.
+     Périmètre couvert : `d1432016..663a5ec6`, quatre commits, une seule session. 1.127.3 → 1.127.5.
+     Point d'entrée demandé par Grégoire : « à ajouter au backlog, la résolution de ce bug » — le lot
+     a grandi de là, à sa demande, en deux temps.
+
+     ▣ #811 — LE JOURNAL DE BORD D'UNE ÉVALUATION N'AVAIT PAS DE FOND (1.127.4). Rapport iPad du 9 au
+       soir. `.journal-modal { background: var(--surface); }` et `--surface` n'est déclarée NULLE PART
+       dans l'app, sans valeur de repli : la déclaration est invalide, le fond reste transparent, et le
+       contenu se lit à même le voile de `.modal-overlay` (bleu 65 % + flou), traversé par le tableau
+       des évaluations. ONZE `var()` du même bloc rebranchées sur la palette réelle, patron
+       `.modal-contenu`. Zéro-dette : les replis en dur qui masquaient les autres noms morts partent.
+     ⮕ LA LEÇON N'EST PAS LE CORRECTIF, C'EST CE QU'IL RÉVÈLE. `sentinelle-567-variables-css-fantomes`
+       CONNAISSAIT `--surface` et la tolérait — un usage, jugé anodin. Elle COMPTAIT les usages sans
+       les QUALIFIER : avec un repli, une variable manquante est bénigne ; SANS repli, elle ANNULE la
+       déclaration. Troisième cliquet ajouté : les usages sans repli comptés à part, 29 noms / 112
+       usages, figés nom par nom. C'est #813 — à prendre par famille et à l'écran, jamais d'un bloc.
+     ⚠ LE PREMIER BREAK-TEST N'A FAIT ROUGIR QU'UN TEST SUR TROIS, ET IL AVAIT RAISON :
+       `background: var(--surface-carte, #1a3040)` apparaît 101 fois dans `styles.css`, et l'ablation
+       touchait la première occurrence — `.u-bg-blanc`, pas le journal. Refaite en ciblant la règle.
+       ⮕ À RETENIR : une ablation par `replace(..., 1)` sur un motif fréquent ne prouve rien.
+
+     ▣ #815 — LA FENÊTRE « SOUTENIR LABO CODEX » (1.127.5). « Difficilement lisible et un peu
+       désordonnée. » CE N'ÉTAIT NI LA LONGUEUR DE LIGNE (64 caractères, fourchette 45-75) NI LE
+       CONTRASTE (tout tenait AA) : c'était l'absence de hiérarchie — titre, quatre titres de section
+       et six items sur huit portaient tous `--accent-primaire` en gras. Trois blocs cadrés sur deux
+       colonnes ; le bleu ne sert plus qu'aux liens ; filets et puces retirés. 759 px contre 945.
+     ⮕ DEUX MAQUETTES SOUMISES À L'ÉCRAN AVANT D'ÉCRIRE UNE LIGNE DE CODE, et Grégoire a tranché :
+       structure B, SA prose (mes phrases d'accroche refusées), la Voûte retirée, le blogue décrit.
+     ⚠ SA DÉCISION A EU UN COÛT, MESURÉ : ses libellés sont longs à gauche et courts à droite, donc
+       les colonnes ne s'équilibraient pas (427 px contre 271) et `align-items: stretch` creusait un
+       vide de 200 px sous la colonne courte — LE MÉCANISME EXACT DE #807. Réglé par `flex-start` et
+       en déplaçant « Suivre le projet » dans la colonne de droite (427 contre 520). Reste assumé :
+       quatre libellés de liens passent sur deux lignes à 322 px de colonne.
+
+     ▣ CE QUE LE RITUEL DE FIN DE SESSION A TROUVÉ, APRÈS LE PUSH. Deux affirmations chiffrées fausses,
+       dans du contenu déjà poussé : « huit `var()` rebranchées » était le nombre de mes OPÉRATIONS de
+       remplacement, pas des variables (c'est ONZE — trois opérations en changeaient deux à la fois) ;
+       « 113 usages sans repli » était exact à l'inscription de #813, PÉRIMÉ trois heures plus tard par
+       #815 qui en a retiré un (112). Corrigés dans `BACKLOG.md`, pas dans l'historique.
+     ⮕ C'est le §4 récit↔code qui les a sortis, pas les tests : ils étaient verts dans les deux cas.
+
+     ▣ MESURÉ, PAS AFFIRMÉ. Vitest 521 fichiers / 5728 essais (520 / 5714 au départ ; +11 pour la
+       sentinelle #811, +3 pour le cliquet sans-repli). CINQ ABLATIONS, SEIZE ROUGEURS, témoin vert
+       avant et après, arbre restauré par empreinte sha256 à chaque fois. Contrastes CALCULÉS depuis
+       `styles.css`, jamais recopiés. Rendus au navigateur (Chromium) dans les deux modes, à 980, 820
+       et 520 px. Les assertions DOM de `modal-soutien.spec.js` rejouées sur le rendu réel, Playwright
+       n'étant pas lançable en cloud (`~/.cache/ms-playwright` absent).
+
+     ⏳ DÛ À GRÉGOIRE, ET À PERSONNE D'AUTRE : Safari sur son iPad, pour les DEUX écrans. Aucun n'y a
+       été vu. Rien dans les correctifs ne dépend du navigateur — inférence, pas mesure.
+     ⛔ LE ROUGE CI EST ANTÉRIEUR À CE LOT (run 862 sur `d1432016`, le commit de départ ; run 861
+       vert). Hypothèse non vérifiée dans `RELAIS.md`. Ce lot ne touche aucune des specs concernées.
+     ▣ #812 et #814 inscrits, non corrigés (la date des rapports de bug ; le bouton de fermeture du
+       journal à 34 × 26 px, seul chemin de sortie). Un PNG de 774 Ko est entré au dépôt : la capture
+       de Grégoire, archivée exprès — premier binaire de `Retours des testeurs/`.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 37 — 8 SEPTEMBRE (APRÈS-MIDI) AU 9 SEPTEMBRE 2026 EN FIN DE SOIRÉE : 1.124.3 → 1.127.3, HUIT VERSIONS EN UNE JOURNÉE.
      Périmètre couvert : `3913b4cb..1a7205ee`, vingt-huit commits, plusieurs sessions — dont DEUX à égalité dans le
      même arbre tout l'après-midi du 9. Ce bloc rend l'état mesuré, pas la liste des commits ; `RELAIS.md` et
