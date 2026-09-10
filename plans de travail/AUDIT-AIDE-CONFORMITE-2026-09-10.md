@@ -84,7 +84,7 @@ confronter au code. 83 chemins et 72 libellés cités ont été relevés.
 | A.6 | bouton « Exporter mes données » | **« Exporter le Codex »** (`data-action="ouvrirModalExport"`) | 1 | **corrigé** |
 | A.7 | case « Activer RàI et détection des patterns » | **« Appliquer une adaptation du modèle de la Réponse à l'intervention »** (`#v2-pref-rai`, l. 9063, dans `#labo-accompagnement`) | 2 | **corrigé** |
 
-**Sentinelle** : `tests/unit/sentinelle-817-aide-chemins-et-libelles.test.js` (9 essais).
+**Sentinelle** : `tests/unit/sentinelle-audit-aide-lot-A-chemins-et-libelles.test.js` (9 essais).
 **Huit ablations, huit rouges**, arbre restauré par sha256. Vitest 523 / 5741.
 
 ⚠ **Une erreur de méthode, et sa leçon.** A.4 a d'abord été rapporté à Grégoire
@@ -171,7 +171,7 @@ trompée. ⮕ **Une surface qui chiffre sans lire sa source finit toujours par
 mentir.** La sentinelle lit désormais chaque valeur là où elle vit : les bornes
 dans le rendu de `tableau-bord-apercu.js`, les défauts dans `preferences-v2.js`.
 
-**Sentinelle** : `tests/unit/sentinelle-818-aide-trois-surfaces-concordent.test.js`
+**Sentinelle** : `tests/unit/sentinelle-audit-aide-lot-B-surfaces-concordent.test.js`
 (5 essais). **Six ablations, six rouges**, dont **deux qui modifient le CODE et non
 la doc** — c'est ce qui prouve que le banc suit la source et ne fige pas une copie.
 
@@ -207,7 +207,7 @@ des libellés recopiés. Ajouter une huitième étape sans compléter `TOUR_NAV`
 `TOUR_TITRE_COURT` rougit. Elle vérifie aussi que les sections et sous-sections
 visées existent, et que Réglages › Préférences ne relance toujours pas la visite.
 
-**Sentinelle** : `tests/unit/sentinelle-819-visite-guidee-coherente.test.js`
+**Sentinelle** : `tests/unit/sentinelle-audit-aide-lot-C-visite-guidee.test.js`
 (6 essais). **Six ablations, six rouges**, arbre restauré par sha256.
 
 ⚠ **Changement de comportement assumé** : C.2 et C.5 ne sont pas de la prose. La
@@ -254,7 +254,7 @@ cadrages** qui en font un exemple (« et non une structure du logiciel », « Au
 échelles possibles », « adaptable à ton contexte », les « Ex. » collés à 601-101).
 C'est la régression à craindre, pas la mention elle-même.
 
-**Sentinelle** : `tests/unit/sentinelle-820-aide-exemples-restent-des-exemples.test.js`
+**Sentinelle** : `tests/unit/sentinelle-audit-aide-lot-E-exemples-restent-des-exemples.test.js`
 (4 essais). **Sept ablations, sept rouges**, arbre restauré par sha256.
 
 ⚠ **Un second test tautologique attrapé par son break-test.** La vérification des
@@ -296,7 +296,7 @@ sondés, dix sont couverts par l'Aide.
 ⚠ Ces deux-là **dépassent le mandat « corrections factuelles »** : combler un trou,
 c'est écrire, pas corriger. Soumis à Grégoire, non écrits.
 
-**Sentinelle** : `tests/unit/sentinelle-821-aide-ne-promet-pas-ce-qui-nexiste-pas.test.js`
+**Sentinelle** : `tests/unit/sentinelle-audit-aide-lot-D-ne-promet-pas-l-inexistant.test.js`
 (3 essais). **Cinq ablations, cinq rouges**, arbre restauré par sha256.
 
 ⚠ **Une ablation mal conçue, et ce qu'elle apprend.** L'ablation « la Modélisation

@@ -29,7 +29,7 @@ que l'Aide est encore conforme ? »). **Les six lots sont faits.**
 
 **Le fichier d'audit est `plans de travail/AUDIT-AIDE-CONFORMITE-2026-09-10.md`** :
 chaque constat y porte sa disposition (*corrigé*, *inscrit n°*, *refusé* + motif,
-*périmé*). **Six sentinelles neuves, 36 ablations toutes rouges.** Elles LISENT leurs
+*périmé*). **Six sentinelles neuves, 33 essais** (compté par `vitest run` sur les six bancs, le 10 sept.). Chaque lot a fait rougir ses ablations avant d'être livré ; le détail, lot par lot, est au fichier d'audit. ⚠ Ne pas agréger ces comptes : plusieurs messages de commit annoncent un CUMUL du banc (« huit ablations » incluait les six du lot précédent), et les additionner double-compte. Elles LISENT leurs
 valeurs à la source (pack de démo, `config.js`, `interpretation-config.js`,
 `preferences-v2.js`, le rendu de `tableau-bord-apercu.js`) plutôt que de figer des
 copies : plusieurs ablations modifient le CODE et non la doc.
@@ -59,21 +59,25 @@ différée (1.20) ne sont mentionnés nulle part dans l'Aide.
    montait à 524, 525, 526, 527. Le nombre d'ESSAIS était juste (lu dans la sortie) ;
    c'est le compte de FICHIERS qui a été recopié sans être remesuré.
 
-⚠⚠ **CINQ SENTINELLES SUR SIX PORTENT UN NUMÉRO TROMPEUR.** La collision d'IDs de la
-nuit (troisième en cinq semaines) a laissé des noms de fichiers qui ne pointent pas vers
-les bonnes fiches :
+✅ **LES SENTINELLES SONT NOMMÉES PAR LOT, PLUS PAR FICHE.** La collision d'IDs de la
+nuit (troisième en cinq semaines) avait laissé cinq bancs sur six pointant vers de
+mauvaises fiches — deux d'entre eux (#819, #820) vers le chantier de l'autre session.
+Renommés le 10 sept. :
 
-| Fichier | Ce qu'il teste | Ce que le numéro désigne |
-|---|---|---|
-| `sentinelle-817-aide-chemins-et-libelles` | le lot A de l'audit | #817 = les trois seuils (non corrigé, sans banc) |
-| `sentinelle-818-aide-trois-surfaces-concordent` | le lot B | #818 = les zones homonymes (non corrigé, sans banc) |
-| `sentinelle-819-visite-guidee-coherente` | le lot C | **#819 = « Consolidation retirée »**, l'autre chantier |
-| `sentinelle-820-aide-exemples-restent-des-exemples` | le lot E | **#820 = sentinelles anti-cache**, l'autre chantier |
-| `sentinelle-821-aide-ne-promet-pas-ce-qui-nexiste-pas` | le lot D | #821 n'est attribué à rien |
+| Fichier | Couvre |
+|---|---|
+| `sentinelle-803-aide-pan-famille-pas-mecanique` | la fiche **#803** (inchangé : il couvre bien une fiche) |
+| `sentinelle-audit-aide-lot-A-chemins-et-libelles` | chemins, libellés de boutons, valeurs chiffrées, formats |
+| `sentinelle-audit-aide-lot-B-surfaces-concordent` | la cohérence des quatre surfaces de l'Aide |
+| `sentinelle-audit-aide-lot-C-visite-guidee` | les trois tableaux parallèles de la visite guidée |
+| `sentinelle-audit-aide-lot-D-ne-promet-pas-l-inexistant` | ce que l'Aide annonce et que le code ne fait pas |
+| `sentinelle-audit-aide-lot-E-exemples-restent-des-exemples` | les cadrages qui font de SRPNF et d'IDME des exemples |
 
-Seule `sentinelle-803-aide-pan-famille-pas-mecanique` porte le bon numéro. ⮕ **Le
-renommage est dû**, avec un nom qui dise le LOT plutôt qu'une fiche — un banc d'audit
-ne couvre pas une fiche, il couvre un balayage.
+⮕ **La règle qui en sort** : un banc d'AUDIT ne couvre pas une fiche, il couvre un
+balayage. Le nommer d'après un numéro de fiche crée une fausse traçabilité — et
+l'expose à toute collision future du compteur. Nommer par lot l'en rend immune.
+⚠ Corollaire à ne pas perdre : **#817 et #818 n'ont AUCUN banc**, ce sont des constats
+non corrigés. Ne pas lire les noms d'hier comme s'ils les couvraient.
 
 ⛔ **VERDICT PLAYWRIGHT : AUCUN sur toute la session** (environnement cloud, pas de banc
 navigateur). **Deux choses sont à éprouver à l'écran avant la CoP du 14** : la carte
@@ -185,9 +189,9 @@ sont cadrés.
 
 **QUATRE SENTINELLES NEUVES**, 26 essais, **26 ablations toutes rouges** :
 `sentinelle-803-aide-pan-famille-pas-mecanique`,
-`sentinelle-817-aide-chemins-et-libelles`,
-`sentinelle-818-aide-trois-surfaces-concordent`,
-`sentinelle-819-visite-guidee-coherente`.
+`sentinelle-audit-aide-lot-A-chemins-et-libelles`,
+`sentinelle-audit-aide-lot-B-surfaces-concordent`,
+`sentinelle-audit-aide-lot-C-visite-guidee`.
 Elles **lisent leurs valeurs à la source** (le pack de démo, `config.js`,
 `interpretation-config.js`, `preferences-v2.js`, le rendu du tableau de bord)
 au lieu de figer des copies : plusieurs ablations modifient le CODE et non la doc.
