@@ -33,6 +33,16 @@ des décisions de pédagogie, elles attendent l'automne (`#821`, `#822`).
 de 24 essais dont 8 break-tests rouges ; Vitest 530 fichiers / 5785 essais. **Pas vérifié** :
 l'écran dans Safari et sur iPad — aucun verdict local ; le CI WebKit tranche, et une divergence
 serait une régression, pas une nouveauté.
+**Ajouté le même soir, sans changement de version — ce que l'écran `Labo › Outils d'observation` fait
+vraiment** : pour chacun de ses vingt réglages, on sait maintenant où son effet se voit (§ 4 du cadrage
+de l'écran de réglage du dépistage). **Quatre réglages ne font rien** — « Découpler P et N », « Fenêtre
+d'analyse des patterns », « Unité d'affichage de l'assiduité » et « Direction du risque » : tu peux les
+changer, aucun écran ne bouge, et la fenêtre d'analyse reste à 3 quoi que tu tapes. Aucun des vingt ne
+touche une note. Quatre agissent ailleurs que dans Suivi (la palette d'annotation, la liste des
+évaluations, le badge « dépistage » d'une grille, l'export recherche). Rien n'est corrigé : ce tri des
+réglages est le chantier que tu as ordonné le 10 septembre, et la forme de l'écran t'appartient.
+**Vérifié comment** : chaque lecteur de chaque clé remonté jusqu'à un rendu, dans le code ; pas d'écran
+ouvert. (`#823`, `#824`)
 
 ↻ **1.128.3 — QUATRE RÉGLAGES QUI N'ATTEIGNAIENT PAS LEUR CALCUL** (build `0910-1147`).
 **Ce que tu verras** : (1) dans le panneau Portfolio d'un profil, les artefacts cochés
