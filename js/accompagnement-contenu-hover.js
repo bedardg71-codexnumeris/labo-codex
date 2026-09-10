@@ -126,8 +126,6 @@ const TOOLTIPS = {
 
     'pref-actions-rlo':
         'Active trois tampons ou estampes (Repérage, Liaison, Ouverture) que tu poses sur les copies pour observer les gestes cognitifs de tes étudiant·es. Les résultats alimentent le profil ACO et l\'export de recherche anonymisé.',
-    'pref-affichage-assiduite':
-        'Choisis l\'unité d\'affichage des totaux de présence et d\'assiduité (ex. : en périodes).',
     'pref-affichage-developpement':
         'Affiche le tableau de progression des critères et les graphiques 0-100 % dans la section «Développement des habiletés» du profil individuel.',
     'pref-affichage-graphiques':
@@ -149,8 +147,6 @@ const TOOLTIPS = {
 
     // --- Dépistage ---
 
-    'depist-decoupler-pn':
-        'Sépare le calcul de la note (P, selon ta pratique) du calcul du niveau d\'attention (N, basé sur les N dernières productions). Recommandé avec la pratique «N meilleurs».',
     'depist-fenetre':
         'Nombre de dernières productions analysées pour détecter les tendances. Valeur basse = détection précoce. Valeur élevée = détection plus fiable, mais plus tardive.',
     'depist-grille':

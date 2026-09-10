@@ -279,13 +279,15 @@ describe('#626 · M2 / D5 — les clés mortes ne sont plus lues', () => {
         expect(code('js/main.js')).not.toContain('pratiquesPersonnalisees');
     });
 
-    // TÉMOIN — les deux volets VIVANTS de la même migration restent. Le retrait
-    // visait le volet 3 seul ; emporter les deux autres serait une perte réelle.
-    it('TÉMOIN · les volets `preferencesUtilisateur` et `bibliothequePratiques` de la migration restent', () => {
+    // TÉMOIN — le volet VIVANT de la même migration reste. Le retrait de #626
+    // visait le volet 3 seul. Le volet `preferencesUtilisateur` est parti à son
+    // tour au #823 (10 sept. 2026), avec la préférence « Découpler P et N » que
+    // personne ne lisait : il ne reste que le volet des pratiques.
+    it('TÉMOIN · le volet `bibliothequePratiques` de la migration reste, celui des préférences est parti (#823)', () => {
         const c = code('js/main.js');
         expect(c).toContain('migration_decoupler_pn_done');
         expect(c).toContain("db.getSync('bibliothequePratiques'");
-        expect(c).toContain("db.getSync('preferencesUtilisateur'");
+        expect(c).not.toContain("db.getSync('preferencesUtilisateur'");
     });
 
     // TÉMOIN — la vraie clé de la bibliothèque n'est pas emportée au passage.

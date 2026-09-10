@@ -8813,26 +8813,13 @@
                                 <summary>Paramètres avancés</summary>
                                 <div class="parametres-avances-pliable-contenu">
 
-                                    <!-- Option : Découpler Performance et Niveau d'attention -->
-                                    <div class="groupe-form u-mb-15">
-                                        <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="depist-decoupler-pn">
-                                            <input type="checkbox" id="v2-pref-decoupler-pn" data-on-change="sauvegarderPreferencesV2">
-                                            <strong style="margin-left: 8px;">Découpler Performance (P) et Niveau d'attention (N)</strong>
-                                        </label>
-                                        <small class="u-texte-petit" style="display: block; color: var(--gris-moyen); margin-top: 8px; margin-left: 28px; line-height: 1.5">
-                                            <strong>P (notation)</strong> : Utilise la méthode de la pratique pour calculer la note finale.<br>
-                                            <strong>N (dépistage)</strong> : Toujours basé sur les N dernières productions pour détecter les tendances.<br>
-                                            <em>Recommandé avec « N meilleurs » pour valoriser le progrès tout en identifiant les besoins d'intervention.</em>
-                                        </small>
-                                    </div>
-
                                     <!-- Fenêtre d'analyse des patterns -->
                                     <div class="groupe-form u-mb-15">
                                         <label for="v2-pref-fenetre-patterns" class="u-mb-8 u-texte-gras" style="display: block" data-tooltip="depist-fenetre">
                                             Fenêtre d'analyse des patterns
                                         </label>
                                         <div class="u-flex-gap-10 u-align-center">
-                                            <input type="number" id="v2-pref-fenetre-patterns" class="controle-form" value="3" min="3" max="12" style="width: 80px;" data-on-change="sauvegarderPreferencesV2">
+                                            <input type="number" id="v2-pref-fenetre-patterns" class="controle-form" value="3" min="3" max="12" style="width: 80px;" data-on-change="sauvegarderSeuilsV2">
                                             <span class="u-texte-09">dernières productions</span>
                                         </div>
                                         <small class="u-texte-petit" style="display: block; color: var(--gris-moyen); margin-top: 8px">
@@ -8940,18 +8927,6 @@
                                 <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
                                     Indices descriptifs Assiduité, Complétion et Performance. Affichés dans la section « Engagement ACP » du profil individuel.
                                 </small>
-                            </div>
-
-                            <!-- Sous-item : Détails A-C-P (unité d'affichage) -->
-                            <div class="groupe-form u-mb-15">
-                                <label for="v2-pref-unite-affichage" class="u-texte-petit" style="display: block; margin-bottom: 4px; color: var(--gris-moyen)" data-tooltip="pref-affichage-assiduite">
-                                    Unité d'affichage de l'assiduité (A)
-                                </label>
-                                <select id="v2-pref-unite-affichage" class="controle-form u-texte-petit" data-on-change="sauvegarderPreferencesV2" style="max-width: 250px;">
-                                    <option value="periodes">Périodes (ex: 12/14 périodes)</option>
-                                    <option value="heures">Heures (ex: 11.0h/12.8h)</option>
-                                    <option value="les-deux">Les deux (périodes et heures)</option>
-                                </select>
                             </div>
 
                             <!-- Sous-item : Seuils d'interprétation (pliable) -->
@@ -11353,7 +11328,7 @@
                                     <li><strong>Navigation</strong> : Lancement direct à l'aperçu, info-bulles au survol, aide contextuelle (<span class="icone-info-aide taille-inline" aria-hidden="true"></span>), mode clair/sombre</li>
                                     <li><strong>Parcours d'apprentissage</strong> : Choisis ton mode d'accompagnement (étape par étape, par exploration, autonome)</li>
                                 </ol>
-                                <p class="u-texte-petit u-mt-10">Les outils d'observation (Taxonomie SOLO, Observation des actions, Micro données ACP, Graphiques d'évolution, Développement des habiletés, Unité d'affichage de l'assiduité) et le dépistage RàI se trouvent dans <strong>Labo → Outils d'observation</strong>.</p>
+                                <p class="u-texte-petit u-mt-10">Les outils d'observation (Taxonomie SOLO, Observation des actions, Micro données ACP, Graphiques d'évolution, Développement des habiletés) et le dépistage RàI se trouvent dans <strong>Labo → Outils d'observation</strong>.</p>
                             </div>
 
                             <p><strong>Options de thème :</strong></p>
@@ -14465,7 +14440,7 @@
     <script src="js/securite-echappement.js?v=20260821a"></script> <!-- CT-29 : echapperAttribut — echapperHtml n'encode pas les guillemets, insuffisant en contexte d'attribut -->
     <script src="js/identite-naturelle.js?v=20260824a"></script> <!-- CT-15 : source unique de l'identite NATURELLE d'une entite du cadre (code de cours #455, courriel, triplet du groupe-cours) -->
     <script src="js/navigation.js?v=20260910c"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
-    <script src="js/preferences.js?v=20260901a"></script> <!-- API centralisée préférences + migration V3 (doit précéder modes.js) ; #485 : défaut rapportPresencesOptions -->
+    <script src="js/preferences.js?v=20260910a"></script> <!-- API centralisée préférences + migration V3 (doit précéder modes.js) ; #485 : défaut rapportPresencesOptions -->
 
     <script src="js/modes.js?v=20260906a"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
@@ -14513,7 +14488,7 @@
     <script src="js/repertoires-bibliotheque.js"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
     <script src="js/pratiques-bibliotheque.js?v=20260903b"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/pratiques-gestion.js?v=20260906b"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
-    <script src="js/preferences-v2.js?v=20260910b"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
+    <script src="js/preferences-v2.js?v=20260910c"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=20260903f"></script> <!-- #649 : un seul chemin de suppression des productions, le garde mort est parti -->
     <script src="js/etudiants.js?v=20260910b"></script>
     <script src="js/productions-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
@@ -14715,7 +14690,7 @@
     <script src="js/accompagnement.js?v=20260910b"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20260910f"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-hover.js?v=20260910g"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
     <script src="js/accompagnement-contenu-popup.js?v=20260910d"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20260910d"></script>
     <script src="js/guides-pedagogiques.js?v=20260629a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
@@ -14723,7 +14698,7 @@
     <script src="js/export-resultats-finaux.js?v=20260905a"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260910i"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260910j"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
