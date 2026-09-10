@@ -217,15 +217,62 @@ texte de l'étape parle des pratiques), mais c'est à éprouver à l'écran.
 
 ---
 
+## Lot E — l'encastrement résiduel (10 sept. 2026)
+
+**Ce que le lot cherchait** : l'Aide présente-t-elle la pratique de Grégoire
+(601-101, SRPNF, IDME, ELLAC, la littérature) comme LA règle de l'application ?
+
+⚠ **Le lot ne cherchait pas à la faire disparaître.** C'est cette pratique qui a
+servi à concevoir l'application, et **l'échelle IDME est SEEDÉE** — règle de
+Grégoire du 26 août : « rien ne doit être codé en dur, mais l'échelle IDME peut
+être seedée ». La question était : reste-t-elle présentée comme un EXEMPLE ?
+
+**Verdict : largement propre.** Le travail d'assouplissement de l'été a tenu.
+
+| Terme | Occ. | Verdict |
+|---|---|---|
+| `601-101` | 2 | ✅ « **Ex.** 601-101-MQ » et « (601-101, **etc.** ) » |
+| `Gérald-Godin` | 1 | ✅ référence bibliographique (rapport PAREA), pas l'institution de Grégoire |
+| `Bédard` | 3 | ✅ 2 en bibliographie ; 1 comme nom dans un exemple de partage |
+| `ELLAC` | 3 | ✅ « inspirée du modèle ELLAC », plus l'entrée de glossaire |
+| `SRPNF` | 8 | ✅ « **Grille d'exemple fournie avec l'application, et non une structure du logiciel** […] Toute grille fonctionne de la même façon, quel que soit ton nombre de critères et ta discipline » |
+| `IDME` | 22 → 21 | ✅ majoritairement (« Autres échelles possibles », « ❌ Désactiver si : tu utilises une échelle chiffrée », « Personnaliser l'échelle IDME si nécessaire »). **Trois restes**, corrigés ci-dessous |
+
+| # | L'écart | Preuve | Disposition |
+|---|---|---|---|
+| E.1 | « **Niveau IDME** : Badge coloré (I/D/M/E) » | le badge rend `art.niveau` coloré par `art.echelleId` (`profil-etudiant-sections-affichage.js:724-725,743`) : c'est le code de TON échelle | **corrigé** |
+| E.2 | idem dans un second passage, avec les quatre couleurs | même mécanisme | **corrigé** (cadré « Avec l'échelle IDME fournie : ») |
+| E.3 | export d'échelle : « Contient : **niveaux IDME**, seuils, descriptions » | l'export porte les niveaux de l'échelle exportée, quelle qu'elle soit | **corrigé** |
+
+**Un faux positif instructif.** Le grep « structure du logiciel » avait mordu sur
+*« Grille d'exemple fournie avec l'application, **et non** une structure du
+logiciel »* — une **négation**. ⮕ Un motif de recherche ne lit pas la syntaxe :
+tout candidat se relit en contexte avant d'être appelé un écart.
+
+**Ce que la sentinelle protège** : non pas l'absence d'IDME, mais la **présence des
+cadrages** qui en font un exemple (« et non une structure du logiciel », « Autres
+échelles possibles », « adaptable à ton contexte », les « Ex. » collés à 601-101).
+C'est la régression à craindre, pas la mention elle-même.
+
+**Sentinelle** : `tests/unit/sentinelle-820-aide-exemples-restent-des-exemples.test.js`
+(4 essais). **Sept ablations, sept rouges**, arbre restauré par sha256.
+
+⚠ **Un second test tautologique attrapé par son break-test.** La vérification des
+mentions de 601-101 utilisait une fenêtre de 60 caractères : elle restait VERTE
+après ablation du « Ex. », parce qu'elle attrapait le « Ex. » de la **ligne
+voisine** (« Titre : Ex. Écriture et littérature »). Le marqueur doit être **collé**
+à la mention. ⮕ Même leçon qu'au lot A, sous une autre forme : **le contexte large
+d'une assertion est une porte ouverte au faux vert.**
+
+---
+
 ## Lots à venir
 
 - ~~**Lot A — balayage mécanique**~~ : **fait le 10 sept.**, valeurs chiffrées et formats compris.
 - ~~**Lot B — cohérence des surfaces**~~ : **fait le 10 sept.** (voir plus haut).
 - ~~**Lot C — visite guidée**~~ : **fait le 10 sept.** (voir plus haut).
 - **Lot D — trous de couverture** : les 1 554 commits de l'été contre l'Aide.
-- **Lot E — encastrement résiduel** : 601-101, Cégep Gérald-Godin, Bédard, SRPNF, IDME,
-  ELLAC, français, littérature. Le pilote suggère que la plupart sont déjà cadrés comme
-  exemples ; à confirmer entrée par entrée.
+- ~~**Lot E — encastrement résiduel**~~ : **fait le 10 sept.** (voir plus haut). Le pilote avait vu juste : largement propre.
 
 ## Garde-fous à ne pas « corriger » par mégarde
 
