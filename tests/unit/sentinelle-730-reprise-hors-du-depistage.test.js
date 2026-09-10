@@ -7,7 +7,8 @@
  * `calculerMoyennesCriteres`, `calculerMoyennesCriteresRecents`, `_filtrerEtTrierEvaluationsIPB`
  * (donc `calculerIPB` et le suivi des fondations), `calculerIndicesNDerniersArtefacts` (la performance
  * du RàI), `identifierDefiSpecifique` (profil-etudiant-calculs.js) ; `calculerDirectionRisque` et
- * `calculerDirectionsCriteres` (profil-etudiant-sections-affichage.js). L'élève qui a repris sa
+ * `calculerDirectionsCriteres` (profil-etudiant-sections-affichage.js). (`calculerDirectionRisque`,
+ * dont le résultat n'était lu par personne, est retirée au #823 — six sites restent gardés ici.) L'élève qui a repris sa
  * dissertation (55 → 75) était lu « niveau 3 » : le dépistage voyait 50, 75, 55 là où la note du cours
  * voit 50, 75, 70. Les deux sœurs du même fichier (`obtenirEchelleCommuneDesEvaluations`,
  * `diagnostiquerConversionNiveaux`) filtraient déjà : c'est leur patron qui est repris.
@@ -69,15 +70,7 @@ function monter() {
     chargerScript('js/interpretation-config.js', globaux, win);
     chargerScript('js/profil-etudiant-calculs.js', globaux, win);
     chargerScript('js/profil-etudiant-helpers.js', globaux, win);
-    // `calculerDirectionRisque` n'est pas exportée sur window : exposée par un accesseur injecté avant le `})();` final.
-    let code = readFileSync(path.join(RACINE, 'js/profil-etudiant-sections-affichage.js'), 'utf8');
-    const fin = code.lastIndexOf('})();');
-    code = code.slice(0, fin) + '\n;window.__calculerDirectionRisque = calculerDirectionRisque;\n' + code.slice(fin);
-    const { document: _d, ...autres } = globaux;
-    const storage = () => ({ _d: {}, getItem(k) { return k in this._d ? this._d[k] : null; }, setItem(k, v) { this._d[k] = String(v); }, removeItem(k) { delete this._d[k]; }, clear() { this._d = {}; } });
-    const fauxDoc = { addEventListener() {}, removeEventListener() {}, getElementById: () => null, querySelector: () => null, querySelectorAll: () => [], createElement: () => ({ style: {}, classList: { add() {}, remove() {}, contains() { return false; } }, setAttribute() {}, appendChild() {}, addEventListener() {} }), body: { classList: { add() {}, remove() {}, contains() { return false; } }, addEventListener() {}, appendChild() {}, setAttribute() {}, getAttribute() { return null; }, style: {} }, documentElement: { addEventListener() {} } };
-    new Function('window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(autres), '"use strict";\n' + code)(win, fauxDoc, console, storage(), storage(), ...Object.values(autres));
-    win.calculerDirectionRisque = win.__calculerDirectionRisque;
+    chargerScript('js/profil-etudiant-sections-affichage.js', globaux, win);
     return win;
 }
 
@@ -101,10 +94,6 @@ describe('#730 · la reprise remplace, dans le dépistage aussi', () => {
     it('identifierDefiSpecifique : Structure sur les trois derniers (0,40 + 0,75 + 0,65) / 3 = 0,60 — avant 0,5167', () => {
         const defi = monter().identifierDefiSpecifique(DA);
         expect([defi.defi, r3(defi.score)]).toEqual(['Structure', 0.6]);
-    });
-    it('calculerDirectionRisque : risque récent 35,0 (sur 50, 75, 70) — avant 40,0 (sur 50, 75, 55)', () => {
-        const d = monter().calculerDirectionRisque(DA);
-        expect(d.risqueRecent).toBe('35.0');
     });
     it('calculerDirectionsCriteres : Structure, moyenne récente 60,0 — avant 51,7', () => {
         const d = monter().calculerDirectionsCriteres(DA);

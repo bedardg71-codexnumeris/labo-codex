@@ -27,8 +27,10 @@ const SEUILS_PAR_DEFAUT = {
     // Seuil minimal pour détecter une progression ou régression significative
     progressionArtefacts: 0.10,  // 10 points sur échelle 0-1
 
-    // Direction du risque (évolution temporelle)
-    // Seuil minimal pour détecter une augmentation ou diminution du risque
+    // Sensibilité des flèches par critère (curseur de Labo › Outils d'observation ;
+    // #823 : ex-« Direction du risque », nom de clé conservé). Variation minimale
+    // de la moyenne d'un critère entre deux fenêtres d'analyse décalées d'une
+    // production pour afficher → ou ← (`calculerDirectionsCriteres`).
     directionRisque: 0.05,  // 5 points sur échelle 0-1
 
     // Fenêtre d'analyse des patterns

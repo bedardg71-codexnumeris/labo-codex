@@ -846,7 +846,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'exemple',
                 titre: 'Valeurs par défaut',
-                contenu: 'Progression\u00a0: 5 points (%). Direction du risque\u00a0: 5 points (%). Défi\u00a0: ≤\u00a070\u00a0%.'
+                contenu: 'Progression\u00a0: 5 points (%). Sensibilité des flèches par critère\u00a0: 5 points (%). Défi\u00a0: ≤\u00a070\u00a0%.'
             },
             {
                 type: 'conseil',

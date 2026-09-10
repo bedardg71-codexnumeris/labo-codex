@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.129',
+            couleur: 'bleu',
+            titre: 'Deux réglages qui ne faisaient rien s\'en vont, la fenêtre d\'analyse fonctionne',
+            items: [
+                '<strong>Deux réglages de Labo&nbsp;›&nbsp;Outils d\'observation sont retirés&nbsp;: «&nbsp;Découpler Performance (P) et Niveau d\'attention (N)&nbsp;» et «&nbsp;Unité d\'affichage de l\'assiduité&nbsp;».</strong> Tu pouvais les changer, aucun écran ne bougeait&nbsp;: rien ne les lisait. Ils promettaient ce que l\'application ne faisait pas. Rien de ce que tu as saisi n\'est touché, et si tu les avais réglés, ce réglage ne changeait déjà rien.',
+                '<strong>La «&nbsp;Fenêtre d\'analyse des patterns&nbsp;» fonctionne maintenant.</strong> Le nombre de dernières productions que tu tapais restait dans le panneau&nbsp;: les calculs du profil (indice de progression, flèches par critère, «&nbsp;sur N&nbsp;» de fiabilité du Suivi du groupe) analysaient toujours <strong>trois</strong> productions, quoi que tu tapes. La valeur du champ s\'applique désormais. ⚠ <strong>Si tu y avais mis un autre nombre, il est reparti à trois</strong>&nbsp;: comme il n\'a jamais eu d\'effet, le reprendre aurait changé tes profils sans que tu l\'aies demandé. Retape-le, et cette fois ça compte.',
+                '<strong>Le curseur «&nbsp;Direction du risque&nbsp;» s\'appelle «&nbsp;Sensibilité des flèches par critère&nbsp;».</strong> Il agit, mais pas sur ce que son nom disait&nbsp;: il règle la variation minimale de la moyenne d\'un critère, d\'une fenêtre d\'analyse à la précédente, pour qu\'une flèche (→ ou ←) apparaisse après ce critère dans le profil (carte RàI, barres SRPNF, phrase «&nbsp;Apprentissage&nbsp;: présentement en amélioration&nbsp;»). Sa valeur et son effet ne changent pas&nbsp;; seuls le nom et l\'aide disent enfin la vérité.'
+            ]
+        },
+        {
             version: '1.128',
             couleur: 'bleu',
             titre: 'La Consolidation des apprentissages est retir\u00e9e',
