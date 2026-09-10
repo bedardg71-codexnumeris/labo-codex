@@ -25,20 +25,54 @@ const TERME = lire('js/accompagnement-contenu-terme.js');
 describe('Infobulles — les chiffres qu\'elles donnent sont ceux du code', () => {
 
     it('les zones de couleur du tableau de bord sont celles que l\'écran affiche', () => {
-        // Les bornes sont EN DUR dans le rendu (tableau-bord-apercu.js n'appelle
-        // jamais obtenirSeuil) : on les extrait du rendu lui-même.
+        // #818 (10 sept. 2026) — CE BANC SE COMPARAIT À LUI-MÊME. Il extrayait les
+        // bornes des littéraux du rendu et vérifiait que l'infobulle les recopiait :
+        // deux copies d'un même arrondi fait à la main, qu'il déclarait concordantes.
+        // Or l'écran annonçait 50 et 80 là où les arrêts du dégradé tombent à 47,5 et
+        // 82,5. Les libellés se CALCULENT désormais ; ce banc recalcule la même chose
+        // depuis les DONNÉES lues à la source (les arrêts, les bornes de l'axe) et
+        // confronte l'infobulle à ce résultat, pas au rendu.
+        //
+        // ⚠ Ces bornes ne classent rien : la barre est un dégradé continu et la
+        // couleur d'un point est interpolée. Elles situent des changements de teinte.
         const tdb = lire('js/tableau-bord-apercu.js');
-        const zones = [...tdb.matchAll(/>(Fragile|Modéré|Favorable|Très favorable)<[\s\S]{0,120}?>([0-9]{2}-[0-9]{2}%|≥ ?[0-9]{2}%)</g)]
-            .map(m => [m[1], m[2].replace('≥ ', '≥ ')]);
-        expect(zones.length).toBe(4);
+
+        const borneAxe = (nom) => {
+            const m = tdb.match(new RegExp(`const ${nom} = ([0-9.]+);`));
+            expect(m, `${nom} a disparu de tableau-bord-apercu.js`).toBeTruthy();
+            return parseFloat(m[1]);
+        };
+        const axeMin = borneAxe('ECHELLE_DISTRIBUTION_MIN');
+        const axeMax = borneAxe('ECHELLE_DISTRIBUTION_MAX');
+
+        const positions = [...tdb.matchAll(/\{\s*position:\s*(\d+),\s*couleur:/g)].map((m) => parseInt(m[1], 10));
+        expect(positions.length, 'ARRETS_DEGRADE ne porte plus quatre arrêts').toBe(4);
+
+        // La même conversion que le module : position sur la barre → score.
+        const pct = (pos) => String(Math.round((axeMin + (pos / 100) * (axeMax - axeMin)) * 1000) / 10).replace('.', ',');
+        const attendus = positions.map((pos, i) =>
+            i < positions.length - 1 ? `${pct(pos)}-${pct(positions[i + 1])}%` : `≥ ${pct(pos)}%`
+        );
+
+        const noms = ['Fragile', 'Modéré', 'Favorable', 'Très favorable'];
+
+        // L'écran DÉRIVE ses libellés : chaque bande appelle le calculateur, dans l'ordre.
+        noms.forEach((nom, i) => {
+            const motif = new RegExp(`>${nom}<[\\s\\S]{0,120}?libelleBandeDistribution\\(${i}\\)`);
+            expect(motif.test(tdb), `la bande « ${nom} » recopie un libellé au lieu de le calculer`).toBe(true);
+        });
 
         const bulle = HOVER.match(/'tdb-zones-couleur':\s*\n?\s*'((?:[^'\\]|\\.)*)'/);
         expect(bulle).toBeTruthy();
-        for (const [nom, bornes] of zones) {
+        noms.forEach((nom, i) => {
             expect(bulle[1]).toContain(nom);
-            // les bornes de l'écran, avec l'espace fine de l'infobulle
-            expect(bulle[1].replace(/\s%/g, '%')).toContain(bornes.replace(/\s/g, ' ').replace(' %', '%'));
-        }
+            // les bornes calculées, avec l'espace fine de l'infobulle
+            expect(
+                bulle[1].replace(/\s%/g, '%'),
+                `l'infobulle ne porte pas la borne calculée de « ${nom} » (attendu ${attendus[i]})`
+            ).toContain(attendus[i]);
+        });
+
         // Ces zones ne sont PAS configurables : l'infobulle ne doit pas le prétendre.
         expect(tdb).not.toContain('obtenirSeuil');
         expect(bulle[1]).not.toMatch(/configurable/i);

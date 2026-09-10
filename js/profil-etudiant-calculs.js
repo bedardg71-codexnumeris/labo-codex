@@ -1621,8 +1621,14 @@ function calculerProgressionEleve(da) {
 
 /**
  * Identifie le défi spécifique (critère SRPNF le plus faible) sur les N derniers artefacts
- * Le nombre N vient des seuils d'interprétation (interpretation-config.js — plus d'UI de réglage, #299)
- * Seuil: Valeur configurable (défaut: 71.25%, ajustable via interpretation-config.js)
+ * Le nombre N et le seuil viennent tous deux des seuils d'interprétation
+ * (interpretation-config.js) et se règlent dans Labo > Outils d'observation :
+ * « Fenêtre d'analyse des patterns » et « Seuil de défi spécifique » (défaut 70 %).
+ * #817 — la mention « défaut: 71.25% » qui vivait ici était fausse : ce nombre
+ * n'apparaît nulle part dans interpretation-config.js. Il venait des deux copies
+ * en dur de l'AFFICHAGE (diagnostics par critère et badges de critères), depuis
+ * alignées elles aussi sur `defiSpecifique`. La mention « plus d'UI de réglage,
+ * #299 » était périmée : les deux réglages ont retrouvé une UI.
  *
  * @param {string} da - Numéro de DA
  * @returns {Object} - { defi: <nom du critère le plus faible, tel qu'il est
