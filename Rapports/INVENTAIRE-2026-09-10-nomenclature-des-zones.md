@@ -81,6 +81,7 @@ La consigne en dénombrait trois. L'inventaire en trouve un quatrième.
 | 2 | Seuils d'interprétation (`interpretation-config.js`) | Fragile · Acceptable · Bon · Excellent (+ « **Critique** » en commentaire l. 55) | 70 / 80 / 85 | oui, 4 paliers | **oui** |
 | 3 | Contexte d'élève (`profil-etudiant-calculs.js:2010+`) | Très favorable · Favorable · Modéré · Fragile | A et C : 85 / 75 / 65 | oui, 4 paliers | non |
 | 4 | **Interprétation A-C** (`profil-etudiant-helpers.js:1040+`) | Favorable · Acceptable · Complétion fragile · … | A et C : 90 / 80 | oui, ≥ 9 branches | non |
+⚠ *Corrigé le 10 sept. au soir (lot A)* : l'entrée du mécanisme 1 n'est **pas** un « indice composite » (§ 2, § 3 ci-dessus) — chaque barre de l'Aperçu positionne **un** indice, A, C ou P (`positionSurEchelleDistribution(e.valeur)`, une barre par indice). Les bandes s'appliquent donc à chaque indice pris seul.
 
 ⚠ Le mécanisme 4 **n'était pas inventorié**. Il emploie les mêmes mots que le 3, sur le
 même écran, avec des bornes différentes.
@@ -155,6 +156,12 @@ d'apprentissage observé**, allant de Fragile à Très favorable ».
 | « zéro occurrence dans `bilan*.js` » (consigne) | **périmé** — corrigé au §4, conclusion maintenue |
 | « dix fichiers » (consigne) | **périmé** — 27 bruts, 13 dans le périmètre |
 | `pratique-pan-specifications.js`, `pack-demo-20.js`, `echelles.js` | **refusé** — homonymes, hors périmètre |
+| « indice composite » comme entrée du mécanisme 1 (§ 2, § 3) | **périmé** — corrigé au § 3 : un indice par barre |
+| « Favorable » et « Fragile » ont trois définitions (§ 2) — *disposition révisée* | **traité, lot A** (10 sept., 1.128.4) : les quatre règles sont écrites en un seul endroit (`js/contexte-qualification.js`) ; les définitions, elles, n'ont PAS bougé — tableau au § 8 |
+| Une 4e borne du mécanisme 2, fixe à 60 %, non inventoriée (§ 8) | **rattaché à #821** — nommée à la source (`BORNE_FIXE_INSUFFISANT`), pas déplacée |
+| La branche « Insuffisant » du mécanisme 3 est inatteignable (§ 8) | **inscrit** — `#822` |
+| « Assiduité critique » / « Complétion critique » : le MÊME libellé sous deux bornes (60 et 70) sur le même écran (§ 8) | **rattaché à #821** — c'est un cas du tableau, pas un item de plus |
+| `obtenirCouleurIndice` (`profil-etudiant-sections-affichage.js`) colore la note finale et P avec 85 / 70 en dur, ni nommés ni réglables | **inscrit et continué** — hors des quatre mécanismes (il qualifie une note, pas un contexte) ; rattaché à #821 pour mémoire, non déplacé |
 
 ---
 
@@ -182,3 +189,66 @@ bon marché.
 - **Temps 4** — les nomenclatures candidates chiffrées : non fait. L'intention est
   tranchée (§1), les mots ne le sont pas.
 - ⛔ **Rien n'est renommé.** Aucun fichier de `js/` n'a été touché par cet inventaire.
+
+---
+
+## 8. LOT B — CE QUI DIVERGE VRAIMENT, mécanisme par mécanisme
+
+> **Écrit le 10 septembre 2026 au soir par Claude Code**, une fois les quatre règles
+> côte à côte dans `js/contexte-qualification.js` (lot A, 1.128.4). **Constater, pas
+> proposer** : aucune borne n'est recommandée ici — c'est de la pédagogie, et c'est ce
+> tableau qui part chez l'orthopédagogue cet automne.
+>
+> Lecture : les pourcentages sont ceux de l'indice concerné. Le mécanisme 1 s'applique à
+> **un** indice par barre (A, C ou P) et **ne classe pas** ; les mécanismes 3 et 4 lisent
+> A **et** C ; le mécanisme 2 lit un pourcentage, et ses trois bornes sont **réglables**
+> (valeurs par défaut ci-dessous : 70 / 80 / 85). « Étendue » = la plage de valeurs où
+> deux mécanismes emploient le même mot pour des situations différentes, en points de
+> pourcentage.
+
+### 8.1 Les mots employés par plus d'un mécanisme
+
+| Mot | Mécanisme 1 · Aperçu | Mécanisme 2 · seuils (réglables) | Mécanisme 3 · contexte (profil) | Mécanisme 4 · interprétation A-C (profil) | Étendue du désaccord |
+|---|---|---|---|---|---|
+| **Favorable** | bande 65 – 82,5 | — | A ≥ 75 **et** C ≥ 75 (jusqu'à ce que les deux atteignent 85) | A ≥ 90 **et** C ≥ 90 | 3 ↔ 4 : **15 points** (75 → 90). 1 ↔ 3 : 10 points (65 → 75, « Favorable » pour 1, « Modéré » pour 3) + 2,5 points (82,5 → 85, « Très favorable » pour 1, « Favorable » pour 3). 1 ↔ 4 : 25 points |
+| **Très favorable** | bande ≥ 82,5 | — | A ≥ 85 **et** C ≥ 85 | — | 1 ↔ 3 : **2,5 points** |
+| **Fragile** | bande 30 – 47,5 | curseur « Fragile » : < 70 (nom du palier dans le panneau et l'infobulle ; le code, lui, dit « insuffisante » ou « critique ») | A < 65 **ou** C < 65 | « Mobilisation / Assiduité / Complétion fragile » : 70 ≤ x < 80, l'autre indice ≥ 70 | 3 ↔ 4 : **aucun chevauchement** — le « fragile » du 4 commence 5 points **au-dessus** de la fin du « Fragile » du 3. 1 ↔ 3 : 17,5 points. 2 ↔ 3 : 5 points. 1 ↔ 2 : 22,5 points |
+| **Modéré** | bande 47,5 – 65 | — | A ≥ 65 **et** C ≥ 65, sous 75 sur l'un | — | 1 ↔ 3 : **aucun chevauchement**, bandes adjacentes (17,5 points de large pour 1, 10 pour 3) |
+| **Acceptable** | — | 70 ≤ x < 80 | — | A ≥ 80 **et** C ≥ 80, sans que les deux atteignent 90 | 2 ↔ 4 : **aucun chevauchement** — l'« Acceptable » du 4 commence là où celui du 2 finit (10 points) |
+| **Critique** | — | « Assiduité critique » / « Complétion critique » : **< 60**, borne **fixe**, non réglable | — | « Assiduité critique » / « Complétion critique » : **< 70** | 2 ↔ 4 : **10 points, pour la MÊME chaîne de caractères**, affichée sur le même écran (carte de l'indice et carte Mobilisation du profil) |
+| **Insuffisant** | — | 60 ≤ x < 70 (borne fixe) | branche « Insuffisant » **inatteignable** (le palier précédent est un OU qui attrape tout) | — | sans objet : un seul mécanisme l'affiche |
+| **Excellent / exemplaire** | — | ≥ 85 (« Taux de complétion excellent », « Assiduité exemplaire ») | — | la prose de « Favorable » dit « **Excellent** engagement comportemental » : ≥ 90 sur les deux | 2 ↔ 4 : 5 points |
+| **Bon** | — | 80 ≤ x < 85 | — | — | un seul mécanisme |
+
+### 8.2 Ce que le tableau montre, sans le trancher
+
+- **Deux paires ne se recoupent jamais** : « Fragile » (3 ↔ 4) et « Acceptable » (2 ↔ 4).
+  Ce ne sont pas des bornes qui divergent de quelques points, ce sont des mots posés sur
+  des plages disjointes.
+- **Un même libellé, deux bornes** : « Assiduité critique » à < 60 (carte de l'indice A)
+  et à < 70 (carte Mobilisation), dans le même profil.
+- **Une borne que personne ne règle** : le 60 % du mécanisme 2 est en dur depuis le
+  23 octobre 2025 ; les trois curseurs du panneau ne l'atteignent pas.
+- **Un palier qui n'existe que dans le code** : « Insuffisant » du mécanisme 3.
+- **Le mécanisme 1 n'est comparable qu'en apparence** : ses bandes situent des teintes
+  sur un dégradé, elles ne classent personne. Le mettre dans le tableau montre que ses
+  mots coïncident avec ceux du mécanisme 3 sans jamais coïncider avec ses chiffres.
+
+### 8.3 Ce que le lot A a livré, et ce qu'il n'a pas touché
+
+- **Livré** : `js/contexte-qualification.js` — les quatre règles, leurs bornes nommées
+  avec provenance et date, déplacées telles quelles depuis `tableau-bord-apercu.js`
+  (lecture de la géométrie, pas copie), `profil-etudiant-helpers.js`,
+  `profil-etudiant-calculs.js`, `etudiants.js` ; la carte Mobilisation du profil lit
+  `BORNES_MOBILISATION` au lieu de comparer A et C à des littéraux, et écrit les mêmes
+  chiffres qu'avant, calculés. Sentinelle `sentinelle-821a-quatre-regles-un-seul-endroit`
+  (24 essais, 8 break-tests rouges). Harnais AVANT/APRÈS sur `5c29d3fd` : **1630 cas,
+  0 différence**, rendu HTML de la carte Mobilisation compris.
+- **Pas touché** : aucun mot, aucune borne, aucune donnée. La divergence A = 80 %,
+  C = 80 % (« Favorable » / « Acceptable ») est **verrouillée telle quelle** par la
+  sentinelle : la faire disparaître la fait rougir.
+- **Supposé, et à corriger si faux** : la géométrie du dégradé (mécanisme 1) reste dans
+  `tableau-bord-apercu.js`, parce que la sentinelle du lot B de l'audit de l'Aide la
+  verrouille là par le texte et que la consigne interdisait de la réécrire ; le module
+  la LIT. Les quatre mots de la légende sont donc écrits deux fois (module et rendu), et
+  une sentinelle vérifie qu'ils restent identiques dans le même ordre.

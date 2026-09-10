@@ -86,6 +86,12 @@ function libelleBandeDistribution(i) {
         : `≥ ${borne(i)}%`;
 }
 
+// #821 lot A (10 sept. 2026) — `contexte-qualification.js` LIT la géométrie du
+// dégradé (bandesLegendeApercu) pour la poser à côté des trois autres règles
+// qui qualifient un contexte ; il ne la recopie pas. Exposée ici, à sa source.
+window.ARRETS_DEGRADE = ARRETS_DEGRADE;
+window.scoreALaPositionDistribution = scoreALaPositionDistribution;
+
 let _etudiantsPrioritaires = [];
 let _tousEtudiantsEnrichis = []; // Tous les étudiants avec indices calculés
 let _filtresActifs = []; // Filtres toggle : 'P', 'M', 'suivi', 'rai'

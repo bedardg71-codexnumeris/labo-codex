@@ -248,33 +248,10 @@ function calculerAssiduitéGlobale(da) {
     return Math.min(100, Math.round(taux));
 }
 
-/**
- * Obtient la couleur selon les seuils configurés par l'utilisateur
- * @param {number} pourcentage - Valeur en pourcentage (0-100)
- * @returns {string} - Couleur CSS
- */
-function obtenirCouleurSelonSeuils(pourcentage) {
-    // Charger les seuils depuis localStorage
-    let seuils;
-    if (typeof chargerSeuilsInterpretation === 'function') {
-        seuils = chargerSeuilsInterpretation().interpretation;
-    } else {
-        // Valeurs par défaut si le module n'est pas chargé
-        seuils = { excellent: 0.85, bon: 0.80, acceptable: 0.70 };
-    }
-
-    const valeur = pourcentage / 100; // Convertir en 0-1
-
-    if (valeur >= seuils.excellent) {
-        return '#0284c7'; // Bleu (excellent)
-    } else if (valeur >= seuils.bon) {
-        return 'var(--vert-succes)'; // Vert (bon)
-    } else if (valeur >= seuils.acceptable) {
-        return '#ca8a04'; // Jaune (acceptable)
-    } else {
-        return '#dc2626'; // Rouge (fragile/critique)
-    }
-}
+// #821 lot A (10 sept. 2026) — `obtenirCouleurSelonSeuils` vit dans
+// `contexte-qualification.js` (mécanisme 2 : un seuil sur un scalaire, réglable).
+// Les trois enveloppes ci-dessous l'appellent par `window`. Son repli « module
+// des seuils absent » (les trois défauts recopiés en dur) est parti avec elle.
 
 /**
  * Obtient la couleur d'affichage selon le taux d'assiduité

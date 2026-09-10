@@ -35,7 +35,7 @@ const PROD = (echeance) => [{ id: 'P1', titre: 'Analyse 1', type: 'travail', pon
 const EVAL_AUTRE = { id: 'EA', etudiantDA: AUTRE, productionId: 'P1', noteFinale: 80, niveauFinal: 'M', echelleId: 'E0', ponderationCouverte: 100, verrouillee: true,
     dateEvaluation: '2026-02-02T12:00:00.000Z', retroactionFinale: 'R.', criteres: [{ critereId: 'c1', critereNom: 'Structure', niveauSelectionne: 'M' }, { critereId: 'c2', critereNom: 'Nuance', niveauSelectionne: 'M' }] };
 
-const MODULES = ['js/interpretation-config.js', 'js/profil-etudiant-calculs.js', 'js/profil-etudiant-helpers.js', 'js/tableau-bord-apercu.js'];
+const MODULES = ['js/interpretation-config.js', 'js/contexte-qualification.js', 'js/profil-etudiant-calculs.js', 'js/profil-etudiant-helpers.js', 'js/tableau-bord-apercu.js'];
 const EXPORTS = (() => { const n = new Set(); for (const f of MODULES) for (const m of readFileSync(path.join(RACINE, f), 'utf8').matchAll(/^\s*window\.([A-Za-z_$][\w$]*)\s*=/gm)) n.add(m[1]); return [...n]; })();
 
 /** Monte le groupe : `echeance` des deux travaux, `evaluations` du groupe, `A` de l'élève. */
@@ -62,6 +62,7 @@ function monter({ echeance, evaluations, A }) {
         accordTermeProduction: (m) => m, obtenirTermeProduction: () => 'travail', anonymiserNom: undefined };
     for (const nom of EXPORTS) if (!(nom in globaux) && !/^[A-Z]/.test(nom) && nom !== 'SEUILS_PAR_DEFAUT') globaux[nom] = fwd(nom);
     chargerScript('js/interpretation-config.js', globaux, win);
+    chargerScript('js/contexte-qualification.js', globaux, win);   // #821 lot A : les quatre règles de qualification d'un contexte
     chargerScript('js/profil-etudiant-calculs.js', globaux, win);
     chargerScript('js/profil-etudiant-helpers.js', globaux, win);
     // `afficherAlerteNonParticipation` n'est pas exportée : exposée par un accesseur injecté avant le `})();` final.

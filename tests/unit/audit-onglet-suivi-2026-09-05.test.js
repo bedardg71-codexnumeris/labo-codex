@@ -179,7 +179,7 @@ function jeuBase() {
 /* ---------------------------------------------------------------------------------------------
    Le bac à sable
    --------------------------------------------------------------------------------------------- */
-const MODULES = ['js/interpretation-config.js', 'js/pratiques/pratique-configurable.js', 'js/pratiques/pratique-registre.js',
+const MODULES = ['js/interpretation-config.js', 'js/contexte-qualification.js', 'js/pratiques/pratique-configurable.js', 'js/pratiques/pratique-registre.js',
     'js/pratiques/pratique-manager.js', 'js/pratiques/pratique-sommative.js', 'js/pratiques/pratique-pan-standards.js',
     'js/pratiques/pratique-pan-specifications.js', 'js/pratiques/denotation-jugements.js', 'js/portfolio.js', 'js/indices.js',
     'js/saisie-presences.js', 'js/profil-etudiant-actions.js', 'js/profil-etudiant-calculs.js', 'js/profil-etudiant-helpers.js',
@@ -282,6 +282,7 @@ function monter(jeu, opts = {}) {
     for (const nom of EXPORTS_WINDOW) if (!(nom in globaux) && !/^[A-Z]/.test(nom) && !OBJETS_EXPORTES.includes(nom)) globaux[nom] = fwd(nom);
 
     chargerScript('js/interpretation-config.js', globaux, win);
+    chargerScript('js/contexte-qualification.js', globaux, win);   // #821 lot A : les quatre règles de qualification d'un contexte
     chargerScript('js/pratiques/pratique-configurable.js', globaux, win);
     chargerScript('js/pratiques/pratique-registre.js', Object.assign({ PratiqueConfigurable: win.PratiqueConfigurable }, globaux), win);
     chargerScript('js/pratiques/pratique-manager.js', Object.assign({ PratiqueConfigurable: win.PratiqueConfigurable }, globaux), win);
