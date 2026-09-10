@@ -7,6 +7,78 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 10 SEPT. 2026, NUIT : LE JOURNAL SANS FOND, PUIS LA FENÊTRE DE SOUTIEN (1.127.5)
+
+> ✅ **`main` à 1.127.5, build `0909-2314`, fusionné en avance rapide (aucun conflit possible : `main`
+> n'avait pas bougé). Vitest 521 fichiers / 5728 essais, vert.**
+>
+> **CE QUI A ÉTÉ FAIT — DEUX LOTS, LE SECOND DEMANDÉ EN COURS DE ROUTE.**
+>
+> **#811 (1.127.4) — LE JOURNAL DE BORD D'UNE ÉVALUATION N'AVAIT PAS DE FOND.** Rapporté par Grégoire
+> sur son iPad. `.journal-modal { background: var(--surface); }` — et **`--surface` n'est déclarée
+> nulle part dans l'app**, sans valeur de repli. La déclaration était donc invalide, le fond restait
+> transparent, et le contenu se lisait à même le voile de `.modal-overlay`. Le bloc entier était écrit
+> contre un jeu de noms étranger : **onze `var()`** rebranchées sur la palette réelle, sur le patron de
+> `.modal-contenu`. Les replis en dur qui masquaient les autres noms morts partent avec (zéro-dette).
+> ⮕ Une seule décision de goût, dite comme telle : la puce de détail passe de `--texte-secondaire` à
+> `--texte-principal`, la première ne rendant que 3,74:1 sur `--surface-element` en mode sombre.
+>
+> **#815 (1.127.5) — LA FENÊTRE « SOUTENIR LABO CODEX ».** Grégoire : « difficilement lisible et un peu
+> désordonnée ». **Ce n'était ni la longueur de ligne (64 caractères) ni le contraste (tout tenait
+> AA)** : c'était l'absence de hiérarchie — titre, quatre titres de section et six items sur huit
+> portaient tous `--accent-primaire` en gras. Trois blocs cadrés sur deux colonnes remplacent les
+> quatre sections ; le bleu ne sert plus qu'aux liens. 759 px contre 945.
+> ⚠ **DEUX MAQUETTES lui ont été soumises à l'écran avant d'écrire une ligne de code**, et il a
+> tranché : structure de la maquette B, **sa prose à lui** (mes phrases d'accroche refusées), la Voûte
+> retirée, et le blogue décrit — « procédures, trucs et astuces de Labo Codex, et des analyses
+> critiques sur la technologie, la pédagogie et l'éducation ».
+> ⮕ **CE QUE SA DÉCISION A COÛTÉ, ET COMMENT ÇA S'EST RÉGLÉ** : ses libellés sont longs à gauche et
+> courts à droite, donc les colonnes ne s'équilibraient pas (427 px contre 271) et `align-items:
+> stretch` creusait un vide de 200 px sous la colonne courte — **le mécanisme exact de #807**.
+> `flex-start`, et « Suivre le projet » déplacé dans la colonne de droite (427 contre 520).
+>
+> **LE VRAI APPORT DU LOT N'EST NI L'UN NI L'AUTRE — C'EST CE QUE #811 A RÉVÉLÉ.**
+> `sentinelle-567-variables-css-fantomes` **connaissait `--surface`** et la tolérait, pour un usage,
+> jugé anodin. Elle COMPTAIT les usages sans les QUALIFIER : avec un repli, une variable manquante est
+> bénigne ; **sans repli, elle annule la déclaration**. Un troisième cliquet compte désormais les
+> usages SANS REPLI à part — **29 noms, 112 usages**, figés nom par nom, le compte ne peut plus monter.
+> C'est **#813**, à prendre par famille et à l'écran, jamais d'un bloc (motif de #787).
+>
+> **INSCRIT, NON CORRIGÉ** : **#812** (le nom d'un rapport de bug mêle date UTC et heure locale : tout
+> rapport produit après 20 h porte la date du lendemain — c'est ce qui a fait dater #811 du 10 alors
+> qu'il est du 9) · **#813** ci-dessus · **#814** (le bouton de fermeture du journal mesure 34 × 26 px
+> et c'est le seul chemin de sortie : ni voile, ni Échap).
+>
+> **MESURÉ, PAS AFFIRMÉ** : rendu au navigateur (Chromium) pour les deux lots, dans les deux modes, à
+> 820 px et 520 px · contrastes CALCULÉS depuis `styles.css`, jamais recopiés · **cinq ablations, seize
+> rougeurs**, témoin vert avant et après, arbre restauré par sha256 à chaque fois · les assertions DOM
+> de `modal-soutien.spec.js` rejouées sur le rendu réel (Playwright n'étant pas lançable en cloud).
+>
+> ⚠ **DEUX CHIFFRES FAUX ONT ÉTÉ TROUVÉS PAR LE RITUEL, APRÈS LE PUSH.** « Huit `var()` rebranchées »
+> était le nombre de mes opérations de remplacement, pas des variables : **c'est onze**. Et « 113
+> usages sans repli » était exact à l'inscription de #813, **périmé trois heures plus tard par #815**
+> qui en a retiré un : **112**. Corrigés dans `BACKLOG.md`, pas dans l'historique des commits, qui
+> portent encore les anciens nombres (`8add4f44`).
+>
+> **CE QUI RESTE DÛ, ET CE N'EST PAS À UNE SESSION.**
+> 1. **Safari sur l'iPad de Grégoire, deux écrans** : le journal de bord et la fenêtre de soutien.
+>    Aucun des deux n'y a été vu. Rien dans les correctifs ne dépend du navigateur — mais c'est une
+>    inférence, pas une mesure.
+> 2. **LE ROUGE CI EST ANTÉRIEUR À CE LOT.** Run 862 (`d1432016`, le commit de départ) : Vitest vert,
+>    **Playwright WebKit ROUGE**, 36 min, pas un échec d'infrastructure. Run 861 (`12a41e29`) était
+>    vert. Entre les deux, deux commits seulement. **Hypothèse non vérifiée** : `1a7205ee` allonge un
+>    libellé (`Niveau SOLO atteint` → `Palier SOLO du niveau`, 3 mots → 4) et
+>    `tests/integration/echelle-reperes-maitrise-rendu.spec.js` assert encore
+>    `lignesLabelSOLO ≤ 2`. Se départage en secondes sur le Mac :
+>    `cd tests && npx playwright test integration/echelle-reperes-maitrise-rendu.spec.js`.
+>    ⮕ **Ce lot-ci ne touche aucune des specs concernées** (mesuré : la seule spec d'intégration
+>    modifiée est `modal-soutien.spec.js`). Le run **863** tournait encore au moment d'écrire.
+> 3. **Un PNG de 774 Ko est entré au dépôt** : `Retours des testeurs/grégoire/BUG_grégoire_2026-09-09…`
+>    — la capture de Grégoire, archivée exprès. **C'est le premier binaire de ce dossier** ; le
+>    précédent #755 (fichiers lus comme binaires) mérite qu'on le sache.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 9 SEPT. 2026, FIN DE SOIRÉE : LES MOTS JUSTES AVANT LE 14 (1.127.3)
 
 > ✅ **`main` à 1.127.3, build `0909-1955`. Vitest 520 fichiers / 5714 essais.**
