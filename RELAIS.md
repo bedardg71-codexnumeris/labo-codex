@@ -7,6 +7,32 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 10 SEPT. 2026, SOIR : #823 LOTS A1, A2 ET B COMMITTÉS, PAS RELEASÉS, PAS POUSSÉS
+
+> ⚠ **`main` local = 1.128.4 + trois commits NON POUSSÉS** (`db5da868` consigne de Cowork,
+> `9ac0078b` le code, puis ce relais). Vérifie : `git rev-list --count origin/main..main`.
+> **Pas de release, pas de changelog, pas de porte terrain encore** — le lot est arrêté sur une
+> question à Grégoire, pas sur un défaut.
+> **Livré dans `9ac0078b`** : « Découpler P et N » et « Unité d'affichage de l'assiduité » retirés
+> avec tout ce qui pendait derrière (formateurs sans appelant, volet `preferencesUtilisateur` de la
+> migration decouplerPR→PN) ; la « Fenêtre d'analyse des patterns » passe par `sauvegarderSeuilsV2`
+> et atteint `obtenirNombreProductionsPourPatterns` (sentinelle #823, 8 essais, 6 ablations rouges).
+> Vitest 531 / 5793. ⛔ Aucune écriture dans les données de personne ; `fenetrePatterns` stockée NON
+> migrée (voulu).
+> **Ce qui attend Grégoire — et il faut sa réponse avant de toucher au reste** : le troisième
+> « mort », **« Direction du risque », est VIVANT** — son seuil `directionRisque` est lu par
+> `calculerDirectionsCriteres` (pas seulement par `calculerDirectionRisque`, qui est bien morte), et
+> ce résultat s'affiche : flèches par critère de la carte RàI du profil, des barres SRPNF, et le texte
+> « en amélioration / en baisse / plateau » (`calculerProgressionEleve`). La carte des effets a
+> confondu deux fonctions quasi homonymes (§ 4.4 du cadrage, ajouté ce soir). Trois options lui sont
+> posées dans le rapport de session : garder le curseur et le renommer (le mot « risque » est proscrit
+> par l'ADR 007), le retirer en figeant 0,05, ou laisser tel quel.
+> **Ensuite, dans l'ordre** : trancher le curseur → `calculerDirectionRisque` + sa variable morte
+> partent dans tous les cas (résultat jamais lu) → changelog (entrée `minor`, `release-et-changelog`)
+> → `release.mjs minor` → markdown de la porte terrain (quatre portes, skill `portes-terrain` ; l'artefact
+> revient à Cowork) → verdict Playwright → `scripts/pousser.sh`.
+> **Hors dépôt, pas à moi** : `Formation/*.html`.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 10 SEPT. 2026, FIN DE SOIRÉE : LA CARTE DES EFFETS (docs, toujours 1.128.4)
 
 > ✅ **`main` à 1.128.4, build `0910-1531`, plus trois commits documentaires du soir, poussés.**
