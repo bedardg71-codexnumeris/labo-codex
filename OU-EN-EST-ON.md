@@ -25,6 +25,44 @@ cible d'apprentissage**, ce dernier point ouvrant un chantier (#810) plutôt qu'
 Consigne de publication de l'artefact pour Cowork :
 `plans de travail/CONSIGNE-COWORK-artefact-porte-802.md`.
 
+↻ **1.127.5 — LA FENÊTRE « SOUTENIR LABO CODEX » SE LIT D'UN COUP** (build `0909-2314`).
+**Ce que tu verras** : quatre sections en liste sont devenues **trois blocs cadrés** — « Avec ton
+temps », « Avec tes moyens », « Suivre le projet » — et le contact descend en pied, sans titre. Le
+bleu ne sert plus **qu'aux liens** : les titres de section le portaient aussi, si bien que rien ne
+ressortait. Les filets entre les lignes et les puces disparaissent. **Le blogue dit enfin sur quoi il
+porte** : procédures, trucs et astuces de Labo Codex, et analyses critiques sur la technologie, la
+pédagogie et l'éducation. La Voûte ne s'y annonce plus — ta décision du 10 septembre.
+**Vérifié comment** : rendu au navigateur (Chromium) en mode clair et en mode sombre, à 980 px, à
+820 px (ta tablette en portrait — aucun débordement) et à 520 px (les blocs s'empilent). La fenêtre
+passe de 945 à 759 pixels de haut. Deux maquettes t'ont été soumises à l'écran avant de coder ; tu as
+tranché la direction et refusé mes phrases d'accroche, donc la prose reste la tienne. (#815)
+⏳ **Ce qui reste dû, et c'est à toi** : cette fenêtre n'a pas été ouverte dans Safari sur ta
+tablette. Rien dans le correctif ne dépend du navigateur, mais personne ne l'y a vue.
+⚠ **Un défaut assumé, pas caché** : quatre libellés de liens passent sur deux lignes dans les
+colonnes. C'est le prix des deux colonnes avec des libellés de cette longueur ; les raccourcir
+toucherait tes mots, donc je ne l'ai pas fait.
+
+↻ **1.127.4 — LE JOURNAL DE BORD D'UNE ÉVALUATION REDEVIENT LISIBLE** (build `0909-2129`).
+**Ce que tu verras** : le journal de bord d'une copie s'ouvrait **sans panneau**. Son contenu se
+lisait à même le voile bleu de la fenêtre, et la liste des évaluations le traversait — bandeau,
+pastilles d'état, boutons — au point de le rendre illisible par bandes. Il a maintenant le même fond
+opaque que les autres fenêtres de l'application, dans les deux modes, et ses étiquettes de détail
+(durée, note, niveau) se lisent au lieu de se deviner.
+**Vérifié comment** : une seule déclaration en était la cause — le fond du panneau s'appuyait sur une
+couleur **qui n'existe nulle part** dans l'application, et une couleur inexistante annule la
+déclaration au lieu de la dégrader. Onze couleurs et mesures du même bloc étaient dans ce cas ;
+toutes rebranchées. Rendu au navigateur sur un banc qui **reproduit ta capture**, dans les deux
+modes ; contrastes recalculés depuis la feuille de style, tous au-dessus du minimum d'accessibilité.
+Un garde-fou empêche désormais ce type de couleur fantôme de se rajouter. (#811, signalé par toi le
+9 septembre à 21 h 02)
+⏳ **Ce qui reste dû, et c'est à toi** : rouvrir un journal de bord sur ta tablette. Safari n'a pas
+été visité.
+⚠ **Deux choses vues en réparant, écrites mais NON corrigées** : le bouton qui ferme ce journal
+mesure 34 × 26 pixels au lieu des 44 × 44 visés au doigt, et c'est le seul moyen d'en sortir — ni le
+voile ni la touche Échap ne ferment (#814). Et le nom de fichier de tes rapports de bug **avance
+d'un jour** dès que tu en produis un après 20 h : celui de ce bug-ci porte le 10 alors que tu l'as
+écrit le 9 (#812).
+
 ↻ **1.127.3 — DEUX MOTS POUR DEUX CHOSES, ET LE BOUTON COCCINELLE NE SERT PLUS QU'AUX BUGS**
 (build `0909-1955`).
 **Ce que tu verras** : dans ta grille, le champ « Niveau SOLO » s'appelle maintenant « **Complexité
