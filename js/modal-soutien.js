@@ -31,44 +31,60 @@
                 <button class="modal-fermer" data-action="fermerModalSoutien" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 <h3 class="modal-titre" id="modalSoutien-titre">Soutenir Labo Codex</h3>
 
-                <div class="modal-section">
-                    <p class="soutien-intro">Voici plusieurs façons de contribuer, selon ton temps, ta voix et tes moyens.</p>
+                <p class="soutien-intro">Voici plusieurs façons de contribuer, selon ton temps, ta voix et tes moyens.</p>
 
-                    <h4 class="soutien-groupe-titre">S'impliquer dans la communauté</h4>
-                    <ul class="soutien-liste">
-                        <li>
-                            <a class="soutien-lien" href="https://www.aqpc.qc.ca/fr/cop-labocodex" target="_blank" rel="noopener noreferrer">Rejoindre la Communauté de pratique (CoP) de l'AQPC.</a>
-                            Développer tes connaissances et soutenir les autres, participer au développement, expérimenter les nouvelles fonctions, signaler des bugs, proposer des idées pour le bien commun des utilisateur·rices (et bientôt, contribuer à la Voûte, prévue cet automne).
-                        </li>
-                        <li>
-                            <strong>Expérimenter l'application et en parler à tes collègues.</strong>
-                            Les accompagner dans leurs propres essais.
-                        </li>
-                        <li>
-                            <strong>Devenir un point de relais (ou ambassadeur·rice) dans ton institution.</strong>
-                            Faire connaître le projet dans d'autres départements ou établissements.
-                        </li>
-                    </ul>
+                <div class="soutien-colonnes">
+                    <div class="soutien-colonne">
+                        <section class="soutien-bloc">
+                            <h4 class="soutien-bloc-titre">Avec ton temps</h4>
+                            <ul class="soutien-liste">
+                                <li>
+                                    <a class="soutien-action" href="https://www.aqpc.qc.ca/fr/cop-labocodex" target="_blank" rel="noopener noreferrer">Rejoindre la Communauté de pratique de l'AQPC</a>
+                                    <span class="soutien-detail">Développer tes connaissances, soutenir les autres, expérimenter les nouvelles fonctions, signaler des bugs et proposer des idées.</span>
+                                </li>
+                                <li>
+                                    <span class="soutien-action">Expérimenter l'application et en parler à tes collègues</span>
+                                    <span class="soutien-detail">Les accompagner dans leurs propres essais.</span>
+                                </li>
+                                <li>
+                                    <span class="soutien-action">Devenir un point de relais dans ton institution</span>
+                                    <span class="soutien-detail">Faire connaître le projet dans d'autres départements ou établissements.</span>
+                                </li>
+                            </ul>
+                        </section>
+                    </div>
 
-                    <h4 class="soutien-groupe-titre">Suivre le projet</h4>
-                    <ul class="soutien-liste">
-                        <li>
-                            <a class="soutien-lien" href="https://codexnumeris.org/#/portal/signup/free" target="_blank" rel="noopener noreferrer">T'abonner gratuitement à Codex Numeris</a>, le blogue du développeur.
-                        </li>
-                    </ul>
+                    <div class="soutien-colonne">
+                        <section class="soutien-bloc">
+                            <h4 class="soutien-bloc-titre">Avec tes moyens</h4>
+                            <ul class="soutien-liste">
+                                <li>
+                                    <a class="soutien-action" href="https://codexnumeris.org/#/portal/signup/68d7cf7691267900011c2b4c/yearly" target="_blank" rel="noopener noreferrer">Souscrire un abonnement de soutien</a>
+                                    <span class="soutien-detail">24 $ par année.</span>
+                                </li>
+                                <li>
+                                    <a class="soutien-action" href="https://codexnumeris.org/#/portal/gift" target="_blank" rel="noopener noreferrer">Offrir un abonnement de soutien</a>
+                                    <span class="soutien-detail">À un·e collègue.</span>
+                                </li>
+                                <li>
+                                    <a class="soutien-action" href="https://codexnumeris.org/#/portal/support" target="_blank" rel="noopener noreferrer">Faire un don</a>
+                                </li>
+                            </ul>
+                        </section>
 
-                    <h4 class="soutien-groupe-titre">Soutenir financièrement</h4>
-                    <ul class="soutien-liste">
-                        <li><a class="soutien-lien" href="https://codexnumeris.org/#/portal/signup/68d7cf7691267900011c2b4c/yearly" target="_blank" rel="noopener noreferrer">Souscrire un abonnement de soutien à Codex Numeris</a> (24 $ par année).</li>
-                        <li><a class="soutien-lien" href="https://codexnumeris.org/#/portal/gift" target="_blank" rel="noopener noreferrer">Offrir un abonnement de soutien</a> à un·e collègue.</li>
-                        <li><a class="soutien-lien" href="https://codexnumeris.org/#/portal/support" target="_blank" rel="noopener noreferrer">Faire un don à Codex Numeris.</a></li>
-                    </ul>
-
-                    <h4 class="soutien-groupe-titre">Nous écrire</h4>
-                    <ul class="soutien-liste">
-                        <li>Un commentaire, une question, ou une demande de présentation de l'application ? Écris-nous à <a class="soutien-lien" href="mailto:labo@codexnumeris.org">labo@codexnumeris.org</a>.</li>
-                    </ul>
+                        <section class="soutien-bloc">
+                            <h4 class="soutien-bloc-titre">Suivre le projet</h4>
+                            <ul class="soutien-liste">
+                                <li>
+                                    <a class="soutien-action" href="https://codexnumeris.org/#/portal/signup/free" target="_blank" rel="noopener noreferrer">T'abonner gratuitement à Codex Numeris</a>
+                                    <span class="soutien-detail">Le blogue du développeur&nbsp;: procédures, trucs et astuces de Labo Codex, et des analyses critiques sur la technologie, la pédagogie et l'éducation.</span>
+                                </li>
+                            </ul>
+                        </section>
+                    </div>
                 </div>
+
+                <p class="soutien-pied">Un commentaire, une question, ou une demande de présentation de l'application&nbsp;? Écris-nous à <a href="mailto:labo@codexnumeris.org">labo@codexnumeris.org</a>.</p>
             </div>
         </div>`;
     }
