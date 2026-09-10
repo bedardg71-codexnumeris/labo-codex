@@ -103,7 +103,7 @@ affiché » = un calcul le lit, mais son résultat n'atteint aucun rendu.
 | Découpler Performance (P) et Niveau d'attention (N) | préférence `decouplerPN` | **personne** (`grep -rn decouplerPN js/` : le panneau qui l'écrit, et une table de migration) | **nulle part.** L'écran promet « P (notation) : utilise la méthode de la pratique pour calculer la note finale » — rien ne lit ce réglage, la note n'en dépend pas, le niveau d'attention non plus | **NON** |
 | Fenêtre d'analyse des patterns | préférence `fenetrePatterns` | **personne.** Les calculs lisent `seuilsInterpretation.nombreProductionsAnalyse` (`obtenirNombreProductionsPourPatterns`, 12 appelants) — une clé que **rien n'écrit** : elle vaut toujours son défaut, 3 | **nulle part.** Ce que l'enseignant croit régler (la fenêtre de l'IPB, des patterns, le « sur N » de fiabilité du Suivi du groupe) reste à 3 quoi qu'il tape — même défaut de branchement que les trois curseurs de `#818` | **NON** |
 | Progression des artefacts | `seuilsInterpretation.progressionArtefacts` | `calculerIPB` (la direction ↗ / ↘ du suivi) → `diagnostiquerSuiviApprentissage` → `determinerCibleIntervention` et `calculerEtudiantsPrioritaires` | Suivi › Suivi du groupe › Observation globale des besoins d'intervention (cible et pattern) et le panneau « prioritaires » de la carte Observation globale des indices d'engagement. **Pas le profil** : aucune section du profil n'appelle ce calcul | **oui — 1 écran** |
-| Direction du risque | `seuilsInterpretation.directionRisque` | `calculerDirectionRisque` (via `extraireScoresCriteres`) — appelée **une** fois, par `genererSectionAccompagnement`, qui range le résultat dans une variable que rien ne lit (l. 845) | **lu, jamais affiché.** Le curseur promet « une tendance du risque (→ ou ←) » ; aucun écran ne la dessine | **NON** |
+| Direction du risque | `seuilsInterpretation.directionRisque` | ⚠ **CORRIGÉ AU § 4.4** — `calculerDirectionRisque` est bien morte (résultat rangé dans une variable que rien ne lit, l. 845), mais le SEUIL a un second lecteur, `calculerDirectionsCriteres` (l. 2202, « même seuil que pour le risque »), dont le résultat s'affiche | **Suivi › Profils individuels › Accompagnement › carte RàI : la flèche (→ / ← / —) après chaque critère ; Développement des habiletés › barres SRPNF : la même flèche ; et le texte « Apprentissage : présentement en amélioration / en baisse / en plateau » (`calculerProgressionEleve`)** | **OUI — 1 écran, 3 rendus** (la ligne disait NON) |
 | Seuil de défi spécifique | `seuilsInterpretation.defiSpecifique` | 9 lecteurs : `genererDiagnosticSRPNF`, `genererSectionPerformance` (profil) ; `calculerIPB`, `diagnostiquerForcesChallenges` (calculs RàI) ; `mettreAJourCriteresCibles` (interventions) ; et 4 morts — `identifierDefiSpecifique` (résultat non lu), `genererTableauObjectifs` (jamais appelée), moteur PAN `_diagnostiquerForcesChallenges` | Suivi › Profils individuels › Développement des habiletés › « Diagnostic par critère (seuil force : 70 %) » et le bloc forces / défis ; Accompagnement › carte RàI (le défi principal) · Suivi › Liste des étudiant·es › colonnes Pattern et RàI · Suivi › Suivi du groupe › besoins d'intervention, prioritaires · Suivi › Interventions › formulaire › les critères « en défi » proposés | **oui — 4 écrans, tous dans Suivi** |
 | Restaurer les valeurs par défaut *(bloc SOLO)* | remet la fenêtre à 3, progression 0,10, direction 0,05, défi 0,70 ; puis **ré-enregistre tout le panneau** (`sauvegarderSeuilsV2` + `sauvegarderPreferencesV2`) | — | ce que les quatre lignes ci-dessus voient — soit, en réalité, **le seuil de défi et la progression** ; la fenêtre et la direction ne changent rien. Ne touche **ni** Fragile / Acceptable / Bon **ni** `idme.*` | — |
 
@@ -139,6 +139,34 @@ affiché » = un calcul le lit, mais son résultat n'atteint aucun rendu.
 - La section « Suivi de l'apprentissage » du profil (`case 'cible'`) appelle
   `genererContenuCibleIntervention`, **qui n'existe nulle part**. Inatteignable aujourd'hui (aucun
   bouton n'y mène depuis `#551`) ; si un jour un bouton y mène, c'est une erreur d'exécution.
+
+#### 4.4 Relecture croisée du 10 septembre au soir — un « mort » sur quatre était vivant
+
+> Mesuré par la session qui a exécuté le lot #823, avant de retirer quoi que ce soit — c'est
+> exactement le cas prévu par `PROTOCOLE.md`, règle 2.
+
+**« Direction du risque » agit.** La carte avait remonté la clé `directionRisque` jusqu'à
+`calculerDirectionRisque` (morte : résultat jamais lu) et s'était arrêtée là. Or le seuil a un
+**second lecteur, quasi homonyme** : `calculerDirectionsCriteres` (profil-etudiant-sections-affichage.js
+l. 2202, commentaire « même seuil que pour le risque »). Et celle-ci est lue par trois rendus :
+la flèche après chaque critère de la carte RàI (`genererSectionAccompagnement`, l. 1131-1133), la
+flèche des barres SRPNF (`_genererBarresSRPNF`, profil-etudiant-diagnostics.js l. 429-445), et le
+texte « Apprentissage : présentement en amélioration / en baisse / en plateau » par
+`calculerProgressionEleve` (profil-etudiant-calculs.js l. 1548). Le curseur règle donc la
+sensibilité de ces flèches — pas « une tendance du risque » : son libellé ment sur son objet, pas
+sur son existence.
+
+**Ce qui reste vrai** : « Découpler P et N », « Unité d'affichage de l'assiduité » et « Fenêtre
+d'analyse des patterns » sont bien tels que décrits — retirés (les deux premiers) et rebranchée
+(la fenêtre) dans le lot #823. `calculerDirectionRisque` reste morte et partira quoi qu'il soit
+décidé du curseur.
+
+**Leçon de méthode** : remonter la CLÉ (`grep directionRisque`) jusqu'à chacun de ses lecteurs,
+pas la fonction qui porte son nom. Deux fonctions à un « s » près se prennent l'une pour l'autre.
+
+**Disposition** : le sort du curseur attend Grégoire (garder et renommer sans le mot « risque »,
+ADR 007 ; ou retirer en figeant 0,05). Les lignes 4.2-3 et 4.3 qui comptent « quatre » placebos
+en comptent trois.
 
 #### 4.2 Ce que la carte fait ressortir, sans le trancher
 
