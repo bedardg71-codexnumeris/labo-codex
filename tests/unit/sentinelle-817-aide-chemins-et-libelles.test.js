@@ -130,6 +130,68 @@ describe('Aide — elle ne décrit pas de fonctionnalité retirée', () => {
     });
 });
 
+describe('Aide — les chiffres qu\'elle cite sont ceux du code', () => {
+
+    // Le pack de démo est la source : les nombres sont COMPTÉS ici, jamais
+    // recopiés. Ajouter un artefact au pack rougit ce banc.
+    function packDemo() {
+        const src = readFileSync(path.join(racine, 'js/pack-demo-20.js'), 'utf8');
+        const bloc = (cle, ouvre, ferme) => {
+            const i = src.indexOf(`"${cle}": ${ouvre}`) + `"${cle}": `.length;
+            let prof = 0, j = i, dansChaine = false;
+            for (; j < src.length; j++) {
+                const c = src[j];
+                if (c === '"' && src[j - 1] !== '\\') dansChaine = !dansChaine;
+                else if (!dansChaine) {
+                    if (c === ouvre) prof++;
+                    else if (c === ferme && --prof === 0) return JSON.parse(src.slice(i, j + 1));
+                }
+            }
+            throw new Error(`bloc « ${cle} » illisible dans pack-demo-20.js`);
+        };
+        return {
+            productions: bloc('productions', '[', ']'),
+            grilles:     bloc('grillesTemplates', '[', ']'),
+            echelles:    bloc('echellesTemplates', '[', ']'),
+            presences:   bloc('presences', '{', '}'),
+            // DA UNIQUES : chaque élève apparaît dans les présences, les
+            // évaluations et le groupe — compter les occurrences donnerait 627.
+            etudiants:   new Set(src.match(/DEMO\d{3}/g) || []).size,
+        };
+    }
+
+    // L'Aide mêle texte brut et entités (« 20 &eacute;tudiant·es ») : on décode
+    // avant de comparer, sinon le banc rougit sur la forme et non sur le fond.
+    const AIDE_DECODEE = AIDE_TXT
+        .replace(/&eacute;/g, 'é').replace(/&egrave;/g, 'è').replace(/&agrave;/g, 'à')
+        .replace(/&ccedil;/g, 'ç').replace(/&Eacute;/g, 'É').replace(/&middot;/g, '·');
+
+    it('le décompte des données de démonstration correspond au pack', () => {
+        const pack = packDemo();
+        const artefacts = pack.productions.filter(p => p.type === 'artefact-portfolio').length;
+        const dates = Object.keys(pack.presences).length;
+
+        // ⚠ Ancré sur LA phrase du décompte, pas sur le nombre seul : « 9 artefacts »
+        // apparaît aussi dans l'exemple de l'indice C (« Étudiant avec 9 artefacts »),
+        // et un toContain() large passait donc même quand le décompte était faux.
+        const portfolios = pack.productions.filter(p => p.type === 'portfolio').length;
+        expect(AIDE_DECODEE).toContain(
+            `${pack.productions.length} productions (${portfolios} portfolio, ${artefacts} artefacts`);
+        expect(AIDE_DECODEE).toContain(`${dates} dates`);
+        expect(AIDE_DECODEE).toContain(`${pack.grilles.length} grilles de critères`);
+        expect(AIDE_DECODEE).toContain(`${pack.echelles.length} échelles de performance`);
+        expect(AIDE_DECODEE).toMatch(new RegExp(`${pack.etudiants}\\s+étudiant`));
+    });
+
+    it('le seuil de défi annoncé est celui d\'interpretation-config.js', () => {
+        const cfgInterp = readFileSync(path.join(racine, 'js/interpretation-config.js'), 'utf8');
+        const m = cfgInterp.match(/defiSpecifique:\s*([0-9.]+)/);
+        expect(m).toBeTruthy();
+        const pct = Math.round(parseFloat(m[1]) * 100);
+        expect(AIDE_DECODEE).toContain(`(${pct}% par défaut)`);
+    });
+});
+
 function decodeEntites(s) {
     return s.replace(/&Eacute;/g, 'É').replace(/&eacute;/g, 'é')
             .replace(/&agrave;/g, 'à').replace(/&egrave;/g, 'è');

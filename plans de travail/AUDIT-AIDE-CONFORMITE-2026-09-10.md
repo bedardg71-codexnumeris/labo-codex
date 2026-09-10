@@ -121,13 +121,34 @@ développement » — l'Aide annonçait un chantier inabouti, puis a continué d
 l'annoncer cinq mois après la disparition du module entier. Chercher les autres
 « en développement », « à venir », « prochainement ».
 
+### Lot A (suite) — les valeurs chiffrées et les formats
+
+| # | L'Aide disait | Le code dit | Disposition |
+|---|---|---|---|
+| A.8 | pack démo : « 11 productions (1 portfolio + **10 artefacts**) » | 11 productions : 1 portfolio, **9 artefacts**, 1 évaluation terminale | **corrigé** |
+| A.9 | pack démo : « **42 dates**, août à décembre » | **32 dates**, du 25 août au 10 décembre | **corrigé** |
+| A.10 | « Seuil de défi : **75 %** par défaut » | `defiSpecifique: 0.70` (`interpretation-config.js:48`) | **corrigé** |
+| A.11 | « forces ≥70 % / défis <70 % » | **trois** seuils : 0,70 · 0,7125 · 0,75 | **inscrit — #817** |
+| A.12 | « Formats acceptés : PDF, JPEG, PNG, WebP » + « HEIC : à convertir » | conforme : `validerMagicBytes` accepte les quatre, et `decodagePossible()` rend `false` sur le protocole `file:`, ce que l'Aide dit exactement | **refusé** (faux positif ; passage soigné en #597) |
+| A.13 | AVIF accepté par `validerMagicBytes`, annoncé nulle part | marginal pour le corpus visé | **refusé** (motif : aucun symptôme, aucun usage attendu) |
+
+**Ce qui est vérifié, et pas seulement corrigé** : le décompte du pack de démo est
+**calculé** par la sentinelle en parsant `pack-demo-20.js` (productions, grilles,
+échelles, dates de présences, DA uniques), et le seuil de défi est **lu** dans
+`interpretation-config.js`. Ajouter un artefact au pack ou changer la constante
+rougit le banc.
+
+⚠ **Un test tautologique attrapé par son break-test.** La première version vérifiait
+`toContain('9 artefacts')` : elle passait même avec un décompte faux, parce que
+« 9 artefacts » apparaît aussi dans l'exemple de l'indice C (« Étudiant avec 9
+artefacts »). L'assertion est désormais ancrée sur la phrase entière du décompte.
+⮕ **Un nombre seul n'est pas une ancre** dans un fichier de 15 000 lignes.
+
 ---
 
 ## Lots à venir
 
-- ~~**Lot A — balayage mécanique**~~ : **fait le 10 sept.** (voir plus haut). Restent
-  hors de sa passe : les valeurs chiffrées citées et les formats de fichiers annoncés,
-  qui demandent de lire les constantes du moteur plutôt que des libellés.
+- ~~**Lot A — balayage mécanique**~~ : **fait le 10 sept.**, valeurs chiffrées et formats compris.
 - **Lot B — cohérence des trois surfaces** : section Aide ↔ popups ↔ infobulles.
 - **Lot C — visite guidée** : ses étapes pointent-elles vers des éléments qui existent ?
 - **Lot D — trous de couverture** : les 1 554 commits de l'été contre l'Aide.
