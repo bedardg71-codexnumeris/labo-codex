@@ -15,6 +15,31 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.128.3 — QUATRE RÉGLAGES QUI N'ATTEIGNAIENT PAS LEUR CALCUL** (build `0910-1147`).
+**Ce que tu verras** : (1) dans le panneau Portfolio d'un profil, les artefacts cochés
+automatiquement correspondent enfin au mode que tu as choisi — « N derniers » retenait en
+réalité les N *meilleurs*, et « Hybride » oubliait le bloc Obligatoires ; en hybride, tu peux
+maintenant cocher à la main autant d'artefacts que la note en compte. (2) Le diagnostic par
+critère affiche « seuil force : 70 % » au lieu d'un 0.7125 figé, et il bouge quand tu bouges
+ton curseur. (3) La légende de couleurs du tableau de bord annonce ses vraies bornes
+(30-47,5 / 47,5-65 / 65-82,5 / ≥ 82,5) ; **la barre elle-même ne change pas d'un pixel**.
+(4) Les trois curseurs « Fragile / Acceptable / Bon » de Labo › Outils d'observation servent
+enfin : ils gardaient ta valeur et te la remontraient, mais aucun calcul ne la lisait.
+⚠ **Si tu avais déjà déplacé un de ces trois curseurs, ton réglage prend effet maintenant** —
+les couleurs de ta liste peuvent bouger. C'est ton réglage qui s'applique ; rien de neuf n'a
+été posé à ta place.
+**Ta note du cours n'était touchée par aucun des quatre.**
+**Vérifié comment** : trois bancs neufs, dont deux qui EXÉCUTENT le code au lieu de le lire
+(les modes de sélection sur un jeu dont les numéros contredisent les identifiants, pour prouver
+lequel des deux tris décide ; le rebranchement des curseurs sur une base montée en mémoire).
+Chaque banc a été rendu ROUGE avant d'être cru : 16 ablations, 16 rouges, l'arbre restauré par
+empreinte sha256 à chaque fois. Vitest : 529 fichiers, 5760 essais, zéro échec.
+⛔ **CE QUI N'EST PAS VÉRIFIÉ** : rien de tout ceci n'a été vu à l'écran. Aucune session cloud ne
+peut lancer Safari, et aucune spec Playwright existante ne touche ce code — le verdict WebKit
+vient de la CI, et le verdict Safari/iPad reste à faire sur ton Mac. **À regarder en priorité** :
+la légende du tableau de bord porte maintenant des décimales (« 47,5 % ») dans quatre colonnes
+serrées — c'est là que ça peut déborder sur iPad.
+
 ↻ **1.128.0 — LA « CONSOLIDATION DES APPRENTISSAGES » N'EXISTE PLUS** (build `0910-0019`).
 **Ce que tu verras** : la carte du Labo a disparu, et **deux autres affichages avec elle** — la
 ligne « Consolidation : … » de l'onglet *Forces et défis* d'un profil étudiant, et les mentions
