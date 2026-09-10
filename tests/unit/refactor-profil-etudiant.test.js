@@ -190,7 +190,6 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
             'genererDiagnosticGenerique',
             '_genererBarresSRPNF',
             'genererBlocProfilRLO',
-            'genererBlocConsolidation',
             'genererConteneurGestesCognitifs',
             'genererNoteRLO',
             'genererOngletsDeveloppement',

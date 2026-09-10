@@ -1200,7 +1200,7 @@
      * grade-bearing doit rester résoluble même s'il a été créé dans un autre trimestre
      * (ex. grille de dépistage h2026 consultée depuis a2025). NE consulte PAS le catalogue
      * de gabarits. Remplace les lectures `db.getSync('grillesTemplates'/'echellesTemplates')`
-     * suivies d'un `.find(id)` aux sites de résolution-par-id (consolidation, pratique-
+     * suivies d'un `.find(id)` aux sites de résolution-par-id (pratique-
      * registre, pan-standards). Retourne l'objet modèle ou null.
      * @param {'grille'|'echelle'} type
      * @param {string} id
