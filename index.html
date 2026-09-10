@@ -13394,18 +13394,18 @@
                                 <li><strong>Statut</strong> : Complété ✓ (vert) ou Non complété ✗ (rouge)</li>
                                 <li><strong>Score</strong> : Pourcentage selon l'échelle IDME (ex: 78%)</li>
                                 <li><strong>Niveau IDME</strong> : Badge coloré (I/D/M/E)</li>
-                                <li><strong>Retenu PAN</strong> : ★ si l'artefact compte dans la note finale du portfolio</li>
+                                <li><strong>Retenu</strong> : les artefacts qui comptent dans la note finale du portfolio sont pleinement opaques et portent une bordure plus marquée ; les autres sont estompés</li>
                             </ol>
 
                             <div class="alerte alerte-info" class="mt-15">
-                                <strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Astuce :</strong> Les artefacts marqués d'une étoile ★ sont ceux sélectionnés automatiquement par les règles PAN (les N meilleurs). Si un·e étudiant·e a 9 artefacts mais que seuls les 3 meilleurs comptent, seuls ces 3 auront l'étoile.
+                                <strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Astuce :</strong> Les artefacts retenus pour la note apparaissent en tête de liste, en pleine opacité et avec une bordure plus marquée ; les autres sont estompés. Ce qui décide de la sélection, c'est la modalité réglée dans ta pratique. Exemple : si ta pratique retient 3 artefacts sur 9, ces 3 sont en tête. ⚠ L'étoile, elle, signale autre chose : un jeton de reprise ou de délai.
                             </div>
 
                             <p class="mt-15"><strong>Actions possibles depuis ce tableau :</strong></p>
                             <ul>
                                 <li>Identifier rapidement les travaux non remis</li>
                                 <li>Voir la progression de la performance dans le temps</li>
-                                <li>Vérifier quels artefacts comptent réellement pour la note (★)</li>
+                                <li>Vérifier quels artefacts comptent réellement pour la note (ceux qui ne sont pas estompés)</li>
                                 <li>Détecter des patterns (ex: toujours faible en Structure)</li>
                             </ul>
                         </div>
@@ -14069,7 +14069,7 @@
                                 <dd class="ml-20-mb-10">Mode qui remplace les noms r&eacute;els des &eacute;tudiants par des pseudonymes (Cerf agile, Loup curieux, etc.). Utile pour les pr&eacute;sentations, les captures d'&eacute;cran et le partage entre coll&egrave;gues. S'active depuis la page d'accueil.</dd>
 
                                 <dt class="titre-section-aide">Artefact</dt>
-                                <dd class="ml-20-mb-10">Production évaluée d'un étudiant. Peut être une dissertation, un examen, une présentation, etc. Dans un portfolio, plusieurs artefacts sont regroupés et seuls les N meilleurs sont retenus pour la note finale selon les règles PAN.</dd>
+                                <dd class="ml-20-mb-10">Production évaluée d'un étudiant. Peut être une dissertation, un examen, une présentation, etc. Dans un portfolio, plusieurs artefacts sont regroupés, et la pratique de notation décide lesquels comptent pour la note finale, selon la modalité de sélection que tu as réglée.</dd>
 
                                 <dt class="titre-section-aide">Assiduité (A)</dt>
                                 <dd class="ml-20-mb-10">Indice primaire mesurant la présence en classe. Calculé automatiquement à partir des présences saisies. Formule : (nombre de présences / nombre de séances) × 100. Reflète l'engagement cognitif de l'étudiant.</dd>
@@ -14523,7 +14523,7 @@
          donc jamais lu sur Safari ni sur iPad. Un script, lui, se charge. Généré
          par scripts/release.mjs en même temps que version.json — les deux ne
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
-    <script src="version.js?v=09092314"></script>
+    <script src="version.js?v=09092337"></script>
     <script src="js/db.js?v=20260826b"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
     <script src="js/pratiques/modalites-evaluation.js?v=20260810a"></script> <!-- SSOT #328 Lot 1 : module propriétaire de modalitesEvaluation (seul point d'écriture), chargé avec la couche stockage -->
@@ -14806,11 +14806,11 @@
     <script src="js/export-resultats-finaux.js?v=20260905a"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260909j"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260909k"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260909j"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260909k"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
