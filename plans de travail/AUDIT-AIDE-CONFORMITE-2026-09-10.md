@@ -68,14 +68,61 @@ des modalités. Elles divergent réellement (#816) ; la figer graverait le défa
 
 ---
 
+## Lot A — le balayage mécanique (10 sept. 2026)
+
+**Méthode** : extraire de l'Aide toute affirmation qu'une machine peut trancher
+(chemins de navigation, libellés de boutons, noms de fonctionnalités), puis la
+confronter au code. 83 chemins et 72 libellés cités ont été relevés.
+
+| # | L'Aide disait | Le code dit | Occ. | Disposition |
+|---|---|---|---|---|
+| A.1 | « Réglages → Captures de progression » | c'est un `<h4>` DANS Réglages › Données (`index.html:9708`, dans `#reglages-donnees` ouvert l. 9530) | 2 | **corrigé** |
+| A.2 | « Évaluations → … » | l'onglet s'appelle **« Évaluation »** au singulier (`nav-label`, l. 4105), comme ses cinq voisins | 8 | **corrigé** |
+| A.3 | « Primo : assistant conversationnel » | **retiré le 21 avril 2026** (`cfee0157`, « retrait primo-* ~5700 l. ») | 19 | **en attente d'arbitrage** |
+| A.4 | bouton « Reconstruire les snapshots historiques » | le bouton EXISTE, il s'appelle **« Recalculer les captures »** (`data-action="lancerReconstructionRetroactive"`, l. 9742) | 1 | **corrigé** |
+| A.5 | bouton « Générer le calendrier complet » | **« Régénérer »** | 1 | **corrigé** |
+| A.6 | bouton « Exporter mes données » | **« Exporter le Codex »** (`data-action="ouvrirModalExport"`) | 1 | **corrigé** |
+| A.7 | case « Activer RàI et détection des patterns » | **« Appliquer une adaptation du modèle de la Réponse à l'intervention »** (`#v2-pref-rai`, l. 9063, dans `#labo-accompagnement`) | 2 | **corrigé** |
+
+**Sentinelle** : `tests/unit/sentinelle-817-aide-chemins-et-libelles.test.js` (7 essais).
+**Six ablations, six rouges**, arbre restauré par sha256. Vitest 523 / 5739.
+
+⚠ **Une erreur de méthode, et sa leçon.** A.4 a d'abord été rapporté à Grégoire
+comme « ce bouton n'existe pas », sur la foi d'un `grep data-action="reconstruire`
+qui cherchait le mauvais nom d'action. Le bouton existait (`lancerReconstruction‑
+Retroactive`). La décision qu'il a prise sur cette base (retirer la procédure)
+aurait supprimé une procédure juste. ⮕ **Une absence de `grep` n'est pas une
+preuve d'absence** : chercher par le nom de la FONCTION appelée, pas par le mot
+qu'on suppose dans l'attribut.
+
+### A.3 — Primo, cinq mois de fantôme
+
+`primo-tooltips.js` (~5 700 lignes) retiré le **21 avril 2026**. Depuis, l'Aide
+décrit un assistant conversationnel qui n'existe plus : **19 mentions**, dont une
+carte de **78 lignes** (`accordeon-aide-primo`, l. 10703-10780) détaillant « les
+4 modules de Primo » et leurs durées, une entrée de glossaire (l. 14185), et des
+recommandations de parcours (« Débute avec Primo pour créer ton premier cours »).
+
+Rien ne subsiste : `guidage-demo.js` ne fait que des encarts statiques en mode
+démo, `wizard-pratique-v2.js` est l'assistant de *pratique de notation*. Les seules
+traces vivantes de « primo » sont des noms de classes CSS de l'aide contextuelle.
+
+**Remplacement soumis à Grégoire, non écrit** : une carte « Prendre en main
+l'application » décrivant les trois outils réels, aux libellés exacts d'`accueil.js`
+(« Données démo », « Assistance ») plus la visite guidée.
+
+⮕ **Motif à chasser au lot D** : le module 3 de cette carte portait « En
+développement » — l'Aide annonçait un chantier inabouti, puis a continué de
+l'annoncer cinq mois après la disparition du module entier. Chercher les autres
+« en développement », « à venir », « prochainement ».
+
+---
+
 ## Lots à venir
 
-- **Lot A — balayage mécanique** : noms de fonctionnalités, chemins de navigation, libellés
-  de boutons, valeurs chiffrées, formats de fichiers annoncés, confrontés au code.
-  ⮕ Déjà une prise au pilote du 10 sept. : l'Aide annonce « **Primo** : assistant
-  conversationnel pour la configuration guidée », or `primo-tooltips.js` a été fusionné
-  dans `accompagnement.js` et « Primo » ne survit que comme préfixe de classes CSS.
-  **Non corrigé, non inscrit** — appartient au lot A.
+- ~~**Lot A — balayage mécanique**~~ : **fait le 10 sept.** (voir plus haut). Restent
+  hors de sa passe : les valeurs chiffrées citées et les formats de fichiers annoncés,
+  qui demandent de lire les constantes du moteur plutôt que des libellés.
 - **Lot B — cohérence des trois surfaces** : section Aide ↔ popups ↔ infobulles.
 - **Lot C — visite guidée** : ses étapes pointent-elles vers des éléments qui existent ?
 - **Lot D — trous de couverture** : les 1 554 commits de l'été contre l'Aide.
