@@ -727,7 +727,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'texte',
-                contenu: "Configure les critères surveillés dans Conception → Grille de critères (tag SOLO). Ajuste le seuil et la fenêtre d'analyse dans Labo → Outils d’observation."
+                contenu: "Configure les critères surveillés dans Conception → Grilles de critères (tag SOLO). Ajuste le seuil et la fenêtre d'analyse dans Labo → Outils d’observation."
             },
             {
                 type: 'action', action: 'ouvrirGuidePedagogique', param: 'solo', libelle: 'Ouvrir le guide SOLO'

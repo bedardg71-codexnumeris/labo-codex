@@ -146,10 +146,41 @@ artefacts »). L'assertion est désormais ancrée sur la phrase entière du déc
 
 ---
 
+## Lot B — la cohérence des quatre surfaces (10 sept. 2026)
+
+**Ce que le lot cherchait** : les lots précédents n'avaient corrigé qu'`index.html`.
+Les popups (62 entrées), les infobulles (~281) et le glossaire (48 termes)
+portaient-ils encore ce qui venait d'en être retiré ?
+
+**Résultat général** : les catalogues sont plus propres que la section Aide.
+Aucune mention de Primo, aucune « règle PAN », aucun libellé de bouton périmé.
+Cinq écarts tout de même, tous dans les infobulles et le popup.
+
+| # | Surface | L'écart | Disposition |
+|---|---|---|---|
+| B.1 | infobulle `cn-prod-type` | « Portfolio (… — **les N meilleurs résultats sont retenus**) » : la réduction que #803 avait retirée d'`index.html`, restée ici | **corrigé** |
+| B.2 | popup `depist-*` | « Conception → **Grille** de critères » : le libellé réel est « Grille**s** » | **corrigé** |
+| B.3 | section Aide | « Fenêtre d'analyse (**4** par défaut) » : `obtenirNombreProductionsPourPatterns()` rend **3** (`interpretation-config.js:36`, repli `|| 3`, et la doc interne de `profil-etudiant-calculs.js:1411`) | **corrigé** |
+| B.4 | infobulle `tdb-zones-couleur` | trois erreurs d'un coup : bornes fausses (0-64/65-74/75-85/≥85 au lieu de **30-49/50-64/65-79/≥80**), zones dites « configurables » alors qu'elles sont **en dur**, et réglage situé dans « Réglages » alors qu'il est dans Labo › Outils | **corrigé** |
+| B.5 | infobulle `depist-seuils-restaurer` | « valeurs par défaut (**65 / 70 / 75 %**) » : les trois curseurs ont pour défauts **70 / 80 / 85** (`preferences-v2.js:328-330`) | **corrigé** |
+| B.6 | glossaire `terme.js:234` | emploie le vocabulaire des zones du tableau de bord et affirme la configurabilité d'un AUTRE mécanisme | **inscrit — #818** |
+
+**Ce que le lot enseigne.** Le popup et le glossaire nomment les zones **sans les
+chiffrer** ; l'infobulle était la seule à chiffrer, et c'est la seule à s'être
+trompée. ⮕ **Une surface qui chiffre sans lire sa source finit toujours par
+mentir.** La sentinelle lit désormais chaque valeur là où elle vit : les bornes
+dans le rendu de `tableau-bord-apercu.js`, les défauts dans `preferences-v2.js`.
+
+**Sentinelle** : `tests/unit/sentinelle-818-aide-trois-surfaces-concordent.test.js`
+(5 essais). **Six ablations, six rouges**, dont **deux qui modifient le CODE et non
+la doc** — c'est ce qui prouve que le banc suit la source et ne fige pas une copie.
+
+---
+
 ## Lots à venir
 
 - ~~**Lot A — balayage mécanique**~~ : **fait le 10 sept.**, valeurs chiffrées et formats compris.
-- **Lot B — cohérence des trois surfaces** : section Aide ↔ popups ↔ infobulles.
+- ~~**Lot B — cohérence des surfaces**~~ : **fait le 10 sept.** (voir plus haut).
 - **Lot C — visite guidée** : ses étapes pointent-elles vers des éléments qui existent ?
 - **Lot D — trous de couverture** : les 1 554 commits de l'été contre l'Aide.
 - **Lot E — encastrement résiduel** : 601-101, Cégep Gérald-Godin, Bédard, SRPNF, IDME,
