@@ -2767,26 +2767,6 @@ function creerGraphiqueCriteres(canvasId, da) {
                                     lignes.push(niveauLabel + ': ' + inter.titre);
                                 }
 
-                                // Consolidation — commentaire qualitatif par critère
-                                var consol = config._consolidation;
-                                if (consol && consol.resume) {
-                                    var critereNom = tooltipItems[0].dataset.label || '';
-                                    var r = consol.resume[critereNom.trim()];
-                                    if (r) {
-                                        lignes.push('');
-                                        if (r.type === 'consolide' && r.artefact === idx) {
-                                            lignes.push('◆ Consolidé depuis cette production');
-                                            lignes.push('  Maintenu ' + r.maintenusSur + '/' + r.totalSuivants + ' suivantes');
-                                        } else if (r.type === 'consolide' && idx > r.artefact) {
-                                            lignes.push('◆ Maîtrise consolidée (depuis P' + (r.artefact + 1) + ')');
-                                        } else if (r.type === 'non-consolide-avec-tentatives') {
-                                            lignes.push('⚠ Maîtrise atteinte ' + r.tentativesM + '× sans rétention');
-                                        } else if (r.type === 'jamais-atteint-m') {
-                                            lignes.push('— Maîtrise non atteinte');
-                                        }
-                                    }
-                                }
-
                                 return lignes;
                             }
                         }
@@ -2834,13 +2814,6 @@ function creerGraphiqueCriteres(canvasId, da) {
                 },
             }
         };
-
-        // Pré-calculer les données de consolidation pour les tooltips
-        var _consolidation = null;
-        if (typeof calculerConsolidationIndividuelle === 'function') {
-            _consolidation = calculerConsolidationIndividuelle(da);
-        }
-        config._consolidation = _consolidation;
 
         // Créer le graphique
         const chart = new Chart(ctx, config);

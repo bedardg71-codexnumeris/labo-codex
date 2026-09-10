@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.128',
+            couleur: 'bleu',
+            titre: 'La Consolidation des apprentissages est retir\u00e9e',
+            items: [
+                '<strong>Le module «&nbsp;Consolidation des apprentissages&nbsp;» n\'existe plus.</strong> Il mesurait si les acquis tenaient d\'une production \u00e0 la suivante, et il n\'a jamais rien donn\u00e9 de concluant. La carte du Labo dispara\u00eet, et avec elle <strong>deux affichages du profil \u00e9tudiant</strong>&nbsp;: la ligne «&nbsp;Consolidation&nbsp;» de l\'onglet <em>Forces et d\u00e9fis</em>, et les mentions «&nbsp;Consolid\u00e9 depuis cette production&nbsp;» qui apparaissaient au survol du graphique de progression. Rien de ce que tu as saisi n\'est touch\u00e9&nbsp;: ce module ne faisait que lire.',
+                '<strong>Le rep\u00e8re «&nbsp;Ma\u00eetris\u00e9 \u00e0 partir de&nbsp;» de tes \u00e9chelles garde tout son effet.</strong> Il servait aussi \u00e0 ce module, mais il en a d\'autres lecteurs&nbsp;: les cartouches et le classement des r\u00e9sultats par niveau continuent de s\'appuyer dessus.',
+                '<strong>La fen\u00eatre «&nbsp;Soutenir Labo Codex&nbsp;» dit \u00e0 quoi on s\'abonne.</strong> «&nbsp;Suivre le projet&nbsp;» passe au-dessus de «&nbsp;Avec tes moyens&nbsp;», et les trois abonnements nomment le <strong>blogue Codex Numeris</strong>&nbsp;: l\'abonnement gratuit et l\'abonnement de soutien sont deux niveaux du m\u00eame abonnement au blogue, et c\'est lui qui finance Labo Codex. Rien ne le disait, et \u00e7a se lisait comme un abonnement \u00e0 l\'application.'
+            ]
+        },
+        {
             version: '1.127',
             couleur: 'bleu',
             titre: 'Le Comparateur parle en six param\u00e8tres',

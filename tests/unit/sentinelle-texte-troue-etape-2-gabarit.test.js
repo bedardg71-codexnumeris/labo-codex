@@ -36,6 +36,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { jetonAuMoins } from './_helpers/jeton-anticache.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
 const source = (rel) => readFileSync(path.join(racine, rel), 'utf8');
@@ -399,9 +400,9 @@ describe('texte troué 2 · E — les invariants statiques du gabarit', () => {
 
     it('E.c les jetons anti-cache des quatre fichiers du volet ont bougé', () => {
         const html = source('index.html');
-        expect(html).toMatch(/js\/grilles\.js\?v=20260904[i-z]|js\/grilles\.js\?v=2026090[5-9]|js\/grilles\.js\?v=20261/);
-        expect(html).toMatch(/js\/evaluation-enonces\.js\?v=2026090[4-9]|js\/evaluation-enonces\.js\?v=20261/);
-        expect(html).toMatch(/js\/evaluation-projection\.js\?v=20260904[d-z]|js\/evaluation-projection\.js\?v=2026090[5-9]|js\/evaluation-projection\.js\?v=20261/);
-        expect(html).toMatch(/styles\.css\?v=20260904[f-z]|styles\.css\?v=2026090[5-9]|styles\.css\?v=20261/);
+        { const j = jetonAuMoins(html, 'js/grilles.js', '20260904i'); expect(j.ok, j.message).toBe(true); }
+        { const j = jetonAuMoins(html, 'js/evaluation-enonces.js', '20260904a'); expect(j.ok, j.message).toBe(true); }
+        { const j = jetonAuMoins(html, 'js/evaluation-projection.js', '20260904d'); expect(j.ok, j.message).toBe(true); }
+        { const j = jetonAuMoins(html, 'styles.css', '20260904f'); expect(j.ok, j.message).toBe(true); }
     });
 });

@@ -312,7 +312,7 @@ function monter(jeu, opts = {}) {
         obtenirEchelleCommuneDesEvaluations: fwd('obtenirEchelleCommuneDesEvaluations'), obtenirPratiqueActuelle: fwd('obtenirPratiqueActuelle'),
         situerPourcentageDansEchelle: fwd('situerPourcentageDansEchelle'), interpreterNiveauAtteint: fwd('interpreterNiveauAtteint'), lireNiveauNoteGlobale: fwd('lireNiveauNoteGlobale'),
         // Le panneau « Développement des habiletés » du profil référence par nom nu des exports d'autres IIFE.
-        _genererBarresSRPNF: fwd('_genererBarresSRPNF'), genererBlocConsolidation: fwd('genererBlocConsolidation'),
+        _genererBarresSRPNF: fwd('_genererBarresSRPNF'),
         genererConteneurGestesCognitifs: fwd('genererConteneurGestesCognitifs'), genererOngletsDeveloppement: fwd('genererOngletsDeveloppement'),
         calculerMoyennesCriteres: fwd('calculerMoyennesCriteres'), diagnostiquerForcesChallenges: fwd('diagnostiquerForcesChallenges'),
         obtenirTermeProduction: fwd('obtenirTermeProduction'), accordTermeProduction: fwd('accordTermeProduction'),

@@ -7,6 +7,107 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 39 — 9 SEPTEMBRE 2026 AU SOIR (jusqu'au 10 après minuit) : TROIS RAPPORTS DE GRÉGOIRE,
+     ET UNE SUPPRESSION QUI DÉBORDAIT DE L'ÉCRAN QU'IL AVAIT CAPTURÉ.
+     Périmètre couvert : à partir de `e91bba1b`. RIEN N'EST COMMITÉ à l'écriture de ce bloc.
+     Version : 1.127.5 → **1.128.0**, build `0910-0019` (`release.mjs minor`, 17 jetons). Changelog écrit.
+     Point d'entrée : « Nous allons corriger des bugs. Voici le premier rapport. »
+
+     ▣ RAPPORT 1 — LE HEIC DANS LA ZONE DE DÉPÔT : CLOS SANS CORRECTIF, ET C'EST UNE MESURE QUI L'A
+       TRANCHÉ. « Le format HEIC n'est pas supporté par Chrome. On l'avait retiré de cet encadré. »
+       La prémisse est vraie du décodeur NATIF de Chrome — c'est le constat qui a ouvert #597 le
+       30 août — mais depuis ce chantier l'application ne compte plus sur Chrome : elle embarque
+       libheif. Trois mesures dans SON Chrome 152 : sur `app.codexnumeris.org`, `decodagePossible()`
+       rend `true` et le worker répond (libheif s'initialise sous la CSP servie) ; sur banc local,
+       `IMG_2179.HEIC` (2 909 950 o) donne 3024 × 4032, JPEG de 1 923 049 o, en 2 535 ms ; et
+       l'historique ne montre QU'UN SEUL commit sur ce libellé (`20e4feaf`, #597) — il ne l'a jamais
+       retiré, il l'a rendu CONDITIONNEL. Le HEIC ne disparaît qu'en `file://`, où aucun worker
+       n'existe. Décision de Grégoire : on ne change rien.
+     ⮕ CE QUE CE RAPPORT A COÛTÉ, ET LE GESTE QUI MANQUE : le bloc `--- SYSTÈME ---` du rapport de bug
+       ne dit pas SOUS QUEL PROTOCOLE l'application était ouverte, alors que c'est exactement ce qui
+       départage les deux affichages. Il a fallu le déduire. Inscrit DANS #812 (même fichier, même
+       passage) plutôt qu'en item neuf.
+
+     ▣ RAPPORT 2 — LA FENÊTRE DE SOUTIEN : DEUX ENCADRÉS INTERVERTIS, ET LE MOT QUI MANQUAIT.
+       « Les abonnements régulier et de soutien concernent le blog Codex Numeris. On dirait ici que
+       c'est un abonnement à Labo Codex. » « Suivre le projet » passe AVANT « Avec tes moyens », et
+       les trois libellés nomment le blogue. Trois formulations soumises à l'écran ; il a tranché :
+       le mot dans les LIENS, là où l'œil se pose, pas une phrase d'ancrage sous le titre.
+     ⮕ Mesuré à trois formats (iPad portrait et paysage, téléphone) : ordre bon, zéro débordement,
+       zéro défilement horizontal ; à 390 px l'overlay défile et le pied reste atteignable. Les
+       hauteurs de colonne (427 et 520) sont INCHANGÉES — une interversion ne déplace pas de matière.
+       Le mode sombre n'a pas été éprouvé, et c'est dit : aucune couleur n'a bougé.
+
+     ▣ RAPPORT 3 — LE MODULE « CONSOLIDATION DES APPRENTISSAGES » EST RETIRÉ (#819). « Cette
+       fonctionnalité n'a jamais vraiment été concluante et nous pouvons la supprimer. »
+     ⚠⚠ LE FAIT QUI COMMANDE TOUT LE LOT : LA SUPPRESSION DÉBORDAIT DE L'ÉCRAN CAPTURÉ. Trois surfaces
+       vivaient sur le même moteur — (A) la carte du Labo, (B) la ligne « Consolidation : … » de
+       l'onglet Forces et défis du profil étudiant, (C) les mentions « ◆ Consolidé depuis cette
+       production » dans l'infobulle du graphique. B et C appelaient `calculerConsolidationIndividuelle` :
+       retirer A seul aurait laissé les 769 lignes du moteur en place. LE PÉRIMÈTRE A DONC ÉTÉ PORTÉ
+       À SA DÉCISION, chiffres à l'appui, avant la première coupe — « ce qu'une suppression doit
+       emporter » est l'un des quatre points qui remontent. Il a tranché : tout part.
+     ▣ RETIRÉ : `js/consolidation.js` (769 l.) · la carte et ses ancrages d'`index.html` (32 l. + la
+       balise `<script>`) · 185 lignes et 26 sélecteurs de `styles.css` · `genererBlocConsolidation`
+       et son helper `_libelleSeuilDeduit` (bloc de 70 l., −76 au diff) · ses trois appels · l'infobulle et son pré-calcul ·
+       les deux déclencheurs (dont `navigation.js`, ZONE PROTÉGÉE — retrait autorisé par la demande,
+       et DIT plutôt que tu) · deux textes d'aide · la section 8 de `docs/modules/depistage-et-suivi.md`.
+       La spec d'origine est ARCHIVÉE, pas supprimée : elle porte sa signature avec Cowork.
+     ⮕ CE QUE LE RETRAIT A RENDU FAUX, ET QUI A SUIVI : `resolueParConsolidation` devient
+       `resolueParRegistre` (`resoudreModeleParId` n'avait que deux appelants pour une échelle, il
+       n'en a plus qu'un) ; quatre commentaires qui citaient le fichier disparu.
+     ⮕ VÉRIFIÉ AVANT DE CONCLURE : `echelle.seuilMaitrise` N'EST PAS ORPHELINE — `cartouches.js`,
+       `profil-etudiant-calculs.js`, `echelles.js`, `wizard-pratique-v2.js` et `import-export.js` la
+       lisent encore. Le repère « Maîtrisé à partir de » garde tout son effet.
+     ⚠ CE QUE LA COUVERTURE PERD, DIT PLUTÔT QUE TU — 21 ESSAIS.
+       `sentinelle-555-seuil-maitrise-lu-non-devine.test.js` supprimée EN ENTIER (12 cas) : elle
+       éprouvait `_detecterScoreMaitrise`, qui vivait dans le module ; l'objet a disparu, pas la
+       couverture d'autre chose. Deux cas de `555-d`, deux d'`audit-onglet-suivi` (C3, G3), trois de
+       `555-2`. Cette dernière verrouillait que l'aide du curseur « Seuil de défi » NOMME le module
+       qu'il ne règle pas : la collision de noms n'a plus de second terme.
+     ⮕ ET C'EST EN LA LISANT QU'UNE COUPE TROP LARGE A ÉTÉ VUE : « Règle le dépistage seulement »
+       était parti avec le renvoi, alors que cette moitié reste VRAIE. Remise, avec un cas neuf qui la
+       tient sur l'infobulle, BREAK-TESTÉ ROUGE (arbre restauré, empreinte sha256 vérifiée).
+     ▣ UN DÉFAUT DE #813 PART AVEC LE MODULE : `--fond-secondaire`, jamais définie, n'était appelée que
+       par le bloc retiré. Le cliquet de `sentinelle-567` a EXIGÉ qu'elle sorte de ses deux listes —
+       « le cliquet descend avec le code » a fonctionné exactement comme il devait.
+
+     ▣ LE FICHIER QUE LA SESSION EST CENSÉE LIRE AVANT DE CORRIGER MENTAIT. `SUIVI-BUGS.md` comptait
+       quatre lignes ouvertes, dont TROIS périmées : #806 et #807 livrés en 1.127.0 (`da25d3f6`) ET
+       validés au terrain (porte #802, 14/14), #811 livré en 1.127.4. Remis d'aplomb : seul #114 reste
+       réellement ouvert. Relevé par le rituel de début de session, pas par une lecture de hasard.
+
+     ⚠ #812 VÉCU DE L'INTÉRIEUR, ET C'EST LA MEILLEURE PREUVE DE L'ITEM. Les premières écritures de
+       cette session portaient « 10 septembre » — l'heure UTC lue au lieu de l'heure locale, à 23 h 53
+       le 9. Exactement le mécanisme du nom des rapports de bug. Corrigé dans les trois fichiers. Et le
+       jeton anti-cache a suivi le même chemin : la sentinelle exige le jour du BUILD (`0909`), pas la
+       date du jour — `?v=20260910a` refusé, `20260909b` accepté.
+
+     ▣ #820 — ET C'EST LA RELEASE QUI L'A DÉCOUVERT : SEPT SENTINELLES MESURAIENT LE CALENDRIER.
+       `release.mjs minor` pose le build `0910-0019` et re-bumpe 17 jetons au 10 septembre. SEPT bancs
+       rougissent d'un coup, sur un lot qui ne les touche pas. Motif : ils vérifiaient un jeton `?v=`
+       par une regex qui ÉNUMÈRE les jours — `20260905[c-z]|2026090[6-9]|20261` — dont la dernière
+       branche visait octobre-décembre. IL Y AVAIT UN TROU DU 10 AU 30 SEPTEMBRE. Le mur était devant
+       nous : n'importe quelle release d'aujourd'hui l'aurait heurté, en pleine livraison.
+     ⮕ CORRIGÉ MAINTENANT, et c'est le seul des trois niveaux qui s'applique — ça bloquait le parcours
+       qu'on livrait. Helper `tests/unit/_helpers/jeton-anticache.js` : deux dates se COMPARENT, elles
+       ne s'énumèrent pas. 18 assertions réécrites, chaque plancher d'origine conservé.
+     ⚠ RÉÉCRIRE 18 ASSERTIONS PEUT NEUTRALISER SEPT SENTINELLES SANS QU'AUCUNE NE LE DISE — donc
+       break-test : jeton ramené à un jour d'août → 6 rouges ; jeton retiré → 6 rouges ; arbre intact
+       → vert. C'est le TÉMOIN qui portait le sens ici : le 10 du mois doit passer.
+
+     ▣ MESURÉ, PAS AFFIRMÉ. Vitest 520 fichiers / 5707 essais, zéro échec (521 / 5728 au départ ;
+       −1 fichier et −21 essais, tous nommés ci-dessus). Zéro référence orpheline au grep (API,
+       `consolidation.js`, `consol-*`, `carte-consolidation`). LES SIX SOUS-SECTIONS DU LABO
+       PARCOURUES AU NAVIGATEUR, ZÉRO ERREUR CONSOLE, et `labo-etudes` ne porte plus que ses deux
+       autres cartes. `modal-soutien.spec.js` vert (2/2). Une ablation, une rougeur.
+     ⏳ DÛ, ET PAS À UNE SESSION : Safari sur son iPad — la fenêtre de soutien y a changé deux fois en
+       vingt-quatre heures sans que personne l'y voie.
+     ▣ CHANGELOG : entrée `1.128` (bleu), trois items — le module retiré et LES DEUX ENDROITS où ça
+       se voit, le repère « Maîtrisé à partir de » qui garde son effet, la fenêtre de soutien.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 38 — 10 SEPTEMBRE 2026, NUIT : DEUX ÉCRANS, ET LE GARDE-FOU QUI COMPTAIT SANS QUALIFIER.
      Périmètre couvert : `d1432016..663a5ec6`, quatre commits, une seule session. 1.127.3 → 1.127.5.
      Point d'entrée demandé par Grégoire : « à ajouter au backlog, la résolution de ce bug » — le lot

@@ -4,7 +4,7 @@
  * Sous-module extrait de profil-etudiant.js (session B refactor, 18 mai 2026).
  *
  * Périmètre : génération HTML des diagnostics SRPNF / Critères / Générique,
- * blocs RLO (Profil, Évolution, Consolidation, Gestes cognitifs, Note),
+ * blocs RLO (Profil, Évolution, Gestes cognitifs, Note),
  * onglets de développement.
  *
  * 11 fonctions, 11 exports window.X (convention systématique session A décision b).
@@ -499,10 +499,10 @@ function _genererBarresSRPNF(da) {
     }
 
     // Encadré « Suivi de l'apprentissage des fondamentaux » retiré (17 avril 2026)
-    // Raison : recoupement partiel avec le bloc « Consolidation » maintenant dans
-    // l'onglet Forces et défis. Consolidation couvre tous les critères sur la
-    // trajectoire complète ; le diagnostic IPB × direction peut être réinjecté
-    // dans l'onglet Accompagnement plus tard au besoin.
+    // Raison : recoupement partiel avec le bloc « Consolidation », lui-même
+    // retiré le 10 septembre 2026 avec tout le module (jamais concluant).
+    // Le diagnostic IPB × direction peut être réinjecté dans l'onglet
+    // Accompagnement plus tard au besoin.
 
     return `
         <div class="section-titre">Forces et défis parmi les critères</div>
@@ -606,76 +606,6 @@ function genererBlocProfilRLO(da) {
             </div>
         </section>
     `;
-}
-
-/**
- * Bloc « Consolidation » — résumé des critères consolidés / fragiles / non consolidés.
- * Déplacé depuis l'onglet Accompagnement vers l'onglet Forces et défis de
- * « Développement des habiletés » (17 avril 2026), car il porte sur le
- * développement des habiletés par critère, pas sur l'accompagnement RàI.
- */
-function genererBlocConsolidation(da) {
-    if (typeof calculerConsolidationIndividuelle !== 'function') return '';
-    const consolidation = calculerConsolidationIndividuelle(da);
-    if (!consolidation || !consolidation.resume) return '';
-    const critConsol = Object.keys(consolidation.resume);
-    if (critConsol.length === 0) return '';
-
-    const items = critConsol.map(critere => {
-        const info = consolidation.resume[critere];
-        if (info.type === 'consolide') {
-            return '<span style="color: var(--vert-succes);">' + echapperHtml(critere) + ' consolidé (' + echapperHtml(info.artefactNom) + ')</span>';
-        } else if (info.type === 'non-consolide-avec-tentatives') {
-            return '<span style="color: var(--orange-attention, #e8a838);">' + echapperHtml(critere) + ' fragile</span>';
-        } else {
-            return '<span style="color: var(--gris-moyen);">' + echapperHtml(critere) + ' non consolidé</span>';
-        }
-    });
-
-    // #555 lot 2 (28 août 2026) — décision de Grégoire : quand le repère de
-    // maîtrise n'est pas posé sur l'échelle, ce bloc CALCULE ET LE DIT. Le
-    // seuil venait jusqu'ici d'une convention (« avant-dernier niveau ») qui
-    // tombait juste par coïncidence sur une échelle I/D/M/E et faux ailleurs,
-    // sans que rien ne le signale à l'écran.
-    const reserve = consolidation.scoreMaitriseDeduit
-        ? '<div style="margin-top: 6px; font-size: 0.78rem; color: var(--gris-moyen); font-style: italic;">' +
-          echapperHtml(_libelleSeuilDeduit(consolidation.scoreMaitriseRaison)) +
-          '</div>'
-        : '';
-
-    return '<div style="margin-top: 16px; padding: 10px 14px; background: var(--fond-carte, var(--fond-secondaire)); border-radius: 6px; font-size: 0.85rem; color: var(--texte-secondaire);">' +
-        '<strong style="color: var(--texte-principal);">Consolidation :</strong> ' + items.join(' · ') +
-        reserve +
-        '</div>';
-}
-
-/**
- * Dit POURQUOI le seuil de maîtrise a dû être déduit — une phrase par cas, en
- * langage d'enseignant plutôt qu'en code de diagnostic.
- * #555 lot 2 (28 août 2026).
- * @param {string|null} raison valeur rendue par `_detecterScoreMaitrise`
- * @returns {string}
- */
-function _libelleSeuilDeduit(raison) {
-    switch (raison) {
-        case 'repere-non-pose':
-            return 'Seuil de maîtrise déduit : aucun repère n’est posé sur l’échelle de cette grille.';
-        case 'repere-introuvable':
-            return 'Seuil de maîtrise déduit : le repère posé désigne un niveau qui n’existe plus dans l’échelle.';
-        case 'repere-sans-min':
-            return 'Seuil de maîtrise déduit : le niveau repère n’a pas de borne inférieure.';
-        case 'echelle-non-resolue':
-            return 'Seuil de maîtrise déduit : l’échelle de cette grille n’a pas pu être retrouvée.';
-        case 'echelle-de-pratique':
-            // Ne PAS renvoyer vers l'éditeur d'échelle : une échelle de pratique
-            // configurable est synthétisée à la volée et n'existe pas dans la
-            // bibliothèque — on ne peut pas y poser de repère. Réclamer ce geste
-            // ferait chercher une case qui n'existe nulle part.
-            return 'Seuil de maîtrise déduit : cette évaluation utilise l’échelle de la pratique, sur laquelle aucun repère ne se pose.';
-        default:
-            // Raison inconnue : le dire quand même plutôt que taire la réserve.
-            return 'Seuil de maîtrise déduit, et non lu sur l’échelle.';
-    }
 }
 
 /**
@@ -894,7 +824,6 @@ function genererBlocEvolutionRLO(da) {
     window.genererDiagnosticGenerique       = genererDiagnosticGenerique;
     window._genererBarresSRPNF              = _genererBarresSRPNF;
     window.genererBlocProfilRLO             = genererBlocProfilRLO;
-    window.genererBlocConsolidation         = genererBlocConsolidation;
     window.genererConteneurGestesCognitifs  = genererConteneurGestesCognitifs;
     window.genererNoteRLO                   = genererNoteRLO;
     window.genererOngletsDeveloppement      = genererOngletsDeveloppement;
