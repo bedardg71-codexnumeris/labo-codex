@@ -15,6 +15,33 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.128.0 — LA « CONSOLIDATION DES APPRENTISSAGES » N'EXISTE PLUS** (build `0910-0019`).
+**Ce que tu verras** : la carte du Labo a disparu, et **deux autres affichages avec elle** — la
+ligne « Consolidation : … » de l'onglet *Forces et défis* d'un profil étudiant, et les mentions
+« Consolidé depuis cette production » qui apparaissaient au survol du graphique de progression.
+C'est toi qui l'as demandé : « cette fonctionnalité n'a jamais vraiment été concluante ».
+**Rien de ce que tu as saisi n'est touché** — ce module ne faisait que lire.
+**Vérifié comment** : les six sous-sections du Labo ouvertes une à une dans un navigateur, aucune
+erreur, et la page « Études » ne porte plus que ses deux autres cartes. Le repère
+« Maîtrisé à partir de » de tes échelles, lui, **garde tout son effet** : il a d'autres lecteurs
+(les cartouches, le classement des résultats par niveau), vérifiés un par un avant de couper.
+
+↻ **La fenêtre « Soutenir Labo Codex » dit à quoi on s'abonne.** « Suivre le projet » passe
+au-dessus de « Avec tes moyens », et les trois abonnements nomment le **blogue Codex Numeris** :
+l'abonnement gratuit et celui de soutien sont deux niveaux du même abonnement au blogue.
+Rien ne le disait, et ça se lisait comme un abonnement à l'application.
+**Vérifié comment** : rendu mesuré à trois formats (iPad portrait et paysage, téléphone) — ordre
+bon, aucun texte hors cadre, aucun défilement horizontal.
+
+▣ **Le format HEIC : il n'y avait rien à corriger, et c'est mesuré.** Tu as signalé que Chrome ne
+lit pas le HEIC. C'est vrai de Chrome, mais l'application ne compte plus sur lui depuis fin août :
+elle embarque son propre décodeur. **Dans ton Chrome, une photo d'iPhone de 2,9 Mo est convertie en
+3024 × 4032 en 2,5 secondes.** L'encadré ne promet le HEIC que là où il peut le tenir — il le
+retire de lui-même quand tu ouvres l'application par double-clic. Rien changé.
+
+⏳ **Ce qui reste à voir sur TA tablette** : la fenêtre de soutien dans Safari. Elle a changé deux
+fois en vingt-quatre heures sans que personne l'y voie.
+
 ✅ **RELEVÉE — la porte terrain des sept livraisons du jour (#802) : 14 sur 14, zéro échec.**
 `plans de travail/PORTES-TERRAIN-2026-09-09.md`, relevée le 9 sept. à 18 h 49. **Ta grille de
 dépistage tient** : re-désignée, elle a survécu au rechargement (rangée 1.1) — plus rien à faire de
