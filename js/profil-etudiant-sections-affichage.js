@@ -4326,9 +4326,14 @@ function genererSectionPerformance(da) {
     const moyennes = calculerMoyennesCriteres(da);
     const diagnostic = diagnostiquerForcesChallenges(moyennes);
 
+    // #817 — même seuil force/défi que le diagnostic par critère, lu dans la
+    // SSOT (`defiSpecifique`). Il valait 0.7125 en dur, comme dans
+    // profil-etudiant-diagnostics.js : deux copies d'un résidu, pas un réglage.
+    const seuilForce = obtenirSeuil('defiSpecifique');
+
     // Fonction helper pour couleur du badge
     const obtenirCouleurBadge = (score) => {
-        if (score >= 0.7125) return 'var(--vert-succes)'; // Vert - Force
+        if (score >= seuilForce) return 'var(--vert-succes)'; // Vert - Force
         if (score >= 0.60) return 'var(--btn-annuler)'; // Jaune - Défi modéré
         if (score >= 0.50) return 'var(--orange-accent)'; // Orange - Défi important
         return 'var(--rouge-erreur)'; // Rouge - Défi critique
