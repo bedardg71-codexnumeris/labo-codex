@@ -231,7 +231,7 @@ const GLOSSAIRE = {
         terme: 'Zone de couleur',
         categorie: 'Tableau de bord',
         etape: 'observation',
-        definition: 'Les paliers de couleur qui traduisent chaque indice A-C-P dans la liste des étudiant·es. Trois seuils découpent quatre bandes : fragile sous le premier, acceptable jusqu’au deuxième, bon jusqu’au troisième, excellent au-delà — chaque curseur ferme la bande qu’il nomme. Les trois se règlent dans Labo > Outils d’observation (70 / 80 / 85 % par défaut) et valent pour A, C, P et M. La barre de l’Aperçu, elle, ne suit pas ces paliers : c’est un dégradé continu, dont la couleur est interpolée.',
+        definition: 'Les paliers de couleur qui traduisent chaque indice A-C-P dans la liste des étudiant·es. Trois seuils découpent quatre bandes : fragile sous le premier, acceptable jusqu’au deuxième, bon jusqu’au troisième, excellent au-delà — chaque curseur ferme la bande qu’il nomme. Les trois se règlent dans Labo > Outils d’observation > Micro-données ACP > Seuils d’interprétation (70 / 80 / 85 % par défaut) et valent pour A, C, P et M. La barre de l’Aperçu, elle, ne suit pas ces paliers : c’est un dégradé continu, dont la couleur est interpolée.',
         voir: 'Tableau de bord > Liste · Labo > Outils d’observation'
     },
 
