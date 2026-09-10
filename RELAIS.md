@@ -7,6 +7,20 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 10 SEPT. 2026 AU SOIR : #821 LOT A LIVRÉ (1.128.4)
+
+> ✅ **`main` à 1.128.4, build `0910-1531`.** Tout est sur `main` ; aucune branche ne porte de
+> travail. Le push suit ce commit par `scripts/pousser.sh` (verdict Playwright d'abord) — si tu
+> lis ceci depuis `origin/main`, il est arrivé. Vérifie : `git rev-list --count origin/main..main`.
+> **Ce qui reste hors dépôt, et qui n'est pas à moi** : `Formation/*.html` (chantier Formation,
+> branche `claude/formation-session-setup-4181r0`) et deux fichiers de Cowork écrits pendant la
+> session (`plans de travail/00-CADRAGES-OUVERTS.md` modifié, `CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md`
+> neuf) — Cowork les commet.
+> **Ce qui attend** : le lot B est écrit (§ 8 de l'inventaire) ; les bornes et les mots attendent
+> l'orthopédagogue (`#821`, `#822`). Le cadrage de Cowork sur l'écran de réglage du dépistage dit
+> lui-même qu'il attendait ce lot : il peut maintenant prendre son tour.
+> ⚠ `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` porte encore l'état mesuré de 1.128.3 : remesure.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 10 SEPT. 2026 : L'AUDIT DE L'AIDE FUSIONNÉ DANS 1.128.0 (1.128.1)
 
 > ✅ **`main` à 1.128.1, build `0910-0649`, commit `0752bc17`, POUSSÉ.** Rien n'attend

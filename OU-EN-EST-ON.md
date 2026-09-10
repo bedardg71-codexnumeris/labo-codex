@@ -15,6 +15,25 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.128.4 — LES QUATRE RÈGLES QUI QUALIFIENT UN CONTEXTE SONT ÉCRITES AU MÊME ENDROIT** (build `0910-1531`).
+**Ce que tu verras : rien.** Pas un mot, pas une borne, pas une couleur n'a bougé — c'est le
+critère de réussite de ce lot, et il est mesuré : les quatre règles ont été rejouées AVANT et
+APRÈS sur 1630 cas (chaque borne, chaque borne ± 1 point, et le texte complet de la carte
+Mobilisation du profil), zéro différence. **Ce qui a changé pour toi** : quand tu demandais
+« comment l'application décide-t-elle qu'un contexte est Favorable ? », la réponse était
+éparpillée dans quatre fichiers. Elle tient maintenant dans un seul (`js/contexte-qualification.js`),
+avec la provenance et la date de chaque borne, et le tableau des désaccords réels — mot par mot,
+en points de pourcentage — est écrit au § 8 de l'inventaire du 10 septembre. **C'est ce tableau
+qui part chez l'orthopédagogue** ; rien n'y est recommandé. Trois faits que personne n'avait vus :
+« Assiduité critique » veut dire « sous 60 % » sur une carte du profil et « sous 70 % » sur la
+carte d'à côté ; une quatrième borne (60 %) n'est réglable nulle part ; et le palier
+« Insuffisant » du contexte ne peut jamais s'afficher. Aucun des trois n'est corrigé : ce sont
+des décisions de pédagogie, elles attendent l'automne (`#821`, `#822`).
+**Vérifié comment** : harnais AVANT/APRÈS sur le code d'avant (`5c29d3fd`) et d'après ; sentinelle
+de 24 essais dont 8 break-tests rouges ; Vitest 530 fichiers / 5785 essais. **Pas vérifié** :
+l'écran dans Safari et sur iPad — aucun verdict local ; le CI WebKit tranche, et une divergence
+serait une régression, pas une nouveauté.
+
 ↻ **1.128.3 — QUATRE RÉGLAGES QUI N'ATTEIGNAIENT PAS LEUR CALCUL** (build `0910-1147`).
 **Ce que tu verras** : (1) dans le panneau Portfolio d'un profil, les artefacts cochés
 automatiquement correspondent enfin au mode que tu as choisi — « N derniers » retenait en
