@@ -64,11 +64,20 @@ function genererDiagnosticSRPNF(da, defisInfo) {
 
     const diagnostic = defisInfo; // Utiliser les défis de la pratique
 
-    // Fonction helper pour obtenir la couleur selon le score
+    // #817 — LE seuil force/défi, lu dans la SSOT des seuils d'interprétation
+    // (`defiSpecifique`, réglable dans Labo > Outils d'observation). Il valait
+    // 0.7125 en dur ici, sans commentaire d'origine, alors que le reste de
+    // l'app décidait « défi » à `defiSpecifique` : l'Aide décrivait une
+    // symétrie force ≥ seuil / défi < seuil que le code n'avait pas.
+    const seuilForce = obtenirSeuil('defiSpecifique');
+
+    // Fonction helper pour obtenir la couleur selon le score.
+    // ⚠ La branche `>= 0.75` retirée ici rendait EXACTEMENT la même couleur que
+    // celle du dessous : elle ne découpait rien. La garder aurait fait mentir la
+    // pastille dès que le seuil monte au-dessus de 0.75 (vert sous un « Défi »).
     const obtenirCouleurScore = (score) => {
         if (score >= 0.85) return 'var(--bleu-clair)'; // Bleu
-        if (score >= 0.75) return 'var(--vert-succes)'; // Vert
-        if (score >= 0.7125) return 'var(--vert-succes)'; // Vert (force)
+        if (score >= seuilForce) return 'var(--vert-succes)'; // Vert (force)
         if (score >= 0.65) return 'var(--btn-annuler)'; // Jaune
         return 'var(--orange-accent)'; // Orange
     };
@@ -76,7 +85,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
     return `
         <!-- DIAGNOSTIC CRITÈRES SRPNF -->
         <h4 class="profil-titre-bleu-mt20">
-            Diagnostic par critère (seuil force&nbsp;: 0.7125)
+            Diagnostic par critère (seuil force&nbsp;: ${Math.round(seuilForce * 100)}&nbsp;%)
         </h4>
 
         <!-- Tableau des scores par critère -->
@@ -96,8 +105,8 @@ function genererDiagnosticSRPNF(da, defisInfo) {
 
                     const pourcentage = Math.round(score * 100);
                     const couleur = obtenirCouleurScore(score);
-                    const estForce = score >= 0.7125;
-                    const estDefi = score < 0.7125;
+                    const estForce = score >= seuilForce;
+                    const estDefi = score < seuilForce;
 
                     return `
                         <div style="font-weight: 500; color: var(--gris-fonce);">${nomCritere}</div>

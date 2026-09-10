@@ -192,19 +192,27 @@
         // (objet à structure mixte non migré vers l'API, voir preferences.js)
         const seuils = db.getSync('seuilsInterpretation') || {};
 
+        // #818 suite — les trois curseurs lisent LA branche que les
+        // consommateurs lisent, via l'accesseur de la SSOT. Ils lisaient des
+        // clés plates que personne d'autre ne regardait : le panneau se
+        // relisait lui-même. Pas de repli local ici — `obtenirSeuil` rend
+        // toujours une valeur, et un second repli serait une seconde
+        // convention (c'est la leçon de #555).
+        // ⚠ La table de correspondance nomme la même borne par l'autre côté :
+        // « Fragile 70 » (sous 70 c'est fragile) = `acceptable: 0.70`.
         const seuilFragile = document.getElementById('v2-seuil-fragile');
         if (seuilFragile) {
-            seuilFragile.value = Math.round((seuils.fragile || 0.70) * 100);
+            seuilFragile.value = Math.round(obtenirSeuil('interpretation.acceptable') * 100);
         }
 
         const seuilAcceptable = document.getElementById('v2-seuil-acceptable');
         if (seuilAcceptable) {
-            seuilAcceptable.value = Math.round((seuils.acceptable || 0.80) * 100);
+            seuilAcceptable.value = Math.round(obtenirSeuil('interpretation.bon') * 100);
         }
 
         const seuilBon = document.getElementById('v2-seuil-bon');
         if (seuilBon) {
-            seuilBon.value = Math.round((seuils.bon || 0.85) * 100);
+            seuilBon.value = Math.round(obtenirSeuil('interpretation.excellent') * 100);
         }
 
         // Seuils avancés de détection
@@ -335,9 +343,21 @@
             return;
         }
 
-        seuils.fragile = fragile / 100;
-        seuils.acceptable = acceptable / 100;
-        seuils.bon = bon / 100;
+        // #818 suite — ÉCRIRE DANS LA BRANCHE QUE LES CONSOMMATEURS LISENT.
+        // Ces trois lignes posaient `fragile`/`acceptable`/`bon` à la racine :
+        // aucun calcul ne les lisait, et `fusionnerAvecDefauts` les faisait
+        // disparaître de l'objet rendu, puisqu'elles n'existent pas au modèle.
+        if (!seuils.interpretation || typeof seuils.interpretation !== 'object') {
+            seuils.interpretation = {};
+        }
+        seuils.interpretation.acceptable = fragile / 100;
+        seuils.interpretation.bon = acceptable / 100;
+        seuils.interpretation.excellent = bon / 100;
+        // Les clés plates ne doivent pas survivre à côté : deux vérités pour un
+        // même réglage, c'est le défaut qu'on retire, pas celui qu'on déplace.
+        delete seuils.fragile;
+        delete seuils.acceptable;
+        delete seuils.bon;
 
         // Seuils avancés de détection
         const seuilProgression = document.getElementById('v2-seuil-progression');

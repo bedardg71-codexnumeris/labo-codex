@@ -33,6 +33,59 @@ const COULEURS_SUIVI = ['#5e9fd0', '#8b6cc4', '#4db89a', '#4ab8d4', '#6a8fc0'];
 const MAX_ETUDIANTS_SUIVIS = 5;
 const CLE_SUIVI = 'etudiantsSuivis';
 
+/* ===============================
+   ÉCHELLE DES DISTRIBUTIONS A-C-P (#818, 10 sept. 2026)
+   =============================== */
+
+// ⚠ CES BORNES NE CLASSENT RIEN. Aucun `if (valeur >= 0.80)` n'existe dans ce
+// module : la barre est un dégradé CONTINU et la couleur d'un point est
+// INTERPOLÉE (obtenirCouleurGradient). Les repères de la légende situent des
+// changements de teinte sur une échelle continue — ils ne découpent pas des
+// catégories, et ne sont pas les seuils d'interprétation (70/80/85), qui sont
+// une autre échelle, celle-là réglable.
+//
+// L'axe ne part pas de 0 : il montre 30 → 100 %. Les arrêts du dégradé sont
+// posés en POSITION sur la barre (0, 25, 50, 75 %), donc en scores 30 / 47,5 /
+// 65 / 82,5 %. La légende annonçait « 30-49 / 50-64 / 65-79 / ≥ 80 » : des
+// arrondis faits à la main des mêmes arrêts, faux de 2,5 points sur deux d'entre
+// eux. Elle les CALCULE désormais, et ne peut plus dériver.
+const ECHELLE_DISTRIBUTION_MIN = 0.30;
+const ECHELLE_DISTRIBUTION_MAX = 1.00;
+
+// LA table du dégradé : position sur la barre + teinte. Elle sert aux trois
+// endroits qui en portaient chacun une copie — la chaîne CSS, l'interpolation
+// de couleur, et les libellés de la légende.
+const ARRETS_DEGRADE = [
+    { position: 0,  couleur: '#ff9800' }, // orange
+    { position: 25, couleur: '#ffc107' }, // jaune
+    { position: 50, couleur: '#28a745' }, // vert
+    { position: 75, couleur: '#2196F3' }  // bleu
+];
+
+/** Position (0-100 sur la barre) d'un score 0-1. */
+function positionSurEchelleDistribution(valeur) {
+    const etendue = ECHELLE_DISTRIBUTION_MAX - ECHELLE_DISTRIBUTION_MIN;
+    return Math.max(0, Math.min((valeur - ECHELLE_DISTRIBUTION_MIN) / etendue * 100, 100));
+}
+
+/** Réciproque : le score 0-1 qu'une position 0-100 sur la barre représente. */
+function scoreALaPositionDistribution(position) {
+    return ECHELLE_DISTRIBUTION_MIN + (position / 100) * (ECHELLE_DISTRIBUTION_MAX - ECHELLE_DISTRIBUTION_MIN);
+}
+
+/** « 47,5 » et non « 47.5 » ni « 47.50 » — virgule décimale, zéro inutile retiré. */
+function pourcentageEchelle(score) {
+    return String(Math.round(score * 1000) / 10).replace('.', ',');
+}
+
+/** Libellé de la bande i de la légende, calculé depuis les arrêts. */
+function libelleBandeDistribution(i) {
+    const borne = (n) => pourcentageEchelle(scoreALaPositionDistribution(ARRETS_DEGRADE[n].position));
+    return i < ARRETS_DEGRADE.length - 1
+        ? `${borne(i)}-${borne(i + 1)}%`
+        : `≥ ${borne(i)}%`;
+}
+
 let _etudiantsPrioritaires = [];
 let _tousEtudiantsEnrichis = []; // Tous les étudiants avec indices calculés
 let _filtresActifs = []; // Filtres toggle : 'P', 'M', 'suivi', 'rai'
@@ -518,9 +571,8 @@ function genererSvgGauss(valeurs, hauteur = 55) {
         return '';
     }
 
-    // Mapper 30-100% sur 0-100% de la barre (comme dans genererBarreDistribution)
-    // position = (valeur - 0.30) / 0.70 * 100
-    const mapperPosition = (val) => Math.max(0, Math.min((val - 0.30) / 0.70 * 100, 100));
+    // #818 — LE mappage de l'échelle, plus une quatrième copie de (val-0.30)/0.70.
+    const mapperPosition = positionSurEchelleDistribution;
 
     const muPos = mapperPosition(moyenne);
     const sigma1MoinsPos = mapperPosition(moyenne - ecartType);
@@ -1734,10 +1786,10 @@ function afficherMetriquesGlobales(etudiants) {
     const legendeUnique = `
         <div class="distribution-legende-commune tb-barre-rai" data-tooltip="tdb-zones-couleur">
             <div class="tb-flex-center-around">
-                <span style="color: #ff9800; text-align: center; font-weight: 600;">Fragile<br><span class="tb-texte-mini">30-49%</span></span>
-                <span style="color: var(--btn-annuler); text-align: center; font-weight: 600;">Modéré<br><span class="tb-texte-mini">50-64%</span></span>
-                <span style="color: var(--vert-succes); text-align: center; font-weight: 600;">Favorable<br><span class="tb-texte-mini">65-79%</span></span>
-                <span style="color: var(--bleu-clair); text-align: center; font-weight: 600;">Très favorable<br><span class="tb-texte-mini">≥ 80%</span></span>
+                <span style="color: #ff9800; text-align: center; font-weight: 600;">Fragile<br><span class="tb-texte-mini">${libelleBandeDistribution(0)}</span></span>
+                <span style="color: var(--btn-annuler); text-align: center; font-weight: 600;">Modéré<br><span class="tb-texte-mini">${libelleBandeDistribution(1)}</span></span>
+                <span style="color: var(--vert-succes); text-align: center; font-weight: 600;">Favorable<br><span class="tb-texte-mini">${libelleBandeDistribution(2)}</span></span>
+                <span style="color: var(--bleu-clair); text-align: center; font-weight: 600;">Très favorable<br><span class="tb-texte-mini">${libelleBandeDistribution(3)}</span></span>
             </div>
         </div>
     `;
@@ -1817,13 +1869,14 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
  */
 function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, afficherSom, afficherPan, correlation = null, texteAttente = '', nbTotal = 0) {
 
-    // Gradient de couleurs 4 zones (Fragile → Modéré → Favorable → Très favorable)
-    // Orange (30-49%) → Jaune (50-64%) → Vert (65-79%) → Bleu (≥80%)
-    const gradient = `linear-gradient(to right,
-        #ff9800 0%,
-        #ffc107 25%,
-        #28a745 50%,
-        #2196F3 75%)`;
+    // Dégradé CONTINU (Fragile → Modéré → Favorable → Très favorable) : orange,
+    // jaune, vert, bleu, posés aux positions 0 / 25 / 50 / 75 % de la barre.
+    // ⚠ Ce commentaire portait « 30-49% → 50-64% → 65-79% → ≥80% » : les mêmes
+    // arrondis faits à la main que la légende, et faux comme elle. Les scores
+    // réels des arrêts sont calculés par scoreALaPositionDistribution().
+    // #818 — construite depuis ARRETS_DEGRADE : la chaîne CSS, l'interpolation
+    // de couleur et les libellés de la légende ne peuvent plus diverger.
+    const gradient = `linear-gradient(to right, ${ARRETS_DEGRADE.map(a => `${a.couleur} ${a.position}%`).join(', ')})`;
 
     // Calculer les moyennes pour affichage
     // 🆕 BETA 98.9: Exclure les élèves sansEvaluation du calcul de moyenne P
@@ -1945,13 +1998,15 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     // Gradient: orange (0%) → jaune (25%) → vert (50%) → bleu (75%+)
     function obtenirCouleurGradient(positionPourcent) {
         // Stops du gradient (position en % de la barre → couleur)
-        const stops = [
-            { pos: 0, r: 255, g: 152, b: 0 },    // #ff9800 orange
-            { pos: 25, r: 255, g: 193, b: 7 },   // #ffc107 jaune
-            { pos: 50, r: 40, g: 167, b: 69 },   // #28a745 vert
-            { pos: 75, r: 33, g: 150, b: 243 },  // #2196F3 bleu
-            { pos: 100, r: 33, g: 150, b: 243 }  // #2196F3 bleu (plateau)
-        ];
+        // #818 — les MÊMES arrêts que la chaîne CSS et la légende, plus un
+        // plateau jusqu'à 100 % : passé le dernier arrêt, la teinte ne bouge plus.
+        const rvb = (hex) => ({
+            r: parseInt(hex.slice(1, 3), 16),
+            g: parseInt(hex.slice(3, 5), 16),
+            b: parseInt(hex.slice(5, 7), 16)
+        });
+        const stops = ARRETS_DEGRADE.map((a) => ({ pos: a.position, ...rvb(a.couleur) }));
+        stops.push({ pos: 100, ...rvb(ARRETS_DEGRADE[ARRETS_DEGRADE.length - 1].couleur) });
 
         // Trouver les deux stops entre lesquels interpoler
         let stopInf = stops[0];
@@ -1994,7 +2049,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             const etudiants = groupesSOM[score];
             etudiants.forEach((e, index) => {
                 // Mapper 30-100% sur 0-100% de la barre
-                const position = Math.max(0, Math.min((e.valeur - 0.30) / 0.70 * 100, 100));
+                const position = positionSurEchelleDistribution(e.valeur);
                 // Jitter pour dilater les agglomérations : ±1.5% horizontal, ±12px vertical
                 const jitterH = (Math.random() - 0.5) * 6.0; // ±3% pour ACPE
                 const jitterV = (Math.random() - 0.5) * 24; // -12px à +12px
@@ -2053,7 +2108,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             const etudiants = groupesPAN[score];
             etudiants.forEach((e, index) => {
                 // Mapper 30-100% sur 0-100% de la barre
-                const position = Math.max(0, Math.min((e.valeur - 0.30) / 0.70 * 100, 100));
+                const position = positionSurEchelleDistribution(e.valeur);
                 // Jitter pour dilater les agglomérations : ±1.5% horizontal, ±12px vertical
                 const jitterH = (Math.random() - 0.5) * 6.0; // ±3% pour ACPE
                 const jitterV = (Math.random() - 0.5) * 24; // -12px à +12px
@@ -2140,7 +2195,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     if (moyenneAffichee !== null && !tousEnAttente) {
         // Convertir pourcentage en décimal puis mapper sur la barre
         const moyenneDecimal = moyenneAffichee / 100;
-        positionMoyenne = Math.max(0, Math.min((moyenneDecimal - 0.30) / 0.70 * 100, 100));
+        positionMoyenne = positionSurEchelleDistribution(moyenneDecimal);
     }
 
     // Obtenir la couleur dynamique correspondant à la position dans le gradient
