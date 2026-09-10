@@ -438,7 +438,7 @@ const TOOLTIPS = {
     'tdb-sous-nav':
         'Quatre vues : aperçu du groupe, liste des individus, profil étudiant·e et interventions RàI.',
     'tdb-zones-couleur':
-        'Fragile (30-49 %), Modéré (50-64 %), Favorable (65-79 %), Très favorable (≥ 80 %).',
+        'Fragile (30-47,5 %), Modéré (47,5-65 %), Favorable (65-82,5 %), Très favorable (≥ 82,5 %).',
 
     // --- Observer (indices A-C-P) ---
 
