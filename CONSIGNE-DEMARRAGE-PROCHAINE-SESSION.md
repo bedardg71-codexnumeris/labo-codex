@@ -18,8 +18,10 @@
 
 1. **`PROTOCOLE.md`** — comment nous trois travaillons ensemble. Sept règles.
 2. **`OU-EN-EST-ON.md`** — où on en est, en gestes d'utilisateur. Sa tête porte `1.128.3`.
-3. **`plans de travail/CONSIGNE-SUIVANTE-nomenclature-des-zones.md`** — la proposition d'analyse
-   du jour (voir LE MANDAT plus bas).
+3. **`Rapports/INVENTAIRE-2026-09-10-nomenclature-des-zones.md`**, puis
+   **`plans de travail/CONSIGNE-DU-JOUR.md`** — le chantier de la journée (voir LE MANDAT plus bas).
+   La proposition d'origine, `plans de travail/CONSIGNE-SUIVANTE-nomenclature-des-zones.md`, est
+   **consommée** : ses temps 1 et 2 sont faits, son temps 4 est tranché.
 4. `CLAUDE.md`, puis `OBJECTIF-COHORTE-1.md` (les huit énoncés).
 
 Puis le rituel : skill `debut-de-session-labo-codex`, **délégué au subagent `audit-debut-session`**.
@@ -66,16 +68,26 @@ propre constat**, et la mesure l'a montré AVANT de coder. Une fiche est une pis
 
 ---
 
-## LE MANDAT — une proposition, à reprendre à froid
+## LE MANDAT — repris par Cowork le 10 septembre en fin d'après-midi
 
-**`plans de travail/CONSIGNE-SUIVANTE-nomenclature-des-zones.md`** — revoir la nomenclature des
-zones de couleur (« fragile / modéré / favorable / très favorable »), que Grégoire ne reconnaît plus :
-« je ne sais pas sur quoi ils s'appuient ». Inscrit au backlog en **`#821`**.
+↻ **La proposition de Claude Code a été reprise à froid, comme son en-tête y invitait.** Ses temps 1
+(inventaire) et 2 (archéologie) sont **faits** — résultats dans
+`Rapports/INVENTAIRE-2026-09-10-nomenclature-des-zones.md`. Son temps 4 est **tranché par Grégoire**.
+Deux de ses affirmations étaient fausses et sont corrigées dans le rapport (« dix fichiers » : 27
+bruts, 13 dans le périmètre ; « zéro occurrence dans `bilan*.js` » : il y en a dix — la conclusion
+tient, mais pour une autre raison).
 
-Le document porte : ce qui est **déjà mesuré et qu'il ne faut pas refaire** (notamment que ces mots
-**ne sortent pas vers les élèves** — dix fichiers, tous côté enseignant), l'analyse en quatre temps,
-le livrable attendu, et deux garde-fous. **Le quatrième temps est un arbitrage de Grégoire : rien ne
-se renomme avant.**
+**Ce que l'inventaire a trouvé et qu'aucune fiche ne portait** : le mot « Favorable » a **trois
+définitions** dans l'app, et « Fragile » aussi. Un étudiant à A = 80 %, C = 80 % est « Favorable » et
+« Acceptable » sur le même écran.
+
+▣ **Arbitrage de Grégoire, 10 septembre** : « Peu importe le chiffre, cette incohérence est à
+corriger. Il faut unifier les définitions. » ⮕ Le renommage, lui, **attend le travail d'automne avec
+l'orthopédagogue** (`#821`).
+
+⮕ **`plans de travail/CONSIGNE-DU-JOUR.md`** porte le chantier : un seul ENDROIT où les quatre règles
+sont écrites, **pas** une seule règle. Livrable invisible à l'écran ; si un pixel bouge, c'est un
+défaut.
 
 **Si Grégoire veut autre chose** : un retour de testeur passe avant (`CLAUDE.md`, priorité absolue).
 Sinon, les cadrages ouverts sont dans `plans de travail/00-CADRAGES-OUVERTS.md` — aucun n'est une
