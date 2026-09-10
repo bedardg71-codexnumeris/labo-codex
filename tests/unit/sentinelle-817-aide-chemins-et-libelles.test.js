@@ -99,6 +99,37 @@ describe('Aide — les boutons qu\'elle dit de cliquer existent', () => {
     });
 });
 
+describe('Aide — elle ne décrit pas de fonctionnalité retirée', () => {
+
+    it('Primo ne revient pas : retiré du code le 21 avril 2026 (cfee0157)', () => {
+        // ~5700 lignes de primo-* supprimées. L'Aide a continué de décrire un
+        // assistant conversationnel pendant cinq mois : 19 mentions, dont une
+        // carte de 78 lignes détaillant « les 4 modules de Primo ».
+        // Le texte rendu ne doit plus le nommer ; les commentaires de code, qui
+        // documentent ce retrait, ne comptent pas.
+        const rendu = AIDE.replace(/<!--[\s\S]*?-->/g, ' ').replace(/<[^>]*>/g, ' ');
+        expect(rendu).not.toMatch(/Primo/);
+    });
+
+    it('la carte de prise en main nomme les trois outils qui existent VRAIMENT', () => {
+        const i = AIDE.indexOf('accordeon-aide-prise-en-main');
+        expect(i).toBeGreaterThan(-1);
+        const carte = AIDE.slice(i, AIDE.indexOf('accordeon-aide-', i + 30));
+
+        // « Données démo » et « Assistance » sont les libellés que génère accueil.js.
+        const accueil = readFileSync(path.join(racine, 'js/accueil.js'), 'utf8');
+        for (const libelle of ['Données démo', 'Assistance']) {
+            const echappe = JSON.stringify(libelle).slice(1, -1)
+                .replace(/é/g, '\\u00e9').replace(/É/g, '\\u00c9');
+            expect(accueil.includes(libelle) || accueil.includes(echappe)).toBe(true);
+            expect(carte).toContain(libelle);
+        }
+        // La visite guidée est le bouton data-param="tour-guide" de l'en-tête.
+        expect(INTERFACE).toContain('data-param="tour-guide"');
+        expect(carte).toContain('Visite guidée');
+    });
+});
+
 function decodeEntites(s) {
     return s.replace(/&Eacute;/g, 'É').replace(/&eacute;/g, 'é')
             .replace(/&agrave;/g, 'à').replace(/&egrave;/g, 'è');
