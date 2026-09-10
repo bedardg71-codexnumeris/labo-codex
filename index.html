@@ -10601,8 +10601,7 @@
                                 <ul class="mt-5">
                                     <li><strong>Données de démonstration</strong> : Explore l'application sans risque avec un jeu de données réaliste (activable depuis l'accueil)</li>
                                     <li><strong>Aide contextuelle</strong> : Info-bulles et repères <span class="icone-info-aide taille-inline" aria-hidden="true"></span> disséminés dans l'interface</li>
-                                    <li><strong>Primo</strong> : Assistant conversationnel pour la configuration guidée</li>
-                                    <li><strong>Visite guidée</strong> <span class="icone-inline icone-inline--guide" aria-hidden="true"></span> : parcours interactif des fonctionnalités principales</li>
+                                                                        <li><strong>Visite guidée</strong> <span class="icone-inline icone-inline--guide" aria-hidden="true"></span> : parcours interactif des fonctionnalités principales</li>
                                 </ul>
                             </div>
                         </div>
@@ -10690,89 +10689,48 @@
                             <p><strong>Deux méthodes possibles :</strong></p>
                             <ul>
                                 <li><strong>Méthode manuelle</strong> : Section Trimestre avec 6 accordéons (configuration détaillée)</li>
-                                <li><strong>Configuration guidée</strong> : Primo guide conversationnellement (plus rapide)</li>
+                                <li><strong>Données démo</strong> : explorer un cours déjà configuré avant de saisir le tien</li>
                             </ul>
 
                             <div class="alerte alerte-succes">
-                                <strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Astuce :</strong> L'assistant Primo peut te guider dans ces étapes de manière conversationnelle. Voir la carte suivante pour les détails.
+                                <strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Astuce :</strong> La carte suivante décrit les trois outils qui t'accompagnent pendant ces étapes.
                             </div>
                         </div>
                     </div>
 
-                    <!-- Carte: Assistant Primo -->
-                    <div class="carte accordeon" id="accordeon-aide-primo">
+                    <!-- Carte: Prendre en main l'application -->
+                    <!-- Remplace la carte « Configuration guidée avec Primo » (audit du 10 sept.
+                         2026, lot A) : primo-tooltips.js a été retiré le 21 avril 2026 (cfee0157)
+                         et l'Aide décrivait depuis un assistant conversationnel inexistant.
+                         Les trois outils ci-dessous portent les libellés exacts de l'interface :
+                         « Données démo » et « Assistance » viennent de js/accueil.js:231,242 ;
+                         la visite guidée est le bouton data-param="tour-guide" de l'en-tête. -->
+                    <div class="carte accordeon" id="accordeon-aide-prise-en-main">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Configuration guidée avec Primo
+                                <span class="accordeon-chevron">▼</span> Prendre en main l'application
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Primo</strong> est un assistant conversationnel qui te guide pas-à-pas dans la configuration de ton système de suivi.</p>
-
+                            <p>Trois outils t'accompagnent au début, et chacun a un rôle distinct.</p>
 
                             <div class="carte-gradient-bleu">
-                                <p class="titre-11-bold-bleu-mb15">Quand utiliser Primo ?</p>
-                                <ul class="lh-2">
-                                    <li><strong>Première utilisation</strong> : Primo apparaît automatiquement au premier chargement</li>
-                                    <li><strong>Nouveau cours</strong> : Pour créer rapidement un groupe-cours complet</li>
-                                    <li><strong>Découverte</strong> : Pour explorer les fonctionnalités de manière guidée</li>
-                                </ul>
+                                <p class="titre-11-bold-bleu-mb15">Données démo</p>
+                                <p>Carte de la page d'accueil. Un cours fictif déjà configuré, à explorer librement : groupes, évaluations, diagnostics. Rien de ce que tu y fais ne touche tes vraies données.</p>
                             </div>
 
-                            <p><strong>Les 4 modules de Primo :</strong></p>
-
-                            <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">Module 1 : Créer un groupe-cours</h4>
-                                <p><strong>Durée :</strong> ~3 minutes</p>
-                                <p>Questions conversationnelles pour configurer :</p>
-                                <ul class="mt-5">
-                                    <li>Informations du cours (code, titre, groupe)</li>
-                                    <li>Dates du trimestre (détecte si déjà configuré)</li>
-                                    <li>Profil enseignant (détecte si existant)</li>
-                                    <li>Horaire hebdomadaire</li>
-                                    <li>Import de la liste d'étudiant·es (CSV/TXT)</li>
-                                    <li>Pratique de notation (dropdown pour sélectionner)</li>
-                                </ul>
-                                <p class="text-muted mt-10 u-texte-09"><em>À la fin, ton groupe-cours est créé et apparaît dans le dropdown de l'en-tête. Les données sont éditables dans Section Trimestre.</em></p>
+                            <div class="carte-gradient-bleu">
+                                <p class="titre-11-bold-bleu-mb15">Visite guidée</p>
+                                <p>Bouton de l'en-tête. Un parcours interactif des écrans principaux et de ce qu'ils servent à faire.</p>
                             </div>
 
-                            <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">Module 2 : Évaluer une production</h4>
-                                <p><strong>Prérequis :</strong> Avoir au moins un groupe-cours créé</p>
-                                <p>Guide direct vers le formulaire d'évaluation avec explications contextuelles.</p>
-                            </div>
-
-                            <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">Module 3 : Explorer les diagnostics</h4>
-                                <p><strong>Prérequis :</strong> Avoir des données (évaluations, présences)</p>
-                                <p>Visite guidée de l'aperçu et des profils étudiant·es.</p>
-                                <p class="text-muted mt-5 u-texte-09"><em>En développement</em></p>
-                            </div>
-
-                            <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">Module 4 : Créer une pratique de notation</h4>
-                                <p><strong>Durée :</strong> ~8 minutes</p>
-                                <p>Assistant interactif pour configurer ta pratique personnalisée :</p>
-                                <ul class="mt-5">
-                                    <li>Choix du type (PAN – Standards, Sommative, etc.)</li>
-                                    <li>Configuration des paramètres (artefacts, seuils, jetons)</li>
-                                    <li>Sélection des grilles et échelles</li>
-                                </ul>
-                            </div>
-
-                            <p><strong>Comment accéder à Primo :</strong></p>
-                            <ul>
-                                <li><strong>Automatiquement</strong> : Au premier chargement de l'application</li>
-                                <li><strong>Visite guidée</strong> : Clique sur le bouton <span class="icone-inline icone-inline--guide" aria-hidden="true"></span> dans l'en-tête (visible lorsque la visite guidée est activée)</li>
-                                <li><strong>Page d'accueil</strong> : Coche la case d'aide contextuelle pour activer les indices et afficher le bouton Primo</li>
-                            </ul>
-
-                            <div class="alerte alerte-attention">
-                                <strong>Navigation libre :</strong> Tu peux quitter Primo à tout moment pour naviguer librement dans l'application. Les données saisies via Primo sont sauvegardées normalement et modifiables depuis <strong>Cadre → Trimestre</strong> (les 6 accordéons).
+                            <div class="carte-gradient-bleu">
+                                <p class="titre-11-bold-bleu-mb15">Assistance</p>
+                                <p>Carte de la page d'accueil. Active les info-bulles et l'aide contextuelle : des repères apparaissent dans l'interface, et les icônes d'information ouvrent l'explication de l'écran où tu te trouves.</p>
                             </div>
 
                             <div class="alerte alerte-succes">
-                                <strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Philosophie :</strong> Primo t'accompagne au début, mais l'objectif est de te rendre autonome. Une fois familiarisé avec l'application, tu n'auras plus besoin de l'assistant.
+                                <strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Pour aller plus loin :</strong> pour configurer ton vrai cours, la marche à suivre est dans la carte « Étapes de configuration », plus haut. Pour ta pratique de notation, l'assistant de Conception → Pratiques de notation te guide pas à pas.
                             </div>
                         </div>
                     </div>
@@ -11522,7 +11480,7 @@
                             </ol>
 
                             <div class="alerte alerte-succes">
-                                <strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Recommandation :</strong> Commence par explorer la démo pour découvrir l'application. Une fois à l'aise, passe en Mode Normal pour configurer ton vrai cours avec Primo ou les formulaires avancés. Pour quitter la démo, clique sur « Quitter la démo » dans le bandeau vert.
+                                <strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Recommandation :</strong> Commence par explorer la démo pour découvrir l'application. Une fois à l'aise, passe en Mode Normal pour configurer ton vrai cours en suivant les étapes de configuration. Pour quitter la démo, clique sur « Quitter la démo » dans le bandeau vert.
                             </div>
                         </div>
                     </div>
@@ -11541,7 +11499,7 @@
                                 <h4 class="text-warning-856-mb10"><span class="icone-inline icone-inline--guide" aria-hidden="true"></span> Visite guidée — Pour débuter</h4>
                                 <p><strong>Recommandé si :</strong> C'est ta première utilisation ou tu préfères être guidé·e</p>
                                 <ul class="mt-8">
-                                    <li>Primo te pose des questions simples en langage courant</li>
+                                    <li>La visite guidée te montre les écrans dans l'ordre où tu t'en serviras</li>
                                     <li>Pas besoin de comprendre tous les paramètres</li>
                                     <li>Configuration rapide (~5 minutes pour un cours complet)</li>
                                     <li>Tu peux toujours affiner ensuite avec les formulaires</li>
@@ -11564,7 +11522,7 @@
                             <div class="carte-gradient-bleu">
                                 <p class="titre-11-bold-bleu-mb10"><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Parcours hybride recommandé</p>
                                 <ol class="lh-2">
-                                    <li><strong>Débute avec Primo</strong> pour créer ton premier cours rapidement</li>
+                                    <li><strong>Débute avec les données démo</strong> pour voir l'application remplie</li>
                                     <li><strong>Explore l'aide contextuelle</strong> avec les données démo pour voir le système en action</li>
                                     <li><strong>Affine avec les formulaires</strong> quand tu veux personnaliser davantage</li>
                                 </ol>
@@ -14182,11 +14140,8 @@
                                 <dt class="titre-section-aide">Production</dt>
                                 <dd class="ml-20-mb-10">Terme générique désignant toute évaluation du cours : examen, travail écrit, quiz, présentation, portfolio. Chaque production a un type, une pondération, et peut être liée à une grille de critères.</dd>
 
-                                <dt class="titre-section-aide">Primo</dt>
-                                <dd class="ml-20-mb-10">Assistant conversationnel int&eacute;gr&eacute; qui guide la configuration du syst&egrave;me de suivi. Propose 4 modules : cr&eacute;er un groupe-cours, &eacute;valuer une production, explorer les diagnostics, cr&eacute;er une pratique de notation. Accessible via le bouton <span class="icone-inline icone-inline--guide" aria-hidden="true"></span> dans l'en-t&ecirc;te (lorsque la visite guid&eacute;e est activ&eacute;e) ou automatiquement au premier lancement.</dd>
-
                                 <dt class="titre-section-aide">Visite guidée (<span class="icone-inline icone-inline--guide" aria-hidden="true"></span>)</dt>
-                                <dd class="ml-20-mb-10">Pr&eacute;f&eacute;rence d'accompagnement qui rend visibles les outils d'aide dans l'interface : bouton Primo, rep&egrave;res <span class="icone-info-aide taille-inline" aria-hidden="true"></span>, banni&egrave;res d'assistant. Activable depuis la page d'accueil ou les r&eacute;glages. D&eacute;sactivable &agrave; tout moment.</dd>
+                                <dd class="ml-20-mb-10">Pr&eacute;f&eacute;rence d'accompagnement qui rend visibles les outils d'aide dans l'interface : rep&egrave;res <span class="icone-info-aide taille-inline" aria-hidden="true"></span> et banni&egrave;res d'assistance. Activable depuis la page d'accueil ou les r&eacute;glages. D&eacute;sactivable &agrave; tout moment.</dd>
                             </dl>
 
                             <h4 class="titre-section-principal">R</h4>
@@ -14523,7 +14478,7 @@
          donc jamais lu sur Safari ni sur iPad. Un script, lui, se charge. Généré
          par scripts/release.mjs en même temps que version.json — les deux ne
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
-    <script src="version.js?v=09092352"></script>
+    <script src="version.js?v=09092359"></script>
     <script src="js/db.js?v=20260826b"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
     <script src="js/pratiques/modalites-evaluation.js?v=20260810a"></script> <!-- SSOT #328 Lot 1 : module propriétaire de modalitesEvaluation (seul point d'écriture), chargé avec la couche stockage -->
@@ -14806,11 +14761,11 @@
     <script src="js/export-resultats-finaux.js?v=20260905a"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260909l"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260909m"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260909l"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260909m"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
