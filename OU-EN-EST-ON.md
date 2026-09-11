@@ -22,7 +22,10 @@ Ton rapport de 14 h 50 : les 408 évaluations citaient trois grilles absentes de
 C'était l'île non réparée : la réparation du 5 août vivait dans l'autre navigateur, et l'instance en
 ligne a reçu la copie d'avant. Tu as recréé les trois grilles sous leurs identifiants d'origine, depuis
 leurs jumelles « H26 », prouvées par leurs critères (223 sur 225, 92 sur 94, 89 sur 89 ; les quatre
-mal estampillées de juin sont nommées, pas touchées). Huit cartouches recopiées, rien d'écrasé.
+mal estampillées de juin sont nommées, pas touchées). Huit cartouches recopiées, rien d'écrasé. Puis, à 15 h 45, **l'échelle** : 44 de ces évaluations (celles de
+février) citaient une échelle de démonstration disparue ; tu l'as recréée sous son identifiant, copie de
+« IDME et niv 0 » — ton hypothèse (la tienne descend de celle-là) confirmée par les notes : 43 sur 44 se
+recalculent à l'identique.
 **Vérifié comment** : dry-run relu par toi, exécution journalisée, outil éprouvé au banc (cassé deux
 fois, remis). **Pas vérifié** : ton écran après Cmd+R — une évaluation H26 ouverte, puis un second
 rechargement pour la durabilité. À noter : les jumelles restent, deux grilles de même nom dans le
