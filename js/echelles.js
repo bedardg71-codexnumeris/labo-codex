@@ -96,7 +96,7 @@ const niveauxDefaut = [
     },
     {
         code: 'D',
-        nom: 'en Développement',
+        nom: 'Développement',
         description: 'Multistructurel',
         niveauSOLO: 'multistructurel',
         min: 65,
@@ -106,7 +106,7 @@ const niveauxDefaut = [
     },
     {
         code: 'M',
-        nom: 'Maîtrisé',
+        nom: 'Maîtrise',
         description: 'Relationnel',
         niveauSOLO: 'relationnel',
         min: 75,
@@ -585,7 +585,7 @@ async function assurerEchelleIdmeDeDepart() {
         // §3 : « de départ » d'abord, la précision ensuite — c'est le mot commun
         // aux trois pièces semées, et c'est lui qui doit se voir dans une liste.
         nom: 'Échelle de départ (IDME)',
-        description: 'Quatre niveaux — Insuffisant, en Développement, Maîtrisé, Étendu. '
+        description: 'Quatre niveaux — Incomplet, Développement, Maîtrise, Étendu. '
             + 'Les valeurs ponctuelles sont un point de départ : modifie-les, ou remplace '
             + 'l\'échelle entière. Rien ici n\'est une norme du projet.',
         // Copie PROFONDE : la constante partagée ne doit jamais devenir mutable

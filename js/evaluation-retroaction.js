@@ -881,7 +881,7 @@ function _rendreAlgoA0Bilan(algoA0) {
     var ech = function (t) { return (typeof echapperHtml === 'function') ? echapperHtml(String(t == null ? '' : t)) : ''; };
     var phrase = window.enoncesAlgo.enonce(algoA0.critere, 'priorite', {});
     if (!phrase) return '';
-    return '<p>- <strong>' + ech(phrase) + '</strong> (' + ech(algoA0.critereNom) + ' : ' + algoA0.erreurs + ' erreur' + (algoA0.erreurs > 1 ? 's' : '') + ' sur ' + algoA0.mots + ' mots, Insuffisant)</p>';
+    return '<p>- <strong>' + ech(phrase) + '</strong> (' + ech(algoA0.critereNom) + ' : ' + algoA0.erreurs + ' erreur' + (algoA0.erreurs > 1 ? 's' : '') + ' sur ' + algoA0.mots + ' mots, Incomplet)</p>';
 }
 
 function _rendreDefisBilan(defis, algoA0, nomsPatrons, niveauDe) {

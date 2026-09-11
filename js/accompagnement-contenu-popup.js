@@ -179,7 +179,7 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: "Échelles prédéfinies disponibles",
                 items: [
-                    "4 niveaux : Incomplet, en Développement, Maîtrisé, Étendu",
+                    "4 niveaux : Incomplet, Développement, Maîtrise, Étendu",
                     "Pourcentage (5 niveaux) : 0-20%, 20-40%, 40-60%, 60-80%, 80-100%",
                     "Lettres (5 niveaux) : E, D, C, B, A",
                     "Personnalisée : crée ta propre échelle"
@@ -1057,18 +1057,18 @@ const AIDE_CONTEXTUELLE = {
     // sa première échelle lisait « plage de pourcentages » puis « valeur numérique
     // fixe », et ne comprenait pas pourquoi remplir les deux. La relation est ce
     // qui manquait, pas la définition. Les deux portent donc le MÊME exemple
-    // (Maîtrisé, 75-89) et se renvoient l'une à l'autre.
+    // (Maîtrise, 75-89) et se renvoient l'une à l'autre.
     'echelle-plage-notes': {
         titre: 'Plage de notes (niveau)',
         sections: [
             {
                 type: 'texte',
-                contenu: "La plage répond à une question\u00a0: « ce pourcentage, c’est quel niveau\u00a0? » Quand tu évalues avec une grille, l’application calcule un résultat chiffré\u00a0; la plage dit dans quel niveau il tombe. C’est elle qui permet à ton étudiant·e de recevoir « Maîtrisé » plutôt qu’un 84\u00a0%\u00a0: le chiffre existe, il reste en coulisse."
+                contenu: "La plage répond à une question\u00a0: « ce pourcentage, c’est quel niveau\u00a0? » Quand tu évalues avec une grille, l’application calcule un résultat chiffré\u00a0; la plage dit dans quel niveau il tombe. C’est elle qui permet à ton étudiant·e de recevoir « Maîtrise » plutôt qu’un 84\u00a0%\u00a0: le chiffre existe, il reste en coulisse."
             },
             {
                 type: 'exemple',
-                titre: 'Maîtrisé, de 75\u00a0% à 89\u00a0%',
-                contenu: "Une étudiante à 78\u00a0% est Maîtrisée. Une autre à 88\u00a0% l’est aussi. Elles reçoivent le même niveau, et c’est voulu — c’est tout le sens d’une échelle."
+                titre: 'Maîtrise, de 75\u00a0% à 89\u00a0%',
+                contenu: "Une étudiante à 78\u00a0% reçoit « Maîtrise ». Une autre à 88\u00a0% le reçoit aussi. Elles reçoivent le même niveau, et c’est voulu — c’est tout le sens d’une échelle."
             },
             {
                 type: 'conseil',
@@ -1082,11 +1082,11 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "La valeur ponctuelle répond à la question inverse de la plage\u00a0: « ce niveau, ça vaut combien\u00a0? » Vient le moment où il faut un chiffre — le bulletin, la note finale, la conversion exigée par le règlement. L’application a alors besoin d’UN nombre pour « Maîtrisé ». Pas d’un intervalle\u00a0: un nombre."
+                contenu: "La valeur ponctuelle répond à la question inverse de la plage\u00a0: « ce niveau, ça vaut combien\u00a0? » Vient le moment où il faut un chiffre — le bulletin, la note finale, la conversion exigée par le règlement. L’application a alors besoin d’UN nombre pour « Maîtrise ». Pas d’un intervalle\u00a0: un nombre."
             },
             {
                 type: 'exemple',
-                titre: 'Maîtrisé vaut… 80\u00a0? 82\u00a0? 85\u00a0?',
+                titre: 'Maîtrise vaut… 80\u00a0? 82\u00a0? 85\u00a0?',
                 contenu: "Avec une plage de 75 à 89, le milieu serait 82. Mais tu voudrais peut-être 80, parce que dans ton département cela correspond à un B. Ou 85, parce que la maîtrise mérite d’être reconnue franchement. Aucun de ces chiffres n’est plus juste que les autres."
             },
             {
