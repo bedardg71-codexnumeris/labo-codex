@@ -7,6 +7,10 @@
 > invisible, mesuré par la sentinelle #749 et la suite complète.
 >
 > **Ce qui échoue ici devient un item de backlog, avec son numéro de porte.** Jamais une note mentale.
+>
+> ✅ **RELEVÉE le 11 septembre 2026 à 14 h 14 (Toronto) — 10 sur 10, zéro échec**, version `1.131.0` lue en bas de page, sur
+> ses deux groupes-cours réels (2.1a-c : la liste suivie survit à la bascule). Artefact « Portes terrain du Suivi du groupe » publié
+> par Cowork à 14 h 10 ; relevé collé par Grégoire dans la conversation Cowork. Aucune remarque sur les mots. Noté par Cowork à 14 h 15.
 
 **Pourquoi cette liste est courte.** Cinq rangées, fixées par la consigne. Le cas réel de l'audit (deux élèves suivis sous A,
 « Détails » ouvert sous B, retour sous A) est rejoué au banc, vingt essais, cinq fois cassés exprès. Reste ce que seul ton
@@ -75,8 +79,9 @@
 
 ## §3 · Décisions — ce qui attend ton verdict
 
-> **Ce ne sont pas des vérifications.** Les trois textes ont été **tranchés par Grégoire le 11 septembre vers 13 h**, avant la
-> release ; ils sont repris ici pour la trace. Rien n'attend ici.
+> **Ce ne sont pas des vérifications.** Les trois textes ont été **proposés par Cowork à 12 h 35 dans la conversation, « à corriger
+> si tu veux, sinon c'est ceux-là » — Grégoire ne les a pas corrigés** (relais de la consigne sans réponse = tel quel, sa règle). Repris
+> ici pour la trace ; corrigé par Cowork à 14 h 08 (le markdown disait « tranchés vers 13 h », il n'y a pas eu de réponse). Rien n'attend ici.
 
 | | Question | Verdict |
 |---|---|---|

@@ -169,3 +169,5 @@ le contenu est trié (sa règle du 10 : trier, puis déplacer). **Un lot par sé
 **Ce qui vaut pour les sept** : rien n'écrit dans les données de quelqu'un sans sa décision (tarir n'est pas réparer : chaque clé
 nue namespacée laisse un stock nu chez les testeurs — on mesure, on sépare, on lui propose) ; les mots que ses collègues lisent
 remontent avant la release ; les règles de l'audit 3 (`#735`-`#754`) sont citées, jamais rejugées.
+
+**Décision de Grégoire, 14 h 17, lot 2 (L-2), dans ses mots : « les abandons visibles (grisés) ».** La note de l'écran devient vraie ; les statistiques restent sur les actifs. Consigne du lot 2 écrite à 14 h 51.
