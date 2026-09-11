@@ -813,6 +813,7 @@ function genererSectionAccompagnement(da) {
                 <!-- Carte 3 : Modèle de la Réponse à l'intervention (RàI) (droite) -->
                 <div class="profil-carte">
                     <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-rai">Modèle de la Réponse à l'intervention (RàI)</h2>
+                    <p class="u-mb-8"><button type="button" class="lien-reglages" data-action="ouvrirOutilsObservation" title="Ouvrir Labo › Outils d'observation, où se règlent le dépistage et ses seuils">Régler les outils d'observation</button></p>
                     <div class="profil-message-vide" style="margin: 20px 0;">
                         En attente de données
                     </div>
@@ -841,7 +842,10 @@ function genererSectionAccompagnement(da) {
         : [];
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true); // true = dépistage (3 artefacts)
     const progression = calculerProgressionEleve(da);
-    const defiSpecifique = identifierDefiSpecifique(da);
+    // #824 (11 sept. 2026) — l'appel à `identifierDefiSpecifique(da)` qui vivait ici
+    // rangeait son résultat dans une variable que rien ne lisait ; retiré. La fonction
+    // reste (`profil-etudiant-calculs.js`) : trois sentinelles l'exécutent (#529, #730,
+    // audit Suivi du 5 sept.), et le seuil qu'elle lit agit ailleurs par `calculerIPB`.
     const directionsCriteres = calculerDirectionsCriteres(da);
 
     // Compter le nombre total d'artefacts évalués (pour afficher la fiabilité des données)
@@ -969,6 +973,7 @@ function genererSectionAccompagnement(da) {
             <!-- Carte RàI : positionnée à droite via order (26 mai PM2) -->
             <div class="profil-carte" style="order: 3">
                 <h2 class="profil-section-titre-sous" data-tooltip="profil-accomp-rai">Modèle de la Réponse à l'intervention (RàI)</h2>
+                <p class="u-mb-8"><button type="button" class="lien-reglages" data-action="ouvrirOutilsObservation" title="Ouvrir Labo › Outils d'observation, où se règlent le dépistage et ses seuils">Régler les outils d'observation</button></p>
 
                 <div class="badge-sys ${niveauRai.badgeClasse}">
                     ${niveauRai.label}
@@ -1623,17 +1628,6 @@ function genererSectionMobilisation(da) {
 // calculerPerformancePAN → déplacé dans indices.js (#206)
 
 /**
- * Obtient la couleur selon le taux (en pourcentage)
- * @param {number} taux - Taux en pourcentage (0-100)
- * @returns {string} - Code couleur
- */
-function obtenirCouleurIndice(taux) {
-    if (taux >= 85) return 'var(--niveau-attention-minimal)'; // Vert
-    if (taux >= 70) return 'var(--niveau-attention-modere)';  // Jaune
-    return 'var(--niveau-attention-tres-eleve)';              // Rouge
-}
-
-/**
  * Obtient les détails d'assiduité pour un étudiant
  * @param {string} da - Numéro de DA
  * @returns {Object} - Détails d'assiduité
@@ -1949,10 +1943,9 @@ function changerSectionProfil(section) {
                 ? window.denotationSaisie.panneau(da)
                 : '<div class="alerte alerte-information">Module de dénotation indisponible.</div>';
             break;
-        case 'cible':
-            titre = 'Suivi de l\'apprentissage';
-            contenu = genererContenuCibleIntervention(da);
-            break;
+        // #824 — le `case 'cible'` (« Suivi de l'apprentissage ») appelait
+        // `genererContenuCibleIntervention`, définie nulle part : erreur d'exécution si un
+        // bouton y avait mené. Inatteignable depuis #551 ; retiré avec sa branche d'aide.
         case 'progression':
             titre = 'Progression temporelle ACP';
             contenu = genererSectionProgression(da);
@@ -1987,9 +1980,7 @@ function changerSectionProfil(section) {
 
     // Générer l'aide Primo selon la section (popup au clic)
     let toggleInfo = '';
-    if (section === 'cible') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-risque-${da}"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>`;
-    } else if (section === 'performance') {
+    if (section === 'performance') {
         toggleInfo = `<span class="primo-aide" data-target="details-calculs-performance-${da}"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>`;
     } else if (section === 'mobilisation') {
         toggleInfo = `<span class="primo-aide" data-target="details-calculs-mobilisation-${da}"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>`;
@@ -2764,7 +2755,7 @@ function genererSectionProductions(da) {
             <h3 class="note-finale-titre">
                 Note finale de session
                 ${(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique) ? `<span class="note-finale-pratique-nom" title="Pratique de notation active (note non calculable — vérifier ses paramètres)">${echapperHtml(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique)}</span>` : ''}
-                ${detailsNoteFinale.pratiqueId ? `<button type="button" class="note-finale-lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(detailsNoteFinale.pratiqueId)}" title="Ouvrir les réglages de cette pratique pour corriger ses paramètres">Réglages de la pratique</button>` : ''}
+                ${detailsNoteFinale.pratiqueId ? `<button type="button" class="lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(detailsNoteFinale.pratiqueId)}" title="Ouvrir les réglages de cette pratique pour corriger ses paramètres">Réglages de la pratique</button>` : ''}
             </h3>
             <div class="alerte alerte-attention" style="margin-top: 12px;">
                 <strong>Note finale non calculable.</strong> ${echapperHtml(detailsNoteFinale.erreur)}
@@ -2903,7 +2894,7 @@ function genererSectionProductions(da) {
                 <h3 class="note-finale-titre">
                     ${detailsNoteFinale.estFinale ? 'Note finale de session' : 'Note provisoire de session'}
                     ${(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique) ? `<span class="note-finale-pratique-nom" title="Pratique de notation appliquée pour ce calcul">${echapperHtml(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique)}</span>` : ''}
-                    ${detailsNoteFinale.pratiqueId ? `<button type="button" class="note-finale-lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(detailsNoteFinale.pratiqueId)}" title="Modifier le statut (provisoire / finale) et les pondérations dans les réglages de la pratique">Réglages de la pratique</button>` : ''}
+                    ${detailsNoteFinale.pratiqueId ? `<button type="button" class="lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(detailsNoteFinale.pratiqueId)}" title="Modifier le statut (provisoire / finale) et les pondérations dans les réglages de la pratique">Réglages de la pratique</button>` : ''}
                 </h3>
 
                 ${enteteBandeauPlafonnement}
@@ -2961,7 +2952,7 @@ function genererSectionProductions(da) {
                 <h3 class="note-finale-titre">
                     ${detailsNoteFinale.estFinale ? 'Note finale de session' : 'Note provisoire de session'}
                     ${(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique) ? `<span class="note-finale-pratique-nom" title="Pratique de notation appliquée pour ce calcul">${echapperHtml(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique)}</span>` : ''}
-                    ${detailsNoteFinale.pratiqueId ? `<button type="button" class="note-finale-lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(detailsNoteFinale.pratiqueId)}" title="Modifier le statut (provisoire / finale) et les pondérations dans les réglages de la pratique">Réglages de la pratique</button>` : ''}
+                    ${detailsNoteFinale.pratiqueId ? `<button type="button" class="lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(detailsNoteFinale.pratiqueId)}" title="Modifier le statut (provisoire / finale) et les pondérations dans les réglages de la pratique">Réglages de la pratique</button>` : ''}
                 </h3>
 
                 ${enteteBandeauPlafonnement}
@@ -3087,187 +3078,6 @@ function genererSectionProductions(da) {
             </div>
         </div>
         ${htmlNoteFinale}
-    `;
-}
-
-/**
- * Génère le tableau des objectifs d'apprentissage avec leurs performances
- *
- * @param {string} da - Numéro DA de l'étudiant
- * @param {string} ensembleId - ID de l'ensemble d'objectifs
- * @param {Object} noteFinaleMultiObjectifs - Résultats du calcul par pratique multi-objectifs
- * @returns {string} - HTML du tableau
- */
-function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
-    // Charger l'ensemble d'objectifs
-    const ensembles = chargerEnsemblesObjectifs();
-    const ensemble = ensembles.find(e => e.id === ensembleId);
-
-    if (!ensemble) {
-        return '<p style="color: var(--gris-clair);">Ensemble d\'objectifs introuvable</p>';
-    }
-
-    const performances = noteFinaleMultiObjectifs.performances || {};
-    const noteFinale = noteFinaleMultiObjectifs.noteFinale || 0;
-
-    // Calculer forces et défis
-    // #555 lot 2 (28 août 2026) — le repli `|| 0.75` est RETIRÉ. Il CONTREDISAIT
-    // la source (`interpretation-config.js` : 0,70) et n'était atteignable sur
-    // aucun chemin d'écriture — une valeur morte qui documentait une fausse règle.
-    const seuil = obtenirSeuil('defiSpecifique');
-    let forces = [];
-    let defis = [];
-
-    ensemble.objectifs.forEach(obj => {
-        const perf = performances[obj.id];
-        if (perf && perf.P !== null && perf.P >= seuil * 100) {
-            forces.push({ ...obj, P: perf.P });
-        } else if (perf && perf.P !== null && perf.P < seuil * 100) {
-            defis.push({ ...obj, P: perf.P });
-        }
-    });
-
-    // Couleurs par type
-    const couleurType = {
-        'fondamental': 'var(--bleu-clair)',      // Bleu
-        'integrateur': 'var(--orange-accent)',      // Orange
-        'transversal': '#9C27B0'       // Violet (pas de variable définie)
-    };
-
-    return `
-        <!-- Note finale pratique multi-objectifs -->
-        <div style="background: var(--surface-conteneur, #142428); padding: 20px; border-radius: 6px; text-align: center; margin-bottom: 20px;">
-            <div class="u-texte-09 u-texte-gris" style="margin-bottom: 5px;">
-                Note finale pondérée (${noteFinaleMultiObjectifs.nbObjectifsEvalues}/${ensemble.objectifs.length} objectifs évalués)
-            </div>
-            <div style="font-size: 3rem; font-weight: bold; color: ${obtenirCouleurIndice(noteFinale)};">
-                ${noteFinale.toFixed(1)}/100
-            </div>
-            <div class="u-texte-mini u-texte-gris-clair" style="margin-top: 5px;">
-                Σ(P_objectif × poids) / 100
-            </div>
-        </div>
-
-        <!-- Résumé forces et défis -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-            <div style="background: var(--vert-pale, #e8f5e9); padding: 15px; border-radius: 6px; border-left: 4px solid var(--vert-succes);">
-                <div style="font-weight: bold; color: var(--vert-succes); margin-bottom: 5px;">Forces (≥ ${(seuil * 100).toFixed(0)}%)</div>
-                <div style="font-size: 1.5rem; font-weight: bold; color: var(--vert-succes);">${forces.length}</div>
-                ${forces.length > 0 ? `<div class="u-texte-mini u-texte-gris" style="margin-top: 5px;">${forces.map(f => f.nom).join(', ')}</div>` : ''}
-            </div>
-            <div style="background: var(--alerte-fond-attention); padding: 15px; border-radius: 6px; border-left: 4px solid var(--orange-accent);">
-                <div style="font-weight: bold; color: var(--orange-accent); margin-bottom: 5px;">Défis (< ${(seuil * 100).toFixed(0)}%)</div>
-                <div style="font-size: 1.5rem; font-weight: bold; color: var(--orange-accent);">${defis.length}</div>
-                ${defis.length > 0 ? `<div class="u-texte-mini u-texte-gris" style="margin-top: 5px;">${defis.map(d => d.nom).join(', ')}</div>` : ''}
-            </div>
-        </div>
-
-        <!-- Tableau détaillé des objectifs -->
-        <h4 class="profil-section-titre-large" style="margin-bottom: 15px;">
-            Détail des ${ensemble.objectifs.length} objectifs d'apprentissage
-        </h4>
-
-        <div style="background: var(--surface-conteneur, #142428); border-radius: 6px; overflow: hidden;">
-            <table class="tableau-objectifs-profil">
-                <thead>
-                    <tr>
-                        <th style="text-align: left; width: 40%;">Objectif</th>
-                        <th style="text-align: center; width: 15%;">Type</th>
-                        <th style="text-align: center; width: 10%;">Poids</th>
-                        <th style="text-align: center; width: 15%;">Performance</th>
-                        <th style="text-align: center; width: 10%;">Niveau</th>
-                        <th style="text-align: center; width: 10%;">Statut</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${ensemble.objectifs.map(obj => {
-                        const perf = performances[obj.id];
-                        const P = perf?.P ?? null;
-                        const nbArtefacts = perf?.nbArtefacts ?? 0;
-
-                        let niveau = '—';
-                        let couleurNiveau = 'var(--gris-clair)';
-                        let couleurStatut = 'var(--gris-clair)';
-                        let labelStatut = 'Non évalué';
-
-                        if (P !== null) {
-                            // Convertir en niveau IDME
-                            niveau = obtenirNiveauIDMEDepuisPourcentage(P);
-                            couleurNiveau = obtenirCouleurNiveauIDME(niveau);
-
-                            // Déterminer statut
-                            if (P >= seuil * 100) {
-                                couleurStatut = 'var(--vert-succes)';
-                                labelStatut = 'Force';
-                            } else {
-                                couleurStatut = 'var(--orange-accent)';
-                                labelStatut = 'Défi';
-                            }
-                        }
-
-                        const couleurBordure = couleurType[obj.type] || '#999';
-
-                        return `
-                            <tr style="border-left: 4px solid ${couleurBordure};">
-                                <td style="padding: 12px;">
-                                    <div style="font-weight: bold; margin-bottom: 3px;">${echapperHtml(obj.nom)}</div>
-                                    ${nbArtefacts > 0 ? `<div class="u-texte-mini u-texte-gris">${nbArtefacts} ${obtenirTermeProduction(nbArtefacts > 1 ? 'pluriel' : 'singulier')}</div>` : ''}
-                                </td>
-                                <td style="text-align: center; padding: 12px;">
-                                    <span style="
-                                        display: inline-block;
-                                        padding: 4px 10px;
-                                        border-radius: 4px;
-                                        font-size: 0.85rem;
-                                        font-weight: bold;
-                                        background: ${couleurBordure}22;
-                                        color: ${couleurBordure};
-                                        border: 1px solid ${couleurBordure}66;
-                                    ">
-                                        ${obj.type.charAt(0).toUpperCase() + obj.type.slice(1)}
-                                    </span>
-                                </td>
-                                <td style="text-align: center; padding: 12px; font-weight: bold; font-size: 1.1rem;">
-                                    ${obj.poids}%
-                                </td>
-                                <td style="text-align: center; padding: 12px;">
-                                    ${P !== null ? `
-                                        <div style="font-size: 1.3rem; font-weight: bold; color: ${obtenirCouleurIndice(P)};">
-                                            ${P.toFixed(1)}%
-                                        </div>
-                                    ` : `<span style="color: var(--gris-clair);">--</span>`}
-                                </td>
-                                <td style="text-align: center; padding: 12px;">
-                                    <!-- BETA 96.1: Bulle avec effet 3D -->
-                                    <span class="bulle-niveau-tableau">
-                                        ${niveau}
-                                    </span>
-                                </td>
-                                <td style="text-align: center; padding: 12px;">
-                                    <span class="pastille-rai" style="background:${couleurStatut}"></span>
-                                    <div style="font-size: 0.75rem; color: ${couleurStatut}; font-weight: bold;">
-                                        ${labelStatut}
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Légende -->
-        <div style="background: var(--surface-conteneur, #142428); padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: var(--gris-moyen);">
-            <div style="margin-bottom: 10px;"><strong>Légende types :</strong></div>
-            <div class="u-flex-gap-15">
-                <div><span style="color: ${couleurType.fondamental}; font-weight: bold;">●</span> Fondamental : Concepts de base</div>
-                <div><span style="color: ${couleurType.integrateur}; font-weight: bold;">●</span> Intégrateur : Compétences complexes</div>
-                <div><span style="color: ${couleurType.transversal}; font-weight: bold;">●</span> Transversal : Habiletés générales</div>
-            </div>
-            <div style="margin-top: 10px;">
-                <strong>Formule :</strong> Note finale = Σ(Performance_objectif × Poids) / 100
-            </div>
-        </div>
     `;
 }
 

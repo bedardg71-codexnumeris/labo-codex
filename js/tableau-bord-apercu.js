@@ -3407,26 +3407,35 @@ function togglerCritereTrajectoires(el) {
 }
 
 /**
- * Ouvre Labo › Outils d'observation, déplie l'accordéon SOLO si fermé,
- * et fait défiler vers le select « Grille de critères pour le dépistage ».
- * Wrapper appelé depuis les boutons sous la barre patterns (genererBarrePatterns).
+ * Ouvre Labo › Outils d'observation et fait défiler jusqu'au sélecteur « Grille de
+ * critères pour le dépistage ». Wrapper appelé depuis les boutons sous la barre des
+ * patterns (genererBarrePatterns).
+ * ↻ 11 sept. 2026 (#824, temps 5 du cadrage 10) : depuis 1.130.0 rien ne se replie sur
+ * cet écran — le dépliage de l'accordéon SOLO que ce wrapper faisait est parti.
  */
 function ouvrirReferenceSoloAccompagnement() {
+    ouvrirOutilsObservation('v2-pref-grille-reference');
+}
+
+/**
+ * Ouvre Labo › Outils d'observation — l'écran reste dans Labo, Suivi y mène par des liens
+ * (décision de Grégoire, 11 sept. 2026, 10 h 48). Sans cible, la page s'ouvre en haut de
+ * l'écran ; avec l'identifiant d'un contrôle, elle défile jusqu'à lui.
+ * Appelé par les liens « Régler les outils d'observation » (Suivi du groupe, carte RàI du
+ * profil) et par le wrapper ci-dessus.
+ * @param {string} [cibleId] - id d'un contrôle de l'écran vers lequel défiler
+ */
+function ouvrirOutilsObservation(cibleId) {
     if (typeof naviguerVers === 'function') {
         naviguerVers('labo', 'accompagnement');
     }
-    // Laisser le DOM se peindre (afficherSousSection + restauration accordéons)
+    // Laisser le DOM se peindre (afficherSousSection) avant de défiler.
     setTimeout(function() {
-        var accordeon = document.getElementById('accordeon-acc-solo');
-        if (accordeon && accordeon.classList.contains('ferme')) {
-            var header = accordeon.querySelector('.accordeon-header');
-            if (header && typeof toggleAccordeonV2 === 'function') {
-                toggleAccordeonV2(header);
-            }
-        }
-        var select = document.getElementById('v2-pref-grille-reference');
-        if (select && typeof select.scrollIntoView === 'function') {
-            select.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        var cible = (typeof cibleId === 'string' && cibleId)
+            ? document.getElementById(cibleId)
+            : document.getElementById('labo-accompagnement');
+        if (cible && typeof cible.scrollIntoView === 'function') {
+            cible.scrollIntoView({ behavior: 'smooth', block: (cibleId ? 'center' : 'start') });
         }
     }, 80);
 }
@@ -3438,6 +3447,7 @@ function ouvrirReferenceSoloAccompagnement() {
 // Export pour permettre le rafraîchissement depuis d'autres modules
 window.tbNavigerVersProfil = tbNavigerVersProfil;
 window.ouvrirReferenceSoloAccompagnement = ouvrirReferenceSoloAccompagnement;
+window.ouvrirOutilsObservation = ouvrirOutilsObservation;
 window.chargerTableauBordApercu = chargerTableauBordApercu;
 window.initialiserModuleTableauBordApercu = initialiserModuleTableauBordApercu;
 window.appliquerCouleursEtudiantsSuivis = appliquerCouleursEtudiantsSuivis;

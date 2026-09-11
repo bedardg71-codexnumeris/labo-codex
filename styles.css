@@ -12568,7 +12568,10 @@ label:has(+ textarea:disabled) {
 }
 
 /* Lien Réglages de la pratique (à droite du titre Note finale/provisoire) */
-.note-finale-lien-reglages {
+/* Lien vers les réglages, dans un en-tête (#127 pour la note finale ; généralisé le
+   11 sept. 2026 pour les deux liens de Suivi vers Labo › Outils d'observation).
+   Référence : design-system.html § 7. */
+.lien-reglages {
     margin-left: auto;
     background: transparent;
     border: 1px solid var(--bordure-claire);
@@ -12580,8 +12583,8 @@ label:has(+ textarea:disabled) {
     cursor: pointer;
     transition: background-color 0.15s, color 0.15s, border-color 0.15s;
 }
-.note-finale-lien-reglages:hover,
-.note-finale-lien-reglages:focus {
+.lien-reglages:hover,
+.lien-reglages:focus {
     background: var(--accent-primaire);
     color: var(--surface-fond, white);
     border-color: var(--accent-primaire);

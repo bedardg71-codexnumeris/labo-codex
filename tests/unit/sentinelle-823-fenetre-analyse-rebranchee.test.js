@@ -220,7 +220,7 @@ describe('#823 · les trois contrôles sans effet sont partis sans laisser de tr
 describe('forme du 11 sept. 2026 · les trois seuils de détection sont des CHAMPS en points, la clé reste en fraction', () => {
     // ⛔ LE PIÈGE : un champ qui affiche « 10 » et qu'on enregistrerait tel quel
     // écrirait 10 là où `calculerIPB` / `calculerDirectionsCriteres` /
-    // `genererDiagnosticSRPNF` attendent 0,10 — flèches et défis faux pour tout
+    // `genererSectionPerformance` (badges) attendent 0,10 — flèches et défis faux pour tout
     // le monde. La conversion se fait à la lecture ET à l'écriture, et ces cas
     // l'EXÉCUTENT sur le vrai panneau.
     // Break-test : retirer le `/ 100` de `_pointsEnFraction` → cas 10 rougit ;
