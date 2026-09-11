@@ -4,7 +4,7 @@
 > `1.133.0` (lot 3 du cadrage 11, la Saisie des présences).** Le MANDAT de Cowork (17 h 08) est **consommé pour le lot 3** ;
 > le lot 4 a sa consigne en file (`plans de travail/CONSIGNE-SUIVANTE-lot-4-profils-individuels.md`, Cowork 17 h 14).
 > Version précédente : **ÉTAT MESURÉ remesuré par Claude Code le 11 septembre 2026 à 16 h 30 (Toronto), à la clôture de
-> `1.132.0` (lot 2 du cadrage 11, la Liste des étudiant·es).** **MANDAT réécrit par Cowork à 17 h 08** pour une session
+> `1.132.0` (lot 2 du cadrage 11, la Liste des étudiant·es).** **MANDAT réécrit par Cowork à 17 h 08, tableau des lots remis à jour à 17 h 54** pour une session
 > neuve : le lot 3 (la Saisie des présences) a sa consigne dans `plans de travail/CONSIGNE-DU-JOUR.md`.
 > Version précédente : **ÉTAT MESURÉ réécrit par Claude Code le 11 septembre 2026 à midi (Toronto), à la clôture de
 > `1.130.2` (#825 temps 1).** Le MANDAT ci-dessous reste celui de Cowork du 10 au soir : ses deux

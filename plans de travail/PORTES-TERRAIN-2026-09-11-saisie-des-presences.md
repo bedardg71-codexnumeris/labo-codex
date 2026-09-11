@@ -7,6 +7,10 @@
 > Données qui montre la clé réelle) n'a **aucune porte** : invisible, mesuré par la sentinelle du lot et la suite complète.
 >
 > **Ce qui échoue ici devient un item de backlog, avec son numéro de porte.** Jamais une note mentale.
+>
+> ✅ **RELEVÉE le 11 septembre 2026 à 18 h 42 (Toronto) — 7 sur 7, zéro échec**, version `1.133.0` lue en bas de page, sur ses deux
+> groupes réels (le verrou par groupe, 2.1a-c). Décision 3.1 : tel quel (le stock des dates verrouillées repris dans chaque groupe).
+> Artefact « Portes terrain de la Saisie des présences » publié par Cowork à 17 h 53 ; relevé collé dans la conversation Cowork. Noté à 18 h 43.
 
 **Pourquoi cette liste est courte.** Cinq rangées, fixées par la consigne. Chaque brique est prouvée au banc (douze essais, dix fois
 cassés exprès, dix rouges) et le parcours de la démo est joué dans un vrai navigateur (WebKit, `index.html` réel, stockage vide :
