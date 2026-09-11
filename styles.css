@@ -2537,49 +2537,144 @@ span.header-icon {
 }
 
 /* ============================================
-   PARAMÈTRES AVANCÉS REPLIABLES (RàI)
+   BLOCS D'OPTION, ÉTIQUETTES « OÙ ÇA AGIT », SOUS-TITRES DE BLOC
+   (Labo › Outils d'observation, forme arrêtée par Grégoire sur maquette le
+   11 sept. 2026 ; remplace les « paramètres avancés repliables » — rien ne se
+   replie plus sur cet écran). Référence : design-system.html § 6.
    ============================================ */
 
-.parametres-avances-pliable {
-    margin-top: 12px;
-}
-.parametres-avances-pliable summary {
-    cursor: pointer;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 4px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--texte-principal);
-    list-style: none;
+/* Sommaire en tête de page : des pastilles-ancres vers les cartes */
+.sommaire-page {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 8px;
+    margin-bottom: 15px;
 }
-.parametres-avances-pliable summary::-webkit-details-marker {
-    display: none;
+.sommaire-page-titre {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--texte-secondaire);
 }
-.parametres-avances-pliable summary::before {
-    content: '▶';
-    transition: transform 0.2s ease;
-    font-size: 0.75rem;
-    color: var(--gris-moyen);
+.sommaire-page a {
+    font-size: 0.85rem;
+    text-decoration: none;
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: 20px;
+    padding: 8px 14px;
+    background: var(--surface-carte);
+    color: var(--bleu-clair);
 }
-.parametres-avances-pliable[open] summary::before {
-    transform: rotate(90deg);
-}
-.parametres-avances-pliable summary:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
-.parametres-avances-pliable-contenu {
-    padding: 14px 16px;
-    margin-top: 4px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 4px;
+.sommaire-page a:hover,
+.sommaire-page a:focus-visible {
+    border-color: var(--bleu-clair);
 }
 
+/* Carte-pilier : le bandeau bleu porte le titre, le rôle et le bouton Guide */
+.carte-pilier .carte-titre-bleu {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.carte-pilier .carte-titre-role {
+    font-weight: 400;
+    font-size: 0.85rem;
+    opacity: 0.85;
+    flex: 1 1 auto;
+}
+.carte-pilier .grille-2col {
+    gap: 10px;
+    margin-bottom: 0;
+}
+.carte-pilier .grille-3col-form,
+.carte-pilier .grille-4col-form {
+    padding: 0;
+}
+
+/* Bloc d'option : une case, un nom, une aide, des étiquettes */
+.bloc-option {
+    padding: 10px 12px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-moyen);
+    background: var(--surface-element);
+}
+.bloc-option-pleine {
+    grid-column: 1 / -1;
+}
+.bloc-option-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    cursor: pointer;
+}
+.bloc-option-label input[type="checkbox"] {
+    margin-top: 4px;
+    flex-shrink: 0;
+}
+.bloc-option-aide {
+    display: block;
+    margin-left: 24px;
+    color: var(--texte-secondaire);
+}
+.bloc-option-aide-alignee {
+    margin-left: 0;
+    margin-top: 6px;
+}
+
+/* Étiquettes « où ça agit » : ambre = hors de Suivi */
+.etiquettes-effet {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 6px 0 0 24px;
+}
+.etiquettes-effet-alignees {
+    margin-left: 0;
+}
+.etiquette-effet {
+    font-size: 0.72rem;
+    color: var(--texte-secondaire);
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: 4px;
+    padding: 1px 7px;
+    white-space: nowrap;
+    background: var(--surface-carte);
+}
+.etiquette-effet-hors {
+    color: var(--orange-accent);
+    border-color: var(--orange-accent);
+}
+
+/* Sous-titre de bloc : titre, étiquettes, bouton à droite */
+.sous-titre-bloc {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 15px 0 8px;
+}
+.sous-titre-bloc h4 {
+    margin: 0;
+    font-size: 0.95rem;
+}
+.sous-titre-bloc .etiquettes-effet {
+    margin: 0;
+    flex: 1 1 auto;
+}
+
+/* Champ chiffré avec son unité à droite — la seule grammaire de seuil */
+.champ-unite {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.champ-unite .controle-form {
+    width: 76px;
+    text-align: right;
+}
 /* Titre avec fond bleu dégradé (comme l'en-tête) */
 .carte h3.carte-titre-bleu {
     background: var(--bleu-moyen);

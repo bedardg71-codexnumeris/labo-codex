@@ -216,3 +216,76 @@ describe('#823 · les trois contrôles sans effet sont partis sans laisser de tr
         }
     });
 });
+
+describe('forme du 11 sept. 2026 · les trois seuils de détection sont des CHAMPS en points, la clé reste en fraction', () => {
+    // ⛔ LE PIÈGE : un champ qui affiche « 10 » et qu'on enregistrerait tel quel
+    // écrirait 10 là où `calculerIPB` / `calculerDirectionsCriteres` /
+    // `genererDiagnosticSRPNF` attendent 0,10 — flèches et défis faux pour tout
+    // le monde. La conversion se fait à la lecture ET à l'écriture, et ces cas
+    // l'EXÉCUTENT sur le vrai panneau.
+    // Break-test : retirer le `/ 100` de `_pointsEnFraction` → cas 10 rougit ;
+    // retirer le `* 100` de `_fractionEnPoints` → cas 11 rougit.
+
+    it('10. tapé en points, écrit en fraction : 60 → 0,60, 12 → 0,12, 7 → 0,07', () => {
+        const { win, store } = monter({ champs: { 'v2-seuil-defi': 60, 'v2-seuil-progression': 12, 'v2-seuil-risque': 7 } });
+        win.sauvegarderSeuilsV2();
+        expect(store.seuilsInterpretation.defiSpecifique, 'le seuil de défi n\'est pas converti').toBe(0.60);
+        expect(store.seuilsInterpretation.progressionArtefacts).toBe(0.12);
+        expect(store.seuilsInterpretation.directionRisque).toBe(0.07);
+        expect(win.obtenirSeuil('defiSpecifique'), 'la fonction que les calculs appellent').toBe(0.60);
+    });
+
+    it('11. stocké en fraction, affiché en points : 0,65 → « 65 », 0,08 → « 8 »', () => {
+        const { win, doc } = monter({
+            store: { seuilsInterpretation: { defiSpecifique: 0.65, progressionArtefacts: 0.08, directionRisque: 0.04 } },
+            champs: { 'v2-seuil-defi': 70, 'v2-seuil-progression': 10, 'v2-seuil-risque': 5 }
+        });
+        win.initialiserPreferencesV2();
+        expect(doc._elems['v2-seuil-defi'].value).toBe('65');
+        expect(doc._elems['v2-seuil-progression'].value).toBe('8');
+        expect(doc._elems['v2-seuil-risque'].value).toBe('4');
+    });
+
+    it('12. « Remettre les valeurs par défaut (3 · 10 · 5 · 70) » remet les champs en points et la clé en fraction — et rien d\'autre', () => {
+        const { win, store, doc } = monter({
+            store: { seuilsInterpretation: { defiSpecifique: 0.65, progressionArtefacts: 0.15, directionRisque: 0.09, nombreProductionsAnalyse: 8, interpretation: { acceptable: 0.6, bon: 0.75, excellent: 0.9 } } },
+            champs: { 'v2-pref-fenetre-patterns': 8, 'v2-seuil-defi': 65, 'v2-seuil-progression': 15, 'v2-seuil-risque': 9, 'v2-seuil-fragile': 60, 'v2-seuil-acceptable': 75, 'v2-seuil-bon': 90 }
+        });
+        win.restaurerSeuilsDetectionDefautV2();
+        expect([doc._elems['v2-pref-fenetre-patterns'].value, doc._elems['v2-seuil-progression'].value, doc._elems['v2-seuil-risque'].value, doc._elems['v2-seuil-defi'].value]).toEqual(['3', '10', '5', '70']);
+        const s = store.seuilsInterpretation;
+        expect([s.nombreProductionsAnalyse, s.progressionArtefacts, s.directionRisque, s.defiSpecifique]).toEqual([3, 0.10, 0.05, 0.70]);
+        // Les trois seuils d'interprétation, eux, ne bougent pas.
+        expect(s.interpretation).toEqual({ acceptable: 0.6, bon: 0.75, excellent: 0.9 });
+    });
+
+    it('13. une valeur vide retombe sur le défaut en fraction, jamais sur NaN ni sur 0', () => {
+        const { win, store } = monter({ champs: { 'v2-seuil-defi': '', 'v2-seuil-progression': 'abc', 'v2-seuil-risque': 0 } });
+        win.sauvegarderSeuilsV2();
+        expect(store.seuilsInterpretation.defiSpecifique).toBe(0.70);
+        expect(store.seuilsInterpretation.progressionArtefacts).toBe(0.10);
+        expect(store.seuilsInterpretation.directionRisque).toBe(0.05);
+    });
+
+    it('14. à l\'écran : trois champs chiffrés, plus aucun curseur, plus d\'étiquette de curseur, et le peintre est parti', () => {
+        const html = readFileSync(path.join(RACINE, 'index.html'), 'utf8');
+        const debut = html.indexOf('id="labo-accompagnement"');
+        const fin = html.indexOf('id="labo-modelisation"', debut);
+        const ecran = html.slice(debut, fin);
+        for (const id of ['v2-seuil-progression', 'v2-seuil-risque', 'v2-seuil-defi']) {
+            const champ = ecran.match(new RegExp(`<input[^>]*id="${id}"[^>]*>`));
+            expect(champ, `${id} a disparu`).not.toBeNull();
+            expect(champ[0]).toMatch(/type="number"/);
+            expect(champ[0]).toMatch(/data-on-change="sauvegarderSeuilsV2"/);
+        }
+        expect(ecran.includes('type="range"'), 'un curseur survit').toBe(false);
+        expect(ecran.includes('v2-valeur-'), 'une étiquette de curseur survit').toBe(false);
+        expect(ecran.includes('mettreAJourAffichageSeuilV2'), 'le peintre est encore appelé').toBe(false);
+        // Rien ne se replie plus sur cet écran.
+        expect(ecran.includes('<details'), 'un repliable survit').toBe(false);
+        expect(ecran.includes('accordeon-header'), 'une carte se replie encore').toBe(false);
+        const panneau = lireCodeSansCommentaires('js/preferences-v2.js');
+        expect(panneau.includes('mettreAJourAffichageSeuilV2'), 'le peintre de curseur est encore défini').toBe(false);
+        expect(panneau.includes('v2-valeur-')).toBe(false);
+    });
+});

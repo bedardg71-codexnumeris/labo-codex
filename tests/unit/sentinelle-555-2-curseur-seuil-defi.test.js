@@ -72,8 +72,11 @@ describe('#555·2 · le curseur « Seuil de défi » dit ce qu\'il ne règle pas
         // maîtrise » dans le dépistage recréerait la double source que #555
         // a passé une journée à supprimer.
         const bloc = blocCurseur();
-        expect(bloc, 'un seul input range dans le bloc')
+        expect(bloc, 'un seul champ de seuil dans le bloc')
             .not.toMatch(/id="v2-seuil-maitrise/);
-        expect((bloc.match(/<input type="range"/g) || []).length).toBe(1);
+        // Forme du 11 sept. 2026 : le curseur est devenu un champ chiffré (points),
+        // et il reste SEUL dans son bloc — aucun second réglage.
+        expect((bloc.match(/<input type="range"/g) || []).length, 'plus aucun curseur').toBe(0);
+        expect((bloc.match(/<input type="number"/g) || []).length).toBe(1);
     });
 });
