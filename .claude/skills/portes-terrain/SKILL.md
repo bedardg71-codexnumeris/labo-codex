@@ -370,13 +370,26 @@ pas une note mentale » — le dire dans l'en-tête, et le tenir au retour.
 
 ---
 
-## LE GARDE ANTI-CACHE NE SURVEILLE QUE `main.js` (promu le 2 septembre 2026)
+## LE GARDE ANTI-CACHE SURVEILLE TOUT FICHIER RÉFÉRENCÉ AVEC UN `?v=` (corrigé le 11 septembre 2026)
 
-*Promotion depuis la consigne de démarrage, règle 3 de `PROTOCOLE.md`.*
+*Promotion depuis la consigne de démarrage, règle 3 de `PROTOCOLE.md` (2 septembre) ;
+titre et premier paragraphe RÉÉCRITS le 11 septembre sur mesure (#825).* Ce bloc
+disait « le garde ne surveille que `main.js` » : **c'est faux depuis #547.**
+Mesuré : `scripts/verifier-anticache-stage.mjs` (hook pre-commit, bloquant) refuse
+tout commit où un fichier stagé garde le `?v=` qu'il avait à HEAD, pour **tout**
+fichier qu'`index.html` référence avec un jeton ; et `scripts/release.mjs`
+(`fichiersModifies`) bumpe le jeton de **tout** `js/` ou `.css` modifié depuis la
+release précédente, arbre de travail compris. Seul `main.js` a en plus sa
+sentinelle dédiée (`sentinelle-cache-busting-main`), parce qu'il porte les
+migrations au boot. Depuis #825, `/js/*` et `/css/*` sont servis **immuables un
+an** : la sentinelle `sentinelle-825-ouverture-immuable` refuse en plus toute
+référence sans `?v=` (dans `index.html` comme dans les deux chargements
+dynamiques, `pack-demo-20.js` et `heic-worker.js`, jeton = build).
 
-Tout fichier corrigé **autre que `js/main.js`** peut arriver **périmé** dans un
-navigateur sans aucun signal. Grégoire a jugé Safari sur du code qui n'était pas
-celui du disque.
+Ce qui reste vrai : un fichier peut arriver **périmé** dans un navigateur sans
+aucun signal si son jeton n'a pas bougé — Grégoire a jugé Safari sur du code qui
+n'était pas celui du disque. Les filets attrapent ce cas au commit et à la
+release ; **ils ne dispensent pas de le vérifier avant d'envoyer une porte.**
 
 ⮕ **Une porte terrain rendue sans bump vérifié porte sur du code inconnu**, et son
 verdict ne vaut rien, ni le vert ni le rouge.
