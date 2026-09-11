@@ -7,6 +7,29 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 13 H 30 : SUIVI DU GROUPE, LOT 1 DU CADRAGE 11 LIVRÉ (1.131.0)
+
+> ✅ **`main` à 1.131.0, build `0911-1259`, commit de release `1d51883e`.** Tout est sur `main` ; aucune branche
+> ne porte de travail. Le push suit par `scripts/pousser.sh` (verdict Playwright d'abord) — si tu lis ceci
+> depuis `origin/main`, il est arrivé. Vérifie : `git rev-list --count origin/main..main`.
+> **Livré** (décision de Grégoire 12 h 31 : « tout l'onglet, 35 constats », sept lots) : **#749 clos** —
+> `js/tableau-bord-apercu.js` : `cleEtudiantsSuivis()` = `cle('etudiantsSuivis') + '_gc_' + <gcId>` (famille
+> dans `CLES_NAMESPACEES`, clé réelle suffixée comme `snapshots` ; `docs/DATA-OWNERSHIP.md`), `nettoyer…`
+> filtre à la lecture et n'écrit plus, semis depuis la nue (ou `<trim>_etudiantsSuivis`) jamais réécrite,
+> `ajouter…` refuse le DA étranger et notifie le sixième (`MESSAGE_SUIVI_COMPLET`), filtre P sur
+> `noteConstructible`, panneau mort retiré (index.html, styles.css, lecteurs), `#suivi-aide-profil`, G-8 une
+> écriture, G-7 périmé (fonctions retirées), démo résolue à la lecture (`profil-etudiant-helpers.js`).
+> Sentinelle `tests/unit/sentinelle-749-suivis-par-groupe-cours.test.js` (21 essais, 6 break-tests) ; bancs
+> d'audit du 5 et du 6 aux valeurs d'après ; `Rapports/AUDIT-sous-onglets-suivi-2026-09-06.md` porte sa
+> disposition. Trois textes tranchés par Grégoire à 13 h. Changelog 1.131 (vert).
+> **Ce qui attend Grégoire** : la porte terrain à cinq rangées, sur ses deux groupes réels
+> (`plans de travail/PORTES-TERRAIN-2026-09-11-suivi-du-groupe.md`) — rangée 1 = le cas réel de l'audit.
+> **Ce qui attend Cowork** : l'artefact jumeau de la porte ; **la consigne du lot 2 (la Liste des
+> étudiant·es, L-1 à L-11)**. Inscrits en chemin : `#828` (filtre M, lot 7), `#829` (sélecteur de grille en
+> démo écrit la globale ; warn Réserve).
+> ⚠ **Dans l'arbre, pas à moi** : `Formation/*.html` (non suivis) et la SUPPRESSION non commise de la
+> capture du 9 sept. (`Retours des testeurs/grégoire/BUG_…journal-de-bord-sans-fond.png`, à Grégoire).
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, MIDI : L'OUVERTURE IMMUABLE LIVRÉE, #825 TEMPS 1 (1.130.2)
 
 > ✅ **`main` à 1.130.2, build `0911-1139`, commit de release `5ce9deef`.** Tout est sur `main` ;

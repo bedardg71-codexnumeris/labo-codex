@@ -44,16 +44,16 @@ il n'y avait **aucune consigne du jour en attente** au matin du 10.
 
 ---
 
-## ÉTAT MESURÉ — 11 SEPTEMBRE 2026, MIDI (TORONTO)
+## ÉTAT MESURÉ — 11 SEPTEMBRE 2026, 13 H 30 (TORONTO)
 
-▣ **Remesuré par Claude Code à la clôture de `1.130.2` — chaque ligne avec la commande qui la
+▣ **Remesuré par Claude Code à la clôture de `1.131.0` — chaque ligne avec la commande qui la
 produit.** La version précédente de ce bloc (10 septembre, 1.128.4) est remplacée, pas corrigée.
 ⚠ **Un état mesuré vieillit en heures. Remesure, ne recopie pas.**
 
-- **Version `1.130.2`, build `0911-1139`** (`cat version.json`). **Quatre releases le 11 au matin**
-  (1.129.1, 1.129.2, 1.130.0, 1.130.1 : les mots du dépistage, la forme de l'écran de réglage, les
-  liens depuis Suivi, #824) puis **1.130.2 à midi** : #825 temps 1, l'ouverture immuable — **rien de
-  visible à l'écran**, un chiffre qui attend sa porte.
+- **Version `1.131.0`, build `0911-1259`** (`cat version.json`). **Quatre releases le 11 au matin**
+  (1.129.1, 1.129.2, 1.130.0, 1.130.1), **1.130.2 à midi** (#825 temps 1, l'ouverture immuable ;
+  hypothèse réfutée par la référence de 11 h 58) puis **1.131.0 vers 13 h 30** : #749, lot 1 du cadrage
+  11 — la liste suivie du Suivi du groupe par groupe-cours, ce que Grégoire verra à sa première bascule.
 - **`origin/main` = `main`** au rituel de midi (`git fetch && git rev-list --count origin/main..HEAD`
   = 0 sur `7130d0db`), puis deux commits locaux (docs de Cowork, release 1.130.2) et le commit de
   relais, poussés par `scripts/pousser.sh` à la clôture. Aucune branche ne porte de travail.
@@ -62,7 +62,7 @@ produit.** La version précédente de ce bloc (10 septembre, 1.128.4) est rempla
   l'application) et la **suppression non commise** de la capture du 9 sept. (`Retours des
   testeurs/grégoire/BUG_…journal-de-bord-sans-fond.png`, à Grégoire). Rien d'autre
   (`git status --porcelain -uall`).
-- **Vitest : 533 fichiers / 5817 essais, 0 échec** (`cd tests && npm run test:unit`, ~27 s), mesuré
+- **Vitest : 534 fichiers / 5840 essais, 0 échec** (`cd tests && npm run test:unit`, ~27 s), mesuré
   AVANT et APRÈS le commit de release (la sentinelle anti-cache post-commit ne juge qu'un bump commité).
   ⛔ **PAS `npm test`** : il enchaîne Playwright, plus de dix minutes.
 - **Playwright : verdict local rendu par `scripts/pousser.sh` sur le SHA du commit de relais** — lire
@@ -79,6 +79,7 @@ produit.** La version précédente de ce bloc (10 septembre, 1.128.4) est rempla
 
 | Lot | Livré | ⚠ Ce que la mesure a corrigé |
 |---|---|---|
+| `#749` lot 1 du cadrage 11 (1.131.0, `1d51883e`) | liste suivie par trimestre et groupe-cours, filtrée à la lecture, semis réversible ; sixième notifié ; filtre P ; panneau mort retiré ; G-8 ; démo résolue à la lecture ; sentinelle 21 essais / 6 break-tests | G-7 **périmé** (fonctions sans appelant depuis #303) ; la préférence `grilleReferenceDepistage` est GLOBALE — « poser à l'activation de la démo » aurait écrasé le choix réel (résolution à la lecture à la place) ; relecture adverse : le semis lit aussi `<trim>_etudiantsSuivis` (migration des résidus), l'ajout ne purge plus l'abandon ; `#828`, `#829` inscrits |
 | `#825` temps 1 (1.130.2) | `netlify.toml` : `/js/*` et `/css/*` immuables un an, invariant écrit ; trois trous bouchés à la source (`repertoires-bibliotheque.js`, `pack-demo-20.js`, `heic-worker.js`) ; sentinelle #825, 16 essais, 5 break-tests rouges ; skill `portes-terrain` corrigé ; porte terrain à 4 rangées | la fiche #825 et le skill disaient « le garde ne surveille que `main.js` » : **faux depuis #547** ; un commentaire contenant `/js/*` a fait avaler la ligne du Worker par le strip-commentaires des tests 597 — reformulé ; **`/styles.css` NE devient PAS immuable** (relecture adverse : `design-system.html` + 17 modules servis la chargent sans jeton) ; le garde #547 ne voit pas les deux fichiers à jeton de build → garde pre-push ajoutée ; `#826` inscrit (jetons déjà servis deux fois le 10 sept.) |
 
 ⮕ **La leçon qui se répète** : la consigne elle-même avait corrigé la prémisse de la fiche ; la
