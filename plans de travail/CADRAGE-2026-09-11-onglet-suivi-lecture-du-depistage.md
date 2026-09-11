@@ -179,3 +179,13 @@ remontent avant la release ; les règles de l'audit 3 (`#735`-`#754`) sont cité
 **Précision de Grégoire, 17 h 24** : *« Les données du portrait de lecteur dans la section confidentielle de l'élève peuvent disparaître complètement. Je n'ai jamais utilisé cette fonction. »* — aucune purge écrite pour autant ; les champs tombent au prochain enregistrement du volet.
 
 **Retour de Grégoire, 17 h 28 (capture)** : dans Profil › Accompagnement, le bouton « + Nouvelle intervention » est « mal situé » (sous le titre HISTORIQUE, à gauche). Cause mesurée : une classe CSS jamais définie (`u-flex-between-mb10`) ; le code voulait titre à gauche, bouton à droite. Ajouté au lot 4 (§ F).
+
+**Retour de Grégoire, 17 h 32 (capture)** : bandeau « MODE ANONYMISATION », le libellé « Afficher DA réels » presque illisible — *« l'écrire en blanc comme le texte à côté »*. Cause mesurée : une règle générique `label` qui gagne sur l'héritage du bandeau. **Les deux retours du soir (bandeau, bouton « Nouvelle intervention ») passent en tête de la consigne du lot 3**, retirés du lot 4.
+
+**Correction de Grégoire, 17 h 35** : *« C'est un retour de moi, mais je voudrais que tu l'insères dans un lot comme les autres. »* ⮕ Les deux retours du soir ne sautent pas la file : le bouton « Nouvelle intervention » retourne au lot 4 (§ F, même écran) ; le libellé du bandeau d'anonymisation va au lot 7, transversal (forme, contrastes), fichier ouvert `CONSIGNE-SUIVANTE-lot-7-transversal-forme-et-cles-nues.md`. La consigne du lot 3 redevient le lot 3 seul.
+
+**Décision de Grégoire, 17 h 47, lot 5 (Interventions, `#748`)** : *« la note reste visible, grisée, avec la mention « (n'est plus dans le groupe) » »* — recommandation de Cowork, reprise dans ses mots ; extension de sa décision du lot 2. Consigne en file : `CONSIGNE-SUIVANTE-lot-5-interventions.md`.
+
+**Décision de Grégoire, 17 h 50, lot 6 (Animation)** : *« Il n'y a pas d'enjeu de confidentialité dans le tirage au sort. Au contraire, ça fait partie d'un jeu. Les élèves voient les noms qui défilent à l'écran et, finalement, quelqu'un est choisi. »* — rien ne change à ce qui est projeté ; la recommandation de Cowork (bandeau, DA hors du DOM) est retirée. Consigne en file : `CONSIGNE-SUIVANTE-lot-6-animation.md`.
+
+**Lot 3 VU par Grégoire, 18 h 42** : porte 7/7 sur ses deux groupes réels, décision 3.1 « tel quel ». **Lot 4 promu consigne du jour à 18 h 43.**
