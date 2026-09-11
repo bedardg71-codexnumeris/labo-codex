@@ -7,6 +7,35 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 11 H 15 : L'ÉCRAN DE RÉGLAGE EST CLOS (1.130.1)
+
+> ✅ **`main` à 1.130.1, build `0911-1103`, commit de release `195d4b38`.** Tout est sur `main` ;
+> aucune branche ne porte de travail. Le push suit par `scripts/pousser.sh` (verdict Playwright
+> d'abord) — si tu lis ceci depuis `origin/main`, il est arrivé. Vérifie :
+> `git rev-list --count origin/main..main`.
+> **Livré** (temps 5 du cadrage 10, décision de Grégoire 10 h 48 — l'écran reste dans Labo, Suivi y
+> mène) : `ouvrirOutilsObservation(cibleId)` (`js/tableau-bord-apercu.js`, wrapper
+> `ouvrirReferenceSoloAccompagnement` adossé, dépliage d'accordéon retiré), deux liens « Régler les
+> outils d'observation » (tête de `Suivi › Suivi du groupe` dans `index.html` ; sous le titre de la
+> carte RàI, deux branches de `genererSectionAccompagnement`), patron `note-finale-lien-reglages`
+> renommé `lien-reglages` (CSS, 3 sites, design-system § 7). `navigation.js` / `config.js` intacts.
+> **#824 LIVRÉ** : 930 lignes de chemins morts retirées (liste dans la fiche), gardés nommés ;
+> sentinelle `tests/unit/sentinelle-824-chemins-morts-retires.test.js`, break-testée deux fois ;
+> #817 et refactor-profil adaptés (la copie morte du seuil est partie avec sa chaîne).
+> ⚠ **Constat à connaître** : « Diagnostic par critère (seuil force : N %) » n'a jamais été affiché
+> (chaîne morte) ; la porte 2.3b de ce matin visait ce texte — note posée dans son markdown. Le seuil
+> agit par les badges de `genererSectionPerformance` (`seuilForce`, l. ~4270) et la carte RàI.
+> **Ce qui attend Grégoire** : la porte terrain à une porte, deux rangées
+> (`plans de travail/PORTES-TERRAIN-2026-09-11-liens-depuis-suivi.md`) et les mots du lien (§ 3 :
+> « Régler… » de Cowork, ou « Réglages des… » du patron). Le tri de l'écran de réglage est **fini**
+> (carte des effets, réglages morts, mots, forme, liens, chemins morts). Ensuite : `#825` (chargement
+> lent, consigne à part), l'onglet Suivi (chantier suivant), `#821` / `#822` avec l'orthopédagogue.
+> **Ce qui attend Cowork** : l'artefact jumeau de la porte ; le mandat suivant.
+> ⚠ **Dans l'arbre, pas à moi** : `Formation/*.html` (non suivis), la SUPPRESSION non commise de la
+> capture du 9 sept. (`Retours des testeurs/grégoire/BUG_…journal-de-bord-sans-fond.png`, à Grégoire),
+> et deux fichiers de Cowork modifiés pendant la session (`CONSIGNE-DEMARRAGE-COWORK.md`,
+> `plans de travail/00-CADRAGES-OUVERTS.md`) — non commis ici.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 10 H 30 : LA FORME DE L'ÉCRAN DE RÉGLAGE LIVRÉE (1.130.0)
 
 > ✅ **`main` à 1.130.0, build `0911-1022`, commit de release `181b8e21`.** Tout est sur `main` ;

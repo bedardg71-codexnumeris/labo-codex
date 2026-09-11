@@ -15,6 +15,28 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.130.1 — DEPUIS LE SUIVI, UN LIEN MÈNE AUX RÉGLAGES ; ET L'ÉCRAN DE RÉGLAGE EST CLOS** (build `0911-1103`).
+**Ce que tu verras** : en tête de `Suivi › Suivi du groupe` et sous le titre de la carte RàI d'un
+profil, un petit bouton-lien **« Régler les outils d'observation »** ouvre `Labo › Outils
+d'observation`. C'est ta décision de 10 h 48 : l'écran reste dans Labo (quatre de ses réglages
+agissent hors de Suivi), et Suivi y mène là où tu constates un effet. Rien d'autre ne change à l'écran.
+**Ce qui a été retiré sans que rien ne bouge** : cinq chemins de code sous les seuils du dépistage,
+inscrits hier, remesurés un par un aujourd'hui (930 lignes) — aucun n'atteignait un écran. Gardé, parce
+que la leçon du 10 dit qu'un « mort » sur quatre est vivant : `identifierDefiSpecifique` (trois bancs
+l'exécutent), les `detecterDefis` et `identifierPattern` des pratiques.
+⚠ **Un constat qui te concerne** : le titre « Diagnostic par critère (seuil force : N %) », que la
+porte 2.3b de ce matin te demandait de lire, **n'a jamais été affiché** — il n'était produit que par
+une de ces chaînes mortes. Le seuil de défi agit bel et bien (couleur des badges « Forces et défis »,
+défi principal de la carte RàI), et sa conversion est prouvée par cinq essais ; mais ce que tu as vu à
+2.3b n'a pas pu être ce titre. La porte du matin porte la note.
+**Vérifié comment** : chaque appelant remesuré dans le code, l'HTML et les tests, y compris sous forme
+de chaîne ; une sentinelle neuve (#824) verrouille l'absence des cinq et la présence des gardés, et
+rougit quand on réintroduit un nom ou qu'on retire la fonction gardée ; le lien du Suivi du groupe
+cliqué sous WebKit dans les deux modes : arrivée sur l'écran, zéro erreur. **Pas vérifié** : le clic
+sur le lien de la carte RàI (il faut un élève avec données) — une porte, deux rangées
+(`plans de travail/PORTES-TERRAIN-2026-09-11-liens-depuis-suivi.md`), l'artefact revient à Cowork. Les
+mots du lien attendent ton verdict (§ 3 de la porte).
+
 ↻ **1.130.0 — « OUTILS D'OBSERVATION » SE LIT SANS RIEN DÉPLIER** (build `0911-1022`).
 **Ce que tu verras** : dans `Labo › Outils d'observation`, la forme que tu as validée sur maquette à
 10 h 05. Les deux sections repliables et les trois cartes-accordéon sont devenues des blocs ouverts ;
