@@ -1,166 +1,139 @@
-# Consigne du jour — Profils individuels : un seul rendu à l'ouverture, des graphiques qui lisent l'échelle de chaque évaluation, et le tri du profil (lot 4 du cadrage 11)
+# Consigne du jour — « Rencontres » : l'orthopédagogue entre par Suivi (lots 1 et 2 du cadrage « Rencontres », formule si le temps reste)
 
-> **Écrite le 11 septembre 2026 à 17 h 14 (Toronto) par Cowork, à froid ; PROMUE consigne du jour à 18 h 43**, le lot 3 étant livré
-> (`1.133.0`, `c816d0cc`, poussé) **et VU** (porte relevée 7/7 à 18 h 42 sur ses deux groupes réels). Application au moment de la
-> promotion : **`1.133.0`**, build `0911-1730`, `main` = `origin/main` = `c816d0cc`. Elle remplace la consigne du lot 3, archivée à côté
-> sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-11-lot-3-saisie-des-presences.md`.
-> **Décisions de Grégoire du 11, dans ses mots, toutes au cadrage 11 (§ 7 et sa queue)** : `#754` et `#752` entrent (17 h 15) ; la case
-> « Services adaptés » suit la liste des étudiant·es et le « Portrait de lecteur » est retiré (17 h 20-24) ; le bouton « Nouvelle
-> intervention » à sa place (17 h 28, « dans un lot comme les autres », 17 h 35).
+> **Écrite le 11 septembre 2026 à 20 h 25 (Toronto) par Cowork**, pour la journée du samedi 12. Application au moment de l'écriture :
+> **`1.134.0`**, build `0911-1922`, `main` = `7092ce42` (lot 4 du cadrage 11 livré à 19 h 22). Elle remplace la consigne du lot 4,
+> archivée à côté sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-11-lot-4-profils-individuels.md`.
+> **Cadrage** : `plans de travail/CADRAGE-2026-09-11-rencontres-l-orthopedagogue-entre-par-suivi.md` (entrée 11 de
+> `00-CADRAGES-OUVERTS.md`). **Sources** : dossier `docs/orthopedagogie/` du dépôt (les deux courriels de
+> l'orthopédagogue, les deux mesures du 11, l'idée de Grégoire) — copié depuis le dossier Cowork le 11 à 20 h 45 ; c'est la copie vivante.
+> **Décisions de Grégoire, dans ses mots** : « universaliser l'application » (18 h 45) ; entrée par Suivi, « trois questions, un cours de
+> service visible dans Cadre » (19 h 20) ; les mots « Rencontres », « rencontre », « Service » (19 h 35) ; « je voudrais que l'on avance le
+> plus possible l'application pour elle, pour lundi, quitte à poursuivre le développement dans la semaine ou le mois » (20 h 10).
+> **But de la journée** : lundi 14, l'orthopédagogue ouvre l'application, répond à trois questions, et tient ses rencontres dedans.
 >
-> **AVANT TOUT — un commit documentaire séparé** : la porte du lot 3 (relevée 7/7), l'entrée 10 de `00-CADRAGES-OUVERTS.md`, le cadrage 11
-> (décisions du soir), les consignes en file 5, 6, 7, `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`, `CONSIGNE-DEMARRAGE-COWORK.md`,
-> l'archivage de la consigne du lot 3, **`git rm "plans de travail/CONSIGNE-SUIVANTE-lot-4-profils-individuels.md"`** (vidé, promu ici) et la présente. `git add` ciblé ; le `D` du PNG et les `Formation/*.html` restent hors de tes commits.
+> **AVANT TOUT — un commit documentaire séparé** : l'archivage de la consigne du lot 4, la présente, le cadrage « Rencontres », l'entrée 11
+> de `00-CADRAGES-OUVERTS.md`, `Rapports/INVENTAIRE-2026-09-11-orthopedagogie-dans-l-app-et-la-doc.md`. `git add` ciblé.
 >
-> ⚠ **Une consigne peut se tromper : mesure, n'obéis pas.** L'audit date du 6 (`1.123.5`) ; les numéros de ligne sont remesurés le 11 à
-> 17 h sur `1.132.0`. Un constat périmé se dit périmé, pas corrigé.
+> ⚠ **Une consigne peut se tromper : mesure, n'obéis pas.** Les numéros de ligne datent du 11 au soir sur `1.133.0`-`1.134.0`.
+> ⛔ **`js/config.js` et `js/navigation.js` sont des zones protégées** (`CLAUDE.md`) : le sous-onglet (§ C) les touche. **Sans l'autorisation
+> explicite de Grégoire dans sa ligne de lancement, § C ne se fait pas** ; le reste se fait, et « Rencontres » attend son feu vert.
 >
-> **Préalables** : le cadrage 11 (§ 7) ; `Rapports/AUDIT-sous-onglets-suivi-2026-09-06.md` **§ 4 seulement** (l. 229-283 : P-1 à P-6, le
-> tableau des gestes, les gestes jamais câblés) ; `BACKLOG.md`, `#752`, `#754`, `#751` (grep ciblé). Skills : `labo-codex`,
-> `depistage-rai` (la conversion des niveaux), `verification-adverse` § 4, `portes-terrain`. ⛔ **`js/navigation.js` est une zone
-> protégée** (`CLAUDE.md`) : ce lot ne la touche pas, voir § A.
+> **Préalables** : le cadrage (§ 3-5) ; les deux mesures du 11 (couplage au groupe-cours ; la séance comme unité de temps) ; `CLAUDE.md`
+> (ce qui remonte à Grégoire, règle 1) ; `PROTOCOLE.md` (relecture croisée : ce lot « ne se reprend pas », il part chez une utilisatrice
+> réelle lundi). Skills : `labo-codex`, `depistage-rai` (§ profil), `verification-adverse`, `portes-terrain`, `release-et-changelog`.
 
 ---
 
-## 0 · CE QUE CE LOT CHANGE POUR GRÉGOIRE ET SES COLLÈGUES
+## 0 · CE QUE CE LOT CHANGE, POUR ELLE ET POUR GRÉGOIRE
 
-1. **Le profil ne se dessine plus quatre fois à l'ouverture.** Aujourd'hui (`#754`, mesuré : vide à 7 ms → rempli à 108 → vide à 212 →
-   rempli à 317), chaque rendu recrée la section affichée : **un texte tapé dans la zone de texte du rapport est effacé**, une note DEN
-   et sa justification non enregistrées aussi, et trois clés d'indices sont réécrites à chaque passage.
-2. **Les graphiques de progression lisent l'échelle de CHAQUE évaluation**, comme le dépistage le fait déjà (`convertirNiveauEnScore`
-   + `tableConversionPourEvaluation`, `profil-etudiant-calculs.js:581`, `:867`, `:1017`…). Aujourd'hui ils convertissent I/D/M/E en
-   40 / 65 / 75 / 100 **écrits en dur** deux fois (`graphiques-progression.js:2132-2135`, `:3436-3439`), lisent tout nombre ≤ 4 comme
-   une note sur 4 (`:2141`, `:3444` — un critère en points « 3 » devient 75 %, « 21 » sur 30 devient 21 %), et une échelle A/B/C
-   donne une courbe **trouée sans un mot**. Les zones colorées du fond viennent de « la première échelle du trimestre » (`:314`,
-   `:366`), pas de celle des évaluations. **Justes chez Grégoire par coïncidence** (son échelle vaut 40/65/75/100), faux chez un
-   collègue.
-3. Le tri : les cases du rapport partagées entre élèves et trimestres, les gestes exportés sans bouton, le cité-pas-rejugé.
+1. **Pour elle** : dans Suivi, un sous-onglet **« Rencontres »**. À la première ouverture, **trois questions** — les dates de son trimestre
+   (si aucun trimestre n'existe), le **nom de son service**, **sa liste d'élèves** (saisie ou collée) — et l'application crée ce que le magasin
+   exige : un trimestre, un **cours de nature « service »** (sans code, sans discipline, sans compétences), un groupe d'élèves, un
+   groupe-cours ; le tout **visible dans Cadre, tel quel**. Ensuite, « Rencontres » liste ses rencontres et lui permet d'en créer
+   (individuelle ou sous-groupe, date, heure, durée, participants, notes par élève, bilan). Profils individuels, volet confidentiel et rapport
+   marchent déjà pour ses élèves (mesure 1, § 4 : ils ne lisent aucun contexte).
+2. **Pour Grégoire et ses collègues** : **rien ne bouge** sur un groupe-cours ordinaire — harnais AVANT/APRÈS obligatoire (§ F). Une chose
+   s'améliore pour tous : une intervention **sait désormais dans quel groupe-cours elle est née**, et la liste des interventions d'un cours ne
+   mêle plus celles d'un autre (constat de l'audit du 5 sept., « les interventions ne portent pas leur groupe-cours »).
+3. **Ce qui reste manuel, exprès, pour un mois** (décision de Grégoire, 20 h 10 : « tout est manuel, comme si elle écrivait sur papier ») :
+   la présence se note **dans la rencontre** (participants), l'indice A et la complétion **se taisent** sur un service, la carte RàI d'un
+   élève de service **ne s'affiche pas**. Ses retours d'octobre trancheront (cadrage § 7). ⛔ Ne rien inventer là.
 
-**Rien n'écrit dans les données de personne**, hors une clé d'état d'écran qui passe par trimestre (§ C), sans semis.
-
----
-
-## 1 · LE LOT
-
-### A. Un seul rendu à l'ouverture (`#754`, P-1) — SANS toucher `navigation.js`
-Quatre sources mesurées le 5-6 : l'appel direct ; le crochet de `navigation.js:590-616` (`afficherSousSection('suivi-profil')` programme
-`afficherProfilComplet(profilActuelDA)` à T+100 ms, garde `_profilAutoChargement` sur la réentrance seulement) ; le `MutationObserver`
-de `profil-etudiant-sections-affichage.js:4400-4420` (recharge 100 ms après que la sous-section devient active) ; et le **rebouclage**
-`afficherProfilComplet:2345` → `afficherSousSection('suivi-profil')` → crochet → `afficherProfilComplet`.
-⮕ **Décision de Cowork, à vérifier par la mesure** : les deux relanceurs qui vivent DANS le module profil suffisent à casser la boucle —
-(1) `afficherProfilComplet` n'appelle `afficherSousSection` **que si la sous-section n'est pas déjà active** ; (2) le `MutationObserver`
-est retiré (son rôle — recharger quand on arrive par la navigation — est déjà celui du crochet de `navigation.js`). Mesure avec la sonde
-de `#754` (compte des insertions dans `#contenuProfilEtudiant`, WebKit local) : **attendu 1, par les trois chemins** (sélecteur, clic
-depuis la Liste, clic depuis le Suivi du groupe). Si un chemin reste à 2 à cause du crochet de `navigation.js`, **n'y touche pas** :
-inscris la mesure et remonte-la à Grégoire (zone protégée, son autorisation). Sentinelle : une spec Playwright locale (pas CI) qui
-compte les rendus, ou le banc Vitest du 6 si `afficherProfilComplet` s'y exécute — **et** : un texte tapé dans `textarea-rapport-<da>`
-survit 500 ms après l'ouverture (c'est ce que Grégoire perd aujourd'hui).
-
-### B. Les graphiques lisent l'échelle de l'évaluation (`#752`, P-5) — rien d'inventé
-1. **Une seule source de conversion** : `convertirNiveauEnScore(niveau, tableConversionPourEvaluation(evaluation, cache))` — celle du
-   dépistage. Les deux tables en dur (`:2132-2135`, `:3436-3439`) et les deux « ≤ 4 → /4 » (`:2141`, `:3444`) **disparaissent**.
-2. **Un critère en points** (l'échelle de l'évaluation le dit — lot 2 du 4 septembre, `#612`) se convertit par sa fraction
-   (`21/30 → 70 %`), par la même fonction que le dépistage (`_fractionEnPoints` / `_pointsEnFraction`, `preferences-v2.js`, ou celle que
-   `profil-etudiant-calculs.js` utilise : **mesure, une seule**).
-3. **Une valeur non convertible** (échelle sans valeur numérique pour ce niveau, table `null` — `#529`) : **le point est absent, et le
-   graphique le dit** (« n évaluations sans valeur convertible » sous la légende, patron `afficherMessageAttente` qui n'existe
-   aujourd'hui que pour les graphiques de groupe). **Jamais une valeur devinée** — décision de Grégoire du 11 (17 h 15), dans les mots
-   de Cowork qu'il a acceptés.
-4. **Les zones colorées du fond** : celles de l'échelle des évaluations tracées ; si plusieurs échelles coexistent, celle de la
-   majorité, et le graphique le dit — **décide et dis-le**, ne demande pas.
-5. Sentinelle, break-testée : (a) une échelle A/B/C à valeurs 0,5 / 0,7 / 0,9 trace 50 / 70 / 90 — pas de trou ; (b) une évaluation
-   « 3 » sur une échelle en points sur 30 trace 10 %, pas 75 ; (c) un niveau sans valeur → point absent + message ; (d) l'échelle de
-   Grégoire (40/65/75/100) trace **les mêmes courbes qu'avant** (non-régression : capture les valeurs d'avant sur le pack démo AVANT
-   de toucher, compare après). Rouges montrés pour (a) et (d).
-
-### C. Les cases du rapport par trimestre (P-2)
-`db.setSync('preferencesRapport', …)` (`profil-etudiant-rapport.js:362`, `:371`) : nue, partagée entre trimestres et élèves, écrite 3-4
-fois à l'ouverture. Passe sous `cle()` (par trimestre ; **par élève, non** : ce sont six cases de forme, pas un contenu — position de
-l'audit, gardée), écrite **au geste** (une case cochée), pas au rendu. Pas de semis ; la nue devient orpheline (diagnostic-353). Le texte
-du rapport reste un recalcul (position : le rapport est une vue) — le § A garantit seulement qu'il n'est plus effacé sous les doigts.
-
-### D. Les gestes exportés sans bouton (tableau 4.1), et le volet confidentiel — deux décisions de Grégoire (17 h 20)
-`attribuerJetonPersonnaliseAvecPrompt`, `retirerJetonPersonnaliseAvecConfirmation`, `supprimerEvaluationDepuisProfil`
-(`profil-etudiant-actions.js:678`, `:705`, `:154`, exportées `:797-800`) ; `toggleDetailIndice` (`sections-affichage.js:3276`, **appelée
-par `portfolio.js:443`** — l'audit la disait morte : **remesure**, un appelant existe). ⚠ Leçon du 10 : un mort se mesure par chaque
-lecteur, y compris sous forme de chaîne (`grep -rn "nomDeLaFonction" js/ index.html tests/`). Ce qui n'a aucun appelant ni bouton :
-**retirer** (pas « câbler »).
-
-**D.1 — « Services adaptés » du volet confidentiel : une seule source, la liste des étudiant·es.** Dans ses mots : *« La case des
-services adaptés devrait être cochée si, lorsque la liste des étudiants est créée, un étudiant a cette option cochée. Donc, ça devrait
-correspondre à la liste originale des étudiants. »* Mesuré : la liste porte déjà ce fait — `e.sa === 'Oui'` (import `groupe.js:212`,
-formulaire `trimestre-v2-etudiants.js:329-350`, `:443`, affiché `sections-affichage.js:2431`) — et le volet stocke **un second
-booléen** `servicesAdaptes` dans `confidentielEtudiants` (`confidentiel.js:98`, `:230`), jamais synchronisé, sans handler sur la case
-(`index.html:15070`). ⮕ **La case du volet reflète `etudiant.sa`** (cochée, **non modifiable** — ça se change dans Cadre › Trimestre,
-et le volet le dit en un mot : « (d'après la liste des étudiant·es) ») ; les champs Catégorie / Sous-catégorie ne s'affichent que si
-`sa === 'Oui'` (`toggleServicesAdaptes`, `:269`, enfin appelée — au rendu, pas au clic). **Stock** : le booléen `servicesAdaptes` déjà
-écrit chez les gens n'est plus lu ni écrit (`:230` retiré) ; `trimestres.js:2218` (`services_adaptes: e.servicesAdaptes`) : mesure ce
-qu'il alimente et fais-le lire `sa` — une seule source (`docs/DATA-OWNERSHIP.md`). Sentinelle : un élève `sa: 'Oui'` → case cochée et
-diagnostic visible ; `sa: 'Non'` → décochée, diagnostic masqué ; Enregistrer n'écrit plus `servicesAdaptes`.
-
-**D.2 — Le « Portrait de lecteur » (Conception · Rigueur · Plausibilité · Nuance · Français) est retiré du volet.** Dans ses mots :
-*« nous allons retirer les dropdown IDME qui sont là uniquement pour ma pratique personnelle. Dans d'autres pratiques ou disciplines,
-il n'y a pas de « Portrait de lecteur » comme ça. »* Mesuré : cinq `<select>` (`index.html:14977-…`), lus et écrits par
-`confidentiel.js:112-117` et `:239-244`, testés à `:311-312` (« a des infos ») — **aucun autre lecteur dans `js/`** (`grep -rn
-"portraitStructure\|portraitRigueur" js/` hors confidentiel.js = 0 ; remesure). ⮕ Retirer les cinq champs, leurs lignes de lecture et
-d'écriture, et le test de `:311`. **Stock — précisé par Grégoire à 17 h 24, dans ses mots** : *« Les données du portrait de lecteur dans
-la section confidentielle de l'élève peuvent disparaître complètement. Je n'ai jamais utilisé cette fonction. »* ⮕ Aucun script de
-purge (écrire dans les données des testeurs n'est pas demandé, et rien ne l'exige) : `sauvegarderConfidentiel` réécrit l'objet entier
-de l'élève depuis le formulaire (`donnees[da] = infos`, `:250`) — **les champs `portrait*` disparaissent d'eux-mêmes au prochain
-Enregistrer** de ce volet, et personne ne les lit d'ici là. Une ligne dans le code le dit. C'est le même motif que « SRPNF » : sa
-pratique codée en dur dans un écran que d'autres disciplines liront.
-
-### F. Le bouton « + Nouvelle intervention » retrouve sa place (retour de Grégoire du 11 au soir, capture — **inséré dans ce lot comme les autres, à sa demande** : « je voudrais que tu l'insères dans un lot comme les autres », 17 h 35)
-Profil › Accompagnement : le bouton est « mal situé » (sous le titre HISTORIQUE, à gauche, collé à
-la carte vide). Mesuré : le code voulait une rangée titre-à-gauche / bouton-à-droite (`profil-etudiant-sections-affichage.js:1423-1427`,
-`<div class="u-flex-between-mb10">`), mais **`u-flex-between-mb10` n'est définie nulle part** (`grep -rn "u-flex-between-mb10"
-styles.css css/` = 0) — c'est le cas de `CLAUDE.md`, « une classe CSS jamais définie » : un lot jamais fini. ⮕ Remplacer par
-`.u-flex-between` (`styles.css:741`) plus la marge utilitaire existante (mesure : `u-mb-10` ?), **sans créer de classe** ; le bouton se
-retrouve **à droite du titre, sur la même ligne**, patron « titre + action » du design-system (§ 7). Vérifier sous WebKit à 1024 et 1366
-que la rangée tient et que la carte de l'historique suit dessous. Porte : rangée 8.
-
-
-### E. Cité, pas rejugé
-P-4 (`#751`, le volet confidentiel en mode anonymisation : après le 14, règle des modes) ; P-3 (le volet en clair : position, skill
-`securite-donnees` — inscrire seulement s'il demande le chiffrement) ; P-6 fonctionne ; `profilOngletDeveloppementActif` nue : lot 7
-avec les clés nues. 14 cibles tactiles : lot 7.
+**Principe de construction** : **un service EST un cours** (enregistrement de `cours` ordinaire + `nature: 'service'`), un groupe-cours de
+service EST un groupe-cours (`horaireId` possiblement `null`). Aucun magasin à part, aucun troisième chemin de données : la liste de ses
+élèves passe par `obtenirEtudiantsCoursActif()` (`js/modes.js:1169`) **sans nouveau cas** — c'est la raison de ce choix. Le mot
+« orthopédagogie » n'apparaît **nulle part** dans le code : un enseignant qui reçoit des élèves à son bureau a le même sous-onglet.
 
 ---
 
-## 2 · CE QUI REMONTE À GRÉGOIRE
-| Où | Question | Sa réponse |
-|---|---|---|
-| D.1 — la case « Services adaptés » | tranché par lui à 17 h 20 : reflète la liste des étudiant·es | ✅ |
-| D.2 — le « Portrait de lecteur » | tranché par lui à 17 h 20 : retiré | ✅ |
-| D.1 — le mot sous la case | « (d'après la liste des étudiant·es) » | _______ (silence = tel quel) |
-| B.3 — le mot sous le graphique | « n évaluations sans valeur convertible dans cette échelle » | _______ (silence = tel quel) |
-| A — si un chemin reste à deux rendus à cause de `navigation.js` | son autorisation pour y toucher, ou le laisser | _______ |
+## 1 · LE LOT — dans cet ordre, un commit par lettre, une seule livraison à la fin
 
-## 3 · LIVRER — `minor` (`1.134.0` si le lot 3 a pris `1.133.0`) : les graphiques changent chez les collègues
-Changelog, une phrase : « Le profil d'un élève s'ouvre en un seul rendu — ce que tu tapes dans le rapport n'est plus effacé ; les
-graphiques de progression lisent l'échelle de chaque évaluation, et disent quand une valeur ne se convertit pas. »
+### A. Un cours de nature « service » (Cadre › Cours)
+- `cours.nature ∈ { 'cours' (défaut, absent = cours), 'service' }`. Dans le formulaire du cours, un choix **« Cours / Service »** (mot
+  « Service », tranché). Pour un service : **seul le nom est requis** ; `codeCours`, `discipline`, `ponderation`, compétences : vides, et
+  la validation de `trimestre-v2-cours.js:1292-1319` (#540) ne les exige pas. **Mesure d'abord** chaque lecteur de `codeCours` /
+  `discipline` / `ponderation` (grep sur `js/`) : ce qui affiche un code vide doit afficher le **nom** ; ce qui calcule sur la
+  pondération doit tolérer l'absence sans NaN. Liste tes trouvailles avant de coder.
+- Dans les listes de Cadre, le service se distingue par son mot (« Service »), pas par une couleur nouvelle.
+
+### B. Un groupe-cours sans horaire — MESURE AVANT DE PROMETTRE
+- `trimestre-v2-groupes-cours.js:612` exige un horaire. Pour un groupe-cours dont le cours est un service, l'horaire devient **facultatif**.
+- ⚠ **C'est le mur de la mesure 2** : 22 fichiers lisent les séances, `genererSeancesCompletes` (`horaire.js:570`) part de l'horaire.
+  **Mesure** ce que `horaireId: null` produit sur chaque lecteur (Suivi du groupe, Liste, Saisie des présences, Profils, Interventions,
+  calendrier, tableau de bord, export PDF, captures) : attendu, **un calendrier vide et des écrans qui le disent** (« Ce service n'a pas
+  d'horaire : la présence se note dans la rencontre »), **jamais une exception ni un écran blanc**.
+- **Si un lecteur casse et ne se répare pas en une heure** : repli **visible**, jamais caché — les trois questions créent un « horaire de
+  service » nommé ainsi, d'un créneau par semaine, affiché dans Cadre. Écris dans le rapport lequel des deux tu as livré et pourquoi.
+
+### C. Le sous-onglet « Rencontres » (Suivi) — ⛔ ZONE PROTÉGÉE, autorisation de Grégoire requise
+- `js/config.js:67` (liste des sous-onglets de Suivi) et `js/navigation.js:169` (correspondance) : ajouter `rencontres` **après**
+  « Interventions ». Une seule sous-section nouvelle dans `index.html`.
+- **Sans service dans le trimestre actif** (ou sans trimestre) : la sous-section montre **les trois questions**, sur un seul écran, et un
+  bouton « Créer mon service ». Réutilise l'existant : la création de trimestre (dates), la création de cours (A), la saisie d'élèves
+  (`trimestre-v2-etudiants.js:497`, `ajouterEtudiantV2`) et, si elle existe, l'analyse d'une liste collée (import CSV) — **mesure ce qui
+  est réutilisable, ne réécris pas un parseur**. À la fin : le service devient le groupe-cours **actif**, et l'écran passe à la liste.
+- **Avec un service actif** : la liste des rencontres de CE service (D), le bouton « + Nouvelle rencontre », et le formulaire d'intervention
+  existant (`interventions.js`) rendu avec le vocabulaire « rencontre » (titre, boutons, libellés) et `type: 'individuel'` par défaut.
+  **Même module, même données, un paramètre de vocabulaire** — pas de copie de `interventions.js`. Le champ « séance concernée » et
+  « marquer les non-participants motivés » sont **cachés** sur un service (ils supposent une séance de groupe).
+- **Avec un groupe-cours ordinaire actif** : « Rencontres » montre la même liste, filtrée sur ce groupe-cours, avec le vocabulaire
+  « rencontre » — c'est l'universalisation demandée ; « Interventions » reste ce qu'il est. Si les deux sous-onglets se marchent dessus,
+  dis-le dans le rapport, **ne fusionne rien** : ça remonte à Grégoire.
+- ⛔ **Si l'autorisation n'est pas dans la ligne de lancement** : A, B, D, E, F se font ; C est écrit dans le rapport comme « prêt, attend
+  le feu vert », et le repli pour lundi est le chemin manuel par Cadre (Cowork l'écrit dimanche).
+
+### D. Une intervention porte son contexte de naissance (pour tous)
+- À la création (`interventions.js:127`), `groupeCoursId` = l'identifiant du groupe-cours actif (via **un point unique** — voir E).
+- La liste (Interventions comme Rencontres) filtre sur le groupe-cours actif. **Compatibilité** : une intervention sans `groupeCoursId`
+  (toutes celles d'avant) reste visible dans tous les contexts et est **estampillée au prochain enregistrement** ; aucune purge, aucun semis.
+- Sentinelle : deux groupes-cours, une intervention chacun, chacun ne voit que la sienne ; une intervention ancienne sans contexte est vue
+  des deux.
+
+### E. Un point unique pour l'identifiant du contexte (hygiène, mesurée le 11)
+- Huit sites recalculent `infoCours._groupeCoursId || infoCours.id` (`profil-etudiant-calculs.js:1830`,
+  `profil-etudiant-sections-affichage.js:2670`, `graphiques-progression.js:595, 820, 1422, 3619`, `snapshots.js:78, 1102`). Une fonction
+  (`snapshots.js:78` en est déjà presque une), exportée, huit appels. **Zéro changement de valeur** : sentinelle qui compare l'ancienne
+  expression et la fonction sur les mêmes `infoCours`.
+
+### F. Rien ne bouge pour l'enseignant — harnais AVANT/APRÈS, puis sentinelles
+- Harnais sur le **pack démo** (comme le 10 sept., `1630 cas / 0 différence` : reprends le même dispositif) : Suivi du groupe, Liste,
+  Présences, Profils (indices, cartes, rapport), Interventions, Cadre, export — **avant** le premier commit de code, **après** le dernier.
+  Un pixel qui bouge hors « Rencontres » et hors l'estampille D est un défaut.
+- Sentinelles : `sentinelle-<n>-un-service-est-un-cours` (A+B : un service se crée sans code, sans horaire, et `obtenirEtudiantsCoursActif`
+  rend sa liste) ; `sentinelle-<n>-intervention-porte-son-contexte` (D) ; `sentinelle-<n>-point-unique-contexte` (E). Break-tests rouges
+  pour chacune, fichiers restaurés à empreinte identique.
+
+### G. Si le lot est fini avant 16 h — la formule « taux de repérage »
+- Registre `js/evaluation-formules.js` (trois modèles, l. 88-150) : un quatrième, `taux_reperage`, note = pondération × (erreurs repérées ÷
+  erreurs au total). Réutilise les deux saisies existantes (`erreurs`, `mots`) **si** le registre permet de renommer leurs libellés par
+  modèle ; sinon, dis-le et n'ajoute rien — un libellé « nombre de mots » sous une saisie qui attend « erreurs au total » est un piège.
+  Sa grille (six critères, quatre niveaux, `docs/orthopedagogie/courriel-2026-09-11_fig2`) **n'est pas semée** : elle la crée dans
+  Conception ; un **modèle** de bibliothèque viendra plus tard, après son mois d'usage.
 
 ---
 
-## 4 · LA PORTE TERRAIN — ses données réelles, en lecture
-Markdown par Claude Code (`PORTES-TERRAIN-<date>-profils-individuels.md`) ; artefact par Cowork. Rangées :
+## 2 · CE QUI REMONTE À GRÉGOIRE (ne code pas à sa place)
+- L'autorisation pour `config.js` / `navigation.js` (§ C) — dans sa ligne de lancement, ou pas.
+- Tout mot nouveau à l'écran hors « Rencontres », « rencontre », « Service » : les trois questions, le message « ce service n'a pas
+  d'horaire », les libellés du formulaire de rencontre — **propose-les dans le rapport, avec leur emplacement** ; livre-les tels quels,
+  il corrigera dimanche.
+- Si A ou B révèle qu'un calcul (note, indice, pondération) change de valeur pour un cours ordinaire : **arrête ce point, inscris, remonte**.
 
-| # | Geste | Attendu |
-|---|---|---|
-| 1 | Profil d'un élève, section Rapport : tape trois mots dans la zone de texte, attends deux secondes | **les trois mots sont encore là** (avant : effacés à 100 ms) |
-| 2 | Ferme le profil, rouvre-le depuis la Liste (clic sur la ligne) | il s'affiche **une fois**, sans clignotement |
-| 3 | Section Performance, graphiques par critère, sur SON échelle | **les mêmes courbes qu'avant** (non-régression : il connaît ses élèves) |
-| 4 | Mode démonstration, un élève, graphiques | pas de trou ; s'il y en a un, le message « sans valeur convertible » est là |
-| 5 | Section Rapport : coche une case, change de trimestre, reviens | la case est **celle du trimestre**, pas partagée |
-| 6 | Volet confidentiel d'un élève marqué SA « Oui » dans Cadre › Trimestre, puis d'un élève « Non » | la case « Services adaptés » suit la liste (cochée / décochée, non modifiable) ; Catégorie et Sous-catégorie visibles seulement pour le premier |
-| 7 | Volet confidentiel : le bloc « Portrait de lecteur » | **absent** ; Parcours, Défis, Diagnostic, Notes intacts |
-| 8 | Section Accompagnement, sous-titre « HISTORIQUE » | le bouton « + Nouvelle intervention » est **à droite du titre, sur la même ligne** ; la carte de l'historique dessous |
+## 3 · LIVRER — `minor` (`1.135.0`) : un sous-onglet nouveau et une estampille sur les interventions
+Une seule livraison, à la fin, après le coup d'œil de Grégoire (§ 4) et la relecture croisée de Cowork sur les commits. Changelog
+utilisateur : ce qu'elle verra lundi, en trois lignes, sans le mot « orthopédagogue » (le sous-onglet sert à tous). Si § C n'a pas eu son
+feu vert : `patch` (`1.134.1`), rien de visible, et le changelog le dit.
 
-⚠ La rangée 3 est la vraie porte de B : aucun banc ne connaît ses courbes comme lui.
-
----
+## 4 · LA PORTE TERRAIN
+Markdown par Claude Code (`PORTES-TERRAIN-2026-09-12-rencontres.md`) ; artefact par Cowork. Rangées :
+1. **Ses deux groupes réels** — Cadre, Suivi du groupe, Liste, Présences, un profil, Interventions : **identiques à hier** (ce qu'il regarde :
+   rien). Ses interventions existantes sont toutes là.
+2. **Mode démo** (pas ses données) — Suivi › Rencontres : les trois questions ; « Créer mon service » ; Cadre montre le service ; Suivi ›
+   Liste montre les élèves saisis ; une rencontre créée, avec notes et bilan, visible dans Rencontres seulement.
+3. **Lundi, la vraie porte** : l'orthopédagogue, sur son poste. Ce que Cowork lui écrit dimanche part de ce que CETTE consigne a livré, pas
+   de ce qu'elle promettait.
 
 ## 5 · TROUVAILLES ET RAPPORT
-Trois issues de `CLAUDE.md`, nommées. Rapport : tête d'`OU-EN-EST-ON.md`, rapport du 6 (§ 4 : lot 4 livré), `#752` et `#754` clos ou
-remesurés, `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`, entrée 10 des cadrages (lot 5 suivant : les Interventions), la consigne commise
-avec le lot.
+Ce qui casse avec `horaireId: null` (B), lecteur par lecteur ; les mots proposés (§ 2) ; ce que § C a coûté dans les zones protégées ;
+et, si tu les vois passer, les deux questions du cadrage § 7 que la journée éclaire (sous-groupes récurrents, vue de la semaine) —
+**inscris, ne code pas**. Fin de journée : `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` réécrite, état mesuré.
