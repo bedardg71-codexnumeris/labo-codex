@@ -1,138 +1,119 @@
-# Consigne du jour — trois réglages qui ne font rien s'en vont, un se rebranche
+# Consigne du jour — les mots de l'écran de réglage du dépistage
 
-> **Écrite le 10 septembre 2026 au soir par Cowork, sur un arbitrage de Grégoire du même soir.**
-> Elle remplace la carte des effets, **livrée** et archivée à côté sous
-> `_ancienne-CONSIGNE-DU-JOUR-2026-09-10-carte-des-effets.md` — **commets l'archivage avec ton
-> premier commit.**
+> **Écrite le 11 septembre 2026 à 6 h 25 (Toronto, `TZ=America/Toronto date`) par Cowork, sur trois
+> arbitrages de Grégoire pris entre 6 h 10 et 6 h 25, à froid.** Application au moment de l'écriture : **`1.129.0`**, build
+> `0910-1645`, `main` = `origin/main` = `c5ffc520`.
+> Elle remplace la consigne d'hier (trois réglages morts, livrée en `1.129.0`), archivée à côté sous
+> `_ancienne-CONSIGNE-DU-JOUR-2026-09-10-trois-reglages-morts.md`.
 >
 > **Remesure avant d'exécuter** : `git --no-optional-locks log --oneline -5`, `cat version.json`,
-> `TZ=America/Toronto date`.
-> ⚠ **Une consigne peut se tromper : mesure, n'obéis pas.**
+> `TZ=America/Toronto date`. ⚠ **Une consigne peut se tromper : mesure, n'obéis pas.**
 >
-> **Préalable de lecture, et il fait autorité** : le **§ 4** de
-> `plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md` — la carte des effets.
-> **Ne la refais pas.** Elle nomme, pour chacun des vingt réglages, ce qu'il écrit et qui le lit.
+> **Préalable de lecture, et il fait autorité** : `plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md`,
+> § 2 et § 3 (les quatre arbitrages y sont écrits, datés, dans ses mots) et § 5 (les clés ne bougent pas).
+
+---
+
+## AVANT TOUT — un commit documentaire séparé
+
+Six fichiers de Cowork sont modifiés dans l'arbre, non commis (hier soir et ce matin) :
+`CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`, `OU-EN-EST-ON.md`, `plans de travail/00-CADRAGES-OUVERTS.md`,
+`plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md`,
+`plans de travail/PORTES-TERRAIN-2026-09-10-823.md` (relevée 12/12), et l'archivage de l'ancienne
+consigne. **Commets-les d'abord, seuls, en nommant les fichiers** (`git add` ciblé, jamais `-A`), avec la
+présente consigne. Puis le lot.
 
 ---
 
 ## POURQUOI
 
-La carte a montré que **quatre des vingt contrôles de `Labo › Outils d'observation` n'agissent nulle
-part** (`#823`). Un cinquième de la page. L'écran ne se contente pas d'être encombré : par endroits,
-il promet ce que le code ne fait pas.
+Le tri de l'écran `Labo › Outils d'observation` suit l'ordre arrêté par Grégoire : **les réglages morts
+(fait, 1.129.0), puis les mots, puis la forme, puis déplacer.** Ce lot est **les mots**. Tout ce qu'il
+touche est un libellé que ses collègues lisent ; il a arbitré chacun ce matin. **Rien ici n'est à
+décider : c'est à appliquer, et à mesurer.**
 
-▣ **Arbitrage de Grégoire, 10 septembre au soir** : « ok, retirer trois, brancher la fenêtre. »
-
-Le partage suit une différence d'état mesurée, pas une préférence : **chez trois d'entre eux il n'y a
-rien derrière ; chez le quatrième, tout fonctionne sauf un nom.**
-
----
-
-## LOT A — les trois qui s'en vont
-
-### 1. « Découpler Performance (P) et Niveau d'attention (N) »
-
-Écrit la préférence `decouplerPN`, que **personne ne lit** (le panneau qui l'écrit, et une table de
-migration). Son texte promet pourtant de séparer la note du dépistage.
-
-**Retirer** : la case et ses trois lignes d'explication dans `index.html` · sa lecture et son écriture
-dans `preferences-v2.js` · son entrée dans la table de correspondance de `preferences.js` · son défaut.
-
-### 2. « Unité d'affichage de l'assiduité (A) »
-
-Écrit `uniteAffichageAssiduite`, lue par deux fonctions de formatage de `preferences-v2.js`
-(`formaterAssiduiteAvecUnite`, `formaterTotalPresence`) qui **n'ont aucun appelant**.
-
-**Retirer** : le menu et son étiquette · la préférence · **et les deux formateurs**. ⛔ Zéro-dette
-(`CLAUDE.md`) : un chantier retire ce qu'il remplace. Laisser les formateurs, c'est laisser la moitié
-du problème.
-
-### 3. « Direction du risque »
-
-Le curseur écrit `seuilsInterpretation.directionRisque`, lu par `calculerDirectionRisque`, appelée
-**une** fois par `genererSectionAccompagnement`, qui range le résultat dans une variable que rien ne
-lit.
-
-**Retirer** : le curseur et ses libellés · la clé du modèle de `interpretation-config.js` ·
-`calculerDirectionRisque` · la variable morte de `genererSectionAccompagnement` · et ce que la chaîne
-laisse derrière (`extraireScoresCriteres`, **seulement si elle n'a plus d'autre appelant** — mesure-le).
-
-▣ **Deuxième motif, et il est de Grégoire** : « risque » est proscrit par `docs/adr/007-vocabulaire-descriptif.md`.
-Ce retrait retire aussi le mot.
-
-⚠ **La ligne « Variation minimale pour afficher une tendance du risque (→ ou ←) » disparaît avec le
-curseur.** Vérifie qu'aucun autre texte de l'écran n'y renvoie.
+⛔ **Libellés seulement.** Aucune clé de données ne change (`idme.insuffisant`, `interpretation.excellent`,
+identifiants DOM, clés de préférences) : les utilisateurs en ont dans leur stockage, et « tarir n'est pas
+réparer ». Aucune écriture dans les données de personne.
 
 ---
 
-## LOT B — la fenêtre se rebranche
+## LOT A — l'échelle IDME, quatre lettres, partout
 
-**L'état mesuré** : le champ « dernières productions » écrit la préférence `fenetrePatterns`. Les
-**douze** calculs lisent `seuilsInterpretation.nombreProductionsAnalyse`
-(`obtenirNombreProductionsPourPatterns`, `profil-etudiant-helpers.js:426`), que **rien n'écrit** — sa
-seule occurrence dans le code est sa valeur par défaut. ⮕ **La fenêtre vaut 3 quoi qu'on tape.**
+**Arbitrage (vers 6 h 15)** : **I — Incomplet · D — Développement · M — Maîtrise · E — Étendu.**
+« Insuffisant » et « Excellent » disparaissent des libellés IDME ; l'infobulle cesse d'hésiter
+(« Insuffisant ou incomplet » → « Incomplet »).
 
-**Le mécanisme qui manque existe déjà et fonctionne** : `sauvegarderSeuilsV2()` (`preferences-v2.js:333`)
-écrit directement dans `seuilsInterpretation`, et c'est lui qui sauvegarde les trois champs
-Fragile / Acceptable / Bon du même écran. Il suffit d'y faire passer une valeur de plus.
+**Les trois endroits mesurés par le cadrage** : `accompagnement-contenu-hover.js:338` (infobulle),
+`guides-pedagogiques.js:50` (guide), `index.html:8972` (écran de réglage). **Il y en a d'autres** :
+`grep -c -E "Insuffisant|Excellent" js/*.js index.html` rend ~100 occurrences dans 21 fichiers — témoin :
+`Étendu` en rend 9 dans `index.html`.
 
-**À faire** :
-1. `sauvegarderSeuilsV2()` écrit aussi `nombreProductionsAnalyse` depuis le champ.
-2. L'initialisation du panneau lit la valeur depuis `seuilsInterpretation`, plus depuis la préférence.
-3. **Retirer `fenetrePatterns`** — préférence, défaut, entrée de la table de correspondance. Zéro-dette :
-   c'est l'ancien système, il ne reste pas « au cas où ».
-4. Le bouton « Restaurer les valeurs par défaut » du bloc SOLO remet 3 **dans la bonne clé**.
+⮕ **La règle de tri, à appliquer occurrence par occurrence** : *est-ce le nom d'un niveau IDME, affiché
+ou lu comme tel ?*
+- **Oui** → renommer.
+- **Non** → ne pas toucher, et lister dans le rapport. Trois familles à laisser : (a) les **noms de
+  niveaux d'une échelle** (gabarits d'`echelles.js`, `pack-demo-20.js`) — ce sont les mots d'une échelle,
+  ils voyagent, et un gabarit renommé n'est plus le même gabarit ; (b) les **clés de données** et noms de
+  zones (`interpretation.excellent`, `idme.insuffisant`…) ; (c) tout mot « excellent » ou « insuffisant »
+  qui n'est pas un palier IDME (prose ordinaire).
+- **Doute** → ne renomme pas, liste-le pour Grégoire. Un libellé renommé par erreur se voit ; un libellé
+  laissé se corrige en dix secondes.
 
-### ⛔ CE QUI NE SE FAIT PAS — la valeur déjà stockée chez les gens
+⚠ Le § 2 du cadrage note que le glissement a touché **les deux extrémités** de l'échelle. Vérifie aussi
+que le **D** et le **M** sont bien « Développement » et « Maîtrise » partout (pas « En développement »,
+« Maîtrisé », etc.) — mesure, ne suppose pas.
 
-Des utilisateurs ont `fenetrePatterns` à 4 ou 5 dans leurs préférences. **Ne la migre pas vers
-`nombreProductionsAnalyse`.**
+## LOT B — le bloc « Seuils d'interprétation » dit ce que ses champs font
 
-▣ **Décision de Cowork, motivée, et Grégoire peut la renverser** : cette valeur n'a **jamais** eu
-d'effet. La migrer donnerait rétroactivement un effet à un réglage qu'un enseignant croyait actif il y
-a des mois, et changerait ses profils sans qu'il ait rien demandé. Repartir du défaut 3 — l'état réel
-d'aujourd'hui — est le seul choix qui ne surprend personne. Qui veut 5 le retape, et cette fois ça
-marchera.
+**Arbitrage (vers 6 h 20)** : le texte du bloc cesse d'annoncer l'IDME. Texte retenu, mot pour mot :
 
-⛔ Plus largement : **aucune écriture dans les données de personne.** Les clés `decouplerPN`,
-`uniteAffichageAssiduite`, `directionRisque` et `fenetrePatterns` resteront orphelines dans les
-préférences des utilisateurs. **C'est voulu** — « tarir n'est pas réparer », et nettoyer le stock de
-quelqu'un remonte à Grégoire (`CLAUDE.md`). Écris-le dans le rapport de session plutôt que de le faire.
+> Ces trois seuils colorent les colonnes Assiduité, Complétion, Performance et Mobilisation de la liste
+> des élèves, et qualifient l'engagement dans le profil. Ils ne touchent ni la note ni l'échelle IDME.
+
+⛔ **Fragile / Acceptable / Bon ne bougent pas** — noms de zones, ils attendent l'orthopédagogue (`#821`).
+Le bloc porte-t-il d'autres phrases qui mentionnent l'IDME ? Mesure ; si oui, elles tombent sous le même
+arbitrage (le bloc ne parle plus d'IDME).
+
+## LOT C — deux textes faux et « cueillette »
+
+**Arbitrage (vers 6 h 25)** :
+1. Aide d'« Indicateurs visuels des seuils » (`index.html`, ~l. 8947) → « Lignes pointillées et
+   étiquettes des niveaux de ton échelle sur les graphiques de progression du profil individuel. »
+   (Mesuré : le plugin trace `genererZonesDepuisEchelle()` → `obtenirEchelleUtilisateur()`, pas l'IDME.)
+2. Infobulle du repère « note différée » (`preferences.js:592`) → « Note différée : la rétroaction passe
+   d'abord. Réglage dans Labo › Outils d'observation. » ⚠ Deux entrées de
+   `accompagnement-contenu-terme.js` (l. 428, 437) disent aussi `voir: 'Réglages > Préférences'` :
+   mesure si elles désignent ce même réglage ; si oui, même correction.
+3. « cueillette » → « collecte », aux deux endroits de l'écran (`index.html`, ~l. 8744 et ~l. 8925).
+   Mesure s'il en reste ailleurs dans l'application ; si oui, liste-les, ne les change pas (hors écran).
 
 ---
 
 ## CE QUI CHANGE À L'ÉCRAN — et qui doit être dit
 
-Contrairement aux deux lots précédents, **celui-ci se voit** : trois contrôles disparaissent de
-`Labo › Outils d'observation`, et un quatrième se met à fonctionner.
+Des mots, seulement des mots. **Aucun calcul, aucune couleur, aucune borne ne bouge** : si un test de
+comportement change de résultat, c'est un défaut. Ce lot se vérifie par la lecture.
 
-⚠ **Conséquence à assumer, arbitrée par Grégoire** : aujourd'hui les analyses portent sur trois
-productions quelle que soit la valeur affichée. Après ce lot, la valeur du champ s'applique vraiment.
-**Un profil peut changer d'aspect** — aucune donnée n'est touchée, seulement la lecture qu'on en fait.
+⮕ **Release `patch`.** ⮕ **Entrée de changelog obligatoire** (skill `release-et-changelog`), en langue
+d'utilisateur : l'échelle IDME dit les mêmes quatre mots partout (Incomplet, Développement, Maîtrise,
+Étendu) ; le bloc des seuils dit ce qu'il règle ; deux aides corrigées.
 
-⮕ **Release `minor`, pas `patch`** : un réglage change de comportement et trois disparaissent.
-⮕ **Entrée de changelog obligatoire**, skill `release-et-changelog`. Elle dit deux choses en langue
-d'utilisateur : trois réglages qui ne faisaient rien ont été retirés ; la fenêtre d'analyse, elle,
-fonctionne maintenant — et si tu y avais mis une valeur, elle est repartie à trois.
-
-⮕ **Porte terrain DUE** — l'écran change (skill `portes-terrain`, règle 1 : une machine ne peut pas
-répondre à « est-ce que ça a l'air bien »). Markdown à toi, artefact à Cowork. Quatre portes, pas plus :
-les trois blocs ont bien disparu sans laisser de trou ni de titre orphelin · le bloc « Paramètres
-avancés » se replie et se déplie encore · une valeur tapée dans la fenêtre survit à un rechargement ·
-et elle atteint vraiment un profil (change-la, rouvre un profil, l'analyse porte sur ce nombre).
-⚠ Sur `https://app.codexnumeris.org`, **pas** le fichier local.
+⮕ **Porte terrain DUE, une seule, trois rangées** (skill `portes-terrain` ; markdown à toi, artefact à
+Cowork) : sur `https://app.codexnumeris.org`, dans `Labo › Outils d'observation` — (1) les quatre lettres
+IDME se lisent Incomplet / Développement / Maîtrise / Étendu, et l'infobulle aussi ; (2) le bloc « Seuils
+d'interprétation » porte le texte retenu, sans « IDME » annoncé ailleurs ; (3) « collecte » aux deux
+endroits, et l'aide des indicateurs visuels parle de « ton échelle ». Pas de porte sur les graphiques :
+ils ne changent pas.
 
 ---
 
 ## CE QUI REMONTE À GRÉGOIRE
 
-1. **Si un des trois « morts » se révèle vivant** à la mesure, arrête et dis-le. La carte est solide,
-   mais elle a été écrite par la session qui l'a mesurée ; c'est exactement le cas où une relecture
-   croisée existe (`PROTOCOLE.md`, règle 2).
+1. **Tout libellé IDME dont tu doutes** (lot A) : liste-le, ne le renomme pas.
 2. **Rien d'autre.** Le reste est technique : tranche, puis dis-le en une ligne en nommant ce que tu as
    supposé.
 
-⛔ **Hors périmètre, et ce n'est pas un oubli** : la forme de l'écran (sa « cacophonie »), les deux
-nomenclatures du bloc « Seuils d'interprétation », les cinq chemins morts de `#824`, les trois défauts
-du lot B (« Assiduité critique » sous deux bornes, la borne à 60 %, le palier inatteignable), et le
-déplacement de l'écran vers `Suivi`. **Un lot, une livraison.**
+⛔ **Hors périmètre, et ce n'est pas un oubli** : la forme de l'écran (temps 4), le déplacement vers Suivi
+(temps 5), les cinq chemins morts (`#824`), les noms de zones et les bornes (`#821`, `#822`), le mot
+« risque » dans l'Aide (inscrit au cadrage, point 5). **Un lot, une livraison.**

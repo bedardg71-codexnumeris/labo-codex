@@ -144,8 +144,19 @@ l'onglet **Suivi** ensuite.
 affaire de mise en page. L'échelle IDME de Grégoire est écrite de **trois façons différentes** selon
 l'endroit, et le E — *Étendu* dans son cadre — devient **« Excellent »** sur l'écran de réglage. Deux
 lettres sur quatre ont glissé du descriptif vers l'évaluatif, contre l'`ADR-007`.
-⏸ **ATTEND la livraison de `CONSIGNE-DU-JOUR.md`** (source unique de qualification) : même terrain,
-mêmes seuils.
+↻ **10 septembre 2026, 18 h 10 (Cowork) — EN COURS, deux temps livrés sur cinq.** Préalable livré :
+la source unique de qualification (`1.128.4`, `js/contexte-qualification.js`). **Temps 1, la carte des
+effets** (§ 4 du cadrage, docs seulement) : vingt réglages, l'écran où chacun agit ; aucun n'agit sur
+une note. **Temps 2, le tri des réglages morts** (`1.129.0`, `#823`) : deux retirés, la fenêtre
+d'analyse rebranchée, « Direction du risque » gardé et renommé « Sensibilité des flèches par critère »
+(arbitrage de Grégoire, après que la relecture croisée eut trouvé le curseur vivant) ; **porte terrain
+relevée par lui, 12 sur 12**. Aucune donnée écrite chez personne, `fenetrePatterns` non migrée.
+⏳ **Ce qui reste, dans l'ordre qu'il a arrêté (trier, puis déplacer)** : (3) **les mots de l'écran** —
+l'IDME écrite de trois façons, les deux nomenclatures du bloc « Seuils d'interprétation », les deux
+textes faux et « cueillette » (`#823`) : **ses mots, son arbitrage** ; (4) **la forme** — une grammaire
+visuelle, un seul « Restaurer » : ce qu'il trouve « cacophonique », à lui ; (5) **déplacer ou scinder**
+vers Suivi, sa proposition, tranchée seulement après 3 et 4. À part, sans lui : les cinq chemins morts
+(`#824`). ⏸ Les bornes elles-mêmes et le nom des zones attendent l'orthopédagogue (`#821`, `#822`).
 ▣ **Ordre TRANCHÉ le 10 septembre par Grégoire** (« ta recommandation est bonne, suivons-la ») :
 **trier le contenu d'abord, déplacer ensuite.** Le déplacement de `Labo` vers `Suivi` reste **sa
 proposition**, à confirmer par la carte des effets — mesurer où chaque réglage produit un effet

@@ -32,9 +32,13 @@ second lecteur vivant. Sans la mesure préalable, les flèches auraient été fi
 personne le sache. C'est toi qui as tranché : garder et renommer.
 **Vérifié comment** : neuf essais qui EXÉCUTENT le panneau sur le vrai code des seuils et prouvent
 que la valeur tapée arrive à la fonction que les douze calculs appellent ; neuf ablations, neuf
-rouges, arbre restauré par empreinte ; Vitest 531 fichiers / 5793 essais. **Pas vérifié** : l'écran
-lui-même — quatre portes t'attendent (`plans de travail/PORTES-TERRAIN-2026-09-10-823.md`), l'artefact
-revient à Cowork. (`#823`)
+rouges, arbre restauré par empreinte ; Vitest 531 fichiers / 5793 essais.
+✅ **VU À L'ÉCRAN PAR GRÉGOIRE — porte terrain relevée le 10 septembre à 18 h 00, 12 sur 12, zéro
+échec** (`plans de travail/PORTES-TERRAIN-2026-09-10-823.md`), sur `app.codexnumeris.org` : les deux
+blocs partis sans trou ni titre orphelin, le curseur sous son nouveau nom et sa nouvelle aide, la
+fenêtre qui survit au rechargement et qui atteint le profil (à 12, plus aucune flèche ; à 3, elles
+reviennent). ⏳ **Reste de ce chantier** : les deux textes de l'écran qui promettent ce que le code ne
+fait pas, et le mot « cueillette » — ce sont tes mots, ils attendent ton tri. (`#823`)
 
 ↻ **1.128.4 — LES QUATRE RÈGLES QUI QUALIFIENT UN CONTEXTE SONT ÉCRITES AU MÊME ENDROIT** (build `0910-1531`).
 **Ce que tu verras : rien.** Pas un mot, pas une borne, pas une couleur n'a bougé — c'est le

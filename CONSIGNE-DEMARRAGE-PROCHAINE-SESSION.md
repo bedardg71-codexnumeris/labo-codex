@@ -1,7 +1,11 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
-> ↻ **ÉTAT MESURÉ remesuré le 10 septembre 2026 en fin de soirée par Claude Code** (le MANDAT, lui,
-> reste tel que Cowork l'a repris en fin d'après-midi — voir la note en tête de sa section).
+> ↻ **MANDAT réécrit par Cowork le 10 septembre 2026 à 18 h 15 (Toronto), après la relève de la porte
+> terrain de `1.129.0`.** L'ÉTAT MESURÉ ci-dessous date de la clôture de `1.128.4` par Claude Code, en
+> fin d'après-midi — son en-tête dit « fin de soirée », mais le commit qui le porte est de **15 h 33,
+> heure de Toronto** (`git log --format=%ci -1 aeaca09a`) ; l'écart de quatre heures est celui d'une
+> horloge UTC, c'est une inférence, pas une mesure. **Il est périmé d'une version** ; la note en tête
+> du mandat dit ce qui a changé.
 > Version précédente de cet en-tête : **ÉTAT MESURÉ et MANDAT réécrits le 10 septembre 2026, en début d'après-midi, par Claude Code**,
 > à la demande explicite de Grégoire. Ils remplacent la version du 9 au soir, périmée de six versions
 > mineures, **et dont les deux fichiers du mandat étaient entièrement consommés**.
@@ -71,36 +75,41 @@ affirmation fausse que la mesure a corrigée AVANT d'écrire. Une consigne est u
 
 ---
 
-## LE MANDAT — repris par Cowork le 10 septembre en fin d'après-midi
+## LE MANDAT — écrit par Cowork le 10 septembre 2026 à 18 h 15 (Toronto), à froid, après la relève
 
-⏸ **CE MANDAT EST CONSOMMÉ** (note d'état, Claude Code, 10 sept. fin de soirée) : le lot A qu'il
-annonce est livré en `1.128.4`, et la consigne suivante (la carte des effets de l'écran de réglage du
-dépistage) est livrée aussi, le même soir. **Cowork écrit le mandat suivant** ; les cadrages ouverts
-sont dans `plans de travail/00-CADRAGES-OUVERTS.md`, et le cadrage 10 attend l'arbitrage de Grégoire
-sur la forme (déplacer, scinder, ou garder dans Labo) — les faits sont au § 4 du cadrage.
+> ⚠ **Ce qui précède ce titre (l'ÉTAT MESURÉ) date de la clôture de `1.128.4` ; `1.129.0` est sortie
+> depuis** (`cat version.json` rend `1.129.0`, build `0910-1645` ; `git log --oneline -1` rend
+> `c5ffc520`, poussé, `origin/main` à égalité). **Remesure, ne recopie pas.**
 
-↻ **La proposition de Claude Code a été reprise à froid, comme son en-tête y invitait.** Ses temps 1
-(inventaire) et 2 (archéologie) sont **faits** — résultats dans
-`Rapports/INVENTAIRE-2026-09-10-nomenclature-des-zones.md`. Son temps 4 est **tranché par Grégoire**.
-Deux de ses affirmations étaient fausses et sont corrigées dans le rapport (« dix fichiers » : 27
-bruts, 13 dans le périmètre ; « zéro occurrence dans `bilan*.js` » : il y en a dix — la conclusion
-tient, mais pour une autre raison).
+**Où en est le chantier du dépistage** (cadrage 10, `plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md`) :
+l'écran `Labo › Outils d'observation` a livré ses deux premiers temps — la carte des effets (§ 4) et le
+tri des réglages morts (`#823`, `1.129.0`, **porte terrain relevée par Grégoire 12/12 à 18 h**). Ordre
+qu'il a arrêté : **trier le contenu, puis déplacer.** Il reste trois temps, et **aucun n'est une
+consigne** : Cowork en écrit une avant qu'on y touche.
 
-**Ce que l'inventaire a trouvé et qu'aucune fiche ne portait** : le mot « Favorable » a **trois
-définitions** dans l'app, et « Fragile » aussi. Un étudiant à A = 80 %, C = 80 % est « Favorable » et
-« Acceptable » sur le même écran.
+**Le prochain lot, recommandé par Cowork — les MOTS de l'écran (temps 3).** Tout ce qui reste à trier
+sur cet écran est un mot que ses collègues lisent : l'IDME écrite de trois façons (« Excellent » pour
+le E, qui est *Étendu* ; « Insuffisant » pour le I — cadrage § 2), les deux nomenclatures du même
+encadré « Seuils d'interprétation » (§ 3), les deux textes qui promettent ce que le code ne fait pas et
+le mot « cueillette » (`#823`, ce qui en reste). ⛔ **Rien ne se code avant son arbitrage** : ce sont
+ses mots et son cadre (`CLAUDE.md`, ce qui remonte à lui, point 3). **La séance commence donc par ses
+décisions, à froid, pas par du code** — et, une fois arrêtées, le lot est une consigne d'étiquettes :
+**les clés de données ne bougent pas** (cadrage § 5, « tarir n'est pas réparer »), seuls les libellés.
+Motif de l'ordre : la forme (temps 4) alignerait des mots qui se contredisent ; le déplacement (temps 5)
+importerait la cacophonie dans Suivi. Les mots d'abord.
 
-▣ **Arbitrage de Grégoire, 10 septembre** : « Peu importe le chiffre, cette incohérence est à
-corriger. Il faut unifier les définitions. » ⮕ Le renommage, lui, **attend le travail d'automne avec
-l'orthopédagogue** (`#821`).
+**Si Grégoire n'a pas le temps de trancher des mots** : le lot `#824` (cinq chemins morts lus par des
+seuils, cadrage § 4.3) se fait **sans lui** — technique, invisible à l'écran, avec le regard de `#551`.
+Cowork écrit la consigne ; Claude Code mesure chaque appelant avant de retirer (la leçon du 10 : un
+« mort » sur quatre était vivant).
 
-⮕ **`plans de travail/CONSIGNE-DU-JOUR.md`** porte le chantier : un seul ENDROIT où les quatre règles
-sont écrites, **pas** une seule règle. Livrable invisible à l'écran ; si un pixel bouge, c'est un
-défaut.
+**Ce qui ne se rouvre pas** : les bornes (0,64 / 0,75 / 0,85 · 65 / 70 / 75 · 70 %) et le nom des zones
+(`#821`, `#822`) — dossier prêt pour l'orthopédagogue au § 8 de
+`Rapports/INVENTAIRE-2026-09-10-nomenclature-des-zones.md` et au § 4 du cadrage. La valeur
+`fenetrePatterns` stockée chez les gens **n'est pas migrée** (décision de Cowork tenue par Grégoire).
 
 **Si Grégoire veut autre chose** : un retour de testeur passe avant (`CLAUDE.md`, priorité absolue).
-Sinon, les cadrages ouverts sont dans `plans de travail/00-CADRAGES-OUVERTS.md` — aucun n'est une
-consigne ; **Cowork en écrit une avant qu'on y touche.**
+Sinon, les cadrages ouverts sont dans `plans de travail/00-CADRAGES-OUVERTS.md`.
 
 ⏸ **Deux points restent dus à l'écran avant la CoP du 14**, qu'aucune session ne peut faire : la
 carte « Prendre en main l'application » (hauteur d'accordéon) et **la visite guidée de bout en bout**,
