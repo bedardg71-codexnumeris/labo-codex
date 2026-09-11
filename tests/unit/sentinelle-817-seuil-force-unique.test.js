@@ -82,7 +82,9 @@ function corpsDeLaFonction(code, nom) {
     return code.slice(debut, fin);
 }
 
-const DIAGNOSTICS = 'js/profil-etudiant-diagnostics.js';
+// ↻ #824 (11 sept. 2026) : la seconde copie du seuil vivait dans `genererDiagnosticSRPNF`
+// (`js/profil-etudiant-diagnostics.js`), un chemin MORT — aucun appelant, jamais affiché.
+// Retirée avec lui ; ce banc ne garde que la copie VIVANTE, celle des badges du profil.
 const BADGES = 'js/profil-etudiant-sections-affichage.js';
 
 describe('#817 · le seuil force/défi n\'a qu\'une source, et la couleur ne peut pas le contredire', () => {
@@ -104,7 +106,6 @@ describe('#817 · le seuil force/défi n\'a qu\'une source, et la couleur ne peu
 
     it('3. une SEULE branche rend le vert dans chaque fonction de couleur, et c\'est celle du seuil', () => {
         const cas = [
-            { fichier: DIAGNOSTICS, fonction: 'obtenirCouleurScore' },
             { fichier: BADGES, fonction: 'obtenirCouleurBadge' }
         ];
         for (const { fichier, fonction } of cas) {
@@ -122,31 +123,21 @@ describe('#817 · le seuil force/défi n\'a qu\'une source, et la couleur ne peu
     });
 
     it('4. « Force » et « Défi » se départagent au même seuil, lu dans la source', () => {
-        const code = lireCode(DIAGNOSTICS);
-        expect(
-            code,
-            'le seuil de force ne vient plus d\'`obtenirSeuil(\'defiSpecifique\')`'
-        ).toMatch(/const\s+seuilForce\s*=\s*obtenirSeuil\(\s*['"]defiSpecifique['"]\s*\)/);
-        expect(code, '`estForce` ne se compare plus au seuil').toMatch(/const\s+estForce\s*=\s*score\s*>=\s*seuilForce\s*;/);
-        expect(code, '`estDefi` ne se compare plus au MÊME seuil — la symétrie décrite par l\'Aide est rompue')
-            .toMatch(/const\s+estDefi\s*=\s*score\s*<\s*seuilForce\s*;/);
         expect(
             lireCode(BADGES),
             'les badges de critères ne lisent plus la source'
         ).toMatch(/const\s+seuilForce\s*=\s*obtenirSeuil\(\s*['"]defiSpecifique['"]\s*\)/);
     });
 
-    it('5. le libellé affiché DÉRIVE du seuil au lieu de le recopier', () => {
-        const code = lireCode(DIAGNOSTICS);
-        const titre = code.match(/Diagnostic par critère \(seuil force[^\n]*/);
-        expect(titre, 'le titre du diagnostic par critère a disparu').not.toBeNull();
-        expect(
-            titre[0],
-            'le titre recopie un nombre au lieu de le calculer — c\'est exactement ce qui affichait « 0.7125 » à l\'écran'
-        ).toContain('${Math.round(seuilForce * 100)}');
-        expect(
-            /:\s*&nbsp;?\s*[0-9]/.test(titre[0]),
-            'un pourcentage en dur est revenu dans le titre'
-        ).toBe(false);
+    it('5. aucun libellé « seuil force : N % » ne recopie un nombre en dur — le titre du diagnostic par critère, jamais affiché, est parti avec #824', () => {
+        for (const fichier of listerJs(path.join(racine, 'js'))) {
+            const code = sansCommentaires(readFileSync(fichier, 'utf8'));
+            for (const m of code.matchAll(/seuil force[^\n]*/g)) {
+                expect(
+                    /:\s*&nbsp;?\s*[0-9]/.test(m[0]),
+                    `${path.relative(racine, fichier)} : un pourcentage en dur dans « ${m[0].slice(0, 40)} »`
+                ).toBe(false);
+            }
+        }
     });
 });

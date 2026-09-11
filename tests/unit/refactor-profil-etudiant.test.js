@@ -189,10 +189,9 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
             'determinerAlerteContextuelle',
             'determinerCibleIntervention',
             // calculerDirectionsCriteres : reste dans le résidu (zone Sections affichage L2517-2724)
-            // Zone Diagnostics — 11 exports (session B 18 mai 2026 : tous promus window.X)
-            'genererDiagnosticCriteres',
-            'genererDiagnosticSRPNF',
-            'genererDiagnosticGenerique',
+            // Zone Diagnostics — 8 exports (session B 18 mai 2026 : tous promus window.X ;
+            // #824, 11 sept. 2026 : `genererDiagnosticCriteres` / `SRPNF` / `Generique` retirées,
+            // aucun appelant — voir le commentaire de retrait dans `js/profil-etudiant-diagnostics.js`)
             '_genererBarresSRPNF',
             'genererBlocProfilRLO',
             'genererConteneurGestesCognitifs',
