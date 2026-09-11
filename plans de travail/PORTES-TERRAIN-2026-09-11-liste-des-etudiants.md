@@ -7,6 +7,11 @@
 > **aucune porte** : invisible, mesuré par la sentinelle du lot et la suite complète.
 >
 > **Ce qui échoue ici devient un item de backlog, avec son numéro de porte.** Jamais une note mentale.
+>
+> ✅ **RELEVÉE le 11 septembre 2026 à 17 h 03 (Toronto) — 10 sur 10, zéro échec**, version `1.132.0` lue en bas de page, **y compris
+> la rangée 2.7a sur un vrai élève en abandon** d'un de ses groupes (grisé, statut affiché, moyennes inchangées). Les deux textes du § 3 :
+> tel quel. Artefact « Portes terrain de la Liste des étudiant·es » publié par Cowork à 15 h 58 ; relevé collé dans la conversation
+> Cowork. Noté par Cowork à 17 h 04.
 
 **Pourquoi cette liste est courte.** Sept rangées, fixées par la consigne. Le piège du lot (un abandon rendu sans que les
 moyennes ne bougent) est prouvé au banc, six fois cassé exprès. Reste ce que seul ton écran tranche : tes groupes réels,

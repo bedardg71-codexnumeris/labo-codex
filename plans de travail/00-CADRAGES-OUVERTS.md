@@ -167,7 +167,8 @@ sur ses deux groupes réels. `#828` inscrit (filtre M, lot 7). **Lot 2 suivant :
 livrées, #767-#772 ; 35 « inscrire » sans symptôme vécu = réservoir, pas backlog) ; « SRPNF » n'est un titre nulle part dans Suivi
 (un seul mot égaré, une notification de l'onglet Évaluation, § 6). Proposition : les cinq temps du réglage, appliqués aux trois
 sous-onglets qui lisent le dépistage. **Tranché par Grégoire à 12 h 31 : « tout l'onglet, 35 constats de l'audit » (option B).** Sept lots, un par sous-onglet dans l'ordre de l'audit puis un transversal (§ 7 du cadrage).
-✅ **Lot 1, Suivi du groupe — LIVRÉ en `1.131.0` (`2a89aaaf`, #749 clos) et VU : porte relevée 10/10 à 14 h 14 sur ses deux groupes réels** (la liste suivie survit à la bascule). Lot 2 suivant : la Liste des étudiant·es — consigne à écrire par Cowork. (noté à 14 h 15)
+✅ **Lot 1, Suivi du groupe — LIVRÉ en `1.131.0` (`2a89aaaf`, #749 clos) et VU : porte relevée 10/10 à 14 h 14 sur ses deux groupes réels** (la liste suivie survit à la bascule). 
+✅ **Lot 2, Liste des étudiant·es — LIVRÉ en `1.132.0` et VU : porte relevée 10/10 à 17 h 03, dont un vrai abandon grisé** (sa décision de 14 h 17). Lot 3 suivant : la Saisie des présences — consigne à écrire par Cowork. (noté à 17 h 04) (noté à 14 h 15)
 ✅ **11 septembre 2026, 11 h 22 (Cowork) — L'ÉCRAN DE RÉGLAGE EST FINI : cinq temps livrés et VUS** (temps 5 :
 `1.130.1`, deux liens depuis Suivi, porte 4/4, libellé « Régler » gardé ; `#824` clos dans la même version). **Cette entrée
 reste ouverte pour la seconde moitié du dossier, l'onglet Suivi** — rien de cadré ; Cowork écrit un cadrage avant toute

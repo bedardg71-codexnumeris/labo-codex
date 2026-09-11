@@ -1,8 +1,8 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
 > ↻ **ÉTAT MESURÉ remesuré par Claude Code le 11 septembre 2026 à 16 h 30 (Toronto), à la clôture de
-> `1.132.0` (lot 2 du cadrage 11, la Liste des étudiant·es).** Le lot 3 (la Saisie des présences) attend
-> sa consigne de Cowork.
+> `1.132.0` (lot 2 du cadrage 11, la Liste des étudiant·es).** **MANDAT réécrit par Cowork à 17 h 08** pour une session
+> neuve : le lot 3 (la Saisie des présences) a sa consigne dans `plans de travail/CONSIGNE-DU-JOUR.md`.
 > Version précédente : **ÉTAT MESURÉ réécrit par Claude Code le 11 septembre 2026 à midi (Toronto), à la clôture de
 > `1.130.2` (#825 temps 1).** Le MANDAT ci-dessous reste celui de Cowork du 10 au soir : ses deux
 > premiers points (écran de réglage, #824) sont **consommés** ; `#825` est livré en temps 1, jugé par sa
@@ -96,47 +96,50 @@ pas un fait.
 
 ---
 
-## LE MANDAT — écrit par Cowork le 10 septembre 2026 à 18 h 15 (Toronto), à froid, après la relève
+## LE MANDAT — réécrit par Cowork le 11 septembre 2026 à 17 h 08 (Toronto), à froid, pour une session Claude Code NEUVE
 
-> ⚠ **Ce qui précède ce titre (l'ÉTAT MESURÉ) date de la clôture de `1.128.4` ; `1.129.0` est sortie
-> depuis** (`cat version.json` rend `1.129.0`, build `0910-1645` ; `git log --oneline -1` rend
-> `c5ffc520`, poussé, `origin/main` à égalité). **Remesure, ne recopie pas.**
+> ⚠ **La session Claude Code du 11 a été compactée : tu es une instance neuve.** L'ÉTAT MESURÉ ci-dessus date de 16 h 30
+> (clôture de `1.132.0`) ; depuis, seul un commit de test (`8a6ddc92`) et des documents de Cowork. **Remesure, ne recopie pas.**
+> La version précédente de ce mandat (10 sept., 18 h 15 : « les mots de l'écran de réglage ») est **entièrement consommée** :
+> l'écran de réglage du dépistage est FINI (cinq temps, cinq portes relevées), `#824` et `#825` sont livrés.
 
-**Où en est le chantier du dépistage** (cadrage 10, `plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md`) :
-l'écran `Labo › Outils d'observation` a livré ses deux premiers temps — la carte des effets (§ 4) et le
-tri des réglages morts (`#823`, `1.129.0`, **porte terrain relevée par Grégoire 12/12 à 18 h**). Ordre
-qu'il a arrêté : **trier le contenu, puis déplacer.** Il reste trois temps, et **aucun n'est une
-consigne** : Cowork en écrit une avant qu'on y touche.
+**Où on en est** : le dossier « dépistage » a deux moitiés. La première, l'écran de réglage (`Labo › Outils d'observation`), est
+**finie et vue** (1.129.1 → 1.130.1, cadrage 10). La seconde, **l'onglet Suivi**, est cadrée (`plans de travail/CADRAGE-2026-09-11-onglet-suivi-lecture-du-depistage.md`,
+§ 7) sur la décision de Grégoire du 11 à 12 h 31, dans ses mots : *« tout l'onglet, 35 constats de l'audit »* — les 35 « inscrire »
+du quatrième audit (`Rapports/AUDIT-sous-onglets-suivi-2026-09-06.md`) entrent dans le chantier, **sept lots, un par sous-onglet dans
+l'ordre de l'audit puis un transversal, un lot par séance, sa porte relevée avant le suivant.**
 
-**Le prochain lot, recommandé par Cowork — les MOTS de l'écran (temps 3).** Tout ce qui reste à trier
-sur cet écran est un mot que ses collègues lisent : l'IDME écrite de trois façons (« Excellent » pour
-le E, qui est *Étendu* ; « Insuffisant » pour le I — cadrage § 2), les deux nomenclatures du même
-encadré « Seuils d'interprétation » (§ 3), les deux textes qui promettent ce que le code ne fait pas et
-le mot « cueillette » (`#823`, ce qui en reste). ⛔ **Rien ne se code avant son arbitrage** : ce sont
-ses mots et son cadre (`CLAUDE.md`, ce qui remonte à lui, point 3). **La séance commence donc par ses
-décisions, à froid, pas par du code** — et, une fois arrêtées, le lot est une consigne d'étiquettes :
-**les clés de données ne bougent pas** (cadrage § 5, « tarir n'est pas réparer »), seuls les libellés.
-Motif de l'ordre : la forme (temps 4) alignerait des mots qui se contredisent ; le déplacement (temps 5)
-importerait la cacophonie dans Suivi. Les mots d'abord.
+| Lot | Sous-onglet | État |
+|---|---|---|
+| 1 | Suivi du groupe | **livré `1.131.0`, vu** (porte 10/10 sur ses deux groupes réels, `#749` clos) |
+| 2 | Liste des étudiant·es | **livré `1.132.0`, vu** (porte 10/10, dont un vrai abandon grisé — sa décision de 14 h 17) |
+| **3** | **Saisie des présences** | **consigne écrite à froid** : `plans de travail/CONSIGNE-DU-JOUR.md` — c'est ton lot |
+| 4 | Profils individuels | à cadrer par Cowork (P-1 à P-6 ; une question didactique : les échelles non convertibles dans les graphiques) |
+| 5 | Interventions | à cadrer (I-1, I-5, I-6, I-7, code mort) |
+| 6 | Animation | à cadrer (ce qui est projeté aux élèves : à Grégoire) |
+| 7 | Transversal | 58 cibles tactiles sur maquette validée ; 12 clés nues, une par une |
 
-**Si Grégoire n'a pas le temps de trancher des mots** : le lot `#824` (cinq chemins morts lus par des
-seuils, cadrage § 4.3) se fait **sans lui** — technique, invisible à l'écran, avec le regard de `#551`.
-Cowork écrit la consigne ; Claude Code mesure chaque appelant avant de retirer (la leçon du 10 : un
-« mort » sur quatre était vivant).
+**Ce que la journée du 11 a appris, à ne pas réapprendre** :
+- **Le lot est fini quand Grégoire l'a VU** — six versions le 11, six portes relevées par lui avant la suivante. Il a levé lui-même
+  sa règle « une livraison par séance » pour les queues de lot ; il regarde avant, c'est ça qui compte.
+- **Un mot proposé sans réponse vaut « tel quel »** (sa règle du 11) : Cowork propose les textes dans la conversation, « à corriger si
+  tu veux, sinon c'est ceux-là » ; s'il ne répond pas, ils partent tels quels et la porte le note.
+- **Une clé nue passe par trimestre ET groupe-cours avec un SEMIS lu une fois, jamais réécrit** (patron `cleEtudiantsSuivis`, lot 1) —
+  rien n'est détruit chez personne ; l'orpheline s'inscrit dans `diagnostic-353`.
+- **L'audit du 6 a cinq jours et une soixantaine de commits de retard** : chaque constat se remesure avant d'être corrigé ; un constat
+  périmé se dit périmé (G-7 l'était), pas corrigé.
+- **La relecture adverse a fait reprendre un point par lot** (le semis à deux clés, l'abandon grisé par son statut) : elle n'est pas
+  un rituel, elle trouve.
 
-**Ce qui ne se rouvre pas** : les bornes (0,64 / 0,75 / 0,85 · 65 / 70 / 75 · 70 %) et le nom des zones
-(`#821`, `#822`) — dossier prêt pour l'orthopédagogue au § 8 de
-`Rapports/INVENTAIRE-2026-09-10-nomenclature-des-zones.md` et au § 4 du cadrage. La valeur
-`fenetrePatterns` stockée chez les gens **n'est pas migrée** (décision de Cowork tenue par Grégoire).
+**Si Grégoire veut autre chose** : un retour de testeur passe avant (`CLAUDE.md`). Le chargement lent (`#825`) est **clos en temps 1** ;
+sa cause de 30-45 s n'est pas établie et se saisit à la reproduction (barre longue du Network), pas avant.
 
-**Si Grégoire veut autre chose** : un retour de testeur passe avant (`CLAUDE.md`, priorité absolue).
-Sinon, les cadrages ouverts sont dans `plans de travail/00-CADRAGES-OUVERTS.md`.
+**Ce qui ne se rouvre pas** : les bornes et les noms des zones (`#821`, `#822`, dossier prêt pour l'orthopédagogue) ; les vingt règles
+de l'audit 3 (`#735`-`#754`, après le 14) ; la chaîne des indices (jugée le 5).
 
-⏸ **Deux points restent dus à l'écran avant la CoP du 14**, qu'aucune session ne peut faire : la
-carte « Prendre en main l'application » (hauteur d'accordéon) et **la visite guidée de bout en bout**,
-dont le lot C de l'audit de l'Aide a changé le parcours. S'y ajoute, depuis le 10 : **la légende du
-tableau de bord porte maintenant des décimales** (« 47,5 % ») dans quatre colonnes serrées — c'est le
-premier endroit à regarder sur iPad.
+⏸ **Dû à l'écran par Grégoire avant le 14** (dans trois jours — il ne les a pas confirmés) : la carte « Prendre en main », la visite
+guidée de bout en bout, la légende à décimales du tableau de bord sur iPad. Et **recueillir ce qui sortira du 14** : personne ne l'a
+pris ; ne le code pas — un gabarit d'une demi-page, à froid, s'il le demande.
 
 ---
 
