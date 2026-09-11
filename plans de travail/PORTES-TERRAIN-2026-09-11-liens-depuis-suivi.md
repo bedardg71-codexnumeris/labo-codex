@@ -7,8 +7,10 @@
 >
 > **Ce qui échoue ici devient un item de backlog, avec son numéro de porte.** Jamais une note mentale.
 >
-> ⏳ **DUE.** Markdown écrit par Claude Code le 11 septembre vers 11 h 10 ; artefact jumeau (bouton
-> « Copier mes résultats ») à publier par Cowork.
+> ✅ **RELEVÉE le 11 septembre 2026 à 11 h 20 (Toronto) — 4 sur 4, zéro échec**, version `1.130.1` lue en bas de
+> page. Markdown écrit par Claude Code vers 11 h 10 ; artefact « Portes terrain des liens depuis Suivi » publié
+> par Cowork à 11 h 18 ; relevé collé par Grégoire dans la conversation Cowork. **Décision 3.1 : « Régler »** (11 h 25,
+> après clarification) — le lien garde « Régler les outils d'observation ». Rien à coder.
 
 **Pourquoi cette liste est courte.** Une porte, deux rangées, fixées par la consigne. Sous WebKit, le
 lien du Suivi du groupe a été cliqué : la sous-section « Outils d'observation » devient active, la page
@@ -53,7 +55,7 @@ deux liens se voient là où ils sont, et mènent au bon endroit sur le site en 
 
 | | Question | Ton verdict |
 |---|---|---|
-| **3.1** | **Les mots du lien.** « Régler les outils d'observation » est la proposition de Cowork, posée telle quelle. Le patron réutilisé (le bouton-lien de la note finale) dit, lui, « Réglages de la pratique » — un nom, pas un verbe. **Garder « Régler les outils d'observation », ou aligner sur le patron : « Réglages des outils d'observation » ?** | _______ |
+| **3.1** ✅ « Régler » (Grégoire, 11 h 22) — libellé gardé | **Les mots du lien.** « Régler les outils d'observation » est la proposition de Cowork, posée telle quelle. Le patron réutilisé (le bouton-lien de la note finale) dit, lui, « Réglages de la pratique » — un nom, pas un verbe. **Garder « Régler les outils d'observation », ou aligner sur le patron : « Réglages des outils d'observation » ?** | _______ |
 
 ---
 

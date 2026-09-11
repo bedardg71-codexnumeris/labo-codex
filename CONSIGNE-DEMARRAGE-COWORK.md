@@ -1,7 +1,8 @@
 # Consigne de démarrage — la session Cowork qui prend le relais
 
-> **Réécrite le 6 septembre 2026, 10 h 10 (Toronto), par la session Cowork du 6 au matin, après la mesure du PDF, quatre correctifs de
-> Grégoire (1.123.2 → 1.123.5) et le cadrage du quatrième audit (les six sous-onglets de Suivi).** **Elle REMPLACE toute version précédente.**
+> **Réécrite le 11 septembre 2026 à 10 h 55 (Toronto), mise à jour à 11 h 22, par la session Cowork du 10-11 septembre**,
+> après QUATRE livraisons vues par Grégoire (1.129.1, 1.129.2, 1.130.0, 1.130.1 — porte 4/4, libellé « Régler » gardé).
+> **L'écran de réglage du dépistage est FINI, cinq temps sur cinq.** Le §3 ci-dessous date de 10 h 51 (1.130.0) ; remesure. **Elle REMPLACE toute version précédente.**
 >
 > ⚠ **Ce fichier porte un nom sans date, exprès.** La date d'écriture est en tête ; c'est elle qui fait foi.
 > ⛔ **Il ne porte que ce qui PÉRIME** : l'état mesuré, le mandat, ce qui est dû, et les erreurs déjà payées. Ce qui a survécu
@@ -15,92 +16,90 @@
 vraies données. **Toi, Cowork** : tu **mesures** le dépôt en lecture seule, tu **rédiges** les consignes, tu **relis** ce qui ne
 se reprend pas, et tu tiens ses fichiers de cadrage et sa console. **Claude Code exécute** et livre.
 
-⛔ **TU NE PARLES PAS À CLAUDE CODE.** Ce que tu as à lui transmettre va dans un **bloc de code**, dans le message, précédé de
-« Pour Claude Code, à relayer » — **jamais dans un artefact**, **jamais avec des retours à la ligne manuels**. Une consigne longue
-va dans un FICHIER (`plans de travail/CONSIGNE-DU-JOUR.md`) et le bloc ne porte qu'une ligne.
+⛔ **TU NE PARLES PAS À CLAUDE CODE.** Une consigne va dans un FICHIER (`plans de travail/CONSIGNE-DU-JOUR.md`, l'ancienne
+archivée sous `_ancienne-CONSIGNE-DU-JOUR-<date>-<sujet>.md`) et Grégoire ne colle qu'une ligne, dans un **bloc de code** du message
+(« Lis « plans de travail/CONSIGNE-DU-JOUR.md » et exécute-la. ») — **jamais dans un artefact**, **jamais avec des retours à la
+ligne manuels**. Une réponse courte à une question de Claude Code (un arbitrage, un libellé) peut aller directement dans un bloc.
+**Au-dessus du bloc, une ou deux phrases disent ce que la consigne va produire à l'écran** — il ne lit pas ce qu'il transmet.
 ⚠ **TU N'ÉCRIS PAS DANS `js/`.** Un fichier temporaire va dans `$HOME` ; ce qui doit rester à portée de Claude Code va dans
 `_to_delete/` (ignoré par git). ⚠ **`git --no-optional-locks status`**, jamais `git status` nu : le verrou bloque Claude Code.
-⚠ **Ce shell n'a pas de réseau** : `git fetch` échoue, `origin/main` est la dernière valeur POUSSÉE DEPUIS CE MAC. Une session
-Claude Code à distance peut avoir poussé plus loin sans que ce Mac le sache — voir §3.
+⚠ **Ce shell n'a pas de réseau** : `git fetch` échoue, `origin/main` est la dernière valeur connue de ce Mac. ⚠ **L'horloge du
+montage est en UTC** : toute heure s'écrit après `TZ=America/Toronto date`, et une heure « de tête » se remesure avant d'être écrite
+(erreur refaite le 11 sept. au matin, corrigée en « vers 6 h 15 »). ⚠ **Le PNG supprimé dans l'arbre** (`Retours des testeurs/grégoire/
+BUG_…journal-de-bord-sans-fond.png`, `D` non commis) est à Grégoire : ne le commets pas, ne le restaure pas, signale-le.
 
 ---
 
 ## 2 · À LIRE D'ABORD, DANS CET ORDRE
 
-1. **`PROTOCOLE.md`** — les sept règles.
-2. **`OU-EN-EST-ON.md`** — sections « L'ÉVALUATION » et « LE SUIVI », puis la matinée du 6 (mesure du PDF, 1.123.1 → 1.123.5).
-3. **`Rapports/AUDIT-onglet-suivi-2026-09-05.md`**, l'en-tête seulement : le tableau des dispositions (#730 à #754). C'est l'état de
-   référence de la chaîne des indices du Suivi.
-4. **`Rapports/MESURE-ce-que-l-eleve-lit-dans-le-pdf-2026-09-06.md`** — trois documents, sept blocs ; C1 et C2 corrigés (1.123.1), F1 (#759)
-   et F2 (#760) inscrits ; **deux bilans = deux implémentations du même texte** : c'est la première question du cadrage de la synthèse.
-5. **`plans de travail/CONSIGNE-DU-JOUR.md`** (écrite le 6 à 10 h 07) et **`Rapports/prompts-audit/PROMPT-AUDIT-sous-onglets-suivi-2026-09-06.md`** —
-   le quatrième audit cadré : six sous-onglets, trois axes (logique propre, affichage, sauvegardes), sans coder. **S'il est déposé, lis
-   le rapport `Rapports/AUDIT-sous-onglets-suivi-2026-09-XX.md` : c'est ton premier mandat (§4 a).**
+1. **`OU-EN-EST-ON.md`**, sa tête (1.130.0 et les trois versions du 11) — où on en est, en gestes d'utilisateur.
+2. **`PROTOCOLE.md`** — les sept règles, dont la règle 6 (ce que tu fais à l'ouverture sans qu'on te le demande).
+3. **`CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`** — l'état mesuré par Claude Code (sa clôture) et le MANDAT (à toi).
+4. **`plans de travail/00-CADRAGES-OUVERTS.md`**, entrée 10, puis
+   **`plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md`** — le dossier « dépistage », ses cinq temps et
+   toutes les décisions de Grégoire, datées, dans ses mots.
+5. **`plans de travail/CONSIGNE-DU-JOUR.md`** — si elle porte encore « clore l'écran de réglage », Claude Code ne l'a pas
+   finie ou son rapport n'a pas été relayé : demande à Grégoire où il en est.
+6. **`BACKLOG.md`**, item `#825` seulement (le chargement lent) — grep ciblé, le fichier fait 930 Ko.
 
-⛔ **Ne lis PAS les 130 autres fichiers de `plans de travail/`.**
+⛔ **Ne lis PAS les 140 autres fichiers de `plans de travail/`.** Une session Cowork qui lit tout n'a plus de place pour travailler.
 
-## 3 · L'ÉTAT MESURÉ — le 6 septembre 2026 à 10 h 09 (Toronto), depuis le Mac, en lecture seule
+---
 
-⚠ **REMESURE-LE.** `git --no-optional-locks log --oneline -7` · `git --no-optional-locks rev-parse --short origin/main` ·
-`cat version.json` · `git --no-optional-locks -c core.quotepath=off status --short | grep -v '^??'` · **`TZ=America/Toronto date`**.
+## 3 · L'ÉTAT MESURÉ — le 11 septembre 2026 à 10 h 51 (Toronto), depuis le Mac, en lecture seule
 
-- **En ligne : 1.123.5**, build `0906-0902` (`aea9d144`) ; **`main` = `origin/main` = `2fb1facf`**, arbre propre sauf
-  `plans de travail/CONSIGNE-DU-JOUR.md` (modifiée par Cowork à 10 h 07 : la consigne de l'audit, l'ancienne archivée à côté sous
-  `_ancienne-CONSIGNE-DU-JOUR-2026-09-06-mesure-pdf.md`, à commettre par Claude Code avec son premier commit).
-- **Le run serveur de 1.123.5 (`34035446544`) est vert de bout en bout** — Vitest et Playwright WebKit. **La spec du rapport du profil
-  (#732) est jugée** : elle a passé avec lui. Les runs de 1.123.2/3/4 ont été annulés par la poussée suivante (concurrence du workflow),
-  Vitest vert à chaque fois avant l'annulation.
-- **La matinée du 6, dans l'ordre** : le rapatriement de la clôture (`886d9828`, relu par Cowork : ce que le patch du Mac avait de plus
-  y est) ; la mesure du PDF sans coder (`d5f911b0`) ; deux textes faux que l'élève lit, corrigés le jour même sur décision de Grégoire
-  (1.123.1, `89bcf4a9` : « 63.5 %% » → « 63.5 % » ; le bilan copié vers Léa ne prend plus la copie en cours pour sa propre précédente,
-  #757/#758 — relecture croisée de Cowork sur le diff : rien à corriger) ; puis **quatre défauts trouvés par Grégoire sur ses données**
-  (SUIVI-BUGS #533-#536, tous de lui, pas des testeurs) corrigés en 1.123.2 → 1.123.5 : vignette d'un travail → page vide (#761),
-  « Appliquer au cours actif » n'assignait pas (#762), le Cadre ne montrait pas la pratique appliquée (#763), « Copier tout » incomplet
-  sans cartouche et spécifique coupée à 120 caractères (#764).
-- **#759 (collage Léa sans sauts de ligne)** : Cowork a recommandé l'option 2 (patch 1.123.6 après avoir mesuré où les sauts se perdent —
-  si c'est Léa qui les avale, inscrire sans correctif). **Grégoire n'a pas dit s'il l'a relayée.** Si `version.json` dit 1.123.6, c'est fait.
-- **Les coups d'œil à l'écran** : Grégoire a vu le Suivi du groupe en « En attente », le bouton « Rapport », la dernière ligne du texte
-  copié (un seul « % »), et « Copier tout » en trois blocs sur 1.123.5. **Quatre gestes attendent un cas réel** (règle du 6, §5) : le
-  profil avec brouillon (1.122), la pratique « Modèle simple » (1.122), la reprise réussie (1.123), le bilan avec artefact antérieur (1.123.1).
-- **Les trois audits cadrés sont fermés** ; le quatrième est cadré, pas exécuté. Reste à trancher par Grégoire, quand il le voudra,
-  **une règle à la fois avec une recommandation** : #700-#705 (moteur), #710-#729 (note du cours), #735-#754 (Suivi), le cadrage
-  « non remis par famille ». Trois touchent ce que l'orthopédagogue lira, à proposer en premier : le brouillon compté comme remis et
-  la garde qui s'ouvre dessus (#737), les deux paliers sur un même profil (#744), l'anonymisation qui n'anonymise pas le volet (#751).
-- **Sa console** — l'artefact « Les huit gestes » (titre à l'écran « Ce qu'il reste à faire »), republiée par Cowork à 9 h 57 ; **plus aucun
-  geste dû à l'écran**. **Demande le lien, n'en fabrique pas une seconde** (la galerie n'en a qu'une). Le renommage n'est pas tranché.
-- ⚠ La première republication de la matinée a été **refusée par le filtre de permissions** de la session ; Grégoire a redonné l'ordre en
-  collant l'URL, et ça a passé. Si ça se reproduit : le dire en une phrase, ne pas contourner.
-- ⚠ NFD : `git status` depuis Cowork montre `??` des fichiers suivis (`Modèle de consigne…`, `jean-françois/`, `projet de
-  développement/`, `ignorés/`). Tous suivis. Ce n'est pas un défaut.
+**Remesure, ne recopie pas** : `cat version.json` · `git --no-optional-locks log --oneline -5` · `git rev-list --count
+origin/main..HEAD` · `git --no-optional-locks status --porcelain | grep -v '^??'` · `TZ=America/Toronto date`.
+
+- **`1.130.0`, build `0911-1022`**, `main` = `origin/main` = `dd7a2b26` au moment de la mesure, **+ 1 commit documentaire non poussé**
+  (`1c5c7dd3`, la consigne de clôture) — Claude Code pousse avec son lot.
+- **Trois versions le 11 au matin, toutes vues par Grégoire** : 1.129.1 (les mots de l'écran de réglage — IDME dite Incomplet /
+  Développement / Maîtrise / Étendu partout, porte 5/5), 1.129.2 (l'échelle de départ renommée à la source, le bilan dit
+  « Incomplet », stock intact prouvé par sentinelle), 1.130.0 (la forme de l'écran selon sa maquette, porte 13/13 Mac + iPad).
+- **Vitest 5799 essais, 0 échec** (`cd tests && npm run test:unit`, ~26 s ; ⛔ pas `npm test`). Verdict Playwright WebKit vert au
+  push de 1.130.0 (`scripts/.verdict-playwright.json`).
+- **Arbre** : un `D` non commis (le PNG de Grégoire, voir §1) ; quatre `Formation/*.html` non suivis (chantier à part).
+- **Artefacts publiés ce matin** (tous « (mine) », galerie claude.ai) : « Portes terrain des mots du dépistage » (relevée),
+  « Outils d'observation, trié » (la maquette, version 2 — sa copie versionnée est `plans de travail/MAQUETTE-2026-09-11-outils-observation.html`),
+  « Portes terrain de la forme » (relevée). **La console « Les huit gestes » (🧭) a été mise à jour le 10 à 18 h 25** ; elle ne
+  porte pas encore les trois versions du 11 — **c'est ton premier geste (règle 6).**
+
+---
 
 ## 4 · CE QUI EST DÛ — dans l'ordre
 
-### a) Ton mandat d'ouverture : relire le rapport du quatrième audit, puis tenir la console
-1. Remesure (§3). **Si `Rapports/AUDIT-sous-onglets-suivi-2026-09-XX.md` est déposé** : relis-le sur le diff réel de la branche
-   (`audit/sous-onglets-suivi-2026-09-06`, fusionnée ou non) — chaque « corriger maintenant » a-t-il son attendu / obtenu et sa phrase
-   de français ? `js/` est-il intact ? — puis propose à Grégoire **le tableau des « corriger maintenant » en UN tour**, avec une
-   recommandation par ligne, comme le 5 au soir (quatre correctifs, une question). Ce qui est règle attend ; ce qui est défaut se
-   corrige le jour même (§5).
-   **S'il n'est pas déposé** : redonne la ligne à coller — `Lis « plans de travail/CONSIGNE-DU-JOUR.md » et exécute-la.` — et dis en
-   deux phrases ce qu'elle produit (un rapport en six sections, rien de neuf à l'écran).
-2. Console : après le lot correctif de l'audit, retirer ce qui est livré, ajouter les gestes à voir **que ses données permettent**
-   (les autres vont sous « attendent un cas réel »).
+**a) À l'ouverture, sans qu'on te le demande (règle 6)** : remesurer ; mettre la console à jour (le dossier dépistage : l'écran
+de réglage est FINI si la clôture est livrée — retirer ses cinq temps de la page et compter ; sinon dire ce qui reste) ; tenir
+`00-CADRAGES-OUVERTS.md` (entrée 10 : temps 3, 4 et 5 livrés) ; réécrire le MANDAT de `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`
+(il date du 10 à 18 h 15 et propose « les mots » — c'est fait).
 
-### b) Ce qui attend Grégoire, et que tu proposes UNE chose à la fois, avec une recommandation
-- **Recueillir ce qui sortira du 14** — personne ne l'a pris, et c'est dans huit jours. **Propose-lui un gabarit de retour à
-  corriger** (un texte, pas une question) : le geste essayé, ce que le collègue attendait, ce qu'il a vu, sur quelles données.
-  **Le canal (courriel, formulaire, la rencontre elle-même) est SA décision** ; ne le choisis pas. ⚠ Le rapport de bogue intégré
-  existe déjà (`BUG_grégoire_2026-09-06_*.txt`, lu par Claude Code ce matin) : **cherche s'il suffit avant de proposer un gabarit neuf**
-  — onzième occurrence possible de « ça existe déjà ».
-- **La synthèse des rétroactions dans le PDF** — son prochain accent, non daté. **La mesure est faite.** Le cadrage commence par UNE
-  question : le bilan du texte Léa est une seconde implémentation du bilan du PDF — les ramener à une seule, laquelle ? Propose-la
-  avec une recommandation, quand il ouvre le sujet, pas avant.
-- **Les règles inscrites** (§3) — seulement quand il le demande ; ne les remonte pas en rafale.
+**b) FAIT à 11 h 22** : la clôture (`1.130.1`) est livrée, sa porte relevée 4/4, le libellé du lien tranché (« Régler »). Rien
+n'attend de ce côté ; la console et `00-CADRAGES-OUVERTS.md` le disent. ⚠ Une leçon de cette porte : la rangée 2.3b de la
+porte de la forme visait un titre que l'app n'a jamais rendu (chaîne morte) — **une attente de porte se vérifie contre un
+RENDU mesuré, pas contre la carte des effets.**
 
-### c) Fin de chaque lot : `OU-EN-EST-ON.md`, sa console, ce fichier (règle 6). Sans qu'il le demande, une ligne pour dire ce qui a changé.
+**c) Le chargement lent — `#825`, décision de Grégoire : « plus tard en journée »** (11 sept., 7 h 25). Tout est mesuré dans
+l'item : 313 requêtes, 3,8 Mo, Load 50 s sans cache, 0,9 s au rechargement ; cause : `netlify.toml` sert `/js/*` en
+`max-age=0, must-revalidate` et 199 scripts synchrones se revalident à la file à chaque OUVERTURE. Remède en deux temps, dans
+l'ordre : (1) jetons `?v=` automatiques pour TOUS les fichiers à la livraison (le garde n'en surveille qu'un — préalable
+obligatoire), puis `/js/*` et `/css/*` immuables un an ; (2) `defer` sur les scripts, mesuré au banc complet. **Écris la consigne
+à froid, avec ce préalable en tête ; c'est un retour de testeur (lui), il passe avant l'onglet Suivi.**
 
-### d) Dû par Grégoire, à ne pas coder à sa place
-Le canal des retours du 14 ; l'arbitrage des règles inscrites ; le renommage de la page ; les quatre gestes qui attendent un cas réel.
+**d) Ensuite, le chantier suivant du dossier dépistage : l'onglet Suivi** (décidé le 10 : « l'écran de réglage d'abord, puisque
+c'est lui qui entraîne le suivi ; Suivi ensuite »). Rien n'est cadré. Deux entrées : le prompt du quatrième audit
+(`Rapports/prompts-audit/PROMPT-AUDIT-sous-onglets-suivi-2026-09-06.md`, jamais exécuté — mesure-le) et **la mesure reportée par
+Grégoire le 10** : le sigle « SRPNF » apparaît 48 fois dans `js/` ; est-il un TITRE affiché à un collègue dont la grille porte
+d'autres critères ? (Le calcul, lui, suit la grille de chacun — mesuré.) **Cowork écrit un cadrage avant toute consigne.**
+
+**e) Prêt pour l'orthopédagogue, n'attend rien** : le § 8 de `Rapports/INVENTAIRE-2026-09-10-nomenclature-des-zones.md` (quels
+mots divergent, de combien de points) et le § 4 du cadrage (où chaque réglage agit). Les bornes et les noms de zones ne se
+rouvrent pas avant elle (`#821`, `#822`).
+
+**f) Dû par Grégoire, à ne pas coder à sa place** : les deux points à l'écran avant le 14 (la carte « Prendre en main », la
+visite guidée de bout en bout) et la légende à décimales du tableau de bord sur iPad ; recueillir ce qui sortira du 14 (canal : sa
+décision) ; renommer sa propre échelle « Maîtrisé » → « Maîtrise » s'il le veut (son stock, son geste).
+
+---
 
 ## 5 · COMMENT GRÉGOIRE VEUT QU'ON LUI PARLE
 
@@ -132,6 +131,33 @@ l'arbitrage de quatre correctifs a pris UN tour et UNE question (la règle didac
 ---
 
 ## 6 · LES ERREURS QUE COWORK A DÉJÀ PAYÉES — ne les refais pas
+
+### Le 10 et le 11 septembre — quatre choses, trois rattrapées, une payée
+
+- **Payée — la carte des effets a déclaré mort un réglage vivant** (« Direction du risque »). Elle avait suivi une fonction
+  quasi homonyme (`calculerDirectionRisque`, morte) et pas la CLÉ (`directionRisque`, lue par `calculerDirectionsCriteres`, cinq
+  appelants). Rattrapée par la relecture de Claude Code AVANT de retirer ; sans elle, les flèches par critère auraient été figées à
+  0,05 chez tout le monde. ⮕ **Un « mort » se mesure par sa clé et chaque lecteur de la clé, pas par le nom d'une fonction.** La
+  consigne de #824 le répète pour chacun des cinq chemins.
+- **Rattrapée — une supposition dans un texte d'aide** (« d'une production à l'autre ») : le code compare deux fenêtres décalées.
+  Nommée comme supposition dans le bloc relayé, Claude Code l'a mesurée et remplacée. ⮕ Une supposition NOMMÉE se corrige en dix
+  secondes ; elle ne coûte que si elle est tue.
+- **Rattrapée — les heures écrites de tête** (6 h 15 / 6 h 25 / 6 h 40 pour des décisions prises entre 6 h 10 et 6 h 25) et
+  « fin de soirée » dans l'en-tête de la consigne de démarrage pour un commit de 15 h 33. ⮕ `TZ=America/Toronto date` avant
+  d'écrire une heure, et « vers » quand on n'a pas l'horloge.
+- **Rattrapée — le compte de la console** (« dix-huit versions depuis le 6 » : c'étaient trente-sept, comptées sur `version.json`).
+  ⮕ Un chiffre dans la console vient d'une commande, pas d'une lecture de titres.
+- **Payée en tokens, pas en erreur — le rechargement simple qui « prouvait » que le cache marche** (0,9 s) : Chrome ne revalide
+  que le document principal sur un reload. C'est `netlify.toml` (`max-age=0, must-revalidate` sur `/js/*`) qui dit la vérité :
+  chaque OUVERTURE revalide ~200 scripts à la file. ⮕ Devant un temps de chargement, lire les en-têtes de cache avant de
+  mesurer au navigateur.
+
+### Le motif qui a tenu, du 10 au 11 : « le lot est fini quand Grégoire l'a VU »
+Quatre livraisons en une matinée (1.129.1, 1.129.2, 1.130.0, et la clôture en cours), chacune avec sa porte terrain relevée par
+lui (5/5, —, 13/13) avant la suivante. Il a lui-même levé sa règle « une livraison par séance » pour les queues de lot ; **il
+regarde avant, et c'est ça qui compte**, pas le nombre.
+
+### Avant le 10 septembre — leçons des 4, 5 et 6 (à promouvoir selon la règle 3 quand elles auront servi trois fois)
 
 *Les 2 et 3 septembre. Elles sont écrites parce qu'elles se ressemblent toutes.*
 
@@ -298,9 +324,6 @@ ce qui manque n'est pas le mécanisme : c'est le chemin pour le trouver.
 
 ## 7 · LA DATE QUI COMPTE
 
-**Le 14 septembre 2026, dans huit jours** — la communauté de pratique se réunit pour la première fois, une vingtaine de membres.
-**Ce n'est pas la date où ces gens arrivent : c'est celle où ils se parlent.**
-
-⚠ **L'angle mort tient toujours** : tout ce qui est ouvert vient de Grégoire ; **les quatre bogues du 6 au matin sont les siens**, le
-dernier retour de testeur date du 26 août. Cinq correctifs et un audit cadré sont sortis d'une matinée, et **toujours rien pour
-recueillir ce que vingt personnes diront le 14**. C'est le seul point que personne n'a pris, et c'est le premier de ton §4 b.
+**Le 14 septembre 2026, dans trois jours** — la communauté de pratique se réunit pour la première fois. **Ce n'est pas la date où
+ces gens arrivent : c'est celle où ils se parlent.** Toujours rien pour recueillir ce que vingt personnes diront ; c'est à lui, et
+personne ne l'a pris. Ne propose pas de le coder : propose un gabarit de retour d'une demi-page, à froid, s'il le demande.
