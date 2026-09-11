@@ -8,6 +8,10 @@
 >
 > **Ce qui échoue ici devient un item de backlog, avec son numéro de porte.** Jamais une note mentale.
 >
+> ↻ **12 h 08 (Cowork) — VUE par Grégoire sur 1.130.2 (« ça va, c'est plus rapide »), porte NON CHIFFRÉE** : aucune rangée cochée, aucun
+> relevé collé. Le lot est clos à son verdict ; les trois rangées restent ouvertes dans l'artefact s'il veut les chiffrer. Le
+> 30-45 s du matin reste sans cause établie (§ 3.1).
+>
 > ⚠ **Aucun banc ne peut mesurer ceci** : les en-têtes de cache n'existent qu'une fois déployés, derrière Cloudflare
 > Access, et un fichier ouvert en `file://` n'a pas d'en-têtes.
 >
