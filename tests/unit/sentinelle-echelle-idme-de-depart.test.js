@@ -22,6 +22,9 @@ import { fileURLToPath } from 'node:url';
 // `valeurCalcul` d'un seul niveau → B rougit ; réutiliser `ECHELLE_GENERIQUE`
 // comme id → C rougit ; retirer la garde `estRessourceSupprimee` → D rougit ;
 // retirer l'id de `IDS_GABARITS_HARDCODES` → E rougit.
+// Break-test du 11 septembre (renommage du gabarit à la source) : remplacer la
+// garde par identifiant par une réécriture de la copie existante → I rougit
+// (« le stock garde ses mots »), fichier restauré par empreinte.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -62,6 +65,36 @@ describe('§2 · l\'échelle IDME de départ complète le triptyque', () => {
         expect(store[CLE].map(e => e.id)).toEqual(['ECHELLE_IDME_DEPART']);
         await win.assurerEchelleIdmeDeDepart();
         expect(store[CLE].length, 'second passage : no-op').toBe(1);
+    });
+
+    it('I · un espace qui porte DÉJÀ sa copie la garde telle quelle — le renommage à la source (11 sept. 2026) ne réécrit pas le stock', async () => {
+        // Le gabarit dit désormais « Développement » / « Maîtrise » ; une copie
+        // semée avant ce jour dit « en Développement » / « Maîtrisé ». Décision de
+        // Grégoire (3.1, 11 sept.) : la source change, le stock ne bouge pas —
+        // « tarir n'est pas réparer ». Ce cas verrouille les deux moitiés.
+        const store = {
+            [CLE]: [{
+                id: 'ECHELLE_IDME_DEPART', nom: 'Échelle de départ (IDME)',
+                description: 'Quatre niveaux — Insuffisant, en Développement, Maîtrisé, Étendu.',
+                niveaux: [
+                    { code: 'I', nom: 'Incomplet', min: 0, max: 64.99, valeurCalcul: 32 },
+                    { code: 'D', nom: 'en Développement', min: 65, max: 74.99, valeurCalcul: 69.5 },
+                    { code: 'M', nom: 'Maîtrisé', min: 75, max: 84.99, valeurCalcul: 79.5 },
+                    { code: 'E', nom: 'Étendu', min: 85, max: 100, valeurCalcul: 92.5 }
+                ]
+            }]
+        };
+        const win = charger(store);
+        await win.assurerEchelleIdmeDeDepart();
+        const copie = store[CLE].find(e => e.id === 'ECHELLE_IDME_DEPART');
+        expect(store[CLE].length, 'aucune seconde copie').toBe(1);
+        expect(copie.niveaux.map(n => n.nom), 'le stock garde ses mots').toEqual(['Incomplet', 'en Développement', 'Maîtrisé', 'Étendu']);
+        expect(copie.description).toMatch(/Insuffisant, en Développement, Maîtrisé/);
+        // Et la SOURCE, elle, dit bien les quatre mots arrêtés : un espace neuf les reçoit.
+        const neuf = {};
+        await charger(neuf).assurerEchelleIdmeDeDepart();
+        expect(neuf[CLE][0].niveaux.map(n => n.nom)).toEqual(['Incomplet', 'Développement', 'Maîtrise', 'Étendu']);
+        expect(neuf[CLE][0].description).toMatch(/Incomplet, Développement, Maîtrise, Étendu/);
     });
 
     it('B · TOUS ses niveaux portent une `valeurCalcul` exploitable — c\'est LA condition de #574', async () => {
