@@ -46,6 +46,8 @@ import { describe, it, expect } from 'vitest';
 import { monter, storeBase } from './_helpers/bac-suivi.js';
 
 const DATE = '2026-09-01';
+// #749 lot 3 (11 sept. 2026) : le verrou vit sous `<trim>_datesVerrouillees_gc_<gc>` (avant : la clé nue `datesVerrouillees`).
+const K_VERROU = 'test_datesVerrouillees_gc_GC1';
 
 /** Trois présences réelles au 1er septembre pour le groupe-cours actif. */
 function storeAvecUneSeance() {
@@ -92,7 +94,7 @@ describe('#785 · verrouiller une date dont le tableau n’est pas rendu', () =>
         // L'INVARIANT. Rétablir `etudiantsATraiter.some(...)` dans le filtre fait tomber cette attente.
         expect(presencesDu(store, DATE)).toHaveLength(3);
         // Et la date est bien verrouillée : le geste demandé a eu lieu, sans emporter la séance.
-        expect(store.datesVerrouillees).toContain(DATE);
+        expect(store[K_VERROU]).toContain(DATE);
     });
 
     it('la séance est INTACTE, pas seulement du même nombre : périodes et notes inchangées', () => {
@@ -118,7 +120,7 @@ describe('#785 · verrouiller une date dont le tableau n’est pas rendu', () =>
         try { b.win.basculerVerrouillageDate(DATE); } catch { /* idem */ }
         // Trois élèves du groupe-cours actif, réécrits depuis les champs affichés.
         expect(presencesDu(store, DATE)).toHaveLength(3);
-        expect(store.datesVerrouillees).toContain(DATE);
+        expect(store[K_VERROU]).toContain(DATE);
     });
 
     it('⚠ CONTRE-ÉPREUVE DU REMÈDE — un tableau rendu ÉCRASE BIEN l’ancienne valeur', () => {
@@ -135,10 +137,10 @@ describe('#785 · verrouiller une date dont le tableau n’est pas rendu', () =>
 
     it('DÉVERROUILLER ne touche à rien — seul le verrouillage passe par la sauvegarde', () => {
         const store = storeAvecUneSeance();
-        store.datesVerrouillees = [DATE];
+        store[K_VERROU] = [DATE];
         const b = monterAvecDomFidele(store, false);
         try { b.win.basculerVerrouillageDate(DATE); } catch { /* idem */ }
         expect(presencesDu(store, DATE)).toHaveLength(3);
-        expect(store.datesVerrouillees || []).not.toContain(DATE);
+        expect(store[K_VERROU] || []).not.toContain(DATE);
     });
 });

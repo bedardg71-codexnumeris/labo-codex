@@ -353,6 +353,21 @@ async function activerModeDemo() {
             peuplerDropdownGroupeCoursActif();
         }
 
+        // 13 bis. #749 lot 3 (11 sept. 2026, S-6) : la saisie des présences se
+        //     réinitialise sur le groupe démo — bandeau « Configuration incomplète »
+        //     réévalué, date posée sur la dernière séance, préférences du trimestre
+        //     démo. Mesuré le 6 sept. : sans cet appel, l'écran gardait l'état du
+        //     démarrage (le mapping `suivi-saisie` de modes.js vise une fonction qui
+        //     n'existe pas — #736, cité, pas rejugé). Même geste que l'orchestre au
+        //     changement de groupe-cours.
+        if (typeof initialiserModuleSaisiePresences === 'function') {
+            try {
+                initialiserModuleSaisiePresences();
+            } catch (e) {
+                console.warn('[Phase5.B] initialiserModuleSaisiePresences:', e);
+            }
+        }
+
         // 14. Navigation vers Suivi › Suivi du groupe (anciennement section 'apercu').
         if (typeof naviguerVers === 'function') {
             naviguerVers('suivi', 'groupe');
@@ -526,6 +541,18 @@ async function desactiverModeDemo() {
         }
         if (typeof peuplerDropdownGroupeCoursActif === 'function') {
             peuplerDropdownGroupeCoursActif();
+        }
+
+        // 7 bis. #749 lot 3 (11 sept. 2026, S-6) : la saisie des présences reprend
+        //     la date et le tri du trimestre restauré — les pointeurs (étape 4) sont
+        //     revenus APRÈS le rafraîchissement de `changerTrimestreActif`, qui a
+        //     tourné sans groupe-cours. Miroir de l'appel à l'activation.
+        if (typeof initialiserModuleSaisiePresences === 'function') {
+            try {
+                initialiserModuleSaisiePresences();
+            } catch (e) {
+                console.warn('[Phase5.C] initialiserModuleSaisiePresences:', e);
+            }
         }
 
         // 8. Navigate vers accueil (pas aperçu — choix Accueil V3)

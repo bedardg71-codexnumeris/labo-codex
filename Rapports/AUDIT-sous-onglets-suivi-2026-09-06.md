@@ -175,6 +175,14 @@ Aucune écriture directe dans `etudiants.js` (0 `setSync`, `set`, `setItem` en b
 
 ## 3 · Saisie des présences — `#suivi-saisie` (`index.html:7912-8118`), `js/saisie-presences.js`, `js/presences-rapport.js`
 
+> ↻ **11 sept. 2026 — lot 3 du cadrage 11 LIVRÉ en 1.133.0** : S-3 (garde `!coursId` posée, commentée — et la même garde manquait
+> dans `sauvegarderPresencesSansValidation`, posée dans le lot) ; S-4 (`datesVerrouillees` par trimestre ET groupe-cours, patron
+> `cleEtudiantsSuivis` ; semis de la liste nue entière, lue jamais réécrite ; `donnees-v2.js` montre la clé réelle) ; S-6 (les quatre
+> préférences sous `cle()`, sans semis ; le bandeau réévalué à chaque initialisation et sur les séances complètes ; date par défaut =
+> dernière séance ≤ aujourd'hui ; « ← Précédent » sans date — remesuré : le bouton rendait sans rien faire — y va aussi ; la saisie se
+> réinitialise à l'activation et au retrait de la démo). S-7 cité (`#736`, `#747`), pas touché ; S-1 fonctionne ; S-5 livré (`#768`).
+> Sentinelle Vitest 12 essais / 10 break-tests ; essai Playwright « démo → saisie » (aucun bandeau, date posée, 20 élèves).
+
 ### 3.1 Tableau des gestes (15 dans `index.html`, 6 générés)
 
 | Geste | Fonction | Effet mesuré | Écrit ? |

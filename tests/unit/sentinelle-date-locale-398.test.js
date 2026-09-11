@@ -73,7 +73,9 @@ describe('#398 · cliquet — les 10 sites fonctionnels consultent la SSOT', () 
         ['js/presences-apercu.js', 2],
         ['js/rythme.js', 2],
         ['js/interventions.js', 1],
-        ['js/saisie-presences.js', 1]
+        // #749 lot 3 (11 sept. 2026) : un second site, `derniereSeancePassee` —
+        // la date par défaut de la saisie (dernière séance ≤ aujourd'hui, LOCAL).
+        ['js/saisie-presences.js', 2]
     ];
 
     it.each(attendus)('%s : %i appel(s) à window.dateLocaleYMD()', (fichier, n) => {

@@ -104,6 +104,18 @@ de l'élève depuis le formulaire (`donnees[da] = infos`, `:250`) — **les cham
 Enregistrer** de ce volet, et personne ne les lit d'ici là. Une ligne dans le code le dit. C'est le même motif que « SRPNF » : sa
 pratique codée en dur dans un écran que d'autres disciplines liront.
 
+### F. Le bouton « + Nouvelle intervention » retrouve sa place (retour de Grégoire, 17 h 28, capture à l'appui)
+Dans `Suivi › Profil › Accompagnement`, sous-titre « HISTORIQUE » : le bouton s'affiche **sous** le titre, à gauche, collé à la carte
+vide — Grégoire le trouve « mal situé ». Mesuré : le code voulait une rangée titre-à-gauche / bouton-à-droite
+(`profil-etudiant-sections-affichage.js:1423-1427`, `<div class="u-flex-between-mb10">`), mais **`u-flex-between-mb10` n'est définie
+nulle part** (`grep -rn "u-flex-between-mb10" styles.css css/` = 0 ; une seule occurrence dans `js/`) — la rangée n'est jamais devenue
+flex, le bouton est tombé en dessous. C'est le cas de `CLAUDE.md` (« une classe CSS jamais définie ») : pas une trouvaille, un lot
+jamais fini. ⮕ Remplacer par la classe existante `.u-flex-between` (`styles.css:741`) plus la marge utilitaire qui existe (mesure :
+`u-mb-10` ?), **sans créer de classe** ; le bouton se retrouve **à droite du titre « HISTORIQUE », sur la même ligne** — le patron
+« titre + action » du design-system (§ 7, `lien-reglages`), en bouton plein puisqu'il crée quelque chose. Vérifier sous WebKit aux
+deux largeurs (1024 / 1366) que la rangée ne se casse pas et que la carte « Aucune intervention documentée » suit dessous. Porte :
+rangée 8.
+
 ### E. Cité, pas rejugé
 P-4 (`#751`, le volet confidentiel en mode anonymisation : après le 14, règle des modes) ; P-3 (le volet en clair : position, skill
 `securite-donnees` — inscrire seulement s'il demande le chiffrement) ; P-6 fonctionne ; `profilOngletDeveloppementActif` nue : lot 7
@@ -138,6 +150,7 @@ Markdown par Claude Code (`PORTES-TERRAIN-<date>-profils-individuels.md`) ; arte
 | 5 | Section Rapport : coche une case, change de trimestre, reviens | la case est **celle du trimestre**, pas partagée |
 | 6 | Volet confidentiel d'un élève marqué SA « Oui » dans Cadre › Trimestre, puis d'un élève « Non » | la case « Services adaptés » suit la liste (cochée / décochée, non modifiable) ; Catégorie et Sous-catégorie visibles seulement pour le premier |
 | 7 | Volet confidentiel : le bloc « Portrait de lecteur » | **absent** ; Parcours, Défis, Diagnostic, Notes intacts |
+| 8 | Section Accompagnement, sous-titre « HISTORIQUE » | le bouton « + Nouvelle intervention » est **à droite du titre, sur la même ligne** ; la carte de l'historique dessous |
 
 ⚠ La rangée 3 est la vraie porte de B : aucun banc ne connaît ses courbes comme lui.
 

@@ -589,31 +589,32 @@ describe('3 · Saisie des présences — écritures, répétition, verrouillage,
         expect(alice[0].periodesPresentes).toBe(0);
     });
 
-    it('S-3 · Si le cours actif est introuvable au clic (coursId null) : les fiches des AUTRES cours à cette date pour les mêmes DA sont supprimées, et les neuves portent coursId: null', () => {
+    it('S-3 · Si le cours actif est introuvable au clic (coursId null) : rien n\'est écrit, la fiche GC2 d\'Alice survit — valeur d\'après #749 lot 3 (11 sept. ; constat d\'origine : la fiche de l\'autre cours remplacée par une fiche coursId: null)', () => {
         const store = storeBase();
         store.test_presences = [{ date: DATE, da: '2000001', periodesPresentes: 2, notes: 'GC2', coursId: 'GC2' }];   // Alice suit aussi GC2
         const b = monterS(store, { coursIdNul: true });
         b.win.enregistrerPresences();
         const alice = store.test_presences.filter(p => p.da === '2000001');
-        noter('S3', { fichesAlice: alice.map(p => ({ coursId: p.coursId, notes: p.notes })) });
+        noter('S3', { fichesAlice: alice.map(p => ({ coursId: p.coursId, notes: p.notes })), ecritures: b.journal.filter(j => j.k === 'test_presences').length });
         expect(alice.length).toBe(1);
-        expect(alice[0].coursId).toBe(null);
-        expect(alice[0].notes).toBe('en retard');   // la fiche GC2 n'existe plus
+        expect(alice[0].coursId).toBe('GC2');       // avant le lot 3 : null
+        expect(alice[0].notes).toBe('GC2');         // avant : 'en retard' (la fiche GC2 n'existait plus)
+        expect(b.journal.filter(j => j.k === 'test_presences')).toHaveLength(0);
     });
 
-    it('S-4 · Verrouiller une date : écrit datesVerrouillees sous clé NUE (partagée entre trimestres et cours) ET réécrit les présences sans passer par le mode', () => {
+    it('S-4 · Verrouiller une date : écrit sous `<trim>_datesVerrouillees_gc_<gc>` — valeur d\'après #749 lot 3 (11 sept. ; constat d\'origine : clé NUE partagée entre trimestres et cours) ; réécrit toujours les présences sans passer par le mode (#736, cité)', () => {
         const store = storeBase(); store.test_presences = [];
         const b = monterS(store);
         b.win.basculerVerrouillageDate(DATE);
         const cles = b.journal.map(j => j.k);
-        noter('S4', { cles, datesVerrouillees: store.datesVerrouillees, presences: store.test_presences.length, verrou: b.interne['saisie-presences.js'].validerDateSaisie(DATE) });
-        expect(store.datesVerrouillees).toEqual([DATE]);
-        expect(cles).toContain('datesVerrouillees');
-        expect(Object.keys(store)).not.toContain('test_datesVerrouillees');
+        noter('S4', { cles, datesVerrouillees: store['test_datesVerrouillees_gc_GC1'], presences: store.test_presences.length, verrou: b.interne['saisie-presences.js'].validerDateSaisie(DATE) });
+        expect(store['test_datesVerrouillees_gc_GC1']).toEqual([DATE]);   // avant : store.datesVerrouillees
+        expect(cles).not.toContain('datesVerrouillees');
+        expect(Object.keys(store)).not.toContain('datesVerrouillees');
         expect(store.test_presences.length).toBe(3);
         // Déverrouiller : idempotent (retour à l'état initial).
         b.win.basculerVerrouillageDate(DATE);
-        expect(store.datesVerrouillees).toEqual([]);
+        expect(store['test_datesVerrouillees_gc_GC1']).toEqual([]);
     });
 
     it('S-5 · La barre du compteur reconstruite au premier rendu : « Rapport » avait disparu et « Annuler » visait suivi-apercu-legacy — depuis #768, Rapport présent et Annuler → suivi-liste (valeur d\'après)', () => {
@@ -638,7 +639,7 @@ describe('3 · Saisie des présences — écritures, répétition, verrouillage,
         expect(html).not.toContain('apercu-legacy');
     });
 
-    it('S-6 · Le bandeau « Configuration incomplète » ne regarde que l\'horaire, jamais les séances ; et initialiser la saisie écrit trois préférences sous clés NUES', () => {
+    it('S-6 · Le bandeau « Configuration incomplète » regarde aussi les séances complètes, et les trois préférences s\'écrivent sous `cle()` — valeur d\'après #749 lot 3 (11 sept. ; constat d\'origine : bandeau visible devant des séances, clés NUES)', () => {
         const store = storeBase();
         store.test_horaire = [];   // aucun horaire… mais des séances complètes existent (le cas du pack démo au boot)
         const b = monterS(store);
@@ -647,10 +648,12 @@ describe('3 · Saisie des présences — écritures, répétition, verrouillage,
         let erreurInit = null;
         try { b.win.initialiserSaisiePresences(); } catch (e) { erreurInit = e.message; }
         const clesNues = b.journal.map(j => j.k).filter(k => /^presences_|^recherchePresences/.test(k));
-        noter('S6', { alerteVisible, seancesCompletes: Object.keys(store.test_seancesCompletes).length, erreurInit, clesNues, valeurs: { date: store.presences_date, groupe: store.presences_groupe, tri: store.presences_tri } });
-        expect(alerteVisible).toBe(true);
-        expect(clesNues).toEqual(['presences_date', 'presences_groupe', 'presences_tri']);
-        expect(store.presences_date).toBe(DATE);
+        const clesTrimestre = b.journal.map(j => j.k).filter(k => /^test_presences_|^test_recherchePresences/.test(k));
+        noter('S6', { alerteVisible, seancesCompletes: Object.keys(store.test_seancesCompletes).length, erreurInit, clesNues, clesTrimestre, valeurs: { date: store.test_presences_date, groupe: store.test_presences_groupe, tri: store.test_presences_tri } });
+        expect(alerteVisible).toBe(false);                     // avant : true
+        expect(clesNues).toEqual([]);                          // avant : ['presences_date', 'presences_groupe', 'presences_tri']
+        expect(clesTrimestre).toEqual(['test_presences_date', 'test_presences_groupe', 'test_presences_tri']);
+        expect(store.test_presences_date).toBe(DATE);
     });
 });
 
