@@ -212,23 +212,25 @@
             seuilBon.value = Math.round(obtenirSeuil('interpretation.excellent') * 100);
         }
 
-        // Seuils avancés de détection
+        // Seuils de détection — forme du 11 sept. 2026 : trois CHAMPS chiffrés
+        // en POINTS (10, 5, 70), là où les calculs lisent des FRACTIONS (0,10,
+        // 0,05, 0,70). La conversion se fait ici à la lecture et dans
+        // `sauvegarderSeuilsV2` à l'écriture — jamais ailleurs. Un champ qui
+        // afficherait « 10 » et l'écrirait tel quel poserait 10 là où le calcul
+        // attend 0,10 : flèches et défis faux pour tout le monde.
         const seuilProgression = document.getElementById('v2-seuil-progression');
         if (seuilProgression) {
-            seuilProgression.value = seuils.progressionArtefacts || 0.10;
-            mettreAJourAffichageSeuilV2('progression', seuilProgression.value);
+            seuilProgression.value = _fractionEnPoints(seuils.progressionArtefacts, 0.10);
         }
 
         const seuilRisque = document.getElementById('v2-seuil-risque');
         if (seuilRisque) {
-            seuilRisque.value = seuils.directionRisque || 0.05;
-            mettreAJourAffichageSeuilV2('risque', seuilRisque.value);
+            seuilRisque.value = _fractionEnPoints(seuils.directionRisque, 0.05);
         }
 
         const seuilDefi = document.getElementById('v2-seuil-defi');
         if (seuilDefi) {
-            seuilDefi.value = seuils.defiSpecifique || 0.70;
-            mettreAJourAffichageSeuilV2('defi', seuilDefi.value);
+            seuilDefi.value = _fractionEnPoints(seuils.defiSpecifique, 0.70);
         }
     }
 
@@ -361,20 +363,21 @@
             seuils.nombreProductionsAnalyse = parseInt(fenetreAnalyse.value) || 3;
         }
 
-        // Seuils avancés de détection
+        // Seuils de détection — les champs sont en POINTS, la clé en FRACTION
+        // (voir le chargement). Une valeur vide ou absurde retombe sur le défaut.
         const seuilProgression = document.getElementById('v2-seuil-progression');
         if (seuilProgression) {
-            seuils.progressionArtefacts = parseFloat(seuilProgression.value) || 0.10;
+            seuils.progressionArtefacts = _pointsEnFraction(seuilProgression.value, 0.10);
         }
 
         const seuilRisque = document.getElementById('v2-seuil-risque');
         if (seuilRisque) {
-            seuils.directionRisque = parseFloat(seuilRisque.value) || 0.05;
+            seuils.directionRisque = _pointsEnFraction(seuilRisque.value, 0.05);
         }
 
         const seuilDefi = document.getElementById('v2-seuil-defi');
         if (seuilDefi) {
-            seuils.defiSpecifique = parseFloat(seuilDefi.value) || 0.70;
+            seuils.defiSpecifique = _pointsEnFraction(seuilDefi.value, 0.70);
         }
 
         db.setSync('seuilsInterpretation', seuils);
@@ -407,42 +410,31 @@
 
         if (fenetreAnalyse) fenetreAnalyse.value = 3;
 
-        if (seuilProgression) {
-            seuilProgression.value = 0.10;
-            mettreAJourAffichageSeuilV2('progression', 0.10);
-        }
-        if (seuilRisque) {
-            seuilRisque.value = 0.05;
-            mettreAJourAffichageSeuilV2('risque', 0.05);
-        }
-        if (seuilDefi) {
-            seuilDefi.value = 0.70;
-            mettreAJourAffichageSeuilV2('defi', 0.70);
-        }
+        // En points, comme les champs (10 · 5 · 70) ; la fraction est posée à l'écriture.
+        if (seuilProgression) seuilProgression.value = 10;
+        if (seuilRisque) seuilRisque.value = 5;
+        if (seuilDefi) seuilDefi.value = 70;
 
         sauvegarderSeuilsV2(); // #823 : la fenêtre y passe aussi
         notifications.succes('Seuils de détection restaurés');
     }
 
     /**
-     * Met à jour l'affichage de la valeur d'un seuil slider
-     * @param {string} type - Type de seuil ('progression', 'risque', 'defi')
-     * @param {number} valeur - Valeur du seuil (0-1)
+     * Fraction stockée (0,10) → points affichés (10). Repli sur le défaut quand la
+     * clé est absente ou illisible. Point unique de conversion à la lecture.
      */
-    function mettreAJourAffichageSeuilV2(type, valeur) {
-        var v = (typeof valeur === 'object' && valeur && valeur.value !== undefined) ? valeur.value : valeur;
-        const valeurNum = parseFloat(v);
+    function _fractionEnPoints(fraction, defaut) {
+        const f = parseFloat(fraction);
+        return Math.round((f > 0 ? f : defaut) * 100);
+    }
 
-        if (type === 'progression') {
-            const elem = document.getElementById('v2-valeur-progression');
-            if (elem) elem.textContent = `${Math.round(valeurNum * 100)} points (%)`;
-        } else if (type === 'risque') {
-            const elem = document.getElementById('v2-valeur-risque');
-            if (elem) elem.textContent = `${Math.round(valeurNum * 100)} points (%)`;
-        } else if (type === 'defi') {
-            const elem = document.getElementById('v2-valeur-defi');
-            if (elem) elem.textContent = `${Math.round(valeurNum * 100)}%`;
-        }
+    /**
+     * Points tapés (« 10 ») → fraction stockée (0,10). Point unique de conversion
+     * à l'écriture. Arrondi à deux décimales : 7 / 100 rend 0.07, pas 0.07000000000000001.
+     */
+    function _pointsEnFraction(points, defaut) {
+        const p = parseInt(points, 10);
+        return p > 0 ? Math.round(p) / 100 : defaut;
     }
 
     /**
@@ -484,7 +476,6 @@
     window.restaurerSeuilsInterpretationDefautV2 = restaurerSeuilsInterpretationDefautV2;
     window.restaurerSeuilsDetectionDefautV2 = restaurerSeuilsDetectionDefautV2;
     window.sauvegarderToutesPreferencesV2 = sauvegarderToutesPreferencesV2;
-    window.mettreAJourAffichageSeuilV2 = mettreAJourAffichageSeuilV2;
     // 🆕 BETA 96.1 : Animation des points
     window.appliquerAnimationPoints = appliquerAnimationPoints;
 

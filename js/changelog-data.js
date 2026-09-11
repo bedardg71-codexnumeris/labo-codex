@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.130',
+            couleur: 'bleu',
+            titre: 'Labo › Outils d\'observation se lit sans rien déplier',
+            items: [
+                '<strong>Tout l\'écran est visible d\'un coup.</strong> Les deux sections repliables (« Paramètres avancés », « Seuils d\'interprétation ») sont devenues des blocs ouverts, et les trois cartes ne se referment plus. Un sommaire en tête (« Sur cette page ») mène à chacune. Les réglages vont deux par rangée&nbsp;: la page tient en deux écrans au lieu de quatre.',
+                '<strong>Chaque réglage dit où il agit.</strong> Sous chaque option, de petites étiquettes nomment l\'écran où son effet se voit (Profil, Liste des élèves, Suivi du groupe…) ; en ambre, celles qui agissent hors de Suivi (la palette d\'annotation, la liste des évaluations, l\'export recherche).',
+                '<strong>Les seuils se tapent au lieu de se glisser.</strong> Les trois curseurs (progression des artefacts, sensibilité des flèches, seuil de défi) sont devenus des champs chiffrés avec leur unité, comme les trois seuils Fragile / Acceptable / Bon. Tes valeurs sont les mêmes qu\'avant, à la même place&nbsp;; les deux boutons « Remettre les valeurs par défaut » disent maintenant lesquelles (3 · 10 · 5 · 70 et 70 · 80 · 85).'
+            ]
+        },
+        {
             version: '1.129',
             couleur: 'bleu',
             titre: 'Deux réglages qui ne faisaient rien s\'en vont, la fenêtre d\'analyse fonctionne',

@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260910c"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260911a"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -8740,279 +8740,245 @@
                             Enregistrer
                         </button>
                     </div>
-                    <p class="text-muted">
-                        Configure les trois piliers de l'accompagnement : observation de la structure des apprentissages (SOLO), collecte des micro-données (ACP), et planification des interventions (RàI). Plie ou déplie chaque section selon ton usage.
+                    <p class="text-muted u-mb-12" style="max-width: 72ch">
+                        Trois piliers de l'accompagnement : la structure des apprentissages (SOLO), les micro-données du contexte (ACP) et la planification des interventions (RàI). Chaque réglage s'enregistre dès que tu le changes.
                     </p>
+                    <nav class="sommaire-page" aria-label="Sur cette page">
+                        <span class="sommaire-page-titre">Sur cette page</span>
+                        <a href="#accordeon-acc-solo">Taxonomie SOLO</a>
+                        <a href="#accordeon-acc-acp">Micro-données ACP</a>
+                        <a href="#accordeon-acc-rai">Intervention (RàI)</a>
+                    </nav>
 
                     <!-- ╔══════════════════════════════════════════════════════════╗
                          CARTE 1 : Taxonomie SOLO
                          (observation des résultats + développement habiletés
                           + observation actions + grille de critères dépistage
-                          + paramètres avancés)
+                          + paramètres d'analyse)
+                         Forme arrêtée par Grégoire sur maquette le 11 sept. 2026 :
+                         rien ne se replie, deux options par rangée, chaque réglage
+                         porte ses étiquettes « où ça agit » (§ 4 du cadrage).
                          ╚══════════════════════════════════════════════════════════╝ -->
-                    <div class="carte accordeon" id="accordeon-acc-solo">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Taxonomie SOLO
-                            </h3>
+                    <div class="carte carte-pilier" id="accordeon-acc-solo">
+                        <h3 class="carte-titre-bleu">
+                            Taxonomie SOLO
+                            <span class="carte-titre-role">ce que l'application observe dans la structure des productions</span>
                             <button class="option-accompagnement-guide-btn" data-action="ouvrirGuidePedagogique" data-param="solo" title="Guide SOLO">
                                 <img src="icons/icon-book.svg" alt="" class="btn-inline-icon"> Guide
                             </button>
-                        </div>
-                        <div class="accordeon-contenu">
+                        </h3>
+                        <div class="grille-2col">
 
-                            <!-- Checkbox d'activation principale -->
-                            <div class="form-group u-mb-15 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
-                                <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-affichage-solo">
+                            <div class="bloc-option">
+                                <label class="bloc-option-label" data-tooltip="pref-affichage-solo">
                                     <input type="checkbox" id="v2-pref-solo" checked data-on-change="sauvegarderPreferencesV2">
-                                    <strong style="margin-left: 8px;">Activer l'observation de la structure des résultats d'apprentissage</strong>
+                                    <span class="u-texte-gras">Activer l'observation de la structure des résultats d'apprentissage</span>
                                 </label>
-                                <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
+                                <small class="bloc-option-aide u-texte-petit">
                                     Affiche les descriptions détaillées des niveaux SOLO (unistructurel, multistructurel, relationnel, abstrait étendu) et active la catégorie « Compréhension » (tampons SOLO) dans la palette d'annotation.
                                 </small>
+                                <div class="etiquettes-effet"><span class="etiquette-effet">Profil › Accompagnement</span><span class="etiquette-effet">Suivi du groupe › distribution IDME</span><span class="etiquette-effet etiquette-effet-hors">Annotation › palette</span></div>
                             </div>
 
-                            <!-- Sous-item : Développement des habiletés -->
-                            <div class="form-group u-mb-15">
-                                <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-affichage-developpement">
+                            <div class="bloc-option">
+                                <label class="bloc-option-label" data-tooltip="pref-affichage-developpement">
                                     <input type="checkbox" id="v2-pref-developpement-habiletes" checked data-on-change="sauvegarderPreferencesV2">
-                                    <strong style="margin-left: 8px;">Développement des habiletés</strong>
+                                    <span class="u-texte-gras">Développement des habiletés</span>
                                 </label>
-                                <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
+                                <small class="bloc-option-aide u-texte-petit">
                                     Tableau de progression des critères. Affiché dans la section « Développement des habiletés » du profil individuel.
                                 </small>
+                                <div class="etiquettes-effet"><span class="etiquette-effet">Profil › Développement des habiletés</span><span class="etiquette-effet">Suivi du groupe › Trajectoires par production</span></div>
                             </div>
 
-                            <!-- Sous-item : Observation des actions (RLO) -->
-                            <div class="form-group u-mb-15">
-                                <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-actions-rlo">
+                            <div class="bloc-option">
+                                <label class="bloc-option-label" data-tooltip="pref-actions-rlo">
                                     <input type="checkbox" id="v2-pref-actions-rlo" data-on-change="sauvegarderPreferencesV2">
-                                    <strong style="margin-left: 8px;">Observation des actions</strong>
+                                    <span class="u-texte-gras">Observation des actions</span>
                                 </label>
-                                <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
+                                <small class="bloc-option-aide u-texte-petit">
                                     Repérage, Liaison et Ouverture — traces des gestes cognitifs dans les productions. Active la catégorie « Action » dans la palette de tampons et son agrégation dans l'évaluation.
                                 </small>
+                                <div class="etiquettes-effet"><span class="etiquette-effet etiquette-effet-hors">Annotation › palette « action »</span><span class="etiquette-effet">Profil › Développement des habiletés › Gestes cognitifs</span><span class="etiquette-effet etiquette-effet-hors">Réglages › Données › export recherche</span></div>
                             </div>
 
-                            <!-- Sous-item : Grille de critères pour le dépistage (migré de RàI le 26 mai PM2) -->
-                            <div class="groupe-form u-mb-15">
-                                <label for="v2-pref-grille-reference" class="u-texte-gras" style="display: block; margin-bottom: 6px" data-tooltip="depist-grille">
-                                    Grille de critères pour le dépistage
-                                </label>
-                                <select id="v2-pref-grille-reference" class="controle-form" data-on-change="sauvegarderPreferencesV2">
-                                    <option value="">— Sélectionner une grille —</option>
-                                    <!-- Options chargées dynamiquement -->
-                                </select>
-                                <small class="u-mt-6 u-texte-petit" style="display: block; color: var(--gris-moyen)">
+                            <div class="bloc-option">
+                                <div class="groupe-form u-mb-0">
+                                    <label for="v2-pref-grille-reference" class="u-texte-gras" style="display: block; margin-bottom: 6px" data-tooltip="depist-grille">
+                                        Grille de critères pour le dépistage
+                                    </label>
+                                    <select id="v2-pref-grille-reference" class="controle-form" data-on-change="sauvegarderPreferencesV2">
+                                        <option value="">— Sélectionner une grille —</option>
+                                        <!-- Options chargées dynamiquement -->
+                                    </select>
+                                </div>
+                                <small class="bloc-option-aide bloc-option-aide-alignee u-texte-petit">
                                     Cette grille définit les critères utilisés pour identifier les forces et défis des étudiant·es.
+                                </small>
+                                <div class="etiquettes-effet etiquettes-effet-alignees"><span class="etiquette-effet">Profil › Accompagnement › carte RàI</span><span class="etiquette-effet">Profil › Développement des habiletés</span><span class="etiquette-effet etiquette-effet-hors">Conception › Grilles › badge « dépistage »</span><span class="etiquette-effet etiquette-effet-hors">Réglages › Données › export recherche</span></div>
+                            </div>
+
+                        </div>
+
+                        <!-- Paramètres d'analyse (ex-« Paramètres avancés » repliables ; migrés de RàI le 26 mai PM2) -->
+                        <div class="sous-titre-bloc">
+                            <h4>Paramètres d'analyse</h4>
+                            <div class="etiquettes-effet"><span class="etiquette-effet">Profil › Accompagnement, Développement des habiletés</span><span class="etiquette-effet">Suivi du groupe › besoins d'intervention</span><span class="etiquette-effet">Liste des élèves</span><span class="etiquette-effet">Interventions › critères en défi</span></div>
+                            <button class="btn btn-secondaire btn-mini" data-action="restaurerSeuilsDetectionDefautV2" data-tooltip="depist-restaurer">
+                                Remettre les valeurs par défaut (3 · 10 · 5 · 70)
+                            </button>
+                        </div>
+                        <div class="grille-4col-form">
+
+                            <!-- Fenêtre d'analyse des patterns -->
+                            <div class="groupe-form u-mb-0">
+                                <label for="v2-pref-fenetre-patterns" data-tooltip="depist-fenetre">Fenêtre d'analyse</label>
+                                <div class="champ-unite">
+                                    <input type="number" id="v2-pref-fenetre-patterns" class="controle-form" value="3" min="3" max="12" data-on-change="sauvegarderSeuilsV2">
+                                    <span class="u-texte-petit text-muted">dernières productions</span>
+                                </div>
+                                <small class="u-texte-mini text-muted" style="display: block; margin-top: 4px">
+                                    Valeur basse = détection précoce | Valeur élevée = détection plus fiable
                                 </small>
                             </div>
 
-                            <!-- Paramètres avancés repliables (migrés de RàI le 26 mai PM2) -->
-                            <details class="parametres-avances-pliable">
-                                <summary>Paramètres avancés</summary>
-                                <div class="parametres-avances-pliable-contenu">
-
-                                    <!-- Fenêtre d'analyse des patterns -->
-                                    <div class="groupe-form u-mb-15">
-                                        <label for="v2-pref-fenetre-patterns" class="u-mb-8 u-texte-gras" style="display: block" data-tooltip="depist-fenetre">
-                                            Fenêtre d'analyse des patterns
-                                        </label>
-                                        <div class="u-flex-gap-10 u-align-center">
-                                            <input type="number" id="v2-pref-fenetre-patterns" class="controle-form" value="3" min="3" max="12" style="width: 80px;" data-on-change="sauvegarderSeuilsV2">
-                                            <span class="u-texte-09">dernières productions</span>
-                                        </div>
-                                        <small class="u-texte-petit" style="display: block; color: var(--gris-moyen); margin-top: 8px">
-                                            Valeur basse = détection précoce | Valeur élevée = détection plus fiable
-                                        </small>
-                                    </div>
-
-                                    <!-- Seuils de détection -->
-                                    <h4 class="u-texte-moyen u-texte-bleu" style="margin: 15px 0 12px 0">Seuils de détection</h4>
-
-                                    <!-- Seuil progression -->
-                                    <div class="u-mb-15 u-p-12" style="background: var(--surface-carte, #1a3a48); border-radius: 6px">
-                                        <label for="v2-seuil-progression" class="u-mb-8 u-texte-gras" style="display: block" data-tooltip="depist-seuil-progression">
-                                            Progression des artefacts
-                                            <span id="v2-valeur-progression" class="u-ml-10 u-texte-bleu">10 points (%)</span>
-                                        </label>
-                                        <input type="range" id="v2-seuil-progression" class="controle-form"
-                                               min="0.05" max="0.20" step="0.01" value="0.10"
-                                               class="u-w-100" style="cursor: pointer"
-                                               data-on-input="mettreAJourAffichageSeuilV2" data-param="progression"
-                                               data-on-change="sauvegarderSeuilsV2">
-                                        <div class="u-mt-5" style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gris-moyen)">
-                                            <span>5 points (sensible)</span>
-                                            <span>20 points (moins sensible)</span>
-                                        </div>
-                                        <small class="u-texte-petit" style="display: block; color: var(--gris-moyen); margin-top: 8px">
-                                            Différence minimale pour considérer une progression (↗) ou régression (↘).
-                                        </small>
-                                    </div>
-
-                                    <!-- Sensibilité des flèches par critère (#823 : ex-« Direction du risque ») -->
-                                    <div class="u-mb-15 u-p-12" style="background: var(--surface-carte, #1a3a48); border-radius: 6px">
-                                        <label for="v2-seuil-risque" class="u-mb-8 u-texte-gras" style="display: block" data-tooltip="depist-seuil-direction">
-                                            Sensibilité des flèches par critère
-                                            <span id="v2-valeur-risque" class="u-ml-10 u-texte-bleu">5 points (%)</span>
-                                        </label>
-                                        <input type="range" id="v2-seuil-risque" class="controle-form"
-                                               min="0.03" max="0.15" step="0.01" value="0.05"
-                                               class="u-w-100" style="cursor: pointer"
-                                               data-on-input="mettreAJourAffichageSeuilV2" data-param="risque"
-                                               data-on-change="sauvegarderSeuilsV2">
-                                        <div class="u-mt-5" style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gris-moyen)">
-                                            <span>3 points (sensible)</span>
-                                            <span>15 points (moins sensible)</span>
-                                        </div>
-                                        <small class="u-texte-petit" style="display: block; color: var(--gris-moyen); margin-top: 8px">
-                                            Variation minimale de la moyenne d'un critère, d'une fenêtre d'analyse à la précédente (la même, décalée d'une production), pour afficher une flèche (→ ou ←) après ce critère.
-                                        </small>
-                                    </div>
-
-                                    <!-- Défi spécifique -->
-                                    <div class="u-mb-15 u-p-12" style="background: var(--surface-carte, #1a3a48); border-radius: 6px">
-                                        <label for="v2-seuil-defi" class="u-mb-8 u-texte-gras" style="display: block" data-tooltip="depist-seuil-defi">
-                                            Seuil de défi spécifique
-                                            <span id="v2-valeur-defi" class="u-ml-10 u-texte-bleu">70%</span>
-                                        </label>
-                                        <input type="range" id="v2-seuil-defi" class="controle-form"
-                                               min="0.60" max="0.80" step="0.01" value="0.70"
-                                               class="u-w-100" style="cursor: pointer"
-                                               data-on-input="mettreAJourAffichageSeuilV2" data-param="defi"
-                                               data-on-change="sauvegarderSeuilsV2">
-                                        <div class="u-mt-5" style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gris-moyen)">
-                                            <span>60% (plus exigeant)</span>
-                                            <span>80% (moins exigeant)</span>
-                                        </div>
-                                        <small class="u-texte-petit" style="display: block; color: var(--gris-moyen); margin-top: 8px">
-                                            Score sous lequel un critère est identifié comme défi nécessitant attention.<br>
-                                            <em>Règle le dépistage seulement.</em>
-                                        </small>
-                                    </div>
-
-                                    <!-- Bouton restaurer seuils de détection -->
-                                    <button class="btn btn-secondaire u-mt-10" data-action="restaurerSeuilsDetectionDefautV2" data-tooltip="depist-restaurer">
-                                        Restaurer les valeurs par défaut
-                                    </button>
-
+                            <!-- Seuil progression (en points, 5 à 20 ; le calcul lit une fraction) -->
+                            <div class="groupe-form u-mb-0">
+                                <label for="v2-seuil-progression" data-tooltip="depist-seuil-progression">Progression des artefacts</label>
+                                <div class="champ-unite">
+                                    <input type="number" id="v2-seuil-progression" class="controle-form" value="10" min="5" max="20" data-on-change="sauvegarderSeuilsV2">
+                                    <span class="u-texte-petit text-muted">points</span>
                                 </div>
-                            </details>
+                                <small class="u-texte-mini text-muted" style="display: block; margin-top: 4px">
+                                    Différence minimale pour considérer une progression (↗) ou régression (↘). De 5 (sensible) à 20 (moins sensible).
+                                </small>
+                            </div>
+
+                            <!-- Sensibilité des flèches par critère (#823 : ex-« Direction du risque » ; en points, 3 à 15) -->
+                            <div class="groupe-form u-mb-0">
+                                <label for="v2-seuil-risque" data-tooltip="depist-seuil-direction">Sensibilité des flèches par critère</label>
+                                <div class="champ-unite">
+                                    <input type="number" id="v2-seuil-risque" class="controle-form" value="5" min="3" max="15" data-on-change="sauvegarderSeuilsV2">
+                                    <span class="u-texte-petit text-muted">points</span>
+                                </div>
+                                <small class="u-texte-mini text-muted" style="display: block; margin-top: 4px">
+                                    Variation minimale de la moyenne d'un critère, d'une fenêtre d'analyse à la précédente (la même, décalée d'une production), pour afficher une flèche (→ ou ←) après ce critère. De 3 (sensible) à 15 (moins sensible).
+                                </small>
+                            </div>
+
+                            <!-- Défi spécifique -->
+                            <div class="groupe-form u-mb-0">
+                                <label for="v2-seuil-defi" data-tooltip="depist-seuil-defi">Seuil de défi spécifique</label>
+                                <div class="champ-unite">
+                                    <input type="number" id="v2-seuil-defi" class="controle-form" value="70" min="60" max="80" data-on-change="sauvegarderSeuilsV2">
+                                    <span class="u-texte-petit text-muted">%</span>
+                                </div>
+                                <small class="u-texte-mini text-muted" style="display: block; margin-top: 4px">
+                                    Score sous lequel un critère est identifié comme défi nécessitant attention. De 60 % (plus exigeant) à 80 % (moins exigeant).<br>
+                                    <em>Règle le dépistage seulement.</em>
+                                </small>
+                            </div>
+                            <!-- Bouton restaurer seuils de détection -->
+                            <!-- (il vit dans le sous-titre du bloc « Paramètres d'analyse », ci-dessus) -->
 
                         </div>
                     </div>
 
                     <!-- ╔══════════════════════════════════════════════════════════╗
                          CARTE 2 : Micro-données ACP
-                         (activation + détails A-C-P + unité + seuils
-                          + graphiques d'évolution)
+                         (collecte + graphiques + indicateurs visuels + note différée
+                          + seuils d'interprétation)
                          ╚══════════════════════════════════════════════════════════╝ -->
-                    <div class="carte accordeon" id="accordeon-acc-acp">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Micro-données ACP
-                            </h3>
+                    <div class="carte carte-pilier" id="accordeon-acc-acp">
+                        <h3 class="carte-titre-bleu">
+                            Micro-données ACP
+                            <span class="carte-titre-role">assiduité, complétion, performance — le contexte d'apprentissage</span>
                             <button class="option-accompagnement-guide-btn" data-action="ouvrirGuidePedagogique" data-param="acp" title="Guide ACP">
                                 <img src="icons/icon-book.svg" alt="" class="btn-inline-icon"> Guide
                             </button>
-                        </div>
-                        <div class="accordeon-contenu">
+                        </h3>
+                        <div class="grille-2col">
 
-                            <!-- Checkbox d'activation principale -->
-                            <div class="form-group u-mb-15 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
-                                <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-outils-acp">
+                            <div class="bloc-option">
+                                <label class="bloc-option-label" data-tooltip="pref-outils-acp">
                                     <input type="checkbox" id="v2-pref-depistage-acp" checked data-on-change="sauvegarderPreferencesV2">
-                                    <strong style="margin-left: 8px;">Activer la collecte des données sur le contexte d'apprentissage et la performance</strong>
+                                    <span class="u-texte-gras">Activer la collecte des données sur le contexte d'apprentissage et la performance</span>
                                 </label>
-                                <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
+                                <small class="bloc-option-aide u-texte-petit">
                                     Indices descriptifs Assiduité, Complétion et Performance. Affichés dans la section « Engagement ACP » du profil individuel.
                                 </small>
+                                <div class="etiquettes-effet"><span class="etiquette-effet">Profil › Engagement ACP</span></div>
                             </div>
 
-                            <!-- Sous-item : Seuils d'interprétation (pliable) -->
-                            <details class="parametres-avances-pliable" data-tooltip="depist-seuils-interpretation">
-                                <summary>Seuils d'interprétation</summary>
-                                <div class="parametres-avances-pliable-contenu">
-                                    <p class="text-muted u-mb-15 u-texte-09">
-                                        Ces trois seuils colorent les colonnes Assiduité, Complétion, Performance et Mobilisation de la liste des élèves, et qualifient l'engagement dans le profil. Ils ne touchent ni la note ni l'échelle IDME.
-                                    </p>
-
-                                    <!-- Indicateurs visuels des seuils -->
-                                    <div class="groupe-form u-mb-20">
-                                        <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="depist-seuils-visuels">
-                                            <input type="checkbox" id="v2-pref-seuils-visuels" checked data-on-change="sauvegarderPreferencesV2">
-                                            <span class="u-texte-gras" style="margin-left: 8px">Indicateurs visuels des seuils</span>
-                                        </label>
-                                        <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
-                                            Lignes pointillées et étiquettes des niveaux de ton échelle sur les graphiques de progression du profil individuel.
-                                        </small>
-                                    </div>
-
-                                    <!-- Grille des seuils -->
-                                    <div class="u-mb-20" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px">
-                                        <!-- Seuil Fragile -->
-                                        <div class="groupe-form u-p-12" style="background: var(--alerte-fond-erreur); border-radius: 6px; border-left: 4px solid var(--alerte-bordure-erreur)">
-                                            <label for="v2-seuil-fragile" class="u-mb-8 u-texte-gras" style="display: block; color: var(--alerte-texte-erreur)" data-tooltip="depist-seuil-fragile">
-                                                Fragile si inférieur à
-                                            </label>
-                                            <div class="u-flex-gap-8 u-align-center">
-                                                <input type="number" id="v2-seuil-fragile" class="controle-form" value="70" min="50" max="80" style="width: 80px;" data-on-change="sauvegarderSeuilsV2">
-                                                <span>%</span>
-                                            </div>
-                                        </div>
-
-                                        <!-- Seuil Acceptable -->
-                                        <div class="groupe-form alerte alerte-attention">
-                                            <label for="v2-seuil-acceptable" class="u-mb-8 u-texte-gras" style="display: block; color: var(--alerte-texte-attention)" data-tooltip="depist-seuil-acceptable">
-                                                Acceptable si inférieur à
-                                            </label>
-                                            <div class="u-flex-gap-8 u-align-center">
-                                                <input type="number" id="v2-seuil-acceptable" class="controle-form" value="80" min="60" max="90" style="width: 80px;" data-on-change="sauvegarderSeuilsV2">
-                                                <span>%</span>
-                                            </div>
-                                        </div>
-
-                                        <!-- Seuil Bon -->
-                                        <div class="groupe-form u-p-12" style="background: var(--alerte-fond-succes); border-radius: 6px; border-left: 4px solid var(--alerte-bordure-succes)">
-                                            <label for="v2-seuil-bon" class="u-mb-8 u-texte-gras u-texte-succes" style="display: block" data-tooltip="depist-seuil-bon">
-                                                Bon si supérieur ou égal à
-                                            </label>
-                                            <div class="u-flex-gap-8 u-align-center">
-                                                <input type="number" id="v2-seuil-bon" class="controle-form" value="85" min="70" max="95" style="width: 80px;" data-on-change="sauvegarderSeuilsV2">
-                                                <span>%</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Bouton restaurer seuils d'interprétation -->
-                                    <button class="btn btn-secondaire u-mt-15" data-action="restaurerSeuilsInterpretationDefautV2" data-tooltip="depist-seuils-restaurer">
-                                        Restaurer les valeurs par défaut
-                                    </button>
-                                </div>
-                            </details>
-
-                            <!-- Sous-item : Graphiques d'évolution ACP -->
-                            <div class="form-group u-mt-15 u-mb-15">
-                                <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-affichage-graphiques">
+                            <div class="bloc-option">
+                                <label class="bloc-option-label" data-tooltip="pref-affichage-graphiques">
                                     <input type="checkbox" id="v2-pref-graphiques" checked data-on-change="sauvegarderPreferencesV2">
-                                    <strong style="margin-left: 8px;">Graphiques d'évolution ACP</strong>
+                                    <span class="u-texte-gras">Graphiques d'évolution ACP</span>
                                 </label>
-                                <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
+                                <small class="bloc-option-aide u-texte-petit">
                                     Graphiques de progression dans le temps. Affichés dans la section « Progression temporelle ACP » du profil individuel.
                                 </small>
+                                <div class="etiquettes-effet"><span class="etiquette-effet">Profil › Progression temporelle ACP</span><span class="etiquette-effet">Profil › Gestes cognitifs › Évolution</span></div>
                             </div>
 
-                            <!-- Sous-item : Note différée (#321, couche 1 PRÉN) -->
-                            <div class="form-group u-mt-15 u-mb-15">
-                                <label class="u-align-center" style="cursor: pointer; display: flex">
-                                    <input type="checkbox" id="v2-pref-note-differee" data-on-change="sauvegarderPreferencesV2">
-                                    <strong style="margin-left: 8px;">Masquer les notes par travail (note différée)</strong>
+                            <div class="bloc-option">
+                                <label class="bloc-option-label" data-tooltip="depist-seuils-visuels">
+                                    <input type="checkbox" id="v2-pref-seuils-visuels" checked data-on-change="sauvegarderPreferencesV2">
+                                    <span class="u-texte-gras">Indicateurs visuels des seuils</span>
                                 </label>
-                                <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
+                                <small class="bloc-option-aide u-texte-petit">
+                                    Lignes pointillées et étiquettes des niveaux de ton échelle sur les graphiques de progression du profil individuel.
+                                </small>
+                                <div class="etiquettes-effet"><span class="etiquette-effet">Profil › graphiques ACP et critères</span><span class="etiquette-effet">Suivi du groupe › semaine par semaine, trajectoires</span></div>
+                            </div>
+
+                            <!-- Note différée (#321, couche 1 PRÉN) -->
+                            <div class="bloc-option">
+                                <label class="bloc-option-label">
+                                    <input type="checkbox" id="v2-pref-note-differee" data-on-change="sauvegarderPreferencesV2">
+                                    <span class="u-texte-gras">Masquer les notes par travail (note différée)</span>
+                                </label>
+                                <small class="bloc-option-aide u-texte-petit">
                                     Remplace la note chiffrée de chaque travail par un repère « note différée » dans la liste des évaluations, le profil et le portfolio, pour que la rétroaction passe d'abord. Les niveaux et la note finale de session restent affichés ; aucun calcul n'est modifié.
                                 </small>
+                                <div class="etiquettes-effet"><span class="etiquette-effet">Profil (dont le panneau Portfolio)</span><span class="etiquette-effet etiquette-effet-hors">Évaluation › Liste des évaluations</span></div>
                             </div>
 
+                        </div>
+
+                        <!-- Seuils d'interprétation (ex-repliable) -->
+                        <div class="sous-titre-bloc" data-tooltip="depist-seuils-interpretation">
+                            <h4>Seuils d'interprétation</h4>
+                            <div class="etiquettes-effet"><span class="etiquette-effet">Liste des élèves › couleur des colonnes A, C, P, M</span><span class="etiquette-effet">Profil › Engagement ACP</span></div>
+                            <button class="btn btn-secondaire btn-mini" data-action="restaurerSeuilsInterpretationDefautV2" data-tooltip="depist-seuils-restaurer">
+                                Remettre les valeurs par défaut (70 · 80 · 85)
+                            </button>
+                        </div>
+                        <p class="text-muted u-mb-8 u-texte-petit">
+                            Ces trois seuils colorent les colonnes Assiduité, Complétion, Performance et Mobilisation de la liste des élèves, et qualifient l'engagement dans le profil. Ils ne touchent ni la note ni l'échelle IDME.
+                        </p>
+                        <div class="grille-3col-form">
+                            <div class="groupe-form u-mb-0">
+                                <label for="v2-seuil-fragile" data-tooltip="depist-seuil-fragile">Fragile si inférieur à</label>
+                                <div class="champ-unite">
+                                    <input type="number" id="v2-seuil-fragile" class="controle-form" value="70" min="50" max="80" data-on-change="sauvegarderSeuilsV2">
+                                    <span class="u-texte-petit text-muted">%</span>
+                                </div>
+                            </div>
+                            <div class="groupe-form u-mb-0">
+                                <label for="v2-seuil-acceptable" data-tooltip="depist-seuil-acceptable">Acceptable si inférieur à</label>
+                                <div class="champ-unite">
+                                    <input type="number" id="v2-seuil-acceptable" class="controle-form" value="80" min="60" max="90" data-on-change="sauvegarderSeuilsV2">
+                                    <span class="u-texte-petit text-muted">%</span>
+                                </div>
+                            </div>
+                            <div class="groupe-form u-mb-0">
+                                <label for="v2-seuil-bon" data-tooltip="depist-seuil-bon">Bon si supérieur ou égal à</label>
+                                <div class="champ-unite">
+                                    <input type="number" id="v2-seuil-bon" class="controle-form" value="85" min="70" max="95" data-on-change="sauvegarderSeuilsV2">
+                                    <span class="u-texte-petit text-muted">%</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -9020,28 +8986,25 @@
                          CARTE 3 : Intervention (RàI)
                          (checkbox d'activation uniquement — sous-items migrés vers SOLO)
                          ╚══════════════════════════════════════════════════════════╝ -->
-                    <div class="carte accordeon" id="accordeon-acc-rai">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Intervention (RàI)
-                            </h3>
+                    <div class="carte carte-pilier" id="accordeon-acc-rai">
+                        <h3 class="carte-titre-bleu">
+                            Intervention (RàI)
+                            <span class="carte-titre-role">adapter le modèle de la Réponse à l'intervention</span>
                             <button class="option-accompagnement-guide-btn" data-action="ouvrirGuidePedagogique" data-param="rai" title="Guide RàI">
                                 <img src="icons/icon-book.svg" alt="" class="btn-inline-icon"> Guide
                             </button>
-                        </div>
-                        <div class="accordeon-contenu">
-
-                            <!-- Checkbox d'activation principale -->
-                            <div class="form-group u-mb-15 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
-                                <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-outils-rai">
+                        </h3>
+                        <div class="grille-2col">
+                            <div class="bloc-option bloc-option-pleine">
+                                <label class="bloc-option-label" data-tooltip="pref-outils-rai">
                                     <input type="checkbox" id="v2-pref-rai" checked data-on-change="sauvegarderPreferencesV2">
-                                    <strong style="margin-left: 8px;">Appliquer une adaptation du modèle de la Réponse à l'intervention</strong>
+                                    <span class="u-texte-gras">Appliquer une adaptation du modèle de la Réponse à l'intervention</span>
                                 </label>
-                                <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
-                                    Active le dépistage dans la sous-section Accompagnement : <strong>Suivi de P et du contexte d'apprentissage</strong> (performance, assiduité, complétion) et <strong>Niveaux d'intervention</strong> (universel, préventif, intensif). La grille de critères et les paramètres avancés se configurent dans la section SOLO ci-dessus.
+                                <small class="bloc-option-aide u-texte-petit">
+                                    Active le dépistage dans la sous-section Accompagnement : <strong>Suivi de P et du contexte d'apprentissage</strong> (performance, assiduité, complétion) et <strong>Niveaux d'intervention</strong> (universel, préventif, intensif). La grille de critères et les paramètres d'analyse se règlent dans le bloc SOLO ci-dessus.
                                 </small>
+                                <div class="etiquettes-effet"><span class="etiquette-effet">Suivi du groupe › besoins d'intervention</span><span class="etiquette-effet">Liste des élèves › colonnes Pattern, RàI</span><span class="etiquette-effet">Profil › Accompagnement</span><span class="etiquette-effet">Interventions › Guide RàI</span></div>
                             </div>
-
                         </div>
                     </div>
 
@@ -14415,7 +14378,7 @@
          donc jamais lu sur Safari ni sur iPad. Un script, lui, se charge. Généré
          par scripts/release.mjs en même temps que version.json — les deux ne
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
-    <script src="version.js?v=09110717"></script>
+    <script src="version.js?v=09111022"></script>
     <script src="js/db.js?v=20260826b"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
     <script src="js/pratiques/modalites-evaluation.js?v=20260810a"></script> <!-- SSOT #328 Lot 1 : module propriétaire de modalitesEvaluation (seul point d'écriture), chargé avec la couche stockage -->
@@ -14488,7 +14451,7 @@
     <script src="js/repertoires-bibliotheque.js"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
     <script src="js/pratiques-bibliotheque.js?v=20260903b"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/pratiques-gestion.js?v=20260906b"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
-    <script src="js/preferences-v2.js?v=20260910d"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
+    <script src="js/preferences-v2.js?v=20260911a"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=20260903f"></script> <!-- #649 : un seul chemin de suppression des productions, le garde mort est parti -->
     <script src="js/etudiants.js?v=20260911a"></script>
     <script src="js/productions-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
@@ -14677,7 +14640,7 @@
     <script src="js/guidage-demo.js?v=20260831b"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260911b"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
+    <script src="js/changelog-data.js?v=20260911c"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260911a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14698,11 +14661,11 @@
     <script src="js/export-resultats-finaux.js?v=20260905a"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260911b"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260911c"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260911b"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260911c"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
