@@ -15,6 +15,22 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.132.0 — LISTE DES ÉTUDIANT·ES : LES ABANDONS RESTENT VISIBLES, GRISÉS ; LES TRIS TRIENT ; LA RECHERCHE IGNORE LES ACCENTS** (lot 2 du cadrage 11, build à lire en bas de page).
+**Ce que tu verras** : dans `Suivi › Liste des étudiant·es`, un élève en abandon, inactif ou en décrochage
+reste dans le tableau, en gris, avec son statut entre parenthèses après son nom — ta décision de 14 h 17.
+La note sous le tableau le promettait déjà ; le tableau le retirait. Les moyennes et les corrélations
+n'ont pas bougé : elles comptent les actifs, comme avant. Le clic sur « # » renverse l'ordre, le tri par DA
+est numérique, « aime » trouve Aimé, la liste se rafraîchit quand tu cesses d'écrire. Le filtre des profils
+offre les six profils que l'application calcule. « ≥ Min. » tient après un tri, et un élève sans aucune
+évaluation compte comme sous le minimum. Dans `Cadre › Trimestre`, un DA déjà présent est refusé à l'ajout
+(le message nomme l'élève existant) et ignoré à l'import ; le numéro de groupe s'écrit sur cinq chiffres.
+Le bouton d'aide du titre ne disparaît plus au premier rendu.
+**Vérifié comment** : sentinelle de quatorze essais sur les modules réels, dont le piège du lot (un abandon
+rendu, `moy=` identique avec et sans lui), six fois cassée exprès et remise ; les bancs d'audit du 6 disent
+l'après. **Pas vérifié** : ton écran, tes groupes réels, et un abandon réel (le pack de démonstration n'en
+porte aucun) — porte terrain de sept rangées (`plans de travail/PORTES-TERRAIN-2026-09-11-liste-des-etudiants.md`).
+Les deux textes de Cadre › Trimestre sont ceux de Cowork, posés tels quels sauf ton mot.
+
 ↻ **TES ÉVALUATIONS D'HIVER 2026 RETROUVENT LEURS GRILLES (données, 11 sept. ~15 h 20 — aucun code d'application)**.
 **Ce que tu verras** : dans `Évaluation › Annoter et évaluer`, une évaluation d'Hiver 2026 s'ouvre avec sa
 grille et son échelle dans la palette Paramètres ; la bannière « Grille d'origine introuvable » a disparu.

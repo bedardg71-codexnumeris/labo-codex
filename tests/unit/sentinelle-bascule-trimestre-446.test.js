@@ -144,6 +144,7 @@ describe('#446 · C — un nom manquant ne coûte plus un écran', () => {
         expect(etudiants).toMatch(
             /typeof valeurA === 'string' \|\| typeof valeurB === 'string'/
         );
-        expect(etudiants).toContain("String(valeurA ?? '').localeCompare(String(valeurB ?? ''))");
+        // #749 lot 2 (11 sept. 2026) : le comparateur prend depuis l'option `numeric` (DA, groupe) — la garde #446 reste.
+        expect(etudiants).toContain("String(valeurA ?? '').localeCompare(String(valeurB ?? ''),");
     });
 });

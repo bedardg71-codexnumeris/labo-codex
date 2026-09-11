@@ -77,7 +77,7 @@ async function chargerListeEtudiantsV2() {
     // Filtrer par groupe si sélectionné
     const groupeFiltre = getGroupeSelectionneV2();
     const etudiants = groupeFiltre
-        ? tousLesEtudiants.filter(e => String(e.groupe).padStart(5, '0') === groupeFiltre)
+        ? tousLesEtudiants.filter(e => normaliserNumeroGroupe(e.groupe) === groupeFiltre)
         : tousLesEtudiants;
 
     // Mettre à jour le compteur dans l'en-tête (total, pas filtré)
@@ -130,7 +130,7 @@ async function chargerListeEtudiantsV2() {
     etudiants.forEach((e, index) => {
         const sa = e.sa === 'Oui' || e.sa === true ? '<span class="icone-inline icone-inline--check" aria-label="Oui"></span>' : '';
         // Formater le groupe sur 5 chiffres (ex: 00001)
-        const groupe = e.groupe ? String(e.groupe).padStart(5, '0') : '—';
+        const groupe = e.groupe ? normaliserNumeroGroupe(e.groupe) : '—';
         const statut = e.statut || '';
         const classeStatut = statut === 'inactif' || statut === 'décrochage' ? ' etudiant-inactif' : '';
         html += `
@@ -181,7 +181,7 @@ function mettreAJourResumeEtudiantsV2(etudiants) {
     if (elemGroupes) {
         const groupesMap = {};
         etudiants.forEach(e => {
-            const grp = e.groupe ? String(e.groupe).padStart(5, '0') : 'Sans groupe';
+            const grp = e.groupe ? normaliserNumeroGroupe(e.groupe) : 'Sans groupe';
             groupesMap[grp] = (groupesMap[grp] || 0) + 1;
         });
 
@@ -250,7 +250,7 @@ function populerDropdownGroupesV2(etudiants) {
     const groupesSet = new Set();
     etudiants.forEach(e => {
         if (e.groupe) {
-            groupesSet.add(String(e.groupe).padStart(5, '0'));
+            groupesSet.add(normaliserNumeroGroupe(e.groupe));
         }
     });
 
@@ -260,7 +260,7 @@ function populerDropdownGroupesV2(etudiants) {
     // étudiants a isDemo=true. Cohérent avec le traitement des autres
     // sélecteurs latéraux (horaires, enseignants).
     const estGroupeDemo = (grp) => etudiants.some(e =>
-        String(e.groupe || '').padStart(5, '0') === grp && e.isDemo === true
+        normaliserNumeroGroupe(e.groupe) === grp && e.isDemo === true
     );
 
     // Reconstruire les options
@@ -335,7 +335,11 @@ async function soumettreEtudiantV2() {
     }
 
     const coursActif = db.getSync('infoCours', null);
-    const groupe = groupeInput || coursActif?.groupe || '00001';
+    // L-9 (#749 lot 2) : padé À L'ÉCRITURE (« 1 » → « 00001 »), par la seule
+    // normalisation partagée (modes.js) — les dix `padStart(5, '0')` de ce fichier
+    // passent par elle aussi. Le stock déjà écrit en « 1 » n'est pas réécrit : les
+    // lecteurs normalisent.
+    const groupe = normaliserNumeroGroupe(groupeInput || coursActif?.groupe || '00001');
 
     const etudiant = {
         da: da || `DA${Date.now()}`,
@@ -355,8 +359,19 @@ async function soumettreEtudiantV2() {
     // instantané lu hors file, donc il pouvait laisser passer une modification
     // concurrente survenue APRÈS sa lecture.
     let introuvable = false;
+    let daEnDouble = null;
     await db.modifier(cleEtud, (lus) => {
         const etudiants = lus || [];
+
+        // L-8 (#749 lot 2) : un DA déjà porté par une autre fiche est REFUSÉ — tout
+        // le reste du code identifie un élève par son DA (findIndex(e => e.da === da)
+        // ×5) ; deux fiches sous le même DA, c'est un élève qui en écrase un autre au
+        // hasard. En édition, la fiche elle-même n'est pas un doublon.
+        if (etudiant.da) {
+            const autre = etudiants.find(e => e && String(e.da) === String(etudiant.da)
+                && !(etudiantEnEditionIndex >= 0 && etudiantEnEditionDA !== null && String(e.da) === String(etudiantEnEditionDA)));
+            if (autre) { daEnDouble = autre; return undefined; }
+        }
 
         if (etudiantEnEditionIndex >= 0) {
             // Mode édition — #382 (audit 5 août, rapport B4) :
@@ -385,6 +400,11 @@ async function soumettreEtudiantV2() {
     }, []);
 
     // Les messages vivent HORS du mutateur : la file ne porte que l'écriture.
+    if (daEnDouble) {
+        // Mots lus par les collègues — proposition Cowork du 11 sept., soumise à Grégoire.
+        notifications.erreur('Ce DA est déjà dans le groupe : ' + ((daEnDouble.prenom || '') + ' ' + (daEnDouble.nom || '')).trim() + '.');
+        return;
+    }
     if (introuvable) {
         notifications.erreur('Étudiant introuvable', 'La liste a changé depuis l\'ouverture du formulaire. Resélectionne l\'étudiant avant d\'enregistrer.');
         return;
@@ -500,13 +520,13 @@ function creerNouveauGroupeV2() {
         prochainNumero++;
     }
 
-    const nouveauGroupe = String(prochainNumero).padStart(5, '0');
+    const nouveauGroupe = normaliserNumeroGroupe(prochainNumero);
 
     // Demander confirmation ou personnalisation
     const groupeSaisi = prompt(`Numéro du nouveau groupe :`, nouveauGroupe);
     if (!groupeSaisi) return; // Annulé
 
-    const groupeFinal = String(groupeSaisi).padStart(5, '0');
+    const groupeFinal = normaliserNumeroGroupe(groupeSaisi);
 
     // Réinitialiser le formulaire et pré-remplir le groupe
     reinitialiserFormEtudiantV2();
@@ -709,7 +729,7 @@ function traiterDonneesImportV2(contenu) {
 
             donneesImportEnAttenteV2.push({
                 da: colonnes[0] || '',
-                groupe: colonnes[1] || '00001',
+                groupe: normaliserNumeroGroupe(colonnes[1] || '00001'),   // L-9 : padé à l'écriture
                 nom: colonnes[2] || '',
                 prenom: colonnes[3] || '',
                 programme: colonnes[4] || '',
@@ -739,7 +759,7 @@ function traiterDonneesImportV2(contenu) {
         `;
 
         donneesImportEnAttenteV2.forEach(e => {
-            const groupe = e.groupe ? String(e.groupe).padStart(5, '0') : '—';
+            const groupe = e.groupe ? normaliserNumeroGroupe(e.groupe) : '—';
             html += `
                 <tr>
                     <td>${e.da}</td><td>${groupe}</td><td>${e.nom}</td><td>${e.prenom}</td><td>${e.programme}</td><td>${e.sa}</td>
@@ -771,14 +791,23 @@ async function confirmerImportV2() {
     // #522 lot 5 — la liste est relue DANS la file. security-ok: les entrées
     // viennent du fichier importé, déjà validé en amont ; seul `coursId` est
     // posé ici, depuis le cours actif.
+    // L-8 (#749 lot 2) : un DA déjà présent dans le groupe n'est PAS dupliqué — il est
+    // ignoré et compté ; la fiche existante ne bouge pas (réimporter le même fichier
+    // n'ajoute rien). Les doublons INTERNES au fichier sont écartés de la même façon.
+    let nbAjoutes = 0;
+    let nbDejaPresents = 0;
     await db.modifier(cleEtud, (lus) => {
         const etudiants = lus || [];
+        const dasPresents = new Set(etudiants.map(e => e && String(e.da)));
 
         donneesImportEnAttenteV2.forEach(e => {
+            if (e.da && dasPresents.has(String(e.da))) { nbDejaPresents++; return; }
+            if (e.da) dasPresents.add(String(e.da));
             etudiants.push({
                 ...e,
                 coursId: coursActif?.id || ''
             });
+            nbAjoutes++;
         });
 
         return etudiants;
@@ -788,7 +817,7 @@ async function confirmerImportV2() {
     // #771 (6 sept. 2026) — la notification lisait `etudiants`, le paramètre du mutateur ci-dessus,
     // hors de portée ici : ReferenceError après l'écriture, aucune confirmation à l'écran.
     const verification = db.getSync(cleEtud, []).length;
-    const nbImportes = donneesImportEnAttenteV2.length;
+    const nbImportes = nbAjoutes;
 
     // Nettoyer
     donneesImportEnAttenteV2 = [];
@@ -802,7 +831,10 @@ async function confirmerImportV2() {
 
     chargerListeEtudiantsV2();
 
-    notifications.succes(`${nbImportes} étudiant(s) importé(s) — ${verification} au total dans le groupe`);
+    // Mots lus par les collègues — proposition Cowork du 11 sept., soumise à Grégoire.
+    notifications.succes(`${nbImportes} étudiant·e${nbImportes > 1 ? 's' : ''} ajouté·e${nbImportes > 1 ? 's' : ''}`
+        + (nbDejaPresents > 0 ? `, ${nbDejaPresents} déjà présent·e${nbDejaPresents > 1 ? 's' : ''} (ignoré·e${nbDejaPresents > 1 ? 's' : ''})` : '')
+        + ` — ${verification} au total dans le groupe`);
 
     // Mettre à jour le guide groupe-cours
 }
@@ -890,7 +922,7 @@ async function supprimerGroupeSelectionneV2() {
 
     // Compter les étudiants du groupe
     const etudiantsDuGroupe = tousLesEtudiants.filter(e =>
-        String(e.groupe).padStart(5, '0') === groupeSelectionne
+        normaliserNumeroGroupe(e.groupe) === groupeSelectionne
     );
 
     if (etudiantsDuGroupe.length === 0) {
@@ -907,7 +939,7 @@ async function supprimerGroupeSelectionneV2() {
     // et un étudiant ajouté pendant la question serait sinon effacé.
     await db.modifier(cleEtud, (lus) => {
         return (lus || []).filter(e =>
-            String(e.groupe).padStart(5, '0') !== groupeSelectionne
+            normaliserNumeroGroupe(e.groupe) !== groupeSelectionne
         );
     }, []);
 

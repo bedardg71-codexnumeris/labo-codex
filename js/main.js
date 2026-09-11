@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0911-1441';
+window._SCRIPT_BUILD_main = '0911-1547';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -111,6 +111,19 @@ window.toggleDisplay = function(element, show) {
 window.estEtudiantExclu = function(etudiant) {
     if (!etudiant || !etudiant.statut) return false;
     return etudiant.statut === 'inactif' || etudiant.statut === 'décrochage' || etudiant.statut === 'abandon';
+};
+
+/**
+ * #749 lot 2 (L-2, 11 sept. 2026) — le MOT que porte un statut exclu, à côté de
+ * la règle qui l'exclut. Ce sont les mots du sélecteur de Cadre › Trimestre
+ * (« Inactivité », « Décrochage ») ; « abandon » est une valeur d'avant ce
+ * sélecteur, encore présente en base : elle garde son mot. Un statut actif ou
+ * inconnu rend '' — rien à afficher.
+ * @param {string} statut
+ * @returns {string}
+ */
+window.libelleStatutEtudiant = function(statut) {
+    return { 'inactif': 'Inactivité', 'décrochage': 'Décrochage', 'abandon': 'Abandon' }[statut] || '';
 };
 
 /* ===============================

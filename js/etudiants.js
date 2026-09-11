@@ -149,9 +149,12 @@ function chargerOptionsFiltres() {
     const filtreGroupe = document.getElementById('filtre-groupe-liste');
     if (filtreGroupe) {
         const groupesSet = new Set();
+        // L-9 (#749 lot 2) : « 1 » et « 00001 » sont UNE entrée — normalisé à la
+        // lecture (window.normaliserNumeroGroupe, modes.js), le stock reste tel quel.
+        const norm = typeof normaliserNumeroGroupe === 'function' ? normaliserNumeroGroupe : (g) => String(g || '');
         etudiants.forEach(function (e) {
-            if (e.groupe && e.groupe.trim() !== '') {
-                groupesSet.add(e.groupe);
+            if (e.groupe && String(e.groupe).trim() !== '') {
+                groupesSet.add(norm(e.groupe));
             }
         });
 
@@ -481,6 +484,11 @@ function mettreAJourTitreListeEtudiants() {
         return;
     }
 
+    // L-11 (#749 lot 2) : le bouton d'aide contextuelle (`data-aide="suivi-liste"`,
+    // index.html) vit DANS ce h2 ; le vider le détruisait au premier rendu — la
+    // capture démo montrait le « i » du primo-aide à sa place. On le garde et on le
+    // remet à droite, avant le primo-aide.
+    const boutonAide = titre.querySelector('[data-aide]');
     // Vider le titre et créer le conteneur avec layout flex
     titre.innerHTML = '';
     const conteneurTitre = document.createElement('div');
@@ -499,6 +507,8 @@ function mettreAJourTitreListeEtudiants() {
         <span class="primo-aide" data-target="note-calcul-indices-liste"
               title="Explication du calcul des indices"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
     `;
+
+    if (boutonAide) partieDroite.insertBefore(boutonAide, partieDroite.firstChild);
 
     conteneurTitre.appendChild(partieGauche);
     conteneurTitre.appendChild(partieDroite);
@@ -639,20 +649,31 @@ window.toggleFiltreMinimum = toggleFiltreMinimum;
  * @param {Array} etudiants - Liste complète des étudiants
  * @returns {Array} - Liste filtrée des étudiants
  */
+/**
+ * L-3 (#749 lot 2) — UNE normalisation pour la recherche et le filtre pattern :
+ * minuscules, sans accents. « aime » trouve Aimé, « cesaire » Césaire,
+ * « comaneci » Comăneci. Le tri par nom, lui, reste `localeCompare`.
+ */
+function normaliserTexteRecherche(texte) {
+    return String(texte || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 function filtrerEtudiants(etudiants) {
     let resultats = etudiants.slice(); // Copie
 
-    // Filtrer pour afficher uniquement les étudiants actifs
-    resultats = resultats.filter(function (e) {
-        return e.statut === 'actif' || !e.statut;
-    });
+    // L-2 (#749 lot 2, décision de Grégoire 11 sept. 2026 : « les abandons visibles,
+    // grisés ») — le filtre `statut === 'actif'` est RETIRÉ. La note de l'écran
+    // disait déjà que les abandons, inactifs et décrochages restent dans le tableau
+    // pour consultation ; elle devient vraie. Les statistiques, elles, passent par
+    // `estEtudiantExclu` plus bas et ne bougent pas.
 
-    // Filtrer par groupe
+    // Filtrer par groupe — L-9 : comparaison normalisée (« 1 » = « 00001 »)
     const filtreGroupe = document.getElementById('filtre-groupe-liste');
     if (filtreGroupe && filtreGroupe.value) {
-        const groupeFiltre = filtreGroupe.value;
+        const norm = typeof normaliserNumeroGroupe === 'function' ? normaliserNumeroGroupe : (g) => String(g || '');
+        const groupeFiltre = norm(filtreGroupe.value);
         resultats = resultats.filter(function (e) {
-            return e.groupe === groupeFiltre;
+            return norm(e.groupe) === groupeFiltre;
         });
     }
 
@@ -683,12 +704,8 @@ function filtrerEtudiants(etudiants) {
         resultats = resultats.filter(function (e) {
             // 🆕 BETA 90+ : Utiliser determinerNiveauRaiPedagogique (Single Source of Truth)
             const niveauInfo = determinerNiveauRaiPedagogique(e.da);
-            // Normaliser le pattern : lowercase, sans accents, espaces → tirets
-            const pattern = niveauInfo.pattern
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '') // Retirer les accents
-                .replace(/\s+/g, '-');
+            // Normaliser le pattern : minuscules, sans accents, espaces → tirets
+            const pattern = normaliserTexteRecherche(niveauInfo.pattern).replace(/\s+/g, '-');
             return pattern === patternFiltre;
         });
     }
@@ -696,10 +713,10 @@ function filtrerEtudiants(etudiants) {
     // Recherche par nom/prénom/DA
     const rechercheNom = document.getElementById('recherche-nom-liste');
     if (rechercheNom && rechercheNom.value.trim()) {
-        const recherche = rechercheNom.value.trim().toLowerCase();
+        const recherche = normaliserTexteRecherche(rechercheNom.value.trim());
         resultats = resultats.filter(function (e) {
-            const nomComplet = (e.nom + ' ' + e.prenom).toLowerCase();
-            const da = (e.da || '').toString().toLowerCase();
+            const nomComplet = normaliserTexteRecherche((e.nom || '') + ' ' + (e.prenom || ''));
+            const da = normaliserTexteRecherche(e.da || '');
             return nomComplet.includes(recherche) || da.includes(recherche);
         });
     }
@@ -748,14 +765,29 @@ function masquerColonnesRaiSiDesactive(activerRai) {
  * FONCTION PRINCIPALE D'AFFICHAGE
  */
 
+/**
+ * L-4 (#749 lot 2) — la recherche est câblée `data-on-input` : un rendu complet par
+ * lettre tapée, avec recalcul des indices du groupe. Cette enveloppe ne rend qu'au
+ * silence (200 ms) ; les `change` des sélecteurs, eux, restent immédiats.
+ */
+let _minuterieRenduListe = null;
+function afficherListeEtudiantsConsultationDifferee() {
+    if (_minuterieRenduListe) clearTimeout(_minuterieRenduListe);
+    _minuterieRenduListe = setTimeout(function () {
+        _minuterieRenduListe = null;
+        afficherListeEtudiantsConsultation();
+    }, 200);
+}
+
 function afficherListeEtudiantsConsultation() {
 
-    // 🔄 FORCER le recalcul des indices A, C et P avant affichage
+    // 🔄 FORCER le recalcul des indices A, C et P avant affichage.
+    // L-4 (#749 lot 2) : cet appel CHAÎNE déjà calculerEtStockerIndicesCP
+    // (indices.js, fin de calculerEtSauvegarderIndicesAssiduite — prouvé par la
+    // sentinelle #749 du lot 1) ; l'appel direct qui suivait écrivait
+    // `<trim>_indicesCP` une seconde fois par rendu. Retiré.
     if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
         calculerEtSauvegarderIndicesAssiduite();
-    }
-    if (typeof calculerEtStockerIndicesCP === 'function') {
-        calculerEtStockerIndicesCP();
     }
 
     // Vérifier si le modèle RàI est activé (préférence utilisateur)
@@ -789,7 +821,9 @@ function afficherListeEtudiantsConsultation() {
     // NOUVEAU: Mettre à jour les statistiques
     mettreAJourStatistiques(etudiantsFiltres);
 
-    // Mettre à jour les badges nombre de personnes
+    // Mettre à jour les badges nombre de personnes — c'est un compte de LIGNES affichées
+    // (abandons visibles compris depuis #749 lot 2), pas une statistique : les `moy=`
+    // et `r=` de l'en-tête se calculent plus bas sur les actifs seulement.
     const nbEtudiants = etudiantsFiltres.length;
     const labelEtudiants = nbEtudiants + ' personne' + (nbEtudiants > 1 ? 's' : '');
 
@@ -828,6 +862,10 @@ function afficherListeEtudiantsConsultation() {
         if (tableContainer) {
             tableContainer.classList.add('u-hide');
         }
+        // Audit du 6 sept. (§ 2.4), commenté et laissé le 11 : on sort AVANT de
+        // mettre à jour `#moy-*` et `#corr-*` — après un filtre qui ne retient
+        // personne, l'en-tête garde les moyennes de l'affichage précédent, sous un
+        // tableau masqué. Mineur : rien de faux n'est affiché à côté d'une ligne.
         return;
     }
 
@@ -907,7 +945,13 @@ function afficherListeEtudiantsConsultation() {
     etudiantsFiltres.forEach(e => {
         const nbEvals = evalsParDA.get(e.da) || 0;
         e.nbEvaluations = nbEvals;
-        e.performanceInsuffisante = nbEvals > 0 && nbEvals < minimumCompletionTab;
+        // L-6 (#749 lot 2, décision Cowork nommée) : « ≥ Min. » signifie « au moins N
+        // évaluations pour qu'un P soit fiable » (la note de l'écran) — 0 est sous N.
+        // Avant : `nbEvals > 0 &&`, un élève sans évaluation n'était pas « insuffisant ».
+        // Un élève exclu (abandon, inactif, décrochage) n'est jamais « insuffisant » :
+        // il est hors des moyennes, hors du compte « (N) » de ≥ Min., et sa ligne reste
+        // grisée par son statut, pas par le filtre (relecture adverse, 11 sept. 2026).
+        e.performanceInsuffisante = !estExclu(e) && nbEvals < minimumCompletionTab;
     });
 
     // 🆕 BETA 95.7 (22 jan): Calculer la moyenne A sur les étudiants avec PRÉSENCES SAISIES
@@ -1030,14 +1074,19 @@ function afficherListeEtudiantsConsultation() {
         reattacherEvenementsToggles();
     }
 
+    // L-1 (#749 lot 2) : le tri « # » comparait `num`, posé APRÈS le tri — il ne
+    // faisait rien. Décision : « # » trie sur l'ORDRE D'ORIGINE (celui du stockage),
+    // ascendant ou descendant ; le numéro affiché reste celui de la ligne après tri.
+    etudiantsFiltres.forEach(function (e, i) { e._ordreOrigine = i; });
+
     // NOUVEAU: Trier selon la colonne active
     etudiantsFiltres.sort(function (a, b) {
         let valeurA, valeurB;
 
         switch(triActuel.colonne) {
             case 'num':
-                valeurA = a.num;
-                valeurB = b.num;
+                valeurA = a._ordreOrigine;
+                valeurB = b._ordreOrigine;
                 break;
             case 'da':
                 valeurA = a.da;
@@ -1081,8 +1130,8 @@ function afficherListeEtudiantsConsultation() {
                 valeurB = b.cibleCalculee.niveau;
                 break;
             default:
-                valeurA = a.num;
-                valeurB = b.num;
+                valeurA = a._ordreOrigine;
+                valeurB = b._ordreOrigine;
         }
 
         // Comparer.
@@ -1094,7 +1143,10 @@ function afficherListeEtudiantsConsultation() {
         // TOUT le groupe. On normalise les deux côtés au moment de comparer.
         let comparaison = 0;
         if (typeof valeurA === 'string' || typeof valeurB === 'string') {
-            comparaison = String(valeurA ?? '').localeCompare(String(valeurB ?? ''));
+            // L-1 (#749 lot 2) : DA et groupe sont des nombres écrits en chaîne —
+            // `{ numeric: true }` met 999999 avant 1000123, comme on le lit.
+            const numerique = triActuel.colonne === 'da' || triActuel.colonne === 'groupe';
+            comparaison = String(valeurA ?? '').localeCompare(String(valeurB ?? ''), undefined, numerique ? { numeric: true } : undefined);
         } else {
             comparaison = (valeurA ?? 0) - (valeurB ?? 0);
         }
@@ -1127,6 +1179,15 @@ function afficherListeEtudiantsConsultation() {
         if (etudiant.performanceInsuffisante) {
             tr.dataset.insuffisant = 'true';
         }
+        // L-2 (#749 lot 2) : un élève exclu des statistiques reste visible, GRISÉ
+        // (patron `tr.etudiant-inactif` de Cadre › Trimestre, styles.css) et porte
+        // son statut en clair dans la colonne Nom (mots de Cadre › Trimestre).
+        const exclu = typeof estEtudiantExclu === 'function' && estEtudiantExclu(etudiant);
+        const libelleStatut = exclu && typeof libelleStatutEtudiant === 'function' ? libelleStatutEtudiant(etudiant.statut) : '';
+        if (exclu) {
+            tr.classList.add('etudiant-inactif');
+            tr.dataset.statut = etudiant.statut || '';
+        }
 
         // Rendre la ligne cliquable
         tr.style.cursor = 'pointer';
@@ -1152,7 +1213,7 @@ function afficherListeEtudiantsConsultation() {
         html += '<td style="text-align: center; color: var(--texte-muted); font-weight: 600;">' + etudiant.num + '</td>';
         html += '<td>' + da + '</td>';
         html += '<td class="etud-text-center"><strong>' + groupe + '</strong></td>';
-        html += '<td>' + nom + '</td>';
+        html += '<td>' + nom + (libelleStatut ? ' <span class="etud-texte-gris-clair">(' + echapperHtml(libelleStatut) + ')</span>' : '') + '</td>';
         html += '<td>' + prenom + '</td>';
         html += '<td class="etud-text-center">' + (etudiant.sa === 'Oui' ? '<span class="icone-inline icone-inline--check" aria-label="Oui"></span>' : '') + '</td>';
 
@@ -1221,6 +1282,11 @@ function afficherListeEtudiantsConsultation() {
         tbody.appendChild(tr);
     });
 
+    // L-6 (#749 lot 2) : le tbody vient d'être reconstruit — si « ≥ Min. » est coché,
+    // son effet (lignes grisées, moyennes qualifiées) doit être rappelé, sinon la
+    // case reste cochée et l'effet est parti au premier tri ou à la première lettre.
+    const chkMinimum = document.getElementById('chk-filtre-minimum');
+    if (chkMinimum && chkMinimum.checked) toggleFiltreMinimum(true);
 
     // Restaurer les préférences de colonnes visibles et vérifier le débordement
     restaurerPreferencesColonnesListe();
@@ -1266,6 +1332,9 @@ function toggleColonneListe(checkbox) {
     setTimeout(verifierDebordementTableauListe, 50);
 }
 
+// Audit du 6 sept. (§ 2.1), commenté le 11 : les colonnes visibles vivent en
+// `sessionStorage` — perdues à la fermeture de l'onglet. Position, pas défaut :
+// c'est une commodité de session, pas un réglage.
 function sauvegarderPreferencesColonnesListe() {
     var selecteur = document.getElementById('liste-colonnes-selecteur');
     if (!selecteur) return;
@@ -1569,6 +1638,7 @@ window.initialiserModuleListeEtudiants = initialiserModuleListeEtudiants;
 window.rechargerListeEtudiants = rechargerListeEtudiants;
 window.chargerListeEtudiants = chargerListeEtudiants;
 window.afficherListeEtudiantsConsultation = afficherListeEtudiantsConsultation;
+window.afficherListeEtudiantsConsultationDifferee = afficherListeEtudiantsConsultationDifferee;
 window.trierTableauPar = trierTableauPar;
 window.obtenirNomProgramme = obtenirNomProgramme;
 window.reinitialiserFiltresListeEtudiants = reinitialiserFiltresListeEtudiants;

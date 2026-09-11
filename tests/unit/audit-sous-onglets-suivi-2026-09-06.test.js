@@ -151,7 +151,10 @@ function monter(store, opts = {}) {
         obtenirDonneesSelonMode: winModes.obtenirDonneesSelonMode, sauvegarderDonneesSelonMode: winModes.sauvegarderDonneesSelonMode,
         obtenirEtudiantsCoursActif: winModes.obtenirEtudiantsCoursActif, obtenirContexteCoursActif: winModes.obtenirContexteCoursActif,
         demarrerCacheLecture: winModes.demarrerCacheLecture, terminerCacheLecture: winModes.terminerCacheLecture, invaliderCacheLecture: winModes.invaliderCacheLecture,
-        filtrerEtudiantsParMode: winModes.filtrerEtudiantsParMode, estModeeLectureSeule: winModes.estModeeLectureSeule, obtenirPratiqueActiveGroupeCours: winModes.obtenirPratiqueActiveGroupeCours
+        filtrerEtudiantsParMode: winModes.filtrerEtudiantsParMode, estModeeLectureSeule: winModes.estModeeLectureSeule, obtenirPratiqueActiveGroupeCours: winModes.obtenirPratiqueActiveGroupeCours,
+        // #749 lot 2 : la normalisation partagée vit dans modes.js ; le libellé de statut dans main.js (non chargé ici).
+        normaliserNumeroGroupe: winModes.normaliserNumeroGroupe,
+        libelleStatutEtudiant: (st) => ({ 'inactif': 'Inactivité', 'décrochage': 'Décrochage', 'abandon': 'Abandon' }[st] || '')
     });
     Object.assign(globaux, opts.globaux || {});
     for (const [k, v] of Object.entries(globaux)) if (!(k in win) && k !== 'document' && k !== 'db') win[k] = v;   // les modules lisent aussi window.X
@@ -427,7 +430,7 @@ describe('2 · Liste des étudiant·es — tris, filtres, écritures par rendu, 
     // Quand le filtre ne retient personne, la fonction sort AVANT de vider le tbody et masque la table : on lit donc 0 ligne si la table est masquée.
     const dasDuTbody = (b) => (b.document.getElementById('tableEtudiantsListe').classList.contains('u-hide') ? [] : (htmlTbody(b).match(/<td[^>]*>(\d{6,7})<\/td>/g) || []).map(x => x.replace(/<[^>]+>/g, '')));
 
-    it('L-1 · Tri « DA » : lexicographique (1000123 avant 999999) ; tri « # » : sans effet (num est posé après le tri)', () => {
+    it('L-1 · Tri « DA » numérique (999999 avant 1000123) ; tri « # » sur l\'ordre d\'origine, dans les deux sens — valeurs d\'après #749 lot 2 (11 sept. ; constat d\'origine : lexicographique, sans effet)', () => {
         const store = storeBase();
         store.test_groupeEtudiants = [
             { da: '999999', nom: 'Zed', prenom: 'Zoé', groupe: '01', coursId: 'GC1', statut: 'actif' },
@@ -442,12 +445,12 @@ describe('2 · Liste des étudiant·es — tris, filtres, écritures par rendu, 
         b.win.trierTableauPar('num');          // num desc
         const ordreNumDesc = dasDuTbody(b);
         noter('L1', { ordreDA, ordreNum, ordreNumDesc, extrait: htmlTbody(b).slice(0, 300) });
-        expect(ordreDA).toEqual(['1000123', '2000001', '999999']);
-        expect(ordreNum).toEqual(['999999', '2000001', '1000123']);        // l'ordre de stockage, inchangé
-        expect(ordreNumDesc).toEqual(['999999', '2000001', '1000123']);    // et le second clic ne renverse rien
+        expect(ordreDA).toEqual(['999999', '1000123', '2000001']);       // numérique
+        expect(ordreNum).toEqual(['999999', '2000001', '1000123']);        // « # » asc = l'ordre d'origine (stockage)
+        expect(ordreNumDesc).toEqual(['1000123', '2000001', '999999']);    // « # » desc = renversé
     });
 
-    it('L-2 · Un élève « abandon » n\'apparaît PAS dans le tableau, alors que la note de l\'écran dit qu\'il y reste', () => {
+    it('L-2 · Un élève « abandon » RESTE dans le tableau, grisé, avec son statut — valeur d\'après #749 lot 2 (décision de Grégoire 11 sept. ; constat d\'origine : absent, la note de l\'écran mentait)', () => {
         const store = storeBase();
         store.test_groupeEtudiants[1].statut = 'abandon';
         const b = monterL(store);
@@ -456,23 +459,27 @@ describe('2 · Liste des étudiant·es — tris, filtres, écritures par rendu, 
         const lignes = readFileSync(path.join(RACINE, 'index.html'), 'utf8').split('\n');
         const ligneIndex = lignes.findIndex((l, i) => i > 7700 && i < 7912 && /Les abandons/.test(l)) + 1;
         const phrase = (lignes[ligneIndex - 1] || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 260);
-        noter('L2', { das, ligneIndex, phrase });
-        expect(das).toEqual(['2000001', '2000003']);
+        const t = b.document.getElementById('tbody-suivi-liste');
+        const ligneAbandon = t.children.find(tr => tr.classList.contains('etudiant-inactif'));
+        noter('L2', { das, ligneIndex, phrase, grisee: !!ligneAbandon, statut: ligneAbandon && ligneAbandon.dataset.statut });
+        expect(das).toEqual(['2000002', '2000001', '2000003']);   // tri par nom : Absent, Assidu, Silence — l'abandon (Absent) est là
+        expect(ligneAbandon && ligneAbandon.dataset.statut).toBe('abandon');
+        expect(ligneAbandon.innerHTML).toContain('(Abandon)');
         expect(ligneIndex).toBeGreaterThan(7709);
         expect(ligneIndex).toBeLessThan(7912);
     });
 
-    it('L-3 · La recherche par nom : insensible à la casse, mais SENSIBLE aux accents (« cesaire » ne trouve pas Césaire)', () => {
+    it('L-3 · La recherche par nom : insensible à la casse ET aux accents — valeur d\'après #749 lot 2 (constat d\'origine : « cesaire » ne trouvait pas Césaire)', () => {
         const store = storeBase();
         store.test_groupeEtudiants[0] = { da: '2000001', nom: 'Césaire', prenom: 'Aimé', groupe: '01', coursId: 'GC1', statut: 'actif' };
         const b = monterL(store);
         const chercher = (t) => { b.document.getElementById('recherche-nom-liste').value = t; b.win.afficherListeEtudiantsConsultation(); return dasDuTbody(b).length; };
         const r = { 'césaire': chercher('césaire'), 'CÉSAIRE': chercher('CÉSAIRE'), 'cesaire': chercher('cesaire'), 'aime': chercher('aime') };
         noter('L3', r);
-        expect(r['césaire']).toBe(1); expect(r['CÉSAIRE']).toBe(1); expect(r['cesaire']).toBe(0); expect(r['aime']).toBe(0);
+        expect(r['césaire']).toBe(1); expect(r['CÉSAIRE']).toBe(1); expect(r['cesaire']).toBe(1); expect(r['aime']).toBe(1);
     });
 
-    it('L-4 · Chaque rendu de la liste relance le calcul des indices : assiduité ×1 et CP ×1 depuis etudiants.js (la chaîne interne d\'indices.js en fait un second)', () => {
+    it('L-4 · Chaque rendu relance l\'assiduité ×1, qui chaîne CP — plus d\'appel direct à CP depuis etudiants.js — valeur d\'après #749 lot 2 (constat d\'origine : CP ×2 par rendu)', () => {
         const store = storeBase();
         const b = monterL(store);
         b.win.afficherListeEtudiantsConsultation();
@@ -481,31 +488,36 @@ describe('2 · Liste des étudiant·es — tris, filtres, écritures par rendu, 
         b.document.getElementById('recherche-nom-liste').value = 'as'; b.win.afficherListeEtudiantsConsultation();
         const grep = (readFileSync(path.join(RACINE, 'js/indices.js'), 'utf8').match(/calculerEtStockerIndicesCP\(\)/g) || []).length;
         noter('L4', { apresUnRendu: apresUn, apresTroisRendus: clone(b.compteurs), appelsCPDansIndicesJs: grep });
-        expect(apresUn).toEqual({ assiduite: 1, cp: 1 });
-        expect(b.compteurs).toEqual({ assiduite: 3, cp: 3 });
+        expect(apresUn).toEqual({ assiduite: 1, cp: 0 });      // CP vient de la chaîne d'indices.js, non stubée ici
+        expect(b.compteurs).toEqual({ assiduite: 3, cp: 0 });
         expect(grep).toBeGreaterThanOrEqual(1);
     });
 
-    it('L-5 · Le filtre « En progression » est une option morte : aucun pattern du code ne s\'appelle ainsi', () => {
+    it('L-5 · Le filtre pattern offre les six patterns du code et rien d\'autre — valeur d\'après #749 lot 2 (constat d\'origine : « En progression » morte, deux patterns non filtrables)', () => {
         const index = readFileSync(path.join(RACINE, 'index.html'), 'utf8').split('\n').slice(7708, 7911).join('\n');
         const calculs = readFileSync(path.join(RACINE, 'js/profil-etudiant-calculs.js'), 'utf8');
         const option = /value="progression"/.test(index);
         const patterns = ['Stable', 'Défi spécifique', 'Difficulté émergente', 'Difficulté persistante', 'Non-participation', 'Données insuffisantes', 'En progression'].map(p => [p, (calculs.match(new RegExp("'" + p + "'", 'g')) || []).length]);
         noter('L5', { option, patterns });
-        expect(option).toBe(true);
+        expect(option).toBe(false);
         expect(patterns.find(p => p[0] === 'En progression')[1]).toBe(0);
         expect(patterns.find(p => p[0] === 'Stable')[1]).toBeGreaterThan(0);
+        expect(/value="non-participation"/.test(index) && /value="donnees-insuffisantes"/.test(index)).toBe(true);
     });
 
-    it('L-6 · Ajouter un élève dont le DA existe déjà (Cadre › Trimestre) : accepté, deux fiches sous le même DA — aucune validation', async () => {
+    it('L-6 · Ajouter un élève dont le DA existe déjà (Cadre › Trimestre) : REFUSÉ, une seule fiche, notification nommant l\'élève existant — valeur d\'après #749 lot 2 (constat d\'origine : accepté, deux fiches)', async () => {
         const store = storeBase();
         const b = monterL(store, { elements: { 'v2-etudiantDA': elementDom({ value: '2000001' }), 'v2-etudiantNom': elementDom({ value: 'Doublon' }), 'v2-etudiantPrenom': elementDom({ value: 'Dede' }), 'v2-etudiantProgramme': elementDom({ value: '' }), 'v2-etudiantSA': elementDom({ value: '' }), 'v2-etudiantGroupe': elementDom({ value: '1' }) } });
         let erreur = null;
         try { await b.win.soumettreEtudiantV2(); } catch (e) { erreur = e.message; }
         const fiches = store.test_groupeEtudiants.filter(e => e.da === '2000001');
         noter('L6', { erreur, nbFichesMemeDA: fiches.length, groupeEcrit: fiches[1] && fiches[1].groupe, notifs: b.notifs.map(n => n.type + ':' + n.t) });
-        expect(fiches.length).toBe(2);
-        expect(fiches[1].groupe).toBe('1');   // non padé : « 1 » ≠ « 00001 » dans le filtre Groupe de la Liste
+        expect(fiches.length).toBe(1);
+        expect(b.notifs.some(n => n.type === 'erreur' && /Ce DA est déjà dans le groupe : Alice Assidu\./.test(n.t))).toBe(true);
+        // Et un DA neuf, groupe « 1 » : écrit PADÉ (L-9)
+        b.document.getElementById('v2-etudiantDA').value = '2000099';
+        await b.win.soumettreEtudiantV2();
+        expect(store.test_groupeEtudiants.find(e => e.da === '2000099').groupe).toBe('00001');
     });
     it('L-7 · Confirmer un import (Cadre › Trimestre) : les élèves étaient ÉCRITS puis la fonction levait ReferenceError sans confirmation — depuis #771, elle notifie (valeur d\'après)', async () => {
         const store = storeBase();

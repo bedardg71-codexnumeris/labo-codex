@@ -1,6 +1,9 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
-> ↻ **ÉTAT MESURÉ réécrit par Claude Code le 11 septembre 2026 à midi (Toronto), à la clôture de
+> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 11 septembre 2026 à 16 h 30 (Toronto), à la clôture de
+> `1.132.0` (lot 2 du cadrage 11, la Liste des étudiant·es).** Le lot 3 (la Saisie des présences) attend
+> sa consigne de Cowork.
+> Version précédente : **ÉTAT MESURÉ réécrit par Claude Code le 11 septembre 2026 à midi (Toronto), à la clôture de
 > `1.130.2` (#825 temps 1).** Le MANDAT ci-dessous reste celui de Cowork du 10 au soir : ses deux
 > premiers points (écran de réglage, #824) sont **consommés** ; `#825` est livré en temps 1, jugé par sa
 > porte. Cowork reprend le mandat à froid.
@@ -44,14 +47,17 @@ il n'y avait **aucune consigne du jour en attente** au matin du 10.
 
 ---
 
-## ÉTAT MESURÉ — 11 SEPTEMBRE 2026, 13 H 30 (TORONTO)
+## ÉTAT MESURÉ — 11 SEPTEMBRE 2026, 16 H 30 (TORONTO)
 
 ▣ **Remesuré par Claude Code à la clôture de `1.131.0` — chaque ligne avec la commande qui la
 produit.** La version précédente de ce bloc (10 septembre, 1.128.4) est remplacée, pas corrigée.
 ⚠ **Un état mesuré vieillit en heures. Remesure, ne recopie pas.**
 
-- **Version `1.131.1`, build `0911-1441`** (`cat version.json`) — 1.131.1 (15 h) : retour testeur #830, la
-  barre A des groupes H2026 (horaires d'avant #540 sans périodes par séance → héritage du format déclaré). **Quatre releases le 11 au matin**
+- **Version `1.132.0`** (`cat version.json` ; le build y est) — lot 2 du cadrage 11, la Liste des étudiant·es
+  (L-1 à L-11 de l'audit du 6). Avant elle, 1.131.1 (15 h) : retour testeur #830, la
+  barre A des groupes H2026 (horaires d'avant #540 sans périodes par séance → héritage du format déclaré) ; puis
+  #831 et #832 (données H2026 de l'instance en ligne, réparées par Grégoire avec des outils dry-run par preuve,
+  sans release). **Quatre releases le 11 au matin**
   (1.129.1, 1.129.2, 1.130.0, 1.130.1), **1.130.2 à midi** (#825 temps 1, l'ouverture immuable ;
   hypothèse réfutée par la référence de 11 h 58) puis **1.131.0 vers 13 h 30** : #749, lot 1 du cadrage
   11 — la liste suivie du Suivi du groupe par groupe-cours, ce que Grégoire verra à sa première bascule.
@@ -63,7 +69,7 @@ produit.** La version précédente de ce bloc (10 septembre, 1.128.4) est rempla
   l'application) et la **suppression non commise** de la capture du 9 sept. (`Retours des
   testeurs/grégoire/BUG_…journal-de-bord-sans-fond.png`, à Grégoire). Rien d'autre
   (`git status --porcelain -uall`).
-- **Vitest : 535 fichiers / 5844 essais, 0 échec** (`cd tests && npm run test:unit`, ~27 s), mesuré
+- **Vitest : 537 fichiers / 5863 essais, 0 échec** (`cd tests && npm run test:unit`, ~27 s), mesuré
   AVANT et APRÈS le commit de release (la sentinelle anti-cache post-commit ne juge qu'un bump commité).
   ⛔ **PAS `npm test`** : il enchaîne Playwright, plus de dix minutes.
 - **Playwright : verdict local rendu par `scripts/pousser.sh` sur le SHA du commit de relais** — lire
@@ -80,6 +86,7 @@ produit.** La version précédente de ce bloc (10 septembre, 1.128.4) est rempla
 
 | Lot | Livré | ⚠ Ce que la mesure a corrigé |
 |---|---|---|
+| `#749` lot 2 du cadrage 11 (1.132.0, la Liste) | abandons visibles grisés avec statut (décision Grégoire 14 h 17), statistiques sur les actifs prouvées ; tris « # » et « DA » ; recherche NFD ; une écriture par rendu + saisie différée 200 ms ; six patterns ; « ≥ Min. » tient, 0 sous N ; DA en double refusé / ignoré et compté ; `normaliserNumeroGroupe` unique ; bouton d'aide conservé ; sentinelle 14 essais / 6 break-tests ; porte 7 rangées | `String(...).padStart(5,'0')` présent **dix** fois dans trimestre-v2-etudiants.js, pas trois ; quatre sentinelles voisines figeaient les constats d'origine (ordre, message d'import, stub du groupe, forme du `localeCompare`) ; relecture adverse : un exclu n'est jamais « insuffisant » (le badge (N) et le grisé partageaient mal leur population), le compteur « N personnes » compte des lignes (commenté), `normaliserNumeroGroupe(undefined)` rend `'00000'` (commenté) ; aucun nouvel ID |
 | `#749` lot 1 du cadrage 11 (1.131.0, `1d51883e`) | liste suivie par trimestre et groupe-cours, filtrée à la lecture, semis réversible ; sixième notifié ; filtre P ; panneau mort retiré ; G-8 ; démo résolue à la lecture ; sentinelle 21 essais / 6 break-tests | G-7 **périmé** (fonctions sans appelant depuis #303) ; la préférence `grilleReferenceDepistage` est GLOBALE — « poser à l'activation de la démo » aurait écrasé le choix réel (résolution à la lecture à la place) ; relecture adverse : le semis lit aussi `<trim>_etudiantsSuivis` (migration des résidus), l'ajout ne purge plus l'abandon ; `#828`, `#829` inscrits |
 | `#825` temps 1 (1.130.2) | `netlify.toml` : `/js/*` et `/css/*` immuables un an, invariant écrit ; trois trous bouchés à la source (`repertoires-bibliotheque.js`, `pack-demo-20.js`, `heic-worker.js`) ; sentinelle #825, 16 essais, 5 break-tests rouges ; skill `portes-terrain` corrigé ; porte terrain à 4 rangées | la fiche #825 et le skill disaient « le garde ne surveille que `main.js` » : **faux depuis #547** ; un commentaire contenant `/js/*` a fait avaler la ligne du Worker par le strip-commentaires des tests 597 — reformulé ; **`/styles.css` NE devient PAS immuable** (relecture adverse : `design-system.html` + 17 modules servis la chargent sans jeton) ; le garde #547 ne voit pas les deux fichiers à jeton de build → garde pre-push ajoutée ; `#826` inscrit (jetons déjà servis deux fois le 10 sept.) |
 
