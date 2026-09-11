@@ -7,6 +7,27 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, MATIN : LES MOTS DU DÉPISTAGE LIVRÉS (1.129.1)
+
+> ✅ **`main` à 1.129.1, build `0911-0644`, commit de release `74fec5df`.** Tout est sur `main` ;
+> aucune branche ne porte de travail. Le push suit par `scripts/pousser.sh` (verdict Playwright
+> d'abord) — si tu lis ceci depuis `origin/main`, il est arrivé. Vérifie :
+> `git rev-list --count origin/main..main`.
+> **Livré** (consigne du 11 sept., trois arbitrages de Grégoire, cadrage 10 § 2-3) : l'échelle IDME
+> dite Incomplet / Développement / Maîtrise / Étendu partout dans la prose (41 libellés, 9 fichiers
+> `js/` + aide intégrée), le bloc « Seuils d'interprétation » qui dit ce que ses champs font, l'aide
+> des « Indicateurs visuels » et l'infobulle « note différée » corrigées, « cueillette » → « collecte ».
+> ⛔ Libellés seulement : zéro clé, zéro id, zéro nombre (multi-ensemble des nombres du diff identique).
+> **#823 CLOS.** Changelog : trois items ajoutés à l'entrée 1.129.
+> **Ce qui attend Grégoire** : la porte terrain à une porte, trois rangées
+> (`plans de travail/PORTES-TERRAIN-2026-09-11-mots-depistage.md`) et **trois décisions à son § 3** :
+> le gabarit « Échelle de départ (IDME) » (`js/echelles.js`) dit encore « en Développement » /
+> « Maîtrisé », et sa description « Insuffisant » — source à renommer ou non ; le littéral
+> « Insuffisant » du bilan élève (`js/evaluation-retroaction.js:884`, reste de #575) ; trois aides qui
+> décrivent le gabarit. Puis les temps 4 (forme) et 5 (déplacer) du cadrage 10, et `#824`.
+> **Ce qui attend Cowork** : l'artefact jumeau de la porte (bouton « Copier mes résultats ») ; le
+> mandat suivant. **Hors dépôt, pas à moi** : `Formation/*.html`.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 10 SEPT. 2026, SOIR : #823 LIVRÉ (1.129.0)
 
 > ✅ **`main` à 1.129.0, build `0910-1645`, commit de release `bd4c9f21`.** Tout est sur `main` ;
