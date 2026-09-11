@@ -15,6 +15,19 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **TES ÉVALUATIONS D'HIVER 2026 RETROUVENT LEURS GRILLES (données, 11 sept. ~15 h 20 — aucun code d'application)**.
+**Ce que tu verras** : dans `Évaluation › Annoter et évaluer`, une évaluation d'Hiver 2026 s'ouvre avec sa
+grille et son échelle dans la palette Paramètres ; la bannière « Grille d'origine introuvable » a disparu.
+Ton rapport de 14 h 50 : les 408 évaluations citaient trois grilles absentes de l'instance en ligne.
+C'était l'île non réparée : la réparation du 5 août vivait dans l'autre navigateur, et l'instance en
+ligne a reçu la copie d'avant. Tu as recréé les trois grilles sous leurs identifiants d'origine, depuis
+leurs jumelles « H26 », prouvées par leurs critères (223 sur 225, 92 sur 94, 89 sur 89 ; les quatre
+mal estampillées de juin sont nommées, pas touchées). Huit cartouches recopiées, rien d'écrasé.
+**Vérifié comment** : dry-run relu par toi, exécution journalisée, outil éprouvé au banc (cassé deux
+fois, remis). **Pas vérifié** : ton écran après Cmd+R — une évaluation H26 ouverte, puis un second
+rechargement pour la durabilité. À noter : les jumelles restent, deux grilles de même nom dans le
+menu d'Hiver 2026 ; les retirer est un autre geste, à ta décision.
+
 ↻ **1.131.1 — LA BARRE « ASSIDUITÉ (A) » DE TES GROUPES D'HIVER 2026 REVIENT** (build à lire en bas de page).
 **Ce que tu verras** : dans `Suivi › Suivi du groupe`, sous un groupe d'Hiver 2026, la barre A porte de
 nouveau ses points et sa moyenne, comme C et P. Ton rapport de 14 h 17 : la barre était vide pour tous
