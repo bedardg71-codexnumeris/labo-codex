@@ -162,8 +162,10 @@ window.reparer353 = async function (opts) {
          '    Confrontés ici aux cours ET aux groupes-cours : un snapshot vivant n\'est plus signalé.');
     bloc('SANS PRODUCTEUR connu dans js/', familles.sansProducteur,
          'Résidu d\'une version antérieure — aucun code n\'écrit ce nom aujourd\'hui.\n' +
-         '    (`etudiantsSuivis` est encore LU, une fois, par le semis de #749 : le supprimer\n' +
-         '    après la première ouverture de chaque groupe-cours, pas avant.)');
+         '    (`etudiantsSuivis` et `datesVerrouillees` sont encore LUS, une fois, par le semis\n' +
+         '    de #749 (lots 1 et 3) : les supprimer après la première ouverture de CHAQUE\n' +
+         '    groupe-cours de CHAQUE trimestre, pas avant — un groupe ouvert après la purge\n' +
+         '    partirait sans ses dates verrouillées.)');
 
     L('TOTAL localStorage : ' + Math.round(total / 1024) + ' K car. (' +
       (100 * total / (5 * 1024 * 1024)).toFixed(1) + ' % du quota, ' + toutes.length + ' clés)');

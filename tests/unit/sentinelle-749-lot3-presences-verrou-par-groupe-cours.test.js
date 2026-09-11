@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { monter, storeBase, elementDom, clone } from './_helpers/bac-suivi.js';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { monter, storeBase, elementDom, clone, RACINE } from './_helpers/bac-suivi.js';
 
 // SENTINELLE #749 lot 3 — SAISIE DES PRÉSENCES : UNE DATE VERROUILLÉE NE L'EST QUE
 // POUR CE GROUPE-COURS ET CE TRIMESTRE ; LES PRÉFÉRENCES NE FUIENT PLUS ; LE
@@ -152,6 +154,51 @@ describe('#749 lot 3 · b/c. le semis lit la clé nue sans l’écrire ; déverr
     });
 });
 
+describe('#749 lot 3 · relecture croisée du 11 sept. — les reprises', () => {
+    it('le semis n’entre PAS dans la démonstration : nue présente, trimestre « demo » → rien de semé, rien de verrouillé', () => {
+        const store = storeSaisie();
+        store.datesVerrouillees = [DATE];
+        store.trimestreActif = 'demo';
+        const b = monterS(store);
+        expect(b.interne['saisie-presences.js'].validerDateSaisie(DATE).verrouille).toBe(false);
+        expect(Object.keys(store)).not.toContain(K1);
+        expect(store.datesVerrouillees).toEqual([DATE]);
+    });
+
+    it('la recherche est REMISE depuis la base : sans terme pour ce trimestre, le résidu du champ est effacé', () => {
+        const store = storeSaisie();
+        const b = monterS(store);
+        b.document.getElementById('recherche-saisie-presences').value = 'ali';    // résidu d'un autre trimestre
+        b.win.initialiserSaisiePresences();
+        expect(b.elements['recherche-saisie-presences'].value).toBe('');
+        store.test_recherchePresences = 'bru';
+        b.win.initialiserSaisiePresences();
+        expect(b.elements['recherche-saisie-presences'].value).toBe('bru');
+    });
+
+    it('sur un poste sans trimestre, le démarrage ne génère rien (aucune clé nue seancesCompletes) ; le bandeau se lit sur le cache', () => {
+        const store = storeSaisie();
+        store.test_horaire = []; store.test_seancesCompletes = {};   // un poste vide : ni horaire, ni cache
+        let generations = 0;
+        const b = monterS(store, { date: '', globaux: { genererSeancesCompletes: () => { generations++; } } });
+        b.win.initialiserModuleSaisiePresences();
+        expect(generations).toBe(0);
+        expect(bandeauVisible(b)).toBe(true);
+        expect(b.elements['date-cours'].value).toBe('');
+        store.trimestreActif = 'test';                               // un trimestre existe : on génère
+        b.win.initialiserModuleSaisiePresences();
+        expect(generations).toBeGreaterThan(0);
+    });
+
+    it('les cinq familles sont inscrites à CLES_NAMESPACEES (sinon `cle()` les rend nues, avec un warn)', () => {
+        const src = readFileSync(path.join(RACINE, 'js/trimestres.js'), 'utf8');
+        const registre = src.slice(src.indexOf('const CLES_NAMESPACEES = ['), src.indexOf('];', src.indexOf('const CLES_NAMESPACEES = [')));
+        for (const nom of ['datesVerrouillees', 'presences_date', 'presences_groupe', 'presences_tri', 'recherchePresences']) {
+            expect(registre, nom).toContain("'" + nom + "'");
+        }
+    });
+});
+
 describe('#749 lot 3 · e. les préférences de l’écran vivent par trimestre', () => {
     it('initialiser la saisie écrit date, sous-groupe et tri sous `cle()` ; la recherche aussi ; aucune clé nue n’est écrite', () => {
         const store = storeSaisie();
@@ -261,4 +308,9 @@ describe('#749 lot 3 · h. sans cours actif, rien n’est écrit', () => {
  *   g.     `derniereSeancePassee` rend null                       → 2 rouges (e démarrage, g)
  *   h.     garde `!coursId` retirée d'enregistrerPresences        → 1 rouge  (h)
  *   d.     résidu du DOM gardé quand la préférence manque         → 1 rouge  (e, démarrage)
+ * Reprises de la relecture croisée (même jour, 16 essais verts avant et après) :
+ *   r1. semis autorisé en démo (`trimestreActif === 'demo'` retiré)  → 1 rouge
+ *   r2. recherche non remise (ancienne forme)                        → 1 rouge
+ *   r3. génération au boot sans trimestre                            → 1 rouge
+ *   r4. `'recherchePresences'` retiré de CLES_NAMESPACEES            → 1 rouge
  */

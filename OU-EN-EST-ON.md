@@ -28,7 +28,9 @@ Invisible mais posé : sans cours actif, l'enregistrement n'écrit plus rien (il
 **Vérifié comment** : sentinelle de douze essais sur le module réel, dix fois cassée exprès (dix rouges) et remise ;
 les trois bancs du 6 qui affirmaient l'avant (S-3, S-4, S-6, et le banc du cadenas #785) disent l'après ; un essai
 Playwright active la démo dans le vrai `index.html`, ouvre la saisie et lit : aucun bandeau, une date posée, vingt
-élèves — cassé exprès (l'appel retiré), rouge, remis. **Pas vérifié** : ton écran, tes deux groupes réels, Safari,
+élèves — cassé exprès (l'appel retiré), rouge, remis. La relecture croisée a fait reprendre deux points : le
+semis n'entre pas dans la démonstration (tes dates verrouillées y seraient restées, pour toujours), et le champ
+Recherche est remis lui aussi ; quatre essais de plus, quatre fois cassés. **Pas vérifié** : ton écran, tes deux groupes réels, Safari,
 l'adresse en ligne — porte terrain de cinq rangées (`plans de travail/PORTES-TERRAIN-2026-09-11-saisie-des-presences.md`),
 dont la première écrit chez toi (le verrou et la grille qu'il sauvegarde ; déverrouiller remet tout comme avant).
 

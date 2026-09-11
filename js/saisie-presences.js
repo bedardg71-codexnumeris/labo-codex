@@ -64,7 +64,10 @@ function initialiserModuleSaisiePresences() {
     // `initialiserSaisiePresences` (changement de date, de groupe-cours, de
     // trimestre, activation ou retrait de la démonstration : les trois chemins
     // passent par ce module — trimestre-v2-orchestre, demo-activation, boot).
-    if (typeof genererSeancesCompletes === 'function') {
+    // Sans trimestre actif (poste vide), rien n'est généré : `genererSeancesCompletes`
+    // écrirait une clé NUE (relecture croisée du 11 sept.) ; le bandeau se lit sur
+    // le cache tel quel.
+    if (typeof genererSeancesCompletes === 'function' && db.getSync('trimestreActif', null)) {
         genererSeancesCompletes(null);
     }
     verifierConfigurationFormatHoraire();
@@ -113,14 +116,25 @@ function initialiserModuleSaisiePresences() {
 }
 
 /**
+ * Le cache des séances complètes du groupe-cours actif, EN LECTURE SEULE
+ * (#749 lot 3). `obtenirSeancesCompletes` GÉNÈRE et ÉCRIT quand le cache
+ * manque — sur un poste sans trimestre, ce serait une clé nue `seancesCompletes`
+ * posée au démarrage (relecture croisée du 11 sept.). Ici : on lit, ou {}.
+ */
+function lireSeancesCompletesEnCache() {
+    if (typeof cleSeancesCompletes !== 'function') return {};
+    const seances = db.getSync(cleSeancesCompletes(), null);
+    return (seances && typeof seances === 'object' && !Array.isArray(seances)) ? seances : {};
+}
+
+/**
  * La date de la dernière séance ≤ aujourd'hui, ou null (#749 lot 3, S-6).
  * Lit le cache des séances complètes du groupe-cours actif (généré par
  * l'appelant) ; ne passe pas par `obtenirToutesDatesCours`, dont le repli sur
  * le calendrier journalise une erreur quand rien n'est encore configuré.
  */
 function derniereSeancePassee() {
-    if (typeof obtenirSeancesCompletes !== 'function') return null;
-    const seances = obtenirSeancesCompletes() || {};
+    const seances = lireSeancesCompletesEnCache();
     const aujourdhui = window.dateLocaleYMD();
     const dates = Object.keys(seances)
         .filter(d => Array.isArray(seances[d]) && seances[d].length > 0 && d <= aujourdhui)
@@ -788,6 +802,12 @@ function obtenirDatesVerrouillees() {
     const liste = db.getSync(k, null);
     if (Array.isArray(liste)) return liste;
 
+    // Pas de semis dans la démonstration (relecture croisée du 11 sept.) : son
+    // stock est vide par construction, et le stock RÉEL n'a rien à y faire — les
+    // clés `demo_*` ne sont jamais purgées, le 8 septembre verrouillé chez
+    // l'enseignant se serait ouvert verrouillé dans sa démo, pour toujours.
+    if (db.getSync('trimestreActif', null) === 'demo') return [];
+
     let source = db.getSync(CLE_VERROU, null);
     const kTrimestre = cle(CLE_VERROU);
     if ((!Array.isArray(source) || source.length === 0) && kTrimestre !== k) {
@@ -998,8 +1018,8 @@ function verifierConfigurationFormatHoraire() {
     // « Configuration incomplète » devant un horaire à deux séances et trente
     // séances complètes, parce que ce bandeau n'était évalué qu'au démarrage.
     let aDesSeances = seancesHoraire.length > 0;
-    if (!aDesSeances && typeof obtenirSeancesCompletes === 'function') {
-        const completes = obtenirSeancesCompletes() || {};
+    if (!aDesSeances) {
+        const completes = lireSeancesCompletesEnCache();
         aDesSeances = Object.keys(completes).some(d => Array.isArray(completes[d]) && completes[d].length > 0);
     }
 
@@ -1107,9 +1127,12 @@ function initialiserSaisiePresences() {
     // Restaurer la valeur de recherche sauvegardée (persistance lors de la navigation)
     const recherche = document.getElementById('recherche-saisie-presences');
     const termeRecherche = db.getSync(cle('recherchePresences'), '');
-    if (recherche && termeRecherche) {
-        recherche.value = termeRecherche;
-        filtrerTableauPresences();
+    if (recherche) {
+        // #749 lot 3 : le champ est REMIS depuis la base, comme la date, le
+        // sous-groupe et le tri — sans terme pour ce trimestre, le résidu d'un autre
+        // trimestre disait « filtré » devant une grille entière (relecture croisée).
+        recherche.value = termeRecherche || '';
+        if (termeRecherche) filtrerTableauPresences();
     }
 }
 
