@@ -397,7 +397,7 @@ function genererExplicationCalculIndices(complementHtml = '') {
 
     if (isPAN) {
         html += '<br>→ <strong>PAN-Standards</strong> : Moyenne des <strong>' + nbArtefacts + ' meilleurs ' + termePlur + '</strong> selon l\'échelle IDME. ';
-        html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Les niveaux IDME (Incomplet, en Développement, Maîtrisé, Étendu) sont convertis en pourcentages.</em>';
+        html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Les niveaux IDME (Incomplet, Développement, Maîtrise, Étendu) sont convertis en pourcentages.</em>';
         html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Seuls les ' + nbArtefacts + ' meilleurs ' + termePlur + ' comptent dans le calcul de P</em>';
     } else {
         html += '<br>→ <strong>Sommative</strong> : Moyenne pondérée de <strong>toutes les évaluations</strong>. ';

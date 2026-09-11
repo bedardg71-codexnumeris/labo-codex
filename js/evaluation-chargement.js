@@ -1228,8 +1228,8 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
     if (niveauxDisponibles.length === 0) {
         niveauxDisponibles = [
             { code: 'I', nom: 'Incomplet' },
-            { code: 'D', nom: 'en Développement' },
-            { code: 'M', nom: 'Maîtrisé' },
+            { code: 'D', nom: 'Développement' },
+            { code: 'M', nom: 'Maîtrise' },
             { code: 'E', nom: 'Étendu' }
         ];
     }

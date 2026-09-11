@@ -106,7 +106,7 @@ var ETATS_VIDES = {
         message: 'Aucune grille de crit\u00e8res. Cr\u00e9e ta premi\u00e8re grille comme tu le ferais sur papier\u00a0: nomme tes crit\u00e8res, choisis leur type (holistique, analytique ou algorithmique) et r\u00e9partis les pond\u00e9rations pour totaliser 100\u00a0%.'
     },
     'conception-echelle-performance': {
-        message: 'Aucune \u00e9chelle de performance. L\u2019\u00e9chelle \u00e9tablit le niveau de performance du crit\u00e8re ou de l\u2019habilet\u00e9 \u00e9valu\u00e9e (ex.\u00a0: Insuffisant, D\u00e9veloppement, Ma\u00eetrise, \u00c9tendu). Configure les seuils et les couleurs qui correspondent \u00e0 ton jugement professionnel.'
+        message: 'Aucune \u00e9chelle de performance. L\u2019\u00e9chelle \u00e9tablit le niveau de performance du crit\u00e8re ou de l\u2019habilet\u00e9 \u00e9valu\u00e9e (ex.\u00a0: Incomplet, D\u00e9veloppement, Ma\u00eetrise, \u00c9tendu). Configure les seuils et les couleurs qui correspondent \u00e0 ton jugement professionnel.'
     },
     'conception-retroactions': {
         message: 'Aucune cartouche de r\u00e9troaction. Les cartouches sont des gabarits de commentaires g\u00e9n\u00e9raux que tu pr\u00e9pares une fois\u00a0: un commentaire par combinaison crit\u00e8re\u00a0\u00d7\u00a0niveau. Lors de l\u2019\u00e9valuation, l\u2019application assemble automatiquement une r\u00e9troaction personnalis\u00e9e.'

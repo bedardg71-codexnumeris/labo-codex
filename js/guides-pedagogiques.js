@@ -47,7 +47,7 @@
     <li><strong>Relationnel</strong> — éléments intégrés en une structure cohérente</li>
     <li><strong>Abstrait étendu</strong> — la structure est transférée à d'autres contextes</li>
 </ul>
-<p>Dans Labo Codex, SOLO sert de fondement à l'échelle de performance IDME (Insuffisant, Développement, Maîtrisé, Étendu) et à l'observation des productions étudiantes via les tampons de la catégorie Compréhension.</p>
+<p>Dans Labo Codex, SOLO sert de fondement à l'échelle de performance IDME (Incomplet, Développement, Maîtrise, Étendu) et à l'observation des productions étudiantes via les tampons de la catégorie Compréhension.</p>
 <p class="guide-pedagogique-ref">Biggs, J. B., &amp; Collis, K. F. (1982). <em>Evaluating the Quality of Learning: The SOLO Taxonomy (Structure of the Observed Learning Outcome)</em>. Academic Press.</p>`
                 },
                 {
@@ -57,7 +57,7 @@
 <h4>Préstructurel</h4>
 <p>L'étudiant·e ne fournit aucune information pertinente, ou des informations sans lien avec la question posée. Code IDME : <strong>0</strong> (Non recevable).</p>
 <h4>Unistructurel <img src="autocollants/solo/comprehension-uni.svg" alt="" class="guide-pedagogique-pictogramme"></h4>
-<p>L'étudiant·e identifie un seul élément pertinent, sans le mettre en relation avec d'autres. La réponse est correcte mais incomplète ou superficielle. Code IDME : <strong>I</strong> (Insuffisant).</p>
+<p>L'étudiant·e identifie un seul élément pertinent, sans le mettre en relation avec d'autres. La réponse est correcte mais incomplète ou superficielle. Code IDME : <strong>I</strong> (Incomplet).</p>
 <p><em>Exemple : à la question « Quelles sont les causes de la Révolution française ? », l'étudiant·e mentionne seulement « la pauvreté » sans détailler ni relier à d'autres facteurs.</em></p>
 <div class="guide-pedagogique-astuce">Pédagogiquement, ce niveau signale une compréhension de surface — un point de départ, pas une fin. L'intervention vise à enrichir les éléments identifiés et à inviter l'étudiant·e à en chercher d'autres.</div>`
                 },
@@ -65,7 +65,7 @@
                     titre: 'Multistructurel',
                     contenu: `
 <h4>Multistructurel <img src="autocollants/solo/comprehension-multi.svg" alt="" class="guide-pedagogique-pictogramme"></h4>
-<p>L'étudiant·e identifie plusieurs éléments pertinents, mais ils restent juxtaposés sans relation explicite entre eux. La réponse est riche mais fragmentée. Code IDME : <strong>D</strong> (En Développement).</p>
+<p>L'étudiant·e identifie plusieurs éléments pertinents, mais ils restent juxtaposés sans relation explicite entre eux. La réponse est riche mais fragmentée. Code IDME : <strong>D</strong> (Développement).</p>
 <p><em>Exemple : pour la même question, l'étudiant·e énumère « la pauvreté, les inégalités sociales, les idées des Lumières et la crise financière » sans expliquer comment ces facteurs interagissent.</em></p>
 <div class="guide-pedagogique-astuce">C'est la <strong>zone critique de consolidation</strong>. L'étudiant·e a les éléments mais pas encore la structure. L'intervention pédagogique vise à amener à <em>relier</em> : « Comment ces facteurs s'influencent-ils les uns les autres ? »</div>
 <p>Dans l'évaluation IDME, ce niveau correspond à un seuil situé entre 64 % et 74 % : la performance est en développement, pas encore aboutie.</p>`
@@ -74,7 +74,7 @@
                     titre: 'Relationnel et Abstrait étendu',
                     contenu: `
 <h4>Relationnel <img src="autocollants/solo/comprehension-relationnel.svg" alt="" class="guide-pedagogique-pictogramme"></h4>
-<p>L'étudiant·e intègre les éléments en une structure cohérente. Il ou elle établit explicitement des relations entre les composantes. La réponse a une logique interne identifiable. Code IDME : <strong>M</strong> (Maîtrisé).</p>
+<p>L'étudiant·e intègre les éléments en une structure cohérente. Il ou elle établit explicitement des relations entre les composantes. La réponse a une logique interne identifiable. Code IDME : <strong>M</strong> (Maîtrise).</p>
 <p><em>Exemple : « Les idées des Lumières ont alimenté la conscience des inégalités, que la crise financière a rendues insupportables aux yeux d'une population déjà appauvrie. »</em></p>
 <h4>Abstrait étendu <img src="autocollants/solo/comprehension-etendu.svg" alt="" class="guide-pedagogique-pictogramme"></h4>
 <p>L'étudiant·e non seulement intègre la structure, mais l'extrapole : comparaisons avec d'autres contextes, formulation de principes généraux, application de la structure à des situations nouvelles. Code IDME : <strong>E</strong> (Étendu).</p>
@@ -315,7 +315,7 @@
                     contenu: `
 <p>Labo Codex implémente actuellement <strong>deux PAN</strong> – deux manières concrètes de certifier l'atteinte plutôt que d'additionner. La pratique sommative reste offerte comme point de comparaison.</p>
 <h4>PAN-Standards (code STD, aussi appelée Maîtrise)</h4>
-<p>Tu évalues par <strong>niveaux de maîtrise</strong> (par exemple l'échelle IDME : Insuffisant, en Développement, Maîtrisé, Étendu). La note est construite à partir de la démonstration de compétence, pas d'une moyenne. C'est la transposition, au collégial, de ce que le Conseil supérieur de l'éducation décrit comme le <em>bulletin descriptif</em> : «&nbsp;l'échelle de notation du bulletin descriptif repose sur l'atteinte de critères et correspond à des niveaux de maîtrise.&nbsp;» En anglais : <em>Standards-Based Grading</em>.</p>
+<p>Tu évalues par <strong>niveaux de maîtrise</strong> (par exemple l'échelle IDME : Incomplet, Développement, Maîtrise, Étendu). La note est construite à partir de la démonstration de compétence, pas d'une moyenne. C'est la transposition, au collégial, de ce que le Conseil supérieur de l'éducation décrit comme le <em>bulletin descriptif</em> : «&nbsp;l'échelle de notation du bulletin descriptif repose sur l'atteinte de critères et correspond à des niveaux de maîtrise.&nbsp;» En anglais : <em>Standards-Based Grading</em>.</p>
 <h4>PAN-Spécifications (code SPE)</h4>
 <p>Chaque travail est jugé <strong>conforme ou non conforme</strong> à des spécifications définies d'avance ; la note finale dépend du nombre de spécifications réussies (les «&nbsp;forfaits&nbsp;»). Le Conseil note d'ailleurs que la communication d'une évaluation certificative «&nbsp;peut également prendre une forme dichotomique : succès ou échec&nbsp;». En anglais : <em>Specifications Grading</em>.</p>
 <h4>Sommative (code SOM) – le point de contraste</h4>

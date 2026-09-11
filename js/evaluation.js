@@ -1140,7 +1140,7 @@ function _afficherCriteresDepuisEvaluation(evaluation) {
     }
     // Fallback IDME
     if (Object.keys(niveauxMap).length === 0) {
-        niveauxMap = { I: 'Insuffisant', D: 'Développement', M: 'Maîtrisé', E: 'Étendu' };
+        niveauxMap = { I: 'Incomplet', D: 'Développement', M: 'Maîtrise', E: 'Étendu' };
     }
 
     const html = evaluation.criteres.map(critere => {
