@@ -1,8 +1,9 @@
 # Portes terrain — 11 septembre 2026 (l'ouverture de l'application, #825 temps 1, 1.130.2)
 
 > **Version à l'écran attendue après déploiement : `1.130.2`** (le build est écrit par la release ; lis-le en bas de page).
-> Couvre : le serveur ne demande plus au navigateur de revalider les deux cents scripts et les deux feuilles de
-> style à chaque ouverture (`netlify.toml`) ; trois fichiers qui échappaient aux jetons anti-cache en ont reçu un.
+> Couvre : le serveur ne demande plus au navigateur de revalider les deux cents scripts (`js/`) ni la feuille
+> `css/accompagnement.css` à chaque ouverture (`netlify.toml`) ; trois fichiers qui échappaient aux jetons
+> anti-cache en ont reçu un. `styles.css`, `index.html` et `version.json` restent redemandés (trois requêtes).
 > **Rien ne change à l'écran. Rien n'écrit dans tes données.**
 >
 > **Ce qui échoue ici devient un item de backlog, avec son numéro de porte.** Jamais une note mentale.
@@ -63,7 +64,7 @@ elle-même : c'est ce qui a caché la cause ce matin (0,92 s au rechargement, 34
 
 | | Geste | Attendu |
 |---|---|---|
-| **2.3a** | Dans le panneau Network de la rangée 2.2b, clique une ligne `js/…` (n'importe laquelle), onglet **Headers**, section **Response Headers**, ligne `cache-control` | **`public, max-age=31536000, immutable`**. Note ce qui est écrit si c'est autre chose : _____ |
+| **2.3a** | Dans le panneau Network de la rangée 2.2b, clique une ligne `js/…` (n'importe laquelle — pas `styles.css`, qui reste revalidée exprès), onglet **Headers**, section **Response Headers**, ligne `cache-control` | **`public, max-age=31536000, immutable`**. Note ce qui est écrit si c'est autre chose : _____ |
 
 ### 2.4 · Sur l'iPad — et la version est la bonne
 
