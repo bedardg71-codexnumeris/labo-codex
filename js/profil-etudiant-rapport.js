@@ -199,27 +199,27 @@ function genererSectionRapport(da) {
                         </div>
                         <div class="grille-checkboxes u-mb-10">
                             <label class="text-sm-pointer">
-                                <input type="checkbox" id="inclure-identification-${da}" data-on-change="genererEtAfficherRapport" data-param="${da}" checked>
+                                <input type="checkbox" id="inclure-identification-${da}" data-on-change="cocherSectionRapport" data-param="${da}" checked>
                                 Identification
                             </label>
                             <label class="text-sm-pointer">
-                                <input type="checkbox" id="inclure-assiduite-${da}" data-on-change="genererEtAfficherRapport" data-param="${da}" checked>
+                                <input type="checkbox" id="inclure-assiduite-${da}" data-on-change="cocherSectionRapport" data-param="${da}" checked>
                                 Assiduité
                             </label>
                             <label class="text-sm-pointer">
-                                <input type="checkbox" id="inclure-completion-${da}" data-on-change="genererEtAfficherRapport" data-param="${da}" checked>
+                                <input type="checkbox" id="inclure-completion-${da}" data-on-change="cocherSectionRapport" data-param="${da}" checked>
                                 Complétion
                             </label>
                             <label class="text-sm-pointer">
-                                <input type="checkbox" id="inclure-performance-${da}" data-on-change="genererEtAfficherRapport" data-param="${da}" checked>
+                                <input type="checkbox" id="inclure-performance-${da}" data-on-change="cocherSectionRapport" data-param="${da}" checked>
                                 Performance
                             </label>
                             <label class="text-sm-pointer">
-                                <input type="checkbox" id="inclure-jetons-${da}" data-on-change="genererEtAfficherRapport" data-param="${da}" checked>
+                                <input type="checkbox" id="inclure-jetons-${da}" data-on-change="cocherSectionRapport" data-param="${da}" checked>
                                 Jetons
                             </label>
                             <label class="text-sm-pointer">
-                                <input type="checkbox" id="inclure-date-${da}" data-on-change="genererEtAfficherRapport" data-param="${da}" checked>
+                                <input type="checkbox" id="inclure-date-${da}" data-on-change="cocherSectionRapport" data-param="${da}" checked>
                                 Date
                             </label>
                         </div>
@@ -256,8 +256,10 @@ function genererEtAfficherRapport(da) {
         return;
     }
 
-    // Sauvegarder les préférences
-    sauvegarderPreferencesRapport(da);
+    // Lot 4 du cadrage 11 (#754 / P-2, 11 sept. 2026) : les cases ne s'écrivent plus
+    // ici — ce chemin est aussi celui du RENDU (restaurerPreferencesRapport), qui
+    // réécrivait la clé trois ou quatre fois à l'ouverture. Elles s'écrivent au
+    // geste, dans `cocherSectionRapport`.
 
     // Lire les options de sections à inclure
     const options = {
@@ -346,7 +348,21 @@ function viderRapport(da) {
 }
 
 /**
- * Sauvegarde les préférences du rapport dans localStorage
+ * Le geste sur une case « Inclure … » : mémoriser, puis régénérer.
+ * ⮕ P-2 (lot 4 du cadrage 11) : c'est le SEUL chemin qui écrit les préférences
+ * — pas le rendu. Les six cases sont de la forme, par trimestre, pas par élève.
+ * @param {string} da - Numéro DA
+ */
+function cocherSectionRapport(da) {
+    sauvegarderPreferencesRapport(da);
+    genererEtAfficherRapport(da);
+}
+
+/**
+ * Sauvegarde les préférences du rapport — par TRIMESTRE (`cle()`), pas par élève.
+ * ⮕ P-2 : la clé nue `preferencesRapport` était partagée entre trimestres et entre
+ * élèves ; la nue devient orpheline (aucun semis : six cases de forme, pas un
+ * contenu ; `diagnostic-353` la connaît).
  * @param {string} da - Numéro DA
  */
 function sauvegarderPreferencesRapport(da) {
@@ -359,7 +375,7 @@ function sauvegarderPreferencesRapport(da) {
         date: document.getElementById(`inclure-date-${da}`)?.checked ?? true
     };
 
-    db.setSync('preferencesRapport', preferences);
+    db.setSync(cle('preferencesRapport'), preferences);
 }
 
 /**
@@ -368,7 +384,7 @@ function sauvegarderPreferencesRapport(da) {
  */
 function restaurerPreferencesRapport(da) {
     // db.getSync retourne déjà l'objet parsé, pas besoin de JSON.parse
-    const preferences = db.getSync('preferencesRapport', null);
+    const preferences = db.getSync(cle('preferencesRapport'), null);
 
     // Restaurer les checkboxes de sections
     const sections = ['identification', 'assiduite', 'completion', 'performance', 'jetons', 'date'];
@@ -383,8 +399,9 @@ function restaurerPreferencesRapport(da) {
     genererEtAfficherRapport(da);
 }
 
-// Exporter les 7 fonctions vers window (décision étape 1 b — convention systématique)
+// Exporter les 8 fonctions vers window (décision étape 1 b — convention systématique)
 window.genererRapportAPI = genererRapportAPI;
+window.cocherSectionRapport = cocherSectionRapport;   // P-2 (lot 4 du cadrage 11)
 window.genererSectionRapport = genererSectionRapport;
 window.genererEtAfficherRapport = genererEtAfficherRapport;
 window.copierRapport = copierRapport;

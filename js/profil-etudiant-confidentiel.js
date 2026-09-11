@@ -95,7 +95,18 @@ function ouvrirModalConfidentiel(da) {
     document.getElementById('confidentiel-cours-decrochage').checked = infos.coursDecrochage || false;
     document.getElementById('confidentiel-cours-renforcement').checked = infos.coursRenforcement || false;
 
-    document.getElementById('confidentiel-services-adaptes').checked = infos.servicesAdaptes || false;
+    // D.1 (lot 4 du cadrage 11 — décision de Grégoire du 11 sept. 2026, 17 h 20) :
+    // UNE source, la liste des étudiant·es (`etudiant.sa`, Cadre › Trimestre). La
+    // case reflète, ne se coche pas ; le second booléen `servicesAdaptes` que ce
+    // volet stockait n'est plus lu ni écrit (stock : il tombe au prochain
+    // Enregistrer, comme les champs `portrait*`). Catégorie et sous-catégorie ne
+    // s'affichent que pour un élève marqué « Oui » — `toggleServicesAdaptes`,
+    // exportée depuis mai et jamais appelée, l'est enfin, au rendu.
+    const servicesAdaptes = !!etudiant && (etudiant.sa === 'Oui' || etudiant.sa === true);
+    const caseServicesAdaptes = document.getElementById('confidentiel-services-adaptes');
+    caseServicesAdaptes.checked = servicesAdaptes;
+    caseServicesAdaptes.disabled = true;
+    toggleServicesAdaptes(servicesAdaptes);
 
     document.getElementById('confidentiel-categorie').value = infos.categorie || '';
     mettreAJourSousCategories();
@@ -109,12 +120,13 @@ function ouvrirModalConfidentiel(da) {
 
     document.getElementById('confidentiel-notes').value = infos.notes || '';
 
-    // Portrait de lecteur
-    document.getElementById('confidentiel-portrait-structure').value = infos.portraitStructure || '';
-    document.getElementById('confidentiel-portrait-rigueur').value = infos.portraitRigueur || '';
-    document.getElementById('confidentiel-portrait-plausibilite').value = infos.portraitPlausibilite || '';
-    document.getElementById('confidentiel-portrait-nuance').value = infos.portraitNuance || '';
-    document.getElementById('confidentiel-portrait-francais').value = infos.portraitFrancais || '';
+    // D.2 (lot 4 du cadrage 11 — décision de Grégoire du 11 sept. 2026, 17 h 20) : le
+    // « Portrait de lecteur » (cinq sélecteurs I/D/M/E, Conception · Rigueur ·
+    // Plausibilité · Nuance · Français) est retiré : c'était sa pratique codée en
+    // dur dans un volet que d'autres disciplines lisent. STOCK (ses mots, 17 h 24 :
+    // « peuvent disparaître complètement ») : aucune purge — `sauvegarderConfidentiel`
+    // réécrit l'objet entier depuis le formulaire, les champs `portrait*` tombent
+    // d'eux-mêmes au prochain Enregistrer, et personne ne les lit d'ici là.
 
     // Charger les notes de présences
     chargerNotesPresencesConfidentiel(da);
@@ -227,7 +239,6 @@ function sauvegarderConfidentiel() {
         coursAbandon: document.getElementById('confidentiel-cours-abandon').checked,
         coursDecrochage: document.getElementById('confidentiel-cours-decrochage').checked,
         coursRenforcement: document.getElementById('confidentiel-cours-renforcement').checked,
-        servicesAdaptes: document.getElementById('confidentiel-services-adaptes').checked,
         categorie: document.getElementById('confidentiel-categorie').value,
         sousCategorie: document.getElementById('confidentiel-sous-categorie').value,
         defiFLS: document.getElementById('confidentiel-defi-fls').checked,
@@ -235,13 +246,9 @@ function sauvegarderConfidentiel() {
         defiIntegration: document.getElementById('confidentiel-defi-integration').checked,
         defiOrganisationScolaire: document.getElementById('confidentiel-defi-organisation-scolaire').checked,
         defiOrganisationCitoyenne: document.getElementById('confidentiel-defi-organisation-citoyenne').checked,
-        notes: document.getElementById('confidentiel-notes').value.trim(),
-        // Portrait de lecteur
-        portraitStructure: document.getElementById('confidentiel-portrait-structure').value,
-        portraitRigueur: document.getElementById('confidentiel-portrait-rigueur').value,
-        portraitPlausibilite: document.getElementById('confidentiel-portrait-plausibilite').value,
-        portraitNuance: document.getElementById('confidentiel-portrait-nuance').value,
-        portraitFrancais: document.getElementById('confidentiel-portrait-francais').value
+        notes: document.getElementById('confidentiel-notes').value.trim()
+        // Ni `servicesAdaptes` (D.1 : la liste des étudiant·es fait foi) ni `portrait*`
+        // (D.2 : retirés) — l'objet entier est réécrit, le stock ancien tombe ici.
     };
 
     // Sauvegarder les infos confidentielles
@@ -302,14 +309,12 @@ function aDesInfosConfidentielles(da) {
     if (!infos) return false;
 
     // Vérifier si au moins une info est renseignée
-    return infos.epgc || infos.servicesAdaptes || infos.categorie ||
+    return infos.epgc || infos.categorie ||
            infos.coursRegulier || infos.coursEchec || infos.coursAbandon ||
            infos.coursDecrochage || infos.coursRenforcement ||
            infos.defiFLS || infos.defiSocialisation || infos.defiIntegration ||
            infos.defiOrganisationScolaire || infos.defiOrganisationCitoyenne ||
-           (infos.notes && infos.notes.length > 0) ||
-           infos.portraitStructure || infos.portraitRigueur || infos.portraitPlausibilite ||
-           infos.portraitNuance || infos.portraitFrancais;
+           (infos.notes && infos.notes.length > 0);
 }
 
 

@@ -8,7 +8,6 @@
    module-scope encapsulées dans l'IIFE :
    - `profilActuelDA` dual-write atomique (état pivot, lu 24× hors module via window.X)
    - `sectionProfilActive` (section profil active par défaut « productions »)
-   - `indiceActif` (indice A/C/P actuellement déployé en détail)
 
    Index historique : MODULE 15 PROFIL DÉTAILLÉ D'UN ÉTUDIANT (modularisation 10 oct 2025).
 
@@ -1420,7 +1419,7 @@ function genererSectionAccompagnement(da) {
 
         <!-- Historique compact -->
         <div class="u-mt-15">
-            <div class="u-flex-between-mb10">
+            <div class="u-flex-between u-mb-10">
                 <h4 style="color: var(--accent-primaire); font-size: 0.95rem; margin: 0; font-weight: 600;" data-tooltip="profil-historique">
                     HISTORIQUE ${interventions && interventions.length > 0 ? `(${interventions.length} intervention${interventions.length > 1 ? 's' : ''})` : ''}
                 </h4>
@@ -2325,6 +2324,33 @@ function _postRendreProfilSection(sectionAffichee, da, container) {
 }
 
 /**
+ * Active la sous-section « suivi-profil » SANS déclencher un second rendu.
+ *
+ * ⮕ #754. Le crochet de `navigation.js` (zone protégée, non touchée) reprogramme
+ * `afficherProfilComplet(profilActuelDA)` à T+100 ms à chaque
+ * `afficherSousSection('suivi-profil')`, sauf si `window._profilAutoChargement`
+ * est levé — c'est le drapeau qu'il déclare lui-même « garde anti-réentrance :
+ * afficherProfilComplet() appelle afficherSousSection() ». On le lève donc le
+ * temps de l'appel : l'ouverture directe (Liste, sélecteur, Suivi du groupe)
+ * rend une fois ; l'arrivée par l'onglet Profil (le crochet seul) rend une fois
+ * aussi, parce que la sous-section est alors déjà active et qu'on ne rappelle rien.
+ * Le MutationObserver qui rechargeait « quand la sous-section devient active »
+ * est retiré : ce rôle est celui du crochet, et il le tient.
+ */
+function _activerSousSectionProfil() {
+    if (typeof afficherSousSection !== 'function') return;
+    const sousSection = document.getElementById('suivi-profil');
+    if (sousSection && sousSection.classList.contains('active')) return;
+    const drapeauAvant = window._profilAutoChargement;
+    window._profilAutoChargement = true;
+    try {
+        afficherSousSection('suivi-profil');
+    } finally {
+        window._profilAutoChargement = drapeauAvant;
+    }
+}
+
+/**
  * Affiche le profil complet avec layout 2 colonnes
  * Inspiré de la page d'évaluation
  *
@@ -2342,7 +2368,12 @@ function afficherProfilComplet(daOuEl) {
     // ✅ NOUVEAU (29 déc 2025): mode anonymisation pour masquer les DA
     const modeAnonymisation = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
 
-    if (typeof afficherSousSection === 'function') afficherSousSection('suivi-profil');
+    // #754 (lot 4 du cadrage 11, 11 sept. 2026) — UN SEUL RENDU À L'OUVERTURE.
+    // Avant : cet appel inconditionnel réveillait le crochet de navigation.js (un
+    // afficherProfilComplet reprogrammé à T+100 ms), et un MutationObserver de ce
+    // fichier en ajoutait un troisième — quatre insertions mesurées, et le texte
+    // tapé dans le rapport effacé. Voir `_activerSousSectionProfil`.
+    _activerSousSectionProfil();
 
     const container = document.getElementById('contenuProfilEtudiant');
     if (!container) {
@@ -3260,128 +3291,6 @@ function genererSectionProgression(da) {
     return html;
 }
 
-/**
- * Variable globale pour suivre quel indice est actuellement affiché
- */
-let indiceActif = null;
-
-/**
- * Toggle l'affichage des détails d'un indice avec lien visuel + grisage des autres cartes
- * MODIFIÉ : Le case 'P' affiche maintenant le portfolio complet
- */
-/**
- * Toggle l'affichage des détails d'un indice
- * MODIFIÉ : Case 'C' supprimé, case 'P' affiche portfolio avec stats C et P
- */
-function toggleDetailIndice(indice, da) {
-    const panneau = document.getElementById('panneau-details-indice');
-    const contenu = document.getElementById('contenu-detail-indice');
-
-    if (!panneau || !contenu) {
-        console.error('❌ Éléments du panneau de détails introuvables');
-        return;
-    }
-
-    // Si on clique sur le même indice, fermer
-    if (indiceActif === indice && !panneau.classList.contains('u-hide')) {
-        fermerDetailIndice();
-        return;
-    }
-
-    // Mettre à jour l'indice actif
-    indiceActif = indice;
-
-    // GRISER toutes les cartes sauf celle active
-    const toutesLesCartes = ['A', 'C', 'P', 'M', 'E', 'R'];
-    toutesLesCartes.forEach(ind => {
-        const carte = document.getElementById(`carte-indice-${ind}`);
-        if (carte) {
-            if (ind === indice) {
-                carte.style.opacity = '1';
-                carte.style.filter = 'none';
-            } else {
-                carte.style.opacity = '0.4';
-                carte.style.filter = 'grayscale(50%)';
-            }
-        }
-    });
-
-    // Récupérer la couleur de la carte cliquée
-    const carteCliquee = document.getElementById(`carte-indice-${indice}`);
-    let couleurBordure = 'var(--accent-primaire)';
-    if (carteCliquee) {
-        const style = window.getComputedStyle(carteCliquee);
-        couleurBordure = style.borderColor;
-    }
-
-    // Appliquer la couleur de bordure au panneau
-    panneau.style.borderTopColor = couleurBordure;
-    panneau.style.borderTopWidth = '4px';
-
-    // Générer le contenu selon l'indice
-    let html = '';
-    switch (indice) {
-        case 'A':
-            html = `
-                <h3 class="profil-titre-bleu-large-pr40">
-                    Assiduité détaillée
-                </h3>
-                ${genererSectionAssiduite(da)}
-            `;
-            break;
-        case 'C':
-            html = `
-                <h3 class="profil-titre-bleu-large-pr40">
-                    Complétion détaillée
-                </h3>
-                ${genererSectionCompletion(da)}
-            `;
-            break;
-        case 'P':
-            html = `
-                ${genererSectionPerformance(da)}
-            `;
-            break;
-        case 'M':
-            html = `
-                <h3 class="profil-titre-bleu-large-pr40">
-                    Mobilisation détaillée
-                </h3>
-                ${genererSectionMobilisation(da)}
-            `;
-            break;
-    }
-
-    contenu.innerHTML = html;
-    panneau.classList.remove('u-hide');
-
-    // Scroll smooth vers le panneau
-    setTimeout(() => {
-        panneau.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, 100);
-}
-
-/**
- * Ferme le panneau de détails
- * MODIFIÉ : Liste des cartes mise à jour sans C
- */
-function fermerDetailIndice() {
-    const panneau = document.getElementById('panneau-details-indice');
-    if (panneau) {
-        panneau.classList.add('u-hide');
-        indiceActif = null;
-    }
-
-    // RETIRER le grisage de toutes les cartes (liste mise à jour)
-    const toutesLesCartes = ['A', 'P', 'M', 'E', 'R'];
-    toutesLesCartes.forEach(ind => {
-        const carte = document.getElementById(`carte-indice-${ind}`);
-        if (carte) {
-            carte.style.opacity = '1';
-            carte.style.filter = 'none';
-        }
-    });
-}
 
 
 /**
@@ -3758,6 +3667,8 @@ function _genererGraphiqueCriteresHTML(da) {
                 ${legendeHTML}
                 ${genererBandeauContexteProfil()}
             </div>
+            <!-- #752 : rempli par creerGraphiqueCriteres quand une valeur ne se convertit pas dans l'échelle de son évaluation -->
+            <p id="graphique-criteres-note-${da}" class="u-texte-mini u-texte-gris" style="margin: 0 0 8px;" hidden></p>
 
             <!-- Canvas pour le graphique Chart.js -->
             <div style="background: var(--surface-conteneur, #142428); padding: 20px; border-radius: 6px; height: 450px;">
@@ -4384,65 +4295,8 @@ window.naviguerVersIntervention = naviguerVersIntervention;
    🔄 RECHARGEMENT AUTOMATIQUE
    =============================== */
 
-/**
- * Surveille l'activation de la sous-section 'suivi-profil'
- * et recharge automatiquement le profil pour refléter les changements
- * faits depuis d'autres sections (ex: modifications d'interventions RàI)
- */
-document.addEventListener('DOMContentLoaded', function() {
-    const sectionProfil = document.getElementById('suivi-profil');
-    if (!sectionProfil) return;
-
-    let dernierDARecharge = null;
-    let timeoutRechargement = null;
-
-    // Observer les changements de la classe 'active' sur la sous-section
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                const estActif = sectionProfil.classList.contains('active');
-                const daActuel = window.profilActuelDA;
-
-                // Si la sous-section vient de devenir active ET qu'un profil est affiché
-                if (estActif && daActuel) {
-                    // Éviter les rechargements en cascade pour le même étudiant
-                    if (dernierDARecharge === daActuel) {
-                        return;
-                    }
-
-                    // Annuler tout rechargement en attente
-                    if (timeoutRechargement) {
-                        clearTimeout(timeoutRechargement);
-                    }
-
-                    // Recharger avec un court délai (debounce)
-                    timeoutRechargement = setTimeout(function() {
-                        dernierDARecharge = daActuel;
-
-                        // Vérifier que la fonction existe avant de l'appeler
-                        if (typeof afficherProfilComplet === 'function') {
-                            afficherProfilComplet(daActuel);
-                        }
-
-                        timeoutRechargement = null;
-                    }, 100); // Délai de 100ms
-                }
-
-                // Réinitialiser le flag quand la section devient inactive
-                if (!estActif) {
-                    dernierDARecharge = null;
-                }
-            }
-        });
-    });
-
-    // Commencer à observer
-    observer.observe(sectionProfil, {
-        attributes: true,
-        attributeFilter: ['class']
-    });
-
-});
+// #754 — l'observateur qui rechargeait le profil quand la sous-section devenait
+// active vivait ici ; retiré le 11 sept. 2026 (voir `_activerSousSectionProfil`).
 
 
 

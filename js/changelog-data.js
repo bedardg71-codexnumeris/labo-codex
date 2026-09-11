@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.134',
+            couleur: 'vert',
+            titre: 'Profil d\'un élève : un seul rendu à l\'ouverture, des graphiques qui lisent l\'échelle de chaque évaluation',
+            items: [
+                '<strong>Le profil d\'un élève s\'ouvre en un seul rendu.</strong> Ce que tu tapes dans la zone de texte du rapport n\'est plus effacé une fraction de seconde après l\'ouverture&nbsp;; une note de dénotation en cours de saisie non plus.',
+                '<strong>Les graphiques de progression lisent l\'échelle de chaque évaluation</strong> — la tienne, et celles de tes collègues, y compris à trois paliers ou en points. Une valeur qui ne se convertit pas dans son échelle n\'est plus tracée à une valeur devinée&nbsp;: le point est absent et le graphique dit combien d\'évaluations sont dans ce cas. Les zones colorées du fond sont celles de l\'échelle des évaluations tracées.',
+                '<strong>Les cases «&nbsp;Inclure…&nbsp;» du rapport appartiennent au trimestre</strong> et se mémorisent quand tu les coches, pas à chaque affichage.',
+                '<strong>Volet confidentiel&nbsp;: la case «&nbsp;Services adaptés&nbsp;» suit la liste des étudiant·es</strong> (Cadre › Trimestre) et ne se coche plus à part&nbsp;; la catégorie et la sous-catégorie ne s\'affichent que pour un élève marqué «&nbsp;Oui&nbsp;». Le bloc «&nbsp;Portrait de lecteur&nbsp;», propre à une pratique particulière, est retiré.',
+                '<strong>Dans Accompagnement, le bouton «&nbsp;+ Nouvelle intervention&nbsp;» est à droite du titre HISTORIQUE</strong>, sur la même ligne, la carte de l\'historique dessous.',
+            ]
+        },
+        {
             version: '1.133',
             couleur: 'vert',
             titre: 'Saisie des présences : le verrou d\'une date ne vaut que pour ce groupe-cours et ce trimestre',

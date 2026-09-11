@@ -303,7 +303,7 @@ function monter(jeu, opts = {}) {
     chargerAvecInterne('js/interventions.js', globaux, win, ['genererAffichageNotesIndividuelles']);
     chargerScript('js/snapshots.js', globaux, win);
     chargerAvecInterne('js/tableau-bord-apercu.js', globaux, win, ['_tousEtudiantsEnrichis', '_etudiantsPrioritaires', '_filtresActifs', 'appliquerFiltres', 'nettoyerEtudiantsSuivis', 'afficherAlerteNonParticipation']);
-    chargerAvecInterne('js/graphiques-progression.js', globaux, win, ['obtenirDonneesCriteres', 'niveauHabiletesVersDecimal', 'genererZonesDepuisEchelle']);
+    chargerAvecInterne('js/graphiques-progression.js', globaux, win, ['obtenirDonneesCriteres', 'moyenneCriteresHabiletes', 'genererZonesDepuisEchelle']);
 
     /** La chaîne complète de calcul, comme l'ouverture du Suivi du groupe la déclenche. */
     const calculerTout = () => { win.calculerEtSauvegarderIndicesAssiduite(); win.calculerEtStockerIndicesCP(); };
@@ -950,11 +950,11 @@ describe('G · les sorties du Suivi et le volet confidentiel', () => {
         expect(boutonSansGarde).toBe(true);
     });
 
-    it('G5 · #539 tenu : les identifiants du volet confidentiel portent encore les cinq critères de Grégoire', () => {
+    it('G5 · le « Portrait de lecteur » (cinq critères de Grégoire codés en dur dans le volet confidentiel) est parti — valeur d\'après le lot 4 du cadrage 11 (constat d\'origine, #539 : les cinq identifiants y étaient)', () => {
         const confidentiel = readFileSync(path.join(RACINE, 'js/profil-etudiant-confidentiel.js'), 'utf8');
         const ids = (confidentiel.match(/confidentiel-portrait-(\w+)/g) || []).filter((v, i, a) => a.indexOf(v) === i);
         noter('G5', { ids });
-        expect(ids).toEqual(['confidentiel-portrait-structure', 'confidentiel-portrait-rigueur', 'confidentiel-portrait-plausibilite', 'confidentiel-portrait-nuance', 'confidentiel-portrait-francais']);
+        expect(ids).toEqual([]);
     });
 });
 
@@ -962,17 +962,20 @@ describe('G · les sorties du Suivi et le volet confidentiel', () => {
    H · LES GRAPHIQUES — cinq mesures
    ============================================================================================= */
 describe('H · ce que les courbes lisent', () => {
-    it('H1 · les courbes par critère convertissent I/D/M/E en 40/65/75/100 ÉCRITS EN DUR : justes chez Grégoire par coïncidence, vides pour une échelle A/B/C', () => {
+    it('H1 · les courbes par critère lisent l\'échelle de chaque évaluation : les mêmes valeurs chez Grégoire, et une échelle A/B/C trace ses paliers — valeur d\'après #752 (lot 4 du cadrage 11 ; constat d\'origine : 40/65/75/100 écrits en dur, courbe vide pour A/B/C)', () => {
         const b = monter(jeuBase());
         const g = b.interne['graphiques-progression.js'];
         const d = g.obtenirDonneesCriteres(DA.ASSIDU);
         const jeu = jeuBase(); jeu.echelles = [clone(E3N)]; jeu.evaluations = ['P1', 'P2'].map(pid => ev('E1' + pid, DA.ASSIDU, pid, 70, 'B', ['B', 'B', 'B'], { echelleId: 'E3N' }));
         const b3 = monter(jeu);
-        const d3 = b3.interne['graphiques-progression.js'].obtenirDonneesCriteres(DA.ASSIDU);
-        noter('H1', { structureIDME: d.criteres.Structure, structureABC: d3.criteres.Structure, habiletes: { D: g.niveauHabiletesVersDecimal('D'), B: g.niveauHabiletesVersDecimal('B') } });
+        const g3 = b3.interne['graphiques-progression.js'];
+        const d3 = g3.obtenirDonneesCriteres(DA.ASSIDU);
+        const habileteB = g3.moyenneCriteresHabiletes(jeu.evaluations[0], new Set(['Structure']), new Map());
+        noter('H1', { structureIDME: d.criteres.Structure, structureABC: d3.criteres.Structure, habiletes: { B: habileteB }, sansValeur: d3.sansValeurConvertible });
         expect(d.criteres.Structure).toEqual([65, 65, 75, 100]);
-        expect(d3.criteres.Structure).toEqual([null, null]);
-        expect(g.niveauHabiletesVersDecimal('B')).toBeNull();
+        expect(d3.criteres.Structure).toEqual([75, 75]);            // valeurCalcul de « B » dans E3N
+        expect(habileteB).toBe(0.75);
+        expect(d3.sansValeurConvertible).toEqual({ evaluations: 0, points: 0 });
     });
 
     it('H2 · les zones colorées du graphique viennent de « la première échelle du trimestre » (ou celle marquée parDefaut), pas de celle des évaluations', () => {

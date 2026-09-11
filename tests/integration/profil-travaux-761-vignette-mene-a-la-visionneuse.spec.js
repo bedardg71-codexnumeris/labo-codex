@@ -70,8 +70,8 @@ test('Porte #761 · la vignette d\'un travail, dans le profil, mène à Évaluat
             stockage: 'indexeddb', thumbnailDataUrl: '', dateImport: '2026-02-01T12:00:00.000Z', dateModification: '2026-02-01T12:00:00.000Z',
             source: 'import-local', importePar: 'single', statut: 'present'
         }]);
-        // Ouvrir un profil le rend TROIS fois (#754) : on compte les rendus pour cliquer APRÈS le dernier,
-        // comme l'enseignant qui regarde la page avant d'y toucher.
+        // Ouvrir un profil le rend UNE fois depuis #754 (lot 4 du cadrage 11 ; trois avant) : on compte les
+        // rendus pour cliquer APRÈS, comme l'enseignant qui regarde la page avant d'y toucher.
         window.__rendus761 = 0;
         const original = window.afficherProfilComplet;
         window.afficherProfilComplet = function () { window.__rendus761 += 1; return original.apply(this, arguments); };
@@ -87,9 +87,9 @@ test('Porte #761 · la vignette d\'un travail, dans le profil, mène à Évaluat
     });
     expect(montage.erreur, `Erreur de montage : ${montage.erreur}`).toBeUndefined();
 
-    // Les rendus successifs du profil passés, la section « Travaux soumis » est demandée (le clic de la
+    // Le rendu du profil passé (un seul, #754), la section « Travaux soumis » est demandée (le clic de la
     // barre latérale), et sa vignette attendue.
-    await page.waitForFunction(() => window.__rendus761 >= 3 && !window._profilAutoChargement, null, { timeout: 10000 });
+    await page.waitForFunction(() => window.__rendus761 >= 1 && !window._profilAutoChargement && !!document.querySelector('#contenuProfilEtudiant .layout-sidebar-2col'), null, { timeout: 10000 });
     await page.evaluate(() => window.changerSectionProfil('travaux'));
     await page.waitForFunction(() => !!document.querySelector('#suivi-profil .travaux-grille-item[data-action="travauxUI.ouvrirFichier"][data-param="FT761"]'), null, { timeout: 10000 });
 

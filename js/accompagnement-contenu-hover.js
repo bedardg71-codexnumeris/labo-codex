@@ -540,13 +540,11 @@ const TOOLTIPS = {
     // --- Données confidentielles ---
 
     'profil-confidentiel':
-        'Données confidentielles stockées localement : parcours, défis, portrait spécifique, diagnostic, notes.',
+        'Données confidentielles stockées localement : parcours, défis, diagnostic, notes.',
     'profil-conf-parcours':
         'ÉPGC (étudiant·e de première génération au cégep) et historique du cours antérieur (ces données sont facultatives).',
-    'profil-conf-lecteur':
-        'Portrait qualitatif du lecteur, saisi à la main. Ces champs sont ceux de la grille d\'exemple fournie ; ils ne se déduisent pas de tes propres critères.',
     'profil-conf-diagnostic':
-        'Services adaptés, catégorie et sous-catégorie du diagnostic. Confidentiel.',
+        'Services adaptés (d\'après la liste des étudiant·es, Cadre › Trimestre), catégorie et sous-catégorie du diagnostic. Confidentiel.',
 
     // --- Interventions RàI ---
 

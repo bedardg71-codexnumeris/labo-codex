@@ -148,24 +148,6 @@ function evaluerProduction(da, productionId) {
     }, 200);
 }
 
-/**
- * Supprime une évaluation depuis le profil élève
- */
-function supprimerEvaluationDepuisProfil(evaluationId) {
-    // Appeler la fonction de suppression du module liste-evaluations.js
-    if (typeof supprimerEvaluation === 'function') {
-        supprimerEvaluation(evaluationId);
-
-        // Recharger la section Productions après suppression
-        setTimeout(() => {
-            if (profilActuelDA) {
-                changerSectionProfil('productions');
-            }
-        }, 500);
-    } else {
-        alert('Fonction de suppression non disponible');
-    }
-}
 
 // #128 (31 mai) : message DIAGNOSTIQUE du « non calculable ». Objectif (retour Grégoire) :
 // que l'enseignant sache si c'est SON assignation/config à corriger, ou si c'est l'app qui
@@ -669,56 +651,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
    GESTION DES JETONS PERSONNALISÉS
    =============================== */
 
-/**
- * Attribue un jeton personnalisé avec demande de motif
- * @param {string} da - Code permanent de l'étudiant
- * @param {string} jetonId - ID du type de jeton
- * @param {string} nomJeton - Nom du jeton (pour affichage)
- */
-function attribuerJetonPersonnaliseAvecPrompt(da, jetonId, nomJeton) {
-    const motif = prompt(`Motif d'utilisation du jeton "${nomJeton}" (optionnel) :`);
 
-    if (motif === null) {
-        // L'utilisateur a annulé
-        return;
-    }
-
-    if (typeof attribuerJetonPersonnalise === 'function') {
-        const succes = attribuerJetonPersonnalise(da, jetonId, motif || '');
-
-        if (succes) {
-            // Recharger la section Mobilisation pour mettre à jour l'affichage
-            changerSectionProfil('mobilisation');
-        }
-    } else {
-        console.error('Fonction attribuerJetonPersonnalise non disponible');
-        alert('Erreur : La fonction de gestion des jetons n\'est pas disponible.');
-    }
-}
-
-/**
- * Retire un jeton personnalisé avec confirmation
- * @param {string} da - Code permanent de l'étudiant
- * @param {string} jetonId - ID du type de jeton
- * @param {string} nomJeton - Nom du jeton (pour affichage)
- */
-function retirerJetonPersonnaliseAvecConfirmation(da, jetonId, nomJeton) {
-    if (!confirm(`Es-tu sûr de vouloir retirer un jeton "${nomJeton}" à cet·te étudiant·e ?`)) {
-        return;
-    }
-
-    if (typeof retirerJetonPersonnalise === 'function') {
-        const succes = retirerJetonPersonnalise(da, jetonId);
-
-        if (succes) {
-            // Recharger la section Mobilisation pour mettre à jour l'affichage
-            changerSectionProfil('mobilisation');
-        }
-    } else {
-        console.error('Fonction retirerJetonPersonnalise non disponible');
-        alert('Erreur : La fonction de gestion des jetons n\'est pas disponible.');
-    }
-}
 
 // Exporter les fonctions vers window
 
@@ -792,12 +725,13 @@ function obtenirPatternEtudiant(da) {
 
 
     // === EXPORTS window.X (convention systématique session A décision b) ===
+    // Lot 4 du cadrage 11 (11 sept. 2026, tableau 4.1 de l'audit du 6) : trois gestes
+    // exportés sans aucun bouton ni appelant — `supprimerEvaluationDepuisProfil`,
+    // `attribuerJetonPersonnaliseAvecPrompt`, `retirerJetonPersonnaliseAvecConfirmation`
+    // (remesurés dans js/, index.html et tests/, chaîne comprise) — retirés, pas câblés.
     window.consulterEvaluation                       = consulterEvaluation;
     window.evaluerProduction                         = evaluerProduction;
-    window.supprimerEvaluationDepuisProfil           = supprimerEvaluationDepuisProfil;
     window.calculerDetailsNoteFinale                 = calculerDetailsNoteFinale;
-    window.attribuerJetonPersonnaliseAvecPrompt      = attribuerJetonPersonnaliseAvecPrompt;
-    window.retirerJetonPersonnaliseAvecConfirmation  = retirerJetonPersonnaliseAvecConfirmation;
     window.calculerEtStockerPatternsGroupe           = calculerEtStockerPatternsGroupe;
     window.obtenirPatternEtudiant                    = obtenirPatternEtudiant;
 })();

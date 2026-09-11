@@ -76,7 +76,7 @@ test('Défense refactor · sentinelle exports browser profil-etudiant', async ({
         determinerNiveauRaiPedagogique: typeof window.determinerNiveauRaiPedagogique,
         determinerCibleIntervention: typeof window.determinerCibleIntervention,
         // Actions (Session C)
-        attribuerJetonPersonnaliseAvecPrompt: typeof window.attribuerJetonPersonnaliseAvecPrompt,
+        calculerEtStockerPatternsGroupe: typeof window.calculerEtStockerPatternsGroupe,
         calculerDetailsNoteFinale: typeof window.calculerDetailsNoteFinale,
         // Confidentiel (Session B — PII)
         ouvrirModalConfidentiel: typeof window.ouvrirModalConfidentiel,
@@ -92,7 +92,7 @@ test('Défense refactor · sentinelle exports browser profil-etudiant', async ({
     expect(surface.calculerIPB).toBe('function');
     expect(surface.determinerNiveauRaiPedagogique).toBe('function');
     expect(surface.determinerCibleIntervention).toBe('function');
-    expect(surface.attribuerJetonPersonnaliseAvecPrompt).toBe('function');
+    expect(surface.calculerEtStockerPatternsGroupe).toBe('function');
     expect(surface.calculerDetailsNoteFinale).toBe('function');
     expect(surface.ouvrirModalConfidentiel).toBe('function');
     expect(surface.sauvegarderConfidentiel).toBe('function');

@@ -758,37 +758,42 @@ describe('4 · Profils individuels — écritures du profil, anonymisation, grap
             obtenirTermeProduction: () => 'artefact', evaluationEntreDansLaNote: () => true, obtenirIdsProductionsEvaluables: () => [], obtenirPratiqueActive: () => null,
             modifierNotesPresence: (da, date, note) => { modifs.push({ da, date, note }); return true; }, toggleDisplay() {}
         }, opts.globaux || {});
-        const b = monter(store, Object.assign({}, opts, { modules: ['js/profil-etudiant-rapport.js', 'js/profil-etudiant-confidentiel.js', 'js/profil-etudiant-diagnostics.js', { chemin: 'js/graphiques-progression.js', internes: ['obtenirDonneesCriteres', 'niveauHabiletesVersDecimal'] }], globaux, objetsExportes: ['profilActuelDA', 'etudiantsListeCache'] }));
+        // Lot 4 du cadrage 11 : les graphiques convertissent par `profil-etudiant-calculs.js` (chargé ici, réel).
+        const b = monter(store, Object.assign({}, opts, { modules: ['js/profil-etudiant-calculs.js', 'js/profil-etudiant-rapport.js', 'js/profil-etudiant-confidentiel.js', 'js/profil-etudiant-diagnostics.js', { chemin: 'js/graphiques-progression.js', internes: ['obtenirDonneesCriteres', 'moyenneCriteresHabiletes'] }], globaux, objetsExportes: ['profilActuelDA', 'etudiantsListeCache'] }));
         b.modifs = modifs;
         return b;
     }
 
-    it('P-1 · Le rapport : ses six cases sont écrites sous « preferencesRapport », clé NUE et sans DA ; le texte, lui, est régénéré à chaque affichage', () => {
+    it('P-1 · Le rapport : ses six cases s\'écrivent sous <trim>_preferencesRapport, au GESTE seulement (le rendu n\'écrit rien) ; le texte, lui, est régénéré à chaque affichage — valeur d\'après le lot 4 du cadrage 11 (constat d\'origine : clé nue, écrite à chaque rendu)', () => {
         const store = storeBase();
         const b = monterP(store, { elements: { ['inclure-jetons-' + DA]: elementDom({ checked: false }), ['textarea-rapport-' + DA]: elementDom({ value: 'TEXTE RETOUCHÉ À LA MAIN' }) } });
         for (const s of ['identification', 'assiduite', 'completion', 'performance', 'date']) b.document.getElementById('inclure-' + s + '-' + DA).checked = true;
-        b.win.genererEtAfficherRapport(DA);
+        b.win.genererEtAfficherRapport(DA);                       // le chemin du RENDU (restaurerPreferencesRapport → génération)
+        const clesApresRendu = Object.keys(store).filter(k => /rapport/i.test(k));
+        b.win.cocherSectionRapport(DA);                           // le GESTE sur une case
         const texte = b.document.getElementById('textarea-rapport-' + DA).value;
-        noter('P1', { cles: Object.keys(store).filter(k => /rapport/i.test(k)), prefs: store.preferencesRapport, texteRetoucheConserve: texte.includes('RETOUCHÉ'), debut: texte.slice(0, 60) });
-        expect(Object.keys(store).filter(k => /rapport/i.test(k))).toEqual(['preferencesRapport']);
-        expect(store.preferencesRapport).toEqual({ identification: true, assiduite: true, completion: true, performance: true, jetons: false, date: true });
+        noter('P1', { clesApresRendu, cles: Object.keys(store).filter(k => /rapport/i.test(k)), prefs: store.test_preferencesRapport, texteRetoucheConserve: texte.includes('RETOUCHÉ'), debut: texte.slice(0, 60) });
+        expect(clesApresRendu).toEqual([]);
+        expect(Object.keys(store).filter(k => /rapport/i.test(k))).toEqual(['test_preferencesRapport']);
+        expect(store.test_preferencesRapport).toEqual({ identification: true, assiduite: true, completion: true, performance: true, jetons: false, date: true });
         expect(texte.includes('RETOUCHÉ')).toBe(false);
     });
 
-    it('P-2 · Le volet confidentiel : écrit EN CLAIR sous <trim>_confidentielEtudiants, remplace tout le sous-objet du DA, et réécrit les notes de présence en cascade', () => {
+    it('P-2 · Le volet confidentiel : écrit EN CLAIR sous <trim>_confidentielEtudiants, remplace tout le sous-objet du DA (le stock `servicesAdaptes` et `portrait*` tombe — lot 4 du cadrage 11), et réécrit les notes de présence en cascade', () => {
         const store = storeBase();
-        store.test_confidentielEtudiants = { [DA]: { notes: 'ancienne note', categorie: 'x', portraitNuance: '3' }, '2000002': { notes: 'Bruno' } };
+        store.test_confidentielEtudiants = { [DA]: { notes: 'ancienne note', categorie: 'x', portraitNuance: '3', servicesAdaptes: true }, '2000002': { notes: 'Bruno' } };
         const ta = elementDom({ value: 'note présence modifiée', dataset: { date: '2026-09-01', da: DA } });
         const b = monterP(store, { selecteurs: { '#confidentiel-notes-presences .note-presence-editable': [ta] } });
         b.win.ouvrirModalConfidentiel(DA);
         b.document.getElementById('confidentiel-notes').value = 'TDAH — plan adapté';
-        b.document.getElementById('confidentiel-services-adaptes').checked = true;
+        const caseSA = b.document.getElementById('confidentiel-services-adaptes');
         b.win.sauvegarderConfidentiel();
         const ecrit = store.test_confidentielEtudiants;
-        noter('P2', { cles: Object.keys(store).filter(k => /confid/i.test(k)), da: ecrit[DA], autreDA: ecrit['2000002'], cascade: b.modifs, enClair: JSON.stringify(ecrit).includes('TDAH') });
+        noter('P2', { cles: Object.keys(store).filter(k => /confid/i.test(k)), da: ecrit[DA], autreDA: ecrit['2000002'], cascade: b.modifs, enClair: JSON.stringify(ecrit).includes('TDAH'), caseSA: { checked: caseSA.checked, disabled: caseSA.disabled } });
         expect(ecrit[DA].notes).toBe('TDAH — plan adapté');
-        expect(ecrit[DA].servicesAdaptes).toBe(true);
-        expect(ecrit[DA].portraitNuance).toBe('3');           // relu dans le formulaire à l'ouverture, réécrit tel quel : le sous-objet est remplacé par ce que le formulaire porte
+        expect(caseSA).toMatchObject({ checked: false, disabled: true });   // l'élève de banc n'a pas `sa: 'Oui'` dans la liste : la case le reflète, sans se cocher
+        expect(ecrit[DA]).not.toHaveProperty('servicesAdaptes');            // plus écrit : la liste des étudiant·es fait foi
+        expect(ecrit[DA]).not.toHaveProperty('portraitNuance');             // le sous-objet est remplacé par ce que le formulaire porte — et le portrait n'y est plus
         expect(ecrit['2000002']).toEqual({ notes: 'Bruno' });   // les autres DA sont intacts
         expect(b.modifs).toEqual([{ da: DA, date: '2026-09-01', note: 'note présence modifiée' }]);
         expect(JSON.stringify(ecrit)).toContain('TDAH');
@@ -819,17 +824,23 @@ describe('4 · Profils individuels — écritures du profil, anonymisation, grap
         expect(Object.keys(store)).not.toContain('test_profilOngletDeveloppementActif');
     });
 
-    it('P-5 · Courbe des critères : « B » (échelle à trois paliers) → trou ; « 3 » → 75 % (lu comme /4) ; « 21 » (points /30) → 21 % ; « M » → 75', () => {
+    it('P-5 · Courbe des critères, valeur d\'après #752 (lot 4 du cadrage 11) : « B » sur une échelle A/B/C → sa valeur (70) ; « 3 », « 21 » et « M », sans valeur dans cette échelle → points absents, comptés ; 3 points sur 30 → 10 — constat d\'origine : trou, 75 (lu comme /4), 21, 75 écrits en dur', () => {
         const store = storeBase();
-        store.test_productions = [{ id: 'P1', nom: 'Un' }, { id: 'P2', nom: 'Deux' }, { id: 'P3', nom: 'Trois' }, { id: 'P4', nom: 'Quatre' }];
-        const ev = (id, pid, niveau, date) => ({ id, etudiantDA: DA, productionId: pid, coursId: 'GC1', dateEvaluation: date, noteFinale: 70, criteres: [{ critereNom: 'Structure', niveauSelectionne: niveau }] });
-        store.test_evaluationsSauvegardees = [ev('E1', 'P1', 'B', '2026-02-01'), ev('E2', 'P2', '3', '2026-03-01'), ev('E3', 'P3', '21', '2026-04-01'), ev('E4', 'P4', 'M', '2026-05-01')];
+        store.test_productions = [{ id: 'P1', nom: 'Un' }, { id: 'P2', nom: 'Deux' }, { id: 'P3', nom: 'Trois' }, { id: 'P4', nom: 'Quatre' }, { id: 'P5', nom: 'Cinq' }];
+        store.test_echellesTemplates = [{ id: 'E3N', nom: 'Trois paliers', niveaux: [{ code: 'A', nom: 'À reprendre', min: 0, max: 59, valeurCalcul: 50 }, { code: 'B', nom: 'Atteint', min: 60, max: 84, valeurCalcul: 70 }, { code: 'C', nom: 'Dépassé', min: 85, max: 100, valeurCalcul: 90 }] }];
+        const ev = (id, pid, critere, date) => ({ id, etudiantDA: DA, productionId: pid, coursId: 'GC1', echelleId: 'E3N', dateEvaluation: date, noteFinale: 70, criteres: [Object.assign({ critereNom: 'Structure' }, critere)] });
+        store.test_evaluationsSauvegardees = [ev('E1', 'P1', { niveauSelectionne: 'B' }, '2026-02-01'), ev('E2', 'P2', { niveauSelectionne: '3' }, '2026-03-01'), ev('E3', 'P3', { niveauSelectionne: '21' }, '2026-04-01'), ev('E4', 'P4', { niveauSelectionne: 'M' }, '2026-05-01'), ev('E5', 'P5', { niveauSelectionne: 'A', points: 3, ponderation: 30 }, '2026-06-01')];
         const b = monterP(store);
-        const d = b.interne['graphiques-progression.js'].obtenirDonneesCriteres(DA);
-        const sansEval = b.interne['graphiques-progression.js'].obtenirDonneesCriteres('2000002');
-        const dec = ['B', '3', 'M'].map(x => b.interne['graphiques-progression.js'].niveauHabiletesVersDecimal(x));
-        noter('P5', { structure: d && d.criteres.Structure, sansEval, decimal: dec });
-        expect(d.criteres.Structure).toEqual([null, 75, 21, 75]);
+        const g = b.interne['graphiques-progression.js'];
+        const d = g.obtenirDonneesCriteres(DA);
+        const sansEval = g.obtenirDonneesCriteres('2000002');
+        const compte = { sansValeur: 0 };
+        const dec = store.test_evaluationsSauvegardees.map(e => g.moyenneCriteresHabiletes(e, new Set(['Structure']), new Map(), compte));
+        noter('P5', { structure: d && d.criteres.Structure, sansValeur: d && d.sansValeurConvertible, sansEval, decimal: dec, compte });
+        expect(d.criteres.Structure).toEqual([70, null, null, null, 10]);
+        expect(d.sansValeurConvertible).toEqual({ evaluations: 3, points: 3 });
+        expect(dec).toEqual([0.7, null, null, null, 0.1]);
+        expect(compte.sansValeur).toBe(3);
         expect(sansEval).toBe(null);
     });
 });

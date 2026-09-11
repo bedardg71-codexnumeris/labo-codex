@@ -1086,7 +1086,7 @@ function initialiserModuleTableauBordApercu() {
         if (badgeClic) {
             const itemParent = badgeClic.closest('.etudiant-suivi-item');
             if (itemParent && itemParent.dataset.da) {
-                if (typeof afficherSousSection === 'function') afficherSousSection('suivi-profil');
+                // #754 : afficherProfilComplet active lui-même la sous-section Profil (un seul rendu).
                 if (typeof afficherProfilComplet === 'function') afficherProfilComplet(itemParent.dataset.da);
                 // Naviguer vers la section Engagement (mobilisation) du profil
                 setTimeout(function() {
@@ -3221,9 +3221,8 @@ function tbNavigerVersProfil(da) {
     if (typeof afficherSection === 'function') {
         afficherSection('suivi');
     }
-    if (typeof afficherSousSection === 'function') {
-        afficherSousSection('suivi-profil');
-    }
+    // #754 : afficherProfilComplet active lui-même la sous-section Profil, sans réveiller
+    // le crochet de navigation.js — un seul rendu.
     if (typeof afficherProfilComplet === 'function') {
         afficherProfilComplet(da);
     }

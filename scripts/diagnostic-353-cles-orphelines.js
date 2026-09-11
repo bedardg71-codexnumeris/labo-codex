@@ -118,8 +118,10 @@ window.reparer353 = async function (opts) {
     // (semis, la liste entière) et laissée en place, exprès. Les quatre états d'écran
     // de la saisie (`presences_*`, `recherchePresences`) sont passés sous `cle()` le
     // même jour, sans semis : leurs nues sont de simples orphelines.
+    // `preferencesRapport` (nue) : les six cases du rapport du profil, passées sous
+    // `cle()` par le lot 4 du cadrage 11 (11 sept. 2026), sans semis : orpheline.
     var SANS_PRODUCTEUR = ['simulation_indicesCP', 'etudiantsSuivis', 'datesVerrouillees',
-        'presences_date', 'presences_groupe', 'presences_tri', 'recherchePresences'];
+        'presences_date', 'presences_groupe', 'presences_tri', 'recherchePresences', 'preferencesRapport'];
 
     toutes.forEach(function (x) {
         // 1. Préfixe de trimestre absent du registre `trimestres`.
