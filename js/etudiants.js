@@ -1192,8 +1192,8 @@ function afficherListeEtudiantsConsultation() {
         // Rendre la ligne cliquable
         tr.style.cursor = 'pointer';
         tr.onclick = function () {
-            // Afficher le profil ET basculer vers la sous-section Profil
-            afficherSousSection('suivi-profil');
+            // #754 : afficherProfilComplet active lui-même la sous-section Profil, sans
+            // réveiller le crochet de navigation.js — un seul rendu (avant : trois).
             afficherProfilComplet(etudiant.da);
         };
 

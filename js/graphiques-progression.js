@@ -359,11 +359,18 @@ function hexVersRgba(hex, alpha = 0.5) {
 }
 
 /**
- * Génère les zones colorées à partir de l'échelle utilisateur
+ * Génère les zones colorées à partir d'une échelle — celle passée, sinon
+ * « la première du trimestre » (`obtenirEchelleUtilisateur`, les graphiques de
+ * groupe A/C/P et la note finale, inchangés).
+ *
+ * ⮕ #752 : les courbes par critère du profil et les trajectoires par habileté
+ * passent l'échelle de LEURS évaluations (la majoritaire si plusieurs), posée par
+ * `_zonesParCanvas` et lue par `zonesPourChart` dans les plugins d'étiquettes.
+ * @param {Object|null} [echelle] - échelle résolue (`niveaux` avec `min`/`max`/`couleur`)
  * @returns {Array} - Tableau de zones pour les annotations
  */
-function genererZonesDepuisEchelle() {
-    const echelle = obtenirEchelleUtilisateur();
+function genererZonesDepuisEchelle(echelle) {
+    if (echelle === undefined) echelle = obtenirEchelleUtilisateur();
 
     if (!echelle || !echelle.niveaux || echelle.niveaux.length === 0) {
         // Fallback: retourner ZONES_IDME par défaut
@@ -381,6 +388,40 @@ function genererZonesDepuisEchelle() {
         label: niveau.nom,
         code: niveau.code
     }));
+}
+
+/**
+ * Les zones d'un graphique donné : celles posées pour son canvas (#752), sinon
+ * celles de l'échelle du trimestre. Un canvas re-rendu remplace son entrée.
+ */
+const _zonesParCanvas = new WeakMap();
+function zonesPourChart(chart) {
+    const canvas = chart && chart.canvas;
+    if (canvas && _zonesParCanvas.has(canvas)) return _zonesParCanvas.get(canvas);
+    return genererZonesDepuisEchelle();
+}
+
+/**
+ * L'échelle majoritaire d'un lot d'évaluations — celle que le plus d'évaluations
+ * désignent ET qui se résout ; `null` si aucune ne se résout (alors pas de zones :
+ * rien d'inventé). Dit aussi combien d'échelles distinctes se résolvent.
+ * @param {Array} evaluations
+ * @returns {{ echelle: Object|null, nb: number, total: number, distinctes: number }}
+ */
+function echelleMajoritaireDesEvaluations(evaluations) {
+    const comptes = new Map();
+    (evaluations || []).forEach(e => {
+        const id = (e && e.echelleId) || '';
+        comptes.set(id, (comptes.get(id) || 0) + 1);
+    });
+    let meilleure = null, nb = 0, distinctes = 0;
+    comptes.forEach((n, id) => {
+        const echelle = (typeof obtenirEchelleResolue === 'function') ? obtenirEchelleResolue(id || null) : null;
+        if (!echelle) return;
+        distinctes += 1;
+        if (n > nb) { meilleure = echelle; nb = n; }
+    });
+    return { echelle: meilleure, nb, total: (evaluations || []).length, distinctes };
 }
 
 /* ===============================
@@ -1849,7 +1890,7 @@ const pluginEtiquettesZones = {
 
         if (!chartArea || !yScale) return;
 
-        const zonesUtilisateur = genererZonesDepuisEchelle();
+        const zonesUtilisateur = zonesPourChart(chart);
         const estModeClair = document.body.classList.contains('mode-clair');
         const yMinVisible = yScale.min;
         const yMaxVisible = yScale.max;
@@ -1929,7 +1970,7 @@ const pluginEtiquettesZones100 = {
         const yMaxVisible = yScale.max;
 
         // Convertir les zones utilisateur (0-1) en échelle 0-100
-        const zonesUtilisateur = genererZonesDepuisEchelle();
+        const zonesUtilisateur = zonesPourChart(chart);
         const zones = zonesUtilisateur.map(zone => ({
             yMin: zone.yMin * 100,
             yMax: zone.yMax * 100,
@@ -2114,31 +2155,31 @@ function obtenirDonneesCriteres(da) {
             return production?.activiteApprentissage || production?.description || production?.nom || `Prod. ${e.productionId}`;
         });
 
-        // Préparer les données par critère
+        // Préparer les données par critère — #752 : chaque valeur se convertit dans
+        // l'échelle de SON évaluation (`scoreCritereEvaluation`, la conversion du
+        // dépistage ; un critère en points par sa fraction). Plus de table I/D/M/E
+        // écrite en dur, plus de « ≤ 4 → sur 4 ». Une valeur qui ne se convertit
+        // pas est un point ABSENT, compté pour que le graphique le dise.
         const donneesCriteres = {};
+        const cacheTables = new Map();
+        const evaluationsSansValeur = new Set();
+        let pointsSansValeur = 0;
 
         criteresUniques.forEach(nomCritere => {
             donneesCriteres[nomCritere] = evaluationsEtudiant.map(e => {
-                // Trouver le critère dans l'array
                 const critere = e.criteres.find(c => c.critereNom === nomCritere);
-                if (!critere || !critere.niveauSelectionne) return null;
-
+                if (!critere) return null;
+                const enPoints = typeof critere.points === 'number' && !isNaN(critere.points);
                 const niveau = critere.niveauSelectionne;
-
-                // Si c'est une lettre IDME, convertir en pourcentage
-                if (typeof niveau === 'string') {
-                    const niveauUpper = niveau.trim().toUpperCase();
-                    if (niveauUpper === '0') return 0;
-                    if (niveauUpper === 'I') return 40;
-                    if (niveauUpper === 'D') return 65;
-                    if (niveauUpper === 'M') return 75;
-                    if (niveauUpper === 'E') return 100;
+                if (!enPoints && (niveau === null || niveau === undefined || String(niveau).trim() === '')) return null;
+                const score = scoreCritereEvaluation(critere, tableConversionPourEvaluation(e, cacheTables));
+                if (score === null) {
+                    pointsSansValeur += 1;
+                    evaluationsSansValeur.add(e.id || e);
+                    return null;
                 }
-
-                // Si c'est un nombre sur 4, convertir en pourcentage
-                const noteNum = parseFloat(niveau);
-                if (isNaN(noteNum)) return null;
-                return noteNum <= 4 ? (noteNum / 4) * 100 : noteNum;
+                // 0,65 × 100 vaut 65,00000000000001 en flottant : deux décimales.
+                return Math.round(score * 10000) / 100;
             });
         });
 
@@ -2146,12 +2187,26 @@ function obtenirDonneesCriteres(da) {
             labels,
             criteres: donneesCriteres,
             criteresUniques,
-            evaluations: evaluationsEtudiant
+            evaluations: evaluationsEtudiant,
+            sansValeurConvertible: { evaluations: evaluationsSansValeur.size, points: pointsSansValeur },
+            echelles: echelleMajoritaireDesEvaluations(evaluationsEtudiant)
         };
     } catch (error) {
         console.error('[obtenirDonneesCriteres] Erreur:', error);
         return null;
     }
+}
+
+/**
+ * « n évaluations sans valeur convertible dans cette échelle » — ou rien.
+ * Le mot proposé à Grégoire (consigne du 11 sept., § 2 : silence = tel quel).
+ * @param {{ evaluations: number, points: number }} compte
+ * @returns {string} vide quand tout se convertit
+ */
+function _messageSansValeurConvertible(compte) {
+    const n = compte ? compte.evaluations : 0;
+    if (!n) return '';
+    return n + ' évaluation' + (n > 1 ? 's' : '') + ' sans valeur convertible dans cette échelle';
 }
 
 /**
@@ -2341,6 +2396,25 @@ function creerGraphiqueCriteres(canvasId, da) {
         }
         var existant = Chart.getChart(canvas);
         if (existant) existant.destroy();
+
+        // #752 — le graphique DIT ce qu'il ne trace pas, et d'où viennent ses zones.
+        const note = document.getElementById('graphique-criteres-note-' + da);
+        const messageSansValeur = _messageSansValeurConvertible(donnees.sansValeurConvertible);
+        const lignesNote = [];
+        if (messageSansValeur) lignesNote.push(messageSansValeur);
+        if (donnees.echelles.distinctes > 1 && donnees.echelles.echelle) {
+            lignesNote.push('Zones : échelle « ' + (donnees.echelles.echelle.nom || donnees.echelles.echelle.id) + ' » ('
+                + donnees.echelles.nb + ' évaluations sur ' + donnees.echelles.total + ')');
+        }
+        if (note) {
+            note.textContent = lignesNote.join(' · ');
+            note.hidden = lignesNote.length === 0;
+        }
+        _zonesParCanvas.set(canvas, donnees.echelles.echelle ? genererZonesDepuisEchelle(donnees.echelles.echelle) : []);
+        if (datasets.every(ds => ds.data.every(v => v === null))) {
+            afficherMessageAttente(canvas, 'Aucune valeur convertible', messageSansValeur || 'Aucune valeur à tracer.');
+            return null;
+        }
 
         const ctx = canvas.getContext('2d');
 
@@ -3422,50 +3496,37 @@ function quantileHabiletes(trieesAsc, p) {
 }
 
 /**
- * Convertit un niveauSelectionne (lettre IDME, échelle /4 ou %) en valeur 0-1.
- * Aligné sur la logique de obtenirDonneesCriteres().
- * @param {string|number} niveauSelectionne
- * @returns {number|null}
- */
-function niveauHabiletesVersDecimal(niveauSelectionne) {
-    if (niveauSelectionne === null || niveauSelectionne === undefined || niveauSelectionne === '') return null;
-
-    if (typeof niveauSelectionne === 'string') {
-        const u = niveauSelectionne.trim().toUpperCase();
-        if (u === '0') return 0;
-        if (u === 'I') return 0.40;
-        if (u === 'D') return 0.65;
-        if (u === 'M') return 0.75;
-        if (u === 'E') return 1.00;
-    }
-
-    const num = parseFloat(niveauSelectionne);
-    if (isNaN(num)) return null;
-    if (num <= 4) return num / 4;
-    if (num <= 100) return num / 100;
-    return Math.min(1, num / 100);
-}
-
-/**
- * Moyenne arithmétique des niveaux des critères actifs pour une évaluation.
+ * Moyenne arithmétique des scores des critères actifs pour une évaluation.
  * En mode Habiletés (1 courbe par habileté), cette fonction est appelée avec
  * un seul critère à la fois — la pondération est donc non pertinente.
  * En mode Note finale, la pondération est déjà appliquée par evaluation.noteFinale.
+ *
+ * ⮕ #752 : chaque score se convertit dans l'échelle de l'évaluation
+ * (`scoreCritereEvaluation`), comme les courbes du profil ; l'ancienne table
+ * I/D/M/E en dur de ce fichier est retirée. Un critère renseigné mais non
+ * convertible est compté dans `compte.sansValeur` (le graphique le dit).
  * @param {Object} evaluation - Objet evaluation avec un array .criteres
  * @param {Set<string>} criteresActifs - Noms de critères à inclure
+ * @param {Map} [cacheTables] - mémo des tables par échelle (une par rendu)
+ * @param {{ sansValeur: number }} [compte] - compteur des valeurs non convertibles
  * @returns {number|null} - Moyenne décimale 0-1 (null si aucun critère évaluable)
  */
-function moyenneCriteresHabiletes(evaluation, criteresActifs) {
+function moyenneCriteresHabiletes(evaluation, criteresActifs, cacheTables, compte) {
     if (!evaluation || !Array.isArray(evaluation.criteres) || evaluation.criteres.length === 0) {
         return null;
     }
+    const table = tableConversionPourEvaluation(evaluation, cacheTables);
     const valeurs = [];
     for (let i = 0; i < evaluation.criteres.length; i++) {
         const c = evaluation.criteres[i];
         if (!c || !c.critereNom) continue;
         if (criteresActifs && !criteresActifs.has(c.critereNom)) continue;
-        const v = niveauHabiletesVersDecimal(c.niveauSelectionne);
+        const enPoints = typeof c.points === 'number' && !isNaN(c.points);
+        const niveau = c.niveauSelectionne;
+        if (!enPoints && (niveau === null || niveau === undefined || String(niveau).trim() === '')) continue;
+        const v = scoreCritereEvaluation(c, table);
         if (v !== null) valeurs.push(v);
+        else if (compte) compte.sansValeur += 1;
     }
     if (valeurs.length === 0) return null;
     let s = 0;
@@ -3670,11 +3731,15 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
         });
 
         // Helper : valeur d'une éval pour UN critère donné (0-1, ou null)
+        // #752 : une table par échelle pour tout le rendu, et le compte de ce qui ne se
+        // convertit pas — dit sous le graphique en mode habiletés.
+        const cacheTables = new Map();
+        const compteConversion = { sansValeur: 0 };
         function _valeurEvalCritere(ev, nomCritere) {
             if (!ev) return null;
             if (ev.statutRemise === 'non-remis' || ev.statutRemise === 'retard') return null;
             if (!Array.isArray(ev.criteres) || ev.criteres.length === 0) return null;
-            return moyenneCriteresHabiletes(ev, new Set([nomCritere]));
+            return moyenneCriteresHabiletes(ev, new Set([nomCritere]), cacheTables, compteConversion);
         }
 
         // 6. Datasets — selon le mode
@@ -4172,6 +4237,27 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
                 }
             }
         };
+
+        // #752 — en mode habiletés, les zones sont celles de l'échelle des évaluations
+        // tracées (la majoritaire), et le graphique dit ce qu'il n'a pas pu convertir.
+        // En mode note finale (un pourcentage du cours), les zones restent celles du
+        // trimestre, comme avant.
+        const noteConversion = document.getElementById('trajectoires-note-conversion');
+        if (mode === 'habiletes') {
+            const echelles = echelleMajoritaireDesEvaluations(Array.from(evalIndex.values()));
+            _zonesParCanvas.set(canvas, echelles.echelle ? genererZonesDepuisEchelle(echelles.echelle) : []);
+            const lignes = [];
+            if (compteConversion.sansValeur > 0) {
+                lignes.push(compteConversion.sansValeur + ' valeur' + (compteConversion.sansValeur > 1 ? 's' : '') + ' sans valeur convertible dans cette échelle');
+            }
+            if (echelles.distinctes > 1 && echelles.echelle) {
+                lignes.push('Zones : échelle « ' + (echelles.echelle.nom || echelles.echelle.id) + ' » (' + echelles.nb + ' évaluations sur ' + echelles.total + ')');
+            }
+            if (noteConversion) { noteConversion.textContent = lignes.join(' · '); noteConversion.hidden = lignes.length === 0; }
+        } else {
+            _zonesParCanvas.delete(canvas);
+            if (noteConversion) { noteConversion.textContent = ''; noteConversion.hidden = true; }
+        }
 
         const chart = new Chart(ctx, config);
         graphiqueTrajectoiresInstance = chart;

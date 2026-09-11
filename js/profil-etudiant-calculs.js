@@ -592,6 +592,35 @@ function convertirNiveauEnScore(niveau, tableConversion) {
 }
 
 /**
+ * Le score 0-1 d'UN critère d'une évaluation, dans l'échelle de CETTE évaluation.
+ *
+ * ⮕ #752 (lot 4 du cadrage 11, 11 sept. 2026). Les graphiques de progression
+ * convertissaient I/D/M/E en 40 / 65 / 75 / 100 écrits en dur, et lisaient tout
+ * nombre ≤ 4 comme une note sur 4. Ici, une seule règle, sans rien inventer :
+ *   - un critère analytique porte ses POINTS (`points` / `ponderation`, lot 2 du
+ *     4 sept.) : sa valeur est sa fraction (21 / 30 → 0,70), pas le niveau déduit ;
+ *   - sinon, `niveauSelectionne` converti par la table de l'évaluation
+ *     (`tableConversionPourEvaluation`), comme le dépistage ;
+ *   - sans valeur convertible : `null`, et l'appelant le DIT (jamais deviné —
+ *     décision de Grégoire du 11 sept., 17 h 15).
+ * ⚠ Le dépistage (`calculerMoyennesCriteres`, IPB) lit encore le NIVEAU déduit d'un
+ * critère en points — c'est #739, à trancher, pas rouvert ici ; ce helper est le
+ * candidat unique quand il le sera.
+ *
+ * @param {Object} critere - une entrée de `evaluation.criteres[]`
+ * @param {Object|null} tableConversion - table de l'évaluation (code → 0-1)
+ * @returns {number|null} score 0-1
+ */
+function scoreCritereEvaluation(critere, tableConversion) {
+    if (!critere) return null;
+    if (typeof critere.points === 'number' && !isNaN(critere.points)) {
+        var max = Number(critere.ponderation);
+        return (Number.isFinite(max) && max > 0) ? critere.points / max : null;
+    }
+    return convertirNiveauEnScore(critere.niveauSelectionne, tableConversion);
+}
+
+/**
  * Calcule les moyennes par critère SRPNF pour un étudiant
  * Parse les rétroactions finales pour extraire les niveaux IDME
  * @param {string} da - Numéro de DA
@@ -2192,6 +2221,10 @@ window._diagnostiquerResolutionEchelles = _diagnostiquerResolutionEchelles;   //
 // de saisie que `obtenirEchelleResolue` ne peut pas résoudre.
 window.zoneDuCodeDansNiveaux = zoneDuCodeDansNiveaux;
 window.convertirNiveauEnScore = convertirNiveauEnScore;
+// #752 — consommées par `graphiques-progression.js` (courbes par critère du profil,
+// trajectoires par habileté) : la même conversion que le dépistage, par évaluation.
+window.tableConversionPourEvaluation = tableConversionPourEvaluation;
+window.scoreCritereEvaluation = scoreCritereEvaluation;
 // #542 A3 — consommée par `profil-etudiant-sections-affichage.js` (carte RàI).
 window.diagnostiquerConversionNiveaux = diagnostiquerConversionNiveaux;
 window.calculerMoyennesCriteres = calculerMoyennesCriteres;

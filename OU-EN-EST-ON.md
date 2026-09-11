@@ -15,6 +15,34 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.134.0 — PROFIL D'UN ÉLÈVE : UN SEUL RENDU À L'OUVERTURE ; LES GRAPHIQUES LISENT L'ÉCHELLE DE CHAQUE ÉVALUATION ; LE VOLET CONFIDENTIEL SUIT LA LISTE** (lot 4 du cadrage 11, build à lire en bas de page).
+**Ce que tu verras** : dans `Suivi › Profils individuels`, le profil s'ouvre une fois — le 6, il se dessinait quatre
+fois, et trois mots tapés dans la zone de texte du rapport disparaissaient à 100 ms. Dans Performance › Critères, les
+courbes lisent l'échelle de CHAQUE évaluation (la tienne donne exactement les mêmes courbes qu'avant ; une échelle A/B/C
+d'un collègue trace ses paliers au lieu d'une courbe trouée ; un critère en points trace sa fraction). Une valeur qui ne se
+convertit pas n'est pas devinée : le point est absent et une ligne sous la légende dit « n évaluations sans valeur
+convertible dans cette échelle » ; si tes évaluations désignent plusieurs échelles, la ligne dit laquelle donne les zones
+(en démo, deux échelles coexistent : la ligne s'affiche, c'est voulu). Les cases « Inclure… » du rapport se mémorisent
+quand tu les coches, par trimestre. Volet confidentiel : la case « Services adaptés » reflète `sa` de la liste des
+étudiant·es (cochée ou non, non modifiable, « (d'après la liste des étudiant·es) ») ; Catégorie et Sous-catégorie ne
+s'affichent que pour un « Oui » ; le « Portrait de lecteur » est parti (tes mots : « peuvent disparaître complètement » —
+aucune purge : les valeurs tombent au prochain Enregistrer de ce volet). Accompagnement : « + Nouvelle intervention » à
+droite du titre HISTORIQUE, la carte dessous (une classe CSS jamais définie). Trois gestes exportés sans bouton et le
+panneau d'indice sans conteneur sont retirés ; l'export anonymisé de trimestre écrit enfin `services_adaptes` d'après la
+liste (il écrivait toujours faux).
+**Vérifié comment** : sonde Playwright #754 dans le vrai `index.html` — un rendu par quatre chemins (Liste, sélecteur,
+Suivi du groupe, onglet Profil), rouge avant (4 rendus, texte effacé), vert après ; deux chemins de plus mesurés depuis
+Évaluations (1 rendu). Non-régression des graphiques : les courbes des 20 profils du pack démo (945 points) et les
+105 courbes de trajectoires capturées AVANT le correctif, identiques APRÈS. Sentinelle de onze essais sur les modules
+réels (échelle A/B/C sans trou, 3 sur 30 → 10, niveau sans valeur → absent et compté, ton échelle → mêmes valeurs,
+zones majoritaires, rapport au geste, case SA, portrait parti, gestes partis, rangée HISTORIQUE), quatre fois cassée
+exprès, quatre rouges, remise (empreintes identiques) ; les bancs du 5 et du 6 (H1, G5, P-1, P-2, P-5) disent l'après ;
+la rangée HISTORIQUE mesurée sous WebKit à 1024 et 1366 (même ligne, bouton à droite, carte dessous). Vitest 539 fichiers
+/ 5890 essais. **Pas vérifié** : ton écran, tes deux groupes réels, TES courbes (la rangée 3 de la porte est la seule
+vraie preuve de non-régression sur tes échelles), Safari — porte terrain de huit rangées
+(`plans de travail/PORTES-TERRAIN-2026-09-11-profils-individuels.md`). **Pas touché** : `js/navigation.js` (zone protégée) —
+aucun chemin n'a eu besoin d'y toucher.
+
 ↻ **1.133.0 — SAISIE DES PRÉSENCES : UNE DATE VERROUILLÉE NE L'EST QUE POUR CE GROUPE-COURS ET CE TRIMESTRE ; LA DÉMONSTRATION N'ANNONCE PLUS UNE CONFIGURATION INCOMPLÈTE** (lot 3 du cadrage 11, build à lire en bas de page).
 **Ce que tu verras** : dans `Suivi › Saisie des présences`, verrouiller une date (le cadenas) ne vaut plus que pour
 le groupe-cours et le trimestre où tu le fais — jusqu'ici, le 8 septembre verrouillé dans un groupe l'était dans

@@ -116,6 +116,11 @@
         'presences_groupe',
         'presences_tri',
         'recherchePresences',
+        // 🆕 Lot 4 du cadrage 11 (11 sept. 2026, P-2) : les six cases « Inclure … » du
+        // rapport du profil, par trimestre (profil-etudiant-rapport.js). Sans semis
+        // (de la forme, pas un contenu) ; la nue `preferencesRapport` devient
+        // orpheline, connue de diagnostic-353.
+        'preferencesRapport',
         // 🆕 Corbeille fichiers travaux (4 mars 2026)
         'corbeilleFichiers',
         // 🆕 (24 mai 2026) Pratique de notation active : namespacée par trimestre
@@ -2215,7 +2220,10 @@
                         statut: e.statut || 'actif',
                         profil: {
                             programme: e.programme || '',
-                            services_adaptes: e.servicesAdaptes || false
+                            // Lot 4 du cadrage 11 (11 sept. 2026) : une seule source, la liste
+                            // des étudiant·es (`sa`) — `e.servicesAdaptes` n'existait sur aucun
+                            // élève (c'était le booléen du volet confidentiel) : toujours faux.
+                            services_adaptes: e.sa === 'Oui' || e.sa === true
                         }
                     })),
 

@@ -202,21 +202,19 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
             // Zone Navigation (résidu) — 2 exports
             'naviguerVersIntervention',
             'naviguerVersNouvelleIntervention',
-            // Zone Rapport — 7 exports (session A 18 mai 2026 : tous promus window.X)
+            // Zone Rapport — 8 exports (session A 18 mai 2026 : tous promus window.X ; cocherSectionRapport, lot 4 du cadrage 11)
             'genererRapportAPI',
+            'cocherSectionRapport',
             'genererSectionRapport',
             'genererEtAfficherRapport',
             'copierRapport',
             'viderRapport',
             'sauvegarderPreferencesRapport',
             'restaurerPreferencesRapport',
-            // Zone Actions cascade — 8 exports (session C 18 mai 2026 : 4 existants + 4 promus window.X)
+            // Zone Actions cascade — 5 exports (session C 18 mai 2026 : 8 ; trois gestes sans bouton retirés par le lot 4 du cadrage 11)
             'consulterEvaluation',
             'evaluerProduction',
-            'supprimerEvaluationDepuisProfil',
             'calculerDetailsNoteFinale',
-            'attribuerJetonPersonnaliseAvecPrompt',
-            'retirerJetonPersonnaliseAvecConfirmation',
             'calculerEtStockerPatternsGroupe',
             'obtenirPatternEtudiant',
             // Zone Confidentiel — 8 exports (session B 18 mai 2026 : 6 existants + 2 promus window.X)

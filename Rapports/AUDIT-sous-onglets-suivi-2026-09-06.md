@@ -183,6 +183,20 @@ Aucune écriture directe dans `etudiants.js` (0 `setSync`, `set`, `setItem` en b
 > réinitialise à l'activation et au retrait de la démo). S-7 cité (`#736`, `#747`), pas touché ; S-1 fonctionne ; S-5 livré (`#768`).
 > Sentinelle Vitest 12 essais / 10 break-tests ; essai Playwright « démo → saisie » (aucun bandeau, date posée, 20 élèves).
 
+> ↻ **11 sept. 2026 — lot 4 du cadrage 11 LIVRÉ en 1.134.0 (§ 4, Profils individuels)** : P-1 corrigé (`#754` clos : le
+> module profil active la sous-section sous le drapeau `_profilAutoChargement` du crochet de navigation.js — zone protégée,
+> non touchée — et n'observe plus la sous-section ; la Liste et le Suivi du groupe n'appellent plus `afficherSousSection`
+> avant le profil ; un rendu par six chemins mesurés, texte du rapport conservé) ; P-2 corrigé (`<trim>_preferencesRapport`,
+> écrite au geste seulement, nue orpheline connue de diagnostic-353) ; P-5 corrigé (`#752` clos : `scoreCritereEvaluation` +
+> `tableConversionPourEvaluation`, la conversion du dépistage, par évaluation ; points → fraction ; non convertible → absent
+> et dit ; zones de l'échelle majoritaire) ; tableau 4.1 : `supprimerEvaluationDepuisProfil`, `attribuerJetonPersonnaliseAvecPrompt`,
+> `retirerJetonPersonnaliseAvecConfirmation` retirés ; `toggleDetailIndice` REMESURÉ — son seul « appelant » (`portfolio.js:443`)
+> lisait un nom privé d'une autre IIFE par `typeof`, toujours `undefined`, et aucun conteneur n'existe : retiré avec
+> `fermerDetailIndice` et l'appel ; `toggleServicesAdaptes` enfin appelée (au rendu) ; volet confidentiel : « Services adaptés »
+> reflète `etudiant.sa` et le « Portrait de lecteur » est retiré (décisions de Grégoire du 11, 17 h 20-24). P-3 cité
+> (position, skill `securite-donnees`, inscrit seulement s'il demande le chiffrement) ; P-4 cité (`#751`, après le 14) ;
+> P-6 fonctionne ; `profilOngletDeveloppementActif` nue : lot 7. Sentinelle 11 essais / 4 break-tests ; sonde Playwright #754.
+
 ### 3.1 Tableau des gestes (15 dans `index.html`, 6 générés)
 
 | Geste | Fonction | Effet mesuré | Écrit ? |

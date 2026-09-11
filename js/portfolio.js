@@ -438,11 +438,9 @@ function toggleArtefactPortfolio(event, da, portfolioId, nombreARetenir) {
         // Recharger TOUT le profil pour mettre à jour les indices A-C-P-M-R
         if (typeof afficherProfilComplet === 'function') {
             afficherProfilComplet(da);
-
-            // Rouvrir automatiquement le panneau Portfolio après rechargement
-            if (typeof toggleDetailIndice === 'function') {
-                toggleDetailIndice('P', da);
-            }
+            // Lot 4 du cadrage 11 (11 sept. 2026) : l'ancien « rouvrir le panneau Portfolio »
+            // appelait `toggleDetailIndice`, privée d'une autre IIFE (jamais atteinte) et
+            // sans conteneur dans la page ; la fonction est retirée avec cet appel.
         } else {
             // Fallback : recharger uniquement le portfolio
             chargerPortfolioEleveDetail(da);
