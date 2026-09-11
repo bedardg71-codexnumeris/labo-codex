@@ -114,6 +114,42 @@ function cleSeancesCompletes(coursId, groupeCoursId = null) {
  * @param {string|null} coursId - ID du cours (null = cours actif)
  * @returns {Array} - Séances horaire du cours
  */
+/**
+ * #830 (11 sept. 2026) — LES SÉANCES D'UN HORAIRE D'AVANT #540 HÉRITENT DU
+ * FORMAT DE L'HORAIRE.
+ *
+ * L'INCIDENT, mesuré sur les données de Grégoire : la barre « Assiduité (A) »
+ * du Suivi du groupe était VIDE pour ses deux groupes d'Hiver 2026. Depuis
+ * #540 lot E2 (26 août), le nombre de périodes d'une séance est une donnée
+ * SAISIE (`seance.nombrePeriodes`) — il ne se déduit plus des heures, par
+ * décision. Ses trois horaires H2026 (janvier) ne portent que `heureDebut`,
+ * `heureFin`, `local` : zéro période offerte, zéro séance comptée, barre vide,
+ * sans un mot. Le stock d'avant le lot n'avait jamais reçu ses périodes.
+ *
+ * Or l'horaire lui-même porte `periodesParSeance` (ici 2) : le FORMAT que
+ * l'utilisateur a saisi à la création (« N séances de P périodes »), que
+ * l'éditeur d'horaire reprend déjà comme repli d'affichage
+ * (trimestre-v2-horaires.js, « reprises »). Ce n'est pas une déduction depuis
+ * les heures — c'est une saisie de niveau horaire. On la projette sur toute
+ * séance qui n'a pas la sienne, EN LECTURE : l'entité n'est pas réécrite (les
+ * séances qui ont leur `nombrePeriodes` le gardent ; un horaire sans
+ * `periodesParSeance` rend ses séances telles quelles, donc 0 — le refus de
+ * répondre de #540 tient).
+ *
+ * Point unique : tout ce qui lit l'horaire résolu (génération des séances
+ * complètes, repli `obtenirPeriodesPrevuesParHoraire`, heures prévues) passe
+ * par obtenirSeancesHoraire, donc hérite ici.
+ */
+function projeterPeriodesParSeance(horaire) {
+    const parDefaut = parseInt(horaire && horaire.periodesParSeance, 10);
+    if (!(parDefaut > 0)) return horaire.seances;
+    return horaire.seances.map(s => {
+        if (!s || typeof s !== 'object') return s;
+        if (parseInt(s.nombrePeriodes, 10) > 0) return s;
+        return Object.assign({}, s, { nombrePeriodes: parDefaut });
+    });
+}
+
 function obtenirSeancesHoraire(coursId) {
     // 1. PRIORITÉ à l'entité Horaire du groupe-cours actif
     // Chaque groupe-cours peut avoir son propre horaire (Lun-Jeu vs Mar-Ven).
@@ -137,7 +173,7 @@ function obtenirSeancesHoraire(coursId) {
                 const horaires = db.getSync(cle('horaires'), []);
                 const horaire = horaires.find(h => h.id === horaireId);
                 if (horaire && horaire.seances && horaire.seances.length > 0) {
-                    return horaire.seances;
+                    return projeterPeriodesParSeance(horaire);
                 }
             }
         }
