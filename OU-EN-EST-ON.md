@@ -27,8 +27,8 @@ tes présences ; le cache des séances se refait tout seul à l'ouverture.
 **Vérifié comment** : six sondes en lecture seule sur tes données, collées par toi dans la console,
 jusqu'à la ligne qui disait 0 ; le cas rejoué au banc avec un horaire d'avant (format 2, séances sans
 nombre), horaire.js et saisie-presences.js réels : 2 périodes, plus 0 ; cassé exprès, rouge, remis.
-**Pas vérifié** : ton écran — ouvre `Suivi › Suivi du groupe` sur un groupe H26 dans un nouvel onglet,
-la barre A doit avoir ses points. Inscrit pour la suite : la barre doit dire pourquoi elle est vide
+**Vérifié par toi** vers 14 h 50 sur `1.131.1` déployée : « ça marche » — la barre A de ton groupe H26 a
+retrouvé ses points. Inscrit pour la suite : la barre doit dire pourquoi elle est vide
 quand ça arrive (#830), au lieu de se taire.
 
 ↻ **1.131.0 — SUIVI DU GROUPE : TES ÉLÈVES SUIVIS SONT GARDÉS PAR GROUPE-COURS, CHANGER DE GROUPE NE LES EFFACE PLUS** (build à lire en bas de page).
