@@ -276,6 +276,16 @@ effet est un réglage qu'on ne corrige jamais.
 ⮕ **Direction retenue : trier le contenu d'abord, déplacer ensuite.** Le déplacement vers `Suivi`
 reste **sa proposition**, à confirmer par la carte des effets — pas un acquis.
 
+▣ **TEMPS 5 — TRANCHÉ PAR GRÉGOIRE LE 11 SEPTEMBRE 2026 à 10 h 48** (« ok » à la recommandation de
+Cowork) : **l'écran reste dans Labo ; son principe (« le réglage là où l'effet se voit ») se réalise par
+des LIENS**, pas par un déménagement. Motifs mesurés : 14 réglages sur 18 agissent dans Suivi, 4
+ailleurs (palette d'annotation, liste des évaluations, badge de grille, export recherche) — dans Suivi,
+l'écran affirmerait faux pour ces quatre ; Suivi porte six sous-onglets ; et le mécanisme existe
+(`ouvrirReferenceSoloAccompagnement`, `tableau-bord-apercu.js:3414`, depuis la barre des patterns). À
+poser aux deux autres endroits où l'on constate un effet : en tête du Suivi du groupe et dans
+Accompagnement du profil. `navigation.js` et `config.js` intacts. **Ce que ça ne règle pas, assumé** :
+qui cherche « où se règle le dépistage » hors de Suivi doit encore deviner Labo — l'Aide le dit.
+
 ⮕ **Recommandation de Cowork : trier le contenu d'abord, déplacer ensuite.** Déplacer tel quel
 importerait la cacophonie dans Suivi. Et le tri produira justement la mesure du §4, qui dira si
 « Suivi » est le bon toit — ou si l'écran doit être **scindé**, ce qu'aucune mesure n'exclut
@@ -296,6 +306,11 @@ un sommaire en tête sert de repère) ; **deux options par rangée**, quatre pui
 ligne ; **une seule grammaire de seuil** (champ chiffré + unité, les trois curseurs disparaissent) ;
 **chaque réglage porte une étiquette « où ça agit »** tirée du § 4 (ambre = hors de Suivi) ; **les deux
 « Restaurer » disent ce qu'ils restaurent**. Points 3 et 4 ci-dessous : tranchés par là.
+▣ **LIVRÉ EN `1.130.0`** (11 sept., build `0911-1022`, `dd7a2b26`) et **VU PAR GRÉGOIRE — porte terrain
+relevée à 10 h 46, 13 sur 13, Mac et iPad, deux modes** (`PORTES-TERRAIN-2026-09-11-forme-outils-observation.md`).
+Ses deux verdicts : les textes longs de 1.129.2 restent (la maquette les abrégeait de son propre chef),
+la plage permise sous chaque champ chiffré reste. ⮕ **Il ne reste de cet écran que le temps 5 : déplacer
+vers Suivi, scinder, ou garder dans Labo — sa décision.**
 
 1. **La carte des effets** : pour chaque réglage de l'écran, l'écran où son effet se voit. C'est le
    préalable du §4, et il tranche la question de l'emplacement.

@@ -1,118 +1,95 @@
-# Consigne du jour — la forme de l'écran de réglage du dépistage (maquette validée)
+# Consigne du jour — clore l'écran de réglage : deux liens depuis Suivi, et les cinq chemins morts
 
-> **Écrite le 11 septembre 2026 à 10 h 10 (Toronto, `TZ=America/Toronto date`) par Cowork, sur la
-> maquette que Grégoire a validée à 10 h 05** (« c'est très bien »). Application au moment de
-> l'écriture : **`1.129.2`**, build `0911-0717`, `main` = `origin/main` = `137e1b33`.
-> Elle remplace la consigne de l'échelle de départ (livrée en `1.129.2`), archivée à côté sous
-> `_ancienne-CONSIGNE-DU-JOUR-2026-09-11-echelle-de-depart.md`.
+> **Écrite le 11 septembre 2026 à 10 h 50 (Toronto, `TZ=America/Toronto date`) par Cowork, sur la
+> décision de Grégoire de 10 h 48** (l'écran reste dans Labo, relié depuis Suivi). Application au moment
+> de l'écriture : **`1.130.0`**, build `0911-1022`, `main` = `origin/main` = `dd7a2b26`.
+> Elle remplace la consigne de la forme (livrée en `1.130.0`, porte relevée 13/13), archivée à côté sous
+> `_ancienne-CONSIGNE-DU-JOUR-2026-09-11-forme-outils-observation.md`.
 >
 > **Remesure avant d'exécuter** : `git --no-optional-locks log --oneline -5`, `cat version.json`,
 > `TZ=America/Toronto date`. ⚠ **Une consigne peut se tromper : mesure, n'obéis pas.**
 >
-> **La spécification, et elle fait autorité** : `plans de travail/MAQUETTE-2026-09-11-outils-observation.html`
-> — ouvre-la depuis le dépôt (elle lit `../styles.css`) et lis son code : ce sont des classes de
-> l'application. Le cadrage : `plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md`,
-> § « CE QUE LE CHANTIER DEVRAIT PRODUIRE » (la décision, ses mots) et § 4 (la carte des effets, source
-> des étiquettes « où ça agit »). Skill **`design-interface`**, § 2 « Processus obligatoire » : il
-> s'applique, `design-system.html` est la source de vérité.
+> **Préalables** : `plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md`, § « LA QUESTION
+> OUVERTE » (la décision du temps 5, ses motifs) et § 4.3 (dispositions) ; `BACKLOG.md`, item `#824`.
 
 ---
 
 ## AVANT TOUT — un commit documentaire séparé
 
-Modifiés, non commis, de Cowork : `BACKLOG.md` (item `#825`, le chargement lent — inscrit, à régler plus
-tard aujourd'hui), le cadrage 10 (§ décision de forme), la maquette (nouveau fichier), et l'archivage de
-l'ancienne consigne. **Commets-les d'abord, seuls, `git add` ciblé**, avec la présente consigne.
-⚠ L'arbre porte aussi un `D` sur `Retours des testeurs/grégoire/BUG_…_2026-09-09_21-03-59_journal-de-bord-sans-fond.png`
-— ce n'est pas de Cowork ; **ne le commets pas dans ce lot**, signale-le dans ton rapport.
+Modifiés, non commis, de Cowork : la porte terrain de la forme (relevée 13/13, deux verdicts), le
+cadrage 10 (temps 4 livré et vu ; temps 5 tranché), et l'archivage de l'ancienne consigne. **Commets-les
+d'abord, seuls, `git add` ciblé**, avec la présente consigne. ⚠ Le `D` sur la capture du 9 septembre
+(`Retours des testeurs/grégoire/BUG_…journal-de-bord-sans-fond.png`) **reste hors de tes commits** : il est
+à Grégoire.
 
 ---
 
 ## POURQUOI
 
-Temps 4 du tri de `Labo › Outils d'observation` (après la carte des effets, les réglages morts et les
-mots). Grégoire trouvait l'écran « cacophonique » ; il a arrêté la forme sur maquette. **Le contenu ne
-change pas** — mêmes 18 réglages, mêmes textes (ceux de `1.129.2`), mêmes clés, mêmes handlers. Seule la
-disposition change, et la façon de saisir trois seuils.
+C'est le dernier temps du tri de `Labo › Outils d'observation`. Grégoire voulait « le réglage dans
+l'onglet où les paramètres ont une influence » ; il a tranché : **l'écran reste dans Labo, et Suivi y
+mène par des liens** aux endroits où l'on constate un effet. En même temps, le nettoyage technique
+inscrit en chemin (`#824`) ferme l'écran pour de bon — invisible, sans lui.
 
 ---
 
-## CE QUE LA MAQUETTE ARRÊTE — à reproduire, pas à réinterpréter
+## LOT A — deux liens vers l'écran de réglage, depuis Suivi
 
-1. **Rien ne se replie.** Les deux `<details class="parametres-avances-pliable">` (« Paramètres
-   avancés », « Seuils d'interprétation ») deviennent des blocs visibles, chacun avec un sous-titre
-   (« Paramètres d'analyse », « Seuils d'interprétation »), ses étiquettes « où ça agit » et son bouton
-   « Remettre… » à droite. Les trois cartes-piliers (`carte accordeon`) **restent ouvertes** : mesure ce
-   que `accordeon-header` fait aujourd'hui (repli ?) et retire le repli si c'en est un — Grégoire : « pas
-   trop d'accordéons qui se referment ».
-2. **Un sommaire en tête** (« Sur cette page » : SOLO · ACP · RàI, ancres vers les trois cartes).
-3. **Deux options par rangée** dans chaque pilier (`grille-2col`), chaque option dans un bloc
-   (`opt` dans la maquette : case + nom en gras + aide + étiquettes). Le sélecteur de grille prend un
-   bloc de la grille SOLO. RàI : un seul bloc pleine largeur.
-4. **Une seule grammaire de seuil** : les trois `<input type="range">` (`v2-seuil-progression`,
-   `v2-seuil-risque`, `v2-seuil-defi`) deviennent des **`<input type="number" class="controle-form">`**
-   avec l'unité à droite (points / points / %), dans `grille-4col-form` avec la fenêtre d'analyse ; les
-   trois seuils Fragile / Acceptable / Bon dans `grille-3col-form`. Les `<span id="v2-valeur-*">` et
-   `mettreAJourAffichageSeuilV2` (`preferences-v2.js:432`, qui ne sert qu'à peindre l'étiquette d'un
-   curseur) **partent** — zéro-dette.
-   ⛔ **LE PIÈGE, mesuré** : les curseurs portent des **fractions** (`0.10`, `0.05`, `0.70` —
-   `preferences-v2.js:412-420`) et `sauvegarderSeuilsV2` lit `parseFloat(el.value) || défaut`. Un champ
-   qui affiche « 10 » et qu'on enregistre tel quel écrit **10** là où le calcul attend **0,10** : les
-   flèches et le seuil de défi seraient faux pour tout le monde. **Convertis à la lecture ET à
-   l'écriture (÷100 / ×100), et prouve-le par un essai qui exécute le vrai panneau** — la sentinelle
-   `#823` (`tests/unit/sentinelle-823-fenetre-analyse-rebranchee.test.js`) et
-   `sentinelle-555-2-curseur-seuil-defi.test.js` touchent ces identifiants : elles doivent rester
-   vertes ou être adaptées, avec un break-test qui rougit si la conversion manque.
-5. **Chaque réglage porte ses étiquettes « où ça agit »** (classe à créer, ex. `etiquette-effet`,
-   variante ambre = hors de Suivi). ⚠ **Les textes des étiquettes viennent du § 4 du cadrage, pas de la
-   maquette** : la maquette en a recopié la plupart, mais deux n'ont pas été vérifiées par Cowork
-   (« Graphiques d'évolution ACP », « Collecte des données… »). Vérifie chacune contre la carte ; si la
-   carte dit autre chose, c'est la carte qui a raison.
-6. **Les deux « Restaurer »** gardent leurs fonctions et prennent le libellé de la maquette
-   (« Remettre les valeurs par défaut (3 · 10 · 5 · 70) » / « (70 · 80 · 85) »), en `btn btn-secondaire
-   btn-mini`, à droite de leur sous-titre. Le bouton « Enregistrer » de l'en-tête reste (décision de
-   Grégoire du 9 sept., `#806 (c)`).
-7. **Design-system** : les composants neufs (bloc d'option, étiquette « où ça agit », sous-titre de bloc
-   avec bouton à droite) entrent dans `design-system.html`, mode sombre ET mode clair, avant d'être
-   employés dans `index.html` — c'est le § 2 du skill `design-interface`. La maquette n'a été vue qu'en
-   mode clair : **le mode sombre se règle avec les variables, et se regarde.**
+**Le mécanisme existe** : `ouvrirReferenceSoloAccompagnement()` (`tableau-bord-apercu.js:3414`) ouvre
+Labo › Outils d'observation et fait défiler jusqu'au sélecteur de grille ; il est appelé depuis les
+boutons sous la barre des patterns. ⚠ Il « déplie l'accordéon SOLO si fermé » : **depuis `1.130.0` rien
+ne se replie** — mesure ce qu'il fait encore et retire ce qui vise un repli qui n'existe plus.
 
-**Ce qui ne change pas** : les identifiants des contrôles (les handlers `data-on-change` /
-`data-on-input` et les préférences les lisent), les clés de données, les infobulles `data-tooltip`, les
-textes d'aide de `1.129.2`, le bouton « Guide » de chaque pilier.
+**À poser, en réutilisant ce mécanisme (ou un frère qui cible un autre bloc)** :
+1. **En tête de Suivi › Suivi du groupe**, près du titre : un lien discret « Régler les outils
+   d'observation » — même patron visuel que les autres liens d'en-tête de l'application (mesure lequel ;
+   `design-system.html` fait foi).
+2. **Dans Suivi › Profils individuels › Accompagnement**, sous le titre de la carte RàI : le même lien.
 
-**Tranche toi-même** : le nommage des classes, le découpage des commits, l'ordre des lots, la forme des
-essais. Dis ce que tu as supposé.
+Deux liens, pas plus : ce sont les deux endroits que la carte des effets (§ 4) désigne le plus souvent.
+Pas de lien dans la liste des élèves ni ailleurs — « inscrire et continuer » si tu en vois l'envie.
+⛔ `js/navigation.js` et `js/config.js` : **zones protégées, intactes.** Le lien navigue par
+`naviguerVers('labo', 'accompagnement')` comme le fait déjà le wrapper.
+
+## LOT B — les cinq chemins morts (`#824`)
+
+Tel qu'inscrit au backlog, mesuré le 10 sept. : `identifierDefiSpecifique` (résultat jamais lu,
+`profil-etudiant-sections-affichage.js:844`), `genererTableauObjectifs` (l. 3173, appelée nulle part),
+`genererDiagnosticCriteres` (`profil-etudiant-diagnostics.js:26`, exportée, appelée nulle part — seul
+chemin vers `pratique.detecterDefis` / `_diagnostiquerForcesChallenges`), `creerGraphiqueGroupeMoyennes`
+(`graphiques-progression.js:1234`, jamais appelée), et `case 'cible'` du profil (l. ~1953) qui appelle
+`genererContenuCibleIntervention`, **définie nulle part**.
+
+⛔ **La leçon du 10 septembre s'applique à chacun : un « mort » sur quatre était vivant.** Avant de
+retirer, remesure **chaque** appelant (`grep` sur `js/` ET `tests/` ET `index.html`, avec témoin) ; un
+seul appelant vivant, et ce chemin-là reste, écrit au rapport. Retire d'un bloc ce qui est confirmé mort,
+avec ce que la chaîne laisse derrière (helpers sans autre appelant), **avec le regard de `#551`** (les
+cinq `identifierPattern` gardés « délibérément » — ne les emporte pas). Zéro écriture dans les données.
 
 ---
 
 ## CE QUI CHANGE À L'ÉCRAN — et qui doit être dit
 
-Tout `Labo › Outils d'observation` change d'aspect ; **aucune valeur enregistrée ne change**, aucune
-donnée n'est écrite chez personne. Un enseignant retrouve ses réglages aux mêmes valeurs, rangés
-autrement, et trois curseurs sont devenus des champs.
+Deux liens nouveaux dans Suivi ; rien d'autre de visible. Aucune valeur, aucune donnée ne change.
 
-⮕ **Release `minor`.** ⮕ **Entrée de changelog** (skill `release-et-changelog`), en langue d'utilisateur :
-l'écran se lit sans rien déplier, chaque réglage dit où il agit, les seuils se tapent au lieu de se
-glisser.
+⮕ **Release `patch`** (sauf si `release-et-changelog` te fait juger autrement — dis-le), une entrée de
+changelog d'une ligne : depuis le Suivi du groupe et l'Accompagnement d'un profil, un lien mène aux
+réglages qui les gouvernent.
 
-⮕ **Porte terrain DUE — Mac ET iPad** (skill `portes-terrain` ; markdown à toi, artefact à Cowork).
-Quatre portes : (1) sur Mac, tout est visible sans rien déplier, le sommaire mène aux trois blocs, rien
-ne déborde ; (2) **sur l'iPad en portrait** (les grilles de l'app passent à deux colonnes sous 900 px),
-les quatre seuils tiennent sur deux rangées, les blocs d'option s'empilent sans chevauchement, les
-étiquettes se lisent, en mode clair et en mode sombre ; (3) **la conversion** — tape 60 dans « Seuil de
-défi spécifique », rouvre un profil : le diagnostic dit « seuil force : 60 % » (et pas 6000 %, ni 0,6 %) ;
-remets 70 ; (4) les deux « Remettre… » remettent chacun leur jeu (3 · 10 · 5 · 70 / 70 · 80 · 85) et
-rien d'autre. Sur `https://app.codexnumeris.org`, pas le fichier local.
+⮕ **Porte terrain : une seule, deux rangées** (markdown à toi, artefact à Cowork) : sur Mac, chaque lien
+mène à Labo › Outils d'observation et la page s'ouvre sur l'écran trié, sans erreur. Pas de porte pour
+le lot B (invisible) : le rapport dit ce qui a été retiré et ce qui a été gardé, et pourquoi.
 
 ---
 
 ## CE QUI REMONTE À GRÉGOIRE
 
-1. **Rien, sauf un mot qui devrait changer** : si un libellé de la maquette ne peut pas tenir (place,
-   chevauchement), ne l'abrège pas — dis-le.
-2. Le reste est technique : tranche, puis dis-le en une ligne en nommant ce que tu as supposé.
+1. **Les mots du lien** : « Régler les outils d'observation » est une proposition de Cowork ; si le
+   patron des liens d'en-tête impose une autre forme, propose la tienne dans le rapport, ne l'invente pas
+   en silence.
+2. **Un chemin mort qui se révèle vivant** : garde-le, dis-le.
+3. Rien d'autre.
 
-⛔ **Hors périmètre** : le déplacement vers Suivi (temps 5, sa décision, après avoir vu la forme), les
-cinq chemins morts (`#824`), le chargement lent (`#825`, plus tard aujourd'hui), les noms de zones et
-les bornes (`#821`, `#822`), le modèle de cartouches et le pack démo. **Un lot, une livraison.**
+⛔ **Hors périmètre** : le chargement lent (`#825`, plus tard aujourd'hui, consigne à part), l'onglet
+Suivi lui-même (chantier suivant), les noms de zones et les bornes (`#821`, `#822`). **Un lot, une
+livraison.**
