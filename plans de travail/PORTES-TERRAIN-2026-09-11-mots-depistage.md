@@ -10,8 +10,10 @@
 > **Ce qui échoue ici devient un item de backlog, avec son numéro de porte.** Jamais une
 > note mentale.
 >
-> ⏳ **DUE.** Markdown écrit par Claude Code le 11 septembre à 6 h 50 ; artefact jumeau
-> (bouton « Copier mes résultats ») à publier par Cowork.
+> ✅ **RELEVÉE le 11 septembre 2026 à 7 h 11 (Toronto) — 5 sur 5, zéro échec**, sur
+> `app.codexnumeris.org`, version `1.129.1` lue en bas de page. Markdown écrit par Claude Code à
+> 6 h 50 ; artefact « Portes terrain des mots du dépistage » publié par Cowork à 7 h 05 ; relevé collé
+> par Grégoire dans la conversation Cowork. **Les trois décisions du § 3 sont prises** (ci-dessous).
 
 **Pourquoi cette liste est courte.** Une porte, trois rangées, et c'est la consigne du jour
 qui les a fixées. Ce lot ne change que des libellés que tes collègues lisent ; la seule
@@ -62,9 +64,9 @@ Pas de porte sur les graphiques : ils ne changent pas.
 
 | | Question | Ton verdict |
 |---|---|---|
-| **3.1** | **L'échelle de départ (IDME) semée chez chaque nouvel utilisateur** (`js/echelles.js`, gabarit) nomme ses niveaux **Incomplet / en Développement / Maîtrisé / Étendu**, et sa description dit « Insuffisant, en Développement, Maîtrisé, Étendu » — elle contredit son propre I. La consigne la laisse (un gabarit renommé n'est plus le même gabarit, et il voyage). Conséquence visible : tout ce qui lit l'échelle (badges, bilan, zones des graphiques) dira « en Développement » / « Maîtrisé » là où la prose de l'application dit « Développement » / « Maîtrise ». **Renommer la SOURCE (le gabarit, pour les prochains espaces) ? Le stock chez toi et chez les testeurs resterait tel quel.** | _______ |
-| **3.2** | **Le bilan que l'élève reçoit** (`js/evaluation-retroaction.js:884`) écrit encore « …, Insuffisant) » en dur pour un critère algorithmique effondré à 0 — seul reste des tables IDME retirées en #575 ; tout le reste du bilan lit les noms de TON échelle. **Le remplacer par le nom du niveau I de ton échelle (comme le reste du bilan), ou par « Incomplet » ?** Ce sont des mots que tes élèves lisent. | _______ |
-| **3.3** | Trois textes d'aide décrivent le gabarit ou un exemple d'échelle avec ses mots actuels : `accompagnement-contenu-popup.js:182` (« 4 niveaux : Incomplet, en Développement, Maîtrisé, Étendu »), `popup.js:1070-1089` (« Maîtrisé, de 75 % à 89 % », exemple de plage), `index.html:5327` (« Titre du niveau (ex: Maîtrisé) »). Laissés parce qu'ils suivent le gabarit. **Ils suivront ta décision 3.1.** | _______ |
+| **3.1** ✅ **« oui, renommer »** (Grégoire, 7 h 11) | **L'échelle de départ (IDME) semée chez chaque nouvel utilisateur** (`js/echelles.js`, gabarit) nomme ses niveaux **Incomplet / en Développement / Maîtrisé / Étendu**, et sa description dit « Insuffisant, en Développement, Maîtrisé, Étendu » — elle contredit son propre I. La consigne la laisse (un gabarit renommé n'est plus le même gabarit, et il voyage). Conséquence visible : tout ce qui lit l'échelle (badges, bilan, zones des graphiques) dira « en Développement » / « Maîtrisé » là où la prose de l'application dit « Développement » / « Maîtrise ». **Renommer la SOURCE (le gabarit, pour les prochains espaces) ? Le stock chez toi et chez les testeurs resterait tel quel.** | _______ |
+| **3.2** ✅ **« remplacer par incomplet »** (Grégoire, 7 h 11) | **Le bilan que l'élève reçoit** (`js/evaluation-retroaction.js:884`) écrit encore « …, Insuffisant) » en dur pour un critère algorithmique effondré à 0 — seul reste des tables IDME retirées en #575 ; tout le reste du bilan lit les noms de TON échelle. **Le remplacer par le nom du niveau I de ton échelle (comme le reste du bilan), ou par « Incomplet » ?** Ce sont des mots que tes élèves lisent. | _______ |
+| **3.3** ✅ suit 3.1 (pas de réponse séparée, 7 h 11) | Trois textes d'aide décrivent le gabarit ou un exemple d'échelle avec ses mots actuels : `accompagnement-contenu-popup.js:182` (« 4 niveaux : Incomplet, en Développement, Maîtrisé, Étendu »), `popup.js:1070-1089` (« Maîtrisé, de 75 % à 89 % », exemple de plage), `index.html:5327` (« Titre du niveau (ex: Maîtrisé) »). Laissés parce qu'ils suivent le gabarit. **Ils suivront ta décision 3.1.** | _______ |
 
 ---
 

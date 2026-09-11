@@ -85,6 +85,16 @@ trace `obtenirEchelleUtilisateur()`, pas l'IDME) ; (2) l'infobulle du repère «
 (`preferences.js:592`) devient « Note différée : la rétroaction passe d'abord. Réglage dans Labo › Outils
 d'observation. » ; (3) « cueillette » → « collecte », aux deux endroits de l'écran.
 
+▣ **LIVRÉ EN `1.129.1`** (11 sept., build `0911-0644`, `31d3cfe4`) : 41 libellés IDME renommés dans neuf
+fichiers et l'aide, le bloc « Seuils d'interprétation » dit ce que ses champs font, les deux aides et
+« collecte » corrigés. **Porte terrain relevée par Grégoire à 7 h 11, 5 sur 5.**
+▣ **TRANCHÉ PAR GRÉGOIRE, 11 septembre 2026 à 7 h 11** (§ 3 de la porte) : (3.1) **le gabarit IDME semé
+chez chaque nouvel utilisateur est renommé à la source** — Incomplet / Développement / Maîtrise / Étendu,
+et sa description suit ; **le stock (sa copie, celles des testeurs) n'est pas touché** — sa propre
+échelle dira « Maîtrisé » jusqu'à ce qu'il la renomme lui-même dans Conception › Échelles ; (3.2) le
+bilan de l'élève écrit **« Incomplet »** pour un critère algorithmique effondré, à la place de
+« Insuffisant » ; (3.3) les trois aides qui décrivent le gabarit suivent 3.1.
+
 ### 4. LA CARTE DES EFFETS — pour chaque réglage, l'écran où son effet se voit
 
 > **Mesuré le 10 septembre 2026 au soir par Claude Code**, sur `1c771840` (1.128.4), zéro ligne de

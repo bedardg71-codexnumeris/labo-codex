@@ -1,119 +1,97 @@
-# Consigne du jour — les mots de l'écran de réglage du dépistage
+# Consigne du jour — l'échelle de départ dit les quatre mots, et le bilan aussi
 
-> **Écrite le 11 septembre 2026 à 6 h 25 (Toronto, `TZ=America/Toronto date`) par Cowork, sur trois
-> arbitrages de Grégoire pris entre 6 h 10 et 6 h 25, à froid.** Application au moment de l'écriture : **`1.129.0`**, build
-> `0910-1645`, `main` = `origin/main` = `c5ffc520`.
-> Elle remplace la consigne d'hier (trois réglages morts, livrée en `1.129.0`), archivée à côté sous
-> `_ancienne-CONSIGNE-DU-JOUR-2026-09-10-trois-reglages-morts.md`.
+> **Écrite le 11 septembre 2026 à 7 h 20 (Toronto, `TZ=America/Toronto date`) par Cowork, sur les trois
+> décisions de Grégoire prises à 7 h 11 au § 3 de `plans de travail/PORTES-TERRAIN-2026-09-11-mots-depistage.md`**
+> (porte relevée 5/5). Application au moment de l'écriture : **`1.129.1`**, build `0911-0644`,
+> `main` = `origin/main` = `31d3cfe4`.
+> Elle remplace la consigne des mots (livrée en `1.129.1`), archivée à côté sous
+> `_ancienne-CONSIGNE-DU-JOUR-2026-09-11-mots-depistage.md`.
 >
 > **Remesure avant d'exécuter** : `git --no-optional-locks log --oneline -5`, `cat version.json`,
 > `TZ=America/Toronto date`. ⚠ **Une consigne peut se tromper : mesure, n'obéis pas.**
 >
-> **Préalable de lecture, et il fait autorité** : `plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md`,
-> § 2 et § 3 (les quatre arbitrages y sont écrits, datés, dans ses mots) et § 5 (les clés ne bougent pas).
+> ⚠ **C'est la queue du lot des mots, pas un lot neuf** : trois libellés que la consigne précédente
+> t'avait dit de laisser dans le doute, et que Grégoire vient de trancher. Même périmètre, mêmes règles.
 
 ---
 
 ## AVANT TOUT — un commit documentaire séparé
 
-Six fichiers de Cowork sont modifiés dans l'arbre, non commis (hier soir et ce matin) :
-`CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`, `OU-EN-EST-ON.md`, `plans de travail/00-CADRAGES-OUVERTS.md`,
-`plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md`,
-`plans de travail/PORTES-TERRAIN-2026-09-10-823.md` (relevée 12/12), et l'archivage de l'ancienne
-consigne. **Commets-les d'abord, seuls, en nommant les fichiers** (`git add` ciblé, jamais `-A`), avec la
-présente consigne. Puis le lot.
+Trois fichiers de Cowork sont modifiés, non commis : `plans de travail/PORTES-TERRAIN-2026-09-11-mots-depistage.md`
+(relevée, décisions écrites), `plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md`
+(§ 3, les décisions), et l'archivage de l'ancienne consigne. **Commets-les d'abord, seuls, `git add`
+ciblé**, avec la présente consigne. Puis le lot.
 
 ---
 
-## POURQUOI
+## LOT A — le gabarit « Échelle de départ (IDME) » est renommé à la SOURCE
 
-Le tri de l'écran `Labo › Outils d'observation` suit l'ordre arrêté par Grégoire : **les réglages morts
-(fait, 1.129.0), puis les mots, puis la forme, puis déplacer.** Ce lot est **les mots**. Tout ce qu'il
-touche est un libellé que ses collègues lisent ; il a arbitré chacun ce matin. **Rien ici n'est à
-décider : c'est à appliquer, et à mesurer.**
+**Décision 3.1 de Grégoire** : « oui, renommer ». Dans `js/echelles.js`, le gabarit semé chez chaque
+nouvel utilisateur : `nom: 'en Développement'` → **`'Développement'`**, `nom: 'Maîtrisé'` →
+**`'Maîtrise'`** (l. ~99 et ~109 ; `'Incomplet'` et `'Étendu'` sont déjà bons), et sa description
+(l. ~588) : « Insuffisant, en Développement, Maîtrisé, Étendu » → **« Incomplet, Développement,
+Maîtrise, Étendu »**. Les codes I / D / M / E, l'identifiant du gabarit, les bornes : **intouchés**.
 
-⛔ **Libellés seulement.** Aucune clé de données ne change (`idme.insuffisant`, `interpretation.excellent`,
-identifiants DOM, clés de préférences) : les utilisateurs en ont dans leur stockage, et « tarir n'est pas
-réparer ». Aucune écriture dans les données de personne.
+⛔ **LE STOCK NE BOUGE PAS — et c'est la mesure qui précède tout.** Le « versement des huit échelles »
+(`echelles.js:740`, `#574`) écrit les gabarits dans `echellesTemplates` des utilisateurs. **Avant de
+renommer, mesure comment il se comporte sur un espace qui a DÉJÀ sa copie** : s'il ne sème que ce qui
+manque, le renommage ne touche que les prochains espaces — c'est ce que Grégoire a décidé. **S'il
+réécrit une copie existante (par identifiant, par nom, à chaque chargement), ARRÊTE et dis-le** : le
+renommage écrirait dans les données de tout le monde, et ça remonte à lui (« tarir n'est pas réparer »).
+Une sentinelle doit verrouiller le cas : un espace qui porte déjà « Maîtrisé » le garde après le
+versement.
 
----
+**Ce que Grégoire assume, écrit au cadrage** : sa propre échelle dira « Maîtrisé » à côté d'une prose
+qui dit « Maîtrise », jusqu'à ce qu'il la renomme lui-même dans Conception › Échelles.
 
-## LOT A — l'échelle IDME, quatre lettres, partout
+## LOT B — le bilan de l'élève écrit « Incomplet »
 
-**Arbitrage (vers 6 h 15)** : **I — Incomplet · D — Développement · M — Maîtrise · E — Étendu.**
-« Insuffisant » et « Excellent » disparaissent des libellés IDME ; l'infobulle cesse d'hésiter
-(« Insuffisant ou incomplet » → « Incomplet »).
+**Décision 3.2** : « remplacer par incomplet ». `js/evaluation-retroaction.js:884`, la phrase du
+critère algorithmique effondré : `…, Insuffisant)` → **`…, Incomplet)`**. En dur, comme aujourd'hui —
+c'est son choix. ⚠ Conséquence à écrire dans le rapport, pas à corriger : pour un collègue dont
+l'échelle nomme autrement son premier niveau, ce mot ne suivra pas son échelle, alors que le reste du
+bilan la lit. Si un texte des essais attend « Insuffisant » ici, il suit.
 
-**Les trois endroits mesurés par le cadrage** : `accompagnement-contenu-hover.js:338` (infobulle),
-`guides-pedagogiques.js:50` (guide), `index.html:8972` (écran de réglage). **Il y en a d'autres** :
-`grep -c -E "Insuffisant|Excellent" js/*.js index.html` rend ~100 occurrences dans 21 fichiers — témoin :
-`Étendu` en rend 9 dans `index.html`.
+## LOT C — les trois aides qui décrivent le gabarit suivent
 
-⮕ **La règle de tri, à appliquer occurrence par occurrence** : *est-ce le nom d'un niveau IDME, affiché
-ou lu comme tel ?*
-- **Oui** → renommer.
-- **Non** → ne pas toucher, et lister dans le rapport. Trois familles à laisser : (a) les **noms de
-  niveaux d'une échelle** (gabarits d'`echelles.js`, `pack-demo-20.js`) — ce sont les mots d'une échelle,
-  ils voyagent, et un gabarit renommé n'est plus le même gabarit ; (b) les **clés de données** et noms de
-  zones (`interpretation.excellent`, `idme.insuffisant`…) ; (c) tout mot « excellent » ou « insuffisant »
-  qui n'est pas un palier IDME (prose ordinaire).
-- **Doute** → ne renomme pas, liste-le pour Grégoire. Un libellé renommé par erreur se voit ; un libellé
-  laissé se corrige en dix secondes.
+**Décision 3.3** : elles suivent 3.1. `accompagnement-contenu-popup.js:182` (« 4 niveaux : Incomplet,
+en Développement, Maîtrisé, Étendu » → « Incomplet, Développement, Maîtrise, Étendu »),
+`popup.js:1070-1089` (l'exemple de plage « Maîtrisé, de 75 % à 89 % » → « Maîtrise… »),
+`index.html:5327` (« Titre du niveau (ex : Maîtrisé) » → « (ex : Maîtrise) »). Mesure s'il en reste
+d'autres qui citent le gabarit par ses anciens mots (le modèle de cartouches `cartouches.js:191` et le
+pack démo `pack-demo-20.js` **restent hors périmètre** : ce sont des contenus, pas des descriptions du
+gabarit — liste-les, ne les change pas).
 
-⚠ Le § 2 du cadrage note que le glissement a touché **les deux extrémités** de l'échelle. Vérifie aussi
-que le **D** et le **M** sont bien « Développement » et « Maîtrise » partout (pas « En développement »,
-« Maîtrisé », etc.) — mesure, ne suppose pas.
+## MESURE DUE, sans correction — ce qu'une grille partagée emporte
 
-## LOT B — le bloc « Seuils d'interprétation » dit ce que ses champs font
-
-**Arbitrage (vers 6 h 20)** : le texte du bloc cesse d'annoncer l'IDME. Texte retenu, mot pour mot :
-
-> Ces trois seuils colorent les colonnes Assiduité, Complétion, Performance et Mobilisation de la liste
-> des élèves, et qualifient l'engagement dans le profil. Ils ne touchent ni la note ni l'échelle IDME.
-
-⛔ **Fragile / Acceptable / Bon ne bougent pas** — noms de zones, ils attendent l'orthopédagogue (`#821`).
-Le bloc porte-t-il d'autres phrases qui mentionnent l'IDME ? Mesure ; si oui, elles tombent sous le même
-arbitrage (le bloc ne parle plus d'IDME).
-
-## LOT C — deux textes faux et « cueillette »
-
-**Arbitrage (vers 6 h 25)** :
-1. Aide d'« Indicateurs visuels des seuils » (`index.html`, ~l. 8947) → « Lignes pointillées et
-   étiquettes des niveaux de ton échelle sur les graphiques de progression du profil individuel. »
-   (Mesuré : le plugin trace `genererZonesDepuisEchelle()` → `obtenirEchelleUtilisateur()`, pas l'IDME.)
-2. Infobulle du repère « note différée » (`preferences.js:592`) → « Note différée : la rétroaction passe
-   d'abord. Réglage dans Labo › Outils d'observation. » ⚠ Deux entrées de
-   `accompagnement-contenu-terme.js` (l. 428, 437) disent aussi `voir: 'Réglages > Préférences'` :
-   mesure si elles désignent ce même réglage ; si oui, même correction.
-3. « cueillette » → « collecte », aux deux endroits de l'écran (`index.html`, ~l. 8744 et ~l. 8925).
-   Mesure s'il en reste ailleurs dans l'application ; si oui, liste-les, ne les change pas (hors écran).
+`partage-export.js` exporte les échelles comme pièces à part (l. 46, 106-109). **Mesure et écris au
+rapport** : quand un collègue partage une grille, les noms des niveaux de son échelle voyagent-ils avec
+elle ? Si oui, un destinataire pourra recevoir « Maîtrisé » d'un collègue et « Maîtrise » du gabarit.
+Ce n'est pas un défaut à corriger ici ; c'est un fait que Grégoire doit connaître.
 
 ---
 
 ## CE QUI CHANGE À L'ÉCRAN — et qui doit être dit
 
-Des mots, seulement des mots. **Aucun calcul, aucune couleur, aucune borne ne bouge** : si un test de
-comportement change de résultat, c'est un défaut. Ce lot se vérifie par la lecture.
+Rien chez Grégoire ni chez les testeurs : leur échelle est du stock. **Un nouvel espace** recevra une
+échelle de départ qui dit Développement / Maîtrise. Le bilan d'un élève dont un critère algorithmique
+s'effondre dira « Incomplet ». Trois aides changent un mot.
 
-⮕ **Release `patch`.** ⮕ **Entrée de changelog obligatoire** (skill `release-et-changelog`), en langue
-d'utilisateur : l'échelle IDME dit les mêmes quatre mots partout (Incomplet, Développement, Maîtrise,
-Étendu) ; le bloc des seuils dit ce qu'il règle ; deux aides corrigées.
+⮕ **Release `patch`**, entrée de changelog (skill `release-et-changelog`) : une ligne — l'échelle de
+départ et le bilan disent les mêmes mots que le reste de l'application.
 
-⮕ **Porte terrain DUE, une seule, trois rangées** (skill `portes-terrain` ; markdown à toi, artefact à
-Cowork) : sur `https://app.codexnumeris.org`, dans `Labo › Outils d'observation` — (1) les quatre lettres
-IDME se lisent Incomplet / Développement / Maîtrise / Étendu, et l'infobulle aussi ; (2) le bloc « Seuils
-d'interprétation » porte le texte retenu, sans « IDME » annoncé ailleurs ; (3) « collecte » aux deux
-endroits, et l'aide des indicateurs visuels parle de « ton échelle ». Pas de porte sur les graphiques :
-ils ne changent pas.
+⮕ **Aucune porte terrain.** Règle 1 du skill `portes-terrain` : une machine répond à tout ici (le
+gabarit se lit dans le code, les aides aussi), et Grégoire ne crée pas de données fictives pour voir un
+espace neuf ni un critère effondré — ça attend un cas réel. Écris-le dans le rapport de session plutôt
+que de fabriquer une liste.
 
 ---
 
 ## CE QUI REMONTE À GRÉGOIRE
 
-1. **Tout libellé IDME dont tu doutes** (lot A) : liste-le, ne le renomme pas.
+1. **Si le versement réécrit le stock** (lot A) : arrête, dis-le, ne renomme pas.
 2. **Rien d'autre.** Le reste est technique : tranche, puis dis-le en une ligne en nommant ce que tu as
    supposé.
 
-⛔ **Hors périmètre, et ce n'est pas un oubli** : la forme de l'écran (temps 4), le déplacement vers Suivi
-(temps 5), les cinq chemins morts (`#824`), les noms de zones et les bornes (`#821`, `#822`), le mot
-« risque » dans l'Aide (inscrit au cadrage, point 5). **Un lot, une livraison.**
+⛔ **Hors périmètre** : le modèle de cartouches et le pack démo, les clés `idme.*`, les noms de zones
+(`#821`), la forme de l'écran (temps 4), le déplacement vers Suivi (temps 5), `#824`.
