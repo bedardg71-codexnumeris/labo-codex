@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -11,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 // `/js/*` et `/css/*` en `max-age=0, must-revalidate` : chaque ouverture
 // revalidait 199 scripts, un aller-retour chacun derrière Cloudflare Access.
 //
-// LE CORRECTIF : `/js/*`, `/css/*`, `/styles.css` deviennent immuables un an.
+// LE CORRECTIF : `/js/*` et `/css/*` deviennent immuables un an.
 // C'est sûr SEULEMENT si aucune URL de ces dossiers ne change jamais de
 // contenu — donc si chaque référence porte un `?v=` que les filets existants
 // (garde pre-commit #547, `release.mjs`) font bouger avec le fichier. Ces
@@ -24,10 +25,23 @@ import { fileURLToPath } from 'node:url';
 //      `?v=` — zéro exception, avec le compte total comme témoin ;
 //   2. tout chargement dynamique dans `js/` (`.src = 'js/…'`, `new Worker('js/…')`)
 //      porte un `?v=` — et la sentinelle VOIT bien les deux sites connus ;
-//   3. `netlify.toml` : `/js/*`, `/css/*`, `/styles.css` portent `immutable` ;
-//      `/*.html` et `/` ne le portent PAS (un `index.html` immuable figerait
+//   3. `netlify.toml` : `/js/*` et `/css/*` portent `immutable` ; `/*.html`, `/`
+//      et `/styles.css` ne le portent PAS (un `index.html` immuable figerait
 //      l'ancienne application un an chez qui l'a reçu — le seul raté
-//      irréversible de ce lot) ; `/version.json` reste `no-store`.
+//      irréversible de ce lot ; `styles.css` est chargée SANS jeton par
+//      `design-system.html` et ses 17 modules, servis eux aussi) ;
+//      `/version.json` reste `no-store` ;
+//   4. les deux fichiers à jeton de build (`pack-demo-20.js`, `heic-worker.js`)
+//      n'ont PAS changé depuis la release précédente : leur URL ne bouge qu'avec
+//      le build, donc un commit qui les touche sans release servirait un contenu
+//      neuf sous une URL immuable. Jugé au pre-push (hook `test:unit`), là où le
+//      garde #547 ne voit rien (il ne lit qu'index.html).
+//
+// CE QUE CETTE SENTINELLE NE VOIT PAS (relecture adverse, 11 sept.) : elle
+// verrouille l'ÉTAT, pas la FORME. Une référence `src='…'` à guillemets simples,
+// `src="./js/…"`, `.setAttribute('src', …)` ou `.src = variable` lui
+// échapperait. Aucune n'existe aujourd'hui (grep vide) ; si l'une apparaît, c'est
+// le motif de lecture qu'il faut étendre, pas la règle.
 //
 // BREAK-TESTS VÉRIFIÉS le 11 septembre 2026 — journal en fin de fichier.
 
@@ -174,7 +188,7 @@ describe('#825 · netlify.toml — immuable un an, sauf la porte d\'entrée', ()
         expect(regles.size).toBeGreaterThanOrEqual(8);
     });
 
-    for (const cible of ['/js/*', '/css/*', '/styles.css']) {
+    for (const cible of ['/js/*', '/css/*']) {
         it(cible + ' est immuable un an', () => {
             const cc = regles.get(cible);
             expect(cc, cible + ' sans règle').toBeTruthy();
@@ -194,8 +208,68 @@ describe('#825 · netlify.toml — immuable un an, sauf la porte d\'entrée', ()
         });
     }
 
+    it('/styles.css reste revalidée — design-system.html et ses modules la chargent sans jeton', () => {
+        // Mesuré le 11 sept. : `grep -c 'href="styles.css"' design-system.html`
+        // → 1 ; 17 modules en `../styles.css`. Immuable, la référence
+        // d'interface afficherait l'ancienne feuille un an après un correctif.
+        const cc = regles.get('/styles.css');
+        expect(cc, '/styles.css sans règle').toBeTruthy();
+        expect(cc).toMatch(/max-age=0/);
+        expect(cc).not.toMatch(/\bimmutable\b/);
+    });
+
     it('/version.json reste no-store — la détection de mise à jour en dépend', () => {
         expect(regles.get('/version.json')).toMatch(/no-store/);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// 4. Les deux fichiers à jeton de build n'ont pas changé depuis la release
+// ---------------------------------------------------------------------------
+
+const FICHIERS_A_JETON_DE_BUILD = ['js/pack-demo-20.js', 'js/heic-worker.js'];
+
+function git(args) {
+    return execFileSync('git', args, {
+        cwd: racineProjet, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
+        maxBuffer: 64 * 1024 * 1024,
+    });
+}
+
+/**
+ * Le commit de la release précédente : le dernier qui a touché version.json.
+ * Même repère que `fichiersModifies` dans scripts/release.mjs.
+ */
+function commitDeLaDerniereRelease() {
+    try { return git(['log', '-1', '--format=%H', '--', 'version.json']).trim() || null; }
+    catch { return null; }
+}
+
+/**
+ * Parmi `fichiers`, ceux qui diffèrent entre `repere` et HEAD.
+ * @returns {string[]}
+ */
+export function fichiersChangesDepuis(repere, fichiers) {
+    if (!repere) return [];
+    return git(['diff', '--name-only', repere, 'HEAD', '--', ...fichiers])
+        .split('\n').map((l) => l.trim()).filter(Boolean);
+}
+
+describe('#825 · pre-push — un fichier à jeton de build ne change pas sans release', () => {
+    const repere = commitDeLaDerniereRelease();
+
+    it('le repère existe (témoin : version.json a un historique)', () => {
+        expect(repere, 'aucun commit ne touche version.json').toBeTruthy();
+    });
+
+    it('pack-demo-20.js et heic-worker.js sont ceux de la dernière release', () => {
+        // Leur URL est `?v=<build>` : sans release, le build ne bouge pas, et un
+        // navigateur qui a déjà l'ancien contenu sous cette URL le garde un an.
+        // Un commit qui les touche doit donc être une release, ou la précéder
+        // dans le MÊME push. Corriger : `node scripts/release.mjs patch`.
+        const changes = fichiersChangesDepuis(repere, FICHIERS_A_JETON_DE_BUILD);
+        expect(changes, 'modifiés depuis la release ' + (repere || '').slice(0, 8)
+            + ' sans nouveau build : ' + changes.join(', ')).toEqual([]);
     });
 });
 
@@ -208,4 +282,9 @@ describe('#825 · netlify.toml — immuable un an, sauf la porte d\'entrée', ()
 //   b. `immutable` retiré de `/js/*` dans netlify.toml : « /js/* est immuable
 //      un an » ROUGE. Remis.
 //   c. `immutable` ajouté à `/*.html` : « /*.html reste à zéro » ROUGE. Remis.
+//   d. `immutable` ajouté à `/styles.css` : « /styles.css reste revalidée »
+//      ROUGE. Remis.
+//   e. commit jetable touchant `js/heic-worker.js` (commentaire) après la release
+//      1.130.2 : « sont ceux de la dernière release » ROUGE, nomme le fichier.
+//      `git reset --soft HEAD~1` + restauration, arbre propre.
 // ---------------------------------------------------------------------------
