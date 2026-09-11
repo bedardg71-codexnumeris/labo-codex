@@ -10,6 +10,11 @@
 
 **Ce que le troisième audit avait jugé et qui n'est pas rejugé** : les fiches #735 à #754. Quand une mesure y ramène, la fiche est citée et le constat se limite à ce qu'elle **produit** à l'écran ou en base. Ce que 1.123.2 à 1.123.5 ont corrigé le matin (#761 à #764) n'a pas été remesuré ; aucune régression n'a été rencontrée en chemin.
 
+> ↻ **11 sept. 2026 — décision de Grégoire (12 h 31) : les 35 « inscrire » et 7 « commenter » sont versés au cadrage 11
+> (`plans de travail/CADRAGE-2026-09-11-onglet-suivi-lecture-du-depistage.md`, § 7), lot par lot, un par sous-onglet.
+> Lot 1 (§ 1, Suivi du groupe) : consigne du 11, livré en 1.131.0 — G-1, G-2, G-3, G-4, G-5, G-8 corrigés ; G-6 commenté ;
+> G-7 PÉRIMÉ (les deux fonctions de badge n'avaient plus d'appelant depuis #303, retirées) ; le filtre M inscrit (#828).**
+
 **Verdicts** : `[exécuté]` = le banc Vitest (fonction réelle, `db` de banc, rechargement = window neuf sur le même store) ; `[navigateur]` = WebKit local, capture nommée ; `[lecture]` = code lu, `grep` cité, non exécuté.
 
 ---

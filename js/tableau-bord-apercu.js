@@ -31,7 +31,14 @@
 
 const COULEURS_SUIVI = ['#5e9fd0', '#8b6cc4', '#4db89a', '#4ab8d4', '#6a8fc0'];
 const MAX_ETUDIANTS_SUIVIS = 5;
+// #749 (11 sept. 2026) — NOM de la famille, jamais une clé de stockage tel quel.
+// La liste vit sous `cle('etudiantsSuivis') + '_gc_' + <groupeCoursId>` (voir
+// cleEtudiantsSuivis) : une liste par trimestre ET par groupe-cours, comme
+// `seancesCompletes_gc_<id>`. La clé NUE `etudiantsSuivis` n'est plus que LUE,
+// une fois, pour le semis (voir obtenirEtudiantsSuivis) — jamais réécrite.
 const CLE_SUIVI = 'etudiantsSuivis';
+// Mots lus par les collègues (proposition Cowork du 11 sept., soumise à Grégoire).
+const MESSAGE_SUIVI_COMPLET = 'Cinq élèves suivis au maximum. Retires-en un pour en ajouter un autre.';
 
 /* ===============================
    ÉCHELLE DES DISTRIBUTIONS A-C-P (#818, 10 sept. 2026)
@@ -96,33 +103,105 @@ let _etudiantsPrioritaires = [];
 let _tousEtudiantsEnrichis = []; // Tous les étudiants avec indices calculés
 let _filtresActifs = []; // Filtres toggle : 'P', 'M', 'suivi', 'rai'
 
+/**
+ * #749 — LA CLÉ DE LA LISTE SUIVIE : PAR TRIMESTRE ET PAR GROUPE-COURS.
+ *
+ * L'INCIDENT (audit du 6 sept., G-2, mesuré) : la liste vivait sous la clé nue
+ * `etudiantsSuivis`, partagée entre trimestres et groupes, et `nettoyer…` la
+ * RÉÉCRIVAIT filtrée par le groupe actif. Ouvrir « Détails » sous le groupe B
+ * écrivait `[]` : les suivis du groupe A étaient perdus en base, à la simple
+ * consultation. Grégoire a deux groupes cet automne.
+ *
+ * Patron suivi : `seancesCompletes_gc_<id>` (horaire.js), avec en plus le
+ * préfixe de trimestre par `cle()` — la famille `etudiantsSuivis` est inscrite
+ * à CLES_NAMESPACEES (trimestres.js), comme `snapshots` dont les clés réelles
+ * portent aussi un suffixe d'id. Sans groupe-cours actif : la clé du trimestre.
+ */
+function cleEtudiantsSuivis() {
+    const gc = db.getSync('groupeCoursActif', null);
+    const gcId = gc && gc.id ? String(gc.id) : '';
+    const base = cle(CLE_SUIVI);
+    return gcId ? base + '_gc_' + gcId : base;
+}
+
+/** Les DA qu'on peut suivre : élèves du groupe actif, hors abandons (G-3). */
+function dasSuivablesDuGroupe() {
+    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+        ? obtenirEtudiantsCoursActif() : [];
+    const exclu = typeof estEtudiantExclu === 'function' ? estEtudiantExclu : () => false;
+    return new Set(etudiants.filter(e => e && !exclu(e)).map(e => e.da));
+}
+
+/**
+ * La liste suivie du groupe-cours actif, telle qu'elle est en base.
+ *
+ * SEMIS — UNE LECTURE QUI ÉCRIT UNE FOIS (tranché par Cowork le 11 sept. 2026,
+ * réversible). À la première lecture d'un groupe-cours dont la clé n'existe pas
+ * encore, si la clé NUE `etudiantsSuivis` (le stock d'avant #749) existe, ses
+ * entrées dont le DA appartient à ce groupe deviennent la liste du groupe. La
+ * clé nue n'est NI effacée NI réécrite : rien n'est détruit chez personne, et si
+ * le semis est faux, la valeur d'origine est encore là (elle devient une
+ * orpheline, connue de scripts/diagnostic-353-cles-orphelines.js). Le semis
+ * n'écrit que s'il a quelque chose à semer : une liste vide ne se stocke pas.
+ *
+ * Seconde source (relecture adverse du 11 sept.) : `migrerResidusClesNues`
+ * (trimestres.js, au boot) copie toute clé nue du registre vers
+ * `<actif>_<nom>` et la PURGE — chez qui n'avait pas encore ce flag, la nue
+ * aura été déplacée en `<trim>_etudiantsSuivis` avant la première lecture.
+ * Le semis lit donc aussi cette clé-là, sans l'écrire.
+ */
 function obtenirEtudiantsSuivis() {
-    return db.getSync(CLE_SUIVI, []);
+    const k = cleEtudiantsSuivis();
+    const liste = db.getSync(k, null);
+    if (Array.isArray(liste)) return liste;
+
+    let source = db.getSync(CLE_SUIVI, null);
+    const kTrimestre = cle(CLE_SUIVI);
+    if ((!Array.isArray(source) || source.length === 0) && kTrimestre !== k) {
+        source = db.getSync(kTrimestre, null);
+    }
+    if (!Array.isArray(source) || source.length === 0) return [];
+    const das = dasSuivablesDuGroupe();
+    const semis = source.filter(s => s && das.has(s.da));
+    if (semis.length > 0) db.setSync(k, semis);
+    return semis;
 }
 
 function sauvegarderEtudiantsSuivis(liste) {
-    db.setSync(CLE_SUIVI, liste);
+    db.setSync(cleEtudiantsSuivis(), liste);
 }
 
-/** Nettoie la liste en retirant les DAs absents du groupe actif */
+/**
+ * La liste suivie, restreinte à ce qui se montre : élèves du groupe actif, non
+ * exclus. FILTRE À LA LECTURE, N'ÉCRIT JAMAIS (#749, G-2/G-3) — ce qui n'est
+ * pas du groupe est ignoré, pas effacé ; un élève en abandon libère son siège
+ * sans perdre son entrée. Une seule écriture subsiste : le geste explicite
+ * (ajouter, retirer, réinitialiser).
+ */
 function nettoyerEtudiantsSuivis() {
-    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
-        ? obtenirEtudiantsCoursActif() : [];
-    const dasActifs = new Set(etudiants.map(e => e.da));
-    const liste = obtenirEtudiantsSuivis();
-    const filtre = liste.filter(s => dasActifs.has(s.da));
-    if (filtre.length !== liste.length) {
-        sauvegarderEtudiantsSuivis(filtre);
-    }
-    return filtre;
+    const das = dasSuivablesDuGroupe();
+    return obtenirEtudiantsSuivis().filter(s => s && das.has(s.da));
 }
 
 function ajouterEtudiantSuivi(da) {
-    const liste = nettoyerEtudiantsSuivis();
-    if (liste.length >= MAX_ETUDIANTS_SUIVIS) return false;
-    if (liste.some(s => s.da === da)) return false;
-    // Trouver le premier index libre (0-4)
-    const indicesUtilises = new Set(liste.map(s => s.couleurIndex));
+    // G-1 : un DA hors du groupe actif (ou exclu) est refusé À L'AJOUT — il était
+    // accepté puis purgé par le nettoyage suivant.
+    if (!dasSuivablesDuGroupe().has(da)) return false;
+    // La liste EN BASE (entrées d'élèves en abandon comprises : elles ne sont pas
+    // purgées par un ajout — relecture adverse du 11 sept.) ; le plafond et les
+    // couleurs, eux, ne comptent que ce qui se montre.
+    const liste = obtenirEtudiantsSuivis();
+    const visibles = nettoyerEtudiantsSuivis();
+    if (liste.some(s => s && s.da === da)) return false;
+    if (visibles.length >= MAX_ETUDIANTS_SUIVIS) {
+        // G-1 : le sixième refus était muet — « un sixième clic qui ne fait rien ».
+        if (typeof notifications !== 'undefined' && notifications && typeof notifications.info === 'function') {
+            notifications.info(MESSAGE_SUIVI_COMPLET);
+        }
+        return false;
+    }
+    // Trouver le premier index libre (0-4) parmi les couleurs affichées
+    const indicesUtilises = new Set(visibles.map(s => s.couleurIndex));
     let couleurIndex = 0;
     for (let i = 0; i < MAX_ETUDIANTS_SUIVIS; i++) {
         if (!indicesUtilises.has(i)) { couleurIndex = i; break; }
@@ -237,7 +316,9 @@ function appliquerFiltres() {
         for (var i = 0; i < _filtresActifs.length; i++) {
             switch (_filtresActifs[i]) {
                 case 'P':
-                    if (e.P >= 65) return false;
+                    // G-4 (#749) : filtrer sur ce qui est MONTRÉ — un P non
+                    // constructible s'affiche « — », il ne peut pas être « < 65 % ».
+                    if (e.noteConstructible === false || e.P >= 65) return false;
                     break;
                 case 'M':
                     if (e.M >= 65) return false;
@@ -260,7 +341,7 @@ function appliquerFiltres() {
             var score = 0;
             for (var i = 0; i < _filtresActifs.length; i++) {
                 switch (_filtresActifs[i]) {
-                    case 'P': score += Math.max(0, 65 - e.P); break;
+                    case 'P': if (e.noteConstructible !== false) score += Math.max(0, 65 - e.P); break;
                     case 'M': score += Math.max(0, 65 - e.M); break;
                     case 'suivi': score += e.suivi ? e.suivi.ipb * 30 + (e.suivi.direction === '↘' ? 20 : e.suivi.direction === '→' ? 10 : 0) : 0; break;
                     case 'rai': score += e.niveau * 20; break;
@@ -274,10 +355,11 @@ function appliquerFiltres() {
     });
 }
 
-/** Compat : ancien nom utilisé par appliquerCouleursPrioritaires */
-function trierEtudiantsPrioritaires() {
-    appliquerFiltres();
-}
+// G-4 (#749) : les ids et classes `prioritaire-tri-*` sont des vestiges (« tri »)
+// pour ce qui est des FILTRES (libellé « Filtrer : »). Ils restent : ils vivent
+// dans styles.css (dark + mode-clair) et dans le HTML généré ici — les renommer
+// n'est pas un renommage interne. Le nom `trierEtudiantsPrioritaires`, lui, n'avait
+// plus d'appelant : retiré.
 
 function appliquerCouleursPrioritaires() {
     // Retirer toutes les classes prioritaire existantes
@@ -297,11 +379,6 @@ function appliquerCouleursPrioritaires() {
     });
 }
 
-/** Legacy — le panneau prioritaire séparé est remplacé par le panneau suivi unifié */
-function genererPanneauPrioritaire() {
-    genererPanneauSuiviEtudiants();
-}
-
 function genererPanneauSuiviEtudiants() {
     const conteneur = document.getElementById('liste-etudiants-suivi');
     const compteur = document.getElementById('compteur-suivi');
@@ -319,6 +396,11 @@ function genererPanneauSuiviEtudiants() {
     const filtrePrio = btnPrio && btnPrio.classList.contains('actif');
 
     if (panneau) panneau.classList.toggle('filtre-prioritaire', filtrePrio);
+
+    // G-5 (#749) : le chemin vers le profil (les badges A/C/P) n'existe qu'en
+    // mode Détails — le mot qui le dit ne s'affiche que là.
+    const aideProfil = document.getElementById('suivi-aide-profil');
+    if (aideProfil) aideProfil.hidden = !filtrePrio;
 
     // S'assurer que les données enrichies sont calculées
     if (filtrePrio && _tousEtudiantsEnrichis.length === 0) {
@@ -860,82 +942,12 @@ function calculerDistributionPerformance(etudiants) {
     return result;
 }
 
-/**
- * Génère un badge HTML indiquant la pratique de notation active
- * @returns {string} - HTML du badge avec icône et texte
- */
-function genererBadgePratique() {
-    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    // #328 L2-b2 : type dérivé de la SSOT groupesCours[].pratiqueId (helper D2),
-    // défaut historique conservé = PRATIQUE_DEFAUT ('standards').
-    const pratique = (typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
-    const typePAN = config.typePAN || 'maitrise';
-    // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
-
-    let texte = '';
-    let couleur = '';
-    let description = '';
-
-    if (pratique === 'sommative') {
-        texte = 'Sommative traditionnelle (SOM)';
-        couleur = '#ff6f00'; // Orange
-        description = 'Moyenne pondérée provisoire';
-    } else {
-        // PAN
-        const typesPAN = {
-            'maitrise': 'Maîtrise (IDME)',
-            'specifications': 'Spécifications',
-            'denotation': 'Dénotation'
-        };
-        texte = `Alternative - ${typesPAN[typePAN] || 'PAN'}`;
-        couleur = '#0277bd'; // Bleu
-        description = 'N meilleurs artefacts';
-    }
-
-    return `
-        <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
-                     background: ${couleur}15; border: 1.5px solid ${couleur}; border-radius: 20px;
-                     font-size: 0.85rem; font-weight: 600; color: ${couleur}; margin-left: 12px;"
-              title="${description}">
-            ${texte}
-        </span>
-    `;
-}
-
-/**
- * Génère un badge compact indiquant la source des données (SOM ou PAN)
- * Pour les sections du tableau de bord
- * @returns {string} - HTML du badge
- */
-function genererBadgeSourceDonnees() {
-    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
-    const { afficherSom: afficherSommatif } = determinerModeAffichageTableauBord(config);
-
-    let texte = '';
-    let couleur = '';
-    let titre = '';
-
-    if (afficherSommatif) {
-        texte = 'Source : SOM';
-        couleur = '#ff6f00';
-        titre = 'Données calculées selon pratique sommative';
-    } else {
-        texte = 'Source : PAN';
-        couleur = '#0277bd';
-        titre = 'Données calculées selon pratique alternative';
-    }
-
-    return `
-        <span style="display: inline-block; padding: 3px 10px; background: ${couleur}15;
-                     border: 1px solid ${couleur}; border-radius: 12px;
-                     font-size: 0.75rem; font-weight: 700; color: ${couleur};
-                     margin-left: 8px; vertical-align: middle;"
-              title="${titre}">
-            ${texte}
-        </span>
-    `;
-}
+// G-7 (#749, 11 sept. 2026) — CONSTAT PÉRIMÉ. `genererBadgePratique` et
+// `genererBadgeSourceDonnees` vivaient ici et rendaient « Alternative - Maîtrise
+// (IDME) » / « Source : PAN » sans pratique configurée ; mesuré le 11 : ZÉRO
+// appelant depuis #303 (`genererIndicateurPratiqueOuCheckboxes` rend ''), et
+// l'en-tête de contexte (mettreAJourContextesSections) n'affiche aucun badge de
+// pratique. Le badge global est `window.genererBadgePratique` (main.js). Retirées.
 
 /* ===============================
    🚀 INITIALISATION DU MODULE
@@ -1230,16 +1242,13 @@ function chargerTableauBordApercu() {
         genererSeancesCompletes(null);
     }
 
-    // 🔄 BETA 95.7: Calculer les indices A avant l'affichage
+    // 🔄 BETA 95.7: Calculer les indices A avant l'affichage.
+    // G-8 (#749, 11 sept. 2026) : cet appel CHAÎNE déjà calculerEtStockerIndicesCP
+    // (indices.js, fin de calculerEtSauvegarderIndicesAssiduite) — l'appel direct
+    // qui suivait ici écrivait `<trim>_indicesCP` une seconde fois, pour le même
+    // résultat. Retiré ; prouvé par la sentinelle #749 (2 écritures avant, 1 après).
     if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
         calculerEtSauvegarderIndicesAssiduite();
-    }
-
-    // 🔄 Calculer les indices C et P (SOM + PAN) avant l'affichage
-    if (typeof calculerEtStockerIndicesCP === 'function') {
-        calculerEtStockerIndicesCP();
-    } else {
-        console.warn('⚠️ calculerEtStockerIndicesCP non disponible - Module portfolio.js non chargé ?');
     }
 
     // 🔄 BETA 95.7: Rafraîchir aussi la liste des étudiants pour synchronisation
@@ -1347,11 +1356,10 @@ function chargerTableauBordApercu() {
         // Appliquer les couleurs des étudiants suivis après génération du HTML
         appliquerCouleursEtudiantsSuivis();
 
-        // Calculer les étudiants prioritaires et mettre à jour le compteur
+        // Calculer les étudiants prioritaires (le compteur `#compteur-prioritaire`
+        // vivait dans le panneau mort `#panneau-prioritaire`, retiré — G-5 #749)
         calculerEtudiantsPrioritaires();
         appliquerCouleursPrioritaires();
-        var compteurPrio = document.getElementById('compteur-prioritaire');
-        if (compteurPrio) compteurPrio.textContent = '(' + _etudiantsPrioritaires.length + ')';
 
         // Horodatage discret en bas du tableau de bord
         const horodatage = document.getElementById('tdb-horodatage');
@@ -1766,25 +1774,19 @@ function afficherMetriquesGlobales(etudiants) {
     const noteToggle = carteIndicateurs.querySelector('.carte-info-toggle');
     const header = carteIndicateurs.querySelector('h3');
     const panneauSuivi = carteIndicateurs.querySelector('#panneau-suivi-etudiants');
-    const panneauPrioritaire = carteIndicateurs.querySelector('#panneau-prioritaire');
+    // G-5 (#749) : `#panneau-prioritaire` n'existe plus — il n'était jamais ouvert.
 
     // Sauvegarder le HTML des éléments à préserver
     const headerHTML = header ? header.outerHTML : '';
     const panneauSuiviHTML = panneauSuivi ? panneauSuivi.outerHTML : '';
-    const panneauPrioritaireHTML = panneauPrioritaire ? panneauPrioritaire.outerHTML : '';
     const noteToggleHTML = noteToggle ? noteToggle.outerHTML : '';
 
-    // Vider et reconstruire avec header, panneaux et note
+    // Vider et reconstruire avec header, panneau et note
     const panneauEtaitOuvert = panneauSuivi && panneauSuivi.classList.contains('ouvert');
-    const prioEtaitOuvert = panneauPrioritaire && panneauPrioritaire.classList.contains('ouvert');
-    carteIndicateurs.innerHTML = headerHTML + panneauSuiviHTML + panneauPrioritaireHTML + noteToggleHTML;
+    carteIndicateurs.innerHTML = headerHTML + panneauSuiviHTML + noteToggleHTML;
 
-    // Regénérer le contenu des panneaux si ouverts
+    // Regénérer le contenu du panneau s'il était ouvert
     if (panneauEtaitOuvert) {
-        genererPanneauSuiviEtudiants();
-    }
-    if (prioEtaitOuvert) {
-        calculerEtudiantsPrioritaires();
         genererPanneauSuiviEtudiants();
     }
 

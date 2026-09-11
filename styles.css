@@ -11853,45 +11853,10 @@ label:has(+ textarea:disabled) {
     background: #c82333;
 }
 
-/* Panneau Prioritaire */
-.panneau-prioritaire {
-    display: none;
-    background: rgba(220, 20, 20, 0.06);
-    border: 1px solid rgba(220, 20, 20, 0.15);
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 12px;
-}
-
-.panneau-prioritaire.ouvert {
-    display: block;
-}
-
-.liste-etudiants-prioritaire {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.etudiant-prioritaire-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    color: var(--texte-clair, #d0e0e4);
-    background: rgba(220, 20, 20, 0.08);
-    border: 1px solid rgba(220, 20, 20, 0.15);
-    transition: background 0.2s, border-color 0.2s;
-}
-
-.etudiant-prioritaire-item:hover {
-    background: rgba(220, 20, 20, 0.18);
-    border-color: rgba(220, 20, 20, 0.35);
-}
-
+/* G-5 (#749, 11 sept. 2026) : le panneau `#panneau-prioritaire` (jamais ouvert) et ses
+   classes sont retirés ; restent `.pastille-prioritaire`, `.etudiant-prioritaire-indices`,
+   `.btn-toggle-prioritaire` et les filtres `.prioritaire-tri-*`, tous vivants. */
+#suivi-aide-profil[hidden] { display: none; }
 .pastille-prioritaire {
     display: inline-block;
     width: 10px;
@@ -11899,17 +11864,6 @@ label:has(+ textarea:disabled) {
     border-radius: 50%;
     flex-shrink: 0;
     background: radial-gradient(circle at 30% 30%, #ff8a70, #d85a40);
-}
-
-.etudiant-prioritaire-nom {
-    font-weight: 600;
-}
-
-.etudiant-prioritaire-diagnostic {
-    font-style: italic;
-    color: var(--gris-moyen, #888);
-    margin-left: auto;
-    font-size: 0.75rem;
 }
 
 .prioritaire-tri-zone {
@@ -24559,30 +24513,10 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
         inset 1px 1px 2px rgba(255, 255, 255, 0.15);
 }
 
-.mode-clair .panneau-prioritaire {
-    background: rgba(220, 53, 69, 0.06);
-    border-color: rgba(220, 53, 69, 0.2);
-}
-
-.mode-clair .etudiant-prioritaire-item {
-    color: var(--texte-principal, #1a1a1a);
-    background: rgba(220, 53, 69, 0.06);
-    border-color: rgba(220, 53, 69, 0.18);
-}
-
-.mode-clair .etudiant-prioritaire-item:hover {
-    background: rgba(220, 53, 69, 0.14);
-    border-color: rgba(220, 53, 69, 0.3);
-}
-
 .mode-clair .btn-toggle-prioritaire.actif {
     background: var(--rouge-danger);
     color: white;
     border-color: var(--rouge-danger);
-}
-
-.mode-clair .etudiant-prioritaire-diagnostic {
-    color: #666;
 }
 
 .mode-clair .prioritaire-tri-btn {

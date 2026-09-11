@@ -318,21 +318,25 @@ describe('1 · Suivi du groupe — liste suivie, filtres, états', () => {
     function storeSix() { const st = storeBase(); st.test_groupeEtudiants.push({ da: '2000005', nom: 'Einstein', prenom: 'Eva', groupe: '01', coursId: 'GC1', statut: 'actif' }, { da: '2000006', nom: 'Fermi', prenom: 'Fanny', groupe: '01', coursId: 'GC1', statut: 'actif' }); return st; }
     const monterG = (store, opts = {}) => monter(store, Object.assign({ modules: [{ chemin: 'js/tableau-bord-apercu.js', internes: INTERNES_G }], globaux: GLOBAUX_G }, opts));
 
-    it('G-1 · La liste suivie : cinq ajouts acceptés, le sixième refusé SANS notification ; la clé est NUE (etudiantsSuivis, pas test_…)', () => {
+    it('G-1 · La liste suivie : cinq ajouts acceptés, le DA d\'un autre groupe refusé À L\'AJOUT, le sixième refusé AVEC notification ; la clé est PAR GROUPE-COURS — valeurs d\'après #749 (11 sept.)', () => {
+        // Constat d'origine (6 sept.) : 2000004 (GC2) accepté puis purgé ; sixième refus muet ; clé NUE `etudiantsSuivis`.
         const store = storeSix();
         const b = monterG(store);
         const i = b.interne['tableau-bord-apercu.js'];
         const acceptes = ['2000001', '2000002', '2000003', '2000004', '2000005', '2000006'].map(da => i.ajouterEtudiantSuivi(da));
         noter('G1', { max: i.MAX_ETUDIANTS_SUIVIS, cle: i.CLE_SUIVI, acceptes, cles: Object.keys(store).filter(k => /suivi/i.test(k)), notifs: b.notifs.length, avert: b.avertissements.length, liste: i.obtenirEtudiantsSuivis() });
-        // 2000004 est dans GC2 : ajouterEtudiantSuivi l'ACCEPTE (aucun test d'appartenance au groupe), puis le nettoyage de l'ajout suivant l'écarte.
-        expect(acceptes).toEqual([true, true, true, true, true, true]);
+        expect(acceptes).toEqual([true, true, true, false, true, true]);   // 2000004 est dans GC2 : refusé à l'ajout
         expect(i.obtenirEtudiantsSuivis().map(s => s.da)).toEqual(['2000001', '2000002', '2000003', '2000005', '2000006']);
-        expect(i.ajouterEtudiantSuivi('2000007')).toBe(false);   // le sixième du groupe : refusé…
-        expect(Object.keys(store).filter(k => /suivi/i.test(k))).toEqual(['etudiantsSuivis']);
-        expect(b.notifs.length + b.avertissements.length).toBe(0);
+        expect(i.ajouterEtudiantSuivi('2000007')).toBe(false);   // hors du groupe : refusé, sans bruit
+        const nbNotifsAvant = b.notifs.length;
+        store.test_groupeEtudiants.push({ da: '2000008', nom: 'Gauss', prenom: 'Gina', groupe: '01', coursId: 'GC1', statut: 'actif' });
+        expect(i.ajouterEtudiantSuivi('2000008')).toBe(false);   // le sixième du groupe : refusé…
+        expect(b.notifs.length).toBe(nbNotifsAvant + 1);          // …et dit
+        expect(b.notifs[b.notifs.length - 1].type).toBe('info');
+        expect(Object.keys(store).filter(k => /suivi/i.test(k))).toEqual(['test_etudiantsSuivis_gc_GC1']);
     });
 
-    it('G-2 · Changer de groupe-cours puis afficher le panneau : la liste suivie du groupe A est PURGÉE en base (pas filtrée), et vide au retour', () => {
+    it('G-2 · Changer de groupe-cours puis afficher le panneau : la liste suivie du groupe A SURVIT, rien n\'est écrit sous B — valeur d\'après #749 (11 sept. ; constat d\'origine : purgée en base, vide au retour)', () => {
         const store = storeSix();
         const b = monterG(store);
         const i = b.interne['tableau-bord-apercu.js'];
@@ -348,14 +352,16 @@ describe('1 · Suivi du groupe — liste suivie, filtres, états', () => {
         store.infoCours = { id: 'GC1', nom: 'Cours banc', groupe: '01', _groupeCoursId: 'GC1' }; store.groupeCoursActif = { id: 'GC1', coursId: 'GC1', groupeNum: '01', trimestreId: 'test' };
         const b3 = monterG(store);
         const apres = b3.interne['tableau-bord-apercu.js'].obtenirEtudiantsSuivis().map(s => s.da);
-        noter('G2', { avant, sousGC2, ecritureSousGC2, apresRetourGC1: apres });
+        const ecrituresSousGC2 = b2.journal.filter(j => /etudiantsSuivis/.test(j.k)).map(j => j.k);
+        noter('G2', { avant, sousGC2, ecritureSousGC2, ecrituresSousGC2, apresRetourGC1: apres });
         expect(avant).toEqual(['2000001', '2000002']);
-        expect(sousGC2).toEqual([]);
-        expect(ecritureSousGC2).toEqual([[]]);   // réécrite vide, immédiatement
-        expect(apres).toEqual([]);              // perdue pour GC1
+        expect(sousGC2).toEqual([]);              // B a sa propre liste, vide
+        expect(ecritureSousGC2).toEqual([]);      // la clé nue n'est plus jamais écrite
+        expect(ecrituresSousGC2).toEqual([]);     // et ouvrir « Détails » sous B n'écrit RIEN
+        expect(apres).toEqual(['2000001', '2000002']);   // le cas réel de l'audit : GC1 survit
     });
 
-    it('G-3 · Un élève passé en « abandon » reste dans la liste suivie (nettoyer ne lit pas estEtudiantExclu) : un des cinq sièges est occupé, invisible', () => {
+    it('G-3 · Un élève passé en « abandon » libère son siège à la lecture, sans perdre son entrée en base — valeur d\'après #749 (constat d\'origine : siège occupé, invisible)', () => {
         const store = storeSix();
         const b = monterG(store);
         const i = b.interne['tableau-bord-apercu.js'];
@@ -365,8 +371,10 @@ describe('1 · Suivi du groupe — liste suivie, filtres, états', () => {
         const i2 = b2.interne['tableau-bord-apercu.js'];
         const liste = i2.nettoyerEtudiantsSuivis().map(s => s.da);
         const actifsAffiches = store.test_groupeEtudiants.filter(e => e.coursId === 'GC1' && !['inactif', 'décrochage', 'abandon'].includes(e.statut)).map(e => e.da);
-        noter('G3', { liste, actifsAffiches: actifsAffiches.length });
-        expect(liste).toContain('2000001');
+        const enBase = store.test_etudiantsSuivis_gc_GC1.map(s => s.da);
+        noter('G3', { liste, enBase, actifsAffiches: actifsAffiches.length });
+        expect(liste).not.toContain('2000001');   // le siège est libre : (1/5), pas (2/5)
+        expect(enBase).toContain('2000001');      // mais rien n'a été effacé
         expect(actifsAffiches).not.toContain('2000001');
     });
 
@@ -381,7 +389,7 @@ describe('1 · Suivi du groupe — liste suivie, filtres, états', () => {
         expect(String(badge)).not.toMatch(/aucune pratique/i);
     });
 
-    it('G-5 · Le filtre « P < 65 % » retient un élève dont le P n\'est pas constructible (affiché « — ») : il filtre sur une valeur qu\'on ne montre pas', () => {
+    it('G-5 · Le filtre « P < 65 % » ÉCARTE un élève dont le P n\'est pas constructible (affiché « — ») — valeur d\'après #749 (constat d\'origine : retenu)', () => {
         const store = storeSix();
         const b = monterG(store);
         const i = b.interne['tableau-bord-apercu.js'];
@@ -393,7 +401,7 @@ describe('1 · Suivi du groupe — liste suivie, filtres, états', () => {
         i.appliquerFiltres();
         const retenus = i._etudiantsPrioritaires.map(e => e.da);
         noter('G5', { retenus });
-        expect(retenus).toEqual(['2000003']);
+        expect(retenus).toEqual([]);   // 2000003 affiche « — » : il ne peut pas être « < 65 % »
     });
 });
 

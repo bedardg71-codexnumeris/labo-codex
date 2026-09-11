@@ -110,7 +110,10 @@ window.reparer353 = async function (opts) {
     var familles = { trimestreInconnu: [], snapshotOrphelin: [], sansProducteur: [] };
     var PREFIXE_TRIMESTRE = /^([aeh]\d{4})_/;
     // Clés sans producteur connu, constatées au grep le 10 août 2026.
-    var SANS_PRODUCTEUR = ['simulation_indicesCP'];
+    // `etudiantsSuivis` (nue) : plus écrite depuis #749 (11 sept. 2026) — la liste
+    // vit sous `<trim>_etudiantsSuivis_gc_<gcId>` ; la nue a été LUE une fois
+    // pour le semis et laissée en place, exprès (réversibilité).
+    var SANS_PRODUCTEUR = ['simulation_indicesCP', 'etudiantsSuivis'];
 
     toutes.forEach(function (x) {
         // 1. Préfixe de trimestre absent du registre `trimestres`.
@@ -152,7 +155,9 @@ window.reparer353 = async function (opts) {
          'Nommés `<trim>_snapshots_<id>` où `<id>` est un GROUPE-COURS en priorité (snapshots.js:77).\n' +
          '    Confrontés ici aux cours ET aux groupes-cours : un snapshot vivant n\'est plus signalé.');
     bloc('SANS PRODUCTEUR connu dans js/', familles.sansProducteur,
-         'Résidu d\'une version antérieure — aucun code n\'écrit ni ne lit ce nom aujourd\'hui.');
+         'Résidu d\'une version antérieure — aucun code n\'écrit ce nom aujourd\'hui.\n' +
+         '    (`etudiantsSuivis` est encore LU, une fois, par le semis de #749 : le supprimer\n' +
+         '    après la première ouverture de chaque groupe-cours, pas avant.)');
 
     L('TOTAL localStorage : ' + Math.round(total / 1024) + ' K car. (' +
       (100 * total / (5 * 1024 * 1024)).toFixed(1) + ' % du quota, ' + toutes.length + ' clés)');

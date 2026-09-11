@@ -1719,7 +1719,13 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             canvas.style.cursor = surElement ? 'pointer' : 'default';
         });
 
-        // Peupler le dropdown des étudiants
+        // Peupler le dropdown des étudiants.
+        // G-6 (audit du 6 sept., #749 lot 1) — ASYMÉTRIE CONNUE, POSITION, PAS DÉFAUT :
+        // ce sélecteur est reconstruit sans restaurer sa valeur (l'élève en relief se
+        // perd au re-rendu), alors que celui des trajectoires (`selecteur-etudiant-
+        // trajectoires`, plus bas) relit `valeurAvant` et la remet. Rien ne survit au
+        // rechargement dans ce sous-onglet hors la liste suivie ; l'aligner est un choix
+        // d'ergonomie à prendre avec le lot transversal, pas un correctif.
         const selecteurEtudiant = document.getElementById('selecteur-etudiant-acp');
         if (selecteurEtudiant) {
             selecteurEtudiant.innerHTML = '<option value="">-- Sélectionner --</option>';

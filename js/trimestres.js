@@ -92,6 +92,14 @@
         // NOMMÉ de réglages (modèle, paramètres, paliers), COPIÉ dans un critère au choix.
         // Propriétaire : js/collections-projection.js. Par trimestre, comme les modèles.
         'collectionsProjection',
+        // 🆕 #749 (11 sept. 2026) : la liste des élèves suivis du Suivi du groupe.
+        // Clé RÉELLE composée : `<trim>_etudiantsSuivis_gc_<groupeCoursId>` (une
+        // liste par groupe-cours, tableau-bord-apercu.js : cleEtudiantsSuivis) —
+        // même forme que `snapshots` (`<trim>_snapshots_<id>`). Les boucles de
+        // copie/migration de ce fichier ne voient donc pas ces clés suffixées,
+        // comme pour snapshots ; la clé nue `etudiantsSuivis` d'avant n'est plus
+        // que lue (semis), jamais migrée ici.
+        'etudiantsSuivis',
         // 🆕 Corbeille fichiers travaux (4 mars 2026)
         'corbeilleFichiers',
         // 🆕 (24 mai 2026) Pratique de notation active : namespacée par trimestre
