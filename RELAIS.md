@@ -25,12 +25,16 @@
 > (le garde #547 compare à HEAD ; six URL ont servi deux contenus le 10 sept.). Essais
 > 597 cas 9/11 adaptés. Skill `portes-terrain` § « LE GARDE ANTI-CACHE » réécrit : il surveille TOUT
 > fichier référencé avec `?v=` depuis #547, pas seulement `main.js`.
-> ⚠ **Ce qui juge le lot, c'est la porte** (`plans de travail/PORTES-TERRAIN-2026-09-11-ouverture-immuable.md`,
-> quatre rangées, nouvel onglet à chaque fois, jamais un reload). **La rangée 1 (référence sur
-> 1.130.1) se fait AVANT le déploiement** — Cowork la demande à Grégoire avant le relais et inscrit le
-> chiffre dans #825. Si la rangée 2 reste au-dessus de 3 s : la cause est ailleurs, on remesure ; les
-> temps 2 (`defer`) et 3 (écran d'attente) ne se font que sur ce chiffre, à froid.
-> **Ce qui attend Cowork** : l'artefact jumeau de la porte ; le chiffre de la rangée 1 ; le mandat
+> ⛔ **L'HYPOTHÈSE EST RÉFUTÉE** : la rangée 1 de la porte, relevée par Grégoire à 11 h 58 sur 1.130.1
+> (nouvel onglet), donne **Load 527 ms, 302 lignes en 304**. La revalidation ne coûtait pas 30-45 s ;
+> les 34-51 s du matin étaient des rechargements forcés. Le lot reste livré (300 requêtes de moins,
+> invariant sain) ; **temps 2 (`defer`) et 3 (écran d'attente) RETIRÉS** ; cause inconnue, à saisir
+> quand le symptôme se reproduit (Network, la barre la plus longue — § 3.1 de la porte). La porte
+> (`plans de travail/PORTES-TERRAIN-2026-09-11-ouverture-immuable.md`) ne juge plus une vitesse : 2.2b
+> zéro 304 sur `js/`, 2.3a l'en-tête arrive, 2.4a l'iPad dit `1.130.2`. **#827** inscrit
+> (`design-system.html` + 17 modules lient `styles.css` sans jeton — sans effet tant que `/styles.css`
+> reste revalidée, ce que la sentinelle impose).
+> **Ce qui attend Cowork** : l'artefact jumeau de la porte (trois rangées restantes) ; le mandat
 > suivant (onglet Suivi, puis `#821` / `#822` avec l'orthopédagogue).
 > ⚠ **Dans l'arbre, pas à moi** : `Formation/*.html` (non suivis) et la SUPPRESSION non commise de la
 > capture du 9 sept. (`Retours des testeurs/grégoire/BUG_…journal-de-bord-sans-fond.png`, à Grégoire).

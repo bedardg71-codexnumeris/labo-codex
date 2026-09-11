@@ -15,24 +15,27 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-↻ **1.130.2 — L'APPLICATION DEVRAIT S'OUVRIR PLUS VITE : LE SERVEUR NE REDEMANDE PLUS CE QUI N'A PAS CHANGÉ** (build `0911-1139`).
-**Ce que tu verras** : rien de nouveau à l'écran. Ce matin, tu as mesuré 30 à 45 s pour ouvrir
-`app.codexnumeris.org` dans un nouvel onglet, alors qu'un rechargement prenait moins d'une seconde. Le
-serveur disait au navigateur, pour chacun des deux cents scripts, « redemande-moi à chaque ouverture »
-même quand rien n'avait bougé. Il dit maintenant « garde-le un an » — et c'est sûr, parce que chaque
-script change d'adresse dès que son contenu change (les jetons `?v=` que la release pose), et que la
-page d'entrée, elle, est toujours redemandée. La première ouverture après une mise à jour reste plus
-longue ; les suivantes ne devraient plus rien redemander.
-**Vérifié comment** : le chiffre attend sa porte — aucun banc ne voit les en-têtes d'un serveur, et ils
-n'existent qu'une fois déployés. Ce qui est prouvé en session : trois fichiers qui échappaient aux
-jetons (un script sans jeton, le pack de démonstration et le décodeur HEIC chargés à la demande) en ont
-reçu un ; une sentinelle refuse désormais toute référence sans jeton et refuse qu'`index.html` devienne
-immuable, break-testée cinq fois (rouge, remis). Une relecture à froid a retenu que la feuille de style
-principale doit rester redemandée (la page de référence d'interface la charge sans jeton) : une requête
-sur deux cents, gardée. ⚠ **Une porte de quatre rangées juge ce lot**
-(`plans de travail/PORTES-TERRAIN-2026-09-11-ouverture-immuable.md`) — et **la rangée 1 se fait AVANT
-le déploiement**, dans un nouvel onglet, c'est le seul « avant » qui existera. Si la seconde ouverture
-reste au-dessus de quelques secondes, la cause est ailleurs et on remesure avant d'aller plus loin.
+↻ **1.130.2 — L'APPLICATION NE REDEMANDE PLUS 300 FICHIERS À CHAQUE OUVERTURE ; LA CAUSE DES 30-45 S N'EST PAS ÉTABLIE** (build `0911-1139`).
+**Ce que tu verras** : rien de nouveau à l'écran. Le serveur disait au navigateur, pour chacun des deux
+cents scripts, « redemande-moi à chaque ouverture » même quand rien n'avait bougé. Il dit maintenant
+« garde-le un an » — et c'est sûr, parce que chaque script change d'adresse dès que son contenu change
+(les jetons `?v=` que la release pose), et que la page d'entrée, elle, est toujours redemandée.
+⚠ **Mais ce n'est pas ce qui te coûtait 30 à 45 secondes.** Ta mesure de 11 h 58, sur la version
+d'avant, dans un nouvel onglet : **527 ms**, 302 fichiers redemandés. Trois cents allers-retours coûtent
+une demi-seconde, pas quarante. Les 34 à 51 s des captures du matin étaient des rechargements forcés,
+pas des ouvertures. Le lot reste livré (moins de requêtes, sain), mais il ne règle pas ce que tu as
+vécu, et les deux suites prévues (charger les scripts en parallèle, un écran d'attente) sont retirées :
+elles répondaient à une cause qui n'est pas la bonne.
+**Ce qui reste dû** : saisir la cause **au moment où ça se reproduit** — Chrome, Network, et la barre la
+plus longue de la cascade (une requête ? le démarrage de l'application ? la base locale ?). Une capture
+de cette barre dans un rapport de bug suffit ; sans reproduction, rien à coder.
+**Vérifié comment** : trois fichiers qui échappaient aux jetons (un script sans jeton, le pack de
+démonstration et le décodeur HEIC chargés à la demande) en ont reçu un ; une sentinelle refuse toute
+référence sans jeton et refuse qu'`index.html` devienne immuable, break-testée cinq fois (rouge, remis).
+Une relecture à froid a retenu que la feuille de style principale doit rester redemandée (la page de
+référence d'interface la charge sans jeton) : une requête sur trois cents, gardée. **Pas vérifié** : que
+l'en-tête arrive jusqu'à ton Chrome derrière Cloudflare, et que l'iPad dit bien `1.130.2` après le
+déploiement — deux rangées de la porte (`plans de travail/PORTES-TERRAIN-2026-09-11-ouverture-immuable.md`).
 
 ↻ **1.130.1 — DEPUIS LE SUIVI, UN LIEN MÈNE AUX RÉGLAGES ; ET L'ÉCRAN DE RÉGLAGE EST CLOS** (build `0911-1103`).
 **Ce que tu verras** : en tête de `Suivi › Suivi du groupe` et sous le titre de la carte RàI d'un

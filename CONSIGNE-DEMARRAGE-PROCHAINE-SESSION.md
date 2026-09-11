@@ -69,9 +69,11 @@ produit.** La version précédente de ce bloc (10 septembre, 1.128.4) est rempla
   `scripts/.verdict-playwright.json` (`code`, `sha`). Le CI WebKit sur `main` est à relire
   (`gh run list --branch main -L 1`) : au rituel de midi, le run du commit `7130d0db` était encore
   `in_progress`.
-- **Le chiffre de #825 n'est PAS mesuré** : les en-têtes n'existent qu'une fois déployés, derrière
-  Cloudflare Access. La porte `plans de travail/PORTES-TERRAIN-2026-09-11-ouverture-immuable.md` le
-  mesure ; sa rangée 1 (référence, sur 1.130.1) doit se faire AVANT le déploiement.
+- **#825 : l'hypothèse de la fiche est RÉFUTÉE** par la référence relevée par Grégoire à 11 h 58 sur
+  1.130.1, nouvel onglet : **Load 527 ms, 302 lignes en 304**. La revalidation ne coûtait pas 30-45 s.
+  Le lot 1.130.2 reste livré (sain, 300 requêtes de moins) ; temps 2 et 3 retirés ; **la cause des
+  30-45 s est inconnue** et se saisit à la reproduction (porte § 3.1). Ne pas rouvrir #825 sans une
+  capture de la barre longue.
 
 **Ce que le 11 septembre à midi a livré, et ce que la mesure a corrigé de la consigne** :
 
