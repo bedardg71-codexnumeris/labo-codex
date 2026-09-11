@@ -15,7 +15,7 @@
 
 ---
 
-## ▣ CE QUI EST OUVERT AUJOURD'HUI — dix cadrages (le 10 ajouté le 10 septembre) ; livrés : le 3 (1.116), le 7 (1.117), le 1 étapes 2 et 3 (1.118, 1.119), le 2 (1.119), le 5 (1.119), le 8 (1.120) ; le 1 est CLOS (étape 4 abandonnée) ; ouverts : le 4, le 6 (à trier)
+## ▣ CE QUI EST OUVERT AUJOURD'HUI — dix cadrages (le 10 ajouté le 10 septembre, quatre temps sur cinq livrés le 11) ; livrés : le 3 (1.116), le 7 (1.117), le 1 étapes 2 et 3 (1.118, 1.119), le 2 (1.119), le 5 (1.119), le 8 (1.120) ; le 1 est CLOS (étape 4 abandonnée) ; ouverts : le 4, le 6 (à trier)
 
 *Aucun n'empêche un des huit énoncés de la cohorte 1 : ils sont tous parcourus depuis le
 3 septembre au matin. Ces quatre-là traitent l'**adoption** et la **justesse**, pas la ligne
@@ -151,7 +151,17 @@ une note. **Temps 2, le tri des réglages morts** (`1.129.0`, `#823`) : deux ret
 d'analyse rebranchée, « Direction du risque » gardé et renommé « Sensibilité des flèches par critère »
 (arbitrage de Grégoire, après que la relecture croisée eut trouvé le curseur vivant) ; **porte terrain
 relevée par lui, 12 sur 12**. Aucune donnée écrite chez personne, `fenetrePatterns` non migrée.
-⏳ **Ce qui reste, dans l'ordre qu'il a arrêté (trier, puis déplacer)** : (3) **les mots de l'écran** —
+✅ **11 septembre 2026, 11 h 22 (Cowork) — L'ÉCRAN DE RÉGLAGE EST FINI : cinq temps livrés et VUS** (temps 5 :
+`1.130.1`, deux liens depuis Suivi, porte 4/4, libellé « Régler » gardé ; `#824` clos dans la même version). **Cette entrée
+reste ouverte pour la seconde moitié du dossier, l'onglet Suivi** — rien de cadré ; Cowork écrit un cadrage avant toute
+consigne (entrées : le prompt du 4e audit jamais exécuté, et la mesure « SRPNF » reportée par Grégoire).
+↻ **11 septembre 2026, 10 h 55 (Cowork) — quatre temps sur cinq livrés et VUS, le cinquième en cours.** Temps 3, les mots
+(`1.129.1`, porte 5/5 ; queue `1.129.2` : échelle de départ renommée à la source, bilan « Incomplet », stock intact) ; temps 4, la
+forme (`1.130.0`, sur sa maquette `MAQUETTE-2026-09-11-outils-observation.html`, porte 13/13 Mac + iPad) ; temps 5 **tranché** à
+10 h 48 : l'écran reste dans Labo, relié depuis Suivi par deux liens — consigne du jour en exécution avec `#824`. Toutes les
+décisions sont datées dans le cadrage. ⮕ **Quand la clôture est livrée et vue, cette entrée quitte la liste** ; le dossier
+dépistage continue par l'onglet Suivi (rien de cadré — Cowork écrit un cadrage avant toute consigne).
+⏳ **Ce qui restait au 10 au soir, dans l'ordre qu'il avait arrêté (trier, puis déplacer)** : (3) **les mots de l'écran** —
 l'IDME écrite de trois façons, les deux nomenclatures du bloc « Seuils d'interprétation », les deux
 textes faux et « cueillette » (`#823`) : **ses mots, son arbitrage** ; (4) **la forme** — une grammaire
 visuelle, un seul « Restaurer » : ce qu'il trouve « cacophonique », à lui ; (5) **déplacer ou scinder**

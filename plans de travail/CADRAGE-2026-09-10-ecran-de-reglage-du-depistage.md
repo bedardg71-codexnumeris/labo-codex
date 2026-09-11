@@ -286,6 +286,14 @@ poser aux deux autres endroits où l'on constate un effet : en tête du Suivi du
 Accompagnement du profil. `navigation.js` et `config.js` intacts. **Ce que ça ne règle pas, assumé** :
 qui cherche « où se règle le dépistage » hors de Suivi doit encore deviner Labo — l'Aide le dit.
 
+▣ **LIVRÉ EN `1.130.1`** (11 sept., build `0911-1103`, `7130d0db`) : les deux liens « Régler les outils d'observation »
+(Suivi du groupe, carte RàI du profil), et les cinq chemins morts retirés (`#824`, 930 lignes, sentinelle). **VU PAR
+GRÉGOIRE — porte relevée à 11 h 20, 4 sur 4** ; libellé du lien : « Régler », gardé (11 h 22).
+⮕ **L'ÉCRAN DE RÉGLAGE EST FINI : cinq temps livrés et vus.** Le dossier « dépistage » continue par l'onglet Suivi.
+⚠ Constat de Claude Code, à retenir : la porte 2.3b de la forme visait un titre (« seuil force : N % ») que
+l'application n'a jamais rendu — chaîne morte ; le seuil agit par les badges et la carte RàI. Une attente de porte
+se vérifie contre un RENDU, pas contre une carte.
+
 ⮕ **Recommandation de Cowork : trier le contenu d'abord, déplacer ensuite.** Déplacer tel quel
 importerait la cacophonie dans Suivi. Et le tri produira justement la mesure du §4, qui dira si
 « Suivi » est le bon toit — ou si l'écran doit être **scindé**, ce qu'aucune mesure n'exclut
