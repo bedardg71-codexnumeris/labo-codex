@@ -15,6 +15,29 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.129.1 — L'ÉCHELLE IDME DIT LES MÊMES QUATRE MOTS PARTOUT, ET LE BLOC DES SEUILS DIT CE QU'IL RÈGLE** (build `0911-0644`).
+**Ce que tu verras** : partout où l'application écrit l'échelle IDME en toutes lettres (aides,
+infobulles, glossaire, guides, aide intégrée, écran de réglage), les quatre lettres se lisent
+**Incomplet / Développement / Maîtrise / Étendu** — tes mots de ce matin. Plus d'« Insuffisant »,
+d'« Insuffisant ou incomplet », d'« Excellent » ni d'« Excellence » ; plus d'« en Développement »
+ni de « Maîtrisé » dans la prose. Dans `Labo › Outils d'observation`, le bloc « Seuils
+d'interprétation » n'annonce plus l'IDME : il dit que ses trois seuils colorent les colonnes
+Assiduité, Complétion, Performance et Mobilisation de la liste des élèves et qualifient
+l'engagement dans le profil, sans toucher ni la note ni l'échelle. L'aide des « Indicateurs
+visuels des seuils » dit que ce sont les niveaux de **ton** échelle qui se tracent sur les
+graphiques ; le repère « note différée » renvoie au bon écran ; « cueillette » est devenu
+« collecte ». Fragile / Acceptable / Bon n'ont pas bougé : ils attendent l'orthopédagogue.
+**Rien n'est écrit dans tes données, et les noms des niveaux de tes échelles ne bougent pas** :
+ce sont tes mots, et ils voyagent avec elles. ⚠ Conséquence à trancher : l'échelle de départ
+semée chez chaque nouvel utilisateur dit encore « en Développement » et « Maîtrisé » (et sa
+description, « Insuffisant ») — la porte terrain te pose la question (§ 3).
+**Vérifié comment** : quarante-sept substitutions, chacune visée par numéro de ligne et
+refusée si le texte n'y était pas exactement une fois ; diff relu en entier ; le multi-ensemble
+des nombres du diff est identique avant et après (aucune borne, aucune couleur) ; Vitest 531
+fichiers / 5793 essais. **Pas vérifié** : l'écran lui-même — une porte, trois rangées
+(`plans de travail/PORTES-TERRAIN-2026-09-11-mots-depistage.md`), l'artefact revient à Cowork.
+Le reste de #823 (les deux textes faux, « cueillette ») est livré : la fiche est close. (`#823`)
+
 ↻ **1.129.0 — DEUX RÉGLAGES QUI NE FAISAIENT RIEN S'EN VONT, LA FENÊTRE D'ANALYSE FONCTIONNE** (build `0910-1645`).
 **Ce que tu verras** : dans `Labo › Outils d'observation`, la case « Découpler P et N » et le menu
 « Unité d'affichage de l'assiduité » ont disparu — rien ne les lisait. La « Fenêtre d'analyse des
