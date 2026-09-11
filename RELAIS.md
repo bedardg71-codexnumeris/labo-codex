@@ -7,6 +7,33 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 7 H 30 : QUEUE DU LOT DES MOTS LIVRÉE (1.129.2)
+
+> ✅ **`main` à 1.129.2, build `0911-0717`, commit de release `2a13d6fa`.** Tout est sur `main` ;
+> aucune branche ne porte de travail. Le push suit par `scripts/pousser.sh` (verdict Playwright
+> d'abord) — si tu lis ceci depuis `origin/main`, il est arrivé. Vérifie :
+> `git rev-list --count origin/main..main`.
+> **Livré** (trois décisions de Grégoire, 7 h 11, § 3 de la porte des mots) : le gabarit « Échelle de
+> départ (IDME) » renommé À LA SOURCE (`js/echelles.js` : Développement / Maîtrise, description
+> corrigée) ; le bilan élève écrit « Incomplet » en dur (`evaluation-retroaction.js:884`, son choix —
+> ce mot ne suit pas l'échelle d'un collègue) ; trois aides suivent (`accompagnement-contenu-popup.js`,
+> `index.html:5327`). Changelog : un item dans 1.129.
+> ⚠ **Prémisse de la consigne corrigée à la mesure** : « le versement des huit échelles (l. 740, #574) »
+> n'existe plus depuis le 1er sept. ; le semis vivant est `assurerEchelleIdmeDeDepart` (`db.modifier`,
+> `return undefined` si la copie existe) — **le stock ne bouge pas**, verrouillé par le cas I de
+> `tests/unit/sentinelle-echelle-idme-de-depart.test.js`, break-testé (garde remplacée par une
+> réécriture → rouge ; fichier restauré par empreinte).
+> **Mesure due, faite** : une grille partagée n'emporte PAS d'échelle (`partage-format.js` : les grilles
+> n'en référencent aucune) ; une échelle partagée voyage entière avec ses noms de niveaux.
+> **Hors périmètre, non touchés, listés** : modèle de cartouches (`cartouches.js:191`), pack démo
+> (`pack-demo-20.js`, 31 occurrences), clés `idme.*`, noms de zones (#821/#822).
+> **Aucune porte terrain** (règle 1 du skill : une machine répond à tout ; pas de données fictives).
+> **Ce qui attend Grégoire** : rien de ce lot. Ensuite : temps 4 (forme) et 5 (déplacer) du cadrage 10,
+> `#824` — Cowork écrit la consigne. **Ce qui attend Cowork** : le mandat suivant.
+> ⚠ **Dans l'arbre, pas à moi** : `Formation/*.html` (non suivis) et une SUPPRESSION non commise de
+> `Retours des testeurs/grégoire/BUG_grégoire_2026-09-09_21-03-59_journal-de-bord-sans-fond.png`
+> (capture ajoutée en `10fe1854`) — laissée telle quelle, à trancher par qui l'a faite.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, MATIN : LES MOTS DU DÉPISTAGE LIVRÉS (1.129.1)
 
 > ✅ **`main` à 1.129.1, build `0911-0644`, commit de release `74fec5df`.** Tout est sur `main` ;

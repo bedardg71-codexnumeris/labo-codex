@@ -15,6 +15,30 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.129.2 — L'ÉCHELLE DE DÉPART DIT LES QUATRE MOTS À LA SOURCE, ET LE BILAN AUSSI** (build `0911-0717`).
+**Ce que tu verras : rien chez toi, rien chez les testeurs.** Ton échelle est du stock, et le stock ne
+bouge pas — c'est ta décision de 7 h 11 (« oui, renommer » la source), et c'est mesuré : ce qui sème
+l'échelle de départ ne fait rien quand un espace en a déjà une. Ta propre échelle dira « Maîtrisé »
+à côté d'une prose qui dit « Maîtrise » jusqu'à ce que tu la renommes dans Conception › Échelles.
+**Un nouvel espace** recevra une « Échelle de départ (IDME) » qui nomme ses niveaux Incomplet /
+Développement / Maîtrise / Étendu, et dont la description dit la même chose (elle disait
+« Insuffisant » alors que son I s'appelait déjà Incomplet). **Le bilan d'un élève** dont un critère de
+français s'effondre lit « Incomplet », plus « Insuffisant » — en dur, comme avant, ton choix ; pour un
+collègue dont l'échelle nomme autrement son premier niveau, ce mot ne suivra pas son échelle, alors
+que le reste du bilan la lit. Trois aides qui décrivaient le gabarit suivent.
+**Ce que la mesure a corrigé dans la consigne** : elle citait « le versement des huit échelles », retiré
+le 1er septembre ; le semis d'aujourd'hui est une autre fonction, et c'est elle qui a été mesurée.
+**Ce qu'un partage emporte** (mesure due, sans correction) : une grille partagée n'emporte PAS
+d'échelle (les grilles n'en référencent aucune) ; une **échelle** partagée voyage entière, avec les
+noms de ses niveaux. Un collègue peut donc te transmettre une échelle qui dit « Maîtrisé » pendant
+qu'un espace neuf dit « Maîtrise ». Ce n'est pas un défaut, c'est le fonctionnement voulu des mots
+qui voyagent.
+**Vérifié comment** : douze substitutions visées par ligne et refusées si non uniques ; une sentinelle
+neuve (un espace qui porte déjà « Maîtrisé » le garde après le semis, un espace neuf reçoit les quatre
+mots), qui rougit quand on remplace la garde du semis par une réécriture, puis fichier restauré par
+empreinte ; Vitest complet après le commit. **Aucune porte terrain** : tout ici se lit dans le code, et
+tu ne crées pas d'espace neuf ni de critère effondré pour voir — ça attend un cas réel.
+
 ↻ **1.129.1 — L'ÉCHELLE IDME DIT LES MÊMES QUATRE MOTS PARTOUT, ET LE BLOC DES SEUILS DIT CE QU'IL RÈGLE** (build `0911-0644`).
 **Ce que tu verras** : partout où l'application écrit l'échelle IDME en toutes lettres (aides,
 infobulles, glossaire, guides, aide intégrée, écran de réglage), les quatre lettres se lisent
