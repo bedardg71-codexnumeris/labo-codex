@@ -68,12 +68,18 @@
      3. lire le plan, en entier ;
      4. FAIRE UNE SAUVEGARDE CODEX ;
      5. `await reparer542({ executer: true, sauvegardeFaite: true })`
+     · #832 (11 sept. 2026) — pour un AUTRE identifiant orphelin, ajouter `cible` :
+       `await reparer542({ cible: 'ECHELLE_DEMO' })` puis
+       `await reparer542({ cible: 'ECHELLE_DEMO', executer: true, sauvegardeFaite: true })`
    ========================================================================= */
 
 (function () {
     'use strict';
 
-    const CIBLE = '1767389426695';
+    // #832 (11 sept. 2026) : l'identifiant orphelin est PARAMÉTRABLE — `{ cible: 'ECHELLE_DEMO' }`
+    // pour les 44 évaluations H2026 restées sous cet id (résidu du 5 août, revu le 26 août).
+    // Le geste, la preuve et les refus sont les mêmes ; seul l'identifiant recréé change.
+    const CIBLE_DEFAUT = '1767389426695';
     const TOLERANCE = 0.06;              // la note stockée est un `toFixed(1)`
     const PLAFOND_COMBINAISONS = 12;
 
@@ -184,6 +190,8 @@
 
     async function reparer542(options) {
         options = options || {};
+        const CIBLE = String(options.cible || CIBLE_DEFAUT);
+        const ETIQUETTE = options.cible ? '#832' : '#542';
         const executer = options.executer === true;
         const sauvegardeFaite = options.sauvegardeFaite === true;
 
@@ -348,8 +356,10 @@
         // Cette échelle est un point d'ancrage historique, pas un défaut à
         // proposer : elle ne doit être choisie que par son identifiant.
         delete neuve.parDefaut;
-        neuve.nom = (retenue.s.objet.nom || 'Échelle') + ' (restaurée #542)';
+        neuve.nom = (retenue.s.objet.nom || 'Échelle') + ' (restaurée ' + ETIQUETTE + ')';
         neuve.restauree542 = {
+            item: ETIQUETTE,
+            cible: CIBLE,
             date: new Date().toISOString(),
             sourceChemin: retenue.s.chemin,
             sourceNom: retenue.s.objet.nom || null,
