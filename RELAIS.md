@@ -21,8 +21,8 @@
 > (4 essais, break-test rouge). SUIVI-BUGS #830 écrit. **#830 inscrit au BACKLOG** pour la suite (la barre
 > doit dire pourquoi elle est vide). ⚠ Leçon de méthode : la CSP de l'app interdit `new Function` — pour
 > instrumenter une fonction, envelopper temporairement les globaux qu'elle appelle (sonde e).
-> **Ce qui attend Grégoire** : ouvrir `Suivi › Suivi du groupe` sur un groupe H26 (nouvel onglet) — la barre A
-> a ses points ; la porte du lot 1 (`PORTES-TERRAIN-2026-09-11-suivi-du-groupe.md`).
+> ✅ **Confirmé au terrain par Grégoire vers 14 h 50** (« ça marche », barre A de retour sur H26, 1.131.1).
+> **Ce qui attend Grégoire** : la porte du lot 1 (`PORTES-TERRAIN-2026-09-11-suivi-du-groupe.md`).
 > **Ce qui attend Cowork** : la consigne du lot 2 (la Liste), l'artefact de la porte du lot 1.
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 13 H 30 : SUIVI DU GROUPE, LOT 1 DU CADRAGE 11 LIVRÉ (1.131.0)
