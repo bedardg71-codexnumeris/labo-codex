@@ -121,7 +121,9 @@ export function monter(store, opts = {}) {
         obtenirDonneesSelonMode: winModes.obtenirDonneesSelonMode, sauvegarderDonneesSelonMode: winModes.sauvegarderDonneesSelonMode,
         obtenirEtudiantsCoursActif: winModes.obtenirEtudiantsCoursActif, obtenirContexteCoursActif: winModes.obtenirContexteCoursActif,
         demarrerCacheLecture: winModes.demarrerCacheLecture, terminerCacheLecture: winModes.terminerCacheLecture, invaliderCacheLecture: winModes.invaliderCacheLecture,
-        filtrerEtudiantsParMode: winModes.filtrerEtudiantsParMode, estModeeLectureSeule: winModes.estModeeLectureSeule, obtenirPratiqueActiveGroupeCours: winModes.obtenirPratiqueActiveGroupeCours
+        filtrerEtudiantsParMode: winModes.filtrerEtudiantsParMode, estModeeLectureSeule: winModes.estModeeLectureSeule, obtenirPratiqueActiveGroupeCours: winModes.obtenirPratiqueActiveGroupeCours,
+        // #749 lot 2 : le numéro de groupe s'écrit et se lit par la fonction unique de modes.js.
+        normaliserNumeroGroupe: winModes.normaliserNumeroGroupe
     });
     Object.assign(globaux, opts.globaux || {});
     for (const [k, v] of Object.entries(globaux)) if (!(k in win) && k !== 'document' && k !== 'db') win[k] = v;
