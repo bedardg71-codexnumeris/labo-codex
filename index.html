@@ -5054,8 +5054,8 @@
                     <!-- Carte Note (pas de Conseil pour Échelle) -->
                     <div id="note-echelle" class="carte-info-toggle carte-info-note" style="display: none;">
                         <strong>Note :</strong> L'échelle de performance définit les niveaux de maîtrise utilisés pour évaluer les critères.
-                        L'échelle IDME (Insuffisant, en Développement, Maîtrisé, Étendu) basée sur la taxonomie SOLO est utilisée dans la pratique PAN-Standards.
-                        Chaque niveau correspond à un seuil de performance : Insuffisant (&lt; 64%), Développement (65-74%), Maîtrisé (75-84%),
+                        L'échelle IDME (Incomplet, Développement, Maîtrise, Étendu) basée sur la taxonomie SOLO est utilisée dans la pratique PAN-Standards.
+                        Chaque niveau correspond à un seuil de performance : Incomplet (&lt; 64%), Développement (65-74%), Maîtrise (75-84%),
                         Étendu (≥ 85%). Cette échelle peut être personnalisée selon les besoins pédagogiques et permet un suivi longitudinal
                         de la progression des étudiant·es. Tu peux créer tes propres échelles de notation adaptées à ta pratique.
                     </div>
@@ -8741,7 +8741,7 @@
                         </button>
                     </div>
                     <p class="text-muted">
-                        Configure les trois piliers de l'accompagnement : observation de la structure des apprentissages (SOLO), cueillette des micro-données (ACP), et planification des interventions (RàI). Plie ou déplie chaque section selon ton usage.
+                        Configure les trois piliers de l'accompagnement : observation de la structure des apprentissages (SOLO), collecte des micro-données (ACP), et planification des interventions (RàI). Plie ou déplie chaque section selon ton usage.
                     </p>
 
                     <!-- ╔══════════════════════════════════════════════════════════╗
@@ -8922,7 +8922,7 @@
                             <div class="form-group u-mb-15 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
                                 <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-outils-acp">
                                     <input type="checkbox" id="v2-pref-depistage-acp" checked data-on-change="sauvegarderPreferencesV2">
-                                    <strong style="margin-left: 8px;">Activer la cueillette des données sur le contexte d'apprentissage et la performance</strong>
+                                    <strong style="margin-left: 8px;">Activer la collecte des données sur le contexte d'apprentissage et la performance</strong>
                                 </label>
                                 <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
                                     Indices descriptifs Assiduité, Complétion et Performance. Affichés dans la section « Engagement ACP » du profil individuel.
@@ -8934,7 +8934,7 @@
                                 <summary>Seuils d'interprétation</summary>
                                 <div class="parametres-avances-pliable-contenu">
                                     <p class="text-muted u-mb-15 u-texte-09">
-                                        Personnalise les seuils pour l'interprétation des indices A-C-P.
+                                        Ces trois seuils colorent les colonnes Assiduité, Complétion, Performance et Mobilisation de la liste des élèves, et qualifient l'engagement dans le profil. Ils ne touchent ni la note ni l'échelle IDME.
                                     </p>
 
                                     <!-- Indicateurs visuels des seuils -->
@@ -8944,7 +8944,7 @@
                                             <span class="u-texte-gras" style="margin-left: 8px">Indicateurs visuels des seuils</span>
                                         </label>
                                         <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
-                                            Lignes pointillées et étiquettes Insuffisant / Développement / Maîtrise / Excellent sur les graphiques Chart.js (section « Progression temporelle ACP » du profil individuel).
+                                            Lignes pointillées et étiquettes des niveaux de ton échelle sur les graphiques de progression du profil individuel.
                                         </small>
                                     </div>
 
@@ -10126,7 +10126,7 @@
                                 <p>La pratique PAN – Standards utilise :</p>
                                 <ul class="mt-5">
                                     <li><strong>Les critères de ta grille</strong> — dans l'exemple SRPNF fourni : Structure, Rigueur, Plausibilité, Nuance, Français</li>
-                                    <li><strong>Échelle IDME</strong> : Basée sur la taxonomie SOLO (Insuffisant, Développement, Maîtrisé, Étendu)</li>
+                                    <li><strong>Échelle IDME</strong> : Basée sur la taxonomie SOLO (Incomplet, Développement, Maîtrise, Étendu)</li>
                                     <li><strong>RàI (Réponse à l'Intervention)</strong> : Détection patterns et niveaux d'intervention</li>
                                 </ul>
                                 <p class="text-muted u-mt-10 u-texte-09"><em>Cette pratique est un exemple parmi d'autres possibilités.</em></p>
@@ -10236,7 +10236,7 @@
                                 </tbody>
                             </table>
 
-                            <p class="mt-10">L'échelle <strong>IDME</strong> (Insuffisant, Développement, Maîtrisé, Étendu) traduit ces niveaux en cotes d'évaluation. Le seuil critique est <strong>M (Maîtrisé)</strong>, correspondant au niveau relationnel et à un indice de performance de 0.75. C'est le niveau qui prédit la réussite dans le cours suivant.</p>
+                            <p class="mt-10">L'échelle <strong>IDME</strong> (Incomplet, Développement, Maîtrise, Étendu) traduit ces niveaux en cotes d'évaluation. Le seuil critique est <strong>M (Maîtrise)</strong>, correspondant au niveau relationnel et à un indice de performance de 0.75. C'est le niveau qui prédit la réussite dans le cours suivant.</p>
 
                             <div class="alerte alerte-information" style="margin-top: 15px;">
                                 <p><strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Pourquoi SOLO plutôt qu'une note sur 100&nbsp;?</strong></p>
@@ -10456,7 +10456,7 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td><strong>I</strong> - Insuffisant</td>
+                                        <td><strong>I</strong> - Incomplet</td>
                                         <td>Préstructurel / Unistructurel</td>
                                         <td class="text-center">&lt; 64%</td>
                                         <td>Incompréhension ou superficielle</td>
@@ -10468,7 +10468,7 @@
                                         <td>Points pertinents sans liens</td>
                                     </tr>
                                     <tr>
-                                        <td><strong>M</strong> - Maîtrisé</td>
+                                        <td><strong>M</strong> - Maîtrise</td>
                                         <td>Relationnel</td>
                                         <td class="text-center">75-84%</td>
                                         <td>Compréhension globale avec liens</td>
@@ -10997,7 +10997,7 @@
                                 <li>Donne un <strong>nom</strong> à l'échelle</li>
                                 <li>Définis les <strong>niveaux</strong> — pour chacun, précise :
                                     <ul>
-                                        <li><strong>Nom</strong> du niveau (ex. « Insuffisant », « En développement », « Maîtrise », « Excellence »)</li>
+                                        <li><strong>Nom</strong> du niveau (ex. « Incomplet », « Développement », « Maîtrise », « Étendu »)</li>
                                         <li><strong>Code lettre</strong> (ex. I, D, M, E)</li>
                                         <li><strong>Seuil (%)</strong> — le pourcentage minimum pour atteindre ce niveau</li>
                                         <li><strong>Couleur</strong> — identifiant visuel du niveau</li>
@@ -11011,10 +11011,10 @@
                             <div class="carte-gradient-bleu">
                                 <h4 class="u-mb-10 u-texte-bleu"><img src="icons/icon-combo-chart.svg" alt="" class="btn-inline-icon"> Exemple IDME</h4>
                                 <ul>
-                                    <li><strong>I — Insuffisant</strong> : &lt; 64%</li>
-                                    <li><strong>D — En développement</strong> : 65-74%</li>
+                                    <li><strong>I — Incomplet</strong> : &lt; 64%</li>
+                                    <li><strong>D — Développement</strong> : 65-74%</li>
                                     <li><strong>M — Maîtrise</strong> : 75-84%</li>
-                                    <li><strong>E — Excellence</strong> : ≥ 85%</li>
+                                    <li><strong>E — Étendu</strong> : ≥ 85%</li>
                                 </ul>
                             </div>
                         </div>
@@ -12944,7 +12944,7 @@
                         <div class="alerte alerte-info u-mt-15">
                             <h4 class="u-mb-10 u-texte-bleu">Option 2 : Observation de la structure SOLO</h4>
                             <p><strong>Activation :</strong> Labo → Outils d'observation → Cocher «Afficher l'observation de la structure des résultats d'apprentissage (SOLO)»</p>
-                            <p><strong>Fonction :</strong> Affiche une carte dans le profil étudiant (section Accompagnement) avec les forces et défis identifiés selon les 4 niveaux IDME (Insuffisant, Développement, Maîtrisé, Étendu) basés sur la taxonomie SOLO de Biggs & Collis.</p>
+                            <p><strong>Fonction :</strong> Affiche une carte dans le profil étudiant (section Accompagnement) avec les forces et défis identifiés selon les 4 niveaux IDME (Incomplet, Développement, Maîtrise, Étendu) basés sur la taxonomie SOLO de Biggs & Collis.</p>
                             <p><strong>Utilisation recommandée :</strong></p>
                             <ul class="u-mt-5">
                                 <li><strong>✅ Activer si :</strong> Ta pratique s'appuie sur la taxonomie SOLO et l'échelle IDME (ex : PAN – Standards)</li>
@@ -12957,7 +12957,7 @@
                             <p><strong>Ces deux concepts sont différents</strong> (quand les deux options sont activées) :</p>
                             <ul class="u-mt-5">
                                 <li><strong>Défis (I/D)</strong> : Niveaux IDME <strong>individuels par critère</strong> dans «Observation de la structure SOLO»
-                                    <br><em class="u-texte-petit" style="color: var(--gris-fonce)">→ Exemple : L'étudiant a un défi D (Développement 65-74%) en Structure mais une force M (Maîtrisé 75-84%) en Français</em>
+                                    <br><em class="u-texte-petit" style="color: var(--gris-fonce)">→ Exemple : L'étudiant a un défi D (Développement 65-74%) en Structure mais une force M (Maîtrise 75-84%) en Français</em>
                                 </li>
                                 <li><strong>Défi spécifique</strong> : <strong>Pattern global</strong> dans l'aperçu (nécessite Performance ≥ 75% avec au moins un défi sur un critère)
                                     <br><em class="u-texte-petit" style="color: var(--gris-fonce)">→ Exemple : Performance moyenne 78% mais Structure à 68% = Pattern «Défi spécifique» (bon globalement, faiblesse ciblée)</em>
@@ -13129,9 +13129,9 @@
                                 <li><strong>Score pondéré</strong> : Moyenne pondérée des évaluations (ex: 0.72)</li>
                                 <li><strong>Niveau</strong> : badge coloré indiquant le niveau atteint, dans les codes et les couleurs de ton échelle. Avec l'échelle IDME fournie :
                                     <ul class="mt-5">
-                                        <li>Badge rouge : Insuffisant (&lt; .64)</li>
+                                        <li>Badge rouge : Incomplet (&lt; .64)</li>
                                         <li>Badge orange : Développement (.65-.74)</li>
-                                        <li>Badge bleu : Maîtrisé (.75-.84)</li>
+                                        <li>Badge bleu : Maîtrise (.75-.84)</li>
                                         <li>Badge vert : Étendu (≥ .85)</li>
                                     </ul>
                                 </li>
@@ -13141,9 +13141,9 @@
                             <div class="carte-code-light-sm">
                                 Structure (15%) : 0.68 [Badge orange : Développement]<br>
                                 Rigueur (20%)   : 0.72 [Badge orange : Développement]<br>
-                                Plausibilité (10%) : 0.80 [Badge bleu : Maîtrisé]<br>
-                                Nuance (25%)    : 0.58 [Badge rouge : Insuffisant]<br>
-                                Français (30%)  : 0.75 [Badge bleu : Maîtrisé]
+                                Plausibilité (10%) : 0.80 [Badge bleu : Maîtrise]<br>
+                                Nuance (25%)    : 0.58 [Badge rouge : Incomplet]<br>
+                                Français (30%)  : 0.75 [Badge bleu : Maîtrise]
                             </div>
 
                             <p class="mt-10"><strong>→ Diagnostic :</strong> Forces en Plausibilité et Français (maîtrisés). Défi majeur en Nuance (insuffisant). Structure et Rigueur en développement.</p>
@@ -13154,8 +13154,8 @@
 
                             <p>Le diagnostic automatique identifie :</p>
                             <ul>
-                                <li><strong>Forces</strong> : Critères ≥ .75 (Maîtrisé ou Étendu)</li>
-                                <li><strong>Défis</strong> : Critères &lt; .75 (Insuffisant ou Développement)</li>
+                                <li><strong>Forces</strong> : Critères ≥ .75 (Maîtrise ou Étendu)</li>
+                                <li><strong>Défis</strong> : Critères &lt; .75 (Incomplet ou Développement)</li>
                             </ul>
 
                             <p class="mt-15"><strong>Stratégies d'intervention différenciée :</strong></p>
@@ -13169,7 +13169,7 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td><strong>Défi Insuffisant (&lt; .64)</strong></td>
+                                        <td><strong>Défi Incomplet (&lt; .64)</strong></td>
                                         <td>
                                             • Remédiation intensive individuelle<br>
                                             • Enseignement explicite du critère<br>
@@ -13187,7 +13187,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Force Maîtrisée (.75-.84)</strong></td>
+                                        <td><strong>Force Maîtrise (.75-.84)</strong></td>
                                         <td>
                                             • Valoriser et encourager<br>
                                             • Proposer transfert à d'autres contextes<br>
@@ -14415,7 +14415,7 @@
          donc jamais lu sur Safari ni sur iPad. Un script, lui, se charge. Généré
          par scripts/release.mjs en même temps que version.json — les deux ne
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
-    <script src="version.js?v=09101645"></script>
+    <script src="version.js?v=09110644"></script>
     <script src="js/db.js?v=20260826b"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
     <script src="js/pratiques/modalites-evaluation.js?v=20260810a"></script> <!-- SSOT #328 Lot 1 : module propriétaire de modalitesEvaluation (seul point d'écriture), chargé avec la couche stockage -->
@@ -14440,7 +14440,7 @@
     <script src="js/securite-echappement.js?v=20260821a"></script> <!-- CT-29 : echapperAttribut — echapperHtml n'encode pas les guillemets, insuffisant en contexte d'attribut -->
     <script src="js/identite-naturelle.js?v=20260824a"></script> <!-- CT-15 : source unique de l'identite NATURELLE d'une entite du cadre (code de cours #455, courriel, triplet du groupe-cours) -->
     <script src="js/navigation.js?v=20260910c"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
-    <script src="js/preferences.js?v=20260910b"></script> <!-- API centralisée préférences + migration V3 (doit précéder modes.js) ; #485 : défaut rapportPresencesOptions -->
+    <script src="js/preferences.js?v=20260911a"></script> <!-- API centralisée préférences + migration V3 (doit précéder modes.js) ; #485 : défaut rapportPresencesOptions -->
 
     <script src="js/modes.js?v=20260906a"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
@@ -14490,7 +14490,7 @@
     <script src="js/pratiques-gestion.js?v=20260906b"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
     <script src="js/preferences-v2.js?v=20260910d"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=20260903f"></script> <!-- #649 : un seul chemin de suppression des productions, le garde mort est parti -->
-    <script src="js/etudiants.js?v=20260910b"></script>
+    <script src="js/etudiants.js?v=20260911a"></script>
     <script src="js/productions-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <!-- #504 : les boutons d'un bloc réordonnable, partagés par cinq écrans.
          Chargé AVANT eux — ils l'appellent au rendu, pas au chargement, mais
@@ -14652,17 +14652,17 @@
     <script src="js/journal.js?v=2026041706"></script>
     <script src="js/snapshots.js?v=20260905b"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
-    <script src="js/graphiques-progression.js?v=20260910c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_TOOLTIP délégué à STYLE_GRAPHIQUE -->
+    <script src="js/graphiques-progression.js?v=20260911a"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_TOOLTIP délégué à STYLE_GRAPHIQUE -->
     <script src="js/correlations-longitudinales.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
         <script src="js/impact-jetons.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=20260905a"></script> <!-- #612 T6.6 : detachement des fichiers exporte a la liste ; #563 -->
-    <script src="js/evaluation-chargement.js?v=20260905j"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
+    <script src="js/evaluation-chargement.js?v=20260911a"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
     <script src="js/evaluation-calcul.js?v=20260910c"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
     <script src="js/evaluation-retroaction.js?v=20260906b"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
     <script src="js/evaluation-sauvegarde.js?v=20260904a"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
-    <script src="js/evaluation.js?v=20260904a"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
+    <script src="js/evaluation.js?v=20260911a"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
     <script src="js/evaluation-handlers.js?v=20260518d"></script> <!-- Beta 99.48 : session A étape 3 refactor (3 fonctions extraites) -->
 
     <!-- RAPPEL BACKUP - Avertissement perte de données (Beta 95) -->
@@ -14677,10 +14677,10 @@
     <script src="js/guidage-demo.js?v=20260831b"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260910g"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
+    <script src="js/changelog-data.js?v=20260911a"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
-    <script src="js/etats-vides.js?v=20260808a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
+    <script src="js/etats-vides.js?v=20260911a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
     <script src="js/transitions.js?v=20260901a"></script> <!-- Jalons du parcours ; #639 : le régime des avis datés est retiré (l'avis #508 était sa seule entrée) -->
 
     <!-- SYSTÈME D'ACCOMPAGNEMENT UNIFIÉ (Beta 99.20) —
@@ -14690,19 +14690,19 @@
     <script src="js/accompagnement.js?v=20260910b"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20260910h"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-hover.js?v=20260911a"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
     <script src="js/accompagnement-contenu-popup.js?v=20260910e"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
-    <script src="js/accompagnement-contenu-terme.js?v=20260910e"></script>
-    <script src="js/guides-pedagogiques.js?v=20260629a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
+    <script src="js/accompagnement-contenu-terme.js?v=20260911a"></script>
+    <script src="js/guides-pedagogiques.js?v=20260911a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
     <script src="js/comparateur-pratiques.js?v=20260909i"></script> <!-- Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->
     <script src="js/export-resultats-finaux.js?v=20260905a"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260910k"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260911a"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260910j"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260911a"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>

@@ -110,7 +110,7 @@ const GLOSSAIRE = {
         terme: 'Échelle de performance',
         categorie: 'Structure',
         etape: 'numerisation',
-        definition: 'Les niveaux que tu attribues à chaque critère lors de l\'évaluation. Par défaut, quatre niveaux alignés sur IDME : Insuffisant, Développement, Maîtrise, Étendu. Tu configures les seuils, les valeurs ponctuelles et les couleurs selon ton jugement professionnel.',
+        definition: 'Les niveaux que tu attribues à chaque critère lors de l\'évaluation. Par défaut, quatre niveaux alignés sur IDME : Incomplet, Développement, Maîtrise, Étendu. Tu configures les seuils, les valeurs ponctuelles et les couleurs selon ton jugement professionnel.',
         voir: 'Conception > Échelles'
     },
 
@@ -270,7 +270,7 @@ const GLOSSAIRE = {
         terme: 'IDME',
         categorie: 'Structure / Tableau de bord',
         etape: 'observation',
-        definition: 'Quatre niveaux de performance alignés sur la taxonomie SOLO : Insuffisant, Développement, Maîtrise, Étendu. Ces niveaux servent de référence dans les échelles, les grilles et les cartouches. Ils décrivent la qualité de la démonstration de compétence à un moment donné.',
+        definition: 'Quatre niveaux de performance alignés sur la taxonomie SOLO : Incomplet, Développement, Maîtrise, Étendu. Ces niveaux servent de référence dans les échelles, les grilles et les cartouches. Ils décrivent la qualité de la démonstration de compétence à un moment donné.',
         voir: 'Conception > Échelles'
     },
 

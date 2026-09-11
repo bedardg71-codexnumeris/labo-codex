@@ -240,21 +240,21 @@ const ZONES_IDME = [
         yMax: 0.65,
         backgroundColor: 'rgba(255, 193, 7, 0.25)',   // Jaune (#ffc107) - transition
         borderColor: 'rgba(255, 193, 7, 0.4)',
-        label: 'en Développement'
+        label: 'Développement'
     },
     {
         yMin: 0.65,
         yMax: 0.75,
         backgroundColor: 'rgba(152, 208, 37, 0.25)',  // Vert citron (#98d025) - comme barre centre-gauche
         borderColor: 'rgba(152, 208, 37, 0.4)',
-        label: 'en Développement'
+        label: 'Développement'
     },
     {
         yMin: 0.75,
         yMax: 0.85,
         backgroundColor: 'rgba(34, 197, 94, 0.25)',   // Vert (#22c55e) - comme barre centre
         borderColor: 'rgba(34, 197, 94, 0.4)',
-        label: 'Maîtrisé'
+        label: 'Maîtrise'
     },
     {
         yMin: 0.85,

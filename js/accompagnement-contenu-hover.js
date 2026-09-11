@@ -170,7 +170,7 @@ const TOOLTIPS = {
     'depist-seuils-restaurer':
         'Réinitialise les seuils d\'interprétation à leurs valeurs par défaut (70 / 80 / 85 %).',
     'depist-seuils-visuels':
-        'Lignes pointillées et étiquettes des zones (ex. : Insuffisant, Développement, Maîtrise, Étendu) sur les graphiques de la section «Progression temporelle ACP» du profil individuel.',
+        'Lignes pointillées et étiquettes des niveaux de ton échelle (ex. : Incomplet, Développement, Maîtrise, Étendu) sur les graphiques de la section «Progression temporelle ACP» du profil individuel.',
 
     // --- Données ---
 
@@ -261,7 +261,7 @@ const TOOLTIPS = {
     // --- Échelles de performance ---
 
     'cn-echelle-titre':
-        'Échelles de conversion pourcentage → niveaux de performance. Configure les seuils et les couleurs pour chaque niveau (ex. : Insuffisant, Développement, Maîtrise, Étendu).',
+        'Échelles de conversion pourcentage → niveaux de performance. Configure les seuils et les couleurs pour chaque niveau (ex. : Incomplet, Développement, Maîtrise, Étendu).',
     'cn-echelle-niveau':
         'Chaque niveau porte DEUX traductions opposées : la plage dit dans quel niveau tombe un pourcentage, la valeur ponctuelle dit ce que vaut ce niveau quand il faut un chiffre. Les deux sont obligatoires, avec le code, le nom et la couleur.',
     'cn-echelle-apercu':
@@ -331,7 +331,7 @@ const TOOLTIPS = {
     'eval-niveau-idme':
         'Niveau calculé automatiquement. Modifie uniquement si nécessaire (ex. : reprise ciblée).',
     'eval-col-niveau':
-        'Niveau IDME : I = Insuffisant ou incomplet, D = en Développement, M = Maîtrisé, E = Étendu.',
+        'Niveau IDME : I = Incomplet, D = Développement, M = Maîtrise, E = Étendu.',
     'eval-statut-remise':
         'Indique si la production a été remise. Conditionne le calcul de l\'indice de complétion (C).',
     'eval-integrite':
@@ -447,7 +447,7 @@ const TOOLTIPS = {
     'tdb-completion':
         'Taux de remise des travaux. La corrélation C×P indique le lien entre la remise et les résultats.',
     'tdb-performance':
-        'Résultats aux évaluations par niveaux. La performance peut être notée avec un chiffre ou une lettre (ex. : Insuffisant ou incomplet, en Développement, Maîtrisé, Étendu).',
+        'Résultats aux évaluations par niveaux. La performance peut être notée avec un chiffre ou une lettre (ex. : Incomplet, Développement, Maîtrise, Étendu).',
     'tdb-liste-individus':
         'Vue détaillée de chaque étudiant·e avec ses indices individuels.',
     'tdb-profil':
@@ -517,7 +517,7 @@ const TOOLTIPS = {
     'profil-mobilisation':
         'Vue d\'ensemble des composantes A et C : présence en classe et remise des travaux. Indique comment l\'étudiant·e se mobilise dans le cours.',
     'profil-progression':
-        'Évolution des indices A-C-P au fil des semaines. Marqueurs : ○ artefact dû, ● jeton appliqué, ▼ intervention RàI. Zones : Insuffisant, en Développement, Maîtrisé, Étendu.',
+        'Évolution des indices A-C-P au fil des semaines. Marqueurs : ○ artefact dû, ● jeton appliqué, ▼ intervention RàI. Zones : Incomplet, Développement, Maîtrise, Étendu.',
     'profil-habiletes':
         'Graphique d\'évolution des critères ou habiletés (si évaluations avec détails). Marqueurs : ● jeton, ▼ intervention. Forces et défis par critère.',
     'profil-accompagnement':

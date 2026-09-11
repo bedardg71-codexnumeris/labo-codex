@@ -589,7 +589,7 @@
         return obtenirPreference('noteDifferee') === true;
     }
     function badgeNoteDifferee() {
-        return '<span class="badge-note-differee" title="Note différée : la rétroaction passe d\'abord. Réglage dans Réglages › Préférences.">note différée</span>';
+        return '<span class="badge-note-differee" title="Note différée : la rétroaction passe d\'abord. Réglage dans Labo › Outils d\'observation.">note différée</span>';
     }
     window.noteDiffereeActive = noteDiffereeActive;
     window.badgeNoteDifferee = badgeNoteDifferee;
