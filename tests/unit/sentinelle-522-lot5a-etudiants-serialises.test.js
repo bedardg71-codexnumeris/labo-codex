@@ -115,6 +115,8 @@ async function monterEtudiants() {
     const win = chargerScript('js/trimestre-v2-etudiants.js', {
         db,
         cle: (k) => k,
+        // #749 lot 2 : la normalisation du numéro de groupe vit dans modes.js (non chargé ici)
+        normaliserNumeroGroupe: (g) => String(g || '').padStart(5, '0'),
         document: {
             addEventListener() {}, getElementById: (id) => elements[id] || null,
             querySelectorAll: () => [], querySelector: () => null

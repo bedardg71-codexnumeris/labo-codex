@@ -697,8 +697,7 @@ function obtenirDonneesSelonMode(cle) {
                         const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
                         // ✅ CORRECTION (9 jan 2026) : Normaliser les groupes avant comparaison
                         // "1" et "00001" doivent être considérés comme égaux
-                        const normaliserGroupe = (g) => String(g || '').padStart(5, '0');
-                        return normaliserGroupe(item.groupe) === normaliserGroupe(groupeCours);
+                        return normaliserNumeroGroupe(item.groupe) === normaliserNumeroGroupe(groupeCours);
                     }
                     // Pour autres données sans coursId : les inclure (migration progressive)
                     return true;
@@ -1151,6 +1150,22 @@ window.filtrerEtudiantsParMode = filtrerEtudiantsParMode;
  *
  * @returns {Array} - Liste des étudiants du cours actif (vide si aucun cours)
  */
+/**
+ * #749 lot 2 (L-9, 11 sept. 2026) — LA SEULE NORMALISATION D'UN NUMÉRO DE GROUPE.
+ * « 1 » et « 00001 » sont le même groupe. Ce module comparait déjà padé (trois
+ * copies locales de la même flèche) pendant que Cadre › Trimestre écrivait « 1 »
+ * tel quel et que la Liste comparait brut : un seul groupe faisait deux entrées
+ * dans le filtre. Une fonction, partagée par l'écriture (trimestre-v2-etudiants)
+ * et les lectures (ici, etudiants.js). Le stock déjà écrit avec « 1 » reste tel
+ * quel : il est normalisé À LA LECTURE, jamais réécrit.
+ */
+function normaliserNumeroGroupe(g) {
+    // Un groupe absent (undefined, null, '') rend '00000' — avant, `String(undefined)`
+    // rendait 'undefined' et ne se comparait à rien. Seul un groupe saisi « 0 » pourrait
+    // désormais coïncider avec une fiche sans groupe (relecture adverse, 11 sept. 2026).
+    return String(g || '').padStart(5, '0');
+}
+
 function obtenirEtudiantsCoursActif() {
     // Obtenir le cours actif (résolu de façon fiable, cf. #130)
     const coursActif = obtenirContexteCoursActif();
@@ -1186,8 +1201,7 @@ function obtenirEtudiantsCoursActif() {
             }
             const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
             // ✅ CORRECTION (9 jan 2026) : Normaliser les groupes avant comparaison
-            const normaliserGroupe = (g) => String(g || '').padStart(5, '0');
-            return normaliserGroupe(groupeEtudiant) === normaliserGroupe(groupeCours);
+            return normaliserNumeroGroupe(groupeEtudiant) === normaliserNumeroGroupe(groupeCours);
         }
 
         // Nouveau format avec coursId
@@ -1203,8 +1217,7 @@ function obtenirEtudiantsCoursActif() {
         // Sinon, filtrer aussi par groupe
         const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
         if (!groupeCours) return true; // Pas de groupe spécifié = tous
-        const normaliserGroupe = (g) => String(g || '').padStart(5, '0');
-        return normaliserGroupe(groupeEtudiant) === normaliserGroupe(groupeCours);
+        return normaliserNumeroGroupe(groupeEtudiant) === normaliserNumeroGroupe(groupeCours);
     });
 
     const modeLabel = estModeCours ? 'tous groupes' : `groupe ${coursActif.groupe}`;
@@ -1284,6 +1297,7 @@ function obtenirPratiqueActiveGroupeCours() {
 
 // Exporter les nouvelles fonctions
 window.obtenirEtudiantsCoursActif = obtenirEtudiantsCoursActif;
+window.normaliserNumeroGroupe = normaliserNumeroGroupe;
 window.etudiantDansCoursActif = etudiantDansCoursActif;
 window.obtenirPratiqueActiveGroupeCours = obtenirPratiqueActiveGroupeCours;
 

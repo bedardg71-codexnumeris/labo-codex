@@ -7,6 +7,25 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 16 H 30 : LA LISTE DES ÉTUDIANT·ES, LOT 2 DU CADRAGE 11 (1.132.0)
+
+> ✅ **`main` à 1.132.0** (`cat version.json` pour le build, `git log --oneline -2` pour les SHA). Tout est sur `main` ;
+> le push suit par `scripts/pousser.sh` — si tu lis ceci depuis `origin/main`, il est arrivé.
+> **Livré** (`js/etudiants.js`, `js/modes.js`, `js/main.js`, `js/trimestre-v2-etudiants.js`, `index.html`) : les élèves en
+> abandon, inactifs ou en décrochage restent dans la Liste, grisés (`tr.etudiant-inactif`) avec leur statut après le nom
+> (décision de Grégoire 14 h 17) ; les `moy=` et `r=` restent sur les actifs (prouvé au banc) ; tri « # » sur l'ordre
+> d'origine, « DA » numérique ; recherche et filtre pattern sans accents ; plus d'appel direct à `calculerEtStockerIndicesCP`
+> au rendu, saisie différée 200 ms ; six patterns ; « ≥ Min. » rappelé en fin de rendu, 0 sous N ; DA en double refusé à
+> l'ajout / ignoré et compté à l'import ; `normaliserNumeroGroupe` unique dans modes.js ; bouton d'aide du titre conservé.
+> Sentinelle `sentinelle-749-lot2-liste-des-etudiants.test.js` (14 essais, 6 break-tests journalisés) ; L-1 à L-6 du banc
+> du 6 aux valeurs d'après ; quatre sentinelles voisines adaptées.
+> **Décisions prises seul, dites** : « # » trie l'ordre d'arrivée ; 0 évaluation = insuffisant (décision Cowork) ; libellé
+> « (Abandon) » dans la colonne Nom sans CSS neuf ; debounce dans etudiants.js ; un exclu n'est jamais « insuffisant » ;
+> le compteur « N personnes » compte des lignes, abandons compris. Les deux textes de Cadre › Trimestre sont ceux de Cowork.
+> **Ce qui attend Grégoire** : la porte `PORTES-TERRAIN-2026-09-11-liste-des-etudiants.md` (7 rangées ; la 7 attend un
+> abandon réel) et les portes du lot 1 ; ses deux mots du § 3.
+> **Ce qui attend Cowork** : l'artefact de cette porte ; la consigne du lot 3 (la Saisie des présences : S-3, S-4, S-6, S-7).
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 15 H : LA BARRE A DES GROUPES H2026 REVIENT (1.131.1, #830)
 
 > ✅ **`main` à 1.131.1, build `0911-1441`, commit de release `d18c4355`.** Tout est sur `main`. Le push suit

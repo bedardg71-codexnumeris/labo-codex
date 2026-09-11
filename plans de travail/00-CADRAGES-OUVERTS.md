@@ -151,6 +151,11 @@ une note. **Temps 2, le tri des réglages morts** (`1.129.0`, `#823`) : deux ret
 d'analyse rebranchée, « Direction du risque » gardé et renommé « Sensibilité des flèches par critère »
 (arbitrage de Grégoire, après que la relecture croisée eut trouvé le curseur vivant) ; **porte terrain
 relevée par lui, 12 sur 12**. Aucune donnée écrite chez personne, `fenetrePatterns` non migrée.
+↻ **11 septembre 2026, 16 h 30 (Claude Code) — LOT 2 DU CADRAGE 11 LIVRÉ (`1.132.0`, Liste des étudiant·es, L-1 à L-11)** :
+les abandons visibles, grisés, avec leur statut (décision de Grégoire 14 h 17) — statistiques inchangées ; tris « # » et « DA » ;
+recherche sans accents ; une écriture par rendu et saisie différée ; six patterns ; « ≥ Min. » tient, 0 sous N ; DA en double
+refusé / ignoré ; groupe padé à l'écriture ; bouton d'aide conservé. Porte terrain de sept rangées (la 7 attend un abandon réel).
+**Lot 3 suivant : la Saisie des présences** (S-3, S-4, S-6, S-7), consigne à écrire par Cowork.
 ↻ **11 septembre 2026, 13 h (Claude Code) — LOT 1 DU CADRAGE 11 LIVRÉ (`1.131.0`, Suivi du groupe, G-1 à G-8)** :
 `#749` clos — la liste suivie par trimestre et groupe-cours, filtrée à la lecture, jamais purgée ; semis depuis la clé nue, laissée
 en place ; sixième ajout notifié ; filtre P sur ce qui est montré ; panneau mort retiré ; G-7 périmé (fonctions sans appelant) ;

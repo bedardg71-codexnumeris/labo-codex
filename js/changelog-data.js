@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.132',
+            couleur: 'vert',
+            titre: 'Liste des étudiant·es : les abandons restent visibles, les tris trient, la recherche ignore les accents',
+            items: [
+                '<strong>Dans Suivi › Liste des étudiant·es, les élèves en abandon, inactifs ou en décrochage restent visibles, grisés, avec leur statut.</strong> La note sous le tableau le disait déjà&nbsp;; le tableau les retirait. Les moyennes et les corrélations, elles, restent calculées sur les élèves actifs, comme avant.',
+                '<strong>Les tris par numéro et par DA trient.</strong> Le clic sur «&nbsp;#&nbsp;» renverse l\'ordre d\'arrivée&nbsp;; le tri par DA est numérique (999999 avant 1000123).',
+                '<strong>La recherche ignore les accents et la casse</strong>&nbsp;: «&nbsp;aime&nbsp;» trouve Aimé, «&nbsp;cesaire&nbsp;» trouve Césaire. Et une lettre tapée ne recalcule plus tout le groupe trois fois&nbsp;: la liste se rafraîchit quand tu cesses d\'écrire.',
+                '<strong>Le filtre «&nbsp;Profils d\'apprentissage&nbsp;» offre les six profils que l\'application calcule</strong> («&nbsp;En progression&nbsp;», qui n\'existait pas, est retiré&nbsp;; «&nbsp;Non-participation&nbsp;» et «&nbsp;Données insuffisantes&nbsp;» s\'ajoutent). La case «&nbsp;≥ Min.&nbsp;» garde son effet après un tri, et un élève sans aucune évaluation compte comme «&nbsp;sous le minimum&nbsp;».',
+                '<strong>Dans Cadre › Trimestre, un DA déjà présent dans le groupe est refusé à l\'ajout, et ignoré à l\'import</strong> (le message compte les ajoutés et les déjà présents). Le numéro de groupe s\'écrit toujours sur cinq chiffres&nbsp;: «&nbsp;1&nbsp;» et «&nbsp;00001&nbsp;» ne font plus deux entrées dans le filtre Groupe.',
+            ]
+        },
+        {
             version: '1.131',
             couleur: 'vert',
             titre: 'Suivi du groupe : tes élèves suivis sont gardés par groupe-cours',

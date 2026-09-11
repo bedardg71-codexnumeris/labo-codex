@@ -28,7 +28,8 @@ describe('#771 · confirmer un import', () => {
         expect(store.test_groupeEtudiants.length).toBe(6);
         const succes = b.notifs.filter(n => n.type === 'succes').map(n => n.t);
         expect(succes.length).toBe(1);
-        expect(succes[0]).toMatch(/^2 étudiant\(s\) importé\(s\)/);
+        // #749 lot 2 (11 sept. 2026) : les mots changent — « ajouté·es », et « déjà présent·es » quand il y en a.
+        expect(succes[0]).toMatch(/^2 étudiant·es ajouté·es/);
         expect(succes[0]).toContain('6 au total');
     });
 });

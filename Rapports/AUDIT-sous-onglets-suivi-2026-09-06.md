@@ -110,6 +110,12 @@ Une seule chose survit : `etudiantsSuivis`. Perdus au rechargement : mode Détai
 
 ## 2 · Liste des étudiant·es — `#suivi-liste` (`index.html:7709-7911`), `js/etudiants.js` ; l'ajout, le retrait et le statut vivent dans **Cadre › Trimestre** (`js/trimestre-v2-etudiants.js`, `index.html:7019-7166`), jamais dans ce sous-onglet
 
+> ↻ **11 sept. 2026 — lot 2 du cadrage 11 LIVRÉ en 1.132.0** : L-1 (tris), L-2 (abandons visibles, grisés — décision de
+> Grégoire 14 h 17), L-3 (recherche sans accents), L-4 (une écriture par rendu, saisie différée), L-5 (six patterns), L-6
+> (≥ Min. tient ; 0 est sous N), L-8 (DA en double refusé / ignoré), L-9 (groupe padé à l'écriture, normalisé à la lecture),
+> L-11 (bouton d'aide conservé) corrigés ; L-7 et L-10 déjà réglés (#771) ; § 2.4 « sort avant #moy-* » et
+> `sessionStorage` commentés. Sentinelle `sentinelle-749-lot2-liste-des-etudiants.test.js` ; L-1 à L-6 du banc aux valeurs d'après.
+
 ### 2.1 Tableau des gestes (31, tous écrits en dur dans `index.html` ; le module n'en génère aucun — la ligne est cliquable par `tr.onclick`, `etudiants.js:1156`)
 
 | Geste | Fonction | Effet mesuré | Écrit ? |
