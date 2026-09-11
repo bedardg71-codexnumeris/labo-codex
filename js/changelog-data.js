@@ -29,6 +29,7 @@
                 '<strong>Chaque réglage dit où il agit.</strong> Sous chaque option, de petites étiquettes nomment l\'écran où son effet se voit (Profil, Liste des élèves, Suivi du groupe…) ; en ambre, celles qui agissent hors de Suivi (la palette d\'annotation, la liste des évaluations, l\'export recherche).',
                 '<strong>Les seuils se tapent au lieu de se glisser.</strong> Les trois curseurs (progression des artefacts, sensibilité des flèches, seuil de défi) sont devenus des champs chiffrés avec leur unité, comme les trois seuils Fragile / Acceptable / Bon. Tes valeurs sont les mêmes qu\'avant, à la même place&nbsp;; les deux boutons « Remettre les valeurs par défaut » disent maintenant lesquelles (3 · 10 · 5 · 70 et 70 · 80 · 85).',
                 '<strong>Depuis le Suivi, un lien mène aux réglages qui le gouvernent.</strong> En tête du Suivi du groupe et sous le titre de la carte RàI d\'un profil, « Régler les outils d\'observation » ouvre Labo&nbsp;›&nbsp;Outils d\'observation. L\'écran reste dans Labo&nbsp;: quatre de ses réglages agissent hors de Suivi (palette d\'annotation, liste des évaluations, badge de grille, export recherche).',
+                '<strong>L\'application s\'ouvre plus vite&nbsp;:</strong> ce qui a déjà été téléchargé n\'est plus redemandé au serveur à chaque ouverture. La première ouverture après une mise à jour reste plus longue, le temps de recevoir ce qui a changé.',
             ]
         },
         {

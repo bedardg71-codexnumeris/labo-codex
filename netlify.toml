@@ -56,6 +56,36 @@
 # ============================================================================
 # Headers de cache — évite que les navigateurs (Safari iPad en particulier)
 # servent des versions périmées après un déploiement.
+#
+# #825 (11 septembre 2026) — `/js/*`, `/css/*` et `/styles.css` deviennent
+# IMMUABLES UN AN. Mesuré par Grégoire dans Chrome (Network, 7 h 17-7 h 20) :
+# une ouverture de l'application revalidait 199 scripts et 2 feuilles de style,
+# un aller-retour chacun derrière Cloudflare Access — 34 à 51 s de Load — alors
+# qu'un rechargement simple servait tout du cache en 0,92 s. « max-age=0,
+# must-revalidate » sur `/js/*` demandait au navigateur de redemander, à chaque
+# ouverture, deux cents fichiers qui n'avaient pas changé.
+#
+# L'INVARIANT QUI REND « immutable » SÛR : UNE URL NE SERT JAMAIS DEUX CONTENUS.
+# Il tient par trois filets, tous versionnés :
+#   1. le garde pre-commit #547 (`scripts/verifier-anticache-stage.mjs`) refuse
+#      tout commit où un fichier stagé garde le `?v=` qu'il avait à HEAD ;
+#   2. `scripts/release.mjs` (`fichiersModifies`) bumpe le jeton de TOUT `js/`
+#      ou `.css` modifié depuis la release précédente, arbre de travail compris ;
+#   3. la sentinelle #825 (`tests/unit/sentinelle-825-ouverture-immuable.test.js`)
+#      refuse une référence sans `?v=` — dans `index.html` comme dans les deux
+#      chargements dynamiques (`pack-demo-20.js`, `heic-worker.js`, jeton = build).
+# Un fichier modifié change donc d'URL ; l'ancienne peut rester en cache un an,
+# plus personne ne la demande.
+#
+# POURQUOI `index.html` ET `/` RESTENT À ZÉRO : c'est le document qui PORTE les
+# jetons. S'il était immuable, un navigateur garderait un an l'ancienne liste
+# d'URL — et l'ancienne application avec. C'est le seul raté irréversible de ce
+# lot (un `index.html` figé ne se rattrape plus chez qui l'a reçu) ; la
+# sentinelle #825 refuse `immutable` sur `/*.html`. `version.json` reste
+# `no-store` : la détection de mise à jour (`init-inline.js`) et la sonde de
+# rechargement (`rechargement-sur.js`) en dépendent. `libs/` n'a aucune règle et
+# aucun jeton pour quatre bibliothèques : elles restent revalidées, quatre
+# requêtes, pas deux cents — hors périmètre, volontairement.
 # ============================================================================
 
 # HTML : toujours revalider (porte d'entrée de l'app)
@@ -69,22 +99,23 @@
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# JavaScript : revalider à chaque accès (ETag gère l'efficacité)
+# JavaScript : immuable un an — chaque URL porte un `?v=` qui change avec le
+# contenu (#825, invariant ci-dessus). Avant : max-age=0, must-revalidate.
 [[headers]]
   for = "/js/*"
   [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
+    Cache-Control = "public, max-age=31536000, immutable"
 
 # Feuilles de style : idem
 [[headers]]
   for = "/css/*"
   [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/styles.css"
   [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
+    Cache-Control = "public, max-age=31536000, immutable"
 
 # Source de vérité de la version : jamais cacher
 [[headers]]

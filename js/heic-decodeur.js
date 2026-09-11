@@ -82,6 +82,16 @@
     }
 
     /**
+     * Jeton anti-cache du worker (#825) : le build courant, ou l'instant si
+     * `version.js` n'a pas été chargé.
+     * @returns {string}
+     */
+    function jetonAntiCache() {
+        const v = window.__VERSION__;
+        return (v && v.build) ? String(v.build) : String(Date.now());
+    }
+
+    /**
      * Crée le worker au premier appel et branche la réception.
      * @returns {Worker|null} Le worker, ou null si l'environnement ne le permet pas
      */
@@ -92,10 +102,15 @@
             return null;
         }
 
-        // Meme trou de filet que pour le bundle : ce chemin n'est dans aucune
-        // balise <script>, donc aucun des trois filets anti-cache ne le voit.
+        // Ce chemin n'est dans aucune balise <script> : ni release.mjs ni le
+        // garde #547 ne le voient. Depuis #825 (11 sept. 2026), le dossier `js/` est
+        // servi IMMUABLE un an, et un jeton figé à la main (`20260830b`) aurait
+        // laissé un worker périmé chez tout le monde : le jeton est le BUILD
+        // courant (`version.js`, chargé en premier), repli `Date.now()` si
+        // absent — jamais une URL nue. Le bundle libheif, lui, vit dans `libs/`
+        // (aucune règle d'en-tête, revalidé) et garde son jeton à la main.
         try {
-            _worker = new Worker('js/heic-worker.js?v=20260830b');
+            _worker = new Worker('js/heic-worker.js?v=' + jetonAntiCache());
         } catch (e) {
             // Ouverte en `file://`, la page a l'origine `null` et Chrome REFUSE
             // de construire un Worker (SecurityError, mesuré le 30 août 2026).

@@ -102,6 +102,16 @@ function cleDemo(nomCollection) {
 }
 
 /**
+ * Jeton anti-cache des chargements dynamiques (#825) : le build courant, ou
+ * l'instant si `version.js` n'a pas été chargé.
+ * @returns {string}
+ */
+function jetonAntiCache() {
+    const v = window.__VERSION__;
+    return (v && v.build) ? String(v.build) : String(Date.now());
+}
+
+/**
  * Lazy-load du pack démo si PACK_DEMARRAGE n'est pas en mémoire.
  * Retourne l'objet pack ou null en cas d'échec.
  */
@@ -112,7 +122,16 @@ function chargerPackDemarrage() {
             return;
         }
         const script = document.createElement('script');
-        script.src = 'js/pack-demo-20.js';
+        // #825 (11 sept. 2026) — le dossier `js/` est servi IMMUABLE un an : une URL
+        // sans jeton ne changerait plus jamais de contenu chez qui l'a déjà
+        // reçue. Ce chemin n'est dans aucune balise <script> d'index.html,
+        // donc ni release.mjs ni le garde #547 ne le voient : le jeton est le
+        // BUILD courant (version.js, chargé en premier). Il change à chaque
+        // release même si le pack n'a pas bougé — 1,1 Mo, seulement chez qui
+        // active la démo ; assumé, contre un régime de lecture de plus dans
+        // release.mjs. Repli `Date.now()` si version.js manque : jamais une
+        // URL nue. La sentinelle #825 refuse un chargement dynamique sans `?v=`.
+        script.src = 'js/pack-demo-20.js?v=' + jetonAntiCache();
         script.onload = function() {
             resolve(typeof PACK_DEMARRAGE !== 'undefined' ? PACK_DEMARRAGE : null);
         };

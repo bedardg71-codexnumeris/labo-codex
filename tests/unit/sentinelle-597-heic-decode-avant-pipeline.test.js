@@ -148,20 +148,26 @@ describe('#597 — le HEIC est converti avant d\'entrer dans le pipeline', () =>
     });
 
     it('cas 9 — la conversion sort du thread principal', () => {
-        expect(decodeurJs).toMatch(/new Worker\('js\/heic-worker\.js\?v=\d{8}[a-z]?'\)/);
+        // #825 (11 sept. 2026) : le jeton n'est plus figé à la main, c'est le
+        // build courant — `/js/*` est servi immuable, une URL figée aurait
+        // laissé un worker périmé un an chez tout le monde.
+        expect(decodeurJs).toMatch(/new Worker\('js\/heic-worker\.js\?v=' \+ jetonAntiCache\(\)\)/);
         // Une promesse sans minuterie reste pendante pour toujours si le worker
         // meurt : la file d'import ne se terminerait jamais.
         expect(decodeurJs).toMatch(/setTimeout\(/);
         expect(decodeurJs).toMatch(/onerror\s*=/);
     });
 
-    it('cas 11 — les deux chemins invisibles des filets portent un jeton à la main', () => {
+    it('cas 11 — les deux chemins invisibles des filets portent un jeton', () => {
         // TROU DE FILET, inscrit dans #597 : un fichier chargé par `importScripts`
         // ou par `new Worker` n'apparaît dans AUCUNE balise <script> d'index.html.
         // Ni release.mjs, ni la sentinelle anti-cache, ni le hook pré-commit ne le
-        // voient : une mise à jour serait servie depuis le cache en silence. Les
-        // deux jetons sont donc posés et maintenus à la main.
-        expect(decodeurJs).toMatch(/heic-worker\.js\?v=\d{8}/);
+        // voient : une mise à jour serait servie depuis le cache en silence.
+        // Depuis #825, le worker (dans `js/`, servi immuable) prend le BUILD
+        // courant comme jeton ; le bundle libheif (dans `libs/`, revalidé, hors
+        // périmètre de #825) garde son jeton à la main.
+        expect(decodeurJs).toMatch(/heic-worker\.js\?v=' \+ jetonAntiCache\(\)/);
+        expect(decodeurJs).toMatch(/window\.__VERSION__/);
         expect(workerJs).toMatch(/libheif-bundle\.js\?v=\d{8}/);
     });
 
