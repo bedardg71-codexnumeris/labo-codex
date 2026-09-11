@@ -15,6 +15,22 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.131.1 — LA BARRE « ASSIDUITÉ (A) » DE TES GROUPES D'HIVER 2026 REVIENT** (build à lire en bas de page).
+**Ce que tu verras** : dans `Suivi › Suivi du groupe`, sous un groupe d'Hiver 2026, la barre A porte de
+nouveau ses points et sa moyenne, comme C et P. Ton rapport de 14 h 17 : la barre était vide pour tous
+tes groupes H26. Depuis la fin août, le nombre de périodes d'une séance se lit dans l'horaire, séance
+par séance, et ne se déduit plus des heures ; tes trois horaires de janvier ne le portaient pas, donc
+zéro période offerte, zéro séance comptée, rien à l'écran et rien pour le dire. Mais chacun de ces
+horaires porte le format que tu avais déclaré (« 2 périodes par séance ») : une séance qui n'a pas son
+nombre reprend maintenant celui de son horaire, à la lecture. Rien n'est réécrit dans tes horaires ni
+tes présences ; le cache des séances se refait tout seul à l'ouverture.
+**Vérifié comment** : six sondes en lecture seule sur tes données, collées par toi dans la console,
+jusqu'à la ligne qui disait 0 ; le cas rejoué au banc avec un horaire d'avant (format 2, séances sans
+nombre), horaire.js et saisie-presences.js réels : 2 périodes, plus 0 ; cassé exprès, rouge, remis.
+**Pas vérifié** : ton écran — ouvre `Suivi › Suivi du groupe` sur un groupe H26 dans un nouvel onglet,
+la barre A doit avoir ses points. Inscrit pour la suite : la barre doit dire pourquoi elle est vide
+quand ça arrive (#830), au lieu de se taire.
+
 ↻ **1.131.0 — SUIVI DU GROUPE : TES ÉLÈVES SUIVIS SONT GARDÉS PAR GROUPE-COURS, CHANGER DE GROUPE NE LES EFFACE PLUS** (build à lire en bas de page).
 **Ce que tu verras** : dans `Suivi › Suivi du groupe`, les élèves que tu suis (au plus cinq, les pilules
 colorées) appartiennent maintenant au groupe-cours où tu les as choisis. Ouvrir « Détails » sous ton
