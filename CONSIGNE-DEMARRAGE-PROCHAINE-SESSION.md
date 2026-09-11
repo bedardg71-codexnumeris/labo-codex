@@ -1,5 +1,10 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ réécrit par Claude Code le 11 septembre 2026 à midi (Toronto), à la clôture de
+> `1.130.2` (#825 temps 1).** Le MANDAT ci-dessous reste celui de Cowork du 10 au soir : ses deux
+> premiers points (écran de réglage, #824) sont **consommés** ; `#825` est livré en temps 1, jugé par sa
+> porte. Cowork reprend le mandat à froid.
+>
 > ↻ **MANDAT réécrit par Cowork le 10 septembre 2026 à 18 h 15 (Toronto), après la relève de la porte
 > terrain de `1.129.0`.** L'ÉTAT MESURÉ ci-dessous date de la clôture de `1.128.4` par Claude Code, en
 > fin d'après-midi — son en-tête dit « fin de soirée », mais le commit qui le porte est de **15 h 33,
@@ -39,39 +44,44 @@ il n'y avait **aucune consigne du jour en attente** au matin du 10.
 
 ---
 
-## ÉTAT MESURÉ — 10 SEPTEMBRE 2026, FIN DE SOIRÉE (TORONTO)
+## ÉTAT MESURÉ — 11 SEPTEMBRE 2026, MIDI (TORONTO)
 
-▣ **Remesuré par Claude Code au rituel de la session du soir, puis à sa clôture — chaque ligne
-avec la commande qui la produit.** La version précédente de ce bloc (début d'après-midi, 1.128.3)
-est remplacée, pas corrigée. ⚠ **Un état mesuré vieillit en heures. Remesure, ne recopie pas.**
+▣ **Remesuré par Claude Code à la clôture de `1.130.2` — chaque ligne avec la commande qui la
+produit.** La version précédente de ce bloc (10 septembre, 1.128.4) est remplacée, pas corrigée.
+⚠ **Un état mesuré vieillit en heures. Remesure, ne recopie pas.**
 
-- **Version `1.128.4`, build `0910-1531`** (`cat version.json`). **Deux releases le 10**
-  (`git log --format=%s origin/main --since='2026-09-10 00:00' | grep -c '^release '` rend `2`) :
-  1.128.3 (quatre réglages qui n'atteignaient pas leur calcul) et 1.128.4 (#821 lot A, un seul
-  endroit pour les quatre règles qui qualifient un contexte, **rien de visible à l'écran**).
-- **`origin/main` = `main`** au rituel (`git fetch && git rev-list --count origin/main..HEAD` = 0),
-  puis **poussé** en fin de session avec les commits documentaires du soir. Aucune branche ne porte
-  de travail, sauf `claude/formation-session-setup-4181r0` (chantier Formation, à part).
+- **Version `1.130.2`, build `0911-1139`** (`cat version.json`). **Quatre releases le 11 au matin**
+  (1.129.1, 1.129.2, 1.130.0, 1.130.1 : les mots du dépistage, la forme de l'écran de réglage, les
+  liens depuis Suivi, #824) puis **1.130.2 à midi** : #825 temps 1, l'ouverture immuable — **rien de
+  visible à l'écran**, un chiffre qui attend sa porte.
+- **`origin/main` = `main`** au rituel de midi (`git fetch && git rev-list --count origin/main..HEAD`
+  = 0 sur `7130d0db`), puis deux commits locaux (docs de Cowork, release 1.130.2) et le commit de
+  relais, poussés par `scripts/pousser.sh` à la clôture. Aucune branche ne porte de travail.
   ⚠ **Le SHA n'est pas écrit ici, exprès.** `git log --oneline -1`.
-- **Arbre : trois `Formation/*.html` non suivis** (chantier Formation, pas à commettre avec un lot
-  du dépistage). Rien d'autre (`git status --porcelain -uall`).
-- **Vitest : 530 fichiers / 5785 essais, 0 échec** (`cd tests && npm run test:unit`, ~26 s).
+- **Arbre : quatre `Formation/*.html` non suivis** (chantier Formation, pas à commettre avec un lot de
+  l'application) et la **suppression non commise** de la capture du 9 sept. (`Retours des
+  testeurs/grégoire/BUG_…journal-de-bord-sans-fond.png`, à Grégoire). Rien d'autre
+  (`git status --porcelain -uall`).
+- **Vitest : 533 fichiers / 5817 essais, 0 échec** (`cd tests && npm run test:unit`, ~27 s), mesuré
+  AVANT et APRÈS le commit de release (la sentinelle anti-cache post-commit ne juge qu'un bump commité).
   ⛔ **PAS `npm test`** : il enchaîne Playwright, plus de dix minutes.
-- **Playwright : verdict local VERT sur le SHA de 1.128.4** (`scripts/.verdict-playwright.json`,
-  `code: 0`, rendu par `scripts/pousser.sh` avant le push du soir). Les commits suivants sont
-  documentaires : le hook laisse passer sans relancer la suite. **Le verdict Safari/iPad reste sur
-  le Mac de Grégoire** ; le CI WebKit sur `main` est à relire (`gh run list --branch main -L 1`).
+- **Playwright : verdict local rendu par `scripts/pousser.sh` sur le SHA du commit de relais** — lire
+  `scripts/.verdict-playwright.json` (`code`, `sha`). Le CI WebKit sur `main` est à relire
+  (`gh run list --branch main -L 1`) : au rituel de midi, le run du commit `7130d0db` était encore
+  `in_progress`.
+- **Le chiffre de #825 n'est PAS mesuré** : les en-têtes n'existent qu'une fois déployés, derrière
+  Cloudflare Access. La porte `plans de travail/PORTES-TERRAIN-2026-09-11-ouverture-immuable.md` le
+  mesure ; sa rangée 1 (référence, sur 1.130.1) doit se faire AVANT le déploiement.
 
-**Ce que le 10 septembre au soir a livré, et ce que la mesure a corrigé des fiches** :
+**Ce que le 11 septembre à midi a livré, et ce que la mesure a corrigé de la consigne** :
 
 | Lot | Livré | ⚠ Ce que la mesure a corrigé |
 |---|---|---|
-| `#821` lot A (1.128.4) | `js/contexte-qualification.js` : les quatre règles, bornes nommées et datées ; harnais AVANT/APRÈS 1630 cas / 0 différence ; sentinelle 24 essais, 8 break-tests rouges | l'inventaire disait « indice composite » pour l'Aperçu : c'est **un indice par barre** ; le mécanisme 2 a une **4e borne fixe à 60 %** ; « Assiduité critique » vit sous deux bornes ; le palier « Insuffisant » est inatteignable (`#822`) |
-| `#821` lot B | le tableau des divergences, en points, § 8 de `Rapports/INVENTAIRE-2026-09-10-nomenclature-des-zones.md` | — |
-| cadrage 10, temps 1 (docs seulement) | **la carte des effets** de `Labo › Outils d'observation`, § 4 de `plans de travail/CADRAGE-2026-09-10-ecran-de-reglage-du-depistage.md` : 20 contrôles, l'écran où chacun agit, en gestes d'utilisateur | **aucun réglage n'agit sur une note** (l'exception de la consigne ne se déclenche pas) ; **quatre contrôles n'agissent nulle part** (`#823`) ; quatre agissent **hors de Suivi** ; cinq chemins morts (`#824`) ; l'ancien § 4 disait « lus par `pratique-pan-standards.js` » — vrai, mais par des chemins morts |
+| `#825` temps 1 (1.130.2) | `netlify.toml` : `/js/*` et `/css/*` immuables un an, invariant écrit ; trois trous bouchés à la source (`repertoires-bibliotheque.js`, `pack-demo-20.js`, `heic-worker.js`) ; sentinelle #825, 16 essais, 5 break-tests rouges ; skill `portes-terrain` corrigé ; porte terrain à 4 rangées | la fiche #825 et le skill disaient « le garde ne surveille que `main.js` » : **faux depuis #547** ; un commentaire contenant `/js/*` a fait avaler la ligne du Worker par le strip-commentaires des tests 597 — reformulé ; **`/styles.css` NE devient PAS immuable** (relecture adverse : `design-system.html` + 17 modules servis la chargent sans jeton) ; le garde #547 ne voit pas les deux fichiers à jeton de build → garde pre-push ajoutée ; `#826` inscrit (jetons déjà servis deux fois le 10 sept.) |
 
-⮕ **La leçon qui se répète** : sur trois consignes de la journée, chacune portait au moins une
-affirmation fausse que la mesure a corrigée AVANT d'écrire. Une consigne est une piste, pas un fait.
+⮕ **La leçon qui se répète** : la consigne elle-même avait corrigé la prémisse de la fiche ; la
+mesure a encore trouvé un piège (une séquence `/*` dans un commentaire). Une consigne est une piste,
+pas un fait.
 
 ---
 
