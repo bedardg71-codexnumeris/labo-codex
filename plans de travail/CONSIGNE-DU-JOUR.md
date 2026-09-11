@@ -1,155 +1,158 @@
-# Consigne du jour — Suivi du groupe : la liste suivie ne s'efface plus en changeant de groupe, et le tri de l'écran (lot 1 du cadrage 11)
+# Consigne du jour — Liste des étudiant·es : les abandons visibles (grisés), les tris qui trient, la recherche sans accents, un DA en double refusé (lot 2 du cadrage 11)
 
-> **Écrite le 11 septembre 2026 à 12 h 35 (Toronto, `TZ=America/Toronto date`) par Cowork**, sur la décision de Grégoire de 12 h 31
-> (« tout l'onglet, 35 constats de l'audit ») et son « oui » pour ce premier lot. Application au moment de l'écriture : **`1.130.2`**,
-> build `0911-1139`, `main` = `origin/main` = `2280aa0d`. Elle remplace la consigne de l'ouverture immuable (livrée en `1.130.2`,
-> vue), archivée à côté sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-11-ouverture-immuable.md`.
+> **Écrite le 11 septembre 2026 à 14 h 51 (Toronto, `TZ=America/Toronto date`) par Cowork**, sur la décision de Grégoire de 14 h 17,
+> dans ses mots : **« les abandons visibles (grisés) »**. Application au moment de l'écriture : **`1.131.0`**, build `0911-1259`,
+> `main` = `origin/main` = `2a89aaaf`. Elle remplace la consigne du lot 1 (livrée en `1.131.0`, porte relevée 10/10 sur ses deux
+> groupes réels), archivée à côté sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-11-lot-1-suivi-du-groupe.md`.
 >
 > **Remesure avant d'exécuter** : `git --no-optional-locks log --oneline -5`, `cat version.json`, `TZ=America/Toronto date`.
-> ⚠ **Une consigne peut se tromper : mesure, n'obéis pas.** L'audit qui fonde ce lot date du 6 sur `1.123.5` ; les numéros de
-> ligne ci-dessous ont été **remesurés aujourd'hui sur `1.130.2`**, mais un constat périmé se dit périmé, pas corrigé.
+> ⚠ **Une consigne peut se tromper : mesure, n'obéis pas.** L'audit date du 6 sur `1.123.5` ; les numéros de ligne ci-dessous sont
+> remesurés aujourd'hui sur `1.131.0` (`etudiants.js` n'a reçu que deux commits depuis, aucun sur ces constats). Un constat périmé se
+> dit périmé, pas corrigé.
 >
-> **Préalables** : `plans de travail/CADRAGE-2026-09-11-onglet-suivi-lecture-du-depistage.md` (§ 7 : la décision, les sept lots) ;
-> `Rapports/AUDIT-sous-onglets-suivi-2026-09-06.md` **§ 1 seulement** (l. 34-105 : G-1 à G-8, le tableau des gestes, les écritures) ;
-> `BACKLOG.md`, item `#749` (grep ciblé). Skills : `labo-codex` (clés nues / namespacées), `design-interface` (microcopy),
-> `verification-adverse` § 4, `portes-terrain`.
+> **Préalables** : le cadrage 11 (§ 7, les sept lots) ; `Rapports/AUDIT-sous-onglets-suivi-2026-09-06.md` **§ 2 seulement**
+> (l. 106-164 : L-1 à L-11, le tableau des gestes) ; `BACKLOG.md`, `#750` (grep ciblé — cité, pas rejugé). Skills : `labo-codex`,
+> `design-interface` (microcopy, états grisés), `verification-adverse` § 4, `portes-terrain`.
 
 ---
 
 ## AVANT TOUT — un commit documentaire séparé
 
-Modifiés ou neufs, non commis, de Cowork : le cadrage 11 (`CADRAGE-2026-09-11-onglet-suivi-lecture-du-depistage.md`), l'entrée 10 de
-`00-CADRAGES-OUVERTS.md`, la porte de l'ouverture immuable (note « vue, non chiffrée »), l'archivage de l'ancienne consigne et la
-présente. **Commets-les d'abord, seuls, `git add` ciblé.** ⚠ Le `D` sur la capture du 9 septembre reste hors de tes commits (à
-Grégoire) ; les quatre `Formation/*.html` aussi.
-
-**Et une disposition à écrire en tête du rapport du 6** (`Rapports/AUDIT-sous-onglets-suivi-2026-09-06.md`, sous « Verdicts ») :
-*« ↻ 11 sept. 2026 — décision de Grégoire (12 h 31) : les 35 « inscrire » et 7 « commenter » sont versés au cadrage 11, lot par lot,
-un par sous-onglet. Lot 1 (§ 1, Suivi du groupe) : consigne du 11. »* C'est ce qui clôt l'audit au sens de `CLAUDE.md`.
+Modifiés, non commis, de Cowork : la porte du lot 1 (relevée 10/10, note de 14 h 15), l'entrée 10 de `00-CADRAGES-OUVERTS.md`,
+l'archivage de la consigne du lot 1, la présente. **Commets-les d'abord, seuls, `git add` ciblé.** Le `D` sur la capture du 9 et les
+quatre `Formation/*.html` restent hors de tes commits.
 
 ---
 
-## 0 · CE QUE CE LOT CHANGE POUR GRÉGOIRE — deux groupes-cours cet automne
+## 0 · CE QUE CE LOT CHANGE POUR GRÉGOIRE ET SES COLLÈGUES
 
-**Aujourd'hui** (mesuré le 6, G-2, `[exécuté]` ; code inchangé au 11 : `tableau-bord-apercu.js:108-118`) : la liste des élèves
-suivis (au plus cinq, les pilules colorées du Suivi du groupe) vit sous **une clé nue**, `etudiantsSuivis` (`:34`), partagée entre
-trimestres et groupes-cours. `nettoyerEtudiantsSuivis` filtre par les DA du groupe actif **et réécrit** si la longueur a changé
-(`:114-116`). Conséquence : ouvrir « Détails » sous le groupe B **efface en base** les suivis du groupe A. **Grégoire a deux groupes
-cet automne** : il perdra ses suivis à chaque bascule, et il ne le saura pas.
+**La Liste dit vrai sur les abandons.** Aujourd'hui, la note sous le tableau (`index.html:7835`) affirme que les élèves « abandon »,
+« inactif » et « décrochage » sont *« toujours affichés dans le tableau pour consultation, mais exclus des statistiques »* — et le
+filtre les retire (`etudiants.js:647` : `statut === 'actif' || !statut`). Un enseignant cherche un décrocheur, ne le trouve pas, et le
+texte lui dit qu'il devrait y être. **Décision de Grégoire (14 h 17) : les abandons sont visibles, grisés.** La note devient vraie ;
+les statistiques restent sur les actifs (déjà le cas : `:910` et la population de `#moy-*`).
 
-**Après** : une liste **par trimestre et par groupe-cours**, jamais purgée en écriture ; ce qui n'est pas du groupe est **ignoré à la
-lecture**, pas effacé. Le reste du lot est du tri sur le même écran, invisible ou presque.
+Le reste du lot : deux tris qui ne triaient pas, une recherche qui ne trouvait pas « Aimé » avec « aime », une option de filtre morte,
+une case « ≥ Min. » qui perdait son effet, un DA en double accepté à l'ajout et à l'import, un bouton d'aide détruit au premier rendu,
+et trois calculs par lettre tapée. Rien n'écrit dans les données de personne.
 
 ---
 
-## 1 · LE LOT — six gestes sur `js/tableau-bord-apercu.js` (et le HTML mort d'`index.html`)
+## 1 · LE LOT — `js/etudiants.js`, `js/trimestre-v2-etudiants.js`, `index.html` (la sous-section `#suivi-liste`)
 
-### A. La liste suivie par groupe-cours (G-2, G-3, `#749`) — la SOURCE, et ce qui est décidé sur le STOCK
+### A. Les abandons visibles, grisés (L-2) — la décision
+- `filtrerEtudiants` (`:647`) ne retire plus les statuts non actifs. La ligne d'un élève « abandon », « inactif » ou « décrochage »
+  se rend **grisée** (classe d'état existante du design-system — mesure : `grep -n "ligne-inactive\|u-grise\|estEtudiantExclu" styles.css
+  js/etudiants.js` ; s'il n'y a pas de patron, un seul, dans `styles.css`, deux modes) et porte **son statut en clair**, le mot que
+  Cadre › Trimestre affiche déjà (« Abandon » / « Inactif » / « Décrochage » — **pas de mot neuf** : réutilise ceux du sélecteur de
+  statut, `index.html:13869`, et sa fonction de libellé si elle existe).
+- **Les statistiques ne bougent pas** : `#moy-*`, `r↔P`, `≥ Min.` restent calculés sur les actifs (`:910`, `:955-961` — mesure qu'ils
+  passent bien par `estEtudiantExclu` ou l'équivalent, et non par la liste filtrée que tu viens d'élargir — **c'est le piège de ce
+  lot** : élargir l'affichage sans élargir la population statistique).
+- Le filtre RàI / pattern / groupe s'applique aux grisés comme aux autres ; la recherche aussi. Le clic sur la ligne ouvre le profil,
+  comme avant. La note de `:7835` reste telle quelle — elle devient vraie.
+- **Sentinelle** : un groupe de banc avec un « abandon » → il est dans les lignes rendues, grisé, avec son statut ; **et** `#moy-a`
+  n'a pas changé par rapport au même groupe sans lui. Retire le grisé → rouge ; compte-le dans la moyenne → rouge.
 
-1. La clé devient une clé composée par trimestre ET groupe-cours — **mesure le patron existant** (`grep -n "_gc_" js/*.js`,
-   `seancesCompletes_gc_<id>` en est un) et suis-le ; l'inscrire là où vivent ses pareilles (`CLES_NAMESPACEES` de `trimestres.js` ?
-   mesure) et dans `docs/DATA-OWNERSHIP.md`.
-2. `nettoyerEtudiantsSuivis` **ne réécrit plus** : elle filtre à la lecture (DA du groupe actif, et `estEtudiantExclu` — G-3, l'élève
-   en abandon libère son siège). Une seule écriture reste : le geste explicite (ajouter, retirer, réinitialiser).
-3. **Le stock — tranché par Cowork, nommé, réversible** : à la première lecture d'un groupe-cours dont la clé n'existe pas encore, si
-   la clé nue `etudiantsSuivis` existe, **ses entrées dont le DA appartient à ce groupe** deviennent la liste du groupe (semis).
-   **La clé nue n'est ni effacée ni réécrite** : rien n'est détruit chez personne, et si le semis est faux, la valeur d'origine est
-   encore là. Elle devient une orpheline (`scripts/diagnostic-353-cles-orphelines.js` la connaît ? mesure, et inscris-la sinon).
-   ⚠ **C'est une lecture qui écrit une fois** : dis-le dans le code, en une phrase datée.
-4. **Sentinelle Vitest, break-testée** : (a) deux groupes, deux listes, ouvrir « Détails » sous B ne change pas la liste de A (le cas
-   mesuré de l'audit : `['2000001','2000002']` doit survivre) ; (b) le semis lit la clé nue et ne l'écrit pas (valeur nue identique
-   avant/après) ; (c) un élève en abandon ne compte pas dans `(n/5)`. Retire le filtre à la lecture → (a) rouge ; fais écrire la clé
-   nue → (b) rouge. Montre les rouges.
+### B. Les tris qui trient (L-1)
+`num` est comparé (`:1038-1040`) avant d'être posé (`:1110`, `num: index + 1` après le tri) : le tri « # » ne fait rien. Poser le
+numéro **avant** de trier, ou trier « # » sur l'ordre d'origine — décide, dis-le. `da` : `localeCompare` sans `{ numeric: true }`
+(`:1097`) met `1000123` avant `999999` — ajoute l'option pour les colonnes numériques-en-chaîne (DA, groupe). Le garde `#446` (`:1091`,
+valeurs `undefined`) **reste** : c'est lui qui empêche un champ vide de casser l'écran entier.
 
-### B. Le sixième ajout dit pourquoi il refuse (G-1)
-`ajouterEtudiantSuivi` rend `false` sans un mot (`:122-123`). Une notification (`notifications.info`, le patron du module) avec
-**le texte validé par Grégoire** (§ 3). Et la porte : un DA hors du groupe actif est refusé à l'ajout (aujourd'hui accepté puis purgé).
+### C. La recherche sans accents (L-3)
+`:699-702` : `toLowerCase()` seul. Normaliser des deux côtés comme le filtre pattern le fait déjà (`:688-689`, `normalize('NFD')` +
+retrait des diacritiques) : « aime » trouve Aimé, « cesaire » trouve Césaire, « comaneci » trouve Comăneci (le cas démo de la sonde 1).
+Une fonction, utilisée par les deux — pas deux copies.
 
-### C. « Filtrer » filtre sur ce qui est montré (G-4)
-Le filtre `P < 65 %` teste `e.P` (`:174` à remesurer) alors que l'écran affiche « — » quand `noteConstructible === false` (`:434`) :
-exclure ces élèves du filtre P. Renommer les vestiges `prioritaire-tri-*` / `trierEtudiantsPrioritaires` (`:278`) en « filtre »
-**seulement si** c'est un renommage interne sans effet sur le CSS ni le HTML généré (`grep -rn "prioritaire-tri" styles.css index.html
-js/`) ; sinon, commente et passe. Le critère « M → (A+C)/2 < 65 » filtre sur une valeur affichée nulle part : **inscrire, ne pas
-toucher** — c'est une position didactique, elle remonte à Grégoire avec le lot 7 s'il le veut.
+### D. Une lettre tapée ne recalcule pas le groupe trois fois (L-4)
+Deux choses : (1) `:757-758` appelle `calculerEtStockerIndicesCP` alors que `calculerEtSauvegarderIndicesAssiduite` (`:754-755`) le
+chaîne déjà (`indices.js:281` — **prouve la chaîne** comme au lot 1, F) : retire l'appel ; (2) la recherche est câblée
+`data-on-input` sans debounce (`index.html:7801`) : un rendu par frappe. Un debounce de 200 ms **sur la source « input » seulement**
+(les `change` des sélecteurs restent immédiats) — dans `afficherListeEtudiantsConsultation` ou dans le dispatcher, tranche selon le
+patron existant (`grep -n "debounce" js/main.js js/etudiants.js`). Mesure avant/après : écritures de `<trim>_indicesCP` pour trois
+frappes — 6 avant, 1 après.
 
-### D. Le panneau mort et le mot qui manque (G-5)
-`#panneau-prioritaire` (`index.html:7554-7562`) n'est jamais ouvert : seul le bouton `#btn-toggle-panneau-prioritaire` (`:7529`)
-vit — il ouvre `#panneau-suivi-etudiants` filtré (`tableau-bord-apercu.js:1113-1130`). ⚠ **Leçon du 10 : un mort se mesure par chaque
-lecteur.** Lecteurs mesurés aujourd'hui : `:1353` (`compteur-prioritaire`, mis à jour dans un conteneur invisible), `:1769` / `:1779`
-(sauvegarde et restauration du HTML au re-rendu), `styles.css:11857-11870` et `:24562`. Retire le HTML mort, ses lecteurs et son CSS ;
-garde le bouton et son compteur **s'il est lisible ailleurs** (mesure : où `compteur-prioritaire` s'affiche-t-il ? nulle part → il part
-avec le panneau). Puis **le mot qui manque** : le chemin vivant vers le profil (les badges A / C / P d'une pilule, en mode Détails)
-n'est écrit nulle part — une ligne de microcopy à la place du « Cliquer → profil » retiré, **texte validé par Grégoire** (§ 3).
+### E. Le filtre « pattern » offre ce que le code produit (L-5)
+`index.html:7795` offre « En progression », que `profil-etudiant-calculs.js` ne produit jamais (0 occurrence) ; « Non-participation » et
+« Données insuffisantes » sont affichables et **non filtrables**. Aligne les options sur les six patterns du code (`Stable`, `Défi
+spécifique`, `Difficulté émergente`, `Difficulté persistante`, `Non-participation`, `Données insuffisantes`) — les libellés existent
+déjà, ce sont ceux des badges. Sentinelle : chaque `value` du sélecteur est un pattern que le calcul produit, et réciproquement.
 
-### E. Sans pratique de notation, dire qu'il n'y en a pas (G-7)
-`genererBadgePratique` (`:867`) et `genererBadgeSourceDonnees` (`:910`) rendent « Alternative - Maîtrise (IDME) » / « Source :
-PAN » pour `config === null`. Un seul badge à la place : **texte validé par Grégoire** (§ 3). Ne touche pas au calcul.
+### F. « ≥ Min. » tient au re-rendu (L-6)
+`toggleFiltreMinimum` (`:601`) grise et remplace `#moy-c` / `#moy-p` ; le rendu suivant (tri, lettre) reconstruit le `tbody` sans la
+rappeler : la case reste cochée, l'effet est parti. Rappeler l'effet en fin de rendu si la case est cochée. **Et une décision de Cowork,
+nommée** : un élève à **0 évaluation** est aujourd'hui « pas insuffisant » (`:910`, `nbEvals > 0 && nbEvals < min`) ; le sens de la
+case est « au moins N évaluations pour qu'un P soit fiable » (la note de `:7835` le dit) — **0 est sous N** : il est grisé comme les
+autres. Ce n'est pas de la didactique, c'est la définition écrite à l'écran ; si Grégoire la lit autrement, dix secondes.
 
-### F. Une lecture n'écrit pas deux fois (G-8) — et la démo exerce ce que la carte montre
-`calculerEtStockerIndicesCP` est appelé à `:1240` alors que `calculerEtSauvegarderIndicesAssiduite` (`:1235`) le chaîne déjà
-(`indices.js:281`, à remesurer) : retire l'appel `:1240` **après avoir prouvé la chaîne** (un essai qui compte les écritures de
-`<trim>_indicesCP` à l'ouverture : 2 avant, 1 après). **Et le pack de démonstration ne pose pas `grilleReferenceDepistage`**
-(`grep -c` = 0 dans `demo-namespace.js`, `demo-activation.js`, `pack-demo-20.js`) : 520 avertissements console à l'ouverture et
-« Défi spécifique » à 0 en démo — **c'est ce que vingt collègues verront le 14**. Pose la grille de référence de la démo à
-l'activation (`demo-activation.js`, skill `integrite-globaux` : une clé namespacée du trimestre démo, pas une globale ; mesure avant
-d'écrire). Si ça déborde le lot (plus d'une dizaine de lignes, ou une décision de forme), **inscris et continue** — le 14 passe avant,
-mais pas au prix d'un correctif de correctif.
+### G. Un DA en double refusé, à l'ajout et à l'import (L-8) ; le groupe padé (L-9) — `trimestre-v2-etudiants.js`
+- **Ajout** (`soumettreEtudiantV2`, `:324-344`) : si un élève du groupe-cours porte déjà ce DA et qu'on n'est pas en édition de ce
+  même élève (`:372`), refuser avec **le texte validé par Grégoire** (§ 3). **Import** (`confirmerImportV2`, autour de `:712`,
+  `:778-783` au 6) : un DA déjà présent dans le groupe n'est pas dupliqué — il est **ignoré et compté** (« N ajoutés, M déjà présents »),
+  jamais écrasé (le stock de l'élève existant ne bouge pas). Sentinelle : deux ajouts du même DA → une fiche ; réimporter le même
+  fichier → aucune fiche en plus.
+- **Groupe** : `groupe: '1'` est écrit tel quel (`:344`, `:712` : `colonnes[1] || '00001'`) alors que `obtenirEtudiantsCoursActif`
+  compare padé (`modes.js:1184`). **Source** : padder à l'écriture (`'00001'`), une seule fonction de normalisation, partagée. **Stock**
+  : les fiches déjà écrites avec `'1'` restent — la Liste **normalise à la lecture** pour ses options de filtre et ses comparaisons
+  (`etudiants.js:150`, `:685`), donc « 1 » et « 00001 » ne font plus deux entrées. Rien n'est réécrit chez personne ; dis-le dans le code.
+
+### H. Le bouton d'aide survit au premier rendu (L-11)
+`mettreAJourTitreListeEtudiants` (`:477-524`) réécrit l'`innerHTML` de `#titre-liste-etudiants` et détruit le bouton `data-aide="suivi-liste"`
+(`index.html:7740`). Sortir le bouton du nœud réécrit, ou le re-générer — tranche selon le patron des autres titres.
+
+### I. Commenter et oublier
+L'état vide qui sort avant de mettre à jour `#moy-*` (`:854`) : un commentaire daté, rien d'autre (audit : commenter). Les préférences
+de colonnes en `sessionStorage` (`:1276`) : position, pas défaut.
 
 ---
 
 ## 2 · CE QUI NE SE FAIT PAS ICI
-
-- **Les cibles tactiles** (9 contrôles sous 44 px dans cette sous-section) : lot 7, transversal, sur maquette.
-- **L'état perdu au rechargement** (G-6 : mode Détails, filtres, indice) : une position, pas un défaut — commenter l'asymétrie ACP /
-  trajectoires (`graphiques-progression.js:2056` vs `:4562`), rien d'autre.
-- **Les deux « moyenne A »** (`#750`), **le filtre M** (§ C), **les règles `#735`-`#754`** : cités, pas rejugés.
-- **Rien n'écrit dans les données de personne** hors le semis nommé au § A.3 — et lui n'efface rien.
+- Les **20 cibles tactiles** sous 44 px de cette sous-section : lot 7. Le tableau qui déborde à 1024 px **et le dit** : fonctionne.
+- Les deux « moyenne A » (`#750`) : cité, pas rejugé. `#735` (élève arrivé en semaine 6) : règle, après le 14.
+- Rien n'écrit dans les données de personne ; le stock des groupes non padés reste, normalisé à la lecture.
 
 ---
 
-## 3 · CE QUI REMONTE À GRÉGOIRE — trois textes que ses collègues liront (proposés par Cowork dans la conversation)
+## 3 · CE QUI REMONTE À GRÉGOIRE — un texte que ses collègues liront (proposé dans la conversation)
 
 | Où | Proposition | Sa réponse |
 |---|---|---|
-| B — le refus du sixième ajout | « Cinq élèves suivis au maximum. Retires-en un pour en ajouter un autre. » | _______ |
-| D — le chemin vers le profil | « Pour ouvrir un profil : clique sur A, C ou P d'un élève suivi. » | _______ |
-| E — sans pratique de notation | « Aucune pratique de notation configurée » | _______ |
+| G — le refus d'un DA en double, à l'ajout | « Ce DA est déjà dans le groupe : [nom de l'élève existant]. » | _______ |
+| G — le compte à l'import | « N étudiant·es ajouté·es, M déjà présent·es (ignoré·es). » | _______ |
 
-⛔ **Pas de release avant ses trois réponses** (ou son « ok » global). S'il corrige un mot, sa version.
-
----
-
-## 4 · LIVRER — `patch` ou `minor`, tranche et dis-le
-
-C'est un correctif (une perte de données) plus du tri ; mais la liste par groupe-cours est un **comportement nouveau** que les
-collègues verront. **Recommandation de Cowork : `minor` (`1.131.0`)** — le changelog le dira en une phrase : « Tes élèves suivis sont
-maintenant gardés par groupe-cours : changer de groupe ne les efface plus. » (à valider avec les trois textes du § 3). Rituel :
-`release.mjs`, `cd tests && npm run test:unit`, relecture croisée sur le diff (règle 2 : ce lot écrit une fois chez les gens — le
-semis), verdict, `pousser.sh`.
+Les statuts grisés reprennent les mots de Cadre › Trimestre ; les options du filtre reprennent les noms des patterns : **pas de mot
+neuf ailleurs.** ⛔ Pas de release avant sa réponse (ou son silence sur les propositions, qui vaut « tel quel » — sa règle du 11).
 
 ---
 
-## 5 · LA PORTE TERRAIN — sur SES données réelles, en lecture, deux groupes-cours
+## 4 · LIVRER — `minor` (`1.132.0`) : les abandons visibles sont un comportement que les collègues verront
+Changelog, une phrase à valider : « Dans Suivi › Liste des étudiant·es, les élèves en abandon ou inactifs restent visibles, grisés,
+avec leur statut ; les tris par numéro et par DA trient ; la recherche ignore les accents. » Rituel habituel : `release.mjs`, Vitest
+depuis `tests/`, relecture croisée sur le diff, verdict, `pousser.sh`.
 
-Tu écris le markdown (`plans de travail/PORTES-TERRAIN-2026-09-11-suivi-du-groupe.md`, modèle du skill) ; Cowork publie l'artefact.
-Rangées, sur `app.codexnumeris.org`, `1.131.0` lue en bas de page :
+---
+
+## 5 · LA PORTE TERRAIN — ses données réelles, en lecture ; l'abandon attend un cas réel s'il n'en a pas
+Tu écris le markdown (`plans de travail/PORTES-TERRAIN-2026-09-11-liste-des-etudiants.md`) ; Cowork publie l'artefact. Rangées sur
+`app.codexnumeris.org`, `1.132.0` en bas de page :
 
 | # | Geste | Attendu |
 |---|---|---|
-| 1 | Groupe-cours A, Suivi du groupe : suivre deux élèves (clic sur leur nom). Basculer sur le groupe B, ouvrir « Détails ». Revenir sur A. | **Les deux élèves sont toujours suivis.** Et B a sa propre liste (vide ou la sienne). |
-| 2 | Sur A, ajouter un sixième élève | le message du § 3 (B), l'ajout refusé |
-| 3 | Sur A, filtre « P » du panneau Détails | aucun élève dont le P affiche « — » |
-| 4 | Sous le titre du panneau : le mot qui dit où cliquer (§ 3 D) ; cliquer sur le A d'un élève suivi | le profil s'ouvre, section Engagement |
-| 5 | Mode démonstration (Labo › Démo), Suivi du groupe | la famille « Défi spécifique » n'est plus à 0 (0 %) ; **aucun** avertissement rouge dans la console |
+| 1 | `Suivi › Liste des étudiant·es`, clique l'en-tête « # » deux fois, puis « DA » deux fois | l'ordre change à chaque clic ; les DA en ordre numérique |
+| 2 | Recherche : tape un prénom accentué **sans l'accent** (un élève réel de son groupe) | la ligne est trouvée |
+| 3 | Filtre « pattern » : ouvre la liste | « En progression » n'y est plus ; « Non-participation » et « Données insuffisantes » y sont |
+| 4 | Coche « ≥ Min. », puis clique un en-tête de tri | les lignes sous le minimum restent grisées après le tri |
+| 5 | `Cadre › Trimestre`, ajoute un élève avec **le DA d'un élève existant** (puis annule) | refusé, le message du § 3 ; aucune fiche en plus |
+| 6 | Titre de la Liste : le bouton d'aide « i » est là après un changement de filtre | présent, cliquable |
+| 7 | **S'il a un élève en abandon dans un de ses groupes** (sinon : attend un cas réel — ne pas en créer) | la ligne est là, grisée, avec le statut ; `moy=` inchangée |
 
-⚠ La rangée 1 est le cas réel de l'audit : elle vaut plus que la sentinelle. **Rien de ce lot n'écrit dans ses données** hors le semis
-(sa liste actuelle, s'il en a une, devient celle du groupe où sont ces élèves ; la valeur d'origine reste en base, intacte).
+⚠ **Pas de données fictives** (sa règle du 6) : la rangée 7 ne se fait que sur un cas réel, ou en démo si le pack en porte un
+(mesure : `grep -c "abandon" js/pack-demo-20.js`) — dis-le dans la porte.
 
 ---
 
 ## 6 · TROUVAILLES ET RAPPORT
-
-Trois issues de `CLAUDE.md`, nommées dans ton rapport. Ce que tu viens d'écrire n'est pas une trouvaille. Rapport : tête
-d'`OU-EN-EST-ON.md` (ce qu'il verra : la rangée 1 en une phrase ; « vérifié comment » ; « pas vérifié » : ses deux groupes réels),
-`#749` clos, l'ÉTAT MESURÉ de `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`, l'entrée 10 de `00-CADRAGES-OUVERTS.md` (lot 1 livré, lot 2
-suivant : la Liste), la présente consigne commise avec le lot.
+Trois issues de `CLAUDE.md`, nommées. Rapport : tête d'`OU-EN-EST-ON.md` (ce qu'il verra, « vérifié comment », « pas vérifié »), le
+rapport du 6 (§ 2 : lot 2 livré), `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` (état mesuré), l'entrée 10 des cadrages ouverts (lot 2
+livré, lot 3 suivant : la Saisie des présences), la présente consigne commise avec le lot.
