@@ -151,6 +151,11 @@ une note. **Temps 2, le tri des réglages morts** (`1.129.0`, `#823`) : deux ret
 d'analyse rebranchée, « Direction du risque » gardé et renommé « Sensibilité des flèches par critère »
 (arbitrage de Grégoire, après que la relecture croisée eut trouvé le curseur vivant) ; **porte terrain
 relevée par lui, 12 sur 12**. Aucune donnée écrite chez personne, `fenetrePatterns` non migrée.
+↻ **11 septembre 2026, 12 h 12 (Cowork) — la seconde moitié est CADRÉE, une question ouverte** :
+`CADRAGE-2026-09-11-onglet-suivi-lecture-du-depistage.md`. Prémisses corrigées : le 4e audit A ÉTÉ exécuté le 6 (six urgences
+livrées, #767-#772 ; 35 « inscrire » sans symptôme vécu = réservoir, pas backlog) ; « SRPNF » n'est un titre nulle part dans Suivi
+(un seul mot égaré, une notification de l'onglet Évaluation, § 6). Proposition : les cinq temps du réglage, appliqués aux trois
+sous-onglets qui lisent le dépistage. **Tranché par Grégoire à 12 h 31 : « tout l'onglet, 35 constats de l'audit » (option B).** Sept lots, un par sous-onglet dans l'ordre de l'audit puis un transversal (§ 7 du cadrage) ; le premier, Suivi du groupe, attend sa consigne.
 ✅ **11 septembre 2026, 11 h 22 (Cowork) — L'ÉCRAN DE RÉGLAGE EST FINI : cinq temps livrés et VUS** (temps 5 :
 `1.130.1`, deux liens depuis Suivi, porte 4/4, libellé « Régler » gardé ; `#824` clos dans la même version). **Cette entrée
 reste ouverte pour la seconde moitié du dossier, l'onglet Suivi** — rien de cadré ; Cowork écrit un cadrage avant toute
