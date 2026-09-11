@@ -8,8 +8,11 @@
 > **Ce qui échoue ici devient un item de backlog, avec son numéro de porte.** Jamais une note
 > mentale.
 >
-> ⏳ **DUE.** Markdown écrit par Claude Code le 11 septembre vers 10 h 30 ; artefact jumeau (bouton
-> « Copier mes résultats ») à publier par Cowork.
+> ✅ **RELEVÉE le 11 septembre 2026 à 10 h 46 (Toronto) — 13 sur 13, zéro échec, Mac et iPad (deux
+> modes)**, version `1.130.0` lue en bas de page. Markdown écrit par Claude Code vers 10 h 30 ; artefact
+> « Portes terrain de la forme » publié par Cowork à 10 h 40 ; relevé collé par Grégoire dans la
+> conversation Cowork. **Décisions du § 3 : 3.1 « Garder les textes longs » · 3.2 « oui »** — rien à
+> coder, l'écran reste tel que livré.
 
 **Pourquoi cette liste est courte.** Quatre portes, fixées par la consigne. Tout ce qu'une machine
 pouvait mesurer l'a été : sous WebKit, à 1280 et à 820 px de large, dans les deux modes, l'écran ne
@@ -87,8 +90,8 @@ Aucune porte ne touche tes données : ce lot n'écrit rien chez toi.
 
 | | Question | Ton verdict |
 |---|---|---|
-| **3.1** | La maquette abrégeait certains libellés (« Observation de la structure des résultats », « Collecte des données de contexte et de performance ») et certaines aides (« Basse : détection précoce. Élevée : plus fiable. »). La consigne disait « mêmes textes que 1.129.2 » et « n'abrège pas » : **j'ai gardé les textes longs**. Sur Mac, les blocs sont donc un peu plus hauts que sur la maquette. **Garder les textes longs, ou prendre les courts de la maquette ?** | _______ |
-| **3.2** | Sous chaque champ chiffré, j'ai ajouté la plage permise en mots (« De 5 (sensible) à 20 (moins sensible) »), parce que les bornes des anciens curseurs (les deux extrémités affichées) disparaissaient avec eux et qu'un champ refuse en silence hors bornes. **Garder ?** | _______ |
+| **3.1** ✅ « Garder les textes longs » (Grégoire, 10 h 46) | La maquette abrégeait certains libellés (« Observation de la structure des résultats », « Collecte des données de contexte et de performance ») et certaines aides (« Basse : détection précoce. Élevée : plus fiable. »). La consigne disait « mêmes textes que 1.129.2 » et « n'abrège pas » : **j'ai gardé les textes longs**. Sur Mac, les blocs sont donc un peu plus hauts que sur la maquette. **Garder les textes longs, ou prendre les courts de la maquette ?** | _______ |
+| **3.2** ✅ « oui » (Grégoire, 10 h 46) | Sous chaque champ chiffré, j'ai ajouté la plage permise en mots (« De 5 (sensible) à 20 (moins sensible) »), parce que les bornes des anciens curseurs (les deux extrémités affichées) disparaissaient avec eux et qu'un champ refuse en silence hors bornes. **Garder ?** | _______ |
 
 ---
 
