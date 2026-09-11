@@ -57,6 +57,11 @@ Le milieu (D, M) a tenu. Hypothèse, à éprouver et non à supposer vraie : ce 
 qui attirent le jugement, parce que c'est là qu'on est tenté de dire « très bien » ou « pas assez ».
 Contredit directement l'`ADR-007` (vocabulaire descriptif, non-prédictif, non-pathologisant).
 
+▣ **TRANCHÉ PAR GRÉGOIRE, 11 septembre 2026, vers 6 h 15** (« ça me va ») — **les quatre lettres, partout
+dans l'application** : **I — Incomplet · D — Développement · M — Maîtrise · E — Étendu.** « Insuffisant »
+et « Excellent » disparaissent des libellés ; l'infobulle cesse d'hésiter. ⛔ Libellés seulement — les
+clés `idme.insuffisant` / `idme.developpement` / `idme.maitrise` **ne bougent pas** (§ 5).
+
 ### 3. Deux nomenclatures dans le même encadré
 
 Bloc « Seuils d'interprétation » : le texte annonce des étiquettes **Insuffisant / Développement /
@@ -65,6 +70,20 @@ Acceptable · Bon**. Deux échelles pour un seul bloc.
 
 ⮕ **La « cacophonie » n'est donc pas d'abord une affaire de mise en page.** Réarranger sans régler ça
 reviendrait à mieux aligner des mots qui se contredisent.
+
+▣ **TRANCHÉ PAR GRÉGOIRE, 11 septembre 2026, vers 6 h 20** : le texte du bloc décrit ce que ses champs font
+et **cesse d'annoncer l'IDME**. Texte retenu : « Ces trois seuils colorent les colonnes Assiduité,
+Complétion, Performance et Mobilisation de la liste des élèves, et qualifient l'engagement dans le
+profil. Ils ne touchent ni la note ni l'échelle IDME. » (M = Mobilisation, moyenne de A et C — confirmé
+par lui ; `obtenirCouleurMobilisation`, `etudiants.js:1519`.) ⛔ **Fragile / Acceptable / Bon ne bougent
+pas** : noms de zones, ils attendent l'orthopédagogue (`#821`).
+
+▣ **TRANCHÉ PAR GRÉGOIRE, 11 septembre 2026, vers 6 h 25 — les deux textes faux et « cueillette »** (reste de
+`#823`) : (1) l'aide d'« Indicateurs visuels des seuils » devient « Lignes pointillées et étiquettes des
+niveaux de ton échelle sur les graphiques de progression du profil individuel. » (mesuré : le plugin
+trace `obtenirEchelleUtilisateur()`, pas l'IDME) ; (2) l'infobulle du repère « note différée »
+(`preferences.js:592`) devient « Note différée : la rétroaction passe d'abord. Réglage dans Labo › Outils
+d'observation. » ; (3) « cueillette » → « collecte », aux deux endroits de l'écran.
 
 ### 4. LA CARTE DES EFFETS — pour chaque réglage, l'écran où son effet se voit
 
@@ -268,6 +287,11 @@ aujourd'hui.
    qu'ils restaurent. À lever.
 5. **Le vocabulaire du risque qui traîne** : « Direction du risque », « tendance du risque » —
    proscrits par l'`ADR-007`, encore à l'écran.
+   ↻ **Livré pour cet écran en `1.129.0`** (mesuré par Cowork le 10 sept. à 18 h : dans les lignes
+   8700-9100 d'`index.html`, « risque » ne survit que dans des identifiants techniques, jamais dans un
+   mot affiché). ⚠ **Hors de cet écran, le mot reste** : une douzaine d'occurrences visibles dans
+   l'Aide (« Indice de risque (R) », « À risque sérieux », « étudiant·es fragiles ou à risque »…).
+   ⮕ Inscrit ici, pas corrigé : c'est le tri de l'Aide et de Suivi, pas celui de l'écran de réglage.
 
 ---
 
@@ -276,4 +300,10 @@ aujourd'hui.
 - **Les bornes elles-mêmes** (0,64 / 0,75 / 0,85 · 65 / 70 / 75 · 5 points · 70 %). Elles attendent le
   travail d'automne avec l'orthopédagogue, comme la nomenclature des zones (`#821`).
 - **L'onglet Suivi lui-même** : c'est le chantier suivant, décidé par Grégoire.
+  ⮕ **À y mesurer, reporté par lui le 10 sept. à 17 h 30** : le sigle « SRPNF » (ses cinq critères —
+  structure, rigueur, plausibilité, nuance, français écrit) apparaît **48 fois dans `js/`** comme nom
+  de fonctions, de commentaires et de titres de section. Le calcul des flèches et le rendu du profil,
+  eux, parcourent les critères de la grille (`obtenirCriteresAvecValeurs`, « au lieu du tableau SRPNF
+  codé en dur ») : ce n'est **pas** codé en dur selon sa pratique. **Ce qui n'est pas mesuré** : si
+  l'un de ces 48 usages est un titre affiché à un collègue dont la grille porte d'autres critères.
 - **Les seuils de détection** au sens de `#817`, déjà traités.

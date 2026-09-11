@@ -7,8 +7,10 @@
 > **Ce qui échoue ici devient un item de backlog, avec son numéro de porte.**
 > Jamais une note mentale.
 >
-> ⏳ **À relever.** Markdown écrit par Claude Code ; l'artefact interactif (bouton
-> « Copier mes résultats ») revient à Cowork — consigne en fin de fichier.
+> ✅ **RELEVÉE le 10 septembre 2026 à 18 h 00 (Toronto) — 12 sur 12, zéro échec**, sur
+> `app.codexnumeris.org`, version `1.129.0` lue en bas de page. Markdown écrit par Claude Code ;
+> artefact « Portes terrain #823 » publié par Cowork à 17 h 50, relevé collé par Grégoire dans la
+> conversation Cowork. Rien ne part au backlog.
 
 **Pourquoi cette liste est courte.** Quatre portes, pas plus, et Grégoire les a
 nommées lui-même. Ce lot change l'écran, et « est-ce que ça a l'air bien » est la
