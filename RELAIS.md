@@ -7,6 +7,35 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 10 H 30 : LA FORME DE L'ÉCRAN DE RÉGLAGE LIVRÉE (1.130.0)
+
+> ✅ **`main` à 1.130.0, build `0911-1022`, commit de release `181b8e21`.** Tout est sur `main` ;
+> aucune branche ne porte de travail. Le push suit par `scripts/pousser.sh` (verdict Playwright
+> d'abord) — si tu lis ceci depuis `origin/main`, il est arrivé. Vérifie :
+> `git rev-list --count origin/main..main`.
+> **Livré** (temps 4 du cadrage 10, maquette `plans de travail/MAQUETTE-2026-09-11-outils-observation.html`
+> validée par Grégoire à 10 h 05) : `Labo › Outils d'observation` sans rien à déplier (cartes
+> `carte carte-pilier`, sans `accordeon` — le délégué de `main.js:1252` ne les plie plus ;
+> `ouvrirReferenceSoloAccompagnement` et `allerVersCarte` restent inoffensifs), sommaire, blocs
+> d'option deux par rangée, étiquettes « où ça agit », trois curseurs → champs chiffrés avec conversion
+> points ↔ fraction (`_fractionEnPoints` / `_pointsEnFraction`, `js/preferences-v2.js`),
+> `mettreAJourAffichageSeuilV2` retirée, CSS des repliables retiré, composants neufs dans
+> `design-system.html` § 6 (deux modes). Identifiants, clés, handlers, infobulles, textes d'aide de
+> 1.129.2 : inchangés (mesuré : 19 ids, 18 `data-tooltip`).
+> **Preuves** : sentinelle #823 cas 10-14 (exécutent le panneau), break-testés ; sentinelle #555·2
+> adaptée ; captures WebKit 1280/820 × sombre/clair, zéro débordement, zéro erreur de page.
+> **Ce qui attend Grégoire** : la porte terrain à quatre portes, Mac ET iPad
+> (`plans de travail/PORTES-TERRAIN-2026-09-11-forme-outils-observation.md`) et ses deux questions
+> au § 3 (textes longs gardés vs abrégés de la maquette ; plages écrites sous les champs). Puis le
+> temps 5 (déplacer vers Suivi — sa décision après avoir vu la forme), `#824`, `#825`.
+> **Ce qui attend Cowork** : l'artefact jumeau de la porte ; le mandat suivant.
+> ⚠ **Incident de session, sans conséquence** : deux greffes `perl -i` (lecture complète puis `print`
+> après EOF) ont vidé `styles.css` et `index.html` dans l'arbre ; restaurés depuis HEAD à l'octet près
+> avant tout commit, greffes rejouées avec écriture explicite. Leçon notée en mémoire.
+> ⚠ **Dans l'arbre, pas à moi** : `Formation/*.html` (non suivis) et la SUPPRESSION non commise de
+> `Retours des testeurs/grégoire/BUG_grégoire_2026-09-09_21-03-59_journal-de-bord-sans-fond.png`
+> (capture ajoutée en `10fe1854`) — laissée telle quelle, signalée trois fois aujourd'hui.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 7 H 30 : QUEUE DU LOT DES MOTS LIVRÉE (1.129.2)
 
 > ✅ **`main` à 1.129.2, build `0911-0717`, commit de release `2a13d6fa`.** Tout est sur `main` ;
