@@ -15,6 +15,29 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.130.0 — « OUTILS D'OBSERVATION » SE LIT SANS RIEN DÉPLIER** (build `0911-1022`).
+**Ce que tu verras** : dans `Labo › Outils d'observation`, la forme que tu as validée sur maquette à
+10 h 05. Les deux sections repliables et les trois cartes-accordéon sont devenues des blocs ouverts ;
+un sommaire « Sur cette page » en tête mène à chaque carte ; les options vont deux par rangée ; chaque
+réglage porte de petites étiquettes qui disent l'écran où son effet se voit (ambre = hors de Suivi) ;
+les trois curseurs sont devenus des champs chiffrés avec leur unité, comme les seuils Fragile /
+Acceptable / Bon ; les deux « Remettre les valeurs par défaut » disent lesquelles. **Tes valeurs sont
+les mêmes, à la même place** : rien n'est écrit chez toi ni chez les testeurs.
+**Ce que j'ai décidé seul, et que tu peux renverser en dix secondes** : j'ai gardé les textes d'aide
+et les libellés de 1.129.2 là où la maquette les abrégeait (la consigne le demandait) ; j'ai écrit la
+plage permise sous chaque champ chiffré (les bornes des curseurs disparaissaient avec eux) ; deux
+étiquettes de la maquette ont été corrigées contre la carte des effets (la collecte ACP n'agit que dans
+le profil ; les graphiques agissent aussi sur « Gestes cognitifs »), trois ajoutées (export recherche
+pour les actions et la grille, Interventions pour le seuil de défi), une retirée (l'export recherche
+que la maquette prêtait au RàI).
+**Vérifié comment** : cinq essais qui EXÉCUTENT le panneau prouvent qu'un « 60 » tapé s'écrit 0,60 pour
+les calculs, que 0,65 stocké s'affiche « 65 », que « Remettre » remet 3 · 10 · 5 · 70 sans toucher
+70 · 80 · 85, et qu'aucun curseur ni repliable ne survit ; sans la division à l'écriture, deux cas
+rougissent ; sans la multiplication à la lecture, un cas rougit ; fichier restauré par empreinte.
+Rendu capturé sous WebKit à 1280 et 820 px, modes sombre et clair : zéro débordement, zéro erreur.
+Vitest complet vert. **Pas vérifié** : Safari et l'iPad — quatre portes
+(`plans de travail/PORTES-TERRAIN-2026-09-11-forme-outils-observation.md`), l'artefact revient à Cowork.
+
 ↻ **1.129.2 — L'ÉCHELLE DE DÉPART DIT LES QUATRE MOTS À LA SOURCE, ET LE BILAN AUSSI** (build `0911-0717`).
 **Ce que tu verras : rien chez toi, rien chez les testeurs.** Ton échelle est du stock, et le stock ne
 bouge pas — c'est ta décision de 7 h 11 (« oui, renommer » la source), et c'est mesuré : ce qui sème
