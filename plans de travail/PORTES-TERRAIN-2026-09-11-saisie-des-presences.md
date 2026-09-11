@@ -94,5 +94,7 @@ ligne** — la seule que tes collègues verront.
 - **Pas de bandeau ≠ rien à dire** : si un trimestre réel n'a **ni** horaire **ni** séances, le bandeau s'affiche toujours — c'est voulu, et
   la sentinelle le tient. Ce qui n'est pas mesuré : un horaire à séances dont le calendrier est vide (le bandeau se tait parce que
   l'horaire a des séances ; la grille dit « Pas de cours pour ce groupe à cette date »).
+- **Ta démonstration** : le semis n'y entre pas (relecture croisée) — tes dates verrouillées réelles n'y apparaîtront pas. Prouvé au
+  banc ; pas vu dans ta démo à toi (le Playwright part d'un stockage vide).
 - **Erreur de la session, rattrapée** : le cliquet `#398` (nombre d'appels à la date locale) a rougi sur la suite complète — un second
   appel, légitime, dans la date par défaut ; le cliquet est monté à 2 avec son motif. Rien n'a été découvert « trois jours plus tard ».
