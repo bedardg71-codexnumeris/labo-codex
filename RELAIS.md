@@ -7,6 +7,34 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, MIDI : L'OUVERTURE IMMUABLE LIVRÉE, #825 TEMPS 1 (1.130.2)
+
+> ✅ **`main` à 1.130.2, build `0911-1139`, commit de release `5ce9deef`.** Tout est sur `main` ;
+> aucune branche ne porte de travail. Le push suit par `scripts/pousser.sh` (verdict Playwright
+> d'abord) — si tu lis ceci depuis `origin/main`, il est arrivé. Vérifie :
+> `git rev-list --count origin/main..main`.
+> **Livré** (retour testeur de 7 h 08, passé avant le backlog) : `netlify.toml` sert `/js/*` et `/css/*`
+> en `max-age=31536000, immutable` ; `/*.html`, `/`, `/version.json` inchangés ; **`/styles.css` reste
+> revalidée** (relecture adverse : `design-system.html` + 17 modules servis la chargent sans jeton) ;
+> l'invariant « une URL ne sert jamais deux contenus » est écrit dans le fichier. Trois trous bouchés
+> à la source : `js/repertoires-bibliotheque.js` (`?v=20260911a` dans index.html), `js/pack-demo-20.js`
+> et `js/heic-worker.js` (jeton = `window.__VERSION__.build`, repli `Date.now()`, helper
+> `jetonAntiCache()` dans `demo-namespace.js` et `heic-decodeur.js`). Sentinelle
+> `tests/unit/sentinelle-825-ouverture-immuable.test.js`, 16 essais, break-testée cinq fois (dont la
+> garde pre-push : les deux fichiers à jeton de build ne changent pas sans release). **#826 inscrit**
+> (le garde #547 compare à HEAD ; six URL ont servi deux contenus le 10 sept.). Essais
+> 597 cas 9/11 adaptés. Skill `portes-terrain` § « LE GARDE ANTI-CACHE » réécrit : il surveille TOUT
+> fichier référencé avec `?v=` depuis #547, pas seulement `main.js`.
+> ⚠ **Ce qui juge le lot, c'est la porte** (`plans de travail/PORTES-TERRAIN-2026-09-11-ouverture-immuable.md`,
+> quatre rangées, nouvel onglet à chaque fois, jamais un reload). **La rangée 1 (référence sur
+> 1.130.1) se fait AVANT le déploiement** — Cowork la demande à Grégoire avant le relais et inscrit le
+> chiffre dans #825. Si la rangée 2 reste au-dessus de 3 s : la cause est ailleurs, on remesure ; les
+> temps 2 (`defer`) et 3 (écran d'attente) ne se font que sur ce chiffre, à froid.
+> **Ce qui attend Cowork** : l'artefact jumeau de la porte ; le chiffre de la rangée 1 ; le mandat
+> suivant (onglet Suivi, puis `#821` / `#822` avec l'orthopédagogue).
+> ⚠ **Dans l'arbre, pas à moi** : `Formation/*.html` (non suivis) et la SUPPRESSION non commise de la
+> capture du 9 sept. (`Retours des testeurs/grégoire/BUG_…journal-de-bord-sans-fond.png`, à Grégoire).
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 11 H 15 : L'ÉCRAN DE RÉGLAGE EST CLOS (1.130.1)
 
 > ✅ **`main` à 1.130.1, build `0911-1103`, commit de release `195d4b38`.** Tout est sur `main` ;
