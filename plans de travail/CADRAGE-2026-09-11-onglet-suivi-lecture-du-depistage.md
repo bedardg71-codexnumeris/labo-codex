@@ -171,3 +171,9 @@ nue namespacée laisse un stock nu chez les testeurs — on mesure, on sépare, 
 remontent avant la release ; les règles de l'audit 3 (`#735`-`#754`) sont citées, jamais rejugées.
 
 **Décision de Grégoire, 14 h 17, lot 2 (L-2), dans ses mots : « les abandons visibles (grisés) ».** La note de l'écran devient vraie ; les statistiques restent sur les actifs. Consigne du lot 2 écrite à 14 h 51.
+
+**Décision de Grégoire, 17 h 15, lot 4 (« oui ») : `#754` (le profil rendu quatre fois, qui efface un texte tapé) et `#752` (les graphiques figés sur I/D/M/E) entrent dans le lot 4** — ils étaient marqués « après le 14 » par des sessions, pas par lui ; sa règle du 5 s'applique. Ce qui n'a pas de valeur convertible : un point absent et un mot, jamais une valeur devinée. Consigne écrite à froid à 17 h 14 : `CONSIGNE-SUIVANTE-lot-4-profils-individuels.md`, en file derrière le lot 3.
+
+**Décisions de Grégoire, 17 h 20, lot 4 (volet confidentiel), dans ses mots** : (1) *« La case des services adaptés devrait être cochée si, lorsque la liste des étudiants est créée, un étudiant a cette option cochée. Donc, ça devrait correspondre à la liste originale des étudiants. »* — une seule source, `etudiant.sa` ; (2) *« nous allons retirer les dropdown IDME qui sont là uniquement pour ma pratique personnelle. Dans d'autres pratiques ou disciplines, il n'y a pas de « Portrait de lecteur » comme ça. »* — les cinq sélecteurs du volet sont retirés, le stock reste non lu. Inscrit dans `CONSIGNE-SUIVANTE-lot-4-profils-individuels.md` § D.
+
+**Précision de Grégoire, 17 h 24** : *« Les données du portrait de lecteur dans la section confidentielle de l'élève peuvent disparaître complètement. Je n'ai jamais utilisé cette fonction. »* — aucune purge écrite pour autant ; les champs tombent au prochain enregistrement du volet.
