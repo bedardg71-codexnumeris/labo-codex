@@ -73,6 +73,7 @@ Aucune porte ne touche tes données : ce lot n'écrit rien chez toi.
 |---|---|---|
 | **2.3a** | Dans « Paramètres d'analyse », mets **60** dans **« Seuil de défi spécifique »** et clique ailleurs | Rien ne s'affiche de spécial : le réglage s'enregistre dès qu'on quitte le champ. |
 | **2.3b** | Va dans Suivi → Profils individuels, ouvre un élève, section **Développement des habiletés**, ligne « Diagnostic par critère » | Le titre dit **« seuil force : 60 % »** — pas 6000 %, ni 0,6 %. |
+| | ⚠ **Constat du 11 sept., 11 h (#824)** : le titre « Diagnostic par critère (seuil force : N %) » n'était rendu que par `genererDiagnosticSRPNF`, une chaîne **sans aucun appelant** — il n'a jamais été affiché. Cette rangée visait un texte absent ; relevée verte, elle ne prouve pas la conversion par ce titre. La conversion est prouvée par les essais 10-14 de la sentinelle #823 et par la couleur des badges « Forces et défis » (même seuil). | — |
 | **2.3c** | Reviens dans Outils d'observation et remets **70** | Le profil dit de nouveau « seuil force : 70 % ». |
 
 ### 2.4 · Les deux « Remettre… » remettent chacun leur jeu, et rien d'autre
