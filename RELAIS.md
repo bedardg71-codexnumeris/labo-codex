@@ -7,6 +7,24 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 15 H : LA BARRE A DES GROUPES H2026 REVIENT (1.131.1, #830)
+
+> ✅ **`main` à 1.131.1, build `0911-1441`, commit de release `d18c4355`.** Tout est sur `main`. Le push suit
+> par `scripts/pousser.sh` — si tu lis ceci depuis `origin/main`, il est arrivé.
+> **Retour testeur de 14 h 17, traité avant le lot 2** : barre « Assiduité (A) » vide pour tous les
+> groupes H2026. Cause (six sondes en lecture seule sur ses données, `scripts/diagnostic-830-indice-A-vide.js`
+> et `…830f-periodes-horaire.js` gardées) : depuis #540 lot E2 le nombre de périodes est une donnée saisie
+> par séance ; ses horaires de janvier ne la portent pas → 0 période → 0 séance → barre vide, muette.
+> Correctif : `js/horaire.js` `projeterPeriodesParSeance` dans `obtenirSeancesHoraire` — le format déclaré
+> `horaire.periodesParSeance` est hérité par toute séance sans `nombrePeriodes`, en lecture ; le cache
+> `seancesCompletes_gc_*` se régénère à l'ouverture. Sentinelle `sentinelle-830-periodes-heritees-de-l-horaire`
+> (4 essais, break-test rouge). SUIVI-BUGS #830 écrit. **#830 inscrit au BACKLOG** pour la suite (la barre
+> doit dire pourquoi elle est vide). ⚠ Leçon de méthode : la CSP de l'app interdit `new Function` — pour
+> instrumenter une fonction, envelopper temporairement les globaux qu'elle appelle (sonde e).
+> **Ce qui attend Grégoire** : ouvrir `Suivi › Suivi du groupe` sur un groupe H26 (nouvel onglet) — la barre A
+> a ses points ; la porte du lot 1 (`PORTES-TERRAIN-2026-09-11-suivi-du-groupe.md`).
+> **Ce qui attend Cowork** : la consigne du lot 2 (la Liste), l'artefact de la porte du lot 1.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 13 H 30 : SUIVI DU GROUPE, LOT 1 DU CADRAGE 11 LIVRÉ (1.131.0)
 
 > ✅ **`main` à 1.131.0, build `0911-1259`, commit de release `1d51883e`.** Tout est sur `main` ; aucune branche
