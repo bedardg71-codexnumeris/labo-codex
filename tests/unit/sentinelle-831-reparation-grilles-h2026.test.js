@@ -57,6 +57,8 @@ function storeBase() {
         h2026_evaluationsSauvegardees: [
             EVAL('grille_ANCIEN_A', ['a1', 'a2', 'a3', 'a4']), EVAL('grille_ANCIEN_A', ['a1', 'a2', 'a3', 'a4']),
             EVAL('grille_ANCIEN_B', ['b1', 'b2', 'b3', 'b4', 'b5']),
+            // Le cas réel de juin : une éval MAL ESTAMPILLÉE — critères de B sous l'id de A.
+            EVAL('grille_ANCIEN_A', ['b1', 'b2', 'b3', 'b4', 'b5']),
         ],
         h2026_cartouches_GRILLE_NEUF_A: [{ id: 'cart1', grilleId: 'GRILLE_NEUF_A', nom: 'Cartouche A' }],
     };
@@ -66,8 +68,9 @@ describe('#831 · dry-run et exécution', () => {
     it('dry-run : le plan est établi par preuve, rien n\'est écrit', async () => {
         const b = monter(storeBase());
         const rapport = await b.win.reparer831();
-        expect(rapport).toMatch(/grille_ANCIEN_A \(2 évals, 4 critères\) ← jumelle GRILLE_NEUF_A/);
-        expect(rapport).toMatch(/grille_ANCIEN_B \(1 évals, 5 critères\) ← jumelle GRILLE_NEUF_B/);
+        // Empreinte MAJORITAIRE : 2 évals sur 3 portent a1..a4 ; la 3e (critères de B) est nommée, pas prise.
+        expect(rapport).toMatch(/grille_ANCIEN_A \(3 évals, 4 critères portés par 2 ; 1 mal estampillée\(s\), non touchée\(s\)\) ← jumelle GRILLE_NEUF_A/);
+        expect(rapport).toMatch(/grille_ANCIEN_B \(1 évals, 5 critères portés par 1\) ← jumelle GRILLE_NEUF_B/);
         expect(b.journal).toEqual([]);
     });
 
@@ -128,6 +131,9 @@ describe('#831 · dry-run et exécution', () => {
 // ---------------------------------------------------------------------------
 // JOURNAL DU BREAK-TEST (11 septembre 2026)
 //   `memesEnsembles` remise à `a.size === b.size` (comparaison par la taille
-//   seule) : l'essai « preuve » ROUGE (la grille au critère renommé est acceptée
-//   et recréée). Remis.
+//   seule) : 4 essais ROUGES (la grille au critère renommé acceptée, et
+//   l'ambiguïté avec GRILLE_GENERIQUE). Remis.
+//   r2 : l'empreinte majoritaire remplacée par l'UNION des critereId (le
+//   premier jet, refusé sur les données réelles : 14 critères pour Grille-4) :
+//   « dry-run » ROUGE (grille_ANCIEN_A refusée). Remis.
 // ---------------------------------------------------------------------------

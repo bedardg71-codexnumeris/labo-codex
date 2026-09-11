@@ -53,20 +53,35 @@
    ============================================================================ */
 (function () {
     'use strict';
-    var VERSION_OUTIL = 'r1 · 11 sept. 2026';
+    var VERSION_OUTIL = 'r2 · 11 sept. 2026 (empreinte majoritaire, hors-empreinte nommés)';
     var TRIMESTRE = 'h2026';
     var K = function (nom) { return TRIMESTRE + '_' + nom; };
     var KC = function (grilleId) { return TRIMESTRE + '_cartouches_' + grilleId; };
     var clone = function (x) { return JSON.parse(JSON.stringify(x)); };
     var _sauvegarde = null;
 
+    /**
+     * L'empreinte MAJORITAIRE des évals d'une grille : l'ensemble de critereId
+     * que le plus grand nombre d'entre elles portent. Pourquoi pas l'union :
+     * le dossier de juin (RELAIS-grilles-h2026-desappariees §0bis) a mesuré
+     * trois évals « mal estampillées » — elles portent les critères d'une
+     * AUTRE grille sous ce grilleId. L'union ferait 14 critères que personne
+     * ne porte ; la majorité en fait 4, et nomme les hors-empreinte sans y
+     * toucher (ce sont des évaluations : on ne réécrit pas la mémoire).
+     */
     function empreinteCriteresEvals(evals, grilleId) {
-        var ids = new Set();
+        var comptes = {}, ensembles = {};
         evals.forEach(function (e) {
             if (!e || e.grilleId !== grilleId) return;
-            (e.criteres || []).forEach(function (c) { if (c && c.critereId) ids.add(String(c.critereId)); });
+            var ids = (e.criteres || []).map(function (c) { return c && c.critereId ? String(c.critereId) : null; }).filter(Boolean).sort();
+            var k = ids.join('|');
+            comptes[k] = (comptes[k] || 0) + 1;
+            ensembles[k] = ids;
         });
-        return ids;
+        var meilleure = null, total = 0;
+        Object.keys(comptes).forEach(function (k) { total += comptes[k]; if (meilleure === null || comptes[k] > comptes[meilleure]) meilleure = k; });
+        if (meilleure === null || meilleure === '') return { ids: new Set(), nb: 0, horsEmpreinte: total };
+        return { ids: new Set(ensembles[meilleure]), nb: comptes[meilleure], horsEmpreinte: total - comptes[meilleure] };
     }
     function empreinteGrille(g) {
         return new Set((g && g.criteres || []).map(function (c) { return String(c && c.id); }));
@@ -88,14 +103,15 @@
         var plan = [], refus = [];
         Object.keys(cites).forEach(function (idAttendu) {
             if (presents.has(idAttendu)) return;
-            var empreinte = empreinteCriteresEvals(evals, idAttendu);
+            var emp = empreinteCriteresEvals(evals, idAttendu);
+            var empreinte = emp.ids;
             if (empreinte.size === 0) { refus.push({ idAttendu: idAttendu, nbEvals: cites[idAttendu], motif: 'aucun critereId porté par ces évals' }); return; }
             var jumelles = grilles.filter(function (g) { return g && !g.isDemo && memesEnsembles(empreinteGrille(g), empreinte); });
             if (jumelles.length !== 1) {
-                refus.push({ idAttendu: idAttendu, nbEvals: cites[idAttendu], motif: jumelles.length === 0 ? 'aucune grille du trimestre ne porte exactement ces ' + empreinte.size + ' critères' : jumelles.length + ' grilles portent ces critères (ambigu)' });
+                refus.push({ idAttendu: idAttendu, nbEvals: cites[idAttendu], motif: jumelles.length === 0 ? 'aucune grille du trimestre ne porte exactement ces ' + empreinte.size + ' critères (empreinte majoritaire, ' + emp.nb + ' évals)' : jumelles.length + ' grilles portent ces critères (ambigu)' });
                 return;
             }
-            plan.push({ idAttendu: idAttendu, nbEvals: cites[idAttendu], nbCriteres: empreinte.size, jumelle: jumelles[0] });
+            plan.push({ idAttendu: idAttendu, nbEvals: cites[idAttendu], nbCriteres: empreinte.size, nbDansEmpreinte: emp.nb, horsEmpreinte: emp.horsEmpreinte, jumelle: jumelles[0] });
         });
         return { plan: plan, refus: refus };
     }
@@ -114,7 +130,7 @@
             L('grilles du trimestre : ' + grilles.length + ' ; évaluations : ' + evals.length);
             var r = etablirPlan(grilles, evals);
             r.refus.forEach(function (x) { L('  ✗ ' + x.idAttendu + ' (' + x.nbEvals + ' évals) — REFUS : ' + x.motif); });
-            r.plan.forEach(function (x) { L('  ✓ ' + x.idAttendu + ' (' + x.nbEvals + ' évals, ' + x.nbCriteres + ' critères) ← jumelle ' + x.jumelle.id + ' « ' + x.jumelle.nom + ' »'); });
+            r.plan.forEach(function (x) { L('  ✓ ' + x.idAttendu + ' (' + x.nbEvals + ' évals, ' + x.nbCriteres + ' critères portés par ' + x.nbDansEmpreinte + (x.horsEmpreinte ? ' ; ' + x.horsEmpreinte + ' mal estampillée(s), non touchée(s)' : '') + ') ← jumelle ' + x.jumelle.id + ' « ' + x.jumelle.nom + ' »'); });
             if (r.plan.length === 0) { L('Rien à recréer.'); return fin(lignes); }
 
             // Cartouches : état des tiroirs
