@@ -9,8 +9,13 @@
 > **Ce qui échoue ici devient un item de backlog, avec son numéro de porte.** Jamais une note mentale.
 >
 > ⚠ **Aucun banc ne peut mesurer ceci** : les en-têtes de cache n'existent qu'une fois déployés, derrière Cloudflare
-> Access, et un fichier ouvert en `file://` n'a pas d'en-têtes. **C'est cette porte qui juge le lot** — si la rangée 2
-> reste au-dessus de quelques secondes, la cause est ailleurs et on remesure avant de toucher à autre chose.
+> Access, et un fichier ouvert en `file://` n'a pas d'en-têtes.
+>
+> ✅ **Rangée 2.1 RELEVÉE par Grégoire le 11 septembre à 11 h 58, sur `1.130.1`, nouvel onglet : Load 527 ms, 302 lignes
+> en 304.** Elle **réfute** l'hypothèse de départ : trois cents revalidations coûtent une demi-seconde, pas 30 à 45 s ;
+> les 34-51 s du matin étaient des rechargements forcés. **La cause des 30-45 s n'est pas établie.** Le lot reste
+> livré (moins de requêtes, sain) ; les rangées 2.2 à 2.4 ne jugent plus une vitesse, elles vérifient que
+> l'immuable est arrivé et n'a rien figé. Les seuils en secondes sont des notes, pas des critères d'échec.
 
 **Pourquoi cette liste est courte.** Quatre rangées, fixées par la consigne. Le reste est mesuré par une sentinelle
 (chaque script d'`index.html` porte un jeton ; les deux chargements dynamiques aussi ; `/js/*` immuable, `index.html`
@@ -45,17 +50,17 @@ elle-même : c'est ce qui a caché la cause ce matin (0,92 s au rechargement, 34
 
 | | Geste | À noter |
 |---|---|---|
-| **2.1a** | Chrome, Mac. **Nouvel onglet** ; ouvre les outils de développement (**Cmd + Option + I**), onglet **Network** ; puis tape `app.codexnumeris.org` et Entrée. Attends la fin du chargement. | En bas du panneau Network : **Load = _____ s** ; et le nombre de lignes dont la colonne Status dit **304** : _____ (tape `304` dans le filtre du panneau pour les compter). Le bas de page doit dire `1.130.1`. |
+| **2.1a** ✅ | Chrome, Mac. **Nouvel onglet** ; ouvre les outils de développement (**Cmd + Option + I**), onglet **Network** ; puis tape `app.codexnumeris.org` et Entrée. Attends la fin du chargement. | **Relevé 11 h 58 : Load 527 ms, 302 lignes en 304**, sur `1.130.1`. |
 
 ### 2.2 · Après le déploiement — la seconde ouverture est courte
 
-> **Pourquoi.** C'est ce que tu as vécu ce matin : 30 à 45 s à chaque ouverture. Attendu après le lot : la
-> première ouverture reçoit ce qui a changé ; la seconde ne redemande plus rien au serveur.
+> **Pourquoi.** La première ouverture reçoit ce qui a changé ; la seconde ne doit plus rien redemander au serveur
+> pour `js/`. (Ce n'est pas ce qui expliquait tes 30-45 s — voir l'en-tête — mais c'est ce que le lot promet.)
 
 | | Geste | Attendu |
 |---|---|---|
 | **2.2a** | Chrome, Mac. **Nouvel onglet**, Network ouvert, tape l'adresse. C'est la **première** ouverture depuis la mise à jour : elle peut être longue. Lis le bas de page. | `1.130.2`. Load noté pour mémoire : _____ s (aucun attendu sur cette rangée). |
-| **2.2b** | **Ferme cet onglet.** **Nouvel onglet**, Network ouvert, tape l'adresse. | **Load sous 3 s** : _____ s. Dans la colonne **Size**, les lignes `js/…` disent **« (memory cache) »** ou **« (disk cache) »** ; **zéro ligne `js/…` en 304** (filtre `304`). |
+| **2.2b** | **Ferme cet onglet.** **Nouvel onglet**, Network ouvert, tape l'adresse. | **Zéro ligne `js/…` en 304** (filtre `304`) : dans la colonne **Size**, les lignes `js/…` disent **« (memory cache) »** ou **« (disk cache) »**. Load noté pour mémoire : _____ ms (la référence était 527 ms ; ce n'est pas un critère). |
 
 ### 2.3 · L'en-tête est bien arrivé jusqu'à Chrome
 
@@ -73,25 +78,26 @@ elle-même : c'est ce qui a caché la cause ce matin (0,92 s au rechargement, 34
 
 | | Geste | Attendu |
 |---|---|---|
-| **2.4a** | Safari, iPad. Ouvre l'application ; **ferme-la complètement** (balaie-la hors de la liste des apps) ; rouvre-la en comptant les secondes à la montre | **Seconde ouverture sous 5 s** : _____ s. Et **le bas de page dit `1.130.2`**. |
+| **2.4a** | Safari, iPad. Ouvre l'application ; **ferme-la complètement** (balaie-la hors de la liste des apps) ; rouvre-la | **Le bas de page dit `1.130.2`** — c'est le critère. Secondes à la montre, pour mémoire seulement : _____ s. |
 
 ---
 
 ## §3 · Décisions — ce qui attend ton verdict
 
-> **Ce ne sont pas des vérifications.** Une seule, et seulement si la rangée 2.2b est au-dessus de quelques secondes.
+> **Ce ne sont pas des vérifications.** Aucune décision n'attend ici : les deux suites prévues de #825 (`defer`,
+> écran d'attente) sont **retirées** — elles répondaient à une cause que ta mesure de 11 h 58 a écartée.
 
-| | Question | Ton verdict |
+| | Ce qui reste dû | Quand |
 |---|---|---|
-| **3.1** | **Si 2.2b reste au-dessus de 3 s** : la cause n'est pas la revalidation. Les deux suites de #825 (charger les scripts en parallèle avec `defer` — temps 2 ; un écran d'attente — temps 3) ne se font **que sur ce chiffre**, à froid. Si 2.2b est sous 3 s, elles n'ont plus d'objet. Ton chiffre, et ce que tu veux : _____ | _______ |
+| **3.1** | **La prochaine fois que l'ouverture prend 30 s ou plus** : Chrome, **Cmd + Option + I**, onglet **Network**, et regarde la **barre la plus longue** dans la cascade (colonne Waterfall). Note son nom (une requête ? `index.html` lui-même ? une police ? un appel à Cloudflare Access ?) et sa durée, dans un rapport de bug (le bouton de retour de l'application) — une capture d'écran de cette ligne suffit. | Au moment où ça se reproduit, pas avant. Sans reproduction, rien à coder. |
 
 ---
 
 ## §4 · Ce que je n'ai pas pu vérifier
 
-- **Le chiffre.** Rien ici n'a été mesuré en ligne : le lot est jugé par cette porte, pas par un banc. L'inférence
-  (revalidation de 199 scripts à chaque ouverture) vient de tes trois captures de ce matin ; elle explique le
-  rechargement simple à 0,92 s, mais elle n'est prouvée que si 2.2b descend.
+- **La cause des 30-45 s.** L'inférence de départ (revalidation de 199 scripts à chaque ouverture) est réfutée par ta
+  référence de 11 h 58 (527 ms pour 302 revalidations). Ce que tu as vécu à 7 h 08 n'a pas été reproduit en mesure ;
+  les trois captures de 7 h 17-7 h 20 étaient des rechargements forcés. La cause reste à saisir (§ 3.1).
 - **Cloudflare.** Il peut réécrire ou ajouter des en-têtes de cache ; seule la rangée 2.3a le dit.
 - **Le pack de démonstration (1,1 Mo) et le décodeur HEIC** portent désormais le numéro de build comme jeton : ils
   seront retéléchargés une fois par version, seulement chez qui active la démo ou remet un HEIC. Assumé, pas mesuré.
