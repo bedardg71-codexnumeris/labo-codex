@@ -208,6 +208,17 @@ PROPOSÉES par l'auditeur, ARBITRÉES par Grégoire, avant tout lot de correctio
 | 2 | **La pratique de notation** — la note du cours (quatre familles SOM/STD/SPE/DEN, les deux systèmes de calcul, l'échelle globale, les jetons) | `PROMPT-AUDIT-pratique-de-notation-2026-09-05.md` | ⏳ **À EXÉCUTER** — prêt, relais donné à Grégoire le 5 septembre. Part du flux H de l'audit 1. Ferme au passage `ultrareview-lot-3-indices.md` et `ultrareview-lot-4a-evaluation.md` (mai, sans disposition). |
 | 3 | **L'onglet Suivi** — présences → assiduité, complétion, niveau, IPB, palier RàI, interventions, agrégats du groupe, graphiques ; **et la protection du volet confidentiel** dans tout ce qui sort | `PROMPT-AUDIT-onglet-suivi-2026-09-05.md` | ⏳ **À EXÉCUTER EN TROISIÈME**, après le 2 (il lit ce que les deux moteurs produisent). Jamais audité comme onglet (mesuré le 5 septembre). Ferme au passage `ultrareview-lot-6-travaux-saisie.md` (N1-N6, présences) et les §5.3/§8/§9 de `AUDIT-decouplage-srpnf-idme-conception-2026-08-27.md`. |
 
+### 11 · « Rencontres » — l'orthopédagogue entre par Suivi — `CADRAGE-2026-09-11-rencontres-l-orthopedagogue-entre-par-suivi.md`
+**Ajouté le 11 septembre au soir par Cowork, après deux courriels de l'orthopédagogue (20 août, 11 sept.) et deux mesures**
+(dossier `docs/orthopedagogie/` du dépôt). Son but, au mot : « universaliser l'application », pas un outil pour une
+seule personne. ⮕ Ce que la mesure a trouvé : le rendez-vous existe déjà (c'est l'intervention) ; « mes élèves » passe par un seul
+goulot (`obtenirEtudiantsCoursActif`) ; les données sont rangées par trimestre, pas par groupe ; le mur est le calendrier des
+présences, engendré par l'horaire hebdomadaire (22 lecteurs).
+▣ **VALIDÉ par Grégoire, 19 h 20** : entrée par Suivi, un sous-onglet nouveau (mot de travail « Rencontres ») ; à la première
+ouverture, **trois questions** (dates du trimestre, nom du service, liste d'élèves) créent en coulisse **un cours de service sans
+code ni discipline, visible dans Cadre**. Pas d'île, pas d'état invisible. Cinq lots proposés (§ 6), cinq points qui remontent
+à lui (§ 7 : les mots, la complétion, la présence aux rendez-vous, le transfert, le dépistage sur sa liste). Rien n'est codé.
+
 ### Né du second audit · Ce que vaut un non-remis, famille par famille — `CADRAGE-2026-09-05-non-remis-par-famille.md`
 **Une règle par famille, pas une règle de moteur** (Grégoire, 5 septembre) : zéro en sommative, ignoré en
 « meilleures notes » si le minimum est atteint. Première mesure due : ce que chaque famille fait aujourd'hui de

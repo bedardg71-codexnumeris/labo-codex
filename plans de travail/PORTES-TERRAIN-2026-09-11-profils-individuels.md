@@ -57,7 +57,7 @@ aucun banc ne connaît tes courbes comme toi.**
 
 | | Geste | Attendu |
 |---|---|---|
-| **3** | Un élève que tu connais, section **Performance › Critères**, sur TON échelle | **les mêmes courbes qu'avant** — mêmes hauteurs, mêmes creux, aucun point disparu. Sous la légende « Critères : », aucune ligne « … sans valeur convertible » (sauf si une de ses évaluations désigne une échelle disparue : alors la ligne le dit, et c'est vrai) |
+| **3** | Un élève que tu connais, section **Performance › Critères**, sur TON échelle | **les mêmes courbes qu'avant** — mêmes hauteurs, mêmes creux, aucun point disparu. ⚠ **Sauf un critère noté en points** (si ta grille en a — le cas du 4 sept., trouvé sur ton écran, le laisse penser) : sa hauteur peut bouger, elle vaut maintenant sa fraction (21 sur 30 → 70 %), plus le niveau déduit — c'est le correctif, pas une régression ; dis-le dans la note. Le pack démo n'a aucun critère en points : sa non-régression ne couvre pas ce chemin (relecture croisée Cowork, 19 h 43). Sous la légende « Critères : », aucune ligne « … sans valeur convertible » (sauf si une de ses évaluations désigne une échelle disparue : alors la ligne le dit, et c'est vrai) |
 | **4** | Mode démonstration, un élève, mêmes graphiques | pas de trou dans les courbes ; **une ligne sous la légende dit « Zones : échelle « IDME et niv 0 » (n évaluations sur m) »** — c'est voulu : le pack démo désigne deux échelles, le graphique dit laquelle donne les zones. S'il y a un trou, la ligne « n évaluations sans valeur convertible dans cette échelle » est là |
 
 ### 2.3 · Les cases du rapport appartiennent au trimestre
