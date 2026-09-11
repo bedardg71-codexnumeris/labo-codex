@@ -1,6 +1,9 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
-> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 11 septembre 2026 à 16 h 30 (Toronto), à la clôture de
+> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 11 septembre 2026 à 17 h 29 (Toronto), à la clôture de
+> `1.133.0` (lot 3 du cadrage 11, la Saisie des présences).** Le MANDAT de Cowork (17 h 08) est **consommé pour le lot 3** ;
+> le lot 4 a sa consigne en file (`plans de travail/CONSIGNE-SUIVANTE-lot-4-profils-individuels.md`, Cowork 17 h 14).
+> Version précédente : **ÉTAT MESURÉ remesuré par Claude Code le 11 septembre 2026 à 16 h 30 (Toronto), à la clôture de
 > `1.132.0` (lot 2 du cadrage 11, la Liste des étudiant·es).** **MANDAT réécrit par Cowork à 17 h 08** pour une session
 > neuve : le lot 3 (la Saisie des présences) a sa consigne dans `plans de travail/CONSIGNE-DU-JOUR.md`.
 > Version précédente : **ÉTAT MESURÉ réécrit par Claude Code le 11 septembre 2026 à midi (Toronto), à la clôture de
@@ -47,14 +50,14 @@ il n'y avait **aucune consigne du jour en attente** au matin du 10.
 
 ---
 
-## ÉTAT MESURÉ — 11 SEPTEMBRE 2026, 16 H 30 (TORONTO)
+## ÉTAT MESURÉ — 11 SEPTEMBRE 2026, 17 H 29 (TORONTO)
 
-▣ **Remesuré par Claude Code à la clôture de `1.131.0` — chaque ligne avec la commande qui la
+▣ **Remesuré par Claude Code à la clôture de `1.133.0` — chaque ligne avec la commande qui la
 produit.** La version précédente de ce bloc (10 septembre, 1.128.4) est remplacée, pas corrigée.
 ⚠ **Un état mesuré vieillit en heures. Remesure, ne recopie pas.**
 
-- **Version `1.132.0`** (`cat version.json` ; le build y est) — lot 2 du cadrage 11, la Liste des étudiant·es
-  (L-1 à L-11 de l'audit du 6). Avant elle, 1.131.1 (15 h) : retour testeur #830, la
+- **Version `1.133.0`** (`cat version.json` ; le build y est) — lot 3 du cadrage 11, la Saisie des présences
+  (S-3, S-4, S-6 de l'audit du 6 ; S-7 cité). Avant elle, 1.132.0 (16 h, lot 2, la Liste, L-1 à L-11) ; 1.131.1 (15 h) : retour testeur #830, la
   barre A des groupes H2026 (horaires d'avant #540 sans périodes par séance → héritage du format déclaré) ; puis
   #831 et #832 (données H2026 de l'instance en ligne, réparées par Grégoire avec des outils dry-run par preuve,
   sans release). **Quatre releases le 11 au matin**
@@ -69,7 +72,7 @@ produit.** La version précédente de ce bloc (10 septembre, 1.128.4) est rempla
   l'application) et la **suppression non commise** de la capture du 9 sept. (`Retours des
   testeurs/grégoire/BUG_…journal-de-bord-sans-fond.png`, à Grégoire). Rien d'autre
   (`git status --porcelain -uall`).
-- **Vitest : 537 fichiers / 5863 essais, 0 échec** (`cd tests && npm run test:unit`, ~27 s), mesuré
+- **Vitest : 538 fichiers / 5875 essais, 0 échec** (`cd tests && npm run test:unit`, ~27 s), mesuré
   AVANT et APRÈS le commit de release (la sentinelle anti-cache post-commit ne juge qu'un bump commité).
   ⛔ **PAS `npm test`** : il enchaîne Playwright, plus de dix minutes.
 - **Playwright : verdict local rendu par `scripts/pousser.sh` sur le SHA du commit de relais** — lire
@@ -86,6 +89,7 @@ produit.** La version précédente de ce bloc (10 septembre, 1.128.4) est rempla
 
 | Lot | Livré | ⚠ Ce que la mesure a corrigé |
 |---|---|---|
+| `#749` lot 3 du cadrage 11 (1.133.0, la Saisie des présences) | `datesVerrouillees` par trimestre ET groupe-cours (patron `cleEtudiantsSuivis`, semis de la liste nue ENTIÈRE, lue jamais réécrite, décision de stock de Cowork nommée dans la porte § 3) ; quatre préférences d'écran sous `cle()` sans semis, champ REMIS depuis la base ; bandeau réévalué à chaque initialisation, sur horaire OU séances complètes ; date par défaut = dernière séance ≤ aujourd'hui ; « Précédent » sans date ; garde `!coursId` (deux sites) ; saisie réinitialisée à l'activation et au retrait de la démo ; `donnees-v2.js` montre la clé réelle ; sentinelle 12 essais / 10 break-tests ; essai Playwright démo → saisie (1 break-test) ; porte 5 rangées | les quatre clés d'écran DOIVENT être au registre `CLES_NAMESPACEES` (une clé absente est rendue nue par `cle()`, avec un warn) — donc l'export de trimestre les emporte si elles existent (quatre chaînes, sans effet) ; les trois signaux « groupe-cours / trimestre / démo » : l'orchestre réinitialise TOUJOURS la saisie (`#suivi-saisie` n'a jamais `u-hide`), la démo ne le faisait pas (le mapping de modes.js vise `afficherTableauPresences`, inexistant — #736, cité) → appel direct ajouté dans demo-activation.js ; le cliquet #398 monte à 2 (second appel légitime à la date locale) ; la même garde S-3 manquait dans `sauvegarderPresencesSansValidation` ; « ← Précédent » sans date : remesuré, le bouton rendait sans rien faire ; aucun nouvel ID |
 | `#749` lot 2 du cadrage 11 (1.132.0, la Liste) | abandons visibles grisés avec statut (décision Grégoire 14 h 17), statistiques sur les actifs prouvées ; tris « # » et « DA » ; recherche NFD ; une écriture par rendu + saisie différée 200 ms ; six patterns ; « ≥ Min. » tient, 0 sous N ; DA en double refusé / ignoré et compté ; `normaliserNumeroGroupe` unique ; bouton d'aide conservé ; sentinelle 14 essais / 6 break-tests ; porte 7 rangées | `String(...).padStart(5,'0')` présent **dix** fois dans trimestre-v2-etudiants.js, pas trois ; quatre sentinelles voisines figeaient les constats d'origine (ordre, message d'import, stub du groupe, forme du `localeCompare`) ; relecture adverse : un exclu n'est jamais « insuffisant » (le badge (N) et le grisé partageaient mal leur population), le compteur « N personnes » compte des lignes (commenté), `normaliserNumeroGroupe(undefined)` rend `'00000'` (commenté) ; aucun nouvel ID |
 | `#749` lot 1 du cadrage 11 (1.131.0, `1d51883e`) | liste suivie par trimestre et groupe-cours, filtrée à la lecture, semis réversible ; sixième notifié ; filtre P ; panneau mort retiré ; G-8 ; démo résolue à la lecture ; sentinelle 21 essais / 6 break-tests | G-7 **périmé** (fonctions sans appelant depuis #303) ; la préférence `grilleReferenceDepistage` est GLOBALE — « poser à l'activation de la démo » aurait écrasé le choix réel (résolution à la lecture à la place) ; relecture adverse : le semis lit aussi `<trim>_etudiantsSuivis` (migration des résidus), l'ajout ne purge plus l'abandon ; `#828`, `#829` inscrits |
 | `#825` temps 1 (1.130.2) | `netlify.toml` : `/js/*` et `/css/*` immuables un an, invariant écrit ; trois trous bouchés à la source (`repertoires-bibliotheque.js`, `pack-demo-20.js`, `heic-worker.js`) ; sentinelle #825, 16 essais, 5 break-tests rouges ; skill `portes-terrain` corrigé ; porte terrain à 4 rangées | la fiche #825 et le skill disaient « le garde ne surveille que `main.js` » : **faux depuis #547** ; un commentaire contenant `/js/*` a fait avaler la ligne du Worker par le strip-commentaires des tests 597 — reformulé ; **`/styles.css` NE devient PAS immuable** (relecture adverse : `design-system.html` + 17 modules servis la chargent sans jeton) ; le garde #547 ne voit pas les deux fichiers à jeton de build → garde pre-push ajoutée ; `#826` inscrit (jetons déjà servis deux fois le 10 sept.) |
@@ -113,8 +117,8 @@ l'ordre de l'audit puis un transversal, un lot par séance, sa porte relevée av
 |---|---|---|
 | 1 | Suivi du groupe | **livré `1.131.0`, vu** (porte 10/10 sur ses deux groupes réels, `#749` clos) |
 | 2 | Liste des étudiant·es | **livré `1.132.0`, vu** (porte 10/10, dont un vrai abandon grisé — sa décision de 14 h 17) |
-| **3** | **Saisie des présences** | **consigne écrite à froid** : `plans de travail/CONSIGNE-DU-JOUR.md` — c'est ton lot |
-| 4 | Profils individuels | à cadrer par Cowork (P-1 à P-6 ; une question didactique : les échelles non convertibles dans les graphiques) |
+| 3 | Saisie des présences | **livré `1.133.0`, porte DUE** (`plans de travail/PORTES-TERRAIN-2026-09-11-saisie-des-presences.md`, cinq rangées, la 1 écrit chez lui) |
+| **4** | **Profils individuels** | **consigne en file** : `plans de travail/CONSIGNE-SUIVANTE-lot-4-profils-individuels.md` (Cowork, 17 h 14 ; `#754` et `#752` entrent, sa décision de 17 h 15) — Cowork la renomme en consigne du jour quand le lot 3 est VU |
 | 5 | Interventions | à cadrer (I-1, I-5, I-6, I-7, code mort) |
 | 6 | Animation | à cadrer (ce qui est projeté aux élèves : à Grégoire) |
 | 7 | Transversal | 58 cibles tactiles sur maquette validée ; 12 clés nues, une par une |

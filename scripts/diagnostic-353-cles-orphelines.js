@@ -113,7 +113,13 @@ window.reparer353 = async function (opts) {
     // `etudiantsSuivis` (nue) : plus écrite depuis #749 (11 sept. 2026) — la liste
     // vit sous `<trim>_etudiantsSuivis_gc_<gcId>` ; la nue a été LUE une fois
     // pour le semis et laissée en place, exprès (réversibilité).
-    var SANS_PRODUCTEUR = ['simulation_indicesCP', 'etudiantsSuivis'];
+    // `datesVerrouillees` (nue) : plus écrite depuis #749 lot 3 (11 sept. 2026) — le
+    // verrou vit sous `<trim>_datesVerrouillees_gc_<gcId>` ; la nue est LUE une fois
+    // (semis, la liste entière) et laissée en place, exprès. Les quatre états d'écran
+    // de la saisie (`presences_*`, `recherchePresences`) sont passés sous `cle()` le
+    // même jour, sans semis : leurs nues sont de simples orphelines.
+    var SANS_PRODUCTEUR = ['simulation_indicesCP', 'etudiantsSuivis', 'datesVerrouillees',
+        'presences_date', 'presences_groupe', 'presences_tri', 'recherchePresences'];
 
     toutes.forEach(function (x) {
         // 1. Préfixe de trimestre absent du registre `trimestres`.

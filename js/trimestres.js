@@ -100,6 +100,22 @@
         // comme pour snapshots ; la clé nue `etudiantsSuivis` d'avant n'est plus
         // que lue (semis), jamais migrée ici.
         'etudiantsSuivis',
+        // 🆕 #749 lot 3 (11 sept. 2026) : les dates verrouillées de la saisie des
+        // présences. Clé RÉELLE composée : `<trim>_datesVerrouillees_gc_<groupeCoursId>`
+        // (saisie-presences.js : cleDatesVerrouillees), même forme qu'`etudiantsSuivis`
+        // et `snapshots` — les boucles de copie/migration de ce fichier ne voient pas
+        // ces clés suffixées ; la clé nue `datesVerrouillees` d'avant n'est plus que
+        // lue (semis, la liste entière), jamais migrée ici.
+        'datesVerrouillees',
+        // 🆕 #749 lot 3 (11 sept. 2026) : les quatre états d'écran de la saisie des
+        // présences (date, sous-groupe, tri, recherche), par trimestre. Inscrits ici
+        // pour que `cle()` les préfixe (une clé absente du registre est rendue nue,
+        // avec un warn) ; sans semis, et hors de l'inventaire de donnees-v2.js : un
+        // état d'écran ne voyage pas.
+        'presences_date',
+        'presences_groupe',
+        'presences_tri',
+        'recherchePresences',
         // 🆕 Corbeille fichiers travaux (4 mars 2026)
         'corbeilleFichiers',
         // 🆕 (24 mai 2026) Pratique de notation active : namespacée par trimestre

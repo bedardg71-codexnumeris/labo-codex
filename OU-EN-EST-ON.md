@@ -15,6 +15,23 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.133.0 — SAISIE DES PRÉSENCES : UNE DATE VERROUILLÉE NE L'EST QUE POUR CE GROUPE-COURS ET CE TRIMESTRE ; LA DÉMONSTRATION N'ANNONCE PLUS UNE CONFIGURATION INCOMPLÈTE** (lot 3 du cadrage 11, build à lire en bas de page).
+**Ce que tu verras** : dans `Suivi › Saisie des présences`, verrouiller une date (le cadenas) ne vaut plus que pour
+le groupe-cours et le trimestre où tu le fais — jusqu'ici, le 8 septembre verrouillé dans un groupe l'était dans
+l'autre, et le serait resté l'an prochain. Les dates que tu avais verrouillées avant restent verrouillées dans
+chacun de tes groupes (elles l'étaient partout ; rien n'est changé au passé, l'ancienne liste reste en place). La
+date, le sous-groupe, le tri et la recherche de l'écran appartiennent maintenant au trimestre : la démonstration ne
+te prend plus ta date, et te la rend au retour. La démonstration elle-même ouvre `Saisie des présences` sans le
+bandeau « Configuration incomplète », sur la dernière séance passée, avec ses vingt élèves — le 6, elle ouvrait sur
+le bandeau, une date vide et « (0 étudiant·e) ». « ← Précédent » sans date va à la dernière séance passée.
+Invisible mais posé : sans cours actif, l'enregistrement n'écrit plus rien (il remplaçait la fiche d'un autre cours).
+**Vérifié comment** : sentinelle de douze essais sur le module réel, dix fois cassée exprès (dix rouges) et remise ;
+les trois bancs du 6 qui affirmaient l'avant (S-3, S-4, S-6, et le banc du cadenas #785) disent l'après ; un essai
+Playwright active la démo dans le vrai `index.html`, ouvre la saisie et lit : aucun bandeau, une date posée, vingt
+élèves — cassé exprès (l'appel retiré), rouge, remis. **Pas vérifié** : ton écran, tes deux groupes réels, Safari,
+l'adresse en ligne — porte terrain de cinq rangées (`plans de travail/PORTES-TERRAIN-2026-09-11-saisie-des-presences.md`),
+dont la première écrit chez toi (le verrou et la grille qu'il sauvegarde ; déverrouiller remet tout comme avant).
+
 ↻ **1.132.0 — LISTE DES ÉTUDIANT·ES : LES ABANDONS RESTENT VISIBLES, GRISÉS ; LES TRIS TRIENT ; LA RECHERCHE IGNORE LES ACCENTS** (lot 2 du cadrage 11, build à lire en bas de page).
 **Ce que tu verras** : dans `Suivi › Liste des étudiant·es`, un élève en abandon, inactif ou en décrochage
 reste dans le tableau, en gris, avec son statut entre parenthèses après son nom — ta décision de 14 h 17.

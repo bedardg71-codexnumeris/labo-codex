@@ -828,7 +828,12 @@
             { cle: 'demo-actif', label: 'Mode démo actif', ns: false },
             { cle: 'indicesCP', label: 'Indices C/P', ns: true },
             { cle: 'formatHoraire', label: 'Format horaire', ns: true },
-            { cle: 'datesVerrouillees', label: 'Dates verrouillées', ns: true },
+            // #749 lot 3 (11 sept. 2026, S-4) : la clé RÉELLE est suffixée par le
+            // groupe-cours actif (saisie-presences.js : cleDatesVerrouillees), comme
+            // `snapshots`. L'inventaire annonçait `<trim>_datesVerrouillees`, que
+            // personne n'écrivait ; il montre maintenant la clé qui existe.
+            { cle: 'datesVerrouillees', label: 'Dates verrouillées (groupe-cours actif)', ns: true,
+              suffixe: () => { const gc = db.getSync('groupeCoursActif', null); return gc && gc.id ? '_gc_' + gc.id : ''; } },
             { cle: 'migrationLegacyEffectuee', label: 'Migration legacy effectuée', ns: false },
             { cle: 'migrationLegacyDate', label: 'Date migration legacy', ns: false }
         ];
@@ -836,7 +841,8 @@
         let html = '<table class="table-ressources"><thead><tr><th>Paramètre</th><th>Clé</th><th>Valeur</th><th>Actions</th></tr></thead><tbody>';
 
         parametres.forEach(p => {
-            const cleFinale = p.ns && trimestreActif ? trimestreActif + '_' + p.cle : p.cle;
+            const cleFinale = (p.ns && trimestreActif ? trimestreActif + '_' + p.cle : p.cle)
+                + (typeof p.suffixe === 'function' ? p.suffixe() : '');
             let valeur = null;
             try {
                 valeur = db.getSync(cleFinale, null);

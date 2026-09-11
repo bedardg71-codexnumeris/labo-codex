@@ -57,40 +57,75 @@ function initialiserModuleSaisiePresences() {
     }
 
     chargerGroupesPresences();
+
+    // #749 lot 3 (11 sept. 2026, S-6) : les séances du groupe-cours ACTIF d'abord,
+    // puis le bandeau « Configuration incomplète » — qui n'était évalué qu'ici, une
+    // fois au démarrage, sur le seul horaire. Il est réévalué à chaque
+    // `initialiserSaisiePresences` (changement de date, de groupe-cours, de
+    // trimestre, activation ou retrait de la démonstration : les trois chemins
+    // passent par ce module — trimestre-v2-orchestre, demo-activation, boot).
+    if (typeof genererSeancesCompletes === 'function') {
+        genererSeancesCompletes(null);
+    }
     verifierConfigurationFormatHoraire();
 
-    // 🆕 BETA 95.7 (22 jan) : Restaurer les paramètres persistés
+    // Restaurer les paramètres persistés — PAR TRIMESTRE (#749 lot 3, S-6).
+    // Les quatre préférences de l'écran (date, sous-groupe, tri, recherche)
+    // vivaient sous des clés NUES : la date d'un trimestre s'ouvrait dans
+    // l'autre. Sans semis : un état d'écran, un trimestre neuf part à vide, et
+    // les clés nues deviennent orphelines (scripts/diagnostic-353). Elles restent
+    // HORS de l'inventaire d'export de donnees-v2.js : un état d'écran ne voyage
+    // pas (décision Cowork, 11 sept.). Le champ est REMIS depuis la base, jamais
+    // laissé à sa valeur d'avant : le DOM survit au changement de trimestre, pas
+    // la préférence.
     const dateInput = document.getElementById('date-cours');
     const selectGroupe = document.getElementById('selectGroupePresences');
     const selectTri = document.getElementById('selectTriPresences');
 
-    const dateSauvegardee = db.getSync('presences_date', '');
-    const groupeSauvegarde = db.getSync('presences_groupe', '');
-    const triSauvegarde = db.getSync('presences_tri', 'nom');
+    const dateSauvegardee = db.getSync(cle('presences_date'), '');
+    const groupeSauvegarde = db.getSync(cle('presences_groupe'), '');
+    const triSauvegarde = db.getSync(cle('presences_tri'), 'nom');
 
     // Restaurer la date (seulement si valide et pas dans le futur)
-    if (dateInput && dateSauvegardee) {
+    if (dateInput) {
         const aujourdhui = window.dateLocaleYMD(); // #398 : date LOCALE
-        if (dateSauvegardee <= aujourdhui) {
-            dateInput.value = dateSauvegardee;
+        dateInput.value = (dateSauvegardee && dateSauvegardee <= aujourdhui) ? dateSauvegardee : '';
+        // Sans date mémorisée (trimestre neuf, démonstration qu'on vient
+        // d'activer) : la séance la plus proche ≤ aujourd'hui, plutôt qu'une
+        // grille vide et « Sélectionne une date » (S-6, mesuré en démo le 6 sept.).
+        if (!dateInput.value) {
+            dateInput.value = derniereSeancePassee() || '';
         }
     }
 
-    // Restaurer le groupe
-    if (selectGroupe && groupeSauvegarde) {
-        selectGroupe.value = groupeSauvegarde;
+    // Restaurer le sous-groupe et le tri
+    if (selectGroupe) {
+        selectGroupe.value = groupeSauvegarde || '';
     }
-
-    // Restaurer le tri
-    if (selectTri && triSauvegarde) {
-        selectTri.value = triSauvegarde;
+    if (selectTri) {
+        selectTri.value = triSauvegarde || 'nom';
     }
 
     if (dateInput && dateInput.value) {
         initialiserSaisiePresences();
         calculerEtSauvegarderIndicesAssiduite();
-
     }
+}
+
+/**
+ * La date de la dernière séance ≤ aujourd'hui, ou null (#749 lot 3, S-6).
+ * Lit le cache des séances complètes du groupe-cours actif (généré par
+ * l'appelant) ; ne passe pas par `obtenirToutesDatesCours`, dont le repli sur
+ * le calendrier journalise une erreur quand rien n'est encore configuré.
+ */
+function derniereSeancePassee() {
+    if (typeof obtenirSeancesCompletes !== 'function') return null;
+    const seances = obtenirSeancesCompletes() || {};
+    const aujourdhui = window.dateLocaleYMD();
+    const dates = Object.keys(seances)
+        .filter(d => Array.isArray(seances[d]) && seances[d].length > 0 && d <= aujourdhui)
+        .sort();
+    return dates.length > 0 ? dates[dates.length - 1] : null;
 }
 
 /* ===============================
@@ -712,30 +747,85 @@ function validerDateSaisie(dateStr) {
 }
 
 /**
+ * #749 lot 3 (11 sept. 2026, S-4) — LA CLÉ DES DATES VERROUILLÉES : PAR
+ * TRIMESTRE ET PAR GROUPE-COURS.
+ *
+ * L'INCIDENT (audit du 6 sept., S-4, mesuré) : la liste vivait sous la clé NUE
+ * `datesVerrouillees`, sans `cle()` ni groupe-cours — le 8 septembre verrouillé
+ * dans le groupe A l'était dans le groupe B, et le restait l'an prochain.
+ * Grégoire a deux groupes cet automne.
+ *
+ * Patron suivi : `cleEtudiantsSuivis` (tableau-bord-apercu.js, lot 1) — la
+ * famille `datesVerrouillees` est inscrite à CLES_NAMESPACEES (trimestres.js),
+ * la clé RÉELLE porte en plus le suffixe `_gc_<id>`, comme `snapshots` ; les
+ * boucles de copie/migration de trimestres.js ne voient pas ces clés suffixées.
+ * Sans groupe-cours actif : la clé du trimestre.
+ */
+const CLE_VERROU = 'datesVerrouillees';
+
+function cleDatesVerrouillees() {
+    const gc = db.getSync('groupeCoursActif', null);
+    const gcId = gc && gc.id ? String(gc.id) : '';
+    const base = cle(CLE_VERROU);
+    return gcId ? base + '_gc_' + gcId : base;
+}
+
+/**
+ * Les dates verrouillées du groupe-cours actif, telles qu'elles sont en base.
+ *
+ * SEMIS — UNE LECTURE QUI ÉCRIT UNE FOIS (tranché par Cowork le 11 sept. 2026,
+ * réversible). À la première lecture d'un groupe-cours dont la clé n'existe pas
+ * encore, si la clé NUE `datesVerrouillees` (le stock d'avant) existe, SA LISTE
+ * ENTIÈRE devient celle du groupe : une date verrouillée l'était partout, on ne
+ * change rien au passé, on cesse de propager l'avenir. La clé nue n'est NI
+ * effacée NI réécrite (orpheline connue de scripts/diagnostic-353-cles-orphelines.js).
+ * Seconde source : `migrerResidusClesNues` (trimestres.js) peut avoir déplacé la
+ * nue en `<trim>_datesVerrouillees` ; elle est lue de même, sans être écrite.
+ * Une liste vide ne se sème pas.
+ */
+function obtenirDatesVerrouillees() {
+    const k = cleDatesVerrouillees();
+    const liste = db.getSync(k, null);
+    if (Array.isArray(liste)) return liste;
+
+    let source = db.getSync(CLE_VERROU, null);
+    const kTrimestre = cle(CLE_VERROU);
+    if ((!Array.isArray(source) || source.length === 0) && kTrimestre !== k) {
+        source = db.getSync(kTrimestre, null);
+    }
+    if (!Array.isArray(source) || source.length === 0) return [];
+    const semis = source.slice();
+    db.setSync(k, semis);
+    return semis;
+}
+
+/**
  * Vérifie si une date est verrouillée
  */
 function estDateVerrouillee(dateStr) {
-    const datesVerrouillees = db.getSync('datesVerrouillees', []);
-    return datesVerrouillees.includes(dateStr);
+    return obtenirDatesVerrouillees().includes(dateStr);
 }
 
 /**
  * Bascule le verrouillage d'une date
  */
 function basculerVerrouillageDate(dateStr) {
-    let datesVerrouillees = db.getSync('datesVerrouillees', []);
+    const datesVerrouillees = obtenirDatesVerrouillees().slice();
 
     const index = datesVerrouillees.indexOf(dateStr);
     if (index > -1) {
         // Déverrouillage
         datesVerrouillees.splice(index, 1);
     } else {
-        // 🆕 FIX (3 fév 2026) : Sauvegarder les présences AVANT de verrouiller
+        // 🆕 FIX (3 fév 2026) : Sauvegarder les présences AVANT de verrouiller.
+        // ⚠ Cette sauvegarde écrit `cle('presences')` HORS du mode anonymisation :
+        // l'une des trois portes de #736, règle arbitrée après le 14 sept. 2026 —
+        // citée ici, pas rejugée. Le lot 3 change la CLÉ du verrou, pas la porte.
         sauvegarderPresencesSansValidation(dateStr);
         datesVerrouillees.push(dateStr);
     }
 
-    db.setSync('datesVerrouillees', datesVerrouillees);
+    db.setSync(cleDatesVerrouillees(), datesVerrouillees);
     initialiserSaisiePresences();
 }
 
@@ -802,6 +892,12 @@ function sauvegarderPresencesSansValidation(dateStr) {
     if (!Array.isArray(presences)) presences = [];
 
     const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
+    // #749 lot 3 (S-3, 11 sept. 2026) : même garde que dans `enregistrerPresences`,
+    // même motif — sans cours actif, la fiche d'un autre cours serait remplacée.
+    if (!coursId) {
+        console.warn('[Présences] sauvegarderPresencesSansValidation : aucun cours actif — rien n\'est écrit.');
+        return;
+    }
     const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
 
     // Filtrer par sous-groupe si sélectionné
@@ -896,10 +992,21 @@ function verifierConfigurationFormatHoraire() {
         ? obtenirSeancesHoraire()
         : db.getSync('seancesHoraire', []);
 
+    // #749 lot 3 (11 sept. 2026, S-6) : les SÉANCES COMPLÈTES du groupe-cours actif
+    // comptent aussi, pas seulement l'horaire — le cache que l'appelant vient de
+    // (re)générer. Le 6 sept., un collègue qui activait la démonstration lisait
+    // « Configuration incomplète » devant un horaire à deux séances et trente
+    // séances complètes, parce que ce bandeau n'était évalué qu'au démarrage.
+    let aDesSeances = seancesHoraire.length > 0;
+    if (!aDesSeances && typeof obtenirSeancesCompletes === 'function') {
+        const completes = obtenirSeancesCompletes() || {};
+        aDesSeances = Object.keys(completes).some(d => Array.isArray(completes[d]) && completes[d].length > 0);
+    }
+
     // Le bandeau porte son propre texte (index.html, #alerteFormatHoraire) : on le
     // révèle ou on le masque, sans le réécrire. L'innerHTML retiré ici tenait un
     // SECOND message, divergent de celui du HTML, avec son propre lien.
-    alerteDiv.classList.toggle('u-hide', seancesHoraire.length > 0);
+    alerteDiv.classList.toggle('u-hide', aDesSeances);
 }
 
 /* ===============================
@@ -916,20 +1023,24 @@ function initialiserSaisiePresences() {
     if (typeof genererSeancesCompletes === 'function') {
         genererSeancesCompletes(null);
     }
+    // #749 lot 3 (S-6) : le bandeau « Configuration incomplète » dit vrai à
+    // chaque initialisation, sur les séances qu'on vient de générer.
+    verifierConfigurationFormatHoraire();
 
     const dateInput = document.getElementById('date-cours');
     const selectGroupe = document.getElementById('selectGroupePresences');
     const selectTri = document.getElementById('selectTriPresences');
 
-    // 🆕 Sauvegarder les paramètres actuels pour persistance
+    // Sauvegarder les paramètres actuels pour persistance — PAR TRIMESTRE
+    // (#749 lot 3, S-6 ; voir initialiserModuleSaisiePresences).
     if (dateInput && dateInput.value) {
-        db.setSync('presences_date', dateInput.value);
+        db.setSync(cle('presences_date'), dateInput.value);
     }
     if (selectGroupe) {
-        db.setSync('presences_groupe', selectGroupe.value);
+        db.setSync(cle('presences_groupe'), selectGroupe.value);
     }
     if (selectTri) {
-        db.setSync('presences_tri', selectTri.value);
+        db.setSync(cle('presences_tri'), selectTri.value);
     }
 
     if (!dateInput || !dateInput.value) {
@@ -995,7 +1106,7 @@ function initialiserSaisiePresences() {
 
     // Restaurer la valeur de recherche sauvegardée (persistance lors de la navigation)
     const recherche = document.getElementById('recherche-saisie-presences');
-    const termeRecherche = db.getSync('recherchePresences', '');
+    const termeRecherche = db.getSync(cle('recherchePresences'), '');
     if (recherche && termeRecherche) {
         recherche.value = termeRecherche;
         filtrerTableauPresences();
@@ -1479,6 +1590,16 @@ function enregistrerPresences() {
     // ✅ CORRIGÉ (8 janvier 2026) : Obtenir coursId en premier pour filtrer correctement
     const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
 
+    // #749 lot 3 (S-3, 11 sept. 2026) : sans cours actif, la garde du filtre
+    // ci-dessous (`coursId && p.coursId && …`) tombe, et la fiche d'un AUTRE cours
+    // à cette date serait remplacée par une fiche `coursId: null`. Cas incohérent
+    // (`infoCours` nul avec un groupe-cours actif), jamais vu par Grégoire : on
+    // n'écrit rien, sans mot neuf à l'écran.
+    if (!coursId) {
+        console.warn('[Présences] enregistrerPresences : aucun cours actif — rien n\'est écrit.');
+        return;
+    }
+
     // Filtrer les étudiants si un sous-groupe est sélectionné (à l'intérieur du groupe-cours)
     let etudiantsATraiter = etudiants;
     if (groupeFiltre) {
@@ -1750,7 +1871,20 @@ function allerCoursSuivant() {
 function allerCoursPrecedent() {
 
     const dateInput = document.getElementById('date-cours');
-    if (!dateInput || !dateInput.value) {
+    if (!dateInput) {
+        return;
+    }
+
+    // #749 lot 3 (S-6, remesuré le 11 sept. 2026 : le bouton rendait sans rien
+    // faire quand la date était vide). Sans date, « Précédent » va à la dernière
+    // séance passée — le point de départ naturel d'une grille vide.
+    if (!dateInput.value) {
+        const derniere = derniereSeancePassee();
+        if (derniere) {
+            dateInput.value = derniere;
+            initialiserSaisiePresences();
+            mettreAJourBoutonsNavigation();
+        }
         return;
     }
 
@@ -1913,7 +2047,7 @@ function filtrerTableauPresences() {
     const terme = recherche.value.toLowerCase().trim();
 
     // Sauvegarder la valeur de recherche pour la persistance lors de la navigation
-    db.setSync('recherchePresences', terme);
+    db.setSync(cle('recherchePresences'), terme);
 
     const tbody = document.getElementById('tbody-saisie-presences');
     if (!tbody) return;
