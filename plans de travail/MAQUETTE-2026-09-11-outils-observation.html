@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Maquette validée par Grégoire le 11 septembre 2026 (« c'est très bien »). Ouvrir depuis le dépôt : la feuille de style est celle de l'application. Artefact : « Outils d'observation, trié », version 2. -->
+<title>Maquette — Outils d'observation, trié</title>
+</head>
+<body class="mode-clair">
+<link rel="stylesheet" href="../styles.css">
+<style>
+/* — propre à la maquette — */
+body{padding:0 16px 60px}
+.maquette{max-width:860px;margin:0 auto}
+.lecture{border:1px solid var(--orange-accent);background:var(--surface-carte);border-radius:var(--radius-moyen);padding:12px 14px;font-size:.88rem;margin:18px 0 16px;color:var(--texte-principal)}
+.lecture b{color:var(--orange-accent)}
+.lecture ul{margin:6px 0 0;padding-left:18px}
+.opt{padding:10px 12px;border:1px solid var(--bordure-claire);border-radius:var(--radius-moyen);background:var(--surface-element)}
+.opt-pleine{grid-column:1/-1}
+.ou-ligne{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 0 24px}
+.ou{font-size:.72rem;color:var(--texte-secondaire);border:1px solid var(--bordure-moyenne);border-radius:4px;padding:1px 7px;white-space:nowrap;background:var(--surface-carte)}
+.ou-hors{color:var(--orange-accent);border-color:var(--orange-accent)}
+.pilier .carte-titre-bleu{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.pilier .carte-titre-bleu .role{font-weight:400;font-size:.85rem;opacity:.85;flex:1 1 auto}
+.sommaire a{font-size:.85rem;text-decoration:none;border:1px solid var(--bordure-moyenne);border-radius:20px;padding:4px 12px;background:var(--surface-carte);color:var(--bleu-clair)}
+.grille-2col{gap:10px}
+.grille-4col-form,.grille-3col-form{padding:0}
+@media (max-width:640px){.grille-2col,.grille-4col-form,.grille-3col-form{grid-template-columns:1fr}}
+</style>
+<script>document.body.classList.add('mode-clair');</script>
+<div class="mode-clair maquette">
+
+<div class="lecture"><b>Maquette, pas l'application</b> — feuille de style et composants du design-system (carte, bandeau bleu, champs, boutons), en mode clair. Même contenu qu'aujourd'hui (18 réglages, après 1.129.2), rangé autrement :
+<ul>
+<li><b>Rien ne se replie</b> : les deux accordéons deviennent des blocs visibles ; le sommaire en tête sert de repère.</li>
+<li><b>Deux options par rangée</b>, quatre puis trois seuils sur une ligne : la page tient en deux écrans.</li>
+<li><b>Une seule façon de régler un seuil</b> (champ + unité) ; le bleu gras ne sert plus qu'aux noms de réglages.</li>
+<li><b>Chaque réglage dit où il agit</b> (étiquette tirée de la carte des effets ; en ambre, hors de Suivi).</li>
+<li><b>Les deux « Restaurer » disent ce qu'ils restaurent</b>, à droite de leur bloc.</li>
+</ul></div>
+
+<div class="sous-section active">
+<div class="u-flex-between u-mb-12" style="align-items:center;flex-wrap:wrap;gap:10px">
+  <h2 class="u-mb-0">Outils d'observation</h2>
+  <button class="btn btn-confirmer btn-compact" type="button">Enregistrer</button>
+</div>
+<p class="text-muted u-mb-12" style="max-width:72ch">Trois piliers de l'accompagnement : la structure des apprentissages (SOLO), les micro-données du contexte (ACP) et la planification des interventions (RàI). Chaque réglage s'enregistre dès que tu le changes.</p>
+<nav class="sommaire u-flex u-flex-wrap u-gap-8 u-mb-15" aria-label="Sur cette page"><span class="u-texte-mini text-muted" style="align-self:center;letter-spacing:.06em;text-transform:uppercase">Sur cette page</span><a href="#m-solo">Taxonomie SOLO</a><a href="#m-acp">Micro-données ACP</a><a href="#m-rai">Intervention (RàI)</a></nav>
+
+<div class="carte pilier" id="m-solo">
+  <h3 class="carte-titre-bleu">Taxonomie SOLO <span class="role">ce que l'application observe dans la structure des productions</span><button class="btn btn-secondaire btn-mini" type="button">Guide</button></h3>
+  <div class="grille-2col">
+    <div class="opt">
+  <label class="u-flex" style="align-items:flex-start;gap:8px;cursor:pointer"><input type="checkbox" checked style="margin-top:4px"><span class="u-texte-gras">Observation de la structure des résultats</span></label>
+  <small class="u-texte-petit text-muted" style="display:block;margin-left:24px">Descriptions détaillées des niveaux SOLO ; active la catégorie « Compréhension » de la palette.</small>
+  <div class="ou-ligne"><span class="ou">Profil › Accompagnement</span><span class="ou">Suivi du groupe</span><span class="ou ou-hors">Annotation › palette</span></div>
+</div>
+    <div class="opt">
+  <label class="u-flex" style="align-items:flex-start;gap:8px;cursor:pointer"><input type="checkbox" checked style="margin-top:4px"><span class="u-texte-gras">Développement des habiletés</span></label>
+  <small class="u-texte-petit text-muted" style="display:block;margin-left:24px">Tableau de progression des critères.</small>
+  <div class="ou-ligne"><span class="ou">Profil › Développement des habiletés</span><span class="ou">Suivi du groupe › Trajectoires par production</span></div>
+</div>
+    <div class="opt">
+  <label class="u-flex" style="align-items:flex-start;gap:8px;cursor:pointer"><input type="checkbox" style="margin-top:4px"><span class="u-texte-gras">Observation des actions</span></label>
+  <small class="u-texte-petit text-muted" style="display:block;margin-left:24px">Repérage, Liaison et Ouverture — traces des gestes cognitifs ; active la catégorie « Action » de la palette.</small>
+  <div class="ou-ligne"><span class="ou ou-hors">Annotation › palette « action »</span><span class="ou">Profil › Développement des habiletés</span></div>
+</div>
+    <div class="opt">
+      <div class="groupe-form u-mb-0"><label style="font-weight:600">Grille de critères pour le dépistage</label><select class="controle-form"><option>Grille 101 — SRPNF (A26)</option><option>— Sélectionner une grille —</option></select></div>
+      <small class="u-texte-petit text-muted" style="display:block;margin-top:6px">Définit les critères qui servent à repérer les forces et les défis ; sans elle, la carte RàI du profil dit pourquoi elle est vide.</small>
+      <div class="ou-ligne" style="margin-left:0"><span class="ou">Profil › Accompagnement › carte RàI</span><span class="ou">Profil › Développement des habiletés</span><span class="ou ou-hors">Conception › Grilles › badge « dépistage »</span></div>
+    </div>
+  </div>
+  <div class="u-flex-between u-flex-wrap u-gap-8 u-mt-15 u-mb-8" style="align-items:baseline"><h4 class="u-mb-0" style="font-size:.95rem">Paramètres d'analyse</h4><div class="ou-ligne" style="margin:0;flex:1"><span class="ou">Profil › Accompagnement, Développement des habiletés</span><span class="ou">Suivi du groupe › besoins d'intervention</span><span class="ou">Liste des élèves</span></div><button class="btn btn-secondaire btn-mini" type="button">Remettre les valeurs par défaut (3 · 10 · 5 · 70)</button></div>
+  <div class="grille-4col-form">
+    <div class="groupe-form u-mb-0"><label>Fenêtre d'analyse</label><div class="u-flex" style="align-items:center;gap:6px"><input type="number" class="controle-form" value="3" style="width:76px;text-align:right"><span class="u-texte-petit text-muted">productions</span></div><small class="u-texte-mini text-muted" style="display:block;margin-top:4px">Basse : détection précoce. Élevée : plus fiable.</small></div>
+    <div class="groupe-form u-mb-0"><label>Progression des artefacts</label><div class="u-flex" style="align-items:center;gap:6px"><input type="number" class="controle-form" value="10" style="width:76px;text-align:right"><span class="u-texte-petit text-muted">points</span></div><small class="u-texte-mini text-muted" style="display:block;margin-top:4px">Écart minimal pour afficher ↗ ou ↘.</small></div>
+    <div class="groupe-form u-mb-0"><label>Sensibilité des flèches par critère</label><div class="u-flex" style="align-items:center;gap:6px"><input type="number" class="controle-form" value="5" style="width:76px;text-align:right"><span class="u-texte-petit text-muted">points</span></div><small class="u-texte-mini text-muted" style="display:block;margin-top:4px">Variation minimale d'une fenêtre à la précédente pour afficher → ou ←.</small></div>
+    <div class="groupe-form u-mb-0"><label>Seuil de défi spécifique</label><div class="u-flex" style="align-items:center;gap:6px"><input type="number" class="controle-form" value="70" style="width:76px;text-align:right"><span class="u-texte-petit text-muted">%</span></div><small class="u-texte-mini text-muted" style="display:block;margin-top:4px">Sous ce score, un critère est un défi. Dépistage seulement.</small></div>
+  </div>
+</div>
+
+<div class="carte pilier" id="m-acp">
+  <h3 class="carte-titre-bleu">Micro-données ACP <span class="role">assiduité, complétion, performance — le contexte d'apprentissage</span><button class="btn btn-secondaire btn-mini" type="button">Guide</button></h3>
+  <div class="grille-2col">
+    <div class="opt">
+  <label class="u-flex" style="align-items:flex-start;gap:8px;cursor:pointer"><input type="checkbox" checked style="margin-top:4px"><span class="u-texte-gras">Collecte des données de contexte et de performance</span></label>
+  <small class="u-texte-petit text-muted" style="display:block;margin-left:24px">Indices descriptifs Assiduité, Complétion et Performance.</small>
+  <div class="ou-ligne"><span class="ou">Profil › Engagement ACP</span><span class="ou">Liste des élèves</span></div>
+</div>
+    <div class="opt">
+  <label class="u-flex" style="align-items:flex-start;gap:8px;cursor:pointer"><input type="checkbox" checked style="margin-top:4px"><span class="u-texte-gras">Graphiques d'évolution ACP</span></label>
+  <small class="u-texte-petit text-muted" style="display:block;margin-left:24px">Progression dans le temps.</small>
+  <div class="ou-ligne"><span class="ou">Profil › Progression temporelle</span></div>
+</div>
+    <div class="opt">
+  <label class="u-flex" style="align-items:flex-start;gap:8px;cursor:pointer"><input type="checkbox" checked style="margin-top:4px"><span class="u-texte-gras">Indicateurs visuels des seuils</span></label>
+  <small class="u-texte-petit text-muted" style="display:block;margin-left:24px">Lignes pointillées et étiquettes des niveaux de ton échelle sur les graphiques.</small>
+  <div class="ou-ligne"><span class="ou">Profil › graphiques</span><span class="ou">Suivi du groupe › semaine par semaine</span></div>
+</div>
+    <div class="opt">
+  <label class="u-flex" style="align-items:flex-start;gap:8px;cursor:pointer"><input type="checkbox" style="margin-top:4px"><span class="u-texte-gras">Masquer les notes par travail (note différée)</span></label>
+  <small class="u-texte-petit text-muted" style="display:block;margin-left:24px">Un repère « note différée » remplace la note de chaque travail, pour que la rétroaction passe d'abord.</small>
+  <div class="ou-ligne"><span class="ou">Profil</span><span class="ou ou-hors">Évaluation › liste</span><span class="ou ou-hors">Portfolio</span></div>
+</div>
+  </div>
+  <div class="u-flex-between u-flex-wrap u-gap-8 u-mt-15 u-mb-8" style="align-items:baseline"><h4 class="u-mb-0" style="font-size:.95rem">Seuils d'interprétation</h4><div class="ou-ligne" style="margin:0;flex:1"><span class="ou">Liste des élèves › couleur des colonnes A, C, P, M</span><span class="ou">Profil › Engagement</span></div><button class="btn btn-secondaire btn-mini" type="button">Remettre les valeurs par défaut (70 · 80 · 85)</button></div>
+  <p class="u-texte-petit text-muted u-mb-8">Ces trois seuils colorent les colonnes Assiduité, Complétion, Performance et Mobilisation de la liste des élèves, et qualifient l'engagement dans le profil. Ils ne touchent ni la note ni l'échelle IDME.</p>
+  <div class="grille-3col-form">
+    <div class="groupe-form u-mb-0"><label>Fragile si inférieur à</label><div class="u-flex" style="align-items:center;gap:6px"><input type="number" class="controle-form" value="70" style="width:76px;text-align:right"><span class="u-texte-petit text-muted">%</span></div></div>
+    <div class="groupe-form u-mb-0"><label>Acceptable si inférieur à</label><div class="u-flex" style="align-items:center;gap:6px"><input type="number" class="controle-form" value="80" style="width:76px;text-align:right"><span class="u-texte-petit text-muted">%</span></div></div>
+    <div class="groupe-form u-mb-0"><label>Bon si supérieur ou égal à</label><div class="u-flex" style="align-items:center;gap:6px"><input type="number" class="controle-form" value="85" style="width:76px;text-align:right"><span class="u-texte-petit text-muted">%</span></div></div>
+  </div>
+</div>
+
+<div class="carte pilier" id="m-rai">
+  <h3 class="carte-titre-bleu">Intervention (RàI) <span class="role">adapter le modèle de la Réponse à l'intervention</span><button class="btn btn-secondaire btn-mini" type="button">Guide</button></h3>
+  <div class="grille-2col">
+    <div class="opt opt-pleine">
+  <label class="u-flex" style="align-items:flex-start;gap:8px;cursor:pointer"><input type="checkbox" checked style="margin-top:4px"><span class="u-texte-gras">Appliquer une adaptation du modèle de la Réponse à l'intervention</span></label>
+  <small class="u-texte-petit text-muted" style="display:block;margin-left:24px"><strong>Suivi de P et du contexte d'apprentissage</strong> (performance, assiduité, complétion) et <strong>niveaux d'intervention</strong> (universel, préventif, intensif). La grille de critères et les paramètres d'analyse se règlent dans le bloc SOLO, ci-dessus.</small>
+  <div class="ou-ligne"><span class="ou">Suivi du groupe › besoins d'intervention</span><span class="ou">Liste des élèves</span><span class="ou">Profil</span><span class="ou">Interventions</span><span class="ou ou-hors">Export recherche</span></div>
+</div>
+  </div>
+</div>
+
+</div>
+</div>
+
+</body>
+</html>

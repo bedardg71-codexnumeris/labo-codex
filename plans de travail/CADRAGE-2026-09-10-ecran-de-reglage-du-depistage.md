@@ -285,6 +285,18 @@ aujourd'hui.
 
 ## CE QUE LE CHANTIER DEVRAIT PRODUIRE
 
+▣ **TEMPS 4 — LA FORME — TRANCHÉ PAR GRÉGOIRE LE 11 SEPTEMBRE 2026 à 10 h 05** (« c'est très bien ») sur
+la maquette `plans de travail/MAQUETTE-2026-09-11-outils-observation.html` (artefact « Outils
+d'observation, trié », version 2, bâtie avec `styles.css` et les composants de `design-system.html`).
+Ses consignes de forme, dans ses mots (10 h) : *optimiser l'espace — beaucoup de défilement vertical ;
+mettre des options côte à côte plutôt que l'une sous l'autre ; des repères visuels ; pas trop
+d'accordéons qui se referment, parce que l'information passe inaperçue quand ils sont fermés.*
+Ce que la maquette arrête : **rien ne se replie** (les deux `<details>` deviennent des blocs visibles,
+un sommaire en tête sert de repère) ; **deux options par rangée**, quatre puis trois seuils sur une
+ligne ; **une seule grammaire de seuil** (champ chiffré + unité, les trois curseurs disparaissent) ;
+**chaque réglage porte une étiquette « où ça agit »** tirée du § 4 (ambre = hors de Suivi) ; **les deux
+« Restaurer » disent ce qu'ils restaurent**. Points 3 et 4 ci-dessous : tranchés par là.
+
 1. **La carte des effets** : pour chaque réglage de l'écran, l'écran où son effet se voit. C'est le
    préalable du §4, et il tranche la question de l'emplacement.
 2. **Une seule nomenclature par échelle**, alignée sur les définitions de Grégoire (IDME, SOLO) et sur
