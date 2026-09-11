@@ -151,6 +151,12 @@ une note. **Temps 2, le tri des réglages morts** (`1.129.0`, `#823`) : deux ret
 d'analyse rebranchée, « Direction du risque » gardé et renommé « Sensibilité des flèches par critère »
 (arbitrage de Grégoire, après que la relecture croisée eut trouvé le curseur vivant) ; **porte terrain
 relevée par lui, 12 sur 12**. Aucune donnée écrite chez personne, `fenetrePatterns` non migrée.
+↻ **11 septembre 2026, 13 h (Claude Code) — LOT 1 DU CADRAGE 11 LIVRÉ (`1.131.0`, Suivi du groupe, G-1 à G-8)** :
+`#749` clos — la liste suivie par trimestre et groupe-cours, filtrée à la lecture, jamais purgée ; semis depuis la clé nue, laissée
+en place ; sixième ajout notifié ; filtre P sur ce qui est montré ; panneau mort retiré ; G-7 périmé (fonctions sans appelant) ;
+démo : grille de référence résolue à la lecture. Trois textes remontés à Grégoire avant la release ; porte terrain de cinq rangées
+sur ses deux groupes réels. `#828` inscrit (filtre M, lot 7). **Lot 2 suivant : la Liste des étudiant·es** (L-1 à L-11), consigne
+à écrire par Cowork.
 ↻ **11 septembre 2026, 12 h 12 (Cowork) — la seconde moitié est CADRÉE, une question ouverte** :
 `CADRAGE-2026-09-11-onglet-suivi-lecture-du-depistage.md`. Prémisses corrigées : le 4e audit A ÉTÉ exécuté le 6 (six urgences
 livrées, #767-#772 ; 35 « inscrire » sans symptôme vécu = réservoir, pas backlog) ; « SRPNF » n'est un titre nulle part dans Suivi

@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.131',
+            couleur: 'vert',
+            titre: 'Suivi du groupe : tes élèves suivis sont gardés par groupe-cours',
+            items: [
+                '<strong>Tes élèves suivis sont maintenant gardés par groupe-cours&nbsp;: changer de groupe ne les efface plus.</strong> Jusqu\'ici, ouvrir « Détails » sous ton deuxième groupe vidait, en base et sans un mot, la liste des élèves suivis du premier. Chaque groupe-cours a sa liste (au plus cinq)&nbsp;; ta liste actuelle est reprise dans le groupe où sont ces élèves, et la valeur d\'avant reste en place.',
+                '<strong>Un sixième clic dit pourquoi il refuse</strong> («&nbsp;Cinq élèves suivis au maximum&nbsp;»), un élève passé en abandon libère son siège, et le filtre «&nbsp;P&nbsp;<&nbsp;65&nbsp;%&nbsp;» ne retient plus un élève dont le P s\'affiche «&nbsp;—&nbsp;». Le bandeau «&nbsp;Étudiant·es prioritaires&nbsp;», qui ne s\'ouvrait jamais, est parti&nbsp;; en mode Détails, une ligne dit où cliquer pour ouvrir un profil.',
+                '<strong>En démonstration, le dépistage n\'est plus muet</strong>&nbsp;: la famille «&nbsp;Défi spécifique&nbsp;» du Suivi du groupe se calcule sur la grille du pack de démonstration, sans toucher à ta propre grille de référence.',
+            ]
+        },
+        {
             version: '1.130',
             couleur: 'bleu',
             titre: 'Labo › Outils d\'observation se lit sans rien déplier',

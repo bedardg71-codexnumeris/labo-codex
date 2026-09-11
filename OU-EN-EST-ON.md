@@ -15,6 +15,23 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **1.131.0 — SUIVI DU GROUPE : TES ÉLÈVES SUIVIS SONT GARDÉS PAR GROUPE-COURS, CHANGER DE GROUPE NE LES EFFACE PLUS** (build à lire en bas de page).
+**Ce que tu verras** : dans `Suivi › Suivi du groupe`, les élèves que tu suis (au plus cinq, les pilules
+colorées) appartiennent maintenant au groupe-cours où tu les as choisis. Ouvrir « Détails » sous ton
+deuxième groupe ne vide plus la liste du premier — jusqu'ici, c'était le cas, en base, sans un mot.
+Ta liste actuelle, si tu en as une, est reprise telle quelle dans le groupe où sont ces élèves ; la
+valeur d'avant reste en place. Un sixième clic sur un nom te dit pourquoi il refuse (cinq au maximum).
+Un élève passé en abandon libère son siège. Le filtre « P < 65 % » ne retient plus un élève dont le P
+s'affiche « — ». Le bandeau « Étudiant·es prioritaires » (qui ne s'ouvrait jamais) est parti ; en mode
+Détails, une ligne dit où cliquer pour ouvrir un profil. En démonstration, la famille « Défi
+spécifique » n'est plus à zéro et la console ne se remplit plus d'avertissements.
+**Vérifié comment** : le cas réel de l'audit du 6 (deux élèves suivis sous A, « Détails » ouvert sous
+B, retour sous A) rejoué au banc : les deux élèves survivent, rien n'est écrit sous B ; vingt essais,
+cinq fois cassés exprès et remis. Les bancs d'audit du 5 et du 6 disent maintenant l'après. Les trois mots
+tranchés par toi à 13 h (le refus du sixième tel quel ; « … d'un élève. » ; rien à écrire pour la
+pratique absente, dont le texte n'avait pas de site). **Pas vérifié** : tes deux groupes réels et ton
+iPad — porte terrain de cinq rangées (`plans de travail/PORTES-TERRAIN-2026-09-11-suivi-du-groupe.md`).
+
 ↻ **1.130.2 — L'APPLICATION NE REDEMANDE PLUS 300 FICHIERS À CHAQUE OUVERTURE ; LA CAUSE DES 30-45 S N'EST PAS ÉTABLIE** (build `0911-1139`).
 **Ce que tu verras** : rien de nouveau à l'écran. Le serveur disait au navigateur, pour chacun des deux
 cents scripts, « redemande-moi à chaque ouverture » même quand rien n'avait bougé. Il dit maintenant

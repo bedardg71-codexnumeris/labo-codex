@@ -825,7 +825,8 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
 describe('F · les nombres du groupe sont-ils la somme des profils', () => {
     it('F1 · le panneau du Suivi du groupe enrichit chaque élève avec les MÊMES fonctions que le profil ; les filtres P < 65 et A+C < 65 retiennent qui on attend', () => {
         // À la main : Assidu (A 100, C 100, P 77, niveau 1), Absent (40, 100, 63, niveau 3), Silence (100, 0, P non constructible, niveau 3).
-        // Filtre P < 65 : Absent (63) et Silence (0). Filtre M = (A + C) / 2 < 65 : Silence (50) seulement (Absent : 70).
+        // Filtre P < 65 : Absent (63) seulement — depuis #749 (11 sept.), Silence (P non constructible, affiché « — ») est ÉCARTÉ.
+        // Filtre M = (A + C) / 2 < 65 : Silence (50) seulement (Absent : 70).
         const b = monter(jeuBase()); b.calculerTout();
         b.win.calculerEtudiantsPrioritaires();
         const tb = b.interne['tableau-bord-apercu.js'];
@@ -839,7 +840,7 @@ describe('F · les nombres du groupe sont-ils la somme des profils', () => {
             { da: DA.ABSENT, A: 40, C: 100, P: 63, M: 70, niveau: 3, pattern: 'Difficulté persistante', ipb: 3 },
             { da: DA.SILENCE, A: 100, C: 0, P: 0, M: 50, niveau: 3, pattern: 'Non-participation', ipb: null }
         ]);
-        expect(filtreP).toEqual([DA.SILENCE, DA.ABSENT]);
+        expect(filtreP).toEqual([DA.ABSENT]);
         expect(filtreM).toEqual([DA.SILENCE]);
     });
 
@@ -858,15 +859,18 @@ describe('F · les nombres du groupe sont-ils la somme des profils', () => {
         expect(r3(pratique)).toBe(0.625);
     });
 
-    it('F3 · les élèves suivis (au plus cinq) vivent sous une clé NUE partagée entre trimestres et groupes ; changer de groupe la réécrit', () => {
-        // À la main : la liste porte un DA de GC1 et un DA d'un autre groupe ; nettoyerEtudiantsSuivis, sous GC1, retire l'autre ET SAUVE.
+    it('F3 · les élèves suivis vivent sous une clé PAR TRIMESTRE ET GROUPE-COURS ; la clé nue d\'avant est lue une fois (semis) et jamais réécrite — valeur d\'après #749 (11 sept.)', () => {
+        // Constat d'origine (5 sept.) : clé NUE partagée, réécrite par nettoyerEtudiantsSuivis. À la main : la nue porte un DA de GC1 et un DA
+        // d'un autre groupe ; la première lecture sous GC1 SÈME le DA de GC1 dans la clé du groupe, et laisse la nue intacte.
         const b = monter(jeuBase(), { store: { etudiantsSuivis: [{ da: DA.ASSIDU }, { da: '3000001' }] } });
         const apres = b.interne['tableau-bord-apercu.js'].nettoyerEtudiantsSuivis();
         const clesTrimestres = readFileSync(path.join(RACINE, 'js/trimestres.js'), 'utf8');
-        noter('F3', { apres, ecriture: b.ecritures.filter(k => /etudiantsSuivis/.test(k)), namespacee: /'etudiantsSuivis'/.test(clesTrimestres) });
+        const ecritures = b.ecritures.filter(k => /etudiantsSuivis/.test(k));
+        noter('F3', { apres, ecriture: ecritures, nueApres: b.store.etudiantsSuivis, namespacee: /'etudiantsSuivis'/.test(clesTrimestres) });
         expect(apres).toEqual([{ da: DA.ASSIDU }]);
-        expect(b.ecritures).toContain('etudiantsSuivis');          // clé nue, pas test_etudiantsSuivis
-        expect(/'etudiantsSuivis'/.test(clesTrimestres)).toBe(false);
+        expect(ecritures.every(k => /^test_etudiantsSuivis(_gc_|$)/.test(k))).toBe(true);   // jamais la nue
+        expect(b.store.etudiantsSuivis).toEqual([{ da: DA.ASSIDU }, { da: '3000001' }]);      // intacte
+        expect(/'etudiantsSuivis'/.test(clesTrimestres)).toBe(true);                         // inscrite au registre
     });
 
     it('F4 · deux « moyenne A » sur deux écrans : le Suivi du groupe compte les élèves avec des séances saisies (l\'absent total à 0 % compris), la Liste ne compte que ceux qui ont une fiche', () => {

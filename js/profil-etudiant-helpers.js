@@ -742,6 +742,26 @@ function diagnostiquerGrilleReferenceDepistage() {
 
     const grilleId = obtenirPreference('grilleReferenceDepistage');
 
+    // DÉMO (#749 lot 1, 11 sept. 2026). La préférence est GLOBALE
+    // (`preferencesUtilisateur`, docs/DATA-OWNERSHIP.md) : elle porte l'id d'une
+    // grille du trimestre RÉEL de l'enseignant, qui n'existe pas dans
+    // `demo_grillesTemplates`. Résultat mesuré à l'audit du 6 : 520 avertissements
+    // « Pas de grille de référence » à l'ouverture du Suivi, « Défi spécifique »
+    // à 0 en démo — ce que vingt collègues verraient le 14. Poser la préférence
+    // à l'activation de la démo aurait ÉCRASÉ le choix réel de l'enseignant (la
+    // classe de défaut de #806) : la démo se résout donc À LA LECTURE, sans rien
+    // écrire — la grille désignée si elle est dans le pack, sinon la première
+    // grille du pack qui a des critères. Hors démo, rien ne change.
+    if (typeof estEnModeDemo === 'function' && estEnModeDemo()) {
+        const grillesDemo = db.getSync(cle('grillesTemplates'), []) || [];
+        const designee = grilleId ? grillesDemo.find(g => g && g.id === grilleId) : null;
+        const grilleDemo = designee || grillesDemo.find(g => g && g.isDemo
+            && Array.isArray(g.criteres) && g.criteres.length > 0);
+        if (grilleDemo && Array.isArray(grilleDemo.criteres) && grilleDemo.criteres.length > 0) {
+            return { grille: grilleDemo, raison: null, message: null };
+        }
+    }
+
     if (!grilleId) {
         return {
             grille: null,
