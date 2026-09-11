@@ -48,7 +48,10 @@ function signaturesDoubleClass() {
     return sigs.sort();
 }
 
-/** La dette connue au 7 septembre 2026, après la réparation de #779. */
+/** La dette connue au 7 septembre 2026, après la réparation de #779.
+ *  ↻ 11 sept. 2026 : trois cas de moins — les trois curseurs de seuils de
+ *  Labo › Outils d'observation (`input|controle-form|u-w-100`) sont devenus des
+ *  champs chiffrés à un seul `class` (forme de l'écran, 1.130.0). */
 const DETTE_CONNUE = [
     'button|btn btn-principal|flex-1',
     'button|btn btn-principal|flex-1',
@@ -65,9 +68,6 @@ const DETTE_CONNUE = [
     'div|groupe-form|max-w-400-mb20',
     'div|groupe-form|max-w-400-mb20-hidden',
     'div|groupe-form|mt-15',
-    'input|controle-form|u-w-100',
-    'input|controle-form|u-w-100',
-    'input|controle-form|u-w-100',
     'table|tableau|mt-10',
     'table|tableau|mt-10',
     'table|tableau|mt-15',
