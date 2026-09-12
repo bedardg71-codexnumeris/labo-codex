@@ -7,6 +7,14 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 10 H 55 (Toronto) : « L'ACCUEIL, LE CHAMP 2, LES RENCONTRES SANS CRITÈRES CIBLÉS » COMMITÉ SUR `main` LOCAL, RELEASE 1.138.0 DUE APRÈS LA RELECTURE DE COWORK
+
+> **Le travail le plus récent est sur `main` LOCAL, devant `origin/main` (`305bb4c8`) — rien de poussé, exprès** (consigne du 12 sept., 10 h 25 révisée 10 h 35, § 5 : une seule livraison `minor` après la relecture croisée de Cowork ; un push déploie).
+> **Livré** (`e011ed64`) : (A) #846 — « 2. Cours ou service » dans les deux contextes, option vide « — Choisir un cours ou un service — », deux clés retirées de `js/mots-nature.js` ; (B) la carte « Tu es orthopédagogue ? » au-dessus des huit tâches (lien `suivi|suivi-rencontres`), « Par où commencer ? » à deux branches, deux paragraphes raccourcis ; (C) sur un service, la carte « Critères ciblés / Objectif visé / Suggérer » n'est pas rendue, l'enregistrement ne touche ni `criteresCibles` ni `objectifVise` quand leur conteneur est absent, bilan d'une rencontre « Ce que tu retiens de la rencontre. ». Deux sentinelles (20 essais, 15 break-tests rouges) ; changelog 1.138 ; jetons 20260912f ×8. **Aucune valeur en base ne change.** Version inchangée : 1.137.0. Vitest 548 / 5 996.
+> **Marche à suivre** : `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`, bloc de tête (relecture → `release.mjs minor` → commit → Vitest → verdict Playwright Cowork fermé → `scripts/pousser.sh` → porte `plans de travail/PORTES-TERRAIN-2026-09-12-accueil.md` + artefact par Cowork). **#848** inscrit ; **dernier ID : #848**.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 9 H 45 (Toronto) : « LA SECTION COURS DU CADRE » RELEASÉ EN 1.137.0 (`5563b233`), POUSSÉ PAR `scripts/pousser.sh` APRÈS LE VERDICT
 
 > ✅ **Tout est sur `main`** : code `7b4beac2` (relu par Cowork), relais `95923700`, release `5563b233` (1.137.0, build 0912-0935), puis ce relais. **Si tu lis ceci sur `origin/main`, le push a eu lieu** ; sinon, `scripts/.verdict-playwright.json` dit sur quel SHA le verdict a été rendu. Vitest 546 / 5 976 après le bump. Décisions de Grégoire du 12 sept. (9 h 35-9 h 40) : 3.2 et 3.3 de la porte des étiquettes « tel quel » ; hors service, le menu des profils dit « Sélectionner un enseignant·e » — tel que livré. **Reste** : la porte `plans de travail/PORTES-TERRAIN-2026-09-12-section-cours.md` (cinq rangées, trois décisions : le mot du titre, #843, les mots neufs) et son artefact jumeau par Cowork ; `CONSIGNE-DU-JOUR.md` + archives (Cowork) non commités ; le lot 5 du cadrage 11 en pause.
