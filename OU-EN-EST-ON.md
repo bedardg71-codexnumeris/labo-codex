@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-↻ **À LIVRER EN 1.135.0 — « RENCONTRES » : UN SERVICE EST UN COURS, UN GROUPE-COURS SANS HORAIRE, LE SOUS-ONGLET SUIVI › RENCONTRES, UNE INTERVENTION QUI SAIT OÙ ELLE EST NÉE** (lots 1 et 2 du cadrage « l'orthopédagogue entre par Suivi » ; quatre commits sur `main` local le 11 septembre au soir, **non poussés exprès** : une seule livraison après ton coup d'œil et la relecture croisée de Cowork — consigne § 3).
+✅ **FAIT EN 1.135.0 (11 SEPTEMBRE 2026, 21 H 50) — « RENCONTRES » : UN SERVICE EST UN COURS, UN GROUPE-COURS SANS HORAIRE, LE SOUS-ONGLET SUIVI › RENCONTRES, UNE INTERVENTION QUI SAIT OÙ ELLE EST NÉE** (lots 1 et 2 du cadrage « l'orthopédagogue entre par Suivi »). ⚠ **Mesuré à la reprise : les quatre commits de code étaient DÉJÀ sur `origin/main` depuis 21 h 36** (reflog « update by push »), donc en ligne sous `1.134.0` sans changelog, contrairement à ce que disaient les trois relais (« non poussés exprès ») — la release 1.135.0 répare ce trou et emporte les **deux reprises de la relecture croisée de Cowork** : (1) une intervention née en mode cours (tous les groupes) est vue depuis chaque groupe de ce cours, et l'inverse — sans ça, changer de mode la faisait disparaître ; (2) **tranché par toi : « Rencontres » ne liste que les services** — sur un groupe-cours ordinaire, plus de liste à deux vocabulaires, seulement la porte « Créer un service » et, s'il existe déjà un service dans le trimestre, le lien pour l'activer ; « Interventions » ne change pas ; la fusion se rejuge après le mois d'usage.
 **Ce que tu verras** : dans `Suivi`, un sous-onglet **« Rencontres »** entre « Interventions » et « Animation ». Sur un poste sans
 trimestre (celui de l'orthopédagogue lundi), il pose **trois questions** sur un seul écran — les dates du trimestre, le nom du
 service, la liste des élèves tapée (« Prénom Nom », « DA ; Nom ; Prénom ») ou collée d'Omnivox — et « Créer mon service » crée ce que
@@ -24,8 +24,9 @@ ses élèves, un **groupe-cours sans horaire** ; Cadre montre le tout tel quel, 
 élèves. Ensuite « Rencontres » liste ses rencontres et en crée (« + Nouvelle rencontre », individuelle par défaut ou en sous-groupe,
 date, heure, participants cochés, note par élève, bilan) — c'est l'intervention, même module, avec le vocabulaire « rencontre » ;
 sur un service, ni « contexte de l'intervention » ni « séance concernée » (ils supposent une séance de groupe). Sur TES deux
-groupes-cours, « Rencontres » montre la même liste que « Interventions », en vocabulaire « rencontre », avec une ligne « Tu reçois des
-élèves hors d'un groupe-cours ? Créer un service ». Dans `Cadre › Cours`, un choix **« Nature : Cours / Service »** en tête du
+groupes-cours, « Rencontres » ne montre AUCUNE liste (tranché le 11 au soir) : une carte qui dit que les rencontres se tiennent dans un
+service et que tes interventions sont sous « Interventions », le lien vers un service du trimestre s'il en existe un, et la ligne « Tu
+reçois des élèves hors d'un groupe-cours ? Créer un service ». Dans `Cadre › Cours`, un choix **« Nature : Cours / Service »** en tête du
 formulaire (sur Cours, tout est comme avant). Pour tous : une intervention **sait désormais dans quel groupe-cours elle est née** et
 la liste d'un groupe-cours ne mêle plus celles d'un autre ; tes interventions d'avant restent visibles partout et prennent leur
 contexte au prochain Enregistrer de chacune (jamais réécrites en masse). Un élève de service sans séance garde A = 100 % et « En
@@ -40,13 +41,19 @@ refusé, le groupe-cours de service sans horaire et l'ordinaire toujours refusé
 par le goulot commun, le point unique sur grille et verrou « plus aucune recopie », l'estampille et le filtre des interventions, la
 lecture des quatre formes de ligne, la création sur poste vide et le refus sans nom / sans élève / sans dates, le marqueur démo),
 vingt-quatre fois cassées exprès, vingt-quatre rouges, remises (empreintes identiques) ; les bancs du 5 et du 6 disent l'après
-(E1) ; Vitest 543 fichiers / 5 928 essais. **Corrigé en chemin** : `cours` est une clé globale — un service créé en démo restait dans
+(E1) ; Vitest 543 fichiers / 5 928 essais. **Les deux reprises** (commit `ea90c376`) : sentinelle des traversées de mode (un cours à deux
+groupes et un autre cours : née en mode cours → vue depuis un groupe ; née dans un groupe → vue en mode cours, jamais celle de l'autre
+cours ; depuis un groupe, celle de l'autre groupe reste cachée) et sentinelle de la porte (aucune liste ni vocabulaire sur un cours
+ordinaire ; le service d'un autre trimestre n'est pas offert ; l'activation mène à la liste) — 5 essais neufs, six fois cassés exprès,
+six rouges, remis à empreinte identique ; Vitest 543 fichiers / 5 932 essais avant et après le commit de release `538fbb92` ; le verdict
+Playwright local rendu sur ce SHA par `scripts/verifier-playwright.mjs`, puis `scripts/pousser.sh` (si tu lis ceci sur `origin/main`, le
+push a eu lieu). **Corrigé en chemin** : `cours` est une clé globale — un service créé en démo restait dans
 ta vraie liste de cours ; il est maintenant marqué et retiré quand tu quittes la démo. **Pas vérifié** : ton écran, tes deux groupes
 réels, Safari, l'orthopédagogue sur son poste lundi ; **la formule « taux de repérage » (§ G) n'est pas livrée** — le registre ne
 permet pas de renommer les libellés des saisies, un modèle avec « nombre de mots » sous « erreurs au total » serait un piège (#835).
 **Zones protégées** : `js/config.js` et `js/navigation.js` touchés (sous-onglet, correspondance, initialisateur) avec ton
-autorisation du 11 au soir. Porte terrain : `plans de travail/PORTES-TERRAIN-2026-09-12-rencontres.md` (douze rangées, dont douze
-mots proposés — silence = tel quel).
+autorisation du 11 au soir. Porte terrain : `plans de travail/PORTES-TERRAIN-2026-09-12-rencontres.md` (treize rangées — la 11b vérifie la porte et
+l'activation d'un service existant —, douze mots proposés dont un neuf pour la carte de la porte — silence = tel quel).
 
 ↻ **1.134.0 — PROFIL D'UN ÉLÈVE : UN SEUL RENDU À L'OUVERTURE ; LES GRAPHIQUES LISENT L'ÉCHELLE DE CHAQUE ÉVALUATION ; LE VOLET CONFIDENTIEL SUIT LA LISTE** (lot 4 du cadrage 11, build à lire en bas de page).
 **Ce que tu verras** : dans `Suivi › Profils individuels`, le profil s'ouvre une fois — le 6, il se dessinait quatre

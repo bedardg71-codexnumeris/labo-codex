@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 22 H 10 : « RENCONTRES » LIVRÉ SUR `main` LOCAL, NON POUSSÉ, RELEASE 1.135.0 DUE
+## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 21 H 50 (horloge du Mac) : « RENCONTRES » RELEASÉ EN 1.135.0 SUR `main`, POUSSÉ PAR `scripts/pousser.sh` APRÈS LE VERDICT
+
+> **Le travail le plus récent est sur `main`** : commit de reprises `ea90c376` (les deux points de la relecture croisée de Cowork) puis release `538fbb92` (1.135.0), puis ce relais. **Si tu lis ceci sur `origin/main`, le push a eu lieu** ; sinon, `scripts/.verdict-playwright.json` dit sur quel SHA le verdict a été rendu.
+> ⚠ **Le bloc du dessous se trompait** : les quatre commits de code étaient sur `origin/main` depuis 21 h 36 (reflog « update by push »), donc en ligne sous 1.134.0 sans changelog — la release répare ce trou. Et ses horodatages (« 22 h 10 », « 12 sept. 21 h ») viennent d'une horloge fausse : le commit de relais est daté 20 h 41 le 11 ; fais foi aux dates git.
+> **Reste** : la porte `plans de travail/PORTES-TERRAIN-2026-09-12-rencontres.md` (13 rangées, artefact jumeau à publier par Cowork) ; les douze mots (silence = tel quel) ; #836 (A = 100 % d'un élève de service, vue par mois…) ; #835 à concevoir ; #833 : le run de 1.134.0 rouge avec deux autres specs (fiche mise à jour) ; le lot 5 du cadrage 11 en pause ; les fichiers de Cowork non commités (`CONSIGNE-DEMARRAGE-COWORK.md`, cadrage, `CONSIGNE-DU-JOUR.md`, `docs/orthopedagogie/`, `Formation/`) — à Grégoire ; **`CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` est commité par cette session** (son diff non commité était la relecture croisée de Cowork, exécutée ici).
+
+## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 22 H 10 (HORLOGE FAUSSE, VOIR CI-DESSUS) : « RENCONTRES » LIVRÉ SUR `main` LOCAL, NON POUSSÉ, RELEASE 1.135.0 DUE
 
 > ⚠ **Le travail le plus récent est sur `main` LOCAL, cinq commits devant `origin/main`, et rien n'est poussé — exprès.**
 > La consigne du jour (§ 3) demande UNE livraison après le coup d'œil de Grégoire et la relecture croisée de Cowork sur les

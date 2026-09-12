@@ -59,7 +59,29 @@ il n'y avait **aucune consigne du jour en attente** au matin du 10.
 
 ---
 
-## ÉTAT MESURÉ — 11 SEPTEMBRE 2026, 22 H 10 (TORONTO)
+## ÉTAT MESURÉ — 11 SEPTEMBRE 2026, 21 H 55 (TORONTO, horloge du Mac : `date`)
+
+▣ **Remesuré par Claude Code à la livraison de 1.135.0.** ⚠ **Les horodatages des blocs du dessous (« 22 h 10 », et « 12 sept. 21 h » dans
+la marche) viennent d'une horloge fausse** : le commit de relais `af574fd2` est daté 20 h 41 le 11 (`git log -1 --format=%ad`). Fais foi aux dates git.
+
+- **Version `1.135.0`**, build `0911-2145` (`cat version.json`) — commit de release `538fbb92`, précédé du commit de reprises `ea90c376`
+  (les deux points de la relecture croisée de Cowork), suivi du commit de relais. Poussé par `scripts/pousser.sh` après le verdict :
+  **si tu lis ceci sur `origin/main`, le push a eu lieu**.
+- ⚠ **« Cinq commits non poussés » était FAUX** : `origin/main` = `af574fd2` depuis 21 h 36 (`git reflog show origin/main`, « update by
+  push ») — #834 était en ligne sous `1.134.0`, sans changelog. La release répare ce trou.
+- **Vitest : 543 fichiers / 5 932 essais, 0 échec** avant et après le commit de release (`cd tests && npm run test:unit`).
+- **Break-tests** : 6 mutations (3 sur `_estampillesAcceptees`, 3 sur `rencontres.js`), 6 rouges, fichiers restaurés à empreinte identique
+  (journal en fin des deux sentinelles #834 concernées).
+- **CI GitHub** : le run de 1.134.0 (`7092ce42`, 34658895912) est ROUGE au job Playwright — `planif-toolbar.spec.js:360` et
+  `pratiques-762-appliquer-au-cours-actif.spec.js:28`, absentes d'`EXCLUS_WEBKIT_LINUX` (fiche #833 mise à jour). Le run de `af574fd2`
+  était en cours. **Relire le run du push de 1.135.0** (`gh run list --branch main -L 1`).
+- **Arbre** : les fichiers de Cowork restent non commités (`CONSIGNE-DEMARRAGE-COWORK.md`, le cadrage, `CONSIGNE-DU-JOUR.md`,
+  `docs/orthopedagogie/`, `Formation/`, la capture supprimée) — à Grégoire. Ce fichier-ci est commité par la session (son diff était la
+  relecture croisée, exécutée).
+
+---
+
+## ÉTAT MESURÉ — 11 SEPTEMBRE 2026, « 22 H 10 » (HORLOGE FAUSSE — voir ci-dessus)
 
 ▣ **Remesuré par Claude Code à la clôture du chantier « Rencontres » — chaque ligne avec la commande qui la produit.**
 Le bloc de 19 h 25 reste dessous, pour l'histoire de la journée. ⚠ **Un état mesuré vieillit en heures. Remesure, ne recopie pas.**
@@ -99,8 +121,33 @@ le A = 100 % d'un élève de service sans séance (#836, laissé exprès).
 
 ## CE QUE LA PROCHAINE SESSION FAIT D'ABORD — la livraison de « Rencontres »
 
+▣ **ÉTAPES 1, 3 et 4 FAITES le 11 sept. à 21 h 55** (reprises `ea90c376`, release `538fbb92`, verdict puis `pousser.sh`). **L'étape 2 (le coup
+d'œil) n'a pas eu lieu** : la porte le remplace, sur 1.135.0. **Restent la 5** (la porte — treize rangées, artefact jumeau par Cowork)
+**et la 6.** Le détail ci-dessous est conservé tel quel, pour l'histoire.
+
 1. **Relecture croisée par Cowork** des cinq commits (`git log --oneline -6`, `git show --stat`), règle 2 de `PROTOCOLE.md`. Toute
    reprise se committe AVANT le verdict.
+   ▣ **FAITE par Cowork le 12 sept. à 21 h 05, sur `ff2860ce` → `445902bd` (diffs de `modes.js`, `horaire.js`, `interventions.js`, stat
+   des 40 fichiers, messages des commits). Verdict : livrable après UNE reprise, technique, tranchée par Cowork :**
+   - ⚠ **Lot D — l'estampille n'a pas la même granularité selon le mode.** `obtenirIdContexteActif` rend `_groupeCoursId` en mode
+     groupe-cours (`orchestre.js:242`) mais `infoCours.id` = **coursId** en mode cours fusionné (`_definirInfoCoursModeCours`, `:182-197`,
+     n'écrit pas `_groupeCoursId`). Donc une intervention créée en mode cours est estampillée du coursId et le filtre
+     `!i.groupeCoursId || i.groupeCoursId === gcActif` la **cache** dès qu'on repasse en mode groupe-cours — et inversement, une
+     intervention née dans un groupe est cachée en mode cours. Avant le lot, tout était visible partout : **c'est une régression pour un
+     enseignant qui passe d'un mode à l'autre** (Grégoire a deux groupes du même cours). Reprise attendue : le filtre accepte aussi (a) une
+     estampille égale au `coursId` du contexte actif, et (b) en mode cours, toute estampille qui est l'id d'un groupe-cours de ce cours.
+     Sentinelle : les deux traversées (née en cours → vue en groupe ; née en groupe → vue en cours) plus les deux cas déjà couverts.
+   - Le court-circuit de `obtenirSeancesHoraire` (service sans horaire → `[]`, jamais le miroir du dernier groupe) : juste, et la garde
+     `gc && !horaireId && contexteActifEstService()` ne touche pas un groupe-cours ordinaire. Le point unique `obtenirIdContexteActif` :
+     zéro changement de valeur par construction (même expression). Le nettoyage démo (`445902bd`) : nécessaire, bien vu.
+   - ▣ **TRANCHÉ PAR GRÉGOIRE, 12 sept., 21 h 02 : « Rencontres » ne liste que les services.** Sur un groupe-cours ordinaire, le
+     sous-onglet n'affiche PAS la liste des interventions du groupe (fini le doublon à deux vocabulaires) : seulement la porte « Créer un
+     service » (et, s'il existe déjà un service dans le trimestre, le lien pour l'activer). « Interventions » reste ce qu'il est. La fusion
+     des deux sous-onglets se rejuge après le mois d'usage de l'orthopédagogue, pas avant. Deuxième reprise, à committer avant le verdict ;
+     la sentinelle des trois questions couvre le cas « contexte ordinaire → porte seulement ». Changelog : la première ligne proposée dit
+     « ce sont tes interventions, dites avec le mot rencontre » — à réécrire : « Rencontres » sert aux services (un cours de nature
+     « Service »), Interventions au groupe-cours.
+   - Rien d'autre à reprendre. Les douze mots sont à Grégoire (silence vaut « tel quel »).
 2. **Le coup d'œil de Grégoire** — sans release, il ne peut le prendre qu'en local (`python3 -m http.server` à la racine, ou
    `file://index.html`) ; ou il accepte la porte APRÈS la release (rangées 1-7 sur ses données, 8-12 en démo).
 3. **Release `minor` → `1.135.0`** (`node scripts/release.mjs minor --dry-run`, puis sans `--dry-run`), après le changelog. Trois
