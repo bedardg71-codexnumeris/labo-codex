@@ -21,6 +21,10 @@
    - Les mots qui suivent la FICHE ouverte dans le formulaire du Cadre (« Nouveau cours » /
      « Modifier le service », le bandeau) : `motsNature(nature du menu Nature)`.
 
+   Consigne du 12 sept. 2026, 10 h 25 (#846) : un mot qui nomme un CHOIX possible ne suit pas
+   le contexte. Le champ 2 du groupe-cours (« Cours ou service ») et son option vide ont quitté
+   cette table : on peut y choisir un cours comme un service, quel que soit le contexte actif.
+
    Chargé juste après db.js : tout module qui écrit une nature à l'écran le trouve.
    =============================== */
 
@@ -34,7 +38,6 @@ const MOTS_NATURE = Object.freeze({
         Objet: 'Cours',                  // en tête de phrase ou de libellé ; le bandeau « Mode modification — Cours … »
         objetLong: 'cours',              // la forme complète (identique pour un cours)
         ObjetLong: 'Cours',
-        objetGroupeCours: 'Cours à enseigner', // Cadre › Groupe-cours, champ 2
         personne: 'enseignant·e',        // « l'enseignant·e responsable »
         Personne: 'Enseignant·e',        // titre de l'accordéon, fil d'Ariane, champ 5
         personneCourt: 'Enseig.',        // carte résumé du groupe-cours
@@ -42,7 +45,6 @@ const MOTS_NATURE = Object.freeze({
         choisirPersonne: 'Sélectionner un enseignant·e', // option vide du sélecteur de profil (v2-selectEnseignant)
         choisirPersonneGC: '— Choisir un enseignant —',   // option vide du champ 5 du groupe-cours (v2-gc-enseignant)
         choisirObjet: 'Sélectionner un cours...',        // option vide du menu Cours du Cadre (v2-selectCours)
-        choisirObjetGC: '— Choisir un cours —',           // option vide du champ 2 du groupe-cours (v2-gc-cours)
         aucunObjet: 'Aucun cours sélectionné',            // la synthèse vide, à gauche du formulaire
         nouveau: 'Nouveau cours',                         // titre du formulaire (création)
         modifier: 'Modifier le cours',                    // titre du formulaire (édition)
@@ -59,7 +61,6 @@ const MOTS_NATURE = Object.freeze({
         Objet: 'Service',
         objetLong: 'service d’orthopédagogie',
         ObjetLong: 'Service d’orthopédagogie',
-        objetGroupeCours: 'Service d’orthopédagogie',
         personne: 'orthopédagogue',
         Personne: 'Orthopédagogue',
         personneCourt: 'Ortho.',
@@ -67,7 +68,6 @@ const MOTS_NATURE = Object.freeze({
         choisirPersonne: 'Sélectionner un·e orthopédagogue',
         choisirPersonneGC: '— Choisir un·e orthopédagogue —',
         choisirObjet: 'Sélectionner un service...',
-        choisirObjetGC: '— Choisir un service —',
         aucunObjet: 'Aucun service sélectionné',
         nouveau: 'Nouveau service',
         modifier: 'Modifier le service',

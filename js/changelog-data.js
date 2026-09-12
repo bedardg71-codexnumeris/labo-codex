@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.138',
+            couleur: 'vert',
+            titre: 'L\'accueil parle aux deux métiers',
+            items: [
+                '<strong>L\'accueil nomme les deux usages de l\'application.</strong> Dans le bandeau «&nbsp;Bienvenue&nbsp;», «&nbsp;Par où commencer&nbsp;?&nbsp;» répond à l\'enseignant·e et à l\'orthopédagogue, chacun par son chemin ; les paragraphes sur les guides et sur le courriel mensuel sont plus courts.',
+                '<strong>Une orthopédagogue trouve sa porte dès l\'accueil</strong>&nbsp;: la carte «&nbsp;Tu es orthopédagogue&nbsp;?&nbsp;», au-dessus des tâches, mène en un geste à Suivi › Rencontres, où son service se décrit en trois questions.',
+                '<strong>Les rencontres d\'orthopédagogie ne demandent plus de cibler des critères d\'évaluation.</strong> Sur un service, le formulaire d\'une rencontre n\'affiche plus «&nbsp;Critères ciblés&nbsp;», «&nbsp;Objectif visé&nbsp;» ni «&nbsp;Suggérer&nbsp;», et le bilan dit simplement «&nbsp;Ce que tu retiens de la rencontre.&nbsp;» Sur un cours, le formulaire d\'une intervention ne change pas.',
+            ]
+        },
+        {
             version: '1.137',
             couleur: 'bleu',
             titre: 'La section Cours du Cadre parle le métier choisi, et ne se contredit plus sur l\'horaire',

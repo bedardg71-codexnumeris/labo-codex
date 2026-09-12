@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260911c"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260912f"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -735,6 +735,56 @@
             color: var(--texte-muted);
             font-weight: 600;
             margin: 0 0 10px;
+        }
+
+        /* Porte de l'orthopédagogie (consigne du 12 sept. 2026, maquette validée par Grégoire) :
+           une carte BLANCHE, conforme aux cartes de l'accueil — même fond, même trait fin, même
+           rayon ; même ombre en mode clair (styles.css, règle des cartes accueil V3). Ni couleur
+           propre, ni bord gauche épais : la sarcelle signe le mode démonstration. */
+        .accueil-porte-ortho {
+            background: var(--surface-carte, #1a3040);
+            border: 1px solid rgba(106, 172, 184, 0.15);
+            border-radius: var(--radius-grand, 10px);
+            padding: 16px 20px;
+            margin: 0 0 24px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px 20px;
+        }
+        .accueil-porte-ortho-titre {
+            font-weight: 600;
+            color: var(--texte-principal);
+            font-size: 0.95rem;
+        }
+        .accueil-porte-ortho-desc {
+            margin-top: 4px;
+            font-size: 0.82rem;
+            color: var(--texte-secondaire);
+            line-height: 1.4;
+        }
+        .accueil-porte-ortho-lien {
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 4px;
+            background: none;
+            border: none;
+            font: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent-primaire);
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .accueil-porte-ortho-lien:hover {
+            text-decoration: underline;
+        }
+        .accueil-porte-ortho-lien:focus-visible {
+            outline: 2px solid var(--accent-primaire);
+            outline-offset: 2px;
+            border-radius: 4px;
         }
 
         /* Grille des 8 raccourcis (4 colonnes × 2 lignes) */
@@ -7386,7 +7436,7 @@
                                             <p class="u-mb-15" style="color: var(--gris-moyen)">Clique sur « + Nouveau groupe-cours » pour renseigner les <span data-mot-nature="nbElementsObligatoires">5 éléments obligatoires</span>.</p>
                                             <ol class="u-texte-09 u-text-left" style="display: inline-block; color: var(--gris-moyen); margin: 0; padding-left: 20px">
                                                 <li>Le <strong>trimestre</strong></li>
-                                                <li><strong data-mot-nature="objetGroupeCours">Cours à enseigner</strong></li>
+                                                <li><strong>Cours ou service</strong></li>
                                                 <li>Le <strong>numéro de groupe</strong> d'étudiant·es</li>
                                                 <li>L'<strong>horaire</strong> des séances<span data-mot-nature="horaireFacultatif"></span></li>
                                                 <li>L'<strong data-mot-nature="personne">enseignant·e</strong> responsable</li>
@@ -7421,9 +7471,9 @@
                                                 </select>
                                             </div>
                                             <div class="groupe-form">
-                                                <label>2. <span data-mot-nature="objetGroupeCours">Cours à enseigner</span> <span class="champ-requis">*</span></label>
+                                                <label>2. Cours ou service <span class="champ-requis">*</span></label>
                                                 <select id="v2-gc-cours" class="controle-form" data-on-change="mettreAJourNomGroupeCoursV2">
-                                                    <option value="">— Choisir un cours —</option>
+                                                    <option value="">— Choisir un cours ou un service —</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -14403,7 +14453,7 @@
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
     <script src="version.js?v=09120935"></script>
     <script src="js/db.js?v=20260826b"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
-    <script src="js/mots-nature.js?v=20260912e"></script> <!-- consigne du 12 sept. 2026 : LE point unique du mot de chaque nature de cours (Enseignement / Orthopédagogie) -->
+    <script src="js/mots-nature.js?v=20260912f"></script> <!-- consigne du 12 sept. 2026 : LE point unique du mot de chaque nature de cours (Enseignement / Orthopédagogie) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
     <script src="js/pratiques/modalites-evaluation.js?v=20260810a"></script> <!-- SSOT #328 Lot 1 : module propriétaire de modalitesEvaluation (seul point d'écriture), chargé avec la couche stockage -->
     <script src="js/securite-hash.js?v=2026050615"></script> <!-- Beta 99.36 b0506-1400 : Défense H — sceau SHA-256 sur ressources partagées -->
@@ -14449,7 +14499,7 @@
     <script src="js/productions-namespace-garde.js?v=20260822a"></script> <!-- #340 : garde-fou anti-contamination productions inter-trimestres (db.set/setSync) -->
     <script src="js/horaire-fusion.js?v=20260821a"></script> <!-- CT-04 : source unique de la fusion entités horaires → horaireHebdo (dédup par jour ET heure) -->
     <script src="js/trimestre.js?v=20260805a"></script> <!-- #368 relais : numérotation paquet de 5, golden master officiel (5 août) -->
-    <script src="js/trimestre-v2.js?v=20260912e"></script> <!-- #366+#369+#374 relais : stats, validations, clé unique (5 août) -->
+    <script src="js/trimestre-v2.js?v=20260912f"></script> <!-- #366+#369+#374 relais : stats, validations, clé unique (5 août) -->
     <script src="js/trimestre-v2-init.js?v=20260906a"></script> <!-- Fusion #374 : jeu unique de fonctions Journées sans cours (5 août) -->
     <script src="js/trimestre-v2-enseignants.js?v=20260912e"></script> <!-- #306 Lot 1 (3 juil.) : bascule Créer/Enregistrer du bouton profil -->
     <script src="js/trimestre-v2-horaires.js?v=20260827a"></script> <!-- #306 Lot 1 (3 juil.) : création d'horaire = « Créer » (séance garde « Ajouter ») -->
@@ -14457,7 +14507,7 @@
     <script src="js/trimestre-v2-cours.js?v=20260912e"></script> <!-- consigne du 12 sept. 2026 (les étiquettes) : le menu Nature et ses libellés viennent de js/mots-nature.js -->
     <script src="js/trimestre-v2-etudiants.js?v=20260911n"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-1014 + handlers 2188-2200, zone 4) -->
     <script src="js/trimestre-v2-groupes-cours.js?v=20260912c"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-219 + 360-1149, zone 6 — hub populerDropdownsAssemblageV2 reste résidu) -->
-    <script src="js/trimestre-v2-orchestre.js?v=20260912e"></script> <!-- #306 Lot 1 (3 juil.) : retrait des fonctions enseignant mortes (zéro-dette) -->
+    <script src="js/trimestre-v2-orchestre.js?v=20260912f"></script> <!-- #306 Lot 1 (3 juil.) : retrait des fonctions enseignant mortes (zéro-dette) -->
 
     <!-- ENTITÉS Beta 95.2 - Architecture modulaire groupe-cours -->
     <script src="js/entites/cours-entite.js?v=20260911l"></script>
@@ -14617,7 +14667,7 @@
     <script src="js/calendrier-vue.js?v=20260805b"></script> <!-- #366+#374 relais : stats fonction pure + clé unique (5 août) -->
     <script src="js/horaire.js?v=20260911l"></script> <!-- #416 lot C : lecture stricte des séances d'un groupe DÉSIGNÉ (jamais de génération) -->
     <script src="js/groupe.js?v=20260908b"></script>
-    <script src="js/interventions.js?v=20260911o"></script> <!-- cadrage « Rencontres » : vocabulaire, conteneur, service -->
+    <script src="js/interventions.js?v=20260912f"></script> <!-- cadrage « Rencontres » : vocabulaire, conteneur, service -->
     <script src="js/rencontres.js?v=20260912c"></script> <!-- cadrage « Rencontres » (12 sept. 2026) : le sous-onglet Suivi › Rencontres, les trois questions -->
 
     <!-- PRIORITÉ 6: Modules avancés (Beta 91.5 - Import/Export) -->
@@ -14660,12 +14710,12 @@
     <script src="js/migrations.js?v=20260827a"></script> <!-- #374-bis : dédoublonnage par contenu (congés recréés à la main, 6 août) -->
 
     <!-- Page d'accueil (Chantier 3) -->
-    <script src="js/accueil.js?v=20260901a"></script> <!-- Refonte nav SP5 : data-param calendrier -->
+    <script src="js/accueil.js?v=20260912f"></script> <!-- Refonte nav SP5 : data-param calendrier -->
     <!-- Guidage contextuel démo (Chantier 4) -->
     <script src="js/guidage-demo.js?v=20260831b"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260912e"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
+    <script src="js/changelog-data.js?v=20260912f"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260911a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
