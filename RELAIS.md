@@ -7,7 +7,11 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 8 H 05 (Toronto) : « LES ÉTIQUETTES » COMMITÉ SUR `main` LOCAL (`fa27b531`), RELEASE 1.136.0 DUE APRÈS LA RELECTURE DE COWORK
+## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 8 H 25 (Toronto) : « LES ÉTIQUETTES » RELEASÉ EN 1.136.0 (`2c84a34a`) ET POUSSÉ PAR `scripts/pousser.sh` APRÈS LE VERDICT
+
+> ✅ **Tout est sur `main` = `origin/main` (`2c84a34a`, 1.136.0, build 0912-0813, en ligne)** : code `fa27b531`, relais `39706b47`, fichiers de Cowork `9e15ddb8` (BACKLOG #839/#840, PROTOCOLE règle 8, CONSIGNE-DU-JOUR + archive), release `2c84a34a`. Relecture croisée de Cowork passée ; Playwright : 0 rougeur nouvelle (une spec instable connue, verte au second essai) ; Vitest 545 / 5 959. **Reste** : la porte `plans de travail/PORTES-TERRAIN-2026-09-12-etiquettes.md` (dix rangées, quatre décisions au § 3 — dont la ligne de `js/config.js` à autoriser) et son artefact jumeau par Cowork. Le bloc du dessous (8 h 05) décrit l'état d'avant la release.
+
+## (PÉRIMÉ 8 h 25) POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 8 H 05 (Toronto) : « LES ÉTIQUETTES » COMMITÉ SUR `main` LOCAL (`fa27b531`), RELEASE 1.136.0 DUE APRÈS LA RELECTURE DE COWORK
 
 > **Le travail le plus récent est sur `main` LOCAL, deux commits devant `origin/main` (`473f3d75` = 1.135.1, en ligne), rien de poussé — exprès** (consigne du 12 sept. § 5 : une seule livraison `minor` après la relecture croisée de Cowork ; un push déploie).
 > **Livré** (`fa27b531`) : `js/mots-nature.js`, LE point unique du mot de chaque nature de cours (« Enseignement » / « Orthopédagogie », l'objet, la personne) ; 22 sites migrés dans `trimestre-v2-cours.js`, `trimestre-v2-groupes-cours.js`, `trimestre-v2-orchestre.js` (`appliquerMotsNatureCadre`, posé par `mettreAJourContexteEntete`), `cours.js`, `rencontres.js`, `accompagnement-contenu-hover.js`, `index.html` (options vides + `data-mot-nature`) ; sentinelle `sentinelle-etiquettes-nature-un-point-unique` (13 essais, verrou structurel) ; changelog 1.136 ; porte `plans de travail/PORTES-TERRAIN-2026-09-12-etiquettes.md`. **Aucune valeur en base ne change.** Version inchangée : 1.135.1. Vitest 545 / 5 959.

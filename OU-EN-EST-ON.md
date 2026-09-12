@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-🔧 **À LIVRER EN 1.136.0 (12 SEPTEMBRE 2026, 8 h 05) — LES ÉTIQUETTES : L'ORTHOPÉDAGOGUE ENTRE PAR LE CADRE, COMME TOUT LE MONDE** (consigne du jour de Cowork, 7 h 40 ; commit `fa27b531` sur `main` local, ni releasé ni poussé : la release `minor` attend la relecture croisée de Cowork, consigne § 5).
+✅ **FAIT EN 1.136.0 (12 SEPTEMBRE 2026, 8 h 25 — release `2c84a34a`, POUSSÉE, `main` = `origin/main` ; relecture croisée de Cowork passée sur `fa27b531`, Playwright vert, Vitest 545 / 5 959) — LES ÉTIQUETTES : L'ORTHOPÉDAGOGUE ENTRE PAR LE CADRE, COMME TOUT LE MONDE** (consigne du jour de Cowork, 7 h 40 ; code `fa27b531`).
 **Ce que tu verras** : dans `Cadre › Cours`, le menu **Nature** dit **« Enseignement »** ou **« Orthopédagogie »** (à la place de « Cours » /
 « Service ») — tes champs, tes fiches, tes données sont intacts ; en base, la nature vaut toujours `'cours'` ou `'service'`, aucune
 migration. Le mot vit à **un seul endroit** (`js/mots-nature.js`) : le jour où d'autres services existent, il se change là, et nulle part

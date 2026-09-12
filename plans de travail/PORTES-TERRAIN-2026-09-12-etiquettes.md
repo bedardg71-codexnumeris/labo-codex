@@ -1,8 +1,8 @@
 # Portes terrain — 12 septembre 2026 (les étiquettes : l'orthopédagogue entre par le Cadre, comme tout le monde — à livrer en 1.136.0)
 
-> **Version à l'écran attendue : `1.136.0`** (écrite le 12 sept. à 8 h, AVANT la release : le lot est commité sur `main` local, **ni releasé
-> ni poussé** — ta consigne (§ 5) veut une seule livraison après la relecture croisée de Cowork, et un push déploie. **Tant que la version
-> lue en bas de page est `1.135.1`, cette liste ne juge rien.**)
+> **Version à l'écran attendue : `1.136.0`**, build `0912-0813` (release `2c84a34a`, **poussée le 12 sept. à 8 h 20** après la relecture
+> croisée de Cowork et le verdict Playwright ; Netlify met en ligne en 30 à 60 s). **Tant que la version lue en bas de page est `1.135.1`,
+> cette liste ne juge rien** : recharge avec vidage de cache.)
 > Couvre : le mot de chaque nature de cours à UN seul endroit (`js/mots-nature.js`) — « Enseignement » / « Orthopédagogie » — et tous les
 > sites qui l'affichent (Cadre › Cours, Cadre › Groupe-cours, la bibliothèque des cours, Suivi › Rencontres, deux infobulles) ; le mot de la
 > personne (enseignant·e / orthopédagogue) qui suit la nature du contexte actif. **Aucun comportement, aucune donnée, aucune règle ne

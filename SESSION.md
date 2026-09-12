@@ -26,7 +26,11 @@
      ⛔ ZONE PROTÉGÉE : le libellé de l'onglet « Rencontres » vit dans js/config.js:70 → non touché, remonté (porte § 3.1) ;
        le titre de la section (index.html) dit « Rencontres (ortho.) ».
      ⚠ Cowork a écrit BACKLOG.md (#839, #840 — dont le second axe du partage, § 3 de la consigne : donc rien inscrit par
-       moi), PROTOCOLE.md (règle 8 : verdict Playwright Cowork fermé) et CONSIGNE-DU-JOUR.md pendant la session : non commités.
+       moi), PROTOCOLE.md (règle 8 : verdict Playwright Cowork fermé) et CONSIGNE-DU-JOUR.md pendant la session.
+     ▣ SUITE 8 h 10 → 8 h 25 (Grégoire : « livre la release et pousse ; relecture de Cowork faite ») : fichiers de Cowork
+       commités `9e15ddb8` ; `release.mjs minor` → 1.136.0 / 0912-0813, 11 jetons ; commit `2c84a34a` ; Vitest 545 / 5 959
+       après le bump ; `scripts/pousser.sh` : Playwright 0 rougeur nouvelle (carac-476 verte au 2e essai, #685), push
+       473f3d75..2c84a34a. main = origin/main. Non commités : brouillons docs/orthopedagogie de Cowork, Formation/, PNG supprimé.
      ===================================================================== -->
 
 <!-- =====================================================================
