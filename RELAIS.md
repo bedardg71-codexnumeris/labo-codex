@@ -7,13 +7,23 @@
 
 ---
 
-## NUMÉROTATION TRANCHÉE — 12 SEPT. 2026, SOIR (Toronto) : OPTION C + RÈGLE DU LIEN, APPLIQUÉE, NON POUSSÉ
+## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 18 H 45 (Toronto) : TOUT EST POUSSÉ — `origin/main` = `46a5ccf7` (+ ce relais)
+
+> ✅ **Mesuré après `git fetch` : `main` = `origin/main`, working tree propre.** Poussés ce soir : `85cd24b1`, `eca024fa`, `03ff9a9b`, `948eed75` à 18 h 31 (verdict Playwright local VERT sur `948eed75` à 18 h 18, Cowork fermé, 0 échec connu) ; puis `46a5ccf7` à 18 h 37, les 17 fichiers de Cowork (Formation, orthopédagogie, relevé de la porte Interventions, trois anciennes consignes, suppression d'une capture), commités par Grégoire dans GitHub Desktop — sans verdict, et c'est la règle : aucun fichier observable au navigateur (motif `OBSERVABLE` de `tests.yml`, testé sous bash). Ce relais-ci est un commit de documents postérieur, poussé de même.
+>
+> **CI GitHub** : `948eed75` (run `34723004615`) — Vitest vert, Playwright **sauté** (push documentaire) ; `46a5ccf7` (run `34723280219`) — en cours à 18 h 38. ⚠ **Le code de 1.139.0 n'a donc JAMAIS été jugé par GitHub** : son seul run Playwright (`34712643286`, sur `e29f734c`) a été annulé après 45 min ; seul le verdict local tient. Le prochain push qui touche un fichier observable relancera la suite.
+>
+> **Reste** : (1) la porte `PORTES-TERRAIN-2026-09-12-interventions.md` — relevée 6/6 par Cowork, rangées 2.4 (Rencontres sur un service, que l'orthopédagogue ouvre lundi) et 2.5 (#748, note grisée d'un élève parti) sautées faute de cas réel ; (2) la liste des 32 partiels de la réconciliation, à déposer dans le dépôt (Grégoire / Cowork) ; (3) le lot 6 du cadrage 11, l'Animation ; (4) la correction de `.gitignore` proposée par Cowork (motif `ignor*s/` : la règle `*ignorés*/` ne matche pas la forme décomposée de macOS) — NON appliquée, rien de suivi n'en dépend. **Prochain numéro, fiche OU bug : #849** (règle 9 de `PROTOCOLE.md`).
+
+---
+
+## NUMÉROTATION TRANCHÉE — 12 SEPT. 2026, SOIR (Toronto) : OPTION C + RÈGLE DU LIEN, APPLIQUÉE, POUSSÉE À 18 H 31 (`948eed75`)
 
 > **Décision de Grégoire** : option C de `Rapports/PROPOSITION-numerotation-bugs-testeurs-2026-09-12.md` + la règle du lien. **Appliquée** (quatrième commit de documents devant `origin/main`, même verdict Playwright que les trois autres) : ligne unique « **Dernier ID utilisé : #848** » en tête de `BACKLOG.md` (mesuré : maximum des fiches, des bugs, du journal git et des fichiers de pilotage ; les « Dernier ID » des blocs « État courant » deviennent historiques) ; encadré « Numérotation » + liste des 123 homonymes en tête de SUIVI-BUGS, et son point « Pour ajouter un bug » réécrit ; skill `debug-labo-codex` §6 (il faisait incrémenter le dernier numéro de SUIVI-BUGS et mettre à jour un compteur « prochain : #XX » qui n'existait pas — la source des collisions) ; skill de début de session ; `PROTOCOLE.md` règle 9 (lue par Cowork) ; statut de la proposition ; une mention périmée d'`ETAT-PROJET.md` (« dernier ID #362 »). **Le prochain numéro, fiche OU bug, est #849.** Aucun numéro renuméroté, aucun fichier de `js/` touché. Hors dépôt, non touché : le skill `task-management` du plugin de Cowork dit déjà « Dernier ID utilisé » de l'en-tête — il trouve désormais la ligne qu'il cherche.
 
 ---
 
-## AMENDEMENT — 12 SEPT. 2026, SOIR (Toronto), APRÈS LA CONTRE-VÉRIFICATION DE COWORK : QUATRE CORRECTIONS DOCUMENTAIRES, NON POUSSÉ
+## AMENDEMENT — 12 SEPT. 2026, SOIR (Toronto), APRÈS LA CONTRE-VÉRIFICATION DE COWORK : QUATRE CORRECTIONS DOCUMENTAIRES, POUSSÉES À 18 H 31 (`03ff9a9b`)
 
 > Troisième commit de documents devant `origin/main` (`e29f734c`), après `85cd24b1` et `eca024fa` : **les trois attendent le MÊME verdict Playwright local** avant le push (§4.5 de fin-de-session). Aucun fichier de `js/` touché. Corrigés : la PROPOSITION de numérotation (123 homonymes et non 81 ; 407 commits nomment un numéro de bug, dont 382 un homonyme, et non 649 ; méthode écrite dans le rapport) ; les dispositions de la RÉCONCILIATION (8 fiches sur 14 fermées par un commit qui les nomme, les 6 autres nommées une à une) ; la ligne de #366 au BACKLOG (le grep rend zéro, pas un). **Aucune option de numérotation appliquée** : SUIVI-BUGS et la ligne « Dernier ID » sont intacts, la décision reste à Grégoire. Les 14 coches, les annotations « ↻ » de #599 et #674 et le blocage des 32 partiels ne bougent pas.
 >
@@ -21,7 +31,7 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, SOIR (Toronto) : BACKLOG RÉCONCILIÉ (14 coches), DOCS SEULEMENT, NON POUSSÉ
+## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, SOIR (Toronto) : BACKLOG RÉCONCILIÉ (14 coches), DOCS SEULEMENT, POUSSÉ À 18 H 31 (`eca024fa`)
 
 > Sur `main` local, devant `origin/main` (`e29f734c`) : `85cd24b1` (relais de 14 h 56) et le commit de ce soir — `BACKLOG.md` : 14 fiches cochées avec preuve contre-vérifiée (#631, #632, #366, #403, #427, #495, #530, #539, #577, #581, #599, #661, #674, #789 ; 255 → 241 cases ouvertes), deux annotations fausses corrigées (#599, #674) ; dispositions au pied de `Rapports/RECONCILIATION-backlog-2026-09-12.md` ; proposition `Rapports/PROPOSITION-numerotation-bugs-testeurs-2026-09-12.md`. **Aucun code touché** ; Vitest 551 / 6 034 au rituel de début. **Deux choses dues à Grégoire** : (1) trancher la numérotation (question fermée en fin de proposition, recommandation C + règle du lien) ; (2) déposer dans le dépôt la liste des 32 partiels avec « ce qui reste » — elle n'est que dans la trace de session de Cowork, et sans elle le point 4 du relais reste bloqué. Le working tree garde les fichiers de Cowork non commités (porte Interventions relevée à 15 h, 16 non suivis) : pas à moi de les commettre.
 
