@@ -24,7 +24,10 @@
        Vitest 548 / 5 996.
      ▣ MESURE CONTRE CONSIGNE : « Commencer → » mène aux trois questions seulement sans trimestre ; #847 déjà pris par Cowork en cours
        de session → ma trouvaille est #848 (Cadre › Cours + la phrase des éléments obligatoires, liée au cours CHOISI — remontée).
-     ▣ DOCS : OU-EN-EST-ON, BACKLOG (#846 [x], #848, état courant), relevé de la porte section Cours, porte accueil (5 + 2), RELAIS,
+     ▣ LOT D (révision de 10 h 50, `62f24316`) : « Tes prochains rendez-vous » rendu par afficherListeInterventions (vue Rencontres +
+       service) — la consigne disait afficherRencontres, mesuré faux (conteneur remplacé par le formulaire, retour = liste seule) ;
+       pas de bloc sans aucune rencontre ; `_formeRencontre` ; bac-suivi fournit dateLocaleYMD. 13 essais, 10 mutations / 10 rouges.
+     ▣ DOCS : OU-EN-EST-ON, BACKLOG (#846 [x], #848, état courant), relevé de la porte section Cours, porte accueil (6 + 2), RELAIS,
        consignes de démarrage (Cowork, prochaine session). Non commités : archives de consigne, Formation/, docs/orthopedagogie/,
        la capture du 9 sept. supprimée — à Grégoire.
      ===================================================================== -->

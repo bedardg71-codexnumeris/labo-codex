@@ -3,7 +3,7 @@
 > **État** : écrite le 12 septembre 2026 par Claude Code, sur la consigne du jour de Cowork (10 h 25, révisée à 10 h 35).
 > Le code est commité sur `main` local, **ni releasé, ni poussé** : la release `1.138.0` attend la relecture croisée de Cowork
 > (consigne § 5). **Cette porte ne s'ouvre qu'une fois `1.138.0` en ligne** (§ 0).
-> Cinq rangées (consigne § 6), deux décisions (§ 3). Ce qui échoue devient un item du BACKLOG, avec son numéro de rangée.
+> Six rangées (consigne § 6, révisée à 10 h 50 : la sixième est « Tes prochains rendez-vous »), deux décisions (§ 3). Code : `e011ed64` + `62f24316`. Ce qui échoue devient un item du BACKLOG, avec son numéro de rangée.
 > **Markdown par Claude Code ; l'artefact jumeau (bouton « Copier mes résultats », champs de saisie au § 3) par Cowork.**
 
 ---
@@ -28,6 +28,8 @@ restent tels qu'ils sont en base : c'est verrouillé par un test.)
 | **3** | Reviens à l'accueil et déplie le bandeau « Bienvenue » | Dans cet ordre : le paragraphe de présentation (inchangé) ; **« Par où commencer ? »** suivi de ses deux branches, **« Je suis enseignant·e — Configure ton trimestre… tu peux les élaborer et les partager avec tes collègues. »** et **« Je suis orthopédagogue — Décris ton service dans Suivi › Rencontres : tes rencontres se tiennent là. »** ; **« Certains concepts sont nouveaux ? »** Trois guides… par les boutons « Guide ». ; **« Ton courriel, une fois par mois. »** Tu donnes ton courriel… sur ton appareil. ; puis l'invitation à la communauté de pratique (inchangée). |
 | **4** | Active un service (ou crée-en un en démo), va dans `Cadre › Groupe-cours`, clique « + Nouveau groupe-cours » et lis le champ 2 | **« 2. Cours ou service »** — et non plus « Service d’orthopédagogie ». Son menu commence par **« — Choisir un cours ou un service — »** (mot proposé, § 3.2) et liste tes cours **et** tes services, comme avant. Sur ton 601-101-MQ, le même champ dit la même chose. Tout le reste du Cadre et de l'accueil est identique à `1.137.0`. |
 | **5** | Sur un service : `Suivi › Rencontres`, ouvre une rencontre. Puis active ton 601-101-MQ : `Suivi › Interventions`, ouvre une intervention | **Sur le service** : pas de bloc « Critères ciblés », ni « Objectif visé », ni de bouton « Suggérer » ; si la rencontre est complétée, son bilan dit **« Ce que tu retiens de la rencontre. »** **Sur ton 601-101-MQ** : le bloc est là, tes cinq critères aussi (Structure, Rigueur, Plausibilité, Nuance, Français écrit), et « Suggérer » propose un objectif quand un critère et un élève sont cochés. |
+
+| **6** | Sur un service : `Suivi › Rencontres`, avec au moins une rencontre datée d'aujourd'hui ou plus tard (crée-en une en démo si besoin) | En tête de la liste, sous le bouton « + Nouvelle rencontre », le bloc **« Tes prochains rendez-vous »** : au plus quatre lignes, **la plus proche en premier** — la date en toutes lettres, l'heure si tu l'as notée, le titre, « individuelle » ou « en sous-groupe ». **La liste du dessous n'a pas changé d'ordre** (la plus récente en premier). Sans rencontre à venir : « Aucun rendez-vous à venir. Tes rencontres passées restent dans la liste ci-dessous. » Sans aucune rencontre : pas de bloc, seulement « Aucune rencontre. » (choix de Claude Code, la phrase serait fausse sous une liste vide). Ouvre une rencontre, puis reviens : le bloc est toujours là. |
 
 ## §3 · Décisions — ce qui attend ton verdict (ce ne sont pas des vérifications : écris ta réponse)
 

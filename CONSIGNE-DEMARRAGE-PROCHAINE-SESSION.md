@@ -1,5 +1,8 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 11 h (Toronto) : la révision de 10 h 50 (lot D, « Tes prochains
+> rendez-vous ») est exécutée à son tour — commit `62f24316`, même livraison. La relecture de Cowork porte sur `e011ed64` ET `62f24316` ;
+> la porte a six rangées. Le reste du bloc ci-dessous vaut tel quel.**
 > ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 10 h 55 (Toronto) : la consigne du jour de Cowork (10 h 25, révisée
 > 10 h 35 — l'accueil, le champ 2, les rencontres sans critères ciblés) est EXÉCUTÉE en un commit de code sur `main` local, `e011ed64`,
 > NI RELEASÉ NI POUSSÉ — exprès (consigne § 5 : une livraison `minor` `1.138.0` après la relecture croisée de Cowork). Version à l'écran :

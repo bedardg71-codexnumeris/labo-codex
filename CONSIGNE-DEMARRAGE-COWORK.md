@@ -4,6 +4,12 @@
 > matinée de **trois versions** (`1.135.1`, `1.136.0`, `1.137.0`), **trois portes terrain relevées** et **dix items inscrits**.
 > Elle REMPLACE toute version précédente.
 >
+> ▣ **MISE À JOUR 11 h : ta révision de 10 h 50 (lot D) est exécutée — commit `62f24316`, à relire AVEC `e011ed64`.** Le bloc « Tes prochains
+> rendez-vous » est rendu par `afficherListeInterventions` (garde `_enVueRencontres() && _surService()`), **pas par `afficherRencontres`** :
+> mesuré, `ouvrirIntervention` remplace le conteneur et le retour (comme Enregistrer / Annuler / Supprimer) ne reconstruit que la liste — le bloc
+> y aurait disparu ; `rencontres.js` n'est pas touché. Sans aucune rencontre : pas de bloc (la phrase arrêtée serait fausse sous une liste vide).
+> `_formeRencontre` lit VOCABULAIRES.rencontres (le badge de la liste écrivait les deux mots une seconde fois). À relire aussi :
+> `tests/unit/_helpers/bac-suivi.js` (fournit `dateLocaleYMD` aux modules). Changelog : quatre items. Porte : **six** rangées.
 > ▣ **NOTE DU 12 SEPTEMBRE, 10 h 55 (Claude Code, exécution de ta consigne du jour, 10 h 25 révisée à 10 h 35).** **Lots A, B et C livrés**
 > en un commit de code sur `main` local, **`e011ed64`** — **ni releasé, ni poussé** : ta consigne (§ 5) veut la release `minor` `1.138.0`
 > APRÈS ta relecture croisée. **À toi** : relire `git show e011ed64` — `js/accueil.js` (la carte, le bandeau), le CSS de `.accueil-porte-ortho`

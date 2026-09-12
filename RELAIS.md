@@ -7,6 +7,10 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 11 H (Toronto) : LOT D (« TES PROCHAINS RENDEZ-VOUS ») AJOUTÉ — `62f24316`, MÊME LIVRAISON 1.138.0
+
+> Quatre commits devant `origin/main` (`305bb4c8`) : `e011ed64` (lots A-C), `1d2385fb` (relais), `62f24316` (lot D), puis ce relais — rien de poussé, exprès. La relecture croisée de Cowork porte sur `e011ed64` **et** `62f24316` ; puis la marche de `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` (bloc de tête). Porte : six rangées.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 10 H 55 (Toronto) : « L'ACCUEIL, LE CHAMP 2, LES RENCONTRES SANS CRITÈRES CIBLÉS » COMMITÉ SUR `main` LOCAL, RELEASE 1.138.0 DUE APRÈS LA RELECTURE DE COWORK
 
 > **Le travail le plus récent est sur `main` LOCAL, devant `origin/main` (`305bb4c8`) — rien de poussé, exprès** (consigne du 12 sept., 10 h 25 révisée 10 h 35, § 5 : une seule livraison `minor` après la relecture croisée de Cowork ; un push déploie).
