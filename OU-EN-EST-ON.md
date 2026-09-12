@@ -15,7 +15,16 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-🟡 **À LIVRER EN 1.138.0 (12 SEPTEMBRE 2026, 11 h — code `e011ed64` (lots A-C) + `62f24316` (lot D) sur `main` local, NI RELEASÉ NI POUSSÉ : la release `minor` attend la relecture croisée de Cowork) — L'ACCUEIL PARLE AUX DEUX MÉTIERS, LE CHAMP 2 NE SE CONTREDIT PLUS, LES RENCONTRES NE DEMANDENT PLUS DE CIBLER DES CRITÈRES, ET SES PROCHAINS RENDEZ-VOUS S'AFFICHENT EN TÊTE** (consigne du jour de Cowork, 10 h 25, révisée à 10 h 35 puis à 10 h 50 ; ta phrase de 7 h 35 : « Je veux que l'orthopédagogue sente qu'elle entre par la porte principale. »).
+🟡 **RELEASÉ EN 1.138.0, PAS ENCORE POUSSÉ (12 SEPTEMBRE 2026, 11 h 20 — release `a0ed0929`, build `0912-1116` ; code `e011ed64` (A-C) + `62f24316` (D), relus par Cowork à 11 h 08, + `e239787f` (E), à relire ; Vitest 550 / 6 020 après le bump. Reste : la relecture du lot E, le verdict Playwright Cowork FERMÉ, `scripts/pousser.sh`) — L'ACCUEIL PARLE AUX DEUX MÉTIERS, LE CHAMP 2 NE SE CONTREDIT PLUS, LES RENCONTRES NE DEMANDENT PLUS DE CIBLER DES CRITÈRES, SES PROCHAINS RENDEZ-VOUS S'AFFICHENT EN TÊTE, ET SUIVI N'A PLUS D'ONGLET « INTERVENTIONS » SUR UN SERVICE** (consigne du jour de Cowork, 10 h 25, révisée à 10 h 35, 10 h 50 et 11 h ; ta décision de 11 h 10 : les cinq d'un coup ; ta phrase de 7 h 35 : « Je veux que l'orthopédagogue sente qu'elle entre par la porte principale. »).
+**Lot E, ce que tu verras** : sur un service, la barre de `Suivi` a six onglets — plus d'« Interventions », qui montrait la même liste que
+« Rencontres » avec les mots de l'enseignement ; sur ton 601-101-MQ, les sept, dans le même ordre. La barre suit une bascule de contexte
+faite **depuis Suivi**, sans te déplacer ; si tu étais sur « Interventions » en passant sur le service, tu arrives sur « Rencontres ».
+**Vérifié comment** : une sentinelle de 11 essais qui charge les vrais fichiers de navigation, huit fois cassée exprès, huit rouges ; la
+chaîne réelle rejouée dans WebKit sur le pack démo (7 → 6 → 7 → 6 onglets, l'onglet actif conservé ou remplacé par « Rencontres »,
+zéro erreur) ; aucun écran ne change au harnais. ⚠ **Ce que la mesure a corrigé** : changer de contexte ne reconstruisait pas la barre
+(la consigne le supposait) — c'est ce lot qui la fait suivre. **Laissé exprès** : sur un service, les boutons du profil qui mènent aux
+interventions ouvrent encore la vue « Interventions » (sans onglet) ; les rediriger vers Rencontres empêchait leur formulaire de s'ouvrir.
+Pas annoncé au changelog : rien ne change pour les enseignants.
 **Lot D, ce que tu verras** : dans `Suivi › Rencontres`, sur un service, sous « + Nouvelle rencontre », le bloc **« Tes prochains rendez-vous »** —
 au plus quatre rencontres à venir, la plus proche en premier (date, heure si notée, titre, individuelle ou en sous-groupe) ; la liste
 dessous garde son ordre. Sans rencontre à venir : « Aucun rendez-vous à venir. Tes rencontres passées restent dans la liste ci-dessous. »

@@ -27,7 +27,13 @@
      ▣ LOT D (révision de 10 h 50, `62f24316`) : « Tes prochains rendez-vous » rendu par afficherListeInterventions (vue Rencontres +
        service) — la consigne disait afficherRencontres, mesuré faux (conteneur remplacé par le formulaire, retour = liste seule) ;
        pas de bloc sans aucune rencontre ; `_formeRencontre` ; bac-suivi fournit dateLocaleYMD. 13 essais, 10 mutations / 10 rouges.
-     ▣ DOCS : OU-EN-EST-ON, BACKLOG (#846 [x], #848, état courant), relevé de la porte section Cours, porte accueil (6 + 2), RELAIS,
+     ▣ LOT E (révision de 11 h, `e239787f` ; navigation.js ouvert par Grégoire) : `_configurationVisible` (copie filtrée,
+       comparateur + Interventions sur un service), `rafraichirSousNavigationSelonContexte` appelé par mettreAJourContexteEntete —
+       mesuré : une bascule de contexte ne reconstruisait pas la barre ; redirection de suivi-interventions ÉCARTÉE (boutons du profil).
+       11 essais (vm, vrais fichiers), 8 mutations / 8 rouges ; chaîne réelle vérifiée dans WebKit.
+     ▣ RELEASE `a0ed0929` — 1.138.0, build 0912-1116, 11 jetons ; Vitest 550 / 6 020 après le bump. NON POUSSÉE : relecture du lot E,
+       verdict Playwright Cowork fermé, pousser.sh.
+     ▣ DOCS : OU-EN-EST-ON, BACKLOG (#846 [x], #848, état courant), relevé de la porte section Cours, porte accueil (7 + 2), RELAIS,
        consignes de démarrage (Cowork, prochaine session). Non commités : archives de consigne, Formation/, docs/orthopedagogie/,
        la capture du 9 sept. supprimée — à Grégoire.
      ===================================================================== -->

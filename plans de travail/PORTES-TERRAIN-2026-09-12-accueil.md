@@ -3,7 +3,9 @@
 > **État** : écrite le 12 septembre 2026 par Claude Code, sur la consigne du jour de Cowork (10 h 25, révisée à 10 h 35).
 > Le code est commité sur `main` local, **ni releasé, ni poussé** : la release `1.138.0` attend la relecture croisée de Cowork
 > (consigne § 5). **Cette porte ne s'ouvre qu'une fois `1.138.0` en ligne** (§ 0).
-> Six rangées (consigne § 6, révisée à 10 h 50 : la sixième est « Tes prochains rendez-vous »), deux décisions (§ 3). Code : `e011ed64` + `62f24316`. Ce qui échoue devient un item du BACKLOG, avec son numéro de rangée.
+> Sept rangées (consigne § 6, révisée à 10 h 50 puis 11 h : la sixième est « Tes prochains rendez-vous », la septième la barre de Suivi),
+> deux décisions (§ 3). Code : `e011ed64` + `62f24316` + `e239787f` ; **release `a0ed0929`, `1.138.0`, build `0912-1116`** — à pousser après
+> la relecture du lot E et le verdict Playwright ; la porte ne s'ouvre qu'une fois ce numéro lu en bas de page. Ce qui échoue devient un item du BACKLOG, avec son numéro de rangée.
 > **Markdown par Claude Code ; l'artefact jumeau (bouton « Copier mes résultats », champs de saisie au § 3) par Cowork.**
 
 ---
@@ -31,6 +33,8 @@ restent tels qu'ils sont en base : c'est verrouillé par un test.)
 
 | **6** | Sur un service : `Suivi › Rencontres`, avec au moins une rencontre datée d'aujourd'hui ou plus tard (crée-en une en démo si besoin) | En tête de la liste, sous le bouton « + Nouvelle rencontre », le bloc **« Tes prochains rendez-vous »** : au plus quatre lignes, **la plus proche en premier** — la date en toutes lettres, l'heure si tu l'as notée, le titre, « individuelle » ou « en sous-groupe ». **La liste du dessous n'a pas changé d'ordre** (la plus récente en premier). Sans rencontre à venir : « Aucun rendez-vous à venir. Tes rencontres passées restent dans la liste ci-dessous. » Sans aucune rencontre : pas de bloc, seulement « Aucune rencontre. » (choix de Claude Code, la phrase serait fausse sous une liste vide). Ouvre une rencontre, puis reviens : le bloc est toujours là. |
 
+| **7** | Active un service, ouvre `Suivi` et compte les onglets. Puis, **en restant dans Suivi**, choisis ton 601-101-MQ dans le menu de l'en-tête ; puis reviens au service, toujours sans quitter Suivi | Sur le service : **six onglets, sans « Interventions »** (Suivi du groupe, Liste, Saisie, Profils, Rencontres, Animation). Sur ton 601-101-MQ : **les sept**, dans l'ordre d'avant. La barre suit la bascule **sans que tu quittes l'onglet où tu es** ; si tu étais sur « Interventions » au moment de passer sur le service, tu arrives sur « Rencontres » (la même liste, dans les mots de l'orthopédagogie). |
+
 ## §3 · Décisions — ce qui attend ton verdict (ce ne sont pas des vérifications : écris ta réponse)
 
 | | Question | Ta réponse |
@@ -48,6 +52,9 @@ restent tels qu'ils sont en base : c'est verrouillé par un test.)
   de référence dans **Conception › Grilles de critères** » — le réglage vit dans `Labo › Outils d'observation`. C'est le texte que
   l'orthopédagogue aurait vu ; sur un service, il ne s'affiche plus. Pour un enseignant sans grille (mardi, la communauté de pratique),
   il reste faux. Non inscrit : à toi de dire s'il faut le reprendre.
+- **Laissé exprès (lot E)** : sur un service, les boutons du profil d'un élève qui mènent aux interventions (« planifier » / « ouvrir » une
+  intervention) ouvrent encore la vue « Interventions », dont l'onglet est caché. Les renvoyer vers « Rencontres » empêchait leur formulaire
+  de s'ouvrir (ils attendent l'écran des interventions). À toi de dire si ces boutons doivent changer sur un service.
 - **Laissé exprès** : sur un service, l'onglet `Suivi › Interventions` ouvre le même formulaire (sans la carte, même règle) ; si
   l'intervention est complétée, son bilan dit encore « Comparaison automatique des critères ciblés avant et après l'intervention. »
   — le tableau ne s'y affichera jamais. Le texte arrêté ne visait que les rencontres.

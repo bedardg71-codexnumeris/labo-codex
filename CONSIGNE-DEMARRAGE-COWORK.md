@@ -4,6 +4,15 @@
 > matinée de **trois versions** (`1.135.1`, `1.136.0`, `1.137.0`), **trois portes terrain relevées** et **dix items inscrits**.
 > Elle REMPLACE toute version précédente.
 >
+> ▣ **MISE À JOUR 11 h 20 : lot E exécuté (`e239787f`) et `1.138.0` RELEASÉE (`a0ed0929`, build 0912-1116) — NON POUSSÉE.** À toi : relire
+> `git show e239787f` — `js/navigation.js` (`_configurationVisible`, `_interventionsMasqueesSurService`, `_poserBoutonsSousNav`,
+> `afficherSousNavigation` refactorisée sans changement de sortie, `rafraichirSousNavigationSelonContexte`) et `js/contexte.js` (l'appel dans
+> `mettreAJourContexteEntete`) ; la sentinelle `sentinelle-onglet-interventions-masque-sur-service-lot-e` (vm, vrais fichiers). ⚠ **Ce que la
+> mesure a corrigé** : ta consigne supposait que la sous-navigation se reconstruit à la bascule — elle ne se reconstruisait pas (seul appelant :
+> `afficherSection`) ; d'où le rafraîchissement, qui ne déplace personne. **Écarté** : rediriger `suivi-interventions` vers Rencontres — les deux
+> boutons du profil (`naviguerVersNouvelleIntervention` / `naviguerVersIntervention`) attendent `#conteneurPrincipal`, leur formulaire ne se
+> serait plus ouvert ; ils ouvrent donc encore la vue Interventions sur un service (laissé exprès, nommé). Puis : **verdict Playwright, toi
+> FERMÉ** (règle 8), `scripts/pousser.sh`, l'artefact de la porte (**sept** rangées).
 > ▣ **MISE À JOUR 11 h : ta révision de 10 h 50 (lot D) est exécutée — commit `62f24316`, à relire AVEC `e011ed64`.** Le bloc « Tes prochains
 > rendez-vous » est rendu par `afficherListeInterventions` (garde `_enVueRencontres() && _surService()`), **pas par `afficherRencontres`** :
 > mesuré, `ouvrirIntervention` remplace le conteneur et le retour (comme Enregistrer / Annuler / Supprimer) ne reconstruit que la liste — le bloc
