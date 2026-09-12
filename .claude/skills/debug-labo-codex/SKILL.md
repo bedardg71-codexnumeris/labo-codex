@@ -264,8 +264,11 @@ Le consulter AVANT de corriger un bug (évite le travail en double).
 ### Procédure
 
 1. **Lire `SUIVI-BUGS.md`** pour déterminer :
-   - Le **prochain numéro séquentiel** : lire le dernier # dans les tableaux
-     « Corrigés » (et « Ouverts ») et incrémenter.
+   - Le **numéro** : le compteur est UNIQUE pour SUIVI-BUGS et BACKLOG (décision de
+     Grégoire, 12 sept. 2026). Prendre le « Dernier ID utilisé » de l'en-tête de
+     `BACKLOG.md` + 1, le vérifier par grep dans les deux registres, et mettre cette
+     ligne à jour dans le même commit. ⛔ Ne JAMAIS incrémenter le dernier numéro de
+     SUIVI-BUGS : c'est ce qui a produit 123 homonymes (encadré en tête de SUIVI-BUGS).
    - La **section «Corrigés» la plus récente** (en haut, juste après «Ouverts»).
      Si le contexte actuel n'y figure pas encore, créer une nouvelle section
      `## Corrigés (date — résumé court)` au-dessus des précédentes.
@@ -283,7 +286,10 @@ Le consulter AVANT de corriger un bug (évite le travail en double).
      puis résumer le fix technique en une phrase. Mentionner le(s) fichier(s) modifié(s).
    - Si le bug venait de la section «Ouverts», **retirer la ligne** de cette section.
 
-3. **Mettre à jour le compteur** «prochain : #XX» dans la section Notes.
+3. **Règle du lien** : si le bug répare ce que décrit une fiche du BACKLOG, la ligne
+   NOMME la fiche (« ferme #631 ») et la case de la fiche se coche dans le même commit.
+   Motif : #631 et #632 sont restés ouverts au BACKLOG alors que leur réparation était
+   tracée sous le bug 831.
 
 4. **Proposer l'insertion à Grégoire** — Montrer la ligne générée et demander :
    «Je l'ajoute dans SUIVI-BUGS.md ?». Ne pas écrire dans le fichier sans

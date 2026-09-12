@@ -305,10 +305,11 @@ En tirer :
 - Si la ligne « État courant » mentionne un HEAD différent du HEAD réel,
   le signaler comme **écart documentaire**
 
-⚠ **Le « Dernier ID utilisé » de l'en-tête est contradictoire** : une ligne
-annonce `#359`, le bloc courant annonce un ID bien plus élevé. Faire foi au
-bloc « État courant » le plus récent, et signaler la contradiction à Grégoire
-plutôt que de la propager.
+⚠ **Le « Dernier ID » fait foi à UNE ligne** : « Dernier ID utilisé » en tête de
+`BACKLOG.md` (posée le 12 sept. 2026 ; compteur unique avec SUIVI-BUGS). Les
+« Dernier ID » des blocs « État courant » sont historiques. Si un grep sur le
+BACKLOG, son archive ou SUIVI-BUGS trouve un numéro plus haut que cette ligne,
+le signaler comme écart documentaire.
 
 Puis parcourir les sections (≤ 1 ligne par section) pour repérer :
 - Items ⚠️ priorité haute actée

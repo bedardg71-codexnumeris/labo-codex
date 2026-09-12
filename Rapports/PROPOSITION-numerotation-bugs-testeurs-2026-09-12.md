@@ -1,8 +1,9 @@
 # PROPOSITION — deux registres, un seul espace de numéros
 
 **Date** : 12 septembre 2026, soir. **Demandé par** : la réconciliation du BACKLOG (Cowork, même jour,
-`Rapports/RECONCILIATION-backlog-2026-09-12.md`). **Statut** : PROPOSITION, rien d'appliqué —
-c'est une décision de forme sur deux registres vivants, elle remonte à Grégoire.
+`Rapports/RECONCILIATION-backlog-2026-09-12.md`). **Statut** : **DÉCIDÉ par Grégoire le 12 septembre
+2026, soir : option C + la règle du lien**, appliquée le même soir (en-têtes de `BACKLOG.md` et de
+SUIVI-BUGS, skill `debug-labo-codex` §6, `PROTOCOLE.md` règle 9). La proposition d'origine suit, inchangée.
 
 ## Le fait
 
