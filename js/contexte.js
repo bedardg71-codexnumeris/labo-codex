@@ -20,6 +20,9 @@ function mettreAJourContexteEntete() {
     // suivent la nature du contexte actif, au même rythme que l'en-tête — au démarrage
     // (initialiserModuleContexte) et à chaque activation (orchestre, changerCoursActif).
     if (typeof appliquerMotsNatureCadre === 'function') appliquerMotsNatureCadre();
+    // Lot E (consigne du 12 sept. 2026, 11 h) : la barre de Suivi suit aussi le contexte (« Interventions » n'a pas
+    // d'onglet sur un service) — une bascule de contexte ne repasse pas par afficherSection (navigation.js).
+    if (typeof rafraichirSousNavigationSelonContexte === 'function') rafraichirSousNavigationSelonContexte();
     const elDate = document.getElementById('entete-date');
     if (!elDate) return;
 
