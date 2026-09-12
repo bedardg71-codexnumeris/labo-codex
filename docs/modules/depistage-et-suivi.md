@@ -305,8 +305,8 @@ Utilise :
     observationsBilan: '',
     dateBilan: timestamp
   },
-  jamaisSauvegardee: false,   // Flag pour nettoyage des interventions orphelines
-  dateCreation, dateModification
+  dateCreation,               // chaine ISO
+  dateModification            // horodatage (ms) — deux types, le stock porte les deux (commente, pas harmonise)
 }
 ```
 
@@ -326,16 +326,18 @@ Profil etudiant > Accompagnement > «+ Nouvelle intervention»
 
 ### Fonctions principales
 
-| Fonction | Role | Lignes |
-|----------|------|--------|
-| `afficherFormulaireIntervention(da)` | Point d'entree — cree l'intervention et ouvre la vue | 657+ |
-| `ouvrirIntervention(id, options)` | Vue complete unifiee (creation et edition) | 697+ |
-| `sauvegarderPresencesIntervention(id)` | Sauvegarde unifiee (infos + presences + criteres + objectif) | 1258+ |
-| `analyserSousGroupe(dasEtudiants)` | Analyse des defis communs du sous-groupe | 185+ |
-| `afficherAnalyseTempsReel(id)` | Apercu du sous-groupe en temps reel | 1054+ |
-| `mettreAJourCriteresCibles(id)` | Mise a jour des criteres cibles quand la selection change | 1084+ |
-| `suggererObjectifIntervention(id)` | Suggestion automatique d'objectif mesurable | 1143+ |
-| `transfererPresencesVersModule(id)` | Transfert des presences vers le module presences | 1390+ |
+| Fonction | Role |
+|----------|------|
+| `afficherFormulaireIntervention(da)` | Point d'entree — construit le brouillon EN MEMOIRE et ouvre la vue (rien n'est ecrit) |
+| `ouvrirIntervention(id, options)` | Vue complete unifiee (creation et edition) |
+| `sauvegarderPresencesIntervention(id)` | Sauvegarde unifiee (infos + presences + criteres + objectif) — la SEULE ecriture, une par clic |
+| `analyserSousGroupe(dasEtudiants)` | Analyse des defis communs du sous-groupe |
+| `afficherAnalyseTempsReel(id)` | Apercu du sous-groupe en temps reel |
+| `mettreAJourCriteresCibles(id)` | Mise a jour des criteres cibles quand la selection change |
+| `suggererObjectifIntervention(id)` | Suggestion automatique d'objectif mesurable |
+| `transfererPresencesVersModule(id)` | Transfert des presences vers le module presences |
+
+(Numeros de ligne retires le 12 sept. 2026 : ils etaient perimes.)
 
 ### Retrocompatibilite
 
@@ -348,11 +350,20 @@ if (!intervention.bilan) intervention.bilan = null;
 if (!intervention.snapshotAvant) intervention.snapshotAvant = {};
 ```
 
-### Nettoyage des interventions orphelines
+### Le brouillon d'une nouvelle intervention (lot 5 du cadrage 11, 12 sept. 2026)
 
-Si une intervention est creee mais que l'enseignant navigue ailleurs sans
-sauvegarder, le flag `jamaisSauvegardee: true` reste. Un guard dans
-`afficherListeInterventions()` purge ces interventions au prochain affichage.
+« Planifier une intervention » (et « + Nouvelle rencontre ») construit l'intervention
+EN MEMOIRE : rien n'est ecrit tant que l'enseignant n'a pas clique « Enregistrer ».
+Naviguer ailleurs l'abandonne sans rien laisser en base ; « Annuler » la jette sans
+ecriture ni confirmation. Avant ce lot, le clic l'ecrivait en base avec un drapeau
+`jamaisSauvegardee: true`, purge au prochain affichage de la liste.
+
+Le stock : un brouillon d'avant le lot, reste en base, n'est ni affiche ni compte
+(liste, compte par eleve) et reste en base — aucune suppression d'office.
+
+Le bilan avant / apres traduit la moyenne en lettre par `obtenirNiveauIDMEDepuisPourcentage`
+(seuils `idme.*`), sur le pourcentage affiche. La note individuelle d'un eleve qui
+n'est plus dans le groupe reste visible, grisee, « (n'est plus dans le groupe) ».
 
 ---
 

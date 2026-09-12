@@ -159,6 +159,13 @@ function monter(store, opts = {}) {
         libelleStatutEtudiant: (st) => ({ 'inactif': 'Inactivité', 'décrochage': 'Décrochage', 'abandon': 'Abandon' }[st] || '')
     });
     Object.assign(globaux, opts.globaux || {});
+    // Lot 5 du cadrage 11 (12 sept. 2026) : la lettre du bilan d'une intervention sort d'`obtenirNiveauIDMEDepuisPourcentage`
+    // (js/profil-etudiant-helpers.js, chargé avant interventions.js dans l'app) — la VRAIE, branchée sur l'`obtenirSeuil` du banc.
+    if (!('obtenirNiveauIDMEDepuisPourcentage' in globaux)) {
+        const winHelpers = {};
+        chargerScript('js/profil-etudiant-helpers.js', globaux, winHelpers);
+        globaux.obtenirNiveauIDMEDepuisPourcentage = winHelpers.obtenirNiveauIDMEDepuisPourcentage;
+    }
     for (const [k, v] of Object.entries(globaux)) if (!(k in win) && k !== 'document' && k !== 'db') win[k] = v;   // les modules lisent aussi window.X
     // Les exports window des modules montés : aiguillés à l'appel (résolution tardive).
     const modules = opts.modules || [];
@@ -184,20 +191,22 @@ describe('5 · Interventions — gestes et écritures', () => {
     };
     const monterI = (store, opts = {}) => monter(store, Object.assign({ modules: MODULES_I, globaux: GLOBAUX_I }, opts));
 
-    it('I-1 · « Planifier une intervention » écrit en base AVANT toute saisie, et le simple affichage de la liste purge ce brouillon', () => {
+    it('I-1 · « Planifier une intervention » écrivait en base AVANT toute saisie, et le ré-affichage de la liste purgeait ce brouillon — depuis le lot 5 du cadrage 11, rien n\'est écrit avant « Enregistrer » (valeur d\'après)', () => {
+        // Constat d'origine (6 sept.) : 1 intervention `jamaisSauvegardee: true` en base (1 écriture), puis
+        // purgée au ré-affichage de la liste (0 intervention, 0 notification).
         const store = storeBase(); store.test_interventions = [];
         const b = monterI(store);
         b.win.afficherFormulaireIntervention();
-        const apres = store.test_interventions;
-        noter('I1.creation', { nb: apres.length, jamaisSauvegardee: apres[0] && apres[0].jamaisSauvegardee, statut: apres[0] && apres[0].statut, ecritures: b.journal.filter(j => j.k === 'test_interventions').length });
-        expect(apres.length).toBe(1);
-        expect(apres[0].jamaisSauvegardee).toBe(true);
-        // L'enseignant change d'onglet et revient : la liste se ré-affiche et l'entrée disparaît, sans un mot.
+        const ecrituresPlanifier = b.journal.filter(j => j.k === 'test_interventions').length;
+        noter('I1.creation', { nb: store.test_interventions.length, ecritures: ecrituresPlanifier });
+        expect(store.test_interventions.length).toBe(0);
+        expect(ecrituresPlanifier).toBe(0);
+        // L'enseignant change d'onglet et revient : la liste se ré-affiche — rien à purger, rien d'écrit.
         const b2 = monterI(store);
         b2.win.afficherListeInterventions();
-        noter('I1.purge', { nb: store.test_interventions.length, notifs: b2.notifs.length });
+        noter('I1.purge', { nb: store.test_interventions.length, ecritures: b2.journal.filter(j => j.k === 'test_interventions').length });
         expect(store.test_interventions.length).toBe(0);
-        expect(b2.notifs.length).toBe(0);
+        expect(b2.journal.filter(j => j.k === 'test_interventions').length).toBe(0);
     });
 
     it('I-2 · Enregistrer : la note individuelle d\'un élève DÉCOCHÉ était effacée — depuis #772, un champ affiché rempli est conservé (valeur d\'après)', () => {
@@ -216,7 +225,7 @@ describe('5 · Interventions — gestes et écritures', () => {
         expect(i.etudiants).toEqual(['2000001']);
         // Avant #772 : { 2000001 } seulement — la note de Bruno n'existait plus. Après : son champ, affiché et rempli, est conservé.
         expect(i.notesIndividuelles).toEqual({ 2000001: 'Alice progresse.', 2000002: 'Bruno absent, à revoir.' });
-        expect(b.journal.filter(j => j.k === 'test_interventions').length).toBe(2);   // deux écritures complètes pour un clic
+        expect(b.journal.filter(j => j.k === 'test_interventions').length).toBe(1);   // une écriture complète pour un clic — deux avant le lot 5 du cadrage 11
     });
 
     it('I-3 · Ouvrir une intervention d\'un AUTRE groupe-cours, puis l\'enregistrer sans rien toucher : ses participants étaient retirés — depuis #772, ce que le formulaire ne montre pas reste (valeur d\'après)', () => {
@@ -257,7 +266,7 @@ describe('5 · Interventions — gestes et écritures', () => {
         expect(conteneur.innerHTML).toContain('desc &lt;i&gt;z&lt;/i&gt;</textarea>'); // avant #769 : brute dans son textarea
     });
 
-    it('I-5 · Le bilan : ses lettres viennent de 0,65/0,75/0,85 en clair ; la suggestion d\'objectif du même écran lit idme.insuffisant = 0,64', () => {
+    it('I-5 · Le bilan : ses lettres venaient de 0,65/0,75/0,85 en clair, quand la suggestion d\'objectif du même écran lit idme.insuffisant = 0,64 — depuis le lot 5 du cadrage 11, la lettre sort des mêmes seuils (valeur d\'après)', () => {
         const store = storeBase();
         store.test_interventions = [{ id: 'I4', titre: 'Fini', date: '2026-09-01', heure: '', duree: 2, type: 'groupe', niveauRai: 2, contexte: 'rattrapage', description: '',
             etudiants: ['2000001'], analyse: null, observations: '', notesIndividuelles: {}, criteresCibles: ['Structure'], objectifVise: '', statut: 'completee',
@@ -271,8 +280,9 @@ describe('5 · Interventions — gestes et écritures', () => {
         const m = bloc.match(/<td[^>]*>\s*([IDME—])\s+(\d+)%/);
         noter('I5', { lettreAvant: m && m[1], pctAvant: m && m[2], present: html.includes('Bilan'), cellule: (bloc.match(/<td[^>]*>\s*[IDME—]\s+\d+%/) || [''])[0].replace(/<[^>]+>/g, '').trim() });
         expect(html).toContain('Bilan');
-        expect(m && m[1]).toBe('I');
-        expect(m && m[2]).toBe('65');   // « 65 % » affiché à côté d'un « I » (arrondi indépendant de la lettre)
+        // Constat d'origine (6 sept.) : « I » à côté de « 65 % » (seuil 0,65 en clair, arrondi indépendant de la lettre).
+        expect(m && m[1]).toBe('D');
+        expect(m && m[2]).toBe('65');
     });
 
     it('I-6 · Rechargement : ce qui est écrit se relit à l\'identique ; le tableau est namespacé (test_interventions) ; la date passe d\'ISO à timestamp', () => {
@@ -280,9 +290,11 @@ describe('5 · Interventions — gestes et écritures', () => {
         const b = monterI(store, { selecteurs: { '#listeEtudiantsIntervention input[type="checkbox"]:checked': [elementDom({ value: '2000001', checked: true })], 'input[name="interventionStatut"]:checked': elementDom({ value: 'en-cours' }), '#criteresCiblesContainer .critere-cible-cb:checked': [] },
             elements: { interventionNiveau: elementDom({ value: '2' }), interventionContexte: elementDom({ value: 'rattrapage' }), interventionTitre: elementDom({ value: 'T' }), interventionDate: elementDom({ value: '2026-09-02' }), interventionHeure: elementDom({ value: '' }), interventionDuree: elementDom({ value: '1.5' }), interventionDescription: elementDom({ value: 'd' }), interventionSeance: elementDom({ value: '2026-09-01' }), observationsIntervention: elementDom({ value: 'o' }), objectifVise: elementDom({ value: 'obj' }), 'note-2000001': elementDom({ value: 'n1' }) } });
         b.win.afficherFormulaireIntervention();
-        const id = store.test_interventions[0].id;
-        const typeCreation = typeof store.test_interventions[0].dateCreation;
+        // Lot 5 du cadrage 11 : le brouillon vit en mémoire — son id se lit sur le bouton « Enregistrer ».
+        const id = (b.document.getElementById('conteneurPrincipal').innerHTML.match(/data-action="sauvegarderPresencesIntervention" data-param="([^"]+)"/) || [])[1];
+        expect(store.test_interventions.length).toBe(0);
         b.win.sauvegarderPresencesIntervention(id);
+        const typeCreation = typeof store.test_interventions[0].dateCreation;
         const ecrit = clone(store.test_interventions[0]);
         const b2 = monterI(store);
         const relu = b2.win.obtenirIntervention(id);
@@ -294,7 +306,7 @@ describe('5 · Interventions — gestes et écritures', () => {
         for (const k of Object.keys(ecrit)) expect(relu[k]).toEqual(ecrit[k]);
     });
 
-    it('I-7 · Note individuelle d\'un élève parti (#748, constat) : l\'en-tête compte 2 notes, une seule ligne est rendue', () => {
+    it('I-7 · Note individuelle d\'un élève parti (#748) : l\'en-tête comptait 2 notes pour une seule ligne rendue — depuis le lot 5 du cadrage 11, la note reste, grisée, « (n\'est plus dans le groupe) » (valeur d\'après)', () => {
         const store = storeBase();
         store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da !== '2000002');   // Bruno a quitté le trimestre
         store.test_interventions = [{ id: 'I5', titre: 'T', date: '2026-09-01', heure: '', duree: 2, type: 'groupe', niveauRai: 2, contexte: 'rattrapage', description: '',
@@ -304,11 +316,14 @@ describe('5 · Interventions — gestes et écritures', () => {
         b.win.afficherListeInterventions();
         const html = liste.innerHTML;
         const bloc = html.slice(html.indexOf('Notes individuelles'));
-        noter('I7', { compteur: (bloc.match(/Notes individuelles[^<]*<[^>]*>[^<]*?(\d+)/) || [])[1], lignesAlice: (bloc.match(/Alice/g) || []).length, lignesBruno: (bloc.match(/Bruno|2000002/g) || []).length });
+        noter('I7', { compteur: (bloc.match(/<strong>(\d+)<\/strong>/) || [])[1], lignesAlice: (bloc.match(/Alice/g) || []).length, lignesBruno: (bloc.match(/Bruno|2000002/g) || []).length });
         expect(html).toContain('Notes individuelles');
         expect(bloc).toContain('Alice');
-        expect(bloc).not.toContain('Bruno');
-        expect(bloc).not.toContain('2000002');
+        // Constat d'origine (6 sept.) : ni « Bruno » ni « 2000002 » — sa note n'était pas rendue. Bruno a quitté le
+        // trimestre : plus de fiche, donc son DA, grisé, avec la mention ; le compteur compte ses deux lignes.
+        expect(bloc).toContain('<div class="etud-texte-gris-clair" style="margin-bottom: 8px; font-size: 0.9rem;">');
+        expect(bloc).toContain('<strong>2000002</strong> (n\'est plus dans le groupe) : b');
+        expect((bloc.match(/<strong>(\d+)<\/strong>/) || [])[1]).toBe('2');
     });
 });
 

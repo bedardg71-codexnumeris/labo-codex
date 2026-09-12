@@ -21,6 +21,14 @@
 
     var CHANGELOG = [
         {
+            version: '1.139',
+            couleur: 'bleu',
+            titre: 'Interventions : rien n\'est écrit avant «&nbsp;Enregistrer&nbsp;»',
+            items: [
+                'Dans Suivi › Interventions, planifier n\'enregistre plus rien tant que tu n\'as pas cliqué Enregistrer ; le bilan avant / après lit les mêmes seuils que le reste de l\'application.',
+            ]
+        },
+        {
             version: '1.138',
             couleur: 'vert',
             titre: 'L\'accueil parle aux deux métiers',
