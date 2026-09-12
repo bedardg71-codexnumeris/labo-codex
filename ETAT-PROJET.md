@@ -604,7 +604,7 @@ Présents et vérifiés sur `main` : `SECURITY.md`, `.github/dependabot.yml`, wo
 
 ## 8. Backlog applicatif — vue par horizon
 
-Détail et contexte complet dans **`BACKLOG.md`** (dernier ID #362). La priorisation vers la mi-août vit
+Détail et contexte complet dans **`BACKLOG.md`** (dernier ID : la ligne « Dernier ID utilisé » de son en-tête, seule à faire foi depuis le 12 sept. 2026). La priorisation vers la mi-août vit
 dans **`plans de travail/PLAN-mi-aout-2026.md`** (3 paliers, porteurs, décisions). Ce document ne duplique
 pas le backlog ; il situe.
 

@@ -7,6 +7,12 @@
 
 ---
 
+## NUMÉROTATION TRANCHÉE — 12 SEPT. 2026, SOIR (Toronto) : OPTION C + RÈGLE DU LIEN, APPLIQUÉE, NON POUSSÉ
+
+> **Décision de Grégoire** : option C de `Rapports/PROPOSITION-numerotation-bugs-testeurs-2026-09-12.md` + la règle du lien. **Appliquée** (quatrième commit de documents devant `origin/main`, même verdict Playwright que les trois autres) : ligne unique « **Dernier ID utilisé : #848** » en tête de `BACKLOG.md` (mesuré : maximum des fiches, des bugs, du journal git et des fichiers de pilotage ; les « Dernier ID » des blocs « État courant » deviennent historiques) ; encadré « Numérotation » + liste des 123 homonymes en tête de SUIVI-BUGS, et son point « Pour ajouter un bug » réécrit ; skill `debug-labo-codex` §6 (il faisait incrémenter le dernier numéro de SUIVI-BUGS et mettre à jour un compteur « prochain : #XX » qui n'existait pas — la source des collisions) ; skill de début de session ; `PROTOCOLE.md` règle 9 (lue par Cowork) ; statut de la proposition ; une mention périmée d'`ETAT-PROJET.md` (« dernier ID #362 »). **Le prochain numéro, fiche OU bug, est #849.** Aucun numéro renuméroté, aucun fichier de `js/` touché. Hors dépôt, non touché : le skill `task-management` du plugin de Cowork dit déjà « Dernier ID utilisé » de l'en-tête — il trouve désormais la ligne qu'il cherche.
+
+---
+
 ## AMENDEMENT — 12 SEPT. 2026, SOIR (Toronto), APRÈS LA CONTRE-VÉRIFICATION DE COWORK : QUATRE CORRECTIONS DOCUMENTAIRES, NON POUSSÉ
 
 > Troisième commit de documents devant `origin/main` (`e29f734c`), après `85cd24b1` et `eca024fa` : **les trois attendent le MÊME verdict Playwright local** avant le push (§4.5 de fin-de-session). Aucun fichier de `js/` touché. Corrigés : la PROPOSITION de numérotation (123 homonymes et non 81 ; 407 commits nomment un numéro de bug, dont 382 un homonyme, et non 649 ; méthode écrite dans le rapport) ; les dispositions de la RÉCONCILIATION (8 fiches sur 14 fermées par un commit qui les nomme, les 6 autres nommées une à une) ; la ligne de #366 au BACKLOG (le grep rend zéro, pas un). **Aucune option de numérotation appliquée** : SUIVI-BUGS et la ligne « Dernier ID » sont intacts, la décision reste à Grégoire. Les 14 coches, les annotations « ↻ » de #599 et #674 et le blocage des 32 partiels ne bougent pas.

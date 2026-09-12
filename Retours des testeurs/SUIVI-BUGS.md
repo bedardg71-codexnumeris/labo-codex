@@ -2,6 +2,10 @@
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
 > **Dernière mise à jour** : 9 septembre 2026, soir — **le tableau « Ouverts » est remis d'aplomb** : #806, #807 (livrés en 1.127.0, `da25d3f6`, et validés au terrain — porte #802, 14/14) et #811 (livré en 1.127.4, `8add4f44`) y traînaient encore comme chantiers en cours ; **seul #114 est réellement ouvert**. Le rapport HEIC du 9 sept. 23 h 35 est **clos sans correctif** : mesuré dans le Chrome de Grégoire, l'application décode bien le HEIC là où elle l'annonce (3024 × 4032 en 2 535 ms), et le libellé est conditionnel depuis #597. _Auparavant_ : 10 septembre 2026, soir — **#811 INSCRIT, NON CORRIGÉ** : la modale « Journal de bord » d'une évaluation s'affiche sans fond sur iPad. Cause mesurée le jour même (`.journal-modal` peint son fond avec `var(--surface)`, variable déclarée nulle part et sans repli) ; rien livré, fiche BACKLOG #811. _Auparavant_ : 9 septembre 2026, après-midi — **cinq rapports du matin corrigés (1.125.2)** : #794 le menu « Actions » en escalier ; #795 l'application remplacée par le 404 de l'hébergeur juste après le chargement d'un codex (panne transitoire côté livraison, MESURÉE : déploiement `ready` depuis 12:46:43 UTC, incident à 13:54 UTC — le code n'y est pour rien, mais il rechargeait sans vérifier que le serveur répondait) ; #796 le bandeau de version qui envoyait les nouveautés vers « Réglages › À propos », où il n'y en a aucune ; #797 les libellés de codes hors du cadre de la palette ; #798 le bouton de mode qui affichait « Évaluer » en pleine annotation. **Onze ablations, onze rouges.**
+>
+> **Numérotation — un seul compteur avec `BACKLOG.md`** (décision de Grégoire, 12 sept. 2026) : un nouveau bug prend le « Dernier ID utilisé » de l'en-tête de `BACKLOG.md` + 1, et cette ligne se met à jour dans le même commit. Aucun numéro ne resert. **Règle du lien** : une ligne qui répare ce que décrit une fiche du BACKLOG NOMME la fiche (« ferme #631 »), et la case de la fiche se coche dans le même commit.
+>
+> ⚠ **123 numéros anciens sont HOMONYMES** — le même numéro désigne ici un bug et, au BACKLOG ou à son archive, une fiche : **37, 48-87, 89-145, 148-155, 157-161, 534-543, 811, 830**. Collisions vérifiées (deux sujets) : 114, 116, 121, 158, 539, 542, 543. Même sujet (cohérent) : 811, 830. Les autres ne sont pas qualifiés. Dans le journal git, un `#N` de cette liste peut désigner l'un ou l'autre : lire le message, pas le numéro. On ne les renumérote pas. Mesure et méthode : `Rapports/PROPOSITION-numerotation-bugs-testeurs-2026-09-12.md`.
 
 ---
 
@@ -587,7 +591,7 @@
 
 ### Pour ajouter un bug
 1. Créer une entrée dans la section "Ouverts"
-2. Assigner un numéro séquentiel — la séquence est PARTAGÉE avec BACKLOG.md : prendre le « Dernier ID » du BACKLOG + 1, et le VÉRIFIER par grep (au 19 août 2026 : dernier ID **#457**)
+2. Assigner un numéro — le compteur est UNIQUE avec BACKLOG.md (encadré « Numérotation » en tête de ce fichier) : « Dernier ID utilisé » de l'en-tête de BACKLOG.md + 1, VÉRIFIÉ par grep dans les deux registres, et cette ligne mise à jour dans le même commit
 3. Documenter dans le sous-dossier du testeur si fichiers/screenshots fournis
 
 ### Pour marquer comme corrigé

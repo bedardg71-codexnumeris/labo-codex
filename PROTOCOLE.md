@@ -483,3 +483,16 @@ Le 11, la marche a été coupée entre le verdict et le push : 1.135.0 committé
 
 **Ce qui ne change pas** : la CI GitHub reste le second verdict (règle 7) ; tant que `#833` la laisse rouge sur des specs sans
 rapport, le verdict local est le seul, d'où l'importance de le prendre dans de bonnes conditions.
+
+## Règle 9 — un seul compteur pour les fiches et les bugs, et le lien entre les deux (12 septembre 2026)
+
+**Fait mesuré le 12 septembre au soir** : `SUIVI-BUGS.md` et `BACKLOG.md` numérotaient dans le même espace sans compteur commun —
+123 numéros désignent à la fois un bug et une fiche. La réparation de #631 et #632 a été tracée sous le bug 831, lu comme la fiche
+#831 : les deux fiches sont restées ouvertes au BACKLOG.
+
+**La règle** (décision de Grégoire, option C de `Rapports/PROPOSITION-numerotation-bugs-testeurs-2026-09-12.md`) :
+1. **Un seul compteur** : la ligne « Dernier ID utilisé » en tête de `BACKLOG.md`. Une fiche ET un bug testeur y prennent leur
+   numéro, et cette ligne se met à jour dans le même commit. Aucun numéro ne resert.
+2. **Le lien** : une ligne de SUIVI-BUGS qui répare ce que décrit une fiche NOMME la fiche (« ferme #631 »), et la case de la fiche
+   se coche dans le même commit.
+3. Les 123 homonymes anciens sont listés en tête de SUIVI-BUGS ; on ne les renumérote pas.
