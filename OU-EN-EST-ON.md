@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-⏳ **À LIVRER EN 1.137.0 (12 SEPTEMBRE 2026, 9 h 25 — commit `7b4beac2` sur `main` local, NI RELEASÉ NI POUSSÉ : la release `minor` attend la relecture croisée de Cowork, consigne § 6) — LA SECTION COURS DU CADRE PARLE LES DEUX MÉTIERS, SANS SE CONTREDIRE** (consigne du jour de Cowork, 8 h 55 ; ta décision 3.4 de la porte des étiquettes et sa rangée 5 échouée).
+✅ **FAIT EN 1.137.0 (12 SEPTEMBRE 2026, 9 h 40 — release `5563b233`, build `0912-0935`, code `7b4beac2` relu par Cowork ; Vitest 546 / 5 976 après le bump ; poussée par `scripts/pousser.sh` après le verdict Playwright — voir RELAIS pour le SHA poussé) — LA SECTION COURS DU CADRE PARLE LES DEUX MÉTIERS, SANS SE CONTREDIRE** (consigne du jour de Cowork, 8 h 55 ; ta décision 3.4 de la porte des étiquettes et sa rangée 5 échouée).
 **Ce que tu verras** : sur un service d'orthopédagogie, le premier choix du menu des profils dit **« Sélectionner un·e orthopédagogue »** — même après
 que le menu s'est rafraîchi (c'était la rangée 5 : la reconstruction du menu réécrivait « — Sélectionner — » en dur par-dessus le bon mot) ; le
 champ 5 du groupe-cours dit « — Choisir un·e orthopédagogue — », le champ 2 « — Choisir un service — ». L'accordéon des cours s'appelle
@@ -42,7 +42,8 @@ provisoires), **Suivi identique hors service**, seules les feuilles de texte du 
 liste des sites manquait le fil d'Ariane, « Cours : », « — Choisir un cours — » et trois « 5 éléments obligatoires ». **B3 tranché** : la
 sentinelle #306 protège la mécanique Créer/Enregistrer du bouton, les titres n'étaient que son ancre — ancre déplacée, break-test rouge.
 **Pas vérifié** : ton écran (porte `plans de travail/PORTES-TERRAIN-2026-09-12-section-cours.md`, cinq rangées, trois décisions), Safari,
-tes deux groupes ; la relecture croisée de Cowork ; le verdict Playwright.
+tes deux groupes. Décisions 3.2 et 3.3 de la porte des étiquettes : « tel quel » (données au relevé, inscrites) ; « Sélectionner un enseignant·e »
+hors service confirmé par toi à 9 h 40.
 
 ✅ **FAIT EN 1.136.0 (12 SEPTEMBRE 2026, 8 h 25 — release `2c84a34a`, POUSSÉE, `main` = `origin/main` ; relecture croisée de Cowork passée sur `fa27b531`, Playwright vert, Vitest 545 / 5 959) — LES ÉTIQUETTES : L'ORTHOPÉDAGOGUE ENTRE PAR LE CADRE, COMME TOUT LE MONDE** (consigne du jour de Cowork, 7 h 40 ; code `fa27b531`).
 **Ce que tu verras** : dans `Cadre › Cours`, le menu **Nature** dit **« Enseignement »** ou **« Orthopédagogie »** (à la place de « Cours » /

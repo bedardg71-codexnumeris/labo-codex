@@ -1,7 +1,8 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
-> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 9 h 25 (Toronto), à la clôture du lot « la section Cours du Cadre »
-> (#841 / #842, commit `7b4beac2` sur `main` local, release `1.137.0` due après la relecture croisée de Cowork).** Voir le premier bloc « ÉTAT MESURÉ » ci-dessous.
+> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 9 h 45 (Toronto) : le lot « la section Cours du Cadre » (#841 / #842,
+> code `7b4beac2` relu par Cowork) est RELEASÉ en `1.137.0` (`5563b233`, build 0912-0935) et poussé par `scripts/pousser.sh` après le verdict
+> Playwright — voir RELAIS. Le bloc « 9 h 25 » ci-dessous décrit l'état d'avant la release ; sa marche (1)-(6) est consommée, reste (7) : la porte.** Voir le premier bloc « ÉTAT MESURÉ » ci-dessous.
 > Version précédente : **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 8 h 05 (Toronto), à la clôture du lot « les étiquettes »
 > (commit `fa27b531`, release `1.136.0` releasée `2c84a34a` et poussée à 8 h 20).**
 > Version précédente : **ÉTAT MESURÉ remesuré par Claude Code le 11 septembre 2026 à 22 h 10 (Toronto), à la clôture du chantier
