@@ -7,6 +7,29 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 46 — 12 SEPTEMBRE 2026, 10 H 25 → 10 H 55 (Toronto) : LA CONSIGNE DU JOUR DE COWORK « LA PORTE DE L'ORTHOPÉDAGOGIE SUR
+     L'ACCUEIL, ET LE CHAMP QUI SE CONTREDIT », révisée à 10 h 35 (lot C : la carte des critères ciblés masquée chez l'orthopédagogue),
+     à partir de `305bb4c8` (1.137.0, en ligne).
+     Rituel (subagent) : aucun écart ; run GitHub de 305bb4c8 encore en cours à la mesure.
+     ▣ LIVRÉ (`e011ed64`, NI RELEASÉ NI POUSSÉ — consigne § 5, release `minor` 1.138.0 après la relecture de Cowork) :
+       (A #846) « 2. Cours ou service » + option vide « — Choisir un cours ou un service — » (mot dérivé, porte § 3.2) ; clés
+       `objetGroupeCours` / `choisirObjetGC` retirées du point unique ; l'orchestre ne re-pose plus v2-gc-cours.
+       (B) carte « Tu es orthopédagogue ? » (blanche, pleine largeur, au-dessus des huit tâches ; lien suivi|suivi-rencontres) ;
+       « Par où commencer ? » à deux branches ; deux paragraphes raccourcis. Mots dans js/accueil.js seul.
+       (C) `_surService()` masque la carte « Critères ciblés / Objectif visé / Suggérer » ; sauvegarderPresencesIntervention ne touche
+       ni criteresCibles ni objectifVise quand leur conteneur manque (objectifVise : ajouté par la mesure) ; aideBilan des rencontres.
+     ▣ PREUVES : sentinelles 846 (11) et lot C (9) ; 15 mutations / 15 rouges (A1 rejouée seule : le script avait mal lu la sortie au
+       premier passage) ; harnais pack démo AVANT = worktree jetable à HEAD, APRÈS = arbre : 20 feuilles, 8 identiques (dont les deux
+       formulaires hors service), zéro valeur ; styles calculés WebKit carte = carte de tâche, deux modes, captures regardées ;
+       Vitest 548 / 5 996.
+     ▣ MESURE CONTRE CONSIGNE : « Commencer → » mène aux trois questions seulement sans trimestre ; #847 déjà pris par Cowork en cours
+       de session → ma trouvaille est #848 (Cadre › Cours + la phrase des éléments obligatoires, liée au cours CHOISI — remontée).
+     ▣ DOCS : OU-EN-EST-ON, BACKLOG (#846 [x], #848, état courant), relevé de la porte section Cours, porte accueil (5 + 2), RELAIS,
+       consignes de démarrage (Cowork, prochaine session). Non commités : archives de consigne, Formation/, docs/orthopedagogie/,
+       la capture du 9 sept. supprimée — à Grégoire.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 45 — 12 SEPTEMBRE 2026, 8 H 55 → 9 H 25 (Toronto) : LA CONSIGNE DU JOUR DE COWORK « FINIR LA SECTION COURS DU CADRE :
      ELLE PARLE LES DEUX MÉTIERS, SANS SE CONTREDIRE » (#841 / #842), à partir de `e8374bc6` (1.136.0, en ligne).
      Rituel (subagent) : aucun écart avec la prémisse ; trouvaille : le run GitHub de 2c84a34a annulé par le push suivant (verdict local seul).

@@ -1,5 +1,11 @@
 # Portes terrain — 12 septembre 2026 (la section Cours du Cadre parle les deux métiers, sans se contredire — à livrer en 1.137.0)
 
+> ▣ **RELEVÉ DU 12 SEPTEMBRE (transmis par Cowork dans la consigne du jour de 10 h 25) : 6/7.** Rangée **1 ÉCHOUÉE** — sur un service,
+> le champ 2 du groupe-cours dit « Service d’orthopédagogie » et son menu liste tous les cours → **#846**, livré le 12 sept. (« 2. Cours
+> ou service »), à releaser en `1.138.0` (porte `PORTES-TERRAIN-2026-09-12-accueil.md`, rangée 4). Décisions **3.1, 3.2 et 3.3 : « tel
+> quel »** — le titre « Cours et services » reste ; le défaut du menu Nature ne suit pas le contexte (#843 reste inscrit) ; les mots neufs
+> restent. Porte close.
+
 > **Version à l'écran attendue : `1.137.0`**, build `0912-0935` (release `5563b233`, poussée le 12 sept. vers 9 h 50 après le verdict
 > Playwright ; Netlify met en ligne en 30 à 60 s). **Tant que la version lue en bas de page est `1.136.0`, cette liste ne juge rien** :
 > recharge avec vidage de cache (Cmd+Maj+R).

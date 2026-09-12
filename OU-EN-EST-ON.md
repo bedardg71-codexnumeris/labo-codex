@@ -15,6 +15,38 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+🟡 **À LIVRER EN 1.138.0 (12 SEPTEMBRE 2026, 10 h 55 — code `e011ed64` sur `main` local, NI RELEASÉ NI POUSSÉ : la release `minor` attend la relecture croisée de Cowork) — L'ACCUEIL PARLE AUX DEUX MÉTIERS, LE CHAMP 2 NE SE CONTREDIT PLUS, LES RENCONTRES NE DEMANDENT PLUS DE CIBLER DES CRITÈRES** (consigne du jour de Cowork, 10 h 25, révisée à 10 h 35 ; ta phrase de 7 h 35 : « Je veux que l'orthopédagogue sente qu'elle entre par la porte principale. »).
+**Ce que tu verras** : sur l'accueil, sous le bandeau « Bienvenue » et au-dessus des tâches, une carte blanche **« Tu es orthopédagogue ? »** —
+« Décris ton service : son nom, la liste de tes étudiant·es et les dates de ton trimestre. » — et **« Commencer → »**, qui mène à Suivi ›
+Rencontres par le même chemin que le sous-onglet. Les huit tâches sont toutes là. Dans le bandeau, **« Par où commencer ? »** répond en deux
+branches (« Je suis enseignant·e — … », « Je suis orthopédagogue — Décris ton service dans Suivi › Rencontres : tes rencontres se tiennent
+là. »), et les deux paragraphes que tu voulais retirer sont raccourcis (« Certains concepts sont nouveaux ? », « Ton courriel, une fois par
+mois. »). Dans `Cadre › Groupe-cours`, le champ 2 dit **« Cours ou service »** sur un service comme sur ton 601-101-MQ (c'était la rangée 1
+échouée de la porte d'hier : il disait « Service d’orthopédagogie » en listant tes cours). Sur un service, le formulaire d'une rencontre
+n'a plus de bloc **« Critères ciblés / Objectif visé / Suggérer »**, et son bilan dit « Ce que tu retiens de la rencontre. » ; **sur ton
+601-101-MQ, le formulaire d'une intervention ne change pas** — tes cinq critères y sont, « Suggérer » répond.
+**Vérifié comment** : deux sentinelles (11 et 9 essais) — la carte au-dessus des huit tâches, son lien sur le chemin de la sous-navigation,
+les mots arrêtés rendus dans l'ordre et écrits à un seul endroit, la carte conforme aux autres dans les deux modes ; le champ 2 identique
+dans les deux contextes, son menu avec les deux natures ; la carte des critères absente sur un service (Rencontres et Interventions),
+présente et inchangée hors service ; **une rencontre à « Structure » enregistrée sur un service garde « Structure » et son objectif**
+(masquer la carte ne doit rien effacer ; l'objectif, la consigne ne le nommait pas : sans garde, il aurait été vidé). **Quinze fois
+cassées exprès, quinze rouges** (une au second passage : au premier, c'est le script qui n'avait pas lu la sortie), code remis
+(empreintes identiques). Le pack démo capturé AVANT (le code de 1.137.0) et rejoué APRÈS : 20 écrans, **8 identiques dont les deux
+formulaires hors service**, les autres ne diffèrent que par les mots du lot et du bruit (heures de calcul, DA provisoires générés) —
+**zéro valeur ne bouge**. Styles mesurés dans WebKit : la carte a le fond, le trait, le rayon et l'ombre d'une carte de tâche, dans les
+deux modes ; captures regardées. Vitest 548 fichiers / 5 996 essais.
+**Pas vérifié** : ton écran, Safari, l'iPad (porte `plans de travail/PORTES-TERRAIN-2026-09-12-accueil.md`, cinq rangées, deux décisions),
+tes deux groupes.
+⚠ **Ce que la mesure a corrigé de la consigne** : « Commencer → » mène aux trois questions **seulement sans trimestre** ; sur ton
+601-101-MQ il mène à la carte « Créer un service d’orthopédagogie », sur un service à la liste des rencontres (porte, rangée 2).
+**Ce qui attend ta décision** (porte § 3) : **deux autres libellés du Cadre ont le défaut du champ 2** — le menu de `Cadre › Cours` dit
+« Sélectionner un service... » en listant tes cours, et la phrase des éléments obligatoires du groupe-cours dit l'horaire facultatif selon le
+service **actif**, alors que l'application l'exige selon le cours **choisi** (#848) ; et le mot de l'option vide du champ 2, « — Choisir un
+cours ou un service — », que j'ai tiré de ton « Cours ou service ».
+**Laissé exprès** (hors service, rien ne change) : sans grille de référence, le formulaire d'une intervention envoie encore vers
+« Conception › Grilles de critères » (le réglage vit dans Labo › Outils d'observation) ; sur un service, l'onglet Interventions garde le
+sous-titre de bilan qui promet une comparaison ; les deux exemples gris « Structure / Rigueur » sont inscrits par Cowork (#847).
+
 ✅ **FAIT EN 1.137.0 (12 SEPTEMBRE 2026, 9 h 40 — release `5563b233`, build `0912-0935`, code `7b4beac2` relu par Cowork ; Vitest 546 / 5 976 après le bump ; poussée par `scripts/pousser.sh` après le verdict Playwright — voir RELAIS pour le SHA poussé) — LA SECTION COURS DU CADRE PARLE LES DEUX MÉTIERS, SANS SE CONTREDIRE** (consigne du jour de Cowork, 8 h 55 ; ta décision 3.4 de la porte des étiquettes et sa rangée 5 échouée).
 **Ce que tu verras** : sur un service d'orthopédagogie, le premier choix du menu des profils dit **« Sélectionner un·e orthopédagogue »** — même après
 que le menu s'est rafraîchi (c'était la rangée 5 : la reconstruction du menu réécrivait « — Sélectionner — » en dur par-dessus le bon mot) ; le

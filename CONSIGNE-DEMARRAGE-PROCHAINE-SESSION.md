@@ -1,6 +1,14 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
-> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 9 h 45 (Toronto) : le lot « la section Cours du Cadre » (#841 / #842,
+> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 10 h 55 (Toronto) : la consigne du jour de Cowork (10 h 25, révisée
+> 10 h 35 — l'accueil, le champ 2, les rencontres sans critères ciblés) est EXÉCUTÉE en un commit de code sur `main` local, `e011ed64`,
+> NI RELEASÉ NI POUSSÉ — exprès (consigne § 5 : une livraison `minor` `1.138.0` après la relecture croisée de Cowork). Version à l'écran :
+> `1.137.0`. Vitest 548 / 5 996 (mesuré avant le commit ; le commit n'a ajouté que des commentaires de journal aux sentinelles).**
+> **Marche** : (1) relecture croisée de Cowork sur `e011ed64` ; (2) corrections éventuelles ; (3) `node scripts/release.mjs minor` ;
+> (4) commit ; (5) `cd tests && npm run test:unit` ; (6) verdict Playwright **Cowork fermé** (PROTOCOLE, règle 8) ; (7) `scripts/pousser.sh` ;
+> (8) porte `plans de travail/PORTES-TERRAIN-2026-09-12-accueil.md` + artefact jumeau par Cowork. Décisions en attente (porte § 3) : #848
+> (A / B / C) et le mot de l'option vide du champ 2. Le lot 5 du cadrage 11 reste en pause.
+> Version précédente : **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 9 h 45 (Toronto) : le lot « la section Cours du Cadre » (#841 / #842,
 > code `7b4beac2` relu par Cowork) est RELEASÉ en `1.137.0` (`5563b233`, build 0912-0935) et poussé par `scripts/pousser.sh` après le verdict
 > Playwright — voir RELAIS. Le bloc « 9 h 25 » ci-dessous décrit l'état d'avant la release ; sa marche (1)-(6) est consommée, reste (7) : la porte.** Voir le premier bloc « ÉTAT MESURÉ » ci-dessous.
 > Version précédente : **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 8 h 05 (Toronto), à la clôture du lot « les étiquettes »
