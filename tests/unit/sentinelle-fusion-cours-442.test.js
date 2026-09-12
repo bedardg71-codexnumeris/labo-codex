@@ -47,6 +47,8 @@ function chargerModule(globauxSupp = {}) {
         db: { getSync: (k, d) => d, setSync: () => {} },
         cle: (k) => k,
         toggleDisplay: () => {},
+        // #842 (12 sept. 2026) : chargerDropdownCoursV2 échappe le mot de son option vide (point unique) — le vrai global du module.
+        echapperHtml: (s) => String(s == null ? '' : s),
         // CT-15 : l'identité du cours vit désormais dans identite-naturelle.js.
         ...globauxIdentiteNaturelle(),
         ...globauxSupp

@@ -94,13 +94,15 @@ describe('A · le point unique : un mot par nature, et nulle part ailleurs', () 
         expect(html).toMatch(/<script src="js\/mots-nature\.js\?v=/);
         // mots-nature.js se charge avant tout module qui l'appelle
         const ordre = (src) => html.indexOf('<script src="js/' + src);
-        for (const m of ['modes.js', 'trimestre-v2-cours.js', 'trimestre-v2-groupes-cours.js', 'trimestre-v2-orchestre.js', 'rencontres.js', 'accompagnement-contenu-hover.js', 'contexte.js']) {
+        for (const m of ['modes.js', 'trimestre-v2.js', 'trimestre-v2-enseignants.js', 'trimestre-v2-cours.js', 'trimestre-v2-groupes-cours.js', 'trimestre-v2-orchestre.js', 'rencontres.js', 'accompagnement-contenu-hover.js', 'contexte.js']) {
             expect(ordre('mots-nature.js'), m + ' doit se charger après mots-nature.js').toBeLessThan(ordre(m));
         }
         // cours.js (bibliothèque des cours, deux cartes) : site absent de la liste de la consigne, attrapé par le verrou ci-dessus.
-        const sites = { 'trimestre-v2-cours.js': 8, 'trimestre-v2-groupes-cours.js': 4, 'trimestre-v2-orchestre.js': 2, 'rencontres.js': 3, 'accompagnement-contenu-hover.js': 3, 'cours.js': 2 };
+        // #841 / #842 (12 sept.) : trimestre-v2.js et trimestre-v2-enseignants.js lisent le contexte actif quand ils reconstruisent un menu ;
+        // l'orchestre ne compte plus qu'un appel (sa fonction morte `peuplerDropdownEnseignants` a été retirée).
+        const sites = { 'trimestre-v2-cours.js': 10, 'trimestre-v2-groupes-cours.js': 4, 'trimestre-v2-orchestre.js': 1, 'trimestre-v2.js': 2, 'trimestre-v2-enseignants.js': 1, 'rencontres.js': 3, 'accompagnement-contenu-hover.js': 4, 'cours.js': 2 };
         for (const [f, min] of Object.entries(sites)) {
-            const n = (lire('js/' + f).match(/\bmots?Nature\(/g) || []).length;
+            const n = (lire('js/' + f).match(/\bmots?Nature(ContexteActif)?\(/g) || []).length;
             expect(n, f + ' lit le point unique').toBeGreaterThanOrEqual(min);
         }
     });
@@ -222,16 +224,15 @@ describe('C · le libellé de la personne suit la nature du contexte actif, dans
         b.win.appliquerMotsNatureCadre();
         expect(b.marques.map(m => m.textContent)).toEqual(['Orthopédagogue', 'Orthopédagogue', 'Profil orthopédagogue', 'orthopédagogue', 'Service d’orthopédagogie', 'orthopédagogue', 'Service d’orthopédagogie', 'Orthopédagogue']);
         expect(b.elements['v2-selectEnseignant'].options[0].textContent).toBe('Sélectionner un·e orthopédagogue');
-        expect(b.elements['v2-gc-enseignant'].options[0].textContent).toBe('-- Sélectionner un·e orthopédagogue');
+        expect(b.elements['v2-gc-enseignant'].options[0].textContent).toBe('— Choisir un·e orthopédagogue —');
         expect(b.elements['v2-gc-enseignant'].options[1].textContent, 'les profils ne bougent pas').toBe('Marie Tremblay');
         etat.service = false;
         b.win.appliquerMotsNatureCadre();
         expect(b.marques.map(m => m.textContent)).toEqual(['Enseignant·e', 'Enseignant·e', 'Profil enseignant', 'enseignant·e', 'Cours à enseigner', 'enseignant·e', 'Cours à enseigner', 'Enseignant·e']);
         expect(b.elements['v2-selectEnseignant'].options[0].textContent).toBe('Sélectionner un enseignant·e');
-        // le sélecteur repeuplé suit aussi
-        etat.service = true;
-        await b.win.peuplerDropdownEnseignants();
-        expect(b.elements['v2-selectEnseignant'].innerHTML).toContain('<option value="">Sélectionner un·e orthopédagogue</option>');
+        // Le menu REPEUPLÉ suit aussi : c'est #841, verrouillé dans sentinelle-section-cours-suit-la-nature-842.test.js
+        // (la fonction `peuplerDropdownEnseignants` de l'orchestre, sans appelant, a été retirée le 12 sept.).
+        expect(b.win.peuplerDropdownEnseignants).toBeUndefined();
     });
     it('contexte.js appelle la pose des mots à chaque mise à jour de l\'en-tête (démarrage et activations)', () => {
         const src = lire('js/contexte.js');

@@ -192,7 +192,8 @@ function chargerDropdownCoursV2() {
         return texte || `Cours ${c.id || 'sans identifiant'}`;
     };
 
-    select.innerHTML = '<option value="">Sélectionner un cours...</option>';
+    // #842 (12 sept. 2026) : le mot de l'option vide suit le contexte actif, depuis le point unique.
+    select.innerHTML = '<option value="">' + echapperHtml(motsNatureContexteActif().choisirObjet) + '</option>';
 
     // Toutes les descriptions de cours, sans distinction de période.
     let coursAfficher = [...tousCours];
@@ -297,6 +298,7 @@ function changerCoursSelectionneV2(coursId) {
         if (btnSupprimer) btnSupprimer.classList.add('u-hide');
         afficherSyntheseCours(null);  // Beta 95.3 : vider la synthèse
         coursEnEditionV2 = null;
+        modeFormCoursV2 = null;
         _cacherBandeauEdition();
         _mettreAJourBoutonActiverCours(null);
         return;
@@ -320,16 +322,15 @@ function changerCoursSelectionneV2(coursId) {
     if (coursSelectionne) {
         // Afficher le formulaire en mode édition
         coursEnEditionV2 = coursId;
-        _afficherBandeauEdition(coursSelectionne.codeCours || coursSelectionne.sigle || coursSelectionne.code || coursSelectionne.nomCours);
+        _afficherBandeauEdition(coursSelectionne);
         _mettreAJourBoutonActiverCours(coursId);
         if (etatVide) etatVide.classList.add('u-hide');
         if (formulaire) formulaire.classList.remove('u-hide');
         if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
 
-        // Mettre à jour le titre
-        const titre = document.getElementById('v2-titreFormCours');
+        // Mettre à jour le titre (#842 : « Modifier le cours » / « Modifier le service », selon la fiche)
         const btnTexte = document.getElementById('v2-btnTexteCours');
-        if (titre) titre.textContent = 'Modifier le cours';
+        _titrerFormCoursV2('modifier');
         if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
         // Remplir le formulaire
@@ -513,10 +514,27 @@ function afficherDetailsCoursV2(cours) {
 // Variable pour stocker l'ID du cours en édition
 let coursEnEditionV2 = null;
 
-function _afficherBandeauEdition(codeCours) {
+// #842 (12 sept. 2026) : le mode du formulaire ouvert ('nouveau' | 'modifier' | 'dupliquer' | null).
+// Le TITRE du formulaire suit la nature de la FICHE — celle du menu Nature — depuis le point unique
+// (js/mots-nature.js) : « Modifier le cours » / « Modifier le service ». Reposé à chaque bascule du menu.
+let modeFormCoursV2 = null;
+
+function _titrerFormCoursV2(mode) {
+    if (mode !== undefined) modeFormCoursV2 = mode;
+    const titre = document.getElementById('v2-titreFormCours');
+    if (!titre || !modeFormCoursV2) return;
+    const nature = document.getElementById('v2-natureCours')?.value === 'service' ? 'service' : 'cours';
+    titre.textContent = motsNature(nature)[modeFormCoursV2];
+}
+
+// #842 : le bandeau nomme la fiche par son mot (« Cours 601-101 » / « Service Aide à la réussite »).
+function _afficherBandeauEdition(cours) {
     const bandeau = document.getElementById('v2-bandeauModeEdition');
     const codeSpan = document.getElementById('v2-bandeauCodeCours');
-    if (codeSpan) codeSpan.textContent = codeCours || '(sans code)';
+    const objetSpan = document.getElementById('v2-bandeauObjet');
+    const code = cours ? (cours.codeCours || cours.sigle || cours.code || cours.nomCours) : '';
+    if (codeSpan) codeSpan.textContent = code || '(sans code)';
+    if (objetSpan) objetSpan.textContent = motsNature(cours).Objet;
     if (bandeau) bandeau.classList.remove('u-hide');
 }
 
@@ -584,7 +602,6 @@ async function nouveauCoursV2() {
 
     const etatVide = document.getElementById('cours-etat-vide');
     const formulaire = document.getElementById('cours-formulaire-edition');
-    const titre = document.getElementById('v2-titreFormCours');
     const btnTexte = document.getElementById('v2-btnTexteCours');
     const selectCours = document.getElementById('v2-selectCours');
 
@@ -594,7 +611,7 @@ async function nouveauCoursV2() {
     // Afficher le formulaire
     if (etatVide) etatVide.classList.add('u-hide');
     if (formulaire) formulaire.classList.remove('u-hide');
-    if (titre) titre.textContent = 'Nouveau cours';
+    _titrerFormCoursV2('nouveau'); // #842 : « Nouveau cours » / « Nouveau service », selon le menu Nature
     // #306 Lot 1 : libellé canonique « Créer » en création (« Enregistrer » en édition)
     if (btnTexte) btnTexte.textContent = 'Créer';
 
@@ -629,18 +646,17 @@ async function modifierCoursSelectionneV2() {
     }
 
     coursEnEditionV2 = coursId;
-    _afficherBandeauEdition(coursSelectionne.codeCours || coursSelectionne.sigle || coursSelectionne.code || coursSelectionne.nomCours);
+    _afficherBandeauEdition(coursSelectionne);
     _mettreAJourBoutonActiverCours(coursId);
 
     const formulaire = document.getElementById('v2-formulaireCours');
     const apercu = document.getElementById('v2-apercuCours');
-    const titre = document.getElementById('v2-titreFormCours');
     const btnTexte = document.getElementById('v2-btnTexteCours');
 
     if (formulaire) {
         formulaire.classList.remove('u-hide');
         if (apercu) apercu.classList.add('u-hide');
-        if (titre) titre.textContent = 'Modifier le cours';
+        _titrerFormCoursV2('modifier'); // #842
         if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
         // Remplir les champs avec les données du cours
@@ -690,13 +706,12 @@ function dupliquerCoursSelectionneV2() {
 
     const formulaire = document.getElementById('v2-formulaireCours');
     const apercu = document.getElementById('v2-apercuCours');
-    const titre = document.getElementById('v2-titreFormCours');
     const btnTexte = document.getElementById('v2-btnTexteCours');
 
     if (formulaire) {
         formulaire.classList.remove('u-hide');
         if (apercu) apercu.classList.add('u-hide');
-        if (titre) titre.textContent = 'Dupliquer le cours';
+        _titrerFormCoursV2('dupliquer'); // #842
         if (btnTexte) btnTexte.textContent = 'Créer la copie';
 
         // Remplir les champs avec les données du cours existant
@@ -974,7 +989,8 @@ function afficherSyntheseCours(cours) {
     if (!sidebar) return;
 
     if (!cours) {
-        sidebar.innerHTML = '<p class="etat-vide-resume">Aucun cours sélectionné</p>';
+        // #842 : « Aucun cours sélectionné » / « Aucun service sélectionné », selon le contexte actif (point unique).
+        sidebar.innerHTML = '<p class="etat-vide-resume" data-mot-nature="aucunObjet">' + echapperHtml(motsNatureContexteActif().aucunObjet) + '</p>';
         return;
     }
 
@@ -1247,6 +1263,7 @@ function changerNatureCoursV2() {
     }
     const nom = document.getElementById('v2-nomCours');
     if (nom) nom.placeholder = service ? 'Ex: Aide à la réussite en français' : 'Ex: Écriture et littérature';
+    _titrerFormCoursV2(); // #842 : le titre suit la fiche (« Nouveau service » dès que le menu bascule)
 }
 
 /** Les options du menu Nature et sa phrase d'aide : le mot de chaque nature, depuis le point unique. */
@@ -1274,6 +1291,7 @@ function setValue(id, value) {
  */
 function annulerFormCoursV2() {
     coursEnEditionV2 = null;
+    modeFormCoursV2 = null;
     _cacherBandeauEdition();
     _mettreAJourBoutonActiverCours(null);
 
