@@ -1,3 +1,11 @@
+> ⚠ **NOTE DU 11 SEPTEMBRE, 20 h (Cowork, session « orthopédagogie ») — LIS CECI AVANT DE PROMOUVOIR LE LOT 5.** Grégoire a tranché à 20 h :
+> le chantier **« Rencontres »** (l'orthopédagogue entre par Suivi ; cadrage `plans de travail/CADRAGE-2026-09-11-rencontres-l-orthopedagogue-entre-par-suivi.md`,
+> entrée 11 de `00-CADRAGES-OUVERTS.md`, sources dans `docs/orthopedagogie/`) passe **avant** la suite du cadrage 11. **La consigne du jour
+> du samedi 12 est celle de « Rencontres »** (`plans de travail/CONSIGNE-DU-JOUR.md`, écrite à 20 h 25 ; celle du lot 4, livré en `1.134.0`,
+> est archivée). **Le lot 5 est en pause** jusqu'à la fin de ce chantier — ne pas le promouvoir, ne pas écraser la consigne du jour ; il
+> remesurera `js/interventions.js` après « Rencontres » (estampille du groupe-cours de naissance, paramètre de vocabulaire). Lots 6 et 7 : après.
+> Une seule session Claude Code écrit dans `js/` demain. But de Grégoire : l'orthopédagogue utilise l'application lundi 14.
+
 # Consigne de démarrage — la session Cowork qui prend le relais
 
 > **Réécrite le 11 septembre 2026 à 18 h 45 (Toronto), par la session Cowork du 11 (10 h 45 – 18 h 45)**, à la clôture d'une journée de
