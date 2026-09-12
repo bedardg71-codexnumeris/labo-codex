@@ -15,6 +15,35 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+⏳ **À LIVRER EN 1.137.0 (12 SEPTEMBRE 2026, 9 h 25 — commit `7b4beac2` sur `main` local, NI RELEASÉ NI POUSSÉ : la release `minor` attend la relecture croisée de Cowork, consigne § 6) — LA SECTION COURS DU CADRE PARLE LES DEUX MÉTIERS, SANS SE CONTREDIRE** (consigne du jour de Cowork, 8 h 55 ; ta décision 3.4 de la porte des étiquettes et sa rangée 5 échouée).
+**Ce que tu verras** : sur un service d'orthopédagogie, le premier choix du menu des profils dit **« Sélectionner un·e orthopédagogue »** — même après
+que le menu s'est rafraîchi (c'était la rangée 5 : la reconstruction du menu réécrivait « — Sélectionner — » en dur par-dessus le bon mot) ; le
+champ 5 du groupe-cours dit « — Choisir un·e orthopédagogue — », le champ 2 « — Choisir un service — ». L'accordéon des cours s'appelle
+**« Cours et services »** (mot proposé, à corriger — porte § 3.1 ; tu avais dit « cours/service ») ; sur un service, il dit « Service : »,
+« Sélectionner un service... », **« Modifier le service »**, « Dupliquer le service », le bandeau **« Mode modification — Service … »**, « Aucun
+service sélectionné », et le fil d'Ariane dit « Service » ; dès que le menu Nature bascule, le titre du formulaire suit (« Nouveau service »).
+Dans l'accordéon Groupe-cours, la phrase qui te contredisait dit maintenant, sur un service, **« renseigne les 4 éléments obligatoires :
+trimestre, service d’orthopédagogie, numéro de groupe et orthopédagogue. L’horaire et la pratique de notation sont facultatifs. »** — et ses
+trois échos (état vide, liste, formulaire) disent 4 éléments et « L'horaire des séances (facultatif) ». L'infobulle du groupe-cours nomme
+« ton cours ou ton service d’orthopédagogie ». **Sur ton 601-101-MQ, tout redit cours et enseignant·e, aux mots d'avant** — sauf deux :
+le titre « Cours et services », et « Sélectionner un enseignant·e » à la place de « — Sélectionner — » dans le menu des profils (le mot que
+le point unique portait déjà). ⚠ **Laissé exprès** : « + Nouveau cours » et « … ou crée un nouveau cours » — les faire suivre ouvrirait un
+formulaire dont le menu Nature dit « Enseignement » ; faire suivre ce défaut est un comportement, pas un mot : **ta décision** (porte § 3.2, #843).
+**Vérifié comment** : une sentinelle de 17 essais (les trois reconstructions de menus lisent le point unique au moment de construire, dans les
+deux ordres « le dernier qui écrit » ; verrou structurel étendu : aucune option vide nommant une personne en dur dans `js/` ni `index.html` ; la
+phrase des éléments obligatoires dans les deux sens ; **les mots de 1.136.0 hors service figés** ; le titre et le bandeau suivent la fiche, la
+synthèse et le menu suivent le contexte ; la valeur en base reste `'service'` après Modifier + Enregistrer), **onze fois cassée exprès, onze
+rouges**, code remis (empreintes identiques). Le pack démo capturé AVANT et rejoué APRÈS : 411 feuilles (valeurs de `cours`, `groupesCours`,
+`groupeEtudiants`, `infoCours`, `groupeCoursActif` ; textes du Cadre dans huit états du formulaire, Suivi du groupe, Liste, un profil — sur
+le groupe-cours démo, sur un service créé par les trois questions, au retour) : **zéro valeur ne bouge** (identifiants générés, dates, DA
+provisoires), **Suivi identique hors service**, seules les feuilles de texte du Cadre diffèrent, sur les mots du lot. Vitest 546 fichiers /
+5 976 essais. ⚠ **Ce que la mesure a corrigé de la consigne** : la fonction de l'orchestre qui posait déjà le bon mot au menu des profils
+**n'avait aucun appelant** (retirée) ; le champ 5 du groupe-cours est peuplé ailleurs (`trimestre-v2.js`), avec un troisième libellé ; la
+liste des sites manquait le fil d'Ariane, « Cours : », « — Choisir un cours — » et trois « 5 éléments obligatoires ». **B3 tranché** : la
+sentinelle #306 protège la mécanique Créer/Enregistrer du bouton, les titres n'étaient que son ancre — ancre déplacée, break-test rouge.
+**Pas vérifié** : ton écran (porte `plans de travail/PORTES-TERRAIN-2026-09-12-section-cours.md`, cinq rangées, trois décisions), Safari,
+tes deux groupes ; la relecture croisée de Cowork ; le verdict Playwright.
+
 ✅ **FAIT EN 1.136.0 (12 SEPTEMBRE 2026, 8 h 25 — release `2c84a34a`, POUSSÉE, `main` = `origin/main` ; relecture croisée de Cowork passée sur `fa27b531`, Playwright vert, Vitest 545 / 5 959) — LES ÉTIQUETTES : L'ORTHOPÉDAGOGUE ENTRE PAR LE CADRE, COMME TOUT LE MONDE** (consigne du jour de Cowork, 7 h 40 ; code `fa27b531`).
 **Ce que tu verras** : dans `Cadre › Cours`, le menu **Nature** dit **« Enseignement »** ou **« Orthopédagogie »** (à la place de « Cours » /
 « Service ») — tes champs, tes fiches, tes données sont intacts ; en base, la nature vaut toujours `'cours'` ou `'service'`, aucune

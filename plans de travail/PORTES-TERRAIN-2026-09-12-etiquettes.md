@@ -9,6 +9,19 @@
 > change** : les valeurs en base restent `'cours'` et `'service'`.
 >
 > **Ce qui échoue ici devient un item de backlog, avec son numéro de porte.** Jamais une note mentale.
+>
+> ✅ **RELEVÉE le 12 septembre 2026 vers 8 h 45 par Grégoire (relayé par Cowork dans la consigne du jour de 8 h 55) : 11 / 12, rangée 5 ÉCHOUÉE.**
+> - **Rangée 5** : sur le service, l'accordéon disait bien « Orthopédagogue », mais le premier choix du menu des profils disait encore
+>   « — Sélectionner — » (la repopulation du menu réécrivait le mot en dur après `appliquerMotsNatureCadre`) ⮕ **#841**, corrigé le
+>   12 sept. dans le lot « section Cours » (à releaser en `1.137.0`) : le mot se lit dans le point unique AU MOMENT où le menu se construit ;
+>   vérifié au harnais du pack démo (« Sélectionner un·e orthopédagogue » après repopulation) et par sentinelle. À revoir à l'écran :
+>   porte `PORTES-TERRAIN-2026-09-12-section-cours.md`, rangée 1.
+> - **Décisions du § 3** (inscrites le 12 sept. à 9 h 20 par Claude Code, d'après la consigne du jour de Cowork) :
+>   **3.1** — « tel quel » : `js/config.js` reste fermé, l'onglet continue de dire « Rencontres ». **3.2** et **3.3** — réponse non relayée
+>   dans les fichiers (ni consigne, ni BACKLOG) : notée comme un silence, donc tel quel, à corriger par Grégoire s'il en va autrement.
+>   **3.4** — « On devrait peut-être renommer cette section "cours/service" et l'adapter selon le choix qui est fait par l'utilisateur. »
+>   ⮕ **#842**, livré le 12 sept. (lot « section Cours », `1.137.0` due) : le titre proposé « Cours et services », les mots de la
+>   section qui suivent la fiche ou le contexte, la phrase des éléments obligatoires corrigée ; « + Nouveau cours » laissé, inscrit **#843**.
 
 **Pourquoi cette liste est courte.** Le pack démo a été capturé AVANT le premier changement et rejoué APRÈS le dernier : 54 feuilles (les
 valeurs de `cours`, `groupesCours`, `groupeEtudiants`, `infoCours`, `groupeCoursActif` ; le texte du Cadre, de Suivi du groupe, Liste,

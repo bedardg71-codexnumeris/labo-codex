@@ -7,6 +7,31 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 45 — 12 SEPTEMBRE 2026, 8 H 55 → 9 H 25 (Toronto) : LA CONSIGNE DU JOUR DE COWORK « FINIR LA SECTION COURS DU CADRE :
+     ELLE PARLE LES DEUX MÉTIERS, SANS SE CONTREDIRE » (#841 / #842), à partir de `e8374bc6` (1.136.0, en ligne).
+     Rituel (subagent) : aucun écart avec la prémisse ; trouvaille : le run GitHub de 2c84a34a annulé par le push suivant (verdict local seul).
+     ▣ LIVRÉ (`7b4beac2`, NI RELEASÉ NI POUSSÉ — consigne § 6, release `minor` 1.137.0 après la relecture de Cowork) :
+       (A #841) `motsNatureContexteActif()` dans js/mots-nature.js ; les TROIS reconstructions le lisent au moment de construire
+       (trimestre-v2-enseignants.js:115 profil ; trimestre-v2.js:277/342 champs 2 et 5 du GC ; trimestre-v2-cours.js menu Cours) ;
+       `appliquerMotsNatureCadre` re-pose une table de 4 options vides. ⚠ MESURÉ : `peuplerDropdownEnseignants` (orchestre) posait
+       déjà le bon mot mais N'AVAIT AUCUN APPELANT — retirée (zéro-dette), #306 verrouille son absence. Verrou structurel étendu.
+       (B #842) index.html : titre « Cours et services » (proposé), data-mot-nature sur 9 éléments neufs (Objet ×2, objet, aucunObjet,
+       elementsObligatoires, nbElementsObligatoires, horaireFacultatif, elementsObligatoiresForm, choisirPersonneGC), `v2-bandeauObjet` ;
+       trimestre-v2-cours.js : `modeFormCoursV2` + `_titrerFormCoursV2(mode)` (titre = motsNature(menu Nature)[mode], re-titré par
+       changerNatureCoursV2), `_afficherBandeauEdition(cours)`, synthèse vide par contexte ; hover reglages-groupe-cours nomme les deux.
+       B3 TRANCHÉ : #306 protège la mécanique Créer/Enregistrer du bouton → ancre déplacée, break-test « Ajouter » rouge.
+       LAISSÉ EXPRÈS → #843 : « + Nouveau cours » / « … crée un nouveau cours » (liés au défaut 'cours' du menu Nature = comportement).
+       Sentinelle 842 : 17 essais, 11 mutations / 11 rouges (empreintes). Harnais pack démo REBÂTI (411 feuilles, 8 états du formulaire,
+       3 contextes) : ZÉRO valeur ; Suivi identique hors service ; hors service 2 mots changent (titre ; « Sélectionner un enseignant·e »).
+       charger-script.js : fournit motsNatureContexteActif + passe contexteActifEstService du harnais au point unique (vivant).
+       Lint F.15 rouge une fois (2 constantes concaténées dans innerHTML) → echapperHtml. Vitest 546 / 5 976. Changelog 1.137 (2 items).
+     ⚠ PIÈGE DE SESSION : `perl -0pi … print "x: $n"` imprime DANS le fichier (première ligne parasite dans 3 fichiers) → print STDERR ;
+       et un `s/\n    const titre = …//g` a aussi mangé la ligne du helper neuf — relire chaque compte de substitution.
+     Docs : porte section-cours (5 rangées, 3 décisions) ; relevé de la porte des étiquettes inscrit (3.2/3.3 = silence) ; BACKLOG
+       (#841/#842 livrés, #843, état courant, commité par moi) ; OU-EN-EST-ON ; PROCHAINE-SESSION ; COWORK ; RELAIS.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 44 — 12 SEPTEMBRE 2026, 7 H 40 → 8 H 05 (Toronto) : LA CONSIGNE DU JOUR DE COWORK « LES ÉTIQUETTES :
      L'ORTHOPÉDAGOGUE ENTRE PAR LE CADRE, COMME TOUT LE MONDE » (lots A à D), à partir de `473f3d75` (1.135.1, en ligne).
      Rituel (subagent) : aucun écart avec la prémisse ; trois relais périmés d'une release (corrigés ici).
