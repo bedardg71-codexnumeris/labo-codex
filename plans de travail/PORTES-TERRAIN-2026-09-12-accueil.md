@@ -10,6 +10,31 @@
 
 ---
 
+## ▣ RELEVÉ PARTIEL — 12 septembre 2026, 11 h 38, **depuis le CLONE en `file://`**, pas depuis le site
+
+> ⚠ **Fait avant la mise en ligne**, sur `file:///Users/kuekatsheu/Documents/GitHub/Monitorage_v6/index.html`, qui portait déjà
+> `1.138.0` build `0912-1116`. Proposition de Grégoire pour ne pas attendre le déploiement ; acceptée par Cowork **avec sa limite**,
+> dite avant le relevé : `file://` et `https://app.codexnumeris.org` sont **deux origines**, donc **deux magasins de données**.
+> Les rangées d'apparence et de mots valent ; celles qui dépendent de son contexte et de ses vraies rencontres, non.
+
+**4 passées · 0 échec · 3 non traitées.**
+
+| | État | Note |
+|---|---|---|
+| **1** | ✅ passée | la carte, sa place, son apparence, les huit tâches |
+| **2** | ✅ passée | ⚠ **à refaire sur le site** : ce que « Commencer → » affiche dépend du contexte actif, et le contexte du clone n'est pas le sien |
+| **3** | ✅ passée | les quatre paragraphes du bandeau, dans l'ordre |
+| **4** | ✅ passée | « 2. Cours ou service » |
+| **5** | ⏳ non traitée | ⚠ **à faire sur le site** : dépend de ses vraies rencontres |
+| **6** | ⏳ non traitée | demande une rencontre datée d'aujourd'hui ou plus tard |
+| **7** | ⏳ non traitée | la barre de Suivi à la bascule de contexte |
+
+**§3 — les deux décisions ne sont pas tranchées** (3.1 #848, 3.2 le mot de l'option vide). Elles restent dues.
+
+⮕ **Ce qui reste : 5, 6, 7 et les deux décisions, sur `https://app.codexnumeris.org`, une fois `1.138.0` poussée.**
+
+---
+
 ## §0 · Préalable — un geste
 
 | | Geste | Attendu |
