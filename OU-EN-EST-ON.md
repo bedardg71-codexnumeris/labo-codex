@@ -15,6 +15,39 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+↻ **À LIVRER EN 1.135.0 — « RENCONTRES » : UN SERVICE EST UN COURS, UN GROUPE-COURS SANS HORAIRE, LE SOUS-ONGLET SUIVI › RENCONTRES, UNE INTERVENTION QUI SAIT OÙ ELLE EST NÉE** (lots 1 et 2 du cadrage « l'orthopédagogue entre par Suivi » ; quatre commits sur `main` local le 11 septembre au soir, **non poussés exprès** : une seule livraison après ton coup d'œil et la relecture croisée de Cowork — consigne § 3).
+**Ce que tu verras** : dans `Suivi`, un sous-onglet **« Rencontres »** entre « Interventions » et « Animation ». Sur un poste sans
+trimestre (celui de l'orthopédagogue lundi), il pose **trois questions** sur un seul écran — les dates du trimestre, le nom du
+service, la liste des élèves tapée (« Prénom Nom », « DA ; Nom ; Prénom ») ou collée d'Omnivox — et « Créer mon service » crée ce que
+le magasin exige et rien d'autre : un trimestre, un **cours de nature « Service »** (sans code, sans discipline, sans compétence),
+ses élèves, un **groupe-cours sans horaire** ; Cadre montre le tout tel quel, l'en-tête bascule dessus, Suivi › Liste montre ses
+élèves. Ensuite « Rencontres » liste ses rencontres et en crée (« + Nouvelle rencontre », individuelle par défaut ou en sous-groupe,
+date, heure, participants cochés, note par élève, bilan) — c'est l'intervention, même module, avec le vocabulaire « rencontre » ;
+sur un service, ni « contexte de l'intervention » ni « séance concernée » (ils supposent une séance de groupe). Sur TES deux
+groupes-cours, « Rencontres » montre la même liste que « Interventions », en vocabulaire « rencontre », avec une ligne « Tu reçois des
+élèves hors d'un groupe-cours ? Créer un service ». Dans `Cadre › Cours`, un choix **« Nature : Cours / Service »** en tête du
+formulaire (sur Cours, tout est comme avant). Pour tous : une intervention **sait désormais dans quel groupe-cours elle est née** et
+la liste d'un groupe-cours ne mêle plus celles d'un autre ; tes interventions d'avant restent visibles partout et prennent leur
+contexte au prochain Enregistrer de chacune (jamais réécrites en masse). Un élève de service sans séance garde A = 100 % et « En
+attente » — c'est le comportement de tout groupe sans séance, laissé exprès (« tout est manuel pour un mois »), inscrit (#836).
+**Vérifié comment** : le pack démo capturé AVANT le premier commit et rejoué APRÈS le dernier — 1 284 feuilles (Cadre, Suivi du
+groupe et ses deux graphiques, Liste, Présences, 20 profils avec indices et palier, Interventions, export) : **0 différence de
+valeur**, seules les chaînes statiques ajoutées diffèrent ; un service sans horaire créé dans le trimestre démo et 13 écrans + 6
+sections du profil visités sans exception ; le parcours des trois questions joué dans WebKit sur un poste vide (trimestre a2026
+créé, 117 jours de calendrier, service, 4 élèves dont deux à DA provisoire, groupe-cours sans horaire actif, une rencontre créée et
+relue, 0 erreur) et en démo ; quatre sentinelles (40 essais : le service se crée sans code et un cours sans code est toujours
+refusé, le groupe-cours de service sans horaire et l'ordinaire toujours refusé, aucune séance servie par repli, la liste du service
+par le goulot commun, le point unique sur grille et verrou « plus aucune recopie », l'estampille et le filtre des interventions, la
+lecture des quatre formes de ligne, la création sur poste vide et le refus sans nom / sans élève / sans dates, le marqueur démo),
+vingt-quatre fois cassées exprès, vingt-quatre rouges, remises (empreintes identiques) ; les bancs du 5 et du 6 disent l'après
+(E1) ; Vitest 543 fichiers / 5 928 essais. **Corrigé en chemin** : `cours` est une clé globale — un service créé en démo restait dans
+ta vraie liste de cours ; il est maintenant marqué et retiré quand tu quittes la démo. **Pas vérifié** : ton écran, tes deux groupes
+réels, Safari, l'orthopédagogue sur son poste lundi ; **la formule « taux de repérage » (§ G) n'est pas livrée** — le registre ne
+permet pas de renommer les libellés des saisies, un modèle avec « nombre de mots » sous « erreurs au total » serait un piège (#835).
+**Zones protégées** : `js/config.js` et `js/navigation.js` touchés (sous-onglet, correspondance, initialisateur) avec ton
+autorisation du 11 au soir. Porte terrain : `plans de travail/PORTES-TERRAIN-2026-09-12-rencontres.md` (douze rangées, dont douze
+mots proposés — silence = tel quel).
+
 ↻ **1.134.0 — PROFIL D'UN ÉLÈVE : UN SEUL RENDU À L'OUVERTURE ; LES GRAPHIQUES LISENT L'ÉCHELLE DE CHAQUE ÉVALUATION ; LE VOLET CONFIDENTIEL SUIT LA LISTE** (lot 4 du cadrage 11, build à lire en bas de page).
 **Ce que tu verras** : dans `Suivi › Profils individuels`, le profil s'ouvre une fois — le 6, il se dessinait quatre
 fois, et trois mots tapés dans la zone de texte du rapport disparaissaient à 100 ms. Dans Performance › Critères, les

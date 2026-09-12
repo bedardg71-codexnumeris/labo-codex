@@ -7,6 +7,23 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 22 H 10 : « RENCONTRES » LIVRÉ SUR `main` LOCAL, NON POUSSÉ, RELEASE 1.135.0 DUE
+
+> ⚠ **Le travail le plus récent est sur `main` LOCAL, cinq commits devant `origin/main`, et rien n'est poussé — exprès.**
+> La consigne du jour (§ 3) demande UNE livraison après le coup d'œil de Grégoire et la relecture croisée de Cowork sur les
+> commits ; un push déploie (Netlify) et aurait mis lundi en ligne sous le numéro d'hier. **Si tu lis ceci depuis `origin/main`,
+> le chantier n'y est pas encore : il est sur le Mac de Grégoire** (`git log --oneline -6` là-bas).
+> **Livré** (`#834`, quatre commits de code — lots A+B, E+D, C, fix démo) : un service EST un cours (`cours.nature`), un groupe-cours
+> sans horaire, le sous-onglet **Suivi › Rencontres** (`js/rencontres.js`, `config.js` et `navigation.js` avec autorisation), le point
+> unique `obtenirIdContexteActif` (modes.js), `intervention.groupeCoursId`. Version **inchangée : 1.134.0**. Vitest 543 / 5 928.
+> **Marche à suivre** : `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`, « Ce que la prochaine session fait d'abord » (relecture →
+> changelog trois lignes → `release.mjs minor` → verdict Playwright → `scripts/pousser.sh` → porte
+> `plans de travail/PORTES-TERRAIN-2026-09-12-rencontres.md`).
+> **Ce qui attend Grégoire** : douze mots (porte § 3, silence = tel quel) ; le chevauchement Interventions / Rencontres ; trois
+> fichiers de Cowork modifiés pendant la session, à committer par lui.
+> **Ce qui attend Cowork** : la relecture croisée ; l'artefact de la porte ; ce qu'elle écrit à l'orthopédagogue dimanche, d'après
+> l'écran des trois questions tel qu'il est livré.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 16 H 30 : LA LISTE DES ÉTUDIANT·ES, LOT 2 DU CADRAGE 11 (1.132.0)
 
 > ✅ **`main` à 1.132.0** (`cat version.json` pour le build, `git log --oneline -2` pour les SHA). Tout est sur `main` ;
