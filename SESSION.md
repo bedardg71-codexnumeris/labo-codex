@@ -7,6 +7,26 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 42 — 11 SEPTEMBRE 2026, 21 H 30 → 21 H 55 (horloge du Mac, `date`) : LA LIVRAISON DE « RENCONTRES », 1.135.0.
+     Périmètre : à partir de `af574fd2`. Point d'entrée : « exécute la marche : les deux reprises de la relecture croisée de
+     Cowork (étape 1), puis la livraison 1.135.0 ». Commits : reprises `ea90c376`, release `538fbb92`, puis ce relais ; verdict
+     Playwright sur le SHA du relais, puis `scripts/pousser.sh`.
+     ▣ LIVRÉ : (1) `_estampillesAcceptees` (interventions.js) — le filtre du lot D accepte le coursId du contexte et, en
+       mode cours, tout groupe-cours du cours ; sentinelle : les deux traversées (3 essais, 3 break-tests rouges) ;
+       (2) `afficherPorteVersUnService` + `activerServiceRencontres` (rencontres.js) — sur un cours ordinaire, la porte
+       seule, avec le lien vers un service du trimestre ; sentinelle : 2 essais, 3 break-tests rouges ; changelog 1.135
+       (première ligne réécrite : « Rencontres » sert aux services) ; porte terrain : rangées 8, 11, 11b, mots.
+     ⚠ CE QUE LA MESURE A CORRIGÉ DE LA CONSIGNE : « cinq commits non poussés » était FAUX — `origin/main` = HEAD depuis
+       21 h 36 (reflog), #834 était en ligne sous 1.134.0 sans changelog ; les horodatages des relais (« 22 h 10 »,
+       « 12 sept. ») viennent d'une horloge fausse (le commit de relais est daté 20 h 41) ; le hook anti-cache a refusé
+       le premier commit (jetons inchangés) → bump manuel ; un jeton daté « 20260912 » aurait été REculé par release.mjs
+       (qui date du jour réel) → remis en séquence « 20260911n/o » avant la release ; le run CI de 1.134.0 est rouge
+       avec deux specs de plus (fiche #833 mise à jour, inscrit et continué).
+     ⚠ CE QUI REMONTE À GRÉGOIRE : le coup d'œil (étape 2 de la marche) n'a pas eu lieu — la porte le remplace, APRÈS la
+       release, sur 1.135.0 ; les douze mots ; #836.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 41 — 11 SEPTEMBRE 2026 AU SOIR (19 h 51 → 22 h 10, Toronto) : « RENCONTRES », L'ORTHOPÉDAGOGUE
      ENTRE PAR SUIVI — lots 1 et 2 du cadrage du 11 (entrée 11), À LIVRER EN 1.135.0.
      Périmètre : à partir de `7092ce42` (1.134.0). Cinq commits sur `main` local, NON POUSSÉS, exprès (consigne § 3 :
