@@ -4,6 +4,10 @@
 > matinée de **trois versions** (`1.135.1`, `1.136.0`, `1.137.0`), **trois portes terrain relevées** et **dix items inscrits**.
 > Elle REMPLACE toute version précédente.
 >
+> ✅ **MISE À JOUR 11 h 52 : `1.138.0` POUSSÉE — `origin/main` = `61b5c883`.** Grégoire a fermé Cowork, le verdict Playwright local est vert sur
+> ce SHA (11 h 51, 0 échec), et il a décidé le push à 11 h 52. Ton relevé partiel de la porte (11 h 38) est commité tel quel (`61b5c883`),
+> AVANT le verdict, pour que le SHA poussé le porte. **À toi** : la relecture de `e239787f` (lot E) à froid — elle n'a pas été vue avant le push ;
+> l'artefact jumeau de la porte (sept rangées ; 5, 6, 7 et § 3 dus sur le site).
 > ▣ **MISE À JOUR 11 h 20 : lot E exécuté (`e239787f`) et `1.138.0` RELEASÉE (`a0ed0929`, build 0912-1116) — NON POUSSÉE.** À toi : relire
 > `git show e239787f` — `js/navigation.js` (`_configurationVisible`, `_interventionsMasqueesSurService`, `_poserBoutonsSousNav`,
 > `afficherSousNavigation` refactorisée sans changement de sortie, `rafraichirSousNavigationSelonContexte`) et `js/contexte.js` (l'appel dans

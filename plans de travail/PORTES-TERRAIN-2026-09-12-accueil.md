@@ -1,8 +1,8 @@
 # Portes terrain — 12 septembre 2026 (l'accueil parle aux deux métiers, le champ 2 ne se contredit plus, les rencontres sans critères ciblés — à livrer en 1.138.0)
 
 > **État** : écrite le 12 septembre 2026 par Claude Code, sur la consigne du jour de Cowork (10 h 25, révisée à 10 h 35).
-> Le code est commité sur `main` local, **ni releasé, ni poussé** : la release `1.138.0` attend la relecture croisée de Cowork
-> (consigne § 5). **Cette porte ne s'ouvre qu'une fois `1.138.0` en ligne** (§ 0).
+> ✅ **`1.138.0` POUSSÉE le 12 sept. à 11 h 52** (`origin/main` = `61b5c883`, build `0912-1116`) : la porte s'ouvre sur le site dès que le
+> numéro se lit en bas de page (§ 0 ; Netlify met en ligne en 30 à 60 s).
 > Sept rangées (consigne § 6, révisée à 10 h 50 puis 11 h : la sixième est « Tes prochains rendez-vous », la septième la barre de Suivi),
 > deux décisions (§ 3). Code : `e011ed64` + `62f24316` + `e239787f` ; **release `a0ed0929`, `1.138.0`, build `0912-1116`** — à pousser après
 > la relecture du lot E et le verdict Playwright ; la porte ne s'ouvre qu'une fois ce numéro lu en bas de page. Ce qui échoue devient un item du BACKLOG, avec son numéro de rangée.

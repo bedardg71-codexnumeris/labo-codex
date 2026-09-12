@@ -1,5 +1,10 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 11 h 52 (Toronto) : `1.138.0` est POUSSÉE — `origin/main` = `61b5c883`
+> (verdict Playwright local vert sur ce SHA à 11 h 51, Cowork fermé ; hook pré-push : Vitest vert, verdict à jour). La marche du bloc de 11 h 20
+> ci-dessous est consommée jusqu'à (4) ; reste (5) : la porte `plans de travail/PORTES-TERRAIN-2026-09-12-accueil.md` — relevé partiel de Cowork
+> à 11 h 38 depuis le clone (1-4 passées ; 5, 6, 7 et les décisions 3.1-3.2 dues sur le site) — et son artefact. La relecture du lot E par
+> Cowork n'a pas été vue avant le push : à faire à froid. Le lot 5 du cadrage 11 reste en pause.**
 > ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 11 h 20 (Toronto) : les cinq lots sont sur `main` local et `1.138.0` est
 > RELEASÉE — `a0ed0929` (build 0912-1116), après `e011ed64` (A-C), `62f24316` (D), `e239787f` (E) et les relais ; RIEN N'EST POUSSÉ. Vitest
 > 550 / 6 020 après le commit du bump. Marche restante : (1) relecture croisée de Cowork sur `e239787f` (A-D relus à 11 h 08) ; (2) corrections
