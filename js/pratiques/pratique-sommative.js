@@ -290,7 +290,7 @@ class PratiqueSommative {
         // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Fonction helper pour obtenir dateEcheance
         // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
         const infoCoursSom = db.getSync('infoCours', null);
-        const gcIdSom = infoCoursSom ? (infoCoursSom._groupeCoursId || infoCoursSom.id || null) : null;
+        const gcIdSom = obtenirIdContexteActif(infoCoursSom);
         const obtenirDateEcheance = (evaluation) => {
             const production = productions.find(p => p.id === evaluation.productionId);
             if (!production) {

@@ -93,7 +93,7 @@ function calculerImpactJetons() {
                 var infoCours = (window.LaboCodexData && typeof window.LaboCodexData.lireInfoCours === 'function')
                     ? window.LaboCodexData.lireInfoCours()
                     : db.getSync('infoCours', null);
-                var gcId = infoCours ? (infoCours._groupeCoursId || infoCours.id || null) : null;
+                var gcId = obtenirIdContexteActif(infoCours);
                 dateEcheance = obtenirEcheanceEffective(prod, gcId).date || '';
             } else {
                 dateEcheance = prod.dateEcheance || '';
@@ -224,7 +224,7 @@ function genererPSansReprises(da, snapshots, donneesP) {
         if (prod) {
             if (typeof obtenirEcheanceEffective === 'function') {
                 var infoCours = db.getSync('infoCours', null);
-                var gcId = infoCours ? (infoCours._groupeCoursId || infoCours.id || null) : null;
+                var gcId = obtenirIdContexteActif(infoCours);
                 dateEcheance = obtenirEcheanceEffective(prod, gcId).date || '';
             } else {
                 dateEcheance = prod.dateEcheance || '';

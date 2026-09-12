@@ -94,6 +94,26 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
     // (sentinelle #344 : capturer le innerHTML injecté par le rendu).
     // Idem pour `localStorage` (sentinelle #374 : la migration de fusion
     // énumère les clés via key(i)/length, absents du stub par défaut).
+    // #834 lot E (cadrage « Rencontres », 12 sept. 2026) — `obtenirIdContexteActif` (modes.js) a
+    // remplacé l'expression `infoCours._groupeCoursId || infoCours.id || null` recopiée dans
+    // dix-neuf sites (échéances, captures, exports, production diagnostique, pratiques…). Les
+    // harnais qui montent ces modules SANS modes.js recevaient un ReferenceError là où, avant,
+    // l'expression vivait dans le module. Même règle que `auDbPret` ci-dessus : un défaut
+    // fidèle à l'application, fourni seulement quand le harnais n'en donne pas un. Il lit
+    // `infoCours` par le `db` du harnais, comme la vraie fonction.
+    if (typeof globaux.obtenirIdContexteActif !== 'function') {
+        const dbHarnais = globaux.db;
+        globaux = Object.assign({}, globaux, {
+            obtenirIdContexteActif: function (infoCours) {
+                const info = (infoCours === undefined)
+                    ? (dbHarnais && typeof dbHarnais.getSync === 'function' ? dbHarnais.getSync('infoCours', null) : null)
+                    : infoCours;
+                if (!info) return null;
+                return info._groupeCoursId || info.id || null;
+            }
+        });
+    }
+
     const { document: documentOverride, localStorage: localStorageOverride, ...autresGlobaux } = globaux;
     const noms = ['window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(autresGlobaux)];
     const valeurs = [fauxWindow, documentOverride || fauxDocument, console, localStorageOverride || fauxStorage(), fauxStorage(), ...Object.values(autresGlobaux)];

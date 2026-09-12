@@ -1828,7 +1828,7 @@ function depistagePeutJugerLaNonParticipation() {
     const productions = obtenirDonneesSelonMode('productions') || [];
     const aujourdhui = (typeof window.dateLocaleYMD === 'function') ? window.dateLocaleYMD() : new Date().toISOString().slice(0, 10);
     const infoCours = db.getSync('infoCours', null);
-    const groupeCoursId = infoCours ? (infoCours._groupeCoursId || infoCours.id || null) : null;
+    const groupeCoursId = obtenirIdContexteActif(infoCours);
     // #790, PORTE 4 — LA PLUS FACILE À OUBLIER, ET CELLE QUI ANNULE LES TROIS AUTRES.
     // En première semaine, la production diagnostique remplit à elle seule les DEUX
     // conditions ci-dessous dès que l'enseignant a corrigé une première copie : elle

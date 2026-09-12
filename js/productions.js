@@ -1737,7 +1737,7 @@ function lireDonneesFormulaireProduction() {
     if (echeancesParGroupe) {
         // Synchroniser dateEcheance legacy avec la date du groupe actif
         const infoCoursActif = db.getSync('infoCours', null);
-        const gcActifId = infoCoursActif ? (infoCoursActif._groupeCoursId || infoCoursActif.id || null) : null;
+        const gcActifId = obtenirIdContexteActif(infoCoursActif);
         const entreeActive = gcActifId ? echeancesParGroupe[gcActifId] : null;
         dateEcheance = (entreeActive && entreeActive.date) ? entreeActive.date : null;
         // Si aucun groupe actif trouvé, prendre la première date assignée

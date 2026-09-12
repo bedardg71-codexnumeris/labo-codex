@@ -7732,7 +7732,7 @@ function chargerProductions() {
         return visibles.map(function(p) {
             // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
             var infoC = db.getSync('infoCours', null);
-            var gcPlanif = infoC ? (infoC._groupeCoursId || infoC.id || null) : null;
+            var gcPlanif = obtenirIdContexteActif(infoC);
             var dateEch = (typeof obtenirEcheanceEffective === 'function')
                 ? obtenirEcheanceEffective(p, gcPlanif).date : p.dateEcheance;
             // ⚠ `titre`, PAS `nom` (25 août 2026). Le modèle de production porte
@@ -7981,7 +7981,7 @@ function afficherDetailsProduction(productionId, productions) {
     } catch(e) { console.warn('[Planif-Carte] grille/echelle lookup skipped:', e.message || e); }
     // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
     var infoCDet = db.getSync('infoCours', null);
-    var gcDetPlanif = infoCDet ? (infoCDet._groupeCoursId || infoCDet.id || null) : null;
+    var gcDetPlanif = obtenirIdContexteActif(infoCDet);
     var dateEchDet = (typeof obtenirEcheanceEffective === 'function')
         ? obtenirEcheanceEffective(prod, gcDetPlanif).date : (prod.dateEcheance || null);
     return { nomProduction: prod.titre, ponderation: prod.ponderation, nomGrille: nomGrille, nomEchelle: nomEchelle, dateEcheance: dateEchDet };

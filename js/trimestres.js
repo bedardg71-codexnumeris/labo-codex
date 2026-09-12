@@ -2451,7 +2451,7 @@
         // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
         if (typeof obtenirEcheanceEffective === 'function') {
             const infoC = db.getSync('infoCours', null);
-            const gcId = infoC ? (infoC._groupeCoursId || infoC.id || null) : null;
+            const gcId = obtenirIdContexteActif(infoC);
             return obtenirEcheanceEffective(prod, gcId).date;
         }
         return prod.dateEcheance || null;
