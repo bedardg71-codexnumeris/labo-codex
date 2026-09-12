@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.135',
+            couleur: 'vert',
+            titre: 'Rencontres : un service est un cours, un sous-onglet pour tenir ses rencontres, une intervention qui sait où elle est née',
+            items: [
+                '<strong>Un sous-onglet «&nbsp;Rencontres&nbsp;» dans Suivi, pour un service.</strong> Quand le contexte actif est un service (un cours de nature «&nbsp;Service&nbsp;», voir ci-dessous), tu y tiens tes rencontres individuelles ou en sous-groupe&nbsp;: date, heure, participants, notes par élève, bilan. Sur un groupe-cours ordinaire, le sous-onglet ne liste rien&nbsp;: il offre seulement de créer un service, ou d\'activer celui qui existe déjà dans le trimestre&nbsp;; tes interventions restent sous «&nbsp;Interventions&nbsp;», qui ne change pas. Sur un poste sans trimestre, trois questions suffisent&nbsp;: les dates, le nom de ton service, ta liste d\'élèves&nbsp;; l\'application crée le reste, visible dans Cadre.',
+                '<strong>Un cours peut être un «&nbsp;Service&nbsp;».</strong> Dans Cadre › Cours, le choix «&nbsp;Nature&nbsp;: Cours / Service&nbsp;»&nbsp;: un service n\'a ni code, ni discipline, ni compétence — seul son nom est requis — et son groupe-cours peut n\'avoir aucun horaire&nbsp;; la présence se note dans la rencontre.',
+                '<strong>Une intervention sait dans quel groupe-cours elle est née.</strong> La liste des interventions d\'un groupe-cours ne mêle plus celles d\'un autre groupe du même cours&nbsp;; en mode cours (tous les groupes), tu les vois toutes. Celles d\'avant restent visibles partout et prennent leur contexte au prochain Enregistrer.',
+            ]
+        },
+        {
             version: '1.134',
             couleur: 'vert',
             titre: 'Profil d\'un élève : un seul rendu à l\'ouverture, des graphiques qui lisent l\'échelle de chaque évaluation',
