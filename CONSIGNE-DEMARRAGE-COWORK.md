@@ -1,3 +1,30 @@
+> ▣ **NOTE DU 12 SEPTEMBRE, 9 h 25 (Claude Code, exécution de ta consigne du jour « la section Cours du Cadre », 8 h 55).**
+> **Lots A (#841) et B (#842) livrés** en un commit de code sur `main` local — **ni releasé, ni poussé** : ta consigne (§ 6) veut la release
+> `minor` `1.137.0` APRÈS ta relecture croisée, et un push déploie. **À toi** : relire `git show 7b4beac2` — `js/mots-nature.js`
+> (les nouvelles clés : choisirPersonne/GC, choisirObjet/GC, aucunObjet, nouveau/modifier/dupliquer, elementsObligatoires ×3, horaireFacultatif,
+> et `motsNatureContexteActif()`) ; `trimestre-v2-enseignants.js:115` ; `trimestre-v2.js:277, 342` ; `trimestre-v2-cours.js` (`_titrerFormCoursV2`,
+> `modeFormCoursV2`, `_afficherBandeauEdition(cours)`, `afficherSyntheseCours(null)`, `chargerDropdownCoursV2`) ; `trimestre-v2-orchestre.js`
+> (`appliquerMotsNatureCadre` : table des quatre options vides ; **`peuplerDropdownEnseignants` RETIRÉE — elle n'avait aucun appelant**, ni js/ ni
+> index.html : c'est pourquoi le bon mot qu'elle posait n'arrivait jamais à l'écran) ; `accompagnement-contenu-hover.js:78` ; `index.html` (titre
+> « Cours et services », `data-mot-nature` sur 9 éléments neufs, `v2-bandeauObjet`, jetons 20260912d ×7) ; la sentinelle
+> `sentinelle-section-cours-suit-la-nature-842` (17 essais, journal de 11 break-tests) ; #306 (ancre déplacée) ; les étiquettes (C adapté, comptes).
+> Puis la session Claude Code suivante fait `node scripts/release.mjs minor`, commit, Vitest, verdict Playwright (toi fermé), `scripts/pousser.sh`.
+> Le changelog est écrit (entrée 1.137, deux items). **Puis l'artefact jumeau** de `plans de travail/PORTES-TERRAIN-2026-09-12-section-cours.md`
+> (cinq rangées, trois décisions au § 3 avec champ de saisie, bouton « Copier mes résultats »).
+> ⚠ **Ce que la mesure a corrigé de ta consigne** : (1) la fonction de l'orchestre est morte, voir ci-dessus ; (2) `v2-gc-enseignant` est peuplé par
+> `trimestre-v2.js:340`, avec un TROISIÈME libellé « — Choisir un enseignant — » (ton grep n'avait mesuré que le premier) ; (3) la liste de B2
+> manquait le fil d'Ariane « Cours », « Cours : », « — Choisir un cours — » (champ 2 du groupe-cours) et TROIS autres « 5 éléments obligatoires »
+> dans l'accordéon Groupe-cours (état vide, liste, formulaire) — quatre sites, pas un. **B3 tranché** : la sentinelle #306 verrouille la mécanique
+> Créer/Enregistrer du BOUTON ; les titres n'étaient que l'ancre de sa regex → ancre déplacée sur `_titrerFormCoursV2('nouveau'/'modifier')`,
+> break-test « Ajouter » rouge ; « Modifier/Dupliquer le service » livrés. **B4** : livré « Cours et services » (ta recommandation), à corriger par lui.
+> ⛔ **Laissé exprès, inscrit #843** : « + Nouveau cours » et « … crée un nouveau cours » — lié au DÉFAUT du menu Nature (« Enseignement ») ;
+> faire suivre le défaut est un comportement (ta consigne § 5). Décision de Grégoire (porte § 3.2).
+> ⚠ **Hors service, deux mots changent quand même** (nommés dans la porte, rangée 4) : le titre, et « Sélectionner un enseignant·e » à la place de
+> « — Sélectionner — » (le point unique le portait depuis 1.136.0 ; c'est la fonction morte qui l'empêchait d'arriver).
+> **Le relevé de la porte des étiquettes est inscrit** dans son markdown (11/12, rangée 5 → #841 ; 3.1 tel quel, 3.4 → #842 ; **3.2 et 3.3 : je n'ai
+> trouvé ta réponse nulle part — notées comme un silence**, corrige si tu les as). `BACKLOG.md` commité par moi (il portait tes #839-#842, qui
+> décrivent ce lot, plus #841/#842 livrés et #843) ; `CONSIGNE-DU-JOUR.md` et ses archives : non commités, à Grégoire.
+
 > ✅ **MISE À JOUR 8 h 25 : 1.136.0 releasée (`2c84a34a`) et POUSSÉE** après ta relecture croisée ; tes fichiers (BACKLOG, PROTOCOLE,
 > CONSIGNE-DU-JOUR, archive) commités à la demande de Grégoire (`9e15ddb8`). Reste à toi : **l'artefact jumeau de la porte**
 > `plans de travail/PORTES-TERRAIN-2026-09-12-etiquettes.md` (dix rangées, § 3 à quatre champs de saisie). Tes brouillons

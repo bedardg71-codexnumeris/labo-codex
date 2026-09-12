@@ -1,7 +1,9 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
-> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 8 h 05 (Toronto), à la clôture du lot « les étiquettes »
-> (commit `fa27b531`, release `1.136.0` due après la relecture croisée de Cowork).** Voir le premier bloc « ÉTAT MESURÉ » ci-dessous.
+> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 9 h 25 (Toronto), à la clôture du lot « la section Cours du Cadre »
+> (#841 / #842, commit `7b4beac2` sur `main` local, release `1.137.0` due après la relecture croisée de Cowork).** Voir le premier bloc « ÉTAT MESURÉ » ci-dessous.
+> Version précédente : **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 8 h 05 (Toronto), à la clôture du lot « les étiquettes »
+> (commit `fa27b531`, release `1.136.0` releasée `2c84a34a` et poussée à 8 h 20).**
 > Version précédente : **ÉTAT MESURÉ remesuré par Claude Code le 11 septembre 2026 à 22 h 10 (Toronto), à la clôture du chantier
 > « Rencontres » (lots 1 et 2 du cadrage « l'orthopédagogue entre par Suivi »), NON RELEASÉ, NON POUSSÉ — exprès.** Le MANDAT
 > ci-dessous (Cowork, 17 h 08, cadrage 11) est **en pause** par décision de Grégoire (11 sept., 20 h, dans la consigne du jour) :
@@ -39,6 +41,30 @@
 >
 > ⚠ **Nom sans date, exprès.** La date d'écriture est en tête ; c'est elle qui fait foi.
 > ⛔ **Ce fichier ne porte que ce qui PÉRIME** : l'état mesuré, le mandat, ce qui est dû.
+
+---
+
+## ÉTAT MESURÉ — 12 SEPTEMBRE 2026, 9 h 25 (TORONTO, `TZ=America/Toronto date`)
+
+▣ **Remesuré par Claude Code après l'exécution de la consigne du jour de Cowork (8 h 55) — « la section Cours du Cadre », lots A (#841) et B (#842).**
+
+- **Version `1.136.0`, INCHANGÉE** — le lot est commité sur `main` local (`7b4beac2` : code + sentinelle + changelog 1.137 + jetons `?v=` 20260912d ×7), **ni releasé
+  ni poussé** : la consigne (§ 6) veut la release `minor` `1.137.0` APRÈS la relecture croisée de Cowork, et un push déploie.
+- **CE QUE LA PROCHAINE SESSION FAIT D'ABORD** : (1) lire la relecture de Cowork (`CONSIGNE-DEMARRAGE-COWORK.md`, note du 12, 9 h 25) et reprendre
+  ses points s'il y en a ; (2) `node scripts/release.mjs minor` (intention : des mots visibles chez tous) ; (3) commit ; (4) Vitest depuis `tests/`
+  (après le commit du bump — la sentinelle anti-cache rougit à tort sur un bump non commité) ; (5) verdict Playwright **Cowork fermé** (PROTOCOLE
+  règle 8) ; (6) `scripts/pousser.sh` ; (7) la porte `plans de travail/PORTES-TERRAIN-2026-09-12-section-cours.md` (cinq rangées, trois
+  décisions) et son artefact jumeau par Cowork.
+- **Vitest : 546 fichiers / 5 976 essais, 0 échec** sur le code final (le lint innerHTML F.15 a rougi une fois — deux constantes concaténées
+  dans `innerHTML` — repassé au vert par `echapperHtml` sur la constante). Break-tests : 11 mutations, 11 rouges, remises vérifiées par empreinte.
+- **Harnais pack démo** rebâti (jetable, scratchpad) : 411 feuilles AVANT/APRÈS, zéro valeur ne bouge, Suivi identique hors service.
+- **Ce que la mesure a corrigé de la consigne** : `peuplerDropdownEnseignants` (orchestre) était MORTE (zéro appelant) — retirée ; `v2-gc-enseignant`
+  est peuplé par `trimestre-v2.js` avec un troisième libellé ; quatre « 5 éléments obligatoires » dans l'accordéon Groupe-cours, pas un.
+- **Ce qui remonte à Grégoire** (porte § 3) : le mot du titre (« Cours et services » livré, il avait dit « cours/service ») ; **#843** — le défaut du
+  menu Nature d'un formulaire neuf suit-il le contexte actif ? (sinon « + Nouveau cours » reste) ; les mots neufs du lot.
+- **Arbre** : `BACKLOG.md` commité par cette session (il porte #841 → livré, #842 → livré, #843, et les entrées #839-#842 de Cowork qui
+  décrivent ce lot) ; `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 8 h 50) et ses deux archives `_ancienne-*` **non commités** — à Grégoire ;
+  `Formation/*.html`, `docs/orthopedagogie/*` non suivis ; la capture du 9 sept. supprimée non commise.
 
 ---
 

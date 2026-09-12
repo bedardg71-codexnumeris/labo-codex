@@ -7,6 +7,15 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 9 H 25 (Toronto) : « LA SECTION COURS DU CADRE » (#841 / #842) COMMITÉ SUR `main` LOCAL, RELEASE 1.137.0 DUE APRÈS LA RELECTURE DE COWORK
+
+> **Le travail le plus récent est sur `main` LOCAL, deux commits devant `origin/main` (`e8374bc6` = relais de 1.136.0, en ligne), rien de poussé — exprès** (consigne du 12 sept., 8 h 55, § 6 : une seule livraison `minor` après la relecture croisée de Cowork ; un push déploie).
+> **Livré** (`7b4beac2`) : #841 — les trois reconstructions de menus de personne et de cours lisent `motsNatureContexteActif()` (js/mots-nature.js) au moment de construire, la fonction MORTE `peuplerDropdownEnseignants` (orchestre) retirée, verrou structurel étendu ; #842 — titre proposé « Cours et services », titres du formulaire et bandeau suivent la FICHE (`_titrerFormCoursV2`), synthèse/menus/fil d'Ariane suivent le CONTEXTE, la phrase des éléments obligatoires dit 4 éléments et l'horaire facultatif sur un service (quatre sites), infobulle du groupe-cours ; sentinelle `sentinelle-section-cours-suit-la-nature-842` (17 essais, 11 break-tests rouges) ; #306 et les étiquettes adaptées ; changelog 1.137 ; jetons 20260912d ×7. **Aucune valeur en base ne change.** Version inchangée : 1.136.0. Vitest 546 / 5 976.
+> **Marche à suivre** : `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`, premier bloc « ÉTAT MESURÉ » (relecture → `release.mjs minor` → commit → Vitest → verdict Playwright Cowork fermé → `scripts/pousser.sh` → porte `plans de travail/PORTES-TERRAIN-2026-09-12-section-cours.md` + artefact par Cowork).
+> **Ce qui attend Grégoire** (porte § 3) : le mot du titre (« Cours et services » livré) ; **#843** — le défaut du menu Nature suit-il le contexte (sinon « + Nouveau cours » reste) ; les mots neufs. **Reste aussi** : le relevé de la porte des étiquettes est inscrit (3.2 et 3.3 notées comme un silence) ; `CONSIGNE-DU-JOUR.md` + archives (Cowork) non commités ; le lot 5 du cadrage 11 en pause.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 8 H 25 (Toronto) : « LES ÉTIQUETTES » RELEASÉ EN 1.136.0 (`2c84a34a`) ET POUSSÉ PAR `scripts/pousser.sh` APRÈS LE VERDICT
 
 > ✅ **Tout est sur `main` = `origin/main` (`2c84a34a`, 1.136.0, build 0912-0813, en ligne)** : code `fa27b531`, relais `39706b47`, fichiers de Cowork `9e15ddb8` (BACKLOG #839/#840, PROTOCOLE règle 8, CONSIGNE-DU-JOUR + archive), release `2c84a34a`. Relecture croisée de Cowork passée ; Playwright : 0 rougeur nouvelle (une spec instable connue, verte au second essai) ; Vitest 545 / 5 959. **Reste** : la porte `plans de travail/PORTES-TERRAIN-2026-09-12-etiquettes.md` (dix rangées, quatre décisions au § 3 — dont la ligne de `js/config.js` à autoriser) et son artefact jumeau par Cowork. Le bloc du dessous (8 h 05) décrit l'état d'avant la release.
