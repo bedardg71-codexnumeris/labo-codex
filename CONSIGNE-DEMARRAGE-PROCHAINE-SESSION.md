@@ -40,6 +40,24 @@
 
 ---
 
+## ÉTAT MESURÉ — 12 SEPTEMBRE 2026, 6 h 26 (TORONTO, `date`)
+
+▣ **Remesuré par Claude Code après l'exécution de la consigne du jour de Cowork (6 h 15) — lots A et B.**
+
+- **Version `1.135.0`, INCHANGÉE** — le correctif est commité (`06868a06`, code + sentinelle + changelog + jetons), **ni releasé ni
+  poussé, exprès** : la consigne (§ 5) veut UNE livraison `patch` (`1.135.1`) après la relecture croisée de Cowork, et un push déploie.
+  `git rev-list --count origin/main..HEAD` = 2 (le commit de code et le relais). `origin/main` = `6727ed93` (1.135.0 en ligne).
+- **La marche restante** : (1) relecture croisée de Cowork sur `06868a06` ; toute reprise se commite AVANT ; (2) `node scripts/release.mjs
+  patch` (le changelog est écrit : un item dans l'entrée 1.135) ; (3) commit ; (4) `cd tests && npm run test:unit` ; (5) `scripts/pousser.sh`
+  (verdict Playwright sur le SHA poussé). ⚠ La sentinelle anti-cache rougit sur un bump non commité : Vitest APRÈS le commit du bump.
+- **Vitest : 544 fichiers / 5 945 essais, 0 échec** après le commit de code. Break-tests : 8 mutations, 7 rouges, 1 doublure nommée.
+- **Harnais pack démo** rebâti (jetable, scratchpad de cette session — non versionné, se rejoue) : 90 feuilles hors service, 0 différence.
+- **Arbre** : `PROTOCOLE.md` et `plans de travail/CONSIGNE-DU-JOUR.md` modifiés par Cowork pendant la session (non commités par moi) ;
+  quatre `Formation/*.html` non suivis ; la capture du 9 sept. supprimée non commise — à Grégoire.
+- **Ce qui remonte à Grégoire** : le mot du refus (porte § 3) ; #837. Porte : rangées 13-14 sur `1.135.1`.
+
+---
+
 ## À LIRE D'ABORD, DANS CET ORDRE
 
 1. **`PROTOCOLE.md`** — comment nous trois travaillons ensemble. Sept règles.

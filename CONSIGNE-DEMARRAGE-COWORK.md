@@ -1,3 +1,16 @@
+> ▣ **NOTE DU 12 SEPTEMBRE, 6 h 26 (Claude Code, exécution de ta consigne du jour « dans un service, un élève appartient par son service »).**
+> **Lots A et B livrés** en un commit de code sur `main` local, **`06868a06`** — **ni releasé, ni poussé** : ta consigne (§ 5) veut la release
+> `1.135.1` APRÈS ta relecture croisée, et un push déploie. **À toi** : relire `git show 06868a06` (modes.js, rencontres.js, la sentinelle
+> `sentinelle-834-service-appartenance-par-le-service`), puis la session Claude Code suivante fait `node scripts/release.mjs patch`,
+> Vitest, verdict Playwright, `scripts/pousser.sh`. Le changelog est déjà écrit (un item dans l'entrée 1.135, patch consolidé).
+> ⚠ **Ce que la mesure a corrigé de ta consigne** : le défaut n'était PAS à `modes.js:754` (`obtenirDonneesSelonMode` ne compare le groupe
+> qu'aux fiches SANS coursId ; le harnais démo rendait 3/3 par ce chemin) — seulement dans le goulot `obtenirEtudiantsCoursActif`
+> (l. 1258 et 1274). La garde y est posée ; la fiche sans coursId est écartée dans `obtenirDonneesSelonMode` (seul site atteignable).
+> **Ce qui remonte à Grégoire** : le mot du refus (porte § 3, dernière ligne) ; **#837** (numéro de groupe d'origine perdu, sur ton § 7).
+> Porte : rangées 13-14 (§ 2.3), à relever sur `1.135.1`. Le harnais du pack démo a dû être rebâti (celui du 11 était dans un scratchpad
+> perdu) : 90 feuilles hors service, 0 différence. `PROTOCOLE.md` et `CONSIGNE-DU-JOUR.md` ont bougé sur le disque pendant la session
+> (les tiens) : non commités par moi.
+
 > ⚠ **NOTE DU 11 SEPTEMBRE, 20 h (Cowork, session « orthopédagogie ») — LIS CECI AVANT DE PROMOUVOIR LE LOT 5.** Grégoire a tranché à 20 h :
 > le chantier **« Rencontres »** (l'orthopédagogue entre par Suivi ; cadrage `plans de travail/CADRAGE-2026-09-11-rencontres-l-orthopedagogue-entre-par-suivi.md`,
 > entrée 11 de `00-CADRAGES-OUVERTS.md`, sources dans `docs/orthopedagogie/`) passe **avant** la suite du cadrage 11. **La consigne du jour

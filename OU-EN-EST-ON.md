@@ -15,6 +15,23 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+🔧 **À LIVRER EN 1.135.1 (12 SEPTEMBRE 2026, 6 h 26) — DANS UN SERVICE, UN ÉLÈVE APPARTIENT PAR SON SERVICE, PAS PAR UN NUMÉRO DE GROUPE** (consigne du jour de Cowork, lots A et B ; commit `06868a06` sur `main` local, ni releasé ni poussé : la release attend la relecture croisée de Cowork).
+**Ce que tu verras** : dans un service, `Suivi › Liste des étudiant·es` montre **tous** les élèves saisis, y compris ceux dont la
+ligne collée d'Omnivox portait le numéro de groupe du collège (ta rangée 9 de ce matin : trois saisis, deux affichés) — corrigé à la
+lecture, **rien n'est réécrit chez toi**, l'élève réapparaît (la colonne « Groupe » de sa fiche garde son « 00007 » ; une fiche créée
+après ce correctif porte « 00001 », le seul groupe d'un service). Et si tu colles plusieurs élèves sur une seule ligne, elle est
+**refusée et nommée** (« Une ligne n'a pas pu être lue — Ligne 1 (« … ») : ne commence pas par un numéro de DA. Une ligne par
+élève… ») au lieu de fabriquer un élève fantôme : le service se crée avec les lignes valides, ou pas du tout. Sur tes deux groupes
+réels : rien ne bouge.
+**Vérifié comment** : une sentinelle de 13 essais (service à groupes hétérogènes rendu 3/3 par les deux sites ; groupe-cours ordinaire à
+deux groupes et mode cours aux valeurs de 1.135.0 figées ; service et cours étanches ; groupe écrit ; refus nommé), huit fois cassée
+exprès, sept rouges — la huitième (0 rouge) est une doublure d'écriture demandée par la consigne, nommée dans le journal ; une garde
+« sans coursId » posée en plus dans le goulot rendait 0 rouge : inatteignable, retirée. Le harnais du pack démo rebâti (jetable) :
+90 feuilles hors service AVANT/APRÈS, **0 différence** ; dans le service, 2/3 → 3/3 et les groupes écrits « 00001 ». Vitest 544 fichiers
+/ 5 945 essais après le commit. ⚠ **Ce que la mesure a corrigé de la consigne** : le défaut n'était PAS dans `obtenirDonneesSelonMode`
+(il ne compare le groupe qu'aux fiches sans coursId ; le harnais rendait 3/3 par ce chemin) — seulement dans le goulot
+`obtenirEtudiantsCoursActif`. **Pas vérifié** : ton écran (porte, rangées 13 et 14), le mot du refus (porte § 3), Safari.
+
 ✅ **FAIT EN 1.135.0 (11 SEPTEMBRE 2026, 21 H 50) — « RENCONTRES » : UN SERVICE EST UN COURS, UN GROUPE-COURS SANS HORAIRE, LE SOUS-ONGLET SUIVI › RENCONTRES, UNE INTERVENTION QUI SAIT OÙ ELLE EST NÉE** (lots 1 et 2 du cadrage « l'orthopédagogue entre par Suivi »). ⚠ **Mesuré à la reprise : les quatre commits de code étaient DÉJÀ sur `origin/main` depuis 21 h 36** (reflog « update by push »), donc en ligne sous `1.134.0` sans changelog, contrairement à ce que disaient les trois relais (« non poussés exprès ») — la release 1.135.0 répare ce trou et emporte les **deux reprises de la relecture croisée de Cowork** : (1) une intervention née en mode cours (tous les groupes) est vue depuis chaque groupe de ce cours, et l'inverse — sans ça, changer de mode la faisait disparaître ; (2) **tranché par toi : « Rencontres » ne liste que les services** — sur un groupe-cours ordinaire, plus de liste à deux vocabulaires, seulement la porte « Créer un service » et, s'il existe déjà un service dans le trimestre, le lien pour l'activer ; « Interventions » ne change pas ; la fusion se rejuge après le mois d'usage.
 **Ce que tu verras** : dans `Suivi`, un sous-onglet **« Rencontres »** entre « Interventions » et « Animation ». Sur un poste sans
 trimestre (celui de l'orthopédagogue lundi), il pose **trois questions** sur un seul écran — les dates du trimestre, le nom du
