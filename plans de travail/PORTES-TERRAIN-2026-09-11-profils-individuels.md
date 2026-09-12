@@ -8,6 +8,16 @@
 > anonymisé qui écrit enfin `services_adaptes` d'après la liste) n'a **aucune porte** : invisible, mesuré par la sentinelle.
 >
 > **Ce qui échoue ici devient un item de backlog, avec son numéro de porte.** Jamais une note mentale.
+>
+> ✅ **RELEVÉE le 12 septembre 2026 à 12 h 49 (Toronto) — 10 sur 10, zéro échec**, version `1.138.0` lue en bas de page
+> (la porte était écrite sur `1.134.0` ; les quatre versions livrées depuis portaient sur l'orthopédagogie). Artefact
+> « Porte terrain des Profils individuels » publié par Cowork à 12 h 40, à la demande de Grégoire (« je ne me souviens
+> pas d'avoir passé la porte du lot 4 ») ; relevé collé dans la conversation Cowork. **Rangée 7 close à 12 h 58 sur
+> capture d'écran** : le bloc « Portrait de lecteur » absent, et Parcours, Défis particuliers, Diagnostic (« Services
+> adaptés » grisée, suivie de « (d'après la liste des étudiant·es) »), Notes personnelles et Notes de présences tous
+> présents — dans ses mots, *« oui, tout est là »*. Il avait d'abord noté la rangée non traitée, le bloc ayant été
+> retiré « dans une séance antérieure » : c'est la livraison de 1.134.0 elle-même, le 11 au soir. Les deux mots du § 3 :
+> **tel quel**, aucun verdict écrit. Noté par Cowork à 13 h.
 
 **Pourquoi cette liste est courte.** Huit rangées, fixées par la consigne. Chaque brique est prouvée au banc (onze essais, quatre fois
 cassés exprès, quatre rouges), le nombre de rendus est compté dans un vrai navigateur (WebKit, `index.html` réel : un rendu par six
@@ -98,13 +108,19 @@ personnelle. »*
 
 | Rangée | ✅ / ❌ | Note |
 |---|---|---|
-| 1 | | |
-| 2 | | |
-| 3 | | |
-| 4 | | |
-| 5 | | |
-| 6 | | |
-| 7 | | |
-| 8 | | |
+| 0.1 | ✅ | |
+| 0.2 | ✅ | version lue : `1.138` |
+| 1 | ✅ | |
+| 2 | ✅ | |
+| 3 | ✅ | aucun critère en points signalé |
+| 4 | ✅ | |
+| 5 | ✅ | |
+| 6 | ✅ | |
+| 7 | ✅ | bloc « Portrait de lecteur » absent ; Parcours, Défis, Diagnostic, Notes personnelles et Notes de présences intacts (capture, 12 h 58) |
+| 8 | ✅ | |
 
-**Relevée le** : _______ · **Version lue en bas de page** : _______ · **Échecs → BACKLOG** : _______
+**Relevée le** : 12 septembre 2026, 12 h 49 (Toronto), rangée 7 close à 12 h 58 · **Version lue en bas de page** : `1.138.0` · **Échecs → BACKLOG** : aucun
+
+**§ 3 · Les deux mots** : tel quel (silence), les deux.
+
+⮕ **Porte close, 10 sur 10.** Rien n'en sort vers le BACKLOG.
