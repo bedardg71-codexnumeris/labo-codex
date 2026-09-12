@@ -16,6 +16,10 @@
  * ✅ BETA 95.2 : Support groupe-cours entities + fallback legacy
  */
 function mettreAJourContexteEntete() {
+    // Consigne du 12 sept. 2026 (les étiquettes) : les mots du Cadre qui nomment la personne
+    // suivent la nature du contexte actif, au même rythme que l'en-tête — au démarrage
+    // (initialiserModuleContexte) et à chaque activation (orchestre, changerCoursActif).
+    if (typeof appliquerMotsNatureCadre === 'function') appliquerMotsNatureCadre();
     const elDate = document.getElementById('entete-date');
     if (!elDate) return;
 

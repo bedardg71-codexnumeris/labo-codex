@@ -295,7 +295,7 @@ async function ouvrirModalBibliothequeCours() {
         coursDansBibliotheque.forEach(cours => {
             const actifBadge = cours.actif ? '<span class="badge-info" style="margin-left: 10px;">Actif</span>' : '';
             const titre = (cours.nature === 'service'
-                ? echapperHtml(cours.nomCours) + ' - Service'
+                ? echapperHtml(cours.nomCours) + ' - ' + motNature(cours) // le mot vient du point unique (js/mots-nature.js, 12 sept. 2026)
                 : echapperHtml(cours.codeCours) + ' - ' + echapperHtml(cours.nomCours)) + actifBadge;
             const ens = (echapperHtml(cours.prenomEnseignant || '') + ' ' + echapperHtml(cours.nomEnseignant || '')).trim();
             const sess = echapperHtml((cours.session || '') + (cours.annee || ''));
@@ -333,7 +333,7 @@ async function ouvrirModalBibliothequeCours() {
     } else {
         coursDisponibles.forEach(cours => {
             const titre = cours.nature === 'service'
-                ? echapperHtml(cours.nomCours) + ' - Service'
+                ? echapperHtml(cours.nomCours) + ' - ' + motNature(cours) // le mot vient du point unique (js/mots-nature.js, 12 sept. 2026)
                 : echapperHtml(cours.codeCours) + ' - ' + echapperHtml(cours.nomCours);
             const sess = echapperHtml((cours.session || '') + (cours.annee || ''));
             contenuSection2 += BibliothequeUI.renderCarteDisponible({

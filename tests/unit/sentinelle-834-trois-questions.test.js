@@ -117,7 +117,7 @@ describe('#834 lot C · « Créer mon service » sur un poste vide', () => {
         expect(gc.enseignantId).toBe('ENS1');
         expect(gc.trimestreId).toBe('a2026');
         expect(b.appels.activations).toEqual([gc.id]);
-        expect(b.appels.notifs.some(x => x.type === 'succes' && /Service créé/.test(x.t) && /1 déjà présent/.test(x.m))).toBe(true);
+        expect(b.appels.notifs.some(x => x.type === 'succes' && /Service d’orthopédagogie créé/.test(x.t) && /1 déjà présent/.test(x.m))).toBe(true);
     });
     it('en DÉMONSTRATION : le service (clé globale `cours`) est marqué pour être retiré à la désactivation ; hors démo, aucun marqueur', async () => {
         const v = { 'rencontres-nomService': 'Aide', 'rencontres-eleves': 'Léa Tremblay' };
