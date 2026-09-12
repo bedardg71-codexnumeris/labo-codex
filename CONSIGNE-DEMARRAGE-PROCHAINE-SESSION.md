@@ -1,5 +1,12 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 11 h 20 (Toronto) : les cinq lots sont sur `main` local et `1.138.0` est
+> RELEASÉE — `a0ed0929` (build 0912-1116), après `e011ed64` (A-C), `62f24316` (D), `e239787f` (E) et les relais ; RIEN N'EST POUSSÉ. Vitest
+> 550 / 6 020 après le commit du bump. Marche restante : (1) relecture croisée de Cowork sur `e239787f` (A-D relus à 11 h 08) ; (2) corrections
+> éventuelles (elles périment le bump : re-lancer `release.mjs --build-only` si du code change) ; (3) verdict Playwright **Cowork fermé**
+> (`cd tests && node ../scripts/verifier-playwright.mjs`, règle 8) sur le SHA exact à pousser ; (4) `scripts/pousser.sh` ; (5) porte
+> `plans de travail/PORTES-TERRAIN-2026-09-12-accueil.md` (sept rangées) + artefact jumeau par Cowork. Les blocs ci-dessous décrivent les
+> états intermédiaires.**
 > ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 11 h (Toronto) : la révision de 10 h 50 (lot D, « Tes prochains
 > rendez-vous ») est exécutée à son tour — commit `62f24316`, même livraison. La relecture de Cowork porte sur `e011ed64` ET `62f24316` ;
 > la porte a six rangées. Le reste du bloc ci-dessous vaut tel quel.**

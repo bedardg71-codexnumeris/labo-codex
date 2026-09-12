@@ -7,6 +7,12 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 11 H 20 (Toronto) : 1.138.0 RELEASÉE (`a0ed0929`) AVEC LES CINQ LOTS — NON POUSSÉE
+
+> Sur `main` local, devant `origin/main` (`305bb4c8`) : `e011ed64` (A-C), `1d2385fb`, `62f24316` (D), `76110ed5`, `e239787f` (E), `a0ed0929` (release 1.138.0, build 0912-1116), puis ce relais. **Rien de poussé.** Reste : relecture du lot E par Cowork → verdict Playwright **Cowork fermé** → `scripts/pousser.sh` → porte (sept rangées) + artefact. Si une correction touche du code après la relecture, le bump est périmé : `release.mjs --build-only` avant le verdict. Vitest 550 / 6 020 après le bump.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 11 H (Toronto) : LOT D (« TES PROCHAINS RENDEZ-VOUS ») AJOUTÉ — `62f24316`, MÊME LIVRAISON 1.138.0
 
 > Quatre commits devant `origin/main` (`305bb4c8`) : `e011ed64` (lots A-C), `1d2385fb` (relais), `62f24316` (lot D), puis ce relais — rien de poussé, exprès. La relecture croisée de Cowork porte sur `e011ed64` **et** `62f24316` ; puis la marche de `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` (bloc de tête). Porte : six rangées.
