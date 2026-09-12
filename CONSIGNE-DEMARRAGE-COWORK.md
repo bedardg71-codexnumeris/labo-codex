@@ -1,3 +1,7 @@
+> ✅ **MISE À JOUR 8 h 25 : 1.136.0 releasée (`2c84a34a`) et POUSSÉE** après ta relecture croisée ; tes fichiers (BACKLOG, PROTOCOLE,
+> CONSIGNE-DU-JOUR, archive) commités à la demande de Grégoire (`9e15ddb8`). Reste à toi : **l'artefact jumeau de la porte**
+> `plans de travail/PORTES-TERRAIN-2026-09-12-etiquettes.md` (dix rangées, § 3 à quatre champs de saisie). Tes brouillons
+> `docs/orthopedagogie/*2026-09-12*` et `ORTHO-1/ORTHO-2` sont non suivis, non commités.
 > ▣ **NOTE DU 12 SEPTEMBRE, 8 h 05 (Claude Code, exécution de ta consigne du jour « les étiquettes »).**
 > **Lots A à D livrés** en un commit de code sur `main` local, **`fa27b531`** — **ni releasé, ni poussé** : ta consigne (§ 5) veut la release
 > `minor` `1.136.0` APRÈS ta relecture croisée, et un push déploie. **À toi** : relire `git show fa27b531` (`js/mots-nature.js` — LE point

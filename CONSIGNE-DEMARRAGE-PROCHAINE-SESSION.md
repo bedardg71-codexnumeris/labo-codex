@@ -46,12 +46,13 @@
 
 ▣ **Remesuré par Claude Code après l'exécution de la consigne du jour de Cowork (7 h 40) — « les étiquettes », lots A à D.**
 
-- **Version `1.135.1`, INCHANGÉE** (`473f3d75`, en ligne) — le lot est commité (`fa27b531` : code + sentinelle + changelog 1.136 + jetons +
-  porte), **ni releasé ni poussé, exprès** : la consigne (§ 5) veut UNE livraison `minor` (`1.136.0`) après la relecture croisée de Cowork.
-  `git rev-list --count origin/main..HEAD` = 2 (le commit de code et ce relais). `origin/main` = `473f3d75`.
-- **La marche restante** : (1) relecture croisée de Cowork sur `fa27b531` ; toute reprise se commite AVANT ; (2) `node scripts/release.mjs
-  minor` (le changelog est écrit : entrée 1.136) ; (3) commit ; (4) `cd tests && npm run test:unit` ; (5) verdict Playwright **Cowork fermé**
-  (PROTOCOLE règle 8, non commise) ; (6) `scripts/pousser.sh`. ⚠ Vitest APRÈS le commit du bump (sentinelle anti-cache).
+- ✅ **MIS À JOUR 8 h 25 : version `1.136.0`, build `0912-0813`, release `2c84a34a` POUSSÉE** (`main` = `origin/main`, 0 devant) par
+  `scripts/pousser.sh` après le verdict Playwright (0 rougeur nouvelle ; `carac-476-volet2-duplication` verte au second essai, instable
+  connue #685). Relecture croisée de Cowork passée sur `fa27b531`. Fichiers de Cowork commités à la demande de Grégoire (`9e15ddb8`).
+  ⚠ Règle 8 de PROTOCOLE (verdict Cowork fermé) : le verdict a été rendu sur demande explicite de Grégoire sans que cette session
+  puisse vérifier si Cowork tournait — aucune panique observée.
+- **La marche restante** : la porte `plans de travail/PORTES-TERRAIN-2026-09-12-etiquettes.md` (dix rangées sur `1.136.0`, quatre
+  décisions au § 3) ; l'artefact jumeau par Cowork ; puis, au retour du terrain, la ligne de `js/config.js:70` si Grégoire l'autorise.
 - **Vitest : 545 fichiers / 5 959 essais, 0 échec** après le commit de code. Break-tests : 8 mutations, 8 rouges, remises vérifiées par empreinte.
 - **Harnais pack démo** rebâti (jetable, scratchpad — non versionné, se rejoue en ~1 min) : 54 feuilles AVANT/APRÈS, zéro valeur ne bouge.
 - **Arbre** : `BACKLOG.md` (#839, #840 par Cowork), `PROTOCOLE.md` (règle 8) et `plans de travail/CONSIGNE-DU-JOUR.md` modifiés par Cowork
