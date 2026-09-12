@@ -7,11 +7,19 @@
 
 ---
 
+## 12 SEPT. 2026, SOIR (Toronto) — DOCUMENTS SEULEMENT, APRÈS `5519864d`
+
+> Claude Code, à la demande de Grégoire : **tri des 37 fiches ouvertes des audits** Cadre, Conception, Évaluation et pratique de
+> notation contre les huit énoncés (`plans de travail/TRI-2026-09-12-fiches-ouvertes-audits.md`) — #473 périmée et cochée, #467
+> gardée avant les partages de la cohorte, 35 après la cohorte ; puis **mise à jour des passages périmés** (consigne de démarrage,
+> OU-EN-EST-ON, État courant du BACKLOG, cadrage 11, index des cadrages, audit du 6, ce relais). Aucun fichier de `js/`, `css/`,
+> `index.html` ni `tests/`. Le reste du bloc ci-dessous vaut tel quel.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 18 H 45 (Toronto) : TOUT EST POUSSÉ — `origin/main` = `46a5ccf7` (+ ce relais)
 
 > ✅ **Mesuré après `git fetch` : `main` = `origin/main`, working tree propre.** Poussés ce soir : `85cd24b1`, `eca024fa`, `03ff9a9b`, `948eed75` à 18 h 31 (verdict Playwright local VERT sur `948eed75` à 18 h 18, Cowork fermé, 0 échec connu) ; puis `46a5ccf7` à 18 h 37, les 17 fichiers de Cowork (Formation, orthopédagogie, relevé de la porte Interventions, trois anciennes consignes, suppression d'une capture), commités par Grégoire dans GitHub Desktop — sans verdict, et c'est la règle : aucun fichier observable au navigateur (motif `OBSERVABLE` de `tests.yml`, testé sous bash). Ce relais-ci est un commit de documents postérieur, poussé de même.
 >
-> **CI GitHub** : `948eed75` (run `34723004615`) — Vitest vert, Playwright **sauté** (push documentaire) ; `46a5ccf7` (run `34723280219`) — en cours à 18 h 38. ⚠ **Le code de 1.139.0 n'a donc JAMAIS été jugé par GitHub** : son seul run Playwright (`34712643286`, sur `e29f734c`) a été annulé après 45 min ; seul le verdict local tient. Le prochain push qui touche un fichier observable relancera la suite.
+> **CI GitHub** : `948eed75` (run `34723004615`) — Vitest vert, Playwright **sauté** (push documentaire) ; `46a5ccf7` (run `34723280219`) — terminé en succès, mesuré au soir par `gh run view` : Vitest vert, Playwright **sauté**. ⚠ **Le code de 1.139.0 n'a donc JAMAIS été jugé par GitHub** : son seul run Playwright (`34712643286`, sur `e29f734c`) a été annulé après 45 min ; seul le verdict local tient. Le prochain push qui touche un fichier observable relancera la suite.
 >
 > **Reste** : (1) la porte `PORTES-TERRAIN-2026-09-12-interventions.md` — relevée 6/6 par Cowork, rangées 2.4 (Rencontres sur un service, que l'orthopédagogue ouvre lundi) et 2.5 (#748, note grisée d'un élève parti) sautées faute de cas réel ; (2) la liste des 32 partiels de la réconciliation, à déposer dans le dépôt (Grégoire / Cowork) ; (3) le lot 6 du cadrage 11, l'Animation ; (4) la correction de `.gitignore` proposée par Cowork (motif `ignor*s/` : la règle `*ignorés*/` ne matche pas la forme décomposée de macOS) — NON appliquée, rien de suivi n'en dépend. **Prochain numéro, fiche OU bug : #849** (règle 9 de `PROTOCOLE.md`).
 
