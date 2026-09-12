@@ -7,6 +7,12 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 11 H 52 (Toronto) : 1.138.0 POUSSÉE — `origin/main` = `61b5c883`
+
+> ✅ **Tout est sur `main` = `origin/main`** jusqu'à `61b5c883` (relevé partiel de la porte par Cowork, commité avant le verdict). Verdict Playwright local vert sur ce SHA (11 h 51, Cowork fermé, 0 échec, 0 instable) ; push par `git push origin main` (hook : Vitest vert, verdict à jour). Ce relais-ci est un commit de documents POSTÉRIEUR, local — voir sa ligne de commit pour son état de push. **Reste** : les rangées 5, 6, 7 de la porte et ses deux décisions, sur le site ; l'artefact jumeau par Cowork ; la relecture du lot E par Cowork (non vue avant le push) ; le lot 5 du cadrage 11 en pause.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 11 H 20 (Toronto) : 1.138.0 RELEASÉE (`a0ed0929`) AVEC LES CINQ LOTS — NON POUSSÉE
 
 > Sur `main` local, devant `origin/main` (`305bb4c8`) : `e011ed64` (A-C), `1d2385fb`, `62f24316` (D), `76110ed5`, `e239787f` (E), `a0ed0929` (release 1.138.0, build 0912-1116), puis ce relais. **Rien de poussé.** Reste : relecture du lot E par Cowork → verdict Playwright **Cowork fermé** → `scripts/pousser.sh` → porte (sept rangées) + artefact. Si une correction touche du code après la relecture, le bump est périmé : `release.mjs --build-only` avant le verdict. Vitest 550 / 6 020 après le bump.
