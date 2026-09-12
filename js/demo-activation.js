@@ -426,9 +426,12 @@ function retirerItemsDemoDesGlobaux() {
         return !(idsListeCours.has(c.id) && estItemDemo(c));
     }));
 
-    // cours (clé canonique) : mêmes IDs que listeCours
+    // cours (clé canonique) : mêmes IDs que listeCours — PLUS un service créé pendant la
+    // démonstration par Suivi › Rencontres (cadrage « Rencontres », 12 sept. 2026) : il porte
+    // `creeEnDemonstration: true` avec `isDemo`, marqueur qu'aucun chemin utilisateur n'écrit.
+    // Sans ce retrait, il resterait dans la vraie liste de cours de l'enseignant (clé globale).
     db.setSync('cours', (db.getSync('cours', []) || []).filter(function(c) {
-        return !(idsListeCours.has(c.id) && estItemDemo(c));
+        return !((idsListeCours.has(c.id) || c.creeEnDemonstration === true) && estItemDemo(c));
     }));
 
     // enseignants : retirer ENS_DEMO (ID synthétique fixe defini dans Phase 1).

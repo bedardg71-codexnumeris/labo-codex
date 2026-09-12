@@ -265,6 +265,13 @@ async function creerMonService() {
         notifications.erreur('Service non créé', 'La fiche n\'a pas pu être enregistrée.');
         return;
     }
+    // ⚠ `cours` est une clé GLOBALE, pas namespacée (mesuré le 11 sept. au soir) : un service créé
+    // PENDANT la démonstration resterait dans la vraie liste de cours de l'enseignant après la
+    // démo — la désactivation ne retire que les items du pack. On le marque ici, et
+    // `retirerItemsDemoDesGlobaux` (demo-activation.js) retire ce marqueur-là aussi.
+    if (typeof estEnModeDemo === 'function' && estEnModeDemo()) {
+        await db.modifier('cours', (lus) => (lus || []).map(c => (c && c.id === service.id) ? Object.assign({}, c, { isDemo: true, creeEnDemonstration: true }) : c), []);
+    }
 
     // 3. Les élèves, dans la liste du trimestre ; un DA déjà présent n'est pas dupliqué.
     let nbAjoutes = 0, nbDejaPresents = 0;
