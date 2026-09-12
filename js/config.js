@@ -65,6 +65,9 @@ const configurationsOnglets = {
         { id: 'saisie', label: 'Saisie des présences' },
         { id: 'profil', label: 'Profils individuels' },
         { id: 'interventions', label: 'Interventions' },
+        // Cadrage « Rencontres » (12 sept. 2026, autorisation de Grégoire pour cette zone protégée) :
+        // les rencontres d'un service — ou d'un groupe-cours — tenues dans l'app, vocabulaire « rencontre ».
+        { id: 'rencontres', label: 'Rencontres' },
         { id: 'animation', label: 'Animation' }
     ],
     'evaluations': [

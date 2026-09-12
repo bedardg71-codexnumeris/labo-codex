@@ -153,7 +153,8 @@ describe('#768/#782 · la barre d\'actions de la saisie', () => {
         const declare = config.match(/'suivi':\s*\[([\s\S]*?)\]/)[1];
         const valides = [...declare.matchAll(/id:\s*'([^']+)'/g)].map(m => 'suivi-' + m[1]);
 
-        expect(valides).toEqual(['suivi-groupe', 'suivi-liste', 'suivi-saisie', 'suivi-profil', 'suivi-interventions', 'suivi-animation']);
+        // #834 lot C (cadrage « Rencontres », 12 sept. 2026, autorisation de Grégoire pour config.js) : « Rencontres » après « Interventions ».
+        expect(valides).toEqual(['suivi-groupe', 'suivi-liste', 'suivi-saisie', 'suivi-profil', 'suivi-interventions', 'suivi-rencontres', 'suivi-animation']);
         expect(cible).toBe('suivi-liste');
         expect(valides).toContain(cible);
     });

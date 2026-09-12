@@ -711,6 +711,8 @@ const TOOLTIPS = {
         'Fiche individuelle d\'un·e étudiant·e : productions, mobilisation, progression, habiletés, accompagnement et rapport.',
     'nav-suivi-interventions':
         'Planifie et documente les interventions RàI de niveaux 2 (préventif) et 3 (intensif).',
+    'nav-suivi-rencontres':
+        'Tiens tes rencontres individuelles ou en sous-groupe : date, participants, notes par élève, bilan. Un service se crée ici en trois questions.',
     'nav-labo-etudes':
         'Analyse les résultats de ta démarche pédagogique : graphiques de progression, corrélations et trajectoires.',
     'nav-labo-rythme':
