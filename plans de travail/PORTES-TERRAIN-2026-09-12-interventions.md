@@ -11,6 +11,18 @@
 >
 > **Ce qui échoue ici devient un item de backlog, avec son numéro de porte.** Jamais une note mentale.
 >
+> ✅ **RELEVÉE le 12 septembre 2026 à 15 h 03 (Toronto, `TZ=America/Toronto date`) — 6 sur 6, zéro échec, deux rangées sautées**, sur `1.139.0`
+> (`origin/main` = `e29f734c`, en ligne). Les six vérifiées : le préalable, « Planifier » qui ne laisse rien (2.1a-b),
+> « Enregistrer » qui écrit une fois et tient au rechargement (2.2a-b), la suppression de l'essai (2.3) — donc le
+> parcours complet d'écriture, sur son groupe-cours réel, dans son navigateur. **Sautées, faute du cas** : 2.4 (le
+> même geste côté Rencontres, sur un service) et 2.5 (la note d'un élève parti du groupe). Artefact « Porte terrain
+> des Interventions » publié par Cowork à 14 h 55 ; relevé collé dans la conversation Cowork. Noté par Cowork à 15 h 05.
+>
+> ⚠ **Ce que cette porte ne prouve donc PAS, et qui reste dû** : le volet C (`#748`, la note grisée d'un élève parti)
+> n'a été éprouvé que par la sentinelle — aucun écran réel ne l'a vu. Idem pour le formulaire de Rencontres sur un
+> service, que **l'orthopédagogue ouvre lundi**. Les deux cas manquent chez Grégoire aujourd'hui ; sa règle du
+> 6 septembre s'applique (pas de données fictives pour éprouver un geste à l'écran) : ils attendent un cas réel.
+>
 > ⚠ **À passer avant lundi** (réserve de Cowork, consigne § en-tête) : le lot change le moment où une intervention est
 > écrite, dans le module que l'orthopédagogue ouvre lundi et la communauté de pratique mardi. Sinon, la livraison attend.
 
@@ -105,14 +117,17 @@ individuelles » la comptait quand même (#748). Ta décision du 11 septembre : 
 
 | Rangée | ✅ / ❌ / sautée | Note |
 |---|---|---|
-| 0.1 | | |
-| 2.1a | | |
-| 2.1b | | |
-| 2.2a | | |
-| 2.2b | | |
-| 2.3 | | |
-| 2.4 | | |
-| 2.5 | | |
-| 3.1 | — | |
+| 0.1 | ✅ | |
+| 2.1a | ✅ | |
+| 2.1b | ✅ | aucune « Essai porte » dans la liste — le défaut I-1 est clos à l'écran |
+| 2.2a | ✅ | une seule fois |
+| 2.2b | ✅ | tient au rechargement |
+| 2.3 | ✅ | essai nettoyé, rien ne reste dans son trimestre |
+| 2.4 | sautée | pas de service d'orthopédagogie chez lui aujourd'hui |
+| 2.5 | sautée | pas d'élève parti du groupe avec une note |
+| 3.1 | — | **tranché** : le titre livré reste. Grégoire, 15 h 10 : « c'est un choix » — un choix explicite, pas un silence. La réserve de Cowork (l'onglet « Interventions » n'existe plus sur un service) est donc vue et écartée. Close |
 
-**Relevée le** : _______ · **Version lue en bas de page** : _______ · **Échecs → BACKLOG** : _______
+**Relevée le** : 12 septembre 2026, 15 h 03 (Toronto) · **Version lue en bas de page** : `1.139.0` · **Échecs → BACKLOG** : aucun
+
+⮕ **Porte close, 6 sur 6, zéro échec.** Rien n'en sort vers le BACKLOG. Deux rangées sautées faute du cas — voir la
+réserve de l'en-tête : le volet C et le formulaire de Rencontres sur un service n'ont pas été vus sur un écran réel.
