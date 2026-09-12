@@ -13,9 +13,13 @@ import { monter, storeBase, elementDom } from './_helpers/bac-suivi.js';
 //   2. une intervention ANCIENNE (sans `groupeCoursId`) est vue des deux — aucune purge, aucun
 //      semis — et prend son contexte au prochain Enregistrer ; une intervention née ailleurs,
 //      rouverte et enregistrée ici, GARDE son contexte de naissance ;
-//   3. sans contexte actif : tout est visible, et une création porte `null`.
+//   3. sans contexte actif : tout est visible, et une création porte `null` ;
+//   4. (relecture croisée de Cowork, 12 sept.) les deux TRAVERSÉES de mode : une intervention née en
+//      mode cours (estampille = coursId) est vue depuis un groupe-cours de ce cours ; une intervention
+//      née dans un groupe-cours est vue en mode cours de ce cours — et jamais celle d'un autre cours ;
+//      en mode groupe-cours, celle de l'AUTRE groupe du même cours reste cachée.
 //
-// BREAK-TESTS VÉRIFIÉS le 11 septembre 2026 au soir — journal en fin de fichier.
+// BREAK-TESTS VÉRIFIÉS le 11 septembre 2026 au soir, puis le 12 (traversées) — journal en fin de fichier.
 
 const GLOBAUX = {
     determinerNiveauRaiPedagogique: () => ({ niveau: 2, pattern: 'Stable', label: 'x' }), calculerTousLesIndices: () => ({ A: 100, C: 100, P: 80 }),
@@ -85,6 +89,57 @@ describe('#834 lot D · l\'estampille au prochain Enregistrer', () => {
     });
 });
 
+describe('#834 lot D · les deux traversées de mode (relecture croisée du 12 sept.)', () => {
+    // Un cours C1 à deux groupes (GC1, GC2), un autre cours C9 (GC9).
+    const groupesCours = () => [
+        { id: 'GC1', coursId: 'C1', trimestreId: 'test', groupeNum: '01' },
+        { id: 'GC2', coursId: 'C1', trimestreId: 'test', groupeNum: '02' },
+        { id: 'GC9', coursId: 'C9', trimestreId: 'test', groupeNum: '01' },
+    ];
+    const cinqInterventions = () => [
+        intervention({ id: 'I_C1', titre: 'Née en mode cours C1', groupeCoursId: 'C1' }),
+        intervention({ id: 'I_GC1', titre: 'Née sous GC1', groupeCoursId: 'GC1' }),
+        intervention({ id: 'I_GC2', titre: 'Née sous GC2', groupeCoursId: 'GC2' }),
+        intervention({ id: 'I_GC9', titre: 'Née sous GC9 (autre cours)', groupeCoursId: 'GC9' }),
+        intervention({ id: 'I_OLD', titre: 'D\'avant le lot' }),
+    ];
+    const enModeGroupeCours = (store, gcId) => {
+        store.infoCours = { id: 'C1', codeCours: '601', groupe: '01', _modeCours: false, _source: 'groupe-cours', _groupeCoursId: gcId };
+        store.groupeCoursActif = { modeCours: false, id: gcId, trimestreId: 'test', coursId: 'C1', groupeNum: '01' };
+    };
+    const enModeCours = (store, coursId) => {
+        store.infoCours = { id: coursId, codeCours: '601', groupe: null, _modeCours: true };
+        store.groupeCoursActif = { modeCours: true, coursId: coursId, trimestreId: 'test', groupe: null, id: null };
+    };
+    const monterCinq = (store) => monter(store, { modules: ['js/interventions.js'], globaux: GLOBAUX, elements: { conteneurPrincipal: elementDom(), listeInterventions: elementDom() } });
+
+    it('née en mode cours → vue depuis GC1 ; celle de GC2 (même cours, autre groupe) reste cachée ; celle de C9 aussi', () => {
+        const store = storeBase(); store.test_interventions = cinqInterventions(); store.test_groupesCours = groupesCours();
+        enModeGroupeCours(store, 'GC1');
+        const b = monterCinq(store);
+        b.win.afficherListeInterventions();
+        expect(idsRendus(b)).toEqual(['I_C1', 'I_GC1', 'I_OLD']);
+    });
+    it('née dans un groupe → vue en mode cours de ce cours (GC1 et GC2), jamais celle d\'un autre cours', () => {
+        const store = storeBase(); store.test_interventions = cinqInterventions(); store.test_groupesCours = groupesCours();
+        enModeCours(store, 'C1');
+        const b = monterCinq(store);
+        b.win.afficherListeInterventions();
+        expect(idsRendus(b)).toEqual(['I_C1', 'I_GC1', 'I_GC2', 'I_OLD']);
+        // Et le magasin n'a pas bougé.
+        expect(store.test_interventions.map(i => i.id).sort()).toEqual(['I_C1', 'I_GC1', 'I_GC2', 'I_GC9', 'I_OLD']);
+    });
+    it('en mode cours, une création est estampillée du coursId (granularité du mode, assumée) — et vue ensuite depuis chaque groupe', () => {
+        const store = storeBase(); store.test_interventions = []; store.test_groupesCours = groupesCours();
+        enModeCours(store, 'C1');
+        const b = monterCinq(store);
+        const id = b.win.creerIntervention({ date: '2026-09-01', titre: 'X' });
+        expect(store.test_interventions.find(i => i.id === id).groupeCoursId).toBe('C1');
+        enModeGroupeCours(store, 'GC2');
+        expect(b.win.interventionsDuContexteActif(store.test_interventions).map(i => i.id)).toEqual([id]);
+    });
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // JOURNAL DES BREAK-TESTS — 11 septembre 2026, 21 h (Toronto). Mutations sur js/interventions.js,
 // suite relancée, fichier restauré à empreinte SHA-256 identique.
@@ -94,3 +149,9 @@ describe('#834 lot D · l\'estampille au prochain Enregistrer', () => {
 //   4. enregistrer : l'estampille écrase le contexte de naissance (`if (true)`) → 1 rouge
 //   5. enregistrer : plus d'estampille au prochain Enregistrer              → 1 rouge
 // 6/6 verts une fois restauré.
+//
+// 12 septembre 2026 (traversées, relecture croisée de Cowork) — mutations sur js/interventions.js :
+//   6. `_estampillesAcceptees` n'accepte plus le coursId du contexte               → 2 rouges
+//   7. les groupes du cours acceptés dans TOUS les modes (GC2 visible depuis GC1)  → 1 rouge
+//   8. en mode cours, les groupes d'un AUTRE cours acceptés                        → 1 rouge
+// 9/9 verts une fois restauré, empreinte identique.

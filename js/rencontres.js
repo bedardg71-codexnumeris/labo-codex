@@ -6,8 +6,11 @@
    Ce fichier ne fait que deux choses :
 
    1. décider ce que montre le sous-onglet — LES TROIS QUESTIONS quand rien ne permet
-      encore de tenir une rencontre (aucun trimestre, ou aucun contexte actif), sinon LA
-      LISTE des rencontres du contexte actif (service ou groupe-cours ordinaire) ;
+      encore de tenir une rencontre (aucun trimestre, ou aucun contexte actif) ; LA PORTE
+      vers un service (créer, ou activer celui du trimestre) quand le contexte actif est un
+      cours ordinaire (tranché par Grégoire le 12 sept. : « Rencontres » ne liste que les
+      services, « Interventions » reste ce qu'il est) ; sinon LA LISTE des rencontres du
+      service actif ;
    2. créer, depuis les trois questions, ce que le magasin exige et rien d'autre : un
       trimestre s'il n'en existe aucun, un cours de nature « service », ses élèves, un
       groupe-cours sans horaire — le tout visible dans Cadre, tel quel. Aucun magasin à
@@ -59,19 +62,59 @@ function afficherRencontres() {
         return;
     }
 
-    // Un contexte existe : la liste des rencontres de CE contexte, vocabulaire « rencontre »
+    // ▣ Tranché par Grégoire le 12 sept. (21 h 02) : « Rencontres » ne liste que les SERVICES.
+    // Sur un groupe-cours ordinaire, pas de liste (fini le doublon à deux vocabulaires avec
+    // « Interventions », qui reste ce qu'il est) : seulement la porte « Créer un service » et,
+    // s'il existe déjà un service dans le trimestre, le lien pour l'activer. La fusion des deux
+    // sous-onglets se rejuge après le mois d'usage, pas avant.
+    const estService = typeof contexteActifEstService === 'function' && contexteActifEstService();
+    if (!estService) {
+        afficherPorteVersUnService(conteneur, trimestre);
+        return;
+    }
+
+    // Un service est actif : la liste des rencontres de CE contexte, vocabulaire « rencontre »
     // (filtrée par le lot D — une rencontre née ailleurs n'apparaît pas ici).
     if (typeof definirVocabulaireInterventions === 'function') definirVocabulaireInterventions('rencontres');
-    const estService = typeof contexteActifEstService === 'function' && contexteActifEstService();
-    let html = '';
-    if (!estService) {
-        // Groupe-cours ordinaire : la même liste, et une porte discrète vers un service —
-        // suivre des élèves hors d'un groupe-cours (mots à valider).
-        html += '<p class="text-muted u-texte-09 u-mb-10">Tu reçois des élèves hors d\'un groupe-cours ? '
-            + '<button type="button" class="lien-reglages" data-action="afficherTroisQuestionsRencontres">Créer un service</button></p>';
-    }
-    conteneur.innerHTML = html + '<div id="listeRencontres"></div>'; // security-ok: `html` est une chaîne littérale de ce fichier, sans donnée
+    conteneur.innerHTML = '<div id="listeRencontres"></div>'; // security-ok: chaîne littérale, sans donnée
     if (typeof afficherListeInterventions === 'function') afficherListeInterventions();
+}
+
+/** Les groupes-cours de service du trimestre (un cours de nature « service »), lecture seule. */
+function _servicesDuTrimestre(trimestre) {
+    const cours = db.getSync('cours', []) || [];
+    const estService = (id) => cours.some(c => c && c.id === id && (typeof estCoursService === 'function' ? estCoursService(c) : c.nature === 'service'));
+    return (db.getSync(cle('groupesCours'), []) || [])
+        .filter(gc => gc && gc.id && (!gc.trimestreId || gc.trimestreId === trimestre.id) && estService(gc.coursId))
+        .map(gc => ({ id: gc.id, nom: (cours.find(c => c && c.id === gc.coursId) || {}).nomCours || gc.nom || gc.id }));
+}
+
+/**
+ * Sur un groupe-cours ordinaire : la porte vers un service — créer, ou activer celui qui existe.
+ * Aucune liste ici (décision du 12 sept.). Mots à valider par Grégoire.
+ */
+function afficherPorteVersUnService(conteneur, trimestre) {
+    const services = _servicesDuTrimestre(trimestre);
+    const liens = services.map(s =>
+        '<li><button type="button" class="lien-reglages" data-action="activerServiceRencontres" data-param="' + echapperHtml(s.id) + '">'
+        + echapperHtml(s.nom) + '</button></li>').join('');
+    conteneur.innerHTML = `
+        <div class="carte">
+            <p class="text-muted">Les rencontres se tiennent dans un <strong>service</strong> — un cours de nature « Service », sans code ni horaire. Le groupe-cours actif est un cours ordinaire : ses interventions sont sous <strong>Suivi › Interventions</strong>.</p>
+            ${services.length > 0 ? `
+            <p class="u-mb-10">Un service existe déjà dans ce trimestre. Active-le pour tenir tes rencontres :</p>
+            <ul class="u-mb-15">${liens}</ul>` : ''}
+            <p class="text-muted u-texte-09 u-mb-10">Tu reçois des élèves hors d'un groupe-cours ?
+                <button type="button" class="lien-reglages" data-action="afficherTroisQuestionsRencontres">Créer un service</button></p>
+        </div>`;
+}
+
+/** Depuis la porte : activer un service existant, puis revenir au sous-onglet (la liste, cette fois). */
+async function activerServiceRencontres(gcId) {
+    if (!gcId) return;
+    if (typeof changerGroupeCoursActifV2 === 'function') await changerGroupeCoursActifV2(gcId);
+    if (typeof peuplerDropdownGroupeCoursActif === 'function') { try { await peuplerDropdownGroupeCoursActif(); } catch (e) { console.warn('[Rencontres] en-tête non rafraîchi :', e); } }
+    afficherRencontres();
 }
 
 /** Depuis la liste d'un groupe-cours ordinaire : revenir aux trois questions pour créer un service. */
@@ -327,6 +370,7 @@ async function creerMonService() {
    =============================== */
 window.afficherRencontres = afficherRencontres;
 window.afficherTroisQuestionsRencontres = afficherTroisQuestionsRencontres;
+window.activerServiceRencontres = activerServiceRencontres;
 window.creerMonService = creerMonService;
 window.analyserListeEleves = analyserListeEleves;
 
