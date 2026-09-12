@@ -95,9 +95,13 @@ describe('sentinelle · libellés Créer/Enregistrer de l\'assemblage (#306 Lot 
         const horaires = readFileSync(path.join(racine, 'js', 'trimestre-v2-horaires.js'), 'utf8');
         const gc = readFileSync(path.join(racine, 'js', 'trimestre-v2-groupes-cours.js'), 'utf8');
 
-        // Cours : « Nouveau cours » doit être suivi du libellé « Créer » (était « Enregistrer »)
-        expect(cours).toMatch(/titre\.textContent = 'Nouveau cours';[\s\S]{0,200}btnTexte\.textContent = 'Créer';/);
-        expect(cours).toMatch(/titre\.textContent = 'Modifier le cours';[\s\S]{0,120}btnTexte\.textContent = 'Enregistrer';/);
+        // Cours : « Nouveau cours » doit être suivi du libellé « Créer » (était « Enregistrer »).
+        // #842 (12 sept. 2026) : le TITRE vient du point unique (js/mots-nature.js, « Nouveau cours » / « Nouveau
+        // service » selon la fiche) — l'ancre est l'appel `_titrerFormCoursV2('nouveau')` ; l'objet de cette sentinelle
+        // reste la mécanique Créer / Enregistrer du BOUTON, qui ne bouge pas.
+        expect(cours).toMatch(/_titrerFormCoursV2\('nouveau'\);[\s\S]{0,200}btnTexte\.textContent = 'Créer';/);
+        expect(cours).toMatch(/_titrerFormCoursV2\('modifier'\);[\s\S]{0,120}btnTexte\.textContent = 'Enregistrer';/);
+        expect(cours).not.toMatch(/titre\.textContent = '(Nouveau|Modifier le|Dupliquer le) cours'/);
         // Horaire (ENTITÉ) : « Nouvel horaire » → « Créer » (était « Ajouter »).
         // NB : le sous-formulaire de SÉANCE (v2-btnConfirmerSeance) garde « Ajouter »
         // à dessein — c'est un ajout à une collection, comme le Groupe d'étudiants
@@ -113,5 +117,8 @@ describe('sentinelle · libellés Créer/Enregistrer de l\'assemblage (#306 Lot 
         expect(orchestre).not.toContain('afficherFormEnseignantV2');
         expect(orchestre).not.toContain('modifierEnseignantSelectionneV2');
         expect(orchestre).not.toContain('enseignantEnEditionUI');
+        // #841 (12 sept. 2026) : `peuplerDropdownEnseignants` (orchestre) n'avait AUCUN appelant — le vrai peuplement est
+        // `populerDropdownEnseignantsV2` (trimestre-v2-enseignants.js) ; retirée, elle ne revient pas.
+        expect(orchestre).not.toContain('peuplerDropdownEnseignants');
     });
 });

@@ -122,8 +122,11 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
     // index.html (mots-nature.js vient juste après db.js).
     if (typeof globaux.motsNature !== 'function') {
         const winMots = {};
-        new Function('window', readFileSync(path.join(racineProjet, 'js/mots-nature.js'), 'utf8'))(winMots);
-        globaux = Object.assign({}, globaux, { motsNature: winMots.motsNature, motNature: winMots.motNature, MOTS_NATURE: winMots.MOTS_NATURE });
+        // `motsNatureContexteActif` lit `contexteActifEstService` : celui du harnais quand il le donne (vivant, pas figé).
+        new Function('window', 'contexteActifEstService', readFileSync(path.join(racineProjet, 'js/mots-nature.js'), 'utf8'))(winMots, globaux.contexteActifEstService);
+        globaux = Object.assign({}, globaux, { motsNature: winMots.motsNature, motNature: winMots.motNature, MOTS_NATURE: winMots.MOTS_NATURE,
+            // #841 / #842 (12 sept.) : les mots du contexte actif — sans `contexteActifEstService` dans le harnais, ceux d'un cours.
+            motsNatureContexteActif: winMots.motsNatureContexteActif });
     }
 
     const { document: documentOverride, localStorage: localStorageOverride, ...autresGlobaux } = globaux;

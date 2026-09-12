@@ -109,7 +109,10 @@ function populerDropdownEnseignantsV2() {
     const enDemoLegacy = typeof estEnModeDemo === 'function' && estEnModeDemo();
     const reels = enDemoLegacy ? enseignants : enseignants.filter(e => !e.isDemo);
 
-    let html = '<option value="">— Sélectionner —</option>';
+    // #841 (12 sept. 2026) : le mot de l'option vide se lit dans le point unique (js/mots-nature.js) AU MOMENT
+    // où le menu se construit — « Sélectionner un enseignant·e » / « Sélectionner un·e orthopédagogue » selon le
+    // contexte actif. Avant, « — Sélectionner — » en dur écrasait le mot posé par appliquerMotsNatureCadre.
+    let html = '<option value="">' + motsNatureContexteActif().choisirPersonne + '</option>';
     reels.forEach(e => {
         const nomComplet = `${e.prenom || ''} ${e.nom || ''}`.trim() || 'Sans nom';
         const selected = (e.id === enseignantEnEditionId) ? ' selected' : '';

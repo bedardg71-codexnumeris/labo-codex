@@ -273,7 +273,8 @@ function populerDropdownsAssemblageV2() {
             const label = code ? `${code}${nom ? ' - ' + nom : ''}` : nom;
             return label || `Cours ${c.id || 'inconnu'}`;
         };
-        let html = '<option value="">— Choisir un cours —</option>';
+        // #842 (12 sept. 2026) : le mot suit le contexte actif, depuis le point unique (js/mots-nature.js).
+        let html = '<option value="">' + motsNatureContexteActif().choisirObjetGC + '</option>';
         coursReels.forEach(c => {
             html += `<option value="${echapperHtml(c.id)}">${echapperHtml(labelCours(c))}</option>`;
         });
@@ -337,7 +338,8 @@ function populerDropdownsAssemblageV2() {
         const enseignantsReels = enDemoLegacy ? enseignants : enseignants.filter(e => !e.isDemo);
 
         const labelEns = e => (`${e.prenom || ''} ${e.nom || ''}`.trim() || e.id);
-        let html = '<option value="">— Choisir un enseignant —</option>';
+        // #841 (12 sept. 2026) : l'option vide nomme la personne du contexte actif (point unique js/mots-nature.js).
+        let html = '<option value="">' + motsNatureContexteActif().choisirPersonneGC + '</option>';
         enseignantsReels.forEach(e => {
             html += `<option value="${echapperHtml(e.id)}">${echapperHtml(labelEns(e))}</option>`;
         });

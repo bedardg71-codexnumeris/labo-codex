@@ -75,7 +75,8 @@ const TOOLTIPS = {
         'le collège), pas à 60 minutes d\'horloge. En session intensive, c\'est ce total ' +
         'd\'heures qui reste l\'invariant, pas le rythme hebdomadaire.',
     'reglages-groupe-cours':
-        'Ton espace de travail pour le trimestre — tu relies ici ton cours, ton groupe, ton horaire et ta façon de construire la note. C\'est le groupe-cours actif qui détermine ce que tu vois partout dans l\'application.',
+        // #842 (12 sept. 2026) : les deux natures, nommées par le point unique js/mots-nature.js.
+        'Ton espace de travail pour le trimestre — tu relies ici ton cours ou ton ' + motsNature('service').objetLong + ', ton groupe, ton horaire et ta façon de construire la note. C\'est le groupe-cours actif qui détermine ce que tu vois partout dans l\'application.',
 
     // --- Champs Trimestre ---
 

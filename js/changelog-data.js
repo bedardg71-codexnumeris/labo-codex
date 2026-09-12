@@ -21,6 +21,15 @@
 
     var CHANGELOG = [
         {
+            version: '1.137',
+            couleur: 'bleu',
+            titre: 'La section Cours du Cadre parle le métier choisi, et ne se contredit plus sur l\'horaire',
+            items: [
+                '<strong>Dans Cadre, la section «&nbsp;Cours et services&nbsp;» suit la fiche et le contexte.</strong> Sur un service d\'orthopédagogie, le formulaire dit «&nbsp;Modifier le service&nbsp;», «&nbsp;Nouveau service&nbsp;» dès que le menu Nature bascule, le bandeau «&nbsp;Mode modification — Service&nbsp;», la synthèse «&nbsp;Aucun service sélectionné&nbsp;», et les menus qui nomment une personne disent «&nbsp;Sélectionner un·e orthopédagogue&nbsp;» — y compris après un rafraîchissement du menu, qui les remettait à «&nbsp;— Sélectionner —&nbsp;». Sur un cours, tout redit cours et enseignant·e.',
+                '<strong>La phrase des éléments obligatoires du groupe-cours ne dit plus l\'horaire obligatoire pour un service</strong>&nbsp;: elle en compte quatre (trimestre, service d\'orthopédagogie, numéro de groupe, orthopédagogue) et dit que l\'horaire et la pratique de notation sont facultatifs — ce que le champ disait déjà deux lignes plus bas. Pour un cours, elle en compte cinq, comme avant.',
+            ]
+        },
+        {
             version: '1.136',
             couleur: 'vert',
             titre: 'Deux usages nommés dans le Cadre : l\'enseignement et l\'orthopédagogie',
