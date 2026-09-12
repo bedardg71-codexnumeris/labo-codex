@@ -1,144 +1,126 @@
-# Consigne du jour — « Rencontres » : l'orthopédagogue entre par Suivi (lots 1 et 2 du cadrage « Rencontres », formule si le temps reste)
+# Consigne du jour — les étiquettes : l'orthopédagogue entre par le Cadre, comme tout le monde
 
-> **Écrite le 11 septembre 2026 à 20 h 25 (Toronto) par Cowork**, pour la journée du samedi 12. Application au moment de l'écriture :
-> **`1.134.0`**, build `0911-1922`, `main` = `7092ce42` (lot 4 du cadrage 11 livré à 19 h 22). Elle remplace la consigne du lot 4,
-> archivée à côté sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-11-lot-4-profils-individuels.md`.
-> **Cadrage** : `plans de travail/CADRAGE-2026-09-11-rencontres-l-orthopedagogue-entre-par-suivi.md` (entrée 11 de
-> `00-CADRAGES-OUVERTS.md`). **Sources** : dossier `docs/orthopedagogie/` du dépôt (les deux courriels de
-> l'orthopédagogue, les deux mesures du 11, l'idée de Grégoire) — copié depuis le dossier Cowork le 11 à 20 h 45 ; c'est la copie vivante.
-> **Décisions de Grégoire, dans ses mots** : « universaliser l'application » (18 h 45) ; entrée par Suivi, « trois questions, un cours de
-> service visible dans Cadre » (19 h 20) ; les mots « Rencontres », « rencontre », « Service » (19 h 35) ; « je voudrais que l'on avance le
-> plus possible l'application pour elle, pour lundi, quitte à poursuivre le développement dans la semaine ou le mois » (20 h 10).
-> **But de la journée** : lundi 14, l'orthopédagogue ouvre l'application, répond à trois questions, et tient ses rencontres dedans.
+> **Écrite le samedi 12 septembre 2026 à 7 h 40 (Toronto) par Cowork**, après le relevé de la porte de « Rencontres » (17/17, zéro échec)
+> et les décisions de Grégoire de 7 h 05 à 7 h 35.
+> État mesuré au moment de l'écriture : **`1.135.1`**, build `0912-0635`, `main` = `origin/main` = `473f3d75`, `rev-list` = **0**.
+> Elle remplace la consigne du correctif d'appartenance, archivée à côté sous
+> `_ancienne-CONSIGNE-DU-JOUR-2026-09-12-appartenance-par-le-service.md`.
 >
-> ▣ **ORDRE TRANCHÉ PAR GRÉGOIRE, 11 sept., 20 h** : ce chantier passe **avant** la suite du cadrage 11. **Le lot 5 (Interventions,
-> `CONSIGNE-SUIVANTE-lot-5-interventions.md`) est EN PAUSE** jusqu'à la fin du chantier « Rencontres » ; il ne se fait pas demain, même si
-> le temps reste (§ G passe avant). Quand il reprendra, il remesurera `js/interventions.js` après ce lot (estampille D, vocabulaire C).
-> Les lots 6 et 7 ne se croisent pas avec celui-ci et attendent aussi. **Une seule session Claude Code écrit dans `js/` demain : celle-ci.**
+> **Cadrage** : `plans de travail/CADRAGE-2026-09-11-rencontres-l-orthopedagogue-entre-par-suivi.md` (entrée 11 de `00-CADRAGES-OUVERTS.md`).
+> **Le lot 5 du cadrage 11 (Interventions) reste EN PAUSE.**
 >
-> **AVANT TOUT — un commit documentaire séparé** : l'archivage de la consigne du lot 4, la présente, le cadrage « Rencontres », l'entrée 11
-> de `00-CADRAGES-OUVERTS.md`, `Rapports/INVENTAIRE-2026-09-11-orthopedagogie-dans-l-app-et-la-doc.md`. `git add` ciblé.
->
-> ⚠ **Une consigne peut se tromper : mesure, n'obéis pas.** Les numéros de ligne datent du 11 au soir sur `1.133.0`-`1.134.0`.
-> ⛔ **`js/config.js` et `js/navigation.js` sont des zones protégées** (`CLAUDE.md`) : le sous-onglet (§ C) les touche. **Sans l'autorisation
-> explicite de Grégoire dans sa ligne de lancement, § C ne se fait pas** ; le reste se fait, et « Rencontres » attend son feu vert.
->
-> **Préalables** : le cadrage (§ 3-5) ; les deux mesures du 11 (couplage au groupe-cours ; la séance comme unité de temps) ; `CLAUDE.md`
-> (ce qui remonte à Grégoire, règle 1) ; `PROTOCOLE.md` (relecture croisée : ce lot « ne se reprend pas », il part chez une utilisatrice
-> réelle lundi). Skills : `labo-codex`, `depistage-rai` (§ profil), `verification-adverse`, `portes-terrain`, `release-et-changelog`.
+> ⚠ **Une consigne peut se tromper : mesure, n'obéis pas.** Les numéros de ligne datent du 12 sept. à 7 h 35 sur `1.135.1`.
+> ⛔ **Aucune zone protégée n'est requise** (`js/config.js`, `js/navigation.js`). Si tu crois devoir les ouvrir, arrête et remonte.
+> **Skills** : `labo-codex`, `design-interface` (tout mot à l'écran), `verification-adverse`, `portes-terrain`, `release-et-changelog`.
 
 ---
 
-## 0 · CE QUE CE LOT CHANGE, POUR ELLE ET POUR GRÉGOIRE
+## 0 · L'INTENTION DE GRÉGOIRE — à lire avant le lot, c'est elle qui juge le résultat
 
-1. **Pour elle** : dans Suivi, un sous-onglet **« Rencontres »**. À la première ouverture, **trois questions** — les dates de son trimestre
-   (si aucun trimestre n'existe), le **nom de son service**, **sa liste d'élèves** (saisie ou collée) — et l'application crée ce que le magasin
-   exige : un trimestre, un **cours de nature « service »** (sans code, sans discipline, sans compétences), un groupe d'élèves, un
-   groupe-cours ; le tout **visible dans Cadre, tel quel**. Ensuite, « Rencontres » liste ses rencontres et lui permet d'en créer
-   (individuelle ou sous-groupe, date, heure, durée, participants, notes par élève, bilan). Profils individuels, volet confidentiel et rapport
-   marchent déjà pour ses élèves (mesure 1, § 4 : ils ne lisent aucun contexte).
-2. **Pour Grégoire et ses collègues** : **rien ne bouge** sur un groupe-cours ordinaire — harnais AVANT/APRÈS obligatoire (§ F). Une chose
-   s'améliore pour tous : une intervention **sait désormais dans quel groupe-cours elle est née**, et la liste des interventions d'un cours ne
-   mêle plus celles d'un autre (constat de l'audit du 5 sept., « les interventions ne portent pas leur groupe-cours »).
-3. **Ce qui reste manuel, exprès, pour un mois** (décision de Grégoire, 20 h 10 : « tout est manuel, comme si elle écrivait sur papier ») :
-   la présence se note **dans la rencontre** (participants), l'indice A et la complétion **se taisent** sur un service, la carte RàI d'un
-   élève de service **ne s'affiche pas**. Ses retours d'octobre trancheront (cadrage § 7). ⛔ Ne rien inventer là.
+Dans ses mots, le 12 sept. à 7 h 35 : **« Je veux que l'orthopédagogue sente qu'elle entre par la porte principale et non par une porte
+de côté qui serait l'onglet Suivi. Elle entre par le Cadre, elle aussi. »**
 
-**Principe de construction** : **un service EST un cours** (enregistrement de `cours` ordinaire + `nature: 'service'`), un groupe-cours de
-service EST un groupe-cours (`horaireId` possiblement `null`). Aucun magasin à part, aucun troisième chemin de données : la liste de ses
-élèves passe par `obtenirEtudiantsCoursActif()` (`js/modes.js:1169`) **sans nouveau cas** — c'est la raison de ce choix. Le mot
-« orthopédagogie » n'apparaît **nulle part** dans le code : un enseignant qui reçoit des élèves à son bureau a le même sous-onglet.
+Et à 7 h 05 : **« Je voudrais que les utilisateurs enseignants comprennent qu'il y a vraiment deux types d'utilisation (l'orthopédagogie
+et l'enseignement) et que les orthopédagogues comprennent que l'application n'est pas que pour les enseignants, mais pour eux aussi.
+[…] On ne change rien au fonctionnement, on fait juste mettre une étiquette (qui pourrait éventuellement changer) pour clarifier
+comment ça fonctionne. »**
+
+⮕ **Ce lot ne change AUCUN comportement, AUCUNE donnée, AUCUNE règle.** Il change des mots, et il en fait un point unique.
+Le critère de réussite : une orthopédagogue qui ouvre `Cadre › Cours` voit, en premier choix, que l'application connaît son métier ;
+un enseignant y voit que l'application en connaît deux.
 
 ---
 
-## 1 · LE LOT — dans cet ordre, un commit par lettre, une seule livraison à la fin
+## 1 · CE QUI EXISTE DÉJÀ — ne le refais pas (mesuré par Cowork le 12 sept. à 7 h 20)
 
-### A. Un cours de nature « service » (Cadre › Cours)
-- `cours.nature ∈ { 'cours' (défaut, absent = cours), 'service' }`. Dans le formulaire du cours, un choix **« Cours / Service »** (mot
-  « Service », tranché). Pour un service : **seul le nom est requis** ; `codeCours`, `discipline`, `ponderation`, compétences : vides, et
-  la validation de `trimestre-v2-cours.js:1292-1319` (#540) ne les exige pas. **Mesure d'abord** chaque lecteur de `codeCours` /
-  `discipline` / `ponderation` (grep sur `js/`) : ce qui affiche un code vide doit afficher le **nom** ; ce qui calcule sur la
-  pondération doit tolérer l'absence sans NaN. Liste tes trouvailles avant de coder.
-- Dans les listes de Cadre, le service se distingue par son mot (« Service »), pas par une couleur nouvelle.
+Le tri des champs **est livré** depuis le lot A (1.135.0). `changerNatureCoursV2` (`js/trimestre-v2-cours.js:1226`) masque aujourd'hui,
+quand la nature est un service : `v2-champCodeCours`, `v2-ligneCompetence`, `v2-lignePonderation` (qui porte **aussi** les heures
+d'enseignement) et `v2-ligneDiscipline`. Seul le nom reste, requis, avec son libellé et son exemple propres.
 
-### B. Un groupe-cours sans horaire — MESURE AVANT DE PROMETTRE
-- `trimestre-v2-groupes-cours.js:612` exige un horaire. Pour un groupe-cours dont le cours est un service, l'horaire devient **facultatif**.
-- ⚠ **C'est le mur de la mesure 2** : 22 fichiers lisent les séances, `genererSeancesCompletes` (`horaire.js:570`) part de l'horaire.
-  **Mesure** ce que `horaireId: null` produit sur chaque lecteur (Suivi du groupe, Liste, Saisie des présences, Profils, Interventions,
-  calendrier, tableau de bord, export PDF, captures) : attendu, **un calendrier vide et des écrans qui le disent** (« Ce service n'a pas
-  d'horaire : la présence se note dans la rencontre »), **jamais une exception ni un écran blanc**.
-- **Si un lecteur casse et ne se répare pas en une heure** : repli **visible**, jamais caché — les trois questions créent un « horaire de
-  service » nommé ainsi, d'un créneau par semaine, affiché dans Cadre. Écris dans le rapport lequel des deux tu as livré et pourquoi.
+Et la mesure dit pourquoi c'est juste, champ par champ — **à ne pas rouvrir** : la pondération n'a qu'un lecteur
+(`trimestre-v2-horaires.js:203`, le recoupement avec l'horaire hebdomadaire — un service n'a pas d'horaire) ; les heures
+d'enseignement n'en ont qu'un (`planification-carte.js:9322`, la carte d'alignement) ; les trois champs ministériels ne sont lus que
+pour être recopiés sur le groupe-cours (`entites/groupe-cours.js`) et par une migration ; le **nom** est lu partout (en-tête, cartes,
+dropdowns, exports, PDF, Codex) et le **code** aussi, d'où la règle « ce qui affiche un code vide affiche le nom ».
 
-### C. Le sous-onglet « Rencontres » (Suivi) — ⛔ ZONE PROTÉGÉE, autorisation de Grégoire requise
-- `js/config.js:67` (liste des sous-onglets de Suivi) et `js/navigation.js:169` (correspondance) : ajouter `rencontres` **après**
-  « Interventions ». Une seule sous-section nouvelle dans `index.html`.
-- **Sans service dans le trimestre actif** (ou sans trimestre) : la sous-section montre **les trois questions**, sur un seul écran, et un
-  bouton « Créer mon service ». Réutilise l'existant : la création de trimestre (dates), la création de cours (A), la saisie d'élèves
-  (`trimestre-v2-etudiants.js:497`, `ajouterEtudiantV2`) et, si elle existe, l'analyse d'une liste collée (import CSV) — **mesure ce qui
-  est réutilisable, ne réécris pas un parseur**. À la fin : le service devient le groupe-cours **actif**, et l'écran passe à la liste.
-- **Avec un service actif** : la liste des rencontres de CE service (D), le bouton « + Nouvelle rencontre », et le formulaire d'intervention
-  existant (`interventions.js`) rendu avec le vocabulaire « rencontre » (titre, boutons, libellés) et `type: 'individuel'` par défaut.
-  **Même module, même données, un paramètre de vocabulaire** — pas de copie de `interventions.js`. Le champ « séance concernée » et
-  « marquer les non-participants motivés » sont **cachés** sur un service (ils supposent une séance de groupe).
-- **Avec un groupe-cours ordinaire actif** : « Rencontres » montre la même liste, filtrée sur ce groupe-cours, avec le vocabulaire
-  « rencontre » — c'est l'universalisation demandée ; « Interventions » reste ce qu'il est. Si les deux sous-onglets se marchent dessus,
-  dis-le dans le rapport, **ne fusionne rien** : ça remonte à Grégoire.
-- ⛔ **Si l'autorisation n'est pas dans la ligne de lancement** : A, B, D, E, F se font ; C est écrit dans le rapport comme « prêt, attend
-  le feu vert », et le repli pour lundi est le chemin manuel par Cadre (Cowork l'écrit dimanche).
-
-### D. Une intervention porte son contexte de naissance (pour tous)
-- À la création (`interventions.js:127`), `groupeCoursId` = l'identifiant du groupe-cours actif (via **un point unique** — voir E).
-- La liste (Interventions comme Rencontres) filtre sur le groupe-cours actif. **Compatibilité** : une intervention sans `groupeCoursId`
-  (toutes celles d'avant) reste visible dans tous les contexts et est **estampillée au prochain enregistrement** ; aucune purge, aucun semis.
-- Sentinelle : deux groupes-cours, une intervention chacun, chacun ne voit que la sienne ; une intervention ancienne sans contexte est vue
-  des deux.
-
-### E. Un point unique pour l'identifiant du contexte (hygiène, mesurée le 11)
-- Huit sites recalculent `infoCours._groupeCoursId || infoCours.id` (`profil-etudiant-calculs.js:1830`,
-  `profil-etudiant-sections-affichage.js:2670`, `graphiques-progression.js:595, 820, 1422, 3619`, `snapshots.js:78, 1102`). Une fonction
-  (`snapshots.js:78` en est déjà presque une), exportée, huit appels. **Zéro changement de valeur** : sentinelle qui compare l'ancienne
-  expression et la fonction sur les mêmes `infoCours`.
-
-### F. Rien ne bouge pour l'enseignant — harnais AVANT/APRÈS, puis sentinelles
-- Harnais sur le **pack démo** (comme le 10 sept., `1630 cas / 0 différence` : reprends le même dispositif) : Suivi du groupe, Liste,
-  Présences, Profils (indices, cartes, rapport), Interventions, Cadre, export — **avant** le premier commit de code, **après** le dernier.
-  Un pixel qui bouge hors « Rencontres » et hors l'estampille D est un défaut.
-- Sentinelles : `sentinelle-<n>-un-service-est-un-cours` (A+B : un service se crée sans code, sans horaire, et `obtenirEtudiantsCoursActif`
-  rend sa liste) ; `sentinelle-<n>-intervention-porte-son-contexte` (D) ; `sentinelle-<n>-point-unique-contexte` (E). Break-tests rouges
-  pour chacune, fichiers restaurés à empreinte identique.
-
-### G. Si le lot est fini avant 16 h — la formule « taux de repérage »
-- Registre `js/evaluation-formules.js` (trois modèles, l. 88-150) : un quatrième, `taux_reperage`, note = pondération × (erreurs repérées ÷
-  erreurs au total). Réutilise les deux saisies existantes (`erreurs`, `mots`) **si** le registre permet de renommer leurs libellés par
-  modèle ; sinon, dis-le et n'ajoute rien — un libellé « nombre de mots » sous une saisie qui attend « erreurs au total » est un piège.
-  Sa grille (six critères, quatre niveaux, `docs/orthopedagogie/courriel-2026-09-11_fig2`) **n'est pas semée** : elle la crée dans
-  Conception ; un **modèle** de bibliothèque viendra plus tard, après son mois d'usage.
+⮕ **Il ne reste donc que les mots.** Si tu te surprends à retirer un champ, c'est que tu refais hier.
 
 ---
 
-## 2 · CE QUI REMONTE À GRÉGOIRE (ne code pas à sa place)
-- L'autorisation pour `config.js` / `navigation.js` (§ C) — dans sa ligne de lancement, ou pas.
-- Tout mot nouveau à l'écran hors « Rencontres », « rencontre », « Service » : les trois questions, le message « ce service n'a pas
-  d'horaire », les libellés du formulaire de rencontre — **propose-les dans le rapport, avec leur emplacement** ; livre-les tels quels,
-  il corrigera dimanche.
-- Si A ou B révèle qu'un calcul (note, indice, pondération) change de valeur pour un cours ordinaire : **arrête ce point, inscris, remonte**.
+## 2 · LE LOT
 
-## 3 · LIVRER — `minor` (`1.135.0`) : un sous-onglet nouveau et une estampille sur les interventions
-Une seule livraison, à la fin, après le coup d'œil de Grégoire (§ 4) et la relecture croisée de Cowork sur les commits. Changelog
-utilisateur : ce qu'elle verra lundi, en trois lignes, sans le mot « orthopédagogue » (le sous-onglet sert à tous). Si § C n'a pas eu son
-feu vert : `patch` (`1.134.1`), rien de visible, et le changelog le dit.
+### A. Un point unique pour le mot de chaque nature
+- Les VALEURS en base **ne changent pas** : `cours.nature` vaut toujours `'cours'` ou `'service'`. Aucune migration, aucune écriture,
+  aucune donnée touchée. C'est la règle qui commande tout ce lot.
+- **Un seul endroit** dans le code donne le mot affiché pour une nature : `'cours'` → **« Enseignement »**, `'service'` →
+  **« Orthopédagogie »**. Grégoire a dit explicitement que ce mot **changera** le jour où d'autres services existeront : il doit se
+  changer là, et nulle part ailleurs. Nomme-le et exporte-le comme les autres points uniques du projet (`contexteActifEstService`,
+  `GROUPE_SERVICE`).
+- **Mesure d'abord tous les sites qui écrivent ces mots à l'écran**, puis fais-les passer par le point unique. Départ mesuré
+  (12 sept., 7 h 35) — **vérifie-le, il est probablement incomplet** :
+  `index.html:6594` (l'option du menu Nature) · `trimestre-v2-cours.js:190, 473, 476, 993, 1159, 1235, 1331, 1354` ·
+  `trimestre-v2-groupes-cours.js:856` · `rencontres.js:129, 164, 178, 301`.
+  ⚠ **Faux ami** : `evaluation-projection.js:370` (« Nom du service d'aide ») ne parle pas de ça — ne le touche pas.
 
-## 4 · LA PORTE TERRAIN
-Markdown par Claude Code (`PORTES-TERRAIN-2026-09-12-rencontres.md`) ; artefact par Cowork. Rangées :
-1. **Ses deux groupes réels** — Cadre, Suivi du groupe, Liste, Présences, un profil, Interventions : **identiques à hier** (ce qu'il regarde :
-   rien). Ses interventions existantes sont toutes là.
-2. **Mode démo** (pas ses données) — Suivi › Rencontres : les trois questions ; « Créer mon service » ; Cadre montre le service ; Suivi ›
-   Liste montre les élèves saisis ; une rencontre créée, avec notes et bilan, visible dans Rencontres seulement.
-3. **Lundi, la vraie porte** : l'orthopédagogue, sur son poste. Ce que Cowork lui écrit dimanche part de ce que CETTE consigne a livré, pas
-   de ce qu'elle promettait.
+### B. Les mots tranchés par Grégoire sur la porte (§ 3, relevé du 12 sept.) — livre-les tels quels
+| Où | Le mot |
+|---|---|
+| `Cadre › Cours`, menu **Nature** | « Enseignement » / « Orthopédagogie » (à la place de « Cours » / « Service ») |
+| Sous-navigation de Suivi | « Rencontres (ortho.) » |
+| Rencontres, les trois questions | « … l'application a besoin de trois choses. Elle crée ensuite **ton service d'orthopédagogie**, visible dans Cadre, tel quel. » · bouton « **Créer mon service d'orthopédagogie** » |
+| Rencontres, notification de création | « **Tes rencontres d'orthopédagogie se tiennent ici** ; Cadre montre le service tel quel. » |
+| Rencontres, carte sur un groupe-cours ordinaire | **nomme l'orthopédagogie directement** (décision de Grégoire : « il s'agit d'un type d'utilisateur complètement différent d'un enseignant »). Propose le texte dans le rapport ; il corrigera. |
 
-## 5 · TROUVAILLES ET RAPPORT
-Ce qui casse avec `horaireId: null` (B), lecteur par lecteur ; les mots proposés (§ 2) ; ce que § C a coûté dans les zones protégées ;
-et, si tu les vois passer, les deux questions du cadrage § 7 que la journée éclaire (sous-groupes récurrents, vue de la semaine) —
-**inscris, ne code pas**. Fin de journée : `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` réécrite, état mesuré.
+### C. Le Cadre comme porte principale — c'est le § 0, et c'est la partie qui demande ton jugement
+- **Le formulaire de groupe-cours** : l'accordéon « Enseignant·e » (`index.html:6294`, `6822`, libellé « Profil enseignant ») et tout
+  libellé qui nomme l'enseignant doivent dire **« orthopédagogue »** quand la nature du cours actif est l'orthopédagogie. Même
+  mécanisme que `changerNatureCoursV2` : un mot, pas un champ retiré.
+- **Relis le Cadre avec ses yeux à elle**, et mesure : titres, états vides, bandeaux d'aide, infobulles de `Cadre › Cours` et
+  `Cadre › Groupe-cours`. Tout ce qui présume l'enseignement (« ton cours », « tes élèves de classe », « le devis ministériel ») se
+  note. **Liste tes trouvailles dans le rapport avec le texte proposé ; ne réécris QUE ce qui est faux pour elle**, pas ce qui est
+  seulement perfectible — sinon ce lot devient une refonte.
+
+### D. Sentinelles, avec break-test rouge
+1. Le point unique rend « Enseignement » pour `'cours'` et « Orthopédagogie » pour `'service'` ; **aucun site ne réécrit le mot en dur**
+   (verrou structurel, à la manière de `obtenirIdContexteActif` : plus aucune recopie hors du point unique).
+2. La valeur en base reste `'service'` après un aller-retour complet du formulaire (création, modification, relecture) — **c'est le
+   verrou qui prouve qu'on n'a changé qu'une étiquette.**
+3. Le libellé de l'enseignant suit la nature du cours actif, dans les deux sens.
+
+**Harnais AVANT/APRÈS sur le pack démo** : les seules différences admises sont des **chaînes affichées**. Zéro valeur, zéro clé,
+zéro identifiant. Si un nombre bouge, arrête et remonte.
+
+---
+
+## 3 · CE QUI NE SE FAIT PAS DANS CE LOT
+- ⛔ **La liste des disciplines ne s'ouvre pas.** Question de Grégoire (7 h 30 : « pourrait-on considérer le service d'orthopédagogie
+  comme une discipline ? »), tranchée par la mesure : la liste est fermée, codée dans `index.html`, organisée par familles
+  ministérielles — c'est le registre du collégial. L'orthopédagogie n'y entre pas. Le partage aura un **second axe** (la nature, qui
+  voyagerait avec le matériel à côté de sa discipline) ; à inscrire, pas à coder.
+- ⛔ **#838** (un élève déjà inscrit à un autre cours n'entre pas dans un service) n'est pas ce lot.
+- ⛔ Aucune migration, aucune réécriture de données, aucun changement de `nature` en base.
+
+## 4 · CE QUI REMONTE À GRÉGOIRE
+- Le texte de la carte sur un groupe-cours ordinaire (§ 2 B, dernière ligne) et tout mot du Cadre que § 2 C fait apparaître :
+  **propose-les dans le rapport, avec leur emplacement** ; livre-les tels quels, il corrigera.
+- Si § 2 C révèle qu'un mot du Cadre est faux pour elle **et** qu'un comportement va avec (un champ requis qui n'a pas de sens),
+  **arrête ce point, inscris, remonte** : ce lot ne change aucun comportement.
+
+## 5 · LIVRER — `minor` (`1.136.0`)
+Le mot « Cours » devient « Enseignement » sur l'écran de **tous** les utilisateurs, pas seulement le sien : c'est visible, donc `minor`.
+Une seule livraison, après la relecture croisée de Cowork. Changelog utilisateur : deux ou trois lignes qui disent ce que chacun voit —
+qu'il y a désormais deux usages nommés dans le Cadre, l'enseignement et l'orthopédagogie, et que rien d'autre ne change.
+
+## 6 · LA PORTE TERRAIN
+Porte neuve et courte (`PORTES-TERRAIN-2026-09-12-etiquettes.md`), markdown par toi, artefact par Cowork :
+1. `Cadre › Cours` sur son 601-101-MQ : le menu Nature dit **Enseignement / Orthopédagogie**, tous ses champs intacts, rien d'autre changé.
+2. Bascule le menu sur Orthopédagogie **sans enregistrer** : les champs se masquent comme avant, les mots suivent ; remets sur
+   Enseignement : tout revient.
+3. En démo, sur le service existant : `Cadre › Cours` et `Cadre › Groupe-cours` disent l'orthopédagogie, y compris le mot de
+   l'orthopédagogue là où l'autre dit l'enseignant.
+4. `Suivi` : le sous-onglet dit « Rencontres (ortho.) » ; les trois questions et la notification portent les mots du § 2 B.
+5. Sur ses deux groupes réels : Suivi du groupe, Liste, un profil — **identiques**.
+
+## 7 · RAPPORT
+Les sites du mot, avant et après le point unique (le compte) ; ce que § 2 C a trouvé dans le Cadre, avec les textes proposés ; ce que
+tu as laissé exprès. Fin de course : `OU-EN-EST-ON.md` et `CONSIGNE-DEMARRAGE-COWORK.md` remesurés.

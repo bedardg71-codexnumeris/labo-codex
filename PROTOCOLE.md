@@ -460,3 +460,26 @@ un push pour laisser finir un run GitHub — le run annulé par `cancel-in-progr
 le suivant juge le sommet de la branche, qui contient tout ce qui précède ; le verdict au jeton
 local (`scripts/pousser.sh`) reste le dernier geste avant chaque push, et le rituel d'ouverture lit
 les JOBS du dernier run (jugé vert, jugé rouge, non jugé).
+
+## Règle 8 — le verdict Playwright local ne se prend pas à deux outils ouverts (12 septembre 2026)
+
+**Fait mesuré par Grégoire le 12 septembre au matin** : les redémarrages nocturnes des 9, 10 et 11 septembre sont des paniques
+noyau par chien de garde (`watchdog timeout`, `kernel_task`), précédées de vingt minutes de pression mémoire extrême sur 16 Go
+(Jetsam à 22 h 17 et 22 h 22 le 11 : ~7,5 Go compressés, 250 Mo libres, load average 20). Ce qui pesait : la VM Apple
+Virtualization de **Cowork** (~2,9 Go), WindowServer, cinq WebContent Safari, le renderer de Claude — **au moment où Claude Code
+lançait le verdict Playwright local** (navigateurs WebKit en série), juste après les commits de release de 21 h 44-21 h 49.
+Le 11, la marche a été coupée entre le verdict et le push : 1.135.0 committée, jamais poussée ; en ligne, l'état intermédiaire
+`af574fd2` sous un faux numéro.
+
+**La règle** :
+1. Le verdict Playwright local (`scripts/verifier-playwright.mjs`) **ne se lance pas pendant qu'une session Cowork est ouverte**.
+   Claude Code le dit avant de le lancer (« ferme Cowork, je lance le verdict »), et Grégoire rouvre Cowork après.
+2. En fin de journée, **la marche s'arrête AVANT le verdict** si Grégoire ferme ; le verdict et le push se prennent le lendemain
+   matin, Cowork fermé. Une livraison ne se termine pas la nuit, sans personne — c'est aussi la règle 6 (« une seule livraison par
+   séance, à la fin, et il regarde avant »).
+3. Quand le verdict doit quand même tourner à côté d'autre chose : `--workers=1` (plus lent, sans pic), et la pression mémoire du
+   Moniteur d'activité doit rester verte.
+4. Un push qui suit un verdict interrompu n'a pas de verdict : on le dit, on ne le suppose pas (`git reflog show origin/main` fait foi).
+
+**Ce qui ne change pas** : la CI GitHub reste le second verdict (règle 7) ; tant que `#833` la laisse rouge sur des specs sans
+rapport, le verdict local est le seul, d'où l'importance de le prendre dans de bonnes conditions.
