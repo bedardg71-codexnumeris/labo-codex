@@ -7,6 +7,12 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, APRÈS 13 H (Toronto) : 1.139.0 POUSSÉE — `origin/main` = `e29f734c`
+
+> ✅ Tout est sur `main` = `origin/main` jusqu'à `e29f734c` (fichiers de Cowork : porte du lot 4 relevée 10/10). Verdict Playwright local vert sur ce SHA, Cowork fermé (huit specs de Conception vertes au second essai, #685 si l'une revient) ; push par `scripts/pousser.sh`. Ce relais-ci est un commit de documents POSTÉRIEUR, local, non poussé (le hook exige un verdict sur chaque SHA). **Reste** : la porte `PORTES-TERRAIN-2026-09-12-interventions.md` + son artefact par Cowork, **avant lundi** (décision 3.1 : le titre de l'entrée « Nouvelles ») ; puis le lot 6 du cadrage 11, l'Animation.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 13 H (Toronto) : 1.139.0 RELEASÉE (build 0912-1259) — NON POUSSÉE
 
 > Sur `main` local, devant `origin/main` (`61b5c883`) : `1b36c338`, `5af8cc8e`, `9ceca4ff` (lot 5), `2893fbab` (relais), `6c8c91a9` (correctif de la relecture croisée de Cowork, 13 h 10), la release 1.139.0, puis ce relais. Vitest 551 / 6 034 après le commit du bump. **Reste** : verdict Playwright **Cowork fermé** sur le SHA exact de ce relais (`cd tests && node ../scripts/verifier-playwright.mjs`) → `scripts/pousser.sh` → porte `PORTES-TERRAIN-2026-09-12-interventions.md` + artefact par Cowork, **avant lundi** ; décision 3.1 (titre de l'entrée « Nouvelles ») à Grégoire.
