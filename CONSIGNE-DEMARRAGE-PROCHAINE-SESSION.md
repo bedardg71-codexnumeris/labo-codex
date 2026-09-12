@@ -1,5 +1,11 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026, soir (Toronto) : `1.139.0` est POUSSÉE (`e29f734c`) et tout ce
+> qui a suivi aussi — `origin/main` = `5519864d` avant le commit de documents de ce soir. Vitest 551 / 6 034. Porte des Interventions
+> RELEVÉE 6/6 par Cowork à 15 h 03, rangées 2.4 et 2.5 sautées faute de cas. Ce soir, documents seulement : tri des 37 fiches ouvertes
+> des audits (`plans de travail/TRI-2026-09-12-fiches-ouvertes-audits.md` — une périmée cochée, #467 gardée avant les partages de la
+> cohorte, 35 après la cohorte) et mise à jour des fichiers de relais. Lot suivant : 6, l'Animation (`CONSIGNE-SUIVANTE-lot-6-animation.md`).
+> Les blocs ci-dessous sont historiques.**
 > ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 13 h (Toronto) : relecture croisée de Cowork sur `9ceca4ff` (13 h 10) —
 > « passe, une correction » — faite (`6c8c91a9` : un Enregistrer introuvable n'annonce plus « enregistrée »). `1.139.0` RELEASÉE (build
 > `0912-1259`), NON POUSSÉE. Vitest 551 / 6 034 après le bump. Marche restante du bloc de 12 h 31 : (4) verdict Playwright Cowork fermé sur le
