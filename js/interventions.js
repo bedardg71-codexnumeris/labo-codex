@@ -1393,125 +1393,132 @@ function sauvegarderPresencesIntervention(interventionId) {
         index = interventions.length - 1;
     }
 
-    if (index !== -1) {
-        const ancienStatut = interventions[index].statut;
+    // Relecture croisée de Cowork (12 sept. 2026, 13 h 10) : un id qui n'est ni en base ni le brouillon n'écrit rien,
+    // et le dit. Avant, le bloc était sauté mais « Intervention enregistrée » s'affichait quand même — et le seul
+    // témoin de ce cas (le console.error de `marquerPresences`) était parti avec elle.
+    if (index === -1) {
+        console.error('Interventions : rien d\'enregistré — id ni en base ni en brouillon :', interventionId);
+        notifications.erreur(V().introuvable);
+        return;
+    }
 
-        // Les présences (etudiants et analyse) : les cochés du formulaire, plus les participants que le
-        // formulaire n'a pas montrés (#772).
-        const participantsNonAffiches = (interventions[index].etudiants || []).filter(da => !dasAffiches.includes(da));
-        _appliquerPresences(interventions[index], [...new Set(participantsNonAffiches.concat(dasSelectionnes))]);
+    const ancienStatut = interventions[index].statut;
 
-        // Dériver contexte, type et absences depuis le formulaire
-        var niveauSave = parseInt(document.getElementById('interventionNiveau').value);
-        var contexteElSave = document.getElementById('interventionContexte');
-        // Sur un service, le contexte de classe n'existe pas : hors-classe, quel que soit le niveau (cadrage § C).
-        var contexteSave = (niveauSave === 2 && contexteElSave && !_surService()) ? contexteElSave.value : 'hors-classe';
-        var typeSave = 'groupe';
-        if (contexteSave === 'mio') typeSave = 'mio';
-        else if (niveauSave === 3) typeSave = 'individuel';
+    // Les présences (etudiants et analyse) : les cochés du formulaire, plus les participants que le
+    // formulaire n'a pas montrés (#772).
+    const participantsNonAffiches = (interventions[index].etudiants || []).filter(da => !dasAffiches.includes(da));
+    _appliquerPresences(interventions[index], [...new Set(participantsNonAffiches.concat(dasSelectionnes))]);
 
-        // Mettre à jour les informations de base
-        interventions[index].titre = document.getElementById('interventionTitre').value;
-        interventions[index].date = document.getElementById('interventionDate').value;
-        interventions[index].heure = document.getElementById('interventionHeure').value;
-        interventions[index].duree = parseFloat(document.getElementById('interventionDuree').value) || 2;
-        interventions[index].niveauRai = niveauSave;
-        interventions[index].contexte = contexteSave;
-        interventions[index].type = typeSave;
-        interventions[index].description = document.getElementById('interventionDescription').value;
+    // Dériver contexte, type et absences depuis le formulaire
+    var niveauSave = parseInt(document.getElementById('interventionNiveau').value);
+    var contexteElSave = document.getElementById('interventionContexte');
+    // Sur un service, le contexte de classe n'existe pas : hors-classe, quel que soit le niveau (cadrage § C).
+    var contexteSave = (niveauSave === 2 && contexteElSave && !_surService()) ? contexteElSave.value : 'hors-classe';
+    var typeSave = 'groupe';
+    if (contexteSave === 'mio') typeSave = 'mio';
+    else if (niveauSave === 3) typeSave = 'individuel';
 
-        // Absences seulement si rattrapage
-        if (contexteSave === 'rattrapage') {
-            interventions[index].seanceConcernee = document.getElementById('interventionSeance').value || null;
-            interventions[index].marquerNonParticipantsMotives = true;
-        } else {
-            interventions[index].seanceConcernee = null;
-            interventions[index].marquerNonParticipantsMotives = false;
-        }
+    // Mettre à jour les informations de base
+    interventions[index].titre = document.getElementById('interventionTitre').value;
+    interventions[index].date = document.getElementById('interventionDate').value;
+    interventions[index].heure = document.getElementById('interventionHeure').value;
+    interventions[index].duree = parseFloat(document.getElementById('interventionDuree').value) || 2;
+    interventions[index].niveauRai = niveauSave;
+    interventions[index].contexte = contexteSave;
+    interventions[index].type = typeSave;
+    interventions[index].description = document.getElementById('interventionDescription').value;
 
-        // Mettre à jour le statut
-        interventions[index].statut = nouveauStatut;
+    // Absences seulement si rattrapage
+    if (contexteSave === 'rattrapage') {
+        interventions[index].seanceConcernee = document.getElementById('interventionSeance').value || null;
+        interventions[index].marquerNonParticipantsMotives = true;
+    } else {
+        interventions[index].seanceConcernee = null;
+        interventions[index].marquerNonParticipantsMotives = false;
+    }
 
-        // Mettre à jour observations
-        interventions[index].observations = observations;
+    // Mettre à jour le statut
+    interventions[index].statut = nouveauStatut;
 
-        // Notes individuelles (#772) : on part de celles en base et on n'écrit que ce que le formulaire a
-        // montré — un champ affiché vide efface la note, un champ affiché rempli la pose (coché ou non) ;
-        // les DA sans champ (autre groupe-cours, élève parti) gardent la leur.
-        const notesIndividuelles = Object.assign({}, interventions[index].notesIndividuelles || {});
-        dasAffiches.forEach(da => {
-            const noteField = document.getElementById(`note-${da}`);
-            if (!noteField) return;
-            const texte = noteField.value.trim();
-            if (texte) notesIndividuelles[da] = texte;
-            else delete notesIndividuelles[da];
-        });
-        interventions[index].notesIndividuelles = notesIndividuelles;
+    // Mettre à jour observations
+    interventions[index].observations = observations;
 
-        // Snapshot incrémental par étudiant (Phase 4 — PT-2 + PT-3)
-        if (!interventions[index].snapshotAvant) interventions[index].snapshotAvant = {};
-        dasSelectionnes.forEach(function(da) {
-            if (!interventions[index].snapshotAvant[da]) {
-                var indicesSnap = typeof calculerTousLesIndices === 'function' ? calculerTousLesIndices(da) : null;
-                var moyennesSnap = typeof calculerMoyennesCriteres === 'function' ? calculerMoyennesCriteres(da) : null;
-                var criteresSnap = {};
-                if (moyennesSnap) {
-                    Object.keys(moyennesSnap).forEach(function(k) {
-                        if (typeof moyennesSnap[k] === 'number') criteresSnap[k] = moyennesSnap[k];
-                    });
-                }
-                interventions[index].snapshotAvant[da] = {
-                    P: indicesSnap ? indicesSnap.P : null,
-                    criteres: criteresSnap
-                };
+    // Notes individuelles (#772) : on part de celles en base et on n'écrit que ce que le formulaire a
+    // montré — un champ affiché vide efface la note, un champ affiché rempli la pose (coché ou non) ;
+    // les DA sans champ (autre groupe-cours, élève parti) gardent la leur.
+    const notesIndividuelles = Object.assign({}, interventions[index].notesIndividuelles || {});
+    dasAffiches.forEach(da => {
+        const noteField = document.getElementById(`note-${da}`);
+        if (!noteField) return;
+        const texte = noteField.value.trim();
+        if (texte) notesIndividuelles[da] = texte;
+        else delete notesIndividuelles[da];
+    });
+    interventions[index].notesIndividuelles = notesIndividuelles;
+
+    // Snapshot incrémental par étudiant (Phase 4 — PT-2 + PT-3)
+    if (!interventions[index].snapshotAvant) interventions[index].snapshotAvant = {};
+    dasSelectionnes.forEach(function(da) {
+        if (!interventions[index].snapshotAvant[da]) {
+            var indicesSnap = typeof calculerTousLesIndices === 'function' ? calculerTousLesIndices(da) : null;
+            var moyennesSnap = typeof calculerMoyennesCriteres === 'function' ? calculerMoyennesCriteres(da) : null;
+            var criteresSnap = {};
+            if (moyennesSnap) {
+                Object.keys(moyennesSnap).forEach(function(k) {
+                    if (typeof moyennesSnap[k] === 'number') criteresSnap[k] = moyennesSnap[k];
+                });
             }
-        });
-
-        // Sauvegarder les critères ciblés et l'objectif (Phase 3). Lot C du 12 sept. : sur un service, leur carte
-        // n'est pas rendue — conteneur ou champ ABSENT ⇒ on ne touche pas au champ : ce qui est en base y reste
-        // (une liste vide lue dans un conteneur absent effacerait des critères que personne n'a décochés).
-        if (document.getElementById('criteresCiblesContainer')) {
-            var criteresCiblesCbs = document.querySelectorAll('#criteresCiblesContainer .critere-cible-cb:checked');
-            interventions[index].criteresCibles = Array.from(criteresCiblesCbs).map(function(cb) { return cb.value; });
-        }
-        var objectifField = document.getElementById('objectifVise');
-        if (objectifField) interventions[index].objectifVise = objectifField.value;
-
-        // Sauvegarder le bilan si l'intervention est complétée (Phase 4)
-        if (nouveauStatut === 'completee') {
-            var bilanAtteintRadio = document.querySelector('input[name="bilanAtteint"]:checked');
-            var bilanSuiteRadio = document.querySelector('input[name="bilanSuite"]:checked');
-            var observationsBilanField = document.getElementById('observationsBilan');
-            interventions[index].bilan = {
-                atteint: bilanAtteintRadio ? bilanAtteintRadio.value : null,
-                suite: bilanSuiteRadio ? bilanSuiteRadio.value : null,
-                observationsBilan: observationsBilanField ? observationsBilanField.value : '',
-                dateBilan: Date.now()
+            interventions[index].snapshotAvant[da] = {
+                P: indicesSnap ? indicesSnap.P : null,
+                criteres: criteresSnap
             };
         }
+    });
 
-        // Lot 5 : le drapeau `jamaisSauvegardee` n'existe plus (le brouillon vit en mémoire). Une intervention
-        // du stock qui le porte encore (à false) le perd ici, à son propre Enregistrer — jamais en masse.
-        delete interventions[index].jamaisSauvegardee;
+    // Sauvegarder les critères ciblés et l'objectif (Phase 3). Lot C du 12 sept. : sur un service, leur carte
+    // n'est pas rendue — conteneur ou champ ABSENT ⇒ on ne touche pas au champ : ce qui est en base y reste
+    // (une liste vide lue dans un conteneur absent effacerait des critères que personne n'a décochés).
+    if (document.getElementById('criteresCiblesContainer')) {
+        var criteresCiblesCbs = document.querySelectorAll('#criteresCiblesContainer .critere-cible-cb:checked');
+        interventions[index].criteresCibles = Array.from(criteresCiblesCbs).map(function(cb) { return cb.value; });
+    }
+    var objectifField = document.getElementById('objectifVise');
+    if (objectifField) interventions[index].objectifVise = objectifField.value;
 
-        // Lot D : une intervention d'avant le lot prend son contexte au premier Enregistrer
-        // qui la touche — celui où l'enseignant la rouvre. Jamais réécrite en masse.
-        if (!interventions[index].groupeCoursId) {
-            const contexteNaissance = obtenirIdContexteActif();
-            if (contexteNaissance) interventions[index].groupeCoursId = contexteNaissance;
-        }
+    // Sauvegarder le bilan si l'intervention est complétée (Phase 4)
+    if (nouveauStatut === 'completee') {
+        var bilanAtteintRadio = document.querySelector('input[name="bilanAtteint"]:checked');
+        var bilanSuiteRadio = document.querySelector('input[name="bilanSuite"]:checked');
+        var observationsBilanField = document.getElementById('observationsBilan');
+        interventions[index].bilan = {
+            atteint: bilanAtteintRadio ? bilanAtteintRadio.value : null,
+            suite: bilanSuiteRadio ? bilanSuiteRadio.value : null,
+            observationsBilan: observationsBilanField ? observationsBilanField.value : '',
+            dateBilan: Date.now()
+        };
+    }
 
-        interventions[index].dateModification = Date.now();
-        sauvegarderInterventions(interventions);
-        if (_estBrouillon(interventionId)) _brouillon = null;
-        // Si l'intervention vient d'être marquée comme complétée, transférer les présences
-        if (nouveauStatut === 'completee' && ancienStatut !== 'completee') {
-            transfererPresencesVersModule(interventionId);
-        }
-        // Si l'intervention est déjà complétée, re-transférer les présences au cas où il y aurait des changements
-        else if (nouveauStatut === 'completee') {
-            transfererPresencesVersModule(interventionId);
-        }
+    // Lot 5 : le drapeau `jamaisSauvegardee` n'existe plus (le brouillon vit en mémoire). Une intervention
+    // du stock qui le porte encore (à false) le perd ici, à son propre Enregistrer — jamais en masse.
+    delete interventions[index].jamaisSauvegardee;
+
+    // Lot D : une intervention d'avant le lot prend son contexte au premier Enregistrer
+    // qui la touche — celui où l'enseignant la rouvre. Jamais réécrite en masse.
+    if (!interventions[index].groupeCoursId) {
+        const contexteNaissance = obtenirIdContexteActif();
+        if (contexteNaissance) interventions[index].groupeCoursId = contexteNaissance;
+    }
+
+    interventions[index].dateModification = Date.now();
+    sauvegarderInterventions(interventions);
+    if (_estBrouillon(interventionId)) _brouillon = null;
+    // Si l'intervention vient d'être marquée comme complétée, transférer les présences
+    if (nouveauStatut === 'completee' && ancienStatut !== 'completee') {
+        transfererPresencesVersModule(interventionId);
+    }
+    // Si l'intervention est déjà complétée, re-transférer les présences au cas où il y aurait des changements
+    else if (nouveauStatut === 'completee') {
+        transfererPresencesVersModule(interventionId);
     }
 
     // Retourner à la liste
