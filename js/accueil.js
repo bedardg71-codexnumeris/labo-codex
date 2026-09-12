@@ -87,9 +87,11 @@ function genererBanniereBienvenue() {
             </button>
             <div id="banniere-bienvenue-corps" class="banniere-bienvenue-corps">
             <p>Labo Codex est un outil de soutien à l’enseignement et de suivi des apprentissages. L’application te propose de numériser ton travail. Tu peux planifier, concevoir, évaluer et suivre la progression de tes étudiant·es. Les mêmes gestes que sur papier, mais dans un seul outil numérique et portable ! Labo Codex est gratuit, ouvert et indépendant !</p>
-            <p><strong>Par où commencer ?</strong> Configure ton trimestre, ton cours et ton groupe dans l’onglet Cadre : tu saisis tout une fois, l’app s’en sert partout. Ensuite, crée tes productions et tes évaluations. Tu peux les élaborer et les partager facilement avec tes collègues.</p>
-            <p><strong>Certains concepts sont nouveaux pour toi ?</strong> Trois guides pédagogiques t’expliquent en quelques pages la taxonomie SOLO, les micro-données et le modèle RàI — accessibles en tout temps par les boutons « Guide » des Outils d’observation.</p>
-            <p>L’identification est requise pour accéder à Labo Codex. Tu donnes ton courriel, tu reçois un code, et tu n’y repenses plus pendant un mois — après quoi tu redonnes ton courriel et c’est reparti. Rien ne se ferme, et tes données restent sur ton appareil.</p>
+            <p><strong>Par où commencer ?</strong><br>
+                <strong>Je suis enseignant·e</strong> — Configure ton trimestre, ton cours et ton groupe dans l’onglet Cadre : tu saisis tout une fois, l’app s’en sert partout. Ensuite, crée tes productions et tes évaluations — tu peux les élaborer et les partager avec tes collègues.<br>
+                <strong>Je suis orthopédagogue</strong> — Décris ton service dans Suivi › Rencontres : tes rencontres se tiennent là.</p>
+            <p><strong>Certains concepts sont nouveaux ?</strong> Trois guides expliquent la taxonomie SOLO, les micro-données et le modèle RàI, accessibles en tout temps par les boutons « Guide ».</p>
+            <p><strong>Ton courriel, une fois par mois.</strong> Tu donnes ton courriel, tu reçois un code, et tu n’y repenses plus. Rien ne se ferme, et tes données restent sur ton appareil.</p>
             ${paragrapheCommunaute}
             <div class="banniere-bienvenue-actions">
                 <button class="btn btn-primaire" data-action="demarrerTourGuide">
@@ -127,6 +129,11 @@ function basculerBanniereBienvenue() {
  *
  *   - Hero « Que souhaites-tu faire ? »
  *   - bannière de bienvenue (nouvel utilisateur)
+ *   - porte de l'orthopédagogie (consigne du 12 sept. 2026) : une carte blanche, pleine
+ *     largeur, au-dessus des tâches — elle n'en remplace aucune ; son lien prend le même
+ *     chemin que la sous-navigation (Suivi › Rencontres, les trois questions). Grégoire :
+ *     « Je veux que l'orthopédagogue sente qu'elle entre par la porte principale. »
+ *     Ses mots, et ceux du bandeau, ne s'écrivent qu'ici.
  *   - Raccourcis : grille 4×2 de 8 cartes d'action
  *   - Utilitaires (gauche) | Aide (droite) : rangée de 4 demi-cartes
  *       · 2 utilitaires neutres (Sauvegarder, Nouveautés)
@@ -148,6 +155,14 @@ function afficherAccueilContenu(conteneur) {
 
     conteneur.innerHTML = `
         ${banniereBienvenueHTML}
+
+        <div class="accueil-porte-ortho" id="accueil-porte-ortho">
+            <div>
+                <div class="accueil-porte-ortho-titre">Tu es orthopédagogue ?</div>
+                <div class="accueil-porte-ortho-desc">Décris ton service : son nom, la liste de tes étudiant·es et les dates de ton trimestre.</div>
+            </div>
+            <button type="button" class="accueil-porte-ortho-lien" data-action="naviguerAccueilCarte" data-param="suivi|suivi-rencontres">Commencer →</button>
+        </div>
 
         <div class="accueil-section-label">Tâches</div>
         <div class="accueil-grille-actions">

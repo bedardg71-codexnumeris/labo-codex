@@ -74,7 +74,9 @@ function monterMots() { return chargerScript('js/mots-nature.js', {}, { addEvent
 // Les mots de 1.136.0 hors service, tels que le harnais du pack démo les a lus AVANT le lot (12 sept., 9 h) —
 // la ligne de contrôle du verrou 4. Ils ne bougent pas : un service actif est le seul cas qui les change.
 const MOTS_1_136_0_HORS_SERVICE = {
-    choisirObjet: 'Sélectionner un cours...', choisirObjetGC: '— Choisir un cours —', choisirPersonneGC: '— Choisir un enseignant —',
+    // #846 (12 sept., 10 h 25) : `choisirObjetGC` a quitté le point unique — le champ 2 ne suit plus la nature
+    // (verrouillé dans sentinelle-accueil-porte-ortho-et-champ2-846.test.js).
+    choisirObjet: 'Sélectionner un cours...', choisirPersonneGC: '— Choisir un enseignant —',
     aucunObjet: 'Aucun cours sélectionné', nouveau: 'Nouveau cours', modifier: 'Modifier le cours', dupliquer: 'Dupliquer le cours', Objet: 'Cours', objet: 'cours',
     elementsObligatoires: 'renseigne les 5 éléments obligatoires : trimestre, cours, numéro de groupe, horaire et enseignant·e. La pratique de notation est facultative.',
     nbElementsObligatoires: '5 éléments obligatoires', elementsObligatoiresForm: 'Renseigne les 5 éléments obligatoires (la pratique de notation est facultative).', horaireFacultatif: ''
@@ -101,7 +103,7 @@ describe('1 · #841 — l\'option vide d\'un menu de personne vient du point uni
         expect(b.elements['v2-selectEnseignant'].innerHTML).not.toContain('— Sélectionner —');
     });
 
-    it('v2-gc-enseignant et v2-gc-cours repeuplés (populerDropdownsAssemblageV2) : « — Choisir un·e orthopédagogue — » / « — Choisir un service — » sur un service', () => {
+    it('v2-gc-enseignant repeuplé (populerDropdownsAssemblageV2) : « — Choisir un·e orthopédagogue — » sur un service ; v2-gc-cours ne suit plus (#846)', () => {
         const etat = { service: true };
         const elements = {};
         const document = fauxDocument(elements);
@@ -110,11 +112,11 @@ describe('1 · #841 — l\'option vide d\'un menu de personne vient du point uni
         win.populerDropdownsAssemblageV2();
         expect(elements['v2-gc-enseignant'].options[0].textContent).toBe('— Choisir un·e orthopédagogue —');
         expect(elements['v2-gc-enseignant'].options[1].textContent).toBe('Marie Tremblay');
-        expect(elements['v2-gc-cours'].options[0].textContent).toBe('— Choisir un service —');
+        expect(elements['v2-gc-cours'].options[0].textContent, '#846 : le champ 2 nomme un choix, pas le contexte').toBe('— Choisir un cours ou un service —');
         etat.service = false;
         win.populerDropdownsAssemblageV2();
         expect(elements['v2-gc-enseignant'].options[0].textContent).toBe(MOTS_1_136_0_HORS_SERVICE.choisirPersonneGC);
-        expect(elements['v2-gc-cours'].options[0].textContent).toBe(MOTS_1_136_0_HORS_SERVICE.choisirObjetGC);
+        expect(elements['v2-gc-cours'].options[0].textContent).toBe('— Choisir un cours ou un service —');
     });
 
     it('le dernier qui écrit dit le même mot : appliquerMotsNatureCadre PUIS le repeuplement, et le repeuplement PUIS appliquerMotsNatureCadre', () => {
@@ -163,7 +165,8 @@ describe('2 · verrou structurel étendu — aucune option vide nommant une pers
         const tv2 = sansCommentaires(lire('js/trimestre-v2.js'));
         const corpsTv2 = tv2.slice(tv2.indexOf('function populerDropdownsAssemblageV2()'));
         expect(corpsTv2).toMatch(/<option value="">' \+ motsNatureContexteActif\(\)\.choisirPersonneGC \+ '<\/option>/);
-        expect(corpsTv2).toMatch(/<option value="">' \+ motsNatureContexteActif\(\)\.choisirObjetGC \+ '<\/option>/);
+        // #846 : le champ 2 ne lit plus le contexte — il nomme un choix (verrou dans la sentinelle 846).
+        expect(corpsTv2).toMatch(/<option value="">— Choisir un cours ou un service —<\/option>/);
         const cours = sansCommentaires(lire('js/trimestre-v2-cours.js'));
         expect(cours).toMatch(/<option value="">' \+ echapperHtml\(motsNatureContexteActif\(\)\.choisirObjet\) \+ '<\/option>/);
     });

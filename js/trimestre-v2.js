@@ -273,8 +273,9 @@ function populerDropdownsAssemblageV2() {
             const label = code ? `${code}${nom ? ' - ' + nom : ''}` : nom;
             return label || `Cours ${c.id || 'inconnu'}`;
         };
-        // #842 (12 sept. 2026) : le mot suit le contexte actif, depuis le point unique (js/mots-nature.js).
-        let html = '<option value="">' + motsNatureContexteActif().choisirObjetGC + '</option>';
+        // #846 (12 sept. 2026) : le champ 2 ne suit PAS le contexte actif — il nomme ce qu'on choisit,
+        // et ce menu offre toujours les deux natures. Un seul mot, sur un cours comme sur un service.
+        let html = '<option value="">— Choisir un cours ou un service —</option>';
         coursReels.forEach(c => {
             html += `<option value="${echapperHtml(c.id)}">${echapperHtml(labelCours(c))}</option>`;
         });

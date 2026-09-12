@@ -1,0 +1,252 @@
+import { describe, it, expect } from 'vitest';
+import { readFileSync, readdirSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { chargerScript } from './_helpers/charger-script.js';
+
+// SENTINELLE — LA PORTE DE L'ORTHOPÉDAGOGIE SUR L'ACCUEIL, ET LE CHAMP 2 QUI NE SE CONTREDIT PLUS
+// (consigne du 12 septembre 2026, 10 h 25 ; #846 et la carte de l'accueil).
+//
+// Grégoire (12 sept., 7 h 35) : « Je veux que l'orthopédagogue sente qu'elle entre par la porte
+// principale. » Aucun comportement, aucune donnée, aucune règle ne change : des mots, et une carte.
+//
+// VERROUILLÉ ICI :
+//   A. #846 — le champ 2 du groupe-cours nomme ce qu'on CHOISIT, pas le contexte : il dit
+//      « Cours ou service » sur un service comme sur un cours, son option vide aussi, et son menu
+//      offre les deux natures dans les deux contextes ; `appliquerMotsNatureCadre` ne le touche plus ;
+//      les deux clés retirées du point unique ne reviennent pas.
+//   B1. la carte est sur l'accueil, SOUS le bandeau et AU-DESSUS du label « Tâches » — et les huit
+//      cartes de tâches sont toujours là (le verrou : rien n'est remplacé) ;
+//   B2. son lien prend le chemin de la sous-navigation (Suivi › Rencontres), pas un second ;
+//   B3. les mots de la carte et du bandeau viennent du RENDU, et un seul endroit les écrit ;
+//   B4. la carte est blanche comme les autres : même fond, même trait, même rayon, même ombre en
+//      mode clair ; ni bord gauche épais, ni couleur propre (la sarcelle signe la démo).
+//
+// BREAK-TESTS VÉRIFIÉS le 12 septembre 2026 — journal en fin de fichier.
+
+const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+const lire = (rel) => readFileSync(path.join(RACINE, rel), 'utf8');
+const clone = (x) => JSON.parse(JSON.stringify(x));
+const cle = (k) => (String(k).startsWith('test_') ? k : 'test_' + k);
+const ech = (s) => String(s == null ? '' : s);
+const sansCommentaires = (code) => code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+function elementDom(id) {
+    const el = { id, _html: '', textContent: '', value: '', style: {}, dataset: {}, options: [], _attrs: {},
+        get innerHTML() { return this._html; },
+        set innerHTML(v) { this._html = v; this.options = [...String(v).matchAll(/<option value="([^"]*)"[^>]*>([^<]*)<\/option>/g)].map(m => ({ value: m[1], textContent: m[2] })); },
+        classList: { add() {}, remove() {}, contains() { return false; }, toggle() {} },
+        querySelector() { return null; }, querySelectorAll() { return []; }, addEventListener() {}, appendChild(c) { return c; },
+        setAttribute(k, v) { this._attrs[k] = v; }, getAttribute(k) { return k in this._attrs ? this._attrs[k] : null; },
+        hasAttribute(k) { return k in this._attrs; }, closest() { return null; }, focus() {} };
+    return el;
+}
+function fauxDocument(elements, marques) {
+    return { getElementById: (id) => (elements[id] || (elements[id] = elementDom(id))), querySelector: () => null,
+        querySelectorAll: (sel) => (sel === '[data-mot-nature]' ? (marques || []) : []),
+        createElement: (t) => elementDom(t), addEventListener() {}, body: elementDom('body'), readyState: 'complete' };
+}
+function dbBanc(store) {
+    return {
+        getSync: (k, d) => (k in store ? clone(store[k]) : d), setSync: (k, v) => { store[k] = clone(v); },
+        get: async (k) => (k in store ? clone(store[k]) : null), set: async (k, v) => { store[k] = clone(v); },
+        modifier: async (k, f, d) => { store[k] = clone(f(k in store ? clone(store[k]) : d)); },
+    };
+}
+const notifs = { succes() {}, erreur() {}, info() {}, warning() {} };
+
+const CHAMP2 = 'Cours ou service';
+const CHAMP2_VIDE = '— Choisir un cours ou un service —';
+
+// ─────────────────────────────────────────────────────────────────────────────
+describe('A · #846 — le champ 2 du groupe-cours dit le même mot sur un service comme sur un cours', () => {
+    const COURS = [{ id: 'C1', codeCours: '601-101-MQ', nomCours: 'Écriture' }, { id: 'S1', nature: 'service', nomCours: 'Aide' }];
+
+    it('le menu repeuplé (populerDropdownsAssemblageV2) : même option vide, et les deux natures, dans les deux contextes', () => {
+        const etat = { service: true };
+        const elements = {};
+        const store = { trimestres: [], trimestreActif: '', cours: COURS, enseignants: [] };
+        const win = chargerScript('js/trimestre-v2.js', { document: fauxDocument(elements), db: dbBanc(store), cle, echapperHtml: ech, echapperAttribut: ech,
+            contexteActifEstService: () => !!etat.service });
+        const attendu = [CHAMP2_VIDE, '601-101-MQ - Écriture', 'Aide'];
+        win.populerDropdownsAssemblageV2();
+        expect(elements['v2-gc-cours'].options.map(o => o.textContent), 'sur un service').toEqual(attendu);
+        etat.service = false;
+        win.populerDropdownsAssemblageV2();
+        expect(elements['v2-gc-cours'].options.map(o => o.textContent), 'sur un cours').toEqual(attendu);
+    });
+
+    it('appliquerMotsNatureCadre ne touche plus l\'option vide du champ 2 (elle ne nomme pas le contexte)', () => {
+        const etat = { service: true };
+        const elements = {};
+        const vide = Object.assign(elementDom('vide'), { value: '', textContent: CHAMP2_VIDE });
+        elements['v2-gc-cours'] = Object.assign(elementDom('v2-gc-cours'), { options: [vide] });
+        const win = chargerScript('js/trimestre-v2-orchestre.js', { document: fauxDocument(elements, []), db: dbBanc({}), cle, echapperHtml: ech,
+            notifications: notifs, contexteActifEstService: () => !!etat.service }, { addEventListener() {} });
+        win.appliquerMotsNatureCadre();
+        expect(vide.textContent, 'sur un service').toBe(CHAMP2_VIDE);
+        etat.service = false;
+        win.appliquerMotsNatureCadre();
+        expect(vide.textContent, 'sur un cours').toBe(CHAMP2_VIDE);
+    });
+
+    it('index.html : le libellé du champ 2, son option vide et l\'élément de la liste disent « Cours ou service », sans marque data-mot-nature', () => {
+        const html = lire('index.html');
+        expect(html).toContain('<label>2. ' + CHAMP2 + ' <span class="champ-requis">*</span></label>');
+        expect(html).toMatch(new RegExp('<select id="v2-gc-cours"[^>]*>\\s*<option value="">' + CHAMP2_VIDE + '</option>'));
+        expect(html).toContain('<li><strong>' + CHAMP2 + '</strong></li>');
+        expect(html).not.toContain('data-mot-nature="objetGroupeCours"');
+        expect(html).not.toContain('Cours à enseigner');
+    });
+
+    it('les deux clés retirées ne reviennent pas au point unique, et aucun module ne les lit', () => {
+        const w = chargerScript('js/mots-nature.js', {}, { addEventListener() {} });
+        for (const nature of ['cours', 'service']) {
+            expect(w.MOTS_NATURE[nature], nature).not.toHaveProperty('objetGroupeCours');
+            expect(w.MOTS_NATURE[nature], nature).not.toHaveProperty('choisirObjetGC');
+        }
+        const fautifs = readdirSync(path.join(RACINE, 'js')).filter(f => f.endsWith('.js'))
+            .filter(f => /objetGroupeCours|choisirObjetGC/.test(sansCommentaires(lire('js/' + f))));
+        expect(fautifs).toEqual([]);
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+const TACHES = ['Adopter ta pratique', 'Planifier ton cours', 'Saisir les présences', 'Importer des productions',
+    'Annoter et évaluer', 'Observer le groupe', 'Consulter un profil', 'Différencier les interventions'];
+
+// Les mots arrêtés par Grégoire (consigne § 2), dans l'ordre où l'accueil les rend.
+const MOTS_BANDEAU = [
+    'Par où commencer ?',
+    'Je suis enseignant·e',
+    '— Configure ton trimestre, ton cours et ton groupe dans l’onglet Cadre : tu saisis tout une fois, l’app s’en sert partout. Ensuite, crée tes productions et tes évaluations — tu peux les élaborer et les partager avec tes collègues.',
+    'Je suis orthopédagogue',
+    '— Décris ton service dans Suivi › Rencontres : tes rencontres se tiennent là.',
+    'Certains concepts sont nouveaux ?',
+    'Trois guides expliquent la taxonomie SOLO, les micro-données et le modèle RàI, accessibles en tout temps par les boutons « Guide ».',
+    'Ton courriel, une fois par mois.',
+    'Tu donnes ton courriel, tu reçois un code, et tu n’y repenses plus. Rien ne se ferme, et tes données restent sur ton appareil.',
+];
+const MOTS_CARTE = ['Tu es orthopédagogue ?', 'Décris ton service : son nom, la liste de tes étudiant·es et les dates de ton trimestre.', 'Commencer →'];
+
+function rendreAccueil() {
+    const elements = {};
+    const appels = [];
+    const win = chargerScript('js/accueil.js', {
+        document: fauxDocument(elements), obtenirPreference: () => false, definirPreference() {}, estEnModeDemo: () => false,
+        afficherSection: (s) => appels.push(['section', s]), afficherSousSection: (s) => appels.push(['sous-section', s]),
+        setTimeout: (f) => f(),
+    }, { addEventListener() {} });
+    win.afficherAccueil();
+    return { html: elements['accueil-contenu'].innerHTML, win, appels };
+}
+
+describe('B1 · la carte est au-dessus des tâches, et les huit tâches sont toujours là', () => {
+    it('ordre : le bandeau, puis la carte, puis le label « Tâches », puis la grille des tâches', () => {
+        const { html } = rendreAccueil();
+        const iBandeau = html.indexOf('id="banniere-bienvenue"');
+        const iCarte = html.indexOf('class="accueil-porte-ortho"');
+        const iTaches = html.indexOf('<div class="accueil-section-label">Tâches</div>');
+        const iGrille = html.indexOf('class="accueil-grille-actions"');
+        expect(iBandeau).toBeGreaterThanOrEqual(0);
+        expect(iCarte, 'la carte est rendue').toBeGreaterThan(iBandeau);
+        expect(iTaches, 'au-dessus du label « Tâches »').toBeGreaterThan(iCarte);
+        expect(iGrille).toBeGreaterThan(iTaches);
+        expect(html.match(/class="accueil-porte-ortho"/g), 'une seule carte').toHaveLength(1);
+    });
+
+    it('les huit cartes de tâches, dans leur ordre, et la carte n\'en est pas une', () => {
+        const { html } = rendreAccueil();
+        const titres = [...html.matchAll(/<div class="accueil-action-titre">([^<]*)<\/div>/g)].map(m => m[1]);
+        expect(titres).toEqual(TACHES);
+        expect(html.match(/class="accueil-action"/g)).toHaveLength(8);
+        const carte = html.slice(html.indexOf('class="accueil-porte-ortho"'), html.indexOf('<div class="accueil-section-label">Tâches</div>'));
+        expect(carte).not.toContain('accueil-action');
+    });
+});
+
+describe('B2 · le lien de la carte prend le chemin de la sous-navigation', () => {
+    it('« Commencer → » mène à Suivi › Rencontres par naviguerAccueilCarte, la route de la sous-navigation', () => {
+        const { html, win, appels } = rendreAccueil();
+        const m = html.match(/<button type="button" class="accueil-porte-ortho-lien" data-action="([^"]+)" data-param="([^"]+)">Commencer →<\/button>/);
+        expect(m, 'le lien est un bouton natif (clavier, Entrée/Espace)').not.toBeNull();
+        expect(m[1]).toBe('naviguerAccueilCarte');
+        expect(m[2]).toBe('suivi|suivi-rencontres');
+        win.naviguerAccueilCarte(m[2]);
+        expect(appels).toEqual([['section', 'suivi'], ['sous-section', 'suivi-rencontres']]);
+        // La même sous-section que la sous-navigation : la table de navigation.js et l'entrée de config.js.
+        expect(lire('js/navigation.js')).toMatch(/'suivi-rencontres': 'nav-suivi-rencontres'/);
+        expect(lire('js/config.js')).toMatch(/\{ id: 'rencontres', label: 'Rencontres' \}/);
+        expect(html.match(/suivi-rencontres/g), 'un seul chemin vers les rencontres depuis l\'accueil').toHaveLength(1);
+    });
+});
+
+describe('B3 · les mots viennent du rendu, et un seul endroit les écrit', () => {
+    it('le rendu porte les mots arrêtés, dans l\'ordre, et plus les deux anciens paragraphes', () => {
+        const { html } = rendreAccueil();
+        let curseur = -1;
+        for (const mot of MOTS_BANDEAU) {
+            const i = html.indexOf(mot);
+            expect(i, mot).toBeGreaterThan(curseur);
+            curseur = i;
+        }
+        const iCarte = html.indexOf('class="accueil-porte-ortho"');
+        curseur = iCarte;
+        for (const mot of MOTS_CARTE) {
+            const i = html.indexOf(mot);
+            expect(i, mot).toBeGreaterThan(curseur);
+            curseur = i;
+        }
+        expect(html).not.toContain('Certains concepts sont nouveaux pour toi');
+        expect(html).not.toContain('L’identification est requise');
+    });
+
+    it('chaque mot n\'est écrit qu\'une fois, dans js/accueil.js — ni ailleurs dans js/, ni dans index.html', () => {
+        const sources = readdirSync(path.join(RACINE, 'js')).filter(f => f.endsWith('.js')).map(f => ['js/' + f, sansCommentaires(lire('js/' + f))]);
+        sources.push(['index.html', lire('index.html')]);
+        for (const mot of [...MOTS_CARTE, ...MOTS_BANDEAU]) {
+            const lieux = sources.flatMap(([f, code]) => Array(code.split(mot).length - 1).fill(f));
+            expect(lieux, mot).toEqual(['js/accueil.js']);
+        }
+    });
+});
+
+describe('B4 · la carte est blanche comme les autres cartes de l\'accueil', () => {
+    const regle = (css, sel) => {
+        const m = css.match(new RegExp('\\n\\s*' + sel.replace(/\./g, '\\.') + '\\s*\\{([^}]*)\\}'));
+        return m ? Object.fromEntries(m[1].split(';').map(d => d.split(':').map(x => x && x.trim())).filter(([k, v]) => k && v)) : null;
+    };
+    it('index.html : même fond, même trait fin, même rayon que .accueil-action ; ni bord gauche, ni ombre ni couleur propres', () => {
+        const html = lire('index.html');
+        const carte = regle(html, '.accueil-porte-ortho');
+        const action = regle(html, '.accueil-action');
+        expect(carte).not.toBeNull();
+        for (const p of ['background', 'border', 'border-radius']) expect(carte[p], p).toBe(action[p]);
+        const declarations = Object.keys(carte).join(' ');
+        expect(declarations).not.toMatch(/border-left|box-shadow|color/);
+        expect(html).not.toMatch(/\.accueil-porte-ortho[\w-]*\s*\{[^}]*(sarcelle|--acc-)/);
+    });
+    it('styles.css : en mode clair, la carte est dans la MÊME règle que les cartes de tâches (fond blanc, même ombre)', () => {
+        const css = lire('styles.css');
+        const m = css.match(/((?:\.mode-clair \.[\w-]+,\s*)+\.mode-clair \.[\w-]+)\s*\{\s*background: #ffffff;\s*border-color: rgba\(3, 46, 92, 0\.08\);\s*box-shadow: var\(--shadow-normal\);\s*\}/);
+        expect(m, 'la règle des cartes accueil V3 en mode clair').not.toBeNull();
+        expect(m[1]).toContain('.mode-clair .accueil-action');
+        expect(m[1]).toContain('.mode-clair .accueil-porte-ortho');
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// JOURNAL DES BREAK-TESTS (12 septembre 2026) — chaque mutation posée, lancée, remise (empreinte sha256 identique).
+//   A1 index.html — le libellé du champ 2 re-marqué data-mot-nature="objetGroupeCours"                      → 1 rouge
+//      ⚠ au premier passage du script de mutations, AUCUN rouge lu ; rejoué seul : 1 rouge. Le défaut était la
+//      lecture de la sortie de Vitest par le script (premier lancement), pas la sentinelle. Noté pour ne pas le taire.
+//   A2 trimestre-v2.js — l'option vide relue au point unique (motsNatureContexteActif().choisirObjet)          → 1 rouge
+//   A3 trimestre-v2-orchestre.js — 'v2-gc-cours' remis dans OPTIONS_VIDES                                     → 1 rouge
+//   A4 mots-nature.js — `choisirObjetGC` remis dans la table                                                  → 1 rouge
+//   B1 accueil.js — une carte de tâche perd sa classe (sept tâches)                                           → 1 rouge
+//   B2 accueil.js — la carte déplacée SOUS le label « Tâches »                                                 → 1 rouge
+//   B3 accueil.js — « Commencer → » mène à suivi-interventions                                                → 1 rouge
+//   B4 rencontres.js — « Tu es orthopédagogue ? » recopié dans un autre module                                → 1 rouge
+//   B5 index.html — un bord gauche épais ajouté à la carte                                                    → 1 rouge
+//   B6 styles.css — la carte retirée de la règle « mode clair » des cartes de l'accueil                        → 1 rouge
+//   B7 accueil.js — « Ton courriel, une fois par mois ! »                                                     → 2 rouges

@@ -457,8 +457,9 @@ function appliquerMotsNatureCadre() {
     // L'option vide des menus de personne et de cours suit aussi (le reste des options = les fiches).
     // #841 : chaque menu lit AUSSI le point unique quand il se reconstruit (trimestre-v2-enseignants.js,
     // trimestre-v2.js, trimestre-v2-cours.js) — ici, on re-pose le mot à chaque activation sans repeupler.
+    // #846 : le champ 2 du groupe-cours (v2-gc-cours) n'y est plus — il nomme un choix, pas le contexte.
     const OPTIONS_VIDES = { 'v2-selectEnseignant': 'choisirPersonne', 'v2-gc-enseignant': 'choisirPersonneGC',
-        'v2-selectCours': 'choisirObjet', 'v2-gc-cours': 'choisirObjetGC' };
+        'v2-selectCours': 'choisirObjet' };
     Object.entries(OPTIONS_VIDES).forEach(([id, cle]) => {
         const sel = document.getElementById(id);
         const vide = sel && sel.options && Array.from(sel.options).find(o => o.value === '');

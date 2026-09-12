@@ -102,7 +102,9 @@ const VOCABULAIRES = {
         titrePresences: 'Participants et notes',
         aidePresences: 'Coche les élèves présents à la rencontre et note tes observations pour chacun.',
         titreBilan: 'Bilan de la rencontre',
-        aideBilan: 'Comparaison des critères ciblés avant et après la rencontre.'
+        // Consigne du 12 sept., 10 h 35 (lot C) : texte ARRÊTÉ par Grégoire à 10 h 40. Sur un service, la carte
+        // des critères ciblés n'est pas rendue : il n'y a plus de comparaison avant/après à annoncer.
+        aideBilan: 'Ce que tu retiens de la rencontre.'
     }
 };
 let _vocabulaireActif = 'interventions';
@@ -850,6 +852,10 @@ function ouvrirIntervention(interventionId, options) {
         criteresInitHtml = '<p class="text-muted" style="font-style: italic;">Configure une grille de référence dans Conception › Grilles de critères pour activer le ciblage par critère.</p>';
     }
 
+    // Consigne du 12 sept., 10 h 35 (lot C, décision de Grégoire) : sur un service, la carte « Critères ciblés /
+    // Objectif visé » n'est PAS rendue — la carte entière, « Suggérer » compris, qui ne sait partir que d'un critère
+    // coché. Masquée, pas supprimée : un besoin semblable peut revenir. Hors service, rien ne change. Conteneur
+    // absent ⇒ sauvegarderPresencesIntervention ne touche ni `criteresCibles` ni `objectifVise`.
     container.innerHTML = `
         <div class="carte">
             <h3 style="margin: 0 0 20px 0;">${options.modeCreation ? V().titreNouvelle : echapperHtml(intervention.titre)}</h3>
@@ -972,6 +978,7 @@ function ouvrirIntervention(interventionId, options) {
                 </div>
             </div>
 
+            ${_surService() ? '' : `
             <!-- Critères ciblés et objectif visé -->
             <div class="carte" style="margin-bottom: 20px;">
                 <h4 class="intervention-mt-0" data-tooltip="interv-criteres-cibles">Critères ciblés</h4>
@@ -995,6 +1002,7 @@ function ouvrirIntervention(interventionId, options) {
                     <button data-action="suggererObjectifIntervention" data-param="${interventionId}" class="btn btn-secondaire" style="white-space: nowrap;">Suggérer</button>
                 </div>
             </div>
+            `}
 
             <!-- Observations générales (pleine largeur) -->
             <div class="carte" style="margin-bottom: 20px;">
@@ -1433,11 +1441,15 @@ function sauvegarderPresencesIntervention(interventionId) {
             }
         });
 
-        // Sauvegarder les critères ciblés et l'objectif (Phase 3)
-        var criteresCiblesCbs = document.querySelectorAll('#criteresCiblesContainer .critere-cible-cb:checked');
-        interventions[index].criteresCibles = Array.from(criteresCiblesCbs).map(function(cb) { return cb.value; });
+        // Sauvegarder les critères ciblés et l'objectif (Phase 3). Lot C du 12 sept. : sur un service, leur carte
+        // n'est pas rendue — conteneur ou champ ABSENT ⇒ on ne touche pas au champ : ce qui est en base y reste
+        // (une liste vide lue dans un conteneur absent effacerait des critères que personne n'a décochés).
+        if (document.getElementById('criteresCiblesContainer')) {
+            var criteresCiblesCbs = document.querySelectorAll('#criteresCiblesContainer .critere-cible-cb:checked');
+            interventions[index].criteresCibles = Array.from(criteresCiblesCbs).map(function(cb) { return cb.value; });
+        }
         var objectifField = document.getElementById('objectifVise');
-        interventions[index].objectifVise = objectifField ? objectifField.value : '';
+        if (objectifField) interventions[index].objectifVise = objectifField.value;
 
         // Sauvegarder le bilan si l'intervention est complétée (Phase 4)
         if (nouveauStatut === 'completee') {

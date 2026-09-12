@@ -100,7 +100,9 @@ describe('A · le point unique : un mot par nature, et nulle part ailleurs', () 
         // cours.js (bibliothèque des cours, deux cartes) : site absent de la liste de la consigne, attrapé par le verrou ci-dessus.
         // #841 / #842 (12 sept.) : trimestre-v2.js et trimestre-v2-enseignants.js lisent le contexte actif quand ils reconstruisent un menu ;
         // l'orchestre ne compte plus qu'un appel (sa fonction morte `peuplerDropdownEnseignants` a été retirée).
-        const sites = { 'trimestre-v2-cours.js': 10, 'trimestre-v2-groupes-cours.js': 4, 'trimestre-v2-orchestre.js': 1, 'trimestre-v2.js': 2, 'trimestre-v2-enseignants.js': 1, 'rencontres.js': 3, 'accompagnement-contenu-hover.js': 4, 'cours.js': 2 };
+        // #846 (12 sept., 10 h 25) : trimestre-v2.js n'en compte plus qu'un — le champ 2 (v2-gc-cours) nomme un choix,
+        // il ne lit plus le contexte ; reste le champ 5 (la personne).
+        const sites = { 'trimestre-v2-cours.js': 10, 'trimestre-v2-groupes-cours.js': 4, 'trimestre-v2-orchestre.js': 1, 'trimestre-v2.js': 1, 'trimestre-v2-enseignants.js': 1, 'rencontres.js': 3, 'accompagnement-contenu-hover.js': 4, 'cours.js': 2 };
         for (const [f, min] of Object.entries(sites)) {
             const n = (lire('js/' + f).match(/\bmots?Nature(ContexteActif)?\(/g) || []).length;
             expect(n, f + ' lit le point unique').toBeGreaterThanOrEqual(min);
@@ -206,7 +208,9 @@ describe('B · le formulaire du Cadre : la VALEUR reste \'service\' après l\'al
 describe('C · le libellé de la personne suit la nature du contexte actif, dans les deux sens', () => {
     function monterOrchestre(etat) {
         const w = monterMots();
-        const cles = ['Personne', 'Personne', 'profil', 'personne', 'objetGroupeCours', 'personne', 'objetGroupeCours', 'Personne'];
+        // #846 : les deux marques `objetGroupeCours` (champ 2 du groupe-cours) ont quitté index.html — le champ
+        // nomme un choix (« Cours ou service »), pas le contexte ; il ne suit plus la nature.
+        const cles = ['Personne', 'Personne', 'profil', 'personne', 'personne', 'Personne'];
         const marques = cles.map((k, i) => { const el = elementDom('m' + i); el.setAttribute('data-mot-nature', k); el.textContent = w.MOTS_NATURE.cours[k]; return el; });
         const elements = {};
         const document = fauxDocument(elements, marques);
@@ -222,13 +226,13 @@ describe('C · le libellé de la personne suit la nature du contexte actif, dans
         const etat = { service: true };
         const b = monterOrchestre(etat);
         b.win.appliquerMotsNatureCadre();
-        expect(b.marques.map(m => m.textContent)).toEqual(['Orthopédagogue', 'Orthopédagogue', 'Profil orthopédagogue', 'orthopédagogue', 'Service d’orthopédagogie', 'orthopédagogue', 'Service d’orthopédagogie', 'Orthopédagogue']);
+        expect(b.marques.map(m => m.textContent)).toEqual(['Orthopédagogue', 'Orthopédagogue', 'Profil orthopédagogue', 'orthopédagogue', 'orthopédagogue', 'Orthopédagogue']);
         expect(b.elements['v2-selectEnseignant'].options[0].textContent).toBe('Sélectionner un·e orthopédagogue');
         expect(b.elements['v2-gc-enseignant'].options[0].textContent).toBe('— Choisir un·e orthopédagogue —');
         expect(b.elements['v2-gc-enseignant'].options[1].textContent, 'les profils ne bougent pas').toBe('Marie Tremblay');
         etat.service = false;
         b.win.appliquerMotsNatureCadre();
-        expect(b.marques.map(m => m.textContent)).toEqual(['Enseignant·e', 'Enseignant·e', 'Profil enseignant', 'enseignant·e', 'Cours à enseigner', 'enseignant·e', 'Cours à enseigner', 'Enseignant·e']);
+        expect(b.marques.map(m => m.textContent)).toEqual(['Enseignant·e', 'Enseignant·e', 'Profil enseignant', 'enseignant·e', 'enseignant·e', 'Enseignant·e']);
         expect(b.elements['v2-selectEnseignant'].options[0].textContent).toBe('Sélectionner un enseignant·e');
         // Le menu REPEUPLÉ suit aussi : c'est #841, verrouillé dans sentinelle-section-cours-suit-la-nature-842.test.js
         // (la fonction `peuplerDropdownEnseignants` de l'orchestre, sans appelant, a été retirée le 12 sept.).
