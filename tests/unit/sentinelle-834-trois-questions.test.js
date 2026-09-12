@@ -77,7 +77,7 @@ function monter(store, opts = {}) {
 describe('#834 lot C · la lecture de la liste d\'élèves', () => {
     it('quatre formes de ligne, les vides ignorées, un DA provisoire quand il manque', () => {
         const b = monter({});
-        const fiches = b.win.analyserListeEleves('Léa Tremblay\n1234567 ; Gagnon ; Noah\n\n2345678\t00001\tRoy\tEmma\t200.B1\n3456789 Marc-Antoine Côté-Lévesque\nDubois, Ali\n   \n');
+        const { fiches } = b.win.analyserListeEleves('Léa Tremblay\n1234567 ; Gagnon ; Noah\n\n2345678\t00001\tRoy\tEmma\t200.B1\n3456789 Marc-Antoine Côté-Lévesque\nDubois, Ali\n   \n');
         expect(fiches.map(f => f.prenom + ' ' + f.nom)).toEqual(['Léa Tremblay', 'Noah Gagnon', 'Emma Roy', 'Marc-Antoine Côté-Lévesque', 'Ali Dubois']);
         expect(fiches.map(f => f.da).slice(1, 4)).toEqual(['1234567', '2345678', '3456789']);
         expect(fiches[0].daProvisoire).toBe(true);
@@ -91,7 +91,7 @@ describe('#834 lot C · la lecture de la liste d\'élèves', () => {
     });
     it('rien n\'est inventé d\'une ligne sans nom', () => {
         const b = monter({});
-        expect(b.win.analyserListeEleves('\n;\n')).toEqual([]);
+        expect(b.win.analyserListeEleves('\n;\n')).toEqual({ fiches: [], refusees: [] });
     });
 });
 
