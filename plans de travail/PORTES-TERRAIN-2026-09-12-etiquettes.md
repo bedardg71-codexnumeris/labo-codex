@@ -17,8 +17,10 @@
 >   vérifié au harnais du pack démo (« Sélectionner un·e orthopédagogue » après repopulation) et par sentinelle. À revoir à l'écran :
 >   porte `PORTES-TERRAIN-2026-09-12-section-cours.md`, rangée 1.
 > - **Décisions du § 3** (inscrites le 12 sept. à 9 h 20 par Claude Code, d'après la consigne du jour de Cowork) :
->   **3.1** — « tel quel » : `js/config.js` reste fermé, l'onglet continue de dire « Rencontres ». **3.2** et **3.3** — réponse non relayée
->   dans les fichiers (ni consigne, ni BACKLOG) : notée comme un silence, donc tel quel, à corriger par Grégoire s'il en va autrement.
+>   **3.1** — « tel quel » : `js/config.js` reste fermé, l'onglet continue de dire « Rencontres ». **3.2** — « tel quel » (le texte de la carte sur un groupe-cours ordinaire reste celui de 1.136.0).
+>   **3.3** — « tel quel » (« Orthopédagogie » / « service d’orthopédagogie » restent). Les deux données par Grégoire au relevé du 12 sept.,
+>   relayées à 9 h 35 (elles avaient d'abord été notées comme un silence, faute de trace dans les fichiers). Et, précisé à 9 h 40 : hors
+>   service, le menu des profils dit bien « Sélectionner un enseignant·e » (pas « — Sélectionner — ») — tel que livré.
 >   **3.4** — « On devrait peut-être renommer cette section "cours/service" et l'adapter selon le choix qui est fait par l'utilisateur. »
 >   ⮕ **#842**, livré le 12 sept. (lot « section Cours », `1.137.0` due) : le titre proposé « Cours et services », les mots de la
 >   section qui suivent la fiche ou le contexte, la phrase des éléments obligatoires corrigée ; « + Nouveau cours » laissé, inscrit **#843**.
