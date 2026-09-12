@@ -1,5 +1,12 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 12 h 31 (Toronto) : le chantier de l'orthopédagogie est CLOS (porte de
+> l'accueil 7/7, relevé de Cowork de 12 h 02, commité `5af8cc8e`). Le lot 5 du cadrage 11 (Suivi › Interventions) est EXÉCUTÉ — `9ceca4ff` sur
+> `main` local, NI RELEASÉ NI POUSSÉ. `origin/main` = `61b5c883` ; devant lui : `1b36c338` (relais de 11 h 52), `5af8cc8e`, `9ceca4ff`, ce relais.
+> Vitest 551 / 6 032. Marche : (1) relecture croisée de Cowork sur `9ceca4ff` ; (2) corrections éventuelles ; (3) `node scripts/release.mjs minor`
+> → `1.139.0`, commit, Vitest ; (4) verdict Playwright **Cowork fermé** (règle 8) sur le SHA exact à pousser ; (5) `scripts/pousser.sh` ; (6) porte
+> `plans de travail/PORTES-TERRAIN-2026-09-12-interventions.md` + artefact jumeau par Cowork — **avant lundi** (réserve de Cowork). Lot suivant :
+> 6, l'Animation. La porte du lot 4 a un relevé vierge au dépôt.**
 > ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 11 h 52 (Toronto) : `1.138.0` est POUSSÉE — `origin/main` = `61b5c883`
 > (verdict Playwright local vert sur ce SHA à 11 h 51, Cowork fermé ; hook pré-push : Vitest vert, verdict à jour). La marche du bloc de 11 h 20
 > ci-dessous est consommée jusqu'à (4) ; reste (5) : la porte `plans de travail/PORTES-TERRAIN-2026-09-12-accueil.md` — relevé partiel de Cowork

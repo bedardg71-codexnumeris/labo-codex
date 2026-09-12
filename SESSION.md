@@ -7,6 +7,15 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 47 — 12 SEPTEMBRE 2026, 11 H 55 → 12 H 31 (Toronto) : LOT 5 DU CADRAGE 11 (SUIVI › INTERVENTIONS), à partir de `1b36c338`
+     (1.138.0 en ligne). Chantier de l'orthopédagogie clos : fichiers de Cowork commités tels quels (`5af8cc8e`). Code `9ceca4ff` : le brouillon
+     naît en mémoire (I-1), une seule écriture par « Enregistrer », lettres du bilan par les seuils idme.* (I-5), note d'un élève parti grisée
+     (#748), code mort retiré (+ creerIntervention et marquerPresences, sans appelant après le lot), I-6 commenté. Sentinelle 12 essais,
+     13 mutations / 13 rouges ; bancs du 5 et du 6 aux valeurs d'après ; #834 par le vrai chemin ; bac-suivi fournit la vraie fonction des
+     lettres. Vitest 551 / 6 032. La consigne nommait `idme.etendu` : inexistant. Ni releasé ni poussé : relecture de Cowork d'abord.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 46 — 12 SEPTEMBRE 2026, 10 H 25 → 10 H 55 (Toronto) : LA CONSIGNE DU JOUR DE COWORK « LA PORTE DE L'ORTHOPÉDAGOGIE SUR
      L'ACCUEIL, ET LE CHAMP QUI SE CONTREDIT », révisée à 10 h 35 (lot C : la carte des critères ciblés masquée chez l'orthopédagogue),
      à partir de `305bb4c8` (1.137.0, en ligne).

@@ -7,6 +7,12 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 12 H 31 (Toronto) : LOT 5 DU CADRAGE 11 COMMITÉ (`9ceca4ff`) — NI RELEASÉ NI POUSSÉ
+
+> Tout est sur `main` local ; `origin/main` = `61b5c883`. Devant lui : `1b36c338` (relais de 11 h 52), `5af8cc8e` (fichiers de Cowork qui closent l'orthopédagogie), `9ceca4ff` (lot 5 : Suivi › Interventions), puis ce relais. **Reste** : relecture croisée de Cowork sur `9ceca4ff` → `release.mjs minor` (1.139.0) → Vitest → verdict Playwright **Cowork fermé** → `scripts/pousser.sh` → porte `PORTES-TERRAIN-2026-09-12-interventions.md` + artefact, **avant lundi**.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 11 H 52 (Toronto) : 1.138.0 POUSSÉE — `origin/main` = `61b5c883`
 
 > ✅ **Tout est sur `main` = `origin/main`** jusqu'à `61b5c883` (relevé partiel de la porte par Cowork, commité avant le verdict). Verdict Playwright local vert sur ce SHA (11 h 51, Cowork fermé, 0 échec, 0 instable) ; push par `git push origin main` (hook : Vitest vert, verdict à jour). Ce relais-ci est un commit de documents POSTÉRIEUR, local — voir sa ligne de commit pour son état de push. **Reste** : les rangées 5, 6, 7 de la porte et ses deux décisions, sur le site ; l'artefact jumeau par Cowork ; la relecture du lot E par Cowork (non vue avant le push) ; le lot 5 du cadrage 11 en pause.
