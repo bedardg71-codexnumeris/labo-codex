@@ -284,14 +284,13 @@ Logique de données :
     observationsBilan: '...',                // Texte libre
     dateBilan: 1234567890                    // Timestamp du bilan
   },
-  jamaisSauvegardee: false,                  // true si créée mais jamais sauvegardée
   statut: 'planifiee' | 'en-cours' | 'completee',
   dateCreation, dateModification
 }
 ```
 
 **Workflow unifié (un seul temps)** :
-1. `afficherFormulaireIntervention(da)` crée l'intervention et ouvre directement `ouvrirIntervention(id, { modeCreation: true })`
+1. `afficherFormulaireIntervention(da)` construit l'intervention EN MÉMOIRE (le brouillon — rien n'est écrit avant « Enregistrer », lot 5 du cadrage 11, 12 sept. 2026) et ouvre directement `ouvrirIntervention(id, { modeCreation: true })`
 2. Vue unique : logistique (titre, niveau RàI, contexte, date, statut) → aperçu sous-groupe + étudiants → critères ciblés + objectif → observations
 3. À la complétion : section bilan avec comparaison avant/après automatique
 

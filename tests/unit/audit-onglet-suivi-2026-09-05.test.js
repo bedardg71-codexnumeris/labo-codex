@@ -733,10 +733,22 @@ describe('D · quel palier pour celui dont on ne sait rien', () => {
    E · INTERVENTIONS
    ============================================================================================= */
 describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
+    // ↻ Lot 5 du cadrage 11 (12 sept. 2026) : `creerIntervention` et `marquerPresences` sont retirées (aucun appelant
+    // en production). La création suit les vrais gestes — « Planifier » (le brouillon, en mémoire) puis « Enregistrer » —,
+    // les champs du formulaire portant ce que l'objet `data` portait (`marquerNonParticipantsMotives` et `seanceConcernee`
+    // se déduisent du contexte « rattrapage », comme à l'écran). Les participants d'un cas de banc se posent en base.
     function creer(b, extra) {
-        const id = b.win.creerIntervention(Object.assign({ date: '2026-02-09', duree: 2, niveauRai: 2, titre: 'Rattrapage banc', contexte: 'rattrapage', marquerNonParticipantsMotives: true, seanceConcernee: '2026-02-09' }, extra || {}));
+        const d = Object.assign({ date: '2026-02-09', duree: 2, niveauRai: 2, titre: 'Rattrapage banc', contexte: 'rattrapage', seanceConcernee: '2026-02-09' }, extra || {});
+        const champs = { interventionNiveau: d.niveauRai, interventionContexte: d.contexte, interventionTitre: d.titre, interventionDate: d.date, interventionHeure: '',
+            interventionDuree: d.duree, interventionDescription: '', interventionSeance: d.seanceConcernee || '', observationsIntervention: '' };
+        for (const [idChamp, v] of Object.entries(champs)) b.elements[idChamp] = elementDom({ value: String(v) });
+        if (!b.elements.conteneurPrincipal) b.elements.conteneurPrincipal = elementDom();
+        b.win.afficherFormulaireIntervention();
+        const id = (b.elements.conteneurPrincipal.innerHTML.match(/data-action="sauvegarderPresencesIntervention" data-param="([^"]+)"/) || [])[1];
+        b.win.sauvegarderPresencesIntervention(id);
         return id;
     }
+    const participer = (b, id, das) => { const t = b.store.test_interventions; t.find(i => i.id === id).etudiants = das; b.store.test_interventions = t; };
     it('E1 · les clés sont namespacées par trimestre ; l\'intervention ne portait AUCUN groupe-cours (constat du 5) — depuis #834 lot D, elle porte son groupe-cours de naissance et la liste ne la montre plus sous un autre (valeur d\'après)', () => {
         const b = monter(jeuBase());
         const naissance = b.store.infoCours._groupeCoursId || b.store.infoCours.id;
@@ -763,14 +775,14 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
         const b = monter(jeu); b.calculerTout();
         const silenceAvant = b.win.calculerAssiduite(DA.SILENCE, null).indice;   // 18/20 = 0,90
         const id = creer(b);
-        b.win.marquerPresences(id, [DA.ABSENT]);
+        participer(b, id, [DA.ABSENT]);
         b.win.transfererPresencesVersModule(id);
         const silenceApres = b.win.calculerAssiduite(DA.SILENCE, null);
         const fiches = b.store.test_presences.filter(p => p.date === '2026-02-09' && p.facultatif).map(p => ({ da: p.da, heures: p.heures, notes: p.notes }));
         const aApres = b.win.calculerAssiduite(DA.ABSENT, null);
         // Hors séance : un rattrapage un mardi.
         const id2 = creer(b, { date: '2026-02-10', seanceConcernee: null, marquerNonParticipantsMotives: false, contexte: 'hors-classe' });
-        b.win.marquerPresences(id2, [DA.ABSENT]);
+        participer(b, id2, [DA.ABSENT]);
         b.win.transfererPresencesVersModule(id2);
         const aMardi = b.win.calculerAssiduite(DA.ABSENT, null);
         noter('E2', { fiches, A_apres: aApres.indice, A_apresMardi: aMardi.indice, silence: { avant: silenceAvant, apres: silenceApres.indice, offertes: silenceApres.periodesOffertes } });
@@ -783,7 +795,7 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
         expect(aMardi.indice).toBe(0.5);   // le mardi n'est pas une séance : rien ne change
     });
 
-    it('E3 · retirer l\'élève du groupe : l\'intervention garde son DA, mais sa note individuelle disparaît de l\'affichage sans un mot', () => {
+    it('E3 · retirer l\'élève du groupe : l\'intervention garde son DA ; sa note individuelle disparaissait de l\'affichage sans un mot — depuis le lot 5 du cadrage 11, elle reste, grisée, « (n\'est plus dans le groupe) » (valeur d\'après)', () => {
         const b = monter(jeuBase());
         const id = creer(b);
         b.store.test_interventions[0].etudiants = [DA.ABSENT]; b.store.test_interventions[0].notesIndividuelles = { [DA.ABSENT]: 'Note confidentielle sur Bruno' };
@@ -793,8 +805,10 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
         noter('E3', { daConserve: b.win.obtenirIntervention(id).etudiants, noteVisibleAvant: /Bruno/.test(avec), noteVisibleApres: /Bruno/.test(sans), compteurAffiche: (sans.match(/<strong>(\d+)<\/strong>/) || [])[1] });
         expect(b.win.obtenirIntervention(id).etudiants).toEqual([DA.ABSENT]);
         expect(/Note confidentielle/.test(avec)).toBe(true);
-        expect(/Note confidentielle/.test(sans)).toBe(false);
-        expect((sans.match(/<strong>(\d+)<\/strong>/) || [])[1]).toBe('1');   // le compteur dit 1, la liste est vide
+        // Constat d'origine (5 sept.) : la note disparaissait et le compteur disait 1 sur une liste vide.
+        expect(/Note confidentielle/.test(sans)).toBe(true);
+        expect(sans).toContain('<strong>' + DA.ABSENT + '</strong> (n\'est plus dans le groupe) : Note confidentielle sur Bruno');
+        expect((sans.match(/<strong>(\d+)<\/strong>/) || [])[1]).toBe('1');   // le compteur dit 1, et la ligne est là
     });
 
     it('E4 · la porte d\'écriture : db.setSync direct, jamais sauvegarderDonneesSelonMode — le mode anonymisation n\'arrête aucune écriture d\'intervention', () => {
@@ -804,11 +818,13 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
         expect(res.setSync).toBeGreaterThanOrEqual(3);
     });
 
-    it('E5 · le bilan avant/après traduit une moyenne 0-1 en lettre par 0,85 / 0,75 / 0,65 écrits en clair — pas par l\'échelle, ni par les seuils configurés (0,64)', () => {
+    it('E5 · le bilan avant/après traduisait une moyenne 0-1 en lettre par 0,85 / 0,75 / 0,65 écrits en clair — depuis le lot 5 du cadrage 11, par les seuils configurés (valeur d\'après ; le comportement : audit du 6, I-5, et la sentinelle du lot)', () => {
         const src = readFileSync(path.join(RACINE, 'js/interventions.js'), 'utf8');
-        const ligne = src.split('\n').find(l => /niveauAvant = avant !== null \? \(avant >= 0\.85/.test(l));
-        noter('E5', { ligne: ligne && ligne.trim().slice(0, 120) });
-        expect(ligne).toMatch(/avant >= 0\.85 \? 'E' : avant >= 0\.75 \? 'M' : avant >= 0\.65 \? 'D' : 'I'/);
+        const enClair = /(avant|apres) >= 0\.(85|75|65) \?/.test(src);
+        const parSeuils = /obtenirNiveauIDMEDepuisPourcentage\(pct\)/.test(src);
+        noter('E5', { enClair, parSeuils });
+        expect(enClair).toBe(false);   // constat d'origine : true
+        expect(parSeuils).toBe(true);
     });
 
     it('E6 · les observations de l\'intervention passent par echapperHtml dans le <textarea> (#733 ; avant : brutes, le bilan seul était échappé)', () => {

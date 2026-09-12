@@ -131,6 +131,14 @@ export function monter(store, opts = {}) {
         obtenirIdContexteActif: winModes.obtenirIdContexteActif, contexteActifEstService: winModes.contexteActifEstService
     });
     Object.assign(globaux, opts.globaux || {});
+    // Lot 5 du cadrage 11 (12 sept. 2026) : la lettre du bilan d'une intervention sort d'`obtenirNiveauIDMEDepuisPourcentage`
+    // (js/profil-etudiant-helpers.js, chargé avant interventions.js dans l'app). Le banc fournit la VRAIE, branchée sur
+    // l'`obtenirSeuil` qu'il reçoit — une copie ici dériverait sans que personne le voie.
+    if (!('obtenirNiveauIDMEDepuisPourcentage' in globaux)) {
+        const winHelpers = {};
+        chargerScript('js/profil-etudiant-helpers.js', globaux, winHelpers);
+        globaux.obtenirNiveauIDMEDepuisPourcentage = winHelpers.obtenirNiveauIDMEDepuisPourcentage;
+    }
     for (const [k, v] of Object.entries(globaux)) if (!(k in win) && k !== 'document' && k !== 'db') win[k] = v;
     const modules = opts.modules || [];
     const exportsWindow = new Set();

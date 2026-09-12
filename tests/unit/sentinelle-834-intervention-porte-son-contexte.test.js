@@ -5,8 +5,11 @@ import { monter, storeBase, elementDom } from './_helpers/bac-suivi.js';
 // CONTEXTE DE NAISSANCE.
 //
 // Constat de l'audit du 5 sept. (E1) : « les interventions ne portent pas leur groupe-cours » —
-// la liste d'un cours mêlait celles d'un autre. Désormais `creerIntervention` estampille
+// la liste d'un cours mêlait celles d'un autre. Désormais la construction d'une intervention estampille
 // `groupeCoursId` (via le point unique `obtenirIdContexteActif`, lot E), et la liste filtre.
+// ↻ Lot 5 du cadrage 11 (12 sept. 2026) : `creerIntervention` est retirée (aucun appelant en production) —
+// une création passe par « Planifier » (le brouillon, construit en mémoire, estampillé là) puis
+// « Enregistrer ». Les trois essais de création suivent ce vrai chemin (`planifierPuisEnregistrer`).
 //
 // VERROUILLÉ ICI :
 //   1. deux groupes-cours, une intervention chacun : chacun ne voit que la sienne ;
@@ -36,18 +39,29 @@ const champs = () => ({ interventionNiveau: elementDom({ value: '3' }), interven
 const selecteurs = () => ({ '#listeEtudiantsIntervention input[type="checkbox"]': [], '#listeEtudiantsIntervention input[type="checkbox"]:checked': [], 'input[name="interventionStatut"]:checked': elementDom({ value: 'en-cours' }), '#criteresCiblesContainer .critere-cible-cb:checked': [] });
 const sousGC2 = (store) => { store.infoCours = { id: 'GC2', nom: 'Autre', groupe: '02', _groupeCoursId: 'GC2' }; store.groupeCoursActif = { id: 'GC2', trimestreId: 'test', coursId: 'GC2', groupeNum: '02' }; };
 const idsRendus = (b) => (b.elements.listeInterventions.innerHTML.match(/data-action="ouvrirIntervention" data-param="([^"]+)"/g) || []).map(m => m.match(/data-param="([^"]+)"/)[1]).sort();
+/** « Planifier » puis « Enregistrer », par les vrais gestes ; rend l'id lu sur le bouton du formulaire. */
+function planifierPuisEnregistrer(b) {
+    b.win.afficherFormulaireIntervention();
+    const html = b.document.getElementById('conteneurPrincipal').innerHTML;
+    const id = (html.match(/data-action="sauvegarderPresencesIntervention" data-param="([^"]+)"/) || [])[1];
+    expect(id, 'le formulaire de création est rendu').toBeTruthy();
+    b.win.sauvegarderPresencesIntervention(id);
+    return id;
+}
+const monterFormulaire = (store) => monter(store, { modules: ['js/interventions.js'], globaux: GLOBAUX,
+    elements: Object.assign({ conteneurPrincipal: elementDom(), listeInterventions: elementDom() }, champs()), selecteurs: selecteurs() });
 
 describe('#834 lot D · création', () => {
     it('une intervention créée sous GC1 porte groupeCoursId GC1', () => {
         const store = storeBase(); store.test_interventions = [];
-        const b = monter(store, { modules: ['js/interventions.js'], globaux: GLOBAUX });
-        const id = b.win.creerIntervention({ date: '2026-09-01', titre: 'X' });
+        const b = monterFormulaire(store);
+        const id = planifierPuisEnregistrer(b);
         expect(store.test_interventions.find(i => i.id === id).groupeCoursId).toBe('GC1');
     });
     it('sans contexte actif, la création porte null — jamais un contexte inventé', () => {
         const store = storeBase(); store.test_interventions = []; store.infoCours = null; store.groupeCoursActif = null;
-        const b = monter(store, { modules: ['js/interventions.js'], globaux: GLOBAUX });
-        const id = b.win.creerIntervention({ date: '2026-09-01', titre: 'X' });
+        const b = monterFormulaire(store);
+        const id = planifierPuisEnregistrer(b);
         expect(store.test_interventions.find(i => i.id === id).groupeCoursId).toBeNull();
     });
 });
@@ -132,8 +146,8 @@ describe('#834 lot D · les deux traversées de mode (relecture croisée du 12 s
     it('en mode cours, une création est estampillée du coursId (granularité du mode, assumée) — et vue ensuite depuis chaque groupe', () => {
         const store = storeBase(); store.test_interventions = []; store.test_groupesCours = groupesCours();
         enModeCours(store, 'C1');
-        const b = monterCinq(store);
-        const id = b.win.creerIntervention({ date: '2026-09-01', titre: 'X' });
+        const b = monterFormulaire(store);
+        const id = planifierPuisEnregistrer(b);
         expect(store.test_interventions.find(i => i.id === id).groupeCoursId).toBe('C1');
         enModeGroupeCours(store, 'GC2');
         expect(b.win.interventionsDuContexteActif(store.test_interventions).map(i => i.id)).toEqual([id]);
